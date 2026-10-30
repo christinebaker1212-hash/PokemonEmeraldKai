@@ -10,7 +10,8 @@ cards it sits in the same place on every kind of card, (100, 218)-(713, 831) on 
 inside here.
 
 The card back (CARD BACKS: PRINTED, tools/ygo/metadata/back.png) is stored the same way, after the cards.
---keep-cards keeps the cards already in printed.bin (when only the back changed and the scans aren't at hand).
+--keep-cards keeps the cards already in printed.bin (when only the back changed and the scans aren't at hand). When
+the catalog has grown, the cards printed.bin already has are kept as they are and only the new ones are encoded.
 
 printed.bin: "YGOP", u32 count, then per card id 1..count and then the back: u32 offset, u32 size (0 = no printed
 card), u16 x, y, w, h (the illustration, in the stored picture's pixels; the whole picture for the back).
@@ -40,7 +41,16 @@ if '--keep-cards' in sys.argv[1:]:
     old = (ROOT / 'graphics/ygo/printed.bin').read_bytes()
     if old[:4] != b'YGOP' or struct.unpack_from('<I', old, 4)[0] != count:
         raise SystemExit('--keep-cards: printed.bin is from another catalog')
+# (cards the catalog had before keep their pictures when it grows: only the new ones are encoded)
+grown = (ROOT / 'graphics/ygo/printed.bin').read_bytes() if old is None and (ROOT / 'graphics/ygo/printed.bin').exists() else None
+if grown is not None and (grown[:4] != b'YGOP' or struct.unpack_from('<I', grown, 4)[0] >= count):
+    grown = None
 for cid in range(1, count + 1):
+    if grown is not None and cid <= struct.unpack_from('<I', grown, 4)[0]:
+        offset, size = struct.unpack_from('<II', grown, 8 + (cid - 1) * 16)
+        if size:
+            table.append(grown[offset:offset + size])
+            continue
     if old is not None:
         offset, size = struct.unpack_from('<II', old, 8 + (cid - 1) * 16)
         table.append(old[offset:offset + size] if size else None)

@@ -69,6 +69,32 @@ static const struct YgoFusion sFusions[] = {
     {1454, {71, 1453}}, /* Meteor Black Dragon */
     {1478, {299, 1368}}, /* Chimera the Flying Mythical Beast */
     {1493, {23, 85}}, /* Rare Fish */
+    {1768, {1011, 1511, 1512}}, /* Ojama King */
+    {1769, {1514, 1515}}, /* Master of Oz */
+    {1770, {246, 291}}, /* Sanwitch */
+    {1829, {854, 855}}, /* Dark Blade the Dragon Knight */
+    {1830, {1680, 1680, 1680}}, /* Mokey Mokey King */
+    {1891, {301, 1645}}, /* Gatling Dragon */
+    {1892, {183, 1858}}, /* King Dragun */
+    {1953, {1919, 1920}}, /* Elemental HERO Flame Wingman */
+    {1954, {1922, 1921}}, /* Elemental HERO Thunder Giant */
+    {2011, {1985, 1986}}, /* Steam Gyroid */
+    {2012, {1988}}, /* UFOroid Fighter */
+    {2013, {1993, 1993}}, /* Cyber Twin Dragon */
+    {2014, {1993, 1993, 1993}}, /* Cyber End Dragon */
+    {2074, {2046, 2055}}, /* VW-Tiger Catapult */
+    {2075, {2074, 899}}, /* VWXYZ-Dragon Catapult Cannon */
+    {2076, {2060, 2047}}, /* Cyber Blader */
+    {2077, {1921, 1920}}, /* Elemental HERO Rampart Blaster */
+    {2078, {1919, 1922, 1992}}, /* Elemental HERO Tempest */
+    {2079, {2052, 2051}}, /* Elemental HERO Wildedge */
+    {2080, {1953, 1922}}, /* Elemental HERO Shining Flare Wingman */
+    {2144, {2004, 2004, 2004}}, /* D.3.S. Frog */
+    {2186, {2048, 2049, 2050}}, /* Arcana Knight Joker */
+    {2218, {1919, 1920, 1921, 1992}}, /* Elemental HERO Electrum */
+    {2251, {1992, 1921}}, /* Elemental HERO Mudballman */
+    {2268, {1125, 1396}}, /* Dragon Master Knight */
+    {2290, {1920, 1992}}, /* Elemental HERO Steam Healer */
 };
 
 const struct YgoFusion *Ygo_FusionOf(unsigned card)

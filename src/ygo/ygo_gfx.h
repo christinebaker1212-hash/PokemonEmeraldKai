@@ -9,6 +9,7 @@
 
 /* id 0: the card back. The texture is exactly w x h. */
 SDL_Texture *Ygo_CardTexture(unsigned id, int w, int h);
+void Ygo_CardArtRect(unsigned id, int w, int h, int *ax, int *ay, int *aw, int *ah);
 void Ygo_DrawCard(unsigned id, float x, float y, float w, float h, double angle, unsigned alpha, unsigned flash);
 /* The big picture: the illustration (or the whole card in FULL CARD), its size; smooth: scale it smoothly */
 SDL_Texture *Ygo_ArtTexture(unsigned id, int *w, int *h, int *smooth);

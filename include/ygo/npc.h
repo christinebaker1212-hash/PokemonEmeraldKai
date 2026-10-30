@@ -32,6 +32,9 @@ struct YgoOpponent
  * ordinary duelist whose decks fall well short plays a level better instead. Sets o->main/extra/rating/level. */
 void Ygo_FitOpponent(struct YgoOpponent *o, int mine);
 int Ygo_OpponentFavor(const struct YgoOpponent *o);
+/* DECK RECIPES: the special duelists (YgoOpponent.special, bits of specialBeaten), each one's deck at their best */
+unsigned Ygo_SpecialCount(void);
+int Ygo_SpecialRecipe(unsigned special, uint16_t *main, uint16_t *extra, char *name, size_t size);
 
 /* The card screens' side (ygo_ui.c) */
 void YgoUi_OpenChallenge(const struct YgoOpponent *opponent);

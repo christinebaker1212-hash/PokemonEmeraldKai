@@ -320,14 +320,43 @@ wait 10
 rendershot deck-sold
 press A 2
 wait 10
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+rendershot structure
+press A 2
+wait 10
+press A 2
+wait 60
+rendershot bought-structure
+press A 2
+wait 10
 mp ygo state
+mp ygo recipes
+wait 20
+rendershot recipes
 quit
 SCRIPT
 MOEMON_DEBUG_MONEY=50000 run gcshop 11,18,2,6
 expect gcshop 'game center: bought card'
 expect gcshop 'game center: bought deck 1'
 refuse gcshop 'game center: bought deck 1, .*game center: bought deck 1'
-echo 'PASS the GAME CENTER Yu-Gi-Oh! clerk: a new duelist set up, a single and a Starter Deck for money, one each'
+expect gcshop 'game center: bought deck 7'   # (Structure Deck: Zombie Madness, further down the list)
+refuse gcshop 'recipe [0-9]* .* valid 0'
+expect gcshop 'recipe [0-9]* Zombie Madness:'   # (a deck bought is a recipe)
+refuse gcshop "recipe [0-9]* Dragon's Roar:"   # (one not bought isn't)
+expect gcshop 'recipe [0-9]* WALLY:'   # (and every special duelist beaten)
+echo 'PASS the GAME CENTER Yu-Gi-Oh! clerk: a new duelist set up, a single, a Starter and a Structure Deck for money, one each; DECK RECIPES of decks bought and duelists beaten, all legal'
+
 fi
 
 # Asked for a Yu-Gi-Oh! duel with only the POKEMON cards: a Starter Deck to keep first, then the duel. With

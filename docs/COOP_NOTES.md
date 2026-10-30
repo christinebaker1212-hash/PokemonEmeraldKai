@@ -2452,8 +2452,9 @@ YGO_CARD_COUNT made from EDOPro's database (Ygo_EdoCard).
   GOAT allow only what they name). The player's choice is YgoCollection.banlist (.ygo format 4); opponents' decks
   follow the game's own (Ygo_GameLimit).
 - Opponents' decks: tools/ygo/scrape_npc_decks.py reads Yugipedia's pages for the opponents of Stairway to the
-  Destined Duel, The Eternal Duelist Soul, World Championship 2004, Reshef of Destruction and The Sacred Cards (three
-  page layouts; names matched through EDOPro's database too), keeps decks the catalog nearly covers (two a character),
+  Destined Duel, The Eternal Duelist Soul, World Championship 2004, Reshef of Destruction, The Sacred Cards, World
+  Championship 2006 and GX Duel Academy (1.56.0; three page layouts; on pages with decks from several games only the
+  game's own section, scrape_npc_decks.py section(); names matched through EDOPro's database too), keeps decks the catalog nearly covers (two a character),
   fills short ones to 40 with Normal Monsters of the deck's own Attribute/Type; tools/ygo/rate_npc_decks.sh rates
   them by AI-against-AI duels (Elo) into src/ygo/ygo_npc_decks.c, weakest first; ygo_field.c GameDeck picks from the
   quarter matching the badge tier.
@@ -2498,6 +2499,46 @@ TCG_LINK_VERSION 15.
   pokemon-tcg-data decks/en) at 18000. The Gym and Neo theme decks need cards neither game has.
 - Tests: tools/tcg/test_gb2.c (every attack 40 times then the AI carries on, every used power, every GB2 deck to the
   end against others).
+
+## Yu-Gi-Oh! to World Championship 2006 (1.56.0)
+
+- Pool: tools/ygo/build_catalog.py adds the English sets from Invasion of Chaos to Shadow of Infinity, the Starter
+  Decks Kaiba / Yugi Evolution and 2006, Structure Decks 1-8, and every card of World Championship 2006 itself
+  (tools/ygo/wc2006.json from tools/ygo/fetch_wc2006.py: the game's card pages by password, its March 2006 Forbidden
+  & Limited list, the decks' copies from Yugipedia's Set Card Lists, its own card names). 2311 cards, 33 sets; old
+  ids never move (tools/ygo/ids.json). North American printings: "LOB-001" codes up to 2004, then "SOD-EN001"; an
+  Ultimate Rare is the second printing of a card the set also has.
+- Limits: Stairway's for its cards; the 2003 pool keeps what it had (3 when Stairway lacks the card) so no saved deck
+  changes; the new cards follow World Championship 2006's list, never below what a deck sold here holds
+  (Blaze of Destruction's two Level Limit - Area B).
+- Sets past 16: YgoCard.sets is 64 bits (YGO_SET_BIT); the YGO_SET_* enum is generated into card_ids.h; YgoSet.starter
+  is YGO_DECK_STARTER / YGO_DECK_STRUCTURE (0 a booster). Ygo_SetShortName drops "Starter Deck: " / "Structure Deck: ".
+- Save: .ygo format 6 stores the card and set counts it was saved with (Ygo_CollectionLoad reads 1-5 as 1509 cards and
+  13 sets) and 32 bits of sold decks (gcDecks).
+- Art: tools/ygo/build_printed.py keeps the pictures printed.bin already has when the catalog grows; fetch_art.py
+  fetches the new ones. The engine's codes: tools/ygo/edo/build_pack.py --codes BABELCDB (no new pak needed: edo.pak
+  has every card).
+- GAME CENTER 2F: every Starter Deck at 10000, every Structure Deck at 12000 (GcDeckCount / GcDeckSet / GcDeckPrice;
+  row k = bit k of gcDecks, the four 2002-2003 decks keep bits 0-3), a scrolling list.
+- DECK RECIPES (both card games): a deck sold at the GAME CENTER only once bought (gcDecks; Yu-Gi-Oh!'s chosen
+  Starter Deck too, the Pokemon side's three starters always), then each special duelist's deck once beaten
+  (specialBeaten): ygo_field.c Ygo_SpecialRecipe builds it at their best (tier 3, a fixed seed, their signature card
+  in), cached. Tests: `mp ygo recipes` (gcshop), `mp cards recipes` (counter).
+- Opponents: 112 World Championship 2006 decks and 9 GX Duel Academy decks join the others (7 Trials to Glory's aren't
+  on Yugipedia); BuildDeck's themed decks and the boosters handed out draw on the whole pool by themselves.
+
+## Rare card foil (1.56.0)
+
+- src/tcg/tcg_foil.c (tcg_foil.h), shared by the three card games: G_Foil(kind, card rect, art rect, seed, frame) and
+  G_FoilHalo. Everything is added light (G_FillAdd, SDL_BLENDMODE_ADD), never a color laid over the picture: a soft
+  diagonal sheen (three layered widths, eased, brightest midway, then a rest), a few four-point twinkles at hashed
+  places, a glint along the name strip (Rares), a light round the edge (Ultra / Secret). Kinds: GLINT, SILVER, GOLD,
+  PRISM (pastel hues), COSMOS (POKeMON holos: pale prism and more twinkles), STAR (TRIPLE TRIAD five stars).
+- The art rectangle comes from the code that draws each face, in every CARD ART mode: G_CardArtRect (tcg_gfx.c: the
+  frame's box, or the printed scan's measured rectangle) and Ygo_CardArtRect (ygo_gfx.c, the same, at the face's
+  built size scaled to the drawn one). TRIPLE TRIAD: the card inside a small inset.
+- Where: the BINDER grids (POKeMON, Yu-Gi-Oh!), the big card of all three, and the pack reveals (with G_FoilHalo instead of the old
+  colored box). Checked by bursts of rendershots (the light's union covers the picture exactly).
 
 ## Card AI levels, power ratings and how a match looks (1.49.0)
 

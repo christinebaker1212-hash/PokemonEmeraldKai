@@ -27,6 +27,7 @@
 #include "tt/npc.h"
 #include "tt/rating.h"
 #include "../tcg/tcg_gfx.h"
+#include "../tcg/tcg_foil.h"
 #include "../tcg/tcg_ui_kit.h"
 #include "../tcg/tcg_guide.h"
 #include "../tcg/tcg_search.h"
@@ -271,6 +272,16 @@ static void StripCard(unsigned id, float x, float y, float w, float h, double an
     Tt_DrawCard(id, x, y, w, h, 1, 1, alpha, &face);
 }
 static void Strip(unsigned card, const char *text) { TcgUi_Strip(card ? StripCard : NULL, card, text); }
+/* The foil of the rarest cards (src/tcg/tcg_foil.c): a four-star card's picture has a white sheen, a five-star's a
+ * slow golden one and twinkles; light over the picture, never paint */
+static void TtFoil(const struct TtCard *c, int x, int y, int w, int h, unsigned frame)
+{
+    int in = w >= 60 ? 4 : 2;
+    if (!c || c->stars < 4)
+        return;
+    G_Foil(c->stars >= 5 ? FOIL_STAR : FOIL_SILVER, x, y, w, h, x + in, y + in, w - 2 * in, h - 2 * in, c->order * 131u,
+           frame);
+}
 static void Card(unsigned id, float x, float y, float w, float h, unsigned seat, unsigned alpha)
 {
     struct TtFace face;
@@ -1190,14 +1201,8 @@ static void InspectScreen(void)
         face.seat = TT_SEAT_BLUE;
         G_FillA(12, 18 - bob, TT_BIG_W, TT_BIG_H, 0x000000, 70);
         Tt_DrawCard((unsigned)U.card, 8, (float)(12 - bob), TT_BIG_W, TT_BIG_H, 1, 1, 255, &face);
-        if (card->stars >= 4)
-        {
-            /* a shine runs over the rarest cards now and then */
-            int sx = (int)((U.frame * 2) % 300) - 40, k;
-            for (k = 0; k < 10; k++)
-                if (sx + k > 4 && sx + k < TT_BIG_W - 4)
-                    G_FillA(8 + sx + k, 14 - bob, 1, TT_BIG_H - 4, 0xffffff, (unsigned)((20 + 6 * k) * (0.6f + 0.4f * pulse)));
-        }
+        (void)pulse;
+        TtFoil(card, 8, 12 - bob, TT_BIG_W, TT_BIG_H, U.frame);
     }
     G_RoundFill(118, 4, 118, 140, 0x182838, 235);
     G_RoundFrame(118, 4, 118, 140, TT_GOLD, 255);
@@ -1308,12 +1313,10 @@ static void RevealScreen(void)
         if (t >= 6 && t < 30)
             face.glow = (uint8_t)(200 - (t - 6) * 8);
         if (t >= 6 && c && c->stars >= 3)
-        {
-            float pulse = 0.5f + 0.5f * sinf(U.frame * 0.15f);
-            G_RoundFill((int)x - 3, (int)y - 3, w + 6, h + 6, c->stars >= 5 ? 0xf070e0 : c->stars == 4 ? 0x70e0d0 : 0xf8d048,
-                        (unsigned)(60 + 60 * pulse));
-        }
+            G_FoilHalo((int)x, (int)y, w, h, c->stars == 4 ? 0x60d0c0 : 0xf0c048, U.frame + (unsigned)i * 17, c->stars >= 5);
         Tt_DrawCard(U.revealed[i], x, y, (float)w, (float)h, fabsf(k), 1, 255, &face);
+        if (t >= 12 && c)
+            TtFoil(c, (int)x, (int)y, w, h, U.frame + (unsigned)i * 17);
         if (t >= 8 && c)
         {
             Tt_DrawStars(c->stars, (int)x + w / 2 - (int)c->stars * 4 + 1, (int)y + h + 3, 9, 255);

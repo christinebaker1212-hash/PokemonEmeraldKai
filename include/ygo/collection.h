@@ -44,9 +44,10 @@ struct YgoCollection
     uint32_t specialBeaten, promoGiven;
     uint8_t optedIn, activeDeck, starter;   /* starter: the Starter Deck chosen (YGO_SET_*) + 1 */
     struct YgoDaily daily[YGO_DAILY_SLOTS];
-    /* the GAME CENTER clerk sells one copy of each single (a bit per card id) and one of each Starter Deck */
+    /* the GAME CENTER clerk sells one copy of each single (a bit per card id) and one of each deck (a bit per row of
+     * its deck list) */
     uint8_t gcSingles[YGO_GC_SINGLE_BYTES];
-    uint8_t gcDecks;
+    uint32_t gcDecks;
     /* format 3: each saved deck's ACE CARD, the card that stands for it on the screens (0: picked for it) */
     uint16_t ace[YGO_SAVED_DECKS];
     /* format 4: the Forbidden & Limited list the player's decks follow, by name ("": the game's own) */
@@ -58,6 +59,7 @@ struct YgoCollection
 #define YGO_SKILL_MAX 300
 
 void Ygo_CollectionInit(struct YgoCollection *c, uint32_t seed);
+const char *Ygo_SetShortName(unsigned set);   /* without "Starter Deck: " / "Structure Deck: " */
 int Ygo_CollectionLoad(struct YgoCollection *c, const char *path);
 int Ygo_CollectionSave(const struct YgoCollection *c, const char *path);   /* never in dev builds */
 

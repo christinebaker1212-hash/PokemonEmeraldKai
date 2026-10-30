@@ -184,6 +184,17 @@ void G_FillA(int x, int y, int w, int h, unsigned rgb, unsigned alpha)
     SDL_RenderFillRect(sR, &r);
 }
 void G_Fill(int x, int y, int w, int h, unsigned rgb) { G_FillA(x, y, w, h, rgb, 255); }
+/* Light added over what is there (a foil's shine: it brightens the picture without covering it) */
+void G_FillAdd(int x, int y, int w, int h, unsigned rgb, unsigned alpha)
+{
+    SDL_Rect r = {x, y, w, h};
+    if (w <= 0 || h <= 0 || !alpha)
+        return;
+    SDL_SetRenderDrawBlendMode(sR, SDL_BLENDMODE_ADD);
+    SDL_SetRenderDrawColor(sR, (rgb >> 16) & 255, (rgb >> 8) & 255, rgb & 255, alpha > 255 ? 255 : alpha);
+    SDL_RenderFillRect(sR, &r);
+    SDL_SetRenderDrawBlendMode(sR, SDL_BLENDMODE_BLEND);
+}
 void G_Frame(int x, int y, int w, int h, unsigned rgb, unsigned alpha)
 {
     G_FillA(x, y, w, 1, rgb, alpha);
@@ -1185,6 +1196,31 @@ static struct Source *Scan(unsigned id)
     if (sArtMode == G_ART_GAME_BOY || !G_HasPrinted(id))
         return NULL;
     return Source(id, 1);
+}
+/* Where a card's illustration is on its face of w x h (as G_CardTexture draws it), for the foil over it */
+void G_CardArtRect(unsigned id, int w, int h, int *ax, int *ay, int *aw, int *ah)
+{
+    const struct TcgCard *c = id ? Tcg_Card(id) : NULL;
+    struct Source *scan = c && sArtMode == G_ART_FULL_CARD ? Scan(id) : NULL;
+    int b = w >= 40 ? 3 : w >= 26 ? 2 : 1;
+    if (scan && scan->w > 0 && scan->h > 0)
+    {
+        *ax = scan->artX * w / scan->w;
+        *ay = scan->artY * h / scan->h;
+        *aw = scan->artW * w / scan->w;
+        *ah = scan->artH * h / scan->h;
+        return;
+    }
+    *ax = b + 1;
+    *aw = w - 2 * b - 2;
+    if (c && c->kind == TCG_ENERGY)
+    {
+        *ah = *aw * 3 / 4;
+        *ay = (h - *ah) / 2;
+        return;
+    }
+    *ah = c && c->kind == TCG_TRAINER && sArtMode == G_ART_PRINTED_ART && Scan(id) ? (*aw * 5 + 4) / 9 : (*aw * 3 + 2) / 4;
+    *ay = b + (w >= 40 ? 6 : w >= 26 ? 3 : 2) + 1;
 }
 int G_HasPrinted(unsigned id)
 {

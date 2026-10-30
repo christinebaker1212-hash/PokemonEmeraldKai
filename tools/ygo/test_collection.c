@@ -103,29 +103,87 @@ int main(void)
         CHECK(placed == have && missing == total - have && missing >= 1 && !strcmp(r.decks[4].name, "Again"));
         CHECK(Ygo_DeckAce(&r, 4) != 0);
     }
-    /* a format 1 file (1.35.0) still loads, nothing sold */
+    /* format 5 (1.49.0-1.55.0, 1509 cards, 13 sets) and format 1 (1.35.0) files still load: the new cards and sets
+     * start at none, nothing sold in a format 1 file */
     {
-        static unsigned char data[1 << 20];
-        FILE *f = fopen("/tmp/ygo-test.ygo", "rb");
-        size_t n = fread(data, 1, sizeof(data), f), size = n - 12 - YGO_GC_SINGLE_BYTES - 1 - 2 * YGO_SAVED_DECKS - 32 - 4, i;
-        uint32_t crc = 0xFFFFFFFFu;
-        unsigned k;
-        fclose(f);
-        for (i = 0; i < size; i++)
+        static const unsigned formats[] = {5, 1};
+        unsigned fi;
+        for (fi = 0; fi < 2; fi++)
         {
-            crc ^= data[12 + i];
-            for (k = 0; k < 8; k++)
-                crc = (crc >> 1) ^ (0xEDB88320u & (0u - (crc & 1)));
+            unsigned format = formats[fi];
+            static unsigned char data[1 << 20];
+            unsigned char *q = data + 12;
+            unsigned k, j;
+            size_t size;
+            uint32_t crc = 0xFFFFFFFFu;
+            FILE *f;
+#define OLD(v, n) do { for (k = 0; k < (n); k++) *q++ = (unsigned char)((uint32_t)(v) >> (8 * k)); } while (0)
+            for (i = 0; i <= 1509; i++)
+                OLD(i == 5 ? 7 : 0, 2);
+            for (i = 0; i < YGO_SAVED_DECKS; i++)
+            {
+                memset(q, 0, YGO_NAME_LEN);
+                if (!i)
+                    strcpy((char *)q, "OLD");
+                q += YGO_NAME_LEN;
+                for (j = 0; j < YGO_DECK_MAX + YGO_FUSION_MAX; j++)
+                    OLD(!i && j < 3 ? 5 : 0, 2);
+            }
+            for (i = 0; i < 13; i++)
+                OLD(i == 3 ? 4 : 0, 2);
+            OLD(12, 4);   /* wins */
+            for (i = 0; i < 9; i++)
+                OLD(0, 4);
+            OLD(1, 1);
+            OLD(0, 1);
+            OLD(2, 1);
+            for (i = 0; i < YGO_DAILY_SLOTS; i++)
+                { OLD(0, 4); OLD(0, 2); }
+            if (format >= 2)
+            {
+                for (i = 0; i < (1509 + 8) / 8; i++)
+                    OLD(i == 1 ? 0x10 : 0, 1);
+                OLD(5, 1);
+                for (i = 0; i < YGO_SAVED_DECKS; i++)
+                    OLD(!i ? 5 : 0, 2);
+                memset(q, 0, 32);
+                q += 32;
+                OLD(-40, 2);
+                OLD(3, 2);
+            }
+#undef OLD
+            size = (size_t)(q - data - 12);
+            for (i = 0; i < size; i++)
+            {
+                crc ^= data[12 + i];
+                for (k = 0; k < 8; k++)
+                    crc = (crc >> 1) ^ (0xEDB88320u & (0u - (crc & 1)));
+            }
+            crc = ~crc;
+            memcpy(data, "MYGO", 4);
+            for (k = 0; k < 4; k++)
+                data[4 + k] = (unsigned char)(format >> (8 * k)), data[8 + k] = (unsigned char)(crc >> (8 * k));
+            f = fopen("/tmp/ygo-test.ygo", "wb");
+            fwrite(data, 1, 12 + size, f);
+            fclose(f);
+            CHECK(Ygo_CollectionLoad(&back, "/tmp/ygo-test.ygo"));
+            CHECK(back.wins == 12 && back.owned[5] == 7 && back.packs[3] == 4 && back.starter == 2 && back.optedIn == 1);
+            CHECK(!strcmp(back.decks[0].name, "OLD") && back.decks[0].main[2] == 5 && !back.decks[0].main[3]);
+            for (i = 1510; i <= YGO_CARD_COUNT; i++)
+                CHECK(!back.owned[i]);
+            for (i = 13; i < YGO_SET_COUNT; i++)
+                CHECK(!back.packs[i]);
+            if (format == 5)
+                CHECK(back.gcDecks == 5 && back.gcSingles[1] == 0x10 && back.ace[0] == 5 && back.skill == -40 && back.rated == 3);
+            else
+                CHECK(back.gcDecks == 0 && !back.gcSingles[1] && !back.ace[0]);
+            /* and saves as today's format */
+            CHECK(Ygo_CollectionSave(&back, "/tmp/ygo-test.ygo"));
+            CHECK(Ygo_CollectionLoad(&c, "/tmp/ygo-test.ygo") && c.owned[5] == 7 && c.gcDecks == back.gcDecks);
         }
-        crc = ~crc;
-        data[4] = 1, data[5] = data[6] = data[7] = 0;
-        for (k = 0; k < 4; k++)
-            data[8 + k] = (unsigned char)(crc >> (8 * k));
-        f = fopen("/tmp/ygo-test.ygo", "wb");
-        fwrite(data, 1, 12 + size, f);
-        fclose(f);
-        CHECK(Ygo_CollectionLoad(&back, "/tmp/ygo-test.ygo"));
-        CHECK(back.wins == 12 && back.gcDecks == 0 && !back.gcSingles[YGO_CARD_RAIGEKI / 8]);
+        c.gcDecks = 0x80000005u;   /* format 6: 32 decks' worth */
+        CHECK(Ygo_CollectionSave(&c, "/tmp/ygo-test.ygo"));
+        CHECK(Ygo_CollectionLoad(&back, "/tmp/ygo-test.ygo") && back.gcDecks == 0x80000005u);
     }
     CHECK(Ygo_MoneyPrice(YGO_CARD_RAIGEKI) >= 300 && Ygo_MoneyPrice(YGO_CARD_RAIGEKI) <= 4000);
     remove("/tmp/ygo-test.ygo");

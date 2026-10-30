@@ -445,6 +445,44 @@ SDL_Texture *Ygo_CardTexture(unsigned id, int w, int h)
 
 /* The sizes faces are built at (the Pokemon cards' sizes); anything in between scales the next size up */
 static const int sSizes[][2] = {{12, 16}, {18, 25}, {22, 30}, {30, 42}, {44, 61}, {72, 100}};
+/* Where the illustration is on a face of w x h as Ygo_DrawCard draws it (the foil over it): the printed card's own
+ * picture rectangle when the whole printed card shows, else the frame's square box (Face) */
+void Ygo_CardArtRect(unsigned id, int w, int h, int *ax, int *ay, int *aw, int *ah)
+{
+    const struct YgoCard *c = Ygo_Card(id);
+    struct Pic *p = sMode == G_ART_FULL_CARD && id ? Picture(id, 0) : NULL;
+    unsigned i, pick = 5;
+    int tw, th, b, nameH, y;
+    if (p && p->w > 0 && p->h > 0)
+    {
+        *ax = (p->artX * w + p->w / 2) / p->w;
+        *ay = (p->artY * h + p->h / 2) / p->h;
+        *aw = (p->artW * w + p->w / 2) / p->w;
+        *ah = (p->artH * h + p->h / 2) / p->h;
+        return;
+    }
+    /* (the face is built at the next size up and scaled to w x h) */
+    for (i = 0; i < 6; i++)
+        if ((float)sSizes[i][0] >= w - 0.5f)
+        {
+            pick = i;
+            break;
+        }
+    tw = sSizes[pick][0], th = sSizes[pick][1];
+    b = tw >= 40 ? 3 : tw >= 26 ? 2 : 1;
+    nameH = tw >= 40 ? 6 : tw >= 26 ? 4 : 2;
+    y = b + nameH + 1;
+    if (c && c->frame <= YGO_RITUAL && tw >= 26)
+        y += (tw >= 40 ? 3 : 2) + 1;
+    *aw = tw - 2 * b - 2;
+    *ah = *aw;
+    if (y + *ah > th - b - (tw >= 26 ? 6 : 2))
+        *ah = th - b - (tw >= 26 ? 6 : 2) - y;
+    *ax = (b + 1) * w / tw;
+    *ay = y * h / th;
+    *aw = (*aw * w + tw / 2) / tw;
+    *ah = (*ah * h + th / 2) / th;
+}
 void Ygo_DrawCard(unsigned id, float x, float y, float w, float h, double angle, unsigned alpha, unsigned flash)
 {
     SDL_Texture *t;

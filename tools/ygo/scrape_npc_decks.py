@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The opponents' decks of the 2002-2004 Game Boy Advance Yu-Gi-Oh! games, from Yugipedia's character pages: casual
+"""The opponents' decks of the 2002-2006 Game Boy Advance Yu-Gi-Oh! games, from Yugipedia's character pages: casual
 decks of every strength (a starting rival's to a final boss's), never tournament decklists. Kept when the game's card
 pool (tools/ygo/catalog.json) has nearly all of the deck: cards it hasn't got are left out, and a deck short of 40
 after that is dropped.
@@ -11,13 +11,39 @@ import json, os, re, sys, time, urllib.parse, urllib.request
 ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 CACHE = os.path.join(ROOT, 'tools', 'ygo', '.cache', 'yugipedia')
 API = 'https://yugipedia.com/api.php'
+# (game, its characters' template, the heading of its part on pages that hold decks of several games). 7 Trials to
+# Glory (World Championship 2005) has no opponents' decks on Yugipedia.
 GAMES = [
-    ('SDD', 'Template:Yu-Gi-Oh! Worldwide Edition: Stairway to the Destined Duel characters'),
-    ('EDS', 'Template:Yu-Gi-Oh! The Eternal Duelist Soul characters'),
-    ('WC4', 'Template:Yu-Gi-Oh! World Championship Tournament 2004 characters'),
-    ('ROD', 'Template:Yu-Gi-Oh! Reshef of Destruction characters'),
-    ('TSC', 'Template:Yu-Gi-Oh! The Sacred Cards characters'),
+    ('SDD', 'Template:Yu-Gi-Oh! Worldwide Edition: Stairway to the Destined Duel characters', None),
+    ('EDS', 'Template:Yu-Gi-Oh! The Eternal Duelist Soul characters', None),
+    ('WC4', 'Template:Yu-Gi-Oh! World Championship Tournament 2004 characters', None),
+    ('ROD', 'Template:Yu-Gi-Oh! Reshef of Destruction characters', None),
+    ('TSC', 'Template:Yu-Gi-Oh! The Sacred Cards characters', None),
+    ('WC6', 'Template:Yu-Gi-Oh! Ultimate Masters: World Championship Tournament 2006 characters', 'World Championship 2006'),
+    ('GXDA', 'Template:Yu-Gi-Oh! GX Duel Academy characters', None),
 ]
+
+SKIP = {'Mimicry'}   # (a deck idea on the GX Duel Academy page, with decks from every later game)
+
+
+def section(text, heading):
+    """The part of a page under the heading that names the game (when the page has one), else the whole page"""
+    if not heading:
+        return text
+    heads = list(re.finditer(r'^(=+)\s*([^=\n]+?)\s*\1\s*$', text, re.M))
+    parts = []
+    for i, m in enumerate(heads):
+        if heading.lower() in m.group(2).lower():
+            level = len(m.group(1))
+            end = next((h.start() for h in heads[i + 1:] if len(h.group(1)) <= level), len(text))
+            parts.append(text[m.end():end])
+    if parts:
+        return '\n'.join(parts)
+    # (no part named after a game at all: the page is this game's)
+    games = ('World Championship', 'Tag Force', 'Duel Links', 'Legacy of the Duelist', 'Spirit Caller')
+    if any(any(g in m.group(2) for g in games) for m in heads):
+        return ''
+    return text
 
 
 def get(params):
@@ -43,6 +69,7 @@ def get(params):
 
 
 def norm(name):
+    name = name.split('|')[0]   # ("Collapse (World Championship 2006)|Shrink|...": a link's page)
     name = re.sub(r'\s*\([^)]*\)\s*$', '', name).strip().lower()
     name = re.sub(r'\bb\.\s*', 'black ', name)   # ("B. Skull Dragon", "Red-Eyes B. Dragon": the old short names)
     return re.sub(r'[^a-z0-9]+', '', name.replace('&', 'and'))
@@ -68,6 +95,13 @@ def names(cat):
     for a, b in ALIASES.items():
         if b in byname:
             byname.setdefault(a, byname[b])
+    # World Championship 2006's own names (its opponents' lists use them)
+    wc6 = os.path.join(ROOT, 'tools', 'ygo', 'wc2006.json')
+    if os.path.exists(wc6):
+        bypw = {c['password']: c for c in cat}
+        for name, pw in json.load(open(wc6)).get('names', {}).items():
+            if pw in bypw:
+                byname.setdefault(norm(name), bypw[pw])
     return byname
 
 
@@ -136,15 +170,18 @@ def main():
     byid = {c['id']: c for c in cat}
     byname = names(cat)
     out, seen = [], set()
-    for game, template in GAMES:
+    for game, template, heading in GAMES:
         links = get({'action': 'parse', 'page': template, 'prop': 'links'})
         pages = [l['*'] for l in links.get('parse', {}).get('links', []) if l.get('ns') == 0 and 'exists' in l]
         for page in pages:
-            if page in seen:
+            if page in SKIP:
                 continue
-            seen.add(page)
+            key = page if heading is None else (game, page)   # (a page under several games: read once)
+            if key in seen:
+                continue
+            seen.add(key)
             data = get({'action': 'parse', 'page': page, 'prop': 'wikitext'})
-            text = data.get('parse', {}).get('wikitext', {}).get('*', '')
+            text = section(data.get('parse', {}).get('wikitext', {}).get('*', ''), heading)
             for k, block in enumerate(blocks(text)):
                 cards, missing, total = [], [], 0
                 for name, n in block:

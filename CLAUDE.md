@@ -176,8 +176,10 @@ TcgDuel_Attacker for Puppet Master), 11 boosters, GB2 decks mixed into card play
 structure decks (tools/moemon_gamecenter/gen_structure_decks.py): COOP_NOTES "Pokemon Card GB2's cards"; test_gb2.c.
 
 Also YU-GI-OH! duels (src/ygo/, include/ygo/: the CARD CASE's second side, L/R switches; SDD's card list and
-Forbidden/Limited list plus the English boosters to the end of 2003 (tools/ygo, catalog in ygo_catalog.c / card_ids.h;
-the ROM is never committed): the cards that can be collected and seen. The rules are EDOPro's: edopro/ocgcore
+Forbidden/Limited list plus the English sets and World Championship 2006's cards up to Shadow of Infinity (tools/ygo,
+catalog in ygo_catalog.c / card_ids.h; tools/ygo/wc2006.json from fetch_wc2006.py; 64-bit set masks YGO_SET_BIT; .ygo
+format 6 keeps its card / set counts; the ROM is never committed): the cards that can be collected and seen
+(COOP_NOTES "Yu-Gi-Oh! to World Championship 2006": Structure Decks at the GAME CENTER, beaten duelists as recipes). The rules are EDOPro's: edopro/ocgcore
 (ygopro-core + Lua 5.4, C++ built by the Makefile's EDO_* rules, AGPL: dist_extras/EDOPRO_CREDITS.txt) with every card
 and script in graphics/ygo/edo.pak (tools/ygo/edo/build_pack.py from BabelCdb, CardScripts, LFLists, strings.conf;
 ygo_edo_data.c). src/ygo/ygo_edo.c bridges it to the game's API (include/ygo/duel.h: YgoQuery / YgoAnswer, events,
@@ -194,7 +196,8 @@ CARD / DECK RECIPES on both card games (COOP_NOTES "Deck menus"), a Starter Deck
 without a deck (ResolveNoDeck), the GAME CENTER 2F clerk; decisions docs/YGO_DECISIONS.md, COOP_NOTES "Yu-Gi-Oh!" and
 "Yu-Gi-Oh! on EDOPro"; tests tools/ygo/test.sh (test_edo, test_edo_cards: scenarios with unshuffled Decks), tools/ygo/test_ui.sh, scenarios ygo_*).
 
-The three card games share INSPECT (R2 / D: PLATFORM_KEY_INSPECT), CONCEDE on your own deck, one cursor (G_Focus)
+The three card games share the rare cards' foil (src/tcg/tcg_foil.c: added light over the exact art rectangle,
+G_CardArtRect / Ygo_CardArtRect; COOP_NOTES "Rare card foil"), INSPECT (R2 / D: PLATFORM_KEY_INSPECT), CONCEDE on your own deck, one cursor (G_Focus)
 and challenge screens with the opponent's battle picture (tcg_field.c CaptureChallengePic): COOP_NOTES "The three card
 games together". They also share AI levels 0-3 that slip like people (weighed by how much worse a choice looks; dice
 only from what both can see), hidden power ratings from AI duels blended with the cards' tournament history

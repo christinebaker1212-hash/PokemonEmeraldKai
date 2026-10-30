@@ -273,7 +273,7 @@ expect practice 'left the table'
 echo 'PASS a practice game'
 fi
 
-# The GAME CENTER 2F: the TRIPLE TRIAD seller's counter, a player beside it asked for a game (rules on the move: the
+# The GAME CENTER 2F: a TRIPLE TRIAD player by the shelves asked for a game (rules on the move: the
 # PETALBURG rules carried in), a win, a card of theirs taken
 if only gamecenter; then
 cat > "$OUT/gamecenter.txt" <<'SCRIPT'
@@ -327,7 +327,7 @@ expect gamecenter 'wins 1'
 echo 'PASS the GAME CENTER: a game with the player by the TRIPLE TRIAD seller, a card taken'
 fi
 
-# A SCHOOL KID by the GAME CENTER's seller plays MOeMON cards and TRIPLE TRIAD: they ask which
+# A SCHOOL KID by the GAME CENTER's shelves plays MOeMON cards and TRIPLE TRIAD: they ask which
 if only which; then
 cat > "$OUT/which.txt" <<'SCRIPT'
 pressuntil A field 5000

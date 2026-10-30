@@ -9,6 +9,7 @@
 Also writes src/ygo/ygo_edo_codes.c: each catalog card's EDOPro code (by password, else by name).
 
 usage: build_pack.py BABELCDB_DIR CARDSCRIPTS_DIR LFLISTS_DIR STRINGS_CONF
+       build_pack.py --codes BABELCDB_DIR   (only src/ygo/ygo_edo_codes.c, after a catalog change)
   (git clone https://github.com/ProjectIgnis/BabelCdb, .../CardScripts, .../LFLists;
    strings.conf from https://raw.githubusercontent.com/ProjectIgnis/Distribution/master/config/strings.conf)
 
@@ -45,6 +46,9 @@ def cards_bin(cdb):
 
 
 def main():
+    if len(sys.argv) == 3 and sys.argv[1] == '--codes':
+        write_codes(sqlite3.connect(os.path.join(sys.argv[2], 'cards.cdb')))
+        return
     if len(sys.argv) != 5:
         sys.exit(__doc__)
     babel, scripts, lflists, strings = sys.argv[1:]
@@ -82,7 +86,11 @@ def main():
         f.write(head + b''.join(table) + bytes(data))
     print('%s: %d files, %d cards, %.1f MB' % (out, len(names), struct.unpack_from('<I', blob, 4)[0],
                                               os.path.getsize(out) / 1e6))
-    # the catalog's cards in EDOPro
+    write_codes(db)
+
+
+def write_codes(db):
+    """the catalog's cards in EDOPro"""
     cat = json.load(open(os.path.join(ROOT, 'tools', 'ygo', 'catalog.json')))['cards']
     known = {r[0] for r in db.execute('select id from datas')}
     byname = {}

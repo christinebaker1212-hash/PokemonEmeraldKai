@@ -337,11 +337,13 @@ wait 10
 press A 2
 wait 4
 mp cards state
+mp cards recipes
 quit
 SCRIPT
 run counter
 expect counter 'screen 12 opted 1 .* points 10 packs 10000000000 '
-echo 'PASS the counter: a spare card traded in, a booster pack bought'
+expect counter 'recipes 3: \[Ember Friends\] \[Tidal Friends\] \[Garden Friends\]$'   # (structure decks only once bought)
+echo 'PASS the counter: a spare card traded in, a booster pack bought; DECK RECIPES without the decks not bought'
 # A PRIZES fanfare at the counter, then the case closed before it ends: the Pokemon Center's
 # music plays again (it stayed paused, and a door then never finished), and the door works.
 cat > "$OUT/fanfare.txt" <<'SCRIPT'

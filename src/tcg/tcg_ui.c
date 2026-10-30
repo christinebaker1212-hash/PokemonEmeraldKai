@@ -27,6 +27,7 @@
 #include "tcg/scale.h"
 #include "tcg_board.h"
 #include "tcg_gfx.h"
+#include "tcg_foil.h"
 #include "tcg_ui_kit.h"
 #include "tcg_guide.h"
 #include "tcg_search.h"
@@ -151,6 +152,7 @@ static struct
     int fromScript;
     void (*returnToGame)(void);
 } U;
+static void TcgFoil(unsigned id, int x, int y, int w, int h, unsigned frame);
 
 static float Ease(float t)
 {
@@ -1645,14 +1647,22 @@ static void ChallengeScreen(void)
         Strip(0, line);
 }
 
-/* DECK RECIPES: the decks the game hands out, card for card (the starters, the GAME CENTER's structure decks), and
- * each special trainer's own deck once you've beaten them */
+/* DECK RECIPES: the decks the game hands out, card for card (the starters, the GAME CENTER's structure decks once
+ * bought), and each special trainer's own deck once you've beaten them */
 struct TcgRecipe
 {
     const char *name, *blurb;
     const uint16_t *cards;
 };
-#define RECIPE_FIXED (3 + (int)ARRAY_COUNT(sStructureDecks))
+/* (the GAME CENTER's structure decks only once bought there: gcDecks) */
+static int RecipeBought(void)
+{
+    unsigned i, n = 0;
+    for (i = 0; i < ARRAY_COUNT(sStructureDecks) && i < 32; i++)
+        n += (Tcg_GetCollection()->gcDecks >> i) & 1;
+    return (int)n;
+}
+#define RECIPE_FIXED (3 + RecipeBought())
 static int RecipeCount(void)
 {
     struct TcgCollection *c = Tcg_GetCollection();
@@ -1695,10 +1705,17 @@ static int Recipe(int k, struct TcgRecipe *r)
     }
     if (k >= 3)
     {
-        r->name = sStructureDecks[k - 3].name;
-        r->blurb = sStructureDecks[k - 3].blurb;
-        r->cards = sStructureDecks[k - 3].cards;
-        return 1;
+        /* the (k - 3)-th structure deck bought */
+        unsigned i, left = (unsigned)(k - 3);
+        for (i = 0; i < ARRAY_COUNT(sStructureDecks) && i < 32; i++)
+            if ((Tcg_GetCollection()->gcDecks >> i) & 1 && !left--)
+            {
+                r->name = sStructureDecks[i].name;
+                r->blurb = sStructureDecks[i].blurb;
+                r->cards = sStructureDecks[i].cards;
+                return 1;
+            }
+        return 0;
     }
     def = DeckNamed(defs[k]);
     if (!def)
@@ -2041,6 +2058,8 @@ static void BinderScreen(void)
         if (on)
             y -= 2;
         G_Card(card, (float)x, (float)y, 30, 42, 0, count || card <= 6 ? 255 : 80, 0);
+        if (count)
+            TcgFoil(card, x, y, 30, 42, U.frame + (unsigned)i * 13);
         if (count && card > 6)
         {
             /* (on the picture's corner: the bottom row shows weakness, resistance and retreat) */
@@ -2119,6 +2138,7 @@ static void InspectScreen(void)
         return;
     G_FillA(10, 34 - bob, 72, 100, 0x000000, 90);
     G_Card(card->id, 8, (float)(30 - bob), 72, 100, 0, 255, 0);
+    TcgFoil(card->id, 8, 30 - bob, 72, 100, U.frame);
     ListBox(86, 4, 152, 140);
     {
         SDL_Rect clip = {90, 8, 144, 132};
@@ -2326,6 +2346,17 @@ static void PacksScreen(void)
 }
 #define REVEAL_TEAR 34
 /* A color around the rainbow (t in 0..359) */
+/* The foil over a card w x h at x, y (src/tcg/tcg_foil.c): a holo's picture shimmers with the starlight of the
+ * printed holos, a Rare's name glints */
+static void TcgFoil(unsigned id, int x, int y, int w, int h, unsigned frame)
+{
+    const struct TcgCard *c = Tcg_Card(id);
+    int ax, ay, aw, ah;
+    if (!c || c->rarity < 2)
+        return;
+    G_CardArtRect(id, w, h, &ax, &ay, &aw, &ah);
+    G_Foil(Tcg_IsHolo(id) ? FOIL_COSMOS : FOIL_GLINT, x, y, w, h, x + ax, y + ay, aw, ah, id * 131u, frame);
+}
 static uint32_t Rainbow(int t)
 {
     int h = ((t % 360) + 360) % 360, x = (h % 60) * 255 / 60, r, g, b;
@@ -2369,24 +2400,14 @@ static void RevealScreen(void)
         int faceUp = (int)i < U.flipped, on = (int)i == U.cursor && U.flipped >= 10;
         int holo = faceUp && c && c->rarity == 2 && Tcg_IsHolo(U.revealed[i]);
         if (faceUp && c && c->rarity >= 2)
-        {
-            int glow = (int)(fabsf(sinf(U.frame * 0.12f)) * 60);
-            G_RoundFill((int)sx - 3, (int)sy - 3, 36, 48, holo ? Rainbow((int)U.frame * 4 + (int)i * 40) : 0xf8e070,
-                        (unsigned)(90 + glow));
-        }
+            G_FoilHalo((int)sx, (int)sy - (on ? 3 : 0), 30, 42, 0xf0c848, U.frame + i * 17, holo);
         G_Card(faceUp ? U.revealed[i] : 0, sx, sy - (on ? 3 : 0), 30, 42, 0, 255, 0);
+        if (faceUp)
+            TcgFoil(U.revealed[i], (int)sx, (int)sy - (on ? 3 : 0), 30, 42, U.frame + i * 17);
         if (faceUp && c && c->rarity >= 2)
         {
-            int s = (int)((U.frame * 2) % 80) - 20;
-            if (s > 0 && s < 30)
-                G_FillA((int)sx + s, (int)sy + 1, 2, 40, 0xffffff, 120);
             if (holo)
             {
-                /* the foil: a band of color sweeping across the picture */
-                int b = (int)((U.frame * 3) % 90) - 30;
-                if (b > -6 && b < 30)
-                    G_FillA((int)sx + (b < 0 ? 0 : b), (int)sy + 4, b < 0 ? 6 + b : 6, 18,
-                            Rainbow((int)U.frame * 6), 90);
                 /* (on the card's foot, over a dark band: below it the second row ran into the strip) */
                 G_RoundFill((int)sx + 2, (int)sy + 33 - (on ? 3 : 0), 26, 9, 0x101828, 210);
                 G_TextAlign((int)sx + 15, (int)sy + 32 - (on ? 3 : 0), TA_CENTER, Rainbow((int)U.frame * 5), 0x302040,
@@ -4556,6 +4577,18 @@ void Tcg_Debug(const char *command)
         char reason[160];
         int valid = Tcg_DeckValidate(c->decks[n].cards, c->owned, reason, sizeof(reason));
         printf("[tcg] deck %u count %u valid %d active %u\n", n, DeckCount(n, 0), valid, c->activeDeck);
+        return;
+    }
+    if (!strcmp(command, "recipes"))
+    {
+        /* DECK RECIPES: the starters, the structure decks bought, the special trainers beaten */
+        int k;
+        struct TcgRecipe r;
+        printf("[tcg] recipes %d:", RecipeCount());
+        for (k = 0; k < RecipeCount(); k++)
+            if (Recipe(k, &r))
+                printf(" [%s]", r.name);
+        printf("\n");
         return;
     }
     if (!strcmp(command, "state"))

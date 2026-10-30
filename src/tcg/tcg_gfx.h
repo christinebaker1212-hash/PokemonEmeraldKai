@@ -67,6 +67,7 @@ unsigned G_Rgb15(unsigned c);
 unsigned G_Mix(unsigned a, unsigned b, float t);
 void G_Fill(int x, int y, int w, int h, unsigned rgb);
 void G_FillA(int x, int y, int w, int h, unsigned rgb, unsigned alpha);
+void G_FillAdd(int x, int y, int w, int h, unsigned rgb, unsigned alpha);   /* added light */
 void G_Frame(int x, int y, int w, int h, unsigned rgb, unsigned alpha);
 void G_RoundFill(int x, int y, int w, int h, unsigned rgb, unsigned alpha);
 void G_RoundFrame(int x, int y, int w, int h, unsigned rgb, unsigned alpha);
@@ -120,6 +121,7 @@ enum
 };
 void G_SetArtMode(unsigned mode);
 int G_HasPrinted(unsigned id);
+void G_CardArtRect(unsigned id, int w, int h, int *ax, int *ay, int *aw, int *ah);
 /* OPTIONS > DISPLAY > CARD BACKS (gMpConfig.cardBack). */
 enum
 {

@@ -25,6 +25,7 @@
 #include "ygo/net.h"
 #include "ygo/npc.h"
 #include "../tcg/tcg_gfx.h"
+#include "../tcg/tcg_foil.h"
 #include "../tcg/tcg_ui_kit.h"
 #include "../tcg/tcg_guide.h"
 #include "../tcg/tcg_search.h"
@@ -106,7 +107,8 @@ enum
 #define ROW_H KIT_ROW_H
 #define SHOP_BINDER 2   /* Y.showAll: the binder is the counter's "card you choose" list */
 #define GC_BINDER 3     /* Y.showAll: the binder is the GAME CENTER clerk's singles, for money */
-#define GC_DECK_PRICE 10000
+#define GC_STARTER_PRICE 10000     /* the GAME CENTER clerk's Starter Decks */
+#define GC_STRUCTURE_PRICE 12000   /* and Structure Decks, a bit more */
 #define FILTERS 7
 static const char *const sFilterNames[FILTERS] = {"ALL", "NORMAL", "EFFECT", "FUSION", "RITUAL", "SPELL", "TRAP"};
 #define YGO_THEME 0x6848b8   /* the case's YU-GI-OH! side: a deep violet */
@@ -632,7 +634,28 @@ static void AddCard(unsigned id)
 }
 /* The GAME CENTER clerk sold their one copy of this single / this Starter Deck */
 static int GcSingleSold(unsigned id) { return id && id <= YGO_CARD_COUNT && (C()->gcSingles[id / 8] >> (id % 8)) & 1; }
-static int GcDeckSold(unsigned k) { return (C()->gcDecks >> k) & 1; }
+static int GcDeckSold(unsigned k) { return k < 32 && (C()->gcDecks >> k) & 1; }
+/* The clerk's decks: every Starter and Structure Deck, oldest first (row k is bit k of gcDecks, so the four 2002-2003
+ * Starter Decks keep bits 0-3) */
+static unsigned GcDeckCount(void)
+{
+    unsigned i, n = 0;
+    for (i = 0; i < YGO_SET_COUNT; i++)
+        n += gYgoSets[i].starter != 0;
+    return n;
+}
+static unsigned GcDeckSet(unsigned k)
+{
+    unsigned i;
+    for (i = 0; i < YGO_SET_COUNT; i++)
+        if (gYgoSets[i].starter && !k--)
+            return i;
+    return YGO_SET_SDY;
+}
+static unsigned GcDeckPrice(unsigned k)
+{
+    return gYgoSets[GcDeckSet(k)].starter == YGO_DECK_STRUCTURE ? GC_STRUCTURE_PRICE : GC_STARTER_PRICE;
+}
 /* The rarity a card came out of a set's pack at */
 static unsigned RarityIn(unsigned set, unsigned card)
 {
@@ -643,11 +666,7 @@ static unsigned RarityIn(unsigned set, unsigned card)
                 return gYgoSets[set].cards[i].rarity;
     return Ygo_Card(card) ? Ygo_Card(card)->rarity : YGO_COMMON;
 }
-static const char *SetName(unsigned set)
-{
-    const char *n = gYgoSets[set].name;
-    return strncmp(n, "Starter Deck: ", 14) ? n : n + 14;
-}
+static const char *SetName(unsigned set) { return Ygo_SetShortName(set); }
 static unsigned SetMascot(unsigned set)
 {
     const struct YgoSet *s = &gYgoSets[set];
@@ -699,33 +718,18 @@ static unsigned RarityInk(unsigned rarity, int phase)
         return G_WHITE;
     }
 }
-/* The foil over a card of w x h at x, y: Super and Ultra Rare a shine across the picture, Secret Rare a rainbow
- * one, Rare and Ultra Rare a glint along the name */
-static void Foil(unsigned rarity, int x, int y, int w, int h, int phase)
+/* The foil over a card of w x h at x, y (src/tcg/tcg_foil.c: light over the picture, never paint): a Rare's name
+ * glints silver, a Super Rare's picture has a white sheen, an Ultra Rare's a warm one with the name and edge in gold,
+ * a Secret Rare's runs through the colors */
+static void Foil(unsigned id, unsigned rarity, int x, int y, int w, int h, int phase)
 {
-    int art = w * 13 / 15, ax = x + (w - art) / 2, ay = y + h * 8 / 42;
-    if (rarity >= YGO_SUPER_RARE)
-    {
-        int band = (phase * 2) % (art + 40) - 20, i;
-        for (i = 0; i < 6; i++)
-        {
-            int bx = band + i;
-            if (bx < 0 || bx >= art)
-                continue;
-            G_FillA(ax + bx, ay, 1, art, rarity == YGO_SECRET_RARE ? Rainbow(phase * 6 + i * 20) : 0xffffff,
-                    (unsigned)(rarity == YGO_SUPER_RARE ? 70 : 100) - (unsigned)i * 8);
-        }
-        if (rarity == YGO_ULTRA_RARE)
-            G_FillA(ax, ay, art, art, 0xf8d050, 22);
-        if (rarity == YGO_SECRET_RARE)
-            G_FillA(ax, ay, art, art, Rainbow(phase * 3), 26);
-    }
-    if (rarity == YGO_RARE || rarity == YGO_ULTRA_RARE || rarity == YGO_SECRET_RARE)
-    {
-        int g = (phase * 2) % (w + 30) - 10;
-        if (g > 0 && g < w - 4)
-            G_FillA(x + g, y + 2, 3, h * 4 / 42 + 1, rarity == YGO_RARE ? 0xffffff : 0xfff0a0, 150);
-    }
+    int ax, ay, aw, ah;
+    unsigned kind = rarity == YGO_SECRET_RARE ? FOIL_PRISM : rarity == YGO_ULTRA_RARE ? FOIL_GOLD
+                  : rarity == YGO_SUPER_RARE ? FOIL_SILVER : rarity == YGO_RARE ? FOIL_GLINT : FOIL_NONE;
+    if (kind == FOIL_NONE)
+        return;
+    Ygo_CardArtRect(id, w, h, &ax, &ay, &aw, &ah);   /* (the whole picture, in either CARD ART) */
+    G_Foil(kind, x, y, w, h, x + ax, y + ay, aw, ah, (unsigned)(x * 7 + y * 13), (unsigned)phase);
 }
 static const char *RarityLabel(unsigned rarity)
 {
@@ -1219,9 +1223,67 @@ static void ChallengeScreen(void)
         Strip(0, line);
 }
 
-/* DECK RECIPES: the Starter Decks, card for card, built again from the cards owned */
-#define RECIPE_COUNT YGO_STARTERS
-static void RecipeCards(int k, uint16_t *main, uint16_t *extra) { StarterDeckOf(sStarters[k], main, extra); }
+/* DECK RECIPES: the Starter Deck you chose and every deck bought from the GAME CENTER clerk, card for card, then each
+ * special duelist's deck once you've beaten them, built again from the cards owned */
+static int RecipeHas(unsigned k)   /* the clerk's deck k */
+{
+    return GcDeckSold(k) || GcDeckSet(k) + 1 == C()->starter;
+}
+static unsigned RecipeDecks(void)
+{
+    unsigned k, n = 0;
+    for (k = 0; k < GcDeckCount(); k++)
+        n += RecipeHas(k);
+    return n;
+}
+static unsigned RecipeDeck(int k)   /* row k (below RecipeDecks()): which of the clerk's decks */
+{
+    unsigned i;
+    for (i = 0; i < GcDeckCount(); i++)
+        if (RecipeHas(i) && !k--)
+            return i;
+    return 0;
+}
+static unsigned RecipeSpecial(int k)   /* row k past the decks: which special duelist (Ygo_SpecialCount() none) */
+{
+    unsigned i, beaten = C()->specialBeaten;
+    k -= (int)RecipeDecks();
+    for (i = 0; i < Ygo_SpecialCount() && i < 31; i++)
+        if ((beaten >> i) & 1 && !k--)
+            return i;
+    return Ygo_SpecialCount();
+}
+static int RecipeCount(void)
+{
+    unsigned i, n = RecipeDecks();
+    for (i = 0; i < Ygo_SpecialCount() && i < 31; i++)
+        n += (C()->specialBeaten >> i) & 1;
+    return (int)n;
+}
+static void RecipeCards(int k, uint16_t *main, uint16_t *extra)
+{
+    char name[24];
+    memset(main, 0, sizeof(uint16_t) * YGO_DECK_MAX);
+    memset(extra, 0, sizeof(uint16_t) * YGO_FUSION_MAX);
+    if (k < (int)RecipeDecks())
+        StarterDeckOf(GcDeckSet(RecipeDeck(k)), main, extra);
+    else
+        Ygo_SpecialRecipe(RecipeSpecial(k), main, extra, name, sizeof(name));
+}
+/* The row's name ("Dragon's Roar", "DRAKE's deck") and the deck slot's name for it */
+static const char *RecipeName(int k, int full)
+{
+    static char name[48];
+    char who[24] = "";
+    if (k < (int)RecipeDecks())
+        return full ? gYgoSets[GcDeckSet(RecipeDeck(k))].name : SetName(GcDeckSet(RecipeDeck(k)));
+    {
+        uint16_t m[YGO_DECK_MAX], e[YGO_FUSION_MAX];
+        Ygo_SpecialRecipe(RecipeSpecial(k), m, e, who, sizeof(who));
+    }
+    snprintf(name, sizeof(name), full ? "%s's deck" : "%s", who);
+    return name;
+}
 static unsigned EmptySlot(void)
 {
     unsigned d;
@@ -1507,25 +1569,36 @@ static void RecipesScreen(void)
     char line[200];
     TcgUi_Background();
     TcgUi_SidePanel("RECIPES", YGO_THEME);
+    int n = RecipeCount(), top = Y.cursor < 3 ? 0 : Y.cursor - 3;
+    if (!n)
+    {
+        TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
+        Strip(0, "No recipes yet. Decks bought at the GAME CENTER and the decks of special duelists you beat go here.");
+        TcgUi_Hints("{B} BACK");
+        return;
+    }
     RecipeCards(Y.cursor, main, extra);
     have = Ygo_RecipeOwned(C(), main, extra, &total);
-    BigCard(SetMascot(sStarters[Y.cursor]), 30, 22, 0);
+    BigCard(Y.cursor < (int)RecipeDecks() ? SetMascot(GcDeckSet(RecipeDeck(Y.cursor))) : Mascot(main, YGO_DECK_MAX), 30, 22,
+            0);
     snprintf(line, sizeof(line), "%u/%u OWNED", have, total);
     G_TextAlign(52, 86, TA_CENTER, have == total ? 0x2858a8 : 0xc04040, G_NO_SHADOW, line, TF_SMALL);
     TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
-    for (i = 0; i < RECIPE_COUNT && i < 6; i++)
+    if (top > n - 6)
+        top = n > 6 ? n - 6 : 0;
+    for (i = 0; i < 6 && top + i < n; i++)
     {
         uint16_t m[YGO_DECK_MAX], e[YGO_FUSION_MAX];
         unsigned h, t;
         char right[16];
-        RecipeCards(i, m, e);
+        RecipeCards(top + i, m, e);
         h = Ygo_RecipeOwned(C(), m, e, &t);
         snprintf(right, sizeof(right), "%u/%u", h, t);
-        TcgUi_Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, Y.cursor == i, 1, SetName(sStarters[i]), right);
+        TcgUi_Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, Y.cursor == top + i, 1, RecipeName(top + i, 0), right);
     }
     RecipeMissing(main, extra, line, sizeof(line), &lost);
     if (!lost)
-        snprintf(line, sizeof(line), "The %s. You have every card.", gYgoSets[sStarters[Y.cursor]].name);
+        snprintf(line, sizeof(line), "The %s. You have every card.", RecipeName(Y.cursor, 1));
     Strip(0, line);
     TcgUi_Hints("{A} BUILD  {B} BACK");
 }
@@ -1708,7 +1781,7 @@ static void BinderScreen(void)
             y -= 2;
         Ygo_DrawCard(card, (float)x, (float)y, 30, 42, 0, count ? 255 : 80, 0);
         if (count)
-            Foil(Ygo_Card(card)->rarity, x, y, 30, 42, Y.frame + i * 13);
+            Foil(card, Ygo_Card(card)->rarity, x, y, 30, 42, Y.frame + i * 13);
         if (count)
         {
             snprintf(line, sizeof(line), "x%u", count);
@@ -1783,7 +1856,7 @@ static void InspectScreen(void)
     G_FillA(10, 34 - bob, 72, 100, 0x000000, 90);
     Ygo_DrawCard(card->id, 8, (float)(30 - bob), 72, 100, 0, 255, 0);
     if (C()->owned[card->id] && Y.back != Y_DUEL)
-        Foil(card->rarity, 8, 30 - bob, 72, 100, Y.frame);
+        Foil(card->id, card->rarity, 8, 30 - bob, 72, 100, Y.frame);
     TcgUi_ListBox(86, 4, 152, 140);
     {
         SDL_Rect clip = {90, 8, 144, 132};
@@ -1846,7 +1919,7 @@ static void InspectScreen(void)
         y = G_Text(94, y, 0xc07020, G_NO_SHADOW, "(This card can't be played yet.)", 136, TF_NARROW);
     }
     {
-        int n = snprintf(line, sizeof(line), "%s", card->sets ? "" : "Not in a 2003 booster");
+        int n = snprintf(line, sizeof(line), "%s", card->sets ? "" : "Not in a booster");
         unsigned s;
         for (s = 0; s < YGO_SET_COUNT; s++)
             if (card->sets >> s & 1)
@@ -1898,7 +1971,13 @@ static void PackArt(int x, int y, unsigned set, int focus)
         [YGO_SET_PSV] = {0xd09028, 0x604010}, [YGO_SET_LON] = {0x30a070, 0x104830}, [YGO_SET_LOD] = {0xc83030, 0x581010},
         [YGO_SET_PGD] = {0xd8b040, 0x685010}, [YGO_SET_MFC] = {0x6050d0, 0x201860}, [YGO_SET_DCR] = {0x484050, 0x101018},
         [YGO_SET_SDY] = {0x8040a0, 0x301040}, [YGO_SET_SDK] = {0x4070d0, 0x183060}, [YGO_SET_SDJ] = {0xd04838, 0x601810},
-        [YGO_SET_SDP] = {0xd0a040, 0x604818}};
+        [YGO_SET_SDP] = {0xd0a040, 0x604818}, [YGO_SET_IOC] = {0x6838a0, 0x180828}, [YGO_SET_AST] = {0xc09050, 0x503010},
+        [YGO_SET_SOD] = {0xd05020, 0x501008}, [YGO_SET_RDS] = {0x3878b8, 0x102848}, [YGO_SET_FET] = {0xe08020, 0x601808},
+        [YGO_SET_TLM] = {0x28a0b8, 0x0c3848}, [YGO_SET_CRV] = {0x78a8d0, 0x203850}, [YGO_SET_EEN] = {0xc84060, 0x481020},
+        [YGO_SET_SOI] = {0x3040a0, 0x080c28}, [YGO_SET_SKE] = {0x3868c8, 0x102458}, [YGO_SET_SYE] = {0xa040b0, 0x381040},
+        [YGO_SET_SD1] = {0xa83030, 0x401010}, [YGO_SET_SD2] = {0x608048, 0x182810}, [YGO_SET_SD3] = {0xe06828, 0x602008},
+        [YGO_SET_SD4] = {0x2878c8, 0x081c50}, [YGO_SET_SD5] = {0xa8a8b8, 0x383848}, [YGO_SET_SD6] = {0x7048c0, 0x201040},
+        [YGO_SET_YSD] = {0x58b048, 0x184010}, [YGO_SET_SD7] = {0x988060, 0x302418}, [YGO_SET_SD8] = {0x50b8a0, 0x103830}};
     int w = 44, h = 58, i;
     G_FillA(x + 2, y + 3, w, h, 0x000000, 80);
     for (i = 0; i < h; i++)
@@ -1989,18 +2068,12 @@ static void RevealScreen(void)
         sx = 105 + (x - 105) * in;
         sy = 40 + (y - 40) * in;
         if (faceUp && rarity >= YGO_RARE)
-        {
-            int glow = (int)(fabsf(sinf(Y.frame * 0.12f)) * 60);
-            G_RoundFill((int)sx - 3, (int)sy - 3, 36, 48,
-                        rarity == YGO_SECRET_RARE ? Rainbow(Y.frame * 4 + (int)i * 40)
-                        : rarity == YGO_ULTRA_RARE ? 0xf8d050
-                        : rarity == YGO_SUPER_RARE ? 0xc0e0ff
-                                                  : 0xd8e0e8,
-                        (unsigned)(70 + glow));
-        }
+            G_FoilHalo((int)sx, (int)sy - (on ? 3 : 0), 30, 42,
+                       rarity == YGO_ULTRA_RARE ? 0xf0c050 : rarity == YGO_SUPER_RARE ? 0x90b8f0 : 0xa0a8b8,
+                       (unsigned)(Y.frame + (int)i * 17), rarity == YGO_SECRET_RARE);
         Ygo_DrawCard(faceUp ? Y.revealed[i] : 0, sx, sy - (on ? 3 : 0), 30, 42, 0, 255, 0);
         if (faceUp)
-            Foil(rarity, (int)sx, (int)sy - (on ? 3 : 0), 30, 42, Y.frame + (int)i * 17);
+            Foil(Y.revealed[i], rarity, (int)sx, (int)sy - (on ? 3 : 0), 30, 42, Y.frame + (int)i * 17);
         if (faceUp && rarity >= YGO_RARE)
         {
             /* (on the card's foot, as on the Pokemon side) */
@@ -2111,15 +2184,19 @@ static void CounterScreen(void)
     }
     else if (CounterKind() == 1)
     {
-        for (i = 0; i < YGO_STARTERS; i++)
+        int top = Y.cursor < 3 ? 0 : Y.cursor - 3, n = (int)GcDeckCount();
+        if (top > n - 6)
+            top = n > 6 ? n - 6 : 0;
+        for (i = 0; i < 6 && top + i < n; i++)
         {
-            int sold = GcDeckSold((unsigned)i);
+            unsigned k = (unsigned)(top + i);
+            int sold = GcDeckSold(k);
             char right[24];
-            snprintf(right, sizeof(right), sold ? "SOLD OUT" : "\xa5%u", GC_DECK_PRICE);
-            TcgUi_Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, i == Y.cursor,
-                      !sold && IsEnoughMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE), SetName(sStarters[i]), right);
+            snprintf(right, sizeof(right), sold ? "SOLD OUT" : "\xa5%u", GcDeckPrice(k));
+            TcgUi_Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, top + i == Y.cursor,
+                      !sold && IsEnoughMoney(&gSaveBlock1Ptr->money, GcDeckPrice(k)), SetName(GcDeckSet(k)), right);
         }
-        snprintf(line, sizeof(line), "%s\n%s", gYgoSets[sStarters[Y.cursor]].name,
+        snprintf(line, sizeof(line), "%s\n%s", gYgoSets[GcDeckSet((unsigned)Y.cursor)].name,
                  GcDeckSold((unsigned)Y.cursor) ? "SOLD OUT: one of each deck per customer." : "Ready to duel in an empty deck slot.");
         Strip(0, line);
     }
@@ -2718,29 +2795,29 @@ static void Act(int action)
     {
         uint16_t main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];
         unsigned slot = Y.recipeSlot >= 0 ? (unsigned)Y.recipeSlot : EmptySlot(), lost = 0;
-        if (Y.askArg < 0 || Y.askArg >= RECIPE_COUNT || slot >= YGO_SAVED_DECKS)
+        if (Y.askArg < 0 || Y.askArg >= RecipeCount() || slot >= YGO_SAVED_DECKS)
             break;
         RecipeCards(Y.askArg, main, extra);
-        Ygo_DeckFromRecipe(c, slot, main, extra, SetName(sStarters[Y.askArg]), &lost);
+        Ygo_DeckFromRecipe(c, slot, main, extra, RecipeName(Y.askArg, 0), &lost);
         printf("[ygo] recipe %d into slot %u, %u missing\n", Y.askArg, slot, lost);
         Screen(Y_DECKS);
         Y.cursor = (int)slot;
         if (lost)
             Say(ACT_NONE, "%s is in slot %u. %u of its cards are missing: add them when you have them.",
-                gYgoSets[sStarters[Y.askArg]].name, slot + 1, lost);
+                RecipeName(Y.askArg, 1), slot + 1, lost);
         else
-            Say(ACT_NONE, "%s is in slot %u, ready to duel.", gYgoSets[sStarters[Y.askArg]].name, slot + 1);
+            Say(ACT_NONE, "%s is in slot %u, ready to duel.", RecipeName(Y.askArg, 1), slot + 1);
         break;
     }
     case ACT_GC_DECK:
     {
         unsigned k = (unsigned)Y.askArg, i, slot;
         uint16_t main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];
-        if (k >= YGO_STARTERS || GcDeckSold(k) || !IsEnoughMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE))
+        if (k >= GcDeckCount() || k >= 32 || GcDeckSold(k) || !IsEnoughMoney(&gSaveBlock1Ptr->money, GcDeckPrice(k)))
             break;
-        RemoveMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE);
-        c->gcDecks |= 1 << k;
-        StarterDeckOf(sStarters[k], main, extra);
+        RemoveMoney(&gSaveBlock1Ptr->money, GcDeckPrice(k));
+        c->gcDecks |= 1u << k;
+        StarterDeckOf(GcDeckSet(k), main, extra);
         for (i = 0; i < YGO_DECK_MAX && main[i]; i++)
             AddCard(main[i]);
         for (i = 0; i < YGO_FUSION_MAX && extra[i]; i++)
@@ -2755,13 +2832,13 @@ static void Act(int action)
         {
             memcpy(Deck(slot)->main, main, sizeof(main));
             memcpy(Deck(slot)->extra, extra, sizeof(extra));
-            snprintf(Deck(slot)->name, YGO_NAME_LEN, "%s", SetName(sStarters[k]));
+            snprintf(Deck(slot)->name, YGO_NAME_LEN, "%s", SetName(GcDeckSet(k)));
             c->ace[slot] = 0;
-            Say(ACT_NONE, "You got the %s! It's in DECKS, slot %u, ready to duel.", gYgoSets[sStarters[k]].name, slot + 1);
+            Say(ACT_NONE, "You got the %s! It's in DECKS, slot %u, ready to duel.", gYgoSets[GcDeckSet(k)].name, slot + 1);
         }
         else
             Say(ACT_NONE, "You got the %s! Its cards are in your CARD CASE (every deck slot is in use).",
-                gYgoSets[sStarters[k]].name);
+                gYgoSets[GcDeckSet(k)].name);
         break;
     }
     case ACT_BUY_CARD:
@@ -3065,7 +3142,7 @@ int YgoUi_Step(unsigned keys)
         break;
     }
     case Y_RECIPES:
-        MoveCursor(pressed, RECIPE_COUNT, 1);
+        MoveCursor(pressed, RecipeCount(), 1);
         if (pressed & KEY_B)
         {
             int back = Y.recipeSlot >= 0 ? Y.recipeSlot : DECK_ROW_RECIPES;
@@ -3073,7 +3150,7 @@ int YgoUi_Step(unsigned keys)
             Screen(Y_DECKS);
             Y.cursor = back;
         }
-        else if (pressed & KEY_A)
+        else if ((pressed & KEY_A) && RecipeCount())
         {
             uint16_t main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];
             unsigned slot = Y.recipeSlot >= 0 ? (unsigned)Y.recipeSlot : EmptySlot(), total, lost;
@@ -3084,10 +3161,10 @@ int YgoUi_Step(unsigned keys)
             if (slot >= YGO_SAVED_DECKS)
                 Say(ACT_NONE, "There's no empty deck slot. Delete a deck first.");
             else if (lost)
-                Ask(ACT_RECIPE, Y.cursor, "Build %s in slot %u? %u of its cards are missing.", gYgoSets[sStarters[Y.cursor]].name,
+                Ask(ACT_RECIPE, Y.cursor, "Build %s in slot %u? %u of its cards are missing.", RecipeName(Y.cursor, 1),
                     slot + 1, lost);
             else
-                Ask(ACT_RECIPE, Y.cursor, "Build %s in slot %u?", gYgoSets[sStarters[Y.cursor]].name, slot + 1);
+                Ask(ACT_RECIPE, Y.cursor, "Build %s in slot %u?", RecipeName(Y.cursor, 1), slot + 1);
         }
         break;
     case Y_ACE:
@@ -3398,23 +3475,26 @@ int YgoUi_Step(unsigned keys)
         }
         else if (CounterKind() == 1)
         {
-            MoveCursor(pressed, YGO_STARTERS, 1);
+            unsigned k;
+            MoveCursor(pressed, (int)GcDeckCount(), 1);
+            k = (unsigned)Y.cursor;
             if (pressed & KEY_A)
             {
-                if (GcDeckSold((unsigned)Y.cursor))
+                if (GcDeckSold(k))
                 {
                     PlaySE(SE_FAILURE);
-                    Say(ACT_NONE, "The %s is sold out. One of each deck per customer!", gYgoSets[sStarters[Y.cursor]].name);
+                    Say(ACT_NONE, "The %s is sold out. One of each deck per customer!", gYgoSets[GcDeckSet(k)].name);
                 }
-                else if (!IsEnoughMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE))
-                    Say(ACT_NONE, "A Starter Deck is \xa5%u. You don't have enough money.", GC_DECK_PRICE);
+                else if (!IsEnoughMoney(&gSaveBlock1Ptr->money, GcDeckPrice(k)))
+                    Say(ACT_NONE, "The %s is \xa5%u. You don't have enough money.", gYgoSets[GcDeckSet(k)].name,
+                        GcDeckPrice(k));
                 else
-                    Ask(ACT_GC_DECK, Y.cursor, "The %s for \xa5%u?", gYgoSets[sStarters[Y.cursor]].name, GC_DECK_PRICE);
+                    Ask(ACT_GC_DECK, Y.cursor, "The %s for \xa5%u?", gYgoSets[GcDeckSet(k)].name, GcDeckPrice(k));
             }
             else if (pressed & (KEY_START | KEY_INSPECT))
             {
                 uint16_t main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];
-                StarterDeckOf(sStarters[Y.cursor], main, extra);
+                StarterDeckOf(GcDeckSet(k), main, extra);
                 Inspect(Mascot(main, YGO_DECK_MAX), Y_COUNTER);
             }
         }
@@ -3677,6 +3757,34 @@ void Ygo_Debug(const char *command)
         if (Y.screen == Y_CLOSED)
             YgoUi_OpenCase(NULL, 0);
         Inspect(n, Y.screen == Y_INSPECT ? Y_HOME : Y.screen);
+        return;
+    }
+    if (!strcmp(command, "recipes"))
+    {
+        /* every special duelist beaten: DECK RECIPES lists their decks; each one a legal deck */
+        int k;
+        for (n = 0; n < Ygo_SpecialCount() && n < 31; n++)
+            c->specialBeaten |= 1u << n;
+        for (k = 0; k < RecipeCount(); k++)
+        {
+            uint16_t main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];
+            char why[160] = "";
+            unsigned all[YGO_CARD_COUNT + 1] = {0}, i;
+            static uint16_t owned[YGO_CARD_COUNT + 1];
+            RecipeCards(k, main, extra);
+            for (i = 0; i < YGO_DECK_MAX && main[i]; i++)
+                all[main[i]]++;
+            for (i = 0; i < YGO_FUSION_MAX && extra[i]; i++)
+                all[extra[i]]++;
+            for (i = 0; i <= YGO_CARD_COUNT; i++)
+                owned[i] = (uint16_t)all[i];
+            printf("[ygo] recipe %d %s: %u+%u valid %d %s\n", k, RecipeName(k, 0), MainCountOf(main), Ygo_DeckCount(extra, YGO_FUSION_MAX),
+                   Ygo_DeckValidate(main, extra, owned, why, sizeof(why)), why);
+        }
+        if (Y.screen == Y_CLOSED)
+            YgoUi_OpenCase(NULL, 0);
+        Screen(Y_RECIPES);
+        Y.recipeSlot = -1;
         return;
     }
     if (!strcmp(command, "binder"))

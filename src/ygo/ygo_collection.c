@@ -262,6 +262,17 @@ int Ygo_DeckRemove(struct YgoCollection *c, unsigned deck, unsigned card)
     return RemoveFrom(c->decks[deck].extra, YGO_FUSION_MAX, card) || RemoveFrom(c->decks[deck].main, YGO_DECK_MAX, card);
 }
 
+/* A set's name without "Starter Deck: " / "Structure Deck: " (a deck's name, a short row) */
+const char *Ygo_SetShortName(unsigned set)
+{
+    const char *n = set < YGO_SET_COUNT ? gYgoSets[set].name : "";
+    if (!strncmp(n, "Starter Deck: ", 14))
+        return n + 14;
+    if (!strncmp(n, "Structure Deck: ", 16))
+        return n + 16;
+    return n;
+}
+
 int Ygo_ChooseStarter(struct YgoCollection *c, unsigned set)
 {
     const struct YgoSet *s;
@@ -271,7 +282,7 @@ int Ygo_ChooseStarter(struct YgoCollection *c, unsigned set)
         return 0;
     s = &gYgoSets[set];
     memset(d, 0, sizeof(*d));
-    snprintf(d->name, sizeof(d->name), "%s", s->name + (strncmp(s->name, "Starter Deck: ", 14) ? 0 : 14));
+    snprintf(d->name, sizeof(d->name), "%s", Ygo_SetShortName(set));
     for (i = 0; i < s->count; i++)
     {
         const struct YgoCard *card = Ygo_Card(s->cards[i].card);
@@ -414,7 +425,7 @@ unsigned Ygo_PointCost(unsigned card)
         return 0;
     if (!c->sets)
     {
-        /* Stairway's cards that no 2003 pack had: by how strong they are */
+        /* cards no real set had (Stairway's and World Championship 2006's own): by how strong they are */
         if (c->frame <= YGO_RITUAL && (c->level >= 7 || (c->atk != YGO_STAT_UNKNOWN && c->atk >= 2500)))
             return 50;
         return c->frame == YGO_NORMAL ? 5 : 15;
@@ -493,9 +504,12 @@ void Ygo_DailyTake(struct YgoCollection *c, uint32_t key, unsigned day)
 }
 
 /* ---- the file: "MYGO", u32 format, u32 crc of the rest, then the fields, little-endian */
-#define YGO_FILE_FORMAT 5   /* 2 (1.36.0): the GAME CENTER clerk's sold singles and decks; 3 (1.38.0): each deck's
+#define YGO_FILE_FORMAT 6   /* 2 (1.36.0): the GAME CENTER clerk's sold singles and decks; 3 (1.38.0): each deck's
                                    ACE CARD; 4 (1.48.0): the Forbidden & Limited list; 5 (1.49.0): the skill
-                                   correction; 1-4 still load */
+                                   correction; 6 (1.56.0): the card and set counts it was saved with (the catalog grows),
+                                   32 bits of sold decks; 1-5 still load (1509 cards, 13 sets) */
+#define FORMAT5_CARDS 1509
+#define FORMAT5_SETS 13
 static void Put(unsigned char **p, uint32_t v, unsigned n)
 {
     unsigned i;
@@ -523,13 +537,28 @@ static uint32_t Crc(const unsigned char *p, size_t n)
     }
     return ~c;
 }
-#define PAYLOAD_SIZE_1                                                                                        \
-    (2 * (YGO_CARD_COUNT + 1) + YGO_SAVED_DECKS * (YGO_NAME_LEN + 2 * (YGO_DECK_MAX + YGO_FUSION_MAX)) +       \
-     2 * YGO_SET_COUNT + 4 * 10 + 3 + 6 * YGO_DAILY_SLOTS)
-#define PAYLOAD_SIZE_2 (PAYLOAD_SIZE_1 + YGO_GC_SINGLE_BYTES + 1)
-#define PAYLOAD_SIZE_3 (PAYLOAD_SIZE_2 + 2 * YGO_SAVED_DECKS)
-#define PAYLOAD_SIZE_4 (PAYLOAD_SIZE_3 + 32)
-#define PAYLOAD_SIZE (PAYLOAD_SIZE_4 + 4)
+/* The payload of a file of this format saved with this many cards and sets */
+static size_t PayloadSize(unsigned format, unsigned cards, unsigned sets)
+{
+    size_t n = 2 * (cards + 1) + YGO_SAVED_DECKS * (YGO_NAME_LEN + 2 * (YGO_DECK_MAX + YGO_FUSION_MAX)) + 2 * sets +
+               4 * 10 + 3 + 6 * YGO_DAILY_SLOTS;
+    if (format >= 2)
+        n += (cards + 8) / 8 + (format >= 6 ? 4 : 1);
+    if (format >= 3)
+        n += 2 * YGO_SAVED_DECKS;
+    if (format >= 4)
+        n += 32;
+    if (format >= 5)
+        n += 4;
+    if (format >= 6)
+        n += 4;   /* the counts */
+    return n;
+}
+#define PAYLOAD_SIZE (4 * 10 + 3 + 6 * YGO_DAILY_SLOTS + 2 * (YGO_CARD_COUNT + 1) +                                    \
+                      YGO_SAVED_DECKS * (YGO_NAME_LEN + 2 * (YGO_DECK_MAX + YGO_FUSION_MAX)) + 2 * YGO_SET_COUNT +     \
+                      YGO_GC_SINGLE_BYTES + 4 + 2 * YGO_SAVED_DECKS + 32 + 4 + 4)
+/* (the biggest file loaded: today's, or a format 5 one if the catalog were ever smaller) */
+#define LOAD_MAX (PAYLOAD_SIZE + 2 * (FORMAT5_CARDS + 1) + 2 * FORMAT5_SETS + (FORMAT5_CARDS + 8) / 8)
 
 int Ygo_CollectionSave(const struct YgoCollection *c, const char *path)
 {
@@ -545,6 +574,8 @@ int Ygo_CollectionSave(const struct YgoCollection *c, const char *path)
     FILE *f;
     if (strlen(path) > sizeof(tmp) - 5)
         return 0;
+    Put(&p, YGO_CARD_COUNT, 2);
+    Put(&p, YGO_SET_COUNT, 2);
     for (i = 0; i <= YGO_CARD_COUNT; i++)
         Put(&p, c->owned[i], 2);
     for (i = 0; i < YGO_SAVED_DECKS; i++)
@@ -578,13 +609,15 @@ int Ygo_CollectionSave(const struct YgoCollection *c, const char *path)
     }
     for (i = 0; i < YGO_GC_SINGLE_BYTES; i++)
         Put(&p, c->gcSingles[i], 1);
-    Put(&p, c->gcDecks, 1);
+    Put(&p, c->gcDecks, 4);
     for (i = 0; i < YGO_SAVED_DECKS; i++)
         Put(&p, c->ace[i], 2);
     memcpy(p, c->banlist, 32);
     p += 32;
     Put(&p, (uint16_t)c->skill, 2);
     Put(&p, c->rated, 2);
+    if (p != data + 12 + PayloadSize(YGO_FILE_FORMAT, YGO_CARD_COUNT, YGO_SET_COUNT))
+        return 0;
     p = data;
     memcpy(p, "MYGO", 4);
     p += 4;
@@ -614,24 +647,38 @@ int Ygo_CollectionSave(const struct YgoCollection *c, const char *path)
 
 int Ygo_CollectionLoad(struct YgoCollection *c, const char *path)
 {
-    static unsigned char data[12 + PAYLOAD_SIZE];
+    static unsigned char data[12 + LOAD_MAX + 1];
     const unsigned char *p = data + 4;
     FILE *f = fopen(path, "rb");
-    unsigned i, j, n, format, size;
+    unsigned i, j, n, format, cards = FORMAT5_CARDS, sets = FORMAT5_SETS;
+    size_t size;
+    uint32_t crc;
     if (!f)
         return 0;
     n = (unsigned)fread(data, 1, sizeof(data), f);
     fclose(f);
-    if (n < 12 || memcmp(data, "MYGO", 4))
+    if (n < 16 || memcmp(data, "MYGO", 4))
         return 0;
     format = Get(&p, 4);
-    size = format == 1 ? PAYLOAD_SIZE_1 : format == 2 ? PAYLOAD_SIZE_2 : format == 3 ? PAYLOAD_SIZE_3
-         : format == 4 ? PAYLOAD_SIZE_4 : PAYLOAD_SIZE;
-    if (format < 1 || format > YGO_FILE_FORMAT || n != 12 + size || Get(&p, 4) != Crc(data + 12, size))
+    crc = Get(&p, 4);
+    if (format >= 6)
+    {
+        cards = Get(&p, 2);
+        sets = Get(&p, 2);
+        if (cards > YGO_CARD_COUNT + FORMAT5_CARDS || sets > YGO_SET_COUNT + FORMAT5_SETS)
+            return 0;
+    }
+    size = PayloadSize(format, cards, sets);
+    if (format < 1 || format > YGO_FILE_FORMAT || n != 12 + size || crc != Crc(data + 12, size))
         return 0;
     memset(c, 0, sizeof(*c));
-    for (i = 0; i <= YGO_CARD_COUNT; i++)
-        c->owned[i] = (uint16_t)Get(&p, 2);
+    /* (cards and sets the catalog no longer has are dropped; ones it has since gained start at 0) */
+    for (i = 0; i <= cards; i++)
+    {
+        unsigned v = Get(&p, 2);
+        if (i <= YGO_CARD_COUNT)
+            c->owned[i] = (uint16_t)v;
+    }
     for (i = 0; i < YGO_SAVED_DECKS; i++)
     {
         memcpy(c->decks[i].name, p, YGO_NAME_LEN);
@@ -642,8 +689,12 @@ int Ygo_CollectionLoad(struct YgoCollection *c, const char *path)
         for (j = 0; j < YGO_FUSION_MAX; j++)
             c->decks[i].extra[j] = (uint16_t)Get(&p, 2);
     }
-    for (i = 0; i < YGO_SET_COUNT; i++)
-        c->packs[i] = (uint16_t)Get(&p, 2);
+    for (i = 0; i < sets; i++)
+    {
+        unsigned v = Get(&p, 2);
+        if (i < YGO_SET_COUNT)
+            c->packs[i] = (uint16_t)v;
+    }
     c->wins = Get(&p, 4);
     c->losses = Get(&p, 4);
     c->rng = Get(&p, 4);
@@ -664,9 +715,13 @@ int Ygo_CollectionLoad(struct YgoCollection *c, const char *path)
     }
     if (format >= 2)
     {
-        for (i = 0; i < YGO_GC_SINGLE_BYTES; i++)
-            c->gcSingles[i] = (uint8_t)Get(&p, 1);
-        c->gcDecks = (uint8_t)Get(&p, 1);
+        for (i = 0; i < (cards + 8) / 8; i++)
+        {
+            unsigned v = Get(&p, 1);
+            if (i < YGO_GC_SINGLE_BYTES)
+                c->gcSingles[i] = (uint8_t)v;
+        }
+        c->gcDecks = Get(&p, format >= 6 ? 4 : 1);
     }
     if (format >= 3)
         for (i = 0; i < YGO_SAVED_DECKS; i++)
@@ -687,6 +742,8 @@ int Ygo_CollectionLoad(struct YgoCollection *c, const char *path)
         c->skill = (int16_t)(skill > YGO_SKILL_MAX ? YGO_SKILL_MAX : skill < -YGO_SKILL_MAX ? -YGO_SKILL_MAX : skill);
         c->rated = (uint16_t)Get(&p, 2);
     }
+    if (c->starter > YGO_SET_COUNT)
+        c->starter = 0;
     /* sanity: ids in range */
     for (i = 0; i < YGO_SAVED_DECKS; i++)
     {

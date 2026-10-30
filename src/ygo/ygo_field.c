@@ -284,10 +284,14 @@ static void BuildDeck(struct YgoOpponent *o, unsigned theme, unsigned tier, u32 
             Add(&b, c->id, 1);
     }
 }
-// Their signature card: the strongest working monster of the type outside the Starter Decks
+// Their signature card: the strongest working monster of the type outside the Starter and Structure Decks
 static unsigned Signature(unsigned theme)
 {
-    unsigned id, best = 0;
+    unsigned id, best = 0, set;
+    uint64_t decks = 0;
+    for (set = 0; set < YGO_SET_COUNT; set++)
+        if (gYgoSets[set].starter)
+            decks |= YGO_SET_BIT(set);
     int bestScore = -1;
     for (id = 1; id <= YGO_CARD_COUNT; id++)
     {
@@ -295,7 +299,7 @@ static unsigned Signature(unsigned theme)
         int s;
         if (!Playable(c) || !Ygo_IsMonster(c) || !InTheme(c, theme) || c->frame == YGO_RITUAL || c->frame == YGO_FUSION)
             continue;
-        if (c->sets & ((1u << YGO_SET_SDY) | (1u << YGO_SET_SDK) | (1u << YGO_SET_SDJ) | (1u << YGO_SET_SDP)))
+        if (c->sets & decks)
             continue;
         s = Score(c) + 120 * c->rarity;
         if (s > bestScore)
@@ -530,6 +534,60 @@ static void Fill(struct YgoOpponent *o, const char *name, const char *title, uns
     o->tcgSpecial = 0xFF;
 }
 
+// Their signature card is in their deck (in place of a small monster)
+static void PutSignature(struct YgoOpponent *o)
+{
+    unsigned n = Ygo_DeckCount(o->main, YGO_DECK_MAX), k, have = 0;
+    if (!o->signature)
+        return;
+    for (k = 0; k < n; k++)
+        have |= o->main[k] == o->signature;
+    for (k = n; !have && k-- > 0;)
+        if (Ygo_IsMonster(Ygo_Card(o->main[k])) && Ygo_Card(o->main[k])->level <= 4)
+        {
+            o->main[k] = o->signature;
+            have = 1;
+        }
+}
+
+// DECK RECIPES: a special duelist's deck once beaten (include/ygo/npc.h). Their deck changes with the day; the recipe is
+// the one they bring at their best, the same every time.
+unsigned Ygo_SpecialCount(void)
+{
+    return YGO_SPECIAL_COUNT;
+}
+int Ygo_SpecialRecipe(unsigned special, uint16_t *main, uint16_t *extra, char *name, size_t size)
+{
+    static struct
+    {
+        u8 built;
+        u16 main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];
+    } sRecipes[YGO_SPECIAL_COUNT];   /* (built once: the screens ask every frame) */
+    const struct Duelist *s;
+    if (special >= YGO_SPECIAL_COUNT)
+        return 0;
+    s = &sDuelists[special];
+    if (!sRecipes[special].built)
+    {
+        struct YgoOpponent *o = malloc(sizeof(*o));
+        if (!o)
+            return 0;
+        sThemedOnly = 1;
+        Fill(o, s->name ? s->name : "RIVAL", s->title, s->theme, 3, 0xFE000000u | special, 0x5EC1A1u * (special + 1));
+        sThemedOnly = 0;
+        o->signature = (u16)Signature(s->theme);
+        PutSignature(o);
+        memcpy(sRecipes[special].main, o->main, sizeof(o->main));
+        memcpy(sRecipes[special].extra, o->extra, sizeof(o->extra));
+        sRecipes[special].built = 1;
+        free(o);
+    }
+    memcpy(main, sRecipes[special].main, sizeof(sRecipes[special].main));
+    memcpy(extra, sRecipes[special].extra, sizeof(sRecipes[special].extra));
+    snprintf(name, size, "%s", s->name ? s->name : "RIVAL");
+    return 1;
+}
+
 // The person in front: 0 they play Pokemon cards (or nothing), PLAY_YGO they duel with Yu-Gi-Oh! (*line: what
 // they say; NULL with *refused set: not now), PLAY_BOTH they ask which (o filled for Yu-Gi-Oh!).
 int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, uint32_t key, int clubStaff,
@@ -590,19 +648,7 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
         // the ELITE FOUR played the Pokemon cards before: their promo cards come with a win (tcg/npc.h order)
         if (i <= YGO_SPECIAL_DRAKE)
             o->tcgSpecial = (u8)(8 + i);
-        // their signature card is in their deck (in place of a small monster)
-        if (o->signature)
-        {
-            unsigned n = Ygo_DeckCount(o->main, YGO_DECK_MAX), k, have = 0;
-            for (k = 0; k < n; k++)
-                have |= o->main[k] == o->signature;
-            for (k = n; !have && k-- > 0;)
-                if (Ygo_IsMonster(Ygo_Card(o->main[k])) && Ygo_Card(o->main[k])->level <= 4)
-                {
-                    o->main[k] = o->signature;
-                    have = 1;
-                }
-        }
+        PutSignature(o);
         o->voice = QUOTE_VOICE_REFINED;
         snprintf(o->quoteWho, sizeof(o->quoteWho), "%s", s->name ? s->name : "RIVAL");
         *line = CardTable_Hello(o->key, QUOTE_GAME_YGO, o->quoteWho, o->voice, s->accept, h);
