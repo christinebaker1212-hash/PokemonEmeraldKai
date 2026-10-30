@@ -1240,6 +1240,22 @@ void YgoBoard_End(void)
         MP_MUSIC_TO_MAP(PlayBGM(B.music));   // the map's own song again (custom music: the map's, not the duel's)
     B.active = 0;
 }
+/* A won game going on to the cards to take: the victory song plays on through them, and the map's song comes back
+   with YgoBoard_ReleaseMusic when they are done */
+static u16 sHeldMusic;
+void YgoBoard_EndHoldMusic(void)
+{
+    if (B.active && B.music)
+        sHeldMusic = B.music;
+    B.active = 0;
+}
+void YgoBoard_ReleaseMusic(void)
+{
+    u16 m = sHeldMusic;
+    sHeldMusic = 0;
+    if (m)
+        MP_MUSIC_TO_MAP(PlayBGM(m));
+}
 void YgoBoard_Sync(const struct YgoDuel *truth)
 {
     B.d = truth;
@@ -1578,6 +1594,10 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
     B.frame++;
     Advance();
     Sprites();
+    /* While the duel shows what happened (a draw, an attack, a Tribute Summon, a coin, a monster destroyed...), the
+       buttons do nothing: nothing can be chosen until it has played out, and no press waits to land after it */
+    if (!YgoBoard_Idle())
+        pressed = 0;
     q = &B.d->query;
     /* A tip of the lesson, or the result, first */
     if (B.tipShown)
@@ -1598,7 +1618,13 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             B.mode = M_OVER;
             B.over = B.frame;
             Banner(won ? "YOU WIN!" : "YOU LOSE...", won ? 0xe0a020 : 0x6070a0, 100000);
-            PlaySE(won ? SE_EXP_MAX : SE_FAILURE);
+            if (won)
+                PlayBGM(MUS_VICTORY_TRAINER);   // as the other card games (its @ygo file in the Yu-Gi-Oh! scene)
+            else
+            {
+                FadeOutBGM(4);
+                PlaySE(SE_FAILURE);
+            }
         }
         if (pressed & KEY_A && B.frame - B.over > 40)
         {

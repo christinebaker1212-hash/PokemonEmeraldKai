@@ -2184,6 +2184,16 @@ What the POKéMON, Yu-Gi-Oh! and Triple Triad screens share, so they feel like o
 - Effects shared by the tables: G_Circle; the POKéMON table got the Yu-Gi-Oh! table's FX_IMPACT (an attack's damage),
   FX_SHARDS (a Knock Out) and FX_RISE (a Basic put into play), run beside the existing waits, none longer.
   `mp cards fx 0/1/2` plays one on their Active.
+- Victory song (1.52.3): a win plays MUS_VICTORY_TRAINER in all three (Yu-Gi-Oh! too now, on its YOU WIN! banner) and
+  it plays on through the cards to take: the UI calls XBoard_EndHoldMusic instead of XBoard_End when a win goes on
+  to the spoils screen; each UI's Screen() calls XBoard_ReleaseMusic (the map's song again) for any screen but the
+  spoils and INSPECT, so it ends when the cards are taken (or the case is closed). Logs show the order with
+  MOEMON_MUSIC_LOG=1.
+- No buttons while the table shows what happened (1.52.3): the boards drop the frame's presses while their events
+  play, so nothing can be picked or moved mid-animation and no press lands after it. POKéMON: TcgBoard_Busy (the
+  deal, a state being presented, the queue, a drawn card's spotlight; not the sprites still gliding after a cursor
+  move, which would make the cursor slow). Yu-Gi-Oh!: !YgoBoard_Idle (events left or the timer running). Triple
+  Triad: a card flying or a banner up, and the deal and the spin can no longer be skipped (the rules page still can).
 
 ## Every POKéMON card attack (1.46.0)
 - The last 20 command lists from the original's effect_functions.asm (pret/poketcg), as FX_* kinds in

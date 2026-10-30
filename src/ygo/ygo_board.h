@@ -33,6 +33,8 @@ void YgoBoard_Tutorial(int on);          /* the lesson: a tip for each new kind 
 void YgoBoard_Result(const char *message);
 void YgoBoard_Render(void);
 void YgoBoard_End(void);
+void YgoBoard_EndHoldMusic(void);   // a won game going on to the cards to take: the victory song plays on
+void YgoBoard_ReleaseMusic(void);   // ...until this (the map's song again; nothing if none is held)
 /* Test harness: put the cursor on a card (kind 0 hand, 1 my monsters, 2 my Spells & Traps, 3 theirs) */
 void YgoBoard_DebugFocus(int kind, int index);
 #endif

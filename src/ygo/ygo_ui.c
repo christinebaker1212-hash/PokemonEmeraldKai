@@ -199,6 +199,8 @@ static void Ask(int action, int arg, const char *format, ...)
 }
 static void Screen(int screen)
 {
+    if (screen != Y_SPOILS && screen != Y_INSPECT)
+        YgoBoard_ReleaseMusic();   // the victory song ends with the cards to take
     Y.screen = screen;
     Y.cursor = 0;
     Y.scroll = 0;
@@ -894,19 +896,23 @@ static void DuelStep(unsigned pressed, unsigned keys)
             YgoNet_Cancel(Ygo_Online(), "Duel complete.");
             Y.online = 0;
         }
-        YgoBoard_End();
         if (Y.vs == VS_NPC && won && Y.spoilCount)
         {
+            YgoBoard_EndHoldMusic();   // the victory song plays on while a card is taken
             Screen(Y_SPOILS);
             Say(ACT_NONE, "As the winner, you may take one card from %s's deck!", Y.opp.name);
         }
-        else if (Y.vs == VS_PRACTICE)
-        {
-            Screen(Y_HOME);
-            Y.cursor = 3;
-        }
         else
-            Close();
+        {
+            YgoBoard_End();
+            if (Y.vs == VS_PRACTICE)
+            {
+                Screen(Y_HOME);
+                Y.cursor = 3;
+            }
+            else
+                Close();
+        }
     }
 }
 

@@ -1268,7 +1268,7 @@ static const u16 sKaisongScene20Songs[] = {412, 458, 471, 475, 476, 477, 478, 48
 static const u16 sKaisongScene21Songs[] = {413};
 static const u16 sKaisongScene22Songs[] = {377, 435};
 static const u16 sKaisongScene23Songs[] = {412, 477, 478, 481, 482, 509};
-static const u16 sKaisongScene24Songs[] = {458, 471, 475, 476, 478, 481, 482, 483, 539};
+static const u16 sKaisongScene24Songs[] = {412, 458, 471, 475, 476, 478, 481, 482, 483, 539};
 static const struct { const char *key; const u16 *songs; u16 count; } sKaisongScenes[] = {
     {"berry_blender", sKaisongScene0Songs, ARRAY_COUNT(sKaisongScene0Songs)},
     {"berry_crush", sKaisongScene1Songs, ARRAY_COUNT(sKaisongScene1Songs)},

@@ -192,7 +192,7 @@ Custom: `mus_poke_mart@rustboro_city_game_center_2f.kaisong`
 
 ### mus_victory_trainer (412)
 Custom: `mus_victory_trainer@tt.kaisong`
-- Scenes: BATTLE SIMULATOR (BATTLE TENTS) [sim], POKéMON TCG card duels [tcg], TRIPLE TRIAD [tt]
+- Scenes: BATTLE SIMULATOR (BATTLE TENTS) [sim], POKéMON TCG card duels [tcg], TRIPLE TRIAD [tt], YU-GI-OH! duels [ygo]
 - Field and battle code (by map): Battles, Coop
 
 ### mus_title (413)

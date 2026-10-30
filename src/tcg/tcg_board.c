@@ -1341,6 +1341,22 @@ void TcgBoard_End(void)
         MP_MUSIC_TO_MAP(PlayBGM(B.music));   // the map's own song again (custom music: the map's, not the duel's)
     B.active = 0;
 }
+/* A won game going on to the cards to take: the victory song plays on through them, and the map's song comes back
+   with TcgBoard_ReleaseMusic when they are done */
+static u16 sHeldMusic;
+void TcgBoard_EndHoldMusic(void)
+{
+    if (B.active && B.music)
+        sHeldMusic = B.music;
+    B.active = 0;
+}
+void TcgBoard_ReleaseMusic(void)
+{
+    u16 m = sHeldMusic;
+    sHeldMusic = 0;
+    if (m)
+        MP_MUSIC_TO_MAP(PlayBGM(m));
+}
 static void Enqueue(const struct TcgDuel *state)
 {
     if (B.qCount == QUEUE)
@@ -1383,6 +1399,7 @@ void TcgBoard_Sync(const struct TcgDuel *truth)
     Enqueue(truth);
 }
 int TcgBoard_Idle(void) { return B.intro <= 0 && B.phase == P_IDLE && !B.qCount && SpritesSettled(); }
+int TcgBoard_Busy(void) { return B.intro > 0 || B.phase != P_IDLE || B.qCount || B.spotTime > 0; }
 void TcgBoard_SetWaiting(int waiting) { B.waiting = waiting; }
 /* Test harness: look again whether anything is left to play from the hand (FocusActiveIfDone) */
 void TcgBoard_CheckDone(void)
@@ -2918,6 +2935,11 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
         B.promoFocused = 0;
     if (B.tutorial && TcgBoard_Idle() && B.mode == M_FREE && !B.toastTime)
         Tip();
+    /* While the duel shows what happened (the deal, an attack, a draw, a coin, a Knock Out, a Prize card...), the
+       buttons do nothing: nothing can be chosen until it has played out, and no press waits to land after it.
+       (The sprites still gliding after a cursor move don't count: that would make the cursor feel slow.) */
+    if (TcgBoard_Busy())
+        pressed = 0;
     if (B.toast[0] && B.toastTime && pressed & (KEY_A | KEY_B))
     {
         B.toastTime = 0;

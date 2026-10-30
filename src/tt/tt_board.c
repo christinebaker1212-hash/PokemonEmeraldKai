@@ -380,6 +380,23 @@ void TtBoard_End(void)
     B.active = 0;
     B.phase = PH_OFF;
 }
+/* A won game going on to the cards to take: the victory song plays on through them, and the map's song comes back
+   with TtBoard_ReleaseMusic when they are done */
+static u16 sHeldMusic;
+void TtBoard_EndHoldMusic(void)
+{
+    if (B.active && B.mapMusic)
+        sHeldMusic = B.mapMusic;
+    B.active = 0;
+    B.phase = PH_OFF;
+}
+void TtBoard_ReleaseMusic(void)
+{
+    u16 m = sHeldMusic;
+    sHeldMusic = 0;
+    if (m)
+        MP_MUSIC_TO_MAP(PlayBGM(m));
+}
 
 void TtBoard_Show(const struct TtDuel *truth)
 {
@@ -689,7 +706,7 @@ int TtBoard_Step(unsigned pressed, unsigned held, unsigned *slot, unsigned *cell
             B.played[seat] &= (uint8_t)~(1 << k);
             PlaySE(n % 2 ? SE_RG_CARD_FLIPPING : SE_BALL_TRAY_ENTER);
         }
-        if (B.t > per * 10 + Dur(12) || ((pressed & KEY_A) && B.t > 8))
+        if (B.t > per * 10 + Dur(12))   // (no skipping: the deal plays out, as every animation does)
         {
             B.played[0] = B.d->played[0];
             B.played[1] = B.d->played[1];
@@ -717,7 +734,7 @@ int TtBoard_Step(unsigned pressed, unsigned held, unsigned *slot, unsigned *cell
             PlaySE(SE_PIN);
             Burst(B.spinFirst ? 180 : 60, 80, Tt_SeatColor(B.spinFirst, 1), 20, 2.4f);
         }
-        if (B.t > len + Dur(30) || ((pressed & KEY_A) && B.t > len - Dur(18)))
+        if (B.t > len + Dur(30))   // (no skipping: the spin plays out)
         {
             B.phase = PH_PLAY;
             B.t = 0;
@@ -759,6 +776,10 @@ int TtBoard_Step(unsigned pressed, unsigned held, unsigned *slot, unsigned *cell
         B.phase = PH_EVENTS;
         return TB_NONE;
     }
+    /* A card still flying to the table or a banner up (SAME!, PLUS!, COMBO!): the buttons do nothing until it has
+       played out */
+    if (B.flying || B.bannerT)
+        pressed = 0;
     if (B.lastTurnSeen != B.d->turn + B.d->round * 16)
     {
         B.lastTurnSeen = B.d->turn + B.d->round * 16;

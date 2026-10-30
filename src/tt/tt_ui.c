@@ -147,6 +147,8 @@ static void Ask(int action, int arg, const char *format, ...)
 }
 static void Screen(int screen)
 {
+    if (screen != T_SPOILS && screen != T_INSPECT)
+        TtBoard_ReleaseMusic();   // the victory song ends with the cards to take
     U.screen = screen;
     U.cursor = 0;
     U.scroll = 0;
@@ -728,13 +730,14 @@ static void DuelStep(unsigned pressed, unsigned keys)
             TtNet_Cancel(Tt_Online(), "Game complete.");
             U.online = 0;
         }
-        TtBoard_End();
         if (U.vs == VS_NPC && U.duel.winner == Me() && U.spoilAllowed)
         {
+            TtBoard_EndHoldMusic();   // the victory song plays on while cards are taken
             Screen(T_SPOILS);
             U.cursor = 0;
             return;
         }
+        TtBoard_End();
         Close();
         return;
     }

@@ -48,5 +48,8 @@ void TcgBoard_Reject(const char *message);
 void TcgBoard_Result(const char *message);
 void TcgBoard_Render(void);
 void TcgBoard_End(void);
+int TcgBoard_Busy(void);   // the duel's events are playing: the buttons do nothing
+void TcgBoard_EndHoldMusic(void);   // a won game going on to the cards to take: the victory song plays on
+void TcgBoard_ReleaseMusic(void);   // ...until this (the map's song again; nothing if none is held)
 void TcgBoard_DebugFocus(int kind, int index);
 #endif

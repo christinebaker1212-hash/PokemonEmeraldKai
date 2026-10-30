@@ -189,6 +189,8 @@ static void Ask(int action, int arg, const char *format, ...)
 }
 static void Screen(int screen)
 {
+    if (screen != UI_SPOILS && screen != UI_INSPECT)
+        TcgBoard_ReleaseMusic();   // the victory song ends with the cards to take
     U.screen = screen;
     U.cursor = 0;
     U.scroll = 0;
@@ -786,19 +788,23 @@ static void DuelStep(unsigned pressed, unsigned keys)
             TcgLink_Cancel(Tcg_Online(), "Duel complete.");
             U.online = 0;
         }
-        TcgBoard_End();
         if (U.vs == VS_NPC && won && U.spoilCount)
         {
+            TcgBoard_EndHoldMusic();   // the victory song plays on while a card is taken
             Screen(UI_SPOILS);
             Say(ACT_NONE, "As the winner, you may take one card from %s's deck!", U.opp.name);
         }
-        else if (U.vs == VS_PRACTICE)
-        {
-            Screen(UI_HOME);
-            U.cursor = 3;
-        }
         else
-            Close();
+        {
+            TcgBoard_End();
+            if (U.vs == VS_PRACTICE)
+            {
+                Screen(UI_HOME);
+                U.cursor = 3;
+            }
+            else
+                Close();
+        }
     }
 }
 

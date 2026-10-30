@@ -22,6 +22,8 @@ int TtBoard_Idle(void);          /* everything shown, nothing moving */
 int TtBoard_Step(unsigned pressed, unsigned held, unsigned *slot, unsigned *cell);
 void TtBoard_Render(void);
 void TtBoard_End(void);
+void TtBoard_EndHoldMusic(void);   // a won game going on to the cards to take: the victory song plays on
+void TtBoard_ReleaseMusic(void);   // ...until this (the map's song again; nothing if none is held)
 void TtBoard_SetFast(int fast);
 void TtBoard_SetWaiting(int waiting);     /* the other side is thinking (an NPC, or a friend's move on its way) */
 void TtBoard_Result(const char *text);    /* the lines under the result: what was won */
