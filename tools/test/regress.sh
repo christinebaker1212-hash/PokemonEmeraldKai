@@ -19,8 +19,9 @@ run_one() {
     [ -f "$src/conf" ] || { echo "?? $n: no such scenario"; return 1; }
     rm -rf "$d"; mkdir -p "$d"; cp "$src"/*.txt "$d/"; cp "$src"/*.dat "$d/" 2>/dev/null   # .dat: a server storage file to start from
     unset MODE DELAY JIT FPS TMO WARP WARP_B WARP_C WARP_D EXPECT_A EXPECT_B EXPECT_C EXPECT_D UNEXPECT_A UNEXPECT_B UNEXPECT_C \
-          UNEXPECT_D ENV_A ENV_B ENV_C ENV_D CHECK NAME_A NAME_B NAME_C NAME_D
+          UNEXPECT_D ENV_A ENV_B ENV_C ENV_D CHECK NAME_A NAME_B NAME_C NAME_D GEN
     . "$src/conf"
+    export MOEMON_GENERATION=${GEN:-9}   # GENERATION: every generation unless the scenario sets GEN
     if [ -n "$WORST" ] && [ "$MODE" -ge 2 ] && [ -z "$DELAY" ]; then   # NA <-> JP for every multi-client scenario
         DELAY=250; JIT=80; FPS=60; TMO=$(( ${TMO:-150} * 2 ))
     fi

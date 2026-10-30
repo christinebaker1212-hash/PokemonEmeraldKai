@@ -2771,4 +2771,5 @@ Old saves need nothing: eggs and Unown keep their real species in the save.
   given or used from a registered button (item_menu.c ItemLaterGen). Not done yet: sealed Pokémon in trades and
   online, the GIMMICKS (MEGA EVOLUTION, Z-MOVES, DYNAMAX, TERASTALLIZATION).
 - Harness: MOEMON_BATTLETEXT=1 logs every battle message ("btext: ..."); MOEMON_GENERATION=N; mp gensetting N.
-- Tests: gen59_moves, region_gens.
+- Tests: gen59_moves, gen_seal, region_gens (the harness runs scenarios at GEN 9 unless their conf sets GEN).
+- Harness: mp gencheck ITEM / genrefresh.

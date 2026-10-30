@@ -1,0 +1,10 @@
+# GENERATION 3 (the default): TURTWIG (Gen 4) is SEALED and can't battle, so TREECKO behind it is sent out; a Gen 4
+# move makes TREECKO sealed too; a ROCKY HELMET (Gen 5) it holds goes back to the bag and can't be used there.
+# At GENERATION 4 TURTWIG battles again.
+MODE=1
+GEN=3
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=412:10,277:10 MOEMON_BATTLETEXT=1"
+EXPECT_A=("gencheck: cap 3 sealed 1 0 held 0 545 bag 0 usable 0" "gencheck: cap 3 sealed 1 1 held 0 545"
+          "gencheck: cap 3 sealed 1 0 held 0 0 bag 1 usable 0" "btext: Go! TREECKO!" "gencheck: cap 4 sealed 0 0")
+UNEXPECT_A=("btext: Go! TURTWIG!" "[crash]")

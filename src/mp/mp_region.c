@@ -668,12 +668,10 @@ static u8 ReturnItem(struct BoxPokemon *b)
 
 void MP_Gen_ReturnHeldItems(void)
 {
-    static u8 sLastCap;
     u8 cap = MP_Gen_Cap(MP_Region_Current());
     u32 i, j, n = 0;
-    if (cap == sLastCap || gSaveBlock1Ptr == NULL || gMain.inBattle)
+    if (gSaveBlock1Ptr == NULL || gMain.inBattle)
         return;
-    sLastCap = cap;
     for (i = 0; i < PARTY_SIZE; i++)
         n += ReturnItem(&gPlayerParty[i].box);
     if (gPokemonStoragePtr != NULL)

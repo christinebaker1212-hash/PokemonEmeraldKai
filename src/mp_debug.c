@@ -2501,6 +2501,23 @@ void MP_TestCommand(const char *cmd, const char *arg)
         if (n > 0)
             printf("[test] wildroll met game %d location %d\n", (int)GetMonData(&mon, MON_DATA_MET_GAME), (int)GetMonData(&mon, MON_DATA_MET_LOCATION));
     }
+    else if (strcmp(cmd, "gencheck") == 0)
+    {
+        // gencheck ITEM: the cap, each party Pokémon's SEALED state and held item, and how many ITEM the bag has
+        int i, item = atoi(arg);
+        printf("[test] gencheck: cap %d sealed", MP_Gen_Cap(MP_Region_Current()));
+        for (i = 0; i < PARTY_SIZE && GetMonData(&gPlayerParty[i], MON_DATA_SPECIES); i++)
+            printf(" %d", MP_Gen_SealedMon(&gPlayerParty[i]));
+        printf(" held");
+        for (i = 0; i < PARTY_SIZE && GetMonData(&gPlayerParty[i], MON_DATA_SPECIES); i++)
+            printf(" %d", (int)GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM));
+        printf(" bag %d usable %d\n", (int)CountTotalItemQuantityInBag(item), MP_Gen_ItemAllowed(item));
+    }
+    else if (strcmp(cmd, "genrefresh") == 0)
+    {
+        // genrefresh: as when a map loads (held items past the GENERATION go back to the bag)
+        MP_Gen_ReturnHeldItems();
+    }
     else if (strcmp(cmd, "gensetting") == 0)
     {
         // gensetting N: the GENERATION setting (3 = vanilla: HOENN Gen 1-3, JOHTO / KANTO Gen 1-2)

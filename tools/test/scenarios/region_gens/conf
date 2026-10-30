@@ -2,6 +2,7 @@
 # GENERATION setting at 4 brings Gen 4 (STARLY / SHINX on ROUTE 29), at 5 and 9 Quetzal's own Pokémon of those
 # generations (LILLIPUP, APPLIN). A Pokémon met there is MET_GAME 14 (JOHTO)
 MODE=1
+GEN=3
 TMO=90
 CHECK="python3 tools/test/scenarios/region_gens/check.py"
 EXPECT_A=("wildroll met game 14 location 45")
