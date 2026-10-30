@@ -549,12 +549,10 @@ u8 MP_Gen_OfAbility(u16 ability)
     return ARRAY_COUNT(sLast) + 1;
 }
 
-// What a Pokémon already has is never held back below Gen 4: Kai had Gen 4's Pokémon, moves and abilities before
-// GENERATION existed, so its default (3) keeps them working
+// The generation moves and abilities follow: the region's cap, down to Gen 3 (the default)
 static u8 UseCap(void)
 {
-    u8 cap = MP_Gen_Cap(MP_Region_Current());
-    return cap < 4 ? 4 : cap;
+    return MP_Gen_Cap(MP_Region_Current());
 }
 
 bool8 MP_Gen_MoveAllowed(u16 move)
@@ -596,6 +594,19 @@ u8 MP_Gen_MoveType(u8 type)
     if (type == TYPE_FAIRY && MP_Gen_Cap(MP_Region_Current()) < 6)
         return TYPE_NORMAL;
     return type;
+}
+
+// SEALED: a Pokémon of a species past the GENERATION stays yours but can't battle (like an EGG), until it's raised
+bool8 MP_Gen_SealedSpecies(u16 species)
+{
+    return species != SPECIES_NONE && species < NUM_SPECIES && MP_Gen_OfSpecies(species) > UseCap();
+}
+
+bool8 MP_Gen_SealedMon(struct Pokemon *mon)
+{
+    if (GetMonData(mon, MON_DATA_IS_EGG))
+        return FALSE;
+    return MP_Gen_SealedSpecies(GetMonData(mon, MON_DATA_SPECIES));
 }
 
 // A battler's types and ability as the generation has them (past the cap: no ability)

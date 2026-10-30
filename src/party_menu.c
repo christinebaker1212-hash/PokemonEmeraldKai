@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_region.h"
 #include "mp.h"
 #include "malloc.h"
 #include "battle.h"
@@ -6514,6 +6515,13 @@ static bool8 TrySwitchInPokemon(void)
     if (GetMonData(&gPlayerParty[slot], MON_DATA_IS_EGG))
     {
         StringExpandPlaceholders(gStringVar4, gText_EggCantBattle);
+        return FALSE;
+    }
+    if (MP_Gen_SealedMon(&gPlayerParty[slot]))   // Moemon Kai: past the GENERATION
+    {
+        static const u8 sText_Sealed[] = _("{STR_VAR_1} is from a later\ngeneration and can't battle!{PAUSE_UNTIL_PRESS}");
+        GetMonNickname(&gPlayerParty[slot], gStringVar1);
+        StringExpandPlaceholders(gStringVar4, sText_Sealed);
         return FALSE;
     }
     if (GetPartyIdFromBattleSlot(slot) == gBattleStruct->prevSelectedPartySlot)

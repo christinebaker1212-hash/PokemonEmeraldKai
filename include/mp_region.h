@@ -64,7 +64,11 @@ u8 MP_Gen_OfAbility(u16 ability);
 bool8 MP_Gen_MoveAllowed(u16 move);                // a move past the cap can't be picked in battle
 u8 MP_Gen_SpeciesType(u16 species, u8 which);      // its types as the generation has them (FAIRY from Gen 6)
 u8 MP_Gen_MoveType(u8 type);                       // FAIRY moves are NORMAL before Gen 6
-void MP_Gen_FitBattler(u8 battler);                // a battler's types and ability as the generation has them
+void MP_Gen_FitBattler(u8 battler);
+bool8 MP_Gen_SealedSpecies(u16 species);           // past the GENERATION: kept, but can't battle
+bool8 MP_Gen_SealedMon(struct Pokemon *mon);       // ... (never an EGG)
+extern struct Pokemon gPlayerParty[];
+#define MP_SEALED(party, i) ((party) == gPlayerParty && MP_Gen_SealedMon(&(party)[i]))   // in "can it battle" checks                // a battler's types and ability as the generation has them
 bool8 MP_Gen_Allowed(u16 species);                 // shown in the region the player is in
 u16 MP_Gen_StandIn(u16 species);                   // its nearest earlier form that is
 const struct WildPokemonInfo *MP_Region_WildInfo(const struct WildPokemonInfo *info);   // the Gen 3 table before it

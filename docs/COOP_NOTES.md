@@ -2764,7 +2764,8 @@ Old saves need nothing: eggs and Unown keep their real species in the save.
   generation is allowed, the Gen 4 cap's elsewhere (tools/quetzal_port/gen_modern.py -> src/data/wild_qz_modern.h,
   trainer_parties_qz_modern.h). FAIRY exists from Gen 6 (MP_Gen_SpeciesType / MoveType; Kai's older FAIRY Pokémon
   take it from 6). Moves and abilities past the cap don't work (greyed in CheckMoveLimitations; MP_Gen_FitBattler),
-  but never below Gen 4: Kai had Gen 4 before GENERATION. Not done yet: sealing Pokémon past a lowered cap, items past
-  the cap, the GIMMICKS (MEGA EVOLUTION, Z-MOVES, DYNAMAX, TERASTALLIZATION).
+  down to Gen 3, the default (the user's rule: the restrictions reach Gen 3 whatever a save has). A party Pokémon of a species past the cap is SEALED:
+  it can't battle (MP_Gen_SealedMon / MP_SEALED beside the battle code's EGG checks; the party menu says why). Not done
+  yet: sealed Pokémon in trades and online, items past the cap, the GIMMICKS (MEGA EVOLUTION, Z-MOVES, DYNAMAX, TERASTALLIZATION).
 - Harness: MOEMON_BATTLETEXT=1 logs every battle message ("btext: ..."); MOEMON_GENERATION=N; mp gensetting N.
 - Tests: gen59_moves, region_gens.

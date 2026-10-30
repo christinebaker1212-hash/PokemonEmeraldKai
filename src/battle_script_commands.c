@@ -3955,7 +3955,7 @@ static void Cmd_checkteamslost(void)
         // In multi battle with Steven, skip his Pokémon
         for (i = 0; i < MULTI_PARTY_SIZE; i++)
         {
-            if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) && !GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG))
+            if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) && !GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG) && !MP_SEALED(gPlayerParty, i))
                 HP_count += GetMonData(&gPlayerParty[i], MON_DATA_HP);
         }
     }
@@ -3963,7 +3963,7 @@ static void Cmd_checkteamslost(void)
     {
         for (i = 0; i < PARTY_SIZE; i++)
         {
-            if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) && !GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG)
+            if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) && !GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG) && !MP_SEALED(gPlayerParty, i)
              && (!(gBattleTypeFlags & BATTLE_TYPE_ARENA) || !(gBattleStruct->arenaLostPlayerMons & gBitTable[i])))
             {
                 HP_count += GetMonData(&gPlayerParty[i], MON_DATA_HP);
@@ -3977,7 +3977,7 @@ static void Cmd_checkteamslost(void)
     // Get total HP for the enemy's party to determine if the player has won
     for (i = 0; i < PARTY_SIZE; i++)
     {
-        if (GetMonData(&gEnemyParty[i], MON_DATA_SPECIES) && !GetMonData(&gEnemyParty[i], MON_DATA_IS_EGG)
+        if (GetMonData(&gEnemyParty[i], MON_DATA_SPECIES) && !GetMonData(&gEnemyParty[i], MON_DATA_IS_EGG) && !MP_SEALED(gEnemyParty, i)
          && (!(gBattleTypeFlags & BATTLE_TYPE_ARENA) || !(gBattleStruct->arenaLostOpponentMons & gBitTable[i])))
         {
             HP_count += GetMonData(&gEnemyParty[i], MON_DATA_HP);
@@ -5194,7 +5194,7 @@ static void Cmd_jumpifcantswitch(void)
         for (i = lastMonId; i < lastMonId + MULTI_PARTY_SIZE; i++)
         {
             if (GetMonData(&party[i], MON_DATA_SPECIES) != SPECIES_NONE
-             && !GetMonData(&party[i], MON_DATA_IS_EGG)
+             && !GetMonData(&party[i], MON_DATA_IS_EGG) && !MP_SEALED(party, i)
              && GetMonData(&party[i], MON_DATA_HP) != 0
              && gBattlerPartyIndexes[gActiveBattler] != i)
                 break;
@@ -5250,7 +5250,7 @@ static void Cmd_jumpifcantswitch(void)
         for (i = lastMonId; i < lastMonId + MULTI_PARTY_SIZE; i++)
         {
             if (GetMonData(&party[i], MON_DATA_SPECIES) != SPECIES_NONE
-             && !GetMonData(&party[i], MON_DATA_IS_EGG)
+             && !GetMonData(&party[i], MON_DATA_IS_EGG) && !MP_SEALED(party, i)
              && GetMonData(&party[i], MON_DATA_HP) != 0
              && gBattlerPartyIndexes[gActiveBattler] != i)
                 break;
@@ -5272,7 +5272,7 @@ static void Cmd_jumpifcantswitch(void)
         for (i = lastMonId; i < lastMonId + (PARTY_SIZE / 2); i++)
         {
             if (GetMonData(&party[i], MON_DATA_SPECIES) != SPECIES_NONE
-             && !GetMonData(&party[i], MON_DATA_IS_EGG)
+             && !GetMonData(&party[i], MON_DATA_IS_EGG) && !MP_SEALED(party, i)
              && GetMonData(&party[i], MON_DATA_HP) != 0
              && gBattlerPartyIndexes[gActiveBattler] != i)
                 break;
@@ -5314,7 +5314,7 @@ static void Cmd_jumpifcantswitch(void)
         {
             if (GetMonData(&party[i], MON_DATA_HP) != 0
              && GetMonData(&party[i], MON_DATA_SPECIES) != SPECIES_NONE
-             && !GetMonData(&party[i], MON_DATA_IS_EGG)
+             && !GetMonData(&party[i], MON_DATA_IS_EGG) && !MP_SEALED(party, i)
              && i != gBattlerPartyIndexes[battlerIn1] && i != gBattlerPartyIndexes[battlerIn2])
                 break;
         }
@@ -7889,7 +7889,7 @@ static void Cmd_forcerandomswitch(void)
             for (i = firstMonId; i < lastMonId; i++)
             {
                 if (GetMonData(&party[i], MON_DATA_SPECIES) != SPECIES_NONE
-                 && !GetMonData(&party[i], MON_DATA_IS_EGG)
+                 && !GetMonData(&party[i], MON_DATA_IS_EGG) && !MP_SEALED(party, i)
                  && GetMonData(&party[i], MON_DATA_HP) != 0
                  && !MP_IsPartyIdOnSide(gBattlerTarget, i))
                     candidates[count++] = i;
@@ -8023,7 +8023,7 @@ static void Cmd_forcerandomswitch(void)
         for (i = firstMonId; i < lastMonId; i++)
         {
             if (GetMonData(&party[i], MON_DATA_SPECIES) != SPECIES_NONE
-             && !GetMonData(&party[i], MON_DATA_IS_EGG)
+             && !GetMonData(&party[i], MON_DATA_IS_EGG) && !MP_SEALED(party, i)
              && GetMonData(&party[i], MON_DATA_HP) != 0)
              {
                  validMons++;
