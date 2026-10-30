@@ -468,4 +468,5 @@ const u8 gMoveCategories[MOVES_COUNT] =
     [MOVE_SEED_FLARE] = MOVE_CATEGORY_SPECIAL,
     [MOVE_OMINOUS_WIND] = MOVE_CATEGORY_SPECIAL,
     [MOVE_SHADOW_FORCE] = MOVE_CATEGORY_PHYSICAL,
+#include "move_categories_gen58.h"   // the Gen 5-8 fork
 };

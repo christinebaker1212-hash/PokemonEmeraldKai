@@ -5,7 +5,7 @@ Writes src/mp/mp_typeicon_gfx.h: one 11x11 icon per type in the style of the
 modern type chart (a colored rounded square with a white symbol), as GBA
 BGR555 colors with bit 15 set where the icon is drawn (0 = see-through).
 mp_typeicons.c draws them over the frame next to each healthbox, so they
-use no sprites or palettes. Kai has no Fairy type; ??? gets a question mark.
+use no sprites or palettes. ??? gets a question mark; FAIRY (the Gen 5-8 fork) a sparkle.
 
 usage: tools/moemon_typeicons/gen.py  (from the repo root)
 """
@@ -175,6 +175,16 @@ TYPES = [
         "###....",
         ".###...",
         "..####.",
+    ]),
+    # Moemon Kai (the Gen 5-8 fork): FAIRY, a four-pointed sparkle
+    ("FAIRY", (0xEF, 0x70, 0xEF), [
+        "...#...",
+        "...#...",
+        "..###..",
+        "#######",
+        "..###..",
+        "...#...",
+        "...#...",
     ]),
 ]
 

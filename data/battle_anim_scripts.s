@@ -372,6 +372,7 @@ gBattleAnims_Moves::
 	ptrvalue Move_DOOM_DESIRE
 	ptrvalue Move_PSYCHO_BOOST
 	.include "data/battle_anim_ptrs_gen4.inc"   @ Moemon Kai: Gen 4 moves
+	.include "data/battle_anim_ptrs_gen58.inc"   @ Moemon Kai: Gen 5-8 moves
 	ptrvalue Move_COUNT /* cannot be reached */
 
 	.align 2
@@ -10768,3 +10769,4 @@ Special_MonToSubstitute:
 
 @ Moemon Kai: Gen 4 moves
 	.include "data/battle_anim_scripts_gen4.inc"
+	.include "data/battle_anim_scripts_gen58.inc"

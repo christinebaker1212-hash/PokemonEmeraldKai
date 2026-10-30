@@ -4615,4 +4615,5 @@ const struct BattleMove gBattleMoves[MOVES_COUNT] =
         .flags = FLAG_PROTECT_AFFECTED | FLAG_MIRROR_MOVE_AFFECTED | FLAG_KINGS_ROCK_AFFECTED,
     },
 #include "battle_moves_gen4.h"   // Moemon Kai: Gen 4 moves
+#include "battle_moves_gen58.h"   // Moemon Kai: Gen 5-8 moves (the Gen 5-8 fork)
 };

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Gen 4 move animations from pokeemerald-expansion, where they only need what Kai has.
 
-    python3 tools/moemon_gen4/gen_anims.py EXPANSION_DIR [--list]
+    python3 tools/moemon_gen4/gen_anims.py EXPANSION_DIR [--list] [--gen58]
+
+--gen58 (the Gen 5-8 fork): moves 468-754, in data/battle_anim_scripts_gen58.inc (G58_ prefixed routines).
 
 For each Gen 4 move still borrowing a Gen 3 animation in data/battle_anim_scripts_gen4.inc (a lone "goto Move_X"),
 takes expansion's gBattleAnimMove_<Name> when every sprite template, visual task, sound, tag, background and script
@@ -20,11 +22,14 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, '..', '..'))
 OUT = os.path.join(REPO, 'data', 'battle_anim_scripts_gen4.inc')
-HELPERS_START = '@ ---- routines shared by the animations above (from pokeemerald-expansion, G4_ prefixed)'
+HELPERS_START = '@ ---- routines shared by the animations above (from pokeemerald-expansion, prefixed)'
 
 
 def camel(const):
     return ''.join(w.capitalize() for w in const[5:].split('_'))
+
+
+NEXT = {}   # label -> the label right after it in the source (where its block runs on to)
 
 
 def blocks(text, label_re):
@@ -35,24 +40,51 @@ def blocks(text, label_re):
         if re.match(label_re, name):
             end = marks[i + 1][0] if i + 1 < len(marks) else len(text)
             out[name] = text[text.index('\n', pos) + 1:end]
+            if i + 1 < len(marks):
+                NEXT[name] = marks[i + 1][1]
     return out
+
+
+def falls_through(body):
+    lines = [l.strip() for l in body.strip().split('\n') if l.strip() and not l.strip().startswith(('@', '//'))]
+    return not lines or lines[-1].split()[0] not in ('end', 'return', 'goto', 'choosetwoturnanim', 'jumpretfalse', 'jumprettrue')
 
 
 def main():
     exp = sys.argv[1]
+    global OUT
+    first, last, pre = 355, 467, 'G4_'
+    if '--gen58' in sys.argv:
+        first, last, pre = 468, 754, 'G58_'
+        OUT = os.path.join(REPO, 'data', 'battle_anim_scripts_gen58.inc')
     src = open(os.path.join(exp, 'data', 'battle_anim_scripts.s'), encoding='utf-8').read()
     kai = open(os.path.join(REPO, 'data', 'battle_anim_scripts.s'), encoding='utf-8').read()
     syms = set(subprocess.run(['nm', os.path.join(REPO, 'pokeemerald64')], capture_output=True, text=True).stdout.split())
     consts = ''.join(open(os.path.join(REPO, p), encoding='utf-8').read() for p in
                      ('include/constants/battle_anim.h', 'include/constants/songs.h', 'include/constants/battle.h'))
+    known = set()
+    for d in ('include', 'include/constants', 'asm/macros', 'constants'):
+        for f in glob.glob(os.path.join(REPO, d, '*')):
+            if os.path.isfile(f):
+                t = open(f, encoding='utf-8', errors='ignore').read()
+                known |= set(re.findall(r'#define\s+(\w+)', t)) | set(re.findall(r'\.(?:set|equ)\s+(\w+)', t))
+                known |= set(re.findall(r'^\s+([A-Z][A-Z0-9_]+)\s*(?:=|,)', t, re.M))   # enum members
     macros = set(re.findall(r'\.macro (\w+)', open(os.path.join(REPO, 'asm/macros/battle_anim_script.inc')).read()))
     macros |= {'end', 'delay', 'goto', 'call', 'return'}
     all_labels = blocks(src, r'.')
     moves = [l.split()[1] for l in open(os.path.join(REPO, 'include/constants/moves.h'))
-             if l.startswith('#define MOVE_') and l.split()[2].isdigit() and 355 <= int(l.split()[2]) <= 467]
+             if l.startswith('#define MOVE_') and l.split()[2].isdigit() and first <= int(l.split()[2]) <= last]
 
     def local_labels(body):
         return set(re.findall(r'^(\w+):', body, re.M))
+
+    def runs_on(name, body):
+        if falls_through(body) and name in NEXT and not NEXT[name].startswith('gBattleAnim'):
+            return body.rstrip() + '\n\tgoto %s\n' % NEXT[name]
+        return body
+
+    for name in list(all_labels):
+        all_labels[name] = runs_on(name, all_labels[name])
 
     def problems(body, seen):
         """What this body (and the routines it calls) needs that Kai lacks; the routines it calls go in seen."""
@@ -66,6 +98,9 @@ def main():
         for c in set(re.findall(r'^\s+(\w+)', body, re.M)):
             if c not in macros:
                 bad.append('cmd ' + c)
+        for c in set(re.findall(r'\b([A-Z][A-Z0-9_]{2,})\b', body)):
+            if c not in known and c not in all_labels and not c.startswith('G4_'):
+                bad.append('const ' + c)
         mine = local_labels(body)
         for t in set(re.findall(r'\b(?:call|goto|jumpargeq|jumpifcontest|jumpifmoveturn|choosetwoturnanim|jumpifdoublebattle|jumpretfalse|jumprettrue)\b[^\n]*', body)):
             for lab in re.findall(r'\b([A-Z]\w+)\b', t):
@@ -80,7 +115,7 @@ def main():
         return bad
 
     have = open(OUT, encoding='utf-8').read()
-    have = have.split(HELPERS_START)[0].rstrip() + '\n'
+    have = have.split('@ ---- routines shared')[0].rstrip() + '\n'
     cur = blocks(have, r'Move_')
     helpers, ported, kept = set(), [], []
     for m in moves:
@@ -110,7 +145,7 @@ def main():
 
     def prefix(body, own):
         for lab in sorted(own | helpers, key=len, reverse=True):
-            body = re.sub(r'\b%s\b' % lab, 'G4_' + lab, body)
+            body = re.sub(r'\b%s\b' % lab, pre + lab, body)
         return body
 
     # expansion loads a template's graphics by itself; Kai needs loadspritegfx for each tag a move shows
@@ -142,7 +177,7 @@ def main():
         have = have[:old.start(1)] + new + have[old.end(1):]
     tail = '\n' + HELPERS_START + '\n'
     for h in sorted(helpers):
-        tail += 'G4_%s:\n%s\n' % (h, kai_syntax(prefix(all_labels[h], local_labels(all_labels[h]))).rstrip())
+        tail += pre + '%s:\n%s\n' % (h, kai_syntax(prefix(all_labels[h], local_labels(all_labels[h]))).rstrip())
     open(OUT, 'w', encoding='utf-8').write(have.rstrip() + '\n' + (tail if helpers else '') + '\n')
 
 
