@@ -94,6 +94,16 @@ TCG_SPECIALS = [
 # (tcg_ui.c sSetPromos: 75% of a booster's cards; GYM_SWEEP_BIT: every Gym Leader's deck beaten)
 SET_PROMOS = [64, 118, 145, 200, 319, 421, 315, 384, 418, 401, 441]
 GYM_PROMO = 102
+# (tcg_ui.c sMilestonePromos: card milestones claimed under PRIZES, counted from what the save already holds)
+MILESTONE_PROMOS = [
+    (309, 'Win a POKéMON card duel'), (317, 'Win 10 POKéMON card duels'), (336, 'Win 25 POKéMON card duels'),
+    (337, 'Win 50 POKéMON card duels'), (346, 'Win 100 POKéMON card duels'), (436, 'Open 10 booster packs'),
+    (430, 'Open 50 booster packs'), (422, 'Open 100 booster packs'), (351, "Beat 5 special trainers' decks"),
+    (373, "Beat 10 special trainers' decks"), (364, "Beat 15 special trainers' decks"),
+    (286, 'Beat all four ELITE FOUR decks'), (407, 'Win a duel without giving up a Prize (CLEAN SWEEP)'),
+    (415, 'Win a duel with a deck of one type (PURE ENERGY)'), (413, 'Own every card of a booster set'),
+    (420, 'Own every card of 4 booster sets'), (381, 'Own every card of all 11 booster sets'),
+]
 # (ygo_field.c: a Yu-Gi-Oh! win over an Elite Four member hands over their POKeMON promo too)
 YGO_E4 = {'SIDNEY', 'PHOEBE', 'GLACIA', 'DRAKE'}
 
@@ -160,6 +170,9 @@ for i, p in enumerate(SET_PROMOS):
     promo_src.setdefault(p, []).append(
         'Own 75%% of the %s booster set\'s cards, then claim it under PRIZES at a CARD CLUB counter or the '
         'GAME CENTER 2F CARD SHOP.' % PACKS[i])
+for p, what in MILESTONE_PROMOS:
+    promo_src.setdefault(p, []).append(
+        '%s, then claim it under PRIZES at a CARD CLUB counter or the GAME CENTER 2F CARD SHOP.' % what)
 promo_src.setdefault(GYM_PROMO, []).append(
     'Beat all eight GYM LEADERS in POKéMON card duels, then claim it under PRIZES at a CARD CLUB counter or the '
     'GAME CENTER 2F CARD SHOP.')
@@ -460,7 +473,9 @@ page.append('<p>%d of the %d POKéMON cards are <b>promo cards</b>. They never c
 page.append('<dl class="legend"><dt>First win</dt><dd>A special trainer gives you their promo card the first time you '
             'beat them in a POKéMON card duel.</dd><dt>75% of a set</dt><dd>Own three quarters of a booster set\'s '
             'cards, then claim the promo at the counter\'s PRIZES tab (25% and 50% give packs and CP).</dd>'
-            '<dt>All GYM LEADERS</dt><dd>Beat all eight GYM LEADERS\' decks, then claim it under PRIZES.</dd></dl>')
+            '<dt>All GYM LEADERS</dt><dd>Beat all eight GYM LEADERS\' decks, then claim it under PRIZES.</dd>'
+            '<dt>Card milestones</dt><dd>Duels won, packs opened, special trainers beaten, booster sets completed and '
+            'more: claim each promo under PRIZES once you get there (what you did before counts too).</dd></dl>')
 if missing:
     page.append('<div class="callout warn"><b>%d promo cards can\'t be obtained yet.</b> These Game Boy 2 promos are in '
                 'the card list, but no one hands them out in this version of the game, so you can\'t complete the '

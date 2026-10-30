@@ -2502,8 +2502,65 @@ static unsigned SpareList(uint16_t *out)
             out[n++] = (uint16_t)id;
     return n;
 }
-/* Prizes: 25 / 50 / 75 % of each set, and every Gym Leader's deck beaten. */
-#define PRIZE_ROWS (TCG_SET_COUNT * 3 + 2)
+/* Prizes: 25 / 50 / 75 % of each set, every Gym Leader's deck beaten, the milestone promo cards, every card. */
+enum { MS_WINS, MS_PACKS, MS_SPECIALS, MS_ELITE, MS_ACHIEVEMENT, MS_SETS };
+/* The Game Boy 2 promo cards no trainer hands over: one for each card milestone, claimed at the counters (read from
+ * what the collection and the achievements already count, so a save that got there before gets them too). Bits of
+ * TcgCollection.rewards in this order. */
+static const struct
+{
+    u8 kind;
+    u16 goal;
+    u16 card;
+    const char *label, *text, *achievement;
+} sMilestonePromos[] = {
+    {MS_WINS, 1, TCG_CARD_MAGIKARP_LV10, "1 WIN", "Win a POKeMON card duel", NULL},
+    {MS_WINS, 10, TCG_CARD_MARILL, "10 WINS", "Win 10 POKeMON card duels", NULL},
+    {MS_WINS, 25, TCG_CARD_DIGLETT_LV16, "25 WINS", "Win 25 POKeMON card duels", NULL},
+    {MS_WINS, 50, TCG_CARD_DUGTRIO_LV40, "50 WINS", "Win 50 POKeMON card duels", NULL},
+    {MS_WINS, 100, TCG_CARD_MACHAMP_LV54, "100 WINS", "Win 100 POKeMON card duels", NULL},
+    {MS_PACKS, 10, TCG_CARD_BILLS_COMPUTER, "10 PACKS", "Open 10 booster packs", NULL},
+    {MS_PACKS, 50, TCG_CARD_COMPUTER_ERROR, "50 PACKS", "Open 50 booster packs", NULL},
+    {MS_PACKS, 100, TCG_CARD_IMAKUNI_CARD_422, "100 PACKS", "Open 100 booster packs", NULL},
+    {MS_SPECIALS, 5, TCG_CARD_GOLEM_LV37, "5 LEGENDS", "Beat 5 special trainers' decks", NULL},
+    {MS_SPECIALS, 10, TCG_CARD_GENGAR_LV40, "10 LEGENDS", "Beat 10 special trainers' decks", NULL},
+    {MS_SPECIALS, 15, TCG_CARD_ALAKAZAM_LV45, "15 LEGENDS", "Beat 15 special trainers' decks", NULL},
+    {MS_ELITE, 4, TCG_CARD_MOLTRES_LV40, "ELITE FOUR", "Beat all 4 ELITE FOUR decks", NULL},
+    {MS_ACHIEVEMENT, 1, TCG_CARD_KANGASKHAN_LV38, "CLEAN SWEEP", "Win a duel without giving up a Prize", "cardflawless"},
+    {MS_ACHIEVEMENT, 1, TCG_CARD_HUNGRY_SNORLAX, "PURE ENERGY", "Win a duel with a deck of one type", "cardmono"},
+    {MS_SETS, 1, TCG_CARD_COOL_PORYGON, "1 SET", "Own every card of a booster set", NULL},
+    {MS_SETS, 4, TCG_CARD_TOGEPI, "4 SETS", "Own every card of 4 booster sets", NULL},
+    {MS_SETS, TCG_SET_COUNT, TCG_CARD_MEWTWO_LV30, "ALL SETS", "Own every card of all 11 booster sets", NULL},
+};
+#define MILESTONE_ROWS ARRAY_COUNT(sMilestonePromos)
+#define PRIZE_ROWS (TCG_SET_COUNT * 3 + 2 + MILESTONE_ROWS)
+/* How far along a milestone is */
+static unsigned MilestoneHave(unsigned k)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    unsigned n = 0, i, total;
+    switch (sMilestonePromos[k].kind)
+    {
+    case MS_WINS:
+        return c->wins;
+    case MS_PACKS:
+        return c->packsOpened;
+    case MS_SPECIALS:
+        for (i = 0; i < TCG_SPECIAL_COUNT; i++)
+            n += (c->specialBeaten >> i) & 1;
+        return n;
+    case MS_ELITE:
+        for (i = TCG_SPECIAL_SIDNEY; i < TCG_SPECIAL_SIDNEY + 4; i++)
+            n += (c->specialBeaten >> i) & 1;
+        return n;
+    case MS_ACHIEVEMENT:
+        return MP_Achieve_IsDoneById(sMilestonePromos[k].achievement) ? 1 : 0;
+    default:
+        for (i = 0; i < TCG_SET_COUNT; i++)
+            n += Tcg_SetOwned(c, i, &total) == total;
+        return n;
+    }
+}
 
 static const unsigned sSetPromos[TCG_SET_COUNT] = {TCG_CARD_MOLTRES_LV37, TCG_CARD_ZAPDOS_LV68, TCG_CARD_SLOWPOKE_LV9,
                                                    TCG_CARD_IMAKUNI_CARD, TCG_CARD_PIKACHU_LV13, TCG_CARD_LUGIA,
@@ -2526,6 +2583,19 @@ static int PrizeState(unsigned row, char *what, size_t size)
         if (Tcg_Milestone(c, set, step))
             return 2;
         return have * 4 >= total * (step + 1);
+    }
+    if (row > TCG_SET_COUNT * 3 && row <= TCG_SET_COUNT * 3 + MILESTONE_ROWS)
+    {
+        unsigned k = row - TCG_SET_COUNT * 3 - 1, have = MilestoneHave(k), goal = sMilestonePromos[k].goal;
+        if (goal > 1)
+            snprintf(what, size, "%s (%u/%u): the promo card %s", sMilestonePromos[k].text, have < goal ? have : goal,
+                     goal, Tcg_Card(sMilestonePromos[k].card)->name);
+        else
+            snprintf(what, size, "%s: the promo card %s", sMilestonePromos[k].text,
+                     Tcg_Card(sMilestonePromos[k].card)->name);
+        if ((c->rewards >> k) & 1)
+            return 2;
+        return have >= goal;
     }
     if (row == TCG_SET_COUNT * 3)
     {
@@ -2566,6 +2636,13 @@ static void ClaimPrize(unsigned row)
             AddCard(sSetPromos[set]);
             Say(ACT_NONE, "You received the promo card %s!", Tcg_Card(sSetPromos[set])->name);
         }
+    }
+    else if (row > TCG_SET_COUNT * 3 && row <= TCG_SET_COUNT * 3 + MILESTONE_ROWS)
+    {
+        unsigned k = row - TCG_SET_COUNT * 3 - 1;
+        c->rewards |= 1u << k;
+        AddCard(sMilestonePromos[k].card);
+        Say(ACT_NONE, "You received the promo card %s!", Tcg_Card(sMilestonePromos[k].card)->name);
     }
     else if (row == TCG_SET_COUNT * 3)
     {
@@ -2751,7 +2828,9 @@ static void CounterLists(int tab)
             int k = U.scroll + i, state = PrizeState(k, line, sizeof(line));
             char label[24];
             snprintf(label, sizeof(label), "%s", k < TCG_SET_COUNT * 3 ? sSetNames[k / 3]
-                                                 : k == TCG_SET_COUNT * 3 ? "GYM DECKS" : "EVERY CARD");
+                                                 : k == TCG_SET_COUNT * 3 ? "GYM DECKS"
+                                                 : k <= TCG_SET_COUNT * 3 + (int)MILESTONE_ROWS ? sMilestonePromos[k - TCG_SET_COUNT * 3 - 1].label
+                                                                                                : "EVERY CARD");
             snprintf(right, sizeof(right), "%s", state == 2 ? "DONE" : state == 1 ? "READY!"
                                                  : k < TCG_SET_COUNT * 3 ? (k % 3 == 0 ? "25%" : k % 3 == 1 ? "50%" : "75%")
                                                                          : "");
@@ -4280,6 +4359,17 @@ void Tcg_Debug(const char *command)
     {
         c->dust = n;
         return;
+    }
+    /* (the milestone prizes: mp cards stats WINS PACKS SPECIAL_BITS) */
+    {
+        unsigned bits;
+        if (sscanf(command, "stats %u %u %x", &n, &m, &bits) == 3)
+        {
+            c->wins = n;
+            c->packsOpened = m;
+            c->specialBeaten = bits;
+            return;
+        }
     }
     if (sscanf(command, "drought %u %u", &n, &m) == 2 && n < TCG_PACK_TYPES)
     {

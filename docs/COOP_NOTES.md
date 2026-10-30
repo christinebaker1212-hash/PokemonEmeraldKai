@@ -2545,6 +2545,12 @@ TCG_LINK_VERSION 15.
   toward the middle of its side's Monster Zones (FX_TRIBUTE: the event waits for all of it, Advance moves it to the
   Graveyard after, so the table never catches up mid-way); a Tribute Summon gathers the light on its zone and bursts
   (FX_GATHER), then its picture big as TRIBUTE SUMMON. No beams of light: a Summon is a ring.
+- 1.58.0, every POKeMON card can be had: the 17 Game Boy 2 promos no trainer handed over are milestone prizes under
+  PRIZES (tcg_ui.c sMilestonePromos: duels won, packs opened, special trainers beaten, the four ELITE FOUR decks,
+  the CLEAN SWEEP / PURE ENERGY achievements, booster sets complete), counted from what the collection and the
+  achievements already hold so older saves claim theirs at once; claimed bits in TcgCollection.rewards (collection
+  format 9). `mp cards stats WINS PACKS SPECIAL_BITS` sets the counters for tests. The card guide (docs/CARD_GUIDE.html,
+  tools/card_guide/build.sh: every card of the three games and where it comes from) lists them.
 - 1.57.0, the AI's "wait, what?" moves (ygo_ai.c): it reads a card's purpose from its words (Says): an Equip Spell
   goes on its own monster unless it cripples (HarmfulEquip: Paralyzing Potion, Germ Infection, Flint, Snatch Steal...),
   a boost (Boost: Rush Recklessly, Reinforcements) on its own; Pointless keeps back Life Point gains above 6000 LP,

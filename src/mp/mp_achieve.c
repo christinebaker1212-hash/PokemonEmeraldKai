@@ -326,7 +326,7 @@ static const struct Achievement sAch[] = {
     {"cardgyms8", "GYM CARD MASTER", "Beat every GYM LEADER's card deck.", AK_COUNT, 0, 8, 1, C_CARDS},
     {"cardspecial15", "LEGENDS OF THE TABLE", "Beat 15 special trainers at cards (either game).", AK_COUNT, 0, 15, 2, C_CARDS},
     {"cardset", "SET COMPLETE", "Own every card of a booster set.", AK_EVENT, 0, 1, 1, C_CARDS},
-    {"cardall", "CARD MASTER", "Own all 228 cards.", AK_EVENT, 0, 1, 2, C_CARDS},
+    {"cardall", "CARD MASTER", "Own every POK~MON card.", AK_EVENT, 0, 1, 2, C_CARDS},
     {"cardpack50", "PACK RAT", "Open 50 booster packs.", AK_COUNT, 0, 50, 1, C_CARDS},
     {"cardflawless", "CLEAN SWEEP", "Win a card duel without giving up a Prize.", AK_EVENT, 0, 1, 1, C_CARDS},
     {"cardfriend1", "TABLE TALK", "Win a card duel against a friend.", AK_COUNT, 0, 1, 0, C_CARDS},

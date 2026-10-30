@@ -480,7 +480,7 @@ void Tcg_RecordResult(struct TcgCollection *c, uint32_t key, int won, unsigned d
 /* Explicit little-endian encoding, independent of compiler padding and ABI. Formats up to 7 hold the first Game Boy
  * game's 228 cards and its 4 boosters; 8 adds Pokemon Card GB2's (TCG_CARD_COUNT, TCG_PACK_TYPES) and the
  * milestones' upper bits. A save of an older format loads into the new collection (the added cards at 0). */
-#define FORMAT 8
+#define FORMAT 9
 #define OLD_CARDS 228
 #define OLD_PACKS 4
 #define CARDS_IN(format) ((format) >= 8 ? TCG_CARD_COUNT : OLD_CARDS)
@@ -499,10 +499,12 @@ void Tcg_RecordResult(struct TcgCollection *c, uint32_t key, int won, unsigned d
 #define EXTRA7_SIZE (TCG_SAVED_DECKS * 2)
 /* 8: the milestones' upper 32 bits (11 boosters x 3), the GAME CENTER's later structure decks (gcDecks bits 8-31) */
 #define EXTRA8_SIZE 7
+/* 9: the milestone promo cards claimed */
+#define EXTRA9_SIZE 4
 #define FILE_SIZE(format)                                                                                              \
     (12u + PAYLOAD_SIZE(format) + ((format) >= 3 ? EXTRA_SIZE : 0) + ((format) >= 4 ? EXTRA4_SIZE : 0) +               \
      ((format) >= 5 ? EXTRA5_SIZE(format) : 0) + ((format) >= 6 ? EXTRA6_SIZE(format) : 0) +                           \
-     ((format) >= 7 ? EXTRA7_SIZE : 0) + ((format) >= 8 ? EXTRA8_SIZE : 0))
+     ((format) >= 7 ? EXTRA7_SIZE : 0) + ((format) >= 8 ? EXTRA8_SIZE : 0) + ((format) >= 9 ? EXTRA9_SIZE : 0))
 static uint32_t Crc(const unsigned char *bytes, size_t size)
 {
     uint32_t crc = ~0u;
@@ -633,6 +635,8 @@ int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
             next.milestonesHi = Get(&p, 4);
             next.gcDecks |= Get(&p, 3) << 8;
         }
+        if (format >= 9)
+            next.rewards = Get(&p, 4);
     }
     else if (next.optedIn)
         next.flags = TCG_FLAG_TUTORIAL | TCG_FLAG_CLUB_MET; /* they started before the CARD CLUB */
@@ -703,6 +707,7 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
         Put(&p, c->ace[i], 2);
     Put(&p, c->milestonesHi, 4);
     Put(&p, c->gcDecks >> 8, 3);
+    Put(&p, c->rewards, 4);
     p = data;
     memcpy(p, "MTCG", 4);
     p += 4;

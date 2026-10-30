@@ -207,6 +207,9 @@ for the deck under the cursor (TcgUi_Match): COOP_NOTES "Card AI levels, power r
 No "wait, what?" moves (1.57.0): the Yu-Gi-Oh! AI reads a card's purpose from its words (ygo_ai.c Says / Boost /
 HarmfulEquip / Pointless / ForBattle) and never chains to its own link; the POKéMON AI attaches Energy only where it
 brings an attack closer (tcg_ai.c EnergyHelps); scenarios "ai ..." in tools/ygo/test_edo_cards.c, tools/tcg/test_ai.c.
+Every card's sources for players: docs/CARD_GUIDE.html (tools/card_guide/build.sh, from the game's own tables; rerun
+after card, deck, shop or reward changes). The POKéMON promos no trainer gives are milestone prizes (tcg_ui.c
+sMilestonePromos, TcgCollection.rewards).
 HOW TO PLAY (src/tcg/tcg_guide.c: SELECT on a game's first case screen, animated pages per game; COOP_NOTES "The three
 card games together").
 SEARCH & SORT (src/tcg/tcg_search.c: L2 / F in the BINDER and deck builders of all three, PLATFORM_KEY_SEARCH; each game's

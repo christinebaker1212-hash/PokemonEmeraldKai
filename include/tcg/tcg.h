@@ -131,6 +131,8 @@ struct TcgCollection
     uint16_t ace[TCG_SAVED_DECKS];
     /* Format 8: the milestones' bits from 32 up (set * 3 + n - 32: the last GB2 boosters) */
     uint32_t milestonesHi;
+    /* Format 9: the promo cards claimed for card milestones (duels won, packs opened...: tcg_ui.c sMilestonePromos) */
+    uint32_t rewards;
 };
 void Tcg_CollectionInit(struct TcgCollection *c, uint32_t seed);
 int Tcg_ChooseStarter(struct TcgCollection *c, unsigned starter);
