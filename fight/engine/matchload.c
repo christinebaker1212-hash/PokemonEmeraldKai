@@ -17,6 +17,8 @@
 #include <pthread.h>
 
 #include "mugen.h"
+#include "mf_compat.h"   /* Moemon Fight: MfMix_SetVoiceLevel */
+#include <math.h>
 
 /* Timer_GetTicks as the original inlines it (Timer_Count included). */
 static int Ml_TimerTicks(void)
@@ -82,6 +84,57 @@ static PersistVars *Ml_PersistEntry(GameVars *g, int team, int member, int slot)
 
 /* ------------------------------------------------------------------ match assets */
 
+static int Ml_CompareLevel(const void *a, const void *b)
+{
+    double x = *(const double *)a, y = *(const double *)b;
+    return x < y ? -1 : x > y;
+}
+
+/*
+ * Moemon Fight: the stage's song stays under the fighters' voices (mf_mixer.c, FIGHT_DECISIONS "Music under the
+ * voices"). A fighter's voice level is the 75th percentile of its sounds of 0.15 s or more (its shouts and lines,
+ * not its hits), the quietest fighter of the match counts, at the volume sounds play at (master and WAV volume).
+ */
+static void Ml_VoiceLevel(void)
+{
+    GameVars *g = g_game;
+    double voice = 0.0;
+    int n;
+
+    for (n = 0; n < 64; n++) {
+        CharData *c = g->player_chars[n];
+        KeyedArray *map;
+        double levels[256];
+        int count = 0, i;
+
+        if (c == NULL || c->snd == NULL || (map = c->snd->map) == NULL || map->slots == NULL) {
+            continue;
+        }
+        /* read the slots directly: KeyedArray_First / Next move the array's cursor, which is fight state */
+        for (i = 0; i < map->capacity && count < 256; i++) {
+            const SndEntry *e = (const SndEntry *)(map->data + (size_t)i * (size_t)map->elem_size);
+            double level;
+            if (!map->slots[i].used || e->type != SND_ENTRY_CHUNK || e->chunk == NULL || e->chunk->abuf == NULL) {
+                continue;
+            }
+            level = MfMix_ClipLevel((const short *)e->chunk->abuf, (int)(e->chunk->alen / 4));
+            if (level > 0.0) {
+                levels[count++] = level;
+            }
+        }
+        if (count > 0) {
+            qsort(levels, (size_t)count, sizeof(double), Ml_CompareLevel);
+            if (voice == 0.0 || levels[(count - 1) * 3 / 4] < voice) {
+                voice = levels[(count - 1) * 3 / 4];
+            }
+        }
+    }
+    voice *= g->master_volume / 100.0 * g->wav_volume / 100.0;
+    MfMix_SetVoiceLevel(voice);
+    Log_Printf("Fighters' voices %.1f dBFS: the stage's song is kept %.0f dB under them\n",
+               voice > 0.0 ? 20.0 * log10(voice) : -99.0, MF_BGM_UNDER_VOICES_DB);
+}
+
 /*
  * 0x00421E80: loads a match: the stage (fatal error when it fails), its
  * camera and BGM, the turns mode faces, the helper slots, then starts it
@@ -111,6 +164,7 @@ void Match_LoadAssets(void)
     memcpy(&g->match_members[0], &g->teams[0].members[g->teams[0].cur_member], sizeof(TeamMember));
     memcpy(&g->match_members[1], &g->teams[1].members[g->teams[1].cur_member], sizeof(TeamMember));
     Match_Start();
+    Ml_VoiceLevel();    /* Moemon Fight */
     g = g_game;
     g->match_load_ticks = Ml_TimerTicks() - g->match_load_ticks;
     Log_Printf("Match assets initialized OK");

@@ -4,7 +4,7 @@ StartScene = 0
 
 [Scene 0]
 LayerAll.Pos = 160, 120
-BGM = chars/ssf2xchunli/char/ending.mp3
+BGM = chars/ssf2x_chunli/char/ending.ogg
 BGM.Loop = 1
 End.Time = 80
 

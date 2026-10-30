@@ -49,7 +49,7 @@ YScale = .1
 Reflect = 0
 
 [Music]
-BGMusic = sound/ssf2x-chunli.mp3;曲名「To Your Heart with Passion」
+BGMusic = sound/ssf2x-chunli.ogg;曲名「To Your Heart with Passion」
 BGVolume = 0
 
 [BGdef]

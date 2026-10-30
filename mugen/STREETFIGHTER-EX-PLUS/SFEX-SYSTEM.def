@@ -57,7 +57,7 @@ title.bgm.loop = 1        ;Set to 0 to prevent looping
 title.bgm.loopstart = 
 title.bgm.loopend = 
   ;Music to play at char select screen.
-select.bgm = STREETFIGHTER-EX-PLUS/SND/SFEX-SELECT.mp3
+select.bgm = STREETFIGHTER-EX-PLUS/SND/SFEX-SELECT.ogg
 select.bgm.volume = 
 select.bgm.loop = 1
 select.bgm.loopstart =
@@ -69,7 +69,7 @@ vs.bgm.loop = 0
 vs.bgm.loopstart =
 vs.bgm.loopend = 
   ;Music to play at victory screen.
-victory.bgm = STREETFIGHTER-EX-PLUS/SND/SFEX-WINNER.mp3
+victory.bgm = STREETFIGHTER-EX-PLUS/SND/SFEX-WINNER.ogg
 victory.bgm.volume =
 victory.bgm.loop = 0
 victory.bgm.loopstart =

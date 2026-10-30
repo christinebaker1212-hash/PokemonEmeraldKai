@@ -49,7 +49,7 @@ YScale = .1
 Reflect = 0
 
 [Music]
-BGMusic = sound/ssf2x-dhalsim.mp3;曲名「Meditations of Yogi」
+BGMusic = sound/ssf2x-dhalsim.ogg;曲名「Meditations of Yogi」
 BGVolume = 0
 
 [BGdef]

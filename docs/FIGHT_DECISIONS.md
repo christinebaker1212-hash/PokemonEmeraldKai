@@ -120,6 +120,33 @@ Where the plan below changed on the way:
   `fight_buttons`, `fight_packs`, `fight_packs_core`, `fight_resync` (tools/test/README.md), and the
   engine's own `tools/fight/build_linux.sh` self test (`WIN=1`: under Wine).
 
+## GBA sound, and music under the voices (1.50.0)
+- Answers: the files shipped in mugen/ are changed (a lower sample rate), and a stage's song is kept under
+  the voices (gap and method left to judgement).
+- `tools/fight/gba_audio.py` rewrote the shipped sound: every clip in the .snd banks is 8-bit mono PCM at
+  13379 Hz (a clip recorded lower keeps its rate), every song Ogg Vorbis at 13379 Hz stereo (quality 3),
+  with the .defs pointed at the new names and sample loop points scaled. 76 MB -> 51 MB. It changes only
+  what isn't GBA sound yet, so a second run does nothing (`--check` exits 1 when something is left). The
+  mixer still plays everything at 8 bits and 13379 Hz, so packs added later sound the same before and
+  after it runs. The two endings' BGM lines named folders that don't exist (`chars/ssf2xchunli/...`) and
+  now name the real ones.
+- Music under the voices (mf_mixer.c MfMix_MusicGain): the song's level is its RMS over 0.4 s blocks with
+  EBU R 128's two gates (-50 dBFS, then 10 dB under the gated mean; no weighting filter), from its first
+  two minutes, decoded once when the song opens (mf_bgm.c MfBgm_Measure, remembered by path and size).
+  A fighter's voice level is the 75th percentile of its sounds of 0.15 s or more (shorter ones are hits
+  and steps), each measured over the 50 ms windows where it sounds (above -45 dBFS); the quieter of the
+  match's fighters counts, at the volume sounds play at (master x WAV volume). The music is scaled so
+  that at its volume (BGM volume, the stage's bgmvolume) it stays MF_BGM_UNDER_VOICES_DB = 3 dB under
+  that; it is never raised. Outside a match (menus, select, VS) nothing is measured against and the
+  music plays as it is.
+- Why measured at run time, not written into the files: players drop their own songs into mugen/sound/
+  (17 stage songs aren't shipped), and the cap has to hold for those too. The measurement runs on the
+  music thread and isn't fight state; a mugen.log line gives both levels (`BGM level`, `Fighters'
+  voices`).
+- Shipped: the voices measure -10 to -5 dBFS (75th percentile), the two stage songs -7.4 and -8.9 dBFS:
+  both were at or over the voices before.
+- Test: `fight_music` also checks the two levels in mugen.log.
+
 ## Plan (as first agreed)
 
 ### The engine in the game

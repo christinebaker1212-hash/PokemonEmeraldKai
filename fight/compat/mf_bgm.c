@@ -7,6 +7,7 @@
  */
 #define MF_SYSTEM_HEAP  /* Moemon Fight: the music thread's memory, outside the fight's heap (mf_mem.h) */
 #include "mugen.h"
+#include "mf_compat.h"
 
 #define DR_MP3_IMPLEMENTATION
 #define DR_MP3_NO_STDIO
@@ -185,6 +186,68 @@ static int MfBgm_Decode(MfBgm *b, short *out, int frames)
     return 0;
 }
 
+/*
+ * How loud the song is (MfMix_GatedLevel of its first two minutes), for keeping a stage's song under the voices:
+ * decoded once and remembered by path and size, then the song is back at its start. mugen.log has it.
+ */
+#define MFBGM_MEASURE_SECONDS 120
+static struct {
+    char path[0x104];
+    size_t size;
+    double level;
+} sMeasured[16];
+static int sMeasuredNext;
+
+static double MfBgm_Measure(MfBgm *b, const char *path)
+{
+    short buf[4096 * 2];
+    double *ms;
+    double level, acc = 0.0;
+    int block = b->rate * 2 / 5, in_block = 0, blocks = 0, max_blocks, left, i;
+
+    for (i = 0; i < 16; i++) {
+        if (sMeasured[i].size == b->size && strcmp(sMeasured[i].path, path) == 0) {
+            return sMeasured[i].level;
+        }
+    }
+    if (block <= 0) {
+        return 0.0;
+    }
+    max_blocks = MFBGM_MEASURE_SECONDS * 5 / 2 + 1;
+    ms = malloc(sizeof(double) * (size_t)max_blocks);
+    if (ms == NULL) {
+        return 0.0;
+    }
+    left = b->rate * MFBGM_MEASURE_SECONDS;
+    while (left > 0 && blocks < max_blocks) {
+        int n = MfBgm_Decode(b, buf, left < 4096 ? left : 4096);
+        if (n <= 0) {
+            break;
+        }
+        left -= n;
+        for (i = 0; i < n; i++) {
+            double v = b->channels == 2 ? (buf[i * 2] + buf[i * 2 + 1]) * (0.5 / 32768.0) : buf[i] / 32768.0;
+            acc += v * v;
+            if (++in_block == block) {
+                ms[blocks++] = acc / block;
+                acc = 0.0;
+                in_block = 0;
+                if (blocks == max_blocks) {
+                    break;
+                }
+            }
+        }
+    }
+    level = MfMix_GatedLevel(ms, blocks);
+    free(ms);
+    MfBgm_Seek(b, 0);
+    snprintf(sMeasured[sMeasuredNext].path, sizeof(sMeasured[0].path), "%s", path);
+    sMeasured[sMeasuredNext].size = b->size;
+    sMeasured[sMeasuredNext].level = level;
+    sMeasuredNext = (sMeasuredNext + 1) % 16;
+    return level;
+}
+
 static int __cdecl MfBgm_Open(void *instance, const BgmPluginIo *io, BgmInfo *info, BgmOpenResult *out)
 {
     MfBgm *b = instance;
@@ -236,6 +299,12 @@ static int __cdecl MfBgm_Open(void *instance, const BgmPluginIo *io, BgmInfo *in
     }
     Log_Printf("BGM %s: %d Hz, %d channel(s), loop %d (%d-%d)\n", info->path, b->rate, b->channels, info->loop,
                info->loop_start, info->loop_end);
+    {
+        /* Moemon Fight: the mixer keeps a stage's song under the fighters' voices */
+        double level = MfBgm_Measure(b, info->path);
+        MfMix_SetMusicLevel(level);
+        Log_Printf("BGM level %.1f dBFS\n", level > 0.0 ? 20.0 * log10(level) : -99.0);
+    }
     out->mode = BGM_MODE_DECODED;
     out->format.rate = (double)b->rate;
     out->format.format = AUDIO_FMT_S16;

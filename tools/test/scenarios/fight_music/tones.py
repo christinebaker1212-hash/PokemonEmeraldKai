@@ -2,7 +2,8 @@
 # Moemon Fight's music test (fight_music). "tones.py pack DIR": a copy of mugen/ (links) whose cabinet only has the
 # SSF2X Dhalsim stage, playing a test song of tones instead of its own: second k of the song is a tone of 300 + 40k
 # Hz. "tones.py RESULTS": reads the game's sound (audio.raw, stereo float32 at 42048 Hz) and checks the song plays at
-# its own speed: during the fight each tone lasts a second (it once played 8 times too fast, at the right pitch).
+# its own speed: during the fight each tone lasts a second (it once played 8 times too fast, at the right pitch), and
+# that the song and the fighters' voices were measured (the song is kept under the voices).
 import math, os, struct, sys, wave
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", ".."))
@@ -71,6 +72,18 @@ def check(results):
     print('quarter seconds of the song at its own speed:', best)
     if best < 40:
         print('the song does not play at its own speed:', seq[:200])
+        sys.exit(1)
+    # the stage's song is measured and kept under the fighters' voices (mf_mixer.c)
+    import re
+    log = open(os.path.join(os.path.dirname(results.rstrip('/')), 'fight_music_pack', 'mugen.log'), 'rb').read().decode('latin-1')
+    song = re.search(r'BGM sound/tones\.wav[^\n]*\nBGM level (-?[\d.]+) dBFS', log)
+    voice = re.search(r"Fighters' voices (-?[\d.]+) dBFS", log)
+    if not song or not voice:
+        print('no song or voice level in mugen.log')
+        sys.exit(1)
+    print('song %s dBFS, voices %s dBFS' % (song.group(1), voice.group(1)))
+    if not (-14 < float(song.group(1)) < -6 and -30 < float(voice.group(1)) < -3):
+        print('levels out of range')
         sys.exit(1)
     print('ok')
 

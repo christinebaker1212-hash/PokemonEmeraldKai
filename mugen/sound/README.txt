@@ -1,5 +1,7 @@
 Stage music. Each stage plays the file its .def names on its bgmusic line; a stage
 whose file is missing plays no music. MP3, OGG, WAV or FLAC (rename the line to match).
+The game keeps every stage song a little quieter than the fighters' voices, however loud
+the file is.
 
 Missing (drop the songs in here with exactly these names):
   SF2 Airforce - Guile Theme.mp3            stages/sf2-airforce.def
@@ -21,5 +23,5 @@ Missing (drop the songs in here with exactly these names):
   SF2 USSR - Zangief Theme.mp3              stages/sf2-ussr.def
 
 Here:
-  ssf2x-chunli.mp3    "To Your Heart with Passion"   stages/ssf2x-chunli.def
-  ssf2x-dhalsim.mp3   "Meditations of Yogi"          stages/ssf2x-dhalsim.def
+  ssf2x-chunli.ogg    "To Your Heart with Passion"   stages/ssf2x-chunli.def
+  ssf2x-dhalsim.ogg   "Meditations of Yogi"          stages/ssf2x-dhalsim.def

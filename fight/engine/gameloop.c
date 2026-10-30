@@ -14,6 +14,7 @@
 #include <pthread.h>
 
 #include "mugen.h"
+#include "mf_compat.h"   /* Moemon Fight */
 
 #define SCREEN_LOCK(m)      pthread_mutex_lock((pthread_mutex_t *)(m))
 #define SCREEN_UNLOCK(m)    pthread_mutex_unlock((pthread_mutex_t *)(m))
@@ -62,6 +63,7 @@ int Game_LoopInit(ScreenLoop *screen)
         Match_LoadAssets();
         g = g_game;
     } else {
+        MfMix_SetVoiceLevel(0.0);   /* Moemon Fight: no fighters, the music plays as it is */
         Log_Printf("Unloading match assets\n");
         Match_FreeAssets();
         Players_ReleaseSlots();

@@ -2012,6 +2012,10 @@ Decisions and the as-built record: docs/FIGHT_DECISIONS.md. Where things are:
   region) stays, so code and C-heap pointers survive; the globals only cross between the same build.
 - Tests: tools/test/README.md (`fight_*`), and tools/fight/build_linux.sh's self test (`step` waits for a
   loading engine; `WIN=1` builds it for Wine, `SAN=1` with AddressSanitizer).
+- Sound (1.50.0): the shipped sounds are GBA sound (8-bit mono 13379 Hz clips, 13379 Hz Ogg songs) by
+  tools/fight/gba_audio.py; a stage's song is kept 3 dB under the fighters' voices by the mixer
+  (MfMix_MusicGain, levels from mf_bgm.c MfBgm_Measure and matchload.c Ml_VoiceLevel): FIGHT_DECISIONS
+  "GBA sound, and music under the voices".
 
 ## Yu-Gi-Oh! card duels (src/ygo/, include/ygo/)
 

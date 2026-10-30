@@ -8,6 +8,7 @@
  * game's m4a mixer plays its own samples, and adds it to the game's sound. mf_rename.h gives the
  * Mix_ / SDL_ names here an MF12_ prefix.
  */
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
@@ -39,6 +40,8 @@ static void (*sMusicHook)(void *udata, Uint8 *stream, int len);
 static void *sMusicArg;
 static void (*sMusicFinished)(void);
 static int sMusicVolume = MIX_MAX_VOLUME;
+/* Stage music under the voices: the fighters' voice level and the song's, both RMS 0..1 (0: not known) */
+static volatile double sVoiceLevel, sMusicLevel;
 /* The music hook hands over one whole block of the engine's music ring per call, the chunk size the mixer was
  * opened with (as SDL_mixer asks it): taken a block at a time, played out MIX_BLOCK frames at a time */
 static Sint16 *sMusicBuf;
@@ -105,8 +108,12 @@ static void Mix_Block(void)
             have += n;
             sMusicPos += n;
         }
-        for (i = 0; i < have * 2; i++) {
-            acc[i] += Gba8(music[i]) * sMusicVolume / MIX_MAX_VOLUME;
+        {
+            /* the music's volume, times the gain that keeps a stage's song under the voices (out of 256) */
+            int vol = (int)(sMusicVolume * 2 * MfMix_MusicGain() + 0.5);
+            for (i = 0; i < have * 2; i++) {
+                acc[i] += Gba8(music[i]) * vol / (MIX_MAX_VOLUME * 2);
+            }
         }
     }
     for (c = 0; c < sChannelCount; c++) {
@@ -169,6 +176,85 @@ void MfMix_Render(short *stereo, int frames, int rate)
         }
     }
     Mix_Unlock();
+}
+
+/*
+ * Music under the voices. A sound's level is its RMS over the 50 ms windows where it sounds (above -45 dBFS),
+ * so pauses don't count; sounds shorter than 0.15 s (hits, steps) give 0 and leave voices to the longer ones.
+ */
+double MfMix_ClipLevel(const short *stereo, int frames)
+{
+    const int win = MF_MIX_RATE / 20;
+    double sum = 0.0;
+    int active = 0, i, j;
+
+    if (stereo == NULL || frames < MF_MIX_RATE * 15 / 100) {
+        return 0.0;
+    }
+    for (i = 0; i + win <= frames; i += win) {
+        double ms = 0.0;
+        for (j = i; j < i + win; j++) {
+            double v = (stereo[j * 2] + stereo[j * 2 + 1]) * (0.5 / 32768.0);
+            ms += v * v;
+        }
+        ms /= win;
+        if (ms > 3.1623e-5) {       /* -45 dBFS */
+            sum += ms;
+            active++;
+        }
+    }
+    return active > 0 ? sqrt(sum / active) : 0.0;
+}
+
+/* A song's level from the mean squares of its 0.4 s blocks: blocks above -50 dBFS, then those within 10 dB of
+ * their power mean (the gates of EBU R 128, without its weighting filter). ms is reordered. */
+double MfMix_GatedLevel(double *ms, int count)
+{
+    double sum = 0.0, mean;
+    int n = 0, i;
+
+    for (i = 0; i < count; i++) {
+        if (ms[i] > 1e-5) {
+            ms[n++] = ms[i];
+            sum += ms[i];
+        }
+    }
+    if (n == 0) {
+        return 0.0;
+    }
+    mean = sum / n;
+    sum = 0.0;
+    count = 0;
+    for (i = 0; i < n; i++) {
+        if (ms[i] > mean * 0.1) {
+            sum += ms[i];
+            count++;
+        }
+    }
+    return count > 0 ? sqrt(sum / count) : 0.0;
+}
+
+void MfMix_SetVoiceLevel(double level)
+{
+    sVoiceLevel = level > 0.0 ? level : 0.0;
+}
+
+void MfMix_SetMusicLevel(double level)
+{
+    sMusicLevel = level > 0.0 ? level : 0.0;
+}
+
+/* At most 1: the song at its volume stays MF_BGM_UNDER_VOICES_DB under the voices. */
+double MfMix_MusicGain(void)
+{
+    double voice = sVoiceLevel, music = sMusicLevel * sMusicVolume / MIX_MAX_VOLUME;
+    double cap;
+
+    if (voice <= 0.0 || music <= 0.0) {
+        return 1.0;
+    }
+    cap = voice * pow(10.0, -MF_BGM_UNDER_VOICES_DB / 20.0) / music;
+    return cap < 1.0 ? cap : 1.0;
 }
 
 void MfMix_Reset(void)
