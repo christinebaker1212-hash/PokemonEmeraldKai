@@ -131,6 +131,216 @@
       "map": "MAP_BATTLE_FRONTIER_OUTSIDE_EAST",
       "x": 3,
       "y": 52
+    },
+    {
+      "id": "HEAL_LOCATION_JOHTO_NEW_BARK_TOWN",
+      "map": "MAP_JOHTO_NEW_BARK_TOWN",
+      "x": 20,
+      "y": 12
+    },
+    {
+      "id": "HEAL_LOCATION_JOHTO_CHERRYGROVE_CITY",
+      "map": "MAP_JOHTO_CHERRYGROVE_CITY",
+      "x": 47,
+      "y": 8
+    },
+    {
+      "id": "HEAL_LOCATION_JOHTO_VIOLET_CITY",
+      "map": "MAP_JOHTO_VIOLET_CITY",
+      "x": 39,
+      "y": 46
+    },
+    {
+      "id": "HEAL_LOCATION_JOHTO_AZALEA_TOWN",
+      "map": "MAP_JOHTO_AZALEA_TOWN",
+      "x": 31,
+      "y": 16
+    },
+    {
+      "id": "HEAL_LOCATION_JOHTO_GOLDENROD_CITY",
+      "map": "MAP_JOHTO_GOLDENROD_CITY",
+      "x": 28,
+      "y": 37
+    },
+    {
+      "id": "HEAL_LOCATION_JOHTO_ECRUTEAK_CITY",
+      "map": "MAP_JOHTO_ECRUTEAK_CITY",
+      "x": 39,
+      "y": 48
+    },
+    {
+      "id": "HEAL_LOCATION_JOHTO_OLIVINE_CITY",
+      "map": "MAP_JOHTO_OLIVINE_CITY",
+      "x": 15,
+      "y": 44
+    },
+    {
+      "id": "HEAL_LOCATION_JOHTO_CIANWOOD_CITY",
+      "map": "MAP_JOHTO_CIANWOOD_CITY",
+      "x": 31,
+      "y": 46
+    },
+    {
+      "id": "HEAL_LOCATION_JOHTO_SAFARI_ZONE_GATE",
+      "map": "MAP_JOHTO_SAFARI_ZONE_GATE",
+      "x": 11,
+      "y": 16
+    },
+    {
+      "id": "HEAL_LOCATION_JOHTO_MAHOGANY_TOWN",
+      "map": "MAP_JOHTO_MAHOGANY_TOWN",
+      "x": 21,
+      "y": 20
+    },
+    {
+      "id": "HEAL_LOCATION_JOHTO_LAKE_OF_RAGE",
+      "map": "MAP_JOHTO_LAKE_OF_RAGE",
+      "x": 31,
+      "y": 43
+    },
+    {
+      "id": "HEAL_LOCATION_JOHTO_BLACKTHORN_CITY",
+      "map": "MAP_JOHTO_BLACKTHORN_CITY",
+      "x": 27,
+      "y": 49
+    },
+    {
+      "id": "HEAL_LOCATION_JOHTO_INDIGO_PLATEAU",
+      "map": "MAP_JOHTO_INDIGO_PLATEAU",
+      "x": 11,
+      "y": 7
+    },
+    {
+      "id": "HEAL_LOCATION_JOHTO_SILVER_CAVE_OUTSIDE",
+      "map": "MAP_JOHTO_SILVER_CAVE_OUTSIDE",
+      "x": 25,
+      "y": 15
+    },
+    {
+      "id": "HEAL_LOCATION_JOHTO_ROUTE32",
+      "map": "MAP_JOHTO_ROUTE32",
+      "x": 25,
+      "y": 85
+    },
+    {
+      "id": "HEAL_LOCATION_KANTO_CELADON_CITY",
+      "map": "MAP_KANTO_CELADON_CITY",
+      "x": 48,
+      "y": 12
+    },
+    {
+      "id": "HEAL_LOCATION_KANTO_CERULEAN_CITY",
+      "map": "MAP_KANTO_CERULEAN_CITY",
+      "x": 22,
+      "y": 20
+    },
+    {
+      "id": "HEAL_LOCATION_KANTO_CINNABAR_ISLAND",
+      "map": "MAP_KANTO_CINNABAR_ISLAND",
+      "x": 14,
+      "y": 12
+    },
+    {
+      "id": "HEAL_LOCATION_KANTO_FIVE_ISLAND",
+      "map": "MAP_KANTO_FIVE_ISLAND",
+      "x": 18,
+      "y": 7
+    },
+    {
+      "id": "HEAL_LOCATION_KANTO_FOUR_ISLAND",
+      "map": "MAP_KANTO_FOUR_ISLAND",
+      "x": 18,
+      "y": 21
+    },
+    {
+      "id": "HEAL_LOCATION_KANTO_FUCHSIA_CITY",
+      "map": "MAP_KANTO_FUCHSIA_CITY",
+      "x": 25,
+      "y": 32
+    },
+    {
+      "id": "HEAL_LOCATION_KANTO_INDIGO_PLATEAU_EXTERIOR",
+      "map": "MAP_KANTO_INDIGO_PLATEAU_EXTERIOR",
+      "x": 11,
+      "y": 7
+    },
+    {
+      "id": "HEAL_LOCATION_KANTO_LAVENDER_TOWN",
+      "map": "MAP_KANTO_LAVENDER_TOWN",
+      "x": 6,
+      "y": 6
+    },
+    {
+      "id": "HEAL_LOCATION_KANTO_ONE_ISLAND",
+      "map": "MAP_KANTO_ONE_ISLAND",
+      "x": 14,
+      "y": 6
+    },
+    {
+      "id": "HEAL_LOCATION_KANTO_PALLET_TOWN",
+      "map": "MAP_KANTO_PALLET_TOWN",
+      "x": 6,
+      "y": 8
+    },
+    {
+      "id": "HEAL_LOCATION_KANTO_PEWTER_CITY",
+      "map": "MAP_KANTO_PEWTER_CITY",
+      "x": 17,
+      "y": 26
+    },
+    {
+      "id": "HEAL_LOCATION_KANTO_ROUTE10",
+      "map": "MAP_KANTO_ROUTE10",
+      "x": 13,
+      "y": 21
+    },
+    {
+      "id": "HEAL_LOCATION_KANTO_ROUTE4",
+      "map": "MAP_KANTO_ROUTE4",
+      "x": 12,
+      "y": 6
+    },
+    {
+      "id": "HEAL_LOCATION_KANTO_SAFFRON_CITY",
+      "map": "MAP_KANTO_SAFFRON_CITY",
+      "x": 24,
+      "y": 39
+    },
+    {
+      "id": "HEAL_LOCATION_KANTO_SEVEN_ISLAND",
+      "map": "MAP_KANTO_SEVEN_ISLAND",
+      "x": 12,
+      "y": 4
+    },
+    {
+      "id": "HEAL_LOCATION_KANTO_SIX_ISLAND",
+      "map": "MAP_KANTO_SIX_ISLAND",
+      "x": 11,
+      "y": 12
+    },
+    {
+      "id": "HEAL_LOCATION_KANTO_THREE_ISLAND",
+      "map": "MAP_KANTO_THREE_ISLAND",
+      "x": 14,
+      "y": 28
+    },
+    {
+      "id": "HEAL_LOCATION_KANTO_TWO_ISLAND",
+      "map": "MAP_KANTO_TWO_ISLAND",
+      "x": 21,
+      "y": 8
+    },
+    {
+      "id": "HEAL_LOCATION_KANTO_VERMILION_CITY",
+      "map": "MAP_KANTO_VERMILION_CITY",
+      "x": 15,
+      "y": 7
+    },
+    {
+      "id": "HEAL_LOCATION_KANTO_VIRIDIAN_CITY",
+      "map": "MAP_KANTO_VIRIDIAN_CITY",
+      "x": 26,
+      "y": 27
     }
   ]
 }
