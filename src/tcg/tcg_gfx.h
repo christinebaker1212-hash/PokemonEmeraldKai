@@ -76,6 +76,9 @@ int G_Measure(const char *s, int font);
 int G_LineHeight(int font);
 /* Word-wrapped text; returns the y after the last line. shadow may be G_NO_SHADOW. */
 int G_Text(int x, int y, unsigned color, unsigned shadow, const char *text, int width, int font);
+int G_TextHeight(const char *text, int width, int font);   /* how tall G_Text would be */
+/* The end of a duel in every card game: YOU WIN! / YOU LOSE... vs. opponent, then how it ended and what it brought */
+void G_ResultScreen(int win, int t, unsigned frame, const char *opponent, const char *reason, const char *result);
 void G_TextAlign(int x, int y, int align, unsigned color, unsigned shadow, const char *text, int font);
 void G_Window(int x, int y, int w, int h);
 void G_Cursor(int x, int y);

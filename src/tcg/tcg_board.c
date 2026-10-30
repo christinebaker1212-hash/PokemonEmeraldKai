@@ -4263,36 +4263,7 @@ static void DrawConfirm(void)
 }
 static void DrawResult(void)
 {
-    int win = B.view.winner == 0, t = B.resultTime;
-    float open = Ease(t / 20.0f);
-    const char *title = win ? "YOU WIN!" : "YOU LOSE...";
-    G_FillA(0, 0, 240, 160, 0x000000, (unsigned)(110 * open));
-    if (win && t < 80 && t % 3 == 0)
-        Sparks(20 + rand() % 200, 40 + rand() % 40, rand() & 1 ? 0xf8e060 : 0x60c8f8, 3, 1.5f);
-    {
-        int band = (int)(34 * open);
-        G_FillA(0, 48 - band / 2, 240, band, win ? 0x283868 : 0x402828, 230);
-        G_FillA(0, 48 - band / 2, 240, 1, win ? 0xf8d850 : 0xa06060, 255);
-        G_FillA(0, 48 + band / 2 - 1, 240, 1, win ? 0xf8d850 : 0xa06060, 255);
-        if (open > 0.9f)
-        {
-            int w = G_Measure(title, TF_NORMAL);
-            char vs[64];
-            (void)w;
-            G_TextAlign(120, 36, TA_CENTER, win ? 0xf8e060 : 0xe8c8c8, 0x302810, title, TF_NORMAL);
-            snprintf(vs, sizeof(vs), "vs. %s", B.opponent);
-            G_TextAlign(120, 51, TA_CENTER, 0xc8d0e0, G_NO_SHADOW, vs, TF_NARROW);
-        }
-    }
-    if (t > 20)
-    {
-        G_Window(16, 74, 208, 56);
-        G_Text(24, 79, G_INK, G_INK_SHADOW, B.confirmText, 192, TF_SMALL);
-        if (B.result[0])
-            G_Text(24, 93, 0x3858a0, G_INK_SHADOW, B.result, 192, TF_SMALL);
-        if (t > 40 && (B.frame / 16) % 2)
-            G_ButtonIcon(206, 122, 0);
-    }
+    G_ResultScreen(B.view.winner == 0, B.resultTime, B.frame, B.opponent, B.confirmText, B.result);
 }
 void TcgBoard_Render(void)
 {

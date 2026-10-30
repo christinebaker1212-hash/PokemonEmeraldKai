@@ -135,7 +135,9 @@ enum
     FX_SHUFFLE,
     FX_IMPACT,   /* an attack landing: a burst and the table shaking (value: frames before it lands) */
     FX_SHARDS,   /* a card destroyed: it breaks apart */
-    FX_RISE      /* a monster Summoned: a ring of light and a beam */
+    FX_RISE,     /* a monster Summoned: a ring of light and a beam */
+    FX_SWEEP     /* a turn or a phase beginning: a band across the middle, its name sweeping through (as the
+                    POKeMON card table's YOUR TURN) */
 };
 struct Fx
 {
@@ -255,6 +257,37 @@ static const char *NameOf(unsigned o)
     return SeesFace(o) ? c->name : "a card";
 }
 static const char *Who(unsigned player) { return player == B.me ? "You" : B.opponent; }
+static struct Fx *AddFx(unsigned kind, int x, int y, int life);
+/* A turn or a phase beginning: the POKeMON card table's YOUR TURN band, the same look, length and sounds */
+static int Sweep(const char *text, unsigned player)
+{
+    struct Fx *f = AddFx(FX_SWEEP, 0, GAP_Y + 11, Fast() ? 34 : 52);
+    int mine = player == B.me;
+    if (f)
+    {
+        snprintf(f->text, sizeof(f->text), "%s", text);
+        f->color = mine ? 0x3878f0 : 0xe85050;
+    }
+    PlaySE(mine ? SE_BALL_TRAY_ENTER : SE_BALL_TRAY_EXIT);
+    return Fast() ? 26 : 40;
+}
+static float SweepEase(float t)
+{
+    return t <= 0 ? 0 : t >= 1 ? 1 : 1 - (1 - t) * (1 - t) * (1 - t);
+}
+/* The end of the duel: the same screen as the other card games (tcg_gfx.c G_ResultScreen) */
+static void OverScreen(void)
+{
+    static const char *const won[] = {"Your opponent's Life Points hit 0!", "Your opponent's Deck ran out.",
+                                      "Exodia the Forbidden One is complete!", "Your opponent conceded.",
+                                      "A card's effect won you the duel!"};
+    static const char *const lost[] = {"Your Life Points hit 0.", "Your Deck ran out.",
+                                       "Your opponent assembled Exodia the Forbidden One.", "You conceded the duel.",
+                                       "A card's effect ended the duel."};
+    unsigned r = B.d->s.winReason, win = B.d->s.winner == B.me;
+    const char *reason = B.d->s.winner > 1 ? "The duel is a draw." : r < 5 ? (win ? won[r] : lost[r]) : "";
+    G_ResultScreen(win, (int)(B.frame - B.over), B.frame, B.opponent, reason, B.result);
+}
 /* One line of text, cut to fit */
 static void Line(int x, int y, unsigned color, const char *text, int width)
 {
@@ -529,21 +562,33 @@ static int Present(const struct YgoEvent *e)
     switch (e->type)
     {
     case YGO_EV_TURN:
+    {
+        char text[32];
         B.turnPlayer = e->player;
         B.turn = (uint16_t)e->value;
-        Banner(e->player == B.me ? "YOUR TURN" : "OPPONENT'S TURN", e->player == B.me ? 0x3070d8 : 0xc83838, Frames(44));
-        Log("Turn %d: %s.", e->value, e->player == B.me ? "your turn" : "the opponent's turn");
-        PlaySE(SE_PC_LOGIN);
-        return Frames(46);
-    case YGO_EV_PHASE:
-        B.phase = (uint8_t)e->value;
-        if (e->value == YGO_PHASE_BATTLE)
+        if (e->player == B.me)
+            snprintf(text, sizeof(text), "YOUR TURN");
+        else if (B.online)
         {
-            Banner("BATTLE PHASE", 0xd86020, Frames(30));
-            PlaySE(SE_M_DETECT);
-            return Frames(30);
+            unsigned k;
+            snprintf(text, sizeof(text), "%s'S TURN", B.opponent);
+            for (k = 0; text[k]; k++)
+                if (text[k] >= 'a' && text[k] <= 'z')
+                    text[k] -= 32;
         }
-        return e->value == YGO_PHASE_MAIN1 || e->value == YGO_PHASE_MAIN2 ? Frames(6) : 0;
+        else
+            snprintf(text, sizeof(text), "OPPONENT'S TURN");
+        Log("Turn %d: %s.", e->value, e->player == B.me ? "your turn" : "the opponent's turn");
+        return Sweep(text, e->player);
+    }
+    case YGO_EV_PHASE:
+    {
+        /* every phase is shown passing (a chance to chain in the Standby Phase is no longer gone before it's seen) */
+        static const char *const names[] = {"DRAW PHASE", "STANDBY PHASE", "MAIN PHASE 1", "BATTLE PHASE", "MAIN PHASE 2",
+                                            "END PHASE"};
+        B.phase = (uint8_t)e->value;
+        return e->value < 6 ? Sweep(names[e->value], B.turnPlayer) : 0;
+    }
     case YGO_EV_DRAW:
         if (o >= B.objCount)
             return 0;
@@ -636,34 +681,45 @@ static int Present(const struct YgoEvent *e)
     case YGO_EV_ATTACK:
         if (o < B.objCount && ObjCenter(o, &x, &y))
         {
-            /* the attacker draws back, dashes at its target and comes home; the blow lands as it gets there */
+            /* the attacker draws back, dashes at its target and comes home; the blow lands as it gets there (the hit
+               sound with it: Advance) and the damage is counted right after */
             struct Fx *f = AddFx(FX_ATTACK, x, y, Frames(40));
             int tx, ty;
             if (f)
             {
-                struct Rect lp = LpRect(SideOf(e->player ^ 1));
                 struct Fx *hit;
+                int hx, hy;
                 f->obj = (uint8_t)o;
                 f->side = (uint8_t)SideOf(e->player);
                 if (t < B.objCount && ObjCenter(t, &tx, &ty))
-                    f->x2 = tx, f->y2 = ty;
+                    f->x2 = tx, f->y2 = ty, hx = tx, hy = ty;
                 else
-                    f->x2 = lp.x + lp.w / 2, f->y2 = lp.y + lp.h / 2;   /* a direct attack: at their Life Points */
-                hit = AddFx(FX_IMPACT, f->x2, f->y2, Frames(40));
+                {
+                    /* a direct attack: at the player, so the far middle of their side of the table; the card slams
+                       into its edge (f->value: it gets all the way there, not most of the way) */
+                    unsigned them = SideOf(e->player ^ 1);
+                    struct Rect back = ZoneRect(them, 1, 2);
+                    float h = B.spr[o].h > 0 ? B.spr[o].h : CH;
+                    hx = back.x + back.w / 2;
+                    hy = them ? back.y : back.y + back.h;
+                    f->x2 = hx;
+                    f->y2 = them ? (int)(hy + h / 2) : (int)(hy - h / 2);
+                    f->value = 1;
+                }
+                hit = AddFx(FX_IMPACT, hx, hy, Frames(40));
                 if (hit)
                     hit->value = Frames(40) * 45 / 100, hit->side = f->side, hit->obj = t < B.objCount ? (uint8_t)t : NONE;
             }
         }
-        PlaySE(SE_M_MEGA_KICK);
+        PlaySE(SE_M_DOUBLE_TEAM);   /* (the dash; the blow's sound is on the slam) */
         MPNet_Log("ygo board: attack by %u on %u", o, t);
         if (t < B.objCount)
             Log("%s attacks %s!", c ? c->name : "A monster", NameOf(t));
         else
             Log("%s attacks directly!", c ? c->name : "A monster");
-        return Frames(40);
+        return Frames(40) * 45 / 100 + 1;   /* (what follows, the damage first, as the blow lands) */
     case YGO_EV_BATTLE:
-        PlaySE(SE_EFFECTIVE);
-        return Frames(16);
+        return Frames(2);
     case YGO_EV_DESTROY:
         if (o >= B.objCount)
             return 0;
@@ -1263,6 +1319,11 @@ void YgoBoard_Sync(const struct YgoDuel *truth)
 }
 int YgoBoard_Idle(void)
 {
+    unsigned i;
+    /* (an attacker still on its way home holds the table: the damage shows as it lands, the rest waits for it) */
+    for (i = 0; i < FX_MAX; i++)
+        if (B.fx[i].life && B.fx[i].kind == FX_ATTACK)
+            return 0;
     return B.active && B.d && B.seq >= B.d->s.eventSeq && B.timer <= 0;
 }
 void YgoBoard_Result(const char *message)
@@ -1300,6 +1361,8 @@ static void Advance(void)
         if (B.fx[i].life)
         {
             B.fx[i].t++;
+            if (B.fx[i].kind == FX_IMPACT && B.fx[i].t == B.fx[i].value)
+                PlaySE(SE_M_MEGA_KICK);   /* the blow, as the card slams home */
             if (B.fx[i].t >= B.fx[i].life)
                 B.fx[i].life = 0;
         }
@@ -1617,7 +1680,6 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             unsigned won = B.d->s.winner == B.me;
             B.mode = M_OVER;
             B.over = B.frame;
-            Banner(won ? "YOU WIN!" : "YOU LOSE...", won ? 0xe0a020 : 0x6070a0, 100000);
             if (won)
                 PlayBGM(MUS_VICTORY_TRAINER);   // as the other card games (its @ygo file in the Yu-Gi-Oh! scene)
             else
@@ -2387,7 +2449,7 @@ static void Attackers(void)
         {
             const struct Fx *f = &B.fx[i];
             const struct CardSprite *sp = &B.spr[f->obj];
-            float t = (float)f->t / f->life, k = AttackReach(t);
+            float t = (float)f->t / f->life, k = AttackReach(t) * (f->value ? 1 / 0.7f : 1);
             float x = sp->x + (f->x2 - f->x) * k, y = sp->y + (f->y2 - f->y) * k;
             if (k <= 0.05f)
                 continue;   /* (at home: drawn with the table) */
@@ -2418,13 +2480,13 @@ static void Cards(void)
             for (i = 0; i < FX_MAX; i++)
                 if (B.fx[i].life && B.fx[i].kind == FX_ATTACK && B.fx[i].obj == o)
                 {
-                    float t = (float)B.fx[i].t / B.fx[i].life, k = AttackReach(t), g;
+                    float t = (float)B.fx[i].t / B.fx[i].life, g, far = B.fx[i].value ? 1 / 0.7f : 1, k = AttackReach(t) * far;
                     float dx = (float)(B.fx[i].x2 - B.fx[i].x), dy = (float)(B.fx[i].y2 - B.fx[i].y);
                     /* the speed trail: fainter copies behind it while it dashes */
                     if (t > 0.2f && t < 0.5f)
                         for (g = 0.12f; g < 0.4f; g += 0.12f)
                         {
-                            float kb = AttackReach(t - g * 0.25f);
+                            float kb = AttackReach(t - g * 0.25f) * far;
                             DrawObj(o, x + dx * kb, y + dy * kb, sp->w, sp->h, sp->angle, (unsigned)(110 * (1 - g * 2)),
                                     0);
                         }
@@ -2618,7 +2680,8 @@ static void Gap(void)
             hint = "{A}OK {INSPECT}LOOK";
             break;
         }
-        G_Hint(238 - G_Hint(0, 0, 0, 0, hint, TF_NARROW, 0), GAP_Y + 11, 0xc0c8e0, G_NO_SHADOW, hint, TF_NARROW, 1);
+        if (B.mode != M_OVER)   /* (the end screen has its own) */
+            G_Hint(238 - G_Hint(0, 0, 0, 0, hint, TF_NARROW, 0), GAP_Y + 11, 0xc0c8e0, G_NO_SHADOW, hint, TF_NARROW, 1);
     }
 }
 /* a pick's number, as the Pokemon card table draws it */
@@ -2723,6 +2786,18 @@ static void Fxs(void)
                        : t > 0.85f                 ? (1 - t) / 0.15f
                                                    : 1;
             G_Banner(f->x, f->y, f->text, f->color, in, (unsigned)(255 * (in > 1 ? 1 : in)));
+            break;
+        }
+        case FX_SWEEP:
+        {
+            float in = SweepEase(t * 4), out = t > 0.75f ? SweepEase((t - 0.75f) * 4) : 0;
+            int w = G_Measure(f->text, TF_NORMAL), x = (int)(-w - 20 + (120 + w / 2 + 20) * in + 300 * out) - w / 2;
+            int band = (int)(22 * (t < 0.1f ? t / 0.1f : t > 0.9f ? (1 - t) / 0.1f : 1));
+            G_FillA(0, f->y - band / 2, 240, band, 0x081018, 170);
+            G_FillA(0, f->y - band / 2, 240, 1, f->color, 255);
+            G_FillA(0, f->y + band / 2 - 1, 240, 1, f->color, 255);
+            if (band > 14)
+                G_Text(x, f->y - 7, G_WHITE, f->color, f->text, 0, TF_NORMAL);
             break;
         }
         case FX_BIGCARD:
@@ -3167,7 +3242,9 @@ void YgoBoard_Render(void)
         SDL_RenderSetViewport(G_R(), NULL);
     Menus();
     Grid();
-    if (B.result[0] && (B.tipShown || B.mode == M_OVER))
+    if (B.mode == M_OVER)
+        OverScreen();
+    else if (B.result[0] && B.tipShown)
     {
         G_Window(0, 112, 240, 48);
         G_Text(8, 116, G_INK, G_INK_SHADOW, B.result, 214,

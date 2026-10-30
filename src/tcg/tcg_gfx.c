@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h> // before global.h: its macros break the Windows intrinsics headers
 #include "mp_version.h"
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -388,6 +389,15 @@ static void Glyph(unsigned code, int x, int y, int font, unsigned color, unsigne
     SDL_SetTextureColorMod(face, (color >> 16) & 255, (color >> 8) & 255, color & 255);
     SDL_RenderCopy(sR, face, &src, &dst);
 }
+static int sMeasureOnly;   /* (G_TextHeight: the same wrapping, nothing drawn) */
+int G_TextHeight(const char *text, int width, int font)
+{
+    int h;
+    sMeasureOnly = 1;
+    h = G_Text(0, 0, 0, 0, text, width, font);
+    sMeasureOnly = 0;
+    return text && *text ? h : 0;
+}
 int G_Text(int x, int y, unsigned color, unsigned shadow, const char *text, int width, int font)
 {
     int px = x, py = y, start = 1, line = G_LineHeight(font);
@@ -424,7 +434,8 @@ int G_Text(int x, int y, unsigned color, unsigned shadow, const char *text, int 
             px = x;
             py += line;
         }
-        Glyph(code, px, py, font, color, shadow);
+        if (!sMeasureOnly)
+            Glyph(code, px, py, font, color, shadow);
         px += w;
     }
     return py + line;
@@ -1642,4 +1653,73 @@ void G_Destroy(void)
     memset(sButtons, 0, sizeof(sButtons));
     sFontReady = 0;
     sR = NULL;
+}
+
+/* The end of a duel, the same in every card game: the screen dims, YOU WIN! / YOU LOSE... on a band with "vs. NAME",
+ * sparks for a win, then a window as tall as its text: how it ended (reason) and what it brought (result, in blue).
+ * t: frames since the duel ended. */
+static unsigned ResultHash(unsigned a)
+{
+    a ^= a >> 16;
+    a *= 0x7feb352du;
+    a ^= a >> 15;
+    a *= 0x846ca68bu;
+    return a ^ (a >> 16);
+}
+void G_ResultScreen(int win, int t, unsigned frame, const char *opponent, const char *reason, const char *result)
+{
+    float open = t / 20.0f;
+    const char *title = win ? "YOU WIN!" : "YOU LOSE...";
+    int k;
+    (void)frame;
+    open = open > 1 ? 1 : open < 0 ? 0 : open;
+    open = 1 - (1 - open) * (1 - open);
+    G_FillA(0, 0, 240, 160, 0x000000, (unsigned)(110 * open));
+    /* sparks: a burst every few frames for the first seconds, each flying out and fading */
+    for (k = 0; win && k < 27; k++)
+    {
+        int born = k * 3, age = t - born, n;
+        unsigned h = ResultHash((unsigned)k * 2654435761u + 17u);
+        int cx = 20 + (int)(h % 200), cy = 40 + (int)((h >> 8) % 40);
+        unsigned color = (h >> 20) & 1 ? 0xf8e060 : 0x60c8f8;
+        if (age < 0 || age >= 24)
+            continue;
+        for (n = 0; n < 3; n++)
+        {
+            float a = n * 2.0944f + (float)((h >> (4 + n)) % 100) / 200.0f, v = 1.5f * (0.6f + (float)((h >> (8 + n)) % 50) / 100.0f);
+            float x = cx + cosf(a) * v * age, y = cy + (sinf(a) * v - 0.4f) * age + 0.05f * age * age;
+            G_FillA((int)x, (int)y, 2, 2, n & 1 ? color : G_Mix(color, 0xffffff, 0.6f), (unsigned)(255 * (24 - age) / 24));
+        }
+    }
+    {
+        int band = (int)(34 * open);
+        G_FillA(0, 48 - band / 2, 240, band, win ? 0x283868 : 0x402828, 230);
+        G_FillA(0, 48 - band / 2, 240, 1, win ? 0xf8d850 : 0xa06060, 255);
+        G_FillA(0, 48 + band / 2 - 1, 240, 1, win ? 0xf8d850 : 0xa06060, 255);
+        if (open > 0.9f)
+        {
+            char vs[64];
+            G_TextAlign(120, 36, TA_CENTER, win ? 0xf8e060 : 0xe8c8c8, 0x302810, title, TF_NORMAL);
+            snprintf(vs, sizeof(vs), "vs. %s", opponent ? opponent : "");
+            G_TextAlign(120, 51, TA_CENTER, 0xc8d0e0, G_NO_SHADOW, vs, TF_NARROW);
+        }
+    }
+    if (t > 20)
+    {
+        /* (as tall as its text: a card player's quote can run to three lines; under the banner, never off screen) */
+        int lines = G_TextHeight(reason, 192, TF_SMALL), extra = result && result[0] ? G_TextHeight(result, 192, TF_SMALL) : 0;
+        int h = 5 + lines + (extra ? 2 + extra : 0) + 12, y = 74;
+        if (h < 56)
+            h = 56;
+        if (h > 160 - 66 - 2)
+            h = 160 - 66 - 2;
+        if (y + h > 158)
+            y = 158 - h;   /* (moves up, at most to just under the banner) */
+        G_Window(16, y, 208, h);
+        G_Text(24, y + 5, G_INK, G_INK_SHADOW, reason ? reason : "", 192, TF_SMALL);
+        if (extra)
+            G_Text(24, y + 5 + lines + 2, 0x3858a0, G_INK_SHADOW, result, 192, TF_SMALL);
+        if (t > 40 && (frame / 16) % 2)
+            G_ButtonIcon(206, y + h - 8, 0);
+    }
 }

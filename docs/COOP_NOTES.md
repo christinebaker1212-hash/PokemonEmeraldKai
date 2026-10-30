@@ -2526,6 +2526,12 @@ TCG_LINK_VERSION 15.
   in), cached. Tests: `mp ygo recipes` (gcshop), `mp cards recipes` (counter).
 - Opponents: 112 World Championship 2006 decks and 9 GX Duel Academy decks join the others (7 Trials to Glory's aren't
   on Yugipedia); BuildDeck's themed decks and the boosters handed out draw on the whole pool by themselves.
+- 1.56.1: every turn and phase passing is the POKeMON table's sweep (ygo_board.c Sweep / FX_SWEEP: same band, length
+  and sounds), so a chain window in the Draw and then the Standby Phase reads as two moments, not one question asked
+  twice. A direct attack's target is the far middle edge of the defender's side (FX_ATTACK value 1: it goes all the
+  way); the blow's sound plays as FX_IMPACT lands (Advance) and the attack event waits only until then, so the damage
+  follows the slam; YgoBoard_Idle holds input while an attacker is still flying. The end of a duel is G_ResultScreen
+  (tcg_gfx.c), shared with the POKeMON table: its window as tall as its text (G_TextHeight).
 
 ## Rare card foil (1.56.0)
 
