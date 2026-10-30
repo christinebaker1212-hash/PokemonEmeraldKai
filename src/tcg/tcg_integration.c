@@ -10,6 +10,7 @@
 #include "item.h"
 #include "constants/items.h"
 #include "tcg/integration.h"
+#include "tcg/quotes.h"
 #include "tcg/online.h"
 #include "ygo/integration.h"
 #include "tt/integration.h"
@@ -50,10 +51,61 @@ void Tcg_WriteSidecar(void)
     char path[600];
     Ygo_WriteSidecar();   /* the Yu-Gi-Oh! cards: "<save>.ygo" */
     Tt_WriteSidecar();    /* the Triple Triad cards: "<save>.tt" */
-    if (!sLoaded || sLoadedFor != SaveOwner() || !sCollection.optedIn)
+    if (!sLoaded || sLoadedFor != SaveOwner())
         return;
+    /* (the records against card players of the other two games live here too) */
+    if (!sCollection.optedIn)
+    {
+        unsigned i;
+        for (i = 0; i < TCG_RECORD_SLOTS && !sCollection.records[i].wins && !sCollection.records[i].losses; i++)
+            ;
+        if (i == TCG_RECORD_SLOTS)
+            return;
+    }
     snprintf(path, sizeof(path), "%s.cards", gPlatformSavePath);
     Tcg_CollectionSave(&sCollection, path);
+}
+/* The records of all three card games: a map person's key with the game in its last byte (1 + game), a special
+ * player's as it is (each game marks its own: 0xFF, 0xFE, 0xFD) */
+static uint32_t RecordKey(uint32_t key, unsigned game)
+{
+    return key >= 0xFD000000u ? key : (key & ~0xFFu) | (1u + game);
+}
+const struct TcgRecord *CardTable_Record(uint32_t key, unsigned game)
+{
+    return key ? Tcg_Record(Tcg_GetCollection(), RecordKey(key, game)) : NULL;
+}
+void CardTable_Result(uint32_t key, unsigned game, int won)
+{
+    if (key)
+        Tcg_RecordResult(Tcg_GetCollection(), RecordKey(key, game), won, Tcg_Today());
+}
+const unsigned char *CardTable_Hello(uint32_t key, unsigned game, const char *who, unsigned voice, const unsigned char *usual,
+                                     uint32_t pick)
+{
+    static u8 sLine[220];
+    char text[200];
+    const struct TcgRecord *r = CardTable_Record(key, game);
+    unsigned wins = r ? r->wins : 0, losses = r ? r->losses : 0;
+    /* their own line now and then (always, for a special player you haven't played yet), else one about your record */
+    if (usual && ((!wins && !losses && who) || (pick >> 23) % 3 == 0))
+        return usual;
+    if (!CardQuote(text, sizeof(text), who, voice, game, QUOTE_HELLO, wins, losses, pick))
+        return usual;
+    MP_AsciiToGame(sLine, text, sizeof(sLine) - 1);
+    return sLine;
+}
+int CardTable_Goodbye(char *out, unsigned long size, const char *name, uint32_t key, unsigned game, const char *who,
+                      unsigned voice, int theyWon, uint32_t pick)
+{
+    char text[200];
+    const struct TcgRecord *r = CardTable_Record(key, game);
+    if (!size || !CardQuote(text, sizeof(text), who, voice, game, theyWon ? QUOTE_THEY_WON : QUOTE_THEY_LOST,
+                            r ? r->wins : !theyWon, r ? r->losses : theyWon, pick))
+        return 0;
+    CardQuote_OneLine(text);
+    snprintf(out, size, "%s: \"%s\"", name, text);
+    return (int)strlen(out);
 }
 static struct TcgLink sOnline;
 static int sOnlineInit;

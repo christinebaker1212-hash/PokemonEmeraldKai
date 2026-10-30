@@ -207,7 +207,7 @@ static struct
     uint8_t pileList[YGO_OBJS];
     int pileCount;
     uint32_t queryStamp, askedStamp;   /* a new question resets the input */
-    char log[96], result[200];
+    char log[96], result[320];
     int over, frame, tipShown, toActionable;
     unsigned tips;
     u16 music, duelMusic;

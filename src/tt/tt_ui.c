@@ -19,6 +19,7 @@
 #include "tcg/integration.h"
 #include "tcg/npc.h"
 #include "tcg/online.h"
+#include "tcg/quotes.h"
 #include "tt/collection.h"
 #include "tt/duel.h"
 #include "tt/integration.h"
@@ -678,7 +679,7 @@ static void Results(void)
 {
     struct TtCollection *c = C();
     unsigned w = U.duel.winner, i;
-    char line[200];
+    char line[320] = "";
     int n = 0;
     U.rewarded = 1;
     for (i = 0; i < TT_HAND; i++)
@@ -704,6 +705,14 @@ static void Results(void)
     {
         TtBoard_Result(w == Me() ? "A fine game! Practice games trade no cards." : "Practice games trade no cards.");
         return;
+    }
+    if (U.vs == VS_NPC && w != 2)
+    {
+        /* your record against them, and what they say (include/tcg/quotes.h) */
+        CardTable_Result(U.opp.key, QUOTE_GAME_TT, w == Me());
+        if ((n = CardTable_Goodbye(line, sizeof(line), U.opp.name, U.opp.key, QUOTE_GAME_TT,
+                                   U.opp.quoteWho[0] ? U.opp.quoteWho : NULL, U.opp.voice, w != Me(), U.opp.hash)))
+            n += snprintf(line + n, sizeof(line) - (size_t)n, "\n");
     }
     Tt_PlayedIn(c, U.region);
     Tt_SkillResult(c, Tt_HandPower(U.dealt[0]) + Tt_PlayerRating(U.rules),

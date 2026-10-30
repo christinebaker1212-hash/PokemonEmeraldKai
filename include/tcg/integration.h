@@ -6,6 +6,17 @@ struct SDL_Renderer;
 struct SDL_Texture;
 union SDL_Event;
 struct TcgCollection *Tcg_GetCollection(void);
+/* Your record against a card player, in any of the three games (QUOTE_GAME_*: kept in "<save>.cards"), and what they
+ * say: before a game (as the game's own text, NULL to keep `usual`) and after it (ASCII, "NAME: ..." on one line). voice
+ * QUOTE_VOICE_*, who the special player's name or NULL. */
+const struct TcgRecord *CardTable_Record(uint32_t key, unsigned game);
+void CardTable_Result(uint32_t key, unsigned game, int won);
+const unsigned char *CardTable_Hello(uint32_t key, unsigned game, const char *who, unsigned voice, const unsigned char *usual,
+                                     uint32_t pick);
+int CardTable_Goodbye(char *out, unsigned long size, const char *name, uint32_t key, unsigned game, const char *who,
+                      unsigned voice, int theyWon, uint32_t pick);
+/* A map person's kind of talk (QUOTE_VOICE_*), by how they look (tcg_field.c's people) */
+unsigned Tcg_VoiceOf(unsigned graphicsId);
 /* The CARD CASE's button on the map: ask the person (or friend) in front for a
  * card duel; 0 when nobody's there (the case opens instead). */
 int Tcg_FieldChallenge(void);

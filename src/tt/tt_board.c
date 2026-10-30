@@ -66,7 +66,7 @@ static struct
     unsigned me;
     const struct TtDuel *d;
     char names[2][24];   // [side]: 0 left (me), 1 right
-    char result[200];
+    char result[320];
     u16 music, mapMusic;
     /* what the table shows (the engine is ahead while events play) */
     struct SCell cell[TT_CELLS];

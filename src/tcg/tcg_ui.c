@@ -22,6 +22,7 @@
 #include "tcg/duel.h"
 #include "tcg/integration.h"
 #include "tcg/npc.h"
+#include "tcg/quotes.h"
 #include "tcg/online.h"
 #include "tcg/scale.h"
 #include "tcg_board.h"
@@ -731,10 +732,11 @@ static int SingleType(const uint16_t *cards)
     return type != TCG_NONE;
 }
 /* What a win over a card player is worth. */
+static int EndQuote(char *out, size_t size, int theyWon);
 static void Rewards(void)
 {
     struct TcgCollection *c = Tcg_GetCollection();
-    char line[200] = "";
+    char line[320] = "";
     int n = 0;
     c->wins++;
     MP_Achieve_Count("cardwin", 1);
@@ -743,6 +745,9 @@ static void Rewards(void)
     if (SingleType(U.duel.players[0].cards))
         MP_Achieve_Unlock("cardmono");
     Tcg_AwardPack(c, U.opp.pack);
+    n = EndQuote(line, sizeof(line), 0);
+    if (n)
+        n += snprintf(line + n, sizeof(line) - n, "\n");
     n += snprintf(line + n, sizeof(line) - n, "A booster pack went into your CARD CASE.");
     if (U.opp.special < TCG_SPECIAL_COUNT)
     {
@@ -785,6 +790,14 @@ static void Rewards(void)
         }
     }
     printf("[tcg] victory vs %s: pack %u, %d cards to choose from\n", U.opp.name, U.opp.pack, U.spoilCount);
+}
+/* What the card player says as the duel ends (include/tcg/quotes.h), with your record counting this duel */
+static int EndQuote(char *out, size_t size, int theyWon)
+{
+    if (U.vs != VS_NPC)
+        return 0;
+    return CardTable_Goodbye(out, size, U.opp.name, U.opp.key, QUOTE_GAME_POKEMON, U.opp.quoteWho[0] ? U.opp.quoteWho : NULL,
+                             U.opp.voice, theyWon, U.opp.pick + U.duel.turn);
 }
 static void FriendRewards(int won)
 {
@@ -848,7 +861,11 @@ static void DuelStep(unsigned pressed, unsigned keys)
         else if (U.vs == VS_NPC && U.duel.winner == 0)
             Rewards();
         else if (U.vs == VS_NPC)
-            TcgBoard_Result("");
+        {
+            char line[200] = "";
+            EndQuote(line, sizeof(line), 1);
+            TcgBoard_Result(line);
+        }
         else if (U.vs == VS_LESSON)
             TcgBoard_Result(U.duel.winner == 0 ? "That's the game! You're ready for real duels."
                                                : "Close one! You'll get the hang of it.");
@@ -1628,13 +1645,23 @@ static void ChallengeScreen(void)
         Strip(0, line);
 }
 
-/* DECK RECIPES: the decks the game hands out, card for card (the starters, the GAME CENTER's structure decks) */
+/* DECK RECIPES: the decks the game hands out, card for card (the starters, the GAME CENTER's structure decks), and
+ * each special trainer's own deck once you've beaten them */
 struct TcgRecipe
 {
     const char *name, *blurb;
     const uint16_t *cards;
 };
-#define RECIPE_COUNT (3 + (int)ARRAY_COUNT(sStructureDecks))
+#define RECIPE_FIXED (3 + (int)ARRAY_COUNT(sStructureDecks))
+static int RecipeCount(void)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    unsigned i, n = 0;
+    for (i = 0; i < gTcgSpecialDeckCount && i < 32; i++)
+        n += (c->specialBeaten >> i) & 1;
+    return RECIPE_FIXED + (int)n;
+}
+#define RECIPE_COUNT RecipeCount()
 static int Recipe(int k, struct TcgRecipe *r)
 {
     static const char *const names[3] = {"Ember Friends", "Tidal Friends", "Garden Friends"};
@@ -1644,6 +1671,28 @@ static int Recipe(int k, struct TcgRecipe *r)
     const struct TcgDeckDefinition *def;
     if (k < 0 || k >= RECIPE_COUNT)
         return 0;
+    if (k >= RECIPE_FIXED)
+    {
+        /* the k-th special trainer beaten (in their order) */
+        static char sNames[TCG_SPECIAL_COUNT][28], sBlurbs[TCG_SPECIAL_COUNT][64];
+        struct TcgCollection *c = Tcg_GetCollection();
+        unsigned i, left = (unsigned)(k - RECIPE_FIXED);
+        for (i = 0; i < gTcgSpecialDeckCount && i < TCG_SPECIAL_COUNT; i++)
+            if ((c->specialBeaten >> i) & 1 && !left--)
+            {
+                static const char *const who[TCG_SPECIAL_COUNT] = {
+                    "ROXANNE", "BRAWLY", "WATTSON", "FLANNERY", "NORMAN", "WINONA", "TATE&LIZA", "JUAN", "SIDNEY",
+                    "PHOEBE", "GLACIA", "DRAKE", "WALLACE", "STEVEN", "RIVAL", "WALLY", "MAXIE", "ARCHIE", "ANABEL",
+                    "TUCKER", "SPENSER", "GRETA", "NOLAND", "LUCY"};
+                snprintf(sNames[i], sizeof(sNames[i]), "%s's deck", who[i]);
+                snprintf(sBlurbs[i], sizeof(sBlurbs[i]), "The deck %s duels with. You beat it!", who[i]);
+                r->name = sNames[i];
+                r->blurb = sBlurbs[i];
+                r->cards = gTcgSpecialDecks[i].cards;
+                return 1;
+            }
+        return 0;
+    }
     if (k >= 3)
     {
         r->name = sStructureDecks[k - 3].name;
@@ -4512,13 +4561,17 @@ void Tcg_Debug(const char *command)
     if (!strcmp(command, "state"))
     {
         struct TcgPlayer *p = &U.duel.players[0];
-        unsigned total, have = Tcg_SetOwned(c, TCG_SET_COUNT, &total);
+        unsigned total, have = Tcg_SetOwned(c, TCG_SET_COUNT, &total), i;
+        char packs[TCG_PACK_TYPES + 1];
+        for (i = 0; i < TCG_PACK_TYPES; i++)   /* (one digit each: the unopened boosters of each kind) */
+            packs[i] = (char)('0' + (c->packs[i] > 9 ? 9 : c->packs[i]));
+        packs[TCG_PACK_TYPES] = 0;
         printf("[tcg] screen %d opted %u phase %u current %u wins %u hand %u field %u bench %u%u%u%u%u idle %d "
-               "energy %u discard %u owned %u points %u packs %u%u%u%u flags %x special %x message %d\n",
+               "energy %u discard %u owned %u points %u packs %s flags %x special %x message %d\n",
                U.screen, c->optedIn, U.duel.phase, U.duel.current, c->wins, p->handSize, p->field[0].stackSize,
                p->field[1].stackSize, p->field[2].stackSize, p->field[3].stackSize, p->field[4].stackSize,
                p->field[5].stackSize, U.screen == UI_DUEL ? TcgBoard_Idle() : -1,
-               TcgDuel_Energy(&U.duel, 0, 0, TCG_NONE), p->discardSize, have, c->dust, c->packs[0], c->packs[1],
-               c->packs[2], c->packs[3], c->flags, c->specialBeaten, U.message[0] != 0);
+               TcgDuel_Energy(&U.duel, 0, 0, TCG_NONE), p->discardSize, have, c->dust, packs, c->flags, c->specialBeaten,
+               U.message[0] != 0);
     }
 }

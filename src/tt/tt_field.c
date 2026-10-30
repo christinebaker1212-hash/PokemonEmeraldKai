@@ -22,6 +22,7 @@
 #include "constants/trainer_types.h"
 #include "data.h"
 #include "tcg/integration.h"
+#include "tcg/quotes.h"
 #include "tt/integration.h"
 #include "tt/npc.h"
 #include "tt/duel.h"
@@ -319,6 +320,8 @@ static void FillSpecial(struct TtOpponent *o, unsigned i, const char *name)
     o->key = 0xFD000000u | i;
     o->special = (uint8_t)i;
     o->music = s->music;
+    o->voice = QUOTE_VOICE_REFINED;
+    snprintf(o->quoteWho, sizeof(o->quoteWho), "%s", s->name ? s->name : "RIVAL");
 }
 void Tt_QueenOpponent(struct TtOpponent *o)
 {
@@ -356,7 +359,7 @@ int Tt_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, uin
     {
         static const u8 sText_Queen[] = _("A game with the CARD QUEEN? I play by\nthe rules of wherever I stand.");
         Tt_QueenOpponent(o);
-        *line = sText_Queen;
+        *line = CardTable_Hello(o->key, QUOTE_GAME_TT, o->quoteWho, o->voice, sText_Queen, h);
         return TT_PLAYS_ONLY;
     }
     for (i = 0; i < TT_SPECIAL_COUNT; i++)
@@ -379,7 +382,7 @@ int Tt_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, uin
             return s->play;
         }
         FillSpecial(o, i, s->name ? s->name : npc->graphicsId == OBJ_EVENT_GFX_RIVAL_MAY_NORMAL ? "MAY" : "BRENDAN");
-        *line = s->accept;
+        *line = CardTable_Hello(o->key, QUOTE_GAME_TT, o->quoteWho, o->voice, s->accept, h);
         return s->play;
     }
     {
@@ -430,7 +433,14 @@ int Tt_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, uin
             }
             Fill(o, label, NULL, region, h, key);
         }
-        *line = sAccept[sTalk][(h >> 21) % 3];
+        {
+            /* (their kind of talk: GENTRY, TRAVELER, STUDENT, ROMANTIC, SCHOLAR, COLLECTOR) */
+            static const u8 sVoice[TALK_COUNT] = {QUOTE_VOICE_REFINED, QUOTE_VOICE_SEA, QUOTE_VOICE_KID,
+                                                  QUOTE_VOICE_STYLISH, QUOTE_VOICE_BRAINY, QUOTE_VOICE_BRAINY};
+            o->voice = sVoice[sTalk];
+            o->quoteWho[0] = 0;
+            *line = CardTable_Hello(o->key, QUOTE_GAME_TT, NULL, o->voice, sAccept[sTalk][(h >> 21) % 3], h);
+        }
         return play;
     }
 }

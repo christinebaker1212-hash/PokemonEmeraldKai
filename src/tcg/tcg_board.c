@@ -315,7 +315,7 @@ static struct
     char pickTitle[64];
     char toast[200];
     int toastTime;
-    char result[200];
+    char result[320];
     int resultShown, resultTime;
     u16 music, duelMusic;
     int speed;
@@ -504,7 +504,7 @@ static void Layout(void)
         for (i = 0; i < p->discardSize; i++)
             Place(who, p->discard[i], Z_DISCARD, 0, i, DiscardRect(who), 1, 2, i + 1 == p->discardSize);
         for (i = 0; i < p->prizeSize; i++)
-            Place(who, p->prizes[i], Z_PRIZE, i, i, PrizeRect(who, i), 0, 2, 1);
+            Place(who, p->prizes[i], Z_PRIZE, i, i, PrizeRect(who, i), p->prizesUp, 2, 1); /* (Here Comes Team Rocket!) */
         for (i = 0; i < p->handSize; i++)
         {
             struct Rect r = who ? MakeRect(105, -50, HAND_W, HAND_H) : HandRect(i, p->handSize);

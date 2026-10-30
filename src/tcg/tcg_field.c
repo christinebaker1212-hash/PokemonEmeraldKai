@@ -20,6 +20,7 @@
 #include "main.h"
 #include "menu.h"
 #include "mp.h"
+#include "tcg/quotes.h"
 #include "overworld.h"
 #include "palette.h"
 #include "pokemon.h"
@@ -374,6 +375,21 @@ static int Gb2Tier(const struct TcgDeckDefinition *def)
             return t;
     }
     return 3;
+}
+
+// What they say before a duel (include/tcg/quotes.h): their own line or, more and more once you've met, one about
+// your record against them
+static const u8 *Hello(struct TcgOpponent *o, const u8 *usual, u32 h)
+{
+    return CardTable_Hello(o->key, QUOTE_GAME_POKEMON, o->quoteWho[0] ? o->quoteWho : NULL, o->voice, usual, h);
+}
+unsigned Tcg_VoiceOf(unsigned graphicsId)
+{
+    unsigned i;
+    for (i = 0; i < ARRAY_COUNT(sPeople); i++)
+        if (sPeople[i].gfx == graphicsId)
+            return sPeople[i].cat;
+    return QUOTE_VOICE_REFINED;
 }
 
 // ---------------------------------------------------------------------------
@@ -845,10 +861,12 @@ static const u8 *AskCards(struct ObjectEvent *npc, const u8 *script, u8 *answer,
         o->pool = TCG_SCALE_POOL_SPECIAL;
         o->pick = h;
         o->prizes = 6;   // (the full game: LEADERS and the like)
+        o->voice = QUOTE_VOICE_REFINED;
+        snprintf(o->quoteWho, sizeof(o->quoteWho), "%s", s->name ? s->name : "RIVAL");
         Tcg_FitOpponent(o, NULL);
         *answer = sYgoLine ? ASK_WHICH : ASK_DUEL;
         sGames = sYgoLine ? GAME_PKMN | GAME_YGO : GAME_PKMN;
-        return sYgoLine ? sYgoLine : s->accept;
+        return sYgoLine ? sYgoLine : Hello(o, s->accept, h);
     }
     o->special = TCG_SPECIAL_NONE;
     for (i = 0; i < ARRAY_COUNT(sPeople); i++)
@@ -913,7 +931,9 @@ static const u8 *AskCards(struct ObjectEvent *npc, const u8 *script, u8 *answer,
         o->pack = cat == CAT_TEAM ? ((h >> 9) & 1 ? 9 : 10) : sGb2Pack[deck <= DECK_MIXED ? deck : DECK_MIXED];
     }
     *answer = ASK_DUEL;
-    return sAccept[cat][(h >> 20) % 3];
+    o->voice = cat;   // (CAT_KID.. CAT_STAFF are QUOTE_VOICE_KID.. QUOTE_VOICE_STAFF)
+    o->quoteWho[0] = 0;
+    return Hello(o, sAccept[cat][(h >> 20) % 3], h);
 }
 
 // ---------------------------------------------------------------------------

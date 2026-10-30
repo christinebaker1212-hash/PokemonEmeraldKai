@@ -32,6 +32,10 @@ gcc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g \
     src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c src/tcg/tcg_powers.c -o "$OUT/attacks"
 "$OUT/attacks"
 
+gcc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g -DCARD_QUOTES_TEST -iquote include \
+    tools/tcg/test_quotes.c src/tcg/card_quotes.c -o "$OUT/quotes"
+"$OUT/quotes"
+
 gcc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g \
     -DTCG_TEST -DMOEMON_DEV_BUILD=1 -iquote include \
     tools/tcg/test_gb2.c src/tcg/tcg_collection.c src/tcg/tcg_catalog.c src/tcg/tcg_ai.c \

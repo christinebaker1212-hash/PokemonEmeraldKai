@@ -2464,6 +2464,41 @@ YGO_CARD_COUNT made from EDOPro's database (Ygo_EdoCard).
   declared name), test_collection.c (deck codes, lists); test_ui.sh "codes" and "table" (`mp ygo mineuntil Q`,
   `mp ygo code TEXT`).
 
+## Pokemon Card GB2's cards (1.55.0)
+
+The second Game Boy game's 445 cards (pret/poketcg2, the Japanese game; its English text and scans from
+Bulbapedia, tools/tcg/fetch_gb2_text.py): 230 are the first game's cards and keep their ids; the 214 new ones are
+ids 229-442, kept stable by tools/tcg/gb2_ids.json (tools/tcg/import_poketcg2.py writes them into catalog.json with
+the GB2 decks and boosters). TCG_CARD_COUNT 442, 11 booster packs (packs 4-10 = GB2's seven sets 6-12; a first-game
+card in a GB2 booster has it in `set2`), collection format 8 (442 cards, 11 packs, milestonesHi, gcDecks bits 8-31),
+TCG_LINK_VERSION 15.
+
+- Attacks: tools/tcg/gb2_effects.py maps every GB2 effect command list to an FX_* kind (amount, extra; after 2 =
+  the handler reads both phases); generate_effects.py appends them to tcg_effect_table.inc. The new kinds are in
+  tcg_effects.c Gb2Effect. Where the Game Boy game plays a card unlike its print (Horrid Pollen at random, Fury
+  Strikes' markers at random, Cat Punch at a random Pokemon...) the game is followed and gb2_effects.TEXT is the card's
+  text in this game (generate_catalog.py). Choices the print leaves to the player that the engine fixes (as it did
+  for Gigashock): damage "divided as you like" goes to one chosen Pokemon; Earth Wave takes the 2 with the least HP
+  left; Energy Control moves Energy off the Defending Pokemon; Texture Magic changes only the Resistance.
+- Targets: TcgDuel_AttackChoice 3 = any of theirs (0-5), 4 = any of yours; TcgDuel_AttackTargetPrompt the words;
+  phase 3 of TcgDuel_AttackEffect switches before the attack (Fox Fire, Drag Off). Swift (g->swift) skips Weakness,
+  Resistance, Defender, guards and powers on the Defending Pokemon. Turn-numbered effects (lockTurn, skipDrawTurn,
+  strangeBeamUntil, poisonMistUntil, powerOffUntil, goopGasUntil) end by themselves.
+- Powers (tcg_powers.c, TCG_POWER_*): always-on ones hook the rules (TcgPower_NoWeakness / NoResistance /
+  RetreatBlock / AfterRetreat / AttackBonus / KnockedOut / NoTrainers, TcgDuel_RetreatCost); "when you play it from
+  your hand" ones check g->fromHand; Puppet Master goes through TcgDuel_Attacker (the card whose attacks the Active
+  uses: everything about attacks asks it, never Field(0, 0)).
+- Trainers and special Energy: tcg_trainers.c; Rainbow Energy pays any one type (EnergyPaid's shortfall), Recycle
+  Energy returns to the hand when it leaves play (TcgDuel_Apply), Computer Error ends the turn (g->turnOver), Here
+  Comes Team Rocket! turns the Prizes face up on the board. Bill's PC can't be played in a duel (it's for trades).
+- Decks: GB2's 113 decks ("GB2 " names) join card players' choices: Gb2Kind by Energy then Pokemon type, Gb2Tier by
+  rating against the first game's tiers (tcg_field.c); about half of card players give a GB2 booster of their kind.
+- The GAME CENTER sells 14 structure decks (tools/moemon_gamecenter/gen_structure_decks.py): the 1999 Base Set's four
+  at 15000, and the later English theme decks every card of which the two games have (theme_decks.json, from
+  pokemon-tcg-data decks/en) at 18000. The Gym and Neo theme decks need cards neither game has.
+- Tests: tools/tcg/test_gb2.c (every attack 40 times then the AI carries on, every used power, every GB2 deck to the
+  end against others).
+
 ## Card AI levels, power ratings and how a match looks (1.49.0)
 
 All three card games now share one idea of difficulty. What the player sees is a word and six pips on the challenge

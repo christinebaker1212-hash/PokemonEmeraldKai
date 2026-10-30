@@ -42,6 +42,8 @@ struct TtOpponent
     uint8_t fit, tier;         /* fit: their hand may be fitted to the player's (tier: the badges' cap) */
     uint32_t hash;             /* (who they are: their hands come from it) */
     uint8_t portraitW, portraitH;
+    uint8_t voice;             /* what they say: include/tcg/quotes.h QUOTE_VOICE_*, and who a special player is */
+    char quoteWho[16];
     uint32_t portrait[64 * 64]; /* ARGB: their sprite as they faced you (up to 32x32), or 64x64: their battle picture */
 };
 

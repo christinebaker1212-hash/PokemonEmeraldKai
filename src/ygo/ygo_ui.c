@@ -17,6 +17,7 @@
 #include "tcg/integration.h"
 #include "tcg/npc.h"
 #include "tcg/online.h"
+#include "tcg/quotes.h"
 #include "tcg/tcg.h"
 #include "ygo/card_ids.h"
 #include "ygo/duel.h"
@@ -784,10 +785,16 @@ static void StarterDeckOf(unsigned set, uint16_t *main, uint16_t *extra)
                 main[n++] = c->id;
         }
 }
+/* What the duelist says as the duel ends (include/tcg/quotes.h), with your record counting this duel */
+static int EndQuote(char *out, size_t size, int theyWon)
+{
+    return CardTable_Goodbye(out, size, Y.opp.name, Y.opp.key, QUOTE_GAME_YGO, Y.opp.quoteWho[0] ? Y.opp.quoteWho : NULL,
+                             Y.opp.voice, theyWon, Y.opp.seed + Y.duel.s.turn);
+}
 static void Rewards(void)
 {
     struct YgoCollection *c = C();
-    char line[200] = "";
+    char line[320] = "";
     int n = 0;
     unsigned set = Y.opp.set < YGO_SET_COUNT && Ygo_SetAvailable(Y.opp.set) ? Y.opp.set : Ygo_RandomSet(&c->rng);
     c->wins++;
@@ -797,6 +804,8 @@ static void Rewards(void)
     if (Y.duel.s.winReason == YGO_WIN_EXODIA)
         MP_Achieve_Unlock("ygoexodia");
     Ygo_AwardPack(c, set);
+    if ((n = EndQuote(line, sizeof(line), 0)))
+        n += snprintf(line + n, sizeof(line) - n, "\n");
     n += snprintf(line + n, sizeof(line) - n, "A %s booster went into your CARD CASE.", gYgoSets[set].code);
     if (Y.opp.special != YGO_SPECIAL_NONE && Y.opp.special < 32)
     {
@@ -915,6 +924,8 @@ static void DuelStep(unsigned pressed, unsigned keys)
         if (Y.vs == VS_NPC && !won)
             C()->losses++;
         if (Y.vs == VS_NPC)
+            CardTable_Result(Y.opp.key, QUOTE_GAME_YGO, won);   /* (your record against them) */
+        if (Y.vs == VS_NPC)
         {
             int mine = Ygo_DeckRating(Deck(C()->activeDeck)->main) + Ygo_PlayerRating();
             Ygo_SkillResult(C(), mine, Y.opp.rating + Ygo_LevelRating(Y.opp.level), won);
@@ -923,7 +934,11 @@ static void DuelStep(unsigned pressed, unsigned keys)
         if (Y.vs == VS_NPC && won)
             Rewards();
         else if (Y.vs == VS_NPC)
-            YgoBoard_Result("");
+        {
+            char line[320] = "";
+            EndQuote(line, sizeof(line), 1);
+            YgoBoard_Result(line);
+        }
         else if (Y.vs == VS_LESSON)
         {
             C()->flags |= YGO_FLAG_TUTORIAL;

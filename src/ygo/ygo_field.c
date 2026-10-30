@@ -20,6 +20,7 @@
 #include "constants/trainer_types.h"
 #include "data.h"
 #include "tcg/integration.h"
+#include "tcg/quotes.h"
 #include "ygo/integration.h"
 #include "ygo/npc.h"
 #include "ygo/duel.h"
@@ -558,6 +559,7 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
         o->key = 0xFE000000u | YGO_SPECIAL_CLUB;
         o->special = YGO_SPECIAL_NONE;
         o->level = 1;   /* (a friendly club duelist with the day's Starter Deck: not fitted) */
+        o->voice = QUOTE_VOICE_STAFF;
         o->rating = (s16)Ygo_DeckRating(o->main);
         o->set = YGO_SET_COUNT;
         o->music = MUS_VS_TRAINER;
@@ -601,7 +603,9 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
                     have = 1;
                 }
         }
-        *line = s->accept;
+        o->voice = QUOTE_VOICE_REFINED;
+        snprintf(o->quoteWho, sizeof(o->quoteWho), "%s", s->name ? s->name : "RIVAL");
+        *line = CardTable_Hello(o->key, QUOTE_GAME_YGO, o->quoteWho, o->voice, s->accept, h);
         return s->play;
     }
     {
@@ -655,7 +659,9 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
         }
         if (team)
             o->music = MUS_VS_AQUA_MAGMA;
-        *line = team ? sText_DuelTeam : sDuelLines[(h >> 20) % 3];
+        o->voice = team ? QUOTE_VOICE_TEAM : Tcg_VoiceOf(npc->graphicsId);
+        o->quoteWho[0] = 0;
+        *line = CardTable_Hello(o->key, QUOTE_GAME_YGO, NULL, o->voice, team ? sText_DuelTeam : sDuelLines[(h >> 20) % 3], h);
         return PLAY_YGO;
     }
 }

@@ -20,6 +20,8 @@ struct YgoOpponent
     int16_t rating;         /* their deck's rating */
     uint32_t seed;          /* (who they are today: their decks come from it) */
     uint8_t portraitW, portraitH;
+    uint8_t voice;          /* what they say: include/tcg/quotes.h QUOTE_VOICE_*, and who a special duelist is */
+    char quoteWho[16];
     uint32_t portrait[64 * 64]; /* ARGB: their sprite as they faced you (up to 32x32), or 64x64: their battle picture */
 };
 #define YGO_SPECIAL_NONE 0xFF

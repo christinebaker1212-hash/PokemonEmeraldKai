@@ -170,6 +170,10 @@ change; per-save skill; tcg_field.c Tcg_FitOpponent); CARD ART / CARD BACKS
 from the built-in graphics/tcg/printed.bin (tools/tcg/fetch_art.py + build_printed_art.py: scans, the back and each
 illustration's measured rectangle; test_art.sh); everything in
 docs/TCG_IMPLEMENTATION.md, decisions in docs/TCG_DECISIONS.md; tests tools/tcg/test*.sh).
+Also Pokemon Card GB2's 214 new cards (ids 229-442, tools/tcg/import_poketcg2.py + fetch_gb2_text.py; attacks mapped in
+tools/tcg/gb2_effects.py, Gb2Effect in tcg_effects.c; 33 powers, 20 Trainers, 4 special Energy; attacks go through
+TcgDuel_Attacker for Puppet Master), 11 boosters, GB2 decks mixed into card players' picks, the GAME CENTER's 14 English
+structure decks (tools/moemon_gamecenter/gen_structure_decks.py): COOP_NOTES "Pokemon Card GB2's cards"; test_gb2.c.
 
 Also YU-GI-OH! duels (src/ygo/, include/ygo/: the CARD CASE's second side, L/R switches; SDD's card list and
 Forbidden/Limited list plus the English boosters to the end of 2003 (tools/ygo, catalog in ygo_catalog.c / card_ids.h;
