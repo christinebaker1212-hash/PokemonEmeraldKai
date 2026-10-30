@@ -65,8 +65,11 @@ bool8 MP_Gen_MoveAllowed(u16 move);                // a move past the cap can't 
 u8 MP_Gen_SpeciesType(u16 species, u8 which);      // its types as the generation has them (FAIRY from Gen 6)
 u8 MP_Gen_MoveType(u8 type);                       // FAIRY moves are NORMAL before Gen 6
 void MP_Gen_FitBattler(u8 battler);
+u8 MP_Gen_OfItem(u16 item);                        // 0 = always there (Kai's own, story items)
+bool8 MP_Gen_ItemAllowed(u16 item);                // past the GENERATION: kept in the bag, can't be used or held
+void MP_Gen_ReturnHeldItems(void);                 // held items past it go back to the bag
 bool8 MP_Gen_SealedSpecies(u16 species);           // past the GENERATION: kept, but can't battle
-bool8 MP_Gen_SealedMon(struct Pokemon *mon);       // ... (never an EGG)
+bool8 MP_Gen_SealedMon(struct Pokemon *mon);       // species, a move or the ability past it (never an EGG)
 extern struct Pokemon gPlayerParty[];
 #define MP_SEALED(party, i) ((party) == gPlayerParty && MP_Gen_SealedMon(&(party)[i]))   // in "can it battle" checks                // a battler's types and ability as the generation has them
 bool8 MP_Gen_Allowed(u16 species);                 // shown in the region the player is in

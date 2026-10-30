@@ -5,6 +5,7 @@
 // (friends' screens with a page per friend online, new friends' size, autosave, the BATTLE FLAG's range).
 // L / R switch tabs. Values change live with Left / Right (or A); B or CLOSE saves and leaves.
 #include "global.h"
+#include "mp_region.h"
 #include "option_menu.h"
 #include "bg.h"
 #include "gpu_regs.h"
@@ -744,6 +745,7 @@ static void Change(u8 row, int dir)
         gMpConfig.generation = 3 + Wrap(MP_Generation() - 3 + dir, 7);
         MPNet_Log("generation: %d", gMpConfig.generation);
         MP_SendRoomRules();
+        MP_Gen_ReturnHeldItems();
         break;
     case OPT_BUTTONICONS: Gamepad_SetIconSet(Gamepad_GetIconSet() + dir); break;
     case OPT_MOENAV:

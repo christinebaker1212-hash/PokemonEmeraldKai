@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_region.h"
 #include "platform/gamepad.h"
 #include "item_menu.h"
 #include "battle.h"
@@ -1939,8 +1940,22 @@ static void RemoveContextWindow(void)
         BagMenu_RemoveWindow(ITEMWIN_2x3);
 }
 
+// Moemon Kai: an item past the GENERATION stays in the bag but can't be used or given (mp_region.c)
+static const u8 sText_ItemLaterGen[] = _("This item is from a later\ngeneration and can't be used.{PAUSE_UNTIL_PRESS}");
+
+static bool8 ItemLaterGen(u8 taskId)
+{
+    if (MP_Gen_ItemAllowed(gSpecialVar_ItemId))
+        return FALSE;
+    RemoveContextWindow();
+    DisplayItemMessage(taskId, FONT_NORMAL, sText_ItemLaterGen, HandleErrorMessage);
+    return TRUE;
+}
+
 static void ItemMenu_UseOutOfBattle(u8 taskId)
 {
+    if (ItemLaterGen(taskId))
+        return;
     if (GetItemFieldFunc(gSpecialVar_ItemId))
     {
         RemoveContextWindow();
@@ -2124,6 +2139,8 @@ static void ItemMenu_MpRegisterX(u8 taskId)      { MpRegisterTo(taskId, 2); }
 
 static void ItemMenu_Give(u8 taskId)
 {
+    if (ItemLaterGen(taskId))
+        return;
     RemoveContextWindow();
     if (!IsWritingMailAllowed(gSpecialVar_ItemId))
     {
@@ -2307,6 +2324,8 @@ static const u8 sText_MpCoopNoItems[] = _("Only healing items work in\nco-op bat
 
 static void ItemMenu_UseInBattle(u8 taskId)
 {
+    if (ItemLaterGen(taskId))
+        return;
     // Moemon Co-op: both games must agree on everything, so only POKé BALLS
     // (in co-op wild battles) can be used
     if (gMpCoopBattle && !(gMpCoopWild && MP_IsBallItem(gSpecialVar_ItemId))
@@ -2330,7 +2349,9 @@ void CB2_ReturnToBagMenuPocket(void)
 
 static void Task_ItemContext_GiveToParty(u8 taskId)
 {
-    if (!IsWritingMailAllowed(gSpecialVar_ItemId))
+    if (!MP_Gen_ItemAllowed(gSpecialVar_ItemId))
+        DisplayItemMessage(taskId, FONT_NORMAL, sText_ItemLaterGen, HandleErrorMessage);
+    else if (!IsWritingMailAllowed(gSpecialVar_ItemId))
     {
         DisplayItemMessage(taskId, FONT_NORMAL, gText_CantWriteMail, HandleErrorMessage);
     }
@@ -2353,7 +2374,9 @@ static void Task_ItemContext_GiveToParty(u8 taskId)
 // Selected item to give to a Pokémon in PC storage
 static void Task_ItemContext_GiveToPC(u8 taskId)
 {
-    if (ItemIsMail(gSpecialVar_ItemId) == TRUE)
+    if (!MP_Gen_ItemAllowed(gSpecialVar_ItemId))
+        DisplayItemMessage(taskId, FONT_NORMAL, sText_ItemLaterGen, HandleErrorMessage);
+    else if (ItemIsMail(gSpecialVar_ItemId) == TRUE)
         DisplayItemMessage(taskId, FONT_NORMAL, gText_CantWriteMail, HandleErrorMessage);
     else if (GetItemPocket(gSpecialVar_ItemId) != POCKET_KEY_ITEMS && MP_ItemCanBeHeld(gSpecialVar_ItemId))   // Moemon Kai: HMs too
         gTasks[taskId].func = Task_FadeAndCloseBagMenu;
@@ -2371,6 +2394,8 @@ bool8 UseRegisteredKeyItemOnField(void)
         return FALSE;
     HideMapNamePopUpWindow();
     ChangeBgY_ScreenOff(0, 0, BG_COORD_SET);
+    if (gSaveBlock1Ptr->registeredItem != ITEM_NONE && !MP_Gen_ItemAllowed(gSaveBlock1Ptr->registeredItem))
+        return FALSE;   // Moemon Kai: past the GENERATION (stays registered)
     if (gSaveBlock1Ptr->registeredItem != ITEM_NONE)
     {
         if (CheckBagHasItem(gSaveBlock1Ptr->registeredItem, 1) == TRUE)

@@ -492,6 +492,8 @@ u16 MP_RegionPartyCount(void)
 // every region shows up to that generation. Johto's / Kanto's wild tables and trainers' teams are the rip's Gen 2 cap
 // below Gen 4 (tools/quetzal_port/gen_gen2.py), its Gen 4 cap from there.
 #include "wild_encounter.h"
+#include "item.h"
+#include "main.h"
 #include "data.h"
 #include "battle.h"
 #include "constants/abilities.h"
@@ -596,7 +598,34 @@ u8 MP_Gen_MoveType(u8 type)
     return type;
 }
 
-// SEALED: a Pokémon of a species past the GENERATION stays yours but can't battle (like an EGG), until it's raised
+// The generation an item comes from (0: Kai's own and the story items JOHTO / KANTO need: always there)
+u8 MP_Gen_OfItem(u16 item)
+{
+    static const u8 sLater[] = {   // ITEM_QUICK_POWDER .. ITEM_RAGE_CANDY_BAR
+        4, 5, 4, 5, 6, 6, 7, 7, 2};
+    static const u8 sGen59[] = {   // ITEM_ICE_STONE .. ITEM_LEADERS_CREST
+        7, 8, 8, 9, 8, 8, 9, 9, 9, 8, 8, 9, 9, 6, 6, 8, 8, 8, 8, 8, 8, 8, 8, 5, 5, 5, 6, 7, 7, 7, 7, 9, 7, 7, 7, 7,
+        6, 5, 5, 6, 8, 6, 9, 9, 9};
+    if (item <= ITEM_TOPO_BERRY)
+        return 3;
+    if (item >= ITEM_QUICK_POWDER && item <= ITEM_RAGE_CANDY_BAR)
+        return sLater[item - ITEM_QUICK_POWDER];
+    if (item == ITEM_CANDY_JAR || item == ITEM_CARD_CASE)
+        return 0;
+    if (item >= ITEM_CARD_CASE + 1 && item <= ITEM_ROWAP_BERRY)
+        return 4;
+    if (item >= ITEM_ICE_STONE && item < ITEM_ICE_STONE + ARRAY_COUNT(sGen59))
+        return sGen59[item - ITEM_ICE_STONE];
+    return 0;
+}
+
+bool8 MP_Gen_ItemAllowed(u16 item)
+{
+    return MP_Gen_OfItem(item) <= UseCap();
+}
+
+// SEALED: a Pokémon of a species, with a move or with an ability past the GENERATION stays yours but can't battle
+// (like an EGG), until GENERATION is raised again
 bool8 MP_Gen_SealedSpecies(u16 species)
 {
     return species != SPECIES_NONE && species < NUM_SPECIES && MP_Gen_OfSpecies(species) > UseCap();
@@ -604,9 +633,55 @@ bool8 MP_Gen_SealedSpecies(u16 species)
 
 bool8 MP_Gen_SealedMon(struct Pokemon *mon)
 {
+    u32 i;
+    u16 species;
     if (GetMonData(mon, MON_DATA_IS_EGG))
         return FALSE;
-    return MP_Gen_SealedSpecies(GetMonData(mon, MON_DATA_SPECIES));
+    species = GetMonData(mon, MON_DATA_SPECIES);
+    if (species == SPECIES_NONE)
+        return FALSE;
+    if (MP_Gen_SealedSpecies(species))
+        return TRUE;
+    for (i = 0; i < MAX_MON_MOVES; i++)
+    {
+        u16 move = GetMonData(mon, MON_DATA_MOVE1 + i);
+        if (move != MOVE_NONE && !MP_Gen_MoveAllowed(move))
+            return TRUE;
+    }
+    return MP_Gen_OfAbility(GetMonAbility(mon)) > UseCap();
+}
+
+// Held items past the GENERATION go back to the bag (party and PC; one that doesn't fit stays held). Called when the
+// generation may have changed: a map loads, OPTIONS, the room's rules
+static u8 ReturnItem(struct BoxPokemon *b)
+{
+    u16 item;
+    if (!GetBoxMonData(b, MON_DATA_SPECIES) || GetBoxMonData(b, MON_DATA_IS_EGG))
+        return 0;
+    item = GetBoxMonData(b, MON_DATA_HELD_ITEM);
+    if (item == ITEM_NONE || MP_Gen_ItemAllowed(item) || !AddBagItem(item, 1))
+        return 0;
+    item = ITEM_NONE;
+    SetBoxMonData(b, MON_DATA_HELD_ITEM, &item);
+    return 1;
+}
+
+void MP_Gen_ReturnHeldItems(void)
+{
+    static u8 sLastCap;
+    u8 cap = MP_Gen_Cap(MP_Region_Current());
+    u32 i, j, n = 0;
+    if (cap == sLastCap || gSaveBlock1Ptr == NULL || gMain.inBattle)
+        return;
+    sLastCap = cap;
+    for (i = 0; i < PARTY_SIZE; i++)
+        n += ReturnItem(&gPlayerParty[i].box);
+    if (gPokemonStoragePtr != NULL)
+        for (i = 0; i < TOTAL_BOXES_COUNT; i++)
+            for (j = 0; j < IN_BOX_COUNT; j++)
+                n += ReturnItem(&gPokemonStoragePtr->boxes[i][j]);
+    if (n)
+        MPNet_Log("generation %d: %u held item(s) back to the bag", cap, n);
 }
 
 // A battler's types and ability as the generation has them (past the cap: no ability)
@@ -804,6 +879,7 @@ void MP_Region_TagMet(struct BoxPokemon *b)
 void MP_Region_OnMapLoaded(void)
 {
     u8 cur = MP_Region_Current();
+    MP_Gen_ReturnHeldItems();   // GENERATION: held items past it go back to the bag
     if (cur != REGION_HOENN)
     {
         void Tt_MapSetup(void);
