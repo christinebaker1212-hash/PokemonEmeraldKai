@@ -46,7 +46,7 @@ pressuntil A cards 2000
 wait 60
 mp cards fast
 mp cards win
-wait 200
+wait 320
 rendershot lesson-won
 press A 2
 waitfor field 600
@@ -85,7 +85,7 @@ press A 2
 wait 60
 mp cards fast
 mp cards win
-wait 200
+wait 320
 press A 2
 wait 30
 press A 2

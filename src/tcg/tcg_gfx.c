@@ -374,6 +374,8 @@ int G_Measure(const char *s, int font)
     }
     return w;
 }
+static unsigned sTextAlpha = 255;   /* (G_TextAlpha) */
+void G_TextAlpha(unsigned alpha) { sTextAlpha = alpha > 255 ? 255 : alpha; }
 static void Glyph(unsigned code, int x, int y, int font, unsigned color, unsigned shadow)
 {
     int w = FontWidth(code, font), h = font == TF_NORMAL ? 15 : 12;
@@ -384,9 +386,11 @@ static void Glyph(unsigned code, int x, int y, int font, unsigned color, unsigne
     if (shadow != G_NO_SHADOW)
     {
         SDL_SetTextureColorMod(sh, (shadow >> 16) & 255, (shadow >> 8) & 255, shadow & 255);
+        SDL_SetTextureAlphaMod(sh, (Uint8)sTextAlpha);
         SDL_RenderCopy(sR, sh, &src, &dst);
     }
     SDL_SetTextureColorMod(face, (color >> 16) & 255, (color >> 8) & 255, color & 255);
+    SDL_SetTextureAlphaMod(face, (Uint8)sTextAlpha);
     SDL_RenderCopy(sR, face, &src, &dst);
 }
 static int sMeasureOnly;   /* (G_TextHeight: the same wrapping, nothing drawn) */
@@ -1704,7 +1708,7 @@ void G_ResultScreen(int win, int t, unsigned frame, const char *opponent, const 
             G_TextAlign(120, 51, TA_CENTER, 0xc8d0e0, G_NO_SHADOW, vs, TF_NARROW);
         }
     }
-    if (t > 20)
+    if (t >= G_RESULT_BOX)
     {
         /* (as tall as its text: a card player's quote can run to three lines; under the banner, never off screen) */
         int lines = G_TextHeight(reason, 192, TF_SMALL), extra = result && result[0] ? G_TextHeight(result, 192, TF_SMALL) : 0;
@@ -1716,10 +1720,12 @@ void G_ResultScreen(int win, int t, unsigned frame, const char *opponent, const 
         if (y + h > 158)
             y = 158 - h;   /* (moves up, at most to just under the banner) */
         G_Window(16, y, 208, h);
+        if (t < G_RESULT_TEXT)
+            return;   /* (the box waits a moment empty, then the quote and the prizes) */
         G_Text(24, y + 5, G_INK, G_INK_SHADOW, reason ? reason : "", 192, TF_SMALL);
         if (extra)
             G_Text(24, y + 5 + lines + 2, 0x3858a0, G_INK_SHADOW, result, 192, TF_SMALL);
-        if (t > 40 && (frame / 16) % 2)
+        if (t >= G_RESULT_READY && (frame / 16) % 2)
             G_ButtonIcon(206, y + h - 8, 0);
     }
 }

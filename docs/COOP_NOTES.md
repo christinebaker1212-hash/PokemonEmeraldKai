@@ -2532,6 +2532,13 @@ TCG_LINK_VERSION 15.
   way); the blow's sound plays as FX_IMPACT lands (Advance) and the attack event waits only until then, so the damage
   follows the slam; YgoBoard_Idle holds input while an attacker is still flying. The end of a duel is G_ResultScreen
   (tcg_gfx.c), shared with the POKeMON table: its window as tall as its text (G_TextHeight).
+- 1.56.2: a phase's sweep waits (B.pendPhase) and shows only when something happens in that phase: the next
+  event that isn't a PHASE / TURN / WIN, or a question of ours that isn't a quiet chance passed for us (L held counts:
+  B.heldL); a phase with neither is passed without one (PhaseBanner, Advance). The middle line's words about the card
+  fade out while a sweep plays and back in when it's our question again (B.infoFade, G_TextAlpha in tcg_gfx.c: text
+  drawn from then on at that alpha). G_ResultScreen's timing for both tables: G_RESULT_BOX (the box, a second after
+  the banner), G_RESULT_TEXT (its words, a second later), G_RESULT_READY (A leaves); test scripts wait 320 frames
+  after `mp ygo win` / `mp cards win`.
 
 ## Rare card foil (1.56.0)
 

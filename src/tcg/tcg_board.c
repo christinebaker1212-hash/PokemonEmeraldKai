@@ -3036,7 +3036,7 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
     if (B.mode == M_RESULT)
     {
         B.resultTime++;
-        if (B.resultTime > 40 && pressed & KEY_A)
+        if (B.resultTime >= G_RESULT_READY && pressed & KEY_A)
         {
             PlaySE(SE_SELECT);
             return BOARD_LEAVE;
