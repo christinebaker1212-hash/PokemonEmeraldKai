@@ -230,5 +230,51 @@ int main(void)
             }
     }
     printf("PASS %u Pokemon Card GB2 used Pokemon Powers, %u times\n", used, ok);
+    /* Every GB2 deck in AI duels against others (GB2's and the first game's), to the end */
+    {
+        unsigned d, games = 0, finished = 0, actions = 0, trainers = 0;
+        for (d = 0; d < gTcgDeckDefinitionCount; d++)
+        {
+            unsigned round;
+            if (strncmp(gTcgDeckDefinitions[d].name, "GB2 ", 4))
+                continue;
+            for (round = 0; round < 3; round++)
+            {
+                unsigned other = (d * 7 + round * 13 + 1) % gTcgDeckDefinitionCount, k;
+                struct TcgAction next;
+                if (!TcgDuel_Init(&g, gTcgDeckDefinitions[d].cards, gTcgDeckDefinitions[other].cards, d * 31 + round + 1, 4))
+                {
+                    printf("FAIL %s or %s isn't a legal deck\n", gTcgDeckDefinitions[d].name, gTcgDeckDefinitions[other].name);
+                    return 1;
+                }
+                games++;
+                for (k = 0; k < 3000 && g.phase != TCG_FINISHED; k++)
+                {
+                    int result;
+                    if (!TcgDuel_AiAction(&g, &next))
+                    {
+                        printf("FAIL %s vs %s: the AI has no action (phase %u)\n", gTcgDeckDefinitions[d].name,
+                               gTcgDeckDefinitions[other].name, g.phase);
+                        return 1;
+                    }
+                    trainers += next.type == TCG_PLAY_TRAINER || next.type == TCG_USE_POWER;
+                    result = TcgDuel_Apply(&g, &next);
+                    if (result != TCG_OK)
+                    {
+                        printf("FAIL %s vs %s: action %u refused: %s\n", gTcgDeckDefinitions[d].name,
+                               gTcgDeckDefinitions[other].name, next.type, g.error);
+                        return 1;
+                    }
+                    assert(TcgDuel_Conserved(&g));
+                    actions++;
+                }
+                finished += g.phase == TCG_FINISHED;
+            }
+        }
+        printf("PASS %u AI duels with GB2's decks, %u finished, %u actions (%u Trainers and powers)\n", games, finished,
+               actions, trainers);
+        if (finished * 10 < games * 9)
+            return 1;
+    }
     return 0;
 }

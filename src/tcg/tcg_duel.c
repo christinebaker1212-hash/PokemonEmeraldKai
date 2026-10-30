@@ -235,7 +235,11 @@ static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack)
 {
     const struct TcgCard *c = TcgDuel_Attacker(g, player);
     const struct TcgAttack *a;
-    unsigned t, total = 0, typed = 0, from = EnergySlot(g, player);
+    unsigned t, total = 0, typed = 0, from = EnergySlot(g, player), rainbow = 0, short_ = 0, i;
+    const struct TcgFieldCard *f = &g->players[player].field[from];
+    /* (Rainbow Energy: any one type each) */
+    for (i = 0; i < f->attachedSize; i++)
+        rainbow += g->players[player].cards[f->attached[i]] == TCG_CARD_RAINBOW_ENERGY;
     if (!c || attack > 1 || c->kind != TCG_POKEMON)
         return 0;
     a = &c->attacks[attack];
@@ -246,13 +250,14 @@ static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack)
         total += a->cost[t];
         if (t != TCG_COLORLESS)
         {
-            if (TcgDuel_Energy(g, player, from, t) < a->cost[t])
-                return 0;
+            unsigned have = TcgDuel_Energy(g, player, from, t);
+            if (have < a->cost[t])
+                short_ += a->cost[t] - have;
             typed += a->cost[t];
         }
     }
     (void)typed;
-    return TcgDuel_Energy(g, player, from, TCG_NONE) >= total;
+    return short_ <= rainbow && TcgDuel_Energy(g, player, from, TCG_NONE) >= total;
 }
 void TcgDuel_DiscardField(struct TcgDuel *g, unsigned player, unsigned slot)
 {
@@ -843,7 +848,17 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             return Error(g, "Headache: you can't play Trainer cards this turn.");
         if (TcgPower_NoTrainers(g))
             return Error(g, "Dark Vileplume's Hay Fever: no Trainer cards can be played.");
-        return TcgDuel_Trainer(g, a);
+        {
+            int result = TcgDuel_Trainer(g, a);
+            if (result == TCG_OK && g->turnOver)
+            {
+                /* Computer Error: the turn is over */
+                g->turnOver = 0;
+                if (g->phase == TCG_TURN)
+                    EndTurn(g);
+            }
+            return result;
+        }
     }
     if (s >= TCG_FIELD_SIZE)
         return TCG_INVALID;
@@ -892,6 +907,24 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         f->attached[f->attachedSize++] = TcgPile_Remove(p->hand, &p->handSize, a->hand);
         p->energyPlayed = 1;
         TcgDuel_Event(g, TCG_EV_ATTACH, g->current, s, 0, c->id, 0);
+        /* GB2's special Energy, attached from the hand */
+        if (c->id == TCG_CARD_POTION_ENERGY && f->damage)
+        {
+            f->damage -= 10;
+            TcgDuel_Event(g, TCG_EV_HEAL, g->current, s, 10, 0, 0);
+        }
+        else if (c->id == TCG_CARD_FULLHEAL_ENERGY && (f->condition || f->poison))
+        {
+            f->condition = TCG_HEALTHY;
+            f->poison = 0;
+            TcgDuel_Event(g, TCG_EV_STATUS, g->current, s, TCG_HEALTHY, 0, 0);
+        }
+        else if (c->id == TCG_CARD_RAINBOW_ENERGY)
+        {
+            f->damage += 10;
+            TcgDuel_Event(g, TCG_EV_DAMAGE, g->current, s, 10, 0, 0);
+            TcgDuel_ResolveKnockouts(g);
+        }
         return TCG_OK;
     default:
         return Error(g, "That action is not available.");
@@ -948,6 +981,25 @@ int TcgDuel_Apply(struct TcgDuel *g, const struct TcgAction *action)
     result = Apply(&next, action);
     if (result == TCG_OK)
     {
+        /* GB2's Recycle Energy: put into the discard pile from play, it goes back to the hand */
+        unsigned who, s, i;
+        for (who = 0; who < 2; who++)
+            for (s = 0; s < TCG_FIELD_SIZE; s++)
+                for (i = 0; i < g->players[who].field[s].attachedSize; i++)
+                {
+                    uint8_t card = g->players[who].field[s].attached[i];
+                    struct TcgPlayer *q = &next.players[who];
+                    unsigned k;
+                    if (g->players[who].cards[card] != TCG_CARD_RECYCLE_ENERGY)
+                        continue;
+                    for (k = 0; k < q->discardSize; k++)
+                        if (q->discard[k] == card)
+                        {
+                            q->hand[q->handSize++] = TcgPile_Remove(q->discard, &q->discardSize, k);
+                            TcgDuel_Log(&next, "Recycle Energy went back to the hand.");
+                            break;
+                        }
+                }
         if (!TcgDuel_Conserved(&next))
         {
             snprintf(g->error, sizeof(g->error), "Internal error: card conservation failed.");

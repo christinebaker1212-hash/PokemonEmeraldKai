@@ -150,12 +150,13 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
     }
     case TCG_CARD_ENERGY_SEARCH:
     case TCG_CARD_POKE_BALL:
+    case TCG_CARD_POKEBALL: /* (GB2's: the same) */
         if (a->selectionCount != 1 || a->selections[0] >= 60)
             return Fail(g, "Select a card from your deck.");
         card = Tcg_Card(p->cards[a->selections[0]]);
         if (id == TCG_CARD_ENERGY_SEARCH && card->id > 6)
             return Fail(g, "Energy Search requires a basic Energy card.");
-        if (id == TCG_CARD_POKE_BALL && card->kind != TCG_POKEMON)
+        if ((id == TCG_CARD_POKE_BALL || id == TCG_CARD_POKEBALL) && card->kind != TCG_POKEMON)
             return Fail(g, "Poke Ball requires a Pokemon card.");
         at = Index(p->deck, p->deckSize, a->selections[0]);
         if (at < 0)
@@ -395,6 +396,303 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
         }
         for (i = 0; i < n; i++)
             p->deck[p->deckSize - i - 1] = a->selections[i];
+        break;
+    /* ---------------- Pokemon Card GB2's ---------------- */
+    case TCG_CARD_IMAKUNI_CARD_422:
+        if (!p->field[0].stackSize)
+            return TCG_INVALID;
+        p->field[0].condition = TCG_CONFUSED;
+        TcgDuel_Event(g, TCG_EV_STATUS, g->current, 0, TCG_CONFUSED, 0, p->field[0].poison);
+        break;
+    case TCG_CARD_FOSSIL_EXCAVATION:
+    {
+        /* a Mysterious Fossil from the deck or the discard pile (selections[0]; none: the first one) */
+        int fromDeck = -1, fromDiscard = -1;
+        for (i = 0; i < p->deckSize; i++)
+            if (p->cards[p->deck[i]] == TCG_CARD_MYSTERIOUS_FOSSIL &&
+                (a->selectionCount ? p->deck[i] == a->selections[0] : fromDeck < 0))
+                fromDeck = (int)i;
+        for (i = 0; i < p->discardSize; i++)
+            if (p->cards[p->discard[i]] == TCG_CARD_MYSTERIOUS_FOSSIL &&
+                (a->selectionCount ? p->discard[i] == a->selections[0] : fromDiscard < 0))
+                fromDiscard = (int)i;
+        if (fromDeck >= 0)
+            p->hand[p->handSize++] = TcgPile_Remove(p->deck, &p->deckSize, (unsigned)fromDeck);
+        else if (fromDiscard >= 0)
+            p->hand[p->handSize++] = TcgPile_Remove(p->discard, &p->discardSize, (unsigned)fromDiscard);
+        else if (a->selectionCount)
+            return Fail(g, "Choose a Mysterious Fossil in your deck or discard pile.");
+        if (fromDeck >= 0 || fromDiscard >= 0)
+            TcgDuel_Event(g, TCG_EV_DRAW, g->current, 0, 1, 0, 0);
+        TcgDuel_Shuffle(g, g->current);
+        break;
+    }
+    case TCG_CARD_MAX_REVIVE:
+    {
+        /* selections: 2 Energy cards from the hand, then a Basic Pokemon from the discard pile; target: the Bench space */
+        unsigned slot = target;
+        if (a->selectionCount != 3)
+            return Fail(g, "Discard 2 Energy cards, then choose a Basic Pokemon in your discard pile.");
+        for (i = 0; i < 2; i++)
+        {
+            card = Tcg_Card(p->cards[a->selections[i]]);
+            if (card->kind != TCG_ENERGY || a->selections[0] == a->selections[1] ||
+                Index(p->hand, p->handSize, a->selections[i]) < 0)
+                return Fail(g, "Discard 2 Energy cards from your hand.");
+        }
+        card = Tcg_Card(p->cards[a->selections[2]]);
+        if (card->kind != TCG_POKEMON || card->stage || Index(p->discard, p->discardSize, a->selections[2]) < 0)
+            return Fail(g, "Choose a Basic Pokemon in your discard pile.");
+        if (slot < 1 || slot >= TCG_FIELD_SIZE || p->field[slot].stackSize)
+            for (slot = 1; slot < TCG_FIELD_SIZE && p->field[slot].stackSize; slot++)
+                ;
+        if (slot >= TCG_FIELD_SIZE)
+            return Fail(g, "Your Bench is full.");
+        for (i = 0; i < 2; i++)
+            Move(p->hand, &p->handSize, p->discard, &p->discardSize, a->selections[i]);
+        f = &p->field[slot];
+        memset(f, 0, sizeof(*f));
+        Move(p->discard, &p->discardSize, f->stack, &f->stackSize, a->selections[2]);
+        f->enteredTurn = g->turn;
+        TcgDuel_Event(g, TCG_EV_PLAY, g->current, slot, 0, card->id, 0);
+        break;
+    }
+    case TCG_CARD_SUPER_SCOOP_UP:
+    {
+        unsigned others = 0, k;
+        if (target >= TCG_FIELD_SIZE || !p->field[target].stackSize)
+            return Fail(g, "Choose one of your Pokemon.");
+        for (k = 0; k < TCG_FIELD_SIZE; k++)
+            others += k != target && p->field[k].stackSize;
+        if (!others)
+            return Fail(g, "It's your only Pokemon in play.");
+        if (TcgDuel_Coin(g, g->current))
+        {
+            f = &p->field[target];
+            for (i = 0; i < f->stackSize; i++)
+                p->hand[p->handSize++] = f->stack[i];
+            for (i = 0; i < f->attachedSize; i++)
+                p->hand[p->handSize++] = f->attached[i];
+            TcgDuel_Event(g, TCG_EV_TO_HAND, g->current, target, 0, p->cards[f->stack[f->stackSize - 1]], 0);
+            memset(f, 0, sizeof(*f));
+        }
+        break;
+    }
+    case TCG_CARD_CHALLENGE:
+    {
+        /* They accept if they have room and Basic Pokemon to put down; then both fill their Benches with the
+         * strongest Basic Pokemon of their decks. Otherwise: draw 2. */
+        unsigned room[2] = {0, 0}, basics[2] = {0, 0};
+        for (who = 0; who < 2; who++)
+        {
+            struct TcgPlayer *q = &g->players[who];
+            for (i = 1; i < TCG_FIELD_SIZE; i++)
+                room[who] += !q->field[i].stackSize;
+            for (i = 0; i < q->deckSize; i++)
+                basics[who] += Tcg_Card(q->cards[q->deck[i]])->kind == TCG_POKEMON && !Tcg_Card(q->cards[q->deck[i]])->stage;
+        }
+        if (!room[g->current ^ 1] || !basics[g->current ^ 1] || (!room[0] && !room[1]))
+        {
+            TcgDuel_Log(g, "Challenge! declined: draw 2 cards.");
+            TcgDuel_Event(g, TCG_EV_DRAW, g->current, 0, TcgDuel_Draw(g, g->current, 2), 0, 0);
+            break;
+        }
+        TcgDuel_Log(g, "Challenge! accepted.");
+        for (n = 0; n < 2; n++)
+        {
+            struct TcgPlayer *q;
+            unsigned slot;
+            who = g->current ^ n;
+            q = &g->players[who];
+            for (slot = 1; slot < TCG_FIELD_SIZE; slot++)
+            {
+                int best = -1;
+                if (q->field[slot].stackSize)
+                    continue;
+                for (i = 0; i < q->deckSize; i++)
+                {
+                    const struct TcgCard *c = Tcg_Card(q->cards[q->deck[i]]);
+                    if (c->kind == TCG_POKEMON && !c->stage && (best < 0 || c->hp > Tcg_Card(q->cards[q->deck[best]])->hp))
+                        best = (int)i;
+                }
+                if (best < 0)
+                    break;
+                memset(&q->field[slot], 0, sizeof(q->field[slot]));
+                q->field[slot].stack[q->field[slot].stackSize++] = TcgPile_Remove(q->deck, &q->deckSize, (unsigned)best);
+                q->field[slot].enteredTurn = g->turn;
+                TcgDuel_Event(g, TCG_EV_PLAY, who, slot, 0, q->cards[q->field[slot].stack[0]], 0);
+            }
+            TcgDuel_Shuffle(g, who);
+        }
+        break;
+    }
+    case TCG_CARD_MOON_STONE:
+    case TCG_CARD_THE_BOSSS_WAY:
+    {
+        /* a Colorless Evolution card (Moon Stone) / a Dark Pokemon's Evolution card (The Boss's Way) from the deck */
+        int pick = -1;
+        if (!p->deckSize)
+            return Fail(g, "Your deck is empty.");
+        for (i = 0; i < p->deckSize; i++)
+        {
+            const struct TcgCard *c = Tcg_Card(p->cards[p->deck[i]]);
+            int ok = c->kind == TCG_POKEMON && c->stage &&
+                     (id == TCG_CARD_MOON_STONE ? c->type == TCG_COLORLESS : (c->dark || !strncmp(c->name, "Dark ", 5)));
+            if (ok && (a->selectionCount ? p->deck[i] == a->selections[0] : pick < 0))
+                pick = (int)i;
+        }
+        if (pick >= 0)
+        {
+            p->hand[p->handSize++] = TcgPile_Remove(p->deck, &p->deckSize, (unsigned)pick);
+            TcgDuel_Event(g, TCG_EV_DRAW, g->current, 0, 1, 0, 0);
+            TcgDuel_Log(g, "%s to the hand.", Tcg_Card(p->cards[p->hand[p->handSize - 1]])->name);
+        }
+        else if (a->selectionCount)
+            return Fail(g, "That card can't be taken.");
+        TcgDuel_Shuffle(g, g->current);
+        TcgDuel_Event(g, TCG_EV_DECK_CHANGED, g->current, 0, 0, 0, 0);
+        break;
+    }
+    case TCG_CARD_IMPOSTER_OAKS_REVENGE:
+        /* a card from the hand discarded; they shuffle their hand in and draw 4 */
+        if (a->selectionCount != 1 || !Move(p->hand, &p->handSize, p->discard, &p->discardSize, a->selections[0]))
+            return Fail(g, "Discard a card from your hand to play this.");
+        while (op->handSize)
+            op->deck[op->deckSize++] = op->hand[--op->handSize];
+        TcgDuel_Shuffle(g, g->current ^ 1);
+        TcgDuel_Event(g, TCG_EV_DRAW, g->current ^ 1, 0, TcgDuel_Draw(g, g->current ^ 1, 4), 0, 0);
+        break;
+    case TCG_CARD_SLEEP:
+        if (op->field[0].stackSize && TcgDuel_Coin(g, g->current))
+        {
+            op->field[0].condition = TCG_ASLEEP;
+            TcgPower_Sanitize(g);
+            TcgDuel_Event(g, TCG_EV_STATUS, g->current ^ 1, 0, op->field[0].condition, 0, op->field[0].poison);
+        }
+        break;
+    case TCG_CARD_COMPUTER_ERROR:
+        /* up to 5 each (always leaving a card in each deck), then the turn is over */
+        for (n = 0; n < 2; n++)
+        {
+            struct TcgPlayer *q = &g->players[g->current ^ n];
+            unsigned k = q->deckSize > 5 ? 5 : q->deckSize ? q->deckSize - 1 : 0;
+            if (k)
+                TcgDuel_Event(g, TCG_EV_DRAW, g->current ^ n, 0, TcgDuel_Draw(g, g->current ^ n, k), 0, 0);
+        }
+        g->turnOver = 1;
+        break;
+    case TCG_CARD_DIGGER:
+    {
+        /* coins in turn until someone flips tails: that player's Active takes 10 */
+        unsigned flipper = g->current;
+        for (n = 0; n < 60; n++, flipper ^= 1)
+            if (!TcgDuel_Coin(g, flipper))
+            {
+                struct TcgFieldCard *hit = &g->players[flipper].field[0];
+                if (hit->stackSize)
+                {
+                    hit->damage += 10;
+                    TcgDuel_Event(g, TCG_EV_DAMAGE, flipper, 0, 10, 0, 0);
+                }
+                break;
+            }
+        break;
+    }
+    case TCG_CARD_POKEMON_RECALL:
+    {
+        /* an Evolution card from the discard pile on top of the deck */
+        int pick = -1;
+        for (i = 0; i < p->discardSize; i++)
+        {
+            const struct TcgCard *c = Tcg_Card(p->cards[p->discard[i]]);
+            if (c->kind == TCG_POKEMON && c->stage && (a->selectionCount ? p->discard[i] == a->selections[0] : pick < 0))
+                pick = (int)i;
+        }
+        if (pick < 0)
+            return Fail(g, "Choose an Evolution card in your discard pile.");
+        p->deck[p->deckSize++] = TcgPile_Remove(p->discard, &p->discardSize, (unsigned)pick);
+        TcgDuel_Event(g, TCG_EV_DECK_CHANGED, g->current, 0, 0, 0, 0);
+        break;
+    }
+    case TCG_CARD_GOOP_GAS_ATTACK:
+        g->goopGasUntil = (uint16_t)(g->turn + 1);
+        TcgDuel_Log(g, "Every Pokemon Power stops working until the end of the next turn.");
+        break;
+    case TCG_CARD_BILLS_TELEPORTER:
+        if (TcgDuel_Coin(g, g->current))
+            TcgDuel_Event(g, TCG_EV_DRAW, g->current, 0, TcgDuel_Draw(g, g->current, 4), 0, 0);
+        break;
+    case TCG_CARD_BILLS_COMPUTER:
+        return Fail(g, "Bill's PC is used for trades, not in a duel.");
+    case TCG_CARD_MASTER_BALL:
+    {
+        /* a Pokemon card from the top 7 of the deck (selections[0], optional), the rest shuffled in */
+        unsigned top = p->deckSize < 7 ? p->deckSize : 7;
+        if (!p->deckSize)
+            return Fail(g, "Your deck is empty.");
+        if (a->selectionCount)
+        {
+            int at = Index(p->deck, p->deckSize, a->selections[0]);
+            if (at < 0 || at < (int)(p->deckSize - top) || Tcg_Card(p->cards[a->selections[0]])->kind != TCG_POKEMON)
+                return Fail(g, "Choose a Pokemon card among the top 7 cards.");
+            p->hand[p->handSize++] = TcgPile_Remove(p->deck, &p->deckSize, (unsigned)at);
+            TcgDuel_Event(g, TCG_EV_DRAW, g->current, 0, 1, 0, 0);
+        }
+        TcgDuel_Shuffle(g, g->current);
+        TcgDuel_Event(g, TCG_EV_DECK_CHANGED, g->current, 0, 0, 0, 0);
+        break;
+    }
+    case TCG_CARD_NIGHTLY_GARBAGE_RUN:
+        /* up to 3 Pokemon and basic Energy cards from the discard pile into the deck */
+        if (!a->selectionCount || a->selectionCount > 3)
+            return Fail(g, "Choose up to 3 Pokemon or basic Energy cards in your discard pile.");
+        for (i = 0; i < a->selectionCount; i++)
+        {
+            const struct TcgCard *c = Tcg_Card(p->cards[a->selections[i]]);
+            if ((c->kind != TCG_POKEMON && !(c->kind == TCG_ENERGY && c->id <= 6)) ||
+                !Move(p->discard, &p->discardSize, p->deck, &p->deckSize, a->selections[i]))
+                return Fail(g, "Choose up to 3 Pokemon or basic Energy cards in your discard pile.");
+        }
+        TcgDuel_Shuffle(g, g->current);
+        TcgDuel_Event(g, TCG_EV_DECK_CHANGED, g->current, 0, 0, 0, 0);
+        break;
+    case TCG_CARD_ROCKETS_SNEAK_ATTACK:
+    {
+        /* their hand looked at: a Trainer there (the rarest) goes into their deck */
+        int pick = -1;
+        for (i = 0; i < op->handSize; i++)
+        {
+            const struct TcgCard *c = Tcg_Card(op->cards[op->hand[i]]);
+            if (c->kind == TCG_TRAINER && (pick < 0 || c->rarity > Tcg_Card(op->cards[op->hand[pick]])->rarity))
+                pick = (int)i;
+        }
+        if (pick >= 0)
+        {
+            TcgDuel_Log(g, "%s from their hand went into their deck.", Tcg_Card(op->cards[op->hand[pick]])->name);
+            op->deck[op->deckSize++] = TcgPile_Remove(op->hand, &op->handSize, (unsigned)pick);
+            TcgDuel_Shuffle(g, g->current ^ 1);
+            TcgDuel_Event(g, TCG_EV_DECK_CHANGED, g->current ^ 1, 0, 0, 0, 0);
+        }
+        else
+            TcgDuel_Log(g, "There's no Trainer card in their hand.");
+        break;
+    }
+    case TCG_CARD_HERE_COMES_TEAM_ROCKET:
+        p->prizesUp = op->prizesUp = 1;
+        TcgDuel_Log(g, "Both players' Prize cards are face up for the rest of the duel.");
+        break;
+    case TCG_CARD_THE_ROCKETS_TRAP:
+        if (TcgDuel_Coin(g, g->current))
+        {
+            for (n = 0; n < 3 && op->handSize; n++)
+                op->deck[op->deckSize++] = TcgPile_Remove(op->hand, &op->handSize, Tcg_RandomBelow(&g->rng, op->handSize));
+            if (n)
+            {
+                TcgDuel_Shuffle(g, g->current ^ 1);
+                TcgDuel_Event(g, TCG_EV_DECK_CHANGED, g->current ^ 1, 0, 0, 0, 0);
+                TcgDuel_Log(g, "%u cards from their hand went into their deck.", n);
+            }
+        }
         break;
     default:
         snprintf(g->error, sizeof(g->error), "Trainer effect not yet ported: %s", Tcg_Card(id)->name);

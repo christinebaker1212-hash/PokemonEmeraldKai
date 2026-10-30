@@ -108,6 +108,30 @@ static int Search(const struct TcgPlayer *p, const uint8_t *pile, unsigned count
     }
     return best;
 }
+static unsigned Left(const struct TcgDuel *g, unsigned who, unsigned slot);
+/* The card in a pile that matches (Pokemon card stage: -1 any, 0 Basic, 1 Evolution) */
+static int FindPokemon(const struct TcgPlayer *p, const uint8_t *pile, unsigned count, int stage)
+{
+    unsigned i;
+    int best = -1;
+    for (i = 0; i < count; i++)
+    {
+        const struct TcgCard *c = Tcg_Card(p->cards[pile[i]]);
+        if (c->kind == TCG_POKEMON && (stage < 0 || (stage ? c->stage != 0 : c->stage == 0)) &&
+            (best < 0 || Score(c) > Score(Tcg_Card(p->cards[best]))))
+            best = pile[i];
+    }
+    return best;
+}
+static int Lowest(const struct TcgPlayer *p, unsigned skip)
+{
+    unsigned i;
+    int worst = -1;
+    for (i = 0; i < p->handSize; i++)
+        if (p->hand[i] != skip && (worst < 0 || Score(Tcg_Card(p->cards[p->hand[i]])) < Score(Tcg_Card(p->cards[worst]))))
+            worst = p->hand[i];
+    return worst;
+}
 static int TrainerAction(const struct TcgDuel *g, unsigned hand, struct TcgAction *a)
 {
     const struct TcgPlayer *p = &g->players[g->current], *op = &g->players[g->current ^ 1];
@@ -278,6 +302,116 @@ static int TrainerAction(const struct TcgDuel *g, unsigned hand, struct TcgActio
         a->selections[0] = selected;
         a->selectionCount = 1;
         break;
+    /* GB2's */
+    case TCG_CARD_POKEBALL:
+        if ((selected = FindPokemon(p, p->deck, p->deckSize, -1)) < 0)
+            return 0;
+        a->selections[a->selectionCount++] = (uint8_t)selected;
+        break;
+    case TCG_CARD_FOSSIL_EXCAVATION:
+        for (i = 0; i < p->handSize && p->cards[p->hand[i]] != TCG_CARD_MYSTERIOUS_FOSSIL; i++)
+            ;
+        if (i < p->handSize)
+            return 0;
+        for (i = j = 0; i < p->deckSize; i++)
+            j += p->cards[p->deck[i]] == TCG_CARD_MYSTERIOUS_FOSSIL;
+        for (i = 0; i < p->discardSize; i++)
+            j += p->cards[p->discard[i]] == TCG_CARD_MYSTERIOUS_FOSSIL;
+        if (!j)
+            return 0;
+        break;
+    case TCG_CARD_MAX_REVIVE:
+        for (i = 0; i < p->handSize && a->selectionCount < 2; i++)
+            if (i != hand && Tcg_Card(p->cards[p->hand[i]])->kind == TCG_ENERGY)
+                a->selections[a->selectionCount++] = p->hand[i];
+        if (a->selectionCount < 2 || (selected = FindPokemon(p, p->discard, p->discardSize, 0)) < 0)
+            return 0;
+        a->selections[a->selectionCount++] = (uint8_t)selected;
+        for (i = 1; i < TCG_FIELD_SIZE && p->field[i].stackSize; i++)
+            ;
+        a->target = (uint8_t)i;
+        break;
+    case TCG_CARD_SUPER_SCOOP_UP:
+        if (Left(g, g->current, 0) > 20)
+            return 0;
+        a->target = 0;
+        break;
+    case TCG_CARD_CHALLENGE:
+        for (i = 1, j = 0; i < TCG_FIELD_SIZE; i++)
+            j += !p->field[i].stackSize;
+        if (j < 3)
+            return 0;
+        break;
+    case TCG_CARD_MOON_STONE:
+    case TCG_CARD_THE_BOSSS_WAY:
+        for (i = 0; i < p->deckSize; i++)
+        {
+            const struct TcgCard *c = Tcg_Card(p->cards[p->deck[i]]);
+            if (c->kind == TCG_POKEMON && c->stage &&
+                (id == TCG_CARD_MOON_STONE ? c->type == TCG_COLORLESS : (c->dark || !strncmp(c->name, "Dark ", 5))))
+                break;
+        }
+        if (i == p->deckSize)
+            return 0;
+        break;
+    case TCG_CARD_IMPOSTER_OAKS_REVENGE:
+        if (op->handSize < 6 || (selected = Lowest(p, p->hand[hand])) < 0)
+            return 0;
+        a->selections[a->selectionCount++] = (uint8_t)selected;
+        break;
+    case TCG_CARD_SLEEP:
+    case TCG_CARD_BILLS_TELEPORTER:
+        break;
+    case TCG_CARD_COMPUTER_ERROR:
+        if (p->handSize > 3 || p->deckSize < 12 || TcgDuel_CanAttack(g, g->current, 0) ||
+            TcgDuel_CanAttack(g, g->current, 1))
+            return 0;
+        break;
+    case TCG_CARD_POKEMON_RECALL:
+        if ((selected = FindPokemon(p, p->discard, p->discardSize, 1)) < 0)
+            return 0;
+        a->selections[a->selectionCount++] = (uint8_t)selected;
+        break;
+    case TCG_CARD_GOOP_GAS_ATTACK:
+        for (i = 0; i < TCG_FIELD_SIZE; i++)
+            if (TcgPower_Working(g, g->current ^ 1, i))
+                break;
+        if (i == TCG_FIELD_SIZE)
+            return 0;
+        break;
+    case TCG_CARD_MASTER_BALL:
+    {
+        unsigned top = p->deckSize < 7 ? p->deckSize : 7;
+        if (!top)
+            return 0;
+        if ((selected = FindPokemon(p, p->deck + p->deckSize - top, top, -1)) >= 0)
+            a->selections[a->selectionCount++] = (uint8_t)selected;
+        break;
+    }
+    case TCG_CARD_NIGHTLY_GARBAGE_RUN:
+        if (p->deckSize > 20)
+            return 0;
+        for (i = 0; i < p->discardSize && a->selectionCount < 3; i++)
+        {
+            const struct TcgCard *c = Tcg_Card(p->cards[p->discard[i]]);
+            if (c->kind == TCG_POKEMON || (c->kind == TCG_ENERGY && c->id <= 6))
+                a->selections[a->selectionCount++] = p->discard[i];
+        }
+        if (!a->selectionCount)
+            return 0;
+        break;
+    case TCG_CARD_ROCKETS_SNEAK_ATTACK:
+        if (op->handSize < 2)
+            return 0;
+        break;
+    case TCG_CARD_THE_ROCKETS_TRAP:
+        if (op->handSize < 4)
+            return 0;
+        break;
+    case TCG_CARD_HERE_COMES_TEAM_ROCKET:
+        if (p->prizesUp)
+            return 0;
+        break;
     default:
         return 0;
     }
@@ -431,6 +565,78 @@ static int PowerAction(const struct TcgDuel *g, struct TcgAction *a)
             if (s && Left(g, me, 0) <= 30 && Left(g, me, s) > Left(g, me, 0) + 30)
                 return Legal(g, a);
             break;
+        /* GB2's */
+        case TCG_POWER_STIFFEN:
+        case TCG_POWER_FOSSIL_GUIDANCE:
+        case TCG_POWER_HELPING_HAND:
+        case TCG_POWER_PREHISTORIC_DREAM:
+            if (power != TCG_POWER_STIFFEN || !s)
+                if (Legal(g, a))
+                    return 1;
+            break;
+        case TCG_POWER_POLLEN_STENCH:
+        case TCG_POWER_LONG_DISTANCE_HYPNOSIS:
+            /* (a gamble: only when its own Active can't attack anyway) */
+            if (!TcgDuel_CanAttack(g, me, 0) && !TcgDuel_CanAttack(g, me, 1) &&
+                !g->players[me ^ 1].field[0].condition && Legal(g, a))
+                return 1;
+            break;
+        case TCG_POWER_POISON_MIST:
+            if (g->players[me ^ 1].field[0].poison && Legal(g, a))
+                return 1;
+            break;
+        case TCG_POWER_GATHER_FIRE:
+            for (t = 0; t < TCG_FIELD_SIZE; t++)
+                if (t != s)
+                {
+                    a->target = (uint8_t)t;
+                    if (Legal(g, a))
+                        return 1;
+                }
+            break;
+        case TCG_POWER_REBIRTH:
+            if (Left(g, me, s) <= 20 && Legal(g, a))
+                return 1;
+            break;
+        case TCG_POWER_FOSSILIZE:
+            if (Left(g, me, 0) <= 20)
+            {
+                a->target = 0;
+                if (Legal(g, a))
+                    return 1;
+            }
+            break;
+        case TCG_POWER_MATTER_EXCHANGE:
+        case TCG_POWER_SPECIAL_DELIVERY:
+        {
+            int worst = Lowest(p, 0xff);
+            if (worst < 0 || (power == TCG_POWER_MATTER_EXCHANGE && p->handSize < 4))
+                break;
+            a->selections[0] = (uint8_t)worst;
+            a->selectionCount = 1;
+            if (Legal(g, a))
+                return 1;
+            break;
+        }
+        case TCG_POWER_EVOLUTIONARY_LIGHT:
+        {
+            unsigned k, f;
+            for (k = 0; k < p->deckSize; k++)
+            {
+                const struct TcgCard *c = Tcg_Card(p->cards[p->deck[k]]);
+                if (c->kind != TCG_POKEMON || !c->stage)
+                    continue;
+                for (f = 0; f < TCG_FIELD_SIZE; f++)
+                    if (TcgDuel_Field(g, me, f) && !strcmp(TcgDuel_Field(g, me, f)->name, c->evolvesFrom))
+                    {
+                        a->selections[0] = p->deck[k];
+                        a->selectionCount = 1;
+                        if (Legal(g, a))
+                            return 1;
+                    }
+            }
+            break;
+        }
         }
     }
     memset(a, 0, sizeof(*a));

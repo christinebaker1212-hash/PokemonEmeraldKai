@@ -276,6 +276,8 @@ struct TcgDuel
      * Pokemon being put into play comes from the hand (Sneak Attack, Reel In...) */
     uint16_t goopGasUntil;
     uint8_t fromHand;
+    /* a Trainer ended the turn (Computer Error) */
+    uint8_t turnOver;
     char error[TCG_LOG_WIDTH];
     char log[TCG_LOG_LINES][TCG_LOG_WIDTH];
     unsigned logCount;

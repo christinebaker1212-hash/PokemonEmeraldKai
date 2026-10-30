@@ -206,6 +206,7 @@ enum
     SRC_MY_ATTACHED,
     SRC_OPP_ATTACHED,
     SRC_TOP5,
+    SRC_TOP7,       /* Master Ball: the top 7 of your deck */
     SRC_TOP3_MINE,  /* Prophecy: the top 3 of a deck, to put in order */
     SRC_TOP3_THEIRS
 };
@@ -234,7 +235,15 @@ enum
     F_OTHER,       /* occupied, not the first choice */
     F_WATER_POKEMON,
     F_ROOM_OTHER,  /* takes a damage counter without a Knock Out, not the first choice */
-    F_DAMAGED_OTHER /* damaged, not the Pokemon using the power */
+    F_DAMAGED_OTHER, /* damaged, not the Pokemon using the power */
+    /* GB2's */
+    F_FOSSIL,          /* a Mysterious Fossil */
+    F_EVOLUTION,       /* an Evolution card */
+    F_COLORLESS_EVOLUTION,
+    F_DARK_EVOLUTION,
+    F_GARBAGE,         /* a Pokemon or basic Energy card */
+    F_HAS_FIRE_OTHER,  /* has a Fire Energy card, not the Pokemon using the power */
+    F_FOSSIL_EVOLVED   /* evolved from a Mysterious Fossil */
 };
 struct Step
 {
@@ -1611,6 +1620,29 @@ static const struct Step *TrainerSteps(unsigned id, int *count)
               {ST_OPP_SLOT, F_EMPTY_BENCH, 0, 0, 0, "Put it on which of their Bench spaces?"});
     case TCG_CARD_POKEDEX:
         STEPS({ST_PICK, F_ANY, SRC_TOP5, 0, 0, "Choose the order: the first is drawn next."});
+    /* GB2's */
+    case TCG_CARD_POKEBALL:
+        STEPS({ST_PICK, F_POKEMON, SRC_DECK, 1, 1, "If heads, take which Pokemon?"});
+    case TCG_CARD_FOSSIL_EXCAVATION:
+        STEPS({ST_PICK, F_FOSSIL, SRC_DECK, 0, 1, "Take a Mysterious Fossil from your deck? (none: discard pile)"});
+    case TCG_CARD_MAX_REVIVE:
+        STEPS({ST_PICK, F_ENERGY, SRC_HAND, 2, 2, "Discard 2 Energy cards from your hand."},
+              {ST_PICK, F_BASIC, SRC_MY_DISCARD, 1, 1, "Revive which Basic Pokemon?"},
+              {ST_MY_SLOT, F_EMPTY_BENCH, 0, 0, 0, "Put it on which Bench space?"});
+    case TCG_CARD_SUPER_SCOOP_UP:
+        STEPS({ST_MY_SLOT, F_OCCUPIED, 0, 0, 0, "If heads, return which Pokemon to your hand?"});
+    case TCG_CARD_MOON_STONE:
+        STEPS({ST_PICK, F_COLORLESS_EVOLUTION, SRC_DECK, 0, 1, "Take which Colorless Evolution card?"});
+    case TCG_CARD_THE_BOSSS_WAY:
+        STEPS({ST_PICK, F_DARK_EVOLUTION, SRC_DECK, 0, 1, "Take which Dark Pokemon card?"});
+    case TCG_CARD_IMPOSTER_OAKS_REVENGE:
+        STEPS({ST_PICK, F_ANY, SRC_HAND, 1, 1, "Discard which card to play it?"});
+    case TCG_CARD_POKEMON_RECALL:
+        STEPS({ST_PICK, F_EVOLUTION, SRC_MY_DISCARD, 1, 1, "Put which Evolution card on your deck?"});
+    case TCG_CARD_MASTER_BALL:
+        STEPS({ST_PICK, F_POKEMON, SRC_TOP7, 0, 1, "Take which Pokemon? (the rest are shuffled in)"});
+    case TCG_CARD_NIGHTLY_GARBAGE_RUN:
+        STEPS({ST_PICK, F_GARBAGE, SRC_MY_DISCARD, 1, 3, "Shuffle up to 3 into your deck."});
     }
     *count = 0;
     return sNoSteps;
@@ -1640,6 +1672,17 @@ static const struct Step *PowerSteps(unsigned power, int *count)
     case TCG_POWER_CURSE:
         STEPS({ST_OPP_SLOT, F_DAMAGED, 0, 0, 0, "Move a damage counter from which of their Pokemon?"},
               {ST_OPP_SLOT, F_OTHER, 0, 0, 0, "Move it to which of their Pokemon?"});
+    /* GB2's */
+    case TCG_POWER_GATHER_FIRE:
+        STEPS({ST_MY_SLOT, F_HAS_FIRE_OTHER, 0, 0, 0, "Take a Fire Energy from which Pokemon?"});
+    case TCG_POWER_FOSSILIZE:
+        STEPS({ST_MY_SLOT, F_FOSSIL_EVOLVED, 0, 0, 0, "If heads, which Pokemon goes back to a Fossil?"});
+    case TCG_POWER_MATTER_EXCHANGE:
+        STEPS({ST_PICK, F_ANY, SRC_HAND, 1, 1, "Discard which card to draw one?"});
+    case TCG_POWER_EVOLUTIONARY_LIGHT:
+        STEPS({ST_PICK, F_EVOLUTION, SRC_DECK, 1, 1, "Take which Evolution card?"});
+    case TCG_POWER_SPECIAL_DELIVERY:
+        STEPS({ST_PICK, F_ANY, SRC_HAND, 0, 1, "Draw, then put which card on top? (none: the new one)"});
     }
     *count = 0;
     return sNoSteps;
@@ -1664,6 +1707,16 @@ static int CardMatches(unsigned owner, unsigned physical, int filter)
         return c->kind == TCG_TRAINER;
     case F_STAGE2:
         return c->kind == TCG_POKEMON && c->stage == 2;
+    case F_FOSSIL:
+        return c->id == TCG_CARD_MYSTERIOUS_FOSSIL;
+    case F_EVOLUTION:
+        return c->kind == TCG_POKEMON && c->stage;
+    case F_COLORLESS_EVOLUTION:
+        return c->kind == TCG_POKEMON && c->stage && c->type == TCG_COLORLESS;
+    case F_DARK_EVOLUTION:
+        return c->kind == TCG_POKEMON && c->stage && (c->dark || !strncmp(c->name, "Dark ", 5));
+    case F_GARBAGE:
+        return c->kind == TCG_POKEMON || (c->kind == TCG_ENERGY && c->id <= 6);
     default:
         return 1;
     }
@@ -1728,6 +1781,16 @@ static int SlotMatches(unsigned who, unsigned slot, int filter)
         return c && slot != B.action.target && f->damage + 10u < (c->kind == TCG_TRAINER ? 10u : c->hp);
     case F_DAMAGED_OTHER:
         return c && f->damage && slot != B.action.slot;
+    case F_HAS_FIRE_OTHER:
+    {
+        unsigned i;
+        for (i = 0; c && slot != B.action.slot && i < f->attachedSize; i++)
+            if (CardOf(who, f->attached[i]) == TCG_CARD_FIRE_ENERGY)
+                return 1;
+        return 0;
+    }
+    case F_FOSSIL_EVOLVED:
+        return c && f->stackSize > 1 && CardOf(who, f->stack[0]) == TCG_CARD_MYSTERIOUS_FOSSIL;
     }
     return 0;
 }
@@ -1821,10 +1884,15 @@ static void AttackStepsAfterOption(const struct TcgAttack *a)
 {
     unsigned choice = a ? TcgDuel_AttackChoice(a, NULL) : 0, ask = TcgDuel_AttackAsk(a);
     int n = 0;
-    if ((choice == 1 && BenchOn(1)) || (choice == 2 && BenchOn(0)))
+    if ((choice == 1 && BenchOn(1)) || (choice == 2 && BenchOn(0)) || choice == 3 || choice == 4)
     {
-        struct Step st = {choice == 1 ? ST_OPP_SLOT : ST_MY_SLOT, F_BENCH, 0, 0, 0,
-                          choice == 1 ? "Aim at which of their Benched Pokemon?" : "Switch with which of your Benched Pokemon?"};
+        const char *prompt = TcgDuel_AttackTargetPrompt(a);
+        struct Step st = {choice == 1 || choice == 3 ? ST_OPP_SLOT : ST_MY_SLOT, choice >= 3 ? F_OCCUPIED : F_BENCH, 0, 0, 0,
+                          prompt                         ? prompt
+                          : choice == 1                  ? "Aim at which of their Benched Pokemon?"
+                          : choice == 2                  ? "Switch with which of your Benched Pokemon?"
+                          : choice == 3                  ? "Aim at which of their Pokemon?"
+                                                         : "Choose one of your Pokemon."};
         sAttackSteps[n++] = st;
     }
     if (ask == TCG_ASK_DISCARD_TRAINER)
@@ -1836,6 +1904,11 @@ static void AttackStepsAfterOption(const struct TcgAttack *a)
     {
         struct Step st = {ST_PICK, F_ANY, B.action.option ? SRC_TOP3_THEIRS : SRC_TOP3_MINE, 0, 3,
                           "Put them back in order: the first chosen goes on top."};
+        sAttackSteps[n++] = st;
+    }
+    else if (ask == TCG_ASK_DECK_TRAINER)
+    {
+        struct Step st = {ST_PICK, F_TRAINER, SRC_DECK, 0, 1, "If heads, take which Trainer?"};
         sAttackSteps[n++] = st;
     }
     else if (ask == TCG_ASK_EVOLVED)
@@ -1862,6 +1935,14 @@ static void AttackSteps(const struct TcgAttack *a)
             {"Conversion 2", "Change its Resistance to which type?"},
             {"Prophecy", "Look at the top of which deck?"},
             {"Devolution Beam", "Devolve whose Pokemon?"},
+            {"Disable", "If heads, which attack can't they use?"},
+            {"Mini-Metronome", "If heads, copy which of their attacks?"},
+            {"Flame Inferno", "Discard how many Fire Energy?"},
+            {"Burning Fire", "Discard how many Fire Energy (any of yours)?"},
+            {"Flame Pillar", "Discard a Fire Energy to hit their Bench?"},
+            {"Rock Blast", "Discard how many Fighting Energy?"},
+            {"Rollout", "Remove how many Food counters?"},
+            {"Texture Magic", "Change its Resistance to which type?"},
         };
         unsigned k;
         snprintf(sAttackPrompt, sizeof(sAttackPrompt), "%s", "Choose for the attack.");
@@ -1919,6 +2000,8 @@ static void ContinueTrainer(struct TcgAction *out, int *result)
         int n = st->max, all = st->source == SRC_TOP5 || st->source == SRC_TOP3_MINE || st->source == SRC_TOP3_THEIRS;
         if (st->source == SRC_TOP5)
             n = B.view.players[0].deckSize < 5 ? B.view.players[0].deckSize : 5;
+        if (st->source == SRC_TOP7 && !n)
+            n = 1;
         if (st->source == SRC_TOP3_MINE || st->source == SRC_TOP3_THEIRS)
         {
             n = B.view.players[st->source == SRC_TOP3_THEIRS].deckSize;
@@ -1990,6 +2073,12 @@ static void OpenPick(int source, int filter, int min, int max, const char *title
     case SRC_OPP_ATTACHED:
         pile = p->field[B.action.target].attached;
         count = p->field[B.action.target].attachedSize;
+        break;
+    case SRC_TOP7:
+        count = p->deckSize < 7 ? p->deckSize : 7;
+        for (i = 0; i < count; i++)
+            sorted[i] = p->deck[p->deckSize - 1 - i];
+        pile = sorted;
         break;
     case SRC_TOP5:
     case SRC_TOP3_MINE:
