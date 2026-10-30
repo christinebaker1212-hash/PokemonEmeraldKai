@@ -259,8 +259,13 @@ Also Gens 5-9 (1.61.0: species 519-1050, moves 468-847, abilities 125-311 as u16
 src/battle_gen59.c with per-move data gGen59Moves and the generic G59 scripts; tools/moemon_gen58, tools/moemon_gen59) and
 the GENERATION setting (3-9, default 3, OPTIONS > GAME and HOST A GAME > GAME RULES, the host's online; mp_region.c MP_Gen_*:
 caps, Quetzal's own Johto / Kanto Pokemon from 5 (gen_modern.py), FAIRY from 6, SEALED Pokemon (species, move or ability past
-it: can't battle, MP_SEALED), later items back to the bag and unusable). COOP_NOTES "Gens 5-9 and GENERATION"; tests
-gen59_moves, gen_seal, region_gens (the harness runs scenarios at GEN 9 unless their conf sets GEN).
+it: can't battle, MP_SEALED), later items back to the bag and unusable), HOENN's pools by generation (gen_hoenn_modern.py),
+the newer abilities (battle_gen59.c's arrival / move end / end of turn hooks; forms as stat recomputes). COOP_NOTES "Gens 5-9
+and GENERATION"; tests gen59_moves, gen59_forms, gen_seal, region_gens (the harness runs scenarios at GEN 9 unless their conf
+sets GEN). Also the battle GIMMICKS (1.61.0: MEGA EVOLUTION, Z-MOVES, DYNAMAX, TERA; include/battle_gimmick.h, battle side at
+the end of battle_gen59.c, src/battle_gimmick.c; START in the move list; one a battle per trainer; AUTO / ON / OFF each,
+the host's online; MEGA forms aren't species: src/data/mp_megas.h from tools/moemon_gimmicks/gen_megas.py, pictures through
+B_ANIM_MP_GIMMICK on every screen; items 553-617): COOP_NOTES "The battle GIMMICKS"; tests gimmick_*.
 Saves never change layout: tools/test/save_layout.py (gcc + MinGW, run by regress.sh and the release) must pass; old
 formats are converted on load by src/mp/mp_savefix.c (MP_SAVE_FORMAT in the sidecar; COOP_NOTES "Save layout and
 migration"; tools/test/save_compat.sh).

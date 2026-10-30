@@ -2769,10 +2769,69 @@ Old saves need nothing: eggs and Unown keep their real species in the save.
   says why). Items have generations too (MP_Gen_OfItem; 0 = Kai's own and the story items): held ones past the cap go
   back to the bag when it drops (MP_Gen_ReturnHeldItems on map loads and OPTIONS), and in the bag they can't be used,
   given or used from a registered button (item_menu.c ItemLaterGen). Not done yet: sealed Pokémon in trades and
-  online, the GIMMICKS (MEGA EVOLUTION, Z-MOVES, DYNAMAX, TERASTALLIZATION).
+  online.
+- Moves past the cap are skipped when learning (MonTryLearningNewMove, GiveBoxMonInitialMoveset, the relearner,
+  CanMonLearnTMTutor, day care egg moves); evolutions into a later generation's species wait.
+- HOENN's pools by GENERATION (tools/moemon_gen59/gen_hoenn_modern.py -> src/data/hoenn_modern.h, applied in
+  mp_region.c): each wild table gives one of its rarer slots to each generation 4-9 (a newer Pokémon sharing a type,
+  the same evolution stage, never a legendary; pseudo-legendary lines only where the slot is Lv. 30+); about half of
+  trainers' team members get a newer stand-in from a generation of their own (crc32-picked), bosses keep their ace.
+  JOHTO / KANTO use Quetzal's own modern tables.
+- Abilities (battle_gen59.c): arrival (MP_Gen59_SwitchInAbility, ArrivalForm), hits taken / given (the MoveEnd
+  chain: TargetAbilityOnHit / AttackerAbilityOnHit, then MoveEndMore: CHEEK POUCH, GULP MISSILE's catch, DANCER,
+  OPPORTUNIST, EMERGENCY EXIT / WIMP OUT), the end of turn (MP_Gen59_EndTurnAbility: MOODY, HEALER, HARVEST, CUD CHEW,
+  SCHOOLING / SHIELDS DOWN, HUNGER SWITCH), moves taken in (MP_Gen59_AbsorbAbility), moves kept off
+  (MP_Gen59_BlockMove: BULLETPROOF, OVERCOAT, GOOD AS GOLD, MAGIC BOUNCE as a block...), accuracy, status blocks
+  (MP_Gen59_StatusBlocked, now called from SetMoveEffect), stat drops (MP_Gen59_OnStatLowered: DEFIANT...) and rises
+  (MP_Gen59_OnStatRaised: OPPORTUNIST). MP_Gen4_MoveEnd calls MP_Gen59_MoveEnd until it returns NULL (each step sets
+  its own G59M_* bit). Form changes are stat recomputes from a form's base stats (sForms: AEGISLASH, WISHIWASHI,
+  PALAFIN, MINIOR, TERAPAGOS), not species changes; ZERO TO HERO remembers the party slots that left
+  (gGen59Field.heroSlots). Approximations: PARENTAL BOND = one hit at x1.25, MAGIC BOUNCE blocks instead of
+  reflecting, the primal weathers are lasting rain / sun, DANCER copies the stat dances only, ILLUSION does nothing.
+  Tests gen59_forms, gen59_exit, gen59_dancer.
+- Items: marts sell the newer battle / evolution items by GENERATION (shop.c MP_ShopItems, sMpShopExtras by map),
+  PICKUP's 95-97 rolls give an allowed newer item.
 - Harness: MOEMON_BATTLETEXT=1 logs every battle message ("btext: ..."); MOEMON_GENERATION=N; mp gensetting N.
 - Tests: gen59_moves, gen_seal, region_gens (the harness runs scenarios at GEN 9 unless their conf sets GEN).
 - Harness: mp gencheck ITEM / genrefresh.
+
+## The battle GIMMICKS (1.61.0)
+MEGA EVOLUTION, Z-MOVES, DYNAMAX and TERASTALLIZATION (include/battle_gimmick.h; the battle side at the end of
+src/battle_gen59.c, settings / pictures / menu text / AI in src/battle_gimmick.c).
+- Settings: gMpConfig.gimmicks, 2 bits each (GIMMICK_SET_AUTO / ON / OFF; AUTO = on from its generation: 6, 7, 8, 9),
+  "gimmicks" in the config; OPTIONS > GAME rows MEGA EVOLUTION / Z-MOVES / DYNAMAX / TERASTALLIZE; HOST A GAME > GAME
+  RULES > GIMMICKS (AUTO / ALL ON / ALL OFF presets); online the host's (MPR_RULES' last byte, protocol 68).
+  MP_Gimmick_Setting / MP_Gimmick_On. Tests: MOEMON_GIMMICKS=dddd (MEGA Z DYNAMAX TERA, 0 AUTO 1 ON 2 OFF).
+- One gimmick a battle per trainer (Owner(): the side, or the battler in multi / co-op / triple / two-opponent
+  battles). The engine sends what a battler may use in the move menu's byte 3 (BtlController_EmitChooseMove:
+  GIMMICK_AVAIL_*, the Z-CRYSTAL's type in bits 3-7); START in the move list cycles MEGA, Z-MOVE (a damaging move of
+  the crystal's type), DYNAMAX, TERA, none (battle_controller_player.c MpGimmickNext; the type line shows the choice,
+  or "START: ..." every other 90 frames); the choice rides in the move byte's bits 4-6 (GIMMICK_MOVE_SHIFT), stripped
+  in HandleTurnActionSelectionState into MP_Gimmick_Choose. The opponent controller asks MP_Gimmick_AiPick (MEGA at
+  once, the others on the trainer's last Pokémon).
+- MP_Gimmick_TurnStart (from CheckFocusPunch_ClearVarsBeforeTurnStarts, in the turn order, before any move) checks
+  again and applies: MEGA (the form's types, ability, stats from its base stats; then its arrival ability through
+  AbilityBattleEffects ON_SWITCHIN), TERA (the species' first type), DYNAMAX (3 turns, counted down in the field's
+  end of turn: GimmickEndTurn), Z (Z-POWER on this turn's move). MEGA and TERA stay with the Pokémon by side and party
+  slot (sG.megaOf / teraOf, reapplied in MP_Gimmick_SwitchIn); DYNAMAX ends on a switch.
+- Effects: MP_Gimmick_Stab (TERA: 2x on its type when it was one of the Pokémon's own, the old STAB kept), 
+  MP_Gimmick_MovePower (Z power and MAX power tables from the base power; TERA moves under 60 become 60),
+  MP_Gen59_FinalDamage halves damage to a DYNAMAX Pokémon (instead of doubling its HP: nothing in the party
+  changes), flinch blocked, status moves become PROTECT (MP_Gimmick_MoveUsed in HandleAction_UseMove), MAX MOVES'
+  effects by type at the move's end (GimmickMoveEnd: weather, terrain, the side's / foes' stat).
+- MEGA forms aren't species: src/data/mp_megas.h (tools/moemon_gimmicks/gen_megas.py) has each form's base species,
+  stone (ITEM_NONE: RAYQUAZA with DRAGON ASCENT; KYOGRE / GROUDON: Emerald's BLUE / RED ORB key items in the bag),
+  types, ability, stats, y offsets and pictures (graphics/moemon/mega: Moemon Quetzal's 50 MEGA / primal forms
+  899-948; stats from pokeemerald-expansion; cache tools/moemon_gimmicks/megas.json).
+- Pictures on every screen: the battle scripts play B_ANIM_MP_GIMMICK (always, behind a SUBSTITUTE too) with
+  kind << 8 | value; AnimTask_MpGimmick flashes the Pokémon and loads the MEGA picture (all 4 frames of the buffer),
+  or tints TERA (a color per type) / DYNAMAX (red), and remembers it by side and party slot (sPicMega / sPicTera /
+  sPicDyna). MP_Gimmick_AfterMonGfx (end of BattleLoadOpponent/PlayerMonSpriteGfx) puts them back whenever the
+  Pokémon is drawn again; MP_Gimmick_YDelta gives a MEGA picture its own height (GetBattlerYDelta).
+- Items 553-617: 47 MEGA STONES (CHARIZARDITE X / Y are CHARZARDITE X / Y: 13 letters) and 18 Z-CRYSTALS (type
+  order, MYSTERY skipped), tools/moemon_gen59/gen_items.py MEGA / ZCRYSTALS; generation 0 (only their gimmick's
+  setting counts: MP_Gimmick_ItemAllowed); sold at LILYCOVE 3F, GOLDENROD 3F, CELADON 3F (shop.c sMpShopGimmickItems).
+- Tests: gimmick_mega, gimmick_dynamax, gimmick_z, gimmick_ai.
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
 a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64
