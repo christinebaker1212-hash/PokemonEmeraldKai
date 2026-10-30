@@ -126,6 +126,15 @@ void PlayNewMapMusic(u16 songNum)
     sMapMusicState = 1;
 }
 
+// Moemon Kai: the map's song is now songNum, and the music playing already is it (MP_Kaisong_SameMusic: a .kaisong
+// holding the same music, like the GAME CENTER's floors): it plays on instead of starting again
+void MP_KeepMapMusic(u16 songNum)
+{
+    sCurrentMapMusic = songNum;
+    sNextMapMusic = 0;
+    sMapMusicState = 2;
+}
+
 void StopMapMusic(void)
 {
     sCurrentMapMusic = 0;

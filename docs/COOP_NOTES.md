@@ -2139,6 +2139,8 @@ The CARD CASE's third side. Decisions: docs/TT_DECISIONS.md.
   (gStringVar1-3: region, rules, trade rule), Tt_SellerStarter, Tt_SellerShop, Tt_MapSetup, Tt_QueenTalk /
   Here / FirstMeeting. FLAG_TT_QUEEN_AWAY (FLAG_UNUSED_0x022) hides the queen outside her region; the region is
   the map section's (Tt_CurrentRegion; buildings of no town keep the last region).
+- Music: every game plays a battle song (1.52.2): ordinary players and friends MUS_RG_VS_TRAINER, specials their own
+  (MUS_VS_GYM_LEADER, MUS_VS_CHAMPION...), a win MUS_VICTORY_TRAINER; as the `tt` scene, `@tt` files replace them.
 - Achievements: the TRIPLE TRIAD tab (counters ttwin, ttsame, ttplus, ttcombo, ttspread, ttabolish, ttspecial,
   ttcards, ttpack). LEGENDS OF THE TABLE counts Triple Triad specials too.
 - Tests: tools/tt/test.sh (rules scenarios from real cards, 2000 random games replayed, the collection file, the
@@ -2323,25 +2325,33 @@ Moemon Music Studio's `.kaisong` exports (format and loading: docs/KAISONG_FORMA
   (`MP_MUSIC_SCENE_HOLD(MUS_...)` / `RELEASE`, mp_sim.c: the songs named are what the picker lists for it). Card boards
   hand the map's song back with `MP_MUSIC_TO_MAP(...)`. `MOEMON_MUSIC_LOG=1` logs each song's scene.
   tools/kaisong/test_scenes.py adds scene files and checks they are picked up.
-- **Loudness** (1.52.1). `python3 tools/kaisong/loudness.py [--write]` plays every file in `music/` and the song it
-  replaces in headless games (`mp playkai FILE` / `mp playsong N`: a clean sound state; then `mp musiclock 1`:
-  the test-only `gMpTestMusicLock` in m4a.c stops the overworld from changing the BGM while it is measured) and prints how loud each
-  plays; `--write` puts the difference in the file's INFO `gain=` (dB). The game applies it per voice in
-  music_player.c ChnVolSetAsm (`sChnGain`, from MP_Kaisong_Gain of the player's song header; 256 = unchanged, so
-  the game's own songs and the bit-exact studio comparisons stay the same). Before the pass the TRIPLE TRIAD files
-  played about 8 dB under their songs and the GAME CENTER's about 5; all 18 now play within 0.2 dB of them. Run it
-  after adding or re-exporting a song (re-exporting drops the gain). kaisong_test.sh check 6.
+- **Loudness** (1.52.1; automatic from 1.52.2). `python3 tools/kaisong/loudness.py [--write] [--passes N]` plays every
+  file in `music/` and the song it replaces in headless games (`mp playkai FILE` / `mp playsong N`: a clean sound state;
+  then `mp musiclock 1`: the test-only `gMpTestMusicLock` in m4a.c stops the overworld from changing the BGM while it is
+  measured) and prints how loud each plays; `--write` puts the difference in the file's INFO `gain=` (dB). Files with
+  the same music (a hash of every chunk but INFO, as the game's `KaiFile.music`) are one group: measured once, one gain
+  (the mean of their songs' levels), so the music doesn't jump where the game plays it on from one to the other. The
+  release and dev release workflows run it (`--reference 0 --write --passes 2`, about 3 minutes) on the game they
+  built, into the copies they ship: nobody runs it by hand, and re-exported songs get theirs again. The game applies
+  the gain per voice in music_player.c ChnVolSetAsm (`sChnGain`, from MP_Kaisong_Gain of the player's song header;
+  256 = unchanged, so the game's own songs and the bit-exact studio comparisons stay the same). kaisong_test.sh check 6.
+- **Same music, no restart** (1.52.2). `MP_Kaisong_SameMusic(song, warp)`: the file that would play there holds the
+  music already playing (the same file, or the same `music` hash: the GAME CENTER's 1F / 3F `mus_game_corner@` and 2F
+  `mus_poke_mart@`). Overworld_PlaySpecialMapMusic and TransitionMapMusic then call sound.c `MP_KeepMapMusic` (the map's
+  song number changes, the music plays on), TryFadeOutOldMapMusic doesn't fade, and MP_Kaisong_Differs is FALSE. Only
+  custom songs: two of the game's own never count as the same. kaisong_test.sh check 7 (the clock in `mp bgm` goes on).
 - **Hooks.** m4a.c `SONG_HEADER(n, song)` in every m4aSongNum* function; MPlayStart on the BGM player calls
   `MP_Kaisong_Started` (sample channels = the file's INFO voices, 5 for the game's songs; dropping channels clears the
   ones past the count). overworld.c: `MP_Kaisong_Differs` in Overworld_PlaySpecialMapMusic, TransitionMapMusic and
   TryFadeOutOldMapMusic (the same song number, another file on the next map: fade over like a new song).
   mp_spectate.c: the song number + the place variant in bits 10-15 (protocol 64).
-- **Engine widening.** `gMPlayTrack_BGM[64]` / `NUM_TRACKS_BGM` 64 (PORTABLE), MP2KPlayerMain's track bits are u64 and
+- **Engine widening.** `gMPlayTrack_BGM[64]` / `NUM_TRACKS_BGM` 64 (PORTABLE; MPlayOpen's cap is 64 there too: until
+  1.52.2 it was still MAX_MUSICPLAYER_TRACKS 16, so a song's tracks past 16 never played), MP2KPlayerMain's track bits are u64 and
   `status` keeps a nonzero 16-bit summary (title_screen.c's `status & 0xFFFF` still works), `TRACKS_ALL` reaches every
   track in m4aMPlay*Control, `MAX_DIRECTSOUND_CHANNELS` = `MAX_SAMPLE_CHANNELS` = 64 (the mixer only runs maxChans of
   them). ply_memacc's not-taken branch skips a whole pointer.
 - **Tests.** tools/test/kaisong_test.sh (studio + game, audio sample for sample). Debug: `mp kaisong` (files),
-  `mp bgm` (song, tracks, voices), `mp playsong N` (a clean sound state first: Game Boy channel phase, frame clock and
+  `mp bgm` (song, tracks, voices, the player's tracks and clock), `mp playsong N` (a clean sound state first: Game Boy channel phase, frame clock and
   frequency registers carry over from earlier sounds in the game, so only a clean start matches the studio's render).
 
 

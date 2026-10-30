@@ -2,7 +2,7 @@
 # Custom songs (.kaisong, src/mp/mp_kaisong.c) end to end: Moemon Music Studio exports a test song, the game plays it
 # from a music folder, and its audio must equal the studio's own render sample for sample.
 # usage: tools/test/kaisong_test.sh   (NOBUILD=1 skips both builds, OUT=dir). Exit code = number of failed checks.
-#   1. a song made without the GBA's limits (15 tracks, 64 voices) for one place (mus_route101@route101) and the GBA
+#   1. a song made without the GBA's limits (30 tracks: past the 16 a music player had, 64 voices) for one place (mus_route101@route101) and the GBA
 #      accurate one (10 tracks, 5 voices) everywhere: on Route 101 the place's plays, bit-exact; a warp to Route 102
 #      (the same song) switches to the everywhere version, which is bit-exact too (played on its own: a warp's sounds
 #      leave Game Boy channel state the studio doesn't have, as they do for the game's own songs)
@@ -12,6 +12,8 @@
 #   5. scenes: one song replaced for several scenes and places at once (BATTLE SIMULATOR, a GYM, the three card games);
 #      each plays only its own file, and a new scene is found from its source alone (tools/kaisong/test_scenes.py)
 #   6. INFO gain= (tools/kaisong/loudness.py --write): the exported Route 101 with gain=-6.0 plays 6 dB under the game's
+#   7. the same music in two files for two floors (the GAME CENTER's 1F and 2F, two game songs): it plays on up the
+#      stairs and back, and changes outside
 cd "$(dirname "$0")/../.." || exit 99
 REPO=$(pwd)
 OUT=${OUT:-/tmp/moemon_kaisong_test}
@@ -26,9 +28,9 @@ check() { local what=$1; shift; if "$@"; then echo "  ok   $what"; else echo "  
 has() { grep -qF -- "$2" "$1"; }
 
 # the studio's side: a 15-track test MIDI, exported both ways, and rendered by its engine
-python3 tools/moemon_music/test/make_test_midi.py "$OUT/big.mid" 10
+python3 tools/moemon_music/test/make_test_midi.py "$OUT/big.mid" 25
 printf 'gba_accurate=1\n' > "$OUT/acc.ini"; printf 'gba_accurate=0\n' > "$OUT/free.ini"
-mkdir -p "$OUT/m1" "$OUT/m2" "$OUT/m3" "$OUT/m4" "$OUT/m5" "$OUT/m6" "$OUT/empty"
+mkdir -p "$OUT/m1" "$OUT/m2" "$OUT/m3" "$OUT/m4" "$OUT/m5" "$OUT/m6" "$OUT/m7" "$OUT/empty"
 MMS_DEFAULTS="$OUT/free.ini" $STUDIO --export "$OUT/big.mid" "$OUT/m1/mus_route101@route101.kaisong" > /dev/null
 MMS_DEFAULTS="$OUT/acc.ini" $STUDIO --export "$OUT/big.mid" "$OUT/m1/mus_route101.kaisong" > /dev/null
 cp "$OUT/m1/mus_route101.kaisong" "$OUT/m5/"
@@ -74,6 +76,9 @@ import shutil
 sys.path.insert(0, 'tools/kaisong'); import loudness
 shutil.copy(out + '/m2/mus_route101.kaisong', out + '/m6/mus_route101.kaisong')
 loudness.write_gain(out + '/m6/mus_route101.kaisong', -6.0)
+# 7: one music for two floors
+for f in ('mus_game_corner@rustboro_city_game_center_1f', 'mus_poke_mart@rustboro_city_game_center_2f'):
+    shutil.copy(out + '/m2/mus_route101.kaisong', out + '/m7/' + f + '.kaisong')
 EOF
 
 cat > "$OUT/cmp.py" <<'EOF'
@@ -107,10 +112,14 @@ run acc "$OUT/m5" "pressuntil A field 5000" "wait 30" "mp playsong 359" "wait 13
 run game "$OUT/empty" "pressuntil A field 5000" "wait 30" "mp playsong 359" "wait 1350" "quit"
 run export "$OUT/m2" "pressuntil A field 5000" "wait 30" "mp playsong 359" "wait 1350" "quit"
 run gain "$OUT/m6" "pressuntil A field 5000" "wait 30" "mp playsong 359" "wait 1350" "quit"
+mkdir -p "$OUT/floors"; printf '%s\n' "pressuntil A field 5000" "wait 60" "mp bgm" "mp warp 11,18,10,3" "wait 300" "mp bgm" "mp warp 11,17,3,3" \
+    "wait 300" "mp bgm" "mp warp 0,3,20,20" "wait 300" "mp bgm" "quit" > "$OUT/floors/a.txt"
+MOEMON_DEBUG_WARP=11,17,5,8 TMO=120 tools/test/run1.sh "$OUT/floors" MOEMON_MUSIC_DIR="$OUT/m7" > /dev/null
 run broken "$OUT/m3" "pressuntil A field 5000" "wait 60" "mp bgm" "quit"
 run own "$OUT/m4" "pressuntil A field 5000" "wait 400" "mp bgm" "quit"
 echo "custom songs:"
-check "the place's song plays on Route 101 (15 tracks, 64 voices)" has "$OUT/free/log.txt" "mus_route101@route101.kaisong plays as mus_route101 here (15 tracks, 64 voices"
+check "the place's song plays on Route 101 (30 tracks, 64 voices)" has "$OUT/free/log.txt" "mus_route101@route101.kaisong plays as mus_route101 here (30 tracks, 64 voices"
+check "  on a music player with all 64 tracks" has "$OUT/free/log.txt" "tracks 30 voices 64 status ffff player tracks 64"
 check "  and sounds exactly like the studio" python3 "$OUT/cmp.py" "$OUT/free/audio.f32" "$OUT/free.f32" 22
 check "  a warp to Route 102 switches to the everywhere one (10 tracks, 5 voices)" has "$OUT/free/log.txt" "[test] bgm song 359 tracks 10 voices 5"
 check "the GBA accurate one sounds exactly like the studio" python3 "$OUT/cmp.py" "$OUT/acc/audio.f32" "$OUT/acc.f32"
@@ -123,6 +132,13 @@ d = 20 * np.log10(np.sqrt((b ** 2).mean()) / np.sqrt((a ** 2).mean()))
 print('    %.2f dB' % d)
 sys.exit(0 if abs(d + 6) < 0.3 else 1)
 EOF
+check "one music on two floors plays on up the stairs and back" python3 - "$OUT/floors/log.txt" <<'EOF'
+import re, sys
+c = [(int(a), int(b)) for a, b in re.findall(r'\[test\] bgm song (\d+) .* clock (\d+)', open(sys.argv[1], errors='replace').read())]
+print('    ', c)
+# 1F (mus_game_corner), 2F, 1F: the same song and a clock that only goes on; outside: Rustboro's song
+sys.exit(0 if len(c) == 4 and c[0][0] == c[1][0] == c[2][0] == 426 and c[0][1] < c[1][1] < c[2][1] and c[3][0] == 399 else 1)
+EOF
 check "a file naming an unknown sample is skipped" has "$OUT/broken/log.txt" "which this game doesn't have"
 check "  and the built-in song plays" has "$OUT/broken/log.txt" "[test] bgm song 359 tracks 8 voices 5"
 check "a file with its own sample loads" has "$OUT/own/log.txt" "mus_route101.kaisong plays as mus_route101 everywhere"
@@ -133,7 +149,7 @@ check "  and plays" python3 "$OUT/loud.py" "$OUT/own/audio.f32"
 #   tt_online / ygo_online / tcg_concede_online: a friend's card game (all three card games have one for that song)
 S="$OUT/scenes"; mkdir -p "$S"
 for f in mus_vs_trainer@sim mus_vs_trainer@slateport_city_battle_tent_lobby mus_vs_gym_leader@rustboro_city_gym \
-         mus_vs_gym_leader@tcg mus_vs_gym_leader@tt mus_rg_union_room@tcg mus_rg_union_room@ygo mus_rg_union_room@tt; do
+         mus_vs_gym_leader@tcg mus_vs_gym_leader@tt mus_rg_union_room@tcg mus_rg_union_room@ygo mus_rg_union_room@tt mus_rg_vs_trainer@tt; do
     cp "$OUT/m2/mus_route101.kaisong" "$S/$f.kaisong"
 done
 scene_run() {   # scene_run SCENARIO: a copy of the scenario with the scenes' music folder
@@ -155,7 +171,7 @@ check "  its victory song is its own too" grep -qF "(mus_victory_trainer) for sc
 check "  and the simulator still works" grep -qF "sim: streak 1 (best 1)" "$OUT/scene_sim_tent/a.log"
 check "ROXANNE's battle plays her gym's file" loads join_gym mus_vs_gym_leader@rustboro_city_gym
 check "  not the card games' (same song)" eval "nloads join_gym mus_vs_gym_leader@tcg && nloads join_gym mus_vs_gym_leader@tt"
-check "TRIPLE TRIAD with a friend plays its own file" loads tt_online mus_rg_union_room@tt
+check "TRIPLE TRIAD with a friend plays its own battle song" loads tt_online mus_rg_vs_trainer@tt
 check "  not the other card games'" eval "nloads tt_online mus_rg_union_room@tcg && nloads tt_online mus_rg_union_room@ygo"
 check "  and the map's own song after the game" grep -qF "(mus_route101) for the map" "$OUT/scene_tt_online/a.log"
 check "YU-GI-OH! with a friend plays its own file" loads ygo_online mus_rg_union_room@ygo

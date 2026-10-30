@@ -52,6 +52,7 @@ struct KaiFile
     u8 failed;
     u8 voices;
     u16 gain;               // INFO gain= (dB) as a factor in 256ths: the song plays as loud as the one it replaces
+    u32 music;              // a hash of everything but INFO: files with the same music (MP_Kaisong_SameMusic)
     struct SongHeader *header;
 };
 
@@ -428,6 +429,15 @@ static bool8 Load(struct KaiFile *f)
         free(data);
         return Fail(f, "cut short (a chunk is missing)");
     }
+    {
+        // the music itself: the header's song fields and every chunk but INFO (FNV-1a)
+        const u8 *parts[7] = {data + 8, names, vgrp, kspl, trak, smpl, wave};
+        u32 lens[7] = {24, namesLen, vgrpLen, ksplLen, trakLen, smpl ? smplLen : 0, wave ? waveLen : 0}, k, n;
+        f->music = 2166136261u;
+        for (k = 0; k < 7; k++)
+            for (n = 0; n < lens[k]; n++)
+                f->music = (f->music ^ parts[k][n]) * 16777619u;
+    }
 
     // INFO: the voices it was made for, and its gain (tools/kaisong/loudness.py measures it against the song it replaces)
     f->voices = KAI_GAME_VOICES;
@@ -717,7 +727,35 @@ bool8 MP_Kaisong_Differs(u16 song, const struct WarpData *warp)
     if (!warp)
         warp = &gSaveBlock1Ptr->location;
     want = HeaderOf(Find(song, -1, warp->mapGroup, warp->mapNum), gSongTable[song].header);
-    return want != gMPlayInfo_BGM.songHeader;
+    return want != gMPlayInfo_BGM.songHeader && !MP_Kaisong_SameMusic(song, warp);
+}
+
+static const struct KaiFile *FileOf(const struct SongHeader *header)
+{
+    int i;
+    for (i = 0; header && i < sKai.count; i++)
+        if (sKai.files[i].header == header)
+            return &sKai.files[i];
+    return NULL;
+}
+
+// TRUE when the song that would play for `song` at warp (NULL = here) is the same music the BGM player plays now:
+// the same header, or two .kaisong files holding the same music (the GAME CENTER's floors, one song replacing two
+// game songs). The overworld then keeps it playing instead of starting it again.
+bool8 MP_Kaisong_SameMusic(u16 song, const struct WarpData *warp)
+{
+    const struct SongHeader *now = gMPlayInfo_BGM.songHeader, *want;
+    const struct KaiFile *a, *b;
+    if (!sKai.count || !gSaveBlock1Ptr || song == 0 || song >= ARRAY_COUNT(sKaisongSongNames) || !now
+     || !(gMPlayInfo_BGM.status & MUSICPLAYER_STATUS_TRACK) || (gMPlayInfo_BGM.status & MUSICPLAYER_STATUS_PAUSE)
+     || (gMPlayInfo_BGM.fadeOI && !(gMPlayInfo_BGM.fadeOV & FADE_IN)))   // (fading out: it is on its way out)
+        return FALSE;
+    if (!warp)
+        warp = &gSaveBlock1Ptr->location;
+    want = HeaderOf(Find(song, -1, warp->mapGroup, warp->mapNum), gSongTable[song].header);
+    a = FileOf(now);
+    b = FileOf(want);
+    return a && b && (a == b || a->music == b->music);   // (only custom songs: the game's own behave as they always did)
 }
 
 u16 MP_Kaisong_SongOf(const struct SongHeader *header)

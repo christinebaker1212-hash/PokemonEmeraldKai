@@ -927,9 +927,10 @@ void MP_TestCommand(const char *cmd, const char *arg)
     else if (strcmp(cmd, "bgm") == 0)
     {
         // bgm - which song the music player plays now, and how many tracks / voices it has
-        printf("[test] bgm song %d tracks %d voices %d status %x\n", MP_Kaisong_SongOf(gMPlayInfo_BGM.songHeader),
+        printf("[test] bgm song %d tracks %d voices %d status %x player tracks %d clock %u\n",
+               MP_Kaisong_SongOf(gMPlayInfo_BGM.songHeader),
                gMPlayInfo_BGM.songHeader ? gMPlayInfo_BGM.songHeader->trackCount : 0, SOUND_INFO_PTR->maxChans,
-               (unsigned)gMPlayInfo_BGM.status);
+               (unsigned)gMPlayInfo_BGM.status, gMPlayInfo_BGM.trackCount, (unsigned)gMPlayInfo_BGM.clock);
     }
     else if (strcmp(cmd, "getflag") == 0)
     {

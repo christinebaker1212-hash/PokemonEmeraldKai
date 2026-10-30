@@ -11,8 +11,8 @@ Moemon Music Studio work (`tools/moemon_music/`): don't use agents (subagents / 
 src/mp/mp_kaisong.c, tools/kaisong/gen.py (docs/SONG_TABLE.md, the studio's place picker data; the release runs it),
 scenes (`@tcg`, `@sim`...: a source file / src folder that names songs, found by gen.py; new music-playing code needs no
 list edit, a scene using the battle code holds the music: MP_MUSIC_SCENE_HOLD), the BGM player at 64 tracks / 64
-voices; loudness: tools/kaisong/loudness.py --write (INFO gain=, so each song plays as loud as the one it replaces; run it
-after adding or re-exporting a song); COOP_NOTES "Custom music"; tools/test/kaisong_test.sh, tools/kaisong/test_scenes.py.
+voices; loudness: tools/kaisong/loudness.py (INFO gain=, so each song plays as loud as the one it replaces; the release
+workflows run it on the shipped copies, nothing by hand), the same music in two files plays on (MP_Kaisong_SameMusic); COOP_NOTES "Custom music"; tools/test/kaisong_test.sh, tools/kaisong/test_scenes.py.
 
 Read `BUILDING_COOP.md` first for the architecture and build steps. The player
 docs are in `dist_extras/README.txt` (shipped next to the exe).

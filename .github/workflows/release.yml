@@ -73,6 +73,15 @@ jobs:
         if: steps.ver.outputs.skip != 'true'
         run: make linux -j"$(nproc)"
 
+      # Custom music (music/*.kaisong) plays as loud as the songs it replaces: each one measured in the game just
+      # built, the difference written into the copies this release ships (INFO gain=; nothing is committed). Files
+      # holding the same music share one gain. If it can't run, the gains in the repository ship as they are.
+      - name: Music volume
+        if: steps.ver.outputs.skip != 'true'
+        run: |
+          python3 tools/kaisong/loudness.py --bin ./pokeemerald64 --reference 0 --write --passes 2 \
+            || echo "::warning::the music volume pass failed; the gains in music/ ship as they are"
+
       - name: Windows build
         if: steps.ver.outputs.skip != 'true'
         run: tools/release/build_windows.sh "$RUNNER_TEMP/SDL2-2.30.9"

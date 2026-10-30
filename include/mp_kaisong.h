@@ -22,6 +22,7 @@ bool8 MP_Kaisong_Differs(u16 song, const struct WarpData *warp);
 void MP_Kaisong_Started(const struct SongHeader *header);
 // Debug / tests: list what music/ has ("mp kaisong").
 void MP_Kaisong_Log(void);
+bool8 MP_Kaisong_SameMusic(u16 song, const struct WarpData *warp);   // the music playing already is that song's here
 u16 MP_Kaisong_Gain(const struct SongHeader *header);   // 256 = as made (INFO gain=)
 bool8 MP_Kaisong_PlayFile(const char *file);   // tests: one file's song (mp playkai)
 

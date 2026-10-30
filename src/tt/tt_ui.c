@@ -1917,7 +1917,7 @@ void TtUi_OpenOnlineDeck(void)
     memcpy(U.opp.portrait, face.portrait, sizeof(U.opp.portrait));
     U.opp.special = TT_SPECIAL_NONE;
     U.opp.online = 1;
-    U.opp.music = MUS_RG_UNION_ROOM;
+    U.opp.music = MUS_RG_VS_TRAINER;
     U.region = region < TT_REGIONS ? region : TT_REGION_PETALBURG;
     U.rules = s->seat == 0 ? C()->regionRules[U.region] : 0;
     U.trade = TT_TRADE_ONE;

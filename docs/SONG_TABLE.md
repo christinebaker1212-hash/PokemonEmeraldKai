@@ -435,7 +435,7 @@ Custom: `mus_vs_aqua_magma_leader@ygo.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_rg_game_corner (485)
-- Scenes: Berry crush [berry_crush], TRIPLE TRIAD [tt]
+- Scenes: Berry crush [berry_crush]
 
 ### mus_rg_rocket_hideout (486)
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
@@ -583,7 +583,7 @@ Custom: `mus_rg_vs_trainer@tt.kaisong`
 - Scenes: Pokemon jump [pokemon_jump]
 
 ### mus_rg_union_room (539)
-- Scenes: CO-OP setup screen [setup], POKéMON TCG card duels [tcg], TRIPLE TRIAD [tt], YU-GI-OH! duels [ygo]
+- Scenes: CO-OP setup screen [setup], POKéMON TCG card duels [tcg], YU-GI-OH! duels [ygo]
 
 ### mus_rg_net_center (540)
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).

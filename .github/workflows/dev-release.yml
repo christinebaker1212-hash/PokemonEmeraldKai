@@ -82,6 +82,9 @@ jobs:
       - name: Build and package dev games
         run: |
           make linux DEV_BUILD=1 DEV_REVISION="$DEV_REVISION" -j"$(nproc)"
+          # custom music as loud as the songs it replaces (as the release does: release.yml "Music volume")
+          python3 tools/kaisong/loudness.py --bin ./pokeemerald64 --reference 0 --write --passes 2 \
+            || echo "::warning::the music volume pass failed; the gains in music/ ship as they are"
           tools/release/build_windows.sh "$RUNNER_TEMP/SDL2-2.30.9"
           tools/release/package.sh linux dist
           SDL2_DLL="$RUNNER_TEMP/SDL2-2.30.9/x86_64-w64-mingw32/bin/SDL2.dll" tools/release/package.sh windows dist

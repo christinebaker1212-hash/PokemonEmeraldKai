@@ -8,9 +8,9 @@ song and where it plays, and the export is named for it:
 - `<song>@<place>.kaisong`: only on one map (`mus_vs_gym_leader@rustboro_city_gym.kaisong`) or in one scene
   (`mus_vs_trainer@sim.kaisong`: the BATTLE SIMULATOR; `@tcg`, `@ygo`, `@tt`: the card games)
 
-Every song here plays as loud as the one it replaces: run `python3 tools/kaisong/loudness.py --write` after adding
-or re-exporting one (it measures them in the game and writes each file's `gain=`; a build of the game is needed:
-`--bin`). It takes a few minutes.
+Every song here plays as loud as the one it replaces, with nothing to do: each release measures them in the game
+it built and writes each file's volume into the copies it ships (`tools/kaisong/loudness.py`, which can also be run
+by hand to see the numbers).
 
 `docs/SONG_TABLE.md` lists every song, the places it plays and the custom songs here. The release makes it again
 (`python3 tools/kaisong/gen.py`); run that before committing new songs so the page in the repository matches.

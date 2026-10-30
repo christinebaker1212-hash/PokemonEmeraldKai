@@ -369,7 +369,7 @@ void TtBoard_Begin(const struct TtDuel *truth, unsigned me, const char *myName, 
     B.spinFirst = Side(truth->first);
     sRng ^= truth->seed;
     B.mapMusic = GetCurrentMapMusic();
-    B.music = (u16)(music ? music : MUS_RG_GAME_CORNER);
+    B.music = (u16)(music ? music : MUS_RG_VS_TRAINER);   // a battle song for every game (the CARD CASE side's @tt files)
     PlayBGM(B.music);
     printf("[tt] table: %s vs %s, seat %u, rules %x\n", myName, theirName, me, truth->rules);
 }

@@ -304,7 +304,7 @@ static void Fill(struct TtOpponent *o, const char *name, const char *title, unsi
         o->level--;   // (some play more loosely)
     o->key = key;
     o->special = TT_SPECIAL_NONE;
-    o->music = MUS_RG_GAME_CORNER;
+    o->music = MUS_RG_VS_TRAINER;
 }
 static void FillSpecial(struct TtOpponent *o, unsigned i, const char *name)
 {

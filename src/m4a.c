@@ -710,8 +710,14 @@ void MPlayOpen(struct MusicPlayerInfo *mplayInfo, struct MusicPlayerTrack *track
     if (trackCount == 0)
         return;
 
+#ifdef PORTABLE
+    // Moemon Kai: the BGM player has 64 tracks for .kaisong songs (gMPlayTrack_BGM); every player passes its own count
+    if (trackCount > 64)
+        trackCount = 64;
+#else
     if (trackCount > MAX_MUSICPLAYER_TRACKS)
         trackCount = MAX_MUSICPLAYER_TRACKS;
+#endif
 
     soundInfo = SOUND_INFO_PTR;
 
