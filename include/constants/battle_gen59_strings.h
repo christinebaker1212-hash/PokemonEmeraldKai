@@ -5,6 +5,6 @@
 // printfromtable gGen59StringIds), right after Gen 4's
 #include "constants/battle_gen4_strings.h"
 #define STRINGID_G59_FIRST (STRINGID_G4_FIRST + STRINGID_G4_COUNT)
-#define STRINGID_G59_COUNT 69
+#define STRINGID_G59_COUNT 72
 
 #endif // GUARD_CONSTANTS_BATTLE_GEN59_STRINGS_H

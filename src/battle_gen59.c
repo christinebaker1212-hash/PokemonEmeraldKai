@@ -111,7 +111,10 @@ static EWRAM_DATA bool8 sStatDown = FALSE;
     X(DRAGON_CHEER, "{B_DEF_NAME_WITH_PREFIX} is getting\npumped!") \
     X(SHED_TAIL, "{B_ATK_NAME_WITH_PREFIX} shed its tail\nto create a decoy!") \
     X(TELEKINESIS, "{B_DEF_NAME_WITH_PREFIX} was hurled\ninto the air!") \
-    X(STATS_RESET, "All stat changes were eliminated!")
+    X(STATS_RESET, "All stat changes were eliminated!") \
+    X(ITEM_RAISED, "{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s {B_LAST_ITEM}\nraised its {B_BUFF1}!") \
+    X(ROCKY_HELMET, "{B_ATK_NAME_WITH_PREFIX} was hurt\nby the {B_LAST_ITEM}!") \
+    X(ABILITY_RAISED, "{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s {B_SCR_ACTIVE_ABILITY}\nraised its {B_BUFF1}!")
 
 #define G59_ENUM(name, text) G59_MSG_##name,
 enum { G59_TEXTS(G59_ENUM) G59_MSG_COUNT };
@@ -155,9 +158,17 @@ static u32 Speed(u8 battler)
     return speed ? speed : 1;
 }
 
+bool8 MP_Gen59_HoldsItem(u8 battler, u16 item)
+{
+    return gBattleMons[battler].item == item && !gGen4Battlers[battler].embargo && gBattleMons[battler].ability != ABILITY_KLUTZ
+        && !gGen59Field.magicRoom;
+}
+
 static u32 Weight(u8 battler)
 {
     u32 w = GetPokedexHeightWeight(SpeciesToNationalPokedexNum(gBattleMons[battler].species), 1);
+    if (MP_Gen59_HoldsItem(battler, ITEM_FLOAT_STONE))
+        w /= 2;
     if (gBattleMons[battler].ability == ABILITY_HEAVY_METAL)
         w *= 2;
     if (gBattleMons[battler].ability == ABILITY_LIGHT_METAL)
@@ -281,6 +292,8 @@ void MP_Gen59_TurnEnd(void)
 
 void MP_Gen59_OnDamaged(u8 battler, u8 attacker, s32 damage)
 {
+    if (battler != attacker && damage > 0 && gBattleMons[battler].item == ITEM_AIR_BALLOON)
+        SetItem(battler, ITEM_NONE);   // popped
     if (battler != attacker && damage > 0 && gGen59Battlers[battler].hitsTaken < 6)
         gGen59Battlers[battler].hitsTaken++;
 }
@@ -304,6 +317,9 @@ void MP_Gen59_OnFainted(u8 battler)
     if (side->fainted < 100)
         side->fainted++;
 }
+
+u8 MP_Gen59_AteType(u16 move, u8 battler, u8 type);
+u32 MP_Gen59_AbilityPower(u16 move, u8 attacker, u32 p);
 
 // ---------------------------------------------------------------------------------------------- terrain
 
@@ -414,7 +430,7 @@ const u8 *MP_Gen59_FieldEndTurn(void)
 // STICKY WEB on arrival: the script, or NULL
 const u8 *MP_Gen59_ArrivalEffect(u8 battler)
 {
-    if (gGen59Sides[GetBattlerSide(battler)].stickyWeb && MP_Gen59_IsGrounded(battler)
+    if (gGen59Sides[GetBattlerSide(battler)].stickyWeb && MP_Gen59_IsGrounded(battler) && !MP_Gen59_HoldsItem(battler, ITEM_HEAVY_DUTY_BOOTS)
      && gBattleMons[battler].statStages[STAT_SPEED] > MIN_STAT_STAGE && gBattleMons[battler].hp != 0)
     {
         gBattleScripting.battler = battler;
@@ -443,6 +459,7 @@ u8 MP_Gen59_MoveType(u16 move, u8 battler, u8 type)
     case EFFECT_IVY_CUDGEL:
         break;
     }
+    type = MP_Gen59_AteType(move, battler, type);
     if (gGen59Field.ionDeluge && type == TYPE_NORMAL)
         type = TYPE_ELECTRIC;
     return type;
@@ -604,6 +621,9 @@ u16 MP_Gen59_MovePower(u16 move, u8 attacker, u8 target, u16 power)
             p = p * 15 / 10;
         break;
     }
+    p = MP_Gen59_AbilityPower(move, attacker, p);
+    if (type == TYPE_FAIRY && (MP_Gen59_HoldsItem(attacker, ITEM_PIXIE_PLATE) || MP_Gen59_HoldsItem(attacker, ITEM_FAIRY_FEATHER)))
+        p = p * 12 / 10;
     return p ? p : 1;
 }
 
@@ -621,6 +641,8 @@ void MP_Gen59_AttackStats(u16 move, u8 attacker, u8 target, u16 *attack, u16 *sp
         *attack = gBattleMons[attacker].defense;
         break;
     }
+    if (MP_Gen59_HoldsItem(target, ITEM_ASSAULT_VEST))
+        *spDefense = *spDefense * 15 / 10;
     if (gGen59Field.wonderRoom)
     {
         u16 t = *defense;
@@ -728,6 +750,23 @@ static bool8 Roll(u8 chance)
     return Random() % 100 < c;
 }
 
+// METEOR BEAM / ELECTRO SHOT raise SP. ATK as they charge (ELECTRO SHOT in rain hits at once), GEOMANCY its stats
+// on the second turn
+static bool8 ChargeStatsNow(u16 move)
+{
+    bool8 charging = (gBattleMons[gBattlerAttacker].status2 & STATUS2_MULTIPLETURNS) != 0;
+    switch (Effect(move))
+    {
+    case EFFECT_METEOR_BEAM:
+        return charging;
+    case EFFECT_ELECTRO_SHOT:
+        return charging || (WEATHER_HAS_EFFECT2 && (gBattleWeather & B_WEATHER_RAIN));
+    case EFFECT_GEOMANCY:
+        return !charging;
+    }
+    return TRUE;
+}
+
 // ---------------------------------------------------------------------------------------------- the commands
 
 static u8 StatusMove(void);
@@ -746,9 +785,13 @@ u8 MP_Gen59_Command(u8 mode)
         return d == NULL || !AnyChangePossible(d);
     case G59_STATS_SELF:
         sStatNext = sStatEnd = 0;
-        if (d && (IsDamaging(move) ? Roll(d->userChance) : TRUE) && gBattleMons[atk].hp != 0)
+        if (d && (IsDamaging(move) ? Roll(d->userChance) : TRUE) && gBattleMons[atk].hp != 0 && ChargeStatsNow(move))
             sStatEnd = NUM_BATTLE_STATS - 1;
         return 0;
+    case G59_ONE_TURN_NOW:
+        return Effect(move) == EFFECT_ELECTRO_SHOT && WEATHER_HAS_EFFECT2 && (gBattleWeather & B_WEATHER_RAIN);
+    case G59_IS_STATUS:
+        return !IsDamaging(move);
     case G59_STATS_TARGET:
         sStatNext = sStatEnd = NUM_BATTLE_STATS - 1;
         if (d && gBattleMons[gBattlerTarget].hp != 0 && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
@@ -1352,4 +1395,289 @@ static u8 StatusMove(void)
             | d->targetStages[0] | d->targetStages[1] | d->targetStages[2] | d->targetStages[3] | d->targetStages[4] | d->targetStages[5] | d->targetStages[6]))
         return !AnyChangePossible(d);
     return 1;
+}
+
+// ---------------------------------------------------------------------------------------------- abilities
+
+// moves from before Gen 5 that count as biting / pulse / slicing / healing moves (the newer ones carry flags)
+static const u16 sOldBiting[] = {MOVE_BITE, MOVE_CRUNCH, MOVE_HYPER_FANG, MOVE_FIRE_FANG, MOVE_ICE_FANG, MOVE_THUNDER_FANG, MOVE_POISON_FANG};
+static const u16 sOldPulse[] = {MOVE_WATER_PULSE, MOVE_DARK_PULSE, MOVE_DRAGON_PULSE, MOVE_AURA_SPHERE};
+static const u16 sOldSlicing[] = {MOVE_CUT, MOVE_RAZOR_LEAF, MOVE_SLASH, MOVE_FURY_CUTTER, MOVE_AIR_SLASH, MOVE_LEAF_BLADE,
+                                  MOVE_NIGHT_SLASH, MOVE_PSYCHO_CUT, MOVE_X_SCISSOR, MOVE_AIR_CUTTER, MOVE_AERIAL_ACE};
+static const u16 sOldHealing[] = {MOVE_RECOVER, MOVE_SOFT_BOILED, MOVE_MILK_DRINK, MOVE_MOONLIGHT, MOVE_MORNING_SUN,
+                                  MOVE_SYNTHESIS, MOVE_SLACK_OFF, MOVE_ROOST, MOVE_WISH, MOVE_HEAL_ORDER, MOVE_REST,
+                                  MOVE_ABSORB, MOVE_MEGA_DRAIN, MOVE_GIGA_DRAIN, MOVE_DRAIN_PUNCH, MOVE_LEECH_LIFE,
+                                  MOVE_DREAM_EATER, MOVE_SWALLOW, MOVE_HEALING_WISH, MOVE_LUNAR_DANCE};
+
+static bool8 InMoves(const u16 *list, u32 n, u16 move)
+{
+    u32 i;
+    for (i = 0; i < n; i++)
+        if (list[i] == move)
+            return TRUE;
+    return FALSE;
+}
+
+static bool8 IsBiting(u16 move)  { return (MoveFlags(move) & MP_MOVE_FLAG_BITING_MOVE) || InMoves(sOldBiting, ARRAY_COUNT(sOldBiting), move); }
+static bool8 IsPulse(u16 move)   { return (MoveFlags(move) & MP_MOVE_FLAG_PULSE_MOVE) || InMoves(sOldPulse, ARRAY_COUNT(sOldPulse), move); }
+static bool8 IsSlicing(u16 move) { return (MoveFlags(move) & MP_MOVE_FLAG_SLICING_MOVE) || InMoves(sOldSlicing, ARRAY_COUNT(sOldSlicing), move); }
+static bool8 IsHealing(u16 move) { return (MoveFlags(move) & MP_MOVE_FLAG_HEALING_MOVE) || InMoves(sOldHealing, ARRAY_COUNT(sOldHealing), move); }
+
+// the "-ATE" abilities: a NORMAL move takes the ability's type
+static u8 AteType(u16 ability)
+{
+    switch (ability)
+    {
+    case ABILITY_PIXILATE:    return TYPE_FAIRY;
+    case ABILITY_REFRIGERATE: return TYPE_ICE;
+    case ABILITY_AERILATE:    return TYPE_FLYING;
+    case ABILITY_GALVANIZE:   return TYPE_ELECTRIC;
+    }
+    return TYPE_MYSTERY;
+}
+
+u8 MP_Gen59_AteType(u16 move, u8 battler, u8 type)
+{
+    u8 ate = AteType(gBattleMons[battler].ability);
+    if (ate != TYPE_MYSTERY && type == TYPE_NORMAL && move != MOVE_STRUGGLE && IsDamaging(move))
+        return ate;
+    return type;
+}
+
+// the ability's boost to a move's power (after the move's own formula)
+u32 MP_Gen59_AbilityPower(u16 move, u8 attacker, u32 p)
+{
+    switch (gBattleMons[attacker].ability)
+    {
+    case ABILITY_PIXILATE:
+    case ABILITY_REFRIGERATE:
+    case ABILITY_AERILATE:
+    case ABILITY_GALVANIZE:
+        if (gBattleMoves[move].type == TYPE_NORMAL && move != MOVE_STRUGGLE)
+            p = p * 12 / 10;
+        break;
+    case ABILITY_STRONG_JAW:
+        if (IsBiting(move))
+            p = p * 15 / 10;
+        break;
+    case ABILITY_MEGA_LAUNCHER:
+        if (IsPulse(move))
+            p = p * 15 / 10;
+        break;
+    case ABILITY_SHARPNESS:
+        if (IsSlicing(move))
+            p = p * 15 / 10;
+        break;
+    }
+    return p;
+}
+
+s8 MP_Gen59_Priority(u8 battler, u16 move)
+{
+    s8 priority = gBattleMoves[move].priority;
+    if (move == MOVE_NONE)
+        return priority;
+    switch (gBattleMons[battler].ability)
+    {
+    case ABILITY_PRANKSTER:
+        if (!IsDamaging(move))
+            priority++;
+        break;
+    case ABILITY_GALE_WINGS:
+        if (gBattleMoves[move].type == TYPE_FLYING && gBattleMons[battler].hp == gBattleMons[battler].maxHP)
+            priority++;
+        break;
+    case ABILITY_TRIAGE:
+        if (IsHealing(move))
+            priority += 3;
+        break;
+    }
+    if (Effect(move) == EFFECT_GRASSY_GLIDE && gGen59Field.terrain == G59_TERRAIN_GRASSY && MP_Gen59_IsGrounded(battler))
+        priority++;
+    return priority;
+}
+
+u32 MP_Gen59_Speed(u8 battler, u32 speed)
+{
+    bool8 weather = WEATHER_HAS_EFFECT2;
+    switch (gBattleMons[battler].ability)
+    {
+    case ABILITY_SAND_RUSH:
+        if (weather && (gBattleWeather & B_WEATHER_SANDSTORM))
+            speed *= 2;
+        break;
+    case ABILITY_SLUSH_RUSH:
+        if (weather && (gBattleWeather & B_WEATHER_HAIL))
+            speed *= 2;
+        break;
+    case ABILITY_SURGE_SURFER:
+        if (gGen59Field.terrain == G59_TERRAIN_ELECTRIC)
+            speed *= 2;
+        break;
+    }
+    return speed;
+}
+
+// PROTEAN / LIBERO: the user becomes the type of the move it's about to use
+void MP_Gen59_OnMoveStart(u8 battler, u16 move)
+{
+    u16 ability = gBattleMons[battler].ability;
+    gGen59Field.moveEndDone = 0;
+    if ((ability == ABILITY_PROTEAN || ability == ABILITY_LIBERO) && move != MOVE_STRUGGLE && move != MOVE_NONE)
+    {
+        u8 type = MP_Gen4_MoveType(move, battler);
+        SetTypes(battler, type, type);
+        gGen59Battlers[battler].thirdType = TYPE_MYSTERY;
+    }
+}
+
+static const u8 sTerrainMsg[] = {0, G59_MSG_TERRAIN_GRASSY, G59_MSG_TERRAIN_MISTY, G59_MSG_TERRAIN_ELECTRIC, G59_MSG_TERRAIN_PSYCHIC};
+
+static u8 SetTerrain(u8 battler, u8 terrain)
+{
+    if (gGen59Field.terrain == terrain)
+        return 0;
+    gGen59Field.terrain = terrain;
+    gGen59Field.terrainTurns = 5;
+    gBattleScripting.battler = battler;
+    Say(sTerrainMsg[terrain]);
+    BattleScriptPushCursorAndCallback(BattleScript_G59AbilitySay);
+    return 1;
+}
+
+static u8 RaiseOnArrival(u8 battler, u8 stat)
+{
+    if (gBattleMons[battler].statStages[stat] >= MAX_STAT_STAGE)
+        return 0;
+    gBattleMons[battler].statStages[stat]++;
+    gBattleScripting.battler = battler;
+    PREPARE_STAT_BUFFER(gBattleTextBuff1, stat);
+    gBattleScripting.animArg1 = STAT_ANIM_PLUS1 + stat - 1;
+    gBattleScripting.animArg2 = 0;
+    Say(G59_MSG_ABILITY_RAISED);
+    BattleScriptPushCursorAndCallback(BattleScript_G59AbilityStat);
+    return 1;
+}
+
+// the Gen 5-9 abilities that act as their Pokémon comes in: 1 if a script was started
+u8 MP_Gen59_SwitchInAbility(u8 battler)
+{
+    if (gBattleMons[battler].hp == 0 || gGen59Battlers[battler].arrived)
+        return 0;
+    gGen59Battlers[battler].arrived = TRUE;
+    gLastUsedAbility = gBattleMons[battler].ability;
+    switch (gBattleMons[battler].ability)
+    {
+    case ABILITY_ELECTRIC_SURGE:
+    case ABILITY_HADRON_ENGINE:
+        return SetTerrain(battler, G59_TERRAIN_ELECTRIC);
+    case ABILITY_PSYCHIC_SURGE:
+        return SetTerrain(battler, G59_TERRAIN_PSYCHIC);
+    case ABILITY_GRASSY_SURGE:
+        return SetTerrain(battler, G59_TERRAIN_GRASSY);
+    case ABILITY_MISTY_SURGE:
+        return SetTerrain(battler, G59_TERRAIN_MISTY);
+    case ABILITY_INTREPID_SWORD:
+        return RaiseOnArrival(battler, STAT_ATK);
+    case ABILITY_DAUNTLESS_SHIELD:
+        return RaiseOnArrival(battler, STAT_DEF);
+    }
+    return 0;
+}
+
+#define G59M_KO      (1 << 0)
+#define G59M_ITEM    (1 << 1)
+#define G59M_HELMET  (1 << 2)
+
+static const u8 *ItemStatUp(u8 battler, u8 stat, u8 stat2)
+{
+    gLastUsedItem = gBattleMons[battler].item;
+    gBattleScripting.battler = battler;
+    if (gBattleMons[battler].statStages[stat] < MAX_STAT_STAGE)
+        gBattleMons[battler].statStages[stat] = min(MAX_STAT_STAGE, gBattleMons[battler].statStages[stat] + (stat2 ? 2 : 1));
+    if (stat2 && gBattleMons[battler].statStages[stat2] < MAX_STAT_STAGE)
+        gBattleMons[battler].statStages[stat2] = min(MAX_STAT_STAGE, gBattleMons[battler].statStages[stat2] + 2);
+    PREPARE_STAT_BUFFER(gBattleTextBuff1, stat);
+    gBattleScripting.animArg1 = (stat2 ? STAT_ANIM_PLUS2 : STAT_ANIM_PLUS1) + stat - 1;
+    gBattleScripting.animArg2 = 0;
+    SetItem(battler, ITEM_NONE);
+    Say(G59_MSG_ITEM_RAISED);
+    return BattleScript_G59ItemStatMoveEnd;
+}
+
+// after a move, one effect at a time (the script, or NULL when done): MOXIE / BEAST BOOST for a knock-out, the
+// target's WEAKNESS POLICY / ABSORB BULB / CELL BATTERY / SNOWBALL, the ROCKY HELMET
+const u8 *MP_Gen59_MoveEnd(void)
+{
+    u8 atk = gBattlerAttacker, def = gBattlerTarget, stat = 0;
+    u32 i, best = 0;
+    bool8 hit = def < gBattlersCount && atk != def && IsDamaging(gCurrentMove) && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+             && gGen4Battlers[def].hitThisTurn;
+    u8 type = MP_Gen4_MoveType(gCurrentMove, atk);
+
+    if (!(gGen59Field.moveEndDone & G59M_ITEM))
+    {
+        gGen59Field.moveEndDone |= G59M_ITEM;
+        if (hit && gBattleMons[def].hp != 0 && !(gBattleMons[def].status2 & STATUS2_SUBSTITUTE))
+        {
+            if (MP_Gen59_HoldsItem(def, ITEM_WEAKNESS_POLICY) && (gMoveResultFlags & MOVE_RESULT_SUPER_EFFECTIVE)
+             && (gBattleMons[def].statStages[STAT_ATK] < MAX_STAT_STAGE || gBattleMons[def].statStages[STAT_SPATK] < MAX_STAT_STAGE))
+                return ItemStatUp(def, STAT_ATK, STAT_SPATK);
+            if ((MP_Gen59_HoldsItem(def, ITEM_ABSORB_BULB) && type == TYPE_WATER && gBattleMons[def].statStages[STAT_SPATK] < MAX_STAT_STAGE))
+                return ItemStatUp(def, STAT_SPATK, 0);
+            if ((MP_Gen59_HoldsItem(def, ITEM_CELL_BATTERY) && type == TYPE_ELECTRIC && gBattleMons[def].statStages[STAT_ATK] < MAX_STAT_STAGE))
+                return ItemStatUp(def, STAT_ATK, 0);
+            if ((MP_Gen59_HoldsItem(def, ITEM_SNOWBALL) && type == TYPE_ICE && gBattleMons[def].statStages[STAT_ATK] < MAX_STAT_STAGE))
+                return ItemStatUp(def, STAT_ATK, 0);
+        }
+    }
+    if (!(gGen59Field.moveEndDone & G59M_HELMET))
+    {
+        gGen59Field.moveEndDone |= G59M_HELMET;
+        if (hit && MP_Gen59_HoldsItem(def, ITEM_ROCKY_HELMET) && (gBattleMoves[gCurrentMove].flags & FLAG_MAKES_CONTACT)
+         && gBattleMons[atk].hp != 0 && gBattleMons[atk].ability != ABILITY_MAGIC_GUARD)
+        {
+            gLastUsedItem = ITEM_ROCKY_HELMET;
+            gBattleMoveDamage = gBattleMons[atk].maxHP / 6;
+            if (gBattleMoveDamage == 0)
+                gBattleMoveDamage = 1;
+            Say(G59_MSG_ROCKY_HELMET);
+            return BattleScript_G59RockyHelmet;
+        }
+    }
+    if (gGen59Field.moveEndDone & G59M_KO)
+        return NULL;
+    gGen59Field.moveEndDone |= G59M_KO;
+    if (def >= gBattlersCount || gBattleMons[def].hp != 0 || gBattleMons[atk].hp == 0 || atk == def
+     || !IsDamaging(gCurrentMove) || (gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
+        return NULL;
+    switch (gBattleMons[atk].ability)
+    {
+    case ABILITY_MOXIE:
+        stat = STAT_ATK;
+        break;
+    case ABILITY_BEAST_BOOST:
+        for (i = STAT_ATK; i <= STAT_SPDEF; i++)
+        {
+            u16 v = (&gBattleMons[atk].attack)[i - 1];
+            if (v > best)
+            {
+                best = v;
+                stat = i;
+            }
+        }
+        break;
+    default:
+        return NULL;
+    }
+    if (stat == 0 || gBattleMons[atk].statStages[stat] >= MAX_STAT_STAGE)
+        return NULL;
+    gBattleMons[atk].statStages[stat]++;
+    gLastUsedAbility = gBattleMons[atk].ability;
+    gBattleScripting.battler = atk;
+    PREPARE_STAT_BUFFER(gBattleTextBuff1, stat);
+    gBattleScripting.animArg1 = STAT_ANIM_PLUS1 + stat - 1;
+    gBattleScripting.animArg2 = 0;
+    Say(G59_MSG_ABILITY_RAISED);
+    return BattleScript_G59AbilityStatMoveEnd;
 }

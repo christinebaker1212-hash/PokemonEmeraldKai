@@ -1,6 +1,6 @@
 #include "global.h"
 #include "battle_gen4.h"
-#include "battle_gen59.h"   // Moemon Kai: Gen 4
+#include "battle_gen59.h"   // Moemon Kai: Gen 5-9
 #include "mp.h"
 #include "mp/mp_join.h"
 #include "battle.h"
@@ -1392,7 +1392,10 @@ static bool8 Gen4GroundImmune(u8 attacker, u8 target)
 {
     if (gGen4Field.gravity || MP_Gen4_HoldEffect(target) == HOLD_EFFECT_IRON_BALL)
         return FALSE;
-    return gGen4Battlers[target].magnetRise || MP_Gen4_TargetAbility(attacker, target) == ABILITY_LEVITATE;
+    if (gGen59Battlers[target].smackedDown)
+        return FALSE;   // SMACK DOWN, THOUSAND ARROWS
+    return gGen4Battlers[target].magnetRise || MP_Gen4_TargetAbility(attacker, target) == ABILITY_LEVITATE
+        || MP_Gen59_HoldsItem(target, ITEM_AIR_BALLOON);
 }
 
 // Moemon Kai: type chart entries Gen 4 skips: GROUND on FLYING under GRAVITY / IRON BALL, PSYCHIC on DARK after
@@ -10382,6 +10385,18 @@ static void Cmd_switchoutabilities(void)
                                      sizeof(gBattleMons[gActiveBattler].status1),
                                      &gBattleMons[gActiveBattler].status1);
         MarkBattlerForControllerExec(gActiveBattler);
+        break;
+    case ABILITY_REGENERATOR:   // Moemon Kai: a third of its HP back as it leaves
+        if (gBattleMons[gActiveBattler].hp != 0 && gBattleMons[gActiveBattler].hp < gBattleMons[gActiveBattler].maxHP)
+        {
+            u32 hp = gBattleMons[gActiveBattler].hp + gBattleMons[gActiveBattler].maxHP / 3;
+            gBattleMons[gActiveBattler].hp = hp > gBattleMons[gActiveBattler].maxHP ? gBattleMons[gActiveBattler].maxHP : hp;
+            BtlController_EmitSetMonData(B_COMM_TO_CONTROLLER, REQUEST_HP_BATTLE,
+                                         gBitTable[*(gBattleStruct->battlerPartyIndexes + gActiveBattler)],
+                                         sizeof(gBattleMons[gActiveBattler].hp),
+                                         &gBattleMons[gActiveBattler].hp);
+            MarkBattlerForControllerExec(gActiveBattler);
+        }
         break;
     }
 

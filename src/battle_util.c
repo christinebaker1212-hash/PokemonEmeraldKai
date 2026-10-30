@@ -1,5 +1,6 @@
 #include "global.h"
-#include "battle_gen4.h"   // Moemon Kai: Gen 4
+#include "battle_gen4.h"
+#include "battle_gen59.h"   // Moemon Kai: Gen 5-9
 #include "mp.h"
 #include "battle.h"
 #include "battle_anim.h"
@@ -2893,6 +2894,9 @@ u8 AbilityBattleEffects(u8 caseID, u8 battler, u16 ability, u8 special, u16 move
                     }
                 }
                 break;
+            default:
+                effect = MP_Gen59_SwitchInAbility(battler);   // Moemon Kai: the SURGES, INTREPID SWORD...
+                break;
             }
             break;
         case ABILITYEFFECT_ENDTURN: // 1
@@ -3074,6 +3078,7 @@ u8 AbilityBattleEffects(u8 caseID, u8 battler, u16 ability, u8 special, u16 move
                 }
                 break;
             case ABILITY_ROUGH_SKIN:
+            case ABILITY_IRON_BARBS:   // Moemon Kai: Gen 5
                 if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
                  && gBattleMons[gBattlerAttacker].hp != 0
                  && !gProtectStructs[gBattlerAttacker].confusionSelfDmg

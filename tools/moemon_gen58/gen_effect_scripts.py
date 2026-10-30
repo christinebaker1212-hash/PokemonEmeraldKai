@@ -31,6 +31,9 @@ SCRIPT = {
     'StrengthSap': 'BattleScript_G59HealUser', 'Purify': 'BattleScript_G59HealUser',
     'LifeDew': 'BattleScript_G59HealUser', 'JungleHealing': 'BattleScript_G59HealUser',
     'ClangorousSoul': 'BattleScript_G59PayHpStats', 'StatChangeHalfHp': 'BattleScript_G59PayHpStats',
+    'MeteorBeam': 'BattleScript_G59TwoTurns', 'ElectroShot': 'BattleScript_G59TwoTurns',
+    'Geomancy': 'BattleScript_G59TwoTurns', 'FreezeShock': 'BattleScript_G59TwoTurns',
+    'IceBurn': 'BattleScript_G59TwoTurns',
 }
 
 GENERIC = r'''
@@ -137,6 +140,36 @@ BattleScript_G59FinalGambit::
 	datahpupdate BS_ATTACKER
 	tryfaintmon BS_TARGET
 	tryfaintmon BS_ATTACKER
+	goto BattleScript_MoveEnd
+
+@ two-turn moves: a charging turn (with METEOR BEAM's / ELECTRO SHOT's SP. ATK), then the hit (GEOMANCY: its stats)
+BattleScript_G59TwoTurns::
+	jumpifstatus2 BS_ATTACKER, STATUS2_MULTIPLETURNS, BattleScript_G59TwoTurnsSecond
+	jumpifword CMP_COMMON_BITS, gHitMarker, HITMARKER_NO_ATTACKSTRING, BattleScript_G59TwoTurnsSecond
+	gen4 G59_ONE_TURN_NOW, BattleScript_G59Hit
+	setbyte sTWOTURN_STRINGID, B_MSG_TURN1_SKY_ATTACK
+	call BattleScriptFirstChargingTurn
+	gen4 G59_STATS_SELF
+	call BattleScript_G59SelfLoop
+	goto BattleScript_MoveEnd
+BattleScript_G59TwoTurnsSecond::
+	attackcanceler
+	setmoveeffect MOVE_EFFECT_CHARGING
+	setbyte sB_ANIM_TURN, 1
+	clearstatusfromeffect BS_ATTACKER
+	orword gHitMarker, HITMARKER_NO_PPDEDUCT
+	gen4 G59_IS_STATUS, BattleScript_G59TwoTurnsStatus
+	accuracycheck BattleScript_PrintMoveMissed, ACC_CURR_MOVE
+	attackstring
+	ppreduce
+	call BattleScript_G59DoHit
+	goto BattleScript_MoveEnd
+BattleScript_G59TwoTurnsStatus::
+	attackstring
+	ppreduce
+	attackanimation
+	waitanimation
+	call BattleScript_G59AllStats
 	goto BattleScript_MoveEnd
 
 @ healing moves: the target's HP (HEAL PULSE) or the user's (SHORE UP, STRENGTH SAP, PURIFY, LIFE DEW...)
@@ -255,6 +288,43 @@ BattleScript_G59EndTurnHurt::
 BattleScript_G59StickyWeb::
 	printfromtable gGen59StringIds
 	waitmessage B_WAIT_TIME_LONG
+	return
+
+@ Gen 5-9 abilities (MP_Gen59_SwitchInAbility, MP_Gen59_MoveEnd)
+BattleScript_G59AbilitySay::
+	pause B_WAIT_TIME_SHORT
+	printfromtable gGen59StringIds
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
+BattleScript_G59AbilityStat::
+	pause B_WAIT_TIME_SHORT
+	playanimation BS_SCRIPTING, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gGen59StringIds
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
+BattleScript_G59AbilityStatMoveEnd::
+	playanimation BS_SCRIPTING, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gGen59StringIds
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_G59ItemStatMoveEnd::
+	playanimation BS_SCRIPTING, B_ANIM_HELD_ITEM_EFFECT
+	waitanimation
+	playanimation BS_SCRIPTING, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gGen59StringIds
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_G59RockyHelmet::
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_HP_UPDATE
+	healthbarupdate BS_ATTACKER
+	datahpupdate BS_ATTACKER
+	printfromtable gGen59StringIds
+	waitmessage B_WAIT_TIME_LONG
+	tryfaintmon BS_ATTACKER
 	return
 '''
 

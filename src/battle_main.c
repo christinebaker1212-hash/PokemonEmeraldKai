@@ -2,7 +2,8 @@
 #include "global.h"
 #include "mp_region.h"
 #include "data/text/trainer_class_names_qz.h"   // Moemon Kai: QZ_TRAINER_MONEY
-#include "battle_gen4.h"   // Moemon Kai: Gen 4
+#include "battle_gen4.h"
+#include "battle_gen59.h"   // Moemon Kai: Gen 5-9
 #include "mp.h"
 #include "battle.h"
 #include "battle_anim.h"
@@ -4993,6 +4994,7 @@ u8 GetWhoStrikesFirst(u8 battler1, u8 battler2, bool8 ignoreChosenMoves)
     u8 holdEffect = 0;
     u8 holdEffectParam = 0;
     u16 moveBattler1 = 0, moveBattler2 = 0;
+    s8 priority1, priority2;   // Moemon Kai
 
     if (WEATHER_HAS_EFFECT)
     {
@@ -5124,11 +5126,14 @@ u8 GetWhoStrikesFirst(u8 battler1, u8 battler2, bool8 ignoreChosenMoves)
         }
     }
 
+    // Moemon Kai: PRANKSTER, GALE WINGS, TRIAGE change a move's priority
+    priority1 = MP_Gen59_Priority(battler1, moveBattler1);
+    priority2 = MP_Gen59_Priority(battler2, moveBattler2);
     // both move priorities are different than 0
-    if (gBattleMoves[moveBattler1].priority != 0 || gBattleMoves[moveBattler2].priority != 0)
+    if (priority1 != 0 || priority2 != 0)
     {
         // both priorities are the same
-        if (gBattleMoves[moveBattler1].priority == gBattleMoves[moveBattler2].priority)
+        if (priority1 == priority2)
         {
             if (speedBattler1 == speedBattler2 && Random() & 1)
                 strikesFirst = 2; // same speeds, same priorities
@@ -5137,7 +5142,7 @@ u8 GetWhoStrikesFirst(u8 battler1, u8 battler2, bool8 ignoreChosenMoves)
 
             // else battler1 has more speed
         }
-        else if (gBattleMoves[moveBattler1].priority < gBattleMoves[moveBattler2].priority)
+        else if (priority1 < priority2)
         {
             strikesFirst = 1; // battler2's move has greater priority
         }

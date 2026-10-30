@@ -5,4 +5,4 @@
 MODE=1
 TMO=200
 EXPECT_A=("candy: released species 4" "candy: released species 7" "candy: released species 1" "candy: Birch's visit is over"
-          "[test] candies after reload: 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 | jar 1" "candy: jar opened (3 candies, 0 to convert)")
+          "[test] candies after reload: 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 | jar 1" "candy: jar opened (3 candies, 0 to convert)")

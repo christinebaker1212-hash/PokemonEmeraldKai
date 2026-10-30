@@ -65,5 +65,7 @@
 #define G59_CAN_DRAG          111  // CIRCLE THROW / DRAGON TAIL: jumps if the target can't be dragged out
 #define G59_GAMBIT            112  // FINAL GAMBIT: the user's HP as damage (jumps if it can't hit)
 #define G59_GAMBIT_SELF       113  // ...then all of it from the user
+#define G59_ONE_TURN_NOW      114  // jumps if the two-turn move needs no charging turn (ELECTRO SHOT in rain)
+#define G59_IS_STATUS         115  // jumps if the move is a status move (GEOMANCY's second turn)
 
 #endif // GUARD_CONSTANTS_BATTLE_GEN4_H

@@ -36,6 +36,7 @@ struct Gen59Battler
     u8 noRetreat:1;
     u8 octolock:1;
     u8 thirdType;          // TRICK-OR-TREAT / FOREST'S CURSE (TYPE_MYSTERY = none)
+    u8 arrived:1;          // its arrival ability has acted (MP_Gen59_SwitchInAbility)
 };
 
 struct Gen59Side
@@ -57,6 +58,7 @@ struct Gen59Field
     u8 echoedVoice;        // ECHOED VOICE: how many turns in a row it was used
     u8 echoedThisTurn:1;
     u8 ionDeluge:1;        // NORMAL moves are ELECTRIC this turn
+    u8 moveEndDone;        // MP_Gen59_MoveEnd's steps done for this move
 };
 
 extern struct Gen59Battler gGen59Battlers[];
@@ -85,5 +87,13 @@ u8 MP_Gen59_MoveType(u16 move, u8 battler, u8 type);
 s8 MP_Gen59_IsPhysical(u16 move, u8 battler);        // -1: as its category says
 bool8 MP_Gen59_StatusBlocked(u8 battler, u8 moveEffect);  // MISTY / ELECTRIC TERRAIN
 bool8 MP_Gen59_IsGrounded(u8 battler);
+bool8 MP_Gen59_HoldsItem(u8 battler, u16 item);      // the Gen 5-9 held items (not under EMBARGO, KLUTZ, MAGIC ROOM)
+u8 MP_Gen59_AteType(u16 move, u8 battler, u8 type);   // PIXILATE...
+u32 MP_Gen59_AbilityPower(u16 move, u8 attacker, u32 power);
+s8 MP_Gen59_Priority(u8 battler, u16 move);           // PRANKSTER, GALE WINGS, TRIAGE, GRASSY GLIDE
+u32 MP_Gen59_Speed(u8 battler, u32 speed);            // SAND RUSH, SLUSH RUSH, SURGE SURFER
+void MP_Gen59_OnMoveStart(u8 battler, u16 move);      // PROTEAN, LIBERO
+u8 MP_Gen59_SwitchInAbility(u8 battler);              // the SURGES, INTREPID SWORD, DAUNTLESS SHIELD
+const u8 *MP_Gen59_MoveEnd(void);                     // MOXIE, BEAST BOOST
 
 #endif // GUARD_BATTLE_GEN59_H

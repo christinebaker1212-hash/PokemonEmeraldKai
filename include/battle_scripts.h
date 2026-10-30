@@ -260,6 +260,11 @@ extern const u8 BattleScript_G59EndTurnSay[];   // Moemon Kai: Gen 5-9 (battle_g
 extern const u8 BattleScript_G59EndTurnHeal[];
 extern const u8 BattleScript_G59EndTurnHurt[];
 extern const u8 BattleScript_G59StickyWeb[];
+extern const u8 BattleScript_G59AbilitySay[];
+extern const u8 BattleScript_G59AbilityStat[];
+extern const u8 BattleScript_G59AbilityStatMoveEnd[];
+extern const u8 BattleScript_G59ItemStatMoveEnd[];
+extern const u8 BattleScript_G59RockyHelmet[];
 extern const u8 BattleScript_G4TurnStatus[];
 extern const u8 BattleScript_G4TurnStatusAnim[];
 extern const u8 BattleScript_G4AbilityStat[];

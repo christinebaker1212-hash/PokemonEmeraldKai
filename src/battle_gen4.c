@@ -174,6 +174,8 @@ bool8 MP_Gen4_IsGrounded(u8 battler)
         return TRUE;
     if (gGen4Battlers[battler].magnetRise)
         return FALSE;
+    if (MP_Gen59_HoldsItem(battler, ITEM_AIR_BALLOON))
+        return FALSE;
     if (gBattleMons[battler].ability == ABILITY_LEVITATE)
         return FALSE;
     return !MP_Gen4_HasType(battler, TYPE_FLYING);
@@ -443,6 +445,7 @@ u32 MP_Gen4_OrderKey(u8 battler, u32 speed, u8 holdEffect)
         speed *= 2;
     if (gGen4Sides[GetBattlerSide(battler)].tailwind)
         speed *= 2;
+    speed = MP_Gen59_Speed(battler, speed);
     if (speed > 0x7FFFFFF0)
         speed = 0x7FFFFFF0;
     if (gGen4Field.trickRoom)
@@ -463,6 +466,7 @@ static const u16 sCopycatBanned[] =
 void MP_Gen4_OnMoveStart(u8 battler, u16 move)
 {
     struct Gen4Battler *b = &gGen4Battlers[battler];
+    MP_Gen59_OnMoveStart(battler, move);
     b->movedThisTurn = TRUE;
     b->meFirst = FALSE;
     gGen4Field.moveEndDone = 0;
@@ -944,7 +948,7 @@ const u8 *MP_Gen4_ArrivalEffect(u8 battler, u8 bsArg)
     if (!(b->switchInDone & G4_ARRIVE_ROCK))
     {
         b->switchInDone |= G4_ARRIVE_ROCK;
-        if (side->stealthRock && gBattleMons[battler].ability != ABILITY_MAGIC_GUARD)
+        if (side->stealthRock && gBattleMons[battler].ability != ABILITY_MAGIC_GUARD && !MP_Gen59_HoldsItem(battler, ITEM_HEAVY_DUTY_BOOTS))
         {
             gBattleMoveDamage = gBattleMons[battler].maxHP * RockEffectiveness16(battler) / 128;
             if (gBattleMoveDamage == 0)
@@ -957,7 +961,7 @@ const u8 *MP_Gen4_ArrivalEffect(u8 battler, u8 bsArg)
     if (!(b->switchInDone & G4_ARRIVE_TSPIKE))
     {
         b->switchInDone |= G4_ARRIVE_TSPIKE;
-        if (side->toxicSpikes && MP_Gen4_IsGrounded(battler))
+        if (side->toxicSpikes && MP_Gen4_IsGrounded(battler) && !MP_Gen59_HoldsItem(battler, ITEM_HEAVY_DUTY_BOOTS))
         {
             gBattleScripting.battler = battler;
             gEffectBattler = battler;
@@ -1481,16 +1485,26 @@ u8 MP_Gen4_WeatherTurns(u8 battler, u8 rockHoldEffect)
 #define G4M_RESIST      (1 << 4)
 #define G4M_JABOCA      (1 << 5)
 #define G4M_MICLE       (1 << 6)
+#define G4M_GEN59       (1 << 7)   // MOXIE, BEAST BOOST (MP_Gen59_MoveEnd)
 
 const u8 *MP_Gen4_MoveEnd(void)
 {
     u8 atk = gBattlerAttacker, def = gBattlerTarget;
     u8 *done = &gGen4Field.moveEndDone;
 
+
     if (*done == 0)
     {
         gGen4Battlers[atk].micle = FALSE;   // MICLE BERRY: this move had the boost
         MP_Gen59_MoveDone(atk, gCurrentMove, gMoveResultFlags);
+    }
+    if (!(*done & G4M_GEN59))
+    {
+        const u8 *script;
+        *done |= G4M_GEN59;
+        script = MP_Gen59_MoveEnd();   // MOXIE, BEAST BOOST
+        if (script != NULL)
+            return script;
     }
     if (!(*done & G4M_RESIST))
     {
