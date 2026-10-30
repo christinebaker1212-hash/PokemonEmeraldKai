@@ -1,0 +1,6 @@
+# A new game in JOHTO (PROF. BIRCH's region question, MOEMON_DEBUG_REGION here) starts in NEW BARK's house, upstairs
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("where map 35.2 xy 4,4" "region 1 cleared 0 started 2")
+UNEXPECT_A=("[crash]")

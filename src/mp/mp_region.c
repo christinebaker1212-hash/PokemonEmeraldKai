@@ -5,6 +5,7 @@
 //   when it was written with this very save (like the bag's extra slots, mp_bag.c).
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "global.h"
 #include "event_data.h"
 #include "mp.h"
@@ -15,6 +16,8 @@
 #include "string_util.h"
 #include "strings.h"
 #include "constants/map_groups.h"
+#include "constants/heal_locations.h"
+#include "overworld.h"
 #include "constants/flags.h"
 #include "constants/qz_port.h"
 #include "constants/items.h"
@@ -88,6 +91,40 @@ void MP_Region_NewGame(void)
     memset(sFlags, 0, sizeof(sFlags));
     memset(sVars, 0, sizeof(sVars));
     memset(&gRegionState, 0, sizeof(gRegionState));
+    sAwayValid = 0;
+    sGlobalValid = FALSE;
+    sLevelCount = 0;
+}
+
+// The region a new game starts in (PROF. BIRCH asks, main_menu.c), applied by MP_Region_StartNewGame
+static u8 sStartRegion;
+
+void MP_Region_SetStartRegion(u8 region)
+{
+    sStartRegion = region < REGION_COUNT ? region : REGION_HOENN;
+}
+
+// End of NewGameInitData: JOHTO starts in NEW BARK's house, KANTO in PALLET's (their own opening scripts run there)
+void MP_Region_StartNewGame(void)
+{
+    const char *env = getenv("MOEMON_DEBUG_REGION");
+    if (env != NULL)
+        sStartRegion = atoi(env) % REGION_COUNT;
+    gRegionState.current = sStartRegion;
+    gRegionState.started = 1 << sStartRegion;
+    if (sStartRegion == REGION_JOHTO)
+    {
+        SetWarpDestination(MAP_GROUP(MAP_JOHTO_PLAYERS_HOUSE2F), MAP_NUM(MAP_JOHTO_PLAYERS_HOUSE2F), WARP_ID_NONE, 4, 4);
+        SetLastHealLocationWarp(HEAL_LOCATION_JOHTO_NEW_BARK_TOWN);
+        WarpIntoMap();
+    }
+    else if (sStartRegion == REGION_KANTO)
+    {
+        SetWarpDestination(MAP_GROUP(MAP_KANTO_PALLET_TOWN_PLAYERS_HOUSE_2F), MAP_NUM(MAP_KANTO_PALLET_TOWN_PLAYERS_HOUSE_2F), WARP_ID_NONE, 6, 6);
+        SetLastHealLocationWarp(HEAL_LOCATION_KANTO_PALLET_TOWN);
+        WarpIntoMap();
+    }
+    sStartRegion = REGION_HOENN;
 }
 
 // What ties the side file to the save it was written with

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_region.h"
 #include "trainer_pokemon_sprites.h"
 #include "bg.h"
 #include "mp.h"
@@ -223,6 +224,8 @@ static void NewGameBirchSpeech_ClearGenderWindow(u8, u8);
 static void Task_NewGameBirchSpeech_WhatsYourName(u8);
 static void Task_NewGameBirchSpeech_LetMeSeeYou(u8);
 static void Task_NewGameBirchSpeech_AskSkip(u8);
+static void Task_NewGameBirchSpeech_AskRegion(u8);
+static void Task_NewGameBirchSpeech_StartAreYouReady(u8);
 static void Task_NewGameBirchSpeech_AfterSkip(u8);
 static void Task_NewGameBirchSpeech_SlideOutOldGenderSprite(u8);
 static void Task_NewGameBirchSpeech_SlideInNewGenderSprite(u8);
@@ -405,6 +408,15 @@ static const struct WindowTemplate sNewGameBirchSpeechTextWindows[] =
         .height = 10,
         .paletteNum = 15,
         .baseBlock = 0x85
+    },
+    {   // Moemon Kai: HOENN / JOHTO / KANTO
+        .bg = 0,
+        .tilemapLeft = 3,
+        .tilemapTop = 3,
+        .width = 6,
+        .height = 6,
+        .paletteNum = 15,
+        .baseBlock = 0x110
     },
     DUMMY_WIN_TEMPLATE
 };
@@ -1767,7 +1779,7 @@ static void Task_NewGameBirchSpeech_WaitForSpriteFadeInAndTextPrinter(u8 taskId)
             gSprites[gTasks[taskId].tLotadSpriteId].oam.objMode = ST_OAM_OBJ_BLEND;
             gSprites[gTasks[taskId].tBirchSpriteId].oam.objMode = ST_OAM_OBJ_NORMAL;   // Moemon Co-op: ask first
             gSprites[gTasks[taskId].tLotadSpriteId].oam.objMode = ST_OAM_OBJ_NORMAL;
-            gTasks[taskId].func = Task_NewGameBirchSpeech_AskSkip;
+            gTasks[taskId].func = Task_NewGameBirchSpeech_AskRegion;   // Moemon Kai: then SKIP THE INTRO in HOENN
         }
     }
 }
@@ -1849,6 +1861,60 @@ static void Task_NewGameBirchSpeech_WaitAskSkip(u8 taskId)
         CreateYesNoMenuParameterized(2, 1, 0xF3, 0xDF, 2, 15);
         gTasks[taskId].func = Task_NewGameBirchSpeech_ProcessSkipYesNo;
     }
+}
+
+// Moemon Kai: a new game can start in any region (docs/REGIONS_PLAN.md). JOHTO and KANTO start at home in NEW BARK /
+// PALLET (mp_region.c MP_Region_StartNewGame); SKIP THE INTRO is HOENN's.
+static const u8 sText_Birch_AskRegion[] = _("Now, where will your journey begin?\pHere in HOENN, far off in JOHTO,\nor in KANTO?");
+static const u8 sText_Hoenn[] = _("HOENN");
+static const u8 sText_Johto[] = _("JOHTO");
+static const u8 sText_Kanto[] = _("KANTO");
+static const struct MenuAction sMenuActions_Region[] = {
+    {sText_Hoenn, {NULL}},
+    {sText_Johto, {NULL}},
+    {sText_Kanto, {NULL}},
+};
+#define WIN_REGION 3
+
+static void Task_NewGameBirchSpeech_ProcessRegionMenu(u8 taskId)
+{
+    s8 choice = Menu_ProcessInputNoWrap();
+    if (choice == MENU_NOTHING_CHOSEN || choice == MENU_B_PRESSED)
+        return;
+    PlaySE(SE_SELECT);
+    NewGameBirchSpeech_ClearGenderWindow(WIN_REGION, TRUE);
+    MP_Region_SetStartRegion(choice);
+    if (choice == REGION_HOENN)
+    {
+        gTasks[taskId].func = Task_NewGameBirchSpeech_AskSkip;
+    }
+    else
+    {
+        MP_QuickStart_Set(SPECIES_NONE, NULL);
+        gTasks[taskId].func = Task_NewGameBirchSpeech_StartAreYouReady;
+    }
+}
+
+static void Task_NewGameBirchSpeech_WaitAskRegion(u8 taskId)
+{
+    if (!RunTextPrintersAndIsPrinter0Active())
+    {
+        DrawMainMenuWindowBorder(&sNewGameBirchSpeechTextWindows[WIN_REGION], 0xF3);
+        FillWindowPixelBuffer(WIN_REGION, PIXEL_FILL(1));
+        PrintMenuTable(WIN_REGION, ARRAY_COUNT(sMenuActions_Region), sMenuActions_Region);
+        InitMenuInUpperLeftCornerNormal(WIN_REGION, ARRAY_COUNT(sMenuActions_Region), 0);
+        PutWindowTilemap(WIN_REGION);
+        CopyWindowToVram(WIN_REGION, COPYWIN_FULL);
+        gTasks[taskId].func = Task_NewGameBirchSpeech_ProcessRegionMenu;
+    }
+}
+
+static void Task_NewGameBirchSpeech_AskRegion(u8 taskId)
+{
+    NewGameBirchSpeech_ClearWindow(0);
+    StringExpandPlaceholders(gStringVar4, sText_Birch_AskRegion);
+    AddTextPrinterForMessage(TRUE);
+    gTasks[taskId].func = Task_NewGameBirchSpeech_WaitAskRegion;
 }
 
 static void Task_NewGameBirchSpeech_AskSkip(u8 taskId)

@@ -1,0 +1,6 @@
+pressuntil A field 5000
+wait 120
+shot start
+mp where
+mp regioninfo
+quit

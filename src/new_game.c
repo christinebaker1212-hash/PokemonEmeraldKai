@@ -216,6 +216,7 @@ void NewGameInitData(void)
     if (MP_DebugQuickStartEnabled())
         MP_DebugQuickStartNewGame();
     MP_QuickStart_Apply();   // Moemon Co-op: SKIP THE INTRO (mp_quickstart.c)
+    MP_Region_StartNewGame();   // Moemon Kai: a new game in JOHTO or KANTO starts there (mp_region.c)
     // Moemon Co-op QoL: a new game starts with STICK RUN off and no extra item buttons
     Gamepad_SetAnalogRun(0);
     Gamepad_SaveSettings();

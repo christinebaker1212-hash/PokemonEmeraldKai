@@ -37,6 +37,8 @@ u8 MP_Region_Current(void);          // the region of the map the player is on
 u8 *MP_Region_FlagPointer(u16 id);   // NULL outside REGION_FLAGS_START..END
 u16 *MP_Region_VarPointer(u16 id);
 void MP_Region_NewGame(void);
+void MP_Region_SetStartRegion(u8 region);   // a new game's region (PROF. BIRCH's question)
+void MP_Region_StartNewGame(void);          // end of NewGameInitData: JOHTO / KANTO start at home there
 void MP_Region_WriteSidecar(void);   // "<save>.region", after the save file is written
 void MP_Region_LoadFromSave(void);
 struct PokemonStorage;
