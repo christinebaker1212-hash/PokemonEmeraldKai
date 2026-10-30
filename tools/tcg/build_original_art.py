@@ -9,7 +9,7 @@ from pathlib import Path
 import struct
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / 'graphics/tcg/original'
-COUNT = 228
+COUNT = 442   # (TCG_CARD_COUNT: the first game's 228, then GB2's)
 blobs = [(SRC / f'{n:03d}.png').read_bytes() if (SRC / f'{n:03d}.png').exists() else b'' for n in range(1, COUNT + 1)]
 head = 8 + 8 * COUNT
 out = bytearray(b'TCGA' + struct.pack('<I', COUNT))

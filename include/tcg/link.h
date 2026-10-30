@@ -12,7 +12,7 @@ enum
 };
 /* Versioned extension relayed by the existing server; no native structs on wire. */
 #define TCG_LINK_RELAY 255
-#define TCG_LINK_VERSION 14  /* 6: Yu-Gi-Oh! duels and trades (types 8-13: src/ygo/ygo_net.c; request kinds 2-3);
+#define TCG_LINK_VERSION 15  /* 6: Yu-Gi-Oh! duels and trades (types 8-13: src/ygo/ygo_net.c; request kinds 2-3);
                                * 7: a Yu-Gi-Oh! answer carries the zone a card goes to (YgoAnswer.zone);
                                * 8: Triple Triad games and trades (type 14: src/tt/tt_net.c; request kinds 4-5);
                                * 9: an action carries an attack's option and Metronome's copy (the last 20 attacks);
@@ -20,7 +20,8 @@ enum
                                * 11: Yu-Gi-Oh! duels on EDOPro's engine (its questions, up to 64 picks an answer);
                                * 12: Yu-Gi-Oh! Decks shuffled from the duel's seed;
                                * 13: Triple Triad's COMBO only from what SAME / PLUS took;
-                               * 14: Triple Triad's HOENN rules from the room host (type 15: tt_integration.c) */
+                               * 14: Triple Triad's HOENN rules from the room host (type 15: tt_integration.c);
+                               * 15: Pokemon Card GB2's cards (ids 229-442) and their rules */
 struct TcgLink
 {
     struct TcgDuel game;

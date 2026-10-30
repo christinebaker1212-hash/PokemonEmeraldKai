@@ -40,13 +40,30 @@ LAYOUTS = {
     'trainer/base3': (54, 190, 557, 461),
     'energy/basic': (80 - INSET, 405 - INSET, 520 + INSET, 735 + INSET),     # the symbol and its glow, 4:3
     'energy/double': (90 - INSET, 250 - INSET, 510 + INSET, 565 + INSET),
+    # GB2's printings (measured the same way): Team Rocket, Neo Genesis and Gym, the renders made for cards never
+    # printed in English (tools/tcg/card_renders.json, Base Set's layout), and the special Energy cards' pictures
+    'pokemon/base5': (65, 94, 549, 435),
+    'pokemon/render': (66, 98, 529, 434),
+    'trainer/base5': (55, 187, 557, 460),
+    'trainer/neo1': (58, 188, 554, 460),
+    'trainer/gym1': (56, 187, 556, 460),
+    'trainer/gym2': (57, 189, 554, 461),
+    'trainer/render': (62, 192, 540, 459),
+    'trainer/basep': (55, 193, 548, 461),
+    'energy/base5': (72, 163, 560, 480),
+    'energy/neo1': (72, 164, 578, 433),
 }
 
 
 def layout(row):
+    source = row['printing'].split('-')[0]
     if row['kind'] == 'energy':
+        if source in ('base5', 'neo1'):
+            return 'energy/' + source   # (the special Energy cards: a picture, not a symbol)
         return 'energy/double' if row['card_id'] == 7 else 'energy/basic'
-    return row['kind'] + '/' + row['printing'].split('-')[0]
+    if source == 'render':
+        return row['kind'] + '/render'
+    return row['kind'] + '/' + source
 
 
 def jpeg(path):
@@ -71,7 +88,8 @@ def main():
         if Image.open(ROOT / row['path']).size != (SCAN_W, SCAN_H):
             raise ValueError(f'{row["path"]}: expected {SCAN_W}x{SCAN_H}')
         data = jpeg(ROOT / row['path'])
-        l, t, r, b = LAYOUTS[layout(row)]
+        # (a Japanese scan: its own measured window, tools/tcg/fetch_art.py)
+        l, t, r, b = row['art_rect'] if row.get('art_rect') else LAYOUTS[layout(row)]
         l, t, r, b = l + INSET, t + INSET, r - INSET, b - INSET
         x, y = round(l * sx), round(t * sy)
         w, h = round(r * sx) - x, round(b * sy) - y

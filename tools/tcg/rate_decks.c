@@ -21,7 +21,7 @@
 #define ROUNDS 8
 #define VARIANT_GAMES 6
 #define REFERENCES 12
-#define MAXD 128
+#define MAXD 256
 
 /* The tables this tool makes (the game's are in tcg_ratings.c): filled in before use */
 int16_t gTcgDeckRating[MAXD], gTcgSpecialRating[1], gTcgVariantRating[1];

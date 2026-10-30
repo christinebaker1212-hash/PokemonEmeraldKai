@@ -2178,13 +2178,44 @@ static void ArtScreen(void)
     Hints(U.zoom ? "{A} FIT  {DPAD} MOVE  {B} BACK" : "{A} ZOOM  {DPAD} MOVE  {B} BACK");
 }
 
+static const char *const sSetNames[TCG_SET_COUNT] = {"COLOSSEUM", "EVOLUTION", "MYSTERY", "LABORATORY",
+                                                     "BEGINNING POKeMON", "LEGENDARY POWER", "ISLAND OF FOSSIL",
+                                                     "PSYCHIC BATTLE", "SKY-FLYING POKeMON", "WE ARE TEAM ROCKET",
+                                                     "TEAM ROCKET'S AMBITION"};
+/* A GB2 booster's face: its first holo Pokemon, else its rarest Pokemon */
+static unsigned PackMascot(unsigned pack)
+{
+    static const unsigned first[] = {TCG_CARD_CHARIZARD, TCG_CARD_VENUSAUR_LV67, TCG_CARD_MEWTWO_LV60,
+                                     TCG_CARD_ZAPDOS_LV64};
+    unsigned i, best = 0;
+    if (pack < TCG_PACK_GB2)
+        return first[pack];
+    for (i = 0; i < TCG_GB2_PACK_MAX && gTcgGb2PackCards[pack - TCG_PACK_GB2][i]; i++)
+    {
+        unsigned id = gTcgGb2PackCards[pack - TCG_PACK_GB2][i];
+        const struct TcgCard *c = Tcg_Card(id);
+        if (c->kind != TCG_POKEMON)
+            continue;
+        if (Tcg_IsHolo(id))
+            return id;
+        if (!best || c->rarity > Tcg_Card(best)->rarity || (c->rarity == Tcg_Card(best)->rarity && c->hp > Tcg_Card(best)->hp))
+            best = id;
+    }
+    return best;
+}
+/* The name printed on a pack (the strip says the full name) */
+static const char *const sPackShort[TCG_PACK_TYPES] = {"COLOSSEUM", "EVOLUTION", "MYSTERY", "LABORATORY", "BEGINNING",
+                                                     "LEGENDARY", "FOSSIL ISLE", "PSYCHIC", "SKY-FLYING", "TEAM ROCKET",
+                                                     "AMBITION"};
 static void PackArt(int x, int y, unsigned pack, int focus)
 {
-    static const unsigned colors[][2] = {{0xd04838, 0x801818}, {0x38a048, 0x185820}, {0x6048c0, 0x302070},
-                                         {0x3078c8, 0x183870}};
-    static const char *const names[] = {"COLOSSEUM", "EVOLUTION", "MYSTERY", "LABORATORY"};
-    static const unsigned mascots[] = {TCG_CARD_CHARIZARD, TCG_CARD_VENUSAUR_LV67, TCG_CARD_MEWTWO_LV60,
-                                       TCG_CARD_ZAPDOS_LV64};
+    static const unsigned colors[TCG_PACK_TYPES][2] = {
+        {0xd04838, 0x801818}, {0x38a048, 0x185820}, {0x6048c0, 0x302070}, {0x3078c8, 0x183870},
+        /* GB2's */
+        {0xe8c030, 0x986810}, {0xd07028, 0x702808}, {0xa88858, 0x584020}, {0xb848a8, 0x581850},
+        {0x58a8e0, 0x205888}, {0x484858, 0x101018}, {0x903040, 0x300810}};
+    const char *const *names = sPackShort;
+    unsigned mascot = PackMascot(pack);
     int w = 44, h = 58, i;
     G_FillA(x + 2, y + 3, w, h, 0x000000, 80);
     for (i = 0; i < h; i++)
@@ -2194,7 +2225,9 @@ static void PackArt(int x, int y, unsigned pack, int focus)
         G_FillA(x + i, y, 1, 3, 0xd8d8e0, 255);
         G_FillA(x + i, y + h - 3, 1, 3, 0xd8d8e0, 255);
     }
-    G_Card(mascots[pack], (float)x + 7, (float)y + 6, 30, 42, 0, 255, 0);
+    G_Card(mascot, (float)x + 7, (float)y + 6, 30, 42, 0, 255, 0);
+    if (pack >= TCG_PACK_GB2)
+        G_Text(x + 2, y + 2, 0xfff0a0, 0x101010, "GB2", 0, TF_NARROW);   /* (the second Game Boy game's) */
     G_FillA(x, y + 47, w, 8, 0x101010, 150);
     G_TextAlign(x + w / 2, y + 45, TA_CENTER, G_WHITE, G_NO_SHADOW, names[pack], TF_NARROW);
     if (focus)
@@ -2216,17 +2249,30 @@ static void PacksScreen(void)
     char line[96];
     Background();
     TopBar("BOOSTER PACKS");
-    for (i = 0; i < 4; i++)
+    /* four at a time out of the eleven, the row following the cursor */
     {
-        int x = 10 + i * 57, on = (int)i == U.cursor;
-        int bob = on ? (int)(fabsf(sinf(U.frame * 0.1f)) * 3) : 0;
-        PackArt(x, 26 - bob, i, on);
-        snprintf(line, sizeof(line), "x%u", c->packs[i]);
-        G_TextAlign(x + 22, 88, TA_CENTER, c->packs[i] ? G_WHITE : 0xc0d8c8, 0x204030, line, TF_SMALL);
-        if (on)
-            G_Frame(x - 3, 26 - bob - 2, 50, 64, 0xe82820, 255);
+        int start = U.cursor - 1 < 0 ? 0 : U.cursor - 1 > TCG_PACK_TYPES - 4 ? TCG_PACK_TYPES - 4 : U.cursor - 1;
+        for (i = 0; i < 4; i++)
+        {
+            unsigned pack = (unsigned)start + i;
+            int x = 10 + i * 57, on = (int)pack == U.cursor;
+            int bob = on ? (int)(fabsf(sinf(U.frame * 0.1f)) * 3) : 0;
+            PackArt(x, 26 - bob, pack, on);
+            snprintf(line, sizeof(line), "x%u", c->packs[pack]);
+            G_TextAlign(x + 22, 88, TA_CENTER, c->packs[pack] ? G_WHITE : 0xc0d8c8, 0x204030, line, TF_SMALL);
+            if (on)
+                G_Frame(x - 3, 26 - bob - 2, 50, 64, 0xe82820, 255);
+        }
+        if (start > 0)
+            G_TextAlign(4, 50, TA_CENTER, G_WHITE, 0x204030, "<", TF_SMALL);
+        if (start < TCG_PACK_TYPES - 4)
+            G_TextAlign(236, 50, TA_CENTER, G_WHITE, 0x204030, ">", TF_SMALL);
+        for (i = 0; i < TCG_PACK_TYPES; i++)
+            G_FillA(120 - TCG_PACK_TYPES * 3 + (int)i * 6, 100, 4, 4, (int)i == U.cursor ? 0xf8f8f8 : 0x5a7868, 255);
     }
-    Strip(0, c->packs[U.cursor] ? "Open this pack!" : "Win card duels to earn booster packs.");
+    snprintf(line, sizeof(line), "%s\n%s", sSetNames[U.cursor],
+             c->packs[U.cursor] ? "Open this pack!" : "Win card duels to earn booster packs.");
+    Strip(0, line);
     Hints("{LEFTRIGHT} CHOOSE  {A} OPEN  {B} BACK");
 }
 #define REVEAL_TEAR 34
@@ -2390,9 +2436,11 @@ static unsigned SpareList(uint16_t *out)
 }
 /* Prizes: 25 / 50 / 75 % of each set, and every Gym Leader's deck beaten. */
 #define PRIZE_ROWS (TCG_SET_COUNT * 3 + 2)
-static const char *const sSetNames[] = {"COLOSSEUM", "EVOLUTION", "MYSTERY", "LABORATORY"};
-static const unsigned sSetPromos[] = {TCG_CARD_MOLTRES_LV37, TCG_CARD_ZAPDOS_LV68, TCG_CARD_SLOWPOKE_LV9,
-                                      TCG_CARD_IMAKUNI_CARD};
+
+static const unsigned sSetPromos[TCG_SET_COUNT] = {TCG_CARD_MOLTRES_LV37, TCG_CARD_ZAPDOS_LV68, TCG_CARD_SLOWPOKE_LV9,
+                                                   TCG_CARD_IMAKUNI_CARD, TCG_CARD_PIKACHU_LV13, TCG_CARD_LUGIA,
+                                                   TCG_CARD_OMASTAR_LV36, TCG_CARD_GRS_MEWTWO, TCG_CARD_DRAGONITE_LV43,
+                                                   TCG_CARD_DARK_PERSIAN_ALT_LV28, TCG_CARD_HERE_COMES_TEAM_ROCKET};
 #define GYM_SWEEP_BIT (1u << 30)
 /* 0 not yet, 1 ready to claim, 2 done */
 static int PrizeState(unsigned row, char *what, size_t size)
@@ -2407,7 +2455,7 @@ static int PrizeState(unsigned row, char *what, size_t size)
         else
             snprintf(what, size, "%s %u%% (%u/%u): %s", sSetNames[set], 25 * (step + 1), have, total,
                      step ? "3 booster packs + 30 CP" : "2 booster packs");
-        if (c->milestones & (1u << row))
+        if (Tcg_Milestone(c, set, step))
             return 2;
         return have * 4 >= total * (step + 1);
     }
@@ -2433,7 +2481,7 @@ static void ClaimPrize(unsigned row)
     if (row < TCG_SET_COUNT * 3)
     {
         unsigned set = row / 3, step = row % 3;
-        c->milestones |= 1u << row;
+        Tcg_SetMilestone(c, set, step);
         if (step == 0)
         {
             c->packs[set] += 2;
@@ -3757,9 +3805,9 @@ int Tcg_Step(unsigned keys)
     {
         int old = U.cursor;
         if (pressed & KEY_LEFT)
-            U.cursor = (U.cursor + 3) % 4;
+            U.cursor = (U.cursor + TCG_PACK_TYPES - 1) % TCG_PACK_TYPES;
         if (pressed & KEY_RIGHT)
-            U.cursor = (U.cursor + 1) % 4;
+            U.cursor = (U.cursor + 1) % TCG_PACK_TYPES;
         if (old != U.cursor)
             PlaySE(SE_SELECT);
         if (pressed & KEY_A)

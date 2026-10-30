@@ -21,7 +21,7 @@ int main(int argc, char **argv)
     assert(argc == 2);
     for (i = 1; i <= TCG_CARD_COUNT; i++)
         assert(Tcg_Card(i)->id == i && Tcg_Card(i)->name[0]);
-    assert(!Tcg_Card(0) && !Tcg_Card(229));
+    assert(!Tcg_Card(0) && !Tcg_Card(TCG_CARD_COUNT + 1));
     for (s = 0; s < 3; s++)
     {
         Tcg_CollectionInit(&c, 123);
@@ -64,7 +64,7 @@ int main(int argc, char **argv)
         for (i = 0; i < 9; i++)
         {
             const struct TcgCard *d = Tcg_Card(a[i]);
-            assert(d->set == p);
+            assert(Tcg_InPack(a[i], p));
             assert(d->kind != TCG_ENERGY);
             rarities[d->rarity]++;
         }
@@ -205,7 +205,8 @@ int main(int argc, char **argv)
     puts("PASS collection round-trip and corrupt-file rejection");
     {
         /* A 1.27 file (format 2): read, with the new parts empty and the CARD CLUB met. */
-        unsigned char v2[12 + TCG_CARD_COUNT * 2 + TCG_SAVED_DECKS * (TCG_NAME_LEN + TCG_DECK_SIZE * 2) + TCG_PACK_TYPES * 2 + 24];
+        /* (1.27 knew the first game's 228 cards and 4 boosters) */
+        unsigned char v2[12 + 228 * 2 + TCG_SAVED_DECKS * (TCG_NAME_LEN + TCG_DECK_SIZE * 2) + 4 * 2 + 24];
         unsigned char *q = v2 + 12;
         uint32_t crc = ~0u;
         unsigned k, b, d;
@@ -216,7 +217,7 @@ int main(int argc, char **argv)
         old.packs[2] = 3;
         old.wins = 7;
 #define PUT(v, n) do { uint32_t x_ = (v); unsigned i_; for (i_ = 0; i_ < (n); i_++) { *q++ = (unsigned char)x_; x_ >>= 8; } } while (0)
-        for (k = 1; k <= TCG_CARD_COUNT; k++)
+        for (k = 1; k <= 228; k++)
             PUT(old.owned[k], 2);
         for (d = 0; d < TCG_SAVED_DECKS; d++)
         {
@@ -225,7 +226,7 @@ int main(int argc, char **argv)
             for (k = 0; k < TCG_DECK_SIZE; k++)
                 PUT(old.decks[d].cards[k], 2);
         }
-        for (k = 0; k < TCG_PACK_TYPES; k++)
+        for (k = 0; k < 4; k++)
             PUT(old.packs[k], 2);
         PUT(old.wins, 4);
         PUT(old.dust, 4);
@@ -262,7 +263,7 @@ int main(int argc, char **argv)
         assert(Tcg_CollectionSave(&other, path));
         Tcg_CollectionInit(&before, 3);
         assert(Tcg_CollectionLoad(&before, path) && !memcmp(&before, &other, sizeof(other)));
-        puts("PASS a 1.27 collection (format 2) loads and saves as format 7");
+        puts("PASS a 1.27 collection (format 2) loads and saves as format 8");
     }
 #endif
     {
@@ -302,7 +303,8 @@ int main(int argc, char **argv)
         for (have = 1; have <= TCG_CARD_COUNT; have++)
             if (gTcgCards[have].set == 0)
                 c.owned[have] = 1;
-        assert(Tcg_TakeMilestones(&c) == 7u);
+        /* (all three of COLOSSEUM's; GB2's boosters that also hold its cards may pass 25 % too) */
+        assert(Tcg_TakeMilestones(&c) >= 3u && Tcg_Milestone(&c, 0, 0) && Tcg_Milestone(&c, 0, 1) && Tcg_Milestone(&c, 0, 2));
         assert(Tcg_TakeMilestones(&c) == 0);
         assert(Tcg_SetOwned(&c, 0, &total) == total);
         puts("PASS spare cards, CARD POINTS, the card shop and set milestones");

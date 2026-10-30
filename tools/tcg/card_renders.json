@@ -1,0 +1,253 @@
+{
+ "about": "English-style card renders made for cards never printed in English (docs/user_images/52_gb_card_renders, from the user): art only, used as a card's printed picture when there is no real printing. Matched to a card by name, HP and attack names; the rules stay the games'. \"ids\" pins a render whose words differ from the card's (Transform for Morph, Neutral Shield for Neutralizing Shield, a render's HP).",
+ "dir": "docs/user_images/52_gb_card_renders",
+ "renders": [
+  {
+   "file": "Articuno.png",
+   "name": "Articuno",
+   "hp": 100,
+   "moves": [
+    "Quickfreeze",
+    "Ice Breath"
+   ]
+  },
+  {
+   "file": "Ditto.png",
+   "name": "Ditto",
+   "hp": 50,
+   "moves": [
+    "Pound",
+    "Transform"
+   ],
+   "ids": [
+    187
+   ]
+  },
+  {
+   "file": "Zapdos.png",
+   "name": "Zapdos",
+   "hp": 100,
+   "moves": [
+    "Peal of Thunder",
+    "Big Thunder"
+   ]
+  },
+  {
+   "file": "a01 bulbasaur.png",
+   "name": "Bulbasaur",
+   "hp": 40,
+   "moves": [
+    "Tackle",
+    "Razor Leaf"
+   ]
+  },
+  {
+   "file": "a02 ivysaur.png",
+   "name": "Ivysaur",
+   "hp": 70,
+   "moves": [
+    "Leech Seed",
+    "Vine Whip"
+   ]
+  },
+  {
+   "file": "createcard.jpg",
+   "name": "Squirtle",
+   "hp": 50,
+   "moves": [
+    "Water Power",
+    "Pound"
+   ]
+  },
+  {
+   "file": "dragonite.png",
+   "name": "Dragonite",
+   "hp": 90,
+   "moves": [
+    "Healing Wind",
+    "Slam"
+   ],
+   "ids": [
+    193
+   ]
+  },
+  {
+   "file": "electrode.png",
+   "name": "Electrode",
+   "hp": 70,
+   "moves": [
+    "Sonicboom",
+    "Energy Spike"
+   ]
+  },
+  {
+   "file": "flare.png",
+   "name": "Flareon",
+   "hp": 60,
+   "moves": [
+    "Bite",
+    "Rage"
+   ]
+  },
+  {
+   "file": "fly.png",
+   "name": "Flying Pikachu",
+   "hp": 40,
+   "moves": [
+    "Thundershock",
+    "Fly"
+   ]
+  },
+  {
+   "file": "imakuni.png",
+   "name": "Imakuni?",
+   "trainer": true
+  },
+  {
+   "file": "jiggle.png",
+   "name": "Jigglypuff",
+   "hp": 50,
+   "moves": [
+    "Friendship Song",
+    "Expand"
+   ]
+  },
+  {
+   "file": "jolty.png",
+   "name": "Jolteon",
+   "hp": 70,
+   "moves": [
+    "Double Kick",
+    "Stun Needle"
+   ],
+   "ids": [
+    114
+   ]
+  },
+  {
+   "file": "magnemite.png",
+   "name": "Magnemite",
+   "hp": 40,
+   "moves": [
+    "Tackle",
+    "Magnetic Storm"
+   ]
+  },
+  {
+   "file": "marowak.png",
+   "name": "Marowak",
+   "hp": 70,
+   "moves": [
+    "Bone Attack",
+    "Wail"
+   ]
+  },
+  {
+   "file": "mew.png",
+   "name": "Mew",
+   "hp": 50,
+   "moves": [
+    "Mystery Attack"
+   ],
+   "ids": [
+    161
+   ]
+  },
+  {
+   "file": "mew2.png",
+   "name": "Mew",
+   "hp": 40,
+   "moves": [
+    "Neutral Shield",
+    "Psyshock"
+   ],
+   "ids": [
+    160
+   ]
+  },
+  {
+   "file": "moltres.png",
+   "name": "Moltres",
+   "hp": 100,
+   "moves": [
+    "Firegiver",
+    "Dive Bomb"
+   ]
+  },
+  {
+   "file": "ninetales.png",
+   "name": "Ninetales",
+   "hp": 80,
+   "moves": [
+    "Mix-Up",
+    "Dancing Embers"
+   ]
+  },
+  {
+   "file": "pidgeot.png",
+   "name": "Pidgeot",
+   "hp": 80,
+   "moves": [
+    "Slicing Wind",
+    "Gale"
+   ]
+  },
+  {
+   "file": "pikachu.png",
+   "name": "Pikachu",
+   "hp": 60,
+   "moves": [
+    "Growl",
+    "Thundershock"
+   ]
+  },
+  {
+   "file": "slowpoke.png",
+   "name": "Slowpoke",
+   "hp": 40,
+   "moves": [
+    "Headbutt",
+    "Amnesia"
+   ]
+  },
+  {
+   "file": "surfing.png",
+   "name": "Surfing Pikachu",
+   "hp": 50,
+   "moves": [
+    "Surf"
+   ],
+   "ids": [
+    101,
+    102
+   ]
+  },
+  {
+   "file": "tangela2.png",
+   "name": "Tangela",
+   "hp": 50,
+   "moves": [
+    "Stun Spore",
+    "Poison Whip"
+   ]
+  },
+  {
+   "file": "venusaur.png",
+   "name": "Venusaur",
+   "hp": 100,
+   "moves": [
+    "Solar Power",
+    "Mega Drain"
+   ]
+  },
+  {
+   "file": "volpy.png",
+   "name": "Vaporeon",
+   "hp": 60,
+   "moves": [
+    "Focus Energy",
+    "Bite"
+   ]
+  }
+ ]
+}

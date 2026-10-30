@@ -115,11 +115,21 @@ static const uint16_t sHolo[] = {
 int Tcg_IsHolo(unsigned card)
 {
     unsigned i;
+    if (card && card <= TCG_CARD_COUNT && gTcgCards[card].holo)
+        return 1;   /* (GB2's: generate_catalog.py) */
     for (i = 0; i < sizeof(sHolo) / sizeof(sHolo[0]); i++)
         if (sHolo[i] == card)
             return 1;
     return 0;
 }
+int Tcg_InPack(unsigned card, unsigned pack)
+{
+    const struct TcgCard *c = Tcg_Card(card);
+    unsigned set = pack < TCG_PACK_GB2 ? pack : pack - TCG_PACK_GB2 + TCG_SET_GB2;
+    return c && pack < TCG_PACK_TYPES && (c->set == set || (pack >= TCG_PACK_GB2 && c->set2 == set));
+}
+/* A card sold in boosters (not a promo or a Basic Energy) */
+static int Boosted(const struct TcgCard *c) { return c && c->set != TCG_SET_PROMO && c->set != TCG_SET_ENERGY; }
 int Tcg_OpenPack(struct TcgCollection *c, unsigned pack, uint16_t result[10])
 {
     struct TcgCollection next;
@@ -132,7 +142,7 @@ int Tcg_OpenPack(struct TcgCollection *c, unsigned pack, uint16_t result[10])
     {
         const struct TcgCard *card = &gTcgCards[i];
         unsigned pool = card->rarity;
-        if (card->set != pack || card->kind == TCG_ENERGY || card->rarity >= 3)
+        if (!Tcg_InPack(i, pack) || card->kind == TCG_ENERGY || card->rarity >= 3)
             continue;
         if (pool == 2 && Tcg_IsHolo(i))
         {
@@ -188,14 +198,14 @@ unsigned Tcg_PointCost(unsigned card)
     const struct TcgCard *def = Tcg_Card(card);
     /* The CARD CLUB counters: commons and uncommons (rares at the GAME CENTER, Tcg_ShopPrice). Promo cards
      * come only from the trainers who hold them, holos only from packs and trades; Basic Energy is free. */
-    return def && card > 6 && def->set < 4 && def->rarity < 2 ? sPointCost[def->rarity & 3] : 0;
+    return def && card > 6 && Boosted(def) && def->kind != TCG_ENERGY && def->rarity < 2 ? sPointCost[def->rarity & 3] : 0;
 }
 /* The GAME CENTER CARD SHOP's price in money: every card of the four sets but the holos */
 static const unsigned sShopPrice[] = {300, 800, 4000, 0};
 unsigned Tcg_ShopPrice(unsigned card)
 {
     const struct TcgCard *def = Tcg_Card(card);
-    return def && card > 6 && def->set < 4 && !Tcg_IsHolo(card) ? sShopPrice[def->rarity & 3] : 0;
+    return def && card > 6 && Boosted(def) && def->kind != TCG_ENERGY && !Tcg_IsHolo(card) ? sShopPrice[def->rarity & 3] : 0;
 }
 unsigned Tcg_Spare(const struct TcgCollection *c, unsigned card)
 {
@@ -263,7 +273,7 @@ unsigned Tcg_SetOwned(const struct TcgCollection *c, unsigned set, unsigned *tot
     unsigned id, have = 0, all = 0;
     for (id = 1; id <= TCG_CARD_COUNT; id++)
     {
-        if (set < TCG_SET_COUNT && gTcgCards[id].set != set)
+        if (set < TCG_SET_COUNT && !Tcg_InPack(id, set))
             continue;
         all++;
         have += c->owned[id] != 0;
@@ -272,18 +282,31 @@ unsigned Tcg_SetOwned(const struct TcgCollection *c, unsigned set, unsigned *tot
         *total = all;
     return have;
 }
-uint32_t Tcg_TakeMilestones(struct TcgCollection *c)
+/* Milestone bits: the first game's sets in milestones (set * 3 + n), GB2's in milestonesHi ((set - 4) * 3 + n) */
+int Tcg_Milestone(const struct TcgCollection *c, unsigned set, unsigned n)
 {
-    uint32_t got = 0;
-    unsigned set, n;
+    return set < TCG_PACK_GB2 ? (c->milestones >> (set * 3 + n)) & 1 : (c->milestonesHi >> ((set - TCG_PACK_GB2) * 3 + n)) & 1;
+}
+void Tcg_SetMilestone(struct TcgCollection *c, unsigned set, unsigned n)
+{
+    if (set < TCG_PACK_GB2)
+        c->milestones |= 1u << (set * 3 + n);
+    else if (set < TCG_SET_COUNT)
+        c->milestonesHi |= 1u << ((set - TCG_PACK_GB2) * 3 + n);
+}
+unsigned Tcg_TakeMilestones(struct TcgCollection *c)
+{
+    unsigned set, n, got = 0;
     for (set = 0; set < TCG_SET_COUNT; set++)
     {
         unsigned total, have = Tcg_SetOwned(c, set, &total);
         for (n = 0; n < 3; n++)
-            if (have * 4 >= total * (n + 1) && !(c->milestones & (1u << (set * 3 + n))))
-                got |= 1u << (set * 3 + n);
+            if (have * 4 >= total * (n + 1) && !Tcg_Milestone(c, set, n))
+            {
+                Tcg_SetMilestone(c, set, n);
+                got++;
+            }
     }
-    c->milestones |= got;
     return got;
 }
 int Tcg_DeckAdd(struct TcgCollection *c, unsigned deck, unsigned card, char *reason, size_t size)
@@ -454,21 +477,32 @@ void Tcg_RecordResult(struct TcgCollection *c, uint32_t key, int won, unsigned d
     r->lastSeen = (uint16_t)day;
 }
 
-/* Explicit little-endian encoding, independent of compiler padding and ABI. */
-#define PAYLOAD_SIZE                                                                                                   \
-    (TCG_CARD_COUNT * 2 + TCG_SAVED_DECKS * (TCG_NAME_LEN + TCG_DECK_SIZE * 2) + TCG_PACK_TYPES * 2 + 24)
+/* Explicit little-endian encoding, independent of compiler padding and ABI. Formats up to 7 hold the first Game Boy
+ * game's 228 cards and its 4 boosters; 8 adds Pokemon Card GB2's (TCG_CARD_COUNT, TCG_PACK_TYPES) and the
+ * milestones' upper bits. A save of an older format loads into the new collection (the added cards at 0). */
+#define FORMAT 8
+#define OLD_CARDS 228
+#define OLD_PACKS 4
+#define CARDS_IN(format) ((format) >= 8 ? TCG_CARD_COUNT : OLD_CARDS)
+#define PACKS_IN(format) ((format) >= 8 ? TCG_PACK_TYPES : OLD_PACKS)
+#define GC_BYTES(cards) (((cards) + 8) / 8)
+#define PAYLOAD_SIZE(format)                                                                                           \
+    (CARDS_IN(format) * 2 + TCG_SAVED_DECKS * (TCG_NAME_LEN + TCG_DECK_SIZE * 2) + PACKS_IN(format) * 2 + 24)
 /* Format 3 adds daily rewards, special trainers, milestones and counters; 4 CARD SCALING; 5 the
  * packs since the last new holo. */
 #define EXTRA_SIZE (TCG_DAILY_SLOTS * 6 + 7 * 4)
 #define EXTRA4_SIZE 4
-#define EXTRA5_SIZE TCG_PACK_TYPES
+#define EXTRA5_SIZE(format) PACKS_IN(format)
 /* 6: the GAME CENTER CARD SHOP's sales and the records against card players */
-#define EXTRA6_SIZE (1 + TCG_GC_SINGLE_BYTES + TCG_RECORD_SLOTS * 12)
+#define EXTRA6_SIZE(format) (1 + GC_BYTES(CARDS_IN(format)) + TCG_RECORD_SLOTS * 12)
 /* 7: each deck's ACE CARD */
 #define EXTRA7_SIZE (TCG_SAVED_DECKS * 2)
+/* 8: the milestones' upper 32 bits (11 boosters x 3) */
+#define EXTRA8_SIZE 4
 #define FILE_SIZE(format)                                                                                              \
-    (12u + PAYLOAD_SIZE + ((format) >= 3 ? EXTRA_SIZE : 0) + ((format) >= 4 ? EXTRA4_SIZE : 0) +                       \
-     ((format) >= 5 ? EXTRA5_SIZE : 0) + ((format) >= 6 ? EXTRA6_SIZE : 0) + ((format) >= 7 ? EXTRA7_SIZE : 0))
+    (12u + PAYLOAD_SIZE(format) + ((format) >= 3 ? EXTRA_SIZE : 0) + ((format) >= 4 ? EXTRA4_SIZE : 0) +               \
+     ((format) >= 5 ? EXTRA5_SIZE(format) : 0) + ((format) >= 6 ? EXTRA6_SIZE(format) : 0) +                           \
+     ((format) >= 7 ? EXTRA7_SIZE : 0) + ((format) >= 8 ? EXTRA8_SIZE : 0))
 static uint32_t Crc(const unsigned char *bytes, size_t size)
 {
     uint32_t crc = ~0u;
@@ -501,10 +535,10 @@ static void Put(unsigned char **p, uint32_t v, unsigned n)
 #endif
 int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
 {
-    unsigned char data[12 + PAYLOAD_SIZE + EXTRA_SIZE + EXTRA4_SIZE + EXTRA5_SIZE + EXTRA6_SIZE + EXTRA7_SIZE + 1];
+    unsigned char data[FILE_SIZE(FORMAT) + 1];
     const unsigned char *p = data;
     struct TcgCollection next;
-    unsigned i, j, format, size;
+    unsigned i, j, format, size, cards, packs;
     FILE *f = fopen(path, "rb");
     if (!f)
         return 0;
@@ -514,11 +548,13 @@ int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
         return 0;
     p += 4;
     format = Get(&p, 4);
-    if (format < 2 || format > 7 || size != FILE_SIZE(format) ||
+    if (format < 2 || format > FORMAT || size != FILE_SIZE(format) ||
         Get(&p, 4) != Crc(data + 12, size - 12))
         return 0;
+    cards = CARDS_IN(format);
+    packs = PACKS_IN(format);
     Tcg_CollectionInit(&next, 1);
-    for (i = 1; i <= TCG_CARD_COUNT; i++)
+    for (i = 1; i <= cards; i++)
     {
         next.owned[i] = Get(&p, 2);
         if (next.owned[i] > TCG_COLLECTION_MAX)
@@ -532,11 +568,11 @@ int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
         for (j = 0; j < TCG_DECK_SIZE; j++)
         {
             next.decks[i].cards[j] = Get(&p, 2);
-            if (next.decks[i].cards[j] > TCG_CARD_COUNT)
+            if (next.decks[i].cards[j] > cards)
                 return 0;
         }
     }
-    for (i = 0; i < TCG_PACK_TYPES; i++)
+    for (i = 0; i < packs; i++)
         next.packs[i] = Get(&p, 2);
     next.wins = Get(&p, 4);
     next.dust = Get(&p, 4);
@@ -569,12 +605,12 @@ int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
             next.rated = Get(&p, 2);
         }
         if (format >= 5)
-            for (i = 0; i < TCG_PACK_TYPES; i++)
+            for (i = 0; i < packs; i++)
                 next.drought[i] = Get(&p, 1);
         if (format >= 6)
         {
             next.gcDecks = Get(&p, 1);
-            for (i = 0; i < TCG_GC_SINGLE_BYTES; i++)
+            for (i = 0; i < GC_BYTES(cards); i++)
                 next.gcSingles[i] = Get(&p, 1);
             for (i = 0; i < TCG_RECORD_SLOTS; i++)
             {
@@ -589,9 +625,11 @@ int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
             for (i = 0; i < TCG_SAVED_DECKS; i++)
             {
                 next.ace[i] = Get(&p, 2);
-                if (next.ace[i] > TCG_CARD_COUNT)
+                if (next.ace[i] > cards)
                     next.ace[i] = 0;
             }
+        if (format >= 8)
+            next.milestonesHi = Get(&p, 4);
     }
     else if (next.optedIn)
         next.flags = TCG_FLAG_TUTORIAL | TCG_FLAG_CLUB_MET; /* they started before the CARD CLUB */
@@ -605,7 +643,7 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
     (void)path;
     return 0;
 #else
-    unsigned char data[FILE_SIZE(7)], *p = data + 12;
+    unsigned char data[FILE_SIZE(FORMAT)], *p = data + 12;
     unsigned i, j;
     FILE *f;
     char tmp[1024];
@@ -660,11 +698,12 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
     }
     for (i = 0; i < TCG_SAVED_DECKS; i++)
         Put(&p, c->ace[i], 2);
+    Put(&p, c->milestonesHi, 4);
     p = data;
     memcpy(p, "MTCG", 4);
     p += 4;
-    Put(&p, 7, 4);
-    Put(&p, Crc(data + 12, PAYLOAD_SIZE + EXTRA_SIZE + EXTRA4_SIZE + EXTRA5_SIZE + EXTRA6_SIZE + EXTRA7_SIZE), 4);
+    Put(&p, FORMAT, 4);
+    Put(&p, Crc(data + 12, sizeof(data) - 12), 4);
     snprintf(tmp, sizeof(tmp), "%s.tmp", path);
     f = fopen(tmp, "wb");
     if (!f)

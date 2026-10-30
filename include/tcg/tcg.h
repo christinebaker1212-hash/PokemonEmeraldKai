@@ -2,12 +2,15 @@
 #define MOEMON_TCG_H
 #include <stddef.h>
 #include <stdint.h>
-#define TCG_CARD_COUNT 228
+#define TCG_CARD_COUNT 442   /* the first Game Boy game's 228, then Pokemon Card GB2's (tools/tcg/import_poketcg2.py) */
 #define TCG_DECK_SIZE 60
 #define TCG_SAVED_DECKS 8
 #define TCG_NAME_LEN 24
 #define TCG_TYPES 7
-#define TCG_PACK_TYPES 4
+#define TCG_PACK_TYPES 11    /* the first game's 4 boosters, then GB2's 7 (TCG_PACK_GB2) */
+#define TCG_PACK_GB2 4
+#define TCG_GB2_PACKS 7
+#define TCG_GB2_PACK_MAX 64
 #define TCG_NONE 255
 #define TCG_COLLECTION_MAX 9999
 
@@ -47,7 +50,17 @@ struct TcgCard
     struct TcgAttack attacks[2];
     uint16_t id, species;
     uint8_t kind, type, rarity, set, stage, hp, retreat, weakness, resistance, level;
+    /* set: its booster (TCG_SET_*: 0-3 the first game's, 4 promos, 5 energy, 6-12 GB2's); set2: the GB2 booster that
+     * also holds a first-game card (255 none); dark: a Dark Pokemon (Team Rocket's) */
+    uint8_t set2, dark, holo;   /* holo: printed as a holofoil (GB2's cards; the first game's: Tcg_IsHolo's list) */
 };
+/* Each GB2 booster's cards (0 ends a list) */
+extern const uint16_t gTcgGb2PackCards[TCG_GB2_PACKS][TCG_GB2_PACK_MAX];
+/* Can that booster (pack type 0-10) hold this card? */
+int Tcg_InPack(unsigned card, unsigned pack);
+#define TCG_SET_PROMO 4
+#define TCG_SET_ENERGY 5
+#define TCG_SET_GB2 6
 struct TcgDeckDefinition
 {
     const char *name;
@@ -67,7 +80,7 @@ struct TcgSavedDeck
     uint16_t cards[TCG_DECK_SIZE];
 };
 #define TCG_DAILY_SLOTS 64 /* opponents whose full reward was taken today */
-#define TCG_SET_COUNT 4     /* COLOSSEUM, EVOLUTION, MYSTERY, LABORATORY: the booster sets */
+#define TCG_SET_COUNT TCG_PACK_TYPES /* the booster sets, as the packs: COLOSSEUM ... LABORATORY, then GB2's seven */
 enum
 {
     TCG_FLAG_TUTORIAL = 1,    /* the teaching duel was offered */
@@ -101,7 +114,7 @@ struct TcgCollection
     /* Format 3 */
     struct TcgDaily daily[TCG_DAILY_SLOTS];
     uint32_t specialBeaten, promoGiven; /* bits by special trainer (TCG_SPECIAL_*) */
-    uint32_t milestones;                /* bit set * 3 + n: 25 / 50 / 75 % of a set rewarded */
+    uint32_t milestones;                /* bit set * 3 + n: 25 / 50 / 75 % of a set rewarded (sets 0-9) */
     uint32_t packsOpened, onlineWins, trades, flags;
     /* Format 4: CARD SCALING's correction (Elo points the player does better than their
      * deck's rating says; include/tcg/scale.h) and how many duels it has learned from. */
@@ -116,6 +129,8 @@ struct TcgCollection
     struct TcgRecord records[TCG_RECORD_SLOTS];
     /* Format 7: each saved deck's ACE CARD, the card that stands for it on the screens (0: picked for it) */
     uint16_t ace[TCG_SAVED_DECKS];
+    /* Format 8: the milestones' bits from 32 up (set * 3 + n - 32: the last GB2 boosters) */
+    uint32_t milestonesHi;
 };
 void Tcg_CollectionInit(struct TcgCollection *c, uint32_t seed);
 int Tcg_ChooseStarter(struct TcgCollection *c, unsigned starter);
@@ -147,10 +162,12 @@ unsigned Tcg_RecipeOwned(const struct TcgCollection *c, const uint16_t recipe[TC
 /* Today's full reward from an opponent (FF8: one card of their deck): once a day each. */
 int Tcg_DailyAvailable(const struct TcgCollection *c, uint32_t key, unsigned day);
 void Tcg_DailyTake(struct TcgCollection *c, uint32_t key, unsigned day);
-/* Distinct cards owned of a booster set (0-3), or of all 228 (set TCG_SET_COUNT). */
+/* Distinct cards owned that a booster (0-10) can hold, or of all of them (set TCG_SET_COUNT). */
 unsigned Tcg_SetOwned(const struct TcgCollection *c, unsigned set, unsigned *total);
-/* Set milestones newly reached (25 / 50 / 75 %): marks them and returns their bits. */
-uint32_t Tcg_TakeMilestones(struct TcgCollection *c);
+/* Set milestones (25 / 50 / 75 %: n 0-2) claimed; newly reached ones: marks them and returns how many */
+int Tcg_Milestone(const struct TcgCollection *c, unsigned set, unsigned n);
+void Tcg_SetMilestone(struct TcgCollection *c, unsigned set, unsigned n);
+unsigned Tcg_TakeMilestones(struct TcgCollection *c);
 /* Spare copies a card can give up: beyond 4 and what the saved decks use. */
 unsigned Tcg_Spare(const struct TcgCollection *c, unsigned card);
 unsigned Tcg_PointValue(unsigned card);
