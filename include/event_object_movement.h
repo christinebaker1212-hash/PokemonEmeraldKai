@@ -21,7 +21,8 @@ enum {
     PALSLOT_NPC_4_REFLECTION,
     PALSLOT_NPC_SPECIAL,
     PALSLOT_NPC_SPECIAL_REFLECTION,
-    OBJ_PALSLOT_COUNT
+    OBJ_PALSLOT_COUNT,
+    PALSLOT_QZ = 0xFE,   // Moemon Kai: Johto / Kanto sprites: their own palette, loaded by tag into any free slot
     // the remaining sprite palette slots (12-15) are used by field effects, the interface, etc.
 };
 
@@ -134,7 +135,8 @@ void ObjectEventSetGraphicsId(struct ObjectEvent *objectEvent, u16 graphicsId);
 void ObjectEventTurn(struct ObjectEvent *objectEvent, u8 direction);
 void ObjectEventTurnByLocalIdAndMap(u8 localId, u8 mapNum, u8 mapGroup, u8 direction);
 const struct ObjectEventGraphicsInfo *GetObjectEventGraphicsInfo(u16 graphicsId);
-const struct ObjectEventGraphicsInfo *QzObjectEventGraphicsInfo(u16 graphicsId);   // Moemon Kai: Johto / Kanto sprites (qz_port.c)
+const struct ObjectEventGraphicsInfo *QzObjectEventGraphicsInfo(u16 graphicsId);
+u8 QzLoadObjectPalette(u16 tag);   // Moemon Kai: Johto / Kanto sprites (qz_port.c)
 void SetObjectInvisibility(u8 localId, u8 mapNum, u8 mapGroup, bool8 invisible);
 void FreeAndReserveObjectSpritePalettes(void);
 void SetObjectEventSpritePosByLocalIdAndMap(u8 localId, u8 mapNum, u8 mapGroup, s16 x, s16 y);

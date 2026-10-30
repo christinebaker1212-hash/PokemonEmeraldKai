@@ -5,6 +5,7 @@
 #include "decoration.h"
 #include "event_data.h"
 #include "event_object_movement.h"
+#include "field_weather.h"
 #include "event_scripts.h"
 #include "faraway_island.h"
 #include "field_camera.h"
@@ -484,6 +485,7 @@ const u8 gInitialMovementTypeFacingDirections[] = {
 #include "data/object_events/base_oam.h"
 #include "data/object_events/object_event_subsprites.h"
 #include "data/object_events/object_event_graphics_info.h"
+#include "data/object_events/qz_object_events.h"   // Moemon Kai: Johto / Kanto sprites
 
 // Moemon Co-op: not const so the player palettes can be recolored at runtime
 static struct SpritePalette sObjectEventSpritePalettes[] = {
@@ -1459,6 +1461,10 @@ static u8 TrySetupObjectEventSprite(const struct ObjectEventTemplate *objectEven
     {
         LoadSpecialObjectReflectionPalette(graphicsInfo->paletteTag, paletteSlot);
     }
+    else if (paletteSlot == PALSLOT_QZ)
+    {
+        paletteSlot = QzLoadObjectPalette(graphicsInfo->paletteTag);   // Moemon Kai
+    }
     else if (paletteSlot >= 16)
     {
         paletteSlot -= 16;
@@ -1638,7 +1644,7 @@ u8 CreateVirtualObject(u16 graphicsId, u8 virtualObjId, s16 x, s16 y, u8 elevati
         sprite->centerToCornerVecX = -(graphicsInfo->width >> 1);
         sprite->centerToCornerVecY = -(graphicsInfo->height >> 1);
         sprite->y += sprite->centerToCornerVecY;
-        sprite->oam.paletteNum = graphicsInfo->paletteSlot;
+        sprite->oam.paletteNum = graphicsInfo->paletteSlot == PALSLOT_QZ ? QzLoadObjectPalette(graphicsInfo->paletteTag) : graphicsInfo->paletteSlot;
         if (sprite->oam.paletteNum >= 16)
             sprite->oam.paletteNum -= 16;
 
@@ -1779,6 +1785,10 @@ static void SpawnObjectEventOnReturnToField(u8 objectEventId, s16 x, s16 y)
     {
         LoadSpecialObjectReflectionPalette(graphicsInfo->paletteTag, graphicsInfo->paletteSlot);
     }
+    else if (paletteSlot == PALSLOT_QZ)
+    {
+        paletteSlot = QzLoadObjectPalette(graphicsInfo->paletteTag);   // Moemon Kai
+    }
     else if (paletteSlot >= 16)
     {
         paletteSlot -= 16;
@@ -1853,6 +1863,10 @@ void ObjectEventSetGraphicsId(struct ObjectEvent *objectEvent, u16 graphicsId)
     else if (paletteSlot == PALSLOT_NPC_SPECIAL)
     {
         LoadSpecialObjectReflectionPalette(graphicsInfo->paletteTag, graphicsInfo->paletteSlot);
+    }
+    else if (paletteSlot == PALSLOT_QZ)
+    {
+        paletteSlot = QzLoadObjectPalette(graphicsInfo->paletteTag);   // Moemon Kai
     }
     else if (paletteSlot >= 16)
     {
@@ -1929,6 +1943,33 @@ static void SetBerryTreeGraphics(struct ObjectEvent *objectEvent, struct Sprite 
         sprite->oam.paletteNum = gBerryTreePaletteSlotTablePointers[berryId][berryStage];
         StartSpriteAnim(sprite, berryStage);
     }
+}
+
+// Moemon Kai: Johto / Kanto sprites (ids OBJ_EVENT_GFX_QZ_FIRST and up; tools/quetzal_port/gen_objects.py)
+const struct ObjectEventGraphicsInfo *QzObjectEventGraphicsInfo(u16 graphicsId)
+{
+    u16 i = graphicsId - OBJ_EVENT_GFX_QZ_FIRST;
+    if (i < ARRAY_COUNT(sQzObjectEventGraphicsInfoPointers))
+        return sQzObjectEventGraphicsInfoPointers[i];
+    return gObjectEventGraphicsInfoPointers[OBJ_EVENT_GFX_NINJA_BOY];
+}
+
+// A Johto / Kanto sprite's own palette: where it already is, else loaded into a free sprite palette
+u8 QzLoadObjectPalette(u16 tag)
+{
+    u32 i;
+    u8 slot = IndexOfSpritePaletteTag(tag);
+    if (slot != 0xFF)
+        return slot;
+    for (i = 0; sQzObjectEventPalettes[i].tag != TAG_NONE; i++)
+        if (sQzObjectEventPalettes[i].tag == tag)
+        {
+            slot = LoadSpritePalette(&sQzObjectEventPalettes[i]);
+            if (slot != 0xFF)
+                UpdateSpritePaletteWithWeather(slot);
+            return slot == 0xFF ? 0 : slot;
+        }
+    return 0;
 }
 
 const struct ObjectEventGraphicsInfo *GetObjectEventGraphicsInfo(u16 graphicsId)
@@ -8706,7 +8747,7 @@ void SetVirtualObjectGraphics(u8 virtualObjId, u16 graphicsId)
 
         sprite->oam = *graphicsInfo->oam;
         sprite->oam.tileNum = tileNum;
-        sprite->oam.paletteNum = graphicsInfo->paletteSlot;
+        sprite->oam.paletteNum = graphicsInfo->paletteSlot == PALSLOT_QZ ? QzLoadObjectPalette(graphicsInfo->paletteTag) : graphicsInfo->paletteSlot;
         sprite->images = graphicsInfo->images;
 
         if (graphicsInfo->subspriteTables == NULL)

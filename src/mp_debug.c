@@ -1181,9 +1181,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
         int i;
         for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
             if (gObjectEvents[i].active)
-                printf("[test] obj %d gfx %d at %d,%d facing %d local %d\n", i, OBJ_GFX_ID(&gObjectEvents[i]),
-                       gObjectEvents[i].currentCoords.x, gObjectEvents[i].currentCoords.y,
-                       gObjectEvents[i].facingDirection, gObjectEvents[i].localId);
+            {
+                struct Sprite *sp = &gSprites[gObjectEvents[i].spriteId];
+                u16 pal = 256 + sp->oam.paletteNum * 16;
+                printf("[test] obj %d gfx %d at %d,%d facing %d local %d pal %d (tag %04x: %04x %04x %04x, faded %04x %04x)\n", i,
+                       OBJ_GFX_ID(&gObjectEvents[i]), gObjectEvents[i].currentCoords.x, gObjectEvents[i].currentCoords.y,
+                       gObjectEvents[i].facingDirection, gObjectEvents[i].localId, sp->oam.paletteNum,
+                       GetSpritePaletteTagByPaletteNum(sp->oam.paletteNum), gPlttBufferUnfaded[pal + 1], gPlttBufferUnfaded[pal + 2],
+                       gPlttBufferUnfaded[pal + 3], gPlttBufferFaded[pal + 1], gPlttBufferFaded[pal + 2]);
+            }
     }
     else if (strcmp(cmd, "lend") == 0)
         MP_Lend_Debug();

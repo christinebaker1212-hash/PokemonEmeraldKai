@@ -191,9 +191,11 @@ def write_constants(texts):
     for v in vars_:
         n = int(v.split('0x')[1], 16)
         lines.append('#define %-40s 0x%X' % (v, n if n >= 0x5000 else VAR_LOW_BASE + lowv.index(v)))
-    lines.append('\n// overworld graphics (placeholders until the sprites are imported)')
+    objs_path = os.path.join(HERE, 'objects.json')   # tools/quetzal_port/gen_objects.py
+    objs = load(objs_path) if os.path.exists(objs_path) else {}
+    lines.append('\n// overworld graphics (tools/quetzal_port/gen_objects.py)')
     for g in sorted(gather(r'\bOBJ_EVENT_GFX_QZ_\w+', texts), key=lambda s: int(s.rsplit('_', 1)[1])):
-        lines.append('#define %-40s OBJ_EVENT_GFX_BOY_1' % g)
+        lines.append('#define %-40s %s' % (g, objs.get(g, 'OBJ_EVENT_GFX_BOY_1')))
     lines.append('\n// music (placeholders until the songs are imported)')
     for g in sorted(gather(r'\bMUS_QZ_\w+', texts), key=lambda s: int(s.rsplit('_', 1)[1])):
         lines.append('#define %-40s MUS_ROUTE101' % g)

@@ -287,9 +287,3 @@ u16 QzSpecialStub(const char *name)
     printf("[qz] special %s not ported\n", name);
     return 0;
 }
-
-// Johto / Kanto sprites (OBJ_EVENT_GFX_QZ_FIRST and up); a stand-in until they are imported
-const struct ObjectEventGraphicsInfo *QzObjectEventGraphicsInfo(u16 graphicsId)
-{
-    return GetObjectEventGraphicsInfo(OBJ_EVENT_GFX_NINJA_BOY);
-}
