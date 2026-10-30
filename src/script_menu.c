@@ -315,7 +315,8 @@ static void Task_HandleMultichoiceGridInput(u8 taskId)
 // Moemon Kai: the test harness's "waitfor multichoice"
 bool8 MP_ScriptMultichoiceOpen(void)
 {
-    return FuncIsActiveTask(Task_HandleMultichoiceInput);
+    bool8 MP_ScrollableMultichoiceOpen(void);
+    return FuncIsActiveTask(Task_HandleMultichoiceInput) || MP_ScrollableMultichoiceOpen();
 }
 
 bool16 ScriptMenu_CreatePCMultichoice(void)

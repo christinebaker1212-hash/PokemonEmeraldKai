@@ -900,8 +900,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "setflag") == 0)
     {
-        // setflag N - an event flag (include/constants/flags.h)
-        FlagSet(atoi(arg));
+        // setflag N - an event flag (include/constants/flags.h; 0x.. hex too)
+        FlagSet(strtol(arg, NULL, 0));
+    }
+    else if (strcmp(cmd, "setvar") == 0)
+    {
+        // setvar ID VALUE - an event var (0x.. hex too)
+        char *end;
+        long id = strtol(arg, &end, 0);
+        VarSet(id, strtol(end, NULL, 0));
     }
     else if (strcmp(cmd, "kaisong") == 0)
     {

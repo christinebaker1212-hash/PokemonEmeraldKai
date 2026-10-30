@@ -67,8 +67,9 @@
 #include "palette.h"
 
 // Moemon Kai: a list made at run time (SCROLL_MULTI_QZ_DYNAMIC, qz_specials.c)
-const u8 *gQzScrollOptions[MAX_SCROLL_MULTI_LENGTH];
+const u8 *gQzScrollOptions[QZ_SCROLL_MAX];
 u8 gQzScrollCount;
+u16 (*gQzScrollResult)(u16 choice);   // turns the row picked (or MULTI_B_PRESSED) into VAR_RESULT; NULL: the row
 
 #define TAG_ITEM_ICON 5500
 
@@ -2685,6 +2686,12 @@ static void ScrollableMultichoice_MoveCursor(s32 itemIndex, bool8 onInit, struct
     }
 }
 
+// Moemon Kai: the test harness's "waitfor multichoice"
+bool8 MP_ScrollableMultichoiceOpen(void)
+{
+    return FuncIsActiveTask(ScrollableMultichoice_ProcessInput);
+}
+
 static void ScrollableMultichoice_ProcessInput(u8 taskId)
 {
     struct Task *task = &gTasks[taskId];
@@ -2696,11 +2703,15 @@ static void ScrollableMultichoice_ProcessInput(u8 taskId)
         break;
     case LIST_CANCEL:
         gSpecialVar_Result = MULTI_B_PRESSED;
+        if (gQzScrollResult != NULL)
+            gSpecialVar_Result = gQzScrollResult(gSpecialVar_Result), gQzScrollResult = NULL;
         PlaySE(SE_SELECT);
         CloseScrollableMultichoice(taskId);
         break;
     default:
         gSpecialVar_Result = input;
+        if (gQzScrollResult != NULL)
+            gSpecialVar_Result = gQzScrollResult(gSpecialVar_Result), gQzScrollResult = NULL;
         PlaySE(SE_SELECT);
         if (!task->tKeepOpenAfterSelect)
         {

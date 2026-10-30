@@ -908,3 +908,86 @@ static u16 QzSaveLeagueVictoryRecord_(void)
 u16 QzGetReachableRegionsMask(void) { return gSpecialVar_Result = QzGetReachableRegionsMask_(); }
 u16 QzTravelToRegion(void) { return gSpecialVar_Result = QzTravelToRegion_(); }
 u16 QzSaveLeagueVictoryRecord(void) { return gSpecialVar_Result = QzSaveLeagueVictoryRecord_(); }
+
+// ---------------------------------------------------------------------------------------------------- starters
+// Quetzal's starter choice (ELM / OAK): any of its 36 starters (gifts.json starter_choices), Gen 4 ones only once
+// Gen 4 is open here (docs/REGIONS_PLAN.md "Gen 4"). A list of names; RESULT = the species, 0 for B.
+extern u16 (*gQzScrollResult)(u16 choice);
+static const u16 sQzStarters[] = {
+    SPECIES_BULBASAUR,
+    SPECIES_CHARMANDER,
+    SPECIES_SQUIRTLE,
+    SPECIES_PIKACHU,
+    SPECIES_ZUBAT,
+    SPECIES_GASTLY,
+    SPECIES_DITTO,
+    SPECIES_EEVEE,
+    SPECIES_PORYGON,
+    SPECIES_CHIKORITA,
+    SPECIES_CYNDAQUIL,
+    SPECIES_TOTODILE,
+    SPECIES_TOGEPI,
+    SPECIES_SNEASEL,
+    SPECIES_SWINUB,
+    SPECIES_TYROGUE,
+    SPECIES_ELEKID,
+    SPECIES_MAGBY,
+    SPECIES_TREECKO,
+    SPECIES_TORCHIC,
+    SPECIES_MUDKIP,
+    SPECIES_RALTS,
+    SPECIES_AZURILL,
+    SPECIES_ARON,
+    SPECIES_ELECTRIKE,
+    SPECIES_TRAPINCH,
+    SPECIES_SPHEAL,
+    SPECIES_TURTWIG,
+    SPECIES_CHIMCHAR,
+    SPECIES_PIPLUP,
+    SPECIES_BUIZEL,
+    SPECIES_HAPPINY,
+    SPECIES_MUNCHLAX,
+    SPECIES_RIOLU,
+    SPECIES_SNOVER,
+    SPECIES_ROTOM,
+};
+static u16 sQzStarterRows[ARRAY_COUNT(sQzStarters)];
+static u8 sQzStarterNames[ARRAY_COUNT(sQzStarters)][POKEMON_NAME_LENGTH + 1];
+
+static u16 QzStarterPicked(u16 row)
+{
+    return row < gQzScrollCount ? sQzStarterRows[row] : 0;
+}
+
+static u16 QzChooseStarter_(void)
+{
+    u8 i, n = 0;
+    for (i = 0; i < ARRAY_COUNT(sQzStarters) && n < QZ_SCROLL_MAX; i++)
+    {
+        if (!MP_Region_Gen4Open() && SpeciesToNationalPokedexNum(sQzStarters[i]) > 386)
+            continue;
+        sQzStarterRows[n] = sQzStarters[i];
+        GetSpeciesName(sQzStarterNames[n], sQzStarters[i]);
+        gQzScrollOptions[n] = sQzStarterNames[n];
+        n++;
+    }
+    gQzScrollCount = n;
+    gQzScrollResult = QzStarterPicked;
+    gSpecialVar_0x8004 = SCROLL_MULTI_QZ_DYNAMIC;
+    ShowScrollableMultichoice();
+    return 0;
+}
+
+// The chosen starter (VAR_TEMP_2) at Lv 5. RESULT: 0 party, 1 PC, 2 no room
+static u16 QzGiveStarter_(void)
+{
+    u16 species = VarGet(VAR_TEMP_2);
+    if (species == SPECIES_NONE || species >= NUM_SPECIES)
+        return 2;
+    return ScriptGiveMon(species, 5, ITEM_NONE, 0, 0, 0);
+}
+
+u16 QzChooseStarterJohto(void) { return QzChooseStarter_(); }
+u16 QzChooseStarterKanto(void) { return QzChooseStarter_(); }
+u16 QzGiveStarterJohto(void) { return gSpecialVar_Result = QzGiveStarter_(); }
+u16 QzGiveStarterKanto(void) { return gSpecialVar_Result = QzGiveStarter_(); }

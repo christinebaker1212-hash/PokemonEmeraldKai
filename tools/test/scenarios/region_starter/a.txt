@@ -1,0 +1,18 @@
+pressuntil A field 5000
+wait 60
+mp warp 35,0,10,5
+wait 120
+mp setvar 0x5004 1
+press UP 3
+wait 10
+pressuntil A multichoice 2000
+wait 30
+shot starter_list
+press DOWN 3
+wait 6
+press A 3
+wait 30
+pressuntil B field 4000
+wait 30
+mp party
+quit

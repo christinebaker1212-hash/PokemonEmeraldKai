@@ -46,6 +46,7 @@
 
 #define MAX_SCROLL_MULTI_ON_SCREEN 6
 #define MAX_SCROLL_MULTI_LENGTH 16
+#define QZ_SCROLL_MAX 64   // Moemon Kai: SCROLL_MULTI_QZ_DYNAMIC's rows (gQzScrollOptions)
 
 // Dept Store Floor Numbers
 #define DEPT_STORE_FLOORNUM_B4F       0
