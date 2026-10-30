@@ -66,6 +66,10 @@
 #include "constants/metatile_labels.h"
 #include "palette.h"
 
+// Moemon Kai: a list made at run time (SCROLL_MULTI_QZ_DYNAMIC, qz_specials.c)
+const u8 *gQzScrollOptions[MAX_SCROLL_MULTI_LENGTH];
+u8 gQzScrollCount;
+
 #define TAG_ITEM_ICON 5500
 
 #define GFXTAG_MULTICHOICE_SCROLL_ARROWS 2000
@@ -2380,6 +2384,37 @@ void ShowScrollableMultichoice(void)
         task->tKeepOpenAfterSelect = FALSE;
         task->tTaskId = taskId;
         break;
+    // Moemon Kai: Kanto's lists (FireRed's ListMenu, QzListMenu) and lists made at run time
+    case SCROLL_MULTI_QZ_DYNAMIC:
+        task->tMaxItemsOnScreen = gQzScrollCount < MAX_SCROLL_MULTI_ON_SCREEN ? gQzScrollCount : MAX_SCROLL_MULTI_ON_SCREEN;
+        task->tNumItems = gQzScrollCount;
+        task->tLeft = 1;
+        task->tTop = 1;
+        task->tWidth = 10;
+        task->tHeight = task->tMaxItemsOnScreen * 2;
+        task->tKeepOpenAfterSelect = FALSE;
+        task->tTaskId = taskId;
+        break;
+    case SCROLL_MULTI_QZ_SILPH_FLOORS:
+        task->tMaxItemsOnScreen = MAX_SCROLL_MULTI_ON_SCREEN;
+        task->tNumItems = 12;
+        task->tLeft = 1;
+        task->tTop = 1;
+        task->tWidth = 6;
+        task->tHeight = 12;
+        task->tKeepOpenAfterSelect = FALSE;
+        task->tTaskId = taskId;
+        break;
+    case SCROLL_MULTI_QZ_KANTO_BADGES:
+        task->tMaxItemsOnScreen = MAX_SCROLL_MULTI_ON_SCREEN;
+        task->tNumItems = 9;
+        task->tLeft = 1;
+        task->tTop = 1;
+        task->tWidth = 12;
+        task->tHeight = 12;
+        task->tKeepOpenAfterSelect = TRUE;
+        task->tTaskId = taskId;
+        break;
     default:
         gSpecialVar_Result = MULTI_B_PRESSED;
         DestroyTask(taskId);
@@ -2387,8 +2422,19 @@ void ShowScrollableMultichoice(void)
     }
 }
 
+static const u8 sText_Qz11F[] = _("11F"), sText_Qz10F[] = _("10F"), sText_Qz9F[] = _("9F"), sText_Qz8F[] = _("8F"),
+                sText_Qz7F[] = _("7F"), sText_Qz6F[] = _("6F"), sText_Qz5F[] = _("5F"), sText_Qz4F[] = _("4F"),
+                sText_Qz3F[] = _("3F"), sText_Qz2F[] = _("2F"), sText_Qz1F[] = _("1F"), sText_QzExit[] = _("EXIT");
+static const u8 sText_QzBoulder[] = _("BOULDERBADGE"), sText_QzCascade[] = _("CASCADEBADGE"), sText_QzThunder[] = _("THUNDERBADGE"),
+                sText_QzRainbow[] = _("RAINBOWBADGE"), sText_QzSoul[] = _("SOULBADGE"), sText_QzMarsh[] = _("MARSHBADGE"),
+                sText_QzVolcano[] = _("VOLCANOBADGE"), sText_QzEarth[] = _("EARTHBADGE");
+
 static const u8 *const sScrollableMultichoiceOptions[][MAX_SCROLL_MULTI_LENGTH] =
 {
+    [SCROLL_MULTI_QZ_SILPH_FLOORS] = {sText_Qz11F, sText_Qz10F, sText_Qz9F, sText_Qz8F, sText_Qz7F, sText_Qz6F, sText_Qz5F,
+                                      sText_Qz4F, sText_Qz3F, sText_Qz2F, sText_Qz1F, sText_QzExit},
+    [SCROLL_MULTI_QZ_KANTO_BADGES] = {sText_QzBoulder, sText_QzCascade, sText_QzThunder, sText_QzRainbow, sText_QzSoul,
+                                      sText_QzMarsh, sText_QzVolcano, sText_QzEarth, sText_QzExit},
     [SCROLL_MULTI_NONE] =
     {
         gText_Exit
@@ -2543,6 +2589,11 @@ static const u8 *const sScrollableMultichoiceOptions[][MAX_SCROLL_MULTI_LENGTH] 
     }
 };
 
+static const u8 *ScrollOption(u16 id, u16 i)   // Moemon Kai: SCROLL_MULTI_QZ_DYNAMIC reads gQzScrollOptions
+{
+    return id == SCROLL_MULTI_QZ_DYNAMIC ? gQzScrollOptions[i] : sScrollableMultichoiceOptions[id][i];
+}
+
 static void Task_ShowScrollableMultichoice(u8 taskId)
 {
     u32 width;
@@ -2561,7 +2612,7 @@ static void Task_ShowScrollableMultichoice(u8 taskId)
 
     for (width = 0, i = 0; i < task->tNumItems; i++)
     {
-        const u8 *text = sScrollableMultichoiceOptions[gSpecialVar_0x8004][i];
+        const u8 *text = ScrollOption(gSpecialVar_0x8004, i);
         sScrollableMultichoice_ListMenuItem[i].name = text;
         sScrollableMultichoice_ListMenuItem[i].id = i;
         width = DisplayTextAndGetWidth(text, width);
@@ -3177,7 +3228,7 @@ void ScrollableMultichoice_RedrawPersistentMenu(void)
         SetStandardWindowBorderStyle(task->tWindowId, FALSE);
 
         for (i = 0; i < MAX_SCROLL_MULTI_ON_SCREEN; i++)
-            AddTextPrinterParameterized5(task->tWindowId, FONT_NORMAL, sScrollableMultichoiceOptions[gSpecialVar_0x8004][scrollOffset + i], 10, i * 16, TEXT_SKIP_DRAW, NULL, 0, 0);
+            AddTextPrinterParameterized5(task->tWindowId, FONT_NORMAL, ScrollOption(gSpecialVar_0x8004, scrollOffset + i), 10, i * 16, TEXT_SKIP_DRAW, NULL, 0, 0);
 
         AddTextPrinterParameterized(task->tWindowId, FONT_NORMAL, gText_SelectorArrow, 0, selectedRow * 16, TEXT_SKIP_DRAW, NULL);
         PutWindowTilemap(task->tWindowId);

@@ -40,6 +40,9 @@
 #define SCROLL_MULTI_BF_MOVE_TUTOR_2                      10
 #define SCROLL_MULTI_SS_TIDAL_DESTINATION                 11
 #define SCROLL_MULTI_BATTLE_TENT_RULES                    12
+#define SCROLL_MULTI_QZ_SILPH_FLOORS                      13   // Moemon Kai: Kanto (QzListMenu)
+#define SCROLL_MULTI_QZ_KANTO_BADGES                      14
+#define SCROLL_MULTI_QZ_DYNAMIC                           15   // options from gQzScrollOptions (qz_specials.c)
 
 #define MAX_SCROLL_MULTI_ON_SCREEN 6
 #define MAX_SCROLL_MULTI_LENGTH 16

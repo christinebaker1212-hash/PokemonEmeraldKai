@@ -48,7 +48,7 @@ static u16 QzIsItemRandomizerOn_(void) { return FALSE; }
 u16 QzRandomizeItemInVar8000(void) { return 0; }
 static u16 QzIsSaveFlag2F4Bit4Set_(void) { return FALSE; }
 u16 QzIncrementChallengeCounterVar(void) { return 0; }
-u16 QzBackupPartyForOptionBattle(void) { return 0; }
+u16 QzBackupPartyForOptionBattle(void) { ScriptContext_Enable(); return 0; }   // a script waits on it
 u16 QzQzEnemyMonEventFixup(void) { return 0; }
 u16 QzHoennPostHealEventCheck(void) { return 0; }
 u16 QzResetFollowerObjects(void) { return 0; }   // Kai's followers aren't objects
@@ -541,3 +541,250 @@ u16 QzIsSelectedItemFossil(void) { return gSpecialVar_Result = QzIsSelectedItemF
 u16 QzIsSelectedItemFossilHalf(void) { return gSpecialVar_Result = QzIsSelectedItemFossilHalf_(); }
 u16 QzAreFossilHalvesCompatible(void) { return gSpecialVar_Result = QzAreFossilHalvesCompatible_(); }
 u16 QzGiveRevivedFossilMon(void) { return gSpecialVar_Result = QzGiveRevivedFossilMon_(); }
+
+// ---------------------------------------------------------------------------------------------------- Kanto (FireRed's)
+#include "constants/field_specials.h"
+#include "constants/game_stat.h"
+#include "constants/map_groups.h"
+#include "constants/songs.h"
+#include "script_menu.h"
+
+extern const u8 *gQzScrollOptions[];
+extern u8 gQzScrollCount;
+
+// Vermilion's gym: the first switch's can at random, the second next to it
+u16 QzSetVermilionTrashCans(void)
+{
+    u16 idx = (Random() % 15) + 1;
+    s16 second = idx;
+    static const s8 sNear[16][4] = {
+        {0}, {1, 5}, {1, 5, -1}, {1, 5, -1}, {1, 5, -1}, {5, -1}, {-5, 1, 5}, {-5, 1, 5, -1}, {-5, 1, 5, -1},
+        {-5, 1, 5, -1}, {-5, 5, -1}, {-5, 1}, {-5, 1, -1}, {-5, 1, -1}, {-5, 1, -1}, {-5, -1},
+    };
+    u8 n = 0;
+    while (n < 4 && sNear[idx][n] != 0)
+        n++;
+    second += sNear[idx][Random() % n];
+    if (second < 1 || second > 15)
+        second = (idx % 5 == 0) ? idx - 1 : idx + 1;
+    gSpecialVar_0x8004 = idx;
+    gSpecialVar_0x8005 = second;
+    return 0;
+}
+
+static u16 QzIsPlayerLeftOfVermilionSailor_(void)
+{
+    return gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_KANTO_VERMILION_CITY)
+        && gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_KANTO_VERMILION_CITY) && gSaveBlock1Ptr->pos.x < 24;
+}
+
+// Elevators: var 0x5104 = the floor of the map the elevator was entered from (4 = 1F, as Emerald's floor names)
+static const struct { u16 map; u8 floor; } sElevatorFloors[] =
+{
+    {MAP_KANTO_SILPH_CO_1F, 4}, {MAP_KANTO_SILPH_CO_2F, 5}, {MAP_KANTO_SILPH_CO_3F, 6}, {MAP_KANTO_SILPH_CO_4F, 7},
+    {MAP_KANTO_SILPH_CO_5F, 8}, {MAP_KANTO_SILPH_CO_6F, 9}, {MAP_KANTO_SILPH_CO_7F, 10}, {MAP_KANTO_SILPH_CO_8F, 11},
+    {MAP_KANTO_SILPH_CO_9F, 12}, {MAP_KANTO_SILPH_CO_10F, 13}, {MAP_KANTO_SILPH_CO_11F, 14},
+    {MAP_KANTO_ROCKET_HIDEOUT_B1F, 3}, {MAP_KANTO_ROCKET_HIDEOUT_B2F, 2}, {MAP_KANTO_ROCKET_HIDEOUT_B4F, 0},
+    {MAP_KANTO_CELADON_CITY_DEPARTMENT_STORE_1F, 4}, {MAP_KANTO_CELADON_CITY_DEPARTMENT_STORE_2F, 5},
+    {MAP_KANTO_CELADON_CITY_DEPARTMENT_STORE_3F, 6}, {MAP_KANTO_CELADON_CITY_DEPARTMENT_STORE_4F, 7},
+    {MAP_KANTO_CELADON_CITY_DEPARTMENT_STORE_5F, 8}, {MAP_KANTO_TRAINER_TOWER_LOBBY, 4}, {MAP_KANTO_TRAINER_TOWER_ROOF, 15},
+};
+
+static u8 ElevatorFloor(void)
+{
+    u8 i;
+    u16 map = (gSaveBlock1Ptr->dynamicWarp.mapGroup << 8) | gSaveBlock1Ptr->dynamicWarp.mapNum;
+    for (i = 0; i < ARRAY_COUNT(sElevatorFloors); i++)
+        if (sElevatorFloors[i].map == map)
+            return sElevatorFloors[i].floor;
+    return 4;
+}
+
+u16 QzGetElevatorFloor(void)
+{
+    VarSet(0x5104, ElevatorFloor());
+    return 0;
+}
+
+// The floor list's row for the floor you're on (Silph: 11F first)
+static u16 QzGetElevatorFloorCursor_(void)
+{
+    u8 floor = ElevatorFloor();
+    return floor >= 4 && floor <= 14 ? 14 - floor : 0;
+}
+
+// FireRed's script lists: 0 the badges (Cerulean's house), 1 Silph Co.'s floors; waitstate, VAR_RESULT = the row
+u16 QzListMenu(void)
+{
+    u16 list = gSpecialVar_0x8004;
+    if (list == 0)
+        gSpecialVar_0x8004 = SCROLL_MULTI_QZ_KANTO_BADGES;
+    else if (list == 1)
+        gSpecialVar_0x8004 = SCROLL_MULTI_QZ_SILPH_FLOORS;
+    else
+    {
+        gSpecialVar_Result = MULTI_B_PRESSED;
+        ScriptContext_Enable();
+        return 0;
+    }
+    ShowScrollableMultichoice();
+    return 0;
+}
+
+u16 QzReturnToListMenu(void)
+{
+    ScrollableMultichoice_RedrawPersistentMenu();
+    return 0;
+}
+
+u16 QzForcePlayerOntoBike(void)
+{
+    if (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_ON_FOOT)
+        SetPlayerAvatarTransitionFlags(PLAYER_AVATAR_FLAG_MACH_BIKE);
+    Overworld_SetSavedMusic(MUS_CYCLING);
+    Overworld_ChangeMusicTo(MUS_CYCLING);
+    return 0;
+}
+
+u16 QzForcePlayerToStartSurfing(void)
+{
+    SetPlayerAvatarTransitionFlags(PLAYER_AVATAR_FLAG_SURFING);
+    return 0;
+}
+
+// Lorelei's dolls: one more for every 25 entries in the HALL OF FAME
+u16 QzUpdateLoreleiDollCollection(void)
+{
+    static const u16 sDolls[] = {FLAG_QZ_0x2197, FLAG_QZ_0x2195, FLAG_QZ_0x2192, FLAG_QZ_0x2196, FLAG_QZ_0x2193,
+                                 FLAG_QZ_0x2190, FLAG_QZ_0x2194, FLAG_QZ_0x2191};
+    u32 clears = GetGameStat(GAME_STAT_ENTERED_HOF), i;
+    for (i = 0; i < ARRAY_COUNT(sDolls); i++)
+        if (clears >= 25 * (i + 1))
+            FlagClear(sDolls[i]);
+    return 0;
+}
+
+// Pewter's museum: the fossils' Pokémon in a picture box
+u16 QzOpenMuseumFossilPicKabutops(void) { ScriptMenu_ShowPokemonPic(SPECIES_KABUTOPS, 10, 3); return 0; }
+u16 QzOpenMuseumFossilPicAerodactyl(void) { ScriptMenu_ShowPokemonPic(SPECIES_AERODACTYL, 10, 3); return 0; }
+u16 QzCloseMuseumFossilPic(void) { ScriptMenu_HidePokemonPic(); return 0; }
+
+// Bill's teleporter: the machine's own animation is FireRed's art; nothing waits on it
+u16 QzAnimateTeleporterHousing(void) { return 0; }
+u16 QzAnimateTeleporterCable(void) { return 0; }
+
+// Resort Gorgeous: Selphy asks for a Pokémon you have seen, with a reward
+static u16 QzSampleResortGorgeousMonAndReward_(void)
+{
+    static const u16 sRewards[] = {ITEM_BIG_PEARL, ITEM_PEARL, ITEM_STARDUST, ITEM_STAR_PIECE, ITEM_NUGGET, ITEM_RARE_CANDY};
+    u16 species = VarGet(VAR_QZ_0x5141), i;
+    if (species == SPECIES_NONE || species == 0xFFFF)
+    {
+        for (i = 0; i < 100; i++)
+        {
+            species = (Random() % (FIRST_GEN4_SPECIES - 1)) + 1;
+            if (GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_GET_SEEN))
+                break;
+        }
+        if (i == 100)
+            species = SPECIES_PIKACHU;
+        VarSet(VAR_QZ_0x5141, species);
+        VarSet(0x5142, sRewards[Random() % ARRAY_COUNT(sRewards)]);
+    }
+    GetSpeciesName(gStringVar1, VarGet(VAR_QZ_0x5141));
+    return TRUE;
+}
+
+static u16 QzPartyHasRequestedResortMon_(void)
+{
+    return PartyHas(VarGet(VAR_QZ_0x5141));
+}
+
+// ---------------------------------------------------------------------------------------------------- the Seagallop
+static const struct { u16 map; u8 x, y; } sSeagallopSpots[] =
+{
+    {MAP_KANTO_VERMILION_CITY, 0x17, 0x20}, {MAP_KANTO_ONE_ISLAND_HARBOR, 8, 5}, {MAP_KANTO_TWO_ISLAND_HARBOR, 8, 5},
+    {MAP_KANTO_THREE_ISLAND_HARBOR, 8, 5}, {MAP_KANTO_FOUR_ISLAND_HARBOR, 8, 5}, {MAP_KANTO_FIVE_ISLAND_HARBOR, 8, 5},
+    {MAP_KANTO_SIX_ISLAND_HARBOR, 8, 5}, {MAP_KANTO_SEVEN_ISLAND_HARBOR, 8, 5}, {MAP_KANTO_CINNABAR_ISLAND, 0x15, 7},
+    {MAP_KANTO_NAVEL_ROCK_HARBOR, 8, 5}, {MAP_KANTO_BIRTH_ISLAND_HARBOR, 8, 5},
+};
+static const u8 sSeagallopNames[][14] = {
+    _("VERMILION CITY"), _("ONE ISLAND"), _("TWO ISLAND"), _("THREE ISLAND"), _("FOUR ISLAND"), _("FIVE ISLAND"),
+    _("SIX ISLAND"), _("SEVEN ISLAND"),
+};
+static const u8 sText_Exit[] = _("EXIT");
+static u8 sSeagallopChoices[ARRAY_COUNT(sSeagallopNames) + 1];
+
+// The ports you can sail to from VAR_0x8004 (the Sevii maps' flags open them); waitstate; FALSE when there is none
+static u16 QzShowSeagallopDestinationMenu_(void)
+{
+    u8 i, n = 0;
+    for (i = 0; i < ARRAY_COUNT(sSeagallopNames); i++)
+    {
+        if (i == gSpecialVar_0x8004)
+            continue;
+        if (i >= 1 && i <= 3 && !FlagGet(FLAG_QZ_0x2213))
+            continue;
+        if (i >= 4 && !FlagGet(FLAG_QZ_0x2214))
+            continue;
+        sSeagallopChoices[n] = i;
+        gQzScrollOptions[n++] = sSeagallopNames[i];
+    }
+    if (n == 0)
+        return FALSE;
+    sSeagallopChoices[n] = 127;
+    gQzScrollOptions[n++] = sText_Exit;
+    gQzScrollCount = n;
+    gSpecialVar_0x8004 = SCROLL_MULTI_QZ_DYNAMIC;
+    ShowScrollableMultichoice();
+    return TRUE;
+}
+
+static u16 QzGetSeagallopMenuSelection_(void)
+{
+    if (gSpecialVar_Result >= gQzScrollCount)
+        return 127;
+    return sSeagallopChoices[gSpecialVar_Result];
+}
+
+// The ship's number (the scripts say it): FireRed's
+static u16 QzGetSeagallopNumber_(void)
+{
+    u16 a = gSpecialVar_0x8004, b = gSpecialVar_0x8006;
+    if (a == 8 || b == 8) return 1;
+    if (a == 0 || b == 0) return 7;
+    if (a == 9 || b == 9) return 10;
+    if (a == 10 || b == 10) return 12;
+    if (a >= 1 && a <= 3 && b >= 1 && b <= 3) return 2;
+    if (a >= 4 && a <= 5 && b >= 4 && b <= 5) return 3;
+    if (a >= 6 && a <= 7 && b >= 6 && b <= 7) return 5;
+    return 6;
+}
+
+// Sail to VAR_0x8006 (FireRed's ferry scene is its own art: the trip is the screen's fade)
+u16 QzDoSeagallopFerryScene(void)
+{
+    u16 dest = gSpecialVar_0x8006 < ARRAY_COUNT(sSeagallopSpots) ? gSpecialVar_0x8006 : 0;
+    SetWarpDestination(sSeagallopSpots[dest].map >> 8, sSeagallopSpots[dest].map & 0xFF, WARP_ID_NONE,
+                       sSeagallopSpots[dest].x, sSeagallopSpots[dest].y);
+    DoWarp();
+    ResetInitialPlayerAvatarState();
+    return 0;
+}
+
+// The S.S. ANNE leaves: FireRed's scene is its own art; the script goes on
+u16 QzDoSSAnneDepartureCutscene(void)
+{
+    ScriptContext_Enable();
+    return 0;
+}
+
+// The League's lights (FireRed's palette effect): the rooms show as they are
+u16 QzDoPokemonLeagueLightingEffect(void) { return 0; }
+u16 QzIsPlayerLeftOfVermilionSailor(void) { return gSpecialVar_Result = QzIsPlayerLeftOfVermilionSailor_(); }
+u16 QzGetElevatorFloorCursor(void) { return gSpecialVar_Result = QzGetElevatorFloorCursor_(); }
+u16 QzSampleResortGorgeousMonAndReward(void) { return gSpecialVar_Result = QzSampleResortGorgeousMonAndReward_(); }
+u16 QzPartyHasRequestedResortMon(void) { return gSpecialVar_Result = QzPartyHasRequestedResortMon_(); }
+u16 QzShowSeagallopDestinationMenu(void) { return gSpecialVar_Result = QzShowSeagallopDestinationMenu_(); }
+u16 QzGetSeagallopMenuSelection(void) { return gSpecialVar_Result = QzGetSeagallopMenuSelection_(); }
+u16 QzGetSeagallopNumber(void) { return gSpecialVar_Result = QzGetSeagallopNumber_(); }
