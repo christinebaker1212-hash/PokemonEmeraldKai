@@ -105,7 +105,7 @@ enum
 };
 #define SC_RULE(opt) ((opt) - OPT_SC_ON)
 
-#define MAX_ROWS 16
+#define MAX_ROWS 24   // (GAME has 20)
 static EWRAM_DATA struct { u8 opt, arg; } sRows[MAX_ROWS] = {0};
 static EWRAM_DATA u8 sRowCount = 0;
 static EWRAM_DATA u8 sTab = 0;
