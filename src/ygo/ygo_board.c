@@ -195,7 +195,7 @@ static struct
     int timer, settled;
     uint8_t phase, turnPlayer;
     uint16_t turn;
-    float infoFade;      /* the middle line's words about the card: shown in the Main Phases, faded in the others */
+    float infoFade;      /* the middle line's words about the card: faded out while a banner is on screen */
     struct Fx fx[FX_MAX];
     /* input */
     int mode, cursorKind, cursorSide, cursorIndex;
@@ -1459,9 +1459,10 @@ static void Advance(void)
     }
     if (B.seq >= s->eventSeq && B.timer <= 0 && !B.settled)
         Settle();
-    /* the words about the card: faded in once a Main Phase has begun (its banner gone), out in every other phase */
+    /* the words about the card: out the moment a turn or phase banner comes up (whenever that phase ended), back as
+       soon as no banner is on screen */
     {
-        int shown = B.phase == YGO_PHASE_MAIN1 || B.phase == YGO_PHASE_MAIN2;
+        int shown = 1;
         for (i = 0; i < FX_MAX && shown; i++)
             if (B.fx[i].life && B.fx[i].kind == FX_SWEEP)
                 shown = 0;

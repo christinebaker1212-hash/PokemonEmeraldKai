@@ -2537,8 +2537,9 @@ TCG_LINK_VERSION 15.
   G_TextAlpha in tcg_gfx.c: text drawn from then on at that alpha). G_ResultScreen's timing for both tables: the
   banner alone for a second, then the box with its words (G_RESULT_BOX), A leaves from G_RESULT_READY; test scripts
   wait 320 frames after `mp ygo win` / `mp cards win`.
-- 1.57.0: the middle line's words show only in the Main Phases, faded in once its sweep is gone, out (as fast as a
-  sweep's band opens) in every other phase; what to pick when the player is asked always shows. Cards turning over
+- 1.57.1: the middle line's words fade out (as fast as a sweep's band opens) the moment any turn or phase sweep
+  comes up and back in as soon as none is on screen, in every phase; what to pick when the player is asked always
+  shows. Cards turning over
   (FX_FLIP: a Flip Summon, a Set card flipped by an attack or an effect, one turned face-down) go edge-on and show
   their other side (Turn, Animated). A Tribute (YGO_EV_TO_GRAVE with YGO_REASON_TRIBUTE) goes white and up as light
   toward the middle of its side's Monster Zones (FX_TRIBUTE: the event waits for all of it, Advance moves it to the
