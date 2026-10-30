@@ -16,7 +16,9 @@ card games). Quetzal's region system is documented in `docs/quetzal/REGIONS.md`;
 ## Travel (a commitment)
 - After a region's Elite Four you get its ticket: HOENN = the S.S. TICKET from Dad (Emerald's own), JOHTO = Elm's,
   KANTO = Bill's. Before that region's Elite Four you can't leave it.
-- Ports: HOENN = Slateport (the S.S. TIDAL), JOHTO = Olivine, KANTO = Vermilion. The boat goes to any other region.
+- Ports: HOENN = Slateport and Lilycove (the S.S. TIDAL's clerks, "Other regions"; the boat docks at Slateport),
+  JOHTO = Olivine, KANTO = Vermilion. The boat goes to any other region. Quetzal's own menus are its second multichoice
+  table (tools/quetzal_rip/multichoice.py, tools/quetzal_port/gen_multichoice.py).
 - First arrival in a region: the boat docks, a short sightseeing walk in the port city with a guide, then a ride to the
   region's beginner town, where the professor gives a starter and the region's dex. Later trips land at the port.
 - Bullet train: Goldenrod's station opens after Johto's Elite Four, Saffron's after Kanto's. It is region travel too.
@@ -53,7 +55,9 @@ Triad's regions with their own rules for Johto's and Kanto's areas (the CARD QUE
 ## Gen 4
 Gen 4 Pokémon only after an Elite Four, outside the region you cleared. Since a game can start in Johto or Kanto, a
 Gen 4 Pokémon in those regions' wild tables or trainer teams is swapped for its Gen 1-3 stand-in until the player has
-beaten an Elite Four somewhere else (the stand-ins come from the Gen 3 cap of the same rip).
+beaten an Elite Four somewhere else (the stand-ins come from the Gen 3 cap of the same rip: quetzal_rip/gen3,
+tools/quetzal_port/gen_gen3.py; mp_region.c MP_Region_WildInfo / MP_Region_TrainerData; test region_gen4). Gifts and
+static encounters in scripts are not swapped yet.
 
 ## Build order
 1. Engine: region id, FRLG-style 640-tile primaries per layout, 16-bit object graphics ids, flags 0x1000-0x3FFF and

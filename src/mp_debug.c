@@ -2480,6 +2480,18 @@ void MP_TestCommand(const char *cmd, const char *arg)
         MP_Region_WriteSidecar();
         MP_Region_LoadFromSave();
     }
+    else if (strcmp(cmd, "wildroll") == 0)
+    {
+        // wildroll N: N land Pokémon from this map's table, as wild encounters would pick (species list)
+        bool8 MP_RollExtraLandMon(struct Pokemon *out);
+        struct Pokemon mon;
+        int i, n = atoi(arg);
+        printf("[test] wildroll:");
+        for (i = 0; i < n; i++)
+            if (MP_RollExtraLandMon(&mon))
+                printf(" %d", (int)GetMonData(&mon, MON_DATA_SPECIES));
+        printf("\n");
+    }
     else if (strcmp(cmd, "regionclear") == 0)
     {
         // regionclear R: as if that region's Elite Four were beaten (0 HOENN: FLAG_SYS_GAME_CLEAR too)

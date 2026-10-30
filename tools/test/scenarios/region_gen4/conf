@@ -1,0 +1,6 @@
+# Gen 4 Pokémon in JOHTO only after an Elite Four in another region: ROUTE 29's grass has no STARLY / SHINX at
+# first (the rip's Gen 3 table) and has them once HOENN's Elite Four counts as beaten
+MODE=1
+TMO=90
+CHECK="python3 tools/test/scenarios/region_gen4/check.py"
+UNEXPECT_A=("[crash]")

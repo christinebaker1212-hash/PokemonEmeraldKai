@@ -710,7 +710,7 @@ static const struct { u16 map; u8 x, y; } sSeagallopSpots[] =
     {MAP_KANTO_SIX_ISLAND_HARBOR, 8, 5}, {MAP_KANTO_SEVEN_ISLAND_HARBOR, 8, 5}, {MAP_KANTO_CINNABAR_ISLAND, 0x15, 7},
     {MAP_KANTO_NAVEL_ROCK_HARBOR, 8, 5}, {MAP_KANTO_BIRTH_ISLAND_HARBOR, 8, 5},
 };
-static const u8 sSeagallopNames[][14] = {
+static const u8 sSeagallopNames[][15] = {
     _("VERMILION CITY"), _("ONE ISLAND"), _("TWO ISLAND"), _("THREE ISLAND"), _("FOUR ISLAND"), _("FIVE ISLAND"),
     _("SIX ISLAND"), _("SEVEN ISLAND"),
 };

@@ -17,6 +17,10 @@
 #include "constants/map_groups.h"
 #include "constants/flags.h"
 #include "constants/qz_port.h"
+#include "constants/items.h"
+#include "constants/moves.h"
+#include "constants/species.h"
+#include "constants/trainers.h"
 
 extern char gPlatformSavePath[512];
 
@@ -420,4 +424,55 @@ u16 MP_GlobalPcLinked(void)
 u16 MP_RegionPartyCount(void)
 {
     return gSpecialVar_Result = CalculatePlayerPartyCount();
+}
+
+// ---------------------------------------------------------------------------------------------------- Gen 4
+// Gen 4 Pokémon appear in JOHTO and KANTO only once the player has beaten an Elite Four in another region (a game
+// can start there). Before that their wild tables and trainers' teams are the rip's Gen 3 versions where they differ
+// (tools/quetzal_port/gen_gen3.py).
+#include "wild_encounter.h"
+#include "data.h"
+#include "../data/wild_qz_gen3.h"
+#include "../data/trainer_parties_qz_gen3.h"
+
+bool8 MP_Region_Gen4Open(void)
+{
+    u8 cur = MP_Region_Current(), r;
+    if (cur == REGION_HOENN)
+        return TRUE;
+    for (r = 0; r < REGION_COUNT; r++)
+        if (r != cur && MP_Region_Cleared(r))
+            return TRUE;
+    return FALSE;
+}
+
+const struct WildPokemonInfo *MP_Region_WildInfo(const struct WildPokemonInfo *info)
+{
+    u32 i;
+    if (info == NULL || MP_Region_Gen4Open())
+        return info;
+    for (i = 0; i < ARRAY_COUNT(sQzGen3Wild); i++)
+        if (sQzGen3Wild[i].gen4 == info)
+            return sQzGen3Wild[i].gen3;
+    return info;
+}
+
+const struct Trainer *MP_Region_TrainerData(u16 trainerNum)
+{
+    static struct Trainer sCopy;
+    u32 i;
+    if (trainerNum < sQzGen3Parties[0].trainerId || MP_Region_Gen4Open())
+        return &gTrainers[trainerNum];
+    for (i = 0; i < ARRAY_COUNT(sQzGen3Parties); i++)
+    {
+        if (sQzGen3Parties[i].trainerId == trainerNum)
+        {
+            sCopy = gTrainers[trainerNum];
+            sCopy.party = sQzGen3Parties[i].party;
+            sCopy.partySize = sQzGen3Parties[i].partySize;
+            sCopy.partyFlags = sQzGen3Parties[i].partyFlags;
+            return &sCopy;
+        }
+    }
+    return &gTrainers[trainerNum];
 }

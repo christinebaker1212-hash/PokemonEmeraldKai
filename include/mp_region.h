@@ -46,4 +46,9 @@ bool8 MP_Region_FitBoxMon(struct BoxPokemon *b, u8 region);   // its EXP for tha
 void MP_Region_FitMon(struct Pokemon *mon, u8 region);
 void MP_Region_FitAll(void);                       // party + own boxes at the current region's levels
 void MP_Region_Travel(u8 from, u8 to);             // PC boxes change places, the party takes the new levels
+struct WildPokemonInfo;
+struct Trainer;
+bool8 MP_Region_Gen4Open(void);                    // an Elite Four beaten in another region (or in HOENN)
+const struct WildPokemonInfo *MP_Region_WildInfo(const struct WildPokemonInfo *info);   // the Gen 3 table before it
+const struct Trainer *MP_Region_TrainerData(u16 trainerNum);                            // the Gen 3 team before it
 #endif

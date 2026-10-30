@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_region.h"
 #include "mp.h"
 #include "battle_setup.h"
 #include "battle_pike.h"
@@ -440,6 +441,8 @@ static bool8 TryGenerateWildMon(const struct WildPokemonInfo *wildMonInfo, u8 ar
     u8 wildMonIndex = 0;
     u8 level;
 
+    wildMonInfo = MP_Region_WildInfo(wildMonInfo);   // Moemon Kai: JOHTO / KANTO before Gen 4 (mp_region.c)
+
     switch (area)
     {
     case WILD_AREA_LAND:
@@ -478,7 +481,10 @@ static bool8 TryGenerateWildMon(const struct WildPokemonInfo *wildMonInfo, u8 ar
 static u16 GenerateFishingWildMon(const struct WildPokemonInfo *wildMonInfo, u8 rod)
 {
     u8 wildMonIndex = ChooseWildMonIndex_Fishing(rod);
-    u8 level = ChooseWildMonLevel(&wildMonInfo->wildPokemon[wildMonIndex]);
+    u8 level;
+
+    wildMonInfo = MP_Region_WildInfo(wildMonInfo);   // Moemon Kai: JOHTO / KANTO before Gen 4 (mp_region.c)
+    level = ChooseWildMonLevel(&wildMonInfo->wildPokemon[wildMonIndex]);
 
     CreateWildMon(wildMonInfo->wildPokemon[wildMonIndex].species, level);
     return wildMonInfo->wildPokemon[wildMonIndex].species;
@@ -1002,6 +1008,7 @@ bool8 MP_RollExtraLandMon(struct Pokemon *out)
 
     if (headerId == HEADER_NONE || (info = gWildMonHeaders[headerId].landMonsInfo) == NULL)
         return FALSE;
+    info = MP_Region_WildInfo(info);
     keep = gEnemyParty[0];
     index = ChooseWildMonIndex_Land();
     level = ChooseWildMonLevel(&info->wildPokemon[index]);

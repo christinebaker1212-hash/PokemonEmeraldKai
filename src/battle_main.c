@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "global.h"
+#include "mp_region.h"
 #include "data/text/trainer_class_names_qz.h"   // Moemon Kai: QZ_TRAINER_MONEY
 #include "battle_gen4.h"   // Moemon Kai: Gen 4
 #include "mp.h"
@@ -2198,9 +2199,11 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
     s32 i, j;
     u8 monsCount;
     u8 partyMax;
+    const struct Trainer *trainer;
 
     if (trainerNum == TRAINER_SECRET_BASE)
         return 0;
+    trainer = MP_Region_TrainerData(trainerNum);   // Moemon Kai: JOHTO / KANTO teams before Gen 4 (mp_region.c)
 
     if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !(gBattleTypeFlags & (BATTLE_TYPE_FRONTIER
                                                                         | BATTLE_TYPE_EREADER_TRAINER
@@ -2211,14 +2214,14 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
 
         if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
         {
-            if (gTrainers[trainerNum].partySize > PARTY_SIZE / 2)
+            if ((*trainer).partySize > PARTY_SIZE / 2)
                 monsCount = PARTY_SIZE / 2;
             else
-                monsCount = gTrainers[trainerNum].partySize;
+                monsCount = (*trainer).partySize;
         }
         else
         {
-            monsCount = gTrainers[trainerNum].partySize;
+            monsCount = (*trainer).partySize;
         }
 
         // Moemon Co-op: level scaling (mp_levelscale.c) needs the level of the trainer's strongest Pokémon
@@ -2226,12 +2229,12 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
         for (i = 0; i < monsCount; i++)
         {
             u8 lvl;
-            switch (gTrainers[trainerNum].partyFlags)
+            switch ((*trainer).partyFlags)
             {
-            case 0: lvl = gTrainers[trainerNum].party.NoItemDefaultMoves[i].lvl; break;
-            case F_TRAINER_PARTY_CUSTOM_MOVESET: lvl = gTrainers[trainerNum].party.NoItemCustomMoves[i].lvl; break;
-            case F_TRAINER_PARTY_HELD_ITEM: lvl = gTrainers[trainerNum].party.ItemDefaultMoves[i].lvl; break;
-            default: lvl = gTrainers[trainerNum].party.ItemCustomMoves[i].lvl; break;
+            case 0: lvl = (*trainer).party.NoItemDefaultMoves[i].lvl; break;
+            case F_TRAINER_PARTY_CUSTOM_MOVESET: lvl = (*trainer).party.NoItemCustomMoves[i].lvl; break;
+            case F_TRAINER_PARTY_HELD_ITEM: lvl = (*trainer).party.ItemDefaultMoves[i].lvl; break;
+            default: lvl = (*trainer).party.ItemCustomMoves[i].lvl; break;
             }
             if (lvl > partyMax)
                 partyMax = lvl;
@@ -2241,21 +2244,21 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
         for (i = 0; i < monsCount; i++)
         {
 
-            if (gTrainers[trainerNum].doubleBattle == TRUE)
+            if ((*trainer).doubleBattle == TRUE)
                 personalityValue = 0x80;
-            else if (gTrainers[trainerNum].encounterMusic_gender & F_TRAINER_FEMALE)
+            else if ((*trainer).encounterMusic_gender & F_TRAINER_FEMALE)
                 personalityValue = 0x78; // Use personality more likely to result in a female Pokémon
             else
                 personalityValue = 0x88; // Use personality more likely to result in a male Pokémon
 
-            for (j = 0; gTrainers[trainerNum].trainerName[j] != EOS; j++)
-                nameHash += gTrainers[trainerNum].trainerName[j];
+            for (j = 0; (*trainer).trainerName[j] != EOS; j++)
+                nameHash += (*trainer).trainerName[j];
 
-            switch (gTrainers[trainerNum].partyFlags)
+            switch ((*trainer).partyFlags)
             {
             case 0:
             {
-                const struct TrainerMonNoItemDefaultMoves *partyData = gTrainers[trainerNum].party.NoItemDefaultMoves;
+                const struct TrainerMonNoItemDefaultMoves *partyData = (*trainer).party.NoItemDefaultMoves;
 
                 for (j = 0; gSpeciesNames[partyData[i].species][j] != EOS; j++)
                     nameHash += gSpeciesNames[partyData[i].species][j];
@@ -2269,7 +2272,7 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
             }
             case F_TRAINER_PARTY_CUSTOM_MOVESET:
             {
-                const struct TrainerMonNoItemCustomMoves *partyData = gTrainers[trainerNum].party.NoItemCustomMoves;
+                const struct TrainerMonNoItemCustomMoves *partyData = (*trainer).party.NoItemCustomMoves;
 
                 for (j = 0; gSpeciesNames[partyData[i].species][j] != EOS; j++)
                     nameHash += gSpeciesNames[partyData[i].species][j];
@@ -2289,7 +2292,7 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
             }
             case F_TRAINER_PARTY_HELD_ITEM:
             {
-                const struct TrainerMonItemDefaultMoves *partyData = gTrainers[trainerNum].party.ItemDefaultMoves;
+                const struct TrainerMonItemDefaultMoves *partyData = (*trainer).party.ItemDefaultMoves;
 
                 for (j = 0; gSpeciesNames[partyData[i].species][j] != EOS; j++)
                     nameHash += gSpeciesNames[partyData[i].species][j];
@@ -2305,7 +2308,7 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
             }
             case F_TRAINER_PARTY_CUSTOM_MOVESET | F_TRAINER_PARTY_HELD_ITEM:
             {
-                const struct TrainerMonItemCustomMoves *partyData = gTrainers[trainerNum].party.ItemCustomMoves;
+                const struct TrainerMonItemCustomMoves *partyData = (*trainer).party.ItemCustomMoves;
 
                 for (j = 0; gSpeciesNames[partyData[i].species][j] != EOS; j++)
                     nameHash += gSpeciesNames[partyData[i].species][j];
@@ -2328,10 +2331,10 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
             }
         }
 
-        gBattleTypeFlags |= gTrainers[trainerNum].doubleBattle;
+        gBattleTypeFlags |= (*trainer).doubleBattle;
     }
 
-    return gTrainers[trainerNum].partySize;
+    return (*trainer).partySize;
 }
 
 static void UNUSED HBlankCB_Battle(void)
