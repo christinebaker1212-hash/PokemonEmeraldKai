@@ -59,5 +59,7 @@ if [ -n "$WIN" ]; then
     $CC $CFLAGS -iquote include tools/fight/mf_selftest.c $OUT/libmf.a -static -lwinmm -lpthread -o $OUT/mf_selftest.exe
 else
     $CC $CFLAGS -iquote include tools/fight/mf_selftest.c $OUT/libmf.a -lpthread -lm -o $OUT/mf_selftest
+    # the resampled sprite drawing's own tests (run: build/fight/linux/test_softscale)
+    $CC $CFLAGS $ENGINE_INC tools/fight/test_softscale.c $OUT/libmf.a -lpthread -lm -o $OUT/test_softscale
 fi
 echo "built $OUT/libmf.a $OUT/mf_selftest"

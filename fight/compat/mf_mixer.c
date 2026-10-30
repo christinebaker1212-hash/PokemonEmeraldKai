@@ -244,6 +244,11 @@ void MfMix_SetMusicLevel(double level)
     sMusicLevel = level > 0.0 ? level : 0.0;
 }
 
+double MfMix_MusicLevel(void)
+{
+    return sMusicLevel;
+}
+
 /* At most 1: the song at its volume stays MF_BGM_UNDER_VOICES_DB under the voices. */
 double MfMix_MusicGain(void)
 {

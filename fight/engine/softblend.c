@@ -25,6 +25,7 @@
  * palette results are used without a NULL check.
  */
 #include "mugen.h"
+#include "mf_softscale.h"   /* Moemon Fight: resampled scaling and rotation */
 
 /* ---- helpers (as softrender.c) ---- */
 
@@ -147,6 +148,18 @@ static void Blend_Put(unsigned short *d, unsigned int c, int op, int alpha_dst)
         break;
     }
     *d = (unsigned short)r;
+}
+
+/* Moemon Fight: Blend_Put for the resampler (mf_softscale.c) */
+typedef struct BlendPutCtx {
+    int op, alpha_dst;
+} BlendPutCtx;
+
+static void Blend_PutColor(unsigned short *d, unsigned int c565, void *ctx)
+{
+    const BlendPutCtx *b = ctx;
+
+    Blend_Put(d, c565, b->op, b->alpha_dst);
 }
 
 /*
@@ -407,6 +420,12 @@ static void Blend_Scale(SpriteSet *set, int sprite, float x, float y, float sw, 
     if (0.001f > d1) {
         d2 = (float)fabs((double)h - sh);
         if (0.001f > d2) {
+            /* Moemon Fight: rounded to the nearest pixel like the resampled sizes (MUGEN truncated towards 0) */
+            if (!MfSoft_Nearest()) {
+                Blend_BlitVariant(set, sprite, (int)ceil((double)x - 0.5), (int)ceil((double)y - 0.5), flip, op,
+                                  alpha_src, alpha_dst);
+                return;
+            }
             Blend_BlitVariant(set, sprite, Ftol(x), Ftol(y), flip, op, alpha_src, alpha_dst);
             return;
         }
@@ -421,6 +440,21 @@ static void Blend_Scale(SpriteSet *set, int sprite, float x, float y, float sw, 
         y0 = (float)(y - ((double)(h - spr->y) * sh / fh - 1.0));
     } else {
         y0 = (float)(y - (double)spr->y * sh / fh);
+    }
+    if (!MfSoft_Nearest()) {
+        /* Moemon Fight: resampled, not nearest (fight/compat/mf_softscale.c) */
+        BlendPutCtx ctx;
+        src = Sprite_GetPixels(set, sprite);
+        if (src == NULL) {
+            return;
+        }
+        dst = Sprite_GetPixels(g_renderTarget, g_renderTargetSprite);
+        pal = Blend_Colors(set, spr, &op, alpha_src, alpha_dst, buf);
+        ctx.op = op;
+        ctx.alpha_dst = alpha_dst;
+        MfSoft_ScaleResampled(spr, src, tspr, dst, x0, y0, sw, sh, (flip & BLEND_FLIP_H) != 0,
+                              (flip & BLEND_FLIP_V) != 0, 0, pal, Blend_PutColor, &ctx, op == BLEND_OP_COPY);
+        return;
     }
     if ((double)g_clipY2 <= y0) {
         return;
@@ -723,6 +757,21 @@ static void Blend_Rotate(SpriteSet *set, int sprite, float x, float y, float ang
     sinv = g_sinTable[idx % 2880];
     fsin = (float)sinv;
     s = (float)((1.0 / 1024) * fsin);
+    if (!MfSoft_Nearest()) {
+        /* Moemon Fight: resampled, not nearest (fight/compat/mf_softscale.c) */
+        BlendPutCtx ctx;
+        src = Sprite_GetPixels(set, sprite);
+        if (src == NULL) {
+            return;
+        }
+        dst = Sprite_GetPixels(g_renderTarget, g_renderTargetSprite);
+        pal = Blend_Colors(set, spr, &op, alpha_src, alpha_dst, buf);
+        ctx.op = op;
+        ctx.alpha_dst = alpha_dst;
+        MfSoft_RotateAt(spr, src, tspr, dst, ix, iy, cosv, sinv, sw, sh, scale2_x, scale2_y, mirror, 0, pal,
+                        Blend_PutColor, &ctx);
+        return;
+    }
     dux = Ftol((double)((cosv << 16) / sw) / scale2_x);
     dvx = Ftol((double)((sinv << 16) / sh) / scale2_x);
     if (idx < 720) {

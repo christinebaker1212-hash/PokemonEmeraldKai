@@ -188,7 +188,7 @@ static int MfBgm_Decode(MfBgm *b, short *out, int frames)
 
 /*
  * How loud the song is (MfMix_GatedLevel of its first two minutes), for keeping a stage's song under the voices:
- * decoded once and remembered by path and size, then the song is back at its start. mugen.log has it.
+ * decoded once and remembered by path and size, then the song is back at its start.
  */
 #define MFBGM_MEASURE_SECONDS 120
 static struct {
@@ -302,8 +302,7 @@ static int __cdecl MfBgm_Open(void *instance, const BgmPluginIo *io, BgmInfo *in
     {
         /* Moemon Fight: the mixer keeps a stage's song under the fighters' voices */
         double level = MfBgm_Measure(b, info->path);
-        MfMix_SetMusicLevel(level);
-        Log_Printf("BGM level %.1f dBFS\n", level > 0.0 ? 20.0 * log10(level) : -99.0);
+        MfMix_SetMusicLevel(level);     /* logged by the engine thread (matchload.c Ml_VoiceLevel) */
     }
     out->mode = BGM_MODE_DECODED;
     out->format.rate = (double)b->rate;

@@ -18,11 +18,12 @@ const char *Fight_BindKeyName(int which);
 const char *Fight_BindPadName(int which);
 int Fight_BindSetting(const char *key, const char *val);   // a moemon_controls.ini line: TRUE when it was one of these
 void Fight_BindWrite(void *file);                         // a FILE *
-// The fight's 480x320 picture while one runs, else NULL
+// The fight's 480x320 picture while one runs, else NULL: display.c shows it as the game picture, scaled and
+// filtered as the game's 240x160 is
+#define FIGHT_CANVAS_W 480
+#define FIGHT_CANVAS_H 320
 struct SDL_Texture *Fight_Canvas(struct SDL_Renderer *r);
-// The fight's picture scaled bicubic towards w x h (at most twice its size: the renderer's linear filter does
-// the rest), else NULL (display.c)
-struct SDL_Texture *Fight_CanvasBicubic(struct SDL_Renderer *r, int w, int h);
+int Fight_SaveCanvasBMP(const char *path);  // tests: that picture as a BMP (0 saved)
 void Fight_DestroyTextures(void);
 // The fight as a 240x160 GBA frame, else NULL (spectating)
 const unsigned short *Fight_Frame(void);

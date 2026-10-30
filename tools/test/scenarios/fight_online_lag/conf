@@ -1,15 +1,16 @@
 # fight_online through the lag proxy at 50 ms + 15 ms jitter on each of the two hops (about 110 ms one way: rollback at
 # work): ALICE sits at the VS cabinet's west seat and waits, BOB sits at the east seat and
 # challenges her; both pick a character and fight (one short round) with made-up buttons. Both games must
-# agree all the way (no desync) and end with a result
+# agree all the way (no desync) and end with a result. The picks are pinned (MOEMON_FIGHT_SEED): some seeds give a
+# round that can run past the test's wait (seed 1998331917, Ryu against Ryu, in 1.49.3 too; looked into in the 6.4 audit)
 MODE=2
 DELAY=50
 JIT=15
 TMO=600
 WARP=10,3,6,9
 WARP_B=10,3,9,9
-ENV_A="MOEMON_FIGHT_ROUNDS=1 MOEMON_FIGHT_TIME=20 MOEMON_FIGHT_NO_UDP=1"
-ENV_B="MOEMON_FIGHT_ROUNDS=1 MOEMON_FIGHT_TIME=20 MOEMON_FIGHT_NO_UDP=1"
+ENV_A="MOEMON_FIGHT_ROUNDS=1 MOEMON_FIGHT_TIME=20 MOEMON_FIGHT_NO_UDP=1 MOEMON_FIGHT_SEED=1998331919"
+ENV_B="MOEMON_FIGHT_ROUNDS=1 MOEMON_FIGHT_TIME=20 MOEMON_FIGHT_NO_UDP=1 MOEMON_FIGHT_SEED=1998331919"
 EXPECT_A=("fight: online with player 1, side 0" "fight: online result")
 EXPECT_B=("fight: player 0 said yes" "fight: online with player 0, side 1" "fight: online result")
 UNEXPECT_A=("desync at" "couldn't go back" "dropped out" ", 0 checks agreed")

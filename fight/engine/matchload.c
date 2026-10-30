@@ -131,8 +131,13 @@ static void Ml_VoiceLevel(void)
     }
     voice *= g->master_volume / 100.0 * g->wav_volume / 100.0;
     MfMix_SetVoiceLevel(voice);
-    Log_Printf("Fighters' voices %.1f dBFS: the stage's song is kept %.0f dB under them\n",
-               voice > 0.0 ? 20.0 * log10(voice) : -99.0, MF_BGM_UNDER_VOICES_DB);
+    {
+        /* the song was measured when it opened, on the music thread, while the fighters loaded */
+        double song = MfMix_MusicLevel();
+        Log_Printf("Fighters' voices %.1f dBFS, the stage's song %.1f dBFS: the song is kept %.0f dB under the "
+                   "voices (x%.2f)\n", voice > 0.0 ? 20.0 * log10(voice) : -99.0,
+                   song > 0.0 ? 20.0 * log10(song) : -99.0, MF_BGM_UNDER_VOICES_DB, MfMix_MusicGain());
+    }
 }
 
 /*

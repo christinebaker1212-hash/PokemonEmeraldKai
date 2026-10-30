@@ -63,12 +63,20 @@ def tones(path, rate=42048):
 
 def check(results):
     seq = tones(os.path.join(results, 'audio.raw'))
-    # the longest run where the tone number goes up by one a second (4 readings each), a stray reading allowed
-    best = run = 0
-    for i in range(4, len(seq)):
-        a, b = seq[i - 4], seq[i]
-        run = run + 1 if a is not None and b is not None and b == a + 1 else 0
-        best = max(best, run)
+    # the longest run of seconds where the tone number goes up by one each second: each second is the tone most of
+    # its four readings agree on (the fighters' voices, louder than the music, can take a reading), tried at the
+    # four ways of lining seconds up with readings
+    best = 0
+    for phase in range(4):
+        secs = []
+        for i in range(phase, len(seq) - 3, 4):
+            q = [v for v in seq[i:i + 4] if v is not None]
+            top = max(set(q), key=q.count) if q else None
+            secs.append(top if top is not None and q.count(top) >= 2 else None)
+        run = 0
+        for a, b in zip(secs, secs[1:]):
+            run = run + 1 if a is not None and b is not None and b == a + 1 else 0
+            best = max(best, run * 4)
     print('quarter seconds of the song at its own speed:', best)
     if best < 40:
         print('the song does not play at its own speed:', seq[:200])
@@ -76,13 +84,13 @@ def check(results):
     # the stage's song is measured and kept under the fighters' voices (mf_mixer.c)
     import re
     log = open(os.path.join(os.path.dirname(results.rstrip('/')), 'fight_music_pack', 'mugen.log'), 'rb').read().decode('latin-1')
-    song = re.search(r'BGM sound/tones\.wav[^\n]*\nBGM level (-?[\d.]+) dBFS', log)
-    voice = re.search(r"Fighters' voices (-?[\d.]+) dBFS", log)
-    if not song or not voice:
-        print('no song or voice level in mugen.log')
+    m = re.search(r"Fighters' voices (-?[\d.]+) dBFS, the stage's song (-?[\d.]+) dBFS", log)
+    if not m:
+        print("no Fighters' voices line in mugen.log")
         sys.exit(1)
-    print('song %s dBFS, voices %s dBFS' % (song.group(1), voice.group(1)))
-    if not (-14 < float(song.group(1)) < -6 and -30 < float(voice.group(1)) < -3):
+    voice, song = float(m.group(1)), float(m.group(2))
+    print('song %.1f dBFS, voices %.1f dBFS' % (song, voice))
+    if not (-14 < song < -6 and -30 < voice < -3):
         print('levels out of range')
         sys.exit(1)
     print('ok')

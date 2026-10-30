@@ -1998,7 +1998,8 @@ Decisions and the as-built record: docs/FIGHT_DECISIONS.md. Where things are:
   frames, the 4:3 screens' sides, the state pages for desync recovery; mf_rollback.c; mf_mem.c: the heap
   region at a fixed address; mf_fit.c: the HUD fitting; mf_pack.c: the fight files' hashes) and the
   third-party code. API: include/mf_engine.h. Hooks in engine files are marked `Moemon Fight`.
-- `src/platform/fight_platform.c`: the picture (bicubic), buttons and their bindings (saved by gamepad.c in
+- `src/platform/fight_platform.c`: the picture (shown by display.c as the game picture at 480x320: the game's
+  scaling modes and filters; 1.50.0), buttons and their bindings (saved by gamepad.c in
   moemon_controls.ini), the sound mix, the overlay (countdown, signal icon) and the CRT.
 - `src/mp/mp_fight.c`: the cabinet (seats, bubbles, the specials in data/scripts/vs_cabinet.inc), the
   challenge (relay 25-31, protocol 57: the pack summary and the answering player's cabinet rules), the
@@ -2016,6 +2017,12 @@ Decisions and the as-built record: docs/FIGHT_DECISIONS.md. Where things are:
   tools/fight/gba_audio.py; a stage's song is kept 3 dB under the fighters' voices by the mixer
   (MfMix_MusicGain, levels from mf_bgm.c MfBgm_Measure and matchload.c Ml_VoiceLevel): FIGHT_DECISIONS
   "GBA sound, and music under the voices".
+- Pixels (1.50.0): scaled, rotated and parallax sprites are area-resampled (fight/compat/mf_softscale.c, hooked
+  in softrender.c / softblend.c / bg.c; MOEMON_FIGHT_NEAREST=1 for MUGEN's nearest), and the picture goes
+  through display.c's own path (srcW x srcH 480x320): FIGHT_DECISIONS "Pixels". Tests fight_display,
+  tools/fight/test_softscale.c.
+- `MOEMON_FIGHT_SEED=N` (tests) fixes an online fight's seed, so its picks are the same every run
+  (fight_online_lag pins one: with seed 1998331917, a Ryu mirror, the round can run past the test's wait, 1.49.3 too).
 
 ## Yu-Gi-Oh! card duels (src/ygo/, include/ygo/)
 

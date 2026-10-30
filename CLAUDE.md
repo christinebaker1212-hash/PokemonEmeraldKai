@@ -47,7 +47,7 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
 ## Headless testing
 `src/platform/sdl2.c` has a test harness: `SDL_VIDEODRIVER=dummy MOEMON_TEST=script.txt MOEMON_SHOTDIR=dir`
 (commands: wait N, press KEYS N, mash KEYS COUNT INTERVAL, shot NAME, shotburst PREFIX FRAMES [STEP] = a shot every
-frame while the script goes on, for glitches that last a few frames (rendershotburst: the window output, overlays too), barrier NAME COUNT = wait until COUNT clients
+frame while the script goes on, for glitches that last a few frames (rendershotburst: the window output, overlays too), fightshot NAME = a VS fight's own 480x320 picture, barrier NAME COUNT = wait until COUNT clients
 sharing the result folder get there, so they act on the same frame, quit).
 `MOEMON_DEBUG_QUICKSTART=1` (+ `MOEMON_DEBUG_NAME/GENDER/WARP/PARTY/MONEY`) skips the intro.
 `MOEMON_COOP_CONFIG=x.ini` and `MOEMON_SAVE=x.sav` let several clients run on one machine.
@@ -211,7 +211,9 @@ docs/TT_DECISIONS.md, COOP_NOTES "Triple Triad"; tests tools/tt/test.sh, tools/t
 Also the VS cabinet (MAUVILLE GAME CORNER's two slot machines at (7,9)/(8,9)): MUGEN fights in fight/ (mugen-unleashed engine,
 include/mf_engine.h), src/platform/fight_platform.c, src/mp/mp_fight.c; online with rollback (dirty pages of a fixed-address heap
 region + the engine's globals section), the pack check by file hashes, desync recovery by page diff, OPTIONS > CONTROLS > FIGHT
-BUTTONS; content in mugen/ (shipped as is); docs/FIGHT_DECISIONS.md and COOP_NOTES "The VS cabinet"; tests fight_*.
+BUTTONS; content in mugen/ (its sounds GBA sound by tools/fight/gba_audio.py; a stage's song kept under the voices by
+mf_mixer.c); sprites area-resampled (fight/compat/mf_softscale.c) and the 480x320 picture shown through display.c's
+own scaling and filters; docs/FIGHT_DECISIONS.md and COOP_NOTES "The VS cabinet"; tests fight_*, tools/fight/test_softscale.c.
 
 Also the DANCE machine on the GAME CENTER's 3F (a DDR EXTREME rhythm game: src/rhythm/, include/rhythm.h, src/mp/mp_rhythm.c;
 StepMania's .sm / .ssc read by rh_chart.c, judged by Beware's EXTREME rules in rh_play.c; drawn into the GBA picture by

@@ -23,7 +23,7 @@ data or Elecbyte files.
 | 3 | While waiting | Seated facing the cabinet, the bubble visible to everyone on the map; B stands up and removes it |
 | 4 | Stakes | None: wins and losses only counted (trainer card / achievements) |
 | 5 | 3:2 screen vs 4:3 packs | Widen the view: scale by height, the camera shows more stage at the sides, the HUD anchors to the real edges; stages too narrow get their edge layers extended |
-| 6 | Sharpness | 480x320, shown with bicubic interpolation (the fight only; the rest of the game keeps its own filter). Changed from nearest-neighbor in the third round |
+| 6 | Sharpness | 480x320, shown with bicubic interpolation (the fight only; the rest of the game keeps its own filter). Changed from nearest-neighbor in the third round. Replaced in 1.50.0: the picture goes through the game's own scaling and filters, sprites are resampled inside it ("Pixels" below) |
 | 7 | HUD off screen | Nudge each element back inside an 8px safe margin, keeping its size; a log says what moved |
 | 8 | Character select | The pack's own screenpack (system.def / select.def / VS screen), fitted by rule 7; both players pick at once |
 | 9 | Transport | Direct UDP between the two players (introduced by the room server, with the game's port mapping); the relay if UDP fails within 2 s |
@@ -73,7 +73,7 @@ data or Elecbyte files.
   cancels it, and the select screen opens for both.
 
 ## Third round
-- The fight is shown with bicubic interpolation, only the fight (#6). `Fight_CanvasBicubic`
+- (Until 1.50.0, see "Pixels") The fight is shown with bicubic interpolation, only the fight (#6). `Fight_CanvasBicubic`
   (src/platform/fight_platform.c) scales each new frame with Catmull-Rom on the CPU to the window's
   size, at most 960x640, and the renderer's linear filter takes it the rest of the way. A window of
   960 or wider is exactly 2x, which has its own quicker path.
@@ -120,6 +120,54 @@ Where the plan below changed on the way:
   `fight_buttons`, `fight_packs`, `fight_packs_core`, `fight_resync` (tools/test/README.md), and the
   engine's own `tools/fight/build_linux.sh` self test (`WIN=1`: under Wine).
 
+## Pixels: resampled sprites, and the game's own display (1.50.0)
+- Asked: rewrite the scaling (not the same algorithms) to fix distortion, uneven pixel stretching and sprite
+  shearing; show the fight inside the game's display so its scaling, pixel grid and spectating apply; keep the
+  three modes alike; keep the simulation and the intended effects. Answers: keep 480x320 but through the
+  game's scaling, grid and spectate path (#51); resample rather than whole scales (#52).
+- The path, inspected end to end: the engine's camera and positions are floats (simulation, untouched); its
+  software drawers put 8-bit sprites on the 480x320 RGB565 target (the canvas; the GL renderers are stubs);
+  MfHost_Present double-buffers it; fight_platform.c adds the messages and the CRT; display.c showed it
+  bicubic, on its own path.
+- What was wrong: 320x240 characters and stages are drawn at 4/3 and the 640x480 screenpack at 2/3, nearest:
+  every third column / row doubled (4/3) or dropped (2/3: letters and lines lost strokes), and which ones
+  moved with the sprite's fraction of a pixel, so pixels crawled as the camera moved. Parallax floors put
+  each row at a truncated whole pixel and picked rows nearest: the floor's rows stepped against each other
+  (the "shearing"; the shear itself is MUGEN's own for "xscale" floors, the GL path does the same, so it
+  stays). Rotated sprites (AngleDraw) were nearest too. 1:1 sprites truncated their position towards 0
+  while scaled ones rounded.
+- Now (fight/compat/mf_softscale.c, hooked into softrender.c / softblend.c / bg.c):
+  - every scaled draw is area-resampled: each screen pixel the coverage-weighted average of the source
+    pixels under it, from the sprite's exact float position and size, so each source pixel covers the same
+    4/3 or 2/3; colour 0 lowers the coverage (outlines as even as the rest); the rectangle's outer edge
+    follows the pixel-centre rule as nearest did, so tiles placed edge to edge still meet without a seam;
+  - the drawer's own operation (copy, subtract, add, alpha by alpha_src / alpha_dst) is applied to the
+    averaged colour and mixed in by coverage: fully covered pixels get exactly what MUGEN's operation
+    gives;
+  - rotated sprites: 4x4 samples per pixel through the drawers' own mapping (sine table, integer pivot);
+  - parallax floors: each row at its exact fractional start, resampled across (stretched "width" rows read
+    from the sprite, not from the copies stretched nearest at load), rows mixed by coverage;
+  - 1:1 sprites round to the nearest pixel like the rest;
+  - speed: integer weights, the palette as four 16-bit lanes in one 64-bit word (one multiply-add per
+    source pixel), source rows resampled once each; big draws repeated exactly (menus, a still camera) are
+    kept (12 slots, keyed by sprite, pixels, palette colours, exact place and clip). About 1-2 ms a frame
+    over nearest; frames run again for rollback don't draw;
+  - `MOEMON_FIGHT_NEAREST=1` brings back MUGEN's nearest drawing (for comparing; it is pixel for pixel the
+    old picture).
+- Display (display.c RenderToBackbuffer): the fight's 480x320 is the game picture with srcW x srcH = 480 x 320
+  instead of 240 x 160, through the same code: PIXEL PERFECT / SHARP FIT / STRETCH place the rect exactly as
+  for the game (PIXEL PERFECT: the GBA screen's whole multiple, so the fight at half that: exact at even
+  multiples, sharp-bilinear at odd), a whole multiple of 480x320 is copied nearest, anything else
+  sharp-bilinear (nearest to the next whole multiple, then linear down); the filters' overlay is built per
+  picture pixel (scanlines from 2 screen rows per pixel, the LCD grid from 3x3, as for the game). The bicubic
+  path (Fight_CanvasBicubic) is gone.
+- Spectating: friends get Fight_Frame, the 480x320 averaged 2x2 into a 240x160 GBA frame (an exact box
+  filter), and show it through their own panel / pop-out scaling, as any game frame.
+- Tests: `fight_display` (each mode, 4x / 3x / 1x, SHARP FIT, STRETCH, the grid at 3x, scanlines at 2x: the
+  window against a reference rendering of the fightshot of the same frame, mean error under 1/255);
+  tools/fight/test_softscale.c (even widths at 4/3 and 2/3, steady as a sprite moves by twelfths of a pixel,
+  seamless tiles, transparency, subtract, parallax rows, rotation; built by build_linux.sh).
+
 ## GBA sound, and music under the voices (1.50.0)
 - Answers: the files shipped in mugen/ are changed (a lower sample rate), and a stage's song is kept under
   the voices (gap and method left to judgement).
@@ -141,8 +189,9 @@ Where the plan below changed on the way:
   music plays as it is.
 - Why measured at run time, not written into the files: players drop their own songs into mugen/sound/
   (17 stage songs aren't shipped), and the cap has to hold for those too. The measurement runs on the
-  music thread and isn't fight state; a mugen.log line gives both levels (`BGM level`, `Fighters'
-  voices`).
+  music thread and isn't fight state; the engine thread logs both levels and the gain when the match
+  loads (`Fighters' voices ... dBFS, the stage's song ... dBFS` in mugen.log; nothing is logged from the
+  music thread, whose log calls raced the engine's).
 - Shipped: the voices measure -10 to -5 dBFS (75th percentile), the two stage songs -7.4 and -8.9 dBFS:
   both were at or over the voices before.
 - Test: `fight_music` also checks the two levels in mugen.log.
@@ -166,7 +215,7 @@ Where the plan below changed on the way:
 
   The whole session (select, VS, fight, results) runs in this deterministic loop, so the select
   screen is synced the same way as the fight.
-- `display.c` asks `Fight_CanvasBicubic()` first: the picture already scaled to the game's rect
+- (Until 1.50.0) `display.c` asks `Fight_CanvasBicubic()` first: the picture already scaled to the game's rect
   (third round).
 - `Platform_GetFrame` gives spectators a 240x160 reduction while a fight is on.
 

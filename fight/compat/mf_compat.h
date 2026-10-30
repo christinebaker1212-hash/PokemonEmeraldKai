@@ -26,6 +26,7 @@ double MfMix_ClipLevel(const short *stereo, int frames);    /* a 13379 Hz sound'
 double MfMix_GatedLevel(double *ms, int count);           /* a song's from the mean squares of its 0.4 s blocks */
 void MfMix_SetVoiceLevel(double level);     /* engine thread: the fighters' voices at the volume they play */
 void MfMix_SetMusicLevel(double level);     /* BGM thread: the song just opened, at full volume */
+double MfMix_MusicLevel(void);
 double MfMix_MusicGain(void);               /* what the stage music is multiplied by now */
 
 #endif /* MF_COMPAT_H */

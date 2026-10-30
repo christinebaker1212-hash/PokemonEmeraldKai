@@ -35,6 +35,7 @@
  *   trimming it to the sprite.
  */
 #include "mugen.h"
+#include "mf_softscale.h"   /* Moemon Fight: resampled scaling and rotation */
 
 /* ---- helpers ---- */
 
@@ -82,6 +83,16 @@ static void Soft_Put(unsigned short *d, unsigned int index, const unsigned short
     } else {
         *d = pal[index];
     }
+}
+
+/* Moemon Fight: Soft_Put for the resampler (mf_softscale.c), given the colour itself */
+static void Soft_PutColor(unsigned short *d, unsigned int c565, void *ctx)
+{
+    unsigned short pal[2];
+
+    pal[0] = 0;
+    pal[1] = (unsigned short)c565;
+    Soft_Put(d, 1, pal, *(const int *)ctx);
 }
 
 /* ---- unscaled drawing ---- */
@@ -316,6 +327,11 @@ static void Soft_Scale(SpriteSet *set, int sprite, float x, float y, float sw, f
     if (0.001f > d1) {
         d2 = (float)fabs((double)h - sh);
         if (0.001f > d2) {
+            /* Moemon Fight: rounded to the nearest pixel like the resampled sizes (MUGEN truncated towards 0) */
+            if (!MfSoft_Nearest()) {
+                Soft_BlitVariant(set, sprite, (int)ceil((double)x - 0.5), (int)ceil((double)y - 0.5), flip, op);
+                return;
+            }
             Soft_BlitVariant(set, sprite, Ftol(x), Ftol(y), flip, op);
             return;
         }
@@ -330,6 +346,18 @@ static void Soft_Scale(SpriteSet *set, int sprite, float x, float y, float sw, f
         y0 = (float)(y - ((double)(h - spr->y) * sh / fh - 1.0));
     } else {
         y0 = (float)(y - (double)spr->y * sh / fh);
+    }
+    if (!MfSoft_Nearest()) {
+        /* Moemon Fight: resampled, not nearest (fight/compat/mf_softscale.c) */
+        src = Sprite_GetPixels(set, sprite);
+        if (src == NULL) {
+            return;
+        }
+        dst = Sprite_GetPixels(g_renderTarget, g_renderTargetSprite);
+        pal = SpriteSet_GetPaletteConverted(set, spr->pal_index)->rgb565;
+        MfSoft_ScaleResampled(spr, src, tspr, dst, x0, y0, sw, sh, (flip & SOFT_FLIP_H) != 0, (flip & SOFT_FLIP_V) != 0,
+                              op == SOFT_OP_OPAQUE, pal, Soft_PutColor, &op, op != SOFT_OP_SUB);
+        return;
     }
     if ((double)g_clipY2 <= y0) {
         return;
@@ -625,6 +653,18 @@ static void Soft_Rotate(SpriteSet *set, int sprite, float x, float y, float angl
     sinv = g_sinTable[idx % 2880];
     fsin = (float)sinv;
     s = (float)((1.0 / 1024) * fsin);
+    if (!MfSoft_Nearest()) {
+        /* Moemon Fight: resampled, not nearest (fight/compat/mf_softscale.c) */
+        src = Sprite_GetPixels(set, sprite);
+        if (src == NULL) {
+            return;
+        }
+        dst = Sprite_GetPixels(g_renderTarget, g_renderTargetSprite);
+        pal = SpriteSet_GetPaletteConverted(set, spr->pal_index)->rgb565;
+        MfSoft_RotateAt(spr, src, tspr, dst, ix, iy, cosv, sinv, sw, sh, scale2_x, scale2_y, mirror, 0, pal,
+                        Soft_PutColor, &op);
+        return;
+    }
     dux = Ftol((double)((cosv << 16) / sw) / scale2_x);
     dvx = Ftol((double)((sinv << 16) / sh) / scale2_x);
     if (idx < 720) {

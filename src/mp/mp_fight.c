@@ -1265,6 +1265,8 @@ static void OnAsk(u8 from, const u8 *d, u16 len)
     sNet.peer = from;
     sNet.session = session;
     sNet.seed = ((u32)rand() << 16) ^ (u32)rand() ^ sTick;
+    if (getenv("MOEMON_FIGHT_SEED") != NULL)
+        sNet.seed = (u32)strtoul(getenv("MOEMON_FIGHT_SEED"), NULL, 10);   // tests: the same picks every time
     sNet.side = sSitAt;
     sNet.delay = 1;
     SendAnswer(from, session, 1, sNet.seed, d[7] | (d[8] << 8));

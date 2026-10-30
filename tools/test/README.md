@@ -41,6 +41,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `pvp_battle` | BATTLE FLAG: BOB (no CHALLENGE phrase: no phrase box) spots ALICE, link battle to the end, the winner gets a tenth of the loser's money |
 | `pvp_switch` | PvP where ALICE's lead faints and she sends in her second Moemon |
 | `fight_resync` | online, BOB's game alone changes a life bar (a desync): both stop at the same frame, ALICE's game (the host) sends the pages that differ, then every check agrees to the end (also at `WORST=1`) |
+| `fight_display` | a CPU fight shown in each scaling mode (PIXEL PERFECT at 4x, 3x and 1x of the GBA screen, SHARP FIT, STRETCH) and with the LCD grid and scanlines: each window output against check.py's reference rendering of the fight's own 480x320 picture of the same frame (`fightshot`) |
 | `fight_packs` | online, BOB's SSF2X Ken has one more file: Ken greyed out on both select screens, ALICE can't pick him |
 | `fight_packs_core` | online, BOB's engine data differs: ALICE says no, BOB is told the fight files aren't the same |
 | `fight_buttons` | OPTIONS > CONTROLS > FIGHT BUTTONS with a virtual pad: a button bound, one taken from another fight button (they swap), one left alone after 8 s; saved in the controls file |

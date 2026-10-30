@@ -37,6 +37,7 @@
  *   element processed (or 0, 0 when there is none yet).
  */
 #include "mugen.h"
+#include "mf_softscale.h"   /* Moemon Fight: resampled parallax floors */
 
 #define BG_PI           3.141592653589793
 #define BG_FIXED_ONE    65536.0             /* 16.16 fixed point steps of the software parallax */
@@ -1266,6 +1267,65 @@ void BgElem_DrawTiled(BgElem *e, const DrawParams *dp, Bg *bg)
 }
 
 /*
+ * Moemon Fight: a parallax floor resampled (fight/compat/mf_softscale.c MfSoft_Parallax), with the rows where
+ * BgElem_DrawParallaxSoft* put them but not rounded to whole pixels: no steps between rows as the camera
+ * moves. "width" floors read the sprite's own rows (not the copies BgElem_InitParallax stretched nearest).
+ * Returns 0 to leave it to the original drawers.
+ */
+static int BgElem_DrawParallaxResampled(Bg *bg, BgElem *e, float scale_x, float scale_y)
+{
+    MfParallaxRow rows[512];
+    const Sprite *spr = Bg_SpriteAt(bg->sprites, e->sprite);
+    const Sprite *target = Bg_SpriteAt(g_renderTarget, g_renderTargetSprite);
+    unsigned char *pixels, *target_pixels;
+    Palette *pal;
+    double sx, sy, px, top, w0;
+    int n, r;
+
+    if (spr == NULL || e->rows == NULL || e->row_widths == NULL) {
+        return 0;
+    }
+    n = (int)ceil(e->height);
+    if (n > spr->h) {
+        n = spr->h;
+    }
+    if (n <= 0 || n > 512) {
+        return 0;
+    }
+    pixels = Sprite_GetPixels(bg->sprites, e->sprite);
+    if (pixels == NULL) {
+        return 1;
+    }
+    target_pixels = Sprite_GetPixels(g_renderTarget, g_renderTargetSprite);
+    pal = SpriteSet_GetPalette(bg->sprites, spr->pal_index);
+    if (pal == NULL) {
+        return 0;
+    }
+    Pal_Convert(pal);
+    sx = (double)scale_x * e->scale_x;
+    sy = (double)scale_y * e->scale_y;
+    px = e->x * (double)e->scale_x;
+    top = e->y * (double)e->scale_y - spr->y * sy;
+    w0 = e->row_widths[0];
+    for (r = 0; r < n; r++) {
+        rows[r].srcw = spr->w;
+        if (e->by_width) {
+            rows[r].src = pixels + spr->rows[r];
+            rows[r].width = e->row_widths[r] * sx;
+            rows[r].start = (px - w0 * sx * 0.5) * e->row_widths[r] / w0 + (double)(g_targetWidth / 2);
+        } else {
+            rows[r].src = e->rows[r];
+            rows[r].width = spr->w * sx;
+            rows[r].start = (((double)e->width_ratio - 1.0) * (r + 1) / e->height + 1.0) * px +
+                            (double)(g_targetWidth / 2) - spr->x * sx;
+        }
+    }
+    MfSoft_Parallax(rows, n, top, sy, e->tile_x != 0, e->mask != 1, pal->rgb565, spr->ncolors, target,
+                    target_pixels);
+    return 1;
+}
+
+/*
  * 0x00473800: draws a parallax element: as a sheared sprite with the OpenGL
  * renderers, row by row onto 15/16-bit targets for 8-bit sprites otherwise
  * (dp is not used then).
@@ -1289,6 +1349,9 @@ void BgElem_DrawParallax(BgElem *e, Bg *bg, const DrawParams *dp)
         return;
     }
     if ((g_targetBpp != 15 && g_targetBpp != 16) || spr->bpp != 8) {
+        return;
+    }
+    if (!MfSoft_Nearest() && BgElem_DrawParallaxResampled(bg, e, scale_x, scale_y)) {
         return;
     }
     if (e->mask == 1) {
