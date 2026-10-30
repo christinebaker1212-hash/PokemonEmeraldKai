@@ -6,6 +6,11 @@ wait 120
 press LEFT 12
 wait 60
 pressuntillog A 6000 co-op: waiting for a partner
+waitlog 8000 wait for another? YES / NO
+wait 30
+press DOWN 2
+wait 10
+press A 2
 waitfor battle 8000
 pressuntillog A 40000 co-op: battle over
 pressuntil A field 6000
