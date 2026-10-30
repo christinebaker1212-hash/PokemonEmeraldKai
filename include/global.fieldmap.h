@@ -65,6 +65,7 @@ struct Tileset
 {
     /*0x00*/ bool8 isCompressed;
     /*0x01*/ bool8 isSecondary;
+             bool8 isFrlg;   // Moemon Kai: a primary with FRLG's split (fieldmap.h NUM_*_FRLG)
     /*0x04*/ const u32 *tiles;
     /*0x08*/ const u16 (*palettes)[16];
     /*0x0C*/ const u16 *metatiles;
@@ -92,9 +93,8 @@ struct BackupMapLayout
 struct ObjectEventTemplate
 {
     /*0x00*/ u8 localId;
-    /*0x01*/ u8 graphicsId;
-    /*0x02*/ u8 kind; // Always OBJ_KIND_NORMAL in Emerald.
-    /*0x03*/ //u8 padding1;
+    /*0x01*/ u8 kind; // Always OBJ_KIND_NORMAL in Emerald.
+    /*0x02*/ u16 graphicsId;   // Moemon Kai: 16 bits (Johto / Kanto sprites past 255); map data only, never saved
     /*0x04*/ s16 x;
     /*0x06*/ s16 y;
     /*0x08*/ u8 elevation;
@@ -176,11 +176,11 @@ struct MapHeader
     /* 0x0C */ const struct MapConnections *connections;
     /* 0x10 */ u16 music;
     /* 0x12 */ u16 mapLayoutId;
-    /* 0x14 */ mapsec_u8_t regionMapSectionId;
+    /* 0x14 */ u8 regionMapSectionIdLo;   // Moemon Kai: the low byte only; the map section is the u16 below
     /* 0x15 */ u8 cave;
     /* 0x16 */ u8 weather;
     /* 0x17 */ u8 mapType;
-    /* 0x18 */ u8 filler_18[2];
+    /* 0x18 */ mapsec_u16_t regionMapSectionId;   // Moemon Kai: was filler (Johto's sections are 0x100+)
                // fields correspond to the arguments in the map_header_flags macro
     /* 0x1A */ bool8 allowCycling:1;
                bool8 allowEscaping:1; // Escape Rope and Dig
@@ -223,7 +223,7 @@ struct ObjectEvent
              u32 hideReflection:1;
              //u32 padding:4;
     /*0x04*/ u8 spriteId;
-    /*0x05*/ u8 graphicsId;
+    /*0x05*/ u8 graphicsIdLo;   // Moemon Kai: the graphics id is graphicsIdLo | graphicsIdHi << 8 (OBJ_GFX_ID)
     /*0x06*/ u8 movementType;
     /*0x07*/ u8 trainerType;
     /*0x08*/ u8 localId;
@@ -250,9 +250,13 @@ struct ObjectEvent
     /*0x20*/ u8 previousMovementDirection;
     /*0x21*/ u8 directionSequenceIndex;
     /*0x22*/ u8 playerCopyableMovement; // COPY_MOVE_*
-    /*0x23*/ //u8 padding2;
+    /*0x23*/ u8 graphicsIdHi;   // Moemon Kai: was padding (0 in every save), the graphics id's high byte
     /*size = 0x24*/
 };
+
+// Moemon Kai: an object's whole graphics id (the save format keeps its low byte at 0x05, the high one in old padding)
+#define OBJ_GFX_ID(obj) ((u16)((obj)->graphicsIdLo | ((obj)->graphicsIdHi << 8)))
+#define SET_OBJ_GFX_ID(obj, id) ((obj)->graphicsIdLo = (u8)(id), (obj)->graphicsIdHi = (u8)((id) >> 8))
 
 struct ObjectEventGraphicsInfo
 {

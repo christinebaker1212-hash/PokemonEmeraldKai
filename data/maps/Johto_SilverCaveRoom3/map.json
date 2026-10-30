@@ -1,0 +1,62 @@
+{
+  "id": "MAP_JOHTO_SILVER_CAVE_ROOM3",
+  "name": "Johto_SilverCaveRoom3",
+  "layout": "LAYOUT_JOHTO_SILVER_CAVE_ROOM3",
+  "music": "MUS_QZ_636",
+  "region_map_section": "MAPSEC_JOHTO_MT_SILVER",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_233",
+      "x": 30,
+      "y": 14,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_SilverCaveRoom3_EventScript_83E03AC",
+      "flag": "FLAG_QZ_0x1423"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_642",
+      "x": 16,
+      "y": 14,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840EA6A",
+      "flag": "FLAG_QZ_0x1217"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 12,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_SILVER_CAVE_SUMMIT",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 32,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_SILVER_CAVE_SNOWY_SLOPE",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

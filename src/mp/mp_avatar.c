@@ -1759,12 +1759,12 @@ bool8 MP_LocalUsesCustomAvatar(void)
     return !((app.base == MP_BASE_BRENDAN && app.gender == MALE) || (app.base == MP_BASE_MAY && app.gender == FEMALE));
 }
 
-bool8 MP_IsMpGraphicsId(u8 graphicsId)
+bool8 MP_IsMpGraphicsId(u16 graphicsId)
 {
     return graphicsId >= OBJ_EVENT_GFX_MP_FIRST && graphicsId <= OBJ_EVENT_GFX_MP_LAST;
 }
 
-const struct ObjectEventGraphicsInfo *MP_GetGraphicsInfo(u8 graphicsId)
+const struct ObjectEventGraphicsInfo *MP_GetGraphicsInfo(u16 graphicsId)
 {
     int slot = graphicsId - OBJ_EVENT_GFX_MP_FIRST;
     if (slot == 0 && sMpGfxInfo[0].images == NULL)
@@ -1824,13 +1824,13 @@ static bool8 PlayerStateOfGfxId(u8 graphicsId, u8 *state)
 
 // The local player's bike / surf / field move / fishing / watering / decorating graphics: the
 // sprite pack's, CREATE's Mach Bike, Brendan's / May's body with the look's head... NULL = the game's own.
-const struct ObjectEventGraphicsInfo *MP_Avatar_LocalStateInfo(u8 graphicsId)
+const struct ObjectEventGraphicsInfo *MP_Avatar_LocalStateInfo(u16 graphicsId)
 {
     u8 st, kind;
     const struct MpPack *pack;
     struct MpAppearance app;
     struct ObjectEventGraphicsInfo *info;
-    if (!sAvatarInit || !PlayerStateOfGfxId(graphicsId, &st))
+    if (!sAvatarInit || graphicsId > 0xFF || !PlayerStateOfGfxId(graphicsId, &st))
         return NULL;
     pack = LocalPack();
     app = GetLocalAppearance();
@@ -1963,7 +1963,7 @@ void MP_Avatar_ApplyLocal(void)
 
     // The sprite's tile block was sized for the old look's graphics
     if (onField && gSprites[gObjectEvents[gPlayerAvatar.objectEventId].spriteId].images)
-        oldBytes = GetObjectEventGraphicsInfo(gObjectEvents[gPlayerAvatar.objectEventId].graphicsId)->size;
+        oldBytes = GetObjectEventGraphicsInfo(OBJ_GFX_ID(&gObjectEvents[gPlayerAvatar.objectEventId]))->size;
     RebuildLocal();
     if (onField)
     {
@@ -2062,7 +2062,7 @@ bool8 MP_Avatar_HeadIcon(s8 id, u8 *tiles, u16 *pal, u16 outline)
 
     if (id < 0)
     {
-        u8 gfx = gObjectEvents[gPlayerAvatar.objectEventId].graphicsId;
+        u8 gfx = OBJ_GFX_ID(&gObjectEvents[gPlayerAvatar.objectEventId]);
         const u16 *p;
         info = MP_Avatar_LocalStateInfo(gfx);
         if (info == NULL)

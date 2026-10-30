@@ -476,14 +476,14 @@ void MP_Avatar_Init(void);
 bool8 MP_LocalUsesCustomAvatar(void);
 u16 MP_PlayerStandInGfxId(u16 vanillaGfx);
 void MP_SetPlayerStandInGfx(void);
-bool8 MP_IsMpGraphicsId(u8 graphicsId);
-const struct ObjectEventGraphicsInfo *MP_GetGraphicsInfo(u8 graphicsId);
+bool8 MP_IsMpGraphicsId(u16 graphicsId);
+const struct ObjectEventGraphicsInfo *MP_GetGraphicsInfo(u16 graphicsId);
 void MP_Avatar_ApplyLocal(void);     // recolor + refresh the local player sprite
 void MP_Avatar_BuildRemote(u8 id);   // rebuild a remote player's gfx info + palette
 void MP_Avatar_GetRemotePalette(u8 id, u8 avatarMode, u16 *dst);
 void MP_Overworld_MenuSpritePalette(u8 spriteId, u16 graphicsId);
 const u16 *MP_Avatar_OriginalPalette(u16 tag);
-const struct ObjectEventGraphicsInfo *MP_Avatar_LocalStateInfo(u8 graphicsId); // sprite pack bike/surf/...
+const struct ObjectEventGraphicsInfo *MP_Avatar_LocalStateInfo(u16 graphicsId); // sprite pack bike/surf/...
 u16 MP_Avatar_RemoteFrontPic(u8 id);
 void MP_Avatar_RefreshPackList(void);
 bool8 MP_Avatar_ExportLocal(char *pathOut, int len);
@@ -1443,6 +1443,7 @@ bool8 MP_BallFx_Active(void);
 void MP_BallFx_StopAll(void);
 void MP_BallFx_MiniBall(s16 x, s16 y, s16 tx, s16 ty, u8 ballColor, u8 life);
 void MP_BallFx_SetClip(s16 x0, s16 y0, s16 x1, s16 y1);
+struct Pokemon *MP_Follower_LocalMon(void);   // mp_follower.c: the party Pokémon following, or NULL
 u32 MP_Follower_LocalFx(u8 *sound);      // mp_follower.c: the follower's ball effect, for the network
 s16 MP_Follower_LocalHue(void);          // mp_follower.c: the follower's Stadium hue, for the network
 bool8 MP_Follower_LocalShiny(void);      // ... whether it's shiny (followerFlags bit 7: its PMD picture's colors)

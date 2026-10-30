@@ -414,7 +414,9 @@ static void LoadMapNamePopUpWindowBg(void)
     u8 popupWindowId = GetMapNamePopUpWindowId();
     mapsec_u16_t regionMapSectionId = gMapHeader.regionMapSectionId;
 
-    if (regionMapSectionId >= KANTO_MAPSEC_START)
+    if (regionMapSectionId >= MAPSEC_NONE)
+        regionMapSectionId = 0;   // Moemon Kai: Johto's sections (0x100+) take the first theme
+    else if (regionMapSectionId >= KANTO_MAPSEC_START)
     {
         if (regionMapSectionId > KANTO_MAPSEC_END)
             regionMapSectionId -= KANTO_MAPSEC_COUNT;

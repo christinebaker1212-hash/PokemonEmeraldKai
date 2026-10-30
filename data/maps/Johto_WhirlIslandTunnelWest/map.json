@@ -1,0 +1,35 @@
+{
+  "id": "MAP_JOHTO_WHIRL_ISLAND_TUNNEL_WEST",
+  "name": "Johto_WhirlIslandTunnelWest",
+  "layout": "LAYOUT_JOHTO_WHIRL_ISLAND_TUNNEL_WEST",
+  "music": "MUS_QZ_631",
+  "region_map_section": "MAPSEC_JOHTO_WHIRL_ISLANDS",
+  "requires_flash": false,
+  "weather": "WEATHER_SHADE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 9,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_WHIRL_ISLAND_TUNNEL_EAST",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 60,
+      "y": 17,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_WHIRL_ISLAND_CAVE",
+      "dest_warp_id": "3"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

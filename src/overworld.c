@@ -820,7 +820,7 @@ void LoadMapFromCameraTransition(u8 mapGroup, u8 mapNum)
     CopySecondaryTilesetToVramUsingHeap(gMapHeader.mapLayout);
     LoadSecondaryTilesetPalette(gMapHeader.mapLayout);
 
-    for (paletteIndex = NUM_PALS_IN_PRIMARY; paletteIndex < NUM_PALS_TOTAL; paletteIndex++)
+    for (paletteIndex = Fieldmap_PrimaryPals(gMapHeader.mapLayout); paletteIndex < NUM_PALS_TOTAL; paletteIndex++)   // Moemon Kai: FRLG split
         ApplyWeatherColorMapToPal(paletteIndex);
 
     InitSecondaryTilesetAnimation();

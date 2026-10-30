@@ -1,0 +1,8 @@
+Kanto_SixIsland_AlteringCave_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, Kanto_SixIsland_AlteringCave_EventScript_841444E
+	.byte 0
+
+Kanto_SixIsland_AlteringCave_EventScript_841444E::
+	setflag FLAG_QZ_0x2257
+	call Quetzal_EventScript_840FBB5
+	end

@@ -1,0 +1,35 @@
+{
+  "id": "MAP_JOHTO_RUINS_OF_ALPH_AERODACTYL_WORD_ROOM",
+  "name": "Johto_RuinsOfAlphAerodactylWordRoom",
+  "layout": "LAYOUT_JOHTO_RUINS_OF_ALPH_AERODACTYL_WORD_ROOM",
+  "music": "MUS_QZ_632",
+  "region_map_section": "MAPSEC_JOHTO_RUINS_OF_ALPH",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": false,
+  "allow_escaping": true,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 17,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_INNER_CHAMBER",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 9,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_CHAMBERS",
+      "dest_warp_id": "26"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

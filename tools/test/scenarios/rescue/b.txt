@@ -3,7 +3,7 @@ waitfor online 6000
 wait 200
 mp hp 1 0
 mp hp 2 0
-mp wild 288:60
+mp wild 288:60 129 129 129 129
 pressuntil A down 6000
 watchlog answered
 waitlog 2000

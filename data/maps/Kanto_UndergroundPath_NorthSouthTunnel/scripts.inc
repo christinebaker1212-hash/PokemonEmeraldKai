@@ -1,0 +1,7 @@
+Kanto_UndergroundPath_NorthSouthTunnel_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, Kanto_UndergroundPath_NorthSouthTunnel_EventScript_8410B53
+	.byte 0
+
+Kanto_UndergroundPath_NorthSouthTunnel_EventScript_8410B53::
+	setflag FLAG_QZ_0x2261
+	end

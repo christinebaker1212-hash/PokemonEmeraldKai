@@ -1,0 +1,46 @@
+pressuntil A field 5000
+wait 60
+mp warp 34,123,10,10
+wait 120
+shot newbark
+mp where
+press LEFT 40
+wait 20
+press DOWN 30
+wait 30
+shot newbark_walk
+mp warp 34,59,20,20
+wait 120
+shot goldenrod
+mp warp 34,36,20,20
+wait 120
+shot ecruteak
+mp warp 35,33,20,10
+wait 120
+shot route29
+mp warp 35,0,5,8
+wait 120
+shot elmslab
+mp warp 37,57,6,8
+wait 120
+shot pallet
+mp where
+press UP 120
+wait 40
+shot route1
+mp where
+mp warp 37,60,20,20
+wait 120
+shot cerulean
+mp warp 37,63,20,20
+wait 120
+shot celadon
+mp where
+mp warp 36,0,20,40
+wait 120
+shot viridianforest
+mp where
+mp warp 37,69,10,10
+wait 120
+shot oneisland
+quit

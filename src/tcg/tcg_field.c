@@ -726,9 +726,9 @@ static void CaptureChallengePic(struct TcgOpponent *o, struct ObjectEvent *npc)
         if (id < TRAINERS_COUNT)
             pic = gTrainers[id].trainerPic;
     }
-    if (pic == 0xFFFF && npc->graphicsId < ARRAY_COUNT(sPicOfGfx) && sPicOfGfx[npc->graphicsId])
-        pic = sPicOfGfx[npc->graphicsId] - 1;
-    printf("[tcg] challenge picture: graphics %u, trainer picture %d\n", npc->graphicsId, pic == 0xFFFF ? -1 : pic);
+    if (pic == 0xFFFF && OBJ_GFX_ID(npc) < ARRAY_COUNT(sPicOfGfx) && sPicOfGfx[OBJ_GFX_ID(npc)])
+        pic = sPicOfGfx[OBJ_GFX_ID(npc)] - 1;
+    printf("[tcg] challenge picture: graphics %u, trainer picture %d\n", OBJ_GFX_ID(npc), pic == 0xFFFF ? -1 : pic);
     if (pic != 0xFFFF && DecodeTrainerPic(o, pic))
         return;
     CapturePortrait(o, npc);
@@ -860,7 +860,7 @@ static const u8 *AskCards(struct ObjectEvent *npc, const u8 *script, u8 *answer,
     {
         const struct Special *s = &sSpecials[i];
         bool8 ok = TRUE;
-        if (npc->graphicsId != s->gfx && (!s->gfx2 || npc->graphicsId != s->gfx2))
+        if (OBJ_GFX_ID(npc) != s->gfx && (!s->gfx2 || OBJ_GFX_ID(npc) != s->gfx2))
             continue;
         if (s->req == REQ_BADGE)
             ok = FlagGet(FLAG_BADGE01_GET + s->reqArg);
@@ -874,7 +874,7 @@ static const u8 *AskCards(struct ObjectEvent *npc, const u8 *script, u8 *answer,
             return s->refuse;
         }
         snprintf(o->name, sizeof(o->name), "%s", s->name ? s->name
-                 : npc->graphicsId == OBJ_EVENT_GFX_RIVAL_MAY_NORMAL ? "MAY" : "BRENDAN");
+                 : OBJ_GFX_ID(npc) == OBJ_EVENT_GFX_RIVAL_MAY_NORMAL ? "MAY" : "BRENDAN");
         snprintf(o->title, sizeof(o->title), "%s", s->title);
         o->deck = gTcgSpecialDecks[i].cards;
         o->key = 0xFF000000u | i;
@@ -896,7 +896,7 @@ static const u8 *AskCards(struct ObjectEvent *npc, const u8 *script, u8 *answer,
     }
     o->special = TCG_SPECIAL_NONE;
     for (i = 0; i < ARRAY_COUNT(sPeople); i++)
-        if (sPeople[i].gfx == npc->graphicsId)
+        if (sPeople[i].gfx == OBJ_GFX_ID(npc))
         {
             cat = sPeople[i].cat;
             deck = sPeople[i].deck;

@@ -1181,7 +1181,7 @@ void MP_TestCommand(const char *cmd, const char *arg)
         int i;
         for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
             if (gObjectEvents[i].active)
-                printf("[test] obj %d gfx %d at %d,%d facing %d local %d\n", i, gObjectEvents[i].graphicsId,
+                printf("[test] obj %d gfx %d at %d,%d facing %d local %d\n", i, OBJ_GFX_ID(&gObjectEvents[i]),
                        gObjectEvents[i].currentCoords.x, gObjectEvents[i].currentCoords.y,
                        gObjectEvents[i].facingDirection, gObjectEvents[i].localId);
     }

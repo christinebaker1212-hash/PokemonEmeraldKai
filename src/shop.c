@@ -806,10 +806,10 @@ static void BuyMenuDrawMapBg(void)
             else
                 metatileLayerType = METATILE_LAYER_TYPE_COVERED;
 
-            if (metatile < NUM_METATILES_IN_PRIMARY)
+            if (metatile < Fieldmap_PrimaryMetatiles(mapLayout))   // Moemon Kai: FRLG split
                 BuyMenuDrawMapMetatile(i, j, mapLayout->primaryTileset->metatiles + metatile * NUM_TILES_PER_METATILE, metatileLayerType);
             else
-                BuyMenuDrawMapMetatile(i, j, mapLayout->secondaryTileset->metatiles + ((metatile - NUM_METATILES_IN_PRIMARY) * NUM_TILES_PER_METATILE), metatileLayerType);
+                BuyMenuDrawMapMetatile(i, j, mapLayout->secondaryTileset->metatiles + ((metatile - Fieldmap_PrimaryMetatiles(mapLayout)) * NUM_TILES_PER_METATILE), metatileLayerType);
         }
     }
 }
@@ -904,10 +904,10 @@ static void BuyMenuDrawObjectEvents(void)
         if (sShopData->viewportObjects[i][OBJ_EVENT_ID] == OBJECT_EVENTS_COUNT)
             continue;
 
-        graphicsInfo = GetObjectEventGraphicsInfo(gObjectEvents[sShopData->viewportObjects[i][OBJ_EVENT_ID]].graphicsId);
+        graphicsInfo = GetObjectEventGraphicsInfo(OBJ_GFX_ID(&gObjectEvents[sShopData->viewportObjects[i][OBJ_EVENT_ID]]));
 
         spriteId = CreateObjectGraphicsSprite(
-            gObjectEvents[sShopData->viewportObjects[i][OBJ_EVENT_ID]].graphicsId,
+            OBJ_GFX_ID(&gObjectEvents[sShopData->viewportObjects[i][OBJ_EVENT_ID]]),
             SpriteCallbackDummy,
             (u16)sShopData->viewportObjects[i][X_COORD] * 16 + 8,
             (u16)sShopData->viewportObjects[i][Y_COORD] * 16 + 48 - graphicsInfo->height / 2,
@@ -920,7 +920,7 @@ static void BuyMenuDrawObjectEvents(void)
         }
 
         // Moemon Co-op: other players' avatars in their own colors
-        MP_Overworld_MenuSpritePalette(spriteId, gObjectEvents[sShopData->viewportObjects[i][OBJ_EVENT_ID]].graphicsId);
+        MP_Overworld_MenuSpritePalette(spriteId, OBJ_GFX_ID(&gObjectEvents[sShopData->viewportObjects[i][OBJ_EVENT_ID]]));
         StartSpriteAnim(&gSprites[spriteId], sShopData->viewportObjects[i][ANIM_NUM]);
     }
 }

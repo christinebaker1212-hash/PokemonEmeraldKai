@@ -1,4 +1,5 @@
 #include "constants/global.h"
+#include "constants/qz_port.h"   // Moemon Kai: Johto / Kanto music
 #include "constants/layouts.h"
 #include "constants/map_types.h"
 #include "constants/maps.h"

@@ -1,0 +1,191 @@
+{
+  "id": "MAP_KANTO_SILPH_CO_10F",
+  "name": "Kanto_SilphCo_10F",
+  "layout": "LAYOUT_KANTO_SILPH_CO_10F",
+  "music": "MUS_RG_SILPH",
+  "region_map_section": "MAPSEC_SILPH_CO",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16195",
+      "x": 2,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
+      "movement_range_x": 2,
+      "movement_range_y": 2,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Kanto_SilphCo_10F_EventScript_8411AFF",
+      "flag": "FLAG_QZ_0x2304"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16218",
+      "x": 10,
+      "y": 17,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_SilphCo_10F_EventScript_8411AD5",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16189",
+      "x": 0,
+      "y": 13,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Kanto_SilphCo_10F_EventScript_8411B16",
+      "flag": "FLAG_QZ_0x2304"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 5,
+      "y": 15,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_SilphCo_10F_EventScript_846BDCB",
+      "flag": "FLAG_QZ_0x22F3"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 2,
+      "y": 15,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_SilphCo_10F_EventScript_846BDD8",
+      "flag": "FLAG_QZ_0x22F5"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 3,
+      "y": 17,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_SilphCo_10F_EventScript_846BDE5",
+      "flag": "FLAG_QZ_0x22F4"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 6,
+      "y": 2,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SILPH_CO_11F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 10,
+      "y": 14,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SILPH_CO_4F",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 14,
+      "y": 9,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SILPH_CO_4F",
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 8,
+      "y": 2,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SILPH_CO_9F",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 14,
+      "y": 17,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SILPH_CO_4F",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 13,
+      "y": 3,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_SILPH_CO_ELEVATOR",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 12,
+      "y": 11,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_SilphCo_10F_EventScript_8458FB2"
+    },
+    {
+      "type": "sign",
+      "x": 13,
+      "y": 11,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_SilphCo_10F_EventScript_8458FB2"
+    },
+    {
+      "type": "sign",
+      "x": 12,
+      "y": 12,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_SilphCo_10F_EventScript_8458FB2"
+    },
+    {
+      "type": "sign",
+      "x": 13,
+      "y": 12,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_SilphCo_10F_EventScript_8458FB2"
+    },
+    {
+      "type": "hidden_item",
+      "x": 9,
+      "y": 9,
+      "elevation": 0,
+      "item": "ITEM_HP_UP",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_143"
+    },
+    {
+      "type": "sign",
+      "x": 7,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_SilphCo_10F_EventScript_8411AF6"
+    }
+  ]
+}

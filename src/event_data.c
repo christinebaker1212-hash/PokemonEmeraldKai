@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_region.h"
 #include "event_data.h"
 #include "mp.h"
 #include "constants/event_objects.h"
@@ -167,6 +168,8 @@ u16 *GetVarPointer(u16 id)
 {
     if (id < VARS_START)
         return NULL;
+    else if (id >= REGION_VARS_START && id < SPECIAL_VARS_START)
+        return MP_Region_VarPointer(id);   // Moemon Kai: Johto / Kanto vars (mp_region.c)
     else if (id < SPECIAL_VARS_START)
         return &gSaveBlock1Ptr->vars[id - VARS_START];
     else
@@ -205,6 +208,8 @@ u8 *GetFlagPointer(u16 id)
 {
     if (id == 0)
         return NULL;
+    else if (id >= REGION_FLAGS_START && id < SPECIAL_FLAGS_START)
+        return MP_Region_FlagPointer(id);   // Moemon Kai: Johto / Kanto flags (mp_region.c)
     else if (id < SPECIAL_FLAGS_START)
         return &gSaveBlock1Ptr->flags[id / 8];
     else

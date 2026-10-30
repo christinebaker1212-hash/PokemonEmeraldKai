@@ -1,0 +1,194 @@
+{
+  "id": "MAP_JOHTO_RADIO_TOWER3F",
+  "name": "Johto_RadioTower3F",
+  "layout": "LAYOUT_JOHTO_RADIO_TOWER3F",
+  "music": "MUS_QZ_615",
+  "region_map_section": "MAPSEC_JOHTO_GOLDENROD_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16052",
+      "x": 17,
+      "y": 10,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 4,
+      "movement_range_y": 4,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Johto_RadioTower3F_EventScript_83D80E1",
+      "flag": "FLAG_QZ_0x1097"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16015",
+      "x": 14,
+      "y": 13,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RadioTower3F_EventScript_83D80F8",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16055",
+      "x": 12,
+      "y": 10,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RadioTower3F_EventScript_83D8154",
+      "flag": "FLAG_QZ_0x1098"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16048",
+      "x": 16,
+      "y": 5,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 4,
+      "movement_range_y": 4,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Johto_RadioTower3F_EventScript_83D809C",
+      "flag": "FLAG_QZ_0x1097"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16048",
+      "x": 23,
+      "y": 10,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 4,
+      "movement_range_y": 4,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Johto_RadioTower3F_EventScript_83D80B3",
+      "flag": "FLAG_QZ_0x1097"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16048",
+      "x": 25,
+      "y": 5,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN_AND_RIGHT",
+      "movement_range_x": 4,
+      "movement_range_y": 4,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Johto_RadioTower3F_EventScript_83D80CA",
+      "flag": "FLAG_QZ_0x1097"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 19,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RADIO_TOWER4F",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 29,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RADIO_TOWER4F",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 9,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RADIO_TOWER2F",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 15,
+      "y": 4,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RadioTower3F_EventScript_83D81BE"
+    },
+    {
+      "type": "sign",
+      "x": 11,
+      "y": 4,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RadioTower3F_EventScript_83D81B2"
+    },
+    {
+      "type": "sign",
+      "x": 25,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RadioTower3F_EventScript_83D8161"
+    },
+    {
+      "type": "sign",
+      "x": 26,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RadioTower3F_EventScript_83D8161"
+    },
+    {
+      "type": "sign",
+      "x": 27,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RadioTower3F_EventScript_83D8161"
+    },
+    {
+      "type": "sign",
+      "x": 28,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RadioTower3F_EventScript_83D8161"
+    },
+    {
+      "type": "sign",
+      "x": 29,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RadioTower3F_EventScript_83D8161"
+    },
+    {
+      "type": "sign",
+      "x": 30,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RadioTower3F_EventScript_83D8161"
+    },
+    {
+      "type": "sign",
+      "x": 31,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RadioTower3F_EventScript_83D8161"
+    }
+  ]
+}

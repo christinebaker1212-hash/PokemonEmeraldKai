@@ -1,5 +1,6 @@
 #include "mp_version.h"
 #include "global.h"
+#include "mp_region.h"
 #include "mp.h"
 #include "platform.h"
 #include "agb_flash.h"
@@ -907,6 +908,8 @@ u8 LoadGameSave(u8 saveType)
         if (status == SAVE_STATUS_OK)
             MP_Bag_LoadFromSave();   // Moemon Co-op: the bigger pockets (mp_bag.c)
             MP_Life_LoadFromSave();  // Moemon Co-op: MOéMON GARDEN, the A-Life (mp_life.c)
+        if (status == SAVE_STATUS_OK)
+            MP_Region_LoadFromSave();   // Moemon Kai: Johto / Kanto flags and vars (mp_region.c)
         gSaveFileStatus = status;
         gGameContinueCallback = NULL;
         break;

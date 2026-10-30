@@ -1,0 +1,131 @@
+{
+  "id": "MAP_KANTO_ONE_ISLAND_TREASURE_BEACH",
+  "name": "Kanto_OneIsland_TreasureBeach",
+  "layout": "LAYOUT_KANTO_ONE_ISLAND_TREASURE_BEACH",
+  "music": "MUS_RG_ROUTE3",
+  "region_map_section": "MAPSEC_TREASURE_BEACH",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_ROUTE",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_KANTO_ONE_ISLAND",
+      "offset": 0,
+      "direction": "up"
+    }
+  ],
+  "object_events": [
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16205",
+      "x": 8,
+      "y": 11,
+      "elevation": 1,
+      "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
+      "movement_range_x": 2,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Kanto_OneIsland_TreasureBeach_EventScript_845C2F8",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16110",
+      "x": 13,
+      "y": 20,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_OneIsland_TreasureBeach_EventScript_841845B",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_746",
+      "x": 15,
+      "y": 17,
+      "elevation": 1,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_0x2DF3"
+    }
+  ],
+  "warp_events": [],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 8,
+      "y": 20,
+      "elevation": 3,
+      "item": "ITEM_STARDUST",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_103"
+    },
+    {
+      "type": "hidden_item",
+      "x": 13,
+      "y": 27,
+      "elevation": 3,
+      "item": "ITEM_STARDUST",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_104"
+    },
+    {
+      "type": "hidden_item",
+      "x": 11,
+      "y": 31,
+      "elevation": 3,
+      "item": "ITEM_PEARL",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_105"
+    },
+    {
+      "type": "hidden_item",
+      "x": 9,
+      "y": 34,
+      "elevation": 3,
+      "item": "ITEM_PEARL",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_106"
+    },
+    {
+      "type": "hidden_item",
+      "x": 15,
+      "y": 22,
+      "elevation": 3,
+      "item": "ITEM_ULTRA_BALL",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_107"
+    },
+    {
+      "type": "hidden_item",
+      "x": 16,
+      "y": 33,
+      "elevation": 3,
+      "item": "ITEM_ULTRA_BALL",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_108"
+    },
+    {
+      "type": "hidden_item",
+      "x": 15,
+      "y": 29,
+      "elevation": 3,
+      "item": "ITEM_STAR_PIECE",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_109"
+    },
+    {
+      "type": "hidden_item",
+      "x": 8,
+      "y": 27,
+      "elevation": 3,
+      "item": "ITEM_BIG_PEARL",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_110"
+    }
+  ]
+}

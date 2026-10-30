@@ -375,15 +375,32 @@ void MapGridSetMetatileEntryAt(s32 x, s32 y, u16 metatile)
     }
 }
 
+// Moemon Kai: the tile / metatile / palette split of a layout (FRLG-style primaries: Johto, Kanto)
+u16 Fieldmap_PrimaryTiles(const struct MapLayout *layout)
+{
+    return layout && layout->primaryTileset && layout->primaryTileset->isFrlg ? NUM_TILES_IN_PRIMARY_FRLG : NUM_TILES_IN_PRIMARY;
+}
+
+u16 Fieldmap_PrimaryMetatiles(const struct MapLayout *layout)
+{
+    return layout && layout->primaryTileset && layout->primaryTileset->isFrlg ? NUM_METATILES_IN_PRIMARY_FRLG : NUM_METATILES_IN_PRIMARY;
+}
+
+u16 Fieldmap_PrimaryPals(const struct MapLayout *layout)
+{
+    return layout && layout->primaryTileset && layout->primaryTileset->isFrlg ? NUM_PALS_IN_PRIMARY_FRLG : NUM_PALS_IN_PRIMARY;
+}
+
 u16 GetMetatileAttributesById(u16 metatile)
 {
-    if (metatile < NUM_METATILES_IN_PRIMARY)
+    u16 split = Fieldmap_PrimaryMetatiles(gMapHeader.mapLayout);
+    if (metatile < split)
     {
         return gMapHeader.mapLayout->primaryTileset->metatileAttributes[metatile];
     }
     else if (metatile < NUM_METATILES_TOTAL)
     {
-        return gMapHeader.mapLayout->secondaryTileset->metatileAttributes[metatile - NUM_METATILES_IN_PRIMARY];
+        return gMapHeader.mapLayout->secondaryTileset->metatileAttributes[metatile - split];
     }
     else
     {
@@ -831,7 +848,7 @@ static void UNUSED ApplyGlobalTintToPaletteSlot(u8 slot, u8 count)
 
 }
 
-static void LoadTilesetPalette(struct Tileset const *tileset, u16 destOffset, u16 size)
+static void LoadTilesetPalette(struct Tileset const *tileset, u16 destOffset, u16 size, u16 split)
 {
     u16 black = RGB_BLACK;
 
@@ -845,7 +862,7 @@ static void LoadTilesetPalette(struct Tileset const *tileset, u16 destOffset, u1
         }
         else if (tileset->isSecondary == TRUE)
         {
-            LoadPalette(tileset->palettes[NUM_PALS_IN_PRIMARY], destOffset, size);
+            LoadPalette(tileset->palettes[split], destOffset, size);
             ApplyGlobalTintToPaletteEntries(destOffset, size >> 1);
         }
         else
@@ -858,35 +875,39 @@ static void LoadTilesetPalette(struct Tileset const *tileset, u16 destOffset, u1
 
 void CopyPrimaryTilesetToVram(struct MapLayout const *mapLayout)
 {
-    CopyTilesetToVram(mapLayout->primaryTileset, NUM_TILES_IN_PRIMARY, 0);
+    CopyTilesetToVram(mapLayout->primaryTileset, Fieldmap_PrimaryTiles(mapLayout), 0);
 }
 
 void CopySecondaryTilesetToVram(struct MapLayout const *mapLayout)
 {
-    CopyTilesetToVram(mapLayout->secondaryTileset, NUM_TILES_TOTAL - NUM_TILES_IN_PRIMARY, NUM_TILES_IN_PRIMARY);
+    u16 split = Fieldmap_PrimaryTiles(mapLayout);
+    CopyTilesetToVram(mapLayout->secondaryTileset, NUM_TILES_TOTAL - split, split);
 }
 
 void CopySecondaryTilesetToVramUsingHeap(struct MapLayout const *mapLayout)
 {
-    CopyTilesetToVramUsingHeap(mapLayout->secondaryTileset, NUM_TILES_TOTAL - NUM_TILES_IN_PRIMARY, NUM_TILES_IN_PRIMARY);
+    u16 split = Fieldmap_PrimaryTiles(mapLayout);
+    CopyTilesetToVramUsingHeap(mapLayout->secondaryTileset, NUM_TILES_TOTAL - split, split);
 }
 
 static void LoadPrimaryTilesetPalette(struct MapLayout const *mapLayout)
 {
-    LoadTilesetPalette(mapLayout->primaryTileset, BG_PLTT_ID(0), NUM_PALS_IN_PRIMARY * PLTT_SIZE_4BPP);
+    LoadTilesetPalette(mapLayout->primaryTileset, BG_PLTT_ID(0), Fieldmap_PrimaryPals(mapLayout) * PLTT_SIZE_4BPP, 0);
 }
 
 void LoadSecondaryTilesetPalette(struct MapLayout const *mapLayout)
 {
-    LoadTilesetPalette(mapLayout->secondaryTileset, BG_PLTT_ID(NUM_PALS_IN_PRIMARY), (NUM_PALS_TOTAL - NUM_PALS_IN_PRIMARY) * PLTT_SIZE_4BPP);
+    u16 split = Fieldmap_PrimaryPals(mapLayout);
+    LoadTilesetPalette(mapLayout->secondaryTileset, BG_PLTT_ID(split), (NUM_PALS_TOTAL - split) * PLTT_SIZE_4BPP, split);
 }
 
 void CopyMapTilesetsToVram(struct MapLayout const *mapLayout)
 {
     if (mapLayout)
     {
-        CopyTilesetToVramUsingHeap(mapLayout->primaryTileset, NUM_TILES_IN_PRIMARY, 0);
-        CopyTilesetToVramUsingHeap(mapLayout->secondaryTileset, NUM_TILES_TOTAL - NUM_TILES_IN_PRIMARY, NUM_TILES_IN_PRIMARY);
+        u16 split = Fieldmap_PrimaryTiles(mapLayout);
+        CopyTilesetToVramUsingHeap(mapLayout->primaryTileset, split, 0);
+        CopyTilesetToVramUsingHeap(mapLayout->secondaryTileset, NUM_TILES_TOTAL - split, split);
     }
 }
 

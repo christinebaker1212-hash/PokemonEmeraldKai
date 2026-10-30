@@ -9,6 +9,12 @@
 #define NUM_PALS_TOTAL 13
 #define MAX_MAP_DATA_SIZE 10240
 
+// Moemon Kai: FRLG-style tilesets (Johto / Kanto, struct Tileset isFrlg on the primary): 640 tiles, 640 metatiles
+// and 7 palettes in the primary, the rest (384 / 384 / 6) in the secondary. The split follows the layout's primary.
+#define NUM_TILES_IN_PRIMARY_FRLG 640
+#define NUM_METATILES_IN_PRIMARY_FRLG 640
+#define NUM_PALS_IN_PRIMARY_FRLG 7
+
 #define NUM_TILES_PER_METATILE 8
 
 // Map coordinates are offset by 7 when using the map
@@ -23,6 +29,9 @@
 
 extern struct BackupMapLayout gBackupMapLayout;
 
+u16 Fieldmap_PrimaryTiles(const struct MapLayout *layout);       // Moemon Kai: 512, or 640 for FRLG-style
+u16 Fieldmap_PrimaryMetatiles(const struct MapLayout *layout);
+u16 Fieldmap_PrimaryPals(const struct MapLayout *layout);
 s32 MapGridGetMetatileIdAt(s32 x, s32 y);
 s32 MapGridGetMetatileBehaviorAt(s32 x, s32 y);
 void MapGridSetMetatileIdAt(s32 x, s32 y, u16 metatile);

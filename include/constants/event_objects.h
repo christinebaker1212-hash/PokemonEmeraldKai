@@ -277,6 +277,9 @@
 #define OBJ_EVENT_GFX_VAR_E  (OBJ_EVENT_GFX_VARS + 0xE)
 #define OBJ_EVENT_GFX_VAR_F  (OBJ_EVENT_GFX_VARS + 0xF) // 255
 
+// Moemon Kai: Johto / Kanto sprites, 16-bit ids (the object's high byte sits in what was padding: OBJ_GFX_ID)
+#define OBJ_EVENT_GFX_QZ_FIRST 0x100
+
 #define SHADOW_SIZE_S   0
 #define SHADOW_SIZE_M   1
 #define SHADOW_SIZE_L   2

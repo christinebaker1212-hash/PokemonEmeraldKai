@@ -18,6 +18,7 @@
 #include <SDL2/SDL.h>
 
 #include "global.h"
+#include "mp_region.h"
 #include "mp.h"
 u8 TrySavingData(u8 saveType);
 #include "mp_life.h"
@@ -427,7 +428,7 @@ static void BackUpSaveFile(void)
 {
     static Uint32 sLastBackup;
     static int sDone;
-    static const char *const sSidecars[] = {"bag", "life", "cards", "ygo", "tt"};   // Moemon Co-op: files that belong with the save
+    static const char *const sSidecars[] = {"bag", "life", "cards", "ygo", "tt", "region"};   // Moemon Co-op: files that belong with the save
     char from[600], to[600];
     unsigned char buf[4096];
     size_t n;
@@ -504,6 +505,7 @@ static void StoreSaveFile()
     MP_Bag_WriteSidecar();   // Moemon Co-op: the pockets' slots past the save block's (mp_bag.c)
     MP_Life_WriteSidecar();  // Moemon Co-op: MOéMON GARDEN, the A-Life (mp_life.c)
     Tcg_WriteSidecar();      // Moemon Kai: the card game's collection (src/tcg/tcg_integration.c)
+    MP_Region_WriteSidecar();   // Moemon Kai: Johto / Kanto progress (src/mp/mp_region.c)
 }
 
 void Platform_StoreSaveFile(void)
@@ -1214,6 +1216,7 @@ static void TestHarnessStep(void)
             MP_Bag_WriteSidecar();
             MP_Life_WriteSidecar();
             Tcg_WriteSidecar();
+            MP_Region_WriteSidecar();
             MP_SaveData_Set("dev_save_probe", 123);
             printf("[test] saveprobe status %d autosave %d dev %d\n",
                    status, gMpConfig.autosaveMinutes, MOEMON_DEV_BUILD);

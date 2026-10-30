@@ -366,7 +366,7 @@ int Tt_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, uin
     {
         const struct Special *s = &sSpecials[i];
         int ok = 1;
-        if (npc->graphicsId != s->gfx && (!s->gfx2 || npc->graphicsId != s->gfx2))
+        if (OBJ_GFX_ID(npc) != s->gfx && (!s->gfx2 || OBJ_GFX_ID(npc) != s->gfx2))
             continue;
         if (s->mapGroup != 0xFFFF && (gSaveBlock1Ptr->location.mapGroup != s->mapGroup
                                       || gSaveBlock1Ptr->location.mapNum != s->mapNum))
@@ -381,7 +381,7 @@ int Tt_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, uin
             *refused = 1;
             return s->play;
         }
-        FillSpecial(o, i, s->name ? s->name : npc->graphicsId == OBJ_EVENT_GFX_RIVAL_MAY_NORMAL ? "MAY" : "BRENDAN");
+        FillSpecial(o, i, s->name ? s->name : OBJ_GFX_ID(npc) == OBJ_EVENT_GFX_RIVAL_MAY_NORMAL ? "MAY" : "BRENDAN");
         *line = CardTable_Hello(o->key, QUOTE_GAME_TT, o->quoteWho, o->voice, s->accept, h);
         return s->play;
     }
@@ -417,7 +417,7 @@ int Tt_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, uin
         else
         {
             for (i = 0; i < ARRAY_COUNT(sTownsfolk); i++)
-                if (sTownsfolk[i].gfx == npc->graphicsId)
+                if (sTownsfolk[i].gfx == OBJ_GFX_ID(npc))
                 {
                     play = sTownsfolk[i].play;
                     sTalk = sTownsfolk[i].talk;

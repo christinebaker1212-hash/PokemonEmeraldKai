@@ -1,0 +1,83 @@
+{
+  "id": "MAP_KANTO_ROUTE5",
+  "name": "Kanto_Route5",
+  "layout": "LAYOUT_KANTO_ROUTE5",
+  "music": "MUS_RG_ROUTE3",
+  "region_map_section": "MAPSEC_ROUTE_5",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_ROUTE",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_KANTO_CERULEAN_CITY",
+      "offset": 0,
+      "direction": "up"
+    },
+    {
+      "map": "MAP_KANTO_SAFFRON_CITY_CONNECTION",
+      "offset": 0,
+      "direction": "down"
+    }
+  ],
+  "object_events": [
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_749",
+      "x": 17,
+      "y": 31,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FDF6",
+      "flag": "FLAG_QZ_0x2E30"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 31,
+      "y": 31,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_UNDERGROUND_PATH_NORTH_ENTRANCE",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 23,
+      "y": 25,
+      "elevation": 0,
+      "dest_map": "MAP_KANTO_ROUTE5_POKEMON_DAY_CARE",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 24,
+      "y": 32,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_ROUTE5_SOUTH_ENTRANCE",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 25,
+      "y": 32,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_ROUTE5_SOUTH_ENTRANCE",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 32,
+      "y": 32,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_Route5_EventScript_8417C5F"
+    }
+  ]
+}

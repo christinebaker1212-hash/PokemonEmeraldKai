@@ -12,7 +12,7 @@ press A 2
 waitfor patchlist 300
 wait 10
 shot list
-pressuntillog DOWN 1800 patch notes: cursor on 1.18
+pressuntillog DOWN 3600 patch notes: cursor on 1.18
 wait 8
 press A 2
 waitfor patchtext 300

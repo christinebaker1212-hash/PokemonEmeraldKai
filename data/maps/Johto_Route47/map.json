@@ -1,0 +1,245 @@
+{
+  "id": "MAP_JOHTO_ROUTE47",
+  "name": "Johto_Route47",
+  "layout": "LAYOUT_JOHTO_ROUTE47",
+  "music": "MUS_QZ_643",
+  "region_map_section": "MAPSEC_JOHTO_ROUTE47",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_ROUTE",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_JOHTO_ROUTE48",
+      "offset": 19,
+      "direction": "up"
+    }
+  ],
+  "object_events": [
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_55",
+      "x": 89,
+      "y": 39,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 2,
+      "movement_range_y": 2,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "2",
+      "script": "Johto_Route47_EventScript_83F6669",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_31",
+      "x": 71,
+      "y": 37,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 6,
+      "movement_range_y": 5,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "5",
+      "script": "Johto_Route47_EventScript_83F6711",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 72,
+      "y": 43,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_Route47_EventScript_83F6CBF",
+      "flag": "FLAG_QZ_0x1116"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16015",
+      "x": 86,
+      "y": 29,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Johto_Route47_EventScript_83F67CE",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16016",
+      "x": 86,
+      "y": 30,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Johto_Route47_EventScript_83F67B0",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 59,
+      "y": 33,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_Route47_EventScript_83F6CCC",
+      "flag": "FLAG_QZ_0x1117"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16063",
+      "x": 57,
+      "y": 15,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Johto_Route47_EventScript_83F6918",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16062",
+      "x": 58,
+      "y": 15,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Johto_Route47_EventScript_83F6936",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 83,
+      "y": 14,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_Route47_EventScript_83F6CB2",
+      "flag": "FLAG_QZ_0x1115"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 31,
+      "y": 13,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_Route47_EventScript_83F6CD9",
+      "flag": "FLAG_QZ_0x1118"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_60",
+      "x": 51,
+      "y": 8,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "108",
+      "script": "Quetzal_EventScript_836266F",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 32,
+      "y": 10,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_Route47_EventScript_83F6CE6",
+      "flag": "FLAG_QZ_0x10F6"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_897",
+      "x": 52,
+      "y": 12,
+      "elevation": 4,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840EA6A",
+      "flag": "FLAG_QZ_GEN_CAPPED"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_1307",
+      "x": 85,
+      "y": 14,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840EA6A",
+      "flag": "FLAG_QZ_GEN_CAPPED"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 106,
+      "y": 32,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_CLIFF_EDGE_CAVE",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 85,
+      "y": 28,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_CLIFF_CAVE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 85,
+      "y": 33,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_CLIFF_CAVE",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 85,
+      "y": 47,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_CLIFF_CAVE",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 40,
+      "y": 44,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_EMBEDDED_TOWER",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

@@ -1,0 +1,266 @@
+{
+  "id": "MAP_JOHTO_DANCE_THEATER",
+  "name": "Johto_DanceTheater",
+  "layout": "LAYOUT_JOHTO_DANCE_THEATER",
+  "music": "MUS_QZ_628",
+  "region_map_section": "MAPSEC_JOHTO_ECRUTEAK_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16029",
+      "x": 7,
+      "y": 2,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_DanceTheater_EventScript_83CF9E7",
+      "flag": "FLAG_QZ_0x10AD"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16029",
+      "x": 5,
+      "y": 3,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_DanceTheater_EventScript_83CF9E7",
+      "flag": "FLAG_QZ_0x10AD"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16029",
+      "x": 13,
+      "y": 2,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_DanceTheater_EventScript_83CF9E7",
+      "flag": "FLAG_QZ_0x10AD"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16029",
+      "x": 15,
+      "y": 3,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_DanceTheater_EventScript_83CF9E7",
+      "flag": "FLAG_QZ_0x10AD"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16029",
+      "x": 10,
+      "y": 3,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_DanceTheater_EventScript_83CFA0A",
+      "flag": "FLAG_QZ_0x10D7"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_30",
+      "x": 7,
+      "y": 11,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_DanceTheater_EventScript_83CFB99",
+      "flag": "FLAG_QZ_0x10D6"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_48",
+      "x": 13,
+      "y": 11,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_DanceTheater_EventScript_83CFAF5",
+      "flag": "FLAG_QZ_0x10D6"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16063",
+      "x": 17,
+      "y": 9,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_DanceTheater_EventScript_83CFB76",
+      "flag": "FLAG_QZ_0x10D6"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16038",
+      "x": 3,
+      "y": 9,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_DanceTheater_EventScript_83CFBBC",
+      "flag": "FLAG_QZ_0x10D6"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_6",
+      "x": 5,
+      "y": 11,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x64",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_DanceTheater_EventScript_83CFBDF",
+      "flag": "FLAG_QZ_0x10D6"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16048",
+      "x": 10,
+      "y": 4,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_DanceTheater_EventScript_83CF789",
+      "flag": "FLAG_QZ_0x10AC"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_3073",
+      "x": 12,
+      "y": 4,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840EA6A",
+      "flag": "FLAG_QZ_GEN_CAPPED"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 10,
+      "y": 17,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_ECRUTEAK_CITY",
+      "dest_warp_id": "6"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 10,
+      "y": 16,
+      "elevation": 0,
+      "var": "VAR_QZ_0x501A",
+      "var_value": "0",
+      "script": "Johto_DanceTheater_EventScript_83CF5C4"
+    },
+    {
+      "type": "trigger",
+      "x": 11,
+      "y": 17,
+      "elevation": 0,
+      "var": "VAR_QZ_0x501A",
+      "var_value": "0",
+      "script": "Johto_DanceTheater_EventScript_83CF5C4"
+    },
+    {
+      "type": "trigger",
+      "x": 9,
+      "y": 17,
+      "elevation": 0,
+      "var": "VAR_QZ_0x501A",
+      "var_value": "0",
+      "script": "Johto_DanceTheater_EventScript_83CF5C4"
+    },
+    {
+      "type": "trigger",
+      "x": 10,
+      "y": 17,
+      "elevation": 0,
+      "var": "VAR_QZ_0x501A",
+      "var_value": "2",
+      "script": "Johto_DanceTheater_EventScript_83CFB3F"
+    },
+    {
+      "type": "trigger",
+      "x": 10,
+      "y": 16,
+      "elevation": 0,
+      "var": "VAR_QZ_0x501A",
+      "var_value": "5",
+      "script": "Johto_DanceTheater_EventScript_83D013A"
+    },
+    {
+      "type": "trigger",
+      "x": 11,
+      "y": 17,
+      "elevation": 0,
+      "var": "VAR_QZ_0x501A",
+      "var_value": "5",
+      "script": "Johto_DanceTheater_EventScript_83D014E"
+    },
+    {
+      "type": "trigger",
+      "x": 9,
+      "y": 17,
+      "elevation": 0,
+      "var": "VAR_QZ_0x501A",
+      "var_value": "5",
+      "script": "Johto_DanceTheater_EventScript_83D0126"
+    }
+  ],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 11,
+      "y": 8,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_DanceTheater_EventScript_83CFC02"
+    },
+    {
+      "type": "sign",
+      "x": 10,
+      "y": 8,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_DanceTheater_EventScript_83CFC02"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+Kanto_SevenIsland_TanobyRuins_ViapoisChamber_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, Kanto_SevenIsland_TanobyRuins_ViapoisChamber_EventScript_8414B01
+	.byte 0
+
+Kanto_SevenIsland_TanobyRuins_ViapoisChamber_EventScript_8414B01::
+	call Quetzal_EventScript_8459544
+	call Quetzal_EventScript_840FBB5
+	end

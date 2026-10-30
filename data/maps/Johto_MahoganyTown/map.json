@@ -1,0 +1,635 @@
+{
+  "id": "MAP_JOHTO_MAHOGANY_TOWN",
+  "name": "Johto_MahoganyTown",
+  "layout": "LAYOUT_JOHTO_MAHOGANY_TOWN",
+  "music": "MUS_QZ_612",
+  "region_map_section": "MAPSEC_JOHTO_MAHOGANY_TOWN",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_JOHTO_ROUTE42",
+      "offset": 1,
+      "direction": "left"
+    },
+    {
+      "map": "MAP_JOHTO_ROUTE43",
+      "offset": 2,
+      "direction": "up"
+    },
+    {
+      "map": "MAP_JOHTO_ROUTE44",
+      "offset": -2,
+      "direction": "right"
+    }
+  ],
+  "object_events": [
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16038",
+      "x": 7,
+      "y": 13,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_MahoganyTown_EventScript_83DF869",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16",
+      "x": 24,
+      "y": 8,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_MahoganyTown_EventScript_83DF899",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16004",
+      "x": 30,
+      "y": 11,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_MahoganyTown_EventScript_83DF792",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_17",
+      "x": 10,
+      "y": 20,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_MahoganyTown_EventScript_83DF88C",
+      "flag": "FLAG_QZ_0x104E"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_10576",
+      "x": 24,
+      "y": 20,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C2D48",
+      "flag": "FLAG_QZ_0x1490"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15003",
+      "x": 25,
+      "y": 20,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C2D48",
+      "flag": "FLAG_QZ_0x1490"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15004",
+      "x": 25,
+      "y": 19,
+      "elevation": 4,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C2D48",
+      "flag": "FLAG_QZ_0x1490"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_10567",
+      "x": 26,
+      "y": 20,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C2D48",
+      "flag": "FLAG_QZ_0x1490"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 14,
+      "y": 4,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_ROUTE43_MAHOGANY_GATE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 15,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_MAHOGANY_MART1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 27,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_MAHOGANY_RED_GYARADOS_SPEECH_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 10,
+      "y": 19,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_MAHOGANY_GYM",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 21,
+      "y": 19,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_MAHOGANY_POKECENTER1F",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 12,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "1",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 13,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "1",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "1",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 12,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "2",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 13,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "2",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "2",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 12,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "3",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 13,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "3",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "3",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 12,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "4",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 13,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "4",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "4",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 12,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "5",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 13,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "5",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "5",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 12,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "6",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 13,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "6",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "6",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 12,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "7",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 12,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "8",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 12,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "9",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 12,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "10",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 12,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "11",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 12,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "12",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 12,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "13",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 12,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "14",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 12,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "15",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 12,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "16",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 13,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "16",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 13,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "15",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 13,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "14",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 13,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "13",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 13,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "12",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 13,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "11",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 13,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "10",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 13,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "9",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 13,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "8",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 13,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "7",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "16",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "15",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "14",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "13",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "12",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "11",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "10",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "9",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "8",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    },
+    {
+      "type": "trigger",
+      "x": 30,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_QZ_0x500C",
+      "var_value": "7",
+      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
+    }
+  ],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 5,
+      "y": 8,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_MahoganyTown_EventScript_83DF8A6"
+    },
+    {
+      "type": "sign",
+      "x": 13,
+      "y": 10,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_MahoganyTown_EventScript_83DF8B2"
+    },
+    {
+      "type": "sign",
+      "x": 12,
+      "y": 19,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_MahoganyTown_EventScript_83DF8BE"
+    }
+  ]
+}

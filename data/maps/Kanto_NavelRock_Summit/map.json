@@ -1,0 +1,61 @@
+{
+  "id": "MAP_KANTO_NAVEL_ROCK_SUMMIT",
+  "name": "Kanto_NavelRock_Summit",
+  "layout": "LAYOUT_KANTO_NAVEL_ROCK_SUMMIT",
+  "music": "MUS_RG_SEVII_CAVE",
+  "region_map_section": "MAPSEC_NAVEL_ROCK",
+  "requires_flash": false,
+  "weather": "WEATHER_SHADE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16141",
+      "x": 9,
+      "y": 6,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "0x0",
+      "flag": "FLAG_QZ_0x218D"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 10,
+      "y": 18,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_NAVEL_ROCK_SUMMIT_PATH_5F",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 9,
+      "y": 12,
+      "elevation": 3,
+      "var": "VAR_TEMP_1",
+      "var_value": "0",
+      "script": "Kanto_NavelRock_Summit_EventScript_8414DDA"
+    }
+  ],
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 9,
+      "y": 11,
+      "elevation": 3,
+      "item": "ITEM_SACRED_ASH",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_160"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+Kanto_FourIsland_IcefallCave_Entrance_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, Kanto_FourIsland_IcefallCave_Entrance_EventScript_8413ADA
+	.byte 0
+
+Kanto_FourIsland_IcefallCave_Entrance_EventScript_8413ADA::
+	setflag FLAG_QZ_0x223D
+	call Quetzal_EventScript_840FBB5
+	end

@@ -1,0 +1,1768 @@
+Kanto_PalletTown_ProfessorOaksLab_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, Kanto_PalletTown_ProfessorOaksLab_EventScript_8418E21
+	map_script MAP_SCRIPT_ON_WARP_INTO_MAP_TABLE, Kanto_PalletTown_ProfessorOaksLab_OnWarp_8418F05
+	map_script MAP_SCRIPT_ON_FRAME_TABLE, Kanto_PalletTown_ProfessorOaksLab_OnFrame_8418F14
+	.byte 0
+
+Kanto_PalletTown_ProfessorOaksLab_OnWarp_8418F05:
+	map_script_2 VAR_QZ_0x511A, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8418F0F
+	.2byte 0
+
+Kanto_PalletTown_ProfessorOaksLab_OnFrame_8418F14:
+	map_script_2 VAR_QZ_0x511A, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419162
+	map_script_2 VAR_QZ_0x511A, 7, Kanto_PalletTown_ProfessorOaksLab_EventScript_8418F26
+	.2byte 0
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8418E21::
+	setflag FLAG_QZ_0x2230
+	call_if_set FLAG_QZ_0x226A, Kanto_PalletTown_ProfessorOaksLab_EventScript_8418E68
+	call_if_eq VAR_QZ_0x511A, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8418EAC
+	call_if_eq VAR_QZ_0x511A, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_8418EC7
+	call_if_eq VAR_QZ_0x511A, 7, Kanto_PalletTown_ProfessorOaksLab_EventScript_8418EBB
+	call_if_eq VAR_QZ_0x511A, 8, Kanto_PalletTown_ProfessorOaksLab_EventScript_8418EA6
+	call_if_set FLAG_QZ_0x215C, Kanto_PalletTown_ProfessorOaksLab_EventScript_8418EA2
+	call Quetzal_EventScript_840FBB5
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8418E68::
+	specialvar VAR_RESULT, QzIsNationalPokedexEnabled
+	goto_if_eq VAR_RESULT, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8418E7B
+	special EnableNationalPokedex
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8418E7B::
+	goto_if_ne VAR_QZ_0x511A, 7, Quetzal_EventScript_8457C6C
+	setvar VAR_QZ_0x511A, 9
+	setvar VAR_QZ_0x5118, 3
+	setobjectxyperm 4, 6, 3
+	setobjectmovementtype 4, 8
+	clearflag FLAG_QZ_0x21A2
+	setflag FLAG_QZ_0x21A3
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8418EA2::
+	setflag FLAG_QZ_0x21E5
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8418EA6::
+	setvar VAR_QZ_0x511A, 9
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8418EAC::
+	setobjectxyperm 4, 6, 0xB
+	setobjectmovementtype 4, 7
+	savebgm MUS_RG_OAK
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8418EBB::
+	setobjectxyperm 4, 6, 0xB
+	setobjectmovementtype 4, 7
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8418EC7::
+	setobjectmovementtype 8, 7
+	goto_if_eq VAR_QZ_0x5147, 0, Kanto_PalletTown_ProfessorOaksLab_EventScript_8418EED
+	goto_if_eq VAR_QZ_0x5147, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8418EF5
+	goto_if_eq VAR_QZ_0x5147, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_8418EFD
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8418EED::
+	setobjectxyperm 8, 0xA, 5
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8418EF5::
+	setobjectxyperm 8, 8, 5
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8418EFD::
+	setobjectxyperm 8, 9, 5
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8418F0F::
+	turnobject LOCALID_PLAYER, 2
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8418F26::
+	lockall
+	setvar VAR_FACING, 2
+	textcolor 0
+	applymovement 4, Kanto_PalletTown_ProfessorOaksLab_Movement_84191D4
+	waitmovement 0
+	removeobject 4
+	setobjectxyperm 4, 6, 3
+	setobjectmovementtype 4, 8
+	clearflag FLAG_QZ_0x21A2
+	applymovement LOCALID_PLAYER, Kanto_PalletTown_ProfessorOaksLab_Movement_84191DB
+	waitmovement 0
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_8418F59
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8418F59::
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843F19E, MSGBOX_DEFAULT
+	closemessage
+	call_if_eq VAR_FACING, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419098
+	call_if_eq VAR_FACING, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_84190DF
+	call_if_eq VAR_FACING, 4, Kanto_PalletTown_ProfessorOaksLab_EventScript_84190B8
+	call_if_eq VAR_FACING, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_84190B8
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843F297, MSGBOX_DEFAULT
+	fadedefaultbgm
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843F344, MSGBOX_DEFAULT
+	call_if_eq VAR_FACING, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_84190FF
+	call_if_eq VAR_FACING, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_841910A
+	textcolor 3
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843F3A2, MSGBOX_DEFAULT
+	closemessage
+	call Quetzal_EventScript_8456AB7
+	call_if_eq VAR_FACING, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419115
+	call_if_eq VAR_FACING, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419120
+	call_if_eq VAR_FACING, 4, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419139
+	call_if_eq VAR_FACING, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_841914B
+	addobject 9
+	addobject 10
+	delay 0x1E
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843F3C5, MSGBOX_DEFAULT
+	closemessage
+	removeobject 9
+	removeobject 10
+	delay 0x1E
+	call_if_eq VAR_FACING, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_841975B
+	call_if_eq VAR_FACING, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419766
+	call_if_eq VAR_FACING, 4, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419771
+	call_if_eq VAR_FACING, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419783
+	textcolor 3
+	playfanfare MUS_RG_OBTAIN_KEY_ITEM
+	message Kanto_PalletTown_ProfessorOaksLab_Text_843F428
+	waitmessage
+	waitfanfare
+	call Quetzal_EventScript_8456AB7
+	special EnableNationalPokedex
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843F443, MSGBOX_DEFAULT
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843F51D, MSGBOX_DEFAULT
+	closemessage
+	playbgm MUS_RG_RIVAL_EXIT, 0
+	call_if_eq VAR_FACING, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419A94
+	call_if_eq VAR_FACING, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419AA6
+	call_if_eq VAR_FACING, 4, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419AA6
+	call_if_eq VAR_FACING, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419AA6
+	removeobject 8
+	fadedefaultbgm
+	setvar VAR_QZ_0x511A, 8
+	releaseall
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419098::
+	setobjectxyperm 8, 5, 0xA
+	addobject 8
+	playbgm MUS_RG_ENCOUNTER_RIVAL, 0
+	applymovement LOCALID_PLAYER, Kanto_PalletTown_ProfessorOaksLab_Movement_8419ABF
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_8419AC8
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84190B8::
+	setobjectxyperm 8, 6, 0xA
+	addobject 8
+	playbgm MUS_RG_ENCOUNTER_RIVAL, 0
+	applymovement 4, Quetzal_Movement_8457AB0
+	applymovement LOCALID_PLAYER, Kanto_PalletTown_ProfessorOaksLab_Movement_8419ABC
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_8419AC8
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84190DF::
+	setobjectxyperm 8, 6, 0xA
+	addobject 8
+	playbgm MUS_RG_ENCOUNTER_RIVAL, 0
+	applymovement 4, Quetzal_Movement_8457AB0
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_8419AC8
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84190FF::
+	applymovement LOCALID_PLAYER, Quetzal_Movement_8457AAC
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_841910A::
+	applymovement LOCALID_PLAYER, Quetzal_Movement_8457AAA
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419115::
+	applymovement 4, Kanto_PalletTown_ProfessorOaksLab_Movement_8419156
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419120::
+	applymovement 4, Kanto_PalletTown_ProfessorOaksLab_Movement_841915C
+	applymovement LOCALID_PLAYER, Kanto_PalletTown_ProfessorOaksLab_Movement_84197DD
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_84197DD
+	waitmovement 4
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419139::
+	applymovement 4, Kanto_PalletTown_ProfessorOaksLab_Movement_8419156
+	applymovement LOCALID_PLAYER, Kanto_PalletTown_ProfessorOaksLab_Movement_84197D9
+	waitmovement 4
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_841914B::
+	applymovement 4, Kanto_PalletTown_ProfessorOaksLab_Movement_8419156
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419162::
+	lockall
+	textcolor 0
+	applymovement 4, Kanto_PalletTown_ProfessorOaksLab_Movement_84191D4
+	waitmovement 0
+	removeobject 4
+	setobjectxyperm 4, 6, 3
+	setobjectmovementtype 4, 8
+	clearflag FLAG_QZ_0x21A2
+	applymovement LOCALID_PLAYER, Kanto_PalletTown_ProfessorOaksLab_Movement_84191DB
+	waitmovement 0
+	applymovement 8, Quetzal_Movement_8457AAC
+	waitmovement 0
+	clearflag FLAG_QZ_0x2130
+	savebgm MUS_DUMMY
+	fadedefaultbgm
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843DFAE, MSGBOX_DEFAULT
+	closemessage
+	delay 0x3C
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E2EE, MSGBOX_DEFAULT
+	closemessage
+	delay 0x1E
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_84191E4
+	waitmovement 0
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843DFD5, MSGBOX_DEFAULT
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E41E, MSGBOX_DEFAULT
+	setvar VAR_QZ_0x511A, 2
+	releaseall
+	end
+
+@ Kanto_PalletTown_ProfessorOaksLab trigger at 5,8 (VAR_QZ_0x511A == 2)
+@ Kanto_PalletTown_ProfessorOaksLab trigger at 6,8 (VAR_QZ_0x511A == 2)
+@ Kanto_PalletTown_ProfessorOaksLab trigger at 7,8 (VAR_QZ_0x511A == 2)
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84191E7::
+	lockall
+	textcolor 0
+	applymovement 4, Kanto_PalletTown_ProfessorOaksLab_Movement_8457AB4
+	waitmovement 0
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E4AD, MSGBOX_DEFAULT
+	closemessage
+	applymovement LOCALID_PLAYER, Kanto_PalletTown_ProfessorOaksLab_Movement_8419209
+	waitmovement 0
+	releaseall
+	end
+
+@ Kanto_PalletTown_ProfessorOaksLab trigger at 5,8 (VAR_QZ_0x511A == 3)
+Kanto_PalletTown_ProfessorOaksLab_EventScript_841920B::
+	lockall
+	setvar VAR_TEMP_2, 1
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_841922F
+
+@ Kanto_PalletTown_ProfessorOaksLab trigger at 6,8 (VAR_QZ_0x511A == 3)
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419217::
+	lockall
+	setvar VAR_TEMP_2, 2
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_841922F
+
+@ Kanto_PalletTown_ProfessorOaksLab trigger at 7,8 (VAR_QZ_0x511A == 3)
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419223::
+	lockall
+	setvar VAR_TEMP_2, 3
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_841922F
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_841922F::
+	textcolor 0
+	playbgm MUS_RG_ENCOUNTER_RIVAL, 0
+	applymovement 8, Quetzal_Movement_8457AB0
+	waitmovement 0
+	applymovement LOCALID_PLAYER, Quetzal_Movement_8457AAC
+	waitmovement 0
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E0CA, MSGBOX_DEFAULT
+	closemessage
+	applymovement 4, Kanto_PalletTown_ProfessorOaksLab_Movement_8457AB4
+	waitmovement 0
+	goto_if_eq VAR_QZ_0x5147, 0, Kanto_PalletTown_ProfessorOaksLab_EventScript_84192F6
+	goto_if_eq VAR_QZ_0x5147, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419371
+	goto_if_eq VAR_QZ_0x5147, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_841927E
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_841927E::
+	goto_if_eq VAR_TEMP_2, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_84192A0
+	goto_if_eq VAR_TEMP_2, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_84192B0
+	goto_if_eq VAR_TEMP_2, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_84192C0
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84192A0::
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_84192E4
+	waitmovement 0
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_84192D0
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84192B0::
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_84192EB
+	waitmovement 0
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_84192D0
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84192C0::
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_84192F1
+	waitmovement 0
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_84192D0
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84192D0::
+	qz_trainerbattle_13 TRAINER_QZ_8518, 3, Kanto_PalletTown_ProfessorOaksLab_Text_843E112, Quetzal_Text_843E142
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_84193E6
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84192F6::
+	goto_if_eq VAR_TEMP_2, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419318
+	goto_if_eq VAR_TEMP_2, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419328
+	goto_if_eq VAR_TEMP_2, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419338
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419318::
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_841935C
+	waitmovement 0
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_84192D0
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419328::
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_8419364
+	waitmovement 0
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_84192D0
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419338::
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_841936B
+	waitmovement 0
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_84192D0
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419371::
+	goto_if_eq VAR_TEMP_2, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419393
+	goto_if_eq VAR_TEMP_2, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_84193A3
+	goto_if_eq VAR_TEMP_2, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_84193B3
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419393::
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_84193D7
+	waitmovement 0
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_84192D0
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84193A3::
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_84193DD
+	waitmovement 0
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_84192D0
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84193B3::
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_84193E2
+	waitmovement 0
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_84192D0
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84193E6::
+	special QzHealPlayerPartyEx
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E162, MSGBOX_DEFAULT
+	closemessage
+	playbgm MUS_RG_RIVAL_EXIT, 0
+	call_if_eq VAR_TEMP_2, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419428
+	call_if_eq VAR_TEMP_2, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_841943A
+	call_if_eq VAR_TEMP_2, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_841944C
+	removeobject 8
+	playse SE_EXIT
+	fadedefaultbgm
+	setvar VAR_QZ_0x511A, 4
+	setflag FLAG_QZ_0x2110
+	releaseall
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419428::
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_841945E
+	applymovement LOCALID_PLAYER, Kanto_PalletTown_ProfessorOaksLab_Movement_8419477
+	waitmovement 8
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_841943A::
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_841946E
+	applymovement LOCALID_PLAYER, Kanto_PalletTown_ProfessorOaksLab_Movement_8419477
+	waitmovement 8
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_841944C::
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_8419466
+	applymovement LOCALID_PLAYER, Kanto_PalletTown_ProfessorOaksLab_Movement_841947D
+	waitmovement 8
+	return
+
+@ Kanto_PalletTown_ProfessorOaksLab object 8 (local id 8, gfx 0x3EED) at 5,4
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419483::
+	lock
+	faceplayer
+	goto_if_eq VAR_QZ_0x511A, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_84194AF
+	goto_if_eq VAR_QZ_0x511A, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_84194A5
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843DF7F, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84194A5::
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E000, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84194AF::
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E099, MSGBOX_DEFAULT
+	release
+	end
+
+@ Kanto_PalletTown_ProfessorOaksLab object 4 (local id 4, gfx 0x3F38) at 6,3
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84194B9::
+	lock
+	faceplayer
+	call_if_ge VAR_QZ_0x511A, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C3F
+	goto_if_set FLAG_TEMP_2, Kanto_PalletTown_ProfessorOaksLab_EventScript_841952F
+	goto_if_eq VAR_QZ_0x511A, 9, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419819
+	goto_if_eq VAR_QZ_0x511A, 8, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419999
+	goto_if_set FLAG_QZ_0x2108, Kanto_PalletTown_ProfessorOaksLab_EventScript_84198E4
+	goto_if_eq VAR_QZ_0x5108, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419819
+	goto_if_eq VAR_QZ_0x511A, 6, Kanto_PalletTown_ProfessorOaksLab_EventScript_84197EC
+	goto_if_ge VAR_QZ_0x513B, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_841954D
+	goto_if_eq VAR_QZ_0x511A, 4, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419543
+	goto_if_eq VAR_QZ_0x511A, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419539
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E44C, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_841952F::
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_84577BD, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419539::
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E666, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419543::
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E6E3, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_841954D::
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E73B, MSGBOX_DEFAULT
+	textcolor 3
+	playfanfare MUS_OBTAIN_TMHM
+	message Kanto_PalletTown_ProfessorOaksLab_Text_843E7E5
+	waitmessage
+	waitfanfare
+	call Quetzal_EventScript_8456AB7
+	removeitem ITEM_PARCEL, 1
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E800, MSGBOX_DEFAULT
+	playbgm MUS_RG_ENCOUNTER_RIVAL, 0
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E1B9, MSGBOX_DEFAULT
+	closemessage
+	call_if_eq VAR_FACING, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_84199AD
+	call_if_eq VAR_FACING, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_84199EC
+	call_if_eq VAR_FACING, 4, Kanto_PalletTown_ProfessorOaksLab_EventScript_84199C9
+	call_if_eq VAR_FACING, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_84199C9
+	fadedefaultbgm
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E1C7, MSGBOX_DEFAULT
+	closemessage
+	delay 0x1E
+	playse SE_PIN
+	applymovement 4, Quetzal_Movement_8457A9E
+	waitmovement 0
+	applymovement 4, Quetzal_Movement_8457AA0
+	waitmovement 0
+	call_if_eq VAR_FACING, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419A08
+	call_if_eq VAR_FACING, 4, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419A3F
+	call_if_eq VAR_FACING, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419A20
+	call_if_eq VAR_FACING, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419AB1
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E83E, MSGBOX_DEFAULT
+	closemessage
+	call_if_eq VAR_FACING, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419798
+	call_if_eq VAR_FACING, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_84197A3
+	call_if_eq VAR_FACING, 4, Kanto_PalletTown_ProfessorOaksLab_EventScript_84197BC
+	call_if_eq VAR_FACING, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_84197CE
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E86C, MSGBOX_DEFAULT
+	closemessage
+	delay 0x28
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E8FB, MSGBOX_DEFAULT
+	closemessage
+	applymovement 4, Quetzal_Movement_8457AAC
+	waitmovement 0
+	removeobject 9
+	delay 0xA
+	removeobject 10
+	delay 0x19
+	call_if_eq VAR_FACING, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_841975B
+	call_if_eq VAR_FACING, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419766
+	call_if_eq VAR_FACING, 4, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419771
+	call_if_eq VAR_FACING, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419783
+	delay 0xA
+	call_if_unset FLAG_QZ_0xA79, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C51
+	call Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C6E
+	setflag FLAG_QZ_0xA79
+	special EnableNationalPokedex
+	setflag FLAG_QZ_0x226A
+	special SetUnlockedPokedexFlags
+	setvar VAR_QZ_0x511F, 1
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E95B, MSGBOX_DEFAULT
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843EA0C, MSGBOX_DEFAULT
+	setvar VAR_0x8004, 0
+	setvar VAR_0x8005, 1
+	special QzQuestLogNop
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843EAC0, MSGBOX_DEFAULT
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E1F8, MSGBOX_DEFAULT
+	call_if_eq VAR_FACING, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419A5E
+	call_if_eq VAR_FACING, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419A70
+	call_if_eq VAR_FACING, 4, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419A82
+	call_if_eq VAR_FACING, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419A82
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E225, MSGBOX_DEFAULT
+	closemessage
+	playbgm MUS_RG_RIVAL_EXIT, 0
+	call_if_eq VAR_FACING, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419A94
+	call_if_eq VAR_FACING, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419AA6
+	call_if_eq VAR_FACING, 4, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419AA6
+	call_if_eq VAR_FACING, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419AA6
+	removeobject 8
+	fadedefaultbgm
+	setvar VAR_QZ_0x511A, 6
+	setvar VAR_QZ_0x513B, 2
+	setvar VAR_QZ_0x513C, 1
+	setvar VAR_QZ_0x511B, 1
+	setvar VAR_QZ_0x5125, 1
+	release
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_841975B::
+	applymovement 4, Kanto_PalletTown_ProfessorOaksLab_Movement_8419792
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419766::
+	applymovement 4, Kanto_PalletTown_ProfessorOaksLab_Movement_8419795
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419771::
+	applymovement 4, Kanto_PalletTown_ProfessorOaksLab_Movement_8419792
+	applymovement LOCALID_PLAYER, Kanto_PalletTown_ProfessorOaksLab_Movement_841978E
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419783::
+	applymovement 4, Kanto_PalletTown_ProfessorOaksLab_Movement_8419792
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419798::
+	applymovement 4, Kanto_PalletTown_ProfessorOaksLab_Movement_84197E1
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84197A3::
+	applymovement 4, Kanto_PalletTown_ProfessorOaksLab_Movement_84197E6
+	applymovement LOCALID_PLAYER, Kanto_PalletTown_ProfessorOaksLab_Movement_84197DD
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_84197DD
+	waitmovement 4
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84197BC::
+	applymovement 4, Kanto_PalletTown_ProfessorOaksLab_Movement_84197E1
+	applymovement LOCALID_PLAYER, Kanto_PalletTown_ProfessorOaksLab_Movement_84197D9
+	waitmovement 4
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84197CE::
+	applymovement 4, Kanto_PalletTown_ProfessorOaksLab_Movement_84197E1
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84197EC::
+	setvar VAR_0x8004, 1
+	specialvar VAR_RESULT, QzGetPokedexCount
+	copyvar VAR_0x8008, VAR_0x8005
+	copyvar VAR_0x8009, VAR_0x8006
+	buffernumberstring 0, VAR_0x8008
+	buffernumberstring 1, VAR_0x8009
+	goto_if_eq VAR_0x8009, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419921
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_8419819
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419819::
+	call Kanto_PalletTown_ProfessorOaksLab_EventScript_845788B
+	goto_if_set FLAG_QZ_0x21E4, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419829
+	release
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419829::
+	closemessage
+	delay 0x28
+	message Kanto_PalletTown_ProfessorOaksLab_Text_84577A1
+	waitmessage
+	call_if_eq VAR_FACING, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_841987A
+	call_if_eq VAR_FACING, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419885
+	call_if_eq VAR_FACING, 4, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419890
+	call_if_eq VAR_FACING, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_841989B
+	applymovement 4, Quetzal_Movement_8457AA4
+	waitmovement 0
+	closemessage
+	delay 0x46
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_84577BD, MSGBOX_DEFAULT
+	setflag FLAG_TEMP_2
+	release
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_841987A::
+	applymovement 4, Kanto_PalletTown_ProfessorOaksLab_Movement_84198A6
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419885::
+	applymovement 4, Kanto_PalletTown_ProfessorOaksLab_Movement_84198AD
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419890::
+	applymovement 4, Kanto_PalletTown_ProfessorOaksLab_Movement_84198B4
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_841989B::
+	applymovement 4, Kanto_PalletTown_ProfessorOaksLab_Movement_84198BB
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84198E4::
+	specialvar VAR_RESULT, QzIsNationalPokedexEnabled
+	goto_if_eq VAR_RESULT, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419819
+	call Kanto_PalletTown_ProfessorOaksLab_EventScript_845788B
+	closemessage
+	goto_if_lt VAR_0x8009, 60, Kanto_PalletTown_ProfessorOaksLab_EventScript_841991F
+	goto_if_unset FLAG_QZ_0x2244, Kanto_PalletTown_ProfessorOaksLab_EventScript_841991F
+	delay 0x1E
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843F133, MSGBOX_DEFAULT
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_8418F59
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_841991F::
+	release
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419921::
+	specialvar VAR_RESULT, QzReturnZero
+	goto_if_eq VAR_RESULT, 2, Quetzal_EventScript_8457FA3
+	special QzQuestLogNop
+	goto_if_set FLAG_QZ_0x21E5, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419999
+	goto_if_set FLAG_QZ_0x215C, Kanto_PalletTown_ProfessorOaksLab_EventScript_84199A3
+	checkitem ITEM_POKE_BALL, 1
+	goto_if_eq VAR_RESULT, 0, Kanto_PalletTown_ProfessorOaksLab_EventScript_841995C
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_8419999
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_841995C::
+	goto_if_ge VAR_QZ_0x5125, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_841996D
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_8419999
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_841996D::
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843EBD8, MSGBOX_DEFAULT
+	additem ITEM_POKE_BALL, 5
+	loadword 0, Kanto_PalletTown_ProfessorOaksLab_Text_843E9EF
+	setorcopyvar VAR_0x8000, 1
+	setorcopyvar VAR_0x8001, 5
+	setorcopyvar VAR_0x8002, 0x16F
+	call Quetzal_EventScript_845571E
+	setflag FLAG_QZ_0x215C
+	release
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419999::
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843EBAD, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84199A3::
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843ECCC, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84199AD::
+	setobjectxyperm 8, 5, 0xA
+	addobject 8
+	applymovement LOCALID_PLAYER, Kanto_PalletTown_ProfessorOaksLab_Movement_8419ABF
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_8419AC8
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84199C9::
+	setobjectxyperm 8, 6, 0xA
+	addobject 8
+	applymovement 4, Quetzal_Movement_8457AB0
+	applymovement LOCALID_PLAYER, Kanto_PalletTown_ProfessorOaksLab_Movement_8419ABC
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_8419AC8
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84199EC::
+	setobjectxyperm 8, 6, 0xA
+	addobject 8
+	applymovement 4, Quetzal_Movement_8457AB0
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_8419AC8
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419A08::
+	applymovement 4, Quetzal_Movement_8457AA4
+	waitmovement 0
+	delay 0xF
+	applymovement 4, Quetzal_Movement_8457AB0
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419A20::
+	applymovement 4, Quetzal_Movement_8457AA4
+	waitmovement 0
+	delay 0xF
+	applymovement LOCALID_PLAYER, Quetzal_Movement_8457AAA
+	applymovement 4, Quetzal_Movement_8457AB0
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419A3F::
+	applymovement 4, Quetzal_Movement_8457AA4
+	waitmovement 0
+	delay 0xF
+	applymovement LOCALID_PLAYER, Quetzal_Movement_8457AAE
+	applymovement 4, Quetzal_Movement_8457AB0
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419A5E::
+	applymovement 8, Quetzal_Movement_8457AA4
+	applymovement LOCALID_PLAYER, Quetzal_Movement_8457AAA
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419A70::
+	applymovement 8, Quetzal_Movement_8457AAC
+	applymovement LOCALID_PLAYER, Quetzal_Movement_8457AB0
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419A82::
+	applymovement 8, Quetzal_Movement_8457AA4
+	applymovement LOCALID_PLAYER, Quetzal_Movement_8457AB0
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419A94::
+	applymovement LOCALID_PLAYER, Kanto_PalletTown_ProfessorOaksLab_Movement_8419ABC
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_8419ACF
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419AA6::
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_8419ACF
+	waitmovement 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419AB1::
+	applymovement LOCALID_PLAYER, Quetzal_Movement_8457AAC
+	waitmovement 0
+	return
+
+@ Kanto_PalletTown_ProfessorOaksLab object 5 (local id 5, gfx 0x3F0E) at 8,4
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419AD6::
+	lock
+	faceplayer
+	setvar VAR_TEMP_1, 0
+	goto_if_ge VAR_QZ_0x511A, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419DD2
+	goto_if_eq VAR_QZ_0x511A, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419AFD
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843ED57, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419AFD::
+	special QzChooseStarterKanto
+	waitstate
+	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_8361B98
+	copyvar VAR_TEMP_2, VAR_RESULT
+	copyvar VAR_QZ_0x5146, VAR_TEMP_2
+	copyvar VAR_QZ_0x5147, VAR_TEMP_1
+	setvar VAR_QZ_0x5143, 2
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_8419BB9
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419BB9::
+	special QzGiveStarterKanto
+	goto_if_eq VAR_RESULT, 2, Quetzal_EventScript_8361BCF
+	removeobject VAR_LAST_TALKED
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E61B, MSGBOX_DEFAULT
+	call Quetzal_EventScript_8456AB7
+	setflag FLAG_QZ_0x21E8
+	bufferspeciesname 0, VAR_TEMP_2
+	message Kanto_PalletTown_ProfessorOaksLab_Text_843E643
+	waitmessage
+	playfanfare MUS_RG_OBTAIN_KEY_ITEM
+	waitfanfare
+	call Quetzal_EventScript_8361ADB
+	call Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C51
+	call Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C6E
+	setflag FLAG_QZ_0xA79
+	setflag FLAG_QZ_0xA78
+	setflag FLAG_QZ_0x2EAF
+	specialvar VAR_RESULT, QzBufferLastReceivedMonForNickname
+	goto_if_eq VAR_RESULT, 0, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419CBF
+	specialvar VAR_RESULT, QzIsNuzlockeOption2D4Bit6
+	goto_if_eq VAR_RESULT, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419CA9
+	msgbox Quetzal_Text_845675A, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419CB4
+	goto_if_eq VAR_RESULT, 0, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419CBF
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C3F::
+	call_if_unset FLAG_QZ_0xA79, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C51
+	call Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C6E
+	setflag FLAG_QZ_0xA79
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C51::
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843F5D6, MSGBOX_DEFAULT
+	textcolor 3
+	playfanfare MUS_RG_OBTAIN_KEY_ITEM
+	message Kanto_PalletTown_ProfessorOaksLab_Text_843E930
+	waitmessage
+	waitfanfare
+	call Quetzal_EventScript_8456AB7
+	special EnableNationalPokedex
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C6E::
+	goto_if_set FLAG_QZ_0x2EAD, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C9F
+	goto_if_set FLAG_QZ_0x2EAE, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C8C
+	setflag FLAG_QZ_0x2EAE
+	goto_if_set FLAG_QZ_0x226A, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C9C
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C8C::
+	call Quetzal_EventScript_835FF25
+	goto_if_ne VAR_0x8007, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419CA0
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C9C::
+	setflag FLAG_QZ_0x2EAD
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C9F::
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419CA0::
+	msgbox Quetzal_Text_8360DB1, MSGBOX_DEFAULT
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419CA9::
+	message Quetzal_Text_845675A
+	waitmessage
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_8419CB4
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419CB4::
+	call Quetzal_EventScript_8361AF2
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_8419CBF
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419CBF::
+	setvar VAR_UNUSED_0x8014, 0
+	closemessage
+	goto_if_eq VAR_QZ_0x5147, 0, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419CE7
+	goto_if_eq VAR_QZ_0x5147, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D07
+	goto_if_eq VAR_QZ_0x5147, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419CF7
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419CE7::
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_8419D6E
+	waitmovement 0
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D17
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419CF7::
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_8419D77
+	waitmovement 0
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D29
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D07::
+	applymovement 8, Kanto_PalletTown_ProfessorOaksLab_Movement_8419D7E
+	waitmovement 0
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D3B
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D17::
+	textcolor 0
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E054, MSGBOX_DEFAULT
+	removeobject 7
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D48
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D29::
+	textcolor 0
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E054, MSGBOX_DEFAULT
+	removeobject 6
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D48
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D3B::
+	textcolor 0
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E054, MSGBOX_DEFAULT
+	removeobject 5
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D48::
+	textcolor 3
+	bufferspeciesname 0, SPECIES_SQUIRTLE
+	message Kanto_PalletTown_ProfessorOaksLab_Text_843E074
+	waitmessage
+	playfanfare MUS_RG_OBTAIN_KEY_ITEM
+	waitfanfare
+	setvar VAR_QZ_0x511A, 3
+	call_if_set FLAG_QZ_0x21E7, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D68
+	release
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D68::
+	setvar VAR_QZ_0x511C, 1
+	return
+
+@ Kanto_PalletTown_ProfessorOaksLab object 6 (local id 6, gfx 0x3F0E) at 9,4
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D84::
+	lock
+	faceplayer
+	setvar VAR_TEMP_1, 1
+	goto_if_ge VAR_QZ_0x511A, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419DD2
+	goto_if_eq VAR_QZ_0x511A, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419AFD
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843ED57, MSGBOX_DEFAULT
+	release
+	end
+
+@ Kanto_PalletTown_ProfessorOaksLab object 7 (local id 7, gfx 0x3F0E) at 10,4
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419DAB::
+	lock
+	faceplayer
+	setvar VAR_TEMP_1, 2
+	goto_if_ge VAR_QZ_0x511A, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419DD2
+	goto_if_eq VAR_QZ_0x511A, 2, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419AFD
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843ED57, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419DD2::
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843ED83, MSGBOX_DEFAULT
+	release
+	end
+
+@ Kanto_PalletTown_ProfessorOaksLab object 1 (local id 1, gfx 0x3F43) at 3,11
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419DDC::
+	lock
+	faceplayer
+	goto_if_set FLAG_QZ_0x2108, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419DF1
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843EF24, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419DF1::
+	setvar VAR_0x8004, 0
+	setvar VAR_0x8005, 5
+	special QzQuestLogNop
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843F053, MSGBOX_DEFAULT
+	release
+	end
+
+@ Kanto_PalletTown_ProfessorOaksLab object 3 (local id 3, gfx 0x3F43) at 11,10
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419E08::
+	lock
+	faceplayer
+	goto_if_set FLAG_QZ_0x2108, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419E1D
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843EF24, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419E1D::
+	setvar VAR_0x8004, 1
+	setvar VAR_0x8005, 0
+	special QzQuestLogNop
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843EF49, MSGBOX_DEFAULT
+	release
+	end
+
+@ Kanto_PalletTown_ProfessorOaksLab object 2 (local id 2, gfx 0x3F5A) at 2,10
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419E34::
+	lock
+	faceplayer
+	setvar VAR_0x8004, 0
+	setvar VAR_0x8005, 2
+	special QzQuestLogNop
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843F0BF, MSGBOX_DEFAULT
+	release
+	end
+
+@ Kanto_PalletTown_ProfessorOaksLab object 9 (local id 9, gfx 0x3F35) at 4,1
+@ Kanto_PalletTown_ProfessorOaksLab object 10 (local id 10, gfx 0x3F35) at 5,1
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419E4D::
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843ED23, MSGBOX_NPC
+	end
+
+@ Kanto_PalletTown_ProfessorOaksLab sign / bg event at 2,1
+@ Kanto_PalletTown_ProfessorOaksLab sign / bg event at 3,1
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419E56::
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843EE32, MSGBOX_SIGN
+	end
+
+@ Kanto_PalletTown_ProfessorOaksLab sign / bg event at 6,1
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419E5F::
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843EDA4, MSGBOX_SIGN
+	end
+
+@ Kanto_PalletTown_ProfessorOaksLab sign / bg event at 7,1
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419E68::
+	lockall
+	goto_if_ge VAR_QZ_0x511A, 6, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419E7E
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843EDC2, MSGBOX_DEFAULT
+	releaseall
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8419E7E::
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843EDF4, MSGBOX_DEFAULT
+	releaseall
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_845788B::
+	specialvar VAR_RESULT, QzReturnZero
+	goto_if_eq VAR_RESULT, 2, Quetzal_EventScript_8457FA3
+	special QzQuestLogNop
+	call_if_set FLAG_QZ_0x21E4, Kanto_PalletTown_ProfessorOaksLab_EventScript_84578B6
+	call_if_unset FLAG_QZ_0x21E4, Kanto_PalletTown_ProfessorOaksLab_EventScript_84578BF
+	call Kanto_PalletTown_ProfessorOaksLab_EventScript_84578D0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84578B6::
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_8457802, MSGBOX_DEFAULT
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84578BF::
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_845710D, MSGBOX_DEFAULT
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84578C8::
+	playfanfare MUS_RG_DEX_RATING
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84578CC::
+	playfanfare MUS_EVOLVED
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_84578D0::
+	setvar VAR_0x8004, 0x1F
+	special QzQuestLogNop
+	special QzQuestLogNop
+	call_if_unset FLAG_QZ_0x21E3, Kanto_PalletTown_ProfessorOaksLab_EventScript_8457924
+	setvar VAR_0x8004, 1
+	specialvar VAR_RESULT, QzGetPokedexCount
+	copyvar VAR_0x8008, VAR_0x8005
+	copyvar VAR_0x8009, VAR_0x8006
+	buffernumberstring 0, VAR_0x8008
+	buffernumberstring 1, VAR_0x8009
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_8457663, MSGBOX_DEFAULT
+	specialvar VAR_RESULT, QzIsRegionalDexComplete
+	goto_if_eq VAR_RESULT, 0, Kanto_PalletTown_ProfessorOaksLab_EventScript_8457927
+	goto_if_eq VAR_RESULT, 1, Kanto_PalletTown_ProfessorOaksLab_EventScript_845793B
+	end
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8457924::
+	textcolor 0
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8457927::
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_84576C8, MSGBOX_DEFAULT
+	call Kanto_PalletTown_ProfessorOaksLab_EventScript_84578C8
+	waitfanfare
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_8457952
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_845793B::
+	setflag FLAG_QZ_0x21E4
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_8457726, MSGBOX_DEFAULT
+	call Kanto_PalletTown_ProfessorOaksLab_EventScript_84578CC
+	waitfanfare
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_8457952
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_8457952::
+	special QzQuestLogNop
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_8419156:
+	walk_up
+	walk_left
+	walk_in_place_faster_up
+	delay_16
+	delay_4
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_841915C:
+	walk_left
+	walk_left
+	walk_up
+	delay_16
+	delay_4
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_84191D4:
+	walk_up
+	walk_up
+	walk_up
+	walk_up
+	walk_up
+	walk_up
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_84191DB:
+	walk_up
+	walk_up
+	walk_up
+	walk_up
+	walk_up
+	walk_up
+	walk_up
+	walk_up
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_84191E4:
+	walk_in_place_up
+	walk_in_place_up
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_8419209:
+	walk_up
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_84192E4:
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_down
+	walk_down
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_84192EB:
+	walk_left
+	walk_left
+	walk_left
+	walk_down
+	walk_down
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_84192F1:
+	walk_left
+	walk_left
+	walk_down
+	walk_down
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_841935C:
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_down
+	walk_down
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_8419364:
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_down
+	walk_down
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_841936B:
+	walk_left
+	walk_left
+	walk_left
+	walk_down
+	walk_down
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_84193D7:
+	walk_left
+	walk_left
+	walk_left
+	walk_down
+	walk_down
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_84193DD:
+	walk_left
+	walk_left
+	walk_down
+	walk_down
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_84193E2:
+	walk_left
+	walk_down
+	walk_down
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_841945E:
+	walk_right
+	walk_down
+	walk_down
+	walk_down
+	walk_down
+	walk_down
+	delay_8
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_8419466:
+	walk_left
+	walk_down
+	walk_down
+	walk_down
+	walk_down
+	walk_down
+	delay_8
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_841946E:
+	walk_right
+	walk_down
+	walk_down
+	walk_down
+	walk_left
+	walk_down
+	walk_down
+	delay_8
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_8419477:
+	delay_16
+	delay_8
+	walk_in_place_faster_right
+	delay_16
+	walk_in_place_faster_down
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_841947D:
+	delay_16
+	delay_8
+	walk_in_place_faster_left
+	delay_16
+	walk_in_place_faster_down
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_841978E:
+	delay_16
+	delay_8
+	walk_in_place_faster_right
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_8419792:
+	walk_right
+	walk_down
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_8419795:
+	walk_down
+	walk_right
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_84197D9:
+	delay_16
+	delay_8
+	walk_in_place_faster_up
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_84197DD:
+	delay_16
+	delay_8
+	walk_in_place_faster_left
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_84197E1:
+	walk_up
+	walk_left
+	delay_16
+	walk_in_place_faster_down
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_84197E6:
+	walk_left
+	walk_left
+	walk_up
+	delay_16
+	walk_in_place_faster_right
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_84198A6:
+	walk_in_place_down
+	walk_in_place_fast_down
+	walk_in_place_down
+	walk_in_place_down
+	walk_in_place_fast_down
+	walk_in_place_down
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_84198AD:
+	walk_in_place_up
+	walk_in_place_fast_up
+	walk_in_place_up
+	walk_in_place_up
+	walk_in_place_fast_up
+	walk_in_place_up
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_84198B4:
+	walk_in_place_left
+	walk_in_place_fast_left
+	walk_in_place_left
+	walk_in_place_left
+	walk_in_place_fast_left
+	walk_in_place_left
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_84198BB:
+	walk_in_place_right
+	walk_in_place_fast_right
+	walk_in_place_right
+	walk_in_place_right
+	walk_in_place_fast_right
+	walk_in_place_right
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_8419ABC:
+	delay_4
+	walk_in_place_faster_down
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_8419ABF:
+	walk_in_place_faster_down
+	delay_16
+	delay_16
+	delay_16
+	delay_16
+	delay_16
+	delay_8
+	walk_in_place_faster_left
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_8419AC8:
+	walk_up
+	walk_up
+	walk_up
+	walk_up
+	walk_up
+	walk_up
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_8419ACF:
+	walk_down
+	walk_down
+	walk_down
+	walk_down
+	walk_down
+	walk_down
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_8419D6E:
+	walk_down
+	walk_down
+	walk_right
+	walk_right
+	walk_right
+	walk_right
+	walk_right
+	walk_up
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_8419D77:
+	walk_down
+	walk_right
+	walk_right
+	walk_right
+	walk_right
+	walk_in_place_faster_up
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_8419D7E:
+	walk_down
+	walk_right
+	walk_right
+	walk_right
+	walk_in_place_faster_up
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Movement_8457AB4:
+	face_down
+	step_end
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843DF7F::
+	.string "BLUE: What, it’s only {PLAYER}?\n"
+	.string "Gramps isn’t around.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843DFAE::
+	.string "BLUE: Gramps!\n"
+	.string "I’m fed up with waiting!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843DFD5::
+	.string "BLUE: Hey! Gramps! No fair!\n"
+	.string "What about me?$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E000::
+	.string "BLUE: Heh, I don’t need to be\n"
+	.string "greedy like you. I’m mature!\p"
+	.string "Go ahead and choose, {PLAYER}!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E054::
+	.string "BLUE: I’ll take this one, then!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E074::
+	.string "BLUE received the {STR_VAR_1}\n"
+	.string "from PROF. OAK!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E099::
+	.string "BLUE: My POKéMON looks a lot\n"
+	.string "tougher than yours.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E0CA::
+	.string "BLUE: Wait, {PLAYER}!\n"
+	.string "Let’s check out our POKéMON!\p"
+	.string "Come on, I’ll take you on!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E112::
+	.string "WHAT?\n"
+	.string "Unbelievable!\l"
+	.string "I picked the wrong POKéMON!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E162::
+	.string "BLUE: Okay! I’ll make my\n"
+	.string "POKéMON battle to toughen it up!\p"
+	.string "{PLAYER}! Gramps!\n"
+	.string "Smell you later!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E1B9::
+	.string "BLUE: Gramps!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E1C7::
+	.string "BLUE: I almost forgot!\n"
+	.string "What did you call me for?$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E1F8::
+	.string "BLUE: All right, Gramps!\n"
+	.string "Leave it all to me!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E225::
+	.string "{PLAYER}, I hate to say it, but you\n"
+	.string "won’t be necessary for this.\p"
+	.string "I know! I’ll borrow a TOWN MAP\n"
+	.string "from my sis!\p"
+	.string "I’ll tell her not to lend you one,\n"
+	.string "{PLAYER}! Hahaha!\p"
+	.string "Don’t bother coming around to\n"
+	.string "my place after this!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E2EE::
+	.string "OAK: BLUE?\n"
+	.string "Let me think…\p"
+	.string "Oh, that’s right, I told you to\n"
+	.string "come! Just wait!\p"
+	.string "Here, {PLAYER}.\p"
+	.string "There are three POKéMON here.\p"
+	.string "Haha!\p"
+	.string "The POKéMON are held inside\n"
+	.string "these POKé BALLS.\p"
+	.string "When I was young, I was a serious\n"
+	.string "POKéMON TRAINER.\p"
+	.string "But now, in my old age, I have\n"
+	.string "only these three left.\p"
+	.string "You can have one.\n"
+	.string "Go on, choose!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E41E::
+	.string "OAK: Be patient, BLUE.\n"
+	.string "You can have one, too!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E44C::
+	.string "OAK: Now, {PLAYER}.\p"
+	.string "Inside those three POKé BALLS are\n"
+	.string "POKéMON.\p"
+	.string "Which one will you choose for\n"
+	.string "yourself?$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E4AD::
+	.string "OAK: Hey!\n"
+	.string "Don’t go away yet!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E61B::
+	.string "This POKéMON is really quite\n"
+	.string "energetic!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E643::
+	.string "{PLAYER} received the {STR_VAR_1}\n"
+	.string "from PROF. OAK!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E666::
+	.string "OAK: If a wild POKéMON appears,\n"
+	.string "your POKéMON can battle it.\p"
+	.string "With it at your side, you should be\n"
+	.string "able to reach the next town.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E6E3::
+	.string "OAK: {PLAYER}, raise your young\n"
+	.string "POKéMON by making it battle.\p"
+	.string "It has to battle for it to grow.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E73B::
+	.string "OAK: Oh, {PLAYER}!\n"
+	.string "How is my old POKéMON?\p"
+	.string "Well, it seems to be growing more\n"
+	.string "attached to you.\p"
+	.string "You must be talented as a POKéMON\n"
+	.string "TRAINER.\p"
+	.string "What’s that?\n"
+	.string "You have something for me?$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E7E5::
+	.string "{PLAYER} delivered OAK’S PARCEL.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E800::
+	.string "Ah! \n"
+	.string "It’s the custom POKé BALL!\p"
+	.string "I had it on order.\n"
+	.string "Thank you!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E83E::
+	.string "OAK: Oh, right!\n"
+	.string "I have a request for you two.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E86C::
+	.string "On the desk there is my invention,\n"
+	.string "the POKéDEX!\p"
+	.string "It automatically records data on\n"
+	.string "POKéMON you’ve seen or caught.\p"
+	.string "It’s a high-tech encyclopedia!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E8FB::
+	.string "OAK: {PLAYER} and BLUE.\n"
+	.string "Take your POKéDEX on your travels.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E930::
+	.string "{PLAYER} received from OAK\n"
+	.string "the NATIONAL POKéDEX!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E95B::
+	.string "OAK: You can’t get detailed data\n"
+	.string "on POKéMON by just seeing them.\p"
+	.string "You must catch them to obtain\n"
+	.string "complete data.\p"
+	.string "Use POKé BALLS to catch\n"
+	.string "wild POKéMON.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843E9EF::
+	.string "{PLAYER} received five POKé BALLS.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843EA0C::
+	.string "When a wild POKéMON appears,\n"
+	.string "it’s fair game.\p"
+	.string "Just throw a POKé BALL at it and\n"
+	.string "try to catch it!\p"
+	.string "This won’t always work, however.\p"
+	.string "A healthy POKéMON can escape.\n"
+	.string "You have to be lucky!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843EAC0::
+	.string "To make a complete guide on all\n"
+	.string "the POKéMON in the world…\p"
+	.string "That was my dream!\p"
+	.string "But, I’m too old.\n"
+	.string "I can’t get the job done.\p"
+	.string "So, I want you two to fulfill my\n"
+	.string "dream for me.\p"
+	.string "Get moving, you two.\p"
+	.string "This is a great undertaking in\n"
+	.string "POKéMON history!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843EBAD::
+	.string "POKéMON around the world wait for\n"
+	.string "you, {PLAYER}!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843EBD8::
+	.string "Ah, {PLAYER}!\n"
+	.string "How is your POKéDEX shaping up?\p"
+	.string "BLUE has already caught some\n"
+	.string "POKéMON and added to the data.\p"
+	.string "So, {PLAYER}, let’s have a look at\n"
+	.string "your POKéDEX.\p"
+	.string "…What’s the matter?\n"
+	.string "You’ve added no new data at all.\p"
+	.string "I’ll give you these, so do try a\n"
+	.string "little harder.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843ECCC::
+	.string "OAK: Come see me sometime.\p"
+	.string "After all, I want to know how your\n"
+	.string "POKéDEX is coming along.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843ED23::
+	.string "It’s like an encyclopedia, but the\n"
+	.string "pages are blank.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843ED57::
+	.string "Those are POKé BALLS.\n"
+	.string "They contain POKéMON!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843ED83::
+	.string "That’s PROF. OAK’s last POKéMON.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843EDA4::
+	.string "Press START to open the MENU!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843EDC2::
+	.string "The SAVE option is on the MENU.\n"
+	.string "Use it regularly.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843EDF4::
+	.string "All POKéMON types have strong and\n"
+	.string "weak points against others.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843EE32::
+	.string "There’s an e-mail message here.\p"
+	.string "…\p"
+	.string "Finally!\n"
+	.string "The ultimate TRAINERS of the\l"
+	.string "POKéMON LEAGUE are ready to\l"
+	.string "take on all comers!\p"
+	.string "Bring your best POKéMON and see\n"
+	.string "how you rate as a TRAINER!\p"
+	.string "POKéMON LEAGUE HQ\n"
+	.string "INDIGO PLATEAU\p"
+	.string "PROF. OAK, please visit us!\n"
+	.string "…$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843EF24::
+	.string "I study POKéMON as PROF. OAK’s\n"
+	.string "AIDE.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843EF49::
+	.string "Hi, {PLAYER}. I bet you’ve become\n"
+	.string "good friends with your POKéMON.\p"
+	.string "By the way, did you know about\n"
+	.string "DAISY?\p"
+	.string "If you show DAISY your POKéMON,\n"
+	.string "she can tell how much it likes you.\p"
+	.string "Occasionally, she will even groom\n"
+	.string "a POKéMON for you.\p"
+	.string "This is a secret, so please don’t\n"
+	.string "tell anyone.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843F053::
+	.string "PROF. OAK is going to have his own\n"
+	.string "radio show soon.\p"
+	.string "The program will be called PROF.\n"
+	.string "OAK’s POKéMON SEMINAR.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843F0BF::
+	.string "PROF. OAK may not look like much,\n"
+	.string "but he’s the authority on POKéMON.\p"
+	.string "Many POKéMON TRAINERS hold him in\n"
+	.string "high regard.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843F133::
+	.string "Ah, now this is excellent!\p"
+	.string "{PLAYER}, I have another important\n"
+	.string "favor to ask of you.\p"
+	.string "I need you to listen closely.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843F19E::
+	.string "Recently, there have been sightings\n"
+	.string "of many rare POKéMON species.\p"
+	.string "I’m talking about POKéMON that\n"
+	.string "have never been seen in KANTO.\p"
+	.string "I would love to go see things for\n"
+	.string "myself, but I’m much too old.\p"
+	.string "Since I can’t do it, {PLAYER}, I’d\n"
+	.string "like you to go in my place.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843F297::
+	.string "BLUE: Hey, I heard that!\p"
+	.string "Gramps, what’s with favoring\n"
+	.string "{PLAYER} over me all the time?\p"
+	.string "I went and collected more POKéMON,\n"
+	.string "and faster, too.\p"
+	.string "You should just let me handle\n"
+	.string "everything.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843F344::
+	.string "OAK: I know, I know.\n"
+	.string "Of course I need your help, too.\p"
+	.string "Now, I need to see both your\n"
+	.string "POKéDEXES.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843F3A2::
+	.string "PROF. OAK took both POKéDEX\n"
+	.string "units.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843F3C5::
+	.string "… … …  … … …\p"
+	.string "… … …  … … …\p"
+	.string "…And that’s done!\p"
+	.string "Now these units can record data on\n"
+	.string "a lot more POKéMON.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843F428::
+	.string "{PLAYER}’s POKéDEX was upgraded!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843F443::
+	.string "Now, {PLAYER} and BLUE!\p"
+	.string "This time, you really must work\n"
+	.string "towards filling your POKéDEXES.\p"
+	.string "I urge you to make them the best\n"
+	.string "and the most complete of all time!\p"
+	.string "Truly, this is a monumentally great\n"
+	.string "undertaking in POKéMON history!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843F51D::
+	.string "BLUE: Gramps, calm down.\n"
+	.string "Don’t get so excited.\p"
+	.string "I’ll get the POKéDEX completed,\n"
+	.string "don’t you worry about a thing.\p"
+	.string "I think I’ll try looking around\n"
+	.string "ONE ISLAND first…\p"
+	.string "Anyways, I’m outta here!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_843F5D6::
+	.string "OAK: Take this NATIONAL POKéDEX\n"
+	.string "with you, too.\p"
+	.string "It records the POKéMON you meet.\n"
+	.string "Go and catch some new partners!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_845710D::
+	.string "OAK: Good to see you!\n"
+	.string "How is your POKéDEX coming along?\p"
+	.string "Here, let me take a look.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_8457663::
+	.string "Your NATIONAL POKéDEX:\n"
+	.string "{STR_VAR_1} species seen in total.\p"
+	.string "In KANTO, you have registered\n"
+	.string "{STR_VAR_2} species as caught.$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_84576C8::
+	.string "Keep registering species in KANTO!\p"
+	.string "I look forward to a full NATIONAL\n"
+	.string "POKéDEX for this region!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_8457726::
+	.string "Finally…\p"
+	.string "You’ve completed the NATIONAL\n"
+	.string "POKéDEX with your KANTO catches!\p"
+	.string "It’s magnificent!\n"
+	.string "Truly, this is a fantastic feat!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_84577A1::
+	.string "Wroooooooaaaaaarrrr!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_84577BD::
+	.string "Thank you, {PLAYER}!\n"
+	.string "Sincerely, thank you!\l"
+	.string "You’ve made my dream a reality!$"
+
+Kanto_PalletTown_ProfessorOaksLab_Text_8457802::
+	.string "OAK: Ah, welcome!\p"
+	.string "Tell me, how is your POKéDEX\n"
+	.string "coming along?\p"
+	.string "Wahaha!\p"
+	.string "Actually, I know how it is, but I\n"
+	.string "love seeing it anyway!\p"
+	.string "Let’s see…$"

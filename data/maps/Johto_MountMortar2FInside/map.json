@@ -1,0 +1,127 @@
+{
+  "id": "MAP_JOHTO_MOUNT_MORTAR2FINSIDE",
+  "name": "Johto_MountMortar2FInside",
+  "layout": "LAYOUT_JOHTO_MOUNT_MORTAR2FINSIDE",
+  "music": "MUS_QZ_631",
+  "region_map_section": "MAPSEC_JOHTO_MT_MORTAR",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15006",
+      "x": 16,
+      "y": 9,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_MountMortar2FInside_EventScript_83DFEAB",
+      "flag": "FLAG_QZ_0x10E9"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15006",
+      "x": 29,
+      "y": 9,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_MountMortar2FInside_EventScript_83DFEB8",
+      "flag": "FLAG_QZ_0x10EA"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15006",
+      "x": 9,
+      "y": 15,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_MountMortar2FInside_EventScript_83DFEC5",
+      "flag": "FLAG_QZ_0x10EB"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15006",
+      "x": 19,
+      "y": 21,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_MountMortar2FInside_EventScript_83DFED2",
+      "flag": "FLAG_QZ_0x10EC"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15006",
+      "x": 28,
+      "y": 26,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_MountMortar2FInside_EventScript_83DFEDF",
+      "flag": "FLAG_QZ_0x10ED"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15006",
+      "x": 2,
+      "y": 37,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_MountMortar2FInside_EventScript_83DFEEC",
+      "flag": "FLAG_QZ_0x10EE"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16055",
+      "x": 11,
+      "y": 29,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 2,
+      "movement_range_y": 2,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "5",
+      "script": "Johto_MountMortar2FInside_EventScript_83DFEF9",
+      "flag": "0"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 17,
+      "y": 37,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_MOUNT_MORTAR1FOUTSIDE",
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 3,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_MOUNT_MORTAR1FINSIDE",
+      "dest_warp_id": "2"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

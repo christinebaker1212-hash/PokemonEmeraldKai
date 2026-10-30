@@ -598,3 +598,4 @@ gSpecials::
 	def_special MP_Sim_Battle, waitstate=1
 	def_special MP_Sim_Won
 	def_special MP_Sim_End
+	.include "data/qz_specials.inc"   @ Moemon Kai: Quetzal's specials (Johto / Kanto)

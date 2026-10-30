@@ -1,0 +1,159 @@
+{
+  "id": "MAP_KANTO_FIVE_ISLAND_MEMORIAL_PILLAR",
+  "name": "Kanto_FiveIsland_MemorialPillar",
+  "layout": "LAYOUT_KANTO_FIVE_ISLAND_MEMORIAL_PILLAR",
+  "music": "MUS_RG_SEVII_ROUTE",
+  "region_map_section": "MAPSEC_MEMORIAL_PILLAR",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_ROUTE",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_KANTO_FIVE_ISLAND_MEADOW",
+      "offset": -20,
+      "direction": "left"
+    }
+  ],
+  "object_events": [
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16158",
+      "x": 8,
+      "y": 44,
+      "elevation": 4,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP_AND_LEFT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_FiveIsland_MemorialPillar_EventScript_8418783",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16187",
+      "x": 12,
+      "y": 6,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP_LEFT_AND_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "3",
+      "script": "Kanto_FiveIsland_MemorialPillar_EventScript_845C6E8",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16187",
+      "x": 14,
+      "y": 17,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN_UP_AND_LEFT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "2",
+      "script": "Kanto_FiveIsland_MemorialPillar_EventScript_845C726",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16187",
+      "x": 17,
+      "y": 31,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "3",
+      "script": "Kanto_FiveIsland_MemorialPillar_EventScript_845C764",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 4,
+      "y": 47,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_FiveIsland_MemorialPillar_EventScript_846C169",
+      "flag": "FLAG_QZ_0x2281"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_3528",
+      "x": 12,
+      "y": 43,
+      "elevation": 4,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_GEN_CAPPED"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_749",
+      "x": 13,
+      "y": 48,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FDF6",
+      "flag": "FLAG_QZ_0x2E24"
+    }
+  ],
+  "warp_events": [],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 9,
+      "y": 43,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_FiveIsland_MemorialPillar_EventScript_84187F8"
+    },
+    {
+      "type": "hidden_item",
+      "x": 8,
+      "y": 52,
+      "elevation": 3,
+      "item": "ITEM_BIG_PEARL",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_170"
+    },
+    {
+      "type": "hidden_item",
+      "x": 15,
+      "y": 7,
+      "elevation": 3,
+      "item": "ITEM_RAZZ_BERRY",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_171"
+    },
+    {
+      "type": "hidden_item",
+      "x": 17,
+      "y": 22,
+      "elevation": 3,
+      "item": "ITEM_SITRUS_BERRY",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_172"
+    },
+    {
+      "type": "hidden_item",
+      "x": 14,
+      "y": 25,
+      "elevation": 3,
+      "item": "ITEM_BLUK_BERRY",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_173"
+    }
+  ]
+}

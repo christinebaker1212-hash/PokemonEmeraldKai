@@ -1,0 +1,321 @@
+{
+  "id": "MAP_JOHTO_NEW_BARK_TOWN",
+  "name": "Johto_NewBarkTown",
+  "layout": "LAYOUT_JOHTO_NEW_BARK_TOWN",
+  "music": "MUS_QZ_611",
+  "region_map_section": "MAPSEC_JOHTO_NEW_BARK_TOWN",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_JOHTO_ROUTE29",
+      "offset": -5,
+      "direction": "left"
+    },
+    {
+      "map": "MAP_JOHTO_ROUTE27",
+      "offset": -11,
+      "direction": "right"
+    }
+  ],
+  "object_events": [
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_17",
+      "x": 24,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_NewBarkTown_EventScript_83E157F",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_47",
+      "x": 9,
+      "y": 16,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN_LEFT_AND_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_NewBarkTown_EventScript_83E14A9",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16053",
+      "x": 7,
+      "y": 7,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_NewBarkTown_EventScript_83E15A1",
+      "flag": "FLAG_QZ_0x106E"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_10576",
+      "x": 21,
+      "y": 23,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C2D48",
+      "flag": "FLAG_QZ_0x1490"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15003",
+      "x": 22,
+      "y": 23,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C2D48",
+      "flag": "FLAG_QZ_0x1490"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_15004",
+      "x": 22,
+      "y": 22,
+      "elevation": 4,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C2D48",
+      "flag": "FLAG_QZ_0x1490"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_10567",
+      "x": 23,
+      "y": 23,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_83C2D48",
+      "flag": "FLAG_QZ_0x1490"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 10,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_ELMS_LAB",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 20,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_PLAYERS_HOUSE1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 4,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_PLAYERS_NEIGHBORS_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 15,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_ELMS_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 16,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_NEW_BARK_TOWN",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 15,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_NEW_BARK_TOWN",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 12,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_ELMS_LAB",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 3,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_NEW_BARK_TOWN",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 0,
+      "y": 12,
+      "elevation": 0,
+      "var": "VAR_QZ_0x5003",
+      "var_value": "2",
+      "script": "Johto_NewBarkTown_EventScript_83E151A"
+    },
+    {
+      "type": "trigger",
+      "x": 0,
+      "y": 13,
+      "elevation": 0,
+      "var": "VAR_QZ_0x5003",
+      "var_value": "2",
+      "script": "Johto_NewBarkTown_EventScript_83E151A"
+    },
+    {
+      "type": "trigger",
+      "x": 0,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_QZ_0x5003",
+      "var_value": "2",
+      "script": "Johto_NewBarkTown_EventScript_83E151A"
+    },
+    {
+      "type": "trigger",
+      "x": 0,
+      "y": 12,
+      "elevation": 0,
+      "var": "VAR_QZ_0x5003",
+      "var_value": "4",
+      "script": "Johto_NewBarkTown_EventScript_83E151A"
+    },
+    {
+      "type": "trigger",
+      "x": 0,
+      "y": 13,
+      "elevation": 0,
+      "var": "VAR_QZ_0x5003",
+      "var_value": "4",
+      "script": "Johto_NewBarkTown_EventScript_83E151A"
+    },
+    {
+      "type": "trigger",
+      "x": 0,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_QZ_0x5003",
+      "var_value": "4",
+      "script": "Johto_NewBarkTown_EventScript_83E151A"
+    },
+    {
+      "type": "trigger",
+      "x": 24,
+      "y": 11,
+      "elevation": 0,
+      "var": "VAR_TEMP_F",
+      "var_value": "0",
+      "script": "Johto_NewBarkTown_EventScript_83E15EF"
+    },
+    {
+      "type": "trigger",
+      "x": 24,
+      "y": 12,
+      "elevation": 0,
+      "var": "VAR_TEMP_F",
+      "var_value": "0",
+      "script": "Johto_NewBarkTown_EventScript_83E15EF"
+    },
+    {
+      "type": "trigger",
+      "x": 24,
+      "y": 13,
+      "elevation": 0,
+      "var": "VAR_TEMP_F",
+      "var_value": "0",
+      "script": "Johto_NewBarkTown_EventScript_83E15EF"
+    },
+    {
+      "type": "trigger",
+      "x": 24,
+      "y": 14,
+      "elevation": 0,
+      "var": "VAR_TEMP_F",
+      "var_value": "0",
+      "script": "Johto_NewBarkTown_EventScript_83E15EF"
+    },
+    {
+      "type": "trigger",
+      "x": 25,
+      "y": 15,
+      "elevation": 0,
+      "var": "VAR_TEMP_F",
+      "var_value": "0",
+      "script": "Johto_NewBarkTown_EventScript_83E15EF"
+    }
+  ],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 10,
+      "y": 14,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_NewBarkTown_EventScript_83E149F"
+    },
+    {
+      "type": "sign",
+      "x": 12,
+      "y": 7,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_NewBarkTown_EventScript_83E15E6"
+    },
+    {
+      "type": "sign",
+      "x": 17,
+      "y": 11,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_NewBarkTown_EventScript_83E184B"
+    },
+    {
+      "type": "sign",
+      "x": 12,
+      "y": 21,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_NewBarkTown_EventScript_83E1854"
+    },
+    {
+      "type": "sign",
+      "x": 9,
+      "y": 9,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_NewBarkTown_EventScript_83E1496"
+    }
+  ]
+}

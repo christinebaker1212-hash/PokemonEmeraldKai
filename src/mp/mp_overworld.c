@@ -101,7 +101,7 @@ static void InitIfNeeded(void)
 bool8 MP_IsMpObjectEvent(const struct ObjectEvent *objectEvent)
 {
     return objectEvent->localId >= MP_LOCALID_BASE && objectEvent->localId < MP_LOCALID_BASE + MP_MAX_PLAYERS
-        && MP_IsMpGraphicsId(objectEvent->graphicsId);
+        && MP_IsMpGraphicsId(OBJ_GFX_ID(objectEvent));
 }
 
 u8 MP_GetRemoteObjectEventId(u8 id)
@@ -448,7 +448,7 @@ static bool8 IsSpawnValid(u8 id)
     if (!r->spawned || r->objId >= OBJECT_EVENTS_COUNT)
         return FALSE;
     obj = &gObjectEvents[r->objId];
-    return obj->active && obj->localId == MP_LOCALID_BASE + id && obj->graphicsId == OBJ_EVENT_GFX_MP_REMOTE(id);
+    return obj->active && obj->localId == MP_LOCALID_BASE + id && OBJ_GFX_ID(obj) == OBJ_EVENT_GFX_MP_REMOTE(id);
 }
 
 // Makes sure the remote player's palette is loaded into a sprite palette slot
@@ -500,7 +500,7 @@ static void RefreshGraphics(u8 id, struct ObjectEvent *obj)
     struct Sprite *sprite = &gSprites[obj->spriteId];
     u8 mode = AvatarModeOf(id);
     // The tile block was sized for the old graphics (walking 16x32, Mach Bike 32x32...)
-    u32 oldBytes = sprite->images ? GetObjectEventGraphicsInfo(obj->graphicsId)->size : 0;
+    u32 oldBytes = sprite->images ? GetObjectEventGraphicsInfo(OBJ_GFX_ID(obj))->size : 0;
     MP_Avatar_BuildRemote(id);
     ObjectEventSetGraphicsId(obj, OBJ_EVENT_GFX_MP_REMOTE(id));
     if (oldBytes)
@@ -804,7 +804,7 @@ void MP_Overworld_DebugDump(void)
             continue;
         o = &gObjectEvents[r->objId];
         printf("[test] remote %d obj %d active %d invisible %d coords %d,%d gfx %d sprite %d", i, r->objId, o->active,
-               o->invisible, o->currentCoords.x, o->currentCoords.y, o->graphicsId, o->spriteId);
+               o->invisible, o->currentCoords.x, o->currentCoords.y, OBJ_GFX_ID(o), o->spriteId);
         if (o->spriteId < MAX_SPRITES)
         {
             struct Sprite *s = &gSprites[o->spriteId];

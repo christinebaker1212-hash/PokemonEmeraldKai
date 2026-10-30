@@ -839,6 +839,12 @@ static struct Pokemon *FindPartyMon(u32 personality)
     return NULL;
 }
 
+// Moemon Kai: the party Pokémon following you, NULL when none (Johto / Kanto scripts: qz_bufferfollowerspecies)
+struct Pokemon *MP_Follower_LocalMon(void)
+{
+    return sLocalPersonality ? FindPartyMon(sLocalPersonality) : NULL;
+}
+
 // The Pokémon shown behind you: the follower, or the one going back into its ball
 static struct Pokemon *FindLocalFollower(void)
 {

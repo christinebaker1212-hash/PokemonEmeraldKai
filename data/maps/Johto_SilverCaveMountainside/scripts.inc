@@ -1,0 +1,7 @@
+Johto_SilverCaveMountainside_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, Johto_SilverCaveMountainside_EventScript_83E041A
+	.byte 0
+
+Johto_SilverCaveMountainside_EventScript_83E041A::
+	call Quetzal_EventScript_840EA62
+	end

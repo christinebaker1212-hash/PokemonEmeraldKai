@@ -1,0 +1,729 @@
+{
+  "id": "MAP_JOHTO_RUINS_OF_ALPH_CHAMBERS",
+  "name": "Johto_RuinsOfAlphChambers",
+  "layout": "LAYOUT_JOHTO_RUINS_OF_ALPH_CHAMBERS",
+  "music": "MUS_QZ_632",
+  "region_map_section": "MAPSEC_JOHTO_RUINS_OF_ALPH",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16002",
+      "x": 24,
+      "y": 5,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F8065",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 3,
+      "y": 38,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F8718",
+      "flag": "FLAG_QZ_0x10F9"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 6,
+      "y": 38,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F8725",
+      "flag": "FLAG_QZ_0x10FA"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 3,
+      "y": 41,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F8732",
+      "flag": "FLAG_QZ_0x10FB"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 6,
+      "y": 41,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F873F",
+      "flag": "FLAG_QZ_0x10FC"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 19,
+      "y": 55,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F874C",
+      "flag": "FLAG_QZ_0x10FD"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 22,
+      "y": 55,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F8759",
+      "flag": "FLAG_QZ_0x10FE"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 19,
+      "y": 58,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F8766",
+      "flag": "FLAG_QZ_0x10FF"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 22,
+      "y": 58,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F8773",
+      "flag": "FLAG_QZ_0x1100"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 22,
+      "y": 41,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F87A7",
+      "flag": "FLAG_QZ_0x1104"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 22,
+      "y": 38,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F878D",
+      "flag": "FLAG_QZ_0x1102"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 19,
+      "y": 38,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F8780",
+      "flag": "FLAG_QZ_0x1101"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 19,
+      "y": 41,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F879A",
+      "flag": "FLAG_QZ_0x1103"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 6,
+      "y": 58,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F87DB",
+      "flag": "FLAG_QZ_0x1108"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 6,
+      "y": 55,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F87C1",
+      "flag": "FLAG_QZ_0x1106"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 3,
+      "y": 55,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F87B4",
+      "flag": "FLAG_QZ_0x1105"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_59",
+      "x": 3,
+      "y": 58,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_NONE",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F87CE",
+      "flag": "FLAG_QZ_0x1107"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_633",
+      "x": 20,
+      "y": 7,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840EA6A",
+      "flag": "FLAG_QZ_0x11FC"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_634",
+      "x": 4,
+      "y": 24,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840EA6A",
+      "flag": "FLAG_QZ_0x11FF"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_635",
+      "x": 20,
+      "y": 24,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840EA6A",
+      "flag": "FLAG_QZ_0x1202"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_1150",
+      "x": 3,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840EA6A",
+      "flag": "FLAG_QZ_GEN_CAPPED"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_1151",
+      "x": 6,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840EA6A",
+      "flag": "FLAG_QZ_GEN_CAPPED"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 20,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_OUTSIDE",
+      "dest_warp_id": "9"
+    },
+    {
+      "x": 4,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_OUTSIDE",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 4,
+      "y": 26,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_OUTSIDE",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 20,
+      "y": 26,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_OUTSIDE",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 20,
+      "y": 22,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_INNER_CHAMBER",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 21,
+      "y": 22,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_INNER_CHAMBER",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 4,
+      "y": 22,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_INNER_CHAMBER",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 5,
+      "y": 22,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_INNER_CHAMBER",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 4,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_INNER_CHAMBER",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 5,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_INNER_CHAMBER",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 20,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_INNER_CHAMBER",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 21,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_INNER_CHAMBER",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 5,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_CHAMBERS",
+      "dest_warp_id": "13"
+    },
+    {
+      "x": 4,
+      "y": 43,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_CHAMBERS",
+      "dest_warp_id": "12"
+    },
+    {
+      "x": 21,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_CHAMBERS",
+      "dest_warp_id": "15"
+    },
+    {
+      "x": 20,
+      "y": 43,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_CHAMBERS",
+      "dest_warp_id": "14"
+    },
+    {
+      "x": 5,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_CHAMBERS",
+      "dest_warp_id": "17"
+    },
+    {
+      "x": 4,
+      "y": 60,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_CHAMBERS",
+      "dest_warp_id": "16"
+    },
+    {
+      "x": 21,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_CHAMBERS",
+      "dest_warp_id": "19"
+    },
+    {
+      "x": 20,
+      "y": 60,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_CHAMBERS",
+      "dest_warp_id": "18"
+    },
+    {
+      "x": 4,
+      "y": 36,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_HO_OH_WORD_ROOM",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 5,
+      "y": 36,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_HO_OH_WORD_ROOM",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 20,
+      "y": 36,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_KABUTO_WORD_ROOM",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 21,
+      "y": 36,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_KABUTO_WORD_ROOM",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 4,
+      "y": 53,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_OMANYTE_WORD_ROOM",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 5,
+      "y": 53,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_OMANYTE_WORD_ROOM",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 20,
+      "y": 53,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_AERODACTYL_WORD_ROOM",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 21,
+      "y": 53,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_AERODACTYL_WORD_ROOM",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 4,
+      "y": 4,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F8044"
+    },
+    {
+      "type": "sign",
+      "x": 20,
+      "y": 4,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F8023"
+    },
+    {
+      "type": "sign",
+      "x": 4,
+      "y": 21,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F802E"
+    },
+    {
+      "type": "sign",
+      "x": 20,
+      "y": 21,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F8039"
+    },
+    {
+      "type": "sign",
+      "x": 5,
+      "y": 4,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F821B"
+    },
+    {
+      "type": "sign",
+      "x": 21,
+      "y": 4,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F809A"
+    },
+    {
+      "type": "sign",
+      "x": 5,
+      "y": 21,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F8121"
+    },
+    {
+      "type": "sign",
+      "x": 21,
+      "y": 21,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F819E"
+    },
+    {
+      "type": "sign",
+      "x": 19,
+      "y": 5,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83F804F"
+    },
+    {
+      "type": "sign",
+      "x": 22,
+      "y": 5,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83F804F"
+    },
+    {
+      "type": "sign",
+      "x": 22,
+      "y": 22,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83F804F"
+    },
+    {
+      "type": "sign",
+      "x": 19,
+      "y": 22,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83F804F"
+    },
+    {
+      "type": "sign",
+      "x": 6,
+      "y": 22,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83F804F"
+    },
+    {
+      "type": "sign",
+      "x": 3,
+      "y": 22,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83F804F"
+    },
+    {
+      "type": "sign",
+      "x": 3,
+      "y": 5,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83F804F"
+    },
+    {
+      "type": "sign",
+      "x": 6,
+      "y": 5,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83F804F"
+    },
+    {
+      "type": "sign",
+      "x": 4,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F8298"
+    },
+    {
+      "type": "sign",
+      "x": 20,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F834C"
+    },
+    {
+      "type": "sign",
+      "x": 4,
+      "y": 18,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F83A6"
+    },
+    {
+      "type": "sign",
+      "x": 20,
+      "y": 18,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Johto_RuinsOfAlphChambers_EventScript_83F82F2"
+    },
+    {
+      "type": "sign",
+      "x": 19,
+      "y": 36,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83F804F"
+    },
+    {
+      "type": "sign",
+      "x": 22,
+      "y": 36,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83F804F"
+    },
+    {
+      "type": "sign",
+      "x": 6,
+      "y": 36,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83F804F"
+    },
+    {
+      "type": "sign",
+      "x": 3,
+      "y": 36,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83F804F"
+    },
+    {
+      "type": "sign",
+      "x": 3,
+      "y": 53,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83F804F"
+    },
+    {
+      "type": "sign",
+      "x": 6,
+      "y": 53,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83F804F"
+    },
+    {
+      "type": "sign",
+      "x": 19,
+      "y": 53,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83F804F"
+    },
+    {
+      "type": "sign",
+      "x": 22,
+      "y": 53,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Quetzal_EventScript_83F804F"
+    }
+  ]
+}

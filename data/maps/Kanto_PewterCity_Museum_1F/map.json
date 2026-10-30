@@ -1,0 +1,216 @@
+{
+  "id": "MAP_KANTO_PEWTER_CITY_MUSEUM_1F",
+  "name": "Kanto_PewterCity_Museum_1F",
+  "layout": "LAYOUT_KANTO_PEWTER_CITY_MUSEUM_1F",
+  "music": "MUS_RG_PEWTER",
+  "region_map_section": "MAPSEC_PEWTER_CITY",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": false,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16219",
+      "x": 16,
+      "y": 5,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PewterCity_Museum_1F_EventScript_841A31E",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16172",
+      "x": 2,
+      "y": 4,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PewterCity_Museum_1F_EventScript_841A4A8",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16195",
+      "x": 21,
+      "y": 3,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PewterCity_Museum_1F_EventScript_841A4B1",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16171",
+      "x": 22,
+      "y": 3,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PewterCity_Museum_1F_EventScript_841A50F",
+      "flag": "FLAG_QZ_0x229F"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16195",
+      "x": 26,
+      "y": 4,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PewterCity_Museum_1F_EventScript_841A49F",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16195",
+      "x": 26,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PewterCity_Museum_1F_EventScript_8471CAE",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_976",
+      "x": 9,
+      "y": 4,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_GEN_CAPPED"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 13,
+      "y": 9,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_PEWTER_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 14,
+      "y": 9,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_PEWTER_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 15,
+      "y": 9,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_PEWTER_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 21,
+      "y": 9,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_PEWTER_CITY",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 22,
+      "y": 9,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_PEWTER_CITY",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 8,
+      "y": 8,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_PEWTER_CITY_MUSEUM_2F",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 12,
+      "y": 5,
+      "elevation": 3,
+      "var": "VAR_QZ_0x511E",
+      "var_value": "0",
+      "script": "Kanto_PewterCity_Museum_1F_EventScript_841A392"
+    },
+    {
+      "type": "trigger",
+      "x": 13,
+      "y": 5,
+      "elevation": 3,
+      "var": "VAR_QZ_0x511E",
+      "var_value": "0",
+      "script": "Kanto_PewterCity_Museum_1F_EventScript_841A3A8"
+    },
+    {
+      "type": "trigger",
+      "x": 14,
+      "y": 5,
+      "elevation": 3,
+      "var": "VAR_QZ_0x511E",
+      "var_value": "0",
+      "script": "Kanto_PewterCity_Museum_1F_EventScript_841A3BE"
+    }
+  ],
+  "bg_events": [
+    {
+      "type": "sign",
+      "x": 4,
+      "y": 4,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_PewterCity_Museum_1F_EventScript_841A518"
+    },
+    {
+      "type": "sign",
+      "x": 4,
+      "y": 7,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Kanto_PewterCity_Museum_1F_EventScript_841A52B"
+    },
+    {
+      "type": "sign",
+      "x": 27,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_PewterCity_Museum_1F_EventScript_845D1ED"
+    },
+    {
+      "type": "sign",
+      "x": 26,
+      "y": 1,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Kanto_PewterCity_Museum_1F_EventScript_845D1ED"
+    }
+  ]
+}

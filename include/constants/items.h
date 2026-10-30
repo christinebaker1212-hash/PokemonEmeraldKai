@@ -582,8 +582,27 @@
 #define LAST_GEN4_BERRY  ITEM_ROWAP_BERRY
 #define NUM_GEN4_BERRIES (LAST_GEN4_BERRY - FIRST_GEN4_BERRY + 1)
 
-#define ITEMS_COUNT 495
 // end of Gen 4 berries
+
+// Moemon Kai: Johto / Kanto story items (tools/quetzal_port/gen_items.py)
+#define ITEM_CLEAR_BELL 495
+#define ITEM_TIDAL_BELL 496
+#define ITEM_GS_BALL 497
+#define ITEM_SILVER_WING 498
+#define ITEM_RAINBOW_WING 499
+#define ITEM_RED_SCALE 500
+#define ITEM_SECRET_POTION 501
+#define ITEM_MYSTERY_EGG 502
+#define ITEM_PARCEL 503
+#define ITEM_SQUIRTBOTTLE 504
+#define ITEM_GRACIDEA 505
+#define ITEM_SPORT_BALL 506
+#define ITEM_UPGRADE 507
+#define FIRST_QZ_ITEM ITEM_CLEAR_BELL
+#define LAST_QZ_ITEM ITEM_UPGRADE
+
+#define ITEMS_COUNT 508
+// end of Johto / Kanto items
 
 // A special item id associated with "Cancel"/"Exit" etc. in a list of items or decorations
 // Its icon is defined at ITEMS_COUNT as the "return to field" arrow

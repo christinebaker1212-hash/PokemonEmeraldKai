@@ -1,0 +1,103 @@
+{
+  "id": "MAP_KANTO_POKEMON_TOWER_7F",
+  "name": "Kanto_PokemonTower_7F",
+  "layout": "LAYOUT_KANTO_POKEMON_TOWER_7F",
+  "music": "MUS_RG_POKE_TOWER",
+  "region_map_section": "MAPSEC_POKEMON_TOWER",
+  "requires_flash": false,
+  "weather": "WEATHER_FOG_HORIZONTAL",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": true,
+  "allow_running": false,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16166",
+      "x": 11,
+      "y": 4,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_PokemonTower_7F_EventScript_8413267",
+      "flag": "FLAG_QZ_0x21D0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16189",
+      "x": 9,
+      "y": 10,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Kanto_PokemonTower_7F_EventScript_8413293",
+      "flag": "FLAG_QZ_0x231A"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16189",
+      "x": 13,
+      "y": 8,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Kanto_PokemonTower_7F_EventScript_841334A",
+      "flag": "FLAG_QZ_0x231B"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16189",
+      "x": 9,
+      "y": 6,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Kanto_PokemonTower_7F_EventScript_84133E3",
+      "flag": "FLAG_QZ_0x231C"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_743",
+      "x": 11,
+      "y": 6,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_0x291B"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 11,
+      "y": 16,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_POKEMON_TOWER_6F",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 11,
+      "y": 4,
+      "elevation": 3,
+      "item": "ITEM_SOOTHE_BELL",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_159"
+    }
+  ]
+}

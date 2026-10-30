@@ -1,0 +1,62 @@
+{
+  "id": "MAP_JOHTO_WHIRL_ISLAND_TUNNEL_EAST",
+  "name": "Johto_WhirlIslandTunnelEast",
+  "layout": "LAYOUT_JOHTO_WHIRL_ISLAND_TUNNEL_EAST",
+  "music": "MUS_QZ_631",
+  "region_map_section": "MAPSEC_JOHTO_WHIRL_ISLANDS",
+  "requires_flash": false,
+  "weather": "WEATHER_SHADE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": false,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_746",
+      "x": 35,
+      "y": 14,
+      "elevation": 1,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840EA6A",
+      "flag": "FLAG_QZ_0x1235"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_1049",
+      "x": 45,
+      "y": 14,
+      "elevation": 1,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840EA6A",
+      "flag": "FLAG_QZ_GEN_CAPPED"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 9,
+      "y": 17,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_WHIRL_ISLAND_TUNNEL_WEST",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 60,
+      "y": 17,
+      "elevation": 0,
+      "dest_map": "MAP_JOHTO_WHIRL_ISLAND_B2F",
+      "dest_warp_id": "2"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

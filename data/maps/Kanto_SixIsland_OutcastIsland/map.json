@@ -1,0 +1,143 @@
+{
+  "id": "MAP_KANTO_SIX_ISLAND_OUTCAST_ISLAND",
+  "name": "Kanto_SixIsland_OutcastIsland",
+  "layout": "LAYOUT_KANTO_SIX_ISLAND_OUTCAST_ISLAND",
+  "music": "MUS_RG_SEVII_ROUTE",
+  "region_map_section": "MAPSEC_OUTCAST_ISLAND",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_ROUTE",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_KANTO_SIX_ISLAND_GREEN_PATH",
+      "offset": 0,
+      "direction": "down"
+    }
+  ],
+  "object_events": [
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16189",
+      "x": 9,
+      "y": 24,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Kanto_SixIsland_OutcastIsland_EventScript_84188C8",
+      "flag": "FLAG_QZ_0x218A"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16134",
+      "x": 12,
+      "y": 15,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Kanto_SixIsland_OutcastIsland_EventScript_845C7A2",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16207",
+      "x": 13,
+      "y": 34,
+      "elevation": 1,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Kanto_SixIsland_OutcastIsland_EventScript_845C7E0",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16205",
+      "x": 14,
+      "y": 61,
+      "elevation": 1,
+      "movement_type": "MOVEMENT_TYPE_WALK_SEQUENCE_DOWN_LEFT_UP_RIGHT",
+      "movement_range_x": 2,
+      "movement_range_y": 4,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Kanto_SixIsland_OutcastIsland_EventScript_845C81E",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16205",
+      "x": 10,
+      "y": 44,
+      "elevation": 1,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Kanto_SixIsland_OutcastIsland_EventScript_845C85C",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16211",
+      "x": 11,
+      "y": 44,
+      "elevation": 1,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "1",
+      "script": "Kanto_SixIsland_OutcastIsland_EventScript_845C8A2",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 11,
+      "y": 16,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_SixIsland_OutcastIsland_EventScript_846C176",
+      "flag": "FLAG_QZ_0x2305"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 7,
+      "y": 21,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_SIX_ISLAND_ALTERING_CAVE",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 16,
+      "y": 23,
+      "elevation": 3,
+      "item": "ITEM_STAR_PIECE",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_178"
+    },
+    {
+      "type": "hidden_item",
+      "x": 6,
+      "y": 24,
+      "elevation": 3,
+      "item": "ITEM_NET_BALL",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_179"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+# Johto and Kanto maps load and draw (FRLG-style 640-tile tilesets in both): warps into New Bark, Goldenrod,
+# Ecruteak, Route 29, Elm's lab, Pallet, Cerulean, Celadon, Viridian Forest, One Island; a few steps in New Bark and
+# across Pallet's border into Route 1 (a map connection)
+MODE=1
+TMO=200
+EXPECT_A=("where map 34.123" "where map 37.57" "where map 37.63" "where map 36.0")
+UNEXPECT_A=("[crash]")

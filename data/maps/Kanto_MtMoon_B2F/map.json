@@ -1,0 +1,233 @@
+{
+  "id": "MAP_KANTO_MT_MOON_B2F",
+  "name": "Kanto_MtMoon_B2F",
+  "layout": "LAYOUT_KANTO_MT_MOON_B2F",
+  "music": "MUS_RG_MT_MOON",
+  "region_map_section": "MAPSEC_MT_MOON",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": true,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16135",
+      "x": 13,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_MtMoon_B2F_EventScript_8410060",
+      "flag": "FLAG_QZ_0x2185"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16135",
+      "x": 14,
+      "y": 7,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_MtMoon_B2F_EventScript_84100D2",
+      "flag": "FLAG_QZ_0x218C"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16195",
+      "x": 13,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_MtMoon_B2F_EventScript_8410007",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16189",
+      "x": 37,
+      "y": 21,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "3",
+      "script": "Kanto_MtMoon_B2F_EventScript_8410192",
+      "flag": "FLAG_QZ_0x219E"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16189",
+      "x": 12,
+      "y": 20,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "2",
+      "script": "Kanto_MtMoon_B2F_EventScript_841014D",
+      "flag": "FLAG_QZ_0x219E"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16189",
+      "x": 35,
+      "y": 12,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_UP",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Kanto_MtMoon_B2F_EventScript_841017B",
+      "flag": "FLAG_QZ_0x219E"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16189",
+      "x": 18,
+      "y": 27,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "4",
+      "script": "Kanto_MtMoon_B2F_EventScript_8410164",
+      "flag": "FLAG_QZ_0x219E"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 30,
+      "y": 26,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_MtMoon_B2F_EventScript_846BAD3",
+      "flag": "FLAG_QZ_0x229D"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 35,
+      "y": 5,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_MtMoon_B2F_EventScript_846BAE0",
+      "flag": "FLAG_QZ_0x229E"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 24,
+      "y": 6,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_MtMoon_B2F_EventScript_846BFBC",
+      "flag": "FLAG_QZ_0x229C"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16142",
+      "x": 3,
+      "y": 11,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_MtMoon_B2F_EventScript_846BFC9",
+      "flag": "FLAG_QZ_0x229B"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_1056",
+      "x": 8,
+      "y": 5,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_QZ_0x54",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Quetzal_EventScript_840FBBD",
+      "flag": "FLAG_QZ_GEN_CAPPED"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 25,
+      "y": 21,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_MT_MOON_B1F",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 31,
+      "y": 11,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_MT_MOON_B1F",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 17,
+      "y": 31,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_MT_MOON_B1F",
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 5,
+      "y": 10,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_MT_MOON_B1F",
+      "dest_warp_id": "6"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 14,
+      "y": 11,
+      "elevation": 3,
+      "var": "VAR_QZ_0x5115",
+      "var_value": "0",
+      "script": "Kanto_MtMoon_B2F_EventScript_840FFF5"
+    }
+  ],
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 20,
+      "y": 16,
+      "elevation": 3,
+      "item": "ITEM_MOON_STONE",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_2"
+    },
+    {
+      "type": "hidden_item",
+      "x": 39,
+      "y": 11,
+      "elevation": 3,
+      "item": "ITEM_ETHER",
+      "flag": "FLAG_QZ_KANTO_HIDDEN_ITEM_3"
+    }
+  ]
+}

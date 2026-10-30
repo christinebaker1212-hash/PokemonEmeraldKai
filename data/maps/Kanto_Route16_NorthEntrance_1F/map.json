@@ -1,0 +1,183 @@
+{
+  "id": "MAP_KANTO_ROUTE16_NORTH_ENTRANCE_1F",
+  "name": "Kanto_Route16_NorthEntrance_1F",
+  "layout": "LAYOUT_KANTO_ROUTE16_NORTH_ENTRANCE_1F",
+  "music": "MUS_RG_PEWTER",
+  "region_map_section": "MAPSEC_ROUTE_16",
+  "requires_flash": false,
+  "weather": "WEATHER_NONE",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": null,
+  "object_events": [
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16182",
+      "x": 6,
+      "y": 8,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_Route16_NorthEntrance_1F_EventScript_842027C",
+      "flag": "0"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16172",
+      "x": 7,
+      "y": 4,
+      "elevation": 3,
+      "movement_type": "MOVEMENT_TYPE_WANDER_LEFT_AND_RIGHT",
+      "movement_range_x": 1,
+      "movement_range_y": 1,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Kanto_Route16_NorthEntrance_1F_EventScript_8420356",
+      "flag": "0"
+    }
+  ],
+  "warp_events": [
+    {
+      "x": 1,
+      "y": 3,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_ROUTE16",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 11,
+      "y": 3,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_ROUTE16",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 1,
+      "y": 12,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_ROUTE16",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 11,
+      "y": 12,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_ROUTE16",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 9,
+      "y": 16,
+      "elevation": 3,
+      "dest_map": "MAP_KANTO_ROUTE16_NORTH_ENTRANCE_2F",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 10,
+      "y": 12,
+      "elevation": 3,
+      "var": "VAR_QZ_0x5124",
+      "var_value": "1",
+      "script": "Quetzal_EventScript_8457C79"
+    },
+    {
+      "type": "trigger",
+      "x": 2,
+      "y": 12,
+      "elevation": 3,
+      "var": "VAR_QZ_0x5124",
+      "var_value": "0",
+      "script": "Quetzal_EventScript_8457C84"
+    },
+    {
+      "type": "trigger",
+      "x": 6,
+      "y": 10,
+      "elevation": 3,
+      "var": "VAR_TEMP_1",
+      "var_value": "0",
+      "script": "Kanto_Route16_NorthEntrance_1F_EventScript_8420285"
+    },
+    {
+      "type": "trigger",
+      "x": 6,
+      "y": 11,
+      "elevation": 3,
+      "var": "VAR_TEMP_1",
+      "var_value": "0",
+      "script": "Kanto_Route16_NorthEntrance_1F_EventScript_8420291"
+    },
+    {
+      "type": "trigger",
+      "x": 1,
+      "y": 13,
+      "elevation": 3,
+      "var": "VAR_QZ_0x5124",
+      "var_value": "0",
+      "script": "Quetzal_EventScript_8457C84"
+    },
+    {
+      "type": "trigger",
+      "x": 1,
+      "y": 11,
+      "elevation": 3,
+      "var": "VAR_QZ_0x5124",
+      "var_value": "0",
+      "script": "Quetzal_EventScript_8457C84"
+    },
+    {
+      "type": "trigger",
+      "x": 11,
+      "y": 11,
+      "elevation": 3,
+      "var": "VAR_QZ_0x5124",
+      "var_value": "1",
+      "script": "Quetzal_EventScript_8457C79"
+    },
+    {
+      "type": "trigger",
+      "x": 11,
+      "y": 13,
+      "elevation": 3,
+      "var": "VAR_QZ_0x5124",
+      "var_value": "1",
+      "script": "Quetzal_EventScript_8457C79"
+    },
+    {
+      "type": "trigger",
+      "x": 6,
+      "y": 12,
+      "elevation": 3,
+      "var": "VAR_TEMP_1",
+      "var_value": "0",
+      "script": "Kanto_Route16_NorthEntrance_1F_EventScript_842029D"
+    },
+    {
+      "type": "trigger",
+      "x": 6,
+      "y": 13,
+      "elevation": 3,
+      "var": "VAR_TEMP_1",
+      "var_value": "0",
+      "script": "Kanto_Route16_NorthEntrance_1F_EventScript_84202A9"
+    },
+    {
+      "type": "trigger",
+      "x": 6,
+      "y": 14,
+      "elevation": 3,
+      "var": "VAR_TEMP_1",
+      "var_value": "0",
+      "script": "Kanto_Route16_NorthEntrance_1F_EventScript_84202B5"
+    }
+  ],
+  "bg_events": []
+}

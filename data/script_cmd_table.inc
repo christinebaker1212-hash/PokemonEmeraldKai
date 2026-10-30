@@ -242,6 +242,26 @@ gScriptCmdTable::
 	script_cmd_table_entry SCR_OP_WARPWHITEFADE                 ScrCmd_warpwhitefade                  @ 0xe0
 	script_cmd_table_entry SCR_OP_BUFFERCONTESTNAME             ScrCmd_buffercontestname              @ 0xe1
 	script_cmd_table_entry SCR_OP_BUFFERITEMNAMEPLURAL          ScrCmd_bufferitemnameplural           @ 0xe2
+	@ Moemon Kai: Moemon Quetzal's commands (Johto / Kanto scripts; asm/macros/qz_event.inc, src/qz_port.c)
+	script_cmd_table_entry SCR_OP_QZ_BUFFERFOLLOWERSPECIES      ScrCmd_qz_bufferfollowerspecies       @ 0xe3
+	script_cmd_table_entry SCR_OP_QZ_GETPLAYERGENDER            ScrCmd_qz_getplayergender             @ 0xe4
+	script_cmd_table_entry SCR_OP_QZ_QUESTMENU                  ScrCmd_qz_questmenu                   @ 0xe5
+	script_cmd_table_entry SCR_OP_QZ_WAITFRAME_VARS             ScrCmd_qz_waitframe_vars              @ 0xe6
+	script_cmd_table_entry SCR_OP_QZ_SETFOLLOWERGFXVAR          ScrCmd_qz_setfollowergfxvar           @ 0xe7
+	script_cmd_table_entry SCR_OP_QZ_DOSTATICWILDBATTLE         ScrCmd_qz_dostaticwildbattle          @ 0xe8
+	script_cmd_table_entry SCR_OP_QZ_GIVESTORYMON               ScrCmd_qz_givestorymon                @ 0xe9
+	script_cmd_table_entry SCR_OP_QZ_TAKEBACKSTORYMON           ScrCmd_qz_takebackstorymon            @ 0xea
+	script_cmd_table_entry SCR_OP_QZ_KEEPONLYLEADMON            ScrCmd_qz_keeponlyleadmon             @ 0xeb
+	script_cmd_table_entry SCR_OP_QZ_SETSTATICWILDMON           ScrCmd_qz_setstaticwildmon            @ 0xec
+	script_cmd_table_entry SCR_OP_QZ_TAKEPARTYMONOFSPECIES      ScrCmd_qz_takepartymonofspecies       @ 0xed
+	script_cmd_table_entry SCR_OP_QZ_CHECKPARTYMONINLIST        ScrCmd_qz_checkpartymoninlist         @ 0xee
+	script_cmd_table_entry SCR_OP_QZ_GIVEODDEGG                 ScrCmd_qz_giveoddegg                  @ 0xef
+	script_cmd_table_entry SCR_OP_QZ_ADDBATTLEPOINTS            ScrCmd_qz_addbattlepoints             @ 0xf0
+	script_cmd_table_entry SCR_OP_QZ_NOP_F1                     ScrCmd_qz_nop_f1                      @ 0xf1
+	script_cmd_table_entry SCR_OP_QZ_NOP_F2                     ScrCmd_qz_nop_f2                      @ 0xf2
+	script_cmd_table_entry SCR_OP_QZ_NOP_F3                     ScrCmd_qz_nop_f3                      @ 0xf3
+	script_cmd_table_entry SCR_OP_QZ_NOP_F4                     ScrCmd_qz_nop_f4                      @ 0xf4
+	script_cmd_table_entry SCR_OP_QZ_CHECKMULTIPLAYERORFLAG     ScrCmd_qz_checkmultiplayerorflag      @ 0xf5
 
 	.if ALLOCATE_SCRIPT_CMD_TABLE
 gScriptCmdTableEnd::

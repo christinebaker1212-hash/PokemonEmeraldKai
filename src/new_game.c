@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_region.h"
 #include "mp.h"
 #include "platform/gamepad.h"
 #include "new_game.h"
@@ -170,6 +171,7 @@ void NewGameInitData(void)
     gDifferentSaveFile = TRUE;
     gSaveBlock2Ptr->encryptionKey = 0;
     ZeroPlayerPartyMons();
+    MP_Region_NewGame();   // Moemon Kai: Johto / Kanto flags and vars (mp_region.c)
     ZeroEnemyPartyMons();
     ResetPokedex();
     ClearFrontierRecord();

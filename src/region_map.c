@@ -133,6 +133,7 @@ static const u8 sRegionMapPlayerIcon_MayGfx[] = INCGFX_U8("graphics/pokenav/regi
 
 #include "data/region_map/region_map_layout.h"
 #include "data/region_map/region_map_entries.h"
+#include "data/region_map/johto_map_sections.h"   // Moemon Kai
 
 static const mapsec_u16_t sRegionMap_SpecialPlaceLocations[][2] =
 {
@@ -1595,6 +1596,10 @@ u8 *GetMapName(u8 *dest, mapsec_u16_t regionMapId, u16 padLength)
     else if (regionMapId < MAPSEC_NONE)
     {
         str = StringCopy(dest, gRegionMapEntries[regionMapId].name);
+    }
+    else if (regionMapId >= MAPSEC_JOHTO_FIRST && regionMapId < MAPSEC_JOHTO_END)
+    {
+        str = StringCopy(dest, gJohtoMapSectionNames[regionMapId - MAPSEC_JOHTO_FIRST]);   // Moemon Kai
     }
     else
     {

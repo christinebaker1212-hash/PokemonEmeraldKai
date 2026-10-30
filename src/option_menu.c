@@ -360,6 +360,7 @@ static void BuildRows(void)
         AddRow(OPT_TEXTSPEED, 0);
         AddRow(OPT_BATTLESCENE, 0);
         AddRow(OPT_BATTLESTYLE, 0);
+        AddRow(OPT_MOVESPLIT, 0);   // Moemon Kai: Gen 4's physical / special split
         AddRow(OPT_SOUND, 0);
         AddRow(OPT_BUTTONMODE, 0);
         AddRow(OPT_FRAME, 0);
@@ -370,7 +371,6 @@ static void BuildRows(void)
         AddRow(OPT_BIKEMUSIC, 0);
         AddRow(OPT_SURFMUSIC, 0);
         AddRow(OPT_LEVELSCALE, 0);
-        AddRow(OPT_MOVESPLIT, 0);
         AddRow(OPT_CARDSCALE, 0);
         break;
     case TAB_DISPLAY:

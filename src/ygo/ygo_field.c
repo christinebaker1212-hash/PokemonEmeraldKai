@@ -628,7 +628,7 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
     {
         const struct Duelist *s = &sDuelists[i];
         unsigned tier;
-        if (npc->graphicsId != s->gfx && (!s->gfx2 || npc->graphicsId != s->gfx2))
+        if (OBJ_GFX_ID(npc) != s->gfx && (!s->gfx2 || OBJ_GFX_ID(npc) != s->gfx2))
             continue;
         if (s->req == REQ_TRAINER && !FlagGet(TRAINER_FLAGS_START + s->reqArg))
         {
@@ -638,7 +638,7 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
         }
         tier = s->play == PLAY_BOTH ? TierOfBadges() + 1 : 3;
         sThemedOnly = 1;
-        Fill(o, s->name ? s->name : npc->graphicsId == OBJ_EVENT_GFX_RIVAL_MAY_NORMAL ? "MAY" : "BRENDAN", s->title,
+        Fill(o, s->name ? s->name : OBJ_GFX_ID(npc) == OBJ_EVENT_GFX_RIVAL_MAY_NORMAL ? "MAY" : "BRENDAN", s->title,
              s->theme, tier, 0xFE000000u | i, h ^ (Tcg_Today() * 0x9e3779b9u));
         sThemedOnly = 0;
         o->special = (u8)i;
@@ -686,12 +686,12 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
         else
         {
             for (i = 0; i < ARRAY_COUNT(sTownsfolk); i++)
-                if (sTownsfolk[i].gfx == npc->graphicsId)
+                if (sTownsfolk[i].gfx == OBJ_GFX_ID(npc))
                 {
                     theme = ThemeAt(sTownsfolk[i].theme, sTownsfolk[i].alt, h);
                     label = sTownsfolk[i].label;
-                    team = npc->graphicsId == OBJ_EVENT_GFX_AQUA_MEMBER_M || npc->graphicsId == OBJ_EVENT_GFX_AQUA_MEMBER_F ||
-                           npc->graphicsId == OBJ_EVENT_GFX_MAGMA_MEMBER_M || npc->graphicsId == OBJ_EVENT_GFX_MAGMA_MEMBER_F;
+                    team = OBJ_GFX_ID(npc) == OBJ_EVENT_GFX_AQUA_MEMBER_M || OBJ_GFX_ID(npc) == OBJ_EVENT_GFX_AQUA_MEMBER_F ||
+                           OBJ_GFX_ID(npc) == OBJ_EVENT_GFX_MAGMA_MEMBER_M || OBJ_GFX_ID(npc) == OBJ_EVENT_GFX_MAGMA_MEMBER_F;
                 }
             if (theme == 0xFF)
                 return 0;
@@ -705,7 +705,7 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
         }
         if (team)
             o->music = MUS_VS_AQUA_MAGMA;
-        o->voice = team ? QUOTE_VOICE_TEAM : Tcg_VoiceOf(npc->graphicsId);
+        o->voice = team ? QUOTE_VOICE_TEAM : Tcg_VoiceOf(OBJ_GFX_ID(npc));
         o->quoteWho[0] = 0;
         *line = CardTable_Hello(o->key, QUOTE_GAME_YGO, NULL, o->voice, team ? sText_DuelTeam : sDuelLines[(h >> 20) % 3], h);
         return PLAY_YGO;

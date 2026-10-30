@@ -976,7 +976,7 @@ static void MpDexBuild(u32 num)
     sMpDexText[0] = EOS;
     len = MpDexAppend(len, more->ruby);
     len = MpDexAppend(len, more->sapphire);
-    if (more->emerald)
+    if (more->emerald || (!more->ruby && !more->sapphire && !more->fireRed))   // Moemon Kai: Gen 4 has its own text only
         len = MpDexAppend(len, gPokedexEntries[num].description);
     len = MpDexAppend(len, more->fireRed);
     MpDexWrap();
@@ -1062,7 +1062,9 @@ void MP_Dex_DebugTexts(u16 show)
             most = sMpDexLineCount, mostNum = n;
         if (len > longest)
             longest = len;
-        if (sMpDexLineCount >= MP_DEX_TEXT_MAXLINES || len >= sizeof(sMpDexText) - 1 || sMpDexLineCount <= MP_DEX_TEXT_ROWS)
+        // (a Gen 4 Pokémon has one game's text, so it may fit in one box)
+        if (sMpDexLineCount >= MP_DEX_TEXT_MAXLINES || len >= sizeof(sMpDexText) - 1
+         || (sMpDexLineCount <= MP_DEX_TEXT_ROWS && (sMpDexMore[n].ruby || sMpDexMore[n].fireRed)))
             bad++, MPNet_Log("dex check: #%u has %u lines, %u characters", n, sMpDexLineCount, len);
     }
     MPNet_Log("dex check: %u species, most lines %u (#%u), longest %u characters, %u to look at", NATIONAL_DEX_COUNT, most, mostNum, longest, bad);
