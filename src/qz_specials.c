@@ -27,6 +27,7 @@
 #include "sound.h"
 #include "string_util.h"
 #include "constants/flags.h"
+#include "constants/heal_locations.h"
 #include "constants/items.h"
 #include "constants/qz_port.h"
 #include "constants/species.h"
@@ -872,11 +873,17 @@ static const struct {u16 map; s8 x, y;} sRegionPorts[REGION_COUNT] = {
 
 // VAR_0x8004 = the region, VAR_0x8005 = the party slot of the one Pokémon who comes (customs: the others go to the
 // GLOBAL PC; EventScript_RegionCustoms picked it). RESULT 1: the boat leaves (the script waits), 0: not allowed.
+#define TRIP_TRAIN 0x7A   // VAR_0x8007 for the MAGNET TRAIN (EventScript_MagnetTrain): GOLDENROD to SAFFRON, no ticket
+
 static u16 QzTravelToRegion_(void)
 {
     u8 to = gSpecialVar_0x8004, from = MP_Region_Current(), keep = gSpecialVar_0x8005, i;
     bool8 first;
-    if (to >= REGION_COUNT || to == from || !(QzGetReachableRegionsMask_() & (1 << to)))
+    bool8 train = gSpecialVar_0x8007 == TRIP_TRAIN;
+    gSpecialVar_0x8007 = 0;
+    if (to >= REGION_COUNT || to == from)
+        return 0;
+    if (train ? !MP_Region_Cleared(from) : !(QzGetReachableRegionsMask_() & (1 << to)))
         return 0;
     if (keep >= PARTY_SIZE || !GetMonData(&gPlayerParty[keep], MON_DATA_SANITY_HAS_SPECIES))
         keep = 0;
@@ -895,6 +902,8 @@ static u16 QzTravelToRegion_(void)
     HealPlayerParty();
     if (first)
         MP_Region_GoToStartHouse(to);   // the first visit: a guide takes the player to the region's first town
+    else if (train)
+        SetWarpDestinationToHealLocation(HEAL_LOCATION_KANTO_SAFFRON_CITY);
     else
         SetWarpDestination(sRegionPorts[to].map >> 8, sRegionPorts[to].map & 0xFF, WARP_ID_NONE, sRegionPorts[to].x, sRegionPorts[to].y);
     DoWarp();

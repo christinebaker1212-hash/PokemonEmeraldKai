@@ -1,0 +1,7 @@
+# GOLDENROD's MAGNET TRAIN after JOHTO's League: the clerk offers the ride to SAFFRON, one Pokémon (customs needs no
+# pick); the first time in KANTO the guide takes the player on to PALLET's house
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=280:30 MOEMON_DEBUG_REGION=1"
+EXPECT_A=("region: travel 1 -> 2" "where map 37.120 xy 6,6")
+UNEXPECT_A=("[crash]")

@@ -61,3 +61,32 @@ EventScript_HoennRegionFerry_Other::
 
 gText_HoennRegionFerry::
 	.string "Where would you like to sail?$"
+
+@ GOLDENROD's MAGNET TRAIN (Quetzal's is broken down): it runs to KANTO's SAFFRON once JOHTO's League is beaten.
+@ The way back is the boat (OLIVINE / VERMILION). Customs as at the ports.
+EventScript_MagnetTrain::
+	specialvar VAR_RESULT, MP_GlobalPcLinked
+	goto_if_eq VAR_RESULT, 0, EventScript_MagnetTrain_Usual
+	msgbox gText_MagnetTrainRide, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, EventScript_RegionCustoms_Cancel
+	setvar VAR_0x8004, 2
+	call EventScript_RegionCustoms
+	msgbox gText_MagnetTrainDeparts, MSGBOX_DEFAULT
+	closemessage
+	setvar VAR_0x8007, 0x7A
+	specialvar VAR_RESULT, QzTravelToRegion
+	goto_if_eq VAR_RESULT, 0, EventScript_RegionCustoms_Cancel
+	waitstate
+	end
+
+EventScript_MagnetTrain_Usual::
+	return
+
+gText_MagnetTrainRide::
+	.string "The MAGNET TRAIN is running again!\p"
+	.string "It goes to SAFFRON CITY in KANTO.\n"
+	.string "Would you like to ride it?$"
+
+gText_MagnetTrainDeparts::
+	.string "The MAGNET TRAIN for SAFFRON CITY\n"
+	.string "is now departing!$"

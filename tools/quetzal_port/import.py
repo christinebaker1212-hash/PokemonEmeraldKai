@@ -340,6 +340,10 @@ MULTI_RE = re.compile(r'^(\tmultichoice(?:default|grid)? [^,\n]+, [^,\n]+, )(0x[
 def script_text(text, where=''):
     text = SPECIAL_RE.sub(lambda m: m.group(1), text)
     # Kai's customs (data/scripts/mp_region.inc: one Pokémon boards, the others go to the GLOBAL PC) before a trip
+    # GOLDENROD's MAGNET TRAIN runs after JOHTO's League (data/scripts/mp_region.inc)
+    text = text.replace('Johto_GoldenrodMagnetTrainStation_EventScript_83D9A1D::\n\tlock\n\tfaceplayer\n',
+                        'Johto_GoldenrodMagnetTrainStation_EventScript_83D9A1D::\n\tlock\n\tfaceplayer\n'
+                        '\tcall EventScript_MagnetTrain\n')
     text = text.replace('\tspecialvar VAR_RESULT, QzTravelToRegion\n',
                         '\tcall EventScript_RegionCustoms\n\tspecialvar VAR_RESULT, QzTravelToRegion\n')
     text = MULTI_RE.sub(lambda m: m.group(1) + ('MULTI_QZ_0x%02X' % int(m.group(2), 0) if int(m.group(2), 0) >= 0x2C

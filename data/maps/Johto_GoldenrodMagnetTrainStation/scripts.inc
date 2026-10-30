@@ -10,6 +10,7 @@ Johto_GoldenrodMagnetTrainStation_EventScript_83D9A13::
 Johto_GoldenrodMagnetTrainStation_EventScript_83D9A1D::
 	lock
 	faceplayer
+	call EventScript_MagnetTrain
 	msgbox Johto_GoldenrodMagnetTrainStation_Text_83D9A4F, MSGBOX_DEFAULT
 	closemessage
 	release

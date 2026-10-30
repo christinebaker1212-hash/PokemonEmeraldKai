@@ -1,0 +1,19 @@
+pressuntil A field 5000
+wait 60
+mp regionclear 1
+mp warp 34,84,16,21
+wait 120
+press UP 3
+wait 10
+pressuntil A yesno 3000
+wait 20
+shot train_ask
+press A 3
+watchlog region: travel
+pressuntillog A 3000 region: travel
+pressuntil B field 3000
+wait 60
+shot arrived
+mp where
+mp regioninfo
+quit
