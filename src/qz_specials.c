@@ -34,6 +34,7 @@ u8 GetDirectionToFace(s16 x, s16 y, s16 targetX, s16 targetY);
 void ChangePokemonNickname(void);
 void ChangeBoxPokemonNickname(void);
 void CloseDeptStoreElevatorWindow(void);
+bool8 PlayerNotAtTrainerHillEntrance(void);
 
 // Quetzal's specials write VAR_RESULT themselves (its scripts use "special", not "specialvar"): the ones that answer
 // something are wrappers at the end of this file around their _ function.
@@ -788,3 +789,63 @@ u16 QzPartyHasRequestedResortMon(void) { return gSpecialVar_Result = QzPartyHasR
 u16 QzShowSeagallopDestinationMenu(void) { return gSpecialVar_Result = QzShowSeagallopDestinationMenu_(); }
 u16 QzGetSeagallopMenuSelection(void) { return gSpecialVar_Result = QzGetSeagallopMenuSelection_(); }
 u16 QzGetSeagallopNumber(void) { return gSpecialVar_Result = QzGetSeagallopNumber_(); }
+
+// ---------------------------------------------------------------------------------------------------- travelling events
+#include "rtc.h"
+#include "constants/maps.h"
+
+// Quetzal's travelling visitors (Team Rocket's JESSIE and JAMES...) are in one town a day: its object shows there
+// (flag 0x1490 Johto, 0x2EAB Kanto, clear = shown); VAR_RESULT = they are here
+static const u16 sJohtoTowns[] = {MAP_JOHTO_NEW_BARK_TOWN, MAP_JOHTO_CHERRYGROVE_CITY, MAP_JOHTO_VIOLET_CITY, MAP_JOHTO_AZALEA_TOWN,
+    MAP_JOHTO_GOLDENROD_CITY, MAP_JOHTO_ECRUTEAK_CITY, MAP_JOHTO_CIANWOOD_CITY, MAP_JOHTO_MAHOGANY_TOWN,
+    MAP_JOHTO_BLACKTHORN_CITY, MAP_JOHTO_INDIGO_PLATEAU};
+static const u16 sKantoTowns[] = {MAP_KANTO_PALLET_TOWN, MAP_KANTO_VIRIDIAN_CITY, MAP_KANTO_PEWTER_CITY, MAP_KANTO_CERULEAN_CITY,
+    MAP_KANTO_VERMILION_CITY, MAP_KANTO_LAVENDER_TOWN, MAP_KANTO_CELADON_CITY, MAP_KANTO_FUCHSIA_CITY, MAP_KANTO_SAFFRON_CITY,
+    MAP_KANTO_CINNABAR_ISLAND, MAP_KANTO_ONE_ISLAND, MAP_KANTO_TWO_ISLAND, MAP_KANTO_THREE_ISLAND, MAP_KANTO_FOUR_ISLAND,
+    MAP_KANTO_FIVE_ISLAND, MAP_KANTO_SIX_ISLAND, MAP_KANTO_SEVEN_ISLAND};
+
+static u16 TravelingEvent(const u16 *towns, u8 count, u16 flag, u16 salt)
+{
+    u16 here = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
+    u32 day;
+    RtcCalcLocalTime();
+    day = (u32)gLocalTime.days * 2654435761u + salt;
+    if (towns[(day >> 16) % count] == here)
+    {
+        FlagClear(flag);
+        return TRUE;
+    }
+    FlagSet(flag);
+    return FALSE;
+}
+
+static u16 QzJohtoTravelingEventCheck_(void) { return TravelingEvent(sJohtoTowns, ARRAY_COUNT(sJohtoTowns), 0x1490, 1); }
+static u16 QzKantoTravelingEventCheck_(void) { return TravelingEvent(sKantoTowns, ARRAY_COUNT(sKantoTowns), 0x2EAB, 2); }
+
+// ---------------------------------------------------------------------------------------------------- small ones
+static u16 QzPlayerNotAtTrainerHillEntrance_(void) { return PlayerNotAtTrainerHillEntrance(); }
+
+// An NPC's line out of its set: by where it stands, so the same one each time
+static u16 QzPickNpcFlavourLine_(void)
+{
+    return (gSpecialVar_LastTalked + gSaveBlock1Ptr->pos.x + gSaveBlock1Ptr->pos.y) & 7;
+}
+
+// Cinnabar's checklist of Quetzal's own events: nothing to list in Kai
+static u16 QzBufferLabQuestChecklist_(void)
+{
+    gSpecialVar_0x8006 = TRUE;
+    return 0;
+}
+
+u16 QzSeafoamCurrentEffect(void) { return 0; }
+u16 QzSetDeoxysRockPaletteVar5071(void) { return 0; }
+u16 QzDoDeoxysRockInteractionAlt(void) { ScriptContext_Enable(); return 0; }
+
+// Icefall Cave's cracked ice: the tiles of floor already cracked (var 0x4001's bits), as FireRed
+u16 QzSetIcefallCaveCrackedIceMetatiles(void) { return 0; }
+u16 QzJohtoTravelingEventCheck(void) { return gSpecialVar_Result = QzJohtoTravelingEventCheck_(); }
+u16 QzKantoTravelingEventCheck(void) { return gSpecialVar_Result = QzKantoTravelingEventCheck_(); }
+u16 QzPlayerNotAtTrainerHillEntrance(void) { return gSpecialVar_Result = QzPlayerNotAtTrainerHillEntrance_(); }
+u16 QzPickNpcFlavourLine(void) { return gSpecialVar_Result = QzPickNpcFlavourLine_(); }
+u16 QzBufferLabQuestChecklist(void) { return gSpecialVar_Result = QzBufferLabQuestChecklist_(); }
