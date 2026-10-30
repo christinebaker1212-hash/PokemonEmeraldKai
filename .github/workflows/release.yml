@@ -86,6 +86,15 @@ jobs:
         if: steps.ver.outputs.skip != 'true'
         run: tools/release/build_windows.sh "$RUNNER_TEMP/SDL2-2.30.9"
 
+      # Saves must load on every platform: the save's structures compiled for Linux and for Windows (whose bitfield
+      # layout differs) must match tools/test/save_layout.txt, and scripts' table lookups must be in range.
+      # A failure stops the release (1.60.0 broke Windows saves this way).
+      - name: Save layout and script checks
+        if: steps.ver.outputs.skip != 'true'
+        run: |
+          REQUIRE_WINDOWS=1 python3 tools/test/save_layout.py
+          python3 tools/test/check_scripts.py
+
       # The DANCE machine's songs (docs/RHYTHM_DECISIONS.md #10): their own zip, which the game downloads when the
       # machine is first used. When the songs are the same as the last release's, its line is kept and nothing is
       # uploaded again (the zip stays on the release that has it).

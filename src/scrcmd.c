@@ -1643,7 +1643,12 @@ bool8 ScrCmd_bufferstdstring(struct ScriptContext *ctx)
     u8 stringVarIndex = ScriptReadByte(ctx);
     u16 index = VarGet(ScriptReadHalfword(ctx));
 
-    StringCopy(sScriptStringVars[stringVarIndex], gStdStrings[index]);
+    extern const u16 gStdStringsCount;
+    // Moemon Kai: JOHTO / KANTO scripts use Quetzal's numbers; one past the table (or a gap) is an empty string
+    if (index >= gStdStringsCount || gStdStrings[index] == NULL)
+        sScriptStringVars[stringVarIndex][0] = EOS;
+    else
+        StringCopy(sScriptStringVars[stringVarIndex], gStdStrings[index]);
     return FALSE;
 }
 

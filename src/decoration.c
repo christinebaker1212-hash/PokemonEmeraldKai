@@ -1382,7 +1382,7 @@ void SetDecoration(void)
             }
 
             VarSet(
-                VAR_OBJ_GFX_ID_0 + (gMapHeader.events->objectEvents[j].graphicsId - OBJ_EVENT_GFX_VAR_0),
+                VAR_OBJ_GFX_ID_0 + (TEMPLATE_GFX_ID(&gMapHeader.events->objectEvents[j]) - OBJ_EVENT_GFX_VAR_0),
                 sPlaceDecorationGraphicsDataBuffer.decoration->tiles[0]);
 
             gSpecialVar_0x8005 = gMapHeader.events->objectEvents[j].localId;

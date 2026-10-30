@@ -249,7 +249,7 @@ static const u8 *const sModeStrings[NUM_TRAINER_HILL_MODES] =
 
 static const struct ObjectEventTemplate sTrainerObjectEventTemplate =
 {
-    .graphicsId = OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL,
+    .graphicsIdLo = OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL,
     .elevation = ELEVATION_DEFAULT,
     .movementType = MOVEMENT_TYPE_LOOK_AROUND,
     .movementRangeX = 1,
@@ -648,7 +648,7 @@ void LoadTrainerHillObjectEventTemplates(void)
 
         eventTemplates[i] = sTrainerObjectEventTemplate;
         eventTemplates[i].localId = i + 1;
-        eventTemplates[i].graphicsId = FacilityClassToGraphicsId(sHillData->floors[floorId].trainers[i].facilityClass);
+        SET_TEMPLATE_GFX_ID(&eventTemplates[i], FacilityClassToGraphicsId(sHillData->floors[floorId].trainers[i].facilityClass));
         eventTemplates[i].x = sHillData->floors[floorId].map.trainerCoords[i] & 0xF;
         eventTemplates[i].y = ((sHillData->floors[floorId].map.trainerCoords[i] >> 4) & 0xF) + HILL_FLOOR_HEIGHT_MARGIN;
         bits = i << 2;

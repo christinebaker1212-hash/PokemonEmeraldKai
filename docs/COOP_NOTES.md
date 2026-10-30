@@ -2773,3 +2773,19 @@ Old saves need nothing: eggs and Unown keep their real species in the save.
 - Harness: MOEMON_BATTLETEXT=1 logs every battle message ("btext: ..."); MOEMON_GENERATION=N; mp gensetting N.
 - Tests: gen59_moves, gen_seal, region_gens (the harness runs scenarios at GEN 9 unless their conf sets GEN).
 - Harness: mp gencheck ITEM / genrefresh.
+## Save layout and migration (1.60.1)
+The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added
+a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Windows saves moved every later field by 64
+(0 badges, a divide by zero in DEWFORD's trends). Since 1.60.1:
+- Graphics ids past 0xFF live in spare bits: ObjectEvent `graphicsIdHi:4` in the first bitfield word (ids up to 0xFFF),
+  ObjectEventTemplate {localId, graphicsIdLo, kind, graphicsIdHi}. Use OBJ_GFX_ID / SET_OBJ_GFX_ID / TEMPLATE_GFX_ID.
+- include/mp_savefix.h, src/mp/mp_savefix.c: the save format is the "<save>.region" sidecar's 'SAVF' chunk (0 = no
+  sidecar, up to 1.59; 1 = 1.60.0; 2 = now). save.c reads SaveBlock1's sectors raw, accepts 1.60.0's Windows sizes
+  (+64 in the last sector, SectorChecksumOk) and squeezes them back (MP_SaveFix_StoreSaveBlock1); LoadGameSave reads
+  the sidecar before the objects and MP_SaveFix_Migrate fixes the template bytes and the high id bits once per load.
+- Guards: tools/test/save_layout.py compiles the saved structs with gcc and MinGW and compares every size and offset with
+  tools/test/save_layout.txt (`--update` only for a deliberate format change, with a migration step and a new
+  MP_SAVE_FORMAT); tools/test/check_scripts.py checks bufferstdstring indices against gStdStrings (Quetzal's 0x1E-0x2D
+  are there; ScrCmd_bufferstdstring writes "" past the table). Both run first in regress.sh and in the release workflow.
+- tools/test/save_compat.sh [SAVE]: a save as it was before 1.60, as 1.60.0 Linux and as 1.60.0 Windows must load to the
+  same `mp savesum` and continue.

@@ -93,8 +93,9 @@ struct BackupMapLayout
 struct ObjectEventTemplate
 {
     /*0x00*/ u8 localId;
-    /*0x01*/ u8 kind; // Always OBJ_KIND_NORMAL in Emerald.
-    /*0x02*/ u16 graphicsId;   // Moemon Kai: 16 bits (Johto / Kanto sprites past 255); map data only, never saved
+    /*0x01*/ u8 graphicsIdLo;   // Moemon Kai: the graphics id is graphicsIdLo | graphicsIdHi << 8 (TEMPLATE_GFX_ID); the save
+    /*0x02*/ u8 kind;           // keeps this struct (SaveBlock1.objectEventTemplates), so the bytes stay where Emerald had them
+    /*0x03*/ u8 graphicsIdHi;   // (was padding: 0 in older saves)
     /*0x04*/ s16 x;
     /*0x06*/ s16 y;
     /*0x08*/ u8 elevation;
@@ -221,7 +222,8 @@ struct ObjectEvent
              u32 disableJumpLandingGroundEffect:1;
              u32 fixedPriority:1;
              u32 hideReflection:1;
-             //u32 padding:4;
+             u32 graphicsIdHi:4;   // Moemon Kai: the graphics id's high bits (ids to 0xFFF; OBJ_GFX_ID). Emerald's padding: the
+                                   // same bits in the Linux and Windows layouts, so the save keeps its shape on both
     /*0x04*/ u8 spriteId;
     /*0x05*/ u8 graphicsIdLo;   // Moemon Kai: the graphics id is graphicsIdLo | graphicsIdHi << 8 (OBJ_GFX_ID)
     /*0x06*/ u8 movementType;
@@ -250,13 +252,16 @@ struct ObjectEvent
     /*0x20*/ u8 previousMovementDirection;
     /*0x21*/ u8 directionSequenceIndex;
     /*0x22*/ u8 playerCopyableMovement; // COPY_MOVE_*
-    /*0x23*/ u8 graphicsIdHi;   // Moemon Kai: was padding (0 in every save), the graphics id's high byte
+    /*0x23*/ //u8 padding2;   (Moemon Kai 1.60.0 used it for the graphics id's high byte; Windows has no padding here)
     /*size = 0x24*/
 };
 
 // Moemon Kai: an object's whole graphics id (the save format keeps its low byte at 0x05, the high one in old padding)
 #define OBJ_GFX_ID(obj) ((u16)((obj)->graphicsIdLo | ((obj)->graphicsIdHi << 8)))
-#define SET_OBJ_GFX_ID(obj, id) ((obj)->graphicsIdLo = (u8)(id), (obj)->graphicsIdHi = (u8)((id) >> 8))
+#define SET_OBJ_GFX_ID(obj, id) ((obj)->graphicsIdLo = (u8)(id), (obj)->graphicsIdHi = ((id) >> 8) & 0xF)
+// ... and an object event template's (map data and SaveBlock1.objectEventTemplates)
+#define TEMPLATE_GFX_ID(t) ((u16)((t)->graphicsIdLo | ((t)->graphicsIdHi << 8)))
+#define SET_TEMPLATE_GFX_ID(t, id) ((t)->graphicsIdLo = (u8)(id), (t)->graphicsIdHi = (u8)((id) >> 8))
 
 struct ObjectEventGraphicsInfo
 {

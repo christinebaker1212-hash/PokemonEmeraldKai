@@ -261,6 +261,9 @@ the GENERATION setting (3-9, default 3, OPTIONS > GAME and HOST A GAME > GAME RU
 caps, Quetzal's own Johto / Kanto Pokemon from 5 (gen_modern.py), FAIRY from 6, SEALED Pokemon (species, move or ability past
 it: can't battle, MP_SEALED), later items back to the bag and unusable). COOP_NOTES "Gens 5-9 and GENERATION"; tests
 gen59_moves, gen_seal, region_gens (the harness runs scenarios at GEN 9 unless their conf sets GEN).
+Saves never change layout: tools/test/save_layout.py (gcc + MinGW, run by regress.sh and the release) must pass; old
+formats are converted on load by src/mp/mp_savefix.c (MP_SAVE_FORMAT in the sidecar; COOP_NOTES "Save layout and
+migration"; tools/test/save_compat.sh).
 
 Gotchas worth knowing before touching battles:
 - Network link (mp_battle.c): queued blocks move into gBlockRecvBuffer in NetLink_GetBlockReceivedStatus, never in

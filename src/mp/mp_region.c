@@ -10,6 +10,7 @@
 #include "event_data.h"
 #include "mp.h"
 #include "mp_region.h"
+#include "mp_savefix.h"
 #include "save.h"
 #include "pokemon.h"
 #include "pokemon_storage_system.h"
@@ -157,6 +158,8 @@ static u32 Fingerprint(void)
     return sum;
 }
 
+static u8 sSaveFormat;   // the loaded save's format (mp_savefix.h): its region side file's SAVF chunk
+
 void MP_Region_WriteSidecar(void)
 {
     char path[600], tmp[610];
@@ -201,6 +204,13 @@ void MP_Region_WriteSidecar(void)
         c[1] = sLevelCount * sizeof(sLevels[0]);
         fwrite(c, sizeof(c), 1, f);
         fwrite(sLevels, sizeof(sLevels[0]), sLevelCount, f);
+        {
+            u32 format = MP_SAVE_FORMAT;   // the save's own layout version (mp_savefix.h)
+            c[0] = CHUNK('S', 'A', 'V', 'F');
+            c[1] = sizeof(format);
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(&format, sizeof(format), 1, f);
+        }
     }
     fclose(f);
     remove(path);
@@ -215,6 +225,7 @@ static bool8 LoadFrom(const char *path)
     if (!f)
         return FALSE;
     memset(&gRegionState, 0, sizeof(gRegionState));
+    sSaveFormat = 1;   // a side file without the format: 1.60.0
     sAwayValid = 0;
     sGlobalValid = FALSE;
     sLevelCount = 0;
@@ -248,6 +259,12 @@ static bool8 LoadFrom(const char *path)
             {
                 sGlobalValid = fread(&sGlobalPC, sizeof(sGlobalPC), 1, f) == 1;
             }
+            else if (c[0] == CHUNK('S', 'A', 'V', 'F') && c[1] == sizeof(u32))
+            {
+                u32 format = 0;
+                if (fread(&format, sizeof(format), 1, f) == 1)
+                    sSaveFormat = format > 255 ? 255 : format;
+            }
             else if (c[0] == CHUNK('L', 'V', 'L', 'S') && c[1] % sizeof(sLevels[0]) == 0)
             {
                 u32 n = c[1] / sizeof(sLevels[0]);
@@ -275,11 +292,13 @@ void MP_Region_LoadFromSave(void)
         if (LoadFrom(path))
         {
             MPNet_Log("region: loaded%s", i ? " (from a backup)" : "");
+            MP_SaveFix_Migrate(sSaveFormat);
             return;
         }
     }
     MP_Region_NewGame();
     MPNet_Log("region: no side file for this save (Johto / Kanto progress starts empty)");
+    MP_SaveFix_Migrate(0);   // 1.59.x and before
 }
 
 // ---------------------------------------------------------------------------------------------------- progress

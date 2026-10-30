@@ -1062,7 +1062,7 @@ static void ShowPostBattleHintText(void)
         case HINT_REMAINING_ITEMS:
             for (i = 0; i < GetNumBattlePyramidObjectEvents(); i++)
             {
-                if (events[i].graphicsId == OBJ_EVENT_GFX_ITEM_BALL && events[i].x != SHRT_MAX && events[i].y != SHRT_MAX)
+                if (TEMPLATE_GFX_ID(&events[i]) == OBJ_EVENT_GFX_ITEM_BALL && events[i].x != SHRT_MAX && events[i].y != SHRT_MAX)
                     textIndex++;
             }
             i = 1;
@@ -1625,7 +1625,7 @@ void LoadBattlePyramidFloorObjectEventScripts(void)
 
     for (i = 0; i < OBJECT_EVENT_TEMPLATES_COUNT; i++)
     {
-        if (events[i].graphicsId != OBJ_EVENT_GFX_ITEM_BALL)
+        if (TEMPLATE_GFX_ID(&events[i]) != OBJ_EVENT_GFX_ITEM_BALL)
             events[i].script = BattlePyramid_TrainerBattle;
         else
             events[i].script = BattlePyramid_FindItemBall;
@@ -1863,9 +1863,9 @@ static bool8 TrySetPyramidObjectEventPositionAtCoords(u8 objType, u8 x, u8 y, u8
         if (mapHeader->events->objectEvents[i].x != x || mapHeader->events->objectEvents[i].y != y)
             continue;
 
-        if (objType != OBJ_TRAINERS || mapHeader->events->objectEvents[i].graphicsId == OBJ_EVENT_GFX_ITEM_BALL)
+        if (objType != OBJ_TRAINERS || TEMPLATE_GFX_ID(&mapHeader->events->objectEvents[i]) == OBJ_EVENT_GFX_ITEM_BALL)
         {
-            if (objType != OBJ_ITEMS || mapHeader->events->objectEvents[i].graphicsId != OBJ_EVENT_GFX_ITEM_BALL)
+            if (objType != OBJ_ITEMS || TEMPLATE_GFX_ID(&mapHeader->events->objectEvents[i]) != OBJ_EVENT_GFX_ITEM_BALL)
                 continue;
         }
 
@@ -1882,10 +1882,10 @@ static bool8 TrySetPyramidObjectEventPositionAtCoords(u8 objType, u8 x, u8 y, u8
             floorEvents[objectEventId].x += (squareId % 4) * 8;
             floorEvents[objectEventId].y += (squareId / 4) * 8;
             floorEvents[objectEventId].localId = objectEventId + 1;
-            if (floorEvents[objectEventId].graphicsId != OBJ_EVENT_GFX_ITEM_BALL)
+            if (TEMPLATE_GFX_ID(&floorEvents[objectEventId]) != OBJ_EVENT_GFX_ITEM_BALL)
             {
                 i = GetUniqueTrainerId(objectEventId);
-                floorEvents[objectEventId].graphicsId = GetBattleFacilityTrainerGfxId(i);
+                SET_TEMPLATE_GFX_ID(&floorEvents[objectEventId], GetBattleFacilityTrainerGfxId(i));
                 gSaveBlock2Ptr->frontier.trainerIds[objectEventId] = i;
             }
             return FALSE;
