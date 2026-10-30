@@ -49,7 +49,7 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
 `src/platform/sdl2.c` has a test harness: `SDL_VIDEODRIVER=dummy MOEMON_TEST=script.txt MOEMON_SHOTDIR=dir`
 (commands: wait N, press KEYS N, mash KEYS COUNT INTERVAL, shot NAME, shotburst PREFIX FRAMES [STEP] = a shot every
 frame while the script goes on, for glitches that last a few frames (rendershotburst: the window output, overlays too), fightshot NAME = a VS fight's own 480x320 picture, barrier NAME COUNT = wait until COUNT clients
-sharing the result folder get there, so they act on the same frame, quit).
+sharing the result folder get there, so they act on the same frame, typetext WORDS = typed on the keyboard ("\n" = Enter), quit).
 `MOEMON_DEBUG_QUICKSTART=1` (+ `MOEMON_DEBUG_NAME/GENDER/WARP/PARTY/MONEY`) skips the intro.
 `MOEMON_COOP_CONFIG=x.ini` and `MOEMON_SAVE=x.sav` let several clients run on one machine.
 `MOEMON_TEST_FPS=120` keeps several clients roughly in sync.
@@ -199,6 +199,9 @@ rules / AI / card changes), CARD SCALING fits with a slight player edge, and the
 for the deck under the cursor (TcgUi_Match): COOP_NOTES "Card AI levels, power ratings and how a match looks".
 HOW TO PLAY (src/tcg/tcg_guide.c: SELECT on a game's first case screen, animated pages per game; COOP_NOTES "The three
 card games together").
+SEARCH & SORT (src/tcg/tcg_search.c: L2 / F in the BINDER and deck builders of all three, PLATFORM_KEY_SEARCH; each game's
+filters and sorts as a SearchGame, a Shown() cache per UI over the screen's own list; "<save>.search"; COOP_NOTES
+"SEARCH & SORT"; test tools/test/card_search.sh, harness `typetext`).
 
 Also TRIPLE TRIAD (src/tt/, include/tt/: the CARD CASE's third side, L/R go round the three games; every Final Fantasy
 XIV card from xivapi (tools/tt: fetch_cards.py, gen_catalog.py, build_art.py -> graphics/tt/cards.bin, gen_pools.py ->

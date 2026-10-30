@@ -2209,6 +2209,39 @@ What the POKéMON, Yu-Gi-Oh! and Triple Triad screens share, so they feel like o
 - The case's menu and its Decks / Booster pages draw the row cursor 1 px lower (TcgUi_RowDown around those three
   screens' draws; the deck builder keeps its own), the binders' and Pokemon / Yu-Gi-Oh! booster pages' card frames too.
 
+## SEARCH & SORT (1.54.0)
+One menu for the BINDER and the deck builder of all three card games: src/tcg/tcg_search.c / .h.
+- The key: PLATFORM_KEY_SEARCH (0x1000, past INSPECT's 0x800): the left trigger while a card screen is up (gamepad.c,
+  Tcg_IsActive), F on the keyboard (sdl2.c), SEARCH in test scripts; KEY_SEARCH in each card file's key enum, {SEARCH}
+  in hints (the LT/L2/ZL icon, a drawn "F" keycap: tcg_gfx.c G_BUTTON_SEARCH). R2 stays INSPECT, L / R the pages/tabs.
+- Each game hands over a SearchGame: its filters (SF_CHOICE with names / values, SF_MIN / SF_MAX from lo by step;
+  names on a MIN show Triple Triad's A), its sorts (key -1 by name, -2 by copies owned, else value()'s key:
+  SEARCH_KEY_NUMBER, SEARCH_KEY_RARITY, then the game's own), name(), value() and owned(). SEARCH_NA: the card has no
+  such value (a Trainer's HP): any filter on it fails and sorting puts it last either way; a choice whose value is
+  SEARCH_ALL lets everything through. Ties keep the screen's own order.
+- TcgSearch_Apply filters and sorts the ids the screen would show, after the screen's own rules (what's visible /
+  collectible, the type or star tab), so it never shows anything new. tcg_ui.c / ygo_ui.c / tt_ui.c keep the result in
+  a Shown() cache keyed on the screen, tab, owned counts (and Triple Triad's seen cards) and TcgSearch_Generation;
+  ListCard / ListSize (Triple Triad: BinderList / BuilderList) read it, so A / SELECT / INSPECT / buying act on the card
+  under the cursor as shown. The trade screens keep their own lists. Sorting never touches decks or counts.
+- The cursor stays on its card when the list changes (SearchStep: ListIndexOf the card it was on; gone: the first).
+- Menu: SEARCH (A: TcgUi_NameOpen, the keyboard or the screen keys; every letter updates the list, B puts it back),
+  SORT BY, ORDER, OWNED ONLY, the filters, CLEAR ALL, DONE; LEFT / RIGHT change a row, START empties it, B or the key
+  closes. The header counts the cards. Badge (TcgSearch_Badge) at the strip's bottom right: orange with what narrows
+  the list and the count, blue "BY <sort>" when only sorted. An empty list says "No cards match." and how to clear.
+- POKéMON: CARD, TYPE (not for Trainers), STAGE, MIN / MAX HP, WEAKNESS / RESISTANCE (NONE too), RETREAT COST; sorts
+  NUMBER, NAME, RARITY, OWNED, HP, RETREAT COST. Yu-Gi-Oh!: CARD, MONSTER TYPE, ATTRIBUTE, LEVEL (the catalog ends in
+  2003: no Ranks or Links), MIN / MAX ATK and DEF ("?" is none), LIST STATUS from Ygo_CopyLimit (the Forbidden &
+  Limited list in use); sorts NUMBER, NAME, RARITY, OWNED, LEVEL, ATK, DEF. Triple Triad: STARS (BY TAB = the tabs;
+  ALL or a star: the tabs show it, and L / R hand back to the tabs: ListTabStep), MIN TOP / RIGHT / BOTTOM / LEFT
+  (A = 10), TYPE (PRIMAL, SCION, SOCIETY, GARLEAN, NO TYPE); sorts NUMBER, NAME, STARS, OWNED, each side, TOTAL. A card
+  not met yet has no name to find and no sides or type to filter or sort by (it stays "???").
+- Settings: "<save>.search", a tab-separated line per game ("pokemon", "yugioh", "triad"); a game's line is read when
+  it's first registered, saving keeps the lines of games not opened since start. Saved when the menu closes.
+- Tests: tools/test/card_search.sh (typing with the harness's `typetext`, take out / add, INSPECT and back, paging,
+  nothing found then CLEAR ALL, sorts); `mp cards|ygo|tt search text X | sort N | desc | owned | filter I V | clear`
+  and `mp cards|ygo|tt shown` (the list, the cursor's card and the deck's count).
+
 ## Every POKéMON card attack (1.46.0)
 - The last 20 command lists from the original's effect_functions.asm (pret/poketcg), as FX_* kinds in
   tcg_effects.c (generate_effects.py "lists"): Mix-Up, Wildfire, Amnesia, Magnetic Storm, Wail, Scavenge, Destiny

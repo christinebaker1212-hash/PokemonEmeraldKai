@@ -868,7 +868,10 @@ struct ButtonTex
 static struct ButtonTex sButtons[24];
 /* {INSPECT}: the card games' look-closer button. A controller's right trigger (RT / R2 / ZR); on the keyboard, D. */
 #define G_BUTTON_INSPECT 0xFE
+/* {SEARCH}: SEARCH & SORT in the card lists. A controller's left trigger (LT / L2 / ZL); on the keyboard, F. */
+#define G_BUTTON_SEARCH 0xFD
 static const u8 sKeyD[7] = {0x1E, 0x11, 0x11, 0x11, 0x11, 0x11, 0x1E};   /* 5x7 "D", top row first, bit 4 = left */
+static const u8 sKeyF[7] = {0x1F, 0x10, 0x10, 0x1E, 0x10, 0x10, 0x10};   /* 5x7 "F" */
 static int ButtonKey(unsigned id, int light)
 {
     return (int)id | Gamepad_IconFamily() << 8 | Gamepad_EffectiveNintendoLayout() << 12 | light << 13;
@@ -900,7 +903,7 @@ static struct ButtonTex *Button(unsigned id, int light)
     s = G_SurfaceNew(32, 16);
     if (!s.px)
         return NULL;
-    if (id == G_BUTTON_INSPECT && Gamepad_IconFamily() == 0 /* GAMEPAD_ICONS_KEYBOARD */)
+    if ((id == G_BUTTON_INSPECT || id == G_BUTTON_SEARCH) && Gamepad_IconFamily() == 0 /* GAMEPAD_ICONS_KEYBOARD */)
     {
         /* a key cap with a D on it, the size of the GBA's A / B buttons' neighbours */
         w = 11;
@@ -909,7 +912,8 @@ static struct ButtonTex *Button(unsigned id, int light)
             {
                 int corner = (x == 0 || x == w - 1) && (y == 0 || y == 10);
                 int edge = x == 0 || x == w - 1 || y == 0 || y == 10;
-                int letter = x >= 3 && x < 8 && y >= 2 && y < 9 && (sKeyD[y - 2] >> (7 - x) & 1);
+                const u8 *glyph = id == G_BUTTON_SEARCH ? sKeyF : sKeyD;
+                int letter = x >= 3 && x < 8 && y >= 2 && y < 9 && (glyph[y - 2] >> (7 - x) & 1);
                 if (corner)
                     continue;
                 S_Px(&s, x, y + 1, ARGB(letter ? mark : edge ? (light ? 0x9090a0 : 0x505058) : body, 255));
@@ -917,7 +921,7 @@ static struct ButtonTex *Button(unsigned id, int light)
         top = 1;
         bottom = 11;
     }
-    else if ((w = MP_ButtonIcon_ToPixels((u8)(id == G_BUTTON_INSPECT ? CHAR_MP_RT : id), buf, 32, 0, 0, sButtonClass, 1, 2)) != 0)
+    else if ((w = MP_ButtonIcon_ToPixels((u8)(id == G_BUTTON_INSPECT ? CHAR_MP_RT : id == G_BUTTON_SEARCH ? CHAR_MP_LT : id), buf, 32, 0, 0, sButtonClass, 1, 2)) != 0)
     {
         for (y = 0; y < 16; y++)
             for (x = 0; x < 32; x++)
@@ -999,7 +1003,8 @@ static int HintToken(const char *s, unsigned *id)
                   {"{UP}", CHAR_DPAD_UP},           {"{DOWN}", CHAR_DPAD_DOWN},
                   {"{LEFT}", CHAR_DPAD_LEFT},       {"{RIGHT}", CHAR_DPAD_RIGHT},
                   {"{UPDOWN}", CHAR_DPAD_UPDOWN},   {"{LEFTRIGHT}", CHAR_DPAD_LEFTRIGHT},
-                  {"{DPAD}", CHAR_DPAD_NONE},       {"{INSPECT}", G_BUTTON_INSPECT}};
+                  {"{DPAD}", CHAR_DPAD_NONE},       {"{INSPECT}", G_BUTTON_INSPECT},
+                  {"{SEARCH}", G_BUTTON_SEARCH}};
     unsigned i;
     for (i = 0; i < sizeof(tokens) / sizeof(tokens[0]); i++)
         if (!strncmp(s, tokens[i].name, strlen(tokens[i].name)))

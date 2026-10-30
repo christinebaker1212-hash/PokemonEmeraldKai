@@ -307,7 +307,7 @@ void YgoNet_Tick(struct YgoNet *l, int connected, uint32_t now)
     if (l->state == YGO_NET_IDLE || l->state == YGO_NET_ENDED)
         return;
     if (!connected)
-        YgoNet_Cancel(l, "Connection lost. No cards or progress were lost.");
+        YgoNet_Cancel(l, "Connection lost.");
     else if ((l->state != YGO_NET_PLAYING || l->pending) && (int32_t)(now - l->deadline) >= 0)
         YgoNet_Cancel(l, "The duel timed out.");
 }

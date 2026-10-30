@@ -71,6 +71,8 @@ void Gamepad_SetKeyHold(int which, int held);
 // Moemon Kai: the card games' INSPECT button (a card up close): the right trigger (RT / R2 / ZR), or D on the
 // keyboard. A bit past the GBA's ten keys in Platform_GetKeyInput; the game itself never sees it (main.c ReadKeys).
 #define PLATFORM_KEY_INSPECT 0x0800
+// Moemon Kai: the card lists' SEARCH & SORT: the left trigger (LT / L2 / ZL), or F on the keyboard
+#define PLATFORM_KEY_SEARCH 0x1000
 
 enum { GAMEPAD_ICONS_KEYBOARD, GAMEPAD_ICONS_NINTENDO, GAMEPAD_ICONS_PLAYSTATION, GAMEPAD_ICONS_XBOX };
 // OPTIONS > CONTROLS > BUTTON ICONS: AUTO (the device used last) or always one set

@@ -358,7 +358,7 @@ void TcgLink_Tick(struct TcgLink *l, int connected, uint32_t now)
     if (l->state == TCG_LINK_IDLE || l->state == TCG_LINK_ENDED)
         return;
     if (!connected)
-        TcgLink_Cancel(l, "Connection lost. No cards or progress were lost.");
+        TcgLink_Cancel(l, "Connection lost.");
     else if ((l->state != TCG_LINK_PLAYING || l->pending) && (int32_t)(now - l->deadline) >= 0)
         TcgLink_Cancel(l, "Card session timed out.");
 }

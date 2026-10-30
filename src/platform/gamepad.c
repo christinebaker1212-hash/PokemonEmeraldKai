@@ -633,6 +633,8 @@ u16 Gamepad_Poll(int *fastForward)
             {
                 if (rt > TRIGGER_ON)
                     keys |= PLATFORM_KEY_INSPECT;
+                if (lt > TRIGGER_ON)
+                    keys |= PLATFORM_KEY_SEARCH;
                 sTurbo = 0;
                 break;
             }

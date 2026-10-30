@@ -26,6 +26,7 @@
 #include "../tcg/tcg_gfx.h"
 #include "../tcg/tcg_ui_kit.h"
 #include "../tcg/tcg_guide.h"
+#include "../tcg/tcg_search.h"
 #include "ygo_board.h"
 #include "ygo_internal.h"
 #include "ygo_gfx.h"
@@ -65,7 +66,8 @@ enum
     KEY_DOWN = 128,
     KEY_R = 256,
     KEY_L = 512,
-    KEY_INSPECT = 2048   /* R2 / ZR / RT, or D on the keyboard: a card up close (gamepad.h PLATFORM_KEY_INSPECT) */
+    KEY_INSPECT = 2048,  /* R2 / ZR / RT, or D on the keyboard: a card up close (gamepad.h PLATFORM_KEY_INSPECT) */
+    KEY_SEARCH = 0x1000  /* L2 / ZL / LT, or F: SEARCH & SORT in the binder and the builder (PLATFORM_KEY_SEARCH) */
 };
 enum
 {
@@ -459,9 +461,93 @@ static int Listed(unsigned id)
         return Ygo_MoneyPrice(id) != 0;
     return Y.showAll ? Ygo_CardReady(id) || C()->owned[id] : C()->owned[id] > 0;
 }
+/* SEARCH & SORT: what the binder and the builder can filter and sort by (src/tcg/tcg_search.c). The catalog stops at
+   2003: Levels only (no Ranks or Link ratings to offer). */
+enum { YK_CARD = SEARCH_KEY_GAME, YK_RACE, YK_ATTR, YK_LEVEL, YK_ATK, YK_DEF, YK_LIMIT };
+static const char *const sSearchCards[] = {"MONSTER", "SPELL", "TRAP"};
+static const char *const sSearchRaces[] = {"AQUA", "BEAST", "BEAST-WARRIOR", "DINOSAUR", "DRAGON", "FAIRY", "FIEND", "FISH",
+                                           "INSECT", "MACHINE", "PLANT", "PYRO", "REPTILE", "ROCK", "SEA SERPENT",
+                                           "SPELLCASTER", "THUNDER", "WARRIOR", "WINGED BEAST", "ZOMBIE"};
+static const int16_t sSearchRaceValues[] = {YGO_AQUA, YGO_BEAST, YGO_BEAST_WARRIOR, YGO_DINOSAUR, YGO_DRAGON, YGO_FAIRY,
+                                            YGO_FIEND, YGO_FISH, YGO_INSECT, YGO_MACHINE, YGO_PLANT, YGO_PYRO, YGO_REPTILE,
+                                            YGO_ROCK, YGO_SEA_SERPENT, YGO_SPELLCASTER, YGO_THUNDER, YGO_WARRIOR,
+                                            YGO_WINGED_BEAST, YGO_ZOMBIE};
+static const char *const sSearchAttrs[] = {"LIGHT", "DARK", "WATER", "FIRE", "EARTH", "WIND", "DIVINE"};
+static const int16_t sSearchAttrValues[] = {YGO_LIGHT, YGO_DARK, YGO_WATER, YGO_FIRE, YGO_EARTH, YGO_WIND, YGO_DIVINE};
+static const char *const sSearchLevels[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"};
+static const int16_t sSearchLevelValues[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+static const char *const sSearchLimits[] = {"FORBIDDEN", "LIMITED", "SEMI-LIMITED", "UNLIMITED"};
+static const struct SearchFilter sSearchFilters[] = {
+    {"CARD", SF_CHOICE, YK_CARD, 3, sSearchCards, NULL, 0, 0, NULL},
+    {"MONSTER TYPE", SF_CHOICE, YK_RACE, 20, sSearchRaces, sSearchRaceValues, 0, 0, NULL},
+    {"ATTRIBUTE", SF_CHOICE, YK_ATTR, 7, sSearchAttrs, sSearchAttrValues, 0, 0, NULL},
+    {"LEVEL", SF_CHOICE, YK_LEVEL, 12, sSearchLevels, sSearchLevelValues, 0, 0, NULL},
+    {"MIN ATK", SF_MIN, YK_ATK, 9, NULL, NULL, 0, 500, NULL},
+    {"MAX ATK", SF_MAX, YK_ATK, 9, NULL, NULL, 0, 500, NULL},
+    {"MIN DEF", SF_MIN, YK_DEF, 9, NULL, NULL, 0, 500, NULL},
+    {"MAX DEF", SF_MAX, YK_DEF, 9, NULL, NULL, 0, 500, NULL},
+    {"LIST STATUS", SF_CHOICE, YK_LIMIT, 4, sSearchLimits, NULL, 0, 0, NULL},
+};
+static const struct SearchSort sSearchSorts[] = {
+    {"NUMBER", SEARCH_KEY_NUMBER}, {"NAME", -1}, {"RARITY", SEARCH_KEY_RARITY}, {"OWNED", -2},
+    {"LEVEL", YK_LEVEL}, {"ATK", YK_ATK}, {"DEF", YK_DEF},
+};
+static const char *SearchName(unsigned id) { return Ygo_Card(id) ? Ygo_Card(id)->name : ""; }
+static int SearchValue(unsigned id, int key)
+{
+    const struct YgoCard *c = Ygo_Card(id);
+    int mon = Ygo_IsMonster(c);
+    if (!c)
+        return SEARCH_NA;
+    switch (key)
+    {
+    case SEARCH_KEY_NUMBER: return (int)id;
+    case SEARCH_KEY_RARITY: return c->rarity;
+    case YK_CARD: return mon ? 0 : c->frame == YGO_SPELL ? 1 : 2;
+    case YK_RACE: return mon ? c->race : SEARCH_NA;
+    case YK_ATTR: return mon ? c->attribute : SEARCH_NA;
+    case YK_LEVEL: return mon ? c->level : SEARCH_NA;
+    case YK_ATK: return mon && c->atk != YGO_STAT_UNKNOWN ? c->atk : SEARCH_NA;
+    case YK_DEF: return mon && c->def != YGO_STAT_UNKNOWN ? c->def : SEARCH_NA;
+    case YK_LIMIT: return (int)(Ygo_CopyLimit(id) > 3 ? 3 : Ygo_CopyLimit(id));   /* (the list the decks follow) */
+    }
+    return SEARCH_NA;
+}
+static unsigned SearchOwned(unsigned id) { return id <= YGO_CARD_COUNT ? C()->owned[id] : 0; }
+static const struct SearchGame sSearchGame = {"yugioh", sSearchFilters, sizeof(sSearchFilters) / sizeof(sSearchFilters[0]),
+                                              sSearchSorts, sizeof(sSearchSorts) / sizeof(sSearchSorts[0]), SearchName,
+                                              SearchValue, SearchOwned};
+static int Searchable(void) { return Y.screen == Y_BINDER || Y.screen == Y_BUILDER; }
+/* The binder's and the builder's list as shown: what Listed lets through, then SEARCH & SORT; kept until something it
+   depends on changes (the screen, its tab, what is owned, the list in use, the search) */
+static uint16_t sShown[YGO_CARD_COUNT + 1];
+static unsigned sShownN, sShownKey[6], sShownReady;
+static void Shown(void)
+{
+    struct YgoCollection *c = C();
+    unsigned key[6], id, n = 0, hash = 0;
+    TcgSearch_Register(SEARCH_YUGIOH, &sSearchGame);
+    for (id = 1; id <= YGO_CARD_COUNT; id++)
+        hash = hash * 31 + c->owned[id];
+    key[0] = (unsigned)Y.screen, key[1] = (unsigned)Y.filter, key[2] = (unsigned)Y.showAll;
+    key[3] = TcgSearch_Generation(SEARCH_YUGIOH), key[4] = hash, key[5] = Ygo_Banlist();
+    if (sShownReady && !memcmp(key, sShownKey, sizeof(key)))
+        return;
+    for (id = 1; id <= YGO_CARD_COUNT; id++)
+        if (Listed(id))
+            sShown[n++] = (uint16_t)id;
+    sShownN = TcgSearch_Apply(SEARCH_YUGIOH, sShown, n);
+    memcpy(sShownKey, key, sizeof(key));
+    sShownReady = 1;
+}
 static unsigned ListSize(void)
 {
     unsigned id, n = 0;
+    if (Searchable())
+    {
+        Shown();
+        return sShownN;
+    }
     for (id = 1; id <= YGO_CARD_COUNT; id++)
         n += Listed(id);
     return n;
@@ -470,9 +556,44 @@ static unsigned ListCard(int index)
 {
     unsigned id;
     int n = 0;
+    if (Searchable())
+    {
+        Shown();
+        return index >= 0 && (unsigned)index < sShownN ? sShown[index] : 0;
+    }
     for (id = 1; id <= YGO_CARD_COUNT; id++)
         if (Listed(id) && n++ == index)
             return id;
+    return 0;
+}
+static int ListIndexOf(unsigned card)
+{
+    unsigned i, n = ListSize();
+    for (i = 0; i < n && card; i++)
+        if (ListCard((int)i) == card)
+            return (int)i;
+    return 0;
+}
+/* SEARCH & SORT over the binder or the builder's cards: {SEARCH} opens it; it has the buttons while it's open */
+static int SearchStep(unsigned pressed)
+{
+    if (!Searchable())
+        return 0;
+    if (TcgSearch_Active())
+    {
+        unsigned keep = ListCard(Y.cursor);
+        if (TcgSearch_Step(pressed))
+            Y.cursor = ListIndexOf(keep);
+        return 1;
+    }
+    if (Y.cursor > 0 && Y.cursor >= (int)ListSize())
+        Y.cursor = ListSize() ? (int)ListSize() - 1 : 0;
+    if (pressed & KEY_SEARCH && (Y.screen == Y_BINDER || Y.side == 0))
+    {
+        TcgSearch_Register(SEARCH_YUGIOH, &sSearchGame);
+        TcgSearch_Open(SEARCH_YUGIOH);
+        return 1;
+    }
     return 0;
 }
 /* A deck's cards, each kind once: the Main Deck then the Fusion Deck */
@@ -721,14 +842,14 @@ static void Rewards(void)
     }
     printf("[ygo] victory vs %s: %s booster, %d cards to choose from\n", Y.opp.name, gYgoSets[set].code, Y.spoilCount);
 }
-/* A duel with a friend: a booster for the winner, nothing lost */
+/* A duel with a friend: a booster for the winner */
 static void FriendRewards(int won)
 {
     struct YgoCollection *c = C();
     unsigned set;
     if (!won)
     {
-        YgoBoard_Result("Good game! Nothing was lost.");
+        YgoBoard_Result("Good game!");
         return;
     }
     set = Ygo_RandomSet(&c->rng);
@@ -802,14 +923,14 @@ static void DuelStep(unsigned pressed, unsigned keys)
         if (Y.vs == VS_NPC && won)
             Rewards();
         else if (Y.vs == VS_NPC)
-            YgoBoard_Result("No cards, money or progress were lost.");
+            YgoBoard_Result("");
         else if (Y.vs == VS_LESSON)
         {
             C()->flags |= YGO_FLAG_TUTORIAL;
             YgoBoard_Result(won ? "That's the game! You're ready to duel anyone." : "Close one! You'll get the hang of it.");
         }
         else if (Y.vs != VS_FRIEND)
-            YgoBoard_Result(won ? "Nothing was wagered: a practice win!" : "Nothing was wagered.");
+            YgoBoard_Result(won ? "A practice win!" : "");
     }
     /* online, the harness's autoplay answers for you through the link */
     if (Y.online && Y.autoPlay && !Y.duel.s.over && Y.duel.query.type != YGO_Q_NONE && Y.duel.query.player == Me() &&
@@ -1494,7 +1615,9 @@ static void BuilderScreen(void)
             G_Frame(x - 2 - o, y - 2 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
         }
     }
-    if (!n)
+    if (!n && TcgSearch_Narrowed(SEARCH_YUGIOH))
+        TcgSearch_Empty(SEARCH_YUGIOH, 80, 50);
+    else if (!n)
         G_TextAlign(80, 56, TA_CENTER, G_WHITE, 0x204030, "No cards of this kind.", TF_SMALL);
     if (n > page)
     {
@@ -1544,8 +1667,9 @@ static void BuilderScreen(void)
             snprintf(line, sizeof(line), "%s", card->name);
     }
     Strip(0, line);
+    TcgSearch_Badge(SEARCH_YUGIOH, -236, 135, (unsigned)n);
     TcgUi_Hints(Y.side ? "{A} TAKE OUT  {LEFT} CARDS  {INSPECT} LOOK  {B} DONE"
-                       : "{A} ADD  {SELECT} TAKE OUT  {INSPECT} LOOK  {B} DONE");
+                       : "{A} ADD  {SELECT} OUT  {INSPECT} LOOK  {SEARCH} SEARCH  {B} DONE");
 }
 
 static void BinderScreen(void)
@@ -1588,14 +1712,17 @@ static void BinderScreen(void)
             G_Frame(x - 2 - o, y - 1 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
         }
     }
-    if (!n)
+    if (!n && TcgSearch_Narrowed(SEARCH_YUGIOH))
+        TcgSearch_Empty(SEARCH_YUGIOH, 120, 50);
+    else if (!n)
         G_TextAlign(120, 56, TA_CENTER, G_WHITE, 0x204030, "No cards of this kind yet.", TF_SMALL);
     if (Y.showAll == SHOP_BINDER)
     {
         snprintf(line, sizeof(line), "%s: %u CARD POINTS\nYou have %u. You own %u.", id ? Ygo_Card(id)->name : "",
                  Ygo_PointCost(id), Points(), id ? c->owned[id] : 0);
         Strip(0, line);
-        TcgUi_Hints("{A} BUY  {L}{R} TYPE  {INSPECT} LOOK  {B} BACK");
+        TcgSearch_Badge(SEARCH_YUGIOH, -236, 135, (unsigned)n);
+        TcgUi_Hints("{A} BUY  {L}{R} TYPE  {INSPECT} LOOK  {SEARCH} SEARCH  {B} BACK");
         return;
     }
     if (Y.showAll == GC_BINDER)
@@ -1607,7 +1734,8 @@ static void BinderScreen(void)
             snprintf(line, sizeof(line), "%s: \xa5%u\nYou have \xa5%u. You own %u.", id ? Ygo_Card(id)->name : "",
                      Ygo_MoneyPrice(id), (unsigned)GetMoney(&gSaveBlock1Ptr->money), id ? c->owned[id] : 0);
         Strip(0, line);
-        TcgUi_Hints("{A} BUY  {L}{R} TYPE  {INSPECT} LOOK  {B} BACK");
+        TcgSearch_Badge(SEARCH_YUGIOH, -236, 135, (unsigned)n);
+        TcgUi_Hints("{A} BUY  {L}{R} TYPE  {INSPECT} LOOK  {SEARCH} SEARCH  {B} BACK");
         return;
     }
     line[0] = 0;
@@ -1618,7 +1746,9 @@ static void BinderScreen(void)
                  c->owned[id] && !Ygo_CardReady(id) ? " (not playable yet)" : "");
     }
     Strip(0, line);
-    TcgUi_Hints(Y.showAll ? "{A} LOOK  {L}{R} TYPE  {SELECT} OWNED  {B} BACK" : "{A} LOOK  {L}{R} TYPE  {SELECT} ALL  {B} BACK");
+    TcgSearch_Badge(SEARCH_YUGIOH, -236, 135, (unsigned)n);
+    TcgUi_Hints(Y.showAll ? "{A} LOOK  {L}{R} TYPE  {SELECT} OWNED  {SEARCH} SEARCH  {B} BACK"
+                          : "{A} LOOK  {L}{R} TYPE  {SELECT} ALL  {SEARCH} SEARCH  {B} BACK");
 }
 
 static void InspectScreen(void)
@@ -2079,7 +2209,7 @@ static void OnlineStep(void)
         return;
     if (s->peerLeft && Y.screen != Y_DUEL && !Y.message[0])
     {
-        Say(ACT_CLOSE, "%s left. Nothing was lost.", Y.opp.name);
+        Say(ACT_CLOSE, "%s left.", Y.opp.name);
         return;
     }
     /* The friend who said yes accepts the asker's invite with the deck they picked */
@@ -2683,6 +2813,8 @@ int YgoUi_Step(unsigned keys)
         }
         return 1;
     }
+    if (SearchStep(pressed))
+        return 1;
     switch (Y.screen)
     {
     case Y_HOME:
@@ -3417,6 +3549,8 @@ void YgoUi_Draw(void)
     default:
         break;
     }
+    if (TcgSearch_Active() && Searchable() && !TcgGuide_Active())
+        TcgSearch_Draw(ListSize());
     TcgUi_MessageBox(Y.message, Y.asking, Y.askYes);
 }
 
@@ -3437,6 +3571,22 @@ void Ygo_Debug(const char *command)
     if (!strcmp(command, "case"))
     {
         YgoUi_OpenCase(NULL, 0);
+        return;
+    }
+    if (!strncmp(command, "search ", 7))
+    {
+        TcgSearch_Register(SEARCH_YUGIOH, &sSearchGame);
+        TcgSearch_Debug(SEARCH_YUGIOH, command + 7);
+        return;
+    }
+    if (!strcmp(command, "shown"))
+    {
+        unsigned i, n = ListSize();
+        printf("[ygo] shown %u (screen %d cursor %d card %u deck %u):", n, Y.screen, Y.cursor, ListCard(Y.cursor),
+               Ygo_DeckCount(C()->decks[Y.deck].main, YGO_DECK_MAX) + Ygo_DeckCount(C()->decks[Y.deck].extra, YGO_FUSION_MAX));
+        for (i = 0; i < n && i < 12; i++)
+            printf(" %s,", Ygo_Card(ListCard((int)i))->name);
+        printf("\n");
         return;
     }
     if (!strcmp(command, "club"))

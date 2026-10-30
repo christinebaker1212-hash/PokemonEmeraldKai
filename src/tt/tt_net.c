@@ -299,7 +299,7 @@ void TtNet_Tick(struct TtNet *l, int connected, uint32_t now)
     if (l->state == TT_NET_IDLE || l->state == TT_NET_ENDED)
         return;
     if (!connected)
-        TtNet_Cancel(l, "Connection lost. No cards were lost.");
+        TtNet_Cancel(l, "Connection lost.");
     else if ((l->state != TT_NET_PLAYING || l->pending) && (int32_t)(now - l->deadline) >= 0)
         TtNet_Cancel(l, "The game timed out.");
 }

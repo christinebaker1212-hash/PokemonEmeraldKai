@@ -28,6 +28,7 @@
 #include "tcg_gfx.h"
 #include "tcg_ui_kit.h"
 #include "tcg_guide.h"
+#include "tcg_search.h"
 #include "platform_text.h"
 #include "tcg_structure_decks.h"
 #include "ygo/integration.h"
@@ -71,7 +72,8 @@ enum
     KEY_DOWN = 128,
     KEY_R = 256,
     KEY_L = 512,
-    KEY_INSPECT = 2048   /* R2 / ZR / RT, or D on the keyboard: a card up close (gamepad.h PLATFORM_KEY_INSPECT) */
+    KEY_INSPECT = 2048,  /* R2 / ZR / RT, or D on the keyboard: a card up close (gamepad.h PLATFORM_KEY_INSPECT) */
+    KEY_SEARCH = 0x1000  /* L2 / ZL / LT, or F: SEARCH & SORT in the binder and the builder (PLATFORM_KEY_SEARCH) */
 };
 /* What a duel is: a card player on the map, practice, the CARD CLUB's lesson, a friend. */
 enum
@@ -472,9 +474,89 @@ static int Visible(unsigned id)
         return Tcg_ShopPrice(id) != 0;
     return U.showAll || c->owned[id];
 }
+/* SEARCH & SORT: what the binder and the builder can filter and sort by (tcg_search.c) */
+enum { PK_KIND = SEARCH_KEY_GAME, PK_TYPE, PK_STAGE, PK_HP, PK_WEAK, PK_RESIST, PK_RETREAT };
+static const char *const sSearchTypes[] = {"GRASS", "FIRE", "WATER", "LIGHTNING", "FIGHTING", "PSYCHIC", "COLORLESS"};
+static const int16_t sSearchTypeValues[] = {TCG_GRASS, TCG_FIRE, TCG_WATER, TCG_LIGHTNING, TCG_FIGHTING, TCG_PSYCHIC,
+                                            TCG_COLORLESS};
+static const char *const sSearchTypesNone[] = {"GRASS", "FIRE", "WATER", "LIGHTNING", "FIGHTING", "PSYCHIC", "COLORLESS",
+                                               "NONE"};
+static const int16_t sSearchTypeNoneValues[] = {TCG_GRASS, TCG_FIRE, TCG_WATER, TCG_LIGHTNING, TCG_FIGHTING, TCG_PSYCHIC,
+                                                TCG_COLORLESS, TCG_NONE};
+static const char *const sSearchKinds[] = {"POKeMON", "TRAINER", "ENERGY"};
+static const int16_t sSearchKindValues[] = {TCG_POKEMON, TCG_TRAINER, TCG_ENERGY};
+static const char *const sSearchStages[] = {"BASIC", "STAGE 1", "STAGE 2"};
+static const char *const sSearchRetreats[] = {"0", "1", "2", "3", "4"};
+static const struct SearchFilter sSearchFilters[] = {
+    {"CARD", SF_CHOICE, PK_KIND, 3, sSearchKinds, sSearchKindValues, 0, 0, NULL},
+    {"TYPE", SF_CHOICE, PK_TYPE, 7, sSearchTypes, sSearchTypeValues, 0, 0, NULL},
+    {"STAGE", SF_CHOICE, PK_STAGE, 3, sSearchStages, NULL, 0, 0, NULL},
+    {"MIN HP", SF_MIN, PK_HP, 10, NULL, NULL, 30, 10, NULL},
+    {"MAX HP", SF_MAX, PK_HP, 10, NULL, NULL, 30, 10, NULL},
+    {"WEAKNESS", SF_CHOICE, PK_WEAK, 8, sSearchTypesNone, sSearchTypeNoneValues, 0, 0, NULL},
+    {"RESISTANCE", SF_CHOICE, PK_RESIST, 8, sSearchTypesNone, sSearchTypeNoneValues, 0, 0, NULL},
+    {"RETREAT COST", SF_CHOICE, PK_RETREAT, 5, sSearchRetreats, NULL, 0, 0, NULL},
+};
+static const struct SearchSort sSearchSorts[] = {
+    {"NUMBER", SEARCH_KEY_NUMBER}, {"NAME", -1}, {"RARITY", SEARCH_KEY_RARITY}, {"OWNED", -2}, {"HP", PK_HP},
+    {"RETREAT COST", PK_RETREAT},
+};
+static const char *SearchName(unsigned id) { return Tcg_Card(id) ? Tcg_Card(id)->name : ""; }
+static int SearchValue(unsigned id, int key)
+{
+    const struct TcgCard *c = Tcg_Card(id);
+    int mon = c && c->kind == TCG_POKEMON;
+    if (!c)
+        return SEARCH_NA;
+    switch (key)
+    {
+    case SEARCH_KEY_NUMBER: return (int)id;
+    case SEARCH_KEY_RARITY: return c->rarity;
+    case PK_KIND: return c->kind;
+    case PK_TYPE: return c->kind == TCG_TRAINER ? SEARCH_NA : c->type;   /* (an Energy card's type is its energy) */
+    case PK_STAGE: return mon ? c->stage : SEARCH_NA;
+    case PK_HP: return mon ? c->hp : SEARCH_NA;
+    case PK_WEAK: return mon ? c->weakness : SEARCH_NA;
+    case PK_RESIST: return mon ? c->resistance : SEARCH_NA;
+    case PK_RETREAT: return mon ? c->retreat : SEARCH_NA;
+    }
+    return SEARCH_NA;
+}
+static unsigned SearchOwned(unsigned id) { return id <= TCG_CARD_COUNT ? Tcg_GetCollection()->owned[id] : 0; }
+static const struct SearchGame sSearchGame = {"pokemon", sSearchFilters, sizeof(sSearchFilters) / sizeof(sSearchFilters[0]),
+                                              sSearchSorts, sizeof(sSearchSorts) / sizeof(sSearchSorts[0]), SearchName,
+                                              SearchValue, SearchOwned};
+static int Searchable(void) { return U.screen == UI_BINDER || U.screen == UI_BUILDER; }
+/* The binder's and the builder's list as shown: what Visible lets through, then SEARCH & SORT; kept until something
+   it depends on changes (the screen, its tab, what is owned, the search) */
+static uint16_t sShown[TCG_CARD_COUNT + 1];
+static unsigned sShownN, sShownKey[6], sShownReady;
+static void Shown(void)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    unsigned key[6], id, n = 0, hash = 0;
+    TcgSearch_Register(SEARCH_POKEMON, &sSearchGame);
+    for (id = 1; id <= TCG_CARD_COUNT; id++)
+        hash = hash * 31 + c->owned[id];
+    key[0] = (unsigned)U.screen, key[1] = (unsigned)U.filter, key[2] = (unsigned)U.showAll;
+    key[3] = TcgSearch_Generation(SEARCH_POKEMON), key[4] = hash, key[5] = 1;
+    if (sShownReady && !memcmp(key, sShownKey, sizeof(key)))
+        return;
+    for (id = 1; id <= TCG_CARD_COUNT; id++)
+        if (Visible(id))
+            sShown[n++] = (uint16_t)id;
+    sShownN = TcgSearch_Apply(SEARCH_POKEMON, sShown, n);
+    memcpy(sShownKey, key, sizeof(key));
+    sShownReady = 1;
+}
 static unsigned ListCard(unsigned index)
 {
     unsigned id;
+    if (Searchable())
+    {
+        Shown();
+        return index < sShownN ? sShown[index] : 0;
+    }
     for (id = 1; id <= TCG_CARD_COUNT; id++)
         if (Visible(id) && !index--)
             return id;
@@ -483,9 +565,45 @@ static unsigned ListCard(unsigned index)
 static unsigned ListSize(void)
 {
     unsigned id, n = 0;
+    if (Searchable())
+    {
+        Shown();
+        return sShownN;
+    }
     for (id = 1; id <= TCG_CARD_COUNT; id++)
         n += Visible(id);
     return n;
+}
+/* Where a card is in the list now (after the search changed): the cursor stays on it, or goes to the start */
+static int ListIndexOf(unsigned card)
+{
+    unsigned i, n = ListSize();
+    for (i = 0; i < n && card; i++)
+        if (ListCard(i) == card)
+            return (int)i;
+    return 0;
+}
+/* SEARCH & SORT over the binder or the builder's cards: {SEARCH} opens it; it has the buttons while it's open */
+static int SearchStep(unsigned pressed)
+{
+    if (!Searchable())
+        return 0;
+    if (TcgSearch_Active())
+    {
+        unsigned keep = ListCard((unsigned)U.cursor);
+        if (TcgSearch_Step(pressed))
+            U.cursor = ListIndexOf(keep);
+        return 1;
+    }
+    if (U.cursor > 0 && U.cursor >= (int)ListSize())
+        U.cursor = ListSize() ? (int)ListSize() - 1 : 0;
+    if (pressed & KEY_SEARCH && (U.screen == UI_BINDER || U.side == 0))
+    {
+        TcgSearch_Register(SEARCH_POKEMON, &sSearchGame);
+        TcgSearch_Open(SEARCH_POKEMON);
+        return 1;
+    }
+    return 0;
 }
 /* Distinct cards in a deck, catalogue order (the builder's right column). */
 static unsigned DeckList(unsigned deck, uint16_t *out)
@@ -673,7 +791,7 @@ static void FriendRewards(int won)
     struct TcgCollection *c = Tcg_GetCollection();
     if (!won)
     {
-        TcgBoard_Result("Good game! Nothing was lost.");
+        TcgBoard_Result("Good game!");
         return;
     }
     c->wins++;
@@ -730,7 +848,7 @@ static void DuelStep(unsigned pressed, unsigned keys)
         else if (U.vs == VS_NPC && U.duel.winner == 0)
             Rewards();
         else if (U.vs == VS_NPC)
-            TcgBoard_Result("No cards, money or progress were lost.");
+            TcgBoard_Result("");
         else if (U.vs == VS_LESSON)
             TcgBoard_Result(U.duel.winner == 0 ? "That's the game! You're ready for real duels."
                                                : "Close one! You'll get the hang of it.");
@@ -1801,7 +1919,9 @@ static void BuilderScreen(void)
             G_Frame(x - 2 - o, y - 2 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
         }
     }
-    if (!n)
+    if (!n && TcgSearch_Narrowed(SEARCH_POKEMON))
+        TcgSearch_Empty(SEARCH_POKEMON, 80, 50);
+    else if (!n)
         G_TextAlign(80, 56, TA_CENTER, G_WHITE, 0x204030, "No cards of this kind.", TF_SMALL);
     if (n > page)
     {
@@ -1844,7 +1964,9 @@ static void BuilderScreen(void)
             snprintf(line, sizeof(line), "%s", card->name);
     }
     Strip(0, line);
-    Hints(U.side ? "{A} TAKE OUT  {LEFT} CARDS  {INSPECT} LOOK  {B} DONE" : "{A} ADD  {SELECT} TAKE OUT  {INSPECT} LOOK  {B} DONE");
+    TcgSearch_Badge(SEARCH_POKEMON, -236, 135, (unsigned)n);
+    Hints(U.side ? "{A} TAKE OUT  {LEFT} CARDS  {INSPECT} LOOK  {B} DONE"
+                 : "{A} ADD  {SELECT} OUT  {INSPECT} LOOK  {SEARCH} SEARCH  {B} DONE");
 }
 
 /* The GAME CENTER CARD SHOP sold its one copy of this single */
@@ -1889,7 +2011,9 @@ static void BinderScreen(void)
             G_Frame(x - 2 - o, y - 1 - o, 34 + 2 * o, 46 + 2 * o, 0xe82820, 255);
         }
     }
-    if (!n)
+    if (!n && TcgSearch_Narrowed(SEARCH_POKEMON))
+        TcgSearch_Empty(SEARCH_POKEMON, 120, 50);
+    else if (!n)
         G_TextAlign(120, 56, TA_CENTER, G_WHITE, 0x204030, "No cards of this kind yet.", TF_SMALL);
     if (U.showAll == GC_BINDER)
     {
@@ -1899,7 +2023,8 @@ static void BinderScreen(void)
             snprintf(line, sizeof(line), "%s: \xa5%u\nYou have \xa5%u. You own %u.", id ? Tcg_Card(id)->name : "",
                      Tcg_ShopPrice(id), (unsigned)GetMoney(&gSaveBlock1Ptr->money), id ? c->owned[id] : 0);
         Strip(0, line);
-        Hints("{A} BUY  {L}{R} TYPE  {B} BACK");
+        TcgSearch_Badge(SEARCH_POKEMON, -236, 135, (unsigned)n);
+        Hints("{A} BUY  {L}{R} TYPE  {SEARCH} SEARCH  {B} BACK");
         return;
     }
     if (U.showAll == SHOP_BINDER)
@@ -1908,7 +2033,8 @@ static void BinderScreen(void)
         snprintf(line, sizeof(line), "%s: %u CARD POINTS\nYou have %u. You own %u.", id ? Tcg_Card(id)->name : "", cost,
                  c->dust, id ? c->owned[id] : 0);
         Strip(0, line);
-        Hints("{A} BUY  {L}{R} TYPE  {B} BACK");
+        TcgSearch_Badge(SEARCH_POKEMON, -236, 135, (unsigned)n);
+        Hints("{A} BUY  {L}{R} TYPE  {SEARCH} SEARCH  {B} BACK");
         return;
     }
     line[0] = 0;
@@ -1922,7 +2048,9 @@ static void BinderScreen(void)
             snprintf(line, sizeof(line), "%s\n%s", card->name, c->owned[id] || id <= 6 ? "" : "Not in your collection yet.");
     }
     Strip(0, line);
-    Hints(U.showAll ? "{A} LOOK  {L}{R} TYPE  {SELECT} OWNED  {B} BACK" : "{A} LOOK  {L}{R} TYPE  {SELECT} ALL  {B} BACK");
+    TcgSearch_Badge(SEARCH_POKEMON, -236, 135, (unsigned)n);
+    Hints(U.showAll ? "{A} LOOK  {L}{R} TYPE  {SELECT} OWNED  {SEARCH} SEARCH  {B} BACK"
+                    : "{A} LOOK  {L}{R} TYPE  {SELECT} ALL  {SEARCH} SEARCH  {B} BACK");
 }
 
 static void InspectScreen(void)
@@ -2973,7 +3101,7 @@ static void OnlineStep(void)
         return;
     if (s->peerLeft && U.screen != UI_DUEL && !U.message[0])
     {
-        Say(ACT_CLOSE, "%s left. Nothing was lost.", U.opp.name);
+        Say(ACT_CLOSE, "%s left.", U.opp.name);
         return;
     }
     /* The friend who said yes accepts the asker's invite with the deck they picked */
@@ -3189,6 +3317,8 @@ int Tcg_Step(unsigned keys)
         }
         return 1;
     }
+    if (SearchStep(pressed))
+        return 1;
     switch (U.screen)
     {
     case UI_HOME:
@@ -3882,6 +4012,8 @@ SDL_Texture *Tcg_Canvas(SDL_Renderer *r, SDL_Texture *game)
             TtUi_Draw();
         break;
     }
+    if (TcgSearch_Active() && Searchable() && !TcgGuide_Active())
+        TcgSearch_Draw(ListSize());
     MessageBox();
     SDL_SetRenderTarget(r, previous);
     SDL_RenderSetViewport(r, &oldViewport);
@@ -3987,6 +4119,23 @@ void Tcg_Debug(const char *command)
     if (!strcmp(command, "case"))
     {
         Tcg_OpenCase(NULL);
+        return;
+    }
+    /* SEARCH & SORT: search text T / sort N / desc / owned / filter I V / clear; shown: the list as it stands */
+    if (!strncmp(command, "search ", 7))
+    {
+        TcgSearch_Register(SEARCH_POKEMON, &sSearchGame);
+        TcgSearch_Debug(SEARCH_POKEMON, command + 7);
+        return;
+    }
+    if (!strcmp(command, "shown"))
+    {
+        unsigned i, n = ListSize();
+        printf("[tcg] shown %u (screen %d cursor %d card %u deck %u):", n, U.screen, U.cursor, ListCard((unsigned)U.cursor),
+               DeckCount(U.deck, 0));
+        for (i = 0; i < n && i < 12; i++)
+            printf(" %s", Tcg_Card(ListCard(i))->name);
+        printf("\n");
         return;
     }
     if (!strcmp(command, "reveal"))

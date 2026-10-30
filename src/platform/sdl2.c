@@ -637,6 +637,9 @@ void ProcessEvents(void)
             case SDLK_d:
                 keys &= ~PLATFORM_KEY_INSPECT;
                 break;
+            case SDLK_f:
+                keys &= ~PLATFORM_KEY_SEARCH;
+                break;
             }
             break;
         case SDL_TEXTINPUT:
@@ -699,6 +702,8 @@ void ProcessEvents(void)
                 else if (!(event.key.keysym.mod & (KMOD_CTRL | KMOD_ALT)) && !event.key.repeat
                  && Platform_InputContext() == INPUT_CONTEXT_PC_STORAGE)
                     Platform_ContextAction(INPUT_ACTION_PC_TAG);
+                else if (!(event.key.keysym.mod & (KMOD_CTRL | KMOD_ALT)) && Tcg_IsActive())
+                    keys |= PLATFORM_KEY_SEARCH;   // Moemon Kai: the card lists' SEARCH & SORT (LT on a controller)
                 break;
             case SDLK_d:
                 // Moemon Kai: the card games' INSPECT (the right trigger on a controller); let go in SDL_KEYUP
@@ -965,7 +970,7 @@ static u16 ParseTestKeys(const char *s)
     static const struct { const char *name; u16 key; } names[] = {
         {"A", A_BUTTON}, {"B", B_BUTTON}, {"START", START_BUTTON}, {"SELECT", SELECT_BUTTON},
         {"L", L_BUTTON}, {"R", R_BUTTON}, {"UP", DPAD_UP}, {"DOWN", DPAD_DOWN},
-        {"LEFT", DPAD_LEFT}, {"RIGHT", DPAD_RIGHT}, {"INSPECT", PLATFORM_KEY_INSPECT}, {"NONE", 0},
+        {"LEFT", DPAD_LEFT}, {"RIGHT", DPAD_RIGHT}, {"INSPECT", PLATFORM_KEY_INSPECT}, {"SEARCH", PLATFORM_KEY_SEARCH}, {"NONE", 0},
     };
     u16 keysOut = 0;
     char buf[64];
@@ -1313,6 +1318,17 @@ static void TestHarnessStep(void)
             char a2[1100] = "";
             sscanf(line, "%*s %*s %1099[^\n]", a2);   // the rest of the line
             MP_TestCommand(arg, a2);
+        }
+        else if (strcmp(cmd, "typetext") == 0)
+        {
+            // typetext WORDS: typed on the keyboard into whatever is taking text ("\n" for Enter)
+            void Platform_QueueTypedText(const char *text);
+            char words[200] = "", *p;
+            sscanf(line, "%*s %199[^\n]", words);
+            for (p = words; *p; p++)
+                if (p[0] == '\\' && p[1] == 'n')
+                    p[0] = '\r', p[1] = '\n';   // (dropped, then Enter)
+            Platform_QueueTypedText(words);
         }
         else if (strcmp(cmd, "rendershot") == 0)
         {

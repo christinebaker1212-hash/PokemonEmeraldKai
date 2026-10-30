@@ -1237,6 +1237,20 @@ them stands the CARD CLUB's Yu-Gi-Oh! duelist (see YU-GI-OH! below).
   Recipes         DECKS > DECK RECIPES (or FROM A RECIPE on an empty slot):
                   the starter and structure decks rebuilt from your cards; the
                   list says what you're missing.
+  Search & Sort   In the BINDER and the deck builder of all three card
+                  games, L2 / LT / ZL (F on the keyboard) opens SEARCH &
+                  SORT: SEARCH finds cards by any part of their name (type
+                  with the keyboard, or the keys on screen), SORT BY and
+                  ORDER put them in another order (number, name, rarity,
+                  copies owned and the game's own numbers: HP, ATK, the
+                  sides of a TRIPLE TRIAD card...), OWNED ONLY and the
+                  game's filters (POKEMON / TRAINER / ENERGY, type, Attribute,
+                  Level, ATK, stars, the least a side may have...) narrow the
+                  list. They all work together; START empties a row and
+                  CLEAR ALL empties everything. A badge under the list shows
+                  what's narrowing it and how many cards are left. It only
+                  changes what the list shows, never your decks or cards,
+                  and each game remembers its own settings.
   Rewards         Every win gives a booster pack, and once a day each
                   opponent lets you pick one card of their deck (not a holo).
                   Losing costs nothing. Spare cards become CARD POINTS at the

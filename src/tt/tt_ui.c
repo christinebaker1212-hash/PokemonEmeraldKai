@@ -28,6 +28,7 @@
 #include "../tcg/tcg_gfx.h"
 #include "../tcg/tcg_ui_kit.h"
 #include "../tcg/tcg_guide.h"
+#include "../tcg/tcg_search.h"
 #include "tt_board.h"
 #include "tt_gfx.h"
 
@@ -56,7 +57,8 @@ enum
 {
     KEY_A = 1, KEY_B = 2, KEY_SELECT = 4, KEY_START = 8, KEY_RIGHT = 16, KEY_LEFT = 32, KEY_UP = 64, KEY_DOWN = 128,
     KEY_R = 256, KEY_L = 512,
-    KEY_INSPECT = 2048   /* R2 / ZR / RT, or D on the keyboard: a card up close (gamepad.h PLATFORM_KEY_INSPECT) */
+    KEY_INSPECT = 2048,  /* R2 / ZR / RT, or D on the keyboard: a card up close (gamepad.h PLATFORM_KEY_INSPECT) */
+    KEY_SEARCH = 0x1000  /* L2 / ZL / LT, or F: SEARCH & SORT in the list and the builder (PLATFORM_KEY_SEARCH) */
 };
 enum { VS_NPC, VS_PRACTICE, VS_FRIEND };
 enum
@@ -276,7 +278,7 @@ static void Card(unsigned id, float x, float y, float w, float h, unsigned seat,
     G_FillA((int)x + 2, (int)y + 3, (int)w, (int)h - 2, 0x000000, alpha * 70 / 255);
     Tt_DrawCard(id, x, y, w, h, 1, 1, alpha, &face);
 }
-/* Cards of a star tab (1-5), in Final Fantasy XIV's order */
+/* Cards of a star tab (1-5; 0: every star), in Final Fantasy XIV's order */
 static unsigned StarList(unsigned stars, uint16_t *out, int ownedOnly)
 {
     static uint16_t sorted[TT_CARD_MAX + 1];
@@ -301,12 +303,91 @@ static unsigned StarList(unsigned stars, uint16_t *out, int ownedOnly)
     for (i = 0; sorted[i]; i++)
     {
         const struct TtCard *c = Tt_Card(sorted[i]);
-        if (c->stars != stars || (ownedOnly && !Owned(sorted[i])))
+        if ((stars && c->stars != stars) || (ownedOnly && !Owned(sorted[i])))
             continue;
         out[n++] = sorted[i];
     }
     return n;
 }
+/* SEARCH & SORT (src/tcg/tcg_search.c) over the list and the builder. Cards not met yet keep their secrets: no name
+   to find, no sides or type to filter or sort by. */
+enum { TK_STARS = SEARCH_KEY_GAME, TK_UP, TK_RIGHT, TK_DOWN, TK_LEFT, TK_TYPE, TK_TOTAL };
+static const char *const sSearchStars[] = {"ALL", "1", "2", "3", "4", "5"};
+static const int16_t sSearchStarValues[] = {SEARCH_ALL, 1, 2, 3, 4, 5};
+static const char *const sSearchSides[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "A"};
+static const char *const sSearchTypes[] = {"PRIMAL", "SCION", "SOCIETY", "GARLEAN", "NO TYPE"};
+static const int16_t sSearchTypeValues[] = {TT_TYPE_PRIMAL, TT_TYPE_SCION, TT_TYPE_SOCIETY, TT_TYPE_GARLEAN, TT_TYPE_NONE};
+enum { SEARCH_STARS_FILTER = 0 };   /* (BY TAB: the star tabs choose; ALL or a star: they step aside) */
+static const struct SearchFilter sSearchFilters[] = {
+    {"STARS", SF_CHOICE, TK_STARS, 6, sSearchStars, sSearchStarValues, 0, 0, "BY TAB"},
+    {"MIN TOP", SF_MIN, TK_UP, 10, sSearchSides, NULL, 1, 1, NULL},
+    {"MIN RIGHT", SF_MIN, TK_RIGHT, 10, sSearchSides, NULL, 1, 1, NULL},
+    {"MIN BOTTOM", SF_MIN, TK_DOWN, 10, sSearchSides, NULL, 1, 1, NULL},
+    {"MIN LEFT", SF_MIN, TK_LEFT, 10, sSearchSides, NULL, 1, 1, NULL},
+    {"TYPE", SF_CHOICE, TK_TYPE, 5, sSearchTypes, sSearchTypeValues, 0, 0, NULL},
+};
+static const struct SearchSort sSearchSorts[] = {
+    {"NUMBER", SEARCH_KEY_NUMBER}, {"NAME", -1}, {"STARS", SEARCH_KEY_RARITY}, {"OWNED", -2},
+    {"TOP", TK_UP}, {"RIGHT", TK_RIGHT}, {"BOTTOM", TK_DOWN}, {"LEFT", TK_LEFT}, {"TOTAL", TK_TOTAL},
+};
+static int Met(unsigned id) { return Owned(id) || Tt_Seen(C(), id); }
+static const char *SearchName(unsigned id) { return Tt_Card(id) && Met(id) ? Tt_Card(id)->name : ""; }
+static int SearchValue(unsigned id, int key)
+{
+    const struct TtCard *c = Tt_Card(id);
+    if (!c)
+        return SEARCH_NA;
+    if (key == SEARCH_KEY_NUMBER)
+        return c->order;
+    if (key == SEARCH_KEY_RARITY || key == TK_STARS)
+        return c->stars;   /* (the tabs show it anyway) */
+    if (!Met(id))
+        return SEARCH_NA;
+    switch (key)
+    {
+    case TK_UP: return c->side[TT_UP];
+    case TK_RIGHT: return c->side[TT_RIGHT];
+    case TK_DOWN: return c->side[TT_DOWN];
+    case TK_LEFT: return c->side[TT_LEFT];
+    case TK_TYPE: return c->type;
+    case TK_TOTAL: return c->side[0] + c->side[1] + c->side[2] + c->side[3];
+    }
+    return SEARCH_NA;
+}
+static const struct SearchGame sSearchGame = {"triad", sSearchFilters, sizeof(sSearchFilters) / sizeof(sSearchFilters[0]),
+                                              sSearchSorts, sizeof(sSearchSorts) / sizeof(sSearchSorts[0]), SearchName,
+                                              SearchValue, Owned};
+static int Searchable(void) { return U.screen == T_LIST || U.screen == T_BUILDER; }
+/* The star the list shows (0: every star): the tab, unless SEARCH & SORT's STARS says otherwise */
+static unsigned ShownStars(void)
+{
+    int choice;
+    TcgSearch_Register(SEARCH_TRIAD, &sSearchGame);
+    choice = TcgSearch_Choice(SEARCH_TRIAD, SEARCH_STARS_FILTER);
+    return choice == 0 ? (unsigned)U.stars : choice == 1 ? 0 : (unsigned)choice - 1;
+}
+/* The list's and the builder's cards as shown, kept until something they depend on changes */
+static uint16_t sShown[TT_CARD_MAX + 1];
+static unsigned sShownN, sShownKey[6], sShownReady;
+static unsigned Shown(uint16_t *out, int ownedOnly)
+{
+    struct TtCollection *c = C();
+    unsigned key[6], id, hash = 0;
+    TcgSearch_Register(SEARCH_TRIAD, &sSearchGame);
+    for (id = 1; id <= TT_CARD_MAX; id++)
+        hash = hash * 31 + c->owned[id] * 2 + (unsigned)Tt_Seen(c, id);
+    key[0] = (unsigned)ownedOnly, key[1] = ShownStars(), key[2] = (unsigned)U.stars;
+    key[3] = TcgSearch_Generation(SEARCH_TRIAD), key[4] = hash, key[5] = 0;
+    if (!sShownReady || memcmp(key, sShownKey, sizeof(key)))
+    {
+        sShownN = TcgSearch_Apply(SEARCH_TRIAD, sShown, StarList(key[1], sShown, ownedOnly));
+        memcpy(sShownKey, key, sizeof(key));
+        sShownReady = 1;
+    }
+    memcpy(out, sShown, sShownN * sizeof(sShown[0]));
+    return sShownN;
+}
+static unsigned BinderList(uint16_t *out) { return Shown(out, 0); }
 static void StarTabs(int x, int y, int selected)
 {
     int i;
@@ -418,6 +499,53 @@ static void StarTabStep(unsigned pressed)
         U.cursor = 0;
         PlaySE(SE_SELECT);
     }
+}
+/* The list's and the builder's L / R: SEARCH & SORT's STARS gives way to the tabs again, from the star it showed */
+static void ListTabStep(unsigned pressed)
+{
+    int choice = TcgSearch_Choice(SEARCH_TRIAD, SEARCH_STARS_FILTER);
+    if (pressed & (KEY_L | KEY_R) && choice)
+    {
+        if (choice >= 2)
+            U.stars = choice - 1;
+        TcgSearch_SetChoice(SEARCH_TRIAD, SEARCH_STARS_FILTER, 0);
+    }
+    StarTabStep(pressed);
+}
+static int ListIndexOf(const uint16_t *list, unsigned n, unsigned card)
+{
+    unsigned i;
+    for (i = 0; i < n && card; i++)
+        if (list[i] == card)
+            return (int)i;
+    return 0;
+}
+/* SEARCH & SORT over the list or the builder's cards: {SEARCH} opens it; it has the buttons while it's open */
+static int SearchStep(unsigned pressed)
+{
+    static uint16_t list[TT_CARD_MAX + 1];
+    unsigned n;
+    if (!Searchable())
+        return 0;
+    n = Shown(list, U.screen == T_BUILDER);
+    if (TcgSearch_Active())
+    {
+        unsigned keep = n && U.cursor < (int)n ? list[U.cursor] : 0;
+        if (TcgSearch_Step(pressed))
+        {
+            n = Shown(list, U.screen == T_BUILDER);
+            U.cursor = ListIndexOf(list, n, keep);
+        }
+        return 1;
+    }
+    if (U.cursor > 0 && U.cursor >= (int)n)
+        U.cursor = n ? (int)n - 1 : 0;
+    if (pressed & KEY_SEARCH && (U.screen == T_LIST || !U.inDeckRow))
+    {
+        TcgSearch_Open(SEARCH_TRIAD);
+        return 1;
+    }
+    return 0;
 }
 static void Inspect(unsigned id, int back)
 {
@@ -631,10 +759,7 @@ static void Results(void)
         n += snprintf(line + n, sizeof(line) - (size_t)n, "A draw. No cards change hands.");
     }
     else
-    {
         c->losses++;
-        n += snprintf(line + n, sizeof(line) - (size_t)n, "No cards lost: only you ever take cards.");
-    }
     TtBoard_Result(line);
 }
 static void CountRules(void)
@@ -904,7 +1029,7 @@ static void DecksScreen(void)
 }
 
 /* The builder: the deck's five slots along the top, the cards owned of a star below */
-static unsigned BuilderList(uint16_t *out) { return StarList((unsigned)U.stars, out, 1); }
+static unsigned BuilderList(uint16_t *out) { return Shown(out, 1); }
 static void BuilderScreen(void)
 {
     static uint16_t list[TT_CARD_MAX + 1];
@@ -944,7 +1069,7 @@ static void BuilderScreen(void)
         snprintf(line, sizeof(line), "5 STARS %u/1", five);
         G_Text(4, 29, five > 1 ? 0xff8070 : 0xc8d8e8, G_NO_SHADOW, line, 0, TF_NARROW);
     }
-    StarTabs(4, 40, U.stars);
+    StarTabs(4, 40, (int)ShownStars());
     for (i = 0; i < (unsigned)page && start + (int)i < (int)n; i++)
     {
         int x = 6 + (int)(i % GRID_COLS) * 33, y = 58 + (int)(i / GRID_COLS) * 18, on = !U.inDeckRow && start + (int)i == U.cursor;
@@ -960,7 +1085,9 @@ static void BuilderScreen(void)
             G_Frame(x + 6 - o, y - 1 - o, 18 + 2 * o, 18 + 2 * o, 0xe82820, 255);
         }
     }
-    if (!n)
+    if (!n && TcgSearch_Narrowed(SEARCH_TRIAD))
+        TcgSearch_Empty(SEARCH_TRIAD, 120, 68);
+    else if (!n)
         G_TextAlign(120, 70, TA_CENTER, G_WHITE, 0x204030, "You own none of these yet.", TF_SMALL);
     id = U.inDeckRow ? d->cards[U.deckSlot] : n ? list[U.cursor] : 0;
     if (id)
@@ -972,20 +1099,21 @@ static void BuilderScreen(void)
     }
     else
         Strip(0, U.inDeckRow ? "An empty slot: pick a card below." : "");
+    TcgSearch_Badge(SEARCH_TRIAD, -236, 135, n);
     TcgUi_Hints(U.inDeckRow ? "{A} TAKE OUT  {INSPECT} LOOK  {DOWN} CARDS  {START} DONE"
-                            : "{A} PUT IN  {INSPECT} LOOK  {L}{R} STARS  {START} DONE");
+                            : "{A} PUT IN  {INSPECT} LOOK  {SEARCH} SEARCH  {START} DONE");   /* ({L}{R}: by the tabs) */
 }
 
 static void ListScreen(void)
 {
     static uint16_t list[TT_CARD_MAX + 1];
     struct TtCollection *c = C();
-    unsigned n = StarList((unsigned)U.stars, list, 0), i, total, have = Tt_OwnedCount(c, (unsigned)U.stars, &total);
+    unsigned n = BinderList(list), i, total, have = Tt_OwnedCount(c, (unsigned)U.stars, &total);
     int page = GRID_COLS * 4, start = U.cursor / page * page;
     char line[160], nums[16];
     TcgUi_Background();
     G_RoundFill(0, 0, 240, 17, 0x203040, 230);
-    StarTabs(2, 2, U.stars);
+    StarTabs(2, 2, (int)ShownStars());
     snprintf(line, sizeof(line), "%u/%u", have, total);
     G_TextAlign(236, 2, TA_RIGHT, G_WHITE, G_NO_SHADOW, line, TF_NARROW);
     for (i = 0; i < (unsigned)page && start + (int)i < (int)n; i++)
@@ -1031,7 +1159,10 @@ static void ListScreen(void)
             Strip(0, line);
         }
     }
-    TcgUi_Hints("{A} LOOK  {L}{R} STARS  {B} BACK");
+    else if (TcgSearch_Narrowed(SEARCH_TRIAD))
+        TcgSearch_Empty(SEARCH_TRIAD, 120, 50);
+    TcgSearch_Badge(SEARCH_TRIAD, -236, 135, n);
+    TcgUi_Hints("{A} LOOK  {L}{R} STARS  {SEARCH} SEARCH  {B} BACK");
 }
 
 static void InspectScreen(void)
@@ -1600,7 +1731,7 @@ static void OnlineStep(void)
         return;
     if (s->peerLeft && U.screen != T_DUEL && !U.message[0])
     {
-        Say(ACT_CLOSE, "%s left. Nothing was lost.", U.opp.name);
+        Say(ACT_CLOSE, "%s left.", U.opp.name);
         return;
     }
     /* The friend who said yes: the asker's rules come with their hand, and ours goes back once a deck is picked */
@@ -1844,6 +1975,11 @@ void TtUi_Draw(void)
     case T_WAIT: WaitScreen(); break;
     case T_TRADE: TradeScreen(); break;
     default: break;
+    }
+    if (TcgSearch_Active() && Searchable() && !TcgGuide_Active())
+    {
+        static uint16_t list[TT_CARD_MAX + 1];
+        TcgSearch_Draw(Shown(list, U.screen == T_BUILDER));
     }
     TcgUi_MessageBox(U.message, U.asking, U.askYes);
 }
@@ -2164,6 +2300,8 @@ int TtUi_Step(unsigned keys)
         }
         return 1;
     }
+    if (SearchStep(pressed))
+        return 1;
     switch (U.screen)
     {
     case T_HOME:
@@ -2293,7 +2431,7 @@ int TtUi_Step(unsigned keys)
     {
         struct TtDeck *d = Deck((unsigned)U.deck);
         unsigned n = BuilderList(list);
-        StarTabStep(pressed);
+        ListTabStep(pressed);
         if (U.inDeckRow)
         {
             if (pressed & KEY_LEFT && U.deckSlot > 0)
@@ -2365,8 +2503,8 @@ int TtUi_Step(unsigned keys)
     }
     case T_LIST:
     {
-        unsigned n = StarList((unsigned)U.stars, list, 0);
-        StarTabStep(pressed);
+        unsigned n = BinderList(list);
+        ListTabStep(pressed);
         GridMove(pressed, (int)n, GRID_COLS);
         if (pressed & KEY_B)
         {
@@ -2655,6 +2793,31 @@ void Tt_Debug(const char *command)
             Tt_GiveStarter(c);
         Tcg_GrantCase();   /* (and the CARD CASE to keep them in) */
         printf("[tt] starter: deck 0 ready %d\n", DeckOk(0));
+    }
+    else if (!strncmp(command, "search ", 7))
+    {
+        TcgSearch_Register(SEARCH_TRIAD, &sSearchGame);
+        TcgSearch_Debug(SEARCH_TRIAD, command + 7);
+    }
+    else if (!strcmp(command, "binder") || !strcmp(command, "builder"))
+    {
+        if (U.screen == T_CLOSED)
+            TtUi_OpenCase(NULL, 0);
+        U.deck = c->activeDeck;
+        U.inDeckRow = 0;
+        Screen(command[1] == 'i' ? T_LIST : T_BUILDER);
+        if (!U.stars)
+            U.stars = 1;
+    }
+    else if (!strcmp(command, "shown"))
+    {
+        static uint16_t list[TT_CARD_MAX + 1];
+        unsigned i, n = Shown(list, U.screen == T_BUILDER);
+        printf("[tt] shown %u (screen %d cursor %d card %u deck %u):", n, U.screen, U.cursor, n ? list[U.cursor] : 0,
+               DeckCount((unsigned)U.deck));
+        for (i = 0; i < n && i < 12; i++)
+            printf(" %s,", Met(list[i]) ? Tt_Card(list[i])->name : "???");
+        printf("\n");
     }
     else if (!strcmp(command, "giveall"))
     {
