@@ -2375,8 +2375,8 @@ static void CB2_MpCoopFinish(void)
             // two trainers: our script's trainer may have been either one, and both are beaten
             if (sCoop.twoTrainers && sCoop.trainerIdB != 0)
             {
-                FlagSet(TRAINER_FLAGS_START + sCoop.trainerId);
-                FlagSet(TRAINER_FLAGS_START + sCoop.trainerIdB);
+                FlagSet(TRAINER_FLAG(sCoop.trainerId));
+                FlagSet(TRAINER_FLAG(sCoop.trainerIdB));
             }
         }
         // Ordinary trainers count as beaten for the partner too. Story battles
@@ -2386,9 +2386,9 @@ static void CB2_MpCoopFinish(void)
               || (OrdinaryTrainer(sCoop.trainerId) && (!sCoop.twoTrainers || OrdinaryTrainer(sCoop.trainerIdB))
                   && (sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE)))
         {
-            FlagSet(TRAINER_FLAGS_START + sCoop.trainerId);
+            FlagSet(TRAINER_FLAG(sCoop.trainerId));
             if (sCoop.twoTrainers && sCoop.trainerIdB != 0)
-                FlagSet(TRAINER_FLAGS_START + sCoop.trainerIdB);
+                FlagSet(TRAINER_FLAG(sCoop.trainerIdB));
         }
         // Gym leaders: the partner gets the badge too (before the rematch check: a leader's first battle is in the
         // rematch table too). Their own copy of the leader's "you won" script runs once back on the field, wherever
@@ -2397,7 +2397,7 @@ static void CB2_MpCoopFinish(void)
         {
             sPendingScript = GymLeaderEndScript(sCoop.trainerId);
             if (sPendingScript)
-                FlagSet(TRAINER_FLAGS_START + sCoop.trainerId);
+                FlagSet(TRAINER_FLAG(sCoop.trainerId));
             MPNet_Log("co-op: the badge of gym leader %d %s", sCoop.trainerId,
                       sPendingScript ? "comes once back on the field" : "has no script found");
         }

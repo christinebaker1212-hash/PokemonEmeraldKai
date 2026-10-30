@@ -630,7 +630,7 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
         unsigned tier;
         if (OBJ_GFX_ID(npc) != s->gfx && (!s->gfx2 || OBJ_GFX_ID(npc) != s->gfx2))
             continue;
-        if (s->req == REQ_TRAINER && !FlagGet(TRAINER_FLAGS_START + s->reqArg))
+        if (s->req == REQ_TRAINER && !FlagGet(TRAINER_FLAG(s->reqArg)))
         {
             *line = s->refuse;
             *refused = 1;
@@ -669,7 +669,7 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
                 return 0;
             team = cls == TRAINER_CLASS_TEAM_AQUA || cls == TRAINER_CLASS_TEAM_MAGMA || cls == TRAINER_CLASS_AQUA_ADMIN ||
                    cls == TRAINER_CLASS_MAGMA_ADMIN;
-            if (!FlagGet(TRAINER_FLAGS_START + id))
+            if (!FlagGet(TRAINER_FLAG(id)))
             {
                 *line = sText_YgoBattleFirst;
                 *refused = 1;

@@ -1032,12 +1032,12 @@ static u8 TrainerBattleLoadArg8(const u8 *ptr)
 
 static u16 GetTrainerAFlag(void)
 {
-    return TRAINER_FLAGS_START + gTrainerBattleOpponent_A;
+    return TRAINER_FLAG(gTrainerBattleOpponent_A);
 }
 
 static u16 GetTrainerBFlag(void)
 {
-    return TRAINER_FLAGS_START + gTrainerBattleOpponent_B;
+    return TRAINER_FLAG(gTrainerBattleOpponent_B);
 }
 
 static bool32 IsPlayerDefeated(u32 battleOutcome)
@@ -1301,7 +1301,7 @@ void SetUpTwoTrainersBattle(void)
 bool32 GetTrainerFlagFromScriptPointer(const u8 *data)
 {
     u32 flag = TrainerBattleLoadArg16(data + 2);
-    return FlagGet(TRAINER_FLAGS_START + flag);
+    return FlagGet(TRAINER_FLAG(flag));
 }
 
 // Set trainer's movement type so they stop and remain facing that direction
@@ -1342,17 +1342,17 @@ static void UNUSED SetBattledTrainerFlag(void)
 
 bool8 HasTrainerBeenFought(u16 trainerId)
 {
-    return FlagGet(TRAINER_FLAGS_START + trainerId);
+    return FlagGet(TRAINER_FLAG(trainerId));
 }
 
 void SetTrainerFlag(u16 trainerId)
 {
-    FlagSet(TRAINER_FLAGS_START + trainerId);
+    FlagSet(TRAINER_FLAG(trainerId));
 }
 
 void ClearTrainerFlag(u16 trainerId)
 {
-    FlagClear(TRAINER_FLAGS_START + trainerId);
+    FlagClear(TRAINER_FLAG(trainerId));
 }
 
 void BattleSetup_StartTrainerBattle(void)
@@ -1624,6 +1624,17 @@ void PlayTrainerEncounterMusic(void)
         case TRAINER_ENCOUNTER_MUSIC_RICH:
             music = MUS_ENCOUNTER_RICH;
             break;
+        // Moemon Kai: Johto's encounter themes (Quetzal's ids 14-23)
+        case 14: music = MUS_JOHTO_ENCOUNTER_ROCKET; break;
+        case 15: music = MUS_JOHTO_RIVAL_APPEARS; break;
+        case 16: music = MUS_JOHTO_ENCOUNTER_CHAMPION; break;
+        case 17: music = MUS_JOHTO_ENCOUNTER_YOUNGSTER; break;
+        case 18: music = MUS_JOHTO_ENCOUNTER_SWIMMER; break;
+        case 19: music = MUS_JOHTO_ENCOUNTER_LASS; break;
+        case 20: music = MUS_JOHTO_ENCOUNTER_COOLTRAINER; break;
+        case 21: music = MUS_JOHTO_ENCOUNTER_NERD; break;
+        case 22: music = MUS_JOHTO_ENCOUNTER_HIKER; break;
+        case 23: music = MUS_JOHTO_ENCOUNTER_SAGE; break;
         default:
             music = MUS_ENCOUNTER_SUSPICIOUS;
         }

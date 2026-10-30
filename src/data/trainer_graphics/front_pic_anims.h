@@ -1,3 +1,4 @@
+#include "front_pic_qz.h"
 static const union AnimCmd *const sAnims_Hiker[] ={
     sAnim_GeneralFrame0,
 };
@@ -467,4 +468,5 @@ const union AnimCmd *const *const gTrainerFrontAnimsPtrTable[] =
     [TRAINER_PIC_RS_MAY] = sAnims_RubySapphireMay,
     [TRAINER_PIC_MP_LOCAL] = sAnims_RubySapphireMay,      // Moemon Co-op: one frame
     [TRAINER_PIC_MP_OPPONENT] = sAnims_RubySapphireMay,
+    QZ_TRAINER_ANIMS   // Moemon Kai: Johto / Kanto
 };

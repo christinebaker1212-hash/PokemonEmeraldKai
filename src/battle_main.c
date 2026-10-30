@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "global.h"
+#include "data/text/trainer_class_names_qz.h"   // Moemon Kai: QZ_TRAINER_MONEY
 #include "battle_gen4.h"   // Moemon Kai: Gen 4
 #include "mp.h"
 #include "battle.h"
@@ -537,6 +538,7 @@ const struct TrainerMoney gTrainerMoneyTable[] =
     {TRAINER_CLASS_HIKER, 10},
     {TRAINER_CLASS_YOUNG_COUPLE, 8},
     {TRAINER_CLASS_WINSTRATE, 10},
+    QZ_TRAINER_MONEY   // Moemon Kai: Johto / Kanto classes
     {0xFF, 5}, // Any trainer class not listed above uses this
 };
 

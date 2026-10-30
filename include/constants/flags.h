@@ -1350,6 +1350,10 @@
 
 #define TRAINER_FLAGS_START                                         0x500
 #define TRAINER_FLAGS_END                                           (TRAINER_FLAGS_START + MAX_TRAINERS_COUNT - 1) // 0x85F
+// Moemon Kai: trainers past MAX_TRAINERS_COUNT (Johto / Kanto, FIRST_QZ_TRAINER) keep their flags from 0x3000,
+// in the region side file (src/mp/mp_region.c). Always go through TRAINER_FLAG.
+#define QZ_TRAINER_FLAGS_START 0x3000
+#define TRAINER_FLAG(id) ((id) < MAX_TRAINERS_COUNT ? TRAINER_FLAGS_START + (id) : QZ_TRAINER_FLAGS_START + (id) - MAX_TRAINERS_COUNT)
 
 // System Flags
 

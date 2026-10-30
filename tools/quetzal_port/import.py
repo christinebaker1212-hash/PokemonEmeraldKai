@@ -210,9 +210,12 @@ def write_constants(texts):
         lines.append('#define %-40s %s' % (g, {0x54: 'MOVEMENT_TYPE_WALK_SLOWLY_IN_PLACE_DOWN', 0x55: 'MOVEMENT_TYPE_WALK_SLOWLY_IN_PLACE_UP',
                                                 0x56: 'MOVEMENT_TYPE_WALK_SLOWLY_IN_PLACE_LEFT', 0x57: 'MOVEMENT_TYPE_WALK_SLOWLY_IN_PLACE_RIGHT'}
                                                .get(v, 'MOVEMENT_TYPE_FACE_DOWN')))
-    lines.append('\n// trainers (placeholders until the trainers are imported)')
-    for g in sorted(gather(r'\bTRAINER_QZ_\w+', texts)):
-        lines.append('#define %-40s TRAINER_NONE' % g)
+    lines.append('\n// trainers (tools/quetzal_port/gen_trainers.py)')
+    tr = sorted(load(os.path.join(RIP, 'gen4', 'data', 'trainers.json'))['trainers'], key=lambda t: t['id'])
+    tid = {t['const']: 864 + n for n, t in enumerate(tr)}   # gen_trainers.py FIRST_ID
+    tid['TRAINER_QZ_913'] = 864 + len(tr)                    # gen_trainers.py: Jessie and James, after them
+    for g in sorted(gather(r'\bTRAINER_QZ_\w+', texts) | set(tid)):
+        lines.append('#define %-40s %s' % (g, tid.get(g, 'TRAINER_NONE')))
     lines += ['', '#endif', '']
     write(os.path.join(REPO, 'include/constants/qz_port.h'), '\n'.join(lines))
     print('constants: %d flags, %d vars' % (len(flags), len(vars_)))

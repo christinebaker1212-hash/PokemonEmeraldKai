@@ -1,3 +1,4 @@
+#include "trainer_class_names_qz.h"
 const u8 gTrainerClassNames[][13] = {
     [TRAINER_CLASS_PKMN_TRAINER_1] = _("{PKMN} TRAINER"),
     [TRAINER_CLASS_PKMN_TRAINER_2] = _("{PKMN} TRAINER"),
@@ -65,4 +66,5 @@ const u8 gTrainerClassNames[][13] = {
     [TRAINER_CLASS_PIKE_QUEEN] = _("PIKE QUEEN"),
     [TRAINER_CLASS_PYRAMID_KING] = _("PYRAMID KING"),
     [TRAINER_CLASS_RS_PROTAG] = _("{PKMN} TRAINER"),
+    QZ_TRAINER_CLASS_NAMES   // Moemon Kai: Johto / Kanto
 };

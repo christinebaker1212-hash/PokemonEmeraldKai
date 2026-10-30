@@ -2403,7 +2403,7 @@ void MP_TestCommand(const char *cmd, const char *arg)
         {
             int id = atoi(tok);
             if (id > 0 && id < TRAINERS_COUNT)
-                printf("[test] trainerflag %d = %d\n", id, FlagGet(TRAINER_FLAGS_START + id) ? 1 : 0);
+                printf("[test] trainerflag %d = %d\n", id, FlagGet(TRAINER_FLAG(id)) ? 1 : 0);
             tok = strtok(NULL, " ");
         }
         fflush(stdout);

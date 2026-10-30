@@ -400,7 +400,7 @@ int Tt_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, uin
                 }
             if (!play)
                 return 0;
-            if (!FlagGet(TRAINER_FLAGS_START + id))
+            if (!FlagGet(TRAINER_FLAG(id)))
             {
                 *line = sText_BattleFirst;
                 *refused = 1;

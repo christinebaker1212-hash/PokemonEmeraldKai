@@ -933,6 +933,7 @@ const u32 gBattleAnimUnusedPal_Unknown2[] = INCGFX_U32("graphics/battle_anims/un
 
 #include "data/graphics/pokemon.h"
 #include "data/graphics/trainers.h"
+#include "data/graphics/trainers_qz.h"   // Moemon Kai: Johto / Kanto trainer pictures
 
 const u8 gMonIcon_QuestionMark[] = INCGFX_U8("graphics/pokemon/question_mark/icon.png", ".4bpp");
 const u8 gMonFootprint_QuestionMark[] = INCGFX_U8("graphics/pokemon/question_mark/footprint.png", ".1bpp");

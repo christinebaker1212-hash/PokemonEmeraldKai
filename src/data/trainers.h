@@ -10260,4 +10260,5 @@ const struct Trainer gTrainers[] = {
         .aiFlags = 0,
         .party = NO_ITEM_DEFAULT_MOVES(sParty_MayLinkPlaceholder),
     },
+#include "trainers_qz.h"   // Moemon Kai: Johto / Kanto trainers (tools/quetzal_port/gen_trainers.py)
 };

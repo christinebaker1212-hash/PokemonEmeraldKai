@@ -865,7 +865,7 @@ static const u8 *AskCards(struct ObjectEvent *npc, const u8 *script, u8 *answer,
         if (s->req == REQ_BADGE)
             ok = FlagGet(FLAG_BADGE01_GET + s->reqArg);
         else if (s->req == REQ_TRAINER)
-            ok = FlagGet(TRAINER_FLAGS_START + s->reqArg);
+            ok = FlagGet(TRAINER_FLAG(s->reqArg));
         else if (s->req == REQ_CHAMPION)
             ok = FlagGet(FLAG_IS_CHAMPION);
         if (!ok)
@@ -913,7 +913,7 @@ static const u8 *AskCards(struct ObjectEvent *npc, const u8 *script, u8 *answer,
     if (npc->trainerType != TRAINER_TYPE_NONE && script && script[0] == 0x5C)   // trainerbattle: a real trainer
     {
         u16 id = script[2] | script[3] << 8;
-        if (!FlagGet(TRAINER_FLAGS_START + id))
+        if (!FlagGet(TRAINER_FLAG(id)))
         {
             *answer = ASK_NO;
             return cat == CAT_REFINED || cat == CAT_STYLISH ? sText_BattleFirstPolite : sText_BattleFirst;

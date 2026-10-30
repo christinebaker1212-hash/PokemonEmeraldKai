@@ -139,7 +139,7 @@ void MP_QuickStart_Apply(void)
     // Route 103: the rival battle, then OLDALE on the way back
     FlagSet(FLAG_HIDE_ROUTE_103_RIVAL);
     FlagSet(FLAG_DEFEATED_RIVAL_ROUTE103);
-    FlagSet(TRAINER_FLAGS_START + sRivalTrainer[male ? 0 : 1][starter]);
+    FlagSet(TRAINER_FLAG(sRivalTrainer[male ? 0 : 1][starter]));
     FlagClear(FLAG_HIDE_LITTLEROOT_TOWN_BIRCHS_LAB_RIVAL);
     FlagSet(FLAG_HIDE_OLDALE_TOWN_RIVAL);
     VarSet(VAR_OLDALE_RIVAL_STATE, 2);
