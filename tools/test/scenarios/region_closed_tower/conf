@@ -1,0 +1,6 @@
+# TRAINER TOWER (SEVEN ISLAND) is closed until its machinery is in: arriving doesn't hang (its ON_RESUME script used to
+# open a message box that could never finish), the gate says so and sends the player back a step, then they walk away
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_WARP=37,7,9,8"
+EXPECT_A=("savesum: map 37.7 at 9,8 " "savesum: map 37.7 at 9,10 ")

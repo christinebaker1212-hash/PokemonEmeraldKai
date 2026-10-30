@@ -5,15 +5,21 @@
 # Each one is loaded, its summary (mp savesum: SaveBlock1's bytes, badges, money, object events, templates) must
 # match the original's, and the game must continue into the overworld without a crash.
 # usage: tools/test/save_compat.sh [SAVE]   (SAVE: a save to use instead of one made here; no side file)
+#   BIN=pokeemerald64.exe runs the Windows build under Wine (SDL2.dll next to it).
 . "$(dirname "$0")/common.sh"
 OUT=${OUT:-/tmp/save_compat}; rm -rf "$OUT"; mkdir -p "$OUT"
 cd "$REPO" || exit 1
+W=""; RUNNER=()
+case "$BIN" in *.exe)
+    command -v wine >/dev/null || { echo "wine not installed"; exit 99; }
+    export WINEDEBUG=-all WINEPREFIX="${WINEPREFIX:-$OUT/wineprefix}"; W="Z:"; RUNNER=(wine) ;;
+esac
 run() {   # run DIR SAVE SCRIPT [ENV...]
     local d=$1 sav=$2 script=$3; shift 3
     mkdir -p "$d"; printf '%b' "$script" > "$d/a.txt"
-    env SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_TEST="$d/a.txt" MOEMON_SHOTDIR="$d" MOEMON_SKIP_COOP_SETUP=1 \
-        MOEMON_COOP_CONFIG="$d/a.ini" MOEMON_CONTROLS_CONFIG="$d/c.ini" MOEMON_SAVE="$sav" "$@" \
-        timeout -k 10 120 "$BIN" > "$d/log.txt" 2>&1
+    env SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_TEST="$W$d/a.txt" MOEMON_SHOTDIR="$W$d" MOEMON_SKIP_COOP_SETUP=1 \
+        MOEMON_COOP_CONFIG="$W$d/a.ini" MOEMON_CONTROLS_CONFIG="$W$d/c.ini" MOEMON_SAVE="$W$sav" "$@" \
+        timeout -k 10 300 "${RUNNER[@]}" "$BIN" > "$d/log.txt" 2>&1
 }
 sum() { grep -m1 "^\[test\] savesum:" "$1/log.txt" | sed 's/^\[test\] savesum: //'; }
 fail=0

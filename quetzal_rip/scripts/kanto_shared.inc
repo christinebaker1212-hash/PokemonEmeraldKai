@@ -1965,11 +1965,30 @@ Quetzal_EventScript_84722EF::
 	setvar VAR_0x8004, 0x10
 	goto Quetzal_EventScript_84736F6
 
+@ Moemon Kai: the TRAINER TOWER's machinery isn't in the game yet, so the tower is closed: the receptionist (0x14) and
+@ the gate (0x11) say so and send the player back; every other call (map loads, floors, the elevator) ends quietly.
+@ Never a message box here for the rest: ON_RESUME scripts run at once and could never wait for one.
 Quetzal_EventScript_84736F6::
-	lockall
+	goto_if_eq VAR_0x8004, 0x14, Quetzal_EventScript_TTClosedDesk
+	goto_if_eq VAR_0x8004, 0x11, Quetzal_EventScript_TTClosedGate
+	end
+
+Quetzal_EventScript_TTClosedDesk::
 	msgbox Quetzal_Text_8473701, MSGBOX_DEFAULT
+	release
+	end
+
+Quetzal_EventScript_TTClosedGate::
+	msgbox Quetzal_Text_8473701, MSGBOX_DEFAULT
+	closemessage
+	applymovement LOCALID_PLAYER, Quetzal_Movement_TTClosedBack
+	waitmovement 0
 	releaseall
 	end
+
+Quetzal_Movement_TTClosedBack:
+	walk_down
+	step_end
 
 Quetzal_Movement_8456AAE:
 	nurse_joy_bow
@@ -2354,8 +2373,9 @@ Quetzal_Text_8471CE4::
 	.string "from your POKéMON team menu.$"
 
 Quetzal_Text_8473701::
-	.string "This Kanto interaction still needs a\n"
-	.string "real engine adapter. Progress stops here.$"
+	.string "I'm sorry, the TRAINER TOWER is\n"
+	.string "closed for now.\p"
+	.string "Please come back another time!$"
 
 Quetzal_Text_847375B::
 	.string "It appears as if {STR_VAR_1} is playing\n"

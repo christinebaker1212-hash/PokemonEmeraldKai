@@ -68,5 +68,10 @@ if [ "${JOBS:-1}" -gt 1 ]; then
     for n in "${names[@]}"; do cat "$OUT/$n.result"; grep -q "^ok" "$OUT/$n.result" || fail=$((fail+1)); done
 fi
 [ $all = 1 ] && { "$TOOLS/version_check.sh" || fail=$((fail+1)); }
+# every map of Hoenn, Johto and Kanto: arriving and its arrival scripts never crash or hang (tools/test/map_sweep.sh)
+if [ $all = 1 ]; then
+    OUT="$OUT" JOBS="${JOBS:-4}" "$TOOLS/map_sweep.sh" 0 39 > "$OUT/map_sweep.txt" 2>&1 || fail=$((fail+1))
+    grep "^FAIL\|^map sweep" "$OUT/map_sweep.txt"
+fi
 echo "$fail failed, results in $OUT"
 exit $fail

@@ -4,4 +4,4 @@ MODE=1
 TMO=150
 ENV_A="MOEMON_DEBUG_PARTY=280:20,283:20"
 EXPECT_A=("gatcha: " "achievement: sr (+3 pulls)" "achievement: follower (+3 pulls)" "achievement: ballstyle (+3 pulls)" "achievement: newlook (+3 pulls)" "[test] achievements")
-UNEXPECT_A=("achievement: ssr" "achievement: ur ")
+# (no UNEXPECT of SSR / UR: the week's free 10-pull, when in stock, may roll them for real)

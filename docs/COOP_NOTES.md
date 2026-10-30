@@ -2789,3 +2789,7 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   are there; ScrCmd_bufferstdstring writes "" past the table). Both run first in regress.sh and in the release workflow.
 - tools/test/save_compat.sh [SAVE]: a save as it was before 1.60, as 1.60.0 Linux and as 1.60.0 Windows must load to the
   same `mp savesum` and continue.
+- tools/test/map_sweep.sh [G0 G1]: every map started on directly, A mashed through its arrival scripts, a few steps;
+  a crash, a hang or a full heap fails (the end of regress.sh runs groups 0-39). It found TRAINER TOWER's placeholder
+  (Quetzal_EventScript_84736F6, from the rip) opening a message box in an ON_RESUME script, which hangs: the tower is
+  closed now (receptionist and gate say so, the rest ends quietly; test region_closed_tower).
