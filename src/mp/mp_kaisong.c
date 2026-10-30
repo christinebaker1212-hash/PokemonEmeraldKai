@@ -711,7 +711,7 @@ struct SongHeader *MP_Kaisong_Header(u16 song, struct SongHeader *builtin)
         int scene = SceneFor(song);
         struct SongHeader *h = HeaderOf(Find(song, scene, gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum), builtin);
         if (getenv("MOEMON_MUSIC_LOG") && gSongTable[song].ms == 0)   // tests: which scene each song plays for
-            MPNet_Log("kaisong: song %d (%s) for %s%s", song, sKaisongSongNames[song], scene >= 0 ? "scene " : "the map",
+            MPNet_Log("kaisong: song %d (%s) for %s%s", song, song < ARRAY_COUNT(sKaisongSongNames) ? sKaisongSongNames[song] : "?", scene >= 0 ? "scene " : "the map",
                       scene >= 0 ? sKaisongScenes[scene].key : "");
         return h;
     }

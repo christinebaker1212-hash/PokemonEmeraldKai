@@ -97,7 +97,9 @@ Files in this repository's `music` folder ship with every update.
 - Map music: Slateport City Oceanic Museum 1F [slateport_city_oceanic_museum_1f], Slateport City Oceanic Museum 2F [slateport_city_oceanic_museum_2f]
 
 ### mus_evolution (377)
+- Map music: Kanto Safari Zone Center [kanto_safari_zone_center], Kanto Safari Zone Center Rest House [kanto_safari_zone_center_rest_house], Kanto Safari Zone East [kanto_safari_zone_east], Kanto Safari Zone East Rest House [kanto_safari_zone_east_rest_house], Kanto Safari Zone North [kanto_safari_zone_north], Kanto Safari Zone North Rest House [kanto_safari_zone_north_rest_house], Kanto Safari Zone Secret House [kanto_safari_zone_secret_house], Kanto Safari Zone West [kanto_safari_zone_west], Kanto Safari Zone West Rest House [kanto_safari_zone_west_rest_house]
 - Scenes: Egg hatching [egg_hatch], Evolution [evolution_scene], Trades [trade]
+- Events: Johto Ice Path B2F Blackthorn Side [johto_ice_path_b2fblackthorn_side]
 
 ### mus_encounter_girl (379)
 - A trainer spots you: 15 places<details><summary>show</summary>Abandoned Ship Corridors 1F [abandoned_ship_corridors_1f], Abandoned Ship Rooms 2 1F [abandoned_ship_rooms2_1f], Fortree City Gym [fortree_city_gym], Jagged Pass [jagged_pass], Mt Pyre 2F [mt_pyre_2f], Route 109 [route109], Route 109 Seashore House [route109_seashore_house], Route 110 Trick House Puzzle 2 [route110_trick_house_puzzle2], Route 110 Trick House Puzzle 3 [route110_trick_house_puzzle3], Route 111 [route111], Route 112 [route112], Route 113 [route113], Route 114 [route114], Route 116 [route116], SS Tidal Rooms [ss_tidal_rooms]</details>
@@ -121,7 +123,7 @@ Files in this repository's `music` folder ship with every update.
 - A trainer spots you: 17 places<details><summary>show</summary>Route 103 [route103], Route 105 [route105], Route 106 [route106], Route 107 [route107], Route 108 [route108], Route 109 [route109], Route 124 [route124], Route 125 [route125], Route 126 [route126], Route 127 [route127], Route 128 [route128], Route 129 [route129], Route 130 [route130], Route 131 [route131], Route 132 [route132], Route 133 [route133], Route 134 [route134]</details>
 
 ### mus_cave_of_origin (386)
-- Map music: Cave Of Origin 1F [cave_of_origin_1f], Cave Of Origin Entrance [cave_of_origin_entrance], Cave Of Origin Unused Ruby Sapphire Map 1 [cave_of_origin_unused_ruby_sapphire_map1], Cave Of Origin Unused Ruby Sapphire Map 2 [cave_of_origin_unused_ruby_sapphire_map2], Cave Of Origin Unused Ruby Sapphire Map 3 [cave_of_origin_unused_ruby_sapphire_map3], Meteor Falls 1F 1R [meteor_falls_1f_1r], Meteor Falls 1F 2R [meteor_falls_1f_2r], Meteor Falls B1F 1R [meteor_falls_b1f_1r], Meteor Falls B1F 2R [meteor_falls_b1f_2r], Meteor Falls Stevens Cave [meteor_falls_stevens_cave]
+- Map music: Cave Of Origin 1F [cave_of_origin_1f], Cave Of Origin Entrance [cave_of_origin_entrance], Cave Of Origin Unused Ruby Sapphire Map 1 [cave_of_origin_unused_ruby_sapphire_map1], Cave Of Origin Unused Ruby Sapphire Map 2 [cave_of_origin_unused_ruby_sapphire_map2], Cave Of Origin Unused Ruby Sapphire Map 3 [cave_of_origin_unused_ruby_sapphire_map3], Kanto Cinnabar Island Primal Chamber [kanto_cinnabar_island_primal_chamber], Meteor Falls 1F 1R [meteor_falls_1f_1r], Meteor Falls 1F 2R [meteor_falls_1f_2r], Meteor Falls B1F 1R [meteor_falls_b1f_1r], Meteor Falls B1F 2R [meteor_falls_b1f_2r], Meteor Falls Stevens Cave [meteor_falls_stevens_cave]
 
 ### mus_roulette (392)
 - Scenes: GAME CORNER slots [slot_machine]
@@ -269,6 +271,7 @@ Custom: `mus_game_corner@rustboro_city_game_center_1f.kaisong`, `mus_game_corner
 ### mus_school (435)
 - Map music: Rustboro City Pokemon School [rustboro_city_pokemon_school]
 - Scenes: Trades [trade]
+- Events: Kanto Seven Island Sevault Canyon House [kanto_seven_island_sevault_canyon_house]
 
 ### mus_hall_of_fame (436)
 - Scenes: Hall of Fame [hall_of_fame], MoeGatcha [gatcha]
@@ -432,16 +435,17 @@ Custom: `mus_vs_aqua_magma_leader@ygo.kaisong`
 - Battles: Magma Hideout 4F (Maxie) [magma_hideout_4f], Mossdeep City Space Center 2F (Maxie) [mossdeep_city_space_center_2f], Mt Chimney (Maxie) [mt_chimney], Seafloor Cavern Room 9 (Archie) [seafloor_cavern_room9]
 
 ### mus_rg_follow_me (484)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Events: Kanto Cinnabar Island [kanto_cinnabar_island], Kanto Cinnabar Island Pokemon Center 1F [kanto_cinnabar_island_pokemon_center_1f], Kanto Pallet Town [kanto_pallet_town], Kanto Pewter City [kanto_pewter_city]
 
 ### mus_rg_game_corner (485)
+- Map music: Kanto Celadon City Game Corner [kanto_celadon_city_game_corner], Kanto Two Island Joyful Game Corner [kanto_two_island_joyful_game_corner]
 - Scenes: Berry crush [berry_crush]
 
 ### mus_rg_rocket_hideout (486)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto Cerulean Cave 1F [kanto_cerulean_cave_1f], Kanto Cerulean Cave 2F [kanto_cerulean_cave_2f], Kanto Cerulean Cave B1F [kanto_cerulean_cave_b1f], Kanto Five Island Rocket Warehouse [kanto_five_island_rocket_warehouse], Kanto Pokemon League Brunos Room [kanto_pokemon_league_brunos_room], Kanto Rocket Hideout B1F [kanto_rocket_hideout_b1f], Kanto Rocket Hideout B2F [kanto_rocket_hideout_b2f], Kanto Rocket Hideout B3F [kanto_rocket_hideout_b3f], Kanto Rocket Hideout B4F [kanto_rocket_hideout_b4f], Kanto Rocket Hideout Elevator [kanto_rocket_hideout_elevator]
 
 ### mus_rg_gym (487)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto Celadon City Gym [kanto_celadon_city_gym], Kanto Cerulean City Gym [kanto_cerulean_city_gym], Kanto Cinnabar Island Gym [kanto_cinnabar_island_gym], Kanto Fuchsia City Gym [kanto_fuchsia_city_gym], Kanto Indigo Plateau Pokemon Center 1F [kanto_indigo_plateau_pokemon_center_1f], Kanto Pewter City Gym [kanto_pewter_city_gym], Kanto Pokemon League Loreleis Room [kanto_pokemon_league_loreleis_room], Kanto Saffron City Gym [kanto_saffron_city_gym], Kanto Vermilion City Gym [kanto_vermilion_city_gym], Kanto Viridian City Gym [kanto_viridian_city_gym]
 
 ### mus_rg_intro_fight (489)
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
@@ -450,10 +454,10 @@ Custom: `mus_vs_aqua_magma_leader@ygo.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_rg_cinnabar (491)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto Cinnabar Island [kanto_cinnabar_island], Kanto Cinnabar Island Pokemon Lab Entrance [kanto_cinnabar_island_pokemon_lab_entrance], Kanto Cinnabar Island Pokemon Lab Experiment Room [kanto_cinnabar_island_pokemon_lab_experiment_room], Kanto Cinnabar Island Pokemon Lab Lounge [kanto_cinnabar_island_pokemon_lab_lounge], Kanto Cinnabar Island Pokemon Lab Research Room [kanto_cinnabar_island_pokemon_lab_research_room]
 
 ### mus_rg_lavender (492)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto Lavender Town [kanto_lavender_town], Kanto Lavender Town House 1 [kanto_lavender_town_house1], Kanto Lavender Town Volunteer Pokemon House [kanto_lavender_town_volunteer_pokemon_house]
 
 ### mus_rg_heal (493)
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
@@ -462,43 +466,44 @@ Custom: `mus_vs_aqua_magma_leader@ygo.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_rg_encounter_rocket (495)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Events: Kanto Cerulean City [kanto_cerulean_city], Kanto Four Island Icefall Cave Back [kanto_four_island_icefall_cave_back], Kanto Mt Ember Exterior [kanto_mt_ember_exterior], Kanto Rocket Hideout B4F [kanto_rocket_hideout_b4f], Kanto Route 24 [kanto_route24]
 
 ### mus_rg_encounter_girl (496)
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_rg_encounter_boy (497)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Events: Kanto Three Island [kanto_three_island], Kanto Two Island Joyful Game Corner [kanto_two_island_joyful_game_corner]
 
 ### mus_rg_hall_of_fame (498)
+- Map music: Johto Hall Of Fame [johto_hall_of_fame]
 - Scenes: MoeGatcha [gatcha]
 
 ### mus_rg_viridian_forest (499)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: 13 places<details><summary>show</summary>Kanto Digletts Cave B1F [kanto_digletts_cave_b1f], Kanto Digletts Cave North Entrance [kanto_digletts_cave_north_entrance], Kanto Digletts Cave South Entrance [kanto_digletts_cave_south_entrance], Kanto Route 22 North Entrance [kanto_route22_north_entrance], Kanto Seafoam Islands 1F [kanto_seafoam_islands_1f], Kanto Seafoam Islands B1F [kanto_seafoam_islands_b1f], Kanto Seafoam Islands B2F [kanto_seafoam_islands_b2f], Kanto Seafoam Islands B3F [kanto_seafoam_islands_b3f], Kanto Seafoam Islands B4F [kanto_seafoam_islands_b4f], Kanto Six Island Pattern Bush [kanto_six_island_pattern_bush], Kanto Three Island Berry Forest [kanto_three_island_berry_forest], Kanto Three Island Dunsparce Tunnel [kanto_three_island_dunsparce_tunnel], Kanto Viridian Forest [kanto_viridian_forest]</details>
 
 ### mus_rg_mt_moon (500)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto Mt Moon 1F [kanto_mt_moon_1f], Kanto Mt Moon B1F [kanto_mt_moon_b1f], Kanto Mt Moon B2F [kanto_mt_moon_b2f], Kanto Mt Moon Route 4 Cave [kanto_mt_moon_route4_cave], Kanto Rock Tunnel 1F [kanto_rock_tunnel_1f], Kanto Rock Tunnel B1F [kanto_rock_tunnel_b1f], Kanto Victory Road 1F [kanto_victory_road_1f], Kanto Victory Road 2F [kanto_victory_road_2f], Kanto Victory Road 3F [kanto_victory_road_3f]
 
 ### mus_rg_poke_mansion (501)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto Pokemon Mansion 1F [kanto_pokemon_mansion_1f], Kanto Pokemon Mansion 2F [kanto_pokemon_mansion_2f], Kanto Pokemon Mansion 3F [kanto_pokemon_mansion_3f], Kanto Pokemon Mansion B1F [kanto_pokemon_mansion_b1f], Kanto Power Plant [kanto_power_plant]
 
 ### mus_rg_credits (502)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Events: Kanto Indigo Plateau Exterior [kanto_indigo_plateau_exterior]
 
 ### mus_rg_route1 (503)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto Route 1 [kanto_route1], Kanto Route 2 [kanto_route2], Kanto Underground Path East West Tunnel [kanto_underground_path_east_west_tunnel], Kanto Underground Path North South Tunnel [kanto_underground_path_north_south_tunnel]
 
 ### mus_rg_route24 (504)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto Route 24 [kanto_route24], Kanto Route 25 [kanto_route25]
 
 ### mus_rg_route3 (505)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: 21 places<details><summary>show</summary>Kanto One Island Kindle Road [kanto_one_island_kindle_road], Kanto One Island Treasure Beach [kanto_one_island_treasure_beach], Kanto Route 10 [kanto_route10], Kanto Route 16 [kanto_route16], Kanto Route 17 [kanto_route17], Kanto Route 18 [kanto_route18], Kanto Route 19 [kanto_route19], Kanto Route 20 [kanto_route20], Kanto Route 21 North [kanto_route21_north], Kanto Route 21 South [kanto_route21_south], Kanto Route 22 [kanto_route22], Kanto Route 3 [kanto_route3], Kanto Route 4 [kanto_route4], Kanto Route 5 [kanto_route5], Kanto Route 6 [kanto_route6], Kanto Route 7 [kanto_route7], Kanto Route 8 [kanto_route8], Kanto Route 9 [kanto_route9], Kanto Three Island Bond Bridge [kanto_three_island_bond_bridge], Kanto Three Island Port [kanto_three_island_port], Kanto Two Island Cape Brink [kanto_two_island_cape_brink]</details>
 
 ### mus_rg_route11 (506)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto Route 11 [kanto_route11], Kanto Route 12 [kanto_route12], Kanto Route 13 [kanto_route13], Kanto Route 14 [kanto_route14], Kanto Route 15 [kanto_route15]
 
 ### mus_rg_victory_road (507)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto Indigo Plateau Exterior [kanto_indigo_plateau_exterior], Kanto Pokemon League Champions Room [kanto_pokemon_league_champions_room], Kanto Pokemon League Lances Room [kanto_pokemon_league_lances_room], Kanto Route 23 [kanto_route23]
 
 ### mus_rg_vs_gym_leader (508)
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
@@ -514,34 +519,35 @@ Custom: `mus_rg_vs_trainer@tt.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_rg_pallet (512)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto Pallet Town [kanto_pallet_town], Kanto Pallet Town Players House 1F [kanto_pallet_town_players_house_1f], Kanto Pallet Town Players House 2F [kanto_pallet_town_players_house_2f], Kanto Pallet Town Rivals House [kanto_pallet_town_rivals_house]
 
 ### mus_rg_oak_lab (513)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto Pallet Town Professor Oaks Lab [kanto_pallet_town_professor_oaks_lab]
 
 ### mus_rg_oak (514)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Events: Kanto Pallet Town [kanto_pallet_town], Kanto Pallet Town Professor Oaks Lab [kanto_pallet_town_professor_oaks_lab]
 
 ### mus_rg_poke_center (515)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: 54 places<details><summary>show</summary>Kanto Celadon City Department Store 1F [kanto_celadon_city_department_store_1f], Kanto Celadon City Department Store 2F [kanto_celadon_city_department_store_2f], Kanto Celadon City Department Store 3F [kanto_celadon_city_department_store_3f], Kanto Celadon City Department Store 4F [kanto_celadon_city_department_store_4f], Kanto Celadon City Department Store 5F [kanto_celadon_city_department_store_5f], Kanto Celadon City Department Store Elevator [kanto_celadon_city_department_store_elevator], Kanto Celadon City Department Store Roof [kanto_celadon_city_department_store_roof], Kanto Celadon City Pokemon Center 1F [kanto_celadon_city_pokemon_center_1f], Kanto Celadon City Pokemon Center 2F [kanto_celadon_city_pokemon_center_2f], Kanto Cerulean City Mart [kanto_cerulean_city_mart], Kanto Cerulean City Pokemon Center 1F [kanto_cerulean_city_pokemon_center_1f], Kanto Cerulean City Pokemon Center 2F [kanto_cerulean_city_pokemon_center_2f], Kanto Cinnabar Island Mart [kanto_cinnabar_island_mart], Kanto Cinnabar Island Pokemon Center 1F [kanto_cinnabar_island_pokemon_center_1f], Kanto Cinnabar Island Pokemon Center 2F [kanto_cinnabar_island_pokemon_center_2f], Kanto Five Island Pokemon Center 1F [kanto_five_island_pokemon_center_1f], Kanto Five Island Pokemon Center 2F [kanto_five_island_pokemon_center_2f], Kanto Four Island Mart [kanto_four_island_mart], Kanto Four Island Pokemon Center 1F [kanto_four_island_pokemon_center_1f], Kanto Four Island Pokemon Center 2F [kanto_four_island_pokemon_center_2f], Kanto Fuchsia City Mart [kanto_fuchsia_city_mart], Kanto Fuchsia City Pokemon Center 1F [kanto_fuchsia_city_pokemon_center_1f], Kanto Fuchsia City Pokemon Center 2F [kanto_fuchsia_city_pokemon_center_2f], Kanto Indigo Plateau Pokemon Center 2F [kanto_indigo_plateau_pokemon_center_2f], Kanto Lavender Town Mart [kanto_lavender_town_mart], Kanto Lavender Town Pokemon Center 1F [kanto_lavender_town_pokemon_center_1f], Kanto Lavender Town Pokemon Center 2F [kanto_lavender_town_pokemon_center_2f], Kanto Pewter City Mart [kanto_pewter_city_mart], Kanto Pewter City Pokemon Center 1F [kanto_pewter_city_pokemon_center_1f], Kanto Pewter City Pokemon Center 2F [kanto_pewter_city_pokemon_center_2f], Kanto Route 10 Pokemon Center 1F [kanto_route10_pokemon_center_1f], Kanto Route 10 Pokemon Center 2F [kanto_route10_pokemon_center_2f], Kanto Route 4 Pokemon Center 1F [kanto_route4_pokemon_center_1f], Kanto Route 4 Pokemon Center 2F [kanto_route4_pokemon_center_2f], Kanto Saffron City Mart [kanto_saffron_city_mart], Kanto Saffron City Pokemon Center 1F [kanto_saffron_city_pokemon_center_1f], Kanto Saffron City Pokemon Center 2F [kanto_saffron_city_pokemon_center_2f], Kanto Seven Island Mart [kanto_seven_island_mart], Kanto Seven Island Pokemon Center 1F [kanto_seven_island_pokemon_center_1f], Kanto Seven Island Pokemon Center 2F [kanto_seven_island_pokemon_center_2f], Kanto Six Island Mart [kanto_six_island_mart], Kanto Six Island Pokemon Center 1F [kanto_six_island_pokemon_center_1f], Kanto Six Island Pokemon Center 2F [kanto_six_island_pokemon_center_2f], Kanto Three Island Mart [kanto_three_island_mart], Kanto Three Island Pokemon Center 1F [kanto_three_island_pokemon_center_1f], Kanto Three Island Pokemon Center 2F [kanto_three_island_pokemon_center_2f], Kanto Two Island Pokemon Center 1F [kanto_two_island_pokemon_center_1f], Kanto Two Island Pokemon Center 2F [kanto_two_island_pokemon_center_2f], Kanto Vermilion City Mart [kanto_vermilion_city_mart], Kanto Vermilion City Pokemon Center 1F [kanto_vermilion_city_pokemon_center_1f], Kanto Vermilion City Pokemon Center 2F [kanto_vermilion_city_pokemon_center_2f], Kanto Viridian City Mart [kanto_viridian_city_mart], Kanto Viridian City Pokemon Center 1F [kanto_viridian_city_pokemon_center_1f], Kanto Viridian City Pokemon Center 2F [kanto_viridian_city_pokemon_center_2f]</details>
+- Events: Kanto Pewter City Pokemon Center 1F [kanto_pewter_city_pokemon_center_1f]
 
 ### mus_rg_ss_anne (516)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: 26 places<details><summary>show</summary>Kanto SS Anne 1F Corridor [kanto_ssanne_1f_corridor], Kanto SS Anne 1F Room 1 [kanto_ssanne_1f_room1], Kanto SS Anne 1F Room 2 [kanto_ssanne_1f_room2], Kanto SS Anne 1F Room 3 [kanto_ssanne_1f_room3], Kanto SS Anne 1F Room 4 [kanto_ssanne_1f_room4], Kanto SS Anne 1F Room 5 [kanto_ssanne_1f_room5], Kanto SS Anne 1F Room 6 [kanto_ssanne_1f_room6], Kanto SS Anne 1F Room 7 [kanto_ssanne_1f_room7], Kanto SS Anne 2F Corridor [kanto_ssanne_2f_corridor], Kanto SS Anne 2F Room 1 [kanto_ssanne_2f_room1], Kanto SS Anne 2F Room 2 [kanto_ssanne_2f_room2], Kanto SS Anne 2F Room 3 [kanto_ssanne_2f_room3], Kanto SS Anne 2F Room 4 [kanto_ssanne_2f_room4], Kanto SS Anne 2F Room 5 [kanto_ssanne_2f_room5], Kanto SS Anne 2F Room 6 [kanto_ssanne_2f_room6], Kanto SS Anne 3F Corridor [kanto_ssanne_3f_corridor], Kanto SS Anne B1F Corridor [kanto_ssanne_b1f_corridor], Kanto SS Anne B1F Room 1 [kanto_ssanne_b1f_room1], Kanto SS Anne B1F Room 2 [kanto_ssanne_b1f_room2], Kanto SS Anne B1F Room 3 [kanto_ssanne_b1f_room3], Kanto SS Anne B1F Room 4 [kanto_ssanne_b1f_room4], Kanto SS Anne B1F Room 5 [kanto_ssanne_b1f_room5], Kanto SS Anne Captains Office [kanto_ssanne_captains_office], Kanto SS Anne Deck [kanto_ssanne_deck], Kanto SS Anne Exterior [kanto_ssanne_exterior], Kanto SS Anne Kitchen [kanto_ssanne_kitchen]</details>
 
 ### mus_rg_surf (517)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Events: Kanto SS Anne Exterior [kanto_ssanne_exterior]
 
 ### mus_rg_poke_tower (518)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto Pokemon League Agathas Room [kanto_pokemon_league_agathas_room], Kanto Pokemon Tower 1F [kanto_pokemon_tower_1f], Kanto Pokemon Tower 2F [kanto_pokemon_tower_2f], Kanto Pokemon Tower 3F [kanto_pokemon_tower_3f], Kanto Pokemon Tower 4F [kanto_pokemon_tower_4f], Kanto Pokemon Tower 5F [kanto_pokemon_tower_5f], Kanto Pokemon Tower 6F [kanto_pokemon_tower_6f], Kanto Pokemon Tower 7F [kanto_pokemon_tower_7f]
 
 ### mus_rg_silph (519)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto Silph Co 10F [kanto_silph_co_10f], Kanto Silph Co 11F [kanto_silph_co_11f], Kanto Silph Co 1F [kanto_silph_co_1f], Kanto Silph Co 2F [kanto_silph_co_2f], Kanto Silph Co 3F [kanto_silph_co_3f], Kanto Silph Co 4F [kanto_silph_co_4f], Kanto Silph Co 5F [kanto_silph_co_5f], Kanto Silph Co 6F [kanto_silph_co_6f], Kanto Silph Co 7F [kanto_silph_co_7f], Kanto Silph Co 8F [kanto_silph_co_8f], Kanto Silph Co 9F [kanto_silph_co_9f], Kanto Silph Co Elevator [kanto_silph_co_elevator]
 
 ### mus_rg_fuchsia (520)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: 20 places<details><summary>show</summary>Kanto Cerulean City [kanto_cerulean_city], Kanto Cerulean City Bike Shop [kanto_cerulean_city_bike_shop], Kanto Cerulean City House 1 [kanto_cerulean_city_house1], Kanto Cerulean City House 2 [kanto_cerulean_city_house2], Kanto Cerulean City House 3 [kanto_cerulean_city_house3], Kanto Cerulean City House 4 [kanto_cerulean_city_house4], Kanto Cerulean City House 5 [kanto_cerulean_city_house5], Kanto Fuchsia City [kanto_fuchsia_city], Kanto Fuchsia City House 1 [kanto_fuchsia_city_house1], Kanto Fuchsia City House 2 [kanto_fuchsia_city_house2], Kanto Fuchsia City House 3 [kanto_fuchsia_city_house3], Kanto Fuchsia City Safari Zone Entrance [kanto_fuchsia_city_safari_zone_entrance], Kanto Fuchsia City Safari Zone Office [kanto_fuchsia_city_safari_zone_office], Kanto Fuchsia City Wardens House [kanto_fuchsia_city_wardens_house], Kanto Lavender Town House 2 [kanto_lavender_town_house2], Kanto One Island Kindle Road Ember Spa [kanto_one_island_kindle_road_ember_spa], Kanto Route 25 Sea Cottage [kanto_route25_sea_cottage], Kanto Six Island Water Path House 1 [kanto_six_island_water_path_house1], Kanto Six Island Water Path House 2 [kanto_six_island_water_path_house2], Kanto Vermilion City House 1 [kanto_vermilion_city_house1]</details>
 
 ### mus_rg_celadon (521)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto Celadon City [kanto_celadon_city], Kanto Celadon City Condominiums 1F [kanto_celadon_city_condominiums_1f], Kanto Celadon City Condominiums 2F [kanto_celadon_city_condominiums_2f], Kanto Celadon City Condominiums 3F [kanto_celadon_city_condominiums_3f], Kanto Celadon City Condominiums Roof [kanto_celadon_city_condominiums_roof], Kanto Celadon City Condominiums Roof Room [kanto_celadon_city_condominiums_roof_room], Kanto Celadon City Game Corner Prize Room [kanto_celadon_city_game_corner_prize_room], Kanto Celadon City Hotel [kanto_celadon_city_hotel], Kanto Celadon City House 1 [kanto_celadon_city_house1], Kanto Celadon City Restaurant [kanto_celadon_city_restaurant], Kanto Route 12 Fishing House [kanto_route12_fishing_house], Kanto Route 16 House [kanto_route16_house]
 
 ### mus_rg_victory_trainer (522)
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
@@ -550,19 +556,19 @@ Custom: `mus_rg_vs_trainer@tt.kaisong`
 - Scenes: Dodrio berry picking [dodrio_berry_picking]
 
 ### mus_rg_victory_gym_leader (524)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Events: Kanto Pokemon League Champions Room [kanto_pokemon_league_champions_room]
 
 ### mus_rg_vermillion (525)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto Route 11 East Entrance 1F [kanto_route11_east_entrance_1f], Kanto Route 11 East Entrance 2F [kanto_route11_east_entrance_2f], Kanto Vermilion City [kanto_vermilion_city], Kanto Vermilion City House 2 [kanto_vermilion_city_house2], Kanto Vermilion City House 3 [kanto_vermilion_city_house3], Kanto Vermilion City Pokemon Fan Club [kanto_vermilion_city_pokemon_fan_club]
 
 ### mus_rg_pewter (526)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: 37 places<details><summary>show</summary>Kanto Pewter City [kanto_pewter_city], Kanto Pewter City House 1 [kanto_pewter_city_house1], Kanto Pewter City House 2 [kanto_pewter_city_house2], Kanto Pewter City Museum 1F [kanto_pewter_city_museum_1f], Kanto Pewter City Museum 2F [kanto_pewter_city_museum_2f], Kanto Route 12 North Entrance 1F [kanto_route12_north_entrance_1f], Kanto Route 12 North Entrance 2F [kanto_route12_north_entrance_2f], Kanto Route 15 West Entrance 1F [kanto_route15_west_entrance_1f], Kanto Route 15 West Entrance 2F [kanto_route15_west_entrance_2f], Kanto Route 16 North Entrance 1F [kanto_route16_north_entrance_1f], Kanto Route 16 North Entrance 2F [kanto_route16_north_entrance_2f], Kanto Route 18 East Entrance 1F [kanto_route18_east_entrance_1f], Kanto Route 18 East Entrance 2F [kanto_route18_east_entrance_2f], Kanto Route 2 East Building [kanto_route2_east_building], Kanto Route 2 House [kanto_route2_house], Kanto Route 2 Viridian Forest North Entrance [kanto_route2_viridian_forest_north_entrance], Kanto Route 2 Viridian Forest South Entrance [kanto_route2_viridian_forest_south_entrance], Kanto Route 5 Pokemon Day Care [kanto_route5_pokemon_day_care], Kanto Route 5 South Entrance [kanto_route5_south_entrance], Kanto Route 6 North Entrance [kanto_route6_north_entrance], Kanto Route 7 East Entrance [kanto_route7_east_entrance], Kanto Route 8 West Entrance [kanto_route8_west_entrance], Kanto Saffron City [kanto_saffron_city], Kanto Saffron City Connection [kanto_saffron_city_connection], Kanto Saffron City Copycats House 1F [kanto_saffron_city_copycats_house_1f], Kanto Saffron City Copycats House 2F [kanto_saffron_city_copycats_house_2f], Kanto Saffron City Dojo [kanto_saffron_city_dojo], Kanto Saffron City House [kanto_saffron_city_house], Kanto Saffron City Mr Psychics House [kanto_saffron_city_mr_psychics_house], Kanto Saffron City Pokemon Trainer Fan Club [kanto_saffron_city_pokemon_trainer_fan_club], Kanto Underground Path East Entrance [kanto_underground_path_east_entrance], Kanto Underground Path North Entrance [kanto_underground_path_north_entrance], Kanto Underground Path South Entrance [kanto_underground_path_south_entrance], Kanto Underground Path West Entrance [kanto_underground_path_west_entrance], Kanto Viridian City [kanto_viridian_city], Kanto Viridian City House [kanto_viridian_city_house], Kanto Viridian City School [kanto_viridian_city_school]</details>
 
 ### mus_rg_encounter_rival (527)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Events: Kanto Cerulean City [kanto_cerulean_city], Kanto Four Island [kanto_four_island], Kanto Pallet Town Professor Oaks Lab [kanto_pallet_town_professor_oaks_lab], Kanto Pokemon Tower 2F [kanto_pokemon_tower_2f], Kanto Route 22 [kanto_route22], Kanto SS Anne 2F Corridor [kanto_ssanne_2f_corridor], Kanto Silph Co 7F [kanto_silph_co_7f], Kanto Six Island Pokemon Center 1F [kanto_six_island_pokemon_center_1f]
 
 ### mus_rg_rival_exit (528)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Events: Kanto Cerulean City [kanto_cerulean_city], Kanto Pallet Town Professor Oaks Lab [kanto_pallet_town_professor_oaks_lab], Kanto Pokemon Tower 2F [kanto_pokemon_tower_2f], Kanto Route 22 [kanto_route22], Kanto SS Anne 2F Corridor [kanto_ssanne_2f_corridor], Kanto Silph Co 7F [kanto_silph_co_7f]
 
 ### mus_rg_game_freak (533)
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
@@ -586,7 +592,7 @@ Custom: `mus_rg_vs_trainer@tt.kaisong`
 - Scenes: CO-OP setup screen [setup], POKéMON TCG card duels [tcg], YU-GI-OH! duels [ygo]
 
 ### mus_rg_net_center (540)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto One Island Pokemon Center 1F [kanto_one_island_pokemon_center_1f], Kanto One Island Pokemon Center 2F [kanto_one_island_pokemon_center_2f]
 
 ### mus_rg_mystery_gift (541)
 - Scenes: Mystery gift menu [mystery_gift_menu]
@@ -595,25 +601,25 @@ Custom: `mus_rg_vs_trainer@tt.kaisong`
 - Scenes: Dodrio berry picking [dodrio_berry_picking]
 
 ### mus_rg_sevii_cave (543)
-- Map music: 21 places<details><summary>show</summary>Altering Cave [altering_cave], Navel Rock B1F [navel_rock_b1f], Navel Rock Bottom [navel_rock_bottom], Navel Rock Down 01 [navel_rock_down01], Navel Rock Down 02 [navel_rock_down02], Navel Rock Down 03 [navel_rock_down03], Navel Rock Down 04 [navel_rock_down04], Navel Rock Down 05 [navel_rock_down05], Navel Rock Down 06 [navel_rock_down06], Navel Rock Down 07 [navel_rock_down07], Navel Rock Down 08 [navel_rock_down08], Navel Rock Down 09 [navel_rock_down09], Navel Rock Down 10 [navel_rock_down10], Navel Rock Down 11 [navel_rock_down11], Navel Rock Entrance [navel_rock_entrance], Navel Rock Fork [navel_rock_fork], Navel Rock Top [navel_rock_top], Navel Rock Up 1 [navel_rock_up1], Navel Rock Up 2 [navel_rock_up2], Navel Rock Up 3 [navel_rock_up3], Navel Rock Up 4 [navel_rock_up4]</details>
+- Map music: 75 places<details><summary>show</summary>Altering Cave [altering_cave], Kanto Cerulean Cave Rayquaza Chamber [kanto_cerulean_cave_rayquaza_chamber], Kanto Five Island Lost Cave Entrance [kanto_five_island_lost_cave_entrance], Kanto Five Island Lost Cave Room 1 [kanto_five_island_lost_cave_room1], Kanto Five Island Lost Cave Room 10 [kanto_five_island_lost_cave_room10], Kanto Five Island Lost Cave Room 11 [kanto_five_island_lost_cave_room11], Kanto Five Island Lost Cave Room 12 [kanto_five_island_lost_cave_room12], Kanto Five Island Lost Cave Room 13 [kanto_five_island_lost_cave_room13], Kanto Five Island Lost Cave Room 14 [kanto_five_island_lost_cave_room14], Kanto Five Island Lost Cave Room 2 [kanto_five_island_lost_cave_room2], Kanto Five Island Lost Cave Room 3 [kanto_five_island_lost_cave_room3], Kanto Five Island Lost Cave Room 4 [kanto_five_island_lost_cave_room4], Kanto Five Island Lost Cave Room 5 [kanto_five_island_lost_cave_room5], Kanto Five Island Lost Cave Room 6 [kanto_five_island_lost_cave_room6], Kanto Five Island Lost Cave Room 7 [kanto_five_island_lost_cave_room7], Kanto Five Island Lost Cave Room 8 [kanto_five_island_lost_cave_room8], Kanto Five Island Lost Cave Room 9 [kanto_five_island_lost_cave_room9], Kanto Four Island Icefall Cave 1F [kanto_four_island_icefall_cave_1f], Kanto Four Island Icefall Cave B1F [kanto_four_island_icefall_cave_b1f], Kanto Four Island Icefall Cave Back [kanto_four_island_icefall_cave_back], Kanto Four Island Icefall Cave Entrance [kanto_four_island_icefall_cave_entrance], Kanto Mt Ember Exterior [kanto_mt_ember_exterior], Kanto Mt Ember Ruby Path 1F [kanto_mt_ember_ruby_path_1f], Kanto Mt Ember Ruby Path B1F [kanto_mt_ember_ruby_path_b1f], Kanto Mt Ember Ruby Path B1F Stairs [kanto_mt_ember_ruby_path_b1f_stairs], Kanto Mt Ember Ruby Path B2F [kanto_mt_ember_ruby_path_b2f], Kanto Mt Ember Ruby Path B2F Stairs [kanto_mt_ember_ruby_path_b2f_stairs], Kanto Mt Ember Ruby Path B3F [kanto_mt_ember_ruby_path_b3f], Kanto Mt Ember Ruby Path B4F [kanto_mt_ember_ruby_path_b4f], Kanto Mt Ember Ruby Path B5F [kanto_mt_ember_ruby_path_b5f], Kanto Mt Ember Summit [kanto_mt_ember_summit], Kanto Mt Ember Summit Path 1F [kanto_mt_ember_summit_path_1f], Kanto Mt Ember Summit Path 2F [kanto_mt_ember_summit_path_2f], Kanto Mt Ember Summit Path 3F [kanto_mt_ember_summit_path_3f], Kanto Navel Rock 1F [kanto_navel_rock_1f], Kanto Navel Rock B1F [kanto_navel_rock_b1f], Kanto Navel Rock Base [kanto_navel_rock_base], Kanto Navel Rock Base Path B10F [kanto_navel_rock_base_path_b10f], Kanto Navel Rock Base Path B11F [kanto_navel_rock_base_path_b11f], Kanto Navel Rock Base Path B1F [kanto_navel_rock_base_path_b1f], Kanto Navel Rock Base Path B2F [kanto_navel_rock_base_path_b2f], Kanto Navel Rock Base Path B3F [kanto_navel_rock_base_path_b3f], Kanto Navel Rock Base Path B4F [kanto_navel_rock_base_path_b4f], Kanto Navel Rock Base Path B5F [kanto_navel_rock_base_path_b5f], Kanto Navel Rock Base Path B6F [kanto_navel_rock_base_path_b6f], Kanto Navel Rock Base Path B7F [kanto_navel_rock_base_path_b7f], Kanto Navel Rock Base Path B8F [kanto_navel_rock_base_path_b8f], Kanto Navel Rock Base Path B9F [kanto_navel_rock_base_path_b9f], Kanto Navel Rock Fork [kanto_navel_rock_fork], Kanto Navel Rock Summit [kanto_navel_rock_summit], Kanto Navel Rock Summit Path 2F [kanto_navel_rock_summit_path_2f], Kanto Navel Rock Summit Path 3F [kanto_navel_rock_summit_path_3f], Kanto Navel Rock Summit Path 4F [kanto_navel_rock_summit_path_4f], Kanto Navel Rock Summit Path 5F [kanto_navel_rock_summit_path_5f], Kanto Six Island Altering Cave [kanto_six_island_altering_cave], Navel Rock B1F [navel_rock_b1f], Navel Rock Bottom [navel_rock_bottom], Navel Rock Down 01 [navel_rock_down01], Navel Rock Down 02 [navel_rock_down02], Navel Rock Down 03 [navel_rock_down03], Navel Rock Down 04 [navel_rock_down04], Navel Rock Down 05 [navel_rock_down05], Navel Rock Down 06 [navel_rock_down06], Navel Rock Down 07 [navel_rock_down07], Navel Rock Down 08 [navel_rock_down08], Navel Rock Down 09 [navel_rock_down09], Navel Rock Down 10 [navel_rock_down10], Navel Rock Down 11 [navel_rock_down11], Navel Rock Entrance [navel_rock_entrance], Navel Rock Fork [navel_rock_fork], Navel Rock Top [navel_rock_top], Navel Rock Up 1 [navel_rock_up1], Navel Rock Up 2 [navel_rock_up2], Navel Rock Up 3 [navel_rock_up3], Navel Rock Up 4 [navel_rock_up4]</details>
 
 ### mus_rg_teachy_tv_show (544)
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_rg_sevii_route (545)
-- Map music: Navel Rock Exterior [navel_rock_exterior], Navel Rock Harbor [navel_rock_harbor]
+- Map music: 16 places<details><summary>show</summary>Kanto Five Island Meadow [kanto_five_island_meadow], Kanto Five Island Memorial Pillar [kanto_five_island_memorial_pillar], Kanto Five Island Resort Gorgeous [kanto_five_island_resort_gorgeous], Kanto Five Island Water Labyrinth [kanto_five_island_water_labyrinth], Kanto Navel Rock Exterior [kanto_navel_rock_exterior], Kanto Navel Rock Harbor [kanto_navel_rock_harbor], Kanto Seven Island Sevault Canyon [kanto_seven_island_sevault_canyon], Kanto Seven Island Sevault Canyon Entrance [kanto_seven_island_sevault_canyon_entrance], Kanto Seven Island Tanoby Ruins [kanto_seven_island_tanoby_ruins], Kanto Seven Island Trainer Tower [kanto_seven_island_trainer_tower], Kanto Six Island Green Path [kanto_six_island_green_path], Kanto Six Island Outcast Island [kanto_six_island_outcast_island], Kanto Six Island Ruin Valley [kanto_six_island_ruin_valley], Kanto Six Island Water Path [kanto_six_island_water_path], Navel Rock Exterior [navel_rock_exterior], Navel Rock Harbor [navel_rock_harbor]</details>
 
 ### mus_rg_sevii_dungeon (546)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: 14 places<details><summary>show</summary>Kanto Seven Island Sevault Canyon Tanoby Key [kanto_seven_island_sevault_canyon_tanoby_key], Kanto Seven Island Tanoby Ruins Dilford Chamber [kanto_seven_island_tanoby_ruins_dilford_chamber], Kanto Seven Island Tanoby Ruins Liptoo Chamber [kanto_seven_island_tanoby_ruins_liptoo_chamber], Kanto Seven Island Tanoby Ruins Monean Chamber [kanto_seven_island_tanoby_ruins_monean_chamber], Kanto Seven Island Tanoby Ruins Rixy Chamber [kanto_seven_island_tanoby_ruins_rixy_chamber], Kanto Seven Island Tanoby Ruins Scufib Chamber [kanto_seven_island_tanoby_ruins_scufib_chamber], Kanto Seven Island Tanoby Ruins Viapois Chamber [kanto_seven_island_tanoby_ruins_viapois_chamber], Kanto Seven Island Tanoby Ruins Weepth Chamber [kanto_seven_island_tanoby_ruins_weepth_chamber], Kanto Six Island Dotted Hole 1F [kanto_six_island_dotted_hole_1f], Kanto Six Island Dotted Hole B1F [kanto_six_island_dotted_hole_b1f], Kanto Six Island Dotted Hole B2F [kanto_six_island_dotted_hole_b2f], Kanto Six Island Dotted Hole B3F [kanto_six_island_dotted_hole_b3f], Kanto Six Island Dotted Hole B4F [kanto_six_island_dotted_hole_b4f], Kanto Six Island Dotted Hole Sapphire Room [kanto_six_island_dotted_hole_sapphire_room]</details>
 
 ### mus_rg_sevii_123 (547)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: 15 places<details><summary>show</summary>Kanto One Island [kanto_one_island], Kanto One Island Harbor [kanto_one_island_harbor], Kanto One Island House 1 [kanto_one_island_house1], Kanto One Island House 2 [kanto_one_island_house2], Kanto Three Island [kanto_three_island], Kanto Three Island Harbor [kanto_three_island_harbor], Kanto Three Island House 1 [kanto_three_island_house1], Kanto Three Island House 2 [kanto_three_island_house2], Kanto Three Island House 3 [kanto_three_island_house3], Kanto Three Island House 4 [kanto_three_island_house4], Kanto Three Island House 5 [kanto_three_island_house5], Kanto Two Island [kanto_two_island], Kanto Two Island Cape Brink House [kanto_two_island_cape_brink_house], Kanto Two Island Harbor [kanto_two_island_harbor], Kanto Two Island House [kanto_two_island_house]</details>
 
 ### mus_rg_sevii_45 (548)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto Five Island [kanto_five_island], Kanto Five Island Harbor [kanto_five_island_harbor], Kanto Five Island House 1 [kanto_five_island_house1], Kanto Five Island House 2 [kanto_five_island_house2], Kanto Five Island Resort Gorgeous House [kanto_five_island_resort_gorgeous_house], Kanto Four Island [kanto_four_island], Kanto Four Island Harbor [kanto_four_island_harbor], Kanto Four Island House 1 [kanto_four_island_house1], Kanto Four Island House 2 [kanto_four_island_house2], Kanto Four Island Loreleis House [kanto_four_island_loreleis_house], Kanto Four Island Pokemon Day Care [kanto_four_island_pokemon_day_care]
 
 ### mus_rg_sevii_67 (549)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto Seven Island [kanto_seven_island], Kanto Seven Island Harbor [kanto_seven_island_harbor], Kanto Seven Island House Room 1 [kanto_seven_island_house_room1], Kanto Seven Island House Room 2 [kanto_seven_island_house_room2], Kanto Seven Island Sevault Canyon House [kanto_seven_island_sevault_canyon_house], Kanto Six Island [kanto_six_island], Kanto Six Island Harbor [kanto_six_island_harbor], Kanto Six Island House [kanto_six_island_house]
 
 ### mus_rg_vs_deoxys (551)
 - Battles: wild Deoxys
@@ -625,16 +631,182 @@ Custom: `mus_rg_vs_trainer@tt.kaisong`
 - Battles: wild Lugia / Ho-Oh
 
 ### mus_rg_encounter_gym_leader (554)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Events: Kanto Cerulean Cave B1F [kanto_cerulean_cave_b1f], Kanto Mt Ember Summit [kanto_mt_ember_summit], Kanto Mt Moon B2F [kanto_mt_moon_b2f], Kanto Power Plant [kanto_power_plant], Kanto Seafoam Islands B4F [kanto_seafoam_islands_b4f]
 
 ### mus_rg_encounter_deoxys (555)
-- Events: Birth Island Exterior [birth_island_exterior]
+- Events: Birth Island Exterior [birth_island_exterior], Johto Silver Cave Room 3 [johto_silver_cave_room3], Kanto Birth Island Exterior [kanto_birth_island_exterior]
 
 ### mus_rg_trainer_tower (556)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto Trainer Tower 1F [kanto_trainer_tower_1f], Kanto Trainer Tower 2F [kanto_trainer_tower_2f], Kanto Trainer Tower 3F [kanto_trainer_tower_3f], Kanto Trainer Tower 4F [kanto_trainer_tower_4f], Kanto Trainer Tower 5F [kanto_trainer_tower_5f], Kanto Trainer Tower 6F [kanto_trainer_tower_6f], Kanto Trainer Tower 7F [kanto_trainer_tower_7f], Kanto Trainer Tower 8F [kanto_trainer_tower_8f], Kanto Trainer Tower Elevator [kanto_trainer_tower_elevator], Kanto Trainer Tower Lobby [kanto_trainer_tower_lobby], Kanto Trainer Tower Roof [kanto_trainer_tower_roof]
 
 ### mus_rg_slow_pallet (557)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Kanto Pokemon League Hall Of Fame [kanto_pokemon_league_hall_of_fame]
+- Events: Kanto Pokemon League Champions Room [kanto_pokemon_league_champions_room]
 
 ### mus_rg_teachy_tv_menu (558)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_trainer_hill (610)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_new_bark (611)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_cherrygrove (612)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_violet (613)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_azalea (614)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_goldenrod (615)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_ecruteak (616)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_cianwood (617)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_route29 (618)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_route30 (619)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_route34 (620)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_route38 (621)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_route42 (622)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_route26 (623)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_pokecenter (624)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_pokemart (625)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_gym (626)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_elms_lab (627)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_dance_theater (628)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_game_corner (629)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_sprout_tower (630)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_cave (631)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_ruins_of_alph (632)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_national_park (633)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_burned_tower (634)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_tin_tower (635)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_mt_silver (636)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_rocket_hideout (637)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_ice_path (638)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_dragons_den (639)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_victory_road (640)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_indigo_plateau (641)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_underground (642)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_cliff_cave (643)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_safari_gate (644)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_safari_zone (645)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_prof_oak (646)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_follow_me (647)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_rival_appears (648)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_rival_departs (649)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_jingle (650)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_cianwood_event (651)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_vs_ho_oh (652)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_vs_lugia (653)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_legend_appears (654)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_event (655)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_encounter_lass (657)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_encounter_youngster (658)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_encounter_nerd (659)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_encounter_sage (660)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_encounter_rocket (661)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_encounter_cooltrainer (662)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_encounter_swimmer (663)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_encounter_hiker (664)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_encounter_champion (665)
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).

@@ -616,6 +616,64 @@ gSongTable::
 	song ph_nurse_blend, MUSIC_PLAYER_SE2, 2
 	song ph_nurse_held, MUSIC_PLAYER_SE2, 2
 	song ph_nurse_solo, MUSIC_PLAYER_SE2, 2
+@ Moemon Kai: Johto music (tools/quetzal_port/gen_music.py)
+	song mus_johto_trainer_hill, MUSIC_PLAYER_BGM, 0
+	song mus_johto_new_bark, MUSIC_PLAYER_BGM, 0
+	song mus_johto_cherrygrove, MUSIC_PLAYER_BGM, 0
+	song mus_johto_violet, MUSIC_PLAYER_BGM, 0
+	song mus_johto_azalea, MUSIC_PLAYER_BGM, 0
+	song mus_johto_goldenrod, MUSIC_PLAYER_BGM, 0
+	song mus_johto_ecruteak, MUSIC_PLAYER_BGM, 0
+	song mus_johto_cianwood, MUSIC_PLAYER_BGM, 0
+	song mus_johto_route29, MUSIC_PLAYER_BGM, 0
+	song mus_johto_route30, MUSIC_PLAYER_BGM, 0
+	song mus_johto_route34, MUSIC_PLAYER_BGM, 0
+	song mus_johto_route38, MUSIC_PLAYER_BGM, 0
+	song mus_johto_route42, MUSIC_PLAYER_BGM, 0
+	song mus_johto_route26, MUSIC_PLAYER_BGM, 0
+	song mus_johto_pokecenter, MUSIC_PLAYER_BGM, 0
+	song mus_johto_pokemart, MUSIC_PLAYER_BGM, 0
+	song mus_johto_gym, MUSIC_PLAYER_BGM, 0
+	song mus_johto_elms_lab, MUSIC_PLAYER_BGM, 0
+	song mus_johto_dance_theater, MUSIC_PLAYER_BGM, 0
+	song mus_johto_game_corner, MUSIC_PLAYER_BGM, 0
+	song mus_johto_sprout_tower, MUSIC_PLAYER_BGM, 0
+	song mus_johto_cave, MUSIC_PLAYER_BGM, 0
+	song mus_johto_ruins_of_alph, MUSIC_PLAYER_BGM, 0
+	song mus_johto_national_park, MUSIC_PLAYER_BGM, 0
+	song mus_johto_burned_tower, MUSIC_PLAYER_BGM, 0
+	song mus_johto_tin_tower, MUSIC_PLAYER_BGM, 0
+	song mus_johto_mt_silver, MUSIC_PLAYER_BGM, 0
+	song mus_johto_rocket_hideout, MUSIC_PLAYER_BGM, 0
+	song mus_johto_ice_path, MUSIC_PLAYER_BGM, 0
+	song mus_johto_dragons_den, MUSIC_PLAYER_BGM, 0
+	song mus_johto_victory_road, MUSIC_PLAYER_BGM, 0
+	song mus_johto_indigo_plateau, MUSIC_PLAYER_BGM, 0
+	song mus_johto_underground, MUSIC_PLAYER_BGM, 0
+	song mus_johto_cliff_cave, MUSIC_PLAYER_BGM, 0
+	song mus_johto_safari_gate, MUSIC_PLAYER_BGM, 0
+	song mus_johto_safari_zone, MUSIC_PLAYER_BGM, 0
+	song mus_johto_prof_oak, MUSIC_PLAYER_BGM, 0
+	song mus_johto_follow_me, MUSIC_PLAYER_BGM, 0
+	song mus_johto_rival_appears, MUSIC_PLAYER_BGM, 0
+	song mus_johto_rival_departs, MUSIC_PLAYER_BGM, 0
+	song mus_johto_jingle, MUSIC_PLAYER_BGM, 0
+	song mus_johto_cianwood_event, MUSIC_PLAYER_BGM, 0
+	song mus_johto_vs_ho_oh, MUSIC_PLAYER_BGM, 0
+	song mus_johto_vs_lugia, MUSIC_PLAYER_BGM, 0
+	song mus_johto_legend_appears, MUSIC_PLAYER_BGM, 0
+	song mus_johto_event, MUSIC_PLAYER_BGM, 0
+	song mus_johto_se_short, MUSIC_PLAYER_SE2, 2
+	song mus_johto_encounter_lass, MUSIC_PLAYER_BGM, 0
+	song mus_johto_encounter_youngster, MUSIC_PLAYER_BGM, 0
+	song mus_johto_encounter_nerd, MUSIC_PLAYER_BGM, 0
+	song mus_johto_encounter_sage, MUSIC_PLAYER_BGM, 0
+	song mus_johto_encounter_rocket, MUSIC_PLAYER_BGM, 0
+	song mus_johto_encounter_cooltrainer, MUSIC_PLAYER_BGM, 0
+	song mus_johto_encounter_swimmer, MUSIC_PLAYER_BGM, 0
+	song mus_johto_encounter_hiker, MUSIC_PLAYER_BGM, 0
+	song mus_johto_encounter_champion, MUSIC_PLAYER_BGM, 0
+@ end of Johto music
 
 	.align 2
 dummy_song_header:

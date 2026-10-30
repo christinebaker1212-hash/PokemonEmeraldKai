@@ -24,6 +24,8 @@ import re
 import shutil
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, '..', '..'))
 RIP = os.path.join(REPO, 'quetzal_rip')
@@ -196,9 +198,11 @@ def write_constants(texts):
     lines.append('\n// overworld graphics (tools/quetzal_port/gen_objects.py)')
     for g in sorted(gather(r'\bOBJ_EVENT_GFX_QZ_\w+', texts), key=lambda s: int(s.rsplit('_', 1)[1])):
         lines.append('#define %-40s %s' % (g, objs.get(g, 'OBJ_EVENT_GFX_BOY_1')))
-    lines.append('\n// music (placeholders until the songs are imported)')
+    import gen_music
+    lines.append('\n// music (tools/quetzal_port/gen_music.py)')
     for g in sorted(gather(r'\bMUS_QZ_\w+', texts), key=lambda s: int(s.rsplit('_', 1)[1])):
-        lines.append('#define %-40s MUS_ROUTE101' % g)
+        n = int(g.rsplit('_', 1)[1])
+        lines.append('#define %-40s %s' % (g, 'MUS_JOHTO_' + gen_music.NAMES[n] if n in gen_music.NAMES else 'MUS_NONE'))
     lines.append('\n// Quetzal\'s own movement types: its Pokémon objects idle in place (0x54-0x57: down, up, left, right as guessed\n'
                  '// from where they stand), 0x64 NPCs stand facing down')
     for g in sorted(gather(r'\bMOVEMENT_TYPE_QZ_\w+', texts)):

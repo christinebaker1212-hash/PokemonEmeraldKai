@@ -542,6 +542,64 @@
 #define PH_NURSE_BLEND              607
 #define PH_NURSE_HELD               608
 #define PH_NURSE_SOLO               609
+// Moemon Kai: Johto music (tools/quetzal_port/gen_music.py)
+#define MUS_JOHTO_TRAINER_HILL      610
+#define MUS_JOHTO_NEW_BARK          611
+#define MUS_JOHTO_CHERRYGROVE       612
+#define MUS_JOHTO_VIOLET            613
+#define MUS_JOHTO_AZALEA            614
+#define MUS_JOHTO_GOLDENROD         615
+#define MUS_JOHTO_ECRUTEAK          616
+#define MUS_JOHTO_CIANWOOD          617
+#define MUS_JOHTO_ROUTE29           618
+#define MUS_JOHTO_ROUTE30           619
+#define MUS_JOHTO_ROUTE34           620
+#define MUS_JOHTO_ROUTE38           621
+#define MUS_JOHTO_ROUTE42           622
+#define MUS_JOHTO_ROUTE26           623
+#define MUS_JOHTO_POKECENTER        624
+#define MUS_JOHTO_POKEMART          625
+#define MUS_JOHTO_GYM               626
+#define MUS_JOHTO_ELMS_LAB          627
+#define MUS_JOHTO_DANCE_THEATER     628
+#define MUS_JOHTO_GAME_CORNER       629
+#define MUS_JOHTO_SPROUT_TOWER      630
+#define MUS_JOHTO_CAVE              631
+#define MUS_JOHTO_RUINS_OF_ALPH     632
+#define MUS_JOHTO_NATIONAL_PARK     633
+#define MUS_JOHTO_BURNED_TOWER      634
+#define MUS_JOHTO_TIN_TOWER         635
+#define MUS_JOHTO_MT_SILVER         636
+#define MUS_JOHTO_ROCKET_HIDEOUT    637
+#define MUS_JOHTO_ICE_PATH          638
+#define MUS_JOHTO_DRAGONS_DEN       639
+#define MUS_JOHTO_VICTORY_ROAD      640
+#define MUS_JOHTO_INDIGO_PLATEAU    641
+#define MUS_JOHTO_UNDERGROUND       642
+#define MUS_JOHTO_CLIFF_CAVE        643
+#define MUS_JOHTO_SAFARI_GATE       644
+#define MUS_JOHTO_SAFARI_ZONE       645
+#define MUS_JOHTO_PROF_OAK          646
+#define MUS_JOHTO_FOLLOW_ME         647
+#define MUS_JOHTO_RIVAL_APPEARS     648
+#define MUS_JOHTO_RIVAL_DEPARTS     649
+#define MUS_JOHTO_JINGLE            650
+#define MUS_JOHTO_CIANWOOD_EVENT    651
+#define MUS_JOHTO_VS_HO_OH          652
+#define MUS_JOHTO_VS_LUGIA          653
+#define MUS_JOHTO_LEGEND_APPEARS    654
+#define MUS_JOHTO_EVENT             655
+#define MUS_JOHTO_SE_SHORT          656
+#define MUS_JOHTO_ENCOUNTER_LASS    657
+#define MUS_JOHTO_ENCOUNTER_YOUNGSTER 658
+#define MUS_JOHTO_ENCOUNTER_NERD    659
+#define MUS_JOHTO_ENCOUNTER_SAGE    660
+#define MUS_JOHTO_ENCOUNTER_ROCKET  661
+#define MUS_JOHTO_ENCOUNTER_COOLTRAINER 662
+#define MUS_JOHTO_ENCOUNTER_SWIMMER 663
+#define MUS_JOHTO_ENCOUNTER_HIKER   664
+#define MUS_JOHTO_ENCOUNTER_CHAMPION 665
+// end of Johto music
 
 #define MUS_ROUTE118                0x7FFF  // Map is split into 2 music sections. controlled by GetCurrLocationDefaultMusic().
 
