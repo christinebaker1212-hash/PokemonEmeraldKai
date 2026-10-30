@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """Produce native immutable card/deck data from the pinned imported catalogue."""
+import sys as _sys
+_sys.path.insert(0,str(__import__('pathlib').Path(__file__).resolve().parent))
+from gb2_effects import TEXT as GB2_TEXT
 from pathlib import Path
 import json
 ROOT=Path(__file__).resolve().parents[2]
@@ -32,9 +35,12 @@ for c in x['cards']:
  if c['kind']=='pokemon':
   stage={'BASIC':0,'STAGE1':1,'STAGE2':2}[c['stage']]
   out.append(f'.hp={c["hp"]}, .stage={stage}, .species={c["species"]}, .level={c["level"]}, .retreat={c["retreat"]}, .weakness={affinity(c["weakness"])}, .resistance={affinity(c["resistance"])}, .evolvesFrom={q(c["evolves_from"])}, .description={q(c["flavor"])}, .attacks={{')
-  for a in c['attacks']:
+  for a in c['attacks']+[None]*(2-len(c['attacks'])):
+   if a is None:
+    out.append('{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0,0,0,0,0,0,0},.damage=0,.category=TCG_DAMAGE_NORMAL},');continue
    costs=','.join(str(a['energy'].get(t,0)) for t in types)
-   out.append(f'{{.name={q(a["name"])},.description={q(a["description"])},.effect={q(a["effect"])},.animation={q(a["animation"])},.cost={{{costs}}},.damage={a["damage"]},.category=TCG_{a["category"]}}},')
+   desc=GB2_TEXT.get(a['effect'].replace('EffectCommands',''),a['description'])
+   out.append(f'{{.name={q(a["name"])},.description={q(desc)},.effect={q(a["effect"])},.animation={q(a["animation"])},.cost={{{costs}}},.damage={a["damage"]},.category=TCG_{a["category"]}}},')
   out.append('}')
  else:out.append(f'.effect={q(c["effect"])},.description={q(c["description"])}')
  out.append('},')

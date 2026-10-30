@@ -35,6 +35,13 @@ struct TcgFieldCard
     uint16_t mirrorDamage;
     uint8_t mirrorCondition, mirrorPoison, mirrorWeaken, mirrorNoAttack, mirrorNoRetreat, mirrorEffect, mirrorArg,
         mirrorWeak;
+    /* Pokemon Card GB2's (turn numbers: TcgDuel.turn, so they end by themselves): lockTurn, the owner's turn its
+     * attack lockAttack (+ 1; 3 = both, and it can't retreat: Drill Dive) can't be used (Slashing Strike, Corrosive
+     * Liquid, Focused One Shot's tails); powerOffUntil, the last turn its Pokemon Power is off (Stare); food,
+     * Hungry Snorlax's Food counters; mirrorShell, Dark Wartortle's Mirror Shell (the opponent's next turn);
+     * charge3, Water Power's tripling (with charged); fossilBoost, Prehistoric Dream's +10 this turn */
+    uint16_t lockTurn, powerOffUntil;
+    uint8_t lockAttack, food, mirrorShell, charge3, fossilBoost;
 };
 enum
 {
@@ -48,7 +55,12 @@ enum
     TCG_GUARD_REDUCE_10,
     TCG_GUARD_REDUCE_20,
     TCG_GUARD_UNDER_40,
-    TCG_GUARD_HALVE
+    TCG_GUARD_HALVE,
+    /* GB2's */
+    TCG_GUARD_UNDER_30,      /* Harden: 20 or less is prevented */
+    TCG_GUARD_DOUBLE,        /* Double-Edged Pincers: damage to it is doubled */
+    TCG_GUARD_BLINK,         /* Blink: a coin, heads prevents the damage */
+    TCG_GUARD_REDUCE_10_LATE /* Expand: 10 less after Weakness and Resistance */
 };
 enum
 {
@@ -146,6 +158,12 @@ struct TcgPlayer
     struct TcgFieldCard field[TCG_FIELD_SIZE];
     uint8_t energyPlayed, confusionRetreatFailed, setupDone, retreated, noTrainers;
     uint16_t turnsTaken;
+    /* GB2's, as turn numbers: skipDrawTurn, the turn this player doesn't draw (Perplex); poisonMistUntil, Poison
+     * Mist's 20 a turn (theirs too) until then; strangeBeamUntil, their damaged Water Pokemon have no Weakness;
+     * noTrainersTurn, their turn without Trainers (Spookify). prizesUp: their Prizes face up (Here Comes Team
+     * Rocket!); poisonNext: the next Active they promote is Poisoned (Gas Explosion) */
+    uint16_t skipDrawTurn, poisonMistUntil, strangeBeamUntil, noTrainersTurn;
+    uint8_t prizesUp, poisonNext;
     uint16_t attachmentExpires[TCG_DECK_SIZE];
 };
 /* Presentation events: what happened, in order, so the duel screen can show
@@ -213,6 +231,11 @@ struct TcgDuel
     /* (also within one attack) nothing it does reaches the Defending Pokemon: Agility and
      * the like, Neutralizing Shield, a heads for Transparency */
     uint8_t foeImmune; /* TCG_IMMUNE_* */
+    /* (GB2's, within one attack: Swift, untouched by any effect on the Defending Pokemon; a Pokemon Power's
+     * bonus to it, Dark Wave and Prehistoric Dream) */
+    uint8_t swift, bonus;
+    /* GB2's: Goop Gas Attack, every Pokemon Power off until the end of this turn (TcgDuel.turn) */
+    uint16_t goopGasUntil;
     char error[TCG_LOG_WIDTH];
     char log[TCG_LOG_LINES][TCG_LOG_WIDTH];
     unsigned logCount;
@@ -246,8 +269,16 @@ int TcgDuel_EffectTouchesDefender(const struct TcgAttack *attack);
 /* Why an attack's effect can't be used now (NULL = it can), e.g. Dream Eater. */
 const char *TcgDuel_EffectBlock(const struct TcgDuel *g, unsigned player, const struct TcgAttack *attack);
 /* 0: no choice. 1: the attacker picks one of the opponent's Benched Pokemon
- * (action.target), 2: one of their own (action.target). */
+ * (action.target), 2: one of their own Benched (action.target), 3: any of the opponent's Pokemon (0-5),
+ * 4: any of their own (0-5). */
 unsigned TcgDuel_AttackChoice(const struct TcgAttack *attack, int *required);
+/* What to ask for that choice (NULL: the usual words) */
+const char *TcgDuel_AttackTargetPrompt(const struct TcgAttack *attack);
+/* Big Snore: used only while Asleep; Mini-Metronome: Metronome on heads */
+int TcgDuel_SleepAttack(const struct TcgAttack *attack);
+int TcgDuel_MetronomeHeads(const struct TcgAttack *attack);
+/* Can the Active Pokemon attack at all now (its conditions, Leer, Slashing Strike...)? */
+int TcgDuel_CanAttackNow(const struct TcgDuel *g, unsigned player, unsigned attack);
 /* Attacks that ask for a choice from a list (TcgAction.option): the labels and which can be picked, and how many
  * (0: none). Metronome lists the Defending Pokemon's attacks for TcgAction.copy instead (TcgDuel_IsMetronome). */
 #define TCG_MAX_OPTIONS 8
@@ -259,7 +290,8 @@ enum
     TCG_ASK_NONE,
     TCG_ASK_DISCARD_TRAINER, /* Scavenge: selections[0], a Trainer in your discard pile */
     TCG_ASK_ORDER_TOP3,      /* Prophecy: selections, the top cards of that deck in their new order (first on top) */
-    TCG_ASK_EVOLVED          /* Devolution Beam: target, an evolved Pokemon on the option's side */
+    TCG_ASK_EVOLVED,         /* Devolution Beam: target, an evolved Pokemon on the option's side */
+    TCG_ASK_DECK_TRAINER     /* Errand-Running: selections[0], a Trainer in your deck (taken on heads) */
 };
 unsigned TcgDuel_AttackAsk(const struct TcgAttack *attack);
 int TcgDuel_IsMetronome(const struct TcgAttack *attack);

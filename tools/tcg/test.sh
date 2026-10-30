@@ -34,6 +34,12 @@ gcc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g \
 
 gcc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g \
     -DTCG_TEST -DMOEMON_DEV_BUILD=1 -iquote include \
+    tools/tcg/test_gb2.c src/tcg/tcg_collection.c src/tcg/tcg_catalog.c src/tcg/tcg_ai.c \
+    src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c src/tcg/tcg_powers.c -o "$OUT/gb2"
+"$OUT/gb2"
+
+gcc -std=c99 -Wall -Wextra -Werror -fsanitize=address,undefined -g \
+    -DTCG_TEST -DMOEMON_DEV_BUILD=1 -iquote include \
     tools/tcg/test_trainers.c src/tcg/tcg_collection.c src/tcg/tcg_catalog.c \
     src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c src/tcg/tcg_powers.c -o "$OUT/trainers"
 "$OUT/trainers"

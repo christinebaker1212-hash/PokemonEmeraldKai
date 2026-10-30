@@ -109,9 +109,18 @@ static void StartTurn(struct TcgDuel *g)
         p->field[s].barrier = 0;
         p->field[s].guard = 0;
         p->field[s].charged = p->field[s].charged == 1 ? 2 : 0;
+        if (!p->field[s].charged)
+            p->field[s].charge3 = 0;
         p->field[s].destinyBond = 0; /* (Destiny Bond lasted the opponent's turn) */
+        p->field[s].mirrorShell = 0; /* (Mirror Shell too) */
     }
     TcgDuel_Event(g, TCG_EV_TURN, g->current, 0, g->turn, 0, 0);
+    if (p->skipDrawTurn == g->turn)
+    {
+        /* Perplex: no card this turn */
+        TcgDuel_Log(g, "Player %u doesn't draw a card this turn.", g->current + 1);
+        return;
+    }
     if (!TcgDuel_Draw(g, g->current, 1))
     {
         g->winner = g->current ^ 1;
@@ -189,12 +198,28 @@ int TcgDuel_NoAttack(const struct TcgDuel *g, unsigned player)
     return f->noAttack == 1 || (f->noAttack == 2 && TcgDuel_BoundEffect(g, player, 0));
 }
 static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack);
+/* Slashing Strike, Drill Dive and the like: that attack (lockAttack 3: any) can't be used this turn */
+static int Locked(const struct TcgDuel *g, unsigned player, unsigned attack)
+{
+    const struct TcgFieldCard *f = &g->players[player].field[0];
+    return f->lockTurn == g->turn && (f->lockAttack == 3 || f->lockAttack == attack + 1);
+}
 int TcgDuel_CanAttack(const struct TcgDuel *g, unsigned player, unsigned attack)
 {
     const struct TcgCard *c = TcgDuel_Field(g, player, 0);
     /* (Amnesia: not the attack chosen, this turn) */
     return EnergyPaid(g, player, attack) && g->players[player].field[0].disabled != attack + 1 &&
-           !TcgDuel_EffectBlock(g, player, &c->attacks[attack]);
+           !Locked(g, player, attack) && !TcgDuel_EffectBlock(g, player, &c->attacks[attack]);
+}
+int TcgDuel_CanAttackNow(const struct TcgDuel *g, unsigned player, unsigned attack)
+{
+    const struct TcgCard *c = TcgDuel_Field(g, player, 0);
+    const struct TcgFieldCard *f = &g->players[player].field[0];
+    if (!c || attack > 1 || c->kind != TCG_POKEMON || f->condition == TCG_PARALYZED || TcgDuel_NoAttack(g, player) ||
+        Locked(g, player, attack))
+        return 0;
+    /* (Big Snore: only while Asleep) */
+    return f->condition != TCG_ASLEEP || TcgDuel_SleepAttack(&c->attacks[attack]);
 }
 static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack)
 {
@@ -313,6 +338,7 @@ static void ClearCondition(struct TcgFieldCard *f)
     f->effectBy = 0;
     f->burn = f->shift = 0;
     f->disabled = f->destinyBond = f->weakAs = f->resistAs = 0;
+    f->lockTurn = f->lockAttack = f->mirrorShell = f->charge3 = f->fossilBoost = 0;
 }
 /* What the opponent's last attack did to it (Mirror Move) */
 static void ClearMirror(struct TcgFieldCard *f)
@@ -355,7 +381,8 @@ static void EndTurn(struct TcgDuel *g)
         p->field[s].disabled = 0;
         ClearMirror(&p->field[s]);
         if (p->field[s].charged == 2)
-            p->field[s].charged = 0;
+            p->field[s].charged = p->field[s].charge3 = 0;
+        p->field[s].fossilBoost = 0;
     }
     p->noTrainers = 0;
     for (who = 0; who < 2; who++)
@@ -449,6 +476,15 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         memset(&g->players[who].field[s], 0, sizeof(struct TcgFieldCard));
         ClearCondition(&g->players[who].field[0]);
         TcgDuel_Event(g, TCG_EV_PROMOTE, who, s, 0, TcgDuel_Field(g, who, 0)->id, 0);
+        if (g->players[who].poisonNext)
+        {
+            /* Gas Explosion: the new Active Pokemon is Poisoned */
+            g->players[who].poisonNext = 0;
+            g->players[who].field[0].poison = 10;
+            TcgPower_Sanitize(g);
+            TcgDuel_Event(g, TCG_EV_STATUS, who, 0, g->players[who].field[0].condition, 0,
+                          g->players[who].field[0].poison);
+        }
         g->phase = TCG_TURN;
         TcgDuel_ResolveKnockouts(g);
         if (g->phase == TCG_TURN && g->needsTurnStart)
@@ -504,14 +540,14 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
                 return Error(g, blocked);
             TcgDuel_Log(g, "Metronome copies %s.", attack->name);
         }
-        if (f->condition == TCG_ASLEEP || f->condition == TCG_PARALYZED || TcgDuel_NoAttack(g, g->current))
+        if (!TcgDuel_CanAttackNow(g, g->current, a->attack))
             return Error(g, "This Pokemon cannot attack now.");
         if (!TcgDuel_EffectSupported(attack->effect))
         {
             snprintf(g->error, sizeof(g->error), "Effect not yet implemented: %s", attack->effect);
             return TCG_UNSUPPORTED;
         }
-        g->noWeakRes = g->attackFailed = g->coinResult = 0;
+        g->noWeakRes = g->attackFailed = g->coinResult = g->swift = g->bonus = 0;
         TcgDuel_Event(g, TCG_EV_ATTACK, g->current, a->attack, 0, attacker->id, 0);
         if (f->condition == TCG_CONFUSED && !TcgDuel_Coin(g, g->current))
         {
@@ -530,6 +566,19 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             EndTurn(g);
             return TCG_OK;
         }
+        if (TcgDuel_MetronomeHeads(&attacker->attacks[a->attack]) && !TcgDuel_Coin(g, g->current))
+        {
+            /* Mini-Metronome: tails, nothing */
+            TcgDuel_Log(g, "%s's attack failed.", attacker->name);
+            EndTurn(g);
+            return TCG_OK;
+        }
+        /* Before the attack: Fox Fire, Drag Off bring out another Defending Pokemon */
+        damage = attack->damage;
+        if ((result = TcgDuel_AttackEffect(g, attack, a, &damage, 3)) != TCG_OK)
+            return result;
+        if (!(target = TcgDuel_Field(g, g->current ^ 1, 0)))
+            return Error(g, "There's no Defending Pokemon.");
         foeBefore = *foe;
         selfCondition = f->condition;
         type = TcgDuel_Type(g, g->current, 0); /* (Venomoth's Shift) */
@@ -551,10 +600,13 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
          * Resistance, PlusPower, Defender, then the substatus that reduce
          * damage; nothing is added to an attack that does no damage. */
         total = (int)damage;
+        if (g->swift)
+            g->noWeakRes = 1; /* (Swift: Weakness, Resistance, powers and every effect on it don't count) */
         if (total > 0)
         {
             if (f->charged == 2)
-                total *= 2;
+                total *= f->charge3 ? 3 : 2;
+            total += g->bonus; /* (Dark Wave, Prehistoric Dream) */
             if (!g->noWeakRes && TcgDuel_Weakness(g, g->current ^ 1, 0) == type)
             {
                 total *= 2;
@@ -566,8 +618,11 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
                 flags |= TCG_DMG_RESIST;
             }
             total += 10 * (int)AttachedTrainerCount(g, g->current, 0, TCG_CARD_PLUSPOWER);
-            total -= 20 * (int)AttachedTrainerCount(g, g->current ^ 1, 0, TCG_CARD_DEFENDER);
-            if (foe->barrier || g->foeImmune == TCG_IMMUNE_YES)
+            if (!g->swift)
+                total -= 20 * (int)AttachedTrainerCount(g, g->current ^ 1, 0, TCG_CARD_DEFENDER);
+            if (g->swift)
+                ;
+            else if (foe->barrier || g->foeImmune == TCG_IMMUNE_YES)
             {
                 TcgDuel_Event(g, TCG_EV_NO_DAMAGE, g->current ^ 1, 0, 0, 0, 0);
                 total = 0;
@@ -583,13 +638,29 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             }
             else if (foe->guard == TCG_GUARD_HALVE)
                 total = total / 2 / 10 * 10;
+            /* GB2's: Harden, Double-Edged Pincers, Blink, Expand */
+            else if (foe->guard == TCG_GUARD_UNDER_30 && total <= 20)
+            {
+                TcgDuel_Event(g, TCG_EV_NO_DAMAGE, g->current ^ 1, 0, 0, 0, 0);
+                total = 0;
+            }
+            else if (foe->guard == TCG_GUARD_DOUBLE)
+                total *= 2;
+            else if (foe->guard == TCG_GUARD_BLINK && TcgDuel_Coin(g, g->current ^ 1))
+            {
+                TcgDuel_Event(g, TCG_EV_NO_DAMAGE, g->current ^ 1, 0, 0, 0, 0);
+                total = 0;
+            }
+            else if (foe->guard == TCG_GUARD_REDUCE_10_LATE)
+                total -= 10;
             /* (Growl and the like: only against the Pokemon that used it) */
             if (f->weaken == TCG_WEAKEN_10 && TcgDuel_BoundEffect(g, g->current, 0))
                 total -= 10;
             else if (f->weaken == TCG_WEAKEN_20 && TcgDuel_BoundEffect(g, g->current, 0))
                 total -= 20;
             /* Mr. Mime's Invisible Wall, Kabuto Armor */
-            total = TcgPower_AttackDamage(g, g->current ^ 1, 0, total, 1);
+            if (!g->swift)
+                total = TcgPower_AttackDamage(g, g->current ^ 1, 0, total, 1);
             if (total < 0)
                 total = 0;
         }
@@ -604,6 +675,13 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             TcgDuel_Event(g, TCG_EV_DAMAGE, g->current, 0, attacker->hp - f->damage, 0, TCG_DMG_SELF);
             f->damage = attacker->hp;
             TcgDuel_Log(g, "Destiny Bond: %s is Knocked Out too.", attacker->name);
+        }
+        if (damage && foe->mirrorShell && f->stackSize)
+        {
+            /* Dark Wartortle's Mirror Shell: as much back at the attacker */
+            f->damage += damage;
+            TcgDuel_Event(g, TCG_EV_DAMAGE, g->current, 0, damage, 0, 0);
+            TcgDuel_Log(g, "Mirror Shell: %u damage back.", damage);
         }
         TcgDuel_Log(g, "%s uses %s for %u damage.", attacker->name, attack->name, damage);
         result = TcgDuel_AttackEffect(g, attack, a, &damage, 1);
@@ -644,7 +722,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             TcgDuel_Event(g, TCG_EV_STATUS, g->current, 0, f->condition, 0, f->poison);
         g->animationCard = attacker->id;
         g->animationKind = a->attack + 1;
-        g->noWeakRes = g->attackFailed = g->coinResult = g->foeImmune = 0;
+        g->noWeakRes = g->attackFailed = g->coinResult = g->foeImmune = g->swift = g->bonus = 0;
         if (g->switchPending)
         {
             /* Only if the Defending Pokemon is still there to be switched. It comes before any
@@ -679,7 +757,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         if (p->retreated)
             return Error(g, "You can only retreat once each turn.");
         if (c->kind == TCG_TRAINER || f->condition == TCG_ASLEEP || f->condition == TCG_PARALYZED || f->noRetreat ||
-            p->confusionRetreatFailed)
+            p->confusionRetreatFailed || (f->lockTurn == g->turn && f->lockAttack == 3))
             return Error(g, "This Pokemon cannot retreat.");
         for (i = 0; i < a->selectionCount; i++)
         {

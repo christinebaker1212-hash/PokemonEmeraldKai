@@ -111,6 +111,14 @@ for name,commands in x['effects'].items():
  elif len(meaningful)==1 and meaningful[0]['function'] in functions:
   op,param=functions[meaningful[0]['function']];covered.append((name,op,param,int(meaningful[0]['phase']=='EFFECTCMDTYPE_AFTER_DAMAGE'),0))
  else:pending.append(name)
+# Pokemon Card GB2's attacks (tools/tcg/gb2_effects.py)
+import sys
+sys.path.insert(0,str(ROOT/'tools/tcg'))
+import gb2_effects
+have={c[0] for c in covered}
+for row in gb2_effects.table():
+ if row[0] not in have:covered.append(row)
+ if row[0] in pending:pending.remove(row[0])
 out=['/* Generated explicit original effect coverage. */']
 for name,op,param,after,extra in covered:out.append('{"'+name+'", FX_'+op+','+str(param)+','+str(after)+','+str(extra)+'},')
 (ROOT/'src/tcg/tcg_effect_table.inc').write_text('\n'.join(out)+'\n')

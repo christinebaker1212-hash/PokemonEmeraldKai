@@ -90,8 +90,98 @@ enum
     FX_METRONOME,
     FX_MORPH,
     FX_CONVERSION_1,
-    FX_CONVERSION_2
+    FX_CONVERSION_2,
+    /* Pokemon Card GB2's attacks (tools/tcg/gb2_effects.py: amount, extra as noted there) */
+    FX_STATUS_HT,         /* a coin: amount on heads, extra on tails */
+    FX_STATUS_OR_RECOIL,  /* a coin: extra on heads, amount to itself on tails */
+    FX_RANDOM_HITS,       /* extra times: amount to one of their Pokemon at random (no W/R) */
+    FX_HORRID_POLLEN,     /* Poisoned and, at random, Confused / Asleep / Paralyzed */
+    FX_DEADLY_POISON,     /* Poisoned; amount more if it already was */
+    FX_CHOSEN_ANY,        /* amount to the chosen one of their Pokemon (target 0-5); extra CA_* */
+    FX_POISON_BENCH,      /* Poisoned, amount to each of their Benched Pokemon */
+    FX_NAME_COUNT,        /* amount more per Pokemon of the group extra (NG_*) on its Bench (or in play: NG_IN_PLAY) */
+    FX_FAIL_RECOIL,       /* tails: nothing, and amount to itself */
+    FX_PETAL_WHIRL,       /* amount coins x extra; 2 or more heads: Confused after */
+    FX_DISCARD_FOE_ENERGY,/* (extra 1: on heads) an Energy card of the Defending Pokemon discarded */
+    FX_REGENERATION,      /* every damage counter off; its Evolution and Energy cards discarded */
+    FX_BONUS_STATUS,      /* heads: amount more and extra (ST_*) */
+    FX_GAS_EXPLOSION,     /* amount to itself; a Knock Out: their next Active is Poisoned */
+    FX_MASS_EXPLOSION,    /* amount x the Koffing / Weezing in play, then amount to each of them */
+    FX_LOCK_SELF,         /* its next turn: extra 0 this attack, 3 no attack or retreat */
+    FX_FIREBALL,          /* needs Fire Energy; heads: one discarded (and amount more); tails: nothing (amount 0) */
+    FX_CONT_FIREBALL,     /* a coin per Fire Energy: amount each heads, as many Fire Energy discarded */
+    FX_SWITCH_HIT,        /* before the damage: target comes out (extra 1: must, and needs a Bench) */
+    FX_LURE_COIN,         /* heads: target comes out (needs a Bench) */
+    FX_SKIP_DRAW,         /* they flip: tails, no draw next turn */
+    FX_SEARCH_TRAINER,    /* heads: selections[0], a Trainer from the deck, to the hand */
+    FX_TAILS_DISCARD_SELF,/* tails: one of its Energy cards discarded */
+    FX_FLAME_INFERNO,     /* option Fire Energy discarded (up to extra): amount more each */
+    FX_FLAME_PILLAR,      /* option 1: a Fire Energy discarded, amount to target on their Bench */
+    FX_BURNING_FIRE,      /* option Fire Energy discarded from its side: amount more each */
+    FX_DRY_UP,            /* target: until tails, a Water Energy discarded per heads */
+    FX_MIRROR_SHELL,      /* damaged next turn: the same back at the attacker */
+    FX_WATER_EXTRA2,      /* amount more per Energy past the cost (extra: up to n; + 16: any type, else Water) */
+    FX_RECOIL_BARRIER,    /* amount to itself; heads: no damage to it next turn */
+    FX_THIRD_EYE,         /* an Energy card of its discarded: draw amount */
+    FX_REST,              /* healed, cured, Asleep */
+    FX_ENERGY_SEARCH,     /* (amount + 128: on heads) up to amount Energy of type extra from the deck onto it */
+    FX_WATER_BOMB,        /* amount per Water Energy past the cost (up to 2) to target on their Bench */
+    FX_STRANGE_BEAM,      /* their next turn: its damaged Water Pokemon have no Weakness */
+    FX_SPIN_SHOWER,       /* heads: 1 or 2 of theirs at random, amount each and an Energy card discarded */
+    FX_RAPID_EVOLUTION,   /* the card from the deck that evolves from it, onto it */
+    FX_FAIL_COINS,        /* amount coins: any tails, nothing */
+    FX_TENTACLE_GRIP,     /* a coin per Water Energy: draw amount per heads */
+    FX_ACID_LOCK,         /* heads: Paralyzed; tails: this attack not next turn */
+    FX_SHORT_CIRCUIT,     /* target: amount per Water Energy on it */
+    FX_SURPRISE_THUNDER,  /* heads, then heads 20 / tails 10 to each of their Benched Pokemon */
+    FX_MICROWAVE,         /* target: amount, heads one of its Energy cards discarded */
+    FX_MAGNETIC_LINES,    /* a basic Energy of the Defending Pokemon onto target on their Bench (extra 1: on heads) */
+    FX_ENERGY_BOMB,       /* its Energy cards onto target on its Bench (none: discarded) */
+    FX_RAGING_THUNDER,    /* tails: amount to target, one of its own */
+    FX_SWIFT,             /* no Weakness, Resistance, powers or effects on the Defending Pokemon */
+    FX_ROLLING_NEEDLE,    /* amount coins: extra more each heads, and extra to itself */
+    FX_THEIR_COIN_BONUS,  /* they flip: tails, amount more */
+    FX_SHUFFLE_THEIRS,    /* their deck shuffled */
+    FX_CONFUSE_SELF,      /* Confused after */
+    FX_FOCUSED_SHOT,      /* heads: next turn the other attack doubled; tails: not next turn */
+    FX_FOCUS_BLAST,       /* heads: amount to target (W/R apply) */
+    FX_SEETHING,          /* a coin per damage counter: amount more each heads */
+    FX_FLING_DECK,        /* the Defending Pokemon and its cards shuffled into their deck (needs a Bench) */
+    FX_BOULDER,           /* amount coins: a damage counter per heads on target on their Bench */
+    FX_ROCK_BLAST,        /* option Fighting Energy discarded (up to 5): amount each to target */
+    FX_BONE_TOSS,         /* heads: amount to it; tails: extra to target on their Bench */
+    FX_BONE_HEADBUTT,     /* 0 / 10 / 20 to one on their Bench at random, then one of them in at random */
+    FX_COIN_BENCH,        /* heads: amount to target on their Bench */
+    FX_MOUNTAIN_BREAK,    /* the top 5 of its deck discarded; Fighting Energy among them to the hand */
+    FX_VANISH,            /* it and its cards shuffled into its deck (needs a Bench) */
+    FX_TYPE_DOUBLE,       /* base damage doubled against type extra */
+    FX_TRANS_DAMAGE,      /* its Energy discarded; its damage counters onto the Defending Pokemon */
+    FX_BOTH_ASLEEP,       /* both Asleep */
+    FX_ONLY_ASLEEP,       /* only while it's Asleep */
+    FX_GRUDGE,            /* amount more per Prize they've taken */
+    FX_POLTERGEIST,       /* amount per Trainer in their hand */
+    FX_BOTHER,            /* heads: a Trainer from their hand at random into their deck */
+    FX_PUSH_ASIDE,        /* heads: one of theirs at random and its cards into their deck */
+    FX_BENCH_MANIP,       /* they flip a coin per Benched Pokemon: amount per tails, no W/R */
+    FX_PSYCRUSH,          /* amount per Psychic Energy card on their Pokemon */
+    FX_COMPLETE_RECOVERY, /* its Energy discarded, healed, no longer Poisoned or Confused */
+    FX_DARK_AMP,          /* a coin per Dark Pokemon on its Bench: amount more each heads */
+    FX_TWISTER,           /* unless Knocked Out, heads: Trainer and Energy cards on it back to their hand */
+    FX_DARK_SONG,         /* heads: Asleep, amount to each of their Benched non-Dark Pokemon */
+    FX_KICK_STAMP,        /* heads: amount more; tails: they switch */
+    FX_ROLL_OVER,         /* it's Asleep; heads: the Defending Pokemon too */
+    FX_EAT,               /* a Food counter (up to 2) */
+    FX_ROLLOUT,           /* option Food counters off: amount more each */
+    FX_COIN_PLUS,         /* amount coins: extra more each heads */
+    FX_STIR_UP,           /* they switch (they choose), then it may switch with target on its Bench */
+    FX_NOTHING            /* (an attack without an effect of its own: Corkscrew Punch) */
 };
+/* GB2's Special Conditions (FX_STATUS_HT ...) */
+enum { ST_NONE, ST_PAR, ST_PSN, ST_CNF, ST_SLP };
+/* FX_CHOSEN_ANY's extra: CA_POWER_OFF its Pokemon Power off until their turn ends (Stare), CA_COIN heads only */
+enum { CA_POWER_OFF = 1, CA_COIN = 2 };
+/* FX_NAME_COUNT's groups */
+enum { NG_NIDORAN = 1, NG_MAGNEMITE = 2, NG_VOLTORB = 3, NG_IN_PLAY = 16 };
 #define BOTH_PHASES 2
 #define ANY_TYPE 7
 struct Effect
@@ -186,6 +276,7 @@ static void Switch(struct TcgDuel *g, unsigned who, unsigned slot)
     p->field[slot].mirrorCondition = p->field[slot].mirrorPoison = p->field[slot].mirrorWeaken = 0;
     p->field[slot].mirrorNoAttack = p->field[slot].mirrorNoRetreat = p->field[slot].mirrorEffect = 0;
     p->field[slot].mirrorArg = p->field[slot].mirrorWeak = 0;
+    p->field[slot].lockTurn = p->field[slot].lockAttack = p->field[slot].mirrorShell = p->field[slot].charge3 = 0;
     TcgDuel_Event(g, TCG_EV_SWITCH, who, slot, 0, 0, 0);
 }
 static void ToBench(struct TcgDuel *g, unsigned who, unsigned physical)
@@ -256,6 +347,97 @@ void TcgDuel_EffectDamage(struct TcgDuel *g, unsigned player, unsigned slot, int
     f->damage += (unsigned)amount;
     TcgDuel_Event(g, TCG_EV_DAMAGE, player, slot, (unsigned)amount, 0, flags);
 }
+
+/* ------------------------------------------------------------------ */
+/* Pokemon Card GB2's helpers                                           */
+/* ------------------------------------------------------------------ */
+static void SetSt(struct TcgFieldCard *f, unsigned st)
+{
+    if (st == ST_PAR)
+        f->condition = TCG_PARALYZED;
+    else if (st == ST_CNF)
+        f->condition = TCG_CONFUSED;
+    else if (st == ST_SLP)
+        f->condition = TCG_ASLEEP;
+    else if (st == ST_PSN && f->poison < 10)
+        f->poison = 10;
+}
+/* amount to one Pokemon from an attack's effect: no Weakness / Resistance unless wr (then the attacker's type's) */
+static void HitSlot(struct TcgDuel *g, unsigned who, unsigned slot, int amount, int wr)
+{
+    if (!TcgDuel_Field(g, who, slot) || amount <= 0)
+        return;
+    if (wr)
+    {
+        unsigned type = TcgDuel_Type(g, who ^ 1, 0);
+        if (TcgDuel_Weakness(g, who, slot) == type)
+            amount *= 2;
+        if (TcgDuel_Resistance(g, who, slot) == type)
+            amount -= 30;
+        if (amount <= 0)
+            return;
+    }
+    TcgDuel_EffectDamage(g, who, slot, amount, 0);
+}
+/* An Energy card attached to that Pokemon discarded: a basic one of type (ANY_TYPE: any card, Double Colorless last
+ * unless pickBest: then first, as the attacker would) */
+static int DiscardOne(struct TcgDuel *g, unsigned who, unsigned slot, unsigned type, int pickBest)
+{
+    struct TcgPlayer *p = &g->players[who];
+    struct TcgFieldCard *f = &p->field[slot];
+    int pick = -1;
+    unsigned i;
+    for (i = 0; i < f->attachedSize; i++)
+    {
+        const struct TcgCard *c = CardAt(g, who, f->attached[i]);
+        if (c->kind != TCG_ENERGY || (type != ANY_TYPE && (c->id > 6 || c->type != type)))
+            continue;
+        if (pick < 0 || (pickBest ? c->id > 6 : CardAt(g, who, f->attached[pick])->id > 6))
+            pick = (int)i;
+    }
+    if (pick < 0)
+        return 0;
+    p->discard[p->discardSize++] = TcgPile_Remove(f->attached, &f->attachedSize, (unsigned)pick);
+    return 1;
+}
+static unsigned EnergyOfType(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned type)
+{
+    const struct TcgFieldCard *f = &g->players[who].field[slot];
+    unsigned i, n = 0;
+    for (i = 0; i < f->attachedSize; i++)
+    {
+        const struct TcgCard *c = CardAt(g, who, f->attached[i]);
+        n += c->kind == TCG_ENERGY && c->id <= 6 && c->type == type;
+    }
+    return n;
+}
+static int IsDark(const struct TcgCard *c) { return c && c->kind == TCG_POKEMON && (c->dark || !strncmp(c->name, "Dark ", 5)); }
+/* Every card of that Pokemon into its owner's deck, shuffled (Fling, Vanish, Push Aside) */
+static void SlotToDeck(struct TcgDuel *g, unsigned who, unsigned slot)
+{
+    struct TcgPlayer *p = &g->players[who];
+    struct TcgFieldCard *f = &p->field[slot];
+    unsigned i;
+    for (i = 0; i < f->stackSize; i++)
+        p->deck[p->deckSize++] = f->stack[i];
+    for (i = 0; i < f->attachedSize; i++)
+        p->deck[p->deckSize++] = f->attached[i];
+    memset(f, 0, sizeof(*f));
+    TcgDuel_Shuffle(g, who);
+    TcgDuel_Event(g, TCG_EV_DECK_CHANGED, who, 0, 0, 0, 0);
+}
+/* The target an attack names, if it's one of that side's Pokemon (bench: 1-5 only) */
+static int ValidTarget(const struct TcgDuel *g, unsigned who, unsigned target, int bench)
+{
+    return target < TCG_FIELD_SIZE && (!bench || target >= 1) && g->players[who].field[target].stackSize;
+}
+static unsigned Coins(struct TcgDuel *g, unsigned who, unsigned n)
+{
+    unsigned i, heads = 0;
+    for (i = 0; i < n && i < 60; i++)
+        heads += TcgDuel_Coin(g, who);
+    return heads;
+}
 /* Recoil: the attacker's own Weakness and Resistance to its own type apply
  * (ApplyDamageModifiers_DamageToSelf). */
 void TcgDuel_SelfDamage(struct TcgDuel *g, int amount)
@@ -298,10 +480,69 @@ unsigned TcgDuel_AttackChoice(const struct TcgAttack *attack, int *required)
         return 1;
     case FX_TELEPORT:
         if (required)
-            *required = 1;
+            *required = !e->extra;
         return 2;
+    /* GB2's */
+    case FX_SWITCH_HIT:
+        if (required)
+            *required = e->extra != 0;
+        return 1;
+    case FX_LURE_COIN:
+        if (required)
+            *required = 1;
+        return 1;
+    case FX_FLAME_PILLAR: case FX_WATER_BOMB: case FX_MAGNETIC_LINES: case FX_BOULDER: case FX_BONE_TOSS:
+    case FX_COIN_BENCH:
+        return 1;
+    case FX_ENERGY_BOMB: case FX_STIR_UP:
+        return 2;
+    case FX_CHOSEN_ANY: case FX_DRY_UP: case FX_SHORT_CIRCUIT: case FX_MICROWAVE: case FX_FOCUS_BLAST:
+    case FX_ROCK_BLAST:
+        if (required)
+            *required = 1;
+        return 3;
+    case FX_RAGING_THUNDER:
+        if (required)
+            *required = 1;
+        return 4;
     }
     return 0;
+}
+const char *TcgDuel_AttackTargetPrompt(const struct TcgAttack *attack)
+{
+    const struct Effect *e = attack ? Effect(attack->effect) : NULL;
+    if (!e)
+        return NULL;
+    switch (e->kind)
+    {
+    case FX_SWITCH_HIT: return e->extra ? "Drag out which of their Benched Pokemon?" : "Switch in which of theirs? (B: none)";
+    case FX_LURE_COIN: return "If heads, bring out which of theirs?";
+    case FX_FLAME_PILLAR: return "Burn which of their Benched Pokemon?";
+    case FX_WATER_BOMB: return "Splash which of their Benched Pokemon?";
+    case FX_MAGNETIC_LINES: return "Move their Energy to which Benched Pokemon?";
+    case FX_BOULDER: return "If heads, which Benched Pokemon gets the counters?";
+    case FX_BONE_TOSS: return "If tails, hit which Benched Pokemon?";
+    case FX_COIN_BENCH: return "If heads, hit which Benched Pokemon?";
+    case FX_ENERGY_BOMB: return "Move its Energy to which Benched Pokemon?";
+    case FX_STIR_UP: return "Then switch with which of yours? (B: stay)";
+    case FX_TELEPORT: return e->extra ? "Switch with which of yours? (B: stay)" : NULL;
+    case FX_RAGING_THUNDER: return "If tails, which of yours takes 30?";
+    case FX_DRY_UP: return "Dry up which of their Pokemon?";
+    case FX_FOCUS_BLAST: return "If heads, hit which of their Pokemon?";
+    case FX_ROCK_BLAST: return "Throw the rocks at which Pokemon?";
+    case FX_CHOSEN_ANY: case FX_SHORT_CIRCUIT: case FX_MICROWAVE: return "Aim at which of their Pokemon?";
+    }
+    return NULL;
+}
+int TcgDuel_SleepAttack(const struct TcgAttack *attack)
+{
+    const struct Effect *e = attack ? Effect(attack->effect) : NULL;
+    return e && e->kind == FX_ONLY_ASLEEP;
+}
+int TcgDuel_MetronomeHeads(const struct TcgAttack *attack)
+{
+    const struct Effect *e = attack ? Effect(attack->effect) : NULL;
+    return e && e->kind == FX_METRONOME && e->extra;
 }
 int TcgDuel_IsMetronome(const struct TcgAttack *attack)
 {
@@ -321,6 +562,8 @@ unsigned TcgDuel_AttackAsk(const struct TcgAttack *attack)
         return TCG_ASK_ORDER_TOP3;
     case FX_DEVOLUTION_BEAM:
         return TCG_ASK_EVOLVED;
+    case FX_SEARCH_TRAINER:
+        return TCG_ASK_DECK_TRAINER;
     }
     return TCG_ASK_NONE;
 }
@@ -405,6 +648,22 @@ unsigned TcgDuel_AttackOptions(const struct TcgDuel *g, unsigned player, const s
         labels[0] = "YOUR POKEMON", ok[0] = (uint8_t)HasEvolved(g, player);
         labels[1] = "THEIR POKEMON", ok[1] = (uint8_t)HasEvolved(g, player ^ 1);
         return 2;
+    /* GB2's: how many to discard / remove */
+    case FX_FLAME_INFERNO: case FX_FLAME_PILLAR: case FX_BURNING_FIRE: case FX_ROCK_BLAST: case FX_ROLLOUT:
+        if (e->kind == FX_FLAME_INFERNO)
+            n = FireEnergyCards(g, player, 0), n = n > e->extra ? e->extra : n;
+        else if (e->kind == FX_FLAME_PILLAR)
+            n = FireEnergyCards(g, player, 0) ? 1 : 0;
+        else if (e->kind == FX_BURNING_FIRE)
+            for (i = 0; i < TCG_FIELD_SIZE; i++)
+                n += FireEnergyCards(g, player, i);
+        else if (e->kind == FX_ROCK_BLAST)
+            n = EnergyOfType(g, player, 0, TCG_FIGHTING), n = n > 5 ? 5 : n;
+        else
+            n = g->players[player].field[0].food;
+        for (i = 0; i <= n && i < TCG_MAX_OPTIONS; i++)
+            labels[i] = sCounts[i], ok[i] = 1;
+        return i;
     }
     return 0;
 }
@@ -413,6 +672,9 @@ unsigned TcgDuel_Weakness(const struct TcgDuel *g, unsigned player, unsigned slo
     const struct TcgCard *c = TcgDuel_Field(g, player, slot);
     const struct TcgFieldCard *f = &g->players[player].field[slot];
     if (!c)
+        return TCG_NONE;
+    /* Staryu's Strange Beam: that side's damaged Water Pokemon have no Weakness this turn */
+    if (g->players[player].strangeBeamUntil == g->turn && f->damage && c->type == TCG_WATER)
         return TCG_NONE;
     return f->weakAs && c->weakness != TCG_NONE ? f->weakAs - 1u : c->weakness;
 }
@@ -505,6 +767,60 @@ void TcgDuel_AiAttackChoices(const struct TcgDuel *g, struct TcgAction *a)
                 break;
             }
         break;
+    /* GB2's */
+    case FX_SEARCH_TRAINER:
+        for (i = 0; i < p->deckSize; i++)
+            if (CardAt(g, g->current, p->deck[i])->kind == TCG_TRAINER)
+            {
+                a->selections[0] = p->deck[i];
+                a->selectionCount = 1;
+                break;
+            }
+        break;
+    case FX_FLAME_INFERNO: case FX_ROCK_BLAST: case FX_ROLLOUT:
+    {
+        const char *labels[TCG_MAX_OPTIONS];
+        uint8_t ok[TCG_MAX_OPTIONS];
+        unsigned n = TcgDuel_AttackOptions(g, g->current, attack, labels, ok);
+        a->option = (uint8_t)(n ? n - 1 : 0); /* (all it can) */
+        break;
+    }
+    case FX_FLAME_PILLAR:
+        a->option = (uint8_t)(BenchCount(g, g->current ^ 1) && FireEnergyCards(g, g->current, 0) > attack->cost[TCG_FIRE]);
+        break;
+    case FX_BURNING_FIRE:
+    {
+        /* only as many as a Knock Out needs */
+        unsigned need = HpLeft(g, g->current ^ 1, 0), have = 0, base = attack->damage;
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+            have += FireEnergyCards(g, g->current, s);
+        a->option = 0;
+        for (i = 0; i <= have && i < TCG_MAX_OPTIONS; i++)
+            if (base + e->amount * i >= need)
+            {
+                a->option = (uint8_t)i;
+                break;
+            }
+        break;
+    }
+    }
+    /* Their Pokemon or its own, for the GB2 attacks that aim anywhere */
+    {
+        unsigned choice = TcgDuel_AttackChoice(attack, NULL), who = g->current ^ (choice == 3), best = TCG_NONE;
+        if (choice == 3 || choice == 4)
+        {
+            for (s = 0; s < TCG_FIELD_SIZE; s++)
+                if (TcgDuel_Field(g, who, s) &&
+                    (best == TCG_NONE || (choice == 3 ? HpLeft(g, who, s) < HpLeft(g, who, best)
+                                                      : HpLeft(g, who, s) > HpLeft(g, who, best))))
+                    best = s;
+            /* (Dry Up and Short Circuit go where the Water Energy is) */
+            if (choice == 3 && (e->kind == FX_DRY_UP || e->kind == FX_SHORT_CIRCUIT))
+                for (s = 0, best = 0; s < TCG_FIELD_SIZE; s++)
+                    if (EnergyOfType(g, who, s, TCG_WATER) > EnergyOfType(g, who, best, TCG_WATER))
+                        best = s;
+            a->target = (uint8_t)(best == TCG_NONE ? 0 : best);
+        }
     }
 }
 static const char *const sFamily[][3] = {
@@ -513,6 +829,7 @@ static const char *const sFamily[][3] = {
     {"BellsproutCallForFamilyEffectCommands", "Bellsprout", NULL},
     {"KrabbyCallForFamilyEffectCommands", "Krabby", NULL},
     {"OddishSproutEffectCommands", "Oddish", NULL},
+    {"ParasScatterSporesEffectCommands", "Paras", NULL},
 };
 static int FamilyMatch(const struct Effect *e, const struct TcgCard *c)
 {
@@ -549,7 +866,21 @@ const char *TcgDuel_EffectBlock(const struct TcgDuel *g, unsigned player, const 
     case FX_LURE:
         return BenchCount(g, player ^ 1) ? NULL : "Your opponent has no Benched Pokemon.";
     case FX_TELEPORT:
+        return e->extra || BenchCount(g, player) ? NULL : "You have no Benched Pokemon.";
+    /* GB2's */
+    case FX_LURE_COIN:
+    case FX_FLING_DECK:
+        return BenchCount(g, player ^ 1) ? NULL : "Your opponent has no Benched Pokemon.";
+    case FX_SWITCH_HIT:
+        return !e->extra || BenchCount(g, player ^ 1) ? NULL : "Your opponent has no Benched Pokemon.";
+    case FX_VANISH:
         return BenchCount(g, player) ? NULL : "You have no Benched Pokemon.";
+    case FX_FIREBALL:
+        return FireEnergyCards(g, player, 0) ? NULL : "There's no Fire Energy card attached to it.";
+    case FX_EAT:
+        return self->food < 2 ? NULL : "It already has 2 Food counters.";
+    case FX_ONLY_ASLEEP:
+        return self->condition == TCG_ASLEEP ? NULL : "It can only use this attack while it's Asleep.";
     case FX_CALL_FAMILY:
     case FX_FRIENDSHIP_SONG:
         if (BenchCount(g, player) == TCG_FIELD_SIZE - 1)
@@ -723,6 +1054,933 @@ static void Amnesia(struct TcgDuel *g, unsigned attack)
     foe->disabled = (uint8_t)(attack + 1);
     TcgDuel_Log(g, "%s can't use %s next turn.", c->name, c->attacks[attack].name);
 }
+/* ------------------------------------------------------------------ */
+/* Pokemon Card GB2's attacks (tools/tcg/gb2_effects.py)                */
+/* ------------------------------------------------------------------ */
+/* The Energy an attack's cost doesn't use: Water (or any type: any) past the cost, like FX_WATER_EXTRA */
+static unsigned EnergyPastCost(const struct TcgDuel *g, const struct TcgAttack *a, int any)
+{
+    unsigned total = TcgDuel_Energy(g, g->current, 0, TCG_NONE), cost = 0, t, water, other, need;
+    for (t = 0; t < TCG_TYPES; t++)
+        cost += a->cost[t];
+    if (any)
+        return total > cost ? total - cost : 0;
+    water = TcgDuel_Energy(g, g->current, 0, TCG_WATER);
+    other = total - water;
+    need = a->cost[TCG_WATER] + (a->cost[TCG_COLORLESS] > other ? a->cost[TCG_COLORLESS] - other : 0);
+    return water > need ? water - need : 0;
+}
+static unsigned FieldFireCards(const struct TcgDuel *g, unsigned who)
+{
+    unsigned s, n = 0;
+    for (s = 0; s < TCG_FIELD_SIZE; s++)
+        n += FireEnergyCards(g, who, s);
+    return n;
+}
+static unsigned NamedInPlay(const struct TcgDuel *g, unsigned who, int bench, const char *const *names)
+{
+    unsigned s, n = 0, k;
+    for (s = bench ? 1 : 0; s < TCG_FIELD_SIZE; s++)
+        for (k = 0; names[k]; k++)
+            if (SameName(TcgDuel_Field(g, who, s), names[k]))
+            {
+                n++;
+                break;
+            }
+    return n;
+}
+/* That Pokemon's attached Energy (or Trainer: kind) cards into a list: their indexes in attached[] */
+static unsigned Attached(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned kind, uint8_t *out)
+{
+    const struct TcgFieldCard *f = &g->players[who].field[slot];
+    unsigned i, n = 0;
+    for (i = 0; i < f->attachedSize; i++)
+        if (CardAt(g, who, f->attached[i])->kind == kind)
+            out[n++] = (uint8_t)i;
+    return n;
+}
+static void DiscardFoeEnergy(struct TcgDuel *g, unsigned who, unsigned slot, int random)
+{
+    struct TcgFieldCard *f = &g->players[who].field[slot];
+    uint8_t list[TCG_DECK_SIZE];
+    unsigned n = Attached(g, who, slot, TCG_ENERGY, list), i, pick;
+    if (!n)
+        return;
+    pick = list[0];
+    if (random)
+        pick = list[Tcg_RandomBelow(&g->rng, n)];
+    else
+        for (i = 0; i < n; i++)   /* (the attacker picks: Double Colorless and special Energy cost the most) */
+            if (CardAt(g, who, f->attached[list[i]])->id > 6)
+                pick = list[i];
+    g->players[who].discard[g->players[who].discardSize++] = TcgPile_Remove(f->attached, &f->attachedSize, pick);
+}
+static void Evolve(struct TcgDuel *g, unsigned who, unsigned slot, unsigned deckIndex)
+{
+    struct TcgPlayer *p = &g->players[who];
+    struct TcgFieldCard *f = &p->field[slot];
+    if (f->stackSize >= 4)
+        return;
+    f->stack[f->stackSize++] = TcgPile_Remove(p->deck, &p->deckSize, deckIndex);
+    f->enteredTurn = g->turn;
+    f->condition = TCG_HEALTHY;
+    f->poison = 0;
+    f->noAttack = f->noRetreat = f->weaken = f->guard = f->charged = f->effectBy = f->charge3 = 0;
+    f->disabled = f->weakAs = f->resistAs = f->burn = f->shift = 0;
+    f->lockTurn = f->lockAttack = 0;
+    TcgDuel_Event(g, TCG_EV_EVOLVE, who, slot, 0, p->cards[f->stack[f->stackSize - 1]], 0);
+    TcgDuel_Log(g, "Evolved into %s.", CardAt(g, who, f->stack[f->stackSize - 1])->name);
+    TcgPower_OnPlay(g, who, slot);
+}
+static int Gb2Effect(struct TcgDuel *g, const struct Effect *e, const struct TcgAttack *a, const struct TcgAction *action,
+                     unsigned *damage, int after)
+{
+    struct TcgPlayer *p = &g->players[g->current], *op = &g->players[g->current ^ 1];
+    struct TcgFieldCard *self = &p->field[0], *foe = &op->field[0];
+    unsigned me = g->current, them = g->current ^ 1, n = 0, i, s;
+    int blocked = g->foeImmune == TCG_IMMUNE_YES;
+    switch (e->kind)
+    {
+    case FX_STATUS_HT:
+        if (!after)
+            SetSt(foe, TcgDuel_Coin(g, me) ? e->amount : e->extra);
+        break;
+    case FX_STATUS_OR_RECOIL:
+        if (!after)
+        {
+            g->coinResult = (uint8_t)TcgDuel_Coin(g, me);
+            if (g->coinResult)
+                SetSt(foe, e->extra);
+        }
+        else if (!g->coinResult)
+            TcgDuel_SelfDamage(g, (int)e->amount);
+        break;
+    case FX_RANDOM_HITS:
+        if (!after)
+            *damage = 0;
+        else
+        {
+            unsigned hits[TCG_FIELD_SIZE] = {0};
+            for (i = 0; i < e->extra; i++)
+                if ((s = RandomSlot(g, them, 0)) != TCG_NONE)
+                    hits[s]++;
+            for (s = 0; s < TCG_FIELD_SIZE; s++)
+                if (hits[s] && !(s == 0 && blocked))
+                    TcgDuel_EffectDamage(g, them, s, (int)(e->amount * hits[s]), 0);
+        }
+        break;
+    case FX_HORRID_POLLEN:
+        if (!after)
+        {
+            static const uint8_t sThree[3] = {ST_CNF, ST_SLP, ST_PAR};
+            SetSt(foe, ST_PSN);
+            SetSt(foe, sThree[Tcg_RandomBelow(&g->rng, 3)]);
+        }
+        break;
+    case FX_DEADLY_POISON:
+        if (!after)
+        {
+            if (foe->poison && !blocked)
+                *damage += e->amount;
+            SetSt(foe, ST_PSN);
+        }
+        break;
+    case FX_CHOSEN_ANY:
+        if (!after)
+        {
+            *damage = 0;
+            g->coinResult = (uint8_t)(!(e->extra & CA_COIN) || TcgDuel_Coin(g, me));
+        }
+        else
+        {
+            if (!ValidTarget(g, them, action->target, 0))
+                return TCG_INVALID;
+            if (!g->coinResult || (action->target == 0 && blocked))
+                break;
+            HitSlot(g, them, action->target, (int)e->amount, 0);
+            if ((e->extra & CA_POWER_OFF) && TcgPower_Id(TcgDuel_Field(g, them, action->target)))
+            {
+                op->field[action->target].powerOffUntil = (uint16_t)(g->turn + 1);
+                TcgDuel_Log(g, "%s's Pokemon Power stops working.", TcgDuel_Field(g, them, action->target)->name);
+            }
+        }
+        break;
+    case FX_POISON_BENCH:
+        if (!after)
+            SetSt(foe, ST_PSN);
+        else
+            BenchDamage(g, them, (int)e->amount);
+        break;
+    case FX_NAME_COUNT:
+        if (!after)
+        {
+            static const char *const sNido[] = {"Nidoran M", "Nidoran F", "Nidorino", "Nidorina", "Nidoking", "Nidoqueen", NULL};
+            static const char *const sMagnet[] = {"Magnemite", "Magneton", "Dark Magneton", NULL};
+            static const char *const sVoltorb[] = {"Voltorb", NULL};
+            unsigned group = e->extra & 15;
+            const char *const *names = group == NG_NIDORAN ? sNido : group == NG_MAGNEMITE ? sMagnet : sVoltorb;
+            if (e->extra & NG_IN_PLAY)
+                n = NamedInPlay(g, me, 0, names) + NamedInPlay(g, them, 0, names);
+            else
+                n = NamedInPlay(g, me, 1, names);
+            *damage += e->amount * n;
+        }
+        break;
+    case FX_FAIL_RECOIL:
+        if (!after && !TcgDuel_Coin(g, me))
+        {
+            *damage = 0;
+            g->attackFailed = 1;
+            TcgDuel_SelfDamage(g, (int)e->amount);
+        }
+        break;
+    case FX_PETAL_WHIRL:
+        if (!after)
+        {
+            n = Coins(g, me, e->amount);
+            *damage = e->extra * n;
+            g->coinResult = n >= 2;
+        }
+        else if (g->coinResult)
+            SetStatus(self, TCG_CONFUSED);
+        break;
+    case FX_DISCARD_FOE_ENERGY:
+        if (!after)
+            g->coinResult = (uint8_t)(!e->extra || TcgDuel_Coin(g, me));
+        else if (g->coinResult && foe->stackSize && !blocked)
+            DiscardFoeEnergy(g, them, 0, 0);
+        break;
+    case FX_REGENERATION:
+        if (after)
+        {
+            Heal(g, me, 0, self->damage);
+            while (self->stackSize > 1)
+                p->discard[p->discardSize++] = self->stack[--self->stackSize];
+            for (i = self->attachedSize; i > 0; i--)
+                if (CardAt(g, me, self->attached[i - 1])->kind == TCG_ENERGY)
+                    p->discard[p->discardSize++] = TcgPile_Remove(self->attached, &self->attachedSize, i - 1);
+            self->condition = TCG_HEALTHY;
+            self->poison = 0;
+            TcgDuel_Event(g, TCG_EV_DEVOLVE, me, 0, 0, p->cards[self->stack[0]], 0);
+        }
+        break;
+    case FX_BONUS_STATUS:
+        if (!after && TcgDuel_Coin(g, me))
+        {
+            *damage += e->amount;
+            SetSt(foe, e->extra);
+        }
+        break;
+    case FX_GAS_EXPLOSION:
+        if (after)
+        {
+            TcgDuel_SelfDamage(g, (int)e->amount);
+            if (foe->stackSize && !HpLeft(g, them, 0))
+                op->poisonNext = 1;
+        }
+        break;
+    case FX_MASS_EXPLOSION:
+    {
+        static const char *const sGas[] = {"Koffing", "Weezing", "Dark Weezing", NULL};
+        unsigned who;
+        if (!after)
+            *damage = e->amount * (NamedInPlay(g, me, 0, sGas) + NamedInPlay(g, them, 0, sGas));
+        else
+            for (who = 0; who < 2; who++)
+                for (s = 0; s < TCG_FIELD_SIZE; s++)
+                {
+                    static const char *const *names = sGas;
+                    unsigned k;
+                    for (k = 0; names[k]; k++)
+                        if (SameName(TcgDuel_Field(g, who, s), names[k]) && !(who == them && s == 0 && blocked))
+                        {
+                            TcgDuel_EffectDamage(g, who, s, (int)e->amount, who == me ? TCG_DMG_SELF : 0);
+                            break;
+                        }
+                }
+        break;
+    }
+    case FX_LOCK_SELF:
+        if (after)
+        {
+            self->lockTurn = (uint16_t)(g->turn + 2);
+            self->lockAttack = (uint8_t)(e->extra == 3 ? 3 : action->attack + 1);
+        }
+        break;
+    case FX_FIREBALL:
+        if (!after)
+        {
+            if (TcgDuel_Coin(g, me))
+            {
+                DiscardEnergy(g, me, 0, TCG_FIRE, 1);
+                *damage += e->amount;
+            }
+            else if (!e->extra)
+            {
+                *damage = 0;
+                g->attackFailed = 1;
+            }
+        }
+        break;
+    case FX_CONT_FIREBALL:
+        if (!after)
+        {
+            n = Coins(g, me, FireEnergyCards(g, me, 0));
+            *damage = e->amount * n;
+            if (n)
+                DiscardEnergy(g, me, 0, TCG_FIRE, n);
+        }
+        break;
+    case FX_SWITCH_HIT:
+        break; /* (before the attack: TcgDuel_AttackEffect's phase 3) */
+    case FX_LURE_COIN:
+        if (!after)
+            g->coinResult = (uint8_t)TcgDuel_Coin(g, me);
+        else if (g->coinResult && !blocked && BenchCount(g, them))
+        {
+            if (!ValidTarget(g, them, action->target, 1))
+                return TCG_INVALID;
+            Switch(g, them, action->target);
+        }
+        break;
+    case FX_SKIP_DRAW:
+        if (after && !TcgDuel_Coin(g, them))
+        {
+            op->skipDrawTurn = (uint16_t)(g->turn + 1);
+            TcgDuel_Log(g, "They won't draw a card next turn.");
+        }
+        break;
+    case FX_SEARCH_TRAINER:
+        if (after)
+        {
+            int at = -1;
+            if (TcgDuel_Coin(g, me))
+            {
+                for (i = 0; i < p->deckSize; i++)
+                    if (CardAt(g, me, p->deck[i])->kind == TCG_TRAINER &&
+                        (action->selectionCount ? p->deck[i] == action->selections[0] : at < 0))
+                        at = (int)i;
+                if (at >= 0)
+                {
+                    p->hand[p->handSize++] = TcgPile_Remove(p->deck, &p->deckSize, (unsigned)at);
+                    TcgDuel_Event(g, TCG_EV_DRAW, me, 0, 1, 0, 0);
+                    TcgDuel_Log(g, "%s to the hand.", CardAt(g, me, p->hand[p->handSize - 1])->name);
+                }
+            }
+            TcgDuel_Shuffle(g, me);
+            TcgDuel_Event(g, TCG_EV_DECK_CHANGED, me, 0, 0, 0, 0);
+        }
+        break;
+    case FX_TAILS_DISCARD_SELF:
+        if (after && !TcgDuel_Coin(g, me))
+            DiscardOne(g, me, 0, ANY_TYPE, 0);
+        break;
+    case FX_FLAME_INFERNO:
+        if (!after)
+        {
+            if (action->option > e->extra || action->option > FireEnergyCards(g, me, 0))
+                return TCG_INVALID;
+            if (action->option)
+                DiscardEnergy(g, me, 0, TCG_FIRE, action->option);
+            *damage += e->amount * action->option;
+        }
+        break;
+    case FX_FLAME_PILLAR:
+        if (!after)
+        {
+            if (action->option > 1 || action->option > FireEnergyCards(g, me, 0))
+                return TCG_INVALID;
+            if (action->option)
+                DiscardEnergy(g, me, 0, TCG_FIRE, 1);
+        }
+        else if (action->option && BenchCount(g, them) && ValidTarget(g, them, action->target, 1))
+            TcgDuel_EffectDamage(g, them, action->target, (int)e->amount, 0);
+        break;
+    case FX_BURNING_FIRE:
+        if (!after)
+        {
+            unsigned left = action->option;
+            if (left > FieldFireCards(g, me))
+                return TCG_INVALID;
+            /* (from this Pokemon first, then the Bench) */
+            for (s = 0; s < TCG_FIELD_SIZE && left; s++)
+            {
+                unsigned k = FireEnergyCards(g, me, s);
+                if (k > left)
+                    k = left;
+                if (k)
+                    DiscardEnergy(g, me, s, TCG_FIRE, k);
+                left -= k;
+            }
+            *damage += e->amount * action->option;
+        }
+        break;
+    case FX_DRY_UP:
+        if (!after)
+            *damage = 0;
+        else
+        {
+            if (!ValidTarget(g, them, action->target, 0))
+                return TCG_INVALID;
+            while (n < 60 && TcgDuel_Coin(g, me))
+                n++;
+            if (action->target == 0 && blocked)
+                break;
+            for (i = 0; i < n; i++)
+                DiscardOne(g, them, action->target, TCG_WATER, 0);
+        }
+        break;
+    case FX_MIRROR_SHELL:
+        if (after)
+            self->mirrorShell = 1;
+        break;
+    case FX_WATER_EXTRA2:
+        if (!after)
+        {
+            n = EnergyPastCost(g, a, (e->extra & 16) != 0);
+            if (n > (e->extra & 15))
+                n = e->extra & 15;
+            *damage += e->amount * n;
+        }
+        break;
+    case FX_RECOIL_BARRIER:
+        if (after)
+        {
+            TcgDuel_SelfDamage(g, (int)e->amount);
+            if (TcgDuel_Coin(g, me))
+                self->barrier = 1;
+        }
+        break;
+    case FX_THIRD_EYE:
+        if (!after)
+        {
+            if (!DiscardOne(g, me, 0, ANY_TYPE, 0))
+                return TCG_INVALID;
+        }
+        else
+            TcgDuel_Event(g, TCG_EV_DRAW, me, 0, TcgDuel_Draw(g, me, e->amount), 0, 0);
+        break;
+    case FX_REST:
+        if (after)
+        {
+            Heal(g, me, 0, self->damage);
+            self->poison = 0;
+            self->condition = TCG_ASLEEP;
+        }
+        break;
+    case FX_ENERGY_SEARCH:
+        if (after)
+        {
+            unsigned max = e->amount & 127;
+            if ((e->amount & 128) && !TcgDuel_Coin(g, me))
+                break;
+            for (i = p->deckSize; i > 0 && n < max; i--)
+            {
+                const struct TcgCard *c = CardAt(g, me, p->deck[i - 1]);
+                if (c->kind == TCG_ENERGY && c->id <= 6 && c->type == e->extra)
+                {
+                    self->attached[self->attachedSize++] = TcgPile_Remove(p->deck, &p->deckSize, i - 1);
+                    TcgDuel_Event(g, TCG_EV_ATTACH, me, 0, 0, c->id, 0);
+                    n++;
+                }
+            }
+            TcgDuel_Shuffle(g, me);
+        }
+        break;
+    case FX_WATER_BOMB:
+        if (!after)
+        {
+            n = EnergyPastCost(g, a, 0);
+            g->coinResult = (uint8_t)(n > 2 ? 2 : n);
+        }
+        else if (g->coinResult && BenchCount(g, them))
+        {
+            if (!ValidTarget(g, them, action->target, 1))
+                return TCG_INVALID;
+            TcgDuel_EffectDamage(g, them, action->target, (int)(e->amount * g->coinResult), 0);
+        }
+        break;
+    case FX_STRANGE_BEAM:
+        if (after)
+            p->strangeBeamUntil = (uint16_t)(g->turn + 1);
+        break;
+    case FX_SPIN_SHOWER:
+        if (!after)
+            *damage = 0;
+        else if (TcgDuel_Coin(g, me))
+        {
+            unsigned count = 1 + Tcg_RandomBelow(&g->rng, 2), first = TCG_NONE;
+            for (i = 0; i < count; i++)
+            {
+                unsigned slots[TCG_FIELD_SIZE], k = 0;
+                for (s = 0; s < TCG_FIELD_SIZE; s++)
+                    if (op->field[s].stackSize && s != first)
+                        slots[k++] = s;
+                if (!k)
+                    break;
+                s = slots[Tcg_RandomBelow(&g->rng, k)];
+                first = s;
+                if (s == 0 && blocked)
+                    continue;
+                TcgDuel_EffectDamage(g, them, s, (int)e->amount, 0);
+                DiscardFoeEnergy(g, them, s, 1);
+            }
+        }
+        break;
+    case FX_RAPID_EVOLUTION:
+        if (after)
+        {
+            const struct TcgCard *mine = TcgDuel_Field(g, me, 0);
+            int at = -1;
+            for (i = 0; i < p->deckSize && mine; i++)
+            {
+                const struct TcgCard *c = CardAt(g, me, p->deck[i]);
+                if (c->kind == TCG_POKEMON && c->stage && !strcmp(c->evolvesFrom, mine->name) &&
+                    (at < 0 || c->hp > CardAt(g, me, p->deck[at])->hp))
+                    at = (int)i;
+            }
+            if (at >= 0)
+                Evolve(g, me, 0, (unsigned)at);
+            TcgDuel_Shuffle(g, me);
+        }
+        break;
+    case FX_FAIL_COINS:
+        if (!after)
+        {
+            if (Coins(g, me, e->amount) != e->amount)
+            {
+                *damage = 0;
+                g->attackFailed = 1;
+            }
+        }
+        break;
+    case FX_TENTACLE_GRIP:
+        if (!after)
+            *damage = 0;
+        else if ((n = Coins(g, me, TcgDuel_Energy(g, me, 0, TCG_WATER))))
+            TcgDuel_Event(g, TCG_EV_DRAW, me, 0, TcgDuel_Draw(g, me, e->amount * n), 0, 0);
+        break;
+    case FX_ACID_LOCK:
+        if (!after)
+            g->coinResult = (uint8_t)TcgDuel_Coin(g, me);
+        else if (g->coinResult)
+            SetSt(foe, ST_PAR);
+        else
+        {
+            self->lockTurn = (uint16_t)(g->turn + 2);
+            self->lockAttack = (uint8_t)(action->attack + 1);
+        }
+        break;
+    case FX_SHORT_CIRCUIT:
+        if (!after)
+            *damage = 0;
+        else
+        {
+            if (!ValidTarget(g, them, action->target, 0))
+                return TCG_INVALID;
+            if (!(action->target == 0 && blocked))
+                HitSlot(g, them, action->target, (int)(e->amount * EnergyOfType(g, them, action->target, TCG_WATER)), 0);
+        }
+        break;
+    case FX_SURPRISE_THUNDER:
+        if (!after)
+            g->coinResult = (uint8_t)(TcgDuel_Coin(g, me) ? 1 + TcgDuel_Coin(g, me) : 0);
+        else if (g->coinResult)
+            BenchDamage(g, them, g->coinResult == 2 ? 20 : 10);
+        break;
+    case FX_MICROWAVE:
+        if (!after)
+            *damage = 0;
+        else
+        {
+            if (!ValidTarget(g, them, action->target, 0))
+                return TCG_INVALID;
+            if (action->target == 0 && blocked)
+                break;
+            HitSlot(g, them, action->target, (int)e->amount, 0);
+            if (TcgDuel_Coin(g, me))
+                DiscardFoeEnergy(g, them, action->target, 0);
+        }
+        break;
+    case FX_MAGNETIC_LINES:
+        if (!after)
+            g->coinResult = (uint8_t)(!e->extra || TcgDuel_Coin(g, me));
+        else if (g->coinResult && foe->stackSize && !blocked && BenchCount(g, them))
+        {
+            int pick = -1;
+            if (!ValidTarget(g, them, action->target, 1))
+                return TCG_INVALID;
+            for (i = 0; i < foe->attachedSize && pick < 0; i++)
+            {
+                const struct TcgCard *c = CardAt(g, them, foe->attached[i]);
+                if (c->kind == TCG_ENERGY && c->id <= 6)
+                    pick = (int)i;
+            }
+            if (pick >= 0)
+            {
+                struct TcgFieldCard *to = &op->field[action->target];
+                to->attached[to->attachedSize++] = TcgPile_Remove(foe->attached, &foe->attachedSize, (unsigned)pick);
+                TcgDuel_Event(g, TCG_EV_ATTACH, them, action->target, 0, op->cards[to->attached[to->attachedSize - 1]], 0);
+            }
+        }
+        break;
+    case FX_ENERGY_BOMB:
+        if (after)
+        {
+            uint8_t list[TCG_DECK_SIZE];
+            unsigned k = Attached(g, me, 0, TCG_ENERGY, list);
+            int to = BenchCount(g, me) ? (ValidTarget(g, me, action->target, 1) ? action->target : -1) : 0;
+            if (to < 0)
+                return TCG_INVALID;
+            for (i = k; i > 0; i--)
+            {
+                uint8_t card = TcgPile_Remove(self->attached, &self->attachedSize, list[i - 1]);
+                if (to)
+                    p->field[to].attached[p->field[to].attachedSize++] = card;
+                else
+                    p->discard[p->discardSize++] = card;
+            }
+            if (to && k)
+                TcgDuel_Event(g, TCG_EV_ATTACH, me, (unsigned)to, 0, 0, 0);
+        }
+        break;
+    case FX_RAGING_THUNDER:
+        if (!after)
+            g->coinResult = (uint8_t)TcgDuel_Coin(g, me);
+        else if (!g->coinResult)
+        {
+            if (!ValidTarget(g, me, action->target, 0))
+                return TCG_INVALID;
+            TcgDuel_EffectDamage(g, me, action->target, (int)e->amount, TCG_DMG_SELF);
+        }
+        break;
+    case FX_SWIFT:
+        if (!after)
+            g->swift = 1;
+        break;
+    case FX_ROLLING_NEEDLE:
+        if (!after)
+        {
+            g->coinResult = (uint8_t)Coins(g, me, e->amount);
+            *damage += e->extra * g->coinResult;
+        }
+        else if (g->coinResult)
+            TcgDuel_SelfDamage(g, (int)(e->extra * g->coinResult));
+        break;
+    case FX_THEIR_COIN_BONUS:
+        if (!after && !TcgDuel_Coin(g, them))
+            *damage += e->amount;
+        break;
+    case FX_SHUFFLE_THEIRS:
+        if (after)
+        {
+            TcgDuel_Shuffle(g, them);
+            TcgDuel_Event(g, TCG_EV_DECK_CHANGED, them, 0, 0, 0, 0);
+        }
+        break;
+    case FX_CONFUSE_SELF:
+        if (after)
+            SetStatus(self, TCG_CONFUSED);
+        break;
+    case FX_FOCUSED_SHOT:
+        if (after)
+        {
+            if (TcgDuel_Coin(g, me))
+                self->charged = 1;
+            else
+            {
+                self->lockTurn = (uint16_t)(g->turn + 2);
+                self->lockAttack = (uint8_t)((action->attack ^ 1) + 1);
+            }
+        }
+        break;
+    case FX_FOCUS_BLAST:
+        if (!after)
+            *damage = 0;
+        else
+        {
+            if (!ValidTarget(g, them, action->target, 0))
+                return TCG_INVALID;
+            if (TcgDuel_Coin(g, me) && !(action->target == 0 && blocked))
+                HitSlot(g, them, action->target, (int)e->amount, 1);
+        }
+        break;
+    case FX_SEETHING:
+        if (!after)
+            *damage += e->amount * Coins(g, me, self->damage / 10);
+        break;
+    case FX_FLING_DECK:
+        if (after && foe->stackSize && !blocked && BenchCount(g, them))
+        {
+            TcgDuel_Log(g, "%s was shuffled into the deck.", TcgDuel_Field(g, them, 0)->name);
+            SlotToDeck(g, them, 0);
+        }
+        break;
+    case FX_BOULDER:
+        if (!after)
+            g->coinResult = (uint8_t)Coins(g, me, e->amount);
+        else if (g->coinResult && BenchCount(g, them))
+        {
+            if (!ValidTarget(g, them, action->target, 1))
+                return TCG_INVALID;
+            /* damage counters, not damage: nothing reduces them */
+            op->field[action->target].damage += 10u * g->coinResult;
+            TcgDuel_Event(g, TCG_EV_DAMAGE, them, action->target, 10u * g->coinResult, 0, 0);
+        }
+        break;
+    case FX_ROCK_BLAST:
+        if (!after)
+        {
+            unsigned fighting = EnergyOfType(g, me, 0, TCG_FIGHTING);
+            if (action->option > 5 || action->option > fighting)
+                return TCG_INVALID;
+            if (action->option)
+                DiscardEnergy(g, me, 0, TCG_FIGHTING, action->option);
+            *damage = 0;
+        }
+        else if (action->option)
+        {
+            if (!ValidTarget(g, them, action->target, 0))
+                return TCG_INVALID;
+            if (!(action->target == 0 && blocked))
+                HitSlot(g, them, action->target, (int)(e->amount * action->option), 0);
+        }
+        break;
+    case FX_BONE_TOSS:
+        if (!after)
+        {
+            g->coinResult = (uint8_t)TcgDuel_Coin(g, me);
+            *damage = g->coinResult ? e->amount : 0;
+        }
+        else if (!g->coinResult && BenchCount(g, them))
+        {
+            if (!ValidTarget(g, them, action->target, 1))
+                return TCG_INVALID;
+            TcgDuel_EffectDamage(g, them, action->target, (int)e->extra, 0);
+        }
+        break;
+    case FX_BONE_HEADBUTT:
+        if (after)
+        {
+            if ((s = RandomSlot(g, them, 1)) != TCG_NONE)
+                TcgDuel_EffectDamage(g, them, s, (int)(10 * Tcg_RandomBelow(&g->rng, 3)), 0);
+            if (foe->stackSize && !blocked && HpLeft(g, them, 0) && (s = RandomSlot(g, them, 1)) != TCG_NONE)
+                Switch(g, them, s);
+        }
+        break;
+    case FX_COIN_BENCH:
+        if (!after)
+            g->coinResult = (uint8_t)TcgDuel_Coin(g, me);
+        else if (g->coinResult && BenchCount(g, them))
+        {
+            if (!ValidTarget(g, them, action->target, 1))
+                return TCG_INVALID;
+            TcgDuel_EffectDamage(g, them, action->target, (int)e->amount, 0);
+        }
+        break;
+    case FX_MOUNTAIN_BREAK:
+        if (after)
+        {
+            unsigned kept = 0;
+            for (i = 0; i < 5 && p->deckSize; i++)
+            {
+                uint8_t card = p->deck[--p->deckSize];
+                const struct TcgCard *c = CardAt(g, me, card);
+                if (c->kind == TCG_ENERGY && c->id <= 6 && c->type == TCG_FIGHTING)
+                    p->hand[p->handSize++] = card, kept++;
+                else
+                    p->discard[p->discardSize++] = card;
+            }
+            TcgDuel_Event(g, TCG_EV_DECK_CHANGED, me, 0, i, 0, 0);
+            if (kept)
+                TcgDuel_Event(g, TCG_EV_DRAW, me, 0, kept, 0, 0);
+            TcgDuel_Log(g, "Mountain Break: %u cards discarded, %u Fighting Energy to the hand.", i - kept, kept);
+        }
+        break;
+    case FX_VANISH:
+        if (after && self->stackSize)
+        {
+            TcgDuel_Log(g, "%s vanished into the deck.", TcgDuel_Field(g, me, 0)->name);
+            /* (its attached cards go to the discard pile) */
+            for (i = 0; i < self->attachedSize; i++)
+                p->discard[p->discardSize++] = self->attached[i];
+            self->attachedSize = 0;
+            SlotToDeck(g, me, 0);
+        }
+        break;
+    case FX_TYPE_DOUBLE:
+        if (!after && TcgDuel_Field(g, them, 0) && TcgDuel_Type(g, them, 0) == e->extra)
+            *damage *= 2;
+        break;
+    case FX_TRANS_DAMAGE:
+        if (after)
+        {
+            unsigned moved = self->damage;
+            DiscardEnergy(g, me, 0, ANY_TYPE, 0);
+            if (!moved || !foe->stackSize || blocked)
+                break;
+            Heal(g, me, 0, moved);
+            foe->damage += moved;
+            TcgDuel_Event(g, TCG_EV_DAMAGE, them, 0, moved, 0, 0);
+        }
+        break;
+    case FX_BOTH_ASLEEP:
+        if (after)
+        {
+            SetSt(foe, ST_SLP);
+            SetStatus(self, TCG_ASLEEP);
+        }
+        break;
+    case FX_ONLY_ASLEEP:
+        break; /* (TcgDuel_EffectBlock, TcgDuel_SleepAttack) */
+    case FX_GRUDGE:
+        if (!after)
+            *damage += e->amount * (g->prizeCount > op->prizeSize ? g->prizeCount - op->prizeSize : 0);
+        break;
+    case FX_POLTERGEIST:
+        if (!after)
+        {
+            for (i = 0; i < op->handSize; i++)
+                n += CardAt(g, them, op->hand[i])->kind == TCG_TRAINER;
+            *damage = e->amount * n;
+            TcgDuel_Log(g, "Poltergeist: %u Trainer cards in their hand.", n);
+        }
+        break;
+    case FX_BOTHER:
+        if (after && TcgDuel_Coin(g, me))
+        {
+            uint8_t list[TCG_DECK_SIZE];
+            for (i = 0; i < op->handSize; i++)
+                if (CardAt(g, them, op->hand[i])->kind == TCG_TRAINER)
+                    list[n++] = (uint8_t)i;
+            if (n)
+            {
+                op->deck[op->deckSize++] = TcgPile_Remove(op->hand, &op->handSize, list[Tcg_RandomBelow(&g->rng, n)]);
+                TcgDuel_Shuffle(g, them);
+                TcgDuel_Event(g, TCG_EV_DECK_CHANGED, them, 0, 0, 0, 0);
+                TcgDuel_Log(g, "Bother: a Trainer card from their hand went into their deck.");
+            }
+        }
+        break;
+    case FX_PUSH_ASIDE:
+        if (after && TcgDuel_Coin(g, me) && BenchCount(g, them))
+        {
+            s = RandomSlot(g, them, 0);
+            if (s == TCG_NONE || (s == 0 && blocked) || (s && TcgPower_Immune(g, them, s)))
+                break;
+            TcgDuel_Log(g, "%s was shuffled into the deck.", TcgDuel_Field(g, them, s)->name);
+            SlotToDeck(g, them, s);
+        }
+        break;
+    case FX_BENCH_MANIP:
+        if (!after)
+        {
+            unsigned coins = BenchCount(g, them);
+            n = coins - Coins(g, them, coins);
+            *damage = e->amount * n;
+            g->noWeakRes = 1;
+        }
+        break;
+    case FX_PSYCRUSH:
+        if (!after)
+        {
+            for (s = 0; s < TCG_FIELD_SIZE; s++)
+                n += EnergyOfType(g, them, s, TCG_PSYCHIC);
+            *damage = e->amount * n;
+        }
+        break;
+    case FX_COMPLETE_RECOVERY:
+        if (after)
+        {
+            DiscardEnergy(g, me, 0, ANY_TYPE, 0);
+            Heal(g, me, 0, self->damage);
+            self->poison = 0;
+            if (self->condition == TCG_CONFUSED)
+                self->condition = TCG_HEALTHY;
+            self->food = 0;
+        }
+        break;
+    case FX_DARK_AMP:
+        if (!after)
+        {
+            for (s = 1; s < TCG_FIELD_SIZE; s++)
+                n += IsDark(TcgDuel_Field(g, me, s));
+            *damage += e->amount * Coins(g, me, n);
+        }
+        break;
+    case FX_TWISTER:
+        if (after && foe->stackSize && !blocked && HpLeft(g, them, 0) && TcgDuel_Coin(g, me))
+        {
+            for (i = foe->attachedSize; i > 0; i--)
+                op->hand[op->handSize++] = TcgPile_Remove(foe->attached, &foe->attachedSize, i - 1);
+            TcgDuel_Event(g, TCG_EV_DRAW, them, 0, 0, 0, 0);
+            TcgDuel_Log(g, "Twister: the cards on %s blew back to the hand.", TcgDuel_Field(g, them, 0)->name);
+        }
+        break;
+    case FX_DARK_SONG:
+        if (!after)
+        {
+            g->coinResult = (uint8_t)TcgDuel_Coin(g, me);
+            if (g->coinResult)
+                SetSt(foe, ST_SLP);
+        }
+        else if (g->coinResult)
+            for (s = 1; s < TCG_FIELD_SIZE; s++)
+                if (TcgDuel_Field(g, them, s) && !IsDark(TcgDuel_Field(g, them, s)))
+                    TcgDuel_EffectDamage(g, them, s, (int)e->amount, 0);
+        break;
+    case FX_KICK_STAMP:
+        if (!after)
+        {
+            g->coinResult = (uint8_t)TcgDuel_Coin(g, me);
+            if (g->coinResult)
+                *damage += e->amount;
+        }
+        else if (!g->coinResult && BenchCount(g, them) && !blocked)
+            g->switchPending = 1;
+        break;
+    case FX_ROLL_OVER:
+        if (after)
+        {
+            SetStatus(self, TCG_ASLEEP);
+            if (TcgDuel_Coin(g, me))
+                SetSt(foe, ST_SLP);
+        }
+        break;
+    case FX_EAT:
+        if (after && self->food < 2)
+            self->food++;
+        break;
+    case FX_ROLLOUT:
+        if (!after)
+        {
+            if (action->option > self->food)
+                return TCG_INVALID;
+            self->food -= action->option;
+            *damage += e->amount * action->option;
+        }
+        break;
+    case FX_COIN_PLUS:
+        if (!after)
+            *damage += e->extra * Coins(g, me, e->amount);
+        break;
+    case FX_STIR_UP:
+        if (after)
+        {
+            if (BenchCount(g, me) && ValidTarget(g, me, action->target, 1))
+                Switch(g, me, action->target);
+            if (foe->stackSize && BenchCount(g, them) && !blocked)
+                g->switchPending = 1;
+        }
+        break;
+    case FX_NOTHING:
+        break;
+    default:
+        return TCG_UNSUPPORTED;
+    }
+    (void)n;
+    return TCG_OK;
+}
 int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const struct TcgAction *action, unsigned *damage,
                          int after)
 {
@@ -734,6 +1992,18 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
         return TCG_OK;
     if (!e)
         return TCG_UNSUPPORTED;
+    if (after == 3)
+    {
+        /* Before the attack (and before the Defending Pokemon's protection is settled): Fox Fire, Drag Off */
+        if (e->kind == FX_SWITCH_HIT && BenchCount(g, g->current ^ 1))
+        {
+            if (ValidTarget(g, g->current ^ 1, action->target, 1))
+                Switch(g, g->current ^ 1, action->target);
+            else if (e->extra)
+                return TCG_INVALID;
+        }
+        return TCG_OK;
+    }
     if (e->after != BOTH_PHASES && e->after != (unsigned)after)
         return TCG_OK;
     if (g->attackFailed)
@@ -851,7 +2121,13 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
 
     /* Recoil and coin results. */
     case FX_RECOIL:
-        if (after)
+        /* (extra: no Weakness and Resistance, Tailspin Attack) */
+        if (after && e->extra && self->stackSize)
+        {
+            self->damage += e->amount;
+            TcgDuel_Event(g, TCG_EV_DAMAGE, g->current, 0, e->amount, 0, TCG_DMG_SELF);
+        }
+        else if (after)
             TcgDuel_SelfDamage(g, (int)e->amount);
         break;
     case FX_RECOIL_COIN:
@@ -1111,6 +2387,9 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
         }
         break;
     case FX_TELEPORT:
+        /* (extra: it may, Teleport Blast) */
+        if (after && e->extra && (!BenchCount(g, g->current) || !action->target))
+            break;
         if (after)
         {
             if (action->target < 1 || action->target >= TCG_FIELD_SIZE || !p->field[action->target].stackSize)
@@ -1162,7 +2441,10 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
         break;
     case FX_CHARGE:
         if (after)
+        {
             self->charged = 1;
+            self->charge3 = e->extra == 3; /* (Water Power: tripled) */
+        }
         break;
 
     /* Cards from the deck and the discard pile. */
@@ -1291,7 +2573,9 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
             const struct TcgCard *c = TcgDuel_Field(g, g->current ^ 1, 0);
             if (!c || action->option > 1 || !RealAttack(&c->attacks[action->option]))
                 return TCG_INVALID;
-            Amnesia(g, action->option);
+            /* (extra: on heads, Disable) */
+            if (!e->extra || TcgDuel_Coin(g, g->current))
+                Amnesia(g, action->option);
         }
         break;
     case FX_MAGNETIC_STORM:
@@ -1563,7 +2847,11 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
         }
         break;
     default:
-        return TCG_UNSUPPORTED;
+    {
+        int result = Gb2Effect(g, e, a, action, damage, after);
+        if (result != TCG_OK)
+            return result;
+    }
     }
     /* (what can't be Asleep, Confused, Paralyzed or Poisoned) */
     TcgPower_Sanitize(g);
@@ -1583,6 +2871,10 @@ int TcgDuel_EffectTouchesDefender(const struct TcgAttack *attack)
     case FX_LURE: case FX_OPP_SWITCH: case FX_WEAKEN: case FX_NO_ATTACK_COIN: case FX_NO_RETREAT_COIN:
     case FX_HYPER_BEAM: case FX_PSYWAVE: case FX_SUPER_FANG: case FX_AMNESIA: case FX_MYSTERY_ATTACK:
     case FX_MIRROR_MOVE: case FX_GALE: case FX_HURRICANE: case FX_CONVERSION_1: case FX_DEVOLUTION_BEAM:
+    case FX_STATUS_HT: case FX_STATUS_OR_RECOIL: case FX_HORRID_POLLEN: case FX_DEADLY_POISON: case FX_POISON_BENCH:
+    case FX_DISCARD_FOE_ENERGY: case FX_BONUS_STATUS: case FX_LURE_COIN: case FX_MAGNETIC_LINES: case FX_TWISTER:
+    case FX_DARK_SONG: case FX_KICK_STAMP: case FX_ROLL_OVER: case FX_BOTH_ASLEEP: case FX_TRANS_DAMAGE:
+    case FX_FLING_DECK: case FX_BONE_HEADBUTT: case FX_STIR_UP: case FX_RANDOM_HITS: case FX_SPIN_SHOWER:
         return 1;
     }
     return 0;
