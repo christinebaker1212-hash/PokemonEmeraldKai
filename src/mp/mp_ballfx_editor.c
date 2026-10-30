@@ -479,6 +479,7 @@ static void StartPreview(void)
         gSprites[sEd->ballSprite].callback = SpriteCallbackDummy;
         gSprites[sEd->ballSprite].oam.priority = 2;
         MP_BallStyle_ApplyToBallSprite(sEd->ballSprite, sEd->ballId, sEd->ballStyle);
+        StartBallSpin(&gSprites[sEd->ballSprite]);
     }
     sEd->phase = PH_DROP;
     sEd->timer = 0;
@@ -519,7 +520,10 @@ static void PreviewFrame(void)
         if (sEd->timer >= 12)
         {
             if (ball)
+            {
                 ball->y = sEd->ballY;
+                StartSpriteAnim(ball, 0);   // landed: done spinning
+            }
             PlaySE(SE_BALL_BOUNCE_1);
             sEd->phase = PH_LAND;
             sEd->timer = 0;

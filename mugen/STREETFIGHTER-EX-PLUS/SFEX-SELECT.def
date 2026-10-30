@@ -1,0 +1,48 @@
+Street Fighter EX Select
+
+[Characters]
+; 12 cells a row (columns in SFEX-SYSTEM.def), 3 rows. Add a character on a new line:
+;   folder/file.def, stages/home.def, includestage=0
+randomselect
+ssf2x_ryu/ssf2x_ryu.def, stages/sf2-suzakucastle dusk.def, includestage=0
+ssf2x_ken/ssf2x_ken.def, stages/sf2-harbor.def, includestage=0
+ssf2x_chunli/ssf2xchunli.def, stages/ssf2x-chunli.def, includestage=0
+ssf2x_dhalsim/ssf2xdhalsim.def, stages/ssf2x-dhalsim.def, includestage=0
+ssf2x_cammy/ssf2x_cammy.def, stages/sf2-england.def, includestage=0
+ssf2x_feilong/ssf2x_feilong.def, stages/sf2-hongkong.def, includestage=0
+ssf2x_deejay/ssfdeejay.def, stages/sf2-jamaica.def, includestage=0
+SSF2X_THAWK/SSF2X_THAWK.def, stages/sf2-mexico.def, includestage=0
+ssf2x_vega/vega-sf2x.def, stages/sf2-taverna.def, includestage=0
+ssf2x_gouki/ssf2x_gouki.def, stages/sf2-castle.def, includestage=0
+randomselect
+
+[ExtraStages]
+; every stage the cabinet can pick at random (mugen/cabinets.ini can list fewer)
+stages/sf2-airforce.def
+stages/sf2-bathhouse.def
+stages/sf2-brazil.def
+stages/sf2-castle.def
+stages/sf2-district.def
+stages/sf2-england.def
+stages/sf2-harbor.def
+stages/sf2-hongkong.def
+stages/sf2-india.def
+stages/sf2-jamaica.def
+stages/sf2-mexico.def
+stages/sf2-suzakucastle dusk.def
+stages/sf2-suzakucastle night.def
+stages/sf2-taverna.def
+stages/sf2-thailand.def
+stages/sf2-thailand2.def
+stages/sf2-ussr.def
+stages/sf2-vega.def
+stages/sf2-vegas.def
+stages/sf2ce-vega.def
+stages/ssf2-vega.def
+stages/ssf2x-chunli.def
+stages/ssf2x-dhalsim.def
+stages/ssf2x-gouki.def
+
+[Options]
+arcade.maxmatches = 7,0,0,0,0,0,0,0,0,0
+team.maxmatches = 6,0,0,0,0,0,0,0,0,0

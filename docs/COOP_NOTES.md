@@ -120,8 +120,11 @@ Battle messages: holds after a message B_WAIT_TIME_LONG/MED/SHORT 40/30/20 (vani
 reassemble after changing them), A/B skips the rest of a hold after 8 frames outside link battles (Cmd_waitmessage),
 single-battle text prints at twice the option speed (BattlePutTextOnWindow; link battles already use 1). A turn (attack +
 enemy attack, MID text, no presses) 684 -> 476 frames.
-Low HP beep (battle_gfx_sfx_util.c PlayLowHpBeep): SE_LOW_HEALTH loops every 36 frames; Task_StopLowHpBeep stops it after
-100 (three "doo duh"s); it plays again when a Moemon newly drops into the red.
+Low HP beep (battle_gfx_sfx_util.c PlayLowHpBeep): SE_LOW_HEALTH loops every 36 ticks; Task_StopLowHpBeep stops it once
+its player's clock reaches 100 ticks (three "doo duh"s), not by task steps, so the solo battle turbo can't cut it short,
+and MpBattleTurbo leaves SE3's tempo alone while it plays (MP_LowHpBeepPlaying): the same in singles, doubles, triples
+and link battles. It plays again when a Moemon newly drops into the red. MOEMON_SE_TRACE=90 logs it (m4a.c TraceSong);
+tests lowhp_beep, lowhp_pvp.
 Co-op partner status (mp_coop.c MP_Coop_SetBattleStatus, MPR_COOP_BSTATUS): the player controller reports MP_BST_ACTION/
 MOVE/BAG/PARTY/DONE; PrintLinkStandbyMsg shows "<partner> is selecting a move to use…" etc. (MP_Coop_ShowStandby) and
 redraws on change until another B_WIN_MSG text replaces it (BattlePutTextOnWindow -> MP_Coop_OnBattleMessage). PvP keeps
@@ -160,7 +163,10 @@ Dailies (mp_events.c): 3 goals a day from 3 pools (everyone G_TRAINERS..G_STRONG
 G_GIFTS..G_CARD; PickGoalsFull, solo fallbacks), hooks call MP_Events_Did(MP_DID_*) (goal + achievement counter). Pair goals
 only count friends with 5+ minutes today ("h:NAME" minute counter). Pull caps: 5 daily pulls/week ("dailypulls:wN"),
 free pulls (mp_gatcha.c MP_Gatcha_GrantFree from MP_Events_Update and on opening: +1 free 10-pull
-"gatcha:free10" per week (STANDARD only), +1 free pull per banner "gatcha:free1bN" per day played, stocked; menu
+"gatcha:free10" per week (STANDARD only), +1 free pull per banner "gatcha:free1bN" per day played, stocked; only for
+a later day / week than the last given ("gatcha:free1day", "gatcha:freewk": a clock set back and forth gave them on
+every launch); each pull stirs gRngValue with the PC's timer (StirRandom: the RNG starts at 0 on every launch and steps
+once a frame, so the same inputs on the same frames pulled the same prizes); test tools/test/gatcha_fair.sh; menu
 FREE x10 / FREE x1 / TICKET), MOEGATCHA TICKETS ("gatcha:tickets": data/scripts/obtain_item.inc Std_ObtainItem ->
 special MP_GatchaTicketForItem for key items / HMs / gym leader TMs / EXP. SHARE, once per item "ticketitem:ID", item
 from scrcmd.c gMpLastScriptItem since VAR_0x8000 changes during the message; Mauville Game Corner doll clerk sells them,
@@ -243,6 +249,11 @@ result message. Test: Route 101 grass, MOEMON_DEBUG_WARP=0,16,12,11 / 0,16,14,11
 wild_encounter.c MP_RollExtraLandMon on the right (enemy slot 3); a catch with the other still out runs
 BattleScript_MpCoopBallCaughtGoOn (VARIOUS_MP_COOP_CAUGHT_ONE/REMOVE_CAUGHT). Only the link master runs battle scripts:
 visuals for both screens must go through controller emits (sprite invisibility value 2 = caught, link partner ball throw). Also gym rematches and tournaments.
+Tournaments (mp_tourney.c, CO-OP > TOURNAMENT): the organizer first picks the kind (TS_CHOOSE: BATTLES or CARD DUELS,
+TK_*; MPR_T_INVITE carries it, protocol 58), then the round robin as before. Card matches: Tcg_TourneyDuel (tcg_online.c)
+opens both games' deck pick with the round's session (0x40000000 | tid | round | ids), the lower id invites; the result
+comes back once through MP_Tourney_OnCardResult (a finished duel; leaving it: a loss for whoever left). The ready check
+is the CARD CASE and the deck in use (Tcg_TourneyNotReady). Debug `mp tourney`; tests tcg_tourney, tourney_battles.
 Level scaling (1.19.0, mp_levelscale.c; OPTIONS > GAME > LEVEL SCALING, gMpConfig.levelScaling / ini level_scaling,
 on by default; online the host's, MPR_RULES byte 3, re-sent by MP_SendRoomRules when the host changes it): the team's
 level = MP_LevelScale_Top3 (average of the 3 highest-level party Pokémon, eggs left out); in a co-op battle the average
@@ -259,6 +270,21 @@ from its personality, no Random), then BoostWild +2. Not scaled: Battle Frontier
 (MP_LevelScale_ForgetPending), roamers, Battle Tower etc. Logs "level scale: trainer N ace A -> B (team T, cap C)",
 "level scale: wild S LvA -> LvB", "level scale: evolved"; debug `mp landwild` (an encounter from the map's grass table);
 env MOEMON_LEVEL_SCALING=0/1. Tests levelscale_wild, levelscale_trainer, levelscale_off, coop_levelscale.
+Settings (1.23.0, protocol 49): MP_SCALE_ON / WILD / TRAINERS / BOSS / CAPS / PAST8 (include/mp.h; gMpConfig.levelScaling
+and gMpConfig.scale[], ini `level_scaling_rules = W T B C P`, defaults 2 2 0 1 0). WILD: OFF, LOW (a quarter of the way
+from the area's level to the team's, minus 0-1), MEDIUM (halfway, minus 0-2: the default; the user found 3-6 below the
+team far too strong), HIGH (the old 3-6 below the team). TRAINERS: OFF, BELOW (the ace 4 under the team), EVEN, ABOVE
+(3 over). BOSS MARGIN: AUTO (the old +2..+5 by badges, the Elite Four +5) or +0..+8 for every boss. BADGE CAPS on / off.
+PAST 8 BADGES: capped until the League then free (the old rule), free, always capped (sCaps[8], 80 after the League).
+A wild Pokémon raised past its evolution level stays the area's own (the normal encounter); 1 in 10 (personality >> 8
+% 10 == 0, so every game in a co-op battle agrees) is the evolved form, a rare encounter (RareEvolvedForm; log
+"level scale: a rare evolved form"; env MOEMON_SCALE_RARE=1 always / 0 never, tests).
+Who sets them: playing alone, OPTIONS > GAME > LEVEL SCALING (A opens its page: GAME > LEVEL SCALING header, the six
+rows, BACK; L / R off on the page; log "level scaling rule N: V"); in a room, its host: HOST A GAME > GAME RULES
+(mp_setup.c SCR_RULES, replacing the TEAM PADDING / BATTLE SPEED rows: those two plus the six; logs "setup: game
+rules", "setup: rule N now V"). A friend's rows show the host's values, locked. MPR_RULES = [id, padding, anim,
+scaling, the five]; MP_LevelScaleRule reads the host's while in someone else's room (sRoomScale), ours otherwise.
+Env MOEMON_LEVEL_RULES="W T B C P" (tests). Tests levelscale_options, host_rules.
 
 Difficulty: trainer/wild levels were vanilla Emerald; route/gym trainers got +2..+6 per story segment, gym aces 15/20/27/33/36/41/47/51,
 E4 53-59, Wallace 62, land wild levels +3/+4 on under-leveled routes and dungeons, route trainers from badge 3 AI TRY_TO_FAINT
@@ -752,6 +778,24 @@ PC, not 1-3: BG palette 1 in battle is the OPTIONS window frame (LoadBattleMenuW
 stay up during other battlers' moves (doubles/triples) flashed white with every backdrop flash (Double-Edge,
 Take Down...). The backdrop itself is 2-4.
 
+## HGSS POKé BALLS (1.26: battle and summary balls)
+The thrown / sent-out / summary ball sprites are the HEARTGOLD / SOULSILVER sheet (docs/user_images/35.png, ripped by
+Sunday-Doneko, credited in dist_extras/README.txt; tools/moemon_balls/hgss_balls.py writes graphics/balls/<ball>.png).
+Each ball: eleven 16x32 frames (include/pokeball.h BALL_FRAME_*): 0 closed (the sheet's first row, the round ball, as in
+menus: docs/user_images/36.png; the sheet's squashed row 8 isn't used), 1 open (23 px tall, its base on the closed
+ball's), 2 empty, 3-10 spinning (the sheet's rows 0-7). The ball's middle is the sprite's (8, 16), so every caller's
+coordinates are as with the old 16x16 balls. OAM 16x32 affine double; anim tile offsets are BALL_FRAME(n) = n * 8;
+BALL_ANIM_SPIN (7) loops the spin frames (2 frames each). StartBallSpin (pokeball.c) starts it for a throw
+(battle_anim_throw.c SpriteCB_Ball_Throw), the player's send-out flight (instead of affine anim 4) and the BALL EFFECTS
+editor's drop; landing goes back to frame 0. GENESIS / EPOCH sheets have their 16x16 art in every frame
+(MP_BallStyle_SpriteHasSpin FALSE): those still turn with affine anim 4. Palettes: POKé BALL's reds are slots 1-3 (dark
+to light) and it uses no slot past 8: COLOR ramps go into 1-3 (ramp shades 1-3), decorations take 9-15. Decorations:
+the closed frame at (6, 11), and on each spinning frame where 40+ red pixels face the screen, at their middle, over red
+pixels only (DecorateSpinFrames). Special balls with art in the sheet (LOVE, FRIEND, FAST, LEVEL, LURE, HEAVY, MOON,
+HEAL, DUSK, QUICK) load their own sheet (tag TAG_MP_BALL_HGSS 0x57B0 + special) and palette (TAG_MP_BALL_SPECIAL +
+special); DREAM is the POKé BALL in its ramp. Test hgss_balls (shots by hand: send-out spin, MASTER BALL throw, blue
+POKé BALL with a STAR, GENESIS, the summary's ball).
+
 ## GENESIS / EPOCH BALLS (Pokémon Red's and Crystal's POKé BALLS)
 
 Items ITEM_GENESIS_BALL (ITEM_052) / ITEM_EPOCH_BALL (ITEM_057), special balls 12 / 13 (style `c000` / `d000`, kept
@@ -807,13 +851,70 @@ The OPTION header (the game's own name, "Moémon Emerald Kai") is printed with t
 
 ## Bigger BAG (mp_bag.c)
 
-gBagPockets point at mp_bag.c's arrays (MP_BAG_*_COUNT in constants/global.h: 200 items, 64 of the others; stacks
+gBagPockets point at mp_bag.c's arrays (MP_BAG_*_COUNT in constants/global.h: 224 items, 64 of the others; stacks
 MP_BAG_ITEM_CAPACITY 999, BAG_ITEM_CAPACITY_DIGITS 3; the Battle Pyramid's u8 bag keeps MAX_BAG_ITEM_CAPACITY 99).
 SaveBlock1's pockets are untouched in size: save.c copies the first slots there before every write
 (MP_Bag_SyncToSaveBlock in WriteSaveSectorOrSlot / HandleReplaceSector), sdl2.c StoreSaveFile writes the rest to
 "<save>.bag" with gSaveCounter and a checksum of SaveBlock1's pockets, and LoadGameSave takes them back only when both
 match. sdl2.c BackUpSaveFile rotates "<save>.bakN.bag" with the backups, and loading tries "<save>.bag" then each
 "<save>.bakN.bag", so a .bak renamed back to the save gets its own extra slots. load_save.c (frontier bag swap) and the Wally tutorial bag use gBagPockets. Debug `mp bag`.
+
+## REJOIN and remembered invite codes (mp_setup.c)
+
+OnRoomJoined saves the room (last_room, last_room_key: the room's key, not its password) and where it is:
+last_room_address = "" (the online lobby), "home" (hosted on this PC: no REJOIN, its server ends with the session) or a
+friend's own server's "host:port" (MP_Lobby_ServerAddress: the server we're on when it isn't the online lobby: an
+invite code, a typed address, a home-network game). MAIN_REJOIN connects there and joins with the key, so a game joined
+with an invite code (and a password) comes back without either. ENTER CODE OR IP starts with last_join_code (the code
+that got us in, saved only once a join succeeds); a locked room that is the last one we were in is joined with its
+key (no password), and a wrong key (the host changed the password) asks for the password. A friend's server that
+doesn't answer on REJOIN says so and points at ENTER CODE OR IP (its address may have changed). Test:
+tools/test/rejoin_smoke.sh (b1 address + password, b2 REJOIN, b3 the remembered code).
+
+## Item descriptions from the Gen 4 games (mp_itemdesc.c)
+
+src/data/text/item_descriptions.h holds the Gen 4 games' texts (HEARTGOLD / SOULSILVER, else PLATINUM, else DIAMOND /
+PEARL; a TM's or HM's is its move's Gen 4 text): tools/moemon_items/gen_desc.py from PokeAPI's csv tables, in the
+game's style (MOéMON, POKé, names in capitals). Items those games don't have keep their texts. The texts have no line
+breaks: MP_ItemDesc_Print wraps one to its window's width (the normal font if it fits the window's lines, else the
+narrow one) and, where it still doesn't fit (the narrow boxes of shops, the PC's item storage and the BATTLE PYRAMID
+bag), shows a page of lines at a time (MP_ItemDesc_Update from MP_FrameUpdate, every 2.5 s, the first page 3.5 s).
+The pager stops as soon as the window holds anything it didn't draw (a checksum of the window's pixels), the screen
+changes or another description is printed. Callers: item_menu.c, shop.c, player_pc.c, battle_pyramid_bag.c,
+pokemon_storage_system.c. Debug `mp itemdesc`. Test item_desc.
+
+## The BAG's eight pockets (HGSS-style screen)
+
+The BAG shows eight pockets in this order: ITEMS, MEDICINE, POKé BALLS, TMs & HMs, BERRIES, BATTLE ITEMS, KEY ITEMS,
+FAVORITES (MP_BAGVIEW_*, include/mp.h). They're views of the save's five pockets, which stay as they are:
+MP_Bag_ViewOfItem puts an ITEMS-pocket item in MEDICINE (battle usage MEDICINE, or the field functions Medicine / PPUp /
+PPRecovery / RareCandy / SacredAsh), BATTLE ITEMS (battle usage OTHER: X items, GUARD SPEC., POKé DOLL...) or ITEMS
+(the rest); the other pockets are one view each. FAVORITES holds every item the player marked (MP_Bag_IsFavorite:
+MP_SaveData "bag:fav%d", 31 items a key), from any pocket, in pocket order. MP_BAG_ITEMS_COUNT is 224: room for every
+ITEMS-pocket item (201) at once.
+
+item_menu.c: gBagPosition.pocket, cursorPosition[] and scrollPosition[] are the VIEW's (BAG_VIEWS 8). sViewSlots[v]
+holds each view's stacks as pointers into the save pockets; UpdatePocketItemList (whatever pocket it's given) compacts and
+sorts all five pockets, then rebuilds every view. ViewItem / ViewQuantity read the view under the cursor; anything that
+depends on the kind of item uses GetItemPocket(item) (the context menu, TM data, berries, holding rules), never the
+pocket shown. GetItemListPosition (item.c RemoveBagItem's hint) maps the cursor back to its save slot (SlotPlace).
+SELECT moves an item within its view: it goes before the item it's dropped on in the save pocket (after the view's last
+one at the end), the others keep their places, and that save pocket's sort order becomes MANUAL; START sorts the save
+pocket (ITEMS, MEDICINE and BATTLE ITEMS share one order). FAVORITES has neither. Every pocket's item menu has FAVORITE /
+UNFAVORITE (ACTION_FAVORITE, its label set by OpenContextMenu; 2x2 menus fill their blank, ITEMS gets a 2x3 one); the
+item menus sit over the list (15 tiles wide for UNFAVORITE). Wally's tutorial opens on MEDICINE (the POTION) and goes
+right to POKé BALLS. berry_tag_screen.c follows the BERRIES view with BAG_LIST_ROWS rows.
+
+The screen: tools/moemon_bag/gen_bag.py fits docs/user_images/31.png (256x192) to 240x160 and writes
+src/mp/mp_bag_gfx.h (a full-color background, its colors, the eight pocket icons). mp_bagui.c MP_BagUI_Composite (sdl2.c,
+after MP_Candy_Composite) draws it under the game's layers wherever nothing else drew (CB2_BagMenuRun only), plus the
+pocket shown picked out (red icon, red frame) and a red frame on the list's cursor row (gray on an item being moved);
+the fade comes from the backdrop color (white). BG2, the old background, is hidden; palette 1's colors 1-3 are the
+design's text colors (dark / white / shadow; 7 is black). Windows: the list x14 y1 15x12 (5 rows, BAG_LIST_FIRST_Y 9,
+no cursor arrow), the description x5 y14 24x6 (white text, COLORID_DESC), the pocket name on the plate x1 y11, the sort
+hint left of the bag. Emerald's BRENDAN / MAY bag (per gender, its pocket frame = the view's save pocket, FAVORITES =
+ITEMS) at 74,41; the item icon in the description box. No rotating ball and no switch arrows: L / R / LEFT / RIGHT go
+straight to the next pocket, round and round. Test bag_pockets (`mp bagview V`).
 
 ## Player stand-ins wear the player's look
 Scenes that show the player as another object take Brendan / May by gender: the Battle Tent and Frontier battle
@@ -939,6 +1040,21 @@ From the first frame (1.22): until the battle's own weather is known (gBattleWea
 from battle_main.c where a turn's action selection begins), Composite draws the weather the field will give it
 (FieldWeather: ABILITYEFFECT_SWITCH_IN_WEATHER's mapping; not in recorded battles), so the rain falls during the intro;
 "It's raining." still comes after the send-out. `mp bwshown`; test battle_weather_intro.
+The others' screens (1.25, protocol 50): in a link battle only the master's engine runs (the others' gBattleMainFunc
+is BeginBattleIntroDummy), so their gBattleWeather never changed and their screens showed their own FIELD weather the
+whole battle: a friend still in the rain of a route, or in a dry room while the master's field rained, saw a sky that
+wasn't the battle's, and a RAIN DANCE never showed. Now the master's PrepareBufferDataTransferLink puts a
+B_COMM_MP_WEATHER block (MP_BattleWeather_LinkState: gBattleWeather, the master's field weather, settled) in the
+stream ahead of the next command whenever that changes (and first thing after the link tasks start, so a joiner gets
+it). The others take it in its place (CopyReceivedLinkBuffersData: after their screen finished what it shows, at most
+90 frames) and set gBattleWeather, their FieldWeather and settled from it. Before the first block, a co-op battle
+already knows the master's field weather: MPR_COOP_ACCEPT (2 bytes after the second lose text) and MPR_COOP_WILD_GO
+(bytes 6-7) carry MP_BattleWeather_FieldFlags, kept by MP_BattleWeather_SetMasterField until NewBattle
+(SetUpBattleVarsAndBirchZigzagoon, which also clears gBattleWeather on every game). A joiner's battle is settled from
+the snapshot. Debug `mp fieldweather N` (this game's field weather now); tests coop_fieldweather (a dry master and a
+rainy friend, then RAIN DANCE), coop_fieldweather2 (the other way round), tri_rain (a triple at NA-JP lag).
+Routes 119 / 123 (mp_linkx.c UpdateWorld): when a friend's weather cycle stage is taken over, MP_Weather_CycleStageChanged
+brings the new stage's weather in at once on a route following the cycle (SetNextWeather), not on the next visit.
 
 ## Shared world and lights (mp_world.c)
 Relay MPR_WORLD_FIRST (220): WS_CHANGE (live, to everyone) and WS_LIST (everything so far, to a friend who just
@@ -983,7 +1099,8 @@ pixel samples), ShiftFrame moves the picture on both ends and only the uncovered
 update goes to 0xFF when every friend watches (the server copies it); a send backlog over 24 KB skips pictures
 (MPNet_ClientQueued; a picture is a diff, so nothing is lost). ApplyUpdate decodes for the battle watcher and the
 panel alike; Panel_DrawLabel draws the card label (dot, name, location / red IN BATTLE pill) with the small font.
-MP_Spectate_PanelSync (sdl2.c VDraw, and SpectateStep while watching a battle) hands the cards to Display_SetPanel.
+MP_Spectate_PanelSync (sdl2.c VDraw, and ScreenStep for the card screens, a VS fight or a battle we watch: VDraw
+doesn't run then; the panel froze through card duels, test spec_tcg) hands the cards to Display_SetPanel.
 display.c: PanelSize = 2 pads + n cards (240s + 2s outline) + gaps, 160s + label 12s; RenderToBackbuffer reserves the
 bottom, PanelFitScale shrinks the cards until they fit with the game at 1x or more; FitWindowToPanel (window only) keeps
 the game's whole scale and shrinks it, then the cards, until the window fits the monitor's usable area, and restores the
@@ -1089,9 +1206,21 @@ directly while ReshowBattleScreenAfterMenu runs (bufferTransferDisabled doesn't 
 battle (green stripes, bits of sprites, an empty box) showed between the transition and the fade-in. gMpReshowDark
 (reshow_battle_screen.c, set by CB2_MpJoinBattle) re-applies BLDCNT darken / BLDY 16 after every rebuild step (step 0
 resets the blend registers); the closing BeginHardwarePaletteFade(0xFF, 0, 16, 0) fades in from that same darkness.
-Joinable: solo wild (savedCallback = CB2_EndWildBattle: not scripted ones like KECLEON) or one trainer, single or
-double (CB2_EndTrainerBattle, modes SINGLE / CONTINUE_SCRIPT / REMATCH and the double ones; not bosses, RIVAL,
-TEAM AQUA / MAGMA), or a co-op double of that kind. Not: triples, two trainers, PvP, frontier, safari, legendaries.
+Joinable (1.43.0): solo wild (savedCallback = CB2_EndWildBattle: not scripted ones like KECLEON), one trainer or two
+who spotted the player at once (CB2_EndTrainerBattle, every trainerbattle mode 0-8), or a co-op battle of that kind:
+any trainer but the Elite Four and the Champion (MP_Coop_JoinTrainerOk: gym leaders, rivals, admins, bosses, story
+grunts too). The master's own script goes on after the battle as it would have alone; a joiner who beat a gym leader
+gets the badge (GymLeaderEndScript: the leader's "you won" script, from the gym's map when the joiner was elsewhere,
+checked before the rematch branch: a leader's first battle is in the rematch table too); route trainers in a
+continue-script mode (MATCH CALL sign-ups) count as beaten for the joiner (OrdinaryTrainer); other story trainers keep
+their own events. A story trainer has no trainer-type object, so MPR_COOP_BATTLING goes out with localId 0 (JOIN works,
+nothing spots). Not: triples (full), PvP, frontier, safari, legendaries.
+Two trainers (589afed3, reapplied in 1.43.0): a third player makes a Triple Battle against both (MpJoinPlan
+trainerIdB, the snapshot's second lose text). TEAM PADDING on: a friend who asks to team up but can't have a seat when
+the battle starts (two trainers, or a moment too late) gets DECLINE_JOIN_AFTER instead of a no, and their game asks to
+JOIN by itself once the battle reports itself joinable (sCoop.joinAfter, UpdateJoinAfter; 30 s at most). A friend a
+held trainer brought in waits up to a minute while the leader answers "wait for another?" (Task_JoinHeld).
+Tests: join_gym (ROXANNE, the badge on both games), coop_two_join3, coop_two_solo_join, coop_two_wait3, coop_held_join3.
 Tests (MODE 2/3, WORST): join_no, join_wild, join_trainer, join_double, join_triple (double -> triple + redirect),
 join_two (two at once), join_cancel, join_leave; `mp partyids` + join_wild/check.py check every party's identities.
 Harness conditions: watchmenu, joinprompt, joinpendingN, friendbattleN.
@@ -1182,6 +1311,9 @@ CARE), icons (pokemon_icon.c CreateMonIcon, the PC's CreateMonIconSprite: a copy
 wire bytes 24-25). Not turned: the PC's group-move BG layer, a friend's held icon in the shared PC, minigame mons of
 other players (no Pokemon data). Debug: mp nick SLOT NAME (- = species name), huemon SLOT, huecheck. Tests: hue_math
 (check_hues.py), hue_look (screenshots), hue_follow (BOB sees ALICE's follower's hue).
+CASTFORM's palette holds its four forms (128 bytes, every other one 32): MakeLz / MP_Hue_LzStruct read the size from
+the LZ header (LzPaletteSize, up to LZ_MAX_COLORS 64), turn each 16 colors and pack them all (1.25.1: a one-palette
+buffer overflowed, and the PC box crashed on Windows as the cursor reached a nicknamed CASTFORM). Test hue_castform.
 
 ## Two trainers at once, grouping on one trainer (D6, protocol 38: mp_coop.c, trainer_see.c, trainer_battle.inc)
 Two trainers spotting a player (gNoOfApproachingTrainers 2): MP_Coop_OnTrainerConfigured keeps the challenge across
@@ -1193,7 +1325,18 @@ the master builds A at 0-2, B at 3-5 (CreateNPCTrainerParty(.., FALSE)), MP_Coop
 smaller team once, no interleave (MP_Coop_ArrangeEnemyParty). Names/pictures/send-outs per side
 (MP_Coop_TwoTrainers, MP_Coop_TrainerPicFor; battle_message.c), BattleScript_MpCoopTwoTrainersWon (both lose texts,
 both prizes). The intro asked the right trainer's picture twice (MULTI and TWO_OPPONENTS blocks): over the link
-the second request never completes, so it's skipped in co-op. Joining in progress refuses it (JOIN_CANT_KIND).
+the second request never completes, so it's skipped in co-op. Joining in progress (1.26, protocol 51): a third player
+makes it a Triple Battle against both (a solo battle against two trainers becomes a co-op double against both). The
+conversion keeps BATTLE_TYPE_TWO_OPPONENTS and the enemy party where it is (slots 0-2 trainer A, 3-5 trainer B: a
+slot says whose a Pokémon is); the new foe spot (battler 5) takes the next Pokémon of the trainer with more left
+(JoinTwoTrainersNextFoe), and the triple's foe pool is shared from then on (MP_TripleSwitchRange). MpJoinPlan
+trainerIdB and the snapshot's loseTextB carry the second trainer to the joiner (sCoop.twoTrainers / trainerIdB via
+JoinSetSeats, gTrainerBattleOpponent_B in MP_Join_ApplySnapshot). "B sent out X" picks the trainer by the Pokémon's
+slot in a triple (MP_Coop_SecondTrainersMon, from B_BUFF1's party index so every game agrees), by side in a double.
+A joiner who came from a trainer script flags both trainers. MPR_COOP_BATTLING bytes 8-10: the second trainer's
+object and id (MP_TrainerBattleLocalIds: both objects from gApproachingTrainers); TryOfferBattleInProgress matches
+the trainer walking up against either, and two walking up against both. Test coop_two_join3 (mp joinask N: JOIN's
+request from a script).
 MPR_COOP_WAIT: + u8 localId2 (second held NPC, 0 = none), u16 waitAge.
 Held trainer spots a free friend (trainer_see.c first pass, MP_Coop_CanJoinHeldTrainer / MP_Coop_NoteHeldSpotter):
 only that trainer approaches; EventScript_TrainerApproach calls MP_Coop_TryJoinHeldTrainer (REQUEST arg 1,
@@ -1208,6 +1351,30 @@ EventScript_MpCoopAfterTrainerBattle (the post-dotrainerbattle steps), 2 -> rele
 (unflagged, CONTINUE_SCRIPT partners never get the flag) spotted the joiner again at once.
 Tests: coop_two_trainers (ROUTE 116 JANICE + JERRY, tile 28,6), coop_two_alone, coop_held_spot, coop_wait_merge
 (check.py: one led, one joined, the leader waited longer). Debug: `mp trainerflag ID...`.
+
+A trainer already battling a friend spots us (1.25): whoever leads a battle against a trainer from the field (solo,
+or a co-op battle's master) sends MPR_COOP_BATTLING (39, routed to mp_coop.c) every second: map, the trainer's
+object (MP_TrainerBattleLocalId: battle_setup.c's object id, or gSpecialVar_LastTalked as the stock trainer scripts
+leave that 0, if it's a trainer object on the map), trainer id and whether the battle can take a friend now
+(MP_Join_CanBeJoined = mp_join.c's JoinableReason); "off" when it ends. When that trainer walks up to another player
+on that map (one trainer: gNoOfApproachingTrainers 1), MP_Coop_TryJoinHeldTrainer (TryOfferBattleInProgress) asks
+"X is battling this trainer! Join their battle, or battle alone?" with JOIN BATTLE / BATTLE ALONE beside the message
+(yes / no box tiles). JOIN BATTLE: MP_Join_AskFromScript (the join-in-progress request, sJoin.fromScript: no field lock,
+the script waits); let in, MP_Coop_JoinedFromTrainerScript sets joinedOther when the snapshot comes, so the battle ends
+as the held-trainer join does (MP_EndJoinedTrainerBattle, the script goes on: MP_Coop_TakeJoinedOther 1). Not let in
+(NO, can't, no answer, B, called off before it started): the script goes on to our own battle with the trainer.
+BATTLE ALONE: the usual speech and battle. Tests coop_spot_join, coop_spot_alone (ROUTE 116 JERRY).
+
+Pokémon battle emotes in link battles (1.25): Emote() sends MPR_BATTLE_MONEMOTE (battler, icon, happy) to the battle
+link's other games (MP_Battle_SendToPeers); MP_LifeBattle_OnPeerEmote shows it over that battler (battler ids are the
+same on every game) with its sound. After a won trainer battle only the Pokémon that knocked out the last foe bubbles
+for it in co-op (it was "the first of ours still out", so every game had its own Pokémon celebrate a friend's
+knockout). Test coop_life_emote (check.sh: each game's emotes are what the other saw, on the same battler).
+
+Quicker screen fades (1.25, palette.c): a BeginNormalPaletteFade of (nearly) every palette, 28 of 32 or more, between 0 and 16 (a
+screen opening or closing: the party menu, the BAG, the POKéDEX pages, warps...) runs UpdateNormalPaletteFade an extra time on 3 of every 7 frames
+(sQuickFade, sQuickFadeCredit): 30% shorter, its delays included. Fades of some palettes or to other levels (battle
+animations, flashes) keep their speed.
 
 ## CANDY JAR (D3, mp_candy.c; ITEM_CANDY_JAR 398, ITEMS_COUNT 399)
 gMpCandies[type]: ReleaseMon (stock release) and Tag_ReleaseAll call MP_Candy_OnRelease(species): +1 of the first
@@ -1330,7 +1497,17 @@ revealed with familiarity or by WATCH (unknown ones are one "??? (not known yet)
 4-7), FONT_NARROW, 7 rows a page, A turns pages. The "Ⓐ MORE" prompt (its own promptWindow at 22,0, baseBlock 762) shows
 only when there is more than one page; A on a one-page journal does nothing (MpJournal_HandleInput still takes it, so it
 never reaches the INFO page's move selection). LEFT on the first summary page goes to the last and RIGHT on the last to
-the first (ChangePage: a left wrap stages the target page's tilemap in the under BG first); test summary_wrap.
+the first; test summary_wrap. INFO is the bottom layer (BG3: its page in the tilemap's left half, the EGG layout in the
+right half), the other pages sit in the right half of BG1 / BG2 (bgDisplayOrder 1: BG1 on top), so the wraps at INFO
+can't use the stock scrolls (1.23.0): RIGHT round to INFO (PssWrapToInfo) slides the page on top away to the left with
+the layer under it at its blank half, then order 0 as when the screen opens; LEFT round from INFO (PssWrapToLast)
+slides the last page in over INFO from the left on BG1 (x 0 down to -256), then order 1 with BG2 holding the page before
+it at 0x10000, ready for the next LEFT (before, the last page's layer sat at its blank half and the POKé BALL page's
+background showed under the JOURNAL). A wrap from a page on a layer (picking a move) stages the last page under it, in
+view. JOURNAL stripes: MpJournal_PaintStripes repaints its sheet (rows 4-19 of [JOURNAL][1]) a sentence at a time
+(rowEntry; INFO rows 4-5 green, 6-7 white), so a wrapped sentence keeps one color. Test summary_wrap_shots.
+`mp summary` hides the map name popup first, as the START menu does: its task kept running and erased its corner of
+the summary's BG0 (the dex number's top row, the SKILLS title) when it timed out.
 
 G2 field life. Emotes (mp_life_emote.c): 16 round pink bubbles drawn in code (NOTE HEART ZZZ EXCLAIM QUESTION SWEAT
 ANGRY TEAR SPARKLE FOOD DOTS CALM SUN WATER BALL LEAF), never the Trainers' square emotes; one co-op palette
@@ -1759,3 +1936,766 @@ COPYCAT's last move, the move-end bits). All reset at battle start (MP_Gen4_Batt
   moves that borrow.
 Debug `mp g4side SIDE ROCK TSPIKES WISH` lays hazards (0 = the player's side), `mp setmove SLOT IDX MOVE`, `mp hold SLOT ITEM`,
 `mp foehold ITEM` (in a battle: the first foe holds ITEM).
+Watering shows the water on the soil (FLDEFF_RIPPLE on the plot every 32 frames, mp_garden_life.c DrawDoing); a
+watering or tending that took ends with FLDEFF_SPARKLE on the plant.
+
+## What Garden Pokémon do shows (mp_garden_life.c DrawDoing)
+Every activity has to be seen, not imagined (the user's rule). Poses LIFE_POSE_SWIM / CLIMB / DIG (mp_life_field.h;
+MP_LifePose_Base: NONE / NONE / SHAKE for the old sprites, mp_pmd.c: WALK paddling / WALK facing up / EAT):
+- SWIM (TypePlace SOAK, the SWIM pursuit, the rare PADDLE's leader, and its follower halfway): on arrival EnterWater
+  steps it onto the water beside it (the tile it faces first; nobody there), keeping the shore tile; at the end
+  LeaveWater steps back (the shore, or any ground beside; no room: 30 frames more in the water). An activity cut
+  short (act NONE while inWater) gets out first. In the water Actor.sink = a quarter of its height + 2, a dive right
+  under every 300 frames (visT 200-249: height + 4, going down 3 a frame), FLDEFF_RIPPLE every 48 frames and at the
+  dive's start and end. Friends' Pokémon: inWater = their tile is water (their game moved them there).
+- CLIMB (the CLIMB pursuit, bands 1-2): Actor.lift up to 20 (a pixel every 2 frames), half of it toward the tree it
+  faces, all of it up, drawn at OAM priority 1 (in front of the tree's top layer, which hid it).
+- DIG (TypePlace DIG, the DIG pursuit): sink 3/5 of its height, FLDEFF_DUST every 24 frames.
+The sink is drawn with sprite.h mpClipOn / mpClipY: nothing of the sprite's OAM entries from that screen line down
+(the feet line: a PMD picture's ground point, an old sprite's bottom). AddSpriteToOamBuffer notes the clip for the
+entries it wrote (mp_bigsprite.c MP_BigSprite_NoteClip; the side list is swapped in by MP_BigSprite_CommitOam with
+the big sprites'), gba_easy_draw.c DrawSprites skips the lines. Any sprite can use it.
+Garden Pokémon also get followers' ground effects (mp_followfx.c slots MP_FOLLOWFX_GARDEN + actor, 24 of them: grass,
+sand, puddles, reflections; none while sunk, lifted or in the water). WATCH says "is swimming in the pond." / "is up
+in a tree!" / "is digging in the dirt." (MP_GardenLife_Doing) except for pursuits and rare moments, which keep
+their own lines (the SWIM pursuit: "is swimming laps in the pond."). Logs "garden: N swims in the pond at", "out of
+the pond", "climbs a tree at", "digs at"; `mp life garden actors` prints sink / up / water; `mp life garden pursuit
+ACTOR LEVEL [P]` picks the pursuit. Test garden_doing.
+
+## 1.30.0: friends' arrows, items, battles, fixes
+- WHERE IS EVERYONE (mp_compass.c, rewritten): drawn over the frame by MP_Compass_Composite (VDraw), no sprites or
+  palettes. A world grid of Hoenn's outdoor maps (BuildWorld: breadth first over the map connections from Littleroot,
+  each map's (0, 0) in world tiles, the first one found kept); an indoor map resolves to its door out (WorldPos: the
+  fewest warps to a placed map, that warp's destination tile; cached). The same / a connected map still uses
+  MP_GetRemoteMapPos; nowhere on the grid (underwater, islands) falls back to the Town Map areas. Arrows at the exact
+  angle (a triangle by signed edge distances, soft outline), the label (small font, name + Manhattan steps) beside
+  it on the inner side; a door in view = no arrow (its friend tag shows). Pings (MP_Compass_PointAt) are the same
+  arrows, smaller, blinking, inset. Log "compass: player N at dx,dy (S steps)". Test compass.
+- Town Map heads (region_map.c, mp_avatar.c MP_Avatar_HeadIcon): the look's standing front frame, the top 16x16 of
+  what's drawn, centered, outlined (an unused palette index) in the player's color (MP_Compass_PlayerColor), white
+  for yours; Brendan's / May's head only if it can't be built.
+- RARE CANDY by the handful (party_menu.c sMpCandy, ItemUseCB_RareCandy): a count window (sMpCandyCountWindowTemplate)
+  up to the candies held; Task_MpCandyNext applies one candy per level, a level that teaches a move shows its line and
+  goes through the usual move tasks (PartyMenuTryEvolution comes back to Task_MpCandyNext while active), then one
+  stats window from the first level to the last and evolution. Unused candies never leave the BAG ("N RARE CANDIES
+  went back in the BAG."). Test candy_many.
+- Smart targeting (mp_smartcursor.c MP_SmartItemSlot): status cures (item effect byte 3) and revives (byte 4
+  ITEM4_REVIVE); in battle the battler choosing (gBattlerInMenuId), then other actives, then the rest; faints noted by
+  MP_NoteFaint (Cmd_tryfaintmon, field poison, `mp hp SLOT 0`). Log "smart cursor: item I -> slot S". Test smart_cursor.
+- PP beside moves (ShowMoveSelectWindow, the window 14 tiles wide). Test pp_shown. Held HMs back to the BAG on
+  SetPlacedMonData into a box (test hm_deposit).
+- Co-op levels: MPR_COOP_RESOLVE boxes carry the Pokemon's moves and PP (25 bytes): the moves learned without
+  forgetting one (state 14) reach the owner's own copy in the battle (they were only in the master's). Tests
+  coop_learn_fit, coop_learn_use, tri_learn_use, double_learn (`mp bmons`).
+- Followers ride in their ball on a bike (mp_follower.c BikeBall: the recall as their owner gets on, the toss and
+  entrance as they get off; friends' too, from their avatarMode). Test bike_follower.
+- Fixes: the card screens tick the fanfare and finish it on close (sound.c MP_Sound_TickFanfare / EndFanfare: a
+  CARD COUNTER prize left the BGM paused and a door's fade waiting for ever; test_ui.sh fanfare); contests get a
+  stand-in DisableStruct for FURY CUTTER / ROLLOUT (battle_anim.c; test contest_furycutter); the Safari Zone's back
+  picture is the look's (battle_controller_safari.c; test safari_look); a friend's DEOXYS shows this game's form in
+  co-op and PvP (ShouldIgnoreDeoxysForm, BattleLoadOpponentMonSpriteGfx; test coop_deoxys); map people whose look is
+  a variable (0-B) never take the player's own sprite (event_data.c VarGetObjectEventGraphicsId: a variable at 0
+  made a copy of the player that took their palette), and the Lilycove Lady's POKeMON always has a POKeMON's look.
+
+## The FRIEND FINDER (1.31.1)
+- mp_compass.c over WHERE IS EVERYONE: hidden until INPUT_ACTION_FRIEND_FINDER (right stick click in gamepad.c's
+  overworld context, G in sdl2.c) calls MP_Compass_Toggle (SE_PC_ON / SE_PC_OFF, log "friend finder: shown /
+  hidden", saved at once: ini friend_finder_shown). OPTIONS > CO-OP > FRIEND FINDER = gMpConfig.finderStyle
+  MP_FINDER_BOTH / ARROWS / RADAR (ini friend_finder = both / arrows / radar; `mp finder N`).
+- sFade (0-16, 2 a frame) fades the whole finder in and out, also around scripts; sWalk (up to WALK_DIM) takes it
+  down while tileTransitionState moves and for 20 frames after. Arrows: scale 11, alpha QUIET_ALPHA, still; a
+  friend who goes away (off screen and NEAR_STEPS = 15 or more steps; m->away turning on) or the toggle gives
+  FLASH_TIME frames at full size, alpha and bob. Pings (sPings) ignore the toggle, the fade and the dimming.
+- The radar: RADAR_R 20 at the top right, a dot per friend with an offset (m->dot, also near or on screen), at
+  (R-4) * d / (d + 24) from you (d in tiles), at the rim when only the area is known (m->exact off). EdgePoint only
+  runs for away friends (0, 0 divided by zero). Test compass: a_hidden, a_pc_door_flash, a_radar, a_arrows,
+  a_walking, a_hidden_again.
+
+## The GAME CENTER and full-color map pictures (1.32.0)
+- mp_mappic.c: pictures pinned to maps, drawn by the renderer past the GBA's tiles and palettes. gba_easy_draw.c calls
+  gMpMapPicLine(line, layers) after the BG lines render (mode 0); MapPicLine puts the picture in BG3 and clears BG1/BG2
+  where it's drawn (sprites on top), and its "over" picture in BG1 (over the sprites). A screen pixel's map pixel:
+  (pos - 7) * 16 + ((x + BG3HOFS - tileOffset * 8) & 255) (GetFieldCameraTileOffset, field_camera.c). A room picture
+  fills the rest of the screen (fill: black, the rooftop's sky); a picture on a connected map shows across the edge
+  (FindShown: the connections). Fades: per frame, per channel c -> a + b * c from PLTT against gPlttBufferUnfaded
+  (BG palettes 0-12). MP_MapPic_Update runs each overworld frame (OverworldBasic).
+- tools/moemon_gamecenter/gen_gamecenter.py: graphics/moemon/gamecenter/*.png (the user's pictures, docs/user_images
+  38-42) to RGB555 .bin (bit 15 drawn) and *_over.bin (furniture rising into the walkable cell north of it, scanned
+  up from that cell's bottom until its floor colors; OVER rects for the clerks' rows; NO_OVER), the floors' layouts
+  from the FLOORS grids on Building + Shop ('.' floor 0x001, '#' blocked, 'W' exit mat 0x006, 'S' stairs 0x250 (a
+  non-animated door: arriving, Task_ExitNonAnimDoor steps the player off the way MP_MapPic_ArrivalDir says, sideways
+  for the stairs and left out of the rooftop door, not down through the rail), 'C' counter 0x232).
+- Maps RustboroCity_GameCenter_1F/2F/3F/Rooftop (gMapGroup_IndoorRustboro 17-20, appended). The tower in RUSTBORO at
+  pixel (407, -47), doors (28, 7) / (32, 7) = Rustboro warps 12 / 13 on metatile 0x35E (a copy of the plaza's 0x2BB
+  with MB_NON_ANIMATED_DOOR, appended to the Rustboro tileset); the trees and fence around it reworked (grass, plaza
+  edges). Admission VAR_GAME_CENTER_PAID (0x404E): set by the receptionist (500), cleared arriving on the doormats
+  (1F on-transition), coord events on 1F row 4 push back while 0; the elevator (MULTI_GAME_CENTER_FLOORS) too.
+- 2F CARD SHOP: Tcg_GameCenterShop -> tcg_ui.c UI_GCSHOP (SINGLES: the binder in GC_BINDER, Tcg_ShopPrice 300 / 800 /
+  4000 by rarity, holos never; DECKS: tcg_structure_decks.h from gen_structure_decks.py, the 1999 Base Set theme decks
+  by their Base Set numbers, GC_DECK_PRICE 15000, into the first empty deck slot). The CARD CLUB's CP pick is commons
+  and uncommons now (Tcg_PointCost). The table's players: Tcg_TalkChallenge (waitstate; FinishTalk resumes the
+  script); on 2F townsfolk never decline (InGameCenterCardShop). The second seller only says he's unpacking.
+- 3F: flavor on every console, TV and cabinet; the COIN counter sells 50 COINS for 1000. Rooftop: flavor people, the
+  Lilycove rooftop's vending machine script.
+- MOENAV map: "GAME CENTER" is a landmark of RUSTBORO's two cells (landmark.c Landmarks_RustboroCity), printed under
+  the city's name when the cursor is on it as the routes' landmarks are; the city map moves down by its lines
+  (pokenav_region_map.c sCityMapRowsDown). No icon on any region map.
+- Pictures and the scroll: MapPicLine's scroll offset against the BG tile offset is signed (a step moves the tile
+  offset a whole tile at once; wrapping at 256 drew the picture's far side down the screen's left edge for a step).
+- Tests gc_look (pictures, clerks behind counters, the Town Map), gc_visit (gate, admission, stairs, shop deck and
+  single, a duel asked by talking, elevator, rooftop, exit). Debug: mp face DIR, mp textspeed N.
+
+## The VS cabinet: MUGEN fights (1.31.0, 1.33.0)
+Decisions and the as-built record: docs/FIGHT_DECISIONS.md. Where things are:
+- `fight/`: the engine (mugen-unleashed, a C rebuild of MUGEN 1.1b1) with `compat/` (SDL 1.2 / SDL_mixer on
+  the game's side, math, heap redirects), `host/` (mf_host.c: the engine thread and coroutine, sessions,
+  frames, the 4:3 screens' sides, the state pages for desync recovery; mf_rollback.c; mf_mem.c: the heap
+  region at a fixed address; mf_fit.c: the HUD fitting; mf_pack.c: the fight files' hashes) and the
+  third-party code. API: include/mf_engine.h. Hooks in engine files are marked `Moemon Fight`.
+- `src/platform/fight_platform.c`: the picture (shown by display.c as the game picture at 480x320: the game's
+  scaling modes and filters; 1.50.0), buttons and their bindings (saved by gamepad.c in
+  moemon_controls.ini), the sound mix, the overlay (countdown, signal icon) and the CRT.
+- `src/mp/mp_fight.c`: the cabinet (seats, bubbles, the specials in data/scripts/vs_cabinet.inc), the
+  challenge (relay 25-31, protocol 57: the pack summary and the answering player's cabinet rules), the
+  netcode (button packets over UDP or the relay, rollback, a hash every 30 frames, desync recovery), the
+  results (wins / losses: `fightwin` / `fightloss` / `fightcpu` / `fightcpuloss` counters, achievements,
+  the TRAINER CARD's VS FIGHTS line).
+- Engine globals that are fight state go into one section (the Makefile renames the engine objects' data
+  sections); anything allocated by the engine thread lands in the heap region. The BGM thread's files
+  (`bgm*.c`) are `MF_SYSTEM_HEAP`: they use the C library's heap and aren't state.
+- Desync recovery merges word by word: a word that is a pointer into this PC's own memory (outside the
+  region) stays, so code and C-heap pointers survive; the globals only cross between the same build.
+- Tests: tools/test/README.md (`fight_*`), and tools/fight/build_linux.sh's self test (`step` waits for a
+  loading engine; `WIN=1` builds it for Wine, `SAN=1` with AddressSanitizer).
+- Sound (1.50.0): the shipped sounds are GBA sound (8-bit mono 13379 Hz clips, 13379 Hz Ogg songs) by
+  tools/fight/gba_audio.py; a stage's song is kept 3 dB under the fighters' voices by the mixer
+  (MfMix_MusicGain, levels from mf_bgm.c MfBgm_Measure and matchload.c Ml_VoiceLevel): FIGHT_DECISIONS
+  "GBA sound, and music under the voices".
+- Pixels (1.50.0): scaled, rotated and parallax sprites are area-resampled (fight/compat/mf_softscale.c, hooked
+  in softrender.c / softblend.c / bg.c; MOEMON_FIGHT_NEAREST=1 for MUGEN's nearest), and the picture goes
+  through display.c's own path (srcW x srcH 480x320): FIGHT_DECISIONS "Pixels". Tests fight_display,
+  tools/fight/test_softscale.c.
+- Character audit and balance audit (1.51.0): tools/fight/check_chars.py (static), tools/fight/audit_chars.sh (every
+  pairing CPU against CPU plus a rollback check, via mf_selftest's `audit`; hooks MOEMON_FIGHT_PICK, MOEMON_FIGHT_WATCH,
+  MOEMON_FIGHT_WARN), tools/fight/balance_audit.py (docs/FIGHT_BALANCE.md; baseline tools/fight/balance_baseline.json),
+  all reading the pack through tools/fight/mugen_files.py. Patterns found: docs/FIGHT_AUDIT.md.
+- Asset ingestion (1.52.0): tools/fight/ingest.py (Makefile fight-ingest runs it when mugen/ changed; record
+  mugen/processed_assets.json, log mugen/ingestion_log.txt, index processed_assets.idx for the game's start check
+  Fight_CheckIngestion); FIGHT_DECISIONS "Asset ingestion"; test tools/fight/test_ingest.sh.
+- `MOEMON_FIGHT_SEED=N` (tests) fixes an online fight's seed, so its picks are the same every run
+  (fight_online_lag pins one: with seed 1998331917, a Ryu mirror, the round can run past the test's wait, 1.49.3 too).
+
+## Yu-Gi-Oh! card duels (src/ygo/, include/ygo/)
+
+The CARD CASE's second side. Decisions (the user's 30 answers and the choices made) are in docs/YGO_DECISIONS.md,
+the work left in docs/YGO_HANDOFF.md.
+
+- Data: tools/ygo/import_sdd.py reads Stairway to the Destined Duel's card list, Forbidden/Limited list and pictures
+  from the player's ROM (never committed) into tools/ygo/sdd.json and graphics/ygo/sdd_art.bin; build_catalog.py +
+  gen_catalog.py add the English sets to the end of 2003 and write src/ygo/ygo_catalog.c, include/ygo/card_ids.h and
+  src/ygo/ygo_fusions.c. fetch_art.py + build_printed.py: graphics/ygo/printed.bin (160x233 JPEGs, then the real
+  back; `--keep-cards` rebuilds only the back).
+- Engine: EDOPro's since 1.48.0 (see "Yu-Gi-Oh! on EDOPro" below; the game's own engine, ygo_duel.c and the
+  ygo_fx_*.c effects, is in the history before that). One YgoQuery at a time, answered with a YgoAnswer; the whole duel
+  follows from the seed and the answers (YgoDuel_Hash), so online only has to exchange answers.
+- The table (ygo_board.c): plays the engine's events one by one, then asks. A chance to chain while a phase changes
+  (YgoDuel_QuietChance: no chain, summon, attack or Damage Step) is passed for the player unless L is held; effects
+  made for such a moment carry YF_PHASE and are still asked. This is the screen's choice, never the engine's.
+- Screens (ygo_ui.c) share the Pokemon case's look (src/tcg/tcg_ui_kit.h); tcg_ui.c hands Step / Draw / IsActive to
+  them while the YU-GI-OH! side is open. CARD ART and CARD BACKS (gMpConfig) apply to both games.
+- World (ygo_field.c): who plays which game by trainer class / townsfolk sprite; three in five bring a deck from the
+  GBA games' opponents by badge tier (GameDeck), the rest themed decks; special duelists with signature cards; tcg_field.c's Task_CardChallenge asks "MOéMON CARDS or YU-GI-OH!" for the CARD CLUB,
+  the rival, WALLY and STEVEN. Both CARD CLUB NPCs stand in OLDALE's and MAUVILLE's POKéMON MARTS and LILYCOVE's
+  DEPARTMENT STORE (data/scripts/ygo_club.inc, card_club.inc).
+- Friends (1.36.0): src/ygo/ygo_net.c (include/ygo/net.h, struct YgoNet: the chain link's struct is YgoLink) on the
+  card games' relay extension 255 (TCG_LINK_VERSION 6, message types 8-13; tcg_integration.c routes them). The
+  invite / accept carry the decks (main + Fusion), then only answers go over, each with the duel's hash before and
+  after (YgoNet_Hash: YgoDuel_Hash plus the answers inside the current step) and an ACK before the next; a
+  concession crossing an answer rolls the answer back (as tcg_link.c). Who goes first comes from the session. The
+  asking is tcg_online.c's with request kinds TCG_ASK_YGO_DUEL / TRADE (2-3); CO-OP > FRIENDS' CARD DUEL / TRADE pick
+  the game with LEFT / RIGHT (mp_linkx.c), the CARD CASE button uses the case's last side. ygo_ui.c: Y_WAIT,
+  Y_TRADE, the board at seat 1 for the friend who accepted, FriendRewards. Tests tools/ygo/test_net.c (two engines
+  through a queue), scenarios ygo_online, ygo_online_nodeck, ygo_trade.
+- No Yu-Gi-Oh! deck (ygo_ui.c ResolveNoDeck): a challenge, a friend's duel or trade opened for a player without a
+  deck goes to the Starter Deck screen first: no Yu-Gi-Oh! cards = a Starter Deck to keep (RESOLVE_GIFT), cards but
+  no deck ready = one to borrow for this duel (RESOLVE_LOAN, Y.loanMain; online onlineDeck -1). A CARD CASE is all
+  a friend needs to be asked (tcg_online.c HasCaseFor).
+- GAME CENTER 2F clerk (1.36.0): the counter with Y.gc set: SINGLES (GC_BINDER, Ygo_MoneyPrice, one copy each in
+  gcSingles) and DECKS (the four Starter Decks, gcDecks) before TRADE IN and CARD SHOP; .ygo format 2.
+- The CARD CLUB member stands behind the POKéMON MART counter (1,2) beside the shopkeeper (the Mart layout has room
+  for one); in LILYCOVE's DEPARTMENT STORE both card NPCs are behind the counter (7,2) and (9,2).
+- Save: "<save>.ygo" beside the save (Ygo collection, written with the Pokemon cards' sidecar, backed up with the
+  save). CARD POINTS are shared with the Pokemon cards.
+- Tests: tools/ygo/test.sh (EDOPro bridge, card scenarios, random duels, collection, deck codes, the link;
+  sanitizers) and
+  tools/ygo/test_ui.sh (the club, a challenge, the case's screens, a practice duel mashed with random keys).
+  Debug: `mp ygo ...` (ygo_ui.c Ygo_Debug).
+
+## Deck menus, recipes, ACE CARD, zones (1.38.0)
+- Both card games' DECKS: A on a slot opens TcgUi_PopMenu (EDIT / RENAME / ACE CARD / DUEL WITH IT / COPY / DELETE;
+  an empty slot BUILD A DECK / FROM A RECIPE); START / SELECT / R keep their shortcuts. Rows: the 8 slots, DECK
+  RECIPES, BACK (DECK_ROWS).
+- RENAME: TcgUi_Name* in tcg_ui.c (shared, tcg_ui_kit.h): a 13x4 keyboard + CASE / SPACE / DEL / OK, typing through
+  Platform_SetTextInput; 16 letters and the width of a deck row. Tests type with the harness's `type` command.
+- ACE CARD: TcgCollection.ace[] (cards format 7), YgoCollection.ace[] (.ygo format 3); Tcg_DeckAce / Ygo_DeckAce fall
+  back to the old pick (Tcg_DeckMascot / Ygo_DeckMascot) when unset or no longer in the deck. COPY copies it, DELETE
+  and a recipe clear it.
+- DECK RECIPES: Tcg_DeckFromRecipe / Ygo_DeckFromRecipe build a recipe from owned cards (copies other decks use
+  still count, as in the builder); the Pokemon recipes are the three starters and tcg_structure_decks.h, the
+  Yu-Gi-Oh! ones the four Starter Decks (StarterDeckOf).
+- Yu-Gi-Oh! zones: YgoAnswer.zone (seq + 1) on a Main Phase answer that puts a card down from the hand; Idle()
+  keeps it in YgoState.zoneWish, TakeZone() uses it when the card lands (else the first empty zone), and the next
+  Main / Battle question drops it. The board's M_ZONE mode (ZoneChoice: no Tribute Summons, no Field Spells) shows
+  the free zones and the card faint in the chosen one. Sent online (ygo_net.c ANSWER_LEN 22, TCG_LINK_VERSION 7).
+- Yu-Gi-Oh! turn menu (OpenPhaseMenu): ChoicesAfter plays the move on a copy of the duel, passing chain windows, to
+  see whether an attack or a play from the hand follows. PreferredPick starts attack targets / Tributes on the
+  best / weakest. Animations: FX_ATTACK (AttackReach: wind-up, dash, home; Attackers() draws it over the band),
+  FX_IMPACT (+ Shake via the render viewport), FX_RETICLE (Brackets, MarchingLine), FX_SHARDS, FX_RISE.
+- Pokemon table: Refocus() after our own action's state is shown (B.refocus, set in Submit).
+- Text fitting: TcgUi_WrapLines / TcgUi_FitText; tcg_board.c Prompt() splits a long prompt in two lines.
+
+## Triple Triad (src/tt/, include/tt/; 1.40.0)
+The CARD CASE's third side. Decisions: docs/TT_DECISIONS.md.
+- Data: tools/tt/fetch_cards.py reads every Final Fantasy XIV card from xivapi (TripleTriadCard + Resident: names,
+  the four numbers, stars, type, sale value, XIV's order) into tools/tt/cards.json, and both pictures (088xxx 40x40
+  icons, 087xxx 104x128 faces) plus the card frame (ui/uld/CardTripleTriad_hr1: the grey plate, the star, the type
+  icons) into the gitignored tools/tt/metadata/. gen_catalog.py writes src/tt/tt_catalog.c and include/tt/card_ids.h
+  (ids are XIV's and never move); build_art.py packs graphics/tt/cards.bin (each face at full size, at the board's
+  40x49 by Lanczos, the icon; the back (graphics/tt/back.png), the plate at both sizes, star and type icons, the large
+  numbers (graphics/tt/numbers.png + the A of graphics/tt/ff8_menu.png) at 10x14 and 7x10; .incbin'd by
+  tt_art_data.c). gen_pools.py writes src/tt/tt_pools.c: each region's cards, each seller's shelf (checked under
+  15%), each special player's five-star cards (every one belongs to someone).
+- Rules (tt_duel.c): FF8's capture code as the decomp reads it (Same, Plus, Plain, the COMBO loop), XIV's rules
+  beside them; deterministic from seed + moves (TtDuel_Hash). Events (TTE_PLACE / RULE / FLIP / SHIFT / ROUND /
+  END) drive the table. AI tt_ai.c (negamax, alpha-beta, endgame search from six empty squares). Hands
+  (tt_hands.c): a region's players rotate through its cards a hand a day, stars by badges; specials one of their
+  five-star cards a day. Deck limits in tt_common.c (Tt_DeckFits).
+- Collection and the regions (tt_collection.c): "<save>.tt" (tagged records "MTTR", unknown tags skipped), owned
+  copies, seen, the shelves' sold singles, six decks, packs, each region's rules / trade rule / games, the rules
+  carried and from where, the CARD QUEEN's region and day, records. Tt_MixRules (spread 30 / abolish 20, 50 / 40
+  where the queen is), Tt_PlayedIn, Tt_QueenMoves. Written with the save (Tcg_WriteSidecar), backed up with it
+  (sdl2.c sSidecars).
+- Screens (tt_ui.c, the kit of tcg_ui_kit.h): HOME, DECKS (EDIT / RENAME / PLAY WITH IT / COPY / DELETE), the
+  builder and the CARD LIST tabbed by stars (L / R), INSPECT, PACKS and the reveal, RULES OF HOENN, CHALLENGE
+  (where the rules mix, announced), the table, SPOILS (the trade rule's picks), a seller's counter (SINGLES /
+  PACKS / SELL), the CARD QUEEN's menu. tcg_ui.c routes Step / Draw / IsActive here like the Yu-Gi-Oh! side;
+  Tcg_OpenCaseGame opens any side; L / R go round POKeMON, YU-GI-OH!, TRIPLE TRIAD (TcgUi_CaseTabs: the chosen
+  side's tab full width). The last side: TT_FLAG_CASE_SIDE.
+- The table (tt_board.c): XIV's layout, hands stacked bottom-up so every card's numbers show; phases DEAL, RULES,
+  SPIN (who starts), PLAY, EVENTS, END. Pictures and numbers: tt_gfx.c (the plate tinted per seat once; a 5x7 pixel
+  font of our own for numbers and banners, Tt_Char / Tt_Text).
+- Who plays (tt_field.c Tt_FieldPick, asked first by tcg_field.c Ask): TT_PLAYS_ONLY / TT_PLAYS_ALSO by trainer
+  class or sprite; specials by sprite (and map for MR. STONE / MR. BRINEY); sellers and the queen by their script
+  (EventScript_TtSeller / EventScript_TtQueen). tcg_field.c's which-game menu holds up to three games (sGames);
+  Tt_WhichLine gives each kind of player its own "which?" line.
+- Map side: data/scripts/tt_seller.inc (EventScript_TtSeller, EventScript_TtQueen, EventScript_TtPlayer,
+  EventScript_TtMapSetup called from each seller's POKeMON CENTER's ON_TRANSITION); specials Tt_SellerState
+  (gStringVar1-3: region, rules, trade rule), Tt_SellerStarter, Tt_SellerShop, Tt_MapSetup, Tt_QueenTalk /
+  Here / FirstMeeting. FLAG_TT_QUEEN_AWAY (FLAG_UNUSED_0x022) hides the queen outside her region; the region is
+  the map section's (Tt_CurrentRegion; buildings of no town keep the last region).
+- Who starts (1.53.0): tt_board.c SpinPhase: the light runs side to side, an even count of runs ends on the left
+  (you), odd on the right, so it stops where it lands (it used to jump at the end); the tick plays as it reaches each
+  name and the pin when it stops. The deal and the spin can't be skipped.
+- Music: every game plays a battle song (1.52.2): ordinary players and friends MUS_RG_VS_TRAINER, specials their own
+  (MUS_VS_GYM_LEADER, MUS_VS_CHAMPION...), a win MUS_VICTORY_TRAINER; as the `tt` scene, `@tt` files replace them.
+- Achievements: the TRIPLE TRIAD tab (counters ttwin, ttsame, ttplus, ttcombo, ttspread, ttabolish, ttspecial,
+  ttcards, ttpack). LEGENDS OF THE TABLE counts Triple Triad specials too.
+- Tests: tools/tt/test.sh (rules scenarios from real cards, 2000 random games replayed, the collection file, the
+  spread odds, every card winnable), tools/tt/test_ui.sh (seller, case, practice, gamecenter, which, queen).
+  Debug: `mp tt ...` (tt_ui.c Tt_Debug): starter, giveall, give ID N, packs P N, first N, auto, rules R HEX,
+  trade R T, carry R, queen R, favor, practice, case, shop R, queenmenu, focus N, win, state, net, concede.
+- With friends (1.41.0, protocol 62, relay extension 255 version 8): asked like the other card games
+  (tcg_online.c request kinds TCG_ASK_TT_DUEL 4 / TCG_ASK_TT_TRADE 5; CO-OP > FRIENDS > CARD DUEL / TRADE with
+  TRIAD picked, or the CARD CASE button in front of them while the case is on its TRIPLE TRIAD side). A game:
+  tt_net.c (struct TtNet, type 14, the kind in byte 7) carries the asker's rules (their region's) and hand in the
+  INVITE, the other's hand in the ACCEPT (RANDOM: each deals their own from their collection), then each move with
+  the game's hash before and after; the next move waits for the ACK. Who starts comes from the session
+  (TtNet_First). A concession crossing a move on the wire takes the move back (the table gets 254, then 255); two
+  crossing: the asker's stands. tt_ui.c VS_FRIEND: the CHALLENGE screen picks the hand (the one asked sees "THEIR
+  RULES" once the invite is in), T_WAIT, the table with me = our seat, their moves replayed into U.duel while the
+  table is still (FriendStep). No cards change hands, no rules spread, no region played in; a win counts
+  onlineWins, ttwin and TABLE TALK. Trades: T_TRADE, cards beyond the deck in use, by stars (L / R), through
+  Tcg_SocialOffer / Confirm. Tests: tools/tt/test_net.c (in test.sh: 2000 linked games, the crossings, a tampered
+  move, the timeout), scenarios tt_online (+ tools/test/check_tt_online.sh: the same game on both) and tt_trade.
+- Not done: tournaments.
+
+## The three card games together (1.45.0)
+What the POKéMON, Yu-Gi-Oh! and Triple Triad screens share, so they feel like one game.
+- INSPECT: PLATFORM_KEY_INSPECT (0x800, past the GBA's ten keys; main.c masks gMain keys to KEYS_MASK so the game
+  never sees it). The right trigger sets it while a card screen is up (gamepad.c, Tcg_IsActive; the trigger's turbo
+  is off then), D on the keyboard (sdl2.c), INSPECT in test scripts. The card files read it as KEY_INSPECT (2048);
+  R and START stay what they were (pages, menus). Hints write {INSPECT}: the RT/R2/ZR icon on a controller, a drawn
+  "D" keycap on the keyboard (tcg_gfx.c G_BUTTON_INSPECT).
+- CONCEDE lives on your own deck in the POKéMON and Yu-Gi-Oh! duels (tcg_board.c OpenDeckMenu, ygo_board.c deckMenu;
+  logs "deck menu: CONCEDE"); the B / START turn menu no longer has it. The deck's tooltip shows the counts and
+  "{A} CONCEDE". Triple Triad keeps it in its turn menu.
+- One cursor: G_Focus (tcg_gfx.c), the POKéMON table's corner brackets stepping out every 8 frames, white, yellow
+  (G_FOCUS_TARGET) while choosing. The Yu-Gi-Oh! table and its card lists use it; picks carry the POKéMON table's
+  numbered badge. Menus share TcgUi_Row and the red G_Frame card cursor; Triple Triad's game table keeps its own.
+- Challenge pictures: tcg_field.c CaptureChallengePic: a trainer's TRAINER_PIC (from its trainerbattle script),
+  else sPicOfGfx (the overworld graphics' own or look-alike picture), else the map sprite as before; a friend gets
+  MP_Avatar_RemoteFrontPic. Stored 64x64 in the opponents' portrait (portraitW 64 = a battle picture) and drawn by
+  G_PicCut: 1x, cut to the window, framed on the top of the figure. Logs "challenge picture: graphics G, trainer
+  picture P". The CARD QUEEN's own screen keeps her map sprite.
+- The deck card on the CARD CASE's first screen floats the same in all three (whole pixels over a still shadow).
+- Effects shared by the tables: G_Circle; the POKéMON table got the Yu-Gi-Oh! table's FX_IMPACT (an attack's damage),
+  FX_SHARDS (a Knock Out) and FX_RISE (a Basic put into play), run beside the existing waits, none longer.
+  `mp cards fx 0/1/2` plays one on their Active.
+- Victory song (1.52.3): a win plays MUS_VICTORY_TRAINER in all three (Yu-Gi-Oh! too now, on its YOU WIN! banner) and
+  it plays on through the cards to take: the UI calls XBoard_EndHoldMusic instead of XBoard_End when a win goes on
+  to the spoils screen; each UI's Screen() calls XBoard_ReleaseMusic (the map's song again) for any screen but the
+  spoils and INSPECT, so it ends when the cards are taken (or the case is closed). Logs show the order with
+  MOEMON_MUSIC_LOG=1.
+- No buttons while the table shows what happened (1.52.3): the boards drop the frame's presses while their events
+  play, so nothing can be picked or moved mid-animation and no press lands after it. POKéMON: TcgBoard_Busy (the
+  deal, a state being presented, the queue, a drawn card's spotlight; not the sprites still gliding after a cursor
+  move, which would make the cursor slow). Yu-Gi-Oh!: !YgoBoard_Idle (events left or the timer running). Triple
+  Triad: a card flying or a banner up, and the deal and the spin can no longer be skipped (the rules page still can).
+
+- HOW TO PLAY (1.53.0): SELECT on any game's first CARD CASE screen opens src/tcg/tcg_guide.c over it (Tcg_Step
+  gives it the buttons first; the canvas draws it instead of the screen). Pages per game (sPokemon, sYugioh, sTriad):
+  a title, a few words in the strip (two lines of the small font or three of the narrow one: opening it logs
+  "page N's words don't fit" otherwise, and the tests refuse that), and a stage drawn from the page's own frame count
+  with the games' own card faces. Triple Triad's examples use real cards whose numbers fit (FindCards: a plain capture,
+  SAME, PLUS, a COMBO corner). LEFT / RIGHT / L / R / A turn pages, B or SELECT close it once let go (so the screen under
+  it never sees the press). The narrow font has no "=": labels say "BEATS", "AND", "BOTH". Tests: each game's test_ui
+  "guide".
+- The case's menu and its Decks / Booster pages draw the row cursor 1 px lower (TcgUi_RowDown around those three
+  screens' draws; the deck builder keeps its own), the binders' and Pokemon / Yu-Gi-Oh! booster pages' card frames too.
+
+## SEARCH & SORT (1.54.0)
+One menu for the BINDER and the deck builder of all three card games: src/tcg/tcg_search.c / .h.
+- The key: PLATFORM_KEY_SEARCH (0x1000, past INSPECT's 0x800): the left trigger while a card screen is up (gamepad.c,
+  Tcg_IsActive), F on the keyboard (sdl2.c), SEARCH in test scripts; KEY_SEARCH in each card file's key enum, {SEARCH}
+  in hints (the LT/L2/ZL icon, a drawn "F" keycap: tcg_gfx.c G_BUTTON_SEARCH). R2 stays INSPECT, L / R the pages/tabs.
+- Each game hands over a SearchGame: its filters (SF_CHOICE with names / values, SF_MIN / SF_MAX from lo by step;
+  names on a MIN show Triple Triad's A), its sorts (key -1 by name, -2 by copies owned, else value()'s key:
+  SEARCH_KEY_NUMBER, SEARCH_KEY_RARITY, then the game's own), name(), value() and owned(). SEARCH_NA: the card has no
+  such value (a Trainer's HP): any filter on it fails and sorting puts it last either way; a choice whose value is
+  SEARCH_ALL lets everything through. Ties keep the screen's own order.
+- TcgSearch_Apply filters and sorts the ids the screen would show, after the screen's own rules (what's visible /
+  collectible, the type or star tab), so it never shows anything new. tcg_ui.c / ygo_ui.c / tt_ui.c keep the result in
+  a Shown() cache keyed on the screen, tab, owned counts (and Triple Triad's seen cards) and TcgSearch_Generation;
+  ListCard / ListSize (Triple Triad: BinderList / BuilderList) read it, so A / SELECT / INSPECT / buying act on the card
+  under the cursor as shown. The trade screens keep their own lists. Sorting never touches decks or counts.
+- The cursor stays on its card when the list changes (SearchStep: ListIndexOf the card it was on; gone: the first).
+- Menu: SEARCH (A: TcgUi_NameOpen, the keyboard or the screen keys; every letter updates the list, B puts it back),
+  SORT BY, ORDER, OWNED ONLY, the filters, CLEAR ALL, DONE; LEFT / RIGHT change a row, START empties it, B or the key
+  closes. The header counts the cards. Badge (TcgSearch_Badge) at the strip's bottom right: orange with what narrows
+  the list and the count, blue "BY <sort>" when only sorted. An empty list says "No cards match." and how to clear.
+- POKéMON: CARD, TYPE (not for Trainers), STAGE, MIN / MAX HP, WEAKNESS / RESISTANCE (NONE too), RETREAT COST; sorts
+  NUMBER, NAME, RARITY, OWNED, HP, RETREAT COST. Yu-Gi-Oh!: CARD, MONSTER TYPE, ATTRIBUTE, LEVEL (the catalog ends in
+  2003: no Ranks or Links), MIN / MAX ATK and DEF ("?" is none), LIST STATUS from Ygo_CopyLimit (the Forbidden &
+  Limited list in use); sorts NUMBER, NAME, RARITY, OWNED, LEVEL, ATK, DEF. Triple Triad: STARS (BY TAB = the tabs;
+  ALL or a star: the tabs show it, and L / R hand back to the tabs: ListTabStep), MIN TOP / RIGHT / BOTTOM / LEFT
+  (A = 10), TYPE (PRIMAL, SCION, SOCIETY, GARLEAN, NO TYPE); sorts NUMBER, NAME, STARS, OWNED, each side, TOTAL. A card
+  not met yet has no name to find and no sides or type to filter or sort by (it stays "???").
+- Settings: "<save>.search", a tab-separated line per game ("pokemon", "yugioh", "triad"); a game's line is read when
+  it's first registered, saving keeps the lines of games not opened since start. Saved when the menu closes.
+- Tests: tools/test/card_search.sh (typing with the harness's `typetext`, take out / add, INSPECT and back, paging,
+  nothing found then CLEAR ALL, sorts); `mp cards|ygo|tt search text X | sort N | desc | owned | filter I V | clear`
+  and `mp cards|ygo|tt shown` (the list, the cursor's card and the deck's count).
+
+## Every POKéMON card attack (1.46.0)
+- The last 20 command lists from the original's effect_functions.asm (pret/poketcg), as FX_* kinds in
+  tcg_effects.c (generate_effects.py "lists"): Mix-Up, Wildfire, Amnesia, Magnetic Storm, Wail, Scavenge, Destiny
+  Bond, Prophecy, Mystery Attack, Devolution Beam, Mirror Move, Gale, Hurricane, Metronome, Morph, Conversion 1 / 2.
+  Every attack of the 228 cards has an effect now (no "Effect not yet implemented").
+- Choices: TcgAction.option (TcgDuel_AttackOptions: the menu's labels and which can be picked) and .copy (Metronome:
+  the Defending Pokemon's attack + 1; tcg_duel.c uses that attack in Metronome's place, its own type kept), then
+  TcgDuel_AttackAsk (Scavenge's Trainer, Prophecy's order, Devolution Beam's Pokemon). The table builds them as
+  steps (tcg_board.c AttackSteps / AttackStepsAfterOption, ST_ATTACK_OPTION, SRC_TOP3_*), logs "attack menu: N
+  choices", "metronome copies NAME", "attack option N". The AI: TcgDuel_AiAttackChoices.
+- New per-Pokemon state (TcgFieldCard): disabled (Amnesia, until its owner's turn ends), destinyBond (until its
+  owner's next turn), weakAs / resistAs (Conversion, until it leaves the Active spot; TcgDuel_Weakness /
+  TcgDuel_Resistance), mirror* (what the opponent's last attack did to it, recorded after every attack, cleared at
+  the end of its owner's turn). New events TCG_EV_DEVOLVE / TO_HAND / MORPH / DECK_CHANGED.
+- TCG_LINK_VERSION 9: an action carries option and copy (bytes 25-26, selections from 27).
+- When the hand has nothing left to play (tcg_board.c HandHasMove: HandPlayable plus TrainerHasUse for the plain
+  cases), the cursor goes to the Active ("refocus: nothing left to play, your Active"; `mp cards checkdone`,
+  `mp cards discardhand` stage it). Tests: tools/tcg/test_attacks.c, test_ui.sh "done" and "metronome".
+
+## Yu-Gi-Oh! table: backgrounds, END TURN, menu widths (1.47.0)
+- Backgrounds: YgoBoard_SetTheme (ygo_ui.c ThemeOf: the opponent's main deck's most common Attribute; online
+  YGO_BG_ONLINE), built once per theme as a 240x160 texture (ygo_board.c BuildTheme). A face-up Field Spell on either
+  side (FieldSpellCard) covers it with Ygo_ArtTexture of that card, cropped to the table and darkened, so any Field
+  Spell, new ones too, gets its own; logs "field background: NAME". `mp ygo fieldbg ID` shows one for tests. (The
+  board isn't redrawn every frame when nothing moves: nothing here is timed by draws.)
+- The Battle Phase query also offers YGO_ACT_END_TURN: the turn frame's b = MAIN_END, TS_BATTLE_DONE skips Main
+  Phase 2. The phase menu's cursor starts on MAIN PHASE 2; the AI still prefers Main Phase 2. TCG_LINK_VERSION 10.
+- Menus: WindowBox grows to its longest row (RowsWidth) and stays on screen.
+
+## The DANCE machine (src/rhythm/, mp_rhythm.c; protocol 61)
+Decisions: docs/RHYTHM_DECISIONS.md. The GAME CENTER's 3F picture is the user's (docs/user_images 43); 44 marks what's
+drawn over the player (blue: read by gen_gamecenter.py from graphics/moemon/gamecenter/3f_marks.png) and where to
+walk (red: checked against the FLOORS grid; row 6 in front of the arcade cabinets is floor now).
+- The game: rh_chart.c (StepMania .sm / .ssc: header, BPMs, stops, the dance-single charts; tools/rhythm/test_charts),
+  rh_play.c (Beware's EXTREME build's rules: windows, rows, combo, freezes judged by row pairs, MAX2 score, dance
+  points, LifeMeterBar; tools/rhythm/test_play runs every chart perfect / 50 ms late / unplayed), rh_field.c (a
+  field), rh_screen.c (the credit, the screens, online sync RN_*), rh_gfx.c (a 24-bit 240x160 picture, the game's
+  fonts through text.c MP_RenderFontGlyph), rh_audio.c (songs streamed and resampled into the game's 42048 Hz mix;
+  the clock: samples mixed + what's queued + the device buffer, smoothed against the PC clock), rh_songs.c (the
+  song list), rh_assets.c (graphics/rhythm/rhythm.bin from tools/rhythm/gen_assets.py: the theme's and note skins'
+  art cut down, the announcer's 207 lines and the theme's sounds as Ogg files).
+- In the game: sdl2.c ScreenStep draws Rhythm_Step into sFrameImage (the GBA picture: scaling, filters, SPECTATE and
+  shots carry on), Platform_QueueAudio mixes Rhythm_MixAudio instead of the GBA's, ProcessEvents hands every event to
+  Rhythm_OnEvent (steps timed by SDL's event time). Headless tests step on the harness's D-pad at the frame, or
+  MOEMON_DANCE_AUTOPLAY=1 steps on every arrow.
+- The map side (mp_rhythm.c): pads by where the player stands (row 7, x 0-2); MPR_RH_PAD (32) repeated each second
+  (side, state, arrows held) for the bubbles and the sprites drawn up on the pads (x2 / y2, mp_overworld.c
+  MP_Rhythm_AvatarPose); MPR_RH_ASK / ANSWER (33-34) to join a waiting friend; MPR_RH_SESSION (35) carries rh_screen's
+  RN_* messages. Specials MP_Rhythm_StepUp / PlayAlone / Wait / Join / Result (data/scripts/dance_machine.inc).
+- Hops (mp_rhythm.c struct PadHop, mine and each friend's): the player hops up onto the pad (an arc 10 px high,
+  SE_LEDGE) when starting alone, waiting (WAIT FOR 2P) or accepting a friend; the credit starts once they're up
+  (Task_StartWhenUp). On the pad: two or more arrows at once make a small double hop facing by the arrows (LEFT+RIGHT
+  alternates west / east, LEFT combos west, RIGHT combos east, three or more north); single LEFT / RIGHT / UP turn
+  that way, DOWN keeps the facing: never south. After the credit (or giving up waiting) the player hops down and the
+  script waits until they're down (Task_EnableWhenDown). The rails in front of the pads are drawn over a player up
+  on them (3f_marks.png blue, docs/user_images 50). MOEMON_DANCE_TRACE=1 logs each hop's facing.
+- The screen turns on and off like an old TV (src/platform/crt_effect.c Crt_Apply, shared with the VS cabinet:
+  24 frames each way; rh_screen.c ST_CLOSING holds the last picture while it collapses, then MP_Rhythm_Ended).
+- The closing line (MP_Rhythm_Result into gStringVar4): from the stages' average grade (a failed stage counts as E),
+  whether one failed and the hardest meter played (CreditMessage: "That was easy!" ... "My legs feel like jelly...").
+- Records: the server's (mp_scores.c, store ops MP_ST_RH_* 40-42, rhythm_scores.dat in MOEMON_STORE_DIR or where it
+  runs; top 10 a chart, one per name), cached in mp_rhythm.c; the player's bests, cleared songs and options in
+  "<save>.dance" (bests made offline are sent when next at the machine online). Achievements (category DANCE)
+  from MP_Rhythm_StageDone, counted when the RESULTS are left (the friend's final score is in by then).
+- The songs: stepmania/Songs in the repository (Beware's 240, simfiles, .ogg, banners, title cards). Not in the
+  game's zip: the release workflow makes MoemonDanceSongs.zip (tools/release/package_songs.sh) and an update.txt
+  line "songs <tag> <zip> <bytes> <sha256> <id>", keeping the last release's line when the id (a hash of every file)
+  is the same; updater.c Updater_Songs* downloads and unpacks it a file at a time into stepmania/ next to the exe
+  (stepmania/songs_version.txt = the id). RhSongs_Root: MOEMON_STEPMANIA_DIR, else that folder, else ./stepmania.
+- Tests: dance_solo, dance_versus, dance_hop (tools/test/README.md), tools/test/dance_songs_test.sh (the download against a
+  local server), tools/rhythm/test.sh (every chart).
+
+## BATTLE ANIMS > MODERN (mp_modernanim.c; 1.43.0)
+OPTIONS > DISPLAY > BATTLE ANIMS: CLASSIC / MODERN (gMpConfig.battleAnims, ini battle_anims; MOEMON_BATTLE_ANIMS for
+tests). This game only: the Classic animation script always runs (same sprites, tasks, sounds, frame count), MODERN
+draws over the finished picture (sdl2.c VDraw after the battle weather), so friends on either setting stay in step.
+Every animation through LaunchBattleAnimation: moves, general (stat changes, weather, Leech Seed...), status; battles
+and contests. Special ones (ball throws, switches) are left to mp_ballfx.c.
+- Effect sprites (template tileTag in the ANIM_TAG range): sprite.c AddSpritesToOamBuffer flags their OAM entries
+  (gMpOamFx), gba_easy_draw.c PutObjPixel writes their pixels into gMpFxLayer while MODERN draws; GlowAndTrails turns
+  them into a blurred halo of their own color pulled toward the move type's, plus fading afterimages (mixed in, not
+  added: halos show on the pale battle fields as well as in caves).
+- Hits: battle_anim.c Cmd_createsprite (hit splat tags), Cmd_createvisualtask (ShakeMon / ShakeMon2 / ShakeMonInPlace /
+  ShakeAndSinkMon / ShakeTargetBasedOnMovePowerOrDmg / ShakeTargetInPattern on the target; HorizontalShake = a quake at
+  the target's feet), Cmd_playsewithpan (a sound panned to the target: a softer burst). A burst: core light, shockwave
+  ring (white inner line), sparks, the type's particles (sTypeParticles: embers rise, drops and rocks fall, leaves
+  sway, bolts, shards, ringlets, wisps, stars, feathers, bubbles), a 1-2 pixel shake for strong hits. Charging: motes
+  and a ring closing on the user; stat changes: chevrons up (warm) or down (cool).
+- Gentle on the eyes: no whole-screen flash, local light fading over 6-7 frames, shake at most 2 px.
+- Nothing outlives the Classic animation (gAnimScriptActive false: cleared).
+Tests: anim_classic then anim_modern (every move both ways with MOEMON_ANIM_FRAMES: tools/test/check_anim_frames.sh
+checks all 716 lengths match; shots of TACKLE, EMBER, WATER GUN, THUNDERBOLT, EARTHQUAKE, ICE BEAM, SHADOW BALL, SWORDS
+DANCE).
+
+## The BATTLE SIMULATOR (mp_sim.c; 1.43.0, protocol 63)
+A counter NPC (OBJ_EVENT_GFX_SCIENTIST_2 at 12,5) in each BATTLE TENT lobby, data/scripts/battle_sim.inc. Opponents
+are digital copies of other players from the last server: their look (MP_Avatar_DigitalFrontPic: the opponent pic
+slot, palette turned to hologram cyan by brightness) and their top 6 by battles taken part in (MpLifeRec.battles, added
+at the end of the record so older .life files load; counted in mp_life_battle.c Finish for every ally sent out).
+- The record (struct SimRecord: name, Trainer ID, packed look, 6 BattleTowerPokemon) goes to the server on connecting
+  (MP_Sim_OnConnected after WELCOME), back on the field after a battle (MP_Sim_BattleOver -> MP_Sim_Update) and on
+  closing (sdl2.c -> MP_Sim_OnClose, flushed). During a simulator battle the record is of the real party (sSim.saved).
+- Server: mp_scores.c MP_ST_SIM_PUT (latest per name + Trainer ID, 256 players, "sim_players.dat") / GET -> ROSTER
+  parts; a PUT is also passed to the room at once (part 0xFF: merge). Client cache "<save>.sim" (server name: the
+  friend's server address or "online lobby", best streak, records), so it works offline; a save that never played
+  online has none ("no battle data, play with others").
+- The battle: BATTLE_TYPE_TRAINER | BATTLE_TYPE_EREADER_TRAINER (Frontier-level AI flags, no EXP, no whiteout, trainers
+  switch as usual), gMpSimBattle for the picture (battle_controller_opponent.c), class "DIGITAL", name and lines
+  (battle_message.c). Everyone at level 50 (SetLevel50: EXP of level 50, stats, healed); the party is saved before and
+  put back after (CB2_EndSimBattle). Each opponent once before repeats; a loss ends the streak; prize money 500 + 250 a
+  win (5000 at most); a new best at 3/5/7/10/15/20: RARE CANDY, PP UP, NUGGET, PP MAX, LUCKY EGG, MASTER BALL.
+Tests: sim_tent (two players, a win at level 50, levels back), sim_nodata.
+
+## Custom music: .kaisong songs (mp_kaisong.c; 1.44.0)
+
+Moemon Music Studio's `.kaisong` exports (format and loading: docs/KAISONG_FORMAT.md) play in place of the game's songs.
+- **Files.** `music/` next to the exe (`Updater_ExeFile("music")`, `MOEMON_MUSIC_DIR` for tests). `<song>.kaisong` =
+  everywhere, `<song>@<place>.kaisong` = only on that map (place = `MAP_` id without `MAP_`, lower case). A place's file
+  beats the everywhere one. Song names: `sound/song_table.inc` (`src/data/mp_kaisong_names.h`); only BGM-player songs.
+  The repository's `music/` ships in every zip (package.sh), so a committed song reaches every player in the update.
+- **Generated tables** (`python3 tools/kaisong/gen.py`, `--check` to verify; the release workflow runs it):
+  `src/data/mp_kaisong_samples.h` (every DirectSoundWaveData_* / ProgrammableWaveData_*: referencing them also keeps
+  them all in the binary), `src/data/mp_kaisong_names.h` (song names, map keys), `docs/SONG_TABLE.md` (every song and
+  where it plays: map music from map.json, script playbgm / playfanfare / savebgm per map and shared scripts, trainer
+  battles by class from GetBattleBGM and encounter music by trainer, on the maps those trainers stand on, legendary
+  battles from battle_setup.c, C screens; plus the custom songs). The studio imports gen.py at build time
+  (gen_soundfont.py: sf_places, sf_maps, sf_song_md) for its SONG > Replaces picker and writes the same page next to its
+  exports (export.c export_song_table; its make test checks the two are byte for byte the same).
+- **Scenes** (`<song>@<scene>.kaisong`). include/mp_kaisong_scene.h wraps every call that starts a song (sound.h,
+  m4a.h, pokemon.h; files that define them say `MP_KAISONG_NO_SCENE`) to record the asking file (`MP_Kaisong_Request`,
+  nested calls keep the outer one). gen.py: a scene is a source file that names songs (`src/mp/mp_x.c` = `x`, `src/x.c` =
+  `x`, a folder `src/tcg` / `ygo` / `tt` / `rhythm` = one scene), unless it is the world's (WORLD: field, scripts,
+  battles, co-op battle code: their songs are the map's places); its songs are the MUS_ constants it names (not ones it
+  only compares with); the label is SCREENS / SUBDIR_SCENES or a `// MUSIC SCENE: Name` comment in the file. The game
+  gets the scenes, their songs and files in mp_kaisong_names.h (sKaisongScenes / sKaisongSceneFiles, looked up by
+  `__FILE__`). Rule: a song the asking scene names plays `@scene`, else everywhere, never a map's file; any other song
+  (a scene handing back the map's song) is the map's. A scene using the game's battle code holds the music
+  (`MP_MUSIC_SCENE_HOLD(MUS_...)` / `RELEASE`, mp_sim.c: the songs named are what the picker lists for it). Card boards
+  hand the map's song back with `MP_MUSIC_TO_MAP(...)`. `MOEMON_MUSIC_LOG=1` logs each song's scene.
+  tools/kaisong/test_scenes.py adds scene files and checks they are picked up.
+- **Loudness** (1.52.1; automatic from 1.52.2). `python3 tools/kaisong/loudness.py [--write] [--passes N]` plays every
+  file in `music/` and the song it replaces in headless games (`mp playkai FILE` / `mp playsong N`: a clean sound state;
+  then `mp musiclock 1`: the test-only `gMpTestMusicLock` in m4a.c stops the overworld from changing the BGM while it is
+  measured) and prints how loud each plays; `--write` puts the difference in the file's INFO `gain=` (dB). Files with
+  the same music (a hash of every chunk but INFO, as the game's `KaiFile.music`) are one group: measured once, one gain
+  (the mean of their songs' levels), so the music doesn't jump where the game plays it on from one to the other. The
+  release and dev release workflows run it (`--reference 0 --write --passes 2`, about 3 minutes) on the game they
+  built, into the copies they ship: nobody runs it by hand, and re-exported songs get theirs again. The game applies
+  the gain per voice in music_player.c ChnVolSetAsm (`sChnGain`, from MP_Kaisong_Gain of the player's song header;
+  256 = unchanged, so the game's own songs and the bit-exact studio comparisons stay the same). kaisong_test.sh check 6.
+- **Same music, no restart** (1.52.2). `MP_Kaisong_SameMusic(song, warp)`: the file that would play there holds the
+  music already playing (the same file, or the same `music` hash: the GAME CENTER's 1F / 3F `mus_game_corner@` and 2F
+  `mus_poke_mart@`). Overworld_PlaySpecialMapMusic and TransitionMapMusic then call sound.c `MP_KeepMapMusic` (the map's
+  song number changes, the music plays on), TryFadeOutOldMapMusic doesn't fade, and MP_Kaisong_Differs is FALSE. Only
+  custom songs: two of the game's own never count as the same. kaisong_test.sh check 7 (the clock in `mp bgm` goes on).
+- **Hooks.** m4a.c `SONG_HEADER(n, song)` in every m4aSongNum* function; MPlayStart on the BGM player calls
+  `MP_Kaisong_Started` (sample channels = the file's INFO voices, 5 for the game's songs; dropping channels clears the
+  ones past the count). overworld.c: `MP_Kaisong_Differs` in Overworld_PlaySpecialMapMusic, TransitionMapMusic and
+  TryFadeOutOldMapMusic (the same song number, another file on the next map: fade over like a new song).
+  mp_spectate.c: the song number + the place variant in bits 10-15 (protocol 64).
+- **Engine widening.** `gMPlayTrack_BGM[64]` / `NUM_TRACKS_BGM` 64 (PORTABLE; MPlayOpen's cap is 64 there too: until
+  1.52.2 it was still MAX_MUSICPLAYER_TRACKS 16, so a song's tracks past 16 never played), MP2KPlayerMain's track bits are u64 and
+  `status` keeps a nonzero 16-bit summary (title_screen.c's `status & 0xFFFF` still works), `TRACKS_ALL` reaches every
+  track in m4aMPlay*Control, `MAX_DIRECTSOUND_CHANNELS` = `MAX_SAMPLE_CHANNELS` = 64 (the mixer only runs maxChans of
+  them). ply_memacc's not-taken branch skips a whole pointer.
+- **Tests.** tools/test/kaisong_test.sh (studio + game, audio sample for sample). Debug: `mp kaisong` (files),
+  `mp bgm` (song, tracks, voices, the player's tracks and clock), `mp playsong N` (a clean sound state first: Game Boy channel phase, frame clock and
+  frequency registers carry over from earlier sounds in the game, so only a clean start matches the studio's render).
+
+
+## Yu-Gi-Oh! on EDOPro (1.48.0)
+
+The rules engine is EDOPro's: every card with every effect, today's rules. The catalog (ygo_catalog.c) stays the cards
+players can collect and see; anything else a duel brings in (tokens, a card an effect creates) gets an id past
+YGO_CARD_COUNT made from EDOPro's database (Ygo_EdoCard).
+
+- Code: edopro/ocgcore (edo9300's ygopro-core, commit in dist_extras/EDOPRO_CREDITS.txt) with its Lua 5.4 compiled as
+  C++ (Makefile EDO_SRCS / EDO_CXXFLAGS; Lua's four global tables renamed edo_* so the fight engine's Lua 5.1 can
+  link beside it; libstdc++ static on Windows; CI needs g++-mingw-w64). Duel flags: Master Rule 5 without the Extra
+  Monster Zones (five zones a side, as the table draws).
+- Data: graphics/ygo/edo.pak, built in (ygo_edo_pak.c .incbin), from tools/ygo/edo/build_pack.py: cards.bin (every
+  card of BabelCdb's cards.cdb with name, text and effect strings), the root and official/ CardScripts, the LFLists,
+  strings.conf. Files are grouped in ~256 KB raw-deflate chunks (stb's zlib decoder); a few chunks are cached.
+  build_pack.py also writes src/ygo/ygo_edo_codes.c (each catalog card's code: its password, else by name).
+- The bridge (src/ygo/ygo_edo.c): runs OCG_DuelProcess to a question; each message becomes events and moves objects in
+  lists mirroring the engine's (Deck, hand, GY, banished, Extra Deck in order; zones by sequence; MSG_MOVE removes
+  then inserts like the engine). When the engine stops, every location is read back (OCG_DuelQueryLocation): codes,
+  positions, ATK/DEF, counters, equips; if the objects disagree with the engine it rebuilds them (gYgoEdoRebuilds,
+  tests require 0). The engine's player 0 always goes first: GP() swaps when the game's player 1 starts.
+- Questions: IDLECMD / BATTLECMD / CHAIN / EFFECTYN / YESNO / OPTION / CARD / TRIBUTE / UNSELECT_CARD / SUM /
+  POSITION / PLACE / COUNTER / SORT / ANNOUNCE_* / ROCK_PAPER_SCISSORS map to YgoQuery types (YGO_Q_SUM, SORT,
+  COUNTER, NAME are new; OPTION can take several picks). Answered here without asking, always from the duel and its
+  answers: a chain window with nothing to chain, SORT_CHAIN (default order), the zone of a Main Phase answer
+  (YgoAnswer.zone, also "first empty"), and "Attack directly?" turned into one attack-target pick (the opponent's
+  monsters or their LP; the following SELECT_CARD answered with the pick). Labels: YgoDuel_QueryText / ItemText from
+  the card's effect strings and the system strings.
+- Copies: a YgoDuel owns its engine (d->edo); never assign one. YgoDuel_Copy and YgoDuel_Rewind rebuild from the seed and
+  the answers (about 25 ms to start a duel); ygo_net.c rewinds when a concession crosses an answer; ygo_ui.c's online
+  Y.duel is a view of the link's duel (ShowOnline, duelShown: never freed from there).
+- AI (ygo_ai.c): rule-based on the questions (no lookahead: the engine can't be copied cheaply), never reading hidden
+  cards (Seen()).
+- Deck codes: Ygo_ReadYdke / WriteYdke / ReadYdk / WriteYdk (ygo_collection.c); a code's card the catalog hasn't got
+  (YgoEdo_CatalogOf also matches other printings) refuses the deck with "This deck contains cards that are not
+  currently implemented. Please try another code."; cards not owned stay in the deck, gray in the builder (the deck
+  is ready once they're owned). FROM CODE takes a code from the clipboard as it's copied (and typing / Ctrl+V);
+  DECK CODE copies one. .ydk files through src/platform/file_dialog.c (Windows' Open / Save As; not offered elsewhere).
+- Lists: Ygo_BanlistCount / Name / UseBanlist: 0 the game's own (Stairway's), then each EDOPro list (whitelists like
+  GOAT allow only what they name). The player's choice is YgoCollection.banlist (.ygo format 4); opponents' decks
+  follow the game's own (Ygo_GameLimit).
+- Opponents' decks: tools/ygo/scrape_npc_decks.py reads Yugipedia's pages for the opponents of Stairway to the
+  Destined Duel, The Eternal Duelist Soul, World Championship 2004, Reshef of Destruction, The Sacred Cards, World
+  Championship 2006 and GX Duel Academy (1.56.0; three page layouts; on pages with decks from several games only the
+  game's own section, scrape_npc_decks.py section(); names matched through EDOPro's database too), keeps decks the catalog nearly covers (two a character),
+  fills short ones to 40 with Normal Monsters of the deck's own Attribute/Type; tools/ygo/rate_npc_decks.sh rates
+  them by AI-against-AI duels (Elo) into src/ygo/ygo_npc_decks.c, weakest first; ygo_field.c GameDeck picks from the
+  quarter matching the badge tier.
+- The table turns the other side's cards to face them (Home: +180 degrees; piles too).
+- Tests: tools/ygo/test_edo.c (determinism, AI / random duels, Copy / Rewind, no rebuilds, no answer the engine
+  refuses), test_edo_cards.c (Decks unshuffled with gYgoEdoNoShuffle: Summons, Tribute, Dark Hole, Monster Reborn,
+  Polymerization, a Ritual's sum, Mirror Force, Change of Heart, Scapegoat's tokens, Time Wizard's coin, Prohibition's
+  declared name), test_collection.c (deck codes, lists); test_ui.sh "codes" and "table" (`mp ygo mineuntil Q`,
+  `mp ygo code TEXT`).
+
+## Pokemon Card GB2's cards (1.55.0)
+
+The second Game Boy game's 445 cards (pret/poketcg2, the Japanese game; its English text and scans from
+Bulbapedia, tools/tcg/fetch_gb2_text.py): 230 are the first game's cards and keep their ids; the 214 new ones are
+ids 229-442, kept stable by tools/tcg/gb2_ids.json (tools/tcg/import_poketcg2.py writes them into catalog.json with
+the GB2 decks and boosters). TCG_CARD_COUNT 442, 11 booster packs (packs 4-10 = GB2's seven sets 6-12; a first-game
+card in a GB2 booster has it in `set2`), collection format 8 (442 cards, 11 packs, milestonesHi, gcDecks bits 8-31),
+TCG_LINK_VERSION 15.
+
+- Attacks: tools/tcg/gb2_effects.py maps every GB2 effect command list to an FX_* kind (amount, extra; after 2 =
+  the handler reads both phases); generate_effects.py appends them to tcg_effect_table.inc. The new kinds are in
+  tcg_effects.c Gb2Effect. Where the Game Boy game plays a card unlike its print (Horrid Pollen at random, Fury
+  Strikes' markers at random, Cat Punch at a random Pokemon...) the game is followed and gb2_effects.TEXT is the card's
+  text in this game (generate_catalog.py). Choices the print leaves to the player that the engine fixes (as it did
+  for Gigashock): damage "divided as you like" goes to one chosen Pokemon; Earth Wave takes the 2 with the least HP
+  left; Energy Control moves Energy off the Defending Pokemon; Texture Magic changes only the Resistance.
+- Targets: TcgDuel_AttackChoice 3 = any of theirs (0-5), 4 = any of yours; TcgDuel_AttackTargetPrompt the words;
+  phase 3 of TcgDuel_AttackEffect switches before the attack (Fox Fire, Drag Off). Swift (g->swift) skips Weakness,
+  Resistance, Defender, guards and powers on the Defending Pokemon. Turn-numbered effects (lockTurn, skipDrawTurn,
+  strangeBeamUntil, poisonMistUntil, powerOffUntil, goopGasUntil) end by themselves.
+- Powers (tcg_powers.c, TCG_POWER_*): always-on ones hook the rules (TcgPower_NoWeakness / NoResistance /
+  RetreatBlock / AfterRetreat / AttackBonus / KnockedOut / NoTrainers, TcgDuel_RetreatCost); "when you play it from
+  your hand" ones check g->fromHand; Puppet Master goes through TcgDuel_Attacker (the card whose attacks the Active
+  uses: everything about attacks asks it, never Field(0, 0)).
+- Trainers and special Energy: tcg_trainers.c; Rainbow Energy pays any one type (EnergyPaid's shortfall), Recycle
+  Energy returns to the hand when it leaves play (TcgDuel_Apply), Computer Error ends the turn (g->turnOver), Here
+  Comes Team Rocket! turns the Prizes face up on the board. Bill's PC can't be played in a duel (it's for trades).
+- Decks: GB2's 113 decks ("GB2 " names) join card players' choices: Gb2Kind by Energy then Pokemon type, Gb2Tier by
+  rating against the first game's tiers (tcg_field.c); about half of card players give a GB2 booster of their kind.
+- The GAME CENTER sells 14 structure decks (tools/moemon_gamecenter/gen_structure_decks.py): the 1999 Base Set's four
+  at 15000, and the later English theme decks every card of which the two games have (theme_decks.json, from
+  pokemon-tcg-data decks/en) at 18000. The Gym and Neo theme decks need cards neither game has.
+- Tests: tools/tcg/test_gb2.c (every attack 40 times then the AI carries on, every used power, every GB2 deck to the
+  end against others).
+
+## Yu-Gi-Oh! to World Championship 2006 (1.56.0)
+
+- Pool: tools/ygo/build_catalog.py adds the English sets from Invasion of Chaos to Shadow of Infinity, the Starter
+  Decks Kaiba / Yugi Evolution and 2006, Structure Decks 1-8, and every card of World Championship 2006 itself
+  (tools/ygo/wc2006.json from tools/ygo/fetch_wc2006.py: the game's card pages by password, its March 2006 Forbidden
+  & Limited list, the decks' copies from Yugipedia's Set Card Lists, its own card names). 2311 cards, 33 sets; old
+  ids never move (tools/ygo/ids.json). North American printings: "LOB-001" codes up to 2004, then "SOD-EN001"; an
+  Ultimate Rare is the second printing of a card the set also has.
+- Limits: Stairway's for its cards; the 2003 pool keeps what it had (3 when Stairway lacks the card) so no saved deck
+  changes; the new cards follow World Championship 2006's list, never below what a deck sold here holds
+  (Blaze of Destruction's two Level Limit - Area B).
+- Sets past 16: YgoCard.sets is 64 bits (YGO_SET_BIT); the YGO_SET_* enum is generated into card_ids.h; YgoSet.starter
+  is YGO_DECK_STARTER / YGO_DECK_STRUCTURE (0 a booster). Ygo_SetShortName drops "Starter Deck: " / "Structure Deck: ".
+- Save: .ygo format 6 stores the card and set counts it was saved with (Ygo_CollectionLoad reads 1-5 as 1509 cards and
+  13 sets) and 32 bits of sold decks (gcDecks).
+- Art: tools/ygo/build_printed.py keeps the pictures printed.bin already has when the catalog grows; fetch_art.py
+  fetches the new ones. The engine's codes: tools/ygo/edo/build_pack.py --codes BABELCDB (no new pak needed: edo.pak
+  has every card).
+- GAME CENTER 2F: every Starter Deck at 10000, every Structure Deck at 12000 (GcDeckCount / GcDeckSet / GcDeckPrice;
+  row k = bit k of gcDecks, the four 2002-2003 decks keep bits 0-3), a scrolling list.
+- DECK RECIPES (both card games): a deck sold at the GAME CENTER only once bought (gcDecks; Yu-Gi-Oh!'s chosen
+  Starter Deck too, the Pokemon side's three starters always), then each special duelist's deck once beaten
+  (specialBeaten): ygo_field.c Ygo_SpecialRecipe builds it at their best (tier 3, a fixed seed, their signature card
+  in), cached. Tests: `mp ygo recipes` (gcshop), `mp cards recipes` (counter).
+- Opponents: 112 World Championship 2006 decks and 9 GX Duel Academy decks join the others (7 Trials to Glory's aren't
+  on Yugipedia); BuildDeck's themed decks and the boosters handed out draw on the whole pool by themselves.
+- 1.56.1: every turn and phase passing is the POKeMON table's sweep (ygo_board.c Sweep / FX_SWEEP: same band, length
+  and sounds), so a chain window in the Draw and then the Standby Phase reads as two moments, not one question asked
+  twice. A direct attack's target is the far middle edge of the defender's side (FX_ATTACK value 1: it goes all the
+  way); the blow's sound plays as FX_IMPACT lands (Advance) and the attack event waits only until then, so the damage
+  follows the slam; YgoBoard_Idle holds input while an attacker is still flying. The end of a duel is G_ResultScreen
+  (tcg_gfx.c), shared with the POKeMON table: its window as tall as its text (G_TextHeight).
+- 1.56.2 / 1.56.3: every phase still gets its sweep (1.56.2 skipped empty ones; 1.56.3 shows them all again). The
+  middle line's words about the card fade out while a sweep plays and back in as soon as it ends (B.infoFade,
+  G_TextAlpha in tcg_gfx.c: text drawn from then on at that alpha). G_ResultScreen's timing for both tables: the
+  banner alone for a second, then the box with its words (G_RESULT_BOX), A leaves from G_RESULT_READY; test scripts
+  wait 320 frames after `mp ygo win` / `mp cards win`.
+- 1.57.1: the middle line's words fade out (as fast as a sweep's band opens) the moment any turn or phase sweep
+  comes up and back in as soon as none is on screen, in every phase; what to pick when the player is asked always
+  shows. Cards turning over
+  (FX_FLIP: a Flip Summon, a Set card flipped by an attack or an effect, one turned face-down) go edge-on and show
+  their other side (Turn, Animated). A Tribute (YGO_EV_TO_GRAVE with YGO_REASON_TRIBUTE) goes white and up as light
+  toward the middle of its side's Monster Zones (FX_TRIBUTE: the event waits for all of it, Advance moves it to the
+  Graveyard after, so the table never catches up mid-way); a Tribute Summon gathers the light on its zone and bursts
+  (FX_GATHER), then its picture big as TRIBUTE SUMMON. No beams of light: a Summon is a ring.
+- 1.59.0, the Frontier Brains out with their cards: each stands by their facility's door on BATTLE FRONTIER's outside
+  maps (map.json objects, hidden by FLAG_FRONTIER_CARDS_* = FLAG_UNUSED_0x023-0x028) once the player holds that
+  facility's silver symbol. tcg_field.c Tcg_FrontierSetup (both maps' ON_TRANSITION) puts (n + 1) / 2 of the n beaten
+  Brains out each day, a window over them that moves one along per Tcg_Today() (online: the room host's day). Their
+  talk lines are data/scripts/frontier_cards.inc; the CARD CASE finds their decks by graphics id as before (sSpecials,
+  sDuelists). Test scenario frontier_cards.
+- 1.58.0, every POKeMON card can be had: the 17 Game Boy 2 promos no trainer handed over are milestone prizes under
+  PRIZES (tcg_ui.c sMilestonePromos: duels won, packs opened, special trainers beaten, the four ELITE FOUR decks,
+  the CLEAN SWEEP / PURE ENERGY achievements, booster sets complete), counted from what the collection and the
+  achievements already hold so older saves claim theirs at once; claimed bits in TcgCollection.rewards (collection
+  format 9). `mp cards stats WINS PACKS SPECIAL_BITS` sets the counters for tests. The card guide (docs/CARD_GUIDE.html,
+  tools/card_guide/build.sh: every card of the three games and where it comes from) lists them.
+- 1.57.0, the AI's "wait, what?" moves (ygo_ai.c): it reads a card's purpose from its words (Says): an Equip Spell
+  goes on its own monster unless it cripples (HarmfulEquip: Paralyzing Potion, Germ Infection, Flint, Snatch Steal...),
+  a boost (Boost: Rush Recklessly, Reinforcements) on its own; Pointless keeps back Life Point gains above 6000 LP,
+  a field wipe that takes more of its own, an Equip with nothing of the right side, battle tricks (ForBattle:
+  Waboku, Negate Attack...) away from a battle, and a boost on its own turn unless in Main Phase 1 it turns a battle
+  around. It never chains to its own link (one answer to an attack: Magic Cylinder and Mirror Force aren't both
+  spent). A FLIP monster is Flip Summoned when its effect has something to work on. The "second best" slip only
+  swaps two close choices on the same side. Scenarios in tools/ygo/test_edo_cards.c ("ai ...").
+- 1.57.0, the POKeMON AI (tcg_ai.c): Energy goes only where it brings an attack closer, its own or an Evolution's in
+  the hand (EnergyHelps / Unmet; Hydro Pump-style attacks take up to two more), else it stays in the hand; Potion /
+  Super Potion only on a hurt Pokemon (Super Potion for 40 or more), Defender on the Active when the opponent has
+  Energy, Full Heal on a condition, POKeMON CENTER only when 50+ is healed and two Energy or fewer are lost
+  (tools/tcg/test_ai.c). Ratings rerun (tcg_ratings.c, tcg_levels.c, the Yu-Gi-Oh! decks and cards).
+
+## Rare card foil (1.56.0)
+
+- src/tcg/tcg_foil.c (tcg_foil.h), shared by the three card games: G_Foil(kind, card rect, art rect, seed, frame) and
+  G_FoilHalo. Everything is added light (G_FillAdd, SDL_BLENDMODE_ADD), never a color laid over the picture: a soft
+  diagonal sheen (three layered widths, eased, brightest midway, then a rest), a few four-point twinkles at hashed
+  places, a glint along the name strip (Rares), a light round the edge (Ultra / Secret). Kinds: GLINT, SILVER, GOLD,
+  PRISM (pastel hues), COSMOS (POKeMON holos: pale prism and more twinkles), STAR (TRIPLE TRIAD five stars).
+- The art rectangle comes from the code that draws each face, in every CARD ART mode: G_CardArtRect (tcg_gfx.c: the
+  frame's box, or the printed scan's measured rectangle) and Ygo_CardArtRect (ygo_gfx.c, the same, at the face's
+  built size scaled to the drawn one). TRIPLE TRIAD: the card inside a small inset.
+- Where: the BINDER grids (POKeMON, Yu-Gi-Oh!), the big card of all three, and the pack reveals (with G_FoilHalo instead of the old
+  colored box). Checked by bursts of rendershots (the light's union covers the picture exactly).
+
+## Card AI levels, power ratings and how a match looks (1.49.0)
+
+All three card games now share one idea of difficulty. What the player sees is a word and six pips on the challenge
+screen (VERY EASY .. FEARSOME), worked out for the deck under the cursor, with a line under it that takes turns
+saying how their cards compare and how they play (`TcgUi_Match`, tcg_ui.c). Ratings are Elo-style numbers and are
+never shown.
+
+- **AI levels** (0 BEGINNER, 1 CASUAL, 2 SKILLED, 3 EXPERT). Not "the best move N% of the time": each choice is
+  weighed by how much worse it looks than the best one, e^(-loss / T), with T smaller the better the level, so near
+  misses are common and blunders rare. On top of that, per-game slips people make: a Trap's moment missed, the
+  second-best target, an Evolution or Trainer held for later, the Energy on the second-best Pokémon, the weaker
+  attack. The dice come only from what both players can see (never the hidden cards), so a duel replays alike.
+  Triple Triad: tt_ai.c (`sTemper`, `TtAi_View` turns cards it can't see into stand-ins as strong as what it has
+  seen). Yu-Gi-Oh!: ygo_ai.c `YgoDuel_AiAnswerLevel`. Pokémon: tcg_ai.c `TcgDuel_AiActionLevel` (level 3 is the old
+  AI exactly, so tcg_ratings.c stays valid).
+- **Who plays at which level**: special players 3; ordinary ones by badges (1 early, 2 from 4 badges), some a level
+  looser; the CARD CLUB lessons 0. When CARD SCALING can't find a deck/hand strong enough (badge caps), an ordinary
+  player plays a level better instead (SKILLED at most).
+- **Fitting (CARD SCALING)**: the player counts as the SKILLED level plus their own record (skill, per save: TT tag
+  TAG_SKILL, .ygo format 5, TCG's existing one). Target = player - favor - their level's give-away, favor +35 for
+  ordinary players (about 55% for the player), -35 for special ones (45%), -70 for the CARD QUEEN (40%). TT:
+  `Tt_FitOpponentHand` (tt_hands.c; other regions' cards when the home region's can't come close; TT favors since
+  1.49.1 below), YGO:
+  `Ygo_FitOpponent` (ygo_field.c; Game Boy decks up to the badge quarter, or the themed deck's closest tier), TCG:
+  `Tcg_FitOpponent` (tcg_field.c). The challenge screen refits for the deck picked (TT keeps the hand under OPEN).
+- **Triple Triad SAME / PLUS (1.49.1)**: the COMBO starts only from the cards SAME or PLUS took, and each wave only from
+  the cards the last wave took (tt_duel.c; before, the placed card's own plain captures comboed too: one PLUS could
+  flip most of the board). The AI has SAME and PLUS in mind for a move 75 / 55 / 35 / 15% of the time by level
+  (tt_ai.c sSeesRules: otherwise it plans without them; the rules still apply to what it plays). Level give-aways are
+  measured for four kinds of table (hidden / OPEN, with or without SAME / PLUS); under SAME / PLUS the player counts as
+  CASUAL (people miss those sums far more than the AI levels do). Favors: special players -20, the CARD QUEEN -35. A
+  special player whose gentlest hand with their five-star card is still well above the player leads with a four-star.
+- **Triple Triad RANDOM**: both hands dealt fair: yours from your cards as close to their usual hand as 48 deals come,
+  theirs from their region's cards as close to yours (`Tt_DealFair`, `Tt_DealRegion`).
+- **Power ratings**, regenerated by tools (rerun after rules / AI / card changes):
+  - TT `tools/tt/rate_cards.sh`: every card from 30000 AI games with random hands (a hand = its cards' average),
+    pulled toward its stars; level give-aways hidden and OPEN apart (`gTtLevelRating`, `gTtLevelRatingOpen`);
+    `rate_cards audit N` plays every region's rules at every badge tier, the CARD QUEEN and RANDOM, before and now:
+    docs/audit_tt.txt.
+  - YGO `tools/ygo/rate_cards.sh` (after rate_npc_decks.sh): every card's worth as three copies in the median and a
+    strong Game Boy deck against the deck without them, blended with its Forbidden & Limited history (Stairway's 2003
+    list and GOAT's 2005 explicit entries first, today's TCG/OCG/Traditional less); a deck's rating is read from its
+    cards (`Ygo_DeckRating`, fitted to the Game Boy decks' measured ratings): docs/audit_ygo.txt.
+  - TCG `tools/tcg/rate_cards.sh`: levels (src/tcg/tcg_levels.c) and every card's worth in the median Game Boy deck
+    of its type (an Evolution with its stages; cards already there four times measured by taking them out), blended
+    with the 1999-2000 tournament staples: docs/audit_tcg.txt. Decks themselves stay rated by AI duels
+    (`TcgScale_RateDeck`, live for the hovered deck: about 30 ms, cached).
+- **Shuffling**: every card game's duel seed is stirred with the clock (`Tcg_DuelSeed`; scripted tests keep theirs).
+  EDOPro never shuffles a Deck itself: ygo_edo.c `Start` shuffles each from the seed (1.48.2).
+
+## Triple Triad: HOENN's rules from the room host (1.49.2)
+
+Online in a room someone else made, HOENN's Triple Triad rules are the host's: every region's rules and TRADE RULE,
+where the CARD QUEEN is and since when (tt_integration.c, type 15 on the card games' relay, TCG_LINK_VERSION 14). The
+host sends them to everyone whenever they change, every five seconds and at once to someone new (the collection is
+loaded for it even if the case was never opened). A friend's collection holds the host's HOENN while in the room; its
+own is kept aside and written to the save instead (`WorldForSave`), and comes back when the room or the host is gone.
+What changes in a friend's game (a rule spread or abolished on a challenge, a CARD QUEEN favor, a paid journey) is
+found by comparing with the host's last word and sent to the host, who takes it and passes it on. The CARD QUEEN only
+moves by herself in the host's game (tt_field.c QueenDrift). Carried rules and GAMES PLAYED HERE stay each player's.
+`mp tt world` prints HOENN as the game sees it; test tt_world.

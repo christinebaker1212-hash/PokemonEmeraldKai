@@ -1,0 +1,28 @@
+[Info]
+Name         ="feilong"
+DisplayName  ="Fei Long"
+VersionDate  =03,23,2011
+MugenVersion =04,14,2002
+Author       ="G.D.T"
+Pal.Defaults =4,1,3,6
+
+[Files]
+Cmd     =feilong.cmd
+Cns     =feilong.cns
+St      =feilong.cns
+st1=option.txt
+StCommon =common1.cns
+Sprite  =feilong.sff
+Anim    =feilong.air
+Sound   = feilong.snd
+
+pal1 = act/feilong_1.act
+pal2 = act/feilong_2.act
+pal3 = act/feilong_3.act
+pal4 = act/feilong_4.act
+pal5 = act/feilong_5.act
+Pal6 = act/feilong_6.act
+
+[Arcade]
+Intro.Storyboard =
+Ending.Storyboard =

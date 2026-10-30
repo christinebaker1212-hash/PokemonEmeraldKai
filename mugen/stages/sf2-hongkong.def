@@ -1,0 +1,183 @@
+; 아 힘들다
+ 
+[Info]
+name = "SF2 Hong Kong - Fei-Long Stage"
+displayname = "HONG KONG - FEI LONG"
+;by EnvyMask666 (maril0906@hanmail.net)
+
+[Camera]
+startx = 0
+starty = 0
+
+boundleft = -186
+boundright = 187
+
+boundhigh = 0 ;스테이지의 높은쪽
+boundlow = 10;스테이지의 낮은쪽
+
+verticalfollow = .3
+floortension = 0
+
+tension = 50
+
+[PlayerInfo]
+;--- Player 1 ---
+p1startx = -70 ;Starting x coordinates X 좌표들을 시작합니다
+p1starty = 0 ;Starting y coordinates y 좌표들을 시작합니다
+p1startz = 0 ;Starting z coordinates z 좌표들을 시작합니다
+p1facing = 1 ;방향 선수가 마주봅니다: 1=right, -1=left
+;--- Player 2 ---
+p2startx = 70
+p2starty = 0
+p2startz = 0
+p2facing = -1
+
+
+leftbound = -1000 
+rightbound = 1000 
+topbound = 0
+botbound = 0 
+
+;----------------------------------------------------------------
+[Scaling]
+topz = 0 ;Top z-coordinate for scaling늘리는 것을 위한 최고 z-coordinate
+botz = 50 ;Bottom z-coordinate for scaling늘리는 것을 위한 장정한 z-coordinate
+topscale = 1 ;Scale to use at top꼭대기에(서) 사용할 저울
+botscale = 1.2 ;Scale to use at bottom바닥에(서) 사용할 저울
+
+;--------------------------------------------------------
+[Bound]
+;Distance from left/right edge of screen that player can move to
+;선수가 움직일 수 있는 스크린의 left/right 모서리로부터의 거리
+;Typically 15 ;전형적으로 15
+screenleft = 15 ;Dist from left of screen that player can move to
+;선수가 움직일 수 있는 스크린의 떠난 것으로부터의 Dist
+screenright = 15 ;Right edge
+;옳은 모서리
+
+;--------------------------------------------------------
+[StageInfo]
+zoffset = 197
+autoturn = 1
+resetBG = 1 
+
+[Shadow]
+color = 92,92,92 
+yscale = .3
+reflect = 0
+
+[Music]
+bgmusic = sound/SF2 Hong Kong - Fei-Long Theme.mp3
+bgvolume = 255
+
+[BGdef] 
+spr = stages/sf2-hongkong.sff
+debugbg = 1 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+[BG 배경]
+type = norm
+spriteno = 1,0
+start = 2,-2
+delta = .49,0
+mask =1
+
+[bg 작은용무브무브]
+type = anim
+start = -9,-15
+delta = .49,0
+actionno=3
+mask =1
+[begin action 3]
+0,0, 0,0, 495
+5,1, 0,0, 10
+0,0, 0,0, 10
+5,2, 1,-2, 10
+5,1, 0,0, 10
+0,0, 0,0, 10
+5,2, 1,-2, 10
+5,1, 0,0, 10
+0,0, 0,0, 10
+5,2, 1,-2, 10
+5,1, 0,0, 10
+0,0, 0,0, 10
+5,2, 1,-2, 10
+
+
+[bg 새무브무브]
+type = anim
+start = 2,-10
+delta = .49,0
+actionno=2
+mask =1
+[begin action 2]
+0,0, 0,0, 485
+6,1, 14,-2, 10
+0,0, 0,0, 10
+6,2, 3,4, 10
+6,1, 14,-2, 10
+0,0, 0,0, 10
+6,2, 3,4, 10
+6,1, 14,-2, 10
+0,0, 0,0, 10
+6,2, 3,4, 10
+6,1, 14,-2, 10
+0,0, 0,0, 10
+6,2, 3,4, 10
+6,1, 14,-2, 10
+0,0, 0,0, 10
+6,2, 3,4, 10
+6,1, 14,-2, 10
+0,0, 0,0, 10
+6,2, 3,4, 10
+
+[BG 용]
+type = norm
+spriteno = 4,0
+start = 7,-1
+delta = .50,0
+mask =1
+
+[bg 용무브무브]
+type = anim
+start = 2,30
+delta = .50,0
+actionno=1
+mask =1
+[begin action 1]
+7,0, 3,6, 500
+7,1, -6,-2, 10
+7,0, 3,6, 10
+7,2, -11,7, 10
+7,1, -6,-2, 10
+7,0, 3,6, 10
+7,2, -11,7, 10
+7,1, -6,-2, 10
+7,0, 3,6, 10
+7,2, -11,7, 10
+7,1, -6,-2, 10
+7,0, 3,6, 10
+7,2, -11,7, 10
+
+
+
+[BG 땅위]
+type = norm
+spriteno = 2,0
+start = -1,14
+delta = 1,0
+mask =1
+
+[BG 바닥]
+type  = parallax
+spriteno = 3,0
+start = -1,14
+delta = .8, .65
+xscale = .4, .8
+yscalestart = 100
+yscaledelta = 1.05
+mask =1
+

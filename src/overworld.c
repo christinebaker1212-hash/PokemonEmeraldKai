@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_kaisong.h"
 #include "mp.h"
 #include "overworld.h"
 #include "battle_pyramid.h"
@@ -1185,8 +1186,13 @@ void Overworld_PlaySpecialMapMusic(void)
         music = MpRideMusic(music);
     }
 
-    if (music != GetCurrentMapMusic())
-        PlayNewMapMusic(music);
+    if (music != GetCurrentMapMusic() || MP_Kaisong_Differs(music, NULL)) // Moemon Kai: this map has its own version
+    {
+        if (MP_Kaisong_SameMusic(music, NULL))
+            MP_KeepMapMusic(music);   // Moemon Kai: the custom song playing is this map's too: it plays on
+        else
+            PlayNewMapMusic(music);
+    }
 }
 
 void Overworld_SetSavedMusic(u16 songNum)
@@ -1217,7 +1223,10 @@ static void TransitionMapMusic(void)
             else if (newMusic == MUS_UNDERWATER && currentMusic != MUS_NONE && currentMusic != MUS_DUMMY)
                 newMusic = currentMusic;   // Moemon Co-op: SURF MUSIC off: diving keeps the sea's song
         }
-        if (newMusic != currentMusic)
+        if ((newMusic != currentMusic || MP_Kaisong_Differs(newMusic, &sWarpDestination)) // Moemon Kai: a place's own version
+         && MP_Kaisong_SameMusic(newMusic, &sWarpDestination))
+            MP_KeepMapMusic(newMusic);   // Moemon Kai: the same custom music: it plays on
+        else if (newMusic != currentMusic || MP_Kaisong_Differs(newMusic, &sWarpDestination))
         {
             if (TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_MACH_BIKE | PLAYER_AVATAR_FLAG_ACRO_BIKE))
                 FadeOutAndFadeInNewMapMusic(newMusic, 4, 4);
@@ -1262,7 +1271,9 @@ void TryFadeOutOldMapMusic(void)
     }
     if (warpMusic != MUS_UNDERWATER)
         sMpSeaSong = 0;
-    if (FlagGet(FLAG_DONT_TRANSITION_MUSIC) != TRUE && warpMusic != GetCurrentMapMusic())
+    if (FlagGet(FLAG_DONT_TRANSITION_MUSIC) != TRUE
+     && (warpMusic != GetCurrentMapMusic() || MP_Kaisong_Differs(warpMusic, &sWarpDestination)) // Moemon Kai
+     && !MP_Kaisong_SameMusic(warpMusic, &sWarpDestination))   // Moemon Kai: the same custom music there: no fade
     {
         if (currentMusic == MUS_SURF
             && VarGet(VAR_SKY_PILLAR_STATE) == 2
@@ -1524,6 +1535,7 @@ static void OverworldBasic(void)
     UpdateCameraPanning();
     MP_Follower_Update(); // Moemon Co-op: after the camera, so it lines up with its owner
     MP_Compass_Update();  // Moemon Co-op: arrows toward friends off screen
+    MP_MapPic_Update();   // ... full-color map pictures in view (mp_mappic.c: the GAME CENTER)
     MP_Piggy_Update();    // Moemon Co-op: riding piggyback
     MP_Emote_Update();
     BuildOamBuffer();

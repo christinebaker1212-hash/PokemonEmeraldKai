@@ -25,7 +25,7 @@
 extern const struct SpritePalette gSpritePalette_GeneralFieldEffect0;
 extern const struct SpritePalette gSpritePalette_GeneralFieldEffect1;
 
-#define FX_SLOTS (1 + MP_MAX_PLAYERS)
+#define FX_SLOTS MP_FOLLOWFX_SLOTS
 
 enum { FX_TALL_GRASS, FX_LONG_GRASS, FX_SPLASH, FX_FLOW, FX_SPRINGS, FX_PILE, FX_SHORT_GRASS };
 
@@ -89,7 +89,8 @@ static u16 CurrentMap(void)
 
 static struct Sprite *FollowerSprite(struct FollowFx *f)
 {
-    if (!f->active || f->spriteId >= MAX_SPRITES || !MP_Follower_IsFollowerSprite(&gSprites[f->spriteId]))
+    if (!f->active || f->spriteId >= MAX_SPRITES
+     || !(MP_Follower_IsFollowerSprite(&gSprites[f->spriteId]) || MP_GardenLife_IsActorSprite(&gSprites[f->spriteId])))
         return NULL;
     return &gSprites[f->spriteId];
 }

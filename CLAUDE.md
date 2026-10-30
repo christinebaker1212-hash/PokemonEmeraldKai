@@ -3,6 +3,17 @@
 Native PC build of Moemon Emerald Kai v1.0 with online 4-player co-op and PvP.
 Based on Kurausukun's `pc_port` branch of pret/pokeemerald (commit 1165825), SDL2.
 
+**Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
+card duels).
+
+Moemon Music Studio work (`tools/moemon_music/`): don't use agents (subagents / the Agent tool): do the work yourself
+(the rule from the studio's own branch). The game plays its `.kaisong` exports: music/ (shipped; `<song>@<place>`),
+src/mp/mp_kaisong.c, tools/kaisong/gen.py (docs/SONG_TABLE.md, the studio's place picker data; the release runs it),
+scenes (`@tcg`, `@sim`...: a source file / src folder that names songs, found by gen.py; new music-playing code needs no
+list edit, a scene using the battle code holds the music: MP_MUSIC_SCENE_HOLD), the BGM player at 64 tracks / 64
+voices; loudness: tools/kaisong/loudness.py (INFO gain=, so each song plays as loud as the one it replaces; the release
+workflows run it on the shipped copies, nothing by hand), the same music in two files plays on (MP_Kaisong_SameMusic); COOP_NOTES "Custom music"; tools/test/kaisong_test.sh, tools/kaisong/test_scenes.py.
+
 Read `BUILDING_COOP.md` first for the architecture and build steps. The player
 docs are in `dist_extras/README.txt` (shipped next to the exe).
 
@@ -17,7 +28,13 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
   are the game's PATCH NOTES (CO-OP setup screen only; gen_patchnotes.py at build time; v0.1-v0.4 = the days before 1.0).
   Notes are for players: say what changed in the game, never where it came from (no "the design you sent", mock-ups,
   tests, file names).
+- Dev updates (planned, HANDOFF.md): unless the user asks for a feature with "As a dev update..." or something like it,
+  it is a main update: don't test it as a dev update and don't push a dev update.
 - `tools/moemon_import/`: scripts that imported the Kai IPS into the decomp (need the user's ROM; not in the repo)
+- `tools/moemon_music/`: Moemon Music Studio, a separate SDL2 program: plays MIDIs (and PSF/PSF2/USF/GBS/2SF/GSF rips and GameCube streams,
+  through vendored emulators in its third_party/ with capture hooks: README there) with the game's own instruments
+  and engine (ported from src/music_player.c etc.; check engine changes against it), exports `.kaisong` songs
+  (docs/KAISONG_FORMAT.md; the game plays them: src/mp/mp_kaisong.c) and decomp sources. `make test` there
 - `graphics/moemon/`: Kai battle sprite and palette blobs (INCBIN'd)
 - Hooks in stock files are marked `Moemon Co-op` / `Moemon Kai` (grep for them)
 - `quetzal_rip/` + `tools/quetzal_rip/`: Kanto and Johto ripped from Moemon Quetzal (maps, scripts, tilesets, sprites,
@@ -34,8 +51,8 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
 ## Headless testing
 `src/platform/sdl2.c` has a test harness: `SDL_VIDEODRIVER=dummy MOEMON_TEST=script.txt MOEMON_SHOTDIR=dir`
 (commands: wait N, press KEYS N, mash KEYS COUNT INTERVAL, shot NAME, shotburst PREFIX FRAMES [STEP] = a shot every
-frame while the script goes on, for glitches that last a few frames, barrier NAME COUNT = wait until COUNT clients
-sharing the result folder get there, so they act on the same frame, quit).
+frame while the script goes on, for glitches that last a few frames (rendershotburst: the window output, overlays too), fightshot NAME = a VS fight's own 480x320 picture, barrier NAME COUNT = wait until COUNT clients
+sharing the result folder get there, so they act on the same frame, typetext WORDS = typed on the keyboard ("\n" = Enter), quit).
 `MOEMON_DEBUG_QUICKSTART=1` (+ `MOEMON_DEBUG_NAME/GENDER/WARP/PARTY/MONEY`) skips the intro.
 `MOEMON_COOP_CONFIG=x.ini` and `MOEMON_SAVE=x.sav` let several clients run on one machine.
 `MOEMON_TEST_FPS=120` keeps several clients roughly in sync.
@@ -69,7 +86,8 @@ up and picks moves to forget at the same time), and ball entrance / recall effec
 drawn over the frame, not bound by the GBA's sprites or palettes; MY PRESET 1-6, APPLY TO PARTY; 41 colors, the newer
 pieces earned by achievements or MoeGatcha prizes (mp_ballunlock.c); art partly imported from the game's battle anims).
 Also the GENESIS / EPOCH BALLS (Red's and Crystal's POKé BALLS: their catch math, throw, send-out, art and sounds;
-mp_legacy_*.c, tools/moemon_legacy).
+mp_legacy_*.c, tools/moemon_legacy). Also the HGSS battle balls (16x32 frames, a spin in the air, special balls' own art:
+pokeball.h BALL_FRAME_*, tools/moemon_balls/hgss_balls.py; COOP_NOTES "HGSS POKé BALLS"; test hgss_balls).
 Also PC TAG mode (west button / F: tag Moemon, then MOVE / RELEASE them together; pokemon_storage_system.c end).
 Also the CANDY JAR (mp_candy.c: candies from releases, PROF. BIRCH brings the jar, a physics jar menu, CONVERT to RARE
 CANDY; ITEM_CANDY_JAR 398). Also the shared PC as 14 boxes in the PC box screen (mp_sharedbox.c: a mirror the stock
@@ -79,9 +97,13 @@ gPokemonStoragePtr is theirs while the PC is open) with MY PC, SEND TO, friends'
 Also action sprites for every look (mp_hybrid.c: Brendan's / May's action frames with the look's head, data from
 tools/moemon_hybrid) and HMs without restrictions plus held HMs (mp_heldhm.c: a held HM never leaves the player).
 Also joining a battle in progress (mp_join.c: JOIN in front of a battling friend; mp_coop.c MP_Coop_JoinConvertMaster
-rearranges the parties; battle_main.c CB2_MpJoinBattle; tests join_*).
+rearranges the parties; battle_main.c CB2_MpJoinBattle; tests join_*), also when the trainer a friend is battling
+spots you (MPR_COOP_BATTLING: JOIN BATTLE / BATTLE ALONE; tests coop_spot_*).
+Link battles: only the master's engine runs, so anything the others' screens show from battle state must reach them
+(battle weather: B_COMM_MP_WEATHER blocks; Pokemon emotes: MPR_BATTLE_MONEMOTE; tests coop_fieldweather*, coop_life_emote).
+Whole-screen fades (28+ of the 32 palettes, 0<->16) are 30% quicker (palette.c sQuickFade).
 Also two trainers at once and players grouped on one trainer (COOP_NOTES "Two trainers at once"; tests coop_two_*, coop_held_spot,
-coop_wait_merge). Also Pokemon Stadium hues for nicknamed Moemon (mp_hue.c: the Stadium page's math, Kai's skin slots kept;
+coop_wait_merge); a third player joining makes it a Triple Battle against both (test coop_two_join3). Also Pokemon Stadium hues for nicknamed Moemon (mp_hue.c: the Stadium page's math, Kai's skin slots kept;
 tools/moemon_hues, tests hue_*). Also the SPECTATE panel (friends' screens beside yours, each friend below / above / left / right /
 in its own pop-out window at 1x-4x, remembered by name: mp_spectate.c streaming and settings, display.c layout, pop-outs and window
 fitting; pixel-for-pixel checks with MOEMON_SPECTRACE + tools/test/check_spectrace.py; tests spec_*).
@@ -98,9 +120,17 @@ CO-OP > SPECTATE) with BIKE MUSIC / SURF MUSIC (overworld.c MpRideMusic), BUTTON
 (match_call.c SelectMatchCallTrainer); tests options_tabs, music_options, spec_menu.
 Also POKéDEX entries from Ruby, Sapphire, Emerald and FireRed as one long text (pokedex.c TEXT tab: MpDexBuild / MpDexDraw,
 reading mode UP/DOWN/B; data from tools/moemon_dex into src/data/pokemon/mp_dex_more.h and mp_dex_bar.h; test dex_text).
-Also FF8-style level scaling (mp_levelscale.c: OPTIONS > GAME > LEVEL SCALING, the host's online; the team's top-3 average,
-co-op seats average via MpState.top3; trainers, wild, scripted wild; badge caps, boss margins, evolutions; tests levelscale_*,
-coop_levelscale).
+Also FF8-style level scaling (mp_levelscale.c: OPTIONS > GAME > LEVEL SCALING and its page of settings MP_SCALE_*, the host's
+online, set on HOST A GAME > GAME RULES; the team's top-3 average, co-op seats average via MpState.top3; trainers, wild (halfway
+by default), scripted wild; badge caps, boss margins, trainer evolutions, a raised wild one's evolved form as a rare encounter;
+tests levelscale_*, coop_levelscale, host_rules).
+Also the BAG's eight pockets (ITEMS, MEDICINE, POKé BALLS, TMs & HMs, BERRIES, BATTLE ITEMS, KEY ITEMS, FAVORITES: views of
+the save's five pockets, MP_BAGVIEW_*; gBagPosition is per view, use GetItemPocket(item) for anything about the item; the
+HGSS-style screen from docs/user_images/31.png drawn in full color by mp_bagui.c; COOP_NOTES "The BAG's eight pockets";
+tests bag_pockets, bag_more). Also item descriptions from the Gen 4 games (tools/moemon_items/gen_desc.py from PokeAPI's
+tables; no line breaks: mp_itemdesc.c MP_ItemDesc_Print wraps them to each window, narrow font or self-turning pages when
+they don't fit; test item_desc) and REJOIN that remembers where the room is (a friend's own server too) plus the last
+invite code (COOP_NOTES "REJOIN and remembered invite codes"; tools/test/rejoin_smoke.sh).
 Also the Garden's BERRY farm (mp_farm.c: the game's own BERRY trees, ids 100-119, framed soil stamped as plots open; online the room host's
 farm through MP_Farm_Tree in GetBerryTreeInfo, plant / pick asked of the host; GA_FARM Pokémon work by nature; COOP_NOTES "BERRY farm"; tests farm_*).
 Also PMD Collab followers and Garden Pokémon (mp_pmd.c, data tools/moemon_pmd -> graphics/moemon/pmd/pmd.bin via .incbin; big sprites:
@@ -116,7 +146,112 @@ story beats; battle memories and rare pink lines; friends' Pokémon and records 
 every POKéMON CENTER's 2F, its escalator redirected in SetupWarp, START > GARDEN quick travel; tilesets via
 tools/moemon_garden/gen_garden.py: original pieces joined by the original maps' rules, a place per type (zones) and
 per badge (growth table), pathfinding to them; the escalator kept at its fldeff_escalator.c ids; test garden_places); G6 pursuits, rare
-moments, eggs and family, evolution; tests life_*, garden_*).
+moments, eggs and family, evolution; every activity visible: swimming in the pond, climbing trees, digging, cut off at the
+water / ground line by sprite.h mpClipOn (any sprite can use it), ground effects as followers'; test garden_doing; tests life_*, garden_*).
+
+Also 1.30.0's WHERE IS EVERYONE arrows (mp_compass.c: a world grid of Hoenn from the map connections, doors for indoor
+maps, drawn over the frame; test compass; the FRIEND FINDER: hidden until the right stick click / G, quiet arrows and a
+corner radar, OPTIONS > CO-OP > FRIEND FINDER: COOP_NOTES "The FRIEND FINDER"), Town Map heads of each look (MP_Avatar_HeadIcon), RARE CANDY counts, smart
+item targeting (mp_smartcursor.c), followers in their ball on bikes: COOP_NOTES "1.30.0".
+
+Also the GAME CENTER (RUSTBORO's north-east tower, four floors drawn from the user's full-color pictures by mp_mappic.c:
+pictures pinned to maps under the sprites, an "over" layer for furniture tops, past the GBA's tiles; maps and masks from
+tools/moemon_gamecenter; the 2F CARD SHOP UI_GCSHOP with money singles and the 1999 theme decks; COOP_NOTES "The GAME
+CENTER"; tests gc_look, gc_visit). Card packs: holos one pack in three, a new one after 20 dry packs (tcg_collection.c,
+tools/tcg/pack_math.py).
+Also CARD DUELS (src/tcg/, include/tcg/: the original 228-card TCG; rules engine with presentation events, the DS-style
+duel board tcg_board.c drawn into a 240x160 canvas display.c shows as the game picture (Tcg_Canvas; spectate gets it via
+Tcg_Frame), CARD CASE item 399 (registered: its button in front of someone challenges them, tcg_field.c), the CARD CLUB in
+three POKéMON CENTERs, 24 special trainer decks (gen_special_decks.py), CARD POINTS counter, `<save>.cards` sidecar,
+friends' duels / trades by request (tcg_online.c) on relay extension 255 with TCG_LINK_VERSION, card duel TOURNAMENTs
+(mp_tourney.c TK_CARDS); NPCs' Prize cards (2/3/4/6) and records (collection format 6, test tcg_record); the GAME CENTER
+CARD SHOP sells one of each (gcDecks / gcSingles) and runs the CARD CLUB's counter too;
+all 26 Pokemon Powers (tcg_powers.c, tests tools/tcg/test_powers.c + test_ui.sh "powers"); every attack of the 228 cards (the last 20 and
+their menus: COOP_NOTES "Every POKéMON card attack", test_attacks.c); CARD SCALING (tcg_scale.c:
+Elo deck ratings from AI duels in the generated tcg_ratings.c, rerun tools/tcg/rate_decks.sh after any rules, AI or deck
+change; per-save skill; tcg_field.c Tcg_FitOpponent); CARD ART / CARD BACKS
+from the built-in graphics/tcg/printed.bin (tools/tcg/fetch_art.py + build_printed_art.py: scans, the back and each
+illustration's measured rectangle; test_art.sh); everything in
+docs/TCG_IMPLEMENTATION.md, decisions in docs/TCG_DECISIONS.md; tests tools/tcg/test*.sh).
+Also Pokemon Card GB2's 214 new cards (ids 229-442, tools/tcg/import_poketcg2.py + fetch_gb2_text.py; attacks mapped in
+tools/tcg/gb2_effects.py, Gb2Effect in tcg_effects.c; 33 powers, 20 Trainers, 4 special Energy; attacks go through
+TcgDuel_Attacker for Puppet Master), 11 boosters, GB2 decks mixed into card players' picks, the GAME CENTER's 14 English
+structure decks (tools/moemon_gamecenter/gen_structure_decks.py): COOP_NOTES "Pokemon Card GB2's cards"; test_gb2.c.
+
+Also YU-GI-OH! duels (src/ygo/, include/ygo/: the CARD CASE's second side, L/R switches; SDD's card list and
+Forbidden/Limited list plus the English sets and World Championship 2006's cards up to Shadow of Infinity (tools/ygo,
+catalog in ygo_catalog.c / card_ids.h; tools/ygo/wc2006.json from fetch_wc2006.py; 64-bit set masks YGO_SET_BIT; .ygo
+format 6 keeps its card / set counts; the ROM is never committed): the cards that can be collected and seen
+(COOP_NOTES "Yu-Gi-Oh! to World Championship 2006": Structure Decks at the GAME CENTER, beaten duelists as recipes). The rules are EDOPro's: edopro/ocgcore
+(ygopro-core + Lua 5.4, C++ built by the Makefile's EDO_* rules, AGPL: dist_extras/EDOPRO_CREDITS.txt) with every card
+and script in graphics/ygo/edo.pak (tools/ygo/edo/build_pack.py from BabelCdb, CardScripts, LFLists, strings.conf;
+ygo_edo_data.c). src/ygo/ygo_edo.c bridges it to the game's API (include/ygo/duel.h: YgoQuery / YgoAnswer, events,
+YgoState as objects that keep their number): never copy a YgoDuel by value (YgoDuel_Copy / Rewind rebuild from the
+answers); cards outside the catalog (tokens) get ids past YGO_CARD_COUNT. AI ygo_ai.c (reads only what it may see), the
+table ygo_board.c (the opponent's cards turned to face them), screens ygo_ui.c (FROM CODE: YDKE codes, DECK CODE,
+.ydk import/export on Windows only via src/platform/file_dialog.c; the LIST row: every EDOPro Forbidden & Limited list,
+YgoCollection.banlist), who plays which game and the special duelists ygo_field.c + tcg_field.c's which-game menu
+(most duelists bring a deck from the GBA games' opponents: ygo_npc_decks.c from tools/ygo/scrape_npc_decks.py +
+rate_npc_decks.sh), the CARD CLUB duelist in the POKéMON MARTS (data/scripts/ygo_club.inc), "<save>.ygo"; quiet chain
+windows are passed by the board unless L is held; printed art and the real back in graphics/ygo/printed.bin;
+duels / trades with friends by answers over relay types 8-13 (ygo_net.c, struct YgoNet), deck menus with RENAME / ACE
+CARD / DECK RECIPES on both card games (COOP_NOTES "Deck menus"), a Starter Deck to keep or borrow for anyone asked
+without a deck (ResolveNoDeck), the GAME CENTER 2F clerk; decisions docs/YGO_DECISIONS.md, COOP_NOTES "Yu-Gi-Oh!" and
+"Yu-Gi-Oh! on EDOPro"; tests tools/ygo/test.sh (test_edo, test_edo_cards: scenarios with unshuffled Decks), tools/ygo/test_ui.sh, scenarios ygo_*).
+
+The three card games share the rare cards' foil (src/tcg/tcg_foil.c: added light over the exact art rectangle,
+G_CardArtRect / Ygo_CardArtRect; COOP_NOTES "Rare card foil"), INSPECT (R2 / D: PLATFORM_KEY_INSPECT), CONCEDE on your own deck, one cursor (G_Focus)
+and challenge screens with the opponent's battle picture (tcg_field.c CaptureChallengePic): COOP_NOTES "The three card
+games together". They also share AI levels 0-3 that slip like people (weighed by how much worse a choice looks; dice
+only from what both can see), hidden power ratings from AI duels blended with the cards' tournament history
+(tools/tt/rate_cards.sh, tools/ygo/rate_cards.sh, tools/tcg/rate_cards.sh: audits in docs/audit_*.txt; rerun after
+rules / AI / card changes), CARD SCALING fits with a slight player edge, and the challenge screen's live difficulty
+for the deck under the cursor (TcgUi_Match): COOP_NOTES "Card AI levels, power ratings and how a match looks".
+No "wait, what?" moves (1.57.0): the Yu-Gi-Oh! AI reads a card's purpose from its words (ygo_ai.c Says / Boost /
+HarmfulEquip / Pointless / ForBattle) and never chains to its own link; the POKéMON AI attaches Energy only where it
+brings an attack closer (tcg_ai.c EnergyHelps); scenarios "ai ..." in tools/ygo/test_edo_cards.c, tools/tcg/test_ai.c.
+Every card's sources for players: docs/CARD_GUIDE.html (tools/card_guide/build.sh, from the game's own tables; rerun
+after card, deck, shop or reward changes). The POKéMON promos no trainer gives are milestone prizes (tcg_ui.c
+sMilestonePromos, TcgCollection.rewards).
+The Frontier Brains play cards outside their facilities once beaten (silver symbol), about half a day in a shifting
+lineup (tcg_field.c Tcg_FrontierSetup; COOP_NOTES 1.59.0).
+HOW TO PLAY (src/tcg/tcg_guide.c: SELECT on a game's first case screen, animated pages per game; COOP_NOTES "The three
+card games together").
+SEARCH & SORT (src/tcg/tcg_search.c: L2 / F in the BINDER and deck builders of all three, PLATFORM_KEY_SEARCH; each game's
+filters and sorts as a SearchGame, a Shown() cache per UI over the screen's own list; "<save>.search"; COOP_NOTES
+"SEARCH & SORT"; test tools/test/card_search.sh, harness `typetext`).
+
+Also TRIPLE TRIAD (src/tt/, include/tt/: the CARD CASE's third side, L/R go round the three games; every Final Fantasy
+XIV card from xivapi (tools/tt: fetch_cards.py, gen_catalog.py, build_art.py -> graphics/tt/cards.bin, gen_pools.py ->
+tt_pools.c; ids are XIV's); FF8's capture rules from the ff8-decomp (SAME, PLUS, SAME WALL, ELEMENTAL with XIV's types,
+COMBO) and XIV's rules, tt_duel.c deterministic, AI tt_ai.c; HOENN's eight regions with their own rules, the rules
+carried from the last region played in spread or abolish (Tt_MixRules), the CARD QUEEN (favors, paid journeys);
+only the player ever takes cards (trade rules ONE / DIFF / DIRECT / ALL); XIV decks of five; sellers in seven POKeMON
+CENTERS + the GAME CENTER 2F (shelves under 15% of the cards, BRONZE / SILVER / GOLD packs, MYTHRIL / IMPERIAL never
+sold); who plays which game tt_field.c Tt_FieldPick before tcg_field.c's own; "<save>.tt"; decisions
+games and trades with friends (tt_net.c over relay type 14, request kinds 4-5; scenarios tt_online, tt_trade);
+docs/TT_DECISIONS.md, COOP_NOTES "Triple Triad"; tests tools/tt/test.sh, tools/tt/test_ui.sh).
+
+Also the VS cabinet (MAUVILLE GAME CORNER's two slot machines at (7,9)/(8,9)): MUGEN fights in fight/ (mugen-unleashed engine,
+include/mf_engine.h), src/platform/fight_platform.c, src/mp/mp_fight.c; online with rollback (dirty pages of a fixed-address heap
+region + the engine's globals section), the pack check by file hashes, desync recovery by page diff, OPTIONS > CONTROLS > FIGHT
+BUTTONS; content in mugen/ (its sounds GBA sound by tools/fight/gba_audio.py; a stage's song kept under the voices by
+mf_mixer.c); sprites area-resampled (fight/compat/mf_softscale.c) and the 480x320 picture shown through display.c's
+own scaling and filters; docs/FIGHT_DECISIONS.md and COOP_NOTES "The VS cabinet"; tests fight_*, tools/fight/test_softscale.c. Character and
+balance audits: tools/fight/check_chars.py, audit_chars.sh, balance_audit.py (docs/FIGHT_AUDIT.md, docs/FIGHT_BALANCE.md); asset
+ingestion tools/fight/ingest.py (run by the build when mugen/ changed; mugen/processed_assets.json, ingestion_log.txt).
+
+Also the DANCE machine on the GAME CENTER's 3F (a DDR EXTREME rhythm game: src/rhythm/, include/rhythm.h, src/mp/mp_rhythm.c;
+StepMania's .sm / .ssc read by rh_chart.c, judged by Beware's EXTREME rules in rh_play.c; drawn into the GBA picture by
+sdl2.c ScreenStep, mixed by Platform_QueueAudio; art and announcer graphics/rhythm/rhythm.bin from tools/rhythm/gen_assets.py;
+the 240 songs in stepmania/Songs, shipped as their own release zip the machine downloads (updater.c Updater_Songs*,
+tools/release/package_songs.sh); VERSUS online by RN_* messages, records server-wide in mp_scores.c, DANCE achievements;
+docs/RHYTHM_DECISIONS.md, COOP_NOTES "The DANCE machine"; tests dance_*, tools/test/dance_songs_test.sh, tools/rhythm/test.sh).
+
+Also BATTLE ANIMS > MODERN (mp_modernanim.c: glows, trails and hit bursts drawn over the Classic animation, which always runs:
+same frame count, test anim_modern checks all 716) and the BATTLE SIMULATOR in the BATTLE TENTS (mp_sim.c: digital copies of
+players from the last server, records via mp_scores.c MP_ST_SIM_*, "<save>.sim"; tests sim_*). Every trainer battle but the
+Elite Four's and the Champion's can be joined (MP_Coop_JoinTrainerOk; test join_gym); COOP_NOTES "Joining a battle in progress".
 
 Gotchas worth knowing before touching battles:
 - Network link (mp_battle.c): queued blocks move into gBlockRecvBuffer in NetLink_GetBlockReceivedStatus, never in

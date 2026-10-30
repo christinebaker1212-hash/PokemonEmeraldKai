@@ -2619,6 +2619,25 @@ static u8 TranslateWeatherNum(u8 weather)
     }
 }
 
+// Moemon Co-op: the weather cycle moved to a friend's stage (mp_linkx.c). On Route 119 or 123, where the weather follows
+// the cycle (not a part where the route's own weather spots changed it), the new stage's weather comes in now, as it
+// does when the player walks onto the route, not on the next visit: friends on the route see the same sky.
+void MP_Weather_CycleStageChanged(u8 oldStage)
+{
+    const u8 *table;
+    if (gMapHeader.weather == WEATHER_ROUTE119_CYCLE)
+        table = sWeatherCycleRoute119;
+    else if (gMapHeader.weather == WEATHER_ROUTE123_CYCLE)
+        table = sWeatherCycleRoute123;
+    else
+        return;
+    if (oldStage >= WEATHER_CYCLE_LENGTH || gSaveBlock1Ptr->weatherCycleStage >= WEATHER_CYCLE_LENGTH
+     || gSaveBlock1Ptr->weather != table[oldStage] || table[oldStage] == table[gSaveBlock1Ptr->weatherCycleStage])
+        return;
+    SetSavedWeather(gMapHeader.weather);
+    SetNextWeather(GetSavedWeather());
+}
+
 void UpdateWeatherPerDay(u16 increment)
 {
     u16 weatherStage = gSaveBlock1Ptr->weatherCycleStage + increment;

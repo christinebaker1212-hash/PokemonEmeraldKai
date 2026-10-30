@@ -26,6 +26,8 @@ press RIGHT 2
 wait 20
 press RIGHT 2
 wait 20
+press RIGHT 2
+wait 20
 press DOWN 2
 wait 20
 shot tmpocket

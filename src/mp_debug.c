@@ -5,6 +5,8 @@
 #include <string.h>
 #include "global.h"
 #include "battle_gen4.h"
+#include "mp_kaisong.h"
+#include "gba/m4a_internal.h"
 #include "data.h"
 #include "platform.h"
 #include "siirtc.h"
@@ -22,6 +24,10 @@
 #include "script.h"
 #include "pokedex.h"
 #include "mp.h"
+#include "tcg/integration.h"
+#include "ygo/integration.h"
+#include "tt/integration.h"
+#include "map_name_popup.h"
 #include "mp_farm.h"
 #include "battle.h"
 #include "battle_anim.h"
@@ -40,6 +46,7 @@
 #include "coins.h"
 #include "overworld.h"
 #include "sound.h"
+#include "m4a.h"
 #include "platform/gamepad.h"
 #include "money.h"
 #include "item.h"
@@ -56,6 +63,54 @@
 bool8 MP_DebugQuickStartEnabled(void)
 {
     return getenv("MOEMON_DEBUG_QUICKSTART") != NULL;
+}
+
+// animall FIRST LAST ATK TGT [TURN]: every move animation from FIRST to LAST in a row, ATK attacking TGT (in a battle,
+// at the action menu); with MOEMON_ANIMCHECK the log lists every sprite animation started (tools/test/check_anims.py)
+#include "task.h"
+extern const u8 *const gBattleAnims_Moves[];
+static void Task_MpAnimAll(u8 taskId)
+{
+    static struct DisableStruct sDisable;
+    s16 *d = gTasks[taskId].data;   // 0 move, 1 last, 2 atk, 3 tgt, 4 turn, 5 phase, 6 timer
+    if (d[5] == 0)
+    {
+        if (gAnimScriptActive)
+            return;
+        if (d[0] > d[1])
+        {
+            printf("[test] animall done\n");
+            MPNet_Log("animall done");   // (what the harness's waitlog sees)
+            fflush(stdout);
+            DestroyTask(taskId);
+            return;
+        }
+        gBattleAnimAttacker = d[2];
+        gBattleAnimTarget = d[3];
+        gAnimMoveTurn = d[4];
+        gAnimMovePower = 60;
+        gAnimMoveDmg = 30;
+        gAnimFriendship = 255;
+        gWeatherMoveAnim = 0;
+        memset(&sDisable, 0, sizeof(sDisable));
+        gAnimDisableStructPtr = &sDisable;
+        LaunchBattleAnimation(gBattleAnims_Moves, d[0], TRUE);
+        d[5] = 1;
+        d[6] = 0;
+        return;
+    }
+    gAnimScriptCallback();
+    if (!gAnimScriptActive || ++d[6] > 1500)
+    {
+        if (d[6] > 1500)
+            printf("[test] animall: move %d didn't end\n", d[0]);
+        else if (getenv("MOEMON_ANIM_FRAMES"))   // each animation's length (BATTLE ANIMS: CLASSIC and MODERN match)
+            printf("[test] animall: move %d took %d frames\n", d[0], d[6]);
+        gSprites[gBattlerSpriteIds[d[2]]].invisible = FALSE;
+        gSprites[gBattlerSpriteIds[d[3]]].invisible = FALSE;
+        d[0]++;
+        d[5] = 0;
+    }
 }
 
 static void SetAsciiName(u8 *dst, const char *src, int maxLen)
@@ -89,6 +144,15 @@ void MP_DebugQuickStartNewGame(void)
     char buf[256];
     int slot = 0;
 
+    // MOEMON_DEBUG_TID: another Trainer ID (things kept per save, e.g. the card collection)
+    if (getenv("MOEMON_DEBUG_TID"))
+    {
+        u32 tid = (u32)strtoul(getenv("MOEMON_DEBUG_TID"), NULL, 0);
+        gSaveBlock2Ptr->playerTrainerId[0] = tid;
+        gSaveBlock2Ptr->playerTrainerId[1] = tid >> 8;
+        gSaveBlock2Ptr->playerTrainerId[2] = tid >> 16;
+        gSaveBlock2Ptr->playerTrainerId[3] = tid >> 24;
+    }
     FlagSet(FLAG_SYS_POKEMON_GET);
     FlagSet(FLAG_SYS_POKEDEX_GET);
     FlagSet(FLAG_SYS_B_DASH);
@@ -163,6 +227,8 @@ bool8 MP_Setup_IsReady(void);
 bool8 MP_Setup_ScreenIs(int screen);
 int MP_TestCondition(const char *name)
 {
+    if (strcmp(name, "cards") == 0)
+        return Tcg_IsActive();
     if (strcmp(name, "log") == 0)   // harness waitlog
     {
         extern int gMpLogSeen;
@@ -307,6 +373,21 @@ int MP_TestCondition(const char *name)
 void MP_OnFileDropped(const char *path);
 void MP_TestCommand(const char *cmd, const char *arg)
 {
+    if (strcmp(cmd, "cards") == 0)
+    {
+        Tcg_Debug(arg);
+        return;
+    }
+    if (strcmp(cmd, "ygo") == 0)
+    {
+        Ygo_Debug(arg);
+        return;
+    }
+    if (strcmp(cmd, "tt") == 0)
+    {
+        Tt_Debug(arg);
+        return;
+    }
     if (strcmp(cmd, "export") == 0)
     {
         char path[200];
@@ -315,11 +396,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "wild") == 0)
     {
-        // wild SPECIES:LEVEL - start a wild battle right now
-        int species = 263, level = 3;
-        sscanf(arg, "%d:%d", &species, &level);
+        // wild SPECIES:LEVEL [M1 M2 M3 M4] - start a wild battle right now (with only these moves, if given: a test
+        // that needs the foe to hit doesn't leave it to the moves it picks)
+        int species = 263, level = 3, m[MAX_MON_MOVES] = {0}, n, i;
+        n = sscanf(arg, "%d:%d %d %d %d %d", &species, &level, &m[0], &m[1], &m[2], &m[3]);
         ZeroEnemyPartyMons();
         CreateMon(&gEnemyParty[0], species, level, 32, 0, 0, OT_ID_PLAYER_ID, 0);
+        if (n >= 3)
+            for (i = 0; i < MAX_MON_MOVES; i++)
+                SetMonMoveSlot(&gEnemyParty[0], m[i], i);
         BattleSetup_StartWildBattle();
     }
     else if (strcmp(cmd, "sumstate") == 0)   // the summary screen's page and input mode (mp summary opens it)
@@ -353,13 +438,26 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void BattleSetup_StartLocalTripleWildBattle(void);
         int sp[PARTY_SIZE] = {288, 286, 290}, lv[PARTY_SIZE] = {5, 5, 5}, i, n = 0, used;
         const char *p = arg;
+        // (S:Lf / S:Lm: that one female / male, for tests that check a card's gender icon)
+        char gender[PARTY_SIZE] = {0};
         while (n < PARTY_SIZE && sscanf(p, "%d:%d%n", &sp[n], &lv[n], &used) == 2)
-            p += used, n++;
+        {
+            p += used;
+            if (*p == 'f' || *p == 'm')
+                gender[n] = *p++;
+            n++;
+        }
         if (n < 3)
             n = 3;
         ZeroEnemyPartyMons();
         for (i = 0; i < n; i++)
-            CreateMon(&gEnemyParty[i], sp[i], lv[i], 32, 0, 0, OT_ID_PLAYER_ID, 0);
+        {
+            if (gender[i])
+                CreateMonWithGenderNatureLetter(&gEnemyParty[i], sp[i], lv[i], 32, gender[i] == 'f' ? MON_FEMALE : MON_MALE,
+                                                0, 0);
+            else
+                CreateMon(&gEnemyParty[i], sp[i], lv[i], 32, 0, 0, OT_ID_PLAYER_ID, 0);
+        }
         gMpDebugTriple = getenv("MOEMON_TRIPLEDEBUG") != NULL;
         BattleSetup_StartLocalTripleWildBattle();
     }
@@ -404,6 +502,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void ShowPlayerTrainerCard(void (*callback)(void));
         void CB2_ReturnToFieldContinueScript(void);
         ShowPlayerTrainerCard(CB2_ReturnToFieldContinueScript);
+    }
+    else if (strcmp(cmd, "finder") == 0)
+    {
+        // finder STYLE: OPTIONS > CO-OP > FRIEND FINDER (0 both, 1 arrows, 2 radar)
+        gMpConfig.finderStyle = atoi(arg) % MP_FINDER_COUNT;
+        MPNet_Log("friend finder: style %d", gMpConfig.finderStyle);
     }
     else if (strcmp(cmd, "townmap") == 0 || strcmp(cmd, "flymap") == 0)
     {
@@ -519,6 +623,43 @@ void MP_TestCommand(const char *cmd, const char *arg)
         for (n = 0; n < 20; n++)
             printf(" %d", gSaveBlock1Ptr->secretBases[n].secretBaseId);
         printf(" tv0kind %d\n", gSaveBlock1Ptr->tvShows[5].common.kind);
+    }
+    else if (strcmp(cmd, "coopask") == 0)   // coopask N - ask player N (1-based) to team up (as walking up to them does)
+    {
+        void MP_Coop_DebugAsk(u8 i);
+        int n = 0;
+        sscanf(arg, "%d", &n);
+        if (n >= 1)
+            MP_Coop_DebugAsk(n - 1);
+    }
+    else if (strcmp(cmd, "joinask") == 0)   // joinask N - ask player N (1-based) to let us join their battle (as JOIN does)
+    {
+        void MP_Join_Ask(u8 target);
+        int n = 0;
+        sscanf(arg, "%d", &n);
+        if (n >= 1)
+            MP_Join_Ask(n - 1);
+    }
+    else if (strcmp(cmd, "animall") == 0)
+    {
+        int first = 1, last = MOVES_COUNT - 1, atk = 1, tgt = 0, turn = 0;
+        u8 t;
+        sscanf(arg, "%d %d %d %d %d", &first, &last, &atk, &tgt, &turn);
+        t = CreateTask(Task_MpAnimAll, 1);
+        gTasks[t].data[0] = first;
+        gTasks[t].data[1] = last;
+        gTasks[t].data[2] = atk;
+        gTasks[t].data[3] = tgt;
+        gTasks[t].data[4] = turn;
+        printf("[test] animall %d-%d, %d -> %d, turn %d\n", first, last, atk, tgt, turn);
+    }
+    else if (strcmp(cmd, "fieldweather") == 0)   // fieldweather N - this game's field weather now (WEATHER_*), not the map's
+    {
+        void SetCurrentAndNextWeatherNoDelay(u8 weather);
+        int v = 0;
+        sscanf(arg, "%d", &v);
+        SetCurrentAndNextWeatherNoDelay(v);
+        printf("[test] field weather %d\n", v);
     }
     else if (strcmp(cmd, "setstage") == 0)
     {
@@ -756,6 +897,65 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // setflag N - an event flag (include/constants/flags.h)
         FlagSet(atoi(arg));
     }
+    else if (strcmp(cmd, "kaisong") == 0)
+    {
+        // kaisong - list music/*.kaisong (custom songs) in the log
+        MP_Kaisong_Log();
+    }
+    else if (strcmp(cmd, "playsong") == 0 || strcmp(cmd, "playkai") == 0)
+    {
+        // playsong N - song N from a clean sound state (no reverb, no voices left), for audio checks against the studio;
+        // playkai FILE - the same with a music/ .kaisong file, wherever it is meant to play (tools/kaisong/loudness.py);
+        // (either clears musiclock)
+        extern u8 gMpTestMusicLock;
+        int i;
+        gMpTestMusicLock = 0;
+        m4aMPlayAllStop();
+        for (i = 0; i < MAX_DIRECTSOUND_CHANNELS; i++)
+            gSoundInfo.chans[i].statusFlags = 0;
+        for (i = 0; i < 4; i++)
+            gCgbChans[i].statusFlags = 0;
+        m4aSoundMode(SOUND_MODE_REVERB_SET);
+        memset(gSoundInfo.pcmBuffer, 0, sizeof(gSoundInfo.pcmBuffer));
+        {
+            // the Game Boy channels' phase and frame clock carry on from earlier sounds in the game; the studio starts at 0
+            extern u32 apuFrame, sampleRate;
+            extern u8 apuCycle;
+            void cgb_audio_init(u32 rate);
+            cgb_audio_init(sampleRate);
+            apuFrame = 0;
+            apuCycle = 0;
+            REG_NR13 = REG_NR14 = REG_NR23 = REG_NR24 = REG_NR33 = REG_NR34 = 0;
+        }
+        if (cmd[4] == 'k')
+            printf("[test] playkai %s %s\n", arg, MP_Kaisong_PlayFile(arg) ? "ok" : "FAILED");
+        else
+        {
+            m4aSongNumStart(atoi(arg));
+            printf("[test] playsong %d\n", atoi(arg));
+        }
+    }
+    else if (strcmp(cmd, "musiclock") == 0)
+    {
+        // musiclock 1 - the song playing keeps the music player: the map's own music changes, stops and fades are
+        // ignored (tools/kaisong/loudness.py, so a long measure isn't taken over by the map's song); 0 = off
+        extern u8 gMpTestMusicLock;
+        gMpTestMusicLock = atoi(arg) != 0;
+        printf("[test] musiclock %d\n", gMpTestMusicLock);
+    }
+    else if (strcmp(cmd, "bgm") == 0)
+    {
+        // bgm - which song the music player plays now, and how many tracks / voices it has
+        printf("[test] bgm song %d tracks %d voices %d status %x player tracks %d clock %u\n",
+               MP_Kaisong_SongOf(gMPlayInfo_BGM.songHeader),
+               gMPlayInfo_BGM.songHeader ? gMPlayInfo_BGM.songHeader->trackCount : 0, SOUND_INFO_PTR->maxChans,
+               (unsigned)gMPlayInfo_BGM.status, gMPlayInfo_BGM.trackCount, (unsigned)gMPlayInfo_BGM.clock);
+    }
+    else if (strcmp(cmd, "getflag") == 0)
+    {
+        // getflag N - whether an event flag is set (2151 = FLAG_BADGE01_GET)
+        printf("[test] flag %d = %d\n", atoi(arg), FlagGet(atoi(arg)) ? 1 : 0);
+    }
     else if (strcmp(cmd, "clearflag") == 0)
     {
         // clearflag N - an event flag off (2144 = FLAG_SYS_POKEMON_GET)
@@ -959,6 +1159,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
             UpdateHealthboxAttribute(gHealthboxSpriteIds[b], mon, HEALTHBOX_ALL);
         }
     }
+    else if (strcmp(cmd, "tourney") == 0)
+    {
+        // tourney - CO-OP > TOURNAMENT
+        MP_Tourney_OpenMenu();
+    }
     else if (strcmp(cmd, "register") == 0)
     {
         // mp register ITEM: adds it and registers it to SELECT
@@ -982,6 +1187,23 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "lend") == 0)
         MP_Lend_Debug();
+    else if (strcmp(cmd, "pp") == 0)
+    {
+        // pp SLOT MOVEINDEX VALUE - a party Moemon's PP for one move; prints all four back
+        int slot = 0, m = 0, v = 0, i;
+        if (sscanf(arg, "%d %d %d", &slot, &m, &v) == 3 && slot >= 0 && slot < PARTY_SIZE && m >= 0 && m < MAX_MON_MOVES)
+        {
+            u8 pp = v;
+            SetMonData(&gPlayerParty[slot], MON_DATA_PP1 + m, &pp);
+        }
+        if (slot >= 0 && slot < PARTY_SIZE)
+        {
+            printf("[test] pp slot %d:", slot);
+            for (i = 0; i < MAX_MON_MOVES; i++)
+                printf(" %u", (unsigned)GetMonData(&gPlayerParty[slot], MON_DATA_PP1 + i));
+            printf("\n");
+        }
+    }
     else if (strcmp(cmd, "teach") == 0)
     {
         // mp teach SLOT MOVE: replaces the first move
@@ -1041,7 +1263,7 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "hp") == 0)
     {
-        // mp hp SLOT VALUE
+        // mp hp SLOT VALUE (0: it fainted now, for REVIVE's cursor); mp partyhp: every slot's HP and status
         int slot = atoi(arg), v = 0;
         const char *sp = strchr(arg, ' ');
         if (sp)
@@ -1050,8 +1272,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
         {
             u16 hp = v;
             SetMonData(&gPlayerParty[slot], MON_DATA_HP, &hp);
+            if (hp == 0)   // (a faint, as far as REVIVE's cursor knows)
+                MP_NoteFaint(GetMonData(&gPlayerParty[slot], MON_DATA_PERSONALITY));
             printf("[test] hp: slot %d = %d\n", slot, v);
         }
+    }
+    else if (strcmp(cmd, "partyhp") == 0)
+    {
+        int i;
+        for (i = 0; i < PARTY_SIZE && GetMonData(&gPlayerParty[i], MON_DATA_SPECIES); i++)
+            printf("[test] partyhp %d: hp %u status %u\n", i, (unsigned)GetMonData(&gPlayerParty[i], MON_DATA_HP),
+                   (unsigned)GetMonData(&gPlayerParty[i], MON_DATA_STATUS));
     }
     else if (strcmp(cmd, "givebadges") == 0)
     {
@@ -1125,6 +1356,20 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // typeicons [0|1] - OPTIONS > TYPE ICONS
         gSaveBlock2Ptr->optionsTypeIcons = arg[0] ? atoi(arg) != 0 : 1;
     }
+    else if (strcmp(cmd, "safari") == 0)
+    {
+        // safari - Safari Zone mode on (balls and steps), so the next wild battle is a Safari battle
+        void EnterSafariMode(void);
+        EnterSafariMode();
+    }
+    else if (strcmp(cmd, "bmons") == 0)
+    {
+        // bmons - every battler's species and moves as the battle has them (not the party's)
+        int b;
+        for (b = 0; b < gBattlersCount; b++)
+            printf("[test] bmon %d: species %u moves %u %u %u %u\n", b, gBattleMons[b].species, gBattleMons[b].moves[0],
+                   gBattleMons[b].moves[1], gBattleMons[b].moves[2], gBattleMons[b].moves[3]);
+    }
     else if (strcmp(cmd, "wilddouble") == 0)
     {
         extern u8 gMpWildDoublePercent;
@@ -1141,6 +1386,29 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] bagorder %d:", p);
             for (i = 0; i < gBagPockets[p].capacity && gBagPockets[p].itemSlots[i].itemId != ITEM_NONE; i++)
                 printf(" %d%s", gBagPockets[p].itemSlots[i].itemId, MP_Bag_IsNew(gBagPockets[p].itemSlots[i].itemId) ? "*" : "");
+            printf("\n");
+        }
+    }
+    else if (strcmp(cmd, "itemdesc") == 0)
+    {
+        // itemdesc - how the last item description was laid out (font, lines, paging)
+        void MP_ItemDesc_Debug(void);
+        MP_ItemDesc_Debug();
+    }
+    else if (strcmp(cmd, "bagview") == 0)
+    {
+        // bagview VIEW - the item numbers one of the BAG's eight pockets shows (MP_BAGVIEW_*), in its order
+        static struct ItemSlot *slots[MP_BAG_ITEMS_COUNT + MP_BAG_KEYITEMS_COUNT + MP_BAG_POKEBALLS_COUNT
+                                      + MP_BAG_TMHM_COUNT + MP_BAG_BERRIES_COUNT];
+        int v = 0;
+        u16 i, n;
+        sscanf(arg, "%d", &v);
+        if (v >= 0 && v < MP_BAGVIEW_COUNT)
+        {
+            n = MP_Bag_ViewSlots(v, slots, ARRAY_COUNT(slots));
+            printf("[test] bagview %d:", v);
+            for (i = 0; i < n; i++)
+                printf(" %d", slots[i]->itemId);
             printf("\n");
         }
     }
@@ -1268,7 +1536,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // music - the song playing now (and the saved bike song); music play: the map's song again, as on arrival
         if (strcmp(arg, "play") == 0)
             Overworld_PlaySpecialMapMusic();
-        printf("[test] music %u saved %u\n", (unsigned)GetCurrentMapMusic(), (unsigned)gSaveBlock1Ptr->savedMusic);
+        printf("[test] music %u saved %u status %08x fanfare %d\n", (unsigned)GetCurrentMapMusic(),
+               (unsigned)gSaveBlock1Ptr->savedMusic, (unsigned)gMPlayInfo_BGM.status, !IsFanfareTaskInactive());
     }
     else if (strcmp(cmd, "bikemode") == 0)
     {
@@ -1294,6 +1563,7 @@ void MP_TestCommand(const char *cmd, const char *arg)
     else if (strcmp(cmd, "summary") == 0)
     {
         extern void CB2_ReturnToField(void);
+        HideMapNamePopUpWindow();   // (as the START menu does: its task would draw over the summary's BG0)
         ShowPokemonSummaryScreen(SUMMARY_MODE_NORMAL, gPlayerParty, 0, gPlayerPartyCount - 1, CB2_ReturnToField);
     }
     else if (strcmp(cmd, "frame") == 0)
@@ -1531,6 +1801,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void ShowPokemonStorageSystemPC(void);
         LockPlayerFieldControls();
         ShowPokemonStorageSystemPC();
+    }
+    else if (strcmp(cmd, "itempc") == 0)
+    {
+        // itempc - the player's PC (ITEM STORAGE, MAILBOX...), as from a PC
+        void PlayerPC(void);
+        LockPlayerFieldControls();
+        PlayerPC();
     }
     else if (strcmp(cmd, "holdtest") == 0)
     {
@@ -2019,6 +2296,24 @@ void MP_TestCommand(const char *cmd, const char *arg)
             DoWarp();
             printf("[test] warp: %d,%d %d,%d\n", g, n, x, y);
         }
+    }
+    else if (strcmp(cmd, "textspeed") == 0)
+    {
+        // textspeed 0|1|2 - OPTIONS > TEXT SPEED (slow, mid, fast)
+        gSaveBlock2Ptr->optionsTextSpeed = atoi(arg) % 3;
+        printf("[test] text speed %d\n", gSaveBlock2Ptr->optionsTextSpeed);
+    }
+    else if (strcmp(cmd, "face") == 0)
+    {
+        // face up|down|left|right - turn the player in place
+        static const char *const sDirs[] = {"down", "up", "left", "right"};
+        int d;
+        for (d = 0; d < 4; d++)
+            if (strcmp(arg, sDirs[d]) == 0)
+            {
+                ObjectEventTurn(&gObjectEvents[gPlayerAvatar.objectEventId], DIR_SOUTH + d);
+                printf("[test] face: %s\n", sDirs[d]);
+            }
     }
     else if (strcmp(cmd, "ballstyle") == 0)
     {

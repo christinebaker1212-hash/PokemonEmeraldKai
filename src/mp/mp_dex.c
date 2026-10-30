@@ -1,3 +1,4 @@
+#include "mp_version.h"
 // Moemon Co-op: one Pokédex for the whole group.
 //
 // Every Pokémon anyone sees or catches is added to everyone's Pokédex. When
@@ -79,6 +80,8 @@ static void LoadCredits(void)
 
 static void SaveCredits(void)
 {
+    if (MOEMON_DEV_BUILD)
+        return;
     FILE *f;
     char path[600];
     int nat, i;

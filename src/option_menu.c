@@ -1,6 +1,7 @@
+#include "mp_version.h"
 // OPTIONS (START > OPTIONS, and the title screen's OPTION): the game's own options screen, with tabs.
 // Moemon Co-op: one place for every setting. GAME (the original options, type icons, name case, creatures), DISPLAY
-// (fullscreen, window scale, scaling, filter, vsync), CONTROLS (controller, buttons, stick run, rumble) and CO-OP
+// (fullscreen, window scale, scaling, filter, vsync), CONTROLS (controller, buttons, stick run, rumble, the fight buttons) and CO-OP
 // (friends' screens with a page per friend online, new friends' size, autosave, the BATTLE FLAG's range).
 // L / R switch tabs. Values change live with Left / Right (or A); B or CLOSE saves and leaves.
 #include "global.h"
@@ -25,6 +26,7 @@
 #include "gba/m4a_internal.h"
 #include "platform/display.h"
 #include "platform/gamepad.h"
+#include "platform/fight.h"
 #include "constants/characters.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
@@ -56,28 +58,45 @@ enum
     OPT_SURFMUSIC,
     OPT_LEVELSCALE,
     OPT_MOVESPLIT,
+    OPT_CARDSCALE,
     OPT_FULLSCREEN,
     OPT_WINSCALE,
     OPT_SCALING,
     OPT_FILTER,
     OPT_VSYNC,
+    OPT_CARDART,
+    OPT_CARDBACK,
+    OPT_BATTLEANIMS,
     OPT_PADSELECT,
     OPT_PADLAYOUT,
     OPT_ANALOGRUN,
     OPT_RUMBLE,
     OPT_BUTTONICONS,
+    OPT_FIGHTKEYS,    // A opens the FIGHT BUTTONS page
     OPT_SPECPANEL,
     OPT_SPECFRIEND,   // a friend online: A opens their page
     OPT_SPECNEW,
     OPT_AUTOSAVE,
     OPT_FLAGRANGE,
     OPT_MOENAV,
+    OPT_FINDER,
     OPT_FR_SHOW,      // a friend's page
     OPT_FR_PLACE,
     OPT_FR_SIZE,
     OPT_FR_BACK,
+    OPT_SC_ON,        // the LEVEL SCALING page (MP_SCALE_*, in order)
+    OPT_SC_WILD,
+    OPT_SC_TRAINERS,
+    OPT_SC_BOSS,
+    OPT_SC_CAPS,
+    OPT_SC_PAST8,
+    OPT_SC_BACK,
+    OPT_FB_BIND,      // the FIGHT BUTTONS page: a fight button (arg: FIGHT_BIND_*)
+    OPT_FB_DEFAULTS,
+    OPT_FB_BACK,
     OPT_CLOSE,
 };
+#define SC_RULE(opt) ((opt) - OPT_SC_ON)
 
 #define MAX_ROWS 16
 static EWRAM_DATA struct { u8 opt, arg; } sRows[MAX_ROWS] = {0};
@@ -86,6 +105,9 @@ static EWRAM_DATA u8 sTab = 0;
 static EWRAM_DATA u8 sSel = 0;
 static EWRAM_DATA u16 sTop = 0;
 static EWRAM_DATA u8 sFriendPage = 0;      // 0: the CO-OP tab, 1 + player id: that friend's page
+static EWRAM_DATA bool8 sScalePage = 0;    // GAME > LEVEL SCALING's page
+static EWRAM_DATA bool8 sFightPage = 0;    // CONTROLS > FIGHT BUTTONS' page
+static EWRAM_DATA u8 sFightQuiet = 0;      // frames of no input after a fight button was chosen
 static EWRAM_DATA u8 sCoopCursor = 0;      // where the CO-OP tab's cursor was before a friend's page
 static EWRAM_DATA u8 sArrowTask = 0;
 static EWRAM_DATA u8 sStartCreatures = 0;
@@ -125,6 +147,17 @@ static const u8 sText_WinScale[] = _("WINDOW SCALE");
 static const u8 sText_Scaling[] = _("SCALING");
 static const u8 sText_Filter[] = _("FILTER");
 static const u8 sText_VSync[] = _("VSYNC");
+static const u8 sText_CardArt[] = _("CARD ART");
+static const u8 sText_CardArtPrinted[] = _("PRINTED ART");
+static const u8 sText_CardArtGameBoy[] = _("GAME BOY");
+static const u8 sText_CardArtFull[] = _("FULL CARD");
+static const u8 sText_CardBacks[] = _("CARD BACKS");
+static const u8 sText_CardScaling[] = _("CARD SCALING");
+static const u8 sText_CardBackPrinted[] = _("PRINTED");
+static const u8 sText_CardBackPixel[] = _("PIXEL");
+static const u8 sText_BattleAnims[] = _("BATTLE ANIMS");
+static const u8 sText_AnimsClassic[] = _("CLASSIC");
+static const u8 sText_AnimsModern[] = _("MODERN");
 static const u8 sText_Controller[] = _("CONTROLLER");
 static const u8 sText_PadButtons[] = _("PAD BUTTONS");
 static const u8 sText_StickRun[] = _("STICK RUN");
@@ -142,9 +175,44 @@ static const u8 sText_LevelScale[] = _("LEVEL SCALING");
 static const u8 sText_MoveSplit[] = _("MOVE KIND");
 static const u8 sText_MoveSplitGen3[] = _("GEN 3");
 static const u8 sText_MoveSplitGen4[] = _("GEN 4");
+static const u8 sText_ScWild[] = _("WILD");
+static const u8 sText_ScTrainers[] = _("TRAINERS");
+static const u8 sText_ScBoss[] = _("BOSS MARGIN");
+static const u8 sText_ScCaps[] = _("BADGE CAPS");
+static const u8 sText_ScPast8[] = _("PAST 8 BADGES");
+static const u8 sText_ScLow[] = _("LOW");
+static const u8 sText_ScMedium[] = _("MEDIUM");
+static const u8 sText_ScHigh[] = _("HIGH");
+static const u8 sText_ScBelow[] = _("BELOW");
+static const u8 sText_ScEven[] = _("EVEN");
+static const u8 sText_ScAbove[] = _("ABOVE");
+static const u8 sText_ScToLeague[] = _("TO LEAGUE");
+static const u8 sText_ScFree[] = _("FREE");
+static const u8 sText_ScCapped[] = _("CAPPED");
+static const u8 sText_ScAuto[] = _("AUTO");
 static const u8 sText_SurfMusic[] = _("SURF MUSIC");
 static const u8 sText_ButtonIcons[] = _("BUTTON ICONS");
+static const u8 sText_FightKeys[] = _("FIGHT BUTTONS");
+static const u8 sText_FbDefaults[] = _("DEFAULTS");
+static const u8 sText_Arcade[] = _("ARCADE");
+static const u8 sText_Custom[] = _("CUSTOM");
+static const u8 sText_PressAKey[] = _("PRESS A KEY");
+static const u8 sText_FbLightPunch[] = _("LIGHT PUNCH");
+static const u8 sText_FbMediumPunch[] = _("MEDIUM PUNCH");
+static const u8 sText_FbHeavyPunch[] = _("HEAVY PUNCH");
+static const u8 sText_FbLightKick[] = _("LIGHT KICK");
+static const u8 sText_FbMediumKick[] = _("MEDIUM KICK");
+static const u8 sText_FbHeavyKick[] = _("HEAVY KICK");
+static const u8 sText_FbStart[] = _("START");
+static const u8 *const sFightButtonNames[FIGHT_BIND_COUNT] = {
+    sText_FbLightPunch, sText_FbMediumPunch, sText_FbHeavyPunch, sText_FbLightKick, sText_FbMediumKick, sText_FbHeavyKick,
+    sText_FbStart,
+};
 static const u8 sText_MoeNav[] = _("MOENAV CALLS");
+static const u8 sText_Finder[] = _("FRIEND FINDER");
+static const u8 sText_FinderBoth[] = _("BOTH");
+static const u8 sText_FinderArrows[] = _("ARROWS");
+static const u8 sText_FinderRadar[] = _("RADAR");
 static const u8 sText_Show[] = _("SHOW");
 static const u8 sText_Place[] = _("PLACE");
 static const u8 sText_Size[] = _("SIZE");
@@ -264,6 +332,20 @@ static void BuildRows(void)
 {
     u8 ids[MP_MAX_PLAYERS], n, i;
     sRowCount = 0;
+    if (sScalePage)
+    {
+        for (i = OPT_SC_ON; i <= OPT_SC_BACK; i++)
+            AddRow(i, 0);
+        return;
+    }
+    if (sFightPage)
+    {
+        for (i = 0; i < FIGHT_BIND_COUNT; i++)
+            AddRow(OPT_FB_BIND, i);
+        AddRow(OPT_FB_DEFAULTS, 0);
+        AddRow(OPT_FB_BACK, 0);
+        return;
+    }
     if (sFriendPage)
     {
         AddRow(OPT_FR_SHOW, sFriendPage - 1);
@@ -289,6 +371,7 @@ static void BuildRows(void)
         AddRow(OPT_SURFMUSIC, 0);
         AddRow(OPT_LEVELSCALE, 0);
         AddRow(OPT_MOVESPLIT, 0);
+        AddRow(OPT_CARDSCALE, 0);
         break;
     case TAB_DISPLAY:
         AddRow(OPT_FULLSCREEN, 0);
@@ -296,6 +379,9 @@ static void BuildRows(void)
         AddRow(OPT_SCALING, 0);
         AddRow(OPT_FILTER, 0);
         AddRow(OPT_VSYNC, 0);
+        AddRow(OPT_BATTLEANIMS, 0);
+        AddRow(OPT_CARDART, 0);
+        AddRow(OPT_CARDBACK, 0);
         break;
     case TAB_CONTROLS:
         AddRow(OPT_PADSELECT, 0);
@@ -303,6 +389,7 @@ static void BuildRows(void)
         AddRow(OPT_ANALOGRUN, 0);
         AddRow(OPT_RUMBLE, 0);
         AddRow(OPT_BUTTONICONS, 0);
+        AddRow(OPT_FIGHTKEYS, 0);
         break;
     case TAB_COOP:
         AddRow(OPT_SPECPANEL, 0);
@@ -313,6 +400,7 @@ static void BuildRows(void)
         AddRow(OPT_AUTOSAVE, 0);
         AddRow(OPT_FLAGRANGE, 0);
         AddRow(OPT_MOENAV, 0);
+        AddRow(OPT_FINDER, 0);
         break;
     }
     AddRow(OPT_CLOSE, 0);
@@ -324,6 +412,12 @@ static void BuildRows(void)
 static int Wrap(int v, int n)
 {
     return (v % n + n) % n;
+}
+
+// Online in a room someone else made, LEVEL SCALING is theirs: shown, not changed
+static bool8 ScaleLocked(void)
+{
+    return MP_Lobby_InRoom() && !MP_LevelScalingIsOurs();
 }
 
 static u8 AutosaveIndex(void)
@@ -362,7 +456,7 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         names[0] = gText_ButtonTypeNormal, names[1] = gText_ButtonTypeLR, names[2] = gText_ButtonTypeLEqualsA;
         return 3;
     case OPT_TYPEICONS: case OPT_FULLSCREEN: case OPT_VSYNC: case OPT_ANALOGRUN: case OPT_RUMBLE: case OPT_SPECPANEL:
-    case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_LEVELSCALE:
+    case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_CARDSCALE:
         names[0] = sText_Off, names[1] = sText_On;
         return 2;
     case OPT_NAMECASE:
@@ -373,6 +467,15 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         return 2;
     case OPT_MOVESPLIT:
         names[0] = sText_MoveSplitGen3, names[1] = sText_MoveSplitGen4;
+        return 2;
+    case OPT_CARDART:
+        names[0] = sText_CardArtPrinted, names[1] = sText_CardArtGameBoy, names[2] = sText_CardArtFull;
+        return 3;
+    case OPT_CARDBACK:
+        names[0] = sText_CardBackPrinted, names[1] = sText_CardBackPixel;
+        return 2;
+    case OPT_BATTLEANIMS:
+        names[0] = sText_AnimsClassic, names[1] = sText_AnimsModern;
         return 2;
     case OPT_SCALING:
         names[0] = sText_PixelPerfect, names[1] = sText_SharpFit, names[2] = sText_Stretch;
@@ -394,8 +497,23 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
     case OPT_MOENAV:
         names[0] = sText_AllCalls, names[1] = sText_Battles;
         return 2;
+    case OPT_FINDER:
+        names[0] = sText_FinderBoth, names[1] = sText_FinderArrows, names[2] = sText_FinderRadar;
+        return 3;
     case OPT_FOLLOWSPRITES:
         names[0] = sText_FollowDefault, names[1] = sText_FollowPmd, names[2] = sText_FollowOriginal;
+        return 3;
+    case OPT_SC_ON: case OPT_SC_CAPS:
+        names[0] = sText_Off, names[1] = sText_On;
+        return 2;
+    case OPT_SC_WILD:
+        names[0] = sText_Off, names[1] = sText_ScLow, names[2] = sText_ScMedium, names[3] = sText_ScHigh;
+        return 4;
+    case OPT_SC_TRAINERS:
+        names[0] = sText_Off, names[1] = sText_ScBelow, names[2] = sText_ScEven, names[3] = sText_ScAbove;
+        return 4;
+    case OPT_SC_PAST8:
+        names[0] = sText_ScToLeague, names[1] = sText_ScFree, names[2] = sText_ScCapped;
         return 3;
     }
     // one free-form value
@@ -413,6 +531,34 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         {
             u8 *p = ConvertIntToDecimalStringN(buf, Display_GetWindowScale(), STR_CONV_MODE_LEFT_ALIGN, 2);
             p[0] = CHAR_x, p[1] = EOS;
+        }
+        break;
+    case OPT_LEVELSCALE:
+        StringCopy(buf, MP_LevelScaleRule(MP_SCALE_ON) ? sText_On : sText_Off);
+        break;
+    case OPT_FIGHTKEYS:
+        StringCopy(buf, Fight_BindIsDefault() ? sText_Arcade : sText_Custom);
+        break;
+    case OPT_FB_BIND:
+        if (Fight_BindListening() == arg + 1)
+            StringCopy(buf, sText_PressAKey);
+        else
+        {
+            char ascii[40];
+            snprintf(ascii, sizeof(ascii), "%.16s / %s", Fight_BindKeyName(arg), Fight_BindPadName(arg));
+            MP_AsciiToGame(buf, ascii, 36);
+        }
+        break;
+    case OPT_SC_BOSS:
+        {
+            u8 v = MP_LevelScaleRule(MP_SCALE_BOSS);
+            if (v == 0)
+                StringCopy(buf, sText_ScAuto);
+            else
+            {
+                buf[0] = CHAR_PLUS;
+                ConvertIntToDecimalStringN(buf + 1, v - 1, STR_CONV_MODE_LEFT_ALIGN, 1);
+            }
         }
         break;
     case OPT_PADSELECT:
@@ -494,6 +640,10 @@ static u8 Current(u8 row)
     case OPT_SCALING:     return Display_GetScaleMode();
     case OPT_FILTER:      return Display_GetFilter();
     case OPT_VSYNC:       return Display_GetVSync() != 0;
+    case OPT_CARDART:     return gMpConfig.cardArt % MP_CARD_ART_COUNT;
+    case OPT_CARDBACK:    return gMpConfig.cardBack != 0;
+    case OPT_BATTLEANIMS: return gMpConfig.battleAnims != 0;
+    case OPT_CARDSCALE:   return gMpConfig.cardScaling != 0;
     case OPT_ANALOGRUN:   return Gamepad_GetAnalogRun() != 0;
     case OPT_RUMBLE:      return Gamepad_GetRumble() != 0;
     case OPT_SPECPANEL:   return gMpConfig.spectatePanel != 0;
@@ -501,10 +651,13 @@ static u8 Current(u8 row)
     case OPT_FR_PLACE:    return FriendPlace(MP_Spectate_Friend(arg, FALSE));
     case OPT_BIKEMUSIC:   return gMpConfig.bikeMusic != 0;
     case OPT_SURFMUSIC:   return gMpConfig.surfMusic != 0;
-    case OPT_LEVELSCALE:  return gMpConfig.levelScaling != 0;
+    case OPT_LEVELSCALE:  return 0;   // (the page has the settings)
+    case OPT_SC_ON: case OPT_SC_WILD: case OPT_SC_TRAINERS: case OPT_SC_BOSS: case OPT_SC_CAPS: case OPT_SC_PAST8:
+        return MP_LevelScaleRule(SC_RULE(sRows[row].opt));
     case OPT_MOVESPLIT:   return gMpConfig.moveSplit != 0;
     case OPT_BUTTONICONS: return Gamepad_GetIconSet();
     case OPT_MOENAV:      return gMpConfig.moenavCalls != 0;
+    case OPT_FINDER:      return gMpConfig.finderStyle % MP_FINDER_COUNT;
     case OPT_FOLLOWSPRITES: return gMpConfig.followerSprites % MP_FOLLOW_SPRITES_COUNT;
     }
     return 0;
@@ -537,6 +690,10 @@ static void Change(u8 row, int dir)
     case OPT_SCALING:     Display_SetScaleMode(Wrap(Display_GetScaleMode() + dir, DISPLAY_SCALE_COUNT)); break;
     case OPT_FILTER:      Display_SetFilter(Wrap(Display_GetFilter() + dir, DISPLAY_FILTER_COUNT)); break;
     case OPT_VSYNC:       Display_SetVSync(!Display_GetVSync()); break;
+    case OPT_CARDART:     gMpConfig.cardArt = Wrap(gMpConfig.cardArt % MP_CARD_ART_COUNT + dir, MP_CARD_ART_COUNT); break;
+    case OPT_CARDBACK:    gMpConfig.cardBack = !gMpConfig.cardBack; break;
+    case OPT_BATTLEANIMS: gMpConfig.battleAnims = !gMpConfig.battleAnims; break;
+    case OPT_CARDSCALE:   gMpConfig.cardScaling = !gMpConfig.cardScaling; break;
     case OPT_PADSELECT:   Gamepad_CycleSelected(dir); break;
     case OPT_PADLAYOUT:   Gamepad_SetLayout(Gamepad_GetLayout() + dir); break;
     case OPT_ANALOGRUN:   Gamepad_SetAnalogRun(!Gamepad_GetAnalogRun()); break;
@@ -549,7 +706,7 @@ static void Change(u8 row, int dir)
         MPNet_Log("spectate panel %s", gMpConfig.spectatePanel ? "on" : "off");
         break;
     case OPT_SPECNEW:     gMpConfig.spectateScale = Wrap(gMpConfig.spectateScale - 1 + dir, 4) + 1; break;
-    case OPT_AUTOSAVE:    gMpConfig.autosaveMinutes = sAutosaveSteps[Wrap(AutosaveIndex() + dir, ARRAY_COUNT(sAutosaveSteps))]; break;
+    case OPT_AUTOSAVE:    if (MOEMON_DEV_BUILD) break; gMpConfig.autosaveMinutes = sAutosaveSteps[Wrap(AutosaveIndex() + dir, ARRAY_COUNT(sAutosaveSteps))]; break;
     case OPT_FLAGRANGE:   gMpConfig.trainerRange = Wrap(gMpConfig.trainerRange - 1 + dir, 8) + 1; break;
     case OPT_BIKEMUSIC:   gMpConfig.bikeMusic = !gMpConfig.bikeMusic; break;
     case OPT_FOLLOWSPRITES:
@@ -557,12 +714,24 @@ static void Change(u8 row, int dir)
         MPNet_Log("follower sprites: %d", gMpConfig.followerSprites);
         break;
     case OPT_SURFMUSIC:   gMpConfig.surfMusic = !gMpConfig.surfMusic; break;
-    case OPT_LEVELSCALE:  gMpConfig.levelScaling = !gMpConfig.levelScaling; MP_SendRoomRules(); break;
+    case OPT_LEVELSCALE:  break;   // A opens its page
+    case OPT_SC_ON: case OPT_SC_WILD: case OPT_SC_TRAINERS: case OPT_SC_BOSS: case OPT_SC_CAPS: case OPT_SC_PAST8:
+        if (!ScaleLocked())
+        {
+            u8 rule = SC_RULE(sRows[row].opt);
+            MP_LevelScaleSetOwn(rule, Wrap(MP_LevelScaleOwnRule(rule) + dir, MP_LevelScaleRuleCount(rule)));
+            MPNet_Log("level scaling rule %d: %d", rule, MP_LevelScaleOwnRule(rule));
+        }
+        break;
     case OPT_MOVESPLIT:   gMpConfig.moveSplit = !gMpConfig.moveSplit; MP_SendRoomRules(); break;
     case OPT_BUTTONICONS: Gamepad_SetIconSet(Gamepad_GetIconSet() + dir); break;
     case OPT_MOENAV:
         gMpConfig.moenavCalls = !gMpConfig.moenavCalls;
         MPNet_Log("moenav calls: %s", gMpConfig.moenavCalls ? "battles" : "all");
+        break;
+    case OPT_FINDER:
+        gMpConfig.finderStyle = Wrap(gMpConfig.finderStyle + dir, MP_FINDER_COUNT);
+        MPNet_Log("friend finder: style %d", gMpConfig.finderStyle);
         break;
     case OPT_FR_SHOW:
         {
@@ -614,6 +783,10 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_SCALING:     return sText_Scaling;
     case OPT_FILTER:      return sText_Filter;
     case OPT_VSYNC:       return sText_VSync;
+    case OPT_CARDART:     return sText_CardArt;
+    case OPT_CARDBACK:    return sText_CardBacks;
+    case OPT_BATTLEANIMS: return sText_BattleAnims;
+    case OPT_CARDSCALE:   return sText_CardScaling;
     case OPT_PADSELECT:   return sText_Controller;
     case OPT_PADLAYOUT:   return sText_PadButtons;
     case OPT_ANALOGRUN:   return sText_StickRun;
@@ -624,11 +797,23 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_FLAGRANGE:   return sText_FlagRange;
     case OPT_BIKEMUSIC:   return sText_BikeMusic;
     case OPT_FOLLOWSPRITES: return sText_Followers;
+    case OPT_SC_ON:       return sText_LevelScale;
+    case OPT_SC_WILD:     return sText_ScWild;
+    case OPT_SC_TRAINERS: return sText_ScTrainers;
+    case OPT_SC_BOSS:     return sText_ScBoss;
+    case OPT_SC_CAPS:     return sText_ScCaps;
+    case OPT_SC_PAST8:    return sText_ScPast8;
+    case OPT_SC_BACK:     return sText_Back;
     case OPT_SURFMUSIC:   return sText_SurfMusic;
     case OPT_LEVELSCALE:  return sText_LevelScale;
     case OPT_MOVESPLIT:   return sText_MoveSplit;
     case OPT_BUTTONICONS: return sText_ButtonIcons;
+    case OPT_FIGHTKEYS:   return sText_FightKeys;
+    case OPT_FB_BIND:     return sFightButtonNames[sRows[row].arg % FIGHT_BIND_COUNT];
+    case OPT_FB_DEFAULTS: return sText_FbDefaults;
+    case OPT_FB_BACK:     return sText_Back;
     case OPT_MOENAV:      return sText_MoeNav;
+    case OPT_FINDER:      return sText_Finder;
     case OPT_FR_SHOW:     return sText_Show;
     case OPT_FR_PLACE:    return sText_Place;
     case OPT_FR_SIZE:     return sText_Size;
@@ -713,6 +898,14 @@ static void DrawHint(void)
 
     if (Gamepad_IsSelecting())
         snprintf(ascii, sizeof(ascii), "PRESS ANY BUTTON ON THE CONTROLLER TO USE");
+    else if (Fight_BindListening())
+        snprintf(ascii, sizeof(ascii), "A KEY OR PAD BUTTON FOR IT. ESC / BACK: STOP");
+    else if (opt == OPT_FIGHTKEYS)
+        snprintf(ascii, sizeof(ascii), "A: THE KEYS AND PAD BUTTONS FOR FIGHTS");
+    else if (opt == OPT_FB_BIND)
+        snprintf(ascii, sizeof(ascii), "A: CHANGE ITS KEY OR PAD BUTTON");
+    else if (opt == OPT_FB_DEFAULTS)
+        snprintf(ascii, sizeof(ascii), "ARROWS / WASD / D-PAD / STICK MOVE");
     else if (opt == OPT_FILTER && Display_GetFilter() != DISPLAY_FILTER_OFF && !Display_IsFilterShown())
         snprintf(ascii, sizeof(ascii), "WINDOW TOO SMALL FOR THE FILTER");
     else if (opt == OPT_PADSELECT)
@@ -733,6 +926,16 @@ static void DrawHint(void)
         snprintf(ascii, sizeof(ascii), "HOW FAR YOU SEE WITH THE BATTLE FLAG");
     else if (opt == OPT_BIKEMUSIC)
         snprintf(ascii, sizeof(ascii), "OFF: THE MAP'S OWN SONG ON A BIKE");
+    else if (opt == OPT_CARDART)
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.cardArt == MP_CARD_ART_GAME_BOY ? "THE GAME BOY PICTURES IN THE FRAME"
+                 : gMpConfig.cardArt == MP_CARD_ART_FULL_CARD ? "THE WHOLE PRINTED CARDS"
+                 : "THE PRINTED PICTURES IN THE FRAME");
+    else if (opt == OPT_CARDSCALE)
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.cardScaling ? "CARD PLAYERS' DECKS FIT YOURS" : "CARD PLAYERS' DECKS GO BY BADGES");
+    else if (opt == OPT_CARDBACK)
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.cardBack ? "A PIXEL-ART CARD BACK" : "THE REAL CARD BACK");
+    else if (opt == OPT_BATTLEANIMS)
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.battleAnims ? "GLOWS, TRAILS AND BIG IMPACTS" : "THE ORIGINAL ANIMATIONS");
     else if (opt == OPT_FOLLOWSPRITES)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.followerSprites == MP_FOLLOW_SPRITES_PMD ? "PMD PICTURES EVERYWHERE"
                  : gMpConfig.followerSprites == MP_FOLLOW_SPRITES_ORIGINAL ? "THE ORIGINAL SPRITES EVERYWHERE"
@@ -740,8 +943,24 @@ static void DrawHint(void)
     else if (opt == OPT_SURFMUSIC)
         snprintf(ascii, sizeof(ascii), "OFF: THE MAP'S SONG SURFING AND DIVING");
     else if (opt == OPT_LEVELSCALE)
-        snprintf(ascii, sizeof(ascii), MP_Lobby_InRoom() && !MP_LevelScalingIsOurs() ? "ONLINE, THE HOST'S IS USED: %s" : "WILD AND TRAINERS KEEP UP WITH YOU",
-                 MP_LevelScaling() ? "ON" : "OFF");
+        snprintf(ascii, sizeof(ascii), "%s", ScaleLocked() ? "ONLINE THE HOST DECIDES. A: SEE IT" : "A: HOW WILD AND TRAINERS KEEP UP");
+    else if (opt >= OPT_SC_ON && opt <= OPT_SC_PAST8 && ScaleLocked())
+        snprintf(ascii, sizeof(ascii), "THE HOST DECIDES THIS ONLINE");
+    else if (opt == OPT_SC_ON)
+        snprintf(ascii, sizeof(ascii), "WILD AND TRAINERS KEEP UP WITH YOU");
+    else if (opt == OPT_SC_WILD)
+        snprintf(ascii, sizeof(ascii), "%s", (const char *[]){"WILD ONES AT THEIR OWN LEVELS", "A QUARTER OF THE WAY TO YOUR TEAM",
+                 "HALFWAY TO YOUR TEAM'S LEVEL", "A FEW LEVELS BELOW YOUR TEAM"}[MP_LevelScaleRule(MP_SCALE_WILD) & 3]);
+    else if (opt == OPT_SC_TRAINERS)
+        snprintf(ascii, sizeof(ascii), "%s", (const char *[]){"TRAINERS AT THEIR OWN LEVELS", "THEIR BEST 4 BELOW YOUR TEAM",
+                 "THEIR BEST AT YOUR TEAM'S LEVEL", "THEIR BEST 3 ABOVE YOUR TEAM"}[MP_LevelScaleRule(MP_SCALE_TRAINERS) & 3]);
+    else if (opt == OPT_SC_BOSS)
+        snprintf(ascii, sizeof(ascii), "HOW FAR ABOVE YOUR TEAM BOSSES ARE");
+    else if (opt == OPT_SC_CAPS)
+        snprintf(ascii, sizeof(ascii), "A LEVEL CAP THAT RISES WITH BADGES");
+    else if (opt == OPT_SC_PAST8)
+        snprintf(ascii, sizeof(ascii), "%s", (const char *[]){"CAPPED UNTIL THE LEAGUE, THEN FREE", "NO CAP ONCE YOU HAVE ALL 8",
+                 "ALWAYS A CAP (80 AFTER THE LEAGUE)"}[MP_LevelScaleRule(MP_SCALE_PAST8) % 3]);
     else if (opt == OPT_MOVESPLIT)
         snprintf(ascii, sizeof(ascii), MP_Lobby_InRoom() && !MP_LevelScalingIsOurs() ? "ONLINE, THE HOST'S IS USED: %s"
                  : "GEN 4: EACH MOVE PHYSICAL OR SPECIAL", MP_MoveSplit() ? "GEN 4" : "GEN 3");
@@ -749,6 +968,8 @@ static void DrawHint(void)
         snprintf(ascii, sizeof(ascii), "AUTO: THE KEYS OR PAD YOU USED LAST");
     else if (opt == OPT_MOENAV)
         snprintf(ascii, sizeof(ascii), "BATTLES: ONLY CALLS ASKING FOR A BATTLE");
+    else if (opt == OPT_FINDER)
+        snprintf(ascii, sizeof(ascii), "RIGHT STICK CLICK / G: SHOW OR HIDE IT");
     else if (opt == OPT_FR_PLACE)
         snprintf(ascii, sizeof(ascii), "%s", MP_Spectate_Friend(arg, FALSE)->popout ? "CLOSING ITS WINDOW HIDES IT" : "WHICH SIDE OF YOUR SCREEN");
     else if (opt == OPT_FR_SIZE)
@@ -772,7 +993,27 @@ static void DrawHeader(void)
 {
     int i, x = 8;
     FillWindowPixelBuffer(WIN_HEADER, PIXEL_FILL(1));
-    if (sFriendPage)
+    if (sFightPage)
+    {
+        u8 buf[40];
+        u8 *p = StringCopy(buf, sTabNames[TAB_CONTROLS]);
+        *p++ = CHAR_SPACE;
+        *p++ = CHAR_GREATER_THAN;
+        *p++ = CHAR_SPACE;
+        StringCopy(p, sText_FightKeys);
+        AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, buf, 8, 1, TEXT_SKIP_DRAW, NULL);
+    }
+    else if (sScalePage)
+    {
+        u8 buf[40];
+        u8 *p = StringCopy(buf, sTabNames[TAB_GAME]);
+        *p++ = CHAR_SPACE;
+        *p++ = CHAR_GREATER_THAN;
+        *p++ = CHAR_SPACE;
+        StringCopy(p, sText_LevelScale);
+        AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, buf, 8, 1, TEXT_SKIP_DRAW, NULL);
+    }
+    else if (sFriendPage)
     {
         u8 buf[32];
         u8 *p = StringCopy(buf, sText_TabCoop);
@@ -817,7 +1058,8 @@ static void HighlightRow(void)
 // A number for everything the rows show, to redraw when something changes elsewhere (F11, a controller, a friend)
 static u32 ShownKey(void)
 {
-    u32 key = 5381 + sRowCount * 7 + sTab * 131 + sFriendPage * 977 + Gamepad_IsSelecting();
+    u32 key = 5381 + sRowCount * 7 + sTab * 131 + sFriendPage * 977 + sScalePage * 31 + Gamepad_IsSelecting()
+            + sFightPage * 53 + Fight_BindListening() * 3001;
     u8 i, j;
     for (i = 0; i < sRowCount; i++)
     {
@@ -965,6 +1207,8 @@ void CB2_InitOptionMenu(void)
         sArrowTask = TASK_NONE;
         if (gSaveBlock2Ptr->optionsWindowFrameType >= WINDOW_FRAMES_COUNT)
             gSaveBlock2Ptr->optionsWindowFrameType = 0;
+        sScalePage = FALSE;
+        sFightPage = FALSE;
         GoTo(TAB_GAME, 0, 0);
         gMain.state++;
         break;
@@ -993,7 +1237,20 @@ static void Task_OptionMenuProcessInput(u8 taskId)
 {
     u8 opt = sRows[sSel].opt;
 
-    if (Gamepad_IsSelecting())
+    if (Fight_BindListening())
+    {
+        // waiting for a fight button's key or pad button (the game's own buttons are left alone meanwhile)
+        int which = Fight_BindListening() - 1, r = Fight_BindPoll();
+        if (r != 0)
+        {
+            PlaySE(SE_SELECT);
+            sFightQuiet = 2;
+            MPNet_Log("fight button %d: %s / %s%s", which, Fight_BindKeyName(which), Fight_BindPadName(which), r < 0 ? " (kept)" : "");
+        }
+    }
+    else if (sFightQuiet)
+        sFightQuiet--;
+    else if (Gamepad_IsSelecting())
     {
         // waiting for a controller button; the keyboard can cancel
         if (JOY_NEW(B_BUTTON | START_BUTTON))
@@ -1007,11 +1264,59 @@ static void Task_OptionMenuProcessInput(u8 taskId)
         GoTo(TAB_COOP, 0, 0);   // that friend left
         return;
     }
-    else if (!sFriendPage && JOY_NEW(L_BUTTON | R_BUTTON))
+    else if (!sFriendPage && !sScalePage && !sFightPage && JOY_NEW(L_BUTTON | R_BUTTON))
     {
         PlaySE(SE_SELECT);
         GoTo(Wrap(sTab + (JOY_NEW(R_BUTTON) ? 1 : -1), TAB_COUNT), 0, 0);
         return;
+    }
+    else if (JOY_NEW(A_BUTTON) && opt == OPT_LEVELSCALE)
+    {
+        PlaySE(SE_SELECT);
+        sScalePage = TRUE;
+        GoTo(TAB_GAME, 0, 0);
+        return;
+    }
+    else if (sScalePage && (JOY_NEW(B_BUTTON | START_BUTTON) || (JOY_NEW(A_BUTTON) && opt == OPT_SC_BACK)))
+    {
+        u8 i;
+        PlaySE(SE_SELECT);
+        sScalePage = FALSE;
+        GoTo(TAB_GAME, 0, 0);
+        for (i = 0; i < sRowCount; i++)   // back on its row
+            if (sRows[i].opt == OPT_LEVELSCALE)
+                sSel = i;
+        RedrawAll();
+        return;
+    }
+    else if (JOY_NEW(A_BUTTON) && opt == OPT_FIGHTKEYS)
+    {
+        PlaySE(SE_SELECT);
+        sFightPage = TRUE;
+        GoTo(TAB_CONTROLS, 0, 0);
+        return;
+    }
+    else if (sFightPage && (JOY_NEW(B_BUTTON | START_BUTTON) || (JOY_NEW(A_BUTTON) && opt == OPT_FB_BACK)))
+    {
+        u8 i;
+        PlaySE(SE_SELECT);
+        sFightPage = FALSE;
+        GoTo(TAB_CONTROLS, 0, 0);
+        for (i = 0; i < sRowCount; i++)   // back on its row
+            if (sRows[i].opt == OPT_FIGHTKEYS)
+                sSel = i;
+        RedrawAll();
+        return;
+    }
+    else if (JOY_NEW(A_BUTTON) && opt == OPT_FB_BIND)
+    {
+        PlaySE(SE_SELECT);
+        Fight_BindListen(sRows[sSel].arg);
+    }
+    else if (JOY_NEW(A_BUTTON) && opt == OPT_FB_DEFAULTS)
+    {
+        PlaySE(SE_SELECT);
+        Fight_BindDefaults();
     }
     else if (JOY_NEW(B_BUTTON | START_BUTTON) || (JOY_NEW(A_BUTTON) && (opt == OPT_CLOSE || opt == OPT_FR_BACK)))
     {
@@ -1045,7 +1350,8 @@ static void Task_OptionMenuProcessInput(u8 taskId)
         Gamepad_StartSelect();
         PlaySE(SE_SELECT);
     }
-    else if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT | A_BUTTON) && opt != OPT_SPECFRIEND)
+    else if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT | A_BUTTON) && opt != OPT_SPECFRIEND && opt != OPT_FIGHTKEYS && opt != OPT_FB_BIND
+          && opt != OPT_FB_DEFAULTS)
     {
         Change(sSel, JOY_NEW(DPAD_LEFT) ? -1 : 1);
         if (opt == OPT_TEXTSPEED || opt == OPT_BUTTONMODE || opt == OPT_FRAME || opt == OPT_NAMECASE || opt == OPT_BATTLESCENE

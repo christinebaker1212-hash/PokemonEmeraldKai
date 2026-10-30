@@ -1,0 +1,234 @@
+; Autor : Juan Carlos http://eternalmugen.cjb.net, basado en el stage de deejey 
+
+[Info]
+name="SF2 Jamaica - Deejay Stage" 
+displayname = "JAMAICA - DEE JAY"
+autor= JC
+
+[Camera]
+startx=0
+starty=0
+boundleft = -180
+boundright = 166
+boundhigh = -14
+floortension=0
+tension=60
+
+[PlayerInfo]
+p1startx=-70
+p1starty=0
+p1startz=0
+p1facing=1
+
+p2startx=70
+p2starty=0
+p2startz=0
+p2facing=-1
+
+leftbound=-1000
+rightbound=1000
+topbound=0
+botbound=0
+
+[Scaling]
+topz=0
+botz=50
+topscale=1
+botscale=1.4
+
+[Bound]
+screenleft=15
+screenright=15
+
+[StageInfo]
+zoffset=225
+autoturn=1
+resetBG   = 0  
+
+[Shadow]
+color = 128,128,128
+yscale = .159
+
+[Music]
+bgmusic= sound/SF2 Jamaica - Deejay Theme.mp3
+bgvolume=20
+
+[BGdef]
+spr=stages\sf2-jamaica.sff
+debug=0
+DEBUGBG=0
+
+[BG cielo,a] 
+type  = normal
+spriteno = 5,4
+start =-7, 0
+delta = .15,.30
+mask = 1
+
+
+[BG cielo,b] 
+type  = ani
+actionno = 5
+start =-7, 0
+delta = .15, .30
+mask = 1
+
+
+[BG cielo,c] 
+type  = normal
+spriteno = 4,7
+start =0, -2
+delta = .60, 1
+mask = 1
+
+[BG cielo,d] 
+type  = ani
+actionno = 4
+start =0, -2
+delta = .60, 1
+mask = 1
+
+[BG 4] 
+type  = normal
+spriteno = 4,3
+start =0, -2
+delta = .60, 1
+mask = 1
+
+
+[BG 5] 
+type  = normal
+spriteno = 4,4
+start =0, -2
+delta = .60, 1
+mask = 1
+
+[BG 6] 
+type = parallax
+spriteno = 1, 5
+start =0, 0
+delta = 1, 1
+mask = 1
+xscale = 1,1
+
+[BG 7] 
+type = parallax
+spriteno = 1, 6
+start =0, 0
+delta = 1, 1
+mask = 1
+xscale = 1,1
+
+[BG 8] 
+type  = ani
+actionno = 1
+start =0, 0
+delta = 1, 1
+mask = 1
+
+
+[BG 9] 
+type  = ani
+actionno = 8
+start =0, 0
+delta = 1, 1
+mask = 1
+
+
+[BG 10] 
+type  = ani
+actionno = 9
+start =0, 0
+delta = 1, 1
+mask = 1
+
+[BG 11] 
+type  = normal
+spriteno = 1,4
+start =0, 0
+delta = 1, 1
+mask = 1
+
+[BG 12] 
+type  = ani
+actionno = 2
+start =0, 0
+delta = 1, 1
+mask = 1
+
+
+[BG 13] 
+type  = ani
+actionno = 3
+start =0, 0
+delta = 1, 1
+mask = 1
+
+
+[Begin action 1]
+0,0,0,0,4
+0,1,0,0,3
+0,2,0,0,2
+0,3,0,0,1
+0,4,0,0,3
+0,5,0,0,3
+0,6,0,0,1
+0,7,0,0,3
+0,8,0,0,3
+0,9,0,0,3
+0,10,0,0,3
+0,11,0,0,4
+0,12,0,0,2
+0,13,0,0,3
+
+[Begin action 8]
+8,0,0,0,1
+8,1,0,0,1
+8,2,0,0,1
+8,3,0,0,1
+8,4,0,0,1
+8,5,0,0,1
+8,6,0,0,1
+8,7,0,0,1
+8,8,0,0,1
+8,9,0,0,1
+8,10,0,0,1
+8,11,0,0,1
+8,12,0,0,1
+8,13,0,0,1
+
+
+
+[Begin action 2]
+1,0,0,0,10
+1,1,0,0,10
+1,2,0,0,10
+
+[Begin action 3]
+2,0,0,0,4
+2,1,0,0,6
+2,2,0,0,6
+2,3,0,0,7
+2,4,0,0,7
+2,5,0,0,6
+
+[Begin action 4]
+4,0,0,0,6
+4,1,0,0,6
+4,2,0,0,6
+
+[Begin action 9]
+9,0,0,0,100
+9,1,0,0,7
+9,2,0,0,7
+9,3,0,0,7
+9,0,0,0,10
+9,1,0,0,7
+9,2,0,0,7
+9,3,0,0,7
+
+[Begin action 5]
+5,0,0,0,5
+5,1,0,0,5
+5,2,0,0,5
+5,3,0,0,5

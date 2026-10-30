@@ -166,6 +166,7 @@ struct MpState
                        // into the next state still shows)
     u8 lifeFace;       // bits 0-1 its facing (0 down, 1 up, 2 left, 3 right), bits 2-4 its pace (pixels a frame)
     u8 top3;           // the average level of their 3 highest-level Pokémon (level scaling, mp_levelscale.c)
+    u8 cardDuel;       // in a card duel (src/tcg): "CARD DUEL" over their name (wire: bit 7 of the light byte)
 };
 #define MP_LIFE_NO_AUTO 127
 
@@ -199,6 +200,17 @@ struct MpSpecFriend
     u8 show;                      // 0: not shown (closing its pop-out window does this)
 };
 
+// LEVEL SCALING's settings (mp_levelscale.c): the room host's online, ours alone (MP_LevelScaleRule)
+enum
+{
+    MP_SCALE_ON,        // on / off (gMpConfig.levelScaling)
+    MP_SCALE_WILD,      // 0 OFF, 1 LOW (a quarter of the way to the team), 2 MEDIUM (halfway), 3 HIGH (3-6 below the team)
+    MP_SCALE_TRAINERS,  // 0 OFF, 1 BELOW (the ace 4 under the team), 2 EVEN (the ace at the team's level), 3 ABOVE (3 over)
+    MP_SCALE_BOSS,      // 0 AUTO (+2 to +5 by badges; the ELITE FOUR +5), 1-9: +0 to +8
+    MP_SCALE_CAPS,      // badge level caps: 1 on, 0 off
+    MP_SCALE_PAST8,     // with all eight badges: 0 capped until the League then free, 1 free, 2 always capped (80 after it)
+    MP_SCALE_COUNT
+};
 struct MpConfig
 {
     bool8 enabled;
@@ -206,6 +218,8 @@ struct MpConfig
     char lastRoom[24];
     char lastRoomKey[65];     // hex SHA-256 room key (not the password)
     char lastHostName[24];
+    char lastRoomAddr[64];    // where lastRoom is: "" the online lobby, "home" hosted on this PC, else a friend's server
+    char lastJoinCode[24];    // the invite code (or address) that last got us into a game (ENTER CODE OR IP starts with it)
     char welcome[40];             // the host's welcome note: "line 1|line 2" (ASCII)
     char name[32];
     struct MpAppearance app;
@@ -227,8 +241,20 @@ struct MpConfig
     u8 bikeMusic;             // OPTIONS > GAME > BIKE MUSIC: the cycling song on a bike (1) or the map's own (0)
     u8 surfMusic;             // OPTIONS > GAME > SURF MUSIC: the surfing / underwater songs (1) or the map's (0)
     u8 moenavCalls;           // OPTIONS > CO-OP > MOENAV CALLS: 0 all, 1 only trainers asking for a battle
+    u8 finderStyle;           // OPTIONS > CO-OP > FRIEND FINDER: MP_FINDER_* (mp_compass.c)
+    u8 finderOn;              // ... shown (the right stick click / G shows and hides it)
     u8 followerSprites;       // OPTIONS > GAME > FOLLOWERS: MP_FOLLOW_SPRITES_*
+    u8 cardArt;               // OPTIONS > DISPLAY > CARD ART: MP_CARD_ART_* (src/tcg/tcg_gfx.h G_ART_*)
+    u8 scale[MP_SCALE_COUNT - 1];   // LEVEL SCALING's settings past ON / OFF (MP_SCALE_WILD..), HOST A GAME > GAME RULES or OPTIONS
+    u8 cardBack;              // OPTIONS > DISPLAY > CARD BACKS: MP_CARD_BACK_* (src/tcg/tcg_gfx.h G_BACK_*)
+    u8 cardScaling;           // OPTIONS > GAME > CARD SCALING: card players' decks fit yours (1) or go by badges (0)
+    u8 battleAnims;           // OPTIONS > DISPLAY > BATTLE ANIMS: 0 CLASSIC, 1 MODERN (mp_modernanim.c; this game only)
 };
+// CARD ART: the printed illustration in the Game Boy frame (the default), the Game Boy picture in it, or the whole printed card
+enum { MP_CARD_ART_PRINTED_ART, MP_CARD_ART_GAME_BOY, MP_CARD_ART_FULL_CARD, MP_CARD_ART_COUNT };
+// CARD BACKS: the printed back (the default) or the pixel-art one
+enum { MP_CARD_BACK_PRINTED, MP_CARD_BACK_PIXEL, MP_CARD_BACK_COUNT };
+enum { MP_FINDER_BOTH, MP_FINDER_ARROWS, MP_FINDER_RADAR, MP_FINDER_COUNT };
 enum { MP_FOLLOW_SPRITES_DEFAULT, MP_FOLLOW_SPRITES_PMD, MP_FOLLOW_SPRITES_ORIGINAL, MP_FOLLOW_SPRITES_COUNT };
 // FOLLOWERS: the PMD Collab pictures for a follower on the map (garden FALSE) or a Garden Pokémon (TRUE)?
 // DEFAULT: the Moemon overworld sprites on the map, PMD in the MOéMON GARDEN; PMD / ORIGINAL: everywhere
@@ -276,11 +302,16 @@ void MP_Lobby_JoinRoom(const char *room, const char *password);
 void MP_Lobby_JoinRoomWithKey(const char *room, const u8 *key);
 const u8 *MP_Lobby_RoomKey(void);
 const char *MP_Lobby_RoomName(void);
+bool8 MP_Lobby_ServerAddress(char *out, int len);   // the server we're on, "host:port" (FALSE: the online lobby or none)
 // The co-op version a server or room reported when it didn't match ours (0 = it didn't say)
 u16 MP_Lobby_OtherVersion(void);
 void MP_Lobby_SetOtherVersion(u16 version);
 bool8 MP_Lobby_IsLocalHost(void);
 bool8 MP_Lobby_IsCreator(void);  // we made the room we're in (its host)
+u8 MP_LevelScaleRule(u8 which);  // MP_SCALE_*: the room host's online (as a friend), ours otherwise
+u8 MP_LevelScaleOwnRule(u8 which);
+void MP_LevelScaleSetOwn(u8 which, u8 value);   // (saved, and the room hears it when we're its host)
+u8 MP_LevelScaleRuleCount(u8 which);            // how many values it has
 s8 MP_RoomHostId(void);          // online in a room someone else made: the host's player id while they're here; else -1
 bool8 MP_Lobby_InRoom(void);
 bool8 MP_TrainerPadding(void);   // the room host's TEAM PADDING (ours when we host or play alone)
@@ -345,6 +376,16 @@ bool8 MP_Bag_IsNew(u16 item);
 void MP_Bag_ClearNew(u16 item);
 void MP_Bag_NoteAdded(u16 item);
 void MP_Bag_ResetMarks(void);
+// the BAG's eight pockets, views of the save's five (mp_bag.c)
+enum { MP_BAGVIEW_ITEMS, MP_BAGVIEW_MEDICINE, MP_BAGVIEW_BALLS, MP_BAGVIEW_TMHM, MP_BAGVIEW_BERRIES, MP_BAGVIEW_BATTLE,
+       MP_BAGVIEW_KEY, MP_BAGVIEW_FAVORITES, MP_BAGVIEW_COUNT };
+struct ItemSlot;
+u8 MP_Bag_ViewOfItem(u16 item);
+u8 MP_Bag_ViewPocket(u8 view);
+u8 MP_Bag_PocketView(u8 pocket);
+u16 MP_Bag_ViewSlots(u8 view, struct ItemSlot **out, u16 max);
+bool8 MP_Bag_IsFavorite(u16 item);
+void MP_Bag_SetFavorite(u16 item, bool8 on);
 void MP_MonArt_Changed(void);   // mp_monart.c: OPTIONS > CREATURES was switched
 // mp_hue.c: Pokémon Stadium hues for nicknamed Pokémon
 #define MP_HUE_TAG_BASE 0x6F00   // 0x6F00-0x6F7F: sprite palette tags of turned palettes
@@ -402,8 +443,20 @@ void MP_Candy_Update(void);
 void MP_Candy_OpenJar(void (*back)(void));
 bool8 MP_Candy_JarOpen(void);
 void MP_Candy_Composite(u16 *frame);
+void MP_BagUI_Composite(u16 *frame);   // mp_bagui.c: the BAG screen's picture
+// mp_itemdesc.c: an item's description wrapped to a window (normal or narrow font; pages when it still doesn't fit)
+void MP_ItemDesc_Print(u8 windowId, const u8 *desc, u8 x, u8 y, u16 width, u16 height, const u8 *colors, u8 fill);
+void MP_ItemDesc_Update(void);
 void MP_BattleWeather_TurnStart(void);        // battle_main.c: a turn begins (the field's weather showed until then)
 void MP_BattleWeather_Composite(u16 *frame);   // mp_battleweather.c: rain, hail, sandstorm and sunlight in battle
+#define MP_BATTLE_WEATHER_STATE 5                 // B_COMM_MP_WEATHER: the battle's weather, the field's, settled
+void MP_BattleWeather_LinkState(u8 *state);       // battle_controllers.c: the master's, for the others' screens
+void MP_BattleWeather_OnLinkState(const u8 *state, u16 size);   // ... the others: the master's weather now
+void MP_BattleWeather_NewBattle(void);           // battle_controllers.c: a battle starts (every game)
+void MP_Battle_SendToPeers(const u8 *buf, u16 len);   // mp_battle.c: to every other game in the battle link
+bool8 MP_QuickFadeActive(void);   // palette.c: a whole-screen fade, already 30% quicker, is running
+u16 MP_BattleWeather_FieldFlags(void);          // this game's field weather as a battle's (B_WEATHER_*)
+void MP_BattleWeather_SetMasterField(u16 flags); // mp_coop.c: the master's, for the co-op battle on its way
 // The renderer (gba_easy_draw.c) passes every pixel of these BG layers and sprite palettes through gMpScenePixel
 extern u16 (*gMpScenePixel)(u16 color, int x, int y, bool8 sprite);
 extern u8 gMpSceneLayers;                     // a bit per BG layer
@@ -718,7 +771,14 @@ void MP_Emote_ShowBubbleFor(u8 playerId, const u8 *text);
 // mp_social.c
 void MP_Social_Open(void);
 void MP_Compass_Update(void);   // mp_compass.c
+void MP_Compass_Composite(u16 *frame);
+u16 MP_Compass_PlayerColor(u8 player);   // a player's color (arrows, Town Map outlines)
+bool8 MP_Avatar_HeadIcon(s8 id, u8 *tiles, u16 *pal, u16 outline);   // the look's head, 16x16 (-1: you)   // ... drawn over the finished frame (platform VDraw)
 bool8 MP_Compass_AnyShown(void);
+void MP_Compass_Toggle(void);     // the right stick click / G: show or hide the FRIEND FINDER
+void MP_MapPic_Update(void);      // mp_mappic.c: full-color pictures pinned to maps (the GAME CENTER)
+bool8 MP_MapPic_IsPictureMap(u8 group, u8 num);
+u8 MP_MapPic_ArrivalDir(s16 x, s16 y);   // the way to step off an arrival door (DIR_NONE: down)
 bool8 MP_Emote_LoadUiPalette(void);   // the sprite palette shared by bubbles, toasts and compass arrows
 // mp_piggy.c
 bool8 MP_Piggy_IsRiding(void);
@@ -851,6 +911,7 @@ const u8 *MP_BallStyle_DecorationName(u8 decoration);
 bool8 MP_BallStyle_CanColor(u8 ballId);
 bool8 MP_BallStyle_CanDecorate(u8 ballId);
 void MP_BallStyle_ApplyToBallSprite(u8 spriteId, u8 ballId, u16 style);
+bool8 MP_BallStyle_SpriteHasSpin(u8 spriteId);   // FALSE: a GENESIS / EPOCH BALL (turn it instead)
 void MP_BallStyle_ApplyToIconPalette(u8 paletteNum, u8 ballId, u16 style);
 void MP_BallStyle_DecorateIcon(u8 spriteId, u8 ballId, u16 style);
 u8 MP_BallStyle_DecorationJump(u8 decoration, s8 dir);
@@ -927,6 +988,7 @@ bool8 MP_InDungeon(void);
 struct Pokemon;
 // Achievements (mp_achieve.c) and things done with friends (mp_events.c MP_Events_Did)
 void MP_Achieve_Count(const char *name, s32 n);
+s32 MP_Achieve_GetCount(const char *name);
 void MP_Achieve_Unlock(const char *id);
 void MP_Achieve_Update(void);
 void MP_Achieve_OnTrainerWin(u16 trainerId);
@@ -947,6 +1009,8 @@ enum { MP_DID_NEWDEX, MP_DID_COOPWIN, MP_DID_COOPGYM, MP_DID_BORROW, MP_DID_LENT
 void MP_Events_Did(u8 what);
 void MP_Events_UpdateToasts(void);
 u8 MP_RareCandyCap(void);   // party_menu.c: no RARE CANDY past the next gym ace
+void MP_NoteFaint(u32 personality);   // mp_smartcursor.c: a player's Pokemon fainted (for REVIVE's cursor)
+s8 MP_SmartItemSlot(u16 item);        // the party slot an item is for (status cure, REVIVE), or -1
 extern u8 gMpEnemyLevelBonus;                     // battle_main.c CreateNPCTrainerParty adds it (co-op team-ups)
 void MP_Coop_PrepareTrainerParty(u16 trainerId);
 void MP_Coop_FinishTrainerParty(u16 trainerId);
@@ -993,6 +1057,7 @@ void MP_Tourney_OpenMenu(void);
 void MP_Tourney_OnRelay(u8 from, const u8 *data, u16 len);
 void MP_Tourney_Update(void);
 void MP_Tourney_OnBattleResult(u8 outcome);
+void MP_Tourney_OnCardResult(int won);   // tcg_online.c: a card duel tournament match ended
 void MP_Battle_Start(u8 opponentId, bool8 isMaster, u32 opponentMoney);
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 
@@ -1033,6 +1098,10 @@ u16 MP_Follower_LocalDex(bool8 *female);
 bool8 MP_Follower_LocalTile(s16 *x, s16 *y);
 bool8 MP_Follower_IsFollowerSprite(struct Sprite *sprite);
 // mp_followfx.c: followers' ground effects (grass, sand, puddles, flowing water, hot springs, ripples, reflections)
+// slots: 0 ours, 1.. friends' followers, MP_FOLLOWFX_GARDEN.. the MOéMON GARDEN's Pokémon
+#define MP_FOLLOWFX_GARDEN (1 + MP_MAX_PLAYERS)
+#define MP_FOLLOWFX_SLOTS (MP_FOLLOWFX_GARDEN + 24)
+bool8 MP_GardenLife_IsActorSprite(struct Sprite *sprite);
 void MP_FollowFx_Update(u8 slot, u8 spriteId, s16 prevX, s16 prevY, s16 curX, s16 curY, u8 moved, u8 fdir, u8 size,
                         u8 elevation, bool8 hidden);
 void MP_FollowFx_Remove(u8 slot);
@@ -1073,7 +1142,8 @@ void (*MP_EndWildBattleCallback(void))(void);        // battle_setup.c
 void MP_StartNormalWildBattle(void);                 // battle_setup.c
 void MP_Coop_ArrangeEnemyParty(void);
 u16 MP_Coop_TrainerPic(void);
-u16 MP_Coop_TrainerPicFor(u8 battler);   // two trainers: the right opponent is the second one
+u16 MP_Coop_TrainerPicFor(u8 battler);
+bool8 MP_Coop_SecondTrainersMon(u8 battler, u8 partyIdx);   // two trainers: the right opponent is the second one
 bool8 MP_Coop_TwoTrainers(void);         // a co-op battle against two trainers at once
 u16 MP_Coop_PartnerBackPicOr(u16 defaultPic);
 bool8 MP_Coop_PartnerHidesBack(void);
@@ -1093,6 +1163,9 @@ u8 MP_Coop_TakeJoinedOther(void);        // specialvar: we were in a friend's ba
 bool8 MP_Coop_CanJoinHeldTrainer(void);  // trainer_see.c: a held trainer may spot us
 void MP_Coop_NoteHeldSpotter(void);      // trainer_see.c: it did (right after MP_Coop_IsNpcHeld)
 void MP_EndJoinedTrainerBattle(void);    // battle_setup.c: our trainer script's battle was a friend's, and won
+u8 MP_TrainerBattleLocalId(void);
+void MP_TrainerBattleLocalIds(u8 *localIdA, u8 *localIdB);   // battle_setup.c: two trainers at once: both (B 0 = one)          // battle_setup.c: the trainer this battle is against (object local id, 0 none)
+void MP_Coop_JoinedFromTrainerScript(void); // mp_join.c: JOIN BATTLE from our trainer's script got us in
 void MP_Coop_PrepareLearnMove(void); // special, post-battle move learning
 
 // mp_notify.c
@@ -1102,6 +1175,13 @@ void MP_SharedPc_FromLabel(u8 *from, const u8 *by);      // mp_sharedpc.c: "from
 void MP_Dex_CaughtByText(u8 *text, const u8 *by);        // pokedex.c: "CAUGHT BY NAME" (40 bytes)
 void MP_Notice_Update(void);
 void MP_OnFileDropped(const char *path);
+// mp_rhythm.c: the DANCE machine on the GAME CENTER's 3F
+void MP_Rhythm_Update(void);
+void MP_Rhythm_OnRelay(u8 from, const u8 *data, u16 len);
+void MP_Rhythm_OnPlayerLeft(u8 id);
+void MP_Rhythm_OnStore(const u8 *data, u16 len);
+struct ObjectEvent;
+void MP_Rhythm_AvatarPose(u8 id, struct ObjectEvent *obj);
 
 // relay message ids (first byte of peer payloads)
 enum {
@@ -1116,6 +1196,10 @@ enum {
     MPR_LINK_BLOCK,        // block data
     MPR_LINK_SYNC,         // standby / close barrier
     MPR_BATTLE_DONE,       // battle finished (u8 outcome from sender's view)
+    MPR_BATTLE_MONEMOTE,   // our Pokémon's battle emote, for the others' screens: u8 battler, icon, happy (mp_life_battle.c)
+    MPR_FIGHT_FIRST = 25,  // the VS cabinet: 25 a seat, 26 a challenge, 27 its answer, 28 buttons, 29 the end, 30 addresses, 31 desync recovery (mp_fight.c)
+    MPR_RHYTHM_FIRST = 32,     // the DANCE machine: 32 a pad, 33 an ask, 34 its answer, 35 the machine's own (mp_rhythm.c)
+    MPR_COOP_BATTLING = 39,    // battling a trainer met on the field: u8 on, mapGroup, mapNum, localId, u16 trainer, u8 joinable (mp_coop.c)
     MPR_SPECTATE_FIRST = 40,   // battle spectating (mp_spectate.c)
     MPR_COOP_FIRST = 60,       // co-op double battles (mp_coop.c)
     MPR_SAY = 80,              // speech bubble: u8 kind, text (mp_emote.c)
@@ -1125,7 +1209,7 @@ enum {
     MPR_PHOTO = 92,            // you were in a team photo: u8 count (mp_photo.c)
     MPR_LEND = 93,             // field moves friends can lend: u8 sub, ... (mp_lend.c)
     MPR_RESCUE = 94,           // rescue instead of blacking out: u8 ask/answer (mp_rescue.c)
-    MPR_RULES = 95,            // the room creator's settings for a friend who joined: u8 trainerPadding, u8 animSpeed, u8 levelScaling (mp_main.c)
+    MPR_RULES = 95,            // the room creator's settings for a friend who joined: u8 trainerPadding, u8 animSpeed, u8 levelScaling, 5 x u8 MP_SCALE_WILD.. (mp_main.c)
     MPR_CLOCK = 96,
     MPR_LIFE_FIRST = 97,       // MOéMON GARDEN: 97 verb on a friend's follower, 98 its answer, 99 a record (mp_life_social.c)            // the room creator's PC clock: s64 local time, as seconds as if it were UTC (mp_main.c)
     MPR_SOCIAL_END = 100,

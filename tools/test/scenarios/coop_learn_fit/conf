@@ -1,0 +1,10 @@
+# Co-op wild Double Battle, both leads one EXP short of Lv7 (two moves: EMBER fits). BOB knocks out a foe (both at 1 HP and asleep),
+# ALICE GROWLs: next turn EMBER is in the battle's moves for both and on BOB's own move list (shot b_moves)
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=280:6+"
+ENV_B="MOEMON_DEBUG_PARTY=280:6+"
+EXPECT_A=("co-op levels: slot 3 learned 52 (battler 2)")
+EXPECT_B=("monmoves: slot 3 species 280 moves 10 45 116 52")

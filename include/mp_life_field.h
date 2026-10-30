@@ -29,6 +29,9 @@ enum
     LIFE_POSE_PULL,     // tugging at its Trainer's sleeve
     LIFE_POSE_BREATH,   // a deep breath (just woke up)
     LIFE_POSE_LAY,      // lying down, awake (basking)
+    LIFE_POSE_SWIM,     // in the water: half under it, paddling, now and then diving right under (the Garden's pond)
+    LIFE_POSE_CLIMB,    // up a tree's trunk, into its leaves
+    LIFE_POSE_DIG,      // digging: sunk into the ground, dirt flying
     LIFE_POSE_COUNT
 };
 u8 MP_LifePose_Base(u8 pose);   // the pose a Moemon sprite shows for it (the first seven)

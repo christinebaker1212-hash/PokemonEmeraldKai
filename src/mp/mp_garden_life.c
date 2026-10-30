@@ -24,6 +24,8 @@
 #include "mp_life_field.h"
 #include "mp_life_social.h"
 #include "event_object_movement.h"
+#include "field_effect.h"
+#include "constants/field_effects.h"
 #include "field_player_avatar.h"
 #include "field_weather.h"
 #include "fieldmap.h"
@@ -46,6 +48,7 @@
 #define MAX_ACTORS     24
 #define TAG_GARDEN_PAL 0x1160     // + actor index
 #define ACTOR_MAGIC    0x4741     // "GA" in sprite data[6]
+STATIC_ASSERT(MP_FOLLOWFX_SLOTS - MP_FOLLOWFX_GARDEN >= MAX_ACTORS, GardenActorsHaveGroundEffects);
 #define GX(x) ((x) + MAP_OFFSET)
 #define GY(y) ((y) + MAP_OFFSET)
 
@@ -93,6 +96,11 @@ struct Actor
     u8 newBody;             // times it showed it's still getting used to a new body (this visit)
     s8 farmPlot;            // GA_FARM: the plot it's seeing to, and what it does there (FARM_WORK_*)
     u8 farmWork;
+    // what it's doing shows (Draw): sunk into the water or the ground (sink), up a tree (lift), and since when
+    u8 sink, lift;
+    u16 visT;
+    bool8 inWater;          // stepped into the pond to swim (ours: it steps back out onto shore when it's done)
+    struct Coords16 shore;
     // the network: the tile it last stepped from (ours: sent with cur); a friend's: the tiles their game says it
     // stepped on, replayed in order (the same path and facings on every screen)
     struct Coords16 from;
@@ -136,6 +144,7 @@ bool8 MP_Garden_HidesFollowers(void)
     return MP_Garden_IsHere();
 }
 
+bool8 MP_GardenLife_TileToSprite(s16 tx, s16 ty, s16 *x, s16 *y);
 static void SpriteCB_Actor(struct Sprite *sprite)
 {
 }
@@ -146,8 +155,14 @@ static bool8 SpriteIsOurs(struct Actor *a)
         && gSprites[a->spriteId].data[6] == ACTOR_MAGIC && gSprites[a->spriteId].data[7] == (s16)(a - sL.a);
 }
 
+bool8 MP_GardenLife_IsActorSprite(struct Sprite *sprite)
+{
+    return sprite->inUse && sprite->callback == SpriteCB_Actor;
+}
+
 static void DestroyActorSprite(struct Actor *a)
 {
+    MP_FollowFx_Remove(MP_FOLLOWFX_GARDEN + (a - sL.a));   // its grass, splashes and reflection go with it
     if (a->pmdOn)
         MP_Pmd_Detach(&a->pmd, SpriteIsOurs(a) ? &gSprites[a->spriteId] : NULL);
     a->pmdOn = FALSE;
@@ -764,6 +779,87 @@ static u8 PoseFrame(struct Actor *a, struct Sprite *sp)
     return a->dir * 2 + ((t / 24) & 1);
 }
 
+// What it's doing shows: in the pond only its top above the water (now and then a dive right under, ripples
+// round it), up a tree's trunk, half in the ground while digging (dust flying). The picture is cut off at its
+// feet (sprite.h mpClipOn), so what's under the water or the ground isn't drawn.
+static void DrawDoing(struct Actor *a, struct Sprite *sp)
+{
+    u8 h = a->pmdOn ? MP_Pmd_Height(&a->pmd) : (a->size == 64 ? 44 : 26);   // (the picture's height above its feet)
+    u8 wantSink = 0, wantLift = 0;
+    bool8 settled = a->moved >= 16, doing = a->act != GA_NONE && (a->phase != 0 || a->owner >= 0);
+    s16 feet = sp->y + (a->pmdOn ? 0 : a->size == 64 ? 32 : 16);   // (sprite coordinates: where it stands)
+
+    if (a->owner >= 0)
+        a->inWater = IsWater(a->cur.x, a->cur.y);   // (a friend's: in the water where their game has it)
+    if (a->inWater)
+    {
+        u16 t = a->visT % 300;
+        wantSink = settled && t >= 200 && t < 250 ? h + 4 : h / 4 + 2;
+        if (settled && !sp->invisible && (a->visT % 48 == 0 || t == 200 || t == 250))
+        {
+            gFieldEffectArguments[0] = sp->x;
+            gFieldEffectArguments[1] = feet - 2;
+            gFieldEffectArguments[2] = 151;
+            gFieldEffectArguments[3] = 3;
+            FieldEffectStart(FLDEFF_RIPPLE);
+        }
+        a->visT++;
+    }
+    else if (settled && doing && a->pose == LIFE_POSE_CLIMB)
+        wantLift = 20;
+    else if (settled && doing && a->pose == LIFE_POSE_DIG)
+    {
+        wantSink = h * 3 / 5;
+        if (!sp->invisible && a->visT % 24 == 0)
+        {
+            gFieldEffectArguments[0] = a->cur.x;
+            gFieldEffectArguments[1] = a->cur.y;
+            gFieldEffectArguments[2] = 3;
+            gFieldEffectArguments[3] = 2;
+            FieldEffectStart(FLDEFF_DUST);
+        }
+        a->visT++;
+    }
+    else if (settled && doing && a->act == GA_FARM && a->farmWork == FARM_WORK_WATER && a->farmPlot >= 0)
+    {
+        // watering: the water splashing on the soft soil
+        s16 px, py, x, y;
+        MP_Farm_PlotPos(a->farmPlot, &px, &py);
+        if (a->visT % 32 == 0 && !sp->invisible && MP_GardenLife_TileToSprite(px, py, &x, &y))
+        {
+            gFieldEffectArguments[0] = x;
+            gFieldEffectArguments[1] = y + 12;
+            gFieldEffectArguments[2] = 151;
+            gFieldEffectArguments[3] = 3;
+            FieldEffectStart(FLDEFF_RIPPLE);
+        }
+        a->visT++;
+    }
+    else
+        a->visT = 0;
+    // (easing in and out of it: a dive goes down fast, everything else a pixel a frame)
+    if (a->sink < wantSink)
+        a->sink += wantSink - a->sink >= 3 && a->inWater ? 3 : 1;
+    else if (a->sink > wantSink)
+        a->sink--;
+    if (a->lift < wantLift && (a->animTimer & 1))
+        a->lift++;
+    else if (a->lift > wantLift)
+        a->lift--;
+    if (a->lift)
+    {
+        // up the trunk of the tree it faces: toward it, then up, in front of the leaves (the tree's top is drawn over
+        // anyone walking behind it: one up in it would vanish)
+        sp->x2 += (a->dir == FDIR_RIGHT ? 1 : a->dir == FDIR_LEFT ? -1 : 0) * a->lift / 2;
+        sp->y2 += (a->dir == FDIR_DOWN ? 1 : a->dir == FDIR_UP ? -1 : 0) * a->lift / 2;
+        if (sp->oam.priority > 1)
+            sp->oam.priority = 1;
+    }
+    sp->y2 += a->sink - a->lift;
+    sp->mpClipOn = a->sink > 0;
+    sp->mpClipY = feet + (sp->coordOffsetEnabled ? gSpriteCoordOffsetY : 0);
+}
+
 static void Draw(struct Actor *a)
 {
     struct ObjectEvent *owner = &gObjectEvents[gPlayerAvatar.objectEventId];
@@ -829,6 +925,7 @@ static void Draw(struct Actor *a)
         MP_Pmd_SetSubpriority(sp, 3, 1);
     else
         SetObjectSubpriorityByElevation(3, sp, 1);
+    DrawDoing(a, sp);
     {
         s16 x = sp->x + sp->x2 + gSpriteCoordOffsetX, y = sp->y + sp->y2 + gSpriteCoordOffsetY;
         s16 m = a->pmdOn ? 136 : 32;   // a PMD picture can reach far from its feet (it's drawn whole, at its exact place)
@@ -840,10 +937,70 @@ static void Draw(struct Actor *a)
                            a->pmdOn ? y - MP_Pmd_Height(&a->pmd) : y - a->size / 2 + (a->size == 64 ? 16 : 4),
                            sp->subpriority > 0 ? sp->subpriority - 1 : 0);
     }
+    // grass, sand, puddles and its reflection, as under a follower (mp_followfx.c); none while it's in the pond,
+    // up a tree or in the ground
+    MP_FollowFx_Update(MP_FOLLOWFX_GARDEN + idx, a->spriteId, a->prev.x, a->prev.y, a->cur.x, a->cur.y, a->moved, a->dir,
+                       a->size, 3, sp->invisible || a->inWater || a->sink || a->lift);
 }
 
 // ---------------------------------------------------------------------------
 // Their own minds
+
+// Into the pond to swim: a step onto the water beside it (the tile it faces first), no other Pokémon there
+static bool8 EnterWater(struct Actor *a)
+{
+    static const s8 d[4][2] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+    s16 tx = 0x7FFF, ty = 0;
+    u8 i;
+    if (a->owner >= 0 || a->inWater || a->moved < 16)
+        return a->inWater;
+    if (a->fx != 0x7FFF && abs(a->fx - a->cur.x) + abs(a->fy - a->cur.y) == 1 && IsWater(a->fx, a->fy)
+     && ActorAtTile(a->fx, a->fy, a) == NULL)
+        tx = a->fx, ty = a->fy;
+    for (i = 0; i < 4 && tx == 0x7FFF; i++)
+        if (IsWater(a->cur.x + d[i][0], a->cur.y + d[i][1]) && ActorAtTile(a->cur.x + d[i][0], a->cur.y + d[i][1], a) == NULL)
+            tx = a->cur.x + d[i][0], ty = a->cur.y + d[i][1];
+    if (tx == 0x7FFF)
+        return FALSE;
+    a->shore = a->cur;
+    a->dir = DirToward(a->cur, tx, ty, a->dir);
+    a->from = a->prev = a->cur;
+    a->cur.x = tx;
+    a->cur.y = ty;
+    a->target = a->cur;
+    a->moved = 0;
+    a->inWater = TRUE;
+    MPNet_Log("garden: %u swims in the pond at %d,%d", a->dex, tx - MAP_OFFSET, ty - MAP_OFFSET);
+    return TRUE;
+}
+
+// ... and back out onto the shore it came from (or any open ground beside it). FALSE: nowhere yet
+static bool8 LeaveWater(struct Actor *a)
+{
+    static const s8 d[4][2] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+    s16 tx = 0x7FFF, ty = 0;
+    u8 i;
+    if (!a->inWater)
+        return TRUE;
+    if (a->moved < 16)
+        return FALSE;
+    if (CanStand(a->shore.x, a->shore.y, a) && abs(a->shore.x - a->cur.x) + abs(a->shore.y - a->cur.y) == 1)
+        tx = a->shore.x, ty = a->shore.y;
+    for (i = 0; i < 4 && tx == 0x7FFF; i++)
+        if (CanStand(a->cur.x + d[i][0], a->cur.y + d[i][1], a))
+            tx = a->cur.x + d[i][0], ty = a->cur.y + d[i][1];
+    if (tx == 0x7FFF)
+        return FALSE;
+    a->dir = DirToward(a->cur, tx, ty, a->dir);
+    a->from = a->prev = a->cur;
+    a->cur.x = tx;
+    a->cur.y = ty;
+    a->target = a->cur;
+    a->moved = 0;
+    a->inWater = FALSE;
+    MPNet_Log("garden: %u out of the pond", a->dex);
+    return TRUE;
+}
 
 static void Plan(struct Actor *a, u8 act, s16 x, s16 y, s16 fx, s16 fy, u16 duration, u8 pose, u8 emote)
 {
@@ -1021,11 +1178,11 @@ static const u8 sPursuitStep[LIFE_PURSUIT_MILESTONES] = {60, 150, 250};
 
 // how it looks at it: [pursuit][0 a beginner, 1 getting there, 2 a natural] = pose, emote
 static const u8 sPursuitLook[LIFE_PURSUIT_COUNT][3][2] = {
-    [LIFE_PURSUIT_CLIMB]   = {{LIFE_POSE_TRIP, LIFE_EMOTE_SWEAT}, {LIFE_POSE_HOP, LIFE_EMOTE_NOTE}, {LIFE_POSE_LOOKUP, LIFE_EMOTE_SPARKLE}},
-    [LIFE_PURSUIT_SWIM]    = {{LIFE_POSE_SHAKE, LIFE_EMOTE_SWEAT}, {LIFE_POSE_SHAKE, LIFE_EMOTE_WATER}, {LIFE_POSE_LEAP, LIFE_EMOTE_WATER}},
+    [LIFE_PURSUIT_CLIMB]   = {{LIFE_POSE_TRIP, LIFE_EMOTE_SWEAT}, {LIFE_POSE_CLIMB, LIFE_EMOTE_NOTE}, {LIFE_POSE_CLIMB, LIFE_EMOTE_SPARKLE}},
+    [LIFE_PURSUIT_SWIM]    = {{LIFE_POSE_SWIM, LIFE_EMOTE_SWEAT}, {LIFE_POSE_SWIM, LIFE_EMOTE_WATER}, {LIFE_POSE_SWIM, LIFE_EMOTE_SPARKLE}},
     [LIFE_PURSUIT_SING]    = {{LIFE_POSE_SIT, LIFE_EMOTE_DOTS}, {LIFE_POSE_SIT, LIFE_EMOTE_NOTE}, {LIFE_POSE_JOY, LIFE_EMOTE_NOTE}},
     [LIFE_PURSUIT_COLLECT] = {{LIFE_POSE_SHAKE, LIFE_EMOTE_QUESTION}, {LIFE_POSE_SHAKE, LIFE_EMOTE_SPARKLE}, {LIFE_POSE_LEAP, LIFE_EMOTE_SPARKLE}},
-    [LIFE_PURSUIT_DIG]     = {{LIFE_POSE_SHAKE, LIFE_EMOTE_DOTS}, {LIFE_POSE_SHAKE, LIFE_EMOTE_EXCLAIM}, {LIFE_POSE_LEAP, LIFE_EMOTE_EXCLAIM}},
+    [LIFE_PURSUIT_DIG]     = {{LIFE_POSE_DIG, LIFE_EMOTE_DOTS}, {LIFE_POSE_DIG, LIFE_EMOTE_EXCLAIM}, {LIFE_POSE_DIG, LIFE_EMOTE_SPARKLE}},
     [LIFE_PURSUIT_TEACH]   = {{LIFE_POSE_NOD, LIFE_EMOTE_DOTS}, {LIFE_POSE_NOD, LIFE_EMOTE_NOTE}, {LIFE_POSE_JOY, LIFE_EMOTE_SPARKLE}},
 };
 
@@ -1170,7 +1327,7 @@ static bool8 StartRare(u8 kind, struct Actor *a, struct Actor *b)
     case LIFE_RARE_PADDLE:
         if (!FindNear(a->cur.x, a->cur.y, T_ByWater, 14, &x, &y, &fx, &fy) || !BesideTile(b, x, y, &bx, &by))
             return FALSE;
-        Plan(a, GA_RARE, x, y, fx, fy, dur, LIFE_POSE_SHAKE, LIFE_EMOTE_WATER);
+        Plan(a, GA_RARE, x, y, fx, fy, dur, LIFE_POSE_SWIM, LIFE_EMOTE_WATER);
         Plan(b, GA_RARE, bx, by, fx, fy, dur, LIFE_POSE_SIT, LIFE_EMOTE_SWEAT);
         break;
     case LIFE_RARE_RIVAL_NAP:
@@ -1307,7 +1464,17 @@ static void FarmDone(struct Actor *a)
         return;
     MP_Farm_PlotPos(a->farmPlot, &px, &py);
     if (abs(a->cur.x - px) + abs(a->cur.y - py) == 1 && MP_Farm_DoWork(a->farmWork, a->farmPlot, a->dex))
+    {
         MP_LifeEmote_Show(LIFE_EMOTE_SLOT_GARDEN(a - sL.a), a->farmWork == FARM_WORK_NIBBLE ? LIFE_EMOTE_HEART : LIFE_EMOTE_NOTE);
+        if (a->farmWork != FARM_WORK_NIBBLE)
+        {
+            // the plant perks up: a twinkle on it
+            gFieldEffectArguments[0] = px - MAP_OFFSET;
+            gFieldEffectArguments[1] = py - MAP_OFFSET;
+            gFieldEffectArguments[2] = 2;
+            FieldEffectStart(FLDEFF_SPARKLE);
+        }
+    }
     a->farmPlot = -1;
 }
 
@@ -1376,10 +1543,10 @@ static bool8 TypePlace(struct Actor *a, u8 tneed, bool8 anyTime)
     sLastZone = -1;
     switch (tneed)
     {
-    case TNEED_SOAK:    ok = FindZone(a, tneed, T_ByWater, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_ByWater, 12, &x, &y, &fx, &fy); pose = LIFE_POSE_SHAKE; emote = LIFE_EMOTE_WATER; break;
+    case TNEED_SOAK:    ok = FindZone(a, tneed, T_ByWater, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_ByWater, 12, &x, &y, &fx, &fy); pose = LIFE_POSE_SWIM; emote = LIFE_EMOTE_WATER; break;
     case TNEED_BASK:    ok = FindZone(a, tneed, T_Any, &x, &y, &fx, &fy) || ((anyTime || Sunny()) && FindNear(a->cur.x, a->cur.y, T_Open, 6, &x, &y, &fx, &fy)); pose = LIFE_POSE_LAY; emote = LIFE_EMOTE_SUN; break;
     case TNEED_SUN:     ok = (anyTime || Sunny()) && (FindZone(a, tneed, T_Any, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Flower, 10, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Open, 6, &x, &y, &fx, &fy)); emote = LIFE_EMOTE_SUN; break;
-    case TNEED_DIG:     ok = FindZone(a, tneed, T_Any, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Sand, 14, &x, &y, &fx, &fy); pose = LIFE_POSE_SHAKE; emote = LIFE_EMOTE_DOTS; break;
+    case TNEED_DIG:     ok = FindZone(a, tneed, T_Any, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Sand, 14, &x, &y, &fx, &fy); pose = LIFE_POSE_DIG; emote = LIFE_EMOTE_DOTS; break;
     case TNEED_FOLIAGE: ok = FindZone(a, tneed, T_Tall, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Tall, 14, &x, &y, &fx, &fy); pose = LIFE_POSE_EAT; emote = LIFE_EMOTE_LEAF; break;
     case TNEED_HEIGHT:  ok = FindZone(a, tneed, T_Lookout, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Open, 4, &x, &y, &fx, &fy); pose = LIFE_POSE_LOOKUP; emote = LIFE_EMOTE_SPARKLE; break;
     case TNEED_SKY:     ok = FindZone(a, tneed, T_Open, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_ByTree, 14, &x, &y, &fx, &fy) || FindNear(a->cur.x, a->cur.y, T_Open, 4, &x, &y, &fx, &fy); pose = LIFE_POSE_LOOKUP; emote = LIFE_EMOTE_SPARKLE; break;
@@ -1702,6 +1869,8 @@ static void Shared(struct Actor *a, struct MpLifeRec *rec)
 
 static void Run(struct Actor *a, struct MpLifeRec *rec)
 {
+    if (a->inWater && !IsWater(a->cur.x, a->cur.y))
+        a->inWater = FALSE;   // (called off to something else mid-swim: it walked out by itself)
     if (a->reactTimer)
     {
         if (--a->reactTimer == 0)
@@ -1713,6 +1882,12 @@ static void Run(struct Actor *a, struct MpLifeRec *rec)
     }
     if (a->act == GA_NONE)
     {
+        if (a->inWater)   // (an activity cut short in the pond: out of it before anything else)
+        {
+            if (a->moved >= 16 && LeaveWater(a))
+                a->pose = LIFE_POSE_NONE;
+            return;
+        }
         if (a->cooldown)
             a->cooldown--;
         else
@@ -1720,6 +1895,18 @@ static void Run(struct Actor *a, struct MpLifeRec *rec)
         return;
     }
     a->timer++;
+    if (a->phase == 0 && a->inWater && (a->cur.x != a->target.x || a->cur.y != a->target.y))
+    {
+        // off somewhere else while swimming: out onto the shore first (no path starts in the water), then on its way
+        struct Coords16 target = a->target;
+        if (a->moved >= 16 && LeaveWater(a))
+        {
+            a->target = target;
+            a->pose = LIFE_POSE_NONE;
+        }
+        if (a->timer <= a->walkLimit)
+            return;
+    }
     if (a->phase == 0)
     {
         // a partner moving off (tag): follow it
@@ -1746,6 +1933,12 @@ static void Run(struct Actor *a, struct MpLifeRec *rec)
             if (a->act == GA_PLAY && a->partner >= 0 && sL.a[a->partner].used)
                 a->dir = DirToward(a->cur, sL.a[a->partner].cur.x, sL.a[a->partner].cur.y, a->dir);
             a->pose = a->arrivePose;
+            if (a->pose == LIFE_POSE_SWIM && !EnterWater(a))
+                a->pose = LIFE_POSE_SHAKE;   // (no room in the water there: splashing at the edge)
+            if (a->pose == LIFE_POSE_CLIMB)
+                MPNet_Log("garden: %u climbs a tree at %d,%d", a->dex, a->cur.x - MAP_OFFSET, a->cur.y - MAP_OFFSET);
+            if (a->pose == LIFE_POSE_DIG)
+                MPNet_Log("garden: %u digs at %d,%d", a->dex, a->cur.x - MAP_OFFSET, a->cur.y - MAP_OFFSET);
             if (a->emote != LIFE_EMOTE_NONE)
                 MP_LifeEmote_Show(LIFE_EMOTE_SLOT_GARDEN(a - sL.a), a->emote);
             if (a->act == GA_DECOR || a->act == GA_NAP)
@@ -1762,7 +1955,8 @@ static void Run(struct Actor *a, struct MpLifeRec *rec)
     // the nervous one finds its courage halfway (a paddle), a family greeting's twirl ends
     if (a->act == GA_RARE && a->rare == LIFE_RARE_PADDLE && !a->lead && a->timer == a->duration / 2)
     {
-        a->pose = LIFE_POSE_SHAKE;
+        // (into the water beside it, if there's room: else it splashes at the edge)
+        a->pose = EnterWater(a) ? LIFE_POSE_SWIM : LIFE_POSE_SHAKE;
         a->emote = LIFE_EMOTE_WATER;
         MP_LifeEmote_Show(LIFE_EMOTE_SLOT_GARDEN(a - sL.a), LIFE_EMOTE_EXCLAIM);
     }
@@ -1772,6 +1966,12 @@ static void Run(struct Actor *a, struct MpLifeRec *rec)
         MP_LifeEmote_Show(LIFE_EMOTE_SLOT_GARDEN(a - sL.a), a->emote);
     if ((a->act == GA_PLAY || a->act == GA_SQUABBLE) && a->partner >= 0 && sL.a[a->partner].used && (a->timer % 30) == 0)
         a->dir = DirToward(a->cur, sL.a[a->partner].cur.x, sL.a[a->partner].cur.y, a->dir);
+    if (a->timer >= a->duration && a->inWater)
+    {
+        if (!LeaveWater(a))
+            a->duration += 30;   // (no room on the shore yet: a little longer in the water)
+        return;
+    }
     if (a->timer >= a->duration)
     {
         bool8 celebrate = FALSE, woke = a->act == GA_NAP;
@@ -1894,6 +2094,16 @@ u8 MP_GardenLife_Detail(u8 i)
     if (a->act == GA_FARM)
         return 0x80 | a->farmWork;
     return 0;
+}
+
+// What it visibly does right now, for WATCH mode: 1 swimming in the pond, 2 up a tree, 3 digging, 0 none of those
+u8 MP_GardenLife_Doing(u8 i)
+{
+    struct Actor *a;
+    if (i >= MAX_ACTORS || !sL.a[i].used)
+        return 0;
+    a = &sL.a[i];
+    return a->inWater ? 1 : a->lift ? 2 : a->sink ? 3 : 0;
 }
 
 u8 MP_GardenLife_Pose(u8 i)
@@ -2180,9 +2390,9 @@ void MP_GardenLife_Debug(const char *args)
         struct Actor *a = &sL.a[i];
         if (!a->used)
             continue;
-        printf("[test] garden actor %u: dex %u owner %d at %d,%d act %u phase %u pose %u partner %d rare %u lead %d learner %d target %d,%d dir %u pmd %d lift %d\n", i,
+        printf("[test] garden actor %u: dex %u owner %d at %d,%d act %u phase %u pose %u partner %d rare %u lead %d learner %d target %d,%d dir %u pmd %d lift %d sink %u up %u water %d\n", i,
                a->dex, a->owner, a->cur.x - MAP_OFFSET, a->cur.y - MAP_OFFSET, a->act, a->phase, a->pose, a->partner, a->rare,
-               a->lead, a->learner, a->target.x - MAP_OFFSET, a->target.y - MAP_OFFSET, a->dir, a->pmdOn, a->pmdOn ? a->pmd.big.lift : 0);
+               a->lead, a->learner, a->target.x - MAP_OFFSET, a->target.y - MAP_OFFSET, a->dir, a->pmdOn, a->pmdOn ? a->pmd.big.lift : 0, a->sink, a->lift, a->inWater);
     }
 }
 
@@ -2289,7 +2499,7 @@ void MP_GardenLife_DebugRare(u8 actor, u8 kind)
 }
 
 // Tests: its pursuit at this level, now
-void MP_GardenLife_DebugPursuit(u8 actor, u8 level)
+void MP_GardenLife_DebugPursuit(u8 actor, u8 level, u8 pursuit)
 {
     struct MpLifeRec *rec;
     struct Actor *a;
@@ -2297,7 +2507,8 @@ void MP_GardenLife_DebugPursuit(u8 actor, u8 level)
     if (actor >= MAX_ACTORS || !sL.a[actor].used || (rec = RecOf(&sL.a[actor])) == NULL)
         return;
     a = &sL.a[actor];
-    p = rec->pursuit ? rec->pursuit : MP_Life_PursuitFor(rec);
+    p = pursuit != LIFE_PURSUIT_NONE && pursuit < LIFE_PURSUIT_COUNT ? pursuit
+      : rec->pursuit ? rec->pursuit : MP_Life_PursuitFor(rec);
     a->act = GA_NONE;
     a->reactTimer = 0;
     if (p != LIFE_PURSUIT_NONE)

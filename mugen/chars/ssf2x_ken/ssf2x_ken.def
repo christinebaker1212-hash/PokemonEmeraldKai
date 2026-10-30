@@ -1,0 +1,35 @@
+[Info]
+Name         ="ken"
+DisplayName  ="ken"
+VersionDate  =09,23,2009
+MugenVersion =04,14,2002
+Author       ="G.D.T"
+Pal.Defaults =1,7
+
+[Files]
+Cmd     =ken.cmd
+Cns     =ken.cns
+St      =ken.cns
+st1=option.txt
+StCommon =common1.cns
+Sprite  =ken.sff
+Anim    =ken.air
+Sound   =ken.snd
+
+pal1 = act/ken_1.act
+pal2 = act/ken_2.act
+pal3 = act/ken_3.act
+pal4 = act/ken_4.act
+pal5 = act/ken_5.act
+Pal6 = act/ken_6.act
+Pal7 = act/ken_7.act
+Pal8 = act/ken_8.act
+Pal9 = act/ken_9.act
+Pal10= act/ken_7.act
+Pal11= act/ken_8.act
+Pal12= act/ken_9.act
+
+
+[Arcade]
+Intro.Storyboard =
+Ending.Storyboard =

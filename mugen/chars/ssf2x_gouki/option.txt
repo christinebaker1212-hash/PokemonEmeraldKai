@@ -1,0 +1,206 @@
+;---------------------------------------------------------------------------
+;Option
+;---------------------------------------------------------------------------
+[Statedef 10010]
+anim=8011
+ctrl=0
+
+[State 300]
+type = VarSet
+trigger1 = 1
+var(1) = 3       ;damage  3...the original(原作通り)  2...reduce damage(2/3)
+                 ;normal or Shin gouki only
+                 ;affect AI'movement
+
+[State 300]
+type = VarSet
+trigger1 = 1
+var(2) = 1       ;Shin gouki's Super  0...disable(不能)  1...able(可能)
+                 ;affect AI's movement
+
+[State 300]
+type = VarSet
+trigger1 = 1
+var(3) = 1       ;reset power at the round start(Shin gouki only)
+　　　　　　　   ;0...No(ﾘｾｯﾄしない)  1...Yes(ﾘｾｯﾄする)
+                 ;affect AI's movement
+
+
+
+
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+[State 1000, 7]
+type = BindToRoot
+trigger1 = 1
+time = -1
+facing = 1
+pos = 0,0
+
+[State 3001, VarSet]
+type = VarSet
+trigger1 = 1
+var(12) = root,var(12)
+
+[State 10000,1]
+Type = DestroySelf
+triggerall = isHelper
+triggerall = root,var(59)
+trigger1 = roundstate >= 3
+
+;---------------------------------------------------------------------------
+;numhelper
+[State 3001, VarSet]
+type = VarSet
+trigger1 = numenemy = 1
+trigger1 = gametime%5 = 0
+var(14) = enemynear,numhelper
+
+[State 3001, VarSet]
+type = VarSet
+trigger1 = numenemy = 1
+trigger1 = gametime%5 = [1,4]
+var(15) = enemynear,numhelper - var(14)
+
+;---------------------------------------------------------------------------
+;P2movetype time measure 1
+[State 3001, VarSet]
+type = VarSet
+trigger1 = P2movetype != A
+var(20) = 0
+
+[State 3001, VarSet]
+type = VarAdd
+trigger1 = var(20)
+var(20) = 1
+
+[State 3001, VarSet]
+type = VarSet
+trigger1 = P2movetype = A
+trigger1 = enemynear,time = 1
+var(20) = 1
+
+;---------------------------------------------------------------------------
+;P2guard time measure
+
+[State 3001, VarSet]
+type = null;VarSet
+trigger1 = var(21) >= 40
+trigger2 = enemynear,movetype = H
+trigger3 = root,movetype = H
+var(23) = 0
+ignorehitpause = 1
+
+[State 3001, VarSet]
+type = null;VarSet
+trigger1 = enemynear,stateno = [120,155]
+trigger1 = enemynear,time = 1
+var(23) = 1
+ignorehitpause = 1
+
+[State 3001, VarSet]
+type = null;VarAdd
+trigger1 = var(23)
+var(23) = 1
+ignorehitpause = 1
+
+;---------------------------------------------------------------------------
+;ガード回数カウント
+[State 3001, VarSet]
+type = VarSet
+trigger1 = root,stateno = [5000,5999]
+trigger2 = root,stateno != [120,155]
+trigger2 = root,movetype = H
+trigger3 = root,movetype = A
+var(30) = 0
+
+[State 3001, VarSet]
+type = VarAdd
+trigger1 = root,stateno = 150 || root,stateno = 152 || root,stateno = 154
+trigger1 = root,time = 1
+var(30) = 1
+ignorehitpause = 1
+
+;ガード間隔
+[State 3001, VarSet]
+type = VarSet
+trigger1 = var(31) >= 40
+trigger2 = root,movetype = A
+var(31) = 0
+ignorehitpause = 1
+
+[State 3001, VarSet]
+type = VarAdd
+trigger1 = var(31)
+var(31) = 1
+ignorehitpause = 1
+
+[State 3001, VarSet]
+type = VarSet
+trigger1 = root,stateno = 150 || root,stateno = 152 || root,stateno = 154
+trigger1 = root,time = 1
+var(31) = 1
+ignorehitpause = 1
+
+;---------------------------------------------------------------------------
+;AI
+[Statedef 10000]
+anim=8011;なにも表示しないｱﾆﾒでもいいけど入れなくても全然問題ない
+ctrl=0
+
+[State 10000,間違いで本体が来たら立ちへ移行]
+type=selfstate
+trigger1=!ishelper
+value=0
+
+[State 10000,プレイヤー判定]
+type=varset
+trigger1=command="up"&&root,command="up"
+trigger2=command="down"&&root,command="down"
+trigger3=command="back"&&root,command="back"
+trigger4=command="fwd"&&root,command="fwd"
+trigger5=command="a"&&root,command="a"
+trigger6=command="b"&&root,command="b"
+trigger7=command="c"&&root,command="c"
+trigger8=command="x"&&root,command="x"
+trigger9=command="y"&&root,command="y"
+trigger10=command="z"&&root,command="z"
+trigger11=command="start"&&root,command="start"
+var(59)=-1
+
+[State 10000,立ったら消失]
+Type = DestroySelf
+triggerAll = isHelper
+Trigger1 = root,var(59) != 0||var(59)=-1
+trigger2=command="up"&&root,command="up"
+trigger3=command="down"&&root,command="down"
+trigger4=command="back"&&root,command="back"
+trigger5=command="fwd"&&root,command="fwd"
+trigger6=command="a"&&root,command="a"
+trigger7=command="b"&&root,command="b"
+trigger8=command="c"&&root,command="c"
+trigger9=command="x"&&root,command="x"
+trigger10=command="y"&&root,command="y"
+trigger11=command="z"&&root,command="z"
+trigger12=command="start"&&root,command="start"
+trigger13 = !root,var(59)
+trigger13 = root,var(10) >= 300
+
+[State 10000,ﾌﾗｸﾞON]
+type=varset
+triggerall=var(59)!=-1
+triggerall = root,ctrl
+triggerall = root,stateno != [120,159]
+triggerall = root,stateno != [5000,5099]
+trigger1=root,command="up"
+trigger2=root,command="down"
+trigger3=root,command="back"
+trigger4=root,command="fwd"
+trigger5=root,command="a"
+trigger6=root,command="b"
+trigger7=root,command="c"
+trigger8=root,command="x"
+trigger9=root,command="y"
+trigger10=root,command="z"
+trigger11=root,command="start"
+var(59)=1

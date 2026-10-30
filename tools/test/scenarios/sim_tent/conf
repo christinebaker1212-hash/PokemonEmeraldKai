@@ -1,0 +1,13 @@
+# The BATTLE SIMULATOR: BOB's record (his look, his top Pokemon) reaches the server when he connects and is passed on to
+# ALICE in the room; in SLATEPORT's BATTLE TENT she talks to the simulator, battles BOB's digital copy at level 50 (her
+# BUBBLEBEAM wins it), gets her prize, stops at a streak of 1, and her MOEMON are back at their own level
+MODE=2
+WARP=9,2,11,5
+WARP_B=0,10,10,10
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_DEBUG_PARTY=288:12"
+EXPECT_A=("sim: sent our record" "sim: a record arrived" "sim: 1 digital trainer(s) here" "sim: battle 1 against" "sim: battle 1 won (our lead back at Lv46)" "sim: streak 1 (best 1)" "sim: the challenge ends at 1")
+EXPECT_B=("sim: sent our record")
+UNEXPECT_A=("crash" "BAD EGG")
+UNEXPECT_B=("crash")

@@ -1,0 +1,33 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 120
+mp textspeed 2
+mp cards starter 0
+mp cards fast
+mp additem 399 1
+barrier ready 2
+mp tourney
+wait 30
+press DOWN 2
+wait 10
+rendershot t_choose
+press A 2
+waitlog 1200 tournament: player 1 joined
+wait 30
+pressuntillog A 600 tournament: round 1, our match
+wait 90
+pressuntillog A 1200 tournament: card match started
+wait 120
+press A 2
+waitlog 1200 card duel: started online
+wait 300
+mp cards concede
+wait 300
+press A 2
+wait 120
+press A 2
+wait 300
+wait 60
+rendershot t_final
+wait 60
+quit

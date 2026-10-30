@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "mp_kaisong.h"
 #include "mp.h"
 #include "money.h"
 #include "battle.h"
@@ -42,6 +43,7 @@
 #include "platform/display.h"
 #include "mp_net.h"
 #include "mp_join.h"
+#include "tcg/integration.h"
 
 #define FRAME_W 240
 #define FRAME_H 160
@@ -135,15 +137,14 @@ bool8 MP_Spectate_IsStreaming(void)
 // ---------------------------------------------------------------------------
 // Encoding
 
+// The song number, and in bits 10-15 which place's custom version plays (music/*.kaisong; 0 = the song's own)
 static u16 CurrentSong(void)
 {
-    u16 i;
+    u16 song;
     if (gMPlayInfo_BGM.songHeader == NULL || (gMPlayInfo_BGM.status & MUSICPLAYER_STATUS_PAUSE))
         return 0;
-    for (i = 0; i < LAST_SONG; i++)
-        if (gSongTable[i].header == gMPlayInfo_BGM.songHeader)
-            return i;
-    return 0;
+    song = MP_Kaisong_SongOf(gMPlayInfo_BGM.songHeader);
+    return song ? song | (MP_Kaisong_VariantOf(gMPlayInfo_BGM.songHeader) << 10) : 0;
 }
 
 static bool8 TileChanged(const u16 *frame, int t)
@@ -245,7 +246,7 @@ static int PackTile(const u16 *frame, int t, u8 *out)
 
 static void SendToViewers(const u8 *data, u16 len)
 {
-    u8 i, to = sStream.viewers | sStream.panel, others = 0;
+    u8 i, to = (sStream.viewers | sStream.panel) & ~Tcg_HiddenFrom(), others = 0;
     for (i = 0; i < MP_MAX_PLAYERS; i++)
         if (i != gMpLocalId && gMpPlayers[i].present)
             others |= 1 << i;
@@ -377,7 +378,13 @@ static bool8 FindShift(const u16 *frame, int *outX, int *outY)
 static void StreamFrame(void)
 {
     const u16 *frame = Platform_GetFrame();
-    bool8 key = sStream.needKey || sStream.keyTimer == 0;
+    static unsigned sHidden;
+    unsigned hidden = Tcg_HiddenFrom();   // a card duel's opponent skips frames: whole pictures again after it
+    bool8 key;
+    if (sHidden & ~hidden)
+        sStream.needKey = TRUE;
+    sHidden = hidden;
+    key = sStream.needKey || sStream.keyTimer == 0;
     int t = 0, pos, count, ox = 0, oy = 0, bytes = 0;
     u8 flags = key ? FRAMEF_KEY : 0;
     static u8 sForced[NUM_TILES];
@@ -749,10 +756,10 @@ static void ApplyFrame(const u8 *data, u16 len)
     if (!ApplyUpdate(sWatch.frame, &sWatch.gotFrame, data, len) || !sWatch.gotFrame)
         return;
     song = data[4] | (data[5] << 8);
-    if (song && song != sWatch.song && song < LAST_SONG)
+    if (song && song != sWatch.song && (song & 0x3FF) < LAST_SONG)
     {
         sWatch.song = song;
-        m4aSongNumStart(song);
+        MP_Kaisong_StartVariant(song & 0x3FF, song >> 10);
     }
 }
 

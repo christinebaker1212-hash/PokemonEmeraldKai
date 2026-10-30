@@ -1,3 +1,4 @@
+#include "mp_version.h"
 #include "global.h"
 #include "mp.h"
 #include "mp_garden.h"   // Moemon Co-op: START > GARDEN
@@ -741,6 +742,13 @@ static bool8 StartMenuPlayerNameCallback(void)
 
 static bool8 StartMenuSaveCallback(void)
 {
+    if (MOEMON_DEV_BUILD)
+    {
+        RemoveExtraStartMenuWindows();
+        HideStartMenu();
+        MP_ShowNotice("DEV BUILD: Saving is disabled.\nReturn to the main update to save.");
+        return TRUE;
+    }
     if (CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE)
         RemoveExtraStartMenuWindows();
 

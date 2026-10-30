@@ -10,6 +10,7 @@
 #include <direct.h>
 #endif
 
+#define STBI_ONLY_JPEG   // the card game's printed scans (src/tcg/tcg_gfx.c)
 #define STBI_ONLY_PNG
 #define STBI_NO_HDR
 #define STBI_NO_LINEAR
@@ -2049,6 +2050,97 @@ void MP_Avatar_BuildRemote(u8 id)
     info->disableReflectionPaletteLoad = TRUE;
 }
 
+// A 16x16 head for the Town Map (region_map.c): the top of the look's standing front frame,
+// centered on what's drawn there, with a 1-pixel outline in `outline` (a palette index no one
+// in the head uses). id -1 is the local player. tiles: 4 tiles (2x2, 128 bytes); pal: 16 colors.
+bool8 MP_Avatar_HeadIcon(s8 id, u8 *tiles, u16 *pal, u16 outline)
+{
+    const struct ObjectEventGraphicsInfo *info;
+    const u8 *src;
+    u8 head[16][16], used[16] = {0}, edge = 0;
+    int w, h, x, y, top = -1, left = 999, right = -1, cx, i;
+
+    if (id < 0)
+    {
+        u8 gfx = gObjectEvents[gPlayerAvatar.objectEventId].graphicsId;
+        const u16 *p;
+        info = MP_Avatar_LocalStateInfo(gfx);
+        if (info == NULL)
+            info = GetObjectEventGraphicsInfo(gfx);
+        p = info ? MP_GetObjectEventPaletteData(info->paletteTag) : NULL;
+        if (p == NULL)
+            return FALSE;
+        memcpy(pal, p, 32);
+    }
+    else
+    {
+        if (id >= MP_MAX_PLAYERS || !gMpPlayers[id].present)
+            return FALSE;
+        info = &sMpGfxInfo[1 + id];
+        if (info->images == NULL)
+            MP_Avatar_BuildRemote(id);
+        MP_Avatar_GetRemotePalette(id, gMpPlayers[id].hasState ? gMpPlayers[id].state.avatarMode : MP_AVATAR_FOOT, pal);
+    }
+    if (info == NULL || info->images == NULL || info->images[0].data == NULL)
+        return FALSE;
+    src = info->images[0].data;
+    w = info->width;
+    h = info->height;
+#define PIX(px, py) ((src[(((py) / 8) * (w / 8) + (px) / 8) * 32 + ((py) % 8) * 4 + ((px) % 8) / 2] >> (((px) & 1) * 4)) & 0xF)
+    for (y = 0; y < h && top < 0; y++)
+        for (x = 0; x < w; x++)
+            if (PIX(x, y))
+            {
+                top = y;
+                break;
+            }
+    if (top < 0)
+        return FALSE;
+    for (y = top; y < top + 14 && y < h; y++)
+        for (x = 0; x < w; x++)
+            if (PIX(x, y))
+            {
+                if (x < left)
+                    left = x;
+                if (x > right)
+                    right = x;
+            }
+    cx = (left + right + 1) / 2;
+    memset(head, 0, sizeof(head));
+    // (a row of room above for the outline)
+    for (y = 0; y < 15; y++)
+        for (x = 0; x < 16; x++)
+        {
+            int sx = cx - 8 + x, sy = top + y;
+            if (sx >= 0 && sx < w && sy < h && x > 0 && x < 15)
+                head[y + 1][x] = PIX(sx, sy);
+            used[head[y + 1][x]] = 1;
+        }
+#undef PIX
+    for (i = 15; i > 0 && !edge; i--)
+        if (!used[i])
+            edge = i;
+    if (edge)
+    {
+        u8 copy[16][16];
+        memcpy(copy, head, sizeof(copy));
+        pal[edge] = outline;
+        for (y = 0; y < 16; y++)
+            for (x = 0; x < 16; x++)
+                if (!copy[y][x] && ((x > 0 && copy[y][x - 1]) || (x < 15 && copy[y][x + 1]) || (y > 0 && copy[y - 1][x])
+                                    || (y < 15 && copy[y + 1][x])))
+                    head[y][x] = edge;
+    }
+    memset(tiles, 0, 128);
+    for (y = 0; y < 16; y++)
+        for (x = 0; x < 16; x++)
+        {
+            u8 *b = &tiles[((y / 8) * 2 + x / 8) * 32 + (y % 8) * 4 + (x % 8) / 2];
+            *b |= head[y][x] << ((x & 1) * 4);
+        }
+    return TRUE;
+}
+
 // ---------------------------------------------------------------------------
 // Trainer pictures (trainer card, battles). They match the overworld sprite
 // unless LOOK > TRAINER PIC / BACK PIC picks another one, and they take the
@@ -2426,6 +2518,38 @@ u16 MP_Avatar_LocalFrontPic(void)
 {
     struct MpAppearance app = GetLocalAppearance();
     return FrontPicId(&app, MP_CR_CACHE_LOCAL, LocalPack(), 0);
+}
+
+// This game's look as others see it (the BATTLE SIMULATOR's record, mp_sim.c)
+struct MpAppearance MP_Avatar_LocalAppearance(void)
+{
+    return GetLocalAppearance();
+}
+
+// The BATTLE SIMULATOR (mp_sim.c): a stored look as the opponent's front picture, as a hologram: its shades kept, in
+// the simulator's cyan light
+u16 MP_Avatar_DigitalFrontPic(const struct MpAppearance *appIn)
+{
+    struct MpAppearance app = Resolved(appIn);
+    u16 pal[16];
+    bool8 canRecolor;
+    int i;
+    if (!BuildFront(&app, MP_CR_CACHE_LOCAL, NULL, sPicBuf, pal, TRUE))
+    {
+        int c = FrontChoice(&app);
+        if (c < 0 || !FrontChoiceTiles(c, sPicBuf, pal, &canRecolor))
+            FrontChoiceTiles(app.gender == FEMALE ? TRAINER_PIC_MAY : TRAINER_PIC_BRENDAN, sPicBuf, pal, &canRecolor);
+    }
+    for (i = 1; i < 16; i++)
+    {
+        int r = (pal[i] & 31), g = (pal[i] >> 5) & 31, b = (pal[i] >> 10) & 31;
+        int l = (r * 3 + g * 6 + b) / 10;              // its brightness
+        int nr = l * 5 / 8 + r / 8, ng = l * 7 / 8 + 4 + g / 8, nb = l * 7 / 8 + 7 + b / 8;
+        pal[i] = (nr > 31 ? 31 : nr) | (ng > 31 ? 31 : ng) << 5 | (nb > 31 ? 31 : nb) << 10;
+    }
+    MP_Pack_WriteLz77Literal((u8 *)gMpTrainerFrontPicLz[1], sPicBuf, TRAINER_PIC_SIZE);
+    MP_Pack_WriteLz77Literal((u8 *)gMpTrainerFrontPalLz[1], pal, 32);
+    return TRAINER_PIC_MP_OPPONENT;
 }
 
 u16 MP_Avatar_RemoteFrontPic(u8 id)

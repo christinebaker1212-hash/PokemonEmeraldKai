@@ -1,0 +1,42 @@
+pressuntil A setup 5000
+wait 30
+press A 2
+wait 90
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+shot hr_host
+press A 2
+wait 30
+shot hr_rules
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press RIGHT 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press RIGHT 2
+wait 8
+shot hr_changed
+press B 2
+wait 20
+press B 2
+wait 20
+quit

@@ -1,0 +1,14 @@
+# the other way round: BOB, whose game runs the battle, has rain on the field and ALICE's game doesn't: the battle is
+# in the rain on both screens from the start, and won with WATER GUN
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+DELAY=250
+JIT=80
+FPS=60
+TMO=400
+ENV_A="MOEMON_DEBUG_PARTY=280:30"
+ENV_B="MOEMON_DEBUG_PARTY=283:30"
+EXPECT_A=("co-op: battle over, outcome 1" "bweather shown rain battle rain")
+EXPECT_B=("co-op: battle over, outcome 1" "bweather shown rain battle rain")
+UNEXPECT_A=("battle weather on screen: none")

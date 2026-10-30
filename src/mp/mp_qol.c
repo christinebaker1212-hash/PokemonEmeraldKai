@@ -1,3 +1,4 @@
+#include "mp_version.h"
 // Moemon Co-op: quality-of-life helpers that don't make the game easier.
 //   * Hold SELECT on the field: pick which Pokémon follows you
 #include <stdio.h>
@@ -217,6 +218,8 @@ static void SeenAdd(u32 h)
     FILE *f;
     SeenLoad();
     if (!SeenInsert(h))
+        return;
+    if (MOEMON_DEV_BUILD)
         return;
     SeenPath(path, sizeof(path));
     f = fopen(path, "ab");

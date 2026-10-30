@@ -1,3 +1,4 @@
+#include "mp_version.h"
 // Moemon Co-op: a bigger BAG (PC only).
 //
 // The pockets hold more kinds of items than the GBA's save block has room for
@@ -101,6 +102,8 @@ static u32 SaveBlockPocketsSum(void)
 // After the save file was written (platform StoreSaveFile): the slots past the save block's
 void MP_Bag_WriteSidecar(void)
 {
+    if (MOEMON_DEV_BUILD)
+        return;
     char path[600];
     FILE *f;
     u32 header[3];
@@ -394,4 +397,99 @@ void MP_Bag_Sort(u8 pocket)
         }
         slots[j] = cur;
     }
+}
+
+// ---------------------------------------------------------------------------
+// The BAG's eight pockets (HGSS's: ITEMS, MEDICINE, POKé BALLS, TMs & HMs, BERRIES, BATTLE ITEMS, KEY ITEMS,
+// FAVORITES). They're views of the save's five pockets: MEDICINE and BATTLE ITEMS are the ITEMS pocket's medicine and
+// battle-only items, ITEMS the rest of it; FAVORITES the items the player marked, from any pocket. The save keeps its
+// five pockets as they are (item_menu.c shows the views).
+
+// Which pocket an item shows in (never FAVORITES: that's as well)
+u8 MP_Bag_ViewOfItem(u16 item)
+{
+    ItemUseFunc f;
+    switch (GetItemPocket(item))
+    {
+    case POCKET_POKE_BALLS: return MP_BAGVIEW_BALLS;
+    case POCKET_TM_HM:      return MP_BAGVIEW_TMHM;
+    case POCKET_BERRIES:    return MP_BAGVIEW_BERRIES;
+    case POCKET_KEY_ITEMS:  return MP_BAGVIEW_KEY;
+    }
+    f = GetItemFieldFunc(item);
+    if (GetItemBattleUsage(item) == ITEM_B_USE_MEDICINE || f == ItemUseOutOfBattle_Medicine || f == ItemUseOutOfBattle_PPUp
+     || f == ItemUseOutOfBattle_PPRecovery || f == ItemUseOutOfBattle_RareCandy || f == ItemUseOutOfBattle_SacredAsh)
+        return MP_BAGVIEW_MEDICINE;
+    if (GetItemBattleUsage(item) == ITEM_B_USE_OTHER)
+        return MP_BAGVIEW_BATTLE;
+    return MP_BAGVIEW_ITEMS;
+}
+
+// The save's pocket a view shows (FAVORITES: POCKETS_COUNT, all of them)
+u8 MP_Bag_ViewPocket(u8 view)
+{
+    static const u8 sPocketOf[MP_BAGVIEW_COUNT] = {
+        [MP_BAGVIEW_ITEMS] = ITEMS_POCKET, [MP_BAGVIEW_MEDICINE] = ITEMS_POCKET, [MP_BAGVIEW_BALLS] = BALLS_POCKET,
+        [MP_BAGVIEW_TMHM] = TMHM_POCKET, [MP_BAGVIEW_BERRIES] = BERRIES_POCKET, [MP_BAGVIEW_BATTLE] = ITEMS_POCKET,
+        [MP_BAGVIEW_KEY] = KEYITEMS_POCKET, [MP_BAGVIEW_FAVORITES] = POCKETS_COUNT,
+    };
+    return view < MP_BAGVIEW_COUNT ? sPocketOf[view] : ITEMS_POCKET;
+}
+
+// ... and the view a save pocket opens on (GoToBagMenu's pocket)
+u8 MP_Bag_PocketView(u8 pocket)
+{
+    static const u8 sViewOf[POCKETS_COUNT] = {
+        [ITEMS_POCKET] = MP_BAGVIEW_ITEMS, [BALLS_POCKET] = MP_BAGVIEW_BALLS, [TMHM_POCKET] = MP_BAGVIEW_TMHM,
+        [BERRIES_POCKET] = MP_BAGVIEW_BERRIES, [KEYITEMS_POCKET] = MP_BAGVIEW_KEY,
+    };
+    return pocket < POCKETS_COUNT ? sViewOf[pocket] : MP_BAGVIEW_ITEMS;
+}
+
+// A view's stacks in order, as the slots they are in the save's pockets (each pocket compacted and in its sort order
+// first: MP_Bag_Sort). FAVORITES: in pocket order, each pocket's own order.
+u16 MP_Bag_ViewSlots(u8 view, struct ItemSlot **out, u16 max)
+{
+    u16 n = 0;
+    u8 p;
+    for (p = 0; p < POCKETS_COUNT; p++)
+    {
+        u8 i;
+        if (view != MP_BAGVIEW_FAVORITES && p != MP_Bag_ViewPocket(view))
+            continue;
+        for (i = 0; i < sPockets[p].bigCount && n < max; i++)
+        {
+            u16 item = sPockets[p].big[i].itemId;
+            if (item == ITEM_NONE)
+                break;
+            if (view == MP_BAGVIEW_FAVORITES ? MP_Bag_IsFavorite(item) : MP_Bag_ViewOfItem(item) == view)
+                out[n++] = &sPockets[p].big[i];
+        }
+    }
+    return n;
+}
+
+// FAVORITES: marked in the item's menu (FAVORITE / UNFAVORITE), kept with the save's other BAG settings
+#define FAV_KEY "bag:fav%d"
+
+bool8 MP_Bag_IsFavorite(u16 item)
+{
+    char key[16];
+    if (item == ITEM_NONE || item >= ITEMS_COUNT)
+        return FALSE;
+    snprintf(key, sizeof(key), FAV_KEY, item / 31);
+    return (MP_SaveData_Get(key) >> (item % 31)) & 1;
+}
+
+void MP_Bag_SetFavorite(u16 item, bool8 on)
+{
+    char key[16];
+    s32 bits;
+    if (item == ITEM_NONE || item >= ITEMS_COUNT)
+        return;
+    snprintf(key, sizeof(key), FAV_KEY, item / 31);
+    bits = MP_SaveData_Get(key);
+    bits = on ? (bits | (1 << (item % 31))) : (bits & ~(1 << (item % 31)));
+    MP_SaveData_Set(key, bits);
+    MPNet_Log("bag: item %d %s", item, on ? "now a favorite" : "no longer a favorite");
 }

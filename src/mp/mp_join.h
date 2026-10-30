@@ -18,6 +18,7 @@ struct MpJoinPlan
     u8 seatPlayer[3];          // network player id of each seat
     u8 mode;                   // mp_coop.c MODE_*
     u16 trainerId;
+    u16 trainerIdB;            // a battle against two trainers: the second (0 = one trainer)
     u8 environment;
     u8 padded;                 // TEAM PADDING's one extra Moemon is in the trainer's party
     u32 battleTypeFlags;       // without BATTLE_TYPE_IS_MASTER / LINK_IN_BATTLE
@@ -43,6 +44,8 @@ void MP_Join_OnTurnStart(void);
 bool8 MP_Join_TurnHook(void);
 bool8 MP_Join_NextEntering(bool8 foes);
 void MP_Join_Ask(u8 target);
+bool8 MP_Join_AskFromScript(u8 target);   // mp_coop.c: JOIN BATTLE picked in a trainer's script
+bool8 MP_Join_CanBeJoined(void);
 bool8 MP_Join_IsAsking(void);
 void MP_Join_OnRelay(u8 from, const u8 *data, u16 len);
 void MP_Join_OnPlayerLeft(u8 id);
@@ -66,7 +69,9 @@ void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (
                                const u8 *joinCount, const struct LinkPlayer *joinLink, const u16 *joinBonus,
                                struct MpJoinPlan *plan);
 void MP_Coop_JoinSetBattlers(const struct MpJoinPlan *plan, u8 seat);
-void MP_Coop_JoinApplyJoiner(const struct MpJoinPlan *plan, u8 seat, const u8 *picks, u8 nPicks, const u8 *loseText);
+const u8 *MP_Coop_JoinLoseTextB(void);
+void MP_Coop_JoinApplyJoiner(const struct MpJoinPlan *plan, u8 seat, const u8 *picks, u8 nPicks, const u8 *loseText,
+                             const u8 *loseTextB);
 void MP_Coop_JoinApplyPartner(const struct MpJoinPlan *plan, u8 seat, const struct Pokemon *party,
                               const struct Pokemon *enemy, const struct Pokemon *oldSeatMons);
 

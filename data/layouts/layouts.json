@@ -4420,6 +4420,46 @@
       "secondary_tileset": "gTileset_MoemonGarden",
       "border_filepath": "data/layouts/MoemonGarden/border.bin",
       "blockdata_filepath": "data/layouts/MoemonGarden/map.bin"
+    },
+    {
+      "id": "LAYOUT_GAME_CENTER_1F",
+      "name": "GameCenter_1F_Layout",
+      "width": 13,
+      "height": 17,
+      "primary_tileset": "gTileset_Building",
+      "secondary_tileset": "gTileset_Shop",
+      "border_filepath": "data/layouts/GameCenter_1F/border.bin",
+      "blockdata_filepath": "data/layouts/GameCenter_1F/map.bin"
+    },
+    {
+      "id": "LAYOUT_GAME_CENTER_2F",
+      "name": "GameCenter_2F_Layout",
+      "width": 13,
+      "height": 17,
+      "primary_tileset": "gTileset_Building",
+      "secondary_tileset": "gTileset_Shop",
+      "border_filepath": "data/layouts/GameCenter_2F/border.bin",
+      "blockdata_filepath": "data/layouts/GameCenter_2F/map.bin"
+    },
+    {
+      "id": "LAYOUT_GAME_CENTER_3F",
+      "name": "GameCenter_3F_Layout",
+      "width": 13,
+      "height": 17,
+      "primary_tileset": "gTileset_Building",
+      "secondary_tileset": "gTileset_Shop",
+      "border_filepath": "data/layouts/GameCenter_3F/border.bin",
+      "blockdata_filepath": "data/layouts/GameCenter_3F/map.bin"
+    },
+    {
+      "id": "LAYOUT_GAME_CENTER_ROOFTOP",
+      "name": "GameCenter_Rooftop_Layout",
+      "width": 18,
+      "height": 16,
+      "primary_tileset": "gTileset_Building",
+      "secondary_tileset": "gTileset_Shop",
+      "border_filepath": "data/layouts/GameCenter_Rooftop/border.bin",
+      "blockdata_filepath": "data/layouts/GameCenter_Rooftop/map.bin"
     }
   ]
 }

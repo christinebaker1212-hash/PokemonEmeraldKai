@@ -57,8 +57,10 @@ static const u8 LandmarkName_MirageTower[] = _("MIRAGE TOWER");
 static const u8 LandmarkName_AlteringCave[] = _("ALTERING CAVE");
 static const u8 LandmarkName_DesertUnderpass[] = _("DESERT UNDERPASS");
 static const u8 LandmarkName_TrainerHill[] = _("TRAINER HILL");
+static const u8 LandmarkName_GameCenter[] = _("GAME CENTER");   // Moemon Co-op
 
 static const struct Landmark Landmark_FlowerShop = {LandmarkName_FlowerShop, FLAG_LANDMARK_FLOWER_SHOP};
+static const struct Landmark Landmark_GameCenter = {LandmarkName_GameCenter, -1};
 static const struct Landmark Landmark_PetalburgWoods = {LandmarkName_PetalburgWoods, -1};
 static const struct Landmark Landmark_MrBrineysCottage = {LandmarkName_MrBrineysCottage, FLAG_LANDMARK_MR_BRINEY_HOUSE};
 static const struct Landmark Landmark_AbandonedShip = {LandmarkName_AbandonedShip, FLAG_LANDMARK_ABANDONED_SHIP};
@@ -99,6 +101,13 @@ static const struct Landmark Landmark_MirageTower = {LandmarkName_MirageTower, F
 static const struct Landmark Landmark_AlteringCave = {LandmarkName_AlteringCave, FLAG_LANDMARK_ALTERING_CAVE};
 static const struct Landmark Landmark_DesertUnderpass = {LandmarkName_DesertUnderpass, FLAG_LANDMARK_DESERT_UNDERPASS};
 static const struct Landmark Landmark_TrainerHill = {LandmarkName_TrainerHill, FLAG_LANDMARK_TRAINER_HILL};
+
+// Moemon Co-op: the GAME CENTER, in RUSTBORO CITY's north-east corner (both of the city's map squares)
+static const struct Landmark *const Landmarks_RustboroCity[]  =
+{
+    &Landmark_GameCenter,
+    NULL,
+};
 
 static const struct Landmark *const Landmarks_Route103_2[]  =
 {
@@ -338,6 +347,8 @@ static const struct Landmark *const Landmarks_MtChimney_2[]  =
 
 static const struct LandmarkList sLandmarkLists[] =
 {
+    {MAPSEC_RUSTBORO_CITY, 0, Landmarks_RustboroCity},
+    {MAPSEC_RUSTBORO_CITY, 1, Landmarks_RustboroCity},
     {MAPSEC_ROUTE_103, 2, Landmarks_Route103_2},
     {MAPSEC_ROUTE_104, 0, Landmarks_Route104_0},
     {MAPSEC_ROUTE_104, 1, Landmarks_Route104_1},

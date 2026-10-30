@@ -18,6 +18,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include <SDL2/SDL.h>
 #include "global.h"
 #include "mp.h"
 #include "bg.h"
@@ -873,13 +875,14 @@ void MP_Gatcha_GrantFree(void)
     if (today == sCheckedDay)
         return;
     sCheckedDay = today;
-    if (MP_SaveData_Get(FREE_WEEK_KEY) != MP_WeekNumber() + 1)
+    // Only a day (week) later than the last one given: the PC's clock set back and forth again gave them every time
+    if (MP_WeekNumber() + 1 > MP_SaveData_Get(FREE_WEEK_KEY))
     {
         MP_SaveData_Set(FREE_WEEK_KEY, MP_WeekNumber() + 1);
         MP_SaveData_Add(FREE10_KEY, 1);
         MPNet_Log("gatcha: free 10-pull for the week (%d in stock)", (int)Free10Stock());
     }
-    if (MP_SaveData_Get(FREE1_DAY_KEY) != today)
+    if (today > MP_SaveData_Get(FREE1_DAY_KEY))
     {
         u8 b;
         MP_SaveData_Set(FREE1_DAY_KEY, today);
@@ -2734,6 +2737,15 @@ static void SaveAfterPull(void)
     MP_Autosave_Saved();
 }
 
+// The game's random numbers start the same on every launch and move on once a frame, so the same buttons on the same
+// frames (a macro, a save copied back) pulled the same prizes again, and a frame later others: the PC's timer in now
+static void StirRandom(void)
+{
+    u64 t = SDL_GetPerformanceCounter();
+    gRngValue ^= (u32)t ^ (u32)(t >> 32) ^ (u32)time(NULL) * 2654435761u;
+    Random();
+}
+
 static bool8 IsLegend(const struct Result *r)
 {
     return r->rarity >= R_UR && r->def->kind == K_MON;
@@ -2759,6 +2771,7 @@ static void StartSpin(u8 count)
     s32 center = CenterCell(), prizeCell;
 
     sG->resultCount = count;
+    StirRandom();
     for (i = 0; i < count; i++)
     {
         struct Result *r = &sG->results[i];
@@ -2790,6 +2803,14 @@ static void StartSpin(u8 count)
     }
     sG->best = best;
     MPNet_Log("gatcha: %d pull(s), best rarity %d", count, sG->results[best].rarity);
+    {
+        char list[96];
+        int at = 0;
+        for (i = 0; i < count; i++)
+            at += snprintf(list + at, sizeof(list) - at, " %s:%d", sRarityShort[sG->results[i].rarity],
+                           (int)(sG->results[i].def - BannerPool(sG->results[i].rarity)->defs));
+        MPNet_Log("gatcha: results%s", list);
+    }
     // achievements: pulls made, and the rarest prize
     MP_Achieve_Count("pull", count);
     if (sG->results[best].rarity >= R_SR)

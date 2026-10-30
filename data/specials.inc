@@ -559,3 +559,42 @@ gSpecials::
 	def_special MP_Garden_ShowDecorationMenu
 	def_special MP_Farm_AskPlant
 	def_special MP_Farm_AskPick
+	def_special Tcg_ClubState
+	def_special Tcg_ClubChooseDeck, waitstate=1
+	def_special Tcg_ClubTeachingDuel, waitstate=1
+	def_special Tcg_ClubCounter, waitstate=1
+	def_special Tcg_ClubGiftReady
+	def_special Tcg_ClubGiveGift
+	def_special Tcg_TalkChallenge, waitstate=1
+	def_special Tcg_GameCenterShop, waitstate=1
+	def_special Ygo_ClubState
+	def_special Ygo_ClubHasCase
+	def_special Ygo_ClubChooseDeck, waitstate=1
+	def_special Ygo_ClubTeachingDuel, waitstate=1
+	def_special Ygo_ClubCounter, waitstate=1
+	def_special Ygo_GameCenterShop, waitstate=1
+	def_special Tt_SellerState
+	def_special Tt_SellerHasCase
+	def_special Tt_SellerStarter, waitstate=1
+	def_special Tt_SellerShop, waitstate=1
+	def_special Tt_MapSetup
+	def_special Tt_QueenHere
+	def_special Tt_QueenTalk, waitstate=1
+	def_special Tt_QueenFirstMeeting
+	def_special Tcg_FrontierSetup
+	def_special MP_Fight_StartCpu, waitstate=1
+	def_special MP_Fight_Result
+	def_special MP_Fight_SeatCheck
+	def_special MP_Fight_Wait, waitstate=1
+	def_special MP_Fight_Challenge, waitstate=1
+	def_special MP_Rhythm_StepUp
+	def_special MP_Rhythm_PlayAlone, waitstate=1
+	def_special MP_Rhythm_Wait, waitstate=1
+	def_special MP_Rhythm_Join, waitstate=1
+	def_special MP_Rhythm_Result
+	def_special MP_Sim_Intro
+	def_special MP_Sim_CanEnter
+	def_special MP_Sim_Next
+	def_special MP_Sim_Battle, waitstate=1
+	def_special MP_Sim_Won
+	def_special MP_Sim_End

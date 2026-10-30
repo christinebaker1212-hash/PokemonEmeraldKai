@@ -1,0 +1,9 @@
+# Moemon Fight: the fight's 480x320 picture goes through the game's own display path: in each scaling mode (PIXEL
+# PERFECT at 4x / 3x / 1x of the GBA screen, SHARP FIT, STRETCH) and with the LCD grid and scanlines, the window
+# shows exactly what that mode and filter make of the fight's picture (check.py against the fightshot of the
+# same frame)
+MODE=1
+TMO=600
+WARP=10,3,6,9
+ENV_A="MOEMON_FIGHT_SYNC=1"
+CHECK="tools/test/scenarios/fight_display/check.py"

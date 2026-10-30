@@ -329,6 +329,20 @@
       "elevation": 0,
       "dest_map": "MAP_RUSTBORO_CITY_HOUSE3",
       "dest_warp_id": "0"
+    },
+    {
+      "x": 28,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_RUSTBORO_CITY_GAME_CENTER_1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 32,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_RUSTBORO_CITY_GAME_CENTER_1F",
+      "dest_warp_id": "1"
     }
   ],
   "coord_events": [
@@ -586,14 +600,6 @@
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
       "script": "RustboroCity_EventScript_DevonCorpSign"
-    },
-    {
-      "type": "sign",
-      "x": 30,
-      "y": 8,
-      "elevation": 0,
-      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
-      "script": "RustboroCity_EventScript_TunnelSign"
     },
     {
       "type": "sign",

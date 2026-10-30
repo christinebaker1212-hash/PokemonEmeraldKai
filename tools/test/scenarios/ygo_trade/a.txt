@@ -1,0 +1,21 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 120
+mp textspeed 2
+mp ygo starter 0
+mp ygo own 1 2
+mp additem 399 1
+barrier ready 2
+mp cards ask 1 3
+wait 300
+rendershot a_trade
+mp cards offer 1
+barrier offered 2
+wait 120
+press START 2
+wait 120
+rendershot a_done
+mp ygo state
+press A 2
+wait 60
+quit

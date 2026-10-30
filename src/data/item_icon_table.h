@@ -426,6 +426,7 @@ const u32 *const gItemIconTable[ITEMS_COUNT + 1][2] =
     [ITEM_PEWTER_CRUNCHIES] = {gItemIcon_PewterCrunchies, gItemIconPalette_PewterCrunchies},
     [ITEM_RAGE_CANDY_BAR] = {gItemIcon_RageCandyBar, gItemIconPalette_RageCandyBar},
     [ITEM_CANDY_JAR] = {gItemIcon_CandyJar, gItemIconPalette_CandyJar},
+    [ITEM_CARD_CASE] = {gItemIcon_TMCase, gItemIconPalette_TMCase},
     ITEM_ICONS_GEN4
     ITEM_ICONS_GEN4_BERRIES
     [ITEMS_COUNT] = {gItemIcon_ReturnToFieldArrow, gItemIconPalette_ReturnToFieldArrow},

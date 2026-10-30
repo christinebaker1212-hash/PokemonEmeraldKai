@@ -47,12 +47,19 @@
 #define FLAG_UNUSED_0x021    0x21 // Unused Flag
 #define FLAG_MP_SKIP_TRUCK   FLAG_UNUSED_0x021 // Moemon Co-op: SKIP THE INTRO, the truck still drops you off
 #define FLAG_UNUSED_0x022    0x22 // Unused Flag
+#define FLAG_TT_QUEEN_AWAY  FLAG_UNUSED_0x022 // Moemon Kai: set while the CARD QUEEN is in another region (tt_field.c Tt_MapSetup)
 #define FLAG_UNUSED_0x023    0x23 // Unused Flag
+#define FLAG_FRONTIER_CARDS_ANABEL   FLAG_UNUSED_0x023 // Moemon Kai: set while this Frontier Brain is not out playing cards (tcg_field.c Tcg_FrontierSetup)
 #define FLAG_UNUSED_0x024    0x24 // Unused Flag
+#define FLAG_FRONTIER_CARDS_TUCKER   FLAG_UNUSED_0x024 // Moemon Kai: set while this Frontier Brain is not out playing cards (tcg_field.c Tcg_FrontierSetup)
 #define FLAG_UNUSED_0x025    0x25 // Unused Flag
+#define FLAG_FRONTIER_CARDS_SPENSER  FLAG_UNUSED_0x025 // Moemon Kai: set while this Frontier Brain is not out playing cards (tcg_field.c Tcg_FrontierSetup)
 #define FLAG_UNUSED_0x026    0x26 // Unused Flag
+#define FLAG_FRONTIER_CARDS_GRETA    FLAG_UNUSED_0x026 // Moemon Kai: set while this Frontier Brain is not out playing cards (tcg_field.c Tcg_FrontierSetup)
 #define FLAG_UNUSED_0x027    0x27 // Unused Flag
+#define FLAG_FRONTIER_CARDS_NOLAND   FLAG_UNUSED_0x027 // Moemon Kai: set while this Frontier Brain is not out playing cards (tcg_field.c Tcg_FrontierSetup)
 #define FLAG_UNUSED_0x028    0x28 // Unused Flag
+#define FLAG_FRONTIER_CARDS_LUCY     FLAG_UNUSED_0x028 // Moemon Kai: set while this Frontier Brain is not out playing cards (tcg_field.c Tcg_FrontierSetup)
 #define FLAG_UNUSED_0x029    0x29 // Unused Flag
 #define FLAG_UNUSED_0x02A    0x2A // Unused Flag
 #define FLAG_UNUSED_0x02B    0x2B // Unused Flag

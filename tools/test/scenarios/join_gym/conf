@@ -1,0 +1,13 @@
+# Story battles can be joined (all but the Elite Four and the Champion): ALICE challenges ROXANNE (RUSTBORO GYM), BOB
+# asks to join once it's on (mp joinask) and she lets him in. ALICE only knows GROWL, BOB's WATER GUN wins it. ALICE's
+# own script goes on (the STONE BADGE), and BOB gets the badge too (his own copy of the leader's "you won" script).
+MODE=2
+WARP=11,3,5,3
+WARP_B=0,10,10,10
+TMO=500
+ENV_A="MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_DEBUG_PARTY=283:46"
+EXPECT_A=("join: our player said yes" "join: battle now 2 seats (was 1)" "join: everyone is in" "co-op: battle over, outcome 1" "flag 2151 = 1")
+EXPECT_B=("co-op: player 1 is battling trainer 265" "join: we're in the battle (seat 1 of 2)" "co-op: battle over, outcome 1" "flag 2151 = 1")
+UNEXPECT_A=("crash" "BAD EGG" "important one")
+UNEXPECT_B=("crash" "BAD EGG" "important one" "can't be joined" "Couldn't join")

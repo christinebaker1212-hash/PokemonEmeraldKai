@@ -1,0 +1,12 @@
+# A game of TRIPLE TRIAD with a friend (asked like CO-OP > FRIENDS > CARD DUEL on TRIAD): BOB says YES, both pick a
+# hand, ALICE's rules (PETALBURG set to OPEN, SAME, PLUS) come with hers, the computer plays both seats through the
+# link to the end; both games hold the same game and leave it, no cards traded
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,13,11
+TMO=300
+EXPECT_A=("asked player 1 for a triple triad duel" "game vs BOB (online, seat 0, rules 7)" "friend's game" "over 1" "left the table")
+EXPECT_B=("friend's game: ALICE, seat 1" "game vs ALICE (online, seat 1, rules 7)" "friend's game" "over 1" "left the table")
+UNEXPECT_A=("online game ended" "move refused")
+UNEXPECT_B=("online game ended" "move refused")
+CHECK="tools/test/check_tt_online.sh"

@@ -88,6 +88,12 @@ If the game says it couldn't open your router:
      host again: the game notices Radmin VPN and gives you an invite code
      that works inside that network.
 
+Joining the same friend again: the CO-OP screen remembers the last game you
+joined. Pick REJOIN <name> at the top and you're back in, with no code or
+password to type. ENTER CODE OR IP also starts with the last code you used,
+so pressing START (or Enter) is enough. If your friend's code has changed
+(a new internet address), type the new one once and it's remembered again.
+
 If a friend can't connect:
   * Internet games never show up in your friend's JOIN list (that list is
     only for the same home network). Your friend must choose JOIN A GAME >
@@ -156,12 +162,19 @@ TEAMING UP FOR A DOUBLE BATTLE
   is the average of your three highest-level Moemon (in a co-op battle, of
   everyone's teams). Trainers' strongest Moemon are at that level, Gym
   Leaders, team bosses, your rival, the Elite Four and the Champion 2 to 5
-  above it, wild Moemon 3 to 6 below. Nothing is ever weaker than it
-  normally is, and nothing goes above a cap that rises with your badges (18
-  with none, 65 with all eight; no cap after the League). A raised Moemon
-  evolves if it would have by that level and knows its moves for it. EXP
-  is the usual for its level. Online, the host's setting counts. The Battle
-  Frontier and mass outbreaks keep their own levels.
+  above it, wild Moemon halfway between their usual level and yours.
+  Nothing is ever weaker than it normally is, and nothing goes above a cap
+  that rises with your badges (18 with none, 65 with all eight; no cap
+  after the League). A raised trainer's Moemon evolves if it would have by
+  that level and knows its moves for it. A raised wild Moemon stays what
+  the area has, but now and then its evolved form turns up instead, a rare
+  find. EXP is the usual for its level. The Battle Frontier and mass
+  outbreaks keep their own levels.
+  Press A on LEVEL SCALING for its settings: WILD (OFF, LOW, MEDIUM, HIGH),
+  TRAINERS (OFF, BELOW, EVEN, ABOVE your team), BOSS MARGIN (AUTO or +0 to
+  +8), BADGE CAPS (ON / OFF) and PAST 8 BADGES (free after the League,
+  always free, or always capped). Online, the host's settings count: the
+  host picks them under HOST A GAME > GAME RULES.
 * Two against one is meant to be a fight: the trainer's Moemon are 2 levels
   higher (3 for gym leaders, Team Aqua/Magma bosses and rematches), they
   use their items and they choose their moves smarter.
@@ -257,6 +270,10 @@ TRIPLE BATTLES (THREE PLAYERS)
   Double Battles. When a
   friend joins and another is online but the trainer can't do a Triple
   Battle, you're told so and it's a Double Battle.
+* With TEAM PADDING ON nobody is ever turned away: a friend who asks once
+  there's no seat left (two trainers at once, or the battle just starting)
+  is told "You'll join it in a moment!" and joins as soon as the battle
+  begins, making it a Triple Battle.
 * Each player brings two Moemon: the first two of your CO-OP TEAM (or your
   first two healthy ones). One is out, the other waits on the bench and comes
   in when the first faints or when you switch.
@@ -294,10 +311,12 @@ to you and facing you. Both of you get a reward for winning.
 
 TOURNAMENT (CO-OP menu > TOURNAMENT)
 ---------------------------------------
-A quick battle tournament between everyone online. Everyone battles everyone
-once, a few matches at a time; with an odd number of players someone sits out
-each round, but everyone plays the same number of matches. These are friendly
-battles: no money changes hands and nobody blacks out. The champion and
+A quick tournament between everyone online: pick BATTLES or CARD DUELS.
+Everyone plays everyone once, a few matches at a time; with an odd number of
+players someone sits out each round, but everyone plays the same number of
+matches. Battles are friendly: no money changes hands and nobody blacks out.
+Card duels need a CARD CASE and a finished deck in use; nothing is wagered,
+and leaving a duel loses that match. The champion and
 second place get prize money; in the day's first tournament with three or
 more players and no forfeits they also get MOEGATCHA pulls (2 and 1).
 Everyone else gets a consolation prize.
@@ -319,9 +338,18 @@ IN BATTLE and press A: "Would you like to spectate, bet, or join?"
             again in that battle). YES: your trainer slides into their battle
             ("<your name> has come to help!") and sends out your first Moemon.
 
-Which battles: a wild Moemon met in grass, caves or water, or an ordinary
-trainer (not a GYM LEADER, rival, TEAM AQUA / MAGMA or other story battle),
-and Double Battles with a friend. Two friends can join at once.
+Which battles: a wild Moemon met in grass, caves or water, or any trainer
+except the ELITE FOUR and the CHAMPION: GYM LEADERS, your rival, TEAM AQUA
+and MAGMA and every other story battle too, two trainers who spotted your
+friend at once, and Double Battles with a friend. Two friends can join at
+once. Your friend's story goes on after the battle as it would have alone;
+if it was a GYM LEADER, you get the badge too.
+
+A trainer who is already battling a friend can spot you too (either one of
+two trainers battling them, or both). When they walk up: "<friend> is
+battling this trainer!" (or "these trainers!") "Join their battle, or battle
+alone?" JOIN BATTLE asks your friend as JOIN does (if they say no, or can't,
+you battle the trainer yourself); BATTLE ALONE is your own battle with them.
 
   - A battle alone becomes a Double Battle (or a Triple Battle when two
     friends join together); a Double Battle with a friend becomes a Triple.
@@ -331,6 +359,8 @@ and Double Battles with a friend. Two friends can join at once.
     learn their moves, after a win).
   - The trainer gets a spot for each new player and sends out its next
     Moemon there if it has one (TEAM PADDING: at most one extra Moemon).
+    Against two trainers, the new spot goes to whichever has more Moemon
+    left, and from then on the two send out each other's Moemon too.
   - A Double Battle you started alone: your second Moemon goes back to its
     Ball and your friend takes that spot.
   - If someone leaves the game during the battle, it's called off, as in
@@ -591,8 +621,19 @@ TOGETHER          Stay within about a screen of a friend and the TOGETHER
                   +14%. Shown at the bottom of the CO-OP menu.
 CATCH-UP          Fewer badges than a friend online? +10% EXP per badge behind
                   (up to +30%).
-WHERE IS EVERYONE Colored arrows at the screen edge point to friends you can't
-                  see (red, blue, green, yellow by player).
+WHERE IS EVERYONE The FRIEND FINDER: G (or right stick click) shows it, again
+                  hides it. Small colored arrows at the screen edge point to
+                  friends you can't see (red, blue, green, yellow by player),
+                  at their exact direction anywhere in Hoenn, with their name
+                  and how many steps away they are, and a radar in the top
+                  right corner has a dot for each friend. An arrow stands out
+                  for a moment when its friend goes away; a friend less than
+                  15 steps away gets none, and it all fades while you walk.
+                  OPTIONS > CO-OP > FRIEND FINDER: BOTH, ARROWS or RADAR. A
+                  friend's ping shows even with it hidden. A friend inside a
+                  building, a cave or a POKEMON CENTER is at its door. The
+                  Town Map shows each friend's own look, outlined in their
+                  color.
 BETTING           When you watch a friend's battle you can bet $500 on them to
                   win or lose. Right: double back. Leave early: bet lost.
 
@@ -648,8 +689,10 @@ HANDY EXTRAS (they save time, they don't make the game easier)
 * Battles are quicker: messages print twice as fast as your text speed
   setting, stay up a shorter time, and A or B moves on to the next one.
   The low HP alarm beeps three times and then stops. Sending Moemon out and
-  the fade at the end of a battle are 30% quicker, and held items like
-  LEFTOVERS (and Ingrain, Wish, Leech Seed) show a short, quick animation.
+  the fade at the end of a battle are 30% quicker (so is every fade from
+  one screen to the next: the party screen, the BAG, doors...), and held
+  items like LEFTOVERS (and Ingrain, Wish, Leech Seed) show a short, quick
+  animation.
   Move animations play 30% faster too (the host's ANIM SPEED: NORMAL,
   +25% or +30%; playing solo, the one in your own HOST A GAME screen).
 * Summary screen: the stat your Moemon's nature raises is red, the one it
@@ -769,11 +812,17 @@ HANDY EXTRAS (they save time, they don't make the game easier)
                   SHALOUR SABLE, BIG MALASADA, PEWTERCRUNCHY (Pewter
                   Crunchies), RAGECANDYBAR: heal all status problems and
                   confusion, from the BAG or in battle, like a LAVA COOKIE.
+* Bag: eight pockets, in this order: ITEMS, MEDICINE, POKE BALLS, TMs & HMs,
+  BERRIES, BATTLE ITEMS, KEY ITEMS and FAVORITES. LEFT / RIGHT (or L / R)
+  go from one to the next, round and round; the row of icons shows where you
+  are. FAVORITE in an item's menu puts it in FAVORITES too (as many items as
+  you like, from every pocket); UNFAVORITE takes it out again.
 * Bag: START sorts the pocket you're in: TYPE (medicine, things used on a
   Moemon, battle items, field items, hold items, mail, the rest), ID, ABC,
   OLDEST or NEWEST (when you got it), or MANUAL (your own order: move items
   with SELECT; moving one switches the pocket to MANUAL). Each pocket keeps
-  its order, shown under {START} at the left. TMs and Berries are by number
+  its order, shown under {START} at the left (ITEMS, MEDICINE and BATTLE
+  ITEMS share one; FAVORITES follows the others). TMs and Berries are by number
   until you pick something else. Items you just got have a "!" before their
   name until the cursor lands on them.
 * Bag: KEY ITEMS > REGISTER asks which button the item goes on: SELECT, L,
@@ -816,7 +865,7 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   game started over an older save waits until you save it by hand once.
   moemon_coop.ini: autosave = minutes (0 = off). Older saves are kept as
   <save>.bak1-3.
-* A bigger BAG: up to 200 kinds of items, 64 kinds of POKE BALLS, key items,
+* A bigger BAG: room for every kind of item, 64 kinds of POKE BALLS, key items,
   TMs/HMs and BERRIES, and up to 999 of each. The save file stays a normal
   Emerald save (its own BAG is the first slots); the rest is kept next to it
   in <save>.bag, written with every save (the .bak files keep theirs as
@@ -871,7 +920,8 @@ colors (and female ones their own look where the collab drew one), and a
 nickname's POKeMON STADIUM colors go on top. The artists are listed in
 PMD_CREDITS.txt next to the game. Talk to it (A) and it's happy to see you. Other players see
 your follower walking behind you too. It hides while you surf or dive and
-comes back when you land. It walks the ground as you do: tall grass shakes
+comes back when you land, and goes back into its ball while you ride a bike
+(out again when you get off). It walks the ground as you do: tall grass shakes
 around it, it leaves footprints in sand, splashes through puddles and
 shallow water, sinks into hot springs, and shows in ponds and on ice. The choice is remembered in moemon_coop.ini.
 Walking together makes it happier: choosing it gives a little friendship
@@ -990,6 +1040,9 @@ A few are fan art, used as drawn: BATTLE GIRL G6, EXPERT F G6, PRESCHOOLER
 G6, SCHOOL KID G8 and SWIMMER G6 by kyledove, KRIS by Selena, YOUNGSTER G7
 by Beliot419.
 
+The POKé BALLS thrown and sent out in battle (and on the summary) are the
+HEARTGOLD / SOULSILVER ones, ripped by Sunday-Doneko.
+
 
 SPRITE EDITOR
 -------------
@@ -1033,6 +1086,12 @@ DISPLAY
                 STRETCH (fills the screen exactly)
   FILTER        OFF, SCANLINES, LCD GRID
   VSYNC         on/off
+  BATTLE ANIMS  CLASSIC (the original animations) or MODERN (the same
+                animations with glowing effects, trails, shockwaves and
+                bursts of each type's colors when a move hits). Only your
+                screen changes: friends on either setting stay in step, and
+                every animation lasts exactly as long either way. Contests
+                use it too.
 CONTROLS
   CONTROLLER    which controller plays. Press A on this row, then press
                 any button on the controller you want; that one is used
@@ -1045,6 +1104,12 @@ CONTROLS
   BUTTON ICONS  the button pictures in help lines: AUTO (the keyboard or
                 controller you used last), or always KEYBOARD, XBOX,
                 PLAYSTATION or NINTENDO
+  FIGHT BUTTONS the VS cabinet's buttons (see VS CABINET): ARCADE when
+                they're the usual ones. A opens a page with each punch and
+                kick; A on one, then press the key or controller button
+                you want for it (one already used by another punch or kick
+                swaps with it). Esc or Back keeps it as it was. DEFAULTS
+                puts them all back.
 CO-OP
   FRIENDS' SCREENS and a row for each friend online: see FRIENDS' SCREENS.
   NEW FRIENDS   the screen size for friends you haven't set up yet
@@ -1052,6 +1117,8 @@ CO-OP
   FLAG RANGE    how many tiles you see with the BATTLE FLAG planted (1-8)
   MOENAV CALLS  ALL, or BATTLES: trainers only call when they want a battle
                 (no chatting). Story calls always come.
+  FRIEND FINDER BOTH, ARROWS or RADAR: how G / the right stick click shows
+                where your friends are
 The window can also be resized freely. Settings are kept in
 moemon_display.ini, moemon_controls.ini and moemon_coop.ini.
 
@@ -1063,6 +1130,7 @@ CONTROLS (keyboard)
   C = CO-OP menu          1-8 = emotes and your phrases
   V = "look here!" ping   F = the extra registered key item (BAG > REGISTER);
                           in the PC boxes, TAG
+  G = show / hide the FRIEND FINDER (arrows / radar toward friends)
   Q (hold) = quick emotes   E (hold) = quick phrases
             (pick with the arrows, let go to send; A / S flip pages)
   Ctrl+P = pause          F11 / Alt+Enter = fullscreen
@@ -1084,7 +1152,8 @@ The other buttons change with what's on screen:
   Walking around    X/Square = the extra registered key item (BAG >
                     REGISTER), stick pushed all the way = run (with
                     STICK RUN on), Y/Triangle = CO-OP menu, left stick click =
-                    "look here!" ping on the tile in front of you
+                    "look here!" ping on the tile in front of you, right
+                    stick click = show / hide the FRIEND FINDER
                     L2/LT (hold) = quick emotes, R2/RT (hold) = quick
                     phrases. They appear around you; push a direction,
                     then let go to send it (A sends right away, B cancels).
@@ -1108,6 +1177,428 @@ you last used the keyboard.
 Controllers rumble when a trainer spots you, when a battle starts and when
 a friend asks you to team up.
 
+
+ITEMS AND YOUR PARTY
+--------------------
+  RARE CANDY      With more than one, the game asks how many (UP / DOWN 1,
+                  LEFT / RIGHT 10). The levels come one after another: a
+                  level that teaches a move stops to say so, then one stats
+                  window shows the whole climb. Any it can't take (Lv. 100,
+                  or the level cap before your next badge) stay in the BAG.
+  The right one   A status cure starts with the cursor on a MOEMON it cures
+                  (in battle the one choosing first), a REVIVE on the one
+                  that fainted last. Nothing is used until you press A.
+  PP              ETHER, MAX ETHER and PP UP show each move's PP left.
+  Held HMs        A MOEMON holding an HM puts it back in the BAG when it goes
+                  into a PC box, as when it's released.
+  New moves       A move learned in a Double or Triple Battle is ready on the
+                  next turn, and on the summary right away, for every player.
+
+CARD DUELS
+----------
+An optional card game, played with the original Pokemon Trading Card Game's
+228 cards on a table like the DS card game's. A CARD CLUB member waits in
+the POKEMON MARTS of OLDALE and MAUVILLE (behind the counter, beside the
+shopkeeper) and LILYCOVE's DEPARTMENT STORE: they hand you a CARD CASE (a key item), three starter decks to pick from and
+a teaching duel if you'd like one, and later run the CARD COUNTER. Beside
+them stands the CARD CLUB's Yu-Gi-Oh! duelist (see YU-GI-OH! below).
+  Challenges      Register the CARD CASE to a button like any key item and
+                  press it in front of someone to ask for a duel (nobody
+                  there: the CARD CASE opens). Talking with A is unchanged.
+                  Trainers play once you've beaten them, and so do plenty of
+                  townsfolk. Most play with 6 or 3 Prize cards, some with 4
+                  or 2 (the challenge says how many), and it shows your
+                  record against them (wins and losses, a concession counts
+                  as a loss) and WON TODAY once you've beaten them today; Gym Leaders (after their badge), the ELITE FOUR,
+                  the Champion, your rival, WALLY, MAXIE, ARCHIE, STEVEN and
+                  the FRONTIER BRAINS have decks of their own.
+  On the table    The same buttons as the Yu-Gi-Oh! table. The D-Pad moves
+                  over the table itself. A on a card shows what you can do
+                  with it (ATTACK, RETREAT and PKMN POWER on your Pokemon); a
+                  card you play floats over the spaces it can go. R2 (the
+                  right trigger; D on the keyboard) looks at a card up close,
+                  in every card game's screens. B closes the hand, then opens
+                  the turn menu (START and SELECT open it too): END TURN
+                  (READY while setting up). To give up, A on your own deck:
+                  CONCEDE asks first and ends the duel at once (a loss,
+                  online too). START or SELECT finishes picking several
+                  cards.
+  Card faces      The bottom row of a POKEMON card shows, as printed, its
+                  weakness (left), resistance (middle) and retreat cost
+                  (right, a dot for each Energy) in the same dots as the
+                  attack costs above it; a dash means none.
+  Decks           CARD CASE > DECKS: A on a deck opens its menu: EDIT (A adds
+                  the card, SELECT takes one out; or RIGHT over to the deck's
+                  list, where A takes out), RENAME (the keys on screen or your
+                  keyboard), ACE CARD (the card shown for the deck), DUEL WITH
+                  IT, COPY and DELETE (the cards stay in your collection).
+                  START copies, SELECT deletes and R picks the deck you duel
+                  with straight from the list. Both card games work the same.
+  Recipes         DECKS > DECK RECIPES (or FROM A RECIPE on an empty slot):
+                  the starter and structure decks rebuilt from your cards; the
+                  list says what you're missing.
+  Search & Sort   In the BINDER and the deck builder of all three card
+                  games, L2 / LT / ZL (F on the keyboard) opens SEARCH &
+                  SORT: SEARCH finds cards by any part of their name (type
+                  with the keyboard, or the keys on screen), SORT BY and
+                  ORDER put them in another order (number, name, rarity,
+                  copies owned and the game's own numbers: HP, ATK, the
+                  sides of a TRIPLE TRIAD card...), OWNED ONLY and the
+                  game's filters (POKEMON / TRAINER / ENERGY, type, Attribute,
+                  Level, ATK, stars, the least a side may have...) narrow the
+                  list. They all work together; START empties a row and
+                  CLEAR ALL empties everything. A badge under the list shows
+                  what's narrowing it and how many cards are left. It only
+                  changes what the list shows, never your decks or cards,
+                  and each game remembers its own settings.
+  Rewards         Every win gives a booster pack, and once a day each
+                  opponent lets you pick one card of their deck (not a holo).
+                  Losing costs nothing. Spare cards become CARD POINTS at the
+                  CARD COUNTER (TRADE IN: A one copy, SELECT every spare copy
+                  of that card, ALL SPARES at the end of the list all of
+                  them; the same on the Yu-Gi-Oh! counter), which sells
+                  commons and uncommons for them.
+  Packs           5 commons, 3 uncommons, a rare and an Energy. One pack in
+                  three has a HOLO rare instead of a plain one: holos only
+                  come from packs and trades. After 20 packs of a set without
+                  a holo you didn't have, the next pack brings one. Cards you
+                  didn't have are marked NEW.
+  CARD SHOP       The GAME CENTER's 2F (RUSTBORO CITY): one copy of any card
+                  of the four sets but the holos, rares too, for money (SOLD
+                  once bought), and three structure decks, one of each (the
+                  1999 theme decks OVERGROWTH, ZAP! and BRUSHFIRE, 60 cards
+                  each, put into an empty deck slot). Its owner also runs a
+                  CARD COUNTER like the CARD CLUB's (TRADE IN, CARD SHOP,
+                  PRIZES), gives a CARD CASE to anyone without one, and the
+                  players at its table duel you when you talk to them.
+  Friends         CO-OP > FRIENDS > a friend > CARD DUEL or CARD TRADE (LEFT /
+                  RIGHT picks MOEMON, YU-GI-OH! or TRIAD), or the CARD CASE
+                  button in front of them (the game whose side the case was
+                  on).
+  Card art        OPTIONS > DISPLAY > CARD ART: PRINTED ART (the printed
+                  pictures in Game Boy card frames), GAME BOY (the Game Boy
+                  pictures) or FULL CARD (the whole printed cards). CARD
+                  BACKS: PRINTED or PIXEL. The few cards that were only ever
+                  in the Game Boy game keep their Game Boy picture.
+  POKEMON POWERS  All of them work as their cards say. A Pokemon with one
+                  you use has PKMN POWER on its menu (the grey line says why
+                  not, when it can't be used); the others work on their own.
+                  With OMANYTE in play, A on your opponent's hand shows it.
+                  A CLEFAIRY DOLL or MYSTERIOUS FOSSIL in play can be
+                  discarded from its menu.
+  Card scaling    OPTIONS > GAME > CARD SCALING (ON at first): card players
+                  in all three card games bring a deck (or hand) that fits
+                  the one you pick, and learn from how your games go, so a
+                  starter deck meets starter sized decks and a strong deck
+                  meets strong ones. Most players come out a touch weaker
+                  than you; Gym Leaders and other special players are a real
+                  test, the CARD QUEEN more so. OFF: decks get stronger with
+                  your badges instead.
+  Triple Triad    Online, HOENN's TRIPLE TRIAD rules are the host's: every
+  online          region's rules, its TRADE RULE and where the CARD QUEEN is.
+                  Rules that spread or fall away in your games, and her
+                  favors, change the host's HOENN for everyone. Your own HOENN
+                  waits in your save for when you play alone.
+  How it looks    The challenge screen shows how the game looks with the
+                  deck under the cursor, from VERY EASY to FEARSOME, with six
+                  pips, and below it, taking turns, how their cards compare
+                  with yours and how they play (BEGINNER, CASUAL, SKILLED,
+                  EXPERT). The computer never looks at your hidden cards and
+                  makes the kind of mistakes people do: the less skilled the
+                  player, the more often.
+Your cards are saved with your game (the save file's .cards file, kept with
+its backups). A few attacks aren't in the game yet; they show as not ready.
+
+YU-GI-OH!
+---------
+The CARD CASE has a second side: L and R switch between POKEMON,
+YU-GI-OH! and TRIPLE TRIAD. Duels follow today's rules (8000 Life Points, the first player
+doesn't draw or attack on their first turn) on today's table, played by EDOPro's
+duel engine: every card does everything its text says. The cards to collect are
+those of the Starter Decks and the English boosters up to the end of 2003.
+  Getting started The CARD CLUB's Yu-Gi-Oh! duelist (beside the CARD CLUB
+                  member) gives you a CARD CASE if you have none, one of the
+                  four Starter Decks (YUGI, KAIBA, JOEY or PEGASUS; START
+                  looks at its cards first) and a teaching duel if you'd like
+                  one. After that they run a counter: TRADE IN (spare cards
+                  for CARD POINTS, the same points as the POKEMON cards) and
+                  CARD SHOP (boosters, or any card you pick).
+  Who duels       PSYCHICS, HEX MANIACS, NINJA BOYS, BLACK BELTS, BATTLE
+                  GIRLS, COOLTRAINERS, RUIN MANIACS, KINDLERS, COLLECTORS,
+                  EXPERTS, TEAM AQUA and MAGMA grunts and most young
+                  townsfolk play Yu-Gi-Oh!; kids, BUG CATCHERS, SWIMMERS,
+                  HIKERS, LASSES and the older townsfolk play POKEMON cards.
+                  The CARD CLUB, your rival, WALLY and STEVEN ask which game
+                  (some play TRIPLE TRIAD too: see TRIPLE TRIAD).
+                  The ELITE FOUR (SIDNEY's Fiends, PHOEBE's Zombies, GLACIA's
+                  Aqua, DRAKE's Dragons), MAXIE, ARCHIE and the FRONTIER
+                  BRAINS have decks of their own, each with a signature card
+                  they hand over the first time you beat them. Most other
+                  duelists bring a deck of an opponent from the Game Boy
+                  Advance Yu-Gi-Oh! games. Decks get stronger with your
+                  badges.
+  On the table    The same buttons as the POKEMON table: the D-Pad moves over
+                  the table; A on a card shows what it can do (SUMMON, SET,
+                  ACTIVATE, ATTACK...), R2 (D on the keyboard) looks at a
+                  card up close, and B, START or SELECT opens the turn menu
+                  (the next phase, END TURN) with END TURN chosen. A on
+                  your own deck offers CONCEDE. When you
+                  can answer with a Trap or Quick-Play Spell, the game asks
+                  "Activate a card?" (B passes). It asks when something
+                  happens (a summon, an attack, a card activated); hold L
+                  to be asked at every chance, phase changes too.
+  Zones           Summoning, Setting or activating a card from your hand
+                  asks which zone it goes to (LEFT / RIGHT, A).
+  Decks           CARD CASE > DECKS: 40 to 60 cards and up to 15 Fusion
+                  Monsters, at most 3 of a card (fewer for the cards the
+                  Forbidden & Limited list limits; the builder shows the
+                  number on the card). The LIST row picks the list: the
+                  game's own (Stairway to the Destined Duel's) or any of
+                  EDOPro's (TCG, OCG, GOAT...).
+  Deck codes      An empty slot offers BUILD A DECK, FROM RECIPE and FROM
+                  CODE: copy a YDKE code (ydke://...) and it shows up there;
+                  A makes the deck from your cards. Cards you don't have yet
+                  show gray and the deck is ready once you have them; a code
+                  with cards the game doesn't have is refused. A deck's menu
+                  has DECK CODE (copies its code). On Windows, FROM .YDK FILE
+                  and EXPORT .YDK open and save EDOPro / YGOPro deck files.
+  Rewards         Every win gives a booster pack, and once a day each
+                  opponent lets you pick one card of their deck. Losing
+                  costs nothing.
+  GAME CENTER     The 2F CARD SHOP's Yu-Gi-Oh! clerk sells one copy of any
+                  card that can be played (300-4000) and the four Starter
+                  Decks (10000, one of each), sets up anyone without a deck,
+                  and runs the same TRADE IN and CARD SHOP as the CARD CLUB.
+  Packs           9 cards, the last a Rare or better: a Super Rare about one
+                  pack in six, an Ultra Rare one in twelve, a Secret Rare one
+                  in twenty-four, as in 2002-2003. Rarities show on the cards:
+                  a silver name for Rare, shiny art for Super, gold for Ultra,
+                  a rainbow for Secret.
+  Card art        CARD ART and CARD BACKS (OPTIONS > DISPLAY) work for these
+                  cards too: GAME BOY shows Stairway to the Destined Duel's
+                  pictures, and CARD BACKS: PRINTED the real card back.
+  Friends         CO-OP > FRIENDS > a friend > CARD DUEL or CARD TRADE with
+                  YU-GI-OH! picked (LEFT / RIGHT), or the CARD CASE button in
+                  front of them while the case is on its YU-GI-OH! side. The
+                  winner of a duel gets a booster; nothing is lost.
+  No deck yet     Asked for a Yu-Gi-Oh! duel or trade with only POKEMON
+                  cards, you pick a Starter Deck to keep first. With
+                  Yu-Gi-Oh! cards but no deck ready to duel, you borrow a
+                  Starter Deck for that duel.
+  Achievements    A YU-GI-OH! tab of their own.
+The Yu-Gi-Oh! cards are saved with your game (the save file's .ygo file).
+
+TRIPLE TRIAD
+------------
+The CARD CASE's third side (L and R go round POKEMON, YU-GI-OH! and TRIPLE
+TRIAD). Five cards a hand, a 3x3 board, and a card's number takes the
+neighbor's number it faces when it's higher. The cards are all of FINAL
+FANTASY XIV's, with the rules of FINAL FANTASY VIII's regions.
+  Getting started A TRIPLE TRIAD seller stands in the POKEMON CENTERS of
+                  PETALBURG, SLATEPORT, MAUVILLE, FALLARBOR, LILYCOVE,
+                  MOSSDEEP and EVER GRANDE, and in the GAME CENTER's 2F CARD
+                  SHOP (RUSTBORO's). The first gives you a CARD CASE if you
+                  have none and five cards to start with.
+  Who plays       GENTLEMEN, LADIES, PARASOL LADIES, BIRD KEEPERS, DRAGON
+                  TAMERS, RANGERS, BREEDERS, couples and INTERVIEWERS play
+                  TRIPLE TRIAD. SAILORS, TRIATHLETES, SCHOOL KIDS, RICH BOYS,
+                  BEAUTIES, POKEMON FANS and scientists play it besides POKEMON
+                  cards; COLLECTORS, COOLTRAINERS, RUIN MANIACS and EXPERTS
+                  besides Yu-Gi-Oh!, and they ask which. The CARD CLUB, your
+                  rival, WALLY and STEVEN play all three. Special players
+                  (WALLACE, JUAN, WINONA, NORMAN, ROXANNE, TATE & LIZA, MR.
+                  STONE, MR. BRINEY, SCOTT, PROF. BIRCH, your MOM and the CARD
+                  QUEEN) bring five-star cards. Hands get stronger with your
+                  badges, and change from day to day.
+  On the table    Your hand on the left, theirs on the right. UP / DOWN picks
+                  a card, A (or RIGHT) takes it to the board, the D-Pad picks
+                  a square and A plays it; B goes back. R2 (D on the
+                  keyboard) looks at a card up close (theirs too, when you
+                  can see it). B on your hand,
+                  START or SELECT opens the turn menu (RULES, CONCEDE).
+  Rules           OPEN, SAME, PLUS, SAME WALL, RANDOM, SUDDEN DEATH and
+                  ELEMENTAL (some squares carry a card type: +1 for that
+                  type, -1 for any other), and COMBO after SAME or PLUS, as in
+                  FINAL FANTASY VIII. From farther away: THREE OPEN, REVERSE,
+                  FALLEN ACE, ASCENSION, DESCENSION, ORDER, CHAOS and SWAP.
+  Regions         HOENN has eight regions, each with its own rules and TRADE
+                  RULE (CARD CASE > RULES OF HOENN). You carry the rules of
+                  the region where you last played. Challenge someone in
+                  another region and one of your rules may spread there, or
+                  one of theirs you don't carry may be abolished.
+  CARD QUEEN      She travels between the regions' POKEMON CENTERS. Where
+                  she is, rules spread and fall away more easily. Beat her
+                  and she changes the TRADE RULE there or abolishes a rule
+                  for you; pay her way and she goes where you like, sometimes
+                  bringing a rule from afar.
+  Winning cards   Only you take cards: losing never costs one. Win, and the
+                  TRADE RULE says what you take: ONE (a card of your choice),
+                  DIFF (as many as you won by), DIRECT (every card of theirs
+                  you turned blue) or ALL (their whole hand). Every card can
+                  be won from someone.
+  Decks           CARD CASE > DECKS: six decks of five different cards, at
+                  most two of four stars or more and one of five stars. The
+                  card list and the builder sort the cards by stars (L / R).
+  Sellers         Each seller has a small shelf of its own (one copy of each,
+                  never more than a few dozen cards), BRONZE, SILVER and GOLD
+                  packs (three cards of one, two or three stars), and buys
+                  spare copies. MYTHRIL and IMPERIAL packs are never sold.
+  Friends         CO-OP > FRIENDS > a friend > CARD DUEL or CARD TRADE with
+                  TRIAD picked (LEFT / RIGHT), or the CARD CASE button in
+                  front of them while the case is on its TRIPLE TRIAD side.
+                  The one who asks brings the rules of where they are; each
+                  picks a hand. Games between friends trade no cards.
+  Achievements    A TRIPLE TRIAD tab of their own.
+The Triple Triad cards are saved with your game (the save file's .tt file).
+FINAL FANTASY XIV and FINAL FANTASY VIII are Square Enix's: the card pictures
+and numbers come from XIV's own data.
+
+GAME CENTER
+-----------
+The tower in RUSTBORO CITY's north-east corner, by the road east (the
+MOENAV map names it under RUSTBORO CITY). Admission at the
+1F reception is 500, good for every floor until you leave; the stairs and
+the elevator are behind her.
+  2F CARD SHOP    Singles, structure decks and card duels (see CARD DUELS),
+                  a Yu-Gi-Oh! clerk (see YU-GI-OH!) and a TRIPLE TRIAD
+                  seller with two players beside him (see TRIPLE TRIAD).
+  3F GAMES        A DANCE machine (see DANCE MACHINE), consoles, TVs, arcade
+                  cabinets (coming soon) and a COIN counter: 50 COINS for
+                  1000 (you'll need a COIN CASE).
+  ROOFTOP         The SKY LOUNGE: people taking a break, and drinks.
+
+VS CABINET
+----------
+MAUVILLE CITY's GAME CORNER has a fighting game: the two slot machines at
+the right end of the bottom row, back to back, are a VS cabinet (a STREET
+FIGHTER EX PLUS screen with SUPER STREET FIGHTER II X characters).
+  Sit down        A at a seat: WAIT FOR 2P (a "Fight me!" balloon goes up
+                  over you; B stands up) or FIGHT CPU.
+  Challenge       A at the other seat while a friend waits: "Fight NAME?"
+                  A friend who sits down during your CPU fight ends it, and
+                  you both go to the character select.
+  The fight       Both pick at once; the stage is picked for you and named
+                  on the VS screen. First to win 2 rounds. Afterwards you
+                  stand up beside the cabinet.
+  Buttons         Light / medium / heavy punch and kick, arcade style:
+                  keyboard U I O (punches) and J K L (kicks), ENTER = start,
+                  arrows or WASD to move. Controller: X Y RB (punches),
+                  A B RT (kicks), START, D-Pad or left stick. Change them in
+                  OPTIONS > CONTROLS > FIGHT BUTTONS.
+  Online          The fight runs on both PCs and fixes up small delays as
+                  it goes (rollback), so it stays smooth. A signal icon in
+                  the corner means the connection is struggling; if your
+                  friend's game goes quiet, "Waiting for NAME... 10" counts
+                  down and the fight ends with no contest. Friends see the
+                  fight in their SPECTATE panel.
+  Different files Fighters or stages that aren't the same on both PCs are
+                  greyed out (and never picked at random). If the fight
+                  game itself differs, you're told so and no fight starts.
+  Wins            Wins and losses show on the back of your TRAINER CARD
+                  (VS FIGHTS), and there are achievements for them.
+  Your own        The fighters, stages and screen are in the mugen folder
+                  next to the game, a standard MUGEN layout: add a fighter
+                  to chars and a line to STREETFIGHTER-EX-PLUS\SFEX-SELECT.def.
+                  Stage songs go in mugen\sound (its README.txt lists the
+                  names). mugen\cabinets.ini has the rules: rounds, life,
+                  round time, speed, which stages. Online, the rules of the
+                  player who was challenged are used.
+                  When the game starts it notes in mugen\ingestion_log.txt
+                  any fighter, stage or file added or changed since the pack
+                  was last checked, so you can see what is new.
+
+BATTLE SIMULATOR
+----------------
+Each BATTLE TENT (SLATEPORT, VERDANTURF, FALLARBOR) has a BATTLE SIMULATOR
+counter. Its opponents are digital copies of the players you've met online
+(on the last server you played on): their look, shown as a hologram, and
+their six Moemon that have been in the most battles.
+
+  * Everyone battles at level 50, your Moemon too. They come back exactly
+    as they were: no EXP, nothing used up, no money lost.
+  * Win and the next simulation loads. One loss ends your streak.
+  * Every win pays prize money. A new best streak of 3, 5, 7, 10, 15 or 20
+    also gets you an item.
+  * The opponents battle like the BATTLE FRONTIER's best and switch Moemon.
+  * Your own copy reaches the server whenever you go online, after your
+    battles and when you close the game. Play online with others first:
+    a game that never has has no battle data yet.
+
+CUSTOM MUSIC
+------------
+The game can play new songs in place of its own: .kaisong files in the
+music folder next to the game. Updates bring the ones made for everyone;
+your own work too.
+  * <song>.kaisong plays instead of that song everywhere, for example
+    mus_route101.kaisong for ROUTES 101 to 103.
+  * <song>@<place>.kaisong only in one place, for example
+    mus_vs_gym_leader@rustboro_city_gym.kaisong for ROXANNE's battle, or
+    one scene: mus_vs_trainer@sim.kaisong for the BATTLE SIMULATOR,
+    @tcg, @ygo and @tt for the three card games, @title_screen...
+    A song changed for one place or scene stays the same everywhere else.
+  * music\SONG_TABLE.md lists every song, the places it plays (the place
+    names are in brackets) and the custom songs that came with the game.
+  * Make them with Moemon Music Studio: SONG > Replaces picks the song and
+    the place, and the export is named for it. Songs made with GBA accurate
+    off play with all their tracks and voices.
+  * Online, music is your own: each player hears their own music folder.
+    A friend watching you over SPECTATE hears your place's song.
+  * A file the game can't play is skipped and the usual song plays.
+
+DANCE MACHINE
+-------------
+The GAME CENTER's 3F (RUSTBORO CITY) has a DANCE DANCE REVOLUTION EXTREME
+machine at the top left: all 240 of EXTREME's songs, its screens and its
+announcer. Stand on the floor in front of it and press A facing it: the
+left side is the 1P pad, the right side the 2P pad.
+  The songs       The first time you step up, the machine offers to
+                  download its songs (about 400 MB, once: they stay in the
+                  stepmania folder next to the game). New songs are offered
+                  the same way when there are some.
+  PLAY ALONE      A credit to yourself.
+  WAIT FOR 2P     "Let's dance!" goes up over you. A friend who steps up to
+                  the other pad is asked "Dance with NAME?"; YES starts a
+                  VERSUS credit for you both. Friends on the map see you up
+                  on the pads, turning with your steps.
+  A credit        Four songs (the 4th is the FINAL STAGE). Failing a song
+                  (the life bar runs out) ends the credit after its results.
+                  Free play.
+  Screens         SELECT STYLE, SELECT DIFFICULTY (BEGINNER, LIGHT,
+                  STANDARD, HEAVY, CHALLENGE), then SELECT MUSIC: LEFT /
+                  RIGHT turn the wheel (A on a series opens or closes it),
+                  UP / DOWN change your difficulty, R or SELECT changes the
+                  sort (SERIES, ABC, BPM). A picks the song, then OPTIONS.
+  Steps           The D-Pad and the face buttons are both the arrows: on a
+                  controller, the D-Pad (or left stick) and X = LEFT,
+                  A = DOWN, Y = UP, B = RIGHT (by where they sit). Keyboard:
+                  the arrows, WASD or IJKL. Hold START for a moment and a
+                  half to give up a song.
+  OPTIONS         SPEED (x0.5 to x8), BOOST, APPEARANCE (HIDDEN, SUDDEN,
+                  STEALTH), TURN (MIRROR, LEFT, RIGHT, SHUFFLE), DARK,
+                  REVERSE, LITTLE, FREEZE ARROW, ARROW (VIVID, NOTE, FLAT,
+                  SOLO), JUDGMENT and TIMING. They're kept for next time.
+  JUDGMENT        ARCADE judges like the EXTREME arcade: MARVELOUS steps
+                  count but show as PERFECT. MARVELOUS shows them (and the
+                  score counts them as the courses do).
+  TIMING          If your steps come out early or late on your PC (the
+                  RESULTS screen shows your average and how many were FAST
+                  or SLOW), move it in 5 ms steps: + judges your steps
+                  later, for sound that comes out late.
+  Two players     Each game plays its own steps, so a slow connection never
+                  makes the arrows stutter; you see your friend's field next
+                  to yours as they step. 1P picks the songs; each of you
+                  picks your own difficulty and options. If your friend
+                  leaves, you carry on alone.
+  Records         Every song's best scores are kept by the server for
+                  everyone on it (whatever the room): SELECT MUSIC shows the
+                  best, RESULTS says NEW RECORD. Scores made offline are sent
+                  the next time you're at the machine online.
+  Achievements    A DANCE page of them, from your first clear to MARVELOUS
+                  full combos on 10-footers, MAX 300 and PARANOiA survivor
+                  MAX, every boss, four-stage full combos and all 240 songs.
+  Your own        Any StepMania song folder (.sm or .ssc, with its .ogg or
+                  .mp3) dropped into stepmania\Songs\<series>\ shows up on the
+                  wheel the next time you step up.
 
 POKEDEX ENTRIES
 ---------------
@@ -1208,7 +1699,7 @@ BERRIES. Your own farm waits for you, growing, until you play alone or
 host.
 
 Over time, a MOEMON may take up something it loves in the Garden:
-climbing the trees, splashing in the pond, singing, collecting pretty
+climbing the trees, swimming in the pond, singing, collecting pretty
 stones, digging tunnels or showing the younger ones. It gets better at
 it, and the JOURNAL celebrates the big steps. Once in a long while, when the
 right MOEMON, the time of day and the weather line up, something rare
@@ -1216,6 +1707,11 @@ happens; the JOURNAL keeps the ones you saw. A MOEMON hatched from an
 EGG knows its parents and may take after them a little. After it
 evolves, it takes a while to get used to its new body, and its friends
 come to see.
+You can see what each one is up to: a WATER type swims out into the pond
+(only its head above the water, now and then diving right under), a
+climber goes up a tree's trunk, a digger sinks half into the soft sand
+with dirt flying, a helper's water splashes on the farm's soil, and they
+rustle through the tall grass like you do.
 
 UPDATES
 -------
@@ -1259,6 +1755,11 @@ FILES
                              AllowSmallTweaks = 1 also opens a log window
                              next to the game, handy when reporting bugs)
   moemon_display.ini         display settings (written by the game)
+  moemon_controls.ini        controller and fight button settings
+  mugen\                     the VS cabinet's fighting game (characters,
+                             stages, screen, cabinets.ini)
+  stepmania\                 the DANCE machine's songs (downloaded by the
+                             machine the first time; add your own in Songs)
   sprites\                   your sprite sheets
   Sprite Editor.html         the sprite editor
   server\                    optional standalone server + DEPLOY.md
@@ -1274,3 +1775,12 @@ KNOWN LIMITATIONS
   Oldale <-> Route 101), not through a building door.
 * Other players walk through you and NPCs, so nobody gets stuck.
 * Trading isn't networked.
+
+DEV UPDATES (OPTIONAL TESTING)
+Set AllowSmallTweaks = 1 in moemon_coop.ini and restart to follow the dev
+channel. DEV / SAVING DISABLED appears in the window title. Dev builds can
+read your progress, but saving and autosave are disabled and no progress is
+written. Settings, screenshots and logs can still be written.
+Set AllowSmallTweaks = 0 and restart with internet access to download the main
+update again, even if its version is lower. Your original save remains intact.
+AutoUpdate = 0 or --no-update prevents switching; turn updates back on to return.

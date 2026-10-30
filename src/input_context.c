@@ -3,6 +3,7 @@
 #include "global.h"
 #include "main.h"
 #include "mp.h"
+#include "tcg/integration.h"
 #include "overworld.h"
 #include "script.h"
 #include "sound.h"
@@ -13,6 +14,8 @@ bool8 NamingScreen_IsActive(void);
 
 int Platform_InputContext(void)
 {
+    if (Tcg_IsActive())
+        return INPUT_CONTEXT_OTHER;
     if (NamingScreen_IsActive())
         return INPUT_CONTEXT_NAMING;
     if (MP_QuickPickOpen() || MP_BattleChat_IsOpen())
@@ -66,6 +69,9 @@ void Platform_ContextAction(int action)
         break;
     case INPUT_ACTION_PING:
         MP_Ping_Place();
+        break;
+    case INPUT_ACTION_FRIEND_FINDER:
+        MP_Compass_Toggle();
         break;
     case INPUT_ACTION_ITEM_X:
         gMpItemXPressed = 20;   // used by the field input (field_control_avatar.c)

@@ -1,3 +1,5 @@
+// Moemon Kai: defines the song functions mp_kaisong_scene.h wraps
+#define MP_KAISONG_NO_SCENE
 #include "global.h"
 #include "gba/m4a_internal.h"
 
@@ -39,7 +41,7 @@ struct MusicPlayerInfo gMPlayInfo_BGM;
 struct MusicPlayerInfo gMPlayInfo_SE1;
 struct MusicPlayerInfo gMPlayInfo_SE2;
 struct MusicPlayerInfo gMPlayInfo_SE3;
-struct MusicPlayerTrack gMPlayTrack_BGM[10];
+struct MusicPlayerTrack gMPlayTrack_BGM[64]; // Moemon Kai: 64 for .kaisong songs made without the track limit (NUM_TRACKS_BGM)
 struct MusicPlayerTrack gMPlayTrack_SE1[3];
 struct MusicPlayerTrack gMPlayTrack_SE2[9];
 struct MusicPlayerTrack gMPlayTrack_SE3[1];
@@ -137,14 +139,62 @@ void m4aSoundInit(void)
 #endif
 }
 
+#ifdef PORTABLE
+char *getenv(const char *);
+int atoi(const char *);
+// Moemon Co-op: MOEMON_SE_TRACE=<song> logs when that song starts and stops playing (tests count the low HP beeps)
+static void TraceSong(void)
+{
+    static int song = -1, playing, frame, since, ticks;
+    const struct Song *s;
+    const struct MusicPlayer *mp;
+    int now;
+    void MPNet_Log(const char *fmt, ...);
+    if (song < 0)
+        song = getenv("MOEMON_SE_TRACE") ? atoi(getenv("MOEMON_SE_TRACE")) : 0;
+    if (song <= 0)
+        return;
+    frame++;
+    s = &gSongTable[song];
+    mp = &gMPlayTable[s->ms];
+    now = mp->info->songHeader == s->header && (mp->info->status & MUSICPLAYER_STATUS_TRACK)
+       && !(mp->info->status & MUSICPLAYER_STATUS_PAUSE);
+    if (now)
+        ticks = mp->info->clock;
+    if (now != playing)
+    {
+        if (now)
+            MPNet_Log("se trace: song %d starts (frame %d)", song, frame);
+        else
+            MPNet_Log("se trace: song %d stops after %d frames, %d ticks", song, frame - since, ticks);
+        playing = now;
+        since = frame;
+    }
+}
+#endif
+
 void m4aSoundMain(void)
 {
 #ifndef PORTABLE
     SoundMain();
 #else
+    TraceSong();
     RunMixerFrame();
 #endif
 }
+
+#ifdef PORTABLE
+#include "mp_kaisong.h"
+// Moemon Kai: a custom song (music/*.kaisong) for this song number here, else the game's own
+#define SONG_HEADER(n, song) MP_Kaisong_Header((n), (song)->header)
+#else
+#define SONG_HEADER(n, song) ((song)->header)
+#endif
+
+// Moemon Kai tests (mp musiclock 1): the song playing keeps the music player; the game's own music changes, stops
+// and fades leave it alone, so a measure isn't taken over by the map's song (tools/kaisong/loudness.py)
+u8 gMpTestMusicLock;
+#define MP_TEST_LOCKED(info) (gMpTestMusicLock && (info) == &gMPlayInfo_BGM)
 
 void m4aSongNumStart(u16 n)
 {
@@ -152,8 +202,11 @@ void m4aSongNumStart(u16 n)
     const struct Song *songTable = gSongTable;
     const struct Song *song = &songTable[n];
     const struct MusicPlayer *mplay = &mplayTable[song->ms];
+    struct SongHeader *header = SONG_HEADER(n, song);
 
-    MPlayStart(mplay->info, song->header);
+    if (MP_TEST_LOCKED(mplay->info))
+        return;
+    MPlayStart(mplay->info, header);
 }
 
 void m4aSongNumStartOrChange(u16 n)
@@ -162,17 +215,20 @@ void m4aSongNumStartOrChange(u16 n)
     const struct Song *songTable = gSongTable;
     const struct Song *song = &songTable[n];
     const struct MusicPlayer *mplay = &mplayTable[song->ms];
+    struct SongHeader *header = SONG_HEADER(n, song);
 
-    if (mplay->info->songHeader != song->header)
+    if (MP_TEST_LOCKED(mplay->info))
+        return;
+    if (mplay->info->songHeader != header)
     {
-        MPlayStart(mplay->info, song->header);
+        MPlayStart(mplay->info, header);
     }
     else
     {
         if ((mplay->info->status & MUSICPLAYER_STATUS_TRACK) == 0
          || (mplay->info->status & MUSICPLAYER_STATUS_PAUSE))
         {
-            MPlayStart(mplay->info, song->header);
+            MPlayStart(mplay->info, header);
         }
     }
 }
@@ -183,11 +239,12 @@ static void UNUSED m4aSongNumStartOrContinue(u16 n)
     const struct Song *songTable = gSongTable;
     const struct Song *song = &songTable[n];
     const struct MusicPlayer *mplay = &mplayTable[song->ms];
+    struct SongHeader *header = SONG_HEADER(n, song);
 
-    if (mplay->info->songHeader != song->header)
-        MPlayStart(mplay->info, song->header);
+    if (mplay->info->songHeader != header)
+        MPlayStart(mplay->info, header);
     else if ((mplay->info->status & MUSICPLAYER_STATUS_TRACK) == 0)
-        MPlayStart(mplay->info, song->header);
+        MPlayStart(mplay->info, header);
     else if (mplay->info->status & MUSICPLAYER_STATUS_PAUSE)
         MPlayContinue(mplay->info);
 }
@@ -198,8 +255,9 @@ void m4aSongNumStop(u16 n)
     const struct Song *songTable = gSongTable;
     const struct Song *song = &songTable[n];
     const struct MusicPlayer *mplay = &mplayTable[song->ms];
+    struct SongHeader *header = SONG_HEADER(n, song);
 
-    if (mplay->info->songHeader == song->header)
+    if (mplay->info->songHeader == header && !MP_TEST_LOCKED(mplay->info))
         m4aMPlayStop(mplay->info);
 }
 
@@ -209,8 +267,9 @@ static void UNUSED m4aSongNumContinue(u16 n)
     const struct Song *songTable = gSongTable;
     const struct Song *song = &songTable[n];
     const struct MusicPlayer *mplay = &mplayTable[song->ms];
+    struct SongHeader *header = SONG_HEADER(n, song);
 
-    if (mplay->info->songHeader == song->header)
+    if (mplay->info->songHeader == header)
         MPlayContinue(mplay->info);
 }
 
@@ -243,11 +302,15 @@ void m4aMPlayAllContinue(void)
 
 void m4aMPlayFadeOut(struct MusicPlayerInfo *mplayInfo, u16 speed)
 {
+    if (MP_TEST_LOCKED(mplayInfo))
+        return;
     MPlayFadeOut(mplayInfo, speed);
 }
 
 void m4aMPlayFadeOutTemporarily(struct MusicPlayerInfo *mplayInfo, u16 speed)
 {
+    if (MP_TEST_LOCKED(mplayInfo))
+        return;
     if (mplayInfo->ident == ID_NUMBER)
     {
         mplayInfo->ident++;
@@ -647,8 +710,14 @@ void MPlayOpen(struct MusicPlayerInfo *mplayInfo, struct MusicPlayerTrack *track
     if (trackCount == 0)
         return;
 
+#ifdef PORTABLE
+    // Moemon Kai: the BGM player has 64 tracks for .kaisong songs (gMPlayTrack_BGM); every player passes its own count
+    if (trackCount > 64)
+        trackCount = 64;
+#else
     if (trackCount > MAX_MUSICPLAYER_TRACKS)
         trackCount = MAX_MUSICPLAYER_TRACKS;
+#endif
 
     soundInfo = SOUND_INFO_PTR;
 
@@ -746,6 +815,8 @@ void MPlayStart(struct MusicPlayerInfo *mplayInfo, struct SongHeader *songHeader
         mplayInfo->ident = ID_NUMBER;
     #ifdef PORTABLE
         mplayInfo->hasBeenRanOnce = FALSE;
+        if (mplayInfo == &gMPlayInfo_BGM)
+            MP_Kaisong_Started(songHeader); // Moemon Kai: the song's own voice count
     #endif
     }
 }
@@ -754,6 +825,9 @@ void m4aMPlayStop(struct MusicPlayerInfo *mplayInfo)
 {
     s32 i;
     struct MusicPlayerTrack *track;
+
+    if (MP_TEST_LOCKED(mplayInfo))
+        return;
 
     if (mplayInfo->ident != ID_NUMBER)
         return;
@@ -1362,7 +1436,7 @@ void m4aMPlayVolumeControl(struct MusicPlayerInfo *mplayInfo, u16 trackBits, u16
 
     while (i > 0)
     {
-        if (trackBits & bit)
+        if (trackBits == TRACKS_ALL || (trackBits & bit)) // Moemon Kai: TRACKS_ALL reaches every track (.kaisong songs have up to 64)
         {
             if (track->flags & MPT_FLG_EXIST)
             {
@@ -1396,7 +1470,7 @@ void m4aMPlayPitchControl(struct MusicPlayerInfo *mplayInfo, u16 trackBits, s16 
 
     while (i > 0)
     {
-        if (trackBits & bit)
+        if (trackBits == TRACKS_ALL || (trackBits & bit)) // Moemon Kai: TRACKS_ALL reaches every track (.kaisong songs have up to 64)
         {
             if (track->flags & MPT_FLG_EXIST)
             {
@@ -1431,7 +1505,7 @@ void m4aMPlayPanpotControl(struct MusicPlayerInfo *mplayInfo, u16 trackBits, s8 
 
     while (i > 0)
     {
-        if (trackBits & bit)
+        if (trackBits == TRACKS_ALL || (trackBits & bit)) // Moemon Kai: TRACKS_ALL reaches every track (.kaisong songs have up to 64)
         {
             if (track->flags & MPT_FLG_EXIST)
             {
@@ -1476,7 +1550,7 @@ void m4aMPlayModDepthSet(struct MusicPlayerInfo *mplayInfo, u16 trackBits, u8 mo
 
     while (i > 0)
     {
-        if (trackBits & bit)
+        if (trackBits == TRACKS_ALL || (trackBits & bit)) // Moemon Kai: TRACKS_ALL reaches every track (.kaisong songs have up to 64)
         {
             if (track->flags & MPT_FLG_EXIST)
             {
@@ -1512,7 +1586,7 @@ void m4aMPlayLFOSpeedSet(struct MusicPlayerInfo *mplayInfo, u16 trackBits, u8 lf
 
     while (i > 0)
     {
-        if (trackBits & bit)
+        if (trackBits == TRACKS_ALL || (trackBits & bit)) // Moemon Kai: TRACKS_ALL reaches every track (.kaisong songs have up to 64)
         {
             if (track->flags & MPT_FLG_EXIST)
             {
@@ -1620,7 +1694,11 @@ cond_true:
     }
 
 cond_false:
+#ifdef PORTABLE
+    track->cmdPtr += sizeof(u8 *); // Moemon Kai: the jump target is a whole pointer (8 bytes on 64-bit)
+#else
     track->cmdPtr += 4;
+#endif
 }
 
 void ply_xcmd(struct MusicPlayerInfo *mplayInfo, struct MusicPlayerTrack *track)

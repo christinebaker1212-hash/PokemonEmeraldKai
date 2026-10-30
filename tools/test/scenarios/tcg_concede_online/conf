@@ -1,0 +1,11 @@
+# Conceding an online card duel from the duel screen ends it at once, as offline: ALICE concedes on BOB's turn or
+# hers (whoever goes first), both boards show the result (event 20), and A takes both back to the field
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,13,11
+DELAY=250
+JIT=80
+FPS=60
+TMO=200
+EXPECT_A=("duel started vs BOB" "show event 20" "[tcg] left the duel")
+EXPECT_B=("duel started vs ALICE" "show event 20" "[tcg] left the duel")

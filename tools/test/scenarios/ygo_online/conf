@@ -1,0 +1,10 @@
+# An online Yu-Gi-Oh! duel (asked like CO-OP > FRIENDS > CARD DUEL on YU-GI-OH!): BOB says YES, both pick a deck, the
+# AI plays both seats through the link to the end; both games hold the same duel (state hash) and leave it
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,13,11
+TMO=400
+EXPECT_A=("asked player 1 for a yu-gi-oh duel" "duel started vs BOB (online, seat 0)" "over 1 winner" "left the duel")
+EXPECT_B=("duel started vs ALICE (online, seat 1)" "over 1 winner" "left the duel")
+UNEXPECT_A=("online duel ended" "answer refused")
+UNEXPECT_B=("online duel ended" "answer refused")

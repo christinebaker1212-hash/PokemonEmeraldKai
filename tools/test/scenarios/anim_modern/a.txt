@@ -1,0 +1,34 @@
+pressuntil A field 5000
+mp wild 288:3 45 45 45 45
+pressuntil A action 3000
+wait 30
+mp animall 33 33 0 1
+rendershotburst m_tackle 40 2
+waitlog 3000 animall done
+mp animall 52 52 0 1
+rendershotburst m_ember 60 3
+waitlog 3000 animall done
+mp animall 55 55 0 1
+rendershotburst m_watergun 60 3
+waitlog 3000 animall done
+mp animall 85 85 0 1
+rendershotburst m_thunderbolt 90 3
+waitlog 3000 animall done
+mp animall 89 89 0 1
+rendershotburst m_earthquake 90 3
+waitlog 3000 animall done
+mp animall 58 58 0 1
+rendershotburst m_icebeam 90 3
+waitlog 3000 animall done
+mp animall 247 247 1 0
+rendershotburst m_shadowball 90 3
+waitlog 3000 animall done
+mp animall 14 14 0 1
+rendershotburst m_swordsdance 90 3
+waitlog 3000 animall done
+mp animall 1 354 0 1
+waitlog 120000 animall done
+mp animall 1 354 1 0
+waitlog 120000 animall done
+log anim test done
+quit

@@ -1,0 +1,106 @@
+[Info]
+;Name = "U.S.S.R"
+Name = "SF2 USSR - Zangief Stage"
+displayname = "USSR - ZANGIEF"
+
+[Camera]
+StartX = 0
+StartY = 0
+BoundLeft = -254
+BoundRight = 256
+BoundHigh = -7
+BoundLow = 0
+VerticalFollow = .2
+FloorTension = 40
+Tension = 80
+
+[PlayerInfo]
+P1StartX = -90
+P1StartY = 0
+P1StartZ = 0
+P1Facing = 1
+P2StartX = 90
+P2StartY = 0
+P2StartZ = 0
+P2Facing = -1
+LeftBound  = -1000
+RightBound = 1000
+TopBound = 0
+BotBound = 0
+
+[Scaling]
+Topz = 0
+Botz = 50
+TopScale = 1
+BotScale = 1.2
+
+[Bound]
+ScreenLeft = 20
+ScreenRight = 20
+
+[StageInfo]
+ZOffSet = 200
+AutoTurn = 1
+ResetBG = 1
+
+[Shadow]
+Color = 87, 143, 175
+YScale = .1
+Reflect = 0
+
+[Music]
+BGMusic = sound/SF2 USSR - Zangief Theme.mp3
+BGVolume =250
+
+[BGdef]
+Spr = stages/sf2-ussr.sff
+DebugBg = 0
+
+[BG]
+Type = Normal
+SpriteNo = 0, 0
+Delta = .44, 1
+
+[BG]
+Type = Normal
+SpriteNo = 1, 0
+Delta = .63, 1
+Mask = 1
+[BG]
+Type = Anim
+ActionNo = 0
+Delta = .63, 1
+[Begin Action 0]
+-1,0, 0,0,12
+1, 1, 0,0,12
+1, 2, 0,0,12
+
+[BG]
+Type  = Parallax
+SpriteNo = 2, 0
+Delta = .63, 1
+XScale = 1, 2
+Mask = 1
+[BG]
+Type = Normal
+SpriteNo = 2, 1
+Delta = 1.25, 1
+
+[BG]
+Type = Normal
+SpriteNo = 3, 0
+Delta = .64, 1
+Mask = 1
+
+[BG]
+Type = Normal
+SpriteNo = 4, 0
+LayerNo = 1
+Delta = 1.25, 1
+Mask = 1
+[BG]
+Type = Normal
+SpriteNo = 5, 0
+LayerNo = 1
+Delta = 1.25, 1
+Mask = 1

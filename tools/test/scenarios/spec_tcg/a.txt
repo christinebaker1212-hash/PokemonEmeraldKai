@@ -1,0 +1,14 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp panel 1 1
+mp cards starter 0
+wait 200
+mp cards open
+wait 200
+display info
+rendershot a_cards1
+wait 90
+rendershot a_cards2
+wait 300
+quit

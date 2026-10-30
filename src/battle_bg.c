@@ -26,11 +26,10 @@
 #include "constants/songs.h"
 #include "constants/trainers.h"
 
-// Moemon Co-op: a co-op wild double is a link battle, but it should look like
-// a wild battle (the route's own background and intro)
-// Moemon Co-op: a co-op wild battle, and a battle friends joined while it ran (mp_join.c), keep their own place's
-// background (a co-op trainer battle is a link battle: the building)
-#define MP_BG_TYPE_FLAGS ((gMpCoopWild || gMpJoinedBattle) ? (gBattleTypeFlags & ~BATTLE_TYPE_LINK) : gBattleTypeFlags)
+// Moemon Co-op: a co-op battle (wild, trainer, Double or Triple) is a link battle, but it should look like the
+// place it's fought in (the route's or cave's own background, a Gym's, the trainer class's), as does a battle friends
+// joined while it ran (mp_join.c). Only PvP keeps the link battle's building
+#define MP_BG_TYPE_FLAGS ((gMpCoopBattle || gMpJoinedBattle) ? (gBattleTypeFlags & ~BATTLE_TYPE_LINK) : gBattleTypeFlags)
 
 struct BattleBackground
 {
@@ -792,7 +791,7 @@ void DrawMainBattleBackground(void)
     }
     else
     {
-        if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild)
+        if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild && gTrainerBattleOpponent_A < TRAINERS_COUNT)
         {
             u8 trainerClass = gTrainers[gTrainerBattleOpponent_A].trainerClass;
             if (trainerClass == TRAINER_CLASS_LEADER)
@@ -1243,7 +1242,7 @@ bool8 LoadChosenBattleElement(u8 caseId)
         }
         else
         {
-            if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
+            if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild && gTrainerBattleOpponent_A < TRAINERS_COUNT)
             {
                 u8 trainerClass = gTrainers[gTrainerBattleOpponent_A].trainerClass;
                 if (trainerClass == TRAINER_CLASS_LEADER)
@@ -1305,7 +1304,7 @@ bool8 LoadChosenBattleElement(u8 caseId)
         }
         else
         {
-            if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
+            if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild && gTrainerBattleOpponent_A < TRAINERS_COUNT)
             {
                 u8 trainerClass = gTrainers[gTrainerBattleOpponent_A].trainerClass;
                 if (trainerClass == TRAINER_CLASS_LEADER)
@@ -1367,7 +1366,7 @@ bool8 LoadChosenBattleElement(u8 caseId)
         }
         else
         {
-            if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
+            if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild && gTrainerBattleOpponent_A < TRAINERS_COUNT)
             {
                 u8 trainerClass = gTrainers[gTrainerBattleOpponent_A].trainerClass;
                 if (trainerClass == TRAINER_CLASS_LEADER)

@@ -111,6 +111,16 @@ void TransferPlttBuffer(void)
     }
 }
 
+// Moemon Co-op: a fade of the whole screen between shown and gone (a new screen opening or closing: the party menu,
+// the BAG, the POKéDEX pages, a warp...) takes 30% less time: 10 steps every 7 frames (fades inside a scene keep their speed)
+static bool8 sQuickFade;
+static u8 sQuickFadeCredit;
+
+bool8 MP_QuickFadeActive(void)
+{
+    return sQuickFade && gPaletteFade.active && gPaletteFade.mode == NORMAL_FADE;
+}
+
 u8 UpdatePaletteFade(void)
 {
     u8 result;
@@ -120,7 +130,14 @@ u8 UpdatePaletteFade(void)
         return PALETTE_FADE_STATUS_LOADING;
 
     if (gPaletteFade.mode == NORMAL_FADE)
+    {
         result = UpdateNormalPaletteFade();
+        if (sQuickFade && gPaletteFade.active && (sQuickFadeCredit += 3) >= 7)
+        {
+            sQuickFadeCredit -= 7;
+            result = UpdateNormalPaletteFade();
+        }
+    }
     else if (gPaletteFade.mode == FAST_FADE)
         result = UpdateFastPaletteFade();
     else
@@ -198,6 +215,10 @@ bool8 BeginNormalPaletteFade(u32 selectedPalettes, s8 delay, u8 startY, u8 targe
         gPaletteFade.blendColor = color;
         gPaletteFade.active = TRUE;
         gPaletteFade.mode = NORMAL_FADE;
+        // (nearly every palette: a screen keeping a couple of its own, like the POKéDEX pages, still counts)
+        sQuickFade = __builtin_popcount(selectedPalettes) >= 28
+                  && ((startY == 0 && targetY == 16) || (startY == 16 && targetY == 0));
+        sQuickFadeCredit = 0;
 
         if (startY < targetY)
             gPaletteFade.yDec = 0;

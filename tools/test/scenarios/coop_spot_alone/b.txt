@@ -1,0 +1,22 @@
+pressuntil A field 5000
+mp teach 0 55
+waitfor online 6000
+waitfor friendbattle 8000
+mp warp 0,31,26,7
+waitfor field 2000
+wait 120
+press RIGHT 12
+wait 20
+press RIGHT 12
+waitlog 8000 join or battle alone
+waitlog 3000 JOIN BATTLE / BATTLE ALONE
+wait 30
+press DOWN 2
+wait 10
+press A 2
+pressuntil A battle 8000
+pressuntil A field 30000
+wait 120
+mp trainerflag 273
+wait 200
+quit

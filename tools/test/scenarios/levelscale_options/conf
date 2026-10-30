@@ -1,0 +1,10 @@
+# OPTIONS > GAME > LEVEL SCALING's page with the real keys: (three rows up from CLOSE, past CARD SCALING) A opens it; WILD from MEDIUM to HIGH, BOSS MARGIN from AUTO
+# to +0; B back to the GAME tab, B closes OPTIONS, saved (a.ini level_scaling_rules). Then a wild battle: 8 badges, a
+# Lv46 team on ROUTE 101 (Lv2-3 there): HIGH puts it 3-6 below the team (40-43). Shots ls_page, ls_changed.
+MODE=1
+WARP=0,16,10,11
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=283:46,280:46,277:46 MOEMON_LEVEL_SCALING=1 MOEMON_SCALE_RARE=0"
+EXPECT_A=("level scaling rule 1: 3" "level scaling rule 3: 1" "(team 46, cap 65)")
+UNEXPECT_A=("level scale: evolved" "-> Lv2" "-> Lv3")
+CHECK="bash tools/test/scenarios/levelscale_options/check.sh"

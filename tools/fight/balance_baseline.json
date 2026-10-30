@@ -1,0 +1,10 @@
+{
+  "_about": "The baseline tools/fight/balance_audit.py compares each character with. baseline: median (the roster's medians, the default) or fixed (the numbers under fixed). tolerance: how far a character may differ before it is listed (damage, life, attack, defence: fractions; advantage_hit, advantage_guard, startup_light: frames). classes: the buttons of light / medium / heavy normals. intentional: CHARACTER:STATE pairs (or a character name) whose likely mistakes were looked at and kept on purpose: they are listed as character traits instead.",
+  "baseline": "median",
+  "fixed": {"life": 1000, "attack": 100, "defence": 100, "power": 3000,
+            "damage": {"light": 30, "medium": 60, "heavy": 90, "special": 100, "super": 250}},
+  "tolerance": {"damage": 0.4, "life": 0.15, "attack": 0.15, "defence": 0.15, "power": 0.15,
+                "advantage_hit": 12, "advantage_guard": 4, "startup_light": 6},
+  "classes": {"light": ["x", "a"], "medium": ["y", "b"], "heavy": ["z", "c"]},
+  "intentional": []
+}

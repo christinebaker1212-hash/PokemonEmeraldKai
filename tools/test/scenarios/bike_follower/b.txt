@@ -1,0 +1,12 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+wait 200
+barrier on 2
+wait 90
+rendershot b_bike
+barrier off 2
+wait 80
+rendershot b_out
+barrier done 2
+quit

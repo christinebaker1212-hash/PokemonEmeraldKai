@@ -1,0 +1,9 @@
+# The DANCE machine (src/rhythm/, mp_rhythm.c): 3F's new picture, stepping up to the machine, PLAY ALONE, CAUTION,
+# SELECT STYLE / DIFFICULTY / MUSIC, OPTIONS, the stage, a song played by MOEMON_DANCE_AUTOPLAY (all MARVELOUS),
+# RESULTS; the second stage given up (START held): FAILED, GAME OVER, back on the map
+MODE=1
+WARP=11,19,1,7
+TMO=400
+ENV_A="MOEMON_DANCE_AUTOPLAY=1"
+EXPECT_A=("dance: a credit" "points, grade")
+UNEXPECT_A=("[crash]")

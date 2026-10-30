@@ -1,0 +1,21 @@
+pressuntil A field 5000
+mp teach 0 55
+waitfor online 6000
+waitfor friendbattle 12000
+wait 200
+mp warp 0,31,26,7
+waitfor field 2000
+wait 120
+press RIGHT 12
+wait 20
+press RIGHT 12
+waitlog 8000 join or battle alone
+waitlog 3000 JOIN BATTLE / BATTLE ALONE
+wait 30
+press A 2
+waitlog 30000 said yes
+waitlog 8000 join: we're in the battle
+pressuntillog A 40000 co-op: battle over
+pressuntil A field 6000
+wait 200
+quit

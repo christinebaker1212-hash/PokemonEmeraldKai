@@ -129,7 +129,11 @@ enum {
    // a reply. During multiplayer, it must NOT directly mark itself
    // as inactive, but instead send one of these, with the player's
    // multiplayer ID as data.
-   B_COMM_CONTROLLER_IS_DONE
+   B_COMM_CONTROLLER_IS_DONE,
+
+   // Moemon Co-op: the battle's weather, from the master (only its game runs the battle) to the others' screens,
+   // sent ahead of the next command whenever it changes (mp_battleweather.c MP_BattleWeather_LinkState)
+   B_COMM_MP_WEATHER
 };
 
 enum {

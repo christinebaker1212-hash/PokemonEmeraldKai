@@ -104,13 +104,9 @@ press DOWN 2
 wait 6
 press A 2
 wait 90
-press RIGHT 2
+press LEFT 2
 wait 20
-press RIGHT 2
-wait 20
-press RIGHT 2
-wait 20
-press RIGHT 2
+press LEFT 2
 wait 30
 press DOWN 2
 wait 20

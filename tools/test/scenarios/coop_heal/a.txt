@@ -11,6 +11,8 @@ press RIGHT 2
 wait 10
 press A 2
 wait 300
+press RIGHT 2
+wait 20
 press A 2
 wait 60
 press A 2

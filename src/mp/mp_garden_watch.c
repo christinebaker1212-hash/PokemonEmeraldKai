@@ -32,6 +32,7 @@ void RemoveCameraObject(void);
 u8 MP_GardenLife_Count(void);
 bool8 MP_GardenLife_Info(u8 i, s16 *x, s16 *y, u8 *act, u8 *phase, s8 *partner, u16 *dex, s8 *owner, u32 *key);
 u8 MP_GardenLife_Detail(u8 i);
+u8 MP_GardenLife_Doing(u8 i);
 
 // (the Garden's activity ids, mp_garden_life.c)
 
@@ -310,11 +311,17 @@ static const u8 sTxt_PursuitAny[] = _("{STR_VAR_1} is busy with something it lov
 static const u8 *const sTxt_Pursuit[LIFE_PURSUIT_COUNT] = {
     [LIFE_PURSUIT_NONE]    = sTxt_PursuitAny,
     [LIFE_PURSUIT_CLIMB]   = (const u8[])_("{STR_VAR_1} is practicing its climbing."),
-    [LIFE_PURSUIT_SWIM]    = (const u8[])_("{STR_VAR_1} is splashing in the shallows."),
+    [LIFE_PURSUIT_SWIM]    = (const u8[])_("{STR_VAR_1} is swimming laps in the pond."),
     [LIFE_PURSUIT_SING]    = (const u8[])_("{STR_VAR_1} is singing its heart out."),
     [LIFE_PURSUIT_COLLECT] = (const u8[])_("{STR_VAR_1} is looking for pretty stones."),
     [LIFE_PURSUIT_DIG]     = (const u8[])_("{STR_VAR_1} is digging a tunnel."),
     [LIFE_PURSUIT_TEACH]   = (const u8[])_("{STR_VAR_1} is showing {STR_VAR_2} how it's done."),
+};
+// what it's visibly doing, when it's that (MP_GardenLife_Doing)
+static const u8 *const sTxt_Doing[] = {
+    [1] = (const u8[])_("{STR_VAR_1} is swimming in the pond."),
+    [2] = (const u8[])_("{STR_VAR_1} is up in a tree!"),
+    [3] = (const u8[])_("{STR_VAR_1} is digging in the dirt."),
 };
 static const u8 sTxt_FarmAny[] = _("{STR_VAR_1} is looking after the BERRY plants.");
 static const u8 *const sTxt_Farm[] = {
@@ -388,6 +395,13 @@ static void Describe(void)
         t = d == 0x80 ? sTxt_Taught : d < LIFE_PURSUIT_COUNT ? sTxt_Pursuit[d] : sTxt_PursuitAny;
         break;
     }
+    }
+    // swimming, up a tree, digging: said as it is (a pursuit says what it's practicing)
+    if (act != GA_PURSUIT && act != GA_RARE)
+    {
+        u8 doing = MP_GardenLife_Doing(sW.focus);
+        if (doing != 0 && doing < ARRAY_COUNT(sTxt_Doing))
+            t = sTxt_Doing[doing];
     }
     StringExpandPlaceholders(gStringVar4, t);
     MP_ShowFieldMessageFitted(gStringVar4);

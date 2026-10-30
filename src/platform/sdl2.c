@@ -1,3 +1,6 @@
+#include "rhythm.h"
+#include "mp_version.h"
+#include "tcg/integration.h"
 #ifdef PLATFORM_SDL2
 #include <assert.h>
 #include <stdbool.h>
@@ -16,6 +19,8 @@
 
 #include "global.h"
 #include "mp.h"
+u8 TrySavingData(u8 saveType);
+#include "mp_life.h"
 #include "platform.h"
 #include "rtc.h"
 #include "gba/defines.h"
@@ -28,6 +33,9 @@
 #include "platform/framedraw.h"
 #include "platform/system.h"
 #include "platform/gamepad.h"
+#include "platform/fight.h"
+#include "mf_engine.h"
+#include "mp_fight.h"
 
 extern void (*const gIntrTable[])(void);
 
@@ -81,6 +89,7 @@ static int sBarrierCount, sBarrierFrames;
 static u16 ParseTestKeys(const char *s);
 static void TestHarnessStep(void);
 static bool SpectateStep(void);
+static bool ScreenStep(void);
 void Platform_SaveScreenshot(const char *name);
 
 extern void AgbMain(void);
@@ -91,6 +100,8 @@ extern void DoSoftReset(void);
 
 int DoMain(void *param);
 void ProcessEvents(void);
+void MP_ModernAnim_Composite(u16 *frame);   // mp_modernanim.c
+
 void VDraw(void);
 
 static void ReadSaveFile(char *path);
@@ -136,7 +147,6 @@ int main(int argc, char **argv)
             printf("Could not open test script %s\n", getenv("MOEMON_TEST"));
     }
 
-    ReadSaveFile(gPlatformSavePath);
 
     Display_PreInit(); // loads moemon_display.ini, sets hints that must precede SDL_Init
 
@@ -146,7 +156,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    if (Display_Init("Moemon Emerald Kai Co-op") != 0)
+    if (Display_Init(MOEMON_BUILD_TITLE) != 0)
         return 1;
     {
         // Moemon Co-op: a newer release installs and starts in place of this one (updater.c)
@@ -159,6 +169,11 @@ int main(int argc, char **argv)
         if (!sTestMode)
             Gamepad_Init();
     }
+    Fight_CheckIngestion();   // Moemon Fight: on a thread of its own, no wait
+
+    // Do not even open/create a save until channel selection and relaunch finish.
+    ReadSaveFile(gPlatformSavePath);
+    printf("[build] %s (%s)\n", MOEMON_BUILD_VERSION, MOEMON_BUILD_CHANNEL);
 
     simTime = curGameTime = lastGameTime = SDL_GetPerformanceCounter();
 
@@ -233,7 +248,7 @@ int main(int argc, char **argv)
             }
             TestHarnessStep();
             MP_FrameUpdate();
-            if (SpectateStep())
+            if (ScreenStep())
             {
                 AudioUpdate();
                 sFrameCounter++;
@@ -320,7 +335,7 @@ int main(int argc, char **argv)
             {
                 //run game logic, draw frame and process DMAs and vblank
                 MP_FrameUpdate();
-                if (SpectateStep())
+                if (ScreenStep())
                     continue;
                 ENTER_VBLANK(); //you must be in VBlank before running a game tick
                 MainLoop();
@@ -345,12 +360,16 @@ int main(int argc, char **argv)
         // Present only when there is something new (a game frame, a resize or a
         // settings change). With vsync on, presenting waits for the monitor;
         // otherwise sleep briefly while the next game frame is still >2ms away.
-        if (Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
+        if (Tcg_IsActive() || MP_Fight_IsActive() || Rhythm_IsActive() || Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
             Display_Present();
         else if (paused || (fixedTimestep - accumulator) / timeScale > 0.002)
             SDL_Delay(1);
     }
 
+    {
+        void MP_Sim_OnClose(void);
+        MP_Sim_OnClose();   // Moemon Co-op: the BATTLE SIMULATOR record, as the game closes (mp_sim.c)
+    }
     CloseSaveFile();
 
     Display_SaveSettings();
@@ -361,6 +380,16 @@ int main(int argc, char **argv)
 
 static void ReadSaveFile(char *path)
 {
+    // Dev builds may read existing progress but must never create or modify it.
+    if (MOEMON_DEV_BUILD)
+    {
+        size_t n = 0;
+        sSaveFile = fopen(path, "rb");
+        if (sSaveFile)
+            n = fread(FLASH_BASE, 1, sizeof(FLASH_BASE), sSaveFile);
+        memset(FLASH_BASE + n, 0xFF, sizeof(FLASH_BASE) - n);
+        return;
+    }
     // Check whether the saveFile exists, and create it if not
     sSaveFile = fopen(path, "r+b");
     if (sSaveFile == NULL)
@@ -368,6 +397,11 @@ static void ReadSaveFile(char *path)
         sSaveFile = fopen(path, "w+b");
     }
 
+    if (!sSaveFile)
+    {
+        memset(FLASH_BASE, 0xFF, sizeof(FLASH_BASE));
+        return;
+    }
     fseek(sSaveFile, 0, SEEK_END);
     int fileSize = ftell(sSaveFile);
     fseek(sSaveFile, 0, SEEK_SET);
@@ -393,7 +427,7 @@ static void BackUpSaveFile(void)
 {
     static Uint32 sLastBackup;
     static int sDone;
-    static const char *const sSidecars[] = {"bag", "life"};   // Moemon Co-op: files that belong with the save
+    static const char *const sSidecars[] = {"bag", "life", "cards", "ygo", "tt"};   // Moemon Co-op: files that belong with the save
     char from[600], to[600];
     unsigned char buf[4096];
     size_t n;
@@ -420,7 +454,7 @@ static void BackUpSaveFile(void)
         remove(to);
         rename(from, to);
         // the sidecars go with their save (mp_bag.c, mp_life.c find theirs by the save's counter)
-        for (k = 0; k < 2; k++)
+        for (k = 0; k < (int)ARRAY_COUNT(sSidecars); k++)
         {
             snprintf(from, sizeof(from), "%s.bak%d.%s", gPlatformSavePath, i - 1, sSidecars[k]);
             snprintf(to, sizeof(to), "%s.bak%d.%s", gPlatformSavePath, i, sSidecars[k]);
@@ -437,7 +471,7 @@ static void BackUpSaveFile(void)
         fclose(out);
     }
     fclose(in);
-    for (k = 0; k < 2; k++)
+    for (k = 0; k < (int)ARRAY_COUNT(sSidecars); k++)
     {
         snprintf(from, sizeof(from), "%s.%s", gPlatformSavePath, sSidecars[k]);
         snprintf(to, sizeof(to), "%s.bak1.%s", gPlatformSavePath, sSidecars[k]);
@@ -459,6 +493,8 @@ static void BackUpSaveFile(void)
 
 static void StoreSaveFile()
 {
+    if (MOEMON_DEV_BUILD)
+        return;
     BackUpSaveFile();
     if (sSaveFile != NULL)
     {
@@ -467,6 +503,7 @@ static void StoreSaveFile()
     }
     MP_Bag_WriteSidecar();   // Moemon Co-op: the pockets' slots past the save block's (mp_bag.c)
     MP_Life_WriteSidecar();  // Moemon Co-op: MOéMON GARDEN, the A-Life (mp_life.c)
+    Tcg_WriteSidecar();      // Moemon Kai: the card game's collection (src/tcg/tcg_integration.c)
 }
 
 void Platform_StoreSaveFile(void)
@@ -476,6 +513,16 @@ void Platform_StoreSaveFile(void)
 
 void Platform_ReadFlash(u16 sectorNum, u32 offset, u8 *dest, u32 size)
 {
+#if MOEMON_DEV_BUILD
+    // The dev session's flash image was loaded read-only at startup. Fresh
+    // profiles deliberately have no file, and must work without creating one.
+    u32 base = ((u32)sectorNum << gFlash->sector.shift) + offset;
+    if (base <= sizeof(FLASH_BASE) && size <= sizeof(FLASH_BASE) - base)
+        memcpy(dest, FLASH_BASE + base, size);
+    else
+        memset(dest, 0xFF, size);
+    return;
+#endif
     // (one line per sector on every save load: only with MOEMON_FLASHDEBUG=1)
     {
         static int sFlashDbg = -1;
@@ -484,7 +531,7 @@ void Platform_ReadFlash(u16 sectorNum, u32 offset, u8 *dest, u32 size)
         if (sFlashDbg)
             DBGPRINTF("ReadFlash(sectorNum=0x%04X,offset=0x%08X,size=0x%02X)\n",sectorNum,offset,size);
     }
-    FILE * savefile = fopen(gPlatformSavePath, "r+b");
+    FILE * savefile = fopen(gPlatformSavePath, "rb");
     if (savefile == NULL)
     {
         puts("Error opening save file.");
@@ -505,7 +552,24 @@ void Platform_ReadFlash(u16 sectorNum, u32 offset, u8 *dest, u32 size)
 
 void Platform_QueueAudio(float *audioBuffer, s32 samplesPerFrame)
 {
+    // Moemon Fight: a fight's sound instead of the game's (samplesPerFrame counts bytes here)
+    Fight_MixAudio(audioBuffer, samplesPerFrame / (int)(2 * sizeof(float)), 42048);
+    // Moemon Rhythm: the DANCE machine's songs and voices instead of the game's sound
+    Rhythm_MixAudio(audioBuffer, samplesPerFrame / (int)(2 * sizeof(float)));
     SDL_QueueAudio(1, audioBuffer, samplesPerFrame);
+    {
+        // Tests (MOEMON_AUDIO_DUMP=file): everything sent to the sound device, raw stereo float32 at 42048 Hz
+        static FILE *sDump;
+        static int sDumpTried;
+        if (!sDumpTried)
+        {
+            sDumpTried = 1;
+            if (getenv("MOEMON_AUDIO_DUMP") != NULL)
+                sDump = fopen(getenv("MOEMON_AUDIO_DUMP"), "wb");
+        }
+        if (sDump != NULL)
+            fwrite(audioBuffer, 1, samplesPerFrame, sDump);
+    }
 }
 
 
@@ -547,6 +611,7 @@ void ProcessEvents(void)
 
     while (SDL_PollEvent(&event))
     {
+        Rhythm_OnEvent(&event);   // Moemon Rhythm: steps timed by when they happened
         if (Display_HandleEvent(&event)) // F11 / Alt+Enter fullscreen, resizes
             continue;
         if (Gamepad_HandleEvent(&event)) // controllers plugged in / out
@@ -569,6 +634,12 @@ void ProcessEvents(void)
             HANDLE_KEYUP(DPAD_DOWN)
             HANDLE_KEYUP(DPAD_LEFT)
             HANDLE_KEYUP(DPAD_RIGHT)
+            case SDLK_d:
+                keys &= ~PLATFORM_KEY_INSPECT;
+                break;
+            case SDLK_f:
+                keys &= ~PLATFORM_KEY_SEARCH;
+                break;
             }
             break;
         case SDL_TEXTINPUT:
@@ -631,12 +702,25 @@ void ProcessEvents(void)
                 else if (!(event.key.keysym.mod & (KMOD_CTRL | KMOD_ALT)) && !event.key.repeat
                  && Platform_InputContext() == INPUT_CONTEXT_PC_STORAGE)
                     Platform_ContextAction(INPUT_ACTION_PC_TAG);
+                else if (!(event.key.keysym.mod & (KMOD_CTRL | KMOD_ALT)) && Tcg_IsActive())
+                    keys |= PLATFORM_KEY_SEARCH;   // Moemon Kai: the card lists' SEARCH & SORT (LT on a controller)
+                break;
+            case SDLK_d:
+                // Moemon Kai: the card games' INSPECT (the right trigger on a controller); let go in SDL_KEYUP
+                if (!(event.key.keysym.mod & (KMOD_CTRL | KMOD_ALT)))
+                    keys |= PLATFORM_KEY_INSPECT;
                 break;
             case SDLK_v:
                 // Moemon Co-op: ping the tile ahead (left stick click on a controller)
                 if (!(event.key.keysym.mod & (KMOD_CTRL | KMOD_ALT)) && !event.key.repeat
                  && Platform_InputContext() == INPUT_CONTEXT_OVERWORLD)
                     Platform_ContextAction(INPUT_ACTION_PING);
+                break;
+            case SDLK_g:
+                // Moemon Co-op: show / hide the FRIEND FINDER (the right stick click on a controller)
+                if (!(event.key.keysym.mod & (KMOD_CTRL | KMOD_ALT)) && !event.key.repeat
+                 && Platform_InputContext() == INPUT_CONTEXT_OVERWORLD)
+                    Platform_ContextAction(INPUT_ACTION_FRIEND_FINDER);
                 break;
             case SDLK_1: case SDLK_2: case SDLK_3: case SDLK_4:
             case SDLK_5: case SDLK_6: case SDLK_7: case SDLK_8:
@@ -729,10 +813,13 @@ void VDraw(void)
     MP_World_PrepareLights();   // Moemon Co-op: friends' lights in dark caves (window 0)
     DrawFrame(image);
     MP_Candy_Composite(image);      // Moemon Co-op: the CANDY JAR's picture under everything drawn
+    MP_BagUI_Composite(image);      // ... and the BAG's
     MP_BattleWeather_Composite(image);   // ... battle weather the whole battle long
+    MP_ModernAnim_Composite(image);      // ... BATTLE ANIMS > MODERN: glows, trails and impacts over the animation
     MP_TriCards_Composite(image);   // Moemon Co-op: Triple Battle cards over the frame
     MP_TypeIcons_Composite(image);  // ... type icons by the healthboxes (OPTIONS > TYPE ICONS)
     MP_LegacyAnim_Composite(image); // ... GENESIS / EPOCH BALL throws (Red's / Crystal's own)
+    MP_Compass_Composite(image);    // ... arrows toward friends off screen
     MP_BallFx_Composite(image);          // ... ball effects (not bound by the GBA's sprites or palettes)
     MP_BattleOverlay_Composite(image);   // ... and the battle emotes over everything
     MP_Spectate_PanelSync();             // ... friends' screens in the panel under ours (CO-OP > SPECTATE)
@@ -854,12 +941,36 @@ void Platform_SetAlarm(u8 *alarmData)
     // TODO
 }
 
+// Moemon Fight: "fpress KEYS N" holds fight buttons (UP DOWN LEFT RIGHT A B C X Y Z START, joined by +)
+static bool sFightKeysHeld;
+void MP_Fight_TestPress(u16 buttons);
+static u16 ParseFightKeys(const char *s)
+{
+    static const struct { const char *name; u16 key; } names[] = {
+        {"UP", MF_BTN_UP}, {"DOWN", MF_BTN_DOWN}, {"LEFT", MF_BTN_LEFT}, {"RIGHT", MF_BTN_RIGHT},
+        {"A", MF_BTN_A}, {"B", MF_BTN_B}, {"C", MF_BTN_C}, {"X", MF_BTN_X}, {"Y", MF_BTN_Y}, {"Z", MF_BTN_Z},
+        {"START", MF_BTN_START},
+    };
+    u16 out = 0;
+    char buf[200];
+    char *tok;
+    snprintf(buf, sizeof(buf), "%s", s);
+    for (tok = strtok(buf, "+"); tok != NULL; tok = strtok(NULL, "+"))
+    {
+        int i;
+        for (i = 0; i < (int)(sizeof(names) / sizeof(names[0])); i++)
+            if (strcmp(tok, names[i].name) == 0)
+                out |= names[i].key;
+    }
+    return out;
+}
+
 static u16 ParseTestKeys(const char *s)
 {
     static const struct { const char *name; u16 key; } names[] = {
         {"A", A_BUTTON}, {"B", B_BUTTON}, {"START", START_BUTTON}, {"SELECT", SELECT_BUTTON},
         {"L", L_BUTTON}, {"R", R_BUTTON}, {"UP", DPAD_UP}, {"DOWN", DPAD_DOWN},
-        {"LEFT", DPAD_LEFT}, {"RIGHT", DPAD_RIGHT}, {"NONE", 0},
+        {"LEFT", DPAD_LEFT}, {"RIGHT", DPAD_RIGHT}, {"INSPECT", PLATFORM_KEY_INSPECT}, {"SEARCH", PLATFORM_KEY_SEARCH}, {"NONE", 0},
     };
     u16 keysOut = 0;
     char buf[64];
@@ -874,8 +985,14 @@ static u16 ParseTestKeys(const char *s)
 void Platform_SaveScreenshot(const char *name)
 {
     char path[1024];
-    SDL_Surface *surf = SDL_CreateRGBSurfaceWithFormatFrom(sFrameImage, DISPLAY_WIDTH, DISPLAY_HEIGHT, 16,
-                                                           DISPLAY_WIDTH * 2, SDL_PIXELFORMAT_ABGR1555);
+    SDL_Surface *surf;
+    // Moemon Fight: a fight's own 480x320 picture
+    if (MfEngine_IsActive() && MfEngine_Frame())
+        surf = SDL_CreateRGBSurfaceWithFormatFrom((void *)MfEngine_Frame(), MF_SCREEN_W, MF_SCREEN_H, 16,
+                                                  MF_SCREEN_W * 2, SDL_PIXELFORMAT_RGB565);
+    else
+        surf = SDL_CreateRGBSurfaceWithFormatFrom(sFrameImage, DISPLAY_WIDTH, DISPLAY_HEIGHT, 16,
+                                                  DISPLAY_WIDTH * 2, SDL_PIXELFORMAT_ABGR1555);
     snprintf(path, sizeof(path), "%s/%s.bmp", sShotDir, name);
     if (surf)
     {
@@ -888,7 +1005,41 @@ void Platform_SaveScreenshot(const char *name)
 
 const u16 *Platform_GetFrame(void)
 {
+    // Moemon Fight: so is a fight (src/platform/fight_platform.c)
+    {
+        const u16 *fight = Fight_Frame();
+        if (fight)
+            return fight;
+    }
+    // Moemon Kai: while a card screen is open, it is what the game shows (spectators, photos)
+    if (Tcg_IsActive())
+    {
+        const u16 *cards = Tcg_Frame();
+        if (cards)
+            return cards;
+    }
     return sFrameImage;
+}
+
+// A frame the card screens, a VS fight or a battle we watch show instead of the game. VDraw doesn't run then, so the
+// SPECTATE panel's friends' screens are handed to the display here (they froze through a card duel)
+static bool ScreenStep(void)
+{
+    if (Tcg_Step(Platform_GetKeyInput()) || MP_Fight_Step())
+    {
+        MP_Spectate_PanelSync();
+        return true;
+    }
+    // Moemon Rhythm: the DANCE machine draws the game's own picture (src/rhythm/rh_screen.c), so the window's
+    // scaling, filters and spectating carry on as for the game
+    if (Rhythm_Step(sFrameImage, Platform_GetKeyInput()))
+    {
+        MP_Spectate_PanelSync();
+        if (!sTestMode)
+            Display_UploadFrame(sFrameImage);
+        return true;
+    }
+    return SpectateStep();
 }
 
 // Moemon Co-op: while watching another player's battle the game is paused and
@@ -916,13 +1067,14 @@ bool8 Platform_IsTestMode(void)
 }
 
 // shotburst PREFIX FRAMES [STEP]: a screenshot every STEP frames (default 1) for the next FRAMES frames, while the
-// script goes on (PREFIX_0000.bmp ...): to catch a glitch that lasts a few frames
+// script goes on (PREFIX_0000.bmp ...): to catch a glitch that lasts a few frames. rendershotburst: the same with
+// the real window output (overlays such as the card screens included)
 static char sBurstName[64];
-static int sBurstLeft, sBurstStep, sBurstIndex;
+static int sBurstLeft, sBurstStep, sBurstIndex, sBurstRender;
 
 static void TestHarnessStep(void)
 {
-    char line[256];
+    char line[1200];
 
     if (sBurstLeft > 0)
     {
@@ -930,7 +1082,16 @@ static void TestHarnessStep(void)
         {
             char name[96];
             snprintf(name, sizeof(name), "%s_%04d", sBurstName, sBurstIndex++);
-            Platform_SaveScreenshot(name);
+            if (sBurstRender)
+            {
+                // rendershotburst: the real window output, overlays included
+                char path[1024];
+                snprintf(path, sizeof(path), "%s/%s.bmp", sShotDir, name);
+                Display_UploadFrame(sFrameImage);
+                Display_SaveOutputBMP(path);
+            }
+            else
+                Platform_SaveScreenshot(name);
         }
     }
 
@@ -990,6 +1151,11 @@ static void TestHarnessStep(void)
             sTestKeys = 0;
         if (sTestWait == 0 && sMashCount == 0)
             sTestKeys = 0;
+        if (sTestWait == 0 && sFightKeysHeld)
+        {
+            MP_Fight_TestPress(0);
+            sFightKeysHeld = false;
+        }
         if (sTestWait > 0)
             return;
     }
@@ -1016,6 +1182,13 @@ static void TestHarnessStep(void)
             sTestWait = atoi(arg);
             return;
         }
+        else if (strcmp(cmd, "fpress") == 0)
+        {
+            MP_Fight_TestPress(ParseFightKeys(arg));
+            sFightKeysHeld = true;
+            sTestWait = n > 0 ? n : 1;
+            return;
+        }
         else if (strcmp(cmd, "press") == 0)
         {
             sTestKeys = ParseTestKeys(arg);
@@ -1034,17 +1207,29 @@ static void TestHarnessStep(void)
             sTestWait = sMashInterval;
             return;
         }
+        else if (strcmp(cmd, "saveprobe") == 0)
+        {
+            int status = TrySavingData(0 /* SAVE_NORMAL */);
+            Platform_StoreSaveFile(); // Also exercise the low-level disk guard.
+            MP_Bag_WriteSidecar();
+            MP_Life_WriteSidecar();
+            Tcg_WriteSidecar();
+            MP_SaveData_Set("dev_save_probe", 123);
+            printf("[test] saveprobe status %d autosave %d dev %d\n",
+                   status, gMpConfig.autosaveMinutes, MOEMON_DEV_BUILD);
+        }
         else if (strcmp(cmd, "shot") == 0)
         {
             Platform_SaveScreenshot(arg);
         }
-        else if (strcmp(cmd, "shotburst") == 0)
+        else if (strcmp(cmd, "shotburst") == 0 || strcmp(cmd, "rendershotburst") == 0)
         {
             int frames = 0, step = 1;
             sscanf(line, "%*s %63s %d %d", sBurstName, &frames, &step);
             sBurstStep = step > 0 ? step : 1;
             sBurstLeft = frames;
             sBurstIndex = 0;
+            sBurstRender = cmd[0] == 'r';
         }
         else if (strcmp(cmd, "waitfor") == 0 || strcmp(cmd, "pressuntil") == 0)
         {
@@ -1130,9 +1315,20 @@ static void TestHarnessStep(void)
         {
             // mp COMMAND [ARG]: game-side test commands (src/mp_debug.c)
             extern void MP_TestCommand(const char *cmd, const char *arg);
-            char a2[200] = "";
-            sscanf(line, "%*s %*s %199[^\n]", a2);   // the rest of the line
+            char a2[1100] = "";
+            sscanf(line, "%*s %*s %1099[^\n]", a2);   // the rest of the line
             MP_TestCommand(arg, a2);
+        }
+        else if (strcmp(cmd, "typetext") == 0)
+        {
+            // typetext WORDS: typed on the keyboard into whatever is taking text ("\n" for Enter)
+            void Platform_QueueTypedText(const char *text);
+            char words[200] = "", *p;
+            sscanf(line, "%*s %199[^\n]", words);
+            for (p = words; *p; p++)
+                if (p[0] == '\\' && p[1] == 'n')
+                    p[0] = '\r', p[1] = '\n';   // (dropped, then Enter)
+            Platform_QueueTypedText(words);
         }
         else if (strcmp(cmd, "rendershot") == 0)
         {
@@ -1142,6 +1338,15 @@ static void TestHarnessStep(void)
             Display_UploadFrame(sFrameImage);
             printf("[test] frame %lu: rendershot %s %s\n", sFrameCounter, path,
                    Display_SaveOutputBMP(path) == 0 ? "ok" : "FAILED");
+            fflush(stdout);
+        }
+        else if (strcmp(cmd, "fightshot") == 0)
+        {
+            // fightshot NAME: a VS fight's own 480x320 picture, as display.c gets it (compare with rendershot)
+            char path[1024];
+            snprintf(path, sizeof(path), "%s/%s.bmp", sShotDir, arg);
+            printf("[test] frame %lu: fightshot %s %s\n", sFrameCounter, path,
+                   Fight_SaveCanvasBMP(path) == 0 ? "ok" : "FAILED");
             fflush(stdout);
         }
         else if (strcmp(cmd, "popshot") == 0)

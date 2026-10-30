@@ -1,0 +1,80 @@
+pressuntil A field 5000
+wait 200
+mp item 13 3
+mp item 86 2
+mp item 110 1
+mp item 75 1
+mp item 4 5
+mp item 289 1
+mp item 139 4
+mp item 259 1
+wait 10
+mp bagview 0
+mp bagview 1
+mp bagview 2
+mp bagview 3
+mp bagview 4
+mp bagview 5
+mp bagview 6
+press START 2
+wait 30
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press A 2
+wait 90
+shot items
+press RIGHT 2
+wait 20
+shot medicine
+press RIGHT 2
+wait 20
+shot balls
+press RIGHT 2
+wait 20
+shot tmhm
+press RIGHT 2
+wait 20
+shot berries
+press RIGHT 2
+wait 20
+shot battle
+press RIGHT 2
+wait 20
+shot key
+press RIGHT 2
+wait 20
+shot favorites_empty
+press RIGHT 2
+wait 20
+shot wrapped
+press RIGHT 2
+wait 20
+press A 2
+wait 20
+shot menu
+press DOWN 2
+wait 6
+press RIGHT 2
+wait 6
+press A 2
+wait 30
+mp bagview 7
+press LEFT 2
+wait 20
+press LEFT 2
+wait 20
+shot favorites
+press A 2
+wait 20
+shot fav_menu
+press DOWN 2
+wait 6
+press RIGHT 2
+wait 6
+press A 2
+wait 30
+mp bagview 7
+shot favorites_after
+quit

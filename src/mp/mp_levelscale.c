@@ -1,19 +1,23 @@
 // Moemon Co-op: FF8-style level scaling (task 198). Wild Pokémon and trainers keep up with the team, so Double and
-// Triple Battles don't leave everything behind. OPTIONS > GAME > LEVEL SCALING (on by default; online the room host's
-// setting counts, as TEAM PADDING: MP_LevelScaling in mp_main.c).
+// Triple Battles don't leave everything behind. LEVEL SCALING and its settings (MP_SCALE_*: OPTIONS > GAME > LEVEL
+// SCALING playing alone, HOST A GAME > GAME RULES for a room; online the host's count: MP_LevelScaleRule).
 //
 // - The team's level: the average of its 3 highest-level Pokémon (MP_LevelScale_Top3). In a co-op battle, the average
 //   of everyone's (each player sends theirs in the wire state: MpState.top3).
-// - Regular trainers' strongest Pokémon match it (the rest keep their gap below); bosses (Gym Leaders, team leaders and
-//   admins, the rival, the Elite Four and the Champion) are 2-5 levels above, more with more badges; wild Pokémon 3-6
-//   below.
+// - TRAINERS: regular trainers' strongest Pokémon BELOW (4 under) / EVEN with / ABOVE (3 over) it (the rest keep their
+//   gap below); bosses (Gym Leaders, team leaders and admins, the rival, the Elite Four and the Champion) BOSS MARGIN
+//   more (AUTO: 2-5 by badges, the Elite Four 5).
+// - WILD: LOW a quarter of the way from the area's level to it, MEDIUM halfway (the default), HIGH 3-6 below it.
 // - Never below the normal level (the area's, the trainer's), never above a cap that rises with the badges (bosses
-//   their margin above it); after the League, 100.
-// - A raised Pokémon evolves if it would have by that level (level evolutions) and knows that level's moves; trainers
-//   with set moves keep them.
+//   their margin above it) when BADGE CAPS is on; with eight badges PAST 8 BADGES: capped until the League then 100,
+//   free, or always capped (80 after the League).
+// - A raised trainer's Pokémon evolves if it would have by that level (level evolutions) and knows that level's moves;
+//   trainers with set moves keep them. A raised wild one stays the area's Pokémon; 1 in 10 is the evolved one, a rare
+//   encounter (RareEvolvedForm).
 // - EXP is normal for the level they are.
 // The Battle Frontier, the Battle Pike and Pyramid, mass outbreaks and roaming Pokémon keep their own levels.
 #include <stdio.h>
+#include <stdlib.h>
 #include "global.h"
 #include "battle.h"
 #include "battle_pike.h"
@@ -90,22 +94,62 @@ static u8 Reference(void)
     return n ? (sum + n / 2) / n : own;
 }
 
+// The level nothing scales past: by badges (BADGE CAPS), and with all eight as PAST 8 BADGES says
 static u8 Cap(void)
 {
     u8 b = MP_Badges();
+    if (!MP_LevelScaleRule(MP_SCALE_CAPS))
+        return MAX_LEVEL;
+    if (b >= 8)
+    {
+        switch (MP_LevelScaleRule(MP_SCALE_PAST8))
+        {
+        case 1: return MAX_LEVEL;                                           // free
+        case 2: return FlagGet(FLAG_SYS_GAME_CLEAR) ? 80 : sCaps[8];        // always capped
+        }
+    }
     if (FlagGet(FLAG_SYS_GAME_CLEAR))
         return MAX_LEVEL;
     return sCaps[b < ARRAY_COUNT(sCaps) ? b : ARRAY_COUNT(sCaps) - 1];
 }
 
-static u8 BossMargin(u16 trainerId)
+static bool8 IsBoss(u16 trainerId)
 {
     u8 cls = gTrainers[trainerId].trainerClass;
+    return cls == TRAINER_CLASS_ELITE_FOUR || cls == TRAINER_CLASS_CHAMPION || cls == TRAINER_CLASS_RIVAL
+        || MP_Coop_IsBossTrainer(trainerId);
+}
+
+static u8 BossMargin(u16 trainerId)
+{
+    u8 cls = gTrainers[trainerId].trainerClass, rule = MP_LevelScaleRule(MP_SCALE_BOSS);
+    if (!IsBoss(trainerId))
+        return 0;
+    if (rule > 0)
+        return rule - 1;   // BOSS MARGIN +0 .. +8
     if (cls == TRAINER_CLASS_ELITE_FOUR || cls == TRAINER_CLASS_CHAMPION)
         return 5;
-    if (cls == TRAINER_CLASS_RIVAL || MP_Coop_IsBossTrainer(trainerId))
-        return 2 + (MP_Badges() * 3 + 4) / 8;   // +2 with no badges ... +5 with eight
-    return 0;
+    return 2 + (MP_Badges() * 3 + 4) / 8;   // AUTO: +2 with no badges ... +5 with eight
+}
+
+// TRAINERS: where a trainer's strongest Pokémon stands against the team
+static s8 TrainerOffset(void)
+{
+    static const s8 sOffsets[] = {0, -4, 0, 3};   // (OFF never scales)
+    u8 rule = MP_LevelScaleRule(MP_SCALE_TRAINERS);
+    return sOffsets[rule < ARRAY_COUNT(sOffsets) ? rule : 2];
+}
+
+// WILD: how far toward the team a wild Pokémon comes (spread 0-3: Random alone, the personality in a co-op battle)
+static s32 WildTarget(u8 ref, u8 normal, u8 spread)
+{
+    switch (MP_LevelScaleRule(MP_SCALE_WILD))
+    {
+    case 0:  return normal;
+    case 1:  return normal + ((s32)ref - normal) / 4 - (spread & 1);   // LOW: a quarter of the way
+    case 3:  return (s32)ref - 3 - spread;                            // HIGH: 3-6 below the team
+    default: return normal + ((s32)ref - normal) / 2 - (spread % 3);  // MEDIUM: halfway
+    }
 }
 
 static u8 ClampLevel(s32 v)
@@ -118,10 +162,10 @@ u8 MP_LevelScale_TrainerMon(u16 trainerId, u8 normal, u8 partyMax)
 {
     u8 ref, margin;
     s32 target;
-    if (!Enabled() || (ref = Reference()) == 0)
+    if (!Enabled() || (ref = Reference()) == 0 || MP_LevelScaleRule(MP_SCALE_TRAINERS) == 0)
         return normal;
     margin = BossMargin(trainerId);
-    target = ref + margin;
+    target = ref + TrainerOffset() + margin;
     if (target > Cap() + margin)
         target = Cap() + margin;
     if (target <= partyMax)
@@ -136,16 +180,16 @@ void MP_LevelScale_LogTrainer(u16 trainerId, u8 partyMax)
                   MP_LevelScale_TrainerMon(trainerId, partyMax, partyMax), Reference(), Cap() + BossMargin(trainerId));
 }
 
-// A wild Pokémon's level (ChooseWildMonLevel's, then this): 3-6 below the team, never below its own
+// A wild Pokémon's level (ChooseWildMonLevel's, then this): toward the team as WILD says, never below its own
 u8 MP_LevelScale_Wild(u8 normal)
 {
     u8 ref;
     s32 target;
     sPendingNormal = normal;
     sPendingValid = TRUE;
-    if (!Enabled() || (ref = Reference()) == 0)
+    if (!Enabled() || (ref = Reference()) == 0 || ref <= normal)
         return normal;
-    target = (s32)ref - 3 - (Random() % 4);
+    target = WildTarget(ref, normal, Random() % 4);
     if (target > Cap())
         target = Cap();
     return target > normal ? ClampLevel(target) : normal;
@@ -214,15 +258,31 @@ void MP_LevelScale_EvolveMon(struct Pokemon *mon)
     MPNet_Log("level scale: evolved %d -> %d at Lv%d", species, evo, GetMonData(mon, MON_DATA_LEVEL));
 }
 
-// The wild Pokémon just made (CreateWildMon): evolved if it was raised past an evolution, and remembered with its own
-// level (a co-op battle may raise it for the whole team)
+// A wild Pokémon raised past an evolution stays what the area has (the normal encounter); now and then (1 in 10) the
+// evolved one turns up instead, a rare encounter. Read from its personality, so every game in a co-op battle agrees.
+static bool8 RareEvolvedForm(struct Pokemon *mon)
+{
+    u32 personality = GetMonData(mon, MON_DATA_PERSONALITY);
+    u16 species = GetMonData(mon, MON_DATA_SPECIES);
+    if (MP_LevelScale_Evolve(species, GetMonData(mon, MON_DATA_LEVEL), personality) == species)
+        return FALSE;
+    if (getenv("MOEMON_SCALE_RARE"))   // tests: 1 always the evolved one, 0 never
+        return atoi(getenv("MOEMON_SCALE_RARE")) != 0;
+    return ((personality >> 8) % 10) == 0;
+}
+
+// The wild Pokémon just made (CreateWildMon): raised past an evolution, the rare evolved form now and then; remembered
+// with its own level (a co-op battle may raise it for the whole team)
 void MP_LevelScale_WildMade(struct Pokemon *mon)
 {
     u8 level = GetMonData(mon, MON_DATA_LEVEL);
     if (!sPendingValid)
         return;
-    if (level > sPendingNormal)
+    if (level > sPendingNormal && RareEvolvedForm(mon))
+    {
+        MPNet_Log("level scale: a rare evolved form");
         MP_LevelScale_EvolveMon(mon);
+    }
     sNoted[sNotedNext].personality = GetMonData(mon, MON_DATA_PERSONALITY);
     sNoted[sNotedNext].normal = sPendingNormal;
     sNotedNext = (sNotedNext + 1) % ARRAY_COUNT(sNoted);
@@ -245,7 +305,7 @@ void MP_LevelScale_CoopWild(struct Pokemon *mon)
     for (i = 0; i < ARRAY_COUNT(sNoted); i++)
         if (sNoted[i].personality == personality && sNoted[i].normal != 0)
             normal = sNoted[i].normal;
-    target = (s32)ref - 3 - (personality % 4);   // the same spread every game would pick (no Random: only the master runs)
+    target = ref > normal ? WildTarget(ref, normal, personality % 4) : normal;   // the same spread every game would pick (no Random: only the master runs)
     if (target > Cap())
         target = Cap();
     if (target < normal)
@@ -256,6 +316,7 @@ void MP_LevelScale_CoopWild(struct Pokemon *mon)
     SetMonData(mon, MON_DATA_EXP, &exp);
     CalculateMonStats(mon);
     GiveMonInitialMoveset(mon);
-    MP_LevelScale_EvolveMon(mon);
+    if (RareEvolvedForm(mon))
+        MP_LevelScale_EvolveMon(mon);
     MPNet_Log("level scale: co-op wild %d Lv%d -> Lv%d (team %d)", GetMonData(mon, MON_DATA_SPECIES), level, target, ref);
 }

@@ -1,0 +1,61 @@
+pressuntil A field 5000
+wait 60
+shot a_3f
+press UP 4
+wait 20
+press A 2
+wait 60
+shot a_menu
+press A 2
+wait 60
+wait 30
+shot b_caution
+press A 2
+wait 40
+shot b_style
+press A 2
+wait 40
+shot b_difficulty
+press RIGHT 2
+wait 10
+press A 2
+wait 60
+shot b_music
+press RIGHT 2
+wait 40
+press RIGHT 2
+wait 60
+shot b_music_song
+press A 2
+wait 30
+shot b_options
+press START 2
+wait 60
+shot b_stage
+wait 120
+shot c_ready
+wait 240
+shot c_play1
+wait 600
+shot c_play2
+waitlog 20000 points, grade
+wait 200
+shot c_results
+press A 2
+wait 120
+shot d_music2
+press RIGHT 2
+wait 60
+press A 2
+wait 30
+press START 2
+wait 300
+press START 120
+wait 200
+shot d_failed
+wait 200
+press A 2
+wait 200
+shot d_gameover
+wait 300
+shot e_back

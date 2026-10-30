@@ -1,0 +1,12 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 60
+barrier set 2
+wait 120
+mp tt world
+mp tt rules 2 b
+wait 60
+mp tt world
+barrier done 2
+wait 60
+quit

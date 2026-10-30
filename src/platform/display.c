@@ -24,6 +24,8 @@
 #include <string.h>
 
 #include "platform/display.h"
+#include "tcg/integration.h"
+#include "platform/fight.h"
 
 #ifdef PLATFORM_SDL2
 
@@ -69,8 +71,8 @@ static SDL_Renderer *sRenderer;
 static SDL_Texture *sGameTex;    // 240x160 game frame, nearest
 static SDL_Texture *sScaleTex;   // 240*kx x 160*ky render target, linear
 static SDL_Texture *sOverlayTex; // filter pattern, same size as the enlarged frame
-static int sScaleKx, sScaleKy;
-static int sOverlayKx, sOverlayKy, sOverlayFilter = -1;
+static int sScaleKx, sScaleKy, sScaleSrcW, sScaleSrcH;
+static int sOverlayKx, sOverlayKy, sOverlayFilter = -1, sOverlaySrcW, sOverlaySrcH;
 static int sTargetsSupported;
 static int sMaxTexW, sMaxTexH;
 static const void *sLastFrame;
@@ -455,6 +457,8 @@ static int CreateRenderer(void)
 
 static void RecreateRenderer(void)
 {
+    Tcg_DestroyTextures();
+    Fight_DestroyTextures();
     DestroyTextures();
     if (sRenderer)
         SDL_DestroyRenderer(sRenderer);
@@ -463,19 +467,22 @@ static void RecreateRenderer(void)
     sDirty = 1;
 }
 
-static int EnsureScaleTex(int kx, int ky)
+// The whole-number enlargement of the picture (srcW x srcH: the GBA's 240x160, or a VS fight's 480x320)
+static int EnsureScaleTex(int kx, int ky, int srcW, int srcH)
 {
-    if (sScaleTex && sScaleKx == kx && sScaleKy == ky)
+    if (sScaleTex && sScaleKx == kx && sScaleKy == ky && sScaleSrcW == srcW && sScaleSrcH == srcH)
         return 1;
     if (sScaleTex)
         SDL_DestroyTexture(sScaleTex);
-    sScaleTex = CreateTex(SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, GBA_W * kx, GBA_H * ky, 1);
+    sScaleTex = CreateTex(SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, srcW * kx, srcH * ky, 1);
     sScaleKx = sScaleKy = 0;
     if (sScaleTex == NULL)
         return 0;
     SDL_SetTextureBlendMode(sScaleTex, SDL_BLENDMODE_NONE);
     sScaleKx = kx;
     sScaleKy = ky;
+    sScaleSrcW = srcW;
+    sScaleSrcH = srcH;
     return 1;
 }
 
@@ -503,13 +510,15 @@ static Uint8 GridAlpha(int pos, int k)
     return 0;
 }
 
-static int EnsureOverlay(int kx, int ky)
+// The filter's overlay (scanlines or the LCD grid) over each of the picture's srcW x srcH pixels
+static int EnsureOverlay(int kx, int ky, int srcW, int srcH)
 {
-    int w = GBA_W * kx, h = GBA_H * ky, x, y;
+    int w = srcW * kx, h = srcH * ky, x, y;
     Uint32 *pixels;
     Uint8 colA[MAX_PRESCALE + 1];
 
-    if (sOverlayTex && sOverlayKx == kx && sOverlayKy == ky && sOverlayFilter == sCfg.filter)
+    if (sOverlayTex && sOverlayKx == kx && sOverlayKy == ky && sOverlayFilter == sCfg.filter && sOverlaySrcW == srcW &&
+        sOverlaySrcH == srcH)
         return 1;
     if (sOverlayTex)
         SDL_DestroyTexture(sOverlayTex);
@@ -542,6 +551,8 @@ static int EnsureOverlay(int kx, int ky)
         sOverlayKx = kx;
         sOverlayKy = ky;
         sOverlayFilter = sCfg.filter;
+        sOverlaySrcW = srcW;
+        sOverlaySrcH = srcH;
     }
     free(pixels);
     return sOverlayTex != NULL;
@@ -1218,12 +1229,17 @@ static int sLastPanelH;
 
 static void RenderToBackbuffer(void)
 {
-    int outW = 0, outH = 0, kx, ky, exact, filterOn, fullW, fullH, gameX = 0, gameY = 0;
+    int outW = 0, outH = 0, kx, ky, exact, filterOn, fullW, fullH, gameX = 0, gameY = 0, srcW = GBA_W, srcH = GBA_H;
     SDL_Rect dst;
+    SDL_Texture *gameTex;
     int panelH = 0;
     struct PanelLayout L;
 
     sFilterShown = 0;
+    // Moemon Kai: the card screens are the game picture while they're open (src/tcg/tcg_ui.c)
+    gameTex = sGameTex ? Tcg_Canvas(sRenderer, sGameTex) : NULL;
+    if (gameTex == NULL)
+        gameTex = sGameTex;
     SDL_SetRenderTarget(sRenderer, NULL);
     if (sPanelCount > 0)
         SDL_SetRenderDrawColor(sRenderer, 17, 19, 26, 255);   // beside the game: the panel's slate, darker
@@ -1253,16 +1269,27 @@ static void RenderToBackbuffer(void)
     ComputeDstRect(outW, outH, &dst);
     dst.x += gameX;
     dst.y += gameY;
-    kx = CeilDiv(dst.w, GBA_W);
-    ky = CeilDiv(dst.h, GBA_H);
-    exact = (dst.w == GBA_W * kx && dst.h == GBA_H * ky);
+    // Moemon Fight: a fight is the game picture, at its own 480x320 (src/platform/fight_platform.c), scaled the same
+    // way as the game's 240x160 in every mode (whole multiples, sharp-bilinear between them) with the same filters
+    {
+        SDL_Texture *fight = Fight_Canvas(sRenderer);
+        if (fight)
+        {
+            gameTex = fight;
+            srcW = FIGHT_CANVAS_W;
+            srcH = FIGHT_CANVAS_H;
+        }
+    }
+    kx = CeilDiv(dst.w, srcW);
+    ky = CeilDiv(dst.h, srcH);
+    exact = (dst.w == srcW * kx && dst.h == srcH * ky);
     if (!exact)
     {
         kx = Clamp(kx, 1, MAX_PRESCALE);
         ky = Clamp(ky, 1, MAX_PRESCALE);
-        while (sMaxTexW > 0 && kx > 1 && GBA_W * kx > sMaxTexW)
+        while (sMaxTexW > 0 && kx > 1 && srcW * kx > sMaxTexW)
             kx--;
-        while (sMaxTexH > 0 && ky > 1 && GBA_H * ky > sMaxTexH)
+        while (sMaxTexH > 0 && ky > 1 && srcH * ky > sMaxTexH)
             ky--;
     }
 
@@ -1272,20 +1299,20 @@ static void RenderToBackbuffer(void)
     else if (exact)
         filterOn = (sCfg.filter == DISPLAY_FILTER_SCANLINES) ? (ky >= 2) : (kx >= 3 && ky >= 3);
     else
-        filterOn = (dst.w >= GBA_W * 3 && dst.h >= GBA_H * 3);
+        filterOn = (dst.w >= srcW * 3 && dst.h >= srcH * 3);
     if (filterOn)
-        filterOn = EnsureOverlay(kx, ky);
+        filterOn = EnsureOverlay(kx, ky, srcW, srcH);
 
     if (exact)
     {
-        SDL_RenderCopy(sRenderer, sGameTex, NULL, &dst);
+        SDL_RenderCopy(sRenderer, gameTex, NULL, &dst);
         if (filterOn)
             SDL_RenderCopy(sRenderer, sOverlayTex, NULL, &dst);
     }
-    else if (sTargetsSupported && EnsureScaleTex(kx, ky) && SDL_SetRenderTarget(sRenderer, sScaleTex) == 0)
+    else if (sTargetsSupported && EnsureScaleTex(kx, ky, srcW, srcH) && SDL_SetRenderTarget(sRenderer, sScaleTex) == 0)
     {
         // Sharp-bilinear: whole-number nearest enlarge, then linear to the output rect.
-        SDL_RenderCopy(sRenderer, sGameTex, NULL, NULL);
+        SDL_RenderCopy(sRenderer, gameTex, NULL, NULL);
         if (filterOn)
             SDL_RenderCopy(sRenderer, sOverlayTex, NULL, NULL);
         SDL_SetRenderTarget(sRenderer, NULL);
@@ -1293,7 +1320,7 @@ static void RenderToBackbuffer(void)
     }
     else
     {
-        SDL_RenderCopy(sRenderer, sGameTex, NULL, &dst);
+        SDL_RenderCopy(sRenderer, gameTex, NULL, &dst);
         filterOn = 0;
     }
     sFilterShown = filterOn;
@@ -1410,6 +1437,8 @@ int Display_Init(const char *title)
 
 void Display_Shutdown(void)
 {
+    Tcg_DestroyTextures();
+    Fight_DestroyTextures();
     DestroyAllPopouts();
     DestroyTextures();
     if (sRenderer)

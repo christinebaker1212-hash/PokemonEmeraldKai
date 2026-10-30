@@ -1,0 +1,276 @@
+;---------------------------------------------------------------------------
+;Super Street Fighter 2X Vega(Gouki) stage
+;---------------------------------------------------------------------------
+[Info]
+name = "ssf2x_vega"
+displayname = "GOUKI'S ISLAND"
+
+[Camera]
+startx = 0
+starty = 0
+boundleft = -227
+boundright = 227
+boundhigh = -15
+boundlow = 0
+verticalfollow = 0.3
+tension = 50
+floortension = 60
+
+[PlayerInfo]
+;--- Player 1 ---
+p1startx = -80
+p1starty = 0
+p1startz = 0
+p1facing = 1
+
+;--- Player 2 ---
+p2startx = 80
+p2starty = 0
+p2startz = 0
+p2facing = -1
+
+;--- Common ---
+leftbound  = -1000
+rightbound =  1000
+topbound  =  0
+botbound  =  0
+
+[Scaling]
+topz     = 0
+botz     = 50
+topscale = 1
+botscale = 1.2
+
+[Bound]
+screenleft = 15
+screenright = 15
+
+[StageInfo]
+zoffset = 215
+autoturn = 1
+resetBG = 1
+
+[Shadow]
+color = 106,90,90  ;96,112,80        ;影の色（数値が多いほど濃くなる）
+yscale = 0.16            ;影の方向（数値を０未満に指定すると影が奥に伸びる）
+reflect = 0             ;キャラの姿を床に反射させるかどうか（1=反射,0=反射させない）
+intensity = 32          ;影の濃さ（0薄い、255濃い）
+;fade.range = -335,-5    ;影のフェードアウト設定
+
+[Reflection]
+intensity = 0           ;反射の強さ(0から256)　デフォルトは0
+
+[Music]
+bgmusic = sound/SF2 Raging Demon - Akuma Theme.mp3
+bgvolume = 255
+
+[BGdef]
+spr = stages/ssf2x-gouki.sff
+debugbg = 1
+
+[BG 00]
+type        = Normal    ;画像表示タイプ。Normal=静止画、Anim=アニメ画、Parallax=立体静止画（一点透視図法）
+spriteNo    = 0,0       ;画像ファイル（*.sff）の画像を表示。Animの時は必要無し
+layerNo     = 0         ;レイヤー属性。0=奥、1=手前に表示
+start       = 0,0       ;軸位置。このdefファイルで設定した軸位置から数える
+delta       = 0.4 ,0.4       ;キャラが動いた時のスクロールスピード。小数点以下可能
+trans       = None      ;透過処理。Add=加算処理（輝く半透明）,Add1=半透明,Sub=減算処理（影の半透明）,None=透過しない
+mask        = 0         ;画像の背景色を透過させるかどうか。1=Yes,0=No
+;velocity    = -0.3,0    ;画像の移動速度
+
+;====================================================================
+;上
+[BG 01]
+type        = Parallax     ;画像表示タイプ。Normal=静止画、Anim=アニメ画、Parallax=立体静止画（一点透視図法）
+spriteNo    = 0,1       ;画像ファイル（*.sff）の画像を表示。Animの時は必要無し
+layerNo     = 0         ;レイヤー属性。0=奥、1=手前に表示
+start       = 0,0       ;軸位置。このdefファイルで設定した軸位置から数える
+delta       = 1.06,1      ;キャラが動いた時のスクロールスピード。小数点以下可能
+trans       = none      ;透過処理。Add=加算処理（輝く半透明）,Add1=半透明,Sub=減算処理（影の半透明）,None=透過しない
+mask        = 0         ;画像の背景色を透過させるかどうか。1=Yes,0=No
+xscale = 1,0.575
+;====================================================================
+;下
+[BG 02]
+type        = Parallax    ;画像表示タイプ。Normal=静止画、Anim=アニメ画、Parallax=立体静止画（一点透視図法）
+spriteNo    = 0,2       ;画像ファイル（*.sff）の画像を表示。Animの時は必要無し
+layerNo     = 0         ;レイヤー属性。0=奥、1=手前に表示
+start       = 0,0
+delta       = 0.686,1    ;キャラが動いた時のスクロールスピード。小数点以下可能
+trans       = none      ;透過処理。Add=加算処理（輝く半透明）,Add1=半透明,Sub=減算処理（影の半透明）,None=透過しない
+mask        = 0         ;画像の背景色を透過させるかどうか。1=Yes,0=No
+xscale =  0.585,1 ;1, 1.75
+;yscalestart = 100
+;yscaledelta = 0.2
+;====================================================================
+;vell
+[BG 03]
+type        = normal    ;画像表示タイプ。Normal=静止画、Anim=アニメ画、Parallax=立体静止画（一点透視図法）
+spriteNo    = 1,0       ;画像ファイル（*.sff）の画像を表示。Animの時は必要無し
+layerNo     = 0         ;レイヤー属性。0=奥、1=手前に表示
+start    = 0,2
+delta    = 0.796,1     ;キャラが動いた時のスクロールスピード。小数点以下可能
+trans       = none      ;透過処理。Add=加算処理（輝く半透明）,Add1=半透明,Sub=減算処理（影の半透明）,None=透過しない
+mask        = 1         ;画像の背景色を透過させるかどうか。1=Yes,0=No
+
+;====================================================================
+;人1(left side)
+[BG 03]
+type        = anim    ;画像表示タイプ。Normal=静止画、Anim=アニメ画、Parallax=立体静止画（一点透視図法）
+ActionNo    = 3     ;画像ファイル（*.sff）の画像を表示。Animの時は必要無し
+layerNo     = 0         ;レイヤー属性。0=奥、1=手前に表示
+start    = -258, 101
+delta    = 0.796,1       ;キャラが動いた時のスクロールスピード。小数点以下可能
+trans       = none      ;透過処理。Add=加算処理（輝く半透明）,Add1=半透明,Sub=減算処理（影の半透明）,None=透過しない
+mask        = 1  
+
+[Begin Action 3]
+2, 1, 0, 0, 6
+2, 0, 0, 0, 6
+
+;人2
+[BG 03]
+type        = anim    ;画像表示タイプ。Normal=静止画、Anim=アニメ画、Parallax=立体静止画（一点透視図法）
+ActionNo    = 4     ;画像ファイル（*.sff）の画像を表示。Animの時は必要無し
+layerNo     = 0         ;レイヤー属性。0=奥、1=手前に表示
+start    = -258, 101
+delta    = 0.796,1       ;キャラが動いた時のスクロールスピード。小数点以下可能
+trans       = none      ;透過処理。Add=加算処理（輝く半透明）,Add1=半透明,Sub=減算処理（影の半透明）,None=透過しない
+mask        = 1 
+
+[Begin Action 4]
+2, 3, 0, 0, 43
+2, 2, 0, 0, 8
+
+;人3
+[BG 03]
+type        = anim    ;画像表示タイプ。Normal=静止画、Anim=アニメ画、Parallax=立体静止画（一点透視図法）
+ActionNo    = 5     ;画像ファイル（*.sff）の画像を表示。Animの時は必要無し
+layerNo     = 0         ;レイヤー属性。0=奥、1=手前に表示
+start    = -258, 101
+delta    = 0.796,1       ;キャラが動いた時のスクロールスピード。小数点以下可能
+trans       = none      ;透過処理。Add=加算処理（輝く半透明）,Add1=半透明,Sub=減算処理（影の半透明）,None=透過しない
+mask        = 1 
+
+[Begin Action 5]
+2, 4, 0, 0, 7
+2, 5, 0, 0, 9
+
+;人4
+[BG 03]
+type        = anim    ;画像表示タイプ。Normal=静止画、Anim=アニメ画、Parallax=立体静止画（一点透視図法）
+ActionNo    = 6     ;画像ファイル（*.sff）の画像を表示。Animの時は必要無し
+layerNo     = 0         ;レイヤー属性。0=奥、1=手前に表示
+start    = -258, 101
+delta    = 0.796,1       ;キャラが動いた時のスクロールスピード。小数点以下可能
+trans       = none      ;透過処理。Add=加算処理（輝く半透明）,Add1=半透明,Sub=減算処理（影の半透明）,None=透過しない
+mask        = 1 
+
+[Begin Action 6]
+2, 6, 0, 0, 8
+2, 7, 0, 0, 9
+
+;人5
+[BG 03]
+type        = anim    ;画像表示タイプ。Normal=静止画、Anim=アニメ画、Parallax=立体静止画（一点透視図法）
+ActionNo    = 7     ;画像ファイル（*.sff）の画像を表示。Animの時は必要無し
+layerNo     = 0         ;レイヤー属性。0=奥、1=手前に表示
+start    = -258, 101
+delta    = 0.796,1       ;キャラが動いた時のスクロールスピード。小数点以下可能
+trans       = none      ;透過処理。Add=加算処理（輝く半透明）,Add1=半透明,Sub=減算処理（影の半透明）,None=透過しない
+mask        = 1 
+
+[Begin Action 7]
+3, 0, 0, 0, 43
+3, 1, 0, 0, 4
+3, 2, 0, 0, 5
+3, 3, 0, 0, 5
+3, 4, 0, 0, 4
+
+;====================================================================
+;人1(right side)
+[BG 03]
+type        = anim    ;画像表示タイプ。Normal=静止画、Anim=アニメ画、Parallax=立体静止画（一点透視図法）
+ActionNo    = 8       ;画像ファイル（*.sff）の画像を表示。Animの時は必要無し
+layerNo     = 0         ;レイヤー属性。0=奥、1=手前に表示
+start    =  64, 101
+delta    = 0.796,1      ;キャラが動いた時のスクロールスピード。小数点以下可能
+trans       = none      ;透過処理。Add=加算処理（輝く半透明）,Add1=半透明,Sub=減算処理（影の半透明）,None=透過しない
+mask        = 1  
+
+[Begin Action 8]
+2, 8, 0, 0, 10
+2, 9, 0, 0, 7
+2, 10, 0, 0, 7
+2, 9, 0, 0, 6
+
+;人2
+[BG 03]
+type        = anim    ;画像表示タイプ。Normal=静止画、Anim=アニメ画、Parallax=立体静止画（一点透視図法）
+ActionNo    = 9       ;画像ファイル（*.sff）の画像を表示。Animの時は必要無し
+layerNo     = 0         ;レイヤー属性。0=奥、1=手前に表示
+start    =  64, 101
+delta    = 0.796,1      ;キャラが動いた時のスクロールスピード。小数点以下可能
+trans       = none      ;透過処理。Add=加算処理（輝く半透明）,Add1=半透明,Sub=減算処理（影の半透明）,None=透過しない
+mask        = 1 
+
+[Begin Action 9]
+2, 11, 0, 0, 7
+2, 12, 0, 0, 6
+
+;人3
+[BG 03]
+type        = anim    ;画像表示タイプ。Normal=静止画、Anim=アニメ画、Parallax=立体静止画（一点透視図法）
+ActionNo    = 10       ;画像ファイル（*.sff）の画像を表示。Animの時は必要無し
+layerNo     = 0         ;レイヤー属性。0=奥、1=手前に表示
+start    =  64, 101
+delta    = 0.796,1      ;キャラが動いた時のスクロールスピード。小数点以下可能
+trans       = none      ;透過処理。Add=加算処理（輝く半透明）,Add1=半透明,Sub=減算処理（影の半透明）,None=透過しない
+mask        = 1 
+
+[Begin Action 10]
+4, 0, 0, 0, 43
+4, 1, 0, 0, 4
+4, 2, 0, 0, 5
+4, 3, 0, 0, 5
+4, 4, 0, 0, 4
+
+;hashira
+[BG 05]
+type        = normal    ;画像表示タイプ。Normal=静止画、Anim=アニメ画、Parallax=立体静止画（一点透視図法）
+spriteNo    = 1,2       ;画像ファイル（*.sff）の画像を表示。Animの時は必要無し
+layerNo     = 0         ;レイヤー属性。0=奥、1=手前に表示
+start    =  -290, 33
+delta    = 0.796,1      ;キャラが動いた時のスクロールスピード。小数点以下可能
+trans       = none      ;透過処理。Add=加算処理（輝く半透明）,Add1=半透明,Sub=減算処理（影の半透明）,None=透過しない
+mask     = 1
+
+;hashira
+[BG 06]
+type        = normal    ;画像表示タイプ。Normal=静止画、Anim=アニメ画、Parallax=立体静止画（一点透視図法）
+spriteNo    = 1,2       ;画像ファイル（*.sff）の画像を表示。Animの時は必要無し
+layerNo     = 0         ;レイヤー属性。0=奥、1=手前に表示
+start    =  253, 33
+delta    = 0.796,1      ;キャラが動いた時のスクロールスピード。小数点以下可能
+trans       = none      ;透過処理。Add=加算処理（輝く半透明）,Add1=半透明,Sub=減算処理（影の半透明）,None=透過しない
+mask     = 1
+
+zau
+[BG 07]
+type        = normal    ;画像表示タイプ。Normal=静止画、Anim=アニメ画、Parallax=立体静止画（一点透視図法）
+spriteNo    = 1,1       ;画像ファイル（*.sff）の画像を表示。Animの時は必要無し
+layerNo     = 0         ;レイヤー属性。0=奥、1=手前に表示
+start    =  -341, 24
+delta    = 0.945,1      ;キャラが動いた時のスクロールスピード。小数点以下可能
+trans       = none      ;透過処理。Add=加算処理（輝く半透明）,Add1=半透明,Sub=減算処理（影の半透明）,None=透過しない
+mask     = 1
+
+;zau
+[BG 08]
+type        = normal    ;画像表示タイプ。Normal=静止画、Anim=アニメ画、Parallax=立体静止画（一点透視図法）
+spriteNo    = 1,1       ;画像ファイル（*.sff）の画像を表示。Animの時は必要無し
+layerNo     = 0         ;レイヤー属性。0=奥、1=手前に表示
+start    =  180, 24
+delta    = 0.945,1      ;キャラが動いた時のスクロールスピード。小数点以下可能
+trans       = none      ;透過処理。Add=加算処理（輝く半透明）,Add1=半透明,Sub=減算処理（影の半透明）,None=透過しない
+mask     = 1

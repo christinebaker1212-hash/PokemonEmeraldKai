@@ -138,11 +138,17 @@ u16 MP_Gen4_TargetAbility(u8 attacker, u8 target)
 
 u8 MP_Gen4_HoldEffect(u8 battler)
 {
-    if (gGen4Battlers[battler].embargo || gBattleMons[battler].ability == ABILITY_KLUTZ)
+    return MP_Gen4_MonHoldEffect(battler, &gBattleMons[battler]);
+}
+
+// The same for a given Pokémon's data (damage math may run on copies of the battlers)
+u8 MP_Gen4_MonHoldEffect(u8 battler, const struct BattlePokemon *mon)
+{
+    if (gGen4Battlers[battler].embargo || mon->ability == ABILITY_KLUTZ)
         return HOLD_EFFECT_NONE;
-    if (gBattleMons[battler].item == ITEM_ENIGMA_BERRY)
+    if (mon->item == ITEM_ENIGMA_BERRY)
         return gEnigmaBerries[battler].holdEffect;
-    return GetItemHoldEffect(gBattleMons[battler].item);
+    return GetItemHoldEffect(mon->item);
 }
 
 bool8 MP_Gen4_HasType(u8 battler, u8 type)

@@ -1,0 +1,10 @@
+# HOENN's Triple Triad rules come from the room host: ALICE (the host) sets MAUVILLE's rules, its TRADE RULE and the
+# CARD QUEEN's place; BOB's game shows hers (not his own); BOB's change (SLATEPORT's rules, as a spread or a CARD QUEEN
+# favor would make one) reaches ALICE, who passes it on; BOB's save keeps his own HOENN
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,13,11
+TMO=200
+EXPECT_A=("tt world: player 2 changed HOENN (4)" "[tt] world: rules 1 3 b 5 " "trade 0 0 0 3" "queen SOOTOPOLIS")
+EXPECT_B=("tt world: the host's HOENN" "[tt] world (the host's): rules 1 3 c 5 " "[tt] world (the host's): rules 1 3 b 5 " "trade 0 0 0 3" "queen SOOTOPOLIS" "tt world: sent the host a change (4)")
+UNEXPECT_B=("[tt] world (the host's): rules 1 3 c 6 ")

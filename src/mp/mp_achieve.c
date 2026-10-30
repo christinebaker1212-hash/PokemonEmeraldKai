@@ -45,8 +45,8 @@ enum {
 };
 
 // The menu's tabs
-enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, NUM_ACH_CATS };
-static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "BATTLE", "CATCHING", "HOENN", "TOGETHER", "EXTRAS"};
+enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, C_CARDS, C_YUGIOH, C_TRIAD, C_DANCE, NUM_ACH_CATS };
+static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "BATTLE", "CATCHING", "HOENN", "TOGETHER", "EXTRAS", "CARDS", "YU-GI-OH!", "TRIPLE TRIAD", "DANCE"};
 
 enum { FL_HMS, FL_RODS, FL_LANDMARKS, FL_SILVER, FL_GOLD };
 enum { DL_STARTERS, DL_FOSSILS, DL_LEGENDS };
@@ -314,6 +314,82 @@ static const struct Achievement sAch[] = {
     {"ballstyle", "BALL STYLIST", "Change a POK~MON's POK~ BALL look.", AK_EVENT, 0, 1, 0, C_EXTRAS},
     {"follower", "WALKING BUDDY", "Have a POK~MON follow you.", AK_EVENT, 0, 1, 0, C_EXTRAS},
     {"newlook", "NEW LOOK", "Change your look in LOOK or CREATE.", AK_EVENT, 0, 1, 0, C_EXTRAS},
+    // VS cabinet fights (mp_fight.c): counted when a fight ends
+    {"fightcpu1", "INSERT COIN", "Beat the CPU at a VS cabinet.", AK_COUNT, 0, 1, 0, C_EXTRAS},
+    {"fightcpu25", "ARCADE MODE", "Beat the CPU 25 times at VS cabinets.", AK_COUNT, 0, 25, 1, C_EXTRAS},
+    {"fightwin1", "A NEW CHALLENGER", "Win a fight against a friend at a VS cabinet.", AK_COUNT, 0, 1, 0, C_TOGETHER},
+    {"fightwin10", "WORLD WARRIOR", "Win 10 fights against friends at VS cabinets.", AK_COUNT, 0, 10, 1, C_TOGETHER},
+    {"fightwin50", "GRAND MASTER", "Win 50 fights against friends at VS cabinets.", AK_COUNT, 0, 50, 2, C_TOGETHER},
+    // Card duels (src/tcg): counted and unlocked by the card screens
+    {"cardwin1", "FIRST DRAW", "Win your first card duel.", AK_COUNT, 0, 1, 0, C_CARDS},
+    {"cardwin100", "CARD SHARK", "Win 100 card duels.", AK_COUNT, 0, 100, 2, C_CARDS},
+    {"cardgyms8", "GYM CARD MASTER", "Beat every GYM LEADER's card deck.", AK_COUNT, 0, 8, 1, C_CARDS},
+    {"cardspecial15", "LEGENDS OF THE TABLE", "Beat 15 special trainers at cards (either game).", AK_COUNT, 0, 15, 2, C_CARDS},
+    {"cardset", "SET COMPLETE", "Own every card of a booster set.", AK_EVENT, 0, 1, 1, C_CARDS},
+    {"cardall", "CARD MASTER", "Own every POK~MON card.", AK_EVENT, 0, 1, 2, C_CARDS},
+    {"cardpack50", "PACK RAT", "Open 50 booster packs.", AK_COUNT, 0, 50, 1, C_CARDS},
+    {"cardflawless", "CLEAN SWEEP", "Win a card duel without giving up a Prize.", AK_EVENT, 0, 1, 1, C_CARDS},
+    {"cardfriend1", "TABLE TALK", "Win a card duel against a friend.", AK_COUNT, 0, 1, 0, C_CARDS},
+    {"cardtrade", "CARD SWAP", "Trade a card with a friend.", AK_EVENT, 0, 1, 0, C_CARDS},
+    {"cardmono", "PURE ENERGY", "Win a card duel with a deck of one type.", AK_EVENT, 0, 1, 1, C_CARDS},
+    {"cardpromo", "PROMO HUNTER", "Win a special trainer's promo card.", AK_EVENT, 0, 1, 1, C_CARDS},
+    // Yu-Gi-Oh! duels (src/ygo): counted and unlocked by the card screens
+    {"ygostart", "IT'S TIME TO DUEL", "Get a Yu-Gi-Oh! Starter Deck.", AK_EVENT, 0, 1, 0, C_YUGIOH},
+    {"ygowin1", "FIRST DUEL", "Win your first Yu-Gi-Oh! duel.", AK_COUNT, 0, 1, 0, C_YUGIOH},
+    {"ygowin100", "KING OF GAMES", "Win 100 Yu-Gi-Oh! duels.", AK_COUNT, 0, 100, 2, C_YUGIOH},
+    {"ygospecial12", "DUELIST KINGDOM", "Beat 12 special duelists at Yu-Gi-Oh!.", AK_COUNT, 0, 12, 2, C_YUGIOH},
+    {"ygosignature", "SIGNATURE MOVE", "Win a special duelist's signature card.", AK_EVENT, 0, 1, 1, C_YUGIOH},
+    {"ygopack50", "BOOSTER BOX", "Open 50 Yu-Gi-Oh! booster packs.", AK_COUNT, 0, 50, 1, C_YUGIOH},
+    {"ygosecret", "SECRET RARE", "Pull a Secret Rare from a booster pack.", AK_EVENT, 0, 1, 1, C_YUGIOH},
+    {"ygoflawless", "UNTOUCHED", "Win a Yu-Gi-Oh! duel without losing any Life Points.", AK_EVENT, 0, 1, 1, C_YUGIOH},
+    {"ygoexodia", "OBLITERATE!", "Win a duel with all five pieces of Exodia.", AK_EVENT, 0, 1, 2, C_YUGIOH},
+    // Triple Triad (src/tt): counted and unlocked by the card screens
+    {"ttstart", "FIRST HAND", "Get your first TRIPLE TRIAD cards.", AK_EVENT, 0, 1, 0, C_TRIAD},
+    {"ttwin1", "OPEN RULES", "Win a game of TRIPLE TRIAD.", AK_COUNT, 0, 1, 0, C_TRIAD},
+    {"ttwin50", "SHUFFLE OR BOOGIE", "Win 50 games of TRIPLE TRIAD.", AK_COUNT, 0, 50, 1, C_TRIAD},
+    {"ttwin200", "MASTER OF THE TABLE", "Win 200 games of TRIPLE TRIAD.", AK_COUNT, 0, 200, 2, C_TRIAD},
+    {"ttperfect", "PERFECT HAND", "Win a game holding nine of the ten cards.", AK_EVENT, 0, 1, 1, C_TRIAD},
+    {"ttsame10", "SAME AS IT EVER WAS", "Take cards with SAME 10 times.", AK_COUNT, 0, 10, 1, C_TRIAD},
+    {"ttplus10", "PLUS ONE", "Take cards with PLUS 10 times.", AK_COUNT, 0, 10, 1, C_TRIAD},
+    {"ttcombo1", "COMBO!", "Start a COMBO.", AK_COUNT, 0, 1, 0, C_TRIAD},
+    {"ttcombo25", "CHAIN REACTION", "Start 25 COMBOs.", AK_COUNT, 0, 25, 2, C_TRIAD},
+    {"ttspread1", "RULES ON THE MOVE", "Carry a rule to a region that didn't play it.", AK_COUNT, 0, 1, 0, C_TRIAD},
+    {"ttspread10", "TRENDSETTER", "Spread rules to other regions 10 times.", AK_COUNT, 0, 10, 1, C_TRIAD},
+    {"ttabolish1", "ABOLISHED!", "See a region's rule abolished.", AK_COUNT, 0, 1, 0, C_TRIAD},
+    {"ttqueen", "BY ROYAL DECREE", "Beat the CARD QUEEN.", AK_EVENT, 0, 1, 1, C_TRIAD},
+    {"ttspecial10", "TRIAD LEGENDS", "Beat 10 special players at TRIPLE TRIAD.", AK_COUNT, 0, 10, 2, C_TRIAD},
+    {"ttcards100", "CARD CARRIER", "Win 100 cards at the table.", AK_COUNT, 0, 100, 1, C_TRIAD},
+    {"tt5star", "FIVE STARS", "Win a five-star card.", AK_EVENT, 0, 1, 1, C_TRIAD},
+    {"ttpack25", "PACK OPENER", "Open 25 TRIPLE TRIAD packs.", AK_COUNT, 0, 25, 1, C_TRIAD},
+    {"ttall", "TRIPLE TRIAD MASTER", "Own every TRIPLE TRIAD card.", AK_EVENT, 0, 1, 2, C_TRIAD},
+    // The DANCE machine (mp_rhythm.c MP_Rhythm_StageDone): made for players who know their DDR
+    {"ddrclear1", "FIRST STEPS", "Clear a song on the DANCE machine.", AK_COUNT, 0, 1, 0, C_DANCE},
+    {"ddrclear100", "DANCE MANIA", "Clear 100 songs on the DANCE machine.", AK_COUNT, 0, 100, 1, C_DANCE},
+    {"ddrclear1000", "BEMANI LIFER", "Clear 1000 songs on the DANCE machine.", AK_COUNT, 0, 1000, 2, C_DANCE},
+    {"ddrsongs50", "SONG HUNTER", "Clear 50 different songs.", AK_COUNT, 0, 50, 1, C_DANCE},
+    {"ddrsongs240", "THE WHOLE EXTREME", "Clear every one of the 240 EXTREME songs.", AK_COUNT, 0, 240, 2, C_DANCE},
+    {"ddrchallenge", "CHALLENGER", "Clear a CHALLENGE chart.", AK_EVENT, 0, 1, 0, C_DANCE},
+    {"ddrfc1", "FULL COMBO", "Full combo a song (GREAT or better).", AK_COUNT, 0, 1, 0, C_DANCE},
+    {"ddrfc100", "COMBO KING", "Full combo 100 songs.", AK_COUNT, 0, 100, 2, C_DANCE},
+    {"ddrpfc1", "PERFECT FULL COMBO", "Full combo a song with PERFECT or better.", AK_COUNT, 0, 1, 1, C_DANCE},
+    {"ddrpfc50", "CRYSTAL CLEAR", "PERFECT full combo 50 songs.", AK_COUNT, 0, 50, 2, C_DANCE},
+    {"ddrmfc", "MARVELOUS!", "MARVELOUS full combo a song (MARVELOUS on).", AK_EVENT, 0, 1, 2, C_DANCE},
+    {"ddrmfcten", "BEYOND HUMAN", "MARVELOUS full combo a 10-foot chart.", AK_EVENT, 0, 1, 2, C_DANCE},
+    {"ddraaanine", "NINE LIVES", "Get an AAA on a 9-foot chart.", AK_EVENT, 0, 1, 1, C_DANCE},
+    {"ddraaaten", "PERFECT TEN", "Get an AAA on a 10-foot chart.", AK_EVENT, 0, 1, 2, C_DANCE},
+    {"ddrmaxthreehundred", "MAX 300", "Clear MAX 300 on HEAVY or CHALLENGE.", AK_EVENT, 0, 1, 1, C_DANCE},
+    {"ddrmaxaa", "MAXIMUM AA", "AA or better on MAX 300, HEAVY or harder.", AK_EVENT, 0, 1, 2, C_DANCE},
+    {"ddrsurvivor", "SURVIVOR", "Clear PARANOiA survivor MAX, HEAVY or harder.", AK_EVENT, 0, 1, 2, C_DANCE},
+    {"ddrboss10", "BOSS RUSH", "Clear all 10 bosses on HEAVY or CHALLENGE.", AK_COUNT, 0, 10, 2, C_DANCE},
+    {"ddrcombo", "1000 COMBO", "Reach a 1000 combo in one song.", AK_EVENT, 0, 1, 2, C_DANCE},
+    {"ddrfourfc", "FOUR FOR FOUR", "Full combo all four stages of a credit.", AK_EVENT, 0, 1, 1, C_DANCE},
+    {"ddrfouraaa", "FLAWLESS CREDIT", "Get AAA on all four stages of a credit.", AK_EVENT, 0, 1, 2, C_DANCE},
+    {"ddrstealth", "BLIND FAITH", "Clear a 9-foot chart or harder on STEALTH.", AK_EVENT, 0, 1, 2, C_DANCE},
+    {"ddrspeed", "LUDICROUS SPEED", "Clear a song at x8.", AK_EVENT, 0, 1, 0, C_DANCE},
+    {"ddrrecord", "MACHINE RECORD", "Set the server's best score on a chart.", AK_EVENT, 0, 1, 1, C_DANCE},
+    {"ddrvs1", "DANCE BATTLE", "Beat a friend in VERSUS.", AK_COUNT, 0, 1, 0, C_DANCE},
+    {"ddrvs25", "DANCE FLOOR LEGEND", "Beat friends in VERSUS 25 times.", AK_COUNT, 0, 25, 2, C_DANCE},
+    {"ddrcredit50", "REGULAR", "Play 50 credits on the DANCE machine.", AK_COUNT, 0, 50, 1, C_DANCE},
 };
 
 #define NUM_ACH ARRAY_COUNT(sAch)
@@ -567,6 +643,13 @@ void MP_Achieve_Count(const char *name, s32 n)
     char key[48];
     CountKey(key, name);
     MP_SaveData_Add(key, n);
+}
+
+s32 MP_Achieve_GetCount(const char *name)
+{
+    char key[48];
+    CountKey(key, name);
+    return MP_SaveData_Get(key);
 }
 
 // A feat (AK_EVENT achievements: "flawless", "shiny"...)

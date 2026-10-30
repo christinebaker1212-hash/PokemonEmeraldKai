@@ -64,6 +64,7 @@ static void ChangeBgYForZoom(bool32);
 static bool32 IsChangeBgYForZoomActive(void);
 static void CreateCityZoomTextSprites(void);
 static void DrawCityMap(struct Pokenav_RegionMapGfx *, mapsec_s32_t, int);
+static u8 sCityMapRowsDown;   // Moemon Co-op: rows the city map moves down for the city's landmarks
 static void PrintLandmarkNames(struct Pokenav_RegionMapGfx *, mapsec_s32_t, int);
 static void SetCityZoomTextInvisibility(bool32);
 static void Task_ChangeBgYForZoom(u8 taskId);
@@ -536,13 +537,21 @@ static void UpdateMapSecInfoWindow(struct Pokenav_RegionMapGfx *state)
     switch (regionMap->mapSecType)
     {
     case MAPSECTYPE_CITY_CANFLY:
+    {
+        // Moemon Co-op: a city's landmarks under its name, as a route's (the GAME CENTER), the city map below them
+        int n = 0;
+        while (n < 2 && GetLandmarkName(regionMap->mapSecId, regionMap->posWithinMapSec, n))
+            n++;
         FillWindowPixelBuffer(state->infoWindowId, PIXEL_FILL(1));
-        PutWindowRectTilemap(state->infoWindowId, 0, 0, 12, 2);
+        PutWindowRectTilemap(state->infoWindowId, 0, 0, 12, 2 + 2 * n);
         AddTextPrinterParameterized(state->infoWindowId, FONT_NARROW, regionMap->mapSecName, 0, 1, TEXT_SKIP_DRAW, NULL);
+        PrintLandmarkNames(state, regionMap->mapSecId, regionMap->posWithinMapSec);
+        sCityMapRowsDown = 2 * n;
         DrawCityMap(state, regionMap->mapSecId, regionMap->posWithinMapSec);
         CopyWindowToVram(state->infoWindowId, COPYWIN_FULL);
         SetCityZoomTextInvisibility(FALSE);
         break;
+    }
     case MAPSECTYPE_CITY_CANTFLY:
         FillWindowPixelBuffer(state->infoWindowId, PIXEL_FILL(1));
         PutWindowRectTilemap(state->infoWindowId, 0, 0, 12, 2);
@@ -643,8 +652,9 @@ static void DrawCityMap(struct Pokenav_RegionMapGfx *state, mapsec_s32_t mapSecI
     if (i == NUM_CITY_MAPS)
         return;
 
-    FillBgTilemapBufferRect_Palette0(1, 0x1041, 17, 6, 12, 11);
-    CopyToBgTilemapBufferRect(1, state->cityZoomPics[i], 18, 6, 10, 10);
+    // (Moemon Co-op: below the city's landmarks, losing as many of its bottom rows; the key covers them anyway)
+    FillBgTilemapBufferRect_Palette0(1, 0x1041, 17, 6 + sCityMapRowsDown, 12, 11 - sCityMapRowsDown);
+    CopyToBgTilemapBufferRect(1, state->cityZoomPics[i], 18, 6 + sCityMapRowsDown, 10, 10 - sCityMapRowsDown);
 }
 
 static void PrintLandmarkNames(struct Pokenav_RegionMapGfx *state, mapsec_s32_t mapSecId, int pos)

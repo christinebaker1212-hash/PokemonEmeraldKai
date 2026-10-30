@@ -8,6 +8,7 @@ void MapMusicMain(void);
 void ResetMapMusic(void);
 u16 GetCurrentMapMusic(void);
 void PlayNewMapMusic(u16 songNum);
+void MP_KeepMapMusic(u16 songNum);   // Moemon Kai
 void StopMapMusic(void);
 void FadeOutMapMusic(u8 speed);
 void FadeOutAndPlayNewMapMusic(u16 songNum, u8 speed);
@@ -18,6 +19,8 @@ bool8 WaitFanfare(bool8 stop);
 void StopFanfareByFanfareNum(u8 fanfareNum);
 void PlayFanfare(u16 songNum);
 bool8 IsFanfareTaskInactive(void);
+void MP_Sound_TickFanfare(void);
+void MP_Sound_EndFanfare(void);
 void FadeInNewBGM(u16 songNum, u8 speed);
 void FadeOutBGMTemporarily(u8 speed);
 bool8 IsBGMPausedOrStopped(void);
@@ -45,5 +48,17 @@ void SE12PanpotControl(s8 pan);
 bool8 IsSEPlaying(void);
 bool8 IsBGMPlaying(void);
 bool8 IsSpecialSEPlaying(void);
+
+// Moemon Kai: songs remember which scene asked for them (custom music: include/mp_kaisong_scene.h)
+#include "mp_kaisong_scene.h"
+#ifndef MP_KAISONG_NO_SCENE
+#define PlayBGM(n) MP_KAISONG_WRAP(PlayBGM(n))
+#define PlayNewMapMusic(n) MP_KAISONG_WRAP(PlayNewMapMusic(n))
+#define FadeOutAndPlayNewMapMusic(n, s) MP_KAISONG_WRAP(FadeOutAndPlayNewMapMusic(n, s))
+#define FadeOutAndFadeInNewMapMusic(n, o, i) MP_KAISONG_WRAP(FadeOutAndFadeInNewMapMusic(n, o, i))
+#define FadeInNewBGM(n, s) MP_KAISONG_WRAP(FadeInNewBGM(n, s))
+#define PlayFanfare(n) MP_KAISONG_WRAP(PlayFanfare(n))
+#define PlayFanfareByFanfareNum(n) MP_KAISONG_WRAP(PlayFanfareByFanfareNum(n))
+#endif
 
 #endif // GUARD_SOUND_H

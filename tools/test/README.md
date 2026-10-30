@@ -22,6 +22,14 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `coop_levelup` | co-op win one EXP short of Lv16 on both: level up + Torchic -> Combusken on both |
 | `coop_icons_flash` | co-op 2-on-2 at NA-JP lag with TYPE ICONS on: THUNDER's screen flashes leave the icons and the window frame alone (screenshots) |
 | `coop_weather` | co-op 2-on-2 at NA-JP lag: SANDSTORM hits all four at once (one line, then quiet turns), win on both |
+| `coop_fieldweather` / `coop_fieldweather2` | NA-JP lag, field weather differs between the games (`mp fieldweather`): every screen shows the battle's weather (the leader's field), RAIN DANCE's rain reaches the friend's screen |
+| `coop_two_join3` | NA-JP lag, three players: two trainers spot ALICE, BOB teams up, CARL joins once it started (`mp joinask 2`, sent on to ALICE): a Triple Battle against both trainers, the third foe spot from the trainer with more left, both trainers beaten on every game |
+| `coop_merge_join3` / `coop_held_join3` | three players: two players grouped on one trainer (waiting merge / held trainer spots the second), then a third one spotted by that trainer joins (JOIN BATTLE) |
+| `hgss_balls` | shots only (looked at by hand): the HGSS balls' send-out spin, a thrown MASTER BALL, a blue POKé BALL with a STAR, a GENESIS BALL, the summary's ball |
+| `tri_rain` | wild triple at NA-JP lag in the leader's rain, one friend's field dry: rain on all three screens, turns go on to the win |
+| `coop_life_emote` | NA-JP lag: a partner save; each game's Pokemon emote shows on the other game over the same Pokemon (check.sh) |
+| `coop_spot_join` / `coop_spot_alone` | ROUTE 116: JERRY, battling ALICE, spots BOB: "join their battle, or battle alone?"; JOIN BATTLE (ALICE lets him in, both win, JERRY beaten on both) / BATTLE ALONE |
+| `hue_castform` | a nicknamed CASTFORM (four form palettes) in the PC under the cursor and in battle, its hue on every form, no crash |
 | `coop_flash` | Granite Cave B2F (dark) at NA-JP lag: each sees the other's light, BOB's FLASH lights up around him on ALICE's screen; co-op notes show in the dark |
 | `coop_world` | NA-JP lag: a CUT tree is gone for a friend who walks onto the map later (list), a smashed rock vanishes live, a STRENGTH boulder moves on both games |
 | `coop_world2` | NA-JP lag: CUT grass is cut on the friend's game; Route 113's ash ALICE walks through clears for BOB, the soot is only hers |
@@ -32,10 +40,31 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `coop_abort_catch` / `coop_abort_catch2` | a catch, then the other player disconnects: the catcher keeps it (master / non-master) |
 | `pvp_battle` | BATTLE FLAG: BOB (no CHALLENGE phrase: no phrase box) spots ALICE, link battle to the end, the winner gets a tenth of the loser's money |
 | `pvp_switch` | PvP where ALICE's lead faints and she sends in her second Moemon |
+| `fight_resync` | online, BOB's game alone changes a life bar (a desync): both stop at the same frame, ALICE's game (the host) sends the pages that differ, then every check agrees to the end (also at `WORST=1`) |
+| `fight_display` | a CPU fight shown in each scaling mode (PIXEL PERFECT at 4x, 3x and 1x of the GBA screen, SHARP FIT, STRETCH) and with the LCD grid and scanlines: each window output against check.py's reference rendering of the fight's own 480x320 picture of the same frame (`fightshot`) |
+| `fight_packs` | online, BOB's SSF2X Ken has one more file: Ken greyed out on both select screens, ALICE can't pick him |
+| `fight_packs_core` | online, BOB's engine data differs: ALICE says no, BOB is told the fight files aren't the same |
+| `fight_buttons` | OPTIONS > CONTROLS > FIGHT BUTTONS with a virtual pad: a button bound, one taken from another fight button (they swap), one left alone after 8 s; saved in the controls file |
+| `dance_solo` | the DANCE machine (GAME CENTER 3F): step up, PLAY ALONE, every screen to a song played by `MOEMON_DANCE_AUTOPLAY` (MARVELOUS full combo, feet x 10,000,000), RESULTS, the next song given up (START held): FAILED, GAME OVER, back on the map |
+| `dance_versus` | ALICE waits on the left pad, BOB steps up to the right one and joins: VERSUS, ALICE picks, both play their own field and see the other's, the records reach the server (`rhythm_scores.dat`); a tie is no win |
+| `dance_hop` | ALICE plays alone: hops up (BOB, beside her, sees the arc and every double hop's facing, never south), one stage, gives up the next; the screen turns off like an old TV, she hops down and says a line from her grades |
+| `lowhp_beep` | a single battle starting in the red, a move animation during the beep at ANIM SPEED 30: the beep stops after 100 ticks (three "doo duh"s; `MOEMON_SE_TRACE=90`) |
+| `lowhp_pvp` | the same in a PvP single battle (a link battle), on both screens |
+| `join_gym` | ALICE challenges ROXANNE, BOB joins from another town: story battles can be joined; both get the STONE BADGE (BOB through the leader's own "you won" script from the gym's map) |
+| `coop_two_wait3` | TEAM PADDING never turns a third away: two trainers spot ALICE, BOB teams up, CARL asks too and is told he'll join; his game JOINs by itself once it starts: a Triple Battle against both |
+| `coop_two_solo_join` | two trainers spot ALICE alone; BOB joins the battle in progress: a co-op battle against both, both trainers beaten on both games (their continue-script mode too) |
+| `sim_tent` | the BATTLE SIMULATOR: BOB's record reaches ALICE, she beats his digital copy at level 50 in SLATEPORT's tent, gets her prize, stops at 1, her party back at its own levels |
+| `sim_nodata` | the BATTLE SIMULATOR on a save that never played online: no battle data, said politely |
+| `anim_classic` | every move animation on BATTLE ANIMS > CLASSIC, each one's length logged (`MOEMON_ANIM_FRAMES`), shots of a few |
+| `anim_modern` | the same on MODERN (run after anim_classic): `tools/test/check_anim_frames.sh` checks all 716 lengths match, no crash |
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped (and their MOéMON GARDEN records travel) |
 | `blender` / `crush` | BERRY GAMES invite, accept, play to the results |
 | `contest` | link CONTEST at the Lilycove counter, start to finish (long) |
 | `card_base` | FRIENDS > TRAINER CARD and VISIT SECRET BASE |
+| `ygo_online` | a Yu-Gi-Oh! duel between friends (ygo_net.c): asked, both pick a deck, the AI plays both seats to the end; both games hold the same duel |
+| `ygo_online_nodeck` | the same with BOB holding only POKEMON cards: he's asked anyway, takes a Starter Deck to keep, and they duel |
+| `tt_world` | HOENN's Triple Triad rules from the room host: BOB sees ALICE's region rules, TRADE RULE and CARD QUEEN, not his own; his change reaches her and comes back |
+| `ygo_trade` | a Yu-Gi-Oh! card trade between friends: both offer, both confirm, each gets the other's card |
 | `spectate` | A on a friend in a battle: watch it, B to stop |
 | `rescue` | BOB loses, ALICE gets HELP? and revives his lead |
 | `lend` | BOB cuts a tree with ALICE's Moemon's CUT |
@@ -76,8 +105,14 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `garden_life` | three Pokémon live in the Garden: play, talking to one, a PIKACHU DOLL placed and played with, WATCH mode (A tells, B back) |
 | `garden_travel` | START > GARDEN from OLDALE, back down to its CENTER; GARDEN in the START menu; a CENTER PC's row; refused in RUSTURF TUNNEL and before having a Pokémon |
 | `garden_longterm` | TREECKO's pursuit reaches a milestone; MUDKIP coaxes a nervous TORCHIC into the pond (seen: in the journal), stargazing; TORCHIC evolves there (new sprite) and the others come to see; COMBUSKEN's JOURNAL page |
+| `garden_doing` | What Garden Pokémon do shows: MUDKIP swims in the pond (cut off at the water line, a dive under), TREECKO climbs a tree, SANDSHREW digs half in the ground (sink / up / water checked from the log) |
+| `bag_pockets` | The BAG's eight pockets, RIGHT through all of them and round again; POTION marked FAVORITE shows in FAVORITES, UNFAVORITE takes it out (`mp bagview`) |
+| `bag_more` | MAY's bag: MEDICINE scrolls, SELECT moves an item (gray frame where it was, the save pocket in its new order), TM info, BERRY tag and back |
+| `item_desc` | Gen 4 item descriptions wrapped to their windows: the BAG's box fits them, a POKé MART's narrow box turns pages by itself (`mp itemdesc`) |
 | `life_family` | MUDKIP and TREECKO make an EGG (the DAY CARE's code), it hatches on a step, meets its parents ("Met its parent"), TREECKO evolves and the follower reacts |
-| `levelscale_wild` | a Lv46 team on Route 101: wild Pokémon capped at 18 with no badges, 40-43 and evolved with eight |
+| `levelscale_wild` | a Lv46 team on Route 101: wild Pokémon capped at 18 with no badges, halfway (22-24) with eight; the rare evolved form (forced on) |
+| `levelscale_options` | OPTIONS > GAME > LEVEL SCALING's page with the keys: WILD HIGH, BOSS MARGIN +0, saved in the ini; a wild one at 40-43, never the evolved form (forced off) |
+| `host_rules` | HOST A GAME > GAME RULES: TRAINERS and PAST 8 BADGES changed with the keys and saved (the room's rules) |
 | `levelscale_trainer` | ROXANNE's ace Lv15 -> 20 against a team averaging 42 (boss margin, no-badge cap) |
 | `levelscale_off` | LEVEL SCALING off: no scaling |
 | `coop_levelscale` | NA-JP lag: ROXANNE scaled for the average of both teams (Lv30 and Lv50) |
@@ -90,6 +125,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `pmd_remote` | NA-JP lag: BOB sees ALICE's shiny ONIX follower as the same shiny PMD picture (followerFlags bit 7) |
 | `patch_notes` | PATCH NOTES on the CO-OP setup screen: the list of version lines, 1.18's five updates full screen (scroll, page), 0.1 at the end (shots) |
 | `summary_wrap` | the summary screen wraps (LEFT on the first page -> the one-page JOURNAL, RIGHT -> back); A on a one-page journal does nothing and opens no move selection |
+| `summary_wrap_shots` | on screen: INFO after RIGHT round from the last page and after SKILLS and back is pixel for pixel the INFO it opened on; the JOURNAL reached by LEFT round from INFO is the one reached page by page; a two-row sentence keeps one stripe color |
 | `battle_weather` | rain, hail, sandstorm and sunlight on screen in a wild battle (shots), a turn in the rain with no repeated line |
 | `battle_weather_map` | a wild battle on rainy Route 120 starts in the rain, on screen |
 | `follow_ground` | the follower in tall grass (Route 101), its reflection (Petalburg's pond), footprints (Route 109), puddle splashes (Route 120), hot springs (Lavaridge) |
@@ -123,6 +159,12 @@ The Windows build under Wine (`apt install wine64`), from the unzipped package:
 
     tools/test/wine_smoke.sh PKG_DIR     # solo boot + battle, then Windows server + Windows host + Linux joiner at 250 ms
 
+REJOIN through a friend's own server (three sessions of one joiner, a host on a local server):
+
+    tools/test/rejoin_smoke.sh [OUT]     # invite code + password once, then REJOIN and the remembered code (no typing)
+    tools/test/kaisong_test.sh           # custom songs: the studio's exports play in the game sample for sample like
+                                         # the studio (15 tracks / 64 voices too), by place, broken files skipped
+
 Lower level, for trying things out (results and logs land in DIR):
 
     tools/test/run1.sh DIR [VAR=value...]       # DIR/a.txt, one client
@@ -132,3 +174,7 @@ Lower level, for trying things out (results and logs land in DIR):
 Harness commands and conditions: see CLAUDE.md ("Headless testing") and `MP_TestCondition` in `src/mp/`.
 Anything network related should pass `coop_wild_lag`-style settings: at 250 ms an ask-and-answer
 through the relay takes over a second.
+
+Move animations: `mp animall FIRST LAST ATK TGT [TURN]` plays every move animation from FIRST to LAST in a row (in a
+battle, at the action menu); with `MOEMON_ANIMCHECK=1` the log lists every sprite animation table and number started,
+to check against the tables' sizes (HYPER BEAM read past its 7-entry orb table).

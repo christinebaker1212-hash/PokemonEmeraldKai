@@ -88,6 +88,7 @@ const u8 *MP_Gen4_BeforeMove(u8 battler);               // CUSTAP BERRY: the scr
 
 bool8 MP_IsPhysicalMove(u16 move, u8 type);
 u8 MP_Gen4_HoldEffect(u8 battler);                      // its item's hold effect, none under EMBARGO / KLUTZ
+u8 MP_Gen4_MonHoldEffect(u8 battler, const struct BattlePokemon *mon);   // the same for that Pokémon's data (copies in damage math)
 u8 MP_Gen4_PlateType(u16 item);
 bool8 MP_Gen4_IsPunchingMove(u16 move);
 s32 MP_Gen4_Stab(s32 damage, u8 attacker);              // ADAPTABILITY

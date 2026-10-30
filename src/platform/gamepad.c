@@ -30,6 +30,8 @@
 #include <string.h>
 #include "global.h"
 #include "platform/gamepad.h"
+#include "platform/fight.h"
+#include "tcg/integration.h"
 
 #define MAX_PADS 4
 #define STICK_DEAD   0.45f   // walking
@@ -103,6 +105,8 @@ static void LoadSettings(void)
         }
         else if (strcmp(key, "controller") == 0 && strcmp(val, "all") != 0)
             snprintf(sSelectedGuid, sizeof(sSelectedGuid), "%s", val);
+        else
+            Fight_BindSetting(key, val);
     }
     fclose(f);
 }
@@ -121,6 +125,7 @@ void Gamepad_SaveSettings(void)
                "; button_icons = auto (the device used last), keyboard, xbox, playstation or nintendo\n"
                "button_icons = %s\n", names[sLayout], sAnalogRun, sRumble, sSelectedGuid[0] ? sSelectedGuid : "all",
                sIconSetNames[sIconSet]);
+    Fight_BindWrite(f);
     fclose(f);
 }
 
@@ -598,11 +603,13 @@ u16 Gamepad_Poll(int *fastForward)
                 Platform_ContextAction(INPUT_ACTION_COOP_MENU);
             if (pressed & BTN(SDL_CONTROLLER_BUTTON_LEFTSTICK))
                 Platform_ContextAction(INPUT_ACTION_PING);
+            if (pressed & BTN(SDL_CONTROLLER_BUTTON_RIGHTSTICK))
+                Platform_ContextAction(INPUT_ACTION_FRIEND_FINDER);
             if (sAnalogRun && lx * lx + ly * ly > STICK_RUN * STICK_RUN)
                 run = 1;
             if (run)
                 keys |= B_BUTTON;
-            // Emotes only come from the LT / RT hold menu (no right stick click or flick)
+            // Emotes only come from the LT / RT hold menu (no right stick flick)
             break;
         case INPUT_CONTEXT_NAMING:
             if (buttons & west)  keys |= B_BUTTON;       // backspace
@@ -621,6 +628,16 @@ u16 Gamepad_Poll(int *fastForward)
         default:
             if (buttons & west)  keys |= B_BUTTON;
             if (buttons & north) keys |= SELECT_BUTTON;
+            // The card games: RT is INSPECT, and LT's tapping A stays off (it would play cards on its own)
+            if (Tcg_IsActive())
+            {
+                if (rt > TRIGGER_ON)
+                    keys |= PLATFORM_KEY_INSPECT;
+                if (lt > TRIGGER_ON)
+                    keys |= PLATFORM_KEY_SEARCH;
+                sTurbo = 0;
+                break;
+            }
             // LT held: tap A over and over to get through text (not while it holds a quick pick open)
             if (lt > TRIGGER_ON && sQuickTrigger != 0)
             {

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "tcg/integration.h"
 #include "mp.h"
 #include "item_use.h"
 #include "battle.h"
@@ -705,6 +706,41 @@ void ItemUseOutOfBattle_CandyJar(u8 taskId)
         gFieldCallback = FieldCB_ReturnToFieldNoScript;
         FadeScreen(FADE_TO_BLACK, 0);
         gTasks[taskId].func = Task_OpenRegisteredCandyJar;
+    }
+}
+
+static void CB2_OpenCardCaseFromBag(void)
+{
+    Tcg_OpenCase(CB2_ReturnToBagMenuPocket);
+}
+
+static void Task_OpenRegisteredCardCase(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        CleanupOverworldWindowsAndTilemaps();
+        Tcg_OpenCase(CB2_ReturnToField);
+        DestroyTask(taskId);
+    }
+}
+
+void ItemUseOutOfBattle_CardCase(u8 taskId)
+{
+    if (gTasks[taskId].tUsingRegisteredKeyItem != TRUE)
+    {
+        gBagMenu->newScreenCallback = CB2_OpenCardCaseFromBag;
+        Task_FadeAndCloseBagMenu(taskId);
+    }
+    else if (Tcg_FieldChallenge())
+    {
+        // Moemon Kai: the button in front of someone asks them for a card duel (src/tcg/tcg_field.c)
+        DestroyTask(taskId);
+    }
+    else
+    {
+        gFieldCallback = FieldCB_ReturnToFieldNoScript;
+        FadeScreen(FADE_TO_BLACK, 0);
+        gTasks[taskId].func = Task_OpenRegisteredCardCase;
     }
 }
 

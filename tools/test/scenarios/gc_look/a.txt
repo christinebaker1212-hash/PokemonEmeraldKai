@@ -1,0 +1,54 @@
+pressuntil A field 5000
+wait 60
+rendershot a_street
+mp warp 0,3,21,3
+wait 60
+rendershot a_north
+mp warp 0,3,28,9
+wait 60
+press UP 20
+wait 20
+press UP 20
+wait 120
+mp where
+rendershot a_1f
+mp warp 11,17,6,12
+wait 60
+rendershot a_1f_clerk
+mp warp 11,17,6,6
+wait 60
+rendershot a_1f_top
+mp warp 11,18,1,10
+wait 60
+rendershot a_2f_clerk
+mp warp 11,18,6,8
+wait 60
+rendershot a_2f
+mp warp 11,19,10,7
+wait 60
+rendershot a_3f_clerk
+mp warp 11,19,6,8
+wait 60
+rendershot a_3f
+mp warp 11,20,8,5
+wait 60
+rendershot a_roof
+mp warp 0,3,28,12
+wait 90
+mp setflag 2146
+press START 2
+wait 30
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press A 2
+wait 120
+press A 2
+wait 150
+press A 2
+wait 90
+rendershot a_moenav
+quit

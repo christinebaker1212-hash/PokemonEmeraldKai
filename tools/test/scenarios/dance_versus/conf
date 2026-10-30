@@ -1,0 +1,14 @@
+# The DANCE machine online: ALICE waits on the left pad (WAIT FOR 2P, "Let's dance!"), BOB steps up to the right
+# pad and is asked "Dance with ALICE?"; YES starts VERSUS on both: ALICE picks the song, BOB sees her wheel, both
+# play their own field (MOEMON_DANCE_AUTOPLAY) and see the other's; both results reach the server's records
+MODE=2
+TMO=500
+WARP=11,19,0,7
+WARP_B=11,19,2,7
+ENV_A="MOEMON_DANCE_AUTOPLAY=1"
+ENV_B="MOEMON_DANCE_AUTOPLAY=1"
+EXPECT_A=("dance: a credit, pad 0, with a friend" "dance: player 1 joins us" "points, grade")
+# (a friend gone before both are at the RESULTS: a failure; after, the other game just quit first)
+EXPECT_B=("dance: a credit, pad 1, with a friend" "points, grade")
+UNEXPECT_A=("[crash]" "nothing from the friend")
+UNEXPECT_B=("[crash]" "nothing from the friend")

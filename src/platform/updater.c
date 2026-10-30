@@ -70,6 +70,8 @@ void Display_Present(void);
 // stb_image's raw deflate decoder (compiled in mp_avatar.c)
 char *stbi_zlib_decode_noheader_malloc(const char *buffer, int len, int *outlen);
 
+unsigned char MP_ConfigAllowsTweaks(void);
+static int sWantDev;
 static char sExeDir[1024];
 static char sExePath[1024];
 
@@ -338,6 +340,7 @@ static struct
     SDL_atomic_t cancel;
     SDL_atomic_t got;        // bytes downloaded
     long total;              // the zip's size from update.txt
+    char channel[16];
     char version[32];
     char tag[48];
     char zip[128];
@@ -366,11 +369,12 @@ struct Sink
     long cap, len;
     struct Sha256 sha;
     int progress;      // count into U.got
+    SDL_atomic_t *got, *cancel;   // (the DANCE machine's songs: their own; NULL: U's)
 };
 
 static int SinkWrite(struct Sink *k, const void *data, size_t n)
 {
-    if (SDL_AtomicGet(&U.cancel))
+    if (SDL_AtomicGet(k->cancel ? k->cancel : &U.cancel))
         return 0;
     if (k->len + (long)n > k->cap)
         return 0;
@@ -386,7 +390,7 @@ static int SinkWrite(struct Sink *k, const void *data, size_t n)
     ShaUpdate(&k->sha, data, n);
     k->len += (long)n;
     if (k->progress)
-        SDL_AtomicSet(&U.got, (int)k->len);
+        SDL_AtomicSet(k->got ? k->got : &U.got, (int)k->len);
     return 1;
 }
 
@@ -586,6 +590,7 @@ static int ParseManifest(char *text)
     char *line = strtok(text, "\r\n");
     int haveFile = 0;
     U.version[0] = U.tag[0] = 0;
+    strcpy(U.channel, "main"); // older main manifests have no channel field
     for (; line; line = strtok(NULL, "\r\n"))
     {
         char key[32], a[128], b[32], c[80], d[128];
@@ -610,7 +615,9 @@ static int ParseManifest(char *text)
         }
         else if (sscanf(line, "%31s %127s", key, a) == 2)
         {
-            if (strcmp(key, "version") == 0)
+            if (strcmp(key, "channel") == 0)
+                snprintf(U.channel, sizeof(U.channel), "%s", a);
+            else if (strcmp(key, "version") == 0)
                 snprintf(U.version, sizeof(U.version), "%s", a);
             else if (strcmp(key, "tag") == 0 && ValidName(a))
                 snprintf(U.tag, sizeof(U.tag), "%s", a);
@@ -624,6 +631,8 @@ static void AssetUrl(char *out, size_t size, const char *name, int latest)
     const char *base = getenv("MOEMON_UPDATE_URL");
     if (base && base[0])
         snprintf(out, size, "%s%s%s", base, base[strlen(base) - 1] == '/' ? "" : "/", name);
+    else if (latest && sWantDev)
+        snprintf(out, size, "https://github.com/%s/releases/download/dev-latest/%s", MOEMON_UPDATE_REPO, name);
     else if (latest)
         snprintf(out, size, "https://github.com/%s/releases/latest/download/%s", MOEMON_UPDATE_REPO, name);
     else
@@ -1033,13 +1042,29 @@ static int Worker(void *arg)
         return 0;
     }
     free(k.mem);
-    if (!VersionNewer(U.version, MOEMON_VERSION))
+    if (strcmp(U.channel, sWantDev ? "dev" : "main") != 0)
     {
-        Log("up to date (this is %s, the latest release is %s)", MOEMON_VERSION, U.version);
+        Log("refusing manifest for wrong channel: %s", U.channel);
         SDL_AtomicSet(&U.phase, PH_NONE);
         return 0;
     }
-    Log("version %s is out (this is %s): downloading %s, %ld bytes", U.version, MOEMON_VERSION, U.zip, U.total);
+    // Never move a current main player onto a dev build based on older main
+    // content if a dev refresh has not finished publishing yet.
+    if (sWantDev && VersionNewer(MOEMON_VERSION, U.version))
+    {
+        Log("dev update is based on an older main version; waiting for refresh");
+        SDL_AtomicSet(&U.phase, PH_NONE);
+        return 0;
+    }
+    // A channel change must install even a lower/equal version. Otherwise only
+    // move forward within the selected channel, comparing the dev revision too.
+    if (sWantDev == MOEMON_DEV_BUILD && !VersionNewer(U.version, MOEMON_BUILD_VERSION))
+    {
+        Log("up to date (this is %s, the latest release is %s)", MOEMON_BUILD_VERSION, U.version);
+        SDL_AtomicSet(&U.phase, PH_NONE);
+        return 0;
+    }
+    Log("version %s is out (this is %s): downloading %s, %ld bytes", U.version, MOEMON_BUILD_VERSION, U.zip, U.total);
 
     // the zip, to a file next to the exe
     SDL_AtomicSet(&U.phase, PH_DOWNLOAD);
@@ -1406,7 +1431,7 @@ int Updater_Run(int argc, char **argv)
     if (!FindExe())
         return 0;
     if (getenv("MOEMON_JUST_UPDATED"))
-        Log("running version %s (just updated)", MOEMON_VERSION);
+        Log("running version %s (just updated)", MOEMON_BUILD_VERSION);
     CleanUpLastUpdate();
 #ifndef _WIN32
     if (!LoadCurl())
@@ -1421,6 +1446,8 @@ int Updater_Run(int argc, char **argv)
         FetchTest(getenv("MOEMON_UPDATE_FETCH"));
         return 1;
     }
+    sWantDev = MP_ConfigAllowsTweaks();
+    Log("selected %s channel (build: %s %s)", sWantDev ? "dev" : "main", MOEMON_BUILD_CHANNEL, MOEMON_BUILD_VERSION);
     if (TurnedOff(argc, argv))
         return 0;
     JoinPath(marker, sizeof(marker), sExeDir, RELEASE_MARKER);
@@ -1494,4 +1521,421 @@ int Updater_Run(int argc, char **argv)
     if (phase == PH_INSTALLED)
         return Relaunch(argc, argv);
     return quit;
+}
+
+// ---------------------------------------------------------------------------
+// Moemon Rhythm: the DANCE machine's songs (docs/RHYTHM_DECISIONS.md #10). They aren't in the game's zip: the
+// latest release's update.txt says where they are ("songs <tag> <zip> <bytes> <sha256> <id>", the id changing
+// only when the songs do), and the machine downloads them when it's first used (and again when they change).
+// They go into stepmania/ next to the exe, with the id in stepmania/songs_version.txt. The zip is unpacked a file
+// at a time from the disk (it's a few hundred MB). MOEMON_UPDATE_URL points at a test server here too.
+
+#define SONGS_DIR "stepmania"
+#define SONGS_ID_FILE "songs_version.txt"
+#define SONGS_DOWNLOAD "songs_download.zip"
+#define MAX_SONGS_ZIP (2000L * 1024L * 1024L)
+
+enum { SONGS_IDLE, SONGS_CHECKING, SONGS_AVAILABLE, SONGS_UPTODATE, SONGS_NONE, SONGS_DOWNLOADING, SONGS_INSTALLING,
+       SONGS_DONE, SONGS_FAILED };
+
+static struct
+{
+    SDL_atomic_t state, got, cancel, files, filesDone;
+    long total;
+    char tag[48], zip[128], sha[65], id[80];
+    char error[96];
+    SDL_Thread *thread;
+} S;
+
+static int SongsReady(void)
+{
+    if (!sExeDir[0] && !FindExe())
+        return 0;
+#ifndef _WIN32
+    if (!LoadCurl())
+        return 0;
+#endif
+    return 1;
+}
+
+// Moemon Kai: a file or folder next to the game (music/ for custom songs)
+const char *Updater_ExeFile(const char *name)
+{
+    static char path[1100];
+    if (!sExeDir[0] && !FindExe())
+        return name;
+    JoinPath(path, sizeof(path), sExeDir, name);
+    return path;
+}
+
+const char *Updater_SongsRoot(void)
+{
+    static char root[1100];
+    if (!sExeDir[0] && !FindExe())
+        return SONGS_DIR;
+    JoinPath(root, sizeof(root), sExeDir, SONGS_DIR);
+    return root;
+}
+
+static void SongsFail(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(S.error, sizeof(S.error), fmt, ap);
+    va_end(ap);
+    Log("songs: %s", S.error);
+    SDL_AtomicSet(&S.state, SONGS_FAILED);
+}
+
+static void InstalledId(char *out, size_t size)
+{
+    char path[1200];
+    FILE *f;
+    out[0] = 0;
+    snprintf(path, sizeof(path), "%s/%s", Updater_SongsRoot(), SONGS_ID_FILE);
+    if ((f = UOpen(path, "r")) != NULL)
+    {
+        if (fgets(out, (int)size, f))
+            out[strcspn(out, "\r\n ")] = 0;
+        fclose(f);
+    }
+}
+
+static int SongsCheckWorker(void *arg)
+{
+    struct Sink k;
+    char url[512], have[96], *line;
+    int status, found = 0;
+    (void)arg;
+    memset(&k, 0, sizeof(k));
+    k.mem = malloc(MAX_MANIFEST + 1);
+    k.cap = MAX_MANIFEST;
+    k.cancel = &S.cancel;
+    ShaInit(&k.sha);
+    if (!k.mem)
+    {
+        SongsFail("OUT OF MEMORY");
+        return 0;
+    }
+    {
+        const char *base = getenv("MOEMON_UPDATE_URL");
+        if (base && base[0])
+            snprintf(url, sizeof(url), "%s%supdate.txt", base, base[strlen(base) - 1] == '/' ? "" : "/");
+        else
+            snprintf(url, sizeof(url), "https://github.com/%s/releases/latest/download/update.txt", MOEMON_UPDATE_REPO);
+    }
+    if (!HttpGet(url, &k, &status))
+    {
+        free(k.mem);
+        SongsFail(status ? "NO SONGS ONLINE (HTTP %d)" : "NO CONNECTION", status);
+        return 0;
+    }
+    k.mem[k.len] = 0;
+    for (line = strtok(k.mem, "\r\n"); line; line = strtok(NULL, "\r\n"))
+    {
+        char key[16], tag[48], zip[128], bytes[32], sha[80], id[80];
+        if (sscanf(line, "%15s %47s %127s %31s %79s %79s", key, tag, zip, bytes, sha, id) == 6 && !strcmp(key, "songs"))
+        {
+            char *end;
+            long n = strtol(bytes, &end, 10);
+            int i, hex = strlen(sha) == 64;
+            for (i = 0; hex && i < 64; i++)
+                hex = isxdigit((unsigned char)sha[i]);
+            if (*end || n <= 0 || n > MAX_SONGS_ZIP || !hex || !ValidName(zip) || !ValidName(tag) || !ValidName(id))
+                break;
+            snprintf(S.tag, sizeof(S.tag), "%s", tag);
+            snprintf(S.zip, sizeof(S.zip), "%s", zip);
+            snprintf(S.id, sizeof(S.id), "%s", id);
+            for (i = 0; i < 64; i++)
+                S.sha[i] = (char)tolower((unsigned char)sha[i]);
+            S.sha[64] = 0;
+            S.total = n;
+            found = 1;
+        }
+    }
+    free(k.mem);
+    if (!found)
+    {
+        Log("songs: the latest release lists no songs");
+        SDL_AtomicSet(&S.state, SONGS_NONE);
+        return 0;
+    }
+    InstalledId(have, sizeof(have));
+    Log("songs: %s on the release (%ld bytes), %s here", S.id, S.total, have[0] ? have : "none");
+    SDL_AtomicSet(&S.state, strcmp(have, S.id) == 0 ? SONGS_UPTODATE : SONGS_AVAILABLE);
+    return 0;
+}
+
+// The zip's entries, from its central directory at the end of the file
+static int SongsEntries(FILE *f, long size, struct Entry **out, int *count)
+{
+    uint8_t *tail, *cd;
+    long tailLen = size < 65536 + 22 ? size : 65536 + 22, i, eocd = -1;
+    uint32_t cdOff, cdLen;
+    int ok;
+    tail = malloc(tailLen);
+    if (!tail || fseek(f, size - tailLen, SEEK_SET) != 0 || fread(tail, 1, tailLen, f) != (size_t)tailLen)
+    {
+        free(tail);
+        return 0;
+    }
+    for (i = tailLen - 22; i >= 0; i--)
+        if (Rd32(tail + i) == 0x06054b50)
+        {
+            eocd = i;
+            break;
+        }
+    if (eocd < 0)
+    {
+        free(tail);
+        return 0;
+    }
+    cdLen = Rd32(tail + eocd + 12);
+    cdOff = Rd32(tail + eocd + 16);
+    free(tail);
+    if ((long)cdOff + (long)cdLen > size || cdLen > 64 * 1024 * 1024)
+        return 0;
+    // ReadEntries wants a zip: the central directory and its end record, as if they were all of it
+    cd = malloc(cdLen + 22);
+    if (!cd || fseek(f, cdOff, SEEK_SET) != 0 || fread(cd, 1, cdLen, f) != cdLen)
+    {
+        free(cd);
+        return 0;
+    }
+    memset(cd + cdLen, 0, 22);
+    cd[cdLen] = 0x50, cd[cdLen + 1] = 0x4b, cd[cdLen + 2] = 0x05, cd[cdLen + 3] = 0x06;
+    {
+        uint32_t n = 0, off = 0;
+        while (off + 46 <= cdLen && Rd32(cd + off) == 0x02014b50)
+        {
+            off += 46 + Rd16(cd + off + 28) + Rd16(cd + off + 30) + Rd16(cd + off + 32);
+            n++;
+        }
+        cd[cdLen + 10] = (uint8_t)n;
+        cd[cdLen + 11] = (uint8_t)(n >> 8);
+        cd[cdLen + 12] = (uint8_t)cdLen, cd[cdLen + 13] = (uint8_t)(cdLen >> 8);
+        cd[cdLen + 14] = (uint8_t)(cdLen >> 16), cd[cdLen + 15] = (uint8_t)(cdLen >> 24);
+        // (offset 0: the directory is where the "zip" starts)
+    }
+    ok = ReadEntries(cd, (long)cdLen + 22, out, count);
+    free(cd);
+    return ok;
+}
+
+static int SongsInstall(const char *zipPath, long size)
+{
+    FILE *f = UOpen(zipPath, "rb");
+    struct Entry *e = NULL;
+    int n = 0, i;
+    if (!f)
+    {
+        SongsFail("COULD NOT READ THE DOWNLOAD");
+        return 0;
+    }
+    if (!SongsEntries(f, size, &e, &n))
+    {
+        fclose(f);
+        SongsFail("THE DOWNLOAD IS NOT A GOOD ZIP");
+        return 0;
+    }
+    SDL_AtomicSet(&S.files, n);
+    for (i = 0; i < n; i++)
+    {
+        uint8_t head[30], *data = NULL, *out;
+        char path[1400], tmp[1500];
+        long start;
+        SDL_AtomicSet(&S.filesDone, i);
+        if (!e[i].name[0])
+            continue;
+        if (fseek(f, e[i].local, SEEK_SET) != 0 || fread(head, 1, 30, f) != 30 || Rd32(head) != 0x04034b50)
+            goto bad;
+        start = (long)e[i].local + 30 + Rd16(head + 26) + Rd16(head + 28);
+        if (start + (long)e[i].csize > size || e[i].usize > 256u * 1024u * 1024u)
+            goto bad;
+        data = malloc(e[i].csize ? e[i].csize : 1);
+        if (!data || fseek(f, start, SEEK_SET) != 0 || fread(data, 1, e[i].csize, f) != e[i].csize)
+            goto bad;
+        if (e[i].method == 0)
+            out = data;
+        else
+        {
+            int len = 0;
+            out = (uint8_t *)stbi_zlib_decode_noheader_malloc((const char *)data, (int)e[i].csize, &len);
+            free(data);
+            data = NULL;
+            if (!out || (uint32_t)len != e[i].usize)
+            {
+                free(out);
+                goto bad;
+            }
+        }
+        if ((e[i].method == 0 && e[i].csize != e[i].usize) || Crc32(out, e[i].usize) != e[i].crc)
+        {
+            free(out);
+            goto bad;
+        }
+        snprintf(path, sizeof(path), "%s/%s", Updater_SongsRoot(), e[i].name);
+        snprintf(tmp, sizeof(tmp), "%s.part", path);
+        if (!WriteFileAll(tmp, out, e[i].usize, 0) || URename(tmp, path) != 0)
+        {
+            free(out);
+            free(e);
+            fclose(f);
+            SongsFail("COULD NOT WRITE %.20s", e[i].name);
+            return 0;
+        }
+        free(out);
+        continue;
+    bad:
+        free(data);
+        free(e);
+        fclose(f);
+        SongsFail("BAD FILE IN THE ZIP: %.16s", e[i].name);
+        return 0;
+    }
+    free(e);
+    fclose(f);
+    return 1;
+}
+
+static int SongsDownloadWorker(void *arg)
+{
+    struct Sink k;
+    char url[600], path[1200], hex[65];
+    int status;
+    (void)arg;
+    snprintf(path, sizeof(path), "%s/%s", sExeDir, SONGS_DOWNLOAD);
+    memset(&k, 0, sizeof(k));
+    k.file = UOpen(path, "wb");
+    k.cap = S.total;
+    k.progress = 1;
+    k.got = &S.got;
+    k.cancel = &S.cancel;
+    ShaInit(&k.sha);
+    if (!k.file)
+    {
+        SongsFail("CANNOT WRITE IN THE GAME FOLDER");
+        return 0;
+    }
+    {
+        const char *base = getenv("MOEMON_UPDATE_URL");
+        if (base && base[0])
+            snprintf(url, sizeof(url), "%s%s%s", base, base[strlen(base) - 1] == '/' ? "" : "/", S.zip);
+        else
+            snprintf(url, sizeof(url), "https://github.com/%s/releases/download/%s/%s", MOEMON_UPDATE_REPO, S.tag, S.zip);
+    }
+    Log("songs: downloading %s", url);
+    if (!HttpGet(url, &k, &status))
+    {
+        fclose(k.file);
+        URemove(path);
+        if (SDL_AtomicGet(&S.cancel))
+        {
+            Log("songs: stopped by the player");
+            SDL_AtomicSet(&S.state, SONGS_AVAILABLE);
+        }
+        else
+            SongsFail(status ? "DOWNLOAD FAILED (HTTP %d)" : "DOWNLOAD FAILED (NO CONNECTION)", status);
+        return 0;
+    }
+    if (fclose(k.file) != 0)
+    {
+        URemove(path);
+        SongsFail("CANNOT WRITE IN THE GAME FOLDER");
+        return 0;
+    }
+    ShaHex(&k.sha, hex);
+    if (k.len != S.total || strcmp(hex, S.sha) != 0)
+    {
+        URemove(path);
+        SongsFail("THE DOWNLOAD IS DAMAGED (CHECKSUM)");
+        return 0;
+    }
+    SDL_AtomicSet(&S.state, SONGS_INSTALLING);
+    if (!SongsInstall(path, S.total))
+    {
+        URemove(path);
+        return 0;
+    }
+    URemove(path);
+    {
+        char idPath[1200];
+        FILE *f;
+        snprintf(idPath, sizeof(idPath), "%s/%s", Updater_SongsRoot(), SONGS_ID_FILE);
+        if ((f = UOpen(idPath, "w")) != NULL)
+        {
+            fprintf(f, "%s\n", S.id);
+            fclose(f);
+        }
+    }
+    Log("songs: %s installed", S.id);
+    SDL_AtomicSet(&S.state, SONGS_DONE);
+    return 0;
+}
+
+static void SongsJoin(void)
+{
+    if (S.thread)
+    {
+        SDL_WaitThread(S.thread, NULL);
+        S.thread = NULL;
+    }
+}
+
+// Asks the latest release which songs it has (in the background): Updater_SongsState says how it went
+void Updater_SongsCheck(void)
+{
+    int st = SDL_AtomicGet(&S.state);
+    if (st == SONGS_CHECKING || st == SONGS_DOWNLOADING || st == SONGS_INSTALLING)
+        return;
+    SongsJoin();
+    if (!SongsReady())
+    {
+        snprintf(S.error, sizeof(S.error), "NO DOWNLOADS ON THIS PC");
+        SDL_AtomicSet(&S.state, SONGS_FAILED);
+        return;
+    }
+    SDL_AtomicSet(&S.cancel, 0);
+    SDL_AtomicSet(&S.state, SONGS_CHECKING);
+    S.thread = SDL_CreateThread(SongsCheckWorker, "songs", NULL);
+    if (!S.thread)
+        SDL_AtomicSet(&S.state, SONGS_FAILED);
+}
+
+void Updater_SongsDownload(void)
+{
+    if (SDL_AtomicGet(&S.state) != SONGS_AVAILABLE)
+        return;
+    SongsJoin();
+    SDL_AtomicSet(&S.cancel, 0);
+    SDL_AtomicSet(&S.got, 0);
+    SDL_AtomicSet(&S.files, 0);
+    SDL_AtomicSet(&S.filesDone, 0);
+    SDL_AtomicSet(&S.state, SONGS_DOWNLOADING);
+    S.thread = SDL_CreateThread(SongsDownloadWorker, "songs", NULL);
+    if (!S.thread)
+        SongsFail("COULD NOT START THE DOWNLOAD");
+}
+
+void Updater_SongsCancel(void)
+{
+    SDL_AtomicSet(&S.cancel, 1);
+}
+
+// SONGS_*; *done / *total: bytes downloaded, or files unpacked while installing; why it failed
+int Updater_SongsState(long *done, long *total, const char **error)
+{
+    int st = SDL_AtomicGet(&S.state);
+    if (st == SONGS_INSTALLING)
+    {
+        *done = SDL_AtomicGet(&S.filesDone);
+        *total = SDL_AtomicGet(&S.files);
+    }
+    else
+    {
+        *done = SDL_AtomicGet(&S.got);
+        *total = S.total;
+    }
+    *error = S.error;
+    return st;
 }

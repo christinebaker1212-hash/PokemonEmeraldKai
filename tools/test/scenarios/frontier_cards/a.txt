@@ -1,0 +1,33 @@
+pressuntil A field 5000
+wait 60
+mp textspeed 2
+mp cards starter 0
+mp register 399
+mp setflag 2244
+mp warp 26,14,18,16
+wait 90
+mp face up
+wait 4
+rendershot a_anabel
+press A 2
+wait 60
+rendershot a_talk
+mash A 6 20
+wait 60
+press SELECT 2
+wait 90
+rendershot a_ask
+mash B 6 20
+wait 120
+mp setflag 2246
+mp setflag 2248
+mp setflag 2250
+mp setflag 2252
+mp setflag 2254
+mp warp 26,4,20,20
+wait 120
+rendershot a_west
+mp warp 26,14,40,32
+wait 120
+rendershot a_east
+quit

@@ -1,0 +1,18 @@
+# a wild Triple Battle at NA-JP lag in the rain of CARL's field (he met the Pokemon), where ALICE's field is dry and
+# BOB's rainy: rain on every screen from the start, WATER GUN turn after turn (the rain goes on at each turn's end)
+# to the win on all three games
+MODE=3
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+WARP_C=0,16,13,12
+DELAY=250
+JIT=80
+FPS=60
+TMO=500
+ENV_A="MOEMON_DEBUG_PARTY=280:12"
+ENV_B="MOEMON_DEBUG_PARTY=283:12"
+ENV_C="MOEMON_DEBUG_PARTY=280:12"
+EXPECT_A=("co-op: battle over, outcome 1" "battle weather on screen: rain")
+EXPECT_B=("co-op: battle over, outcome 1" "battle weather on screen: rain")
+EXPECT_C=("co-op: battle over, outcome 1" "bweather shown rain battle rain")
+UNEXPECT_A=("battle weather on screen: none")

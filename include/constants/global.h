@@ -59,7 +59,7 @@
 #define BAG_BERRIES_COUNT 46
 // Moemon Co-op (PC): the pockets as the game uses them; the save block keeps the counts above
 // and the rest goes next to the save file (src/mp/mp_bag.c)
-#define MP_BAG_ITEMS_COUNT 200
+#define MP_BAG_ITEMS_COUNT 224   // (room for every item of the ITEMS pocket)
 #define MP_BAG_KEYITEMS_COUNT 64
 #define MP_BAG_POKEBALLS_COUNT 64
 #define MP_BAG_TMHM_COUNT 64

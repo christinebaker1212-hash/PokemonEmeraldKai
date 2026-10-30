@@ -442,6 +442,9 @@ void MP_Pmd_Animate(struct MpPmdView *v, u8 *pdir, u8 *pturn, bool8 walking, u8 
     case LIFE_POSE_PULL:   anim = PMD_ANIM_PULL; break;
     case LIFE_POSE_BREATH: anim = PMD_ANIM_DEEPBREATH; break;
     case LIFE_POSE_LAY:    anim = PMD_ANIM_LAYING; break;
+    case LIFE_POSE_SWIM:   anim = PMD_ANIM_WALK; break;                      // paddling
+    case LIFE_POSE_CLIMB:  anim = PMD_ANIM_WALK; want = PMD_DIR_UP; break;   // climbing the trunk
+    case LIFE_POSE_DIG:    anim = PMD_ANIM_EAT; break;                       // head down, digging
     }
     if (pose != LIFE_POSE_SPIN)
     {

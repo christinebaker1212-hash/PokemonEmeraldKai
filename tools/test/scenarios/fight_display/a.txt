@@ -1,0 +1,54 @@
+pressuntil A field 5000
+wait 60
+press RIGHT 2
+wait 20
+press A 2
+wait 60
+press DOWN 2
+wait 10
+press A 2
+wait 300
+fpress RIGHT 2
+wait 10
+fpress A 2
+wait 600
+shot fight_start
+display filter 0
+display mode 0
+winsize 960 640
+wait 6
+fightshot pp4_src
+rendershot pp4
+winsize 720 480
+wait 6
+fightshot pp3_src
+rendershot pp3
+winsize 240 160
+wait 6
+fightshot pp1_src
+rendershot pp1
+display mode 1
+winsize 1000 700
+wait 6
+fightshot fit_src
+rendershot fit
+display mode 2
+winsize 1000 700
+wait 6
+fightshot stretch_src
+rendershot stretch
+display mode 0
+display filter 2
+winsize 1440 960
+wait 6
+fightshot grid3_src
+rendershot grid3
+display filter 1
+winsize 960 640
+wait 6
+fightshot scan2_src
+rendershot scan2
+display filter 0
+fpress RIGHT 40
+shot after_walk
+quit

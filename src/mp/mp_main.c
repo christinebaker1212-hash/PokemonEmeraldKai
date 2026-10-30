@@ -1,3 +1,5 @@
+#include "tcg/integration.h"
+#include "mp_version.h"
 // Moemon Co-op: client core (config, lobby session, player roster, local state)
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,6 +12,7 @@
 #include "mp_join.h"
 #include "global.h"
 #include "mp.h"
+#include "mp_fight.h"
 #include "mp_pmd.h"
 #include "main.h"
 #include "overworld.h"
@@ -125,6 +128,8 @@ static u8 AsciiCharToGame(char c)
 static void SendWelcome(u8 id);
 static bool8 sRoomPadding, sRoomRulesHeard;   // MPR_RULES from the room's host
 static s8 sRoomHostId = -1;          // ... and who sent them (the host's player id)
+static u8 sRoomScale[MP_SCALE_COUNT - 1];   // ... LEVEL SCALING's settings
+static void LevelRulesFromEnv(void);
 static bool8 sRoomLevelScaling;
 static bool8 sRoomMoveSplit = TRUE;   // Moemon Kai: MPR_RULES byte 4
 // The game clock: online it's the host's PC clock (MPR_CLOCK), offline our own
@@ -292,13 +297,19 @@ bool8 MP_ConfigAllowsTweaks(void)
         char *p = line, *eq;
         while (*p == ' ' || *p == '\t')
             p++;
-        if (strncasecmp(p, "AllowSmallTweaks", 16) != 0 || !(eq = strchr(p, '=')))
+        if (strncasecmp(p, "AllowSmallTweaks", 16) != 0)
             continue;
-        on = atoi(eq + 1) == 1;
+        eq = p + 16;
+        while (*eq == ' ' || *eq == '\t')
+            eq++;
+        if (*eq == '=')
+            on = atoi(eq + 1) == 1;
     }
     fclose(f);
     return on;
 }
+
+static int sMainAutosaveMinutes;
 
 static void LoadConfig(void)
 {
@@ -312,6 +323,12 @@ static void LoadConfig(void)
     gMpConfig.trainerPadding = TRUE;
     gMpConfig.levelScaling = TRUE;
     gMpConfig.moveSplit = TRUE;
+    gMpConfig.cardScaling = TRUE;
+    gMpConfig.scale[MP_SCALE_WILD - 1] = 2;      // MEDIUM: halfway between the area's level and the team's
+    gMpConfig.scale[MP_SCALE_TRAINERS - 1] = 2;   // EVEN
+    gMpConfig.scale[MP_SCALE_BOSS - 1] = 0;       // AUTO
+    gMpConfig.scale[MP_SCALE_CAPS - 1] = 1;
+    gMpConfig.scale[MP_SCALE_PAST8 - 1] = 0;
     gMpConfig.animSpeed = 30;
     gMpConfig.spectateScale = 1;
     gMpConfig.bikeMusic = TRUE;
@@ -341,6 +358,8 @@ static void LoadConfig(void)
         else if (strcmp(key, "last_room") == 0) snprintf(gMpConfig.lastRoom, sizeof(gMpConfig.lastRoom), "%s", val);
         else if (strcmp(key, "last_room_key") == 0 && strlen(val) == MP_ROOM_KEY_SIZE * 2) snprintf(gMpConfig.lastRoomKey, sizeof(gMpConfig.lastRoomKey), "%s", val);
         else if (strcmp(key, "last_host_name") == 0) snprintf(gMpConfig.lastHostName, sizeof(gMpConfig.lastHostName), "%s", val);
+        else if (strcmp(key, "last_room_address") == 0) snprintf(gMpConfig.lastRoomAddr, sizeof(gMpConfig.lastRoomAddr), "%s", val);
+        else if (strcmp(key, "last_join_code") == 0) snprintf(gMpConfig.lastJoinCode, sizeof(gMpConfig.lastJoinCode), "%s", val);
         else if (strcmp(key, "welcome") == 0) snprintf(gMpConfig.welcome, sizeof(gMpConfig.welcome), "%s", val);
         else if (strcmp(key, "sprite") == 0)
         {
@@ -379,10 +398,30 @@ static void LoadConfig(void)
         else if (strcmp(key, "trainer_padding") == 0) gMpConfig.trainerPadding = atoi(val) != 0;
         else if (strcmp(key, "level_scaling") == 0) gMpConfig.levelScaling = atoi(val) != 0;
         else if (strcmp(key, "move_split") == 0) gMpConfig.moveSplit = atoi(val) != 0;
+        else if (strcmp(key, "level_scaling_rules") == 0)
+        {
+            int v[MP_SCALE_COUNT - 1], k;
+            if (sscanf(val, "%d %d %d %d %d", &v[0], &v[1], &v[2], &v[3], &v[4]) == MP_SCALE_COUNT - 1)
+                for (k = 0; k < MP_SCALE_COUNT - 1; k++)
+                    if (v[k] >= 0 && v[k] < MP_LevelScaleRuleCount(k + 1))
+                        gMpConfig.scale[k] = v[k];
+        }
         else if (strcmp(key, "spectate_panel") == 0) gMpConfig.spectatePanel = atoi(val) != 0;
         else if (strcmp(key, "bike_music") == 0) gMpConfig.bikeMusic = atoi(val) != 0;
         else if (strcmp(key, "surf_music") == 0) gMpConfig.surfMusic = atoi(val) != 0;
+        else if (strcmp(key, "card_art") == 0)   // (1.28's "printed" never had the pictures: it's the new default)
+            gMpConfig.cardArt = strcmp(val, "gameboy") == 0     ? MP_CARD_ART_GAME_BOY
+                              : strcmp(val, "full_card") == 0 ? MP_CARD_ART_FULL_CARD
+                                                              : MP_CARD_ART_PRINTED_ART;
+        else if (strcmp(key, "card_scaling") == 0) gMpConfig.cardScaling = atoi(val) != 0;
+        else if (strcmp(key, "battle_anims") == 0) gMpConfig.battleAnims = strcmp(val, "modern") == 0;
+        else if (strcmp(key, "card_back") == 0)
+            gMpConfig.cardBack = strcmp(val, "pixel") == 0 ? MP_CARD_BACK_PIXEL : MP_CARD_BACK_PRINTED;
         else if (strcmp(key, "moenav_calls") == 0) gMpConfig.moenavCalls = strcmp(val, "battles") == 0;
+        else if (strcmp(key, "friend_finder") == 0)
+            gMpConfig.finderStyle = strcmp(val, "arrows") == 0 ? MP_FINDER_ARROWS
+                                  : strcmp(val, "radar") == 0  ? MP_FINDER_RADAR : MP_FINDER_BOTH;
+        else if (strcmp(key, "friend_finder_shown") == 0) gMpConfig.finderOn = atoi(val) != 0;
         else if (strcmp(key, "follower_sprites") == 0)
             gMpConfig.followerSprites = strcmp(val, "pmd") == 0 ? MP_FOLLOW_SPRITES_PMD
                                       : strcmp(val, "original") == 0 ? MP_FOLLOW_SPRITES_ORIGINAL : MP_FOLLOW_SPRITES_DEFAULT;
@@ -485,6 +524,8 @@ void MP_SaveConfig(void)
         "autosave = %d\n"
         "; remembered for the next session\n"
         "last_room = %s\nlast_room_key = %s\nlast_host_name = %s\n"
+        "; where that room is (empty: the online lobby; home: hosted on this PC) and the code that got you in\n"
+        "last_room_address = %s\nlast_join_code = %s\n"
         "; shown to friends who join a server you host (HOST A GAME > WELCOME NOTE); | starts line 2\n"
         "welcome = %s\n"
         "; servers you host: co-op trainers get one extra Moemon, so Double / Triple Battles work\n"
@@ -494,6 +535,9 @@ void MP_SaveConfig(void)
         "level_scaling = %d\n"
         "; OPTIONS > GAME > MOVE KIND: 1 = each move physical or special on its own (Gen 4), 0 = by type (Gen 3)\n"
         "move_split = %d\n"
+        "; its settings: wild (0 off, 1 low, 2 medium, 3 high), trainers (0 off, 1 below, 2 even, 3 above), boss margin\n"
+        "; (0 auto, 1-9 = +0 to +8), badge caps (0 / 1), past 8 badges (0 capped until the League, 1 free, 2 always capped)\n"
+        "level_scaling_rules = %d %d %d %d %d\n"
         "; servers you host (and playing alone): battle animations this much faster, 0, 25 or 30 (percent)\n"
         "battle_anim_speed = %d\n"
         "; CO-OP > SPECTATE: friends' screens in a panel under yours (0 / 1), each this many times (1-4)\n"
@@ -502,19 +546,37 @@ void MP_SaveConfig(void)
         "bike_music = %d\nsurf_music = %d\n"
         "; OPTIONS > CO-OP > MOENAV CALLS: all, or battles (only trainers asking for a battle; story calls always come)\n"
         "moenav_calls = %s\n"
+        "; OPTIONS > CO-OP > FRIEND FINDER: both, arrows (at the edge of the screen) or radar (in the corner);\n"
+        "; shown = 1 while it's on (the right stick click / G)\n"
+        "friend_finder = %s\nfriend_finder_shown = %d\n"
         "; OPTIONS > GAME > FOLLOWERS: default (the original sprites on the map, PMD in the MOEMON GARDEN), pmd or original\n"
         "follower_sprites = %s\n"
+        "; OPTIONS > DISPLAY > CARD ART: printed_art (the printed pictures in the Game Boy frame), gameboy (the Game Boy\n"
+        "; pictures in it) or full_card (the whole printed cards)\n"
+        "card_art = %s\n"
+        "; OPTIONS > DISPLAY > CARD BACKS: printed (the real card back) or pixel\n"
+        "card_back = %s\n"
+        "; OPTIONS > GAME > CARD SCALING: 1 = card players' decks fit yours and how you play, 0 = by badges\n"
+        "card_scaling = %d\n"
+        "; OPTIONS > DISPLAY > BATTLE ANIMS: classic or modern (glows, trails and impacts over the same animations)\n"
+        "battle_anims = %s\n"
         "; advanced: use a different online lobby server (address or address:port)\n"
         "lobby = %s\n"
         "; your 32 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
         gMpConfig.name, sprite, gMpConfig.customSprite, skin, outfit, accent, hair,
         MP_Avatar_FrontSelConfigName(gMpConfig.app.frontSel), MP_Avatar_BackSelConfigName(gMpConfig.app.backSel),
-        gMpConfig.app.bike ? "bike" : "ride", gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality, gMpConfig.autosaveMinutes,
-        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.levelScaling, gMpConfig.moveSplit, gMpConfig.animSpeed,
+        gMpConfig.app.bike ? "bike" : "ride", gMpConfig.trainerRange, (unsigned)gMpConfig.followerPersonality, MOEMON_DEV_BUILD ? sMainAutosaveMinutes : gMpConfig.autosaveMinutes,
+        gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.lastRoomAddr, gMpConfig.lastJoinCode, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.levelScaling, gMpConfig.moveSplit,
+        gMpConfig.scale[0], gMpConfig.scale[1], gMpConfig.scale[2], gMpConfig.scale[3], gMpConfig.scale[4], gMpConfig.animSpeed,
         gMpConfig.spectatePanel, gMpConfig.spectateScale, gMpConfig.bikeMusic, gMpConfig.surfMusic,
         gMpConfig.moenavCalls ? "battles" : "all",
+        gMpConfig.finderStyle == MP_FINDER_ARROWS ? "arrows" : gMpConfig.finderStyle == MP_FINDER_RADAR ? "radar" : "both",
+        gMpConfig.finderOn,
         gMpConfig.followerSprites == MP_FOLLOW_SPRITES_PMD ? "pmd" : gMpConfig.followerSprites == MP_FOLLOW_SPRITES_ORIGINAL ? "original" : "default",
-        gMpConfig.lobby);
+        gMpConfig.cardArt == MP_CARD_ART_GAME_BOY ? "gameboy" : gMpConfig.cardArt == MP_CARD_ART_FULL_CARD ? "full_card"
+                                                                                                         : "printed_art",
+        gMpConfig.cardBack == MP_CARD_BACK_PIXEL ? "pixel" : "printed", gMpConfig.cardScaling,
+        gMpConfig.battleAnims ? "modern" : "classic", gMpConfig.lobby);
     {
         int i;
         for (i = 0; i < MP_NUM_PHRASES; i++)
@@ -639,7 +701,7 @@ static void PackState(const struct MpState *s, u8 *p)
     PutU16(p + 14, s->seq);
     PutU16(p + 16, s->followerDex); p[18] = s->followerFlags; p[19] = s->badges;
     PutU16(p + 20, s->followerFx & 0xFFFF);
-    p[22] = s->light;
+    p[22] = (s->light & 0x7F) | (s->cardDuel ? 0x80 : 0);
     p[23] = s->followerFx >> 16;
     PutU16(p + 24, (u16)s->followerHue);
     PutU32(p + 26, s->followerKey);
@@ -658,7 +720,8 @@ static void UnpackState(const u8 *p, struct MpState *s)
     s->seq = GetU16(p + 14);
     s->followerDex = GetU16(p + 16); s->followerFlags = p[18]; s->badges = p[19];
     s->followerFx = GetU16(p + 20) | ((u32)p[23] << 16);
-    s->light = p[22];
+    s->light = p[22] & 0x7F;
+    s->cardDuel = p[22] >> 7;
     s->followerHue = (s16)GetU16(p + 24);
     s->followerKey = GetU32(p + 26);
     s->lifeAct = p[30]; s->lifePose = p[31]; s->lifeDx = (s8)p[32]; s->lifeDy = (s8)p[33];
@@ -682,6 +745,12 @@ static void PackAppearance(const struct MpAppearance *a, u8 *p)
     MP_Created_Pack(&a->recipe, p + 13);   // MP_CREATED_BYTES (14): bytes 13-26, FIELD HAIR last
     p[27] = a->bike;
 }
+
+static void UnpackAppearance(const u8 *p, struct MpAppearance *a);
+
+// A look as the wire carries it (APPEARANCE_SIZE bytes: the BATTLE SIMULATOR's records, mp_sim.c)
+void MP_PackAppearance(const struct MpAppearance *a, u8 *p) { PackAppearance(a, p); }
+void MP_UnpackAppearance(const u8 *p, struct MpAppearance *a) { UnpackAppearance(p, a); }
 
 static void UnpackAppearance(const u8 *p, struct MpAppearance *a)
 {
@@ -767,6 +836,8 @@ bool8 MP_SmallTweaksAllowed(void)
 
 bool8 MP_IsLocalFree(void)
 {
+    if (Tcg_IsActive())
+        return FALSE;
     if (!MP_IsInOverworld() || gPaletteFade.active)
         return FALSE;
     if (ArePlayerFieldControlsLocked() || ScriptContext_IsEnabled())
@@ -862,6 +933,8 @@ static void CollectLocalState(struct MpState *s)
         if (MP_IsLocalFree())
             s->flags |= MPF_FREE;
     }
+    // Moemon Kai: in a card duel (the game is paused behind the card screens: they stay put)
+    s->cardDuel = Tcg_DuelingNow() != 0;
     // From the moment the battle transition starts, so others see it right away
     if (MP_Battle_IsActive() || gMain.inBattle || MP_IsBattleTransitionRunning())
         s->flags |= MPF_IN_BATTLE;
@@ -872,6 +945,9 @@ static void CollectLocalState(struct MpState *s)
         if (MP_IsInOverworld() ? (MP_IsStartMenuOpen() || MP_IsScriptMenuOpen() || MP_IsShopMenuOpen()
                                   || MP_Menu_IsCoopMenuOpen() || MpUi_IsOpen())
                                : !MP_IsFieldLoadCallback())
+            s->flags |= MPF_IN_MENU;
+        // (the card screens other than a duel count as a menu)
+        if (Tcg_IsActive() && !s->cardDuel)
             s->flags |= MPF_IN_MENU;
     }
     if (MP_Coop_IsChallenged())
@@ -912,7 +988,8 @@ static bool8 StateDiffers(const struct MpState *a, const struct MpState *b)
         || a->followerFx != b->followerFx || a->followerHue != b->followerHue
         || a->badges != b->badges || a->followerKey != b->followerKey || a->lifeAct != b->lifeAct
         || a->lifePose != b->lifePose || a->lifeDx != b->lifeDx || a->lifeDy != b->lifeDy || a->lifeEmoteSeq != b->lifeEmoteSeq
-        || a->lifePx != b->lifePx || a->lifePy != b->lifePy || a->lifeFace != b->lifeFace || a->top3 != b->top3;
+        || a->lifePx != b->lifePx || a->lifePy != b->lifePy || a->lifeFace != b->lifeFace || a->top3 != b->top3
+        || a->cardDuel != b->cardDuel;
 }
 
 static void SendLocalState(bool8 force)
@@ -997,6 +1074,7 @@ static void HandlePlayerLeft(u8 id)
     MP_Overworld_OnPlayerLeft(id);
     MP_Emote_OnPlayerLeft(id);
     MP_Piggy_OnPlayerLeft(id);
+    MP_Rhythm_OnPlayerLeft(id);
     MP_Linkx_OnPlayerLeft(id);
     MP_Minigame_OnPlayerLeft(id);
     MP_Group_OnPlayerLeft(id);
@@ -1106,6 +1184,10 @@ static void HandleMessage(u8 type, u8 *data, u16 len)
         snprintf(sStatus, sizeof(sStatus), "ONLINE (PLAYER %d)", gMpLocalId + 1);
         MPNet_Log("joined \"%s\" as player %d", sLobby.room, gMpLocalId + 1);
         SendLocalBlobs();
+        {
+            void MP_Sim_OnConnected(void);
+            MP_Sim_OnConnected();   // the BATTLE SIMULATOR: our record up, everyone's back (mp_sim.c)
+        }
         SendLocalState(TRUE);
         break;
     case MPMSG_S_REJECT:
@@ -1194,7 +1276,16 @@ static void HandleMessage(u8 type, u8 *data, u16 len)
 // Routes peer messages to the module that owns the message id
 void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
 {
-    if (data[0] >= MPR_LINK_PLAYER && data[0] < MPR_SPECTATE_FIRST)
+    if (!len) return;
+    if (data[0] == 255)
+        Tcg_OnlineRelay(from, data, len);
+    else if (data[0] >= MPR_FIGHT_FIRST && data[0] < MPR_FIGHT_FIRST + 7)
+        MP_Fight_OnRelay(from, data, len);
+    else if (data[0] >= MPR_RHYTHM_FIRST && data[0] < MPR_RHYTHM_FIRST + 4)
+        MP_Rhythm_OnRelay(from, data, len);
+    else if (data[0] == MPR_COOP_BATTLING)
+        MP_Coop_OnRelay(from, data, len);
+    else if (data[0] >= MPR_LINK_PLAYER && data[0] < MPR_SPECTATE_FIRST)
         MP_Battle_OnRelay(from, data, len);
     else if (data[0] >= MPR_SPECTATE_FIRST && data[0] < MPR_COOP_FIRST)
         MP_Spectate_OnRelay(from, data, len);
@@ -1211,7 +1302,12 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
             sRoomPadding = data[1] != 0;
             sRoomAnimSpeed = len >= 3 ? (data[2] > 30 ? 30 : data[2]) : 30;
             sRoomLevelScaling = len >= 4 ? data[3] != 0 : TRUE;
-            sRoomMoveSplit = len >= 5 ? data[4] != 0 : TRUE;
+            {
+                u8 k;
+                for (k = 0; k < MP_SCALE_COUNT - 1; k++)
+                    sRoomScale[k] = len >= 5 + k && data[4 + k] < MP_LevelScaleRuleCount(k + 1) ? data[4 + k] : gMpConfig.scale[k];
+            }
+            sRoomMoveSplit = len >= 4 + MP_SCALE_COUNT ? data[3 + MP_SCALE_COUNT] != 0 : TRUE;   // Moemon Kai: MOVE KIND after the level rules
             sRoomRulesHeard = TRUE;
             sRoomHostId = from;
             MPNet_Log("room rules from player %d: team padding %s, anim speed +%d%%, level scaling %s", from + 1,
@@ -1336,8 +1432,11 @@ static void SendWelcome(u8 id)
     if (sLobby.creator)
     {
         // the room's settings first (the host decides them for everyone)
-        u8 rules[5] = {MPR_RULES, OwnPadding(), OwnAnimSpeed(), OwnLevelScaling(), OwnMoveSplit()};
-        MP_SendRelay(id, rules, 5);
+        u8 rules[4 + MP_SCALE_COUNT] = {MPR_RULES, OwnPadding(), OwnAnimSpeed(), OwnLevelScaling()};
+        LevelRulesFromEnv();
+        memcpy(rules + 4, gMpConfig.scale, MP_SCALE_COUNT - 1);
+        rules[3 + MP_SCALE_COUNT] = OwnMoveSplit();
+        MP_SendRelay(id, rules, sizeof(rules));
         SendClock(id);
     }
     if (!sLobby.creator || len == 0 || strspn(gMpConfig.welcome, " |") == len)
@@ -1441,6 +1540,58 @@ bool8 MP_LevelScalingIsOurs(void)   // not a joiner who heard the host's rules
     return sLobby.creator || !sRoomRulesHeard;
 }
 
+u8 MP_LevelScaleRuleCount(u8 which)
+{
+    static const u8 sCounts[MP_SCALE_COUNT] = {2, 4, 4, 10, 2, 3};
+    return which < MP_SCALE_COUNT ? sCounts[which] : 1;
+}
+
+// Tests: MOEMON_LEVEL_RULES="WILD TRAINERS BOSS CAPS PAST8" sets ours at the start
+static void LevelRulesFromEnv(void)
+{
+    static bool8 sDone;
+    int v[MP_SCALE_COUNT - 1], k;
+    if (sDone)
+        return;
+    sDone = TRUE;
+    if (getenv("MOEMON_LEVEL_RULES") && sscanf(getenv("MOEMON_LEVEL_RULES"), "%d %d %d %d %d", &v[0], &v[1], &v[2], &v[3], &v[4]) == 5)
+        for (k = 0; k < MP_SCALE_COUNT - 1; k++)
+            if (v[k] >= 0 && v[k] < MP_LevelScaleRuleCount(k + 1))
+                gMpConfig.scale[k] = v[k];
+}
+
+u8 MP_LevelScaleOwnRule(u8 which)
+{
+    LevelRulesFromEnv();
+    if (which == MP_SCALE_ON)
+        return OwnLevelScaling();
+    return which < MP_SCALE_COUNT ? gMpConfig.scale[which - 1] : 0;
+}
+
+u8 MP_LevelScaleRule(u8 which)
+{
+    LevelRulesFromEnv();
+    if (which == MP_SCALE_ON)
+        return MP_LevelScaling();
+    if (which >= MP_SCALE_COUNT)
+        return 0;
+    if (!sLobby.creator && sRoomRulesHeard)
+        return sRoomScale[which - 1];
+    return gMpConfig.scale[which - 1];
+}
+
+void MP_LevelScaleSetOwn(u8 which, u8 value)
+{
+    if (which >= MP_SCALE_COUNT || value >= MP_LevelScaleRuleCount(which))
+        return;
+    if (which == MP_SCALE_ON)
+        gMpConfig.levelScaling = value;
+    else
+        gMpConfig.scale[which - 1] = value;
+    MP_SaveConfig();
+    MP_SendRoomRules();
+}
+
 bool8 MP_LevelScaling(void)
 {
     if (!sLobby.creator && sRoomRulesHeard)
@@ -1451,7 +1602,7 @@ bool8 MP_LevelScaling(void)
 // The host changed a room setting (OPTIONS): everyone hears it again
 void MP_SendRoomRules(void)
 {
-    u8 rules[5];
+    u8 rules[4 + MP_SCALE_COUNT];
     u8 i;
     if (!sLobby.creator || sLobby.state != MP_LOBBY_IN_ROOM)
         return;
@@ -1459,10 +1610,12 @@ void MP_SendRoomRules(void)
     rules[1] = OwnPadding();
     rules[2] = OwnAnimSpeed();
     rules[3] = OwnLevelScaling();
-    rules[4] = OwnMoveSplit();
+    LevelRulesFromEnv();
+    memcpy(rules + 4, gMpConfig.scale, MP_SCALE_COUNT - 1);
+    rules[3 + MP_SCALE_COUNT] = OwnMoveSplit();
     for (i = 0; i < MP_MAX_PLAYERS; i++)
         if (i != gMpLocalId && gMpPlayers[i].present)
-            MP_SendRelay(i, rules, 5);
+            MP_SendRelay(i, rules, sizeof(rules));
 }
 
 bool8 MP_TrainerPadding(void)
@@ -1511,6 +1664,23 @@ void MP_Lobby_Connect(const char *address, bool8 isLocal)
     sLobby.isLocal = isLocal;
     MPNet_Log("connecting to lobby %s:%d", host, port);
     OpenConnection();
+}
+
+// The server we're connected to, "host:port" (FALSE: the online lobby, or none)
+bool8 MP_Lobby_ServerAddress(char *out, int len)
+{
+    char host[128];
+    int port = MP_DEFAULT_PORT;
+    if (sLobby.host[0] == 0)
+        return FALSE;
+    if (MP_OnlineLobbyAddress()[0])
+    {
+        MPNet_ParseAddress(MP_OnlineLobbyAddress(), host, sizeof(host), &port);
+        if (strcmp(host, sLobby.host) == 0 && port == sLobby.port)
+            return FALSE;
+    }
+    snprintf(out, len, "%s:%d", sLobby.host, sLobby.port);
+    return TRUE;
 }
 
 void MP_Lobby_Disconnect(void)
@@ -1805,6 +1975,9 @@ void MP_Init(void)
         return;
     sInitDone = TRUE;
     LoadConfig();
+    sMainAutosaveMinutes = gMpConfig.autosaveMinutes;
+    if (MOEMON_DEV_BUILD)
+        gMpConfig.autosaveMinutes = 0;
     MPNet_Init();
     MP_Avatar_Init();
     snprintf(sStatus, sizeof(sStatus), "OFFLINE");
@@ -1826,9 +1999,13 @@ void MP_FrameUpdate(void)
     u16 len;
     int guard;
 
+    Tcg_OnlineTick();
+    MP_Fight_Update();          // the VS cabinet's seats and bubbles (mp_fight.c)
+    MP_Rhythm_Update();         // the DANCE machine's pads and bubbles (mp_rhythm.c)
     MP_Achieve_Update();        // achievements are personal: offline too
     MP_Autosave_Update();       // quiet saves on the map
     MP_Events_UpdateToasts();   // ... and so are their notes
+    MP_ItemDesc_Update();       // the next page of an item's description too long for its window (mp_itemdesc.c)
     MpUi_RefreshIcons();        // help lines follow keyboard / pad switches
 
     if (!sInitDone)
@@ -1854,6 +2031,10 @@ void MP_FrameUpdate(void)
     if (gMain.inBattle)
         MP_Emote_BattleUpdate();   // battle emote bubbles (solo battles too)
     MP_LifeBattle_Update();        // MOéMON GARDEN in battle: moments, bonds, Pokémon emotes, rare lines
+    {
+        void MP_Sim_Update(void);
+        MP_Sim_Update();           // the BATTLE SIMULATOR: our record to the server after a battle (mp_sim.c)
+    }
     if (!(MPNet_ClientStatus() == MPNET_CONNECTED && gMpLocalId >= 0))
         MP_Events_Update();        // daily goals alone (online: below)
 

@@ -84,6 +84,7 @@ enum {
     SCR_MESSAGE,
     SCR_PATCHES,       // PATCH NOTES: the versions
     SCR_PATCHTEXT,     // ... one version's notes, full screen
+    SCR_RULES,         // HOST A GAME > GAME RULES
 };
 
 // Main screen choices
@@ -103,8 +104,7 @@ enum {
     HOST_PASSWORD,
     HOST_NOTE,
     HOST_LISTED,
-    HOST_PADDING,
-    HOST_ANIM,
+    HOST_RULES,        // GAME RULES: team padding, battle speed, level scaling (SCR_RULES)
     HOST_START,
     HOST_BACK,
     HOST_ROWS
@@ -165,6 +165,7 @@ static EWRAM_DATA struct
     u8 password[WALDA_PHRASE_LENGTH + 1];
     bool8 listed;
     u8 hostCursor;
+    u8 rulesCursor;
     // join list
     struct JoinEntry entries[MAX_JOIN_ENTRIES];
     u8 entryCount;
@@ -179,6 +180,9 @@ static EWRAM_DATA struct
     u8 after;
     u8 message[240];
     u8 inviteCode[WALDA_PHRASE_LENGTH + 1];
+    char joiningCode[24];      // the invite code being joined (remembered once we're in: gMpConfig.lastJoinCode)
+    bool8 rejoining;           // REJOIN to a friend's own server (its own message when it can't be reached)
+    bool8 triedKey;            // joining a locked room with the key remembered from last time (wrong: ask the password)
     u8 note[2][WALDA_PHRASE_LENGTH + 1];       // welcome note lines, game charset
     char codeHost[24];
     int codePort;
@@ -376,7 +380,7 @@ static void BuildMainItems(void)
             sSetup.mainItems[sSetup.mainCount++] = MAIN_PATCHES;
         return;
     }
-    if (gMpConfig.lastRoom[0] && gMpConfig.lastRoomKey[0])
+    if (gMpConfig.lastRoom[0] && gMpConfig.lastRoomKey[0] && strcmp(gMpConfig.lastRoomAddr, "home") != 0)
         sSetup.mainItems[sSetup.mainCount++] = MAIN_REJOIN;
     sSetup.mainItems[sSetup.mainCount++] = MAIN_HOST;
     sSetup.mainItems[sSetup.mainCount++] = MAIN_JOIN;
@@ -542,14 +546,13 @@ static const char *LobbyErrorText(u8 err)
 static void DrawHost(void)
 {
     u8 i;
-    static const char *const labels[] = {"SERVER NAME", "PASSWORD", "WELCOME NOTE", "SHOW IN LIST", "TEAM PADDING", "ANIM SPEED", "START HOSTING", "BACK"};
+    static const char *const labels[] = {"SERVER NAME", "PASSWORD", "WELCOME NOTE", "SHOW IN LIST", "GAME RULES", "START HOSTING", "BACK"};
     static const char *const help[] = {
         "The name your friends will look for.",
         "Optional. Friends need it to join.",
         "Optional. Two short lines your friends see when they join.",
         "NO hides it: friends must type the exact name.",
-        "ON: trainers get one extra Moemon when friends team up.",
-        "How much faster battle animations play, for everyone.",
+        "Team padding, battle speed and level scaling, for everyone.",
         "Open the server and start playing!",
         "Go back to HOST / JOIN.",
     };
@@ -583,17 +586,16 @@ static void DrawHost(void)
                 PrintGame(WIN_MAIN, shown, 104, y, sHostAccent);
             }
         }
-        else if (i == HOST_LISTED || i == HOST_PADDING || i == HOST_ANIM)
+        else if (i == HOST_LISTED)
         {
             u8 lt[] = {CHAR_LEFT_ARROW, EOS}, rt[] = {CHAR_RIGHT_ARROW, EOS};
             PrintGame(WIN_MAIN, lt, 104, y, sHostNormal);
-            if (i == HOST_LISTED)
-                Print(WIN_MAIN, sSetup.listed ? "YES" : "NO", 114, y, sHostAccent);
-            else if (i == HOST_PADDING)
-                Print(WIN_MAIN, gMpConfig.trainerPadding ? "ON" : "OFF", 114, y, sHostAccent);
-            else
-                Print(WIN_MAIN, gMpConfig.animSpeed == 30 ? "+30%" : gMpConfig.animSpeed == 25 ? "+25%" : "NORMAL", 114, y, sHostAccent);
-            PrintGame(WIN_MAIN, rt, i == HOST_ANIM ? 156 : 140, y, sHostNormal);
+            Print(WIN_MAIN, sSetup.listed ? "YES" : "NO", 114, y, sHostAccent);
+            PrintGame(WIN_MAIN, rt, 140, y, sHostNormal);
+        }
+        else if (i == HOST_RULES)
+        {
+            Print(WIN_MAIN, MP_LevelScaleOwnRule(MP_SCALE_ON) ? "SCALING ON" : "SCALING OFF", 104, y, sHostAccent);
         }
         if (i == sSetup.hostCursor)
             AddTextPrinterParameterized3(WIN_MAIN, FONT_NORMAL, x - 12, y, sHostNormal, TEXT_SKIP_DRAW, sHostArrow);
@@ -807,6 +809,9 @@ static void DrawJoin(void)
 
 static void EnterJoinList(void)
 {
+    sSetup.joiningCode[0] = 0;
+    sSetup.rejoining = FALSE;
+    sSetup.triedKey = FALSE;
     sSetup.screen = SCR_JOIN;
     sSetup.joinCursor = 0;
     sSetup.scroll = 0;
@@ -822,6 +827,18 @@ static void EnterJoinList(void)
     }
     RefreshJoinList();
     DrawScreen();
+}
+
+// The key of the room we were last in (from the ini)
+static void LastRoomKey(u8 *key)
+{
+    int i;
+    for (i = 0; i < MP_ROOM_KEY_SIZE; i++)
+    {
+        unsigned v = 0;
+        sscanf(gMpConfig.lastRoomKey + i * 2, "%2x", &v);
+        key[i] = (u8)v;
+    }
 }
 
 static void JoinEntryNow(u8 index)
@@ -1112,6 +1129,119 @@ static void ShowPatchReader(bool8 on)
     CopyBgTilemapBufferToVram(0);   // (this screen runs no scheduled copies)
 }
 
+// ---------------------------------------------------------------------------
+// HOST A GAME > GAME RULES: the room's rules, for everyone (TEAM PADDING, ANIM SPEED and LEVEL SCALING's settings;
+// playing alone, OPTIONS > GAME has the level scaling ones)
+
+enum { RULE_PADDING, RULE_ANIM, RULE_SCALE_FIRST, RULE_BACK = RULE_SCALE_FIRST + MP_SCALE_COUNT, RULE_ROWS };
+#define RULE_LINE_H 10
+
+static void RuleValue(u8 row, char *out, int len)
+{
+    static const char *const sWild[] = {"OFF", "LOW", "MEDIUM", "HIGH"};
+    static const char *const sTrainers[] = {"OFF", "BELOW", "EVEN", "ABOVE"};
+    static const char *const sPast8[] = {"TO LEAGUE", "FREE", "ALWAYS CAPPED"};
+    u8 v;
+    if (row == RULE_PADDING)
+        snprintf(out, len, "%s", gMpConfig.trainerPadding ? "ON" : "OFF");
+    else if (row == RULE_ANIM)
+        snprintf(out, len, "%s", gMpConfig.animSpeed == 30 ? "+30%" : gMpConfig.animSpeed == 25 ? "+25%" : "NORMAL");
+    else if (row >= RULE_SCALE_FIRST && row < RULE_BACK)
+    {
+        u8 rule = row - RULE_SCALE_FIRST;
+        v = MP_LevelScaleOwnRule(rule);
+        switch (rule)
+        {
+        case MP_SCALE_ON:
+        case MP_SCALE_CAPS:     snprintf(out, len, "%s", v ? "ON" : "OFF"); break;
+        case MP_SCALE_WILD:     snprintf(out, len, "%s", sWild[v & 3]); break;
+        case MP_SCALE_TRAINERS: snprintf(out, len, "%s", sTrainers[v & 3]); break;
+        case MP_SCALE_BOSS:     if (v == 0) snprintf(out, len, "AUTO"); else snprintf(out, len, "+%d", v - 1); break;
+        default:                snprintf(out, len, "%s", sPast8[v % 3]); break;
+        }
+    }
+    else
+        out[0] = 0;
+}
+
+static void DrawRules(void)
+{
+    static const char *const labels[RULE_ROWS] = {"TEAM PADDING", "ANIM SPEED", "LEVEL SCALING", "  WILD", "  TRAINERS",
+                                                  "  BOSS MARGIN", "  BADGE CAPS", "  PAST 8 BADGES", "BACK"};
+    static const char *const help[RULE_ROWS] = {
+        "ON: trainers get one extra Moemon when friends team up.",
+        "How much faster battle animations play, for everyone.",
+        "Wild Moemon and trainers keep up with the team.",
+        "LOW: a quarter way to the team. MEDIUM: halfway. HIGH: near the team.",
+        "Trainers' best Moemon: BELOW, EVEN with or ABOVE the team.",
+        "Extra levels for GYM LEADERS, rivals, ELITE FOUR. AUTO: +2 to +5.",
+        "Nothing scales past a level that rises with the badges.",
+        "8 badges: capped to the LEAGUE then free, FREE, or ALWAYS capped.",
+        "Back to HOST A GAME.",
+    };
+    u8 i;
+    FillWindowPixelBuffer(WIN_FULL, PIXEL_FILL(1));
+    for (i = 0; i < RULE_ROWS; i++)
+    {
+        u8 y = 1 + RULE_LINE_H * i;
+        char value[24];
+        bool8 off = i > RULE_SCALE_FIRST && i < RULE_BACK && !MP_LevelScaleOwnRule(MP_SCALE_ON);
+        Print(WIN_FULL, labels[i], 14, y, off ? sHostDisabled : sHostNormal);
+        RuleValue(i, value, sizeof(value));
+        if (value[0])
+        {
+            u8 lt[] = {CHAR_LEFT_ARROW, EOS}, rt[] = {CHAR_RIGHT_ARROW, EOS};
+            PrintGame(WIN_FULL, lt, 120, y, sHostNormal);
+            Print(WIN_FULL, value, 130, y, off ? sHostDisabled : sHostAccent);
+            PrintGame(WIN_FULL, rt, 216, y, sHostNormal);
+        }
+        if (i == sSetup.rulesCursor)
+            AddTextPrinterParameterized3(WIN_FULL, FONT_NORMAL, 2, y, sHostNormal, TEXT_SKIP_DRAW, sHostArrow);
+    }
+    PrintWrapped(WIN_FULL, help[sSetup.rulesCursor], 1 + RULE_LINE_H * RULE_ROWS + 2, 216, sColorDim);
+    CopyWindowToVram(WIN_FULL, COPYWIN_GFX);
+}
+
+static void HandleRules(void)
+{
+    int dir = JOY_NEW(DPAD_LEFT) ? -1 : 1;
+    u8 row = sSetup.rulesCursor;
+    if (JOY_NEW(DPAD_UP | DPAD_DOWN))
+    {
+        sSetup.rulesCursor = JOY_NEW(DPAD_UP) ? (row + RULE_ROWS - 1) % RULE_ROWS : (row + 1) % RULE_ROWS;
+        PlaySE(SE_SELECT);
+        DrawScreen();
+    }
+    else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && row == RULE_BACK))
+    {
+        PlaySE(SE_SELECT);
+        sSetup.screen = SCR_HOST;
+        ShowPatchReader(FALSE);
+        DrawScreen();
+    }
+    else if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT | A_BUTTON) && row != RULE_BACK)
+    {
+        if (row == RULE_PADDING)
+            gMpConfig.trainerPadding = !gMpConfig.trainerPadding;
+        else if (row == RULE_ANIM)
+        {
+            static const u8 sSpeeds[] = {0, 25, 30};
+            u8 i = gMpConfig.animSpeed == 30 ? 2 : gMpConfig.animSpeed == 25 ? 1 : 0;
+            gMpConfig.animSpeed = sSpeeds[(i + (dir < 0 ? 2 : 1)) % 3];
+        }
+        else
+        {
+            u8 rule = row - RULE_SCALE_FIRST, n = MP_LevelScaleRuleCount(rule);
+            MP_LevelScaleSetOwn(rule, (MP_LevelScaleOwnRule(rule) + n + dir) % n);
+        }
+        MP_SaveConfig();   // remembered for the next server
+        PlaySE(SE_SELECT);
+        DrawScreen();
+        MPNet_Log("setup: rule %d now %d", row, row == RULE_PADDING ? gMpConfig.trainerPadding : row == RULE_ANIM ? gMpConfig.animSpeed
+                  : MP_LevelScaleOwnRule(row - RULE_SCALE_FIRST));
+    }
+}
+
 static void LogPatchCursor(void)
 {
     char name[16];
@@ -1191,6 +1321,7 @@ static void DrawScreen(void)
     case SCR_HOST:    Print(WIN_TITLE, "HOST A GAME", 12, 2, sColorTitle); break;
     case SCR_JOIN:    Print(WIN_TITLE, "JOIN A GAME", 12, 2, sColorTitle); break;
     case SCR_PATCHES: Print(WIN_TITLE, "PATCH NOTES", 12, 2, sColorTitle); break;
+    case SCR_RULES:   Print(WIN_TITLE, "GAME RULES", 12, 2, sColorTitle); break;
     case SCR_PATCHTEXT:
     {
         char title[32], name[16];
@@ -1212,6 +1343,7 @@ static void DrawScreen(void)
     case SCR_MESSAGE: DrawMessage(); break;
     case SCR_PATCHES: DrawPatches(); break;
     case SCR_PATCHTEXT: DrawPatchText(); break;
+    case SCR_RULES:   DrawRules(); break;
     }
 }
 
@@ -1272,19 +1404,20 @@ static void HandleMain(void)
         case MAIN_REJOIN:
         {
             u8 key[MP_ROOM_KEY_SIZE];
-            int i;
-            for (i = 0; i < MP_ROOM_KEY_SIZE; i++)
-            {
-                unsigned v = 0;
-                sscanf(gMpConfig.lastRoomKey + i * 2, "%2x", &v);
-                key[i] = (u8)v;
-            }
-            if (!MP_HasOnlineLobby())
+            LastRoomKey(key);
+            // Moemon Co-op: where the room was: a friend's own server (joined with an invite code, or at home) or
+            // the online lobby. No code or password to type again.
+            sSetup.rejoining = gMpConfig.lastRoomAddr[0] != 0;
+            if (sSetup.rejoining)
+                MP_Lobby_Connect(gMpConfig.lastRoomAddr, FALSE);
+            else if (!MP_HasOnlineLobby())
             {
                 EnterJoinList();
                 break;
             }
-            MP_Lobby_Connect(MP_OnlineLobbyAddress(), FALSE);
+            else
+                MP_Lobby_Connect(MP_OnlineLobbyAddress(), FALSE);
+            MPNet_Log("rejoin: %s at %s", gMpConfig.lastRoom, sSetup.rejoining ? gMpConfig.lastRoomAddr : "the online lobby");
             MP_Lobby_JoinRoomWithKey(gMpConfig.lastRoom, key);
             MP_AsciiToGame(sSetup.roomName, gMpConfig.lastRoom, WALDA_PHRASE_LENGTH);
             StartWorking(WORK_JOIN);
@@ -1343,22 +1476,14 @@ static void HandleHost(void)
         PlaySE(SE_SELECT);
         DrawScreen();
     }
-    else if (sSetup.hostCursor == HOST_ANIM && JOY_NEW(DPAD_LEFT | DPAD_RIGHT | A_BUTTON))
+    else if (sSetup.hostCursor == HOST_RULES && JOY_NEW(A_BUTTON))
     {
-        static const u8 sSpeeds[] = {0, 25, 30};
-        u8 i = gMpConfig.animSpeed == 30 ? 2 : gMpConfig.animSpeed == 25 ? 1 : 0;
-        i = (i + (JOY_NEW(DPAD_LEFT) ? 2 : 1)) % 3;
-        gMpConfig.animSpeed = sSpeeds[i];
-        MP_SaveConfig();
         PlaySE(SE_SELECT);
+        sSetup.rulesCursor = 0;
+        sSetup.screen = SCR_RULES;
+        ShowPatchReader(TRUE);   // (the full-screen window)
         DrawScreen();
-    }
-    else if (sSetup.hostCursor == HOST_PADDING && JOY_NEW(DPAD_LEFT | DPAD_RIGHT | A_BUTTON))
-    {
-        gMpConfig.trainerPadding = !gMpConfig.trainerPadding;
-        MP_SaveConfig();   // remembered for the next server
-        PlaySE(SE_SELECT);
-        DrawScreen();
+        MPNet_Log("setup: game rules");
     }
     else if (JOY_NEW(B_BUTTON))
     {
@@ -1446,7 +1571,9 @@ static void HandleJoin(void)
         struct JoinEntry *e = &sSetup.entries[sSetup.joinCursor];
         if (e->byCode)
         {
+            // (the last code that worked, ready to use again)
             memset(sSetup.inviteCode, EOS, sizeof(sSetup.inviteCode));
+            MP_AsciiToGame(sSetup.inviteCode, gMpConfig.lastJoinCode, WALDA_PHRASE_LENGTH);
             OpenTextEntry(6, NAMING_SCREEN_COOP_CODE, sSetup.inviteCode);
             return;
         }
@@ -1522,6 +1649,17 @@ static void OnRoomJoined(void)
     snprintf(gMpConfig.lastRoom, sizeof(gMpConfig.lastRoom), "%s", MP_Lobby_RoomName());
     for (i = 0; i < MP_ROOM_KEY_SIZE; i++)
         snprintf(gMpConfig.lastRoomKey + i * 2, 3, "%02x", key[i]);
+    // Moemon Co-op: and where it is, so REJOIN finds it again (a friend's own server too: no code to type)
+    if (sSetup.work == WORK_HOST_LOCAL)
+        snprintf(gMpConfig.lastRoomAddr, sizeof(gMpConfig.lastRoomAddr), "home");
+    else if (!MP_Lobby_ServerAddress(gMpConfig.lastRoomAddr, sizeof(gMpConfig.lastRoomAddr)))
+        gMpConfig.lastRoomAddr[0] = 0;
+    if (sSetup.joiningCode[0])
+        snprintf(gMpConfig.lastJoinCode, sizeof(gMpConfig.lastJoinCode), "%s", sSetup.joiningCode);
+    sSetup.joiningCode[0] = 0;
+    sSetup.rejoining = FALSE;
+    sSetup.triedKey = FALSE;
+    MPNet_Log("joined %s (at %s)", gMpConfig.lastRoom, gMpConfig.lastRoomAddr[0] ? gMpConfig.lastRoomAddr : "the online lobby");
     MP_SaveConfig();
     MPLan_StopSearch();
     if (sSetup.work == WORK_HOST_ONLINE)
@@ -1583,7 +1721,18 @@ static void HandleWorking(void)
         }
         sSetup.pendingJoin = 0;
         memset(sSetup.password, EOS, sizeof(sSetup.password));
-        if (e->room.flags & MP_ROOM_FLAG_LOCKED)
+        if ((e->room.flags & MP_ROOM_FLAG_LOCKED) && gMpConfig.lastRoomKey[0] && strcmp(e->room.name, gMpConfig.lastRoom) == 0)
+        {
+            // Moemon Co-op: the room we were in last time: its key, no password to type again
+            u8 key[MP_ROOM_KEY_SIZE];
+            LastRoomKey(key);
+            MPNet_Log("invite code: %s again, with its key", e->room.name);
+            sSetup.triedKey = TRUE;
+            MP_Lobby_JoinRoomWithKey(e->room.name, key);
+            MP_AsciiToGame(sSetup.roomName, e->room.name, WALDA_PHRASE_LENGTH);
+            StartWorking(WORK_JOIN);
+        }
+        else if (e->room.flags & MP_ROOM_FLAG_LOCKED)
             OpenTextEntry(3, NAMING_SCREEN_COOP_PASSWORD, sSetup.password);
         else
             JoinEntryNow(0);
@@ -1610,6 +1759,18 @@ static void HandleWorking(void)
         MP_Lobby_Disconnect();
         if (sSetup.work == WORK_CODE)
             ShowMessage("Couldn't reach your friend's game. Check the code, and ask them to make sure they're still hosting.", TRUE, AFTER_JOIN);
+        else if (sSetup.triedKey && err == MP_LOBBY_ERR_BAD_PASSWORD)
+        {
+            // the host changed the password since: ask it (the room's entry is still there to join)
+            sSetup.triedKey = FALSE;
+            MPNet_Log("invite code: the room's password changed, asking for it");
+            OpenTextEntry(3, NAMING_SCREEN_COOP_PASSWORD, sSetup.password);
+        }
+        else if (sSetup.rejoining && (err == MP_LOBBY_ERR_UNREACHABLE || err == MP_LOBBY_ERR_NOT_FOUND))
+        {
+            sSetup.rejoining = FALSE;
+            ShowMessage("Couldn't reach your friend's game. Ask them to make sure they're hosting. If their invite code changed, use JOIN A GAME > ENTER CODE OR IP.", TRUE, AFTER_JOIN);
+        }
         else
             ShowMessage(LobbyErrorText(err), TRUE, sSetup.work == WORK_JOIN ? AFTER_JOIN : AFTER_HOST);
         return;
@@ -1674,6 +1835,7 @@ static void Task_Setup(u8 taskId)
         case SCR_MESSAGE: HandleMessage(); break;
         case SCR_PATCHES: HandlePatches(); break;
         case SCR_PATCHTEXT: HandlePatchText(); break;
+        case SCR_RULES:   HandleRules(); break;
         }
         break;
     case 1: // fading out to the keyboard
@@ -1768,6 +1930,7 @@ static void CB2_ReturnFromTextEntry(void)
             break;
         }
     haveAddress:
+        snprintf(sSetup.joiningCode, sizeof(sSetup.joiningCode), "%s", code);
         snprintf(addr, sizeof(addr), "%u.%u.%u.%u:%d", ip >> 24, (ip >> 16) & 255, (ip >> 8) & 255, ip & 255, port);
         snprintf(sSetup.codeHost, sizeof(sSetup.codeHost), "%u.%u.%u.%u", ip >> 24, (ip >> 16) & 255, (ip >> 8) & 255, ip & 255);
         sSetup.codePort = port;

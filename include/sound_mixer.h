@@ -75,7 +75,7 @@ struct MixerSource {
     u32 blockCount; // bdpcm block count
 };
 
-enum { MAX_SAMPLE_CHANNELS = 12 };
+enum { MAX_SAMPLE_CHANNELS = 64 }; // Moemon Kai: = MAX_DIRECTSOUND_CHANNELS
 enum { MIXED_AUDIO_BUFFER_SIZE = 4907 };
 
 struct SoundMixerState {

@@ -1,0 +1,1670 @@
+/*
+ * Moemon Fight: the engine inside the game (include/mf_engine.h).
+ *
+ * The engine runs on its own thread, as the original ran on its main thread: it starts up once
+ * (System_Init, the select list), then waits for sessions. A session is the part of the original
+ * game flow from the match setup to the victory screen (character select, versus screen,
+ * match), started without the title screen in VS mode (two players) or arcade mode (player 1
+ * against the CPU, one match). Every frame of the screen loops ends in MfHost_FrameEnd, where
+ * the engine waits for the game to step it with both players' buttons; its clock moves one frame
+ * per step. Files are read under the mugen/ folder (MOEMON_MUGEN_DIR), and a fatal error ends the
+ * engine's thread instead of the program.
+ */
+#include <setjmp.h>
+#include <pthread.h>
+#include <time.h>
+#include <errno.h>
+#include <sys/stat.h>
+#ifndef _WIN32
+#include <dirent.h>
+#include <strings.h>
+#include <math.h>
+#endif
+
+#include "mugen.h"
+#include "mf_compat.h"
+#include "mf_mem_internal.h"
+#include "mf_coro.h"
+#include "mf_rollback.h"
+#include "../../include/mf_engine.h"
+
+/* the real C library calls, which mf_port.h redirects for the engine */
+#undef fopen
+#undef remove
+#undef exit
+
+/* ------------------------------------------------------------------ state */
+
+enum {
+    HOST_OFF,           /* the thread hasn't started */
+    HOST_LOADING,       /* System_Init */
+    HOST_READY,         /* waiting for a session */
+    HOST_RUNNING,       /* a session runs */
+    HOST_DEAD           /* stopped on an error */
+};
+
+static pthread_mutex_t sLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t sCond = PTHREAD_COND_INITIALIZER;
+static pthread_t sThread;
+static pthread_t sEngineThread;     /* set by the thread itself (sThread may not be written yet) */
+static volatile int sState = HOST_OFF;
+static int sSessionPending;
+static int sActive;                 /* a session was asked for and hasn't ended */
+static struct MfSession sSession;
+static int sResult = MF_RESULT_NONE;
+static int sCancel;
+static char sError[0x1000];
+
+/* What the game asks of the engine thread between frames (MfEngine_Step, MfEngine_RollBack) */
+enum { CMD_NONE, CMD_STEP, CMD_REWIND };
+static int sCmd;                    /* posted, not taken yet */
+static unsigned short sCmdButtons[2];
+static int sCmdQuiet;
+static unsigned int sCmdFrame;
+static int sCmdOk;
+static int sBusy;                   /* the engine is running a frame (or loading, or between sessions) */
+static unsigned long sAnswered;     /* frames finished and rewinds done: what the game waits on */
+
+/* The frame the engine runs next (engine thread) */
+static unsigned short sStepButtons[2];
+static int sStepQuiet, sStepCancel;
+static unsigned int sFrame;         /* frames done in this session */
+static volatile unsigned int sFramesDone;
+static unsigned int sHash;          /* MfEngine_Hash of the last frame */
+static int sNewSession;             /* the first frame of a session is being run */
+static int sReplaying;              /* the frame running is one run again after going back (MfEngine_StepQuiet) */
+static int sAtReady;                /* the engine yielded between sessions (Host_Ready) */
+static int sStartKept;              /* the engine as it started up is kept (MfRollback_KeepStart) */
+static unsigned int sSessionsRun;
+
+static void *sExitJump[5];          /* __builtin_setjmp: no unwinding across the engine's own stack */
+static int sExitJumpReady;
+
+static unsigned short sFrames[2][MF_SCREEN_W * MF_SCREEN_H];
+static int sFront;                  /* index of the frame the game shows */
+static int sHaveFrame;
+static int sPresented;              /* the back frame has a new picture */
+static volatile unsigned int sFrameSerial;
+
+/* The host's values that belong to the fight's state (kept with each frame for rollback: HostVars) */
+static unsigned short sHeld[2];     /* the buttons the engine's keys are down for */
+static int sMotifScreen;            /* a screenpack screen (select, VS, results): black beside the pack's 4:3 */
+static int sLastScreen;             /* the session's last screen: its fade out isn't shown (the game's CRT turns
+                                       the last bright picture off instead) */
+static int sZone;                   /* the match is on screen: frames are kept to go back to (online) */
+
+static char sRoot[0x200];           /* "<mugen folder>/" */
+static int sSyncSteps;              /* MOEMON_FIGHT_SYNC: MfEngine_Step waits for the frame (tests) */
+
+/* The engine's clock: MfTime_* ticks per second, one frame per step. */
+#define HOST_CLOCK_FREQ 60000
+static long long sClock;
+
+/* ------------------------------------------------------------------ files */
+
+static void Host_InitRoot(void)
+{
+    const char *env = getenv("MOEMON_MUGEN_DIR");
+    size_t n;
+
+    snprintf(sRoot, sizeof(sRoot), "%s", env != NULL && env[0] != '\0' ? env : "mugen");
+    n = strlen(sRoot);
+    if (n > 0 && sRoot[n - 1] != '/' && sRoot[n - 1] != '\\' && n + 1 < sizeof(sRoot)) {
+        sRoot[n] = '/';
+        sRoot[n + 1] = '\0';
+    }
+}
+
+static int Path_IsAbsolute(const char *path)
+{
+    if (path[0] == '/' || path[0] == '\\') {
+        return 1;
+    }
+    return path[0] != '\0' && path[1] == ':';
+}
+
+#ifndef _WIN32
+/* Linux test builds: the pack's paths assume Windows (backslashes, any letter case). Finds each part
+ * of path case-insensitively; returns 1 with the real path in out. */
+static int Path_ResolveCase(const char *path, char *out, size_t size)
+{
+    char work[0x400];
+    char *part, *save = NULL;
+    size_t len;
+
+    snprintf(work, sizeof(work), "%s", path);
+    out[0] = '\0';
+    if (work[0] == '/') {
+        snprintf(out, size, "/");
+    }
+    for (part = strtok_r(work, "/", &save); part != NULL; part = strtok_r(NULL, "/", &save)) {
+        char candidate[0x400];
+        DIR *dir;
+        struct dirent *e;
+        int found = 0;
+
+        len = strlen(out);
+        snprintf(candidate, sizeof(candidate), "%s%s", out, part);
+        if (access(candidate, F_OK) == 0) {
+            snprintf(out + len, size - len, "%s/", part);
+            continue;
+        }
+        dir = opendir(len > 0 ? out : ".");
+        if (dir == NULL) {
+            return 0;
+        }
+        while ((e = readdir(dir)) != NULL) {
+            if (strcasecmp(e->d_name, part) == 0) {
+                snprintf(out + len, size - len, "%s/", e->d_name);
+                found = 1;
+                break;
+            }
+        }
+        closedir(dir);
+        if (!found) {
+            return 0;
+        }
+    }
+    len = strlen(out);
+    if (len > 1 && out[len - 1] == '/') {
+        out[len - 1] = '\0';
+    }
+    return 1;
+}
+#endif
+
+/* The real path of an engine path: under sRoot unless absolute. */
+static void Path_Full(const char *path, char *out, size_t size)
+{
+    char *p;
+
+    if (Path_IsAbsolute(path)) {
+        snprintf(out, size, "%s", path);
+    } else {
+        snprintf(out, size, "%s%s", sRoot, path);
+    }
+#ifndef _WIN32
+    for (p = out; *p != '\0'; p++) {
+        if (*p == '\\') {
+            *p = '/';
+        }
+    }
+#else
+    (void)p;
+#endif
+}
+
+/* The real path of an engine path (mf_pack.c), in any letter case on Linux; 0 when there's nothing there */
+int MfHost_RealPath(const char *path, char *out, size_t size)
+{
+    struct stat st;
+
+    if (sRoot[0] == '\0') {
+        Host_InitRoot();
+    }
+    Path_Full(path, out, size);
+    if (stat(out, &st) == 0) {
+        return 1;
+    }
+#ifndef _WIN32
+    {
+        char real[0x400];
+        if (Path_ResolveCase(out, real, sizeof(real)) && stat(real, &st) == 0) {
+            snprintf(out, size, "%s", real);
+            return 1;
+        }
+    }
+#endif
+    return 0;
+}
+
+FILE *MfFile_Open(const char *path, const char *mode)
+{
+    char full[0x400];
+    FILE *fp;
+
+    if (path == NULL || path[0] == '\0') {
+        return NULL;
+    }
+    Path_Full(path, full, sizeof(full));
+#ifndef _WIN32
+    if (mode[0] == 'r') {
+        /* as on Windows: no folders, and any letter case */
+        char real[0x400];
+        struct stat st;
+        if (stat(full, &st) != 0) {
+            if (!Path_ResolveCase(full, real, sizeof(real)) || stat(real, &st) != 0) {
+                return NULL;
+            }
+            snprintf(full, sizeof(full), "%s", real);
+        }
+        if (S_ISDIR(st.st_mode)) {
+            return NULL;
+        }
+    }
+#endif
+    fp = fopen(full, mode);
+    return fp;
+}
+
+int MfFile_Remove(const char *path)
+{
+    char full[0x400];
+
+    Path_Full(path, full, sizeof(full));
+    return remove(full);
+}
+
+int MfFile_Chdir(const char *path)
+{
+    return 0;   /* the game's working directory stays */
+}
+
+char *MfFile_Getcwd(char *buf, int size)
+{
+    if (buf == NULL || size <= 0) {
+        return NULL;
+    }
+    snprintf(buf, (size_t)size, "%s", sRoot);
+    return buf;
+}
+
+/* ------------------------------------------------------------------ the clock */
+
+int MfTime_Counter(LARGE_INTEGER *count)
+{
+    count->QuadPart = sClock;
+    return 1;
+}
+
+int MfTime_Frequency(LARGE_INTEGER *freq)
+{
+    freq->QuadPart = HOST_CLOCK_FREQ;
+    return 1;
+}
+
+unsigned int MfTime_Ms(void)
+{
+    return (unsigned int)(sClock * 1000 / HOST_CLOCK_FREQ);
+}
+
+/* ------------------------------------------------------------------ errors */
+
+void MfHost_ErrorDialog(const char *text, const char *title)
+{
+    snprintf(sError, sizeof(sError), "%s", text != NULL ? text : "");
+    fprintf(stderr, "[fight] %s\n%s\n", title != NULL ? title : "", sError);
+    /* Error_Exit frees the game variables next: the BGM thread must not outlive them */
+    if (g_bgmInitialized) {
+        Bgm_Deinit();
+    }
+}
+
+void MfHost_Exit(int code)
+{
+    if (sExitJumpReady && MfMem_InEngine && pthread_equal(pthread_self(), sEngineThread)) {
+        __builtin_longjmp(sExitJump, 1);
+    }
+    fprintf(stderr, "[fight] the engine exited (%d) outside its thread\n", code);
+    abort();
+}
+
+/* ------------------------------------------------------------------ settings */
+
+/* The keys of the engine's built-in key maps (system.c input_builtin_keys), in MF_BTN_* order. */
+static const int sPlayerKeys[2][11] = {
+    { SDLK_UP, SDLK_DOWN, SDLK_LEFT, SDLK_RIGHT, SDLK_COMMA, SDLK_PERIOD, SDLK_SLASH, SDLK_l, SDLK_SEMICOLON,
+      SDLK_QUOTE, SDLK_RETURN },
+    { SDLK_w, SDLK_s, SDLK_a, SDLK_d, SDLK_f, SDLK_g, SDLK_h, SDLK_r, SDLK_t, SDLK_y, SDLK_u },
+};
+static const int sKeySlots[11] = {
+    KEY_JUMP, KEY_CROUCH, KEY_LEFT, KEY_RIGHT, KEY_A, KEY_B, KEY_C, KEY_X, KEY_Y, KEY_Z, KEY_START,
+};
+
+void MfHost_ConfigLoaded(void)
+{
+    GameVars *g = g_game;
+    BgmPluginEntry *plugin;
+    DynArray *plugins;
+
+    /* the picture: the software renderer, 480x320 */
+    g->render_mode = RENDER_SYSTEM;
+    g->depth = 16;
+    g->video_flags = 0;
+    g->video_width = MF_SCREEN_W;
+    g->video_height = MF_SCREEN_H;
+    g->stage_fit = 0;
+    g->system_fit = 0;
+    g->safe_mode = 0;
+    g->game_width = MF_SCREEN_W;
+    g->game_height = MF_SCREEN_H;
+    g->game_coord[0] = MF_SCREEN_W;
+    g->game_coord[1] = MF_SCREEN_H;
+    g->game_coord[2] = (MF_SCREEN_W - 1) / 2;
+    g->game_coord[3] = (MF_SCREEN_H - 1) / 2;
+    memcpy(g_gameCoord, g->game_coord, sizeof(g_gameCoord));
+    g->game_speed = 60;
+
+    /* the sound: GBA rate, mono sound effects, every song through the "moemon" plugin */
+    g->sound_enabled = 1;
+    g->sample_rate = MF_MIX_RATE;
+    g->channels = 2;
+    g->bit_depth = 16;
+    g->stereo_effects = 0;
+    g->sfx_resample_method = SND_RESAMPLE_LIBRESAMPLE;
+    g->bgm_resample_method = SND_RESAMPLE_LIBRESAMPLE;
+    g->bgm_disabled = 0;
+    plugins = calloc(1, sizeof(DynArray));
+    plugin = calloc(1, sizeof(BgmPluginEntry));
+    if (plugins != NULL && plugin != NULL) {
+        plugins->data = calloc(BGM_ARRAY_CAPACITY, sizeof(void *));
+        plugins->elem_size = sizeof(void *);
+        plugins->capacity = BGM_ARRAY_CAPACITY;
+        plugin->name = strdup("moemon");
+        if (plugins->data != NULL && plugin->name != NULL) {
+            ((BgmPluginEntry **)plugins->data)[0] = plugin;
+            plugins->count = 1;
+            g->music_plugins = plugins;    /* the pack's list is left as it was read */
+        }
+    }
+
+    g->nojoy = 1;
+    g->precache = 0;            /* characters load on the engine's thread, where errors are caught */
+
+    /* no debug keys, no first-run box */
+    g->debug = 0;
+    g->allow_debug_mode = 0;
+    g->first_run = 0;
+}
+
+void MfHost_KeysLoaded(void)
+{
+    GameVars *g = g_game;
+    int p, i;
+
+    /* the players' buttons arrive as the built-in keys, whatever the pack's [P1 Keys] say; no joysticks */
+    for (p = 0; p < 2; p++) {
+        for (i = 0; i < 11; i++) {
+            g->keys[p][sKeySlots[i]] = sPlayerKeys[p][i];
+        }
+        g->option_input[p][1] = 0;
+        g->use_joystick[p] = 0;
+        g->joystick_type[p] = 0;
+    }
+}
+
+/* ------------------------------------------------------------------ the screenpack's place */
+
+/* The motif fits the picture whole (by height for 4:3 packs in 3:2), centred: nothing of it is cut off or
+ * squished (docs/FIGHT_DECISIONS.md #5). */
+void MfHost_FitMotif(void)
+{
+    GameVars *g = g_game;
+    double sx = g->game_coord[0] / g->motif_coord[0];
+    double sy = g->game_coord[1] / g->motif_coord[1];
+    double s = sx < sy ? sx : sy;
+
+    g->motif_scale = s;
+    g_mfMotifOffsetX = (int)floor((g->game_coord[0] - g->motif_coord[0] * s) / 2.0 + 0.5);
+    g_mfHudShift = 0;
+    g_mfHudSideX[0] = -g_mfMotifOffsetX;   /* until MfFit_Hud measures the HUD */
+    g_mfHudSideX[1] = g_mfMotifOffsetX;
+    g_mfHudTopY = g_mfHudBottomY = 0;
+}
+
+/* ------------------------------------------------------------------ the sides of 4:3 screens */
+
+/* The select, VS and results screens are the pack's 4:3 in the middle of the 3:2 picture. The sides show the
+ * screen's background: kept as it is drawn, before anything else of the screen (MfHost_KeepBackground), then
+ * put in the sides once the screen is drawn (MfHost_FillSides), over whatever slid past the 4:3 edges. Where the
+ * background reaches past its edges it goes on as it is; where it doesn't, it is mirrored from the edge. */
+static unsigned short sBack[MF_SCREEN_W * MF_SCREEN_H];
+static int sBackKept, sSidesDone;
+
+static SDL_Surface *Host_Target(void)
+{
+    const Sprite *spr;
+    SDL_Surface *surface;
+
+    if (g_renderTarget == NULL || g_renderTarget->sprites == NULL) {
+        return NULL;
+    }
+    spr = (const Sprite *)(g_renderTarget->sprites->data + g_renderTarget->sprites->elem_size * g_renderTargetSprite);
+    if (spr == NULL || spr->format != SPRITE_FORMAT_SURFACE || (surface = spr->pixels) == NULL
+        || surface->format->BytesPerPixel != 2) {
+        return NULL;
+    }
+    return surface;
+}
+
+static int Host_SidesWanted(void)
+{
+    return sMotifScreen && g_mfMotifOffsetX > 0 && !g_game->skip_draw;
+}
+
+void MfHost_KeepBackground(void)
+{
+    SDL_Surface *surface = Host_SidesWanted() ? Host_Target() : NULL;
+    int y, w, h;
+
+    if (surface == NULL) {
+        return;
+    }
+    w = surface->w < MF_SCREEN_W ? surface->w : MF_SCREEN_W;
+    h = surface->h < MF_SCREEN_H ? surface->h : MF_SCREEN_H;
+    memset(sBack, 0, sizeof(sBack));
+    for (y = 0; y < h; y++) {
+        memcpy(sBack + y * MF_SCREEN_W, (const unsigned char *)surface->pixels + y * surface->pitch, (size_t)w * 2);
+    }
+    sBackKept = 1;
+}
+
+static int Host_Bright(unsigned short c)
+{
+    return ((c >> 11) & 31) + ((c >> 5) & 63) / 2 + (c & 31) > 12;
+}
+
+/* One side of a row: x0..x1 (exclusive) of the picture. The background as it is where it really goes there
+ * (mostly lit); else its colour at the screen's edge (the inside columns e0..e1, rows y-2..y+2 averaged, so
+ * text at the edge doesn't streak) carried out to the picture's edge, a little darker towards it */
+static void Host_FillSide(unsigned short *row, int y, int h, int x0, int x1, int e0, int e1, int outer)
+{
+    const unsigned short *back = sBack + y * MF_SCREEN_W;
+    int x, lit = 0, r = 0, g = 0, b = 0, n = 0, yy;
+
+    for (x = x0; x < x1; x++) {
+        lit += Host_Bright(back[x]);
+    }
+    if (lit * 4 >= (x1 - x0) * 3) {
+        memcpy(row + x0, back + x0, (size_t)(x1 - x0) * 2);
+        return;
+    }
+    for (yy = y - 2; yy <= y + 2; yy++) {
+        const unsigned short *line = sBack + (yy < 0 ? 0 : yy >= h ? h - 1 : yy) * MF_SCREEN_W;
+        for (x = e0; x < e1; x++) {
+            r += line[x] >> 11;
+            g += (line[x] >> 5) & 63;
+            b += line[x] & 31;
+            n++;
+        }
+    }
+    for (x = x0; x < x1; x++) {
+        int d = x < outer ? outer - x : x - outer;        /* how far from the picture's edge */
+        int k = 208 + 48 * d / (x1 - x0 > 1 ? x1 - x0 : 1);    /* 4/5 brightness at the picture's edge */
+        k = k > 256 ? 256 : k;
+        row[x] = (unsigned short)(((r / n * k >> 8) << 11) | ((g / n * k >> 8) << 5) | (b / n * k >> 8));
+    }
+}
+
+void MfHost_FillSides(void)
+{
+    SDL_Surface *surface = Host_SidesWanted() ? Host_Target() : NULL;
+    int left = g_mfMotifOffsetX;
+    int right = g_mfMotifOffsetX + (int)floor(g_game->motif_coord[0] * g_game->motif_scale + 0.5);
+    int y, w, h;
+
+    if (surface == NULL) {
+        sBackKept = 0;
+        return;
+    }
+    w = surface->w < MF_SCREEN_W ? surface->w : MF_SCREEN_W;
+    h = surface->h < MF_SCREEN_H ? surface->h : MF_SCREEN_H;
+    if (right > w) {
+        right = w;
+    }
+    for (y = 0; y < h; y++) {
+        unsigned short *row = (unsigned short *)((unsigned char *)surface->pixels + y * surface->pitch);
+        if (!sBackKept) {
+            memset(row, 0, (size_t)left * 2);
+            memset(row + right, 0, (size_t)(w - right) * 2);
+            continue;
+        }
+        Host_FillSide(row, y, h, 0, left, left, left + 4 < right ? left + 4 : right, 0);
+        Host_FillSide(row, y, h, right, w, right - 4 > left ? right - 4 : left, right, w - 1);
+    }
+    sBackKept = 0;
+    sSidesDone = 1;
+}
+
+/* ------------------------------------------------------------------ frames */
+
+void MfHost_Present(const SDL_Surface *surface)
+{
+    unsigned short *dst = sFrames[sFront ^ 1];
+    int w, h, y;
+
+    if (surface == NULL || surface->format->BytesPerPixel != 2) {
+        return;
+    }
+    if (sLastScreen && g_game->fade.type != 0 && g_game->fade.out) {
+        return;
+    }
+    w = surface->w < MF_SCREEN_W ? surface->w : MF_SCREEN_W;
+    h = surface->h < MF_SCREEN_H ? surface->h : MF_SCREEN_H;
+    if (w < MF_SCREEN_W || h < MF_SCREEN_H) {
+        memset(dst, 0, sizeof(sFrames[0]));
+    }
+    for (y = 0; y < h; y++) {
+        memcpy(dst + y * MF_SCREEN_W, (const unsigned char *)surface->pixels + y * surface->pitch, (size_t)w * 2);
+    }
+    if (sMotifScreen && g_mfMotifOffsetX > 0 && !sSidesDone) {
+        /* a screen without a background (MfHost_FillSides): what slides past its 4:3 edges isn't shown */
+        int right = g_mfMotifOffsetX + (int)floor(g_game->motif_coord[0] * g_game->motif_scale + 0.5);
+        for (y = 0; y < MF_SCREEN_H; y++) {
+            memset(dst + y * MF_SCREEN_W, 0, (size_t)g_mfMotifOffsetX * 2);
+            if (right < MF_SCREEN_W) {
+                memset(dst + y * MF_SCREEN_W + right, 0, (size_t)(MF_SCREEN_W - right) * 2);
+            }
+        }
+    }
+    sPresented = 1;
+    sSidesDone = 0;
+}
+
+/* The fight is on screen (Fight_DrawHud): the picture's full width is the stage's */
+void MfHost_MatchShown(void)
+{
+    sMotifScreen = 0;
+    sZone = 1;
+}
+
+/* Key events for the buttons that changed (engine thread). */
+static void Host_PushButtons(const unsigned short buttons[2])
+{
+    int p, i;
+
+    for (p = 0; p < 2; p++) {
+        unsigned short changed = (unsigned short)(buttons[p] ^ sHeld[p]);
+        for (i = 0; i < 11; i++) {
+            if (changed & (1 << i)) {
+                MfSdl_PushKey(sPlayerKeys[p][i], (buttons[p] >> i) & 1);
+            }
+        }
+        sHeld[p] = buttons[p];
+    }
+}
+
+/* The end of every frame: back to the engine thread's loop (Host_FrameDone), which resumes the engine for the
+ * next frame with its buttons */
+void MfHost_FrameEnd(void)
+{
+    /* Moemon Fight: each song's level and the gain against the voices, logged here on the engine thread once the
+     * music thread has opened it (it logs nothing itself: its log calls raced the engine's) */
+    static int logged_opens;
+    if (MfMix_MusicOpens() != logged_opens) {
+        double level = MfMix_MusicLevel();
+        logged_opens = MfMix_MusicOpens();
+        Log_Printf("Song level %.1f dBFS, played at x%.2f\n", level > 0.0 ? 20.0 * log10(level) : -99.0,
+                   MfMix_MusicGain());
+    }
+    MfCoro_Yield();
+
+    sClock += g_timerFrameTicks > 0 ? g_timerFrameTicks : HOST_CLOCK_FREQ / 60;
+    sReplaying = sStepQuiet;
+    if (sStepCancel) {
+        /* escape ends any screen; nothing else is held */
+        unsigned short none[2] = { 0, 0 };
+        Host_PushButtons(none);
+        MfSdl_PushKey(SDLK_ESCAPE, 1);
+        MfSdl_PushKey(SDLK_ESCAPE, 0);
+    } else {
+        Host_PushButtons(sStepButtons);
+    }
+    g_game->skip_draw = sStepQuiet;
+}
+
+int MfHost_Replaying(void)
+{
+    return sReplaying;
+}
+
+int MfHost_OnEngine(void)
+{
+    return MfMem_InEngine;
+}
+
+unsigned int MfHost_FrameRunning(void)
+{
+    return sFrame + 1;
+}
+
+/* ------------------------------------------------------------------ rollback */
+
+/* The host's part of the fight's state, kept with each frame */
+typedef struct HostVars {
+    long long clock;
+    unsigned short held[2];
+    int motif_screen;
+    int zone;
+} HostVars;
+
+static void Host_PackVars(void *out)
+{
+    HostVars v;
+
+    memset(out, 0, MF_RB_HOST_SIZE);
+    v.clock = sClock;
+    v.held[0] = sHeld[0];
+    v.held[1] = sHeld[1];
+    v.motif_screen = sMotifScreen;
+    v.zone = sZone;
+    memcpy(out, &v, sizeof(v));
+}
+
+static void Host_UnpackVars(const void *in)
+{
+    HostVars v;
+
+    memcpy(&v, in, sizeof(v));
+    sClock = v.clock;
+    sHeld[0] = v.held[0];
+    sHeld[1] = v.held[1];
+    sMotifScreen = v.motif_screen;
+    sZone = v.zone;
+}
+
+/* What the two players' games must agree on after a frame: every player and helper, the timer and the RNGs */
+static unsigned int Host_Hash(void)
+{
+    GameVars *g = g_game;
+    unsigned int h = 2166136261u;
+    int i;
+
+#define HASH(v) do { const unsigned char *b_ = (const unsigned char *)&(v); size_t n_; \
+        for (n_ = 0; n_ < sizeof(v); n_++) { h = (h ^ b_[n_]) * 16777619u; } } while (0)
+    if (g == NULL) {
+        return 0;
+    }
+    HASH(g->round_time);
+    HASH(g->match_rng);
+    HASH(g->session_rng);
+    for (i = 1; i < 65; i++) {
+        Player *p = g->players[i];
+        if (p == NULL) {
+            continue;
+        }
+        HASH(i);
+        HASH(p->id);
+        HASH(p->state_no);
+        HASH(p->ctrl);
+        HASH(p->life);
+        HASH(p->power);
+        HASH(p->facing);
+        HASH(p->pos.x);
+        HASH(p->pos.y);
+        HASH(p->vel.x);
+        HASH(p->vel.y);
+    }
+#undef HASH
+    return h;
+}
+
+/* After each frame (engine thread, the engine stopped in MfHost_FrameEnd): the picture, keeping the frame,
+ * then what the game asks next */
+static void Host_FrameDone(void)
+{
+    unsigned char vars[MF_RB_HOST_SIZE];
+
+    pthread_mutex_lock(&sLock);
+    if (sPresented) {
+        sFront ^= 1;
+        sHaveFrame = 1;
+        sPresented = 0;
+        sFrameSerial++;
+    }
+    if (sNewSession) {
+        sNewSession = 0;
+        sFrame = 0;
+        MfRollback_End();
+    }
+    sFrame++;
+    if (sSession.rollback) {
+        Host_PackVars(vars);
+        if (!sZone) {
+            if (MfRollback_On()) {
+                MfRollback_End();
+            }
+        } else if (!MfRollback_On()) {
+            MfRollback_Begin(sFrame, vars);
+        } else {
+            MfRollback_Save(sFrame, vars);
+        }
+    }
+    sHash = Host_Hash();
+    sFramesDone = sFrame;
+    sBusy = 0;
+    sAnswered++;
+    pthread_cond_broadcast(&sCond);
+    for (;;) {
+        while (sCmd == CMD_NONE && !sCancel) {
+            pthread_cond_wait(&sCond, &sLock);
+        }
+        if (sCancel) {
+            sStepButtons[0] = sStepButtons[1] = 0;
+            sStepQuiet = 0;
+            sStepCancel = 1;
+            sCmd = CMD_NONE;
+            break;
+        }
+        if (sCmd == CMD_REWIND) {
+            sCmdOk = MfRollback_Restore(sCmdFrame, vars);
+            if (sCmdOk) {
+                Host_UnpackVars(vars);
+                sFrame = sCmdFrame;
+                sFramesDone = sFrame;
+                sHash = Host_Hash();
+            }
+            sCmd = CMD_NONE;
+            sAnswered++;
+            pthread_cond_broadcast(&sCond);
+            continue;
+        }
+        sStepButtons[0] = sCmdButtons[0];
+        sStepButtons[1] = sCmdButtons[1];
+        sStepQuiet = sCmdQuiet;
+        sStepCancel = 0;
+        sCmd = CMD_NONE;
+        break;
+    }
+    sBusy = 1;
+    pthread_mutex_unlock(&sLock);
+}
+
+/* ------------------------------------------------------------------ sessions */
+
+/* The cabinet's rules from mugen/cabinets.ini (missing values keep the pack's). */
+/* The cabinet's stages (cabinets.ini "stages", empty: every stage of the select list) and whether a CPU fight
+ * is on the opponent's own stage (cpu.stage = home) */
+static char sStages[64][0x80];
+static int sStageCount;
+static int sCpuHomeStage;
+
+static void Host_ReadStages(const char *list)
+{
+    sStageCount = 0;
+    while (list != NULL && *list != '\0' && sStageCount < 64) {
+        const char *end = strchr(list, ',');
+        size_t n = end != NULL ? (size_t)(end - list) : strlen(list);
+        char name[0x80];
+        while (n > 0 && (*list == ' ' || *list == '\t')) {
+            list++;
+            n--;
+        }
+        while (n > 0 && (list[n - 1] == ' ' || list[n - 1] == '\t')) {
+            n--;
+        }
+        if (n > 0 && n < 0x60) {
+            memcpy(name, list, n);
+            name[n] = '\0';
+            /* "sf2-harbor" is stages/sf2-harbor.def */
+            snprintf(sStages[sStageCount++], 0x80, "%s%s%s", strchr(name, '/') || strchr(name, '\\') ? "" : "stages/",
+                     name, n > 4 && _stricmp(name + n - 4, ".def") == 0 ? "" : ".def");
+        }
+        list = end != NULL ? end + 1 : NULL;
+    }
+}
+
+int MfPack_StageIndex(const char *path);
+
+/* A stage one of the online players lacks (mf_pack.c) */
+static int Host_StageOff(const char *path)
+{
+    int i = MfPack_StageIndex(path);
+    return i >= 0 && i < MF_PACK_MAX && sSession.stageOff[i];
+}
+
+/* A character one of the online players lacks: greyed out on the select screen (select.c) */
+int MfHost_CharOff(int char_index)
+{
+    return char_index >= 0 && char_index < MF_PACK_MAX && sSession.charOff[char_index];
+}
+
+/* The fight's stage, from the match RNG (the same on both sides online): the cabinet's list or the select list,
+ * without the stages one of the players lacks (unless that's all of them) */
+static void Host_PickStage(void)
+{
+    GameVars *g = g_game;
+    const char *path;
+    const char *ok[64];
+    int i, n = 0, total = sStageCount > 0 ? sStageCount : g->stage_count;
+
+    for (i = 0; i < total && n < 64; i++) {
+        const char *p = sStageCount > 0 ? sStages[i] : g->select_screen[i].path;
+        if (!Host_StageOff(p)) {
+            ok[n++] = p;
+        }
+    }
+    if (n > 0) {
+        path = ok[Random_Next() % n];
+    } else if (sStageCount > 0) {
+        path = sStages[Random_Next() % sStageCount];
+    } else if (g->stage_count > 0) {
+        path = g->select_screen[Random_Next() % g->stage_count].path;
+    } else {
+        return;
+    }
+    g->select_stage[0] = '\0';
+    strncat(g->select_stage, path, sizeof(g->select_stage) - 1);
+    g->arcade_music[0] = '\0';     /* the stage's own music */
+}
+
+/* The VS screen names the stage (the cabinet picks it: nobody chose it) */
+static char sStageName[0x50];
+static int sStagePos[2], sStageFont[3];
+
+const char *MfHost_VsStage(int pos[2], int font[3])
+{
+    pos[0] = sStagePos[0];
+    pos[1] = sStagePos[1];
+    font[0] = sStageFont[0];
+    font[1] = sStageFont[1];
+    font[2] = sStageFont[2];
+    return sStageName;
+}
+
+static void Host_NameStage(void)
+{
+    Ini *def = g_game->select_stage[0] != '\0' ? Ini_Open(g_game->select_stage) : NULL;
+    const char *name = NULL;
+
+    sStageName[0] = '\0';
+    if (def == NULL) {
+        return;
+    }
+    if (Ini_SelectGroup(def, "Info") != -1) {
+        name = Ini_GetValue(def, "displayname");
+        if (name == NULL) {
+            name = Ini_GetValue(def, "name");
+        }
+    }
+    if (name != NULL) {
+        size_t n;
+        while (*name == '"' || *name == ' ') {
+            name++;
+        }
+        snprintf(sStageName, sizeof(sStageName), "%s", name);
+        n = strlen(sStageName);
+        while (n > 0 && (sStageName[n - 1] == '"' || sStageName[n - 1] == ' ')) {
+            sStageName[--n] = '\0';
+        }
+    }
+    Ini_Free(def);
+}
+
+static void Host_ApplyCabinet(const char *cabinet)
+{
+    GameVars *g = g_game;
+    Ini *ini = NULL;
+    int v, hud_top = 8;
+    const char *text;
+
+    sStageCount = 0;
+    sCpuHomeStage = 0;
+    sStagePos[0] = sStagePos[1] = -1;
+    sStageFont[0] = -1;
+    sStageFont[1] = sStageFont[2] = 0;
+    if (sSession.cabinetText[0] != '\0') {
+        /* online: the answering player's rules */
+        Stream *st = Stream_OpenMemory(sSession.cabinetText, (int)strnlen(sSession.cabinetText, sizeof(sSession.cabinetText)));
+        if (st != NULL) {
+            ini = Ini_Parse(st, INI_MODE_READ);
+            Stream_Close(st);
+        }
+    } else {
+        ini = Ini_Open("cabinets.ini");
+    }
+    if (ini == NULL) {
+        MfFit_Hud(hud_top);
+        return;
+    }
+    if (Ini_SelectGroup(ini, cabinet) != -1) {
+        if (Ini_GetInt(ini, "hud.top", &v) && v >= -1 && v <= 80) {
+            hud_top = v;
+        }
+        Host_ReadStages(Ini_GetValue(ini, "stages"));
+        if (Ini_Scanf(ini, "vs.stage.offset", "%i,%i", &sStagePos[0], &sStagePos[1]) < 2) {
+            sStagePos[0] = sStagePos[1] = -1;
+        }
+        if (Ini_Scanf(ini, "vs.stage.font", "%i,%i,%i", &sStageFont[0], &sStageFont[1], &sStageFont[2]) < 1) {
+            sStageFont[0] = -1;
+        }
+        text = Ini_GetValue(ini, "cpu.stage");
+        sCpuHomeStage = text != NULL && _stricmp(text, "home") == 0;
+        if (Ini_GetInt(ini, "rounds", &v) && v >= 1 && v <= 9) {
+            g->fight.round.match_wins = v;
+        }
+        if (Ini_GetInt(ini, "life", &v) && v >= 30 && v <= 300) {
+            g->life = v;
+        }
+        if (Ini_GetInt(ini, "time", &v) && (v == -1 || (v >= 20 && v <= 99))) {
+            g->time = v;
+        }
+        if (Ini_GetInt(ini, "speed", &v) && v >= -9 && v <= 9) {
+            g->option_game_speed = v;
+        }
+        if (Ini_GetInt(ini, "cpu.level", &v) && v >= 1 && v <= 8) {
+            g->difficulty = v;
+        }
+    }
+    Ini_Free(ini);
+    /* tests: short fights */
+    if (getenv("MOEMON_FIGHT_ROUNDS") != NULL && atoi(getenv("MOEMON_FIGHT_ROUNDS")) >= 1) {
+        g->fight.round.match_wins = atoi(getenv("MOEMON_FIGHT_ROUNDS"));
+    }
+    if (getenv("MOEMON_FIGHT_TIME") != NULL && atoi(getenv("MOEMON_FIGHT_TIME")) >= 5) {
+        g->time = atoi(getenv("MOEMON_FIGHT_TIME"));
+    }
+    MfFit_Hud(hud_top);
+}
+
+/*
+ * Tests (the 6.4 audit, tools/fight/audit_chars.sh): MOEMON_FIGHT_PICK="P1,P2[,STAGE]" skips the select screen with
+ * those characters (select list numbers from 0) on palette 1, and the stage (cabinet list number, or a .def path);
+ * MOEMON_FIGHT_WATCH=1 has the CPU play both sides (Players_ForceAi).
+ */
+static int Host_TestPicks(void)
+{
+    GameVars *g = g_game;
+    const char *env = getenv("MOEMON_FIGHT_PICK");
+    int pick[2], side;
+
+    if (env == NULL || sscanf(env, "%d,%d", &pick[0], &pick[1]) != 2) {
+        return 0;
+    }
+    g->team_variant = 0;
+    g->arcade_side = 0;
+    for (side = 0; side < 2; side++) {
+        TeamSel *t = &g->teams[side];
+        TeamSlot *slot = &t->members[0].slots[0];
+        int c = pick[side] >= 0 && pick[side] < g->char_count ? pick[side] : 0;
+        t->member_count = 1;
+        t->members[0].count = 1;
+        t->members[0].mode = TEAM_SINGLE;
+        t->char_count = 1;
+        slot->player = side + 1;
+        slot->side = side;
+        slot->char_index = c;
+        slot->pal = PalReserve_Request(c, 0);
+        g->player_sides[side] = side;
+    }
+    memcpy(&g->match_members[0], &g->teams[0].members[0], sizeof(TeamMember));
+    memcpy(&g->match_members[1], &g->teams[1].members[0], sizeof(TeamMember));
+    return 1;
+}
+
+static void Host_TestStage(void)
+{
+    GameVars *g = g_game;
+    const char *env = getenv("MOEMON_FIGHT_PICK");
+    const char *stage;
+    int n;
+
+    if (env == NULL || (stage = strchr(env, ',')) == NULL || (stage = strchr(stage + 1, ',')) == NULL) {
+        return;
+    }
+    stage++;
+    if (sscanf(stage, "%d", &n) == 1 && strchr(stage, '.') == NULL) {
+        if (sStageCount > 0 && n >= 0 && n < sStageCount) {
+            stage = sStages[n];
+        } else {
+            return;
+        }
+    }
+    g->select_stage[0] = '\0';
+    strncat(g->select_stage, stage, sizeof(g->select_stage) - 1);
+    g->arcade_music[0] = '\0';
+}
+
+int MfHost_TestWatch(void)
+{
+    static int watch = -1;
+    if (watch < 0) {
+        watch = getenv("MOEMON_FIGHT_WATCH") != NULL;
+    }
+    return watch;
+}
+
+static int Host_RunSession(const struct MfSession *s)
+{
+    GameVars *g = g_game;
+    int state = 6;
+    int result = MF_RESULT_CANCELLED;
+
+    Host_ApplyCabinet(s->cabinet[0] != '\0' ? s->cabinet : "mauville_gc");
+    sMotifScreen = 0;
+    sLastScreen = 0;
+    g = g_game;
+    g->game_mode = s->mode == MF_MODE_CPU ? GAME_MODE_ARCADE : GAME_MODE_VERSUS;
+    g->game_mode_side = 0;
+    g->demo_mode = 0;
+    g->quick_vs = 0;
+    Rng_Seed((int)(s->seed & 0x7FFFFFFE) + 1);
+    while (!sCancel) {
+        switch (state) {
+        case 6:
+            state = Gameflow_SetupMatch();
+            break;
+        case 7:
+            sMotifScreen = 1;
+            if (Host_TestPicks()) {
+                state = 8;      /* tests: the fighters were given (MOEMON_FIGHT_PICK) */
+                break;
+            }
+            state = Charsel_Run();
+            if (state != 8) {
+                return MF_RESULT_CANCELLED;
+            }
+            break;
+        case 8:
+            Gameflow_PickStage();
+            if (s->mode != MF_MODE_CPU || !sCpuHomeStage) {
+                Host_PickStage();
+            }
+            Host_TestStage();
+            Host_NameStage();
+            state = 10;
+            break;
+        case 10:
+            state = Versus_Run();
+            if (state != 11) {
+                return MF_RESULT_CANCELLED;
+            }
+            break;
+        case 11:
+            sLastScreen = s->mode == MF_MODE_CPU;   /* one match against the CPU, no results screen */
+            state = Match_Run();    /* the VS screen stays up while it loads: MfHost_MatchShown */
+            sZone = 0;
+            g = g_game;
+            if (state == 11) {
+                break;      /* the match is played again */
+            }
+            if (state == 6 || !g->match_has_result) {
+                return MF_RESULT_CANCELLED;
+            }
+            result = g->match_winner == 1 ? MF_RESULT_P1 : g->match_winner == 2 ? MF_RESULT_P2 : MF_RESULT_DRAW;
+            if (state != 12) {
+                return result;      /* an arcade loss: no continue screen */
+            }
+            break;
+        case 12:
+            sMotifScreen = 1;
+            sLastScreen = 1;
+            Victory_Run();
+            return result;
+        default:
+            return result;
+        }
+    }
+    return MF_RESULT_CANCELLED;
+}
+
+/* What the original main() does before the game flow, and the select list (game flow step 2). */
+static void Host_StartEngine(void)
+{
+    static char arg0[] = "mugen";
+    char *argv[] = { arg0, NULL };
+
+    g_cmdline = calloc(1, sizeof(CmdLineArgs));
+    if (g_cmdline == NULL) {
+        MfHost_ErrorDialog("Out of memory", "M.U.G.E.N Error");
+        __builtin_longjmp(sExitJump, 1);
+    }
+    Log_Init();
+    CmdLine_Parse(1, argv);
+    System_Init();
+    Gfx_SetRenderTarget(g_game->screen, 0);
+    g_gfxClear(0);
+    Gfx_SetClipRect(0, 0, g_targetWidth, g_targetHeight);
+    Timer_Reset();
+    Timer_SetFps(60);
+    g_game->start_ticks = (int)Timer_GetTicks();
+    Select_Init();
+}
+
+/* The engine itself, as a coroutine on the fight's heap region (fight/host/mf_coro.c): starts up, then runs
+ * the sessions it's given */
+static void Host_EngineMain(void)
+{
+    if (__builtin_setjmp(sExitJump) != 0) {
+        pthread_mutex_lock(&sLock);
+        sState = HOST_DEAD;
+        sActive = 0;
+        sSessionPending = 0;
+        sResult = MF_RESULT_ERROR;
+        if (sError[0] == '\0') {
+            snprintf(sError, sizeof(sError), "The fight engine stopped.");
+        }
+        pthread_cond_broadcast(&sCond);
+        pthread_mutex_unlock(&sLock);
+        return;
+    }
+    sExitJumpReady = 1;
+    Host_StartEngine();
+    for (;;) {
+        struct MfSession session;
+        int result;
+
+        /* the engine thread waits for a session (Host_Ready), the engine as it started up put back */
+        sAtReady = 1;
+        MfCoro_Yield();
+        sAtReady = 0;
+        session = sSession;
+
+        MfSdl_ClearEvents();
+        sHeld[0] = sHeld[1] = 0;
+        sZone = 0;
+        result = Host_RunSession(&session);
+        MfMix_Reset();
+        sZone = 0;
+
+        pthread_mutex_lock(&sLock);
+        sResult = sCancel ? MF_RESULT_CANCELLED : result;
+        sActive = 0;
+        sCancel = 0;
+        sCmd = CMD_NONE;
+        sAnswered++;
+        pthread_cond_broadcast(&sCond);
+        pthread_mutex_unlock(&sLock);
+    }
+}
+
+/* Between sessions (engine thread, the engine stopped in Host_EngineMain): the first time, the engine as it
+ * started up is kept; then the next session, which begins from it (a session is the same whatever ran before,
+ * on any PC: online games start alike) */
+static void Host_Ready(void)
+{
+    unsigned char vars[MF_RB_HOST_SIZE];
+
+    if (!sStartKept) {
+        Host_PackVars(vars);
+        sStartKept = MfRollback_KeepStart(vars);
+    }
+    pthread_mutex_lock(&sLock);
+    sState = HOST_READY;
+    sBusy = 1;
+    pthread_cond_broadcast(&sCond);
+    while (!sSessionPending) {
+        pthread_cond_wait(&sCond, &sLock);
+    }
+    sSessionPending = 0;
+    sState = HOST_RUNNING;
+    sNewSession = 1;
+    pthread_mutex_unlock(&sLock);
+    if (sStartKept && sSessionsRun > 0 && MfRollback_RestoreStart(vars)) {
+        Host_UnpackVars(vars);
+    }
+    sSessionsRun++;
+}
+
+static void *Host_Thread(void *arg)
+{
+    sEngineThread = pthread_self();
+    MfRollback_ThreadInit();
+    if (!MfMem_Init() || !MfCoro_Create(Host_EngineMain)) {
+        pthread_mutex_lock(&sLock);
+        sState = HOST_DEAD;
+        sActive = 0;
+        sSessionPending = 0;
+        sResult = MF_RESULT_ERROR;
+        snprintf(sError, sizeof(sError), "Not enough memory for the fight engine.");
+        pthread_cond_broadcast(&sCond);
+        pthread_mutex_unlock(&sLock);
+        return NULL;
+    }
+    sBusy = 1;
+    while (MfCoro_Resume()) {
+        if (sAtReady) {
+            Host_Ready();
+        } else {
+            Host_FrameDone();
+        }
+    }
+    return NULL;
+}
+
+/* ------------------------------------------------------------------ the game's side */
+
+int MfEngine_Begin(const struct MfSession *session)
+{
+    pthread_mutex_lock(&sLock);
+    if (sState == HOST_DEAD || sActive) {
+        pthread_mutex_unlock(&sLock);
+        return 0;
+    }
+    if (sState == HOST_OFF) {
+        pthread_attr_t attr;
+        Host_InitRoot();
+        sSyncSteps = getenv("MOEMON_FIGHT_SYNC") != NULL;
+        pthread_attr_init(&attr);
+        pthread_attr_setstacksize(&attr, 4 << 20);
+        sState = HOST_LOADING;
+        if (pthread_create(&sThread, &attr, Host_Thread, NULL) != 0) {
+            sState = HOST_DEAD;
+            snprintf(sError, sizeof(sError), "Couldn't start the fight engine.");
+            pthread_attr_destroy(&attr);
+            pthread_mutex_unlock(&sLock);
+            return 0;
+        }
+        pthread_attr_destroy(&attr);
+    }
+    sSession = *session;
+    sSessionPending = 1;
+    sActive = 1;
+    sCancel = 0;
+    sResult = MF_RESULT_NONE;
+    sCmd = CMD_NONE;
+    sFramesDone = 0;
+    sHaveFrame = 0;
+    pthread_cond_broadcast(&sCond);
+    pthread_mutex_unlock(&sLock);
+    return 1;
+}
+
+int MfEngine_IsActive(void)
+{
+    return sActive;
+}
+
+/* Posts a command for the engine thread and waits for it: wait_ms -1 until done, else at most that long.
+ * 0 when the engine isn't taking commands (busy with the last one, or not in a session) */
+static int Host_Post(int cmd, const unsigned short buttons[2], int quiet, unsigned int frame, int wait_ms)
+{
+    unsigned long target;
+    struct timespec until;
+
+    pthread_mutex_lock(&sLock);
+    if (wait_ms < 0) {
+        while (sActive && (sBusy || sCmd != CMD_NONE) && sState != HOST_DEAD) {
+            pthread_cond_wait(&sCond, &sLock);
+        }
+    }
+    if (!sActive || sBusy || sCmd != CMD_NONE) {
+        pthread_mutex_unlock(&sLock);
+        return 0;
+    }
+    sCmd = cmd;
+    if (buttons != NULL) {
+        sCmdButtons[0] = buttons[0];
+        sCmdButtons[1] = buttons[1];
+    }
+    sCmdQuiet = quiet;
+    sCmdFrame = frame;
+    sCmdOk = 0;
+    target = sAnswered + 1;
+    pthread_cond_broadcast(&sCond);
+    if (wait_ms < 0) {
+        while (sActive && sAnswered < target && sState != HOST_DEAD) {
+            pthread_cond_wait(&sCond, &sLock);
+        }
+    } else if (wait_ms > 0) {
+        clock_gettime(CLOCK_REALTIME, &until);
+        until.tv_nsec += wait_ms * 1000000L;
+        if (until.tv_nsec >= 1000000000L) {
+            until.tv_sec++;
+            until.tv_nsec -= 1000000000L;
+        }
+        while (sActive && sAnswered < target) {
+            if (pthread_cond_timedwait(&sCond, &sLock, &until) == ETIMEDOUT) {
+                break;
+            }
+        }
+    }
+    pthread_mutex_unlock(&sLock);
+    return 1;
+}
+
+int MfEngine_Step(const unsigned short buttons[2])
+{
+    /* tests wait for every frame, however long it takes; the game gives a frame 100 ms (loading takes longer:
+     * the steps meanwhile aren't taken) */
+    return Host_Post(CMD_STEP, buttons, 0, 0, sSyncSteps ? -1 : 100);
+}
+
+int MfEngine_Ready(void)
+{
+    return sActive && !sBusy && sCmd == CMD_NONE;
+}
+
+unsigned int MfEngine_FrameCount(void)
+{
+    return sFramesDone;
+}
+
+void MfEngine_StepQuiet(const unsigned short buttons[2])
+{
+    Host_Post(CMD_STEP, buttons, 1, 0, -1);
+}
+
+int MfEngine_RollBack(unsigned int frame)
+{
+    int ok;
+
+    if (!Host_Post(CMD_REWIND, NULL, 0, frame, -1)) {
+        return 0;
+    }
+    pthread_mutex_lock(&sLock);
+    ok = sCmdOk;
+    pthread_mutex_unlock(&sLock);
+    return ok;
+}
+
+int MfEngine_Kept(unsigned int *oldest)
+{
+    int on;
+
+    pthread_mutex_lock(&sLock);
+    on = sActive && !sBusy && MfRollback_On();
+    if (on && oldest != NULL) {
+        *oldest = MfRollback_Oldest();
+    }
+    pthread_mutex_unlock(&sLock);
+    return on;
+}
+
+unsigned int MfEngine_Hash(void)
+{
+    return sHash;
+}
+
+/* ------------------------------------------------------------------ desync recovery */
+
+static unsigned char *Host_Region(int region, size_t *size)
+{
+    size_t used;
+
+    if (region == MF_STATE_GLOBALS) {
+        return MfRollback_Globals(size);
+    }
+    used = MfMem_Used();
+    *size = MfMem_Base() != NULL && used > MF_MEM_STACK_SIZE ? used - MF_MEM_STACK_SIZE : 0;
+    return MfMem_Base() != NULL ? MfMem_Base() + MF_MEM_STACK_SIZE : NULL;   /* not the stack: each its own */
+}
+
+/* The engine waits between frames (sLock held) */
+static int Host_Idle(void)
+{
+    return sActive && !sBusy && sCmd == CMD_NONE && sState != HOST_DEAD;
+}
+
+static unsigned int Host_PageHash(const unsigned char *p, size_t n)
+{
+    unsigned long long h = 0x9E37;
+    size_t i;
+
+    for (i = 0; i + 8 <= n; i += 8) {
+        unsigned long long w;
+        memcpy(&w, p + i, 8);
+        h = (h ^ w) * 0x9E3779B97F4A7C15ULL;
+        h ^= h >> 29;
+    }
+    for (; i < n; i++) {
+        h = (h ^ p[i]) * 0x100000001B3ULL;
+    }
+    return (unsigned int)(h ^ (h >> 32)) | 1;   /* 0: no page */
+}
+
+/* The globals' layout in this build: their size and where a few of them are */
+static unsigned int Host_Layout(void)
+{
+    size_t size;
+    unsigned char *start = MfRollback_Globals(&size);
+    unsigned long long v[5];
+
+    v[0] = size;
+    v[1] = (unsigned long long)((unsigned char *)&g_game - start);
+    v[2] = (unsigned long long)((unsigned char *)&g_renderTarget - start);
+    v[3] = sizeof(GameVars);
+#ifdef _WIN32
+    v[4] = 1;
+#else
+    v[4] = 2;
+#endif
+    return Host_PageHash((const unsigned char *)v, sizeof(v));
+}
+
+int MfEngine_StateInfo(struct MfStateInfo *out)
+{
+    size_t size;
+    int ok;
+
+    memset(out, 0, sizeof(*out));
+    pthread_mutex_lock(&sLock);
+    ok = Host_Idle() && MfMem_Base() != NULL;
+    if (ok) {
+        out->heapBase = (unsigned long long)(uintptr_t)MfMem_Base();
+        out->heapUsed = (unsigned int)MfMem_Used();
+        Host_Region(MF_STATE_GLOBALS, &size);
+        out->globalsSize = (unsigned int)size;
+        out->layout = Host_Layout();
+        out->pages[MF_STATE_GLOBALS] = (unsigned int)((size + MF_STATE_PAGE - 1) / MF_STATE_PAGE);
+        Host_Region(MF_STATE_HEAP, &size);
+        out->pages[MF_STATE_HEAP] = (unsigned int)((size + MF_STATE_PAGE - 1) / MF_STATE_PAGE);
+        Host_PackVars(out->host);
+    }
+    pthread_mutex_unlock(&sLock);
+    return ok;
+}
+
+int MfEngine_StateHashes(int region, unsigned int first, unsigned int count, unsigned int *out)
+{
+    size_t size, at;
+    unsigned char *base;
+    unsigned int i;
+
+    pthread_mutex_lock(&sLock);
+    if (!Host_Idle() || region < 0 || region >= MF_STATE_REGIONS) {
+        pthread_mutex_unlock(&sLock);
+        return 0;
+    }
+    base = Host_Region(region, &size);
+    for (i = 0; i < count; i++) {
+        at = (size_t)(first + i) * MF_STATE_PAGE;
+        out[i] = base == NULL || at >= size ? 0
+               : Host_PageHash(base + at, size - at < MF_STATE_PAGE ? size - at : MF_STATE_PAGE);
+    }
+    pthread_mutex_unlock(&sLock);
+    return 1;
+}
+
+int MfEngine_StatePage(int region, unsigned int index, unsigned char *out)
+{
+    size_t size, at = (size_t)index * MF_STATE_PAGE;
+    unsigned char *base;
+    int ok;
+
+    memset(out, 0, MF_STATE_PAGE);
+    pthread_mutex_lock(&sLock);
+    ok = Host_Idle() && region >= 0 && region < MF_STATE_REGIONS;
+    if (ok) {
+        base = Host_Region(region, &size);
+        ok = base != NULL && at < size;
+        if (ok) {
+            memcpy(out, base + at, size - at < MF_STATE_PAGE ? size - at : MF_STATE_PAGE);
+        }
+    }
+    pthread_mutex_unlock(&sLock);
+    return ok;
+}
+
+int MfEngine_StateBegin(void)
+{
+    int ok;
+
+    pthread_mutex_lock(&sLock);
+    ok = Host_Idle();
+    if (ok) {
+        MfRollback_End();       /* the frames kept no longer lead here */
+        MfMem_MapLocal();
+    }
+    pthread_mutex_unlock(&sLock);
+    return ok;
+}
+
+int MfEngine_StatePut(int region, unsigned int index, const unsigned char *page)
+{
+    size_t at = (size_t)index * MF_STATE_PAGE, size, n, w;
+    unsigned char *base, *dst;
+
+    pthread_mutex_lock(&sLock);
+    if (!Host_Idle() || region < 0 || region >= MF_STATE_REGIONS) {
+        pthread_mutex_unlock(&sLock);
+        return 0;
+    }
+    if (region == MF_STATE_HEAP) {
+        /* the heap may reach further there: ours grows to it */
+        size_t end = MF_MEM_STACK_SIZE + at + MF_STATE_PAGE;
+        if (MfMem_Base() == NULL || end > MfMem_Size()) {
+            pthread_mutex_unlock(&sLock);
+            return 0;
+        }
+        if (end > MfMem_Used()) {
+            MfMem_SetUsed(end);
+        }
+    }
+    base = Host_Region(region, &size);
+    if (base == NULL || at >= size) {
+        pthread_mutex_unlock(&sLock);
+        return 0;
+    }
+    dst = base + at;
+    n = size - at < MF_STATE_PAGE ? size - at : MF_STATE_PAGE;
+    for (w = 0; w + 8 <= n; w += 8) {
+        unsigned long long mine, theirs;
+        memcpy(&mine, dst + w, 8);
+        memcpy(&theirs, page + w, 8);
+        if (mine != theirs && !MfMem_LocalPointer(mine)) {
+            memcpy(dst + w, &theirs, 8);
+        }
+    }
+    for (; w < n; w++) {
+        dst[w] = page[w];
+    }
+    pthread_mutex_unlock(&sLock);
+    return 1;
+}
+
+int MfEngine_StateEnd(const struct MfStateInfo *from)
+{
+    unsigned char vars[MF_RB_HOST_SIZE];
+    int ok;
+
+    pthread_mutex_lock(&sLock);
+    ok = Host_Idle();
+    if (ok) {
+        Host_UnpackVars(from->host);
+        if (from->heapUsed > MfMem_Used()) {
+            MfMem_SetUsed(from->heapUsed);
+        }
+        sHash = Host_Hash();
+        if (sSession.rollback && sZone) {
+            Host_PackVars(vars);
+            MfRollback_Begin(sFrame, vars);
+        }
+    }
+    pthread_mutex_unlock(&sLock);
+    return ok;
+}
+
+void MfEngine_TestPoke(int delta)
+{
+    pthread_mutex_lock(&sLock);
+    if (Host_Idle() && g_game != NULL && g_game->players[1] != NULL) {
+        g_game->players[1]->life += delta;
+        sHash = Host_Hash();
+    }
+    pthread_mutex_unlock(&sLock);
+}
+
+const unsigned short *MfEngine_Frame(void)
+{
+    return sHaveFrame ? sFrames[sFront] : NULL;
+}
+
+unsigned int MfEngine_FrameSerial(void)
+{
+    return sFrameSerial;
+}
+
+int MfEngine_Result(void)
+{
+    return sActive ? MF_RESULT_NONE : sResult;
+}
+
+void MfEngine_Cancel(void)
+{
+    pthread_mutex_lock(&sLock);
+    if (sActive) {
+        sCancel = 1;
+        sCmd = CMD_NONE;
+        if (sSessionPending) {
+            /* not started yet */
+            sSessionPending = 0;
+            sActive = 0;
+            sResult = MF_RESULT_CANCELLED;
+            sCancel = 0;
+        }
+        pthread_cond_broadcast(&sCond);
+    }
+    pthread_mutex_unlock(&sLock);
+}
+
+const char *MfEngine_Error(void)
+{
+    return sError;
+}
+
+void MfEngine_MixAudio(short *stereo, int frames, int rate)
+{
+    if (sState == HOST_RUNNING || sState == HOST_READY) {
+        MfMix_Render(stereo, frames, rate);
+    }
+}
+
+/* Tests: what the character audit reads (tools/fight/audit_chars.sh, mf_selftest's "audit") */
+int MfEngine_PlayerInfo(int n, struct MfPlayerInfo *out)
+{
+    GameVars *g = g_game;
+    Player *p;
+
+    memset(out, 0, sizeof(*out));
+    if (g == NULL || n < 1 || n > g->player_slots || n > 64 || (p = g->players[n]) == NULL || !p->active) {
+        return 0;
+    }
+    out->helper = p->helper;
+    out->state = p->state_no;
+    out->prev_state = p->prev_state_no;
+    out->state_time = p->state_time;
+    out->ctrl = p->ctrl;
+    out->statetype = p->statetype;
+    out->movetype = p->movetype;
+    out->life = p->life;
+    out->life_max = p->life_max;
+    out->power = p->power;
+    out->alive = p->alive;
+    out->hitpause = p->hitpause_time;
+    out->state_missing = !p->state_exists;
+    out->x = p->pos.x;
+    out->y = p->pos.y;
+    snprintf(out->name, sizeof(out->name), "%s", p->name);
+    return 1;
+}
+
+int MfEngine_PlayerSlots(void)
+{
+    return g_game != NULL ? g_game->player_slots : 0;
+}
+
+int MfEngine_RoundState(void)
+{
+    return g_game != NULL ? g_game->round_state : -1;
+}
+
+int MfEngine_RoundTime(void)
+{
+    return g_game != NULL ? g_game->round_time : -1;
+}
+
+int MfEngine_Paused(void)
+{
+    return g_game != NULL && g_game->pause_kind >= 0;
+}

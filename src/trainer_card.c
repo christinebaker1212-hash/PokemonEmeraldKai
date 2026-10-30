@@ -1,4 +1,5 @@
 #include "global.h"
+#include "tcg/integration.h"
 #include "mp.h"
 #include "scanline_effect.h"
 #include "palette.h"
@@ -773,6 +774,9 @@ static void TrainerCard_GenerateCardForPlayer(struct TrainerCard *trainerCard)
     trainerCard->frontierBP = gSaveBlock2Ptr->frontier.cardBattlePoints;
     if (trainerCard->hasAllFrontierSymbols)
         trainerCard->stars++;
+    // Moemon Kai: every card of the card game collected (src/tcg) is a star too
+    if (Tcg_CardMasterStar() && trainerCard->stars < 4)
+        trainerCard->stars++;
 
     if (trainerCard->gender == FEMALE)
         trainerCard->unionRoomClass = gUnionRoomFacilityClasses[(trainerCard->trainerId % NUM_UNION_ROOM_CLASSES) + NUM_UNION_ROOM_CLASSES];
@@ -788,6 +792,8 @@ void TrainerCard_GenerateCardForLinkPlayer(struct TrainerCard *trainerCard)
     trainerCard->linkHasAllFrontierSymbols = HasAllFrontierSymbols();
     *((u16 *)&trainerCard->linkPoints.frontier) = gSaveBlock2Ptr->frontier.cardBattlePoints;
     if (trainerCard->linkHasAllFrontierSymbols)
+        trainerCard->stars++;
+    if (Tcg_CardMasterStar() && trainerCard->stars < 4)
         trainerCard->stars++;
 
     if (trainerCard->gender == FEMALE)
@@ -1314,6 +1320,21 @@ static void PrintContestStringOnCard(void)
 {
     if (sData->cardType != CARD_TYPE_FRLG && sData->trainerCard.contestsWithFriends)
         PrintStatOnBackOfCard(4, gText_WonContestsWFriends, sData->textNumLinkContests, sTrainerCardStatColors);
+    // Moemon Co-op: fights at the VS cabinets (friends and the CPU), on our own card
+    else if (sData->cardType != CARD_TYPE_FRLG && !sData->isLink)
+    {
+        static const u8 sText_VsFights[] = _("VS FIGHTS");
+        s32 wins = MP_Achieve_GetCount("fightwin") + MP_Achieve_GetCount("fightcpu");
+        s32 losses = MP_Achieve_GetCount("fightloss") + MP_Achieve_GetCount("fightcpuloss");
+        u8 text[64];
+        if (wins + losses > 0)
+        {
+            ConvertIntToDecimalStringN(gStringVar1, min(wins, 9999), STR_CONV_MODE_LEFT_ALIGN, 4);
+            ConvertIntToDecimalStringN(gStringVar2, min(losses, 9999), STR_CONV_MODE_LEFT_ALIGN, 4);
+            StringExpandPlaceholders(text, gText_WinsLosses);
+            PrintStatOnBackOfCard(4, sText_VsFights, text, sTrainerCardTextColors);
+        }
+    }
 }
 
 static void BufferBattleFacilityStats(void)

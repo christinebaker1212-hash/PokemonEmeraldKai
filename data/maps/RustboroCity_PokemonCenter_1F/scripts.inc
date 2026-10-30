@@ -5,6 +5,7 @@ RustboroCity_PokemonCenter_1F_MapScripts::
 
 RustboroCity_PokemonCenter_1F_OnTransition:
 	setrespawn HEAL_LOCATION_RUSTBORO_CITY
+	call EventScript_TtMapSetup
 	call Common_EventScript_UpdateBrineyLocation
 	end
 

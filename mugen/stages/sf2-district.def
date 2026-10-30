@@ -1,0 +1,440 @@
+;--------------------------------------------------------
+[Info]
+name = "SF2 District - Chun-Li Stage"
+displayname = "CHINA - CHUN-LI"
+
+;--------------------------------------------------------
+[Camera]
+startx = 0
+starty = 0
+boundleft = -224
+boundright = 224
+boundhigh = -370
+boundlow = 0
+verticalfollow = .97
+floortension = 75
+tension = 80
+
+;--------------------------------------------------------
+[PlayerInfo]
+p1startx = -70
+p1starty = 0
+p1startz = 0
+p1facing = 1
+p2startx = 70
+p2starty = 0
+p2startz = 0
+p2facing = -1
+leftbound = -1000
+rightbound = 1000
+topbound = 0
+botbound = 0
+
+;--------------------------------------------------------
+[Scaling]
+topz = 0       
+botz = 50      
+topscale = 1       
+botscale = 1.2     
+
+;--------------------------------------------------------
+[Bound]
+screenleft = 15
+screenright = 15
+
+;--------------------------------------------------------
+[StageInfo]
+zoffset = 216
+autoturn = 1
+resetBG = 0
+localcoord=320,240
+
+;--------------------------------------------------------
+[Shadow]
+;color = 128, 128, 128
+yscale = .15
+reflect = 0
+
+;--------------------------------------------------------
+[Music]
+bgmusic = sound/SF2 District - Chun-Li Theme.mp3
+
+;--------------------------------------------------------
+[BGdef]
+spr = stages/sf2-district.sff
+debugbg = 0
+
+;--------------------------------------------------------
+;--------------------------------------------------------
+
+[BG Sky]
+type = normal 
+spriteno = 0, 0
+start = 0, -304
+delta = .408482, 1
+
+[BG Background]
+type  = normal
+spriteno = 0, 1
+start = 0, 0
+delta = .669642, 1
+mask = 1
+
+[BG Family]
+type  = anim
+actionno = 1
+start = -263, 96
+delta = .669642, 1
+mask = 0
+
+[BG Bothmen]
+type  = anim
+actionno = 2
+start = -159, 104
+delta = .669642, 1
+mask = 0
+
+[BG Chicken]
+type  = anim
+actionno = 3
+start = -53, 135
+delta = .669642, 1
+mask = 0
+
+[BG ManWithBike]
+type  = anim
+actionno = 4
+start = 70, 97
+delta = .669642, 1
+mask = 1
+
+[BG WomanWashing]
+type  = anim
+actionno = 5
+start = 195, 137
+delta = .669642, 1
+mask = 1
+
+[BG Ground] 
+type  = parallax
+spriteno = 8, 0
+start = 0, 176
+delta = .669642, 1
+xscale = 1, 1.780002
+
+[BG ShopDeco]
+type  = anim
+actionno = 6
+start = 280, 58
+delta = .669642, 1
+mask = 1
+
+[BG LeftRock]
+type  = normal
+spriteno = 9, 0
+start = -199, 217
+delta = 1.133928, 1
+mask = 1
+layerno = 1
+
+[BG RightRock]
+type  = normal
+spriteno = 9, 0
+start = 226, 220
+delta = 1.158482, 1
+mask = 1
+layerno = 1
+
+[BG Bike1GoToRight]
+type  = anim
+actionno = 7
+start = -700, 110
+delta = 1, 1
+velocity = 2,0
+mask = 1
+tile = 1, 0
+tilespacing = 6210, 0
+
+[BG Bike2GoToRight]
+type  = anim
+actionno = 8
+start = 2924, 108
+delta = 1, 1
+velocity = 2,0
+mask = 1
+tile = 1, 0
+tilespacing = 6210, 0
+
+[BG Bike3GoToRight]
+type  = anim
+actionno = 9
+start = 700, 110
+delta = 1, 1
+velocity = 3,0
+mask = 1
+tile = 1, 0
+tilespacing = 6210, 0
+
+[BG Bike4GoToRight]
+type  = anim
+actionno = 10
+start = 2200, 110
+delta = 1, 1
+velocity = 2.5,0
+mask = 1
+tile = 1, 0
+tilespacing = 6210, 0
+
+[BG Bike5GoToRight]
+type  = anim
+actionno = 11
+start = 5000, 110
+delta = 1, 1
+velocity = 2,0
+mask = 1
+tile = 1, 0
+tilespacing = 6210, 0
+
+[BG Bike6GoToRight]
+type  = anim
+actionno = 12
+start = 3400, 110
+delta = 1, 1
+velocity = 3,0
+mask = 1
+tile = 1, 0
+tilespacing = 6210, 0
+
+[BG Bike7GoToRight]
+type  = anim
+actionno = 13
+start = 5600, 110
+delta = 1, 1
+velocity = 2.5,0
+mask = 1
+tile = 1, 0
+tilespacing = 6210, 0
+
+[BG Bike1GoToLeft]
+type  = anim
+actionno = 14
+start = 3000, 110
+delta = 1, 1
+velocity = -2,0
+mask = 1
+tile = -1, 0
+tilespacing = 8610, 0
+
+[BG Bike2GoToLeft]
+type  = anim
+actionno = 15
+start = -1940, 110
+delta = 1, 1
+velocity = -3,0
+mask = 1
+tile = -1, 0
+tilespacing = 8610, 0
+
+[BG Bike3GoToLeft]
+type  = anim
+actionno = 16
+start = -800, 110
+delta = 1, 1
+velocity = -2,0
+mask = 1
+tile = -1, 0
+tilespacing = 8610, 0
+
+[BG Bike4GoToLeft]
+type  = anim
+actionno = 17
+start = -8000, 110
+delta = 1, 1
+velocity = -2,0
+mask = 1
+tile = -1, 0
+tilespacing = 8610, 0
+
+[BG Bike5GoToLeft]
+type  = anim
+actionno = 18
+start = -4940, 110
+delta = 1, 1
+velocity = -3,0
+mask = 1
+tile = -1, 0
+tilespacing = 7610, 0
+
+[BG Bike6GoToLeft]
+type  = anim
+actionno = 19
+start = -2800, 110
+delta = 1, 1
+velocity = -2,0
+mask = 1
+tile = -1, 0
+tilespacing = 7610, 0
+
+;_____________________________________________________________________________________________________
+
+[Begin Action 1] ; Family
+2,0, 0,0, 37
+2,1, 0,0, 12
+2,2, 0,0, 12
+2,1, 0,0, 12
+2,0, 0,0, 62
+2,1, 0,0, 12
+2,2, 0,0, 12
+2,1, 0,0, 12
+2,0, 0,0, 12
+2,1, 0,0, 12
+2,2, 0,0, 12
+2,1, 0,0, 12
+2,0, 0,0, 83
+            
+[Begin Action 2] ; BothMen
+3,0, 0,0, 15
+3,1, 0,0, 10
+3,2, 0,0, 10
+3,1, 0,0, 10
+3,0, 0,0, 10
+3,1, 0,0, 10
+3,2, 0,0, 10
+3,1, 0,0, 10
+3,0, 0,0, 72
+
+[Begin Action 3] ; Chicken
+4,0, 0,0, 72
+4,1, 0,0, 7
+4,2, 0,0, 7
+4,1, 0,0, 7
+4,0, 0,0, 7
+4,1, 0,0, 7
+4,2, 0,0, 7
+4,1, 0,0, 7
+4,0, 0,0, 7
+4,1, 0,0, 7
+4,2, 0,0, 7
+4,1, 0,0, 7
+4,0, 0,0, 18
+            
+[Begin Action 4] ; Man With Bike
+5,0, 0,0, 48
+5,1, 0,0, 13
+5,2, 0,0, 13
+5,1, 0,0, 13
+5,0, 0,0, 32
+
+[Begin Action 5] ; Woman Washing
+6,0, 0,0, 7
+6,1, 0,0, 12
+6,0, 0,0, 5
+
+[Begin Action 6] ; Shop Decoration
+7,0, 0,0, 8
+7,1, 0,0, 8
+7,2, 0,0, 8
+
+[Begin Action 7] ; Bike 1 Go to Right
+10,0, 0,0, 8
+10,1, 0,0, 8
+10,2, 0,0, 8
+10,3, 0,0, 8
+10,4, 0,0, 8
+10,5, 0,0, 8
+
+[Begin Action 8] ; Bike 2 Go to Right
+12,0, 0,0, 8
+12,1, 0,0, 8
+12,2, 0,0, 8
+12,3, 0,0, 8
+12,4, 0,0, 8
+12,5, 0,0, 8
+
+[Begin Action 9] ; Bike 3 Go to Right
+14,0, 0,0, 8
+14,1, 0,0, 8
+14,2, 0,0, 8
+14,3, 0,0, 8
+14,4, 0,0, 8
+14,5, 0,0, 8
+
+[Begin Action 10] ; Bike 4 Go to Right
+16,0, 0,0, 8
+16,1, 0,0, 8
+16,2, 0,0, 8
+16,3, 0,0, 8
+16,4, 0,0, 8
+16,5, 0,0, 8
+
+[Begin Action 11] ; Bike 5 Go to Right
+18,0, 0,0, 8
+18,1, 0,0, 8
+18,2, 0,0, 8
+18,3, 0,0, 8
+18,4, 0,0, 8
+18,5, 0,0, 8
+
+[Begin Action 12] ; Bike 6 Go to Right
+20,0, 0,0, 8
+20,1, 0,0, 8
+20,2, 0,0, 8
+20,3, 0,0, 8
+20,4, 0,0, 8
+20,5, 0,0, 8
+
+[Begin Action 13] ; Bike 7 Go to Right
+22,0, 0,0, 8
+22,1, 0,0, 8
+22,2, 0,0, 8
+22,3, 0,0, 8
+22,4, 0,0, 8
+22,5, 0,0, 8
+
+[Begin Action 14] ; Bike 1 Go to Left
+21,0, 0,0, 8
+21,1, 0,0, 8
+21,2, 0,0, 8
+21,3, 0,0, 8
+21,4, 0,0, 8
+21,5, 0,0, 8
+
+[Begin Action 15] ; Bike 2 Go to Left
+19,0, 0,0, 8
+19,1, 0,0, 8
+19,2, 0,0, 8
+19,3, 0,0, 8
+19,4, 0,0, 8
+19,5, 0,0, 8
+
+[Begin Action 16] ; Bike 3 Go to Left
+17,0, 0,0, 8
+17,1, 0,0, 8
+17,2, 0,0, 8
+17,3, 0,0, 8
+17,4, 0,0, 8
+17,5, 0,0, 8
+
+[Begin Action 17] ; Bike 4 Go to Left
+15,0, 0,0, 8
+15,1, 0,0, 8
+15,2, 0,0, 8
+15,3, 0,0, 8
+15,4, 0,0, 8
+15,5, 0,0, 8
+
+[Begin Action 18] ; Bike 5 Go to Left
+13,0, 0,0, 8
+13,1, 0,0, 8
+13,2, 0,0, 8
+13,3, 0,0, 8
+13,4, 0,0, 8
+13,5, 0,0, 8
+
+[Begin Action 19] ; Bike 6 Go to Left
+11,0, 0,0, 8
+11,1, 0,0, 8
+11,2, 0,0, 8
+11,3, 0,0, 8
+11,4, 0,0, 8
+11,5, 0,0, 8

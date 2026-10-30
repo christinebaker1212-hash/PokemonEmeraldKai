@@ -5,6 +5,7 @@ PetalburgCity_PokemonCenter_1F_MapScripts::
 
 PetalburgCity_PokemonCenter_1F_OnTransition:
 	setrespawn HEAL_LOCATION_PETALBURG_CITY
+	call EventScript_TtMapSetup
 	call Common_EventScript_UpdateBrineyLocation
 	end
 

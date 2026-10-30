@@ -1,3 +1,4 @@
+#include "mp_version.h"
 // Moemon Co-op: quiet autosave. Every few minutes of play on the map (sooner
 // after a battle), the game saves itself the moment the player is standing
 // free: no script, menu, message, battle or warp running. Nothing is shown.
@@ -76,7 +77,7 @@ static void Save(void)
 void MP_Autosave_Update(void)
 {
     u32 due;
-    if (gMpConfig.autosaveMinutes == 0)
+    if (MOEMON_DEV_BUILD || gMpConfig.autosaveMinutes == 0)
         return;
     if (gMain.inBattle)
     {

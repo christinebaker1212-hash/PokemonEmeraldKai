@@ -1,0 +1,9 @@
+# BATTLE ANIMS > MODERN: every move's animation (mp animall), ALICE's side attacking and the foe's, with glows, trails and
+# impacts drawn over them; each takes exactly as many frames as on CLASSIC (anim_classic logs the same list: the test
+# compares them, tools/test/check_anim_frames.sh) and nothing crashes. Shots of a few moves for a look.
+MODE=1
+TMO=900
+ENV_A="MOEMON_BATTLE_ANIMS=modern MOEMON_ANIM_FRAMES=1 MOEMON_DEBUG_PARTY=283:40"
+EXPECT_A=("animall: move 33 took" "animall: move 354 took" "anim test done")
+UNEXPECT_A=("didn't end" "crash")
+CHECK="tools/test/check_anim_frames.sh"

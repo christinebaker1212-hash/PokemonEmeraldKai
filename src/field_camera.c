@@ -85,6 +85,13 @@ void FieldUpdateBgTilemapScroll(void)
     SetGpuReg(REG_OFFSET_BG3VOFS, r4);
 }
 
+// Moemon Co-op: where the map's tiles start in the BG tilemaps (mp_mappic.c finds a screen pixel's map pixel)
+void GetFieldCameraTileOffset(u8 *x, u8 *y)
+{
+    *x = sFieldCameraOffset.xTileOffset;
+    *y = sFieldCameraOffset.yTileOffset;
+}
+
 void GetCameraOffsetWithPan(s16 *x, s16 *y)
 {
     *x = sFieldCameraOffset.xPixelOffset + sHorizontalCameraPan;

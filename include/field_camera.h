@@ -28,5 +28,6 @@ void SetCameraPanning(s16 horizontal, s16 vertical);
 void InstallCameraPanAheadCallback(void);
 void UpdateCameraPanning(void);
 void FieldUpdateBgTilemapScroll(void);
+void GetFieldCameraTileOffset(u8 *x, u8 *y);   // Moemon Co-op
 
 #endif //GUARD_FIELD_CAMERA_H

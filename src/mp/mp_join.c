@@ -9,10 +9,13 @@
 // when it has one (BattleScript_MpJoinEntrance). mp_coop.c rearranges the parties (MP_Coop_Join*), battle_main.c
 // starts the friend's battle from the snapshot (CB2_MpJoinBattle) and the end of the battle is the usual co-op one.
 //
-// Which battles: a solo battle against a wild Pokémon or an ordinary trainer (not a gym leader, admin, rival or
-// other story battle), or a co-op Double Battle of that kind (it becomes a Triple Battle). Up to two friends at once.
+// Which battles: a solo battle against a wild Pokémon or any trainer but the Elite Four and the Champion (gym
+// leaders, rivals and story battles too: MP_Coop_JoinTrainerOk), or a co-op Double Battle of that kind (it becomes a
+// Triple Battle). Up to two friends at once.
 // A Double Battle the player started alone: their second Pokémon goes back to its ball and the friend takes its spot
-// (a co-op double; a second friend later makes it a triple).
+// (a co-op double; a second friend later makes it a triple). Two trainers who spotted the player at once count too:
+// each keeps their own team (slots 0-2 / 3-5); in a Triple Battle against both, the third foe spot is filled from the
+// trainer with more Pokémon left and the two share their Pokémon from then on (mp_coop.c MP_Coop_JoinConvertMaster).
 #include <stdio.h>
 #include <string.h>
 #include "global.h"
@@ -142,6 +145,8 @@ struct MpJoinSnapshot
     u16 sideStatuses[NUM_BATTLE_SIDES];
     u8 haveLoseText;
     u8 loseText[JOIN_LOSE_TEXT_MAX + 1];
+    u8 haveLoseTextB;                  // two trainers: the second one's
+    u8 loseTextB[JOIN_LOSE_TEXT_MAX + 1];
 };
 
 static EWRAM_DATA struct
@@ -180,6 +185,8 @@ static EWRAM_DATA struct
     u8 nPicks;
     bool8 gotState;
     bool8 aborted;
+    bool8 fromScript;                // asked from the trainer's script (it spotted us while battling them): the
+                                     // script waits; not let in, it goes on to our own battle (MP_Join_AskFromScript)
     u8 fmsg[200];
 } sJoin;
 
@@ -238,8 +245,8 @@ static u8 JoinableReason(void)
         return JOIN_CANT_OVER;
     if (gMpCoopBattle)
     {
-        if (!MP_Coop_IsMaster() || MP_Coop_TwoTrainers())
-            return JOIN_CANT_KIND;   // (two trainers: no third seat, nor a third foe spot)
+        if (!MP_Coop_IsMaster())
+            return JOIN_CANT_KIND;   // (two trainers: a third player makes it a Triple Battle against both)
         if (MP_Coop_SeatCount() >= 3)
             return JOIN_CANT_FULL;
         if (!gMpCoopWild && !MP_Coop_JoinTrainerOk())
@@ -254,8 +261,10 @@ static u8 JoinableReason(void)
         // after the battle)
         return gMain.savedCallback == MP_EndWildBattleCallback() ? 0xFF : JOIN_CANT_STORY;
     }
-    // one trainer, single or double (a Double Battle the player started alone: their second Pokémon makes room)
-    if ((flags != BATTLE_TYPE_TRAINER && flags != (BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE))
+    // one trainer, single or double (a Double Battle the player started alone: their second Pokémon makes room), or
+    // two trainers who spotted the player at once (a friend makes it a co-op battle against both)
+    if ((flags != BATTLE_TYPE_TRAINER && flags != (BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE)
+         && !(flags == (BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE | BATTLE_TYPE_TWO_OPPONENTS) && gTrainerBattleOpponent_B != 0))
      || gMain.savedCallback != MP_EndTrainerBattleCallback())
         return JOIN_CANT_KIND;   // doubles, two trainers, frontier, safari, legendaries...
     if (!MP_Coop_JoinTrainerOk())
@@ -432,6 +441,15 @@ static void SendSnapshots(const struct MpJoinPlan *plan)
             snap->loseText[i] = lose[i];
         snap->loseText[i] = EOS;
         snap->haveLoseText = TRUE;
+    }
+    lose = plan->trainerIdB != 0 ? MP_Coop_JoinLoseTextB() : NULL;
+    if (lose != NULL)
+    {
+        u16 i;
+        for (i = 0; i < JOIN_LOSE_TEXT_MAX && lose[i] != EOS; i++)
+            snap->loseTextB[i] = lose[i];
+        snap->loseTextB[i] = EOS;
+        snap->haveLoseTextB = TRUE;
     }
     memcpy(parties, gPlayerParty, sizeof(struct Pokemon) * PARTY_SIZE);
     memcpy(parties + sizeof(struct Pokemon) * PARTY_SIZE, gEnemyParty, sizeof(struct Pokemon) * PARTY_SIZE);
@@ -841,8 +859,16 @@ static void FriendDone(u8 taskId)
 {
     sJoin.fstate = FJS_NONE;
     sJoin.target = -1;
-    UnlockPlayerFieldControls();
     DestroyTask(taskId);
+    if (sJoin.fromScript)
+    {
+        // not let in: the trainer's script goes on to our own battle with them
+        sJoin.fromScript = FALSE;
+        MPNet_Log("join: not joined, battling the trainer alone");
+        ScriptContext_Enable();
+        return;
+    }
+    UnlockPlayerFieldControls();
 }
 
 static void FriendShowEnd(u8 taskId, const char *fmt, u8 who)
@@ -918,7 +944,8 @@ static void Task_JoinFriend(u8 taskId)
             CleanupOverworldWindowsAndTilemaps();
             sJoin.ftimer = 0;
             SetMainCallback2(CB2_JoinWaitState);
-            UnlockPlayerFieldControls();
+            if (!sJoin.fromScript)
+                UnlockPlayerFieldControls();
             DestroyTask(taskId);
         }
         break;
@@ -971,10 +998,34 @@ void MP_Join_Ask(u8 target)
     sJoin.aborted = FALSE;
     Send(target, buf, 1);
     MPNet_Log("join: asking player %d to let us join", target + 1);
-    LockPlayerFieldControls();
+    if (!sJoin.fromScript)
+        LockPlayerFieldControls();
     FriendMessage("Asking %s to let you\njoin… ({B_BUTTON} never mind)", target);
     taskId = CreateTask(Task_JoinFriend, 80);
     gTasks[taskId].data[0] = 0;
+}
+
+// mp_coop.c: JOIN BATTLE picked when a trainer battling this friend spotted us. The trainer's script waits (waitstate):
+// let in, it goes on after the battle (MP_Coop_TakeJoinedOther); not, it goes on to our own battle with the trainer.
+// FALSE: couldn't ask (the script goes on at once)
+bool8 MP_Join_AskFromScript(u8 target)
+{
+    if (FuncIsActiveTask(Task_JoinFriend) || sJoin.fstate != FJS_NONE)
+        return FALSE;
+    sJoin.fromScript = TRUE;
+    MP_Join_Ask(target);
+    if (!FuncIsActiveTask(Task_JoinFriend))
+    {
+        sJoin.fromScript = FALSE;
+        return FALSE;
+    }
+    return TRUE;
+}
+
+// mp_coop.c: can this battle be joined now (a friend its trainer spots may choose to)
+bool8 MP_Join_CanBeJoined(void)
+{
+    return JoinableReason() == 0xFF;
 }
 
 bool8 MP_Join_IsAsking(void)
@@ -1052,11 +1103,14 @@ static void CB2_JoinWaitState(void)
         sJoin.gotState = FALSE;
         sJoin.fstate = FJS_NONE;
         MP_Coop_JoinApplyJoiner(&snap->plan, snap->seat, sJoin.picks, sJoin.nPicks,
-                                snap->haveLoseText ? snap->loseText : NULL);
+                                snap->haveLoseText ? snap->loseText : NULL, snap->haveLoseTextB ? snap->loseTextB : NULL);
         memcpy(gPlayerParty, parties, sizeof(struct Pokemon) * PARTY_SIZE);
         memcpy(gEnemyParty, parties + PARTY_SIZE, sizeof(struct Pokemon) * PARTY_SIZE);
         sJoin.entering = snap->plan.entering;
         gMpJoinedBattle = TRUE;
+        if (sJoin.fromScript)
+            MP_Coop_JoinedFromTrainerScript();   // (the trainer's script goes on after the battle)
+        sJoin.fromScript = FALSE;
         SetMainCallback2(CB2_MpJoinBattle);
         return;
     }
@@ -1070,6 +1124,13 @@ static void CB2_JoinWaitState(void)
         sJoin.aborted = FALSE;
         MP_Events_QueueToast(text);
         Overworld_ResetMapMusic();
+        if (sJoin.fromScript)
+        {
+            // the trainer's script goes on to our own battle with them
+            sJoin.fromScript = FALSE;
+            SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+            return;
+        }
         SetMainCallback2(CB2_ReturnToField);
     }
 }
@@ -1082,7 +1143,7 @@ void MP_Join_ApplySnapshot(void)
 
     gBattleEnvironment = snap->plan.environment;
     gTrainerBattleOpponent_A = snap->trainerId;
-    gTrainerBattleOpponent_B = 0;
+    gTrainerBattleOpponent_B = snap->plan.trainerIdB;   // two trainers: the second
     MP_Coop_JoinSetBattlers(&snap->plan, snap->seat);
     for (b = 0; b < MAX_BATTLERS_COUNT; b++)
     {
@@ -1093,6 +1154,7 @@ void MP_Join_ApplySnapshot(void)
     gSideStatuses[0] = snap->sideStatuses[0];
     gSideStatuses[1] = snap->sideStatuses[1];
     gBattleWeather = snap->plan.weather;
+    MP_BattleWeather_TurnStart();   // (the battle has its own weather by now: never the field's)
     MP_Battle_JoinLink(snap->plan.seatPlayer, snap->plan.count, snap->seat, snap->syncSeq, TRUE);
     SaveLinkPlayers(snap->plan.count);
     gBattleScripting.multiplayerId = GetMultiplayerId();

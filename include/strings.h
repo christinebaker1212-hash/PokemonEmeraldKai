@@ -3027,4 +3027,9 @@ extern const u8 gText_BoxName[];
 extern const u8 gText_PkmnsNickname[];
 extern const u8 gText_TellHimTheWords[];
 
+// Moemon Fight: the VS cabinet
+extern const u8 gText_MpFightWait2P[];
+extern const u8 gText_MpFightCpu[];
+extern const u8 gText_MpDanceAlone[];
+
 #endif // GUARD_STRINGS_H

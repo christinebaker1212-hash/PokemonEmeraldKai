@@ -2,9 +2,11 @@ pressuntil A field 5000
 wait 120
 pressuntil B field 900
 wait 300
+press UP 50
+wait 20
 mp life garden actors
 watchlog milestone
-mp life garden pursuit 2 58
+mp life garden pursuit 2 58 1
 wait 240
 shot pursuit
 waitlog 1500

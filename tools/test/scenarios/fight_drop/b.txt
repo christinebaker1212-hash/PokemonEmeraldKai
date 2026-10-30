@@ -1,0 +1,21 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 120
+barrier seated 2
+wait 120
+press LEFT 2
+wait 20
+press A 2
+wait 100
+press A 2
+watchlog fight: online with
+waitlog 1500
+wait 400
+fpress RIGHT 2
+wait 10
+fpress A 2
+watchlog fight: online result
+waitlog 4000
+wait 200
+shot after_b
+quit

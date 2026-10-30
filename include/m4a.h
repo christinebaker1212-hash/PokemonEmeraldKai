@@ -27,4 +27,10 @@ extern struct SoundInfo gSoundInfo;
 extern bool8 gSoundInit;
 #endif
 
+#include "mp_kaisong_scene.h"
+#ifndef MP_KAISONG_NO_SCENE
+#define m4aSongNumStart(n) MP_KAISONG_WRAP(m4aSongNumStart(n))
+#define m4aSongNumStartOrChange(n) MP_KAISONG_WRAP(m4aSongNumStartOrChange(n))
+#endif
+
 #endif //GUARD_M4A_H

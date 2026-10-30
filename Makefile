@@ -6,6 +6,8 @@ REVISION    := 0
 MODERN      ?= 0
 KEEP_TEMPS  ?= 0
 PORTABLE    ?= 0
+DEV_BUILD   ?= 0
+DEV_REVISION ?= 0
 IS64BIT     ?= 1
 TARGET_PLATFORM ?= PLATFORM_SDL2
 TARGET_OS       ?= NONE
@@ -14,6 +16,11 @@ TILE_RENDERER   ?= RENDERER_EASY_DRAW
 # `File name`.gba ('_modern' will be appended to the modern builds)
 FILE_NAME := pokeemerald
 BUILD_DIR := build
+# Keep dev executables and objects separate, including when changing revision.
+ifeq ($(DEV_BUILD),1)
+  FILE_NAME := pokeemerald-dev
+endif
+
 
 # Builds the ROM using a modern compiler
 MODERN      ?= 0
@@ -124,7 +131,7 @@ ifeq ($(PORTABLE),1)
 
   ifeq ($(TARGET_OS),WINDOWS)
     OS_CFLAGS :=
-    OS_LFLAGS := -lwinmm -lxinput9_1_0 -lws2_32 -liphlpapi -lwinhttp
+    OS_LFLAGS := -lwinmm -lxinput9_1_0 -lws2_32 -liphlpapi -lwinhttp -lcomdlg32
     BUILD_FEXTENSION := .exe
   else
     OS_CFLAGS :=
@@ -181,6 +188,9 @@ MODERN_ROM_NAME := $(FILE_NAME)_modern.gba
 MODERN_OBJ_DIR_NAME := $(BUILD_DIR)/modern
 PORTABLE_ROM_NAME := $(FILE_NAME)$(BIT_WIDTH)$(BUILD_FEXTENSION)
 PORTABLE_OBJ_DIR_NAME := $(BUILD_DIR)/pc$(BIT_WIDTH)
+ifeq ($(DEV_BUILD),1)
+  PORTABLE_OBJ_DIR_NAME := $(BUILD_DIR)/pc$(BIT_WIDTH)-dev-$(DEV_REVISION)-$(TARGET_OS)
+endif
 PORTABLE_ROM_NAME_OTHER := $(FILE_NAME)$(OTHER_BIT_WIDTH)$(BUILD_FEXTENSION)
 PORTABLE_OBJ_DIR_NAME_OTHER := $(BUILD_DIR)/pc$(OTHER_BIT_WIDTH)
 ASSETS_DIR_NAME := $(BUILD_DIR)/assets
@@ -240,6 +250,8 @@ ifeq ($(MODERN),0)
   LIB := $(LIBPATH) -lgcc -lc -L../../libagbsyscall -lagbsyscall
 else ifeq ($(PORTABLE),1)
   CPPFLAGS += -D NONMATCHING -D PORTABLE -D $(TARGET_PLATFORM) -D $(TILE_RENDERER) -D UBFIX $(CPPFLAGS64) $(PLATFORM_INCLUDES) -I$(SDL_DIR)/include -L$(SDL_DIR)/lib
+  CPPFLAGS += -DMOEMON_DEV_BUILD=$(DEV_BUILD) -DMOEMON_DEV_REVISION=$(DEV_REVISION)
+  override CFLAGS += -DMOEMON_DEV_BUILD=$(DEV_BUILD) -DMOEMON_DEV_REVISION=$(DEV_REVISION)
   MODERNCC := $(PREFIX)gcc
   PATH_MODERNCC := PATH="$(PATH)" $(MODERNCC)
   CC1 	:= $(shell $(PREFIX)gcc --print-prog-name=cc1) -quiet
@@ -359,6 +371,57 @@ ifeq ($(TARGET_OS),WINDOWS)
   OBJS += $(OBJ_DIR)/res.o
 endif
 
+# Moemon Fight: the fight engine (fight/, include/mf_engine.h): plain C with its own flags, none of the
+# game's preprocessing
+ifeq ($(PORTABLE),1)
+  FIGHT_SRCS := $(wildcard fight/engine/*.c fight/compat/mf_*.c fight/host/*.c) \
+                $(wildcard fight/third_party/zlib/*.c) $(wildcard fight/third_party/musl_math/*.c) \
+                fight/third_party/dlmalloc/mf_dlmalloc.c \
+                $(filter-out %/lua.c %/luac.c %/print.c,$(wildcard fight/third_party/lua-5.1.4/src/*.c)) \
+                fight/third_party/minizip-0.15/unzip.c \
+                $(filter-out %/pngtest.c %/pnggccrd.c %/pngvcrd.c,$(wildcard fight/third_party/libpng-1.2.38/png*.c))
+  FIGHT_OBJS := $(patsubst %.c,$(OBJ_DIR)/%.o,$(FIGHT_SRCS))
+  # The fight's state for rollback (fight/host/mf_rollback.c): the engine's globals (not the music's) and the SDL
+  # layer's key state and events, gathered into one section after compiling
+  FIGHT_STATE_OBJS := $(patsubst %.c,$(OBJ_DIR)/%.o,$(filter-out fight/engine/bgm%,$(wildcard fight/engine/*.c)) \
+                      fight/compat/mf_sdl12.c)
+  FIGHT_CFLAGS := -std=gnu11 -O2 -m$(BIT_WIDTH) -fno-strict-aliasing -ffp-contract=off -w -DPNG_SKIP_SETJMP_CHECK \
+                  -include fight/compat/mf_rename.h -Ifight/engine -Ifight/compat -Ifight/compat/SDL \
+                  -Ifight/third_party/minizip-0.15 -Ifight/third_party/libpng-1.2.38 \
+                  -Ifight/third_party/lua-5.1.4/src -Ifight/third_party/zlib -Ifight/third_party/audio
+  ifeq ($(TARGET_OS),LINUX)
+    FIGHT_CFLAGS += -Ifight/compat/linux
+    OS_LFLAGS += -lpthread -lm
+    FIGHT_STATE_SECTIONS := --rename-section .data=mfstate --rename-section .data.rel=mfstate \
+                            --rename-section .data.rel.local=mfstate --rename-section .bss=mfstate,alloc,load,contents,data
+  else
+    FIGHT_STATE_SECTIONS := --rename-section .data='.data$$mfB' --rename-section .bss='.data$$mfB2,alloc,load,contents,data'
+    OS_LFLAGS += -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic
+  endif
+  OBJS += $(FIGHT_OBJS)
+endif
+
+# Moemon Co-op: EDOPro's duel engine for the Yu-Gi-Oh! duels (edopro/ocgcore: edo9300's ygopro-core, AGPL-3.0, with
+# its Lua 5.4 built as C++ like EDOPro does, so none of its symbols meet the fight engine's Lua 5.1)
+ifeq ($(PORTABLE),1)
+  EDO_LUA_SKIP := lbitlib lcorolib ldblib linit loadlib loslib ltests lua luac lutf8lib onelua
+  EDO_SRCS := $(wildcard edopro/ocgcore/*.cpp) \
+              $(filter-out $(EDO_LUA_SKIP:%=edopro/ocgcore/lua/src/%.c),$(wildcard edopro/ocgcore/lua/src/*.c))
+  EDO_OBJS := $(patsubst %,$(OBJ_DIR)/%.o,$(EDO_SRCS))
+  EDO_CXX := $(PREFIX)g++
+  # (Lua's few global tables renamed: C++ doesn't mangle a variable's name and the fight engine's Lua has them too)
+  EDO_CXXFLAGS := -std=c++17 -O2 -m$(BIT_WIDTH) -fno-rtti -w -Iedopro/ocgcore/lua/src \
+                  -include edopro/ocgcore/lua/luaconf-customize.h -DluaP_opmodes=edo_luaP_opmodes \
+                  -Dlua_ident=edo_lua_ident -DluaT_typenames_=edo_luaT_typenames_ -Dluai_ctype_=edo_luai_ctype_
+  ifeq ($(TARGET_OS),WINDOWS)
+    EDO_CXXFLAGS += -DWIN32 -D_WIN32 -DNOMINMAX
+    OS_LFLAGS += -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic
+  else
+    OS_LFLAGS += -lstdc++
+  endif
+  OBJS += $(EDO_OBJS)
+endif
+
 OBJS_REL := $(patsubst $(OBJ_DIR)/%,%,$(OBJS))
 
 SUBDIRS  := $(sort $(dir $(OBJS)))
@@ -367,8 +430,21 @@ $(shell mkdir -p $(SUBDIRS))
 # Pretend rules that are actually flags defer to `make all`
 modern: all
 compare: all
-winwsl: all
-linux: all
+winwsl: all fight-ingest
+linux: all fight-ingest
+
+# Moemon Fight: the VS cabinet's pack goes through ingestion (tools/fight/ingest.py: GBA sound, debug text off, the
+# audits, mugen/processed_assets.json) when a file in mugen/ or the tools is newer than the last run; otherwise this
+# costs one find. Without python3 or ffmpeg the build goes on and says so.
+FIGHT_INGEST_DUE := $(shell [ -f build/fight_ingest.stamp ] && find mugen tools/fight -type f -newer build/fight_ingest.stamp \
+                      ! -name ingestion_log.txt ! -name 'processed_assets.*' ! -name '*.log' ! -path '*__pycache__*' \
+                      2>/dev/null | head -1 || echo first)
+.PHONY: fight-ingest
+fight-ingest:
+ifneq ($(FIGHT_INGEST_DUE),)
+	@mkdir -p build; if python3 tools/fight/ingest.py --quiet; then touch build/fight_ingest.stamp; \
+	else echo "fight ingestion skipped (it needs python3 and ffmpeg): run tools/fight/ingest.py"; fi
+endif
 
 # Other rules
 rom: $(ROM)
@@ -473,6 +549,24 @@ else
 	@echo -e ".text\n\t.align\t2, 0\n" >> $(C_BUILDDIR)/$*.s
 	$(AS) $(ASFLAGS) -o $@ $(C_BUILDDIR)/$*.s
 endif
+
+# Moemon Fight: the fight engine's objects (FIGHT_OBJS)
+$(OBJ_DIR)/fight/%.o: fight/%.c
+	@echo "$(MODERNCC) <fight flags> -o $@ $<"
+	@$(MODERNCC) $(FIGHT_CFLAGS) -MMD -MP -c $< -o $@
+	$(if $(filter $@,$(FIGHT_STATE_OBJS)),@$(OBJCOPY) $(FIGHT_STATE_SECTIONS) $@)
+
+-include $(FIGHT_OBJS:.o=.d)
+
+# Moemon Co-op: the EDOPro engine's objects (EDO_OBJS): C++, Lua's .c files too
+$(OBJ_DIR)/edopro/%.cpp.o: edopro/%.cpp
+	@echo "$(EDO_CXX) <edopro flags> -o $@ $<"
+	@$(EDO_CXX) $(EDO_CXXFLAGS) -MMD -MP -c $< -o $@
+$(OBJ_DIR)/edopro/%.c.o: edopro/%.c
+	@echo "$(EDO_CXX) <edopro flags> -x c++ -o $@ $<"
+	@$(EDO_CXX) $(EDO_CXXFLAGS) -x c++ -MMD -MP -c $< -o $@
+
+-include $(EDO_OBJS:.o=.d)
 
 $(C_BUILDDIR)/%.d: $(C_SUBDIR)/%.c
 	$(SCANINC) -M $@ -g $(ASSETS_DIR_NAME) $(INCLUDE_SCANINC_ARGS) -I tools/agbcc/include $<

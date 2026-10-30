@@ -1,0 +1,59 @@
+pressuntil A field 5000
+vpad
+wait 60
+press START 2
+wait 30
+press UP 2
+wait 10
+press UP 2
+wait 10
+press A 2
+wait 120
+press R 2
+wait 20
+press R 2
+wait 20
+press DOWN 2
+wait 5
+press DOWN 2
+wait 5
+press DOWN 2
+wait 5
+press DOWN 2
+wait 5
+press DOWN 2
+wait 20
+shot f_controls
+press A 2
+wait 30
+shot f_page
+press A 2
+wait 10
+shot f_listening
+vbtn lb 1
+wait 3
+vbtn lb 0
+wait 20
+press DOWN 2
+wait 5
+press DOWN 2
+wait 5
+press A 2
+wait 10
+vbtn south 1
+wait 3
+vbtn south 0
+wait 20
+press DOWN 2
+wait 5
+press DOWN 2
+wait 5
+press A 2
+wait 500
+shot f_bound
+press B 2
+wait 20
+shot f_custom
+press B 2
+wait 120
+quit

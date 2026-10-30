@@ -67,6 +67,7 @@
 #include "battle_message.h"
 #include "trainer_hill.h"
 #include "trainer_see.h"
+#include "window.h"
 #include "constants/battle.h"
 #include "constants/battle_setup.h"
 #include "constants/items.h"
@@ -130,7 +131,9 @@ enum {
     DECLINE_TOO_LATE,
     DECLINE_BUSY,
     DECLINE_NO_TRIPLE,   // a third player: this trainer can't do a Triple Battle
+    DECLINE_JOIN_AFTER,  // TEAM PADDING: no seat at the start, but JOIN it as soon as it starts (sCoop.joinAfter)
 };
+static u8 ThirdDecline(void);
 
 enum {
     ROLE_NONE,
@@ -171,6 +174,29 @@ static u16 GymBadgeFlag(u16 trainerId)
     return 0;
 }
 
+// The gym a leader battles in (their "you won" script is one of its objects')
+const u8 *MP_FindTrainerEndScriptOnMap(u16 trainerId, u16 mapGroup, u16 mapNum);   // battle_setup.c
+static const u8 *GymLeaderEndScript(u16 trainerId)
+{
+    u16 map;
+    const u8 *script = MP_FindTrainerEndScript(trainerId);   // (in the gym: this map's)
+    if (script != NULL)
+        return script;
+    switch (trainerId)
+    {
+    case TRAINER_ROXANNE_1:       map = MAP_RUSTBORO_CITY_GYM; break;
+    case TRAINER_BRAWLY_1:        map = MAP_DEWFORD_TOWN_GYM; break;
+    case TRAINER_WATTSON_1:       map = MAP_MAUVILLE_CITY_GYM; break;
+    case TRAINER_FLANNERY_1:      map = MAP_LAVARIDGE_TOWN_GYM_1F; break;
+    case TRAINER_NORMAN_1:        map = MAP_PETALBURG_CITY_GYM; break;
+    case TRAINER_WINONA_1:        map = MAP_FORTREE_CITY_GYM; break;
+    case TRAINER_TATE_AND_LIZA_1: map = MAP_MOSSDEEP_CITY_GYM; break;
+    case TRAINER_JUAN_1:          map = MAP_SOOTOPOLIS_CITY_GYM_1F; break;
+    default:                      return NULL;
+    }
+    return MP_FindTrainerEndScriptOnMap(trainerId, MAP_GROUP(map), MAP_NUM(map));
+}
+
 static struct
 {
     // Challenged player
@@ -204,6 +230,8 @@ static struct
     u8 targetName[MP_NAME_LEN + 1];
     u16 timer;
     s8 declinedBy;         // don't ask this player again until their challenge ends
+    s8 joinAfter;          // DECLINE_JOIN_AFTER: JOIN this player's battle once it's running (MP_Coop_Update)
+    u16 joinAfterTimer;
     s8 cancelledAsk;       // we pressed B while asking them: ask again once we've turned away and back
     s8 promptedFor;        // whose "wants to join" question is up (they may stop asking and ask again)
     // Battle. Seats: 0 = the master (who met the trainer / wild Pokémon), 1-2
@@ -258,7 +286,7 @@ static struct
     u8 catchSeat[3];          // the seat that threw the ball
     u8 catchCount;
     u8 caught;             // CAUGHT_*
-} sCoop = { .requester = -1, .requester2 = -1, .declinedBy = -1, .cancelledAsk = -1, .promptedFor = -1, .wildFrom = -1, .bonusFrom = -1, .wildTarget2 = -1,
+} sCoop = { .requester = -1, .requester2 = -1, .declinedBy = -1, .joinAfter = -1, .cancelledAsk = -1, .promptedFor = -1, .wildFrom = -1, .bonusFrom = -1, .wildTarget2 = -1,
             .mergeTarget = -1, .heldJoin = -1, .mergeAsk = -1 };
 
 // Pokémon each seat brings: 3 in a co-op double, 2 in a triple
@@ -344,6 +372,7 @@ static const u8 sText_TheyHaveOne[] = _("{STR_VAR_1}'s opponent only has one\nMO
 static const u8 sText_TooLate[] = _("Too late! {STR_VAR_1}'s battle has\nalready started.");
 static const u8 sText_Busy[] = _("{STR_VAR_1} can't team up right now.");
 static const u8 sText_NoTripleAsker[] = _("{STR_VAR_1}'s opponent can't do a Triple\nBattle. It's a Double Battle this time!");
+static const u8 sText_JoinAfter[] = _("{STR_VAR_1}'s battle is starting.\nYou'll join it in a moment!");
 static const u8 sText_NoTripleFew[] = _("This trainer has fewer than 3 MOéMON:\nno Triple Battle. It's a Double!");
 static const u8 sText_NoTripleKind[] = _("This battle can't be a Triple Battle.\nIt's a Double!");
 static const u8 sText_Left[] = _("{STR_VAR_1} left the game.");
@@ -432,6 +461,17 @@ u16 MP_Coop_TrainerPic(void)
 bool8 MP_Coop_TwoTrainers(void)
 {
     return gMpCoopBattle && !gMpCoopWild && (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS) && gTrainerBattleOpponent_B != 0;
+}
+
+// Two trainers: is the Pokémon that battler sends out (party slot partyIdx) the second trainer's? Their own side in a
+// double; in a Triple Battle against both (a friend joined) they share the field, and the slot says whose it is
+bool8 MP_Coop_SecondTrainersMon(u8 battler, u8 partyIdx)
+{
+    if (!MP_Coop_TwoTrainers() || !(battler & BIT_SIDE))
+        return FALSE;
+    if (IS_TRIPLE_BATTLE())
+        return partyIdx >= MULTI_PARTY_SIZE && partyIdx < PARTY_SIZE;
+    return GetBattlerPosition(battler) == B_POSITION_OPPONENT_RIGHT;
 }
 
 // The trainer picture of an opponent battler: two trainers, the right one is the second
@@ -615,13 +655,19 @@ static u8 CoopTrainerTeamSize(u16 trainerId)
 static void OnResolve(const u8 *data, u32 len);
 static void OnResolveDone(s8 from, const u8 *data, u32 len);
 
+// With TEAM PADDING on, a third player is never turned away from one trainer: the trainer is padded up to three
+// Moemon for the Triple Battle (MP_Coop_FinishTrainerParty), whatever kind of battle it was (Twins too).
 static bool8 TripleEligible(void)
 {
-    return !sCoop.twoTrainers   // two trainers: 2 players vs both of them
-        && CoopTrainerTeamSize(sCoop.trainerId) >= 3
-        && (sCoop.mode == TRAINER_BATTLE_SINGLE || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT
-            || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC || sCoop.mode == TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT
-            || sCoop.mode == TRAINER_BATTLE_REMATCH);
+    bool8 single = sCoop.mode == TRAINER_BATTLE_SINGLE || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT
+                || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC || sCoop.mode == TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT
+                || sCoop.mode == TRAINER_BATTLE_REMATCH;
+    if (sCoop.twoTrainers)
+        return FALSE;   // two trainers: 2 players vs both of them
+    if (MP_TrainerPadding())
+        return single || sCoop.mode == TRAINER_BATTLE_DOUBLE || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE
+            || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE_NO_MUSIC || sCoop.mode == TRAINER_BATTLE_REMATCH_DOUBLE;
+    return single && CoopTrainerTeamSize(sCoop.trainerId) >= 3;
 }
 
 // Someone besides `except` who could still come and join: anyone online, anywhere,
@@ -694,7 +740,7 @@ static bool8 FriendOnMap(void)
 // u16 trainer, u8 mode, u8 count, u8 seat, 3x u8 player, lose text
 static void AcceptRequester(void)
 {
-    u8 buf[11 + (LOSE_TEXT_MAX + 1) * 2];
+    u8 buf[11 + (LOSE_TEXT_MAX + 1) * 2 + 2];
     const u8 *lose;
     u16 len = 0;
     u8 i;
@@ -710,7 +756,7 @@ static void AcceptRequester(void)
     }
     else if (PlayerValid(sCoop.requester2))
     {
-        SendByte(sCoop.requester2, MPR_COOP_DECLINE, DECLINE_TOO_LATE);
+        SendByte(sCoop.requester2, MPR_COOP_DECLINE, ThirdDecline());
     }
     sCoop.requester2 = -1;
     sCoop.waitingThird = FALSE;
@@ -740,6 +786,12 @@ static void AcceptRequester(void)
             buf[11 + len++] = lose[k++];
     }
     buf[11 + len++] = EOS;
+    {
+        // the weather here: the battle starts in it on every screen (only this game runs the battle)
+        u16 field = MP_BattleWeather_FieldFlags();
+        buf[11 + len++] = field & 0xFF;
+        buf[11 + len++] = field >> 8;
+    }
     for (i = 1; i < sCoop.joinCount; i++)
     {
         buf[5] = i;
@@ -782,6 +834,13 @@ static void BeginWaitStage(void)
     }
     sCoop.waitTimer = 0;
     SendWait(TRUE);
+}
+
+// A friend who asked but gets no seat when the battle starts (two trainers, or a moment too late): with TEAM PADDING
+// on nobody is ever turned away: they JOIN it as soon as it's running (mp_join.c; the battle grows to a triple)
+static u8 ThirdDecline(void)
+{
+    return MP_TrainerPadding() ? DECLINE_JOIN_AFTER : DECLINE_TOO_LATE;
 }
 
 // One friend is in. When the trainer allows a Triple Battle and someone else is
@@ -842,7 +901,7 @@ static void StopAsking(void);
 static void FinishJoinCheck(u8 taskId)
 {
     if (!sCoop.accepted && PlayerValid(sCoop.requester2))
-        SendByte(sCoop.requester2, MPR_COOP_DECLINE, DECLINE_TOO_LATE);
+        SendByte(sCoop.requester2, MPR_COOP_DECLINE, ThirdDecline());
     if (!sCoop.accepted)
     {
         sCoop.requester2 = -1;
@@ -856,6 +915,8 @@ static void FinishJoinCheck(u8 taskId)
     ScriptContext_Enable();
     DestroyTask(taskId);
 }
+
+static bool8 sAloneChosen;   // BATTLE ALONE picked when this trainer walked up (no "wait for a partner?" then)
 
 static void Task_JoinCheck(u8 taskId)
 {
@@ -882,8 +943,10 @@ static void Task_JoinCheck(u8 taskId)
         if (!PlayerValid(sCoop.requester))
         {
             // Nobody asked yet: offer to wait for a friend on this map
-            if (CoopTrainerTeamSize(sCoop.trainerId) <= 1 || !FriendOnMap() || gSelectedObjectEvent >= OBJECT_EVENTS_COUNT)
+            if (CoopTrainerTeamSize(sCoop.trainerId) <= 1 || !FriendOnMap() || gSelectedObjectEvent >= OBJECT_EVENTS_COUNT
+             || sAloneChosen)
             {
+                sAloneChosen = FALSE;
                 FinishJoinCheck(taskId);
                 break;
             }
@@ -1245,6 +1308,20 @@ void MP_Coop_JoinCheck(void)
 // or we both wait on the same trainer and they waited first. The trainer script waits; once they let us in, the
 // battle starts and the script ends afterwards (CB2_MpCoopFinish returns to it).
 
+// Tests (mp coopask N): ask player N to team up, as walking up to them does
+void MP_Coop_DebugAsk(u8 i)
+{
+    if (!PlayerValid(i) || sCoop.role != ROLE_NONE)
+        return;
+    sCoop.role = ROLE_ASKING;
+    sCoop.target = i;
+    StringCopyN(sCoop.targetName, gMpPlayers[i].name, MP_NAME_LEN);
+    sCoop.targetName[MP_NAME_LEN] = EOS;
+    sCoop.timer = 0;
+    SendByte(i, MPR_COOP_REQUEST, 0);
+    MPNet_Log("co-op: asking player %d to team up", i + 1);
+}
+
 static void StartJoiningFriend(u8 host)
 {
     sCoop.role = ROLE_ASKING;
@@ -1296,7 +1373,9 @@ static void Task_JoinHeld(u8 taskId)
         DestroyTask(taskId);   // the battle starts (Task_StartJoinerBattle); the script goes on after it
         return;
     }
-    if (sCoop.role != ROLE_ASKING || !PlayerValid(sCoop.target) || ++data[0] >= JOIN_FRIEND_FRAMES)
+    // (while they're still on that trainer, answering "wait for another?", we wait for them: up to a minute)
+    if (sCoop.role != ROLE_ASKING || !PlayerValid(sCoop.target)
+     || ++data[0] >= ((gMpPlayers[sCoop.target].state.flags & MPF_CHALLENGED) ? JOIN_FRIEND_FRAMES * 5 : JOIN_FRIEND_FRAMES))
     {
         // not after all: our own battle with this trainer
         if (sCoop.role == ROLE_ASKING)
@@ -1315,21 +1394,238 @@ static void Task_JoinHeld(u8 taskId)
     }
 }
 
+static bool8 TryOfferBattleInProgress(void);
+
 // Special, after a trainer walked up to us (data/scripts/trainer_battle.inc): VAR_RESULT TRUE = asking to join the
-// friend waiting on that trainer (the script waits), FALSE = the usual speech and battle
+// friend waiting on that trainer, or asking whether to join the battle a friend is having with it (the script
+// waits either way), FALSE = the usual speech and battle
 void MP_Coop_TryJoinHeldTrainer(void)
 {
     s8 host = sCoop.heldJoin;
     gSpecialVar_Result = FALSE;
     sCoop.heldJoin = -1;
     sCoop.joinedOther = FALSE;
-    if (host < 0 || gApproachingTrainerId != 0)
+    sAloneChosen = FALSE;
+    if (gApproachingTrainerId != 0)
         return;
+    if (host < 0)
+    {
+        gSpecialVar_Result = TryOfferBattleInProgress();
+        return;
+    }
     if (!PlayerValid(host) || !sHeld[host].ttl || sCoop.role != ROLE_NONE || gMpCoopBattle)
         return;
     StartJoiningFriend(host);
     CreateTask(Task_JoinHeld, 80);
     gSpecialVar_Result = TRUE;
+}
+
+// ---------------------------------------------------------------------------
+// A trainer some friend is battling spots us: JOIN BATTLE (their battle in progress, mp_join.c) or BATTLE ALONE.
+// Whoever runs a battle against a trainer on the field says so to everyone (MPR_COOP_BATTLING) every second.
+
+#define BATTLING_PERIOD 60
+#define BATTLING_TTL    (BATTLING_PERIOD * 3)
+
+static struct
+{
+    u16 ttl;
+    u8 mapGroup, mapNum, localId;
+    u16 trainerId;
+    bool8 joinable;   // their battle can take a friend now (mp_join.c)
+    u8 localId2;      // two trainers at once: the second (0 = one trainer)
+    u16 trainerId2;
+} sBattling[MP_MAX_PLAYERS];
+static u16 sBattlingTimer;
+static bool8 sBattlingSent;
+
+static void SendBattling(bool8 on)
+{
+    u16 trainer = gTrainerBattleOpponent_A, trainer2;
+    u8 localId, localId2;
+    MP_TrainerBattleLocalIds(&localId, &localId2);
+    trainer2 = localId2 != 0 ? gTrainerBattleOpponent_B : 0;
+    {
+        u8 buf[11] = {MPR_COOP_BATTLING, on, gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum,
+                      localId, trainer & 0xFF, trainer >> 8, on && MP_Join_CanBeJoined(),
+                      localId2, trainer2 & 0xFF, trainer2 >> 8};
+        MP_SendRelay(0xFF, buf, sizeof(buf));
+    }
+    sBattlingSent = on;
+}
+
+// MP_Coop_Update: in a battle against a trainer met on the field, led by this game
+static void UpdateBattling(void)
+{
+    u8 i;
+    bool8 on = gMain.inBattle && (gBattleTypeFlags & BATTLE_TYPE_TRAINER) && gBattleOutcome == 0
+            && gTrainerBattleOpponent_A != 0 && gTrainerBattleOpponent_A < TRAINERS_COUNT
+            && (gMpCoopBattle ? sCoop.isMaster : !gNetLinkActive);
+    // (a gym leader or other story trainer has no trainer object to spot anyone: localId 0, but friends can JOIN)
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+        if (sBattling[i].ttl && (--sBattling[i].ttl == 0 || !PlayerValid(i)))
+            sBattling[i].ttl = 0;
+    if (!on)
+    {
+        if (sBattlingSent && MP_IsConnected())
+            SendBattling(FALSE);
+        sBattlingSent = FALSE;
+        sBattlingTimer = 0;
+        return;
+    }
+    if (sBattlingTimer)
+    {
+        sBattlingTimer--;
+        return;
+    }
+    sBattlingTimer = BATTLING_PERIOD;
+    if (MP_IsConnected())
+        SendBattling(TRUE);
+}
+
+static void OnBattling(u8 from, const u8 *data, u16 len)
+{
+    if (from >= MP_MAX_PLAYERS || len < 11)
+        return;
+    if (!data[1])
+    {
+        sBattling[from].ttl = 0;
+        return;
+    }
+    if (!sBattling[from].ttl)
+        MPNet_Log("co-op: player %d is battling trainer %d (NPC %d)%s%s", from + 1, data[5] | (data[6] << 8), data[4],
+                  data[8] ? " and a second trainer" : "", data[7] ? "" : ", not joinable");
+    sBattling[from].ttl = BATTLING_TTL;
+    sBattling[from].mapGroup = data[2];
+    sBattling[from].mapNum = data[3];
+    sBattling[from].localId = data[4];
+    sBattling[from].trainerId = data[5] | (data[6] << 8);
+    sBattling[from].joinable = data[7];
+    sBattling[from].localId2 = data[8];
+    sBattling[from].trainerId2 = data[9] | (data[10] << 8);
+}
+
+static const u8 sText_BattlingThem[] = _("{STR_VAR_1} is battling this trainer!\nJoin their battle, or battle alone?");
+static const u8 sText_BattlingBoth[] = _("{STR_VAR_1} is battling these trainers!\nJoin their battle, or battle alone?");
+static const u8 sText_ChoiceJoinBattle[] = _("JOIN BATTLE");
+static const u8 sText_ChoiceBattleAlone[] = _("BATTLE ALONE");
+static const struct MenuAction sInProgressChoices[] =
+{
+    {sText_ChoiceJoinBattle, {NULL}},
+    {sText_ChoiceBattleAlone, {NULL}},
+};
+// beside the message (the yes / no box's tiles: it isn't up)
+static const struct WindowTemplate sInProgressWindow =
+{
+    .bg = 0,
+    .tilemapLeft = 17,
+    .tilemapTop = 9,
+    .width = 12,
+    .height = 4,
+    .paletteNum = 15,
+    .baseBlock = 0x125,
+};
+
+#define tFriend data[1]
+#define tWindow data[2]
+
+static void Task_OfferBattleInProgress(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    switch (tState)
+    {
+    case 0:
+        if (!IsTextPrinterActive(0))
+        {
+            tWindow = AddWindow(&sInProgressWindow);
+            DrawStdWindowFrame(tWindow, FALSE);
+            PrintMenuTable(tWindow, ARRAY_COUNT(sInProgressChoices), sInProgressChoices);
+            InitMenuInUpperLeftCornerNormal(tWindow, ARRAY_COUNT(sInProgressChoices), 0);
+            CopyWindowToVram(tWindow, COPYWIN_FULL);
+            MPNet_Log("co-op: JOIN BATTLE / BATTLE ALONE");
+            tState++;
+        }
+        break;
+    case 1:
+    {
+        s8 answer = Menu_ProcessInputNoWrap();
+        u8 f = tFriend;
+        if (answer == MENU_NOTHING_CHOSEN)
+            break;
+        ClearStdWindowAndFrameToTransparent(tWindow, TRUE);
+        RemoveWindow(tWindow);
+        HideFieldMessageBox();
+        DestroyTask(taskId);
+        if (answer == 0 && PlayerValid(f) && (gMpPlayers[f].state.flags & MPF_IN_BATTLE))
+        {
+            MPNet_Log("co-op: joining player %d's battle with this trainer", f + 1);
+            if (MP_Join_AskFromScript(f))
+                return;   // (mp_join.c goes on with the script)
+        }
+        else
+        {
+            MPNet_Log("co-op: battling the trainer alone (player %d is battling it too)", f + 1);
+            sAloneChosen = TRUE;
+        }
+        ScriptContext_Enable();   // our own battle with the trainer
+        break;
+    }
+    }
+}
+
+#undef tFriend
+#undef tWindow
+
+// The trainer walking up to us is the one a friend is battling now, and they can take a friend in: ask
+static bool8 TryOfferBattleInProgress(void)
+{
+    struct ObjectEvent *trainer, *trainer2 = NULL;
+    u8 i, taskId;
+    if ((gNoOfApproachingTrainers != 1 && gNoOfApproachingTrainers != 2) || sCoop.role != ROLE_NONE || gMpCoopBattle
+     || sCoop.waitStage != WAIT_NONE || MP_Join_IsAsking() || !MP_IsConnected())
+        return FALSE;
+    trainer = &gObjectEvents[gApproachingTrainers[0].objectEventId];
+    if (gNoOfApproachingTrainers == 2)
+        trainer2 = &gObjectEvents[gApproachingTrainers[1].objectEventId];
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+    {
+        bool8 first, second;
+        if (!sBattling[i].ttl || !sBattling[i].joinable || !PlayerValid(i) || !(gMpPlayers[i].state.flags & MPF_IN_BATTLE))
+            continue;
+        if (sBattling[i].mapGroup != gSaveBlock1Ptr->location.mapGroup || sBattling[i].mapNum != gSaveBlock1Ptr->location.mapNum)
+            continue;
+        // the trainer walking up is the one they battle, or one of the two (two trainers at once)
+        first = sBattling[i].localId == trainer->localId && sBattling[i].trainerId == gTrainerBattleOpponent_A;
+        second = sBattling[i].localId2 != 0 && sBattling[i].localId2 == trainer->localId
+              && sBattling[i].trainerId2 == gTrainerBattleOpponent_A;
+        if (!first && !second)
+            continue;
+        // both of them spotted us: both must be that battle's (the second one's id isn't set up yet: its object says)
+        if (trainer2 != NULL && (sBattling[i].localId2 == 0
+                                 || trainer2->localId != (first ? sBattling[i].localId2 : sBattling[i].localId)))
+            continue;
+        SetNameVar(i);
+        StringExpandPlaceholders(sText, sBattling[i].localId2 != 0 ? sText_BattlingBoth : sText_BattlingThem);
+        HideMapNamePopUpWindow(); // the route sign scrolls the text box layer
+        MP_ShowFieldMessageFitted(sText);
+        taskId = CreateTask(Task_OfferBattleInProgress, 80);
+        gTasks[taskId].data[0] = 0;
+        gTasks[taskId].data[1] = i;
+        MPNet_Log("co-op: spotted by the trainer player %d is battling: join or battle alone?", i + 1);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+// mp_join.c: we're in the friend's battle now (asked from our trainer's script): our own challenge is theirs, and
+// the script goes on after the battle as after our own (MP_Coop_TakeJoinedOther)
+void MP_Coop_JoinedFromTrainerScript(void)
+{
+    sCoop.joinedOther = TRUE;
+    sCoop.challenged = FALSE;
+    sCoop.accepted = FALSE;
+    sCoop.requester = -1;
+    sCoop.requester2 = -1;
 }
 
 // Specialvar: we went into a friend's battle from this trainer script. 1: won (the script ends as after its own
@@ -1587,7 +1883,7 @@ void MP_Coop_FinishTwoTrainerParty(u16 trainerA, u16 trainerB)
 
 void MP_Coop_FinishTrainerParty(u16 trainerId)
 {
-    u8 n;
+    u8 n, start;
     gMpEnemyLevelBonus = 0;
     n = CountEnemyMons(0, PARTY_SIZE);
     if (!MP_TrainerPadding() || n == 0 || n >= PARTY_SIZE)
@@ -1595,8 +1891,12 @@ void MP_Coop_FinishTrainerParty(u16 trainerId)
         MPNet_Log("coop: trainer %d party %d, no padding", trainerId, n);
         return;
     }
-    PadTrainer(trainerId, 0, n);
-    MPNet_Log("coop: trainer %d party %d -> %d: %d %d %d %d %d %d", trainerId, n, n + 1,
+    start = n;
+    PadTrainer(trainerId, 0, n++);
+    // a Triple Battle with TEAM PADDING: never fewer than three (one per player), so a third player is never refused
+    while (sCoop.count == 3 && n < 3)
+        PadTrainer(trainerId, 0, n++);
+    MPNet_Log("coop: trainer %d party %d -> %d: %d %d %d %d %d %d", trainerId, start, n,
               GetMonData(&gEnemyParty[0], MON_DATA_SPECIES), GetMonData(&gEnemyParty[1], MON_DATA_SPECIES),
               GetMonData(&gEnemyParty[2], MON_DATA_SPECIES), GetMonData(&gEnemyParty[3], MON_DATA_SPECIES),
               GetMonData(&gEnemyParty[4], MON_DATA_SPECIES), GetMonData(&gEnemyParty[5], MON_DATA_SPECIES));
@@ -2004,11 +2304,28 @@ static bool8 IsLoss(u8 outcome)
     return outcome == B_OUTCOME_LOST || outcome == B_OUTCOME_DREW || outcome == B_OUTCOME_FORFEITED;
 }
 
+// A route trainer (their battle's script after it only signs them up for MATCH CALL), not a gym leader, admin, boss,
+// rival or Team Aqua / Magma member whose script after the battle moves the story on
+static bool8 OrdinaryTrainer(u16 trainerId)
+{
+    if (trainerId == 0 || trainerId >= TRAINERS_COUNT || MP_Coop_IsBossTrainer(trainerId))
+        return FALSE;
+    switch (gTrainers[trainerId].trainerClass)
+    {
+    case TRAINER_CLASS_RIVAL:
+    case TRAINER_CLASS_TEAM_AQUA:
+    case TRAINER_CLASS_TEAM_MAGMA:
+        return FALSE;
+    }
+    return TRUE;
+}
+
 static void CB2_MpCoopFinish(void)
 {
-    MPNet_Log("co-op: battle over, outcome %d, prize %u, lead Lv%d %u exp, money %u, %d move(s) to learn",
+    MPNet_Log("co-op: battle over, outcome %d, prize %u, lead Lv%d %u exp, money %u, %d move(s) to learn (mode %d, trainers %d %d%s)",
               sCoop.outcome, (unsigned)sCoop.money, GetMonData(&gPlayerParty[0], MON_DATA_LEVEL),
-              (unsigned)GetMonData(&gPlayerParty[0], MON_DATA_EXP), (unsigned)GetMoney(&gSaveBlock1Ptr->money), sCoop.learnCount);
+              (unsigned)GetMonData(&gPlayerParty[0], MON_DATA_EXP), (unsigned)GetMoney(&gSaveBlock1Ptr->money), sCoop.learnCount,
+              sCoop.mode, sCoop.trainerId, sCoop.twoTrainers ? sCoop.trainerIdB : 0, sCoop.isMaster ? ", master" : "");
     gSpecialVar_Result = sCoop.outcome;
     gBattleOutcome = sCoop.outcome;
     if (sCoop.outcome == B_OUTCOME_WON)
@@ -2053,27 +2370,40 @@ static void CB2_MpCoopFinish(void)
         // Our own trainer script was waiting on this trainer (it spotted us too): beaten here as after our own battle,
         // and the script goes on the same way (MP_Coop_TakeJoinedOther)
         if (sCoop.joinedOther)
+        {
             MP_EndJoinedTrainerBattle();
+            // two trainers: our script's trainer may have been either one, and both are beaten
+            if (sCoop.twoTrainers && sCoop.trainerIdB != 0)
+            {
+                FlagSet(TRAINER_FLAGS_START + sCoop.trainerId);
+                FlagSet(TRAINER_FLAGS_START + sCoop.trainerIdB);
+            }
+        }
         // Ordinary trainers count as beaten for the partner too. Story battles
         // (gym leaders, rivals...) keep their own event scripts, so the partner
         // can still battle them on their own later.
-        else if (sCoop.mode == TRAINER_BATTLE_SINGLE || sCoop.mode == TRAINER_BATTLE_DOUBLE)
+        else if (sCoop.mode == TRAINER_BATTLE_SINGLE || sCoop.mode == TRAINER_BATTLE_DOUBLE
+              || (OrdinaryTrainer(sCoop.trainerId) && (!sCoop.twoTrainers || OrdinaryTrainer(sCoop.trainerIdB))
+                  && (sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT || sCoop.mode == TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE)))
         {
             FlagSet(TRAINER_FLAGS_START + sCoop.trainerId);
             if (sCoop.twoTrainers && sCoop.trainerIdB != 0)
                 FlagSet(TRAINER_FLAGS_START + sCoop.trainerIdB);
         }
+        // Gym leaders: the partner gets the badge too (before the rematch check: a leader's first battle is in the
+        // rematch table too). Their own copy of the leader's "you won" script runs once back on the field, wherever
+        // they are (a friend who joined from elsewhere: the gym's script, GymLeaderEndScript).
+        else if (GymBadgeFlag(sCoop.trainerId) && !FlagGet(GymBadgeFlag(sCoop.trainerId)))
+        {
+            sPendingScript = GymLeaderEndScript(sCoop.trainerId);
+            if (sPendingScript)
+                FlagSet(TRAINER_FLAGS_START + sCoop.trainerId);
+            MPNet_Log("co-op: the badge of gym leader %d %s", sCoop.trainerId,
+                      sPendingScript ? "comes once back on the field" : "has no script found");
+        }
         // A team rematch with a gym leader: the partner gets the reward too
         else if (MP_Rematch_IsRematchTrainer(sCoop.trainerId))
             MP_Rematch_Reward();
-        // Gym leaders: the partner gets the badge too. Their own copy of the
-        // leader's "you won" script runs once back on the field.
-        else if (GymBadgeFlag(sCoop.trainerId) && !FlagGet(GymBadgeFlag(sCoop.trainerId)))
-        {
-            sPendingScript = MP_FindTrainerEndScript(sCoop.trainerId);
-            if (sPendingScript)
-                FlagSet(TRAINER_FLAGS_START + sCoop.trainerId);
-        }
     }
     if (sCoop.joinedOther)
     {
@@ -2093,6 +2423,7 @@ static void TryRunPendingScript(void)
     LockPlayerFieldControls();
     ScriptContext_SetupScript(sPendingScript);
     sPendingScript = NULL;
+    MPNet_Log("co-op: the gym leader's \"you won\" script runs for us");
 }
 
 void MP_Coop_OnBattleAborted(void)
@@ -2269,6 +2600,9 @@ static void OnAccepted(u8 from, const u8 *data, u16 len)
         sCoop.loseTextB[i] = data[pos++];
     sCoop.loseTextB[i] = EOS;
     sCoop.haveLoseTextB = i > 0;
+    pos++;
+    if (pos + 2 <= len)
+        MP_BattleWeather_SetMasterField(data[pos] | (data[pos + 1] << 8));   // (the master's field weather)
     if (sCoop.trainerId >= TRAINERS_COUNT || trainerB >= TRAINERS_COUNT)
         return;
     sCoop.twoTrainers = trainerB != 0;
@@ -2486,8 +2820,10 @@ static void StartWildCoop(const u8 *players, u8 count)
     IncrementGameStat(GAME_STAT_WILD_BATTLES);
     for (i = 1; i < count; i++)
     {
-        // u8 seat count, u8 their seat, the seats' players
-        u8 buf[6] = {MPR_COOP_WILD_GO, count, i, players[0], players[1], count == 3 ? players[2] : 0xFF};
+        // u8 seat count, u8 their seat, the seats' players, u16 the weather here (the battle starts in it)
+        u16 field = MP_BattleWeather_FieldFlags();
+        u8 buf[8] = {MPR_COOP_WILD_GO, count, i, players[0], players[1], count == 3 ? players[2] : 0xFF,
+                     field & 0xFF, field >> 8};
         Send(players[i], buf, sizeof(buf));
     }
     CreateTask(Task_StartJoinerBattle, 1);
@@ -2679,6 +3015,8 @@ static void OnWildRelay(u8 from, const u8 *data, u16 len)
                 players[1] = data[4];
                 players[2] = data[5];
             }
+            if (len >= 8)
+                MP_BattleWeather_SetMasterField(data[6] | (data[7] << 8));
             sCoop.wildFrom = -1;
             gTrainerBattleOpponent_A = 0;
             gTrainerBattleOpponent_B = 0;
@@ -3070,12 +3408,34 @@ static void TraceParties(void)
                   gBattleStruct->monToSwitchIntoId[5], gAbsentBattlerFlags);
 }
 
+// DECLINE_JOIN_AFTER: once their battle says it can be joined (MPR_COOP_BATTLING) and we're free, JOIN asks for us
+#define JOIN_AFTER_FRAMES (60 * 30)
+static void UpdateJoinAfter(void)
+{
+    s8 who = sCoop.joinAfter;
+    if (who < 0)
+        return;
+    if (!PlayerValid(who) || gMpCoopBattle || ++sCoop.joinAfterTimer > JOIN_AFTER_FRAMES)
+    {
+        MPNet_Log("co-op: player %d's battle never came to join", who + 1);
+        sCoop.joinAfter = -1;
+        return;
+    }
+    if (sBattling[who].ttl && sBattling[who].joinable && MP_IsLocalFree() && !MP_Join_IsAsking())
+    {
+        sCoop.joinAfter = -1;
+        MPNet_Log("co-op: player %d's battle is on: asking to join it", who + 1);
+        MP_Join_Ask(who);
+    }
+}
+
 void MP_Coop_Update(void)
 {
     TraceParties();
     UpdateBattleStatus();
     TryRunPendingScript();
     UpdateHeld();
+    UpdateBattling();
 
     if (sCoop.wildAsking)
         UpdateWildAsking();
@@ -3089,6 +3449,7 @@ void MP_Coop_Update(void)
     if (sCoop.declinedBy >= 0
      && (!PlayerValid(sCoop.declinedBy) || !(gMpPlayers[sCoop.declinedBy].state.flags & MPF_CHALLENGED)))
         sCoop.declinedBy = -1;
+    UpdateJoinAfter();
 
     if (sCoop.waitStage == WAIT_WAITING && sCoop.waitAge < 0xFFFF)
         sCoop.waitAge++;
@@ -3166,6 +3527,9 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
 {
     switch (data[0])
     {
+    case MPR_COOP_BATTLING:
+        OnBattling(from, data, len);
+        break;
     case MPR_COOP_WAIT:
         if (from < MP_MAX_PLAYERS && len >= 5)
         {
@@ -3265,12 +3629,12 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
         if (sCoop.challenged && !sCoop.accepted && PlayerValid(sCoop.requester) && from != sCoop.requester
          && !TripleEligible())
         {
-            SendByte(from, MPR_COOP_DECLINE, DECLINE_NO_TRIPLE);
+            SendByte(from, MPR_COOP_DECLINE, ThirdDecline());
             break;
         }
         if (!sCoop.challenged || sCoop.accepted)
         {
-            SendByte(from, MPR_COOP_DECLINE, DECLINE_TOO_LATE);   // the battle is on its way
+            SendByte(from, MPR_COOP_DECLINE, sCoop.challenged ? ThirdDecline() : DECLINE_TOO_LATE);   // the battle is on its way
             MPNet_Log("co-op: player %d asked too late", from + 1);
         }
         else if (sCoop.prompting && from == sCoop.promptedFor && !PlayerValid(sCoop.requester))
@@ -3305,12 +3669,19 @@ void MP_Coop_OnRelay(u8 from, const u8 *data, u16 len)
         }
         else if (sCoop.role == ROLE_ASKING && from == sCoop.target)
         {
-            static const u8 *const sReasons[] = {sText_SaidNo, sText_TheyHaveOne, sText_TooLate, sText_Busy, sText_NoTripleAsker};
+            static const u8 *const sReasons[] = {sText_SaidNo, sText_TheyHaveOne, sText_TooLate, sText_Busy, sText_NoTripleAsker,
+                                                       sText_JoinAfter};
             u8 reason = len > 1 && data[1] < ARRAY_COUNT(sReasons) ? data[1] : DECLINE_BUSY;
             StopAsking();
             // Only a real "no" stops us asking them again (busy / too late: try again)
             if (reason == DECLINE_NO || reason == DECLINE_ONE_MON)
                 sCoop.declinedBy = from;
+            if (reason == DECLINE_JOIN_AFTER)
+            {
+                sCoop.joinAfter = from;
+                sCoop.joinAfterTimer = 0;
+                MPNet_Log("co-op: joining player %d's battle once it starts", from + 1);
+            }
             ShowAskerMessage(sReasons[reason], from);
         }
         break;
@@ -3458,7 +3829,7 @@ static bool8 ResolveMine(u8 slot, s8 player)
 // Sends each player their part and starts ours
 void MP_Coop_ResolveStart(void)
 {
-    u8 buf[4 + PARTY_SIZE * 13 + MAX_RESOLVE_LEARN * 15];
+    u8 buf[4 + PARTY_SIZE * 25 + MAX_RESOLVE_LEARN * 15];
     u8 boxSlot[PARTY_SIZE], learnSlot[MAX_RESOLVE_LEARN], nb, nl, i, k;
     u16 before[PARTY_SIZE][NUM_STATS], learnMove[MAX_RESOLVE_LEARN];
     s8 p;
@@ -3481,6 +3852,16 @@ void MP_Coop_ResolveStart(void)
                 buf[len++] = sResolve.before[i][k] & 0xFF;
                 buf[len++] = sResolve.before[i][k] >> 8;
             }
+            // its moves and PP as we have them now: the moves it learned without forgetting one are
+            // already in (the owner's own copy gets them now, not after the battle)
+            for (k = 0; k < MAX_MON_MOVES; k++)
+            {
+                u16 m = GetMonData(&gPlayerParty[sResolve.boxSlot[i]], MON_DATA_MOVE1 + k);
+                buf[len++] = m & 0xFF;
+                buf[len++] = m >> 8;
+            }
+            for (k = 0; k < MAX_MON_MOVES; k++)
+                buf[len++] = GetMonData(&gPlayerParty[sResolve.boxSlot[i]], MON_DATA_PP1 + k);
             nb++;
         }
         for (i = 0; i < sResolve.nLearn; i++)
@@ -3618,13 +3999,23 @@ static void OnResolve(const u8 *data, u32 len)
         return;
     nb = data[1];
     nl = data[2];
-    if (nb > PARTY_SIZE || nl > MAX_RESOLVE_LEARN || len < 3u + nb * 13 + nl * 15)
+    if (nb > PARTY_SIZE || nl > MAX_RESOLVE_LEARN || len < 3u + nb * 25 + nl * 15)
         return;
     for (i = 0; i < nb; i++)
     {
         boxSlot[i] = data[pos++];
         for (k = 0; k < NUM_STATS; k++, pos += 2)
             before[i][k] = data[pos] | (data[pos + 1] << 8);
+        // its moves as the master has them (with the ones it learned without forgetting one)
+        if (boxSlot[i] < PARTY_SIZE)
+            for (k = 0; k < MAX_MON_MOVES; k++)
+            {
+                u16 m = data[pos + k * 2] | (data[pos + k * 2 + 1] << 8);
+                u8 pp = data[pos + MAX_MON_MOVES * 2 + k];
+                SetMonData(&gPlayerParty[boxSlot[i]], MON_DATA_MOVE1 + k, &m);
+                SetMonData(&gPlayerParty[boxSlot[i]], MON_DATA_PP1 + k, &pp);
+            }
+        pos += MAX_MON_MOVES * 3;
     }
     for (i = 0; i < nl; i++)
     {
@@ -3807,32 +4198,46 @@ u8 MP_Coop_Seat(void)
     return gMpCoopBattle ? sCoop.seat : 0;
 }
 
-// An ordinary trainer friends may join: not a gym leader, admin, rival, Team Aqua / Magma or other story battle.
-// (Route trainers who sign up for MATCH CALL after the battle use the continue-script mode too: they're fine.)
+// A trainer friends may join: any but the Elite Four and the Champion. Gym leaders, rivals, admins, bosses and story
+// grunts too: the master's own script goes on after the battle as it would have alone, a friend who joined a gym
+// leader's battle gets the badge (MP_Coop_OnBattleEnd: their own copy of the leader's "you won" script), and the rest
+// keep their own event scripts (a friend can still battle them on their own later).
+static bool8 JoinTrainerIdOk(u16 trainer)
+{
+    if (trainer == 0 || trainer >= TRAINERS_COUNT)
+        return FALSE;
+    switch (gTrainers[trainer].trainerClass)
+    {
+    case TRAINER_CLASS_ELITE_FOUR:
+    case TRAINER_CLASS_CHAMPION:
+        return FALSE;
+    }
+    return TRUE;
+}
+
 bool8 MP_Coop_JoinTrainerOk(void)
 {
     u16 trainer = gMpCoopBattle ? sCoop.trainerId : gTrainerBattleOpponent_A;
     u8 mode = gMpCoopBattle ? sCoop.mode : GetTrainerBattleMode();
-    if (trainer == 0 || trainer >= TRAINERS_COUNT || MP_Coop_IsBossTrainer(trainer))
+    // two trainers at once: neither may be one of the Elite Four or the Champion
+    u16 trainerB = gMpCoopBattle ? (sCoop.twoTrainers ? sCoop.trainerIdB : 0)
+                                 : ((gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS) ? gTrainerBattleOpponent_B : 0);
+    if (!JoinTrainerIdOk(trainer) || (trainerB != 0 && !JoinTrainerIdOk(trainerB)))
         return FALSE;
-    switch (gTrainers[trainer].trainerClass)
-    {
-    case TRAINER_CLASS_RIVAL:       // MAY / BRENDAN, WALLY, STEVEN
-    case TRAINER_CLASS_TEAM_AQUA:
-    case TRAINER_CLASS_TEAM_MAGMA:
-        return FALSE;
-    }
     switch (mode)
     {
     case TRAINER_BATTLE_SINGLE:
+    case TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC:
     case TRAINER_BATTLE_CONTINUE_SCRIPT:
-    case TRAINER_BATTLE_REMATCH:
+    case TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT:
     case TRAINER_BATTLE_DOUBLE:                   // a Double Battle the player started alone
+    case TRAINER_BATTLE_REMATCH:
     case TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE:
     case TRAINER_BATTLE_REMATCH_DOUBLE:
+    case TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE_NO_MUSIC:
         return TRUE;
     }
-    return FALSE;
+    return FALSE;   // (the Battle Pyramid, the Trainer Hill, the frontier's set trainers)
 }
 
 // The trainer's "you won" line, for a friend's game
@@ -3841,6 +4246,43 @@ const u8 *MP_Coop_JoinLoseText(void)
     if (gMpCoopWild || !(gBattleTypeFlags & BATTLE_TYPE_TRAINER))
         return NULL;
     return GetTrainerALoseText();
+}
+
+// The second trainer's (two trainers at once)
+const u8 *MP_Coop_JoinLoseTextB(void)
+{
+    if (gMpCoopWild || !(gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS) || gTrainerBattleOpponent_B == 0)
+        return NULL;
+    return GetTrainerBLoseText();
+}
+
+// Two trainers, a Triple Battle: the third foe spot's Pokémon comes from the trainer with more left in reserve (the
+// first one on a tie), JOIN_UNUSED = neither has one
+static u8 JoinTwoTrainersNextFoe(void)
+{
+    u8 half, i, b, best = JOIN_UNUSED, bestCount = 0;
+    for (half = 0; half < 2; half++)
+    {
+        u8 n = 0, first = JOIN_UNUSED;
+        for (i = half * MULTI_PARTY_SIZE; i < (half + 1) * MULTI_PARTY_SIZE; i++)
+        {
+            bool8 out = FALSE;
+            for (b = 1; b < gBattlersCount; b += 2)
+                if (gBattlerPartyIndexes[b] == i && !(gAbsentBattlerFlags & (1 << b)))
+                    out = TRUE;
+            if (out || !IsUsableMon(&gEnemyParty[i]))
+                continue;
+            if (first == JOIN_UNUSED)
+                first = i;
+            n++;
+        }
+        if (n > bestCount)
+        {
+            bestCount = n;
+            best = first;
+        }
+    }
+    return best;
 }
 
 // Master: the conversion. joinMons[j] / joinCount[j] / joinLink[j] / joinBonus[j] for the new seats in order.
@@ -3859,6 +4301,9 @@ void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (
     // a Double Battle the player started alone: their second Pokemon went back to its ball (mp_join.c
     // BattleScript_MpJoinRecall) and battler 2 becomes the first friend's
     bool8 soloDouble = !wasCoop && (gBattleTypeFlags & BATTLE_TYPE_DOUBLE);
+    // two trainers at once: each one's team stays on its own slots (0-2 / 3-5), so a Pokémon's slot says whose it is
+    bool8 twoTrainers = (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS) && gTrainerBattleOpponent_B != 0
+                     && (wasCoop ? (sCoop.twoTrainers && !gMpCoopWild) : (gBattleTypeFlags & BATTLE_TYPE_TRAINER) != 0);
     struct LinkPlayer lp[3];
 
     memset(plan, 0, sizeof(*plan));
@@ -3893,6 +4338,8 @@ void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (
         gMain.savedCallback = CB2_MpCoopEndBattle;
         sCoop.wildDouble = FALSE;
         sCoop.wildExtra = 0;
+        sCoop.twoTrainers = twoTrainers;
+        sCoop.trainerIdB = twoTrainers ? gTrainerBattleOpponent_B : 0;
     }
     wild = sCoop.mode == MODE_WILD;
     for (s = 0; s < oldCount; s++)
@@ -3901,6 +4348,7 @@ void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (
         plan->seatPlayer[oldCount + s] = joiner[s];
     plan->mode = sCoop.mode;
     plan->trainerId = sCoop.trainerId;
+    plan->trainerIdB = twoTrainers ? gTrainerBattleOpponent_B : 0;
 
     // --- the players' side ---
     ZeroPlayerPartyMons();
@@ -4105,6 +4553,12 @@ void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (
             for (k = 0; k < PARTY_SIZE; k++)
                 slotOf[k] = JOIN_UNUSED;
         }
+        if (twoTrainers)
+        {
+            // two trainers: everything stays where it is (slots 0-2 the first trainer's, 3-5 the second's)
+            for (k = 0; k < PARTY_SIZE; k++)
+                order[k] = slotOf[k] = k;
+        }
         ZeroEnemyPartyMons();
         if (!wild)
         {
@@ -4173,7 +4627,9 @@ void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (
                 // the trainer's next Pokémon for this battler, if it has one
                 s32 first, last;
                 u8 idx = JOIN_UNUSED;
-                if (count == 3)
+                if (twoTrainers)
+                    idx = JoinTwoTrainersNextFoe();
+                else if (count == 3)
                     first = 3, last = PARTY_SIZE, idx = b / 2;
                 else
                     first = 3, last = PARTY_SIZE, idx = 3;
@@ -4222,7 +4678,8 @@ void MP_Coop_JoinConvertMaster(u8 newPlayers, const u8 *joiner, struct Pokemon (
     gMpCoopWild = wild;
     gIsTripleBattle = count == 3;
     gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE | BATTLE_TYPE_LINK | BATTLE_TYPE_MULTI
-                     | BATTLE_TYPE_TOWER_LINK_MULTI | BATTLE_TYPE_IS_MASTER | (gBattleTypeFlags & BATTLE_TYPE_LINK_IN_BATTLE);
+                     | BATTLE_TYPE_TOWER_LINK_MULTI | BATTLE_TYPE_IS_MASTER | (gBattleTypeFlags & BATTLE_TYPE_LINK_IN_BATTLE)
+                     | (twoTrainers ? BATTLE_TYPE_TWO_OPPONENTS : 0);   // (each trainer's names, pictures, both prizes)
     gLinkType = LINKTYPE_BATTLE;
     sCoop.isMaster = TRUE;
     sCoop.seat = 0;
@@ -4286,11 +4743,14 @@ static void JoinSetSeats(const struct MpJoinPlan *plan, u8 seat)
     sCoop.partner = sCoop.seatPlayer[0];
     sCoop.mode = plan->mode;
     sCoop.trainerId = plan->trainerId;
+    sCoop.twoTrainers = plan->trainerIdB != 0;
+    sCoop.trainerIdB = plan->trainerIdB;
 }
 
 // The friend who joined: their real party is set aside (the battle's party is the master's snapshot) and their
 // picks are their seat's Pokémon
-void MP_Coop_JoinApplyJoiner(const struct MpJoinPlan *plan, u8 seat, const u8 *picks, u8 nPicks, const u8 *loseText)
+void MP_Coop_JoinApplyJoiner(const struct MpJoinPlan *plan, u8 seat, const u8 *picks, u8 nPicks, const u8 *loseText,
+                             const u8 *loseTextB)
 {
     u8 i;
     SavePlayerParty();   // LoadPlayerParty brings the real party back afterwards
@@ -4317,6 +4777,14 @@ void MP_Coop_JoinApplyJoiner(const struct MpJoinPlan *plan, u8 seat, const u8 *p
             sCoop.loseText[i] = loseText[i];
         sCoop.loseText[i] = EOS;
         sCoop.haveLoseText = i > 0;
+    }
+    sCoop.haveLoseTextB = FALSE;
+    if (loseTextB != NULL)
+    {
+        for (i = 0; i < LOSE_TEXT_MAX && loseTextB[i] != EOS; i++)
+            sCoop.loseTextB[i] = loseTextB[i];
+        sCoop.loseTextB[i] = EOS;
+        sCoop.haveLoseTextB = i > 0;
     }
     sCoop.afterBattle = NULL;
     sCoop.role = ROLE_NONE;

@@ -1,0 +1,46 @@
+Triple Triad audit: 400 games a line, the player a stand-in as the game counts one (SKILLED; CASUAL under SAME / PLUS), every region's first rules
+region       tier          before      now  RANDOM<   RANDOM
+PETALBURG    0-1 badges       81%      59%      77%      64%
+PETALBURG    2-3 badges       94%      58%      89%      53%
+PETALBURG    4-6 badges       96%      60%      79%      51%
+PETALBURG    7-8 badges       94%      62%      76%      52%
+RUSTBORO     0-1 badges       60%      60%      56%      55%
+RUSTBORO     2-3 badges       64%      60%      56%      56%
+RUSTBORO     4-6 badges       65%      65%      43%      58%
+RUSTBORO     7-8 badges       60%      65%      39%      61%
+SLATEPORT    0-1 badges       53%      56%      55%      53%
+SLATEPORT    2-3 badges       61%      55%      53%      53%
+SLATEPORT    4-6 badges       58%      53%      47%      55%
+SLATEPORT    7-8 badges       58%      56%      45%      54%
+MAUVILLE     0-1 badges       57%      52%      51%      53%
+MAUVILLE     2-3 badges       56%      56%      55%      52%
+MAUVILLE     4-6 badges       52%      56%      40%      50%
+MAUVILLE     7-8 badges       53%      47%      37%      46%
+LAVARIDGE    0-1 badges       49%      54%      51%      50%
+LAVARIDGE    2-3 badges       66%      56%      51%      56%
+LAVARIDGE    4-6 badges       58%      55%      41%      53%
+LAVARIDGE    7-8 badges       62%      60%      39%      52%
+LILYCOVE     0-1 badges       46%      58%      40%      44%
+LILYCOVE     2-3 badges       51%      64%      43%      54%
+LILYCOVE     4-6 badges       44%      63%      23%      52%
+LILYCOVE     7-8 badges       41%      61%      22%      53%
+SOOTOPOLIS   0-1 badges       53%      54%      46%      49%
+SOOTOPOLIS   2-3 badges       46%      56%      42%      48%
+SOOTOPOLIS   4-6 badges       48%      53%      37%      50%
+SOOTOPOLIS   7-8 badges       47%      50%      36%      51%
+EVER GRANDE  0-1 badges       57%      56%      53%      50%
+EVER GRANDE  2-3 badges       49%      57%      41%      54%
+EVER GRANDE  4-6 badges       34%      56%      25%      45%
+EVER GRANDE  7-8 badges       38%      50%      26%      46%
+
+special      tier          before      now  RANDOM<   RANDOM
+STEVEN       0-1 badges       21%      34%      21%      39%
+STEVEN       2-3 badges       27%      44%      27%      42%
+STEVEN       4-6 badges       32%      44%      27%      41%
+STEVEN       7-8 badges       43%      46%      30%      43%
+CARD QUEEN   0-1 badges       25%      39%      21%      35%
+CARD QUEEN   2-3 badges       31%      44%      27%      41%
+CARD QUEEN   4-6 badges       38%      43%      30%      37%
+CARD QUEEN   7-8 badges       38%      40%      32%      41%
+
+levels against the best (same hands, both seats): level 0 23% level 1 38% level 2 42%

@@ -67,6 +67,8 @@ static struct
     s16 sandX, sandY;
     u16 lastWeather;
     bool8 settled;               // the battle's own weather is known (it set one, or the first turn began)
+    bool8 linkField;             // not the master: its field weather came (B_COMM_MP_WEATHER) ...
+    u16 linkFieldWeather;        // ... and is this
     // what ScenePixel does this frame
     u8 tintBg, tintMons;
     u16 tintColor;
@@ -391,6 +393,53 @@ static void Clear(void)
     memset(sW.sand, 0, sizeof(sW.sand));
 }
 
+static u16 FieldWeather(void);
+
+// mp_coop.c: a co-op battle is on its way; the weather on the master's field (ACCEPT / WILD_GO), for the battle's
+// first frames, before the battle itself says
+static bool8 sPendingField;
+static u16 sPendingFieldWeather;
+
+void MP_BattleWeather_SetMasterField(u16 flags)
+{
+    sPendingField = TRUE;
+    sPendingFieldWeather = flags;
+}
+
+// battle_controllers.c: a new battle (every game): the master's field weather if it came, nothing from it yet
+void MP_BattleWeather_NewBattle(void)
+{
+    sW.linkField = sPendingField;
+    sW.linkFieldWeather = sPendingFieldWeather;
+    sPendingField = FALSE;
+    sW.settled = FALSE;
+}
+
+// battle_controllers.c PrepareBufferDataTransferLink, the master: the battle's weather, the field's (shown until the
+// battle has its own) and whether the battle's is known yet. Sent ahead of the next command whenever it changes.
+void MP_BattleWeather_LinkState(u8 *state)
+{
+    u16 field = FieldWeather();
+    state[0] = gBattleWeather & 0xFF;
+    state[1] = gBattleWeather >> 8;
+    state[2] = field & 0xFF;
+    state[3] = field >> 8;
+    state[4] = sW.settled || gBattleWeather != 0;
+}
+
+// ... the others' games: the master's, in its place among the commands (their own battle engine doesn't run, so
+// gBattleWeather is only ever what the master says)
+void MP_BattleWeather_OnLinkState(const u8 *state, u16 size)
+{
+    if (size < MP_BATTLE_WEATHER_STATE)
+        return;
+    gBattleWeather = state[0] | (state[1] << 8);
+    sW.linkFieldWeather = state[2] | (state[3] << 8);
+    sW.linkField = TRUE;
+    if (state[4])
+        sW.settled = TRUE;
+}
+
 // Tests: the weather on screen now and the battle's own
 void MP_BattleWeather_Debug(void)
 {
@@ -406,10 +455,20 @@ void MP_BattleWeather_TurnStart(void)
 
 // The field's weather becomes the battle's once everyone is out (battle_util.c ABILITYEFFECT_SWITCH_IN_WEATHER, with
 // its "It's raining." line). Until then, the weather it's going to be: on screen from the battle's first frame.
+// In a link battle only the master's game runs the battle: the others show its field's weather (they can stand in
+// another, a weather on its way out or a route whose weather changed since) once it says what that is.
 static u16 FieldWeather(void)
 {
     if (gBattleTypeFlags & BATTLE_TYPE_RECORDED)
         return 0;
+    if (sW.linkField && (gBattleTypeFlags & BATTLE_TYPE_LINK) && !(gBattleTypeFlags & BATTLE_TYPE_IS_MASTER))
+        return sW.linkFieldWeather;
+    return MP_BattleWeather_FieldFlags();
+}
+
+// This game's field weather as a battle's (B_WEATHER_*)
+u16 MP_BattleWeather_FieldFlags(void)
+{
     switch (GetCurrentWeather())
     {
     case WEATHER_RAIN:

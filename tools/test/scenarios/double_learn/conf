@@ -1,0 +1,6 @@
+# one client, a wild Double Battle (the second foe Lv50 and asleep, so it goes on):
+# The battle's own moves have PECK right away (bmon 0), as in a single battle
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:15+,283:12"
+EXPECT_A=("bmon 0: species 280 moves 64")

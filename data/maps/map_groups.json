@@ -208,7 +208,11 @@
     "RustboroCity_Flat2_1F",
     "RustboroCity_Flat2_2F",
     "RustboroCity_Flat2_3F",
-    "RustboroCity_House3"
+    "RustboroCity_House3",
+    "RustboroCity_GameCenter_1F",
+    "RustboroCity_GameCenter_2F",
+    "RustboroCity_GameCenter_3F",
+    "RustboroCity_GameCenter_Rooftop"
   ],
   "gMapGroup_IndoorFortree": [
     "FortreeCity_House1",

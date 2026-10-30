@@ -1,0 +1,14 @@
+pressuntil A setup 5000
+wait 30
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press A 2
+wait 60
+press A 2
+wait 90
+shot b3_code
+type \n
+waitlog 1200 joined
+quit

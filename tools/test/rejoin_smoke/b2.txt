@@ -1,0 +1,8 @@
+pressuntil A setup 5000
+wait 30
+shot b2_main
+press A 2
+waitlog 1200 joined
+wait 30
+shot b2_joined
+quit

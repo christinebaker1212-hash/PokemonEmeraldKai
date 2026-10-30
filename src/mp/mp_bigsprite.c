@@ -12,10 +12,41 @@ bool8 MP_IsReflectionSprite(struct Sprite *sprite);
 
 static struct MpBigOam sPending[OAM_ENTRY_COUNT], sLive[OAM_ENTRY_COUNT];
 static u16 sPendingCount, sLiveCount;
+// Any sprite's OAM entries can stop at a screen line (sprite->mpClipOn: a Pokémon in water, half in the ground)
+#define NO_CLIP 0x7FFF
+static s16 sPendingClip[OAM_ENTRY_COUNT], sLiveClip[OAM_ENTRY_COUNT];
+static bool8 sPendingAnyClip, sLiveAnyClip;
 
 void MP_BigSprite_BeginOam(void)
 {
     sPendingCount = 0;
+    if (sPendingAnyClip)
+    {
+        u16 i;
+        for (i = 0; i < OAM_ENTRY_COUNT; i++)
+            sPendingClip[i] = NO_CLIP;
+        sPendingAnyClip = FALSE;
+    }
+}
+
+void MP_BigSprite_NoteClip(struct Sprite *sprite, u16 first, u16 end)
+{
+    u16 i;
+    if (!sprite->mpClipOn)
+        return;
+    if (!sPendingAnyClip)
+    {
+        for (i = 0; i < OAM_ENTRY_COUNT; i++)
+            sPendingClip[i] = NO_CLIP;
+        sPendingAnyClip = TRUE;
+    }
+    for (i = first; i < end && i < OAM_ENTRY_COUNT; i++)
+        sPendingClip[i] = sprite->mpClipY;
+}
+
+int MP_BigSprite_OamClipY(u16 oamIndex)
+{
+    return sLiveAnyClip && oamIndex < OAM_ENTRY_COUNT ? sLiveClip[oamIndex] : NO_CLIP;
 }
 
 bool8 MP_BigSprite_AddOam(struct Sprite *sprite, u16 *oamIndex)
@@ -86,6 +117,9 @@ void MP_BigSprite_CommitOam(void)
 {
     memcpy(sLive, sPending, sPendingCount * sizeof(sLive[0]));
     sLiveCount = sPendingCount;
+    sLiveAnyClip = sPendingAnyClip;
+    if (sPendingAnyClip)
+        memcpy(sLiveClip, sPendingClip, sizeof(sLiveClip));
 }
 
 const struct MpBigOam *MP_BigSprite_Oam(u16 index)

@@ -1,0 +1,37 @@
+[Info]
+Name         ="gouki"
+DisplayName  ="gouki"
+VersionDate  =11,08,2009
+MugenVersion =04,14,2002
+Author       ="G.D.T"
+Pal.Defaults =1,7
+
+[Files]
+Cmd     = gouki.cmd
+Cns     = gouki.cns
+St      = gouki.cns
+St1      = AI.txt
+St2     = option.txt
+StCommon = common1.cns
+Sprite  = gouki.sff
+Anim    = gouki.air
+Sound   = gouki.snd
+
+
+pal1 = act/gouki_4.act
+pal2 = act/gouki_5.act
+pal3 = act/gouki_6.act
+pal4 = act/gouki_1.act
+pal5 = act/gouki_2.act
+Pal6 = act/gouki_3.act
+Pal7 = act/gouki_4.act
+Pal8 = act/gouki_5.act
+Pal9 = act/gouki_7.act
+Pal10= act/gouki_1.act
+Pal11= act/gouki_2.act
+Pal12= act/gouki_12.act
+
+
+[Arcade]
+Intro.Storyboard =
+Ending.Storyboard =

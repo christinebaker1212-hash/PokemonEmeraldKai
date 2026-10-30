@@ -1,0 +1,14 @@
+# co-op 2-on-2 at NA-JP lag where ALICE's game shows rain on the field and BOB's (who met the wild Pokemon, so his
+# game runs the battle) doesn't: ALICE's screen shows BOB's field (no rain) until her RAIN DANCE brings rain to both
+# screens; WATER GUN wins it on both
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+DELAY=250
+JIT=80
+FPS=60
+TMO=400
+ENV_A="MOEMON_DEBUG_PARTY=280:30"
+ENV_B="MOEMON_DEBUG_PARTY=283:30"
+EXPECT_A=("co-op: battle over, outcome 1" "bweather shown none battle none" "battle weather on screen: rain")
+EXPECT_B=("co-op: battle over, outcome 1" "bweather shown none battle none" "battle weather on screen: rain")

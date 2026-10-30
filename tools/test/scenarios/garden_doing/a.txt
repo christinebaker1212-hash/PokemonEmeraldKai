@@ -1,0 +1,35 @@
+pressuntil A field 5000
+wait 120
+pressuntil B field 900
+wait 200
+mp life garden actors
+watchlog swims in the pond
+mp life garden place 0 11
+waitlog 3000
+wait 60
+mp life garden actors
+shot swim
+wait 150
+mp life garden actors
+shot dive
+watchlog out of the pond
+waitlog 3000
+wait 30
+mp life garden actors
+watchlog climbs a tree
+mp life garden pursuit 1 200 1
+waitlog 3000
+wait 60
+mp life garden actors
+shot climb
+mp warp 0,57,33,25
+wait 240
+mp life garden actors
+watchlog digs at
+mp life garden place 2 5
+waitlog 3000
+wait 60
+mp life garden actors
+shot dig
+mp life garden actors
+quit

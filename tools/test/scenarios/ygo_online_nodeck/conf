@@ -1,0 +1,10 @@
+# Asked for a Yu-Gi-Oh! duel with only the POKEMON cards: BOB is asked anyway (no "doesn't have a deck" refusal), says
+# YES, takes a Starter Deck to keep, picks it, and the duel is played out on both games
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,13,11
+TMO=400
+EXPECT_A=("asked player 1 for a yu-gi-oh duel" "duel started vs BOB (online, seat 0)" "over 1 winner")
+EXPECT_B=("no deck: a Starter Deck to keep" "no deck: took the SD" "duel started vs ALICE (online, seat 1)" "over 1 winner")
+UNEXPECT_A=("doesn't have" "online duel ended")
+UNEXPECT_B=("online duel ended")

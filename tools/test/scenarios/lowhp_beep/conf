@@ -1,0 +1,6 @@
+# The low HP beep in a single battle: three beeps (SE_LOW_HEALTH loops every 36 ticks), then silence, like doubles
+# and triples; MOEMON_SE_TRACE=90 logs how long it plays each time
+MODE=1
+
+ENV_A="MOEMON_SE_TRACE=90 MOEMON_DEBUG_PARTY=280:30 MOEMON_ANIM_SPEED=30"
+EXPECT_A=("se trace: song 90 starts" "song 90 stops after 99 frames, 99 ticks" "solo battle done")

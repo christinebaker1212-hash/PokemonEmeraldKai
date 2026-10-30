@@ -5,6 +5,7 @@ EverGrandeCity_PokemonCenter_1F_MapScripts::
 
 EverGrandeCity_PokemonCenter_1F_OnTransition:
 	setrespawn HEAL_LOCATION_EVER_GRANDE_CITY
+	call EventScript_TtMapSetup
 	call_if_unset FLAG_MET_SCOTT_IN_EVERGRANDE, EverGrandeCity_PokemonCenter_1F_EventScript_TryShowScott
 	end
 

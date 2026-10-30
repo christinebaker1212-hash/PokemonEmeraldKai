@@ -4842,6 +4842,18 @@ const struct Item gItems[] =
         .type = ITEM_USE_FIELD,
         .fieldUseFunc = ItemUseOutOfBattle_CandyJar,
     },
+    [ITEM_CARD_CASE] =
+    {
+        .name = _("CARD CASE"),
+        .itemId = ITEM_CARD_CASE,
+        .price = 0,
+        .description = sCardCaseDesc,
+        .importance = 1,
+        .registrability = TRUE,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_FIELD,
+        .fieldUseFunc = ItemUseOutOfBattle_CardCase,
+    },
 #include "items_gen4.h"   // Moemon Kai: Gen 4 items
 #include "items_gen4_berries.h"   // Moemon Kai: Gen 4 berries
 };

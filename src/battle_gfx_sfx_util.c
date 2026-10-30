@@ -19,6 +19,7 @@
 #include "sound.h"
 #include "party_menu.h"
 #include "m4a.h"
+#include "gba/m4a_internal.h"
 #include "decompress.h"
 #include "data.h"
 #include "palette.h"
@@ -631,6 +632,12 @@ void BattleLoadOpponentMonSpriteGfx(struct Pokemon *mon, u8 battler)
 
     otId = GetMonData(mon, MON_DATA_OT_ID);
     position = GetBattlerPosition(battler);
+    // Moemon Co-op: a PvP foe is a player of this game: their DEOXYS shows this game's form
+    // (a wild or trainer one keeps the Normal Forme it always had)
+    if (gNetLinkActive && !gMpCoopBattle && gBattleSpritesDataPtr->battlerData[battler].transformSpecies == SPECIES_NONE)
+        HandleLoadSpecialPokePic(&gMonFrontPicTable[species], gMonSpritesGfxPtr->sprites.ptr[position],
+                                 species, currentPersonality);
+    else
     HandleLoadSpecialPokePic_DontHandleDeoxys(&gMonFrontPicTable[species],
                                               gMonSpritesGfxPtr->sprites.ptr[position],
                                               species, currentPersonality);
@@ -1123,14 +1130,28 @@ void ClearBehindSubstituteBit(u8 battler)
     gBattleSpritesDataPtr->battlerData[battler].behindSubstitute = 0;
 }
 
-// Moemon Co-op: the low HP beep plays three times ("doo duh" x3), then stops.
-// The sound loops every 36 frames; it comes back when another Moemon (or the
-// same one after being healed) drops into the red.
-#define LOW_HP_BEEP_FRAMES 100
+// Moemon Co-op: the low HP beep plays three times ("doo duh" x3), then stops, in every kind of battle.
+// SE_LOW_HEALTH loops every 36 ticks (doo 12, duh 12, rest 12): it stops once its own player has played 100 ticks,
+// so neither the battle's turbo (tasks stepped twice a frame) nor ANIM SPEED changes how many beeps are heard
+// (battle_main.c MpBattleTurbo also leaves the beep's tempo alone). It comes back when another Moemon (or the same
+// one after being healed) drops into the red.
+#define LOW_HP_BEEP_TICKS 100
+
+bool8 MP_LowHpBeepPlaying(void)
+{
+    const struct Song *song = &gSongTable[SE_LOW_HEALTH];
+    return gMPlayTable[song->ms].info->songHeader == song->header
+        && !(gMPlayTable[song->ms].info->status & MUSICPLAYER_STATUS_PAUSE);
+}
 
 static void Task_StopLowHpBeep(u8 taskId)
 {
-    if (!gMain.inBattle || ++gTasks[taskId].data[0] >= LOW_HP_BEEP_FRAMES)
+    const struct Song *song = &gSongTable[SE_LOW_HEALTH];
+    struct MusicPlayerInfo *info = gMPlayTable[song->ms].info;
+
+    // (another sound took the player: the beep is over; a safety net of 10 seconds of task steps)
+    if (!gMain.inBattle || !MP_LowHpBeepPlaying() || info->clock >= LOW_HP_BEEP_TICKS
+     || ++gTasks[taskId].data[0] >= 600)
     {
         m4aSongNumStop(SE_LOW_HEALTH);
         DestroyTask(taskId);

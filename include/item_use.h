@@ -8,6 +8,7 @@ void ItemUseOutOfBattle_Itemfinder(u8 var);
 void ItemUseOutOfBattle_BattleFlag(u8 taskId);
 void ItemUseOutOfBattle_PokeblockCase(u8 taskId);
 void ItemUseOutOfBattle_CandyJar(u8 taskId);
+void ItemUseOutOfBattle_CardCase(u8 taskId);
 void ItemUseOutOfBattle_CoinCase(u8 taskId);
 void ItemUseOutOfBattle_PowderJar(u8 taskId);
 void ItemUseOutOfBattle_WailmerPail(u8 taskId);

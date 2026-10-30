@@ -1,0 +1,7 @@
+# A card player's record and Prize cards on the challenge screen: TEST COLLECTOR plays with 2 Prizes (r_challenge0:
+# "2 PRIZES", 0W 0L; r_board: two Prize cards each); a win (r_challenge1: 1W 0L, WON TODAY), then a concession counts
+# as a loss (r_challenge2: 1W 1L)
+MODE=1
+WARP=0,16,12,11
+TMO=150
+EXPECT_A=("[tcg] record vs TEST COLLECTOR: 1-0" "[tcg] record vs TEST COLLECTOR: 1-1")

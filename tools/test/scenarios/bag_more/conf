@@ -1,0 +1,10 @@
+# The BAG, more of it (MAY's bag): MEDICINE with nine items scrolls (the arrows on the list's frame); SELECT moves
+# HYPER POTION's neighbor down past it (a gray frame where it was, the line where it goes: mp bagorder 0 shows the save
+# pocket in its new order, REPEL still last); TMs & HMs shows the HM tag inside its row and the TM's move data in the
+# description box; BERRIES > CHECK TAG opens the tag, DOWN shows the next BERRY and B comes back with the cursor on it.
+# Shots medicine, scrolled, moving, moved, tmhm, tm_menu, berry_tag, berry_tag2, berries_back.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_GENDER=F"
+EXPECT_A=("[test] bagview 1: 13 14 15 16 17 18 20 19 21" "[test] bagorder 0: 13 14 15 16 17 18 20* 19 21* 86")
+UNEXPECT_A=("[heap] out of memory")

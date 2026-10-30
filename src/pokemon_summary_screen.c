@@ -230,6 +230,8 @@ static s8 AdvanceMultiBattleMonIndex(s8);
 static bool8 IsValidToViewInMulti(struct Pokemon *);
 static void ChangePage(u8, s8);
 static void PssScrollRight(u8);
+static void PssWrapToInfo(u8);
+static void PssWrapToLast(u8);
 static void PssScrollRightEnd(u8);
 static void PssScrollLeft(u8);
 static void PssScrollLeftEnd(u8);
@@ -1956,6 +1958,7 @@ static void ChangePage(u8 taskId, s8 delta)
     s16 *data = gTasks[taskId].data;
 
     s8 target;
+    bool8 wrapLeft, fromInfo;
 
     if (summary->isEgg)
         return;
@@ -1970,22 +1973,100 @@ static void ChangePage(u8 taskId, s8 delta)
 
     PlaySE(SE_SELECT);
     ClearPageWindowTilemaps(sMonSummaryScreen->currPageIndex);
-    if (delta == -1 && target > sMonSummaryScreen->currPageIndex)
+    wrapLeft = delta == -1 && target > sMonSummaryScreen->currPageIndex;
+    fromInfo = sMonSummaryScreen->currPageIndex == PSS_PAGE_INFO;
+    if (wrapLeft && !fromInfo)
     {
-        // scrolling left uncovers the layer underneath: it holds the page before, so put the last page there
+        // (round to the last page from a page on a layer, e.g. picking a move: scrolling left uncovers the layer
+        // underneath, so the last page goes there, its picture in view)
         u8 under = sMonSummaryScreen->bgDisplayOrder == 0 ? 1 : 2;
         SetBgTilemapBuffer(under, sMonSummaryScreen->bgTilemapBuffers[target][0]);
-        ChangeBgX(under, 0, BG_COORD_SET);
+        ChangeBgX(under, 0x10000, BG_COORD_SET);
         ScheduleBgCopyTilemapToVram(under);
     }
     sMonSummaryScreen->currPageIndex = target;
     data[0] = 0;
-    if (delta == 1)
+    if (wrapLeft && fromInfo)
+        SetTaskFuncWithFollowupFunc(taskId, PssWrapToLast, gTasks[taskId].func);   // Moemon Co-op
+    else if (delta == 1 && target == PSS_PAGE_INFO)
+        SetTaskFuncWithFollowupFunc(taskId, PssWrapToInfo, gTasks[taskId].func);   // Moemon Co-op
+    else if (delta == 1)
         SetTaskFuncWithFollowupFunc(taskId, PssScrollRight, gTasks[taskId].func);
     else
         SetTaskFuncWithFollowupFunc(taskId, PssScrollLeft, gTasks[taskId].func);
     CreateTextPrinterTask(sMonSummaryScreen->currPageIndex);
     HidePageSpecificSprites();
+}
+
+// Moemon Co-op: RIGHT on the last page back to INFO. INFO is the bottom layer (BG3, its own picture in the
+// tilemap's left half; the right half is the EGG layout, which sliding it in like the other pages showed). So
+// the page on top slides away to the left instead, the page under it hidden first, and INFO is there beneath.
+static void PssWrapToInfo(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    if (data[0] == 0)
+    {
+        u8 under;
+        data[1] = sMonSummaryScreen->bgDisplayOrder ? 1 : 2;   // the layer showing the page we're leaving
+        under = data[1] == 1 ? 2 : 1;
+        ChangeBgX(under, 0, BG_COORD_SET);   // (a tilemap's left half is blank: nothing between the page and INFO)
+        ScheduleBgCopyTilemapToVram(under);
+    }
+    ChangeBgX(data[1], 0x2000, BG_COORD_ADD);
+    data[0] += 32;
+    if (data[0] > 0xFF)
+    {
+        ChangeBgX(data[1], 0, BG_COORD_SET);   // (all the way round: its blank half)
+        sMonSummaryScreen->bgDisplayOrder = 0;   // as when the screen opens on INFO
+        SetBgAttribute(1, BG_ATTR_PRIORITY, 1);
+        SetBgAttribute(2, BG_ATTR_PRIORITY, 2);
+        data[1] = 0;
+        data[0] = 0;
+        DrawPagination();
+        PutPageWindowTilemaps(sMonSummaryScreen->currPageIndex);
+        SetTypeIcons();
+        TryDrawExperienceProgressBar();
+        SwitchTaskToFollowupFunc(taskId);
+    }
+}
+
+// Moemon Co-op: LEFT on INFO round to the last page. INFO is the bottom layer and doesn't move, so the last page slides
+// in over it from the left on BG1 (a layer's page is in the right half of its tilemap: scrolling x from 0 down to -256
+// brings it in from the left). It ends as if the page had been reached the usual way: BG1 on top showing it
+// (bgDisplayOrder 1), BG2 under it holding the page before, ready for the next LEFT.
+static void PssWrapToLast(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    u8 page = sMonSummaryScreen->currPageIndex;
+    if (data[0] == 0)
+    {
+        SetBgTilemapBuffer(1, sMonSummaryScreen->bgTilemapBuffers[page][0]);
+        ChangeBgX(1, 0, BG_COORD_SET);
+        ChangeBgX(2, 0, BG_COORD_SET);   // (nothing between it and INFO)
+        SetBgAttribute(1, BG_ATTR_PRIORITY, 1);
+        SetBgAttribute(2, BG_ATTR_PRIORITY, 2);
+        ScheduleBgCopyTilemapToVram(1);
+        ScheduleBgCopyTilemapToVram(2);
+        ShowBg(1);
+        ShowBg(2);
+    }
+    ChangeBgX(1, 0x2000, BG_COORD_SUB);
+    data[0] += 32;
+    if (data[0] > 0xFF)
+    {
+        ChangeBgX(1, 0x10000, BG_COORD_SET);
+        SetBgTilemapBuffer(2, sMonSummaryScreen->bgTilemapBuffers[page - 1][0]);
+        ChangeBgX(2, page - 1 > PSS_PAGE_INFO ? 0x10000 : 0, BG_COORD_SET);
+        ScheduleBgCopyTilemapToVram(2);
+        sMonSummaryScreen->bgDisplayOrder = 1;
+        data[1] = 0;
+        data[0] = 0;
+        DrawPagination();
+        PutPageWindowTilemaps(page);
+        SetTypeIcons();
+        TryDrawExperienceProgressBar();
+        SwitchTaskToFollowupFunc(taskId);
+    }
 }
 
 static void PssScrollRight(u8 taskId) // Scroll right
@@ -3261,6 +3342,8 @@ static EWRAM_DATA struct
     u8 pages;
     u8 rowCount;
     u8 rows[48][LIFE_JOURNAL_TEXT];   // wrapped rows; a fact's first row starts with a bullet
+    u8 rowEntry[48];                  // the sentence each row belongs to (its rows share one stripe color)
+    u8 entries;
 } *sMpJournal = NULL;
 
 static const u8 sMpJournalText_Title[] = _("JOURNAL");
@@ -3329,8 +3412,10 @@ static void MpJournal_Wrap(const u8 *text)
             fit = end = next;
         }
         {
-            u8 *r = sMpJournal->rows[sMpJournal->rowCount++];
+            u8 *r;
             u16 n = fit - start;
+            sMpJournal->rowEntry[sMpJournal->rowCount] = sMpJournal->entries;
+            r = sMpJournal->rows[sMpJournal->rowCount++];
             if (first)
                 *r++ = CHAR_HYPHEN, *r++ = CHAR_SPACE;
             else
@@ -3343,6 +3428,7 @@ static void MpJournal_Wrap(const u8 *text)
             start++;
         first = FALSE;
     }
+    sMpJournal->entries++;
 }
 
 static void MpJournal_Build(void)
@@ -3351,6 +3437,7 @@ static void MpJournal_Build(void)
     struct BoxPokemon *box = &sMonSummaryScreen->currentMon.box;
     u8 n, i;
     sMpJournal->rowCount = 0;
+    sMpJournal->entries = 0;
     n = MP_Life_Journal(box, lines, LIFE_JOURNAL_LINES);
     if (n == 0)
         MpJournal_Wrap(sMpJournalText_NoRecord);
@@ -3368,9 +3455,15 @@ static void MpJournal_Build(void)
             if (sMpJournal->rowCount + pad <= ARRAY_COUNT(sMpJournal->rows))
             {
                 for (k = count; k-- > 0;)
+                {
                     memcpy(sMpJournal->rows[before + pad + k], sMpJournal->rows[before + k], LIFE_JOURNAL_TEXT);
+                    sMpJournal->rowEntry[before + pad + k] = sMpJournal->rowEntry[before + k];
+                }
                 for (k = 0; k < pad; k++)
+                {
                     sMpJournal->rows[before + k][0] = EOS;
+                    sMpJournal->rowEntry[before + k] = before > 0 ? sMpJournal->rowEntry[before - 1] : 0;   // (the stripe goes on)
+                }
                 sMpJournal->rowCount += pad;
             }
         }
@@ -3382,11 +3475,43 @@ static void MpJournal_Build(void)
         sMpJournal->page = 0;
 }
 
+// The sheet's stripes, a sentence at a time: all the rows of one sentence green, the next sentence's white (the
+// rows the INFO page's boxes are made of: 4-5 green, 6-7 white)
+static void MpJournal_PaintStripes(void)
+{
+    u16 *dst = sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_JOURNAL][1];
+    const u16 *src = sMonSummaryScreen->bgTilemapBuffers[PSS_PAGE_INFO][0];
+    u8 i, x, white = 0;
+    s16 first = -1, prev = -1;
+    for (i = 0; i < MPJ_ROWS; i++)
+    {
+        u16 r = sMpJournal->page * (MPJ_ROWS - 1) + i;
+        s16 entry = (i < MPJ_ROWS - 1 && r < sMpJournal->rowCount) ? sMpJournal->rowEntry[r] : -1;
+        if (first < 0 && entry >= 0)
+            first = entry;
+        if (entry >= 0)
+            white = (entry - first) & 1;
+        else if (i > 0 && prev != -2)
+            white ^= 1, prev = -2;   // past the sentences: the page count's row, the next color
+        if (entry >= 0)
+            prev = entry;
+        for (x = 10; x < 30; x++)
+        {
+            u8 sx = x == 27 ? 26 : x;
+            dst[(4 + 2 * i) * 32 + x] = src[(white ? 6 : 4) * 32 + sx];
+            dst[(5 + 2 * i) * 32 + x] = src[(white ? 7 : 5) * 32 + sx];
+        }
+    }
+    ScheduleBgCopyTilemapToVram(1);
+    ScheduleBgCopyTilemapToVram(2);
+}
+
 static void MpJournal_Draw(void)
 {
     u8 i, w = sMpJournal->bodyWindow;
     if (w == WINDOW_NONE)
         return;
+    MpJournal_PaintStripes();
     FillWindowPixelBuffer(w, PIXEL_FILL(0));
     for (i = 0; i < MPJ_ROWS - 1; i++)
     {

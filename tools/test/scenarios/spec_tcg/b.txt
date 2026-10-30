@@ -1,0 +1,13 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp panel 1 1
+wait 380
+press LEFT 30
+press UP 30
+press RIGHT 40
+press DOWN 30
+wait 120
+rendershot b_seen
+wait 200
+quit

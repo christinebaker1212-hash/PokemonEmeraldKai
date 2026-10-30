@@ -1,0 +1,15 @@
+# co-op wild 2-on-2 at NA-JP lag: ALICE's MOEMON hangs on at 3 HP and BOB's knocks out a foe; on each game its own
+# MOEMON bubbles (ALICE's heart, BOB's sparkle) and the friend's bubble shows over the friend's MOEMON (the same
+# battler on both games, never over one's own); shot emote on both
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+DELAY=250
+JIT=80
+FPS=60
+TMO=400
+ENV_A="MOEMON_DEBUG_PARTY=280:30"
+ENV_B="MOEMON_DEBUG_PARTY=283:30"
+EXPECT_A=("co-op: battle over, outcome 1" "a friend's emote")
+EXPECT_B=("co-op: battle over, outcome 1" "a friend's emote")
+CHECK="tools/test/scenarios/coop_life_emote/check.sh"

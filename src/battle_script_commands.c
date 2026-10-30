@@ -3093,6 +3093,7 @@ static void Cmd_tryfaintmon(void)
             if (GetBattlerSide(gActiveBattler) == B_SIDE_PLAYER)
             {
                 gHitMarker |= HITMARKER_PLAYER_FAINTED;
+                MP_NoteFaint(gBattleMons[gActiveBattler].personality);   // Moemon Co-op: REVIVE's cursor
                 if (gBattleResults.playerFaintCounter < 255)
                     gBattleResults.playerFaintCounter++;
                 AdjustFriendshipOnBattleFaint(gActiveBattler);
@@ -3466,7 +3467,10 @@ static void MpCoopGiveMoveToBattleMons(u8 slot, u16 move)
     for (b = 0; b < gBattlersCount; b++)
         if (GetBattlerSide(b) == B_SIDE_PLAYER && gBattlerPartyIndexes[b] == slot
          && !(gBattleMons[b].status2 & STATUS2_TRANSFORMED))
+        {
             GiveMoveToBattleMon(&gBattleMons[b], move);
+            MPNet_Log("co-op levels: slot %d learned %d (battler %d)", slot, move, b);
+        }
 }
 
 static void MpCoopExpStep(void)

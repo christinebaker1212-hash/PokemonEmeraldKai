@@ -61,6 +61,7 @@ struct Room
 
 static mp_sock sListen = MP_BADSOCK;
 static mp_sock sDiscovery = MP_BADSOCK;
+static mp_sock sWho = MP_BADSOCK;    // UDP on the lobby's port: tells a player the address it comes from (MPUdp)
 static int sPort;
 static struct SrvConn *sConns[MAX_CONNS];
 static struct Room sRooms[MAX_ROOMS];
@@ -583,7 +584,10 @@ static void HandleMessage(int c, uint8_t type, uint8_t *data, uint16_t len)
         if (r && sc->helloDone)
         {
             struct StoreCtx sx = {c, sc->room};
-            MPStore_Handle(r->key, sc->slot, data, len, StoreSend, &sx);
+            if (len >= 1 && data[0] >= MP_ST_RH_SUBMIT && data[0] <= MP_ST_SIM_ROSTER)
+                MPScores_Handle(data, len, StoreSend, &sx);   // DANCE records, BATTLE SIMULATOR trainers: the whole server
+            else
+                MPStore_Handle(r->key, sc->slot, data, len, StoreSend, &sx);
         }
         break;
     }
@@ -672,6 +676,31 @@ static void AnswerDiscovery(void)
     }
 }
 
+// "MFWHO" + 4 bytes -> "MFYOU" + the same 4 bytes + the IPv4 address and port the datagram came from: a player's
+// address as the internet sees it, for a direct connection to a friend (the VS cabinet, src/mp/mp_fight.c)
+static void AnswerWho(void)
+{
+    uint8_t buf[32], out[17];
+    int guard;
+    if (sWho == MP_BADSOCK)
+        return;
+    for (guard = 0; guard < 64; guard++)
+    {
+        struct sockaddr_in from;
+        mp_socklen fromLen = sizeof(from);
+        int n = (int)recvfrom(sWho, (char *)buf, sizeof(buf), 0, (struct sockaddr *)&from, &fromLen);
+        if (n <= 0)
+            break;
+        if (n < 9 || memcmp(buf, "MFWHO", 5) != 0 || from.sin_family != AF_INET)
+            continue;
+        memcpy(out, "MFYOU", 5);
+        memcpy(out + 5, buf + 5, 4);
+        memcpy(out + 9, &from.sin_addr.s_addr, 4);   // network order
+        memcpy(out + 13, &from.sin_port, 2);
+        sendto(sWho, (const char *)out, 15, 0, (struct sockaddr *)&from, fromLen);
+    }
+}
+
 static mp_sock OpenListen(int port)
 {
     struct sockaddr_in6 addr6;
@@ -740,6 +769,24 @@ int MPServer_Start(int port, int lanDiscovery)
         return -1;
     }
     sPort = port;
+    {
+        struct sockaddr_in addr;
+        sWho = socket(AF_INET, SOCK_DGRAM, 0);
+        if (sWho != MP_BADSOCK)
+        {
+            memset(&addr, 0, sizeof(addr));
+            addr.sin_family = AF_INET;
+            addr.sin_addr.s_addr = htonl(INADDR_ANY);
+            addr.sin_port = htons((uint16_t)port);
+            if (bind(sWho, (struct sockaddr *)&addr, sizeof(addr)) != 0)
+            {
+                mp_closesock(sWho);
+                sWho = MP_BADSOCK;
+            }
+            else
+                MPSock_SetNonBlocking(sWho);
+        }
+    }
     if (lanDiscovery)
     {
         struct sockaddr_in addr;
@@ -781,8 +828,11 @@ void MPServer_Stop(void)
         mp_closesock(sListen);
     if (sDiscovery != MP_BADSOCK)
         mp_closesock(sDiscovery);
+    if (sWho != MP_BADSOCK)
+        mp_closesock(sWho);
     sListen = MP_BADSOCK;
     sDiscovery = MP_BADSOCK;
+    sWho = MP_BADSOCK;
 }
 
 void MPServer_Poll(void)
@@ -796,6 +846,7 @@ void MPServer_Poll(void)
         return;
     AcceptNew();
     AnswerDiscovery();
+    AnswerWho();
     now = time(NULL);
 
     for (i = 0; i < MAX_CONNS; i++)
@@ -856,6 +907,12 @@ void MPServer_Wait(int ms)
         FD_SET(sDiscovery, &rset);
         if (sDiscovery > maxSock)
             maxSock = sDiscovery;
+    }
+    if (sWho != MP_BADSOCK)
+    {
+        FD_SET(sWho, &rset);
+        if (sWho > maxSock)
+            maxSock = sWho;
     }
     for (i = 0; i < MAX_CONNS; i++)
     {

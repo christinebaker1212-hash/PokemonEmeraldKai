@@ -1,3 +1,5 @@
+// Moemon Kai: defines the song functions mp_kaisong_scene.h wraps
+#define MP_KAISONG_NO_SCENE
 #include "global.h"
 #include "gba/m4a_internal.h"
 #include "sound.h"
@@ -124,6 +126,15 @@ void PlayNewMapMusic(u16 songNum)
     sMapMusicState = 1;
 }
 
+// Moemon Kai: the map's song is now songNum, and the music playing already is it (MP_Kaisong_SameMusic: a .kaisong
+// holding the same music, like the GAME CENTER's floors): it plays on instead of starting again
+void MP_KeepMapMusic(u16 songNum)
+{
+    sCurrentMapMusic = songNum;
+    sNextMapMusic = 0;
+    sMapMusicState = 2;
+}
+
 void StopMapMusic(void)
 {
     sCurrentMapMusic = 0;
@@ -246,6 +257,26 @@ static void Task_Fanfare(u8 taskId)
     {
         m4aMPlayContinue(&gMPlayInfo_BGM);
         DestroyTask(taskId);
+    }
+}
+
+// Moemon Co-op: screens that run outside the main loop (the card game) tick the fanfare
+// themselves, and finish it when they close: the field they return to resets the tasks,
+// which would leave the music paused for good (and a warp waiting on it).
+void MP_Sound_TickFanfare(void)
+{
+    u8 taskId = FindTaskIdByFunc(Task_Fanfare);
+    if (taskId != TASK_NONE)
+        Task_Fanfare(taskId);
+}
+
+void MP_Sound_EndFanfare(void)
+{
+    u8 taskId = FindTaskIdByFunc(Task_Fanfare);
+    if (taskId != TASK_NONE)
+    {
+        sFanfareCounter = 0;
+        Task_Fanfare(taskId);
     }
 }
 

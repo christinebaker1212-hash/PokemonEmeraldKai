@@ -9,5 +9,6 @@ void MP_LifeBattle_Update(void);       // every frame (mp_main.c), in and out of
 bool8 MP_LifeBattle_TextHold(void);    // battle controllers, when a message finished printing: TRUE = wait
 extern bool8 gMpBattleTextPink;        // battle_message.c BattlePutTextOnWindow: the next B_WIN_MSG text is a line
 void MP_LifeBattle_Debug(const char *args);
+void MP_LifeBattle_OnPeerEmote(u8 battler, u8 icon, bool8 happy);   // mp_battle.c: MPR_BATTLE_MONEMOTE
 
 #endif // GUARD_MP_LIFE_BATTLE_H

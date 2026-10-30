@@ -1466,6 +1466,16 @@ void CreateRegionMapPlayerIcon(u16 tileTag, u16 paletteTag)
         sheet.data = sRegionMapPlayerIcon_MayGfx;
         palette.data = sRegionMapPlayerIcon_MayPal;
     }
+    // Moemon Co-op: the head of the look you wear, not Brendan's or May's
+    {
+        static u8 sHeadTiles[128];
+        static u16 sHeadPal[16];
+        if (MP_Avatar_HeadIcon(-1, sHeadTiles, sHeadPal, RGB_WHITE))
+        {
+            sheet.data = sHeadTiles;
+            palette.data = sHeadPal;
+        }
+    }
     LoadSpriteSheet(&sheet);
     LoadSpritePalette(&palette);
     spriteId = CreateSprite(&template, 0, 0, 1);
@@ -2104,7 +2114,6 @@ void MP_RegionMap_SetFlyWarp(mapsec_u16_t town)
 
 #define TAG_MP_FRIEND_ICON   0x5400   // + friend slot (tiles)
 #define TAG_MP_FRIEND_PAL    0x5410   // + gender
-
 static EWRAM_DATA u8 sMpFriendSprite[MP_MAX_PLAYERS] = {0};
 static EWRAM_DATA u8 sMpFriendCount = 0;
 static EWRAM_DATA u8 sMpFriendIds[MP_MAX_PLAYERS] = {0};
@@ -2194,12 +2203,26 @@ static void MpCreateFriendIcons(void)
     sMpFriendCount = MP_Friends_List(sMpFriendIds);
     for (i = 0; i < sMpFriendCount; i++)
     {
+        static u8 sHeadTiles[MP_MAX_PLAYERS][128];
+        static u16 sHeadPal[MP_MAX_PLAYERS][16];
         u8 gender = gMpPlayers[sMpFriendIds[i]].app.gender == FEMALE ? FEMALE : MALE;
         struct SpriteSheet sheet = {gender == FEMALE ? sRegionMapPlayerIcon_MayGfx : sRegionMapPlayerIcon_BrendanGfx, 0x80, TAG_MP_FRIEND_ICON + i};
         struct SpriteTemplate tmpl = {TAG_MP_FRIEND_ICON + i, TAG_MP_FRIEND_PAL + gender, &sRegionMapPlayerIconOam,
                                       sRegionMapPlayerIconAnimTable, NULL, gDummySpriteAffineAnimTable, SpriteCallbackDummy};
+        // The head of the look they wear, outlined in their player color (their arrows' color);
+        // Brendan's / May's head, tinted blue, only if it can't be made
+        if (MP_Avatar_HeadIcon(sMpFriendIds[i], sHeadTiles[i], sHeadPal[i], MP_Compass_PlayerColor(sMpFriendIds[i])))
+        {
+            struct SpritePalette sp = {sHeadPal[i], TAG_MP_FRIEND_PAL + 2 + i};
+            sheet.data = sHeadTiles[i];
+            tmpl.paletteTag = TAG_MP_FRIEND_PAL + 2 + i;
+            LoadSpritePalette(&sp);
+        }
+        else
+        {
+            LoadMpFriendPalette(gender);
+        }
         sMpFriendTmpl[i] = tmpl;
-        LoadMpFriendPalette(gender);
         LoadSpriteSheet(&sheet);
         sMpFriendSprite[i] = CreateSprite(&sMpFriendTmpl[i], 0, 0, 2);
     }
@@ -2217,6 +2240,8 @@ static void MpDestroyFriendIcons(void)
         sMpFriendSprite[i] = MAX_SPRITES;
         FreeSpriteTilesByTag(TAG_MP_FRIEND_ICON + i);
     }
+    for (i = 0; i < MP_MAX_PLAYERS; i++)
+        FreeSpritePaletteByTag(TAG_MP_FRIEND_PAL + 2 + i);
     FreeSpritePaletteByTag(TAG_MP_FRIEND_PAL + MALE);
     FreeSpritePaletteByTag(TAG_MP_FRIEND_PAL + FEMALE);
     sMpFriendCount = 0;

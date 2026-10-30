@@ -1,0 +1,343 @@
+;_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+;                                                            No,23
+;   『 SUPER STREET FIGHTER ⅡX 』
+;     ブランカステージ
+;                                               製作者　はたＢＯＷ
+;_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+[Info]
+name = "SF2 Brazil - Blanka Stage"
+displayname = "BRAZIL - BLANKA"
+autor = Hatabow
+
+;========================================================
+[Camera]
+startx = 0
+starty = 0
+
+boundleft = -211
+boundright = 211
+
+boundhigh = 0
+boundlow = 0
+
+verticalfollow = .1
+
+floortension = 0
+
+tension = 60
+
+;========================================================
+[PlayerInfo]
+;--- Player 1 ---
+p1startx = -70
+p1starty = 0
+p1startz = 0
+p1facing = 1
+
+;--- Player 2 ---
+p2startx = 70
+p2starty = 0
+p2startz = 0
+p2facing = -1
+
+;--- Common ---
+leftbound = -1000
+rightbound = 1000
+topbound = 0
+botbound = 0
+
+;========================================================
+[Scaling]
+topz = 0
+botz = 50
+topscale = 1
+botscale = 1.2
+
+;========================================================
+[Bound]
+screenleft = 20
+screenright = 20
+
+;========================================================
+[StageInfo]
+zoffset = 210
+autoturn = 1
+resetBG = 1
+
+;========================================================
+[Shadow]
+intensity = 50
+color = 100,100,100
+yscale = -.1
+fade.range = -400,-100
+
+[Reflection]
+intensity = 0
+
+;========================================================
+[Music]
+bgmusic = sound/SF2 Brazil - Blanka Theme.mp3
+bgvolume = 255
+
+;========================================================
+[BGdef]
+spr = stages/sf2-brazil.sff
+debugbg = 0
+
+;========================================================
+[BG];背景
+type = normal
+spriteno = 0,0
+start = -110,22
+delta = 0,0
+tile = 1,0
+
+[BG];家
+type = normal
+spriteno = 0,1
+start = 0,22
+delta = .71,1
+mask = 1
+
+[BG];家の下のブクブク １
+type = anim
+actionno = 11
+start = -361,176
+delta = .71,1
+
+[BG];家の下のブクブク ２
+type = anim
+actionno = 11
+start = -233,176
+delta = .71,1
+
+[BG];家の下のブクブク ３
+type = anim
+actionno = 11
+start = -105,176
+delta = .71,1
+
+[Begin Action 11];家の下のブクブク
+11,0, 0,0, 5
+11,1, 0,0, 5
+11,2, 0,0, 5
+11,3, 0,0, 5
+11,4, 0,0, 5
+11,5, 0,0, 5
+11,6, 0,0, 5
+11,7, 0,0, 5
+
+[BG];川のブクブク
+type = anim
+actionno = 12
+start = -32,140
+delta = .71,1
+
+[Begin Action 12];川のブクブク
+12,0, 0,0, 5
+12,1, 0,0, 5
+12,2, 0,0, 5
+12,3, 0,0, 5
+12,4, 0,0, 5
+12,5, 0,0, 5
+12,6, 0,0, 5
+12,7, 0,0, 5
+
+[BG];床
+type = parallax
+spriteno = 0,2
+start = 0,22
+delta = .83,1
+xscale = 1,1.6
+
+[BG];ギャラリー
+type = normal
+spriteno = 0,3
+start = 0,22
+delta = .85,1
+mask = 1
+
+[BG];ワンピの女の子
+type = anim
+actionno = 1
+start = 257,153
+delta = .85,1
+
+[Begin Action 1];ワンピの女の子
+1,0, 0,0, 20
+1,1, 0,0, 10
+1,2, 0,0, 10
+1,1, 0,0, 10
+
+[BG];チビジャンプ
+type = anim
+actionno = 2
+start = 220,159
+delta = .85,1
+
+[Begin Action 2];チビジャンプ
+2,0, 0,0, 65
+2,1, 0,0, 10
+2,2, 0,0, 10
+2,1, 0,0, 10
+
+[BG];ランニンＧパン
+type = anim
+actionno = 3
+start = 224,130
+delta = .85,1
+
+[Begin Action 3];ランニンＧパン
+3,0, 0,0, 57
+3,1, 0,0, 8
+3,2, 0,0, 10
+3,1, 0,0, 10
+
+[BG];カメラ小僧と
+type = anim
+actionno = 4
+start = 149,126
+delta = .85,1
+
+[Begin Action 4];カメラ小僧と
+4,0, 0,0, 50
+4,1, 0,0, 3
+4,2, 0,0, 10
+
+[BG];ハゲ親父と
+type = anim
+actionno = 5
+start = 91,130
+delta = .85,1
+
+[Begin Action 5];ハゲ親父と
+5,0, 0,0, 33
+5,1, 0,0, 10
+
+[BG];窓左
+type = anim
+actionno = 8
+start = -271,98
+delta = .71,1
+
+[Begin Action 8];窓左
+8,0, 0,0, 94
+-1,1, 0,0, 8
+8,0, 0,0, 8
+-1,1, 0,0, 8
+8,0, 0,0, 8
+-1,1, 0,0, 8
+
+[BG];窓右
+type = anim
+actionno = 9
+start = -143,98
+delta = .71,1
+
+[Begin Action 9];窓右
+-1,1, 0,0, 64
+9,0, 0,0, 8
+-1,1, 0,0, 8
+9,0, 0,0, 8
+-1,1, 0,0, 8
+9,0, 0,0, 8
+
+[BG];青年
+type = anim
+actionno = 6
+start = -92,128
+delta = .887,1
+
+[Begin Action 6];青年
+6,0, 0,0, 72
+6,1, 0,0, 10
+6,2, 0,0, 10
+6,1, 0,0, 10
+6,0, 0,0, 10
+6,1, 0,0, 10
+6,2, 0,0, 10
+6,1, 0,0, 10
+
+[BG];青年がもつ魚
+type = anim
+actionno = 7
+start = -94,160
+delta = .887,1
+
+[Begin Action 7];青年がもつ魚
+6,3, 0,0, 80
+6,4, 0,0, 3
+6,5, 0,0, 3
+6,4, 0,0, 3
+6,5, 0,0, 3
+
+[BG];大蛇
+type = anim
+actionno = 10
+start = 28,73
+delta = .85,1
+
+[Begin Action 10];大蛇
+-10,1, 0,0, 200
+10,0, 0,0, 2
+10,1, 0,0, 2
+10,0, 0,0, 2
+-10,1, 0,0, 300
+10,0, 0,0, 2
+10,1, 0,0, 2
+10,0, 0,0, 2
+-10,1, 0,0, 300
+10,0, 0,0, 2
+10,1, 0,0, 2
+10,0, 0,0, 2
+-10,1, 0,0, 2
+10,0, 0,0, 2
+10,1, 0,0, 2
+10,0, 0,0, 2
+-10,1, 0,0, 20
+10,0, 0,0, 2
+10,1, 0,0, 2
+10,0, 0,0, 2
+-10,1, 0,0, 300
+10,0, 0,0, 2
+10,1, 0,0, 2
+10,0, 0,0, 2
+-10,1, 0,0, 300
+10,0, 0,0, 2
+10,1, 0,0, 2
+10,0, 0,0, 2
+-10,1, 0,0, 2
+10,0, 0,0, 2
+10,1, 0,0, 2
+10,0, 0,0, 2
+-10,1, 0,0, 50
+10,0, 0,0, 2
+10,1, 0,0, 2
+10,0, 0,0, 2
+-10,1, 0,0, 2
+10,0, 0,0, 2
+10,1, 0,0, 2
+10,0, 0,0, 2
+
+[BG];くい １
+type = normal
+spriteno = 13,0
+start = -120,165
+delta = .85,1
+mask = 1
+
+[BG];くい ２
+type = normal
+spriteno = 13,0
+start = 290,213
+delta = 1.22,1
+layerno = 1
+mask = 1
+
+[BG];くい ３
+type = normal
+spriteno = 13,0
+start = -275,213
+delta = 1.22,1
+layerno = 1
+mask = 1

@@ -1,0 +1,32 @@
+[Info]
+Name = "SSF2Xダルシム"
+DisplayName = "Dhalsim"
+MugenVersion = 04,14,2001
+Author = "MASA"
+Pal.Defaults = 4,5,6,1,2,3
+[Files]
+Cmd = char/dhalsim.cmd
+Cns = char/dhalsim2.cns
+St = char/common.st
+St1 = char/action.st
+St2 = char/throw.st
+St3 = char/tech.st
+St4 = char/state.st
+;St5 = char/helper2.st;←技表機能を取っ払いたい人用
+St5 = char/helper.st
+StCommon = common1.cns
+Sprite = char/dhalsim.sff
+Anim = char/dhalsim.air
+Sound = char/dhalsim.snd
+Pal1 = char/color4.act;弱キックカラー
+Pal2 = char/color5.act;中キックカラー
+Pal3 = char/color6.act;強キックカラー
+Pal4 = char/color1.act;弱パンチカラー
+Pal5 = char/color2.act;中パンチカラー
+Pal6 = char/color3.act;強パンチカラー
+Pal7 = char/color7.act;スタートボタンカラー
+Pal8 = char/color8.act;ボタン押しっぱなしカラー
+Pal9 = char/color9.act;スーパーモードカラー
+Pal10 = char/color10.act;スーパーモードカラー2P
+[Arcade]
+Ending.StoryBoard = char/ending.def

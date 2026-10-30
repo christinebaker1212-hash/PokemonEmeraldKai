@@ -1,0 +1,10 @@
+# Co-op wild battle with BOB's DEOXYS out: ALICE's screen shows it in the same form as BOB's own (shots a_deoxys,
+# b_deoxys), not the Normal Forme every other game's DEOXYS used to get
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+ENV_B="MOEMON_DEBUG_PARTY=410:30"
+EXPECT_A=("action menu at frame")
+EXPECT_B=("action menu at frame")

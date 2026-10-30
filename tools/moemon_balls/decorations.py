@@ -193,7 +193,7 @@ def preview(path, its, root):
                     px[x, y] = (0, 0, 0, 0)
         return rgba
     icon = load(os.path.join(root, 'graphics/items/icons/poke_ball.png'))
-    ball = load(os.path.join(root, 'graphics/balls/poke.png')).crop((0, 0, 16, 16))
+    ball = load(os.path.join(root, 'graphics/balls/poke.png')).crop((0, 8, 16, 24))   # the resting frame's middle (rows 8-23 of 32)
     c8 = lambda c: tuple(v * 255 // 31 for v in COLORS[c]) + (255,)
     S, per = 6, 12
     cw, ch = 24 * S + 10, 24 * S + 16 * S + 30

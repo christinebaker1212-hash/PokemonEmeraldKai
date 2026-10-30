@@ -1,0 +1,12 @@
+# Moemon Fight: ALICE is fighting the CPU at the VS cabinet when BOB sits down at the other seat and asks her: the
+# CPU fight ends and both games go to the select screen, then fight each other (one short round)
+MODE=2
+TMO=600
+WARP=10,3,6,9
+WARP_B=10,3,9,9
+ENV_A="MOEMON_FIGHT_ROUNDS=1 MOEMON_FIGHT_TIME=20"
+ENV_B="MOEMON_FIGHT_ROUNDS=1 MOEMON_FIGHT_TIME=20"
+EXPECT_A=("fight: player 1 joins, the CPU fight ends" "fight: online with player 1, side 0" "fight: online result")
+EXPECT_B=("fight: player 0 said yes" "fight: online with player 0, side 1" "fight: online result")
+UNEXPECT_A=("desync at" "couldn't go back" "dropped out" ", 0 checks agreed" "fight: result")
+UNEXPECT_B=("desync at" "couldn't go back" "dropped out" ", 0 checks agreed")

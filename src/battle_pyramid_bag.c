@@ -32,6 +32,7 @@
 #include "constants/items.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
+#include "mp.h"
 
 #define TAG_SCROLL_ARROW  2910
 #define TAG_PYRAMID_BAG   4132
@@ -680,7 +681,10 @@ static void PrintItemDescription(s32 listMenuId)
     const u8 *desc;
     if (listMenuId != LIST_CANCEL)
     {
+        // Moemon Co-op: wrapped to the box (mp_itemdesc.c)
         desc = GetItemDescription(gSaveBlock2Ptr->frontier.pyramidBag.itemId[gSaveBlock2Ptr->frontier.lvlMode][listMenuId]);
+        MP_ItemDesc_Print(WIN_INFO, desc, 3, 0, 14 * 8 - 4, 48, sTextColors[COLORID_DARK_GRAY], PIXEL_FILL(0));
+        return;
     }
     else
     {

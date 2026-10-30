@@ -1,0 +1,5 @@
+# ETHER from the BAG: the move list shows each move's PP left (shot ether_moves), and the ETHER restores the chosen one
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=280:10"
+EXPECT_A=("[test] pp slot 0: 3 40" "[test] pp slot 0: 13 40")

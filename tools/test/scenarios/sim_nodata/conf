@@ -1,0 +1,5 @@
+# The BATTLE SIMULATOR on a save that never played online: no battle data, and the attendant says so politely
+MODE=1
+WARP=9,2,11,5
+EXPECT_A=("sim: 0 digital trainer(s) here")
+UNEXPECT_A=("sim: battle")

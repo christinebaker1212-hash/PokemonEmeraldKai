@@ -1,0 +1,414 @@
+; 아 힘들다
+ 
+[Info]
+name = "SF2 Mexico - T.Hawk Stage"
+displayname = "MEXICO - T. HAWK"
+;by EnvyMask666 (maril0906@hanmail.net)
+
+[Camera]
+startx = 0
+starty = 0
+
+boundleft = -227
+boundright = 226
+
+boundhigh = 0 ;스테이지의 높은쪽
+boundlow = 10 ;스테이지의 낮은쪽
+
+verticalfollow = .3
+floortension = 0
+
+tension = 50
+
+[PlayerInfo]
+;--- Player 1 ---
+p1startx = -70 ;Starting x coordinates X 좌표들을 시작합니다
+p1starty = 0 ;Starting y coordinates y 좌표들을 시작합니다
+p1startz = 0 ;Starting z coordinates z 좌표들을 시작합니다
+p1facing = 1 ;방향 선수가 마주봅니다: 1=right, -1=left
+;--- Player 2 ---
+p2startx = 70
+p2starty = 0
+p2startz = 0
+p2facing = -1
+
+
+leftbound = -1000 
+rightbound = 1000 
+topbound = 0 
+botbound = 0 
+
+;----------------------------------------------------------------
+[Scaling]
+topz = 0 ;Top z-coordinate for scaling늘리는 것을 위한 최고 z-coordinate
+botz = 50 ;Bottom z-coordinate for scaling늘리는 것을 위한 장정한 z-coordinate
+topscale = 1 ;Scale to use at top꼭대기에(서) 사용할 저울
+botscale = 1.2 ;Scale to use at bottom바닥에(서) 사용할 저울
+
+;--------------------------------------------------------
+[Bound]
+;Distance from left/right edge of screen that player can move to
+;선수가 움직일 수 있는 스크린의 left/right 모서리로부터의 거리
+;Typically 15 ;전형적으로 15
+screenleft = 15 ;Dist from left of screen that player can move to
+;선수가 움직일 수 있는 스크린의 떠난 것으로부터의 Dist
+screenright = 15 ;Right edge
+;옳은 모서리
+
+;--------------------------------------------------------
+[StageInfo]
+zoffset = 218
+autoturn = 1
+resetBG = 1 
+
+[Shadow]
+color = 92,92,92 
+yscale = .3
+reflect = 0
+
+[Music]
+bgmusic = sound/SF2 Mexico - T.Hawk Theme.mp3
+bgvolume = 255
+
+[BGdef] 
+spr = stages/sf2-mexico.sff
+debugbg = 1 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+[BG 건물]
+type  = norm
+spriteno = 1,3
+start = 0,5
+delta = .51, 0
+mask =1
+
+
+[BG 흙땅]
+type = norm
+spriteno = 1,1
+start = 0,6
+delta = .68,0
+mask =1
+
+[BG 천막]
+type = norm
+spriteno = 2,0
+start = -70,-5
+delta = .68,0
+mask =1
+
+[BG 모이]
+type = anim
+start = -69,2
+delta = .68,0
+mask =1
+actionno = 0
+[begin action 0]
+3,0, 0,0, 30
+3,1, 0,0, 10
+3,2, 0,0, 10
+3,1, 0,0, 10
+
+[BG 새ㅠㅠ1]
+type = anim
+start = -69,50
+delta = .68,0
+mask =1
+actionno = 13
+[begin action 13]
+15,0, 0,0, 10
+15,1, 0,0, 10
+15,2, 0,0, 10
+15,3, 0,0, 10
+15,4, 0,0, 10
+15,3, 0,0, 10
+15,4, 0,0, 10
+15,3, 0,0, 10
+15,4, 0,0, 10
+16,0, 0,0, 10
+16,1, 0,0, 10
+16,2, 0,0, 10
+16,3, 0,0, 10
+16,4, 0,0, 10
+
+[BG 새ㅠㅠ4]
+type = anim
+start = -52,44
+delta = .68,0
+mask =1
+actionno = 16
+[begin action 16]
+15,0, 0,0, 10
+15,1, 0,0, 10
+15,2, 0,0, 10
+15,3, 0,0, 10
+15,4, 0,0, 10
+15,3, 0,0, 10
+15,4, 0,0, 10
+15,3, 0,0, 10
+15,4, 0,0, 10
+16,0, 0,0, 10
+16,1, 0,0, 10
+16,2, 0,0, 10
+16,3, 0,0, 10
+16,4, 0,0, 10
+16,3, 0,0, 10
+16,4, 0,0, 10
+16,3, 0,0, 10
+16,4, 0,0, 10
+
+[BG 새ㅠㅠ2]
+type = anim
+start = -80,44
+delta = .68,0
+mask =1
+actionno = 14
+[begin action 14]
+15,0, 0,0, 10
+15,1, 0,0, 10
+15,0, 0,0, 10
+15,1, 0,0, 10
+15,0, 0,0, 10
+15,1, 0,0, 10
+15,2, 0,0, 10
+15,3, 0,0, 10
+15,4, 0,0, 10
+16,0, 0,0, 10
+16,1, 0,0, 10
+16,2, 0,0, 10
+16,3, 0,0, 10
+16,4, 0,0, 10
+16,3, 0,0, 10
+16,4, 0,0, 10
+16,3, 0,0, 10
+16,4, 0,0, 10
+[BG 새ㅠㅠ3]
+type = anim
+start = -82,49
+delta = .68,0
+mask =1
+actionno = 15
+[begin action 15]
+15,0, 0,0, 10
+15,1, 0,0, 10
+15,2, 0,0, 10
+15,3, 0,0, 10
+15,4, 0,0, 10
+15,3, 0,0, 10
+15,4, 0,0, 10
+15,3, 0,0, 10
+15,4, 0,0, 10
+16,0, 0,0, 10
+16,1, 0,0, 10
+16,2, 0,0, 10
+16,3, 0,0, 10
+16,4, 0,0, 10
+16,3, 0,0, 10
+16,4, 0,0, 10
+16,3, 0,0, 10
+16,4, 0,0, 10
+16,3, 0,0, 10
+16,4, 0,0, 10
+[BG 새ㅠㅠ5]
+type = anim
+start = -76,60
+delta = .68,0
+mask =1
+actionno = 17
+[begin action 17]
+15,0, 0,0, 10
+15,1, 0,0, 10
+15,2, 0,0, 10
+15,3, 0,0, 10
+15,4, 0,0, 10
+16,0, 0,0, 10
+16,1, 0,0, 10
+16,2, 0,0, 10
+16,3, 0,0, 10
+16,4, 0,0, 10
+
+[BG 선인장]
+type = norm
+spriteno = 4,3
+start = -31,-15
+delta = .68,0
+mask =1
+
+[BG 사람들]
+type = anim
+start = -72,-18
+delta = .68,0
+mask =1
+actionno = 2
+[begin action 2]
+4,0, 0,0, 10
+4,1, 0,0, 10
+4,2, 0,0, 10
+4,1, 0,0, 10
+
+[BG 돈내]
+type = anim
+start = 4,15
+delta = .68,0
+mask =1
+actionno = 5
+[begin action 5]
+8,0, 0,0, 10
+8,1, 0,0, 10
+8,2, 0,0, 10
+8,1, 0,0, 10
+8,0, 0,0, 10
+8,1, 0,0, 10
+8,2, 0,0, 10
+8,1, 0,0, 5
+8,2, 0,0, 5
+8,1, 0,0, 5
+8,2, 0,0, 5
+8,1, 0,0, 10
+[BG 아줌마]
+type = anim
+start = -36,7
+delta = .68,0
+mask =1
+actionno = 3
+[begin action 3]
+6,1, 0,0, 10
+6,2, 0,0, 10
+6,3, 0,0, 10
+6,2, 0,0, 10
+
+[BG 바닥]
+type  = parallax
+spriteno = 1,0
+start = -3,8
+delta = .8, .65
+xscale = .5, .8
+yscalestart = 100
+yscaledelta = 1.05
+mask =1
+
+[BG 오른쪽인디언]
+type = anim
+start = -40,20
+delta = 1,0
+mask =1
+actionno = 7 
+[begin action 7]
+11,1, 0,0, 15
+11,2, 0,0, 15
+11,1, 0,0, 15
+11,2, 0,0, 15
+11,1, 0,0, 15
+11,2, 0,0, 15
+11,1, 0,0, 15
+11,2, 0,0, 15
+11,1, 0,0, 5
+11,2, 0,0, 5
+11,1, 0,0, 5
+11,2, 0,0, 5
+11,1, 0,0, 5
+11,2, 0,0, 5
+11,0, 0,0, 10
+11,3, 0,0, 10
+11,0, 0,0, 10
+11,3, 0,0, 10
+
+[BG 가운데인디언]
+type = anim
+start = -7,8
+delta = 1,0
+mask =1
+actionno = 1
+[begin action 1]
+5,0, 0,0, 10
+5,1, 0,0, 10
+5,2, 0,0, 30
+5,1, 0,0, 10
+
+[BG 왼쪽인디언]
+type = anim
+start = -9,6
+delta = 1,0
+mask =1
+actionno = 6
+[begin action 6]
+9,1, 0,0, 10
+9,0, 0,0, 10
+9,1, 0,0, 10
+9,2, 0,0, 30
+
+
+
+[BG 실수]
+type = norm
+spriteno = 7,0
+start = -189,-56
+delta = 1,0
+mask =1
+
+[BG 돗자리부부]
+type = anim
+start = -189,-56
+delta = 1,0
+mask =1
+actionno = 4
+[begin action 4]
+7,0, 0,0, 100
+7,1, 0,0, 20
+7,2, 0,0, 20
+7,1, 0,0, 20
+
+
+[bg 오른쪽건물]
+type = norm
+spriteno = 10,0
+start = 16,-47
+delta = 1,0
+mask =1
+
+[BG 누님들]
+type = anim
+start = 172,-12
+delta = 1,0
+mask =1
+actionno = 8
+[begin action 8]
+12,0, 0,0, 10
+12,1, 0,0, 10
+12,2, 0,0, 10
+12,1, 0,0, 10
+12,0, 0,0, 10
+12,1, 0,0, 10
+12,2, 0,0, 10
+12,1, 0,0, 10
+
+[BG 카메라]
+type = anim
+start = 142,-10
+delta = 1,0
+mask =1
+actionno = 9
+[begin action 9]
+13,0, 0,0, 140
+13,1, 0,0, 10
+13,0, 0,0, 10
+13,1, 0,0, 10
+13,2, 0,0, 20
+13,3, 0,0, 20
+13,2, 0,0, 20
+
+[BG 펀쳐]
+type = anim
+start = 121,-2
+delta = 1,0
+mask =1
+actionno = 10
+[begin action 10]
+14,0, 0,0, 80
+14,1, 0,0, 10
+14,2, 0,0, 10
+14,1, 0,0, 10
+14,0, 0,0, 10
+14,1, 0,0, 10
+14,2, 0,0, 10
+14,1, 0,0, 10

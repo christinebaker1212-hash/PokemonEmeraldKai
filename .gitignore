@@ -57,3 +57,16 @@ __pycache__/
 # Moemon Co-op: per-player settings the game writes next to the exe
 moemon_controls.ini
 photos/
+
+pokeemerald-dev64
+
+# Original scan downloads are build inputs; ship the versioned compressed art pack.
+/graphics/tcg/printed/
+/tools/tcg/metadata/
+/tools/ygo/metadata/
+
+# Moemon Fight: what the fight engine writes into the pack while it runs
+mugen/*.log
+mugen/mugen*.png
+/tools/tt/metadata/
+/tools/ygo/.cache/

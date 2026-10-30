@@ -1,5 +1,5 @@
 # Losing a joined battle. ALICE (one Moemon that only knows GROWL; Lv22, so a critical hit can't end her battle on
-# turn 1 before BOB is let in) battles a strong wild ZIGZAGOON; BOB (a weak one) joins (A until the menu opens). Both lose and black out like after any team battle; afterwards everyone still has the same Moemon, none
+# turn 1 before BOB is let in) battles a strong wild ZIGZAGOON (only HEADBUTT, so it always hits back); BOB (a weak one) joins (A until the menu opens). Both lose and black out like after any team battle; afterwards everyone still has the same Moemon, none
 # lost or swapped.
 MODE=2
 WARP=0,10,10,10

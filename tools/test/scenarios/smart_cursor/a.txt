@@ -1,0 +1,53 @@
+pressuntil A field 5000
+wait 100
+mp item 15 1
+mp item 24 1
+mp pstatus 1 8
+mp pstatus 2 16
+press START 2
+wait 30
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press A 2
+wait 90
+press RIGHT 2
+wait 20
+press DOWN 2
+wait 10
+press A 2
+wait 20
+press A 2
+waitfor partymenu 300
+wait 30
+shot burnheal_cursor
+press A 2
+wait 120
+press A 2
+wait 60
+press B 2
+wait 120
+mp partyhp
+mp hp 2 0
+mp hp 1 0
+mp pstatus 1 0
+wait 60
+shot r_start
+press A 2
+wait 90
+shot r_bag
+press A 2
+wait 20
+press A 2
+waitfor partymenu 300
+wait 30
+shot revive_cursor
+press A 2
+wait 120
+press A 2
+wait 60
+press B 2
+wait 120
+mp partyhp
+quit

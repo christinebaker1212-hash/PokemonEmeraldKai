@@ -1,0 +1,5669 @@
+
+;-------------------------------------------------------------------
+;SLP
+[StateDef 200]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 200
+VelSet = 0
+SprPriority = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 200]
+Type = Turn
+Trigger1 = P2Dist X < 0 && Time = 0
+
+[State 200]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 0
+Volumescale = 100
+
+[State 200]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = S, NA
+HitFlag = MA
+GuardFlag = M
+Damage = 28
+GetPower = 120
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S50+TeamSide
+Guard.SparkNo = S50
+SparkXY = -70+Floor(P2Dist X)/2, -58
+HitSound = S1, 0
+GuardSound = S3, 0
+AnimType = Light
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 11
+Ground.HitTime = 12
+Guard.HitTime = 19
+Air.HitTime = 12
+Ground.Velocity = -5*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -10*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;SLP-BF
+[StateDef 201]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 201
+VelSet = 0
+SprPriority = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 200]
+Type = Turn
+Trigger1 = P2Dist X < 0 && Time = 0
+
+[State 200]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 0
+Volumescale = 100
+
+[State 200]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = S, NA
+HitFlag = MA
+GuardFlag = M
+Damage = 28
+GetPower = 120
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S50+TeamSide
+Guard.SparkNo = S50
+SparkXY = -70+Floor(P2Dist X)/2, -45
+HitSound = S1, 0
+GuardSound = S3, 0
+AnimType = Light
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 11
+Ground.HitTime = 12
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -5*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -10*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;SMP
+[StateDef 210]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 210
+VelSet = 0
+SprPriority = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 210]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 1
+Volumescale = 100
+
+[State 210]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = S, NA
+HitFlag = MA
+GuardFlag = M
+Damage = 147
+GetPower = 240
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S52+TeamSide
+Guard.SparkNo = S50
+SparkXY = -80+Floor(P2Dist X)/2, -66
+HitSound = S1, 1
+GuardSound = S3, 0
+AnimType = Middle
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 17
+Ground.HitTime = 16
+Guard.HitTime = 24
+Air.HitTime = 99
+Ground.Velocity = -7*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -14*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 210]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;SMP-N
+[StateDef 211]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 211
+VelSet = 0
+SprPriority = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 210]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 1
+Volumescale = 100
+
+[State 210]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = S, NA
+HitFlag = MA
+GuardFlag = M
+Damage = 147
+GetPower = 240
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S52+TeamSide
+Guard.SparkNo = S50
+SparkXY = -60+Floor(P2Dist X)/2, -80
+HitSound = S1, 1
+GuardSound = S3, 0
+AnimType = Middle
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 17
+Ground.HitTime = 16
+Guard.HitTime = 24
+Air.HitTime = 99
+Ground.Velocity = -7*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -14*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 210]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+
+
+;---------------------------------------------------------------------------
+;SSP
+[StateDef 220]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 220
+VelSet = 0
+SprPriority = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 220]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 2
+Volumescale = 100
+
+[State 220]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = S, NA
+HitFlag = MA
+GuardFlag = M
+Damage = 168
+GetPower = 300
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY = -80+Floor(P2Dist X)/2, -74
+HitSound = S1, 2
+GuardSound = S3, 0
+AnimType = Hard
+Air.AnimType = Back
+Ground.Type = High
+Ground.SlideTime = 21
+Ground.HitTime = 20
+Guard.HitTime = 29
+Air.HitTime = 99
+Ground.Velocity = -9*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -18*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 220]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+;---------------------------------------------------------------------------
+;SSP-N
+[StateDef 221]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 221
+VelSet = 0
+SprPriority = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 220]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 2
+Volumescale = 100
+
+[State 220]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = Animelem = 3
+Attr = S, NA
+HitFlag = MA
+GuardFlag = M
+Damage = 119
+GetPower = 180
+GivePower = 0
+PauseTime = 12, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY = -75+Floor(P2Dist X)/2, -60
+HitSound = S1, 2
+GuardSound = S3, 0
+AnimType = Hard
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 21
+Ground.HitTime = 20
+Guard.HitTime = 29
+Air.HitTime = 99
+Ground.Velocity = -4*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -8*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 220]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = Animelem = 4
+Attr = S, NA
+HitFlag = MA
+GuardFlag = M
+Damage = 119
+GetPower = 180
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY = -60+Floor(P2Dist X)/2, -46
+HitSound = S1, 2
+GuardSound = S3, 0
+AnimType = Hard
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 21
+Ground.HitTime = 20
+Guard.HitTime = 29
+Air.HitTime = 99
+Ground.Velocity = -9*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -18*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 220]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;SLK
+[StateDef 230]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 230
+VelSet = 0
+SprPriority = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 200]
+Type = Turn
+Trigger1 = P2Dist X < 0 && Time = 0
+
+[State 200]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 0
+Volumescale = 100
+
+[State 200]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = S, NA
+HitFlag = MA
+GuardFlag = M
+Damage = 112
+GetPower = 240
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S50+TeamSide
+Guard.SparkNo = S50
+SparkXY = -70+Floor(P2Dist X)/2, -62
+HitSound = S2, 0
+GuardSound = S3, 0
+AnimType = Light
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 11
+Ground.HitTime = 12
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -5*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -10*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;SLK-N
+[StateDef 231]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 231
+VelSet = 0
+SprPriority = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 200]
+Type = Turn
+Trigger1 = P2Dist X < 0 && Time = 0
+
+[State 200]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 0
+Volumescale = 100
+
+[State 200]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = S, NA
+HitFlag = MA
+GuardFlag = M
+Damage = 112
+GetPower = 240
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S50+TeamSide
+Guard.SparkNo = S50
+SparkXY = -70+Floor(P2Dist X)/2, -62
+HitSound = S2, 0
+GuardSound = S3, 0
+AnimType = Light
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 11
+Ground.HitTime = 12
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -5*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -10*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;SMK
+[StateDef 240]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 240
+VelSet = 0
+SprPriority = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 210]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 1
+Volumescale = 100
+
+[State 210]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = S, NA
+HitFlag = MA
+GuardFlag = M
+Damage = 147
+GetPower = 240
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S52+TeamSide
+Guard.SparkNo = S50
+SparkXY = -80+Floor(P2Dist X)/2, -55
+HitSound = S2, 1
+GuardSound = S3, 0
+AnimType = Middle
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 17
+Ground.HitTime = 16
+Guard.HitTime = 24
+Air.HitTime = 99
+Ground.Velocity = -7*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -14*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 210]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;SMK-N
+[StateDef 241]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 241
+VelSet = 0
+SprPriority = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 210]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 1
+Volumescale = 100
+
+[State 210]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = S, NA
+HitFlag = MA
+GuardFlag = M
+Damage = 147
+GetPower = 240
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S52+TeamSide
+Guard.SparkNo = S50
+SparkXY = -70+Floor(P2Dist X)/2, -45
+HitSound = S2, 1
+GuardSound = S3, 0
+AnimType = Middle
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 17
+Ground.HitTime = 16
+Guard.HitTime = 24
+Air.HitTime = 99
+Ground.Velocity = -7*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -14*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 210]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;SSK
+[StateDef 250]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 250
+VelSet = 0
+SprPriority = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 220]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 2
+Volumescale = 100
+
+[State 220]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = S, NA
+HitFlag = MA
+GuardFlag = M
+Damage = 168
+GetPower = 300
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY = -86+Floor(P2Dist X)/2, -76
+HitSound = S2, 2
+GuardSound = S3, 0
+AnimType = Hard
+Air.AnimType = Back
+Ground.Type = High
+Ground.SlideTime = 21
+Ground.HitTime = 20
+Guard.HitTime = 29
+Air.HitTime = 99
+Ground.Velocity = -9*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -18*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 220]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+;---------------------------------------------------------------------------
+;SSK-N
+[StateDef 251]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 251
+VelSet = 0
+SprPriority = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 220]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 2
+Volumescale = 100
+
+[State 220]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = S, NA
+HitFlag = MA
+GuardFlag = M
+Damage = 168
+GetPower = 300
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY = -80+Floor(P2Dist X)/2, -74
+HitSound = S2, 2
+GuardSound = S3, 0
+AnimType = Hard
+Air.AnimType = Back
+Ground.Type = High
+Ground.SlideTime = 21
+Ground.HitTime = 20
+Guard.HitTime = 29
+Air.HitTime = 99
+Ground.Velocity = -9*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -18*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 220]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;CLP
+[StateDef 300]
+Type = C
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 300
+VelSet = 0
+SprPriority = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 300]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 0
+Volumescale = 100
+
+[State 300]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = C, NA
+HitFlag = MA
+GuardFlag = M
+Damage = 28
+GetPower = 120
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S50+TeamSide
+Guard.SparkNo = S50
+SparkXY = -60+Floor(P2Dist X)/2, -52
+HitSound = S1, 0
+GuardSound = S3, 0
+AnimType = Light
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 11
+Ground.HitTime = 12
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -5*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -8*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 300]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 11
+Ctrl = 1
+;---------------------------------------------------------------------------
+;CMP
+[StateDef 310]
+Type = C
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 310
+VelSet = 0
+SprPriority = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 210]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 1
+Volumescale = 100
+
+[State 310]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = C, NA
+HitFlag = MA
+GuardFlag = M
+Damage = 147
+GetPower = 270
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S52+TeamSide
+Guard.SparkNo = S50
+SparkXY = -65+Floor(P2Dist X)/2, -60
+HitSound = S1, 1
+GuardSound = S3, 0
+AnimType = Middle
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 17
+Ground.HitTime = 16
+Guard.HitTime = 24
+Air.HitTime = 99
+Ground.Velocity = -7*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -14*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 210]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 11
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;CSP
+[StateDef 320]
+Type = C
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 320
+VelSet = 0
+SprPriority = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 220]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 2
+Volumescale = 100
+
+[State 320]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = AnimElem = 3
+Attr = C, NA
+HitFlag = MA
+GuardFlag = M
+Damage = 182
+GetPower = 300
+GivePower = 0
+PauseTime = 12, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY =  -41+Floor(P2Dist X)/2, -65
+HitSound = S1, 2
+GuardSound = S3, 0
+AnimType = Hard
+Air.AnimType = Back
+Ground.Type = High
+Ground.SlideTime = 21
+Ground.HitTime = 20
+Guard.HitTime = 29
+Air.HitTime = 99
+Ground.Velocity = -4*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -8*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 320]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = AnimElem = 4
+Attr = C, NA
+HitFlag = MA
+GuardFlag = L
+Damage = 119
+GetPower = 240
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY =  -72+Floor(P2Dist X)/2, -15
+HitSound = S1, 2
+GuardSound = S3, 0
+AnimType = Hard
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 21
+Ground.HitTime = 20
+Guard.HitTime = 29
+Air.HitTime = 99
+Ground.Velocity = -9*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -18*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 220]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 11
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;CLK
+[StateDef 330]
+Type = C
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 330
+VelSet = 0
+SprPriority = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 300]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 0
+Volumescale = 100
+
+[State 300]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = C, NA
+HitFlag = MA
+GuardFlag = M
+Damage = 28
+GetPower = 120
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S50+TeamSide
+Guard.SparkNo = S50
+SparkXY = -60+Floor(P2Dist X)/2, -15
+HitSound = S2, 0
+GuardSound = S3, 0
+AnimType = Light
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 11
+Ground.HitTime = 12
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -5*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -10*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 300]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 11
+Ctrl = 1
+;---------------------------------------------------------------------------
+;CMK
+[StateDef 340]
+Type = C
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 340
+VelSet = 0
+SprPriority = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 210]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 1
+Volumescale = 100
+
+[State 310]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = C, NA
+HitFlag = MA
+GuardFlag = M
+Damage = 147
+GetPower = 270
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S52+TeamSide
+Guard.SparkNo = S50
+SparkXY = -65+Floor(P2Dist X)/2, -15
+HitSound = S2, 1
+GuardSound = S3, 0
+AnimType = Middle
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 17
+Ground.HitTime = 16
+Guard.HitTime = 24
+Air.HitTime = 99
+Ground.Velocity = -7*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -14*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 210]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 11
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;CSK
+[StateDef 350]
+Type = C
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 350
+VelSet = 0
+SprPriority = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 220]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 2
+Volumescale = 100
+
+[State 350]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = AnimElem = 2
+Attr = C, NA
+HitFlag = MA
+GuardFlag = L
+Damage = 168
+GetPower = 315
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY = -65+Floor(P2Dist X)/2, -15
+HitSound = S2, 2
+GuardSound = S3, 0
+AnimType = Hard
+Ground.Type = Trip
+Ground.SlideTime = 21
+Ground.HitTime = 20
+Guard.HitTime = 29
+Ground.Velocity = -2*Const(Size.XScale), -5
+Guard.Velocity = -9*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -5
+Ground.CornerPush.VelOff = -18*Const(Size.XScale)
+Fall = 1
+Fall.Recover = 0
+Fall.YVelocity = 0
+YAccel = .25
+P2Facing = 1
+
+[State 350]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = AnimElem = 4
+Attr = C, NA
+HitFlag = MA
+GuardFlag = L
+Damage = 154
+GetPower = 285
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY = -65+Floor(P2Dist X)/2, -15
+HitSound = S2, 2
+GuardSound = S3, 0
+AnimType = Hard
+Ground.Type = Trip
+Ground.SlideTime = 21
+Ground.HitTime = 20
+Guard.HitTime = 29
+Ground.Velocity = -2*Const(Size.XScale), -5
+Guard.Velocity = -9*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -5
+Ground.CornerPush.VelOff = -18*Const(Size.XScale)
+Fall = 1
+Fall.Recover = 0
+Fall.YVelocity = 0
+YAccel = .25
+P2Facing = 1
+
+[State 220]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 11
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;JLP
+[StateDef 400]
+Type = A
+MoveType = A
+Physics = A
+Ctrl = 0
+Anim = 400
+
+[State 400]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 0
+volumescale = 100
+
+[State 400]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = A, NA
+HitFlag = MA
+GuardFlag = H
+Damage = 119
+GetPower = 135
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S50+TeamSide
+Guard.SparkNo = S50
+SparkXY = -60+Floor(P2Dist X)/2, -70
+HitSound = S1, 0
+GuardSound = S3, 0
+Animtype = Light
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 11
+Ground.HitTime = 12
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -5*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -10*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Pos Y >= 0 && Vel Y > 0
+value = 52
+
+;---------------------------------------------------------------------------
+;JMP
+[Statedef 410]
+Type = A
+MoveType = A
+Physics = A
+Ctrl = 0
+Anim = 401
+
+[State 410]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 1
+volumescale = 100
+
+[State 410]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = A, NA
+HitFlag = MA
+GuardFlag = H
+Damage = 147
+GetPower = 240
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S52+TeamSide
+Guard.SparkNo = S50
+SparkXY = -60+Floor(P2Dist X)/2, -70
+HitSound = S1, 1
+GuardSound = S3, 0
+Animtype = Light
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 11
+Ground.HitTime = 12
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -5*Const(Size.XScale)
+Ground.CornerPush.VelOff = -10*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+YAccel = .25
+P2Facing = 1
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Pos Y >= 0 && Vel Y > 0
+value = 52
+
+;---------------------------------------------------------------------------
+;JMP-D
+[Statedef 411]
+Type = A
+MoveType = A
+Physics = A
+Ctrl = 0
+Anim = 410
+
+[State 410]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 1
+volumescale = 100
+
+[State 410]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = A, NA
+HitFlag = MA
+GuardFlag = H
+Damage = 147
+GetPower = 240
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S52+TeamSide
+Guard.SparkNo = S50
+SparkXY = -60+Floor(P2Dist X)/2, -70
+HitSound = S1, 1
+GuardSound = S3, 0
+Animtype = Light
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 11
+Ground.HitTime = 12
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -5*Const(Size.XScale)
+Ground.CornerPush.VelOff = -10*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+YAccel = .25
+P2Facing = 1
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Pos Y >= 0 && Vel Y > 0
+value = 52
+
+;---------------------------------------------------------------------------
+;JSP-N
+[StateDef 420]
+Type = A
+MoveType = A
+Physics = A
+Ctrl = 0
+Anim = 420
+
+[State 420]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 2
+volumescale = 100
+
+[State 420]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = A, NA
+HitFlag = MA
+GuardFlag = H
+Damage = 168
+GetPower = 315
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY = -68+Floor(P2Dist X)/2, -52
+HitSound = S1, 2
+GuardSound = S3, 0
+AnimType = Light
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 11
+Ground.HitTime = 12
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -5*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -10*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Pos Y >= 0 && Vel Y > 0
+value = 52
+
+;---------------------------------------------------------------------------
+;JSP-BF
+[StateDef 421]
+Type = A
+MoveType = A
+Physics = A
+Ctrl = 0
+Anim = 421
+
+[State 420]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 2
+volumescale = 100
+
+[State 420]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = A, NA
+HitFlag = MA
+GuardFlag = H
+Damage = 168
+GetPower = 315
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY = -68+Floor(P2Dist X)/2, -52
+HitSound = S1, 2
+GuardSound = S3, 0
+AnimType = Light
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 11
+Ground.HitTime = 12
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -5*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -10*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Pos Y >= 0 && Vel Y > 0
+value = 52
+
+;---------------------------------------------------------------------------
+;JSP-D
+[StateDef 422]
+Type = A
+MoveType = A
+Physics = A
+Ctrl = 0
+Anim = 422
+
+[State 420]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 2
+volumescale = 100
+
+[State 420]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = A, NA
+HitFlag = MA
+GuardFlag = H
+Damage = 182
+GetPower = 330
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY = -58+Floor(P2Dist X)/2, -70
+HitSound = S1, 2
+GuardSound = S3, 0
+AnimType = Light
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 11
+Ground.HitTime = 12
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -5*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -10*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Pos Y >= 0 && Vel Y > 0
+value = 52
+
+;---------------------------------------------------------------------------
+;JLK
+[StateDef 430]
+Type = A
+MoveType = A
+Physics = A
+Ctrl = 0
+Anim = Ifelse(vel x = 0,430,431)
+
+[State 400]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 0
+volumescale = 100
+
+[State 400]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = A, NA
+HitFlag = MA
+GuardFlag = H
+Damage = 119
+GetPower = 135
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S50+TeamSide
+Guard.SparkNo = S50
+SparkXY = -60+Floor(P2Dist X)/2, -60
+HitSound = S2, 0
+GuardSound = S3, 0
+Animtype = Light
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 11
+Ground.HitTime = 12
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -5*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -10*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Pos Y >= 0 && Vel Y > 0
+value = 52
+
+;---------------------------------------------------------------------------
+;JMK
+[Statedef 440]
+Type = A
+MoveType = A
+Physics = A
+Ctrl = 0
+Anim = Ifelse(vel x = 0,440,441)
+
+[State 410]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 1
+volumescale = 100
+
+[State 410]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = A, NA
+HitFlag = MA
+GuardFlag = H
+Damage = 147
+GetPower = 240
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S52+TeamSide
+Guard.SparkNo = S50
+SparkXY = -60+Floor(P2Dist X)/2, -60
+HitSound = S2, 1
+GuardSound = S3, 0
+Animtype = Light
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 11
+Ground.HitTime = 12
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -5*Const(Size.XScale)
+Ground.CornerPush.VelOff = -10*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+YAccel = .25
+P2Facing = 1
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Pos Y >= 0 && Vel Y > 0
+value = 52
+
+;---------------------------------------------------------------------------
+;JSK
+[StateDef 450]
+Type = A
+MoveType = A
+Physics = A
+Ctrl = 0
+Anim = Ifelse(vel x = 0,450,451)
+
+[State 420]
+Type = PlaySnd
+Trigger1 = Time = 0
+Value = S0, 2
+volumescale = 100
+
+[State 420]
+Type = HitDef
+trigger1= (p2stateno!=[5020,5050]) && p2stateno!=5040
+Trigger1 = !time
+Attr = A, NA
+HitFlag = MA
+GuardFlag = H
+Damage = 168
+GetPower = 315
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY = -68+Floor(P2Dist X)/2, -60
+HitSound = S2, 2
+GuardSound = S3, 0
+AnimType = Light
+Air.AnimType = Back
+Ground.Type = Low
+Ground.SlideTime = 11
+Ground.HitTime = 12
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -5*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -10*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Pos Y >= 0 && Vel Y > 0
+value = 52
+
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+
+;---------------------------------------------------------------------------
+;Rising Hawk Light 
+[StateDef 1000]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 1000
+
+[State 0, super]
+type = Poweradd
+Trigger1 = time = 0
+value = 400
+
+[State 420]
+Type = PlaySnd
+Trigger1 = Time = 3
+Value = S100, 0
+volumescale = 100
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 300, 4]
+type = VelSet
+trigger1 = Time = 0
+x = 0
+y = 0
+
+[State 450]
+Type = HitDef
+Trigger1 = !Time
+Attr = SCA, NA
+HitFlag = MA
+GuardFlag = H
+Damage = 189
+GetPower = 0
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY = -80+Floor(P2Dist X)/2, -100 - (AnimElem=4,>0)*20 - (AnimElem=5,>0)*10
+HitSound = S1, 2
+GuardSound = S3, 0
+AnimType = Hard
+Ground.Type = Low
+Ground.SlideTime = 13
+Ground.HitTime = 14
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -2*Const(Size.XScale), -6.2
+Guard.Velocity = -9*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -6.2
+Ground.CornerPush.VelOff = -15*Const(Size.XScale)
+Fall = 1
+Fall.Recover = 0
+Fall.YVelocity = -4
+YAccel = .25
+P2Facing = 1
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = animtime = 0
+value = 1001
+ctrl = 1
+
+;---------------------------------------------------------------------------
+;Rising Hawk Light Up
+[StateDef 1001]
+Type = A
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 1001
+
+[State 1100, 2]
+type = VelSet
+trigger1 = AnimElem = 1
+x = 5.2
+y = -5.2
+
+[State 1100, Gravity]
+type = Veladd
+trigger1 = time > 0
+y = .29
+
+[State 1100, Velocity]
+type = VelMul
+trigger1 = time >= 0
+x = .87
+
+
+[State 450]
+Type = HitDef
+Trigger1 = p2movetype != H
+Trigger1 = !Time
+Attr = A, NA
+HitFlag = MA
+GuardFlag = H
+Damage = 140
+GetPower = 0
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY = -80+Floor(P2Dist X)/2, -100 - (AnimElem=4,>0)*20 - (AnimElem=5,>0)*10
+HitSound = S1, 2
+GuardSound = S3, 0
+AnimType = Hard
+Ground.Type = Low
+Ground.SlideTime = 13
+Ground.HitTime = 14
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -2*Const(Size.XScale), -6.2
+Guard.Velocity = -9*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -6.2
+Ground.CornerPush.VelOff = -15*Const(Size.XScale)
+Fall = 1
+Fall.Recover = 0
+Fall.YVelocity = -4
+YAccel = .25
+P2Facing = 1
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Time>=18
+value = 1002
+
+;---------------------------------------------------------------------------
+;Rising Hawk Light Recovery
+[StateDef 1002]
+Type = A
+MoveType = I
+Physics = N
+Ctrl = 0
+Anim = 1004
+
+[State 300, 4]
+type = Posadd
+trigger1 = Time = 0
+x = 20
+y = 30
+
+[State 300, 4]
+type = VelSet
+trigger1 = Time = 0
+x = 0
+y = 0
+
+[State 300, 4]
+type = Veladd
+trigger1 = Time >9
+y = .4
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Pos Y >= 0 && Vel Y > 0
+value = 52
+
+;---------------------------------------------------------------------------
+;Rising Hawk Medium
+[StateDef 1010]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 1002
+
+[State 0, super]
+type = Poweradd
+Trigger1 = time = 0
+value = 420
+
+[State 420]
+Type = PlaySnd
+Trigger1 = Time = 3
+Value = S100, 0
+volumescale = 100
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 300, 4]
+type = VelSet
+trigger1 = Time = 0
+x = 0
+y = 0
+
+[State 450]
+Type = HitDef
+Trigger1 = !Time
+Attr = A, NA
+HitFlag = MA
+GuardFlag = H
+Damage = 189
+GetPower = 0
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY = -28+Floor(P2Dist X)/2, -50 - (AnimElem=4,>0)*20 - (AnimElem=5,>0)*10
+HitSound = S1, 2
+GuardSound = S3, 0
+AnimType = Hard
+Ground.Type = Low
+Ground.SlideTime = 13
+Ground.HitTime = 14
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -2.1*Const(Size.XScale), -6.3
+Guard.Velocity = -9*Const(Size.XScale)
+Air.Velocity = -2.1*Const(Size.XScale), -6.3
+Ground.CornerPush.VelOff = -15*Const(Size.XScale)
+Fall = 1
+Fall.Recover = 0
+Fall.YVelocity = -4
+YAccel = .25
+P2Facing = 1
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = animtime = 0
+value = 1011
+ctrl = 1
+
+;---------------------------------------------------------------------------
+;Rising Hawk Medium Up
+[StateDef 1011]
+Type = A
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 1003
+
+[State 1100, 2]
+type = VelSet
+trigger1 = AnimElem = 1
+x = 6.4
+y = -6.4
+
+[State 1100, Gravity]
+type = Veladd
+trigger1 = time > 0
+y = .33
+
+[State 1100, Velocity]
+type = VelMul
+trigger1 = time >= 0
+x = .86
+
+[State 450]
+Type = HitDef
+Trigger1 = p2movetype != H
+Trigger1 = !Time
+Attr = A, NA
+HitFlag = MA
+GuardFlag = H
+Damage = 77
+GetPower = 0
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY = -80+Floor(P2Dist X)/2, -100 - (AnimElem=4,>0)*20 - (AnimElem=5,>0)*10
+HitSound = S1, 2
+GuardSound = S3, 0
+AnimType = Hard
+Ground.Type = Low
+Ground.SlideTime = 13
+Ground.HitTime = 14
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -2.1*Const(Size.XScale), -6.3
+Guard.Velocity = -9*Const(Size.XScale)
+Air.Velocity = -2.1*Const(Size.XScale), -6.3
+Ground.CornerPush.VelOff = -15*Const(Size.XScale)
+Fall = 1
+Fall.Recover = 0
+Fall.YVelocity = -4
+YAccel = .25
+P2Facing = 1
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Time>=19
+value = 1002
+
+;---------------------------------------------------------------------------
+;Rising Hawk Strong
+[StateDef 1020]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 1002
+
+[State 0, super]
+type = Poweradd
+Trigger1 = time = 0
+value = 440
+
+[State 420]
+Type = PlaySnd
+Trigger1 = Time = 3
+Value = S100, 0
+volumescale = 100
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 300, 4]
+type = VelSet
+trigger1 = Time = 0
+x = 0
+y = 0
+
+[State 220]
+Type = HitDef
+Trigger1 = p2Statetype != A
+Trigger1 = !time
+Attr = S, NA
+HitFlag = MA
+GuardFlag = M
+Damage = 189
+GetPower = 0
+GivePower = 0
+PauseTime = 12, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY = -86+Floor(P2Dist X)/2, -76
+HitSound = S1, 2
+GuardSound = S3, 0
+AnimType = Hard
+Air.AnimType = Back
+Ground.Type = High
+Ground.SlideTime = 21
+Ground.HitTime = 20
+Guard.HitTime = 29
+Air.HitTime = 99
+Ground.Velocity = -2*Const(Size.XScale)
+Air.Velocity = -2*Const(Size.XScale), -4
+Ground.CornerPush.VelOff = -2*Const(Size.XScale)
+YAccel = .25
+P2Facing = 1
+
+[State 450]
+Type = HitDef
+Trigger1 = p2Statetype = A
+Trigger1 = !time
+Attr = A, NA
+HitFlag = MA
+GuardFlag = H
+Damage = 84
+GetPower = 0
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY = -80+Floor(P2Dist X)/2, -100 - (AnimElem=4,>0)*20 - (AnimElem=5,>0)*10
+HitSound = S1, 2
+GuardSound = S3, 0
+AnimType = Hard
+Ground.Type = Low
+Ground.SlideTime = 13
+Ground.HitTime = 14
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -2.2*Const(Size.XScale), -6.4
+Guard.Velocity = -9*Const(Size.XScale)
+Air.Velocity = -2.2*Const(Size.XScale), -6.4
+Ground.CornerPush.VelOff = -15*Const(Size.XScale)
+Fall = 1
+Fall.Recover = 0
+Fall.YVelocity = -4
+YAccel = .25
+P2Facing = 1
+
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = animtime = 0
+value = 1021
+ctrl = 1
+
+;---------------------------------------------------------------------------
+;Rising Hawk Strong Up
+[StateDef 1021]
+Type = A
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 1003
+
+[State 1100, 2]
+type = VelSet
+trigger1 = AnimElem = 1
+x = 7.5
+y = -7.5
+
+[State 1100, Gravity]
+type = Veladd
+trigger1 = time > 0
+y = .37
+
+[State 1100, Velocity]
+type = VelMul
+trigger1 = time >= 0
+x = .85
+
+[State 450]
+Type = HitDef
+Triggerall = !time
+Trigger1 = (p2Movetype = H && p2Statetype != A)
+Trigger2 = p2Movetype != H
+Attr = A, NA
+HitFlag = MA
+GuardFlag = H
+Damage = 84
+GetPower = 0
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY = -80+Floor(P2Dist X)/2, -100 - (AnimElem=4,>0)*20 - (AnimElem=5,>0)*10
+HitSound = S1, 2
+GuardSound = S3, 0
+AnimType = Hard
+Ground.Type = Low
+Ground.SlideTime = 13
+Ground.HitTime = 14
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -2.2*Const(Size.XScale), -6.4
+Guard.Velocity = -9*Const(Size.XScale)
+Air.Velocity = -2.2*Const(Size.XScale), -6.4
+Ground.CornerPush.VelOff = -15*Const(Size.XScale)
+Fall = 1
+Fall.Recover = 0
+Fall.YVelocity = -4
+YAccel = .25
+P2Facing = 1
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Time>=21
+value = 1002
+
+;-----------------------------------------------------------------------------------------
+;Condor Dive
+[Statedef 1100]
+type    = A
+movetype = A
+physics = N
+juggle = 1
+ctrl = 0
+sprpriority = 2
+anim = 1100
+
+[State 0, super]
+type = Poweradd
+Trigger1 = time = 0
+value = 450
+
+[State 420]
+Type = PlaySnd
+Trigger1 = Time = 3
+Value = S100, 0
+volumescale = 100
+
+[State 1200, 2]
+type = VelSet
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 1200, 2]
+type = VelSet
+trigger1 = AnimElem = 3
+x = 11
+y = 5
+
+[State 450]
+Type = HitDef
+Trigger1 = !time
+Attr = SCA, NA
+HitFlag = MA
+GuardFlag = H
+Damage = 189
+GetPower = 0
+GivePower = 0
+PauseTime = 14, 14
+SparkNo = S54+TeamSide
+Guard.SparkNo = S50
+SparkXY = -84+Floor(P2Dist X)/2, -40 - (AnimElem=4,>0)*20 - (AnimElem=5,>0)*10
+HitSound = S1, 2
+GuardSound = S3, 0
+AnimType = Hard
+Ground.Type = Low
+Ground.SlideTime = 13
+Ground.HitTime = 12
+Guard.HitTime = 19
+Air.HitTime = 99
+Ground.Velocity = -2.2*Const(Size.XScale), -6.2
+Guard.Velocity = -9*Const(Size.XScale)
+Air.Velocity = -2.2*Const(Size.XScale), -6.2
+Ground.CornerPush.VelOff = -16*Const(Size.XScale)
+Fall = 1
+Fall.Recover = 0
+Fall.YVelocity = -4
+YAccel = .25
+P2Facing = 1
+
+[State 1200, 4]
+type = ChangeState
+trigger1 = 1
+trigger1 = Movecontact
+value = 1101
+
+[State 1200, 5]
+type = ChangeState
+trigger1 = Time > 10
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 5
+value = 1102
+
+;------------------------------------------------------------------------------------------
+;Condor Dive Hit
+[Statedef 1101]
+type    = A
+movetype= A
+physics = N
+juggle  = 1
+velset = -2,-7
+ctrl = 0
+anim = 1101
+sprpriority = 2
+
+[State 1200, 1]
+type = VelAdd
+trigger1 = 1
+y = .4
+
+[State 1200, 2]
+type = ChangeState
+trigger1 = Time > 10
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 52
+
+;---------------------------------------------------------------------------
+;Condor Dive Land
+[Statedef 1102]
+type    = C
+movetype= I
+physics = C
+juggle  = 1
+velset = 10,0
+ctrl = 0
+anim = 1102
+sprpriority = 2
+
+[State 1200, 1]
+type = PosSet
+trigger1 = AnimElem = 1
+trigger2 = AnimElem = 2
+y = 5
+
+[State 1200, 1]
+type = PosSet
+trigger1 = AnimElem = 3
+y = 0
+
+[State 1200, 2]
+type = PlaySnd
+trigger1 = AnimElem = 2
+value = S4, 15
+Volumescale = 100
+
+[State -2]
+Type = Explod
+trigger1 = Numexplod(70)<=4
+trigger1 = Vel X > 0
+trigger1 = timemod = 5,2
+Anim = 70
+ID= 70
+Pos = 0, 0
+Random = 50,5
+PosType = P1
+SprPriority = 10
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale), 1
+
+[State 1200, 5]
+type = ChangeState
+trigger1 = animtime = 0
+value = 11
+ctrl = 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;-------------------------------------------------------------------------
+;Mexican Typhoon Light S
+[StateDef 1200]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 1200
+SprPriority = 2
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 0, stop]
+type = Velset
+trigger1 = 1
+x = 0
+y = 0
+
+[State 500]
+Type = HitDef
+Trigger1 = Time = 0
+Attr = SC, NT
+HitFlag = M    ;- r
+Priority = 0, Miss
+Damage = 0
+GetPower = 0
+GivePower = 0
+NumHits = 0
+SparkNo = -1
+HitSound = -1
+AnimType = Light
+Ground.Velocity = -5*Const(Size.XScale), 0
+Fall = 1
+Fall.Recover = 0
+Fall.YVelocity = -4
+YAccel = .25
+ID = 1
+P1StateNo = 12001
+P2StateNo = 12010
+P1Facing = 1
+P2Facing = 1
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;Mexican Typhoon Light C
+[StateDef 1201]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 1201
+SprPriority = 2
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 0, stop]
+type = Velset
+trigger1 = 1
+x = 0
+y = 0
+
+[State 500]
+Type = HitDef
+Trigger1 = Time = 0
+Attr = SC, NT
+HitFlag = M    ;- r
+Priority = 0, Miss
+Damage = 0
+GetPower = 0
+GivePower = 0
+NumHits = 0
+SparkNo = -1
+HitSound = -1
+AnimType = Light
+Ground.Velocity = -5*Const(Size.XScale), 0
+Fall = 1
+Fall.Recover = 0
+Fall.YVelocity = -4
+YAccel = .25
+ID = 1
+P1StateNo = 12001
+P2StateNo = 12010
+P1Facing = 1
+P2Facing = 1
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;Mexican Typhoon Light Get
+[StateDef 12001]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+Anim = 1202
+VelSet = 0
+SprPriority = 2
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelem = 1
+pos = 80,0
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelem = 2
+pos = 60,-44
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 12002
+
+;---------------------------------------------------------------------------
+;P2 Mexican Typhoon Light GET
+[StateDef 12010]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0
+SprPriority = 2
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 12010
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = P2StateNo = 12002
+Value = 12011
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;Mexican Typhoon Light loop
+[StateDef 12002]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+VelSet = 0
+Anim = 1203
+SprPriority = 2
+
+[State -2]
+Type = Explod
+Trigger1 = Numexplod(1204) = 0
+Trigger1 = 1
+ID = 1204
+Anim = 1204
+Pos = 0,0
+PosType = P1
+SprPriority = 1
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale),Const(Size.YScale)
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 901]
+type = PlaySnd
+trigger1 = Time = 0
+value = S100,1
+Volumescale = 100
+
+[State 901]
+type = PlaySnd
+Trigger1 = time = 10
+Trigger2 = time = 30
+value = S300,2
+Volumescale = 100
+[State 901]
+type = PlaySnd
+Trigger1 = time = 10
+Trigger2 = time = 30
+value = S300,2
+Volumescale = 100
+
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(1) >= 0
+Pos = 59,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(2) >= 0
+Pos = -32,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(3) >= 0
+Pos = -46,-110
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(4) >= 0
+Pos = -24,-140
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(5) >= 0
+Pos = 50,-150
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(6) >= 0
+Pos = 70,-105
+
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(7) >= 0
+Pos = 59,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(8) >= 0
+Pos = -32,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(9) >= 0
+Pos = -46,-110
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(10) >= 0
+Pos = -24,-140
+
+[State 0, stop]
+type = Velset
+trigger1 = 1
+x = 1
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+y = -5
+
+[State 1000, 2]
+type = Veladd
+trigger1 = time >2
+y = .2
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 12003
+
+;---------------------------------------------------------------------------
+;P2 Mexican Typhoon Light loop
+[StateDef 12011]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0
+SprPriority = 2
+
+[State 200]
+type = ScreenBound
+trigger1 = 1
+value = 1
+movecamera = 0,0
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 12011
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = P2StateNo = 12003
+Value = 12012
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;Mexican Typhoon Light Prepare Stomp
+[StateDef 12003]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+VelSet = 0
+Anim = 1205
+SprPriority = 2
+
+[State -2]
+Type = Explod
+Trigger1 = Numexplod(1208) = 0
+Trigger1 = 1
+ID = 1208
+Anim = 1208
+Pos = 0,0
+PosType = P1
+SprPriority = 1
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale),Const(Size.YScale)
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(1) >= 0
+Pos = -24,-140
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(2) >= 0
+Pos = 72,-103
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(3) >= 0
+Pos = 60,-20
+
+[State 1000, 1]
+type = VelSet
+Trigger1 = time = 0
+x = 0
+y = 0
+
+[State 1000, 1]
+type = VelAdd
+Trigger1 = 1
+y = .4
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Pos Y >= 15 && Vel Y > 0
+Value = 12004
+
+;---------------------------------------------------------------------------
+;P2 Mexican Typhoon Light Prepare Stomp
+[StateDef 12012]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0
+SprPriority = 2
+
+[State 200]
+type = ScreenBound
+trigger1 = 1
+value = 1
+movecamera = 0,0
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 12012
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = P2StateNo = 12004
+Value = 12013
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+
+;---------------------------------------------------------------------------
+;Mexican Typhoon Light Stomp
+[StateDef 12004]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+VelSet = 0
+Anim = 1206
+SprPriority = 2
+
+[State -2, TargetLifeadd]
+type = Poweradd
+trigger1 = time = 0
+value = 900
+
+[State -2]
+Type = Explod
+Trigger1 = Time = 1
+Anim = 70 + (Var(12)=-1)*10
+Pos = 60,-20
+PosType = P1
+SprPriority = 10
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale), 1
+
+[State -2]
+Type = Explod
+Trigger1 = Time = 1
+Anim = 54+TeamSide
+Pos = 60,-20
+PosType = P1
+SprPriority = 10
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale), 1
+
+[State 901]
+type = PlaySnd
+trigger1 = Time = 0
+value = S4,10
+Volumescale = 100
+
+[State 903, EnvShake]
+type = EnvShake
+trigger1 = Time = 0
+time = 48
+ampl = 3
+freq = 80
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 20
+
+[State 0, stop]
+type = posset
+trigger1 = pos y >20
+trigger1 = Time = 0
+y = 20
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 501]
+Type = TargetBind
+Trigger1 = time <10
+Pos = 60,-20
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Time >= 15
+Value = 12005
+
+;---------------------------------------------------------------------------
+;P2 Mexican Typhoon Light Stomp
+[StateDef 12013]
+type    = A
+movetype= H
+physics = N
+velset = 0,0
+
+[State -2, TargetLifeadd]
+type = Lifeadd
+trigger1 = time = 0
+value = -266
+
+[State 200]
+type = NotHitBy
+trigger1 = Time < 10
+value = SCA
+time = 1
+
+[State 200]
+type = PlayerPush
+trigger1 = Time < 10
+value = 0
+
+[State 200]
+type = ScreenBound
+trigger1 = Time < 10
+value = 1
+movecamera = 0,0
+
+[State 200]
+type = ChangeAnim2
+trigger1 = Time = 0
+value = 12013
+
+[State 200]
+type = PosSet
+trigger1 = AnimElem = 1
+y = 0
+
+[State 200]
+type = VelSet
+trigger1 = Time = 11
+x = -3
+y = -9
+
+[State 200]
+type = VelAdd
+trigger1 = Time > 10
+y = .4
+
+[State 200]
+type = SelfState
+trigger1 = Time > 15
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 5100 ;Hit ground
+
+;------------------------------------------------------------------------------------------
+;Mexican Typhoon Jump End
+[Statedef 12005]
+type    = A
+movetype= A
+physics = N
+juggle  = 1
+velset = -3,-6
+ctrl = 0
+anim = 1207
+sprpriority = 2
+
+[State 1200, 1]
+type = VelAdd
+trigger1 = 1
+y = .3
+
+[State 1200, 2]
+type = ChangeState
+trigger1 = Time > 10
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 52
+
+;---------------------------------------------------------------------------
+;Mexican Typhoon Medium S
+[StateDef 1210]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 1200
+SprPriority = 2
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 0, stop]
+type = Velset
+trigger1 = 1
+x = 0
+y = 0
+
+[State 500]
+Type = HitDef
+Trigger1 = Time = 0
+Attr = SC, NT
+HitFlag = M    ;- r
+Priority = 0, Miss
+Damage = 0
+GetPower = 0
+GivePower = 0
+NumHits = 0
+SparkNo = -1
+HitSound = -1
+AnimType = Light
+Ground.Velocity = -5*Const(Size.XScale), 0
+Fall = 1
+Fall.Recover = 0
+Fall.YVelocity = -4
+YAccel = .25
+ID = 1
+P1StateNo = 12101
+P2StateNo = 12110
+P1Facing = 1
+P2Facing = 1
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;Mexican Typhoon Medium C
+[StateDef 1211]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 1201
+SprPriority = 2
+
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 0, stop]
+type = Velset
+trigger1 = 1
+x = 0
+y = 0
+
+[State 500]
+Type = HitDef
+Trigger1 = Time = 0
+Attr = SC, NT
+HitFlag = M    ;- r
+Priority = 0, Miss
+Damage = 0
+GetPower = 0
+GivePower = 0
+NumHits = 0
+SparkNo = -1
+HitSound = -1
+AnimType = Light
+Ground.Velocity = -5*Const(Size.XScale), 0
+Fall = 1
+Fall.Recover = 0
+Fall.YVelocity = -4
+YAccel = .25
+ID = 1
+P1StateNo = 12101
+P2StateNo = 12110
+P1Facing = 1
+P2Facing = 1
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;Mexican Typhoon Medium Get
+[StateDef 12101]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+Anim = 1202
+VelSet = 0
+SprPriority = 2
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelem = 1
+pos = 80,0
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelem = 2
+pos = 60,-44
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 12102
+
+;---------------------------------------------------------------------------
+;P2 Mexican Typhoon Medium GET
+[StateDef 12110]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0
+SprPriority = 2
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 12010
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = P2StateNo = 12102
+Value = 12111
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;Mexican Typhoon Medium loop
+[StateDef 12102]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+VelSet = 0
+Anim = 1203
+SprPriority = 2
+
+[State -2]
+Type = Explod
+Trigger1 = Numexplod(1214) = 0
+Trigger1 = 1
+ID = 1214
+Anim = 1204
+Pos = 0,0
+PosType = P1
+SprPriority = 1
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale),Const(Size.YScale)
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 901]
+type = PlaySnd
+trigger1 = Time = 0
+value = S100,1
+Volumescale = 100
+
+[State 901]
+type = PlaySnd
+Trigger1 = time = 9
+Trigger2 = time = 18
+Trigger3 = time = 27
+value = S300,2
+Volumescale = 100
+[State 901]
+type = PlaySnd
+Trigger1 = time = 9
+Trigger2 = time = 18
+Trigger3 = time = 27
+value = S300,2
+Volumescale = 100
+
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(1) >= 0
+Pos = 59,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(2) >= 0
+Pos = -32,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(3) >= 0
+Pos = -46,-110
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(4) >= 0
+Pos = -24,-140
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(5) >= 0
+Pos = 50,-150
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(6) >= 0
+Pos = 70,-105
+
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(7) >= 0
+Pos = 59,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(8) >= 0
+Pos = -32,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(9) >= 0
+Pos = -46,-110
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(10) >= 0
+Pos = -24,-140
+
+[State 0, stop]
+type = Velset
+trigger1 = 1
+x = 1.02
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+y = -6
+
+[State 1000, 2]
+type = Veladd
+trigger1 = time >2
+y = 0.2
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 12103
+
+;---------------------------------------------------------------------------
+;P2 Mexican Typhoon Medium loop
+[StateDef 12111]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0
+SprPriority = 2
+
+[State 200]
+type = ScreenBound
+trigger1 = 1
+value = 1
+movecamera = 0,0
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 12011
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = P2StateNo = 12103
+Value = 12112
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;Mexican Typhoon Medium Prepare Stomp
+[StateDef 12103]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+VelSet = 0
+Anim = 1205
+SprPriority = 2
+
+[State -2]
+Type = Explod
+Trigger1 = Numexplod(1218) = 0
+Trigger1 = 1
+ID = 1218
+Anim = 1208
+Pos = 0,0
+PosType = P1
+SprPriority = 1
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale),Const(Size.YScale)
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(1) >= 0
+Pos = -24,-140
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(2) >= 0
+Pos = 72,-103
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(3) >= 0
+Pos = 60,-20
+
+[State 1000, 1]
+type = VelSet
+Trigger1 = time = 0
+x = 0
+y = 0
+
+[State 1000, 1]
+type = VelAdd
+Trigger1 = 1
+y = .4
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Pos Y >= 15 && Vel Y > 0
+Value = 12104
+
+;---------------------------------------------------------------------------
+;P2 Mexican Typhoon Medium Prepare Stomp
+[StateDef 12112]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0
+SprPriority = 2
+
+[State 200]
+type = ScreenBound
+trigger1 = 1
+value = 1
+movecamera = 0,0
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 12012
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = P2StateNo = 12104
+Value = 12113
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;Mexican Typhoon Medium Stomp
+[StateDef 12104]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+VelSet = 0
+Anim = 1206
+SprPriority = 2
+
+[State -2, TargetLifeadd]
+type = Poweradd
+trigger1 = time = 0
+value = 950
+
+[State -2]
+Type = Explod
+Trigger1 = Time = 1
+Anim = 70 + (Var(12)=-1)*10
+Pos = 60,-20
+PosType = P1
+SprPriority = 10
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale), 1
+
+[State -2]
+Type = Explod
+Trigger1 = Time = 1
+Anim = 54+TeamSide
+Pos = 60,-20
+PosType = P1
+SprPriority = 10
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale), 1
+
+[State 901]
+type = PlaySnd
+trigger1 = Time = 0
+value = S4,10
+Volumescale = 100
+
+[State 903, EnvShake]
+type = EnvShake
+trigger1 = Time = 0
+time = 48
+ampl = 3
+freq = 80
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 20
+
+[State 0, stop]
+type = posset
+trigger1 = pos y >20
+trigger1 = Time = 0
+y = 20
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 501]
+Type = TargetBind
+Trigger1 = time <10
+Pos = 60,-20
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Time >= 15
+Value = 12105
+
+;---------------------------------------------------------------------------
+;P2 Mexican Typhoon Medium Stomp
+[StateDef 12113]
+type    = A
+movetype= H
+physics = N
+velset = 0,0
+
+[State -2, TargetLifeadd]
+type = Lifeadd
+trigger1 = time = 0
+value = -294
+
+[State 200]
+type = NotHitBy
+trigger1 = Time < 10
+value = SCA
+time = 1
+
+[State 200]
+type = PlayerPush
+trigger1 = Time < 10
+value = 0
+
+[State 200]
+type = ScreenBound
+trigger1 = Time < 10
+value = 1
+movecamera = 0,0
+
+[State 200]
+type = ChangeAnim2
+trigger1 = Time = 0
+value = 12013
+
+[State 200]
+type = PosSet
+trigger1 = AnimElem = 1
+y = 0
+
+[State 200]
+type = VelSet
+trigger1 = Time = 11
+x = -3
+y = -9
+
+[State 200]
+type = VelAdd
+trigger1 = Time > 10
+y = .4
+
+[State 200]
+type = SelfState
+trigger1 = Time > 15
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 5100 ;Hit ground
+
+;------------------------------------------------------------------------------------------
+;Mexican Typhoon Jump End
+[Statedef 12105]
+type    = A
+movetype= A
+physics = N
+juggle  = 1
+velset = -3,-6
+ctrl = 0
+anim = 1207
+sprpriority = 2
+
+[State 1200, 1]
+type = VelAdd
+trigger1 = 1
+y = .3
+
+[State 1200, 2]
+type = ChangeState
+trigger1 = Time > 10
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 52
+
+;-------------------------------------------------------------------------
+;Mexican Typhoon Strong S
+[StateDef 1220]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 1200
+SprPriority = 2
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 0, stop]
+type = Velset
+trigger1 = 1
+x = 0
+y = 0
+
+[State 500]
+Type = HitDef
+Trigger1 = Time = 0
+Attr = SC, NT
+HitFlag = M    ;- r
+Priority = 0, Miss
+Damage = 0
+GetPower = 0
+GivePower = 0
+NumHits = 0
+SparkNo = -1
+HitSound = -1
+AnimType = Light
+Ground.Velocity = -5*Const(Size.XScale), 0
+Fall = 1
+Fall.Recover = 0
+Fall.YVelocity = -4
+YAccel = .25
+ID = 1
+P1StateNo = 12201
+P2StateNo = 12210
+P1Facing = 1
+P2Facing = 1
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;Mexican Typhoon Strong C
+[StateDef 1221]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 1201
+SprPriority = 2
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 0, stop]
+type = Velset
+trigger1 = 1
+x = 0
+y = 0
+
+[State 500]
+Type = HitDef
+Trigger1 = Time = 0
+Attr = SC, NT
+HitFlag = M    ;- r
+Priority = 0, Miss
+Damage = 0
+GetPower = 0
+GivePower = 0
+NumHits = 0
+SparkNo = -1
+HitSound = -1
+AnimType = Light
+Ground.Velocity = -5*Const(Size.XScale), 0
+Fall = 1
+Fall.Recover = 0
+Fall.YVelocity = -4
+YAccel = .25
+ID = 1
+P1StateNo = 12201
+P2StateNo = 12210
+P1Facing = 1
+P2Facing = 1
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;Mexican Typhoon Strong Get
+[StateDef 12201]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+Anim = 1202
+VelSet = 0
+SprPriority = 2
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelem = 1
+pos = 80,0
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelem = 2
+pos = 60,-44
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 12202
+
+;---------------------------------------------------------------------------
+;P2 Mexican Typhoon Strong GET
+[StateDef 12210]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0
+SprPriority = 2
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 12010
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = P2StateNo = 12202
+Value = 12211
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;Mexican Typhoon Strong loop
+[StateDef 12202]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+VelSet = 0
+Anim = 1223
+SprPriority = 2
+
+[State -2]
+Type = Explod
+Trigger1 = Numexplod(1224) = 0
+Trigger1 = 1
+ID = 1224
+Anim = 1224
+Pos = 0,0
+PosType = P1
+SprPriority = 1
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale),Const(Size.YScale)
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 901]
+type = PlaySnd
+trigger1 = Time = 0
+value = S100,1
+Volumescale = 100
+
+[State 901]
+type = PlaySnd
+Trigger1 = time = 9
+Trigger2 = time = 18
+Trigger3 = time = 27
+Trigger4 = time = 36
+Trigger5 = time = 45
+value = S300,2
+Volumescale = 100
+[State 901]
+type = PlaySnd
+Trigger1 = time = 9
+Trigger2 = time = 18
+Trigger3 = time = 27
+Trigger4 = time = 36
+Trigger5 = time = 45
+value = S300,2
+Volumescale = 100
+
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(1) >= 0
+Pos = 59,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(2) >= 0
+Pos = -32,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(3) >= 0
+Pos = -46,-110
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(4) >= 0
+Pos = -24,-140
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(5) >= 0
+Pos = 50,-150
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(6) >= 0
+Pos = 70,-105
+
+
+
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(7) >= 0
+Pos = 59,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(8) >= 0
+Pos = -32,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(9) >= 0
+Pos = -46,-110
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(10) >= 0
+Pos = -24,-140
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(11) >= 0
+Pos = 50,-150
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(12) >= 0
+Pos = 70,-105
+
+
+
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(13) >= 0
+Pos = 59,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(14) >= 0
+Pos = -32,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(15) >= 0
+Pos = -46,-110
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(16) >= 0
+Pos = -24,-140
+
+[State 0, stop]
+type = Velset
+trigger1 = 1
+x = 1
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+y = -7
+
+[State 1000, 2]
+type = Veladd
+trigger1 = time >3
+y = 0.21
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 12203
+
+;---------------------------------------------------------------------------
+;P2 Mexican Typhoon Strong loop
+[StateDef 12211]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0
+SprPriority = 2
+
+[State 200]
+type = ScreenBound
+trigger1 = 1
+value = 1
+movecamera = 0,0
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 12011
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = P2StateNo = 12203
+Value = 12212
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;Mexican Typhoon Strong Prepare Stomp
+[StateDef 12203]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+VelSet = 0
+Anim = 1205
+SprPriority = 2
+
+[State -2]
+Type = Explod
+Trigger1 = Numexplod(1228) = 0
+Trigger1 = 1
+ID = 1228
+Anim = 1208
+Pos = 0,0
+PosType = P1
+SprPriority = 1
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale),Const(Size.YScale)
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(1) >= 0
+Pos = -24,-140
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(2) >= 0
+Pos = 72,-103
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(3) >= 0
+Pos = 60,-20
+
+[State 1000, 1]
+type = VelSet
+Trigger1 = time = 0
+x = 0
+
+[State 1000, 1]
+type = VelAdd
+Trigger1 = 1
+y = .45
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Pos Y >= 15 && Vel Y > 0
+Value = 12204
+
+;---------------------------------------------------------------------------
+;P2 Mexican Typhoon Strong Prepare Stomp
+[StateDef 12212]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0
+SprPriority = 2
+
+[State 200]
+type = ScreenBound
+trigger1 = 1
+value = 1
+movecamera = 0,0
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 12012
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = P2StateNo = 12204
+Value = 12213
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;Mexican Typhoon Strong Stomp
+[StateDef 12204]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+VelSet = 0
+Anim = 1206
+SprPriority = 2
+
+[State -2, TargetLifeadd]
+type = Poweradd
+trigger1 = time = 0
+value = 1000
+
+[State -2]
+Type = Explod
+Trigger1 = Time = 1
+Anim = 70 + (Var(12)=-1)*10
+Pos = 60,-20
+PosType = P1
+SprPriority = 10
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale), 1
+
+[State -2]
+Type = Explod
+Trigger1 = Time = 1
+Anim = 54+TeamSide
+Pos = 60,-20
+PosType = P1
+SprPriority = 10
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale), 1
+
+[State 901]
+type = PlaySnd
+trigger1 = Time = 0
+value = S4,10
+Volumescale = 100
+
+[State 903, EnvShake]
+type = EnvShake
+trigger1 = Time = 0
+time = 48
+ampl = 3
+freq = 80
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 20
+
+[State 0, stop]
+type = posset
+trigger1 = pos y >20
+trigger1 = Time = 0
+y = 20
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 501]
+Type = TargetBind
+Trigger1 = time <10
+Pos = 60,-20
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Time >= 15
+Value = 12205
+
+;---------------------------------------------------------------------------
+;P2 Mexican Typhoon Strong Stomp
+[StateDef 12213]
+type    = A
+movetype= H
+physics = N
+velset = 0,0
+
+[State -2, TargetLifeadd]
+type = Lifeadd
+trigger1 = time = 0
+value = -322
+
+[State 200]
+type = NotHitBy
+trigger1 = Time < 10
+value = SCA
+time = 1
+
+[State 200]
+type = PlayerPush
+trigger1 = Time < 10
+value = 0
+
+[State 200]
+type = ScreenBound
+trigger1 = Time < 10
+value = 1
+movecamera = 0,0
+
+[State 200]
+type = ChangeAnim2
+trigger1 = Time = 0
+value = 12013
+
+[State 200]
+type = PosSet
+trigger1 = AnimElem = 1
+y = 0
+
+[State 200]
+type = VelSet
+trigger1 = Time = 11
+x = -3
+y = -9
+
+[State 200]
+type = VelAdd
+trigger1 = Time > 10
+y = .4
+
+[State 200]
+type = SelfState
+trigger1 = Time > 15
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 5100 ;Hit ground
+
+;------------------------------------------------------------------------------------------
+;Mexican Typhoon Jump End
+[Statedef 12205]
+type    = A
+movetype= A
+physics = N
+juggle  = 1
+velset = -3,-6
+ctrl = 0
+anim = 1207
+sprpriority = 2
+
+[State 1200, 1]
+type = VelAdd
+trigger1 = 1
+y = .3
+
+[State 1200, 2]
+type = ChangeState
+trigger1 = Time > 10
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 52
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------------
+
+
+;-------------------------------------------------------------------------
+;Mexican Typhoon SUPER
+[StateDef 1230]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 1200
+SprPriority = 2
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 0, stop]
+type = Velset
+trigger1 = 1
+x = 0
+y = 0
+
+[State 500]
+Type = HitDef
+Trigger1 = Time = 0
+Attr = SC, NT
+HitFlag = M    ;- r
+Priority = 0, Miss
+Damage = 0
+GetPower = 0
+GivePower = 0
+NumHits = 0
+SparkNo = -1
+HitSound = -1
+AnimType = Light
+Ground.Velocity = -5*Const(Size.XScale), 0
+Fall = 1
+Fall.Recover = 0
+Fall.YVelocity = -4
+YAccel = .25
+ID = 1
+P1StateNo = 12301
+P2StateNo = 12310
+P1Facing = 1
+P2Facing = 1
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;Mexican Typhoon SUPER C
+[StateDef 1231]
+Type = S
+MoveType = A
+Physics = N
+Ctrl = 0
+Anim = 1201
+SprPriority = 2
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 0
+
+[State 0, stop]
+type = Velset
+trigger1 = 1
+x = 0
+y = 0
+
+[State 500]
+Type = HitDef
+Trigger1 = Time = 0
+Attr = SC, NT
+HitFlag = M    ;- r
+Priority = 0, Miss
+Damage = 0
+GetPower = 0
+GivePower = 0
+NumHits = 0
+SparkNo = -1
+HitSound = -1
+AnimType = Light
+Ground.Velocity = -5*Const(Size.XScale), 0
+Fall = 1
+Fall.Recover = 0
+Fall.YVelocity = -4
+YAccel = .25
+ID = 1
+P1StateNo = 12301
+P2StateNo = 12310
+P1Facing = 1
+P2Facing = 1
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 0
+Ctrl = 1
+
+;---------------------------------------------------------------------------
+;Mexican Typhoon SUPER Get
+[StateDef 12301]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+Anim = 12022
+VelSet = 0
+SprPriority = 2
+PowerAdd = 0
+
+[State 0, super]
+type = Poweradd
+Trigger1 = time = 0
+value = -3000
+
+[State 300]
+type = Pause
+trigger1 = Time = 0
+time = 17
+movetime = 17
+
+[State 2000]
+Type = Explod
+Trigger1 = Time = 0
+Anim = 10090
+Pos = 34,-18
+PosType = P1
+OwnPal = 1
+SprPriority = 10
+PauseMoveTime = -1
+BindTime = -1
+Scale = Const(Size.XScale), 1
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 0
+Time = 80
+Trans = None
+FrameGap = 3
+Length = 15
+PalColor = 0
+PalBright = 90, 90, 121
+PalContrast = 170, 170, 245
+PalAdd = -25, -25, -25
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 80
+Time = 0
+
+
+[State 901]
+type = PlaySnd
+trigger1 = Time = 0
+value = S210,0
+Volumescale = 100
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelem = 1
+trigger2 = Animelem = 2
+pos = 80,0
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = Animelem = 3
+pos = 60,-44
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 12302
+
+;---------------------------------------------------------------------------
+;P2 Mexican Typhoon SUPER GET
+[StateDef 12310]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0
+SprPriority = 2
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 0
+Time = 80
+Trans = None
+FrameGap = 3
+Length = 15
+PalColor = 0
+PalBright = 90, 90, 121
+PalContrast = 170, 170, 245
+PalAdd = -25, -25, -25
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 12010
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 12311
+
+[State 200]
+Type = ChangeState
+Triggerall = 1
+Trigger1 = P2StateNo = 12302
+Value = 12311
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;Mexican Typhoon SUPER loop
+[StateDef 12302]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+VelSet = 0
+Anim = 1223
+SprPriority = 2
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 0
+Time = 80
+Trans = None
+FrameGap = 3
+Length = 15
+PalColor = 0
+PalBright = 90, 90, 121
+PalContrast = 170, 170, 245
+PalAdd = -25, -25, -25
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 80
+Time = 0
+
+[State -2]
+Type = Explod
+Trigger1 = Numexplod(1234) = 0
+Trigger1 = 1
+ID = 1234
+Anim = 1224
+Pos = 0,0
+PosType = P1
+SprPriority = 1
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale),Const(Size.YScale)
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 901]
+type = PlaySnd
+trigger1 = Time = 0
+value = S100,1
+Volumescale = 100
+
+[State 901]
+type = PlaySnd
+Trigger1 = time = 9
+Trigger2 = time = 18
+Trigger3 = time = 27
+Trigger4 = time = 36
+Trigger5 = time = 45
+value = S300,2
+Volumescale = 100
+[State 901]
+type = PlaySnd
+Trigger1 = time = 9
+Trigger2 = time = 18
+Trigger3 = time = 27
+Trigger4 = time = 36
+Trigger5 = time = 45
+value = S300,2
+Volumescale = 100
+
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(1) >= 0
+Pos = 59,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(2) >= 0
+Pos = -32,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(3) >= 0
+Pos = -46,-110
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(4) >= 0
+Pos = -24,-140
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(5) >= 0
+Pos = 50,-150
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(6) >= 0
+Pos = 70,-105
+
+
+
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(7) >= 0
+Pos = 59,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(8) >= 0
+Pos = -32,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(9) >= 0
+Pos = -46,-110
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(10) >= 0
+Pos = -24,-140
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(11) >= 0
+Pos = 50,-150
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(12) >= 0
+Pos = 70,-105
+
+
+
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(13) >= 0
+Pos = 59,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(14) >= 0
+Pos = -32,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(15) >= 0
+Pos = -46,-110
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(16) >= 0
+Pos = -24,-140
+
+[State 0, stop]
+type = Velset
+trigger1 = 1
+x = 1
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+y = -5
+
+[State 1000, 2]
+type = Veladd
+trigger1 = time >24
+y = .26
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 12303
+
+;---------------------------------------------------------------------------
+;P2 Mexican Typhoon SUPER loop
+[StateDef 12311]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0
+SprPriority = 2
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 0
+Time = 80
+Trans = None
+FrameGap = 3
+Length = 15
+PalColor = 0
+PalBright = 90, 90, 121
+PalContrast = 170, 170, 245
+PalAdd = -25, -25, -25
+
+[State 200]
+type = ScreenBound
+trigger1 = 1
+value = 1
+movecamera = 0,0
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 12011
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = P2StateNo = 12303
+Value = 12312
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;Mexican Typhoon SUPER Prepare Stomp
+[StateDef 12303]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+VelSet = 0
+Anim = 1205
+SprPriority = 2
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 0
+Time = 80
+Trans = None
+FrameGap = 3
+Length = 15
+PalColor = 0
+PalBright = 90, 90, 121
+PalContrast = 170, 170, 245
+PalAdd = -25, -25, -25
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 80
+Time = 0
+
+[State -2]
+Type = Explod
+Trigger1 = Numexplod(1238) = 0
+Trigger1 = 1
+ID = 1238
+Anim = 1208
+Pos = 0,0
+PosType = P1
+SprPriority = 1
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale),Const(Size.YScale)
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(1) >= 0
+Pos = -24,-140
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(2) >= 0
+Pos = 72,-103
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(3) >= 0
+Pos = 60,-20
+
+[State 1000, 1]
+type = VelSet
+Trigger1 = time = 0
+x = 0
+
+[State 1000, 1]
+type = VelAdd
+Trigger1 = 1
+y = .2
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Pos Y >= 15 && Vel Y > 0
+Value = 12304
+
+;---------------------------------------------------------------------------
+;P2 Mexican Typhoon SUPER Prepare Stomp
+[StateDef 12312]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0
+SprPriority = 2
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 0
+Time = 80
+Trans = None
+FrameGap = 3
+Length = 15
+PalColor = 0
+PalBright = 90, 90, 121
+PalContrast = 170, 170, 245
+PalAdd = -25, -25, -25
+
+[State 200]
+type = ScreenBound
+trigger1 = 1
+value = 1
+movecamera = 0,0
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 12012
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = P2StateNo = 12304
+Value = 12313
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;Mexican Typhoon SUPER Stomp
+[StateDef 12304]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+VelSet = 0
+Anim = 1206
+SprPriority = 2
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 0
+Time = 80
+Trans = None
+FrameGap = 3
+Length = 15
+PalColor = 0
+PalBright = 90, 90, 121
+PalContrast = 170, 170, 245
+PalAdd = -25, -25, -25
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 80
+Time = 0
+
+[State -2]
+Type = Explod
+Trigger1 = Time = 1
+Anim = 70 + (Var(12)=-1)*10
+Pos = 60,-20
+PosType = P1
+SprPriority = 10
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale), 1
+
+[State -2]
+Type = Explod
+Trigger1 = Time = 1
+Anim = 54+TeamSide
+Pos = 60,-20
+PosType = P1
+SprPriority = 10
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale), 1
+
+[State 901]
+type = PlaySnd
+trigger1 = Time = 0
+value = S4,10
+Volumescale = 100
+
+[State 903, EnvShake]
+type = EnvShake
+trigger1 = Time = 0
+time = 48
+ampl = 3
+freq = 80
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 20
+
+[State 0, stop]
+type = posset
+trigger1 = pos y >20
+trigger1 = Time = 0
+y = 20
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 501]
+Type = TargetBind
+Trigger1 = 1
+Pos = 60,-20
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Time >= 15
+Value = 12305
+
+;---------------------------------------------------------------------------
+;P2 Mexican Typhoon SUPER Stomp
+[StateDef 12313]
+type    = A
+movetype= H
+physics = N
+velset = 0,0
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 0
+Time = 80
+Trans = None
+FrameGap = 3
+Length = 15
+PalColor = 0
+PalBright = 90, 90, 121
+PalContrast = 170, 170, 245
+PalAdd = -25, -25, -25
+
+[State -2, TargetLifeadd]
+type = Lifeadd
+trigger1 = time = 0
+value = -322
+kill = 0
+
+[State 200]
+type = NotHitBy
+trigger1 = Time < 10
+value = SCA
+time = 1
+
+[State 200]
+type = PlayerPush
+trigger1 = 1
+value = 0
+
+[State 200]
+type = ScreenBound
+trigger1 = 1
+value = 1
+movecamera = 0,0
+
+[State 200]
+type = ChangeAnim2
+trigger1 = Time = 0
+value = 12013
+
+[State 200]
+type = VelSet
+trigger1 = 1
+x = 0
+y = 0
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = P2StateNo = 12305
+Value = 12314
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;Mexican Typhoon End loop
+[StateDef 12305]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+VelSet = 0
+Anim = 12032
+SprPriority = 2
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 0
+Time = 80
+Trans = None
+FrameGap = 3
+Length = 15
+PalColor = 0
+PalBright = 90, 90, 121
+PalContrast = 170, 170, 245
+PalAdd = -25, -25, -25
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 80
+Time = 0
+
+[State -2]
+Type = Explod
+Trigger1 = Numexplod(1244) = 0
+Trigger1 = 1
+ID = 1244
+Anim = 12042
+Pos = 0,0
+PosType = P1
+SprPriority = 1
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale),Const(Size.YScale)
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 901]
+type = PlaySnd
+Trigger1 = time = 5
+value = S300,2
+Volumescale = 100
+[State 901]
+type = PlaySnd
+Trigger1 = time = 5
+value = S300,2
+Volumescale = 100
+
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(1) >= 0
+Pos = 59,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(2) >= 0
+Pos = -32,-72
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(3) >= 0
+Pos = -46,-110
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(4) >= 0
+Pos = -24,-140
+
+[State 0, stop]
+type = Velset
+trigger1 = 1
+x = -1
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+y = -6
+
+[State 1000, 2]
+type = Veladd
+trigger1 = time >2
+y = 0.25
+
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Value = 12306
+
+;---------------------------------------------------------------------------
+;P2 Mexican Typhoon End loop
+[StateDef 12314]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0
+SprPriority = 2
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 0
+Time = 80
+Trans = None
+FrameGap = 3
+Length = 15
+PalColor = 0
+PalBright = 90, 90, 121
+PalContrast = 170, 170, 245
+PalAdd = -25, -25, -25
+
+[State 200]
+type = ScreenBound
+trigger1 = 1
+value = 1
+movecamera = 0,0
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 120112
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = P2StateNo = 12306
+Value = 12315
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+;---------------------------------------------------------------------------
+;Mexican Typhoon End Prepare Stomp
+[StateDef 12306]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+VelSet = 0
+Anim = 1205
+SprPriority = 2
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 0
+Time = 80
+Trans = None
+FrameGap = 3
+Length = 15
+PalColor = 0
+PalBright = 90, 90, 121
+PalContrast = 170, 170, 245
+PalAdd = -25, -25, -25
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 80
+Time = 0
+
+[State -2]
+Type = Explod
+Trigger1 = Numexplod(1248) = 0
+Trigger1 = 1
+ID = 1248
+Anim = 1208
+Pos = 0,0
+PosType = P1
+SprPriority = 1
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale),Const(Size.YScale)
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(1) >= 0
+Pos = -24,-140
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(2) >= 0
+Pos = 72,-103
+[State 501]
+Type = TargetBind
+Trigger1 = AnimElemTime(3) >= 0
+Pos = 60,-20
+
+[State 0, stop]
+type = Velset
+trigger1 = 1
+x = -1
+
+;[State 1000, 1]
+;type = VelSet
+;Trigger1 = time = 0
+;y = 0
+
+[State 1000, 1]
+type = VelAdd
+Trigger1 = 1
+y = .5
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Pos Y >= 15 && Vel Y > 0
+Value = 12307
+
+;---------------------------------------------------------------------------
+;P2 Mexican Typhoon Light Prepare Stomp
+[StateDef 12315]
+Type = A
+MoveType = H
+Physics = N
+Ctrl = 0
+VelSet = 0
+SprPriority = 2
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 0
+Time = 80
+Trans = None
+FrameGap = 3
+Length = 15
+PalColor = 0
+PalBright = 90, 90, 121
+PalContrast = 170, 170, 245
+PalAdd = -25, -25, -25
+
+[State 200]
+type = ScreenBound
+trigger1 = 1
+value = 1
+movecamera = 0,0
+
+[State 810, Playerpush]
+type = Playerpush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 200]
+Type = ChangeAnim2
+Trigger1 = Time = 0
+Value = 12012
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = -1
+
+[State -2, nothitby]
+type = nothitby
+Trigger1 = 1
+value = SCA
+
+[State 200]
+Type = ChangeState
+Trigger1 = AnimTime = 0
+Trigger2 = P2StateNo = 12307
+Value = 12316
+
+[State 200]
+Type = SelfState
+Trigger1 = alive = 1
+Trigger1 = time >3
+Trigger1 = Roundstate = 3
+Value = 5030
+
+[State 200]
+Type = SelfState
+Trigger1 = time >100
+Value = 5030
+
+;---------------------------------------------------------------------------
+;Mexican Typhoon end Stomp
+[StateDef 12307]
+Type = S
+MoveType = I
+Physics = N
+Ctrl = 0
+VelSet = 0
+Anim = 1206
+SprPriority = 2
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 0
+Time = 80
+Trans = None
+FrameGap = 3
+Length = 15
+PalColor = 0
+PalBright = 90, 90, 121
+PalContrast = 170, 170, 245
+PalAdd = -25, -25, -25
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 80
+Time = 0
+
+[State -2]
+Type = Explod
+Trigger1 = Time = 1
+Anim = 70 + (Var(12)=-1)*10
+Pos = 60,-20
+PosType = P1
+SprPriority = 10
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale), 1
+
+[State -2]
+Type = Explod
+Trigger1 = Time = 1
+Anim = 54+TeamSide
+Pos = 60,-20
+PosType = P1
+SprPriority = 10
+OwnPal = 1
+BindTime = -1
+Scale = Const(Size.XScale), 1
+
+[State 901]
+type = PlaySnd
+trigger1 = Time = 0
+value = S4,10
+Volumescale = 100
+
+[State 903, EnvShake]
+type = EnvShake
+trigger1 = Time = 0
+time = 48
+ampl = 3
+freq = 80
+
+[State 0, stop]
+type = posset
+triggerall = enemy,AuthorName != "OMEGAPSYCHO-BOSS"
+trigger1 = Time = 0
+y = 20
+
+[State 0, stop]
+type = posset
+trigger1 = pos y >20
+trigger1 = Time = 0
+y = 20
+
+[State 810, SprPriority]
+type = SprPriority
+trigger1 = time = 0
+value = 2
+
+[State 501]
+Type = TargetBind
+Trigger1 = time <10
+Pos = 60,-20
+
+[State 0, stop]
+type = Velset
+trigger1 = time = 0
+x = 0
+y = 0
+
+[State 206, ChangeState]
+type = ChangeState
+trigger1 = Time >= 15
+Value = 12308
+
+;---------------------------------------------------------------------------
+;P2 Mexican Typhoon Light Stomp
+[StateDef 12316]
+type    = A
+movetype= H
+physics = N
+velset = 0,0
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 0
+Time = 9
+Trans = None
+FrameGap = 3
+Length = 15
+PalColor = 0
+PalBright = 90, 90, 121
+PalContrast = 170, 170, 245
+PalAdd = -25, -25, -25
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 9
+Time = 0
+
+[State -2, TargetLifeadd]
+type = Lifeadd
+trigger1 = time = 0
+value = -231
+
+[State 200]
+type = NotHitBy
+trigger1 = Time < 10
+value = SCA
+time = 1
+
+[State 200]
+type = PlayerPush
+trigger1 = Time < 10
+value = 0
+
+[State 200]
+type = ScreenBound
+trigger1 = Time < 10
+value = 1
+movecamera = 0,0
+
+[State 200]
+type = ChangeAnim2
+trigger1 = Time = 0
+value = 12013
+
+[State 200]
+type = PosSet
+trigger1 = AnimElem = 1
+y = 0
+
+[State 200]
+type = VelSet
+trigger1 = Time = 11
+x = -3
+y = -9
+
+[State 200]
+type = VelAdd
+trigger1 = Time > 10
+y = .4
+
+[State 200]
+type = SelfState
+trigger1 = Time > 15
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 5100 ;Hit ground
+
+;------------------------------------------------------------------------------------------
+;Mexican Typhoon Jump End
+[Statedef 12308]
+type    = A
+movetype= A
+physics = N
+juggle  = 1
+velset = -3,-6
+ctrl = 0
+anim = 1207
+sprpriority = 2
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 0
+Time = 35
+Trans = None
+FrameGap = 3
+Length = 15
+PalColor = 0
+PalBright = 90, 90, 121
+PalContrast = 170, 170, 245
+PalAdd = -25, -25, -25
+
+[State 2200]
+Type = AfterImage
+Trigger1 = Time = 35
+Time = 0
+
+[State 1200, 1]
+type = VelAdd
+trigger1 = 1
+y = .3
+
+[State 1200, 2]
+type = ChangeState
+trigger1 = Time > 10
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 52
+

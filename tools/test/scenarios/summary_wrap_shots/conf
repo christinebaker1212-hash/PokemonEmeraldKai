@@ -1,0 +1,9 @@
+# The summary screen's wraparound on screen: INFO, LEFT to the JOURNAL (its one sentence wraps onto a second row: both
+# rows one stripe color), RIGHT back round to INFO, which must look exactly as it did (it used to slide in the EGG
+# layout), then SKILLS and LEFT back to INFO again. check.py compares the INFO page's shots pixel for pixel, the JOURNAL reached by LEFT with the one reached
+# by RIGHT, and the stripes.
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_PARTY=283:12"
+EXPECT_A=("journal: shown")
+CHECK="python3 tools/test/scenarios/summary_wrap_shots/check.py"

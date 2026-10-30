@@ -34,4 +34,26 @@ const u32 gBallPal_Luxury[] = INCGFX_U32("graphics/balls/luxury.png", ".gbapal.l
 const u32 gBallGfx_Premier[] = INCGFX_U32("graphics/balls/premier.png", ".4bpp.lz");
 const u32 gBallPal_Premier[] = INCGFX_U32("graphics/balls/premier.png", ".gbapal.lz");
 
+// Moemon Co-op: the MoeGatcha special balls' own HEARTGOLD / SOULSILVER art (tools/moemon_balls/hgss_balls.py)
+const u32 gBallGfx_Love[] = INCGFX_U32("graphics/balls/love.png", ".4bpp.lz");
+const u32 gBallPal_Love[] = INCGFX_U32("graphics/balls/love.png", ".gbapal.lz");
+const u32 gBallGfx_Friend[] = INCGFX_U32("graphics/balls/friend.png", ".4bpp.lz");
+const u32 gBallPal_Friend[] = INCGFX_U32("graphics/balls/friend.png", ".gbapal.lz");
+const u32 gBallGfx_Fast[] = INCGFX_U32("graphics/balls/fast.png", ".4bpp.lz");
+const u32 gBallPal_Fast[] = INCGFX_U32("graphics/balls/fast.png", ".gbapal.lz");
+const u32 gBallGfx_Level[] = INCGFX_U32("graphics/balls/level.png", ".4bpp.lz");
+const u32 gBallPal_Level[] = INCGFX_U32("graphics/balls/level.png", ".gbapal.lz");
+const u32 gBallGfx_Lure[] = INCGFX_U32("graphics/balls/lure.png", ".4bpp.lz");
+const u32 gBallPal_Lure[] = INCGFX_U32("graphics/balls/lure.png", ".gbapal.lz");
+const u32 gBallGfx_Heavy[] = INCGFX_U32("graphics/balls/heavy.png", ".4bpp.lz");
+const u32 gBallPal_Heavy[] = INCGFX_U32("graphics/balls/heavy.png", ".gbapal.lz");
+const u32 gBallGfx_Moon[] = INCGFX_U32("graphics/balls/moon.png", ".4bpp.lz");
+const u32 gBallPal_Moon[] = INCGFX_U32("graphics/balls/moon.png", ".gbapal.lz");
+const u32 gBallGfx_Heal[] = INCGFX_U32("graphics/balls/heal.png", ".4bpp.lz");
+const u32 gBallPal_Heal[] = INCGFX_U32("graphics/balls/heal.png", ".gbapal.lz");
+const u32 gBallGfx_Dusk[] = INCGFX_U32("graphics/balls/dusk.png", ".4bpp.lz");
+const u32 gBallPal_Dusk[] = INCGFX_U32("graphics/balls/dusk.png", ".gbapal.lz");
+const u32 gBallGfx_Quick[] = INCGFX_U32("graphics/balls/quick.png", ".4bpp.lz");
+const u32 gBallPal_Quick[] = INCGFX_U32("graphics/balls/quick.png", ".gbapal.lz");
+
 const u32 gOpenPokeballGfx[] = INCGFX_U32("graphics/balls/open.png", ".4bpp.lz");

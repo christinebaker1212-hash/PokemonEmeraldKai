@@ -673,6 +673,7 @@ void CB2_MpJoinBattle(void)
     {
         s32 i;
         gBattleMainFunc = BeginBattleIntroDummy;
+        MP_BattleWeather_NewBattle();
         for (i = 0; i < MAX_BATTLERS_COUNT; i++)
         {
             gBattlerControllerFuncs[i] = BattleControllerDummy;
@@ -2036,8 +2037,8 @@ static u8 MpBattleTurboRate(void)
     u8 rate = 0, anim;
     if (MP_FastGeneralAnimRunning())
         return 20;
-    if (gBattleOutcome != 0 && gPaletteFade.active)
-        rate = 6;
+    if (gBattleOutcome != 0 && gPaletteFade.active && !MP_QuickFadeActive())
+        rate = 6;   // (a whole-screen fade is 30% quicker by itself: palette.c)
     else if (MP_SendOutRunning())
         rate = 6;
     // Moemon Co-op: the host's ANIM SPEED for move (and every other) battle animation
@@ -2067,9 +2068,11 @@ static void MpBattleTurbo(void)
     if (gAnimScriptActive && MP_BattleAnimSpeed() != 0 && !MP_SpecialAnimRunning())
     {
         u16 tempo = 256 * (100 + MP_BattleAnimSpeed()) / 100;
+        bool8 MP_LowHpBeepPlaying(void);   // battle_gfx_sfx_util.c: the beep keeps its own tempo
         MpSetSoundTempo(&gMPlayInfo_SE1, tempo);
         MpSetSoundTempo(&gMPlayInfo_SE2, tempo);
-        MpSetSoundTempo(&gMPlayInfo_SE3, tempo);
+        if (!MP_LowHpBeepPlaying())
+            MpSetSoundTempo(&gMPlayInfo_SE3, tempo);
     }
     if (rate == 0)
         return;

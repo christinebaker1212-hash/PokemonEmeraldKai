@@ -1,0 +1,31 @@
+pressuntil A field 5000
+wait 60
+mp textspeed 2
+mp cards starter 0
+mp cards fast
+mp cards open 2
+wait 60
+rendershot r_challenge0
+press A 2
+wait 500
+rendershot r_board
+mp cards win
+wait 200
+mash A 30 20
+wait 60
+mash B 10 20
+wait 60
+mp cards open 2
+wait 60
+rendershot r_challenge1
+press A 2
+wait 400
+mp cards concede
+wait 200
+mash A 10 20
+wait 60
+mp cards open 2
+wait 60
+rendershot r_challenge2
+press B 2
+quit

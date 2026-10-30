@@ -1,0 +1,11 @@
+pressuntil A field 5000
+waitfor online 6000
+mp hp 0 8
+mp teach 0 45
+wait 200
+mp phraseclear 0
+mp battleflag
+waitlog 4000 starting PvP battle
+mash A 100 20
+wait 300
+quit

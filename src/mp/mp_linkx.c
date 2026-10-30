@@ -1,3 +1,4 @@
+#include "mp_version.h"
 // Moemon Co-op: the game's own link features, online with friends.
 //
 //   * Record mixing: TV shows, Secret Bases, the Old Man's songs, Dewford's
@@ -21,6 +22,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "tcg/integration.h"
+#include "tcg/tcg.h"
+#include "ygo/integration.h"
+#include "tt/integration.h"
 #include "mp.h"
 #include "mp_garden.h"
 #include "daycare.h"
@@ -479,6 +484,11 @@ static void UpdateDaycare(void)
     sDcLastMask = mask;
 }
 
+// Dev sessions can still receive an egg without persisting or consuming the
+// main game's pending-egg file.
+static struct Pokemon sDevPendingEgg;
+static bool8 sDevHasPendingEgg, sDevEggTaken;
+
 // The EGG made with a friend's POKéMON waits next to the save ("<save>.coopegg")
 static void EggPath(char *out, size_t size)
 {
@@ -491,7 +501,13 @@ void MP_Linkx_SetPendingEgg(const struct Pokemon *egg, u8 friendId)
     u8 species[POKEMON_NAME_LENGTH + 1];
     FILE *f;
     EggPath(path, sizeof(path));
-    f = fopen(path, "wb");
+    if (MOEMON_DEV_BUILD)
+    {
+        sDevPendingEgg = *egg;
+        sDevHasPendingEgg = TRUE;
+        sDevEggTaken = FALSE;
+    }
+    f = MOEMON_DEV_BUILD ? NULL : fopen(path, "wb");
     if (f)
     {
         fwrite(egg, sizeof(*egg), 1, f);
@@ -512,13 +528,28 @@ bool8 MP_Linkx_TakePendingEgg(struct Pokemon *egg)
     char path[600];
     FILE *f;
     bool8 ok = FALSE;
+    if (MOEMON_DEV_BUILD)
+    {
+        if (sDevHasPendingEgg)
+        {
+            *egg = sDevPendingEgg;
+            sDevHasPendingEgg = FALSE;
+            sDevEggTaken = TRUE;
+            return TRUE;
+        }
+        if (sDevEggTaken)
+            return FALSE;
+    }
     EggPath(path, sizeof(path));
     f = fopen(path, "rb");
     if (!f)
         return FALSE;
     ok = fread(egg, sizeof(*egg), 1, f) == 1;
     fclose(f);
-    remove(path);
+    if (!MOEMON_DEV_BUILD)
+        remove(path);
+    else if (ok)
+        sDevEggTaken = TRUE;
     return ok;
 }
 
@@ -530,7 +561,7 @@ static void CheckPendingEggOnLoad(void)
     char path[600];
     struct Pokemon egg;
     FILE *f;
-    if (strcmp(sCheckedFor, gPlatformSavePath) == 0 || !MP_IsInOverworld())
+    if ((MOEMON_DEV_BUILD && sDevEggTaken) || strcmp(sCheckedFor, gPlatformSavePath) == 0 || !MP_IsInOverworld())
         return;
     snprintf(sCheckedFor, sizeof(sCheckedFor), "%s", gPlatformSavePath);
     if (gSaveBlock1Ptr->daycare.offspringPersonality != 0)
@@ -622,8 +653,13 @@ static void UpdateWorld(void)
 
     // Routes 119/123 weather: everyone follows the leader
     lead = WorldLeader(0);
-    if (lead >= 0 && gSaveBlock1Ptr->weatherCycleStage != sWorld[lead].stage)
+    if (lead >= 0 && gSaveBlock1Ptr->weatherCycleStage != sWorld[lead].stage && sWorld[lead].stage < 4)
+    {
+        void MP_Weather_CycleStageChanged(u8 oldStage);
+        u8 old = gSaveBlock1Ptr->weatherCycleStage;
         gSaveBlock1Ptr->weatherCycleStage = sWorld[lead].stage;
+        MP_Weather_CycleStageChanged(old);   // (the route's sky changes now if it follows the cycle)
+    }
 
     // Latias/Latios: roam where the leader's does
     lead = WorldLeader(2);
@@ -834,7 +870,7 @@ void MP_Linkx_Update(void)
 // CO-OP > BERRY GAMES: BERRY BLENDER, BERRY CRUSH
 
 enum { SC_FRIEND, SC_BERRY, SC_WAIT };
-enum { FR_GOTO, FR_CARD, FR_BASE, FR_BACK, FR_COUNT };
+enum { FR_GOTO, FR_CARD, FR_BASE, FR_CARD_DUEL, FR_CARD_TRADE, FR_BACK, FR_COUNT };
 enum { BG_BLENDER, BG_CRUSH, BG_BACK, BG_COUNT };
 
 static EWRAM_DATA struct
@@ -843,6 +879,7 @@ static EWRAM_DATA struct
     u8 screen;
     u8 friend;
     u16 cursor;
+    u8 game;  // CARD DUEL / CARD TRADE: the game (LEFT / RIGHT): 0 Moemon cards, 1 Yu-Gi-Oh!, 2 Triple Triad
     char note[96];
 } sUi = {0};
 
@@ -867,6 +904,8 @@ static void Draw(void)
             "Fly to the town nearest to them (towns you've been to).",
             "Look at their TRAINER CARD.",
             "Walk into their SECRET BASE, wherever you are.",
+            "Ask them for a card duel; LEFT / RIGHT: which game. Both of you pick a deck.",
+            "Swap a card with them from your CARD CASES; LEFT / RIGHT: which game.",
             "Back to the list of friends.",
         };
         u16 dest = MP_Friends_Destination(sUi.friend);
@@ -884,6 +923,9 @@ static void Draw(void)
         MpUi_RowAscii(FR_GOTO, sUi.cursor == FR_GOTO, "GO TO", dest < MAPSEC_NONE ? right : "-");
         MpUi_RowAscii(FR_CARD, sUi.cursor == FR_CARD, "TRAINER CARD", NULL);
         MpUi_RowAscii(FR_BASE, sUi.cursor == FR_BASE, "VISIT SECRET BASE", NULL);
+        static const char *const games[] = {"MOEMON", "YU-GI-OH!", "TRIAD"};
+        MpUi_RowAscii(FR_CARD_DUEL, sUi.cursor == FR_CARD_DUEL, "CARD DUEL", games[sUi.game]);
+        MpUi_RowAscii(FR_CARD_TRADE, sUi.cursor == FR_CARD_TRADE, "CARD TRADE", games[sUi.game]);
         MpUi_RowAscii(FR_BACK, sUi.cursor == FR_BACK, "BACK", NULL);
         MpUi_End();
         MpUi_HelpAscii(sUi.note[0] ? sUi.note : sHelp[sUi.cursor]);
@@ -941,6 +983,12 @@ static void Task_LinkxUi(u8 taskId);
 
 static void OpenScreen(u8 screen)
 {
+    // CARD DUEL / CARD TRADE start on the game we have cards for (both: the CARD CASE's side used last)
+    const struct YgoCollection *y = Ygo_GetCollection();
+    const struct TtCollection *t = Tt_GetCollection();
+    sUi.game = y->optedIn && (!Tcg_GetCollection()->optedIn || (y->flags & YGO_FLAG_CASE_SIDE));
+    if (t->optedIn && ((t->flags & TT_FLAG_CASE_SIDE) || (!Tcg_GetCollection()->optedIn && !y->optedIn)))
+        sUi.game = 2;
     sUi.screen = screen;
     sUi.cursor = 0;
     sUi.note[0] = 0;
@@ -1052,6 +1100,15 @@ static void Task_LinkxUi(u8 taskId)
         Draw();
         return;
     }
+    if (sUi.screen == SC_FRIEND && (sUi.cursor == FR_CARD_DUEL || sUi.cursor == FR_CARD_TRADE)
+     && JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
+    {
+        sUi.game = (sUi.game + (JOY_NEW(DPAD_RIGHT) ? 1 : 2)) % 3;
+        sUi.note[0] = 0;
+        PlaySE(SE_SELECT);
+        Draw();
+        return;
+    }
     if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON) && sUi.cursor == count - 1))
     {
         PlaySE(SE_SELECT);
@@ -1119,6 +1176,25 @@ static void Task_LinkxUi(u8 taskId)
         }
         CloseUi(taskId);
         MP_Friends_GoTo(who);
+        return;
+    }
+    case FR_CARD_DUEL:
+    case FR_CARD_TRADE:
+    {
+        // Moemon Kai: card duels and trades between friends, both games (src/tcg/tcg_online.c TCG_ASK_*)
+        u8 kind = (sUi.cursor == FR_CARD_DUEL ? 0 : 1) + sUi.game * 2;
+        const char *why = Tcg_CanAskFriend(sUi.friend, kind);
+        if (why)
+        {
+            PlaySE(SE_FAILURE);
+            snprintf(sUi.note, sizeof(sUi.note), "%s", why);
+            break;
+        }
+        {
+            u8 who = sUi.friend;
+            CloseUi(taskId);
+            Tcg_AskFriend(who, kind);
+        }
         return;
     }
     case FR_CARD:
