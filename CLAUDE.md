@@ -255,6 +255,12 @@ Elite Four's and the Champion's can be joined (MP_Coop_JoinTrainerOk; test join_
 
 Also JOHTO and KANTO (1.60.0, Moemon Quetzal's regions capped to Gen 4: docs/REGIONS_PLAN.md, COOP_NOTES "JOHTO and
 KANTO"; src/mp/mp_region.c and "<save>.region", src/qz_specials.c, tools/quetzal_port/; tests region_*).
+Also Gens 5-9 (1.61.0: species 519-1050, moves 468-847, abilities 125-311 as u16, items 508-552, FAIRY; u32 learnsets;
+src/battle_gen59.c with per-move data gGen59Moves and the generic G59 scripts; tools/moemon_gen58, tools/moemon_gen59) and
+the GENERATION setting (3-9, default 3, OPTIONS > GAME and HOST A GAME > GAME RULES, the host's online; mp_region.c MP_Gen_*:
+caps, Quetzal's own Johto / Kanto Pokemon from 5 (gen_modern.py), FAIRY from 6, SEALED Pokemon (species, move or ability past
+it: can't battle, MP_SEALED), later items back to the bag and unusable). COOP_NOTES "Gens 5-9 and GENERATION"; tests
+gen59_moves, gen_seal, region_gens (the harness runs scenarios at GEN 9 unless their conf sets GEN).
 
 Gotchas worth knowing before touching battles:
 - Network link (mp_battle.c): queued blocks move into gBlockRecvBuffer in NetLink_GetBlockReceivedStatus, never in
