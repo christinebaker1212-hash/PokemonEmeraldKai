@@ -80,10 +80,9 @@ int G_TextHeight(const char *text, int width, int font);   /* how tall G_Text wo
 void G_TextAlpha(unsigned alpha);   /* text drawn from now on: 255 solid (set it back after) */
 /* The end of a duel in every card game: YOU WIN! / YOU LOSE... vs. opponent, then how it ended and what it brought */
 void G_ResultScreen(int win, int t, unsigned frame, const char *opponent, const char *reason, const char *result);
-/* its timing in frames: the banner opens (20), a second's pause, the box, a second's pause, its words, then A */
+/* its timing in frames: the banner opens (20), a second's pause, then the box with its words, then A */
 #define G_RESULT_BOX 80
-#define G_RESULT_TEXT 140
-#define G_RESULT_READY 150
+#define G_RESULT_READY 90
 void G_TextAlign(int x, int y, int align, unsigned color, unsigned shadow, const char *text, int font);
 void G_Window(int x, int y, int w, int h);
 void G_Cursor(int x, int y);

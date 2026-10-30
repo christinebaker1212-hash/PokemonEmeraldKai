@@ -1720,8 +1720,6 @@ void G_ResultScreen(int win, int t, unsigned frame, const char *opponent, const 
         if (y + h > 158)
             y = 158 - h;   /* (moves up, at most to just under the banner) */
         G_Window(16, y, 208, h);
-        if (t < G_RESULT_TEXT)
-            return;   /* (the box waits a moment empty, then the quote and the prizes) */
         G_Text(24, y + 5, G_INK, G_INK_SHADOW, reason ? reason : "", 192, TF_SMALL);
         if (extra)
             G_Text(24, y + 5 + lines + 2, 0x3858a0, G_INK_SHADOW, result, 192, TF_SMALL);

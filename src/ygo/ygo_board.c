@@ -191,8 +191,6 @@ static struct
     int timer, settled;
     uint8_t phase, turnPlayer;
     uint16_t turn;
-    int8_t pendPhase;    /* a phase begun whose banner waits for something to happen in it (-1: none) */
-    uint8_t heldL;       /* (L held: quiet chances to chain are asked, so a waiting phase banner shows) */
     float infoFade;      /* the middle line's words about the card: 1 shown, 0 faded while banners play */
     struct Fx fx[FX_MAX];
     /* input */
@@ -582,15 +580,12 @@ static int Present(const struct YgoEvent *e)
         else
             snprintf(text, sizeof(text), "OPPONENT'S TURN");
         Log("Turn %d: %s.", e->value, e->player == B.me ? "your turn" : "the opponent's turn");
-        B.pendPhase = -1;
         return Sweep(text, e->player);
     }
     case YGO_EV_PHASE:
-        /* a phase's banner waits for something to happen in it (Advance: PhaseBanner); one where nothing can is
-           passed without one */
+        /* every phase is shown passing (a chance to chain in the Standby Phase is no longer gone before it's seen) */
         B.phase = (uint8_t)e->value;
-        B.pendPhase = e->value < 6 ? (int8_t)e->value : -1;
-        return 0;
+        return e->value < 6 ? Sweep(sPhaseNames[e->value], B.turnPlayer) : 0;
     case YGO_EV_DRAW:
         if (o >= B.objCount)
             return 0;
@@ -1262,7 +1257,6 @@ void YgoBoard_Begin(const struct YgoDuel *truth, unsigned me, const char *oppone
     memset(&B, 0, sizeof(B));
     B.fast = fast;
     B.active = 1;
-    B.pendPhase = -1;
     B.infoFade = 1;
     B.online = online;
     B.theme = (uint8_t)(online ? YGO_BG_ONLINE : sNextTheme);
@@ -1356,13 +1350,6 @@ void YgoBoard_DebugFocus(int kind, int index)
 /* ------------------------------------------------------------------ */
 /* Step                                                                 */
 /* ------------------------------------------------------------------ */
-static int MyQuestion(void);
-static int PhaseBanner(void)
-{
-    int phase = B.pendPhase;
-    B.pendPhase = -1;
-    return phase >= 0 && phase < 6 ? Sweep(sPhaseNames[phase], B.turnPlayer) : 0;
-}
 static void Advance(void)
 {
     const struct YgoState *s = T();
@@ -1398,28 +1385,14 @@ static void Advance(void)
         B.seq = s->eventSeq - YGO_EVENT_RING;
     while (B.seq < s->eventSeq && B.timer <= 0 && guard++ < 64)
     {
-        const struct YgoEvent *e = YgoDuel_GetEvent(s, B.seq);
-        /* something happens in a phase whose banner waits: the banner first, then this */
-        if (e && B.pendPhase >= 0 && e->type != YGO_EV_PHASE && e->type != YGO_EV_TURN && e->type != YGO_EV_WIN &&
-            e->type != YGO_EV_NONE)
-        {
-            B.timer = PhaseBanner();
-            continue;
-        }
-        if (e && e->type == YGO_EV_WIN)
-            B.pendPhase = -1;
-        B.seq++;
+        const struct YgoEvent *e = YgoDuel_GetEvent(s, B.seq++);
         B.settled = 0;
         if (e)
             B.timer = Present(e);
     }
     if (B.seq >= s->eventSeq && B.timer <= 0 && !B.settled)
         Settle();
-    /* or the duel asks us something in it (a chance to chain that's passed for us is nothing) */
-    if (B.pendPhase >= 0 && B.timer <= 0 && MyQuestion() &&
-        !(B.d->query.type == YGO_Q_CHAIN && !B.heldL && YgoDuel_QuietChance(B.d)))
-        B.timer = PhaseBanner();
-    /* the words about the card fade while a banner plays, and come back when it's our move */
+    /* the words about the card fade while a banner plays, and come back as it ends */
     {
         int banner = 0;
         for (i = 0; i < FX_MAX; i++)
@@ -1427,7 +1400,7 @@ static void Advance(void)
                 banner = 1;
         if (banner)
             B.infoFade = B.infoFade > 0.15f ? B.infoFade - 0.15f : 0;
-        else if (B.infoFade < 1 && (MyQuestion() || B.d->s.over))
+        else if (B.infoFade < 1)
             B.infoFade = B.infoFade < 0.9f ? B.infoFade + 0.1f : 1;
     }
 }
@@ -1691,7 +1664,6 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
     if (!B.active || !B.d)
         return YB_NONE;
     B.frame++;
-    B.heldL = (held & KEY_L) != 0;
     Advance();
     Sprites();
     /* While the duel shows what happened (a draw, an attack, a Tribute Summon, a coin, a monster destroyed...), the
