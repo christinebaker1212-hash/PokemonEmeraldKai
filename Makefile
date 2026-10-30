@@ -430,8 +430,21 @@ $(shell mkdir -p $(SUBDIRS))
 # Pretend rules that are actually flags defer to `make all`
 modern: all
 compare: all
-winwsl: all
-linux: all
+winwsl: all fight-ingest
+linux: all fight-ingest
+
+# Moemon Fight: the VS cabinet's pack goes through ingestion (tools/fight/ingest.py: GBA sound, debug text off, the
+# audits, mugen/processed_assets.json) when a file in mugen/ or the tools is newer than the last run; otherwise this
+# costs one find. Without python3 or ffmpeg the build goes on and says so.
+FIGHT_INGEST_DUE := $(shell [ -f build/fight_ingest.stamp ] && find mugen tools/fight -type f -newer build/fight_ingest.stamp \
+                      ! -name ingestion_log.txt ! -name 'processed_assets.*' ! -name '*.log' ! -path '*__pycache__*' \
+                      2>/dev/null | head -1 || echo first)
+.PHONY: fight-ingest
+fight-ingest:
+ifneq ($(FIGHT_INGEST_DUE),)
+	@mkdir -p build; if python3 tools/fight/ingest.py --quiet; then touch build/fight_ingest.stamp; \
+	else echo "fight ingestion skipped (it needs python3 and ffmpeg): run tools/fight/ingest.py"; fi
+endif
 
 # Other rules
 rom: $(ROM)

@@ -2025,6 +2025,9 @@ Decisions and the as-built record: docs/FIGHT_DECISIONS.md. Where things are:
   pairing CPU against CPU plus a rollback check, via mf_selftest's `audit`; hooks MOEMON_FIGHT_PICK, MOEMON_FIGHT_WATCH,
   MOEMON_FIGHT_WARN), tools/fight/balance_audit.py (docs/FIGHT_BALANCE.md; baseline tools/fight/balance_baseline.json),
   all reading the pack through tools/fight/mugen_files.py. Patterns found: docs/FIGHT_AUDIT.md.
+- Asset ingestion (1.52.0): tools/fight/ingest.py (Makefile fight-ingest runs it when mugen/ changed; record
+  mugen/processed_assets.json, log mugen/ingestion_log.txt, index processed_assets.idx for the game's start check
+  Fight_CheckIngestion); FIGHT_DECISIONS "Asset ingestion"; test tools/fight/test_ingest.sh.
 - `MOEMON_FIGHT_SEED=N` (tests) fixes an online fight's seed, so its picks are the same every run
   (fight_online_lag pins one: with seed 1998331917, a Ryu mirror, the round can run past the test's wait, 1.49.3 too).
 

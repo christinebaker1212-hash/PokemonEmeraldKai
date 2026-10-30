@@ -392,6 +392,18 @@ def main():
             if os.path.isfile(p):
                 st = os.stat(p)
                 idx.append('%d %d %s' % (st.st_size, int(st.st_mtime), os.path.relpath(p, root).replace('\\', '/')))
+    # and every .def in chars/NAME/ and stages/ it looked at (some aren't characters or stages), so the game's check
+    # only reports ones that are new
+    for sub, depth in (('chars', 1), ('stages', 0)):
+        base = os.path.join(root, sub)
+        for dp, dirs, files in os.walk(base):
+            if dp[len(base):].count(os.sep) >= depth:
+                dirs[:] = []
+            for f in files:
+                if f.lower().endswith('.def'):
+                    p = os.path.join(dp, f)
+                    st = os.stat(p)
+                    idx.append('%d %d %s' % (st.st_size, int(st.st_mtime), os.path.relpath(p, root).replace('\\', '/')))
     idx_path = os.path.join(root, 'processed_assets.idx')
     new_idx = '\n'.join(sorted(set(idx))) + '\n'
     if not os.path.exists(idx_path) or open(idx_path).read() != new_idx:

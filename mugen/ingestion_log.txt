@@ -1,0 +1,175 @@
+2026-10-30 03:50:36  ingestion: 41 to process, 0 unchanged, 0 removed
+2026-10-30 03:50:36  char:chars/SSF2X_THAWK/SSF2X_THAWK.def: new
+2026-10-30 03:50:36    repaired: debug text switched off in chars/SSF2X_THAWK/CODE/-2Thawk.cns
+2026-10-30 03:50:36  char:chars/ssf2x_cammy/ssf2x_cammy.def: new
+2026-10-30 03:50:36    repaired: debug text switched off in chars/ssf2x_cammy/option.txt
+2026-10-30 03:50:36  char:chars/ssf2x_chunli/ssf2xchunli.def: new
+2026-10-30 03:50:36    found: anim chars/ssf2x_chunli/char/state.st:49: Explod anim = 93: not in the .air
+2026-10-30 03:50:36    found: anim chars/ssf2x_chunli/char/common.st:449: Statedef 5041: anim 5041 is not in the .air
+2026-10-30 03:50:36    found: anim chars/ssf2x_chunli/char/common.st:456: Explod anim = 93: not in the .air
+2026-10-30 03:50:36    found: sound chars/ssf2x_chunli/char/common.st:466: PlaySnd value = 2,12: not in the .snd
+2026-10-30 03:50:36  char:chars/ssf2x_chunli/ssf2xchunli2.def: new
+2026-10-30 03:50:37    found: anim chars/ssf2x_chunli/char/state.st:49: Explod anim = 93: not in the .air
+2026-10-30 03:50:37    found: anim chars/ssf2x_chunli/char/common.st:449: Statedef 5041: anim 5041 is not in the .air
+2026-10-30 03:50:37    found: anim chars/ssf2x_chunli/char/common.st:456: Explod anim = 93: not in the .air
+2026-10-30 03:50:37    found: sound chars/ssf2x_chunli/char/common.st:466: PlaySnd value = 2,12: not in the .snd
+2026-10-30 03:50:37  char:chars/ssf2x_deejay/ssfdeejay.def: new
+2026-10-30 03:50:37    found: anim chars/ssf2x_deejay/ssfdeejay.cns:138: Statedef 191: anim 190 is not in the .air
+2026-10-30 03:50:37    found: anim chars/ssf2x_deejay/ssfdeejay.cns:144: ChangeAnim value = 190: not in the .air
+2026-10-30 03:50:37  char:chars/ssf2x_dhalsim/ssf2xdhalsim.def: new
+2026-10-30 03:50:37    found: sound chars/ssf2x_dhalsim/char/common.st:189: PlaySnd value = 2,13: not in the .snd
+2026-10-30 03:50:37    found: anim chars/ssf2x_dhalsim/char/action.st:1506: ChangeAnim value = 48: not in the .air
+2026-10-30 03:50:37    found: anim chars/ssf2x_dhalsim/char/tech.st:59: Projectile projremanim = 1004: not in the .air
+2026-10-30 03:50:37  char:chars/ssf2x_dhalsim/ssf2xdhalsim2.def: new
+2026-10-30 03:50:37    found: sound chars/ssf2x_dhalsim/char/common.st:189: PlaySnd value = 2,13: not in the .snd
+2026-10-30 03:50:37    found: anim chars/ssf2x_dhalsim/char/action.st:1506: ChangeAnim value = 48: not in the .air
+2026-10-30 03:50:37    found: anim chars/ssf2x_dhalsim/char/tech.st:59: Projectile projremanim = 1004: not in the .air
+2026-10-30 03:50:37  char:chars/ssf2x_feilong/ssf2x_feilong.def: new
+2026-10-30 03:50:37    repaired: debug text switched off in chars/ssf2x_feilong/option.txt
+2026-10-30 03:50:37  char:chars/ssf2x_gouki/ssf2x_ex shin gouki.def: new
+2026-10-30 03:50:37    repaired: debug text switched off in chars/ssf2x_gouki/gouki.cns
+2026-10-30 03:50:37  char:chars/ssf2x_gouki/ssf2x_gouki(normal).def: new
+2026-10-30 03:50:37  char:chars/ssf2x_gouki/ssf2x_gouki.def: new
+2026-10-30 03:50:38  char:chars/ssf2x_gouki/ssf2x_shin gouki.def: new
+2026-10-30 03:50:38  char:chars/ssf2x_ken/ssf2x_ken.def: new
+2026-10-30 03:50:38    repaired: debug text switched off in chars/ssf2x_ken/option.txt
+2026-10-30 03:50:38  char:chars/ssf2x_ryu/ssf2x_ryu.def: new
+2026-10-30 03:50:38    repaired: debug text switched off in chars/ssf2x_ryu/option.txt
+2026-10-30 03:50:38  char:chars/ssf2x_vega/vega-sf2ce.def: new
+2026-10-30 03:50:38    repaired: debug text switched off in chars/ssf2x_vega/override.cns
+2026-10-30 03:50:38  char:chars/ssf2x_vega/vega-sf2x.def: new
+2026-10-30 03:50:39  core: new
+2026-10-30 03:50:39  stage:stages/sf2-airforce.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 Airforce - Guile Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/sf2-bathhouse.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 Bathhouse - Honda Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/sf2-brazil.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 Brazil - Blanka Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/sf2-castle.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 Raging Demon - Akuma Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/sf2-district.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 District - Chun-Li Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/sf2-england.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 England - Cammy Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/sf2-harbor.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 Harbor - Ken Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/sf2-hongkong.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 Hong Kong - Fei-Long Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/sf2-india.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 India - Dhalsim Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/sf2-jamaica.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 Jamaica - Deejay Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/sf2-mexico.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 Mexico - T.Hawk Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/sf2-suzakucastle dusk.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 Suzaku Castle - Ryu Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/sf2-suzakucastle night.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 Suzaku Castle - Ryu Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/sf2-taverna.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 Taverna - Vega Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/sf2-thailand.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 Thailand - Sagat Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/sf2-thailand2.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 Dictator - M.Bison Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/sf2-ussr.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 USSR - Zangief Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/sf2-vega.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 Taverna - Vega Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/sf2-vegas.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 Las Vegas - Balrog Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/sf2ce-vega.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 Taverna - Vega Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/ssf2-vega.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 Taverna - Vega Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  stage:stages/ssf2x-chunli.def: new
+2026-10-30 03:50:39  stage:stages/ssf2x-dhalsim.def: new
+2026-10-30 03:50:39  stage:stages/ssf2x-gouki.def: new
+2026-10-30 03:50:39    found: its song (sound/SF2 Raging Demon - Akuma Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:50:39  balance audit: 0 likely mistakes, 4 character traits, 94 to check at run time
+2026-10-30 03:52:02  ingestion: 41 to process, 0 unchanged, 0 removed
+2026-10-30 03:52:02  char:chars/SSF2X_THAWK/SSF2X_THAWK.def: the rules or settings changed
+2026-10-30 03:52:03  char:chars/ssf2x_cammy/ssf2x_cammy.def: the rules or settings changed
+2026-10-30 03:52:03  char:chars/ssf2x_chunli/ssf2xchunli.def: the rules or settings changed
+2026-10-30 03:52:03    found: anim chars/ssf2x_chunli/char/state.st:49: Explod anim = 93: not in the .air
+2026-10-30 03:52:03    found: anim chars/ssf2x_chunli/char/common.st:449: Statedef 5041: anim 5041 is not in the .air
+2026-10-30 03:52:03    found: anim chars/ssf2x_chunli/char/common.st:456: Explod anim = 93: not in the .air
+2026-10-30 03:52:03    found: sound chars/ssf2x_chunli/char/common.st:466: PlaySnd value = 2,12: not in the .snd
+2026-10-30 03:52:03  char:chars/ssf2x_chunli/ssf2xchunli2.def: the rules or settings changed
+2026-10-30 03:52:03    found: anim chars/ssf2x_chunli/char/state.st:49: Explod anim = 93: not in the .air
+2026-10-30 03:52:03    found: anim chars/ssf2x_chunli/char/common.st:449: Statedef 5041: anim 5041 is not in the .air
+2026-10-30 03:52:03    found: anim chars/ssf2x_chunli/char/common.st:456: Explod anim = 93: not in the .air
+2026-10-30 03:52:03    found: sound chars/ssf2x_chunli/char/common.st:466: PlaySnd value = 2,12: not in the .snd
+2026-10-30 03:52:03  char:chars/ssf2x_deejay/ssfdeejay.def: the rules or settings changed
+2026-10-30 03:52:03    found: anim chars/ssf2x_deejay/ssfdeejay.cns:138: Statedef 191: anim 190 is not in the .air
+2026-10-30 03:52:03    found: anim chars/ssf2x_deejay/ssfdeejay.cns:144: ChangeAnim value = 190: not in the .air
+2026-10-30 03:52:03  char:chars/ssf2x_dhalsim/ssf2xdhalsim.def: the rules or settings changed
+2026-10-30 03:52:03    found: sound chars/ssf2x_dhalsim/char/common.st:189: PlaySnd value = 2,13: not in the .snd
+2026-10-30 03:52:03    found: anim chars/ssf2x_dhalsim/char/action.st:1506: ChangeAnim value = 48: not in the .air
+2026-10-30 03:52:03    found: anim chars/ssf2x_dhalsim/char/tech.st:59: Projectile projremanim = 1004: not in the .air
+2026-10-30 03:52:03  char:chars/ssf2x_dhalsim/ssf2xdhalsim2.def: the rules or settings changed
+2026-10-30 03:52:03    found: sound chars/ssf2x_dhalsim/char/common.st:189: PlaySnd value = 2,13: not in the .snd
+2026-10-30 03:52:03    found: anim chars/ssf2x_dhalsim/char/action.st:1506: ChangeAnim value = 48: not in the .air
+2026-10-30 03:52:03    found: anim chars/ssf2x_dhalsim/char/tech.st:59: Projectile projremanim = 1004: not in the .air
+2026-10-30 03:52:03  char:chars/ssf2x_feilong/ssf2x_feilong.def: the rules or settings changed
+2026-10-30 03:52:03  char:chars/ssf2x_gouki/ssf2x_ex shin gouki.def: the rules or settings changed
+2026-10-30 03:52:03  char:chars/ssf2x_gouki/ssf2x_gouki(normal).def: the rules or settings changed
+2026-10-30 03:52:04  char:chars/ssf2x_gouki/ssf2x_gouki.def: the rules or settings changed
+2026-10-30 03:52:04  char:chars/ssf2x_gouki/ssf2x_shin gouki.def: the rules or settings changed
+2026-10-30 03:52:04  char:chars/ssf2x_ken/ssf2x_ken.def: the rules or settings changed
+2026-10-30 03:52:04  char:chars/ssf2x_ryu/ssf2x_ryu.def: the rules or settings changed
+2026-10-30 03:52:04  char:chars/ssf2x_vega/vega-sf2ce.def: the rules or settings changed
+2026-10-30 03:52:05  char:chars/ssf2x_vega/vega-sf2x.def: the rules or settings changed
+2026-10-30 03:52:05  core: the rules or settings changed
+2026-10-30 03:52:05  stage:stages/sf2-airforce.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 Airforce - Guile Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/sf2-bathhouse.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 Bathhouse - Honda Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/sf2-brazil.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 Brazil - Blanka Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/sf2-castle.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 Raging Demon - Akuma Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/sf2-district.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 District - Chun-Li Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/sf2-england.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 England - Cammy Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/sf2-harbor.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 Harbor - Ken Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/sf2-hongkong.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 Hong Kong - Fei-Long Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/sf2-india.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 India - Dhalsim Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/sf2-jamaica.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 Jamaica - Deejay Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/sf2-mexico.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 Mexico - T.Hawk Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/sf2-suzakucastle dusk.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 Suzaku Castle - Ryu Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/sf2-suzakucastle night.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 Suzaku Castle - Ryu Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/sf2-taverna.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 Taverna - Vega Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/sf2-thailand.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 Thailand - Sagat Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/sf2-thailand2.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 Dictator - M.Bison Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/sf2-ussr.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 USSR - Zangief Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/sf2-vega.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 Taverna - Vega Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/sf2-vegas.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 Las Vegas - Balrog Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/sf2ce-vega.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 Taverna - Vega Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/ssf2-vega.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 Taverna - Vega Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:05  stage:stages/ssf2x-chunli.def: the rules or settings changed
+2026-10-30 03:52:05  stage:stages/ssf2x-dhalsim.def: the rules or settings changed
+2026-10-30 03:52:05  stage:stages/ssf2x-gouki.def: the rules or settings changed
+2026-10-30 03:52:05    found: its song (sound/SF2 Raging Demon - Akuma Theme.mp3) is missing: the stage plays no music
+2026-10-30 03:52:06  balance audit: 0 likely mistakes, 4 character traits, 94 to check at run time
+2026-10-30 03:54:38  game start: 2 changed, 0 gone, 0 new since the last ingestion (run tools/fight/ingest.py)
+    changed: cabinets.ini
+    changed: stages/ssf2x-dhalsim.def
+2026-10-30 03:57:38  game start: 2 changed, 0 gone, 0 new since the last ingestion (run tools/fight/ingest.py)
+    changed: cabinets.ini
+    changed: stages/ssf2x-dhalsim.def

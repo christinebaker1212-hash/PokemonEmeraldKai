@@ -652,3 +652,182 @@ unsigned int Fight_Ms(void)
 {
     return SDL_GetTicks();
 }
+
+// ---------------------------------------------------------------------------------------------------------------
+// The pack against its ingestion record (tools/fight/ingest.py writes mugen/processed_assets.idx: size, modification
+// time and path of every file the characters, stages and shared files use). At start, on a thread of its own so the
+// game doesn't wait: files changed or gone since, and character / stage .defs the record doesn't know (a pack added
+// by hand), go to mugen/ingestion_log.txt with what to run. Nothing is changed: ingestion itself needs the tools.
+
+#include <sys/stat.h>
+#include <time.h>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <dirent.h>
+#include <strings.h>
+#endif
+
+#define INGEST_MAX 4096
+
+static char sIngestRoot[512];
+static char (*sIngestKnown)[160];
+static int sIngestKnownCount;
+
+static int Ingest_Known(const char *rel)
+{
+    int i;
+    for (i = 0; i < sIngestKnownCount; i++)
+        if (strcmp(sIngestKnown[i], rel) == 0)
+            return 1;
+    return 0;
+}
+
+// The .defs one level down (chars/NAME/*.def) or in the folder itself (stages/*.def) the record lacks
+static void Ingest_NewDefs(const char *sub, int depth, FILE *out, int *count)
+{
+    char dir[700];
+    snprintf(dir, sizeof(dir), "%s%s", sIngestRoot, sub);
+#ifdef _WIN32
+    {
+        char pat[720];
+        WIN32_FIND_DATAA fd;
+        HANDLE h;
+        snprintf(pat, sizeof(pat), "%s/*", dir);
+        h = FindFirstFileA(pat, &fd);
+        if (h == INVALID_HANDLE_VALUE)
+            return;
+        do
+        {
+            char rel[400];
+            const char *n = fd.cFileName;
+            size_t len = strlen(n);
+            if (n[0] == '.')
+                continue;
+            snprintf(rel, sizeof(rel), "%s/%s", sub, n);
+            if ((fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && depth > 0)
+                Ingest_NewDefs(rel, depth - 1, out, count);
+            else if (len > 4 && _stricmp(n + len - 4, ".def") == 0 && !Ingest_Known(rel) && (*count)++ < 20)
+                fprintf(out, "    new: %s\n", rel);
+        } while (FindNextFileA(h, &fd));
+        FindClose(h);
+    }
+#else
+    {
+        DIR *d = opendir(dir);
+        struct dirent *e;
+        if (d == NULL)
+            return;
+        while ((e = readdir(d)) != NULL)
+        {
+            char rel[400], full[1200];
+            struct stat st;
+            size_t len = strlen(e->d_name);
+            if (e->d_name[0] == '.')
+                continue;
+            snprintf(rel, sizeof(rel), "%s/%s", sub, e->d_name);
+            snprintf(full, sizeof(full), "%s%s", sIngestRoot, rel);
+            if (stat(full, &st) != 0)
+                continue;
+            if (S_ISDIR(st.st_mode) && depth > 0)
+                Ingest_NewDefs(rel, depth - 1, out, count);
+            else if (len > 4 && strcasecmp(e->d_name + len - 4, ".def") == 0 && !Ingest_Known(rel) && (*count)++ < 20)
+                fprintf(out, "    new: %s\n", rel);
+        }
+        closedir(d);
+    }
+#endif
+}
+
+static int SDLCALL Ingest_Thread(void *unused)
+{
+    char path[700], line[700], report[4096];
+    FILE *idx, *mem;
+    int changed = 0, missing = 0, fresh = 0;
+    (void)unused;
+    snprintf(path, sizeof(path), "%sprocessed_assets.idx", sIngestRoot);
+    sIngestKnown = calloc(INGEST_MAX, sizeof(*sIngestKnown));
+    if (sIngestKnown == NULL)
+        return 0;
+    mem = tmpfile();
+    if (mem == NULL)
+    {
+        free(sIngestKnown);
+        return 0;
+    }
+    idx = fopen(path, "r");
+    if (idx == NULL)
+    {
+        fprintf(mem, "    no ingestion record (processed_assets.idx)\n");
+        changed = 1;
+    }
+    else
+    {
+        while (fgets(line, sizeof(line), idx))
+        {
+            long long size, mtime;
+            char rel[512], full[1200];
+            struct stat st;
+            line[strcspn(line, "\r\n")] = 0;
+            if (sscanf(line, "%lld %lld %511[^\n]", &size, &mtime, rel) != 3)
+                continue;
+            if (sIngestKnownCount < INGEST_MAX)
+                snprintf(sIngestKnown[sIngestKnownCount++], sizeof(sIngestKnown[0]), "%s", rel);
+            snprintf(full, sizeof(full), "%s%s", sIngestRoot, rel);
+            if (stat(full, &st) != 0)
+            {
+                if (missing++ < 20)
+                    fprintf(mem, "    gone: %s\n", rel);
+            }
+            else if ((long long)st.st_size != size)
+            {
+                // sizes only: unzipping an update sets every file's time (ingestion compares contents)
+                if (changed++ < 20)
+                    fprintf(mem, "    changed: %s\n", rel);
+            }
+        }
+        fclose(idx);
+        Ingest_NewDefs("chars", 1, mem, &fresh);
+        Ingest_NewDefs("stages", 0, mem, &fresh);
+    }
+    if (changed || missing || fresh)
+    {
+        size_t n;
+        FILE *log;
+        time_t now = time(NULL);
+        char when[32];
+        strftime(when, sizeof(when), "%Y-%m-%d %H:%M:%S", localtime(&now));
+        rewind(mem);
+        n = fread(report, 1, sizeof(report) - 1, mem);
+        report[n] = 0;
+        snprintf(path, sizeof(path), "%singestion_log.txt", sIngestRoot);
+        log = fopen(path, "a");
+        if (log != NULL)
+        {
+            fprintf(log, "%s  game start: %d changed, %d gone, %d new since the last ingestion (run "
+                         "tools/fight/ingest.py)\n%s", when, changed, missing, fresh, report);
+            fclose(log);
+        }
+        printf("[fight] the pack changed since its last ingestion: %d changed, %d gone, %d new (mugen/ingestion_log.txt)\n",
+               changed, missing, fresh);
+        fflush(stdout);
+    }
+    fclose(mem);
+    free(sIngestKnown);
+    sIngestKnown = NULL;
+    return 0;
+}
+
+void Fight_CheckIngestion(void)
+{
+    const char *env = getenv("MOEMON_MUGEN_DIR");
+    size_t n;
+    SDL_Thread *t;
+    snprintf(sIngestRoot, sizeof(sIngestRoot), "%s", env != NULL && env[0] ? env : "mugen");
+    n = strlen(sIngestRoot);
+    if (n && sIngestRoot[n - 1] != '/' && sIngestRoot[n - 1] != '\\' && n + 1 < sizeof(sIngestRoot))
+        strcat(sIngestRoot, "/");
+    t = SDL_CreateThread(Ingest_Thread, "fight-ingest", NULL);
+    if (t != NULL)
+        SDL_DetachThread(t);
+}

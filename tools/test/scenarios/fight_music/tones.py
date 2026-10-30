@@ -84,11 +84,20 @@ def check(results):
     # the stage's song is measured and kept under the fighters' voices (mf_mixer.c)
     import re
     log = open(os.path.join(os.path.dirname(results.rstrip('/')), 'fight_music_pack', 'mugen.log'), 'rb').read().decode('latin-1')
-    m = re.search(r"Fighters' voices (-?[\d.]+) dBFS, the stage's song (-?[\d.]+) dBFS", log)
-    if not m:
-        print("no Fighters' voices line in mugen.log")
+    voice_m = re.search(r"Fighters' voices (-?[\d.]+) dBFS", log)
+    # the stage's song: the first song level logged after the fighters' voices (the music thread opens it as the
+    # round starts)
+    song_m = re.search(r"Song level (-?[\d.]+) dBFS, played at x([\d.]+)", log[voice_m.end():]) if voice_m else None
+    if not voice_m or not song_m:
+        print("no Fighters' voices line or no song level after it in mugen.log")
         sys.exit(1)
-    voice, song = float(m.group(1)), float(m.group(2))
+    voice, song = float(voice_m.group(1)), float(song_m.group(1))
+    gain = float(song_m.group(2))
+    # the pack's BGM volume (75%, -2.5 dB) already lowers it; past that the mixer's gain takes it 3 dB under
+    if song - 2.5 > voice - 3 and not gain < 1:
+        print('the song (%.1f dBFS) is played at x%.2f: not kept under the voices (%.1f dBFS)' % (song, gain, voice))
+        sys.exit(1)
+    print('played at x%.2f' % gain)
     print('song %.1f dBFS, voices %.1f dBFS' % (song, voice))
     if not (-14 < song < -6 and -30 < voice < -3):
         print('levels out of range')

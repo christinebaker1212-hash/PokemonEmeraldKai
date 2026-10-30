@@ -11,7 +11,7 @@
 [Statedef -2]
 
 [State -3,Display.de.Info]
-type = DisplayToClipboard
+type = null;DisplayToClipboard ;switched off by ingestion: debug text only
 trigger1 = 1
 text = "WWW.OMEGAPSYCHO.WEBS.COM"
 

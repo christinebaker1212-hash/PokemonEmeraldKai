@@ -1,0 +1,970 @@
+{
+ "assets": {
+  "char:chars/SSF2X_THAWK/SSF2X_THAWK.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "chars/SSF2X_THAWK/CODE/-2Thawk.cns": "c9d2123643eb50a1d38c4f4131a5e274c97e45de",
+    "chars/SSF2X_THAWK/CODE/MOVESThawk.cns": "ff58b741e0ab7bcdec9db5b116881824de11d49a",
+    "chars/SSF2X_THAWK/CODE/THAWK.sff": "c09612b1aa4aaf6b8ae695392786a834b5d54816",
+    "chars/SSF2X_THAWK/CODE/THAWK.snd": "e2c4ff9568269c4d59fef35ba24ec5020161fdb1",
+    "chars/SSF2X_THAWK/CODE/ThrowThawk.cns": "807d44d912ae3b81497cddac2e760220d8d1bdee",
+    "chars/SSF2X_THAWK/CODE/animationThawk.air": "a2ef18e1de8e8ac51cb22215f536ffb9929dcdda",
+    "chars/SSF2X_THAWK/CODE/commandThawk.cmd": "2d0c0aafed1bbeb4f30af85a3c9c727725b305e3",
+    "chars/SSF2X_THAWK/CODE/commonThawk.cns": "a4c38b27911023012ced677825c609b4515433bb",
+    "chars/SSF2X_THAWK/CODE/constantThawk.cns": "62caabda5fa1ab5fd8e53fe925e82c2c6572207c",
+    "chars/SSF2X_THAWK/CODE/statesThawk.cns": "5f9d45e021265408b700d9662a456c34a409e167",
+    "chars/SSF2X_THAWK/SSF2X_THAWK.def": "367ea419d290fbde6d6d35795544a0c52925476c",
+    "chars/SSF2X_THAWK/act/THawk_AMARELLA.act": "196d7eb8ff02659b062fe122ed45a6e7277d0f17",
+    "chars/SSF2X_THAWK/act/THawk_BLACK.act": "e639a34f5124d6144e0a605e872d3091b14f1595",
+    "chars/SSF2X_THAWK/act/THawk_BROWN.act": "794601ed3b866202771c5e07341207e0ed183e55",
+    "chars/SSF2X_THAWK/act/THawk_GOLD.act": "667141063b2d8f6db2f08605d937e205cf460d32",
+    "chars/SSF2X_THAWK/act/THawk_GREEN.act": "69856a1cd6af12b64bff7360030f085ac93ad23d",
+    "chars/SSF2X_THAWK/act/THawk_NewGREEN.act": "ac91d7ac37ac40018dad804d5b30c693306169d6",
+    "chars/SSF2X_THAWK/act/THawk_ORANGE.act": "1ba33b002f79a62dead826a0fed825dc4f0a58de",
+    "chars/SSF2X_THAWK/act/THawk_ORIGINAL.act": "74cfc5319de4a33319f246b80b7bff2a866bf4e3",
+    "chars/SSF2X_THAWK/act/THawk_PINK.act": "6e3d29c43f571009d15d6386eb0122884e715aa2",
+    "chars/SSF2X_THAWK/act/THawk_PURPLE.act": "1c9dac371420849fa368ff1fabc9b0823a1deb64",
+    "chars/SSF2X_THAWK/act/THawk_TURQUESE.act": "c2619c304dfc3c988aa0340d2c56ffce9158154d",
+    "chars/SSF2X_THAWK/act/THawk_WHITE.act": "4d729847e4e7633fa123ac2331c0c3130ed0b727"
+   },
+   "findings": [],
+   "kind": "char",
+   "path": "chars/SSF2X_THAWK/SSF2X_THAWK.def",
+   "processed": "2026-10-30 03:52:03",
+   "proposals": [],
+   "repairs": [
+    "debug text switched off in chars/SSF2X_THAWK/CODE/-2Thawk.cns"
+   ],
+   "rules": 1,
+   "status": "done"
+  },
+  "char:chars/ssf2x_cammy/ssf2x_cammy.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "chars/ssf2x_cammy/act/cammy_1.act": "ea734acb93d96616f00ea43988b1adc9be8bde5b",
+    "chars/ssf2x_cammy/act/cammy_2.act": "405558078b3d861c9a937da6cff5d5cc6c2e5efb",
+    "chars/ssf2x_cammy/act/cammy_3.act": "5b6081c6881b84616fc286ad54fe506349f355ad",
+    "chars/ssf2x_cammy/act/cammy_4.act": "90c15884469d109c92ad30e803df6c4d89a04a70",
+    "chars/ssf2x_cammy/act/cammy_5.act": "b50f84900c1df8713acbd25faf498f5bc7257600",
+    "chars/ssf2x_cammy/act/cammy_6.act": "990d3a6fe146287ffb90c0d5e1f13bc01639209d",
+    "chars/ssf2x_cammy/cammy.air": "eefab4a6b7caf90debee34b2d41078b96699c2b0",
+    "chars/ssf2x_cammy/cammy.cmd": "8072108e7381eadbb771e8f782279fcd7565b96f",
+    "chars/ssf2x_cammy/cammy.cns": "fd63c687d4954958d111e4a37e37da0e243f48f6",
+    "chars/ssf2x_cammy/cammy.sff": "2b2d0306893d2b79dfed4f09a26d8fdcd2d01383",
+    "chars/ssf2x_cammy/cammy.snd": "55b72578e2f028d90ea4e1cf476d8f4d969317c1",
+    "chars/ssf2x_cammy/option.txt": "8e4e7bdc06e327bdb38a2aa235c5abfa75a99e1a",
+    "chars/ssf2x_cammy/ssf2x_cammy.def": "c960a166d1df6ae085fcce822ba008945ddcc69e",
+    "data/common1.cns": "997d8cef7828da6a19736f1595ccc02d71552fa3"
+   },
+   "findings": [],
+   "kind": "char",
+   "path": "chars/ssf2x_cammy/ssf2x_cammy.def",
+   "processed": "2026-10-30 03:52:03",
+   "proposals": [],
+   "repairs": [
+    "debug text switched off in chars/ssf2x_cammy/option.txt"
+   ],
+   "rules": 1,
+   "status": "done"
+  },
+  "char:chars/ssf2x_chunli/ssf2xchunli.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "chars/ssf2x_chunli/char/action.st": "5044d7b1e27b33c670ee3a33c1a03eb72c5f1c93",
+    "chars/ssf2x_chunli/char/chunli.air": "8b3ee5c27bc02dacac96685b19b0042567ce2ebf",
+    "chars/ssf2x_chunli/char/chunli.cmd": "fb14aaa620534273ce1aae293622050c4209d888",
+    "chars/ssf2x_chunli/char/chunli.cns": "7d04983bcfaf4a3d90a5428e6f3adf49f336b8f8",
+    "chars/ssf2x_chunli/char/chunli.sff": "68a8b0f9295ad44aa3aed4224e3b4b61aa6678e8",
+    "chars/ssf2x_chunli/char/chunli.snd": "4ffac781ede98361ed7ad5119f0f006d992aa66c",
+    "chars/ssf2x_chunli/char/color1.act": "e2aa0ac004315dc29e25e6a2e71fca1cd44519e9",
+    "chars/ssf2x_chunli/char/color10.act": "bd0859506047ed7585b11c226f07d0b1478f2c6d",
+    "chars/ssf2x_chunli/char/color2.act": "f9aba24393413b67fc3b348f2db0c5aa7c3ba4c1",
+    "chars/ssf2x_chunli/char/color3.act": "85639f9bfe48b637669b0e99d112fd904e61d1ac",
+    "chars/ssf2x_chunli/char/color4.act": "18acb8d366816d70065308d7f9605eb54c4f67ca",
+    "chars/ssf2x_chunli/char/color5.act": "515f0e9513d6fc31a2cf8c4702870a44c9c65265",
+    "chars/ssf2x_chunli/char/color6.act": "c78bad1590e99b6ab65bc8b95a6690a21e9f5ad3",
+    "chars/ssf2x_chunli/char/color7.act": "831b970d5edd4df18166e87028106b775cb0d1a2",
+    "chars/ssf2x_chunli/char/color8.act": "876cb54ea384fee2005b3ae082e0d360652fe195",
+    "chars/ssf2x_chunli/char/color9.act": "4863337060ae05f0ed651d1f227b018a98785c4c",
+    "chars/ssf2x_chunli/char/common.st": "239efbff493a5a05c1a79117b4c01aba215ddda9",
+    "chars/ssf2x_chunli/char/helper.st": "f0ef0f00bdad71a55e7db3415f738a0f389e5b8f",
+    "chars/ssf2x_chunli/char/state.st": "6058dd82d1f8e97ec3738792f4f2ab80ae734bdf",
+    "chars/ssf2x_chunli/char/tech.st": "a5b257538484ef201d1be30475eadc634632c8e7",
+    "chars/ssf2x_chunli/char/throw.st": "1724d9df089fb44f15dbe14e762e4e8991f296d6",
+    "chars/ssf2x_chunli/ssf2xchunli.def": "237385a6b6397aedd2c166bc3c4e5c5570c05fed",
+    "data/common1.cns": "997d8cef7828da6a19736f1595ccc02d71552fa3"
+   },
+   "findings": [
+    "anim chars/ssf2x_chunli/char/state.st:49: Explod anim = 93: not in the .air",
+    "anim chars/ssf2x_chunli/char/common.st:449: Statedef 5041: anim 5041 is not in the .air",
+    "anim chars/ssf2x_chunli/char/common.st:456: Explod anim = 93: not in the .air",
+    "sound chars/ssf2x_chunli/char/common.st:466: PlaySnd value = 2,12: not in the .snd"
+   ],
+   "kind": "char",
+   "path": "chars/ssf2x_chunli/ssf2xchunli.def",
+   "processed": "2026-10-30 03:52:03",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "char:chars/ssf2x_chunli/ssf2xchunli2.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "chars/ssf2x_chunli/char/action.st": "5044d7b1e27b33c670ee3a33c1a03eb72c5f1c93",
+    "chars/ssf2x_chunli/char/chunli.air": "8b3ee5c27bc02dacac96685b19b0042567ce2ebf",
+    "chars/ssf2x_chunli/char/chunli.cmd": "fb14aaa620534273ce1aae293622050c4209d888",
+    "chars/ssf2x_chunli/char/chunli.sff": "68a8b0f9295ad44aa3aed4224e3b4b61aa6678e8",
+    "chars/ssf2x_chunli/char/chunli.snd": "4ffac781ede98361ed7ad5119f0f006d992aa66c",
+    "chars/ssf2x_chunli/char/chunli2.cns": "e66a0a2115cfa34ec76566bf3ded9235c79702b1",
+    "chars/ssf2x_chunli/char/color1.act": "e2aa0ac004315dc29e25e6a2e71fca1cd44519e9",
+    "chars/ssf2x_chunli/char/color10.act": "bd0859506047ed7585b11c226f07d0b1478f2c6d",
+    "chars/ssf2x_chunli/char/color2.act": "f9aba24393413b67fc3b348f2db0c5aa7c3ba4c1",
+    "chars/ssf2x_chunli/char/color3.act": "85639f9bfe48b637669b0e99d112fd904e61d1ac",
+    "chars/ssf2x_chunli/char/color4.act": "18acb8d366816d70065308d7f9605eb54c4f67ca",
+    "chars/ssf2x_chunli/char/color5.act": "515f0e9513d6fc31a2cf8c4702870a44c9c65265",
+    "chars/ssf2x_chunli/char/color6.act": "c78bad1590e99b6ab65bc8b95a6690a21e9f5ad3",
+    "chars/ssf2x_chunli/char/color7.act": "831b970d5edd4df18166e87028106b775cb0d1a2",
+    "chars/ssf2x_chunli/char/color8.act": "876cb54ea384fee2005b3ae082e0d360652fe195",
+    "chars/ssf2x_chunli/char/color9.act": "4863337060ae05f0ed651d1f227b018a98785c4c",
+    "chars/ssf2x_chunli/char/common.st": "239efbff493a5a05c1a79117b4c01aba215ddda9",
+    "chars/ssf2x_chunli/char/helper.st": "f0ef0f00bdad71a55e7db3415f738a0f389e5b8f",
+    "chars/ssf2x_chunli/char/state.st": "6058dd82d1f8e97ec3738792f4f2ab80ae734bdf",
+    "chars/ssf2x_chunli/char/tech.st": "a5b257538484ef201d1be30475eadc634632c8e7",
+    "chars/ssf2x_chunli/char/throw.st": "1724d9df089fb44f15dbe14e762e4e8991f296d6",
+    "chars/ssf2x_chunli/ssf2xchunli2.def": "cd809df1256c18b098de4ab1346fec7b479f97f4",
+    "data/common1.cns": "997d8cef7828da6a19736f1595ccc02d71552fa3"
+   },
+   "findings": [
+    "anim chars/ssf2x_chunli/char/state.st:49: Explod anim = 93: not in the .air",
+    "anim chars/ssf2x_chunli/char/common.st:449: Statedef 5041: anim 5041 is not in the .air",
+    "anim chars/ssf2x_chunli/char/common.st:456: Explod anim = 93: not in the .air",
+    "sound chars/ssf2x_chunli/char/common.st:466: PlaySnd value = 2,12: not in the .snd"
+   ],
+   "kind": "char",
+   "path": "chars/ssf2x_chunli/ssf2xchunli2.def",
+   "processed": "2026-10-30 03:52:03",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "char:chars/ssf2x_deejay/ssfdeejay.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "chars/ssf2x_deejay/deejay.ACT": "015593993a3fb7385b6def9a23d4f14cb1429143",
+    "chars/ssf2x_deejay/deejay2.ACT": "7e194c8c8cd68d3ae73f618da2f883f24fabaa1d",
+    "chars/ssf2x_deejay/sound.snd": "9d91c620721cbdbb9fa152e94128251d6abbbff8",
+    "chars/ssf2x_deejay/ssfdeejay.air": "e32382d708f46798831314fdce8a1196e5e08603",
+    "chars/ssf2x_deejay/ssfdeejay.cmd": "c0c4b9c95be7be70ade954ccea1a1233a97b83a2",
+    "chars/ssf2x_deejay/ssfdeejay.cns": "721dbf441ea71ff2f51b39f4a305e30746e9c566",
+    "chars/ssf2x_deejay/ssfdeejay.def": "6d25334d6a67bae8dbc5514ea221e5754f47b8b1",
+    "chars/ssf2x_deejay/ssfdeejay.sff": "cc4038568c0b7bdd61e0c395c8b615368d5b2949",
+    "data/common1.cns": "997d8cef7828da6a19736f1595ccc02d71552fa3"
+   },
+   "findings": [
+    "anim chars/ssf2x_deejay/ssfdeejay.cns:138: Statedef 191: anim 190 is not in the .air",
+    "anim chars/ssf2x_deejay/ssfdeejay.cns:144: ChangeAnim value = 190: not in the .air"
+   ],
+   "kind": "char",
+   "path": "chars/ssf2x_deejay/ssfdeejay.def",
+   "processed": "2026-10-30 03:52:03",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "char:chars/ssf2x_dhalsim/ssf2xdhalsim.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "chars/ssf2x_dhalsim/char/action.st": "7cd977c640afa722b6904ea6041a69d021959e39",
+    "chars/ssf2x_dhalsim/char/color1.act": "994850785b948981271b908ffc89566a4ecb605c",
+    "chars/ssf2x_dhalsim/char/color10.act": "fb1da29d83a2baae988b75e1b2c1842f7074865a",
+    "chars/ssf2x_dhalsim/char/color2.act": "ac696d5e56830c79c35283ba3a879f0fcbfa2682",
+    "chars/ssf2x_dhalsim/char/color3.act": "6bba2d490de9ebb90f1a7e077fcfe67936fc3bae",
+    "chars/ssf2x_dhalsim/char/color4.act": "f3aeefd4434755d547c75b16745d20573b733693",
+    "chars/ssf2x_dhalsim/char/color5.act": "43fd7ebf504bfe2fc170e697247d03b096b5e8cb",
+    "chars/ssf2x_dhalsim/char/color6.act": "e6661a8a65539bceae8ad7a3e2cbbf0f64d08ac7",
+    "chars/ssf2x_dhalsim/char/color7.act": "00fcadaca5dfc3d3901ba4ca1005b82329151b96",
+    "chars/ssf2x_dhalsim/char/color8.act": "39754dc64c7f76bfaf3925605533cc074574aaa9",
+    "chars/ssf2x_dhalsim/char/color9.act": "02029ecc54b4ffc77d8f74948dfc6d52bab80873",
+    "chars/ssf2x_dhalsim/char/common.st": "92add7a4c1dfaecb501a3416543d5cafa7356d8b",
+    "chars/ssf2x_dhalsim/char/dhalsim.air": "e2b29c685608491bdfcea97ad969dea7fd79f761",
+    "chars/ssf2x_dhalsim/char/dhalsim.cmd": "d8cb0e727468ff8c787231d09f39080f8d6e1e64",
+    "chars/ssf2x_dhalsim/char/dhalsim.cns": "e590301099b1fa95f5df42b78a7024671e0b0094",
+    "chars/ssf2x_dhalsim/char/dhalsim.sff": "860f559703ca864e1182fdd2347ac654076c517f",
+    "chars/ssf2x_dhalsim/char/dhalsim.snd": "206ef502a605fc9cfddcc8ee7a339c371b7e43d8",
+    "chars/ssf2x_dhalsim/char/helper.st": "1da96babd592597b5a88f59c502fa1e0e637ab10",
+    "chars/ssf2x_dhalsim/char/state.st": "1d8e9079cca0f9c109fb6905644a5ac559cb48ea",
+    "chars/ssf2x_dhalsim/char/tech.st": "f9b1494c79b16effd3c6c14e2a37ab3e647e47cb",
+    "chars/ssf2x_dhalsim/char/throw.st": "2085305f26b40c42f17463a2db79ac73ab7884bc",
+    "chars/ssf2x_dhalsim/ssf2xdhalsim.def": "1798d73c84a74839d017222feb2dbfe013fe382f",
+    "data/common1.cns": "997d8cef7828da6a19736f1595ccc02d71552fa3"
+   },
+   "findings": [
+    "sound chars/ssf2x_dhalsim/char/common.st:189: PlaySnd value = 2,13: not in the .snd",
+    "anim chars/ssf2x_dhalsim/char/action.st:1506: ChangeAnim value = 48: not in the .air",
+    "anim chars/ssf2x_dhalsim/char/tech.st:59: Projectile projremanim = 1004: not in the .air"
+   ],
+   "kind": "char",
+   "path": "chars/ssf2x_dhalsim/ssf2xdhalsim.def",
+   "processed": "2026-10-30 03:52:03",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "char:chars/ssf2x_dhalsim/ssf2xdhalsim2.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "chars/ssf2x_dhalsim/char/action.st": "7cd977c640afa722b6904ea6041a69d021959e39",
+    "chars/ssf2x_dhalsim/char/color1.act": "994850785b948981271b908ffc89566a4ecb605c",
+    "chars/ssf2x_dhalsim/char/color10.act": "fb1da29d83a2baae988b75e1b2c1842f7074865a",
+    "chars/ssf2x_dhalsim/char/color2.act": "ac696d5e56830c79c35283ba3a879f0fcbfa2682",
+    "chars/ssf2x_dhalsim/char/color3.act": "6bba2d490de9ebb90f1a7e077fcfe67936fc3bae",
+    "chars/ssf2x_dhalsim/char/color4.act": "f3aeefd4434755d547c75b16745d20573b733693",
+    "chars/ssf2x_dhalsim/char/color5.act": "43fd7ebf504bfe2fc170e697247d03b096b5e8cb",
+    "chars/ssf2x_dhalsim/char/color6.act": "e6661a8a65539bceae8ad7a3e2cbbf0f64d08ac7",
+    "chars/ssf2x_dhalsim/char/color7.act": "00fcadaca5dfc3d3901ba4ca1005b82329151b96",
+    "chars/ssf2x_dhalsim/char/color8.act": "39754dc64c7f76bfaf3925605533cc074574aaa9",
+    "chars/ssf2x_dhalsim/char/color9.act": "02029ecc54b4ffc77d8f74948dfc6d52bab80873",
+    "chars/ssf2x_dhalsim/char/common.st": "92add7a4c1dfaecb501a3416543d5cafa7356d8b",
+    "chars/ssf2x_dhalsim/char/dhalsim.air": "e2b29c685608491bdfcea97ad969dea7fd79f761",
+    "chars/ssf2x_dhalsim/char/dhalsim.cmd": "d8cb0e727468ff8c787231d09f39080f8d6e1e64",
+    "chars/ssf2x_dhalsim/char/dhalsim.sff": "860f559703ca864e1182fdd2347ac654076c517f",
+    "chars/ssf2x_dhalsim/char/dhalsim.snd": "206ef502a605fc9cfddcc8ee7a339c371b7e43d8",
+    "chars/ssf2x_dhalsim/char/dhalsim2.cns": "099c3f12841b5c8c27062bf98583ca799b1ece60",
+    "chars/ssf2x_dhalsim/char/helper.st": "1da96babd592597b5a88f59c502fa1e0e637ab10",
+    "chars/ssf2x_dhalsim/char/state.st": "1d8e9079cca0f9c109fb6905644a5ac559cb48ea",
+    "chars/ssf2x_dhalsim/char/tech.st": "f9b1494c79b16effd3c6c14e2a37ab3e647e47cb",
+    "chars/ssf2x_dhalsim/char/throw.st": "2085305f26b40c42f17463a2db79ac73ab7884bc",
+    "chars/ssf2x_dhalsim/ssf2xdhalsim2.def": "0bad222d06a5bd74349d2672832216122cbf7596",
+    "data/common1.cns": "997d8cef7828da6a19736f1595ccc02d71552fa3"
+   },
+   "findings": [
+    "sound chars/ssf2x_dhalsim/char/common.st:189: PlaySnd value = 2,13: not in the .snd",
+    "anim chars/ssf2x_dhalsim/char/action.st:1506: ChangeAnim value = 48: not in the .air",
+    "anim chars/ssf2x_dhalsim/char/tech.st:59: Projectile projremanim = 1004: not in the .air"
+   ],
+   "kind": "char",
+   "path": "chars/ssf2x_dhalsim/ssf2xdhalsim2.def",
+   "processed": "2026-10-30 03:52:03",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "char:chars/ssf2x_feilong/ssf2x_feilong.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "chars/ssf2x_feilong/act/feilong_1.act": "c158675c774809afa81288100f00c864ff2bbee6",
+    "chars/ssf2x_feilong/act/feilong_2.act": "6d568e01b1639b91da18003885ae561dd1f8499c",
+    "chars/ssf2x_feilong/act/feilong_3.act": "c191d1dd6145b84d9a32373dd8872b2724299eff",
+    "chars/ssf2x_feilong/act/feilong_4.act": "b474ba96f0b06c785e5e731ddcb158cfb75e79d5",
+    "chars/ssf2x_feilong/act/feilong_5.act": "254608b93d09ea2824a35d312e5c62f1185a75a9",
+    "chars/ssf2x_feilong/act/feilong_6.act": "e01f165a77cc5d686b73bbb226d7abe81d7780dd",
+    "chars/ssf2x_feilong/feilong.air": "c0a52cb6fd6efaf465e0467ab29ed85e0dd6c662",
+    "chars/ssf2x_feilong/feilong.cmd": "eb6a6466286bbc855db221ea2c64a4f3799c7fe2",
+    "chars/ssf2x_feilong/feilong.cns": "1a0d2d371e672db02caa0e72e82f8af453554a41",
+    "chars/ssf2x_feilong/feilong.sff": "4bdc10a698f5479b15ecaa2de360a32c28ddf180",
+    "chars/ssf2x_feilong/feilong.snd": "5efe49750f01e41fe235549876334fb33cffc57e",
+    "chars/ssf2x_feilong/option.txt": "ae5efe70db127f8435ee55dd5bcd1aa9d825e37d",
+    "chars/ssf2x_feilong/ssf2x_feilong.def": "d3613171cb9f992d177654fad2f1515eb7836853",
+    "data/common1.cns": "997d8cef7828da6a19736f1595ccc02d71552fa3"
+   },
+   "findings": [],
+   "kind": "char",
+   "path": "chars/ssf2x_feilong/ssf2x_feilong.def",
+   "processed": "2026-10-30 03:52:03",
+   "proposals": [],
+   "repairs": [
+    "debug text switched off in chars/ssf2x_feilong/option.txt"
+   ],
+   "rules": 1,
+   "status": "done"
+  },
+  "char:chars/ssf2x_gouki/ssf2x_ex shin gouki.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "chars/ssf2x_gouki/AI.txt": "bd8ca1a517edf24084beb3b8eb35fc5f39749f98",
+    "chars/ssf2x_gouki/act/gouki_12.act": "6ac6ba79f6325394174074962ae615f2c5a9a1a3",
+    "chars/ssf2x_gouki/act/gouki_7.act": "33b16fef91cf800910d4f47647c4fbbc07726cc7",
+    "chars/ssf2x_gouki/gouki.air": "0e295a0a8364221230dc3e6ec21e60c2536cb9d9",
+    "chars/ssf2x_gouki/gouki.cmd": "ac1bd57b284207b1c010368465ecf4247ea82711",
+    "chars/ssf2x_gouki/gouki.cns": "070d2511e93714f0584aba19c53372fb3420512e",
+    "chars/ssf2x_gouki/gouki.sff": "bd24563fe3e036ed3707ed6961a2c7183c39b2d6",
+    "chars/ssf2x_gouki/gouki.snd": "9e5321d3f2a64c68ee8aead34b262171a5f334ce",
+    "chars/ssf2x_gouki/option.txt": "f9fe967494257611245827c8f755e1de689f475d",
+    "chars/ssf2x_gouki/ssf2x_ex shin gouki.def": "2ca4feab20ce42121c41b51479d73db08d17ccfb",
+    "data/common1.cns": "997d8cef7828da6a19736f1595ccc02d71552fa3"
+   },
+   "findings": [],
+   "kind": "char",
+   "path": "chars/ssf2x_gouki/ssf2x_ex shin gouki.def",
+   "processed": "2026-10-30 03:52:03",
+   "proposals": [],
+   "repairs": [
+    "debug text switched off in chars/ssf2x_gouki/gouki.cns"
+   ],
+   "rules": 1,
+   "status": "done"
+  },
+  "char:chars/ssf2x_gouki/ssf2x_gouki(normal).def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "chars/ssf2x_gouki/AI.txt": "bd8ca1a517edf24084beb3b8eb35fc5f39749f98",
+    "chars/ssf2x_gouki/act/gouki_1.act": "96869e51b98becb0dc0c9466c75dd8905529dc3b",
+    "chars/ssf2x_gouki/act/gouki_2.act": "7145e5ceb20f5f8054815951bfd66d94baf28a6e",
+    "chars/ssf2x_gouki/act/gouki_3.act": "d7c66b4bf5c8e93ae781b307e8bc574b956901e8",
+    "chars/ssf2x_gouki/act/gouki_4.act": "fc544e1fba5c738250870e0c61eacaa858480e18",
+    "chars/ssf2x_gouki/act/gouki_5.act": "094d9f1a32d6e81093418f4dbbc122b775f75381",
+    "chars/ssf2x_gouki/act/gouki_6.act": "b95293d6c8d32002359f8a9f3cb43e96d49bdc8a",
+    "chars/ssf2x_gouki/gouki.air": "0e295a0a8364221230dc3e6ec21e60c2536cb9d9",
+    "chars/ssf2x_gouki/gouki.cmd": "ac1bd57b284207b1c010368465ecf4247ea82711",
+    "chars/ssf2x_gouki/gouki.cns": "070d2511e93714f0584aba19c53372fb3420512e",
+    "chars/ssf2x_gouki/gouki.sff": "bd24563fe3e036ed3707ed6961a2c7183c39b2d6",
+    "chars/ssf2x_gouki/gouki.snd": "9e5321d3f2a64c68ee8aead34b262171a5f334ce",
+    "chars/ssf2x_gouki/option.txt": "f9fe967494257611245827c8f755e1de689f475d",
+    "chars/ssf2x_gouki/ssf2x_gouki(normal).def": "3849b3cdbefa86baf9205474b266016a46de24b2",
+    "data/common1.cns": "997d8cef7828da6a19736f1595ccc02d71552fa3"
+   },
+   "findings": [],
+   "kind": "char",
+   "path": "chars/ssf2x_gouki/ssf2x_gouki(normal).def",
+   "processed": "2026-10-30 03:52:04",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "char:chars/ssf2x_gouki/ssf2x_gouki.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "chars/ssf2x_gouki/AI.txt": "bd8ca1a517edf24084beb3b8eb35fc5f39749f98",
+    "chars/ssf2x_gouki/act/gouki_1.act": "96869e51b98becb0dc0c9466c75dd8905529dc3b",
+    "chars/ssf2x_gouki/act/gouki_12.act": "6ac6ba79f6325394174074962ae615f2c5a9a1a3",
+    "chars/ssf2x_gouki/act/gouki_2.act": "7145e5ceb20f5f8054815951bfd66d94baf28a6e",
+    "chars/ssf2x_gouki/act/gouki_3.act": "d7c66b4bf5c8e93ae781b307e8bc574b956901e8",
+    "chars/ssf2x_gouki/act/gouki_4.act": "fc544e1fba5c738250870e0c61eacaa858480e18",
+    "chars/ssf2x_gouki/act/gouki_5.act": "094d9f1a32d6e81093418f4dbbc122b775f75381",
+    "chars/ssf2x_gouki/act/gouki_6.act": "b95293d6c8d32002359f8a9f3cb43e96d49bdc8a",
+    "chars/ssf2x_gouki/act/gouki_7.act": "33b16fef91cf800910d4f47647c4fbbc07726cc7",
+    "chars/ssf2x_gouki/gouki.air": "0e295a0a8364221230dc3e6ec21e60c2536cb9d9",
+    "chars/ssf2x_gouki/gouki.cmd": "ac1bd57b284207b1c010368465ecf4247ea82711",
+    "chars/ssf2x_gouki/gouki.cns": "070d2511e93714f0584aba19c53372fb3420512e",
+    "chars/ssf2x_gouki/gouki.sff": "bd24563fe3e036ed3707ed6961a2c7183c39b2d6",
+    "chars/ssf2x_gouki/gouki.snd": "9e5321d3f2a64c68ee8aead34b262171a5f334ce",
+    "chars/ssf2x_gouki/option.txt": "f9fe967494257611245827c8f755e1de689f475d",
+    "chars/ssf2x_gouki/ssf2x_gouki.def": "8e72f174f48d0b420da1267782cca37400e6c95e",
+    "data/common1.cns": "997d8cef7828da6a19736f1595ccc02d71552fa3"
+   },
+   "findings": [],
+   "kind": "char",
+   "path": "chars/ssf2x_gouki/ssf2x_gouki.def",
+   "processed": "2026-10-30 03:52:04",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "char:chars/ssf2x_gouki/ssf2x_shin gouki.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "chars/ssf2x_gouki/AI.txt": "bd8ca1a517edf24084beb3b8eb35fc5f39749f98",
+    "chars/ssf2x_gouki/act/gouki_1.act": "96869e51b98becb0dc0c9466c75dd8905529dc3b",
+    "chars/ssf2x_gouki/act/gouki_2.act": "7145e5ceb20f5f8054815951bfd66d94baf28a6e",
+    "chars/ssf2x_gouki/act/gouki_3.act": "d7c66b4bf5c8e93ae781b307e8bc574b956901e8",
+    "chars/ssf2x_gouki/act/gouki_4.act": "fc544e1fba5c738250870e0c61eacaa858480e18",
+    "chars/ssf2x_gouki/act/gouki_5.act": "094d9f1a32d6e81093418f4dbbc122b775f75381",
+    "chars/ssf2x_gouki/act/gouki_6.act": "b95293d6c8d32002359f8a9f3cb43e96d49bdc8a",
+    "chars/ssf2x_gouki/gouki.air": "0e295a0a8364221230dc3e6ec21e60c2536cb9d9",
+    "chars/ssf2x_gouki/gouki.cmd": "ac1bd57b284207b1c010368465ecf4247ea82711",
+    "chars/ssf2x_gouki/gouki.cns": "070d2511e93714f0584aba19c53372fb3420512e",
+    "chars/ssf2x_gouki/gouki.sff": "bd24563fe3e036ed3707ed6961a2c7183c39b2d6",
+    "chars/ssf2x_gouki/gouki.snd": "9e5321d3f2a64c68ee8aead34b262171a5f334ce",
+    "chars/ssf2x_gouki/option.txt": "f9fe967494257611245827c8f755e1de689f475d",
+    "chars/ssf2x_gouki/ssf2x_shin gouki.def": "9ee17990341bafbdeafa5f30116c7e1201d0e153",
+    "data/common1.cns": "997d8cef7828da6a19736f1595ccc02d71552fa3"
+   },
+   "findings": [],
+   "kind": "char",
+   "path": "chars/ssf2x_gouki/ssf2x_shin gouki.def",
+   "processed": "2026-10-30 03:52:04",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "char:chars/ssf2x_ken/ssf2x_ken.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "chars/ssf2x_ken/act/ken_1.act": "4bee76f4098586314423064ceb7a749f0eb199da",
+    "chars/ssf2x_ken/act/ken_2.act": "4e23f7caf105c309dc0673caf92a98d96f9a330b",
+    "chars/ssf2x_ken/act/ken_3.act": "f3b6360c48d98a1e74899a44471c99b15f890b63",
+    "chars/ssf2x_ken/act/ken_4.act": "c85924df1de1260f9e8fd2459ef64e94f6d4a7d2",
+    "chars/ssf2x_ken/act/ken_5.act": "3a24a49a7c0a0cdc75d57e62b48b3f47e1a0103c",
+    "chars/ssf2x_ken/act/ken_6.act": "e3f3e88255eb124cf4108ae656f867c49d985ac7",
+    "chars/ssf2x_ken/act/ken_7.act": "7ba2f802a8fae01928102a2fbfd401729d4a9354",
+    "chars/ssf2x_ken/act/ken_8.act": "20472c46228d20619ad200daffb9526330b68aaa",
+    "chars/ssf2x_ken/act/ken_9.act": "aedf2b390c1da8c8fe26369dfe6c24138e86a759",
+    "chars/ssf2x_ken/ken.air": "af03d4d9a934d2773c183e0aa7c613b4a80891fa",
+    "chars/ssf2x_ken/ken.cmd": "9ace1b4fb8ee990fe437e8daa2949fa8d1b099ca",
+    "chars/ssf2x_ken/ken.cns": "1027a1cad7f3dfc400ba6ba7655c5ac224cc4b50",
+    "chars/ssf2x_ken/ken.sff": "fca68891c094aac96b67a34a37f6ca374b8aabf5",
+    "chars/ssf2x_ken/ken.snd": "feb8c9ff0945e1f05daef68848276524888a5422",
+    "chars/ssf2x_ken/option.txt": "3d27d0f93150d307a91e357303d0cd1daec36a95",
+    "chars/ssf2x_ken/ssf2x_ken.def": "f0e8fb2429c851e3c61ba4c20d23a12705578bb2",
+    "data/common1.cns": "997d8cef7828da6a19736f1595ccc02d71552fa3"
+   },
+   "findings": [],
+   "kind": "char",
+   "path": "chars/ssf2x_ken/ssf2x_ken.def",
+   "processed": "2026-10-30 03:52:04",
+   "proposals": [],
+   "repairs": [
+    "debug text switched off in chars/ssf2x_ken/option.txt"
+   ],
+   "rules": 1,
+   "status": "done"
+  },
+  "char:chars/ssf2x_ryu/ssf2x_ryu.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "chars/ssf2x_ryu/act/ryu_1.act": "772f07d50e77a7416fdadb8c3ea5a469ec5f5679",
+    "chars/ssf2x_ryu/act/ryu_10.act": "db6fb435fd0a8905f60908da99e70c956a4eed9a",
+    "chars/ssf2x_ryu/act/ryu_11.act": "fe04e1391fb048b55412b1baf1a35f1267b88dc8",
+    "chars/ssf2x_ryu/act/ryu_12.act": "343b143b8461b2e7abe0783ae972bf28bbb13395",
+    "chars/ssf2x_ryu/act/ryu_2.act": "1f0b331a51047b8c94d89f875a1b45fca92ef63b",
+    "chars/ssf2x_ryu/act/ryu_3.act": "6e18c496c8eab151d619397fd5331deff2a2f8d8",
+    "chars/ssf2x_ryu/act/ryu_4.act": "9795e2da8866db525b92c3bf7afa4f41900dabd0",
+    "chars/ssf2x_ryu/act/ryu_5.act": "b29c911b98086d38db075f6d4fb2876669f4e535",
+    "chars/ssf2x_ryu/act/ryu_6.act": "fdc614d2fc9363a335b248d12076a4ab30ade753",
+    "chars/ssf2x_ryu/act/ryu_7.act": "d6aeb2fa460d246a9ccbbafb1e2978fa8acef92f",
+    "chars/ssf2x_ryu/act/ryu_9.act": "3c6658738de834f418056ddc4f8d7f4979eea433",
+    "chars/ssf2x_ryu/option.txt": "dd1336bb782cf60d523c06f4e29eeedaf45b7865",
+    "chars/ssf2x_ryu/ryu.air": "d889bf701c5a4a3e7c76efefc503a07c628ac3cc",
+    "chars/ssf2x_ryu/ryu.cmd": "4146a0f9b45e7dc904f6aa75ffeb5e226715b7f7",
+    "chars/ssf2x_ryu/ryu.cns": "9b29b01cc1adfb6ee3763cd982816187e37e1117",
+    "chars/ssf2x_ryu/ryu.sff": "56343934e0ad60eaa2130f760a2c29e108e8a459",
+    "chars/ssf2x_ryu/ryu.snd": "54243b028d02ea326801b77a550e03408ac2538a",
+    "chars/ssf2x_ryu/ssf2x_ryu.def": "7b3767d00fb4b392600cd07019dde67ed687e37d",
+    "data/common1.cns": "997d8cef7828da6a19736f1595ccc02d71552fa3"
+   },
+   "findings": [],
+   "kind": "char",
+   "path": "chars/ssf2x_ryu/ssf2x_ryu.def",
+   "processed": "2026-10-30 03:52:04",
+   "proposals": [],
+   "repairs": [
+    "debug text switched off in chars/ssf2x_ryu/option.txt"
+   ],
+   "rules": 1,
+   "status": "done"
+  },
+  "char:chars/ssf2x_vega/vega-sf2ce.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "chars/ssf2x_vega/animation.air": "5b41be0eb5cb8482eb77f9a499db648e3b7622fb",
+    "chars/ssf2x_vega/command.cmd": "db4499d35271d76c78689b18d3d2679e2d2bab36",
+    "chars/ssf2x_vega/common.cns": "9c7fa1b5feff45d44fb2cc281a54c4d3e0c9d5f8",
+    "chars/ssf2x_vega/override.cns": "9156c9d9b36dc00909feebfa149030c3565cb04e",
+    "chars/ssf2x_vega/palette/color-snes1.act": "612efeb3237540a897b4f627ee348ae916cc67d2",
+    "chars/ssf2x_vega/palette/color-snes2.act": "69ea330d8d2b6eb1afbd15bed41cd2d21cbff8dc",
+    "chars/ssf2x_vega/palette/color-snes3.act": "b3e1b3eafb8f3bd261f59deafd0e1b50d8ee6e60",
+    "chars/ssf2x_vega/palette/color1.act": "256f60ad3ef2404a421c9d675e79492830c0e328",
+    "chars/ssf2x_vega/palette/color2.act": "a4f69d354db7b79e08318d324de9a6dd95bd59df",
+    "chars/ssf2x_vega/palette/color3.act": "d660ffb0228993497b4477a0f1fcbdc26d6797e8",
+    "chars/ssf2x_vega/sound.snd": "646ff9debb87cdaf4bd2d702306c6e62704c77ff",
+    "chars/ssf2x_vega/sprite.sff": "8a1cdf44da646b977e966dd9411dfbc411141228",
+    "chars/ssf2x_vega/states.cns": "78cb8cb0705a4127594019b7ae807cbca1f2eb66",
+    "chars/ssf2x_vega/vega-sf2ce.def": "cacc7e05d51db198af57fe26e627568d83f76113",
+    "chars/ssf2x_vega/winquote.cns": "646f73c6b13de77b44379091e3ee82e2e316853b",
+    "data/common1.cns": "997d8cef7828da6a19736f1595ccc02d71552fa3"
+   },
+   "findings": [],
+   "kind": "char",
+   "path": "chars/ssf2x_vega/vega-sf2ce.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [
+    "debug text switched off in chars/ssf2x_vega/override.cns"
+   ],
+   "rules": 1,
+   "status": "done"
+  },
+  "char:chars/ssf2x_vega/vega-sf2x.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "chars/ssf2x_vega/animation.air": "5b41be0eb5cb8482eb77f9a499db648e3b7622fb",
+    "chars/ssf2x_vega/command.cmd": "db4499d35271d76c78689b18d3d2679e2d2bab36",
+    "chars/ssf2x_vega/common.cns": "9c7fa1b5feff45d44fb2cc281a54c4d3e0c9d5f8",
+    "chars/ssf2x_vega/override.cns": "9156c9d9b36dc00909feebfa149030c3565cb04e",
+    "chars/ssf2x_vega/sound.snd": "646ff9debb87cdaf4bd2d702306c6e62704c77ff",
+    "chars/ssf2x_vega/sprite2.sff": "86cffb475ed1114672ac36e972791989a91df45d",
+    "chars/ssf2x_vega/states.cns": "78cb8cb0705a4127594019b7ae807cbca1f2eb66",
+    "chars/ssf2x_vega/vega-sf2x.def": "99540d6922e55a021098e55cc7a8fea44f083f1e",
+    "chars/ssf2x_vega/winquote.cns": "646f73c6b13de77b44379091e3ee82e2e316853b",
+    "data/common1.cns": "997d8cef7828da6a19736f1595ccc02d71552fa3"
+   },
+   "findings": [],
+   "kind": "char",
+   "path": "chars/ssf2x_vega/vega-sf2x.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "core": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "STREETFIGHTER-EX-PLUS/FNT/SFEX-CONTINUE.fnt": "a6433343746d5d9e8e458033162ccc4d384b3ff0",
+    "STREETFIGHTER-EX-PLUS/FNT/SFEX-FRONTEND.fnt": "1a3b964c151a8154f30d8433627c7b6bb968d68a",
+    "STREETFIGHTER-EX-PLUS/FNT/SFEX-LBCOMBO.fnt": "e80503f8b60b2c1c8fc85fd037ea9314fb7dc576",
+    "STREETFIGHTER-EX-PLUS/FNT/SFEX-LBNAME.fnt": "d53e014126c4da1a23ecb99ca49bfb737eaafbe0",
+    "STREETFIGHTER-EX-PLUS/FNT/SFEX-LBTIMER.fnt": "54d63b74ac5b8348e544ca058be6037c326f1113",
+    "STREETFIGHTER-EX-PLUS/FNT/SFEX-MENU.fnt": "e80503f8b60b2c1c8fc85fd037ea9314fb7dc576",
+    "STREETFIGHTER-EX-PLUS/FNT/SFEX-NAME.fnt": "f5eaceb27be344390840126abfe2a2fd87119c7b",
+    "STREETFIGHTER-EX-PLUS/FNT/SFEX-NAMELG.fnt": "5e8d4379882a69cc4f3a10f40e7a8490538a35f2",
+    "STREETFIGHTER-EX-PLUS/FNT/SFEX-NAMESM.fnt": "1ba1e84cce2074657fcb921847b8b1e454c1cc19",
+    "STREETFIGHTER-EX-PLUS/FNT/SFEX-WINNER.fnt": "d83b6ce3ae235e54661a8aa3521ffcebf6368f83",
+    "STREETFIGHTER-EX-PLUS/SFEX-FIGHT.def": "9585c55b9ee9456323fcda38a7c17d2d3cb80b13",
+    "STREETFIGHTER-EX-PLUS/SFEX-FIGHT.sff": "c1c5ae2bb669c318481b8bb56f77d8f472b5eefd",
+    "STREETFIGHTER-EX-PLUS/SFEX-FIGHT.snd": "38e0bff233855e355505bf21cafd814645847993",
+    "STREETFIGHTER-EX-PLUS/SFEX-SELECT.def": "8d89a7484a2a2f1c32094d080a9d4800e572eba6",
+    "STREETFIGHTER-EX-PLUS/SFEX-SYSTEM.def": "62377451d4a692f2726df90423ceaf0f85a99d6a",
+    "STREETFIGHTER-EX-PLUS/SFEX-SYSTEM.sff": "6adcb4598e95d4ab12ef8f2a3afe5d33b49ba69f",
+    "STREETFIGHTER-EX-PLUS/SFEX-SYSTEM.snd": "9007e356f954d6ead470c338cd12f919f5a0b323",
+    "cabinets.ini": "2cd24c680fecc444bbbcbf169bdb890a1eceb091",
+    "data/common.snd": "159c109bfe7436d26e652f122d7c1a814296ef41",
+    "data/fightfx.air": "fd78b27d5a4c9f0cf02fb77eba4082b9b531ce59",
+    "data/fightfx.sff": "ce8e6aa9c5f2341051216ef35f56d43dd7cb97a0",
+    "data/mugen.cfg": "959edf61cfa540aa2e62241b4b85c24f719598ef"
+   },
+   "findings": [],
+   "kind": "core",
+   "path": "STREETFIGHTER-EX-PLUS/SFEX-SYSTEM.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/sf2-airforce.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/sf2-airforce.def": "62bc2903b6cd5cbd1060f660bf656048d8ae6d6b",
+    "stages/sf2-airforce.sff": "5938d7cb9f0ccacde61cbe114eac02f80375cf83"
+   },
+   "findings": [
+    "its song (sound/SF2 Airforce - Guile Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/sf2-airforce.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/sf2-bathhouse.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/sf2-bathhouse.def": "9614e7b4fd26598610b801a76ef06528e236ec94",
+    "stages/sf2-bathhouse.sff": "83d58e90d0caa3410615b126696f31b09a0c430a"
+   },
+   "findings": [
+    "its song (sound/SF2 Bathhouse - Honda Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/sf2-bathhouse.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/sf2-brazil.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/sf2-brazil.def": "ef1ca64930b92bbd1e95024436f60a7837809d2d",
+    "stages/sf2-brazil.sff": "cfc1abf835d3aa7255c528c90b2081ada6db9c18"
+   },
+   "findings": [
+    "its song (sound/SF2 Brazil - Blanka Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/sf2-brazil.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/sf2-castle.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/sf2-castle.def": "2b36181051e6023fda77a9bd21cd9991c40e83ac",
+    "stages/sf2-castle.sff": "10a3b048eed85cb45752a97c6873af45427a5d48"
+   },
+   "findings": [
+    "its song (sound/SF2 Raging Demon - Akuma Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/sf2-castle.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/sf2-district.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/sf2-district.def": "bcaf5d6032a368a1be0f1c881ff77e9d3ab6e572",
+    "stages/sf2-district.sff": "ccf315b0b373e88c1ff8b7a143d798e4b131792e"
+   },
+   "findings": [
+    "its song (sound/SF2 District - Chun-Li Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/sf2-district.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/sf2-england.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/sf2-england.def": "fa8250a630bcdf7bbf1d3853766d2c158c8a4b43",
+    "stages/sf2-england.sff": "079f06d271cb6bc14b244ce33c183e064ba71b17"
+   },
+   "findings": [
+    "its song (sound/SF2 England - Cammy Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/sf2-england.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/sf2-harbor.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/sf2-harbor.def": "b02eca02864ea854230058349424ecb094685de0",
+    "stages/sf2-harbor.sff": "5bf6e8ff96556a873c0ff15e5b089c9e749db1bc"
+   },
+   "findings": [
+    "its song (sound/SF2 Harbor - Ken Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/sf2-harbor.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/sf2-hongkong.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/sf2-hongkong.def": "cff3996b1725087f8fa4767a2865e028332401ce",
+    "stages/sf2-hongkong.sff": "2aa2f8f063d1e62c2ac3bbc5acaf3f14088fbe6c"
+   },
+   "findings": [
+    "its song (sound/SF2 Hong Kong - Fei-Long Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/sf2-hongkong.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/sf2-india.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/sf2-india.def": "9364489dad6d4068c9e38faeb4724b03655b4085",
+    "stages/sf2-india.sff": "5b9cc6e8d9017064bb13a1ff54d01a3c046ba3c6"
+   },
+   "findings": [
+    "its song (sound/SF2 India - Dhalsim Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/sf2-india.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/sf2-jamaica.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/sf2-jamaica.def": "3a3032f1ee9bde0351b66addf15d5df0ba2a4159",
+    "stages/sf2-jamaica.sff": "00aa6cddef0df53dcc724a4020efeb2a53a91a96"
+   },
+   "findings": [
+    "its song (sound/SF2 Jamaica - Deejay Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/sf2-jamaica.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/sf2-mexico.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/sf2-mexico.def": "e5f117bc6e384147721ddab1cb23f8e630955135",
+    "stages/sf2-mexico.sff": "b515ec6b04a14d2cf89fe35dc37cb32e8b2345cd"
+   },
+   "findings": [
+    "its song (sound/SF2 Mexico - T.Hawk Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/sf2-mexico.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/sf2-suzakucastle dusk.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/sf2-suzakucastle dusk.def": "2a9b7776c31d5eb7662a0b1c293328fc6922dcaf",
+    "stages/sf2-suzakucastle dusk.sff": "a817db6baf34656540f0e0f7e549d7457a5f6b16"
+   },
+   "findings": [
+    "its song (sound/SF2 Suzaku Castle - Ryu Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/sf2-suzakucastle dusk.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/sf2-suzakucastle night.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/sf2-suzakucastle night.def": "d79524d37791905b1d9511f1d777c87479740339",
+    "stages/sf2-suzakucastle night.sff": "7c395e758280a31810e86482e6cb6c35ea502cb8"
+   },
+   "findings": [
+    "its song (sound/SF2 Suzaku Castle - Ryu Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/sf2-suzakucastle night.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/sf2-taverna.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/sf2-taverna.def": "612d81e7c097ae366f74dd66edaf203e36d7370c",
+    "stages/sf2-taverna.sff": "abcc2fad96fd2c42337922f5bf5fc77df5456e03"
+   },
+   "findings": [
+    "its song (sound/SF2 Taverna - Vega Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/sf2-taverna.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/sf2-thailand.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/sf2-thailand.def": "c195e28e4d8367c54e9227bdde47a50a7715d95e",
+    "stages/sf2-thailand.sff": "19ffda1bdfe05eb3cbc92fff424775746d1e2fb4"
+   },
+   "findings": [
+    "its song (sound/SF2 Thailand - Sagat Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/sf2-thailand.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/sf2-thailand2.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/sf2-thailand2.def": "fead8a09d20737df7bc711cc7d74c0e9e9c5d0d8",
+    "stages/sf2-thailand2.sff": "036142f2c1d5f41365252c6c2396d8491769ac4e"
+   },
+   "findings": [
+    "its song (sound/SF2 Dictator - M.Bison Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/sf2-thailand2.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/sf2-ussr.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/sf2-ussr.def": "22cc1cceacbb7cc107cd9f74354116e68812d18f",
+    "stages/sf2-ussr.sff": "53d8013c2b0070d208ac357c4c3ddba138c33c9d"
+   },
+   "findings": [
+    "its song (sound/SF2 USSR - Zangief Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/sf2-ussr.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/sf2-vega.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/sf2-vega.def": "f1bc60f8a528b9d079d4db4ef511f4b3f0c94965",
+    "stages/sf2-vega.sff": "d2c6ab49c6dd37b7ee19db6dde401d9dbf296b15"
+   },
+   "findings": [
+    "its song (sound/SF2 Taverna - Vega Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/sf2-vega.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/sf2-vegas.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/sf2-vegas.def": "2a160181007f047ea5ef531b21610f16c1103fbf",
+    "stages/sf2-vegas.sff": "4cf6fcad0c2ae84a9a44e4323fdd1e538bb67536"
+   },
+   "findings": [
+    "its song (sound/SF2 Las Vegas - Balrog Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/sf2-vegas.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/sf2ce-vega.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/sf2ce-vega.def": "989ce927d1e9912a30f6cf683e05b73ba19552af",
+    "stages/sf2ce-vega.sff": "b773b4fdea61cf23ccdf9a7f0feb3677a2a052e0"
+   },
+   "findings": [
+    "its song (sound/SF2 Taverna - Vega Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/sf2ce-vega.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/ssf2-vega.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/ssf2-vega.def": "28a68114f98f7b2cac0eac0fe114ff7255229d69",
+    "stages/ssf2-vega.sff": "dda65d8023db10ad3030391028820c1874f6e3ee"
+   },
+   "findings": [
+    "its song (sound/SF2 Taverna - Vega Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/ssf2-vega.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/ssf2x-chunli.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "sound/ssf2x-chunli.ogg": "ea212332e313e9dd4675d78f4b064e8fe3aa39a6",
+    "stages/ssf2x-chunli.def": "352bdaaf28222b81220a0a4d9a029ba02fe92d60",
+    "stages/ssf2x-chunli.sff": "dcd019255739d2989ada28c6b67d2db92472e26d"
+   },
+   "findings": [],
+   "kind": "stage",
+   "path": "stages/ssf2x-chunli.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/ssf2x-dhalsim.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "sound/ssf2x-dhalsim.ogg": "5f8d206abb0a528e40650ece6cab3db879bc3e29",
+    "stages/ssf2x-dhalsim.def": "86ba5bce1aea758a6d4cca228b565492c41365ba",
+    "stages/ssf2x-dhalsim.sff": "5b9cc6e8d9017064bb13a1ff54d01a3c046ba3c6"
+   },
+   "findings": [],
+   "kind": "stage",
+   "path": "stages/ssf2x-dhalsim.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  },
+  "stage:stages/ssf2x-gouki.def": {
+   "config": "6babd1d87d127c2d",
+   "deps": {
+    "stages/ssf2x-gouki.def": "9566de13293b8f09dc54b4d7ab0b4a072a12b0e5",
+    "stages/ssf2x-gouki.sff": "036142f2c1d5f41365252c6c2396d8491769ac4e"
+   },
+   "findings": [
+    "its song (sound/SF2 Raging Demon - Akuma Theme.mp3) is missing: the stage plays no music"
+   ],
+   "kind": "stage",
+   "path": "stages/ssf2x-gouki.def",
+   "processed": "2026-10-30 03:52:05",
+   "proposals": [],
+   "repairs": [],
+   "rules": 1,
+   "status": "done"
+  }
+ },
+ "balance": {
+  "counts": {
+   "mistake": 0,
+   "runtime": 94,
+   "trait": 4
+  },
+  "mistakes": [],
+  "when": "2026-10-30 03:52:06"
+ },
+ "rules": 1
+}

@@ -169,6 +169,7 @@ int main(int argc, char **argv)
         if (!sTestMode)
             Gamepad_Init();
     }
+    Fight_CheckIngestion();   // Moemon Fight: on a thread of its own, no wait
 
     // Do not even open/create a save until channel selection and relaunch finish.
     ReadSaveFile(gPlatformSavePath);

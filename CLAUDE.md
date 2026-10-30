@@ -214,7 +214,8 @@ region + the engine's globals section), the pack check by file hashes, desync re
 BUTTONS; content in mugen/ (its sounds GBA sound by tools/fight/gba_audio.py; a stage's song kept under the voices by
 mf_mixer.c); sprites area-resampled (fight/compat/mf_softscale.c) and the 480x320 picture shown through display.c's
 own scaling and filters; docs/FIGHT_DECISIONS.md and COOP_NOTES "The VS cabinet"; tests fight_*, tools/fight/test_softscale.c. Character and
-balance audits: tools/fight/check_chars.py, audit_chars.sh, balance_audit.py (docs/FIGHT_AUDIT.md, docs/FIGHT_BALANCE.md).
+balance audits: tools/fight/check_chars.py, audit_chars.sh, balance_audit.py (docs/FIGHT_AUDIT.md, docs/FIGHT_BALANCE.md); asset
+ingestion tools/fight/ingest.py (run by the build when mugen/ changed; mugen/processed_assets.json, ingestion_log.txt).
 
 Also the DANCE machine on the GAME CENTER's 3F (a DDR EXTREME rhythm game: src/rhythm/, include/rhythm.h, src/mp/mp_rhythm.c;
 StepMania's .sm / .ssc read by rh_chart.c, judged by Beware's EXTREME rules in rh_play.c; drawn into the GBA picture by

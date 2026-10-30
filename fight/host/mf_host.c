@@ -18,6 +18,7 @@
 #ifndef _WIN32
 #include <dirent.h>
 #include <strings.h>
+#include <math.h>
 #endif
 
 #include "mugen.h"
@@ -587,6 +588,15 @@ static void Host_PushButtons(const unsigned short buttons[2])
  * next frame with its buttons */
 void MfHost_FrameEnd(void)
 {
+    /* Moemon Fight: each song's level and the gain against the voices, logged here on the engine thread once the
+     * music thread has opened it (it logs nothing itself: its log calls raced the engine's) */
+    static int logged_opens;
+    if (MfMix_MusicOpens() != logged_opens) {
+        double level = MfMix_MusicLevel();
+        logged_opens = MfMix_MusicOpens();
+        Log_Printf("Song level %.1f dBFS, played at x%.2f\n", level > 0.0 ? 20.0 * log10(level) : -99.0,
+                   MfMix_MusicGain());
+    }
     MfCoro_Yield();
 
     sClock += g_timerFrameTicks > 0 ? g_timerFrameTicks : HOST_CLOCK_FREQ / 60;

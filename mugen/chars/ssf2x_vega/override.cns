@@ -1086,7 +1086,7 @@ value = 2
 
 ;----- Display -----
 [State -2, Variables]
-type = DisplayToClipboard
+type = null;DisplayToClipboard ;switched off by ingestion: debug text only
 trigger1 = 1
 text = "Hits: %d/%d \t Dizzy Falling: %d \nWin: %d \t Lose: %d"
 params = Var(7), Var(8), Var(9), Var(41), Var(42)

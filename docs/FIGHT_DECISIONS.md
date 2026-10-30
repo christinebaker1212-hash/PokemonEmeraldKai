@@ -120,6 +120,37 @@ Where the plan below changed on the way:
   `fight_buttons`, `fight_packs`, `fight_packs_core`, `fight_resync` (tools/test/README.md), and the
   engine's own `tools/fight/build_linux.sh` self test (`WIN=1`: under Wine).
 
+## Asset ingestion (1.52.0)
+- Answers left to judgement (#54, #55):
+  - where it runs: the build (Makefile `fight-ingest`, part of `make linux` / `make winwsl`, so the release
+    workflow runs it too) whenever a file in mugen/ or tools/fight/ is newer than the last run, plus a check at game
+    start;
+  - in place or copies: in place, in mugen/, with atomic writes. Every repair is safe to repeat, and git holds the
+    originals;
+  - where the record and log live: `mugen/processed_assets.json` and `mugen/ingestion_log.txt`, next to the pack
+    they describe, so they travel with it. `mugen/processed_assets.idx` is the game's quick index.
+- `tools/fight/ingest.py`:
+  - finds the characters (the select list, plus any character .def in chars/), the stages (stages/*.def and the
+    ones named) and the shared files, with each one's dependencies;
+  - processes an asset when it is new, when a dependency's content changed (SHA-1), when it is marked in progress
+    (an interrupted run), or when the rules (RULES_VERSION) or tools and settings (a hash of the tools and
+    balance_baseline.json) changed;
+  - drops removed assets from the record;
+  - logs everything; `--force` processes everything again, `--check` changes nothing.
+- What it applies by itself (keeps behaviour): GBA sound (gba_audio.py) and debug-text controllers in states
+  -3..-1 switched off. The checks it runs: check_chars.py, stage validation, and the roster's balance audit when a
+  character changed. What waits for `--apply-proposals`: a ChangeState / TargetState to a missing state where one
+  state of the same block of ten exists (a likely typo). Balance changes are only reported.
+- Game start (fight_platform.c Fight_CheckIngestion, a detached thread, so start-up doesn't wait): compares
+  file sizes with the index (times aren't compared, because unzipping an update resets them) and looks for .defs
+  the index lacks. Differences go to ingestion_log.txt ("game start: N changed, M gone, K new ... run
+  tools/fight/ingest.py") and to stdout. It changes nothing.
+- First run on the shipped pack: 41 assets. Debug text was switched off in 7 characters. Stage findings: 17 stages
+  name songs that aren't shipped. Balance: 0 likely mistakes.
+- Tests: tools/fight/test_ingest.sh (first run, nothing to do, a changed file rechecks only its character, a new
+  character, a removed stage, --force without repeated repairs, an interrupted run and its resumption, a proposal
+  listed and then applied).
+
 ## Pixels: resampled sprites, and the game's own display (1.50.0)
 - Asked: rewrite the scaling (not the same algorithms) to fix distortion, uneven pixel stretching and sprite
   shearing; show the fight inside the game's display so its scaling, pixel grid and spectating apply; keep the
@@ -189,9 +220,10 @@ Where the plan below changed on the way:
   music plays as it is.
 - Why measured at run time, not written into the files: players drop their own songs into mugen/sound/
   (17 stage songs aren't shipped), and the cap has to hold for those too. The measurement runs on the
-  music thread and isn't fight state; the engine thread logs both levels and the gain when the match
-  loads (`Fighters' voices ... dBFS, the stage's song ... dBFS` in mugen.log; nothing is logged from the
-  music thread, whose log calls raced the engine's).
+  music thread and isn't fight state. The engine thread logs the voices when the match loads (`Fighters'
+  voices ... dBFS`) and each song's level and gain once the music thread has opened it, at the next frame's end
+  (`Song level ... dBFS, played at x...`, mf_host.c MfHost_FrameEnd). Nothing is logged from the music thread,
+  whose log calls raced the engine's, and the stage's song often opens only as the round starts.
 - Shipped: the voices measure -10 to -5 dBFS (75th percentile), the two stage songs -7.4 and -8.9 dBFS:
   both were at or over the voices before.
 - Test: `fight_music` also checks the two levels in mugen.log.

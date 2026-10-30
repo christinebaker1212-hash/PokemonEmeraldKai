@@ -18522,7 +18522,7 @@ var(52) = helper(10010),var(1)
 
 ;---------------------------------------------------------------------------
 [State -2, クリップボード]
-type = DisplayToClipboard
+type = null;DisplayToClipboard ;switched off by ingestion: debug text only
 trigger1 = 1
 text = "Body-Distance X=%d,Y=%d  Velocity X=%f,Y=%f \n" ;Cancel=%d, Throw=%d, Button=%d, 
 params = floor(P2BodyDist X),floor(P2bodyDist Y),(Vel X),(Vel Y)
@@ -18534,7 +18534,7 @@ text = "var(20)=%d,var(21)=%d var(22)=%d,var(23)=%d var(24)=%d \n"
 params = var(20),var(21),var(22),var(23),var(24)
 
 [State -2, クリップボード（追加専用）]
-type = AppendToClipboard
+type = null;AppendToClipboard ;switched off by ingestion: debug text only
 trigger1 = 1
 text = "var(46) = %d var(8) = %d var(11) = %d RecoverTime = %d  \n"
 params = var(46),var(8),var(11),(enemynear,GetHitVar(RecoverTime))

@@ -1489,6 +1489,9 @@ FIGHTER EX PLUS screen with SUPER STREET FIGHTER II X characters).
                   names). mugen\cabinets.ini has the rules: rounds, life,
                   round time, speed, which stages. Online, the rules of the
                   player who was challenged are used.
+                  When the game starts it notes in mugen\ingestion_log.txt
+                  any fighter, stage or file added or changed since the pack
+                  was last checked, so you can see what is new.
 
 BATTLE SIMULATOR
 ----------------

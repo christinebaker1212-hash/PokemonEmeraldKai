@@ -84,8 +84,6 @@ static PersistVars *Ml_PersistEntry(GameVars *g, int team, int member, int slot)
 
 /* ------------------------------------------------------------------ match assets */
 
-static int g_mlBgmOpens = -1;
-
 static int Ml_CompareLevel(const void *a, const void *b)
 {
     double x = *(const double *)a, y = *(const double *)b;
@@ -133,21 +131,8 @@ static void Ml_VoiceLevel(void)
     }
     voice *= g->master_volume / 100.0 * g->wav_volume / 100.0;
     MfMix_SetVoiceLevel(voice);
-    {
-        /* the song was measured when it opened, on the music thread, while the fighters loaded (wait for it a
-         * little if it hasn't: the log only; the mixer's gain follows the song's level whenever it comes) */
-        double song;
-        int waited = 0;
-        while (g_mlBgmOpens >= 0 && MfMix_MusicOpens() == g_mlBgmOpens && waited < 1500) {
-            Sleep(5);
-            waited += 5;
-        }
-        g_mlBgmOpens = -1;
-        song = MfMix_MusicLevel();
-        Log_Printf("Fighters' voices %.1f dBFS, the stage's song %.1f dBFS: the song is kept %.0f dB under the "
-                   "voices (x%.2f)\n", voice > 0.0 ? 20.0 * log10(voice) : -99.0,
-                   song > 0.0 ? 20.0 * log10(song) : -99.0, MF_BGM_UNDER_VOICES_DB, MfMix_MusicGain());
-    }
+    Log_Printf("Fighters' voices %.1f dBFS: the stage's song is kept %.0f dB under them\n",
+               voice > 0.0 ? 20.0 * log10(voice) : -99.0, MF_BGM_UNDER_VOICES_DB);
 }
 
 /*
@@ -762,7 +747,6 @@ int Stage_Activate(Stage *st)
         return 1;
     }
     Bgm_Stop();
-    g_mlBgmOpens = MfMix_MusicOpens();     /* Moemon Fight: Ml_VoiceLevel logs the song once it is open */
     if (!Bgm_Load(bgm)) {
         return 0;
     }
