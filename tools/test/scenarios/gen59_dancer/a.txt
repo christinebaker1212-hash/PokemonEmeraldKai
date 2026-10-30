@@ -1,0 +1,10 @@
+pressuntil A field 5000
+mp teach 0 33
+mp wild 19:30 14
+pressuntil A action 4000
+wait 20
+press A 2
+wait 20
+press A 2
+waitlog 1500 joined the
+quit

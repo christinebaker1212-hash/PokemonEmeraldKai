@@ -1,0 +1,5 @@
+# EMERGENCY EXIT: a wild GOLISOPOD knocked from over half its HP to under half leaves the battle
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=150:20 MOEMON_BATTLETEXT=1"
+EXPECT_A=("btext: MEWTWO used CONFUSION" "fled" "savesum")

@@ -1,0 +1,11 @@
+pressuntil A field 5000
+mp teach 0 55
+mp wild 1049:5 33
+
+pressuntil A action 4000
+wait 20
+press A 2
+wait 20
+press A 2
+pressuntil A field 4000
+quit

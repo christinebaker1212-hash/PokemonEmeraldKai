@@ -140,7 +140,7 @@ bool8 MP_IsPhysicalMove(u16 move, u8 type)
 u16 MP_Gen4_TargetAbility(u8 attacker, u8 target)
 {
     u16 ability = gBattleMons[target].ability;
-    if (attacker != target && gBattleMons[attacker].ability == ABILITY_MOLD_BREAKER
+    if (attacker != target && (gBattleMons[attacker].ability == ABILITY_MOLD_BREAKER || MP_Gen59_IgnoresAbilities(attacker))
      && InList(sBreakableAbilities, ARRAY_COUNT(sBreakableAbilities), ability))
         return ABILITY_NONE;
     return ability;
@@ -1500,11 +1500,10 @@ const u8 *MP_Gen4_MoveEnd(void)
     }
     if (!(*done & G4M_GEN59))
     {
-        const u8 *script;
-        *done |= G4M_GEN59;
-        script = MP_Gen59_MoveEnd();   // MOXIE, BEAST BOOST
+        const u8 *script = MP_Gen59_MoveEnd();   // MOXIE, BEAST BOOST... (one script a call, until there are none)
         if (script != NULL)
             return script;
+        *done |= G4M_GEN59;
     }
     if (!(*done & G4M_RESIST))
     {

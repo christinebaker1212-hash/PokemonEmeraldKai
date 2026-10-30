@@ -1,0 +1,6 @@
+# Form changes on arrival: WISHIWASHI (Lv. 30) forms a school, a wild TERAPAGOS's TERA SHIFT transforms it; WATER GUN
+# from the school then knocks it out
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=771:30 MOEMON_BATTLETEXT=1"
+EXPECT_A=("formed" "transformed" "btext: WISHIWASHI used WATER GUN")

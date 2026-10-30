@@ -1,0 +1,13 @@
+pressuntil A field 5000
+mp teach 0 93
+mp wild 793:20 33
+pressuntil A action 4000
+mp bstatus 1 0 40
+wait 20
+press A 2
+wait 20
+press A 2
+waitlog 1500 fled
+pressuntil A field 4000
+mp savesum
+quit

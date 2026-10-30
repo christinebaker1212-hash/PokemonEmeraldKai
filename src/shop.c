@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_region.h"
 #include "mp.h"
 #include "bg.h"
 #include "data.h"
@@ -36,6 +37,7 @@
 #include "tv.h"
 #include "constants/decorations.h"
 #include "constants/items.h"
+#include "constants/map_groups.h"
 #include "constants/metatile_behaviors.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
@@ -1254,10 +1256,66 @@ static void RecordItemPurchase(u8 taskId)
 #undef tItemId
 #undef tListTaskId
 
+// Moemon Kai: GENERATION in shops. Items past it aren't sold, and the department stores (HOENN's LILYCOVE, JOHTO's
+// GOLDENROD, KANTO's CELADON) add the newer battle items (3F) and evolution items (2F / 4F) from their generation on
+static const u16 sMpShopBattleItems[] = {
+    ITEM_WIDE_LENS, ITEM_MUSCLE_BAND, ITEM_WISE_GLASSES, ITEM_EXPERT_BELT, ITEM_LIGHT_CLAY, ITEM_LIFE_ORB,
+    ITEM_POWER_HERB, ITEM_TOXIC_ORB, ITEM_FLAME_ORB, ITEM_FOCUS_SASH, ITEM_ZOOM_LENS, ITEM_METRONOME, ITEM_IRON_BALL,
+    ITEM_LAGGING_TAIL, ITEM_DESTINY_KNOT, ITEM_BLACK_SLUDGE, ITEM_ICY_ROCK, ITEM_SMOOTH_ROCK, ITEM_HEAT_ROCK,
+    ITEM_DAMP_ROCK, ITEM_GRIP_CLAW, ITEM_CHOICE_SCARF, ITEM_CHOICE_SPECS, ITEM_STICKY_BARB, ITEM_SHED_SHELL,
+    ITEM_BIG_ROOT, ITEM_POWER_BRACER, ITEM_POWER_BELT, ITEM_POWER_LENS, ITEM_POWER_BAND, ITEM_POWER_ANKLET,
+    ITEM_POWER_WEIGHT, ITEM_EVIOLITE, ITEM_ROCKY_HELMET, ITEM_AIR_BALLOON, ITEM_FLOAT_STONE, ITEM_ABSORB_BULB,
+    ITEM_CELL_BATTERY, ITEM_PIXIE_PLATE, ITEM_ASSAULT_VEST, ITEM_WEAKNESS_POLICY, ITEM_SNOWBALL, ITEM_ELECTRIC_SEED,
+    ITEM_PSYCHIC_SEED, ITEM_MISTY_SEED, ITEM_GRASSY_SEED, ITEM_HEAVY_DUTY_BOOTS, ITEM_FAIRY_FEATHER,
+    ITEM_BOOSTER_ENERGY,
+};
+static const u16 sMpShopEvolutionItems[] = {
+    ITEM_SHINY_STONE, ITEM_DUSK_STONE, ITEM_DAWN_STONE, ITEM_OVAL_STONE, ITEM_PROTECTOR, ITEM_ELECTIRIZER,
+    ITEM_MAGMARIZER, ITEM_DUBIOUS_DISC, ITEM_REAPER_CLOTH, ITEM_RAZOR_CLAW, ITEM_RAZOR_FANG, ITEM_ICE_STONE,
+    ITEM_SWEET_APPLE, ITEM_TART_APPLE, ITEM_SYRUPY_APPLE, ITEM_CRACKED_POT, ITEM_CHIPPED_POT,
+    ITEM_UNREMARKABLE_TEACUP, ITEM_MASTERPIECE_TEACUP, ITEM_METAL_ALLOY, ITEM_WHIPPED_DREAM, ITEM_SACHET,
+    ITEM_LINKING_CORD, ITEM_STRAWBERRY_SWEET, ITEM_LOVE_SWEET, ITEM_BERRY_SWEET, ITEM_CLOVER_SWEET, ITEM_FLOWER_SWEET,
+    ITEM_STAR_SWEET, ITEM_RIBBON_SWEET, ITEM_AUSPICIOUS_ARMOR, ITEM_MALICIOUS_ARMOR, ITEM_RED_NECTAR,
+    ITEM_YELLOW_NECTAR, ITEM_PINK_NECTAR, ITEM_PURPLE_NECTAR, ITEM_LEADERS_CREST,
+};
+static const struct { u16 map; const u16 *items; u8 count; } sMpShopExtras[] = {
+    {MAP_LILYCOVE_CITY_DEPARTMENT_STORE_3F, sMpShopBattleItems, ARRAY_COUNT(sMpShopBattleItems)},
+    {MAP_JOHTO_GOLDENROD_DEPT_STORE3F, sMpShopBattleItems, ARRAY_COUNT(sMpShopBattleItems)},
+    {MAP_KANTO_CELADON_CITY_DEPARTMENT_STORE_3F, sMpShopBattleItems, ARRAY_COUNT(sMpShopBattleItems)},
+    {MAP_LILYCOVE_CITY_DEPARTMENT_STORE_2F, sMpShopEvolutionItems, ARRAY_COUNT(sMpShopEvolutionItems)},
+    {MAP_JOHTO_GOLDENROD_DEPT_STORE4F, sMpShopEvolutionItems, ARRAY_COUNT(sMpShopEvolutionItems)},
+    {MAP_KANTO_CELADON_CITY_DEPARTMENT_STORE_4F, sMpShopEvolutionItems, ARRAY_COUNT(sMpShopEvolutionItems)},
+};
+
+static const u16 *MP_ShopItems(const u16 *items)
+{
+    static u16 sItems[192];
+    u16 here = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
+    u32 i, j, k, n = 0;
+    for (i = 0; items[i] != ITEM_NONE && n < ARRAY_COUNT(sItems) - 1; i++)
+        if (MP_Gen_ItemAllowed(items[i]))
+            sItems[n++] = items[i];
+    for (i = 0; i < ARRAY_COUNT(sMpShopExtras); i++)
+    {
+        if (sMpShopExtras[i].map != here)
+            continue;
+        for (j = 0; j < sMpShopExtras[i].count && n < ARRAY_COUNT(sItems) - 1; j++)
+        {
+            u16 item = sMpShopExtras[i].items[j];
+            for (k = 0; k < n && sItems[k] != item; k++)
+                ;
+            if (k == n && MP_Gen_ItemAllowed(item) && GetItemPrice(item) != 0)
+                sItems[n++] = item;
+        }
+    }
+    sItems[n] = ITEM_NONE;
+    return sItems;
+}
+
 void CreatePokemartMenu(const u16 *itemsForSale)
 {
     CreateShopMenu(MART_TYPE_NORMAL);
-    SetShopItemsForSale(itemsForSale);
+    SetShopItemsForSale(MP_ShopItems(itemsForSale));
     ClearItemPurchases();
     SetShopMenuCallback(ScriptContext_Enable);
 }

@@ -5146,7 +5146,12 @@ u8 GetWhoStrikesFirst(u8 battler1, u8 battler2, bool8 ignoreChosenMoves)
     if (priority1 != 0 || priority2 != 0)
     {
         // both priorities are the same
-        if (priority1 == priority2)
+        if (priority1 == priority2 && MP_Gen59_MovesLast(battler1, moveBattler1) != MP_Gen59_MovesLast(battler2, moveBattler2))
+        {
+            if (MP_Gen59_MovesLast(battler1, moveBattler1))
+                strikesFirst = 1;   // Moemon Kai: MYCELIUM MIGHT
+        }
+        else if (priority1 == priority2)
         {
             if (speedBattler1 == speedBattler2 && Random() & 1)
                 strikesFirst = 2; // same speeds, same priorities
@@ -5163,6 +5168,11 @@ u8 GetWhoStrikesFirst(u8 battler1, u8 battler2, bool8 ignoreChosenMoves)
         // else battler1's move has greater priority
     }
     // both priorities are equal to 0
+    else if (MP_Gen59_MovesLast(battler1, moveBattler1) != MP_Gen59_MovesLast(battler2, moveBattler2))
+    {
+        if (MP_Gen59_MovesLast(battler1, moveBattler1))
+            strikesFirst = 1;   // Moemon Kai: MYCELIUM MIGHT
+    }
     else
     {
         if (speedBattler1 == speedBattler2 && Random() & 1)

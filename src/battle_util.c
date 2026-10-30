@@ -2957,11 +2957,16 @@ u8 AbilityBattleEffects(u8 caseID, u8 battler, u16 ability, u8 special, u16 move
                 case ABILITY_TRUANT:
                     gDisableStructs[gBattlerAttacker].truantCounter ^= 1;
                     break;
+                default:
+                    effect = MP_Gen59_EndTurnAbility(battler);   // Moemon Kai: MOODY, HEALER, HARVEST
+                    break;
                 }
             }
             break;
         case ABILITYEFFECT_MOVES_BLOCK: // 2
-            if (gLastUsedAbility == ABILITY_SOUNDPROOF)
+            if (MP_Gen59_BlockMove(battler, move))   // Moemon Kai: BULLETPROOF, QUEENLY MAJESTY, GOOD AS GOLD...
+                effect = 1;
+            else if (gLastUsedAbility == ABILITY_SOUNDPROOF)
             {
                 for (i = 0; sSoundMovesTable[i] != SOUND_MOVES_END; i++)
                 {
@@ -3015,6 +3020,9 @@ u8 AbilityBattleEffects(u8 caseID, u8 battler, u16 ability, u8 special, u16 move
                             gBattlescriptCurrInstr = BattleScript_G4MotorDrive_PPLoss;
                         effect = 2;
                     }
+                    break;
+                default:
+                    effect = MP_Gen59_AbsorbAbility(battler, move, moveType);   // Moemon Kai: SAP SIPPER, EARTH EATER...
                     break;
                 case ABILITY_FLASH_FIRE:
                     if (moveType == TYPE_FIRE && !(gBattleMons[battler].status1 & STATUS1_FREEZE))
@@ -3591,6 +3599,14 @@ u8 ItemBattleEffects(u8 caseID, u8 battler, bool8 moveTurn)
     {
         battlerHoldEffect = GetItemHoldEffect(gLastUsedItem);
         battlerHoldEffectParam = GetItemHoldEffectParam(gLastUsedItem);
+    }
+    // Moemon Kai: UNNERVE / AS ONE keep BERRIES from being eaten; RIPEN doubles a BERRY's HP
+    if (gLastUsedItem >= FIRST_BERRY_INDEX && gLastUsedItem <= LAST_BERRY_INDEX && battler < gBattlersCount)
+    {
+        if (MP_Gen59_BerriesBlocked(battler))
+            battlerHoldEffect = HOLD_EFFECT_NONE;
+        else if (battlerHoldEffect == HOLD_EFFECT_RESTORE_HP && MP_Gen59_Ripen(battler) == 2)
+            battlerHoldEffectParam *= 2;
     }
 
     atkItem = gBattleMons[gBattlerAttacker].item;

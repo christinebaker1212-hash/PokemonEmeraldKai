@@ -3,7 +3,7 @@
     {
         .name = _("ICE STONE"),
         .itemId = ITEM_ICE_STONE,
-        .price = 0,
+        .price = 3000,
         .description = sIceStoneDesc,
         .pocket = POCKET_ITEMS,
         .type = ITEM_USE_PARTY_MENU,
@@ -102,7 +102,7 @@
     {
         .name = _("DARK SCROLL"),
         .itemId = ITEM_SCROLL_OF_DARKNESS,
-        .price = 0,
+        .price = 10000,
         .description = sScrollOfDarknessDesc,
         .pocket = POCKET_ITEMS,
         .type = ITEM_USE_PARTY_MENU,
@@ -113,7 +113,7 @@
     {
         .name = _("WATER SCROLL"),
         .itemId = ITEM_SCROLL_OF_WATERS,
-        .price = 0,
+        .price = 10000,
         .description = sScrollOfWatersDesc,
         .pocket = POCKET_ITEMS,
         .type = ITEM_USE_PARTY_MENU,
@@ -146,7 +146,7 @@
     {
         .name = _("WHIPPED DREAM"),
         .itemId = ITEM_WHIPPED_DREAM,
-        .price = 0,
+        .price = 3000,
         .description = sWhippedDreamDesc,
         .pocket = POCKET_ITEMS,
         .type = ITEM_USE_PARTY_MENU,
@@ -157,7 +157,7 @@
     {
         .name = _("SACHET"),
         .itemId = ITEM_SACHET,
-        .price = 0,
+        .price = 3000,
         .description = sSachetDesc,
         .pocket = POCKET_ITEMS,
         .type = ITEM_USE_PARTY_MENU,
@@ -300,7 +300,7 @@
     {
         .name = _("ELECTRIC SEED"),
         .itemId = ITEM_ELECTRIC_SEED,
-        .price = 0,
+        .price = 4000,
         .description = sElectricSeedDesc,
         .pocket = POCKET_ITEMS,
         .type = ITEM_USE_BAG_MENU,
@@ -311,7 +311,7 @@
     {
         .name = _("PSYCHIC SEED"),
         .itemId = ITEM_PSYCHIC_SEED,
-        .price = 0,
+        .price = 4000,
         .description = sPsychicSeedDesc,
         .pocket = POCKET_ITEMS,
         .type = ITEM_USE_BAG_MENU,
@@ -322,7 +322,7 @@
     {
         .name = _("MISTY SEED"),
         .itemId = ITEM_MISTY_SEED,
-        .price = 0,
+        .price = 4000,
         .description = sMistySeedDesc,
         .pocket = POCKET_ITEMS,
         .type = ITEM_USE_BAG_MENU,
@@ -333,7 +333,7 @@
     {
         .name = _("GRASSY SEED"),
         .itemId = ITEM_GRASSY_SEED,
-        .price = 0,
+        .price = 4000,
         .description = sGrassySeedDesc,
         .pocket = POCKET_ITEMS,
         .type = ITEM_USE_BAG_MENU,
@@ -344,7 +344,7 @@
     {
         .name = _("BOOSTER ENRGY"),
         .itemId = ITEM_BOOSTER_ENERGY,
-        .price = 0,
+        .price = 10000,
         .description = sBoosterEnergyDesc,
         .pocket = POCKET_ITEMS,
         .type = ITEM_USE_BAG_MENU,
@@ -399,7 +399,7 @@
     {
         .name = _("ASSAULT VEST"),
         .itemId = ITEM_ASSAULT_VEST,
-        .price = 0,
+        .price = 50000,
         .description = sAssaultVestDesc,
         .pocket = POCKET_ITEMS,
         .type = ITEM_USE_BAG_MENU,
@@ -432,7 +432,7 @@
     {
         .name = _("WEAKNESS POL."),
         .itemId = ITEM_WEAKNESS_POLICY,
-        .price = 0,
+        .price = 20000,
         .description = sWeaknessPolicyDesc,
         .pocket = POCKET_ITEMS,
         .type = ITEM_USE_BAG_MENU,
@@ -443,7 +443,7 @@
     {
         .name = _("HEAVYDTYBOOTS"),
         .itemId = ITEM_HEAVY_DUTY_BOOTS,
-        .price = 0,
+        .price = 20000,
         .description = sHeavyDutyBootsDesc,
         .pocket = POCKET_ITEMS,
         .type = ITEM_USE_BAG_MENU,

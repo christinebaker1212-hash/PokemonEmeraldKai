@@ -60,7 +60,10 @@
 
 extern const u8 *const gBattleScriptsForMoveEffects[];
 
-#define DEFENDER_IS_PROTECTED ((gProtectStructs[gBattlerTarget].protected) && (gBattleMoves[gCurrentMove].flags & FLAG_PROTECT_AFFECTED))
+// Moemon Kai: CORROSION poisons POISON and STEEL types
+#define CORRODES (gEffectBattler != gBattlerAttacker && gBattleMons[gBattlerAttacker].ability == ABILITY_CORROSION)
+#define DEFENDER_IS_PROTECTED ((gProtectStructs[gBattlerTarget].protected) && (gBattleMoves[gCurrentMove].flags & FLAG_PROTECT_AFFECTED) \
+    && !(gBattleMons[gBattlerAttacker].ability == ABILITY_UNSEEN_FIST && (gBattleMoves[gCurrentMove].flags & FLAG_MAKES_CONTACT)))   // Moemon Kai: UNSEEN FIST
 
 #define LEVEL_UP_BANNER_START 416
 #define LEVEL_UP_BANNER_END   512
@@ -1189,6 +1192,7 @@ static void Cmd_accuracycheck(void)
         if (gBattleMons[gBattlerAttacker].ability == ABILITY_HUSTLE && MP_IsPhysicalMove(move, type))
             calc = (calc * 80) / 100; // 1.2 hustle loss
         calc = MP_Gen4_Accuracy(move, gBattlerAttacker, gBattlerTarget, calc);   // Moemon Kai: Gen 4
+        calc = MP_Gen59_Accuracy(gBattlerAttacker, gBattlerTarget, move, calc);  // Moemon Kai: Gen 5-9
 
         if (gBattleMons[gBattlerTarget].item == ITEM_ENIGMA_BERRY)
         {
@@ -2336,6 +2340,10 @@ void SetMoveEffect(bool8 primary, u8 certain)
         && gBattleCommunication[MOVE_EFFECT_BYTE] <= MOVE_EFFECT_TOXIC && affectsUser != MOVE_EFFECT_AFFECTS_USER)
         INCREMENT_RESET_RETURN
 
+    // Moemon Kai: Gen 5-9 status protection (MISTY / ELECTRIC TERRAIN, COMATOSE, PURIFYING SALT, the VEILs...)
+    if (affectsUser != MOVE_EFFECT_AFFECTS_USER && MP_Gen59_StatusBlocked(gEffectBattler, gBattleCommunication[MOVE_EFFECT_BYTE]))
+        INCREMENT_RESET_RETURN
+
     if (gBattleMons[gEffectBattler].hp == 0
         && gBattleCommunication[MOVE_EFFECT_BYTE] != MOVE_EFFECT_PAYDAY
         && gBattleCommunication[MOVE_EFFECT_BYTE] != MOVE_EFFECT_STEAL_ITEM)
@@ -2395,7 +2403,7 @@ void SetMoveEffect(bool8 primary, u8 certain)
                 }
                 RESET_RETURN
             }
-            if ((IS_BATTLER_OF_TYPE(gEffectBattler, TYPE_POISON) || IS_BATTLER_OF_TYPE(gEffectBattler, TYPE_STEEL))
+            if (((IS_BATTLER_OF_TYPE(gEffectBattler, TYPE_POISON) && !CORRODES) || (IS_BATTLER_OF_TYPE(gEffectBattler, TYPE_STEEL) && !CORRODES))
                 && (gHitMarker & HITMARKER_STATUS_ABILITY_EFFECT)
                 && (primary == TRUE || certain == MOVE_EFFECT_CERTAIN))
             {
@@ -2405,9 +2413,9 @@ void SetMoveEffect(bool8 primary, u8 certain)
                 gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_STATUS_HAD_NO_EFFECT;
                 RESET_RETURN
             }
-            if (IS_BATTLER_OF_TYPE(gEffectBattler, TYPE_POISON))
+            if ((IS_BATTLER_OF_TYPE(gEffectBattler, TYPE_POISON) && !CORRODES))
                 break;
-            if (IS_BATTLER_OF_TYPE(gEffectBattler, TYPE_STEEL))
+            if ((IS_BATTLER_OF_TYPE(gEffectBattler, TYPE_STEEL) && !CORRODES))
                 break;
             if (gBattleMons[gEffectBattler].status1)
                 break;
@@ -2522,7 +2530,7 @@ void SetMoveEffect(bool8 primary, u8 certain)
                 }
                 RESET_RETURN
             }
-            if ((IS_BATTLER_OF_TYPE(gEffectBattler, TYPE_POISON) || IS_BATTLER_OF_TYPE(gEffectBattler, TYPE_STEEL))
+            if (((IS_BATTLER_OF_TYPE(gEffectBattler, TYPE_POISON) && !CORRODES) || (IS_BATTLER_OF_TYPE(gEffectBattler, TYPE_STEEL) && !CORRODES))
                 && (gHitMarker & HITMARKER_STATUS_ABILITY_EFFECT)
                 && (primary == TRUE || certain == MOVE_EFFECT_CERTAIN))
             {
@@ -2534,7 +2542,7 @@ void SetMoveEffect(bool8 primary, u8 certain)
             }
             if (gBattleMons[gEffectBattler].status1)
                 break;
-            if (!IS_BATTLER_OF_TYPE(gEffectBattler, TYPE_POISON) && !IS_BATTLER_OF_TYPE(gEffectBattler, TYPE_STEEL))
+            if (!(IS_BATTLER_OF_TYPE(gEffectBattler, TYPE_POISON) && !CORRODES) && !(IS_BATTLER_OF_TYPE(gEffectBattler, TYPE_STEEL) && !CORRODES))
             {
                 if (gBattleMons[gEffectBattler].ability == ABILITY_IMMUNITY)
                     break;
@@ -6438,6 +6446,7 @@ static void Cmd_removeitem(void)
     *usedHeldItem = gBattleMons[gActiveBattler].item;
     gBattleMons[gActiveBattler].item = ITEM_NONE;
     MP_Gen4_ItemLost(gActiveBattler);   // Moemon Kai: UNBURDEN
+    MP_Gen59_AteBerry(gActiveBattler, *usedHeldItem);   // Moemon Kai: CHEEK POUCH, CUD CHEW (a BERRY's removeitem)
 
     BtlController_EmitSetMonData(B_COMM_TO_CONTROLLER, REQUEST_HELDITEM_BATTLE, 0, sizeof(gBattleMons[gActiveBattler].item), &gBattleMons[gActiveBattler].item);
     MarkBattlerForControllerExec(gActiveBattler);
@@ -7628,6 +7637,10 @@ static u8 ChangeStatBuffs(s8 statValue, u8 statId, u8 flags, const u8 *BS_ptr)
 
     PREPARE_STAT_BUFFER(gBattleTextBuff1, statId)
 
+    if (gBattleMons[gActiveBattler].ability == ABILITY_CONTRARY   // Moemon Kai: CONTRARY turns the change around,
+     || (MP_Gen59_IntimidateRaises(gActiveBattler) && gLastUsedAbility == ABILITY_INTIMIDATE && statValue < 0))   // GUARD DOG INTIMIDATE
+        statValue ^= STAT_BUFF_NEGATIVE;
+
     if (statValue <= -1) // Stat decrease.
     {
         if (gSideTimers[GET_BATTLER_SIDE(gActiveBattler)].mistTimer
@@ -7656,7 +7669,9 @@ static u8 ChangeStatBuffs(s8 statValue, u8 statId, u8 flags, const u8 *BS_ptr)
             return STAT_CHANGE_DIDNT_WORK;
         }
         else if ((gBattleMons[gActiveBattler].ability == ABILITY_CLEAR_BODY
-                  || gBattleMons[gActiveBattler].ability == ABILITY_WHITE_SMOKE)
+                  || gBattleMons[gActiveBattler].ability == ABILITY_WHITE_SMOKE
+                  || gBattleMons[gActiveBattler].ability == ABILITY_FULL_METAL_BODY   // Moemon Kai: Gen 7
+                  || MP_Gen59_FlowerVeil(gActiveBattler))                            // Moemon Kai: Gen 6
                  && !certain && gCurrentMove != MOVE_CURSE)
         {
             if (flags == STAT_CHANGE_ALLOW_PTR)
@@ -7690,8 +7705,9 @@ static u8 ChangeStatBuffs(s8 statValue, u8 statId, u8 flags, const u8 *BS_ptr)
             }
             return STAT_CHANGE_DIDNT_WORK;
         }
-        else if (gBattleMons[gActiveBattler].ability == ABILITY_HYPER_CUTTER
-                 && !certain && statId == STAT_ATK)
+        else if (((gBattleMons[gActiveBattler].ability == ABILITY_HYPER_CUTTER && statId == STAT_ATK)
+                  || (gBattleMons[gActiveBattler].ability == ABILITY_BIG_PECKS && statId == STAT_DEF))   // Moemon Kai: Gen 5
+                 && !certain)
         {
             if (flags == STAT_CHANGE_ALLOW_PTR)
             {
@@ -7757,6 +7773,10 @@ static u8 ChangeStatBuffs(s8 statValue, u8 statId, u8 flags, const u8 *BS_ptr)
             gBattleCommunication[MULTISTRING_CHOOSER] = (gBattlerTarget == gActiveBattler); // B_MSG_ATTACKER_STAT_ROSE or B_MSG_DEFENDER_STAT_ROSE
     }
 
+    if (statValue < 0 && gBattleMons[gActiveBattler].statStages[statId] > MIN_STAT_STAGE)
+        MP_Gen59_OnStatLowered(gActiveBattler);   // Moemon Kai: LASH OUT, DEFIANT, COMPETITIVE
+    if (statValue > 0 && gBattleMons[gActiveBattler].statStages[statId] < MAX_STAT_STAGE)
+        MP_Gen59_OnStatRaised(gActiveBattler, statId, statValue);   // Moemon Kai: OPPORTUNIST
     gBattleMons[gActiveBattler].statStages[statId] += statValue;
     if (gBattleMons[gActiveBattler].statStages[statId] < MIN_STAT_STAGE)
         gBattleMons[gActiveBattler].statStages[statId] = MIN_STAT_STAGE;
@@ -10377,6 +10397,7 @@ static void Cmd_trygetintimidatetarget(void)
 static void Cmd_switchoutabilities(void)
 {
     gActiveBattler = GetBattlerForBattleScript(gBattlescriptCurrInstr[1]);
+    MP_Gen59_SwitchedOut(gActiveBattler);   // Moemon Kai: ZERO TO HERO
 
     switch (gBattleMons[gActiveBattler].ability)
     {
@@ -10507,6 +10528,26 @@ static void Cmd_pickup(void)
                 if (lvlDivBy10 > 9)
                     lvlDivBy10 = 9;
 
+                if (rand >= 95 && rand <= 97)   // Moemon Kai: GENERATION: now and then a newer item
+                {
+                    static const u16 sNewer[] = {
+                        ITEM_SHINY_STONE, ITEM_DUSK_STONE, ITEM_DAWN_STONE, ITEM_OVAL_STONE, ITEM_RAZOR_CLAW,
+                        ITEM_RAZOR_FANG, ITEM_BIG_ROOT, ITEM_ICE_STONE, ITEM_SWEET_APPLE, ITEM_TART_APPLE,
+                        ITEM_SYRUPY_APPLE, ITEM_CRACKED_POT, ITEM_UNREMARKABLE_TEACUP, ITEM_STRAWBERRY_SWEET,
+                        ITEM_BERRY_SWEET, ITEM_LOVE_SWEET, ITEM_RED_NECTAR, ITEM_YELLOW_NECTAR, ITEM_PINK_NECTAR,
+                        ITEM_PURPLE_NECTAR, ITEM_ABSORB_BULB, ITEM_CELL_BATTERY, ITEM_SNOWBALL, ITEM_ELECTRIC_SEED,
+                        ITEM_PSYCHIC_SEED, ITEM_MISTY_SEED, ITEM_GRASSY_SEED, ITEM_FAIRY_FEATHER, ITEM_METAL_ALLOY,
+                    };
+                    u16 pick[ARRAY_COUNT(sNewer)], n = 0;
+                    for (j = 0; j < (int)ARRAY_COUNT(sNewer); j++)
+                        if (MP_Gen_ItemAllowed(sNewer[j]) && MP_Gen_OfItem(sNewer[j]) >= 4)
+                            pick[n++] = sNewer[j];
+                    if (n != 0)
+                    {
+                        SetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, &pick[Random() % n]);
+                        continue;
+                    }
+                }
                 for (j = 0; j < (int)ARRAY_COUNT(sPickupProbabilities); j++)
                 {
                     if (sPickupProbabilities[j] > rand)
@@ -10906,6 +10947,8 @@ static void Cmd_handleballthrow(void)
             {
                 gBattleCommunication[MULTISTRING_CHOOSER] = shakes;
                 gBattlescriptCurrInstr = BattleScript_ShakeBallThrow;
+                if (!gMpCoopWild)
+                    MP_Gen59_BallFailed(gBattlerAttacker, gLastUsedItem);   // Moemon Kai: BALL FETCH
             }
         }
     }

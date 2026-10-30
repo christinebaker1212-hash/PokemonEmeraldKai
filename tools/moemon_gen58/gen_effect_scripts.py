@@ -326,6 +326,95 @@ BattleScript_G59RockyHelmet::
 	waitmessage B_WAIT_TIME_LONG
 	tryfaintmon BS_ATTACKER
 	return
+
+BattleScript_G59AbilitySayMoveEnd::
+	printfromtable gGen59StringIds
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_G59StatusMoveEnd::
+	statusanimation BS_SCRIPTING
+	updatestatusicon BS_SCRIPTING
+	printfromtable gGen59StringIds
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_G59WeatherMoveEnd::
+	printfromtable gGen59StringIds
+	waitmessage B_WAIT_TIME_LONG
+	playanimation BS_ATTACKER, B_ANIM_SANDSTORM_CONTINUES
+	return
+
+BattleScript_G59HealMoveEnd::
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_HP_UPDATE
+	healthbarupdate BS_SCRIPTING
+	datahpupdate BS_SCRIPTING
+	printfromtable gGen59StringIds
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_G59HealEnd3::
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_HP_UPDATE
+	healthbarupdate BS_SCRIPTING
+	datahpupdate BS_SCRIPTING
+	printfromtable gGen59StringIds
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
+BattleScript_G59StatusEnd3::
+	updatestatusicon BS_SCRIPTING
+	printfromtable gGen59StringIds
+	waitmessage B_WAIT_TIME_LONG
+	end3
+
+BattleScript_G59AbsorbStat::
+	attackstring
+	pause B_WAIT_TIME_SHORT
+	orbyte gMoveResultFlags, MOVE_RESULT_DOESNT_AFFECT_FOE
+	statbuffchange STAT_CHANGE_ALLOW_PTR | MOVE_EFFECT_CERTAIN, BattleScript_G59AbsorbStatUseless
+	jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_INCREASE, BattleScript_G59AbsorbStatUseless
+	setgraphicalstatchangevalues
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gStatUpStringIds
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_MoveEnd
+BattleScript_G59AbsorbStatUseless::
+	printstring STRINGID_PKMNSXMADEYUSELESS
+	waitmessage B_WAIT_TIME_LONG
+	goto BattleScript_MoveEnd
+
+BattleScript_G59AbsorbStat_PPLoss::
+	ppreduce
+	goto BattleScript_G59AbsorbStat
+
+@ EMERGENCY EXIT / WIMP OUT: the target switches out at the move's end
+BattleScript_G59EmergencyExit::
+	printfromtable gGen59StringIds
+	waitmessage B_WAIT_TIME_LONG
+	jumpifcantswitch SWITCH_IGNORE_ESCAPE_PREVENTION | BS_TARGET, BattleScript_G59EmergencyExitEnd
+	openpartyscreen BS_TARGET, BattleScript_G59EmergencyExitEnd
+	switchoutabilities BS_TARGET
+	waitstate
+	switchhandleorder BS_TARGET, 2
+	returntoball BS_TARGET
+	getswitchedmondata BS_TARGET
+	switchindataupdate BS_TARGET
+	hpthresholds BS_TARGET
+	printstring STRINGID_SWITCHINMON
+	switchinanim BS_TARGET, TRUE
+	waitstate
+	switchineffects BS_TARGET
+BattleScript_G59EmergencyExitEnd::
+	return
+
+@ a wild Pokemon's EMERGENCY EXIT: it leaves (the battle ends)
+BattleScript_G59Flee::
+	printfromtable gGen59StringIds
+	waitmessage B_WAIT_TIME_LONG
+	returntoball BS_TARGET
+	waitstate
+	setoutcomeonteleport BS_TARGET
+	finishaction
 '''
 
 
