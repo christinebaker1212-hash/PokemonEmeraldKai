@@ -5,7 +5,7 @@
 
 Kai's followers for national dex 1-386 are HGSS-style overworld sprites cut by tools/moemon_followers/slice.py.
 Quetzal has the same kind for every Pokemon (its "FFP2" blobs, tools/quetzal_rip/ffp2.py): this takes 387-1025
-(Gen 5-9 names from tools/moemon_gen59/species.json; the ones Quetzal lacks keep no follower sprite)
+(Gen 5-9 names from tools/moemon_gen59/species.json; one Quetzal lacks comes from graphics/moemon/followers/extra)
 (matched by name in tools/quetzal_rip/pokemon_ow_gfx.json, the normal colors) and appends them to
 graphics/moemon/followers/followers.bin in slice.py's format (8 frames down1 down2 up1 up2 left1 left2 right1 right2,
 4bpp tiles, then 16 colors; right = the left frames mirrored), with "sheet": "quetzal" in index.json, and rewrites
@@ -93,6 +93,29 @@ def main():
             blob += f
         blob += bytes(rom.d[pals[info['palette_tag']]:pals[info['palette_tag']] + 32])
         index.append({'dex': dex, 'variant': 0, 'size': size, 'offset': off, 'sheet': 'quetzal', 'cell': gid})
+        added += 1
+    # the ones Quetzal lacks: an overworld sheet of 6 frames (down1 down2 up1 up2 left1 left2, indexed colors) in
+    # graphics/moemon/followers/extra/<dex>_<name>.png, from pokeemerald-expansion (OGERPON)
+    from PIL import Image
+    extra_dir = os.path.join(REPO, 'graphics', 'moemon', 'followers', 'extra')
+    for fn in sorted(os.listdir(extra_dir)) if os.path.isdir(extra_dir) else []:
+        dex = int(fn.split('_')[0])
+        if dex not in missing:
+            continue
+        im = Image.open(os.path.join(extra_dir, fn))
+        size = im.height
+        pix = im.load()
+        fr = [to_tiles([[pix[k * size + x, y] & 15 for x in range(size)] for y in range(size)], size) for k in range(6)]
+        pal = im.getpalette()[:48] + [0] * max(0, 48 - len(im.getpalette()[:48]))
+        off = len(blob)
+        for f in (fr[0], fr[1], fr[2], fr[3], fr[4], fr[5], mirror(fr[4], size), mirror(fr[5], size)):
+            blob += f
+        for c in range(16):
+            r, g, b = pal[3 * c] >> 3, pal[3 * c + 1] >> 3, pal[3 * c + 2] >> 3
+            v = r | g << 5 | b << 10
+            blob += bytes([v & 0xFF, v >> 8])
+        index.append({'dex': dex, 'variant': 0, 'size': size, 'offset': off, 'sheet': 'quetzal', 'cell': 0})
+        missing.remove(dex)
         added += 1
     open(os.path.join(OUT, 'followers.bin'), 'wb').write(blob)
     json.dump(index, open(os.path.join(OUT, 'index.json'), 'w'), indent=0)

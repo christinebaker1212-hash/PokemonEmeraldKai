@@ -8486,5 +8486,13 @@
 "offset": 4781184,
 "sheet": "quetzal",
 "cell": 1335
+},
+{
+"dex": 1017,
+"variant": 0,
+"size": 32,
+"offset": 4785312,
+"sheet": "quetzal",
+"cell": 0
 }
 ]
