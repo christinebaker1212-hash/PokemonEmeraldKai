@@ -111,6 +111,7 @@ static const struct Rgb sTypeColor[NUMBER_OF_MON_TYPES] = {
     [TYPE_ICE]      = {150, 236, 255},
     [TYPE_DRAGON]   = {128, 112, 255},
     [TYPE_DARK]     = {170,  70, 110},
+    [TYPE_FAIRY]    = {255, 150, 220},   // Moemon Kai: FAIRY
 };
 
 static u8 Clamp8(int v) { return v < 0 ? 0 : (v > 255 ? 255 : v); }
@@ -251,6 +252,7 @@ static const struct
     [TYPE_ICE]      = {P_SHARD,    3, 12, 24},
     [TYPE_DRAGON]   = {P_EMBER,   -2, 12, 24},
     [TYPE_DARK]     = {P_WISP,     0, 10, 22},
+    [TYPE_FAIRY]    = {P_STAR,    -1, 11, 24},   // Moemon Kai: FAIRY (an empty entry divided by a zero life)
 };
 
 static void Particle(u16 *frame, int shape, int x, int y, int age, int life, struct Rgb c, u32 seed)
