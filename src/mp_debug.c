@@ -2491,6 +2491,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
             if (MP_RollExtraLandMon(&mon))
                 printf(" %d", (int)GetMonData(&mon, MON_DATA_SPECIES));
         printf("\n");
+        if (n > 0)
+            printf("[test] wildroll met game %d location %d\n", (int)GetMonData(&mon, MON_DATA_MET_GAME), (int)GetMonData(&mon, MON_DATA_MET_LOCATION));
     }
     else if (strcmp(cmd, "regionclear") == 0)
     {

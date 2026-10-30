@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_region.h"
 #include "pokemon.h"
 #include "egg_hatch.h"
 #include "pokedex.h"
@@ -387,6 +388,7 @@ static void AddHatchedMonToParty(u8 id)
 
     metLocation = GetCurrentRegionMapSectionId();
     SetMonData(mon, MON_DATA_MET_LOCATION, &metLocation);
+    MP_Region_TagMet(&mon->box);   // Moemon Kai: hatched in JOHTO
 
     MonRestorePP(mon);
     CalculateMonStats(mon);

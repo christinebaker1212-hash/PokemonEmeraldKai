@@ -1,6 +1,7 @@
 // Moemon Kai: defines the song functions mp_kaisong_scene.h wraps
 #define MP_KAISONG_NO_SCENE
 #include "global.h"
+#include "mp_region.h"
 #include "battle_gen4.h"   // Moemon Kai: Gen 4
 #include "mp.h"
 #include "malloc.h"
@@ -2342,6 +2343,7 @@ void CreateBoxMon(struct BoxPokemon *boxMon, u16 species, u8 level, u8 fixedIV, 
     SetBoxMonData(boxMon, MON_DATA_MET_LOCATION, &value);
     SetBoxMonData(boxMon, MON_DATA_MET_LEVEL, &level);
     SetBoxMonData(boxMon, MON_DATA_MET_GAME, &gGameVersion);
+    MP_Region_TagMet(boxMon);   // Moemon Kai: met in JOHTO (its map sections are past one byte)
     value = ITEM_POKE_BALL;
     SetBoxMonData(boxMon, MON_DATA_POKEBALL, &value);
     SetBoxMonData(boxMon, MON_DATA_OT_GENDER, &gSaveBlock2Ptr->playerGender);

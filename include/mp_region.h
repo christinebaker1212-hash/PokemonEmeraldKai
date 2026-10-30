@@ -7,6 +7,9 @@
 #define REGION_KANTO 2
 #define REGION_COUNT 3
 
+// A Pokémon met in JOHTO: its MET_GAME (MON_DATA_MET_LOCATION holds the low byte of the JOHTO map section)
+#define MP_METGAME_JOHTO 14
+
 // Johto / Kanto flags and vars past the save block's (tools/quetzal_port/import.py places them)
 #define REGION_FLAGS_START 0x1000
 #define REGION_FLAGS_END   0x4000   // SPECIAL_FLAGS_START
@@ -48,6 +51,7 @@ void MP_Region_FitAll(void);                       // party + own boxes at the c
 void MP_Region_Travel(u8 from, u8 to);             // PC boxes change places, the party takes the new levels
 struct WildPokemonInfo;
 struct Trainer;
+void MP_Region_TagMet(struct BoxPokemon *b);      // met / hatched here: JOHTO's places get MP_METGAME_JOHTO
 bool8 MP_Region_Gen4Open(void);                    // an Elite Four beaten in another region (or in HOENN)
 const struct WildPokemonInfo *MP_Region_WildInfo(const struct WildPokemonInfo *info);   // the Gen 3 table before it
 const struct Trainer *MP_Region_TrainerData(u16 trainerNum);                            // the Gen 3 team before it

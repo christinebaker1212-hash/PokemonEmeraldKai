@@ -21,6 +21,7 @@
 #include "constants/moves.h"
 #include "constants/species.h"
 #include "constants/trainers.h"
+#include "constants/region_map_sections.h"
 
 extern char gPlatformSavePath[512];
 
@@ -475,4 +476,12 @@ const struct Trainer *MP_Region_TrainerData(u16 trainerNum)
         }
     }
     return &gTrainers[trainerNum];
+}
+
+// ---------------------------------------------------------------------------------------------------- met location
+void MP_Region_TagMet(struct BoxPokemon *b)
+{
+    u8 game = MP_METGAME_JOHTO;
+    if (gMapHeader.regionMapSectionId >= MAPSEC_JOHTO_FIRST && gMapHeader.regionMapSectionId < MAPSEC_JOHTO_END)
+        SetBoxMonData(b, MON_DATA_MET_GAME, &game);
 }
