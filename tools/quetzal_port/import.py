@@ -483,6 +483,8 @@ def main():
     write_constants(texts)
     write_specials(texts)
     write_macros()
+    import fix_warp_tiles   # FireRed door mats: both halves warp (fix_warp_tiles.py)
+    fix_warp_tiles.main()
     for c, where in sorted(IDS.missing.items()):
         print('  not in Kai: %s (%s)' % (c, ', '.join(sorted(where)[:4])))
 

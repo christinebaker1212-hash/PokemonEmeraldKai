@@ -1238,7 +1238,7 @@ Quetzal_EventScript_83E0644::
 
 Quetzal_EventScript_83E064C::
 	msgbox Quetzal_Text_83E0685, MSGBOX_DEFAULT
-	setvar VAR_0x8000, 0x186
+	setvar VAR_0x8000, ITEM_LIGHT_BALL   @ Moemon Kai: Quetzal's PIKASHUNIUM Z (0x186, a number: not translated)
 	setvar VAR_0x8001, 1
 	additem VAR_0x8000, VAR_0x8001
 	copyvar VAR_0x8007, VAR_RESULT
@@ -2905,12 +2905,12 @@ Quetzal_Text_83DFBD4::
 	.string "Someone must stop them!$"
 
 Quetzal_Text_83E0685::
-	.string "RED offers you a Z-Crystal\n"
+	.string "RED offers you a LIGHT BALL\n"
 	.string "as a sign of respect.$"
 
 Quetzal_Text_83E06B6::
 	.string "There is no room in the BAG.\p"
-	.string "RED will keep the crystal\n"
+	.string "RED will keep the LIGHT BALL\n"
 	.string "until you return for it.$"
 
 Quetzal_Text_83E0706::

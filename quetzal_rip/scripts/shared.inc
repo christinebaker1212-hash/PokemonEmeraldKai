@@ -111,7 +111,7 @@ Quetzal_EventScript_835FD2E::
 	end
 
 Quetzal_EventScript_835FF25::
-	setvar VAR_0x8000, 1
+	setvar VAR_0x8000, ITEM_POKE_BALL   @ Moemon Kai: Quetzal's item 1 (a number here: not translated by the import)
 	setvar VAR_0x8001, 5
 	additem VAR_0x8000, VAR_0x8001
 	copyvar VAR_0x8007, VAR_RESULT

@@ -1612,6 +1612,8 @@ void CB2_NewGame(void)
     ScriptContext_Init();
     UnlockPlayerFieldControls();
     gFieldCallback = MP_DebugQuickStartEnabled() ? NULL : ExecuteTruckSequence;
+    if (MP_Region_Current() != REGION_HOENN)
+        gFieldCallback = FieldCB_WarpExitFadeFromBlack;   // Moemon Kai: JOHTO / KANTO start in a house, not the truck
     gFieldCallback2 = NULL;
     DoMapLoadLoop(&gMain.state);
     SetFieldVBlankCallback();
