@@ -1,0 +1,8 @@
+# A room is in its host's region: ALICE hosts in HOENN, BOB's game is in JOHTO; BOB hears the room's rules, is told
+# "This room is in HOENN." and leaves
+MODE=2
+TMO=150
+ENV_B="MOEMON_DEBUG_REGION=1"
+EXPECT_B=("region: the room is in HOENN, we're in JOHTO: leaving")
+UNEXPECT_A=("[crash]")
+UNEXPECT_B=("[crash]")

@@ -1,0 +1,4 @@
+pressuntil A field 5000
+wait 600
+mp regioninfo
+quit

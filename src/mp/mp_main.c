@@ -11,6 +11,7 @@
 #include "mp_net.h"
 #include "mp_join.h"
 #include "global.h"
+#include "mp_region.h"
 #include "mp.h"
 #include "mp_fight.h"
 #include "mp_pmd.h"
@@ -132,6 +133,7 @@ static u8 sRoomScale[MP_SCALE_COUNT - 1];   // ... LEVEL SCALING's settings
 static void LevelRulesFromEnv(void);
 static bool8 sRoomLevelScaling;
 static bool8 sRoomMoveSplit = TRUE;   // Moemon Kai: MPR_RULES byte 4
+static u8 sLeaveForRegion;   // Moemon Kai: 1 + the host's region when it isn't ours (we leave the room)
 // The game clock: online it's the host's PC clock (MPR_CLOCK), offline our own
 static bool8 sHostClockHeard;
 static s64 sHostClockOffset;      // the host's local time minus our time(NULL), in seconds
@@ -1308,6 +1310,9 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
                     sRoomScale[k] = len >= 5 + k && data[4 + k] < MP_LevelScaleRuleCount(k + 1) ? data[4 + k] : gMpConfig.scale[k];
             }
             sRoomMoveSplit = len >= 4 + MP_SCALE_COUNT ? data[3 + MP_SCALE_COUNT] != 0 : TRUE;   // Moemon Kai: MOVE KIND after the level rules
+            if (len >= 5 + MP_SCALE_COUNT && data[4 + MP_SCALE_COUNT] < REGION_COUNT
+             && data[4 + MP_SCALE_COUNT] != MP_Region_Current())
+                sLeaveForRegion = 1 + data[4 + MP_SCALE_COUNT];   // Moemon Kai: the room is in another region
             sRoomRulesHeard = TRUE;
             sRoomHostId = from;
             MPNet_Log("room rules from player %d: team padding %s, anim speed +%d%%, level scaling %s", from + 1,
@@ -1432,10 +1437,11 @@ static void SendWelcome(u8 id)
     if (sLobby.creator)
     {
         // the room's settings first (the host decides them for everyone)
-        u8 rules[4 + MP_SCALE_COUNT] = {MPR_RULES, OwnPadding(), OwnAnimSpeed(), OwnLevelScaling()};
+        u8 rules[5 + MP_SCALE_COUNT] = {MPR_RULES, OwnPadding(), OwnAnimSpeed(), OwnLevelScaling()};
         LevelRulesFromEnv();
         memcpy(rules + 4, gMpConfig.scale, MP_SCALE_COUNT - 1);
         rules[3 + MP_SCALE_COUNT] = OwnMoveSplit();
+        rules[4 + MP_SCALE_COUNT] = MP_Region_Current();   // Moemon Kai: the room is in its host's region
         MP_SendRelay(id, rules, sizeof(rules));
         SendClock(id);
     }
@@ -1602,10 +1608,11 @@ bool8 MP_LevelScaling(void)
 // The host changed a room setting (OPTIONS): everyone hears it again
 void MP_SendRoomRules(void)
 {
-    u8 rules[4 + MP_SCALE_COUNT];
+    u8 rules[5 + MP_SCALE_COUNT];
     u8 i;
     if (!sLobby.creator || sLobby.state != MP_LOBBY_IN_ROOM)
         return;
+    rules[4 + MP_SCALE_COUNT] = MP_Region_Current();
     rules[0] = MPR_RULES;
     rules[1] = OwnPadding();
     rules[2] = OwnAnimSpeed();
@@ -1995,6 +2002,17 @@ void MP_FrameEnd(void)
 
 void MP_FrameUpdate(void)
 {
+    if (sLeaveForRegion)
+    {
+        // Moemon Kai: a room is in its host's region (docs/REGIONS_PLAN.md "Co-op")
+        static const char *const sNames[REGION_COUNT] = {"HOENN", "JOHTO", "KANTO"};
+        char msg[96];
+        snprintf(msg, sizeof(msg), "This room is in %s.\fTravel there to join it.", sNames[sLeaveForRegion - 1]);
+        MPNet_Log("region: the room is in %s, we're in %s: leaving", sNames[sLeaveForRegion - 1], sNames[MP_Region_Current()]);
+        sLeaveForRegion = 0;
+        MP_Lobby_Disconnect();
+        MP_ShowNotice(msg);
+    }
     u8 type;
     u16 len;
     int guard;

@@ -470,6 +470,7 @@ void MP_Region_Travel(u8 from, u8 to)
         MP_Region_FitMon(&gPlayerParty[i], to);
     gRegionState.current = to;
     gRegionState.started |= 1 << to;
+    MP_SendRoomRules();   // a host's room goes with them: friends still in the old region are told and leave
     MPNet_Log("region: travel %d -> %d (PC boxes swapped, party at its levels there)", from, to);
 }
 
