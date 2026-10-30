@@ -1,0 +1,17 @@
+pressuntil A field 5000
+wait 60
+press UP 20
+wait 40
+mash A 30 20
+wait 90
+shot gate
+mp save
+wait 30
+mp savesum
+press DOWN 16
+press DOWN 16
+wait 20
+mp save
+wait 30
+mp savesum
+quit
