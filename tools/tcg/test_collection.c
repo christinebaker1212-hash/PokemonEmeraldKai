@@ -180,7 +180,7 @@ int main(int argc, char **argv)
 #else
     c.skill = -123; /* CARD SCALING's correction (format 4) goes both ways */
     c.rated = 17;
-    c.gcDecks = 5; /* format 6: the GAME CENTER's sales and the records */
+    c.gcDecks = 5 | (1u << 13); /* format 6: the GAME CENTER's sales and the records (format 8: past 8 decks) */
     c.gcSingles[3] = 0x41;
     c.ace[0] = TCG_CARD_SQUIRTLE; /* format 7: a deck's ACE CARD */
     Tcg_RecordResult(&c, 0x01020301u, 1, 9000);

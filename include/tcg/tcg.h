@@ -124,7 +124,7 @@ struct TcgCollection
     uint8_t drought[TCG_PACK_TYPES];
     /* Format 6: what the GAME CENTER CARD SHOP sold (each structure deck once, one copy of each single: bits)
      * and the records against card players */
-    uint8_t gcDecks;
+    uint32_t gcDecks; /* (bits past 7: format 8) */
     uint8_t gcSingles[TCG_GC_SINGLE_BYTES];
     struct TcgRecord records[TCG_RECORD_SLOTS];
     /* Format 7: each saved deck's ACE CARD, the card that stands for it on the screens (0: picked for it) */

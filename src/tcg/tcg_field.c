@@ -339,6 +339,43 @@ static const struct TcgDeckDefinition *DeckNamed(const char *name)
     return NULL;
 }
 
+// Pokemon Card GB2's decks ("GB2 " in gTcgDeckDefinitions), mixed in with the first game's: each goes to the kind of
+// player its Energy (or, short of that, its Pokemon) says, and to the badge tier of the first game's decks as strong
+// as it (by the ratings)
+static int Gb2Kind(const struct TcgDeckDefinition *def)
+{
+    unsigned count[TCG_COLORLESS + 1] = {0}, i, best = 0;
+    for (i = 0; i < TCG_DECK_SIZE; i++)
+    {
+        const struct TcgCard *c = Tcg_Card(def->cards[i]);
+        if (c && c->kind == TCG_ENERGY && c->id <= 6)
+            count[c->type] += 2;
+        else if (c && c->kind == TCG_POKEMON && c->type <= TCG_COLORLESS)
+            count[c->type]++;
+    }
+    for (i = 1; i <= TCG_COLORLESS; i++)
+        if (count[i] > count[best])
+            best = i;
+    // (TCG_FIRE.. TCG_PSYCHIC, TCG_COLORLESS line up with DECK_FIRE.. DECK_COLORLESS)
+    return (int)best;
+}
+static int Gb2Tier(const struct TcgDeckDefinition *def)
+{
+    int rating = gTcgDeckRating[def - gTcgDeckDefinitions], t, kind, k;
+    for (t = 0; t < 3; t++)
+    {
+        int top = 0;
+        for (kind = 0; kind < DECK_MIXED; kind++)
+            for (k = 0; k < 3; k++)
+                if (sPools[kind][t][k] && DeckNamed(sPools[kind][t][k]) &&
+                    gTcgDeckRating[DeckNamed(sPools[kind][t][k]) - gTcgDeckDefinitions] > top)
+                    top = gTcgDeckRating[DeckNamed(sPools[kind][t][k]) - gTcgDeckDefinitions];
+        if (rating <= top)
+            return t;
+    }
+    return 3;
+}
+
 // ---------------------------------------------------------------------------
 // CARD SCALING: who brings which deck (include/tcg/scale.h)
 
@@ -388,7 +425,7 @@ static const struct Candidate *Closest(const struct Candidate *list, unsigned co
 
 void Tcg_FitOpponent(struct TcgOpponent *o, const uint16_t *mine)
 {
-    struct Candidate list[32];
+    struct Candidate list[96];
     const struct Candidate *chosen;
     unsigned n = 0, i, t, k;
     int you, deckRating, target;
@@ -433,6 +470,13 @@ again:
                     list[n++].rating = gTcgDeckRating[def - gTcgDeckDefinitions];
                 }
             }
+        // (and GB2's decks of their kind)
+        for (i = 0; i < gTcgDeckDefinitionCount && n < ARRAY_COUNT(list); i++)
+            if (!strncmp(gTcgDeckDefinitions[i].name, "GB2 ", 4) && Gb2Kind(&gTcgDeckDefinitions[i]) == o->pool)
+            {
+                list[n].deck = gTcgDeckDefinitions[i].cards;
+                list[n++].rating = gTcgDeckRating[i];
+            }
         target = you - SCALE_FAVOR - TcgScale_LevelRating(o->level);
         if (target > cap)
         {
@@ -460,6 +504,14 @@ again:
                 list[n++].rating = gTcgDeckRating[def - gTcgDeckDefinitions];
             }
         }
+        // (and GB2's decks of their kind and tier)
+        for (i = 0; i < gTcgDeckDefinitionCount && n < ARRAY_COUNT(list); i++)
+            if (!strncmp(gTcgDeckDefinitions[i].name, "GB2 ", 4) && Gb2Kind(&gTcgDeckDefinitions[i]) == o->pool &&
+                Gb2Tier(&gTcgDeckDefinitions[i]) == tier)
+            {
+                list[n].deck = gTcgDeckDefinitions[i].cards;
+                list[n++].rating = gTcgDeckRating[i];
+            }
         target = 0;
     }
     if (!n)
@@ -850,8 +902,16 @@ static const u8 *AskCards(struct ObjectEvent *npc, const u8 *script, u8 *answer,
     }
     o->mat = cat == CAT_TEAM ? (deck == DECK_WATER ? 9 : 10) : MatFor(deck);
     o->music = cat == CAT_TEAM ? MUS_VS_AQUA_MAGMA : MUS_VS_TRAINER;
+    // The booster pack they give: one of the first game's or, about half the time, GB2's of their kind
     o->pack = deck == DECK_FIRE || deck == DECK_FIGHTING ? 0 : deck == DECK_GRASS || deck == DECK_WATER ? 1
             : deck == DECK_PSYCHIC ? 2 : 3;
+    if ((h >> 8) & 1)
+    {
+        static const u8 sGb2Pack[DECK_MIXED + 1] = {
+            [DECK_FIRE] = 5, [DECK_GRASS] = 9, [DECK_LIGHTNING] = 8, [DECK_WATER] = 6,
+            [DECK_FIGHTING] = 6, [DECK_PSYCHIC] = 7, [DECK_COLORLESS] = 8, [DECK_MIXED] = 4};
+        o->pack = cat == CAT_TEAM ? ((h >> 9) & 1 ? 9 : 10) : sGb2Pack[deck <= DECK_MIXED ? deck : DECK_MIXED];
+    }
     *answer = ASK_DUEL;
     return sAccept[cat][(h >> 20) % 3];
 }

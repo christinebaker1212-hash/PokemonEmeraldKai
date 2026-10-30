@@ -2363,10 +2363,9 @@ static void RevealScreen(void)
     if (U.flipped >= 10)
     {
         const struct TcgCard *c = Tcg_Card(U.revealed[U.cursor]);
-        static const char *const setNames[] = {"COLOSSEUM", "EVOLUTION", "MYSTERY", "LABORATORY"};
         char line[64];
         if (U.revealComplete && (U.age / 60) % 3 != 2)
-            snprintf(line, sizeof(line), "%s COMPLETE! Every card!", setNames[U.pack & 3]);
+            snprintf(line, sizeof(line), "%s COMPLETE! Every card!", sPackShort[U.pack % TCG_PACK_TYPES]);
         else
             snprintf(line, sizeof(line), "%s%s", c ? c->name : "", c && Tcg_IsHolo(U.revealed[U.cursor]) ? " (holo)" : "");
         Strip(0, line);
@@ -2412,18 +2411,17 @@ static const char *const sCounterTabs[] = {"TRADE IN", "CARD SHOP", "PRIZES"};
 enum
 {
     BUY_PACK0,
-    BUY_PACK1,
-    BUY_PACK2,
-    BUY_PACK3,
-    BUY_CARD,
+    BUY_CARD = BUY_PACK0 + TCG_PACK_TYPES, /* (a booster pack of each set before it) */
     BUY_RARE_CANDY,
     BUY_PP_UP,
     BUY_TICKET,
     BUY_COUNT
 };
 static const char *const sBuyNames[BUY_COUNT] = {"COLOSSEUM PACK", "EVOLUTION PACK", "MYSTERY PACK", "LABORATORY PACK",
+                                                 "BEGINNING PACK", "LEGENDARY PACK", "FOSSIL ISLE PACK", "PSYCHIC PACK",
+                                                 "SKY-FLYING PACK", "TEAM ROCKET PACK", "AMBITION PACK",
                                                  "A CARD YOU PICK", "RARE CANDY", "PP UP", "MOEGATCHA TICKET"};
-static const unsigned sBuyCost[BUY_COUNT] = {40, 40, 40, 40, 0, 20, 25, 30};
+static const unsigned sBuyCost[BUY_COUNT] = {40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 0, 20, 25, 30};
 /* Cards with spare copies, for TRADE IN. */
 static unsigned SpareList(uint16_t *out)
 {
@@ -2509,7 +2507,6 @@ static void ClaimPrize(unsigned row)
 }
 /* The GAME CENTER CARD SHOP (RUSTBORO CITY): singles for money (the rares the CARD CLUB doesn't have) and the
  * three structure decks. */
-#define GC_DECK_PRICE 15000
 static const char *const sGcTabs[] = {"SINGLES", "DECKS", "TRADE IN", "CARD SHOP", "PRIZES"};
 #define GC_TABS 5
 static void MoveCursor(unsigned pressed, int count, int step);
@@ -2546,15 +2543,17 @@ static void GcShopScreen(void)
     }
     else
     {
-        for (i = 0; i < (int)ARRAY_COUNT(sStructureDecks); i++)
+        /* (a scrolling list: 6 rows at a time) */
+        int top = U.cursor < 6 ? 0 : U.cursor - 5;
+        for (i = top; i < (int)ARRAY_COUNT(sStructureDecks) && i < top + 6; i++)
         {
             int sold = GcDeckSold((unsigned)i);
-            snprintf(right, sizeof(right), sold ? "SOLD OUT" : "\xa5%u", GC_DECK_PRICE);
-            Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, i == U.cursor,
-                !sold && IsEnoughMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE), sStructureDecks[i].name, right);
+            snprintf(right, sizeof(right), sold ? "SOLD OUT" : "\xa5%u", sStructureDecks[i].price);
+            Row(LIST_X + 2, 8 + (i - top) * ROW_H, LIST_W - 4, i == U.cursor,
+                !sold && IsEnoughMoney(&gSaveBlock1Ptr->money, sStructureDecks[i].price), sStructureDecks[i].name, right);
         }
         snprintf(line, sizeof(line), "%s\n%s", sStructureDecks[U.cursor].blurb,
-                 GcDeckSold((unsigned)U.cursor) ? "SOLD OUT: one of each deck." : "The 1999 theme deck, all 60 cards.");
+                 GcDeckSold((unsigned)U.cursor) ? "SOLD OUT: one of each deck." : sStructureDecks[U.cursor].set);
         Strip(0, line);
     }
     Hints("{A} CHOOSE  {L}{R} COUNTER  {B} LEAVE");
@@ -2591,13 +2590,15 @@ static void GcShopStep(unsigned pressed)
                 Say(ACT_NONE, "The %s deck is sold out. One of each deck per customer!", sStructureDecks[U.cursor].name);
                 printf("[tcg] game center: deck %d sold out\n", U.cursor);
             }
-            else if (!IsEnoughMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE))
+            else if (!IsEnoughMoney(&gSaveBlock1Ptr->money, sStructureDecks[U.cursor].price))
             {
                 PlaySE(SE_FAILURE);
-                Say(ACT_NONE, "A structure deck is \xa5%u. You don't have enough money.", GC_DECK_PRICE);
+                Say(ACT_NONE, "The %s deck is \xa5%u. You don't have enough money.", sStructureDecks[U.cursor].name,
+                    sStructureDecks[U.cursor].price);
             }
             else
-                Ask(ACT_GC_DECK, U.cursor, "The %s deck for \xa5%u?", sStructureDecks[U.cursor].name, GC_DECK_PRICE);
+                Ask(ACT_GC_DECK, U.cursor, "The %s deck for \xa5%u?", sStructureDecks[U.cursor].name,
+                    sStructureDecks[U.cursor].price);
         }
     }
     if (pressed & KEY_B)
@@ -2666,7 +2667,7 @@ static void CounterLists(int tab)
                 sBuyNames[k], right);
         }
         Strip(0, U.cursor == BUY_CARD ? "Commons and uncommons, 5 or 15 CP. Rares: the GAME CENTER in RUSTBORO."
-                 : U.cursor < 4       ? "A booster pack of 10 cards from this set."
+                 : U.cursor < BUY_CARD ? "A booster pack of 10 cards from this set."
                  : U.cursor == BUY_TICKET ? "One pull on any MOEGATCHA banner."
                                           : "It goes into your BAG.");
     }
@@ -2968,10 +2969,11 @@ static void Act(int action)
     case ACT_GC_DECK:
     {
         unsigned k = (unsigned)U.askArg, i, slot;
-        if (k >= ARRAY_COUNT(sStructureDecks) || GcDeckSold(k) || !IsEnoughMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE))
+        if (k >= ARRAY_COUNT(sStructureDecks) || GcDeckSold(k) ||
+            !IsEnoughMoney(&gSaveBlock1Ptr->money, sStructureDecks[k].price))
             break;
-        RemoveMoney(&gSaveBlock1Ptr->money, GC_DECK_PRICE);
-        c->gcDecks |= 1 << k;
+        RemoveMoney(&gSaveBlock1Ptr->money, sStructureDecks[k].price);
+        c->gcDecks |= 1u << k;
         for (i = 0; i < TCG_DECK_SIZE; i++)
             if (sStructureDecks[k].cards[i] > 6)
                 AddCard(sStructureDecks[k].cards[i]);

@@ -497,8 +497,8 @@ void Tcg_RecordResult(struct TcgCollection *c, uint32_t key, int won, unsigned d
 #define EXTRA6_SIZE(format) (1 + GC_BYTES(CARDS_IN(format)) + TCG_RECORD_SLOTS * 12)
 /* 7: each deck's ACE CARD */
 #define EXTRA7_SIZE (TCG_SAVED_DECKS * 2)
-/* 8: the milestones' upper 32 bits (11 boosters x 3) */
-#define EXTRA8_SIZE 4
+/* 8: the milestones' upper 32 bits (11 boosters x 3), the GAME CENTER's later structure decks (gcDecks bits 8-31) */
+#define EXTRA8_SIZE 7
 #define FILE_SIZE(format)                                                                                              \
     (12u + PAYLOAD_SIZE(format) + ((format) >= 3 ? EXTRA_SIZE : 0) + ((format) >= 4 ? EXTRA4_SIZE : 0) +               \
      ((format) >= 5 ? EXTRA5_SIZE(format) : 0) + ((format) >= 6 ? EXTRA6_SIZE(format) : 0) +                           \
@@ -629,7 +629,10 @@ int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
                     next.ace[i] = 0;
             }
         if (format >= 8)
+        {
             next.milestonesHi = Get(&p, 4);
+            next.gcDecks |= Get(&p, 3) << 8;
+        }
     }
     else if (next.optedIn)
         next.flags = TCG_FLAG_TUTORIAL | TCG_FLAG_CLUB_MET; /* they started before the CARD CLUB */
@@ -685,7 +688,7 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
     Put(&p, c->rated, 2);
     for (i = 0; i < TCG_PACK_TYPES; i++)
         Put(&p, c->drought[i], 1);
-    Put(&p, c->gcDecks, 1);
+    Put(&p, c->gcDecks & 0xff, 1);
     for (i = 0; i < TCG_GC_SINGLE_BYTES; i++)
         Put(&p, c->gcSingles[i], 1);
     for (i = 0; i < TCG_RECORD_SLOTS; i++)
@@ -699,6 +702,7 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
     for (i = 0; i < TCG_SAVED_DECKS; i++)
         Put(&p, c->ace[i], 2);
     Put(&p, c->milestonesHi, 4);
+    Put(&p, c->gcDecks >> 8, 3);
     p = data;
     memcpy(p, "MTCG", 4);
     p += 4;
