@@ -14,7 +14,21 @@
 #define REGION_VARS_START  0x5000
 #define REGION_VARS_COUNT  0x300
 
+// Per-region progress, in the region side file
+struct RegionState
+{
+    u8 cleared;      // bit per region: its Elite Four beaten (Hoenn: FLAG_SYS_GAME_CLEAR too)
+    u8 started;      // bit per region: the player has been there
+    u8 current;      // the region of the last trip (the boat's maps take it from here)
+    u8 filler[61];   // room for later fields without a format change
+};
+extern struct RegionState gRegionState;
+
 u8 MP_Region_OfGroup(u8 group);
+u16 MP_Region_BadgeFlag(u8 region, u8 badge);
+u8 MP_Region_BadgeCount(u8 region);
+bool8 MP_Region_Cleared(u8 region);
+void MP_Region_SetCleared(u8 region);
 u8 MP_Region_Current(void);          // the region of the map the player is on
 u8 *MP_Region_FlagPointer(u16 id);   // NULL outside REGION_FLAGS_START..END
 u16 *MP_Region_VarPointer(u16 id);

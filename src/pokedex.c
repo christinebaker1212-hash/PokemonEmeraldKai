@@ -2465,7 +2465,7 @@ static void CreatePokedexList(u8 dexMode, u8 order)
         }
         break;
     case ORDER_ALPHABETICAL:
-        for (i = 0; i < NUM_SPECIES - 1; i++)
+        for (i = 0; i < ARRAY_COUNT(gPokedexOrder_Alphabetical); i++)   // Moemon Kai: the table's own length
         {
             temp_dexNum = gPokedexOrder_Alphabetical[i];
 
@@ -2493,7 +2493,7 @@ static void CreatePokedexList(u8 dexMode, u8 order)
         }
         break;
     case ORDER_LIGHTEST:
-        for (i = 0; i < NATIONAL_DEX_COUNT; i++)
+        for (i = 0; i < ARRAY_COUNT(gPokedexOrder_Weight); i++)
         {
             temp_dexNum = gPokedexOrder_Weight[i];
 

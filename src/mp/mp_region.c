@@ -11,14 +11,17 @@
 #include "mp_region.h"
 #include "save.h"
 #include "constants/map_groups.h"
+#include "constants/flags.h"
+#include "constants/qz_port.h"
 
 extern char gPlatformSavePath[512];
 
 #define REGION_MAGIC 0x4E474552   // "REGN"
-#define REGION_FORMAT 1
+#define REGION_FORMAT 2   // 2: + struct RegionState
 
 static u8 sFlags[REGION_FLAG_BYTES];
 static u16 sVars[REGION_VARS_COUNT];
+struct RegionState gRegionState;   // per-region progress (mp_region.h)
 
 u8 MP_Region_OfGroup(u8 group)
 {
@@ -52,6 +55,7 @@ void MP_Region_NewGame(void)
 {
     memset(sFlags, 0, sizeof(sFlags));
     memset(sVars, 0, sizeof(sVars));
+    memset(&gRegionState, 0, sizeof(gRegionState));
 }
 
 // What ties the side file to the save it was written with
@@ -78,10 +82,11 @@ void MP_Region_WriteSidecar(void)
     header[0] = REGION_MAGIC;
     header[1] = REGION_FORMAT;
     header[2] = Fingerprint();
-    header[3] = sizeof(sFlags) + sizeof(sVars);
+    header[3] = sizeof(sFlags) + sizeof(sVars) + sizeof(gRegionState);
     fwrite(header, sizeof(header), 1, f);
     fwrite(sFlags, sizeof(sFlags), 1, f);
     fwrite(sVars, sizeof(sVars), 1, f);
+    fwrite(&gRegionState, sizeof(gRegionState), 1, f);
     fclose(f);
     remove(path);
     rename(tmp, path);
@@ -94,9 +99,17 @@ static bool8 LoadFrom(const char *path)
     bool8 ok = FALSE;
     if (!f)
         return FALSE;
-    if (fread(header, sizeof(header), 1, f) == 1 && header[0] == REGION_MAGIC && header[1] == REGION_FORMAT
-     && header[2] == Fingerprint() && header[3] == sizeof(sFlags) + sizeof(sVars))
+    memset(&gRegionState, 0, sizeof(gRegionState));
+    if (fread(header, sizeof(header), 1, f) == 1 && header[0] == REGION_MAGIC && header[2] == Fingerprint()
+     && header[3] >= sizeof(sFlags) + sizeof(sVars))
+    {
         ok = fread(sFlags, sizeof(sFlags), 1, f) == 1 && fread(sVars, sizeof(sVars), 1, f) == 1;
+        if (ok && header[3] > sizeof(sFlags) + sizeof(sVars))   // format 2+: the region state (a later build's longer one: what fits)
+        {
+            u32 n = header[3] - sizeof(sFlags) - sizeof(sVars);
+            fread(&gRegionState, n < sizeof(gRegionState) ? n : sizeof(gRegionState), 1, f);
+        }
+    }
     fclose(f);
     return ok;
 }
@@ -119,4 +132,35 @@ void MP_Region_LoadFromSave(void)
     }
     MP_Region_NewGame();
     MPNet_Log("region: no side file for this save (Johto / Kanto progress starts empty)");
+}
+
+// ---------------------------------------------------------------------------------------------------- progress
+static const u16 sBadgeFlags[REGION_COUNT] = {FLAG_BADGE01_GET, FLAG_QZ_0x11B2, FLAG_QZ_0x2100};
+
+u16 MP_Region_BadgeFlag(u8 region, u8 badge)
+{
+    if (region >= REGION_COUNT || badge >= 8)
+        return 0;
+    return sBadgeFlags[region] + badge;
+}
+
+u8 MP_Region_BadgeCount(u8 region)
+{
+    u8 i, n = 0;
+    for (i = 0; i < 8; i++)
+        n += FlagGet(MP_Region_BadgeFlag(region, i)) != 0;
+    return n;
+}
+
+bool8 MP_Region_Cleared(u8 region)
+{
+    if (region == REGION_HOENN && FlagGet(FLAG_SYS_GAME_CLEAR))
+        return TRUE;
+    return region < REGION_COUNT && (gRegionState.cleared & (1 << region));
+}
+
+void MP_Region_SetCleared(u8 region)
+{
+    if (region < REGION_COUNT)
+        gRegionState.cleared |= 1 << region;
 }

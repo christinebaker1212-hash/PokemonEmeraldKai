@@ -3735,7 +3735,7 @@
     {
         .trainerClass = 32,
         .encounterMusic_gender = 0,
-        .trainerPic = 29,
+        .trainerPic = 128,
         .trainerName = _("BROCK"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3747,7 +3747,7 @@
     {
         .trainerClass = 32,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 34,
+        .trainerPic = 129,
         .trainerName = _("MISTY"),
         .items = {ITEM_SUPER_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3759,7 +3759,7 @@
     {
         .trainerClass = 32,
         .encounterMusic_gender = 0,
-        .trainerPic = 33,
+        .trainerPic = 130,
         .trainerName = _("LT. SURGE"),
         .items = {ITEM_SUPER_POTION, ITEM_FULL_HEAL, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3771,7 +3771,7 @@
     {
         .trainerClass = 32,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 30,
+        .trainerPic = 131,
         .trainerName = _("ERIKA"),
         .items = {ITEM_HYPER_POTION, ITEM_FULL_HEAL, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3783,7 +3783,7 @@
     {
         .trainerClass = 32,
         .encounterMusic_gender = 0,
-        .trainerPic = 32,
+        .trainerPic = 132,
         .trainerName = _("KOGA"),
         .items = {ITEM_HYPER_POTION, ITEM_HYPER_POTION, ITEM_FULL_HEAL, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3795,7 +3795,7 @@
     {
         .trainerClass = 32,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 35,
+        .trainerPic = 133,
         .trainerName = _("SABRINA"),
         .items = {ITEM_HYPER_POTION, ITEM_HYPER_POTION, ITEM_FULL_HEAL, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3807,7 +3807,7 @@
     {
         .trainerClass = 32,
         .encounterMusic_gender = 0,
-        .trainerPic = 28,
+        .trainerPic = 134,
         .trainerName = _("BLAINE"),
         .items = {ITEM_HYPER_POTION, ITEM_HYPER_POTION, ITEM_FULL_HEAL, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3819,7 +3819,7 @@
     {
         .trainerClass = 32,
         .encounterMusic_gender = 6,
-        .trainerPic = 31,
+        .trainerPic = 135,
         .trainerName = _("GIOVANNI"),
         .items = {ITEM_HYPER_POTION, ITEM_HYPER_POTION, ITEM_FULL_HEAL, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3831,7 +3831,7 @@
     {
         .trainerClass = 31,
         .encounterMusic_gender = 10 | F_TRAINER_FEMALE,
-        .trainerPic = 19,
+        .trainerPic = 136,
         .trainerName = _("LORELEI"),
         .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3843,7 +3843,7 @@
     {
         .trainerClass = 31,
         .encounterMusic_gender = 10,
-        .trainerPic = 17,
+        .trainerPic = 137,
         .trainerName = _("BRUNO"),
         .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3855,7 +3855,7 @@
     {
         .trainerClass = 31,
         .encounterMusic_gender = 10 | F_TRAINER_FEMALE,
-        .trainerPic = 16,
+        .trainerPic = 138,
         .trainerName = _("AGATHA"),
         .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3867,7 +3867,7 @@
     {
         .trainerClass = 31,
         .encounterMusic_gender = 10,
-        .trainerPic = 18,
+        .trainerPic = 139,
         .trainerName = _("LANCE"),
         .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3879,7 +3879,7 @@
     {
         .trainerClass = 38,
         .encounterMusic_gender = 0,
-        .trainerPic = 8,
+        .trainerPic = 140,
         .trainerName = _("BLUE"),
         .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_FULL_RESTORE},
         .doubleBattle = FALSE,
@@ -3891,7 +3891,7 @@
     {
         .trainerClass = 37,
         .encounterMusic_gender = 0,
-        .trainerPic = 59,
+        .trainerPic = 141,
         .trainerName = _("BEN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3903,7 +3903,7 @@
     {
         .trainerClass = 37,
         .encounterMusic_gender = 0,
-        .trainerPic = 59,
+        .trainerPic = 141,
         .trainerName = _("CALVIN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3915,7 +3915,7 @@
     {
         .trainerClass = 37,
         .encounterMusic_gender = 0,
-        .trainerPic = 59,
+        .trainerPic = 141,
         .trainerName = _("JOSH"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3927,7 +3927,7 @@
     {
         .trainerClass = 37,
         .encounterMusic_gender = 0,
-        .trainerPic = 59,
+        .trainerPic = 141,
         .trainerName = _("TIMMY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3939,7 +3939,7 @@
     {
         .trainerClass = 37,
         .encounterMusic_gender = 0,
-        .trainerPic = 59,
+        .trainerPic = 141,
         .trainerName = _("JOEY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3951,7 +3951,7 @@
     {
         .trainerClass = 37,
         .encounterMusic_gender = 0,
-        .trainerPic = 59,
+        .trainerPic = 141,
         .trainerName = _("DAN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3963,7 +3963,7 @@
     {
         .trainerClass = 37,
         .encounterMusic_gender = 0,
-        .trainerPic = 59,
+        .trainerPic = 141,
         .trainerName = _("CHAD"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3975,7 +3975,7 @@
     {
         .trainerClass = 37,
         .encounterMusic_gender = 0,
-        .trainerPic = 59,
+        .trainerPic = 141,
         .trainerName = _("TYLER"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3987,7 +3987,7 @@
     {
         .trainerClass = 37,
         .encounterMusic_gender = 0,
-        .trainerPic = 59,
+        .trainerPic = 141,
         .trainerName = _("EDDIE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -3999,7 +3999,7 @@
     {
         .trainerClass = 37,
         .encounterMusic_gender = 0,
-        .trainerPic = 59,
+        .trainerPic = 141,
         .trainerName = _("DILLON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4011,7 +4011,7 @@
     {
         .trainerClass = 37,
         .encounterMusic_gender = 0,
-        .trainerPic = 59,
+        .trainerPic = 141,
         .trainerName = _("YASU"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4023,7 +4023,7 @@
     {
         .trainerClass = 37,
         .encounterMusic_gender = 0,
-        .trainerPic = 59,
+        .trainerPic = 141,
         .trainerName = _("DAVE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4035,7 +4035,7 @@
     {
         .trainerClass = 51,
         .encounterMusic_gender = 0,
-        .trainerPic = 5,
+        .trainerPic = 142,
         .trainerName = _("RICK"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4047,7 +4047,7 @@
     {
         .trainerClass = 51,
         .encounterMusic_gender = 0,
-        .trainerPic = 5,
+        .trainerPic = 142,
         .trainerName = _("DOUG"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4059,7 +4059,7 @@
     {
         .trainerClass = 51,
         .encounterMusic_gender = 0,
-        .trainerPic = 5,
+        .trainerPic = 142,
         .trainerName = _("SAMMY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4071,7 +4071,7 @@
     {
         .trainerClass = 51,
         .encounterMusic_gender = 0,
-        .trainerPic = 5,
+        .trainerPic = 142,
         .trainerName = _("COLTON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4083,7 +4083,7 @@
     {
         .trainerClass = 51,
         .encounterMusic_gender = 0,
-        .trainerPic = 5,
+        .trainerPic = 142,
         .trainerName = _("GREG"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4095,7 +4095,7 @@
     {
         .trainerClass = 51,
         .encounterMusic_gender = 0,
-        .trainerPic = 5,
+        .trainerPic = 142,
         .trainerName = _("JAMES"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4107,7 +4107,7 @@
     {
         .trainerClass = 51,
         .encounterMusic_gender = 0,
-        .trainerPic = 5,
+        .trainerPic = 142,
         .trainerName = _("KENT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4119,7 +4119,7 @@
     {
         .trainerClass = 51,
         .encounterMusic_gender = 0,
-        .trainerPic = 5,
+        .trainerPic = 142,
         .trainerName = _("ROBBY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4131,7 +4131,7 @@
     {
         .trainerClass = 51,
         .encounterMusic_gender = 0,
-        .trainerPic = 5,
+        .trainerPic = 142,
         .trainerName = _("CALE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4143,7 +4143,7 @@
     {
         .trainerClass = 51,
         .encounterMusic_gender = 0,
-        .trainerPic = 5,
+        .trainerPic = 142,
         .trainerName = _("KEIGO"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4155,7 +4155,7 @@
     {
         .trainerClass = 51,
         .encounterMusic_gender = 0,
-        .trainerPic = 5,
+        .trainerPic = 142,
         .trainerName = _("ELIJAH"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4167,7 +4167,7 @@
     {
         .trainerClass = 51,
         .encounterMusic_gender = 0,
-        .trainerPic = 5,
+        .trainerPic = 142,
         .trainerName = _("BRENT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4179,7 +4179,7 @@
     {
         .trainerClass = 51,
         .encounterMusic_gender = 0,
-        .trainerPic = 5,
+        .trainerPic = 142,
         .trainerName = _("CONNER"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4191,7 +4191,7 @@
     {
         .trainerClass = 54,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 27,
+        .trainerPic = 143,
         .trainerName = _("JANICE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4203,7 +4203,7 @@
     {
         .trainerClass = 54,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 27,
+        .trainerPic = 143,
         .trainerName = _("SALLY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4215,7 +4215,7 @@
     {
         .trainerClass = 54,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 27,
+        .trainerPic = 143,
         .trainerName = _("ROBIN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4227,7 +4227,7 @@
     {
         .trainerClass = 54,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 27,
+        .trainerPic = 143,
         .trainerName = _("CRISSY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4239,7 +4239,7 @@
     {
         .trainerClass = 54,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 27,
+        .trainerPic = 143,
         .trainerName = _("MIRIAM"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4251,7 +4251,7 @@
     {
         .trainerClass = 54,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 27,
+        .trainerPic = 143,
         .trainerName = _("IRIS"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4263,7 +4263,7 @@
     {
         .trainerClass = 54,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 27,
+        .trainerPic = 143,
         .trainerName = _("RELI"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4275,7 +4275,7 @@
     {
         .trainerClass = 54,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 27,
+        .trainerPic = 143,
         .trainerName = _("ALI"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4287,7 +4287,7 @@
     {
         .trainerClass = 54,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 27,
+        .trainerPic = 143,
         .trainerName = _("HALEY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4299,7 +4299,7 @@
     {
         .trainerClass = 54,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 27,
+        .trainerPic = 143,
         .trainerName = _("ANN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4311,7 +4311,7 @@
     {
         .trainerClass = 54,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 27,
+        .trainerPic = 143,
         .trainerName = _("DAWN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4323,7 +4323,7 @@
     {
         .trainerClass = 54,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 27,
+        .trainerPic = 143,
         .trainerName = _("PAIGE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4335,7 +4335,7 @@
     {
         .trainerClass = 54,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 27,
+        .trainerPic = 143,
         .trainerName = _("ANDREA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4347,7 +4347,7 @@
     {
         .trainerClass = 54,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 27,
+        .trainerPic = 143,
         .trainerName = _("MEGAN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4359,7 +4359,7 @@
     {
         .trainerClass = 54,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 27,
+        .trainerPic = 143,
         .trainerName = _("JULIA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4371,7 +4371,7 @@
     {
         .trainerClass = 54,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 27,
+        .trainerPic = 143,
         .trainerName = _("KAY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4383,7 +4383,7 @@
     {
         .trainerClass = 54,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 27,
+        .trainerPic = 143,
         .trainerName = _("LISA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4395,7 +4395,7 @@
     {
         .trainerClass = 47,
         .encounterMusic_gender = 0,
-        .trainerPic = 50,
+        .trainerPic = 144,
         .trainerName = _("EDMOND"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4407,7 +4407,7 @@
     {
         .trainerClass = 47,
         .encounterMusic_gender = 0,
-        .trainerPic = 50,
+        .trainerPic = 144,
         .trainerName = _("TREVOR"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4419,7 +4419,7 @@
     {
         .trainerClass = 47,
         .encounterMusic_gender = 0,
-        .trainerPic = 50,
+        .trainerPic = 144,
         .trainerName = _("LEONARD"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4431,7 +4431,7 @@
     {
         .trainerClass = 47,
         .encounterMusic_gender = 0,
-        .trainerPic = 50,
+        .trainerPic = 144,
         .trainerName = _("DUNCAN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4443,7 +4443,7 @@
     {
         .trainerClass = 47,
         .encounterMusic_gender = 0,
-        .trainerPic = 50,
+        .trainerPic = 144,
         .trainerName = _("HUEY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4455,7 +4455,7 @@
     {
         .trainerClass = 47,
         .encounterMusic_gender = 0,
-        .trainerPic = 50,
+        .trainerPic = 144,
         .trainerName = _("DYLAN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4467,7 +4467,7 @@
     {
         .trainerClass = 47,
         .encounterMusic_gender = 0,
-        .trainerPic = 50,
+        .trainerPic = 144,
         .trainerName = _("PHILLIP"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4479,7 +4479,7 @@
     {
         .trainerClass = 47,
         .encounterMusic_gender = 0,
-        .trainerPic = 50,
+        .trainerPic = 144,
         .trainerName = _("DWAYNE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4491,7 +4491,7 @@
     {
         .trainerClass = 26,
         .encounterMusic_gender = 0,
-        .trainerPic = 7,
+        .trainerPic = 145,
         .trainerName = _("LIAM"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4503,7 +4503,7 @@
     {
         .trainerClass = 26,
         .encounterMusic_gender = 0,
-        .trainerPic = 7,
+        .trainerPic = 145,
         .trainerName = _("SHANE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4515,7 +4515,7 @@
     {
         .trainerClass = 26,
         .encounterMusic_gender = 0,
-        .trainerPic = 7,
+        .trainerPic = 145,
         .trainerName = _("ETHAN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4527,7 +4527,7 @@
     {
         .trainerClass = 26,
         .encounterMusic_gender = 0,
-        .trainerPic = 7,
+        .trainerPic = 145,
         .trainerName = _("RICKY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4539,7 +4539,7 @@
     {
         .trainerClass = 26,
         .encounterMusic_gender = 0,
-        .trainerPic = 7,
+        .trainerPic = 145,
         .trainerName = _("JEFF"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4551,7 +4551,7 @@
     {
         .trainerClass = 26,
         .encounterMusic_gender = 0,
-        .trainerPic = 7,
+        .trainerPic = 145,
         .trainerName = _("CHRIS"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4563,7 +4563,7 @@
     {
         .trainerClass = 26,
         .encounterMusic_gender = 0,
-        .trainerPic = 7,
+        .trainerPic = 145,
         .trainerName = _("DREW"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4575,7 +4575,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("DIANA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4587,7 +4587,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("NANCY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4599,7 +4599,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("ISABELLE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4611,7 +4611,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("KELSEY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4623,7 +4623,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("ALICIA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4635,7 +4635,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("CAITLIN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4647,7 +4647,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("HEIDI"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4659,7 +4659,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("CAROL"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4671,7 +4671,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("SOFIA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4683,7 +4683,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("MARTHA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4695,7 +4695,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("TINA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4707,7 +4707,7 @@
     {
         .trainerClass = 23,
         .encounterMusic_gender = 3,
-        .trainerPic = 38,
+        .trainerPic = 147,
         .trainerName = _("MARK"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4719,7 +4719,7 @@
     {
         .trainerClass = 23,
         .encounterMusic_gender = 3,
-        .trainerPic = 38,
+        .trainerPic = 147,
         .trainerName = _("HERMAN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4731,7 +4731,7 @@
     {
         .trainerClass = 23,
         .encounterMusic_gender = 3,
-        .trainerPic = 38,
+        .trainerPic = 147,
         .trainerName = _("COOPER"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4743,7 +4743,7 @@
     {
         .trainerClass = 23,
         .encounterMusic_gender = 3,
-        .trainerPic = 38,
+        .trainerPic = 147,
         .trainerName = _("STEVE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4755,7 +4755,7 @@
     {
         .trainerClass = 23,
         .encounterMusic_gender = 3,
-        .trainerPic = 38,
+        .trainerPic = 147,
         .trainerName = _("WINSTON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4767,7 +4767,7 @@
     {
         .trainerClass = 23,
         .encounterMusic_gender = 3,
-        .trainerPic = 38,
+        .trainerPic = 147,
         .trainerName = _("DAWSON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4779,7 +4779,7 @@
     {
         .trainerClass = 23,
         .encounterMusic_gender = 3,
-        .trainerPic = 38,
+        .trainerPic = 147,
         .trainerName = _("ASHTON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4791,7 +4791,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 53,
+        .trainerPic = 148,
         .trainerName = _("JOVAN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4803,7 +4803,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 53,
+        .trainerPic = 148,
         .trainerName = _("MIGUEL"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4815,7 +4815,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 53,
+        .trainerPic = 148,
         .trainerName = _("AIDAN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4827,7 +4827,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 53,
+        .trainerPic = 148,
         .trainerName = _("GLENN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4839,7 +4839,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 53,
+        .trainerPic = 148,
         .trainerName = _("LESLIE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4851,7 +4851,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 53,
+        .trainerPic = 148,
         .trainerName = _("ERIK"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4863,7 +4863,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 53,
+        .trainerPic = 148,
         .trainerName = _("AVERY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4875,7 +4875,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 53,
+        .trainerPic = 148,
         .trainerName = _("DEREK"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4887,7 +4887,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 53,
+        .trainerPic = 148,
         .trainerName = _("ZAC"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4899,7 +4899,7 @@
     {
         .trainerClass = 2,
         .encounterMusic_gender = 11,
-        .trainerPic = 24,
+        .trainerPic = 149,
         .trainerName = _("MARCOS"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4911,7 +4911,7 @@
     {
         .trainerClass = 2,
         .encounterMusic_gender = 11,
-        .trainerPic = 24,
+        .trainerPic = 149,
         .trainerName = _("FRANKLIN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4923,7 +4923,7 @@
     {
         .trainerClass = 2,
         .encounterMusic_gender = 11,
-        .trainerPic = 24,
+        .trainerPic = 149,
         .trainerName = _("NOB"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4935,7 +4935,7 @@
     {
         .trainerClass = 2,
         .encounterMusic_gender = 11,
-        .trainerPic = 24,
+        .trainerPic = 149,
         .trainerName = _("WAYNE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4947,7 +4947,7 @@
     {
         .trainerClass = 2,
         .encounterMusic_gender = 11,
-        .trainerPic = 24,
+        .trainerPic = 149,
         .trainerName = _("ALAN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4959,7 +4959,7 @@
     {
         .trainerClass = 2,
         .encounterMusic_gender = 11,
-        .trainerPic = 24,
+        .trainerPic = 149,
         .trainerName = _("BRICE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4971,7 +4971,7 @@
     {
         .trainerClass = 2,
         .encounterMusic_gender = 11,
-        .trainerPic = 24,
+        .trainerPic = 149,
         .trainerName = _("CLARK"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4983,7 +4983,7 @@
     {
         .trainerClass = 2,
         .encounterMusic_gender = 11,
-        .trainerPic = 24,
+        .trainerPic = 149,
         .trainerName = _("TRENT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -4995,7 +4995,7 @@
     {
         .trainerClass = 2,
         .encounterMusic_gender = 11,
-        .trainerPic = 24,
+        .trainerPic = 149,
         .trainerName = _("DUDLEY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5007,7 +5007,7 @@
     {
         .trainerClass = 2,
         .encounterMusic_gender = 11,
-        .trainerPic = 24,
+        .trainerPic = 149,
         .trainerName = _("ALLEN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5019,7 +5019,7 @@
     {
         .trainerClass = 2,
         .encounterMusic_gender = 11,
-        .trainerPic = 24,
+        .trainerPic = 149,
         .trainerName = _("ERIC"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5031,7 +5031,7 @@
     {
         .trainerClass = 2,
         .encounterMusic_gender = 11,
-        .trainerPic = 24,
+        .trainerPic = 149,
         .trainerName = _("LENNY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5043,7 +5043,7 @@
     {
         .trainerClass = 2,
         .encounterMusic_gender = 11,
-        .trainerPic = 24,
+        .trainerPic = 149,
         .trainerName = _("OLIVER"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5055,7 +5055,7 @@
     {
         .trainerClass = 2,
         .encounterMusic_gender = 11,
-        .trainerPic = 24,
+        .trainerPic = 149,
         .trainerName = _("LUCAS"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5067,7 +5067,7 @@
     {
         .trainerClass = 40,
         .encounterMusic_gender = 0,
-        .trainerPic = 2,
+        .trainerPic = 150,
         .trainerName = _("JARED"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5079,7 +5079,7 @@
     {
         .trainerClass = 40,
         .encounterMusic_gender = 0,
-        .trainerPic = 2,
+        .trainerPic = 150,
         .trainerName = _("MALIK"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5091,7 +5091,7 @@
     {
         .trainerClass = 40,
         .encounterMusic_gender = 0,
-        .trainerPic = 2,
+        .trainerPic = 150,
         .trainerName = _("ERNEST"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5103,7 +5103,7 @@
     {
         .trainerClass = 40,
         .encounterMusic_gender = 0,
-        .trainerPic = 2,
+        .trainerPic = 150,
         .trainerName = _("ALEX"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5115,7 +5115,7 @@
     {
         .trainerClass = 40,
         .encounterMusic_gender = 0,
-        .trainerPic = 2,
+        .trainerPic = 150,
         .trainerName = _("LAO"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5127,7 +5127,7 @@
     {
         .trainerClass = 40,
         .encounterMusic_gender = 0,
-        .trainerPic = 2,
+        .trainerPic = 150,
         .trainerName = _("HIDEO"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5139,7 +5139,7 @@
     {
         .trainerClass = 40,
         .encounterMusic_gender = 0,
-        .trainerPic = 2,
+        .trainerPic = 150,
         .trainerName = _("RUBEN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5151,7 +5151,7 @@
     {
         .trainerClass = 40,
         .encounterMusic_gender = 0,
-        .trainerPic = 2,
+        .trainerPic = 150,
         .trainerName = _("BILLY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5163,7 +5163,7 @@
     {
         .trainerClass = 40,
         .encounterMusic_gender = 0,
-        .trainerPic = 2,
+        .trainerPic = 150,
         .trainerName = _("NIKOLAS"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5175,7 +5175,7 @@
     {
         .trainerClass = 40,
         .encounterMusic_gender = 0,
-        .trainerPic = 2,
+        .trainerPic = 150,
         .trainerName = _("JAXON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5187,7 +5187,7 @@
     {
         .trainerClass = 40,
         .encounterMusic_gender = 0,
-        .trainerPic = 2,
+        .trainerPic = 150,
         .trainerName = _("WILLIAM"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5199,7 +5199,7 @@
     {
         .trainerClass = 40,
         .encounterMusic_gender = 0,
-        .trainerPic = 2,
+        .trainerPic = 150,
         .trainerName = _("LUKAS"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5211,7 +5211,7 @@
     {
         .trainerClass = 40,
         .encounterMusic_gender = 0,
-        .trainerPic = 2,
+        .trainerPic = 150,
         .trainerName = _("ISAAC"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5223,7 +5223,7 @@
     {
         .trainerClass = 40,
         .encounterMusic_gender = 0,
-        .trainerPic = 2,
+        .trainerPic = 150,
         .trainerName = _("GERALD"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5235,7 +5235,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_BURGLAR,
         .encounterMusic_gender = 3,
-        .trainerPic = 6,
+        .trainerPic = 151,
         .trainerName = _("QUINN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5247,7 +5247,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_BURGLAR,
         .encounterMusic_gender = 3,
-        .trainerPic = 6,
+        .trainerPic = 151,
         .trainerName = _("RAMON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5259,7 +5259,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_BURGLAR,
         .encounterMusic_gender = 3,
-        .trainerPic = 6,
+        .trainerPic = 151,
         .trainerName = _("DUSTY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5271,7 +5271,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_BURGLAR,
         .encounterMusic_gender = 3,
-        .trainerPic = 6,
+        .trainerPic = 151,
         .trainerName = _("ARNIE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5283,7 +5283,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_BURGLAR,
         .encounterMusic_gender = 3,
-        .trainerPic = 6,
+        .trainerPic = 151,
         .trainerName = _("SIMON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5295,7 +5295,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_BURGLAR,
         .encounterMusic_gender = 3,
-        .trainerPic = 6,
+        .trainerPic = 151,
         .trainerName = _("LEWIS"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5307,7 +5307,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 0,
-        .trainerPic = 20,
+        .trainerPic = 152,
         .trainerName = _("BAILY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5319,7 +5319,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 0,
-        .trainerPic = 20,
+        .trainerPic = 152,
         .trainerName = _("BRAXTON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5331,7 +5331,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 0,
-        .trainerPic = 20,
+        .trainerPic = 152,
         .trainerName = _("BERNIE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5343,7 +5343,7 @@
     {
         .trainerClass = 39,
         .encounterMusic_gender = 11,
-        .trainerPic = 21,
+        .trainerPic = 153,
         .trainerName = _("DALE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5355,7 +5355,7 @@
     {
         .trainerClass = 39,
         .encounterMusic_gender = 11,
-        .trainerPic = 21,
+        .trainerPic = 153,
         .trainerName = _("BARNY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5367,7 +5367,7 @@
     {
         .trainerClass = 39,
         .encounterMusic_gender = 11,
-        .trainerPic = 21,
+        .trainerPic = 153,
         .trainerName = _("NED"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5379,7 +5379,7 @@
     {
         .trainerClass = 39,
         .encounterMusic_gender = 11,
-        .trainerPic = 21,
+        .trainerPic = 153,
         .trainerName = _("CHIP"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5391,7 +5391,7 @@
     {
         .trainerClass = 39,
         .encounterMusic_gender = 11,
-        .trainerPic = 21,
+        .trainerPic = 153,
         .trainerName = _("HANK"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5403,7 +5403,7 @@
     {
         .trainerClass = 39,
         .encounterMusic_gender = 11,
-        .trainerPic = 21,
+        .trainerPic = 153,
         .trainerName = _("ELLIOT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5415,7 +5415,7 @@
     {
         .trainerClass = 39,
         .encounterMusic_gender = 11,
-        .trainerPic = 21,
+        .trainerPic = 153,
         .trainerName = _("RONALD"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5427,7 +5427,7 @@
     {
         .trainerClass = 39,
         .encounterMusic_gender = 11,
-        .trainerPic = 21,
+        .trainerPic = 153,
         .trainerName = _("CLAUDE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5439,7 +5439,7 @@
     {
         .trainerClass = 39,
         .encounterMusic_gender = 11,
-        .trainerPic = 21,
+        .trainerPic = 153,
         .trainerName = _("WADE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5451,7 +5451,7 @@
     {
         .trainerClass = 39,
         .encounterMusic_gender = 11,
-        .trainerPic = 21,
+        .trainerPic = 153,
         .trainerName = _("NOLAN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5463,7 +5463,7 @@
     {
         .trainerClass = 39,
         .encounterMusic_gender = 11,
-        .trainerPic = 21,
+        .trainerPic = 153,
         .trainerName = _("ANDREW"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5475,7 +5475,7 @@
     {
         .trainerClass = 8,
         .encounterMusic_gender = 8,
-        .trainerPic = 55,
+        .trainerPic = 154,
         .trainerName = _("LUIS"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5487,7 +5487,7 @@
     {
         .trainerClass = 8,
         .encounterMusic_gender = 8,
-        .trainerPic = 55,
+        .trainerPic = 154,
         .trainerName = _("RICHARD"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5499,7 +5499,7 @@
     {
         .trainerClass = 8,
         .encounterMusic_gender = 8,
-        .trainerPic = 55,
+        .trainerPic = 154,
         .trainerName = _("REECE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5511,7 +5511,7 @@
     {
         .trainerClass = 8,
         .encounterMusic_gender = 8,
-        .trainerPic = 55,
+        .trainerPic = 154,
         .trainerName = _("MATTHEW"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5523,7 +5523,7 @@
     {
         .trainerClass = 8,
         .encounterMusic_gender = 8,
-        .trainerPic = 55,
+        .trainerPic = 154,
         .trainerName = _("DOUGLAS"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5535,7 +5535,7 @@
     {
         .trainerClass = 8,
         .encounterMusic_gender = 8,
-        .trainerPic = 55,
+        .trainerPic = 154,
         .trainerName = _("DAVID"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5547,7 +5547,7 @@
     {
         .trainerClass = 8,
         .encounterMusic_gender = 8,
-        .trainerPic = 55,
+        .trainerPic = 154,
         .trainerName = _("TONY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5559,7 +5559,7 @@
     {
         .trainerClass = 8,
         .encounterMusic_gender = 8,
-        .trainerPic = 55,
+        .trainerPic = 154,
         .trainerName = _("AXLE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5571,7 +5571,7 @@
     {
         .trainerClass = 8,
         .encounterMusic_gender = 8,
-        .trainerPic = 55,
+        .trainerPic = 154,
         .trainerName = _("BARRY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5583,7 +5583,7 @@
     {
         .trainerClass = 8,
         .encounterMusic_gender = 8,
-        .trainerPic = 55,
+        .trainerPic = 154,
         .trainerName = _("DEAN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5595,7 +5595,7 @@
     {
         .trainerClass = 8,
         .encounterMusic_gender = 8,
-        .trainerPic = 55,
+        .trainerPic = 154,
         .trainerName = _("DARRIN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5607,7 +5607,7 @@
     {
         .trainerClass = 8,
         .encounterMusic_gender = 8,
-        .trainerPic = 55,
+        .trainerPic = 154,
         .trainerName = _("SPENCER"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5619,7 +5619,7 @@
     {
         .trainerClass = 8,
         .encounterMusic_gender = 8,
-        .trainerPic = 55,
+        .trainerPic = 154,
         .trainerName = _("JACK"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5631,7 +5631,7 @@
     {
         .trainerClass = 8,
         .encounterMusic_gender = 8,
-        .trainerPic = 55,
+        .trainerPic = 154,
         .trainerName = _("JEROME"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5643,7 +5643,7 @@
     {
         .trainerClass = 8,
         .encounterMusic_gender = 8,
-        .trainerPic = 55,
+        .trainerPic = 154,
         .trainerName = _("ROLAND"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5655,7 +5655,7 @@
     {
         .trainerClass = 12,
         .encounterMusic_gender = 0,
-        .trainerPic = 15,
+        .trainerPic = 155,
         .trainerName = _("KOJI"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5667,7 +5667,7 @@
     {
         .trainerClass = 12,
         .encounterMusic_gender = 0,
-        .trainerPic = 15,
+        .trainerPic = 155,
         .trainerName = _("LUKE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5679,7 +5679,7 @@
     {
         .trainerClass = 12,
         .encounterMusic_gender = 0,
-        .trainerPic = 15,
+        .trainerPic = 155,
         .trainerName = _("CAMRON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5691,7 +5691,7 @@
     {
         .trainerClass = 12,
         .encounterMusic_gender = 0,
-        .trainerPic = 15,
+        .trainerPic = 155,
         .trainerName = _("RAUL"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5703,7 +5703,7 @@
     {
         .trainerClass = 12,
         .encounterMusic_gender = 0,
-        .trainerPic = 15,
+        .trainerPic = 155,
         .trainerName = _("ISAIAH"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5715,7 +5715,7 @@
     {
         .trainerClass = 12,
         .encounterMusic_gender = 0,
-        .trainerPic = 15,
+        .trainerPic = 155,
         .trainerName = _("ZEEK"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5727,7 +5727,7 @@
     {
         .trainerClass = 12,
         .encounterMusic_gender = 0,
-        .trainerPic = 15,
+        .trainerPic = 155,
         .trainerName = _("JAMAL"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5739,7 +5739,7 @@
     {
         .trainerClass = 12,
         .encounterMusic_gender = 0,
-        .trainerPic = 15,
+        .trainerPic = 155,
         .trainerName = _("COREY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5751,7 +5751,7 @@
     {
         .trainerClass = 50,
         .encounterMusic_gender = 0,
-        .trainerPic = 22,
+        .trainerPic = 156,
         .trainerName = _("HUGO"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5763,7 +5763,7 @@
     {
         .trainerClass = 50,
         .encounterMusic_gender = 0,
-        .trainerPic = 22,
+        .trainerPic = 156,
         .trainerName = _("JASPER"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5775,7 +5775,7 @@
     {
         .trainerClass = 50,
         .encounterMusic_gender = 0,
-        .trainerPic = 22,
+        .trainerPic = 156,
         .trainerName = _("DIRK"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5787,7 +5787,7 @@
     {
         .trainerClass = 50,
         .encounterMusic_gender = 0,
-        .trainerPic = 22,
+        .trainerPic = 156,
         .trainerName = _("DARIAN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5799,7 +5799,7 @@
     {
         .trainerClass = 50,
         .encounterMusic_gender = 0,
-        .trainerPic = 22,
+        .trainerPic = 156,
         .trainerName = _("STAN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5811,7 +5811,7 @@
     {
         .trainerClass = 50,
         .encounterMusic_gender = 0,
-        .trainerPic = 22,
+        .trainerPic = 156,
         .trainerName = _("RICH"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5823,7 +5823,7 @@
     {
         .trainerClass = 21,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 1,
+        .trainerPic = 157,
         .trainerName = _("BRIDGET"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5835,7 +5835,7 @@
     {
         .trainerClass = 21,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 1,
+        .trainerPic = 157,
         .trainerName = _("TAMIA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5847,7 +5847,7 @@
     {
         .trainerClass = 21,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 1,
+        .trainerPic = 157,
         .trainerName = _("LORI"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5859,7 +5859,7 @@
     {
         .trainerClass = 21,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 1,
+        .trainerPic = 157,
         .trainerName = _("LOLA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5871,7 +5871,7 @@
     {
         .trainerClass = 21,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 1,
+        .trainerPic = 157,
         .trainerName = _("SHEILA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5883,7 +5883,7 @@
     {
         .trainerClass = 45,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 54,
+        .trainerPic = 158,
         .trainerName = _("TIFFANY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5895,7 +5895,7 @@
     {
         .trainerClass = 45,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 54,
+        .trainerPic = 158,
         .trainerName = _("NORA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5907,7 +5907,7 @@
     {
         .trainerClass = 45,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 54,
+        .trainerPic = 158,
         .trainerName = _("MELISSA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5919,7 +5919,7 @@
     {
         .trainerClass = 21,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 1,
+        .trainerPic = 157,
         .trainerName = _("GRACE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5931,7 +5931,7 @@
     {
         .trainerClass = 21,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 1,
+        .trainerPic = 157,
         .trainerName = _("OLIVIA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5943,7 +5943,7 @@
     {
         .trainerClass = 45,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 54,
+        .trainerPic = 158,
         .trainerName = _("ANYA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5955,7 +5955,7 @@
     {
         .trainerClass = 45,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 54,
+        .trainerPic = 158,
         .trainerName = _("ALICE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5967,7 +5967,7 @@
     {
         .trainerClass = 45,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 54,
+        .trainerPic = 158,
         .trainerName = _("CONNIE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5979,7 +5979,7 @@
     {
         .trainerClass = 45,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 54,
+        .trainerPic = 158,
         .trainerName = _("SHIRLEY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -5991,7 +5991,7 @@
     {
         .trainerClass = 29,
         .encounterMusic_gender = 4,
-        .trainerPic = 43,
+        .trainerPic = 159,
         .trainerName = _("JOHAN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6003,7 +6003,7 @@
     {
         .trainerClass = 29,
         .encounterMusic_gender = 4,
-        .trainerPic = 43,
+        .trainerPic = 159,
         .trainerName = _("TYRON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6015,7 +6015,7 @@
     {
         .trainerClass = 29,
         .encounterMusic_gender = 4,
-        .trainerPic = 43,
+        .trainerPic = 159,
         .trainerName = _("CAMERON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6027,7 +6027,7 @@
     {
         .trainerClass = 29,
         .encounterMusic_gender = 4,
-        .trainerPic = 43,
+        .trainerPic = 159,
         .trainerName = _("PRESTON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6039,7 +6039,7 @@
     {
         .trainerClass = 50,
         .encounterMusic_gender = 0,
-        .trainerPic = 46,
+        .trainerPic = 160,
         .trainerName = _("LUCA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6051,7 +6051,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_JUGGLER,
         .encounterMusic_gender = 11,
-        .trainerPic = 25,
+        .trainerPic = 161,
         .trainerName = _("DALTON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6063,7 +6063,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_JUGGLER,
         .encounterMusic_gender = 11,
-        .trainerPic = 25,
+        .trainerPic = 161,
         .trainerName = _("NELSON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6075,7 +6075,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_JUGGLER,
         .encounterMusic_gender = 11,
-        .trainerPic = 25,
+        .trainerPic = 161,
         .trainerName = _("KIRK"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6087,7 +6087,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_JUGGLER,
         .encounterMusic_gender = 11,
-        .trainerPic = 25,
+        .trainerPic = 161,
         .trainerName = _("SHAWN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6099,7 +6099,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_JUGGLER,
         .encounterMusic_gender = 11,
-        .trainerPic = 25,
+        .trainerPic = 161,
         .trainerName = _("GREGORY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6111,7 +6111,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_JUGGLER,
         .encounterMusic_gender = 11,
-        .trainerPic = 25,
+        .trainerPic = 161,
         .trainerName = _("EDWARD"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6123,7 +6123,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_JUGGLER,
         .encounterMusic_gender = 11,
-        .trainerPic = 25,
+        .trainerPic = 161,
         .trainerName = _("KAYDEN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6135,7 +6135,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_JUGGLER,
         .encounterMusic_gender = 11,
-        .trainerPic = 25,
+        .trainerPic = 161,
         .trainerName = _("NATE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6147,7 +6147,7 @@
     {
         .trainerClass = 41,
         .encounterMusic_gender = 11,
-        .trainerPic = 56,
+        .trainerPic = 162,
         .trainerName = _("PHIL"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6159,7 +6159,7 @@
     {
         .trainerClass = 41,
         .encounterMusic_gender = 11,
-        .trainerPic = 56,
+        .trainerPic = 162,
         .trainerName = _("EDGAR"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6171,7 +6171,7 @@
     {
         .trainerClass = 41,
         .encounterMusic_gender = 11,
-        .trainerPic = 56,
+        .trainerPic = 162,
         .trainerName = _("JASON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6183,7 +6183,7 @@
     {
         .trainerClass = 41,
         .encounterMusic_gender = 11,
-        .trainerPic = 56,
+        .trainerPic = 162,
         .trainerName = _("COLE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6195,7 +6195,7 @@
     {
         .trainerClass = 41,
         .encounterMusic_gender = 11,
-        .trainerPic = 56,
+        .trainerPic = 162,
         .trainerName = _("VINCENT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6207,7 +6207,7 @@
     {
         .trainerClass = 6,
         .encounterMusic_gender = 5,
-        .trainerPic = 3,
+        .trainerPic = 163,
         .trainerName = _("SEBASTIAN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6219,7 +6219,7 @@
     {
         .trainerClass = 6,
         .encounterMusic_gender = 5,
-        .trainerPic = 3,
+        .trainerPic = 163,
         .trainerName = _("PERRY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6231,7 +6231,7 @@
     {
         .trainerClass = 6,
         .encounterMusic_gender = 5,
-        .trainerPic = 3,
+        .trainerPic = 163,
         .trainerName = _("ROBERT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6243,7 +6243,7 @@
     {
         .trainerClass = 6,
         .encounterMusic_gender = 5,
-        .trainerPic = 3,
+        .trainerPic = 163,
         .trainerName = _("DONALD"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6255,7 +6255,7 @@
     {
         .trainerClass = 6,
         .encounterMusic_gender = 5,
-        .trainerPic = 3,
+        .trainerPic = 163,
         .trainerName = _("BENNY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6267,7 +6267,7 @@
     {
         .trainerClass = 6,
         .encounterMusic_gender = 5,
-        .trainerPic = 3,
+        .trainerPic = 163,
         .trainerName = _("EDWIN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6279,7 +6279,7 @@
     {
         .trainerClass = 6,
         .encounterMusic_gender = 5,
-        .trainerPic = 3,
+        .trainerPic = 163,
         .trainerName = _("CHESTER"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6291,7 +6291,7 @@
     {
         .trainerClass = 6,
         .encounterMusic_gender = 5,
-        .trainerPic = 3,
+        .trainerPic = 163,
         .trainerName = _("WILTON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6303,7 +6303,7 @@
     {
         .trainerClass = 6,
         .encounterMusic_gender = 5,
-        .trainerPic = 3,
+        .trainerPic = 163,
         .trainerName = _("RAMIRO"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6315,7 +6315,7 @@
     {
         .trainerClass = 6,
         .encounterMusic_gender = 5,
-        .trainerPic = 3,
+        .trainerPic = 163,
         .trainerName = _("JACOB"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6327,7 +6327,7 @@
     {
         .trainerClass = 6,
         .encounterMusic_gender = 5,
-        .trainerPic = 3,
+        .trainerPic = 163,
         .trainerName = _("ROGER"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6339,7 +6339,7 @@
     {
         .trainerClass = 6,
         .encounterMusic_gender = 5,
-        .trainerPic = 3,
+        .trainerPic = 163,
         .trainerName = _("CARTER"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6351,7 +6351,7 @@
     {
         .trainerClass = 6,
         .encounterMusic_gender = 5,
-        .trainerPic = 3,
+        .trainerPic = 163,
         .trainerName = _("MITCH"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6363,7 +6363,7 @@
     {
         .trainerClass = 6,
         .encounterMusic_gender = 5,
-        .trainerPic = 3,
+        .trainerPic = 163,
         .trainerName = _("BECK"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6375,7 +6375,7 @@
     {
         .trainerClass = 6,
         .encounterMusic_gender = 5,
-        .trainerPic = 3,
+        .trainerPic = 163,
         .trainerName = _("MARLON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6387,7 +6387,7 @@
     {
         .trainerClass = 12,
         .encounterMusic_gender = 4,
-        .trainerPic = 4,
+        .trainerPic = 164,
         .trainerName = _("KOICHI"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6399,7 +6399,7 @@
     {
         .trainerClass = 12,
         .encounterMusic_gender = 4,
-        .trainerPic = 4,
+        .trainerPic = 164,
         .trainerName = _("MIKE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6411,7 +6411,7 @@
     {
         .trainerClass = 12,
         .encounterMusic_gender = 4,
-        .trainerPic = 4,
+        .trainerPic = 164,
         .trainerName = _("HIDEKI"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6423,7 +6423,7 @@
     {
         .trainerClass = 12,
         .encounterMusic_gender = 4,
-        .trainerPic = 4,
+        .trainerPic = 164,
         .trainerName = _("AARON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6435,7 +6435,7 @@
     {
         .trainerClass = 12,
         .encounterMusic_gender = 4,
-        .trainerPic = 4,
+        .trainerPic = 164,
         .trainerName = _("HITOSHI"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6447,7 +6447,7 @@
     {
         .trainerClass = 12,
         .encounterMusic_gender = 4,
-        .trainerPic = 4,
+        .trainerPic = 164,
         .trainerName = _("ATSUSHI"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6459,7 +6459,7 @@
     {
         .trainerClass = 12,
         .encounterMusic_gender = 4,
-        .trainerPic = 4,
+        .trainerPic = 164,
         .trainerName = _("KIYO"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6471,7 +6471,7 @@
     {
         .trainerClass = 12,
         .encounterMusic_gender = 4,
-        .trainerPic = 4,
+        .trainerPic = 164,
         .trainerName = _("TAKASHI"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6483,7 +6483,7 @@
     {
         .trainerClass = 12,
         .encounterMusic_gender = 4,
-        .trainerPic = 4,
+        .trainerPic = 164,
         .trainerName = _("DAISUKE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6495,7 +6495,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 44,
+        .trainerPic = 165,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6507,7 +6507,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 44,
+        .trainerPic = 165,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6519,7 +6519,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 44,
+        .trainerPic = 165,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6531,7 +6531,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 44,
+        .trainerPic = 165,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6543,7 +6543,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 44,
+        .trainerPic = 165,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6555,7 +6555,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 44,
+        .trainerPic = 165,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6567,7 +6567,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 44,
+        .trainerPic = 165,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6579,7 +6579,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 44,
+        .trainerPic = 165,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6591,7 +6591,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 44,
+        .trainerPic = 165,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6603,7 +6603,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 51,
+        .trainerPic = 166,
         .trainerName = _("TED"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6615,7 +6615,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 51,
+        .trainerPic = 166,
         .trainerName = _("CONNOR"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6627,7 +6627,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 51,
+        .trainerPic = 166,
         .trainerName = _("JERRY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6639,7 +6639,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 51,
+        .trainerPic = 166,
         .trainerName = _("JOSE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6651,7 +6651,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 51,
+        .trainerPic = 166,
         .trainerName = _("RODNEY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6663,7 +6663,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 51,
+        .trainerPic = 166,
         .trainerName = _("BEAU"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6675,7 +6675,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 51,
+        .trainerPic = 166,
         .trainerName = _("TAYLOR"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6687,7 +6687,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 51,
+        .trainerPic = 166,
         .trainerName = _("JOSHUA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6699,7 +6699,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 51,
+        .trainerPic = 166,
         .trainerName = _("PARKER"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6711,7 +6711,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 51,
+        .trainerPic = 166,
         .trainerName = _("ED"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6723,7 +6723,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 51,
+        .trainerPic = 166,
         .trainerName = _("TRAVIS"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6735,7 +6735,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 51,
+        .trainerPic = 166,
         .trainerName = _("BRAYDON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6747,7 +6747,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 51,
+        .trainerPic = 166,
         .trainerName = _("IVAN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6759,7 +6759,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 31,
+        .trainerPic = 135,
         .trainerName = _("GIOVANNI"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6771,7 +6771,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 31,
+        .trainerPic = 135,
         .trainerName = _("GIOVANNI"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6783,7 +6783,7 @@
     {
         .trainerClass = 32,
         .encounterMusic_gender = 6,
-        .trainerPic = 31,
+        .trainerPic = 135,
         .trainerName = _("GIOVANNI"),
         .items = {ITEM_HYPER_POTION, ITEM_HYPER_POTION, ITEM_FULL_HEAL, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6795,7 +6795,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6807,7 +6807,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6819,7 +6819,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6831,7 +6831,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6843,7 +6843,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6855,7 +6855,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6867,7 +6867,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6879,7 +6879,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6891,7 +6891,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6903,7 +6903,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6915,7 +6915,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6927,7 +6927,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6939,7 +6939,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6951,7 +6951,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6963,7 +6963,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6975,7 +6975,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6987,7 +6987,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -6999,7 +6999,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7011,7 +7011,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7023,7 +7023,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7035,7 +7035,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7047,7 +7047,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7059,7 +7059,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7071,7 +7071,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7083,7 +7083,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7095,7 +7095,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7107,7 +7107,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7119,7 +7119,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7131,7 +7131,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7143,7 +7143,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7155,7 +7155,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7167,7 +7167,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7179,7 +7179,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7191,7 +7191,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7203,7 +7203,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7215,7 +7215,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7227,7 +7227,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7239,7 +7239,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7251,7 +7251,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7263,7 +7263,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7275,7 +7275,7 @@
     {
         .trainerClass = 5,
         .encounterMusic_gender = 5,
-        .trainerPic = 11,
+        .trainerPic = 168,
         .trainerName = _("SAMUEL"),
         .items = {ITEM_SUPER_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7287,7 +7287,7 @@
     {
         .trainerClass = 5,
         .encounterMusic_gender = 5,
-        .trainerPic = 11,
+        .trainerPic = 168,
         .trainerName = _("GEORGE"),
         .items = {ITEM_HYPER_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7299,7 +7299,7 @@
     {
         .trainerClass = 5,
         .encounterMusic_gender = 5,
-        .trainerPic = 11,
+        .trainerPic = 168,
         .trainerName = _("COLBY"),
         .items = {ITEM_HYPER_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7311,7 +7311,7 @@
     {
         .trainerClass = 5,
         .encounterMusic_gender = 5,
-        .trainerPic = 11,
+        .trainerPic = 168,
         .trainerName = _("ROLANDO"),
         .items = {ITEM_HYPER_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7323,7 +7323,7 @@
     {
         .trainerClass = 5,
         .encounterMusic_gender = 5,
-        .trainerPic = 11,
+        .trainerPic = 168,
         .trainerName = _("YUJI"),
         .items = {ITEM_HYPER_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7335,7 +7335,7 @@
     {
         .trainerClass = 5,
         .encounterMusic_gender = 5,
-        .trainerPic = 11,
+        .trainerPic = 168,
         .trainerName = _("WARREN"),
         .items = {ITEM_HYPER_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7347,7 +7347,7 @@
     {
         .trainerClass = 5,
         .encounterMusic_gender = 5 | F_TRAINER_FEMALE,
-        .trainerPic = 10,
+        .trainerPic = 169,
         .trainerName = _("MARY"),
         .items = {ITEM_SUPER_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7359,7 +7359,7 @@
     {
         .trainerClass = 5,
         .encounterMusic_gender = 5 | F_TRAINER_FEMALE,
-        .trainerPic = 10,
+        .trainerPic = 169,
         .trainerName = _("CAROLINE"),
         .items = {ITEM_HYPER_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7371,7 +7371,7 @@
     {
         .trainerClass = 5,
         .encounterMusic_gender = 5 | F_TRAINER_FEMALE,
-        .trainerPic = 10,
+        .trainerPic = 169,
         .trainerName = _("ALEXA"),
         .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7383,7 +7383,7 @@
     {
         .trainerClass = 5,
         .encounterMusic_gender = 5 | F_TRAINER_FEMALE,
-        .trainerPic = 10,
+        .trainerPic = 169,
         .trainerName = _("NAOMI"),
         .items = {ITEM_HYPER_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7395,7 +7395,7 @@
     {
         .trainerClass = 31,
         .encounterMusic_gender = 10 | F_TRAINER_FEMALE,
-        .trainerPic = 19,
+        .trainerPic = 136,
         .trainerName = _("LORELEI"),
         .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7407,7 +7407,7 @@
     {
         .trainerClass = 31,
         .encounterMusic_gender = 10,
-        .trainerPic = 17,
+        .trainerPic = 137,
         .trainerName = _("BRUNO"),
         .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7419,7 +7419,7 @@
     {
         .trainerClass = 31,
         .encounterMusic_gender = 10 | F_TRAINER_FEMALE,
-        .trainerPic = 16,
+        .trainerPic = 138,
         .trainerName = _("AGATHA"),
         .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7431,7 +7431,7 @@
     {
         .trainerClass = 31,
         .encounterMusic_gender = 10,
-        .trainerPic = 18,
+        .trainerPic = 139,
         .trainerName = _("LANCE"),
         .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7443,7 +7443,7 @@
     {
         .trainerClass = 32,
         .encounterMusic_gender = 0,
-        .trainerPic = 29,
+        .trainerPic = 128,
         .trainerName = _("BROCK"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7455,7 +7455,7 @@
     {
         .trainerClass = 32,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 34,
+        .trainerPic = 129,
         .trainerName = _("MISTY"),
         .items = {ITEM_SUPER_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7467,7 +7467,7 @@
     {
         .trainerClass = 32,
         .encounterMusic_gender = 0,
-        .trainerPic = 33,
+        .trainerPic = 130,
         .trainerName = _("LT. SURGE"),
         .items = {ITEM_SUPER_POTION, ITEM_FULL_HEAL, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7479,7 +7479,7 @@
     {
         .trainerClass = 32,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 30,
+        .trainerPic = 131,
         .trainerName = _("ERIKA"),
         .items = {ITEM_HYPER_POTION, ITEM_FULL_HEAL, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7491,7 +7491,7 @@
     {
         .trainerClass = 32,
         .encounterMusic_gender = 0,
-        .trainerPic = 32,
+        .trainerPic = 132,
         .trainerName = _("KOGA"),
         .items = {ITEM_HYPER_POTION, ITEM_HYPER_POTION, ITEM_FULL_HEAL, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7503,7 +7503,7 @@
     {
         .trainerClass = 32,
         .encounterMusic_gender = 0,
-        .trainerPic = 28,
+        .trainerPic = 134,
         .trainerName = _("BLAINE"),
         .items = {ITEM_HYPER_POTION, ITEM_HYPER_POTION, ITEM_FULL_HEAL, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7515,7 +7515,7 @@
     {
         .trainerClass = 32,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 35,
+        .trainerPic = 133,
         .trainerName = _("SABRINA"),
         .items = {ITEM_HYPER_POTION, ITEM_HYPER_POTION, ITEM_FULL_HEAL, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7527,7 +7527,7 @@
     {
         .trainerClass = 30,
         .encounterMusic_gender = 13,
-        .trainerPic = 23,
+        .trainerPic = 170,
         .trainerName = _("THOMAS"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7539,7 +7539,7 @@
     {
         .trainerClass = 30,
         .encounterMusic_gender = 13,
-        .trainerPic = 23,
+        .trainerPic = 170,
         .trainerName = _("ARTHUR"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7551,7 +7551,7 @@
     {
         .trainerClass = 30,
         .encounterMusic_gender = 13,
-        .trainerPic = 23,
+        .trainerPic = 170,
         .trainerName = _("TUCKER"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7563,7 +7563,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 45,
+        .trainerPic = 171,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7575,7 +7575,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 45,
+        .trainerPic = 171,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7587,7 +7587,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 45,
+        .trainerPic = 171,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7599,7 +7599,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 45,
+        .trainerPic = 171,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7611,7 +7611,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 45,
+        .trainerPic = 171,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7623,7 +7623,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 45,
+        .trainerPic = 171,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7635,7 +7635,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 45,
+        .trainerPic = 171,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7647,7 +7647,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 45,
+        .trainerPic = 171,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7659,7 +7659,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 45,
+        .trainerPic = 171,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7671,7 +7671,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 45,
+        .trainerPic = 171,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7683,7 +7683,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 45,
+        .trainerPic = 171,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7695,7 +7695,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_RIVAL,
         .encounterMusic_gender = 0,
-        .trainerPic = 45,
+        .trainerPic = 171,
         .trainerName = _("BLUE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7707,7 +7707,7 @@
     {
         .trainerClass = 38,
         .encounterMusic_gender = 0,
-        .trainerPic = 8,
+        .trainerPic = 140,
         .trainerName = _("BLUE"),
         .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_FULL_RESTORE},
         .doubleBattle = FALSE,
@@ -7719,7 +7719,7 @@
     {
         .trainerClass = 38,
         .encounterMusic_gender = 0,
-        .trainerPic = 8,
+        .trainerPic = 140,
         .trainerName = _("BLUE"),
         .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_FULL_RESTORE},
         .doubleBattle = FALSE,
@@ -7731,7 +7731,7 @@
     {
         .trainerClass = 38,
         .encounterMusic_gender = 0,
-        .trainerPic = 8,
+        .trainerPic = 140,
         .trainerName = _("BLUE"),
         .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_FULL_RESTORE},
         .doubleBattle = FALSE,
@@ -7743,7 +7743,7 @@
     {
         .trainerClass = 14,
         .encounterMusic_gender = 3 | F_TRAINER_FEMALE,
-        .trainerPic = 9,
+        .trainerPic = 172,
         .trainerName = _("PATRICIA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7755,7 +7755,7 @@
     {
         .trainerClass = 14,
         .encounterMusic_gender = 3 | F_TRAINER_FEMALE,
-        .trainerPic = 9,
+        .trainerPic = 172,
         .trainerName = _("CARLY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7767,7 +7767,7 @@
     {
         .trainerClass = 14,
         .encounterMusic_gender = 3 | F_TRAINER_FEMALE,
-        .trainerPic = 9,
+        .trainerPic = 172,
         .trainerName = _("HOPE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7779,7 +7779,7 @@
     {
         .trainerClass = 14,
         .encounterMusic_gender = 3 | F_TRAINER_FEMALE,
-        .trainerPic = 9,
+        .trainerPic = 172,
         .trainerName = _("PAULA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7791,7 +7791,7 @@
     {
         .trainerClass = 14,
         .encounterMusic_gender = 3 | F_TRAINER_FEMALE,
-        .trainerPic = 9,
+        .trainerPic = 172,
         .trainerName = _("LAUREL"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7803,7 +7803,7 @@
     {
         .trainerClass = 14,
         .encounterMusic_gender = 3 | F_TRAINER_FEMALE,
-        .trainerPic = 9,
+        .trainerPic = 172,
         .trainerName = _("JODY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7815,7 +7815,7 @@
     {
         .trainerClass = 14,
         .encounterMusic_gender = 3 | F_TRAINER_FEMALE,
-        .trainerPic = 9,
+        .trainerPic = 172,
         .trainerName = _("TAMMY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7827,7 +7827,7 @@
     {
         .trainerClass = 14,
         .encounterMusic_gender = 3 | F_TRAINER_FEMALE,
-        .trainerPic = 9,
+        .trainerPic = 172,
         .trainerName = _("RUTH"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7839,7 +7839,7 @@
     {
         .trainerClass = 14,
         .encounterMusic_gender = 3 | F_TRAINER_FEMALE,
-        .trainerPic = 9,
+        .trainerPic = 172,
         .trainerName = _("KARINA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7851,7 +7851,7 @@
     {
         .trainerClass = 14,
         .encounterMusic_gender = 3 | F_TRAINER_FEMALE,
-        .trainerPic = 9,
+        .trainerPic = 172,
         .trainerName = _("JANAE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7863,7 +7863,7 @@
     {
         .trainerClass = 14,
         .encounterMusic_gender = 3 | F_TRAINER_FEMALE,
-        .trainerPic = 9,
+        .trainerPic = 172,
         .trainerName = _("ANGELICA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7875,7 +7875,7 @@
     {
         .trainerClass = 14,
         .encounterMusic_gender = 3 | F_TRAINER_FEMALE,
-        .trainerPic = 9,
+        .trainerPic = 172,
         .trainerName = _("EMILIA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7887,7 +7887,7 @@
     {
         .trainerClass = 14,
         .encounterMusic_gender = 3 | F_TRAINER_FEMALE,
-        .trainerPic = 9,
+        .trainerPic = 172,
         .trainerName = _("JENNIFER"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7899,7 +7899,7 @@
     {
         .trainerClass = 14,
         .encounterMusic_gender = 3 | F_TRAINER_FEMALE,
-        .trainerPic = 9,
+        .trainerPic = 172,
         .trainerName = _("AMANDA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7911,7 +7911,7 @@
     {
         .trainerClass = 14,
         .encounterMusic_gender = 3 | F_TRAINER_FEMALE,
-        .trainerPic = 9,
+        .trainerPic = 172,
         .trainerName = _("STACY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7923,7 +7923,7 @@
     {
         .trainerClass = 14,
         .encounterMusic_gender = 3 | F_TRAINER_FEMALE,
-        .trainerPic = 9,
+        .trainerPic = 172,
         .trainerName = _("TASHA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7935,7 +7935,7 @@
     {
         .trainerClass = 2,
         .encounterMusic_gender = 11,
-        .trainerPic = 24,
+        .trainerPic = 149,
         .trainerName = _("JEREMY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7947,7 +7947,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("ALMA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7959,7 +7959,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("SUSIE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7971,7 +7971,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("VALERIE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7983,7 +7983,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("GWEN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -7995,7 +7995,7 @@
     {
         .trainerClass = 40,
         .encounterMusic_gender = 0,
-        .trainerPic = 2,
+        .trainerPic = 150,
         .trainerName = _("VIRGIL"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8007,7 +8007,7 @@
     {
         .trainerClass = 26,
         .encounterMusic_gender = 0,
-        .trainerPic = 7,
+        .trainerPic = 145,
         .trainerName = _("FLINT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8019,7 +8019,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("MISSY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8031,7 +8031,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("IRENE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8043,7 +8043,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("DANA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8055,7 +8055,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("ARIANA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8067,7 +8067,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("LEAH"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8079,7 +8079,7 @@
     {
         .trainerClass = 26,
         .encounterMusic_gender = 0,
-        .trainerPic = 7,
+        .trainerPic = 145,
         .trainerName = _("JUSTIN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8091,7 +8091,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("YAZMIN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8103,7 +8103,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("KINDRA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8115,7 +8115,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("BECKY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8127,7 +8127,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("CELIA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8139,7 +8139,7 @@
     {
         .trainerClass = 30,
         .encounterMusic_gender = 13,
-        .trainerPic = 23,
+        .trainerPic = 170,
         .trainerName = _("BROOKS"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8151,7 +8151,7 @@
     {
         .trainerClass = 30,
         .encounterMusic_gender = 13,
-        .trainerPic = 23,
+        .trainerPic = 170,
         .trainerName = _("LAMAR"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8163,7 +8163,7 @@
     {
         .trainerClass = 46,
         .encounterMusic_gender = 9,
-        .trainerPic = 58,
+        .trainerPic = 173,
         .trainerName = _("ELI & ANNE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = TRUE,
@@ -8175,7 +8175,7 @@
     {
         .trainerClass = 55,
         .encounterMusic_gender = 5,
-        .trainerPic = 12,
+        .trainerPic = 174,
         .trainerName = _("RAY & TYRA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = TRUE,
@@ -8187,7 +8187,7 @@
     {
         .trainerClass = 55,
         .encounterMusic_gender = 2,
-        .trainerPic = 60,
+        .trainerPic = 175,
         .trainerName = _("GIA & JES"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = TRUE,
@@ -8199,7 +8199,7 @@
     {
         .trainerClass = 46,
         .encounterMusic_gender = 9,
-        .trainerPic = 58,
+        .trainerPic = 173,
         .trainerName = _("KIRI & JAN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = TRUE,
@@ -8211,7 +8211,7 @@
     {
         .trainerClass = 55,
         .encounterMusic_gender = 4,
-        .trainerPic = 14,
+        .trainerPic = 176,
         .trainerName = _("RON & MYA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = TRUE,
@@ -8223,7 +8223,7 @@
     {
         .trainerClass = 55,
         .encounterMusic_gender = 2,
-        .trainerPic = 60,
+        .trainerPic = 175,
         .trainerName = _("LEA & JED"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = TRUE,
@@ -8235,7 +8235,7 @@
     {
         .trainerClass = 57,
         .encounterMusic_gender = 8,
-        .trainerPic = 52,
+        .trainerPic = 177,
         .trainerName = _("LIA & LUC"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = TRUE,
@@ -8247,7 +8247,7 @@
     {
         .trainerClass = 57,
         .encounterMusic_gender = 8,
-        .trainerPic = 52,
+        .trainerPic = 177,
         .trainerName = _("LIL & IAN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = TRUE,
@@ -8259,7 +8259,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 47,
+        .trainerPic = 178,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8271,7 +8271,7 @@
     {
         .trainerClass = 29,
         .encounterMusic_gender = 4 | F_TRAINER_FEMALE,
-        .trainerPic = 42,
+        .trainerPic = 179,
         .trainerName = _("JACLYN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8283,7 +8283,7 @@
     {
         .trainerClass = 43,
         .encounterMusic_gender = 4,
-        .trainerPic = 13,
+        .trainerPic = 180,
         .trainerName = _("SHARON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8295,7 +8295,7 @@
     {
         .trainerClass = 18,
         .encounterMusic_gender = 2,
-        .trainerPic = 57,
+        .trainerPic = 181,
         .trainerName = _("AMIRA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8307,7 +8307,7 @@
     {
         .trainerClass = 4,
         .encounterMusic_gender = 1,
-        .trainerPic = 39,
+        .trainerPic = 182,
         .trainerName = _("ALIZE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8319,7 +8319,7 @@
     {
         .trainerClass = 52,
         .encounterMusic_gender = 5,
-        .trainerPic = 41,
+        .trainerPic = 183,
         .trainerName = _("NICOLAS"),
         .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8331,7 +8331,7 @@
     {
         .trainerClass = 52,
         .encounterMusic_gender = 5 | F_TRAINER_FEMALE,
-        .trainerPic = 40,
+        .trainerPic = 184,
         .trainerName = _("MADELINE"),
         .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8343,7 +8343,7 @@
     {
         .trainerClass = 15,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 0,
+        .trainerPic = 185,
         .trainerName = _("NIKKI"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8355,7 +8355,7 @@
     {
         .trainerClass = 16,
         .encounterMusic_gender = 11,
-        .trainerPic = 49,
+        .trainerPic = 186,
         .trainerName = _("STANLY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8367,7 +8367,7 @@
     {
         .trainerClass = 20,
         .encounterMusic_gender = 1,
-        .trainerPic = 26,
+        .trainerPic = 187,
         .trainerName = _("JACKI"),
         .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8379,7 +8379,7 @@
     {
         .trainerClass = 50,
         .encounterMusic_gender = 1,
-        .trainerPic = 36,
+        .trainerPic = 188,
         .trainerName = _("DAISY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8391,7 +8391,7 @@
     {
         .trainerClass = 40,
         .encounterMusic_gender = 0,
-        .trainerPic = 2,
+        .trainerPic = 150,
         .trainerName = _("GOON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8403,7 +8403,7 @@
     {
         .trainerClass = 40,
         .encounterMusic_gender = 0,
-        .trainerPic = 2,
+        .trainerPic = 150,
         .trainerName = _("GOON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8415,7 +8415,7 @@
     {
         .trainerClass = 40,
         .encounterMusic_gender = 0,
-        .trainerPic = 2,
+        .trainerPic = 150,
         .trainerName = _("GOON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8427,7 +8427,7 @@
     {
         .trainerClass = 51,
         .encounterMusic_gender = 0,
-        .trainerPic = 5,
+        .trainerPic = 142,
         .trainerName = _("ANTHONY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8439,7 +8439,7 @@
     {
         .trainerClass = 51,
         .encounterMusic_gender = 0,
-        .trainerPic = 5,
+        .trainerPic = 142,
         .trainerName = _("CHARLIE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8451,7 +8451,7 @@
     {
         .trainerClass = 37,
         .encounterMusic_gender = 0,
-        .trainerPic = 59,
+        .trainerPic = 141,
         .trainerName = _("JOHNSON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8463,7 +8463,7 @@
     {
         .trainerClass = 40,
         .encounterMusic_gender = 0,
-        .trainerPic = 2,
+        .trainerPic = 150,
         .trainerName = _("RICARDO"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8475,7 +8475,7 @@
     {
         .trainerClass = 40,
         .encounterMusic_gender = 0,
-        .trainerPic = 2,
+        .trainerPic = 150,
         .trainerName = _("JAREN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8487,7 +8487,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8499,7 +8499,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8511,7 +8511,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8523,7 +8523,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8535,7 +8535,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8547,7 +8547,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8559,7 +8559,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 47,
+        .trainerPic = 178,
         .trainerName = _("ADMIN"),
         .items = {ITEM_HYPER_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8571,7 +8571,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("ADMIN"),
         .items = {ITEM_HYPER_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8583,7 +8583,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_SUPER_NERD,
         .encounterMusic_gender = 3,
-        .trainerPic = 51,
+        .trainerPic = 166,
         .trainerName = _("GIDEON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8595,7 +8595,7 @@
     {
         .trainerClass = 45,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 54,
+        .trainerPic = 158,
         .trainerName = _("AMARA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8607,7 +8607,7 @@
     {
         .trainerClass = 45,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 54,
+        .trainerPic = 158,
         .trainerName = _("MARIA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8619,7 +8619,7 @@
     {
         .trainerClass = 45,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 54,
+        .trainerPic = 158,
         .trainerName = _("ABIGAIL"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8631,7 +8631,7 @@
     {
         .trainerClass = 8,
         .encounterMusic_gender = 8,
-        .trainerPic = 55,
+        .trainerPic = 154,
         .trainerName = _("FINN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8643,7 +8643,7 @@
     {
         .trainerClass = 8,
         .encounterMusic_gender = 8,
-        .trainerPic = 55,
+        .trainerPic = 154,
         .trainerName = _("GARRETT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8655,7 +8655,7 @@
     {
         .trainerClass = 39,
         .encounterMusic_gender = 11,
-        .trainerPic = 21,
+        .trainerPic = 153,
         .trainerName = _("TOMMY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8667,7 +8667,7 @@
     {
         .trainerClass = 43,
         .encounterMusic_gender = 4,
-        .trainerPic = 13,
+        .trainerPic = 180,
         .trainerName = _("TANYA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8679,7 +8679,7 @@
     {
         .trainerClass = 12,
         .encounterMusic_gender = 4,
-        .trainerPic = 4,
+        .trainerPic = 164,
         .trainerName = _("SHEA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8691,7 +8691,7 @@
     {
         .trainerClass = 12,
         .encounterMusic_gender = 4,
-        .trainerPic = 4,
+        .trainerPic = 164,
         .trainerName = _("HUGH"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8703,7 +8703,7 @@
     {
         .trainerClass = 26,
         .encounterMusic_gender = 0,
-        .trainerPic = 7,
+        .trainerPic = 145,
         .trainerName = _("BRYCE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8715,7 +8715,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("CLAIRE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8727,7 +8727,7 @@
     {
         .trainerClass = 55,
         .encounterMusic_gender = 4,
-        .trainerPic = 14,
+        .trainerPic = 176,
         .trainerName = _("MIK & KIA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = TRUE,
@@ -8739,7 +8739,7 @@
     {
         .trainerClass = 15,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 0,
+        .trainerPic = 185,
         .trainerName = _("VIOLET"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8751,7 +8751,7 @@
     {
         .trainerClass = 18,
         .encounterMusic_gender = 2,
-        .trainerPic = 57,
+        .trainerPic = 181,
         .trainerName = _("ALEXIS"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8763,7 +8763,7 @@
     {
         .trainerClass = 46,
         .encounterMusic_gender = 9,
-        .trainerPic = 58,
+        .trainerPic = 173,
         .trainerName = _("JOY & MEG"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = TRUE,
@@ -8775,7 +8775,7 @@
     {
         .trainerClass = 45,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 54,
+        .trainerPic = 158,
         .trainerName = _("TISHA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8787,7 +8787,7 @@
     {
         .trainerClass = 50,
         .encounterMusic_gender = 1,
-        .trainerPic = 36,
+        .trainerPic = 188,
         .trainerName = _("CELINA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8799,7 +8799,7 @@
     {
         .trainerClass = 50,
         .encounterMusic_gender = 1,
-        .trainerPic = 36,
+        .trainerPic = 188,
         .trainerName = _("RAYNA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8811,7 +8811,7 @@
     {
         .trainerClass = 20,
         .encounterMusic_gender = 1,
-        .trainerPic = 26,
+        .trainerPic = 187,
         .trainerName = _("GILLIAN"),
         .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8823,7 +8823,7 @@
     {
         .trainerClass = 37,
         .encounterMusic_gender = 0,
-        .trainerPic = 59,
+        .trainerPic = 141,
         .trainerName = _("DESTIN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8835,7 +8835,7 @@
     {
         .trainerClass = 8,
         .encounterMusic_gender = 8,
-        .trainerPic = 55,
+        .trainerPic = 154,
         .trainerName = _("TOBY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8847,7 +8847,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8859,7 +8859,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 48,
+        .trainerPic = 167,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8871,7 +8871,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_TEAM_ROCKET,
         .encounterMusic_gender = 6,
-        .trainerPic = 47,
+        .trainerPic = 178,
         .trainerName = _("GRUNT"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8883,7 +8883,7 @@
     {
         .trainerClass = 6,
         .encounterMusic_gender = 5,
-        .trainerPic = 3,
+        .trainerPic = 163,
         .trainerName = _("MILO"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8895,7 +8895,7 @@
     {
         .trainerClass = 6,
         .encounterMusic_gender = 5,
-        .trainerPic = 3,
+        .trainerPic = 163,
         .trainerName = _("CHAZ"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8907,7 +8907,7 @@
     {
         .trainerClass = 6,
         .encounterMusic_gender = 5,
-        .trainerPic = 3,
+        .trainerPic = 163,
         .trainerName = _("HAROLD"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8919,7 +8919,7 @@
     {
         .trainerClass = 39,
         .encounterMusic_gender = 11,
-        .trainerPic = 21,
+        .trainerPic = 153,
         .trainerName = _("TYLOR"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8931,7 +8931,7 @@
     {
         .trainerClass = 8,
         .encounterMusic_gender = 8,
-        .trainerPic = 55,
+        .trainerPic = 154,
         .trainerName = _("MYMO"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8943,7 +8943,7 @@
     {
         .trainerClass = 45,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 54,
+        .trainerPic = 158,
         .trainerName = _("NICOLE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8955,7 +8955,7 @@
     {
         .trainerClass = 57,
         .encounterMusic_gender = 8,
-        .trainerPic = 52,
+        .trainerPic = 177,
         .trainerName = _("AVA & GEB"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = TRUE,
@@ -8967,7 +8967,7 @@
     {
         .trainerClass = 15,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 0,
+        .trainerPic = 185,
         .trainerName = _("ROSE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8979,7 +8979,7 @@
     {
         .trainerClass = 8,
         .encounterMusic_gender = 8,
-        .trainerPic = 55,
+        .trainerPic = 154,
         .trainerName = _("SAMIR"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -8991,7 +8991,7 @@
     {
         .trainerClass = 45,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 54,
+        .trainerPic = 158,
         .trainerName = _("DENISE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9003,7 +9003,7 @@
     {
         .trainerClass = 46,
         .encounterMusic_gender = 9,
-        .trainerPic = 58,
+        .trainerPic = 173,
         .trainerName = _("MIU & MIA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = TRUE,
@@ -9015,7 +9015,7 @@
     {
         .trainerClass = 2,
         .encounterMusic_gender = 11,
-        .trainerPic = 24,
+        .trainerPic = 149,
         .trainerName = _("EARL"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9027,7 +9027,7 @@
     {
         .trainerClass = 16,
         .encounterMusic_gender = 11,
-        .trainerPic = 49,
+        .trainerPic = 186,
         .trainerName = _("FOSTER"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9039,7 +9039,7 @@
     {
         .trainerClass = 16,
         .encounterMusic_gender = 11,
-        .trainerPic = 49,
+        .trainerPic = 186,
         .trainerName = _("LARRY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9051,7 +9051,7 @@
     {
         .trainerClass = 2,
         .encounterMusic_gender = 11,
-        .trainerPic = 24,
+        .trainerPic = 149,
         .trainerName = _("DARYL"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9063,7 +9063,7 @@
     {
         .trainerClass = 23,
         .encounterMusic_gender = 3,
-        .trainerPic = 38,
+        .trainerPic = 147,
         .trainerName = _("HECTOR"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9075,7 +9075,7 @@
     {
         .trainerClass = 29,
         .encounterMusic_gender = 4,
-        .trainerPic = 43,
+        .trainerPic = 159,
         .trainerName = _("DARIO"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9087,7 +9087,7 @@
     {
         .trainerClass = 29,
         .encounterMusic_gender = 4 | F_TRAINER_FEMALE,
-        .trainerPic = 42,
+        .trainerPic = 179,
         .trainerName = _("RODETTE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9099,7 +9099,7 @@
     {
         .trainerClass = 15,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 0,
+        .trainerPic = 185,
         .trainerName = _("MIAH"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9111,7 +9111,7 @@
     {
         .trainerClass = 55,
         .encounterMusic_gender = 2,
-        .trainerPic = 60,
+        .trainerPic = 175,
         .trainerName = _("EVE & JON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = TRUE,
@@ -9123,7 +9123,7 @@
     {
         .trainerClass = TRAINER_CLASS_QZ_JUGGLER,
         .encounterMusic_gender = 11,
-        .trainerPic = 25,
+        .trainerPic = 161,
         .trainerName = _("MASON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9135,7 +9135,7 @@
     {
         .trainerClass = 43,
         .encounterMusic_gender = 4,
-        .trainerPic = 13,
+        .trainerPic = 180,
         .trainerName = _("CYNDY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9147,7 +9147,7 @@
     {
         .trainerClass = 43,
         .encounterMusic_gender = 4,
-        .trainerPic = 13,
+        .trainerPic = 180,
         .trainerName = _("JOCELYN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9159,7 +9159,7 @@
     {
         .trainerClass = 41,
         .encounterMusic_gender = 11,
-        .trainerPic = 56,
+        .trainerPic = 162,
         .trainerName = _("EVAN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9171,7 +9171,7 @@
     {
         .trainerClass = 52,
         .encounterMusic_gender = 5,
-        .trainerPic = 41,
+        .trainerPic = 183,
         .trainerName = _("LOGAN"),
         .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9183,7 +9183,7 @@
     {
         .trainerClass = 52,
         .encounterMusic_gender = 5,
-        .trainerPic = 41,
+        .trainerPic = 183,
         .trainerName = _("JACKSON"),
         .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9195,7 +9195,7 @@
     {
         .trainerClass = 52,
         .encounterMusic_gender = 5 | F_TRAINER_FEMALE,
-        .trainerPic = 40,
+        .trainerPic = 184,
         .trainerName = _("BETH"),
         .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9207,7 +9207,7 @@
     {
         .trainerClass = 52,
         .encounterMusic_gender = 5 | F_TRAINER_FEMALE,
-        .trainerPic = 40,
+        .trainerPic = 184,
         .trainerName = _("KATELYN"),
         .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9219,7 +9219,7 @@
     {
         .trainerClass = 5,
         .encounterMusic_gender = 5,
-        .trainerPic = 11,
+        .trainerPic = 168,
         .trainerName = _("LEROY"),
         .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9231,7 +9231,7 @@
     {
         .trainerClass = 5,
         .encounterMusic_gender = 5 | F_TRAINER_FEMALE,
-        .trainerPic = 10,
+        .trainerPic = 169,
         .trainerName = _("MICHELLE"),
         .items = {ITEM_HYPER_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9243,7 +9243,7 @@
     {
         .trainerClass = 55,
         .encounterMusic_gender = 5,
-        .trainerPic = 12,
+        .trainerPic = 174,
         .trainerName = _("LEX & NYA"),
         .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = TRUE,
@@ -9255,7 +9255,7 @@
     {
         .trainerClass = 16,
         .encounterMusic_gender = 11,
-        .trainerPic = 49,
+        .trainerPic = 186,
         .trainerName = _("BRANDON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9267,7 +9267,7 @@
     {
         .trainerClass = 16,
         .encounterMusic_gender = 11,
-        .trainerPic = 49,
+        .trainerPic = 186,
         .trainerName = _("BENJAMIN"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9279,7 +9279,7 @@
     {
         .trainerClass = 50,
         .encounterMusic_gender = 1,
-        .trainerPic = 36,
+        .trainerPic = 188,
         .trainerName = _("EDNA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9291,7 +9291,7 @@
     {
         .trainerClass = 30,
         .encounterMusic_gender = 13,
-        .trainerPic = 23,
+        .trainerPic = 170,
         .trainerName = _("CLIFFORD"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9303,7 +9303,7 @@
     {
         .trainerClass = 20,
         .encounterMusic_gender = 1,
-        .trainerPic = 26,
+        .trainerPic = 187,
         .trainerName = _("SELPHY"),
         .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9315,7 +9315,7 @@
     {
         .trainerClass = 16,
         .encounterMusic_gender = 11,
-        .trainerPic = 49,
+        .trainerPic = 186,
         .trainerName = _("LAWSON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9327,7 +9327,7 @@
     {
         .trainerClass = 29,
         .encounterMusic_gender = 4 | F_TRAINER_FEMALE,
-        .trainerPic = 42,
+        .trainerPic = 179,
         .trainerName = _("LAURA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9339,7 +9339,7 @@
     {
         .trainerClass = 4,
         .encounterMusic_gender = 1,
-        .trainerPic = 39,
+        .trainerPic = 182,
         .trainerName = _("BETHANY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9351,7 +9351,7 @@
     {
         .trainerClass = 4,
         .encounterMusic_gender = 1,
-        .trainerPic = 39,
+        .trainerPic = 182,
         .trainerName = _("ALLISON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9363,7 +9363,7 @@
     {
         .trainerClass = 51,
         .encounterMusic_gender = 0,
-        .trainerPic = 5,
+        .trainerPic = 142,
         .trainerName = _("GARRET"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9375,7 +9375,7 @@
     {
         .trainerClass = 51,
         .encounterMusic_gender = 0,
-        .trainerPic = 5,
+        .trainerPic = 142,
         .trainerName = _("JONAH"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9387,7 +9387,7 @@
     {
         .trainerClass = 51,
         .encounterMusic_gender = 0,
-        .trainerPic = 5,
+        .trainerPic = 142,
         .trainerName = _("VANCE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9399,7 +9399,7 @@
     {
         .trainerClass = 37,
         .encounterMusic_gender = 0,
-        .trainerPic = 59,
+        .trainerPic = 141,
         .trainerName = _("NASH"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9411,7 +9411,7 @@
     {
         .trainerClass = 37,
         .encounterMusic_gender = 0,
-        .trainerPic = 59,
+        .trainerPic = 141,
         .trainerName = _("CORDELL"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9423,7 +9423,7 @@
     {
         .trainerClass = 54,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 27,
+        .trainerPic = 143,
         .trainerName = _("DALIA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9435,7 +9435,7 @@
     {
         .trainerClass = 54,
         .encounterMusic_gender = 1 | F_TRAINER_FEMALE,
-        .trainerPic = 27,
+        .trainerPic = 143,
         .trainerName = _("JOANA"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9447,7 +9447,7 @@
     {
         .trainerClass = 26,
         .encounterMusic_gender = 0,
-        .trainerPic = 7,
+        .trainerPic = 145,
         .trainerName = _("RILEY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9459,7 +9459,7 @@
     {
         .trainerClass = 27,
         .encounterMusic_gender = 2 | F_TRAINER_FEMALE,
-        .trainerPic = 37,
+        .trainerPic = 146,
         .trainerName = _("MARCY"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9471,7 +9471,7 @@
     {
         .trainerClass = 16,
         .encounterMusic_gender = 11,
-        .trainerPic = 49,
+        .trainerPic = 186,
         .trainerName = _("LAYTON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9483,7 +9483,7 @@
     {
         .trainerClass = 12,
         .encounterMusic_gender = 0,
-        .trainerPic = 15,
+        .trainerPic = 155,
         .trainerName = _("PAXTON"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
@@ -9507,7 +9507,7 @@
     {
         .trainerClass = 13,
         .encounterMusic_gender = 6,
-        .trainerPic = 13,
+        .trainerPic = 180,
         .trainerName = _("ARCHIE"),
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,

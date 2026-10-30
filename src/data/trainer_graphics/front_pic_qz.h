@@ -66,6 +66,128 @@ extern const u32 gTrainerFrontPic_Qz164[];
 extern const u32 gTrainerPalette_Qz164[];
 extern const u32 gTrainerFrontPic_Qz93[];
 extern const u32 gTrainerPalette_Qz93[];
+extern const u32 gTrainerFrontPic_Qz252[];
+extern const u32 gTrainerPalette_Qz252[];
+extern const u32 gTrainerFrontPic_Qz257[];
+extern const u32 gTrainerPalette_Qz257[];
+extern const u32 gTrainerFrontPic_Qz256[];
+extern const u32 gTrainerPalette_Qz256[];
+extern const u32 gTrainerFrontPic_Qz253[];
+extern const u32 gTrainerPalette_Qz253[];
+extern const u32 gTrainerFrontPic_Qz255[];
+extern const u32 gTrainerPalette_Qz255[];
+extern const u32 gTrainerFrontPic_Qz258[];
+extern const u32 gTrainerPalette_Qz258[];
+extern const u32 gTrainerFrontPic_Qz251[];
+extern const u32 gTrainerPalette_Qz251[];
+extern const u32 gTrainerFrontPic_Qz254[];
+extern const u32 gTrainerPalette_Qz254[];
+extern const u32 gTrainerFrontPic_Qz242[];
+extern const u32 gTrainerPalette_Qz242[];
+extern const u32 gTrainerFrontPic_Qz240[];
+extern const u32 gTrainerPalette_Qz240[];
+extern const u32 gTrainerFrontPic_Qz239[];
+extern const u32 gTrainerPalette_Qz239[];
+extern const u32 gTrainerFrontPic_Qz241[];
+extern const u32 gTrainerPalette_Qz241[];
+extern const u32 gTrainerFrontPic_Qz231[];
+extern const u32 gTrainerPalette_Qz231[];
+extern const u32 gTrainerFrontPic_Qz282[];
+extern const u32 gTrainerPalette_Qz282[];
+extern const u32 gTrainerFrontPic_Qz228[];
+extern const u32 gTrainerPalette_Qz228[];
+extern const u32 gTrainerFrontPic_Qz250[];
+extern const u32 gTrainerPalette_Qz250[];
+extern const u32 gTrainerFrontPic_Qz273[];
+extern const u32 gTrainerPalette_Qz273[];
+extern const u32 gTrainerFrontPic_Qz230[];
+extern const u32 gTrainerPalette_Qz230[];
+extern const u32 gTrainerFrontPic_Qz260[];
+extern const u32 gTrainerPalette_Qz260[];
+extern const u32 gTrainerFrontPic_Qz261[];
+extern const u32 gTrainerPalette_Qz261[];
+extern const u32 gTrainerFrontPic_Qz276[];
+extern const u32 gTrainerPalette_Qz276[];
+extern const u32 gTrainerFrontPic_Qz247[];
+extern const u32 gTrainerPalette_Qz247[];
+extern const u32 gTrainerFrontPic_Qz225[];
+extern const u32 gTrainerPalette_Qz225[];
+extern const u32 gTrainerFrontPic_Qz229[];
+extern const u32 gTrainerPalette_Qz229[];
+extern const u32 gTrainerFrontPic_Qz243[];
+extern const u32 gTrainerPalette_Qz243[];
+extern const u32 gTrainerFrontPic_Qz244[];
+extern const u32 gTrainerPalette_Qz244[];
+extern const u32 gTrainerFrontPic_Qz278[];
+extern const u32 gTrainerPalette_Qz278[];
+extern const u32 gTrainerFrontPic_Qz238[];
+extern const u32 gTrainerPalette_Qz238[];
+extern const u32 gTrainerFrontPic_Qz245[];
+extern const u32 gTrainerPalette_Qz245[];
+extern const u32 gTrainerFrontPic_Qz224[];
+extern const u32 gTrainerPalette_Qz224[];
+extern const u32 gTrainerFrontPic_Qz277[];
+extern const u32 gTrainerPalette_Qz277[];
+extern const u32 gTrainerFrontPic_Qz266[];
+extern const u32 gTrainerPalette_Qz266[];
+extern const u32 gTrainerFrontPic_Qz269[];
+extern const u32 gTrainerPalette_Qz269[];
+extern const u32 gTrainerFrontPic_Qz248[];
+extern const u32 gTrainerPalette_Qz248[];
+extern const u32 gTrainerFrontPic_Qz279[];
+extern const u32 gTrainerPalette_Qz279[];
+extern const u32 gTrainerFrontPic_Qz226[];
+extern const u32 gTrainerPalette_Qz226[];
+extern const u32 gTrainerFrontPic_Qz227[];
+extern const u32 gTrainerPalette_Qz227[];
+extern const u32 gTrainerFrontPic_Qz267[];
+extern const u32 gTrainerPalette_Qz267[];
+extern const u32 gTrainerFrontPic_Qz274[];
+extern const u32 gTrainerPalette_Qz274[];
+extern const u32 gTrainerFrontPic_Qz271[];
+extern const u32 gTrainerPalette_Qz271[];
+extern const u32 gTrainerFrontPic_Qz234[];
+extern const u32 gTrainerPalette_Qz234[];
+extern const u32 gTrainerFrontPic_Qz233[];
+extern const u32 gTrainerPalette_Qz233[];
+extern const u32 gTrainerFrontPic_Qz246[];
+extern const u32 gTrainerPalette_Qz246[];
+extern const u32 gTrainerFrontPic_Qz268[];
+extern const u32 gTrainerPalette_Qz268[];
+extern const u32 gTrainerFrontPic_Qz232[];
+extern const u32 gTrainerPalette_Qz232[];
+extern const u32 gTrainerFrontPic_Qz281[];
+extern const u32 gTrainerPalette_Qz281[];
+extern const u32 gTrainerFrontPic_Qz235[];
+extern const u32 gTrainerPalette_Qz235[];
+extern const u32 gTrainerFrontPic_Qz283[];
+extern const u32 gTrainerPalette_Qz283[];
+extern const u32 gTrainerFrontPic_Qz237[];
+extern const u32 gTrainerPalette_Qz237[];
+extern const u32 gTrainerFrontPic_Qz275[];
+extern const u32 gTrainerPalette_Qz275[];
+extern const u32 gTrainerFrontPic_Qz270[];
+extern const u32 gTrainerPalette_Qz270[];
+extern const u32 gTrainerFrontPic_Qz265[];
+extern const u32 gTrainerPalette_Qz265[];
+extern const u32 gTrainerFrontPic_Qz236[];
+extern const u32 gTrainerPalette_Qz236[];
+extern const u32 gTrainerFrontPic_Qz280[];
+extern const u32 gTrainerPalette_Qz280[];
+extern const u32 gTrainerFrontPic_Qz262[];
+extern const u32 gTrainerPalette_Qz262[];
+extern const u32 gTrainerFrontPic_Qz264[];
+extern const u32 gTrainerPalette_Qz264[];
+extern const u32 gTrainerFrontPic_Qz263[];
+extern const u32 gTrainerPalette_Qz263[];
+extern const u32 gTrainerFrontPic_Qz223[];
+extern const u32 gTrainerPalette_Qz223[];
+extern const u32 gTrainerFrontPic_Qz272[];
+extern const u32 gTrainerPalette_Qz272[];
+extern const u32 gTrainerFrontPic_Qz249[];
+extern const u32 gTrainerPalette_Qz249[];
+extern const u32 gTrainerFrontPic_Qz259[];
+extern const u32 gTrainerPalette_Qz259[];
 #define QZ_TRAINER_SPRITES \
     TRAINER_SPRITE(QZ_211, gTrainerFrontPic_Qz211, TRAINER_PIC_SIZE), \
     TRAINER_SPRITE(QZ_221, gTrainerFrontPic_Qz221, TRAINER_PIC_SIZE), \
@@ -100,6 +222,67 @@ extern const u32 gTrainerPalette_Qz93[];
     TRAINER_SPRITE(QZ_134, gTrainerFrontPic_Qz134, TRAINER_PIC_SIZE), \
     TRAINER_SPRITE(QZ_164, gTrainerFrontPic_Qz164, TRAINER_PIC_SIZE), \
     TRAINER_SPRITE(QZ_93, gTrainerFrontPic_Qz93, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_252, gTrainerFrontPic_Qz252, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_257, gTrainerFrontPic_Qz257, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_256, gTrainerFrontPic_Qz256, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_253, gTrainerFrontPic_Qz253, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_255, gTrainerFrontPic_Qz255, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_258, gTrainerFrontPic_Qz258, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_251, gTrainerFrontPic_Qz251, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_254, gTrainerFrontPic_Qz254, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_242, gTrainerFrontPic_Qz242, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_240, gTrainerFrontPic_Qz240, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_239, gTrainerFrontPic_Qz239, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_241, gTrainerFrontPic_Qz241, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_231, gTrainerFrontPic_Qz231, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_282, gTrainerFrontPic_Qz282, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_228, gTrainerFrontPic_Qz228, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_250, gTrainerFrontPic_Qz250, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_273, gTrainerFrontPic_Qz273, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_230, gTrainerFrontPic_Qz230, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_260, gTrainerFrontPic_Qz260, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_261, gTrainerFrontPic_Qz261, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_276, gTrainerFrontPic_Qz276, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_247, gTrainerFrontPic_Qz247, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_225, gTrainerFrontPic_Qz225, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_229, gTrainerFrontPic_Qz229, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_243, gTrainerFrontPic_Qz243, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_244, gTrainerFrontPic_Qz244, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_278, gTrainerFrontPic_Qz278, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_238, gTrainerFrontPic_Qz238, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_245, gTrainerFrontPic_Qz245, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_224, gTrainerFrontPic_Qz224, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_277, gTrainerFrontPic_Qz277, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_266, gTrainerFrontPic_Qz266, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_269, gTrainerFrontPic_Qz269, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_248, gTrainerFrontPic_Qz248, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_279, gTrainerFrontPic_Qz279, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_226, gTrainerFrontPic_Qz226, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_227, gTrainerFrontPic_Qz227, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_267, gTrainerFrontPic_Qz267, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_274, gTrainerFrontPic_Qz274, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_271, gTrainerFrontPic_Qz271, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_234, gTrainerFrontPic_Qz234, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_233, gTrainerFrontPic_Qz233, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_246, gTrainerFrontPic_Qz246, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_268, gTrainerFrontPic_Qz268, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_232, gTrainerFrontPic_Qz232, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_281, gTrainerFrontPic_Qz281, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_235, gTrainerFrontPic_Qz235, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_283, gTrainerFrontPic_Qz283, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_237, gTrainerFrontPic_Qz237, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_275, gTrainerFrontPic_Qz275, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_270, gTrainerFrontPic_Qz270, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_265, gTrainerFrontPic_Qz265, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_236, gTrainerFrontPic_Qz236, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_280, gTrainerFrontPic_Qz280, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_262, gTrainerFrontPic_Qz262, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_264, gTrainerFrontPic_Qz264, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_263, gTrainerFrontPic_Qz263, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_223, gTrainerFrontPic_Qz223, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_272, gTrainerFrontPic_Qz272, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_249, gTrainerFrontPic_Qz249, TRAINER_PIC_SIZE), \
+    TRAINER_SPRITE(QZ_259, gTrainerFrontPic_Qz259, TRAINER_PIC_SIZE), \
 
 #define QZ_TRAINER_PALS \
     TRAINER_PAL(QZ_211, gTrainerPalette_Qz211), \
@@ -135,6 +318,67 @@ extern const u32 gTrainerPalette_Qz93[];
     TRAINER_PAL(QZ_134, gTrainerPalette_Qz134), \
     TRAINER_PAL(QZ_164, gTrainerPalette_Qz164), \
     TRAINER_PAL(QZ_93, gTrainerPalette_Qz93), \
+    TRAINER_PAL(QZ_252, gTrainerPalette_Qz252), \
+    TRAINER_PAL(QZ_257, gTrainerPalette_Qz257), \
+    TRAINER_PAL(QZ_256, gTrainerPalette_Qz256), \
+    TRAINER_PAL(QZ_253, gTrainerPalette_Qz253), \
+    TRAINER_PAL(QZ_255, gTrainerPalette_Qz255), \
+    TRAINER_PAL(QZ_258, gTrainerPalette_Qz258), \
+    TRAINER_PAL(QZ_251, gTrainerPalette_Qz251), \
+    TRAINER_PAL(QZ_254, gTrainerPalette_Qz254), \
+    TRAINER_PAL(QZ_242, gTrainerPalette_Qz242), \
+    TRAINER_PAL(QZ_240, gTrainerPalette_Qz240), \
+    TRAINER_PAL(QZ_239, gTrainerPalette_Qz239), \
+    TRAINER_PAL(QZ_241, gTrainerPalette_Qz241), \
+    TRAINER_PAL(QZ_231, gTrainerPalette_Qz231), \
+    TRAINER_PAL(QZ_282, gTrainerPalette_Qz282), \
+    TRAINER_PAL(QZ_228, gTrainerPalette_Qz228), \
+    TRAINER_PAL(QZ_250, gTrainerPalette_Qz250), \
+    TRAINER_PAL(QZ_273, gTrainerPalette_Qz273), \
+    TRAINER_PAL(QZ_230, gTrainerPalette_Qz230), \
+    TRAINER_PAL(QZ_260, gTrainerPalette_Qz260), \
+    TRAINER_PAL(QZ_261, gTrainerPalette_Qz261), \
+    TRAINER_PAL(QZ_276, gTrainerPalette_Qz276), \
+    TRAINER_PAL(QZ_247, gTrainerPalette_Qz247), \
+    TRAINER_PAL(QZ_225, gTrainerPalette_Qz225), \
+    TRAINER_PAL(QZ_229, gTrainerPalette_Qz229), \
+    TRAINER_PAL(QZ_243, gTrainerPalette_Qz243), \
+    TRAINER_PAL(QZ_244, gTrainerPalette_Qz244), \
+    TRAINER_PAL(QZ_278, gTrainerPalette_Qz278), \
+    TRAINER_PAL(QZ_238, gTrainerPalette_Qz238), \
+    TRAINER_PAL(QZ_245, gTrainerPalette_Qz245), \
+    TRAINER_PAL(QZ_224, gTrainerPalette_Qz224), \
+    TRAINER_PAL(QZ_277, gTrainerPalette_Qz277), \
+    TRAINER_PAL(QZ_266, gTrainerPalette_Qz266), \
+    TRAINER_PAL(QZ_269, gTrainerPalette_Qz269), \
+    TRAINER_PAL(QZ_248, gTrainerPalette_Qz248), \
+    TRAINER_PAL(QZ_279, gTrainerPalette_Qz279), \
+    TRAINER_PAL(QZ_226, gTrainerPalette_Qz226), \
+    TRAINER_PAL(QZ_227, gTrainerPalette_Qz227), \
+    TRAINER_PAL(QZ_267, gTrainerPalette_Qz267), \
+    TRAINER_PAL(QZ_274, gTrainerPalette_Qz274), \
+    TRAINER_PAL(QZ_271, gTrainerPalette_Qz271), \
+    TRAINER_PAL(QZ_234, gTrainerPalette_Qz234), \
+    TRAINER_PAL(QZ_233, gTrainerPalette_Qz233), \
+    TRAINER_PAL(QZ_246, gTrainerPalette_Qz246), \
+    TRAINER_PAL(QZ_268, gTrainerPalette_Qz268), \
+    TRAINER_PAL(QZ_232, gTrainerPalette_Qz232), \
+    TRAINER_PAL(QZ_281, gTrainerPalette_Qz281), \
+    TRAINER_PAL(QZ_235, gTrainerPalette_Qz235), \
+    TRAINER_PAL(QZ_283, gTrainerPalette_Qz283), \
+    TRAINER_PAL(QZ_237, gTrainerPalette_Qz237), \
+    TRAINER_PAL(QZ_275, gTrainerPalette_Qz275), \
+    TRAINER_PAL(QZ_270, gTrainerPalette_Qz270), \
+    TRAINER_PAL(QZ_265, gTrainerPalette_Qz265), \
+    TRAINER_PAL(QZ_236, gTrainerPalette_Qz236), \
+    TRAINER_PAL(QZ_280, gTrainerPalette_Qz280), \
+    TRAINER_PAL(QZ_262, gTrainerPalette_Qz262), \
+    TRAINER_PAL(QZ_264, gTrainerPalette_Qz264), \
+    TRAINER_PAL(QZ_263, gTrainerPalette_Qz263), \
+    TRAINER_PAL(QZ_223, gTrainerPalette_Qz223), \
+    TRAINER_PAL(QZ_272, gTrainerPalette_Qz272), \
+    TRAINER_PAL(QZ_249, gTrainerPalette_Qz249), \
+    TRAINER_PAL(QZ_259, gTrainerPalette_Qz259), \
 
 #define QZ_TRAINER_COORDS \
     [TRAINER_PIC_QZ_211] = {.size = 8, .y_offset = 1}, \
@@ -170,6 +414,67 @@ extern const u32 gTrainerPalette_Qz93[];
     [TRAINER_PIC_QZ_134] = {.size = 8, .y_offset = 1}, \
     [TRAINER_PIC_QZ_164] = {.size = 8, .y_offset = 1}, \
     [TRAINER_PIC_QZ_93] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_252] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_257] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_256] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_253] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_255] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_258] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_251] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_254] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_242] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_240] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_239] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_241] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_231] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_282] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_228] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_250] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_273] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_230] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_260] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_261] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_276] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_247] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_225] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_229] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_243] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_244] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_278] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_238] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_245] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_224] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_277] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_266] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_269] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_248] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_279] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_226] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_227] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_267] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_274] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_271] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_234] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_233] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_246] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_268] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_232] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_281] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_235] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_283] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_237] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_275] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_270] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_265] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_236] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_280] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_262] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_264] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_263] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_223] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_272] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_249] = {.size = 8, .y_offset = 1}, \
+    [TRAINER_PIC_QZ_259] = {.size = 8, .y_offset = 1}, \
 
 #define QZ_TRAINER_ANIMS \
     [TRAINER_PIC_QZ_211] = sAnims_RubySapphireMay, \
@@ -205,4 +510,65 @@ extern const u32 gTrainerPalette_Qz93[];
     [TRAINER_PIC_QZ_134] = sAnims_RubySapphireMay, \
     [TRAINER_PIC_QZ_164] = sAnims_RubySapphireMay, \
     [TRAINER_PIC_QZ_93] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_252] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_257] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_256] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_253] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_255] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_258] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_251] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_254] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_242] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_240] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_239] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_241] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_231] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_282] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_228] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_250] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_273] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_230] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_260] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_261] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_276] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_247] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_225] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_229] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_243] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_244] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_278] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_238] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_245] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_224] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_277] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_266] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_269] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_248] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_279] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_226] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_227] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_267] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_274] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_271] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_234] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_233] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_246] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_268] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_232] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_281] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_235] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_283] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_237] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_275] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_270] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_265] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_236] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_280] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_262] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_264] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_263] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_223] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_272] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_249] = sAnims_RubySapphireMay, \
+    [TRAINER_PIC_QZ_259] = sAnims_RubySapphireMay, \
 

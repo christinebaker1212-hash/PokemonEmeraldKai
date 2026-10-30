@@ -30,6 +30,14 @@ MONEY = {66: 22, 67: 12, 68: 10, 69: 15, 70: 20, 71: 10, 72: 10, 73: 16, 74: 25,
 BEGIN, END = '// Moemon Kai: Johto / Kanto (tools/quetzal_port/gen_trainers.py)', '// end of Johto / Kanto trainers'
 
 
+def PicOf(t):
+    # Kanto trainers' pictures sit 0xDF further (front_pic_id); one past the table (Kanto's MAGMA LEADER) keeps Emerald's
+    p = t.get('front_pic_id', t['trainer_pic'])
+    if not os.path.exists(os.path.join(RIP, 'trainer_pics/front/pic_%d.png' % p)):
+        p = t['trainer_pic']
+    return p
+
+
 def consts(path, prefix):
     return set(re.findall(r'#define (%s\w+)' % prefix, open(os.path.join(REPO, path), encoding='utf-8').read()))
 
@@ -49,7 +57,7 @@ def main():
     data = json.load(open(os.path.join(RIP, 'gen4', 'data', 'trainers.json')))
     trainers = sorted(data['trainers'], key=lambda t: t['id'])
     # Quetzal's Hoenn trainer the Johto / Kanto scripts battle (its Hoenn data isn't in the rip): Jessie and James
-    rocket_pic = next(t['trainer_pic'] for t in trainers if t['class'] == 77)
+    rocket_pic = next(PicOf(t) for t in trainers if t['class'] == 77)
     trainers.append({'id': 913, 'const': 'TRAINER_QZ_913', 'name': 'JESSIE&JAMES', 'class': 77, 'encounter_music': 14,
                      'female': True, 'trainer_pic': rocket_pic, 'items': ['ITEM_NONE'] * 4, 'double_battle': False,
                      'ai_flags': '0x7', 'party_type': 1, 'party': [
@@ -70,7 +78,7 @@ def main():
     # pictures
     pics, picmap = [], {}
     for t in trainers:
-        p = t['trainer_pic']
+        p = PicOf(t)
         if p >= KAI_PICS and p not in picmap:
             picmap[p] = FIRST_PIC + len(pics)
             pics.append(p)
@@ -120,7 +128,7 @@ def main():
                  'ItemDefaultMoves': 'ITEM_DEFAULT_MOVES', 'ItemCustomMoves': 'ITEM_CUSTOM_MOVES'}[struct]
         cls = t['class']
         cls_c = 'TRAINER_CLASS_QZ_%s' % CLASSES[cls] if cls in CLASSES else str(cls)
-        pic = picmap.get(t['trainer_pic'], t['trainer_pic'])
+        pic = picmap.get(PicOf(t), PicOf(t))
         entries += ('    [%s] =\n    {\n        .trainerClass = %s,\n        .encounterMusic_gender = %d%s,\n'
                     '        .trainerPic = %d,\n        .trainerName = _("%s"),\n        .items = {%s},\n'
                     '        .doubleBattle = %s,\n        .aiFlags = %s,\n        .party = %s(%s),\n    },\n\n') % (
