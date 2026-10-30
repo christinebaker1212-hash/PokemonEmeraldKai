@@ -124,15 +124,15 @@ Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E8CD::
 	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E790
 
 Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E8FE::
-	setvar VAR_ITEM_ID, 0xA5
+	setvar VAR_ITEM_ID, ITEM_HELIX_FOSSIL
 	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E91F
 
 Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E909::
-	setvar VAR_ITEM_ID, 0xA6
+	setvar VAR_ITEM_ID, ITEM_DOME_FOSSIL
 	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E91F
 
 Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E914::
-	setvar VAR_ITEM_ID, 0xA7
+	setvar VAR_ITEM_ID, ITEM_OLD_AMBER
 	goto Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E91F
 
 Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E91F::

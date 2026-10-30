@@ -314,6 +314,9 @@ class Ids:
                 self.missing.setdefault(c, set()).add(where)
             return m.group(1) + c
         text = re.sub(r'(setvar VAR_0x8004, )(0x[0-9A-Fa-f]+|\d+)$', raw_species, text, flags=re.M)
+        # items chosen by number (VAR_ITEM_ID: the fossil lab's remembered fossil)
+        text = re.sub(r'(setvar VAR_ITEM_ID, )(0x[0-9A-Fa-f]+|\d+)$', lambda m: m.group(1) + self.item(
+            self.item_by_id.get(int(m.group(2), 0), 'ITEM_NONE'), where), text, flags=re.M)
         text = re.sub(r'\bITEM_\w+\b', lambda m: self.item(m.group(0), where) if m.group(0) not in
                       ('ITEM_NONE', 'ITEM_USE_FIELD') else m.group(0), text)
         text = re.sub(r'\bMOVE_[A-Z0-9_]+\b', lambda m: self.move(m.group(0), where), text)

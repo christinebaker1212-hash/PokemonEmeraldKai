@@ -120,23 +120,23 @@ Johto_RuinsOfAlphResearchCenter_EventScript_83F7140::
 	goto Johto_RuinsOfAlphResearchCenter_EventScript_83F6FF5
 
 Johto_RuinsOfAlphResearchCenter_EventScript_83F7187::
-	setvar VAR_ITEM_ID, 0xA8
+	setvar VAR_ITEM_ID, ITEM_ROOT_FOSSIL
 	goto Johto_RuinsOfAlphResearchCenter_EventScript_83F71BE
 
 Johto_RuinsOfAlphResearchCenter_EventScript_83F7192::
-	setvar VAR_ITEM_ID, 0xA9
+	setvar VAR_ITEM_ID, ITEM_CLAW_FOSSIL
 	goto Johto_RuinsOfAlphResearchCenter_EventScript_83F71BE
 
 Johto_RuinsOfAlphResearchCenter_EventScript_83F719D::
-	setvar VAR_ITEM_ID, 0xA5
+	setvar VAR_ITEM_ID, ITEM_HELIX_FOSSIL
 	goto Johto_RuinsOfAlphResearchCenter_EventScript_83F71BE
 
 Johto_RuinsOfAlphResearchCenter_EventScript_83F71A8::
-	setvar VAR_ITEM_ID, 0xA6
+	setvar VAR_ITEM_ID, ITEM_DOME_FOSSIL
 	goto Johto_RuinsOfAlphResearchCenter_EventScript_83F71BE
 
 Johto_RuinsOfAlphResearchCenter_EventScript_83F71B3::
-	setvar VAR_ITEM_ID, 0xA7
+	setvar VAR_ITEM_ID, ITEM_OLD_AMBER
 	goto Johto_RuinsOfAlphResearchCenter_EventScript_83F71BE
 
 Johto_RuinsOfAlphResearchCenter_EventScript_83F71BE::

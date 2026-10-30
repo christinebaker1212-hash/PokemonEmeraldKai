@@ -9,6 +9,10 @@
 #include "field_screen_effect.h"
 #include "fieldmap.h"
 #include "field_specials.h"
+#include "item.h"
+#include "item_menu.h"
+#include "main.h"
+#include "shop.h"
 #include "mp.h"
 #include "mp_region.h"
 #include "overworld.h"
@@ -27,6 +31,8 @@
 #include "constants/species.h"
 
 u8 GetDirectionToFace(s16 x, s16 y, s16 targetX, s16 targetY);
+void ChangePokemonNickname(void);
+void ChangeBoxPokemonNickname(void);
 void CloseDeptStoreElevatorWindow(void);
 
 // Quetzal's specials write VAR_RESULT themselves (its scripts use "special", not "specialvar"): the ones that answer
@@ -426,3 +432,112 @@ u16 QzJohtoStaticEncounterAfterBattle(void) { return gSpecialVar_Result = QzJoht
 u16 QzKantoStaticEncounterAfterBattle(void) { return gSpecialVar_Result = QzKantoStaticEncounterAfterBattle_(); }
 u16 QzClearStaticFlagAfterWildBattle(void) { return gSpecialVar_Result = QzClearStaticFlagAfterWildBattle_(); }
 u16 QzStartMarowakGhostBattle(void) { return gSpecialVar_Result = QzStartMarowakGhostBattle_(); }
+
+// ---------------------------------------------------------------------------------------------------- gifts, nicknames
+// After a gift (givemon's VAR_RESULT: 0 party, 1 PC): VAR_0x8004 = its party slot, or 6 in the PC; its name in STR_VAR_1
+static u16 QzBufferLastReceivedMonForNickname_(void)
+{
+    u16 species;
+    if (gSpecialVar_Result == MON_GIVEN_TO_PC)
+    {
+        gSpecialVar_0x8004 = PARTY_SIZE;
+        species = GetBoxMonDataAt(gSpecialVar_MonBoxId, gSpecialVar_MonBoxPos, MON_DATA_SPECIES);
+    }
+    else
+    {
+        gSpecialVar_0x8004 = CalculatePlayerPartyCount() - 1;
+        species = GetMonData(&gPlayerParty[gSpecialVar_0x8004], MON_DATA_SPECIES);
+    }
+    GetSpeciesName(gStringVar1, species);
+    return TRUE;
+}
+
+u16 QzNicknameLastReceivedMon(void)
+{
+    if (gSpecialVar_0x8004 < PARTY_SIZE)
+        ChangePokemonNickname();
+    else
+        ChangeBoxPokemonNickname();
+    return 0;
+}
+
+// ---------------------------------------------------------------------------------------------------- fossils
+static const u16 sFossils[][2] =
+{
+    {ITEM_HELIX_FOSSIL, SPECIES_OMANYTE}, {ITEM_DOME_FOSSIL, SPECIES_KABUTO}, {ITEM_OLD_AMBER, SPECIES_AERODACTYL},
+    {ITEM_ROOT_FOSSIL, SPECIES_LILEEP}, {ITEM_CLAW_FOSSIL, SPECIES_ANORITH}, {ITEM_ARMOR_FOSSIL, SPECIES_SHIELDON},
+    {ITEM_SKULL_FOSSIL, SPECIES_CRANIDOS},
+};
+
+static u16 FossilSpecies(u16 item)
+{
+    u8 i;
+    for (i = 0; i < ARRAY_COUNT(sFossils); i++)
+        if (sFossils[i][0] == item)
+            return sFossils[i][1];
+    return SPECIES_NONE;
+}
+
+static u16 QzBagHasFossil_(void)
+{
+    u8 i;
+    for (i = 0; i < ARRAY_COUNT(sFossils); i++)
+        if (CheckBagHasItem(sFossils[i][0], 1))
+            return TRUE;
+    return FALSE;
+}
+
+static void CB2_ChooseFossil(void)
+{
+    GoToBagMenu(ITEMMENULOCATION_BERRY_TREE, KEYITEMS_POCKET, CB2_ReturnToFieldContinueScript);
+}
+
+// The bag's KEY ITEMS to pick a fossil from (VAR_ITEM_ID, 0 when backed out); waitstate
+u16 QzChooseItemFromBagForFossil(void)
+{
+    SetMainCallback2(CB2_ChooseFossil);
+    return 0;
+}
+
+static u16 QzIsSelectedItemFossil_(void) { return FossilSpecies(gSpecialVar_ItemId) != SPECIES_NONE; }
+static u16 QzIsSelectedItemFossilHalf_(void) { return FALSE; }       // Galar's fossil halves are past the cap
+static u16 QzAreFossilHalvesCompatible_(void) { return FALSE; }
+
+// The Pokémon of the fossil VAR_ITEM_ID (Lv 20 in Kanto, 10 in Johto) into VAR_0x800A; VAR_RESULT = where it went
+static u16 QzGiveRevivedFossilMon_(void)
+{
+    u16 species = FossilSpecies(gSpecialVar_ItemId);
+    if (species == SPECIES_NONE)
+        return MON_CANT_GIVE;
+    gSpecialVar_0x800A = species;
+    return ScriptGiveMon(species, MP_Region_Current() == REGION_JOHTO ? 10 : 20, ITEM_NONE, 0, 0, 0);
+}
+
+// ---------------------------------------------------------------------------------------------------- marts
+// The Celadon / Goldenrod counters for items of legend; Mega Stones and Z-Crystals are past the cap
+static const u16 sLegendaryItems[] = {ITEM_SOUL_DEW, ITEM_ADAMANT_ORB, ITEM_LUSTROUS_ORB, ITEM_GRISEOUS_ORB, ITEM_NONE};
+static const u16 sNoItems[] = {ITEM_NONE};
+
+u16 QzShowLegendaryItemShop(void)
+{
+    CreatePokemartMenu(sLegendaryItems);
+    return 0;
+}
+
+u16 QzShowMegaStoneShop(void)
+{
+    CreatePokemartMenu(sNoItems);
+    return 0;
+}
+
+u16 QzShowZCrystalShop(void)
+{
+    CreatePokemartMenu(sNoItems);
+    return 0;
+}
+u16 QzBufferLastReceivedMonForNickname(void) { return gSpecialVar_Result = QzBufferLastReceivedMonForNickname_(); }
+u16 QzBagHasFossil(void) { return gSpecialVar_Result = QzBagHasFossil_(); }
+u16 QzIsSelectedItemFossil(void) { return gSpecialVar_Result = QzIsSelectedItemFossil_(); }
+u16 QzIsSelectedItemFossilHalf(void) { return gSpecialVar_Result = QzIsSelectedItemFossilHalf_(); }
+u16 QzAreFossilHalvesCompatible(void) { return gSpecialVar_Result = QzAreFossilHalvesCompatible_(); }
+u16 QzGiveRevivedFossilMon(void) { return gSpecialVar_Result = QzGiveRevivedFossilMon_(); }
