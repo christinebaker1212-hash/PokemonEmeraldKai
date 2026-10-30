@@ -1,0 +1,8 @@
+# GENERATION 3 with nothing but SEALED POKéMON (an updated save whose team is all Gen 4): a wild battle doesn't crash or
+# lock up, the lead battles anyway
+MODE=1
+GEN=3
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=412:10 MOEMON_BATTLETEXT=1"
+EXPECT_A=("btext: Go! TURTWIG!" "btext: TURTWIG used")
+UNEXPECT_A=("[crash]")
