@@ -84,7 +84,7 @@ Yu-Gi-Oh! table too (5.2). A drawn
   -> `src/tcg/tcg_decks.c`): the 8 Gym Leaders (after their badge), the Elite Four (after
   beating them), WALLACE (Champion), STEVEN, the rival, WALLY, MAXIE, ARCHIE and the six
   Frontier Brains. 15 hand over a promo card on the first win (`gTcgSpecialPromos`).
-- **Packs** (1.32.0, `Tcg_OpenPack`): 5 commons, 3 uncommons, a rare and a Basic Energy. The
+- **Packs** (1.32.0, `Tcg_OpenPack`): 6 commons, 3 uncommons and a rare, the rare last (1.59.1: no Basic Energy, it is free). The
   rare is a holo (`Tcg_IsHolo`: the rares WotC printed as holofoils, Base Set / Jungle 1-16,
   Fossil 1-15, 45 cards) one pack in `TCG_HOLO_ODDS` (3), a plain rare otherwise; after
   `TCG_HOLO_PITY` (20) packs of a set without a holo the player didn't have
