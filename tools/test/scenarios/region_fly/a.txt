@@ -1,0 +1,32 @@
+pressuntil A field 5000
+wait 60
+mp warp 34,59,28,37
+wait 120
+mp setflag 4538
+mp townmap
+wait 90
+shot johto_town
+press B 5
+wait 90
+mp flymap
+wait 60
+mash RIGHT 11 12
+wait 20
+mash DOWN 1 12
+wait 30
+shot fly_cursor
+press A 5
+wait 300
+shot landed
+mp where
+mp warp 37,60,20,20
+wait 120
+mp flymap
+wait 90
+shot kanto_fly
+press R 5
+wait 30
+shot kanto_sevii1
+press B 5
+wait 60
+quit

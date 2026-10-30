@@ -1,0 +1,6 @@
+# Johto's and Kanto's town maps and Fly: the JOHTO town map in Goldenrod, Fly from Goldenrod to New Bark once its
+# flag is set (lands at its heal location), Kanto's Fly map and R turning to the Sevii Islands' first map
+MODE=1
+TMO=150
+EXPECT_A=("where map 34.123 xy 20,12")
+UNEXPECT_A=("[crash]")

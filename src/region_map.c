@@ -135,6 +135,20 @@ static const u8 sRegionMapPlayerIcon_MayGfx[] = INCGFX_U8("graphics/pokenav/regi
 #include "data/region_map/region_map_entries.h"
 #include "data/region_map/johto_map_sections.h"   // Moemon Kai
 
+// Moemon Kai: Johto's and Kanto's town maps (tools/quetzal_port/gen_regionmap.py). The map shown is the region the
+// player stands in (Kanto: the part of it, the main map or one of the Sevii Island maps; L / R turn between them).
+#define QZMAP_HOENN 0
+#define QZMAP_JOHTO 1
+#define QZMAP_KANTO 2   // 3-5: the Sevii Islands
+#define QZMAP_COUNT 6
+struct QzMapPlace { mapsec_u16_t mapsec; u8 map, x, y, width, height; };
+struct QzFlyDest { mapsec_u16_t mapsec; u8 map; u8 heal; u16 flag; };
+#include "mp_region.h"
+#include "data/region_map/qz_region_maps.h"
+static u8 sShownMap;    // QZMAP_*
+static u8 sPlayerMap;   // the map the player is on
+static struct RegionMapLocation sQzBox;
+
 static const mapsec_u16_t sRegionMap_SpecialPlaceLocations[][2] =
 {
     {MAPSEC_UNDERWATER_105,             MAPSEC_ROUTE_105},
@@ -510,6 +524,93 @@ static const struct SpriteTemplate sFlyDestIconSpriteTemplate =
     .callback = SpriteCallbackDummy
 };
 
+// Moemon Kai: which map shows a map section, and where on it
+static const struct QzMapPlace *QzPlace(mapsec_u16_t mapsec, u8 map)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sQzMapPlaces); i++)
+        if (sQzMapPlaces[i].mapsec == mapsec && (map == QZMAP_COUNT || sQzMapPlaces[i].map == map))
+            return &sQzMapPlaces[i];
+    return NULL;
+}
+
+// The map a map section is on (Johto's sections and Kanto's are only on theirs; QZMAP_COUNT: nowhere)
+static u8 MapOfMapSec(mapsec_u16_t mapsec)
+{
+    const struct QzMapPlace *p;
+    if (mapsec < MAPSEC_NONE && gRegionMapEntries[mapsec].width != 0 && (mapsec < KANTO_MAPSEC_START || mapsec > KANTO_MAPSEC_END))
+        return QZMAP_HOENN;
+    p = QzPlace(mapsec, QZMAP_COUNT);
+    return p != NULL ? p->map : QZMAP_COUNT;
+}
+
+static bool8 MapSecShown(mapsec_u16_t mapsec)
+{
+    if (sShownMap == QZMAP_HOENN)
+        return mapsec < MAPSEC_NONE && gRegionMapEntries[mapsec].width != 0;
+    return QzPlace(mapsec, sShownMap) != NULL;
+}
+
+// A map section's box on the map shown (one cell in the corner when it isn't on it: never 0 wide)
+static const struct RegionMapLocation *MapSecBox(mapsec_u16_t mapsec)
+{
+    const struct QzMapPlace *p;
+    if (sShownMap == QZMAP_HOENN && mapsec < MAPSEC_NONE && gRegionMapEntries[mapsec].width != 0)
+        return &gRegionMapEntries[mapsec];
+    p = sShownMap != QZMAP_HOENN ? QzPlace(mapsec, sShownMap) : NULL;
+    sQzBox.x = p ? p->x : 0;
+    sQzBox.y = p ? p->y : 0;
+    sQzBox.width = p ? p->width : 1;
+    sQzBox.height = p ? p->height : 1;
+    return &sQzBox;
+}
+
+// The map section the player is in, for choosing the map (the town an indoor map or a cave leads out to)
+static mapsec_u16_t PlayerMapSecForMap(void)
+{
+    mapsec_u16_t sec = gMapHeader.regionMapSectionId;
+    const struct MapHeader *h;
+    if (MapOfMapSec(sec) != QZMAP_COUNT)
+        return sec;
+    h = Overworld_GetMapHeaderByGroupAndId(gSaveBlock1Ptr->escapeWarp.mapGroup, gSaveBlock1Ptr->escapeWarp.mapNum);
+    if (h != NULL && MapOfMapSec(h->regionMapSectionId) != QZMAP_COUNT)
+        return h->regionMapSectionId;
+    h = Overworld_GetMapHeaderByGroupAndId(gSaveBlock1Ptr->dynamicWarp.mapGroup, gSaveBlock1Ptr->dynamicWarp.mapNum);
+    if (h != NULL && MapOfMapSec(h->regionMapSectionId) != QZMAP_COUNT)
+        return h->regionMapSectionId;
+    return sec;
+}
+
+static void ChooseShownMap(void)
+{
+    u8 region = MP_Region_OfGroup(gSaveBlock1Ptr->location.mapGroup);
+    u8 map = MapOfMapSec(PlayerMapSecForMap());
+    if (region == REGION_JOHTO)
+        sPlayerMap = QZMAP_JOHTO;
+    else if (region == REGION_KANTO)
+        sPlayerMap = (map >= QZMAP_KANTO && map < QZMAP_COUNT) ? map : QZMAP_KANTO;
+    else
+        sPlayerMap = QZMAP_HOENN;
+    sShownMap = sPlayerMap;
+}
+
+u8 MP_RegionMap_Shown(void)
+{
+    return sShownMap;
+}
+
+// The town map's title: the region shown
+const u8 *MP_RegionMap_Title(void)
+{
+    static const u8 sJohto[] = _("JOHTO");
+    static const u8 sKanto[] = _("KANTO");
+    if (sShownMap == QZMAP_JOHTO)
+        return sJohto;
+    if (sShownMap >= QZMAP_KANTO)
+        return sKanto;
+    return gText_Hoenn;
+}
+
 void InitRegionMap(struct RegionMap *regionMap, bool8 zoomed)
 {
     InitRegionMapData(regionMap, NULL, zoomed);
@@ -519,6 +620,7 @@ void InitRegionMap(struct RegionMap *regionMap, bool8 zoomed)
 void InitRegionMapData(struct RegionMap *regionMap, const struct BgTemplate *template, bool8 zoomed)
 {
     sRegionMap = regionMap;
+    ChooseShownMap();   // Moemon Kai
     sRegionMap->initStep = 0;
     sRegionMap->zoomed = zoomed;
     sRegionMap->inputCallback = zoomed == TRUE ? ProcessRegionMapInput_Zoomed : ProcessRegionMapInput_Full;
@@ -541,9 +643,25 @@ void InitRegionMapData(struct RegionMap *regionMap, const struct BgTemplate *tem
 void ShowRegionMapForPokedexAreaScreen(struct RegionMap *regionMap)
 {
     sRegionMap = regionMap;
+    sShownMap = sPlayerMap = QZMAP_HOENN;   // Moemon Kai: the POKéDEX's area map is Hoenn's
     InitMapBasedOnPlayerLocation();
     sRegionMap->playerIconSpritePosX = sRegionMap->cursorPosX;
     sRegionMap->playerIconSpritePosY = sRegionMap->cursorPosY;
+}
+
+static const u32 *MapGfx(void)
+{
+    return sShownMap == QZMAP_HOENN ? sRegionMapBg_GfxLZ : sQzMapGfx[sShownMap - 1].gfx;
+}
+
+static const u32 *MapTilemap(void)
+{
+    return sShownMap == QZMAP_HOENN ? sRegionMapBg_TilemapLZ : sQzMapGfx[sShownMap - 1].tilemap;
+}
+
+static const u16 *MapPal(void)
+{
+    return sShownMap == QZMAP_HOENN ? sRegionMapBg_Pal : sQzMapGfx[sShownMap - 1].pal;
 }
 
 bool8 LoadRegionMapGfx(void)
@@ -552,24 +670,24 @@ bool8 LoadRegionMapGfx(void)
     {
     case 0:
         if (sRegionMap->bgManaged)
-            DecompressAndCopyTileDataToVram(sRegionMap->bgNum, sRegionMapBg_GfxLZ, 0, 0, 0);
+            DecompressAndCopyTileDataToVram(sRegionMap->bgNum, MapGfx(), 0, 0, 0);
         else
-            LZ77UnCompVram(sRegionMapBg_GfxLZ, (u16 *)BG_CHAR_ADDR(2));
+            LZ77UnCompVram(MapGfx(), (u16 *)BG_CHAR_ADDR(2));
         break;
     case 1:
         if (sRegionMap->bgManaged)
         {
             if (!FreeTempTileDataBuffersIfPossible())
-                DecompressAndCopyTileDataToVram(sRegionMap->bgNum, sRegionMapBg_TilemapLZ, 0, 0, 1);
+                DecompressAndCopyTileDataToVram(sRegionMap->bgNum, MapTilemap(), 0, 0, 1);
         }
         else
         {
-            LZ77UnCompVram(sRegionMapBg_TilemapLZ, (u16 *)BG_SCREEN_ADDR(28));
+            LZ77UnCompVram(MapTilemap(), (u16 *)BG_SCREEN_ADDR(28));
         }
         break;
     case 2:
         if (!FreeTempTileDataBuffersIfPossible())
-            LoadPalette(sRegionMapBg_Pal, BG_PLTT_ID(7), 3 * PLTT_SIZE_4BPP);
+            LoadPalette(MapPal(), BG_PLTT_ID(7), 3 * PLTT_SIZE_4BPP);
         break;
     case 3:
         LZ77UnCompWram(sRegionMapCursorSmallGfxLZ, sRegionMap->cursorSmallImage);
@@ -651,10 +769,41 @@ u8 DoRegionMapInputCallback(void)
     return sRegionMap->inputCallback();
 }
 
+// Moemon Kai: L / R turn between Kanto's map and the Sevii Islands' three
+static void QzTurnMap(s8 dir)
+{
+    mapsec_u16_t mapSecId;
+
+    sShownMap = QZMAP_KANTO + (sShownMap - QZMAP_KANTO + (QZMAP_COUNT - QZMAP_KANTO) + dir) % (QZMAP_COUNT - QZMAP_KANTO);
+    LZ77UnCompVram(MapGfx(), (u16 *)BG_CHAR_ADDR(sRegionMap->bgManaged ? sRegionMap->charBaseIdx : 2));
+    LZ77UnCompVram(MapTilemap(), (u16 *)BG_SCREEN_ADDR(sRegionMap->bgManaged ? sRegionMap->mapBaseIdx : 28));
+    LoadPalette(MapPal(), BG_PLTT_ID(7), 3 * PLTT_SIZE_4BPP);
+    mapSecId = GetMapSecIdAt(sRegionMap->cursorPosX, sRegionMap->cursorPosY);
+    sRegionMap->mapSecId = mapSecId;
+    sRegionMap->mapSecType = GetMapsecType(mapSecId);
+    GetMapName(sRegionMap->mapSecName, mapSecId, MAP_NAME_LENGTH);
+    GetPositionOfCursorWithinMapSec();
+    MpPlaceFriendIcons();
+    if (sFlyMap != NULL && sRegionMap == &sFlyMap->regionMap)
+    {
+        u32 i;
+        for (i = 0; i < MAX_SPRITES; i++)
+            if (gSprites[i].inUse && gSprites[i].template->paletteTag == TAG_FLY_ICON)
+                DestroySprite(&gSprites[i]);
+        CreateFlyDestIcons();
+    }
+    m4aSongNumStart(SE_DEX_PAGE);
+}
+
 static u8 ProcessRegionMapInput_Full(void)
 {
     u8 input;
 
+    if (sShownMap >= QZMAP_KANTO && (JOY_NEW(L_BUTTON) || JOY_NEW(R_BUTTON)))
+    {
+        QzTurnMap(JOY_NEW(R_BUTTON) ? 1 : -1);
+        return MAP_INPUT_MOVE_END;
+    }
     input = MAP_INPUT_NONE;
     sRegionMap->cursorDeltaX = 0;
     sRegionMap->cursorDeltaY = 0;
@@ -968,6 +1117,8 @@ static mapsec_u16_t GetMapSecIdAt(u16 x, u16 y)
     }
     y -= MAPCURSOR_Y_MIN;
     x -= MAPCURSOR_X_MIN;
+    if (sShownMap != QZMAP_HOENN)
+        return sQzMapLayouts[sShownMap - 1][y][x];   // Moemon Kai
     return sRegionMap_MapSectionLayout[y][x];
 }
 
@@ -1067,26 +1218,26 @@ static void InitMapBasedOnPlayerLocation(void)
 
     xOnMap = x;
 
-    dimensionScale = mapWidth / gRegionMapEntries[sRegionMap->mapSecId].width;
+    dimensionScale = mapWidth / MapSecBox(sRegionMap->mapSecId)->width;
     if (dimensionScale == 0)
     {
         dimensionScale = 1;
     }
     x /= dimensionScale;
-    if (x >= gRegionMapEntries[sRegionMap->mapSecId].width)
+    if (x >= MapSecBox(sRegionMap->mapSecId)->width)
     {
-        x = gRegionMapEntries[sRegionMap->mapSecId].width - 1;
+        x = MapSecBox(sRegionMap->mapSecId)->width - 1;
     }
 
-    dimensionScale = mapHeight / gRegionMapEntries[sRegionMap->mapSecId].height;
+    dimensionScale = mapHeight / MapSecBox(sRegionMap->mapSecId)->height;
     if (dimensionScale == 0)
     {
         dimensionScale = 1;
     }
     y /= dimensionScale;
-    if (y >= gRegionMapEntries[sRegionMap->mapSecId].height)
+    if (y >= MapSecBox(sRegionMap->mapSecId)->height)
     {
-        y = gRegionMapEntries[sRegionMap->mapSecId].height - 1;
+        y = MapSecBox(sRegionMap->mapSecId)->height - 1;
     }
 
     switch (sRegionMap->mapSecId)
@@ -1122,8 +1273,8 @@ static void InitMapBasedOnPlayerLocation(void)
         GetMarineCaveCoords(&sRegionMap->cursorPosX, &sRegionMap->cursorPosY);
         return;
     }
-    sRegionMap->cursorPosX = gRegionMapEntries[sRegionMap->mapSecId].x + x + MAPCURSOR_X_MIN;
-    sRegionMap->cursorPosY = gRegionMapEntries[sRegionMap->mapSecId].y + y + MAPCURSOR_Y_MIN;
+    sRegionMap->cursorPosX = MapSecBox(sRegionMap->mapSecId)->x + x + MAPCURSOR_X_MIN;
+    sRegionMap->cursorPosY = MapSecBox(sRegionMap->mapSecId)->y + y + MAPCURSOR_Y_MIN;
 }
 
 static void RegionMap_InitializeStateBasedOnSSTidalLocation(void)
@@ -1158,28 +1309,57 @@ static void RegionMap_InitializeStateBasedOnSSTidalLocation(void)
         mapHeader = Overworld_GetMapHeaderByGroupAndId(mapGroup, mapNum);
 
         sRegionMap->mapSecId = mapHeader->regionMapSectionId;
-        dimensionScale = mapHeader->mapLayout->width / gRegionMapEntries[sRegionMap->mapSecId].width;
+        dimensionScale = mapHeader->mapLayout->width / MapSecBox(sRegionMap->mapSecId)->width;
         if (dimensionScale == 0)
             dimensionScale = 1;
         x = xOnMap / dimensionScale;
-        if (x >= gRegionMapEntries[sRegionMap->mapSecId].width)
-            x = gRegionMapEntries[sRegionMap->mapSecId].width - 1;
+        if (x >= MapSecBox(sRegionMap->mapSecId)->width)
+            x = MapSecBox(sRegionMap->mapSecId)->width - 1;
 
-        dimensionScale = mapHeader->mapLayout->height / gRegionMapEntries[sRegionMap->mapSecId].height;
+        dimensionScale = mapHeader->mapLayout->height / MapSecBox(sRegionMap->mapSecId)->height;
         if (dimensionScale == 0)
             dimensionScale = 1;
         y = yOnMap / dimensionScale;
-        if (y >= gRegionMapEntries[sRegionMap->mapSecId].height)
-            y = gRegionMapEntries[sRegionMap->mapSecId].height - 1;
+        if (y >= MapSecBox(sRegionMap->mapSecId)->height)
+            y = MapSecBox(sRegionMap->mapSecId)->height - 1;
         break;
     }
     sRegionMap->playerIsInCave = FALSE;
-    sRegionMap->cursorPosX = gRegionMapEntries[sRegionMap->mapSecId].x + x + MAPCURSOR_X_MIN;
-    sRegionMap->cursorPosY = gRegionMapEntries[sRegionMap->mapSecId].y + y + MAPCURSOR_Y_MIN;
+    sRegionMap->cursorPosX = MapSecBox(sRegionMap->mapSecId)->x + x + MAPCURSOR_X_MIN;
+    sRegionMap->cursorPosY = MapSecBox(sRegionMap->mapSecId)->y + y + MAPCURSOR_Y_MIN;
+}
+
+// Moemon Kai: Johto's and Kanto's towns can be flown to once visited (Quetzal's lists: VIOLET and OLIVINE also wait
+// for the story to let the player leave them)
+static const struct QzFlyDest *QzFlyDestOf(mapsec_u16_t mapSecId)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sQzFlyDests); i++)
+        if (sQzFlyDests[i].mapsec == mapSecId)
+            return &sQzFlyDests[i];
+    return NULL;
+}
+
+static bool8 QzCanFlyTo(const struct QzFlyDest *d)
+{
+    if (d->mapsec == MAPSEC_JOHTO_VIOLET_CITY && VarGet(0x5008) < 3)
+        return FALSE;
+    if (d->mapsec == MAPSEC_JOHTO_OLIVINE_CITY && VarGet(0x500D) < 1)
+        return FALSE;
+    return d->mapsec == MAPSEC_PALLET_TOWN || FlagGet(d->flag);
 }
 
 static u8 GetMapsecType(mapsec_u16_t mapSecId)
 {
+    if (sShownMap != QZMAP_HOENN)
+    {
+        const struct QzFlyDest *d = QzFlyDestOf(mapSecId);
+        if (mapSecId == MAPSEC_NONE)
+            return MAPSECTYPE_NONE;
+        if (d != NULL)
+            return QzCanFlyTo(d) ? MAPSECTYPE_CITY_CANFLY : MAPSECTYPE_CITY_CANTFLY;
+        return MAPSECTYPE_ROUTE;
+    }
     switch (mapSecId)
     {
     case MAPSEC_NONE:
@@ -1559,7 +1739,9 @@ static void SpriteCB_PlayerIconMapFull(struct Sprite *sprite)
 
 static void SpriteCB_PlayerIcon(struct Sprite *sprite)
 {
-    if (sRegionMap->blinkPlayerIcon)
+    if (sShownMap != sPlayerMap)
+        sprite->invisible = TRUE;   // Moemon Kai: another of Kanto's maps is shown
+    else if (sRegionMap->blinkPlayerIcon)
     {
         if (++sprite->sTimer > 16)
         {
@@ -1644,10 +1826,10 @@ u8 *GetMapNameHandleAquaHideout(u8 *dest, mapsec_u16_t mapSecId)
 
 static void GetMapSecDimensions(mapsec_u16_t mapSecId, u16 *x, u16 *y, u16 *width, u16 *height)
 {
-    *x = gRegionMapEntries[mapSecId].x;
-    *y = gRegionMapEntries[mapSecId].y;
-    *width = gRegionMapEntries[mapSecId].width;
-    *height = gRegionMapEntries[mapSecId].height;
+    *x = MapSecBox(mapSecId)->x;
+    *y = MapSecBox(mapSecId)->y;
+    *width = MapSecBox(mapSecId)->width;
+    *height = MapSecBox(mapSecId)->height;
 }
 
 bool8 IsRegionMapZoomed(void)
@@ -1870,6 +2052,38 @@ static void CreateFlyDestIcons(void)
     u16 shape;
     u8 spriteId;
 
+    if (sShownMap != QZMAP_HOENN)
+    {
+        // Moemon Kai: Johto's / Kanto's towns
+        u32 i;
+        for (i = 0; i < ARRAY_COUNT(sQzFlyDests); i++)
+        {
+            if (sQzFlyDests[i].map != sShownMap)
+                continue;
+            mapSecId = sQzFlyDests[i].mapsec;
+            GetMapSecDimensions(mapSecId, &x, &y, &width, &height);
+            x = (x + MAPCURSOR_X_MIN) * 8 + 4;
+            y = (y + MAPCURSOR_Y_MIN) * 8 + 4;
+            if (width == 2)
+                shape = SPRITE_SHAPE(16x8);
+            else if (height == 2)
+                shape = SPRITE_SHAPE(8x16);
+            else
+                shape = SPRITE_SHAPE(8x8);
+            spriteId = CreateSprite(&sFlyDestIconSpriteTemplate, x, y, 10);
+            if (spriteId != MAX_SPRITES)
+            {
+                gSprites[spriteId].oam.shape = shape;
+                if (QzCanFlyTo(&sQzFlyDests[i]))
+                    gSprites[spriteId].callback = SpriteCB_FlyDestIcon;
+                else
+                    shape += 3;
+                StartSpriteAnim(&gSprites[spriteId], shape);
+                gSprites[spriteId].sIconMapSec = mapSecId;
+            }
+        }
+        return;
+    }
     canFlyFlag = FLAG_VISITED_LITTLEROOT_TOWN;
     for (mapSecId = MAPSEC_LITTLEROOT_TOWN; mapSecId <= MAPSEC_EVER_GRANDE_CITY; mapSecId++)
     {
@@ -1913,6 +2127,8 @@ static void TryCreateRedOutlineFlyDestIcons(void)
     mapsec_u16_t mapSecId;
     u8 spriteId;
 
+    if (sShownMap != QZMAP_HOENN)
+        return;
     for (i = 0; sRedOutlineFlyDestinations[i][1] != MAPSEC_NONE; i++)
     {
         if (FlagGet(sRedOutlineFlyDestinations[i][0]))
@@ -2018,7 +2234,12 @@ static void CB_ExitFlyMap(void)
         if (!UpdatePaletteFade())
         {
             FreeRegionMapIconResources();
-            if (sFlyMap->choseFlyLocation)
+            if (sFlyMap->choseFlyLocation && QzFlyDestOf(sFlyMap->regionMap.mapSecId) != NULL)
+            {
+                SetWarpDestinationToHealLocation(QzFlyDestOf(sFlyMap->regionMap.mapSecId)->heal);   // Moemon Kai
+                ReturnToFieldFromFlyMapSelect();
+            }
+            else if (sFlyMap->choseFlyLocation)
             {
                 switch (sFlyMap->regionMap.mapSecId)
                 {
@@ -2168,14 +2389,14 @@ static void MpPlaceFriendIcons(void)
             continue;
         sprite = &gSprites[sMpFriendSprite[i]];
         sec = MP_Friends_Mapsec(sMpFriendIds[i]);
-        if (sec >= MAPSEC_NONE || gRegionMapEntries[sec].width == 0
+        if (!MapSecShown(sec)
          || sRegionMap->playerIconSprite == NULL || sRegionMap->playerIconSprite->callback == SpriteCallbackDummy)
         {
             sprite->invisible = TRUE;
             sprite->callback = SpriteCallbackDummy;
             continue;
         }
-        loc = &gRegionMapEntries[sec];
+        loc = MapSecBox(sec);
         px = loc->x + loc->width / 2 + MAPCURSOR_X_MIN;
         py = loc->y + loc->height / 2 + MAPCURSOR_Y_MIN;
         // Friends in the same place are spread out a little
