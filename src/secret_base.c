@@ -599,7 +599,7 @@ void InitSecretBaseDecorationSprites(void)
             if (MetatileBehavior_HoldsSmallDecoration(metatileBehavior) == TRUE
              || MetatileBehavior_HoldsLargeDecoration(metatileBehavior) == TRUE)
             {
-                gSpecialVar_Result = VAR_OBJ_GFX_ID_0 + (gMapHeader.events->objectEvents[objectEventId].graphicsId - OBJ_EVENT_GFX_VAR_0);
+                gSpecialVar_Result = VAR_OBJ_GFX_ID_0 + (TEMPLATE_GFX_ID(&gMapHeader.events->objectEvents[objectEventId]) - OBJ_EVENT_GFX_VAR_0);
                 VarSet(gSpecialVar_Result, gDecorations[decorations[i]].tiles[0]);
                 gSpecialVar_Result = gMapHeader.events->objectEvents[objectEventId].localId;
                 FlagClear(FLAG_DECORATION_1 + gSpecialVar_0x8004);

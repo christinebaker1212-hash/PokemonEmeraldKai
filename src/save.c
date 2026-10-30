@@ -2,6 +2,7 @@
 #include "global.h"
 #include "mp_region.h"
 #include "mp.h"
+#include "mp_savefix.h"
 #include "platform.h"
 #include "agb_flash.h"
 #include "gba/flash_internal.h"
@@ -488,6 +489,21 @@ static u8 TryLoadSaveSlot(u16 sectorId, struct SaveSectorLocation *locations)
     return status;
 }
 
+// Moemon Kai: 1.60.0's Windows build wrote SaveBlock1 64 bytes longer (its struct ObjectEvent took 40 bytes there, 36
+// everywhere else: MP_SAVE_WIN160_EXTRA), so that save's last SaveBlock1 sector checks out only at that length. Such a
+// sector is accepted, and the save is read whole and put back into today's layout (MP_SaveFix_FromWin160).
+static bool8 SectorChecksumOk(const struct SaveSector *sector, const struct SaveSectorLocation *locations)
+{
+    u16 id = sector->id;
+    if (id >= NUM_SECTORS_PER_SLOT)
+        return FALSE;
+    if (sector->checksum == CalculateChecksum((void *)sector->data, locations[id].size))
+        return TRUE;
+    return id == SECTOR_ID_SAVEBLOCK1_END
+        && locations[id].size + MP_SAVE_WIN160_EXTRA <= SECTOR_DATA_SIZE
+        && sector->checksum == CalculateChecksum((void *)sector->data, locations[id].size + MP_SAVE_WIN160_EXTRA);
+}
+
 // sectorId arg is ignored, this always reads the full save slot
 static u8 CopySaveSlotData(u16 sectorId, struct SaveSectorLocation *locations)
 {
@@ -495,7 +511,9 @@ static u8 CopySaveSlotData(u16 sectorId, struct SaveSectorLocation *locations)
     u16 checksum;
     u16 slotOffset = NUM_SECTORS_PER_SLOT * (gSaveCounter % NUM_SAVE_SLOTS);
     u16 id;
+    bool8 sb1Read = FALSE, sb1Win160 = FALSE;
 
+    MP_SaveFix_BeginSaveBlock1();
     for (i = 0; i < NUM_SECTORS_PER_SLOT; i++)
     {
         ReadFlashSector(i + slotOffset, gReadWriteSector);
@@ -505,15 +523,32 @@ static u8 CopySaveSlotData(u16 sectorId, struct SaveSectorLocation *locations)
             gLastWrittenSector = i;
 
         checksum = CalculateChecksum(gReadWriteSector->data, locations[id].size);
+        (void)checksum;
 
         // Only copy data for sectors whose signature and checksum fields are correct
-        if (gReadWriteSector->signature == SECTOR_SIGNATURE && gReadWriteSector->checksum == checksum)
+        if (gReadWriteSector->signature == SECTOR_SIGNATURE && SectorChecksumOk(gReadWriteSector, locations))
         {
-            u16 j;
-            for (j = 0; j < locations[id].size; j++)
+            u16 j, size = locations[id].size;
+            if (id >= SECTOR_ID_SAVEBLOCK1_START && id <= SECTOR_ID_SAVEBLOCK1_END)
+            {
+                // Moemon Kai: SaveBlock1 is gathered whole first (MP_SaveFix: older layouts)
+                u8 *raw = MP_SaveFix_RawSaveBlock1();
+                if (id == SECTOR_ID_SAVEBLOCK1_END && gReadWriteSector->checksum != CalculateChecksum(gReadWriteSector->data, size))
+                {
+                    size += MP_SAVE_WIN160_EXTRA;
+                    sb1Win160 = TRUE;
+                }
+                for (j = 0; j < size; j++)
+                    raw[sSaveSlotLayout[id].offset + j] = gReadWriteSector->data[j];
+                sb1Read = TRUE;
+                continue;
+            }
+            for (j = 0; j < size; j++)
                 ((u8 *)locations[id].data)[j] = gReadWriteSector->data[j];
         }
     }
+    if (sb1Read)
+        MP_SaveFix_StoreSaveBlock1(sb1Win160);   // into gSaveBlock1Ptr, converted if it's 1.60.0's Windows layout
 
     return SAVE_STATUS_OK;
 }
@@ -537,7 +572,8 @@ static u8 GetSaveValidStatus(const struct SaveSectorLocation *locations)
         {
             signatureValid = TRUE;
             checksum = CalculateChecksum(gReadWriteSector->data, locations[gReadWriteSector->id].size);
-            if (gReadWriteSector->checksum == checksum)
+            (void)checksum;
+            if (SectorChecksumOk(gReadWriteSector, locations))   // Moemon Kai: 1.60.0's Windows saves too
             {
                 saveSlot1Counter = gReadWriteSector->counter;
                 validSectorFlags |= 1 << gReadWriteSector->id;
@@ -569,7 +605,8 @@ static u8 GetSaveValidStatus(const struct SaveSectorLocation *locations)
         {
             signatureValid = TRUE;
             checksum = CalculateChecksum(gReadWriteSector->data, locations[gReadWriteSector->id].size);
-            if (gReadWriteSector->checksum == checksum)
+            (void)checksum;
+            if (SectorChecksumOk(gReadWriteSector, locations))   // Moemon Kai: 1.60.0's Windows saves too
             {
                 saveSlot2Counter = gReadWriteSector->counter;
                 validSectorFlags |= 1 << gReadWriteSector->id;
@@ -904,12 +941,13 @@ u8 LoadGameSave(u8 saveType)
     case SAVE_NORMAL:
     default:
         status = TryLoadSaveSlot(FULL_SAVE_SLOT, gRamSaveSectorLocations);
+        if (status == SAVE_STATUS_OK)
+            MP_Region_LoadFromSave();   // Moemon Kai: Johto / Kanto flags and vars (mp_region.c); older save layouts
+                                        // are brought up to date here (mp_savefix.c), before anything is copied out
         CopyPartyAndObjectsFromSave();
         if (status == SAVE_STATUS_OK)
             MP_Bag_LoadFromSave();   // Moemon Co-op: the bigger pockets (mp_bag.c)
-            MP_Life_LoadFromSave();  // Moemon Co-op: MOéMON GARDEN, the A-Life (mp_life.c)
-        if (status == SAVE_STATUS_OK)
-            MP_Region_LoadFromSave();   // Moemon Kai: Johto / Kanto flags and vars (mp_region.c)
+        MP_Life_LoadFromSave();  // Moemon Co-op: MOéMON GARDEN, the A-Life (mp_life.c)
         gSaveFileStatus = status;
         gGameContinueCallback = NULL;
         break;

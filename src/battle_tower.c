@@ -2312,7 +2312,7 @@ static void LoadMultiPartnerCandidatesData(void)
     for (i = 0; i < 6; i++)
     {
         trainerId = gSaveBlock2Ptr->frontier.trainerIds[i];
-        objEventTemplates[i + 1].graphicsId = GetBattleFacilityTrainerGfxId(trainerId);
+        SET_TEMPLATE_GFX_ID(&objEventTemplates[i + 1], GetBattleFacilityTrainerGfxId(trainerId));
         for (j = 0; j < 2; j++)
         {
             while (1)
@@ -2366,7 +2366,7 @@ static void LoadMultiPartnerCandidatesData(void)
     if (r10 != 0)
     {
         gSaveBlock2Ptr->frontier.trainerIds[6] = spArray[Random() % r10];
-        objEventTemplates[7].graphicsId = GetBattleFacilityTrainerGfxId(gSaveBlock2Ptr->frontier.trainerIds[6]);
+        SET_TEMPLATE_GFX_ID(&objEventTemplates[7], GetBattleFacilityTrainerGfxId(gSaveBlock2Ptr->frontier.trainerIds[6]));
         FlagClear(FLAG_HIDE_BATTLE_TOWER_MULTI_BATTLE_PARTNER_ALT_1);
         GetApprenticeMultiPartnerParty(gSaveBlock2Ptr->frontier.trainerIds[6]);
     }
@@ -2409,7 +2409,7 @@ static void LoadMultiPartnerCandidatesData(void)
     if (r10 != 0)
     {
         gSaveBlock2Ptr->frontier.trainerIds[7] = spArray[Random() % r10];
-        objEventTemplates[8].graphicsId = GetBattleFacilityTrainerGfxId(gSaveBlock2Ptr->frontier.trainerIds[7]);
+        SET_TEMPLATE_GFX_ID(&objEventTemplates[8], GetBattleFacilityTrainerGfxId(gSaveBlock2Ptr->frontier.trainerIds[7]));
         FlagClear(FLAG_HIDE_BATTLE_TOWER_MULTI_BATTLE_PARTNER_ALT_2);
         GetRecordMixFriendMultiPartnerParty(gSaveBlock2Ptr->frontier.trainerIds[7]);
     }

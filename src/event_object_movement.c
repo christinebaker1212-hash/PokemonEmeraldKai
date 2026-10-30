@@ -1315,7 +1315,7 @@ static u8 InitObjectEventStateFromTemplate(const struct ObjectEventTemplate *tem
     y = template->y + MAP_OFFSET;
     objectEvent->active = TRUE;
     objectEvent->triggerGroundEffectsOnMove = TRUE;
-    SET_OBJ_GFX_ID(objectEvent, template->graphicsId);
+    SET_OBJ_GFX_ID(objectEvent, TEMPLATE_GFX_ID(template));
     objectEvent->movementType = template->movementType;
     objectEvent->localId = template->localId;
     objectEvent->mapNum = mapNum;
@@ -1509,7 +1509,7 @@ static u8 TrySpawnObjectEventTemplate(const struct ObjectEventTemplate *objectEv
     const struct ObjectEventGraphicsInfo *graphicsInfo;
     const struct SubspriteTable *subspriteTables = NULL;
 
-    graphicsInfo = GetObjectEventGraphicsInfo(objectEventTemplate->graphicsId);
+    graphicsInfo = GetObjectEventGraphicsInfo(TEMPLATE_GFX_ID(objectEventTemplate));
     MakeSpriteTemplateFromObjectEventTemplate(objectEventTemplate, &spriteTemplate, &subspriteTables);
     spriteFrameImage.size = graphicsInfo->size;
     spriteTemplate.images = &spriteFrameImage;
@@ -1540,7 +1540,7 @@ u8 SpawnSpecialObjectEventParameterized(u16 graphicsId, u8 movementBehavior, u8 
     x -= MAP_OFFSET;
     y -= MAP_OFFSET;
     objectEventTemplate.localId = localId;
-    objectEventTemplate.graphicsId = graphicsId;
+    SET_TEMPLATE_GFX_ID(&objectEventTemplate, graphicsId);
     objectEventTemplate.kind = OBJ_KIND_NORMAL;
     objectEventTemplate.x = x;
     objectEventTemplate.y = y;
@@ -1587,7 +1587,7 @@ static void CopyObjectGraphicsInfoToSpriteTemplate_WithMovementType(u16 graphics
 
 static void MakeSpriteTemplateFromObjectEventTemplate(const struct ObjectEventTemplate *objectEventTemplate, struct SpriteTemplate *spriteTemplate, const struct SubspriteTable **subspriteTables)
 {
-    CopyObjectGraphicsInfoToSpriteTemplate_WithMovementType(objectEventTemplate->graphicsId, objectEventTemplate->movementType, spriteTemplate, subspriteTables);
+    CopyObjectGraphicsInfoToSpriteTemplate_WithMovementType(TEMPLATE_GFX_ID(objectEventTemplate), objectEventTemplate->movementType, spriteTemplate, subspriteTables);
 }
 
 // Used to create a sprite using a graphicsId associated with object events.

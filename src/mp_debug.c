@@ -1449,6 +1449,31 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] bag pocket %d: %d kinds (of %d), biggest stack %d\n", p, kinds, gBagPockets[p].capacity, biggest);
         }
     }
+    else if (strcmp(cmd, "savesum") == 0)
+    {
+        // savesum: a summary of the loaded save (tools/test/save_compat.sh compares older formats' with today's)
+        u32 h = 2166136261u, i;
+        const u8 *p = (const u8 *)gSaveBlock1Ptr;
+        for (i = 0; i < sizeof(struct SaveBlock1); i++)
+        {
+            if (i >= offsetof(struct SaveBlock1, objectEvents) && i < offsetof(struct SaveBlock1, objectEvents) + sizeof(gSaveBlock1Ptr->objectEvents))
+                continue;   // (the object events: below, field by field)
+            h = (h ^ p[i]) * 16777619u;
+        }
+        printf("[test] savesum: map %d.%d at %d,%d money %u badges", gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum,
+               gSaveBlock1Ptr->pos.x, gSaveBlock1Ptr->pos.y, (unsigned)GetMoney(&gSaveBlock1Ptr->money));
+        for (i = 0; i < 8; i++)
+            printf("%d", FlagGet(FLAG_BADGE01_GET + i));
+        printf(" sb1 %08x objs", h);
+        for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+            if (gSaveBlock1Ptr->objectEvents[i].active)
+                printf(" %d:%x@%d,%d", gSaveBlock1Ptr->objectEvents[i].localId, OBJ_GFX_ID(&gSaveBlock1Ptr->objectEvents[i]),
+                       gSaveBlock1Ptr->objectEvents[i].currentCoords.x, gSaveBlock1Ptr->objectEvents[i].currentCoords.y);
+        printf(" tmpl");
+        for (i = 0; i < 8; i++)
+            printf(" %x/%d", TEMPLATE_GFX_ID(&gSaveBlock1Ptr->objectEventTemplates[i]), gSaveBlock1Ptr->objectEventTemplates[i].kind);
+        printf("\n");
+    }
     else if (strcmp(cmd, "save") == 0)
     {
         u8 TrySavingData(u8 saveType);

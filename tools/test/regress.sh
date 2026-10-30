@@ -12,6 +12,9 @@ if [ -z "$NOBUILD" ]; then
     (cd "$REPO" && make linux -j"$(nproc)" > "$OUT/build.log" 2>&1) || { echo "build failed, see $OUT/build.log"; exit 99; }
 fi
 build_server || exit 99
+# Saves load on every platform (the structures' layout, tools/test/save_layout.py) and scripts' lookups are in range
+python3 "$TOOLS/save_layout.py" || { echo "FAIL save layout"; exit 1; }
+python3 "$TOOLS/check_scripts.py" || { echo "FAIL scripts"; exit 1; }
 names=("$@"); all=0; [ ${#names[@]} = 0 ] && { names=($(ls "$TOOLS/scenarios")); all=1; }
 
 run_one() {

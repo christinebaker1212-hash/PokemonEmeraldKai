@@ -122,7 +122,10 @@ void UpdateDewfordTrendPerDay(u16 days)
             if ((u16)trendiness > trend->maxTrendiness)
             {
                 // Reached limit, reset trendiness
-                u32 newTrendiness = trendiness % trend->maxTrendiness;
+                u32 newTrendiness;
+                if (trend->maxTrendiness == 0)
+                    trend->maxTrendiness = 1;   // Moemon Kai: never divide by a broken save's zero
+                newTrendiness = trendiness % trend->maxTrendiness;
                 trendiness = trendiness / trend->maxTrendiness;
 
                 trend->gainingTrendiness = trendiness ^ 1;

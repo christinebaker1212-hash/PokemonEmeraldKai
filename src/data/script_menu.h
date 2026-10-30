@@ -931,6 +931,23 @@ static const struct MultichoiceListStruct sMultichoiceLists[] =
 #include "script_menu_qz_entries.h"   // Moemon Kai: Quetzal's menus
 };
 
+static const u8 sText_QzStd_1E[] = _("MEDICINE");
+static const u8 sText_QzStd_1F[] = _("TRAINING");
+static const u8 sText_QzStd_20[] = _("EVO/FORMS");
+static const u8 sText_QzStd_21[] = _("BATTLE ITEM");
+static const u8 sText_QzStd_22[] = _("MEGA STONES");
+static const u8 sText_QzStd_23[] = _("Z CRYSTALS");
+static const u8 sText_QzStd_24[] = _("TERA SHARDS");
+static const u8 sText_QzStd_25[] = _("BOULDER BADGE");
+static const u8 sText_QzStd_26[] = _("CASCADE BADGE");
+static const u8 sText_QzStd_27[] = _("THUNDER BADGE");
+static const u8 sText_QzStd_28[] = _("RAINBOW BADGE");
+static const u8 sText_QzStd_29[] = _("SOUL BADGE");
+static const u8 sText_QzStd_2A[] = _("MARSH BADGE");
+static const u8 sText_QzStd_2B[] = _("VOLCANO BADGE");
+static const u8 sText_QzStd_2C[] = _("EARTH BADGE");
+static const u8 sText_QzStd_2D[] = _("COINS");
+
 const u8 *const gStdStrings[] =
 {
     [STDSTRING_COOL] = gText_Cool,
@@ -963,7 +980,24 @@ const u8 *const gStdStrings[] =
     [STDSTRING_BATTLE_ARENA] = gText_BattleArena,
     [STDSTRING_BATTLE_PIKE] = gText_BattlePike,
     [STDSTRING_BATTLE_PYRAMID] = gText_BattlePyramid,
+    [0x1E] = sText_QzStd_1E,   // Moemon Kai: Quetzal's (FRLG-based) extra standard strings
+    [0x1F] = sText_QzStd_1F,
+    [0x20] = sText_QzStd_20,
+    [0x21] = sText_QzStd_21,
+    [0x22] = sText_QzStd_22,
+    [0x23] = sText_QzStd_23,
+    [0x24] = sText_QzStd_24,
+    [0x25] = sText_QzStd_25,
+    [0x26] = sText_QzStd_26,
+    [0x27] = sText_QzStd_27,
+    [0x28] = sText_QzStd_28,
+    [0x29] = sText_QzStd_29,
+    [0x2A] = sText_QzStd_2A,
+    [0x2B] = sText_QzStd_2B,
+    [0x2C] = sText_QzStd_2C,
+    [0x2D] = sText_QzStd_2D,
 };
+const u16 gStdStringsCount = ARRAY_COUNT(gStdStrings);
 
 static const u8 sLinkServicesMultichoiceIds[] =
 {
