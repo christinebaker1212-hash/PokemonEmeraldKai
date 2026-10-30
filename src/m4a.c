@@ -191,6 +191,11 @@ void m4aSoundMain(void)
 #define SONG_HEADER(n, song) ((song)->header)
 #endif
 
+// Moemon Kai tests (mp musiclock 1): the song playing keeps the music player; the game's own music changes, stops
+// and fades leave it alone, so a measure isn't taken over by the map's song (tools/kaisong/loudness.py)
+u8 gMpTestMusicLock;
+#define MP_TEST_LOCKED(info) (gMpTestMusicLock && (info) == &gMPlayInfo_BGM)
+
 void m4aSongNumStart(u16 n)
 {
     const struct MusicPlayer *mplayTable = gMPlayTable;
@@ -199,6 +204,8 @@ void m4aSongNumStart(u16 n)
     const struct MusicPlayer *mplay = &mplayTable[song->ms];
     struct SongHeader *header = SONG_HEADER(n, song);
 
+    if (MP_TEST_LOCKED(mplay->info))
+        return;
     MPlayStart(mplay->info, header);
 }
 
@@ -210,6 +217,8 @@ void m4aSongNumStartOrChange(u16 n)
     const struct MusicPlayer *mplay = &mplayTable[song->ms];
     struct SongHeader *header = SONG_HEADER(n, song);
 
+    if (MP_TEST_LOCKED(mplay->info))
+        return;
     if (mplay->info->songHeader != header)
     {
         MPlayStart(mplay->info, header);
@@ -248,7 +257,7 @@ void m4aSongNumStop(u16 n)
     const struct MusicPlayer *mplay = &mplayTable[song->ms];
     struct SongHeader *header = SONG_HEADER(n, song);
 
-    if (mplay->info->songHeader == header)
+    if (mplay->info->songHeader == header && !MP_TEST_LOCKED(mplay->info))
         m4aMPlayStop(mplay->info);
 }
 
@@ -293,11 +302,15 @@ void m4aMPlayAllContinue(void)
 
 void m4aMPlayFadeOut(struct MusicPlayerInfo *mplayInfo, u16 speed)
 {
+    if (MP_TEST_LOCKED(mplayInfo))
+        return;
     MPlayFadeOut(mplayInfo, speed);
 }
 
 void m4aMPlayFadeOutTemporarily(struct MusicPlayerInfo *mplayInfo, u16 speed)
 {
+    if (MP_TEST_LOCKED(mplayInfo))
+        return;
     if (mplayInfo->ident == ID_NUMBER)
     {
         mplayInfo->ident++;
@@ -806,6 +819,9 @@ void m4aMPlayStop(struct MusicPlayerInfo *mplayInfo)
 {
     s32 i;
     struct MusicPlayerTrack *track;
+
+    if (MP_TEST_LOCKED(mplayInfo))
+        return;
 
     if (mplayInfo->ident != ID_NUMBER)
         return;

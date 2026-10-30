@@ -883,10 +883,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // kaisong - list music/*.kaisong (custom songs) in the log
         MP_Kaisong_Log();
     }
-    else if (strcmp(cmd, "playsong") == 0)
+    else if (strcmp(cmd, "playsong") == 0 || strcmp(cmd, "playkai") == 0)
     {
-        // playsong N - song N from a clean sound state (no reverb, no voices left), for audio checks against the studio
+        // playsong N - song N from a clean sound state (no reverb, no voices left), for audio checks against the studio;
+        // playkai FILE - the same with a music/ .kaisong file, wherever it is meant to play (tools/kaisong/loudness.py);
+        // (either clears musiclock)
+        extern u8 gMpTestMusicLock;
         int i;
+        gMpTestMusicLock = 0;
         m4aMPlayAllStop();
         for (i = 0; i < MAX_DIRECTSOUND_CHANNELS; i++)
             gSoundInfo.chans[i].statusFlags = 0;
@@ -904,8 +908,21 @@ void MP_TestCommand(const char *cmd, const char *arg)
             apuCycle = 0;
             REG_NR13 = REG_NR14 = REG_NR23 = REG_NR24 = REG_NR33 = REG_NR34 = 0;
         }
-        m4aSongNumStart(atoi(arg));
-        printf("[test] playsong %d\n", atoi(arg));
+        if (cmd[4] == 'k')
+            printf("[test] playkai %s %s\n", arg, MP_Kaisong_PlayFile(arg) ? "ok" : "FAILED");
+        else
+        {
+            m4aSongNumStart(atoi(arg));
+            printf("[test] playsong %d\n", atoi(arg));
+        }
+    }
+    else if (strcmp(cmd, "musiclock") == 0)
+    {
+        // musiclock 1 - the song playing keeps the music player: the map's own music changes, stops and fades are
+        // ignored (tools/kaisong/loudness.py, so a long measure isn't taken over by the map's song); 0 = off
+        extern u8 gMpTestMusicLock;
+        gMpTestMusicLock = atoi(arg) != 0;
+        printf("[test] musiclock %d\n", gMpTestMusicLock);
     }
     else if (strcmp(cmd, "bgm") == 0)
     {

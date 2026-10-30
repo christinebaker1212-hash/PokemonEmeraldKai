@@ -51,6 +51,7 @@ struct KaiFile
     u8 variant;             // 0 everywhere, 1-63 a hash of the place (spectating)
     u8 failed;
     u8 voices;
+    u16 gain;               // INFO gain= (dB) as a factor in 256ths: the song plays as loud as the one it replaces
     struct SongHeader *header;
 };
 
@@ -428,8 +429,9 @@ static bool8 Load(struct KaiFile *f)
         return Fail(f, "cut short (a chunk is missing)");
     }
 
-    // INFO: the voices it was made for
+    // INFO: the voices it was made for, and its gain (tools/kaisong/loudness.py measures it against the song it replaces)
     f->voices = KAI_GAME_VOICES;
+    f->gain = 256;
     if (info)
     {
         char line[80];
@@ -446,6 +448,17 @@ static bool8 Load(struct KaiFile *f)
             {
                 int v = atoi(line + 7);
                 f->voices = v < 1 ? KAI_GAME_VOICES : v > MAX_DIRECTSOUND_CHANNELS ? MAX_DIRECTSOUND_CHANNELS : v;
+            }
+            else if (!strncmp(line, "gain=", 5))
+            {
+                // dB, -12 to +12, to a factor without libm: 10^(dB/20) by steps of a tenth of a dB
+                double db = atof(line + 5), g = 1.0;
+                int i, steps;
+                db = db < -12.0 ? -12.0 : db > 12.0 ? 12.0 : db;
+                steps = (int)(db * 10.0 + (db < 0 ? -0.5 : 0.5));
+                for (i = 0; i < (steps < 0 ? -steps : steps); i++)
+                    g *= steps < 0 ? 0.98855309 : 1.01157945;   // 10^(-0.1/20), 10^(0.1/20)
+                f->gain = (u16)(g * 256.0 + 0.5);
             }
             a = b + 1;
         }
@@ -763,6 +776,39 @@ void MP_Kaisong_Started(const struct SongHeader *header)
         soundInfo->chans[i].statusFlags = 0;
     soundInfo->maxChans = want;
     soundInfo->ident = ID_NUMBER;
+}
+
+// The gain of the song a music player plays (256 = as made, also for the game's own songs): music_player.c
+// ChnVolSetAsm scales each voice's volume by it
+u16 MP_Kaisong_Gain(const struct SongHeader *header)
+{
+    int i;
+    if (header)
+        for (i = 0; i < sKai.count; i++)
+            if (sKai.files[i].header == header)
+                return sKai.files[i].gain;
+    return 256;
+}
+
+// Tests (mp playkai FILE): the file's song on its music player, whatever the map or scene; FALSE when it can't play
+bool8 MP_Kaisong_PlayFile(const char *file)
+{
+    int i;
+    if (!sKai.scanned)
+        Scan();
+    for (i = 0; i < sKai.count; i++)
+    {
+        struct KaiFile *f = &sKai.files[i];
+        if (strcmp(f->file, file) == 0)
+        {
+            struct SongHeader *h = HeaderOf(f, NULL);
+            if (!h)
+                return FALSE;
+            MPlayStart(gMPlayTable[gSongTable[f->song].ms].info, h);
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 void MP_Kaisong_Log(void)

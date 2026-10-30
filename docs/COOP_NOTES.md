@@ -2323,6 +2323,14 @@ Moemon Music Studio's `.kaisong` exports (format and loading: docs/KAISONG_FORMA
   (`MP_MUSIC_SCENE_HOLD(MUS_...)` / `RELEASE`, mp_sim.c: the songs named are what the picker lists for it). Card boards
   hand the map's song back with `MP_MUSIC_TO_MAP(...)`. `MOEMON_MUSIC_LOG=1` logs each song's scene.
   tools/kaisong/test_scenes.py adds scene files and checks they are picked up.
+- **Loudness** (1.52.1). `python3 tools/kaisong/loudness.py [--write]` plays every file in `music/` and the song it
+  replaces in headless games (`mp playkai FILE` / `mp playsong N`: a clean sound state; then `mp musiclock 1`:
+  the test-only `gMpTestMusicLock` in m4a.c stops the overworld from changing the BGM while it is measured) and prints how loud each
+  plays; `--write` puts the difference in the file's INFO `gain=` (dB). The game applies it per voice in
+  music_player.c ChnVolSetAsm (`sChnGain`, from MP_Kaisong_Gain of the player's song header; 256 = unchanged, so
+  the game's own songs and the bit-exact studio comparisons stay the same). Before the pass the TRIPLE TRIAD files
+  played about 8 dB under their songs and the GAME CENTER's about 5; all 18 now play within 0.2 dB of them. Run it
+  after adding or re-exporting a song (re-exporting drops the gain). kaisong_test.sh check 6.
 - **Hooks.** m4a.c `SONG_HEADER(n, song)` in every m4aSongNum* function; MPlayStart on the BGM player calls
   `MP_Kaisong_Started` (sample channels = the file's INFO voices, 5 for the game's songs; dropping channels clears the
   ones past the count). overworld.c: `MP_Kaisong_Differs` in Overworld_PlaySpecialMapMusic, TransitionMapMusic and

@@ -9,7 +9,26 @@ Files in this repository's `music` folder ship with every update.
 
 ## Custom music in this version
 
-None yet.
+| file | replaces | where | title |
+|---|---|---|---|
+| `mus_game_corner@rustboro_city_game_center_1f.kaisong` | mus_game_corner | Rustboro City Game Center 1F | Lamb Chop |
+| `mus_game_corner@rustboro_city_game_center_3f.kaisong` | mus_game_corner | Rustboro City Game Center 3F | Lamb Chop |
+| `mus_poke_mart@rustboro_city_game_center_2f.kaisong` | mus_poke_mart | Rustboro City Game Center 2F | Lamb Chop |
+| `mus_rg_vs_trainer@tt.kaisong` | mus_rg_vs_trainer | tt | Shuffle or Boogie |
+| `mus_victory_trainer@tt.kaisong` | mus_victory_trainer | tt | The Winner |
+| `mus_vs_aqua_magma@ygo.kaisong` | mus_vs_aqua_magma | ygo | 003C SEQ_DU_D_01 |
+| `mus_vs_aqua_magma_leader@ygo.kaisong` | mus_vs_aqua_magma_leader | ygo | 0042 SEQ_DU_D_07 |
+| `mus_vs_champion@tt.kaisong` | mus_vs_champion | tt | Shuffle or Boogie |
+| `mus_vs_champion@ygo.kaisong` | mus_vs_champion | ygo | 0044 SEQ_DU_D_09 |
+| `mus_vs_elite_four@tcg.kaisong` | mus_vs_elite_four | tcg | 0046 SEQ_DU_R_15 |
+| `mus_vs_elite_four@tt.kaisong` | mus_vs_elite_four | tt | Shuffle or Boogie |
+| `mus_vs_elite_four@ygo.kaisong` | mus_vs_elite_four | ygo | 0046 SEQ_DU_R_15 |
+| `mus_vs_frontier_brain@ygo.kaisong` | mus_vs_frontier_brain | ygo | 003e SEQ_DU_R_02 |
+| `mus_vs_gym_leader@tt.kaisong` | mus_vs_gym_leader | tt | Shuffle or Boogie |
+| `mus_vs_rival@tt.kaisong` | mus_vs_rival | tt | Shuffle or Boogie |
+| `mus_vs_rival@ygo.kaisong` | mus_vs_rival | ygo | 0044 SEQ_DU_D_09 |
+| `mus_vs_trainer@cable_club.kaisong` | mus_vs_trainer | cable_club | 0044 SEQ_DU_D_09 |
+| `mus_vs_trainer@ygo.kaisong` | mus_vs_trainer | ygo | 003E SEQ_DU_D_03 |
 
 ## Songs
 
@@ -145,6 +164,7 @@ None yet.
 - Field and battle code (by map): Option menu, Riding a BIKE
 
 ### mus_poke_mart (404)
+Custom: `mus_poke_mart@rustboro_city_game_center_2f.kaisong`
 - Map music: 18 places<details><summary>show</summary>Battle Frontier Mart [battle_frontier_mart], Fallarbor Town Mart [fallarbor_town_mart], Fortree City Mart [fortree_city_mart], Lavaridge Town Mart [lavaridge_town_mart], Lilycove City Department Store 2F [lilycove_city_department_store_2f], Lilycove City Department Store 3F [lilycove_city_department_store_3f], Lilycove City Department Store 4F [lilycove_city_department_store_4f], Lilycove City Department Store 5F [lilycove_city_department_store_5f], Lilycove City Unused Mart [lilycove_city_unused_mart], Mauville City Mart [mauville_city_mart], Mossdeep City Mart [mossdeep_city_mart], Oldale Town Mart [oldale_town_mart], Petalburg City Mart [petalburg_city_mart], Rustboro City Game Center 2F [rustboro_city_game_center_2f], Rustboro City Mart [rustboro_city_mart], Slateport City Mart [slateport_city_mart], Sootopolis City Mart [sootopolis_city_mart], Verdanturf Town Mart [verdanturf_town_mart]</details>
 
 ### mus_littleroot (405)
@@ -171,6 +191,7 @@ None yet.
 - Map music: 13 places<details><summary>show</summary>Abandoned Ship Underwater 1 [abandoned_ship_underwater1], Abandoned Ship Underwater 2 [abandoned_ship_underwater2], Underwater Route 105 [underwater_route105], Underwater Route 124 [underwater_route124], Underwater Route 125 [underwater_route125], Underwater Route 126 [underwater_route126], Underwater Route 127 [underwater_route127], Underwater Route 128 [underwater_route128], Underwater Route 129 [underwater_route129], Underwater Route 134 [underwater_route134], Underwater Seafloor Cavern [underwater_seafloor_cavern], Underwater Sealed Chamber [underwater_sealed_chamber], Underwater Sootopolis City [underwater_sootopolis_city]</details>
 
 ### mus_victory_trainer (412)
+Custom: `mus_victory_trainer@tt.kaisong`
 - Scenes: BATTLE SIMULATOR (BATTLE TENTS) [sim], POKéMON TCG card duels [tcg], TRIPLE TRIAD [tt]
 - Field and battle code (by map): Battles, Coop
 
@@ -216,6 +237,7 @@ None yet.
 - Scenes: Cable car [cable_car]
 
 ### mus_game_corner (426)
+Custom: `mus_game_corner@rustboro_city_game_center_1f.kaisong`, `mus_game_corner@rustboro_city_game_center_3f.kaisong`
 - Map music: Mauville City Game Corner [mauville_city_game_corner], Rustboro City Game Center 1F [rustboro_city_game_center_1f], Rustboro City Game Center 3F [rustboro_city_game_center_3f]
 - Scenes: MoeGatcha [gatcha]
 
@@ -354,6 +376,7 @@ None yet.
 - Battles: wild Rayquaza
 
 ### mus_vs_frontier_brain (471)
+Custom: `mus_vs_frontier_brain@ygo.kaisong`
 - Scenes: POKéMON TCG card duels [tcg], YU-GI-OH! duels [ygo]
 - Battles: Frontier Brains (BATTLE FRONTIER)
 
@@ -367,19 +390,23 @@ None yet.
 - Battles: wild POKéMON, anywhere
 
 ### mus_vs_aqua_magma (475)
+Custom: `mus_vs_aqua_magma@ygo.kaisong`
 - Scenes: POKéMON TCG card duels [tcg], YU-GI-OH! duels [ygo]
 - Battles: 28 places<details><summary>show</summary>Aqua Hideout 1F (Grunt) [aqua_hideout_1f], Aqua Hideout B1F (Grunt) [aqua_hideout_b1f], Aqua Hideout B2F (Grunt) [aqua_hideout_b2f], Aqua Hideout B2F (Matt) [aqua_hideout_b2f], Jagged Pass (Grunt) [jagged_pass], Magma Hideout 1F (Grunt) [magma_hideout_1f], Magma Hideout 2F 1R (Grunt) [magma_hideout_2f_1r], Magma Hideout 2F 2R (Grunt) [magma_hideout_2f_2r], Magma Hideout 3F 1R (Grunt) [magma_hideout_3f_1r], Magma Hideout 3F 2R (Grunt) [magma_hideout_3f_2r], Magma Hideout 4F (Grunt) [magma_hideout_4f], Magma Hideout 4F (Tabitha) [magma_hideout_4f], Mossdeep City Space Center 1F (Grunt) [mossdeep_city_space_center_1f], Mossdeep City Space Center 2F (Grunt) [mossdeep_city_space_center_2f], Mossdeep City Space Center 2F (Tabitha) [mossdeep_city_space_center_2f], Mt Chimney (Grunt) [mt_chimney], Mt Chimney (Tabitha) [mt_chimney], Mt Pyre Summit (Grunt) [mt_pyre_summit], Petalburg Woods (Grunt) [petalburg_woods], Route 119 Weather Institute 1F (Grunt) [route119_weather_institute_1f], Route 119 Weather Institute 2F (Grunt) [route119_weather_institute_2f], Route 119 Weather Institute 2F (Shelly) [route119_weather_institute_2f], Rusturf Tunnel (Grunt) [rusturf_tunnel], Seafloor Cavern Room 1 (Grunt) [seafloor_cavern_room1], Seafloor Cavern Room 3 (Grunt) [seafloor_cavern_room3], Seafloor Cavern Room 3 (Shelly) [seafloor_cavern_room3], Seafloor Cavern Room 4 (Grunt) [seafloor_cavern_room4], Slateport City Oceanic Museum 2F (Grunt) [slateport_city_oceanic_museum_2f]</details>
 
 ### mus_vs_trainer (476)
+Custom: `mus_vs_trainer@cable_club.kaisong`, `mus_vs_trainer@ygo.kaisong`
 - Scenes: BATTLE SIMULATOR (BATTLE TENTS) [sim], Link battles (CABLE CLUB) [cable_club], POKéMON TCG card duels [tcg], YU-GI-OH! duels [ygo]
 - Battles: 70 places<details><summary>show</summary>Abandoned Ship Corridors 1F [abandoned_ship_corridors_1f], Abandoned Ship Corridors B1F [abandoned_ship_corridors_b1f], Abandoned Ship Rooms 1F [abandoned_ship_rooms_1f], Abandoned Ship Rooms 2 1F [abandoned_ship_rooms2_1f], Battle Frontier Battle Pyramid Floor [battle_frontier_battle_pyramid_floor], Dewford Town Gym [dewford_town_gym], Fortree City Gym [fortree_city_gym], Jagged Pass [jagged_pass], Lavaridge Town Gym 1F [lavaridge_town_gym_1f], Mauville City (Wally) [mauville_city], Mauville City Gym [mauville_city_gym], Meteor Falls 1F 2R [meteor_falls_1f_2r], Mossdeep City Gym [mossdeep_city_gym], Mt Chimney [mt_chimney], Mt Pyre 2F [mt_pyre_2f], Mt Pyre 3F [mt_pyre_3f], Mt Pyre 4F [mt_pyre_4f], Mt Pyre 5F [mt_pyre_5f], Mt Pyre 6F [mt_pyre_6f], Petalburg City Gym [petalburg_city_gym], Petalburg Woods [petalburg_woods], Route 102 [route102], Route 103 [route103], Route 104 [route104], Route 105 [route105], Route 106 [route106], Route 107 [route107], Route 108 [route108], Route 109 [route109], Route 109 Seashore House [route109_seashore_house], Route 110 [route110], Route 110 Trick House Puzzle 1 [route110_trick_house_puzzle1], Route 110 Trick House Puzzle 2 [route110_trick_house_puzzle2], Route 110 Trick House Puzzle 3 [route110_trick_house_puzzle3], Route 110 Trick House Puzzle 4 [route110_trick_house_puzzle4], Route 110 Trick House Puzzle 6 [route110_trick_house_puzzle6], Route 110 Trick House Puzzle 7 [route110_trick_house_puzzle7], Route 110 Trick House Puzzle 8 [route110_trick_house_puzzle8], Route 111 [route111], Route 112 [route112], Route 113 [route113], Route 114 [route114], Route 115 [route115], Route 116 [route116], Route 117 [route117], Route 118 [route118], Route 119 [route119], Route 120 [route120], Route 121 [route121], Route 123 [route123], Route 124 [route124], Route 125 [route125], Route 126 [route126], Route 127 [route127], Route 128 [route128], Route 129 [route129], Route 130 [route130], Route 131 [route131], Route 132 [route132], Route 133 [route133], Route 134 [route134], Rustboro City Gym [rustboro_city_gym], Rusturf Tunnel [rusturf_tunnel], SS Tidal Lower Deck [ss_tidal_lower_deck], SS Tidal Rooms [ss_tidal_rooms], Sootopolis City Gym B1F [sootopolis_city_gym_b1f], Victory Road 1F [victory_road_1f], Victory Road 1F (Wally) [victory_road_1f], Victory Road B1F [victory_road_b1f], Victory Road B2F [victory_road_b2f]</details>
 - Field and battle code (by map): Battle
 
 ### mus_vs_gym_leader (477)
+Custom: `mus_vs_gym_leader@tt.kaisong`
 - Scenes: Link battles (CABLE CLUB) [cable_club], POKéMON TCG card duels [tcg], TRIPLE TRIAD [tt]
 - Battles: Dewford Town Gym (Brawly) [dewford_town_gym], Fortree City Gym (Winona) [fortree_city_gym], Lavaridge Town Gym 1F (Flannery) [lavaridge_town_gym_1f], Mauville City Gym (Wattson) [mauville_city_gym], Mossdeep City Gym (Tate&Liza) [mossdeep_city_gym], Petalburg City Gym (Norman) [petalburg_city_gym], Rustboro City Gym (Roxanne) [rustboro_city_gym], Sootopolis City Gym 1F (Juan) [sootopolis_city_gym_1f]
 
 ### mus_vs_champion (478)
+Custom: `mus_vs_champion@tt.kaisong`, `mus_vs_champion@ygo.kaisong`
 - Scenes: POKéMON TCG card duels [tcg], TRIPLE TRIAD [tt], YU-GI-OH! duels [ygo]
 - Battles: Ever Grande City Champions Room (Wallace) [ever_grande_city_champions_room]
 
@@ -390,14 +417,17 @@ None yet.
 - Battles: Kyogre / Groudon battle, wild Groudon, wild Kyogre
 
 ### mus_vs_rival (481)
+Custom: `mus_vs_rival@tt.kaisong`, `mus_vs_rival@ygo.kaisong`
 - Scenes: POKéMON TCG card duels [tcg], TRIPLE TRIAD [tt], YU-GI-OH! duels [ygo]
 - Battles: 14 places<details><summary>show</summary>Frontier battle, Lilycove City (Brendan) [lilycove_city], Lilycove City (May) [lilycove_city], Meteor Falls Stevens Cave (Steven) [meteor_falls_stevens_cave], Route 103 (Brendan) [route103], Route 103 (May) [route103], Route 104 (Brendan) [route104], Route 104 (May) [route104], Route 110 (Brendan) [route110], Route 110 (May) [route110], Route 119 (Brendan) [route119], Route 119 (May) [route119], Rustboro City (Brendan) [rustboro_city], Rustboro City (May) [rustboro_city]</details>
 
 ### mus_vs_elite_four (482)
+Custom: `mus_vs_elite_four@tcg.kaisong`, `mus_vs_elite_four@tt.kaisong`, `mus_vs_elite_four@ygo.kaisong`
 - Scenes: POKéMON TCG card duels [tcg], TRIPLE TRIAD [tt], YU-GI-OH! duels [ygo]
 - Battles: Ever Grande City Drakes Room (Drake) [ever_grande_city_drakes_room], Ever Grande City Glacias Room (Glacia) [ever_grande_city_glacias_room], Ever Grande City Phoebes Room (Phoebe) [ever_grande_city_phoebes_room], Ever Grande City Sidneys Room (Sidney) [ever_grande_city_sidneys_room]
 
 ### mus_vs_aqua_magma_leader (483)
+Custom: `mus_vs_aqua_magma_leader@ygo.kaisong`
 - Scenes: POKéMON TCG card duels [tcg], YU-GI-OH! duels [ygo]
 - Battles: Magma Hideout 4F (Maxie) [magma_hideout_4f], Mossdeep City Space Center 2F (Maxie) [mossdeep_city_space_center_2f], Mt Chimney (Maxie) [mt_chimney], Seafloor Cavern Room 9 (Archie) [seafloor_cavern_room9]
 
@@ -474,6 +504,7 @@ None yet.
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_rg_vs_trainer (509)
+Custom: `mus_rg_vs_trainer@tt.kaisong`
 - Scenes: TRIPLE TRIAD [tt]
 
 ### mus_rg_vs_wild (510)

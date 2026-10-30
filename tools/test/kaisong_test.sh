@@ -11,6 +11,7 @@
 #   4. a version 2 file (its own sample) loads and plays
 #   5. scenes: one song replaced for several scenes and places at once (BATTLE SIMULATOR, a GYM, the three card games);
 #      each plays only its own file, and a new scene is found from its source alone (tools/kaisong/test_scenes.py)
+#   6. INFO gain= (tools/kaisong/loudness.py --write): the exported Route 101 with gain=-6.0 plays 6 dB under the game's
 cd "$(dirname "$0")/../.." || exit 99
 REPO=$(pwd)
 OUT=${OUT:-/tmp/moemon_kaisong_test}
@@ -27,7 +28,7 @@ has() { grep -qF -- "$2" "$1"; }
 # the studio's side: a 15-track test MIDI, exported both ways, and rendered by its engine
 python3 tools/moemon_music/test/make_test_midi.py "$OUT/big.mid" 10
 printf 'gba_accurate=1\n' > "$OUT/acc.ini"; printf 'gba_accurate=0\n' > "$OUT/free.ini"
-mkdir -p "$OUT/m1" "$OUT/m2" "$OUT/m3" "$OUT/m4" "$OUT/m5" "$OUT/empty"
+mkdir -p "$OUT/m1" "$OUT/m2" "$OUT/m3" "$OUT/m4" "$OUT/m5" "$OUT/m6" "$OUT/empty"
 MMS_DEFAULTS="$OUT/free.ini" $STUDIO --export "$OUT/big.mid" "$OUT/m1/mus_route101@route101.kaisong" > /dev/null
 MMS_DEFAULTS="$OUT/acc.ini" $STUDIO --export "$OUT/big.mid" "$OUT/m1/mus_route101.kaisong" > /dev/null
 cp "$OUT/m1/mus_route101.kaisong" "$OUT/m5/"
@@ -68,6 +69,11 @@ o = bytes(hdr)
 for cid, body in chunks:
     o += cid + struct.pack('<I', len(body)) + bytes(body) + b'\0' * (-len(body) & 3)
 open(out + '/m4/mus_route101.kaisong', 'wb').write(o)
+# 6: the export with a gain
+import shutil
+sys.path.insert(0, 'tools/kaisong'); import loudness
+shutil.copy(out + '/m2/mus_route101.kaisong', out + '/m6/mus_route101.kaisong')
+loudness.write_gain(out + '/m6/mus_route101.kaisong', -6.0)
 EOF
 
 cat > "$OUT/cmp.py" <<'EOF'
@@ -100,6 +106,7 @@ run free "$OUT/m1" "pressuntil A field 5000" "wait 30" "mp bgm" "mp playsong 359
 run acc "$OUT/m5" "pressuntil A field 5000" "wait 30" "mp playsong 359" "wait 1350" "mp bgm" "quit"
 run game "$OUT/empty" "pressuntil A field 5000" "wait 30" "mp playsong 359" "wait 1350" "quit"
 run export "$OUT/m2" "pressuntil A field 5000" "wait 30" "mp playsong 359" "wait 1350" "quit"
+run gain "$OUT/m6" "pressuntil A field 5000" "wait 30" "mp playsong 359" "wait 1350" "quit"
 run broken "$OUT/m3" "pressuntil A field 5000" "wait 60" "mp bgm" "quit"
 run own "$OUT/m4" "pressuntil A field 5000" "wait 400" "mp bgm" "quit"
 echo "custom songs:"
@@ -109,6 +116,13 @@ check "  a warp to Route 102 switches to the everywhere one (10 tracks, 5 voices
 check "the GBA accurate one sounds exactly like the studio" python3 "$OUT/cmp.py" "$OUT/acc/audio.f32" "$OUT/acc.f32"
 check "the game's Route 101 exported plays like the built-in song" cmp -s "$OUT/game/audio.f32" "$OUT/export/audio.f32"
 check "  (and it is loaded from the file)" has "$OUT/export/log.txt" "mus_route101.kaisong plays as mus_route101 everywhere (8 tracks, 5 voices"
+check "a file with gain=-6.0 plays 6 dB under the built-in song" python3 - "$OUT/game/audio.f32" "$OUT/gain/audio.f32" <<'EOF'
+import numpy as np, sys
+a, b = (np.fromfile(f, dtype=np.float32)[-42048 * 2 * 15:] for f in sys.argv[1:3])
+d = 20 * np.log10(np.sqrt((b ** 2).mean()) / np.sqrt((a ** 2).mean()))
+print('    %.2f dB' % d)
+sys.exit(0 if abs(d + 6) < 0.3 else 1)
+EOF
 check "a file naming an unknown sample is skipped" has "$OUT/broken/log.txt" "which this game doesn't have"
 check "  and the built-in song plays" has "$OUT/broken/log.txt" "[test] bgm song 359 tracks 8 voices 5"
 check "a file with its own sample loads" has "$OUT/own/log.txt" "mus_route101.kaisong plays as mus_route101 everywhere"

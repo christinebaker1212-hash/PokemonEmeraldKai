@@ -11,6 +11,13 @@
 
 static u32 MidiKeyToFreq(struct WaveData2 *wav, u8 key, u8 pitch);
 void ChnVolSetAsm(struct MixerSource *chan, struct MP2KTrack *track);
+
+// Moemon Kai: a custom song's gain (INFO gain=, src/mp/mp_kaisong.c MP_Kaisong_Gain: 256 = as made) for the player whose
+// notes ChnVolSetAsm sets now, so a .kaisong plays as loud as the game's song it replaces. On each note's own volume
+// (velocity included), where there is the most room before the 255 a voice can have.
+#include "mp_kaisong.h"
+static u16 sChnGain = 256;
+#define CHN_GAIN_FOR(player) (sChnGain = MP_Kaisong_Gain((const struct SongHeader *)(player)->songHeader))
 float *cgb_get_buffer();
 extern void * const gMPlayJumpTableTemplate[];
 extern const u8 gScaleTable[];
@@ -480,6 +487,7 @@ void MP2KPlayerMain(void *voidPtrPlayer) {
             continue;
         }
         TrkVolPitSet(player, track);
+        CHN_GAIN_FOR(player);
         for (struct MixerSource *chan = track->chan; chan != NULL; chan = chan->next) {
             if ((chan->status & 0xC7) == 0) {
                 ClearChain(chan);
@@ -532,12 +540,14 @@ void TrackStop(struct MP2KPlayerState *player, struct MP2KTrack *track) {
 void ChnVolSetAsm(struct MixerSource *chan, struct MP2KTrack *track) {
     s8 forcedPan = chan->rhythmPan;
     u32 rightVolume = (u8)(forcedPan + 128) * chan->velocity * track->volRightCalculated / 128 / 128;
+    rightVolume = rightVolume * sChnGain >> 8;
     if (rightVolume > 0xFF) {
         rightVolume = 0xFF;
     }
     chan->rightVol = rightVolume;
     
     u32 leftVolume = (u8)(127 - forcedPan) * chan->velocity * track->volLeftCalculated / 128 / 128;
+    leftVolume = leftVolume * sChnGain >> 8;
     if (leftVolume > 0xFF) {
         leftVolume = 0xFF;
     }
@@ -687,6 +697,7 @@ void MP2K_event_nxx(u8 clock, struct MP2KPlayerState *player, struct MP2KTrack *
     chan->release = instrument->release;
     chan->echoVol = track->echoVolume;
     chan->echoLen = track->echoLength;
+    CHN_GAIN_FOR(player);
     ChnVolSetAsm(chan, track);
     
     // Avoid promoting keyShiftCalculated to u8 by splitting the addition into a separate statement

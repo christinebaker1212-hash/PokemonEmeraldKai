@@ -45,7 +45,14 @@ voices=5                   sample voices the song was made for (5 = GBA accurate
 tool=Moemon Music Studio 1.0
 made=2026-10-25 14:55
 source=Final Fantasy 7 - Nobuo Uematsu - PlayStation      (songs made from music of another game)
+gain=5.2                   dB, -12 to 12: the game plays the song that much louder or quieter (missing = 0)
 ```
+
+`gain=` is the one key the game uses: every sample and Game Boy voice's volume (velocity × track volume, before
+the clamp to 255) is multiplied by it, in 0.1 dB steps (src/music_player.c ChnVolSetAsm, mp_kaisong.c
+MP_Kaisong_Gain). The studio doesn't write it; `tools/kaisong/loudness.py --write` does, so a song plays as loud as
+the game song it replaces (the measure: RMS over 400 ms blocks with EBU R 128's two gates, on the game's own output).
+A voice already at full volume can't go louder, so a song with big boosts may need a second `--write`.
 
 ### `NAME`: sample and wave names
 
