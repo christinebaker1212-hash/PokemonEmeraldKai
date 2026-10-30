@@ -5,5 +5,5 @@
 # all 493 texts (none too long; none of Gen 1-3's fitting in one box). Shots d_*.png.
 MODE=1
 TMO=150
-EXPECT_A=("dex check: 493 species, most lines 19 (#303), longest 697 characters, 0 to look at" "dex check: #252 has 16 lines" "dex text: reading #252, 16 lines" "dex text: top 3 of 12" "dex text: top 2 of 12" "dex text: closed")
+EXPECT_A=("dex check: 1025 species, most lines 19 (#303), longest 697 characters, 0 to look at" "dex check: #252 has 16 lines" "dex text: reading #252, 16 lines" "dex text: top 3 of 12" "dex text: top 2 of 12" "dex text: closed")
 UNEXPECT_A=("dex text: reading #254" "dex text: top 4 of 12")

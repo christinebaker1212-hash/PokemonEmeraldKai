@@ -12,7 +12,7 @@ rendershot a_anabel
 press A 2
 wait 60
 rendershot a_talk
-mash A 6 20
+mash A 12 20
 wait 60
 press SELECT 2
 wait 90
