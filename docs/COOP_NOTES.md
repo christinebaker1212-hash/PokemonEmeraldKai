@@ -2699,3 +2699,31 @@ What changes in a friend's game (a rule spread or abolished on a challenge, a CA
 found by comparing with the host's last word and sent to the host, who takes it and passes it on. The CARD QUEEN only
 moves by herself in the host's game (tt_field.c QueenDrift). Carried rules and GAMES PLAYED HERE stay each player's.
 `mp tt world` prints HOENN as the game sees it; test tt_world.
+
+## JOHTO and KANTO (1.60.0)
+The plan is docs/REGIONS_PLAN.md; the content is Moemon Quetzal's (quetzal_rip/, capped to Gen 4: quetzal_rip/gen4),
+brought in by tools/quetzal_port/ (import.py: maps, layouts, tilesets, scripts, constants; gen_*.py: items, sprites,
+music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-ins, card look-alikes). Re-run
+`python3 tools/quetzal_port/import.py --force` after changing the importer: its output is deterministic.
+- Region of a map: its group (MP_Region_OfGroup: Johto 34-35, Kanto 36-39). src/mp/mp_region.c keeps flags
+  0x1000-0x3FFF, vars 0x5000-0x52FF and struct RegionState in "<save>.region" (format 3: chunks for the other regions'
+  PC boxes, the GLOBAL PC and the levels per region). The save itself is unchanged.
+- Engine: FRLG-style 640-tile primaries (Tileset.isFrlg), 16-bit object graphics ids (OBJ_GFX_ID; Quetzal's sprites
+  from 0x100 with palettes by tag, PALSLOT_QZ), 16-bit map sections (Johto's are MAPSEC_JOHTO_* 0x100+; a Pokémon met
+  there has MET_GAME 14), Quetzal's script commands 0xE3-0xF5 (src/qz_port.c) and specials (src/qz_specials.c; the
+  rest log and do nothing: src/qz_specials_stub.c), its own multichoice menus as MULTI_QZ_* (ids 117+).
+- Travel: QzGetReachableRegionsMask / QzTravelToRegion (League beaten + S.S. TICKET; the MAGNET TRAIN with
+  VAR_0x8007 = 0x7A), customs EventScript_RegionCustoms (data/scripts/mp_region.inc), MP_Region_Travel swaps the
+  personal PC and fits levels (MP_Region_FitBoxMon: Lv 5 the first time); entering another region on foot does the
+  same (MP_Region_OnMapLoaded). First trips go to MP_Region_GoToStartHouse.
+- New game: PROF. BIRCH's region question (main_menu.c), MP_Region_StartNewGame; harness MOEMON_DEBUG_REGION=N.
+- Gen 4 before an Elite Four elsewhere: MP_Region_WildInfo / MP_Region_TrainerData (tools/quetzal_port/gen_gen3.py).
+- Town map / Fly: region_map.c sShownMap (QZMAP_*), data src/data/region_map/qz_region_maps.h.
+- Card games: Tcg_LookGfx (Quetzal sprites -> Kai look-alikes), TT_REGION_JOHTO / KANTO, KAI_PEOPLE in import.py.
+- Co-op: MPR_RULES' last byte is the host's region; a player elsewhere leaves (protocol 66).
+- Harness: mp regioninfo / regionclear R / regionreload / wildroll N / pcmenu / setvar ID V; waitfor multichoice.
+- Tests: region_walk, region_fly, region_travel, region_globalpc, region_gen4, region_starter, region_newgame,
+  region_train, region_coop.
+- Not done yet: the Bug-Catching Contest, Ruins of Alph puzzles, Quetzal's postgame and time-travel events (their
+  specials are still stubs), HEADBUTT trees, FRLG door animations, 3x2 map borders, the sightseeing walk on a first
+  arrival, a SAFFRON station, everyone following the host on a trip, per-region co-op shared PCs.

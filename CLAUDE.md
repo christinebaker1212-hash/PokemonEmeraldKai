@@ -253,6 +253,9 @@ same frame count, test anim_modern checks all 716) and the BATTLE SIMULATOR in t
 players from the last server, records via mp_scores.c MP_ST_SIM_*, "<save>.sim"; tests sim_*). Every trainer battle but the
 Elite Four's and the Champion's can be joined (MP_Coop_JoinTrainerOk; test join_gym); COOP_NOTES "Joining a battle in progress".
 
+Also JOHTO and KANTO (1.60.0, Moemon Quetzal's regions capped to Gen 4: docs/REGIONS_PLAN.md, COOP_NOTES "JOHTO and
+KANTO"; src/mp/mp_region.c and "<save>.region", src/qz_specials.c, tools/quetzal_port/; tests region_*).
+
 Gotchas worth knowing before touching battles:
 - Network link (mp_battle.c): queued blocks move into gBlockRecvBuffer in NetLink_GetBlockReceivedStatus, never in
   ResetBlockReceivedFlag; the receive task stops after a B_COMM_TO_CONTROLLER message; link tasks never run twice a frame.
