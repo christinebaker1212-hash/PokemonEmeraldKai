@@ -15,3 +15,4 @@ UNEXPECT_A=("BADEGG" "no Pokemon left")
 UNEXPECT_B=("BADEGG" "no Pokemon left")
 UNEXPECT_C=("BADEGG" "no Pokemon left")
 CHECK="tools/test/check_partytrace.py"
+GEN=3   # (WATTSON's own team: at GENERATION 9 a HELIOLISK drinks the SURFs)
