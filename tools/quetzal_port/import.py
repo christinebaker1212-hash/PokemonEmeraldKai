@@ -333,8 +333,17 @@ IDS = None
 SPECIAL_RE = re.compile(r'\b(Qz\w+?)_(\d+)\b')
 
 
+# Quetzal's own menus (its second multichoice table, ids 0x2C+: tools/quetzal_port/gen_multichoice.py)
+MULTI_RE = re.compile(r'^(\tmultichoice(?:default|grid)? [^,\n]+, [^,\n]+, )(0x[0-9A-Fa-f]+|\d+)', re.M)
+
+
 def script_text(text, where=''):
     text = SPECIAL_RE.sub(lambda m: m.group(1), text)
+    # Kai's customs (data/scripts/mp_region.inc: one Pokémon boards, the others go to the GLOBAL PC) before a trip
+    text = text.replace('\tspecialvar VAR_RESULT, QzTravelToRegion\n',
+                        '\tcall EventScript_RegionCustoms\n\tspecialvar VAR_RESULT, QzTravelToRegion\n')
+    text = MULTI_RE.sub(lambda m: m.group(1) + ('MULTI_QZ_0x%02X' % int(m.group(2), 0) if int(m.group(2), 0) >= 0x2C
+                                                else m.group(2)), text)
     return IDS.fix(text, where)
 
 

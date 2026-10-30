@@ -22,27 +22,27 @@ Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C412::
 	end
 
 Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C476::
-	multichoicedefault 0, 0, 0x59, 1, 0
+	multichoicedefault 0, 0, MULTI_QZ_0x59, 1, 0
 	nop
 	goto Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C4B7
 
 Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C483::
-	multichoicedefault 0, 0, 0x59, 1, 1
+	multichoicedefault 0, 0, MULTI_QZ_0x59, 1, 1
 	nop
 	goto Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C4B7
 
 Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C490::
-	multichoicedefault 0, 0, 0x59, 1, 2
+	multichoicedefault 0, 0, MULTI_QZ_0x59, 1, 2
 	nop
 	goto Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C4B7
 
 Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C49D::
-	multichoicedefault 0, 0, 0x59, 1, 3
+	multichoicedefault 0, 0, MULTI_QZ_0x59, 1, 3
 	nop
 	goto Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C4B7
 
 Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C4AA::
-	multichoicedefault 0, 0, 0x59, 1, 4
+	multichoicedefault 0, 0, MULTI_QZ_0x59, 1, 4
 	nop
 	goto Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C4B7
 

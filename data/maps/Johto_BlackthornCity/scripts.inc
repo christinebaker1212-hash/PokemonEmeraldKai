@@ -138,7 +138,7 @@ Johto_BlackthornCity_EventScript_83C6A1F::
 	goto_if_set FLAG_QZ_0x1055, Johto_BlackthornCity_EventScript_83C6ADF
 	msgbox Johto_BlackthornCity_Text_83C6D5C, MSGBOX_DEFAULT
 	closemessage
-	multichoice 0x14, 0, 0x4A, 1
+	multichoice 0x14, 0, MULTI_QZ_0x4A, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Johto_BlackthornCity_EventScript_83C6AD1

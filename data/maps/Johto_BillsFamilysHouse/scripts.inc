@@ -49,7 +49,7 @@ Johto_BillsFamilysHouse_EventScript_83D3144::
 	goto_if_eq VAR_RESULT, 0, Johto_BillsFamilysHouse_EventScript_83D3189
 	goto_if_set FLAG_QZ_0x103B, Johto_BillsFamilysHouse_EventScript_8407138
 	msgbox Johto_BillsFamilysHouse_Text_84076F4, MSGBOX_DEFAULT
-	multichoice 0x14, 0, 0x96, 1
+	multichoice 0x14, 0, MULTI_QZ_0x96, 1
 	nop
 	goto_if_eq VAR_RESULT, 0, Johto_BillsFamilysHouse_EventScript_8407138
 	goto_if_eq VAR_RESULT, 1, Johto_BillsFamilysHouse_EventScript_83D319D

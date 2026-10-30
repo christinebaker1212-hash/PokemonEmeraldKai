@@ -10,6 +10,7 @@ LilycoveCity_Harbor_EventScript_FerryAttendant::
 	lock
 	faceplayer
 	goto_if_unset FLAG_SYS_GAME_CLEAR, LilycoveCity_Harbor_EventScript_FerryUnavailable
+	call EventScript_HoennRegionFerry   @ Moemon Kai: the boat to JOHTO / KANTO
 	call LilycoveCity_Harbor_EventScript_GetEonTicketState
 	call LilycoveCity_Harbor_EventScript_GetAuroraTicketState
 	call LilycoveCity_Harbor_EventScript_GetOldSeaMapState

@@ -125,6 +125,7 @@
 #define MULTI_VS_CABINET                   114   // Moemon Fight: WAIT FOR 2P / FIGHT CPU / CANCEL
 #define MULTI_GAME_CENTER_FLOORS           115   // Moemon Co-op: the GAME CENTER's elevator: 1F / 2F / 3F / EXIT
 #define MULTI_DANCE_MACHINE                116   // Moemon Rhythm: PLAY ALONE / WAIT FOR 2P / CANCEL
+#include "constants/script_menu_qz.h"   // Moemon Kai: Quetzal's menus, 117+
 
 // Lilycove SS Tidal Multichoice Selections
 #define SSTIDAL_SELECTION_SLATEPORT        0

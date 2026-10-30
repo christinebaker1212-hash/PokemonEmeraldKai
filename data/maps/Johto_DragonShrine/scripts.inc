@@ -50,7 +50,7 @@ Johto_DragonShrine_EventScript_83CC3C0::
 
 Johto_DragonShrine_EventScript_83CC3D2::
 	message Johto_DragonShrine_Text_83CC61B
-	multichoice 0x14, 6, 0x4F, 1
+	multichoice 0x14, 6, MULTI_QZ_0x4F, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Johto_DragonShrine_EventScript_83CC40D
@@ -65,7 +65,7 @@ Johto_DragonShrine_EventScript_83CC40D::
 
 Johto_DragonShrine_EventScript_83CC41A::
 	message Johto_DragonShrine_Text_83CC634
-	multichoice 0x14, 6, 0x50, 1
+	multichoice 0x14, 6, MULTI_QZ_0x50, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Johto_DragonShrine_EventScript_83CC455
@@ -80,7 +80,7 @@ Johto_DragonShrine_EventScript_83CC455::
 
 Johto_DragonShrine_EventScript_83CC462::
 	message Johto_DragonShrine_Text_83CC653
-	multichoice 0x14, 6, 0x51, 1
+	multichoice 0x14, 6, MULTI_QZ_0x51, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 1, Johto_DragonShrine_EventScript_83CC49D
@@ -95,7 +95,7 @@ Johto_DragonShrine_EventScript_83CC49D::
 
 Johto_DragonShrine_EventScript_83CC4AA::
 	message Johto_DragonShrine_Text_83CC67F
-	multichoice 0x14, 6, 0x52, 1
+	multichoice 0x14, 6, MULTI_QZ_0x52, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Johto_DragonShrine_EventScript_83CC4E5
@@ -110,7 +110,7 @@ Johto_DragonShrine_EventScript_83CC4E5::
 
 Johto_DragonShrine_EventScript_83CC4F2::
 	message Johto_DragonShrine_Text_83CC6AB
-	multichoice 0x14, 6, 0x53, 1
+	multichoice 0x14, 6, MULTI_QZ_0x53, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 2, Johto_DragonShrine_EventScript_83CC530

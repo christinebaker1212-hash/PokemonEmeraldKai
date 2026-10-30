@@ -207,7 +207,7 @@ Kanto_Route25_SeaCottage_EventScript_8420911::
 Kanto_Route25_SeaCottage_EventScript_842091F::
 	message Kanto_Route25_SeaCottage_Text_8450929
 	waitmessage
-	multichoice 0, 0, 0x5C, 1
+	multichoice 0, 0, MULTI_QZ_0x5C, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_Route25_SeaCottage_EventScript_8420973

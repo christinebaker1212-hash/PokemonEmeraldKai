@@ -163,6 +163,7 @@ SlateportCity_Harbor_EventScript_FerryAttendant::
 	end
 
 SlateportCity_Harbor_EventScript_AskForTicket::
+	call EventScript_HoennRegionFerry   @ Moemon Kai: the boat to JOHTO / KANTO
 	msgbox SlateportCity_Harbor_Text_MayISeeYourTicket, MSGBOX_DEFAULT
 	message SlateportCity_Harbor_Text_FlashedTicketWhereTo
 	waitmessage

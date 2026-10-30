@@ -598,4 +598,8 @@ gSpecials::
 	def_special MP_Sim_Battle, waitstate=1
 	def_special MP_Sim_Won
 	def_special MP_Sim_End
+	def_special MP_PcMenuChoice
+	def_special MP_ShowGlobalPC, waitstate=1
+	def_special MP_GlobalPcLinked
+	def_special MP_RegionPartyCount
 	.include "data/qz_specials.inc"   @ Moemon Kai: Quetzal's specials (Johto / Kanto)

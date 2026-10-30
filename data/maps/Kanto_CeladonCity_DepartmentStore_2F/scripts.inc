@@ -34,7 +34,7 @@ Kanto_CeladonCity_DepartmentStore_2F_EventScript_841BB46::
 Kanto_CeladonCity_DepartmentStore_2F_EventScript_841BB58::
 	message Kanto_CeladonCity_DepartmentStore_2F_Text_84457EE
 	waitmessage
-	multichoice 0, 0, 0x8A, 1
+	multichoice 0, 0, MULTI_QZ_0x8A, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_CeladonCity_DepartmentStore_2F_EventScript_841BB89

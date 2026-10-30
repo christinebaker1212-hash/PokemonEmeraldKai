@@ -8,7 +8,7 @@ Kanto_BirthIsland_Harbor_EventScript_8415241::
 	message Quetzal_Text_8431905
 	waitmessage
 	setvar VAR_0x8004, 0xA
-	multichoice 0x14, 8, 0x74, 1
+	multichoice 0x14, 8, MULTI_QZ_0x74, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Quetzal_EventScript_84594BB

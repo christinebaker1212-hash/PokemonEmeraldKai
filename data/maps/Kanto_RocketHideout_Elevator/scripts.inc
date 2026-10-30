@@ -20,17 +20,17 @@ Kanto_RocketHideout_Elevator_EventScript_84111D4::
 	end
 
 Kanto_RocketHideout_Elevator_EventScript_841122B::
-	multichoicedefault 0, 0, 0x6E, 1, 0
+	multichoicedefault 0, 0, MULTI_QZ_0x6E, 1, 0
 	nop
 	goto Kanto_RocketHideout_Elevator_EventScript_8411252
 
 Kanto_RocketHideout_Elevator_EventScript_8411238::
-	multichoicedefault 0, 0, 0x6E, 1, 1
+	multichoicedefault 0, 0, MULTI_QZ_0x6E, 1, 1
 	nop
 	goto Kanto_RocketHideout_Elevator_EventScript_8411252
 
 Kanto_RocketHideout_Elevator_EventScript_8411245::
-	multichoicedefault 0, 0, 0x6E, 1, 2
+	multichoicedefault 0, 0, MULTI_QZ_0x6E, 1, 2
 	nop
 	goto Kanto_RocketHideout_Elevator_EventScript_8411252
 

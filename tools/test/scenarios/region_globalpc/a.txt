@@ -1,0 +1,36 @@
+pressuntil A field 5000
+wait 60
+mp regionclear 0
+mp pcmenu
+pressuntil A multichoice 2000
+wait 20
+shot pc_menu
+press DOWN 3
+wait 6
+press DOWN 3
+wait 6
+press DOWN 3
+wait 6
+press A 3
+wait 30
+pressuntil A pcstorage 3000
+wait 30
+shot global_menu
+press DOWN 3
+wait 6
+press DOWN 3
+wait 6
+press A 3
+wait 200
+shot global_boxes
+mp regioninfo
+press B 3
+wait 120
+press B 3
+wait 120
+press B 3
+wait 60
+pressuntil B field 3000
+wait 30
+mp regioninfo
+quit

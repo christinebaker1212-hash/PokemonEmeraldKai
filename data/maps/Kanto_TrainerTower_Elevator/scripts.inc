@@ -24,12 +24,12 @@ Kanto_TrainerTower_Elevator_EventScript_84148BD::
 	end
 
 Kanto_TrainerTower_Elevator_EventScript_8414900::
-	multichoicedefault 0, 0, 0x6F, 1, 0
+	multichoicedefault 0, 0, MULTI_QZ_0x6F, 1, 0
 	nop
 	goto Kanto_TrainerTower_Elevator_EventScript_841491A
 
 Kanto_TrainerTower_Elevator_EventScript_841490D::
-	multichoicedefault 0, 0, 0x6F, 1, 1
+	multichoicedefault 0, 0, MULTI_QZ_0x6F, 1, 1
 	nop
 	goto Kanto_TrainerTower_Elevator_EventScript_841491A
 

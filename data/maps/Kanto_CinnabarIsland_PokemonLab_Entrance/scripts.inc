@@ -23,7 +23,7 @@ Kanto_CinnabarIsland_PokemonLab_Entrance_EventScript_841E4AA::
 Kanto_CinnabarIsland_PokemonLab_Entrance_EventScript_841E4D6::
 	message Quetzal_Text_8360D02
 	waitmessage
-	multichoice 0x14, 0, 0x89, 1
+	multichoice 0x14, 0, MULTI_QZ_0x89, 1
 	nop
 	goto_if_eq VAR_RESULT, 0, Kanto_CinnabarIsland_PokemonLab_Entrance_EventScript_841E4FD
 	goto_if_eq VAR_RESULT, 1, Kanto_CinnabarIsland_PokemonLab_Entrance_EventScript_841E50C

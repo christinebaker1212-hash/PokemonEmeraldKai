@@ -15,11 +15,13 @@ EventScript_PCMainMenu::
 	end
 
 EventScript_AccessPC::
+	specialvar VAR_RESULT, MP_PcMenuChoice   @ Moemon Kai: the row picked as a choice (the GLOBAL PC adds one)
 	switch VAR_RESULT
 	case 0, EventScript_AccessPokemonStorage
 	case 1, EventScript_AccessPlayersPC
 	case 2, EventScript_AccessHallOfFame
 	case 3, EventScript_TurnOffPC
+	case 4, EventScript_AccessGlobalPC
 	case MULTI_B_PRESSED, EventScript_TurnOffPC
 	end
 
@@ -59,4 +61,20 @@ EventScript_AccessHallOfFame::
 	playse SE_PC_LOGIN
 	special AccessHallOfFamePC
 	goto EventScript_AccessPC
+	end
+
+@ Moemon Kai: the GLOBAL PC (docs/REGIONS_PLAN.md): one set of boxes for every region, open in a region whose Elite
+@ Four the player has beaten
+EventScript_AccessGlobalPC::
+	playse SE_PC_LOGIN
+	specialvar VAR_RESULT, MP_GlobalPcLinked
+	goto_if_eq VAR_RESULT, 0, EventScript_GlobalPcNoLink
+	msgbox gText_GlobalPcOpened, MSGBOX_DEFAULT
+	special MP_ShowGlobalPC
+	goto EventScript_PCMainMenu
+	end
+
+EventScript_GlobalPcNoLink::
+	msgbox gText_GlobalPcNoLink, MSGBOX_DEFAULT
+	goto EventScript_PCMainMenu
 	end

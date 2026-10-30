@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "mp_region.h"
 #include "battle_gen4.h"
 #include "mp_kaisong.h"
 #include "gba/m4a_internal.h"
@@ -286,6 +287,11 @@ int MP_TestCondition(const char *name)
         return gMain.inBattle;
     if (strcmp(name, "surfing") == 0)   // surfing and free to move
         return (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_SURFING) && MP_IsLocalFree();
+    if (strcmp(name, "multichoice") == 0)   // a script's multichoice menu is up
+    {
+        bool8 MP_ScriptMultichoiceOpen(void);
+        return MP_ScriptMultichoiceOpen();
+    }
     if (strcmp(name, "partymenu") == 0)   // the party screen is up (e.g. picking the next Moemon in battle)
     {
         bool8 MP_PartyMenu_IsOpen(void);
@@ -2449,6 +2455,38 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         printf("[test] party menu cursor %d layout %d type %d (triple %d co-op %d flags %x)\n", gPartyMenu.slotId, gPartyMenu.layout,
                gPartyMenu.menuType, gIsTripleBattle, gMpCoopBattle, (unsigned)gBattleTypeFlags);
+    }
+    else if (strcmp(cmd, "regioninfo") == 0)
+    {
+        // regioninfo: the region, its progress, the party's levels, the GLOBAL PC's room (mp_region.c)
+        int i;
+        printf("[test] region %d cleared %d started %d global free %d party:", MP_Region_Current(), gRegionState.cleared,
+               gRegionState.started, MP_Region_GlobalFree());
+        for (i = 0; i < PARTY_SIZE; i++)
+            if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES))
+                printf(" %d:L%d", (int)GetMonData(&gPlayerParty[i], MON_DATA_SPECIES), (int)GetMonData(&gPlayerParty[i], MON_DATA_LEVEL));
+        printf(" box1 %d%s\n", (int)GetBoxMonData(&MP_PersonalStorage()->boxes[0][0], MON_DATA_SPECIES),
+               gPokemonStoragePtr == MP_PersonalStorage() ? " (own boxes)" : " (other boxes shown)");
+    }
+    else if (strcmp(cmd, "pcmenu") == 0)
+    {
+        // pcmenu: a POKéMON CENTER's PC (its menu: storage, the player's PC, HALL OF FAME, GLOBAL PC...)
+        extern const u8 EventScript_PC[];
+        ScriptContext_SetupScript(EventScript_PC);
+    }
+    else if (strcmp(cmd, "regionreload") == 0)
+    {
+        // regionreload: writes "<save>.region" and reads it back (chunks: other regions' PCs, the GLOBAL PC, levels)
+        MP_Region_WriteSidecar();
+        MP_Region_LoadFromSave();
+    }
+    else if (strcmp(cmd, "regionclear") == 0)
+    {
+        // regionclear R: as if that region's Elite Four were beaten (0 HOENN: FLAG_SYS_GAME_CLEAR too)
+        int r = atoi(arg);
+        MP_Region_SetCleared(r);
+        if (r == 0)
+            FlagSet(FLAG_SYS_GAME_CLEAR);
     }
     else if (strcmp(cmd, "party") == 0)
     {

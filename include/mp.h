@@ -953,6 +953,7 @@ struct MpPcCursor
 struct PokemonStorage;
 struct BoxPokemon;
 struct PokemonStorage *MP_PersonalStorage(void);
+void MP_Storage_ShowOther(struct PokemonStorage *other);   // Moemon Kai: the GLOBAL PC in the box screen (NULL: back)
 bool8 MP_SharedBox_IsMirrorShown(void);
 void MP_SharedBox_ShowShared(bool8 shared);
 void MP_SharedBox_SaveBlocksMoved(struct PokemonStorage *own);

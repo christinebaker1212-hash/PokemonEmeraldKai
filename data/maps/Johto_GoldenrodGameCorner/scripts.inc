@@ -192,7 +192,7 @@ Johto_GoldenrodGameCorner_EventScript_83D518E::
 	goto_if_eq VAR_RESULT, 0, Johto_GoldenrodGameCorner_EventScript_83D530A
 	msgbox Johto_GoldenrodGameCorner_Text_83D54CF, MSGBOX_DEFAULT
 	call Quetzal_EventScript_841CE7A
-	multichoice 0xC, 0, 0x4C, 1
+	multichoice 0xC, 0, MULTI_QZ_0x4C, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Johto_GoldenrodGameCorner_EventScript_83D5204

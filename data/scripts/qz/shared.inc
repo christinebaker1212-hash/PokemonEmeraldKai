@@ -238,7 +238,7 @@ Quetzal_EventScript_840F954::
 Quetzal_EventScript_840F9AD::
 	message Quetzal_Text_840FAE5
 	waitmessage
-	multichoice 0x10, 2, 0x8E, 1
+	multichoice 0x10, 2, MULTI_QZ_0x8E, 1
 	nop
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_840FA85
 	goto Quetzal_EventScript_840FA97
@@ -246,7 +246,7 @@ Quetzal_EventScript_840F9AD::
 Quetzal_EventScript_840F9C9::
 	message Quetzal_Text_840FAE5
 	waitmessage
-	multichoice 0x10, 2, 0x8F, 1
+	multichoice 0x10, 2, MULTI_QZ_0x8F, 1
 	nop
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_840FA8B
 	goto Quetzal_EventScript_840FA97
@@ -254,7 +254,7 @@ Quetzal_EventScript_840F9C9::
 Quetzal_EventScript_840F9E5::
 	message Quetzal_Text_840FAE5
 	waitmessage
-	multichoice 0x10, 2, 0x90, 1
+	multichoice 0x10, 2, MULTI_QZ_0x90, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Quetzal_EventScript_840FA8B
@@ -264,7 +264,7 @@ Quetzal_EventScript_840F9E5::
 Quetzal_EventScript_840FA11::
 	message Quetzal_Text_840FAE5
 	waitmessage
-	multichoice 0x10, 2, 0x91, 1
+	multichoice 0x10, 2, MULTI_QZ_0x91, 1
 	nop
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_840FA91
 	goto Quetzal_EventScript_840FA97
@@ -272,7 +272,7 @@ Quetzal_EventScript_840FA11::
 Quetzal_EventScript_840FA2D::
 	message Quetzal_Text_840FAE5
 	waitmessage
-	multichoice 0x10, 2, 0x92, 1
+	multichoice 0x10, 2, MULTI_QZ_0x92, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Quetzal_EventScript_840FA91
@@ -282,7 +282,7 @@ Quetzal_EventScript_840FA2D::
 Quetzal_EventScript_840FA59::
 	message Quetzal_Text_840FAE5
 	waitmessage
-	multichoice 0x10, 2, 0x93, 1
+	multichoice 0x10, 2, MULTI_QZ_0x93, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Quetzal_EventScript_840FA91
@@ -309,6 +309,7 @@ Quetzal_EventScript_840FA9D::
 	copyvar VAR_0x8004, VAR_RESULT
 	msgbox Quetzal_Text_840FB09, MSGBOX_DEFAULT
 	closemessage
+	call EventScript_RegionCustoms
 	specialvar VAR_RESULT, QzTravelToRegion
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_840FABD
 	waitstate
@@ -325,7 +326,7 @@ Quetzal_EventScript_841C97A::
 	buffernumberstring 0, VAR_RESULT
 	message Quetzal_Text_8446AB2
 	waitmessage
-	multichoice 0xD, 0, 0x60, 1
+	multichoice 0xD, 0, MULTI_QZ_0x60, 1
 	nop
 	copyvar VAR_0x8009, VAR_RESULT
 	copyvar VAR_0x8000, VAR_RESULT

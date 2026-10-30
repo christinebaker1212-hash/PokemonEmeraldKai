@@ -57,7 +57,7 @@ Kanto_ViridianCity_School_EventScript_841A11D::
 Kanto_ViridianCity_School_EventScript_841A12C::
 	message Kanto_ViridianCity_School_Text_84402E4
 	waitmessage
-	multichoicegrid 7, 1, 0x80, 1, 3
+	multichoicegrid 7, 1, MULTI_QZ_0x80, 1, 3
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_ViridianCity_School_EventScript_841A18C

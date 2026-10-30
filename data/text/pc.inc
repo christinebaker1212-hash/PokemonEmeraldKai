@@ -15,3 +15,13 @@ gText_AccessedPlayersPC::
 
 gText_AccessedLanettesPC::
 	.string "Accessed LANETTE's PC.$"
+
+@ Moemon Kai
+gText_GlobalPcOpened::
+	.string "The GLOBAL PC was accessed.\p"
+	.string "POKéMON STORAGE SYSTEM opened.$"
+
+gText_GlobalPcNoLink::
+	.string "GLOBAL PC: link not established.\p"
+	.string "This region's POKéMON LEAGUE must be\n"
+	.string "beaten before its PCs join the network.$"

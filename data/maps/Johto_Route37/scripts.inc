@@ -41,7 +41,7 @@ Johto_Route37_EventScript_83F22AA::
 	goto_if_set FLAG_QZ_0x1044, Johto_Route37_EventScript_83F236A
 	msgbox Johto_Route37_Text_83F2539, MSGBOX_DEFAULT
 	closemessage
-	multichoice 0x14, 0, 0x4A, 1
+	multichoice 0x14, 0, MULTI_QZ_0x4A, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Johto_Route37_EventScript_83F232F

@@ -52,7 +52,7 @@ Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841BFF2::
 	end
 
 Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C062::
-	multichoice 0, 0, 0x78, 1
+	multichoice 0, 0, MULTI_QZ_0x78, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C1D4
@@ -61,7 +61,7 @@ Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C062::
 	end
 
 Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C08F::
-	multichoice 0, 0, 0x7D, 1
+	multichoice 0, 0, MULTI_QZ_0x7D, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C1F5
@@ -70,7 +70,7 @@ Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C08F::
 	end
 
 Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C0BC::
-	multichoice 0, 0, 0x7A, 1
+	multichoice 0, 0, MULTI_QZ_0x7A, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C1D4
@@ -80,7 +80,7 @@ Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C0BC::
 	end
 
 Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C0F4::
-	multichoice 0, 0, 0x7C, 1
+	multichoice 0, 0, MULTI_QZ_0x7C, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C216
@@ -89,7 +89,7 @@ Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C0F4::
 	end
 
 Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C121::
-	multichoice 0, 0, 0x79, 1
+	multichoice 0, 0, MULTI_QZ_0x79, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C1D4
@@ -99,7 +99,7 @@ Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C121::
 	end
 
 Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C159::
-	multichoice 0, 0, 0x7E, 1
+	multichoice 0, 0, MULTI_QZ_0x7E, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C1F5
@@ -109,7 +109,7 @@ Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C159::
 	end
 
 Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C191::
-	multichoice 0, 0, 0x7B, 1
+	multichoice 0, 0, MULTI_QZ_0x7B, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C1D4
@@ -217,7 +217,7 @@ Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C2F2::
 	goto Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C303
 
 Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C303::
-	multichoice 0x10, 0, 0x58, 1
+	multichoice 0x10, 0, MULTI_QZ_0x58, 1
 	nop
 	copyvar VAR_TEMP_1, VAR_RESULT
 	copyvar VAR_0x8000, VAR_TEMP_1

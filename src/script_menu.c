@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_region.h"
 #include "main.h"
 #include "event_data.h"
 #include "field_effect.h"
@@ -311,6 +312,12 @@ static void Task_HandleMultichoiceGridInput(u8 taskId)
 
 #undef tWindowId
 
+// Moemon Kai: the test harness's "waitfor multichoice"
+bool8 MP_ScriptMultichoiceOpen(void)
+{
+    return FuncIsActiveTask(Task_HandleMultichoiceInput);
+}
+
 bool16 ScriptMenu_CreatePCMultichoice(void)
 {
     if (FuncIsActiveTask(Task_HandleMultichoiceInput) == TRUE)
@@ -325,12 +332,21 @@ bool16 ScriptMenu_CreatePCMultichoice(void)
     }
 }
 
+// Moemon Kai: the PC menu's choices by row (MP_PcMenuChoice turns the row picked into one of these)
+#define PCMENU_STORAGE 0
+#define PCMENU_PLAYER  1
+#define PCMENU_HOF     2
+#define PCMENU_LOGOFF  3
+#define PCMENU_GLOBAL  4
+static u8 sPcMenuRows[5];
+
 static void CreatePCMultichoice(void)
 {
+    static const u8 sGlobalPc[] = _("GLOBAL PC");
     u8 x = 8;
     u32 pixelWidth = 0;
     u8 width;
-    u8 numChoices;
+    u8 numChoices = 0;
     u8 windowId;
     int i;
 
@@ -338,29 +354,24 @@ static void CreatePCMultichoice(void)
     {
         pixelWidth = DisplayTextAndGetWidth(sPCNameStrings[i], pixelWidth);
     }
-
-    if (FlagGet(FLAG_SYS_GAME_CLEAR))
-    {
-        pixelWidth = DisplayTextAndGetWidth(gText_HallOfFame, pixelWidth);
-    }
-
+    pixelWidth = DisplayTextAndGetWidth(gText_HallOfFame, pixelWidth);
+    pixelWidth = DisplayTextAndGetWidth(sGlobalPc, pixelWidth);
     width = ConvertPixelWidthToTileWidth(pixelWidth);
 
-    // Include Hall of Fame option if player is champion
-    if (FlagGet(FLAG_SYS_GAME_CLEAR))
+    sPcMenuRows[numChoices++] = PCMENU_STORAGE;
+    sPcMenuRows[numChoices++] = PCMENU_PLAYER;
+    if (FlagGet(FLAG_SYS_GAME_CLEAR))   // Include Hall of Fame option if player is champion
+        sPcMenuRows[numChoices++] = PCMENU_HOF;
+    if (MP_Region_AnyCleared())         // Moemon Kai: the GLOBAL PC, after any region's Elite Four
+        sPcMenuRows[numChoices++] = PCMENU_GLOBAL;
+    sPcMenuRows[numChoices++] = PCMENU_LOGOFF;
+
+    windowId = CreateWindowFromRect(0, 0, width, numChoices * 2);
+    SetStandardWindowBorderStyle(windowId, FALSE);
+    for (i = 2; i < numChoices; i++)
     {
-        numChoices = 4;
-        windowId = CreateWindowFromRect(0, 0, width, 8);
-        SetStandardWindowBorderStyle(windowId, FALSE);
-        AddTextPrinterParameterized(windowId, FONT_NORMAL, gText_HallOfFame, x, 33, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(windowId, FONT_NORMAL, gText_LogOff, x, 49, TEXT_SKIP_DRAW, NULL);
-    }
-    else
-    {
-        numChoices = 3;
-        windowId = CreateWindowFromRect(0, 0, width, 6);
-        SetStandardWindowBorderStyle(windowId, FALSE);
-        AddTextPrinterParameterized(windowId, FONT_NORMAL, gText_LogOff, x, 33, TEXT_SKIP_DRAW, NULL);
+        const u8 *text = sPcMenuRows[i] == PCMENU_HOF ? gText_HallOfFame : sPcMenuRows[i] == PCMENU_GLOBAL ? sGlobalPc : gText_LogOff;
+        AddTextPrinterParameterized(windowId, FONT_NORMAL, text, x, 1 + 16 * i, TEXT_SKIP_DRAW, NULL);
     }
 
     // Change PC name if player has met Lanette
@@ -374,6 +385,14 @@ static void CreatePCMultichoice(void)
     InitMenuInUpperLeftCornerNormal(windowId, numChoices, 0);
     CopyWindowToVram(windowId, COPYWIN_FULL);
     InitMultichoiceCheckWrap(FALSE, numChoices, windowId, MULTI_PC);
+}
+
+// Moemon Kai: VAR_RESULT (the PC menu's row) as PCMENU_* (MULTI_B_PRESSED stays)
+u16 MP_PcMenuChoice(void)
+{
+    if (gSpecialVar_Result < ARRAY_COUNT(sPcMenuRows))
+        gSpecialVar_Result = sPcMenuRows[gSpecialVar_Result];
+    return gSpecialVar_Result;
 }
 
 void ScriptMenu_DisplayPCStartupPrompt(void)

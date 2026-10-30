@@ -94,7 +94,7 @@ Kanto_VermilionCity_EventScript_840F931::
 	goto_if_eq VAR_RESULT, 0, Kanto_VermilionCity_EventScript_840F94E
 	message Kanto_VermilionCity_Text_840FAC7
 	waitmessage
-	multichoice 0x10, 2, 0x8D, 1
+	multichoice 0x10, 2, MULTI_QZ_0x8D, 1
 	nop
 	return
 
@@ -229,7 +229,7 @@ Kanto_VermilionCity_EventScript_84166EB::
 	call_if_unset FLAG_QZ_0x21F3, Kanto_VermilionCity_EventScript_8416742
 	message Kanto_VermilionCity_Text_842FE9D
 	waitmessage
-	multichoice 0x11, 6, 0x76, 1
+	multichoice 0x11, 6, MULTI_QZ_0x76, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_VermilionCity_EventScript_8416671
@@ -247,7 +247,7 @@ Kanto_VermilionCity_EventScript_841674E::
 	call_if_unset FLAG_QZ_0x21F2, Kanto_VermilionCity_EventScript_8416795
 	message Kanto_VermilionCity_Text_842FE9D
 	waitmessage
-	multichoice 0xD, 6, 0x75, 1
+	multichoice 0xD, 6, MULTI_QZ_0x75, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_VermilionCity_EventScript_8416671
@@ -266,7 +266,7 @@ Kanto_VermilionCity_EventScript_84167A1::
 	call_if_unset FLAG_QZ_0x21F2, Kanto_VermilionCity_EventScript_8416795
 	message Kanto_VermilionCity_Text_842FE9D
 	waitmessage
-	multichoice 0xD, 4, 0x77, 1
+	multichoice 0xD, 4, MULTI_QZ_0x77, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_VermilionCity_EventScript_8416671

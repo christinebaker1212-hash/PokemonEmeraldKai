@@ -25,7 +25,7 @@ Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CE9A::
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CECF::
 	call Quetzal_EventScript_841CE7A
-	multichoice 0xB, 0, 0x61, 1
+	multichoice 0xB, 0, MULTI_QZ_0x61, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CF29
@@ -147,7 +147,7 @@ Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D07C::
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D0AC::
 	call Quetzal_EventScript_841CE7A
-	multichoice 0xB, 0, 0x62, 1
+	multichoice 0xB, 0, MULTI_QZ_0x62, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D103
@@ -223,7 +223,7 @@ Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D1D8::
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D208::
 	call Quetzal_EventScript_841CE7A
-	multichoice 0xA, 0, 0x5F, 1
+	multichoice 0xA, 0, MULTI_QZ_0x5F, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D25F

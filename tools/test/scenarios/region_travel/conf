@@ -1,0 +1,10 @@
+# The boat between regions: a HOENN champion with the S.S. TICKET asks SLATEPORT's ferry clerk for "Other regions",
+# picks OLIVINE (JOHTO), keeps MUDKIP at customs (TORCHIC and TREECKO go to the GLOBAL PC) and lands at OLIVINE's
+# port with MUDKIP at Lv 5 (its first time in JOHTO); the side file keeps all of it through a write and read back.
+# Then JOHTO's League counts as beaten and OLIVINE's clerk takes them back to SLATEPORT: MUDKIP is Lv 25 again
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:30,258:25,252:20"
+EXPECT_A=("region: travel 0 -> 1" "where map 35.12 xy 8,16" "region 1 cleared 1 started 2 global free 418 party: 258:L5 box1 0 (own boxes)"
+          "region: travel 1 -> 0" "where map 9.9 xy 8,11" "region 0 cleared 3 started 3 global free 418 party: 258:L25")
+UNEXPECT_A=("[crash]" "region: no side file")

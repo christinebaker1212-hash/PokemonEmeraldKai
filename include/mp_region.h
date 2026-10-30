@@ -36,4 +36,14 @@ u16 *MP_Region_VarPointer(u16 id);
 void MP_Region_NewGame(void);
 void MP_Region_WriteSidecar(void);   // "<save>.region", after the save file is written
 void MP_Region_LoadFromSave(void);
+struct PokemonStorage;
+struct BoxPokemon;
+struct Pokemon;
+struct PokemonStorage *MP_Region_GlobalPC(void);   // the GLOBAL PC's boxes (made on first use)
+bool8 MP_Region_DepositGlobal(const struct BoxPokemon *mon);
+u16 MP_Region_GlobalFree(void);
+bool8 MP_Region_FitBoxMon(struct BoxPokemon *b, u8 region);   // its EXP for that region (Lv 5 the first time)
+void MP_Region_FitMon(struct Pokemon *mon, u8 region);
+void MP_Region_FitAll(void);                       // party + own boxes at the current region's levels
+void MP_Region_Travel(u8 from, u8 to);             // PC boxes change places, the party takes the new levels
 #endif

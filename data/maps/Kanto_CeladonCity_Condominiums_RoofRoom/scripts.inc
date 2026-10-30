@@ -66,7 +66,7 @@ Kanto_CeladonCity_Condominiums_RoofRoom_EventScript_841C7FD::
 	message Kanto_CeladonCity_Condominiums_RoofRoom_Text_8446720
 	waitmessage
 	setvar VAR_0x8004, 4
-	multichoice 0, 0, 0x6C, 1
+	multichoice 0, 0, MULTI_QZ_0x6C, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_CeladonCity_Condominiums_RoofRoom_EventScript_841C89D
@@ -79,7 +79,7 @@ Kanto_CeladonCity_Condominiums_RoofRoom_EventScript_841C7FD::
 Kanto_CeladonCity_Condominiums_RoofRoom_EventScript_841C854::
 	message Kanto_CeladonCity_Condominiums_RoofRoom_Text_8446720
 	waitmessage
-	multichoice 0, 0, 0x6C, 1
+	multichoice 0, 0, MULTI_QZ_0x6C, 1
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_CeladonCity_Condominiums_RoofRoom_EventScript_841C89D

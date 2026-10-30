@@ -169,9 +169,30 @@ static void MarkChanged(u16 slot)
     sChangedForUi = TRUE;
 }
 
+static struct PokemonStorage *sOwnUnderOther;   // our own boxes while another set (the GLOBAL PC) is shown
+static struct PokemonStorage *sOtherShown;
+
 struct PokemonStorage *MP_PersonalStorage(void)
 {
+    if (sOwnUnderOther != NULL)
+        return sOwnUnderOther;
     return sPersonal ? sPersonal : gPokemonStoragePtr;
+}
+
+// Moemon Kai: the box screen shows another set of boxes (the GLOBAL PC); NULL: our own again
+void MP_Storage_ShowOther(struct PokemonStorage *other)
+{
+    if (other != NULL && sOwnUnderOther == NULL && sPersonal == NULL)
+    {
+        sOwnUnderOther = gPokemonStoragePtr;
+        sOtherShown = other;
+        gPokemonStoragePtr = other;
+    }
+    else if (other == NULL && sOwnUnderOther != NULL)
+    {
+        gPokemonStoragePtr = sOwnUnderOther;
+        sOwnUnderOther = NULL;
+    }
 }
 
 bool8 MP_SharedBox_IsMirrorShown(void)
@@ -269,6 +290,12 @@ void MP_SharedBox_ShowShared(bool8 shared)
 // load_save.c: the save blocks moved; our own boxes are there now
 void MP_SharedBox_SaveBlocksMoved(struct PokemonStorage *own)
 {
+    if (sOwnUnderOther != NULL)
+    {
+        sOwnUnderOther = own;
+        gPokemonStoragePtr = sOtherShown;
+        return;
+    }
     if (sPersonal != NULL)
     {
         sPersonal = own;

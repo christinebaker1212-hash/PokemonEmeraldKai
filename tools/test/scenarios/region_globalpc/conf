@@ -1,0 +1,7 @@
+# The GLOBAL PC: after HOENN's Elite Four the PC menu has GLOBAL PC (below HALL OF FAME); its storage menus open
+# the box screen over the GLOBAL PC's boxes (GLOBAL1...); closing it shows the player's own boxes again
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=280:30,258:25"
+EXPECT_A=("box1 0 (other boxes shown)" "global free 420 party: 280:L30 258:L25 box1 0 (own boxes)")
+UNEXPECT_A=("[crash]")

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "global.h"
+#include "mp_region.h"
 #include "malloc.h"
 #include "mp.h"
 #include "bg.h"
@@ -1610,6 +1611,8 @@ enum {
 #define tNextOption     data[3]
 #define tWindowId       data[15]
 
+static bool8 sMpGlobalPc;   // Moemon Kai: the menus are the GLOBAL PC's
+
 static void Task_PCMainMenu(u8 taskId)
 {
     struct Task *task = &gTasks[taskId];
@@ -1650,6 +1653,13 @@ static void Task_PCMainMenu(u8 taskId)
             break;
         case MENU_B_PRESSED:
         case OPTION_EXIT:
+            if (sMpGlobalPc)
+            {
+                // Moemon Kai: the GLOBAL PC closes; what came out of it takes this region's levels
+                sMpGlobalPc = FALSE;
+                MP_Storage_ShowOther(NULL);
+                MP_Region_FitAll();
+            }
             ClearStdWindowAndFrame(task->tWindowId, TRUE);
             UnlockPlayerFieldControls();
             ScriptContext_Enable();
@@ -1720,6 +1730,14 @@ static void Task_PCMainMenu(u8 taskId)
         }
         break;
     }
+}
+
+// Moemon Kai: the GLOBAL PC (mp_region.c keeps its boxes): the same menus and box screen over its boxes
+void MP_ShowGlobalPC(void)
+{
+    sMpGlobalPc = TRUE;
+    MP_Storage_ShowOther(MP_Region_GlobalPC());
+    ShowPokemonStorageSystemPC();
 }
 
 void ShowPokemonStorageSystemPC(void)

@@ -1,0 +1,922 @@
+{
+ "_note": "Quetzal's second multichoice table: script id = 0x2C + index",
+ "first_id": 44,
+ "menus": [
+  {
+   "id": 44,
+   "items": [
+    "HOENN",
+    "SINNOH",
+    "UNOVA",
+    "KALOS",
+    "ALOLA",
+    "GALAR",
+    "PALDEA",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 45,
+   "items": [
+    "DITTO",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 46,
+   "items": [
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 47,
+   "items": [
+    "CASTFORM",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 48,
+   "items": [
+    "CHERRIM",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 49,
+   "items": [
+    "DARMANITAN",
+    "MELOETTA",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 50,
+   "items": [
+    "GRENINJA",
+    "AEGISLASH",
+    "XERNEAS",
+    "ZYGARDE",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 51,
+   "items": [
+    "WISHIWASHI",
+    "MIMIKYU",
+    "MINIOR",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 52,
+   "items": [
+    "CRAMORANT",
+    "EISCUE",
+    "MORPEKO",
+    "ZACIAN",
+    "ZAMAZENTA",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 53,
+   "items": [
+    "PALAFIN",
+    "OGERPON",
+    "TERAPAGOS",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 54,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}NORMAL",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}IMPOSTER",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 55,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}NORMAL",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}WEATHER",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 56,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}OVERCAST",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}SUNSHINE",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 57,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}NORMAL",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}ZEN",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 58,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}NORMAL",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}ILLUSION",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 59,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}ARIA",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}PIROUETTE",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 60,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}NORMAL",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}ASH",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 61,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}SHIELD",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}BLADE",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 62,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}NEUTRAL",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}ACTIVE",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 63,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}NORMAL",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}COMPLETE",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 64,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}SOLO",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}SCHOOL",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 65,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}DISGUISED",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}BUSTED",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 66,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}METEOR",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}CORE",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 67,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}NORMAL",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}GULPING",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}GORGING",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 68,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}ICE",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}NOICE",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 69,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}FULLBELLY",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}HANGRY",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 70,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}NORMAL",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}CROWNED",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 71,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}ZERO",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}HERO",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 72,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}MASKED",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}UNMASKED",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 73,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}NORMAL",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}TERASTAL",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 74,
+   "items": [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 75,
+   "items": [
+    "Love Ball",
+    "Lure Ball",
+    "Friend Ball",
+    "Heavy Ball",
+    "Moon Ball",
+    "Fast Ball",
+    "Level Ball",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 76,
+   "items": [
+    "VULPIX A.",
+    "FEEBAS",
+    "DRATINI",
+    "DITTO",
+    "DREEPY",
+    "MIMIKYU"
+   ]
+  },
+  {
+   "id": 77,
+   "items": [
+    "Floor 6",
+    "Floor 5",
+    "Floor 4",
+    "Floor 3",
+    "Floor 2",
+    "Floor 1",
+    "Ground floor",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 78,
+   "items": [
+    "GOLD",
+    "SILVER"
+   ]
+  },
+  {
+   "id": 79,
+   "items": [
+    "Pal",
+    "Underling",
+    "Friend"
+   ]
+  },
+  {
+   "id": 80,
+   "items": [
+    "Strategy",
+    "Training",
+    "Cheating"
+   ]
+  },
+  {
+   "id": 81,
+   "items": [
+    "Weak person",
+    "Tough person",
+    "Anybody"
+   ]
+  },
+  {
+   "id": 82,
+   "items": [
+    "Love",
+    "Violence",
+    "Knowledge"
+   ]
+  },
+  {
+   "id": 83,
+   "items": [
+    "Tough",
+    "Weak",
+    "Both"
+   ]
+  },
+  {
+   "id": 84,
+   "items": [
+    "Vermilion",
+    "Southern Island",
+    "Birth Island",
+    "Faraway Island",
+    "Battle Frontier",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 85,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}ENGLISH",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}SPANISH",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}SP-LATAM",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}PT-BR",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 86,
+   "items": [
+    "OLD AMBER",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 87,
+   "items": [
+    "BICYCLE 1000000",
+    "NO THANKS"
+   ]
+  },
+  {
+   "id": 88,
+   "items": [
+    "FRESH WATER ¥200",
+    "SODA POP ¥300",
+    "LEMONADE ¥350",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 89,
+   "items": [
+    "5F",
+    "4F",
+    "3F",
+    "2F",
+    "1F",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 90,
+   "items": [
+    "DOME FOSSIL",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 91,
+   "items": [
+    "DOME FOSSIL",
+    "OLD AMBER",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 92,
+   "items": [
+    "EEVEE",
+    "FLAREON",
+    "JOLTEON",
+    "VAPOREON",
+    "QUIT LOOKING"
+   ]
+  },
+  {
+   "id": 93,
+   "items": [
+    "EGGS",
+    "QUIT"
+   ]
+  },
+  {
+   "id": 94,
+   "items": [
+    "EGGS",
+    "VICTORIES",
+    "QUIT"
+   ]
+  },
+  {
+   "id": 95,
+   "items": [
+    "Expert Belt",
+    "Eviolite",
+    "Loaded Dice",
+    "Choice Scarf",
+    "Assault Vest"
+   ]
+  },
+  {
+   "id": 96,
+   "items": [
+    "50 COINS",
+    "500 COINS"
+   ]
+  },
+  {
+   "id": 97,
+   "items": [
+    "ALOLAN VULPIX",
+    "LARVESTA",
+    "DRATINI",
+    "ROTOM",
+    "PORYGON"
+   ]
+  },
+  {
+   "id": 98,
+   "items": [
+    "Peat Block",
+    "Dubious Disc",
+    "Electirizer",
+    "Magmarizer",
+    "Metal Alloy"
+   ]
+  },
+  {
+   "id": 99,
+   "items": [
+    "HELIX FOSSIL",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 100,
+   "items": [
+    "HELIX FOSSIL",
+    "OLD AMBER",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 101,
+   "items": [
+    "HALL OF FAME",
+    "EGGS",
+    "QUIT"
+   ]
+  },
+  {
+   "id": 102,
+   "items": [
+    "HALL OF FAME",
+    "EGGS",
+    "VICTORIES",
+    "QUIT"
+   ]
+  },
+  {
+   "id": 103,
+   "items": [
+    "HALL OF FAME",
+    "QUIT"
+   ]
+  },
+  {
+   "id": 104,
+   "items": [
+    "HALL OF FAME",
+    "VICTORIES",
+    "QUIT"
+   ]
+  },
+  {
+   "id": 105,
+   "items": [
+    "ONE ISLAND",
+    "TWO ISLAND",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 106,
+   "items": [
+    "ONE ISLAND",
+    "THREE ISLAND",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 107,
+   "items": [
+    "TWO ISLAND",
+    "THREE ISLAND",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 108,
+   "items": [
+    "LINKED GAME PLAY",
+    "DIRECT CORNER",
+    "UNION ROOM",
+    "QUIT"
+   ]
+  },
+  {
+   "id": 109,
+   "items": [
+    "2 TINYMUSHROOMS",
+    "1 BIG MUSHROOM"
+   ]
+  },
+  {
+   "id": 110,
+   "items": [
+    "B1 F",
+    "B2 F",
+    "B4 F",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 111,
+   "items": [
+    "ROOFTOP",
+    "B1 F",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 112,
+   "items": [
+    "ONE ISLAND",
+    "TWO ISLAND",
+    "THREE ISLAND",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 113,
+   "items": [
+    "VERMILION",
+    "ONE ISLAND",
+    "TWO ISLAND",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 114,
+   "items": [
+    "VERMILION",
+    "ONE ISLAND",
+    "THREE ISLAND",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 115,
+   "items": [
+    "VERMILION",
+    "TWO ISLAND",
+    "THREE ISLAND",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 116,
+   "items": [
+    "VERMILION",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 117,
+   "items": [
+    "SEVII ISLANDS",
+    "BIRTH ISLAND",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 118,
+   "items": [
+    "SEVII ISLANDS",
+    "NAVEL ROCK",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 119,
+   "items": [
+    "SEVII ISLANDS",
+    "NAVEL ROCK",
+    "BIRTH ISLAND",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 120,
+   "items": [
+    "FRESH WATER",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 121,
+   "items": [
+    "FRESH WATER",
+    "LEMONADE",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 122,
+   "items": [
+    "FRESH WATER",
+    "SODA POP",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 123,
+   "items": [
+    "FRESH WATER",
+    "SODA POP",
+    "LEMONADE",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 124,
+   "items": [
+    "LEMONADE",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 125,
+   "items": [
+    "SODA POP",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 126,
+   "items": [
+    "SODA POP",
+    "LEMONADE",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 127,
+   "items": [
+    "NORMAL",
+    "BLACK",
+    "PINK",
+    "SEPIA"
+   ]
+  },
+  {
+   "id": 128,
+   "items": [
+    "SLP",
+    "PSN",
+    "PAR",
+    "BRN",
+    "FRZ",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 129,
+   "items": [
+    "SINGLE",
+    "DOUBLE",
+    "KNOCKOUT",
+    "MIXED",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 130,
+   "items": [
+    "VICTORIES",
+    "QUIT"
+   ]
+  },
+  {
+   "id": 131,
+   "items": [
+    "YES",
+    "NO"
+   ]
+  },
+  {
+   "id": 132,
+   "items": [
+    "YES",
+    "NO",
+    "INFO"
+   ]
+  },
+  {
+   "id": 133,
+   "items": [
+    "YES",
+    "NO",
+    "INFO"
+   ]
+  },
+  {
+   "id": 134,
+   "items": [
+    "VERMILION",
+    "ONE ISLAND",
+    "TWO ISLAND",
+    "THREE ISLAND",
+    "FOUR ISLAND",
+    "OTHER",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 135,
+   "items": [
+    "FOUR ISLAND",
+    "FIVE ISLAND",
+    "SIX ISLAND",
+    "SEVEN ISLAND",
+    "OTHER",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 136,
+   "items": [
+    "CHALLENGE",
+    "INFO",
+    "BANNED",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 137,
+   "items": [
+    "Buy",
+    "Check trials",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 138,
+   "items": [
+    "Special Balls",
+    "Flutes",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 139,
+   "items": [
+    "Held items",
+    "Type boosters",
+    "Weather & support",
+    "Gems",
+    "X items",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 140,
+   "items": [
+    "Berries & Gracidea",
+    "Defensive berries",
+    "Herbal medicine",
+    "Vitamins",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 141,
+   "items": [
+    "Regular voyages",
+    "Other regions",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 142,
+   "items": [
+    "LILYCOVE (HOENN)",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 143,
+   "items": [
+    "OLIVINE (JOHTO)",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 144,
+   "items": [
+    "OLIVINE (JOHTO)",
+    "LILYCOVE (HOENN)",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 145,
+   "items": [
+    "VERMILION (KANTO)",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 146,
+   "items": [
+    "VERMILION (KANTO)",
+    "LILYCOVE (HOENN)",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 147,
+   "items": [
+    "VERMILION (KANTO)",
+    "OLIVINE (JOHTO)",
+    "EXIT"
+   ]
+  },
+  {
+   "id": 148,
+   "items": [
+    "NUMBER",
+    "MOVEMENT",
+    "BEACH",
+    "DOUBLES",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 149,
+   "items": [
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}0%",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}5%",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}10%",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}25%",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}50%",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}75%",
+    "{COLOR GREEN}{SHADOW LIGHT_GREEN}100%",
+    "CANCEL"
+   ]
+  },
+  {
+   "id": 150,
+   "items": [
+    "Research",
+    "Rotom",
+    "EXIT"
+   ]
+  }
+ ]
+}

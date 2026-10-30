@@ -807,6 +807,8 @@ struct MultichoiceListStruct
     u8 count;
 };
 
+#include "script_menu_qz.h"   // Moemon Kai
+
 static const struct MultichoiceListStruct sMultichoiceLists[] =
 {
     [MULTI_BRINEY_ON_DEWFORD]          = MULTICHOICE(MultichoiceList_BrineyOnDewford),
@@ -926,6 +928,7 @@ static const struct MultichoiceListStruct sMultichoiceLists[] =
     [MULTI_VS_CABINET]                 = MULTICHOICE(MultichoiceList_VsCabinet),
     [MULTI_GAME_CENTER_FLOORS]         = MULTICHOICE(MultichoiceList_GameCenterFloors),
     [MULTI_DANCE_MACHINE]              = MULTICHOICE(MultichoiceList_DanceMachine),
+#include "script_menu_qz_entries.h"   // Moemon Kai: Quetzal's menus
 };
 
 const u8 *const gStdStrings[] =

@@ -21,6 +21,7 @@
 #include "pokemon_storage_system.h"
 #include "qz_specials.h"
 #include "random.h"
+#include "save.h"
 #include "script.h"
 #include "script_pokemon_util.h"
 #include "sound.h"
@@ -849,3 +850,61 @@ u16 QzKantoTravelingEventCheck(void) { return gSpecialVar_Result = QzKantoTravel
 u16 QzPlayerNotAtTrainerHillEntrance(void) { return gSpecialVar_Result = QzPlayerNotAtTrainerHillEntrance_(); }
 u16 QzPickNpcFlavourLine(void) { return gSpecialVar_Result = QzPickNpcFlavourLine_(); }
 u16 QzBufferLabQuestChecklist(void) { return gSpecialVar_Result = QzBufferLabQuestChecklist_(); }
+
+// ---------------------------------------------------------------------------------------------------- region travel
+// The boats between regions (docs/REGIONS_PLAN.md "Travel"): a region's port takes the player to the other regions
+// once its Elite Four is beaten and the S.S. TICKET is in the bag. RESULT = bit per region (HOENN 1, JOHTO 2,
+// KANTO 4), the ports' menus (MULTI_QZ_0x8E-0x93) list them.
+static u16 QzGetReachableRegionsMask_(void)
+{
+    u8 cur = MP_Region_Current();
+    if (!MP_Region_Cleared(cur) || !CheckBagHasItem(ITEM_SS_TICKET, 1))
+        return 0;
+    return ((1 << REGION_COUNT) - 1) & ~(1 << cur);
+}
+
+// Where each region's boat comes in: HOENN at SLATEPORT's harbor, JOHTO at OLIVINE's port, KANTO at VERMILION
+static const struct {u16 map; s8 x, y;} sRegionPorts[REGION_COUNT] = {
+    {MAP_SLATEPORT_CITY_HARBOR, 8, 11},
+    {MAP_JOHTO_OLIVINE_PORT, 8, 16},
+    {MAP_KANTO_VERMILION_CITY, 23, 32},
+};
+
+// VAR_0x8004 = the region, VAR_0x8005 = the party slot of the one Pokémon who comes (customs: the others go to the
+// GLOBAL PC; EventScript_RegionCustoms picked it). RESULT 1: the boat leaves (the script waits), 0: not allowed.
+static u16 QzTravelToRegion_(void)
+{
+    u8 to = gSpecialVar_0x8004, from = MP_Region_Current(), keep = gSpecialVar_0x8005, i;
+    if (to >= REGION_COUNT || to == from || !(QzGetReachableRegionsMask_() & (1 << to)))
+        return 0;
+    if (keep >= PARTY_SIZE || !GetMonData(&gPlayerParty[keep], MON_DATA_SANITY_HAS_SPECIES))
+        keep = 0;
+    if (MP_Region_GlobalFree() < CalculatePlayerPartyCount() - 1)
+        return 0;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        if (i == keep || !GetMonData(&gPlayerParty[i], MON_DATA_SANITY_HAS_SPECIES))
+            continue;
+        MP_Region_DepositGlobal(&gPlayerParty[i].box);
+        ZeroMonData(&gPlayerParty[i]);
+    }
+    CompactPartySlots();
+    MP_Region_Travel(from, to);
+    HealPlayerParty();
+    SetWarpDestination(sRegionPorts[to].map >> 8, sRegionPorts[to].map & 0xFF, WARP_ID_NONE, sRegionPorts[to].x, sRegionPorts[to].y);
+    DoWarp();
+    ResetInitialPlayerAvatarState();
+    return 1;
+}
+
+// After the Hall of Fame: the region counts as cleared (its boat, the GLOBAL PC, Gen 4 elsewhere) and the game is
+// saved. RESULT 1 = saved.
+static u16 QzSaveLeagueVictoryRecord_(void)
+{
+    MP_Region_SetCleared(MP_Region_Current());
+    return TrySavingData(SAVE_NORMAL) == SAVE_STATUS_OK;
+}
+
+u16 QzGetReachableRegionsMask(void) { return gSpecialVar_Result = QzGetReachableRegionsMask_(); }
+u16 QzTravelToRegion(void) { return gSpecialVar_Result = QzTravelToRegion_(); }
+u16 QzSaveLeagueVictoryRecord(void) { return gSpecialVar_Result = QzSaveLeagueVictoryRecord_(); }

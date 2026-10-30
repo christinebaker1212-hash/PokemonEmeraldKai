@@ -10,6 +10,10 @@
 #include "mp.h"
 #include "mp_region.h"
 #include "save.h"
+#include "pokemon.h"
+#include "pokemon_storage_system.h"
+#include "string_util.h"
+#include "strings.h"
 #include "constants/map_groups.h"
 #include "constants/flags.h"
 #include "constants/qz_port.h"
@@ -17,11 +21,34 @@
 extern char gPlatformSavePath[512];
 
 #define REGION_MAGIC 0x4E474552   // "REGN"
-#define REGION_FORMAT 2   // 2: + struct RegionState
+#define REGION_FORMAT 3   // 2: + struct RegionState, 3: + chunks (other regions' PCs, the GLOBAL PC, levels)
 
 static u8 sFlags[REGION_FLAG_BYTES];
 static u16 sVars[REGION_VARS_COUNT];
 struct RegionState gRegionState;   // per-region progress (mp_region.h)
+
+// Each region's own PC boxes: the save's are the region the player is in; the others wait here (sAwayValid: bit per
+// region). The GLOBAL PC is one more set of boxes, shared by every region.
+static struct PokemonStorage sAwayPC[REGION_COUNT];
+static u8 sAwayValid;
+static struct PokemonStorage sGlobalPC;
+static bool8 sGlobalValid;
+
+// Levels per region: a Pokémon's EXP in each region it has been in (it is Lv 5 the first time in a new one). The
+// Pokémon's own EXP is the one of region "cur".
+struct RegionLevel
+{
+    u32 pers, otid;
+    u32 exp[REGION_COUNT];
+    u8 has;   // bit per region: exp[] holds its EXP there
+    u8 cur;
+    u16 filler;
+};
+#define MAX_REGION_LEVELS 8192
+static struct RegionLevel sLevels[MAX_REGION_LEVELS];
+static u32 sLevelCount;
+
+#define CHUNK(a, b, c, d) ((u32)(a) | ((u32)(b) << 8) | ((u32)(c) << 16) | ((u32)(d) << 24))
 
 u8 MP_Region_OfGroup(u8 group)
 {
@@ -87,6 +114,31 @@ void MP_Region_WriteSidecar(void)
     fwrite(sFlags, sizeof(sFlags), 1, f);
     fwrite(sVars, sizeof(sVars), 1, f);
     fwrite(&gRegionState, sizeof(gRegionState), 1, f);
+    // chunks: {tag, length, data}
+    {
+        u32 c[2];
+        u8 r;
+        for (r = 0; r < REGION_COUNT; r++)
+        {
+            if (!(sAwayValid & (1 << r)))
+                continue;
+            c[0] = CHUNK('P', 'C', '0' + r, ' ');
+            c[1] = sizeof(sAwayPC[r]);
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(&sAwayPC[r], sizeof(sAwayPC[r]), 1, f);
+        }
+        if (sGlobalValid)
+        {
+            c[0] = CHUNK('G', 'L', 'P', 'C');
+            c[1] = sizeof(sGlobalPC);
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(&sGlobalPC, sizeof(sGlobalPC), 1, f);
+        }
+        c[0] = CHUNK('L', 'V', 'L', 'S');
+        c[1] = sLevelCount * sizeof(sLevels[0]);
+        fwrite(c, sizeof(c), 1, f);
+        fwrite(sLevels, sizeof(sLevels[0]), sLevelCount, f);
+    }
     fclose(f);
     remove(path);
     rename(tmp, path);
@@ -100,6 +152,9 @@ static bool8 LoadFrom(const char *path)
     if (!f)
         return FALSE;
     memset(&gRegionState, 0, sizeof(gRegionState));
+    sAwayValid = 0;
+    sGlobalValid = FALSE;
+    sLevelCount = 0;
     if (fread(header, sizeof(header), 1, f) == 1 && header[0] == REGION_MAGIC && header[2] == Fingerprint()
      && header[3] >= sizeof(sFlags) + sizeof(sVars))
     {
@@ -108,6 +163,36 @@ static bool8 LoadFrom(const char *path)
         {
             u32 n = header[3] - sizeof(sFlags) - sizeof(sVars);
             fread(&gRegionState, n < sizeof(gRegionState) ? n : sizeof(gRegionState), 1, f);
+            if (n > sizeof(gRegionState))
+                fseek(f, n - sizeof(gRegionState), SEEK_CUR);
+        }
+        // format 3+: chunks (an unknown one is skipped)
+        while (ok)
+        {
+            u32 c[2];
+            long next;
+            if (fread(c, sizeof(c), 1, f) != 1)
+                break;
+            next = ftell(f) + c[1];
+            if (c[0] >= CHUNK('P', 'C', '0', ' ') && c[0] < CHUNK('P', 'C', '0' + REGION_COUNT, ' ')
+             && (c[0] & 0xFF00FFFF) == CHUNK('P', 'C', 0, ' ') && c[1] == sizeof(struct PokemonStorage))
+            {
+                u8 r = ((c[0] >> 16) & 0xFF) - '0';
+                if (fread(&sAwayPC[r], sizeof(sAwayPC[r]), 1, f) == 1)
+                    sAwayValid |= 1 << r;
+            }
+            else if (c[0] == CHUNK('G', 'L', 'P', 'C') && c[1] == sizeof(sGlobalPC))
+            {
+                sGlobalValid = fread(&sGlobalPC, sizeof(sGlobalPC), 1, f) == 1;
+            }
+            else if (c[0] == CHUNK('L', 'V', 'L', 'S') && c[1] % sizeof(sLevels[0]) == 0)
+            {
+                u32 n = c[1] / sizeof(sLevels[0]);
+                if (n > MAX_REGION_LEVELS)
+                    n = MAX_REGION_LEVELS;
+                sLevelCount = fread(sLevels, sizeof(sLevels[0]), n, f);
+            }
+            fseek(f, next, SEEK_SET);
         }
     }
     fclose(f);
@@ -172,4 +257,167 @@ bool8 MP_Region_AnyCleared(void)
         if (MP_Region_Cleared(r))
             return TRUE;
     return FALSE;
+}
+
+// ---------------------------------------------------------------------------------------------------- PCs
+static void ResetStorage(struct PokemonStorage *st, const u8 *name)
+{
+    u8 i;
+    memset(st, 0, sizeof(*st));
+    for (i = 0; i < TOTAL_BOXES_COUNT; i++)
+    {
+        u8 *dest = StringCopy(st->boxNames[i], name);
+        ConvertIntToDecimalStringN(dest, i + 1, STR_CONV_MODE_LEFT_ALIGN, 2);
+        st->boxWallpapers[i] = i % 12;   // the 12 default wallpapers (FOREST to SAVANNA: pokemon_storage_system.c)
+    }
+}
+
+struct PokemonStorage *MP_Region_GlobalPC(void)
+{
+    static const u8 sGlobal[] = _("GLOBAL");   // + 1-14: BOX_NAME_LENGTH (8) letters at most
+    if (!sGlobalValid)
+    {
+        ResetStorage(&sGlobalPC, sGlobal);
+        sGlobalValid = TRUE;
+    }
+    return &sGlobalPC;
+}
+
+// Puts a Pokémon in the GLOBAL PC's first free place (FALSE: it's full)
+bool8 MP_Region_DepositGlobal(const struct BoxPokemon *mon)
+{
+    struct PokemonStorage *st = MP_Region_GlobalPC();
+    u8 b, p;
+    for (b = 0; b < TOTAL_BOXES_COUNT; b++)
+        for (p = 0; p < IN_BOX_COUNT; p++)
+            if (!GetBoxMonData((struct BoxPokemon *)&st->boxes[b][p], MON_DATA_SANITY_HAS_SPECIES))
+            {
+                st->boxes[b][p] = *mon;
+                return TRUE;
+            }
+    return FALSE;
+}
+
+u16 MP_Region_GlobalFree(void)
+{
+    struct PokemonStorage *st = MP_Region_GlobalPC();
+    u16 n = 0;
+    u8 b, p;
+    for (b = 0; b < TOTAL_BOXES_COUNT; b++)
+        for (p = 0; p < IN_BOX_COUNT; p++)
+            n += !GetBoxMonData(&st->boxes[b][p], MON_DATA_SANITY_HAS_SPECIES);
+    return n;
+}
+
+// ---------------------------------------------------------------------------------------------------- levels
+static struct RegionLevel *FindLevels(u32 pers, u32 otid)
+{
+    u32 i;
+    for (i = 0; i < sLevelCount; i++)
+        if (sLevels[i].pers == pers && sLevels[i].otid == otid)
+            return &sLevels[i];
+    return NULL;
+}
+
+// Gives a Pokémon its EXP for "region" (keeping its EXP for the region it had). TRUE when its EXP changed.
+bool8 MP_Region_FitBoxMon(struct BoxPokemon *b, u8 region)
+{
+    struct RegionLevel *e;
+    u32 pers, otid, exp, newExp;
+    u16 species;
+    if (region >= REGION_COUNT || !GetBoxMonData(b, MON_DATA_SANITY_HAS_SPECIES) || GetBoxMonData(b, MON_DATA_IS_EGG))
+        return FALSE;
+    pers = GetBoxMonData(b, MON_DATA_PERSONALITY);
+    otid = GetBoxMonData(b, MON_DATA_OT_ID);
+    exp = GetBoxMonData(b, MON_DATA_EXP);
+    e = FindLevels(pers, otid);
+    if (e == NULL)
+    {
+        // first seen: the level it has is the one of the region it's in
+        if (sLevelCount >= MAX_REGION_LEVELS)
+            return FALSE;
+        e = &sLevels[sLevelCount++];
+        memset(e, 0, sizeof(*e));
+        e->pers = pers;
+        e->otid = otid;
+        e->cur = region;
+    }
+    e->exp[e->cur] = exp;
+    e->has |= 1 << e->cur;
+    if (e->cur == region)
+        return FALSE;
+    species = GetBoxMonData(b, MON_DATA_SPECIES);
+    newExp = (e->has & (1 << region)) ? e->exp[region] : gExperienceTables[gSpeciesInfo[species].growthRate][5];
+    e->cur = region;
+    if (newExp == exp)
+        return FALSE;
+    SetBoxMonData(b, MON_DATA_EXP, &newExp);
+    return TRUE;
+}
+
+void MP_Region_FitMon(struct Pokemon *mon, u8 region)
+{
+    if (MP_Region_FitBoxMon(&mon->box, region))
+    {
+        CalculateMonStats(mon);
+        if (GetMonData(mon, MON_DATA_HP) > 0)
+        {
+            u16 hp = GetMonData(mon, MON_DATA_MAX_HP);
+            SetMonData(mon, MON_DATA_HP, &hp);
+        }
+    }
+}
+
+// The party and the player's own boxes take the levels of the region the player is in (after the GLOBAL PC: what
+// came out of it came with another region's level)
+void MP_Region_FitAll(void)
+{
+    u8 region = MP_Region_Current(), i, b, p;
+    struct PokemonStorage *st = MP_PersonalStorage();
+    for (i = 0; i < PARTY_SIZE; i++)
+        MP_Region_FitMon(&gPlayerParty[i], region);
+    for (b = 0; b < TOTAL_BOXES_COUNT; b++)
+        for (p = 0; p < IN_BOX_COUNT; p++)
+            MP_Region_FitBoxMon(&st->boxes[b][p], region);
+}
+
+// ---------------------------------------------------------------------------------------------------- travel
+// Leaving "from" for "to": the personal PC's boxes change places, the party takes the new region's levels
+void MP_Region_Travel(u8 from, u8 to)
+{
+    static const u8 sBox[] = _("BOX");
+    struct PokemonStorage *own = MP_PersonalStorage();
+    u8 i;
+    if (from >= REGION_COUNT || to >= REGION_COUNT || from == to)
+        return;
+    for (i = 0; i < PARTY_SIZE; i++)
+        MP_Region_FitMon(&gPlayerParty[i], from);   // remembers their levels here
+    sAwayPC[from] = *own;
+    sAwayValid |= 1 << from;
+    if (sAwayValid & (1 << to))
+    {
+        *own = sAwayPC[to];
+        sAwayValid &= ~(1 << to);
+    }
+    else
+    {
+        ResetStorage(own, sBox);
+    }
+    for (i = 0; i < PARTY_SIZE; i++)
+        MP_Region_FitMon(&gPlayerParty[i], to);
+    gRegionState.current = to;
+    gRegionState.started |= 1 << to;
+    MPNet_Log("region: travel %d -> %d (PC boxes swapped, party at its levels there)", from, to);
+}
+
+// ---------------------------------------------------------------------------------------------------- specials
+// The GLOBAL PC links only in a region whose Elite Four the player has beaten
+u16 MP_GlobalPcLinked(void)
+{
+    return gSpecialVar_Result = MP_Region_Cleared(MP_Region_Current());
+}
+
+u16 MP_RegionPartyCount(void)
+{
+    return gSpecialVar_Result = CalculatePlayerPartyCount();
 }
