@@ -301,28 +301,28 @@ Kanto_Route25_SeaCottage_Movement_84209D0:
 	step_end
 
 Kanto_Route25_SeaCottage_Text_84502AA::
-	.string "Hiya! I’m a POKéMON…\n"
+	.string "Hiya! I’m a MOéMON…\n"
 	.string "…No I’m not!\p"
 	.string "Call me BILL!\n"
-	.string "I’m a true-blue POKéMANIAC!\p"
+	.string "I’m a true-blue MOéMANIAC!\p"
 	.string "Hey!\n"
 	.string "What’s with that skeptical look?\p"
 	.string "I’m not joshing you, pal.\p"
 	.string "I screwed up an experiment and got\n"
-	.string "combined with a POKéMON!\p"
+	.string "combined with a MOéMON!\p"
 	.string "So, how about it?\n"
 	.string "Help me out here!$"
 
 Kanto_Route25_SeaCottage_Text_8450396::
-	.string "Hiya! I’m a POKéMON…\n"
+	.string "Hiya! I’m a MOéMON…\n"
 	.string "…No I’m not!\p"
 	.string "Call me BILL!\n"
-	.string "I’m a true-blue POKéMANIAC!\p"
+	.string "I’m a true-blue MOéMANIAC!\p"
 	.string "Hey!\n"
 	.string "What’s with that skeptical look?\p"
 	.string "I’m not joshing you, lady.\p"
 	.string "I screwed up an experiment and got\n"
-	.string "combined with a POKéMON!\p"
+	.string "combined with a MOéMON!\p"
 	.string "So, how about it?\n"
 	.string "Help me out here!$"
 
@@ -356,7 +356,7 @@ Kanto_Route25_SeaCottage_Text_84505EB::
 	.string "BILL: Yeehah!\n"
 	.string "Thanks, bud! I owe you one!\p"
 	.string "So, did you come to see my\n"
-	.string "POKéMON collection?\p"
+	.string "MOéMON collection?\p"
 	.string "You didn’t?\n"
 	.string "That’s a bummer.\p"
 	.string "I’ve got to thank you…\n"
@@ -366,7 +366,7 @@ Kanto_Route25_SeaCottage_Text_8450694::
 	.string "BILL: Yeehah!\n"
 	.string "Thanks, lady! I owe you one!\p"
 	.string "So, did you come to see my\n"
-	.string "POKéMON collection?\p"
+	.string "MOéMON collection?\p"
 	.string "You didn’t?\n"
 	.string "That’s a bummer.\p"
 	.string "I’ve got to thank you…\n"
@@ -391,7 +391,7 @@ Kanto_Route25_SeaCottage_Text_845077F::
 
 Kanto_Route25_SeaCottage_Text_845085B::
 	.string "BILL: Feel like checking out some\n"
-	.string "of my rare POKéMON on my PC?\p"
+	.string "of my rare MOéMON on my PC?\p"
 	.string "Go on, check out my PC.$"
 
 Kanto_Route25_SeaCottage_Text_84508B2::
@@ -403,7 +403,7 @@ Kanto_Route25_SeaCottage_Text_84508DD::
 	.string "Cell Separator.$"
 
 Kanto_Route25_SeaCottage_Text_845090B::
-	.string "BILL’s favorite POKéMON list!$"
+	.string "BILL’s favorite MOéMON list!$"
 
 Kanto_Route25_SeaCottage_Text_8450929::
-	.string "Which POKéMON do you want to see?$"
+	.string "Which MOéMON do you want to see?$"

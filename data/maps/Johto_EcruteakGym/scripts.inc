@@ -111,19 +111,19 @@ Johto_EcruteakGym_EventScript_83CDD88::
 	end
 
 Johto_EcruteakGym_Text_83CDD93::
-	.string "ECRUTEAK CITY POKéMON GYM$"
+	.string "ECRUTEAK CITY MOéMON GYM$"
 
 Johto_EcruteakGym_Text_83CDDAD::
-	.string "ECRUTEAK CITY POKéMON GYM\p"
+	.string "ECRUTEAK CITY MOéMON GYM\p"
 	.string "MORTY’S CERTIFIED TRAINERS:\n"
 	.string "{PLAYER}$"
 
 Johto_EcruteakGym_Text_83CDDE6::
 	.string "Good of you to have come.\p"
-	.string "Here in ECRUTEAK, POKéMON have\n"
+	.string "Here in ECRUTEAK, MOéMON have\n"
 	.string "always been revered.\p"
 	.string "It’s said that a rainbow-colored\n"
-	.string "POKéMON will come down to\l"
+	.string "MOéMON will come down to\l"
 	.string "appear before a true Trainer.\p"
 	.string "I believed that tale, so I’ve\n"
 	.string "trained here in secret.\p"
@@ -132,7 +132,7 @@ Johto_EcruteakGym_Text_83CDDE6::
 	.string "Just a bit more...\p"
 	.string "With a little more, I could see\n"
 	.string "a future where I meet the\l"
-	.string "rainbow-colored POKéMON.\p"
+	.string "rainbow-colored MOéMON.\p"
 	.string "You’re going to help me reach\n"
 	.string "that level!$"
 
@@ -144,9 +144,9 @@ Johto_EcruteakGym_Text_83CDFBD::
 	.string "{PLAYER} received the FOGBADGE.$"
 
 Johto_EcruteakGym_Text_83CDFD7::
-	.string "With the FOGBADGE, POKéMON up\n"
+	.string "With the FOGBADGE, MOéMON up\n"
 	.string "to Level 50 will obey you.\p"
-	.string "Also, any POKéMON that knows\n"
+	.string "Also, any MOéMON that knows\n"
 	.string "SURF will be able to use it\l"
 	.string "anytime.\p"
 	.string "I want you to have this too.$"
@@ -166,7 +166,7 @@ Johto_EcruteakGym_Text_83CE0D2::
 
 Johto_EcruteakGym_Text_83CE297::
 	.string "I spent the spring with my\n"
-	.string "POKéMON.\p"
+	.string "MOéMON.\p"
 	.string "Then summer, fall, and winter...\p"
 	.string "Then spring came again.\n"
 	.string "We’ve been together a long time.$"
@@ -176,17 +176,17 @@ Johto_EcruteakGym_Text_83CE315::
 	.string "them both.$"
 
 Johto_EcruteakGym_Text_83CE33C::
-	.string "Where did POKéMON come from?$"
+	.string "Where did MOéMON come from?$"
 
 Johto_EcruteakGym_Text_83CE359::
 	.string "Can you inflict any damage\n"
-	.string "on our POKéMON?$"
+	.string "on our MOéMON?$"
 
 Johto_EcruteakGym_Text_83CE384::
 	.string "Ah! Well done!$"
 
 Johto_EcruteakGym_Text_83CE393::
-	.string "We use GHOST-type POKéMON.\p"
+	.string "We use GHOST-type MOéMON.\p"
 	.string "No NORMAL-type attacks can\n"
 	.string "harm them!$"
 
@@ -217,7 +217,7 @@ Johto_EcruteakGym_Text_83CE4C9::
 	.string "Hey, CHAMP! You’re almost\n"
 	.string "halfway there!\p"
 	.string "Everyone here uses GHOST-type\n"
-	.string "POKéMON.\p"
+	.string "MOéMON.\p"
 	.string "NORMAL- and FIGHTING-type hits\n"
 	.string "usually can’t hurt them.\p"
 	.string "Watch out for MORTY’s illusions\n"

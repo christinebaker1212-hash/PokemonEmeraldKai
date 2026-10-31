@@ -51,4 +51,4 @@ Johto_RuinsOfAlphArceusChamber_EventScript_840EB14::
 
 Johto_RuinsOfAlphArceusChamber_Text_8401E09::
 	.string "The ORIGIN EGG answers\n"
-	.string "your six Mythical Pokémon.$"
+	.string "your six Mythical MOéMON.$"

@@ -73,10 +73,10 @@ Kanto_PalletTown_RivalsHouse_EventScript_8418D8D::
 	end
 
 Kanto_PalletTown_RivalsHouse_Text_8418D96::
-	.string "Want to know how your POKéMON\n"
-	.string "evolves? Check the POKéDEX.\p"
+	.string "Want to know how your MOéMON\n"
+	.string "evolves? Check the MOéDEX.\p"
 	.string "It doesn’t depend on friendship\n"
-	.string "here. The POKéDEX tells you how!$"
+	.string "here. The MOéDEX tells you how!$"
 
 Kanto_PalletTown_RivalsHouse_Text_843D8A4::
 	.string "DAISY: Hi, {PLAYER}!\p"
@@ -99,7 +99,7 @@ Kanto_PalletTown_RivalsHouse_Text_843DA7F::
 
 Kanto_PalletTown_RivalsHouse_Text_843DABD::
 	.string "The shelves are crammed full of\n"
-	.string "books on POKéMON.$"
+	.string "books on MOéMON.$"
 
 Kanto_PalletTown_RivalsHouse_Text_843DF5F::
 	.string "“The lovely and sweet\n"

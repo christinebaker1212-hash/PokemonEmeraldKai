@@ -490,7 +490,7 @@ Johto_SafariZoneEntrance_Text_838271E::
 
 Johto_SafariZoneEntrance_Text_838276B::
 	.string "I’m going to make delicious オカキクケS\n"
-	.string "and make my POKéMON cuter.$"
+	.string "and make my MOéMON cuter.$"
 
 Johto_SafariZoneEntrance_Text_839360E::
 	.string "Would you like to exit the SAFARI\n"
@@ -552,21 +552,21 @@ Johto_SafariZoneEntrance_Text_83F9214::
 	.string "Thank you, {PLAYER}!\n"
 	.string "Here, take this money to upgrade\l"
 	.string "your SAFARI LEVEL and show me an\l"
-	.string "exotic POKéMON from the BRUSH area\l"
+	.string "exotic MOéMON from the BRUSH area\l"
 	.string "next!$"
 
 Johto_SafariZoneEntrance_Text_83F928E::
 	.string "Thank you, {PLAYER}!\n"
 	.string "Here, take this money to upgrade\l"
 	.string "your SAFARI LEVEL and show me an\l"
-	.string "exotic POKéMON from the MOUNTAIN\l"
+	.string "exotic MOéMON from the MOUNTAIN\l"
 	.string "area next!$"
 
 Johto_SafariZoneEntrance_Text_83F930B::
 	.string "Thank you, {PLAYER}!\n"
 	.string "Here, take this money to upgrade\l"
 	.string "your SAFARI LEVEL and show me an\l"
-	.string "exotic POKéMON from the CAVE area\l"
+	.string "exotic MOéMON from the CAVE area\l"
 	.string "next!$"
 
 Johto_SafariZoneEntrance_Text_83F9384::
@@ -582,25 +582,25 @@ Johto_SafariZoneEntrance_Text_83F942D::
 
 Johto_SafariZoneEntrance_Text_83F9442::
 	.string "Ah, {PLAYER}!\p"
-	.string "Did you bring an exotic POKéMON\n"
+	.string "Did you bring an exotic MOéMON\n"
 	.string "from the BEACH area of the FUCHSIA\l"
 	.string "SAFARI ZONE to show me?$"
 
 Johto_SafariZoneEntrance_Text_83F94A5::
 	.string "Ah, {PLAYER}!\p"
-	.string "Did you bring an exotic POKéMON\n"
+	.string "Did you bring an exotic MOéMON\n"
 	.string "from the BRUSH area of the FUCHSIA\l"
 	.string "SAFARI ZONE to show me?$"
 
 Johto_SafariZoneEntrance_Text_83F9508::
 	.string "Ah, {PLAYER}!\p"
-	.string "Did you bring an exotic POKéMON\n"
+	.string "Did you bring an exotic MOéMON\n"
 	.string "from the MOUNTAIN area of the\l"
 	.string "FUCHSIA SAFARI ZONE to show me?$"
 
 Johto_SafariZoneEntrance_Text_83F956E::
 	.string "Ah, {PLAYER}!\p"
-	.string "Did you bring an exotic POKéMON\n"
+	.string "Did you bring an exotic MOéMON\n"
 	.string "from the CAVE area of the FUCHSIA\l"
 	.string "SAFARI ZONE to show me?$"
 
@@ -624,7 +624,7 @@ Johto_SafariZoneEntrance_Text_83F97E9::
 	.string "This is a brand new SAFARI ZONE,\n"
 	.string "with all six areas ready to explore!\p"
 	.string "Every area has different wild\n"
-	.string "POKéMON waiting to be discovered.\p"
+	.string "MOéMON waiting to be discovered.\p"
 	.string "Enjoy your visit and explore\n"
 	.string "as much as you like!$"
 
@@ -646,7 +646,7 @@ Johto_SafariZoneEntrance_Text_83F999D::
 
 Johto_SafariZoneEntrance_Text_83F99CA::
 	.string "I heard one of the areas has\n"
-	.string "rare dragon POKéMON!$"
+	.string "rare dragon MOéMON!$"
 
 Johto_SafariZoneEntrance_Text_83F9A44::
 	.string "Welcome to JOHTO’S SAFARI ZONE!\p"
@@ -654,7 +654,7 @@ Johto_SafariZoneEntrance_Text_83F9A44::
 	.string "areas with no time or step limit.$"
 
 Johto_SafariZoneEntrance_Text_83F9AAD::
-	.string "Wild POKéMON here are battled and\n"
+	.string "Wild MOéMON here are battled and\n"
 	.string "caught normally, just like on any\l"
 	.string "other route.\p"
 	.string "Each area has different wildlife.\n"

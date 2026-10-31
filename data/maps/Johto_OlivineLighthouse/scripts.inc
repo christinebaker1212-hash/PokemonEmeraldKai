@@ -221,10 +221,10 @@ Johto_OlivineLighthouse_Text_83E5A04::
 	.string "the trainers waiting inside.$"
 
 Johto_OlivineLighthouse_Text_83E5A62::
-	.string "In the past, POKéMON used to light\n"
+	.string "In the past, MOéMON used to light\n"
 	.string "the sea around OLIVINE at night.\p"
 	.string "The LIGHTHOUSE was built in honor\n"
-	.string "of those noble POKéMON.$"
+	.string "of those noble MOéMON.$"
 
 Johto_OlivineLighthouse_Text_83E5B0E::
 	.string "Men of the sea are always\n"
@@ -247,7 +247,7 @@ Johto_OlivineLighthouse_Text_83E5BAB::
 	.string "serious.$"
 
 Johto_OlivineLighthouse_Text_83E5BCE::
-	.string "Up top is a POKéMON that keeps\n"
+	.string "Up top is a MOéMON that keeps\n"
 	.string "the LIGHTHOUSE lit.\p"
 	.string "But I hear that it’s sick now,\n"
 	.string "and can’t be cured normally.$"
@@ -258,11 +258,11 @@ Johto_OlivineLighthouse_Text_83E5C82::
 
 Johto_OlivineLighthouse_Text_83E5CC5::
 	.string "You really are concerned about\n"
-	.string "the sick POKéMON…$"
+	.string "the sick MOéMON…$"
 
 Johto_OlivineLighthouse_Text_83E5CF6::
 	.string "How the heck do you go up?\p"
-	.string "I want to visit the sick POKéMON,\n"
+	.string "I want to visit the sick MOéMON,\n"
 	.string "but I can’t get up there…$"
 
 Johto_OlivineLighthouse_Text_83E5D4D::
@@ -275,23 +275,23 @@ Johto_OlivineLighthouse_Text_83E5D7E::
 Johto_OlivineLighthouse_Text_83E5D9C::
 	.string "Every time I return to OLIVINE,\n"
 	.string "I visit the GYM.\p"
-	.string "The GYM LEADER’s POKéMON type\n"
+	.string "The GYM LEADER’s MOéMON type\n"
 	.string "changed without me noticing.$"
 
 Johto_OlivineLighthouse_Text_83E5E08::
 	.string "I travel the world to train my\n"
-	.string "POKéMON. I wish to battle you.$"
+	.string "MOéMON. I wish to battle you.$"
 
 Johto_OlivineLighthouse_Text_83E5E46::
 	.string "…sigh… I must train some more…$"
 
 Johto_OlivineLighthouse_Text_83E5E65::
 	.string "JASMINE used to use ROCK-type\n"
-	.string "POKéMON like ONIX.$"
+	.string "MOéMON like ONIX.$"
 
 Johto_OlivineLighthouse_Text_83E5EC4::
 	.string "JASMINE must be worried sick about\n"
-	.string "the POKéMON here.\p"
+	.string "the MOéMON here.\p"
 	.string "She won’t even smile these days.$"
 
 Johto_OlivineLighthouse_Text_83E5F1A::
@@ -307,12 +307,12 @@ Johto_OlivineLighthouse_Text_83E5F7B::
 	.string "Nobody had better get in my way!$"
 
 Johto_OlivineLighthouse_Text_83E5FE1::
-	.string "Aaack! My POKéMON!$"
+	.string "Aaack! My MOéMON!$"
 
 Johto_OlivineLighthouse_Text_83E5FF4::
 	.string "Right. Anybody would be worried if\n"
-	.string "his or her own POKéMON were hurt.\p"
-	.string "I’ll pray for the POKéMON here, so\n"
+	.string "his or her own MOéMON were hurt.\p"
+	.string "I’ll pray for the MOéMON here, so\n"
 	.string "JASMINE can come back to the GYM.$"
 
 Johto_OlivineLighthouse_Text_83E60AC::
@@ -331,19 +331,19 @@ Johto_OlivineLighthouse_Text_83E6118::
 
 Johto_OlivineLighthouse_Text_83E616D::
 	.string "We’re pretty high up here. My bird\n"
-	.string "POKéMON are in prime form.$"
+	.string "MOéMON are in prime form.$"
 
 Johto_OlivineLighthouse_Text_83E61AB::
 	.string "Oops… They crashed…$"
 
 Johto_OlivineLighthouse_Text_83E61BF::
-	.string "My POKéMON learned how to use FLY in\n"
+	.string "My MOéMON learned how to use FLY in\n"
 	.string "CIANWOOD.\p"
 	.string "Well, since I’m a loser, I’ll FLY\n"
 	.string "across the sea…$"
 
 Johto_OlivineLighthouse_Text_83E62B6::
-	.string "JASMINE: …This POKéMON always kept\n"
+	.string "JASMINE: …This MOéMON always kept\n"
 	.string "the sea lit at night.\p"
 	.string "…But it suddenly got sick… It’s\n"
 	.string "gasping for air…\p"

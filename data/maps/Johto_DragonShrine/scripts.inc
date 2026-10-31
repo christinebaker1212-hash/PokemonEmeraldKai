@@ -378,7 +378,7 @@ Johto_DragonShrine_Text_83CC549::
 	.string "Ready?$"
 
 Johto_DragonShrine_Text_83CC61B::
-	.string "What are POKéMON to you?$"
+	.string "What are MOéMON to you?$"
 
 Johto_DragonShrine_Text_83CC634::
 	.string "What helps you to win battles?$"
@@ -389,10 +389,10 @@ Johto_DragonShrine_Text_83CC653::
 
 Johto_DragonShrine_Text_83CC67F::
 	.string "What is most important for\n"
-	.string "raising POKéMON?$"
+	.string "raising MOéMON?$"
 
 Johto_DragonShrine_Text_83CC6AB::
-	.string "Strong POKéMON. Weak POKéMON.\n"
+	.string "Strong MOéMON. Weak MOéMON.\n"
 	.string "Which is more important?$"
 
 Johto_DragonShrine_Text_83CC6E2::
@@ -403,13 +403,13 @@ Johto_DragonShrine_Text_83CC718::
 
 Johto_DragonShrine_Text_83CC72A::
 	.string "Hm… I see…\p"
-	.string "You care deeply for POKéMON.\p"
+	.string "You care deeply for MOéMON.\p"
 	.string "Very commendable.\p"
 	.string "That conviction is what is\n"
 	.string "important!\p"
 	.string "{PLAYER}, don’t lose that belief.\p"
 	.string "It will see you through at the\n"
-	.string "POKéMON LEAGUE.$"
+	.string "MOéMON LEAGUE.$"
 
 Johto_DragonShrine_Text_83CC950::
 	.string "CLAIR: I’m sorry for how I treated\n"
@@ -419,7 +419,7 @@ Johto_DragonShrine_Text_83CC950::
 Johto_DragonShrine_Text_83CC9B2::
 	.string "It’s a DRAGON SCALE.\p"
 	.string "A rare treasure carried by some\n"
-	.string "Dragon-type POKéMON.$"
+	.string "Dragon-type MOéMON.$"
 
 Johto_DragonShrine_Text_83CC9FC::
 	.string "My grandfather will keep the gift.\n"
@@ -434,7 +434,7 @@ Johto_DragonShrine_Text_83CCA59::
 	.string "of NEW BARK TOWN. Use SURF there.\p"
 	.string "Once you become CHAMPION, you can\n"
 	.string "challenge the GYM LEADERS again.\p"
-	.string "When you reach the POKéMON LEAGUE,\n"
+	.string "When you reach the MOéMON LEAGUE,\n"
 	.string "don’t you dare lose!\p"
 	.string "If you do, I’ll feel even worse\n"
 	.string "about having lost to you.\p"
@@ -474,9 +474,9 @@ Johto_DragonShrine_Text_83CCD30::
 
 Johto_DragonShrine_Text_83CCD49::
 	.string "RISINGBADGE will enable your\n"
-	.string "POKéMON to use the move for\l"
+	.string "MOéMON to use the move for\l"
 	.string "climbing waterfalls.\p"
-	.string "Also, all POKéMON will recognize\n"
+	.string "Also, all MOéMON will recognize\n"
 	.string "you as a trainer and obey your\l"
 	.string "every command without question.$"
 
@@ -511,7 +511,7 @@ Johto_DragonShrine_Text_83CD063::
 	.string "have recognized your worth.$"
 
 Johto_DragonShrine_Text_83CD0F5::
-	.string "Dragon POKéMON are symbolic of our\n"
+	.string "Dragon MOéMON are symbolic of our\n"
 	.string "clan.\p"
 	.string "You have shown that you can be\n"
 	.string "entrusted with one.$"
@@ -523,4 +523,4 @@ Johto_DragonShrine_Text_83CD151::
 
 Johto_DragonShrine_Text_840185F::
 	.string "Would you like to give a nickname\n"
-	.string "to this POKéMON?$"
+	.string "to this MOéMON?$"

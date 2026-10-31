@@ -171,7 +171,7 @@ Kanto_Route15_EventScript_846BC80::
 	end
 
 Kanto_Route15_Text_84367D7::
-	.string "I just got some POKéMON in trades.\n"
+	.string "I just got some MOéMON in trades.\n"
 	.string "Can I try them out on you?$"
 
 Kanto_Route15_Text_8436815::
@@ -179,7 +179,7 @@ Kanto_Route15_Text_8436815::
 
 Kanto_Route15_Text_8436826::
 	.string "You can’t change the nickname of\n"
-	.string "any POKéMON you get in a trade.\p"
+	.string "any MOéMON you get in a trade.\p"
 	.string "Only the Original TRAINER can get\n"
 	.string "the nickname changed.$"
 
@@ -197,7 +197,7 @@ Kanto_Route15_Text_84368E9::
 
 Kanto_Route15_Text_843691B::
 	.string "When I whistle, I can summon bird\n"
-	.string "POKéMON.$"
+	.string "MOéMON.$"
 
 Kanto_Route15_Text_8436946::
 	.string "Ow!\n"
@@ -218,11 +218,11 @@ Kanto_Route15_Text_84369E6::
 	.string "This is so obvious, you should know\n"
 	.string "this, but…\p"
 	.string "Moves like EARTHQUAKE and FISSURE\n"
-	.string "have no effect on bird POKéMON.$"
+	.string "have no effect on bird MOéMON.$"
 
 Kanto_Route15_Text_8436A57::
 	.string "Oh, you’re a little cutie!\n"
-	.string "So like a darling POKéMON!$"
+	.string "So like a darling MOéMON!$"
 
 Kanto_Route15_Text_8436A8D::
 	.string "You looked so cute, too!$"
@@ -233,15 +233,15 @@ Kanto_Route15_Text_8436AA6::
 	.string "I’m a big girl now.$"
 
 Kanto_Route15_Text_8436AD8::
-	.string "I raise POKéMON for protection\n"
+	.string "I raise MOéMON for protection\n"
 	.string "because I live alone.$"
 
 Kanto_Route15_Text_8436B0D::
-	.string "POKéMON isn’t about winning or\n"
+	.string "MOéMON isn’t about winning or\n"
 	.string "losing for me.$"
 
 Kanto_Route15_Text_8436B3B::
-	.string "I love having my POKéMON greet me\n"
+	.string "I love having my MOéMON greet me\n"
 	.string "when I get home.\p"
 	.string "It’s so reassuring.$"
 
@@ -270,17 +270,17 @@ Kanto_Route15_Text_8436C48::
 
 Kanto_Route15_Text_8436C86::
 	.string "What’s cool and happening?\n"
-	.string "Trading POKéMON!$"
+	.string "Trading MOéMON!$"
 
 Kanto_Route15_Text_8436CB2::
 	.string "I said trade!$"
 
 Kanto_Route15_Text_8436CC0::
-	.string "I trade POKéMON with my friends\n"
+	.string "I trade MOéMON with my friends\n"
 	.string "all the time.$"
 
 Kanto_Route15_Text_8436CEE::
-	.string "Want to play with my POKéMON?$"
+	.string "Want to play with my MOéMON?$"
 
 Kanto_Route15_Text_8436D0C::
 	.string "I was too impatient!$"
@@ -306,7 +306,7 @@ Kanto_Route15_Text_8436DD6::
 
 Kanto_Route15_Text_8436E12::
 	.string "MYA: Do you want to challenge us?\n"
-	.string "You’ll need two POKéMON, though.$"
+	.string "You’ll need two MOéMON, though.$"
 
 Kanto_Route15_Text_8436E55::
 	.string "RON: My sister gets scary when we\n"
@@ -323,11 +323,11 @@ Kanto_Route15_Text_8436E9E::
 Kanto_Route15_Text_8436ECA::
 	.string "RON: Did you want to battle with\n"
 	.string "my sister and me?\p"
-	.string "You need two POKéMON, then.$"
+	.string "You need two MOéMON, then.$"
 
 Kanto_Route15_Text_846FAF6::
 	.string "I’m going to keep battling with the\n"
-	.string "POKéMON I got in trades.$"
+	.string "MOéMON I got in trades.$"
 
 Kanto_Route15_Text_846FB33::
 	.string "You look gentle, so I think I can\n"
@@ -335,7 +335,7 @@ Kanto_Route15_Text_846FB33::
 	.string "I’ll give it one more go!$"
 
 Kanto_Route15_Text_846FB79::
-	.string "When I whistle, bird POKéMON\n"
+	.string "When I whistle, bird MOéMON\n"
 	.string "gather around.\p"
 	.string "They’re amazingly cute!$"
 
@@ -345,11 +345,11 @@ Kanto_Route15_Text_846FBBD::
 
 Kanto_Route15_Text_846FBF9::
 	.string "Oh, you’re a little cutie!\n"
-	.string "So like a darling POKéMON!\l"
+	.string "So like a darling MOéMON!\l"
 	.string "I remember you now!$"
 
 Kanto_Route15_Text_846FC43::
-	.string "I raise POKéMON for protection\n"
+	.string "I raise MOéMON for protection\n"
 	.string "because I live alone.\p"
 	.string "That hasn’t changed.$"
 
@@ -363,10 +363,10 @@ Kanto_Route15_Text_846FCBA::
 
 Kanto_Route15_Text_846FCEC::
 	.string "What’s cool and happening?\n"
-	.string "Trading POKéMON, of course.$"
+	.string "Trading MOéMON, of course.$"
 
 Kanto_Route15_Text_846FD23::
-	.string "Want to play with my POKéMON\n"
+	.string "Want to play with my MOéMON\n"
 	.string "again?$"
 
 Kanto_Route15_Text_846FD47::

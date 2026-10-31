@@ -23,11 +23,11 @@ Johto_ElmsHouse_Text_83E1AF4::
 	.string "Hi, {PLAYER}! My husband’s always\n"
 	.string "so busy--I hope he’s OK.\p"
 	.string "When he’s caught up in his\n"
-	.string "POKéMON research, he even\l"
+	.string "MOéMON research, he even\l"
 	.string "forgets to eat.$"
 
 Johto_ElmsHouse_Text_83E1B6E::
 	.string "When I grow up, I’m going to\n"
 	.string "help my dad!\p"
 	.string "I’m going to be a great\n"
-	.string "POKéMON professor!$"
+	.string "MOéMON professor!$"

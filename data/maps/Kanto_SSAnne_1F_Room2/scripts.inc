@@ -26,7 +26,7 @@ Kanto_SSAnne_1F_Room2_EventScript_846BB14::
 	end
 
 Kanto_SSAnne_1F_Room2_Text_8423F4E::
-	.string "I love POKéMON!\n"
+	.string "I love MOéMON!\n"
 	.string "Do you?$"
 
 Kanto_SSAnne_1F_Room2_Text_8423F66::
@@ -36,11 +36,11 @@ Kanto_SSAnne_1F_Room2_Text_8423F66::
 Kanto_SSAnne_1F_Room2_Text_8423F7A::
 	.string "Listen, listen!\n"
 	.string "Let me be your friend, okay?\p"
-	.string "Then we can trade POKéMON and\n"
+	.string "Then we can trade MOéMON and\n"
 	.string "do stuff.$"
 
 Kanto_SSAnne_1F_Room2_Text_8423FCF::
-	.string "I collected these POKéMON\n"
+	.string "I collected these MOéMON\n"
 	.string "from all around the world!$"
 
 Kanto_SSAnne_1F_Room2_Text_8424004::
@@ -48,9 +48,9 @@ Kanto_SSAnne_1F_Room2_Text_8424004::
 	.string "I went around the world for these!$"
 
 Kanto_SSAnne_1F_Room2_Text_842402F::
-	.string "You hurt my poor POKéMON!\p"
+	.string "You hurt my poor MOéMON!\p"
 	.string "I demand that you heal them at a\n"
-	.string "POKéMON CENTER!$"
+	.string "MOéMON CENTER!$"
 
 Kanto_SSAnne_1F_Room2_Text_842407A::
 	.string "We are cruising around the world,\n"

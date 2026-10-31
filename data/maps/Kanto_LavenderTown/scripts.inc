@@ -70,14 +70,14 @@ Kanto_LavenderTown_Text_842F63C::
 
 Kanto_LavenderTown_Text_842F68A::
 	.string "This town is known as the grave\n"
-	.string "site of POKéMON.\p"
+	.string "site of MOéMON.\p"
 	.string "Memorial services are held in\n"
-	.string "POKéMON TOWER.$"
+	.string "MOéMON TOWER.$"
 
 Kanto_LavenderTown_Text_842F6E8::
-	.string "Ghosts appeared in POKéMON TOWER.\p"
+	.string "Ghosts appeared in MOéMON TOWER.\p"
 	.string "I think they’re the spirits of\n"
-	.string "POKéMON that the ROCKETS killed.$"
+	.string "MOéMON that the ROCKETS killed.$"
 
 Kanto_LavenderTown_Text_842F74A::
 	.string "LAVENDER TOWN\n"
@@ -90,8 +90,8 @@ Kanto_LavenderTown_Text_842F76E::
 
 Kanto_LavenderTown_Text_842F7AA::
 	.string "LAVENDER VOLUNTEER\n"
-	.string "POKéMON HOUSE$"
+	.string "MOéMON HOUSE$"
 
 Kanto_LavenderTown_Text_842F7CB::
-	.string "POKéMON TOWER\n"
-	.string "Becalm the Spirits of POKéMON$"
+	.string "MOéMON TOWER\n"
+	.string "Becalm the Spirits of MOéMON$"

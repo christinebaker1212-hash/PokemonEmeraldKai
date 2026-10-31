@@ -81,7 +81,7 @@ Johto_Route41_Text_83F442D::
 
 Johto_Route41_Text_83F446F::
 	.string "I’m a bit tired.\n"
-	.string "If I win, lend me your POKéMON.$"
+	.string "If I win, lend me your MOéMON.$"
 
 Johto_Route41_Text_83F44A0::
 	.string "Pant, pant…$"
@@ -103,7 +103,7 @@ Johto_Route41_Text_83F456F::
 
 Johto_Route41_Text_83F4593::
 	.string "It was a dark and stormy night…\p"
-	.string "I saw this giant POKéMON flying\n"
+	.string "I saw this giant MOéMON flying\n"
 	.string "from the islands.\p"
 	.string "It was scattering feathers\n"
 	.string "from its silver wings.$"
@@ -140,12 +140,12 @@ Johto_Route41_Text_83F4799::
 
 Johto_Route41_Text_83F47B0::
 	.string "There’s supposed to be a big\n"
-	.string "POKéMON deep beneath WHIRL ISLANDS.\p"
+	.string "MOéMON deep beneath WHIRL ISLANDS.\p"
 	.string "I wonder what it could be?$"
 
 Johto_Route41_Text_83F4823::
 	.string "You look so elegant,\n"
-	.string "riding your POKéMON.$"
+	.string "riding your MOéMON.$"
 
 Johto_Route41_Text_83F484D::
 	.string "I’m crushed…$"

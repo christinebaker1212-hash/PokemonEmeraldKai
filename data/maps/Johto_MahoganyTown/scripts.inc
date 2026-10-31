@@ -288,6 +288,6 @@ Johto_MahoganyTown_Text_83DFB58::
 	.string "a RAGECANDYBAR!$"
 
 Johto_MahoganyTown_Text_83DFB8A::
-	.string "MAHOGANY TOWN POKéMON GYM\p"
+	.string "MAHOGANY TOWN MOéMON GYM\p"
 	.string "LEADER: PRYCE\p"
 	.string "The Teacher of Winter’s Harshness$"

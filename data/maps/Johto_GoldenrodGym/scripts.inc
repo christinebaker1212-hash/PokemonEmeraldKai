@@ -147,18 +147,18 @@ Johto_GoldenrodGym_EventScript_83D5A1E::
 	end
 
 Johto_GoldenrodGym_Text_83D5A29::
-	.string "GOLDENROD POKéMON GYM$"
+	.string "GOLDENROD MOéMON GYM$"
 
 Johto_GoldenrodGym_Text_83D5A3F::
-	.string "GOLDENROD TOWN POKéMON GYM\p"
+	.string "GOLDENROD TOWN MOéMON GYM\p"
 	.string "WHITNEY’S CERTIFIED TRAINERS:\n"
 	.string "{PLAYER}$"
 
 Johto_GoldenrodGym_Text_83D5A7B::
 	.string "Hi! I’m WHITNEY!\p"
-	.string "Everyone was into POKéMON, so I got\n"
+	.string "Everyone was into MOéMON, so I got\n"
 	.string "into it too!\p"
-	.string "POKéMON are super-cute!\p"
+	.string "MOéMON are super-cute!\p"
 	.string "You want to battle? I’m warning\n"
 	.string "you- I’m good!$"
 
@@ -183,9 +183,9 @@ Johto_GoldenrodGym_Text_83D5BD2::
 	.string "{PLAYER} received PLAINBADGE.$"
 
 Johto_GoldenrodGym_Text_83D5BEA::
-	.string "PLAINBADGE lets your POKéMON use\n"
+	.string "PLAINBADGE lets your MOéMON use\n"
 	.string "STRENGTH outside of battle.\p"
-	.string "It also boosts your POKéMON’s\n"
+	.string "It also boosts your MOéMON’s\n"
 	.string "DEFENSE.\p"
 	.string "Oh, you can have this too!$"
 
@@ -199,7 +199,7 @@ Johto_GoldenrodGym_Text_83D5CCA::
 	.string "Ah, that was a good cry!$"
 
 Johto_GoldenrodGym_Text_83D5D91::
-	.string "Don’t let my POKéMON’s cute looks\n"
+	.string "Don’t let my MOéMON’s cute looks\n"
 	.string "fool you.\p"
 	.string "They can whip you!$"
 
@@ -207,12 +207,12 @@ Johto_GoldenrodGym_Text_83D5DD0::
 	.string "Darn… I thought you were weak…$"
 
 Johto_GoldenrodGym_Text_83D5DEF::
-	.string "Do my POKéMON think I’m cute?$"
+	.string "Do my MOéMON think I’m cute?$"
 
 Johto_GoldenrodGym_Text_83D5E0D::
-	.string "I like cute POKéMON better than\n"
-	.string "strong POKéMON.\p"
-	.string "But I have strong and cute POKéMON!$"
+	.string "I like cute MOéMON better than\n"
+	.string "strong MOéMON.\p"
+	.string "But I have strong and cute MOéMON!$"
 
 Johto_GoldenrodGym_Text_83D5E61::
 	.string "Oh, no, no, no!$"
@@ -253,9 +253,9 @@ Johto_GoldenrodGym_Text_83D600F::
 Johto_GoldenrodGym_Text_83D603D::
 	.string "Yo! CHAMP in making!\p"
 	.string "This GYM is home to WHITNEY, the\n"
-	.string "master of NORMAL-type POKéMON.\p"
+	.string "master of NORMAL-type MOéMON.\p"
 	.string "Be cautious of her cute team.\p"
-	.string "Some of the POKéMON in this gym\n"
+	.string "Some of the MOéMON in this gym\n"
 	.string "have the newly discovered FAIRY\l"
 	.string "type as well.\p"
 	.string "Check ROUTE 34 if you need a\n"

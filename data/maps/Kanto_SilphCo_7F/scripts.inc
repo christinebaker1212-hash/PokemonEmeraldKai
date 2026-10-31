@@ -304,7 +304,7 @@ Kanto_SilphCo_7F_Text_8426947::
 	.string "Oh! Hi! You’re not a ROCKET!\n"
 	.string "You came to save us?\l"
 	.string "Why, thank you!\p"
-	.string "I want you to have this POKéMON\n"
+	.string "I want you to have this MOéMON\n"
 	.string "for saving us.$"
 
 Kanto_SilphCo_7F_Text_84269B8::
@@ -313,7 +313,7 @@ Kanto_SilphCo_7F_Text_84269B8::
 
 Kanto_SilphCo_7F_Text_84269E6::
 	.string "It’s a LAPRAS.\n"
-	.string "It’s a very intelligent POKéMON.\p"
+	.string "It’s a very intelligent MOéMON.\p"
 	.string "We kept it in our lab, but it will\n"
 	.string "be much better off with you.\p"
 	.string "I think you will be a good TRAINER\n"
@@ -329,7 +329,7 @@ Kanto_SilphCo_7F_Text_8426ABE::
 
 Kanto_SilphCo_7F_Text_8426B25::
 	.string "TEAM ROCKET was after the MASTER\n"
-	.string "BALL, which catches any POKéMON.$"
+	.string "BALL, which catches any MOéMON.$"
 
 Kanto_SilphCo_7F_Text_8426B67::
 	.string "We canceled the MASTER BALL\n"
@@ -337,7 +337,7 @@ Kanto_SilphCo_7F_Text_8426B67::
 
 Kanto_SilphCo_7F_Text_8426BA3::
 	.string "It would be bad if TEAM ROCKET\n"
-	.string "took over SILPH or our POKéMON.$"
+	.string "took over SILPH or our MOéMON.$"
 
 Kanto_SilphCo_7F_Text_8426BE2::
 	.string "Wow!\p"
@@ -418,11 +418,11 @@ Kanto_SilphCo_7F_Text_8426EB5::
 Kanto_SilphCo_7F_Text_8426F0E::
 	.string "Well, {PLAYER}!\n"
 	.string "I’m moving on up and ahead!\p"
-	.string "By checking my POKéDEX, I’m\n"
+	.string "By checking my MOéDEX, I’m\n"
 	.string "starting to see what’s strong and\l"
 	.string "how they evolve!\p"
 	.string "Am I a genius or what?\p"
-	.string "I’m going to the POKéMON LEAGUE to\n"
+	.string "I’m going to the MOéMON LEAGUE to\n"
 	.string "boot out the ELITE FOUR.\p"
 	.string "I’ll become the world’s most\n"
 	.string "powerful TRAINER!\p"

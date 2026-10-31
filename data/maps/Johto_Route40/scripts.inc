@@ -119,7 +119,7 @@ Johto_Route40_Text_83F3DA7::
 
 Johto_Route40_Text_83F3DEF::
 	.string "Hey, you’re young and fit!\p"
-	.string "Don’t ride your POKéMON!\n"
+	.string "Don’t ride your MOéMON!\n"
 	.string "Swim!$"
 
 Johto_Route40_Text_83F3E29::
@@ -144,7 +144,7 @@ Johto_Route40_Text_83F3ECE::
 Johto_Route40_Text_83F3F12::
 	.string "No inner tube for me.\p"
 	.string "I’m hanging on to a sea\n"
-	.string "POKéMON!$"
+	.string "MOéMON!$"
 
 Johto_Route40_Text_83F3F49::
 	.string "Ooh, I’m feeling dizzy!$"
@@ -180,7 +180,7 @@ Johto_Route40_Text_83F41CC::
 	.string "MONICA: It’s an item that raises\n"
 	.string "the power of FLYING-type moves.\p"
 	.string "You should equip a bird\n"
-	.string "POKéMON with that item.$"
+	.string "MOéMON with that item.$"
 
 Johto_Route40_Text_83F423D::
 	.string "MONICA: My brothers and\n"

@@ -166,38 +166,38 @@ Johto_Route29_EventScript_83ECD85::
 	end
 
 Johto_Route29_Text_83ECD92::
-	.string "POKéMON hide in the grass.\n"
+	.string "MOéMON hide in the grass.\n"
 	.string "Who knows when they’ll pop out…$"
 
 Johto_Route29_Text_83ECDCD::
 	.string "I’ve seen you a couple times.\n"
-	.string "How many POKéMON have you caught?\p"
+	.string "How many MOéMON have you caught?\p"
 	.string "Would you like me to tell you\n"
-	.string "how to catch POKéMON?$"
+	.string "how to catch MOéMON?$"
 
 Johto_Route29_Text_83ECE41::
 	.string "If you weaken them first,\n"
-	.string "POKéMON are easier to catch.\p"
+	.string "MOéMON are easier to catch.\p"
 	.string "Then, throw a ball at them from\n"
 	.string "your bag! Any ball will do.\p"
 	.string "If you want to learn more,\n"
 	.string "go to the ACADEMY in VIOLET CITY!\p"
 	.string "The students there know a lot\n"
-	.string "about POKéMON.$"
+	.string "about MOéMON.$"
 
 Johto_Route29_Text_83ECF1E::
 	.string "Oh. Fine, then.\p"
 	.string "Check every route to find\n"
-	.string "different types of POKéMON.\p"
-	.string "Your POKéDEX shows where you can\n"
+	.string "different types of MOéMON.\p"
+	.string "Your MOéDEX shows where you can\n"
 	.string "find them too!\p"
 	.string "If you want to learn more,\n"
 	.string "go to the ACADEMY in VIOLET CITY!\p"
 	.string "The students know a lot about\n"
-	.string "POKéMON.$"
+	.string "MOéMON.$"
 
 Johto_Route29_Text_83ECFF8::
-	.string "Yo. How are your POKéMON?\p"
+	.string "Yo. How are your MOéMON?\p"
 	.string "If they’re weak and not ready\n"
 	.string "for battle, keep out of the grass.$"
 
@@ -212,11 +212,11 @@ Johto_Route29_Text_83ED0C0::
 	.string "so I saved to record my progress.$"
 
 Johto_Route29_Text_83ED0FC::
-	.string "I’m waiting for POKéMON that\n"
+	.string "I’m waiting for MOéMON that\n"
 	.string "appear only later in the day.$"
 
 Johto_Route29_Text_83ED137::
-	.string "I’m waiting for POKéMON that\n"
+	.string "I’m waiting for MOéMON that\n"
 	.string "appear only at night.$"
 
 Johto_Route29_Text_83ED16A::

@@ -20,11 +20,11 @@ Johto_PlayersNeighborsHouse_EventScript_83E19B9::
 	end
 
 Johto_PlayersNeighborsHouse_Text_83E19C6::
-	.string "PIKACHU is an evolved POKéMON.\p"
+	.string "PIKACHU is an evolved MOéMON.\p"
 	.string "I was amazed by PROF.ELM’s\n"
 	.string "findings.\p"
 	.string "He’s so famous for his research\n"
-	.string "on POKéMON evolution.\p"
+	.string "on MOéMON evolution.\p"
 	.string "…sigh…\p"
 	.string "I wish I could be a researcher\n"
 	.string "like him…$"
@@ -32,5 +32,5 @@ Johto_PlayersNeighborsHouse_Text_83E19C6::
 Johto_PlayersNeighborsHouse_Text_83E1A70::
 	.string "My daughter is adamant about\n"
 	.string "becoming PROF.ELM’s assistant.\p"
-	.string "She really loves POKéMON!\p"
+	.string "She really loves MOéMON!\p"
 	.string "But then, so do I!$"

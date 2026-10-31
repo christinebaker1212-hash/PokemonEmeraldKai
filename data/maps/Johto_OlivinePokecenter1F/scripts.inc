@@ -27,7 +27,7 @@ Johto_OlivinePokecenter1F_EventScript_83E680D::
 Johto_OlivinePokecenter1F_Text_83E681A::
 	.string "The SAILOR in the OLIVINE CAFE\n"
 	.string "next door is really generous.\p"
-	.string "He taught my POKéMON STRENGTH.\p"
+	.string "He taught my MOéMON STRENGTH.\p"
 	.string "Now it can move big boulders\n"
 	.string "without breaking a sweat.$"
 
@@ -35,4 +35,4 @@ Johto_OlivinePokecenter1F_Text_83E68AD::
 	.string "There’s a person in CIANWOOD\n"
 	.string "CITY across the sea.\p"
 	.string "I heard him bragging about his\n"
-	.string "rare POKéMON all the time.$"
+	.string "rare MOéMON all the time.$"

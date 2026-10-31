@@ -149,10 +149,10 @@ Kanto_MtMoon_1F_Text_8422EF2::
 	.string "Don’t sneak up on me!$"
 
 Kanto_MtMoon_1F_Text_8422F0E::
-	.string "My POKéMON won’t do!$"
+	.string "My MOéMON won’t do!$"
 
 Kanto_MtMoon_1F_Text_8422F23::
-	.string "I have to find stronger POKéMON.\n"
+	.string "I have to find stronger MOéMON.\n"
 	.string "Where might they be?$"
 
 Kanto_MtMoon_1F_Text_8422F59::

@@ -49,7 +49,7 @@ Johto_GoldenrodMagnetTrainStation_Text_83D9A4F::
 Johto_GoldenrodMagnetTrainStation_Text_83D9AA1::
 	.string "I’m the PRESIDENT.\p"
 	.string "My dream was to link JOHTO and KANTO\n"
-	.string "with a train faster than a POKéMON.\p"
+	.string "with a train faster than a MOéMON.\p"
 	.string "But the service has been suspended\n"
 	.string "indefinitely.$"
 

@@ -8,6 +8,6 @@ Kanto_CeruleanCity_House4_EventScript_841ACDB::
 
 Kanto_CeruleanCity_House4_Text_841ACE4::
 	.string "I love reading stories of travels\n"
-	.string "and encounters with POKéMON.\p"
+	.string "and encounters with MOéMON.\p"
 	.string "Maybe one day I’ll read about\n"
 	.string "your adventures!$"

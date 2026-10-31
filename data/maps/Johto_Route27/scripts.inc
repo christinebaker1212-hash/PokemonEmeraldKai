@@ -160,7 +160,7 @@ Johto_Route27_Text_83EC5EC::
 
 Johto_Route27_Text_83EC61E::
 	.string "You shouldn’t underestimate the\n"
-	.string "wild POKéMON in these parts.$"
+	.string "wild MOéMON in these parts.$"
 
 Johto_Route27_Text_83EC65B::
 	.string "Oh! You’re much too strong!$"
@@ -178,9 +178,9 @@ Johto_Route27_Text_83EC6F7::
 
 Johto_Route27_Text_83EC711::
 	.string "I’m checking out pre- and post-\n"
-	.string "evolution POKéMON.\p"
+	.string "evolution MOéMON.\p"
 	.string "Evolution really does make\n"
-	.string "POKéMON stronger.\p"
+	.string "MOéMON stronger.\p"
 	.string "But evolved forms also learn\n"
 	.string "moves later on.$"
 
@@ -188,7 +188,7 @@ Johto_Route27_Text_83EC79E::
 	.string "Don’t say a thing!\p"
 	.string "Let me guess what you’re thinking.\p"
 	.string "Mmmmmmm…\p"
-	.string "I got it! You’re on the POKéMON\n"
+	.string "I got it! You’re on the MOéMON\n"
 	.string "LEAGUE challenge!$"
 
 Johto_Route27_Text_83EC80F::
@@ -207,7 +207,7 @@ Johto_Route27_Text_83EC888::
 
 Johto_Route27_Text_83EC88F::
 	.string "BIRD KEEPERS like me mimic bird\n"
-	.string "whistles to command POKéMON.$"
+	.string "whistles to command MOéMON.$"
 
 Johto_Route27_Text_83EC8CC::
 	.string "TOHJO FALLS\p"
@@ -223,4 +223,4 @@ Johto_Route27_Text_83EC942::
 
 Johto_Route27_Text_83EC95A::
 	.string "Just like in fishing, it’s all over\n"
-	.string "in POKéMON if you give up.$"
+	.string "in MOéMON if you give up.$"

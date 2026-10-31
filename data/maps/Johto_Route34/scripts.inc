@@ -127,7 +127,7 @@ Johto_Route34_Text_83EFD8A::
 
 Johto_Route34_Text_83EFDD8::
 	.string "I’m the best in my class at\n"
-	.string "POKéMON.$"
+	.string "MOéMON.$"
 
 Johto_Route34_Text_83EFDFD::
 	.string "No! There are better trainers…$"
@@ -138,7 +138,7 @@ Johto_Route34_Text_83EFE1C::
 
 Johto_Route34_Text_83EFE4E::
 	.string "I’m confident in my ability to\n"
-	.string "raise POKéMON.\p"
+	.string "raise MOéMON.\p"
 	.string "Want to see?$"
 
 Johto_Route34_Text_83EFE89::
@@ -171,7 +171,7 @@ Johto_Route34_Text_83EFF99::
 	.string "Be good and stay out of trouble.$"
 
 Johto_Route34_Text_83EFFFE::
-	.string "I just got my POKéMON back from\n"
+	.string "I just got my MOéMON back from\n"
 	.string "DAY-CARE.\p"
 	.string "Let’s see how much stronger it got!$"
 
@@ -179,7 +179,7 @@ Johto_Route34_Text_83F004C::
 	.string "Why does it end this way?$"
 
 Johto_Route34_Text_83F0066::
-	.string "My POKéMON came back with new moves.\p"
+	.string "My MOéMON came back with new moves.\p"
 	.string "That confounded me to no end!$"
 
 Johto_Route34_Text_83F00C6::
@@ -229,4 +229,4 @@ Johto_Route34_Text_83F0350::
 
 Johto_Route34_Text_83F03AF::
 	.string "DAY-CARE\p"
-	.string "LET US RAISE YOUR POKéMON FOR YOU!$"
+	.string "LET US RAISE YOUR MOéMON FOR YOU!$"

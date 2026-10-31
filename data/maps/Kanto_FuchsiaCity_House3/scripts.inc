@@ -8,5 +8,5 @@ Kanto_FuchsiaCity_House3_EventScript_841DA41::
 
 Kanto_FuchsiaCity_House3_Text_841DAFA::
 	.string "You can delete moves on your\n"
-	.string "POKéMON’s summary screen.\p"
+	.string "MOéMON’s summary screen.\p"
 	.string "You don’t need my help anymore!$"

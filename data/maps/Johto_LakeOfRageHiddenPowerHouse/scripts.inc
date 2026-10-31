@@ -28,11 +28,11 @@ Johto_LakeOfRageHiddenPowerHouse_Text_83DDECC::
 	.string "Here I have meditated. Inside me,\n"
 	.string "a new power has been awakened.\p"
 	.string "Let me share my power with your\n"
-	.string "POKéMON. Take this, child.$"
+	.string "MOéMON. Take this, child.$"
 
 Johto_LakeOfRageHiddenPowerHouse_Text_83DDF5F::
 	.string "This DAWN STONE can make\n"
-	.string "certain POKéMON evolve.\p"
+	.string "certain MOéMON evolve.\p"
 	.string "Even a small stone can\n"
 	.string "awaken a hidden power.$"
 

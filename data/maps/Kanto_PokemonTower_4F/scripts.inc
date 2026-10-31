@@ -70,5 +70,5 @@ Kanto_PokemonTower_4F_Text_842A772::
 	.string "Who? What?$"
 
 Kanto_PokemonTower_4F_Text_842A782::
-	.string "May the departed POKéMON rest in\n"
+	.string "May the departed MOéMON rest in\n"
 	.string "peace…$"

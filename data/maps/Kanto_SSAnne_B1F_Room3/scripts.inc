@@ -22,5 +22,5 @@ Kanto_SSAnne_B1F_Room3_Text_8424885::
 	.string "Lost it!$"
 
 Kanto_SSAnne_B1F_Room3_Text_8424894::
-	.string "Sea POKéMON live in deep water.\n"
+	.string "Sea MOéMON live in deep water.\n"
 	.string "You’ll need a ROD to fish them up!$"

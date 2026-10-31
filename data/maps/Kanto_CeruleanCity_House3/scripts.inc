@@ -44,7 +44,7 @@ Kanto_CeruleanCity_House3_EventScript_841AA2C::
 	end
 
 Kanto_CeruleanCity_House3_Text_8442272::
-	.string "My husband likes trading POKéMON.\p"
-	.string "You’re collecting POKéMON for your\n"
-	.string "POKéDEX, aren’t you?\p"
+	.string "My husband likes trading MOéMON.\p"
+	.string "You’re collecting MOéMON for your\n"
+	.string "MOéDEX, aren’t you?\p"
 	.string "Would you please trade with him?$"

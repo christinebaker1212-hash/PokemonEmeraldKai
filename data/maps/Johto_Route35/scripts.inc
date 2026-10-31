@@ -99,7 +99,7 @@ Johto_Route35_EventScript_83F149B::
 	end
 
 Johto_Route35_Text_83F14A8::
-	.string "I’ve been getting POKéMON data off\n"
+	.string "I’ve been getting MOéMON data off\n"
 	.string "my radio. I think I’m good.$"
 
 Johto_Route35_Text_83F14E7::
@@ -107,7 +107,7 @@ Johto_Route35_Text_83F14E7::
 
 Johto_Route35_Text_83F14EF::
 	.string "Music on the radio changes the\n"
-	.string "moods of wild POKéMON.$"
+	.string "moods of wild MOéMON.$"
 
 Johto_Route35_Text_83F1525::
 	.string "I’m gonna show my girlfriend I’m\n"
@@ -128,7 +128,7 @@ Johto_Route35_Text_83F15CD::
 	.string "Oh, my! You’re so strong!$"
 
 Johto_Route35_Text_83F15E7::
-	.string "I can count on my POKéMON more than\n"
+	.string "I can count on my MOéMON more than\n"
 	.string "my boyfriend.$"
 
 Johto_Route35_Text_83F1619::
@@ -148,7 +148,7 @@ Johto_Route35_Text_83F169A::
 	.string "Yikes! Not fast enough!$"
 
 Johto_Route35_Text_83F16B2::
-	.string "Some POKéMON flee right away.\p"
+	.string "Some MOéMON flee right away.\p"
 	.string "Try catching them with KURT’s\n"
 	.string "FAST BALL.\p"
 	.string "Whenever I find a ASPEAR BERRY, I\n"
@@ -163,11 +163,11 @@ Johto_Route35_Text_83F176F::
 
 Johto_Route35_Text_83F1786::
 	.string "I was going to dazzle you with my\n"
-	.string "prize POKéMON.\p"
+	.string "prize MOéMON.\p"
 	.string "But your prowess electrified me!$"
 
 Johto_Route35_Text_83F17D8::
-	.string "I’ll go anywhere if bug POKéMON\n"
+	.string "I’ll go anywhere if bug MOéMON\n"
 	.string "appear there.$"
 
 Johto_Route35_Text_83F1806::
@@ -184,8 +184,8 @@ Johto_Route35_Text_83F18C9::
 	.string "Ow! I scorched the tip of my nose!$"
 
 Johto_Route35_Text_83F18EC::
-	.string "The POKéMON March on the radio\n"
-	.string "lures wild POKéMON.$"
+	.string "The MOéMON March on the radio\n"
+	.string "lures wild MOéMON.$"
 
 Johto_Route35_Text_83F191F::
 	.string "I’m always alert while\n"

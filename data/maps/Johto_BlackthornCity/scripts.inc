@@ -221,7 +221,7 @@ Johto_BlackthornCity_Text_83C6CB5::
 	.string "Huh? I’m listening to my radio!$"
 
 Johto_BlackthornCity_Text_83C6CEF::
-	.string "Are you going to make your POKéMON\n"
+	.string "Are you going to make your MOéMON\n"
 	.string "remember some moves?$"
 
 Johto_BlackthornCity_Text_83C6D27::
@@ -259,9 +259,9 @@ Johto_BlackthornCity_Text_83C6E91::
 	.string "A Quiet Mountain Retreat$"
 
 Johto_BlackthornCity_Text_83C6EBA::
-	.string "BLACKTHORN CITY POKéMON GYM\n"
+	.string "BLACKTHORN CITY MOéMON GYM\n"
 	.string "LEADER: CLAIR\p"
-	.string "The Blessed User of Dragon POKéMON$"
+	.string "The Blessed User of Dragon MOéMON$"
 
 Johto_BlackthornCity_Text_83C6F07::
 	.string "MOVE BROS’ HOUSE$"

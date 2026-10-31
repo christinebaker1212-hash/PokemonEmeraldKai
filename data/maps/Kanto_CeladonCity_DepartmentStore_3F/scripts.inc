@@ -183,7 +183,7 @@ Kanto_CeladonCity_DepartmentStore_3F_Mart_841BDA0:
 	.2byte ITEM_NONE
 
 Kanto_CeladonCity_DepartmentStore_3F_Text_844582E::
-	.string "Captured POKéMON are registered\n"
+	.string "Captured MOéMON are registered\n"
 	.string "with an ID No. and the OT.\p"
 	.string "OT stands for “Original TRAINER” -\n"
 	.string "the TRAINER that caught it first.$"
@@ -199,10 +199,10 @@ Kanto_CeladonCity_DepartmentStore_3F_Text_84458F5::
 	.string "I collect them!\p"
 	.string "Huh?\p"
 	.string "HAUNTER turned into a different\n"
-	.string "POKéMON while being traded!$"
+	.string "MOéMON while being traded!$"
 
 Kanto_CeladonCity_DepartmentStore_3F_Text_8445968::
-	.string "You can identify POKéMON you get\n"
+	.string "You can identify MOéMON you get\n"
 	.string "in trades by their ID Numbers.$"
 
 Kanto_CeladonCity_DepartmentStore_3F_Text_84459A8::
@@ -235,4 +235,4 @@ Kanto_CeladonCity_DepartmentStore_3F_Text_8445A81::
 
 Kanto_CeladonCity_DepartmentStore_3F_Text_8445ABF::
 	.string "Red and Green!\n"
-	.string "Both are POKéMON!$"
+	.string "Both are MOéMON!$"

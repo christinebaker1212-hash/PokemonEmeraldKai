@@ -207,13 +207,13 @@ Kanto_Route22_Movement_84181B2:
 
 Kanto_Route22_Text_8438B71::
 	.string "BLUE: Hey! {PLAYER}!\p"
-	.string "You’re off to the POKéMON LEAGUE?\n"
+	.string "You’re off to the MOéMON LEAGUE?\n"
 	.string "Forget about it!\p"
 	.string "You probably don’t have any\n"
 	.string "BADGES, do you?\p"
 	.string "The guard won’t let you through\n"
 	.string "without them.\p"
-	.string "By the way, did your POKéMON get\n"
+	.string "By the way, did your MOéMON get\n"
 	.string "any stronger?$"
 
 Kanto_Route22_Text_8438C3C::
@@ -221,7 +221,7 @@ Kanto_Route22_Text_8438C3C::
 	.string "You just lucked out!$"
 
 Kanto_Route22_Text_8438C57::
-	.string "I heard the POKéMON LEAGUE is\n"
+	.string "I heard the MOéMON LEAGUE is\n"
 	.string "crawling with tough TRAINERS.\p"
 	.string "I have to figure out how to get\n"
 	.string "past them.\p"
@@ -231,12 +231,12 @@ Kanto_Route22_Text_8438C57::
 Kanto_Route22_Text_8438D21::
 	.string "BLUE: What? {PLAYER}!\n"
 	.string "What a surprise to see you here!\p"
-	.string "So you’re going to the POKéMON\n"
+	.string "So you’re going to the MOéMON\n"
 	.string "LEAGUE?\p"
 	.string "You collected all the BADGES, too?\n"
 	.string "That’s cool!\p"
 	.string "Then I’ll whip you, {PLAYER}, as a\n"
-	.string "warm-up for the POKéMON LEAGUE!\p"
+	.string "warm-up for the MOéMON LEAGUE!\p"
 	.string "Come on!$"
 
 Kanto_Route22_Text_8438DEF::
@@ -245,11 +245,11 @@ Kanto_Route22_Text_8438DEF::
 
 Kanto_Route22_Text_8438E10::
 	.string "That loosened me up.\n"
-	.string "I’m ready for the POKéMON LEAGUE!\p"
+	.string "I’m ready for the MOéMON LEAGUE!\p"
 	.string "{PLAYER}, you need more practice.\p"
 	.string "But hey, you know that!\n"
 	.string "I’m out of here. Smell ya!$"
 
 Kanto_Route22_Text_8438EE8::
-	.string "POKéMON LEAGUE\n"
+	.string "MOéMON LEAGUE\n"
 	.string "Front Gate$"

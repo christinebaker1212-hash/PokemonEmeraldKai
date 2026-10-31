@@ -39,7 +39,7 @@ Kanto_Route1_EventScript_8417C03::
 
 Kanto_Route1_Text_8433564::
 	.string "Hi!\n"
-	.string "I work at a POKéMON MART.\p"
+	.string "I work at a MOéMON MART.\p"
 	.string "It’s part of a convenient chain\n"
 	.string "selling all sorts of items.\p"
 	.string "Please, visit us in VIRIDIAN CITY.\p"
@@ -48,7 +48,7 @@ Kanto_Route1_Text_8433564::
 
 Kanto_Route1_Text_843360E::
 	.string "Please come see us if you need\n"
-	.string "POKé BALLS for catching POKéMON.$"
+	.string "POKé BALLS for catching MOéMON.$"
 
 Kanto_Route1_Text_843364E::
 	.string "{PLAYER} put the POTION away in\n"

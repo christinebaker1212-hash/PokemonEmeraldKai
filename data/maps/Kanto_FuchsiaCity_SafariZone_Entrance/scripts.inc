@@ -22,7 +22,7 @@ Kanto_FuchsiaCity_SafariZone_Entrance_Text_8447F46::
 
 Kanto_FuchsiaCity_SafariZone_Entrance_Text_8447F79::
 	.string "The SAFARI ZONE has four areas.\p"
-	.string "Each has different wild POKéMON,\n"
+	.string "Each has different wild MOéMON,\n"
 	.string "including some rare species.\p"
 	.string "Battles work normally, so bring\n"
 	.string "your own POKé BALLS.\p"

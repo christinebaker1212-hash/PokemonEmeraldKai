@@ -194,7 +194,7 @@ Johto_BlackthornGym1F_Text_83C749A::
 	.string "I am CLAIR.\p"
 	.string "The world’s best dragon master.\p"
 	.string "I can hold my own against even the\n"
-	.string "POKéMON LEAGUE’s ELITE FOUR.\p"
+	.string "MOéMON LEAGUE’s ELITE FOUR.\p"
 	.string "Do you still want to take me on?\p"
 	.string "…Fine. Let’s do it!\p"
 	.string "As a GYM LEADER, I will use my full\n"
@@ -208,7 +208,7 @@ Johto_BlackthornGym1F_Text_83C757B::
 Johto_BlackthornGym1F_Text_83C75B3::
 	.string "I won’t admit this.\p"
 	.string "I may have lost, but you’re still\n"
-	.string "not ready for the POKéMON LEAGUE.\p"
+	.string "not ready for the MOéMON LEAGUE.\p"
 	.string "I know. You should take the dragon-\n"
 	.string "user challenge.\p"
 	.string "Behind this GYM is a place called\n"
@@ -226,13 +226,13 @@ Johto_BlackthornGym1F_Text_83C770D::
 
 Johto_BlackthornGym1F_Text_83C77A6::
 	.string "What’s the matter?\p"
-	.string "Aren’t you headed to the POKéMON\n"
+	.string "Aren’t you headed to the MOéMON\n"
 	.string "LEAGUE?\p"
 	.string "Don’t you know where it is?\p"
 	.string "From here, go to NEW BARK TOWN.\p"
 	.string "Then SURF east. The route there is\n"
 	.string "very tough.\p"
-	.string "Don’t you dare lose at the POKéMON\n"
+	.string "Don’t you dare lose at the MOéMON\n"
 	.string "LEAGUE!\p"
 	.string "If you do, I’ll feel even worse\n"
 	.string "about having lost to you!\p"
@@ -244,14 +244,14 @@ Johto_BlackthornGym1F_Text_83C78D1::
 
 Johto_BlackthornGym1F_Text_83C79FB::
 	.string "I just got access to use DRAGON-\n"
-	.string "type POKéMON!$"
+	.string "type MOéMON!$"
 
 Johto_BlackthornGym1F_Text_83C7A2A::
 	.string "Rats! If only I had a DRAGONITE!$"
 
 Johto_BlackthornGym1F_Text_83C7A4B::
 	.string "Members of our dragon-user clan\n"
-	.string "can use dragon POKéMON only after\l"
+	.string "can use dragon MOéMON only after\l"
 	.string "our MASTER allows it.$"
 
 Johto_BlackthornGym1F_Text_83C7AA3::
@@ -270,7 +270,7 @@ Johto_BlackthornGym1F_Text_83C7B1B::
 	.string "I’ll show you how tough they are!$"
 
 Johto_BlackthornGym1F_Text_83C7B60::
-	.string "My dragon POKéMON lost?$"
+	.string "My dragon MOéMON lost?$"
 
 Johto_BlackthornGym1F_Text_83C7B78::
 	.string "LANCE told you that he’d like to\n"
@@ -289,7 +289,7 @@ Johto_BlackthornGym1F_Text_83C7BED::
 	.string "Thanks for showing me!$"
 
 Johto_BlackthornGym1F_Text_83C7C21::
-	.string "Dragons are sacred POKéMON.\p"
+	.string "Dragons are sacred MOéMON.\p"
 	.string "They are full of life energy.\p"
 	.string "If you’re not serious, you won’t\n"
 	.string "be able to beat them.$"
@@ -318,15 +318,15 @@ Johto_BlackthornGym1F_Text_83C7CEA::
 
 Johto_BlackthornGym1F_Text_83C7E64::
 	.string "You were great to beat CLAIR!\p"
-	.string "All that’s left is the POKéMON\n"
+	.string "All that’s left is the MOéMON\n"
 	.string "LEAGUE challenge.\p"
 	.string "You’re on the way to becoming the\n"
-	.string "POKéMON CHAMPION!$"
+	.string "MOéMON CHAMPION!$"
 
 Johto_BlackthornGym1F_Text_83C7F07::
-	.string "BLACKTHORN CITY POKéMON GYM$"
+	.string "BLACKTHORN CITY MOéMON GYM$"
 
 Johto_BlackthornGym1F_Text_83C7F23::
-	.string "BLACKTHORN CITY POKéMON GYM\p"
+	.string "BLACKTHORN CITY MOéMON GYM\p"
 	.string "CLAIR’S CERTIFIED TRAINERS:\n"
 	.string "{PLAYER}$"

@@ -81,7 +81,7 @@ Kanto_OneIsland_KindleRoad_EmberSpa_Text_842DAE7::
 Kanto_OneIsland_KindleRoad_EmberSpa_Text_842DB59::
 	.string "The water is perfectly warm.\n"
 	.string "It feels exquisite…\p"
-	.string "{PLAYER} and the POKéMON were\n"
+	.string "{PLAYER} and the MOéMON were\n"
 	.string "fully refreshed!$"
 
 Kanto_OneIsland_KindleRoad_EmberSpa_Text_842DBB3::
@@ -101,7 +101,7 @@ Kanto_OneIsland_KindleRoad_EmberSpa_Text_842DC59::
 	.string "BRUNO, who’s a senior ahead of me,\n"
 	.string "visits the SPA on occasion.\p"
 	.string "He comes to rehab injuries, both\n"
-	.string "his own and his POKéMON’s.$"
+	.string "his own and his MOéMON’s.$"
 
 Kanto_OneIsland_KindleRoad_EmberSpa_Text_842DD2B::
 	.string "Hot springs go hand-in-hand with\n"
@@ -111,4 +111,4 @@ Kanto_OneIsland_KindleRoad_EmberSpa_Text_842DD2B::
 
 Kanto_OneIsland_KindleRoad_EmberSpa_Text_842DD9B::
 	.string "A PROTECTOR can help a certain\n"
-	.string "POKéMON evolve.$"
+	.string "MOéMON evolve.$"

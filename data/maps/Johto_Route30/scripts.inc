@@ -102,7 +102,7 @@ Johto_Route30_EventScript_83ED43F::
 	end
 
 Johto_Route30_Text_83ED448::
-	.string "MR.POKéMON’s House$"
+	.string "MR.MOéMON’s House$"
 
 Johto_Route30_Text_83ED45B::
 	.string "Go, RATTATA!\p"
@@ -114,7 +114,7 @@ Johto_Route30_Text_83ED470::
 
 Johto_Route30_Text_83ED49C::
 	.string "I just lost, so I’m trying to\n"
-	.string "find more POKéMON.\p"
+	.string "find more MOéMON.\p"
 	.string "Wait! You look weak! Come on,\n"
 	.string "let’s battle!$"
 
@@ -123,13 +123,13 @@ Johto_Route30_Text_83ED4F9::
 	.string "Doggone it!$"
 
 Johto_Route30_Text_83ED518::
-	.string "Do I have to have more POKéMON\n"
+	.string "Do I have to have more MOéMON\n"
 	.string "in order to battle better?\p"
 	.string "No! I’m sticking with this one\n"
 	.string "no matter what!$"
 
 Johto_Route30_Text_83ED581::
-	.string "You’re a POKéMON trainer,\n"
+	.string "You’re a MOéMON trainer,\n"
 	.string "right?\p"
 	.string "Then you have to battle!$"
 
@@ -144,7 +144,7 @@ Johto_Route30_Text_83ED5D9::
 	.string "people to get better.$"
 
 Johto_Route30_Text_83ED632::
-	.string "Instead of a bug POKéMON,\n"
+	.string "Instead of a bug MOéMON,\n"
 	.string "I found a trainer!$"
 
 Johto_Route30_Text_83ED65F::
@@ -152,11 +152,11 @@ Johto_Route30_Text_83ED65F::
 
 Johto_Route30_Text_83ED678::
 	.string "I ran out of POKé BALLS while\n"
-	.string "I was catching POKéMON.\p"
+	.string "I was catching MOéMON.\p"
 	.string "I should’ve bought some more…$"
 
 Johto_Route30_Text_83ED6CC::
-	.string "MR. POKéMON’s house?\n"
+	.string "MR. MOéMON’s house?\n"
 	.string "It’s a bit farther ahead.$"
 
 Johto_Route30_Text_83ED6FB::
@@ -176,9 +176,9 @@ Johto_Route30_Text_83ED772::
 Johto_Route30_Text_83ED7D2::
 	.string "TRAINER TIPS\p"
 	.string "No stealing other people’s\n"
-	.string "POKéMON!\p"
+	.string "MOéMON!\p"
 	.string "POKé BALLS are to be thrown\n"
-	.string "only at wild POKéMON!$"
+	.string "only at wild MOéMON!$"
 
 Johto_Route30_Text_83ED8CA::
 	.string "A message from PROF. ELM arrived:\p"

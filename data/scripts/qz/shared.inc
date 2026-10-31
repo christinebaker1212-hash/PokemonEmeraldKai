@@ -477,12 +477,12 @@ Quetzal_Text_83615BA::
 	.string "BOX “{STR_VAR_1}.”$"
 
 Quetzal_Text_83615FD::
-	.string "There’s no more room for POKéMON!\p"
-	.string "The POKéMON BOXES are full and\n"
+	.string "There’s no more room for MOéMON!\p"
+	.string "The MOéMON BOXES are full and\n"
 	.string "can’t accept any more!$"
 
 Quetzal_Text_8361A68::
-	.string "You cannot receive gift POKéMON\n"
+	.string "You cannot receive gift MOéMON\n"
 	.string "during the NUZLOCKE challenge.\p"
 	.string "Come back after completing\n"
 	.string "this region’s challenge.$"
@@ -523,7 +523,7 @@ Quetzal_Text_83C32AA::
 
 Quetzal_Text_83E90EF::
 	.string "This passage links JOHTO and KANTO.\p"
-	.string "Only the champions of both POKéMON\n"
+	.string "Only the champions of both MOéMON\n"
 	.string "LEAGUES may cross.$"
 
 Quetzal_Text_83F09A4::
@@ -542,8 +542,8 @@ Quetzal_Text_83F721C::
 
 Quetzal_Text_83F760D::
 	.string "Wait! That thing you have there…\n"
-	.string "Is that a POKéMON fossil?\p"
-	.string "Would you like to bring that POKéMON\n"
+	.string "Is that a MOéMON fossil?\p"
+	.string "Would you like to bring that MOéMON\n"
 	.string "back to life?\p"
 	.string "I can with my newly developed\n"
 	.string "FOSSIL REGENERATOR.$"

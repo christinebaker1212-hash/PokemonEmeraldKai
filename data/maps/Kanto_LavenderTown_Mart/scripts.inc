@@ -31,7 +31,7 @@ Kanto_LavenderTown_Mart_EventScript_841B33D::
 
 Kanto_LavenderTown_Mart_Text_8443E51::
 	.string "I’m searching for items that raise\n"
-	.string "the stats of POKéMON.\p"
+	.string "the stats of MOéMON.\p"
 	.string "They’re effective over the course\n"
 	.string "of a single battle.\p"
 	.string "X ATTACK, X DEFEND, X SPEED, \n"
@@ -40,11 +40,11 @@ Kanto_LavenderTown_Mart_Text_8443E51::
 
 Kanto_LavenderTown_Mart_Text_8443F22::
 	.string "Did you buy some REVIVES?\n"
-	.string "They revive any fainted POKéMON!$"
+	.string "They revive any fainted MOéMON!$"
 
 Kanto_LavenderTown_Mart_Text_8443F5D::
 	.string "Sometimes, a TRAINER duo will\n"
-	.string "challenge you with two POKéMON\l"
+	.string "challenge you with two MOéMON\l"
 	.string "at the same time.\p"
 	.string "If that happens, you have to send\n"
-	.string "out two POKéMON to battle, too.$"
+	.string "out two MOéMON to battle, too.$"

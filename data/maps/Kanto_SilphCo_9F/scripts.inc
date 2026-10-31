@@ -138,7 +138,7 @@ Kanto_SilphCo_9F_Text_8427277::
 	.string "Thank you so much.$"
 
 Kanto_SilphCo_9F_Text_842728A::
-	.string "Your POKéMON seem to adore you,\n"
+	.string "Your MOéMON seem to adore you,\n"
 	.string "kid!$"
 
 Kanto_SilphCo_9F_Text_84272AF::
@@ -149,7 +149,7 @@ Kanto_SilphCo_9F_Text_84272B7::
 	.string "your age…$"
 
 Kanto_SilphCo_9F_Text_84272E2::
-	.string "Your POKéMON have weak points!\n"
+	.string "Your MOéMON have weak points!\n"
 	.string "I can nail them!$"
 
 Kanto_SilphCo_9F_Text_8427312::

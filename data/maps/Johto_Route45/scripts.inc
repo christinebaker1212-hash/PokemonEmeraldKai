@@ -85,7 +85,7 @@ Johto_Route45_EventScript_83F5D69::
 
 Johto_Route45_Text_83F5D76::
 	.string "Be prepared for anything!\p"
-	.string "Let me see if your POKéMON have\n"
+	.string "Let me see if your MOéMON have\n"
 	.string "been raised properly!$"
 
 Johto_Route45_Text_83F5DC6::
@@ -102,15 +102,15 @@ Johto_Route45_Text_83F5E14::
 	.string "spunkiness, I’m the man!$"
 
 Johto_Route45_Text_83F5E6A::
-	.string "My POKéMON weren’t spunky enough!$"
+	.string "My MOéMON weren’t spunky enough!$"
 
 Johto_Route45_Text_83F5E8C::
 	.string "Boy, do I love HP UP! Mmmm, yum!\p"
-	.string "I keep drinking my POKéMON’s!\p"
+	.string "I keep drinking my MOéMON’s!\p"
 	.string "I can’t help it!$"
 
 Johto_Route45_Text_83F5EDC::
-	.string "My POKéMON are power packed!$"
+	.string "My MOéMON are power packed!$"
 
 Johto_Route45_Text_83F5EF9::
 	.string "Wahahah! I’m the big loser!$"
@@ -123,7 +123,7 @@ Johto_Route45_Text_83F5F15::
 Johto_Route45_Text_83F5F5B::
 	.string "Why do I climb mountains?\p"
 	.string "Because they’re there.\p"
-	.string "Why do I train POKéMON?\p"
+	.string "Why do I train MOéMON?\p"
 	.string "Because they’re there!$"
 
 Johto_Route45_Text_83F5FBB::
@@ -131,7 +131,7 @@ Johto_Route45_Text_83F5FBB::
 
 Johto_Route45_Text_83F5FD6::
 	.string "The best thing to ever happen to\n"
-	.string "me was discovering POKéMON.$"
+	.string "me was discovering MOéMON.$"
 
 Johto_Route45_Text_83F6086::
 	.string "I was training here alone.\p"
@@ -147,13 +147,13 @@ Johto_Route45_Text_83F60CA::
 
 Johto_Route45_Text_83F61B3::
 	.string "What are your thoughts on\n"
-	.string "raising POKéMON?$"
+	.string "raising MOéMON?$"
 
 Johto_Route45_Text_83F61DE::
 	.string "You’ve won my respect.$"
 
 Johto_Route45_Text_83F61F5::
-	.string "I see you’re raising your POKéMON\n"
+	.string "I see you’re raising your MOéMON\n"
 	.string "with care.\p"
 	.string "The bond you build will save you\n"
 	.string "in tough situations.$"
@@ -170,7 +170,7 @@ Johto_Route45_Text_83F62B8::
 	.string "I’m not in favor of overly\n"
 	.string "powerful moves.\p"
 	.string "I want to win, but I also don’t\n"
-	.string "want to harm POKéMON.$"
+	.string "want to harm MOéMON.$"
 
 Johto_Route45_Text_83F6319::
 	.string "I’m really, really tough!$"

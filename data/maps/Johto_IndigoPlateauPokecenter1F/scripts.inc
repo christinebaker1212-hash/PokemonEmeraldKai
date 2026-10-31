@@ -129,12 +129,12 @@ Johto_IndigoPlateauPokecenter1F_Text_83DCED8::
 	.string "Now, go get ’em!$"
 
 Johto_IndigoPlateauPokecenter1F_Text_83DCFA0::
-	.string "The POKéMON LEAGUE is not taking\n"
+	.string "The MOéMON LEAGUE is not taking\n"
 	.string "new challengers at the moment.\p"
 	.string "Please check back later.$"
 
 Johto_IndigoPlateauPokecenter1F_Text_83DCFF9::
-	.string "At the POKéMON LEAGUE, you’ll get\n"
+	.string "At the MOéMON LEAGUE, you’ll get\n"
 	.string "tested by the ELITE FOUR.\p"
 	.string "You have to beat them all. If you\n"
 	.string "lose, you have to start all over!$"
@@ -142,7 +142,7 @@ Johto_IndigoPlateauPokecenter1F_Text_83DCFF9::
 Johto_IndigoPlateauPokecenter1F_Text_83DD097::
 	.string "You won the JOHTO LEAGUE, but this\n"
 	.string "isn’t over.\p"
-	.string "My POKéMON and I are still training.\p"
+	.string "My MOéMON and I are still training.\p"
 	.string "{PLAYER}! I challenge you!$"
 
 Johto_IndigoPlateauPokecenter1F_Text_83DD100::
@@ -150,7 +150,7 @@ Johto_IndigoPlateauPokecenter1F_Text_83DD100::
 	.string "OK--I lost…$"
 
 Johto_IndigoPlateauPokecenter1F_Text_83DD10E::
-	.string "I’ll keep training with my POKéMON.\p"
+	.string "I’ll keep training with my MOéMON.\p"
 	.string "I’ll be here. Challenge me anytime.$"
 
 Johto_IndigoPlateauPokecenter1F_Text_83DD1BB::

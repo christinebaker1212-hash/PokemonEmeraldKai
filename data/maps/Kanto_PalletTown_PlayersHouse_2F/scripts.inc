@@ -82,7 +82,7 @@ Kanto_PalletTown_PlayersHouse_2F_Text_8418B90::
 
 Kanto_PalletTown_PlayersHouse_2F_Text_8418BA1::
 	.string "I have witnessed the bond\n"
-	.string "between you and your Pokémon.\p"
+	.string "between you and your MOéMON.\p"
 	.string "Your journey is not yet over.\p"
 	.string "We shall meet again.$"
 

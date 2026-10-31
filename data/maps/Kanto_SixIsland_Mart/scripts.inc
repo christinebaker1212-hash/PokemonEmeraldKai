@@ -31,7 +31,7 @@ Kanto_SixIsland_Mart_EventScript_845D3C0::
 	end
 
 Kanto_SixIsland_Mart_Text_8454764::
-	.string "Play with POKéMON lots and live\n"
+	.string "Play with MOéMON lots and live\n"
 	.string "a long life!\p"
 	.string "Take AGATHA, for example.\p"
 	.string "She set a record for being the\n"

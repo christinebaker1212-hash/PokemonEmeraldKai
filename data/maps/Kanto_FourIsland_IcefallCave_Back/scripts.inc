@@ -185,7 +185,7 @@ Kanto_FourIsland_IcefallCave_Back_Movement_8413CCC:
 
 Kanto_FourIsland_IcefallCave_Back_Text_842B758::
 	.string "LORELEI: Keep your filthy hands\n"
-	.string "off the POKéMON in the cave!\p"
+	.string "off the MOéMON in the cave!\p"
 	.string "Do as I say, or you’ll have me to\n"
 	.string "answer to!$"
 
@@ -202,7 +202,7 @@ Kanto_FourIsland_IcefallCave_Back_Text_842B812::
 	.string "Right now, I need your help.\p"
 	.string "Help me kick these poachers out\n"
 	.string "before they do anything else.\p"
-	.string "They’ve been catching POKéMON\n"
+	.string "They’ve been catching MOéMON\n"
 	.string "here, then selling them off!\p"
 	.string "Are you ready?\n"
 	.string "You take that one, please!$"
@@ -210,7 +210,7 @@ Kanto_FourIsland_IcefallCave_Back_Text_842B812::
 Kanto_FourIsland_IcefallCave_Back_Text_842B914::
 	.string "W-what?!\p"
 	.string "Who says we can’t do what we want\n"
-	.string "with the POKéMON we catch?$"
+	.string "with the MOéMON we catch?$"
 
 Kanto_FourIsland_IcefallCave_Back_Text_842B95A::
 	.string "We didn’t plan on this!$"
@@ -221,7 +221,7 @@ Kanto_FourIsland_IcefallCave_Back_Text_842B972::
 	.string "You!\n"
 	.string "Tell me!\p"
 	.string "Where have you taken the captured\n"
-	.string "POKéMON?\p"
+	.string "MOéMON?\p"
 	.string "I’m smashing your ring once and\n"
 	.string "for all!$"
 
@@ -240,7 +240,7 @@ Kanto_FourIsland_IcefallCave_Back_Text_842BA1C::
 Kanto_FourIsland_IcefallCave_Back_Text_842BAA2::
 	.string "Wawaah! Okay!\n"
 	.string "I’ll talk!\p"
-	.string "The POKéMON are in the ROCKET\n"
+	.string "The MOéMON are in the ROCKET\n"
 	.string "WAREHOUSE on FIVE ISLAND.\p"
 	.string "There! I said it!\n"
 	.string "We’ll be going now!\p"

@@ -216,14 +216,14 @@ Kanto_Route17_Text_84375FE::
 	.string "POWER PLANT.$"
 
 Kanto_Route17_Text_843762D::
-	.string "I leveled up my POKéMON, but it\n"
+	.string "I leveled up my MOéMON, but it\n"
 	.string "won’t evolve. Why?$"
 
 Kanto_Route17_Text_8437660::
 	.string "Why, you!$"
 
 Kanto_Route17_Text_843766A::
-	.string "Maybe some POKéMON need element\n"
+	.string "Maybe some MOéMON need element\n"
 	.string "STONES to evolve.$"
 
 Kanto_Route17_Text_843769C::
@@ -271,14 +271,14 @@ Kanto_Route17_Text_84377AF::
 
 Kanto_Route17_Text_84377DD::
 	.string "TRAINER TIPS\p"
-	.string "All POKéMON are unique.\p"
-	.string "Even POKéMON of the same species\n"
+	.string "All MOéMON are unique.\p"
+	.string "Even MOéMON of the same species\n"
 	.string "and level grow at different rates.$"
 
 Kanto_Route17_Text_8437846::
 	.string "TRAINER TIPS\p"
 	.string "Get off your bike and move slowly\n"
-	.string "when approaching a DexNav POKéMON.$"
+	.string "when approaching a DexNav MOéMON.$"
 
 Kanto_Route17_Text_8437898::
 	.string "ROUTE 17\n"
@@ -286,7 +286,7 @@ Kanto_Route17_Text_8437898::
 
 Kanto_Route17_Text_84378BD::
 	.string "It’s a notice!\p"
-	.string "Don’t throw the game, throw POKé\n"
+	.string "Don’t throw the game, throw MOé\n"
 	.string "BALLS instead!$"
 
 Kanto_Route17_Text_84378FC::
@@ -313,7 +313,7 @@ Kanto_Route17_Text_846FFD2::
 	.string "electrify you today!$"
 
 Kanto_Route17_Text_8470004::
-	.string "I leveled up my POKéMON, but it\n"
+	.string "I leveled up my MOéMON, but it\n"
 	.string "absolutely won’t evolve. Why?$"
 
 Kanto_Route17_Text_8470042::

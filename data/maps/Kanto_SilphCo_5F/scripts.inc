@@ -189,7 +189,7 @@ Kanto_SilphCo_5F_Text_842634E::
 	.string "Blast it!$"
 
 Kanto_SilphCo_5F_Text_842635E::
-	.string "We worked on the ultimate POKé\n"
+	.string "We worked on the ultimate MOé\n"
 	.string "BALL which would catch anything.$"
 
 Kanto_SilphCo_5F_Text_842639E::
@@ -216,18 +216,18 @@ Kanto_SilphCo_5F_Text_842643A::
 	.string "KOFFING evolves into WEEZING!$"
 
 Kanto_SilphCo_5F_Text_842646A::
-	.string "It’s a POKéMON REPORT!\p"
-	.string "POKéMON LAB created PORYGON,\n"
-	.string "the first virtual-reality POKéMON.$"
+	.string "It’s a MOéMON REPORT!\p"
+	.string "MOéMON LAB created PORYGON,\n"
+	.string "the first virtual-reality MOéMON.$"
 
 Kanto_SilphCo_5F_Text_84264C1::
-	.string "It’s a POKéMON REPORT!\p"
-	.string "Over 350 POKéMON techniques have\n"
+	.string "It’s a MOéMON REPORT!\p"
+	.string "Over 350 MOéMON techniques have\n"
 	.string "been confirmed.$"
 
 Kanto_SilphCo_5F_Text_8426509::
-	.string "It’s a POKéMON REPORT!\p"
-	.string "Some POKéMON have been confirmed\n"
+	.string "It’s a MOéMON REPORT!\p"
+	.string "Some MOéMON have been confirmed\n"
 	.string "to evolve when they are traded.$"
 
 Kanto_SilphCo_5F_Text_8426561::
@@ -238,6 +238,6 @@ Kanto_SilphCo_5F_Text_842657A::
 	.string "Those thugs that took over our\n"
 	.string "building…\p"
 	.string "Their BOSS said he was looking for\n"
-	.string "strong POKéMON.\p"
+	.string "strong MOéMON.\p"
 	.string "I hope our PRESIDENT managed to\n"
 	.string "avoid trouble…$"

@@ -122,10 +122,10 @@ Johto_EcruteakTinTowerEntrance_Text_83CF47F::
 	.string "see it.$"
 
 Johto_EcruteakTinTowerEntrance_Text_83CF4E2::
-	.string "The TIN TOWER shook! A POKéMON must\n"
+	.string "The TIN TOWER shook! A MOéMON must\n"
 	.string "have returned to the top!$"
 
 Johto_EcruteakTinTowerEntrance_Text_83CF520::
-	.string "Two towers… Two POKéMON…\p"
+	.string "Two towers… Two MOéMON…\p"
 	.string "But when one burned down, both\n"
-	.string "POKéMON flew away, never to return.$"
+	.string "MOéMON flew away, never to return.$"

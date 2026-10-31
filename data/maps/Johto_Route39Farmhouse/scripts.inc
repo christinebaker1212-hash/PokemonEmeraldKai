@@ -90,7 +90,7 @@ Johto_Route39Farmhouse_Text_83F3A08::
 Johto_Route39Farmhouse_Text_83F3AB5::
 	.string "How’d you like my MOOMOO MILK?\p"
 	.string "It’s my pride and joy, there.\p"
-	.string "Give it to POKéMON to restore HP!\p"
+	.string "Give it to MOéMON to restore HP!\p"
 	.string "I’ll give it to ya fer just\n"
 	.string "¥500.$"
 
@@ -127,7 +127,7 @@ Johto_Route39Farmhouse_Text_83F3C53::
 	.string "Here’s somethin’ fer your trouble.$"
 
 Johto_Route39Farmhouse_Text_83F3CB2::
-	.string "A POKéMON holding LEFTOVERS\n"
+	.string "A MOéMON holding LEFTOVERS\n"
 	.string "regains a little HP every turn.\p"
 	.string "That’ll help it keep its strength\n"
 	.string "up in battle, hon!$"

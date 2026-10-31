@@ -1412,22 +1412,22 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843E074::
 	.string "from PROF. OAK!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E099::
-	.string "BLUE: My POKéMON looks a lot\n"
+	.string "BLUE: My MOéMON looks a lot\n"
 	.string "tougher than yours.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E0CA::
 	.string "BLUE: Wait, {PLAYER}!\n"
-	.string "Let’s check out our POKéMON!\p"
+	.string "Let’s check out our MOéMON!\p"
 	.string "Come on, I’ll take you on!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E112::
 	.string "WHAT?\n"
 	.string "Unbelievable!\l"
-	.string "I picked the wrong POKéMON!$"
+	.string "I picked the wrong MOéMON!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E162::
 	.string "BLUE: Okay! I’ll make my\n"
-	.string "POKéMON battle to toughen it up!\p"
+	.string "MOéMON battle to toughen it up!\p"
 	.string "{PLAYER}! Gramps!\n"
 	.string "Smell you later!$"
 
@@ -1458,12 +1458,12 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843E2EE::
 	.string "Oh, that’s right, I told you to\n"
 	.string "come! Just wait!\p"
 	.string "Here, {PLAYER}.\p"
-	.string "There are three POKéMON here.\p"
+	.string "There are three MOéMON here.\p"
 	.string "Haha!\p"
-	.string "The POKéMON are held inside\n"
+	.string "The MOéMON are held inside\n"
 	.string "these POKé BALLS.\p"
 	.string "When I was young, I was a serious\n"
-	.string "POKéMON TRAINER.\p"
+	.string "MOéMON TRAINER.\p"
 	.string "But now, in my old age, I have\n"
 	.string "only these three left.\p"
 	.string "You can have one.\n"
@@ -1476,7 +1476,7 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843E41E::
 Kanto_PalletTown_ProfessorOaksLab_Text_843E44C::
 	.string "OAK: Now, {PLAYER}.\p"
 	.string "Inside those three POKé BALLS are\n"
-	.string "POKéMON.\p"
+	.string "MOéMON.\p"
 	.string "Which one will you choose for\n"
 	.string "yourself?$"
 
@@ -1485,7 +1485,7 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843E4AD::
 	.string "Don’t go away yet!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E61B::
-	.string "This POKéMON is really quite\n"
+	.string "This MOéMON is really quite\n"
 	.string "energetic!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E643::
@@ -1493,22 +1493,22 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843E643::
 	.string "from PROF. OAK!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E666::
-	.string "OAK: If a wild POKéMON appears,\n"
-	.string "your POKéMON can battle it.\p"
+	.string "OAK: If a wild MOéMON appears,\n"
+	.string "your MOéMON can battle it.\p"
 	.string "With it at your side, you should be\n"
 	.string "able to reach the next town.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E6E3::
 	.string "OAK: {PLAYER}, raise your young\n"
-	.string "POKéMON by making it battle.\p"
+	.string "MOéMON by making it battle.\p"
 	.string "It has to battle for it to grow.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E73B::
 	.string "OAK: Oh, {PLAYER}!\n"
-	.string "How is my old POKéMON?\p"
+	.string "How is my old MOéMON?\p"
 	.string "Well, it seems to be growing more\n"
 	.string "attached to you.\p"
-	.string "You must be talented as a POKéMON\n"
+	.string "You must be talented as a MOéMON\n"
 	.string "TRAINER.\p"
 	.string "What’s that?\n"
 	.string "You have something for me?$"
@@ -1528,42 +1528,42 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843E83E::
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E86C::
 	.string "On the desk there is my invention,\n"
-	.string "the POKéDEX!\p"
+	.string "the MOéDEX!\p"
 	.string "It automatically records data on\n"
-	.string "POKéMON you’ve seen or caught.\p"
+	.string "MOéMON you’ve seen or caught.\p"
 	.string "It’s a high-tech encyclopedia!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E8FB::
 	.string "OAK: {PLAYER} and BLUE.\n"
-	.string "Take your POKéDEX on your travels.$"
+	.string "Take your MOéDEX on your travels.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E930::
 	.string "{PLAYER} received from OAK\n"
-	.string "the NATIONAL POKéDEX!$"
+	.string "the NATIONAL MOéDEX!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E95B::
 	.string "OAK: You can’t get detailed data\n"
-	.string "on POKéMON by just seeing them.\p"
+	.string "on MOéMON by just seeing them.\p"
 	.string "You must catch them to obtain\n"
 	.string "complete data.\p"
 	.string "Use POKé BALLS to catch\n"
-	.string "wild POKéMON.$"
+	.string "wild MOéMON.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E9EF::
 	.string "{PLAYER} received five POKé BALLS.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843EA0C::
-	.string "When a wild POKéMON appears,\n"
+	.string "When a wild MOéMON appears,\n"
 	.string "it’s fair game.\p"
 	.string "Just throw a POKé BALL at it and\n"
 	.string "try to catch it!\p"
 	.string "This won’t always work, however.\p"
-	.string "A healthy POKéMON can escape.\n"
+	.string "A healthy MOéMON can escape.\n"
 	.string "You have to be lucky!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843EAC0::
 	.string "To make a complete guide on all\n"
-	.string "the POKéMON in the world…\p"
+	.string "the MOéMON in the world…\p"
 	.string "That was my dream!\p"
 	.string "But, I’m too old.\n"
 	.string "I can’t get the job done.\p"
@@ -1571,19 +1571,19 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843EAC0::
 	.string "dream for me.\p"
 	.string "Get moving, you two.\p"
 	.string "This is a great undertaking in\n"
-	.string "POKéMON history!$"
+	.string "MOéMON history!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843EBAD::
-	.string "POKéMON around the world wait for\n"
+	.string "MOéMON around the world wait for\n"
 	.string "you, {PLAYER}!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843EBD8::
 	.string "Ah, {PLAYER}!\n"
-	.string "How is your POKéDEX shaping up?\p"
+	.string "How is your MOéDEX shaping up?\p"
 	.string "BLUE has already caught some\n"
-	.string "POKéMON and added to the data.\p"
+	.string "MOéMON and added to the data.\p"
 	.string "So, {PLAYER}, let’s have a look at\n"
-	.string "your POKéDEX.\p"
+	.string "your MOéDEX.\p"
 	.string "…What’s the matter?\n"
 	.string "You’ve added no new data at all.\p"
 	.string "I’ll give you these, so do try a\n"
@@ -1592,7 +1592,7 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843EBD8::
 Kanto_PalletTown_ProfessorOaksLab_Text_843ECCC::
 	.string "OAK: Come see me sometime.\p"
 	.string "After all, I want to know how your\n"
-	.string "POKéDEX is coming along.$"
+	.string "MOéDEX is coming along.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843ED23::
 	.string "It’s like an encyclopedia, but the\n"
@@ -1600,10 +1600,10 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843ED23::
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843ED57::
 	.string "Those are POKé BALLS.\n"
-	.string "They contain POKéMON!$"
+	.string "They contain MOéMON!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843ED83::
-	.string "That’s PROF. OAK’s last POKéMON.$"
+	.string "That’s PROF. OAK’s last MOéMON.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843EDA4::
 	.string "Press START to open the MENU!$"
@@ -1613,7 +1613,7 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843EDC2::
 	.string "Use it regularly.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843EDF4::
-	.string "All POKéMON types have strong and\n"
+	.string "All MOéMON types have strong and\n"
 	.string "weak points against others.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843EE32::
@@ -1621,28 +1621,28 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843EE32::
 	.string "…\p"
 	.string "Finally!\n"
 	.string "The ultimate TRAINERS of the\l"
-	.string "POKéMON LEAGUE are ready to\l"
+	.string "MOéMON LEAGUE are ready to\l"
 	.string "take on all comers!\p"
-	.string "Bring your best POKéMON and see\n"
+	.string "Bring your best MOéMON and see\n"
 	.string "how you rate as a TRAINER!\p"
-	.string "POKéMON LEAGUE HQ\n"
+	.string "MOéMON LEAGUE HQ\n"
 	.string "INDIGO PLATEAU\p"
 	.string "PROF. OAK, please visit us!\n"
 	.string "…$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843EF24::
-	.string "I study POKéMON as PROF. OAK’s\n"
+	.string "I study MOéMON as PROF. OAK’s\n"
 	.string "AIDE.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843EF49::
 	.string "Hi, {PLAYER}. I bet you’ve become\n"
-	.string "good friends with your POKéMON.\p"
+	.string "good friends with your MOéMON.\p"
 	.string "By the way, did you know about\n"
 	.string "DAISY?\p"
-	.string "If you show DAISY your POKéMON,\n"
+	.string "If you show DAISY your MOéMON,\n"
 	.string "she can tell how much it likes you.\p"
 	.string "Occasionally, she will even groom\n"
-	.string "a POKéMON for you.\p"
+	.string "a MOéMON for you.\p"
 	.string "This is a secret, so please don’t\n"
 	.string "tell anyone.$"
 
@@ -1650,12 +1650,12 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843F053::
 	.string "PROF. OAK is going to have his own\n"
 	.string "radio show soon.\p"
 	.string "The program will be called PROF.\n"
-	.string "OAK’s POKéMON SEMINAR.$"
+	.string "OAK’s MOéMON SEMINAR.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843F0BF::
 	.string "PROF. OAK may not look like much,\n"
-	.string "but he’s the authority on POKéMON.\p"
-	.string "Many POKéMON TRAINERS hold him in\n"
+	.string "but he’s the authority on MOéMON.\p"
+	.string "Many MOéMON TRAINERS hold him in\n"
 	.string "high regard.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843F133::
@@ -1666,8 +1666,8 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843F133::
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843F19E::
 	.string "Recently, there have been sightings\n"
-	.string "of many rare POKéMON species.\p"
-	.string "I’m talking about POKéMON that\n"
+	.string "of many rare MOéMON species.\p"
+	.string "I’m talking about MOéMON that\n"
 	.string "have never been seen in KANTO.\p"
 	.string "I would love to go see things for\n"
 	.string "myself, but I’m much too old.\p"
@@ -1678,7 +1678,7 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843F297::
 	.string "BLUE: Hey, I heard that!\p"
 	.string "Gramps, what’s with favoring\n"
 	.string "{PLAYER} over me all the time?\p"
-	.string "I went and collected more POKéMON,\n"
+	.string "I went and collected more MOéMON,\n"
 	.string "and faster, too.\p"
 	.string "You should just let me handle\n"
 	.string "everything.$"
@@ -1687,10 +1687,10 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843F344::
 	.string "OAK: I know, I know.\n"
 	.string "Of course I need your help, too.\p"
 	.string "Now, I need to see both your\n"
-	.string "POKéDEXES.$"
+	.string "MOéDEXES.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843F3A2::
-	.string "PROF. OAK took both POKéDEX\n"
+	.string "PROF. OAK took both MOéDEX\n"
 	.string "units.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843F3C5::
@@ -1698,42 +1698,42 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843F3C5::
 	.string "… … …  … … …\p"
 	.string "…And that’s done!\p"
 	.string "Now these units can record data on\n"
-	.string "a lot more POKéMON.$"
+	.string "a lot more MOéMON.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843F428::
-	.string "{PLAYER}’s POKéDEX was upgraded!$"
+	.string "{PLAYER}’s MOéDEX was upgraded!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843F443::
 	.string "Now, {PLAYER} and BLUE!\p"
 	.string "This time, you really must work\n"
-	.string "towards filling your POKéDEXES.\p"
+	.string "towards filling your MOéDEXES.\p"
 	.string "I urge you to make them the best\n"
 	.string "and the most complete of all time!\p"
 	.string "Truly, this is a monumentally great\n"
-	.string "undertaking in POKéMON history!$"
+	.string "undertaking in MOéMON history!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843F51D::
 	.string "BLUE: Gramps, calm down.\n"
 	.string "Don’t get so excited.\p"
-	.string "I’ll get the POKéDEX completed,\n"
+	.string "I’ll get the MOéDEX completed,\n"
 	.string "don’t you worry about a thing.\p"
 	.string "I think I’ll try looking around\n"
 	.string "ONE ISLAND first…\p"
 	.string "Anyways, I’m outta here!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843F5D6::
-	.string "OAK: Take this NATIONAL POKéDEX\n"
+	.string "OAK: Take this NATIONAL MOéDEX\n"
 	.string "with you, too.\p"
-	.string "It records the POKéMON you meet.\n"
+	.string "It records the MOéMON you meet.\n"
 	.string "Go and catch some new partners!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_845710D::
 	.string "OAK: Good to see you!\n"
-	.string "How is your POKéDEX coming along?\p"
+	.string "How is your MOéDEX coming along?\p"
 	.string "Here, let me take a look.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_8457663::
-	.string "Your NATIONAL POKéDEX:\n"
+	.string "Your NATIONAL MOéDEX:\n"
 	.string "{STR_VAR_1} species seen in total.\p"
 	.string "In KANTO, you have registered\n"
 	.string "{STR_VAR_2} species as caught.$"
@@ -1741,12 +1741,12 @@ Kanto_PalletTown_ProfessorOaksLab_Text_8457663::
 Kanto_PalletTown_ProfessorOaksLab_Text_84576C8::
 	.string "Keep registering species in KANTO!\p"
 	.string "I look forward to a full NATIONAL\n"
-	.string "POKéDEX for this region!$"
+	.string "MOéDEX for this region!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_8457726::
 	.string "Finally…\p"
 	.string "You’ve completed the NATIONAL\n"
-	.string "POKéDEX with your KANTO catches!\p"
+	.string "MOéDEX with your KANTO catches!\p"
 	.string "It’s magnificent!\n"
 	.string "Truly, this is a fantastic feat!$"
 
@@ -1760,7 +1760,7 @@ Kanto_PalletTown_ProfessorOaksLab_Text_84577BD::
 
 Kanto_PalletTown_ProfessorOaksLab_Text_8457802::
 	.string "OAK: Ah, welcome!\p"
-	.string "Tell me, how is your POKéDEX\n"
+	.string "Tell me, how is your MOéDEX\n"
 	.string "coming along?\p"
 	.string "Wahaha!\p"
 	.string "Actually, I know how it is, but I\n"

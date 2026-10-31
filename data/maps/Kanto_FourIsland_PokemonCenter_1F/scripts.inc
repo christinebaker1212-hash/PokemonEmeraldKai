@@ -43,13 +43,13 @@ Kanto_FourIsland_PokemonCenter_1F_EventScript_845D1A1::
 	end
 
 Kanto_FourIsland_PokemonCenter_1F_Text_8453BBF::
-	.string "There’s a rare kind of ICE POKéMON\n"
+	.string "There’s a rare kind of ICE MOéMON\n"
 	.string "that lives in the cave.\p"
 	.string "We get a lot of visitors hoping to\n"
-	.string "see that POKéMON.$"
+	.string "see that MOéMON.$"
 
 Kanto_FourIsland_PokemonCenter_1F_Text_8453C2F::
-	.string "Oh? A POKéMON EGG?\n"
+	.string "Oh? A MOéMON EGG?\n"
 	.string "…I have no idea.\p"
 	.string "…Oh, wait. The DAY-CARE people\n"
 	.string "in town were saying something.\p"
@@ -58,14 +58,14 @@ Kanto_FourIsland_PokemonCenter_1F_Text_8453C2F::
 
 Kanto_FourIsland_PokemonCenter_1F_Text_8453CCC::
 	.string "What’s this?\p"
-	.string "The new POKéMON JOURNAL hasn’t\n"
+	.string "The new MOéMON JOURNAL hasn’t\n"
 	.string "arrived on this island?$"
 
 Kanto_FourIsland_PokemonCenter_1F_Text_8461F16::
-	.string "This is a POKéMON JOURNAL from\n"
+	.string "This is a MOéMON JOURNAL from\n"
 	.string "years ago…\p"
-	.string "POKéMON JOURNAL\n"
+	.string "MOéMON JOURNAL\n"
 	.string "CONTEST Special!\p"
-	.string "The Spring POKéMON CONTEST’s\n"
+	.string "The Spring MOéMON CONTEST’s\n"
 	.string "Grand Champion is DAISY OAK of\l"
 	.string "PALLET TOWN!$"

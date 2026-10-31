@@ -59,7 +59,7 @@ Kanto_SaffronCity_CopycatsHouse_2F_EventScript_8471CC9::
 
 Kanto_SaffronCity_CopycatsHouse_2F_Text_844ABBB::
 	.string "{PLAYER}: Hi!\n"
-	.string "Do you like POKéMON?\p"
+	.string "Do you like MOéMON?\p"
 	.string "{PLAYER}: Uh, no, I just asked you.\p"
 	.string "{PLAYER}: Huh?\n"
 	.string "You’re strange!\p"
@@ -68,7 +68,7 @@ Kanto_SaffronCity_CopycatsHouse_2F_Text_844ABBB::
 
 Kanto_SaffronCity_CopycatsHouse_2F_Text_844AC4C::
 	.string "{PLAYER}: Hi.\n"
-	.string "You must like POKéMON.\p"
+	.string "You must like MOéMON.\p"
 	.string "{PLAYER}: No, not me.\n"
 	.string "I asked you.\p"
 	.string "{PLAYER}: Pardon?\n"
@@ -83,7 +83,7 @@ Kanto_SaffronCity_CopycatsHouse_2F_Text_844AF8B::
 	.string "SEE HOW PRETTY I CAN BE?$"
 
 Kanto_SaffronCity_CopycatsHouse_2F_Text_844AFCC::
-	.string "This is a rare POKéMON!\n"
+	.string "This is a rare MOéMON!\n"
 	.string "Huh? It’s only a doll!$"
 
 Kanto_SaffronCity_CopycatsHouse_2F_Text_844AFFB::
@@ -95,4 +95,4 @@ Kanto_SaffronCity_CopycatsHouse_2F_Text_844B02B::
 	.string "My Secrets!\p"
 	.string "Skill: Mimicry!\n"
 	.string "Hobby: Collecting dolls!\l"
-	.string "Favorite POKéMON: CLEFAIRY!$"
+	.string "Favorite MOéMON: CLEFAIRY!$"

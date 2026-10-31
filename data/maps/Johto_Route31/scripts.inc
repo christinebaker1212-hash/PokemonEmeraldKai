@@ -110,18 +110,18 @@ Johto_Route31_EventScript_83EE5AB::
 
 Johto_Route31_Text_83EE5B8::
 	.string "DARK CAVE…\p"
-	.string "If POKéMON could light it up,\n"
+	.string "If MOéMON could light it up,\n"
 	.string "I’d explore it.$"
 
 Johto_Route31_Text_83EE5F1::
-	.string "I caught a bunch of POKéMON.\n"
+	.string "I caught a bunch of MOéMON.\n"
 	.string "Let me battle with you!$"
 
 Johto_Route31_Text_83EE626::
 	.string "Awwwww…$"
 
 Johto_Route31_Text_83EE62E::
-	.string "You can catch POKéMON even if\n"
+	.string "You can catch MOéMON even if\n"
 	.string "you have six with you.\p"
 	.string "If you catch one, it’ll go to\n"
 	.string "your BOX automatically.$"
@@ -129,9 +129,9 @@ Johto_Route31_Text_83EE62E::
 Johto_Route31_Text_83EE699::
 	.string "… Hnuurg… Huh?\p"
 	.string "I walked too far today looking\n"
-	.string "for POKéMON.\p"
+	.string "for MOéMON.\p"
 	.string "My feet hurt and I’m sleepy…\p"
-	.string "If I were a wild POKéMON, I’d\n"
+	.string "If I were a wild MOéMON, I’d\n"
 	.string "be easy to catch…\p"
 	.string "…Zzzz…$"
 
@@ -145,7 +145,7 @@ Johto_Route31_Text_83EE757::
 
 Johto_Route31_Text_83EE75E::
 	.string "{PLAYER} handed over the\n"
-	.string "POKéMON holding the MAIL.$"
+	.string "MOéMON holding the MAIL.$"
 
 Johto_Route31_Text_83EE78B::
 	.string "Let’s see…\p"
@@ -163,7 +163,7 @@ Johto_Route31_Text_83EE832::
 	.string "if its holder can still evolve.$"
 
 Johto_Route31_Text_83EE927::
-	.string "I found a good POKéMON in DARK\n"
+	.string "I found a good MOéMON in DARK\n"
 	.string "CAVE.\p"
 	.string "I’m going to raise it to take\n"
 	.string "on FALKNER.\p"

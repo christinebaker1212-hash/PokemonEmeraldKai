@@ -249,7 +249,7 @@ Johto_KurtsHouse_Text_83C5D0F::
 	.string "Ah, don’t worry.\p"
 	.string "I’ll tell you anyhow.\p"
 	.string "TEAM ROCKET’s an evil gang that\n"
-	.string "uses POKéMON for their dirty work.\p"
+	.string "uses MOéMON for their dirty work.\p"
 	.string "They’re supposed to have disbanded\n"
 	.string "three years ago.\p"
 	.string "Anyway, they’re at the WELL,\n"

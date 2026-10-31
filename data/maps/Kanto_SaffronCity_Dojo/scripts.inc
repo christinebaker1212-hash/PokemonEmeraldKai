@@ -179,7 +179,7 @@ Kanto_SaffronCity_Dojo_Text_844B102::
 	.string "But, I beseech you, do not take\n"
 	.string "our emblem as your trophy!\p"
 	.string "In return, I will give you a prized\n"
-	.string "FIGHTING POKéMON!\p"
+	.string "FIGHTING MOéMON!\p"
 	.string "Choose whichever one you like!$"
 
 Kanto_SaffronCity_Dojo_Text_844B1A7::

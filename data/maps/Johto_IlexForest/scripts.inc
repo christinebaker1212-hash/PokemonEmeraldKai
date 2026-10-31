@@ -700,7 +700,7 @@ Johto_IlexForest_Text_83DC5EA::
 
 Johto_IlexForest_Text_83DC6A8::
 	.string "Wow! Thanks a whole bunch!\p"
-	.string "My boss’ POKéMON won’t obey me\n"
+	.string "My boss’ MOéMON won’t obey me\n"
 	.string "because I don’t have a BADGE.$"
 
 Johto_IlexForest_Text_83DC71A::
@@ -716,7 +716,7 @@ Johto_IlexForest_Text_83DC72C::
 	.string "I know! Here, take this.$"
 
 Johto_IlexForest_Text_83DC7D4::
-	.string "A POKéMON holding this CHARCOAL\n"
+	.string "A MOéMON holding this CHARCOAL\n"
 	.string "gets stronger FIRE-type attacks.\p"
 	.string "With JOHTO’s second GYM BADGE,\n"
 	.string "you can already use CUT.$"
@@ -774,13 +774,13 @@ Johto_IlexForest_Text_83DCB17::
 
 Johto_IlexForest_Text_83DCBDC::
 	.string "Don’t sneak up on me like that!\p"
-	.string "You frightened a POKéMON away!$"
+	.string "You frightened a MOéMON away!$"
 
 Johto_IlexForest_Text_83DCC1B::
-	.string "I hadn’t seen that POKéMON before…$"
+	.string "I hadn’t seen that MOéMON before…$"
 
 Johto_IlexForest_Text_83DCC3E::
-	.string "A POKéMON I’ve never seen before\n"
+	.string "A MOéMON I’ve never seen before\n"
 	.string "fell out of the tree when I used\l"
 	.string "HEADBUTT.\p"
 	.string "I ought to use HEADBUTT in other\n"
@@ -804,7 +804,7 @@ Johto_IlexForest_Text_83DCD7E::
 Johto_IlexForest_Text_83DCDAD::
 	.string "Wow! Are you going to show me how\n"
 	.string "to get out?\p"
-	.string "You are such a smart POKéMON!$"
+	.string "You are such a smart MOéMON!$"
 
 Johto_IlexForest_Text_83DCDF9::
 	.string "See you.$"

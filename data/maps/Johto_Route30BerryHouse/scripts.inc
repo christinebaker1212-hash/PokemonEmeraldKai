@@ -22,10 +22,10 @@ Johto_Route30BerryHouse_EventScript_83ED981::
 
 Johto_Route30BerryHouse_Text_83ED98C::
 	.string "When you follow that path up north,\n"
-	.string "you will see MR. POKéMON’s house.\p"
+	.string "you will see MR. MOéMON’s house.\p"
 	.string "But before you go, allow me to\n"
 	.string "tell you about BERRIES!\p"
-	.string "POKéMON get healthier by eating\n"
+	.string "MOéMON get healthier by eating\n"
 	.string "BERRIES.\p"
 	.string "They can even eat BERRIES\n"
 	.string "they’re holding in battle.\p"
@@ -36,5 +36,5 @@ Johto_Route30BerryHouse_Text_83ED98C::
 Johto_Route30BerryHouse_Text_83EDAC1::
 	.string "Check trees for BERRIES.\p"
 	.string "If respawning is enabled, defeating\n"
-	.string "POKéMON can replenish them.\p"
+	.string "MOéMON can replenish them.\p"
 	.string "Waiting a few hours won’t do it.$"

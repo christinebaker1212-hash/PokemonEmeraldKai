@@ -35,6 +35,6 @@ Kanto_FuchsiaCity_House1_Text_8448B9A::
 	.string "even as a child!$"
 
 Kanto_FuchsiaCity_House1_Text_8448BF6::
-	.string "BILL files his own POKéMON data on\n"
+	.string "BILL files his own MOéMON data on\n"
 	.string "his PC.\p"
 	.string "Did he show you?$"

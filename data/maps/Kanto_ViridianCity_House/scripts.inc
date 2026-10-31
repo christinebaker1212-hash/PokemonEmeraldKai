@@ -34,7 +34,7 @@ Kanto_ViridianCity_House_Text_843F646::
 	.string "names are easier to remember.$"
 
 Kanto_ViridianCity_House_Text_843F6C3::
-	.string "My daddy loves POKéMON, too.$"
+	.string "My daddy loves MOéMON, too.$"
 
 Kanto_ViridianCity_House_Text_843F6E0::
 	.string "SPEARY: Tetweet!$"

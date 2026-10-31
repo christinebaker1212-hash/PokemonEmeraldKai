@@ -150,7 +150,7 @@ Kanto_Route4_PokemonCenter_1F_Text_844DE76::
 	.string "Okay, set six POKé BALLS in my\n"
 	.string "belt…\p"
 	.string "Yeah, that’ll do it. At most, you\n"
-	.string "can have six POKéMON with you.$"
+	.string "can have six MOéMON with you.$"
 
 Kanto_Route4_PokemonCenter_1F_Text_844DEDC::
 	.string "TEAM ROCKET attacks CERULEAN\n"
@@ -161,14 +161,14 @@ Kanto_Route4_PokemonCenter_1F_Text_844DEDC::
 Kanto_Route4_PokemonCenter_1F_Text_844DF3C::
 	.string "MAN: Hello there, laddie!\n"
 	.string "Have I got a deal just for you!\p"
-	.string "I’ll let you have a secret POKéMON\n"
+	.string "I’ll let you have a secret MOéMON\n"
 	.string "- a MAGIKARP - for just ¥500!\p"
 	.string "So, you’ll buy it, am I right?$"
 
 Kanto_Route4_PokemonCenter_1F_Text_844DFD6::
 	.string "MAN: Hello there, sweetie pie!\n"
 	.string "Have I got a deal just for you!\p"
-	.string "I’ll let you have a secret POKéMON\n"
+	.string "I’ll let you have a secret MOéMON\n"
 	.string "- a MAGIKARP - for just ¥500!\p"
 	.string "So, you’ll buy it, am I right?$"
 
@@ -182,7 +182,7 @@ Kanto_Route4_PokemonCenter_1F_Text_844E0A9::
 
 Kanto_Route4_PokemonCenter_1F_Text_844E0E0::
 	.string "There’s no more room for any more\n"
-	.string "POKéMON, it looks like.$"
+	.string "MOéMON, it looks like.$"
 
 Kanto_Route4_PokemonCenter_1F_Text_844E11A::
 	.string "You’ll need more money than that!$"
@@ -193,7 +193,7 @@ Kanto_Route4_PokemonCenter_1F_Text_844E13C::
 
 Kanto_Route4_PokemonCenter_1F_Text_844E17D::
 	.string "Sometimes, you’ll have too many\n"
-	.string "POKéMON with you to add any more.\p"
+	.string "MOéMON with you to add any more.\p"
 	.string "In that case, you should just\n"
 	.string "store some using any PC.$"
 

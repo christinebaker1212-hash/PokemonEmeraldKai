@@ -206,12 +206,12 @@ Johto_Route35NationalParkGate_Text_83D15D0::
 	.string "Hello Trainer! The Bug-Catching\n"
 	.string "Contest is on today.\p"
 	.string "The rules are simple.\p"
-	.string "Using one of your POKéMON, catch a\n"
-	.string "bug POKéMON to be judged.\p"
+	.string "Using one of your MOéMON, catch a\n"
+	.string "bug MOéMON to be judged.\p"
 	.string "Would you like to give it a try?$"
 
 Johto_Route35NationalParkGate_Text_83D1679::
-	.string "Any EXP your POKéMON gains during\n"
+	.string "Any EXP your MOéMON gains during\n"
 	.string "the contest will be reverted when\l"
 	.string "you leave.\p"
 	.string "Here are the SAFARI BALLS for the\n"
@@ -220,7 +220,7 @@ Johto_Route35NationalParkGate_Text_83D1679::
 Johto_Route35NationalParkGate_Text_83D170D::
 	.string "You have eight minutes and thirty\n"
 	.string "SAFARI BALLS.\p"
-	.string "You may catch up to five POKéMON.\n"
+	.string "You may catch up to five MOéMON.\n"
 	.string "Your highest-scoring catch will be\l"
 	.string "entered automatically.\p"
 	.string "You keep every catch, even if\n"
@@ -229,9 +229,9 @@ Johto_Route35NationalParkGate_Text_83D170D::
 	.string "shiny and radiant all affect score.$"
 
 Johto_Route35NationalParkGate_Text_83D180F::
-	.string "If you have more than one POKéMON,\n"
+	.string "If you have more than one MOéMON,\n"
 	.string "you’ll have to use the\l"
-	.string "first POKéMON in your party.\p"
+	.string "first MOéMON in your party.\p"
 	.string "Is that OK with you?$"
 
 Johto_Route35NationalParkGate_Text_83D1929::
@@ -239,9 +239,9 @@ Johto_Route35NationalParkGate_Text_83D1929::
 	.string "future.$"
 
 Johto_Route35NationalParkGate_Text_83D1955::
-	.string "Uh-oh… The first POKéMON in your\n"
+	.string "Uh-oh… The first MOéMON in your\n"
 	.string "party can’t battle.\p"
-	.string "Please switch it with the POKéMON\n"
+	.string "Please switch it with the MOéMON\n"
 	.string "you want to use, then come see me.$"
 
 Johto_Route35NationalParkGate_Text_83D19CF::
@@ -251,7 +251,7 @@ Johto_Route35NationalParkGate_Text_83D19CF::
 	.string "slots do not count.$"
 
 Johto_Route35NationalParkGate_Text_83D1B41::
-	.string "I love bird POKéMON! I found a\n"
+	.string "I love bird MOéMON! I found a\n"
 	.string "DARK-type bird in the park\l"
 	.string "last night!$"
 

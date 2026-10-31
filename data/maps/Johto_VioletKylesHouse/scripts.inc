@@ -60,7 +60,7 @@ Johto_VioletKylesHouse_EventScript_83FFA01::
 	end
 
 Johto_VioletKylesHouse_Text_83FFA0B::
-	.string "I collect POKéMON!\n"
+	.string "I collect MOéMON!\n"
 	.string "Do you have a {STR_VAR_1}?\p"
 	.string "Want to trade it for my\n"
 	.string "{STR_VAR_2}?$"
@@ -80,7 +80,7 @@ Johto_VioletKylesHouse_Text_83FFAC0::
 	.string "Hi, how’s my SPHEAL doing?$"
 
 Johto_VioletKylesHouse_Text_83FFADB::
-	.string "A POKéMON you get in a trade\n"
+	.string "A MOéMON you get in a trade\n"
 	.string "grows quickly.\p"
 	.string "But if you don’t have the right\n"
 	.string "GYM BADGE, they may disobey you.$"

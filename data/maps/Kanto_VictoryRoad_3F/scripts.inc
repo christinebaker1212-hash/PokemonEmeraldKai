@@ -122,7 +122,7 @@ Kanto_VictoryRoad_3F_Text_8425361::
 
 Kanto_VictoryRoad_3F_Text_8425375::
 	.string "All TRAINERS here are headed to\n"
-	.string "the POKéMON LEAGUE.\p"
+	.string "the MOéMON LEAGUE.\p"
 	.string "Don’t let down your guard.$"
 
 Kanto_VictoryRoad_3F_Text_84253C4::
@@ -140,7 +140,7 @@ Kanto_VictoryRoad_3F_Text_842541C::
 Kanto_VictoryRoad_3F_Text_842544E::
 	.string "RAY: Together, the two of us are\n"
 	.string "striving for the pinnacle.\p"
-	.string "We need you to bring two POKéMON\n"
+	.string "We need you to bring two MOéMON\n"
 	.string "into battle with us.$"
 
 Kanto_VictoryRoad_3F_Text_84254C0::
@@ -156,4 +156,4 @@ Kanto_VictoryRoad_3F_Text_8425500::
 
 Kanto_VictoryRoad_3F_Text_8425545::
 	.string "TYRA: You can’t battle with us if\n"
-	.string "you have only one POKéMON.$"
+	.string "you have only one MOéMON.$"

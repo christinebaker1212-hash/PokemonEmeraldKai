@@ -41,12 +41,12 @@ Kanto_CeruleanCity_House5_Text_84432ED::
 
 Kanto_CeruleanCity_House5_Text_844330C::
 	.string "A BERRY SWEET can help a certain\n"
-	.string "POKéMON evolve.\p"
+	.string "MOéMON evolve.\p"
 	.string "I hope you put it to good use.$"
 
 Kanto_CeruleanCity_House5_Text_8443404::
 	.string "I hope that BERRY SWEET helps\n"
-	.string "your POKéMON grow.$"
+	.string "your MOéMON grow.$"
 
 Kanto_CeruleanCity_House5_Text_84435A6::
 	.string "No records have been registered.$"

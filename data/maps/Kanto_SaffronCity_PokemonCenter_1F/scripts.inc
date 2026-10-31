@@ -40,7 +40,7 @@ Kanto_SaffronCity_PokemonCenter_1F_EventScript_841F0D9::
 	end
 
 Kanto_SaffronCity_PokemonCenter_1F_Text_844BF7E::
-	.string "POKéMON growth rates differ from\n"
+	.string "MOéMON growth rates differ from\n"
 	.string "species to species.$"
 
 Kanto_SaffronCity_PokemonCenter_1F_Text_844BFB3::

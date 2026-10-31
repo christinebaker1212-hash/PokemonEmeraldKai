@@ -20,10 +20,10 @@ Johto_CherrygroveEvolutionSpeechHouse_EventScript_83C98B5::
 	end
 
 Johto_CherrygroveEvolutionSpeechHouse_Text_83C98C2::
-	.string "POKéMON gain experience in\n"
+	.string "MOéMON gain experience in\n"
 	.string "battle and change their form.$"
 
 Johto_CherrygroveEvolutionSpeechHouse_Text_83C98FB::
-	.string "POKéMON change?\p"
+	.string "MOéMON change?\p"
 	.string "I would be shocked if one did\n"
 	.string "that!$"

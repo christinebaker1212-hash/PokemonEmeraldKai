@@ -100,9 +100,9 @@ Kanto_PokemonLeague_AgathasRoom_Text_8428B04::
 	.string "But that was decades ago.\n"
 	.string "He’s a shadow of his former self.\p"
 	.string "Now he just wants to fiddle with\n"
-	.string "his POKéDEX.\p"
+	.string "his MOéDEX.\p"
 	.string "He’s wrong.\n"
-	.string "POKéMON are for battling!\p"
+	.string "MOéMON are for battling!\p"
 	.string "{PLAYER}! I’ll show you how a real\n"
 	.string "TRAINER battles!{PLAY_BGM 0x022A}$"
 
@@ -115,9 +115,9 @@ Kanto_PokemonLeague_AgathasRoom_Text_8428C44::
 	.string "But that was decades ago.\n"
 	.string "He’s a shadow of his former self.\p"
 	.string "Now he just wants to fiddle with\n"
-	.string "his POKéDEX.\p"
+	.string "his MOéDEX.\p"
 	.string "He’s wrong.\n"
-	.string "POKéMON are for battling!\p"
+	.string "MOéMON are for battling!\p"
 	.string "{PLAYER}! I’ll show you how a real\n"
 	.string "TRAINER battles!{PLAY_BGM 0x022A}$"
 

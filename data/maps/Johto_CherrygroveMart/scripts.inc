@@ -25,8 +25,8 @@ Johto_CherrygroveMart_Text_83C9988::
 
 Johto_CherrygroveMart_Text_83C99F7::
 	.string "When I was walking in the grass, a\n"
-	.string "bug POKéMON poisoned my POKéMON!\p"
+	.string "bug MOéMON poisoned my MOéMON!\p"
 	.string "I just kept going, but then my\n"
-	.string "POKéMON fainted.\p"
+	.string "MOéMON fainted.\p"
 	.string "You should keep an ANTIDOTE\n"
 	.string "with you.$"

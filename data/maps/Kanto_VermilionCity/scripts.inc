@@ -505,17 +505,17 @@ Kanto_VermilionCity_Text_842F9D9::
 Kanto_VermilionCity_Text_842FA06::
 	.string "NOTICE!\p"
 	.string "ROUTE 12 may be blocked off by a\n"
-	.string "sleeping POKéMON.\p"
+	.string "sleeping MOéMON.\p"
 	.string "Detour through ROCK TUNNEL to\n"
 	.string "LAVENDER TOWN.\p"
 	.string "VERMILION POLICE$"
 
 Kanto_VermilionCity_Text_842FA7F::
-	.string "POKéMON FAN CLUB\n"
-	.string "All POKéMON fans welcome!$"
+	.string "MOéMON FAN CLUB\n"
+	.string "All MOéMON fans welcome!$"
 
 Kanto_VermilionCity_Text_842FAAA::
-	.string "VERMILION CITY POKéMON GYM\n"
+	.string "VERMILION CITY MOéMON GYM\n"
 	.string "LEADER: LT. SURGE\l"
 	.string "The Lightning American!$"
 

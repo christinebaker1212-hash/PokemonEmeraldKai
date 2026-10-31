@@ -53,15 +53,15 @@ Kanto_FiveIsland_WaterLabyrinth_EventScript_845C6D1::
 	end
 
 Kanto_FiveIsland_WaterLabyrinth_Text_84185D3::
-	.string "This little POKéMON wants to\n"
+	.string "This little MOéMON wants to\n"
 	.string "see the world.\p"
 	.string "I’d like it to travel with you!$"
 
 Kanto_FiveIsland_WaterLabyrinth_Text_841861F::
-	.string "You received a special POKéMON!$"
+	.string "You received a special MOéMON!$"
 
 Kanto_FiveIsland_WaterLabyrinth_Text_841863F::
-	.string "You received a special POKéMON!\p"
+	.string "You received a special MOéMON!\p"
 	.string "It was sent to a PC Box.$"
 
 Kanto_FiveIsland_WaterLabyrinth_Text_8418678::
@@ -73,10 +73,10 @@ Kanto_FiveIsland_WaterLabyrinth_Text_8418698::
 
 Kanto_FiveIsland_WaterLabyrinth_Text_843ADBE::
 	.string "This is an excellent environment\n"
-	.string "for raising POKéMON.$"
+	.string "for raising MOéMON.$"
 
 Kanto_FiveIsland_WaterLabyrinth_Text_843ADF4::
-	.string "Your POKéMON are growing up\n"
+	.string "Your MOéMON are growing up\n"
 	.string "admirably well!$"
 
 Kanto_FiveIsland_WaterLabyrinth_Text_843AE20::
@@ -85,5 +85,5 @@ Kanto_FiveIsland_WaterLabyrinth_Text_843AE20::
 
 Kanto_FiveIsland_WaterLabyrinth_Text_847105D::
 	.string "Oh, hello!\p"
-	.string "Are you raising your POKéMON in a\n"
+	.string "Are you raising your MOéMON in a\n"
 	.string "good environment?$"

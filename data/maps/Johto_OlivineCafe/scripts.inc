@@ -54,7 +54,7 @@ Johto_OlivineCafe_Text_83E472D::
 	.string "DOJO in SAFFRON CITY.$"
 
 Johto_OlivineCafe_Text_83E483D::
-	.string "Hah! Your POKéMON sure look like\n"
+	.string "Hah! Your MOéMON sure look like\n"
 	.string "lightweights!\p"
 	.string "They don’t have the power to\n"
 	.string "move boulders aside.\p"

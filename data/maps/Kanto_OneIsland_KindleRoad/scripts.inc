@@ -338,7 +338,7 @@ Kanto_OneIsland_KindleRoad_Text_8439E8C::
 Kanto_OneIsland_KindleRoad_Text_8439EC7::
 	.string "KIA: If you want to battle with\n"
 	.string "us, you have to bring at least two\l"
-	.string "POKéMON with you.$"
+	.string "MOéMON with you.$"
 
 Kanto_OneIsland_KindleRoad_Text_8439F1C::
 	.string "MIK: Together with KIA, I’m afraid\n"
@@ -355,7 +355,7 @@ Kanto_OneIsland_KindleRoad_Text_8439F67::
 Kanto_OneIsland_KindleRoad_Text_8439F94::
 	.string "MIK: Hey, do you want to battle\n"
 	.string "with us two?\p"
-	.string "Bring two or more POKéMON with\n"
+	.string "Bring two or more MOéMON with\n"
 	.string "you, then.$"
 
 Kanto_OneIsland_KindleRoad_Text_8439FEB::

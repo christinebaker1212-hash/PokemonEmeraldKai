@@ -36,7 +36,7 @@ Kanto_FourIsland_Mart_Text_8453FF8::
 	.string "I bet even you’d know her.\n"
 	.string "It’s LORELEI of the ELITE FOUR!\p"
 	.string "When LORELEI was just a tyke,\n"
-	.string "I taught her about POKéMON.$"
+	.string "I taught her about MOéMON.$"
 
 Kanto_FourIsland_Mart_Text_84540AC::
 	.string "The SEVII ISLANDS are in a warm\n"
@@ -44,4 +44,4 @@ Kanto_FourIsland_Mart_Text_84540AC::
 	.string "But there is one exception you\n"
 	.string "need to know about.\p"
 	.string "The ICEFALL CAVE is frigid because\n"
-	.string "of the POKéMON that live in it.$"
+	.string "of the MOéMON that live in it.$"

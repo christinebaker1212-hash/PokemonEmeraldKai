@@ -238,9 +238,9 @@ Kanto_PewterCity_Museum_1F_Text_84408AC::
 
 Kanto_PewterCity_Museum_1F_Text_844090D::
 	.string "AMBER contains the genetic matter\n"
-	.string "of ancient POKéMON.\p"
+	.string "of ancient MOéMON.\p"
 	.string "There’s a LAB somewhere trying to\n"
-	.string "resurrect POKéMON from AMBER.$"
+	.string "resurrect MOéMON from AMBER.$"
 
 Kanto_PewterCity_Museum_1F_Text_8440983::
 	.string "AMBER is actually sap, that gooey\n"
@@ -258,15 +258,15 @@ Kanto_PewterCity_Museum_1F_Text_8440A73::
 	.string "Ssh! Listen, I need to share a\n"
 	.string "secret with someone.\p"
 	.string "I think that this chunk of AMBER\n"
-	.string "contains POKéMON DNA!\p"
+	.string "contains MOéMON DNA!\p"
 	.string "It would be a shattering scientific\n"
-	.string "breakthrough if POKéMON could be\l"
+	.string "breakthrough if MOéMON could be\l"
 	.string "resurrected from it.\p"
 	.string "But, my colleagues just ignore\n"
 	.string "what I have to say.\p"
 	.string "So, I have a favor to ask!\p"
 	.string "I want you to get this examined at\n"
-	.string "a POKéMON LAB somewhere.$"
+	.string "a MOéMON LAB somewhere.$"
 
 Kanto_PewterCity_Museum_1F_Text_8440BC2::
 	.string "{PLAYER} received the OLD AMBER\n"
@@ -278,7 +278,7 @@ Kanto_PewterCity_Museum_1F_Text_8440BEA::
 
 Kanto_PewterCity_Museum_1F_Text_8440C29::
 	.string "We have two fossils of rare,\n"
-	.string "prehistoric POKéMON on exhibit.$"
+	.string "prehistoric MOéMON on exhibit.$"
 
 Kanto_PewterCity_Museum_1F_Text_8440C66::
 	.string "There is a beautiful piece of\n"
@@ -287,7 +287,7 @@ Kanto_PewterCity_Museum_1F_Text_8440C66::
 Kanto_PewterCity_Museum_1F_Text_8440CA1::
 	.string "A reconstruction of Aerodactyl’s\n"
 	.string "skeleton.\p"
-	.string "This Pokémon soared through the skies\n"
+	.string "This MOéMON soared through the skies\n"
 	.string "long before our cities existed.$"
 
 Kanto_PewterCity_Museum_1F_Text_8440D12::
@@ -297,7 +297,7 @@ Kanto_PewterCity_Museum_1F_Text_8440D12::
 	.string "adaptations of an ancient predator.$"
 
 Kanto_PewterCity_Museum_1F_Text_8461841::
-	.string "POKéMON JOURNAL\p"
+	.string "MOéMON JOURNAL\p"
 	.string "Special Feature: PEWTER GYM\n"
 	.string "LEADER BROCK!\p"
 	.string "BROCK rarely laughs, but is said to\n"

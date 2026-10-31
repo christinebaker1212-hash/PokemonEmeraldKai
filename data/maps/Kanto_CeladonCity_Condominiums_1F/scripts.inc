@@ -89,7 +89,7 @@ Kanto_CeladonCity_Condominiums_1F_Text_84461D5::
 	.string "It really is the best.$"
 
 Kanto_CeladonCity_Condominiums_1F_Text_8446214::
-	.string "My dear POKéMON keep me company.\n"
+	.string "My dear MOéMON keep me company.\n"
 	.string "MEOWTH even brings money home!$"
 
 Kanto_CeladonCity_Condominiums_1F_Text_8446254::

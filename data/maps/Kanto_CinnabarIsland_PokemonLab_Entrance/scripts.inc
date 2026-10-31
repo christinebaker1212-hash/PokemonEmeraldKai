@@ -93,7 +93,7 @@ Kanto_CinnabarIsland_PokemonLab_Entrance_Mart_841E574:
 	.2byte ITEM_NONE
 
 Kanto_CinnabarIsland_PokemonLab_Entrance_Text_8449E2F::
-	.string "We study POKéMON here.\p"
+	.string "We study MOéMON here.\p"
 	.string "We also sell plates\n"
 	.string "for your research.$"
 
@@ -102,15 +102,15 @@ Kanto_CinnabarIsland_PokemonLab_Entrance_Text_8449E6D::
 	.string "DR. FUJI?!$"
 
 Kanto_CinnabarIsland_PokemonLab_Entrance_Text_8449E96::
-	.string "POKéMON LAB\n"
+	.string "MOéMON LAB\n"
 	.string "Meeting Room$"
 
 Kanto_CinnabarIsland_PokemonLab_Entrance_Text_8449EAF::
-	.string "POKéMON LAB\n"
+	.string "MOéMON LAB\n"
 	.string "R & D Room$"
 
 Kanto_CinnabarIsland_PokemonLab_Entrance_Text_8449EC6::
-	.string "POKéMON LAB\n"
+	.string "MOéMON LAB\n"
 	.string "Testing Room$"
 
 Kanto_CinnabarIsland_PokemonLab_Entrance_Text_8449EDF::

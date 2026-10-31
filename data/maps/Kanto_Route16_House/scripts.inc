@@ -53,7 +53,7 @@ Kanto_Route16_House_Text_844FD1C::
 
 Kanto_Route16_House_Text_844FD44::
 	.string "A RAZOR FANG can help a certain\n"
-	.string "POKéMON evolve.\p"
+	.string "MOéMON evolve.\p"
 	.string "Please put it to good use.$"
 
 Kanto_Route16_House_Text_844FD8F::

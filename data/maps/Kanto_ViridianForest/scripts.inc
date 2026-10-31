@@ -107,12 +107,12 @@ Kanto_ViridianForest_EventScript_846BFAF::
 
 Kanto_ViridianForest_Text_842283C::
 	.string "I came here with some friends to\n"
-	.string "catch us some BUG POKéMON!\p"
+	.string "catch us some BUG MOéMON!\p"
 	.string "They’re all itching to get into\n"
-	.string "some POKéMON battles!$"
+	.string "some MOéMON battles!$"
 
 Kanto_ViridianForest_Text_84228AE::
-	.string "Hey! You have POKéMON!\n"
+	.string "Hey! You have MOéMON!\n"
 	.string "Come on!\l"
 	.string "Let’s battle ’em!$"
 
@@ -127,11 +127,11 @@ Kanto_ViridianForest_Text_84228FC::
 Kanto_ViridianForest_Text_8422931::
 	.string "Yo!\n"
 	.string "You can’t jam out if you’re a\l"
-	.string "POKéMON TRAINER!$"
+	.string "MOéMON TRAINER!$"
 
 Kanto_ViridianForest_Text_8422964::
 	.string "Huh?\n"
-	.string "I ran out of POKéMON!$"
+	.string "I ran out of MOéMON!$"
 
 Kanto_ViridianForest_Text_842297F::
 	.string "That totally stinks! I’m going to\n"
@@ -163,47 +163,47 @@ Kanto_ViridianForest_Text_8422AC3::
 	.string "I lost some of my allowance…$"
 
 Kanto_ViridianForest_Text_8422AE0::
-	.string "Did you know that POKéMON evolve?$"
+	.string "Did you know that MOéMON evolve?$"
 
 Kanto_ViridianForest_Text_8422B02::
 	.string "Oh!\n"
 	.string "I lost!$"
 
 Kanto_ViridianForest_Text_8422B0E::
-	.string "BUG POKéMON evolve quickly.\n"
+	.string "BUG MOéMON evolve quickly.\n"
 	.string "They’re a lot of fun!$"
 
 Kanto_ViridianForest_Text_8422B40::
 	.string "I was throwing POKé BALLS to\n"
-	.string "catch POKéMON, and I ran out.\p"
+	.string "catch MOéMON, and I ran out.\p"
 	.string "That’s why you can never have too\n"
 	.string "many POKé BALLS.$"
 
 Kanto_ViridianForest_Text_8422BAE::
 	.string "TRAINER TIPS\p"
-	.string "If your POKéMON are weak and you\n"
+	.string "If your MOéMON are weak and you\n"
 	.string "want to avoid battles, stay away\l"
 	.string "from grassy areas!$"
 
 Kanto_ViridianForest_Text_8422C10::
 	.string "For poison, use ANTIDOTE!\n"
-	.string "Get it at POKéMON MARTS!$"
+	.string "Get it at MOéMON MARTS!$"
 
 Kanto_ViridianForest_Text_8422C43::
 	.string "TRAINER TIPS\p"
 	.string "Contact PROF. OAK via a PC to\n"
-	.string "get your POKéDEX evaluated!$"
+	.string "get your MOéDEX evaluated!$"
 
 Kanto_ViridianForest_Text_8422C8A::
 	.string "TRAINER TIPS\p"
-	.string "You can’t catch a POKéMON that\n"
+	.string "You can’t catch a MOéMON that\n"
 	.string "belongs to someone else.\p"
 	.string "Throw POKé BALLS only at wild\n"
-	.string "POKéMON to catch them!$"
+	.string "MOéMON to catch them!$"
 
 Kanto_ViridianForest_Text_8422D04::
 	.string "TRAINER TIPS\p"
-	.string "Weaken POKéMON before attempting\n"
+	.string "Weaken MOéMON before attempting\n"
 	.string "capture!\p"
 	.string "When healthy, they may escape!$"
 

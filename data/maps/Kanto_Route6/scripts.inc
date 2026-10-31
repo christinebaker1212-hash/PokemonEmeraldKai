@@ -128,7 +128,7 @@ Kanto_Route6_Text_84341EB::
 	.string "I couldn’t beat your challenge…$"
 
 Kanto_Route6_Text_8434218::
-	.string "I should bring more POKéMON with\n"
+	.string "I should bring more MOéMON with\n"
 	.string "me. I’ll feel safer that way.$"
 
 Kanto_Route6_Text_8434257::
@@ -150,7 +150,7 @@ Kanto_Route6_Text_84342E1::
 	.string "You’re too good!$"
 
 Kanto_Route6_Text_84342F2::
-	.string "Are my POKéMON weak?\n"
+	.string "Are my MOéMON weak?\n"
 	.string "Or, am I just bad?\l"
 	.string "Which do you think?$"
 
@@ -170,7 +170,7 @@ Kanto_Route6_Text_846EB13::
 
 Kanto_Route6_Text_846EB88::
 	.string "I’m trying to find something good\n"
-	.string "that’s not a BUG POKéMON, but…$"
+	.string "that’s not a BUG MOéMON, but…$"
 
 Kanto_Route6_Text_846EBC9::
 	.string "Huh?\n"

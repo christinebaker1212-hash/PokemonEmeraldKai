@@ -35,7 +35,7 @@ Johto_CherrygrovePokecenter1F_EventScript_83C9AB5::
 
 Johto_CherrygrovePokecenter1F_Text_83C9AD8::
 	.string "It’s great. I can store any number\n"
-	.string "of POKéMON, and it’s all free.$"
+	.string "of MOéMON, and it’s all free.$"
 
 Johto_CherrygrovePokecenter1F_Text_83C9B1A::
 	.string "That PC is free for any\n"
@@ -44,4 +44,4 @@ Johto_CherrygrovePokecenter1F_Text_83C9B1A::
 Johto_CherrygrovePokecenter1F_Text_83C9B42::
 	.string "They say a watched pot never\n"
 	.string "boils. But watching the clock\l"
-	.string "in the POKéCENTER makes time fly!$"
+	.string "in the MOéCENTER makes time fly!$"

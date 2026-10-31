@@ -7,5 +7,5 @@ Kanto_UndergroundPath_WestEntrance_EventScript_8410B62::
 	end
 
 Kanto_UndergroundPath_WestEntrance_Text_8424C51::
-	.string "I heard a sleepy POKéMON appeared\n"
+	.string "I heard a sleepy MOéMON appeared\n"
 	.string "out near CELADON CITY, too.$"

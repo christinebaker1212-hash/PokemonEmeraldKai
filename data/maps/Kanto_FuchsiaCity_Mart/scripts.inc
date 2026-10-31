@@ -32,4 +32,4 @@ Kanto_FuchsiaCity_Mart_Text_844804C::
 
 Kanto_FuchsiaCity_Mart_Text_84480C4::
 	.string "Did you try X SPEED?\n"
-	.string "It speeds up a POKéMON in battle.$"
+	.string "It speeds up a MOéMON in battle.$"

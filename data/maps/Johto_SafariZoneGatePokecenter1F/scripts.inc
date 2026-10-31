@@ -34,19 +34,19 @@ Johto_SafariZoneGatePokecenter1F_EventScript_83F8D23::
 	end
 
 Johto_SafariZoneGatePokecenter1F_Text_83F8D30::
-	.string "Those who come to a POKéMON CENTER\n"
-	.string "often take good care of their POKéMON.\p"
+	.string "Those who come to a MOéMON CENTER\n"
+	.string "often take good care of their MOéMON.\p"
 	.string "Wouldn’t you agree?$"
 
 Johto_SafariZoneGatePokecenter1F_Text_83F8D8E::
 	.string "After a long walk in the mountains to\n"
-	.string "find a POKéMON CENTER, when you’re\l"
+	.string "find a MOéMON CENTER, when you’re\l"
 	.string "just about to fall flat...\p"
 	.string "Then it feels like you are in paradise!$"
 
 Johto_SafariZoneGatePokecenter1F_Text_83F8E1A::
 	.string "Safari, safari, it is so much fun.\n"
 	.string "Safari, safari, so interesting, huh!\p"
-	.string "So many POKéMON are waiting for us!\p"
+	.string "So many MOéMON are waiting for us!\p"
 	.string "...That’s a song I made up.\n"
 	.string "I sing it when I am in the SAFARI ZONE.$"

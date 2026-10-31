@@ -2635,12 +2635,12 @@ Quetzal_Text_8306DCC::
 	.string "Decided against buying a drink.$"
 
 Quetzal_Text_83609E1::
-	.string "Okay, I’ll take your POKéMON\n"
+	.string "Okay, I’ll take your MOéMON\n"
 	.string "for a few seconds.$"
 
 Quetzal_Text_8360A11::
 	.string "Thank you for waiting.\p"
-	.string "We’ve restored your POKéMON\n"
+	.string "We’ve restored your MOéMON\n"
 	.string "to full health.$"
 
 Quetzal_Text_8360A54::
@@ -2648,8 +2648,8 @@ Quetzal_Text_8360A54::
 
 Quetzal_Text_8360A6E::
 	.string "Hello, and welcome to\n"
-	.string "the POKéMON CENTER.\p"
-	.string "We restore your tired POKéMON\n"
+	.string "the MOéMON CENTER.\p"
+	.string "We restore your tired MOéMON\n"
 	.string "to full health.\p"
 	.string "Would you like to…$"
 
@@ -2663,14 +2663,14 @@ Quetzal_Text_8360AD9::
 	.string "you’re the first TRAINER I’ve ever\l"
 	.string "seen with a GOLD CARD!\p"
 	.string "Okay, {PLAYER}, please allow me\n"
-	.string "the honor of resting your POKéMON!$"
+	.string "the honor of resting your MOéMON!$"
 
 Quetzal_Text_8360BFB::
 	.string "I’m delighted to see you, {PLAYER}!\n"
 	.string "You want the usual, am I right?$"
 
 Quetzal_Text_8360C39::
-	.string "Okay, I’ll take your POKéMON\n"
+	.string "Okay, I’ll take your MOéMON\n"
 	.string "for a few seconds.$"
 
 Quetzal_Text_8360C69::
@@ -2683,12 +2683,12 @@ Quetzal_Text_8360D6A::
 	.string "The BAG is full…$"
 
 Quetzal_Text_83611E8::
-	.string "Your POKéMON may be infected with\n"
-	.string "POKéRUS.\p"
-	.string "Little is known about the POKéRUS\n"
+	.string "Your MOéMON may be infected with\n"
+	.string "MOéRUS.\p"
+	.string "Little is known about the MOéRUS\n"
 	.string "except that they are microscopic life-\l"
-	.string "forms that attach to POKéMON.\p"
-	.string "While infected, POKéMON are said to\n"
+	.string "forms that attach to MOéMON.\p"
+	.string "While infected, MOéMON are said to\n"
 	.string "grow exceptionally well.$"
 
 Quetzal_Text_83614E5::
@@ -2735,16 +2735,16 @@ Quetzal_Text_837F16B::
 	.string "Would you like to use ROCK SMASH?$"
 
 Quetzal_Text_837F1B0::
-	.string "It’s a rugged rock, but a POKéMON\n"
+	.string "It’s a rugged rock, but a MOéMON\n"
 	.string "may be able to smash it.$"
 
 Quetzal_Text_837F1EB::
-	.string "It’s a big boulder, but a POKéMON\n"
+	.string "It’s a big boulder, but a MOéMON\n"
 	.string "may be able to push it aside.\p"
 	.string "Would you like to use STRENGTH?$"
 
 Quetzal_Text_837F295::
-	.string "It’s a big boulder, but a POKéMON\n"
+	.string "It’s a big boulder, but a MOéMON\n"
 	.string "may be able to push it aside.$"
 
 Quetzal_Text_837F2D5::
@@ -2756,9 +2756,9 @@ Quetzal_Text_837F5F7::
 	.string "You cannot cross it yet.$"
 
 Quetzal_Text_8383BB5::
-	.string "GINA: Oh? Only one POKéMON?\n"
+	.string "GINA: Oh? Only one MOéMON?\n"
 	.string "Then, we don’t battle with you.\p"
-	.string "If there’s only one POKéMON, it will\n"
+	.string "If there’s only one MOéMON, it will\n"
 	.string "be lonesome. That’s not nice.$"
 
 Quetzal_Text_8396B35::
@@ -2819,7 +2819,7 @@ Quetzal_Text_83D4AAD::
 	.string "collected…$"
 
 Quetzal_Text_83D4B64::
-	.string "My POKéMON always get paralyzed or\n"
+	.string "My MOéMON always get paralyzed or\n"
 	.string "poisoned when the chips are down…\p"
 	.string "So I came to buy some FULL HEAL.\p"
 	.string "I wonder if there’s any left?$"
@@ -2865,7 +2865,7 @@ Quetzal_Text_83E0BA6::
 
 Quetzal_Text_83E0BFA::
 	.string "The NATIONAL PARK has different\n"
-	.string "POKéMON during the BUG-CATCHING\l"
+	.string "MOéMON during the BUG-CATCHING\l"
 	.string "CONTEST.$"
 
 Quetzal_Text_83EB7ED::
@@ -2873,7 +2873,7 @@ Quetzal_Text_83EB7ED::
 
 Quetzal_Text_83EBCD7::
 	.string "I’m making my final preparations\n"
-	.string "for the POKéMON LEAGUE.$"
+	.string "for the MOéMON LEAGUE.$"
 
 Quetzal_Text_83EBD10::
 	.string "I blew it!$"
@@ -2910,10 +2910,10 @@ Quetzal_Text_83F4AB1::
 
 Quetzal_Text_83F863F::
 	.string "It’s a replica of an ancient\n"
-	.string "POKéMON.$"
+	.string "MOéMON.$"
 
 Quetzal_Text_83FA742::
-	.string "A POKéMON statue…\p"
+	.string "A MOéMON statue…\p"
 	.string "It looks very distinguished.$"
 
 Quetzal_Text_83FBA4E::
@@ -2987,7 +2987,7 @@ Quetzal_Text_840184F::
 
 Quetzal_Text_8401892::
 	.string "Whoa, wait. You can’t carry any\n"
-	.string "more POKéMON.$"
+	.string "more MOéMON.$"
 
 Quetzal_Text_84018D6::
 	.string "The door is locked.$"
@@ -3100,11 +3100,11 @@ Quetzal_Text_84054E0::
 
 Quetzal_Text_840745D::
 	.string "Old notes describe a sleeping\n"
-	.string "artificial Pokémon.\p"
+	.string "artificial MOéMON.\p"
 	.string "It’s in the switch room in\n"
 	.string "Goldenrod’s Underground.\p"
 	.string "They say it responds to a party\n"
-	.string "of six Steel-type Pokémon.\p"
+	.string "of six Steel-type MOéMON.\p"
 	.string "The first must be holding\n"
 	.string "a Heart Scale.$"
 
@@ -3116,7 +3116,7 @@ Quetzal_Text_8407527::
 
 Quetzal_Text_84075A6::
 	.string "I found references to an\n"
-	.string "artificial Pokémon.\p"
+	.string "artificial MOéMON.\p"
 	.string "It’s in the switch room in\n"
 	.string "Goldenrod’s Underground.\p"
 	.string "If you find a Magearna with its\n"

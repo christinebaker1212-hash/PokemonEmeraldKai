@@ -30,6 +30,6 @@ Johto_AzaleaMart_Text_83C6419::
 
 Johto_AzaleaMart_Text_83C64D7::
 	.string "A GREAT BALL is better for catch-\n"
-	.string "ing POKéMON than a POKé BALL.\p"
+	.string "ing MOéMON than a POKé BALL.\p"
 	.string "But KURT’s might be better some-\n"
 	.string "times.$"

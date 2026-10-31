@@ -33,7 +33,7 @@ Kanto_SafariZone_Center_Text_8427ED9::
 
 Kanto_SafariZone_Center_Text_8427EE4::
 	.string "TRAINER TIPS\p"
-	.string "Wild POKéMON battles here follow\n"
+	.string "Wild MOéMON battles here follow\n"
 	.string "the normal rules.$"
 
 Kanto_SafariZone_Center_Text_8427F24::

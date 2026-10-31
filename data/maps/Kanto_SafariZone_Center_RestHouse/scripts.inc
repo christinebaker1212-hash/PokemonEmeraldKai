@@ -16,5 +16,5 @@ Kanto_SafariZone_Center_RestHouse_Text_842815B::
 	.string "ERIK, go?$"
 
 Kanto_SafariZone_Center_RestHouse_Text_8428183::
-	.string "I’m catching POKéMON to take home\n"
+	.string "I’m catching MOéMON to take home\n"
 	.string "as gifts.$"

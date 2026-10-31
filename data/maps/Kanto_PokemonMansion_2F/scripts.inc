@@ -69,10 +69,10 @@ Kanto_PokemonMansion_2F_Text_8427BCA::
 Kanto_PokemonMansion_2F_Text_8427C06::
 	.string "Diary: July 5\n"
 	.string "Guyana, South America\p"
-	.string "A new POKéMON was discovered deep\n"
+	.string "A new MOéMON was discovered deep\n"
 	.string "in the jungle.$"
 
 Kanto_PokemonMansion_2F_Text_8427C5B::
 	.string "Diary: July 10\n"
 	.string "We christened the newly discovered\l"
-	.string "POKéMON, MEW.$"
+	.string "MOéMON, MEW.$"

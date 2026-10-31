@@ -187,7 +187,7 @@ Kanto_CeladonCity_Text_8430356::
 	.string "The City of Rainbow Dreams$"
 
 Kanto_CeladonCity_Text_843037E::
-	.string "CELADON CITY POKéMON GYM\n"
+	.string "CELADON CITY MOéMON GYM\n"
 	.string "LEADER: ERIKA\l"
 	.string "The Nature-Loving Princess!$"
 
@@ -200,7 +200,7 @@ Kanto_CeladonCity_Text_84303D1::
 
 Kanto_CeladonCity_Text_8430400::
 	.string "TRAINER TIPS\p"
-	.string "GUARD SPEC. protects POKéMON\n"
+	.string "GUARD SPEC. protects MOéMON\n"
 	.string "from status-reduction moves during\l"
 	.string "battle.\p"
 	.string "Get your items at the\n"

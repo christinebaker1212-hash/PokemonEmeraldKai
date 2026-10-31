@@ -37,13 +37,13 @@ Kanto_ViridianCity_PokemonCenter_1F_Text_84406E0::
 	.string "It’s so kind of her!$"
 
 Kanto_ViridianCity_PokemonCenter_1F_Text_8440741::
-	.string "There’s a POKéMON CENTER in every\n"
+	.string "There’s a MOéMON CENTER in every\n"
 	.string "town ahead.\p"
 	.string "They charge no money, so don’t\n"
-	.string "be shy about healing POKéMON.$"
+	.string "be shy about healing MOéMON.$"
 
 Kanto_ViridianCity_PokemonCenter_1F_Text_84407AC::
-	.string "POKéMON CENTERS heal your tired,\n"
-	.string "hurt, or fainted POKéMON.\p"
-	.string "They make all POKéMON completely\n"
+	.string "MOéMON CENTERS heal your tired,\n"
+	.string "hurt, or fainted MOéMON.\p"
+	.string "They make all MOéMON completely\n"
 	.string "healthy.$"

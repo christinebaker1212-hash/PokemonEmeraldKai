@@ -111,7 +111,7 @@ Johto_RadioTower2F_Text_83D7BCA::
 
 Johto_RadioTower2F_Text_83D7BEF::
 	.string "Lullabies on the radio may make\n"
-	.string "POKéMON sleep.$"
+	.string "MOéMON sleep.$"
 
 Johto_RadioTower2F_Text_83D7C1E::
 	.string "Why would they want to take over\n"
@@ -131,7 +131,7 @@ Johto_RadioTower2F_Text_83D7DA0::
 
 Johto_RadioTower2F_Text_83D7DD2::
 	.string "We’re TEAM ROCKET, the exploiters\n"
-	.string "of POKéMON!\p"
+	.string "of MOéMON!\p"
 	.string "We love being evil! Scared?$"
 
 Johto_RadioTower2F_Text_83D7E1C::
@@ -174,5 +174,5 @@ Johto_RadioTower2F_Text_83D7FAF::
 	.string "2F SALES$"
 
 Johto_RadioTower2F_Text_83D7FB8::
-	.string "PROF.OAK’S POKéMON TALK\p"
+	.string "PROF.OAK’S MOéMON TALK\p"
 	.string "The Hottest Show on the Air!$"

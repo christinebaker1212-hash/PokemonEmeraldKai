@@ -37,7 +37,7 @@ Kanto_LavenderTown_House1_Text_8443ADF::
 	.string "TEAM ROCKET.$"
 
 Kanto_LavenderTown_House1_Text_8443B5A::
-	.string "The ghost of POKéMON TOWER is\n"
+	.string "The ghost of MOéMON TOWER is\n"
 	.string "gone!\p"
 	.string "Someone must have soothed its\n"
 	.string "restless spirit!$"

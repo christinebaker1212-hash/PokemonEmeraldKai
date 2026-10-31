@@ -192,7 +192,7 @@ Kanto_SilphCo_11F_Text_84276D2::
 	.string "anywhere.\p"
 	.string "It’s our secret prototype MASTER\n"
 	.string "BALL.\p"
-	.string "It will catch any POKéMON without\n"
+	.string "It will catch any MOéMON without\n"
 	.string "fail!\p"
 	.string "You should be quiet about using it,\n"
 	.string "though.$"
@@ -224,7 +224,7 @@ Kanto_SilphCo_11F_Text_84278A9::
 	.string "You ruined our plans for SILPH!\p"
 	.string "But, TEAM ROCKET will never fall!\p"
 	.string "{PLAYER}! Never forget that all\n"
-	.string "POKéMON exist for TEAM ROCKET!\p"
+	.string "MOéMON exist for TEAM ROCKET!\p"
 	.string "I must go, but I shall return!$"
 
 Kanto_SilphCo_11F_Text_8427951::
@@ -248,7 +248,7 @@ Kanto_SilphCo_11F_Text_84279CE::
 
 Kanto_SilphCo_11F_Text_84279E0::
 	.string "Watch your step…\n"
-	.string "My BOSS likes his POKéMON tough!$"
+	.string "My BOSS likes his MOéMON tough!$"
 
 Kanto_SilphCo_11F_Text_8427A31::
 	.string "SILPH CO. HEAD OFFICE\n"

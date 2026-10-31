@@ -132,7 +132,7 @@ Johto_BurnedTower1F_Movement_83C86A9:
 
 Johto_BurnedTower1F_Text_83C83EF::
 	.string "EUSINE: My name’s EUSINE.\p"
-	.string "I’m on the trail of a POKéMON\n"
+	.string "I’m on the trail of a MOéMON\n"
 	.string "called SUICUNE.\p"
 	.string "And you are...?\p"
 	.string "{PLAYER}? Glad to meet you!\p"
@@ -150,7 +150,7 @@ Johto_BurnedTower1F_Text_83C84FA::
 Johto_BurnedTower1F_Text_83C856B::
 	.string "MORTY: ECRUTEAK’s GYM LEADER\n"
 	.string "has to study what are said to\l"
-	.string "be the legendary POKéMON--\l"
+	.string "be the legendary MOéMON--\l"
 	.string "SUICUNE, ENTEI and RAIKOU.\p"
 	.string "EUSINE is here, so I’ve\n"
 	.string "decided to investigate the\l"
@@ -160,7 +160,7 @@ Johto_BurnedTower1F_Text_83C86B6::
 	.string "..............................\p"
 	.string "...Oh, it’s you.\p"
 	.string "I came looking for some\n"
-	.string "legendary POKéMON they say\l"
+	.string "legendary MOéMON they say\l"
 	.string "roost here.\p"
 	.string "But there’s nothing here!\p"
 	.string "Nothing, after all the effort\n"
@@ -171,13 +171,13 @@ Johto_BurnedTower1F_Text_83C86B6::
 Johto_BurnedTower1F_Text_83C8792::
 	.string "...Humph!\p"
 	.string "I only lost because my\n"
-	.string "POKéMON are incredibly weak.\p"
+	.string "MOéMON are incredibly weak.\p"
 	.string "How pathetic.$"
 
 Johto_BurnedTower1F_Text_83C87DE::
 	.string "...Aw, whatever.\p"
 	.string "You’d never be able to catch\n"
-	.string "a legendary POKéMON anyway.$"
+	.string "a legendary MOéMON anyway.$"
 
 Johto_BurnedTower1F_Text_83C886B::
 	.string "Humph!\p"

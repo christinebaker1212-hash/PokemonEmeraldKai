@@ -126,7 +126,7 @@ Kanto_FuchsiaCity_Gym_Text_84482BE::
 	.string "Poison brings steady doom.\n"
 	.string "Sleep renders foes helpless.\p"
 	.string "Despair to the creeping horror of\n"
-	.string "POISON-type POKéMON!{PLAY_BGM 0x022A}$"
+	.string "POISON-type MOéMON!{PLAY_BGM 0x022A}$"
 
 Kanto_FuchsiaCity_Gym_Text_84483D4::
 	.string "Humph!\n"
@@ -135,7 +135,7 @@ Kanto_FuchsiaCity_Gym_Text_84483D4::
 	.string "Take the SOULBADGE!$"
 
 Kanto_FuchsiaCity_Gym_Text_8448411::
-	.string "When afflicted by TOXIC, a POKéMON\n"
+	.string "When afflicted by TOXIC, a MOéMON\n"
 	.string "suffers more and more.\p"
 	.string "It suffers worsening damage as the\n"
 	.string "battle wears on!\p"
@@ -143,7 +143,7 @@ Kanto_FuchsiaCity_Gym_Text_8448411::
 
 Kanto_FuchsiaCity_Gym_Text_844849E::
 	.string "Now that you have the SOULBADGE,\n"
-	.string "the DEFENSE of your POKéMON rises.\p"
+	.string "the DEFENSE of your MOéMON rises.\p"
 	.string "It also lets you SURF outside of\n"
 	.string "battle.\p"
 	.string "Ah!\n"
@@ -162,9 +162,9 @@ Kanto_FuchsiaCity_Gym_Text_8448584::
 	.string "Make space for this, child!$"
 
 Kanto_FuchsiaCity_Gym_Text_84485A0::
-	.string "Strength isn’t the key for POKéMON.\n"
+	.string "Strength isn’t the key for MOéMON.\n"
 	.string "Do you understand this?\p"
-	.string "POKéMON is about strategy!\p"
+	.string "MOéMON is about strategy!\p"
 	.string "I’ll show you how strategy can\n"
 	.string "beat brute strength.$"
 
@@ -259,13 +259,13 @@ Kanto_FuchsiaCity_Gym_Text_8448A94::
 	.string "even now!$"
 
 Kanto_FuchsiaCity_Gym_Text_8448AC2::
-	.string "FUCHSIA POKéMON GYM\n"
+	.string "FUCHSIA MOéMON GYM\n"
 	.string "LEADER: KOGA\p"
 	.string "WINNING TRAINERS:\n"
 	.string "BLUE$"
 
 Kanto_FuchsiaCity_Gym_Text_8448AFA::
-	.string "FUCHSIA POKéMON GYM\n"
+	.string "FUCHSIA MOéMON GYM\n"
 	.string "LEADER: KOGA\p"
 	.string "WINNING TRAINERS:\n"
 	.string "BLUE, {PLAYER}$"

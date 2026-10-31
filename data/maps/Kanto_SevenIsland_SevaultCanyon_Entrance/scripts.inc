@@ -109,7 +109,7 @@ Kanto_SevenIsland_SevaultCanyon_Entrance_Text_843C78B::
 
 Kanto_SevenIsland_SevaultCanyon_Entrance_Text_843C7D2::
 	.string "Lalalah…\n"
-	.string "My POKéMON, I send them out,\l"
+	.string "My MOéMON, I send them out,\l"
 	.string "all the girls scream and shout!$"
 
 Kanto_SevenIsland_SevaultCanyon_Entrance_Text_843C818::
@@ -127,14 +127,14 @@ Kanto_SevenIsland_SevaultCanyon_Entrance_Text_843C863::
 
 Kanto_SevenIsland_SevaultCanyon_Entrance_Text_843C8C2::
 	.string "I punish people who abuse\n"
-	.string "POKéMON!$"
+	.string "MOéMON!$"
 
 Kanto_SevenIsland_SevaultCanyon_Entrance_Text_843C8E5::
 	.string "You don’t seem to be a problem\n"
 	.string "TRAINER.$"
 
 Kanto_SevenIsland_SevaultCanyon_Entrance_Text_843C90D::
-	.string "If you treat your POKéMON with\n"
+	.string "If you treat your MOéMON with\n"
 	.string "kindness, they’ll understand.$"
 
 Kanto_SevenIsland_SevaultCanyon_Entrance_Text_843C94A::
@@ -152,7 +152,7 @@ Kanto_SevenIsland_SevaultCanyon_Entrance_Text_843C99B::
 Kanto_SevenIsland_SevaultCanyon_Entrance_Text_843C9C3::
 	.string "EVE: I want to team up with JON\n"
 	.string "when I battle you.\p"
-	.string "Come back with two POKéMON, okay?$"
+	.string "Come back with two MOéMON, okay?$"
 
 Kanto_SevenIsland_SevaultCanyon_Entrance_Text_843CA18::
 	.string "JON: When I’m with EVE, it feels\n"
@@ -193,7 +193,7 @@ Kanto_SevenIsland_SevaultCanyon_Entrance_Text_8471853::
 
 Kanto_SevenIsland_SevaultCanyon_Entrance_Text_8471892::
 	.string "I don’t forgive people who abuse\n"
-	.string "POKéMON!$"
+	.string "MOéMON!$"
 
 Kanto_SevenIsland_SevaultCanyon_Entrance_Text_84718BC::
 	.string "EVE: I’ll team up with JON and\n"

@@ -67,7 +67,7 @@ Kanto_PewterCity_PokemonCenter_1F_Text_84419F0::
 
 Kanto_PewterCity_PokemonCenter_1F_Text_8441A07::
 	.string "Yawn!\p"
-	.string "When JIGGLYPUFF sings, POKéMON get\n"
+	.string "When JIGGLYPUFF sings, MOéMON get\n"
 	.string "drowsy…\p"
 	.string "…Me, too…\n"
 	.string "Snore…$"
@@ -77,7 +77,7 @@ Kanto_PewterCity_PokemonCenter_1F_Text_8441A49::
 	.string "trading my CLEFAIRY for one.$"
 
 Kanto_PewterCity_PokemonCenter_1F_Text_8441A86::
-	.string "I’m trading POKéMON with that kid\n"
+	.string "I’m trading MOéMON with that kid\n"
 	.string "there.\p"
 	.string "I had two PIKACHU, so I figured\n"
 	.string "I might as well trade one.$"
@@ -86,4 +86,4 @@ Kanto_PewterCity_PokemonCenter_1F_Text_846C305::
 	.string "TRAINERS from all sorts of places\n"
 	.string "pass through here.\p"
 	.string "Every trip is a chance to meet\n"
-	.string "new POKéMON!$"
+	.string "new MOéMON!$"

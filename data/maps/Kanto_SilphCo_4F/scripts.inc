@@ -130,11 +130,11 @@ Kanto_SilphCo_4F_Text_8426143::
 	.string "My BOSS has been after this place!$"
 
 Kanto_SilphCo_4F_Text_8426171::
-	.string "My POKéMON is my loyal servant.$"
+	.string "My MOéMON is my loyal servant.$"
 
 Kanto_SilphCo_4F_Text_8426191::
 	.string "Darn!\n"
-	.string "You weak POKéMON!$"
+	.string "You weak MOéMON!$"
 
 Kanto_SilphCo_4F_Text_84261A9::
 	.string "The doors are electronically\n"

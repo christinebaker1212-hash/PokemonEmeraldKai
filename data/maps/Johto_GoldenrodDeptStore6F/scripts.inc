@@ -104,7 +104,7 @@ Johto_GoldenrodDeptStore6F_Text_83D45A3::
 	.string "the FIGHTING DOJO!$"
 
 Johto_GoldenrodDeptStore6F_Text_83D46CE::
-	.string "I collect POKéMON!\n"
+	.string "I collect MOéMON!\n"
 	.string "Do you have a {STR_VAR_1}?\p"
 	.string "Want to trade it for my\n"
 	.string "{STR_VAR_2}?$"
@@ -126,7 +126,7 @@ Johto_GoldenrodDeptStore6F_Text_83D4783::
 Johto_GoldenrodDeptStore6F_Text_83D47C6::
 	.string "Do you listen to LUCKY CHANNEL?\p"
 	.string "They say if you want to win,\n"
-	.string "you should trade POKéMON with as\l"
+	.string "you should trade MOéMON with as\l"
 	.string "many people as possible to get\l"
 	.string "different ID numbers.\p"
 	.string "However, trading isn’t as widely\n"
@@ -135,7 +135,7 @@ Johto_GoldenrodDeptStore6F_Text_83D47C6::
 Johto_GoldenrodDeptStore6F_Text_83D4894::
 	.string "If you’re tired, try the vending\n"
 	.string "machine’s drinks.\p"
-	.string "Your POKéMON will love them too.$"
+	.string "Your MOéMON will love them too.$"
 
 Johto_GoldenrodDeptStore6F_Text_83D48E8::
 	.string "Take a Break from Shopping!\p"

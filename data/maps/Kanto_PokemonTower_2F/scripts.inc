@@ -94,7 +94,7 @@ Kanto_PokemonTower_2F_Movement_8413072:
 Kanto_PokemonTower_2F_Text_842A3C2::
 	.string "BLUE: Hey, {PLAYER}!\n"
 	.string "What brings you here?\l"
-	.string "Is your POKéMON dead?\p"
+	.string "Is your MOéMON dead?\p"
 	.string "Hey! It’s alive!\p"
 	.string "I can at least make them faint!\n"
 	.string "Let’s go!$"
@@ -105,7 +105,7 @@ Kanto_PokemonTower_2F_Text_842A438::
 	.string "I took it easy on you, too!$"
 
 Kanto_PokemonTower_2F_Text_842A49B::
-	.string "How’s your POKéDEX coming?\n"
+	.string "How’s your MOéDEX coming?\n"
 	.string "I just caught a CUBONE!\p"
 	.string "I can’t find the bigger MAROWAK.\n"
 	.string "Where could they be?\p"

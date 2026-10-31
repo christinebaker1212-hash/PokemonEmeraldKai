@@ -95,7 +95,7 @@ Kanto_RockTunnel_B1F_Text_8429DD5::
 	.string "thinking.$"
 
 Kanto_RockTunnel_B1F_Text_8429DFD::
-	.string "You have a POKéDEX?\n"
+	.string "You have a MOéDEX?\n"
 	.string "I want one, too.$"
 
 Kanto_RockTunnel_B1F_Text_8429E22::
@@ -103,23 +103,23 @@ Kanto_RockTunnel_B1F_Text_8429E22::
 	.string "I am so jealous!$"
 
 Kanto_RockTunnel_B1F_Text_8429E3A::
-	.string "When you finish your POKéDEX,\n"
+	.string "When you finish your MOéDEX,\n"
 	.string "can I have it?$"
 
 Kanto_RockTunnel_B1F_Text_8429E67::
-	.string "Um… Do you know about POKéMON\n"
+	.string "Um… Do you know about MOéMON\n"
 	.string "cosplay?$"
 
 Kanto_RockTunnel_B1F_Text_8429E8E::
 	.string "Well, that’s that.$"
 
 Kanto_RockTunnel_B1F_Text_8429EA1::
-	.string "POKéMON cosplay is dressing up as\n"
-	.string "POKéMON for fun.\p"
+	.string "MOéMON cosplay is dressing up as\n"
+	.string "MOéMON for fun.\p"
 	.string "CLEFAIRY is a favorite.$"
 
 Kanto_RockTunnel_B1F_Text_8429EEC::
-	.string "My POKéMON techniques will leave\n"
+	.string "My MOéMON techniques will leave\n"
 	.string "you crying!$"
 
 Kanto_RockTunnel_B1F_Text_8429F19::
@@ -128,7 +128,7 @@ Kanto_RockTunnel_B1F_Text_8429F19::
 
 Kanto_RockTunnel_B1F_Text_8429F3D::
 	.string "In mountains, you’ll often find\n"
-	.string "ROCK-type POKéMON.$"
+	.string "ROCK-type MOéMON.$"
 
 Kanto_RockTunnel_B1F_Text_8429F70::
 	.string "I don’t often come here, but I will\n"
@@ -139,7 +139,7 @@ Kanto_RockTunnel_B1F_Text_8429FA0::
 	.string "I lost!$"
 
 Kanto_RockTunnel_B1F_Text_8429FAC::
-	.string "I like tiny POKéMON.\n"
+	.string "I like tiny MOéMON.\n"
 	.string "Big ones are too scary!$"
 
 Kanto_RockTunnel_B1F_Text_8429FD9::
@@ -149,11 +149,11 @@ Kanto_RockTunnel_B1F_Text_8429FF5::
 	.string "Fired away!$"
 
 Kanto_RockTunnel_B1F_Text_842A001::
-	.string "I’ll raise my POKéMON to beat\n"
+	.string "I’ll raise my MOéMON to beat\n"
 	.string "yours, kid.$"
 
 Kanto_RockTunnel_B1F_Text_842A02B::
-	.string "I draw illustrations of POKéMON\n"
+	.string "I draw illustrations of MOéMON\n"
 	.string "when I’m home.$"
 
 Kanto_RockTunnel_B1F_Text_842A05A::

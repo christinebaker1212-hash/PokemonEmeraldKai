@@ -113,7 +113,7 @@ Johto_RuinsOfAlphOutside_Text_83F7CEF::
 	.string "The RUINS are from about 1500\n"
 	.string "years ago.\p"
 	.string "Nobody knows who built them.\p"
-	.string "It’s also not known if the POKéMON\n"
+	.string "It’s also not known if the MOéMON\n"
 	.string "statues have any meaning.\p"
 	.string "It’s all one big mystery…$"
 

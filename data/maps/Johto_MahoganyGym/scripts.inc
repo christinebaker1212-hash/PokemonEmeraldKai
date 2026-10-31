@@ -122,21 +122,21 @@ Johto_MahoganyGym_EventScript_83DE751::
 	end
 
 Johto_MahoganyGym_Text_83DE585::
-	.string "MAHOGANY TOWN POKéMON GYM$"
+	.string "MAHOGANY TOWN MOéMON GYM$"
 
 Johto_MahoganyGym_Text_83DE59F::
-	.string "MAHOGANY TOWN POKéMON GYM\p"
+	.string "MAHOGANY TOWN MOéMON GYM\p"
 	.string "PRYCE’S CERTIFIED TRAINERS:\n"
 	.string "{PLAYER}$"
 
 Johto_MahoganyGym_Text_83DE75C::
-	.string "POKéMON have many experiences\n"
+	.string "MOéMON have many experiences\n"
 	.string "in their lives, just like we do.\p"
 	.string "I, too, have seen and suffered\n"
 	.string "much in my life.\p"
 	.string "Since I am your elder, let me\n"
 	.string "show you what I mean.\p"
-	.string "I have been with POKéMON since\n"
+	.string "I have been with MOéMON since\n"
 	.string "before you were born.\p"
 	.string "I do not lose easily.\p"
 	.string "I, PRYCE--the winter trainer--\n"
@@ -154,8 +154,8 @@ Johto_MahoganyGym_Text_83DE90D::
 
 Johto_MahoganyGym_Text_83DE927::
 	.string "That BADGE will raise the SPECIAL\n"
-	.string "ATTACK of POKéMON.\p"
-	.string "It also lets your POKéMON use\n"
+	.string "ATTACK of MOéMON.\p"
+	.string "It also lets your MOéMON use\n"
 	.string "WHIRLPOOL to get across\l"
 	.string "real whirlpools.\p"
 	.string "And this… This is a gift from me!$"
@@ -170,15 +170,15 @@ Johto_MahoganyGym_Text_83DE9C5::
 Johto_MahoganyGym_Text_83DEA4F::
 	.string "When the ice and snow melt,\n"
 	.string "spring arrives.\p"
-	.string "You and your POKéMON will be\n"
+	.string "You and your MOéMON will be\n"
 	.string "together for many years to come.\p"
 	.string "Cherish your time together!$"
 
 Johto_MahoganyGym_Text_83DEC22::
 	.string "PRYCE is a veteran who has\n"
-	.string "trained POKéMON for some 50 years.\p"
+	.string "trained MOéMON for some 50 years.\p"
 	.string "He’s got a solid lineup of\n"
-	.string "POKéMON to cover whatever\l"
+	.string "MOéMON to cover whatever\l"
 	.string "you bring his way.\p"
 	.string "Fire is a good place to start,\n"
 	.string "but watch out for the rain!$"
@@ -190,7 +190,7 @@ Johto_MahoganyGym_Text_83DECE3::
 	.string "bridged the generation gap!$"
 
 Johto_MahoganyGym_Text_83DED49::
-	.string "I’ll freeze your POKéMON,\n"
+	.string "I’ll freeze your MOéMON,\n"
 	.string "so you can’t do a thing!$"
 
 Johto_MahoganyGym_Text_83DED7C::
@@ -198,7 +198,7 @@ Johto_MahoganyGym_Text_83DED7C::
 
 Johto_MahoganyGym_Text_83DED99::
 	.string "I think there’s a move a\n"
-	.string "POKéMON can use while it’s\l"
+	.string "MOéMON can use while it’s\l"
 	.string "frozen.$"
 
 Johto_MahoganyGym_Text_83DEDD5::
@@ -213,7 +213,7 @@ Johto_MahoganyGym_Text_83DEE2F::
 Johto_MahoganyGym_Text_83DEE4E::
 	.string "This GYM is great.\n"
 	.string "I love boarding with my\l"
-	.string "POKéMON!$"
+	.string "MOéMON!$"
 
 Johto_MahoganyGym_Text_83DEE82::
 	.string "I know PRYCE’s secret.$"

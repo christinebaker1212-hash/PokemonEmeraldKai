@@ -37,9 +37,9 @@ Johto_TohjoFalls_Text_83FC029::
 
 Johto_TohjoFalls_Text_83FC0A9::
 	.string "With the SUPER ROD, you can hook\n"
-	.string "POKéMON from the deepest waters.$"
+	.string "MOéMON from the deepest waters.$"
 
 Johto_TohjoFalls_Text_83FC0EB::
 	.string "Use the SUPER ROD in deep water.\p"
-	.string "You never know what POKéMON\n"
+	.string "You never know what MOéMON\n"
 	.string "might bite!$"

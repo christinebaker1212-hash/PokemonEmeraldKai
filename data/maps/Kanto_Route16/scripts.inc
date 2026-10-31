@@ -239,7 +239,7 @@ Kanto_Route16_Text_84370D9::
 	.string "Bad, bad, bad!$"
 
 Kanto_Route16_Text_84370E8::
-	.string "If I’m going to have POKéMON, they\n"
+	.string "If I’m going to have MOéMON, they\n"
 	.string "may as well be ferocious.\p"
 	.string "I’d use them to leave my enemies\n"
 	.string "in tatters.$"
@@ -253,12 +253,12 @@ Kanto_Route16_Text_8437180::
 
 Kanto_Route16_Text_8437193::
 	.string "I get my kicks by harassing people\n"
-	.string "with my stinking POKéMON.\p"
+	.string "with my stinking MOéMON.\p"
 	.string "They’re great for startling people.\n"
 	.string "And, they bite, too.$"
 
 Kanto_Route16_Text_8437209::
-	.string "A POKéMON is sprawled out in\n"
+	.string "A MOéMON is sprawled out in\n"
 	.string "a deep and comfortable slumber.$"
 
 Kanto_Route16_Text_8437246::
@@ -282,7 +282,7 @@ Kanto_Route16_Text_84372F2::
 	.string "You need to focus less on me.$"
 
 Kanto_Route16_Text_8437322::
-	.string "JED: You have just one POKéMON?\n"
+	.string "JED: You have just one MOéMON?\n"
 	.string "Is there no love in your heart?$"
 
 Kanto_Route16_Text_8437362::
@@ -299,9 +299,9 @@ Kanto_Route16_Text_84373C4::
 
 Kanto_Route16_Text_84373EB::
 	.string "LEA: Oh, you don’t have two\n"
-	.string "POKéMON with you?\p"
+	.string "MOéMON with you?\p"
 	.string "Doesn’t it feel lonely for you or\n"
-	.string "your POKéMON?$"
+	.string "your MOéMON?$"
 
 Kanto_Route16_Text_846FDB9::
 	.string "What do you want?$"

@@ -158,11 +158,11 @@ Johto_MrPokemonsHouse_Text_83EDD23::
 
 Johto_MrPokemonsHouse_Text_83EDD65::
 	.string "I know a couple who run a\n"
-	.string "POKéMON DAY-CARE service.\p"
+	.string "MOéMON DAY-CARE service.\p"
 	.string "They gave me that EGG.\p"
 	.string "I was intrigued, so I sent\n"
 	.string "mail to PROF.ELM.\p"
-	.string "For POKéMON evolution,\n"
+	.string "For MOéMON evolution,\n"
 	.string "PROF.ELM is the authority.$"
 
 Johto_MrPokemonsHouse_Text_83EDE0F::
@@ -175,7 +175,7 @@ Johto_MrPokemonsHouse_Text_83EDE33::
 
 Johto_MrPokemonsHouse_Text_83EDE67::
 	.string "You are returning to PROF.ELM?\p"
-	.string "Here. Your POKéMON should have\n"
+	.string "Here. Your MOéMON should have\n"
 	.string "some rest.$"
 
 Johto_MrPokemonsHouse_Text_83EDEB0::
@@ -187,45 +187,45 @@ Johto_MrPokemonsHouse_Text_83EDEC6::
 
 Johto_MrPokemonsHouse_Text_83EDEFE::
 	.string "OAK: So you’re {PLAYER}!\p"
-	.string "I’m OAK, a POKéMON researcher.\p"
+	.string "I’m OAK, a MOéMON researcher.\p"
 	.string "I see ELM already gave you a\n"
-	.string "POKéDEX. Your journey has begun!\p"
-	.string "Meeting many POKéMON will help\n"
+	.string "MOéDEX. Your journey has begun!\p"
+	.string "Meeting many MOéMON will help\n"
 	.string "you understand them better.$"
 
 Johto_MrPokemonsHouse_Text_83EDFA9::
 	.string "OAK: Aha! So you’re {PLAYER}!\p"
-	.string "I’m OAK! A POKéMON researcher.\p"
+	.string "I’m OAK! A MOéMON researcher.\p"
 	.string "I was just visiting my old friend\n"
-	.string "MR. POKéMON.\p"
+	.string "MR. MOéMON.\p"
 	.string "I heard you were running an errand\n"
 	.string "for PROF.ELM, so I waited here.\p"
-	.string "Oh! What’s this? A rare POKéMON!\p"
+	.string "Oh! What’s this? A rare MOéMON!\p"
 	.string "Let’s see…\n"
 	.string "Hm, I see!\p"
 	.string "I understand why PROF.ELM gave\n"
-	.string "you a POKéMON for this errand.\p"
+	.string "you a MOéMON for this errand.\p"
 	.string "To researchers like PROF.ELM and\n"
-	.string "I, POKéMON are our friends.\p"
+	.string "I, MOéMON are our friends.\p"
 	.string "He saw that you would treat your\n"
-	.string "POKéMON with love and care.\p"
+	.string "MOéMON with love and care.\p"
 	.string "…Ah!\p"
 	.string "You seem to be dependable. How\n"
 	.string "would you like to help me out?\p"
 	.string "See? This is the latest version of\n"
-	.string "the POKéDEX.\p"
+	.string "the MOéDEX.\p"
 	.string "It automatically records data on\n"
-	.string "POKéMON you’ve seen or caught.\p"
+	.string "MOéMON you’ve seen or caught.\p"
 	.string "It’s a hi-tech encyclopedia!\p"
 	.string "It shows their habitats, how\n"
 	.string "they evolve, and their moves.$"
 
 Johto_MrPokemonsHouse_Text_83EE24C::
-	.string "{PLAYER} received POKéDEX!$"
+	.string "{PLAYER} received MOéDEX!$"
 
 Johto_MrPokemonsHouse_Text_83EE261::
-	.string "Go meet many kinds of POKéMON and\n"
-	.string "complete that POKéDEX!\p"
+	.string "Go meet many kinds of MOéMON and\n"
+	.string "complete that MOéDEX!\p"
 	.string "But I’ve stayed too long.\p"
 	.string "I have to get to GOLDENROD\n"
 	.string "for my usual radio show.\p"

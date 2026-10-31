@@ -94,7 +94,7 @@ Kanto_ViridianCity_Mart_Text_8440596::
 
 Kanto_ViridianCity_Mart_Text_84405E5::
 	.string "{PLAYER} received OAK’S PARCEL\n"
-	.string "from the POKéMON MART clerk.$"
+	.string "from the MOéMON MART clerk.$"
 
 Kanto_ViridianCity_Mart_Text_844061B::
 	.string "Okay, thanks! Please say hi to\n"
@@ -106,5 +106,5 @@ Kanto_ViridianCity_Mart_Text_8440651::
 
 Kanto_ViridianCity_Mart_Text_8440688::
 	.string "I’ve got to buy some POTIONS.\p"
-	.string "You never know when your POKéMON\n"
+	.string "You never know when your MOéMON\n"
 	.string "will need quick healing.$"

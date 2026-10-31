@@ -164,7 +164,7 @@ Kanto_Route14_EventScript_845AFA9::
 	end
 
 Kanto_Route14_Text_843610C::
-	.string "You should review your POKéMON’s\n"
+	.string "You should review your MOéMON’s\n"
 	.string "moves from the team menu.$"
 
 Kanto_Route14_Text_8436147::
@@ -175,14 +175,14 @@ Kanto_Route14_Text_8436162::
 	.string "as you earn BADGES.$"
 
 Kanto_Route14_Text_8436198::
-	.string "My bird POKéMON should be ready\n"
+	.string "My bird MOéMON should be ready\n"
 	.string "for battle.$"
 
 Kanto_Route14_Text_84361C4::
 	.string "Not ready yet!$"
 
 Kanto_Route14_Text_84361D3::
-	.string "My bird POKéMON need to learn\n"
+	.string "My bird MOéMON need to learn\n"
 	.string "better moves.$"
 
 Kanto_Route14_Text_84361FF::
@@ -195,13 +195,13 @@ Kanto_Route14_Text_843627A::
 	.string "Aww, bummer!$"
 
 Kanto_Route14_Text_8436287::
-	.string "Try teaching POKéMON a move that’s\n"
+	.string "Try teaching MOéMON a move that’s\n"
 	.string "the same type as it.\p"
 	.string "That apparently boosts the power\n"
 	.string "of the move.$"
 
 Kanto_Route14_Text_84362ED::
-	.string "Have you taught your bird POKéMON\n"
+	.string "Have you taught your bird MOéMON\n"
 	.string "how to FLY?\p"
 	.string "You’ll be able to soar with it into\n"
 	.string "the sky!$"
@@ -210,7 +210,7 @@ Kanto_Route14_Text_8436348::
 	.string "Shot down in flames!$"
 
 Kanto_Route14_Text_843635D::
-	.string "Bird POKéMON are my one true love.\n"
+	.string "Bird MOéMON are my one true love.\n"
 	.string "I don’t want to raise anything else.$"
 
 Kanto_Route14_Text_84363A5::
@@ -223,7 +223,7 @@ Kanto_Route14_Text_84363D6::
 
 Kanto_Route14_Text_84363E9::
 	.string "Well, the winged mirages are the\n"
-	.string "legendary bird POKéMON.\p"
+	.string "legendary bird MOéMON.\p"
 	.string "There are three of them: ARTICUNO,\n"
 	.string "ZAPDOS, and MOLTRES.$"
 
@@ -259,7 +259,7 @@ Kanto_Route14_Text_843655D::
 	.string "You!?$"
 
 Kanto_Route14_Text_8436569::
-	.string "Raising POKéMON is a drag, man.$"
+	.string "Raising MOéMON is a drag, man.$"
 
 Kanto_Route14_Text_8436589::
 	.string "We ride out here because of the\n"
@@ -269,13 +269,13 @@ Kanto_Route14_Text_84365BB::
 	.string "Wipeout!$"
 
 Kanto_Route14_Text_84365C4::
-	.string "It’s cool you made your POKéMON so\n"
+	.string "It’s cool you made your MOéMON so\n"
 	.string "strong.\p"
 	.string "Might is right!\n"
 	.string "And you know it!$"
 
 Kanto_Route14_Text_8436610::
-	.string "POKéMON battle?\n"
+	.string "MOéMON battle?\n"
 	.string "Cool! Rumble!$"
 
 Kanto_Route14_Text_843662E::
@@ -302,7 +302,7 @@ Kanto_Route14_Text_84366D9::
 
 Kanto_Route14_Text_84366FA::
 	.string "KIRI: We can battle if you have\n"
-	.string "two POKéMON.$"
+	.string "two MOéMON.$"
 
 Kanto_Route14_Text_8436727::
 	.string "JAN: KIRI, here we go!\n"
@@ -318,22 +318,22 @@ Kanto_Route14_Text_8436768::
 
 Kanto_Route14_Text_843679F::
 	.string "JAN: You want to battle?\n"
-	.string "You don’t have enough POKéMON.$"
+	.string "You don’t have enough MOéMON.$"
 
 Kanto_Route14_Text_846F867::
 	.string "I used TMs to teach good moves\n"
-	.string "to my POKéMON.$"
+	.string "to my MOéMON.$"
 
 Kanto_Route14_Text_846F895::
-	.string "My bird POKéMON should be ready\n"
+	.string "My bird MOéMON should be ready\n"
 	.string "for battle this time.$"
 
 Kanto_Route14_Text_846F8CB::
-	.string "Are you using TMs on POKéMON?\n"
+	.string "Are you using TMs on MOéMON?\n"
 	.string "Just holding them is useless.$"
 
 Kanto_Route14_Text_846F907::
-	.string "Have you taught your bird POKéMON\n"
+	.string "Have you taught your bird MOéMON\n"
 	.string "how to FLY?\p"
 	.string "You’ll be able to soar with it into\n"
 	.string "the sky! Give it a try.$"
@@ -361,7 +361,7 @@ Kanto_Route14_Text_846FA44::
 	.string "the wide-open spaces.$"
 
 Kanto_Route14_Text_846FA7C::
-	.string "POKéMON battle, right?\n"
+	.string "MOéMON battle, right?\n"
 	.string "Cool! Rumble!$"
 
 Kanto_Route14_Text_846FAA1::

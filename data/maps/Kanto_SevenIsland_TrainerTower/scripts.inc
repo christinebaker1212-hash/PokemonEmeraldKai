@@ -66,14 +66,14 @@ Kanto_SevenIsland_TrainerTower_Text_843C526::
 
 Kanto_SevenIsland_TrainerTower_Text_843C59B::
 	.string "Somewhere on this island, peculiar\n"
-	.string "POKéMON are sleeping.$"
+	.string "MOéMON are sleeping.$"
 
 Kanto_SevenIsland_TrainerTower_Text_843C5D4::
 	.string "What an amazing TRAINER!$"
 
 Kanto_SevenIsland_TrainerTower_Text_843C5ED::
 	.string "Somewhere on this island, peculiar\n"
-	.string "POKéMON are sleeping.\p"
+	.string "MOéMON are sleeping.\p"
 	.string "Could it be that they’re waiting\n"
 	.string "for you?$"
 
@@ -89,4 +89,4 @@ Kanto_SevenIsland_TrainerTower_Text_847177C::
 
 Kanto_SevenIsland_TrainerTower_Text_8471794::
 	.string "Somewhere on this island, peculiar\n"
-	.string "POKéMON are sleeping.$"
+	.string "MOéMON are sleeping.$"

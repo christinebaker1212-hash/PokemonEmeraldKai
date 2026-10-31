@@ -177,7 +177,7 @@ Kanto_Route8_EventScript_845A80B::
 	end
 
 Kanto_Route8_Text_843438C::
-	.string "You look good at POKéMON, but how\n"
+	.string "You look good at MOéMON, but how\n"
 	.string "is your chemistry grade?$"
 
 Kanto_Route8_Text_84343C7::
@@ -217,11 +217,11 @@ Kanto_Route8_Text_84344D7::
 	.string "Why??$"
 
 Kanto_Route8_Text_84344E2::
-	.string "When POKéMON grow up, they get\n"
+	.string "When MOéMON grow up, they get\n"
 	.string "ugly! They shouldn’t evolve.$"
 
 Kanto_Route8_Text_843451E::
-	.string "School is fun, but so are POKéMON.$"
+	.string "School is fun, but so are MOéMON.$"
 
 Kanto_Route8_Text_8434541::
 	.string "You made it clear to me that\n"
@@ -250,7 +250,7 @@ Kanto_Route8_Text_8434641::
 
 Kanto_Route8_Text_843466D::
 	.string "Look what you did to my poor, cute\n"
-	.string "POKéMON!$"
+	.string "MOéMON!$"
 
 Kanto_Route8_Text_8434699::
 	.string "SAFFRON’s gatekeeper won’t let us\n"
@@ -265,12 +265,12 @@ Kanto_Route8_Text_8434716::
 	.string "Missed the big chance!$"
 
 Kanto_Route8_Text_843472D::
-	.string "Playing games and POKéMON are like\n"
+	.string "Playing games and MOéMON are like\n"
 	.string "eating peanuts! I just can’t stop!$"
 
 Kanto_Route8_Text_8434773::
 	.string "What’s a cute, round, and fluffy\n"
-	.string "POKéMON?$"
+	.string "MOéMON?$"
 
 Kanto_Route8_Text_843479D::
 	.string "Stop!\p"
@@ -279,7 +279,7 @@ Kanto_Route8_Text_843479D::
 Kanto_Route8_Text_84347C4::
 	.string "I read that CLEFAIRY evolves when\n"
 	.string "it’s exposed to a MOON STONE.\p"
-	.string "I read that in a POKéMON JOURNAL.\n"
+	.string "I read that in a MOéMON JOURNAL.\n"
 	.string "I wonder if it’s true?$"
 
 Kanto_Route8_Text_843483D::
@@ -295,12 +295,12 @@ Kanto_Route8_Text_8434897::
 	.string "We used our twin power…$"
 
 Kanto_Route8_Text_84348B9::
-	.string "ELI: I caught my POKéMON with\n"
+	.string "ELI: I caught my MOéMON with\n"
 	.string "ANNE!$"
 
 Kanto_Route8_Text_84348DD::
 	.string "ELI: We can’t battle if you don’t\n"
-	.string "have two POKéMON.$"
+	.string "have two MOéMON.$"
 
 Kanto_Route8_Text_8434911::
 	.string "ANNE: We’ll shock you with our twin\n"
@@ -310,12 +310,12 @@ Kanto_Route8_Text_843493C::
 	.string "ANNE: Our twin power…$"
 
 Kanto_Route8_Text_8434952::
-	.string "ANNE: I’m raising POKéMON with\n"
+	.string "ANNE: I’m raising MOéMON with\n"
 	.string "ELI.$"
 
 Kanto_Route8_Text_8434976::
 	.string "ANNE: Hi, hi! Let’s battle!\n"
-	.string "But bring two POKéMON.$"
+	.string "But bring two MOéMON.$"
 
 Kanto_Route8_Text_84349A9::
 	.string "My bike’s acting up, man.$"
@@ -340,7 +340,7 @@ Kanto_Route8_Text_8434A41::
 	.string "all just because of this.$"
 
 Kanto_Route8_Text_846EC39::
-	.string "You are good at POKéMON, but how\n"
+	.string "You are good at MOéMON, but how\n"
 	.string "is your chemistry grade?$"
 
 Kanto_Route8_Text_846EC73::
@@ -358,7 +358,7 @@ Kanto_Route8_Text_846ECDA::
 
 Kanto_Route8_Text_846ED19::
 	.string "School is fun, but I still think\n"
-	.string "POKéMON are fun, too.$"
+	.string "MOéMON are fun, too.$"
 
 Kanto_Route8_Text_846ED50::
 	.string "MEOWTH and PERSIAN are so cute,\n"
@@ -374,7 +374,7 @@ Kanto_Route8_Text_846EDC5::
 
 Kanto_Route8_Text_846EDFB::
 	.string "What’s a cute, round, and fluffy\n"
-	.string "POKéMON?\p"
+	.string "MOéMON?\p"
 	.string "You already know, don’t you?$"
 
 Kanto_Route8_Text_846EE42::

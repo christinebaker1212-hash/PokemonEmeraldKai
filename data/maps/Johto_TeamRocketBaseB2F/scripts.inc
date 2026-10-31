@@ -690,7 +690,7 @@ Johto_TeamRocketBaseB2F_Text_83E9E7B::
 
 Johto_TeamRocketBaseB2F_Text_83E9F20::
 	.string "LANCE: Quickly {PLAYER}, choose\n"
-	.string "your POKéMON!$"
+	.string "your MOéMON!$"
 
 Johto_TeamRocketBaseB2F_Text_83EA26C::
 	.string "Tch, you really are strong.\n"
@@ -725,7 +725,7 @@ Johto_TeamRocketBaseB2F_Text_83EA45C::
 	.string "That should stop this machine\n"
 	.string "from transmitting that strange\l"
 	.string "signal.\p"
-	.string "It’s no fault of the POKéMON, so\n"
+	.string "It’s no fault of the MOéMON, so\n"
 	.string "it makes me feel guilty.\p"
 	.string "{PLAYER}, let’s split the job.$"
 
@@ -739,14 +739,14 @@ Johto_TeamRocketBaseB2F_Text_83EA59D::
 	.string "normal.\p"
 	.string "You’re the hero! Let me thank\n"
 	.string "you on behalf of all the\l"
-	.string "POKéMON.\p"
+	.string "MOéMON.\p"
 	.string "Oh, yes. You should take this.\n"
 	.string "I found it here, but I don’t\l"
 	.string "have any need for it.$"
 
 Johto_TeamRocketBaseB2F_Text_83EA67E::
 	.string "That’s WHIRLPOOL. Teach it to a\n"
-	.string "POKéMON to get across wild water.\p"
+	.string "MOéMON to get across wild water.\p"
 	.string "But keep this in mind.\p"
 	.string "You can use that out of battle\n"
 	.string "only with the BADGE from\l"
@@ -755,7 +755,7 @@ Johto_TeamRocketBaseB2F_Text_83EA67E::
 Johto_TeamRocketBaseB2F_Text_83EA71D::
 	.string "{PLAYER}…\p"
 	.string "The journey to becoming the\n"
-	.string "POKéMON MASTER is long and\l"
+	.string "MOéMON MASTER is long and\l"
 	.string "difficult.\p"
 	.string "Knowing that, will you keep\n"
 	.string "going?\p"
@@ -769,13 +769,13 @@ Johto_TeamRocketBaseB2F_Text_83EA71D::
 
 Johto_TeamRocketBaseB2F_Text_83EA95D::
 	.string "LANCE: Are you all right?\p"
-	.string "Your POKéMON are hurt and tired.\p"
+	.string "Your MOéMON are hurt and tired.\p"
 	.string "Here, give them some of my\n"
 	.string "medicine.$"
 
 Johto_TeamRocketBaseB2F_Text_83EA9BD::
 	.string "LANCE: {PLAYER}, let’s give it\n"
-	.string "our best for POKéMON.$"
+	.string "our best for MOéMON.$"
 
 Johto_TeamRocketBaseB2F_Text_83EA9EC::
 	.string "The door won’t open?\p"
@@ -801,7 +801,7 @@ Johto_TeamRocketBaseB2F_Text_83EAAEA::
 Johto_TeamRocketBaseB2F_Text_83EAAFB::
 	.string "I got wiped out on the last\n"
 	.string "mission by a kid too.\p"
-	.string "When we were abducting POKéMON,\n"
+	.string "When we were abducting MOéMON,\n"
 	.string "this kid with long red hair and\l"
 	.string "mean-looking eyes just\l"
 	.string "creamed me…$"

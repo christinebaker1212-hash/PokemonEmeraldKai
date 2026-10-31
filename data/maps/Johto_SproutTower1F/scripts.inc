@@ -58,7 +58,7 @@ Johto_SproutTower1F_EventScript_83FA3E9::
 Johto_SproutTower1F_Text_83FA3F6::
 	.string "We stand guard in this tower.\p"
 	.string "Here, we express our gratitude\n"
-	.string "to honor all POKéMON.$"
+	.string "to honor all MOéMON.$"
 
 Johto_SproutTower1F_Text_83FA449::
 	.string "Th-Thank you!$"
@@ -75,7 +75,7 @@ Johto_SproutTower1F_Text_83FA4AB::
 
 Johto_SproutTower1F_Text_83FA4DC::
 	.string "SPROUT TOWER was built long ago\n"
-	.string "as a place for POKéMON training.$"
+	.string "as a place for MOéMON training.$"
 
 Johto_SproutTower1F_Text_83FA51D::
 	.string "A BELLSPROUT over 100 feet\n"

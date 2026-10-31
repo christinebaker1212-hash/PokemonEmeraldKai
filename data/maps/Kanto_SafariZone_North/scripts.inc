@@ -60,7 +60,7 @@ Kanto_SafariZone_North_Text_8427FD5::
 
 Kanto_SafariZone_North_Text_8427FDC::
 	.string "TRAINER TIPS\p"
-	.string "POKéMON hide in tall grass.\p"
+	.string "MOéMON hide in tall grass.\p"
 	.string "Zigzag through grassy areas to\n"
 	.string "flush them out.$"
 

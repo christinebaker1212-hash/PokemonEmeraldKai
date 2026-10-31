@@ -226,12 +226,12 @@ Kanto_ViridianCity_Movement_8415941:
 
 Kanto_ViridianCity_Text_842E15B::
 	.string "Those POKé BALLS at your waist!\n"
-	.string "You have POKéMON, don’t you?\p"
+	.string "You have MOéMON, don’t you?\p"
 	.string "It’s great that you can carry and\n"
-	.string "use POKéMON anytime, anywhere.$"
+	.string "use MOéMON anytime, anywhere.$"
 
 Kanto_ViridianCity_Text_842E1D9::
-	.string "This POKéMON GYM is always closed.\p"
+	.string "This MOéMON GYM is always closed.\p"
 	.string "I wonder who the LEADER is?$"
 
 Kanto_ViridianCity_Text_842E218::
@@ -239,7 +239,7 @@ Kanto_ViridianCity_Text_842E218::
 
 Kanto_ViridianCity_Text_842E238::
 	.string "You want to know about the two\n"
-	.string "kinds of caterpillar POKéMON?$"
+	.string "kinds of caterpillar MOéMON?$"
 
 Kanto_ViridianCity_Text_842E275::
 	.string "Oh, okay then!$"
@@ -247,7 +247,7 @@ Kanto_ViridianCity_Text_842E275::
 Kanto_ViridianCity_Text_842E284::
 	.string "CATERPIE has no poison,\n"
 	.string "but WEEDLE does.\p"
-	.string "Watch that your POKéMON aren’t\n"
+	.string "Watch that your MOéMON aren’t\n"
 	.string "stabbed by WEEDLE’s POISON STING.$"
 
 Kanto_ViridianCity_Text_842E2EE::
@@ -273,9 +273,9 @@ Kanto_ViridianCity_Text_842E3EE::
 	.string "But I made it too strong.\n"
 	.string "It gave me a headache…\p"
 	.string "Incidentally, are you filling your\n"
-	.string "POKéDEX?\p"
+	.string "MOéDEX?\p"
 	.string "At first, focus on weakening the\n"
-	.string "POKéMON before trying to catch it.$"
+	.string "MOéMON before trying to catch it.$"
 
 Kanto_ViridianCity_Text_842E4D3::
 	.string "VIRIDIAN CITY \n"
@@ -283,20 +283,20 @@ Kanto_ViridianCity_Text_842E4D3::
 
 Kanto_ViridianCity_Text_842E4FF::
 	.string "TRAINER TIPS\p"
-	.string "Catch POKéMON and expand your\n"
+	.string "Catch MOéMON and expand your\n"
 	.string "collection.\p"
 	.string "The more you have, the easier it\n"
 	.string "is to battle.$"
 
 Kanto_ViridianCity_Text_842E565::
 	.string "TRAINER TIPS\p"
-	.string "The battle moves of POKéMON are\n"
+	.string "The battle moves of MOéMON are\n"
 	.string "limited by their POWER POINTS, PP.\p"
 	.string "To replenish PP, rest your tired\n"
-	.string "POKéMON at a POKéMON CENTER.$"
+	.string "MOéMON at a MOéMON CENTER.$"
 
 Kanto_ViridianCity_Text_842E5F3::
-	.string "VIRIDIAN CITY POKéMON GYM$"
+	.string "VIRIDIAN CITY MOéMON GYM$"
 
 Kanto_ViridianCity_Text_842E60D::
 	.string "VIRIDIAN GYM’s doors are locked…$"

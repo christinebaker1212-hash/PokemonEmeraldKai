@@ -98,13 +98,13 @@ Johto_EcruteakPokecenter1F_Text_83CED42::
 
 Johto_EcruteakPokecenter1F_Text_83CED8E::
 	.string "I just finished adjustments on my\n"
-	.string "POKéMON STORAGE SYSTEM.\p"
+	.string "MOéMON STORAGE SYSTEM.\p"
 	.string "You know that PC you use to store\n"
-	.string "all your POKéMON?\p"
+	.string "all your MOéMON?\p"
 	.string "I developed that myself!\p"
 	.string "Now that I’ve installed this one,\n"
 	.string "my PC is running at all\l"
-	.string "POKéMON CENTERS in JOHTO and KANTO.\p"
+	.string "MOéMON CENTERS in JOHTO and KANTO.\p"
 	.string "I have to hurry on back to\n"
 	.string "GOLDENROD and see my folks. Feel\l"
 	.string "free to visit anytime!\p"
@@ -114,12 +114,12 @@ Johto_EcruteakPokecenter1F_Text_83CEECF::
 	.string "The way the KIMONO GIRLS dance is\n"
 	.string "marvelous.\p"
 	.string "Just like the way they use their\n"
-	.string "POKéMON.$"
+	.string "MOéMON.$"
 
 Johto_EcruteakPokecenter1F_Text_83CEFBD::
 	.string "MORTY, the GYM LEADER, is soooo\n"
 	.string "cool.\p"
-	.string "His POKéMON are really tough too.$"
+	.string "His MOéMON are really tough too.$"
 
 Johto_EcruteakPokecenter1F_Text_83CF005::
 	.string "LAKE OF RAGE…\p"

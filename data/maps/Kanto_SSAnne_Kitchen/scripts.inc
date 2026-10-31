@@ -84,7 +84,7 @@ Kanto_SSAnne_Kitchen_Text_8423A8B::
 Kanto_SSAnne_Kitchen_Text_8423ABE::
 	.string "Did you hear about SNORLAX?\n"
 	.string "It’s a glutton.\p"
-	.string "No other POKéMON eats and sleeps\n"
+	.string "No other MOéMON eats and sleeps\n"
 	.string "the way SNORLAX can and does!$"
 
 Kanto_SSAnne_Kitchen_Text_8423B29::

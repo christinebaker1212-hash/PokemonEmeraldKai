@@ -536,7 +536,7 @@ Kanto_ThreeIsland_Text_84329E2::
 Kanto_ThreeIsland_Text_8432A1F::
 	.string "Thank you! Those goons were\n"
 	.string "nothing but bad trouble.\p"
-	.string "Oh, look, your POKéMON got hurt\n"
+	.string "Oh, look, your MOéMON got hurt\n"
 	.string "on my account.$"
 
 Kanto_ThreeIsland_Text_8432A83::
@@ -549,7 +549,7 @@ Kanto_ThreeIsland_Text_8432AA0::
 
 Kanto_ThreeIsland_Text_8432AB6::
 	.string "You’ve got seriously impressive\n"
-	.string "POKéMON with you.$"
+	.string "MOéMON with you.$"
 
 Kanto_ThreeIsland_Text_8432AE8::
 	.string "It’d be fantastic if someone as\n"

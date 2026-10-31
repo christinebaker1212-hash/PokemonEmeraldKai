@@ -113,11 +113,11 @@ Kanto_LavenderTown_VolunteerPokemonHouse_Text_84437B4::
 	.string "This is really MR. FUJI’s house.\p"
 	.string "He’s really kind.\p"
 	.string "He looks after abandoned and\n"
-	.string "orphaned POKéMON.$"
+	.string "orphaned MOéMON.$"
 
 Kanto_LavenderTown_VolunteerPokemonHouse_Text_8443816::
 	.string "It’s so warm!\n"
-	.string "POKéMON are so nice to hug.$"
+	.string "MOéMON are so nice to hug.$"
 
 Kanto_LavenderTown_VolunteerPokemonHouse_Text_8443840::
 	.string "NIDORINO: Gaoo!$"
@@ -127,38 +127,38 @@ Kanto_LavenderTown_VolunteerPokemonHouse_Text_8443850::
 
 Kanto_LavenderTown_VolunteerPokemonHouse_Text_8443861::
 	.string "MR. FUJI: {PLAYER}…\p"
-	.string "Your POKéDEX quest is one that\n"
+	.string "Your MOéDEX quest is one that\n"
 	.string "requires strong dedication.\p"
-	.string "Without deep love for POKéMON,\n"
+	.string "Without deep love for MOéMON,\n"
 	.string "your quest may fail.\p"
 	.string "I’m not sure if this will help you,\n"
 	.string "but I’d like you to have it.$"
 
 Kanto_LavenderTown_VolunteerPokemonHouse_Text_844391F::
-	.string "{PLAYER} received a POKé FLUTE\n"
+	.string "{PLAYER} received a MOé FLUTE\n"
 	.string "from MR. FUJI.$"
 
 Kanto_LavenderTown_VolunteerPokemonHouse_Text_8443947::
-	.string "Upon hearing the POKé FLUTE,\n"
-	.string "sleeping POKéMON will spring awake.\p"
-	.string "Try using it on POKéMON that are\n"
+	.string "Upon hearing the MOé FLUTE,\n"
+	.string "sleeping MOéMON will spring awake.\p"
+	.string "Try using it on MOéMON that are\n"
 	.string "sleeping obstacles.$"
 
 Kanto_LavenderTown_VolunteerPokemonHouse_Text_84439BD::
 	.string "You must make room for this!$"
 
 Kanto_LavenderTown_VolunteerPokemonHouse_Text_84439DA::
-	.string "MR. FUJI: Has my POKé FLUTE\n"
+	.string "MR. FUJI: Has my MOé FLUTE\n"
 	.string "helped you?$"
 
 Kanto_LavenderTown_VolunteerPokemonHouse_Text_8443A02::
-	.string "POKéMON FAN MAGAZINE\n"
+	.string "MOéMON FAN MAGAZINE\n"
 	.string "Monthly Grand Prize Drawing!\p"
 	.string "The application form is…\p"
 	.string "Gone! It’s been clipped out.\n"
 	.string "Someone must have applied already.$"
 
 Kanto_LavenderTown_VolunteerPokemonHouse_Text_8443A8D::
-	.string "POKéMON magazines line the shelf.\p"
-	.string "POKéMON INSIDER…\p"
-	.string "POKéMON FAN…$"
+	.string "MOéMON magazines line the shelf.\p"
+	.string "MOéMON INSIDER…\p"
+	.string "MOéMON FAN…$"

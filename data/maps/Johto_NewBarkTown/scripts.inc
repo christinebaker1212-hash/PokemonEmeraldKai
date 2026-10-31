@@ -362,12 +362,12 @@ Johto_NewBarkTown_Text_83E1683::
 Johto_NewBarkTown_Text_83E16A9::
 	.string "Wait, {PLAYER}!\p"
 	.string "It’s dangerous to go out\n"
-	.string "without a POKéMON!\p"
-	.string "Wild POKéMON jump out of the grass\n"
+	.string "without a MOéMON!\p"
+	.string "Wild MOéMON jump out of the grass\n"
 	.string "on the way to the next town.$"
 
 Johto_NewBarkTown_Text_83E171F::
-	.string "Oh! Your POKéMON is adorable!\n"
+	.string "Oh! Your MOéMON is adorable!\n"
 	.string "I wish I had one!$"
 
 Johto_NewBarkTown_Text_83E174F::
@@ -382,7 +382,7 @@ Johto_NewBarkTown_Text_83E1793::
 Johto_NewBarkTown_Text_83E17C5::
 	.string ". . .\p"
 	.string "So this is the famous ELM\n"
-	.string "POKéMON LAB…$"
+	.string "MOéMON LAB…$"
 
 Johto_NewBarkTown_Text_83E17F2::
 	.string "…What are you staring at?$"
@@ -405,14 +405,14 @@ Johto_NewBarkTown_Text_83E1879::
 
 Johto_NewBarkTown_Text_83E18D9::
 	.string "Wait! That crossing leads to the\n"
-	.string "POKéMON LEAGUE.\p"
+	.string "MOéMON LEAGUE.\p"
 	.string "You still have things to do in\n"
 	.string "JOHTO. Don’t rush off just yet!$"
 
 Johto_NewBarkTown_Text_83E1949::
 	.string "You can head for the LEAGUE now!\n"
 	.string "It’s a dangerous crossing.\p"
-	.string "Take care of your POKéMON.\n"
+	.string "Take care of your MOéMON.\n"
 	.string "Good luck!$"
 
 Johto_NewBarkTown_Text_8403CE8::

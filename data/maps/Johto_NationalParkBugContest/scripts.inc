@@ -322,14 +322,14 @@ Johto_NationalParkBugContest_Text_83C3765::
 	.string "It is time for the judging!$"
 
 Johto_NationalParkBugContest_Text_83C37DF::
-	.string "You did not catch a POKéMON, so\n"
+	.string "You did not catch a MOéMON, so\n"
 	.string "there is nothing to judge.$"
 
 Johto_NationalParkBugContest_Text_83C381A::
 	.string "We will judge the best of the\n"
-	.string "POKéMON you caught.\p"
+	.string "MOéMON you caught.\p"
 	.string "The other contestants caught new\n"
-	.string "POKéMON during this contest too.$"
+	.string "MOéMON during this contest too.$"
 
 Johto_NationalParkBugContest_Text_83C388E::
 	.string "Third place: {STR_VAR_1}!\p"
@@ -394,15 +394,15 @@ Johto_NationalParkBugContest_Text_83E0978::
 	.string "Don’t bother me.$"
 
 Johto_NationalParkBugContest_Text_83E09A4::
-	.string "ED: My PARASECT puts POKéMON to\n"
+	.string "ED: My PARASECT puts MOéMON to\n"
 	.string "sleep with SPORE.$"
 
 Johto_NationalParkBugContest_Text_83E09D6::
 	.string "SHAUN: I’m not concerned about\n"
 	.string "winning.\p"
-	.string "I’m just looking for rare POKéMON.$"
+	.string "I’m just looking for rare MOéMON.$"
 
 Johto_NationalParkBugContest_Text_83E0A21::
 	.string "BARRY: You should weaken bug\n"
-	.string "POKéMON first,\p"
+	.string "MOéMON first,\p"
 	.string "then throw a BALL.$"

@@ -188,7 +188,7 @@ Kanto_SaffronCity_Text_84312B1::
 
 Kanto_SaffronCity_Text_84312D1::
 	.string "With SILPH under control, we can\n"
-	.string "exploit POKéMON around the world!\p"
+	.string "exploit MOéMON around the world!\p"
 	.string "We’ll get stinking rich, yeahah!$"
 
 Kanto_SaffronCity_Text_8431335::
@@ -235,9 +235,9 @@ Kanto_SaffronCity_Text_8431530::
 	.string "FIGHTING DOJO$"
 
 Kanto_SaffronCity_Text_843153E::
-	.string "SAFFRON CITY POKéMON GYM\n"
+	.string "SAFFRON CITY MOéMON GYM\n"
 	.string "LEADER: SABRINA\l"
-	.string "The Master of PSYCHIC POKéMON!$"
+	.string "The Master of PSYCHIC MOéMON!$"
 
 Kanto_SaffronCity_Text_8431586::
 	.string "TRAINER TIPS\p"
@@ -252,7 +252,7 @@ Kanto_SaffronCity_Text_843162E::
 	.string "The new GREAT BALL offers improved\n"
 	.string "catching rates.\p"
 	.string "Try it on those hard-to-catch\n"
-	.string "POKéMON.$"
+	.string "MOéMON.$"
 
 Kanto_SaffronCity_Text_8431695::
 	.string "SILPH CO. OFFICE BUILDING$"

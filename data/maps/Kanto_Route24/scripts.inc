@@ -203,7 +203,7 @@ Kanto_Route24_Text_8438FC4::
 	.string "By the way, how would you like to\n"
 	.string "join TEAM ROCKET?\p"
 	.string "We’re a group of professional\n"
-	.string "criminals specializing in POKéMON!\p"
+	.string "criminals specializing in MOéMON!\p"
 	.string "Want to join?\p"
 	.string "Are you sure?\p"
 	.string "Come on, join us!\p"

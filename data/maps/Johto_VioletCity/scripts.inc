@@ -333,17 +333,17 @@ Johto_VioletCity_Text_83FEC5D::
 	.string "in SPROUT TOWER.\p"
 	.string "They say that GHOST-type\n"
 	.string "moves can bypass the defenses\p"
-	.string "of tough POKéMON like ONIX\n"
+	.string "of tough MOéMON like ONIX\n"
 	.string "and GEODUDE.$"
 
 Johto_VioletCity_Text_83FECEA::
-	.string "Hey, you’re a POKéMON trainer?\p"
+	.string "Hey, you’re a MOéMON trainer?\p"
 	.string "If you head to the ACADEMY,\n"
 	.string "you might learn something new!$"
 
 Johto_VioletCity_Text_83FED44::
 	.string "FALKNER, from the VIOLET\n"
-	.string "POKéMON GYM, is a fine trainer!\p"
+	.string "MOéMON GYM, is a fine trainer!\p"
 	.string "He inherited his father’s gym\n"
 	.string "and has done a great job with\l"
 	.string "it.$"
@@ -354,15 +354,15 @@ Johto_VioletCity_Text_83FEDBD::
 	.string "and dances! Cool!$"
 
 Johto_VioletCity_Text_83FEE32::
-	.string "VIOLET CITY POKéMON GYM\p"
+	.string "VIOLET CITY MOéMON GYM\p"
 	.string "LEADER: FALKNER, The Elegant\n"
-	.string "Master of Flying POKéMON$"
+	.string "Master of Flying MOéMON$"
 
 Johto_VioletCity_Text_83FEEFF::
 	.string "A message from PROF. ELM arrived:\p"
 	.string "We discovered something about\n"
 	.string "the EGG!\p"
-	.string "My assistant is at the POKéMON\n"
+	.string "My assistant is at the MOéMON\n"
 	.string "CENTER in VIOLET CITY.\p"
 	.string "Please talk to him.$"
 
@@ -372,7 +372,7 @@ Johto_VioletCity_Text_83FEF92::
 
 Johto_VioletCity_Text_83FEFB3::
 	.string "I see...\p"
-	.string "So it was handed from MR. POKéMON\n"
+	.string "So it was handed from MR. MOéMON\n"
 	.string "to PROF.ELM, then from \l"
 	.string "PROF.ELM to you.\p"
 	.string "Now I get it...$"

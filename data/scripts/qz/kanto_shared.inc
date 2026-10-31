@@ -2079,7 +2079,7 @@ Quetzal_Text_8366334::
 	.string "the START menu.\p"
 	.string "Choose the trade option.\n"
 	.string "Each player needs at least\l"
-	.string "two POKéMON in their party.\p"
+	.string "two MOéMON in their party.\p"
 	.string "Your game and cheat modes must\n"
 	.string "match. Challenges may prevent\l"
 	.string "some trades.\p"
@@ -2132,10 +2132,10 @@ Quetzal_Text_843564A::
 	.string "And returned to the mountains.$"
 
 Quetzal_Text_8435693::
-	.string "Want to use the POKé FLUTE?$"
+	.string "Want to use the MOé FLUTE?$"
 
 Quetzal_Text_84356AF::
-	.string "{PLAYER} played the POKé FLUTE.$"
+	.string "{PLAYER} played the MOé FLUTE.$"
 
 Quetzal_Text_843E142::
 	.string "BLUE: Yeah!\n"
@@ -2176,7 +2176,7 @@ Quetzal_Text_8455AC6::
 	.string "You don’t have the {STR_VAR_1}\n"
 	.string "yet.\p"
 	.string "You have to have it to get to\n"
-	.string "the POKéMON LEAGUE.$"
+	.string "the MOéMON LEAGUE.$"
 
 Quetzal_Text_8455B3E::
 	.string "You can pass here only if you have\n"
@@ -2201,7 +2201,7 @@ Quetzal_Text_8455C4B::
 	.string "room for the {STR_VAR_2}.$"
 
 Quetzal_Text_8455C79::
-	.string "I’m looking for the POKéMON\n"
+	.string "I’m looking for the MOéMON\n"
 	.string "{STR_VAR_1}!\p"
 	.string "Wanna trade one for my\n"
 	.string "{STR_VAR_2}?$"
@@ -2286,8 +2286,8 @@ Quetzal_Text_8455F46::
 	.string "BOX “{STR_VAR_1}.”$"
 
 Quetzal_Text_8455FC6::
-	.string "There’s no more room for POKéMON!\p"
-	.string "The POKéMON BOXES are full and\n"
+	.string "There’s no more room for MOéMON!\p"
+	.string "The MOéMON BOXES are full and\n"
 	.string "can’t accept any more!$"
 
 Quetzal_Text_84563A6::
@@ -2309,7 +2309,7 @@ Quetzal_Text_84565ED::
 	.string "Which floor do you want?$"
 
 Quetzal_Text_84566B6::
-	.string "Okay, I’ll take your POKéMON for a\n"
+	.string "Okay, I’ll take your MOéMON for a\n"
 	.string "few seconds.$"
 
 Quetzal_Text_84566E6::
@@ -2317,7 +2317,7 @@ Quetzal_Text_84566E6::
 
 Quetzal_Text_8456700::
 	.string "Thank you for waiting.\n"
-	.string "We’ve restored your POKéMON to\l"
+	.string "We’ve restored your MOéMON to\l"
 	.string "full health.$"
 
 Quetzal_Text_845675A::
@@ -2352,16 +2352,16 @@ Quetzal_Text_846B56A::
 	.string "Would you like to use ROCK SMASH?$"
 
 Quetzal_Text_846B5AF::
-	.string "It’s a rugged rock, but a POKéMON\n"
+	.string "It’s a rugged rock, but a MOéMON\n"
 	.string "may be able to smash it.$"
 
 Quetzal_Text_846B658::
-	.string "It’s a big boulder, but a POKéMON\n"
+	.string "It’s a big boulder, but a MOéMON\n"
 	.string "may be able to push it aside.\p"
 	.string "Would you like to use STRENGTH?$"
 
 Quetzal_Text_846B702::
-	.string "It’s a big boulder, but a POKéMON\n"
+	.string "It’s a big boulder, but a MOéMON\n"
 	.string "may be able to push it aside.$"
 
 Quetzal_Text_846B742::
@@ -2370,7 +2370,7 @@ Quetzal_Text_846B742::
 
 Quetzal_Text_8471CE4::
 	.string "Move training is handled directly\n"
-	.string "from your POKéMON team menu.$"
+	.string "from your MOéMON team menu.$"
 
 Quetzal_Text_8473701::
 	.string "I'm sorry, the TRAINER TOWER is\n"

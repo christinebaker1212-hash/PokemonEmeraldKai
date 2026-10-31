@@ -57,7 +57,7 @@ Kanto_CeruleanCity_BikeShop_EventScript_841AC74::
 
 Kanto_CeruleanCity_BikeShop_Text_8442A2A::
 	.string "Welcome to our BIKE SHOP!\p"
-	.string "We work with the POKéMON FAN CLUB\n"
+	.string "We work with the MOéMON FAN CLUB\n"
 	.string "in VERMILION CITY.\p"
 	.string "Get a BIKE VOUCHER there and\n"
 	.string "exchange it here for a BICYCLE!$"
@@ -92,7 +92,7 @@ Kanto_CeruleanCity_BikeShop_Text_8442BCF::
 
 Kanto_CeruleanCity_BikeShop_Text_8442C37::
 	.string "These BIKES are so cool!\p"
-	.string "I’ll visit the POKéMON FAN CLUB\n"
+	.string "I’ll visit the MOéMON FAN CLUB\n"
 	.string "in VERMILION to ask for a voucher!$"
 
 Kanto_CeruleanCity_BikeShop_Text_8442C93::

@@ -239,7 +239,7 @@ Kanto_PokemonTower_7F_Text_842AAD6::
 	.string "This old guy marched right up to\n"
 	.string "our HIDEOUT.\p"
 	.string "Then, he starts ranting about how\n"
-	.string "TEAM ROCKET’s abusing POKéMON.\p"
+	.string "TEAM ROCKET’s abusing MOéMON.\p"
 	.string "So, we’re just talking it over as\n"
 	.string "adults.$"
 
@@ -248,7 +248,7 @@ Kanto_PokemonTower_7F_Text_842AB6F::
 	.string "No more!$"
 
 Kanto_PokemonTower_7F_Text_842AB80::
-	.string "POKéMON are only good for making\n"
+	.string "MOéMON are only good for making\n"
 	.string "money. Why not use them?\p"
 	.string "You stay out of our business!$"
 
@@ -272,5 +272,5 @@ Kanto_PokemonTower_7F_Text_842AC32::
 	.string "finally left us.\p"
 	.string "I must thank you for your kind\n"
 	.string "concern.\p"
-	.string "Follow me to my home, POKéMON\n"
+	.string "Follow me to my home, MOéMON\n"
 	.string "HOUSE, at the foot of this tower.$"

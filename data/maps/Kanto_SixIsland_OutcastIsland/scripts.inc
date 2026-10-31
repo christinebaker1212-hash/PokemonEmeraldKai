@@ -80,7 +80,7 @@ Kanto_SixIsland_OutcastIsland_EventScript_846C176::
 	end
 
 Kanto_SixIsland_OutcastIsland_Text_843B643::
-	.string "There’re no rare POKéMON around\n"
+	.string "There’re no rare MOéMON around\n"
 	.string "these parts! Not a one!\p"
 	.string "That burns me up, man.\n"
 	.string "I’ll take it out on you!$"
@@ -90,7 +90,7 @@ Kanto_SixIsland_OutcastIsland_Text_843B6AB::
 
 Kanto_SixIsland_OutcastIsland_Text_843B6B1::
 	.string "So listen, you haven’t seen any\n"
-	.string "rare POKéMON, have you?$"
+	.string "rare MOéMON, have you?$"
 
 Kanto_SixIsland_OutcastIsland_Text_843B6E9::
 	.string "I’m having no luck at all.\n"
@@ -117,7 +117,7 @@ Kanto_SixIsland_OutcastIsland_Text_843B7BA::
 	.string "I’m beat…$"
 
 Kanto_SixIsland_OutcastIsland_Text_843B7E3::
-	.string "It’s not so easy sending POKéMON\n"
+	.string "It’s not so easy sending MOéMON\n"
 	.string "out while swimming, you know?$"
 
 Kanto_SixIsland_OutcastIsland_Text_843B822::
@@ -145,7 +145,7 @@ Kanto_SixIsland_OutcastIsland_Text_843B917::
 Kanto_SixIsland_OutcastIsland_Text_843B949::
 	.string "AVA: You’re challenging us to\n"
 	.string "a battle?\p"
-	.string "You’ll need at least two POKéMON\n"
+	.string "You’ll need at least two MOéMON\n"
 	.string "if you want to do that.$"
 
 Kanto_SixIsland_OutcastIsland_Text_843B9AA::
@@ -163,7 +163,7 @@ Kanto_SixIsland_OutcastIsland_Text_843BA09::
 Kanto_SixIsland_OutcastIsland_Text_843BA4B::
 	.string "GEB: Please battle against me and\n"
 	.string "my sister!\p"
-	.string "…Oh, you don’t have two POKéMON?$"
+	.string "…Oh, you don’t have two MOéMON?$"
 
 Kanto_SixIsland_OutcastIsland_Text_8471376::
 	.string "I’m still having no luck at all.\n"

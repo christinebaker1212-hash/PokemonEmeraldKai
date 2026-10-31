@@ -185,4 +185,4 @@ Kanto_Route23_EventScript_8457D2F::
 
 Kanto_Route23_Text_8438F02::
 	.string "VICTORY ROAD GATE -\n"
-	.string "POKéMON LEAGUE$"
+	.string "MOéMON LEAGUE$"

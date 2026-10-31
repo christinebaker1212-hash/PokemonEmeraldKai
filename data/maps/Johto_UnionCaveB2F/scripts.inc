@@ -51,7 +51,7 @@ Johto_UnionCaveB2F_Text_83FE333::
 	.string "You’ve got dazzling style!$"
 
 Johto_UnionCaveB2F_Text_83FE34E::
-	.string "Your POKéMON style is stunning and\n"
+	.string "Your MOéMON style is stunning and\n"
 	.string "colorful, I admit.\p"
 	.string "You’ll just keep getting better!$"
 
@@ -66,7 +66,7 @@ Johto_UnionCaveB2F_Text_83FE3E9::
 	.string "improve.$"
 
 Johto_UnionCaveB2F_Text_83FE417::
-	.string "If the POKéMON I liked were there,\n"
+	.string "If the MOéMON I liked were there,\n"
 	.string "I’d go anywhere.\p"
 	.string "That’s what a real trainer does.$"
 
@@ -74,6 +74,6 @@ Johto_UnionCaveB2F_Text_83FE46C::
 	.string "I’d rather pet my babies than this!$"
 
 Johto_UnionCaveB2F_Text_83FE490::
-	.string "Just once a week, a POKéMON comes to\n"
+	.string "Just once a week, a MOéMON comes to\n"
 	.string "the water’s edge.\p"
-	.string "I wanted to see that POKéMON…$"
+	.string "I wanted to see that MOéMON…$"

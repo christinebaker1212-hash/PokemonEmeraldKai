@@ -12,7 +12,7 @@ Kanto_SSAnne_2F_Room3_EventScript_8410862::
 	end
 
 Kanto_SSAnne_2F_Room3_Text_84243EF::
-	.string "Ah, yes, I have seen some POKéMON\n"
+	.string "Ah, yes, I have seen some MOéMON\n"
 	.string "ferry people across the water!$"
 
 Kanto_SSAnne_2F_Room3_Text_8424430::

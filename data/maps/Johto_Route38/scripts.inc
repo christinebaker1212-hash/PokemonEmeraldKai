@@ -66,7 +66,7 @@ Johto_Route38_EventScript_83F27F8::
 
 Johto_Route38_Text_83F2805::
 	.string "Fly high into the sky,\n"
-	.string "my beloved bird POKéMON!$"
+	.string "my beloved bird MOéMON!$"
 
 Johto_Route38_Text_83F2835::
 	.string "I feel like just flying\n"
@@ -74,7 +74,7 @@ Johto_Route38_Text_83F2835::
 
 Johto_Route38_Text_83F2857::
 	.string "I plan to train in CIANWOOD CITY\n"
-	.string "to teach my POKéMON how to FLY.$"
+	.string "to teach my MOéMON how to FLY.$"
 
 Johto_Route38_Text_83F2898::
 	.string "Let me try something\n"
@@ -87,13 +87,13 @@ Johto_Route38_Text_83F28BE::
 Johto_Route38_Text_83F28DE::
 	.string "I have to take so many\n"
 	.string "tests, I don’t have much\l"
-	.string "time for POKéMON.\p"
+	.string "time for MOéMON.\p"
 	.string "So when I do get to play,\n"
 	.string "I really concentrate.$"
 
 Johto_Route38_Text_83F2950::
 	.string "You seem to be good at\n"
-	.string "POKéMON.\p"
+	.string "MOéMON.\p"
 	.string "If you are, how about\n"
 	.string "giving me some advice?$"
 
@@ -109,20 +109,20 @@ Johto_Route38_Text_83F29C0::
 Johto_Route38_Text_83F2A04::
 	.string "Hi! Aren’t you a cute\n"
 	.string "trainer!\p"
-	.string "May I see your POKéMON?$"
+	.string "May I see your MOéMON?$"
 
 Johto_Route38_Text_83F2A3B::
 	.string "I’m glad I got to see\n"
-	.string "your POKéMON!$"
+	.string "your MOéMON!$"
 
 Johto_Route38_Text_83F2A5F::
-	.string "When I see POKéMON, it\n"
+	.string "When I see MOéMON, it\n"
 	.string "seems to soothe my nerves.$"
 
 Johto_Route38_Text_83F2A91::
 	.string "I’ve been overseas, so I\n"
 	.string "know about all sorts of\l"
-	.string "POKéMON!$"
+	.string "MOéMON!$"
 
 Johto_Route38_Text_83F2ACB::
 	.string "Your skill is world class!$"
@@ -130,10 +130,10 @@ Johto_Route38_Text_83F2ACB::
 Johto_Route38_Text_83F2AE6::
 	.string "All kinds of people around\n"
 	.string "the world live happily with\l"
-	.string "POKéMON.$"
+	.string "MOéMON.$"
 
 Johto_Route38_Text_83F2B26::
-	.string "Don’t you think my POKéMON\n"
+	.string "Don’t you think my MOéMON\n"
 	.string "and I are beautiful?$"
 
 Johto_Route38_Text_83F2B56::

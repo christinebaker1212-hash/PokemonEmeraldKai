@@ -99,18 +99,18 @@ Kanto_Route11_EastEntrance_2F_EventScript_841FDEA::
 Kanto_Route11_EastEntrance_2F_Text_844EE87::
 	.string "Hi! Remember me?\n"
 	.string "I’m one of PROF. OAK’s AIDES.\p"
-	.string "If your POKéDEX has complete data\n"
+	.string "If your MOéDEX has complete data\n"
 	.string "on {STR_VAR_1} species, I’m supposed to\l"
 	.string "give you a reward.\p"
 	.string "PROF. OAK entrusted me with the\n"
 	.string "{STR_VAR_2} for you.\p"
 	.string "So, {PLAYER}, let me ask you.\p"
 	.string "Have you gathered data on at least\n"
-	.string "{STR_VAR_1} kinds of POKéMON?$"
+	.string "{STR_VAR_1} kinds of MOéMON?$"
 
 Kanto_Route11_EastEntrance_2F_Text_844EF86::
 	.string "Great! You have caught or owned\n"
-	.string "{STR_VAR_3} kinds of POKéMON!\p"
+	.string "{STR_VAR_3} kinds of MOéMON!\p"
 	.string "Congratulations!\n"
 	.string "Here you go!$"
 
@@ -133,7 +133,7 @@ Kanto_Route11_EastEntrance_2F_Text_844EFFB::
 Kanto_Route11_EastEntrance_2F_Text_844F12C::
 	.string "Let’s see what the binoculars have\n"
 	.string "to show…\p"
-	.string "A big POKéMON is asleep on a road!$"
+	.string "A big MOéMON is asleep on a road!$"
 
 Kanto_Route11_EastEntrance_2F_Text_844F17B::
 	.string "Let’s see what the binoculars have\n"

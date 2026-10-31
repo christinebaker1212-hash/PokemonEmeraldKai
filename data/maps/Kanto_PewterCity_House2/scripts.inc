@@ -12,15 +12,15 @@ Kanto_PewterCity_House2_EventScript_841A7E4::
 	end
 
 Kanto_PewterCity_House2_Text_8441AEA::
-	.string "POKéMON learn new techniques as\n"
+	.string "MOéMON learn new techniques as\n"
 	.string "they grow.\p"
 	.string "But some moves must be taught to\n"
 	.string "them by people.$"
 
 Kanto_PewterCity_House2_Text_8441B46::
-	.string "A POKéMON becomes easier to \n"
+	.string "A MOéMON becomes easier to \n"
 	.string "catch if it has a status problem.\p"
 	.string "Sleep, poison, burn, or paralysis…\n"
 	.string "Those are all effective.\p"
-	.string "But catching POKéMON is never\n"
+	.string "But catching MOéMON is never\n"
 	.string "a sure thing!$"

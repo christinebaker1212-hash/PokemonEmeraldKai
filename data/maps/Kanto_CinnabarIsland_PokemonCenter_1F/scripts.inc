@@ -166,7 +166,7 @@ Kanto_CinnabarIsland_PokemonCenter_1F_Text_844A519::
 	.string "to check the UNION ROOM.$"
 
 Kanto_CinnabarIsland_PokemonCenter_1F_Text_844A60C::
-	.string "POKéMON can still learn techniques\n"
+	.string "MOéMON can still learn techniques\n"
 	.string "after canceling evolution.\p"
 	.string "Evolution can wait until new moves\n"
 	.string "have been learned.$"

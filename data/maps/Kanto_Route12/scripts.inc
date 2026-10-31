@@ -199,7 +199,7 @@ Kanto_Route12_EventScript_846BC73::
 	end
 
 Kanto_Route12_Text_84355DE::
-	.string "A POKéMON is sprawled out in\n"
+	.string "A MOéMON is sprawled out in\n"
 	.string "a deep and comfortable slumber.$"
 
 Kanto_Route12_Text_84356C9::
@@ -223,7 +223,7 @@ Kanto_Route12_Text_843573C::
 
 Kanto_Route12_Text_843574F::
 	.string "With a better ROD, I could catch\n"
-	.string "better POKéMON…$"
+	.string "better MOéMON…$"
 
 Kanto_Route12_Text_8435780::
 	.string "I’m searching for a MOON STONE.\n"
@@ -233,13 +233,13 @@ Kanto_Route12_Text_84357B4::
 	.string "Oww!$"
 
 Kanto_Route12_Text_84357B9::
-	.string "I could have made my POKéMON\n"
+	.string "I could have made my MOéMON\n"
 	.string "evolve with a MOON STONE.\p"
 	.string "I would have won then, I bet.$"
 
 Kanto_Route12_Text_843580E::
 	.string "Electricity is my specialty.\p"
-	.string "I don’t know a thing about POKéMON\n"
+	.string "I don’t know a thing about MOéMON\n"
 	.string "of the sea, though.$"
 
 Kanto_Route12_Text_8435862::
@@ -247,10 +247,10 @@ Kanto_Route12_Text_8435862::
 
 Kanto_Route12_Text_843586D::
 	.string "Water conducts electricity, so you\n"
-	.string "should zap sea POKéMON.$"
+	.string "should zap sea MOéMON.$"
 
 Kanto_Route12_Text_84358A8::
-	.string "The FISHING FOOL versus POKéMON\n"
+	.string "The FISHING FOOL versus MOéMON\n"
 	.string "KID!$"
 
 Kanto_Route12_Text_84358CD::
@@ -259,7 +259,7 @@ Kanto_Route12_Text_84358CD::
 Kanto_Route12_Text_84358DD::
 	.string "I guess you get to be good at\n"
 	.string "what you like.\p"
-	.string "Well, you beat me at POKéMON,\n"
+	.string "Well, you beat me at MOéMON,\n"
 	.string "but you can’t top me at fishing.$"
 
 Kanto_Route12_Text_8435949::
@@ -310,7 +310,7 @@ Kanto_Route12_Text_8435B09::
 	.string "JES: GIA and I, we’ll be\n"
 	.string "together forever.\p"
 	.string "We won’t battle unless you have\n"
-	.string "two POKéMON of your own.$"
+	.string "two MOéMON of your own.$"
 
 Kanto_Route12_Text_8435B6D::
 	.string "GIA: Hey, JES…\p"
@@ -326,7 +326,7 @@ Kanto_Route12_Text_8435BA9::
 Kanto_Route12_Text_8435BCF::
 	.string "GIA: I can’t bear to battle\n"
 	.string "without my JES!\p"
-	.string "Don’t you have one more POKéMON?$"
+	.string "Don’t you have one more MOéMON?$"
 
 Kanto_Route12_Text_846F443::
 	.string "Yeah!\n"
@@ -344,11 +344,11 @@ Kanto_Route12_Text_846F4AE::
 Kanto_Route12_Text_846F4E1::
 	.string "Electricity has always been my\n"
 	.string "specialty.\p"
-	.string "I don’t know a thing about POKéMON\n"
+	.string "I don’t know a thing about MOéMON\n"
 	.string "of the sea, though.$"
 
 Kanto_Route12_Text_846F542::
-	.string "The FISHING FOOL vs. POKéMON KID!\n"
+	.string "The FISHING FOOL vs. MOéMON KID!\n"
 	.string "Another round, fight!$"
 
 Kanto_Route12_Text_846F57A::

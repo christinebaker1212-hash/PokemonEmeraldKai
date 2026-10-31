@@ -100,21 +100,21 @@ Johto_VioletGym_EventScript_83FF8F1::
 	end
 
 Johto_VioletGym_Text_83FF1C2::
-	.string "I’m FALKNER, the VIOLET POKéMON\n"
+	.string "I’m FALKNER, the VIOLET MOéMON\n"
 	.string "GYM leader!\p"
 	.string "People say you can clip\n"
-	.string "FLYING-type POKéMON’s wings\p"
+	.string "FLYING-type MOéMON’s wings\p"
 	.string "with a jolt of electricity…\n"
 	.string "I won’t allow such insults to bird\l"
-	.string "POKéMON!\p"
+	.string "MOéMON!\p"
 	.string "I’ll show you the real power\n"
-	.string "of the magnificent bird POKéMON!$"
+	.string "of the magnificent bird MOéMON!$"
 
 Johto_VioletGym_Text_83FF2A8::
 	.string "…Darn! My dad’s cherished bird\n"
-	.string "POKéMON…\p"
+	.string "MOéMON…\p"
 	.string "All right. Take this.\p"
-	.string "It’s the official POKéMON LEAGUE\n"
+	.string "It’s the official MOéMON LEAGUE\n"
 	.string "ZEPHYRBADGE.$"
 
 Johto_VioletGym_Text_83FF314::
@@ -122,8 +122,8 @@ Johto_VioletGym_Text_83FF314::
 
 Johto_VioletGym_Text_83FF32D::
 	.string "ZEPHYRBADGE raises the ATTACK\n"
-	.string "power of POKéMON.\p"
-	.string "It also enables POKéMON to use\n"
+	.string "power of MOéMON.\p"
+	.string "It also enables MOéMON to use\n"
 	.string "FLASH, if they can learn it,\l"
 	.string "anytime.\p"
 	.string "Here--take this too.$"
@@ -131,11 +131,11 @@ Johto_VioletGym_Text_83FF32D::
 Johto_VioletGym_Text_83FF3B7::
 	.string "HEAVY-DUTY BOOTS protect against\n"
 	.string "hazards when entering battle.\p"
-	.string "My flying POKéMON appreciate\n"
+	.string "My flying MOéMON appreciate\n"
 	.string "being able to land safely!$"
 
 Johto_VioletGym_Text_83FF42E::
-	.string "There are POKéMON GYMS in cities\n"
+	.string "There are MOéMON GYMS in cities\n"
 	.string "and towns ahead.\p"
 	.string "You should test your skills at\n"
 	.string "these GYMS.\p"
@@ -145,7 +145,7 @@ Johto_VioletGym_Text_83FF42E::
 Johto_VioletGym_Text_83FF5B4::
 	.string "The keyword is guts!\p"
 	.string "Those here are training night and\n"
-	.string "day to become bird POKéMON masters.\p"
+	.string "day to become bird MOéMON masters.\p"
 	.string "Come on!$"
 
 Johto_VioletGym_Text_83FF618::
@@ -181,7 +181,7 @@ Johto_VioletGym_Text_83FF6E0::
 	.string "and ROCK-type moves, but watch out\l"
 	.string "for MUD-SLAP!\p"
 	.string "If you want more help, go visit the\n"
-	.string "POKéMON ACADEMY.\p"
+	.string "MOéMON ACADEMY.\p"
 	.string "The students there really know\n"
 	.string "their stuff!$"
 
@@ -191,9 +191,9 @@ Johto_VioletGym_Text_83FF898::
 	.string "time at all!$"
 
 Johto_VioletGym_Text_83FF8FC::
-	.string "VIOLET CITY POKéMON GYM$"
+	.string "VIOLET CITY MOéMON GYM$"
 
 Johto_VioletGym_Text_83FF914::
-	.string "VIOLET CITY POKéMON GYM\p"
+	.string "VIOLET CITY MOéMON GYM\p"
 	.string "FALKNER’S CERTIFIED TRAINERS:\n"
 	.string "{PLAYER}$"

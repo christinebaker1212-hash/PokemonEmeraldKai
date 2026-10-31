@@ -127,5 +127,5 @@ Kanto_PokemonTower_5F_Text_842A884::
 Kanto_PokemonTower_5F_Text_842A8C1::
 	.string "Entered the purified and protected\n"
 	.string "zone.\p"
-	.string "{PLAYER}’s POKéMON were fully\n"
+	.string "{PLAYER}’s MOéMON were fully\n"
 	.string "healed.$"

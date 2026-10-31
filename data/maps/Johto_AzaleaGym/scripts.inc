@@ -704,19 +704,19 @@ Johto_AzaleaGym_Movement_83C4D14:
 	step_end
 
 Johto_AzaleaGym_Text_83C4D3F::
-	.string "AZALEA POKéMON GYM$"
+	.string "AZALEA MOéMON GYM$"
 
 Johto_AzaleaGym_Text_83C4D52::
-	.string "AZALEA TOWN POKéMON GYM\p"
+	.string "AZALEA TOWN MOéMON GYM\p"
 	.string "BUGSY’S CERTIFIED TRAINERS:\n"
 	.string "{PLAYER}$"
 
 Johto_AzaleaGym_Text_83C4D89::
 	.string "I’m BUGSY!\p"
 	.string "I never lose when it comes\n"
-	.string "to bug POKéMON.\p"
+	.string "to bug MOéMON.\p"
 	.string "My research is going to make me the\n"
-	.string "authority on bug POKéMON!\p"
+	.string "authority on bug MOéMON!\p"
 	.string "For example, did you know\n"
 	.string "that the move CUT is\l"
 	.string "actually a BUG-type move?\p"
@@ -725,7 +725,7 @@ Johto_AzaleaGym_Text_83C4D89::
 
 Johto_AzaleaGym_Text_83C4E7B::
 	.string "Whoa, amazing! You’re an\n"
-	.string "expert on POKéMON!\p"
+	.string "expert on MOéMON!\p"
 	.string "My research isn’t complete\n"
 	.string "yet.\p"
 	.string "OK, you win. Take this\n"
@@ -737,10 +737,10 @@ Johto_AzaleaGym_Text_83C4EE5::
 Johto_AzaleaGym_Text_83C4EFC::
 	.string "Do you know the benefits\n"
 	.string "of HIVEBADGE?\p"
-	.string "If you have it, POKéMON up\n"
+	.string "If you have it, MOéMON up\n"
 	.string "to L30 will obey you,\l"
 	.string "even traded ones.\p"
-	.string "POKéMON that know CUT will be able\n"
+	.string "MOéMON that know CUT will be able\n"
 	.string "to use it outside of battle too.\p"
 	.string "Here, I also want you to\n"
 	.string "have this.$"
@@ -748,28 +748,28 @@ Johto_AzaleaGym_Text_83C4EFC::
 Johto_AzaleaGym_Text_83C4FCE::
 	.string "That’s BLACK AUGURITE.\p"
 	.string "It can awaken a rugged new form\n"
-	.string "in a certain Bug-type POKéMON.\p"
+	.string "in a certain Bug-type MOéMON.\p"
 	.string "Isn’t that great?\n"
 	.string "I discovered it!$"
 
 Johto_AzaleaGym_Text_83C5047::
-	.string "Bug POKéMON are deep. There are\n"
+	.string "Bug MOéMON are deep. There are\n"
 	.string "many mysteries to be explored.\p"
 	.string "Study your favorites thoroughly.$"
 
 Johto_AzaleaGym_Text_83C519D::
-	.string "Bug POKéMON evolve young. So they\n"
+	.string "Bug MOéMON evolve young. So they\n"
 	.string "get stronger that much faster.$"
 
 Johto_AzaleaGym_Text_83C51DE::
 	.string "Just evolving isn’t enough!$"
 
 Johto_AzaleaGym_Text_83C51FA::
-	.string "POKéMON become stronger\n"
+	.string "MOéMON become stronger\n"
 	.string "if they evolve. Really!$"
 
 Johto_AzaleaGym_Text_83C522A::
-	.string "Bug POKéMON are cool and tough!\n"
+	.string "Bug MOéMON are cool and tough!\n"
 	.string "I’ll prove it to you!$"
 
 Johto_AzaleaGym_Text_83C5260::
@@ -777,13 +777,13 @@ Johto_AzaleaGym_Text_83C5260::
 
 Johto_AzaleaGym_Text_83C527E::
 	.string "They’re so cool, but most girls\n"
-	.string "don’t like bug POKéMON.\p"
+	.string "don’t like bug MOéMON.\p"
 	.string "I don’t know why…$"
 
 Johto_AzaleaGym_Text_83C52C8::
 	.string "You saved all the SLOWPOKE?\n"
 	.string "Whew, you’re mighty!\p"
-	.string "But my grown-up POKéMON are\n"
+	.string "But my grown-up MOéMON are\n"
 	.string "pretty tough too!$"
 
 Johto_AzaleaGym_Text_83C5327::
@@ -819,19 +819,19 @@ Johto_AzaleaGym_Text_83C547E::
 	.string "goodness!$"
 
 Johto_AzaleaGym_Text_83C549E::
-	.string "MAY: Our bug POKéMON lost!\n"
+	.string "MAY: Our bug MOéMON lost!\n"
 	.string "Oh, what a shame.\p"
 	.string "BUGSY’s won’t lose though!\p"
 	.string "His PINECO makes short work\n"
-	.string "of ROCK-type POKéMON!$"
+	.string "of ROCK-type MOéMON!$"
 
 Johto_AzaleaGym_Text_83C5518::
 	.string "Yo, challenger!\p"
 	.string "BUGSY’s young, but his knowledge\n"
-	.string "of bug POKéMON is for real.\p"
+	.string "of bug MOéMON is for real.\p"
 	.string "It’s going to be tough\n"
 	.string "without my advice.\p"
-	.string "Let’s see… BUGSY’s bagworm POKéMON\n"
+	.string "Let’s see… BUGSY’s bagworm MOéMON\n"
 	.string "knows a move that covers its\l"
 	.string "ROCK-type weakness.\p"
 	.string "He’s also developed a new version\n"
@@ -843,4 +843,4 @@ Johto_AzaleaGym_Text_83C565F::
 	.string "Well done! That was a great\n"
 	.string "clash of talented young trainers.\p"
 	.string "With people like you, the\n"
-	.string "future of POKéMON is bright!$"
+	.string "future of MOéMON is bright!$"

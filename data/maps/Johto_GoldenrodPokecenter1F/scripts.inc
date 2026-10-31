@@ -48,7 +48,7 @@ Johto_GoldenrodPokecenter1F_Text_83D68BF::
 	.string "trainer, like you!$"
 
 Johto_GoldenrodPokecenter1F_Text_83D6916::
-	.string "This is a special POKéMON CENTER.\n"
+	.string "This is a special MOéMON CENTER.\n"
 	.string "The roof is made of gold!$"
 
 Johto_GoldenrodPokecenter1F_Text_83D6952::
@@ -57,9 +57,9 @@ Johto_GoldenrodPokecenter1F_Text_83D6952::
 	.string "anything!$"
 
 Johto_GoldenrodPokecenter1F_Text_83D69A0::
-	.string "A higher level POKéMON doesn’t\n"
+	.string "A higher level MOéMON doesn’t\n"
 	.string "always win.\p"
 	.string "After all, it may have a type\n"
 	.string "disadvantage.\p"
 	.string "I don’t think there is a single\n"
-	.string "POKéMON that is the toughest.$"
+	.string "MOéMON that is the toughest.$"

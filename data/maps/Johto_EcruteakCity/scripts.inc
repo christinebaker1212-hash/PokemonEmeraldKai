@@ -258,31 +258,31 @@ Johto_EcruteakCity_Text_83CD70A::
 	.string "I hear there are ghosts in it now.$"
 
 Johto_EcruteakCity_Text_83CD77B::
-	.string "Three big POKéMON ran off in different\n"
+	.string "Three big MOéMON ran off in different\n"
 	.string "directions. What were they?$"
 
 Johto_EcruteakCity_Text_83CD7BE::
 	.string "I heard a rumor about OLIVINE\n"
 	.string "LIGHTHOUSE.\p"
-	.string "The POKéMON that serves as the\n"
+	.string "The MOéMON that serves as the\n"
 	.string "beacon fell ill. Sounds like they\l"
 	.string "are in trouble.$"
 
 Johto_EcruteakCity_Text_83CD839::
-	.string "The POKéMON at OLIVINE LIGHTHOUSE\n"
+	.string "The MOéMON at OLIVINE LIGHTHOUSE\n"
 	.string "has been cured.\p"
 	.string "Boats can safely sail out to sea at\n"
 	.string "night again.$"
 
 Johto_EcruteakCity_Text_83CD89C::
-	.string "I hear POKéMON are rampaging at the\n"
+	.string "I hear MOéMON are rampaging at the\n"
 	.string "LAKE OF RAGE. I’d like to see that.$"
 
 Johto_EcruteakCity_Text_83CD8E4::
 	.string "In the distant past…\p"
 	.string "This tower burned in a fire. Three\n"
-	.string "nameless POKéMON perished in it.\p"
-	.string "A rainbow-colored POKéMON descended\n"
+	.string "nameless MOéMON perished in it.\p"
+	.string "A rainbow-colored MOéMON descended\n"
 	.string "from the sky and resurrected them…\p"
 	.string "It’s a legend that has been passed\n"
 	.string "down by ECRUTEAK GYM LEADERS.\p"
@@ -311,7 +311,7 @@ Johto_EcruteakCity_Text_83CDB21::
 	.string "No Trespassing by the Unworthy.$"
 
 Johto_EcruteakCity_Text_83CDB5E::
-	.string "ECRUTEAK CITY POKéMON GYM\n"
+	.string "ECRUTEAK CITY MOéMON GYM\n"
 	.string "LEADER: MORTY\p"
 	.string "The Mystic Seer of the Future$"
 

@@ -405,14 +405,14 @@ Johto_GoldenrodUndergroundSwitchRoomEntrances_Text_83DA7E9::
 
 Johto_GoldenrodUndergroundSwitchRoomEntrances_Text_83DA8CC::
 	.string "…Why… Why do I lose?\p"
-	.string "I’ve assembled the toughest POKéMON.\p"
+	.string "I’ve assembled the toughest MOéMON.\p"
 	.string "I didn’t ease up on the gas.\p"
 	.string "So why do I lose?$"
 
 Johto_GoldenrodUndergroundSwitchRoomEntrances_Text_83DA935::
 	.string "…I don’t understand…\p"
 	.string "Is what that LANCE guy said true?\p"
-	.string "That I don’t treat POKéMON properly?\p"
+	.string "That I don’t treat MOéMON properly?\p"
 	.string "Love…\p"
 	.string "Trust…\p"
 	.string "Are they really what I lack?\p"
@@ -421,7 +421,7 @@ Johto_GoldenrodUndergroundSwitchRoomEntrances_Text_83DA935::
 	.string "But it’s not going to end here.\p"
 	.string "Not now. Not because of this.\p"
 	.string "I won’t give up my dream of becoming\n"
-	.string "the world’s best POKéMON trainer!$"
+	.string "the world’s best MOéMON trainer!$"
 
 Johto_GoldenrodUndergroundSwitchRoomEntrances_Text_83DAAF3::
 	.string "Open one shutter, another closes.\p"

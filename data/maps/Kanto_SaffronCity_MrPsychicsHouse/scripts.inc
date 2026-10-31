@@ -41,7 +41,7 @@ Kanto_SaffronCity_MrPsychicsHouse_Text_844C0C7::
 Kanto_SaffronCity_MrPsychicsHouse_Text_844C0F2::
 	.string "You already know, don’t you?\n"
 	.string "A MOON STONE causes evolution in\l"
-	.string "certain POKéMON.$"
+	.string "certain MOéMON.$"
 
 Kanto_SaffronCity_MrPsychicsHouse_Text_844C141::
 	.string "Where do you plan to put this?\n"

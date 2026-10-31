@@ -62,7 +62,7 @@ Kanto_FuchsiaCity_House2_Text_84491DE::
 	.string "A crummy OLD ROD could only catch\n"
 	.string "MAGIKARP, yes?\p"
 	.string "But with a GOOD ROD, you can\n"
-	.string "catch much better POKéMON.$"
+	.string "catch much better MOéMON.$"
 
 Kanto_FuchsiaCity_House2_Text_844927F::
 	.string "Oh…\n"

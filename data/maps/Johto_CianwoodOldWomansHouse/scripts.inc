@@ -34,7 +34,7 @@ Johto_CianwoodOldWomansHouse_Text_83CAC79::
 	.string "I don’t remember the last time\n"
 	.string "someone came to visit me.\p"
 	.string "When I was young, I was a\n"
-	.string "POKéMON Trainer, too.\l"
+	.string "MOéMON Trainer, too.\l"
 	.string "I tried to reach the tower and\l"
 	.string "dive into the ocean.\p"
 	.string "I put a lot of effort into many\n"

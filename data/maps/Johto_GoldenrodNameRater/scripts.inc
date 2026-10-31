@@ -24,7 +24,7 @@ Johto_GoldenrodNameRater_EventScript_83D62CD::
 
 Johto_GoldenrodNameRater_Text_83D617A::
 	.string "Have you heard of RADIANT\n"
-	.string "POKéMON?\p"
+	.string "MOéMON?\p"
 	.string "Their colors can be altered by\n"
 	.string "many different palette filters.\p"
 	.string "These filters can affect both\n"

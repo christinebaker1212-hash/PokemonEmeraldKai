@@ -49,7 +49,7 @@ Kanto_SSAnne_Deck_Text_8423916::
 	.string "You’re impressive!$"
 
 Kanto_SSAnne_Deck_Text_8423929::
-	.string "How many kinds of POKéMON do you\n"
+	.string "How many kinds of MOéMON do you\n"
 	.string "think there are in this big world?$"
 
 Kanto_SSAnne_Deck_Text_842396D::
@@ -61,4 +61,4 @@ Kanto_SSAnne_Deck_Text_842398B::
 
 Kanto_SSAnne_Deck_Text_84239A0::
 	.string "My pa said there are 100 kinds of\n"
-	.string "POKéMON. I think there are more.$"
+	.string "MOéMON. I think there are more.$"

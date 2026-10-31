@@ -138,7 +138,7 @@ Johto_LakeOfRageMagikarpHouse_Text_83DE2B3::
 	.string "those men wearing black arrived.$"
 
 Johto_LakeOfRageMagikarpHouse_Text_83DE2F6::
-	.string "I can’t leave you without a POKéMON\n"
+	.string "I can’t leave you without a MOéMON\n"
 	.string "that can battle!$"
 
 Johto_LakeOfRageMagikarpHouse_Text_83DE32B::

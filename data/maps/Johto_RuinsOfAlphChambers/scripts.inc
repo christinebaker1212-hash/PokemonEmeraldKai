@@ -458,11 +458,11 @@ Johto_RuinsOfAlphChambers_Text_83F8465::
 Johto_RuinsOfAlphChambers_Text_83F8476::
 	.string "Welcome to this chamber.\p"
 	.string "There are sliding panels that depict\n"
-	.string "a POKéMON drawn by the ancients.\p"
+	.string "a MOéMON drawn by the ancients.\p"
 	.string "Slide the panels around to form\n"
 	.string "the picture.\p"
 	.string "To the left is a description of\n"
-	.string "the POKéMON.\p"
+	.string "the MOéMON.\p"
 	.string "Scientists in the lab are examin-\n"
 	.string "-ing some newly found patterns.$"
 
@@ -475,17 +475,17 @@ Johto_RuinsOfAlphChambers_Text_83F85B1::
 	.string "This is getting spooky.$"
 
 Johto_RuinsOfAlphChambers_Text_83F85E6::
-	.string "A POKéMON that hid on the sea floor.\n"
+	.string "A MOéMON that hid on the sea floor.\n"
 	.string "Eyes on its back scanned the area.$"
 
 Johto_RuinsOfAlphChambers_Text_83F8665::
-	.string "This flying POKéMON attacked its\n"
+	.string "This flying MOéMON attacked its\n"
 	.string "prey with saw-like fangs.$"
 
 Johto_RuinsOfAlphChambers_Text_83F86A0::
-	.string "This POKéMON drifted in the sea\n"
+	.string "This MOéMON drifted in the sea\n"
 	.string "by twisting its ten tentacles.$"
 
 Johto_RuinsOfAlphChambers_Text_83F86DF::
-	.string "A POKéMON that flew gracefully on\n"
+	.string "A MOéMON that flew gracefully on\n"
 	.string "rainbow-colored wings.$"

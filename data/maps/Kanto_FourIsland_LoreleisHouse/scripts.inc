@@ -53,7 +53,7 @@ Kanto_FourIsland_LoreleisHouse_Text_8453DBE::
 	.string "If anything were to happen on\n"
 	.string "the island where I was born…\p"
 	.string "I wouldn’t know about it if I were\n"
-	.string "in the POKéMON LEAGUE.\p"
+	.string "in the MOéMON LEAGUE.\p"
 	.string "I wonder if that would make me\n"
 	.string "irresponsible to my home…$"
 
@@ -64,7 +64,7 @@ Kanto_FourIsland_LoreleisHouse_Text_8453EA4::
 	.string "That means there isn’t any reason\n"
 	.string "for me to be here all the time.\p"
 	.string "Thank you…\p"
-	.string "I’ll return to the POKéMON LEAGUE\n"
+	.string "I’ll return to the MOéMON LEAGUE\n"
 	.string "in a short while.$"
 
 Kanto_FourIsland_LoreleisHouse_Text_8453F70::
@@ -74,4 +74,4 @@ Kanto_FourIsland_LoreleisHouse_Text_8453F70::
 	.string "That’s all I can do.$"
 
 Kanto_FourIsland_LoreleisHouse_Text_8453FDA::
-	.string "Stuffed POKéMON dolls galore!$"
+	.string "Stuffed MOéMON dolls galore!$"

@@ -220,13 +220,13 @@ Kanto_TwoIsland_Text_84321ED::
 Kanto_TwoIsland_Text_8432222::
 	.string "There’s an old woman who lives in\n"
 	.string "a cottage out on the cape.\p"
-	.string "She gives the eye to POKéMON.\n"
+	.string "She gives the eye to MOéMON.\n"
 	.string "It’s a bit unnerving.$"
 
 Kanto_TwoIsland_Text_8432293::
 	.string "Boing! Boing!\n"
 	.string "Have you tried the jumping game?\p"
-	.string "The POKéMON you can enter…\n"
+	.string "The MOéMON you can enter…\n"
 	.string "Boing!\p"
 	.string "Some go boing!\p"
 	.string "And some go boooooooing!\p"

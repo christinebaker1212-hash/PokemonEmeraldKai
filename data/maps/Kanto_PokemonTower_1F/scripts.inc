@@ -42,17 +42,17 @@ Kanto_PokemonTower_1F_EventScript_8412F6D::
 	end
 
 Kanto_PokemonTower_1F_Text_842A23D::
-	.string "POKéMON TOWER was erected in the\n"
-	.string "memory of POKéMON that died.$"
+	.string "MOéMON TOWER was erected in the\n"
+	.string "memory of MOéMON that died.$"
 
 Kanto_PokemonTower_1F_Text_842A27B::
 	.string "Did you come to pay respects?\p"
-	.string "Bless your POKéMON-loving heart,\n"
+	.string "Bless your MOéMON-loving heart,\n"
 	.string "son.$"
 
 Kanto_PokemonTower_1F_Text_842A2BF::
 	.string "Did you come to pay respects?\p"
-	.string "Bless your POKéMON-loving heart,\n"
+	.string "Bless your MOéMON-loving heart,\n"
 	.string "girl.$"
 
 Kanto_PokemonTower_1F_Text_842A304::

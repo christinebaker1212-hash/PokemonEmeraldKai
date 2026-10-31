@@ -123,21 +123,21 @@ Johto_VioletPokecenter1F_Text_83FFECC::
 	.string "{PLAYER}, long time, no see.\p"
 	.string "PROF.ELM asked me to find you.\p"
 	.string "He has another favor to ask.\p"
-	.string "Would you take the POKéMON EGG?$"
+	.string "Would you take the MOéMON EGG?$"
 
 Johto_VioletPokecenter1F_Text_83FFF3F::
 	.string "{PLAYER}, long time, no see.\p"
 	.string "PROF.ELM asked me to find you.\p"
 	.string "He has another favor to ask.\p"
-	.string "Would you take the POKéMON EGG?\p"
+	.string "Would you take the MOéMON EGG?\p"
 	.string "Oh, wait... You need to make room\n"
 	.string "in your party first.$"
 
 Johto_VioletPokecenter1F_Text_83FFFE9::
-	.string "We discovered that a POKéMON won’t\n"
+	.string "We discovered that a MOéMON won’t\n"
 	.string "hatch until it grows in the EGG.\p"
 	.string "It also has to be with other\n"
-	.string "active POKéMON to hatch.\p"
+	.string "active MOéMON to hatch.\p"
 	.string "{PLAYER}, you’re the only person\n"
 	.string "we can rely on.$"
 
@@ -145,22 +145,22 @@ Johto_VioletPokecenter1F_Text_84000F1::
 	.string "B-but… PROF.ELM asked for you…$"
 
 Johto_VioletPokecenter1F_Text_8400110::
-	.string "While my POKéMON are recovering\n"
+	.string "While my MOéMON are recovering\n"
 	.string "I love to read a good book.$"
 
 Johto_VioletPokecenter1F_Text_84001C3::
 	.string "A guy named BILL made the\n"
-	.string "POKéMON PC storage system.$"
+	.string "MOéMON PC storage system.$"
 
 Johto_VioletPokecenter1F_Text_84001F8::
 	.string "It was around three years ago.\p"
 	.string "TEAM ROCKET was up to no good\n"
-	.string "with POKéMON.\p"
+	.string "with MOéMON.\p"
 	.string "But justice prevailed--a young\n"
 	.string "kid broke ’em up.$"
 
 Johto_VioletPokecenter1F_Text_8400274::
-	.string "POKéMON are smart. They won’t\n"
+	.string "MOéMON are smart. They won’t\n"
 	.string "obey a trainer they don’t respect.\p"
 	.string "Without the right GYM BADGES,\n"
 	.string "they will just do as they please.$"

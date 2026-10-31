@@ -133,10 +133,10 @@ Johto_CianwoodGym_Movement_83CA6F7:
 	step_end
 
 Johto_CianwoodGym_Text_83CA4A7::
-	.string "CIANWOOD CITY POKéMON GYM$"
+	.string "CIANWOOD CITY MOéMON GYM$"
 
 Johto_CianwoodGym_Text_83CA4C1::
-	.string "CIANWOOD CITY POKéMON GYM\p"
+	.string "CIANWOOD CITY MOéMON GYM\p"
 	.string "CHUCK’S CERTIFIED TRAINERS:\n"
 	.string "{PLAYER}$"
 
@@ -144,7 +144,7 @@ Johto_CianwoodGym_Text_83CA6F9::
 	.string "WAHAHAH!\p"
 	.string "So you’ve come this far!\p"
 	.string "Let me tell you, I’m tough!\p"
-	.string "My POKéMON will crush stones and\n"
+	.string "My MOéMON will crush stones and\n"
 	.string "shatter bones!\p"
 	.string "Watch this!$"
 
@@ -156,7 +156,7 @@ Johto_CianwoodGym_Text_83CA773::
 Johto_CianwoodGym_Text_83CA78D::
 	.string "There! Scared now, are you?\p"
 	.string "What? It has nothing to do with\n"
-	.string "POKéMON?\p"
+	.string "MOéMON?\p"
 	.string "That’s true!\p"
 	.string "Come on. We shall do battle!$"
 
@@ -164,15 +164,15 @@ Johto_CianwoodGym_Text_83CA83B::
 	.string "{PLAYER} received STORMBADGE.$"
 
 Johto_CianwoodGym_Text_83CA853::
-	.string "STORMBADGE makes all POKéMON up to\n"
+	.string "STORMBADGE makes all MOéMON up to\n"
 	.string "L70 obey, even traded ones.\p"
-	.string "It also lets your POKéMON use FLY\n"
+	.string "It also lets your MOéMON use FLY\n"
 	.string "when you’re not in a battle.\p"
 	.string "Here, take this too!$"
 
 Johto_CianwoodGym_Text_83CA8E6::
 	.string "That’s a PUNCHING GLOVE.\p"
-	.string "Give it to a POKéMON that fights\n"
+	.string "Give it to a MOéMON that fights\n"
 	.string "with its fists!$"
 
 Johto_CianwoodGym_Text_83CA930::
@@ -182,7 +182,7 @@ Johto_CianwoodGym_Text_83CA930::
 	.string "24 hours a day!$"
 
 Johto_CianwoodGym_Text_83CAA39::
-	.string "My POKéMON and I are bound togeth-\n"
+	.string "My MOéMON and I are bound togeth-\n"
 	.string "er by friendship.\p"
 	.string "Our bond will never be broken!$"
 
@@ -191,7 +191,7 @@ Johto_CianwoodGym_Text_83CAA8D::
 
 Johto_CianwoodGym_Text_83CAA9E::
 	.string "You seem to have a strong bond\n"
-	.string "with your POKéMON too!$"
+	.string "with your MOéMON too!$"
 
 Johto_CianwoodGym_Text_83CAAEB::
 	.string "We martial artists fear nothing!$"
@@ -200,7 +200,7 @@ Johto_CianwoodGym_Text_83CAB0C::
 	.string "That’s shocking!$"
 
 Johto_CianwoodGym_Text_83CAB1D::
-	.string "Fighting POKéMON are afraid of\n"
+	.string "Fighting MOéMON are afraid of\n"
 	.string "psychics…$"
 
 Johto_CianwoodGym_Text_83CAB5D::
@@ -215,11 +215,11 @@ Johto_CianwoodGym_Text_83CAB91::
 
 Johto_CianwoodGym_Text_83CABC0::
 	.string "My raging fists will shatter your\n"
-	.string "POKéMON!$"
+	.string "MOéMON!$"
 
 Johto_CianwoodGym_Text_83CABEB::
 	.string "I got shattered!$"
 
 Johto_CianwoodGym_Text_83CABFC::
-	.string "My POKéMON lost…\n"
+	.string "My MOéMON lost…\n"
 	.string "My… my pride is shattered…$"

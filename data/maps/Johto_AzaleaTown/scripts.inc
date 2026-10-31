@@ -321,13 +321,13 @@ Johto_AzaleaTown_Text_83C3DA7::
 	.string "Then let’s see how good you are.$"
 
 Johto_AzaleaTown_Text_83C3E3F::
-	.string "…Humph! Useless POKéMON!\p"
+	.string "…Humph! Useless MOéMON!\p"
 	.string "Listen, you. You only won because\n"
-	.string "my POKéMON were weak.$"
+	.string "my MOéMON were weak.$"
 
 Johto_AzaleaTown_Text_83C3E90::
 	.string "I hate the weak.\p"
-	.string "POKéMON, trainers. It doesn’t\n"
+	.string "MOéMON, trainers. It doesn’t\n"
 	.string "matter who or what.\p"
 	.string "I’m going to be strong and wipe\n"
 	.string "out the weak.\p"
@@ -369,7 +369,7 @@ Johto_AzaleaTown_Text_83C417A::
 	.string "in ILEX FOREST.\p"
 	.string "But these skinny trees make it\n"
 	.string "impossible to get through.\p"
-	.string "The CHARCOAL MAN’s POKéMON\n"
+	.string "The CHARCOAL MAN’s MOéMON\n"
 	.string "can CUT down trees.$"
 
 Johto_AzaleaTown_Text_83C423D::
@@ -385,7 +385,7 @@ Johto_AzaleaTown_Text_83C4286::
 
 Johto_AzaleaTown_Text_83C42B7::
 	.string "AZALEA TOWN\n"
-	.string "Where People and POKéMON Live in\l"
+	.string "Where People and MOéMON Live in\l"
 	.string "Happy Harmony.$"
 
 Johto_AzaleaTown_Text_83C42F3::
@@ -393,9 +393,9 @@ Johto_AzaleaTown_Text_83C42F3::
 
 Johto_AzaleaTown_Text_83C4300::
 	.string "AZALEA TOWN\n"
-	.string "POKéMON GYM\p"
+	.string "MOéMON GYM\p"
 	.string "LEADER: BUGSY\p"
-	.string "The Walking Bug POKéMON\n"
+	.string "The Walking Bug MOéMON\n"
 	.string "Encyclopedia$"
 
 Johto_AzaleaTown_Text_83C434B::

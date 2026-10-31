@@ -88,19 +88,19 @@ Johto_GoldenrodDeptStore4F_Mart_83D3E54:
 	.2byte ITEM_NONE
 
 Johto_GoldenrodDeptStore4F_Text_83D40A8::
-	.string "Hey. I love strong POKéMON.\p"
+	.string "Hey. I love strong MOéMON.\p"
 	.string "I feed them PROTEIN to crank up\n"
 	.string "their ATTACK.$"
 
 Johto_GoldenrodDeptStore4F_Text_83D4117::
 	.string "There were rumours that some\n"
-	.string "POKéMON evolve only by\l"
+	.string "MOéMON evolve only by\l"
 	.string "being traded via a Game Link\l"
 	.string "cable.\p"
 	.string "Pfft...\p"
 	.string "Such misinformation.\p"
 	.string "I know some of the rumoured\n"
-	.string "POKéMON:\l"
+	.string "MOéMON:\l"
 	.string "MACHOKE, KADABRA, HAUNTER and,\l"
 	.string "um, GRAVELER,\l"
 	.string "but they all evolve through\l"

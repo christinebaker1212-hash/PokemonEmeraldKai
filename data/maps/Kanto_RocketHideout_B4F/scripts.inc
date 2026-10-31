@@ -186,7 +186,7 @@ Kanto_RocketHideout_B4F_EventScript_846BBFE::
 Kanto_RocketHideout_B4F_Text_84258DE::
 	.string "So! I must say, I am impressed you\n"
 	.string "got here.\p"
-	.string "TEAM ROCKET captures POKéMON from\n"
+	.string "TEAM ROCKET captures MOéMON from\n"
 	.string "around the world.\p"
 	.string "They’re important tools for keeping\n"
 	.string "our criminal enterprise going.\p"
@@ -199,7 +199,7 @@ Kanto_RocketHideout_B4F_Text_84259D0::
 	.string "This can’t be!$"
 
 Kanto_RocketHideout_B4F_Text_84259E5::
-	.string "I see that you raise POKéMON with\n"
+	.string "I see that you raise MOéMON with\n"
 	.string "utmost care.\p"
 	.string "A child like you would never\n"
 	.string "understand what I hope to achieve.\p"

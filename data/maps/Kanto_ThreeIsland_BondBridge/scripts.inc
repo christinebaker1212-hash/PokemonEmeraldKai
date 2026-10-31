@@ -113,7 +113,7 @@ Kanto_ThreeIsland_BondBridge_Text_843A15B::
 
 Kanto_ThreeIsland_BondBridge_Text_843A187::
 	.string "Perhaps that reek is your sweaty\n"
-	.string "POKéMON’s body odor…$"
+	.string "MOéMON’s body odor…$"
 
 Kanto_ThreeIsland_BondBridge_Text_843A1BD::
 	.string "Where are you off to in such\n"
@@ -121,7 +121,7 @@ Kanto_ThreeIsland_BondBridge_Text_843A1BD::
 
 Kanto_ThreeIsland_BondBridge_Text_843A1E3::
 	.string "You’re raising some wonderful\n"
-	.string "POKéMON.$"
+	.string "MOéMON.$"
 
 Kanto_ThreeIsland_BondBridge_Text_843A20A::
 	.string "If you keep going this way, you’ll\n"
@@ -141,7 +141,7 @@ Kanto_ThreeIsland_BondBridge_Text_843A291::
 
 Kanto_ThreeIsland_BondBridge_Text_843A2C4::
 	.string "Yay, yay!\n"
-	.string "POKéMON!$"
+	.string "MOéMON!$"
 
 Kanto_ThreeIsland_BondBridge_Text_843A2D7::
 	.string "What happens now?$"
@@ -159,13 +159,13 @@ Kanto_ThreeIsland_BondBridge_Text_843A33C::
 	.string "Now will you please go away?$"
 
 Kanto_ThreeIsland_BondBridge_Text_843A36B::
-	.string "A POKéMON bit through my \n"
+	.string "A MOéMON bit through my \n"
 	.string "swimsuit.\p"
 	.string "I can’t get out of the water!$"
 
 Kanto_ThreeIsland_BondBridge_Text_843A3AD::
 	.string "JOY: We’ll teach you what our\n"
-	.string "favorite POKéMON is!$"
+	.string "favorite MOéMON is!$"
 
 Kanto_ThreeIsland_BondBridge_Text_843A3E0::
 	.string "JOY: Ohh…\n"
@@ -178,11 +178,11 @@ Kanto_ThreeIsland_BondBridge_Text_843A3EF::
 Kanto_ThreeIsland_BondBridge_Text_843A421::
 	.string "JOY: I really want to battle with\n"
 	.string "MEG.\p"
-	.string "One POKéMON isn’t enough.$"
+	.string "One MOéMON isn’t enough.$"
 
 Kanto_ThreeIsland_BondBridge_Text_843A462::
 	.string "MEG: We’ll show you our favorite\n"
-	.string "POKéMON.$"
+	.string "MOéMON.$"
 
 Kanto_ThreeIsland_BondBridge_Text_843A48C::
 	.string "MEG: Ohh…\n"
@@ -194,7 +194,7 @@ Kanto_ThreeIsland_BondBridge_Text_843A49B::
 Kanto_ThreeIsland_BondBridge_Text_843A4B6::
 	.string "MEG: I want to battle together\n"
 	.string "with JOY.\p"
-	.string "One POKéMON isn’t enough.$"
+	.string "One MOéMON isn’t enough.$"
 
 Kanto_ThreeIsland_BondBridge_Text_843A4F9::
 	.string "BERRY FOREST AHEAD$"
@@ -217,7 +217,7 @@ Kanto_ThreeIsland_BondBridge_Text_8470F98::
 
 Kanto_ThreeIsland_BondBridge_Text_8470FC3::
 	.string "Yay, yay!\n"
-	.string "POKéMON!$"
+	.string "MOéMON!$"
 
 Kanto_ThreeIsland_BondBridge_Text_8470FD6::
 	.string "Oh, no, didn’t I tell you already?\n"
