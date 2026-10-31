@@ -1865,9 +1865,9 @@ static void InspectScreen(void)
     y = 8 - Y.inspectScroll;
     G_Text(94, y, G_INK, G_INK_SHADOW, card->name, 136, TF_NORMAL);
     y += 15;
-    if (Ygo_IsMonster(card))
+    if (Ygo_IsMonster(card) || card->frame == YGO_TOKEN)   /* a TOKEN shows as the monster it is */
     {
-        static const char *const kinds[] = {"Normal", "Effect", "Fusion", "Ritual"};
+        static const char *const kinds[] = {"Normal", "Effect", "Fusion", "Ritual", "Spell", "Trap", "Token"};
         int n = snprintf(line, sizeof(line), "%s  %s / ", Ygo_AttributeName(card->attribute), Ygo_RaceName(card->race));
         if (card->abilities & YGO_ABILITY_FLIP)
             n += snprintf(line + n, sizeof(line) - n, "Flip / ");
@@ -1891,7 +1891,7 @@ static void InspectScreen(void)
     }
     G_FillA(92, y, 140, 1, 0xd8d8d0, 255);
     y = G_Text(94, y + 2, 0x404040, G_NO_SHADOW, card->text, 136, TF_NARROW);
-    if (Ygo_IsMonster(card))
+    if (Ygo_IsMonster(card) || card->frame == YGO_TOKEN)
     {
         char atk[8], def[8];
         if (card->atk == YGO_STAT_UNKNOWN)
@@ -3750,6 +3750,18 @@ void Ygo_Debug(const char *command)
         for (id = 1; id <= YGO_CARD_COUNT; id++)
             if (c->owned[id] < want && Ygo_CardReady(id))
                 c->owned[id] = (uint16_t)want;
+        return;
+    }
+    if (sscanf(command, "inspectcode %u", &n) == 1)
+    {
+        /* a card by its passcode (tokens and other cards outside the catalog too) */
+        unsigned YgoEdo_IdOfCode(uint32_t code);
+        n = YgoEdo_IdOfCode(n);
+        printf("[test] ygo inspectcode: id %u\n", n);
+        if (Y.screen == Y_CLOSED)
+            YgoUi_OpenCase(NULL, 0);
+        if (n)
+            Inspect(n, Y.screen == Y_INSPECT ? Y_HOME : Y.screen);
         return;
     }
     if (sscanf(command, "inspect %u", &n) == 1)

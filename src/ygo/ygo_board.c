@@ -2770,7 +2770,7 @@ static void Gap(void)
         {
             const struct YgoCard *c = Ygo_Card(id);
             char stats[64];
-            if (Ygo_IsMonster(c))
+            if (Ygo_IsMonster(c) || c->frame == YGO_TOKEN)   /* (a TOKEN is a monster on the field) */
             {
                 int atk = c->atk, def = c->def;
                 if (cur >= 0 && B.mode != M_PICK_GRID && B.mode != M_PILE && B.spots[cur].obj < B.objCount &&
@@ -3404,7 +3404,7 @@ static void Grid(void)
             char line[96];
             G_FillA(0, 112, 240, 48, 0x5848c8, 255);
             G_Text(8, 114, G_WHITE, 0x302878, c->name, 226, TF_NORMAL);
-            if (Ygo_IsMonster(c))
+            if (Ygo_IsMonster(c) || c->frame == YGO_TOKEN)
                 snprintf(line, sizeof(line), "%s  %s  LV%u  ATK %d  DEF %d", Ygo_AttributeName(c->attribute),
                          Ygo_RaceName(c->race), c->level, c->atk, c->def);
             else

@@ -33,8 +33,10 @@ def table(path, macro):
 
 
 def species_info():
-    """type1 and bodyColor per SPECIES_ name"""
-    t = open(os.path.join(REPO, 'src/data/pokemon/species_info.h')).read()
+    """type1 and bodyColor per SPECIES_ name (Gen 1-3, Gen 4 and Gen 5-9 tables)"""
+    t = ''.join(open(os.path.join(REPO, 'src/data/pokemon', f)).read()
+                for f in ('species_info.h', 'species_info_gen4.h', 'species_info_gen59.h')
+                if os.path.exists(os.path.join(REPO, 'src/data/pokemon', f)))
     out = {}
     for m in re.finditer(r'\[SPECIES_(\w+)\]\s*=\s*\{(.*?)\n    \}', t, re.S):
         body = m.group(2)
@@ -43,6 +45,38 @@ def species_info():
         if ty and col:
             out[m.group(1)] = (ty.group(1), col.group(1))
     return out
+
+
+def later_pics():
+    """Gen 4-9: SPECIES_ name -> (front picture png, palette .pal) of Kai's pictures (gen4_tables.h / gen59_tables.h
+    name them, src/data/graphics/pokemon_gen4.h / _gen59.h give the files)"""
+    files = {}
+    for f in ('src/data/graphics/pokemon_gen4.h', 'src/data/graphics/pokemon_gen59.h'):
+        for m in re.finditer(r'const u32 (\w+)\[\] = INCGFX_U32\("([^"]+)"', open(os.path.join(REPO, f)).read()):
+            files[m.group(1)] = m.group(2)
+    out = {}
+    for f in ('src/data/pokemon_graphics/gen4_tables.h', 'src/data/pokemon_graphics/gen59_tables.h'):
+        t = open(os.path.join(REPO, f)).read()
+        front = dict(re.findall(r'SPECIES_SPRITE\((\w+),\s*(gMonFrontPic_\w+)\)', t))
+        pal = dict(re.findall(r'SPECIES_PAL\((\w+),\s*(gMonPalette_\w+)\)', t))
+        for n, sym in front.items():
+            if n in pal and sym in files and pal[n] in files:
+                out[n] = (os.path.join(REPO, files[sym]), os.path.join(REPO, files[pal[n]]))
+    return out
+
+
+def png_indices(path):
+    """the first 64x64 frame's palette indices"""
+    from PIL import Image
+    im = Image.open(path)
+    w = im.size[0]
+    return [[im.getpixel((x, y)) & 15 for x in range(min(64, w))] for y in range(64)]
+
+
+def jasc(path):
+    L = [l.strip() for l in open(path) if l.strip()]
+    cs = [tuple(int(v) for v in l.split()[:3]) for l in L[3:3 + int(L[2])]]
+    return (cs + [(0, 0, 0)] * 16)[:16]
 
 
 def stadium_key(name):
@@ -99,6 +133,14 @@ def main():
             s = set(over[pic])
         else:
             s = skin.classify(gba.pal(open(pp, 'rb').read()), gba.pic(open(pf, 'rb').read()))
+        skins[name] = sum(1 << k for k in s)
+
+    # Gen 4-9 (their own picture files)
+    for name, (pf, pp) in later_pics().items():
+        if name in skins or consts.get(name, num) >= num or not (os.path.exists(pf) and os.path.exists(pp)):
+            continue
+        key = os.path.basename(os.path.dirname(pf))
+        s = set(over[key]) if key in over else skin.classify(jasc(pp), png_indices(pf))
         skins[name] = sum(1 << k for k in s)
 
     rows = sorted(((v, n) for n, v in consts.items() if v < num), key=lambda x: x[0])

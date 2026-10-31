@@ -1,0 +1,9 @@
+# Stadium hues for the later generations' POKeMON (1.61.5): a nicknamed DIALGA (Gen 4) and SPRIGATITO (Gen 9) get a hue
+# within their limits (tools/moemon_hues/make_hues.py: Stadium's limits of their type and body color), the same one
+# the page's own JavaScript gives (check_hues.py); without a nickname, none
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=508:50,931:10,931:10"
+EXPECT_A=("[test] huemon 1 species 508" "[test] huemon 2 species 931" "[test] huemon 3 species 931 hue 0")
+UNEXPECT_A=("[crash]" "huemon 1 species 508 hue 0" "huemon 2 species 931 hue 0")
+CHECK="python3 tools/moemon_hues/check_hues.py"

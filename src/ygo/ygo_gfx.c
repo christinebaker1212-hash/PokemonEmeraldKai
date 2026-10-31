@@ -285,6 +285,35 @@ static void Back(struct GSurface *s)
         S_RoundFrame(s, 1, 1, w - 2, h - 2, 1, ARGB(0x8a5a2a, 255));
 }
 
+/* A TOKEN's picture (tokens have no printed illustration): a coin in its attribute's color on a dark field, a
+ * four-pointed star struck in it, light from the top left */
+static void TokenArt(struct GSurface *s, const struct YgoCard *c, int x, int y, int w, int h)
+{
+    unsigned col = Ygo_AttributeColor(c->attribute), dark = G_Mix(col, 0x101010, 0.75f);
+    float cx = x + w / 2.0f, cy = y + h / 2.0f, r = (w < h ? w : h) * 0.38f;
+    int i, j;
+    for (j = 0; j < h; j++)
+        S_Fill(s, x, y + j, w, 1, ARGB(G_Mix(G_Mix(col, 0x202020, 0.6f), dark, (float)j / (h > 1 ? h - 1 : 1)), 255));
+    if (r < 2)
+        return;
+    S_Disc(s, cx + 0.6f, cy + 0.8f, r, ARGB(0x101010, 160));   /* its shadow */
+    S_Disc(s, cx, cy, r, ARGB(G_Mix(col, 0xffffff, 0.15f), 255));
+    S_Ring(s, cx, cy, r, r >= 8 ? 1.5f : 1.0f, ARGB(G_Mix(col, 0x000000, 0.45f), 255));
+    if (r >= 6)
+        S_Ring(s, cx, cy, r * 0.78f, 1.0f, ARGB(G_Mix(col, 0xffffff, 0.45f), 200));
+    /* the star: four points, thinner toward their tips */
+    for (j = -(int)r; j <= (int)r; j++)
+        for (i = -(int)r; i <= (int)r; i++)
+        {
+            float ax = i < 0 ? -i : i, ay = j < 0 ? -j : j, k = r * 0.62f;
+            if (ax * ay * 6.0f + (ax + ay) * k * 0.28f <= k * k * 0.32f && ax <= k && ay <= k)
+                S_Px(s, (int)(cx + i), (int)(cy + j), ARGB(G_Mix(0xffffff, col, (ax + ay) / (2 * k)), 255));
+        }
+    /* a glint */
+    if (r >= 6)
+        S_Disc(s, cx - r * 0.45f, cy - r * 0.45f, r * 0.14f, ARGB(0xffffff, 200));
+}
+
 static void Face(struct GSurface *s, const struct YgoCard *c)
 {
     int w = s->w, h = s->h, b = w >= 40 ? 3 : w >= 26 ? 2 : 1, i;
@@ -327,6 +356,8 @@ static void Face(struct GSurface *s, const struct YgoCard *c)
     S_Fill(s, artX - 1, artY - 1, artW + 2, artH + 2, ARGB(dark, 255));
     if (art)
         ArtInto(art, s, artX, artY, artW, artH);
+    else if (c->frame == YGO_TOKEN || c->id > YGO_CARD_COUNT)
+        TokenArt(s, c, artX, artY, artW, artH);
     /* the text box: lines that read as text from afar; monsters keep a line for ATK / DEF */
     y = artY + artH + 2;
     if (y < h - b - 1)

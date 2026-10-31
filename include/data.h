@@ -3,7 +3,7 @@
 
 #include "constants/moves.h"
 
-#define SPECIES_SHINY_TAG 500
+#define SPECIES_SHINY_TAG 0x3000   // Moemon Kai: was 500 (Emerald's 412 species); a shiny palette's tag is species + this, past every species number (1051 and the Unown letters)
 
 #define MAX_TRAINER_ITEMS 4
 

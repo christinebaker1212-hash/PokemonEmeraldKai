@@ -1,0 +1,9 @@
+pressuntil A field 5000
+wait 30
+mp huecheck
+mp nick 1 Sparky
+mp nick 2 Mr. Fluff
+mp huemon 1
+mp huemon 2
+mp huemon 3
+quit

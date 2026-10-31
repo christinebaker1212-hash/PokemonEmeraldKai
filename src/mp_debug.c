@@ -1295,12 +1295,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "setmon") == 0)
     {
-        // setmon SLOT SPECIES LEVEL - a new party Moemon of that species in SLOT (tests that go through every species)
-        int slot = 0, species = 1, level = 50;
-        sscanf(arg, "%d %d %d", &slot, &species, &level);
+        // setmon SLOT SPECIES LEVEL [ITEM] - a new party Moemon of that species in SLOT, holding ITEM (tests that go
+        // through every species)
+        int slot = 0, species = 1, level = 50, item = 0;
+        sscanf(arg, "%d %d %d %d", &slot, &species, &level, &item);
         if (slot >= 0 && slot < PARTY_SIZE && species > 0 && species < NUM_SPECIES)
         {
+            u16 held = item;
             CreateMon(&gPlayerParty[slot], species, level, 32, 0, 0, OT_ID_PLAYER_ID, 0);
+            SetMonData(&gPlayerParty[slot], MON_DATA_HELD_ITEM, &held);
             CalculatePlayerPartyCount();
         }
     }
