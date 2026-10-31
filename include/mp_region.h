@@ -17,6 +17,7 @@
 #define REGION_FLAGS_END   0x4000   // SPECIAL_FLAGS_START
 #define REGION_SINNOH_FLAGS 0x3000
 #define FLAG_SINNOH_BADGE01 (REGION_SINNOH_FLAGS + 0)   // .. + 7
+#define FLAG_SINNOH_HIDDEN  0x3FFF   // always set (s3d.c S3D_LayoutBlocks): Platinum's objects that aren't people here
 #define REGION_FLAG_BYTES  ((REGION_FLAGS_END - REGION_FLAGS_START) / 8)
 #define REGION_VARS_START  0x5000
 #define REGION_VARS_COUNT  0x300

@@ -3299,6 +3299,12 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   CANALAVE's south dock (8, 62), but it isn't on the boat's list (QzGetReachableRegionsMask_) until its story is in.
   The region side file's level records hold 4 regions' EXP now: chunk LVL4; an old LVLS chunk (3 regions,
   struct RegionLevel3) is read and converted. Names: "SINNOH" in mp_main.c's lists.
+- People, signs and coord events (gen_maps.py from each place's events file): where they stand (local tiles), the game's
+  closest sprite and movement (tools/sinnoh/sprites.py, our own table; things that aren't people stay as hidden
+  objects, flag 0x3FFF FLAG_SINNOH_HIDDEN, set when a SINNOH map loads, so the local ids keep Platinum's order), hide
+  flags and coord variables as SINNOH numbers (tools/sinnoh/ids.py: flags from 0x3008, variables from 0x5180; only
+  numbers reach the repository). Nobody has a script yet: SINNOH's people and their words are to be written for
+  this game, not translated from Platinum's scripts. `mp hideobjs` hides every object (test_poc's picture).
 - Wild POKéMON: tools/sinnoh/gen_wild.py POKEPLATINUM_DIR puts each kept place's base encounter table (species and
   levels from res/field/encounters) into src/data/wild_encounters.json as gSinnoh_* entries (154 places): grass 12
   slots and surfing 5 as in Emerald; fishing OLD 2 / GOOD 3 / SUPER 5 of Platinum's 5 a rod. Not yet: Platinum's

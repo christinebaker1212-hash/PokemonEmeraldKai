@@ -1864,6 +1864,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
         u8 r = MP_Team_Toggle(slot);
         printf("[test] team: slot %d -> %d (count %d)\n", slot, r, MP_Team_Count());
     }
+    else if (strcmp(cmd, "hideobjs") == 0)
+    {
+        // hideobjs: every object event on the map invisible, the player too (hidesprites doesn't last: the overworld
+        // sets each sprite's visibility from its object every frame)
+        int i;
+        for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+            if (gObjectEvents[i].active)
+                gObjectEvents[i].invisible = TRUE;
+    }
     else if (strcmp(cmd, "hidesprites") == 0)
     {
         // hidesprites: every sprite invisible (a clean background for screenshots / mock-ups)

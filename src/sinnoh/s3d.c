@@ -20,6 +20,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "event_data.h"
+#include "mp_region.h"
 #include "gpu_regs.h"
 #include "event_object_movement.h"
 #include "field_camera.h"
@@ -348,6 +350,7 @@ u16 S3D_MapMusic(u16 song)
 // ------------------------------------------------------------------------------------------------ map blocks
 const u16 *S3D_LayoutBlocks(const struct MapLayout *layout)
 {
+    FlagSet(FLAG_SINNOH_HIDDEN);   // (Platinum's objects that aren't people here stay hidden: tools/sinnoh/gen_maps.py)
     static u16 *sBlocks[ARRAY_COUNT(sMaps)];
     u32 i, bx, bz, x, y;
     for (i = 0; i < ARRAY_COUNT(sMaps); i++)

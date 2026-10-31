@@ -32,7 +32,7 @@ run() {   # NAME SCRIPT [VAR=value...]
     TMO=120 bash "$REPO/tools/test/run1.sh" "$OUT/$name" MOEMON_S3D_PAK="$OUT/platinum3d.pak" MOEMON_S3D_HOUR=12 "$@" > /dev/null
 }
 
-run look 'pressuntil A field 5000\nwait 30\nmp warp 40,0,14,9\nwait 200\nshot frame\nquit\n'
+run look 'pressuntil A field 5000\nwait 30\nmp warp 40,0,14,9\nwait 200\nmp hideobjs\nwait 2\nshot frame\nquit\n'   # (no people: the reference has none)
 python3 -I "$REPO/tools/sinnoh/render_ref.py" "$SRC" "$OUT/look/ref.png" 0 110 873 12 > /dev/null
 check "TWINLEAF in 3D matches the reference" "python3 -I - '$OUT/look' <<'EOF'
 import sys
