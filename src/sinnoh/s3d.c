@@ -31,6 +31,8 @@
 #include "s3d.h"
 #include "sprite.h"
 #include "constants/maps.h"
+#include "constants/songs.h"
+#include "../data/sinnoh_night_songs.h"
 
 extern void (*gMpS3dLine)(int line, u16 layers[4][DISPLAY_WIDTH]);
 const char *Updater_ExeFile(const char *name);
@@ -239,6 +241,26 @@ static s32 MapIndex(u8 group, u8 num)
         if (sMaps[i].map == ((group << 8) | num))
             return i;
     return -1;
+}
+
+bool8 S3D_IsSinnohGroup(u8 mapGroup)
+{
+    return mapGroup == MAP_GROUP(MAP_SINNOH_TWINLEAF_TOWN);
+}
+
+// Platinum's towns and routes have night versions of their songs (20:00 to 4:00), picked as the map's music starts
+u16 S3D_MapMusic(u16 song)
+{
+    u32 i;
+    s32 hour;
+    RtcCalcLocalTime();
+    hour = getenv("MOEMON_S3D_HOUR") ? atoi(getenv("MOEMON_S3D_HOUR")) : gLocalTime.hours;   // (tests: a fixed hour)
+    if (hour >= 4 && hour < 20)
+        return song;
+    for (i = 0; i < ARRAY_COUNT(sSinnohNightSongs); i++)
+        if (sSinnohNightSongs[i][0] == song)
+            return sSinnohNightSongs[i][1];
+    return song;
 }
 
 // ------------------------------------------------------------------------------------------------ map blocks

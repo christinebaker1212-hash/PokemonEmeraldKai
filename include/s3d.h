@@ -15,6 +15,8 @@ extern float gS3dSpriteDepth[];
 extern s16 gS3dSpriteFeet[];
 void S3D_NoteOam(u16 spriteId, u16 first, u16 end);
 void S3D_CommitOam(void);
+bool8 S3D_IsSinnohGroup(u8 mapGroup);           // a SINNOH map (its own music, battle songs...)
+u16 S3D_MapMusic(u16 song);                      // a SINNOH map's song by night (Platinum's own night versions)
 // The blocks of a map's layout: a SINNOH map's come from the pack (Platinum's collision), others are the layout's
 const u16 *S3D_LayoutBlocks(const struct MapLayout *layout);
 

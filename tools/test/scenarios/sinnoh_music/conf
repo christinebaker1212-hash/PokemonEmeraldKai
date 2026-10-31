@@ -1,0 +1,8 @@
+# SINNOH's own music (Diamond / Platinum's, music/mus_sinnoh_*.kaisong): TWINLEAF TOWN by day (MUS_SINNOH_TWINLEAF,
+# 678) and by night (its night version, 679), and a wild battle there (MUS_SINNOH_VS_WILD). Needs the 3D pack
+# (tools/sinnoh/make_pack.sh) only for the picture; the music plays without it.
+MODE=1
+TMO=90
+ENV_A="MOEMON_S3D_HOUR=12"
+EXPECT_A=("bgm song 678 " "bgm song 783 " "plays as mus_sinnoh_twinleaf everywhere")
+UNEXPECT_A=("[crash]" "TIMEOUT" "no music called")

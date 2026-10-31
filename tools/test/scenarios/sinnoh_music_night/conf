@@ -1,0 +1,6 @@
+# TWINLEAF TOWN after dark plays its night version (MUS_SINNOH_TWINLEAF_NIGHT, 679), as Platinum does from 20:00 to 4:00
+MODE=1
+TMO=90
+ENV_A="MOEMON_S3D_HOUR=22"
+EXPECT_A=("bgm song 679 " "plays as mus_sinnoh_twinleaf_night everywhere")
+UNEXPECT_A=("[crash]" "TIMEOUT" "no music called")

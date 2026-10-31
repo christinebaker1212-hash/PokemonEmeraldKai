@@ -3227,3 +3227,12 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
 - tools/moemon_music/gen_soundfont.py skips comments in voicegroup lines (JOHTO's drum sets name their keys).
 - Tests: battle_music_johto (666 from its .kaisong), battle_music_kanto (510, unchanged).
 
+## SINNOH's music
+- 127 song slots (include/constants/songs.h MUS_SINNOH_*, 678-804, between the "SINNOH's songs" markers that
+  tools/kaisong/sinnoh_songs.py slots writes; sound/song_table.inc names each for an Emerald song with `.set`, as
+  JOHTO's battle slots) and music/mus_sinnoh_*.kaisong from the user's Diamond / Platinum rips (sinnoh_songs.py
+  convert). Night versions: src/data/sinnoh_night_songs.h (generated) pairs a day slot with <slot>_night;
+  overworld.c GetLocationMusic asks S3D_MapMusic on a SINNOH map (S3D_IsSinnohGroup), night = 20:00-4:00
+  (MOEMON_S3D_HOUR in tests). Battles on a SINNOH map: pokemon.c MpSinnohBattleBGM, victories MP_RegionVictorySong.
+- Tests sinnoh_music, sinnoh_music_night.
+

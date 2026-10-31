@@ -13,9 +13,9 @@ import os
 import struct
 
 MAPS = [
-    ('Sinnoh_TwinleafTown', 'MAP_SINNOH_TWINLEAF_TOWN', 3, 27, 1, 1, 'MUS_LITTLEROOT', 'MAP_TYPE_TOWN',
+    ('Sinnoh_TwinleafTown', 'MAP_SINNOH_TWINLEAF_TOWN', 3, 27, 1, 1, 'MUS_SINNOH_TWINLEAF', 'MAP_TYPE_TOWN',
      [('MAP_SINNOH_ROUTE201', 0, 'up')]),
-    ('Sinnoh_Route201', 'MAP_SINNOH_ROUTE201', 3, 26, 2, 1, 'MUS_ROUTE101', 'MAP_TYPE_ROUTE',
+    ('Sinnoh_Route201', 'MAP_SINNOH_ROUTE201', 3, 26, 2, 1, 'MUS_SINNOH_ROUTE201', 'MAP_TYPE_ROUTE',
      [('MAP_SINNOH_TWINLEAF_TOWN', 0, 'down')]),
 ]
 GROUP = 'gMapGroup_Sinnoh'

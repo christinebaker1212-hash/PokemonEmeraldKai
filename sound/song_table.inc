@@ -700,6 +700,262 @@ gSongTable::
 	song mus_johto_victory_trainer, MUSIC_PLAYER_BGM, 0
 	song mus_johto_victory_gym_leader, MUSIC_PLAYER_BGM, 0
 @ end of Johto music
+@ Moemon Kai: SINNOH's songs (tools/kaisong/sinnoh_songs.py)
+	.set mus_sinnoh_twinleaf, mus_littleroot
+	.set mus_sinnoh_twinleaf_night, mus_littleroot
+	.set mus_sinnoh_sandgem, mus_oldale
+	.set mus_sinnoh_sandgem_night, mus_oldale
+	.set mus_sinnoh_jubilife, mus_slateport
+	.set mus_sinnoh_jubilife_night, mus_slateport
+	.set mus_sinnoh_oreburgh, mus_rustboro
+	.set mus_sinnoh_oreburgh_night, mus_rustboro
+	.set mus_sinnoh_floaroma, mus_petalburg
+	.set mus_sinnoh_floaroma_night, mus_petalburg
+	.set mus_sinnoh_eterna, mus_fortree
+	.set mus_sinnoh_eterna_night, mus_fortree
+	.set mus_sinnoh_hearthome, mus_lilycove
+	.set mus_sinnoh_hearthome_night, mus_lilycove
+	.set mus_sinnoh_solaceon, mus_fallarbor
+	.set mus_sinnoh_solaceon_night, mus_fallarbor
+	.set mus_sinnoh_veilstone, mus_route110
+	.set mus_sinnoh_veilstone_night, mus_route110
+	.set mus_sinnoh_canalave, mus_dewford
+	.set mus_sinnoh_canalave_night, mus_dewford
+	.set mus_sinnoh_snowpoint, mus_route119
+	.set mus_sinnoh_snowpoint_night, mus_route119
+	.set mus_sinnoh_sunyshore, mus_sootopolis
+	.set mus_sinnoh_sunyshore_night, mus_sootopolis
+	.set mus_sinnoh_league, mus_ever_grande
+	.set mus_sinnoh_league_night, mus_ever_grande
+	.set mus_sinnoh_fight_area, mus_ever_grande
+	.set mus_sinnoh_fight_area_night, mus_ever_grande
+	.set mus_sinnoh_valor_lakefront, mus_lilycove
+	.set mus_sinnoh_valor_lakefront_night, mus_lilycove
+	.set mus_sinnoh_route201, mus_route101
+	.set mus_sinnoh_route201_night, mus_route101
+	.set mus_sinnoh_route203, mus_route104
+	.set mus_sinnoh_route203_night, mus_route104
+	.set mus_sinnoh_route205, mus_route110
+	.set mus_sinnoh_route205_night, mus_route110
+	.set mus_sinnoh_route206, mus_route111
+	.set mus_sinnoh_route206_night, mus_route111
+	.set mus_sinnoh_route209, mus_route113
+	.set mus_sinnoh_route209_night, mus_route113
+	.set mus_sinnoh_route210, mus_route119
+	.set mus_sinnoh_route210_night, mus_route119
+	.set mus_sinnoh_route216, mus_route120
+	.set mus_sinnoh_route216_night, mus_route120
+	.set mus_sinnoh_route225, mus_route122
+	.set mus_sinnoh_route225_night, mus_route122
+	.set mus_sinnoh_route228, mus_route122
+	.set mus_sinnoh_route228_night, mus_route122
+	.set mus_sinnoh_surf, mus_surf
+	.set mus_sinnoh_bicycle, mus_cycling
+	.set mus_sinnoh_lake, mus_route101
+	.set mus_sinnoh_research_lab, mus_birch_lab
+	.set mus_sinnoh_pokecenter, mus_poke_center
+	.set mus_sinnoh_pokecenter_night, mus_poke_center
+	.set mus_sinnoh_pokemart, mus_poke_mart
+	.set mus_sinnoh_oreburgh_gate, mus_cave_of_origin
+	.set mus_sinnoh_oreburgh_mine, mus_cave_of_origin
+	.set mus_sinnoh_gym, mus_gym
+	.set mus_sinnoh_eterna_forest, mus_petalburg_woods
+	.set mus_sinnoh_galactic_building, mus_aqua_magma_hideout
+	.set mus_sinnoh_galactic_hideout, mus_aqua_magma_hideout
+	.set mus_sinnoh_galactic_hideout_deep, mus_aqua_magma_hideout
+	.set mus_sinnoh_mt_coronet, mus_cave_of_origin
+	.set mus_sinnoh_spear_pillar, mus_cave_of_origin
+	.set mus_sinnoh_victory_road, mus_victory_road
+	.set mus_sinnoh_forest_house, mus_abandoned_ship
+	.set mus_sinnoh_great_marsh, mus_safari_zone
+	.set mus_sinnoh_game_corner, mus_game_corner
+	.set mus_sinnoh_cavern_on_the_lake, mus_cave_of_origin
+	.set mus_sinnoh_amity_square, mus_route101
+	.set mus_sinnoh_battle_tower, mus_b_tower
+	.set mus_sinnoh_iron_mountain, mus_cave_of_origin
+	.set mus_sinnoh_league_showdown, mus_ever_grande
+	.set mus_sinnoh_distortion_world, mus_cave_of_origin
+	.set mus_sinnoh_villa, mus_littleroot
+	.set mus_sinnoh_rival, mus_encounter_may
+	.set mus_sinnoh_dawn, mus_encounter_may
+	.set mus_sinnoh_lucas, mus_encounter_brendan
+	.set mus_sinnoh_lake_encounter, mus_encounter_suspicious
+	.set mus_sinnoh_follow_me, mus_follow_me
+	.set mus_sinnoh_lets_go_together, mus_follow_me
+	.set mus_sinnoh_galactic_appears, mus_encounter_aqua
+	.set mus_sinnoh_legendary_appears, mus_cave_of_origin
+	.set mus_sinnoh_natural_disaster, mus_cave_of_origin
+	.set mus_sinnoh_elite_four_appear, mus_encounter_elite_four
+	.set mus_sinnoh_cynthia, mus_encounter_champion
+	.set mus_sinnoh_hall_of_fame, mus_hall_of_fame
+	.set mus_sinnoh_ending, mus_credits
+	.set mus_sinnoh_looker, mus_encounter_suspicious
+	.set mus_sinnoh_giratina_appears, mus_cave_of_origin
+	.set mus_sinnoh_giratina_appears_2, mus_cave_of_origin
+	.set mus_sinnoh_azure_flute, mus_cave_of_origin
+	.set mus_sinnoh_arceus, mus_cave_of_origin
+	.set mus_sinnoh_encounter_kid, mus_encounter_male
+	.set mus_sinnoh_encounter_miniskirt, mus_encounter_girl
+	.set mus_sinnoh_encounter_twins, mus_encounter_twins
+	.set mus_sinnoh_encounter_biker, mus_encounter_cool
+	.set mus_sinnoh_encounter_hiker, mus_encounter_hiker
+	.set mus_sinnoh_encounter_ace_trainer, mus_encounter_cool
+	.set mus_sinnoh_encounter_martial_artist, mus_encounter_cool
+	.set mus_sinnoh_encounter_sailor, mus_encounter_male
+	.set mus_sinnoh_encounter_aroma_lady, mus_encounter_female
+	.set mus_sinnoh_encounter_collector, mus_encounter_rich
+	.set mus_sinnoh_encounter_gambler, mus_encounter_rich
+	.set mus_sinnoh_encounter_artist, mus_encounter_intense
+	.set mus_sinnoh_vs_wild, mus_vs_wild
+	.set mus_sinnoh_vs_trainer, mus_vs_trainer
+	.set mus_sinnoh_vs_rival, mus_vs_rival
+	.set mus_sinnoh_vs_gym_leader, mus_vs_gym_leader
+	.set mus_sinnoh_vs_galactic, mus_vs_aqua_magma
+	.set mus_sinnoh_vs_galactic_commander, mus_vs_aqua_magma_leader
+	.set mus_sinnoh_vs_galactic_boss, mus_vs_aqua_magma_leader
+	.set mus_sinnoh_vs_dialga_palkia, mus_vs_kyogre_groudon
+	.set mus_sinnoh_vs_lake_guardians, mus_vs_regi
+	.set mus_sinnoh_vs_legendary, mus_vs_regi
+	.set mus_sinnoh_vs_elite_four, mus_vs_elite_four
+	.set mus_sinnoh_vs_champion, mus_vs_champion
+	.set mus_sinnoh_vs_arceus, mus_vs_kyogre_groudon
+	.set mus_sinnoh_vs_giratina, mus_vs_kyogre_groudon
+	.set mus_sinnoh_vs_regis, mus_vs_regi
+	.set mus_sinnoh_vs_frontier_brain, mus_vs_frontier_brain
+	.set mus_sinnoh_victory_wild, mus_victory_wild
+	.set mus_sinnoh_victory_trainer, mus_victory_trainer
+	.set mus_sinnoh_victory_gym_leader, mus_victory_gym_leader
+	.set mus_sinnoh_victory_galactic, mus_victory_aqua_magma
+	.set mus_sinnoh_victory_elite_four, mus_victory_league
+	.set mus_sinnoh_victory_champion, mus_victory_league
+	song mus_sinnoh_twinleaf, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_twinleaf_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_sandgem, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_sandgem_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_jubilife, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_jubilife_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_oreburgh, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_oreburgh_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_floaroma, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_floaroma_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_eterna, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_eterna_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_hearthome, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_hearthome_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_solaceon, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_solaceon_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_veilstone, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_veilstone_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_canalave, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_canalave_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_snowpoint, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_snowpoint_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_sunyshore, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_sunyshore_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_league, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_league_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_fight_area, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_fight_area_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_valor_lakefront, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_valor_lakefront_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_route201, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_route201_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_route203, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_route203_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_route205, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_route205_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_route206, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_route206_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_route209, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_route209_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_route210, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_route210_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_route216, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_route216_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_route225, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_route225_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_route228, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_route228_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_surf, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_bicycle, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_lake, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_research_lab, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_pokecenter, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_pokecenter_night, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_pokemart, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_oreburgh_gate, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_oreburgh_mine, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_gym, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_eterna_forest, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_galactic_building, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_galactic_hideout, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_galactic_hideout_deep, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_mt_coronet, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_spear_pillar, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_victory_road, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_forest_house, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_great_marsh, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_game_corner, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_cavern_on_the_lake, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_amity_square, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_battle_tower, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_iron_mountain, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_league_showdown, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_distortion_world, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_villa, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_rival, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_dawn, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_lucas, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_lake_encounter, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_follow_me, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_lets_go_together, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_galactic_appears, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_legendary_appears, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_natural_disaster, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_elite_four_appear, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_cynthia, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_hall_of_fame, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_ending, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_looker, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_giratina_appears, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_giratina_appears_2, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_azure_flute, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_arceus, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_encounter_kid, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_encounter_miniskirt, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_encounter_twins, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_encounter_biker, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_encounter_hiker, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_encounter_ace_trainer, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_encounter_martial_artist, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_encounter_sailor, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_encounter_aroma_lady, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_encounter_collector, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_encounter_gambler, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_encounter_artist, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_vs_wild, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_vs_trainer, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_vs_rival, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_vs_gym_leader, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_vs_galactic, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_vs_galactic_commander, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_vs_galactic_boss, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_vs_dialga_palkia, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_vs_lake_guardians, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_vs_legendary, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_vs_elite_four, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_vs_champion, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_vs_arceus, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_vs_giratina, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_vs_regis, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_vs_frontier_brain, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_victory_wild, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_victory_trainer, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_victory_gym_leader, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_victory_galactic, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_victory_elite_four, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_victory_champion, MUSIC_PLAYER_BGM, 0
+@ end of SINNOH's songs
 
 	.align 2
 dummy_song_header:

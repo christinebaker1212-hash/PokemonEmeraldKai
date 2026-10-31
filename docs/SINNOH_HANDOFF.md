@@ -109,12 +109,13 @@ perspective camera. The engine draws those models as Platinum does instead of pi
   option may come later.
 
 ## Music
-The user has Sinnoh's music and will upload it later as files Moemon Music Studio reads (tools/moemon_music/: it
-plays 2SF rips and the rest through its vendored emulators). Wait for those rather than taking the music from the
-ROM. They go through the studio into .kaisong songs in music/ (`<song>@<place>` for each Sinnoh map, battle and
-scene), picked up by tools/kaisong/gen.py's tables (docs/SONG_TABLE.md) and leveled by tools/kaisong/loudness.py as
-the release does; check with tools/test/kaisong_test.sh and tools/kaisong/test_scenes.py (CLAUDE.md "Moemon Music
-Studio work": no agents for the studio's work).
+Done (2026-10-31): the user's Diamond and Platinum 2SF rips became 127 song slots of SINNOH's own (MUS_SINNOH_*,
+678-804) and music/mus_sinnoh_*.kaisong through Moemon Music Studio (tools/kaisong/sinnoh_songs.py: the track -> slot
+table, `slots` writes the slots, `convert` the files). Towns and routes have Platinum's night versions as <slot>_night,
+which S3D_MapMusic plays from 20:00 to 4:00; SINNOH's battles and victories pick their own slots (pokemon.c
+MpSinnohBattleBGM / MP_RegionVictorySong on a SINNOH map). Left out: Wi-Fi, GTS, Mystery Gift, Super Contests,
+Poffins, the Underground, title and opening. New maps take their slot as their map.json music (tools/sinnoh/gen_maps.py).
+Tests sinnoh_music (day, battle), sinnoh_music_night.
 
 ## First step
 A proof of concept: Twinleaf Town + Route 201 drawn by the 3D engine from the user's ROM, the LOOK walking on

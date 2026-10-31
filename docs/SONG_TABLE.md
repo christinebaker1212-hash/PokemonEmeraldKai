@@ -69,6 +69,34 @@ Files in this repository's `music` folder ship with every update.
 | `mus_johto_vs_wild.kaisong` | mus_johto_vs_wild | everywhere | Battle! Wild Pokemon (Johto) |
 | `mus_poke_mart@rustboro_city_game_center_2f.kaisong` | mus_poke_mart | Rustboro City Game Center 2F | Lamb Chop |
 | `mus_rg_vs_trainer@tt.kaisong` | mus_rg_vs_trainer | tt | Shuffle or Boogie |
+| `mus_sinnoh_canalave.kaisong` | mus_sinnoh_canalave | everywhere | Canalave City (Daytime) |
+| `mus_sinnoh_canalave_night.kaisong` | mus_sinnoh_canalave_night | everywhere | Canalave City (Nighttime) |
+| `mus_sinnoh_eterna.kaisong` | mus_sinnoh_eterna | everywhere | Eterna City (Daytime) |
+| `mus_sinnoh_eterna_night.kaisong` | mus_sinnoh_eterna_night | everywhere | Eterna City (Nighttime) |
+| `mus_sinnoh_fight_area.kaisong` | mus_sinnoh_fight_area | everywhere | Fight Area (Daytime) |
+| `mus_sinnoh_fight_area_night.kaisong` | mus_sinnoh_fight_area_night | everywhere | Fight Area (Nighttime) |
+| `mus_sinnoh_floaroma.kaisong` | mus_sinnoh_floaroma | everywhere | Floaroma Town (Daytime) |
+| `mus_sinnoh_floaroma_night.kaisong` | mus_sinnoh_floaroma_night | everywhere | Floaroma Town (Nighttime) |
+| `mus_sinnoh_hearthome.kaisong` | mus_sinnoh_hearthome | everywhere | Hearthome City (Daytime) |
+| `mus_sinnoh_hearthome_night.kaisong` | mus_sinnoh_hearthome_night | everywhere | Hearthome City (Nighttime) |
+| `mus_sinnoh_jubilife.kaisong` | mus_sinnoh_jubilife | everywhere | Jubilife City (Daytime) |
+| `mus_sinnoh_jubilife_night.kaisong` | mus_sinnoh_jubilife_night | everywhere | Jubilife City (Nighttime) |
+| `mus_sinnoh_league.kaisong` | mus_sinnoh_league | everywhere | Pokemon League (Daytime) |
+| `mus_sinnoh_league_night.kaisong` | mus_sinnoh_league_night | everywhere | Pokemon League (Nighttime) |
+| `mus_sinnoh_oreburgh.kaisong` | mus_sinnoh_oreburgh | everywhere | Oreburgh City (Daytime) |
+| `mus_sinnoh_oreburgh_night.kaisong` | mus_sinnoh_oreburgh_night | everywhere | Oreburgh City (Nighttime) |
+| `mus_sinnoh_sandgem.kaisong` | mus_sinnoh_sandgem | everywhere | Sandgem Town (Daytime) |
+| `mus_sinnoh_sandgem_night.kaisong` | mus_sinnoh_sandgem_night | everywhere | Sandgem Town (Nighttime) |
+| `mus_sinnoh_snowpoint.kaisong` | mus_sinnoh_snowpoint | everywhere | Snowpoint City (Daytime) |
+| `mus_sinnoh_snowpoint_night.kaisong` | mus_sinnoh_snowpoint_night | everywhere | Snowpoint City (Nighttime) |
+| `mus_sinnoh_solaceon.kaisong` | mus_sinnoh_solaceon | everywhere | Solaceon Town (Daytime) |
+| `mus_sinnoh_solaceon_night.kaisong` | mus_sinnoh_solaceon_night | everywhere | Solaceon Town (Nighttime) |
+| `mus_sinnoh_sunyshore.kaisong` | mus_sinnoh_sunyshore | everywhere | Sunnyshore City (Daytime) |
+| `mus_sinnoh_sunyshore_night.kaisong` | mus_sinnoh_sunyshore_night | everywhere | Sunyshore City (Nighttime) |
+| `mus_sinnoh_twinleaf.kaisong` | mus_sinnoh_twinleaf | everywhere | Twinleaf Town (Daytime) |
+| `mus_sinnoh_twinleaf_night.kaisong` | mus_sinnoh_twinleaf_night | everywhere | Twinleaf Town (Nighttime) |
+| `mus_sinnoh_veilstone.kaisong` | mus_sinnoh_veilstone | everywhere | Veilstone City (Daytime) |
+| `mus_sinnoh_veilstone_night.kaisong` | mus_sinnoh_veilstone_night | everywhere | Veilstone City (Nighttime) |
 | `mus_victory_trainer@tt.kaisong` | mus_victory_trainer | tt | The Winner |
 | `mus_vs_aqua_magma@ygo.kaisong` | mus_vs_aqua_magma | ygo | 003C SEQ_DU_D_01 |
 | `mus_vs_aqua_magma_leader@ygo.kaisong` | mus_vs_aqua_magma_leader | ygo | 0042 SEQ_DU_D_07 |
@@ -954,4 +982,413 @@ Custom: `mus_johto_victory_trainer.kaisong`
 
 ### mus_johto_victory_gym_leader (677)
 Custom: `mus_johto_victory_gym_leader.kaisong`
+- Field and battle code (by map): Battles
+
+### mus_sinnoh_twinleaf (678)
+Custom: `mus_sinnoh_twinleaf.kaisong`
+- Map music: Sinnoh Twinleaf Town [sinnoh_twinleaf_town]
+
+### mus_sinnoh_twinleaf_night (679)
+Custom: `mus_sinnoh_twinleaf_night.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_sandgem (680)
+Custom: `mus_sinnoh_sandgem.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_sandgem_night (681)
+Custom: `mus_sinnoh_sandgem_night.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_jubilife (682)
+Custom: `mus_sinnoh_jubilife.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_jubilife_night (683)
+Custom: `mus_sinnoh_jubilife_night.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_oreburgh (684)
+Custom: `mus_sinnoh_oreburgh.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_oreburgh_night (685)
+Custom: `mus_sinnoh_oreburgh_night.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_floaroma (686)
+Custom: `mus_sinnoh_floaroma.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_floaroma_night (687)
+Custom: `mus_sinnoh_floaroma_night.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_eterna (688)
+Custom: `mus_sinnoh_eterna.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_eterna_night (689)
+Custom: `mus_sinnoh_eterna_night.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_hearthome (690)
+Custom: `mus_sinnoh_hearthome.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_hearthome_night (691)
+Custom: `mus_sinnoh_hearthome_night.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_solaceon (692)
+Custom: `mus_sinnoh_solaceon.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_solaceon_night (693)
+Custom: `mus_sinnoh_solaceon_night.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_veilstone (694)
+Custom: `mus_sinnoh_veilstone.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_veilstone_night (695)
+Custom: `mus_sinnoh_veilstone_night.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_canalave (696)
+Custom: `mus_sinnoh_canalave.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_canalave_night (697)
+Custom: `mus_sinnoh_canalave_night.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_snowpoint (698)
+Custom: `mus_sinnoh_snowpoint.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_snowpoint_night (699)
+Custom: `mus_sinnoh_snowpoint_night.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_sunyshore (700)
+Custom: `mus_sinnoh_sunyshore.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_sunyshore_night (701)
+Custom: `mus_sinnoh_sunyshore_night.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_league (702)
+Custom: `mus_sinnoh_league.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_league_night (703)
+Custom: `mus_sinnoh_league_night.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_fight_area (704)
+Custom: `mus_sinnoh_fight_area.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_fight_area_night (705)
+Custom: `mus_sinnoh_fight_area_night.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_valor_lakefront (706)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_valor_lakefront_night (707)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_route201 (708)
+- Map music: Sinnoh Route 201 [sinnoh_route201]
+
+### mus_sinnoh_route201_night (709)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_route203 (710)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_route203_night (711)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_route205 (712)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_route205_night (713)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_route206 (714)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_route206_night (715)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_route209 (716)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_route209_night (717)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_route210 (718)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_route210_night (719)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_route216 (720)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_route216_night (721)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_route225 (722)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_route225_night (723)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_route228 (724)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_route228_night (725)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_surf (726)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_bicycle (727)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_lake (728)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_research_lab (729)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_pokecenter (730)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_pokecenter_night (731)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_pokemart (732)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_oreburgh_gate (733)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_oreburgh_mine (734)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_gym (735)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_eterna_forest (736)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_galactic_building (737)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_galactic_hideout (738)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_galactic_hideout_deep (739)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_mt_coronet (740)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_spear_pillar (741)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_victory_road (742)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_forest_house (743)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_great_marsh (744)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_game_corner (745)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_cavern_on_the_lake (746)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_amity_square (747)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_battle_tower (748)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_iron_mountain (749)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_league_showdown (750)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_distortion_world (751)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_villa (752)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_rival (753)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_dawn (754)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_lucas (755)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_lake_encounter (756)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_follow_me (757)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_lets_go_together (758)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_galactic_appears (759)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_legendary_appears (760)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_natural_disaster (761)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_elite_four_appear (762)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_cynthia (763)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_hall_of_fame (764)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_ending (765)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_looker (766)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_giratina_appears (767)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_giratina_appears_2 (768)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_azure_flute (769)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_arceus (770)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_encounter_kid (771)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_encounter_miniskirt (772)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_encounter_twins (773)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_encounter_biker (774)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_encounter_hiker (775)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_encounter_ace_trainer (776)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_encounter_martial_artist (777)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_encounter_sailor (778)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_encounter_aroma_lady (779)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_encounter_collector (780)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_encounter_gambler (781)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_encounter_artist (782)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_vs_wild (783)
+- Field and battle code (by map): Battles
+
+### mus_sinnoh_vs_trainer (784)
+- Field and battle code (by map): Battles
+
+### mus_sinnoh_vs_rival (785)
+- Field and battle code (by map): Battles
+
+### mus_sinnoh_vs_gym_leader (786)
+- Field and battle code (by map): Battles
+
+### mus_sinnoh_vs_galactic (787)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_vs_galactic_commander (788)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_vs_galactic_boss (789)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_vs_dialga_palkia (790)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_vs_lake_guardians (791)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_vs_legendary (792)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_vs_elite_four (793)
+- Field and battle code (by map): Battles
+
+### mus_sinnoh_vs_champion (794)
+- Field and battle code (by map): Battles
+
+### mus_sinnoh_vs_arceus (795)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_vs_giratina (796)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_vs_regis (797)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_vs_frontier_brain (798)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_victory_wild (799)
+- Field and battle code (by map): Battles
+
+### mus_sinnoh_victory_trainer (800)
+- Field and battle code (by map): Battles
+
+### mus_sinnoh_victory_gym_leader (801)
+- Field and battle code (by map): Battles
+
+### mus_sinnoh_victory_galactic (802)
+- Field and battle code (by map): Battles
+
+### mus_sinnoh_victory_elite_four (803)
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_victory_champion (804)
 - Field and battle code (by map): Battles

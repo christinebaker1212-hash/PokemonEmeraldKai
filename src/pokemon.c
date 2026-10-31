@@ -2,6 +2,7 @@
 #define MP_KAISONG_NO_SCENE
 #include "global.h"
 #include "mp_region.h"
+#include "s3d.h"   // Moemon Kai: SINNOH
 #include "battle_gen4.h"   // Moemon Kai: Gen 4
 #include "mp.h"
 #include "malloc.h"
@@ -6754,6 +6755,23 @@ static u16 MpRegionBattleBGM(void)
 // Moemon Kai: a victory song in JOHTO is its own (HeartGold / SoulSilver's); elsewhere the song as asked
 u16 MP_RegionVictorySong(u16 song)
 {
+    if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup) && !(gBattleTypeFlags & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_TRAINER_HILL)))
+    {
+        switch (song)
+        {
+        case MUS_VICTORY_WILD:
+            return MUS_SINNOH_VICTORY_WILD;
+        case MUS_VICTORY_TRAINER:
+            return MUS_SINNOH_VICTORY_TRAINER;
+        case MUS_VICTORY_AQUA_MAGMA:
+            return MUS_SINNOH_VICTORY_GALACTIC;
+        case MUS_VICTORY_GYM_LEADER:
+            return MUS_SINNOH_VICTORY_GYM_LEADER;
+        case MUS_VICTORY_LEAGUE:
+            return MUS_SINNOH_VICTORY_CHAMPION;
+        }
+        return song;
+    }
     if (MP_Region_Current() != REGION_JOHTO || (gBattleTypeFlags & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_TRAINER_HILL)))
         return song;
     switch (song)
@@ -6770,8 +6788,32 @@ u16 MP_RegionVictorySong(u16 song)
     return song;
 }
 
+// Moemon Kai: SINNOH's own battle songs (Diamond / Platinum's, music/mus_sinnoh_vs_*.kaisong)
+static u16 MpSinnohBattleBGM(void)
+{
+    if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER))
+        return MUS_SINNOH_VS_WILD;
+    switch (gTrainers[gTrainerBattleOpponent_A].trainerClass)
+    {
+    case TRAINER_CLASS_CHAMPION:
+        return MUS_SINNOH_VS_CHAMPION;
+    case TRAINER_CLASS_ELITE_FOUR:
+        return MUS_SINNOH_VS_ELITE_FOUR;
+    case TRAINER_CLASS_LEADER:
+        return MUS_SINNOH_VS_GYM_LEADER;
+    case TRAINER_CLASS_RIVAL:
+        return MUS_SINNOH_VS_RIVAL;
+    default:
+        return MUS_SINNOH_VS_TRAINER;
+    }
+}
+
 u16 GetBattleBGM(void)
 {
+    if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup)
+     && !(gBattleTypeFlags & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_TRAINER_HILL))
+     && (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK)) || gMpCoopBattle))
+        return MpSinnohBattleBGM();
     if (MP_Region_Current() != REGION_HOENN
      && !(gBattleTypeFlags & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_TRAINER_HILL | BATTLE_TYPE_KYOGRE_GROUDON
                               | BATTLE_TYPE_REGI))

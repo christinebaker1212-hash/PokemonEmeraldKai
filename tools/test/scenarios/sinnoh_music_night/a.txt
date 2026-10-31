@@ -1,0 +1,6 @@
+pressuntil A field 5000
+wait 30
+mp warp 40,0,14,14
+wait 200
+mp bgm
+quit
