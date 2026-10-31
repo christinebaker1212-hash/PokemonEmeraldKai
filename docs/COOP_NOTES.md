@@ -2775,6 +2775,8 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   BUSH) repeat them 3 wide (fieldmap.c GetBorderBlockAt); every other map's border is 2x2.
 - Doors: Quetzal has no door animations for JOHTO / KANTO's tiles either (its door table is Emerald's; a second
   8-entry one is never used), so their doors open without one.
+- Triple Triad sellers in JOHTO / KANTO stock what MAUVILLE's / LILYCOVE's do (Tt_PoolOf, as their players' hands):
+  gTtSellerStock has HOENN's eight shelves only, and the seller crashed on the missing ones.
 - tools/test/npc_sweep.sh talks to every person and reads every sign on every map (harness `mp sweepnote`); it
   reports crashes, hangs, scripts still holding the player and stubs reached.
 - Not done yet: Quetzal's other postgame events (GIOVANNI's past and the time travel: still stubs that log and go on), FRLG door animations, 3x2 map

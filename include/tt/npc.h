@@ -29,6 +29,7 @@ enum
 /* 0-terminated lists */
 extern const uint16_t *const gTtRegionPool[TT_REGIONS];      /* the cards a region's players carry */
 extern const uint16_t *const gTtSellerStock[TT_REGIONS];     /* each region's seller's singles (3 stars at most) */
+unsigned Tt_PoolOf(unsigned region);   /* Moemon Kai: the HOENN region whose pool and shelf JOHTO / KANTO use (tt_hands.c) */
 extern const uint16_t *const gTtSpecialCards[TT_SPECIAL_COUNT];   /* a special player's own rare cards */
 
 struct TtOpponent

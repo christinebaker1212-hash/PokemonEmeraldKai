@@ -1544,7 +1544,7 @@ static const char *const sShopTabs[] = {"SINGLES", "PACKS", "SELL"};
 #define SHOP_TABS 3
 static unsigned ShopList(uint16_t *out)
 {
-    const uint16_t *stock = gTtSellerStock[U.shopRegion < TT_REGIONS ? U.shopRegion : 0];
+    const uint16_t *stock = gTtSellerStock[Tt_PoolOf(U.shopRegion < TT_REGIONS ? U.shopRegion : 0)];   // (JOHTO / KANTO use HOENN's)
     unsigned n = 0, i;
     if (U.shopTab == 0)
         for (i = 0; stock[i]; i++)
