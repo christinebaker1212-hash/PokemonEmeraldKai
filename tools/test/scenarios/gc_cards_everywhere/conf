@@ -1,0 +1,8 @@
+# Every card in every region: the GAME CENTER (reached from JOHTO here) sells POKeMON promo cards (12000) and its
+# Triple Triad seller adds the 4- and 5-star cards only special players carry (up to 20000); elsewhere a seller
+# keeps to its shelf of 1-3 stars
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=6:50"
+EXPECT_A=("price 12000, tt singles" "top 2600" "where map 11.18" "top 20000")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -11,6 +11,7 @@
 #include "global.h"
 #include "event_data.h"
 #include "constants/flags.h"
+#include "constants/maps.h"
 #include "mp.h"
 #include "money.h"
 #include "script.h"
@@ -1547,8 +1548,26 @@ static unsigned ShopList(uint16_t *out)
     const uint16_t *stock = gTtSellerStock[Tt_PoolOf(U.shopRegion < TT_REGIONS ? U.shopRegion : 0)];   // (JOHTO / KANTO use HOENN's)
     unsigned n = 0, i;
     if (U.shopTab == 0)
+    {
         for (i = 0; stock[i]; i++)
             out[n++] = stock[i];
+        // Moemon Kai: the GAME CENTER (in every region) also has the cards only special players carry, so every card
+        // can be had in JOHTO and KANTO too
+        if (gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_RUSTBORO_CITY_GAME_CENTER_2F)
+         && gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_RUSTBORO_CITY_GAME_CENTER_2F))
+        {
+            unsigned s, k, j;
+            for (s = 0; s < TT_SPECIAL_COUNT; s++)
+                for (k = 0; gTtSpecialCards[s][k]; k++)
+                {
+                    uint16_t id = gTtSpecialCards[s][k];
+                    for (j = 0; j < n && out[j] != id; j++)
+                        ;
+                    if (j == n && Tt_Card(id) && Tt_Card(id)->stars >= 4)
+                        out[n++] = id;
+                }
+        }
+    }
     else if (U.shopTab == 2)
     {
         unsigned id;
@@ -1556,6 +1575,21 @@ static unsigned ShopList(uint16_t *out)
             if (Owned(id) > 1)
                 out[n++] = (uint16_t)id;
     }
+    return n;
+}
+// Tests (mp cardshop): how many singles a seller here lists for REGION, and the dearest one's price
+unsigned TtUi_DebugShop(unsigned region, unsigned *topPrice)
+{
+    static uint16_t list[TT_CARD_MAX + 1];
+    int keepRegion = U.shopRegion, keepTab = U.shopTab;
+    unsigned n, i;
+    U.shopRegion = (int)region, U.shopTab = 0;
+    n = ShopList(list);
+    U.shopRegion = keepRegion, U.shopTab = keepTab;
+    *topPrice = 0;
+    for (i = 0; i < n; i++)
+        if (Tt_SinglePrice(list[i]) > *topPrice)
+            *topPrice = Tt_SinglePrice(list[i]);
     return n;
 }
 static int Bought(unsigned id) { return id && id <= TT_CARD_MAX && (C()->bought[id / 8] >> (id % 8) & 1); }

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Fires every story trigger of some map groups, one game per map: each step trigger (a map's coord events) with its
-# variable set to the value it waits for, the player stepping onto it from a free neighbouring cell; and each map's
+# variable set to the value it waits for, the player standing on its cell (harness mp steptrigger); and each map's
 # frame scripts (map_script_2: VAR, VALUE) by setting the variable and warping in. Then it mashes A through what plays
 # (battles too: foes at 1 HP; card games conceded) and checks the game is free again and the variable moved on.
 # Reports: FAIL (crash, hang, out-of-memory heap), HELD (a script still holding the player), STUB (a special that isn't
@@ -57,14 +57,17 @@ for g in range(g0, g1 + 1):
             if vid is None:
                 continue
             start = None
-            for dx, dy, d in ((0, 1, 'up'), (0, -1, 'down'), (1, 0, 'left'), (-1, 0, 'right')):
-                fx, fy = c['x'] + dx, c['y'] + dy
-                if free(fx, fy) and (fx, fy) not in coords:
-                    start = (fx, fy, d)
+            for strict in (True, False):   # (a cell with a trigger of its own only if nothing else is free)
+                for dx, dy, d in ((0, 1, 'up'), (0, -1, 'down'), (1, 0, 'left'), (-1, 0, 'right')):
+                    fx, fy = c['x'] + dx, c['y'] + dy
+                    if free(fx, fy) and (not strict or (fx, fy) not in coords):
+                        start = (fx, fy, d)
+                        break
+                if start:
                     break
             if start is None:
                 continue
-            events.append(('step', vid, int(str(c.get('var_value', '0')), 0), c['x'], c['y']) + start + (c['script'],))
+            events.append(('step', vid, int(str(c.get('var_value', '0')), 0), c['x'], c['y']) + start + (c['script'], c.get('elevation', 0)))
         sp = os.path.join(repo, 'data/maps', name, 'scripts.inc')
         text = open(sp).read() if os.path.exists(sp) else ''
         landing = None
@@ -83,17 +86,18 @@ for g in range(g0, g1 + 1):
                 val = int(val, 0)
             except ValueError:
                 continue
-            events.append(('frame', vid, val, landing[0], landing[1], landing[0], landing[1], 'down', script))
+            events.append(('frame', vid, val, landing[0], landing[1], landing[0], landing[1], 'down', script, 0))
         if not events:
             continue
-        lines = ['pressuntil A field 5000', 'wait 30', 'mp teach 0 44', 'mp teach 1 44', 'mp battlestyle 1']
-        for kind, vid, val, x, y, fx, fy, d, script in events:
+        lines = ['pressuntil A field 5000', 'wait 400', 'mp teach 0 44', 'mp teach 1 44', 'mp battlestyle 1']   # (the start's achievements toast takes the first input)
+        for kind, vid, val, x, y, fx, fy, d, script, elev in events:
             note = '%s_%s_%d,%d_0x%X=%d' % (kind, script, x, y, vid, val)
             if kind == 'step':
-                lines += ['mp warp %d,%d,%d,%d' % (g, n, fx, fy), 'wait 40']
+                # the player on the trigger's cell, facing the way they'd have come; the trigger run as a step would
+                lines += ['mp warp %d,%d,%d,%d' % (g, n, x, y), 'wait 40']
                 if vid:
                     lines.append('mp setvar 0x%X %d' % (vid, val))
-                lines += ['mp face %s' % d, 'wait 4', 'mp sweepmark', 'press %s 8' % d.upper(), 'wait 30']
+                lines += ['mp face %s' % d, 'wait 4', 'mp sweepmark', 'mp steptrigger %d %d' % (x, y), 'wait 30']
             else:
                 lines += ['mp setvar 0x%X %d' % (vid, val), 'mp sweepmark', 'mp warp %d,%d,%d,%d' % (g, n, fx, fy), 'wait 60']
             lines += ['mash A 40 8', 'pressuntil A field 7000', 'mp cards concede', 'mp ygo concede', 'mp tt concede',
@@ -107,7 +111,7 @@ for g in range(g0, g1 + 1):
 PY
 one() {   # one GROUP NUM REGION COUNT NAME
     local d="$D/run_$5"; mkdir -p "$d"
-    local t=$(( 60 + $4 * 70 ))
+    local t=$(( 90 + $4 * 120 ))
     (cd "$d" && env SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_TEST="$D/scripts/$5.txt" MOEMON_SHOTDIR="$d" \
         MOEMON_SKIP_COOP_SETUP=1 MOEMON_DEBUG_QUICKSTART=1 MOEMON_DEBUG_WARP="$1,$2,1,1" MOEMON_DEBUG_REGION="${REGION:-$3}" \
         MOEMON_DEBUG_PARTY=6:100,9:100 MOEMON_TEST_FOE_HP1=1 MOEMON_COOP_CONFIG="$d/a.ini" MOEMON_CONTROLS_CONFIG="$d/c.ini" \

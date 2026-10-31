@@ -1,4 +1,5 @@
 #include "global.h"
+#include "constants/event_object_movement.h"
 #include "mp.h"
 #include "frontier_util.h"
 #include "battle_setup.h"
@@ -117,9 +118,23 @@ bool8 ScrCmd_end(struct ScriptContext *ctx)
     return FALSE;
 }
 
+// Moemon Kai: JOHTO's / KANTO's scripts were ripped from a GBA game; a few call its own code by ROM address (a
+// palette saved around a fade, FireRed's quest log, BILL's teleporter waiting for its animation). Those addresses
+// mean nothing here: skip them (callnative does nothing, gotonative goes on at once) instead of jumping into them
+static bool8 IsGbaRomAddress(uintptr_t a)
+{
+    return a >= 0x08000000 && a < 0x0A000000;
+}
+
 bool8 ScrCmd_gotonative(struct ScriptContext *ctx)
 {
     bool8 (*addr)(void) = (bool8 (*)(void))ScriptReadPointer(ctx);
+
+    if (IsGbaRomAddress((uintptr_t)addr))
+    {
+        printf("[qz] gotonative 0x%X skipped\n", (unsigned)(uintptr_t)addr);
+        return FALSE;
+    }
 
     SetupNativeScript(ctx, addr);
     return TRUE;
@@ -145,6 +160,11 @@ bool8 ScrCmd_callnative(struct ScriptContext *ctx)
 {
     NativeFunc func = (NativeFunc)ScriptReadPointer(ctx);
 
+    if (IsGbaRomAddress((uintptr_t)func))
+    {
+        printf("[qz] callnative 0x%X skipped\n", (unsigned)(uintptr_t)func);   // (Moemon Kai: see IsGbaRomAddress)
+        return FALSE;
+    }
     func();
     return FALSE;
 }
@@ -1187,6 +1207,10 @@ bool8 ScrCmd_setobjectmovementtype(struct ScriptContext *ctx)
     u16 localId = VarGet(ScriptReadHalfword(ctx));
     u8 movementType = ScriptReadByte(ctx);
 
+    // Moemon Kai: Quetzal's own movement types aren't Emerald's (past NUM_MOVEMENT_TYPES the object's callback was
+    // garbage and the game crashed when it spawned): 0x64 is the DANCE THEATER's spin, anything else stands
+    if (movementType >= NUM_MOVEMENT_TYPES)
+        movementType = movementType == 0x64 ? MOVEMENT_TYPE_ROTATE_COUNTERCLOCKWISE : MOVEMENT_TYPE_FACE_DOWN;
     SetObjEventTemplateMovementType(localId, movementType);
     return FALSE;
 }

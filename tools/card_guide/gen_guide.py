@@ -318,12 +318,14 @@ for i, own in enumerate(tt['specials']):
     for k in own:
         tt_special_of.setdefault(k, []).append(i)
 TT_PACK = {1: 'BRONZE (¥600)', 2: 'SILVER (¥1600)', 3: 'GOLD (¥4000)'}
-TT_PRICE = {1: 400, 2: 1000, 3: 2600}
+TT_PRICE = {1: 400, 2: 1000, 3: 2600, 4: 8000, 5: 20000}
 
 
 def tt_row(c):
     k, stars = c['id'], c['stars']
     sold = '; '.join('%s: ¥%d' % (REGIONS[r][2], TT_PRICE[stars]) for r in shelf_regions.get(k, []))
+    if stars >= 4 and k in tt_special_of:   # (tt_ui.c ShopList: the GAME CENTER, in every region, has them too)
+        sold = (sold + '; ' if sold else '') + 'GAME CENTER 2F (every region): ¥%d' % TT_PRICE[stars]
     regions = pool_regions.get(k, [])
     if stars <= 3:
         players = ', '.join(REGIONS[r][0].title() for r in regions) or ''
@@ -449,7 +451,8 @@ Packs are the only way to get <b>holo</b> cards (apart from trading with a frien
 (never a promo or a holo).</li>
 <li><b>CARD CLUB counters</b> (Oldale and Mauville POKéMON MARTS, the Lilycove DEPARTMENT STORE): trade in spare
 cards for CARD POINTS (CP) and buy any common or uncommon card with them.</li>
-<li><b>GAME CENTER 2F CARD SHOP</b> (Rustboro City): one copy of every non-holo card of the booster sets for money,
+<li><b>GAME CENTER 2F CARD SHOP</b> (Rustboro City; in JOHTO and KANTO, by the attendant in GOLDENROD's and
+CELADON's GAME CORNERS): one copy of every non-holo card of the booster sets and of every promo card for money,
 the structure and theme decks, and the CARD CLUB counter's services.</li>
 <li><b>Starter deck.</b> Your first deck (Ember, Tidal or Garden Friends). Basic Energy is always free.</li></ul>
 <h3>YU-GI-OH!</h3><ul>
@@ -462,7 +465,8 @@ money, plus the Starter and Structure Decks. So no YU-GI-OH! card is out of reac
 <li><b>Winning cards.</b> When you win, you take cards from your opponent's hand. The town's trade rule decides how
 many: ONE (one card of your choice), DIFF (one per point you won by), DIRECT (the cards you turned) or ALL.</li>
 <li><b>Sellers</b> in seven POKéMON CENTERS and the GAME CENTER 2F: BRONZE (1★), SILVER (2★) and GOLD (3★) packs of
-5 cards, and a few singles (1★ to 3★) that are different in each town. No one sells 4★ or 5★ cards.</li>
+5 cards, and a few singles (1★ to 3★) that are different in each town. The GAME CENTER 2F seller (in every region)
+also has one copy of each 4★ and 5★ card that only the special players carry.</li>
 <li><b>4★ cards</b> are carried by ordinary players once you have 4 or more badges (more of them with 7 or more).
 <b>5★ cards</b> are carried only by the special players below.</li></ul>''')
 

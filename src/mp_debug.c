@@ -2260,6 +2260,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
             SetMonData(&gPlayerParty[slot], MON_DATA_FRIENDSHIP, &f);
         }
     }
+    else if (strcmp(cmd, "cardshop") == 0)
+    {
+        // cardshop: the GAME CENTER's prices here (a POKeMON promo card, the Triple Triad seller's singles)
+        extern unsigned Tcg_ShopPrice(unsigned card);
+        extern unsigned TtUi_DebugShop(unsigned region, unsigned *topPrice);
+        unsigned top, n = TtUi_DebugShop(1, &top), promo = 0, id;
+        for (id = 7; id < 500 && !promo; id++)
+            if (Tcg_ShopPrice(id) == 12000)
+                promo = id;
+        printf("[test] cardshop tcg promo %u price %u, tt singles %u top %u\n", promo, promo ? Tcg_ShopPrice(promo) : 0, n, top);
+    }
     else if (strcmp(cmd, "evotarget") == 0)
     {
         // evotarget SLOT [ITEM]: what the party POKeMON would evolve into: on leveling up, or with ITEM used on it
@@ -2756,6 +2767,30 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] objat %d,%d: local %d gfx %d\n", x, y, gObjectEvents[id].localId, OBJ_GFX_ID(&gObjectEvents[id]));
         else
             printf("[test] objat %d,%d: none\n", x, y);
+    }
+    else if (strcmp(cmd, "steptrigger") == 0)
+    {
+        // steptrigger X Y: as if the player stepped onto that cell: its step trigger runs if its variable holds the value
+        int x = 0, y = 0, i;
+        const struct CoordEvent *ev = gMapHeader.events->coordEvents;
+        sscanf(arg, "%d %d", &x, &y);
+        for (i = 0; i < gMapHeader.events->coordEventCount; i++)
+            if (ev[i].x == x && ev[i].y == y && ev[i].script != NULL && ev[i].trigger != TRIGGER_RUN_IMMEDIATELY
+             && (ev[i].trigger == 0 || VarGet(ev[i].trigger) == ev[i].index))
+            {
+                ScriptContext_SetupScript(ev[i].script);
+                printf("[test] steptrigger %d,%d: runs\n", x, y);
+                break;
+            }
+        if (i == gMapHeader.events->coordEventCount)
+            printf("[test] steptrigger %d,%d: none\n", x, y);
+    }
+    else if (strcmp(cmd, "elevation") == 0)
+    {
+        // elevation N: the player's height (a step trigger only fires at its own: tools/test/story_sweep.sh)
+        struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];
+        me->currentElevation = me->previousElevation = atoi(arg);
+        printf("[test] elevation %d\n", atoi(arg));
     }
     else if (strcmp(cmd, "boulderswitch") == 0)
     {

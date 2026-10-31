@@ -2044,6 +2044,12 @@ ACTOR LEVEL [P]` picks the pursuit. Test garden_doing.
   offset a whole tile at once; wrapping at 256 drew the picture's far side down the screen's left edge for a step).
 - Tests gc_look (pictures, clerks behind counters, the Town Map), gc_visit (gate, admission, stairs, shop deck and
   single, a duel asked by talking, elevator, rooftop, exit). Debug: mp face DIR, mp textspeed N.
+- Every card in every region (1.61.3): with the GAME CENTER reachable from JOHTO / KANTO, its 2F CARD SHOP also sells
+  one copy of each POKéMON promo card (tcg_collection.c Tcg_ShopPrice, 12000: the 44 promos came only from HOENN's
+  special trainers and prizes) and its Triple Triad seller adds every 4- and 5-star card only special players carry
+  (tt_ui.c ShopList, Tt_SinglePrice 8000 / 20000). Yu-Gi-Oh! needed nothing (every card is in a booster, a shop or a
+  deck, and GOLDENROD's / CELADON's stores have CARD CLUB duelists). Test gc_cards_everywhere (harness mp cardshop);
+  the card guide (tools/card_guide) says so.
 - JOHTO's and KANTO's GAME CENTER (1.61.3): HOENN's 2F and 3F, no 1F and no ROOFTOP (the user's rule: HOENN's tower
   keeps its four floors; a region without a tower of its own gets an attendant and 2F / 3F only). The attendants
   stand in GOLDENROD's and CELADON's GAME CORNERS at (12, 2) (map.json objects added after the import: put them back
@@ -2806,6 +2812,11 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   sat a row above the door): EventScript_GoldenrodElevator + qz_specials.c QzGoldenrodElevatorMenu / Go list B1F-6F
   and set the elevator's way out; the floors' warps are on the doors (9, 4), B1F got one at (10, 6). Quetzal's
   arrival scene (VAR 0x5015 = 1) isn't used. Test qz_goldenrod_elevator.
+- Ripped scripts that call Quetzal's own code by ROM address (callnative / gotonative 0x08xxxxxx: ICE PATH's palette
+  save, FIVE ISLAND's quest-log save, BILL's teleporter wait, GOLDENROD's elevator arrival) are skipped (scrcmd.c
+  IsGbaRomAddress): they crashed the game. Quetzal's movement type 0x64 (the DANCE THEATER leader's spin) is
+  ROTATE_COUNTERCLOCKWISE; any other type past Emerald's table stands (scrcmd.c, and object spawns guard it): the
+  theater crashed on every visit after its scene. Test qz_dance_theater.
 - Story triggers: tools/quetzal_port/story_vars.py (run by regress.sh) checks every JOHTO / KANTO step trigger and frame
   script waits for a value some script or the code sets (KNOWN lists the ones that rightly don't, checked against
   the ROM); tools/test/story_sweep.sh fires each trigger in the game (its variable set, the player stepping on it)
