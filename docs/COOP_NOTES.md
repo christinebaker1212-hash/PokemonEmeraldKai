@@ -3285,7 +3285,9 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   fetch_decomp.sh's parts 2), the region's coordinates made local, warps into places left out dropped. The pack
   stamps warp tiles: Platinum's south mat (0x65) stays Emerald's south arrow warp (General metatile 0x024), every
   other warp (doors 0x69, cave mouths, stairs, escalators) warps when stepped on (non-animated door, 0x0A7).
-- Not yet: the pack is 93 MB (textures as RGBA: to compress), animated textures, billboard props, Platinum's door
+- The pack file is "S3DZ" + the pack deflated (zlib, already in the game for the fight engine): 93 MB -> 7 MB, inflated
+  in about a quarter of a second when the first SINNOH map loads (s3d.c LoadPack).
+- Not yet: animated textures, billboard props, Platinum's door
   animations, the buildings' people and signs (step 4), speed (about 6 ms a frame), Windows not built with it yet.
 - Test: tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM] (the 3D picture against render_ref.py: mean under 8 of 765 a
   pixel, now 2.9; a house's wall; TWINLEAF to ROUTE 201; the ground's heights; with a ROM, its pack the same as the

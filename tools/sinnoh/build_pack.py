@@ -10,6 +10,7 @@ POKEPLATINUM_DIR is a pret/pokeplatinum checkout (source.py): it holds every map
 light set Platinum has, so no ROM is needed; the release builds the pack from it (tools/sinnoh/fetch_decomp.sh). Built
 from the ROM instead, the pack is the same, byte for byte (tools/sinnoh/test_poc.sh checks it when given a ROM).
 
+The file is "S3DZ", u32 the pack's size, then the pack deflated with zlib (src/sinnoh/s3d.c inflates it at load).
 Format (little endian), version 3:
   "S3DP" u32 version
   u32 textures:  each u16 w, u16 h, then w*h u32 RGBA (alpha 0-255)
@@ -33,6 +34,7 @@ import hashlib
 import math
 import os
 import struct
+import zlib
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -191,8 +193,10 @@ def write(path, pack, light_sets, matrices):
             out += bytes(len(h) for h in hts)
             for h in hts:
                 out += struct.pack('<3f', *(h + [0.0] * (3 - len(h))))
-    open(path, 'wb').write(out)
-    return len(out)
+    # stored compressed: "S3DZ", u32 the size of the pack, then the pack deflated (zlib): 88 MB -> about 6
+    packed = b'S3DZ' + struct.pack('<I', len(out)) + zlib.compress(bytes(out), 6)
+    open(path, 'wb').write(packed)
+    return len(packed)
 
 
 def main():

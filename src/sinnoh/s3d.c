@@ -36,6 +36,7 @@
 
 extern void (*gMpS3dLine)(int line, u16 layers[4][DISPLAY_WIDTH]);
 const char *Updater_ExeFile(const char *name);
+int uncompress(unsigned char *dest, unsigned long *destLen, const unsigned char *source, unsigned long sourceLen);   // (zlib)
 extern bool (*gMpS3dOamHidden)(int oamIndex, int x, int line);
 
 #define W DISPLAY_WIDTH
@@ -124,6 +125,22 @@ static void LoadPack(void)
         return;
     }
     fclose(f);
+    if (size >= 8 && memcmp(data, "S3DZ", 4) == 0)
+    {
+        // the pack is stored deflated (build_pack.py): inflated once here (about a quarter of a second)
+        unsigned long rawSize = data[4] | data[5] << 8 | data[6] << 16 | (unsigned long)data[7] << 24;
+        u8 *raw = malloc(rawSize ? rawSize : 1);
+        if (raw == NULL || uncompress(raw, &rawSize, data + 8, (unsigned long)(size - 8)) != 0)
+        {
+            printf("[s3d] %s: can't inflate the pack\n", path);
+            free(raw);
+            free(data);
+            return;
+        }
+        free(data);
+        data = raw;
+        size = (long)rawSize;
+    }
     r.p = data;
     r.end = data + size;
     r.bad = FALSE;
