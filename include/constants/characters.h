@@ -269,7 +269,6 @@
 #define PLACEHOLDER_ID_MAXIE         0xB
 #define PLACEHOLDER_ID_KYOGRE        0xC
 #define PLACEHOLDER_ID_GROUDON       0xD
-#define PLACEHOLDER_ID_SINNOH_TEXT   0x40   // Moemon Kai: + bank, message (2 bytes of 7 bits each): SINNOH's text (src/sinnoh/s3d_text.c)
 
 // battle placeholders are located in battle_message.h
 

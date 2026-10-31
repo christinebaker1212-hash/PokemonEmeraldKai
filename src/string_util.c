@@ -345,14 +345,6 @@ u8 *StringExpandPlaceholders(u8 *dest, const u8 *src)
         {
         case PLACEHOLDER_BEGIN:
             placeholderId = *src++;
-            if (placeholderId == PLACEHOLDER_ID_SINNOH_TEXT)
-            {
-                // Moemon Kai: a message of SINNOH's text pack (src/sinnoh/s3d_text.c)
-                u16 bank = (src[0] & 0x7F) << 7 | (src[1] & 0x7F), msg = (src[2] & 0x7F) << 7 | (src[3] & 0x7F);
-                src += 4;
-                dest = StringExpandPlaceholders(dest, S3D_Text(bank, msg));
-                break;
-            }
             expandedString = GetExpandedPlaceholder(placeholderId);
             dest = StringExpandPlaceholders(dest, expandedString);
             break;

@@ -7,8 +7,7 @@
 set -e
 DIR="${1:?usage: fetch_decomp.sh DIR}"
 COMMIT=6eeb1b04c6433761f3049811b7e1383619c59743   # (2026-10-24; change it only with a check that the pack still matches)
-PARTS=3   # what is fetched (2: + res/field/events, the warps; 3: + res/text, the words); a folder fetched with fewer
-          # parts is fetched again
+PARTS=2   # what is fetched (2: + res/field/events, the warps); a folder fetched with other parts is fetched again
 MARK="$COMMIT parts $PARTS"
 if [ -f "$DIR/.s3d_commit" ] && [ "$(cat "$DIR/.s3d_commit")" = "$MARK" ]; then
     echo "pokeplatinum $COMMIT already in $DIR"
@@ -24,8 +23,7 @@ cd "$DIR"
 git init -q
 git remote add origin https://github.com/pret/pokeplatinum.git
 git sparse-checkout set --no-cone /generated/map_headers.txt /include/data/map_headers.h /res/field/matrices/ \
-    /res/field/maps/ /res/field/area_data/ /res/field/props/ /res/field/lighting/ /res/field/events/ \
-    /res/text/
+    /res/field/maps/ /res/field/area_data/ /res/field/props/ /res/field/lighting/ /res/field/events/
 for i in 1 2 3 4; do
     git fetch -q --depth 1 --filter=blob:none origin "$COMMIT" && break
     sleep $((2 ** i))

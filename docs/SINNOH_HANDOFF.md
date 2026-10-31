@@ -12,7 +12,8 @@ Queued after the 1.61.6 release and the KANTO / JOHTO sweep (the user's plan, 20
   41-44), with every place's warps: doors lead in, mats out. The pack ships compressed (7 MB). SINNOH is a region of its own
   (REGION_SINNOH: GENERATION cap 4+, badges from flag 0x3000, CANALAVE's dock for the boat, off the boat's list
   until its story is in), with Platinum's wild POKéMON (gen_wild.py). Next: data (step 3: trainers, items, marts),
-  scripts and text (step 4, converted at build time like the 3D pack: never in the repository), the PÓKETCH (step 5);
+  scripts and text (step 4: original writing for this game, committed per map; DECIDED 2026-10-31: nothing of
+  Platinum's scripts or text is converted, committed or shipped), the PÓKETCH (step 5);
   animated textures and Platinum's door animations when there's time (the 3D picture takes 4-5 ms a frame).
 - DECIDED (the user, 2026-10-31): the 3D data comes from pret/pokeplatinum, not a ROM. The decomp holds every map
   block, texture set, prop model and light set as files (byte for byte the ROM's), so tools/sinnoh/make_pack.sh fetches
@@ -98,9 +99,9 @@ perspective camera. The engine draws those models as Platinum does instead of pi
    compared against reference pictures), then inside the game: one Sinnoh map drawn in 3D with billboarded sprites.
 2. Collision and height: Platinum's tile permissions -> Emerald behaviours; BDHC -> heights under objects, bridge
    layers.
-3. Data converters: trainers, wild, items, marts, text; small new systems for Honey Trees, Poké Radar,
+3. Data converters: trainers, wild, items, marts (no text: SINNOH's words are written for this game); small new systems for Honey Trees, Poké Radar,
    swarms and the Great Marsh; Rock Climb and Defog as field moves.
-4. Scripts: convert the common commands, write the cutscenes by hand. This is the bulk of the work
+4. Scripts: written for this game, with its own words (nothing converted from Platinum's scripts). This is the bulk of the work
    (Team Galactic, the lakes, Spear Pillar, the Distortion World; the Distortion World's own gravity and camera
    need the 3D engine's camera moves).
 5. PÓKETCH Key Item and its apps (touch apps use the D-pad cursor or mouse). Self-contained, can come early.

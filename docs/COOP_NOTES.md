@@ -3222,7 +3222,7 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
 - tools/moemon_text/moe_words.py: HOENN's rule as code (moe()): every POKé word -> MOé (POKéMON -> MOéMON, POKéDEX ->
   MOéDEX, POKéMANIAC, POKéRUS...; mixed case in capitals), POKé BALL(S) kept (the item's name; MOé FLUTE and MOé DOLL
   are the items' names). Run on JOHTO's and KANTO's map scripts and data/scripts/qz (.string lines only: 1761
-  lines); re-run it after re-importing Quetzal's scripts. tools/sinnoh/build_text.py applies moe() to SINNOH's text.
+  lines); re-run it after re-importing Quetzal's scripts.
 
 ## Running outdoors in JOHTO and KANTO (1.62.2)
 - Some of Moemon Quetzal's outdoor maps forbid running (allow_running false on 21 JOHTO towns / routes: CHERRYGROVE
@@ -3309,14 +3309,9 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   levels from res/field/encounters) into src/data/wild_encounters.json as gSinnoh_* entries (154 places): grass 12
   slots and surfing 5 as in Emerald; fishing OLD 2 / GOOD 3 / SUPER 5 of Platinum's 5 a rod. Not yet: Platinum's
   day / night grass slots, swarms, the POKé RADAR, GBA-slot tables. ROUTE 201: STARLY, BIDOOF, KRICKETOT.
-- Words: tools/sinnoh/build_text.py makes sinnoh/platinum_text.pak from the decomp's message banks (res/text, English;
-  MOéMON's words applied by tools/moemon_text/moe_words.py moe(), as in HOENN's and, since 1.62.4, JOHTO's / KANTO's text;
-  fetch_decomp.sh parts 3) when the release is built (make_pack.sh; package.sh ships it in sinnoh/): never in the
-  repository. The game's character set (charmap.txt; no glyph: '?'), "\n" a new line, "\r" a scroll, "\f" a new
-  page, string buffers 0-2 STR_VAR_1-3, deflated ("S3TZ"). Banks are numbered by file name (bank_numbers(), the
-  pinned commit). A script's text is PLACEHOLDER_BEGIN, PLACEHOLDER_ID_SINNOH_TEXT (0x40), bank and message as two
-  7-bit bytes each (sinnoh_text_bytes()): StringExpandPlaceholders asks src/sinnoh/s3d_text.c S3D_Text for it
-  ("Message missing" without the pack). `mp s3dtext BANK MSG` shows one (the log has its length only).
+- Words: SINNOH's people, signs and story are written for this game (in its scripts, MOéMON's words like HOENN's, so
+  OPTIONS > CREATURES swaps them back like any text); nothing of Platinum's text is used or shipped (decided
+  2026-10-31: the earlier text pack built from the decomp's message banks is gone).
 - Not yet: animated textures (prop animations are linked to models in Platinum's code, not its data), billboard props, Platinum's door
   animations, the buildings' people and signs (step 4), speed (about 6 ms a frame), Windows not built with it yet.
 - Test: tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM] (the 3D picture against render_ref.py: mean under 8 of 765 a

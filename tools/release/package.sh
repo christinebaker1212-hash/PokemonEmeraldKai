@@ -44,11 +44,10 @@ mkdir -p "$P/mugen"
 mkdir -p "$P/music"
 cp music/*.kaisong "$P/music/" 2>/dev/null || true
 cp docs/SONG_TABLE.md "$P/music/SONG_TABLE.md"
-# SINNOH's 3D pack and text pack (tools/sinnoh/make_pack.sh builds them from pret/pokeplatinum; the release runs it first)
+# SINNOH's 3D pack (tools/sinnoh/make_pack.sh builds them from pret/pokeplatinum; the release runs it first)
 if [ -f sinnoh/platinum3d.pak ]; then
     mkdir -p "$P/sinnoh"
     cp sinnoh/platinum3d.pak "$P/sinnoh/"
-    if [ -f sinnoh/platinum_text.pak ]; then cp sinnoh/platinum_text.pak "$P/sinnoh/"; fi   # (its words)
 fi
 printf 'Moemon Emerald Kai Co-op %s (%s)\nThe game checks for updates when it starts (AutoUpdate = 0 in moemon_coop.ini turns that off).\n' "$VER ($CHANNEL)" "$PLAT" > "$P/moemon_release.txt"
 ZIP="$OUT/MoemonEmeraldKaiCoop-$PLAT.zip"

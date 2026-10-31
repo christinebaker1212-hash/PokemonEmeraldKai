@@ -5,8 +5,6 @@ FLUTE and MOé DOLL are the items' names). Mixed case (Pokémon, Poké) goes the
 writes it.
 
     python3 -I tools/moemon_text/moe_words.py FILE...      # rewrites the .string lines of these script files
-
-moe() is also what tools/sinnoh/build_text.py applies to SINNOH's text when it builds the text pack.
 """
 import re
 import sys
