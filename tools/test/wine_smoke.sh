@@ -19,7 +19,7 @@ printf 'pressuntil A field 5000\nshot w0\nmp wild 288:3\npressuntil A action 300
 (cd "$GAME" && SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_TEST="Z:$D/solo/a.txt" MOEMON_SHOTDIR="Z:$D/solo" \
     MOEMON_DEBUG_QUICKSTART=1 MOEMON_SKIP_COOP_SETUP=1 MOEMON_COOP_CONFIG="Z:$D/solo/a.ini" MOEMON_SAVE="Z:$D/solo/a.sav" \
     timeout 300 wine MoemonEmeraldKaiCoop.exe > "$D/solo/a.log" 2>&1)
-if [ "$(grep -c "action menu at frame" "$D/solo/a.log")" -ge 2 ]; then echo "ok   wine solo (a HOENN and a GEN 9 wild battle)"; else
+if [ "$(grep -c "action menu at frame" "$D/solo/a.log")" -ge 2 ]; then echo "ok   wine solo (a HOENN and a GEN 9 wild battle)"; else echo "FAIL wine solo (see $D/solo/a.log)"; fail=$((fail+1)); fi
 
 M="$D/mixed"; cp "$TOOLS/scenarios/coop_wild/a.txt" "$TOOLS/scenarios/coop_wild/b.txt" "$M/"
 PORT=$(free_port); LP=$(free_port)
