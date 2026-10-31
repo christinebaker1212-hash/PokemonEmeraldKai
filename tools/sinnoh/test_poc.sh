@@ -5,6 +5,7 @@
 #      within rounding (the player's own spot left out)
 #   2. Platinum's collision: walking up into the player's house stops at its wall
 #   3. walking north out of TWINLEAF reaches ROUTE 201 (the maps' connection) with the 3D view following
+#   4. the ground's height (BDHC): TWINLEAF's 16, its pond's 8, blended between tile centres
 #   and, given a Platinum ROM too, that the pack built from the cartridge is the same, byte for byte
 # usage: tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [PLATINUM_ROM]   (BIN=the game, default ./pokeemerald64)
 SRC="${1:?usage: test_poc.sh POKEPLATINUM_DIR [PLATINUM_ROM]}"
@@ -21,10 +22,12 @@ if [ -n "$ROM" ]; then
     python3 -I "$REPO/tools/sinnoh/build_pack.py" --rom "$ROM" "$SRC" "$OUT/from_rom.pak" > "$OUT/pack_rom.log"
     check "the pack from the ROM is the decomp's, byte for byte" "cmp -s '$OUT/platinum3d.pak' '$OUT/from_rom.pak'"
 fi
-run() {   # NAME SCRIPT
-    mkdir -p "$OUT/$1"
-    printf '%b' "$2" > "$OUT/$1/a.txt"
-    TMO=120 bash "$REPO/tools/test/run1.sh" "$OUT/$1" MOEMON_S3D_PAK="$OUT/platinum3d.pak" MOEMON_S3D_HOUR=12 > /dev/null
+run() {   # NAME SCRIPT [VAR=value...]
+    local name="$1" script="$2"
+    shift 2
+    mkdir -p "$OUT/$name"
+    printf '%b' "$script" > "$OUT/$name/a.txt"
+    TMO=120 bash "$REPO/tools/test/run1.sh" "$OUT/$name" MOEMON_S3D_PAK="$OUT/platinum3d.pak" MOEMON_S3D_HOUR=12 "$@" > /dev/null
 }
 
 run look 'pressuntil A field 5000\nwait 30\nmp warp 40,0,14,9\nwait 200\nshot frame\nquit\n'
@@ -50,6 +53,10 @@ check "the house's wall stops the player at (10, 12)" "grep -q 'where map 40.0 x
 run walk 'pressuntil A field 5000\nwait 30\nmp warp 40,0,14,14\nwait 200\npress UP 330\nwait 40\nshot route\nmp where\nquit\n'
 check "walking north reaches ROUTE 201" "grep -q 'where map 40.1' '$OUT/walk/log.txt'"
 check "the 3D pack was loaded" "grep -q '\[s3d\] .*textures' '$OUT/walk/log.txt'"
+
+# the ground's height (BDHC): TWINLEAF's ground is at 16, its pond (rows 27+) at 8, blended between tile centres
+run slope 'pressuntil A field 5000\nwait 30\nmp warp 40,0,15,24\nwait 200\nmp s3dground 248 392\nmp s3dground 248 472\nmp s3dground 248 432\nquit\n'
+check "the ground: 16 in TWINLEAF, 8 on its pond, 12 between" "grep -q 's3dground 248 392: 16.00' '$OUT/slope/log.txt' && grep -q 's3dground 248 472: 8.00' '$OUT/slope/log.txt' && grep -q 's3dground 248 432: 12.00' '$OUT/slope/log.txt'"
 
 echo "$fail failed (results in $OUT)"
 exit $fail

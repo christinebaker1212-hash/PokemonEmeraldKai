@@ -3254,10 +3254,18 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   roofs in front of whoever stands behind them, as on the DS).
 - Light blocks: Platinum's rule (area_light.c): the first block whose end time is past now, in 2-second units of the
   day; MOEMON_S3D_HOUR fixes the hour for tests.
-- Not yet: BDHC heights (all at the block's altitude), animated textures, billboard props, the rest of the matrix
-  (build_pack.py's window), speed (about 6 ms a frame), Windows not built with it yet.
+- Heights (BDHC): the pack (version 2) holds each block's ground heights at every tile's centre (build_pack.py
+  heights(): every plate, a rectangle around the block's centre in x / z and a plane, that holds the point; up to 3,
+  a bridge over the ground; world heights, the matrix altitude only matters on filler cells). s3d.c GroundAt blends
+  the 4 tile centres around a point, each tile's height the one nearest the object's last (TileHeight): the camera
+  target stands on the ground under the player (sView.playerH) and every field sprite on the ground under its feet
+  (S3D_PlaceSprite with its sprite id: sSpriteH keeps each one's layer). render_ref.py targets the same height.
+  `mp s3dground X Y [NEAR]` reads it (map pixels). TWINLEAF's ground is 16, its pond 8.
+- Not yet: animated textures, billboard props, the rest of the matrix (build_pack.py's window), speed (about 6 ms a
+  frame), Windows not built with it yet.
 - Test: tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM] (the 3D picture against render_ref.py: mean under 8 of 765 a
-  pixel, now 2.9; a house's wall; TWINLEAF to ROUTE 201; with a ROM, its pack the same as the decomp's).
+  pixel, now 2.9; a house's wall; TWINLEAF to ROUTE 201; the ground's heights; with a ROM, its pack the same as the
+  decomp's).
 
 ## JOHTO's music from HeartGold / SoulSilver
 - music/mus_johto_*.kaisong: HGSS's songs (the user's 2SF rip, not in the repository) through Moemon Music Studio's

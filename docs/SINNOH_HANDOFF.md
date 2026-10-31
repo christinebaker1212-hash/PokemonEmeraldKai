@@ -7,8 +7,9 @@ Queued after the 1.61.6 release and the KANTO / JOHTO sweep (the user's plan, 20
   ROUTE 201 drawn by the new 3D engine from the user's ROM, walked with Platinum's collision, the player and every field
   sprite standing in the scene (hidden by trees and roofs in front of them), lit by the area's lights for the hour.
   tools/sinnoh/test_poc.sh checks it against the offline reference render. COOP_NOTES "SINNOH's 3D engine" has the
-  how. Next: heights (BDHC), the rest of the map matrix, animated textures (water), buildings' doors and warps,
-  speed (about 6 ms a frame now), then data (step 3) and scripts (step 4).
+  how. Heights (BDHC) done: the camera and every sprite stand on Platinum's ground (COOP_NOTES). Next: the rest of the
+  map matrix, animated textures (water), buildings' doors and warps, speed (about 6 ms a frame now), then data
+  (step 3) and scripts (step 4).
 - DECIDED (the user, 2026-10-31): the 3D data comes from pret/pokeplatinum, not a ROM. The decomp holds every map
   block, texture set, prop model and light set as files (byte for byte the ROM's), so tools/sinnoh/make_pack.sh fetches
   it at a pinned commit (fetch_decomp.sh) and build_pack.py converts it; the release does that and ships

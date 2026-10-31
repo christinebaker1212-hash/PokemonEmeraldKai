@@ -268,6 +268,10 @@ static float GroundAt(float wx, float wz, float near)
     return (h00 * (1 - ax) + h10 * ax) * (1 - az) + (h01 * (1 - ax) + h11 * ax) * az;
 }
 
+// Tests (mp s3dground): the ground's height at a point of the current SINNOH map, in its pixels (16 a tile); NaN when
+// it isn't a 3D map
+float S3D_TestGround(s32 mapX, s32 mapY, float near);
+
 static s32 MapIndex(u8 group, u8 num)
 {
     u32 i;
@@ -794,6 +798,18 @@ static void S3dLine(int line, u16 layers[4][DISPLAY_WIDTH])
 }
 
 // ------------------------------------------------------------------------------------------------ every frame
+float S3D_TestGround(s32 mapX, s32 mapY, float near)
+{
+    s32 map = MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
+    if (map < 0)
+        return NAN;
+    if (!sPack.tried)
+        LoadPack();
+    if (!sPack.ok)
+        return NAN;
+    return GroundAt(sMaps[map].cx * BLOCK + mapX, sMaps[map].cz * BLOCK + mapY, near);
+}
+
 bool8 S3D_Active(void)
 {
     return sView.active && gMain.callback2 == CB2_Overworld;

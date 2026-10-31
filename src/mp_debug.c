@@ -5,6 +5,7 @@
 #include <string.h>
 #include "global.h"
 #include "arcade.h"   // Moemon Kai: the GAME CENTER's arcade boards
+#include "s3d.h"   // Moemon Kai: SINNOH's 3D engine (tests)
 #include "mp_region.h"
 #include "field_control_avatar.h"
 #include "battle_gen4.h"
@@ -2689,6 +2690,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // regionreload: writes "<save>.region" and reads it back (chunks: other regions' PCs, the GLOBAL PC, levels)
         MP_Region_WriteSidecar();
         MP_Region_LoadFromSave();
+    }
+    else if (strcmp(cmd, "s3dground") == 0)
+    {
+        // s3dground X Y [NEAR]: SINNOH's ground height (BDHC) at map pixel (X, Y) of this map, the layer nearest NEAR
+        int x = 0, y = 0;
+        float near = 0.0f;
+        sscanf(arg, "%d %d %f", &x, &y, &near);
+        printf("[test] s3dground %d %d: %.2f\n", x, y, S3D_TestGround(x, y, near));
     }
     else if (strcmp(cmd, "wildroll") == 0)
     {
