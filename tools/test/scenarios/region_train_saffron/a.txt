@@ -1,0 +1,15 @@
+pressuntil A field 5000
+wait 30
+mp face up
+mp warp 37,67,26,40
+wait 120
+mp face up
+mash A 6 20
+pressuntil B field 600
+mp regionclear 2
+mp face up
+mash A 30 20
+wait 300
+pressuntil A field 2000
+mp where
+quit

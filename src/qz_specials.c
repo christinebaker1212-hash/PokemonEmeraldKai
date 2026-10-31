@@ -888,7 +888,7 @@ static const struct {u16 map; s8 x, y;} sRegionPorts[REGION_COUNT] = {
 
 // VAR_0x8004 = the region, VAR_0x8005 = the party slot of the one Pokémon who comes (customs: the others go to the
 // GLOBAL PC; EventScript_RegionCustoms picked it). RESULT 1: the boat leaves (the script waits), 0: not allowed.
-#define TRIP_TRAIN 0x7A   // VAR_0x8007 for the MAGNET TRAIN (EventScript_MagnetTrain): GOLDENROD to SAFFRON, no ticket
+#define TRIP_TRAIN 0x7A   // VAR_0x8007 for the MAGNET TRAIN (EventScript_MagnetTrain*): GOLDENROD <-> SAFFRON, no ticket
 
 static u16 QzTravelToRegion_(void)
 {
@@ -917,8 +917,8 @@ static u16 QzTravelToRegion_(void)
     HealPlayerParty();
     if (first)
         MP_Region_GoToStartHouse(to);   // the first visit: a guide takes the player to the region's first town
-    else if (train)
-        SetWarpDestinationToHealLocation(HEAL_LOCATION_KANTO_SAFFRON_CITY);
+    else if (train)   // GOLDENROD <-> SAFFRON
+        SetWarpDestinationToHealLocation(to == REGION_KANTO ? HEAL_LOCATION_KANTO_SAFFRON_CITY : HEAL_LOCATION_JOHTO_GOLDENROD_CITY);
     else
         SetWarpDestination(sRegionPorts[to].map >> 8, sRegionPorts[to].map & 0xFF, WARP_ID_NONE, sRegionPorts[to].x, sRegionPorts[to].y);
     DoWarp();

@@ -2777,10 +2777,13 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   8-entry one is never used), so their doors open without one.
 - Triple Triad sellers in JOHTO / KANTO stock what MAUVILLE's / LILYCOVE's do (Tt_PoolOf, as their players' hands):
   gTtSellerStock has HOENN's eight shelves only, and the seller crashed on the missing ones.
+- SAFFRON's MAGNET TRAIN counter: an attendant by the POKeMON CENTER (data/maps/Kanto_SaffronCity/map.json, added
+  after the import: put it back if import.py runs again) runs EventScript_MagnetTrainSaffron to GOLDENROD once KANTO's
+  League is beaten (QzTravelToRegion's train lands at the other city's POKeMON CENTER). Test region_train_saffron.
 - tools/test/npc_sweep.sh talks to every person and reads every sign on every map (harness `mp sweepnote`); it
   reports crashes, hangs, scripts still holding the player and stubs reached.
 - Not done yet: Quetzal's other postgame events (GIOVANNI's past and the time travel: still stubs that log and go on), FRLG door animations, 3x2 map
-  borders, the sightseeing walk on a first arrival, a SAFFRON station, everyone following the host on a trip,
+  borders, the sightseeing walk on a first arrival, everyone following the host on a trip,
   per-region co-op shared PCs. The plan for what's left: docs/HANDOFF_REGIONS_GENS.md.
 
 ## Gens 5-9 and GENERATION (1.61.0)

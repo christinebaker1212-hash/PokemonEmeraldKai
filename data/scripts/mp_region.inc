@@ -82,6 +82,45 @@ EventScript_MagnetTrain::
 EventScript_MagnetTrain_Usual::
 	return
 
+@ ...and SAFFRON's way back to GOLDENROD (an attendant by the POKeMON CENTER: FireRed's SAFFRON has no station),
+@ once KANTO's League is beaten
+EventScript_MagnetTrainSaffron::
+	lock
+	faceplayer
+	specialvar VAR_RESULT, MP_GlobalPcLinked
+	goto_if_eq VAR_RESULT, 0, EventScript_MagnetTrainSaffron_Closed
+	msgbox gText_MagnetTrainRideJohto, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, EventScript_RegionCustoms_Cancel
+	setvar VAR_0x8004, 1
+	call EventScript_RegionCustoms
+	msgbox gText_MagnetTrainDepartsJohto, MSGBOX_DEFAULT
+	closemessage
+	setvar VAR_0x8007, 0x7A
+	specialvar VAR_RESULT, QzTravelToRegion
+	goto_if_eq VAR_RESULT, 0, EventScript_RegionCustoms_Cancel
+	waitstate
+	end
+
+EventScript_MagnetTrainSaffron_Closed::
+	msgbox gText_MagnetTrainSaffronClosed, MSGBOX_DEFAULT
+	release
+	end
+
+gText_MagnetTrainRideJohto::
+	.string "This is the MAGNET TRAIN's SAFFRON\n"
+	.string "counter. It goes to GOLDENROD CITY\p"
+	.string "in JOHTO. Would you like to ride it?$"
+
+gText_MagnetTrainDepartsJohto::
+	.string "The MAGNET TRAIN for GOLDENROD CITY\n"
+	.string "is now departing!$"
+
+gText_MagnetTrainSaffronClosed::
+	.string "This is the MAGNET TRAIN's SAFFRON\n"
+	.string "counter.\p"
+	.string "The line to JOHTO opens for the\n"
+	.string "CHAMPION of KANTO's POKéMON LEAGUE.$"
+
 gText_MagnetTrainRide::
 	.string "The MAGNET TRAIN is running again!\p"
 	.string "It goes to SAFFRON CITY in KANTO.\n"

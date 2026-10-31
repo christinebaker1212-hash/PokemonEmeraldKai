@@ -1,0 +1,7 @@
+# SAFFRON's MAGNET TRAIN counter (an attendant by the POKeMON CENTER): closed before KANTO's League, then the train
+# to JOHTO (here a first visit: on to the region's first town)
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=6:50"
+EXPECT_A=("region: travel 2 -> 1")
+UNEXPECT_A=("[crash]")
