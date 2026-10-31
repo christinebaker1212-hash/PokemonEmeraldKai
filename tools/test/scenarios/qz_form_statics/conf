@@ -1,0 +1,8 @@
+# Statics whose Quetzal form Kai doesn't have stand as the species itself from the form's generation: ZARUDE in
+# ILEX FOREST (GEN 8) is there to battle (it had no encounter and talking did nothing)
+MODE=1
+GEN=8
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=6:60"
+EXPECT_A=("life battle: begin")
+UNEXPECT_A=("[crash]")

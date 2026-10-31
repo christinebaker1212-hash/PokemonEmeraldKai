@@ -1,0 +1,5 @@
+# The NATIONAL DEX holds the GENERATION's POKeMON: its size and the seen / caught counts stop at 386 / 493 / 721 / 1025
+MODE=1
+TMO=60
+EXPECT_A=("dexcount size 386 seen 2 caught 2 all 0" "dexcount size 493 seen 3 caught 3 all 0" "dexcount size 721 seen 4 caught 4 all 0" "dexcount size 1025 seen 5 caught 5 all 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

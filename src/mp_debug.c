@@ -567,6 +567,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // life show|remember|minutes|trait|count|save|load|reveal|journal ... (mp_life.c)
         MP_Life_Debug(arg);
     }
+    else if (strcmp(cmd, "dexcount") == 0)
+    {
+        // dexcount: the NATIONAL DEX's size at the GENERATION and the counts in it (pokedex.c)
+        printf("[test] dexcount size %u seen %u caught %u all %d\n", MP_Gen_DexCount(), GetNationalPokedexCount(FLAG_GET_SEEN),
+               GetNationalPokedexCount(FLAG_GET_CAUGHT), HasAllMons());
+    }
     else if (strcmp(cmd, "dexcheck") == 0)
     {
         // dexcheck [NATIONAL_NUMBER]: every species' long Pokedex text built and checked (pokedex.c)
@@ -2242,6 +2248,25 @@ void MP_TestCommand(const char *cmd, const char *arg)
                     printf(" %d", (int)GetMonData(&gPlayerParty[i], MON_DATA_SPECIES));
             printf("\n");
         }
+    }
+    else if (strcmp(cmd, "friendship") == 0)
+    {
+        // friendship SLOT N: a party POKeMON's friendship
+        int slot = 0, n = 0;
+        if (sscanf(arg, "%d %d", &slot, &n) == 2 && slot >= 0 && slot < PARTY_SIZE)
+        {
+            u8 f = n;
+            SetMonData(&gPlayerParty[slot], MON_DATA_FRIENDSHIP, &f);
+        }
+    }
+    else if (strcmp(cmd, "evotarget") == 0)
+    {
+        // evotarget SLOT [ITEM]: what the party POKeMON would evolve into: on leveling up, or with ITEM used on it
+        int slot = 0, item = 0;
+        sscanf(arg, "%d %d", &slot, &item);
+        if (slot >= 0 && slot < PARTY_SIZE)
+            printf("[test] evotarget %d item %d: %u\n", slot, item, GetEvolutionTargetSpecies(&gPlayerParty[slot],
+                   item ? EVO_MODE_ITEM_CHECK : EVO_MODE_NORMAL, item));
     }
     else if (strcmp(cmd, "item") == 0)
     {

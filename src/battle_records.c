@@ -23,6 +23,8 @@
 #include "constants/game_stat.h"
 #include "trainer_hill.h"
 #include "constants/rgb.h"
+#include "event_data.h"
+#include "mp_region.h"
 
 static void Task_CloseTrainerHillRecordsOnButton(u8 taskId);
 static void Task_BeginPaletteFade(u8 taskId);
@@ -315,6 +317,14 @@ static void PrintLinkBattleRecord(struct LinkBattleRecord *record, u8 y, s32 lan
 void ShowLinkBattleRecords(void)
 {
     s32 i, x;
+
+    // Moemon Kai: KANTO's TRAINER TOWER sign is FireRed's (VAR_0x8004 = 1: the tower's records, after a fade to black,
+    // with waitstate): Emerald's TRAINER HILL records are the same screen
+    if (gSpecialVar_0x8004 == 1 && MP_Region_Current() != REGION_HOENN)
+    {
+        ShowTrainerHillRecords();
+        return;
+    }
 
     gRecordsWindowId = AddWindow(&sLinkBattleRecordsWindow);
     DrawStdWindowFrame(gRecordsWindowId, FALSE);

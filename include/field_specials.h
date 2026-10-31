@@ -21,6 +21,7 @@ bool32 CountSSTidalStep(u16 delta);
 u8 GetSSTidalLocation(s8 *mapGroup, s8 *mapNum, s16 *x, s16 *y);
 void ShowScrollableMultichoice(void);
 void ScrollableMultichoice_RedrawPersistentMenu(void);
+void ScrollableMultichoice_TryReturnToList(void);
 void FrontierGamblerSetWonOrLost(bool8 won);
 u8 TryGainNewFanFromCounter(u8 incrementId);
 bool8 InPokemonCenter(void);

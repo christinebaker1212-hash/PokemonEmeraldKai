@@ -10538,6 +10538,7 @@ static void Cmd_pickup(void)
                         ITEM_BERRY_SWEET, ITEM_LOVE_SWEET, ITEM_RED_NECTAR, ITEM_YELLOW_NECTAR, ITEM_PINK_NECTAR,
                         ITEM_PURPLE_NECTAR, ITEM_ABSORB_BULB, ITEM_CELL_BATTERY, ITEM_SNOWBALL, ITEM_ELECTRIC_SEED,
                         ITEM_PSYCHIC_SEED, ITEM_MISTY_SEED, ITEM_GRASSY_SEED, ITEM_FAIRY_FEATHER, ITEM_METAL_ALLOY,
+                        ITEM_RARE_BONE, ITEM_ODD_KEYSTONE, ITEM_GIMMIGHOUL_COIN,
                     };
                     u16 pick[ARRAY_COUNT(sNewer)], n = 0;
                     for (j = 0; j < (int)ARRAY_COUNT(sNewer); j++)

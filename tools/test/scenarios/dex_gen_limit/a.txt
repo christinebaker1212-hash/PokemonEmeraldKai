@@ -1,0 +1,16 @@
+pressuntil A field 5000
+wait 30
+mp dexcatch 25
+mp dexcatch 300
+mp dexcatch 450
+mp dexcatch 700
+mp dexcatch 1000
+mp gensetting 3
+mp dexcount
+mp gensetting 4
+mp dexcount
+mp gensetting 6
+mp dexcount
+mp gensetting 9
+mp dexcount
+quit

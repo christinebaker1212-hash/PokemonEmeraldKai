@@ -203,6 +203,14 @@ def expand_macros(body, macros):
     return body
 
 
+EXTRA_EVOS = (
+    '    [SPECIES_MILCERY] = {%s},\n' % ', '.join('{EVO_ITEM, ITEM_%s_SWEET, SPECIES_ALCREMIE}' % k for k in
+                                              ('STRAWBERRY', 'LOVE', 'BERRY', 'CLOVER', 'FLOWER', 'STAR', 'RIBBON')) +
+    '    [SPECIES_MELTAN] = {{EVO_LEVEL, 40, SPECIES_MELMETAL}},\n'
+    '    [SPECIES_FARFETCHD] = {{EVO_ITEM_HOLD, ITEM_STICK, SPECIES_SIRFETCHD}},\n'
+    '    [SPECIES_MR_MIME] = {{EVO_ITEM_HOLD, ITEM_NEVER_MELT_ICE, SPECIES_MR_RIME}},\n')
+
+
 def parse_evos(text):
     evos = []
     for m in re.finditer(r'\{(EVO_\w+),\s*([^,]+),\s*(SPECIES_\w+)(.*?)\}(?=\s*,\s*\{EVO|\s*$)', text.strip(), re.S):
@@ -537,6 +545,9 @@ def main():
     for frm, lvl, to in (('SPECIES_PRIMEAPE', 35, 'SPECIES_ANNIHILAPE'), ('SPECIES_GIRAFARIG', 32, 'SPECIES_FARIGIRAF'),
                          ('SPECIES_DUNSPARCE', 32, 'SPECIES_DUDUNSPARCE'), ('SPECIES_STANTLER', 31, 'SPECIES_WYRDEER')):
         evo.append('    [%s] = {{EVO_LEVEL, %d, %s}},\n' % (frm, lvl, to))
+    # evolutions Kai has no way for (GALARIAN forms, a spin, MELTAN's candies): the nearest one it has (EEVEE's
+    # SYLVEON is evolution.h's, by BABY-DOLL EYES and friendship: pokemon.c)
+    evo.append(EXTRA_EVOS)
     write('src/data/pokemon/evolution_gen59.h', ''.join(evo))
 
     # ---- pokedex

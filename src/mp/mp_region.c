@@ -674,6 +674,8 @@ u8 MP_Gen_OfItem(u16 item)
         return sLater[item - ITEM_QUICK_POWDER];
     if (item == ITEM_CANDY_JAR || item == ITEM_CARD_CASE)
         return 0;
+    if (item == ITEM_LINKING_CORD)
+        return 3;   // (it does the trade evolutions of every generation: pokemon.c)
     if (item >= ITEM_CARD_CASE + 1 && item <= ITEM_ROWAP_BERRY)
         return 4;
     if (item >= ITEM_ICE_STONE && item < ITEM_ICE_STONE + ARRAY_COUNT(sGen59))
@@ -751,6 +753,14 @@ void MP_Gen_FitBattler(u8 battler)
     gBattleMons[battler].types[1] = MP_Gen_SpeciesType(gBattleMons[battler].species, 1);
     if (MP_Gen_OfAbility(gBattleMons[battler].ability) > UseCap())
         gBattleMons[battler].ability = ABILITY_NONE;
+}
+
+// The NATIONAL DEX's size at the GENERATION (pokedex.c): 386 at GEN 3 ... 1025 at 9, never below Gen 3's
+u16 MP_Gen_DexCount(void)
+{
+    static const u16 sLast[] = {151, 251, 386, 493, 649, 721, 809, 905, 1025};
+    u8 c = UseCap();
+    return sLast[min(c, ARRAY_COUNT(sLast)) - 1];
 }
 
 // A Pokémon of a generation the region the player is in shows

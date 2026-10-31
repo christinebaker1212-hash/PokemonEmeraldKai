@@ -2782,6 +2782,11 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   8-entry one is never used), so their doors open without one.
 - Triple Triad sellers in JOHTO / KANTO stock what MAUVILLE's / LILYCOVE's do (Tt_PoolOf, as their players' hands):
   gTtSellerStock has HOENN's eight shelves only, and the seller crashed on the missing ones.
+- KANTO's TRAINER TOWER records sign: FireRed's ShowLinkBattleRecords with VAR_0x8004 = 1 is its tower's records
+  screen; Emerald's TRAINER HILL records stand in (battle_records.c; test qz_tower_records). FireRed's list kept open
+  after a choice (CERULEAN's badge describer) took no input once drawn again: QzReturnToListMenu now also calls
+  ScrollableMultichoice_TryReturnToList (test qz_list_return). The NPC sweep's menus that ignore B (CELADON's
+  department store clerks, the condominium roof's notice) close with their EXIT row, as in Quetzal.
 - SAFFRON's MAGNET TRAIN counter: an attendant by the POKeMON CENTER (data/maps/Kanto_SaffronCity/map.json, added
   after the import: put it back if import.py runs again) runs EventScript_MagnetTrainSaffron to GOLDENROD once KANTO's
   League is beaten (QzTravelToRegion's train lands at the other city's POKeMON CENTER). Test region_train_saffron.
@@ -2867,6 +2872,26 @@ Old saves need nothing: eggs and Unown keep their real species in the save.
   Tests gen59_forms, gen59_exit, gen59_dancer.
 - Items: marts sell the newer battle / evolution items by GENERATION (shop.c MP_ShopItems, sMpShopExtras by map),
   PICKUP's 95-97 rolls give an allowed newer item.
+- Everything obtainable at each GENERATION (1.61.3): tools/moemon_gen59/obtain_audit.py models every source
+  (each region's wild tables as mp_region.c picks them, HEADBUTT, statics, the scripts' gifts / wild battles / eggs,
+  starters, in-game trades, the Bug-Catching Contest, MoeGatcha's fixed prizes, evolutions, breeding) and
+  item_audit.py every item's (marts and shop.c's lists, field and hidden items, gifts, PICKUP, MoeGatcha, held items);
+  regress.sh fails if a POKéMON of the GENERATION's NATIONAL DEX or an item of its generation has no source (the
+  reports land in the result folder; docs/audit_obtain.txt / audit_items.txt are copies). What filled the gaps:
+  HOENN at GEN 3 has Ruby / Sapphire's SURSKIT (ROUTE 102), ROSELIA (117), ZANGOOSE (114), LUNATONE (METEOR FALLS)
+  and MEDITITE (MT. PYRE) in rare slots (wild_encounters.json); the paradox POKéMON have a GEN 9 slot each
+  (gen_hoenn_modern.py PARADOX); MANAPHY's eggs are PHIONE (daycare.c); SYLVEON is EEVEE with BABY-DOLL EYES (Lv 15 from
+  GEN 6) and high friendship (pokemon.c EVO_MOVE; checked last, so it wins over ESPEON / UMBREON as in Gen 8);
+  MILCERY takes any sweet, MELTAN evolves at 40, FARFETCH'D holding a STICK and MR. MIME holding NEVER-MELT ICE level
+  into SIRFETCH'D / MR. RIME (gen_species.py EXTRA_EVOS: Kai has no GALARIAN forms); the LINKING CORD does every
+  trade evolution (holding the trade item where one is needed) and is a Gen 3 item, so a lone player gets ALAKAZAM,
+  GENGAR, STEELIX...; the forms Quetzal's statics use (GALARIAN birds, ZARUDE, MAGEARNA, ZYGARDE, HOOPA) are the species
+  from the form's generation (gen_static.py, QzStatic.gen). Items: UP-GRADE and the two scrolls at the evolution
+  counters, DREAM / FAB / RETRO MAIL at LILYCOVE's 2F, RARE BONE / ODD KEYSTONE / GIMMIGHOUL COIN by PICKUP, SHUCKLE's
+  rare held item is BERRY JUICE. Test evo_ways (harness mp evotarget SLOT [ITEM], mp friendship SLOT N).
+- The NATIONAL DEX holds the GENERATION's POKéMON (MP_Gen_DexCount: 386 at GEN 3, 493, 649, 721, 809, 905, 1025):
+  pokedex.c's lists in every order, GetNationalPokedexCount (seen / caught counts everywhere) and HasAllMons (the
+  diploma: every POKéMON past Gen 3 to the GENERATION too). Test dex_gen_limit (harness mp dexcount).
 - Harness: MOEMON_BATTLETEXT=1 logs every battle message ("btext: ..."); MOEMON_GENERATION=N; mp gensetting N.
 - Tests: gen59_moves, gen_seal, region_gens (the harness runs scenarios at GEN 9 unless their conf sets GEN).
 - Harness: mp gencheck ITEM / genrefresh.

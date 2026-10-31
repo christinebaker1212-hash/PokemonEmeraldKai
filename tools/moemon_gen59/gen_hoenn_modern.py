@@ -7,7 +7,8 @@ JOHTO and KANTO take Quetzal's own tables as GENERATION rises (wild_qz_modern.h.
 - Wild: each table gives one of its rarer slots to each generation 4-9 (land 5% 5% 4% 4% 1% 1%; water and ROCK SMASH
   5% 4% 1% twice over; fishing one slot per rod and two more), the common slots stay. The slot's newer POKéMON shares
   a type with the one it stands in for (its first type first) and is at the same evolution stage; never a legendary,
-  mythical, ULTRA BEAST or paradox POKéMON, and no species twice in a table.
+  mythical, ULTRA BEAST or paradox POKéMON, and no species twice in a table. The paradox POKéMON have their own
+  places at GENERATION 9 (PARADOX: one each, the 1% land slot).
 - Trainers: a team member has an even chance of a generation 4-9 of its own (about half of them in all): at that
   GENERATION and above it is a newer POKéMON chosen the same way (no two alike in a team). Gym Leaders', the Elite
   Four's, the Champion's, the teams' leaders' and the rival's last POKéMON (their ace) stay.
@@ -33,6 +34,13 @@ NOT_WILD = {  # evolve or are babies, but are legendary / mythical / Ultra Beast
     'URSHIFU', 'MELTAN', 'MELMETAL', 'ZACIAN', 'ZAMAZENTA', 'ETERNATUS', 'CALYREX', 'GLASTRIER', 'SPECTRIER',
     'ENAMORUS', 'TERAPAGOS', 'OGERPON', 'OKIDOGI', 'MUNKIDORI', 'FEZANDIPITI', 'PECHARUNT', 'GIMMIGHOUL',
     'GHOLDENGO', 'MANAPHY', 'PHIONE', 'KORAIDON', 'MIRAIDON',
+}
+PARADOX = {  # the paradox POKéMON, wild nowhere else: the GENERATION 9 land slot (1%) of a fitting place
+    'gRoute111': 'GREAT_TUSK', 'gDesertUnderpass': 'SANDY_SHOCKS', 'gRoute120': 'SCREAM_TAIL', 'gRoute119': 'BRUTE_BONNET',
+    'gMtPyre_Summit': 'FLUTTER_MANE', 'gSafariZone_Northeast': 'SLITHER_WING', 'gSkyPillar_5F': 'ROARING_MOON',
+    'gVictoryRoad_B1F': 'IRON_TREADS', 'gShoalCave_LowTideIceRoom': 'IRON_BUNDLE', 'gNewMauville_Inside': 'IRON_HANDS',
+    'gMeteorFalls_B1F_1R': 'IRON_JUGULIS', 'gMagmaHideout_4F': 'IRON_MOTH', 'gNewMauville_Entrance': 'IRON_THORNS',
+    'gArtisanCave_1F': 'IRON_VALIANT',
 }
 PSEUDO = {  # strong lines: wild only where the slot's POKéMON are Lv. 30 or more
     'GIBLE', 'GABITE', 'GARCHOMP', 'DEINO', 'ZWEILOUS', 'HYDREIGON', 'GOOMY', 'SLIGGOO', 'GOODRA', 'JANGMO_O',
@@ -170,6 +178,8 @@ def main():
                     if generation(ids.get(orig, 0)) >= 4:
                         continue
                     c = pick(orig, g, '%s:%d:%d' % (label, slot, g), used, mons[slot]['min_level'] < 30)
+                    if g == 9 and field == 'land_mons' and e['base_label'] in PARADOX:
+                        c = 'SPECIES_' + PARADOX[e['base_label']]
                     if c:
                         used.add(c)
                         wild_rows.append((label, len(mons), slot, g, c))

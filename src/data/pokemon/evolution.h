@@ -88,7 +88,8 @@ const struct Evolution gEvolutionTable[NUM_SPECIES][EVOS_PER_MON] =
                             {EVO_FRIENDSHIP_DAY, 0, SPECIES_ESPEON},
                             {EVO_FRIENDSHIP_NIGHT, 0, SPECIES_UMBREON},
                             {EVO_ITEM, ITEM_LEAF_STONE, SPECIES_LEAFEON},
-                            {EVO_ITEM_HOLD, ITEM_NEVER_MELT_ICE, SPECIES_GLACEON}},  // Moemon Kai: Gen 4
+                            {EVO_ITEM_HOLD, ITEM_NEVER_MELT_ICE, SPECIES_GLACEON},  // Moemon Kai: Gen 4
+                            {EVO_MOVE, MOVE_BABY_DOLL_EYES, SPECIES_SYLVEON}},  // Moemon Kai: Gen 6 (with friendship, pokemon.c; last: it wins over ESPEON / UMBREON)
     [SPECIES_PORYGON]     = {{EVO_TRADE_ITEM, ITEM_UP_GRADE, SPECIES_PORYGON2},
                             {EVO_LEVEL, 40, SPECIES_PORYGON2}},  // Moemon Kai
     [SPECIES_OMANYTE]    = {{EVO_LEVEL, 40, SPECIES_OMASTAR}},

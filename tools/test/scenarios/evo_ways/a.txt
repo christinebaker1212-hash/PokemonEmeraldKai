@@ -1,0 +1,16 @@
+pressuntil A field 5000
+wait 30
+mp evotarget 0 523
+mp hold 1 199
+mp evotarget 1 523
+mp hold 2 225
+mp evotarget 2
+mp evotarget 3 524
+mp evotarget 4
+mp teach 5 608
+mp friendship 5 255
+mp evotarget 5
+mp gensetting 3
+mp evotarget 0 523
+mp evotarget 2
+quit

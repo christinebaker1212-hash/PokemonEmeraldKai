@@ -370,7 +370,7 @@ static u16 RefreshStatics(void)
         const struct QzStatic *e = &sQzStatics[i];
         if (!HereIs(e))
             continue;
-        if (FlagGet(e->doneFlag) || !MP_Gen_Allowed(e->species)
+        if (FlagGet(e->doneFlag) || !MP_Gen_Allowed(e->species) || MP_Gen_Cap(e->region) < e->gen   // (a form: GALARIAN ARTICUNO...)
          || (e->region == 2 && e->species == SPECIES_MELOETTA && !FlagGet(FLAG_QZ_0x2924))   // after the CHANSEY Dance
          || (e->species == SPECIES_DARKRAI && !FlagGet(e->region == 1 ? FLAG_QZ_0x1425 : FLAG_QZ_0x292B))   // in a dream
          || (e->region == 2 && e->species == SPECIES_MEW && e->group == 36 && !FlagGet(FLAG_QZ_0x2931)))   // under the truck
@@ -643,9 +643,12 @@ u16 QzListMenu(void)
     return 0;
 }
 
+// FireRed's ReturnToListMenu: the list kept open after a choice (CERULEAN's badges) is drawn again and takes input
+// again (it waited for ScrollableMultichoice_TryReturnToList: without it B and A did nothing and the player was stuck)
 u16 QzReturnToListMenu(void)
 {
     ScrollableMultichoice_RedrawPersistentMenu();
+    ScrollableMultichoice_TryReturnToList();
     return 0;
 }
 

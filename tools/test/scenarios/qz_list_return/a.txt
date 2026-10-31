@@ -1,0 +1,32 @@
+pressuntil A field 5000
+wait 30
+mp warp 38,11,6,6
+wait 40
+mp face up
+press A 4
+wait 200
+press A 4
+wait 200
+press A 4
+wait 200
+press A 4
+wait 200
+press A 4
+wait 200
+press A 4
+wait 200
+press A 4
+wait 200
+press A 4
+wait 200
+press B 4
+wait 200
+press B 4
+wait 200
+press B 4
+wait 200
+press B 4
+wait 200
+pressuntil B field 1500
+mp ctx
+quit

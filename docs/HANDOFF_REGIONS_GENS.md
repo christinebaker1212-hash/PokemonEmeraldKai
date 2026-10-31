@@ -59,7 +59,13 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
 - Six cross-region round trips (tools/test/gen_region_trips.py, tests region_trip_*); story_johto plays JOHTO's
   opening to the starter.
 - 3x2 borders for KANTO's seven FireRed layouts; door animations: none in Quetzal either (left as is).
-- 1.61.1 released (the seal fix, contest, puzzles, credits, GAME RULES gimmick rows).
+- 1.61.1 released (the seal fix, contest, puzzles, credits, GAME RULES gimmick rows). 1.61.2 released.
+- NPC sweep recheck of the 67 maps: all pass; the last holds fixed (TRAINER TOWER sign, CERULEAN's badge list) or
+  B-ignoring menus with an EXIT row (not bugs).
+- GENERATION audit (item 4): tools/moemon_gen59/obtain_audit.py + item_audit.py, run by regress.sh; every POKéMON
+  and item has a source at GEN 3-9 (COOP_NOTES "Gens 5-9 and GENERATION", "Everything obtainable"). The NATIONAL
+  DEX is limited to the GENERATION (MP_Gen_DexCount). Caveat: the audits read sources from the data; they don't
+  prove a place is reachable in the story (a static behind a postgame flag counts).
 
 ## Next steps
 1. Ship 1.61.3 (hotfix: JOHTO mart clerks, CUT, KURT's shop, Triple Triad sellers crashed; plus the extras since
@@ -82,11 +88,9 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
    play each destination's opening after a first arrival by boat (party not empty: story_johto-style), and extend
    story_johto past the starter (ROUTE 29, MR. POKeMON, the rival) plus a KANTO one (OAK, the parcel).
    Also port Quetzal's legendary unlock conditions (COOP_NOTES "JOHTO and KANTO": special 704 / 757's kind switch).
-5. The GENERATION audit (item 4 above): a script under tools/ that, for each GEN 3-9, lists species obtainable from
-   wild tables (all three regions, by MP_Gen pools), static / gift / trade scripts, prizes (GAME CORNERS, contests,
-   MoeGatcha), evolutions and breeding of those; and every item's sources (marts by GEN, pickups, held items,
-   hidden / ball items). Fill the gaps (wild slots, trades, prizes). Then cap the POKéDEX's NATIONAL count and
-   lists at the GEN (pokedex.c, the dex completion checks / diplomas, MoeGatcha). Tests per GEN.
+5. The GENERATION audit (item 4 above): DONE (see Done). Left: MoeGatcha's random picks are still 1-386 at every
+   GENERATION (mp_gatcha.c RandomSpecies) - could widen to MP_Gen_DexCount; the per-region JOHTO / KANTO dexes
+   aren't touched.
 6. Cards in every region (item 5 above): list where each card comes from per region (tools/card_guide data,
    tcg_field.c / ygo_field.c / tt_field.c pickers, shops); add sellers / duelists / packs in JOHTO and KANTO where
    a card is missing; check every challengeable NPC's position and visibility flags (an automated walk-up test);

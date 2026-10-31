@@ -5813,7 +5813,8 @@ u16 GetEvolutionTargetSpecies(struct Pokemon *mon, u8 mode, u16 evolutionItem)
                     targetSpecies = gEvolutionTable[species][i].targetSpecies;
                 break;
             case EVO_MOVE:
-                if (MonKnowsMove(mon, gEvolutionTable[species][i].param))
+                if (MonKnowsMove(mon, gEvolutionTable[species][i].param)
+                 && (gEvolutionTable[species][i].targetSpecies != SPECIES_SYLVEON || friendship >= FRIENDSHIP_EVO_THRESHOLD))   // Moemon Kai
                     targetSpecies = gEvolutionTable[species][i].targetSpecies;
                 break;
             case EVO_LEVEL_MALE:
@@ -5863,6 +5864,20 @@ u16 GetEvolutionTargetSpecies(struct Pokemon *mon, u8 mode, u16 evolutionItem)
               || (gEvolutionTable[species][i].method == EVO_ITEM_FEMALE && GetMonGender(mon) == MON_FEMALE))  // Moemon Kai
              && gEvolutionTable[species][i].param == evolutionItem)
             {
+                targetSpecies = gEvolutionTable[species][i].targetSpecies;
+                break;
+            }
+            // Moemon Kai: a LINKING CORD does what a trade would (KADABRA, MACHOKE...; holding the item for STEELIX,
+            // SCIZOR, KINGDRA...), so the trade evolutions need no second player
+            if (evolutionItem == ITEM_LINKING_CORD
+             && (gEvolutionTable[species][i].method == EVO_TRADE
+              || (gEvolutionTable[species][i].method == EVO_TRADE_ITEM && gEvolutionTable[species][i].param == heldItem)))
+            {
+                if (gEvolutionTable[species][i].method == EVO_TRADE_ITEM && mode == EVO_MODE_ITEM_USE)
+                {
+                    heldItem = ITEM_NONE;
+                    SetMonData(mon, MON_DATA_HELD_ITEM, &heldItem);
+                }
                 targetSpecies = gEvolutionTable[species][i].targetSpecies;
                 break;
             }

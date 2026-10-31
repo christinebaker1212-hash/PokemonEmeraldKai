@@ -1,0 +1,7 @@
+GEN 3: 386 of 386 obtainable, 0 missing
+GEN 4: 493 of 493 obtainable, 0 missing
+GEN 5: 649 of 649 obtainable, 0 missing
+GEN 6: 721 of 721 obtainable, 0 missing
+GEN 7: 809 of 809 obtainable, 0 missing
+GEN 8: 905 of 905 obtainable, 0 missing
+GEN 9: 1025 of 1025 obtainable, 0 missing

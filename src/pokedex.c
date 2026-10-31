@@ -1,5 +1,6 @@
 #include "global.h"
 #include "mp.h"
+#include "mp_region.h"
 #include "battle_main.h"
 #include "bg.h"
 #include "data.h"
@@ -2420,7 +2421,7 @@ static void CreatePokedexList(u8 dexMode, u8 order)
     case DEX_MODE_NATIONAL:
         if (IsNationalPokedexEnabled())
         {
-            temp_dexCount = NATIONAL_DEX_COUNT;
+            temp_dexCount = MP_Gen_DexCount();   // Moemon Kai: the GENERATION's POKéMON (386 at GEN 3 ... 1025 at 9)
             temp_isHoennDex = FALSE;
         }
         else
@@ -2471,7 +2472,7 @@ static void CreatePokedexList(u8 dexMode, u8 order)
         {
             temp_dexNum = gPokedexOrder_Alphabetical[i];
 
-            if (NationalToHoennOrder(temp_dexNum) <= temp_dexCount && GetSetPokedexFlag(temp_dexNum, FLAG_GET_SEEN))
+            if (NationalToHoennOrder(temp_dexNum) <= temp_dexCount && (temp_isHoennDex || temp_dexNum <= temp_dexCount) && GetSetPokedexFlag(temp_dexNum, FLAG_GET_SEEN))
             {
                 sPokedexView->pokedexList[sPokedexView->pokemonListCount].dexNum = temp_dexNum;
                 sPokedexView->pokedexList[sPokedexView->pokemonListCount].seen = TRUE;
@@ -2485,7 +2486,7 @@ static void CreatePokedexList(u8 dexMode, u8 order)
         {
             temp_dexNum = gPokedexOrder_Weight[i];
 
-            if (NationalToHoennOrder(temp_dexNum) <= temp_dexCount && GetSetPokedexFlag(temp_dexNum, FLAG_GET_CAUGHT))
+            if (NationalToHoennOrder(temp_dexNum) <= temp_dexCount && (temp_isHoennDex || temp_dexNum <= temp_dexCount) && GetSetPokedexFlag(temp_dexNum, FLAG_GET_CAUGHT))
             {
                 sPokedexView->pokedexList[sPokedexView->pokemonListCount].dexNum = temp_dexNum;
                 sPokedexView->pokedexList[sPokedexView->pokemonListCount].seen = TRUE;
@@ -2499,7 +2500,7 @@ static void CreatePokedexList(u8 dexMode, u8 order)
         {
             temp_dexNum = gPokedexOrder_Weight[i];
 
-            if (NationalToHoennOrder(temp_dexNum) <= temp_dexCount && GetSetPokedexFlag(temp_dexNum, FLAG_GET_CAUGHT))
+            if (NationalToHoennOrder(temp_dexNum) <= temp_dexCount && (temp_isHoennDex || temp_dexNum <= temp_dexCount) && GetSetPokedexFlag(temp_dexNum, FLAG_GET_CAUGHT))
             {
                 sPokedexView->pokedexList[sPokedexView->pokemonListCount].dexNum = temp_dexNum;
                 sPokedexView->pokedexList[sPokedexView->pokemonListCount].seen = TRUE;
@@ -2513,7 +2514,7 @@ static void CreatePokedexList(u8 dexMode, u8 order)
         {
             temp_dexNum = gPokedexOrder_Height[i];
 
-            if (NationalToHoennOrder(temp_dexNum) <= temp_dexCount && GetSetPokedexFlag(temp_dexNum, FLAG_GET_CAUGHT))
+            if (NationalToHoennOrder(temp_dexNum) <= temp_dexCount && (temp_isHoennDex || temp_dexNum <= temp_dexCount) && GetSetPokedexFlag(temp_dexNum, FLAG_GET_CAUGHT))
             {
                 sPokedexView->pokedexList[sPokedexView->pokemonListCount].dexNum = temp_dexNum;
                 sPokedexView->pokedexList[sPokedexView->pokemonListCount].seen = TRUE;
@@ -2527,7 +2528,7 @@ static void CreatePokedexList(u8 dexMode, u8 order)
         {
             temp_dexNum = gPokedexOrder_Height[i];
 
-            if (NationalToHoennOrder(temp_dexNum) <= temp_dexCount && GetSetPokedexFlag(temp_dexNum, FLAG_GET_CAUGHT))
+            if (NationalToHoennOrder(temp_dexNum) <= temp_dexCount && (temp_isHoennDex || temp_dexNum <= temp_dexCount) && GetSetPokedexFlag(temp_dexNum, FLAG_GET_CAUGHT))
             {
                 sPokedexView->pokedexList[sPokedexView->pokemonListCount].dexNum = temp_dexNum;
                 sPokedexView->pokedexList[sPokedexView->pokemonListCount].seen = TRUE;
@@ -4700,9 +4701,9 @@ s8 GetSetPokedexFlag(u16 nationalDexNo, u8 caseID)
 u16 GetNationalPokedexCount(u8 caseID)
 {
     u16 count = 0;
-    u16 i;
+    u16 i, n = MP_Gen_DexCount();   // Moemon Kai: the GENERATION's POKéMON
 
-    for (i = 0; i < NATIONAL_DEX_COUNT; i++)
+    for (i = 0; i < n; i++)
     {
         switch (caseID)
         {
@@ -4808,7 +4809,14 @@ bool16 HasAllMons(void)
     }
 
     // -2 excludes Jirachi and Deoxys
-    for (i = JOHTO_DEX_COUNT; i < NATIONAL_DEX_COUNT - 2; i++)
+    for (i = JOHTO_DEX_COUNT; i < NATIONAL_DEX_COUNT_GEN3 - 2; i++)
+    {
+        if (!GetSetPokedexFlag(i + 1, FLAG_GET_CAUGHT))
+            return FALSE;
+    }
+
+    // Moemon Kai: and every POKéMON of Gen 4 to the GENERATION (each can be caught at its GENERATION: tools/moemon_gen59/obtain_audit.py)
+    for (i = NATIONAL_DEX_COUNT_GEN3; i < MP_Gen_DexCount(); i++)
     {
         if (!GetSetPokedexFlag(i + 1, FLAG_GET_CAUGHT))
             return FALSE;

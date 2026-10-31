@@ -73,6 +73,7 @@ bool8 MP_Gen_SealedSpecies(u16 species);           // past the GENERATION: kept,
 bool8 MP_Gen_SealedMon(struct Pokemon *mon);       // species, a move or the ability past it (never an EGG)
 extern struct Pokemon gPlayerParty[];
 #define MP_SEALED(party, i) ((party) == gPlayerParty && MP_Gen_SealedMon(&(party)[i]))   // in "can it battle" checks                // a battler's types and ability as the generation has them
+u16 MP_Gen_DexCount(void);                       // the NATIONAL DEX at the GENERATION: 386 at GEN 3 ... 1025 at 9
 bool8 MP_Gen_Allowed(u16 species);                 // shown in the region the player is in
 bool8 MP_Gen_ObjectHidden(u8 localId);             // a later generation's POKéMON on the map (JOHTO / KANTO)
 u16 MP_Gen_StandIn(u16 species);                   // its nearest earlier form that is

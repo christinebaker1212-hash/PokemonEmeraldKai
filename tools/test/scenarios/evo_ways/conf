@@ -1,0 +1,9 @@
+# Ways to evolve without a second player or a missing form: the LINKING CORD does a trade evolution (KADABRA, ONIX
+# holding a METAL COAT); FARFETCH'D holding a STICK becomes SIRFETCH'D, MILCERY takes a sweet, MELTAN levels at 40, EEVEE
+# with BABY-DOLL EYES and friendship becomes SYLVEON; at GEN 3 the LINKING CORD still works and SIRFETCH'D waits
+MODE=1
+GEN=9
+TMO=60
+ENV_A="MOEMON_DEBUG_PARTY=64:30,95:30,83:30,893:30,833:40,133:20"
+EXPECT_A=("evotarget 0 item 523: 65" "evotarget 1 item 523: 208" "evotarget 2 item 0: 890" "evotarget 3 item 524: 894" "evotarget 4 item 0: 834" "evotarget 5 item 0: 725" "evotarget 2 item 0: 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

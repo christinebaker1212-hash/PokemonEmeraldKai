@@ -1,0 +1,10 @@
+pressuntil A field 5000
+wait 60
+mp gensetting 8
+mp warp 34,94,10,25
+wait 120
+mp face up
+mash A 40 10
+wait 300
+mp party
+quit

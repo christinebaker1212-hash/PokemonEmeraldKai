@@ -1,0 +1,7 @@
+# KANTO's TRAINER TOWER lobby sign (FireRed's records special with VAR_0x8004 = 1 and a waitstate): Emerald's
+# TRAINER HILL records screen, and the player is free afterwards
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=6:50"
+EXPECT_A=("ctx 1 free 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

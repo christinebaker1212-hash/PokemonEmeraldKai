@@ -1,0 +1,7 @@
+# CERULEAN's badge describer (FireRed's list kept open after a choice, QzReturnToListMenu): after a badge's words the
+# list takes input again, and B closes it
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=6:50"
+EXPECT_A=("ctx 1 free 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")
