@@ -256,6 +256,11 @@ int MP_TestCondition(const char *name)
         bool8 NamingScreen_IsActive(void);
         return NamingScreen_IsActive() && !gPaletteFade.active;
     }
+    if (strcmp(name, "mainmenu") == 0)
+    {
+        bool8 MP_MainMenu_Active(void);   // (main_menu.c: CONTINUE / NEW GAME / OPTION / SAVE FILE waits for a key)
+        return MP_MainMenu_Active();
+    }
     if (strcmp(name, "regionmenu") == 0)
     {
         bool8 MP_IntroRegionMenu_Active(void);

@@ -23,6 +23,7 @@
 u8 TrySavingData(u8 saveType);
 #include "mp_life.h"
 #include "platform.h"
+#include "save_slots.h"
 #include "rtc.h"
 #include "gba/defines.h"
 #include "gba/m4a_internal.h"
@@ -131,13 +132,26 @@ int main(int argc, char **argv)
     }
 #endif
 
-    for (int i = 1; i < argc; i++)
     {
-        if (strcmp(argv[i], "--save") == 0 && i + 1 < argc)
-            snprintf(gPlatformSavePath, sizeof(gPlatformSavePath), "%s", argv[++i]);
+        // Moemon Co-op: --save PATH / MOEMON_SAVE, else the save file in use in saves/ (save_slots.c)
+        extern int gPlatformArgc;
+        extern char **gPlatformArgv;
+        bool explicitSave = getenv("MOEMON_SAVE") != NULL;
+        gPlatformArgc = argc;
+        gPlatformArgv = argv;
+        for (int i = 1; i < argc; i++)
+        {
+            if (strcmp(argv[i], "--save") == 0 && i + 1 < argc)
+            {
+                snprintf(gPlatformSavePath, sizeof(gPlatformSavePath), "%s", argv[++i]);
+                explicitSave = true;
+            }
+        }
+        if (getenv("MOEMON_SAVE"))
+            snprintf(gPlatformSavePath, sizeof(gPlatformSavePath), "%s", getenv("MOEMON_SAVE"));
+        if (!explicitSave)
+            SaveSlots_Init(MOEMON_DEV_BUILD);
     }
-    if (getenv("MOEMON_SAVE"))
-        snprintf(gPlatformSavePath, sizeof(gPlatformSavePath), "%s", getenv("MOEMON_SAVE"));
     if (getenv("MOEMON_SHOTDIR"))
         snprintf(sShotDir, sizeof(sShotDir), "%s", getenv("MOEMON_SHOTDIR"));
     if (getenv("MOEMON_TEST"))
@@ -506,6 +520,8 @@ static void StoreSaveFile()
     MP_Life_WriteSidecar();  // Moemon Co-op: MOéMON GARDEN, the A-Life (mp_life.c)
     Tcg_WriteSidecar();      // Moemon Kai: the card game's collection (src/tcg/tcg_integration.c)
     MP_Region_WriteSidecar();   // Moemon Kai: Johto / Kanto progress (src/mp/mp_region.c)
+    if (SaveSlots_Current())
+        SaveSlots_WriteSummary();   // Moemon Co-op: who and where, for the title screen's SAVE FILE (save_slots.c)
 }
 
 void Platform_StoreSaveFile(void)

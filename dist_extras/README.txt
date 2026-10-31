@@ -1738,16 +1738,33 @@ installs it into this folder and starts the new version by itself.
 * On Linux it needs libcurl (installed on nearly every system).
 
 
+SAVE FILES
+----------
+The game has three save files, each in its own folder inside "saves" next
+to the .exe: saves\slot1, saves\slot2 and saves\slot3. Everything that
+belongs to a save file stays in its folder (the save itself,
+pokeemerald.sav, and the files the game keeps beside it for cards, the
+GARDEN, JOHTO and KANTO and the rest), so the three never mix.
+
+Pick one on the title screen: SAVE FILE is the last choice. LEFT / RIGHT
+shows each file (its player, region, badges and play time), A starts the
+game on the one shown. To erase one, show it and press SELECT; the game
+asks twice before anything is deleted.
+
+A save from an older version (pokeemerald.sav next to the .exe) moves into
+saves\slot1 by itself the first time this version starts, every file as it
+was.
+
 USING YOUR EXISTING SAVE
 ------------------------
-The game saves to "pokeemerald.sav" next to the .exe. It's the normal
-128 KB Emerald flash save, so a Moemon Emerald Kai save from mGBA should
-work: BACK IT UP, copy it next to the .exe and rename it pokeemerald.sav.
+A save file is the normal 128 KB Emerald flash save, so a Moemon Emerald
+Kai save from mGBA should work: BACK IT UP, copy it into an empty save
+file's folder (saves\slot2, say) and rename it pokeemerald.sav.
 
 Every time you save, the game first keeps your previous save as
-pokeemerald.sav.bak1 (and the two before that as .bak2 and .bak3). If a
-save ever goes wrong, close the game and rename a .bak file to
-pokeemerald.sav.
+pokeemerald.sav.bak1 (and the two before that as .bak2 and .bak3), in the
+save file's folder. If a save ever goes wrong, close the game and rename a
+.bak file to pokeemerald.sav.
 
 
 FILES
@@ -1764,6 +1781,7 @@ FILES
                              stages, screen, cabinets.ini)
   stepmania\                 the DANCE machine's songs (downloaded by the
                              machine the first time; add your own in Songs)
+  saves\                     your three save files (slot1, slot2, slot3)
   sprites\                   your sprite sheets
   Sprite Editor.html         the sprite editor
   server\                    optional standalone server + DEPLOY.md

@@ -879,6 +879,19 @@ SaveBlock1's pockets are untouched in size: save.c copies the first slots there 
 match. sdl2.c BackUpSaveFile rotates "<save>.bakN.bag" with the backups, and loading tries "<save>.bag" then each
 "<save>.bakN.bag", so a .bak renamed back to the save gets its own extra slots. load_save.c (frontier bag swap) and the Wally tutorial bag use gBagPockets. Debug `mp bag`.
 
+## Save files: the saves folder and three save files (1.61.5)
+- src/platform/save_slots.c, include/save_slots.h. The save and everything named after it ("<save>.*": sidecars,
+  .bakN backups, .summary) live in saves/slot1-3; saves/slot.txt is the one in use (gPlatformSavePath set before the
+  save is read). A pokeemerald.sav beside the game (an older version's) and its "pokeemerald.sav.*" files move into
+  saves/slot1 by rename, unchanged, when saves/slot1 has no save yet. --save PATH / MOEMON_SAVE (the tests) use that
+  path and turn the slots off (the title menu is as before); dev builds read the slot's save, never move or write.
+- Title screen (main_menu.c MpDrawSlotItem...): SAVE FILE is the last item (window 3 in the no-save layout, window 5
+  in the saved one): LEFT / RIGHT the file shown, from its "<save>.summary" (name, region, badges, time; written by
+  StoreSaveFile) or else the save's own SaveBlock2 (name, time); A on another file writes slot.txt and starts the game
+  again (SaveSlots_Switch: CreateProcessW / execv; under MOEMON_TEST it logs and exits); SELECT asks twice in window 7
+  and erases the file's "pokeemerald.sav*" files (SaveSlots_Erase; the file in use restarts empty). Harness
+  condition "mainmenu". Test tools/test/save_slots.sh (a scratch game folder: the move, the switch, the erase).
+
 ## REJOIN and remembered invite codes (mp_setup.c)
 
 OnRoomJoined saves the room (last_room, last_room_key: the room's key, not its password) and where it is:

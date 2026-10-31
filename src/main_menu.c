@@ -38,6 +38,8 @@
 #include "text_window.h"
 #include "title_screen.h"
 #include "window.h"
+#include "save_slots.h"   // Moemon Co-op: SAVE FILE
+#include <stdio.h>
 #include "mystery_gift_menu.h"
 
 /*
@@ -541,6 +543,7 @@ enum
     ACTION_MYSTERY_GIFT,
     ACTION_MYSTERY_EVENTS,
     ACTION_EREADER,
+    ACTION_MP_SAVE_FILE,   // Moemon Co-op: SAVE FILE (save_slots.c)
     ACTION_INVALID
 };
 
@@ -640,6 +643,95 @@ static u32 InitMainMenu(bool8 returningFromOptionsMenu)
 
 #define tArrowTaskIsScrolled data[15]   // For scroll indicator arrow task
 
+// (tests: harness condition "mainmenu")
+bool8 MP_MainMenu_Active(void)
+{
+    return FuncIsActiveTask(Task_HandleMainMenuInput);
+}
+
+// Moemon Co-op: SAVE FILE, the last item: LEFT / RIGHT go through the three save files (who, where, badges and time
+// from each one's summary), A starts the game again on the one shown (save_slots.c). Not with --save / MOEMON_SAVE.
+static u8 sMpSlotShown;
+static u8 sMpEraseStep;   // ERASE: 1 asked, 2 asked again
+static const u8 sMpEraseAsk1[] = _("Erase this SAVE FILE and all its data?\nA: ERASE   B: KEEP IT");
+static const u8 sMpEraseAsk2[] = _("It can't be brought back. Erase it?\nA: ERASE   B: KEEP IT");
+static bool8 MpSlotsOn(u8 menuType)
+{
+    return SaveSlots_Current() != 0 && menuType <= HAS_SAVED_GAME;
+}
+static u8 MpSlotItem(u8 menuType)
+{
+    return menuType == HAS_NO_SAVED_GAME ? 2 : 3;
+}
+static u8 MpSlotWindow(u8 menuType)
+{
+    return menuType == HAS_NO_SAVED_GAME ? 3 : 5;   // (the 3rd / 4th item's place, free in that layout)
+}
+static void MpDrawSlotItem(u8 menuType)
+{
+    static const char *const sRegions[] = {"HOENN", "JOHTO", "KANTO"};
+    struct SaveSlotSummary sum;
+    char text[64];
+    u8 buf[64];
+    u8 win = MpSlotWindow(menuType);
+    if (sMpSlotShown < 1 || sMpSlotShown > SAVE_SLOT_COUNT)
+        sMpSlotShown = SaveSlots_Current();
+    FillWindowPixelBuffer(win, PIXEL_FILL(0xA));
+    MP_AsciiToGame(buf, "SAVE FILE ", sizeof(buf) - 1);
+    {
+        u8 *end = buf + StringLength(buf);   // (the font's own arrows round the number)
+        *end++ = CHAR_LEFT_ARROW;
+        *end++ = CHAR_0 + sMpSlotShown;
+        *end++ = CHAR_RIGHT_ARROW;
+        *end = EOS;
+    }
+    AddTextPrinterParameterized3(win, FONT_NORMAL, 0, 1, sTextColor_Headers, TEXT_SKIP_DRAW, buf);
+    SaveSlots_Summary(sMpSlotShown, &sum);
+    if (!sum.exists)
+        snprintf(text, sizeof(text), "(empty)");
+    else if (!sum.known && sum.header)
+        snprintf(text, sizeof(text), "%s  %u:%02u", sum.name, sum.hours, sum.minutes);
+    else if (!sum.known)
+        snprintf(text, sizeof(text), "saved game");
+    else
+        snprintf(text, sizeof(text), "%s  %s %u  %u:%02u", sum.name, sRegions[sum.region < 3 ? sum.region : 0],
+                 sum.badges, sum.hours, sum.minutes);
+    MP_AsciiToGame(buf, text, sizeof(buf) - 1);
+    AddTextPrinterParameterized3(win, FONT_NARROW, 92, 1, sTextColor_MenuInfo, TEXT_SKIP_DRAW, buf);
+    PutWindowTilemap(win);
+    CopyWindowToVram(win, COPYWIN_GFX);
+}
+
+// (the ERASE question in the message window, at once)
+static void MpShowEraseQuestion(const u8 *str)
+{
+    FillWindowPixelBuffer(7, PIXEL_FILL(0xA));
+    AddTextPrinterParameterized3(7, FONT_NORMAL, 0, 1, sTextColor_Headers, TEXT_SKIP_DRAW, str);
+    PutWindowTilemap(7);
+    CopyWindowToVram(7, COPYWIN_GFX);
+    DrawMainMenuWindowBorder(&sWindowTemplates_MainMenu[7], MAIN_MENU_BORDER_TILE);
+    SetGpuReg(REG_OFFSET_WIN0H, WIN_RANGE(9, DISPLAY_WIDTH - 9));
+    SetGpuReg(REG_OFFSET_WIN0V, WIN_RANGE(113, DISPLAY_HEIGHT - 1));
+}
+
+// (the windows the ERASE question covered, drawn again)
+static void MpCloseEraseWindow(u8 menuType)
+{
+    u8 i;
+    ClearMainMenuWindowTilemap(&sWindowTemplates_MainMenu[7]);
+    for (i = 0; i < 7; i++)
+    {
+        bool8 shown = menuType == HAS_NO_SAVED_GAME ? (i <= 1 || i == 3) : (i >= 2 && i <= 5);
+        if (!shown)
+            continue;
+        if (i == MpSlotWindow(menuType))
+            MpDrawSlotItem(menuType);
+        PutWindowTilemap(i);
+        DrawMainMenuWindowBorder(&sWindowTemplates_MainMenu[i], MAIN_MENU_BORDER_TILE);
+    }
+    CopyBgTilemapBufferToVram(0);
+}
+
 static void Task_MainMenuCheckSaveFile(u8 taskId)
 {
     s16 *data = gTasks[taskId].data;
@@ -705,7 +797,9 @@ static void Task_MainMenuCheckSaveFile(u8 taskId)
         }
         sCurrItemAndOptionMenuCheck &= ~OPTION_MENU_FLAG;  // turn off the "returning from options menu" flag
         tCurrItem = sCurrItemAndOptionMenuCheck;
-        tItemCount = tMenuType + 2;
+        tItemCount = tMenuType + 2 + MpSlotsOn(tMenuType);
+        sMpSlotShown = SaveSlots_Current();
+        sMpEraseStep = 0;
     }
 }
 
@@ -809,6 +903,11 @@ static void Task_DisplayMainMenu(u8 taskId)
                 CopyWindowToVram(1, COPYWIN_GFX);
                 DrawMainMenuWindowBorder(&sWindowTemplates_MainMenu[0], MAIN_MENU_BORDER_TILE);
                 DrawMainMenuWindowBorder(&sWindowTemplates_MainMenu[1], MAIN_MENU_BORDER_TILE);
+                if (MpSlotsOn(HAS_NO_SAVED_GAME))
+                {
+                    MpDrawSlotItem(HAS_NO_SAVED_GAME);
+                    DrawMainMenuWindowBorder(&sWindowTemplates_MainMenu[3], MAIN_MENU_BORDER_TILE);
+                }
                 break;
             case HAS_SAVED_GAME:
                 FillWindowPixelBuffer(2, PIXEL_FILL(0xA));
@@ -827,6 +926,11 @@ static void Task_DisplayMainMenu(u8 taskId)
                 DrawMainMenuWindowBorder(&sWindowTemplates_MainMenu[2], MAIN_MENU_BORDER_TILE);
                 DrawMainMenuWindowBorder(&sWindowTemplates_MainMenu[3], MAIN_MENU_BORDER_TILE);
                 DrawMainMenuWindowBorder(&sWindowTemplates_MainMenu[4], MAIN_MENU_BORDER_TILE);
+                if (MpSlotsOn(HAS_SAVED_GAME))
+                {
+                    MpDrawSlotItem(HAS_SAVED_GAME);
+                    DrawMainMenuWindowBorder(&sWindowTemplates_MainMenu[5], MAIN_MENU_BORDER_TILE);
+                }
                 break;
             case HAS_MYSTERY_GIFT:
                 FillWindowPixelBuffer(2, PIXEL_FILL(0xA));
@@ -903,6 +1007,63 @@ static bool8 HandleMainMenuInput(u8 taskId)
 {
     s16 *data = gTasks[taskId].data;
 
+    if (sMpEraseStep != 0)
+    {
+        // (Moemon Co-op: ERASE, asked twice; B keeps it)
+        if (JOY_NEW(A_BUTTON) && sMpEraseStep == 1)
+        {
+            PlaySE(SE_SELECT);
+            sMpEraseStep = 2;
+            MpShowEraseQuestion(sMpEraseAsk2);
+        }
+        else if (JOY_NEW(A_BUTTON))
+        {
+            PlaySE(SE_SELECT);
+            sMpEraseStep = 0;
+            SaveSlots_Erase(sMpSlotShown);
+            if (sMpSlotShown == SaveSlots_Current())
+                SaveSlots_Switch(sMpSlotShown);   // (the file in use: the game starts again on it, empty)
+            MpCloseEraseWindow(tMenuType);
+            return TRUE;
+        }
+        else if (JOY_NEW(B_BUTTON))
+        {
+            PlaySE(SE_SELECT);
+            sMpEraseStep = 0;
+            MpCloseEraseWindow(tMenuType);
+            return TRUE;
+        }
+        return FALSE;
+    }
+    if (MpSlotsOn(tMenuType) && tCurrItem == MpSlotItem(tMenuType) && JOY_NEW(SELECT_BUTTON))
+    {
+        struct SaveSlotSummary sum;
+        SaveSlots_Summary(sMpSlotShown, &sum);
+        if (!sum.exists)
+        {
+            PlaySE(SE_FAILURE);   // (nothing to erase)
+            return FALSE;
+        }
+        PlaySE(SE_SELECT);
+        sMpEraseStep = 1;
+        MpShowEraseQuestion(sMpEraseAsk1);
+        return FALSE;
+    }
+    if (MpSlotsOn(tMenuType) && tCurrItem == MpSlotItem(tMenuType) && JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
+    {
+        // (Moemon Co-op: SAVE FILE: the one shown)
+        sMpSlotShown = JOY_NEW(DPAD_RIGHT) ? sMpSlotShown % SAVE_SLOT_COUNT + 1
+                                           : (sMpSlotShown + SAVE_SLOT_COUNT - 2) % SAVE_SLOT_COUNT + 1;
+        PlaySE(SE_SELECT);
+        MpDrawSlotItem(tMenuType);
+        return FALSE;
+    }
+    if (MpSlotsOn(tMenuType) && tCurrItem == MpSlotItem(tMenuType) && JOY_NEW(A_BUTTON)
+     && sMpSlotShown == SaveSlots_Current())
+    {
+        PlaySE(SE_FAILURE);   // (already on it)
+        return FALSE;
+    }
     if (JOY_NEW(A_BUTTON))
     {
         PlaySE(SE_SELECT);
@@ -982,6 +1143,9 @@ static void Task_HandleMainMenuAPressed(u8 taskId)
                     case 1:
                         action = ACTION_OPTION;
                         break;
+                    case 2:
+                        action = ACTION_MP_SAVE_FILE;
+                        break;
                 }
                 break;
             case HAS_SAVED_GAME:
@@ -996,6 +1160,9 @@ static void Task_HandleMainMenuAPressed(u8 taskId)
                         break;
                     case 2:
                         action = ACTION_OPTION;
+                        break;
+                    case 3:
+                        action = ACTION_MP_SAVE_FILE;
                         break;
                 }
                 break;
@@ -1109,6 +1276,10 @@ static void Task_HandleMainMenuAPressed(u8 taskId)
                 SetMainCallback2(CB2_InitEReader);
                 DestroyTask(taskId);
                 break;
+            case ACTION_MP_SAVE_FILE:
+                SaveSlots_Switch(sMpSlotShown);   // (the game starts again on it)
+                DestroyTask(taskId);
+                break;
             case ACTION_INVALID:
                 gTasks[taskId].tCurrItem = 0;
                 gTasks[taskId].func = Task_DisplayMainMenuInvalidActionError;
@@ -1209,6 +1380,9 @@ static void HighlightSelectedMainMenuItem(u8 menuType, u8 selectedMenuItem, s16 
                 case 1:
                     SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(1));
                     break;
+                case 2:   // Moemon Co-op: SAVE FILE
+                    SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(3));
+                    break;
             }
             break;
         case HAS_SAVED_GAME:
@@ -1223,6 +1397,9 @@ static void HighlightSelectedMainMenuItem(u8 menuType, u8 selectedMenuItem, s16 
                     break;
                 case 2:
                     SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(4));
+                    break;
+                case 3:   // Moemon Co-op: SAVE FILE
+                    SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(5));
                     break;
             }
             break;
