@@ -8,7 +8,7 @@ placeholder (sinnoh_text_bytes()).
     python3 -I tools/sinnoh/build_text.py POKEPLATINUM_DIR OUT.pak
 
 Banks are numbered by their file names in order (bank_numbers()): tools/sinnoh/gen_maps.py and the scripts use the same
-numbers from the same pinned commit. A message: Platinum's line breaks become Emerald's ("\\n" a new line, "\\r" a
+numbers from the same pinned commit. A message: MOéMON's words (tools/moemon_text/moe_words.py, as HOENN's text), Platinum's line breaks become Emerald's ("\\n" a new line, "\\r" a
 scroll, "\\f" a new page), its string buffers 0-2 STR_VAR_1-3, any character the game has no glyph for a '?'.
 
 File: "S3TZ", u32 the size of the pack, the pack deflated (zlib). Pack (little endian): "S3DT" u32 version 1, u32 banks,
@@ -20,6 +20,9 @@ import re
 import struct
 import sys
 import zlib
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'moemon_text'))
+from moe_words import moe  # noqa: E402   (HOENN's words: POKéMON -> MOéMON, POKé BALL kept)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 VERSION = 1
@@ -98,7 +101,8 @@ def main():
     for name, n in numbers.items():
         data = json.load(open(os.path.join(root, 'res/text', name + '.json'), encoding='utf-8'))
         msgs = data.get('messages', []) if isinstance(data, dict) else []
-        banks[n] = [convert(text(m.get('en_US')), cmap) if text(m.get('en_US')) is not None else None for m in msgs]
+        banks[n] = [convert(moe(text(m.get('en_US'))), cmap) if text(m.get('en_US')) is not None else None
+                    for m in msgs]
     head = bytearray(b'S3DT' + struct.pack('<II', VERSION, len(banks)))
     table_at = len(head)
     head += b'\0' * 4 * len(banks)

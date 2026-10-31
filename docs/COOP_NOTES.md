@@ -3304,6 +3304,7 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   slots and surfing 5 as in Emerald; fishing OLD 2 / GOOD 3 / SUPER 5 of Platinum's 5 a rod. Not yet: Platinum's
   day / night grass slots, swarms, the POKé RADAR, GBA-slot tables. ROUTE 201: STARLY, BIDOOF, KRICKETOT.
 - Words: tools/sinnoh/build_text.py makes sinnoh/platinum_text.pak from the decomp's message banks (res/text, English;
+  MOéMON's words applied by tools/moemon_text/moe_words.py moe(), as in HOENN's and, since 1.62.4, JOHTO's / KANTO's text;
   fetch_decomp.sh parts 3) when the release is built (make_pack.sh; package.sh ships it in sinnoh/): never in the
   repository. The game's character set (charmap.txt; no glyph: '?'), "\n" a new line, "\r" a scroll, "\f" a new
   page, string buffers 0-2 STR_VAR_1-3, deflated ("S3TZ"). Banks are numbered by file name (bank_numbers(), the
