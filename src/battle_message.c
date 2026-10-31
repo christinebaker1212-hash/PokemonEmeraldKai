@@ -3004,6 +3004,12 @@ u32 BattleStringExpandPlaceholders(const u8 *src, u8 *dst)
             case B_TXT_TRAINER1_WIN_TEXT: // trainerA win text
                 if (gMpSimBattle)
                     toCpy = MP_Sim_WinText();   // Moemon Co-op: the BATTLE SIMULATOR
+                else if (MP_QzEarlyRivalBattle())
+                {
+                    // Moemon Kai: an early rival battle's own text (battle_setup.c)
+                    StringExpandPlaceholders(gStringVar4, GetTrainerWonSpeech());
+                    toCpy = gStringVar4;
+                }
                 else if (gBattleTypeFlags & BATTLE_TYPE_FRONTIER)
                 {
                     CopyFrontierTrainerText(FRONTIER_PLAYER_LOST_TEXT, gTrainerBattleOpponent_A);

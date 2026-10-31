@@ -119,6 +119,7 @@ EWRAM_DATA static u8 *sTrainerABattleScriptRetAddr = NULL;
 EWRAM_DATA static u8 *sTrainerBBattleScriptRetAddr = NULL;
 EWRAM_DATA static bool8 sShouldCheckTrainerBScript = FALSE;
 EWRAM_DATA static u8 sNoOfPossibleTrainerRetScripts = 0;
+EWRAM_DATA static u16 sQzEarlyRivalFlags = 0;   // Moemon Kai: FRLG's early rival battle (Quetzal's mode 13): 1 heal after
 
 // The first transition is used if the enemy Pokémon are lower level than our Pokémon.
 // Otherwise, the second transition is used.
@@ -182,6 +183,28 @@ static const struct TrainerBattleParameter sOrdinaryBattleParams[] =
     {&sTrainerABattleScriptRetAddr, TRAINER_PARAM_CLEAR_VAL_POINTER},
     {&sTrainerBattleEndScript,      TRAINER_PARAM_LOAD_SCRIPT_RET_ADDR},
 };
+
+// Moemon Kai: Quetzal's trainerbattle 13 is FireRed's TRAINER_BATTLE_EARLY_RIVAL (BLUE in OAK's lab and on ROUTE
+// 22): the trainer, flags (1: heal after), the text when the player wins, the text when the rival wins. No intro,
+// the script goes on after the battle won or lost, and a loss doesn't white out (the rival's text is shown instead)
+#define TRAINER_BATTLE_QZ_EARLY_RIVAL 13
+static const struct TrainerBattleParameter sQzEarlyRivalBattleParams[] =
+{
+    {&sTrainerBattleMode,           TRAINER_PARAM_LOAD_VAL_8BIT},
+    {&gTrainerBattleOpponent_A,     TRAINER_PARAM_LOAD_VAL_16BIT},
+    {&sQzEarlyRivalFlags,           TRAINER_PARAM_LOAD_VAL_16BIT},
+    {&sTrainerAIntroSpeech,         TRAINER_PARAM_CLEAR_VAL_POINTER},
+    {&sTrainerADefeatSpeech,        TRAINER_PARAM_LOAD_VAL_POINTER},
+    {&sTrainerVictorySpeech,        TRAINER_PARAM_LOAD_VAL_POINTER},
+    {&sTrainerCannotBattleSpeech,   TRAINER_PARAM_CLEAR_VAL_POINTER},
+    {&sTrainerABattleScriptRetAddr, TRAINER_PARAM_CLEAR_VAL_POINTER},
+    {&sTrainerBattleEndScript,      TRAINER_PARAM_LOAD_SCRIPT_RET_ADDR},
+};
+
+bool8 MP_QzEarlyRivalBattle(void)
+{
+    return sTrainerBattleMode == TRAINER_BATTLE_QZ_EARLY_RIVAL && (gBattleTypeFlags & BATTLE_TYPE_TRAINER);
+}
 
 static const struct TrainerBattleParameter sContinueScriptBattleParams[] =
 {
@@ -1195,6 +1218,9 @@ static const u8 *ConfigureTrainerBattle(const u8 *data)
     case TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT:
         TrainerBattleLoadArgs(sOrdinaryNoIntroBattleParams, data);
         return EventScript_DoNoIntroTrainerBattle;
+    case TRAINER_BATTLE_QZ_EARLY_RIVAL:
+        TrainerBattleLoadArgs(sQzEarlyRivalBattleParams, data);
+        return EventScript_QzEarlyRivalBattle;
     case TRAINER_BATTLE_DOUBLE:
         TrainerBattleLoadArgs(sDoubleBattleParams, data);
         SetMapVarsToTrainer();
@@ -1473,6 +1499,13 @@ static void CB2_EndTrainerBattle(void)
     {
         SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
     }
+    else if (IsPlayerDefeated(gBattleOutcome) == TRUE && sTrainerBattleMode == TRAINER_BATTLE_QZ_EARLY_RIVAL)
+    {
+        // Moemon Kai: an early rival battle lost: no whiting out, the scene goes on (healed if the battle says so)
+        if (sQzEarlyRivalFlags & 1)
+            HealPlayerParty();
+        SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+    }
     else if (IsPlayerDefeated(gBattleOutcome) == TRUE)
     {
         if (CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE || InTrainerHillChallenge())
@@ -1594,6 +1627,35 @@ void PlayTrainerEncounterMusic(void)
         trainerId = gTrainerBattleOpponent_B;
 
     if (sTrainerBattleMode != TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC
+        && sTrainerBattleMode != TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE_NO_MUSIC
+        && trainerId >= FIRST_QZ_TRAINER && GetTrainerEncounterMusicId(trainerId) < TRAINER_ENCOUNTER_MUSIC_QZ_FIRST)
+    {
+        // Moemon Kai: JOHTO / KANTO's trainers with FireRed's encounter music ids: FireRed's themes (its
+        // PlayTrainerEncounterMusic); Johto's own (14-23) below
+        switch (GetTrainerEncounterMusicId(trainerId))
+        {
+        case TRAINER_ENCOUNTER_MUSIC_FEMALE:
+        case TRAINER_ENCOUNTER_MUSIC_GIRL:
+        case TRAINER_ENCOUNTER_MUSIC_TWINS:
+            music = MUS_RG_ENCOUNTER_GIRL;
+            break;
+        case TRAINER_ENCOUNTER_MUSIC_MALE:
+        case TRAINER_ENCOUNTER_MUSIC_INTENSE:
+        case TRAINER_ENCOUNTER_MUSIC_COOL:
+        case TRAINER_ENCOUNTER_MUSIC_SWIMMER:
+        case TRAINER_ENCOUNTER_MUSIC_ELITE_FOUR:
+        case TRAINER_ENCOUNTER_MUSIC_HIKER:
+        case TRAINER_ENCOUNTER_MUSIC_INTERVIEWER:
+        case TRAINER_ENCOUNTER_MUSIC_RICH:
+            music = MUS_RG_ENCOUNTER_BOY;
+            break;
+        default:
+            music = MUS_RG_ENCOUNTER_ROCKET;
+            break;
+        }
+        PlayNewMapMusic(music);
+    }
+    else if (sTrainerBattleMode != TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC
         && sTrainerBattleMode != TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE_NO_MUSIC)
     {
         switch (GetTrainerEncounterMusicId(trainerId))

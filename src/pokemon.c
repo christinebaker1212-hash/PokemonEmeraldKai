@@ -6712,8 +6712,31 @@ void ClearBattleMonForms(void)
         gBattleMonForms[i] = 0;
 }
 
+// Moemon Kai: JOHTO and KANTO battle to FireRed / LeafGreen's themes, as in Quetzal (it has none of its own but HO-OH's
+// and LUGIA's): the CHAMPION's, the gym leaders' and ELITE FOUR's, every other trainer's, the wild one
+static u16 MpRegionBattleBGM(void)
+{
+    if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER))
+        return MUS_RG_VS_WILD;
+    switch (gTrainers[gTrainerBattleOpponent_A].trainerClass)
+    {
+    case TRAINER_CLASS_CHAMPION:
+        return MUS_RG_VS_CHAMPION;
+    case TRAINER_CLASS_LEADER:
+    case TRAINER_CLASS_ELITE_FOUR:
+        return MUS_RG_VS_GYM_LEADER;
+    default:
+        return MUS_RG_VS_TRAINER;
+    }
+}
+
 u16 GetBattleBGM(void)
 {
+    if (MP_Region_Current() != REGION_HOENN
+     && !(gBattleTypeFlags & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_TRAINER_HILL | BATTLE_TYPE_KYOGRE_GROUDON
+                              | BATTLE_TYPE_REGI))
+     && (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK)) || gMpCoopBattle))
+        return MpRegionBattleBGM();
     if (gMpCoopWild)
         return MUS_VS_WILD; // Moemon Co-op: wild doubles
     if (gBattleTypeFlags & BATTLE_TYPE_KYOGRE_GROUDON)

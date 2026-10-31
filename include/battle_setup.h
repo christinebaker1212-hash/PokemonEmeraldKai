@@ -55,6 +55,7 @@ void PlayTrainerEncounterMusic(void);
 const u8 *GetTrainerALoseText(void);
 const u8 *GetTrainerBLoseText(void);
 const u8 *GetTrainerWonSpeech(void);
+bool8 MP_QzEarlyRivalBattle(void);   // Moemon Kai: FRLG's early rival battle (Quetzal's trainerbattle 13)
 void UpdateRematchIfDefeated(s32 rematchTableId);
 void IncrementRematchStepCounter(void);
 void TryUpdateRandomTrainerRematches(u16 mapGroup, u16 mapNum);

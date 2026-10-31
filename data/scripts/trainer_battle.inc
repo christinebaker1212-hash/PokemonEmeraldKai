@@ -56,6 +56,11 @@ EventScript_DoNoIntroTrainerBattle::
 	dotrainerbattle
 	gotopostbattlescript
 
+@ Moemon Kai: FireRed's early rival battle (Quetzal's trainerbattle 13): no intro, the script goes on after it
+EventScript_QzEarlyRivalBattle::
+	dotrainerbattle
+	gotopostbattlescript
+
 EventScript_TryDoRematchBattle::
 	call EventScript_RevealTrainer
 	specialvar VAR_RESULT, IsTrainerReadyForRematch

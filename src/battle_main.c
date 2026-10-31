@@ -5597,6 +5597,12 @@ static void HandleEndTurn_BattleLost(void)
     else
     {
         gBattlescriptCurrInstr = BattleScript_LocalBattleLost;
+        {
+            // Moemon Kai: an early rival battle lost: the rival's text, no whiting out (battle_setup.c)
+            bool8 MP_QzEarlyRivalBattle(void);
+            if (MP_QzEarlyRivalBattle())
+                gBattlescriptCurrInstr = BattleScript_LocalBattleLostPrintTrainersWinText;
+        }
     }
 
     gBattleMainFunc = HandleEndTurn_FinishBattle;
