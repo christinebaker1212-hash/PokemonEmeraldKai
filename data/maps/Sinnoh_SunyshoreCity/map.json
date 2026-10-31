@@ -1,0 +1,31 @@
+{
+  "id": "MAP_SINNOH_SUNYSHORE_CITY",
+  "name": "Sinnoh_SunyshoreCity",
+  "layout": "LAYOUT_SINNOH_SUNYSHORE_CITY",
+  "music": "MUS_SINNOH_SUNYSHORE",
+  "region_map_section": "MAPSEC_NONE",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_CITY",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_SINNOH_ROUTE222",
+      "offset": 32,
+      "direction": "left"
+    },
+    {
+      "map": "MAP_SINNOH_ROUTE223",
+      "offset": 0,
+      "direction": "up"
+    }
+  ],
+  "object_events": [],
+  "warp_events": [],
+  "coord_events": [],
+  "bg_events": []
+}

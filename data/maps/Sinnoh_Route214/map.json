@@ -1,0 +1,36 @@
+{
+  "id": "MAP_SINNOH_ROUTE214",
+  "name": "Sinnoh_Route214",
+  "layout": "LAYOUT_SINNOH_ROUTE214",
+  "music": "MUS_SINNOH_ROUTE210",
+  "region_map_section": "MAPSEC_NONE",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_ROUTE",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_SINNOH_VALOR_LAKEFRONT",
+      "offset": -32,
+      "direction": "down"
+    },
+    {
+      "map": "MAP_SINNOH_SPRING_PATH",
+      "offset": 32,
+      "direction": "right"
+    },
+    {
+      "map": "MAP_SINNOH_VEILSTONE_CITY",
+      "offset": -32,
+      "direction": "up"
+    }
+  ],
+  "object_events": [],
+  "warp_events": [],
+  "coord_events": [],
+  "bg_events": []
+}

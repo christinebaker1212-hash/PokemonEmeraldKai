@@ -17,6 +17,16 @@
       "map": "MAP_SINNOH_TWINLEAF_TOWN",
       "offset": 0,
       "direction": "down"
+    },
+    {
+      "map": "MAP_SINNOH_VERITY_LAKEFRONT",
+      "offset": -32,
+      "direction": "left"
+    },
+    {
+      "map": "MAP_SINNOH_SANDGEM_TOWN",
+      "offset": 0,
+      "direction": "right"
     }
   ],
   "object_events": [],

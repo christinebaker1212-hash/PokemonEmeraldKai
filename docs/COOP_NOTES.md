@@ -3242,8 +3242,13 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
 - The pack is never committed (/sinnoh/ is ignored); the release runs make_pack.sh and package.sh ships it in sinnoh/.
   The game reads sinnoh/platinum3d.pak beside it (Updater_ExeFile, as music/) or MOEMON_S3D_PAK. Without it the SINNOH
   maps keep their placeholder layouts (every cell blocked).
-- Maps: tools/sinnoh/gen_maps.py makes the field engine's maps (group 40: MAP_SINNOH_TWINLEAF_TOWN 32x32 from matrix
-  cell (3, 27), MAP_SINNOH_ROUTE201 64x32 from (3, 26), connected) with placeholder blocks; fieldmap.c asks
+- Maps: tools/sinnoh/gen_maps.py POKEPLATINUM_DIR makes the field engine's maps: every outdoor place of matrix 0 (66:
+  towns, cities, routes, lakefronts, islands) as group 40, numbers kept (TWINLEAF TOWN 0, ROUTE 201 1, then by name),
+  each the rectangle of its matrix cells (four are L-shaped: the corner is the matrix's filler, blocked), connected
+  wherever two rectangles touch; music from the header's day song (MUSIC: SEQ -> slot), type and weather from the
+  header (WEATHER), placeholder blocks; it also writes src/sinnoh/s3d_maps.h (sMaps) and data/event_scripts_sinnoh.s's
+  includes, and keeps events already in a map.json. MAX_MAP_DATA_SIZE is 16384 (SEABREAK PATH is 32x256); the pack
+  covers the whole matrix (45 MB, 7 s to build); fieldmap.c asks
   S3D_LayoutBlocks for a layout's blocks (the map and its connections), which gives the pack's for SINNOH maps. Script
   file data/event_scripts_sinnoh.s. They count as HOENN for regions for now (MP_Region_OfGroup).
 - Drawing (src/sinnoh/s3d.c): S3D_Update each overworld frame (after the camera) finds the map and Emerald's camera
@@ -3269,8 +3274,8 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   target stands on the ground under the player (sView.playerH) and every field sprite on the ground under its feet
   (S3D_PlaceSprite with its sprite id: sSpriteH keeps each one's layer). render_ref.py targets the same height.
   `mp s3dground X Y [NEAR]` reads it (map pixels). TWINLEAF's ground is 16, its pond 8.
-- Not yet: animated textures, billboard props, the rest of the matrix (build_pack.py's window), speed (about 6 ms a
-  frame), Windows not built with it yet.
+- Not yet: animated textures, billboard props, doors / warps and the buildings' insides, speed (about 6 ms a frame),
+  Windows not built with it yet.
 - Test: tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM] (the 3D picture against render_ref.py: mean under 8 of 765 a
   pixel, now 2.9; a house's wall; TWINLEAF to ROUTE 201; the ground's heights; with a ROM, its pack the same as the
   decomp's).

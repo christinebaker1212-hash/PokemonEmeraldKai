@@ -5,7 +5,8 @@
 #      within rounding (the player's own spot left out)
 #   2. Platinum's collision: walking up into the player's house stops at its wall
 #   3. walking north out of TWINLEAF reaches ROUTE 201 (the maps' connection) with the 3D view following
-#   4. the ground's height (BDHC): TWINLEAF's 16, its pond's 8, blended between tile centres
+#   4. ROUTE 201's east edge leads into SANDGEM TOWN (every outdoor map of the matrix is there)
+#   5. the ground's height (BDHC): TWINLEAF's 16, its pond's 8, blended between tile centres
 #   and, given a Platinum ROM too, that the pack built from the cartridge is the same, byte for byte
 # usage: tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [PLATINUM_ROM]   (BIN=the game, default ./pokeemerald64)
 SRC="${1:?usage: test_poc.sh POKEPLATINUM_DIR [PLATINUM_ROM]}"
@@ -53,6 +54,10 @@ check "the house's wall stops the player at (10, 12)" "grep -q 'where map 40.0 x
 run walk 'pressuntil A field 5000\nwait 30\nmp warp 40,0,14,14\nwait 200\npress UP 330\nwait 40\nshot route\nmp where\nquit\n'
 check "walking north reaches ROUTE 201" "grep -q 'where map 40.1' '$OUT/walk/log.txt'"
 check "the 3D pack was loaded" "grep -q '\[s3d\] .*textures' '$OUT/walk/log.txt'"
+
+# the whole matrix: ROUTE 201's east edge leads into SANDGEM TOWN (map 54 of group 40, tools/sinnoh/gen_maps.py)
+run east 'pressuntil A field 5000\nwait 30\nmp warp 40,1,52,12\nwait 200\npress RIGHT 220\nwait 60\nmp where\nquit\n'
+check "walking east off ROUTE 201 reaches SANDGEM TOWN" "grep -q 'where map 40.54' '$OUT/east/log.txt'"
 
 # the ground's height (BDHC): TWINLEAF's ground is at 16, its pond (rows 27+) at 8, blended between tile centres
 run slope 'pressuntil A field 5000\nwait 30\nmp warp 40,0,15,24\nwait 200\nmp s3dground 248 392\nmp s3dground 248 472\nmp s3dground 248 432\nquit\n'

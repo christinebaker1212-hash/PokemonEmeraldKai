@@ -4,7 +4,7 @@
 
     python3 -I tools/sinnoh/build_pack.py POKEPLATINUM_DIR OUT.pak [X0 Z0 X1 Z1]
     python3 -I tools/sinnoh/build_pack.py --rom ROM POKEPLATINUM_DIR OUT.pak [...]   (the same from the cartridge)
-        the cells of map matrix 0 from (X0, Z0) to (X1, Z1) (default: around TWINLEAF TOWN and ROUTE 201)
+        the cells of map matrix 0 from (X0, Z0) to (X1, Z1) (default: all of it)
 
 POKEPLATINUM_DIR is a pret/pokeplatinum checkout (source.py): it holds every map block, texture set, prop model and
 light set Platinum has, so no ROM is needed; the release builds the pack from it (tools/sinnoh/fetch_decomp.sh). Built
@@ -184,10 +184,11 @@ def main():
         rom, args = args[1], args[2:]
     src = open_source(rom, decomp=args[0]) if rom else open_source(args[0])
     out_path = args[1]
-    window = [int(x) for x in args[2:6]] if len(args) >= 6 else [1, 23, 6, 29]
+    mx = src.matrix(0)
+    # the cells of map matrix 0 from (X0, Z0) to (X1, Z1); default: all of it
+    window = [int(x) for x in args[2:6]] if len(args) >= 6 else [0, 0, mx.width - 1, mx.height - 1]
     x0, z0, x1, z1 = window
     pack = Pack()
-    mx = src.matrix(0)
     light_index = {}
     light_sets = []
     tex_cache = {}

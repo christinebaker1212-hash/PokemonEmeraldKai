@@ -1,0 +1,2 @@
+Sinnoh_FloaromaTown_MapScripts::
+	.byte 0

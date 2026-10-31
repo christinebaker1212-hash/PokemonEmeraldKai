@@ -1,0 +1,36 @@
+{
+  "id": "MAP_SINNOH_HEARTHOME_CITY",
+  "name": "Sinnoh_HearthomeCity",
+  "layout": "LAYOUT_SINNOH_HEARTHOME_CITY",
+  "music": "MUS_SINNOH_HEARTHOME",
+  "region_map_section": "MAPSEC_NONE",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_CITY",
+  "allow_cycling": true,
+  "allow_escaping": false,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [
+    {
+      "map": "MAP_SINNOH_ROUTE212_NORTH",
+      "offset": 0,
+      "direction": "down"
+    },
+    {
+      "map": "MAP_SINNOH_ROUTE208",
+      "offset": 32,
+      "direction": "left"
+    },
+    {
+      "map": "MAP_SINNOH_ROUTE209",
+      "offset": 0,
+      "direction": "right"
+    }
+  ],
+  "object_events": [],
+  "warp_events": [],
+  "coord_events": [],
+  "bg_events": []
+}

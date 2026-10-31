@@ -7,7 +7,7 @@
 #define NUM_METATILES_TOTAL 1024
 #define NUM_PALS_IN_PRIMARY 6
 #define NUM_PALS_TOTAL 13
-#define MAX_MAP_DATA_SIZE 10240
+#define MAX_MAP_DATA_SIZE 16384   // Moemon Kai: 10240 on the GBA; SINNOH's SEABREAK PATH is 32x256 (not in the save)
 
 // Moemon Kai: FRLG-style tilesets (Johto / Kanto, struct Tileset isFrlg on the primary): 640 tiles, 640 metatiles
 // and 7 palettes in the primary, the rest (384 / 384 / 6) in the secondary. The split follows the layout's primary.

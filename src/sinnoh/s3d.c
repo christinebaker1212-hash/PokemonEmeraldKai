@@ -77,10 +77,7 @@ static struct
 } sPack;
 
 // SINNOH's maps: the matrix cell of each one's top-left block and its size in blocks
-static const struct { u16 map; u8 cx, cz, bw, bh; } sMaps[] = {
-    {MAP_SINNOH_TWINLEAF_TOWN, 3, 27, 1, 1},
-    {MAP_SINNOH_ROUTE201, 3, 26, 2, 1},
-};
+#include "s3d_maps.h"   // sMaps: each SINNOH map and where it lies on the matrix (tools/sinnoh/gen_maps.py)
 
 typedef struct { const u8 *p, *end; bool8 bad; } Reader;
 
