@@ -206,6 +206,9 @@ def over(name, floor, size):
     open(os.path.join(GFX, name + '_over.bin'), 'wb').write(out)
     return sum(m for row in mask for m in row)
 
+PASSAGE = (88, 5, 120, 31)   # 2f.png's elevator doors and frame
+
+
 def main():
     for floor, rows in FLOORS.items():
         w, h = len(rows[0]), len(rows)
@@ -218,6 +221,10 @@ def main():
         n = over(PICTURES[floor], floor, (pw, ph))
         print('GameCenter_%s: %dx%d, picture %dx%d, %d pixels over the sprites' % (floor, w, h, pw, ph, n))
     print('building: %dx%d' % picture('building'))
+    # JOHTO's / KANTO's way up (2F and 3F only): 2F's elevator doors, without their floor plate, on the wall behind the
+    # GAME CORNERS' attendants (mp_mappic.c)
+    Image.open(os.path.join(GFX, '2f.png')).convert('RGBA').crop(PASSAGE).save(os.path.join(GFX, 'passage.png'))
+    print('passage: %dx%d' % picture('passage'))
 
 if __name__ == '__main__':
     main()

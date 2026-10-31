@@ -1,0 +1,7 @@
+# KANTO's GAME CENTER: CELADON's GAME CORNER attendant takes the player to 2F (still KANTO), and 2F's stairs down lead
+# back to the GAME CORNER
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=6:50"
+EXPECT_A=("where map 11.18 xy 3,2" "where map 38.49 xy 13,3" "region 2 " "ctx 1 free 1")
+UNEXPECT_A=("[crash]" "region 0 " "TIMEOUT")

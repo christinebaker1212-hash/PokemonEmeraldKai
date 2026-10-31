@@ -1,0 +1,18 @@
+pressuntil A field 5000
+wait 60
+mp warp 34,59,22,24
+wait 120
+mp where
+mp life garden travel 0
+waitlog 900 garden: quick travel there
+wait 300
+pressuntil B field 1200
+wait 60
+mp where
+mp regioninfo
+press LEFT 20
+wait 300
+mp where
+mp regioninfo
+mp ctx
+quit

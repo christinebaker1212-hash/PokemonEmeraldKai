@@ -60,6 +60,8 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
   opening to the starter.
 - 3x2 borders for KANTO's seven FireRed layouts; door animations: none in Quetzal either (left as is).
 - 1.61.1 released (the seal fix, contest, puzzles, credits, GAME RULES gimmick rows). 1.61.2 released.
+- The MOéMON GARDEN and the GAME CENTER floors are shared by every region (no trip into HOENN from JOHTO / KANTO;
+  back out where the player came in): tests garden_johto, gc_johto, gc_kanto.
 - NPC sweep recheck of the 67 maps: all pass; the last holds fixed (TRAINER TOWER sign, CERULEAN's badge list) or
   B-ignoring menus with an EXIT row (not bugs).
 - GENERATION audit (item 4): tools/moemon_gen59/obtain_audit.py + item_audit.py, run by regress.sh; every POKéMON
@@ -80,7 +82,8 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
      tools/quetzal_port/import.py regenerates the stub list from what src/qz_*.c defines).
    - Sightseeing walk on first arrival (a guide in the port city before the ride to the first town).
    - Per-region co-op shared PCs (the server's 14 shared boxes, one set per region).
-3. Playthroughs of JOHTO and KANTO from a new game (MOEMON_DEBUG_REGION=1 / 2): story order, every gym, rival,
+3. (The user: "In the New Game playthrough sweep, be absolutely certain that every story event triggers correctly.")
+   Playthroughs of JOHTO and KANTO from a new game (MOEMON_DEBUG_REGION=1 / 2): story order, every gym, rival,
    key event; plus an automated sweep that talks to every NPC / sign / trigger of every Johto and Kanto map
    (tools/test/npc_sweep.sh does this now: run it, fix what it reports) and greps logs for "not ported",
    crashes, stuck script contexts.
@@ -94,5 +97,9 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
 6. Cards in every region (item 5 above): list where each card comes from per region (tools/card_guide data,
    tcg_field.c / ygo_field.c / tt_field.c pickers, shops); add sellers / duelists / packs in JOHTO and KANTO where
    a card is missing; check every challengeable NPC's position and visibility flags (an automated walk-up test);
-   pick each region's GAME CENTER spot (e.g. GOLDENROD's / CELADON's game corners' neighbours) and place it.
+   GAME CENTER: DONE for JOHTO / KANTO (an attendant in GOLDENROD's / CELADON's GAME CORNER, 2F and 3F only, by the
+   user's rule; COOP_NOTES "The GAME CENTER"). Still to do here: a per-region card audit (which cards only come from
+   HOENN's special trainers: TCG promos, YGO signatures, TT 5-star cards) and JOHTO / KANTO counterparts (their gym
+   leaders, Elite Four, champions, rivals as special duelists giving the same prizes), checked by a tool like
+   obtain_audit.py over the card guide's dumps (tools/card_guide).
 7. Achievements (item 6 above): audit mp_achieve.c against JOHTO / KANTO content, add per-region ones.

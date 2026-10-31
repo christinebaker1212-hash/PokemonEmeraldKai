@@ -1,0 +1,21 @@
+pressuntil A field 5000
+wait 60
+mp warp 38,49,13,3
+wait 120
+mp face up
+shot passage
+press A 4
+pressuntil A field 3000
+wait 120
+mp where
+mp regioninfo
+mp warp 11,18,2,3
+wait 120
+mp face up
+wait 10
+press UP 8
+wait 300
+mp where
+mp regioninfo
+mp ctx
+quit

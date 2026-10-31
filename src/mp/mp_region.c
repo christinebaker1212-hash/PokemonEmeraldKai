@@ -68,9 +68,74 @@ u8 MP_Region_OfGroup(u8 group)
     return REGION_HOENN;
 }
 
+// The MOéMON GARDEN and the GAME CENTER's floors are HOENN's maps but every region's: in one, the player is in the
+// region they came from (no trip, no PC swap), and its way out leads back to where they stepped in
+bool8 MP_Region_IsSharedMap(u8 group, u8 num)
+{
+    static const u16 sShared[] = {MAP_MOEMON_GARDEN, MAP_RUSTBORO_CITY_GAME_CENTER_1F, MAP_RUSTBORO_CITY_GAME_CENTER_2F,
+                                  MAP_RUSTBORO_CITY_GAME_CENTER_3F, MAP_RUSTBORO_CITY_GAME_CENTER_ROOFTOP};
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sShared); i++)
+        if (MAP_GROUP(sShared[i]) == group && MAP_NUM(sShared[i]) == num)
+            return TRUE;
+    return FALSE;
+}
+
 u8 MP_Region_Current(void)
 {
-    return MP_Region_OfGroup(gSaveBlock1Ptr->location.mapGroup);
+    u8 group = gSaveBlock1Ptr->location.mapGroup;
+    if (MP_Region_IsSharedMap(group, gSaveBlock1Ptr->location.mapNum) && gRegionState.current < REGION_COUNT)
+        return gRegionState.current;
+    return MP_Region_OfGroup(group);
+}
+
+void MP_Region_NoteWarp(u8 destGroup, u8 destNum)
+{
+    const struct WarpData *here = &gSaveBlock1Ptr->location;
+    if (!MP_Region_IsSharedMap(destGroup, destNum) || MP_Region_IsSharedMap(here->mapGroup, here->mapNum))
+        return;
+    gRegionState.originGroup = here->mapGroup;
+    gRegionState.originNum = here->mapNum;
+    gRegionState.originX = gSaveBlock1Ptr->pos.x;
+    gRegionState.originY = gSaveBlock1Ptr->pos.y;
+    gRegionState.originValid = TRUE;
+}
+
+// JOHTO's / KANTO's GAME CENTER: 2F and 3F, reached by the GAME CORNERS' attendants. The elevator's other floor
+// there (VAR_RESULT 2 or 3; 0 in HOENN, whose tower keeps its four floors)
+u16 MP_Region_GameCenterOtherFloor(void)
+{
+    u8 group = gSaveBlock1Ptr->location.mapGroup, num = gSaveBlock1Ptr->location.mapNum;
+    if (MP_Region_Current() == REGION_HOENN || group != MAP_GROUP(MAP_RUSTBORO_CITY_GAME_CENTER_2F))
+        return gSpecialVar_Result = 0;
+    if (num == MAP_NUM(MAP_RUSTBORO_CITY_GAME_CENTER_2F))
+        return gSpecialVar_Result = 3;
+    if (num == MAP_NUM(MAP_RUSTBORO_CITY_GAME_CENTER_3F))
+        return gSpecialVar_Result = 2;
+    return gSpecialVar_Result = 0;
+}
+
+// A warp that doesn't lead anywhere in JOHTO's / KANTO's GAME CENTER: 3F's stairs up to the ROOFTOP
+bool8 MP_Region_WarpClosed(u8 destGroup, u8 destNum)
+{
+    return destGroup == MAP_GROUP(MAP_RUSTBORO_CITY_GAME_CENTER_ROOFTOP) && destNum == MAP_NUM(MAP_RUSTBORO_CITY_GAME_CENTER_ROOFTOP)
+        && MP_Region_Current() != REGION_HOENN;
+}
+
+// After SetupWarp set where a warp leads (the GARDEN's own redirect too): out of a shared map in JOHTO / KANTO, back
+// to where the player stepped in (HOENN keeps the maps' own exits: RUSTBORO's doors, the CENTERs' escalators)
+void MP_Region_SharedExit(u8 destGroup, u8 destNum)
+{
+    const struct WarpData *here = &gSaveBlock1Ptr->location;
+    if (!MP_Region_IsSharedMap(here->mapGroup, here->mapNum) || MP_Region_Current() == REGION_HOENN
+     || !gRegionState.originValid)
+        return;
+    // (JOHTO's / KANTO's GAME CENTER is its 2F and 3F only: the stairs down to 1F lead out)
+    if (MP_Region_IsSharedMap(destGroup, destNum)
+     && !(destGroup == MAP_GROUP(MAP_RUSTBORO_CITY_GAME_CENTER_1F) && destNum == MAP_NUM(MAP_RUSTBORO_CITY_GAME_CENTER_1F)))
+        return;
+    SetWarpDestination(gRegionState.originGroup, gRegionState.originNum, WARP_ID_NONE, gRegionState.originX,
+                       gRegionState.originY);
 }
 
 u8 *MP_Region_FlagPointer(u16 id)

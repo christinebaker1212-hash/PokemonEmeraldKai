@@ -41,6 +41,7 @@ static const u16 sGameCenterRooftop[] = INCBIN_U16("graphics/moemon/gamecenter/r
 static const u16 sGameCenter1FOver[] = INCBIN_U16("graphics/moemon/gamecenter/1f_over.bin");
 static const u16 sGameCenter2FOver[] = INCBIN_U16("graphics/moemon/gamecenter/2f_over.bin");
 static const u16 sGameCenter3FOver[] = INCBIN_U16("graphics/moemon/gamecenter/3f_over.bin");
+static const u16 sGameCenterPassage[] = INCBIN_U16("graphics/moemon/gamecenter/passage.bin");
 
 #define BLACK 0x8000
 #define SKY (0x8000 | RGB(19, 26, 31))
@@ -53,6 +54,9 @@ static const struct MapPic sPics[] = {
     {MAP_RUSTBORO_CITY_GAME_CENTER_2F, 0, 0, 208, 272, sGameCenter2F, BLACK, sGameCenter2FOver},
     {MAP_RUSTBORO_CITY_GAME_CENTER_3F, 0, 0, 208, 272, sGameCenter3F, BLACK, sGameCenter3FOver},
     {MAP_RUSTBORO_CITY_GAME_CENTER_ROOFTOP, 0, 0, 288, 256, sGameCenterRooftop, SKY, NULL},
+    // JOHTO's / KANTO's way up to the GAME CENTER: elevator doors on the wall behind the attendant at (13, 2)
+    {MAP_JOHTO_GOLDENROD_GAME_CORNER, 13 * 16 - 8, 6, 32, 26, sGameCenterPassage, 0, NULL},
+    {MAP_KANTO_CELADON_CITY_GAME_CORNER, 13 * 16 - 8, 6, 32, 26, sGameCenterPassage, 0, NULL},
 };
 
 #define MAX_SHOWN 4

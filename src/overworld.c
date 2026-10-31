@@ -549,6 +549,7 @@ const struct MapLayout *GetMapLayout(void)
 
 void ApplyCurrentWarp(void)
 {
+    MP_Region_NoteWarp(sWarpDestination.mapGroup, sWarpDestination.mapNum);   // Moemon Kai: into a shared map (mp_region.c)
     gLastUsedWarp = gSaveBlock1Ptr->location;
     gSaveBlock1Ptr->location = sWarpDestination;
     sFixedDiveWarp = sDummyWarpData;

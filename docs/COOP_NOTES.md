@@ -2044,6 +2044,17 @@ ACTOR LEVEL [P]` picks the pursuit. Test garden_doing.
   offset a whole tile at once; wrapping at 256 drew the picture's far side down the screen's left edge for a step).
 - Tests gc_look (pictures, clerks behind counters, the Town Map), gc_visit (gate, admission, stairs, shop deck and
   single, a duel asked by talking, elevator, rooftop, exit). Debug: mp face DIR, mp textspeed N.
+- JOHTO's and KANTO's GAME CENTER (1.61.3): HOENN's 2F and 3F, no 1F and no ROOFTOP (the user's rule: HOENN's tower
+  keeps its four floors; a region without a tower of its own gets an attendant and 2F / 3F only). The attendants
+  stand in GOLDENROD's and CELADON's GAME CORNERS at (13, 2) (map.json objects added after the import: put them back
+  if import.py runs again) with 2F's elevator doors pinned on the wall behind them (passage.png, cut from 2f.png by
+  gen_gamecenter.py PASSAGE; sPics). EventScript_GameCenterGuide sets VAR_GAME_CENTER_PAID and warps to 2F's stairs.
+  The floors are shared maps (mp_region.c MP_Region_IsSharedMap: with the MOéMON GARDEN): MP_Region_Current there is
+  the region the player came from (no trip, no PC swap), MP_Region_NoteWarp (overworld.c ApplyCurrentWarp) keeps
+  where they stepped in (RegionState.origin*, in the region sidecar), and MP_Region_SharedExit (SetupWarp) sends a
+  warp out of a shared map, or 2F's stairs down to 1F, back there. Outside HOENN the elevator asks only for the other
+  floor (MP_Region_GameCenterOtherFloor) and 3F's stairs up say the ROOFTOP is closed (MP_Region_WarpClosed in
+  TryStartWarpEventScript). Tests gc_johto, gc_kanto, garden_johto.
 
 ## The VS cabinet: MUGEN fights (1.31.0, 1.33.0)
 Decisions and the as-built record: docs/FIGHT_DECISIONS.md. Where things are:

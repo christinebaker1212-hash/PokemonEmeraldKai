@@ -197,3 +197,51 @@ gText_QzHeadbuttUsed::
 
 gText_QzHeadbuttNothing::
 	.string "Nope.\nNothing happened…$"
+
+@ GOLDENROD's and CELADON's GAME CORNERS: the way up to the GAME CENTER. JOHTO's / KANTO's is HOENN's 2F and 3F
+@ (shared by every region: mp_region.c MP_Region_IsSharedMap; no 1F, no ROOFTOP), its stairs down lead back here
+EventScript_GameCenterGuide::
+	lock
+	faceplayer
+	msgbox gText_GameCenterGuide, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, EventScript_GameCenterGuide_No
+	msgbox gText_GameCenterGuideGo, MSGBOX_DEFAULT
+	closemessage
+	setvar VAR_GAME_CENTER_PAID, 1
+	warp MAP_RUSTBORO_CITY_GAME_CENTER_2F, 0
+	waitstate
+	end
+
+EventScript_GameCenterRoofClosed::
+	lockall
+	msgbox gText_GameCenterRoofClosed, MSGBOX_DEFAULT
+	closemessage
+	applymovement OBJ_EVENT_ID_PLAYER, EventScript_GameCenterRoofClosed_StepBack
+	waitmovement 0
+	releaseall
+	end
+
+EventScript_GameCenterRoofClosed_StepBack:
+	walk_down
+	step_end
+
+gText_GameCenterRoofClosed::
+	.string "The way up to the ROOFTOP is closed.$"
+
+
+EventScript_GameCenterGuide_No::
+	msgbox gText_GameCenterGuideNo, MSGBOX_DEFAULT
+	release
+	end
+
+gText_GameCenterGuide::
+	.string "Upstairs is the GAME CENTER! The\n"
+	.string "CARD SHOP on 2F, games and the DANCE\p"
+	.string "machine on 3F. Shall I take you up?$"
+
+gText_GameCenterGuideGo::
+	.string "Right this way! Have fun!$"
+
+gText_GameCenterGuideNo::
+	.string "Any time! The GAME CENTER is always\n"
+	.string "open.$"

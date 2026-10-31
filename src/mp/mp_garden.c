@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "global.h"
+#include "mp_region.h"
 #include "mp.h"
 #include "mp_garden.h"
 #include "mp_farm.h"
@@ -356,7 +357,7 @@ static const u8 *QuickTravelBlocked(bool8 fromPc)
     if (!fromPc && CenterAt(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum) < 0
      && (!Overworld_MapTypeAllowsTeleportAndFly(gMapHeader.mapType) || InList(sNoTravelMaps, ARRAY_COUNT(sNoTravelMaps))))
         return sText_NotHere;
-    if (ReturnCenter() < 0)
+    if (ReturnCenter() < 0 && MP_Region_Current() == REGION_HOENN)   // (JOHTO / KANTO: back where you came from, mp_region.c)
         return sText_NoCenter;
     return NULL;
 }

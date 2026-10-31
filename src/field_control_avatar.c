@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_region.h"
 #include "mp.h"
 #include "mp_garden.h"   // Moemon Co-op
 #include "battle_setup.h"
@@ -763,6 +764,13 @@ static bool8 TryStartWarpEventScript(struct MapPosition *position, u16 metatileB
 
     if (warpEventId != WARP_ID_NONE && IsWarpMetatileBehavior(metatileBehavior) == TRUE)
     {
+        // Moemon Kai: a closed way (JOHTO's / KANTO's GAME CENTER has no ROOFTOP): a word, and the player steps back
+        if (MP_Region_WarpClosed(gMapHeader.events->warps[warpEventId].mapGroup, gMapHeader.events->warps[warpEventId].mapNum))
+        {
+            extern const u8 EventScript_GameCenterRoofClosed[];
+            ScriptContext_SetupScript(EventScript_GameCenterRoofClosed);
+            return TRUE;
+        }
         StoreInitialPlayerAvatarState();
         SetupWarp(&gMapHeader, warpEventId, position);
         if (MetatileBehavior_IsEscalator(metatileBehavior) == TRUE)
@@ -887,6 +895,7 @@ static void SetupWarp(struct MapHeader *unused, s8 warpEventId, struct MapPositi
             SetDynamicWarp(mapHeader->events->warps[warpEventId].warpId, gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, warpEventId);
         // Moemon Co-op: every POKéMON CENTER's escalator goes up to the MOéMON GARDEN, whose escalator goes back down
         MP_Garden_RedirectWarp(warpEvent->mapGroup, warpEvent->mapNum);
+        MP_Region_SharedExit(warpEvent->mapGroup, warpEvent->mapNum);   // Moemon Kai: out of the GARDEN / GAME CENTER in JOHTO / KANTO
     }
 }
 

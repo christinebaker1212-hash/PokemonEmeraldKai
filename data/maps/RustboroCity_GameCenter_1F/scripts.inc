@@ -65,6 +65,9 @@ RustboroCity_GameCenter_1F_Movement_StepBack:
 @ Every floor's elevator (not to the ROOFTOP: the stairs from 3F go up there)
 RustboroCity_GameCenter_EventScript_Elevator::
 	lockall
+	specialvar VAR_RESULT, MP_Region_GameCenterOtherFloor   @ Moemon Kai: JOHTO's / KANTO's GAME CENTER: 2F and 3F
+	goto_if_eq VAR_RESULT, 2, RustboroCity_GameCenter_EventScript_ElevatorDownTo2F
+	goto_if_eq VAR_RESULT, 3, RustboroCity_GameCenter_EventScript_ElevatorUpTo3F
 	goto_if_eq VAR_GAME_CENTER_PAID, 0, RustboroCity_GameCenter_EventScript_ElevatorUnpaid
 	msgbox RustboroCity_GameCenter_Text_WhichFloor, MSGBOX_DEFAULT
 	multichoice 0, 0, MULTI_GAME_CENTER_FLOORS, FALSE
@@ -75,6 +78,24 @@ RustboroCity_GameCenter_EventScript_Elevator::
 	closemessage
 	releaseall
 	end
+
+RustboroCity_GameCenter_EventScript_ElevatorDownTo2F::
+	msgbox RustboroCity_GameCenter_Text_DownTo2F, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, YES, RustboroCity_GameCenter_EventScript_Elevator2F
+	releaseall
+	end
+
+RustboroCity_GameCenter_EventScript_ElevatorUpTo3F::
+	msgbox RustboroCity_GameCenter_Text_UpTo3F, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, YES, RustboroCity_GameCenter_EventScript_Elevator3F
+	releaseall
+	end
+
+RustboroCity_GameCenter_Text_DownTo2F:
+	.string "Go down to 2F, the CARD SHOP?$"
+
+RustboroCity_GameCenter_Text_UpTo3F:
+	.string "Go up to 3F, the games floor?$"
 
 RustboroCity_GameCenter_EventScript_ElevatorUnpaid::
 	msgbox RustboroCity_GameCenter_1F_Text_PayFirst, MSGBOX_DEFAULT

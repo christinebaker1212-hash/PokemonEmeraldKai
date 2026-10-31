@@ -23,7 +23,9 @@ struct RegionState
     u8 cleared;      // bit per region: its Elite Four beaten (Hoenn: FLAG_SYS_GAME_CLEAR too)
     u8 started;      // bit per region: the player has been there
     u8 current;      // the region of the last trip (the boat's maps take it from here)
-    u8 filler[61];   // room for later fields without a format change
+    u8 originGroup, originNum, originX, originY;   // where the player stepped into a shared map from (MP_Region_IsSharedMap)
+    u8 originValid;
+    u8 filler[56];   // room for later fields without a format change
 };
 extern struct RegionState gRegionState;
 
@@ -34,7 +36,12 @@ bool8 MP_Region_Cleared(u8 region);
 void MP_Region_SetCleared(u8 region);
 bool8 MP_Region_AnyCleared(void);   // an Elite Four beaten in any region (the GLOBAL PC)
 u8 MP_Region_StartChoice(void);       // PROF. BIRCH's region question, until the new game starts
-u8 MP_Region_Current(void);          // the region of the map the player is on
+u8 MP_Region_Current(void);          // the region of the map the player is on (a shared map: the region they came from)
+bool8 MP_Region_IsSharedMap(u8 group, u8 num);   // the MOéMON GARDEN and the GAME CENTER: every region's
+void MP_Region_NoteWarp(u8 destGroup, u8 destNum);   // overworld.c ApplyCurrentWarp: stepping into a shared map
+void MP_Region_SharedExit(u8 destGroup, u8 destNum);
+u16 MP_Region_GameCenterOtherFloor(void);   // special: the elevator's other floor in JOHTO / KANTO (2F / 3F only)
+bool8 MP_Region_WarpClosed(u8 destGroup, u8 destNum);   // field_control_avatar.c: JOHTO's / KANTO's GAME CENTER has no ROOFTOP    // field_control_avatar.c SetupWarp: leaving one goes back where the player came from
 u8 *MP_Region_FlagPointer(u16 id);   // NULL outside REGION_FLAGS_START..END
 u16 *MP_Region_VarPointer(u16 id);
 void MP_Region_NewGame(void);

@@ -583,7 +583,7 @@ static mapsec_u16_t PlayerMapSecForMap(void)
 
 static void ChooseShownMap(void)
 {
-    u8 region = MP_Region_OfGroup(gSaveBlock1Ptr->location.mapGroup);
+    u8 region = MP_Region_Current();   // (the GARDEN / GAME CENTER: the region the player came from)
     u8 map = MapOfMapSec(PlayerMapSecForMap());
     if (region == REGION_JOHTO)
         sPlayerMap = QZMAP_JOHTO;
