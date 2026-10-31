@@ -2562,6 +2562,15 @@ YGO_CARD_COUNT made from EDOPro's database (Ygo_EdoCard).
   them by AI-against-AI duels (Elo) into src/ygo/ygo_npc_decks.c, weakest first; ygo_field.c GameDeck picks from the
   quarter matching the badge tier.
 - The table turns the other side's cards to face them (Home: +180 degrees; piles too).
+- Counters (1.61.5): YgoObj.counterType keeps the kind (EDOPro's number: 0x1 Spell Counter...; MSG_ADD_COUNTER, the
+  first kind in QUERY_COUNTERS), YGO_EV_COUNTER carries it in flags; the names are strings.conf's "!counter" lines
+  (YgoEdo_Counter; kept with the system strings, top bit set). The table shows a badge with the count at a card's top
+  right (YgoBoard_CounterBadge; color by kind: Spell violet, Venom green, A-Counter blue, the rest amber), glows and
+  logs each change ("Breaker the Magical Warrior got a Spell Counter (1 now).": arrivals start at 0 shown, their
+  events bring the counters), and the close-up says "1 Spell Counter on it" with the badge on the picture
+  (YgoBoard_InspectCounters: the object the last INSPECT was at). The online hash leaves counterType out (older
+  versions agree). `mp ygo decktop ID...` puts cards at the bottom of the active Deck list (drawn first after
+  `mp ygo stack`). Tests: test_edo_cards "spell counters", test_ui.sh "counters".
 - Tests: tools/ygo/test_edo.c (determinism, AI / random duels, Copy / Rewind, no rebuilds, no answer the engine
   refuses), test_edo_cards.c (Decks unshuffled with gYgoEdoNoShuffle: Summons, Tribute, Dark Hole, Monster Reborn,
   Polymerization, a Ritual's sum, Mirror Force, Change of Heart, Scapegoat's tokens, Time Wizard's coin, Prohibition's

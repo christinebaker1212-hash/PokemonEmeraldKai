@@ -53,6 +53,7 @@ unsigned YgoEdo_CatalogOf(uint32_t code);
 /* A string by EDOPro's description number: a card's effect string (code << 20 | n) or a system string */
 const char *YgoEdo_Desc(uint64_t desc);
 const char *YgoEdo_System(unsigned id);
+const char *YgoEdo_Counter(unsigned type);
 /* Does EDOPro play the card fully (a script for it, or a Normal Monster that needs none)? */
 int YgoEdo_Playable(uint32_t code);
 

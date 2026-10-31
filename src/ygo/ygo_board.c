@@ -24,6 +24,7 @@ void MPNet_Log(const char *fmt, ...);
 #include "ygo_board.h"
 #include "../tcg/tcg_ui_kit.h"
 #include "ygo_gfx.h"
+#include "ygo_edo.h"
 
 enum
 {
@@ -114,6 +115,8 @@ struct Shown
 {
     uint8_t loc, seq, faceUp, attackPos, controller;
     uint16_t order;   /* hand and pile order: later is further right / on top */
+    uint8_t counters;      /* counters on it (Spell Counters...) and their kind, as YgoObj */
+    uint16_t counterType;
 };
 struct CardSprite
 {
@@ -449,6 +452,8 @@ static void TakeTruth(unsigned o)
     sh->faceUp = t->faceUp;
     sh->attackPos = t->attackPos;
     sh->controller = t->controller;
+    sh->counters = t->counters;
+    sh->counterType = t->counterType;
 }
 /* The first zone free in what's shown */
 static unsigned FreeZone(unsigned player, unsigned loc)
@@ -469,9 +474,12 @@ static void MoveShown(unsigned o, unsigned loc, unsigned player)
 {
     const struct YgoObj *t = &T()->objs[o];
     struct Shown *sh = &B.shown[o];
+    int wasOnField = sh->loc == YGO_LOC_MZONE || sh->loc == YGO_LOC_SZONE;
     if (t->location == loc)
     {
         TakeTruth(o);
+        if (!wasOnField)
+            sh->counters = 0, sh->counterType = 0;   /* (its counters come with their own events, seen arriving) */
     }
     else
     {
@@ -482,6 +490,8 @@ static void MoveShown(unsigned o, unsigned loc, unsigned player)
         sh->faceUp = loc != YGO_LOC_DECK && loc != YGO_LOC_EXTRA;
         sh->attackPos = 1;
     }
+    if (loc != YGO_LOC_MZONE && loc != YGO_LOC_SZONE)
+        sh->counters = 0, sh->counterType = 0;   /* (counters go when a card leaves the field) */
     sh->order = ++B.orderNext;
 }
 /* Everything shown has caught up: the shown state becomes the engine's */
@@ -578,6 +588,54 @@ static void Number(unsigned side, int value, unsigned color)
 static const char *const sPhaseNames[] = {"DRAW PHASE", "STANDBY PHASE", "MAIN PHASE 1", "BATTLE PHASE",
                                           "MAIN PHASE 2", "END PHASE"};
 /* One event: what changes on the table, and how long it's shown */
+/* Counters: a color for each kind (Spell Counters violet, Venom green, the rest amber), a name ("Spell Counter"; n > 1:
+ * "2 Spell Counters"), a round badge with the number */
+unsigned YgoBoard_CounterColor(unsigned type)
+{
+    switch (type & 0xfff)
+    {
+    case 0x1: return 0x9050f0;   /* Spell Counter */
+    case 0x9: return 0x50b040;   /* Venom Counter */
+    case 0xe: return 0x3878e0;   /* A-Counter */
+    default:  return 0xd89020;
+    }
+}
+void YgoBoard_CounterName(unsigned type, char *out, size_t size, unsigned n)
+{
+    const char *name = YgoEdo_Counter(type);
+    size_t len = name ? strcspn(name, "(") : 0;
+    while (len && name[len - 1] == ' ')
+        len--;
+    if (!len)
+        name = "Counter", len = 7;
+    if (n > 1)
+        snprintf(out, size, "%u %.*ss", n, (int)len, name);
+    else
+        snprintf(out, size, "%.*s", (int)len, name);
+}
+void YgoBoard_CounterBadge(int x, int y, unsigned n, unsigned type)
+{
+    char num[4];
+    int w;
+    if (!n)
+        return;
+    snprintf(num, sizeof(num), "%u", n > 99 ? 99 : n);
+    w = G_DigitsWidth(num, 0, 1) + 6;
+    if (w < 11)
+        w = 11;
+    G_RoundFill(x - w / 2, y, w, 11, YgoBoard_CounterColor(type), 255);
+    G_RoundFrame(x - w / 2, y, w, 11, 0xf8f8f8, 255);
+    G_Digits(x - G_DigitsWidth(num, 0, 1) / 2, y + 3, num, 0, 1, G_WHITE, 255);
+}
+static int sInspectObj = -1;   /* the object the last look up close was at (-1: none, or a pile) */
+int YgoBoard_InspectCounters(unsigned *type)
+{
+    if (sInspectObj < 0 || sInspectObj >= (int)B.objCount || !B.shown[sInspectObj].counters)
+        return 0;
+    if (type)
+        *type = B.shown[sInspectObj].counterType;
+    return B.shown[sInspectObj].counters;
+}
 static int Present(const struct YgoEvent *e)
 {
     unsigned o = e->obj, t = e->target;
@@ -838,6 +896,29 @@ static int Present(const struct YgoEvent *e)
             Flash(o, e->value >= 0 ? 0x60ff80 : 0xff6060, Frames(14));
         PlaySE(e->value >= 0 ? SE_M_SWORDS_DANCE : SE_M_LEER);
         return Frames(16);
+    case YGO_EV_COUNTER:
+    {
+        /* a counter put on or taken off: the badge on the card changes, the card glows its color */
+        unsigned before, now = e->value < 0 ? 0 : e->value > 255 ? 255 : (unsigned)e->value;
+        char kind[40];
+        if (o >= B.objCount)
+            return 0;
+        before = B.shown[o].counters;
+        B.shown[o].counters = (uint8_t)now;
+        if (e->flags)
+            B.shown[o].counterType = e->flags;
+        YgoBoard_CounterName(B.shown[o].counterType, kind, sizeof(kind), now > before ? now - before : before - now);
+        if (now == before)
+            return 0;
+        Flash(o, YgoBoard_CounterColor(B.shown[o].counterType), Frames(12));
+        PlaySE(now > before ? SE_M_MINIMIZE : SE_M_SKETCH);
+        if (now > before)
+            Log("%s %s %s (%u now).", NameOf(o), now - before == 1 ? "got a" : "got", kind, now);
+        else
+            Log("%s lost %s%s (%u left).", NameOf(o), before - now == 1 ? "a " : "", kind, now);
+        printf("[ygo] board: %s\n", B.log);
+        return Frames(14);
+    }
     case YGO_EV_EQUIP:
         if (o < B.objCount)
             Flash(o, 0x80c0ff, Frames(14));
@@ -1697,6 +1778,16 @@ static int ConfirmPicks(struct YgoAnswer *a)
     }
     return 1;
 }
+static unsigned SpotCard(int i);
+/* The card at spot i, to look at up close: remembered for its counters (YgoBoard_InspectCounters) */
+static unsigned InspectSpot(int i)
+{
+    sInspectObj = i >= 0 && i < B.spotCount && B.spots[i].kind != SP_PILE ? (int)B.spots[i].obj : -1;
+    if (getenv("MOEMON_TEST"))
+        printf("[ygo] inspect spot %d obj %d counters %u\n", i, sInspectObj,
+               sInspectObj >= 0 && sInspectObj < (int)B.objCount ? B.shown[sInspectObj].counters : 0);
+    return SpotCard(i);
+}
 static unsigned SpotCard(int i)
 {
     const struct Spot *s;
@@ -1845,7 +1936,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
         cur = CurrentSpot();
         if (pressed & KEY_INSPECT)
         {
-            unsigned id = SpotCard(cur);
+            unsigned id = InspectSpot(cur);
             if (id)
             {
                 *card = id;
@@ -1893,7 +1984,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             }
             if (SpotCard(cur))
             {
-                *card = SpotCard(cur);
+                *card = InspectSpot(cur);
                 PlaySE(SE_SELECT);
                 return YB_INSPECT;
             }
@@ -1912,6 +2003,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
         }
         if (pressed & KEY_INSPECT && B.menuObj < (int)B.objCount)
         {
+            sInspectObj = B.menuObj;
             *card = T()->objs[B.menuObj].card;
             return YB_INSPECT;
         }
@@ -1951,6 +2043,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
         }
         if (pressed & KEY_INSPECT && B.menuObj < (int)B.objCount)
         {
+            sInspectObj = B.menuObj;
             *card = T()->objs[B.menuObj].card;
             return YB_INSPECT;
         }
@@ -2013,7 +2106,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
         cur = CurrentSpot();
         if (pressed & KEY_INSPECT && SpotCard(cur))
         {
-            *card = SpotCard(cur);
+            *card = InspectSpot(cur);
             return YB_INSPECT;
         }
         if (pressed & KEY_A && cur >= 0 && B.spots[cur].item >= 0)
@@ -2061,6 +2154,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
         {
             if (pressed & (KEY_A | KEY_INSPECT))
             {
+                sInspectObj = -1;   /* (a pile's cards hold no counters) */
                 *card = T()->objs[B.pileList[B.gridCursor]].card;
                 return YB_INSPECT;
             }
@@ -2076,6 +2170,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             unsigned o = q->items[B.gridCursor].obj;
             if (o < B.objCount)
             {
+                sInspectObj = (int)o;
                 *card = T()->objs[o].card;
                 return YB_INSPECT;
             }
@@ -2120,6 +2215,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             B.gridCursor = B.gridCursor + 8 < n ? B.gridCursor + 8 : n - 1, PlaySE(SE_SELECT);
         if (pressed & KEY_INSPECT)
         {
+            sInspectObj = -1;
             *card = B.d->names[B.gridCursor];
             return YB_INSPECT;
         }
@@ -2149,6 +2245,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             unsigned id = o < B.objCount ? T()->objs[o].card : q->card;
             if (id)
             {
+                sInspectObj = o < B.objCount ? (int)o : -1;
                 *card = id;
                 return YB_INSPECT;
             }
@@ -2660,6 +2757,8 @@ static void Cards(void)
                 if (Across(a))
                     r = R(r.x - 3, r.y + 3, r.h, r.w);
                 Stats(o, r);
+                /* its counters: a badge at the top right corner */
+                YgoBoard_CounterBadge(r.x + r.w - 3, r.y - 3, B.shown[o].counters, B.shown[o].counterType);
             }
         }
     /* the hand: the card under the cursor a little higher */

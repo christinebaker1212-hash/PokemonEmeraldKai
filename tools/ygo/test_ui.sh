@@ -518,6 +518,47 @@ expect zone 'ygo mine reached 8'
 echo 'PASS the engine asks where a Summoned monster goes: the Monster Zones light up (screenshot tribute_zone)'
 fi
 
+# Counters: Breaker the Magical Warrior Normal Summoned gets its Spell Counter, a violet badge on the table and a line
+# on its close-up (screenshots counter_table, counter_inspect)
+if only counters; then
+cat > "$OUT/counters.txt" <<'SCRIPT'
+pressuntil A field 5000
+wait 60
+mp ygo starter 0
+mp ygo decktop 918 912 120
+mp ygo stack
+mp ygo seed 7
+mp ygo first 0
+mp ygo practice
+wait 200
+mp ygo mineuntil 1
+waitlog 6000 ygo mine reached
+wait 30
+mp ygo mine
+wait 150
+mp ygo mine
+wait 150
+mp ygo mine
+waitlog 600 got a Spell Counter
+wait 60
+mp ygo focus 1 0
+wait 10
+mp ygo focus 1 1
+wait 10
+mp ygo focus 1 2
+wait 10
+rendershot counter_table
+press INSPECT 2
+wait 40
+rendershot counter_inspect
+quit
+SCRIPT
+run counters
+expect counters 'Breaker the Magical Warrior got a Spell Counter (1 now)'
+expect counters 'inspect spot [0-9]* obj [0-9]* counters 1'
+echo 'PASS counters: a Spell Counter on the table (badge) and on the close-up (screenshots counter_table, counter_inspect)'
+fi
+
 if only table; then
 cat > "$OUT/table.txt" <<'SCRIPT'
 pressuntil A field 5000

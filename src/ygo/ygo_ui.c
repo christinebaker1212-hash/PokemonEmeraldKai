@@ -1844,6 +1844,8 @@ static void InspectScreen(void)
     const struct YgoCard *card = Ygo_Card((unsigned)Y.card);
     char line[200];
     int y, bob = Y.age < 12 ? (int)((12 - Y.age) * 1.5f) : 0, i;
+    unsigned counterType = 0;
+    int counters = Y.back == Y_DUEL ? YgoBoard_InspectCounters(&counterType) : 0;
     if (Y.back == Y_DUEL)
     {
         YgoBoard_Render();
@@ -1863,8 +1865,11 @@ static void InspectScreen(void)
         SDL_RenderSetClipRect(G_R(), &clip);
     }
     y = 8 - Y.inspectScroll;
-    G_Text(94, y, G_INK, G_INK_SHADOW, card->name, 136, TF_NORMAL);
-    y += 15;
+    {
+        /* (a long name takes two lines) */
+        int end = G_Text(94, y, G_INK, G_INK_SHADOW, card->name, 136, TF_NORMAL);
+        y = end + 2 > y + 15 ? end + 2 : y + 15;
+    }
     if (Ygo_IsMonster(card) || card->frame == YGO_TOKEN)   /* a TOKEN shows as the monster it is */
     {
         static const char *const kinds[] = {"Normal", "Effect", "Fusion", "Ritual", "Spell", "Trap", "Token"};
@@ -1888,6 +1893,14 @@ static void InspectScreen(void)
                  card->frame == YGO_SPELL ? "SPELL" : "TRAP");
         G_Text(94, y, card->frame == YGO_SPELL ? 0x208868 : 0xb02870, G_NO_SHADOW, line, 136, TF_NARROW);
         y += 11;
+    }
+    if (counters > 0)
+    {
+        /* on the table with counters: how many, of what kind (and the badge on its picture, below) */
+        char kind[40];
+        YgoBoard_CounterName(counterType, kind, sizeof(kind), (unsigned)counters);
+        snprintf(line, sizeof(line), "%s%s on it", counters == 1 ? "1 " : "", kind);
+        y = G_Text(94, y, YgoBoard_CounterColor(counterType), G_NO_SHADOW, line, 136, TF_NARROW) + 1;
     }
     G_FillA(92, y, 140, 1, 0xd8d8d0, 255);
     y = G_Text(94, y + 2, 0x404040, G_NO_SHADOW, card->text, 136, TF_NARROW);
@@ -1934,6 +1947,8 @@ static void InspectScreen(void)
     if (Y.inspectMax < 0)
         Y.inspectMax = 0;
     SDL_RenderSetClipRect(G_R(), NULL);
+    if (counters > 0)
+        YgoBoard_CounterBadge(76, 26 - bob, (unsigned)counters, counterType);
     if (Y.inspectMax > 0)
     {
         if (Y.inspectScroll > 0)
@@ -3666,6 +3681,25 @@ void Ygo_Debug(const char *command)
     if (!strcmp(command, "case"))
     {
         YgoUi_OpenCase(NULL, 0);
+        return;
+    }
+    if (!strncmp(command, "decktop ", 8))
+    {
+        /* decktop ID...: the active Deck's last cards become these (owned), drawn first after "stack" (tests) */
+        uint16_t *main = Deck(c->activeDeck)->main;
+        unsigned count = Ygo_DeckCount(main, YGO_DECK_MAX), id;
+        const char *p = command + 8;
+        int used;
+        while (count && sscanf(p, "%u%n", &id, &used) == 1)
+        {
+            p += used;
+            if (!id || id > YGO_CARD_COUNT)
+                continue;
+            main[--count] = (uint16_t)id;
+            if (c->owned[id] < 3)
+                c->owned[id] = 3;
+        }
+        printf("[ygo] decktop set\n");
         return;
     }
     if (!strncmp(command, "search ", 7))

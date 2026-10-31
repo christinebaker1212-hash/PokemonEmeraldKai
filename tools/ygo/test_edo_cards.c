@@ -496,6 +496,51 @@ int main(void)
           !strcmp(Ygo_Card(D.s.objs[D.s.players[0].monsters[0] - 1].card)->name, "Sheep Token"));
     printf("ok   %s\n", sScenario);
 
+    /* Counters: Breaker the Magical Warrior gets a Spell Counter when it's Normal Summoned (its kind kept for the
+     * table's badge and name), spends it on a Set card; Skilled Dark Magician counts the Spells that resolve */
+    sScenario = "spell counters";
+    Start(LIST("Breaker the Magical Warrior", "Pot of Greed", "Skilled Dark Magician"), LIST("Waboku"), NULL);
+    Until(0, YGO_Q_IDLE);
+    Act(YGO_ACT_SUMMON, "Breaker the Magical Warrior");
+    Until(0, YGO_Q_IDLE);
+    {
+        unsigned b = D.s.players[0].monsters[0] ? D.s.players[0].monsters[0] - 1u : 0, i;
+        for (i = 0; i < YGO_ZONES; i++)
+            if (D.s.players[0].monsters[i])
+                b = D.s.players[0].monsters[i] - 1u;
+        CHECK(!strcmp(Ygo_Card(D.s.objs[b].card)->name, "Breaker the Magical Warrior"));
+        CHECK(D.s.objs[b].counters == 1 && D.s.objs[b].counterType == 1);
+        CHECK(SawEvent(YGO_EV_COUNTER));
+        CHECK(YgoDuel_Atk(&D.s, b) == 1600 + 300);
+        CHECK(YgoEdo_Counter(1) && !strcmp(YgoEdo_Counter(1), "Spell Counter"));
+        Act(YGO_ACT_END_TURN, NULL);
+        Until(0, YGO_Q_IDLE);   /* (the opponent's turn passes: its AI Sets what it can) */
+        CHECK(D.s.turn == 3);
+        if (D.s.players[1].spells[0] || D.s.players[1].spells[1] || D.s.players[1].spells[2] ||
+            D.s.players[1].spells[3] || D.s.players[1].spells[4])
+        {
+            Act(YGO_ACT_ACTIVATE, "Breaker the Magical Warrior");
+            Until(0, YGO_Q_IDLE);
+            CHECK(D.s.objs[b].counters == 0 && D.s.objs[b].counterType == 0);
+            CHECK(YgoDuel_Atk(&D.s, b) == 1600);
+        }
+        /* Skilled Dark Magician: a Spell Counter for each Spell Card that resolves */
+        Act(YGO_ACT_SUMMON, "Skilled Dark Magician");
+        Until(0, YGO_Q_IDLE);
+        Act(YGO_ACT_ACTIVATE, "Pot of Greed");
+        Until(0, YGO_Q_IDLE);
+        for (i = 0; i < YGO_ZONES; i++)
+            if (D.s.players[0].monsters[i] &&
+                !strcmp(Ygo_Card(D.s.objs[D.s.players[0].monsters[i] - 1].card)->name, "Skilled Dark Magician"))
+            {
+                unsigned m = D.s.players[0].monsters[i] - 1u;
+                CHECK(D.s.objs[m].counters == 1 && D.s.objs[m].counterType == 1);
+                break;
+            }
+        CHECK(i < YGO_ZONES);
+    }
+    printf("ok   %s\n", sScenario);
+
     /* Time Wizard: a coin call and the toss */
     sScenario = "coin";
     Start(LIST("Time Wizard"), LIST("Waboku"), NULL);

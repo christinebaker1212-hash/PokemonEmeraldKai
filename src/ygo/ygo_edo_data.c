@@ -273,11 +273,20 @@ static void LoadStrings(void)
         p = strchr(line, '\n');
         if (p)
             *p++ = 0;
-        if (strncmp(line, "!system ", 8))
+        if (!strncmp(line, "!counter ", 9))
+        {
+            /* the counters' names, kept apart from the system strings by the top bit */
+            id = strtoul(line + 9, &end, 0);
+            if (end == line + 9 || *end != ' ')
+                continue;
+            id |= 0x80000000u;
+        }
+        else if (strncmp(line, "!system ", 8))
             continue;
-        id = strtoul(line + 8, &end, 0);
+        else
+            id = strtoul(line + 8, &end, 0);
         if (end == line + 8 || *end != ' ')
-            continue;
+            continue;   /* (a "!system" line with no number; "!counter" ones were checked above) */
         end[strcspn(end, "\r")] = 0;
         if (n == cap)
             E.system = realloc(E.system, sizeof(*E.system) * (cap *= 2));
@@ -303,6 +312,14 @@ const char *YgoEdo_System(unsigned id)
             hi = mid;
     }
     return lo < E.systemCount && E.system[lo].id == id ? E.system[lo].text : NULL;
+}
+/* A counter's name ("Spell Counter"), by its kind as the engine gives it (some carry flag bits: 0x1002 Wedge Counter) */
+const char *YgoEdo_Counter(unsigned type)
+{
+    const char *t = type ? YgoEdo_System(0x80000000u | type) : NULL;
+    if (!t && type)
+        t = YgoEdo_System(0x80000000u | (type & 0xfff));
+    return t;
 }
 const char *YgoEdo_Desc(uint64_t desc)
 {

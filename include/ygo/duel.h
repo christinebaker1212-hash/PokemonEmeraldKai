@@ -72,6 +72,7 @@ struct YgoObj
     uint8_t equipTo;            /* Equip Spell: the monster's object + 1 */
     uint8_t counters, negated, reason;
     uint8_t attacked;           /* it declared an attack this turn */
+    uint16_t counterType;       /* the kind of counter it holds (EDOPro's: 0x1 Spell Counter...; 0 none) */
     int32_t atk, def;           /* now, with every effect (-1: "?") */
     uint8_t level;
     uint16_t enteredTurn;       /* the turn it reached its location */
@@ -222,7 +223,7 @@ enum YgoEventType
     YGO_EV_WIN,           /* player wins: value YGO_WIN_* */
     YGO_EV_MOVE,          /* obj moved on the field, or put there by an effect (no summon, set or activation) */
     YGO_EV_DECLARE,       /* player declared value: flags 1 a card (card), 2 a number, 3 a Type, 4 an Attribute */
-    YGO_EV_COUNTER        /* obj's counters changed (value: now) */
+    YGO_EV_COUNTER        /* obj's counters changed (value: now; flags: their kind, YgoObj.counterType) */
 };
 enum { YGO_WIN_LP, YGO_WIN_DECK_OUT, YGO_WIN_EXODIA, YGO_WIN_CONCEDE, YGO_WIN_EFFECT };
 struct YgoEvent

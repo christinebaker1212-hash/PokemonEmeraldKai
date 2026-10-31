@@ -259,7 +259,7 @@ static void Place(struct YgoDuel *d, unsigned o, struct Loc l)
         ob->attackPos = 1;
     }
     if (!(l.loc & (EDO_LOC_MZONE | EDO_LOC_SZONE)))
-        ob->equipTo = 0, ob->counters = 0, ob->negated = 0, ob->summonType = 0;
+        ob->equipTo = 0, ob->counters = 0, ob->counterType = 0, ob->negated = 0, ob->summonType = 0;
 }
 static int NewObj(struct YgoDuel *d, uint32_t code, unsigned owner)
 {
@@ -348,7 +348,7 @@ struct QCard
     int32_t atk, def;
     struct Loc equip;
     int hasEquip;
-    uint32_t counters;
+    uint32_t counters, counterType;
 };
 /* One card of a location query; returns the bytes it took */
 static const uint8_t *QueryCard(const uint8_t *p, const uint8_t *end, struct QCard *c)
@@ -391,7 +391,12 @@ static const uint8_t *QueryCard(const uint8_t *p, const uint8_t *end, struct QCa
         {
             uint32_t n = R32(&r), i;
             for (i = 0; i < n && !r.bad; i++)
-                c->counters += R32(&r) >> 16;
+            {
+                uint32_t v = R32(&r);
+                c->counters += v >> 16;
+                if ((v >> 16) && !c->counterType)
+                    c->counterType = v & 0xffff;   /* (the first kind it holds) */
+            }
             break;
         }
         default:
@@ -475,6 +480,7 @@ static int Sync(struct YgoDuel *d, int fix)
                     ob->level = (uint8_t)c.level;
                     ob->negated = (c.status & STATUS_DISABLED) != 0;
                     ob->counters = (uint8_t)(c.counters > 255 ? 255 : c.counters);
+                    ob->counterType = (uint16_t)(c.counters ? c.counterType : 0);
                     ob->equipTo = 0;
                     if (c.hasEquip)
                     {
@@ -1222,19 +1228,25 @@ static void Message(struct YgoDuel *d, unsigned type, const uint8_t *data, uint3
     case MSG_REMOVE_COUNTER:
     {
         struct Loc l;
-        unsigned n;
+        unsigned n, kind;
         int o;
-        R16(&r);
+        kind = R16(&r);
         l = RLoc3(&r, 1);
         n = R16(&r);
         o = ObjAt(e, l);
         if (o < 0)
             return;
         if (type == MSG_ADD_COUNTER)
+        {
             s->objs[o].counters = (uint8_t)(s->objs[o].counters + n > 255 ? 255 : s->objs[o].counters + n);
+            s->objs[o].counterType = (uint16_t)kind;
+        }
         else
             s->objs[o].counters = (uint8_t)(s->objs[o].counters > n ? s->objs[o].counters - n : 0);
-        Event(d, YGO_EV_COUNTER, s->objs[o].controller, o, -1, s->objs[o].counters, 0);
+        if (!s->objs[o].counters)
+            s->objs[o].counterType = 0;
+        /* (flags: the kind of counter) */
+        Event(d, YGO_EV_COUNTER, s->objs[o].controller, o, -1, s->objs[o].counters, s->objs[o].counterType);
         return;
     }
     case MSG_REMOVE_CARDS:

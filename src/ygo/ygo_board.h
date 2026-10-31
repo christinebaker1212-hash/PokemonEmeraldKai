@@ -4,6 +4,7 @@
  * (one at a time: a summon, an activation, an attack...) and asks the player only the engine's questions. */
 #ifndef MOEMON_YGO_BOARD_H
 #define MOEMON_YGO_BOARD_H
+#include <stddef.h>
 #include "ygo/duel.h"
 
 enum
@@ -32,6 +33,11 @@ void YgoBoard_SetMusic(unsigned song);
 void YgoBoard_Tutorial(int on);          /* the lesson: a tip for each new kind of question */
 void YgoBoard_Result(const char *message);
 void YgoBoard_Render(void);
+/* Counters on cards (Spell Counters...): their color, name and badge; how many the card last looked at up close has */
+unsigned YgoBoard_CounterColor(unsigned type);
+void YgoBoard_CounterName(unsigned type, char *out, size_t size, unsigned n);
+void YgoBoard_CounterBadge(int x, int y, unsigned n, unsigned type);
+int YgoBoard_InspectCounters(unsigned *type);
 void YgoBoard_End(void);
 void YgoBoard_EndHoldMusic(void);   // a won game going on to the cards to take: the victory song plays on
 void YgoBoard_ReleaseMusic(void);   // ...until this (the map's song again; nothing if none is held)
