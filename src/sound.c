@@ -32,6 +32,7 @@ extern struct ToneData gCryTable[];
 extern struct ToneData gCryTable_Reverse[];
 // Moemon Kai: the cries in each table (sound/cry_tables.inc: the reverse table follows the forward one)
 #define MP_CRY_COUNT ((u32)(gCryTable_Reverse - gCryTable))
+bool8 MP_CryValid(u32 cry);
 
 static void Task_Fanfare(u8 taskId);
 static void CreateFanfareTask(void);
@@ -409,6 +410,7 @@ void PlayCryInternal(u16 species, s8 pan, s8 volume, u8 priority, u8 mode)
     u32 chorus;
     u32 index;
     u8 table;
+    u16 mpSpecies = species;   // Moemon Co-op: (for the battle intro diagnostics)
 
     species--;
 
@@ -505,6 +507,11 @@ void PlayCryInternal(u16 species, s8 pan, s8 volume, u8 priority, u8 mode)
     species = SpeciesToCryId(species);
     index = species % 128;
     table = species / 128;
+    {
+        // Moemon Co-op: the battle intro diagnostics hear every cry (mp_battlediag.c)
+        void MP_BattleDiag_Cry(u16 species, u32 cry, bool8 ok);
+        MP_BattleDiag_Cry(mpSpecies, species, MP_CryValid(species));
+    }
 
     #define GET_CRY(speciesIndex, tableId, reversed) \
         ((reversed) ? &gCryTable_Reverse[(128 * (tableId)) + (speciesIndex)] : &gCryTable[(128 * (tableId)) + (speciesIndex)])
@@ -514,6 +521,12 @@ void PlayCryInternal(u16 species, s8 pan, s8 volume, u8 priority, u8 mode)
         gMPlay_PokemonCry = SetPokemonCryTone(GET_CRY(index, table, reverse));
 
     #undef GET_CRY
+}
+
+// Moemon Kai: cry number cry is in the tables and holds a sound
+bool8 MP_CryValid(u32 cry)
+{
+    return cry < MP_CRY_COUNT && gCryTable[cry].wav != NULL;
 }
 
 // Moemon Kai (tests: mp crycheck): every species' cry is in both tables and has a sample

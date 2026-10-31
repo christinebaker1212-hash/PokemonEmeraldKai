@@ -3354,8 +3354,35 @@ void BeginBattleIntro(void)
     gBattleMainFunc = BattleIntroGetMonsData;
 }
 
+// Moemon Co-op: the battle intro's step now for the diagnostics (mp_battlediag.c), NULL once at the action menu
+static const char *MpIntroStage(void)
+{
+    static const struct { void (*func)(void); const char *name; } sSteps[] = {
+        {BattleIntroGetMonsData, "GET MONS DATA"},
+        {BattleIntroPrepareBackgroundSlide, "BACKGROUND SLIDE"},
+        {BattleIntroDrawTrainersOrMonsSprites, "DRAW SPRITES"},
+        {BattleIntroDrawPartySummaryScreens, "PARTY SUMMARY"},
+        {BattleIntroPrintTrainerWantsToBattle, "TRAINER WANTS TO BATTLE"},
+        {BattleIntroPrintWildMonAttacked, "WILD MON APPEARED"},
+        {BattleIntroPrintOpponentSendsOut, "OPPONENT SENDS OUT"},
+        {BattleIntroPrintPlayerSendsOut, "PLAYER SENDS OUT"},
+        {BattleIntroOpponent1SendsOutMonAnimation, "OPPONENT 1 SEND-OUT"},
+        {BattleIntroOpponent2SendsOutMonAnimation, "OPPONENT 2 SEND-OUT"},
+        {BattleIntroRecordMonsToDex, "RECORD TO DEX"},
+        {BattleIntroPlayer1SendsOutMonAnimation, "PLAYER 1 SEND-OUT"},
+        {TryDoEventsBeforeFirstTurn, "EVENTS BEFORE FIRST TURN"},
+    };
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sSteps); i++)
+        if (gBattleMainFunc == sSteps[i].func)
+            return sSteps[i].name;
+    return NULL;
+}
+
 static void BattleMainCB1(void)
 {
+    void MP_BattleDiag_Frame(const char *stage, bool8 linked);
+    MP_BattleDiag_Frame(MpIntroStage(), (gBattleTypeFlags & BATTLE_TYPE_LINK) != 0);
     gBattleMainFunc();
 
     for (gActiveBattler = 0; gActiveBattler < gBattlersCount; gActiveBattler++)

@@ -892,6 +892,16 @@ match. sdl2.c BackUpSaveFile rotates "<save>.bakN.bag" with the backups, and loa
   and erases the file's "pokeemerald.sav*" files (SaveSlots_Erase; the file in use restarts empty). Harness
   condition "mainmenu". Test tools/test/save_slots.sh (a scratch game folder: the move, the switch, the erase).
 
+## Battle intro diagnostics (1.61.5)
+- src/mp/mp_battlediag.c, on with AllowSmallTweaks = 1 (or MOEMON_BATTLEDIAG=1). battle_main.c BattleMainCB1 names
+  the intro step (MpIntroStage: GET MONS DATA ... EVENTS BEFORE FIRST TURN, NULL at the action menu); sound.c
+  PlayCryInternal and pokemon_animation.c's front / back animation launchers report in. The log ("[diag]") gets the
+  battlers (species, level, HP, cry number and whether it holds a sound, sprite), each step with its frame, each cry
+  and animation, and at the action menu each battler's expected (shown, cry, animation) against what happened
+  ("<- out of order"). A step that doesn't move on for 600 frames (1200 linked; not while the text box prints or
+  waits for a button) writes "INTRO STUCK: <step>" with the foe, shown or not, cried or not in the text box.
+  MOEMON_BATTLEDIAG_STUCK=frames for tests; scenario battle_diag.
+
 ## REJOIN and remembered invite codes (mp_setup.c)
 
 OnRoomJoined saves the room (last_room, last_room_key: the room's key, not its password) and where it is:

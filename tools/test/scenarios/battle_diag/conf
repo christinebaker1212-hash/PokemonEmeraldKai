@@ -1,0 +1,7 @@
+# The battle intro diagnostics (AllowSmallTweaks = 1; MOEMON_BATTLEDIAG here): a wild GROOKEY's intro logs the
+# battlers, its steps, the cries and animations, every battler shown with its cry, and no STUCK report.
+MODE=1
+TMO=60
+ENV_A="MOEMON_BATTLEDIAG=1 MOEMON_DEBUG_PARTY=280:30"
+EXPECT_A=("battler 1 (foe): GROOKEY Lv5" "cry: GROOKEY (cry 811) playing" "battler 1 GROOKEY: expected shown, cry, animation; got shown, cry, animation" "intro done in")
+UNEXPECT_A=("out of order" "intro STUCK" "HAS NO SOUND" "[crash]")

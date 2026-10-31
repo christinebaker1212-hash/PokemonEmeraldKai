@@ -1007,6 +1007,10 @@ static void Task_HandleMonAnimation(u8 taskId)
 void LaunchAnimationTaskForFrontSprite(struct Sprite *sprite, u8 frontAnimId)
 {
     u8 taskId = CreateTask(Task_HandleMonAnimation, 128);
+    {
+        void MP_BattleDiag_Anim(u16 species, u8 animId, bool8 back);   // Moemon Co-op: (mp_battlediag.c)
+        MP_BattleDiag_Anim(sprite->data[2], frontAnimId, FALSE);
+    }
     gTasks[taskId].ptr.spritePtr = sprite;
     gTasks[taskId].tAnimId = frontAnimId;
 }
@@ -1030,6 +1034,10 @@ void LaunchAnimationTaskForBackSprite(struct Sprite *sprite, u8 backAnimSet)
 
     // * 3 below because each back anim has 3 variants depending on nature
     animId = 3 * backAnimSet + sBackAnimNatureModTable[nature];
+    {
+        void MP_BattleDiag_Anim(u16 species, u8 animId, bool8 back);   // Moemon Co-op: (mp_battlediag.c)
+        MP_BattleDiag_Anim(sprite->data[2], animId, TRUE);
+    }
     gTasks[taskId].tAnimId = animId < ARRAY_COUNT(sBackAnimationIds) ? sBackAnimationIds[animId] : 0;
 }
 

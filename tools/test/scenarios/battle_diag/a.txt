@@ -1,0 +1,6 @@
+pressuntil A field 5000
+wait 30
+mp wild 835:5
+pressuntil A action 1500
+wait 10
+quit
