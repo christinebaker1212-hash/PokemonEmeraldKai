@@ -1,0 +1,7 @@
+# KANTO's ARCEUS trials wait for ARCEUS's visit to the player's bedroom (FLAG_QZ_0x2E13): ROUTE 2's ARCEUS is hidden
+# before (talking to the spot starts nothing), there after, and its battle is ARCEUS's, to FireRed's legendary theme.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_BATTLETEXT=1"
+EXPECT_A=("flag 11810 = 1" "flag 11810 = 0" "Wild ARCEUS appeared" "bgm song 553 ")
+UNEXPECT_A=("[crash]" "TIMEOUT" "VICTINI")

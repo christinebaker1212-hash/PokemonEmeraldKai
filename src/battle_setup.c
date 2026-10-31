@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_region.h"
 #include "mp.h"
 #include "platform/gamepad.h"
 #include "battle.h"
@@ -583,6 +584,13 @@ void BattleSetup_StartLegendaryBattle(void)
     switch (GetMonData(&gEnemyParty[0], MON_DATA_SPECIES, NULL))
     {
     default:
+        // Moemon Kai: any other legendary (JOHTO / KANTO's stand on the map): FireRed's legendary theme, not GROUDON's
+        // battle (Emerald's default)
+        CreateBattleStartTask(B_TRANSITION_BLUR, MUS_RG_VS_LEGEND);
+        break;
+    case SPECIES_MEWTWO:
+        CreateBattleStartTask(B_TRANSITION_BLUR, MUS_RG_VS_MEWTWO);
+        break;
     case SPECIES_GROUDON:
         gBattleTypeFlags |= BATTLE_TYPE_GROUDON;
         CreateBattleStartTask(B_TRANSITION_GROUDON, MUS_VS_KYOGRE_GROUDON);
@@ -600,7 +608,11 @@ void BattleSetup_StartLegendaryBattle(void)
         break;
     case SPECIES_LUGIA:
     case SPECIES_HO_OH:
-        CreateBattleStartTask(B_TRANSITION_BLUR, MUS_RG_VS_LEGEND);
+        // Moemon Kai: JOHTO's own (Quetzal's) for its two
+        CreateBattleStartTask(B_TRANSITION_BLUR, MP_Region_Current() == REGION_JOHTO
+                              ? (GetMonData(&gEnemyParty[0], MON_DATA_SPECIES, NULL) == SPECIES_LUGIA ? MUS_JOHTO_VS_LUGIA
+                                                                                                      : MUS_JOHTO_VS_HO_OH)
+                              : MUS_RG_VS_LEGEND);
         break;
     case SPECIES_MEW:
         CreateBattleStartTask(B_TRANSITION_GRID_SQUARES, MUS_VS_MEW);

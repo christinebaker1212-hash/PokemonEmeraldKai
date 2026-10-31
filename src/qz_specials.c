@@ -369,6 +369,25 @@ static u16 QzClearStaticFlagAfterWildBattle_(void)
     return TRUE;
 }
 
+// KANTO's ARCEUS trials (Quetzal): 17 ARCEUS of the types on routes and islands, shown once ARCEUS has come to the
+// player's bedroom in PALLET (FLAG_QZ_0x2E13); the Normal-type one in ALTERING CAVE once the 17 are done
+#define QZ_ARCEUS_FINAL_FLAG 0x2E15
+static bool8 ArceusTrialWaits(const struct QzStatic *e)
+{
+    u32 i;
+    if (e->region != 2 || e->species != SPECIES_ARCEUS)
+        return FALSE;
+    if (!FlagGet(FLAG_QZ_0x2E13))
+        return TRUE;
+    if (e->objFlag != QZ_ARCEUS_FINAL_FLAG)
+        return FALSE;
+    for (i = 0; i < ARRAY_COUNT(sQzStatics); i++)
+        if (sQzStatics[i].region == 2 && sQzStatics[i].species == SPECIES_ARCEUS
+         && sQzStatics[i].objFlag != QZ_ARCEUS_FINAL_FLAG && !FlagGet(sQzStatics[i].doneFlag))
+            return TRUE;
+    return FALSE;
+}
+
 // On entering a map: a done Pokémon stays hidden; one of a later generation than the region shows waits (MP_Gen_Cap)
 static u16 RefreshStatics(void)
 {
@@ -381,7 +400,8 @@ static u16 RefreshStatics(void)
         if (FlagGet(e->doneFlag) || !MP_Gen_Allowed(e->species) || MP_Gen_Cap(e->region) < e->gen   // (a form: GALARIAN ARTICUNO...)
          || (e->region == 2 && e->species == SPECIES_MELOETTA && !FlagGet(FLAG_QZ_0x2924))   // after the CHANSEY Dance
          || (e->species == SPECIES_DARKRAI && !FlagGet(e->region == 1 ? FLAG_QZ_0x1425 : FLAG_QZ_0x292B))   // in a dream
-         || (e->region == 2 && e->species == SPECIES_MEW && e->group == 36 && !FlagGet(FLAG_QZ_0x2931)))   // under the truck
+         || (e->region == 2 && e->species == SPECIES_MEW && e->group == 36 && !FlagGet(FLAG_QZ_0x2931))   // under the truck
+         || ArceusTrialWaits(e))
             FlagSet(e->objFlag);
         else
             FlagClear(e->objFlag);

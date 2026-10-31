@@ -1,0 +1,24 @@
+pressuntil A field 5000
+wait 30
+mp warp 37,77,4,62
+wait 120
+pressuntil B field 600
+mp getflag 0x2E22
+mp face up
+wait 10
+press A 4
+wait 120
+mp where
+shot hidden
+mp setflag 0x2E13
+mp warp 37,77,4,62
+wait 120
+pressuntil B field 600
+mp getflag 0x2E22
+shot shown
+mp face up
+wait 10
+press A 4
+pressuntil A action 3000
+mp bgm
+quit
