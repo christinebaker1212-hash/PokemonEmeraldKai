@@ -71,3 +71,4 @@ mugen/*.log
 mugen/mugen*.png
 /tools/tt/metadata/
 /tools/ygo/.cache/
+sim_players.dat
