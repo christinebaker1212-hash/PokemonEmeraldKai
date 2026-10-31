@@ -14,11 +14,12 @@ export WINEDEBUG=-all WINEPREFIX="${WINEPREFIX:-$OUT/wineprefix}"
 D="$OUT/wine_smoke"; rm -rf "$D"; mkdir -p "$D/solo" "$D/mixed"; fail=0
 GAME="$D/game"; cp -r "$PKG" "$GAME"   # the game writes its save and crash_log.txt next to the exe
 
-printf 'pressuntil A field 5000\nshot w0\nmp wild 288:3\npressuntil A action 3000\nshot w1\nquit\n' > "$D/solo/a.txt"
+# (then a GEN 9 one: its cry is past 511 in the cry tables, the part of them 1.61.4 read wrong)
+printf 'pressuntil A field 5000\nshot w0\nmp wild 288:3\npressuntil A action 3000\nshot w1\npress RIGHT 2\nwait 4\npress DOWN 2\nwait 4\npress A 2\npressuntil B field 1500\nwait 10\nmp wild 856:5\npressuntil A action 3000\nshot w2\nquit\n' > "$D/solo/a.txt"
 (cd "$GAME" && SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_TEST="Z:$D/solo/a.txt" MOEMON_SHOTDIR="Z:$D/solo" \
     MOEMON_DEBUG_QUICKSTART=1 MOEMON_SKIP_COOP_SETUP=1 MOEMON_COOP_CONFIG="Z:$D/solo/a.ini" MOEMON_SAVE="Z:$D/solo/a.sav" \
     timeout 300 wine MoemonEmeraldKaiCoop.exe > "$D/solo/a.log" 2>&1)
-if grep -q "action menu at frame" "$D/solo/a.log"; then echo "ok   wine solo"; else echo "FAIL wine solo (see $D/solo/a.log)"; fail=$((fail+1)); fi
+if [ "$(grep -c "action menu at frame" "$D/solo/a.log")" -ge 2 ]; then echo "ok   wine solo (a HOENN and a GEN 9 wild battle)"; else
 
 M="$D/mixed"; cp "$TOOLS/scenarios/coop_wild/a.txt" "$TOOLS/scenarios/coop_wild/b.txt" "$M/"
 PORT=$(free_port); LP=$(free_port)
