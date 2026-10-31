@@ -39,6 +39,8 @@ void Fight_Crt(int phase, int time, int length);
 void Fight_Hold(int on);
 // At start: the pack against its ingestion record (mugen/processed_assets.idx), on a thread; differences are logged
 void Fight_CheckIngestion(void);
+// A fight is the game picture: the display waits for the GPU each frame (no frames queued ahead: input lag)
+int Fight_LowLatency(void);
 // Milliseconds since the game started (the online fight's timing)
 unsigned int Fight_Ms(void);
 

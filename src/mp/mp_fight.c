@@ -1166,8 +1166,9 @@ static bool8 NetStep(void)
                   " %d ahead (they're %d)", cur, sNet.remoteLast, sNet.peerFrame, sNet.localLast, sNet.rollbacks,
                   sNet.rtt16 / 16, FramesAhead(), sNet.peerAhead);
     // the input delay follows the ping on the select screen (the frames a message takes, 1 to 3); it only grows, as
-    // buttons already sent can't be taken back
-    if (sNet.rtt16 != 0 && !FightEngine_Kept(NULL))
+    // buttons already sent can't be taken back. Not in the first 2 seconds: a game still loading (an arcade board
+    // reading its ROM set) makes the time there and back look long, and the delay would stay at 3 for the session
+    if (sNet.rtt16 != 0 && !FightEngine_Kept(NULL) && cur >= 120)
     {
         u8 want = (sNet.rtt16 / 16 + 1) / 2;
         want = want < 1 ? 1 : want > 3 ? 3 : want;

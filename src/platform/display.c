@@ -1545,6 +1545,19 @@ void Display_Present(void)
         return;
     RenderToBackbuffer();
     SDL_RenderPresent(sRenderer);
+    // Moemon Fight: while a fight is the picture, wait for the GPU to take this frame before the game runs the next
+    // ("hard GPU sync", as emulators do). With vsync a driver lets the game run up to ~3 frames ahead of the screen,
+    // unnoticed elsewhere but a fighting game's every press shows that much later. A read of one pixel waits for it
+    if (Fight_LowLatency() && Display_GetVSync())
+    {
+        SDL_RendererInfo info;
+        if (SDL_GetRendererInfo(sRenderer, &info) == 0 && !(info.flags & SDL_RENDERER_SOFTWARE))
+        {
+            Uint32 px;
+            SDL_Rect one = {0, 0, 1, 1};
+            SDL_RenderReadPixels(sRenderer, &one, SDL_PIXELFORMAT_ARGB8888, &px, 4);
+        }
+    }
     PresentPopouts();
     sDirty = 0;
 }

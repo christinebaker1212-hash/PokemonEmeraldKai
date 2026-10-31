@@ -2174,7 +2174,15 @@ bootleg", moved here from MAUVILLE's GAME CORNER, whose (7,9)/(8,9) are slot mac
 - SPECTATE (mp_spectate.c): frames carry the arcade game on the sender's screen + 1 in FRAMEF bits 3-5
   (MP_Fight_ArcadeShown). A viewer without that set (Arcade_HasSet) doesn't apply them: the card shows CONNECTING...
   until the game is off that screen, then asks for a whole picture (the user's rule).
-- Tests: `mp arcade GAME FRAMES` (harness: opens a board, runs it, prints sound, lit pixels and a RAM hash); the fight_*
+- Input lag (1.62.3, the user: "moves come out late", controller, alone and online): the board answers on the next
+  frame (`mp arcadelag GAME AT BUTTONS`), costs 2-3 ms a frame and replays a loaded state exactly (`mp arcadedet GAME
+  AT`), so the lag was the PC's: with vsync a Direct3D driver queues up to ~3 frames. display.c Display_Present reads
+  one pixel after presenting while Fight_LowLatency() (a fight is the picture; accelerated renderer, vsync on): the
+  "hard GPU sync" emulators use. Online, mp_fight.c's input delay ignored the first 120 frames' round trips (the
+  board's ROM load looked like a 9-frame ping and locked the delay at 3). Game over / a VS win don't end the
+  session: holding START does (the user prefers it).
+- Tests: `mp arcade GAME FRAMES` (harness: opens a board, runs it, prints sound, lit pixels and a RAM hash, then its
+  frame / save / load times); the fight_*
   scenarios now sit at row 11 (the MUGEN cabinet). The CAPCOM games can only be tested with the sets (scratch only).
 
 ## The VS cabinet: MUGEN fights (1.31.0, 1.33.0)

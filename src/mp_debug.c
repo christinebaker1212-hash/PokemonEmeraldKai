@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+unsigned int SDL_GetTicks(void);
 #include "arcade.h"   // Moemon Kai: the GAME CENTER's arcade boards
 #include "s3d.h"   // Moemon Kai: SINNOH's 3D engine (tests)
 #include "mp_region.h"
@@ -1003,10 +1004,23 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] arcade %d: no board\n", game);
             return;
         }
-        for (f = 1; f <= frames; f++)
         {
-            Arcade_Frame(f > 600 && f < 620 ? ARCADE_COIN : f > 700 && f < 710 ? ARCADE_START : 0, 0);
-            pairs += Arcade_TakeAudio(sAudio, 4096);
+            static uint8_t sState[8 << 20];
+            u32 t0 = SDL_GetTicks(), t1, t2;
+            size_t size = 0;
+            for (f = 1; f <= frames; f++)
+            {
+                Arcade_Frame(f > 600 && f < 620 ? ARCADE_COIN : f > 700 && f < 710 ? ARCADE_START : 0, 0);
+                pairs += Arcade_TakeAudio(sAudio, 4096);
+            }
+            t1 = SDL_GetTicks();
+            for (f = 0; f < 60; f++)
+                size = Arcade_SaveState(sState, sizeof(sState));
+            t2 = SDL_GetTicks();
+            for (f = 0; f < 60; f++)
+                Arcade_LoadState(sState, size);
+            printf("[test] arcade timing: %.2f ms a frame, state %u bytes, save %.2f ms, load %.2f ms\n",
+                   frames ? (t1 - t0) / (float)frames : 0.0f, (unsigned)size, (t2 - t1) / 60.0f, (SDL_GetTicks() - t2) / 60.0f);
         }
         {
             const uint32_t *pic = Arcade_Picture();
@@ -1016,6 +1030,72 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] arcade %d (%s): %d frames, %ld sound pairs at %d Hz, %u lit pixels, ram hash %08x\n", game,
                    Arcade_Title(game), frames, pairs, Arcade_SampleRate(), lit, Arcade_Hash());
         }
+        Arcade_Close();
+    }
+    else if (strcmp(cmd, "arcadelag") == 0)
+    {
+        // arcadelag GAME AT BUTTONS: run the board to frame AT (a coin and START along the way), then from there with
+        // and without BUTTONS (ARCADE_* bits) held 4 frames: the first frame whose picture differs (input to picture)
+        static uint8_t sState[8 << 20];
+        static uint32_t sHash[2][40];
+        int game = 0, at = 0, buttons = 0, f, run, lag = -1;
+        size_t size;
+        sscanf(arg, "%d %d %d", &game, &at, &buttons);
+        if (!Arcade_Open(game))
+            return;
+        for (f = 1; f <= at; f++)
+            Arcade_Frame(f > 600 && f < 606 ? ARCADE_COIN : f > 640 && f < 646 ? ARCADE_START : 0, 0);
+        size = Arcade_SaveState(sState, sizeof(sState));
+        for (run = 0; run < 2; run++)
+        {
+            Arcade_LoadState(sState, size);
+            for (f = 0; f < 40; f++)
+            {
+                const uint32_t *pic;
+                uint32_t h = 2166136261u, i;
+                Arcade_Frame(run && f < 4 ? buttons : 0, 0);
+                pic = Arcade_Picture();
+                for (i = 0; i < ARCADE_WIDTH * ARCADE_HEIGHT; i++)
+                    h = (h ^ pic[i]) * 16777619u;
+                sHash[run][f] = h;
+            }
+        }
+        for (f = 0; f < 40 && lag < 0; f++)
+            if (sHash[0][f] != sHash[1][f])
+                lag = f;
+        printf("[test] arcadelag %d (%s): pressed on frame 0, the picture first differs on frame %d\n", game,
+               Arcade_Title(game), lag);
+        Arcade_Close();
+    }
+    else if (strcmp(cmd, "arcadedet") == 0)
+    {
+        // arcadedet GAME AT: whether a save state loaded replays exactly: frames AT+1.. run straight on, then again
+        // from the state saved at AT (the same buttons); the first frame whose RAM hash differs (-1: none)
+        static uint8_t sState[8 << 20];
+        static uint32_t sH[2][120];
+        int game = 0, at = 0, f, run, bad = -1;
+        size_t size;
+        sscanf(arg, "%d %d", &game, &at);
+        if (!Arcade_Open(game))
+            return;
+        for (f = 1; f <= at; f++)
+            Arcade_Frame(f > 600 && f < 606 ? ARCADE_COIN : f > 640 && f < 646 ? ARCADE_START : 0, 0);
+        size = Arcade_SaveState(sState, sizeof(sState));
+        for (run = 0; run < 2; run++)
+        {
+            if (run)
+                Arcade_LoadState(sState, size);
+            for (f = 0; f < 120; f++)
+            {
+                Arcade_Frame((f / 7) % 3 == 0 ? ARCADE_RIGHT | ARCADE_LP : (f / 5) % 4 == 1 ? ARCADE_LEFT : 0, 0);
+                sH[run][f] = Arcade_Hash();
+            }
+        }
+        for (f = 0; f < 120 && bad < 0; f++)
+            if (sH[0][f] != sH[1][f])
+                bad = f;
+        printf("[test] arcadedet %d (%s): from a loaded state, the first frame that differs: %d\n", game,
+               Arcade_Title(game), bad);
         Arcade_Close();
     }
     else if (strcmp(cmd, "bgm") == 0)
