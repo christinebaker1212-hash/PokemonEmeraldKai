@@ -2,18 +2,12 @@ Johto_GoldenrodCity_MapScripts::
 	map_script MAP_SCRIPT_ON_TRANSITION, Johto_GoldenrodCity_EventScript_83D23CC
 	map_script MAP_SCRIPT_ON_LOAD, Quetzal_EventScript_83C2D44
 	map_script MAP_SCRIPT_ON_RESUME, Quetzal_EventScript_83C2D44
-	map_script MAP_SCRIPT_ON_FRAME_TABLE, Johto_GoldenrodCity_OnFrame_83D23C2
 	.byte 0
-
-Johto_GoldenrodCity_OnFrame_83D23C2:
-	map_script_2 VAR_TEMP_2, 1, Johto_GoldenrodCity_EventScript_84070C4
-	.2byte 0
 
 Johto_GoldenrodCity_EventScript_83D23CC::
 	special QzSetGiovanniModeFlag14A4
 	special QzJohtoTravelingEventCheck
 	call Quetzal_EventScript_840EA62
-	special QzTimeTravelGoldenrodCheck
 	end
 
 @ Johto_GoldenrodCity trigger at 34,26 (VAR_TEMP_0 == 0)
@@ -260,17 +254,6 @@ Johto_GoldenrodCity_EventScript_83D256F::
 	release
 	end
 
-Johto_GoldenrodCity_EventScript_84070C4::
-	special QzTimeTravelGoldenrodCheck
-	goto_if_ne VAR_TEMP_2, 1, Quetzal_EventScript_8406ED7
-	setvar VAR_TEMP_2, 0
-	lockall
-	playse SE_POKENAV_CALL
-	msgbox Johto_GoldenrodCity_Text_84073E8, MSGBOX_DEFAULT
-	call Quetzal_EventScript_84070F0
-	playse SE_POKENAV_HANG_UP
-	goto Quetzal_EventScript_8406ED7
-
 Johto_GoldenrodCity_Text_83D257C::
 	.string "This is the GOLDENROD GYM!\p"
 	.string "Our leader WHITNEY is not here\n"
@@ -387,8 +370,3 @@ Johto_GoldenrodCity_Text_83D2C68::
 Johto_GoldenrodCity_Text_83D2C7D::
 	.string "Blooming Beautiful FLOWER SHOP$"
 
-Johto_GoldenrodCity_Text_84073E8::
-	.string "BILL: Hi! I heard you became\n"
-	.string "Johto Champion. Congratulations!\p"
-	.string "I’m working on some research.\n"
-	.string "Perhaps you can help me.$"

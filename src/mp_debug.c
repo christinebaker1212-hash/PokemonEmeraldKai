@@ -993,13 +993,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
     else if (strcmp(cmd, "getflag") == 0)
     {
         // getflag N - whether an event flag is set (2151 = FLAG_BADGE01_GET)
-        printf("[test] flag %d = %d\n", atoi(arg), FlagGet(atoi(arg)) ? 1 : 0);
+        int f = (int)strtol(arg, NULL, 0);   // (decimal or 0x hex, as setflag)
+        printf("[test] flag %d = %d\n", f, FlagGet(f) ? 1 : 0);
     }
     else if (strcmp(cmd, "clearflag") == 0)
     {
         // clearflag N - an event flag off (2144 = FLAG_SYS_POKEMON_GET)
-        FlagClear(atoi(arg));
-        printf("[test] clearflag %d\n", atoi(arg));
+        int f = (int)strtol(arg, NULL, 0);   // (decimal or 0x hex, as setflag)
+        FlagClear(f);
+        printf("[test] clearflag %d\n", f);
     }
     else if (strcmp(cmd, "ticketbackfill") == 0)
     {

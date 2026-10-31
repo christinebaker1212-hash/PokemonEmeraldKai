@@ -4,13 +4,3 @@
 #include "event_data.h"
 #include "qz_specials.h"
 
-QZ_STUB(QzTimeTravelChoosePartyMon)
-QZ_STUB(QzTimeTravelEventEligibility)
-QZ_STUB(QzTimeTravelEventStart)
-QZ_STUB(QzTimeTravelGoldenrodCheck)
-QZ_STUB(QzTimeTravelHandOverPartyMon)
-QZ_STUB(QzTimeTravelHouseFrameCheck)
-QZ_STUB(QzTimeTravelHouseProgress)
-QZ_STUB(QzTimeTravelHouseStatus)
-QZ_STUB(QzTimeTravelMapMetatiles)
-QZ_STUB(QzTimeTravelSetFlag14AB)

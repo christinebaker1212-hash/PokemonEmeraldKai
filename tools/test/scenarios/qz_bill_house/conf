@@ -1,0 +1,8 @@
+# BILL's house in GOLDENROD without Quetzal's time-travel story (removed: the user's call): BILL gives his ROTOM once
+# (once he is home: 0x103A cleared, as after the ECRUTEAK scene) and chats after; GOLDENROD loads without the
+# story's phone call
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_WARP=34,61,1,1 MOEMON_DEBUG_PARTY=6:50"
+EXPECT_A=(" 504(" "flag 4155 = 1" "ctx 1 free 1" "where map 34.59 xy 16,23")
+UNEXPECT_A=("[crash]" "TIMEOUT" "not ported")

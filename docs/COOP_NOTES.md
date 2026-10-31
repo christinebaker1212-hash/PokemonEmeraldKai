@@ -2859,6 +2859,11 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   The ARCEUS chamber's item (700) wants six level 100 legendaries and every other JOHTO / KANTO legendary caught or beaten
   at the GENERATION. Tests story_giovanni (the whole story), story_giovanni_no. Test-only MOEMON_TEST_FOE_WEAK: foes'
   Attack / Sp. Atk at 1 too.
+- BILL's time travel (Quetzal's JOHTO postgame trip to a "possible future" playing as CELEBI, after giving BILL a
+  MAGEARNA) is removed, the user's call: BILL's house keeps its people and BILL his ROTOM gift and chat (his
+  time-travel menu, the passage object and its scenes are gone), GOLDENROD lost its phone call about it, and Quetzal's
+  ten QzTimeTravel* specials and johto_shared.inc's time-travel scripts are gone (data/qz_specials.inc too). If
+  tools/quetzal_port/import.py runs again they come back: remove them again. Test qz_bill_house.
 - A special that is done when it returns (a JOHTO / KANTO special with nothing to wait for, every stub) calls
   ScriptContext_Enable at once; Emerald's waitstate right after it then stopped the script for good (S.S. ANNE's
   departure froze the player on the dock). ScrCmd_special / specialvar note when the special enabled the script
@@ -2889,7 +2894,7 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   real clerks). story_johto plays JOHTO's opening (house, MOM, ELM, the starter); harness mp getvar.
 - tools/test/npc_sweep.sh talks to every person and reads every sign on every map (harness `mp sweepnote`); it
   reports crashes, hangs, scripts still holding the player and stubs reached.
-- Not done yet: Quetzal's other postgame events (GIOVANNI's past and the time travel: still stubs that log and go on), FRLG door animations, 3x2 map
+- Not done yet: FRLG door animations, 3x2 map
   borders, the sightseeing walk on a first arrival, everyone following the host on a trip,
   per-region co-op shared PCs. The plan for what's left: docs/HANDOFF_REGIONS_GENS.md.
 

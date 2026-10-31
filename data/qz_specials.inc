@@ -132,16 +132,6 @@
 	def_special QzStartDreamEvent
 	def_special QzStartMarowakGhostBattle
 	def_special QzStartRuinsOfAlphPuzzle
-	def_special QzTimeTravelChoosePartyMon
-	def_special QzTimeTravelEventEligibility
-	def_special QzTimeTravelEventStart
-	def_special QzTimeTravelGoldenrodCheck
-	def_special QzTimeTravelHandOverPartyMon
-	def_special QzTimeTravelHouseFrameCheck
-	def_special QzTimeTravelHouseProgress
-	def_special QzTimeTravelHouseStatus
-	def_special QzTimeTravelMapMetatiles
-	def_special QzTimeTravelSetFlag14AB
 	def_special QzTravelToRegion
 	def_special QzUpdateLoreleiDollCollection
 	def_special QzUseAltGymLeaderTeam

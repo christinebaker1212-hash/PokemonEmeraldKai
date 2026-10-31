@@ -1,0 +1,31 @@
+pressuntil A field 5000
+wait 400
+mp textspeed 2
+mp clearflag 0x103A
+mp warp 34,61,5,5
+wait 120
+
+
+mp face up
+wait 4
+press A 4
+wait 60
+shot talk
+pressuntil A yesno 3000
+press A 4
+mash A 40 10
+pressuntil A field 3000
+mp party
+mp getflag 0x103B
+mp face up
+wait 4
+press A 4
+wait 60
+shot again
+pressuntil A field 3000
+mp ctx
+mp warp 34,59,16,23
+wait 120
+mp ctx
+mp where
+quit

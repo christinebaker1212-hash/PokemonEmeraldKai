@@ -88,29 +88,8 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
    tests, Windows build, fast-forward the default branch, check the release run.
 2. Extras still open (task list):
    - GIOVANNI's past: DONE (COOP_NOTES "GIOVANNI's alternate past"; tests story_giovanni, story_giovanni_no).
-   - Quetzal's two story modes, still stubs in src/qz_specials_stub.c (each logs and re-enables the script, so
-     none freezes, but the events don't happen): GIOVANNI's past (Tohjo Falls -> RadioTower; the player plays as
-     GIOVANNI, swapped teams, a partner multi battle) and BILL's time travel (Goldenrod; the player plays as CELEBI).
-     Port them from the Quetzal ROM (not in the repo; tools/quetzal_rip/dis_special.py ROM sNNN disassembles a
-     special) and docs/quetzal/SPECIALS.md / JOHTO.md section 13 (move each from the stub file to src/qz_*.c;
-     tools/quetzal_port/import.py regenerates the stub list from what src/qz_*.c defines).
-     Read so far from the ROM (GIOVANNI's past; sb2 = gSaveBlock2Ptr, sb2+8 = Quetzal's player character id, 0x12 =
-     GIOVANNI; sb2+0x2C7 bit 6 = a mode bit saved / restored with it):
-     - 0x82A300C "in GIOVANNI mode" = FlagGet(0x1318). 0x82A2DD8(id) "a Rocket look" = id 0x12, 0x3F, 0x40 or 0x64-0x66
-       (Kai: LOOKs GIOVANNI / ROCKET GRUNT M / F...). 0x82A2E54(n) "can travel" = not linked (0x80C5918, 0x030034A4),
-       not in co-op (0x82611B4, 0x82AF6DC), not in GIOVANNI mode, 0x82A2E44 (0x8262534: a party / follower check),
-       0x82A2E00(n), then party has species 0xFB (CELEBI, 0x82AB0D4).
-     - 694 CanStart: !flag 0x1319 && var 0x506C == 0 && 0x82A2E54(1) && !(sb2+0x2C7 bit 6) && Rocket look (sb2+8).
-     - 695 Start: if not in GIOVANNI mode: var 0x506D = sb2+8, var 0x506E = sb2+0x2C7 bit 6, var 0x5076 = 0,
-       0x8266CDC (followers reset), FlagClear(0x1318)?, if flag 0x1319: var 0x506C = 4; else if var 0x506C == 0 ...
-       sets var 0x5075 / sb2+8 = 0x12 (the player becomes GIOVANNI) - rest still to read (0x082A326E on).
-     - 698 End: FlagClear 0x131C, 0x1319; var 0x506C = 4; 699; var 0x5076 = 3. 699 EnterPast: if GIOVANNI mode,
-       0x82A2F28 (restore: sb2+8 = var 0x506D, the 0x2C7 bit = var 0x506E); FlagSet 0x1318; var 0x5076 = 0.
-     - 700 ItemAvailable: RESULT = GIOVANNI mode && !flag 0x131A && 0x82A2FC0 (sb2+0x2F4 bit 4 clear && 0x82A2F6C &&
-       0x82AA83C && 0x82AA84C). 701: FlagClear 0x131A, 0x131D. 702 ElmCheck: RESULT = (sb2 byte at ? == 0) && flag
-       0x131A && !flag 0x131B && !GIOVANNI mode. 703: FlagClear 0x131B, 0x131F. 792 TohjoSignCheck: RESULT = (flag
-       0x1319 || var 0x506C != 0) && 0x82A2E54(?).
-     Helper: /tmp scripts aside, `tools/quetzal_rip/dis_special.py ROM ADDR N` reads any function.
+   - BILL's time travel: REMOVED (the user: "Remove it entirely"; COOP_NOTES "BILL's time travel"). No Quetzal special
+     is a stub any more (src/qz_specials_stub.c is empty).
    - Sightseeing walk on first arrival (a guide in the port city before the ride to the first town).
    - Per-region co-op shared PCs (the server's 14 shared boxes, one set per region).
 3. (The user: "In the New Game playthrough sweep, be absolutely certain that every story event triggers correctly.")
@@ -151,3 +130,7 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
 10. THE ABSOLUTE LAST PASS, after everything is committed and built: MoeGatcha - every banner by GENERATION, Gen 3
    (today's banners) as the base: newer POKeMON / items join each banner as the GENERATION rises (mp_gatcha.c;
    RandomSpecies is still 1-386 at every GENERATION).
+11. THE FINAL PASS AFTER THE MOEGATCHA ONE (the user, once everything else is finished, pushed, built and updated):
+   every Moemon must have an equivalent POKeMON battle sprite. The user switched from Moemon appearance to POKeMON
+   appearance and a battle showed nothing at all, and the game locked up. Check every species' front / back picture
+   in that mode (Gens 4-9 especially, the forms, MEGA / gimmick pictures) and that a missing one can't freeze a battle.
