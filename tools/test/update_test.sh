@@ -71,9 +71,14 @@ fresh() {   # a player's game folder: the old release, a save and an ini
     printf 'PlayerName = TESTER\nAutoUpdate = 1\n' > "$G/moemon_coop.ini"
     (cd "$G" && find . -type f -print0 | sort -z | xargs -0 sha256sum) > "$OUT/before_$1.txt"
 }
+moved() {   # the folder's file list as the game keeps it: since 1.61.5 the save is in saves/slot1 (save_slots.c moves
+            # it there unchanged on the first start), the rest where it was
+    sed 's| \./pokeemerald\.sav| ./saves/slot1/pokeemerald.sav|' "$OUT/$1"
+}
 unchanged() {   # every file the folder had is as it was (the game may add its own, like the display .ini),
-                # and nothing of the update is left
-    (cd "$G" && sha256sum -c --quiet "$OUT/$1" > /dev/null 2>&1) && [ -z "$(find "$G" -name '*.upd_*' -o -name 'update_*')" ]
+                # nothing of the update is left, and no save is left beside the exe
+    (cd "$G" && moved "$1" | sha256sum -c --quiet > /dev/null 2>&1) && [ -z "$(find "$G" -name '*.upd_*' -o -name 'update_*')" ] \
+        && [ ! -e "$G/pokeemerald.sav" ]
 }
 run() {   # run CASE [env...]: the game in $G, log in $G/log.txt, "reached" screenshot in $G/shots
     local c=$1; shift
@@ -137,7 +142,7 @@ check "new file" test -f "$G/newfile.txt"
 check "new folder" test -f "$G/extras/deep.txt"
 check "release marker updated" has "$G/moemon_release.txt" "9.9.9"
 check "ini untouched" cmp -s "$G/moemon_coop.ini" <(printf 'PlayerName = TESTER\nAutoUpdate = 1\n')
-check "save untouched" bash -c "cd '$G' && grep ' ./pokeemerald.sav\$' '$OUT/before_6.txt' | sha256sum -c --quiet"
+check "save untouched (moved into saves/slot1)" bash -c "cd '$G' && grep ' ./pokeemerald.sav\$' '$OUT/before_6.txt' | sed 's| ./pokeemerald.sav| ./saves/slot1/pokeemerald.sav|' | sha256sum -c --quiet"
 check "exe in place" test -f "$G/$EXE"
 # the restarted game deletes them; on Windows the old exe can still be closing then, so it may only be
 # listed for the start after (case 7 checks that nothing is left)
