@@ -252,7 +252,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Quetzal_EventScript_840FBBD",
-      "flag": "FLAG_QZ_GEN_CAPPED"
+      "flag": "FLAG_QZ_0x2355"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_1278",
@@ -265,7 +265,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Quetzal_EventScript_840FBBD",
-      "flag": "FLAG_QZ_GEN_CAPPED"
+      "flag": "FLAG_QZ_0x23B2"
     }
   ],
   "warp_events": [

@@ -736,6 +736,22 @@ bool8 MP_Gen_Allowed(u16 species)
     return MP_Gen_OfSpecies(species) <= MP_Gen_Cap(MP_Region_Current());
 }
 
+#include "../data/qz_later_objects.h"
+
+// JOHTO's / KANTO's overworld POKéMON of a later generation (legendaries standing on the map, MAGEARNA...) stay out
+// of sight while the GENERATION doesn't allow them (event_object_movement.c, with the object's own flag)
+bool8 MP_Gen_ObjectHidden(u8 localId)
+{
+    u32 i;
+    u8 group = gSaveBlock1Ptr->location.mapGroup, num = gSaveBlock1Ptr->location.mapNum;
+    if (MP_Region_OfGroup(group) == REGION_HOENN)
+        return FALSE;
+    for (i = 0; i < ARRAY_COUNT(sQzLaterObjects); i++)
+        if (sQzLaterObjects[i].group == group && sQzLaterObjects[i].num == num && sQzLaterObjects[i].localId == localId)
+            return !MP_Gen_Allowed(sQzLaterObjects[i].species);
+    return FALSE;
+}
+
 // The nearest earlier form the region shows (a MAMOSWINE in a Gen 2 region is a PILOSWINE); the species itself when
 // it's allowed or nothing before it is
 u16 MP_Gen_StandIn(u16 species)

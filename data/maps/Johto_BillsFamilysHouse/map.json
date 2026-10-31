@@ -64,7 +64,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_BillsFamilysHouse_EventScript_84073AA",
-      "flag": "FLAG_QZ_GEN_CAPPED"
+      "flag": "FLAG_QZ_0x14B4"
     }
   ],
   "warp_events": [

@@ -34,6 +34,10 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
 - JOHTO / KANTO at GEN 3 sealed every POKéMON with a later ability (mp_region.c UseCap: never below Gen 3; the
   Gen 2 cap is only for the regions' pools). Credits after their HALL OF FAME (credits.c no-catch guard,
   post_battle_event_funcs.c region-aware GameClear, qz_specials.c QzDoCredits / QzAfterCreditsReset; test region_hof).
+- JOHTO / KANTO's overworld POKéMON of Gens 5-9 (146 objects: legendaries, MAGEARNA, REGIELEKI...) and 131 more
+  static encounters, hidden by the rip's Gen 4 cap, are back from their GENERATION on
+  (tools/quetzal_port/gen_later_objects.py + gen_static.py; mp_region.c MP_Gen_ObjectHidden; test region_later_mons).
+  Rerun both after tools/quetzal_port/import.py.
 - 1.61.1 released (the seal fix, contest, puzzles, credits, GAME RULES gimmick rows).
 
 ## Next steps

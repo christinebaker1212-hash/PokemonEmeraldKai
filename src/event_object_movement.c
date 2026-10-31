@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_region.h"
 #include "malloc.h"
 #include "battle_pyramid.h"
 #include "berry.h"
@@ -1364,7 +1365,7 @@ u8 Unref_TryInitLocalObjectEvent(u8 localId)
         for (i = 0; i < objectEventCount; i++)
         {
             template = &gSaveBlock1Ptr->objectEventTemplates[i];
-            if (template->localId == localId && !FlagGet(template->flagId))
+            if (template->localId == localId && !FlagGet(template->flagId) && !MP_Gen_ObjectHidden(localId))   // Moemon Kai
                 return InitObjectEventStateFromTemplate(template, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
         }
     }
@@ -1694,7 +1695,7 @@ void TrySpawnObjectEvents(s16 cameraX, s16 cameraY)
             s16 npcY = template->y + MAP_OFFSET;
 
             if (top <= npcY && bottom >= npcY && left <= npcX && right >= npcX
-                && !FlagGet(template->flagId))
+                && !FlagGet(template->flagId) && !MP_Gen_ObjectHidden(template->localId))   // Moemon Kai
                 TrySpawnObjectEventTemplate(template, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, cameraX, cameraY);
         }
     }

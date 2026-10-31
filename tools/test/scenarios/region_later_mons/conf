@@ -1,0 +1,8 @@
+# JOHTO / KANTO's POKéMON of later generations standing on the map show from their GENERATION on: MELOETTA in the
+# DANCE THEATER is hidden at GEN 3 and a static battle at GEN 9
+MODE=1
+GEN=3
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=6:60"
+EXPECT_A=("life battle: begin")
+UNEXPECT_A=("[crash]")

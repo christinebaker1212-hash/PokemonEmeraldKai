@@ -74,6 +74,7 @@ bool8 MP_Gen_SealedMon(struct Pokemon *mon);       // species, a move or the abi
 extern struct Pokemon gPlayerParty[];
 #define MP_SEALED(party, i) ((party) == gPlayerParty && MP_Gen_SealedMon(&(party)[i]))   // in "can it battle" checks                // a battler's types and ability as the generation has them
 bool8 MP_Gen_Allowed(u16 species);                 // shown in the region the player is in
+bool8 MP_Gen_ObjectHidden(u8 localId);             // a later generation's POKéMON on the map (JOHTO / KANTO)
 u16 MP_Gen_StandIn(u16 species);                   // its nearest earlier form that is
 const struct WildPokemonInfo *MP_Region_WildInfo(const struct WildPokemonInfo *info);   // the Gen 3 table before it
 const struct Trainer *MP_Region_TrainerData(u16 trainerNum);                            // the Gen 3 team before it
