@@ -159,6 +159,7 @@ def main():
     ap.add_argument('--write', action='store_true')
     a = ap.parse_args()
     a.music = os.path.abspath(a.music)
+    a.bin = os.path.abspath(a.bin)   # (the game runs in a folder of its own: a relative path, as the release passes, was lost)
     ids = song_ids()
     files = sorted(f for f in os.listdir(a.music) if f.endswith('.kaisong'))
     if not files:
