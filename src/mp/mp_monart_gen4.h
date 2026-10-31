@@ -5,225 +5,300 @@ static const u32 sPkPalette_Turtwig[] = INCGFX_U32("graphics/pokemon/turtwig/nor
 static const u32 sPkShinyPalette_Turtwig[] = INCGFX_U32("graphics/pokemon/turtwig/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Turtwig_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Turtwig[] = {sPkAnim_Turtwig_1};
+static const union AnimCmd *const sPkAnims_Turtwig[] = {sAnim_GeneralFrame0, sPkAnim_Turtwig_1};
 static const u32 sPkFrontPic_Grotle[] = INCGFX_U32("graphics/pokemon/grotle/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Grotle[] = INCGFX_U32("graphics/pokemon/grotle/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Grotle[] = INCGFX_U32("graphics/pokemon/grotle/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Grotle[] = INCGFX_U32("graphics/pokemon/grotle/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Grotle_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Grotle[] = {sPkAnim_Grotle_1};
+static const union AnimCmd *const sPkAnims_Grotle[] = {sAnim_GeneralFrame0, sPkAnim_Grotle_1};
 static const u32 sPkFrontPic_Torterra[] = INCGFX_U32("graphics/pokemon/torterra/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Torterra[] = INCGFX_U32("graphics/pokemon/torterra/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Torterra[] = INCGFX_U32("graphics/pokemon/torterra/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Torterra[] = INCGFX_U32("graphics/pokemon/torterra/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Torterra_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Torterra[] = {sPkAnim_Torterra_1};
+static const union AnimCmd *const sPkAnims_Torterra[] = {sAnim_GeneralFrame0, sPkAnim_Torterra_1};
 static const u32 sPkFrontPic_Chimchar[] = INCGFX_U32("graphics/pokemon/chimchar/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Chimchar[] = INCGFX_U32("graphics/pokemon/chimchar/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Chimchar[] = INCGFX_U32("graphics/pokemon/chimchar/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Chimchar[] = INCGFX_U32("graphics/pokemon/chimchar/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Chimchar_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Chimchar[] = {sPkAnim_Chimchar_1};
+static const union AnimCmd *const sPkAnims_Chimchar[] = {sAnim_GeneralFrame0, sPkAnim_Chimchar_1};
 static const u32 sPkFrontPic_Monferno[] = INCGFX_U32("graphics/pokemon/monferno/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Monferno[] = INCGFX_U32("graphics/pokemon/monferno/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Monferno[] = INCGFX_U32("graphics/pokemon/monferno/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Monferno[] = INCGFX_U32("graphics/pokemon/monferno/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Monferno_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Monferno[] = {sPkAnim_Monferno_1};
+static const union AnimCmd *const sPkAnims_Monferno[] = {sAnim_GeneralFrame0, sPkAnim_Monferno_1};
 static const u32 sPkFrontPic_Infernape[] = INCGFX_U32("graphics/pokemon/infernape/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Infernape[] = INCGFX_U32("graphics/pokemon/infernape/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Infernape[] = INCGFX_U32("graphics/pokemon/infernape/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Infernape[] = INCGFX_U32("graphics/pokemon/infernape/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Infernape_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Infernape[] = {sPkAnim_Infernape_1};
+static const union AnimCmd *const sPkAnims_Infernape[] = {sAnim_GeneralFrame0, sPkAnim_Infernape_1};
 static const u32 sPkFrontPic_Piplup[] = INCGFX_U32("graphics/pokemon/piplup/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Piplup[] = INCGFX_U32("graphics/pokemon/piplup/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Piplup[] = INCGFX_U32("graphics/pokemon/piplup/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Piplup[] = INCGFX_U32("graphics/pokemon/piplup/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Piplup_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Piplup[] = {sPkAnim_Piplup_1};
+static const union AnimCmd *const sPkAnims_Piplup[] = {sAnim_GeneralFrame0, sPkAnim_Piplup_1};
 static const u32 sPkFrontPic_Prinplup[] = INCGFX_U32("graphics/pokemon/prinplup/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Prinplup[] = INCGFX_U32("graphics/pokemon/prinplup/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Prinplup[] = INCGFX_U32("graphics/pokemon/prinplup/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Prinplup[] = INCGFX_U32("graphics/pokemon/prinplup/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Prinplup_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Prinplup[] = {sPkAnim_Prinplup_1};
+static const union AnimCmd *const sPkAnims_Prinplup[] = {sAnim_GeneralFrame0, sPkAnim_Prinplup_1};
 static const u32 sPkFrontPic_Empoleon[] = INCGFX_U32("graphics/pokemon/empoleon/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Empoleon[] = INCGFX_U32("graphics/pokemon/empoleon/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Empoleon[] = INCGFX_U32("graphics/pokemon/empoleon/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Empoleon[] = INCGFX_U32("graphics/pokemon/empoleon/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Empoleon_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Empoleon[] = {sPkAnim_Empoleon_1};
+static const union AnimCmd *const sPkAnims_Empoleon[] = {sAnim_GeneralFrame0, sPkAnim_Empoleon_1};
 static const u32 sPkFrontPic_Starly[] = INCGFX_U32("graphics/pokemon/starly/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Starly[] = INCGFX_U32("graphics/pokemon/starly/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Starly[] = INCGFX_U32("graphics/pokemon/starly/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Starly[] = INCGFX_U32("graphics/pokemon/starly/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Starly_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Starly[] = {sPkAnim_Starly_1};
+static const union AnimCmd *const sPkAnims_Starly[] = {sAnim_GeneralFrame0, sPkAnim_Starly_1};
 static const u32 sPkFrontPic_Staravia[] = INCGFX_U32("graphics/pokemon/staravia/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Staravia[] = INCGFX_U32("graphics/pokemon/staravia/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Staravia[] = INCGFX_U32("graphics/pokemon/staravia/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Staravia[] = INCGFX_U32("graphics/pokemon/staravia/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Staravia_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Staravia[] = {sPkAnim_Staravia_1};
+static const union AnimCmd *const sPkAnims_Staravia[] = {sAnim_GeneralFrame0, sPkAnim_Staravia_1};
 static const u32 sPkFrontPic_Staraptor[] = INCGFX_U32("graphics/pokemon/staraptor/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Staraptor[] = INCGFX_U32("graphics/pokemon/staraptor/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Staraptor[] = INCGFX_U32("graphics/pokemon/staraptor/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Staraptor[] = INCGFX_U32("graphics/pokemon/staraptor/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Staraptor_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Staraptor[] = {sPkAnim_Staraptor_1};
+static const union AnimCmd *const sPkAnims_Staraptor[] = {sAnim_GeneralFrame0, sPkAnim_Staraptor_1};
 static const u32 sPkFrontPic_Bidoof[] = INCGFX_U32("graphics/pokemon/bidoof/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Bidoof[] = INCGFX_U32("graphics/pokemon/bidoof/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Bidoof[] = INCGFX_U32("graphics/pokemon/bidoof/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Bidoof[] = INCGFX_U32("graphics/pokemon/bidoof/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Bidoof_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Bidoof[] = {sPkAnim_Bidoof_1};
+static const union AnimCmd *const sPkAnims_Bidoof[] = {sAnim_GeneralFrame0, sPkAnim_Bidoof_1};
 static const u32 sPkFrontPic_Bibarel[] = INCGFX_U32("graphics/pokemon/bibarel/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Bibarel[] = INCGFX_U32("graphics/pokemon/bibarel/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Bibarel[] = INCGFX_U32("graphics/pokemon/bibarel/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Bibarel[] = INCGFX_U32("graphics/pokemon/bibarel/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Bibarel_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Bibarel[] = {sPkAnim_Bibarel_1};
+static const union AnimCmd *const sPkAnims_Bibarel[] = {sAnim_GeneralFrame0, sPkAnim_Bibarel_1};
 static const u32 sPkFrontPic_Kricketot[] = INCGFX_U32("graphics/pokemon/kricketot/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Kricketot[] = INCGFX_U32("graphics/pokemon/kricketot/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Kricketot[] = INCGFX_U32("graphics/pokemon/kricketot/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Kricketot[] = INCGFX_U32("graphics/pokemon/kricketot/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Kricketot_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Kricketot[] = {sPkAnim_Kricketot_1};
+static const union AnimCmd *const sPkAnims_Kricketot[] = {sAnim_GeneralFrame0, sPkAnim_Kricketot_1};
 static const u32 sPkFrontPic_Kricketune[] = INCGFX_U32("graphics/pokemon/kricketune/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Kricketune[] = INCGFX_U32("graphics/pokemon/kricketune/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Kricketune[] = INCGFX_U32("graphics/pokemon/kricketune/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Kricketune[] = INCGFX_U32("graphics/pokemon/kricketune/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Kricketune_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Kricketune[] = {sPkAnim_Kricketune_1};
+static const union AnimCmd *const sPkAnims_Kricketune[] = {sAnim_GeneralFrame0, sPkAnim_Kricketune_1};
 static const u32 sPkFrontPic_Shinx[] = INCGFX_U32("graphics/pokemon/shinx/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Shinx[] = INCGFX_U32("graphics/pokemon/shinx/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Shinx[] = INCGFX_U32("graphics/pokemon/shinx/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Shinx[] = INCGFX_U32("graphics/pokemon/shinx/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Shinx_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Shinx[] = {sPkAnim_Shinx_1};
+static const union AnimCmd *const sPkAnims_Shinx[] = {sAnim_GeneralFrame0, sPkAnim_Shinx_1};
 static const u32 sPkFrontPic_Luxio[] = INCGFX_U32("graphics/pokemon/luxio/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Luxio[] = INCGFX_U32("graphics/pokemon/luxio/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Luxio[] = INCGFX_U32("graphics/pokemon/luxio/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Luxio[] = INCGFX_U32("graphics/pokemon/luxio/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Luxio_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Luxio[] = {sPkAnim_Luxio_1};
+static const union AnimCmd *const sPkAnims_Luxio[] = {sAnim_GeneralFrame0, sPkAnim_Luxio_1};
 static const u32 sPkFrontPic_Luxray[] = INCGFX_U32("graphics/pokemon/luxray/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Luxray[] = INCGFX_U32("graphics/pokemon/luxray/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Luxray[] = INCGFX_U32("graphics/pokemon/luxray/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Luxray[] = INCGFX_U32("graphics/pokemon/luxray/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Luxray_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Luxray[] = {sPkAnim_Luxray_1};
+static const union AnimCmd *const sPkAnims_Luxray[] = {sAnim_GeneralFrame0, sPkAnim_Luxray_1};
 static const u32 sPkFrontPic_Budew[] = INCGFX_U32("graphics/pokemon/budew/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Budew[] = INCGFX_U32("graphics/pokemon/budew/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Budew[] = INCGFX_U32("graphics/pokemon/budew/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Budew[] = INCGFX_U32("graphics/pokemon/budew/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Budew_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Budew[] = {sPkAnim_Budew_1};
+static const union AnimCmd *const sPkAnims_Budew[] = {sAnim_GeneralFrame0, sPkAnim_Budew_1};
 static const u32 sPkFrontPic_Roserade[] = INCGFX_U32("graphics/pokemon/roserade/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Roserade[] = INCGFX_U32("graphics/pokemon/roserade/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Roserade[] = INCGFX_U32("graphics/pokemon/roserade/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Roserade[] = INCGFX_U32("graphics/pokemon/roserade/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Roserade_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Roserade[] = {sPkAnim_Roserade_1};
+static const union AnimCmd *const sPkAnims_Roserade[] = {sAnim_GeneralFrame0, sPkAnim_Roserade_1};
 static const u32 sPkFrontPic_Cranidos[] = INCGFX_U32("graphics/pokemon/cranidos/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Cranidos[] = INCGFX_U32("graphics/pokemon/cranidos/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Cranidos[] = INCGFX_U32("graphics/pokemon/cranidos/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Cranidos[] = INCGFX_U32("graphics/pokemon/cranidos/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Cranidos_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Cranidos[] = {sPkAnim_Cranidos_1};
+static const union AnimCmd *const sPkAnims_Cranidos[] = {sAnim_GeneralFrame0, sPkAnim_Cranidos_1};
 static const u32 sPkFrontPic_Rampardos[] = INCGFX_U32("graphics/pokemon/rampardos/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Rampardos[] = INCGFX_U32("graphics/pokemon/rampardos/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Rampardos[] = INCGFX_U32("graphics/pokemon/rampardos/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Rampardos[] = INCGFX_U32("graphics/pokemon/rampardos/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Rampardos_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Rampardos[] = {sPkAnim_Rampardos_1};
+static const union AnimCmd *const sPkAnims_Rampardos[] = {sAnim_GeneralFrame0, sPkAnim_Rampardos_1};
 static const u32 sPkFrontPic_Shieldon[] = INCGFX_U32("graphics/pokemon/shieldon/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Shieldon[] = INCGFX_U32("graphics/pokemon/shieldon/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Shieldon[] = INCGFX_U32("graphics/pokemon/shieldon/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Shieldon[] = INCGFX_U32("graphics/pokemon/shieldon/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Shieldon_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Shieldon[] = {sPkAnim_Shieldon_1};
+static const union AnimCmd *const sPkAnims_Shieldon[] = {sAnim_GeneralFrame0, sPkAnim_Shieldon_1};
 static const u32 sPkFrontPic_Bastiodon[] = INCGFX_U32("graphics/pokemon/bastiodon/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Bastiodon[] = INCGFX_U32("graphics/pokemon/bastiodon/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Bastiodon[] = INCGFX_U32("graphics/pokemon/bastiodon/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Bastiodon[] = INCGFX_U32("graphics/pokemon/bastiodon/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Bastiodon_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Bastiodon[] = {sPkAnim_Bastiodon_1};
+static const union AnimCmd *const sPkAnims_Bastiodon[] = {sAnim_GeneralFrame0, sPkAnim_Bastiodon_1};
 static const u32 sPkFrontPic_Burmy[] = INCGFX_U32("graphics/pokemon/burmy/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Burmy[] = INCGFX_U32("graphics/pokemon/burmy/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Burmy[] = INCGFX_U32("graphics/pokemon/burmy/normal.pal", ".gbapal.lz");
@@ -233,7 +308,7 @@ static const union AnimCmd sPkAnim_Burmy_1[] =
     ANIMCMD_FRAME(0, 30),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Burmy[] = {sPkAnim_Burmy_1};
+static const union AnimCmd *const sPkAnims_Burmy[] = {sAnim_GeneralFrame0, sPkAnim_Burmy_1};
 static const u32 sPkFrontPic_Wormadam[] = INCGFX_U32("graphics/pokemon/wormadam/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Wormadam[] = INCGFX_U32("graphics/pokemon/wormadam/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Wormadam[] = INCGFX_U32("graphics/pokemon/wormadam/normal.pal", ".gbapal.lz");
@@ -243,79 +318,103 @@ static const union AnimCmd sPkAnim_Wormadam_1[] =
     ANIMCMD_FRAME(0, 30),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Wormadam[] = {sPkAnim_Wormadam_1};
+static const union AnimCmd *const sPkAnims_Wormadam[] = {sAnim_GeneralFrame0, sPkAnim_Wormadam_1};
 static const u32 sPkFrontPic_Mothim[] = INCGFX_U32("graphics/pokemon/combee/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Mothim[] = INCGFX_U32("graphics/pokemon/combee/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Mothim[] = INCGFX_U32("graphics/pokemon/combee/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Mothim[] = INCGFX_U32("graphics/pokemon/combee/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Mothim_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Mothim[] = {sPkAnim_Mothim_1};
+static const union AnimCmd *const sPkAnims_Mothim[] = {sAnim_GeneralFrame0, sPkAnim_Mothim_1};
 static const u32 sPkFrontPic_Combee[] = INCGFX_U32("graphics/pokemon/combee/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Combee[] = INCGFX_U32("graphics/pokemon/combee/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Combee[] = INCGFX_U32("graphics/pokemon/combee/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Combee[] = INCGFX_U32("graphics/pokemon/combee/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Combee_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Combee[] = {sPkAnim_Combee_1};
+static const union AnimCmd *const sPkAnims_Combee[] = {sAnim_GeneralFrame0, sPkAnim_Combee_1};
 static const u32 sPkFrontPic_Vespiquen[] = INCGFX_U32("graphics/pokemon/vespiquen/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Vespiquen[] = INCGFX_U32("graphics/pokemon/vespiquen/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Vespiquen[] = INCGFX_U32("graphics/pokemon/vespiquen/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Vespiquen[] = INCGFX_U32("graphics/pokemon/vespiquen/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Vespiquen_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Vespiquen[] = {sPkAnim_Vespiquen_1};
+static const union AnimCmd *const sPkAnims_Vespiquen[] = {sAnim_GeneralFrame0, sPkAnim_Vespiquen_1};
 static const u32 sPkFrontPic_Pachirisu[] = INCGFX_U32("graphics/pokemon/pachirisu/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Pachirisu[] = INCGFX_U32("graphics/pokemon/pachirisu/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Pachirisu[] = INCGFX_U32("graphics/pokemon/pachirisu/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Pachirisu[] = INCGFX_U32("graphics/pokemon/pachirisu/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Pachirisu_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Pachirisu[] = {sPkAnim_Pachirisu_1};
+static const union AnimCmd *const sPkAnims_Pachirisu[] = {sAnim_GeneralFrame0, sPkAnim_Pachirisu_1};
 static const u32 sPkFrontPic_Buizel[] = INCGFX_U32("graphics/pokemon/buizel/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Buizel[] = INCGFX_U32("graphics/pokemon/buizel/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Buizel[] = INCGFX_U32("graphics/pokemon/buizel/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Buizel[] = INCGFX_U32("graphics/pokemon/buizel/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Buizel_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Buizel[] = {sPkAnim_Buizel_1};
+static const union AnimCmd *const sPkAnims_Buizel[] = {sAnim_GeneralFrame0, sPkAnim_Buizel_1};
 static const u32 sPkFrontPic_Floatzel[] = INCGFX_U32("graphics/pokemon/floatzel/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Floatzel[] = INCGFX_U32("graphics/pokemon/floatzel/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Floatzel[] = INCGFX_U32("graphics/pokemon/floatzel/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Floatzel[] = INCGFX_U32("graphics/pokemon/floatzel/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Floatzel_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Floatzel[] = {sPkAnim_Floatzel_1};
+static const union AnimCmd *const sPkAnims_Floatzel[] = {sAnim_GeneralFrame0, sPkAnim_Floatzel_1};
 static const u32 sPkFrontPic_Cherubi[] = INCGFX_U32("graphics/pokemon/cherubi/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Cherubi[] = INCGFX_U32("graphics/pokemon/cherubi/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Cherubi[] = INCGFX_U32("graphics/pokemon/cherubi/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Cherubi[] = INCGFX_U32("graphics/pokemon/cherubi/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Cherubi_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Cherubi[] = {sPkAnim_Cherubi_1};
+static const union AnimCmd *const sPkAnims_Cherubi[] = {sAnim_GeneralFrame0, sPkAnim_Cherubi_1};
 static const u32 sPkFrontPic_Cherrim[] = INCGFX_U32("graphics/pokemon/cherrim/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Cherrim[] = INCGFX_U32("graphics/pokemon/cherrim/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Cherrim[] = INCGFX_U32("graphics/pokemon/cherrim/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Cherrim[] = INCGFX_U32("graphics/pokemon/cherrim/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Cherrim_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Cherrim[] = {sPkAnim_Cherrim_1};
+static const union AnimCmd *const sPkAnims_Cherrim[] = {sAnim_GeneralFrame0, sPkAnim_Cherrim_1};
 static const u32 sPkFrontPic_Shellos[] = INCGFX_U32("graphics/pokemon/shellos/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Shellos[] = INCGFX_U32("graphics/pokemon/shellos/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Shellos[] = INCGFX_U32("graphics/pokemon/shellos/normal.pal", ".gbapal.lz");
@@ -325,7 +424,7 @@ static const union AnimCmd sPkAnim_Shellos_1[] =
     ANIMCMD_FRAME(0, 30),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Shellos[] = {sPkAnim_Shellos_1};
+static const union AnimCmd *const sPkAnims_Shellos[] = {sAnim_GeneralFrame0, sPkAnim_Shellos_1};
 static const u32 sPkFrontPic_Gastrodon[] = INCGFX_U32("graphics/pokemon/gastrodon/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Gastrodon[] = INCGFX_U32("graphics/pokemon/gastrodon/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Gastrodon[] = INCGFX_U32("graphics/pokemon/gastrodon/normal.pal", ".gbapal.lz");
@@ -335,637 +434,847 @@ static const union AnimCmd sPkAnim_Gastrodon_1[] =
     ANIMCMD_FRAME(0, 30),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Gastrodon[] = {sPkAnim_Gastrodon_1};
+static const union AnimCmd *const sPkAnims_Gastrodon[] = {sAnim_GeneralFrame0, sPkAnim_Gastrodon_1};
 static const u32 sPkFrontPic_Ambipom[] = INCGFX_U32("graphics/pokemon/ambipom/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Ambipom[] = INCGFX_U32("graphics/pokemon/ambipom/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Ambipom[] = INCGFX_U32("graphics/pokemon/ambipom/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Ambipom[] = INCGFX_U32("graphics/pokemon/ambipom/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Ambipom_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Ambipom[] = {sPkAnim_Ambipom_1};
+static const union AnimCmd *const sPkAnims_Ambipom[] = {sAnim_GeneralFrame0, sPkAnim_Ambipom_1};
 static const u32 sPkFrontPic_Drifloon[] = INCGFX_U32("graphics/pokemon/drifloon/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Drifloon[] = INCGFX_U32("graphics/pokemon/drifloon/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Drifloon[] = INCGFX_U32("graphics/pokemon/drifloon/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Drifloon[] = INCGFX_U32("graphics/pokemon/drifloon/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Drifloon_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Drifloon[] = {sPkAnim_Drifloon_1};
+static const union AnimCmd *const sPkAnims_Drifloon[] = {sAnim_GeneralFrame0, sPkAnim_Drifloon_1};
 static const u32 sPkFrontPic_Drifblim[] = INCGFX_U32("graphics/pokemon/drifblim/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Drifblim[] = INCGFX_U32("graphics/pokemon/drifblim/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Drifblim[] = INCGFX_U32("graphics/pokemon/drifblim/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Drifblim[] = INCGFX_U32("graphics/pokemon/drifblim/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Drifblim_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Drifblim[] = {sPkAnim_Drifblim_1};
+static const union AnimCmd *const sPkAnims_Drifblim[] = {sAnim_GeneralFrame0, sPkAnim_Drifblim_1};
 static const u32 sPkFrontPic_Buneary[] = INCGFX_U32("graphics/pokemon/buneary/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Buneary[] = INCGFX_U32("graphics/pokemon/buneary/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Buneary[] = INCGFX_U32("graphics/pokemon/buneary/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Buneary[] = INCGFX_U32("graphics/pokemon/buneary/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Buneary_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Buneary[] = {sPkAnim_Buneary_1};
+static const union AnimCmd *const sPkAnims_Buneary[] = {sAnim_GeneralFrame0, sPkAnim_Buneary_1};
 static const u32 sPkFrontPic_Lopunny[] = INCGFX_U32("graphics/pokemon/lopunny/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Lopunny[] = INCGFX_U32("graphics/pokemon/lopunny/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Lopunny[] = INCGFX_U32("graphics/pokemon/lopunny/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Lopunny[] = INCGFX_U32("graphics/pokemon/lopunny/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Lopunny_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Lopunny[] = {sPkAnim_Lopunny_1};
+static const union AnimCmd *const sPkAnims_Lopunny[] = {sAnim_GeneralFrame0, sPkAnim_Lopunny_1};
 static const u32 sPkFrontPic_Mismagius[] = INCGFX_U32("graphics/pokemon/mismagius/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Mismagius[] = INCGFX_U32("graphics/pokemon/mismagius/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Mismagius[] = INCGFX_U32("graphics/pokemon/mismagius/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Mismagius[] = INCGFX_U32("graphics/pokemon/mismagius/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Mismagius_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Mismagius[] = {sPkAnim_Mismagius_1};
+static const union AnimCmd *const sPkAnims_Mismagius[] = {sAnim_GeneralFrame0, sPkAnim_Mismagius_1};
 static const u32 sPkFrontPic_Honchkrow[] = INCGFX_U32("graphics/pokemon/honchkrow/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Honchkrow[] = INCGFX_U32("graphics/pokemon/honchkrow/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Honchkrow[] = INCGFX_U32("graphics/pokemon/honchkrow/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Honchkrow[] = INCGFX_U32("graphics/pokemon/honchkrow/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Honchkrow_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Honchkrow[] = {sPkAnim_Honchkrow_1};
+static const union AnimCmd *const sPkAnims_Honchkrow[] = {sAnim_GeneralFrame0, sPkAnim_Honchkrow_1};
 static const u32 sPkFrontPic_Glameow[] = INCGFX_U32("graphics/pokemon/glameow/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Glameow[] = INCGFX_U32("graphics/pokemon/glameow/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Glameow[] = INCGFX_U32("graphics/pokemon/glameow/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Glameow[] = INCGFX_U32("graphics/pokemon/glameow/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Glameow_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Glameow[] = {sPkAnim_Glameow_1};
+static const union AnimCmd *const sPkAnims_Glameow[] = {sAnim_GeneralFrame0, sPkAnim_Glameow_1};
 static const u32 sPkFrontPic_Purugly[] = INCGFX_U32("graphics/pokemon/purugly/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Purugly[] = INCGFX_U32("graphics/pokemon/purugly/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Purugly[] = INCGFX_U32("graphics/pokemon/purugly/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Purugly[] = INCGFX_U32("graphics/pokemon/purugly/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Purugly_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Purugly[] = {sPkAnim_Purugly_1};
+static const union AnimCmd *const sPkAnims_Purugly[] = {sAnim_GeneralFrame0, sPkAnim_Purugly_1};
 static const u32 sPkFrontPic_Chingling[] = INCGFX_U32("graphics/pokemon/chingling/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Chingling[] = INCGFX_U32("graphics/pokemon/chingling/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Chingling[] = INCGFX_U32("graphics/pokemon/chingling/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Chingling[] = INCGFX_U32("graphics/pokemon/chingling/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Chingling_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Chingling[] = {sPkAnim_Chingling_1};
+static const union AnimCmd *const sPkAnims_Chingling[] = {sAnim_GeneralFrame0, sPkAnim_Chingling_1};
 static const u32 sPkFrontPic_Stunky[] = INCGFX_U32("graphics/pokemon/stunky/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Stunky[] = INCGFX_U32("graphics/pokemon/stunky/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Stunky[] = INCGFX_U32("graphics/pokemon/stunky/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Stunky[] = INCGFX_U32("graphics/pokemon/stunky/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Stunky_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Stunky[] = {sPkAnim_Stunky_1};
+static const union AnimCmd *const sPkAnims_Stunky[] = {sAnim_GeneralFrame0, sPkAnim_Stunky_1};
 static const u32 sPkFrontPic_Skuntank[] = INCGFX_U32("graphics/pokemon/skuntank/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Skuntank[] = INCGFX_U32("graphics/pokemon/skuntank/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Skuntank[] = INCGFX_U32("graphics/pokemon/skuntank/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Skuntank[] = INCGFX_U32("graphics/pokemon/skuntank/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Skuntank_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Skuntank[] = {sPkAnim_Skuntank_1};
+static const union AnimCmd *const sPkAnims_Skuntank[] = {sAnim_GeneralFrame0, sPkAnim_Skuntank_1};
 static const u32 sPkFrontPic_Bronzor[] = INCGFX_U32("graphics/pokemon/bronzor/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Bronzor[] = INCGFX_U32("graphics/pokemon/bronzor/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Bronzor[] = INCGFX_U32("graphics/pokemon/bronzor/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Bronzor[] = INCGFX_U32("graphics/pokemon/bronzor/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Bronzor_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Bronzor[] = {sPkAnim_Bronzor_1};
+static const union AnimCmd *const sPkAnims_Bronzor[] = {sAnim_GeneralFrame0, sPkAnim_Bronzor_1};
 static const u32 sPkFrontPic_Bronzong[] = INCGFX_U32("graphics/pokemon/bronzong/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Bronzong[] = INCGFX_U32("graphics/pokemon/bronzong/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Bronzong[] = INCGFX_U32("graphics/pokemon/bronzong/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Bronzong[] = INCGFX_U32("graphics/pokemon/bronzong/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Bronzong_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Bronzong[] = {sPkAnim_Bronzong_1};
+static const union AnimCmd *const sPkAnims_Bronzong[] = {sAnim_GeneralFrame0, sPkAnim_Bronzong_1};
 static const u32 sPkFrontPic_Bonsly[] = INCGFX_U32("graphics/pokemon/bonsly/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Bonsly[] = INCGFX_U32("graphics/pokemon/bonsly/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Bonsly[] = INCGFX_U32("graphics/pokemon/bonsly/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Bonsly[] = INCGFX_U32("graphics/pokemon/bonsly/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Bonsly_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Bonsly[] = {sPkAnim_Bonsly_1};
+static const union AnimCmd *const sPkAnims_Bonsly[] = {sAnim_GeneralFrame0, sPkAnim_Bonsly_1};
 static const u32 sPkFrontPic_MimeJr[] = INCGFX_U32("graphics/pokemon/mime_jr/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_MimeJr[] = INCGFX_U32("graphics/pokemon/mime_jr/back.png", ".4bpp.lz");
 static const u32 sPkPalette_MimeJr[] = INCGFX_U32("graphics/pokemon/mime_jr/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_MimeJr[] = INCGFX_U32("graphics/pokemon/mime_jr/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_MimeJr_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_MimeJr[] = {sPkAnim_MimeJr_1};
+static const union AnimCmd *const sPkAnims_MimeJr[] = {sAnim_GeneralFrame0, sPkAnim_MimeJr_1};
 static const u32 sPkFrontPic_Happiny[] = INCGFX_U32("graphics/pokemon/happiny/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Happiny[] = INCGFX_U32("graphics/pokemon/happiny/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Happiny[] = INCGFX_U32("graphics/pokemon/happiny/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Happiny[] = INCGFX_U32("graphics/pokemon/happiny/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Happiny_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Happiny[] = {sPkAnim_Happiny_1};
+static const union AnimCmd *const sPkAnims_Happiny[] = {sAnim_GeneralFrame0, sPkAnim_Happiny_1};
 static const u32 sPkFrontPic_Chatot[] = INCGFX_U32("graphics/pokemon/chatot/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Chatot[] = INCGFX_U32("graphics/pokemon/chatot/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Chatot[] = INCGFX_U32("graphics/pokemon/chatot/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Chatot[] = INCGFX_U32("graphics/pokemon/chatot/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Chatot_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Chatot[] = {sPkAnim_Chatot_1};
+static const union AnimCmd *const sPkAnims_Chatot[] = {sAnim_GeneralFrame0, sPkAnim_Chatot_1};
 static const u32 sPkFrontPic_Spiritomb[] = INCGFX_U32("graphics/pokemon/spiritomb/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Spiritomb[] = INCGFX_U32("graphics/pokemon/spiritomb/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Spiritomb[] = INCGFX_U32("graphics/pokemon/spiritomb/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Spiritomb[] = INCGFX_U32("graphics/pokemon/spiritomb/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Spiritomb_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Spiritomb[] = {sPkAnim_Spiritomb_1};
+static const union AnimCmd *const sPkAnims_Spiritomb[] = {sAnim_GeneralFrame0, sPkAnim_Spiritomb_1};
 static const u32 sPkFrontPic_Gible[] = INCGFX_U32("graphics/pokemon/gible/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Gible[] = INCGFX_U32("graphics/pokemon/gible/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Gible[] = INCGFX_U32("graphics/pokemon/gible/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Gible[] = INCGFX_U32("graphics/pokemon/gible/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Gible_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Gible[] = {sPkAnim_Gible_1};
+static const union AnimCmd *const sPkAnims_Gible[] = {sAnim_GeneralFrame0, sPkAnim_Gible_1};
 static const u32 sPkFrontPic_Gabite[] = INCGFX_U32("graphics/pokemon/gabite/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Gabite[] = INCGFX_U32("graphics/pokemon/gabite/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Gabite[] = INCGFX_U32("graphics/pokemon/gabite/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Gabite[] = INCGFX_U32("graphics/pokemon/gabite/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Gabite_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Gabite[] = {sPkAnim_Gabite_1};
+static const union AnimCmd *const sPkAnims_Gabite[] = {sAnim_GeneralFrame0, sPkAnim_Gabite_1};
 static const u32 sPkFrontPic_Garchomp[] = INCGFX_U32("graphics/pokemon/garchomp/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Garchomp[] = INCGFX_U32("graphics/pokemon/garchomp/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Garchomp[] = INCGFX_U32("graphics/pokemon/garchomp/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Garchomp[] = INCGFX_U32("graphics/pokemon/garchomp/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Garchomp_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Garchomp[] = {sPkAnim_Garchomp_1};
+static const union AnimCmd *const sPkAnims_Garchomp[] = {sAnim_GeneralFrame0, sPkAnim_Garchomp_1};
 static const u32 sPkFrontPic_Munchlax[] = INCGFX_U32("graphics/pokemon/munchlax/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Munchlax[] = INCGFX_U32("graphics/pokemon/munchlax/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Munchlax[] = INCGFX_U32("graphics/pokemon/munchlax/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Munchlax[] = INCGFX_U32("graphics/pokemon/munchlax/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Munchlax_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Munchlax[] = {sPkAnim_Munchlax_1};
+static const union AnimCmd *const sPkAnims_Munchlax[] = {sAnim_GeneralFrame0, sPkAnim_Munchlax_1};
 static const u32 sPkFrontPic_Riolu[] = INCGFX_U32("graphics/pokemon/riolu/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Riolu[] = INCGFX_U32("graphics/pokemon/riolu/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Riolu[] = INCGFX_U32("graphics/pokemon/riolu/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Riolu[] = INCGFX_U32("graphics/pokemon/riolu/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Riolu_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Riolu[] = {sPkAnim_Riolu_1};
+static const union AnimCmd *const sPkAnims_Riolu[] = {sAnim_GeneralFrame0, sPkAnim_Riolu_1};
 static const u32 sPkFrontPic_Lucario[] = INCGFX_U32("graphics/pokemon/lucario/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Lucario[] = INCGFX_U32("graphics/pokemon/lucario/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Lucario[] = INCGFX_U32("graphics/pokemon/lucario/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Lucario[] = INCGFX_U32("graphics/pokemon/lucario/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Lucario_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Lucario[] = {sPkAnim_Lucario_1};
+static const union AnimCmd *const sPkAnims_Lucario[] = {sAnim_GeneralFrame0, sPkAnim_Lucario_1};
 static const u32 sPkFrontPic_Hippopotas[] = INCGFX_U32("graphics/pokemon/hippopotas/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Hippopotas[] = INCGFX_U32("graphics/pokemon/hippopotas/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Hippopotas[] = INCGFX_U32("graphics/pokemon/hippopotas/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Hippopotas[] = INCGFX_U32("graphics/pokemon/hippopotas/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Hippopotas_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Hippopotas[] = {sPkAnim_Hippopotas_1};
+static const union AnimCmd *const sPkAnims_Hippopotas[] = {sAnim_GeneralFrame0, sPkAnim_Hippopotas_1};
 static const u32 sPkFrontPic_Hippowdon[] = INCGFX_U32("graphics/pokemon/hippowdon/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Hippowdon[] = INCGFX_U32("graphics/pokemon/hippowdon/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Hippowdon[] = INCGFX_U32("graphics/pokemon/hippowdon/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Hippowdon[] = INCGFX_U32("graphics/pokemon/hippowdon/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Hippowdon_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Hippowdon[] = {sPkAnim_Hippowdon_1};
+static const union AnimCmd *const sPkAnims_Hippowdon[] = {sAnim_GeneralFrame0, sPkAnim_Hippowdon_1};
 static const u32 sPkFrontPic_Skorupi[] = INCGFX_U32("graphics/pokemon/skorupi/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Skorupi[] = INCGFX_U32("graphics/pokemon/skorupi/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Skorupi[] = INCGFX_U32("graphics/pokemon/skorupi/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Skorupi[] = INCGFX_U32("graphics/pokemon/skorupi/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Skorupi_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Skorupi[] = {sPkAnim_Skorupi_1};
+static const union AnimCmd *const sPkAnims_Skorupi[] = {sAnim_GeneralFrame0, sPkAnim_Skorupi_1};
 static const u32 sPkFrontPic_Drapion[] = INCGFX_U32("graphics/pokemon/drapion/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Drapion[] = INCGFX_U32("graphics/pokemon/drapion/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Drapion[] = INCGFX_U32("graphics/pokemon/drapion/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Drapion[] = INCGFX_U32("graphics/pokemon/drapion/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Drapion_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Drapion[] = {sPkAnim_Drapion_1};
+static const union AnimCmd *const sPkAnims_Drapion[] = {sAnim_GeneralFrame0, sPkAnim_Drapion_1};
 static const u32 sPkFrontPic_Croagunk[] = INCGFX_U32("graphics/pokemon/croagunk/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Croagunk[] = INCGFX_U32("graphics/pokemon/croagunk/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Croagunk[] = INCGFX_U32("graphics/pokemon/croagunk/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Croagunk[] = INCGFX_U32("graphics/pokemon/croagunk/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Croagunk_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Croagunk[] = {sPkAnim_Croagunk_1};
+static const union AnimCmd *const sPkAnims_Croagunk[] = {sAnim_GeneralFrame0, sPkAnim_Croagunk_1};
 static const u32 sPkFrontPic_Toxicroak[] = INCGFX_U32("graphics/pokemon/toxicroak/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Toxicroak[] = INCGFX_U32("graphics/pokemon/toxicroak/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Toxicroak[] = INCGFX_U32("graphics/pokemon/toxicroak/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Toxicroak[] = INCGFX_U32("graphics/pokemon/toxicroak/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Toxicroak_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Toxicroak[] = {sPkAnim_Toxicroak_1};
+static const union AnimCmd *const sPkAnims_Toxicroak[] = {sAnim_GeneralFrame0, sPkAnim_Toxicroak_1};
 static const u32 sPkFrontPic_Carnivine[] = INCGFX_U32("graphics/pokemon/carnivine/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Carnivine[] = INCGFX_U32("graphics/pokemon/carnivine/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Carnivine[] = INCGFX_U32("graphics/pokemon/carnivine/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Carnivine[] = INCGFX_U32("graphics/pokemon/carnivine/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Carnivine_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Carnivine[] = {sPkAnim_Carnivine_1};
+static const union AnimCmd *const sPkAnims_Carnivine[] = {sAnim_GeneralFrame0, sPkAnim_Carnivine_1};
 static const u32 sPkFrontPic_Finneon[] = INCGFX_U32("graphics/pokemon/finneon/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Finneon[] = INCGFX_U32("graphics/pokemon/finneon/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Finneon[] = INCGFX_U32("graphics/pokemon/finneon/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Finneon[] = INCGFX_U32("graphics/pokemon/finneon/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Finneon_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Finneon[] = {sPkAnim_Finneon_1};
+static const union AnimCmd *const sPkAnims_Finneon[] = {sAnim_GeneralFrame0, sPkAnim_Finneon_1};
 static const u32 sPkFrontPic_Lumineon[] = INCGFX_U32("graphics/pokemon/lumineon/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Lumineon[] = INCGFX_U32("graphics/pokemon/lumineon/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Lumineon[] = INCGFX_U32("graphics/pokemon/lumineon/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Lumineon[] = INCGFX_U32("graphics/pokemon/lumineon/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Lumineon_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Lumineon[] = {sPkAnim_Lumineon_1};
+static const union AnimCmd *const sPkAnims_Lumineon[] = {sAnim_GeneralFrame0, sPkAnim_Lumineon_1};
 static const u32 sPkFrontPic_Mantyke[] = INCGFX_U32("graphics/pokemon/mantyke/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Mantyke[] = INCGFX_U32("graphics/pokemon/mantyke/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Mantyke[] = INCGFX_U32("graphics/pokemon/mantyke/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Mantyke[] = INCGFX_U32("graphics/pokemon/mantyke/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Mantyke_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Mantyke[] = {sPkAnim_Mantyke_1};
+static const union AnimCmd *const sPkAnims_Mantyke[] = {sAnim_GeneralFrame0, sPkAnim_Mantyke_1};
 static const u32 sPkFrontPic_Snover[] = INCGFX_U32("graphics/pokemon/snover/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Snover[] = INCGFX_U32("graphics/pokemon/snover/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Snover[] = INCGFX_U32("graphics/pokemon/snover/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Snover[] = INCGFX_U32("graphics/pokemon/snover/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Snover_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Snover[] = {sPkAnim_Snover_1};
+static const union AnimCmd *const sPkAnims_Snover[] = {sAnim_GeneralFrame0, sPkAnim_Snover_1};
 static const u32 sPkFrontPic_Abomasnow[] = INCGFX_U32("graphics/pokemon/abomasnow/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Abomasnow[] = INCGFX_U32("graphics/pokemon/abomasnow/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Abomasnow[] = INCGFX_U32("graphics/pokemon/abomasnow/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Abomasnow[] = INCGFX_U32("graphics/pokemon/abomasnow/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Abomasnow_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Abomasnow[] = {sPkAnim_Abomasnow_1};
+static const union AnimCmd *const sPkAnims_Abomasnow[] = {sAnim_GeneralFrame0, sPkAnim_Abomasnow_1};
 static const u32 sPkFrontPic_Weavile[] = INCGFX_U32("graphics/pokemon/weavile/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Weavile[] = INCGFX_U32("graphics/pokemon/weavile/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Weavile[] = INCGFX_U32("graphics/pokemon/weavile/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Weavile[] = INCGFX_U32("graphics/pokemon/weavile/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Weavile_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Weavile[] = {sPkAnim_Weavile_1};
+static const union AnimCmd *const sPkAnims_Weavile[] = {sAnim_GeneralFrame0, sPkAnim_Weavile_1};
 static const u32 sPkFrontPic_Magnezone[] = INCGFX_U32("graphics/pokemon/magnezone/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Magnezone[] = INCGFX_U32("graphics/pokemon/magnezone/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Magnezone[] = INCGFX_U32("graphics/pokemon/magnezone/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Magnezone[] = INCGFX_U32("graphics/pokemon/magnezone/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Magnezone_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Magnezone[] = {sPkAnim_Magnezone_1};
+static const union AnimCmd *const sPkAnims_Magnezone[] = {sAnim_GeneralFrame0, sPkAnim_Magnezone_1};
 static const u32 sPkFrontPic_Lickilicky[] = INCGFX_U32("graphics/pokemon/lickilicky/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Lickilicky[] = INCGFX_U32("graphics/pokemon/lickilicky/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Lickilicky[] = INCGFX_U32("graphics/pokemon/lickilicky/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Lickilicky[] = INCGFX_U32("graphics/pokemon/lickilicky/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Lickilicky_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Lickilicky[] = {sPkAnim_Lickilicky_1};
+static const union AnimCmd *const sPkAnims_Lickilicky[] = {sAnim_GeneralFrame0, sPkAnim_Lickilicky_1};
 static const u32 sPkFrontPic_Rhyperior[] = INCGFX_U32("graphics/pokemon/rhyperior/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Rhyperior[] = INCGFX_U32("graphics/pokemon/rhyperior/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Rhyperior[] = INCGFX_U32("graphics/pokemon/rhyperior/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Rhyperior[] = INCGFX_U32("graphics/pokemon/rhyperior/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Rhyperior_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Rhyperior[] = {sPkAnim_Rhyperior_1};
+static const union AnimCmd *const sPkAnims_Rhyperior[] = {sAnim_GeneralFrame0, sPkAnim_Rhyperior_1};
 static const u32 sPkFrontPic_Tangrowth[] = INCGFX_U32("graphics/pokemon/tangrowth/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Tangrowth[] = INCGFX_U32("graphics/pokemon/tangrowth/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Tangrowth[] = INCGFX_U32("graphics/pokemon/tangrowth/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Tangrowth[] = INCGFX_U32("graphics/pokemon/tangrowth/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Tangrowth_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Tangrowth[] = {sPkAnim_Tangrowth_1};
+static const union AnimCmd *const sPkAnims_Tangrowth[] = {sAnim_GeneralFrame0, sPkAnim_Tangrowth_1};
 static const u32 sPkFrontPic_Electivire[] = INCGFX_U32("graphics/pokemon/electivire/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Electivire[] = INCGFX_U32("graphics/pokemon/electivire/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Electivire[] = INCGFX_U32("graphics/pokemon/electivire/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Electivire[] = INCGFX_U32("graphics/pokemon/electivire/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Electivire_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Electivire[] = {sPkAnim_Electivire_1};
+static const union AnimCmd *const sPkAnims_Electivire[] = {sAnim_GeneralFrame0, sPkAnim_Electivire_1};
 static const u32 sPkFrontPic_Magmortar[] = INCGFX_U32("graphics/pokemon/magmortar/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Magmortar[] = INCGFX_U32("graphics/pokemon/magmortar/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Magmortar[] = INCGFX_U32("graphics/pokemon/magmortar/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Magmortar[] = INCGFX_U32("graphics/pokemon/magmortar/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Magmortar_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Magmortar[] = {sPkAnim_Magmortar_1};
+static const union AnimCmd *const sPkAnims_Magmortar[] = {sAnim_GeneralFrame0, sPkAnim_Magmortar_1};
 static const u32 sPkFrontPic_Togekiss[] = INCGFX_U32("graphics/pokemon/togekiss/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Togekiss[] = INCGFX_U32("graphics/pokemon/togekiss/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Togekiss[] = INCGFX_U32("graphics/pokemon/togekiss/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Togekiss[] = INCGFX_U32("graphics/pokemon/togekiss/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Togekiss_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Togekiss[] = {sPkAnim_Togekiss_1};
+static const union AnimCmd *const sPkAnims_Togekiss[] = {sAnim_GeneralFrame0, sPkAnim_Togekiss_1};
 static const u32 sPkFrontPic_Yanmega[] = INCGFX_U32("graphics/pokemon/yanmega/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Yanmega[] = INCGFX_U32("graphics/pokemon/yanmega/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Yanmega[] = INCGFX_U32("graphics/pokemon/yanmega/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Yanmega[] = INCGFX_U32("graphics/pokemon/yanmega/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Yanmega_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Yanmega[] = {sPkAnim_Yanmega_1};
+static const union AnimCmd *const sPkAnims_Yanmega[] = {sAnim_GeneralFrame0, sPkAnim_Yanmega_1};
 static const u32 sPkFrontPic_Leafeon[] = INCGFX_U32("graphics/pokemon/leafeon/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Leafeon[] = INCGFX_U32("graphics/pokemon/leafeon/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Leafeon[] = INCGFX_U32("graphics/pokemon/leafeon/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Leafeon[] = INCGFX_U32("graphics/pokemon/leafeon/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Leafeon_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Leafeon[] = {sPkAnim_Leafeon_1};
+static const union AnimCmd *const sPkAnims_Leafeon[] = {sAnim_GeneralFrame0, sPkAnim_Leafeon_1};
 static const u32 sPkFrontPic_Glaceon[] = INCGFX_U32("graphics/pokemon/glaceon/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Glaceon[] = INCGFX_U32("graphics/pokemon/glaceon/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Glaceon[] = INCGFX_U32("graphics/pokemon/glaceon/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Glaceon[] = INCGFX_U32("graphics/pokemon/glaceon/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Glaceon_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Glaceon[] = {sPkAnim_Glaceon_1};
+static const union AnimCmd *const sPkAnims_Glaceon[] = {sAnim_GeneralFrame0, sPkAnim_Glaceon_1};
 static const u32 sPkFrontPic_Gliscor[] = INCGFX_U32("graphics/pokemon/gliscor/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Gliscor[] = INCGFX_U32("graphics/pokemon/gliscor/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Gliscor[] = INCGFX_U32("graphics/pokemon/gliscor/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Gliscor[] = INCGFX_U32("graphics/pokemon/gliscor/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Gliscor_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Gliscor[] = {sPkAnim_Gliscor_1};
+static const union AnimCmd *const sPkAnims_Gliscor[] = {sAnim_GeneralFrame0, sPkAnim_Gliscor_1};
 static const u32 sPkFrontPic_Mamoswine[] = INCGFX_U32("graphics/pokemon/mamoswine/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Mamoswine[] = INCGFX_U32("graphics/pokemon/mamoswine/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Mamoswine[] = INCGFX_U32("graphics/pokemon/mamoswine/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Mamoswine[] = INCGFX_U32("graphics/pokemon/mamoswine/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Mamoswine_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Mamoswine[] = {sPkAnim_Mamoswine_1};
+static const union AnimCmd *const sPkAnims_Mamoswine[] = {sAnim_GeneralFrame0, sPkAnim_Mamoswine_1};
 static const u32 sPkFrontPic_PorygonZ[] = INCGFX_U32("graphics/pokemon/porygon_z/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_PorygonZ[] = INCGFX_U32("graphics/pokemon/porygon_z/back.png", ".4bpp.lz");
 static const u32 sPkPalette_PorygonZ[] = INCGFX_U32("graphics/pokemon/porygon_z/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_PorygonZ[] = INCGFX_U32("graphics/pokemon/porygon_z/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_PorygonZ_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_PorygonZ[] = {sPkAnim_PorygonZ_1};
+static const union AnimCmd *const sPkAnims_PorygonZ[] = {sAnim_GeneralFrame0, sPkAnim_PorygonZ_1};
 static const u32 sPkFrontPic_Gallade[] = INCGFX_U32("graphics/pokemon/gallade/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Gallade[] = INCGFX_U32("graphics/pokemon/gallade/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Gallade[] = INCGFX_U32("graphics/pokemon/gallade/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Gallade[] = INCGFX_U32("graphics/pokemon/gallade/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Gallade_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Gallade[] = {sPkAnim_Gallade_1};
+static const union AnimCmd *const sPkAnims_Gallade[] = {sAnim_GeneralFrame0, sPkAnim_Gallade_1};
 static const u32 sPkFrontPic_Probopass[] = INCGFX_U32("graphics/pokemon/probopass/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Probopass[] = INCGFX_U32("graphics/pokemon/probopass/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Probopass[] = INCGFX_U32("graphics/pokemon/probopass/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Probopass[] = INCGFX_U32("graphics/pokemon/probopass/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Probopass_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Probopass[] = {sPkAnim_Probopass_1};
+static const union AnimCmd *const sPkAnims_Probopass[] = {sAnim_GeneralFrame0, sPkAnim_Probopass_1};
 static const u32 sPkFrontPic_Dusknoir[] = INCGFX_U32("graphics/pokemon/dusknoir/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Dusknoir[] = INCGFX_U32("graphics/pokemon/dusknoir/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Dusknoir[] = INCGFX_U32("graphics/pokemon/dusknoir/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Dusknoir[] = INCGFX_U32("graphics/pokemon/dusknoir/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Dusknoir_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Dusknoir[] = {sPkAnim_Dusknoir_1};
+static const union AnimCmd *const sPkAnims_Dusknoir[] = {sAnim_GeneralFrame0, sPkAnim_Dusknoir_1};
 static const u32 sPkFrontPic_Froslass[] = INCGFX_U32("graphics/pokemon/froslass/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Froslass[] = INCGFX_U32("graphics/pokemon/froslass/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Froslass[] = INCGFX_U32("graphics/pokemon/froslass/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Froslass[] = INCGFX_U32("graphics/pokemon/froslass/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Froslass_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Froslass[] = {sPkAnim_Froslass_1};
+static const union AnimCmd *const sPkAnims_Froslass[] = {sAnim_GeneralFrame0, sPkAnim_Froslass_1};
 static const u32 sPkFrontPic_Rotom[] = INCGFX_U32("graphics/pokemon/rotom/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Rotom[] = INCGFX_U32("graphics/pokemon/rotom/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Rotom[] = INCGFX_U32("graphics/pokemon/rotom/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Rotom[] = INCGFX_U32("graphics/pokemon/rotom/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Rotom_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Rotom[] = {sPkAnim_Rotom_1};
+static const union AnimCmd *const sPkAnims_Rotom[] = {sAnim_GeneralFrame0, sPkAnim_Rotom_1};
 static const u32 sPkFrontPic_Uxie[] = INCGFX_U32("graphics/pokemon/uxie/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Uxie[] = INCGFX_U32("graphics/pokemon/uxie/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Uxie[] = INCGFX_U32("graphics/pokemon/uxie/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Uxie[] = INCGFX_U32("graphics/pokemon/uxie/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Uxie_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Uxie[] = {sPkAnim_Uxie_1};
+static const union AnimCmd *const sPkAnims_Uxie[] = {sAnim_GeneralFrame0, sPkAnim_Uxie_1};
 static const u32 sPkFrontPic_Mesprit[] = INCGFX_U32("graphics/pokemon/mesprit/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Mesprit[] = INCGFX_U32("graphics/pokemon/mesprit/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Mesprit[] = INCGFX_U32("graphics/pokemon/mesprit/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Mesprit[] = INCGFX_U32("graphics/pokemon/mesprit/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Mesprit_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Mesprit[] = {sPkAnim_Mesprit_1};
+static const union AnimCmd *const sPkAnims_Mesprit[] = {sAnim_GeneralFrame0, sPkAnim_Mesprit_1};
 static const u32 sPkFrontPic_Azelf[] = INCGFX_U32("graphics/pokemon/azelf/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Azelf[] = INCGFX_U32("graphics/pokemon/azelf/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Azelf[] = INCGFX_U32("graphics/pokemon/azelf/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Azelf[] = INCGFX_U32("graphics/pokemon/azelf/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Azelf_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Azelf[] = {sPkAnim_Azelf_1};
+static const union AnimCmd *const sPkAnims_Azelf[] = {sAnim_GeneralFrame0, sPkAnim_Azelf_1};
 static const u32 sPkFrontPic_Dialga[] = INCGFX_U32("graphics/pokemon/dialga/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Dialga[] = INCGFX_U32("graphics/pokemon/dialga/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Dialga[] = INCGFX_U32("graphics/pokemon/dialga/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Dialga[] = INCGFX_U32("graphics/pokemon/dialga/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Dialga_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Dialga[] = {sPkAnim_Dialga_1};
+static const union AnimCmd *const sPkAnims_Dialga[] = {sAnim_GeneralFrame0, sPkAnim_Dialga_1};
 static const u32 sPkFrontPic_Palkia[] = INCGFX_U32("graphics/pokemon/palkia/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Palkia[] = INCGFX_U32("graphics/pokemon/palkia/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Palkia[] = INCGFX_U32("graphics/pokemon/palkia/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Palkia[] = INCGFX_U32("graphics/pokemon/palkia/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Palkia_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Palkia[] = {sPkAnim_Palkia_1};
+static const union AnimCmd *const sPkAnims_Palkia[] = {sAnim_GeneralFrame0, sPkAnim_Palkia_1};
 static const u32 sPkFrontPic_Heatran[] = INCGFX_U32("graphics/pokemon/heatran/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Heatran[] = INCGFX_U32("graphics/pokemon/heatran/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Heatran[] = INCGFX_U32("graphics/pokemon/heatran/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Heatran[] = INCGFX_U32("graphics/pokemon/heatran/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Heatran_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Heatran[] = {sPkAnim_Heatran_1};
+static const union AnimCmd *const sPkAnims_Heatran[] = {sAnim_GeneralFrame0, sPkAnim_Heatran_1};
 static const u32 sPkFrontPic_Regigigas[] = INCGFX_U32("graphics/pokemon/regigigas/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Regigigas[] = INCGFX_U32("graphics/pokemon/regigigas/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Regigigas[] = INCGFX_U32("graphics/pokemon/regigigas/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Regigigas[] = INCGFX_U32("graphics/pokemon/regigigas/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Regigigas_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Regigigas[] = {sPkAnim_Regigigas_1};
+static const union AnimCmd *const sPkAnims_Regigigas[] = {sAnim_GeneralFrame0, sPkAnim_Regigigas_1};
 static const u32 sPkFrontPic_Giratina[] = INCGFX_U32("graphics/pokemon/giratina/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Giratina[] = INCGFX_U32("graphics/pokemon/giratina/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Giratina[] = INCGFX_U32("graphics/pokemon/giratina/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Giratina[] = INCGFX_U32("graphics/pokemon/giratina/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Giratina_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Giratina[] = {sPkAnim_Giratina_1};
+static const union AnimCmd *const sPkAnims_Giratina[] = {sAnim_GeneralFrame0, sPkAnim_Giratina_1};
 static const u32 sPkFrontPic_Cresselia[] = INCGFX_U32("graphics/pokemon/cresselia/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Cresselia[] = INCGFX_U32("graphics/pokemon/cresselia/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Cresselia[] = INCGFX_U32("graphics/pokemon/cresselia/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Cresselia[] = INCGFX_U32("graphics/pokemon/cresselia/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Cresselia_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Cresselia[] = {sPkAnim_Cresselia_1};
+static const union AnimCmd *const sPkAnims_Cresselia[] = {sAnim_GeneralFrame0, sPkAnim_Cresselia_1};
 static const u32 sPkFrontPic_Phione[] = INCGFX_U32("graphics/pokemon/phione/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Phione[] = INCGFX_U32("graphics/pokemon/phione/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Phione[] = INCGFX_U32("graphics/pokemon/phione/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Phione[] = INCGFX_U32("graphics/pokemon/phione/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Phione_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Phione[] = {sPkAnim_Phione_1};
+static const union AnimCmd *const sPkAnims_Phione[] = {sAnim_GeneralFrame0, sPkAnim_Phione_1};
 static const u32 sPkFrontPic_Manaphy[] = INCGFX_U32("graphics/pokemon/manaphy/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Manaphy[] = INCGFX_U32("graphics/pokemon/manaphy/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Manaphy[] = INCGFX_U32("graphics/pokemon/manaphy/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Manaphy[] = INCGFX_U32("graphics/pokemon/manaphy/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Manaphy_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Manaphy[] = {sPkAnim_Manaphy_1};
+static const union AnimCmd *const sPkAnims_Manaphy[] = {sAnim_GeneralFrame0, sPkAnim_Manaphy_1};
 static const u32 sPkFrontPic_Darkrai[] = INCGFX_U32("graphics/pokemon/darkrai/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Darkrai[] = INCGFX_U32("graphics/pokemon/darkrai/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Darkrai[] = INCGFX_U32("graphics/pokemon/darkrai/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Darkrai[] = INCGFX_U32("graphics/pokemon/darkrai/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Darkrai_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Darkrai[] = {sPkAnim_Darkrai_1};
+static const union AnimCmd *const sPkAnims_Darkrai[] = {sAnim_GeneralFrame0, sPkAnim_Darkrai_1};
 static const u32 sPkFrontPic_Shaymin[] = INCGFX_U32("graphics/pokemon/shaymin/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Shaymin[] = INCGFX_U32("graphics/pokemon/shaymin/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Shaymin[] = INCGFX_U32("graphics/pokemon/shaymin/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Shaymin[] = INCGFX_U32("graphics/pokemon/shaymin/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Shaymin_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Shaymin[] = {sPkAnim_Shaymin_1};
+static const union AnimCmd *const sPkAnims_Shaymin[] = {sAnim_GeneralFrame0, sPkAnim_Shaymin_1};
 static const u32 sPkFrontPic_Arceus[] = INCGFX_U32("graphics/pokemon/victini/anim_front.png", ".4bpp.lz");
 static const u32 sPkBackPic_Arceus[] = INCGFX_U32("graphics/pokemon/victini/back.png", ".4bpp.lz");
 static const u32 sPkPalette_Arceus[] = INCGFX_U32("graphics/pokemon/victini/normal.pal", ".gbapal.lz");
 static const u32 sPkShinyPalette_Arceus[] = INCGFX_U32("graphics/pokemon/victini/shiny.pal", ".gbapal.lz");
 static const union AnimCmd sPkAnim_Arceus_1[] =
 {
+    ANIMCMD_FRAME(0, 30),
+    ANIMCMD_FRAME(1, 30),
+    ANIMCMD_FRAME(0, 1),
     ANIMCMD_END,
 };
-static const union AnimCmd *const sPkAnims_Arceus[] = {sPkAnim_Arceus_1};
+static const union AnimCmd *const sPkAnims_Arceus[] = {sAnim_GeneralFrame0, sPkAnim_Arceus_1};
 #define GEN4_PK_FRONT \
     SPECIES_SPRITE(TURTWIG, sPkFrontPic_Turtwig), \
     SPECIES_SPRITE(GROTLE, sPkFrontPic_Grotle), \

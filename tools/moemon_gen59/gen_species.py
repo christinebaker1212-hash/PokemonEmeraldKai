@@ -651,9 +651,12 @@ def main():
             c, e['backPicSize'][0], e['backPicSize'][1], e.get('backPicYOffset', 0)))
         if e.get('enemyMonElevation'):
             tabs['pk_elev'].append('    [%s] = %d,' % (c, e['enemyMonElevation']))
+        # (the battle starts anim 1, the front picture's two frames; without frames listed, the usual 0-1-0; anim 0
+        # is the still frame: a one-entry list had the battle reading past it, OPTIONS > CREATURES POKeMON crashed)
+        frames = e['frontAnimFrames'] or [(0, 30), (1, 30), (0, 1)]
         pk_defs.append('static const union AnimCmd sPkAnim_%s_1[] =\n{\n%s    ANIMCMD_END,\n};\n'
-                       'static const union AnimCmd *const sPkAnims_%s[] = {sPkAnim_%s_1};\n' % (
-                           cm, ''.join('    ANIMCMD_FRAME(%s, %s),\n' % tuple(f) for f in e['frontAnimFrames']), cm, cm))
+                       'static const union AnimCmd *const sPkAnims_%s[] = {sAnim_GeneralFrame0, sPkAnim_%s_1};\n' % (
+                           cm, ''.join('    ANIMCMD_FRAME(%s, %s),\n' % tuple(f) for f in frames), cm, cm))
         tabs['pk_anims'].append('    [%s] = sPkAnims_%s,' % (c, cm))
         aid = e['frontAnimId'] if e['frontAnimId'] in kai_anims else 'ANIM_V_SQUISH_AND_BOUNCE'
         tabs['pk_animid'].append('    [%s - 1] = %s,' % (c, aid))

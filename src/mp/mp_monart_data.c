@@ -9,6 +9,12 @@
 #define SPECIES_SPRITE(species, sprite) [SPECIES_##species] = {sprite, MON_PIC_SIZE, SPECIES_##species}
 #define SPECIES_PAL(species, pal) [SPECIES_##species] = {pal, SPECIES_##species}
 #define SPECIES_SHINY_PAL(species, pal) [SPECIES_##species] = {pal, SPECIES_##species + SPECIES_SHINY_TAG}
+// the still frame every front animation list starts with (the Gen 4-9 headers use it too)
+static const union AnimCmd sAnim_GeneralFrame0[] =
+{
+    ANIMCMD_FRAME(0, 0),
+    ANIMCMD_END,
+};
 #include "mp_monart_gen4.h"   // Moemon Kai: Gen 4
 #include "mp_monart_gen59.h"   // Moemon Kai: Gen 5-9
 
@@ -4382,11 +4388,6 @@ const u8 gEnemyMonElevation_Pokemon[NUM_SPECIES] =
 };
 
 // front_pic_anims.h (data.c's sAnim_GeneralFrame0 first)
-static const union AnimCmd sAnim_GeneralFrame0[] =
-{
-    ANIMCMD_FRAME(0, 0),
-    ANIMCMD_END,
-};
 static const union AnimCmd sAnim_None_1[] =
 {
     ANIMCMD_FRAME(0, 30),

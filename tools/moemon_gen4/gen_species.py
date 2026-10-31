@@ -410,9 +410,10 @@ def main():
             c, e['backPicSize'][0], e['backPicSize'][1], e.get('backPicYOffset', 0)))
         if e.get('enemyMonElevation'):
             tabs['pk_elev'].append('    [%s] = %d,' % (c, e['enemyMonElevation']))
-        frames = e['frontAnimFrames']
+        # (anim 0 the still frame, anim 1 the two frames: see tools/moemon_gen59/gen_species.py)
+        frames = e['frontAnimFrames'] or [(0, 30), (1, 30), (0, 1)]
         pk_defs.append('static const union AnimCmd sPkAnim_%s_1[] =\n{\n%s    ANIMCMD_END,\n};\n'
-                       'static const union AnimCmd *const sPkAnims_%s[] = {sPkAnim_%s_1};\n' % (
+                       'static const union AnimCmd *const sPkAnims_%s[] = {sAnim_GeneralFrame0, sPkAnim_%s_1};\n' % (
                            cm, ''.join('    ANIMCMD_FRAME(%s, %s),\n' % tuple(fr) for fr in frames), cm, cm))
         tabs['pk_anims'].append('    [%s] = sPkAnims_%s,' % (c, cm))
         aid = e['frontAnimId'] if e['frontAnimId'] in kai_anims else 'ANIM_V_SQUISH_AND_BOUNCE'
