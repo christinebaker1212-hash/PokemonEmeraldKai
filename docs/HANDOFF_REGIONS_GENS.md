@@ -142,3 +142,7 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
    every Moemon must have an equivalent POKeMON battle sprite. The user switched from Moemon appearance to POKeMON
    appearance and a battle showed nothing at all, and the game locked up. Check every species' front / back picture
    in that mode (Gens 4-9 especially, the forms, MEGA / gimmick pictures) and that a missing one can't freeze a battle.
+12. AFTER EVERYTHING ABOVE (the user, in this order of asking): Pokemon Stadium nickname colors (mp_hue.c) for every
+   new Pokemon (Gens 4-9); the modern Gen 4-9 cries sourced and added with a GBA sound filter pass; a token icon for
+   Yu-Gi-Oh! tokens (ids past YGO_CARD_COUNT); SEALED (past the GENERATION) Pokemon marked with an icon and/or tint in
+   the party, PC and summary.
