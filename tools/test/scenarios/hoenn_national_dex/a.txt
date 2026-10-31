@@ -1,0 +1,11 @@
+pressuntil A field 5000
+wait 60
+mp clearflag 0x8E4
+mp startmenu
+mp regionreload
+mp setflag 0x8E4
+mp startmenu
+mp regionreload
+mp startmenu
+mp dexcount
+quit

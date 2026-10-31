@@ -1,0 +1,7 @@
+# HOENN's POKeDEX comes with the NATIONAL DEX (as JOHTO's and KANTO's do; it shows the GENERATION's POKeMON). A save
+# that got BIRCH's POKeDEX without it (before 1.61.4) gets it when loaded; one with no POKeDEX from BIRCH doesn't
+MODE=1
+GEN=3
+TMO=60
+EXPECT_A=("national 0" "region: the NATIONAL DEX for this save's POKeDEX" "national 1" "dexcount size 386")
+UNEXPECT_A=("[crash]")

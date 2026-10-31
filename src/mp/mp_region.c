@@ -390,6 +390,18 @@ static void MoveQuetzalSystemFlags(void)
     }
 }
 
+// HOENN's POKeDEX comes with the NATIONAL DEX (1.61.4: before, only after HOENN's League); saves that got BIRCH's
+// POKeDEX without it get it on loading (it shows the GENERATION's POKeMON: MP_Gen_DexCount). JOHTO / KANTO give theirs
+// in their own scripts.
+static void GiveNationalDex(void)
+{
+    if (FlagGet(FLAG_RECEIVED_POKEDEX_FROM_BIRCH) && !IsNationalPokedexEnabled())
+    {
+        EnableNationalPokedex();
+        MPNet_Log("region: the NATIONAL DEX for this save's POKeDEX");
+    }
+}
+
 void MP_Region_LoadFromSave(void)
 {
     char path[600];
@@ -415,12 +427,14 @@ void MP_Region_LoadFromSave(void)
                 }
             MoveQuetzalSystemFlags();
             MP_SaveFix_Migrate(sSaveFormat);
+            GiveNationalDex();
             return;
         }
     }
     MP_Region_NewGame();
     MPNet_Log("region: no side file for this save (Johto / Kanto progress starts empty)");
     MP_SaveFix_Migrate(0);   // 1.59.x and before
+    GiveNationalDex();
 }
 
 // ---------------------------------------------------------------------------------------------------- progress

@@ -151,6 +151,7 @@ void MP_QuickStart_Apply(void)
     // Back at the lab: the POKéDEX and 5 POKé BALLS
     FlagSet(FLAG_SYS_POKEDEX_GET);
     SetUnlockedPokedexFlags();
+    EnableNationalPokedex();   // (with the POKeDEX, as BIRCH's lab gives it)
     FlagSet(FLAG_RECEIVED_POKEDEX_FROM_BIRCH);
     VarSet(VAR_CABLE_CLUB_TUTORIAL_STATE, 1);
     AddBagItem(ITEM_POKE_BALL, 5);
