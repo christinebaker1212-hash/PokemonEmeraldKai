@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "arcade.h"   // Moemon Kai: the GAME CENTER's arcade boards
 #include "mp_region.h"
 #include "field_control_avatar.h"
 #include "battle_gen4.h"
@@ -987,6 +988,34 @@ void MP_TestCommand(const char *cmd, const char *arg)
         extern u8 gMpTestMusicLock;
         gMpTestMusicLock = atoi(arg) != 0;
         printf("[test] musiclock %d\n", gMpTestMusicLock);
+    }
+    else if (strcmp(cmd, "arcade") == 0)
+    {
+        // arcade GAME FRAMES - Moemon Kai: open the GAME CENTER's arcade board GAME (include/arcade.h) from the player's
+        // set (MOEMON_ARCADE_DIR in tests), run it FRAMES frames (a coin and START along the way) and say what it did
+        int game = 0, frames = 0, f;
+        long pairs = 0;
+        static int16_t sAudio[8192];
+        sscanf(arg, "%d %d", &game, &frames);
+        if (!Arcade_Open(game))
+        {
+            printf("[test] arcade %d: no board\n", game);
+            return;
+        }
+        for (f = 1; f <= frames; f++)
+        {
+            Arcade_Frame(f > 600 && f < 620 ? ARCADE_COIN : f > 700 && f < 710 ? ARCADE_START : 0, 0);
+            pairs += Arcade_TakeAudio(sAudio, 4096);
+        }
+        {
+            const uint32_t *pic = Arcade_Picture();
+            uint32_t lit = 0, i;
+            for (i = 0; i < ARCADE_WIDTH * ARCADE_HEIGHT; i++)
+                lit += (pic[i] & 0xFFFFFF) != 0;
+            printf("[test] arcade %d (%s): %d frames, %ld sound pairs at %d Hz, %u lit pixels, ram hash %08x\n", game,
+                   Arcade_Title(game), frames, pairs, Arcade_SampleRate(), lit, Arcade_Hash());
+        }
+        Arcade_Close();
     }
     else if (strcmp(cmd, "bgm") == 0)
     {

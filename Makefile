@@ -422,6 +422,21 @@ ifeq ($(PORTABLE),1)
   OBJS += $(EDO_OBJS)
 endif
 
+# Moemon Kai: the GAME CENTER's arcade boards (arcade/: cps2recomp's CPS-2 machine, GPL-3.0, its 68000 interpreted;
+# the games come from each player's own ROM sets at run time, include/arcade.h)
+ifeq ($(PORTABLE),1)
+  ARCADE_RUNTIME := game spare no_blocks no_game no_z80_blocks recomp recomp_z80
+  ARCADE_SRCS := arcade/arcade_cps2.cpp $(wildcard arcade/cps2recomp/machine/*.cpp) \
+                 $(wildcard arcade/cps2recomp/video/*.cpp) $(wildcard arcade/cps2recomp/sound/*.cpp) \
+                 $(ARCADE_RUNTIME:%=arcade/cps2recomp/runtime/%.cpp) arcade/cps2recomp/recomp-common/settings.cpp
+  ARCADE_OBJS := $(patsubst %,$(OBJ_DIR)/%.o,$(ARCADE_SRCS))
+  ARCADE_CXXFLAGS := -std=c++20 -O2 -m$(BIT_WIDTH) -w -iquote include -iquote arcade -iquote arcade/cps2recomp/machine -iquote arcade/cps2recomp/runtime -Ifight/third_party/zlib
+  ifeq ($(TARGET_OS),WINDOWS)
+    ARCADE_CXXFLAGS += -DNOMINMAX
+  endif
+  OBJS += $(ARCADE_OBJS)
+endif
+
 OBJS_REL := $(patsubst $(OBJ_DIR)/%,%,$(OBJS))
 
 SUBDIRS  := $(sort $(dir $(OBJS)))
@@ -567,6 +582,13 @@ $(OBJ_DIR)/edopro/%.c.o: edopro/%.c
 	@$(EDO_CXX) $(EDO_CXXFLAGS) -x c++ -MMD -MP -c $< -o $@
 
 -include $(EDO_OBJS:.o=.d)
+
+# Moemon Kai: the arcade boards' objects (ARCADE_OBJS)
+$(OBJ_DIR)/arcade/%.cpp.o: arcade/%.cpp
+	@echo "$(EDO_CXX) <arcade flags> -o $@ $<"
+	@$(EDO_CXX) $(ARCADE_CXXFLAGS) -MMD -MP -c $< -o $@
+
+-include $(ARCADE_OBJS:.o=.d)
 
 $(C_BUILDDIR)/%.d: $(C_SUBDIR)/%.c
 	$(SCANINC) -M $@ -g $(ASSETS_DIR_NAME) $(INCLUDE_SCANINC_ARGS) -I tools/agbcc/include $<
