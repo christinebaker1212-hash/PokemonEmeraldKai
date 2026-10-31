@@ -59,7 +59,7 @@ Kanto_CeladonCity_DepartmentStore_5F_Mart_841BF60:
 
 Kanto_CeladonCity_DepartmentStore_5F_Text_8445D31::
 	.string "They sell items that change\n"
-	.string "the forms of certain POKéMON.\p"
+	.string "the forms of certain MOéMON.\p"
 	.string "Each item works with specific\n"
 	.string "species.$"
 

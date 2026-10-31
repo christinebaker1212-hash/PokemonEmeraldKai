@@ -81,7 +81,7 @@ Johto_Route35GoldenrodGate_EventScript_83D0EDB::
 Johto_Route35GoldenrodGate_Text_83D0EE8::
 	.string "Excuse me, kid! Can you do a guy\n"
 	.string "a favor?\p"
-	.string "Can you take this POKéMON with MAIL\n"
+	.string "Can you take this MOéMON with MAIL\n"
 	.string "to my friend?\p"
 	.string "He’s on ROUTE 31.$"
 
@@ -118,11 +118,11 @@ Johto_Route35GoldenrodGate_Text_83D1140::
 	.string "watered it with a SQUIRTBOTTLE.$"
 
 Johto_Route35GoldenrodGate_Text_83D11CF::
-	.string "I like the POKéMON Lullaby they play\n"
+	.string "I like the MOéMON Lullaby they play\n"
 	.string "on the radio.$"
 
 Johto_Route35GoldenrodGate_Text_83D1202::
-	.string "I wonder how many kinds of POKéMON\n"
+	.string "I wonder how many kinds of MOéMON\n"
 	.string "there are in the world.\p"
 	.string "Three years ago, PROF.OAK said that\n"
 	.string "there were 150 different kinds.\p"

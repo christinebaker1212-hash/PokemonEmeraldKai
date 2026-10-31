@@ -158,7 +158,7 @@ Kanto_SilphCo_6F_Text_84266B4::
 
 Kanto_SilphCo_6F_Text_84266F3::
 	.string "TEAM ROCKET is trying to conquer\n"
-	.string "the world with POKéMON.$"
+	.string "the world with MOéMON.$"
 
 Kanto_SilphCo_6F_Text_842672C::
 	.string "TEAM ROCKET ran away, and it’s all\n"
@@ -166,7 +166,7 @@ Kanto_SilphCo_6F_Text_842672C::
 
 Kanto_SilphCo_6F_Text_842675F::
 	.string "They must have targeted SILPH for\n"
-	.string "our POKéMON products.$"
+	.string "our MOéMON products.$"
 
 Kanto_SilphCo_6F_Text_8426797::
 	.string "Come work for SILPH when you\n"

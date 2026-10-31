@@ -198,7 +198,7 @@ Johto_BurnedTowerB1F_Text_83C8BD9::
 	.string "{PLAYER}, I owe this all to you!\p"
 	.string "Thank you!\p"
 	.string "I heard that the legendary\n"
-	.string "POKéMON of ECRUTEAK test\l"
+	.string "MOéMON of ECRUTEAK test\l"
 	.string "chosen humans by allowing them\l"
 	.string "to get close.\p"
 	.string "I’m going to track SUICUNE.\p"

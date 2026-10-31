@@ -50,25 +50,25 @@ Johto_CianwoodPokecenter1F_EventScript_83CB8CC::
 	end
 
 Johto_CianwoodPokecenter1F_Text_83CB5FC::
-	.string "As far as water POKéMON go,\n"
+	.string "As far as water MOéMON go,\n"
 	.string "TENTACOOL is the best by a\l"
 	.string "nautical mile!$"
 
 Johto_CianwoodPokecenter1F_Text_83CB69B::
-	.string "Did you meet the POKéMANIAC?\p"
+	.string "Did you meet the MOéMANIAC?\p"
 	.string "He’s always bragging about his\n"
-	.string "rare POKéMON.$"
+	.string "rare MOéMON.$"
 
 Johto_CianwoodPokecenter1F_Text_83CB706::
-	.string "The POKéMON GYM trainers here are\n"
+	.string "The MOéMON GYM trainers here are\n"
 	.string "macho bullies.\p"
 	.string "If I stick around, they might\n"
 	.string "come after me.\p"
 	.string "Here’s some advice: the GYM LEADER\n"
 	.string "uses the FIGHTING-type.\p"
 	.string "So you should confound him with\n"
-	.string "psychic POKéMON.\p"
-	.string "Wipe out his POKéMON before they\n"
+	.string "psychic MOéMON.\p"
+	.string "Wipe out his MOéMON before they\n"
 	.string "can use their physical strength.\p"
 	.string "And those boulders in the middle\n"
 	.string "of the GYM?\p"
@@ -81,8 +81,8 @@ Johto_CianwoodPokecenter1F_Text_83CB89F::
 	.string "I could tell by looking at you!$"
 
 Johto_CianwoodPokecenter1F_Text_83CB8D9::
-	.string "I love showing off the POKéMON\n"
+	.string "I love showing off the MOéMON\n"
 	.string "that I’ve raised.\p"
 	.string "Don’t you?\p"
 	.string "I’m going to get into a bunch of\n"
-	.string "battles, and show off my POKéMON!$"
+	.string "battles, and show off my MOéMON!$"

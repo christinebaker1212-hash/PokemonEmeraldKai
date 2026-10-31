@@ -21,12 +21,12 @@ Johto_GoldenrodPPSpeechHouse_EventScript_83D66CA::
 
 Johto_GoldenrodPPSpeechHouse_Text_83D66D7::
 	.string "Once while I was battling, my\n"
-	.string "POKéMON couldn’t make any moves.\p"
+	.string "MOéMON couldn’t make any moves.\p"
 	.string "The POWER POINTS, or PP, of its\n"
 	.string "moves were all gone.$"
 
 Johto_GoldenrodPPSpeechHouse_Text_83D674B::
-	.string "Sometimes, a healthy POKéMON may be\n"
+	.string "Sometimes, a healthy MOéMON may be\n"
 	.string "unable to use its moves.\p"
 	.string "If that happens, heal it at a\n"
-	.string "POKéMON CENTER or use an item.$"
+	.string "MOéMON CENTER or use an item.$"

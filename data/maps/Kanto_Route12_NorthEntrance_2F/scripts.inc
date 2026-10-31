@@ -51,14 +51,14 @@ Kanto_Route12_NorthEntrance_2F_EventScript_841FE8A::
 	end
 
 Kanto_Route12_NorthEntrance_2F_Text_844F283::
-	.string "My POKéMON’s ashes are stored in\n"
-	.string "POKéMON TOWER.\p"
+	.string "My MOéMON’s ashes are stored in\n"
+	.string "MOéMON TOWER.\p"
 	.string "Please take this SHINY STONE.\n"
 	.string "I don’t need it anymore…$"
 
 Kanto_Route12_NorthEntrance_2F_Text_844F2EA::
-	.string "My POKéMON’s ashes are stored in\n"
-	.string "POKéMON TOWER.\p"
+	.string "My MOéMON’s ashes are stored in\n"
+	.string "MOéMON TOWER.\p"
 	.string "Please take this SHINY STONE.\n"
 	.string "I don’t need it anymore…$"
 
@@ -68,8 +68,8 @@ Kanto_Route12_NorthEntrance_2F_Text_844F351::
 
 Kanto_Route12_NorthEntrance_2F_Text_844F381::
 	.string "A SHINY STONE can make certain\n"
-	.string "POKéMON evolve.\p"
-	.string "Please treat your POKéMON with\n"
+	.string "MOéMON evolve.\p"
+	.string "Please treat your MOéMON with\n"
 	.string "kindness.$"
 
 Kanto_Route12_NorthEntrance_2F_Text_844F3D9::
@@ -83,4 +83,4 @@ Kanto_Route12_NorthEntrance_2F_Text_844F3F7::
 Kanto_Route12_NorthEntrance_2F_Text_844F43A::
 	.string "Let’s see what the binoculars have\n"
 	.string "to show…\p"
-	.string "It’s POKéMON TOWER!$"
+	.string "It’s MOéMON TOWER!$"

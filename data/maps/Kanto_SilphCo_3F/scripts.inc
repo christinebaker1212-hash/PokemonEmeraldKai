@@ -92,7 +92,7 @@ Kanto_SilphCo_3F_Text_8425F8E::
 
 Kanto_SilphCo_3F_Text_8425FB4::
 	.string "{PLAYER}!\n"
-	.string "You and your POKéMON saved us!$"
+	.string "You and your MOéMON saved us!$"
 
 Kanto_SilphCo_3F_Text_8425FD7::
 	.string "Quit messing with us, kid!$"
@@ -114,7 +114,7 @@ Kanto_SilphCo_3F_Text_842605E::
 Kanto_SilphCo_3F_Text_8426071::
 	.string "Humph…\p"
 	.string "TEAM ROCKET said that if I helped\n"
-	.string "them, they’d let me study POKéMON.$"
+	.string "them, they’d let me study MOéMON.$"
 
 Kanto_SilphCo_3F_Text_84260BD::
 	.string "SILPH CO. HEAD OFFICE\n"

@@ -13,10 +13,10 @@ Johto_Route26HealHouse_EventScript_83EC117::
 	end
 
 Johto_Route26HealHouse_Text_83EC131::
-	.string "Your POKéMON look a little tired.\p"
+	.string "Your MOéMON look a little tired.\p"
 	.string "You should rest them a while.$"
 
 Johto_Route26HealHouse_Text_83EC171::
 	.string "There!\p"
-	.string "Your POKéMON are looking good!\p"
+	.string "Your MOéMON are looking good!\p"
 	.string "Keep at it!$"

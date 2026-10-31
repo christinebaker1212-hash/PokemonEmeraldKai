@@ -189,7 +189,7 @@ Kanto_FiveIsland_ResortGorgeous_Text_843A8EA::
 
 Kanto_FiveIsland_ResortGorgeous_Text_843A92E::
 	.string "I’m thinking of having a pool\n"
-	.string "made specially for POKéMON.$"
+	.string "made specially for MOéMON.$"
 
 Kanto_FiveIsland_ResortGorgeous_Text_843A968::
 	.string "Oh, my goodness gracious!$"
@@ -248,7 +248,7 @@ Kanto_FiveIsland_ResortGorgeous_Text_8471156::
 
 Kanto_FiveIsland_ResortGorgeous_Text_8471197::
 	.string "They’re almost finished making the\n"
-	.string "pool for my POKéMON.\p"
+	.string "pool for my MOéMON.\p"
 	.string "You must drop in for a visit.$"
 
 Kanto_FiveIsland_ResortGorgeous_Text_84711ED::

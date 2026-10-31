@@ -38,11 +38,11 @@ Kanto_SaffronCity_House_Text_844BE1E::
 
 Kanto_SaffronCity_House_Text_844BE30::
 	.string "The COPYCAT is cute!\n"
-	.string "I’m getting her a POKé DOLL.$"
+	.string "I’m getting her a MOé DOLL.$"
 
 Kanto_SaffronCity_House_Text_844BE62::
 	.string "I was given a PP UP as a gift.\p"
 	.string "It’s used to increase the PP of\n"
-	.string "a POKéMON’s move.\p"
+	.string "a MOéMON’s move.\p"
 	.string "I should use it on a powerful move\n"
 	.string "with only a few PP.$"

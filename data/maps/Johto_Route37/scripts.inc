@@ -104,7 +104,7 @@ Johto_Route37_Text_83F23A7::
 
 Johto_Route37_Text_83F23CD::
 	.string "ANN: I can tell what my sister and\n"
-	.string "my POKéMON are thinking.$"
+	.string "my MOéMON are thinking.$"
 
 Johto_Route37_Text_83F2409::
 	.string "ANNE: ANN and I are in this\n"
@@ -116,10 +116,10 @@ Johto_Route37_Text_83F242F::
 
 Johto_Route37_Text_83F2455::
 	.string "ANNE: We share the same feelings as\n"
-	.string "our POKéMON.$"
+	.string "our MOéMON.$"
 
 Johto_Route37_Text_83F2486::
-	.string "POKéMON can’t do a thing if they are\n"
+	.string "MOéMON can’t do a thing if they are\n"
 	.string "asleep.\p"
 	.string "I’ll show you how scary that is!$"
 
@@ -127,7 +127,7 @@ Johto_Route37_Text_83F24D4::
 	.string "I lost. That’s pretty sad…$"
 
 Johto_Route37_Text_83F24EF::
-	.string "Putting POKéMON to sleep or paralyz-\n"
+	.string "Putting MOéMON to sleep or paralyz-\n"
 	.string "ing them are good battle techniques.$"
 
 Johto_Route37_Text_83F2539::
@@ -146,7 +146,7 @@ Johto_Route37_Text_83F25F3::
 	.string "… What was it now…\p"
 	.string "…\p"
 	.string "Oh! I remember now!\p"
-	.string "A POKéMON that knows electric\n"
+	.string "A MOéMON that knows electric\n"
 	.string "moves should hold it.\p"
 	.string "My sis MONICA said it powers up\n"
 	.string "electric moves!$"

@@ -148,11 +148,11 @@ Kanto_SaffronCity_Gym_Text_844B5E0::
 	.string "People just don’t realize it.$"
 
 Kanto_SaffronCity_Gym_Text_844B655::
-	.string "The MARSHBADGE makes POKéMON up\n"
+	.string "The MARSHBADGE makes MOéMON up\n"
 	.string "to Lv. 70 obey you.\p"
-	.string "Stronger POKéMON will become wild,\n"
+	.string "Stronger MOéMON will become wild,\n"
 	.string "ignoring your orders in battle.\p"
-	.string "Just don’t raise your POKéMON too\n"
+	.string "Just don’t raise your MOéMON too\n"
 	.string "much to avoid that problem.\p"
 	.string "Please take this gift, too.$"
 
@@ -163,7 +163,7 @@ Kanto_SaffronCity_Gym_Text_844B726::
 Kanto_SaffronCity_Gym_Text_844B736::
 	.string "It boosts the holder’s Special\n"
 	.string "Attack, but locks it into one move\l"
-	.string "until you switch POKéMON.$"
+	.string "until you switch MOéMON.$"
 
 Kanto_SaffronCity_Gym_Text_844B792::
 	.string "Your BAG is full of other items.$"
@@ -189,12 +189,12 @@ Kanto_SaffronCity_Gym_Text_844B8A0::
 
 Kanto_SaffronCity_Gym_Text_844B8B6::
 	.string "BUG, GHOST, and DARK moves can\n"
-	.string "threaten PSYCHIC POKéMON.$"
+	.string "threaten PSYCHIC MOéMON.$"
 
 Kanto_SaffronCity_Gym_Text_844B8EF::
-	.string "POKéMON take on the appearance of\n"
+	.string "MOéMON take on the appearance of\n"
 	.string "their TRAINERS.\p"
-	.string "Your POKéMON must be tough, then!$"
+	.string "Your MOéMON must be tough, then!$"
 
 Kanto_SaffronCity_Gym_Text_844B943::
 	.string "I knew it!$"
@@ -202,12 +202,12 @@ Kanto_SaffronCity_Gym_Text_844B943::
 Kanto_SaffronCity_Gym_Text_844B94E::
 	.string "I have much to learn still…\p"
 	.string "I must master PSYCHIC and teach it\n"
-	.string "to my POKéMON…$"
+	.string "to my MOéMON…$"
 
 Kanto_SaffronCity_Gym_Text_844B99C::
 	.string "You understand, don’t you?\p"
 	.string "That power alone isn’t enough to\n"
-	.string "win in the world of POKéMON?$"
+	.string "win in the world of MOéMON?$"
 
 Kanto_SaffronCity_Gym_Text_844B9F5::
 	.string "I don’t believe this!$"
@@ -217,7 +217,7 @@ Kanto_SaffronCity_Gym_Text_844BA0B::
 	.string "MASTER next door.$"
 
 Kanto_SaffronCity_Gym_Text_844BA3F::
-	.string "You and I, our POKéMON shall\n"
+	.string "You and I, our MOéMON shall\n"
 	.string "battle!$"
 
 Kanto_SaffronCity_Gym_Text_844BA64::
@@ -237,7 +237,7 @@ Kanto_SaffronCity_Gym_Text_844BAF8::
 	.string "Down and out!$"
 
 Kanto_SaffronCity_Gym_Text_844BB0A::
-	.string "There used to be two POKéMON GYMS\n"
+	.string "There used to be two MOéMON GYMS\n"
 	.string "in SAFFRON.\p"
 	.string "The FIGHTING DOJO next door lost\n"
 	.string "its GYM status, though.\p"
@@ -245,7 +245,7 @@ Kanto_SaffronCity_Gym_Text_844BB0A::
 	.string "decided to have just one GYM.$"
 
 Kanto_SaffronCity_Gym_Text_844BBAE::
-	.string "SAFFRON POKéMON GYM is famous for\n"
+	.string "SAFFRON MOéMON GYM is famous for\n"
 	.string "training psychics.\p"
 	.string "You want to see SABRINA, don’t\n"
 	.string "you? I can tell!$"
@@ -260,10 +260,10 @@ Kanto_SaffronCity_Gym_Text_844BC1B::
 Kanto_SaffronCity_Gym_Text_844BC4D::
 	.string "Yo!\n"
 	.string "Champ in the making!\p"
-	.string "SABRINA’s POKéMON use psychic\n"
+	.string "SABRINA’s MOéMON use psychic\n"
 	.string "power instead of force.\p"
-	.string "FIGHTING POKéMON are especially\n"
-	.string "weak against PSYCHIC POKéMON.\p"
+	.string "FIGHTING MOéMON are especially\n"
+	.string "weak against PSYCHIC MOéMON.\p"
 	.string "They’ll get destroyed before they\n"
 	.string "can even aim a punch!$"
 
@@ -273,13 +273,13 @@ Kanto_SaffronCity_Gym_Text_844BD12::
 	.string "at the slots!$"
 
 Kanto_SaffronCity_Gym_Text_844BD55::
-	.string "SAFFRON POKéMON GYM\n"
+	.string "SAFFRON MOéMON GYM\n"
 	.string "LEADER: SABRINA\p"
 	.string "WINNING TRAINERS:\n"
 	.string "BLUE$"
 
 Kanto_SaffronCity_Gym_Text_844BD90::
-	.string "SAFFRON POKéMON GYM\n"
+	.string "SAFFRON MOéMON GYM\n"
 	.string "LEADER: SABRINA\p"
 	.string "WINNING TRAINERS:\n"
 	.string "BLUE, {PLAYER}$"

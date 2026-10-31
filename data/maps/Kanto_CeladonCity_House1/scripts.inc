@@ -24,7 +24,7 @@ Kanto_CeladonCity_House1_Text_8447BDD::
 Kanto_CeladonCity_House1_Text_8447C11::
 	.string "CHIEF!\p"
 	.string "We just shipped two thousand\n"
-	.string "more POKéMON as slot prizes\l"
+	.string "more MOéMON as slot prizes\l"
 	.string "again today!$"
 
 Kanto_CeladonCity_House1_Text_8447C5E::

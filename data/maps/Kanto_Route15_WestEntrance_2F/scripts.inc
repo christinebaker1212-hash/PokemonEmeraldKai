@@ -60,18 +60,18 @@ Kanto_Route15_WestEntrance_2F_EventScript_84201B7::
 Kanto_Route15_WestEntrance_2F_Text_844FA45::
 	.string "Hi! Remember me?\n"
 	.string "I’m one of PROF. OAK’s AIDES.\p"
-	.string "If your POKéDEX has complete data\n"
+	.string "If your MOéDEX has complete data\n"
 	.string "on {STR_VAR_1} species, I’m supposed to\l"
 	.string "give you a reward.\p"
 	.string "PROF. OAK entrusted me with the\n"
 	.string "{STR_VAR_2} for you.\p"
 	.string "So, {PLAYER}, let me ask you.\p"
 	.string "Have you gathered data on at least\n"
-	.string "{STR_VAR_1} kinds of POKéMON?$"
+	.string "{STR_VAR_1} kinds of MOéMON?$"
 
 Kanto_Route15_WestEntrance_2F_Text_844FB44::
 	.string "Great! You have caught or owned\n"
-	.string "{STR_VAR_3} kinds of POKéMON!\p"
+	.string "{STR_VAR_3} kinds of MOéMON!\p"
 	.string "Congratulations!\n"
 	.string "Here you go!$"
 
@@ -80,7 +80,7 @@ Kanto_Route15_WestEntrance_2F_Text_844FB97::
 	.string "from the AIDE.$"
 
 Kanto_Route15_WestEntrance_2F_Text_844FBB9::
-	.string "A POKéMON holding this item gains\n"
+	.string "A MOéMON holding this item gains\n"
 	.string "extra EXP. Points in battle.$"
 
 Kanto_Route15_WestEntrance_2F_Text_844FBF8::

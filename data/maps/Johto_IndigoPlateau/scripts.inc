@@ -17,4 +17,4 @@ Johto_IndigoPlateau_EventScript_83DCE19::
 Johto_IndigoPlateau_Text_83DCE22::
 	.string "INDIGO PLATEAU\p"
 	.string "The Ultimate Goal for Trainers!\p"
-	.string "POKéMON LEAGUE HQ$"
+	.string "MOéMON LEAGUE HQ$"

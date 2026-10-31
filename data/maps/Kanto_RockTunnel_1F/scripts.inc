@@ -97,7 +97,7 @@ Kanto_RockTunnel_1F_Text_8429AD1::
 	.string "Which way is out?$"
 
 Kanto_RockTunnel_1F_Text_8429AFD::
-	.string "That sleeping POKéMON on ROUTE 12\n"
+	.string "That sleeping MOéMON on ROUTE 12\n"
 	.string "forced me to take this detour.$"
 
 Kanto_RockTunnel_1F_Text_8429B3E::
@@ -111,7 +111,7 @@ Kanto_RockTunnel_1F_Text_8429B77::
 	.string "You’re talented enough to hike!$"
 
 Kanto_RockTunnel_1F_Text_8429B97::
-	.string "POKéMON fight!\n"
+	.string "MOéMON fight!\n"
 	.string "Ready, go!$"
 
 Kanto_RockTunnel_1F_Text_8429BB1::
@@ -133,17 +133,17 @@ Kanto_RockTunnel_1F_Text_8429C1B::
 
 Kanto_RockTunnel_1F_Text_8429C3A::
 	.string "I came this far looking for wild\n"
-	.string "POKéMON.$"
+	.string "MOéMON.$"
 
 Kanto_RockTunnel_1F_Text_8429C64::
-	.string "I’m out of POKéMON!$"
+	.string "I’m out of MOéMON!$"
 
 Kanto_RockTunnel_1F_Text_8429C78::
 	.string "You looked cute and harmless.\n"
 	.string "Was I ever wrong!$"
 
 Kanto_RockTunnel_1F_Text_8429CA8::
-	.string "You have POKéMON!\n"
+	.string "You have MOéMON!\n"
 	.string "Let’s start!$"
 
 Kanto_RockTunnel_1F_Text_8429CC7::

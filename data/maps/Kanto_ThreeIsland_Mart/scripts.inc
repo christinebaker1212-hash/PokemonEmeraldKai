@@ -36,12 +36,12 @@ Kanto_ThreeIsland_Mart_Text_84536AC::
 
 Kanto_ThreeIsland_Mart_Text_84536F4::
 	.string "I sometimes buy medicine here.\p"
-	.string "But a lot of people heal POKéMON\n"
+	.string "But a lot of people heal MOéMON\n"
 	.string "with BERRIES from BERRY FOREST.\p"
 	.string "After all, BERRIES are free and\n"
 	.string "they never run out.$"
 
 Kanto_ThreeIsland_Mart_Text_8453788::
 	.string "Those BIKERS were about to trash\n"
-	.string "this POKéMON MART.\p"
+	.string "this MOéMON MART.\p"
 	.string "Am I glad they decided to leave!$"

@@ -46,7 +46,7 @@ Johto_TrainerHillOutside_Text_83FC306::
 
 Johto_TrainerHillOutside_Text_83FC35D::
 	.string "BATTLE TENT: FACTORY\n"
-	.string "’Find it! The ultimate POKéMON!’$"
+	.string "’Find it! The ultimate MOéMON!’$"
 
 Johto_TrainerHillOutside_Text_83FC393::
 	.string "BATTLE TENT: PALACE\n"

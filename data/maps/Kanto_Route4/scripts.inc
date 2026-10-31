@@ -60,11 +60,11 @@ Kanto_Route4_EventScript_8471C81::
 
 Kanto_Route4_Text_8433B9E::
 	.string "Ouch! I tripped over a rocky\n"
-	.string "POKéMON, GEODUDE!$"
+	.string "MOéMON, GEODUDE!$"
 
 Kanto_Route4_Text_8433BCD::
 	.string "I came to MT. MOON in search of\n"
-	.string "mushroom POKéMON.$"
+	.string "mushroom MOéMON.$"
 
 Kanto_Route4_Text_8433BFF::
 	.string "After all I did to catch them!$"
@@ -91,5 +91,5 @@ Kanto_Route4_Text_8433FED::
 	.string "like him.$"
 
 Kanto_Route4_Text_846EAB5::
-	.string "I always catch mushroom POKéMON\n"
+	.string "I always catch mushroom MOéMON\n"
 	.string "on MT. MOON.$"

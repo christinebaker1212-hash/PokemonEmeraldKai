@@ -122,36 +122,36 @@ Kanto_ViridianCity_School_Text_843FFC1::
 	.string "Let’s check out the notebook.\p"
 	.string "First page…\p"
 	.string "POKé BALLS are used to catch\n"
-	.string "POKéMON.\p"
-	.string "Up to six POKéMON can be carried\n"
+	.string "MOéMON.\p"
+	.string "Up to six MOéMON can be carried\n"
 	.string "in your party.\p"
 	.string "People who raise and battle\n"
-	.string "with POKéMON are called TRAINERS.$"
+	.string "with MOéMON are called TRAINERS.$"
 
 Kanto_ViridianCity_School_Text_844007F::
 	.string "Second page…\p"
-	.string "A healthy POKéMON may be hard to\n"
+	.string "A healthy MOéMON may be hard to\n"
 	.string "catch, so weaken it first.\p"
 	.string "Poison, burn, or cause another\n"
 	.string "status problem to weaken it.$"
 
 Kanto_ViridianCity_School_Text_8440104::
 	.string "Third page…\p"
-	.string "POKéMON TRAINERS seek others to\n"
-	.string "engage in POKéMON battles.\p"
+	.string "MOéMON TRAINERS seek others to\n"
+	.string "engage in MOéMON battles.\p"
 	.string "To TRAINERS, the taste of victory\n"
 	.string "is sweet, indeed.\p"
 	.string "Battles are constantly waged at\n"
-	.string "POKéMON GYMS everywhere.$"
+	.string "MOéMON GYMS everywhere.$"
 
 Kanto_ViridianCity_School_Text_84401B8::
 	.string "Fourth page…\p"
-	.string "The ultimate goal for all POKéMON\n"
+	.string "The ultimate goal for all MOéMON\n"
 	.string "TRAINERS is simple.\p"
 	.string "It is to defeat the top eight\n"
-	.string "POKéMON GYM LEADERS.\p"
+	.string "MOéMON GYM LEADERS.\p"
 	.string "Do so to earn the right to face…\p"
-	.string "The ELITE FOUR of the POKéMON\n"
+	.string "The ELITE FOUR of the MOéMON\n"
 	.string "LEAGUE!$"
 
 Kanto_ViridianCity_School_Text_8440275::
@@ -162,16 +162,16 @@ Kanto_ViridianCity_School_Text_8440284::
 	.string "Don’t look at my notes!$"
 
 Kanto_ViridianCity_School_Text_84402A7::
-	.string "The blackboard lists POKéMON\n"
+	.string "The blackboard lists MOéMON\n"
 	.string "STATUS problems during battles.$"
 
 Kanto_ViridianCity_School_Text_84402E4::
 	.string "Which topic do you want to read?$"
 
 Kanto_ViridianCity_School_Text_8440305::
-	.string "A POKéMON can’t attack if it’s\n"
+	.string "A MOéMON can’t attack if it’s\n"
 	.string "asleep.\p"
-	.string "POKéMON will stay asleep even\n"
+	.string "MOéMON will stay asleep even\n"
 	.string "after battles.\p"
 	.string "Use AWAKENING to awaken one\n"
 	.string "from sleep.$"
@@ -183,28 +183,28 @@ Kanto_ViridianCity_School_Text_8440381::
 	.string "Use BURN HEAL to cure a burn.$"
 
 Kanto_ViridianCity_School_Text_84403FB::
-	.string "When poisoned, a POKéMON’s health\n"
+	.string "When poisoned, a MOéMON’s health\n"
 	.string "steadily drops.\p"
 	.string "Poison lingers after battles.\n"
 	.string "Use an ANTIDOTE to cure poison!$"
 
 Kanto_ViridianCity_School_Text_844046B::
-	.string "A frozen POKéMON becomes\n"
+	.string "A frozen MOéMON becomes\n"
 	.string "helplessly immobile.\p"
 	.string "It stays frozen even after the\n"
 	.string "battle ends.\p"
 	.string "Use ICE HEAL to thaw out the\n"
-	.string "suffering POKéMON.$"
+	.string "suffering MOéMON.$"
 
 Kanto_ViridianCity_School_Text_84404F5::
 	.string "Paralysis reduces SPEED and may\n"
-	.string "prevent the POKéMON from moving.\p"
+	.string "prevent the MOéMON from moving.\p"
 	.string "Paralysis remains after battles.\n"
 	.string "Use PARLYZ HEAL for treatment.$"
 
 Kanto_ViridianCity_School_Text_8461E90::
-	.string "POKéMON JOURNAL\p"
+	.string "MOéMON JOURNAL\p"
 	.string "Special Feature: PROF. OAK,\n"
-	.string "the POKéMON Researcher!\p"
+	.string "the MOéMON Researcher!\p"
 	.string "PROF. OAK reportedly lives with his\n"
 	.string "grandchildren DAISY and BLUE.$"

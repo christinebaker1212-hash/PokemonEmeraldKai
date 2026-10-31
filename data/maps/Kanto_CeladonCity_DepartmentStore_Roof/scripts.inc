@@ -306,7 +306,7 @@ Kanto_CeladonCity_DepartmentStore_Roof_Text_8445EF7::
 
 Kanto_CeladonCity_DepartmentStore_Roof_Text_8445F1E::
 	.string "A SWEET APPLE can make a certain\n"
-	.string "POKéMON evolve.$"
+	.string "MOéMON evolve.$"
 
 Kanto_CeladonCity_DepartmentStore_Roof_Text_8445F4F::
 	.string "Yay!\p"
@@ -316,7 +316,7 @@ Kanto_CeladonCity_DepartmentStore_Roof_Text_8445F4F::
 
 Kanto_CeladonCity_DepartmentStore_Roof_Text_8445F84::
 	.string "A TART APPLE can make a certain\n"
-	.string "POKéMON evolve.$"
+	.string "MOéMON evolve.$"
 
 Kanto_CeladonCity_DepartmentStore_Roof_Text_8445FB4::
 	.string "Yay!\p"
@@ -326,7 +326,7 @@ Kanto_CeladonCity_DepartmentStore_Roof_Text_8445FB4::
 
 Kanto_CeladonCity_DepartmentStore_Roof_Text_8445FE9::
 	.string "A SYRUPY APPLE can make a certain\n"
-	.string "POKéMON evolve.$"
+	.string "MOéMON evolve.$"
 
 Kanto_CeladonCity_DepartmentStore_Roof_Text_844601B::
 	.string "You don’t have space for this!$"

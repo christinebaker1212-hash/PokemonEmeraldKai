@@ -193,7 +193,7 @@ Kanto_Route19_Text_8437BB3::
 	.string "Belly flop!$"
 
 Kanto_Route19_Text_8437BBF::
-	.string "I can beat even marine POKéMON\n"
+	.string "I can beat even marine MOéMON\n"
 	.string "at swimming.$"
 
 Kanto_Route19_Text_8437BEB::
@@ -207,7 +207,7 @@ Kanto_Route19_Text_8437C0C::
 	.string "yonder!$"
 
 Kanto_Route19_Text_8437C33::
-	.string "I tried diving for POKéMON, but it\n"
+	.string "I tried diving for MOéMON, but it\n"
 	.string "was a no-go.$"
 
 Kanto_Route19_Text_8437C63::
@@ -215,7 +215,7 @@ Kanto_Route19_Text_8437C63::
 
 Kanto_Route19_Text_8437C69::
 	.string "I guess you have to fish for sea\n"
-	.string "POKéMON.$"
+	.string "MOéMON.$"
 
 Kanto_Route19_Text_8437C93::
 	.string "I look at the sea to forget all\n"
@@ -297,11 +297,11 @@ Kanto_Route19_Text_8437F95::
 Kanto_Route19_Text_8437FE9::
 	.string "LIA: I want to battle together\n"
 	.string "with my little brother.\p"
-	.string "Don’t you have two POKéMON?$"
+	.string "Don’t you have two MOéMON?$"
 
 Kanto_Route19_Text_843803C::
 	.string "LUC: My big sis taught me how\n"
-	.string "to swim and train POKéMON.$"
+	.string "to swim and train MOéMON.$"
 
 Kanto_Route19_Text_8438075::
 	.string "LUC: Oh, wow!\n"
@@ -314,7 +314,7 @@ Kanto_Route19_Text_84380A4::
 Kanto_Route19_Text_84380DF::
 	.string "LUC: I don’t want to if I can’t\n"
 	.string "battle you with my big sis.\p"
-	.string "Don’t you have two POKéMON?$"
+	.string "Don’t you have two MOéMON?$"
 
 Kanto_Route19_Text_8470194::
 	.string "I’m almost warmed up to go\n"
@@ -333,7 +333,7 @@ Kanto_Route19_Text_8470223::
 	.string "Have you seen?$"
 
 Kanto_Route19_Text_847024D::
-	.string "I tried diving for POKéMON again,\n"
+	.string "I tried diving for MOéMON again,\n"
 	.string "but it was a no-go like before.$"
 
 Kanto_Route19_Text_847028F::
@@ -343,7 +343,7 @@ Kanto_Route19_Text_847028F::
 
 Kanto_Route19_Text_84702F0::
 	.string "You always get to ride your\n"
-	.string "POKéMON…\p"
+	.string "MOéMON…\p"
 	.string "It looks so relaxing.\n"
 	.string "Can I have it if I win?$"
 
@@ -368,5 +368,5 @@ Kanto_Route19_Text_84703E7::
 
 Kanto_Route19_Text_8470454::
 	.string "LUC: My big sis taught me all\n"
-	.string "about POKéMON.\p"
+	.string "about MOéMON.\p"
 	.string "I wonder if I’m better?$"

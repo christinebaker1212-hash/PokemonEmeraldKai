@@ -10,7 +10,7 @@ Kanto_SSAnne_1F_Room7_EventScript_84107F8::
 Kanto_SSAnne_1F_Room7_Text_8424207::
 	.string "I am but a solitary traveler…\p"
 	.string "My sole companions and friends are\n"
-	.string "POKéMON I caught on my journeys…$"
+	.string "MOéMON I caught on my journeys…$"
 
 Kanto_SSAnne_1F_Room7_Text_8424269::
 	.string "My, my friends…$"

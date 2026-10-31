@@ -139,7 +139,7 @@ Kanto_Route9_EventScript_846BFE3::
 	end
 
 Kanto_Route9_Text_8434A7E::
-	.string "You have POKéMON with you!\n"
+	.string "You have MOéMON with you!\n"
 	.string "You’re mine!$"
 
 Kanto_Route9_Text_8434AA6::
@@ -153,7 +153,7 @@ Kanto_Route9_Text_8434AB7::
 
 Kanto_Route9_Text_8434B0B::
 	.string "Who’s that walking there with those\n"
-	.string "good-looking POKéMON?$"
+	.string "good-looking MOéMON?$"
 
 Kanto_Route9_Text_8434B45::
 	.string "Out like a light!$"
@@ -189,7 +189,7 @@ Kanto_Route9_Text_8434C25::
 Kanto_Route9_Text_8434C46::
 	.string "Keep it coming, eh!\p"
 	.string "Oh wait.\n"
-	.string "I’m out of POKéMON!$"
+	.string "I’m out of MOéMON!$"
 
 Kanto_Route9_Text_8434C77::
 	.string "You sure had guts standing up to\n"
@@ -208,7 +208,7 @@ Kanto_Route9_Text_8434CD8::
 
 Kanto_Route9_Text_8434CF6::
 	.string "I got up early every day to raise\n"
-	.string "my POKéMON from cocoons!$"
+	.string "my MOéMON from cocoons!$"
 
 Kanto_Route9_Text_8434D31::
 	.string "WHAT?\p"
@@ -231,13 +231,13 @@ Kanto_Route9_Text_8434DB8::
 	.string "Us hearty guys always laugh!$"
 
 Kanto_Route9_Text_8434DDF::
-	.string "Go, my super BUG POKéMON!$"
+	.string "Go, my super BUG MOéMON!$"
 
 Kanto_Route9_Text_8434DF9::
 	.string "My bugs…$"
 
 Kanto_Route9_Text_8434E02::
-	.string "If you don’t like BUG POKéMON,\n"
+	.string "If you don’t like BUG MOéMON,\n"
 	.string "you bug me!$"
 
 Kanto_Route9_Text_8434E2D::
@@ -250,7 +250,7 @@ Kanto_Route9_Text_846EED4::
 
 Kanto_Route9_Text_846EF03::
 	.string "I haven’t forgotten you were with\n"
-	.string "those good-looking POKéMON.$"
+	.string "those good-looking MOéMON.$"
 
 Kanto_Route9_Text_846EF41::
 	.string "I’m taking ROCK TUNNEL to go to\n"
@@ -272,11 +272,11 @@ Kanto_Route9_Text_846F004::
 
 Kanto_Route9_Text_846F029::
 	.string "I got up early every day to train\n"
-	.string "my POKéMON from cocoons!$"
+	.string "my MOéMON from cocoons!$"
 
 Kanto_Route9_Text_846F064::
 	.string "Hahahaha!\n"
 	.string "I’ll win this time!$"
 
 Kanto_Route9_Text_846F082::
-	.string "Go win, my super BUG POKéMON!$"
+	.string "Go win, my super BUG MOéMON!$"

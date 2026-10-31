@@ -63,7 +63,7 @@ Kanto_SSAnne_CaptainsOffice_Text_8423C91::
 	.string "Let me teach you my prized CUT\n"
 	.string "technique.\p"
 	.string "With the CASCADE BADGE, your\n"
-	.string "POKéMON can now cut small trees.\p"
+	.string "MOéMON can now cut small trees.\p"
 	.string "Please take this gift as well!$"
 
 Kanto_SSAnne_CaptainsOffice_Text_8423D4F::
@@ -72,7 +72,7 @@ Kanto_SSAnne_CaptainsOffice_Text_8423D4F::
 
 Kanto_SSAnne_CaptainsOffice_Text_8423D7A::
 	.string "A METAL COAT helps certain\n"
-	.string "POKéMON evolve.\p"
+	.string "MOéMON evolve.\p"
 	.string "And now that you know CUT, try it\n"
 	.string "on the trees around VERMILION!$"
 

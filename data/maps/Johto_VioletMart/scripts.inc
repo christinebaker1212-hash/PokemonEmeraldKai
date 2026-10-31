@@ -31,15 +31,15 @@ Johto_VioletMart_EventScript_83FFC1E::
 	end
 
 Johto_VioletMart_Text_83FFC2B::
-	.string "When you first catch a POKéMON,\n"
+	.string "When you first catch a MOéMON,\n"
 	.string "it may be weak.\p"
 	.string "But it will eventually grow to\n"
 	.string "be strong.\p"
-	.string "It’s important to treat POKéMON\n"
+	.string "It’s important to treat MOéMON\n"
 	.string "with love.$"
 
 Johto_VioletMart_Text_83FFCB0::
-	.string "POKéMON can hold items like\n"
+	.string "MOéMON can hold items like\n"
 	.string "POTION and ANTIDOTE.\p"
 	.string "But they don’t appear to know\n"
 	.string "how to use man-made items.$"

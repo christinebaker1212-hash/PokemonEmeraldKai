@@ -26,7 +26,7 @@ Johto_Route26South_Text_83EBDDA::
 	.string "Gaah! Life is even tougher!$"
 
 Johto_Route26South_Text_83EBDF6::
-	.string "To get to POKéMON LEAGUE, you have\n"
+	.string "To get to MOéMON LEAGUE, you have\n"
 	.string "to get through VICTORY ROAD.\p"
 	.string "But VICTORY ROAD is tough.\p"
 	.string "Practically nobody goes there!$"
@@ -41,6 +41,6 @@ Johto_Route26South_Text_83EC089::
 	.string "Good battle!$"
 
 Johto_Route26South_Text_83EC096::
-	.string "People and POKéMON grow from their\n"
+	.string "People and MOéMON grow from their\n"
 	.string "experiences.\p"
 	.string "Don’t get lazy and complacent.$"

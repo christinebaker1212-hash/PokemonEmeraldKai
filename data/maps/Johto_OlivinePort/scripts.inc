@@ -45,12 +45,12 @@ Johto_OlivinePort_Text_83E6DEB::
 Johto_OlivinePort_Text_83E6E2C::
 	.string "How many RODS do you have?\p"
 	.string "Different RODS catch different\n"
-	.string "POKéMON.$"
+	.string "MOéMON.$"
 
 Johto_OlivinePort_Text_83E6E6F::
 	.string "S.S.AQUA uses jets to skim\n"
 	.string "over the waves!$"
 
 Johto_OlivinePort_Text_83E6E9A::
-	.string "There are lots of POKéMON in KANTO.\p"
+	.string "There are lots of MOéMON in KANTO.\p"
 	.string "I wish I could go…$"

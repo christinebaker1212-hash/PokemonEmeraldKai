@@ -17,7 +17,7 @@ Kanto_Route2_ViridianForest_NorthEntrance_EventScript_841F6AA::
 	end
 
 Kanto_Route2_ViridianForest_NorthEntrance_Text_844DCFE::
-	.string "Many POKéMON live only in forests \n"
+	.string "Many MOéMON live only in forests \n"
 	.string "and caves.\p"
 	.string "You need to be persistent and look\n"
 	.string "everywhere to get different kinds.$"
@@ -26,12 +26,12 @@ Kanto_Route2_ViridianForest_NorthEntrance_Text_844DD72::
 	.string "Have you noticed the skinny trees\n"
 	.string "on the roadside?\p"
 	.string "They can be cut down by a special\n"
-	.string "POKéMON move, I hear.$"
+	.string "MOéMON move, I hear.$"
 
 Kanto_Route2_ViridianForest_NorthEntrance_Text_844DDDD::
 	.string "Do you know the evolution-cancel\n"
 	.string "technique?\p"
-	.string "When a POKéMON is evolving, you\n"
+	.string "When a MOéMON is evolving, you\n"
 	.string "can stop the process.\p"
 	.string "It’s a technique for raising\n"
-	.string "POKéMON the way they are.$"
+	.string "MOéMON the way they are.$"

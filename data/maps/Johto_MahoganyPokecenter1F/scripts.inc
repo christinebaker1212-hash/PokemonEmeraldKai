@@ -28,13 +28,13 @@ Johto_MahoganyPokecenter1F_Text_83DF162::
 	.string "RAGE…$"
 
 Johto_MahoganyPokecenter1F_Text_83DF1B3::
-	.string "I stop my POKéMON from evolving too\n"
+	.string "I stop my MOéMON from evolving too\n"
 	.string "early.\p"
 	.string "I make them learn certain moves\n"
 	.string "before I let them evolve.$"
 
 Johto_MahoganyPokecenter1F_Text_83DF218::
-	.string "POKéMON do become stronger when they\n"
+	.string "MOéMON do become stronger when they\n"
 	.string "evolve,\p"
 	.string "but they also learn moves more\n"
 	.string "slowly.$"

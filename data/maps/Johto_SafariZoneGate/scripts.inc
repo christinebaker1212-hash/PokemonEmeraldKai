@@ -156,15 +156,15 @@ Johto_SafariZoneGate_Text_83F8863::
 
 Johto_SafariZoneGate_Text_83F890A::
 	.string "This SAFARI ZONE is great!\n"
-	.string "I just kept going after POKéMON!\p"
+	.string "I just kept going after MOéMON!\p"
 	.string "That made my JIGGLYPUFF upset though.$"
 
 Johto_SafariZoneGate_Text_83F896C::
 	.string "I have always wanted to catch my first\n"
-	.string "POKéMON at the SAFARI ZONE.$"
+	.string "MOéMON at the SAFARI ZONE.$"
 
 Johto_SafariZoneGate_Text_83F89AF::
-	.string "There are many POKéMON to choose from,\n"
+	.string "There are many MOéMON to choose from,\n"
 	.string "but nothing beats the cuteness of\l"
 	.string "SLOWPOKE.\p"
 	.string "People often say that I look like one!$"

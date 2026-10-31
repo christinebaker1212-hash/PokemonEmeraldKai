@@ -22,7 +22,7 @@ Kanto_CeladonCity_Hotel_EventScript_841D50F::
 	end
 
 Kanto_CeladonCity_Hotel_Text_8447CB5::
-	.string "POKéMON?\n"
+	.string "MOéMON?\n"
 	.string "No, this is a hotel for people.\p"
 	.string "We’re full up, unfortunately.$"
 

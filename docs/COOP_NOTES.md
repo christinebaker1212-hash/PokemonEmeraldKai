@@ -3218,6 +3218,12 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   `setvar VAR_0x80xx, N` before item / species / move commands; OAK's 5 POKé BALLS and RED's gift were the two.
 - QzBufferLastReceivedMonForNickname reads gMpLastGivenMonPlace / Slot (pokemon.c GiveMonToPlayer), not VAR_RESULT.
 
+## MOéMON in JOHTO's and KANTO's text (1.62.4)
+- tools/moemon_text/moe_words.py: HOENN's rule as code (moe()): every POKé word -> MOé (POKéMON -> MOéMON, POKéDEX ->
+  MOéDEX, POKéMANIAC, POKéRUS...; mixed case in capitals), POKé BALL(S) kept (the item's name; MOé FLUTE and MOé DOLL
+  are the items' names). Run on JOHTO's and KANTO's map scripts and data/scripts/qz (.string lines only: 1761
+  lines); re-run it after re-importing Quetzal's scripts. tools/sinnoh/build_text.py applies moe() to SINNOH's text.
+
 ## Running outdoors in JOHTO and KANTO (1.62.2)
 - Some of Moemon Quetzal's outdoor maps forbid running (allow_running false on 21 JOHTO towns / routes: CHERRYGROVE
   CITY, ROUTE 23 and 26, the NATIONAL PARK, the SAFARI ZONE, MT. SILVER's outside...). The user called that silly:

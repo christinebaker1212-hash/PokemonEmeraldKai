@@ -69,11 +69,11 @@ Johto_DayCare_Text_83F0400::
 	.string "{PLAYER} put away the dictionary.$"
 
 Johto_DayCare_Text_83F047C::
-	.string "A book about POKéMON!\p"
+	.string "A book about MOéMON!\p"
 	.string "{PLAYER} flipped through\n"
 	.string "the book.\p"
 	.string "It must have the word\n"
-	.string "POKéMON written on every page.\p"
+	.string "MOéMON written on every page.\p"
 	.string "{PLAYER} put away the book.$"
 
 Johto_DayCare_Text_83F04FA::
@@ -90,7 +90,7 @@ Johto_DayCare_Text_83F04FA::
 	.string "{PLAYER} put away the book.$"
 
 Johto_DayCare_Text_83F05BD::
-	.string "A book of POKéMON abilities!\p"
+	.string "A book of MOéMON abilities!\p"
 	.string "{PLAYER} flipped through\n"
 	.string "the book.\p"
 	.string "PICHU -> STATIC\l"
@@ -105,12 +105,12 @@ Johto_DayCare_Text_83F05BD::
 Johto_DayCare_Text_83F0707::
 	.string "I’m the DAY-CARE couple’s son.\p"
 	.string "An ODD EGG was found with a TRAINER’s\n"
-	.string "POKéMON, but they didn’t want it...\p"
+	.string "MOéMON, but they didn’t want it...\p"
 	.string "I’d like you to take good care of it.$"
 
 Johto_DayCare_Text_83F0796::
 	.string "It looks like you can’t carry another\n"
-	.string "POKéMON anyway.$"
+	.string "MOéMON anyway.$"
 
 Johto_DayCare_Text_83F07CC::
 	.string "{PLAYER} Received the ODD EGG.$"

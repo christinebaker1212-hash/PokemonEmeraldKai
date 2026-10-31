@@ -31,7 +31,7 @@ Kanto_CeruleanCity_House2_Text_8442119::
 	.string "house!\p"
 	.string "They stole a valuable SUN STONE!\p"
 	.string "I was going to use it to evolve\n"
-	.string "one of my POKéMON.\p"
+	.string "one of my MOéMON.\p"
 	.string "That cost me a bundle, it did!$"
 
 Kanto_CeruleanCity_House2_Text_84421C9::

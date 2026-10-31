@@ -13,13 +13,13 @@ Kanto_Route11_EastEntrance_1F_EventScript_841FC98::
 
 Kanto_Route11_EastEntrance_1F_Text_844ED48::
 	.string "Don’t you think it’s hard to think\n"
-	.string "up good names for POKéMON?\p"
+	.string "up good names for MOéMON?\p"
 	.string "Especially if you’ve caught a\n"
 	.string "whole bunch?\p"
 	.string "In LAVENDER TOWN, there’s a man\n"
-	.string "who rates POKéMON nicknames.\p"
+	.string "who rates MOéMON nicknames.\p"
 	.string "He can even help you rename your\n"
-	.string "POKéMON, too.$"
+	.string "MOéMON, too.$"
 
 Kanto_Route11_EastEntrance_1F_Text_844EE1D::
 	.string "If you’re aiming to reach LAVENDER\n"

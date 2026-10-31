@@ -30,10 +30,10 @@ Kanto_SevenIsland_Mart_EventScript_8420AD8::
 	end
 
 Kanto_SevenIsland_Mart_Text_8450FF0::
-	.string "POKéMON have personalities of their\n"
+	.string "MOéMON have personalities of their\n"
 	.string "own, just like people.\p"
 	.string "My PIKACHU has a HASTY nature,\n"
-	.string "so it grew to be a speedy POKéMON.$"
+	.string "so it grew to be a speedy MOéMON.$"
 
 Kanto_SevenIsland_Mart_Text_845106D::
 	.string "Okay, preparations are complete\n"

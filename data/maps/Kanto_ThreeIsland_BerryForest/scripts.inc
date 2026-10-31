@@ -97,7 +97,7 @@ Kanto_ThreeIsland_BerryForest_Movement_8413ABC:
 Kanto_ThreeIsland_BerryForest_Text_842B4DF::
 	.string "LOSTELLE: Whimper… Sniff…\n"
 	.string "Oh! Please, help!\p"
-	.string "A scary POKéMON appeared there\n"
+	.string "A scary MOéMON appeared there\n"
 	.string "a little while ago.\p"
 	.string "It kept scaring.\n"
 	.string "It made LOSTELLE scared.\p"
@@ -131,8 +131,8 @@ Kanto_ThreeIsland_BerryForest_Text_842B6A8::
 Kanto_ThreeIsland_BerryForest_Text_842B6DF::
 	.string "Welcome to the BERRY FOREST\p"
 	.string "Be friendly and share BERRIES with\n"
-	.string "others and POKéMON.$"
+	.string "others and MOéMON.$"
 
 Kanto_ThreeIsland_BerryForest_Text_842B732::
 	.string "Beware of wild, BERRY-loving\n"
-	.string "POKéMON!$"
+	.string "MOéMON!$"

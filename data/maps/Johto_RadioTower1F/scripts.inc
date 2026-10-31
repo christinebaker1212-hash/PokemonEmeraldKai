@@ -321,7 +321,7 @@ Johto_RadioTower1F_Text_83D6F24::
 Johto_RadioTower1F_Text_83D6F8F::
 	.string "Question 1:\p"
 	.string "Does FALKNER, VIOLET’s GYM LEADER,\n"
-	.string "specialize in FLYING-type POKéMON?$"
+	.string "specialize in FLYING-type MOéMON?$"
 
 Johto_RadioTower1F_Text_83D6FE1::
 	.string "Correct!\n"
@@ -332,14 +332,14 @@ Johto_RadioTower1F_Text_83D6FE1::
 Johto_RadioTower1F_Text_83D7028::
 	.string "Bull’s-eye!\n"
 	.string "Question 3:\p"
-	.string "Does catching a POKéMON in HOENN\n"
+	.string "Does catching a MOéMON in HOENN\n"
 	.string "automatically register it as\l"
 	.string "caught in JOHTO too?$"
 
 Johto_RadioTower1F_Text_83D7093::
 	.string "So far so good!\n"
 	.string "Question 4:\p"
-	.string "Can you change a POKéMON’s nickname\n"
+	.string "Can you change a MOéMON’s nickname\n"
 	.string "from the party menu?$"
 
 Johto_RadioTower1F_Text_83D70E8::
@@ -358,7 +358,7 @@ Johto_RadioTower1F_Text_83D717F::
 	.string "You won’t have to repeat the QUIZ.$"
 
 Johto_RadioTower1F_Text_83D71E0::
-	.string "A POKéMON holding a METRONOME hits\n"
+	.string "A MOéMON holding a METRONOME hits\n"
 	.string "harder when it uses the same move\l"
 	.string "several times in a row.$"
 
@@ -376,7 +376,7 @@ Johto_RadioTower1F_Text_83D72A8::
 	.string "His sweet voice makes me melt!$"
 
 Johto_RadioTower1F_Text_83D72DD::
-	.string "I love MARY, from POKéMON TALK.\p"
+	.string "I love MARY, from MOéMON TALK.\p"
 	.string "I only know what she sounds like,\n"
 	.string "though.$"
 
@@ -403,7 +403,7 @@ Johto_RadioTower1F_Text_83D7417::
 	.string "5F DIRECTOR’S OFFICE$"
 
 Johto_RadioTower1F_Text_83D75E8::
-	.string "Welcome to the POKéMON LOTTERY!\p"
+	.string "Welcome to the MOéMON LOTTERY!\p"
 	.string "We compare the last digits of your\n"
 	.string "TRAINER ID with the ticket number.\p"
 	.string "Match at least two digits to win.\n"
@@ -424,7 +424,7 @@ Johto_RadioTower1F_Text_83D7728::
 	.string "The LOTO TICKET number is {STR_VAR_1}.\p"
 	.string "I need to run a check on this number\n"
 	.string "to see if it matches any of your\l"
-	.string "POKéMON’s ID numbers. Please wait.$"
+	.string "MOéMON’s ID numbers. Please wait.$"
 
 Johto_RadioTower1F_Text_83D77AF::
 	.string "Congratulations!\p"

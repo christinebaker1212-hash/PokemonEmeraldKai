@@ -268,7 +268,7 @@ Johto_CianwoodCity_Text_83C9CBB::
 	.string "You crossed the sea to get here?\p"
 	.string "That must have been hard.\p"
 	.string "It would be much easier if your\n"
-	.string "POKéMON knew how to FLY...$"
+	.string "MOéMON knew how to FLY...$"
 
 Johto_CianwoodCity_Text_83C9D31::
 	.string "But you can’t use FLY without this\n"
@@ -282,7 +282,7 @@ Johto_CianwoodCity_Text_83C9DB3::
 	.string "Then you should take this HM.$"
 
 Johto_CianwoodCity_Text_83C9DEE::
-	.string "Teach FLY to your POKéMON.\p"
+	.string "Teach FLY to your MOéMON.\p"
 	.string "You will be able to FLY instantly\n"
 	.string "to anywhere you have visited.$"
 
@@ -300,12 +300,12 @@ Johto_CianwoodCity_Text_83C9F02::
 	.string "Boulders to the north of town can\n"
 	.string "be crushed.\p"
 	.string "They may be hiding something.\p"
-	.string "Your POKéMON could use ROCK SMASH\n"
+	.string "Your MOéMON could use ROCK SMASH\n"
 	.string "to break them.$"
 
 Johto_CianwoodCity_Text_83C9F8C::
 	.string "CHUCK, the GYM LEADER, spars with\n"
-	.string "his fighting POKéMON.$"
+	.string "his fighting MOéMON.$"
 
 Johto_CianwoodCity_Text_83CA0D0::
 	.string "EUSINE: Yo, {PLAYER}.\p"
@@ -328,7 +328,7 @@ Johto_CianwoodCity_Text_83CA243::
 
 Johto_CianwoodCity_Text_83CA264::
 	.string "You’re amazing, {PLAYER}!\p"
-	.string "No wonder POKéMON gravitate to you.\p"
+	.string "No wonder MOéMON gravitate to you.\p"
 	.string "I get it now.\p"
 	.string "I’m going to keep searching for\n"
 	.string "SUICUNE.\p"
@@ -340,7 +340,7 @@ Johto_CianwoodCity_Text_83CA314::
 	.string "A Port Surrounded by Rough Seas$"
 
 Johto_CianwoodCity_Text_83CA34E::
-	.string "CIANWOOD CITY POKéMON GYM\p"
+	.string "CIANWOOD CITY MOéMON GYM\p"
 	.string "LEADER: CHUCK\p"
 	.string "His Roaring Fists Do the Talking$"
 

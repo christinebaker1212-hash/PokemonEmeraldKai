@@ -18,11 +18,11 @@ Johto_Route26_Text_83EBF4B::
 	.string "He was really strong, but…\p"
 	.string "It was as if he absolutely had to\n"
 	.string "win at any cost.\p"
-	.string "I felt sorry for his POKéMON.$"
+	.string "I felt sorry for his MOéMON.$"
 
 Johto_Route26_Text_83EBFD9::
-	.string "POKéMON aren’t tools of war.$"
+	.string "MOéMON aren’t tools of war.$"
 
 Johto_Route26_Text_83EBFF6::
-	.string "POKéMON are in-valuable, lifelong\n"
+	.string "MOéMON are in-valuable, lifelong\n"
 	.string "partners.$"

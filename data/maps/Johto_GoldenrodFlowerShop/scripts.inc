@@ -166,10 +166,10 @@ Johto_GoldenrodFlowerShop_Text_839638B::
 
 Johto_GoldenrodFlowerShop_Text_83963E6::
 	.string "You can use a BERRY or give it\n"
-	.string "to a POKéMON to hold.\p"
+	.string "to a MOéMON to hold.\p"
 	.string "But now they have a machine that mixes\n"
 	.string "up different BERRIES and makes candies\l"
-	.string "for POKéMON.\p"
+	.string "for MOéMON.\p"
 	.string "I want some candy, too.$"
 
 Johto_GoldenrodFlowerShop_Text_83D4CB9::
@@ -219,7 +219,7 @@ Johto_GoldenrodFlowerShop_Text_83D4FE0::
 	.string "Wow, you beat WHITNEY? Cool!$"
 
 Johto_GoldenrodFlowerShop_Text_83D4FFD::
-	.string "So it really was a POKéMON!$"
+	.string "So it really was a MOéMON!$"
 
 Johto_GoldenrodFlowerShop_Text_83D5056::
 	.string "These BERRIES weaken super-effective\n"

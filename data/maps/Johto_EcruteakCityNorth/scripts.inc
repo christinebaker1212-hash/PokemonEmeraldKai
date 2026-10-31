@@ -19,7 +19,7 @@ Johto_EcruteakCityNorth_EventScript_83C6817::
 	end
 
 Johto_EcruteakCityNorth_Text_83C672D::
-	.string "MORTY: The legendary POKéMON\n"
+	.string "MORTY: The legendary MOéMON\n"
 	.string "did not choose me...\p"
 	.string "But that does not mean that I\n"
 	.string "have lost out on my future.\p"

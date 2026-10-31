@@ -37,7 +37,7 @@ Johto_Route46_EventScript_83F640A::
 
 Johto_Route46_Text_83F6417::
 	.string "Awright! I’ll show you the\n"
-	.string "power of mountain POKéMON!$"
+	.string "power of mountain MOéMON!$"
 
 Johto_Route46_Text_83F644D::
 	.string "Mercy! You showed me your\n"
@@ -48,7 +48,7 @@ Johto_Route46_Text_83F646E::
 	.string "We HIKERS are like that.$"
 
 Johto_Route46_Text_83F64A0::
-	.string "I’m raising POKéMON too!\p"
+	.string "I’m raising MOéMON too!\p"
 	.string "Will you battle with me?$"
 
 Johto_Route46_Text_83F64D2::
@@ -60,7 +60,7 @@ Johto_Route46_Text_83F64D8::
 	.string "No excuses--I admit I lost.$"
 
 Johto_Route46_Text_83F6515::
-	.string "I raise POKéMON too!\p"
+	.string "I raise MOéMON too!\p"
 	.string "Will you battle with me?$"
 
 Johto_Route46_Text_83F6543::

@@ -29,9 +29,9 @@ Kanto_FuchsiaCity_SafariZone_Office_Text_84480FB::
 
 Kanto_FuchsiaCity_SafariZone_Office_Text_8448152::
 	.string "WARDEN SLOWPOKE is very\n"
-	.string "knowledgeable about POKéMON.\p"
+	.string "knowledgeable about MOéMON.\p"
 	.string "He even has some fossils of rare,\n"
-	.string "extinct POKéMON.$"
+	.string "extinct MOéMON.$"
 
 Kanto_FuchsiaCity_SafariZone_Office_Text_84481BA::
 	.string "WARDEN SLOWPOKE came in, but\n"

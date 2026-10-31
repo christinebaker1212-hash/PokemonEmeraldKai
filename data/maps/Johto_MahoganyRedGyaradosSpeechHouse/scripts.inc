@@ -27,7 +27,7 @@ Johto_MahoganyRedGyaradosSpeechHouse_Text_83DF063::
 
 Johto_MahoganyRedGyaradosSpeechHouse_Text_83DF0D5::
 	.string "My favorite radio program? I’d say\n"
-	.string "POKéMON MUSIC.$"
+	.string "MOéMON MUSIC.$"
 
 Johto_MahoganyRedGyaradosSpeechHouse_Text_83DF107::
 	.string "I’ve been hearing laughter on the\n"

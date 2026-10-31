@@ -160,14 +160,14 @@ Kanto_VermilionCity_PokemonFanClub_Text_84445C8::
 	.string "SEEL: Kyuoo!$"
 
 Kanto_VermilionCity_PokemonFanClub_Text_84445D5::
-	.string "I chair the POKéMON Fan Club!\p"
+	.string "I chair the MOéMON Fan Club!\p"
 	.string "I raise more than a hundred\n"
-	.string "POKéMON!\p"
+	.string "MOéMON!\p"
 	.string "I’m very fussy when it comes to\n"
-	.string "POKéMON! I surely am!\p"
+	.string "MOéMON! I surely am!\p"
 	.string "So…\p"
 	.string "Did you come visit to hear about\n"
-	.string "my POKéMON?$"
+	.string "my MOéMON?$"
 
 Kanto_VermilionCity_PokemonFanClub_Text_844467F::
 	.string "Good!\n"
@@ -206,7 +206,7 @@ Kanto_VermilionCity_PokemonFanClub_Text_84448B7::
 Kanto_VermilionCity_PokemonFanClub_Text_84448E5::
 	.string "Hello, {PLAYER}!\p"
 	.string "Did you come see me about my\n"
-	.string "POKéMON again?\p"
+	.string "MOéMON again?\p"
 	.string "No?\n"
 	.string "Too bad!$"
 
@@ -215,7 +215,7 @@ Kanto_VermilionCity_PokemonFanClub_Text_8444929::
 
 Kanto_VermilionCity_PokemonFanClub_Text_844493D::
 	.string "Our CHAIRMAN is very vocal about\n"
-	.string "POKéMON.$"
+	.string "MOéMON.$"
 
 Kanto_VermilionCity_PokemonFanClub_Text_8444967::
 	.string "Let’s all listen politely to other\n"
@@ -226,6 +226,6 @@ Kanto_VermilionCity_PokemonFanClub_Text_8444994::
 
 Kanto_VermilionCity_PokemonFanClub_Text_84449B7::
 	.string "Our CHAIRMAN really does adore his\n"
-	.string "POKéMON.\p"
+	.string "MOéMON.\p"
 	.string "But the person who is most liked by\n"
-	.string "POKéMON is DAISY, I think.$"
+	.string "MOéMON is DAISY, I think.$"

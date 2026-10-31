@@ -626,7 +626,7 @@ Johto_RadioTower5F_Text_83D953C::
 Johto_RadioTower5F_Text_83D95E0::
 	.string "DIRECTOR: {PLAYER}, thank you!\p"
 	.string "Your courageous actions have saved\n"
-	.string "POKéMON nationwide.\p"
+	.string "MOéMON nationwide.\p"
 	.string "I know it’s not much, but please\n"
 	.string "take this.$"
 
@@ -638,7 +638,7 @@ Johto_RadioTower5F_Text_83D965C::
 	.string "TOWER.\p"
 	.string "We dug up that wing during\n"
 	.string "construction.\p"
-	.string "I heard that all sorts of POKéMON\n"
+	.string "I heard that all sorts of MOéMON\n"
 	.string "lived in GOLDENROD in the past.\p"
 	.string "Perhaps…\p"
 	.string "That wing has some connection to the\n"
@@ -650,8 +650,8 @@ Johto_RadioTower5F_Text_83D97A9::
 	.string "That reminds me…\p"
 	.string "That wing I gave you... I think\n"
 	.string "it’s related to the LEGENDARY\l"
-	.string "POKéMON.\p"
-	.string "But! The LEGENDARY POKéMON won’t\n"
+	.string "MOéMON.\p"
+	.string "But! The LEGENDARY MOéMON won’t\n"
 	.string "appear with just that wing...\p"
 	.string "Apparently there is something else\n"
 	.string "you need... Or something like that.\p"
@@ -666,9 +666,9 @@ Johto_RadioTower5F_Text_83D98B5::
 
 Johto_RadioTower5F_Text_83D9929::
 	.string "DIRECTOR: Hello, {PLAYER}!\p"
-	.string "You know, I love POKéMON.\p"
+	.string "You know, I love MOéMON.\p"
 	.string "I built this RADIO TOWER so I could\n"
-	.string "express my love of POKéMON.\p"
+	.string "express my love of MOéMON.\p"
 	.string "It would be nice if people enjoyed\n"
 	.string "our programs.$"
 
@@ -686,7 +686,7 @@ Johto_RadioTower5F_Text_8402418::
 	.string "Go to NEW BARK TOWN and oversee\l"
 	.string "contributions from the south.\p"
 	.string "Some families still resist us.\n"
-	.string "We need their Pokémon and their labor.\l"
+	.string "We need their MOéMON and their labor.\l"
 	.string "I trust you will persuade them.$"
 
 Johto_RadioTower5F_Text_84024D6::
@@ -741,12 +741,12 @@ Johto_RadioTower5F_Text_84036F8::
 	.string "GIOVANNI: Stand beside me.\n"
 	.string "You brought me here.\l"
 	.string "Let’s finish what we started.\p"
-	.string "Choose up to three Pokémon. I’ll bring\n"
+	.string "Choose up to three MOéMON. I’ll bring\n"
 	.string "three of my own. That boy will\l"
 	.string "have to face us both.$"
 
 Johto_RadioTower5F_Text_84037BA::
-	.string "ETHAN: My Pokémon can’t take any more.\n"
+	.string "ETHAN: My MOéMON can’t take any more.\n"
 	.string "I have to get them out of here.\p"
 	.string "I don’t know what he promised you.\n"
 	.string "But look at who you’re helping.\p"
@@ -795,7 +795,7 @@ Johto_RadioTower5F_Text_8404303::
 	.string "more than doing it alone.$"
 
 Johto_RadioTower5F_Text_840433A::
-	.string "SILVER: Choose up to three Pokémon.\n"
+	.string "SILVER: Choose up to three MOéMON.\n"
 	.string "I will fight with three of mine.$"
 
 Johto_RadioTower5F_Text_840437F::
@@ -805,11 +805,11 @@ Johto_RadioTower5F_Text_840437F::
 	.string "Not my fault.\p"
 	.string "I have mistreated those\n"
 	.string "who stood by me too.\p"
-	.string "My Pokémon deserve better.\n"
+	.string "My MOéMON deserve better.\n"
 	.string "That is something I can change.$"
 
 Johto_RadioTower5F_Text_8404460::
-	.string "SILVER: Here. Your Pokémon\n"
+	.string "SILVER: Here. Your MOéMON\n"
 	.string "have earned these.$"
 
 Johto_RadioTower5F_Text_840448E::

@@ -147,14 +147,14 @@ Kanto_Route13_EventScript_845ACB5::
 	end
 
 Kanto_Route13_Text_8435C1C::
-	.string "My bird POKéMON want to battle\n"
+	.string "My bird MOéMON want to battle\n"
 	.string "with you!$"
 
 Kanto_Route13_Text_8435C45::
-	.string "My bird POKéMON combo lost?$"
+	.string "My bird MOéMON combo lost?$"
 
 Kanto_Route13_Text_8435C61::
-	.string "My POKéMON look happy even though\n"
+	.string "My MOéMON look happy even though\n"
 	.string "they lost.$"
 
 Kanto_Route13_Text_8435C8E::
@@ -180,7 +180,7 @@ Kanto_Route13_Text_8435D21::
 	.string "LEADERS. I know!$"
 
 Kanto_Route13_Text_8435D50::
-	.string "My cute POKéMON wish to make your\n"
+	.string "My cute MOéMON wish to make your\n"
 	.string "acquaintance.$"
 
 Kanto_Route13_Text_8435D80::
@@ -188,7 +188,7 @@ Kanto_Route13_Text_8435D80::
 	.string "You totally won!$"
 
 Kanto_Route13_Text_8435D9D::
-	.string "You have to make POKéMON battle\n"
+	.string "You have to make MOéMON battle\n"
 	.string "to toughen them up.$"
 
 Kanto_Route13_Text_8435DD1::
@@ -201,7 +201,7 @@ Kanto_Route13_Text_8435E07::
 
 Kanto_Route13_Text_8435E26::
 	.string "CARBOS boosted the SPEED of my\n"
-	.string "POKéMON.$"
+	.string "MOéMON.$"
 
 Kanto_Route13_Text_8435E4E::
 	.string "I’m not going to lose.\n"
@@ -223,18 +223,18 @@ Kanto_Route13_Text_8435EDE::
 
 Kanto_Route13_Text_8435EF4::
 	.string "I wonder which is stronger, male or\n"
-	.string "female POKéMON?$"
+	.string "female MOéMON?$"
 
 Kanto_Route13_Text_8435F28::
 	.string "Do you want to battle some\n"
-	.string "POKéMON with me?$"
+	.string "MOéMON with me?$"
 
 Kanto_Route13_Text_8435F54::
 	.string "It’s over already?$"
 
 Kanto_Route13_Text_8435F67::
 	.string "I don’t know anything about\n"
-	.string "POKéMON actually.\p"
+	.string "MOéMON actually.\p"
 	.string "The ones I use… I picked them\n"
 	.string "for their looks!$"
 
@@ -249,7 +249,7 @@ Kanto_Route13_Text_8435FF2::
 	.string "Get lost!$"
 
 Kanto_Route13_Text_8435FFC::
-	.string "I always go with bird POKéMON.\n"
+	.string "I always go with bird MOéMON.\n"
 	.string "I’ve dedicated myself to them.$"
 
 Kanto_Route13_Text_843603A::
@@ -274,7 +274,7 @@ Kanto_Route13_Text_84360EB::
 	.string "North to SILENCE BRIDGE$"
 
 Kanto_Route13_Text_846F694::
-	.string "My bird POKéMON remember you!$"
+	.string "My bird MOéMON remember you!$"
 
 Kanto_Route13_Text_846F6B2::
 	.string "I want to be the best TRAINER \n"
@@ -285,7 +285,7 @@ Kanto_Route13_Text_846F6E2::
 	.string "You got more cool BADGES!$"
 
 Kanto_Route13_Text_846F701::
-	.string "My cutely grown POKéMON wish to\n"
+	.string "My cutely grown MOéMON wish to\n"
 	.string "become reacquainted with you.$"
 
 Kanto_Route13_Text_846F73F::
@@ -309,5 +309,5 @@ Kanto_Route13_Text_846F811::
 	.string "What’re you starin’ at?$"
 
 Kanto_Route13_Text_846F829::
-	.string "I always go with bird POKéMON.\n"
+	.string "I always go with bird MOéMON.\n"
 	.string "I’ve dedicated myself to them.$"

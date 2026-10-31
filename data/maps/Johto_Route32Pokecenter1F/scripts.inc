@@ -66,6 +66,6 @@ Johto_Route32Pokecenter1F_Text_83EFA13::
 	.string "Yo, kid. How are they biting?$"
 
 Johto_Route32Pokecenter1F_Text_83EFA31::
-	.string "What should I make my POKéMON hold?\p"
+	.string "What should I make my MOéMON hold?\p"
 	.string "Maybe an item that increases\n"
 	.string "ATTACK power…$"

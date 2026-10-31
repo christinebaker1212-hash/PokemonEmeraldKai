@@ -46,15 +46,15 @@ Kanto_Route2_EastBuilding_EventScript_841F68E::
 Kanto_Route2_EastBuilding_Text_844DB4D::
 	.string "Hi! Remember me?\n"
 	.string "I’m one of PROF. OAK’s AIDES.\p"
-	.string "If your POKéDEX has complete data\n"
+	.string "If your MOéDEX has complete data\n"
 	.string "on ten species, I have a reward.\p"
 	.string "So, {PLAYER}, let me ask you.\p"
 	.string "Have you gathered data on at least\n"
-	.string "ten kinds of POKéMON?$"
+	.string "ten kinds of MOéMON?$"
 
 Kanto_Route2_EastBuilding_Text_844DC10::
 	.string "Great! You have caught or owned\n"
-	.string "{STR_VAR_3} kinds of POKéMON!\p"
+	.string "{STR_VAR_3} kinds of MOéMON!\p"
 	.string "Congratulations!\n"
 	.string "Here you go!$"
 
@@ -64,7 +64,7 @@ Kanto_Route2_EastBuilding_Text_844DC63::
 
 Kanto_Route2_EastBuilding_Text_844DC8E::
 	.string "A GALARICA CUFF can make a\n"
-	.string "certain POKéMON evolve.$"
+	.string "certain MOéMON evolve.$"
 
 Kanto_Route2_EastBuilding_Text_844DCC1::
 	.string "ROCK TUNNEL is very dark.\n"

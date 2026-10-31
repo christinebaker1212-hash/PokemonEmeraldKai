@@ -71,14 +71,14 @@ Johto_EarlsPokemonAcademy_EventScript_840034D::
 
 Johto_EarlsPokemonAcademy_Text_8400359::
 	.string "I’m not a GBA kid, but I love\n"
-	.string "playing POKéMON games!\p"
+	.string "playing MOéMON games!\p"
 	.string "In the old games, you had to battle\n"
-	.string "a lot of wild POKéMON to get enough\l"
+	.string "a lot of wild MOéMON to get enough\l"
 	.string "EXP.\p"
 	.string "But in newer games, the EXP. SHARE\n"
-	.string "makes your POKéMON level up too fast.\p"
+	.string "makes your MOéMON level up too fast.\p"
 	.string "In this game, the EXP. SHARE is\n"
-	.string "balanced to put your POKéMON at just\l"
+	.string "balanced to put your MOéMON at just\l"
 	.string "the right level. Or slightly higher,\l"
 	.string "depending on how many battles you do.\p"
 	.string "If you want a traditional GEN 1-4\n"
@@ -89,12 +89,12 @@ Johto_EarlsPokemonAcademy_Text_8400359::
 
 Johto_EarlsPokemonAcademy_Text_840054D::
 	.string "EARL, I am!\p"
-	.string "Wonderful are POKéMON, yes!\p"
+	.string "Wonderful are MOéMON, yes!\p"
 	.string "Teach you I will to be a better\n"
 	.string "trainer!$"
 
 Johto_EarlsPokemonAcademy_Text_840059E::
-	.string "Certain POKéMON start off weak and\n"
+	.string "Certain MOéMON start off weak and\n"
 	.string "require much more EXP to become\l"
 	.string "strong than others do.\p"
 	.string "For example, LARVITAR is quite weak\n"
@@ -103,10 +103,10 @@ Johto_EarlsPokemonAcademy_Text_840059E::
 	.string "much EXP.\p"
 	.string "Only the most dedicated trainers\n"
 	.string "should attempt to train such a\l"
-	.string "POKéMON.$"
+	.string "MOéMON.$"
 
 Johto_EarlsPokemonAcademy_Text_8400882::
-	.string "POKéMON previously thought to\n"
+	.string "MOéMON previously thought to\n"
 	.string "only evolve through trade can\p"
 	.string "evolve through leveling.\n"
 	.string "MACHOKE and GRAVELER evolve\p"
@@ -114,11 +114,11 @@ Johto_EarlsPokemonAcademy_Text_8400882::
 	.string "HAUNTER evolve at LVL 42.\p"
 	.string "Some items, like the METAL\n"
 	.string "COAT, have also been found to\p"
-	.string "evolve certain POKéMON\n"
+	.string "evolve certain MOéMON\n"
 	.string "while holding and leveling up.$"
 
 Johto_EarlsPokemonAcademy_Text_8400999::
-	.string "Notable POKéMON available in an\n"
+	.string "Notable MOéMON available in an\n"
 	.string "area can be seen in the overworld!\p"
 	.string "But make sure to check routes\n"
 	.string "at DAY and NIGHT!$"
@@ -127,8 +127,8 @@ Johto_EarlsPokemonAcademy_Text_8400A0C::
 	.string "BERRIES in the JOHTO region are\n"
 	.string "good for healing and making BALLS.\p"
 	.string "BERRIES in KANTO are good for\n"
-	.string "reducing a POKéMON’s stats.\p"
-	.string "The DOJO in KANTO helps POKéMON\n"
+	.string "reducing a MOéMON’s stats.\p"
+	.string "The DOJO in KANTO helps MOéMON\n"
 	.string "perfect individual stats.$"
 
 Johto_EarlsPokemonAcademy_Text_8400AC3::
@@ -139,6 +139,6 @@ Johto_EarlsPokemonAcademy_Text_8400AC3::
 
 Johto_EarlsPokemonAcademy_Text_8400B3A::
 	.string "The blackboard describes\n"
-	.string "POKéMON HM moves.\p"
+	.string "MOéMON HM moves.\p"
 	.string "HMs, once unlocked, don’t need to\n"
 	.string "be taught to be used.$"

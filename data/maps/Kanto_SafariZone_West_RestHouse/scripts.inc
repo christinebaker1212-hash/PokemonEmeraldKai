@@ -17,15 +17,15 @@ Kanto_SafariZone_West_RestHouse_EventScript_841219F::
 	end
 
 Kanto_SafariZone_West_RestHouse_Text_84283EC::
-	.string "Tossing ROCKS at POKéMON might\n"
+	.string "Tossing ROCKS at MOéMON might\n"
 	.string "make them run, but they’ll be\l"
 	.string "easier to catch.$"
 
 Kanto_SafariZone_West_RestHouse_Text_842843A::
-	.string "Using BAIT will make POKéMON more\n"
+	.string "Using BAIT will make MOéMON more\n"
 	.string "likely to stick around if they get\l"
 	.string "busy eating.$"
 
 Kanto_SafariZone_West_RestHouse_Text_842848C::
 	.string "I hiked a lot, but I didn’t see any\n"
-	.string "POKéMON I wanted.$"
+	.string "MOéMON I wanted.$"

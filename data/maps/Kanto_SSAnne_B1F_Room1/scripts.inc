@@ -23,13 +23,13 @@ Kanto_SSAnne_B1F_Room1_Text_84246E5::
 
 Kanto_SSAnne_B1F_Room1_Text_84246FC::
 	.string "When we’re out at sea, jellyfish\n"
-	.string "POKéMON sometimes drift by.$"
+	.string "MOéMON sometimes drift by.$"
 
 Kanto_SSAnne_B1F_Room1_Text_8424739::
 	.string "Hello, stranger!\p"
 	.string "I can’t tell if you’re from the seas\n"
 	.string "or mountains, but stop and chat.\p"
-	.string "All my POKéMON are from the sea.$"
+	.string "All my MOéMON are from the sea.$"
 
 Kanto_SSAnne_B1F_Room1_Text_84247B1::
 	.string "Darn!\n"

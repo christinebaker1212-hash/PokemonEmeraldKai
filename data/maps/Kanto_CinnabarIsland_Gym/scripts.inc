@@ -759,7 +759,7 @@ Kanto_CinnabarIsland_Gym_Text_844948B::
 	.string "Hah!\p"
 	.string "I am BLAINE, the red-hot LEADER\n"
 	.string "of CINNABAR GYM!\p"
-	.string "My fiery POKéMON are all rough\n"
+	.string "My fiery MOéMON are all rough\n"
 	.string "and ready with intense heat!\p"
 	.string "They incinerate all challengers!\p"
 	.string "Hah!\n"
@@ -778,7 +778,7 @@ Kanto_CinnabarIsland_Gym_Text_844959A::
 Kanto_CinnabarIsland_Gym_Text_84495E9::
 	.string "Hah!\p"
 	.string "The VOLCANOBADGE heightens the\n"
-	.string "SPECIAL stats of your POKéMON.\p"
+	.string "SPECIAL stats of your MOéMON.\p"
 	.string "Here, you can have this, too!$"
 
 Kanto_CinnabarIsland_Gym_Text_844964A::
@@ -788,14 +788,14 @@ Kanto_CinnabarIsland_Gym_Text_844964A::
 Kanto_CinnabarIsland_Gym_Text_844965A::
 	.string "That item will make your attacks\n"
 	.string "even more powerful!\p"
-	.string "But watch your POKéMON’s HP.\n"
+	.string "But watch your MOéMON’s HP.\n"
 	.string "All that power comes at a price!$"
 
 Kanto_CinnabarIsland_Gym_Text_84496CD::
 	.string "Make space for this, child!$"
 
 Kanto_CinnabarIsland_Gym_Text_84496E9::
-	.string "Do you know how hot POKéMON fire\n"
+	.string "Do you know how hot MOéMON fire\n"
 	.string "breath can get?$"
 
 Kanto_CinnabarIsland_Gym_Text_844971A::
@@ -817,10 +817,10 @@ Kanto_CinnabarIsland_Gym_Text_84497B4::
 
 Kanto_CinnabarIsland_Gym_Text_84497C1::
 	.string "I get this uncontrollable urge to\n"
-	.string "steal other people’s POKéMON.$"
+	.string "steal other people’s MOéMON.$"
 
 Kanto_CinnabarIsland_Gym_Text_8449801::
-	.string "I’ve studied POKéMON thoroughly.\n"
+	.string "I’ve studied MOéMON thoroughly.\n"
 	.string "You can’t win!$"
 
 Kanto_CinnabarIsland_Gym_Text_8449831::
@@ -832,14 +832,14 @@ Kanto_CinnabarIsland_Gym_Text_8449855::
 	.string "for you to understand.$"
 
 Kanto_CinnabarIsland_Gym_Text_844988C::
-	.string "I like using FIRE-type POKéMON.\n"
+	.string "I like using FIRE-type MOéMON.\n"
 	.string "I just do.$"
 
 Kanto_CinnabarIsland_Gym_Text_84498B7::
 	.string "Too hot to handle!$"
 
 Kanto_CinnabarIsland_Gym_Text_84498CA::
-	.string "I wish there were a thief POKéMON.\n"
+	.string "I wish there were a thief MOéMON.\n"
 	.string "I’d use that!$"
 
 Kanto_CinnabarIsland_Gym_Text_84498FB::
@@ -853,7 +853,7 @@ Kanto_CinnabarIsland_Gym_Text_8449923::
 	.string "Our LEADER, BLAINE, became lost\n"
 	.string "in the mountains but good.\p"
 	.string "Night fell when a fiery bird\n"
-	.string "POKéMON appeared.\p"
+	.string "MOéMON appeared.\p"
 	.string "Its light allowed BLAINE to find\n"
 	.string "his way down safely.$"
 
@@ -867,7 +867,7 @@ Kanto_CinnabarIsland_Gym_Text_84499FD::
 
 Kanto_CinnabarIsland_Gym_Text_8449A0D::
 	.string "PONYTA, NINETALES…\n"
-	.string "Those are popular FIRE POKéMON.$"
+	.string "Those are popular FIRE MOéMON.$"
 
 Kanto_CinnabarIsland_Gym_Text_8449A40::
 	.string "Fire is weak against H2O.$"
@@ -879,13 +879,13 @@ Kanto_CinnabarIsland_Gym_Text_8449A5A::
 Kanto_CinnabarIsland_Gym_Text_8449A6B::
 	.string "Water beats fire, of course.\p"
 	.string "But fire melts ice, so the FIRE\n"
-	.string "type beats ICE-type POKéMON.$"
+	.string "type beats ICE-type MOéMON.$"
 
 Kanto_CinnabarIsland_Gym_Text_8449AC5::
 	.string "Yo!\n"
 	.string "Champ in the making!\p"
 	.string "The hotheaded BLAINE is a FIRE\n"
-	.string "POKéMON pro.\p"
+	.string "MOéMON pro.\p"
 	.string "Douse his spirits with water!\p"
 	.string "You’d better take some\n"
 	.string "BURN HEALS, too.$"
@@ -895,24 +895,24 @@ Kanto_CinnabarIsland_Gym_Text_8449B50::
 	.string "You beat that firebrand!$"
 
 Kanto_CinnabarIsland_Gym_Text_8449B6D::
-	.string "CINNABAR POKéMON GYM\n"
+	.string "CINNABAR MOéMON GYM\n"
 	.string "LEADER: BLAINE\p"
 	.string "WINNING TRAINERS:\n"
 	.string "BLUE$"
 
 Kanto_CinnabarIsland_Gym_Text_8449BA8::
-	.string "CINNABAR POKéMON GYM\n"
+	.string "CINNABAR MOéMON GYM\n"
 	.string "LEADER: BLAINE\p"
 	.string "WINNING TRAINERS:\n"
 	.string "BLUE, {PLAYER}$"
 
 Kanto_CinnabarIsland_Gym_Text_8449BE7::
-	.string "POKéMON Quiz!\p"
+	.string "MOéMON Quiz!\p"
 	.string "Get it right, and the door opens to\n"
 	.string "the next room.\p"
 	.string "Get it wrong, and face a TRAINER!\p"
 	.string "If you want to conserve your\n"
-	.string "POKéMON for the GYM LEADER…\p"
+	.string "MOéMON for the GYM LEADER…\p"
 	.string "Then get it right!\n"
 	.string "Here we go!$"
 
@@ -920,7 +920,7 @@ Kanto_CinnabarIsland_Gym_Text_8449CA2::
 	.string "CATERPIE evolves into METAPOD?$"
 
 Kanto_CinnabarIsland_Gym_Text_8449CC1::
-	.string "There are nine certified POKéMON\n"
+	.string "There are nine certified MOéMON\n"
 	.string "LEAGUE BADGES?$"
 
 Kanto_CinnabarIsland_Gym_Text_8449CF1::
@@ -928,10 +928,10 @@ Kanto_CinnabarIsland_Gym_Text_8449CF1::
 
 Kanto_CinnabarIsland_Gym_Text_8449D0E::
 	.string "Are electric moves effective\n"
-	.string "against GROUND-type POKéMON?$"
+	.string "against GROUND-type MOéMON?$"
 
 Kanto_CinnabarIsland_Gym_Text_8449D48::
-	.string "POKéMON of the same kind and level\n"
+	.string "MOéMON of the same kind and level\n"
 	.string "are not identical?$"
 
 Kanto_CinnabarIsland_Gym_Text_8449D7E::

@@ -183,7 +183,7 @@ Kanto_Route20_Text_8438172::
 	.string "Splash!$"
 
 Kanto_Route20_Text_843817A::
-	.string "I wish I could ride my POKéMON.\n"
+	.string "I wish I could ride my MOéMON.\n"
 	.string "I bet you’re not tired.$"
 
 Kanto_Route20_Text_84381B2::
@@ -225,10 +225,10 @@ Kanto_Route20_Text_84382EE::
 
 Kanto_Route20_Text_84382F5::
 	.string "I should’ve been buffing up my\n"
-	.string "POKéMON, not me!$"
+	.string "MOéMON, not me!$"
 
 Kanto_Route20_Text_8438325::
-	.string "Why are you riding a POKéMON?\n"
+	.string "Why are you riding a MOéMON?\n"
 	.string "Can’t you swim?$"
 
 Kanto_Route20_Text_8438353::
@@ -236,10 +236,10 @@ Kanto_Route20_Text_8438353::
 	.string "Torpedoed!$"
 
 Kanto_Route20_Text_8438364::
-	.string "Riding a POKéMON sure looks fun!$"
+	.string "Riding a MOéMON sure looks fun!$"
 
 Kanto_Route20_Text_8438385::
-	.string "I rode my bird POKéMON here.$"
+	.string "I rode my bird MOéMON here.$"
 
 Kanto_Route20_Text_84383A2::
 	.string "Oh, no!\n"
@@ -268,14 +268,14 @@ Kanto_Route20_Text_843849A::
 	.string "I’m so disappointed!$"
 
 Kanto_Route20_Text_84384AF::
-	.string "POKéMON have taken over an\n"
+	.string "MOéMON have taken over an\n"
 	.string "abandoned mansion on CINNABAR.\p"
-	.string "They call it the POKéMON MANSION\n"
+	.string "They call it the MOéMON MANSION\n"
 	.string "now.$"
 
 Kanto_Route20_Text_843850F::
 	.string "CINNABAR, in the west, has a LAB\n"
-	.string "for POKéMON.\p"
+	.string "for MOéMON.\p"
 	.string "My daddy works there.$"
 
 Kanto_Route20_Text_8438553::
@@ -291,7 +291,7 @@ Kanto_Route20_Text_84385C8::
 	.string "SEAFOAM ISLANDS$"
 
 Kanto_Route20_Text_84385D8::
-	.string "Strong TRAINERS and WATER POKéMON\n"
+	.string "Strong TRAINERS and WATER MOéMON\n"
 	.string "are common sights in these parts.\p"
 	.string "They say that MISTY of the\n"
 	.string "CERULEAN GYM trains here.$"
@@ -317,11 +317,11 @@ Kanto_Route20_Text_8470556::
 	.string "before!$"
 
 Kanto_Route20_Text_8470593::
-	.string "Why are you riding a POKéMON?\n"
+	.string "Why are you riding a MOéMON?\n"
 	.string "Haven’t you learned to swim yet?$"
 
 Kanto_Route20_Text_84705D2::
-	.string "I rode my bird POKéMON here.$"
+	.string "I rode my bird MOéMON here.$"
 
 Kanto_Route20_Text_84705EF::
 	.string "My boyfriend gave me big pearls.\n"
@@ -333,5 +333,5 @@ Kanto_Route20_Text_847062B::
 
 Kanto_Route20_Text_847066A::
 	.string "CINNABAR, in the west, has a LAB\n"
-	.string "for POKéMON.\p"
+	.string "for MOéMON.\p"
 	.string "My daddy works there.$"

@@ -134,11 +134,11 @@ Johto_RadioTower3F_Text_83D820E::
 	.string "3F PERSONNEL$"
 
 Johto_RadioTower3F_Text_83D821B::
-	.string "POKéMON MUSIC with Host DJ BEN$"
+	.string "MOéMON MUSIC with Host DJ BEN$"
 
 Johto_RadioTower3F_Text_83D823A::
 	.string "We have recordings of the cries\n"
-	.string "of all POKéMON that have been\l"
+	.string "of all MOéMON that have been\l"
 	.string "found.\p"
 	.string "We must have about 400 kinds.$"
 
@@ -175,7 +175,7 @@ Johto_RadioTower3F_Text_83D8515::
 	.string "ARCHER will be so upset...$"
 
 Johto_RadioTower3F_Text_83D8547::
-	.string "It feels great ordering POKéMON\n"
+	.string "It feels great ordering MOéMON\n"
 	.string "to commit crimes.$"
 
 Johto_RadioTower3F_Text_83D8579::
@@ -183,7 +183,7 @@ Johto_RadioTower3F_Text_83D8579::
 
 Johto_RadioTower3F_Text_83D8589::
 	.string "I feel lousy over losing!\p"
-	.string "Darn it! I hate useless POKéMON!$"
+	.string "Darn it! I hate useless MOéMON!$"
 
 Johto_RadioTower3F_Text_83D85C4::
 	.string "Why did the shutter open? Did you\n"

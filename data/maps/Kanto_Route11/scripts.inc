@@ -166,7 +166,7 @@ Kanto_Route11_Text_84351DC::
 	.string "Didn’t go my way!$"
 
 Kanto_Route11_Text_84351F5::
-	.string "POKéMON is life!\n"
+	.string "MOéMON is life!\n"
 	.string "And to live is to play games!$"
 
 Kanto_Route11_Text_8435224::
@@ -178,7 +178,7 @@ Kanto_Route11_Text_8435245::
 
 Kanto_Route11_Text_8435255::
 	.string "You can’t be a coward in the world\n"
-	.string "of POKéMON!$"
+	.string "of MOéMON!$"
 
 Kanto_Route11_Text_8435284::
 	.string "Let’s go, but don’t cheat!$"
@@ -206,7 +206,7 @@ Kanto_Route11_Text_8435331::
 	.string "But, I think I can win.$"
 
 Kanto_Route11_Text_8435362::
-	.string "My POKéMON couldn’t win…\n"
+	.string "My MOéMON couldn’t win…\n"
 	.string "Haven’t they grown enough?$"
 
 Kanto_Route11_Text_8435396::
@@ -238,10 +238,10 @@ Kanto_Route11_Text_8435442::
 
 Kanto_Route11_Text_8435473::
 	.string "Darn!\n"
-	.string "My POKéMON need to be stronger!$"
+	.string "My MOéMON need to be stronger!$"
 
 Kanto_Route11_Text_8435499::
-	.string "There’s a fat POKéMON that comes\n"
+	.string "There’s a fat MOéMON that comes\n"
 	.string "down from the mountains.\p"
 	.string "I bet it’d be strong if you can\n"
 	.string "catch it.$"
@@ -257,7 +257,7 @@ Kanto_Route11_Text_843552D::
 	.string "Well, better get back to work.$"
 
 Kanto_Route11_Text_843554C::
-	.string "I raised my POKéMON carefully.\n"
+	.string "I raised my MOéMON carefully.\n"
 	.string "They should be ready by now!$"
 
 Kanto_Route11_Text_8435588::
@@ -311,6 +311,6 @@ Kanto_Route11_Text_846F3C3::
 	.string "Keep your eyes out for live wires!$"
 
 Kanto_Route11_Text_846F3E6::
-	.string "I raised my POKéMON carefully.\n"
+	.string "I raised my MOéMON carefully.\n"
 	.string "They should be ready by now.\l"
 	.string "This time, they should win, too.$"

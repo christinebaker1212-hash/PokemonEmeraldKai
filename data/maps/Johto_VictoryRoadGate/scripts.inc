@@ -113,7 +113,7 @@ Johto_VictoryRoadGate_Text_83E8F90::
 Johto_VictoryRoadGate_Text_83E8FC3::
 	.string "Sorry kid, this way is closed until\n"
 	.string "someone deals with that LEGENDARY\l"
-	.string "POKéMON...$"
+	.string "MOéMON...$"
 
 Johto_VictoryRoadGate_Text_83E9014::
 	.string "You don’t have all the GYM BADGES\n"
@@ -127,7 +127,7 @@ Johto_VictoryRoadGate_Text_83E906B::
 
 Johto_VictoryRoadGate_Text_83E90A7::
 	.string "This way leads to MT.SILVER.\p"
-	.string "You’ll see scary-strong POKéMON out\n"
+	.string "You’ll see scary-strong MOéMON out\n"
 	.string "there.$"
 
 Johto_VictoryRoadGate_Text_8401EA9::

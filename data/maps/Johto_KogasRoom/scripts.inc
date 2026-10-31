@@ -93,7 +93,7 @@ Johto_KogasRoom_Text_83E8762::
 	.string "Prepare to be the victim of my\n"
 	.string "sinister technique!\p"
 	.string "Fwahahahaha!\p"
-	.string "POKéMON is not merely about brute\n"
+	.string "MOéMON is not merely about brute\n"
 	.string "force--you shall see soon enough!$"
 
 Johto_KogasRoom_Text_83E8878::

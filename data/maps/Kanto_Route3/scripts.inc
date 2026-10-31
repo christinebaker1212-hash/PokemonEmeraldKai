@@ -129,7 +129,7 @@ Kanto_Route3_Text_84337D0::
 	.string "You beat me again!$"
 
 Kanto_Route3_Text_84337E3::
-	.string "There are other kinds of POKéMON\n"
+	.string "There are other kinds of MOéMON\n"
 	.string "than the ones you find in forests.$"
 
 Kanto_Route3_Text_8433827::
@@ -142,10 +142,10 @@ Kanto_Route3_Text_8433867::
 	.string "I don’t believe it!$"
 
 Kanto_Route3_Text_843387B::
-	.string "Are you using a POKéMON CENTER’s\n"
-	.string "PC for storing your POKéMON?\p"
+	.string "Are you using a MOéMON CENTER’s\n"
+	.string "PC for storing your MOéMON?\p"
 	.string "Each BOX can hold up to\n"
-	.string "30 POKéMON.$"
+	.string "30 MOéMON.$"
 
 Kanto_Route3_Text_84338DD::
 	.string "Excuse me!\n"
@@ -163,11 +163,11 @@ Kanto_Route3_Text_8433949::
 	.string "Let’s get with it right away!$"
 
 Kanto_Route3_Text_843397A::
-	.string "If I had new POKéMON, I would’ve\n"
+	.string "If I had new MOéMON, I would’ve\n"
 	.string "won!$"
 
 Kanto_Route3_Text_84339A0::
-	.string "If a POKéMON BOX on the PC gets\n"
+	.string "If a MOéMON BOX on the PC gets\n"
 	.string "full, just switch to another BOX.$"
 
 Kanto_Route3_Text_84339E2::
@@ -194,14 +194,14 @@ Kanto_Route3_Text_8433A96::
 	.string "winter. That’s my policy.$"
 
 Kanto_Route3_Text_8433ACE::
-	.string "I’ll battle you with the POKéMON\n"
+	.string "I’ll battle you with the MOéMON\n"
 	.string "I just caught.$"
 
 Kanto_Route3_Text_8433AFE::
 	.string "Done like dinner!$"
 
 Kanto_Route3_Text_8433B10::
-	.string "Trained POKéMON are stronger than\n"
+	.string "Trained MOéMON are stronger than\n"
 	.string "the wild ones.$"
 
 Kanto_Route3_Text_8433B41::
@@ -245,7 +245,7 @@ Kanto_Route3_Text_846EA2E::
 	.string "You’re still not wearing shorts!$"
 
 Kanto_Route3_Text_846EA6B::
-	.string "I’ll battle you with the POKéMON\n"
+	.string "I’ll battle you with the MOéMON\n"
 	.string "I started raising.$"
 
 Kanto_Route3_Text_846EA9F::

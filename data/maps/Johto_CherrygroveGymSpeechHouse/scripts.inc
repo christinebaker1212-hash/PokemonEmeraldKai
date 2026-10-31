@@ -21,14 +21,14 @@ Johto_CherrygroveGymSpeechHouse_EventScript_83C971E::
 
 Johto_CherrygroveGymSpeechHouse_Text_83C972B::
 	.string "You’re trying to see how good\n"
-	.string "you are as a POKéMON trainer?\p"
-	.string "You better visit the POKéMON\n"
+	.string "you are as a MOéMON trainer?\p"
+	.string "You better visit the MOéMON\n"
 	.string "GYMS all over JOHTO and collect\l"
 	.string "BADGES.$"
 
 Johto_CherrygroveGymSpeechHouse_Text_83C97AC::
 	.string "When I get older, I’m going to\n"
 	.string "be a GYM LEADER!\p"
-	.string "I make my POKéMON battle with\n"
+	.string "I make my MOéMON battle with\n"
 	.string "my friend’s to make them\l"
 	.string "tougher!$"

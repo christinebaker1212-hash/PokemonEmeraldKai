@@ -51,7 +51,7 @@ Johto_OlivineTimsHouse_EventScript_83E55B9::
 	end
 
 Johto_OlivineTimsHouse_Text_83E55C3::
-	.string "I collect POKéMON!\n"
+	.string "I collect MOéMON!\n"
 	.string "Do you have a {STR_VAR_1}?\p"
 	.string "Want to trade it for my\n"
 	.string "{STR_VAR_2}?$"

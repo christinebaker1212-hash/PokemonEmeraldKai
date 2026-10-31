@@ -33,7 +33,7 @@ Johto_CliffEdgeCave_Text_83CBB59::
 	.string "just around the corner.\p"
 	.string "It’s really fun!\n"
 	.string "You will see many different kinds of\l"
-	.string "POKéMON, and it’s all you can catch!\p"
+	.string "MOéMON, and it’s all you can catch!\p"
 	.string "There is no reason not to go, right?\n"
 	.string "Just around the corner.$"
 
@@ -46,6 +46,6 @@ Johto_CliffEdgeCave_Text_83CBC2D::
 
 Johto_CliffEdgeCave_Text_83CBCCF::
 	.string "Everything Is Thrilling!\n"
-	.string "Explore to Find Wild POKéMON!\l"
+	.string "Explore to Find Wild MOéMON!\l"
 	.string "Warden BAOBA’s SAFARI ZONE\l"
 	.string "Up and Running!$"

@@ -324,16 +324,16 @@ Johto_PlayersHouse1F_Text_83E3D44::
 	.string "Have you heard?\p"
 	.string "My daughter is adamant about\n"
 	.string "becoming PROF.ELM’s assistant.\p"
-	.string "She really loves POKéMON!$"
+	.string "She really loves MOéMON!$"
 
 Johto_PlayersHouse1F_Text_83E3DC0::
-	.string "MOM: Wow, that’s a cute POKéMON.\n"
+	.string "MOM: Wow, that’s a cute MOéMON.\n"
 	.string "Where did you get it?\p"
 	.string "…\p"
 	.string "So, you’re leaving on an adventure...\n"
 	.string "That does sound challenging...\p"
 	.string "Just be careful.\p"
-	.string "POKéMON are your friends.\n"
+	.string "MOéMON are your friends.\n"
 	.string "You need to work as a team.\p"
 	.string "Now, go on!\n"
 	.string "I’m behind you all the way!$"
@@ -376,7 +376,7 @@ Johto_PlayersHouse1F_Text_8402770::
 
 Johto_PlayersHouse1F_Text_8402837::
 	.string "MOM: Before you go, let me\n"
-	.string "take care of your Pokémon.\p"
+	.string "take care of your MOéMON.\p"
 	.string "They fought for us too.$"
 
 Johto_PlayersHouse1F_Text_8402A08::

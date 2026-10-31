@@ -16,4 +16,4 @@ Johto_Route34IlexForestGate_Text_83D12B6::
 	.string "It watches over the FOREST from\n"
 	.string "across time.\p"
 	.string "I think that it must be a\n"
-	.string "GRASS-type POKéMON.$"
+	.string "GRASS-type MOéMON.$"

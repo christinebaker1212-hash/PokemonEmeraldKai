@@ -175,14 +175,14 @@ Kanto_FiveIsland_MemorialPillar_Text_843B2B5::
 
 Kanto_FiveIsland_MemorialPillar_Text_843B2DB::
 	.string "It fills me with happiness when\n"
-	.string "bird POKéMON beg playfully…$"
+	.string "bird MOéMON beg playfully…$"
 
 Kanto_FiveIsland_MemorialPillar_Text_843B317::
 	.string "Scrub, scrub…$"
 
 Kanto_FiveIsland_MemorialPillar_Text_843B325::
 	.string "Hello…\n"
-	.string "Your POKéMON look healthy…$"
+	.string "Your MOéMON look healthy…$"
 
 Kanto_FiveIsland_MemorialPillar_Text_843B347::
 	.string "This is where I buried my ONIX…\n"
@@ -213,7 +213,7 @@ Kanto_FiveIsland_MemorialPillar_Text_843B45A::
 	.string "thanks?$"
 
 Kanto_FiveIsland_MemorialPillar_Text_843B502::
-	.string "Please be good to your POKéMON,\n"
+	.string "Please be good to your MOéMON,\n"
 	.string "too.$"
 
 Kanto_FiveIsland_MemorialPillar_Text_843B527::

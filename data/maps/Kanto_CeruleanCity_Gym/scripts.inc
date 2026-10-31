@@ -94,19 +94,19 @@ Kanto_CeruleanCity_Gym_EventScript_841ABCA::
 Kanto_CeruleanCity_Gym_Text_84424E1::
 	.string "Hi, you’re a new face!\p"
 	.string "Only those TRAINERS who have a\n"
-	.string "policy about POKéMON can turn pro.\p"
+	.string "policy about MOéMON can turn pro.\p"
 	.string "What is your approach when you\n"
-	.string "catch and train POKéMON?\p"
+	.string "catch and train MOéMON?\p"
 	.string "My policy is an all-out offensive\n"
-	.string "with WATER-type POKéMON!{PLAY_BGM 0x022A}$"
+	.string "with WATER-type MOéMON!{PLAY_BGM 0x022A}$"
 
 Kanto_CeruleanCity_Gym_Text_84425B1::
-	.string "A POKéMON holding it restores\n"
+	.string "A MOéMON holding it restores\n"
 	.string "a little HP at the end of each turn.$"
 
 Kanto_CeruleanCity_Gym_Text_84425F4::
 	.string "The CASCADEBADGE makes all\n"
-	.string "POKéMON up to Lv. 30 obey.\p"
+	.string "MOéMON up to Lv. 30 obey.\p"
 	.string "That includes even outsiders you\n"
 	.string "got in trades.\p"
 	.string "There’s more. You can now use CUT\n"
@@ -159,7 +159,7 @@ Kanto_CeruleanCity_Gym_Text_8442896::
 	.string "Champ in the making!\p"
 	.string "Let me give you some advice!\p"
 	.string "The LEADER, MISTY, is a pro who\n"
-	.string "uses WATER-type POKéMON.\p"
+	.string "uses WATER-type MOéMON.\p"
 	.string "GRASS and ELECTRIC types\n"
 	.string "can help!\p"
 	.string "But watch out for Abilities\n"
@@ -172,13 +172,13 @@ Kanto_CeruleanCity_Gym_Text_8442959::
 	.string "darn-good team!$"
 
 Kanto_CeruleanCity_Gym_Text_84429B2::
-	.string "CERULEAN POKéMON GYM\n"
+	.string "CERULEAN MOéMON GYM\n"
 	.string "LEADER: MISTY\p"
 	.string "WINNING TRAINERS:\n"
 	.string "BLUE$"
 
 Kanto_CeruleanCity_Gym_Text_84429EC::
-	.string "CERULEAN POKéMON GYM\n"
+	.string "CERULEAN MOéMON GYM\n"
 	.string "LEADER: MISTY\p"
 	.string "WINNING TRAINERS:\n"
 	.string "BLUE, {PLAYER}$"

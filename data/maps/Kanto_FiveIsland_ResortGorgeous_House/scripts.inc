@@ -167,11 +167,11 @@ Kanto_FiveIsland_ResortGorgeous_House_Movement_8421DC2:
 Kanto_FiveIsland_ResortGorgeous_House_Text_8454849::
 	.string "SELPHY: Will you do me a favor?\p"
 	.string "I’ll reward you for showing me\n"
-	.string "a Pokémon. One reward per day!\p"
+	.string "a MOéMON. One reward per day!\p"
 	.string "Will you accept a request?$"
 
 Kanto_FiveIsland_ResortGorgeous_House_Text_84548C2::
-	.string "I wish to see a Pokémon:\n"
+	.string "I wish to see a MOéMON:\n"
 	.string "{STR_VAR_1}.\p"
 	.string "Bring one in your party anytime.\n"
 	.string "You don’t need to catch another.$"
@@ -180,7 +180,7 @@ Kanto_FiveIsland_ResortGorgeous_House_Text_8454921::
 	.string "Would you like to cancel this request?$"
 
 Kanto_FiveIsland_ResortGorgeous_House_Text_8454948::
-	.string "I’ll think of another Pokémon, then!\p"
+	.string "I’ll think of another MOéMON, then!\p"
 	.string "Talk to me again if you’d like\n"
 	.string "a new request.$"
 
@@ -230,7 +230,7 @@ Kanto_FiveIsland_ResortGorgeous_House_Text_8454EAB::
 	.string "to Lady SELPHY.$"
 
 Kanto_FiveIsland_ResortGorgeous_House_Text_8461BC0::
-	.string "POKéMON JOURNAL\p"
+	.string "MOéMON JOURNAL\p"
 	.string "Special Feature: CINNABAR GYM\n"
 	.string "LEADER BLAINE!\p"
 	.string "BLAINE is said to remove his dark\n"

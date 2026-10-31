@@ -97,7 +97,7 @@ Johto_Route44_Text_83F57CB::
 	.string "I fish until I can’t anymore.\p"
 	.string "I also battle until I drop.\p"
 	.string "That’s my relationship with my\n"
-	.string "POKéMON.$"
+	.string "MOéMON.$"
 
 Johto_Route44_Text_83F582D::
 	.string "Hmmmm… This isn’t right.$"
@@ -108,14 +108,14 @@ Johto_Route44_Text_83F5846::
 
 Johto_Route44_Text_83F5887::
 	.string "Do you know about the legendary\n"
-	.string "bird POKéMON?$"
+	.string "bird MOéMON?$"
 
 Johto_Route44_Text_83F58B5::
 	.string "Whew! You’re hot stuff.$"
 
 Johto_Route44_Text_83F58CD::
 	.string "ARTICUNO, ZAPDOS and MOLTRES are\n"
-	.string "the three legendary bird POKéMON.\p"
+	.string "the three legendary bird MOéMON.\p"
 	.string "I heard there are other legendary\n"
 	.string "birds, though.$"
 
@@ -131,21 +131,21 @@ Johto_Route44_Text_83F5979::
 
 Johto_Route44_Text_83F59A9::
 	.string "I’ll do anything to get my hands\n"
-	.string "on rare POKéMON!$"
+	.string "on rare MOéMON!$"
 
 Johto_Route44_Text_83F59DB::
-	.string "Oooh, your POKéMON are so\n"
+	.string "Oooh, your MOéMON are so\n"
 	.string "appealing.$"
 
 Johto_Route44_Text_83F5A00::
-	.string "If a POKéMON has different colors\n"
+	.string "If a MOéMON has different colors\n"
 	.string "from usual, it’s more valuable.\p"
 	.string "What? You mean that’s not true?$"
 
 Johto_Route44_Text_83F5A62::
 	.string "I can tell you’re a good trainer\n"
 	.string "by looking at you.\p"
-	.string "I’m good at POKéMON, and I can\n"
+	.string "I’m good at MOéMON, and I can\n"
 	.string "see that you are too.$"
 
 Johto_Route44_Text_83F5ACB::

@@ -24,7 +24,7 @@ Johto_Route27SandstormHouse_EventScript_83EC9B0::
 	end
 
 Johto_Route27SandstormHouse_Text_83EC9DD::
-	.string "Heading to the POKéMON LEAGUE?\p"
+	.string "Heading to the MOéMON LEAGUE?\p"
 	.string "Here. This gift may help you\n"
 	.string "on your journey.$"
 

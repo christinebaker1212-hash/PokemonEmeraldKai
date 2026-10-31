@@ -121,14 +121,14 @@ Kanto_FuchsiaCity_WardensHouse_Text_8448FE3::
 
 Kanto_FuchsiaCity_WardensHouse_Text_844900F::
 	.string "WARDEN: BLACK AUGURITE can make\n"
-	.string "a certain POKéMON evolve.\p"
+	.string "a certain MOéMON evolve.\p"
 	.string "Thanks again for returning my\n"
 	.string "GOLD TEETH!$"
 
 Kanto_FuchsiaCity_WardensHouse_Text_8449084::
-	.string "POKéMON photos and fossils are on\n"
+	.string "MOéMON photos and fossils are on\n"
 	.string "display.$"
 
 Kanto_FuchsiaCity_WardensHouse_Text_84490AF::
-	.string "Old POKéMON merchandise is on\n"
+	.string "Old MOéMON merchandise is on\n"
 	.string "display.$"

@@ -380,27 +380,27 @@ Johto_LakeOfRage_Text_83DD910::
 	.string "usually blue?$"
 
 Johto_LakeOfRage_Text_83DD974::
-	.string "Let me battle with the POKéMON I\n"
+	.string "Let me battle with the MOéMON I\n"
 	.string "just caught!$"
 
 Johto_LakeOfRage_Text_83DD9A2::
 	.string "I might be an expert angler, but\n"
-	.string "I stink as a POKéMON trainer…$"
+	.string "I stink as a MOéMON trainer…$"
 
 Johto_LakeOfRage_Text_83DD9E1::
 	.string "I won’t lose as an angler! I catch\n"
-	.string "POKéMON all day.$"
+	.string "MOéMON all day.$"
 
 Johto_LakeOfRage_Text_83DDA15::
 	.string "No matter what I do, all I catch\n"
-	.string "are the same POKéMON…$"
+	.string "are the same MOéMON…$"
 
 Johto_LakeOfRage_Text_83DDA4C::
 	.string "My line’s all tangled up…$"
 
 Johto_LakeOfRage_Text_83DDA66::
 	.string "Why can’t I catch any good\n"
-	.string "POKéMON?$"
+	.string "MOéMON?$"
 
 Johto_LakeOfRage_Text_83DDA8A::
 	.string "If a trainer spots another trainer,\n"
@@ -411,7 +411,7 @@ Johto_LakeOfRage_Text_83DDADF::
 	.string "Whew… Good battle.$"
 
 Johto_LakeOfRage_Text_83DDAF2::
-	.string "POKéMON and their trainer become\n"
+	.string "MOéMON and their trainer become\n"
 	.string "powerful through constant battling.$"
 
 Johto_LakeOfRage_Text_83DDB37::

@@ -23,7 +23,7 @@ Johto_VioletNicknameSpeechHouse_Text_83FFB63::
 	.string "She uses the names of her\n"
 	.string "favorite things to eat.\p"
 	.string "For the nicknames she gives to\n"
-	.string "her POKéMON, I mean.$"
+	.string "her MOéMON, I mean.$"
 
 Johto_VioletNicknameSpeechHouse_Text_83FFBC9::
 	.string "I call my PIDGEY STRAWBERRY!$"

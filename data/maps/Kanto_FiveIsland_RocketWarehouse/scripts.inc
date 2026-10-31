@@ -246,12 +246,12 @@ Kanto_FiveIsland_RocketWarehouse_Movement_8413F5F:
 	step_end
 
 Kanto_FiveIsland_RocketWarehouse_Text_842BBEC::
-	.string "There are many POKéMON locked\n"
+	.string "There are many MOéMON locked\n"
 	.string "away in the pen…$"
 
 Kanto_FiveIsland_RocketWarehouse_Text_842BC1B::
 	.string "The pen door is unlocked.\n"
-	.string "The POKéMON appear to have fled.$"
+	.string "The MOéMON appear to have fled.$"
 
 Kanto_FiveIsland_RocketWarehouse_Text_842BC56::
 	.string "Did you come here knowing it’s\n"
@@ -265,7 +265,7 @@ Kanto_FiveIsland_RocketWarehouse_Text_842BCAF::
 	.string "What planet are you from?$"
 
 Kanto_FiveIsland_RocketWarehouse_Text_842BCDF::
-	.string "Oh, now your POKéMON look strong.\n"
+	.string "Oh, now your MOéMON look strong.\n"
 	.string "You’re willing to sell them?\p"
 	.string "Oh?\n"
 	.string "You wanted to battle?$"
@@ -276,7 +276,7 @@ Kanto_FiveIsland_RocketWarehouse_Text_842BD38::
 
 Kanto_FiveIsland_RocketWarehouse_Text_842BD4B::
 	.string "We can give you a great price.\n"
-	.string "Sell us your POKéMON!$"
+	.string "Sell us your MOéMON!$"
 
 Kanto_FiveIsland_RocketWarehouse_Text_842BD80::
 	.string "I got word about you from the\n"
@@ -349,7 +349,7 @@ Kanto_FiveIsland_RocketWarehouse_Text_842C21E::
 	.string "A report with graphs and text is on\n"
 	.string "the PC monitor.\p"
 	.string "“The Influence of Magnetic Waves\n"
-	.string "on POKéMON Evolution”…\p"
+	.string "on MOéMON Evolution”…\p"
 	.string "… … … … … …\p"
 	.string "It’s too difficult to understand…$"
 

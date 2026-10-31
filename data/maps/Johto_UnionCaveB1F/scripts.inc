@@ -66,18 +66,18 @@ Johto_UnionCaveB1F_Text_83FE0C3::
 
 Johto_UnionCaveB1F_Text_83FE113::
 	.string "Who’s there?\p"
-	.string "Leave me and my POKéMON alone!$"
+	.string "Leave me and my MOéMON alone!$"
 
 Johto_UnionCaveB1F_Text_83FE13F::
 	.string "Go… Go away!$"
 
 Johto_UnionCaveB1F_Text_83FE14C::
-	.string "Just me and my POKéMON. I’m de-\n"
+	.string "Just me and my MOéMON. I’m de-\n"
 	.string "lirious with joy.$"
 
 Johto_UnionCaveB1F_Text_83FE17E::
 	.string "I came all the way here to conduct\n"
-	.string "my POKéMON research.\p"
+	.string "my MOéMON research.\p"
 	.string "Let me demonstrate my findings in a\n"
 	.string "real battle!$"
 

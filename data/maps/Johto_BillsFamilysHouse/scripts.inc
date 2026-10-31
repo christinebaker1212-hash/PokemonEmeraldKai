@@ -86,19 +86,19 @@ Johto_BillsFamilysHouse_Text_83D336F::
 	.string "He’s getting to be a real headache…$"
 
 Johto_BillsFamilysHouse_Text_83D33D6::
-	.string "Oh, you collect POKéMON? My son\n"
+	.string "Oh, you collect MOéMON? My son\n"
 	.string "BILL is an expert.\p"
-	.string "He just got called to the POKéMON\n"
+	.string "He just got called to the MOéMON\n"
 	.string "CENTER in ECRUTEAK CITY.\p"
 	.string "My husband went off to the GAME\n"
 	.string "CORNER without being called…$"
 
 Johto_BillsFamilysHouse_Text_83D3481::
 	.string "My husband was once known as a\n"
-	.string "POKéMANIAC.\p"
+	.string "MOéMANIAC.\p"
 	.string "BILL must have taken after his\n"
 	.string "father.$"
 
 Johto_BillsFamilysHouse_Text_83D34D3::
 	.string "My big brother BILL made the PC\n"
-	.string "POKéMON storage system.$"
+	.string "MOéMON storage system.$"

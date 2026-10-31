@@ -396,7 +396,7 @@ Johto_Route32_Text_83EEE4D::
 	.string "Some guy wearing glasses\p"
 	.string "was looking for you.\p"
 	.string "See for yourself. He’s waiting for\n"
-	.string "you at the POKéMON CENTER.$"
+	.string "you at the MOéMON CENTER.$"
 
 Johto_Route32_Text_83EEEC4::
 	.string "Before going on, you must defeat\n"
@@ -405,14 +405,14 @@ Johto_Route32_Text_83EEEC4::
 	.string "SPROUT TOWER.$"
 
 Johto_Route32_Text_83EEF1E::
-	.string "Have you gone to the POKéMON GYM?\n"
-	.string "You can test your POKéMON and\p"
+	.string "Have you gone to the MOéMON GYM?\n"
+	.string "You can test your MOéMON and\p"
 	.string "yourself there.\n"
 	.string "It’s a rite of passage for all\p"
 	.string "trainers!$"
 
 Johto_Route32_Text_83EEF97::
-	.string "You have some good POKéMON there.\n"
+	.string "You have some good MOéMON there.\n"
 	.string "It must be from the training you\p"
 	.string "gave them around VIOLET CITY.\n"
 	.string "The training at the GYM must have\p"
@@ -449,11 +449,11 @@ Johto_Route32_Text_83EF1B5::
 
 Johto_Route32_Text_83EF1BE::
 	.string "Calm, collected… The essence of\n"
-	.string "fishing and POKéMON is the same.$"
+	.string "fishing and MOéMON is the same.$"
 
 Johto_Route32_Text_83EF1FF::
 	.string "I’m really good at both\n"
-	.string "fishing and POKéMON.\p"
+	.string "fishing and MOéMON.\p"
 	.string "I’m not about to lose to any kid!$"
 
 Johto_Route32_Text_83EF24E::
@@ -463,16 +463,16 @@ Johto_Route32_Text_83EF24E::
 Johto_Route32_Text_83EF26B::
 	.string "Fishing is a lifelong\n"
 	.string "passion.\p"
-	.string "POKéMON are lifelong friends!$"
+	.string "MOéMON are lifelong friends!$"
 
 Johto_Route32_Text_83EF2A8::
-	.string "My POKéMON? Freshly caught!$"
+	.string "My MOéMON? Freshly caught!$"
 
 Johto_Route32_Text_83EF2C4::
 	.string "SPLASH?$"
 
 Johto_Route32_Text_83EF2CC::
-	.string "Freshly caught POKéMON are\n"
+	.string "Freshly caught MOéMON are\n"
 	.string "no match for properly raised ones.$"
 
 Johto_Route32_Text_83EF30A::
@@ -486,10 +486,10 @@ Johto_Route32_Text_83EF35E::
 	.string "I’m going to try to be the\n"
 	.string "best with my favorites.\p"
 	.string "I’m not using the same tough\n"
-	.string "POKéMON as everyone else.$"
+	.string "MOéMON as everyone else.$"
 
 Johto_Route32_Text_83EF3C8::
-	.string "I found some good POKéMON\n"
+	.string "I found some good MOéMON\n"
 	.string "in the grass!\p"
 	.string "I think they’ll do it for me!$"
 
@@ -555,7 +555,7 @@ Johto_Route32_Text_83EF728::
 	.string "Here’s a POISON BARB for you!$"
 
 Johto_Route32_Text_83EF746::
-	.string "FRIEDA: Give it to a POKéMON\n"
+	.string "FRIEDA: Give it to a MOéMON\n"
 	.string "that has POISON-type moves.\p"
 	.string "Oh!\p"
 	.string "It’s wicked!\p"
@@ -586,7 +586,7 @@ Johto_Route32_Text_83EF87D::
 
 Johto_Route32_Text_83FEB33::
 	.string "Look around!\p"
-	.string "It’s easy to see what POKéMON\n"
+	.string "It’s easy to see what MOéMON\n"
 	.string "you can catch in an area without\l"
 	.string "having to run around in tall\l"
 	.string "grass all day!$"

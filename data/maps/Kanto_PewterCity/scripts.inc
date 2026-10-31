@@ -1054,7 +1054,7 @@ Kanto_PewterCity_Text_842E74E::
 	.string "fell on MT. MOON.$"
 
 Kanto_PewterCity_Text_842E7B7::
-	.string "There aren’t many serious POKéMON\n"
+	.string "There aren’t many serious MOéMON\n"
 	.string "TRAINERS here.\p"
 	.string "They’re all like BUG CATCHERS,\n"
 	.string "you know, just hobbyists.\p"
@@ -1087,7 +1087,7 @@ Kanto_PewterCity_Text_842E93E::
 
 Kanto_PewterCity_Text_842E95C::
 	.string "I’m spraying REPEL to keep wild\n"
-	.string "POKéMON out of my garden!$"
+	.string "MOéMON out of my garden!$"
 
 Kanto_PewterCity_Text_842E996::
 	.string "You’re a TRAINER, right?\p"
@@ -1100,12 +1100,12 @@ Kanto_PewterCity_Text_842E9DF::
 
 Kanto_PewterCity_Text_842EA0E::
 	.string "TRAINER TIPS\p"
-	.string "All POKéMON that appear in battle,\n"
+	.string "All MOéMON that appear in battle,\n"
 	.string "however briefly, earn EXP Points.$"
 
 Kanto_PewterCity_Text_842EA60::
 	.string "NOTICE!\p"
-	.string "Thieves have been stealing POKéMON\n"
+	.string "Thieves have been stealing MOéMON\n"
 	.string "fossils from MT. MOON.\p"
 	.string "Please call the PEWTER POLICE if\n"
 	.string "you have any information.$"
@@ -1114,9 +1114,9 @@ Kanto_PewterCity_Text_842EADD::
 	.string "PEWTER MUSEUM OF SCIENCE$"
 
 Kanto_PewterCity_Text_842EAF6::
-	.string "PEWTER CITY POKéMON GYM\n"
+	.string "PEWTER CITY MOéMON GYM\n"
 	.string "LEADER: BROCK\l"
-	.string "The Rock-Solid POKéMON TRAINER!$"
+	.string "The Rock-Solid MOéMON TRAINER!$"
 
 Kanto_PewterCity_Text_842EB3C::
 	.string "PEWTER CITY\n"

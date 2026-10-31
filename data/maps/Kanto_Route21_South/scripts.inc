@@ -68,14 +68,14 @@ Kanto_Route21_South_EventScript_845BF1F::
 	end
 
 Kanto_Route21_South_Text_84387B5::
-	.string "I caught my POKéMON at sea.$"
+	.string "I caught my MOéMON at sea.$"
 
 Kanto_Route21_South_Text_84387D1::
 	.string "Diver!!\n"
 	.string "Down!!$"
 
 Kanto_Route21_South_Text_84387E0::
-	.string "Where’d you catch your POKéMON?$"
+	.string "Where’d you catch your MOéMON?$"
 
 Kanto_Route21_South_Text_8438800::
 	.string "Right now, I’m in a triathlon meet.$"
@@ -122,7 +122,7 @@ Kanto_Route21_South_Text_84389A6::
 	.string "I got a bite! Yeah!$"
 
 Kanto_Route21_South_Text_847073E::
-	.string "I caught my POKéMON at sea.\n"
+	.string "I caught my MOéMON at sea.\n"
 	.string "And that’s where I train them.$"
 
 Kanto_Route21_South_Text_8470779::

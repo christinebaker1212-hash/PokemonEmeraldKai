@@ -44,7 +44,7 @@ Kanto_Route2_House_EventScript_841F5EB::
 	end
 
 Kanto_Route2_House_Text_844DAE5::
-	.string "A fainted POKéMON just has no\n"
+	.string "A fainted MOéMON just has no\n"
 	.string "energy left to battle.\p"
 	.string "It can still use moves like CUT\n"
 	.string "outside of battle.$"

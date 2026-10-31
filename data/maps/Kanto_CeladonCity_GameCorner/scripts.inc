@@ -423,14 +423,14 @@ Kanto_CeladonCity_GameCorner_Text_8446D4D::
 	.string "champ in the making!\p"
 	.string "CELADON GYM’s LEADER is ERIKA.\p"
 	.string "She is a user of GRASS-type\n"
-	.string "POKéMON, and at one with nature.\p"
+	.string "MOéMON, and at one with nature.\p"
 	.string "She might appear docile because of\n"
 	.string "her flower arranging…\p"
 	.string "But she’s not one to be taken\n"
 	.string "lightly!$"
 
 Kanto_CeladonCity_GameCorner_Text_8446E41::
-	.string "They offer rare POKéMON that can\n"
+	.string "They offer rare MOéMON that can\n"
 	.string "be exchanged for your COINS.\p"
 	.string "But, I just can’t seem to win!$"
 
@@ -451,7 +451,7 @@ Kanto_CeladonCity_GameCorner_Text_8446F0F::
 
 Kanto_CeladonCity_GameCorner_Text_8446F27::
 	.string "Darn! I need more COINS for the\n"
-	.string "POKéMON I want!$"
+	.string "MOéMON I want!$"
 
 Kanto_CeladonCity_GameCorner_Text_8446F57::
 	.string "Hey, what? You’re throwing me off!\n"

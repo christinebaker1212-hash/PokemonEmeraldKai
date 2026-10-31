@@ -281,7 +281,7 @@ Johto_GoldenrodUnderground_Text_83DB062::
 	.string "So, you took on Team Rocket?\l"
 	.string "You are impressive!\p"
 	.string "You may be able to face the\n"
-	.string "legendary POKé...$"
+	.string "legendary MOé...$"
 
 Johto_GoldenrodUnderground_Text_83DB123::
 	.string "Hahaha! Never mind.\n"
@@ -295,7 +295,7 @@ Johto_GoldenrodUnderground_Text_83DB208::
 Johto_GoldenrodUnderground_Text_83DB336::
 	.string "I got booted out of the GAME CORNER.\p"
 	.string "I was trying to cheat using my\n"
-	.string "POKéMON…$"
+	.string "MOéMON…$"
 
 Johto_GoldenrodUnderground_Text_83DB383::
 	.string "…Grumble…$"
@@ -314,22 +314,22 @@ Johto_GoldenrodUnderground_Text_83DB423::
 	.string "Ow, ow, ow!$"
 
 Johto_GoldenrodUnderground_Text_83DB42F::
-	.string "I know my POKéMON type alignments.\p"
-	.string "But I only use one type of POKéMON.$"
+	.string "I know my MOéMON type alignments.\p"
+	.string "But I only use one type of MOéMON.$"
 
 Johto_GoldenrodUnderground_Text_83DB476::
-	.string "My POKéMON just got a haircut!\p"
+	.string "My MOéMON just got a haircut!\p"
 	.string "I’ll show you how strong it is!$"
 
 Johto_GoldenrodUnderground_Text_83DB4B5::
 	.string "Aiyeeee!$"
 
 Johto_GoldenrodUnderground_Text_83DB4BE::
-	.string "Your POKéMON will like you more if\n"
+	.string "Your MOéMON will like you more if\n"
 	.string "you give them haircuts.$"
 
 Johto_GoldenrodUnderground_Text_83DB4F9::
-	.string "I think you have some rare POKéMON\n"
+	.string "I think you have some rare MOéMON\n"
 	.string "with you.\p"
 	.string "Let me see them!$"
 

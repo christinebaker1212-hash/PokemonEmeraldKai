@@ -25,7 +25,7 @@ Johto_Route29Route46Gate_Text_83D1DCC::
 	.string "them to take a shortcut.$"
 
 Johto_Route29Route46Gate_Text_83D1E18::
-	.string "Different kinds of POKéMON\n"
+	.string "Different kinds of MOéMON\n"
 	.string "appear past here.\p"
 	.string "If you want to catch them all,\n"
 	.string "you have to look everywhere.$"

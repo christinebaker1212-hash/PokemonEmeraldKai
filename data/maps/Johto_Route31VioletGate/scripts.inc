@@ -30,6 +30,6 @@ Johto_Route31VioletGate_Text_83D1E9C::
 	.string "SPROUT TOWER?$"
 
 Johto_Route31VioletGate_Text_83D1EC2::
-	.string "I saw the cutest POKéMON out\n"
+	.string "I saw the cutest MOéMON out\n"
 	.string "there.\p"
 	.string "It looked a lot like PIKACHU!$"

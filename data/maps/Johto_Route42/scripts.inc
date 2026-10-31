@@ -219,7 +219,7 @@ Johto_Route42_Text_83F4D2D::
 
 Johto_Route42_Text_83F4E0E::
 	.string "Let me demonstrate the power\n"
-	.string "of the POKéMON I caught!$"
+	.string "of the MOéMON I caught!$"
 
 Johto_Route42_Text_83F4E44::
 	.string "What? That’s not right.\n"
@@ -227,7 +227,7 @@ Johto_Route42_Text_83F4E44::
 
 Johto_Route42_Text_83F4E72::
 	.string "I want to become the trainer\n"
-	.string "CHAMP using the POKéMON I\l"
+	.string "CHAMP using the MOéMON I\l"
 	.string "caught myself.\p"
 	.string "That’s the best part of fishing!$"
 
@@ -253,9 +253,9 @@ Johto_Route42_Text_83F4F97::
 	.string "MOON STONE…$"
 
 Johto_Route42_Text_83F4FB9::
-	.string "You’re working on a POKéDEX?\p"
+	.string "You’re working on a MOéDEX?\p"
 	.string "Wow, you must know some\n"
-	.string "pretty rare POKéMON!\p"
+	.string "pretty rare MOéMON!\p"
 	.string "May I please see it?\n"
 	.string "Please?$"
 

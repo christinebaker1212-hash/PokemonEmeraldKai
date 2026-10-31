@@ -155,10 +155,10 @@ Kanto_Route25_Text_84393CF::
 	.string "You’re decent.$"
 
 Kanto_Route25_Text_84393DE::
-	.string "All POKéMON have weaknesses.\n"
+	.string "All MOéMON have weaknesses.\n"
 	.string "Even the strongest ones.\p"
 	.string "That’s why it’s best to raise\n"
-	.string "POKéMON of different types.$"
+	.string "MOéMON of different types.$"
 
 Kanto_Route25_Text_843944E::
 	.string "Dad took me to a great party on\n"
@@ -201,12 +201,12 @@ Kanto_Route25_Text_84395C2::
 	.string "I knew I’d lose, too!$"
 
 Kanto_Route25_Text_84395D8::
-	.string "If your POKéMON gets confused,\n"
+	.string "If your MOéMON gets confused,\n"
 	.string "switch it out.\p"
 	.string "That’s a good tactic.$"
 
 Kanto_Route25_Text_843961C::
-	.string "My friend has many cute POKéMON.\n"
+	.string "My friend has many cute MOéMON.\n"
 	.string "I’m so jealous!$"
 
 Kanto_Route25_Text_843964D::
@@ -228,7 +228,7 @@ Kanto_Route25_Text_84396E4::
 	.string "A ZUBAT bit me back in that cave.$"
 
 Kanto_Route25_Text_843970C::
-	.string "I’m off to see a POKéMANIAC’s\n"
+	.string "I’m off to see a MOéMANIAC’s\n"
 	.string "collection at the cape.$"
 
 Kanto_Route25_Text_8439742::
@@ -236,10 +236,10 @@ Kanto_Route25_Text_8439742::
 	.string "too!$"
 
 Kanto_Route25_Text_8439767::
-	.string "The POKéMANIAC sure lives up to\n"
+	.string "The MOéMANIAC sure lives up to\n"
 	.string "his name.\p"
 	.string "His collection includes many rare\n"
-	.string "species of POKéMON.$"
+	.string "species of MOéMON.$"
 
 Kanto_Route25_Text_84397C7::
 	.string "You’re going to see BILL?\n"
@@ -289,7 +289,7 @@ Kanto_Route25_Text_847097A::
 	.string "I knew I had to battle you again!$"
 
 Kanto_Route25_Text_84709B0::
-	.string "My friend has many cute POKéMON.\n"
+	.string "My friend has many cute MOéMON.\n"
 	.string "I’m so jealous!$"
 
 Kanto_Route25_Text_84709E1::
@@ -297,7 +297,7 @@ Kanto_Route25_Text_84709E1::
 	.string "but I’ve still got gas in the tank!$"
 
 Kanto_Route25_Text_8470A24::
-	.string "A POKéMANIAC lives on the cape.\n"
+	.string "A MOéMANIAC lives on the cape.\n"
 	.string "Have you seen his collection?$"
 
 Kanto_Route25_Text_8470A62::

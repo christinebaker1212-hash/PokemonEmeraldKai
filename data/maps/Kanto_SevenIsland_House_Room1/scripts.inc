@@ -87,4 +87,4 @@ Kanto_SevenIsland_House_Room1_Text_8450ADD::
 	.string "A held Berry can change\n"
 	.string "the course of a battle.\p"
 	.string "Choose one that suits each\n"
-	.string "of your Pokémon.$"
+	.string "of your MOéMON.$"

@@ -573,11 +573,11 @@ Kanto_OneIsland_PokemonCenter_1F_Text_8451313::
 
 Kanto_OneIsland_PokemonCenter_1F_Text_845134D::
 	.string "CELIO, this is {PLAYER}, a rising\n"
-	.string "contender as the POKéMON CHAMP!$"
+	.string "contender as the MOéMON CHAMP!$"
 
 Kanto_OneIsland_PokemonCenter_1F_Text_8451389::
 	.string "CELIO, this is {PLAYER}, the\n"
-	.string "reigning POKéMON CHAMP!$"
+	.string "reigning MOéMON CHAMP!$"
 
 Kanto_OneIsland_PokemonCenter_1F_Text_84513B8::
 	.string "CELIO: That’s really impressive.\p"
@@ -711,7 +711,7 @@ Kanto_OneIsland_PokemonCenter_1F_Text_8451C37::
 	.string "CELIO: {PLAYER}, how have things\n"
 	.string "been for you?\p"
 	.string "Oh, is that right?\n"
-	.string "You’ve caught more POKéMON.\p"
+	.string "You’ve caught more MOéMON.\p"
 	.string "Do you know what?\n"
 	.string "Maybe I can be useful to you.$"
 
@@ -721,7 +721,7 @@ Kanto_OneIsland_PokemonCenter_1F_Text_8451CBF::
 	.string "I’m changing it so it can handle\n"
 	.string "trades over long distances.\p"
 	.string "When I get finished, you’ll be\n"
-	.string "trading for exotic POKéMON from\l"
+	.string "trading for exotic MOéMON from\l"
 	.string "TRAINERS far away.$"
 
 Kanto_OneIsland_PokemonCenter_1F_Text_8451D7B::
@@ -826,7 +826,7 @@ Kanto_OneIsland_PokemonCenter_1F_Text_84523D5::
 	.string "I’m not crying.\p"
 	.string "That’s enough about me!\p"
 	.string "{PLAYER}, you’re going to keep\n"
-	.string "looking for exotic POKéMON, right?\p"
+	.string "looking for exotic MOéMON, right?\p"
 	.string "I wish you the best of luck!$"
 
 Kanto_OneIsland_PokemonCenter_1F_Text_8452459::
@@ -836,8 +836,8 @@ Kanto_OneIsland_PokemonCenter_1F_Text_8452459::
 
 Kanto_OneIsland_PokemonCenter_1F_Text_845248F::
 	.string "{PLAYER}, what’s your favorite kind\n"
-	.string "of POKéMON?\p"
-	.string "BILL is a POKéMANIAC, so he loves\n"
+	.string "of MOéMON?\p"
+	.string "BILL is a MOéMANIAC, so he loves\n"
 	.string "every kind.\p"
 	.string "Apparently, the first one he caught\n"
 	.string "was an ABRA.$"
@@ -872,11 +872,11 @@ Kanto_OneIsland_PokemonCenter_1F_Text_84526C9::
 	.string "not enjoy a hike?$"
 
 Kanto_OneIsland_PokemonCenter_1F_Text_8452729::
-	.string "I wish I could trade POKéMON with\n"
+	.string "I wish I could trade MOéMON with\n"
 	.string "my boyfriend who lives far away…$"
 
 Kanto_OneIsland_PokemonCenter_1F_Text_845276C::
-	.string "I traded POKéMON with my boyfriend\n"
+	.string "I traded MOéMON with my boyfriend\n"
 	.string "far away!\p"
 	.string "Everyone’s saying that we can\n"
 	.string "thank you and CELIO.\p"
@@ -885,7 +885,7 @@ Kanto_OneIsland_PokemonCenter_1F_Text_845276C::
 Kanto_OneIsland_PokemonCenter_1F_Text_84527DB::
 	.string "Network Machine\n"
 	.string "Link Level 0\p"
-	.string "…POKéMON Storage System under\n"
+	.string "…MOéMON Storage System under\n"
 	.string "adjustment…$"
 
 Kanto_OneIsland_PokemonCenter_1F_Text_8452822::

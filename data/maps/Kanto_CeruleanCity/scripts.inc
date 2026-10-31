@@ -379,7 +379,7 @@ Kanto_CeruleanCity_Text_842EC1A::
 	.string "You’re still struggling along back\n"
 	.string "here?\p"
 	.string "I’m doing great! I caught a bunch\n"
-	.string "of strong and smart POKéMON!\p"
+	.string "of strong and smart MOéMON!\p"
 	.string "Here, let me see what you caught,\n"
 	.string "{PLAYER}!$"
 
@@ -391,12 +391,12 @@ Kanto_CeruleanCity_Text_842ECB6::
 Kanto_CeruleanCity_Text_842ECDA::
 	.string "BLUE: Hey, guess what?\p"
 	.string "I went to BILL’s and got him to\n"
-	.string "show me his rare POKéMON.\p"
+	.string "show me his rare MOéMON.\p"
 	.string "That added a lot of pages to my\n"
-	.string "POKéDEX!\p"
+	.string "MOéDEX!\p"
 	.string "After all, BILL’s world famous as a\n"
-	.string "POKéMANIAC.\p"
-	.string "He invented the POKéMON Storage\n"
+	.string "MOéMANIAC.\p"
+	.string "He invented the MOéMON Storage\n"
 	.string "System on PC, too.\p"
 	.string "Since you’re using his system,\n"
 	.string "you should go thank him.\p"
@@ -409,7 +409,7 @@ Kanto_CeruleanCity_Text_842EE1B::
 	.string "You can have it--try to keep up!$"
 
 Kanto_CeruleanCity_Text_842EE6D::
-	.string "Have a POKéMON hold it to gain\n"
+	.string "Have a MOéMON hold it to gain\n"
 	.string "more EXP. Don’t fall behind!\p"
 	.string "All right, smell ya!$"
 
@@ -464,7 +464,7 @@ Kanto_CeruleanCity_Text_842F0F1::
 
 Kanto_CeruleanCity_Text_842F186::
 	.string "You’re making an encyclopedia on\n"
-	.string "POKéMON? That sounds amusing.$"
+	.string "MOéMON? That sounds amusing.$"
 
 Kanto_CeruleanCity_Text_842F1C5::
 	.string "The people here were robbed.\p"
@@ -492,8 +492,8 @@ Kanto_CeruleanCity_Text_842F2BD::
 
 Kanto_CeruleanCity_Text_842F2D0::
 	.string "No! That’s wrong!\n"
-	.string "It’s so hard to control POKéMON!\p"
-	.string "Your POKéMON’s obedience depends\n"
+	.string "It’s so hard to control MOéMON!\p"
+	.string "Your MOéMON’s obedience depends\n"
 	.string "on your abilities as a TRAINER.$"
 
 Kanto_CeruleanCity_Text_842F344::
@@ -515,12 +515,12 @@ Kanto_CeruleanCity_Text_842F3A3::
 
 Kanto_CeruleanCity_Text_842F3ED::
 	.string "This is CERULEAN CAVE.\p"
-	.string "Horribly strong POKéMON live inside\n"
+	.string "Horribly strong MOéMON live inside\n"
 	.string "there.\p"
 	.string "It takes a very special TRAINER to\n"
 	.string "be allowed inside there.\p"
 	.string "You’d have to be strong enough to\n"
-	.string "become the POKéMON LEAGUE\l"
+	.string "become the MOéMON LEAGUE\l"
 	.string "CHAMPION for starters.\p"
 	.string "And, you would have to have\n"
 	.string "made a great achievement.$"
@@ -532,16 +532,16 @@ Kanto_CeruleanCity_Text_842F4F4::
 
 Kanto_CeruleanCity_Text_842F527::
 	.string "TRAINER TIPS\p"
-	.string "A POKéMON can be made to hold\n"
+	.string "A MOéMON can be made to hold\n"
 	.string "an item.\p"
 	.string "Some items can even be used by\n"
-	.string "the holding POKéMON in battle.$"
+	.string "the holding MOéMON in battle.$"
 
 Kanto_CeruleanCity_Text_842F599::
 	.string "Grass and caves handled easily!\n"
 	.string "BIKE SHOP$"
 
 Kanto_CeruleanCity_Text_842F5C3::
-	.string "CERULEAN CITY POKéMON GYM\n"
+	.string "CERULEAN CITY MOéMON GYM\n"
 	.string "LEADER: MISTY\l"
 	.string "The Tomboyish Mermaid!$"

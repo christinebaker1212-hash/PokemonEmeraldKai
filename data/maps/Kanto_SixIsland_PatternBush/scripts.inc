@@ -92,20 +92,20 @@ Kanto_SixIsland_PatternBush_EventScript_8414431::
 
 Kanto_SixIsland_PatternBush_Text_842C643::
 	.string "I’m curious, how do you raise your\n"
-	.string "POKéMON?$"
+	.string "MOéMON?$"
 
 Kanto_SixIsland_PatternBush_Text_842C66F::
-	.string "You raise your POKéMON with a\n"
+	.string "You raise your MOéMON with a\n"
 	.string "whole lot of love!$"
 
 Kanto_SixIsland_PatternBush_Text_842C6A0::
 	.string "In the same way your mother raised\n"
 	.string "you full of love, you should raise\l"
-	.string "your POKéMON.$"
+	.string "your MOéMON.$"
 
 Kanto_SixIsland_PatternBush_Text_842C6F4::
 	.string "I’m working to preserve the natural\n"
-	.string "ecology of POKéMON here.$"
+	.string "ecology of MOéMON here.$"
 
 Kanto_SixIsland_PatternBush_Text_842C731::
 	.string "Oh, for someone so young, you are\n"
@@ -113,17 +113,17 @@ Kanto_SixIsland_PatternBush_Text_842C731::
 
 Kanto_SixIsland_PatternBush_Text_842C75F::
 	.string "I’m not saying that you shouldn’t\n"
-	.string "catch POKéMON.\p"
+	.string "catch MOéMON.\p"
 	.string "I just want people to raise their\n"
-	.string "POKéMON responsibly.$"
+	.string "MOéMON responsibly.$"
 
 Kanto_SixIsland_PatternBush_Text_842C7C7::
-	.string "I caught a BUG POKéMON that lives\n"
+	.string "I caught a BUG MOéMON that lives\n"
 	.string "only around here!$"
 
 Kanto_SixIsland_PatternBush_Text_842C7FB::
 	.string "Heheh…\n"
-	.string "Isn’t my POKéMON awesome?$"
+	.string "Isn’t my MOéMON awesome?$"
 
 Kanto_SixIsland_PatternBush_Text_842C81C::
 	.string "There’s a girl near the BUSH who\n"
@@ -131,11 +131,11 @@ Kanto_SixIsland_PatternBush_Text_842C81C::
 
 Kanto_SixIsland_PatternBush_Text_842C85E::
 	.string "You know, it just doesn’t feel right\n"
-	.string "if I don’t use BUG POKéMON.$"
+	.string "if I don’t use BUG MOéMON.$"
 
 Kanto_SixIsland_PatternBush_Text_842C89F::
 	.string "It’s okay, losing is a fun part of\n"
-	.string "POKéMON’s appeal, too.$"
+	.string "MOéMON’s appeal, too.$"
 
 Kanto_SixIsland_PatternBush_Text_842C8D9::
 	.string "By the way, “appeal” is a weird\n"
@@ -145,7 +145,7 @@ Kanto_SixIsland_PatternBush_Text_842C8D9::
 
 Kanto_SixIsland_PatternBush_Text_842C94F::
 	.string "Yeah, yeah, yeah!\n"
-	.string "Look at all the BUG POKéMON!$"
+	.string "Look at all the BUG MOéMON!$"
 
 Kanto_SixIsland_PatternBush_Text_842C97E::
 	.string "I got beat while I was still busy\n"
@@ -196,7 +196,7 @@ Kanto_SixIsland_PatternBush_Text_842CB99::
 	.string "Isn’t it refreshing?$"
 
 Kanto_SixIsland_PatternBush_Text_842CC07::
-	.string "I love BUG POKéMON.\n"
+	.string "I love BUG MOéMON.\n"
 	.string "That’s why I’m here all the time.\p"
 	.string "Am I the only girl like that?$"
 
@@ -206,7 +206,7 @@ Kanto_SixIsland_PatternBush_Text_842CC5B::
 
 Kanto_SixIsland_PatternBush_Text_842CC99::
 	.string "I’m going to keep on collecting\n"
-	.string "BUG POKéMON.\p"
+	.string "BUG MOéMON.\p"
 	.string "Am I the only girl like that?$"
 
 Kanto_SixIsland_PatternBush_Text_842CCE4::

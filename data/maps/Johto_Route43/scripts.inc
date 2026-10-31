@@ -61,43 +61,43 @@ Johto_Route43_EventScript_83F5113::
 	end
 
 Johto_Route43_Text_83F5120::
-	.string "I love POKéMON!\p"
+	.string "I love MOéMON!\p"
 	.string "That’s why I started--and why I’ll\n"
-	.string "keep on collecting POKéMON!$"
+	.string "keep on collecting MOéMON!$"
 
 Johto_Route43_Text_83F516F::
 	.string "How could you do this to me?$"
 
 Johto_Route43_Text_83F518C::
 	.string "What else do I like besides\n"
-	.string "POKéMON?\p"
+	.string "MOéMON?\p"
 	.string "MARY on the radio. I bet she’s\n"
 	.string "cute!$"
 
 Johto_Route43_Text_83F51D6::
 	.string "Hey! Do you have any rare\n"
-	.string "POKéMON?$"
+	.string "MOéMON?$"
 
 Johto_Route43_Text_83F51F9::
-	.string "Oh, my poor POKéMON! Darlings!$"
+	.string "Oh, my poor MOéMON! Darlings!$"
 
 Johto_Route43_Text_83F5218::
 	.string "I’d be happy just to own a single\n"
-	.string "rare POKéMON.$"
+	.string "rare MOéMON.$"
 
 Johto_Route43_Text_83F5248::
 	.string "Would you get this?\p"
 	.string "Some SILVER guy made fun of my\n"
-	.string "POKéMON!\p"
-	.string "Darn it! My POKéMON’s great!$"
+	.string "MOéMON!\p"
+	.string "Darn it! My MOéMON’s great!$"
 
 Johto_Route43_Text_83F52A1::
 	.string "My NIDOKING did pretty right on!$"
 
 Johto_Route43_Text_83F52C2::
 	.string "It’s okay for people to like\n"
-	.string "different types of POKéMON.\p"
-	.string "POKéMON isn’t just about having the\n"
+	.string "different types of MOéMON.\p"
+	.string "MOéMON isn’t just about having the\n"
 	.string "most powerful one.$"
 
 Johto_Route43_Text_83F5332::
@@ -110,13 +110,13 @@ Johto_Route43_Text_83F5384::
 
 Johto_Route43_Text_83F53A6::
 	.string "KURT’s LURE BALL is the best for\n"
-	.string "catching hooked POKéMON.\p"
+	.string "catching hooked MOéMON.\p"
 	.string "It’s much more effective than a\n"
 	.string "ULTRA BALL.$"
 
 Johto_Route43_Text_83F540C::
 	.string "I can do so much with my\n"
-	.string "POKéMON--it’s super-fun!$"
+	.string "MOéMON--it’s super-fun!$"
 
 Johto_Route43_Text_83F543E::
 	.string "Losing isn’t fun at all…$"
@@ -133,7 +133,7 @@ Johto_Route43_Text_83F54DB::
 	.string "I played too much!$"
 
 Johto_Route43_Text_83F54EE::
-	.string "I’m having a picnic with POKéMON.\p"
+	.string "I’m having a picnic with MOéMON.\p"
 	.string "Won’t you join us?$"
 
 Johto_Route43_Text_83F5549::
@@ -142,9 +142,9 @@ Johto_Route43_Text_83F5549::
 
 Johto_Route43_Text_83F556F::
 	.string "TRAINER TIPS\p"
-	.string "All POKéMON have pros and cons\n"
+	.string "All MOéMON have pros and cons\n"
 	.string "depending on their types.\p"
 	.string "If their types differ, a higher-\n"
-	.string "level POKéMON may lose in battle.\p"
+	.string "level MOéMON may lose in battle.\p"
 	.string "Learn which types are strong and\n"
-	.string "weak against your POKéMON’s type.$"
+	.string "weak against your MOéMON’s type.$"

@@ -688,7 +688,7 @@ Johto_ElmsLab_Text_82E0C31::
 	.string "Better not mess around with it.$"
 
 Johto_ElmsLab_Text_82E0C6E::
-	.string "It’s crammed with books on POKéMON.$"
+	.string "It’s crammed with books on MOéMON.$"
 
 Johto_ElmsLab_Text_83E1D2E::
 	.string "{PLAYER}!\p"
@@ -702,7 +702,7 @@ Johto_ElmsLab_Text_83E2392::
 Johto_ElmsLab_Text_83E23AC::
 	.string "ELM: {PLAYER}! There you are!\p"
 	.string "I needed to ask you a favor.\p"
-	.string "I’m conducting new POKéMON\n"
+	.string "I’m conducting new MOéMON\n"
 	.string "research right now. I was\l"
 	.string "wondering if you could help\l"
 	.string "me with it, {PLAYER}.\p"
@@ -713,7 +713,7 @@ Johto_ElmsLab_Text_83E23AC::
 	.string "don’t quite understand yet.\p"
 	.string "So!\p"
 	.string "I’d like you to raise a\n"
-	.string "POKéMON that I recently caught.$"
+	.string "MOéMON that I recently caught.$"
 
 Johto_ElmsLab_Text_83E24FB::
 	.string "Thanks, {PLAYER}!\n"
@@ -727,7 +727,7 @@ Johto_ElmsLab_Text_83E253B::
 	.string "When I announce my findings,\n"
 	.string "I’m sure we’ll delve deeper\p"
 	.string "into the many mysteries of\n"
-	.string "POKéMON.\p"
+	.string "MOéMON.\p"
 	.string "You can count on it!$"
 
 Johto_ElmsLab_Text_83E25AD::
@@ -739,14 +739,14 @@ Johto_ElmsLab_Text_83E25AD::
 Johto_ElmsLab_Text_83E25E9::
 	.string "Hey, listen.\p"
 	.string "I have an acquaintance called\n"
-	.string "MR. POKéMON.\p"
+	.string "MR. MOéMON.\p"
 	.string "He keeps finding weird things and\n"
 	.string "raving about his discoveries.\p"
 	.string "Anyway, I just got an e-mail\n"
 	.string "from him saying that this\l"
 	.string "time it’s real.\p"
 	.string "It is intriguing, but we’re\n"
-	.string "busy with our POKéMON research...\p"
+	.string "busy with our MOéMON research...\p"
 	.string "Wait!\n"
 	.string "I know!\p"
 	.string "{PLAYER}, can you go in our\n"
@@ -754,8 +754,8 @@ Johto_ElmsLab_Text_83E25E9::
 
 Johto_ElmsLab_Text_83E2711::
 	.string "I want you to raise one of\n"
-	.string "the POKéMON contained in these BALLS.\p"
-	.string "You’ll be that POKéMON’s\n"
+	.string "the MOéMON contained in these BALLS.\p"
+	.string "You’ll be that MOéMON’s\n"
 	.string "first partner, {PLAYER}!\p"
 	.string "Go on. Pick one!$"
 
@@ -765,26 +765,26 @@ Johto_ElmsLab_Text_83E278F::
 
 Johto_ElmsLab_Text_83E2858::
 	.string "ELM: I think that’s a great\n"
-	.string "POKéMON too!$"
+	.string "MOéMON too!$"
 
 Johto_ElmsLab_Text_83E2881::
 	.string "{PLAYER} received {STR_VAR_1}!$"
 
 Johto_ElmsLab_Text_83E2891::
-	.string "ELM: Take this POKéDEX, too.\p"
-	.string "Record the POKéMON you meet\n"
+	.string "ELM: Take this MOéDEX, too.\p"
+	.string "Record the MOéMON you meet\n"
 	.string "and catch some new partners!$"
 
 Johto_ElmsLab_Text_83E28E7::
 	.string "{PLAYER} received the\n"
-	.string "NATIONAL POKéDEX!$"
+	.string "NATIONAL MOéDEX!$"
 
 Johto_ElmsLab_Text_83E2909::
 	.string "Would you like to give your\n"
 	.string "{STR_VAR_1} a nickname?$"
 
 Johto_ElmsLab_Text_83E2934::
-	.string "MR. POKéMON lives a little bit\n"
+	.string "MR. MOéMON lives a little bit\n"
 	.string "beyond CHERRYGROVE, the next\l"
 	.string "city over.\p"
 	.string "It’s almost a direct route\n"
@@ -793,16 +793,16 @@ Johto_ElmsLab_Text_83E2934::
 	.string "anything happens!$"
 
 Johto_ElmsLab_Text_83E2A18::
-	.string "If a wild POKéMON appears, let\n"
-	.string "your POKéMON battle it!\p"
-	.string "If your POKéMON is hurt, you\n"
+	.string "If a wild MOéMON appears, let\n"
+	.string "your MOéMON battle it!\p"
+	.string "If your MOéMON is hurt, you\n"
 	.string "should heal it with the machine\l"
-	.string "to my right, or at the POKéCENTER.\p"
+	.string "to my right, or at the MOéCENTER.\p"
 	.string "I’m counting on you!$"
 
 Johto_ElmsLab_Text_83E2B4D::
 	.string "ELM: {PLAYER}, this is terrible…\p"
-	.string "Oh, yes, what was MR. POKéMON’s\n"
+	.string "Oh, yes, what was MR. MOéMON’s\n"
 	.string "big discovery?$"
 
 Johto_ElmsLab_Text_83E2B97::
@@ -813,11 +813,11 @@ Johto_ElmsLab_Text_83E2BBE::
 	.string "ELM: This?$"
 
 Johto_ElmsLab_Text_83E2BC9::
-	.string "But… Is it a POKéMON EGG?\p"
+	.string "But… Is it a MOéMON EGG?\p"
 	.string "If it is, it is a great\n"
 	.string "discovery!\p"
 	.string "ELM: What?!?\p"
-	.string "PROF.OAK gave you a POKéDEX?\p"
+	.string "PROF.OAK gave you a MOéDEX?\p"
 	.string "{PLAYER}, is that true?\n"
 	.string "Th-that’s incredible!\p"
 	.string "He is superb at seeing the\n"
@@ -825,8 +825,8 @@ Johto_ElmsLab_Text_83E2BC9::
 	.string "Wow, {PLAYER}. You may have what\n"
 	.string "it takes to become the CHAMPION.\p"
 	.string "You seem to be getting on\n"
-	.string "great with POKéMON too.\p"
-	.string "You should take the POKéMON\n"
+	.string "great with MOéMON too.\p"
+	.string "You should take the MOéMON\n"
 	.string "GYM challenge.\p"
 	.string "The closest GYM would be the\n"
 	.string "one in VIOLET CITY.\p"
@@ -848,29 +848,29 @@ Johto_ElmsLab_Text_83E2F09::
 	.string "ELM: {PLAYER}, you look great!$"
 
 Johto_ElmsLab_Text_83E2F22::
-	.string "What? That POKéMON!?!$"
+	.string "What? That MOéMON!?!$"
 
 Johto_ElmsLab_Text_83E2F38::
-	.string "The EGG hatched! So, POKéMON\n"
+	.string "The EGG hatched! So, MOéMON\n"
 	.string "are born from EGGS…\p"
-	.string "No, perhaps not all POKéMON\n"
+	.string "No, perhaps not all MOéMON\n"
 	.string "are.\p"
 	.string "Wow, there’s still a lot of\n"
 	.string "research to be done.$"
 
 Johto_ElmsLab_Text_83E2FBB::
 	.string "Thanks, {PLAYER}! You’re helping\n"
-	.string "unravel POKéMON mysteries for us!\p"
+	.string "unravel MOéMON mysteries for us!\p"
 	.string "I want you to have this as a\n"
 	.string "token of our appreciation.$"
 
 Johto_ElmsLab_Text_83E3030::
 	.string "That’s an EVERSTONE.\p"
-	.string "Some species of POKéMON evolve\n"
+	.string "Some species of MOéMON evolve\n"
 	.string "when they grow to certain levels.\p"
-	.string "A POKéMON holding the EVERSTONE\n"
+	.string "A MOéMON holding the EVERSTONE\n"
 	.string "won’t evolve.\p"
-	.string "Give it to a POKéMON you don’t\n"
+	.string "Give it to a MOéMON you don’t\n"
 	.string "want to evolve.$"
 
 Johto_ElmsLab_Text_83E3154::
@@ -883,9 +883,9 @@ Johto_ElmsLab_Text_83E3154::
 Johto_ElmsLab_Text_83E31B5::
 	.string "The MASTER BALL is the best!\p"
 	.string "It’s the ultimate BALL! It’ll\n"
-	.string "catch any POKéMON without fail.\p"
+	.string "catch any MOéMON without fail.\p"
 	.string "It’s given only to recognized\n"
-	.string "POKéMON researchers.\p"
+	.string "MOéMON researchers.\p"
 	.string "I think you can make much better\n"
 	.string "use of it than I can, {PLAYER}!$"
 
@@ -964,21 +964,21 @@ Johto_ElmsLab_Text_83E37C8::
 	.string "There was a loud noise\n"
 	.string "outside…\p"
 	.string "When we went to look,\n"
-	.string "someone stole a POKéMON.\p"
+	.string "someone stole a MOéMON.\p"
 	.string "It’s unbelievable that anyone\n"
 	.string "would do that!\p"
-	.string "…sigh… That stolen POKéMON.\p"
+	.string "…sigh… That stolen MOéMON.\p"
 	.string "I wonder how it’s doing.\p"
-	.string "They say a POKéMON raised by a\n"
+	.string "They say a MOéMON raised by a\n"
 	.string "bad person turns bad itself.$"
 
 Johto_ElmsLab_Text_83E38B5::
 	.string "{PLAYER}!\p"
-	.string "Use these on your POKéDEX\n"
+	.string "Use these on your MOéDEX\n"
 	.string "quest!$"
 
 Johto_ElmsLab_Text_83E393B::
-	.string "I heard a POKéMON was stolen\n"
+	.string "I heard a MOéMON was stolen\n"
 	.string "here…\p"
 	.string "I was just getting some\n"
 	.string "information from PROF.ELM.\p"
@@ -1002,7 +1002,7 @@ Johto_ElmsLab_Text_83E3A4E::
 
 Johto_ElmsLab_Text_83E3A68::
 	.string "Ah, {PLAYER}!\p"
-	.string "How’s your POKéDEX coming along?\n"
+	.string "How’s your MOéDEX coming along?\n"
 	.string "I’m busy now, but visit sometime\l"
 	.string "and I can check your progress!$"
 
@@ -1011,4 +1011,4 @@ Johto_ElmsLab_Text_8401E3B::
 
 Johto_ElmsLab_Text_8401E64::
 	.string "ELM: Good heavens!\n"
-	.string "That Pokémon... is ARCEUS!$"
+	.string "That MOéMON... is ARCEUS!$"

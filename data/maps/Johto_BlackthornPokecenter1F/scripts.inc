@@ -19,12 +19,12 @@ Johto_BlackthornPokecenter1F_EventScript_83C8293::
 
 Johto_BlackthornPokecenter1F_Text_83C829C::
 	.string "Deep inside far-off INDIGO\n"
-	.string "PLATEAU is the POKéMON LEAGUE.\p"
+	.string "PLATEAU is the MOéMON LEAGUE.\p"
 	.string "I hear the best trainers gather\n"
 	.string "there from around the country.$"
 
 Johto_BlackthornPokecenter1F_Text_83C8315::
 	.string "There was this move I just had\n"
-	.string "to teach my POKéMON.\p"
+	.string "to teach my MOéMON.\p"
 	.string "So I got the MOVE DELETER to make\n"
 	.string "it forget an HM move.$"

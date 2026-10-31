@@ -40,7 +40,7 @@ Kanto_SixIsland_WaterPath_House1_EventScript_8421EA2::
 	end
 
 Kanto_SixIsland_WaterPath_House1_Text_8421EBA::
-	.string "HERACROSS is my favorite POKéMON!\p"
+	.string "HERACROSS is my favorite MOéMON!\p"
 	.string "Bring one in your party, and\n"
 	.string "I’ll give you a gift for showing me!$"
 

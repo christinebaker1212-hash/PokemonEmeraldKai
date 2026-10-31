@@ -112,7 +112,7 @@ Johto_SlowpokeWellB1F_Text_83F9C67::
 	.string "the WELL.\p"
 	.string "I slammed down hard on my back,\n"
 	.string "so I can’t move.\p"
-	.string "Rats! If I were fit, my POKéMON\n"
+	.string "Rats! If I were fit, my MOéMON\n"
 	.string "would’ve punished them…\p"
 	.string "Ah, it can’t be helped.\p"
 	.string "{PLAYER}, show them how gutsy\n"

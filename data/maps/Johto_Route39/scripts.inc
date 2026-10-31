@@ -238,7 +238,7 @@ Johto_Route39_Movement_83F3025:
 
 Johto_Route39_Text_83F2DF6::
 	.string "BAOBA: GOOD HEAVENS! Did that\n"
-	.string "shadow belong to a POKéMON?\p"
+	.string "shadow belong to a MOéMON?\p"
 	.string "Those golden feathers... No doubt\n"
 	.string "about it--that was HO-OH!$"
 
@@ -246,7 +246,7 @@ Johto_Route39_Text_83F2E6C::
 	.string "How strange...\p"
 	.string "...Oh!\n"
 	.string "What you are holding is...\l"
-	.string "what they call... a POKéDEX!\p"
+	.string "what they call... a MOéDEX!\p"
 	.string "Haven’t seen one of those in ages.\p"
 	.string "My name is BAOBA!\n"
 	.string "I used to run a SAFARI ZONE in\l"
@@ -266,13 +266,13 @@ Johto_Route39_Text_83F3047::
 
 Johto_Route39_Text_83F3099::
 	.string "I just got back to OLIVINE.\p"
-	.string "So how about a POKéMON battle?$"
+	.string "So how about a MOéMON battle?$"
 
 Johto_Route39_Text_83F30D4::
 	.string "Awaaargh!$"
 
 Johto_Route39_Text_83F30DE::
-	.string "My POKéMON were caught and\n"
+	.string "My MOéMON were caught and\n"
 	.string "raised overseas.\p"
 	.string "They’re my companions on\n"
 	.string "those long voyages.$"
@@ -288,12 +288,12 @@ Johto_Route39_Text_83F317C::
 Johto_Route39_Text_83F319F::
 	.string "I’m not listening to your\n"
 	.string "bragging!\p"
-	.string "We POKé FANS have a policy\n"
+	.string "We MOé FANS have a policy\n"
 	.string "of not listening to bragging!$"
 
 Johto_Route39_Text_83F3213::
-	.string "Such darling POKéMON.\p"
-	.string "Let’s show our POKéMON\n"
+	.string "Such darling MOéMON.\p"
+	.string "Let’s show our MOéMON\n"
 	.string "together at the same time.$"
 
 Johto_Route39_Text_83F325B::
@@ -301,19 +301,19 @@ Johto_Route39_Text_83F325B::
 
 Johto_Route39_Text_83F3270::
 	.string "Do you know about baby\n"
-	.string "POKéMON?\p"
+	.string "MOéMON?\p"
 	.string "I bet they’re just adorable!$"
 
 Johto_Route39_Text_83F32C4::
 	.string "Let me see what your\n"
-	.string "POKéMON are capable of.$"
+	.string "MOéMON are capable of.$"
 
 Johto_Route39_Text_83F32F1::
-	.string "Ooh, your POKéMON have\n"
+	.string "Ooh, your MOéMON have\n"
 	.string "potential.$"
 
 Johto_Route39_Text_83F3313::
-	.string "You know how POKéMON have\n"
+	.string "You know how MOéMON have\n"
 	.string "different abilities?\p"
 	.string "People are like that too.\n"
 	.string "Everyone has different\l"
@@ -348,8 +348,8 @@ Johto_Route39_Text_83F34BF::
 Johto_Route39_Text_83F34F6::
 	.string "TRAINER TIPS\p"
 	.string "Use HEADBUTT on trees to shake\n"
-	.string "POKéMON out.\p"
-	.string "Different kinds of POKéMON\n"
+	.string "MOéMON out.\p"
+	.string "Different kinds of MOéMON\n"
 	.string "drop out of trees.\p"
 	.string "Use HEADBUTT on any tree\n"
 	.string "you see!$"

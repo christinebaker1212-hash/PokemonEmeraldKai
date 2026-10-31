@@ -25,11 +25,11 @@ Kanto_SaffronCity_Mart_EventScript_841F061::
 	end
 
 Kanto_SaffronCity_Mart_Text_844BEEA::
-	.string "MAX REPEL keeps weaker POKéMON\n"
+	.string "MAX REPEL keeps weaker MOéMON\n"
 	.string "from appearing.\p"
 	.string "MAX REPEL stays effective longer\n"
 	.string "than SUPER REPEL.$"
 
 Kanto_SaffronCity_Mart_Text_844BF4C::
 	.string "REVIVE is costly, but it revives\n"
-	.string "fainted POKéMON!$"
+	.string "fainted MOéMON!$"

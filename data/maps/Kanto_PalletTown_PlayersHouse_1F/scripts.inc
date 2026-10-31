@@ -74,7 +74,7 @@ Kanto_PalletTown_PlayersHouse_1F_Text_843D6E9::
 
 Kanto_PalletTown_PlayersHouse_1F_Text_843D710::
 	.string "MOM: Oh, good! You and your\n"
-	.string "POKéMON are looking great.\l"
+	.string "MOéMON are looking great.\l"
 	.string "Take care now!$"
 
 Kanto_PalletTown_PlayersHouse_1F_Text_843D756::

@@ -10,4 +10,4 @@ Kanto_FourIsland_House2_Text_8462B3F::
 	.string "I collect stickers from places\n"
 	.string "I’ve visited.\p"
 	.string "Each one reminds me of a trip\n"
-	.string "and the POKéMON I met there.$"
+	.string "and the MOéMON I met there.$"

@@ -128,7 +128,7 @@ Kanto_CeladonCity_DepartmentStore_4F_Text_8445C20::
 	.string "They’re by the berries and remedies!$"
 
 Kanto_CeladonCity_DepartmentStore_4F_Text_8445C61::
-	.string "A held berry can help your POKéMON\n"
+	.string "A held berry can help your MOéMON\n"
 	.string "during battle.\p"
 	.string "Pick one that suits your partner!$"
 
@@ -138,5 +138,5 @@ Kanto_CeladonCity_DepartmentStore_4F_Text_8445CB5::
 	.string "and vitamins.$"
 
 Kanto_CeladonCity_DepartmentStore_4F_Text_8445CF3::
-	.string "Take good care of your POKéMON.\n"
+	.string "Take good care of your MOéMON.\n"
 	.string "Which section would you like?$"

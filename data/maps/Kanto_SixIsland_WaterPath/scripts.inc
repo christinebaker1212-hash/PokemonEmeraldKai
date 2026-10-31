@@ -128,7 +128,7 @@ Kanto_SixIsland_WaterPath_Text_843BBB1::
 Kanto_SixIsland_WaterPath_Text_843BBE0::
 	.string "I want to go to the woods over\n"
 	.string "there, but…\p"
-	.string "There are lots of BUG POKéMON.\n"
+	.string "There are lots of BUG MOéMON.\n"
 	.string "They scare me a little.$"
 
 Kanto_SixIsland_WaterPath_Text_843BC42::
@@ -163,7 +163,7 @@ Kanto_SixIsland_WaterPath_Text_843BDA9::
 
 Kanto_SixIsland_WaterPath_Text_843BDC9::
 	.string "When I can’t be with my boyfriend,\n"
-	.string "I spend time with the POKéMON he\l"
+	.string "I spend time with the MOéMON he\l"
 	.string "gave me.$"
 
 Kanto_SixIsland_WaterPath_Text_843BE16::
@@ -179,7 +179,7 @@ Kanto_SixIsland_WaterPath_Text_843BE74::
 	.string "these parts?$"
 
 Kanto_SixIsland_WaterPath_Text_843BEA3::
-	.string "MIU: Hello, POKéMON!\n"
+	.string "MIU: Hello, MOéMON!\n"
 	.string "It’s time to play!$"
 
 Kanto_SixIsland_WaterPath_Text_843BECB::
@@ -195,7 +195,7 @@ Kanto_SixIsland_WaterPath_Text_843BF0D::
 	.string "We want to battle together.$"
 
 Kanto_SixIsland_WaterPath_Text_843BF43::
-	.string "MIA: Hello, POKéMON!\n"
+	.string "MIA: Hello, MOéMON!\n"
 	.string "It’s time to battle!$"
 
 Kanto_SixIsland_WaterPath_Text_843BF6D::
@@ -204,11 +204,11 @@ Kanto_SixIsland_WaterPath_Text_843BF6D::
 
 Kanto_SixIsland_WaterPath_Text_843BF97::
 	.string "MIA: Ohh…\n"
-	.string "I’m sorry, my POKéMON…$"
+	.string "I’m sorry, my MOéMON…$"
 
 Kanto_SixIsland_WaterPath_Text_843BFB8::
 	.string "MIA: Oh, you only have one\n"
-	.string "POKéMON?\p"
+	.string "MOéMON?\p"
 	.string "Don’t you feel lonesome?$"
 
 Kanto_SixIsland_WaterPath_Text_843BFF5::
@@ -242,9 +242,9 @@ Kanto_SixIsland_WaterPath_Text_84715A0::
 	.string "mountains around these parts?$"
 
 Kanto_SixIsland_WaterPath_Text_84715DE::
-	.string "MIU: Hello, POKéMON!\n"
+	.string "MIU: Hello, MOéMON!\n"
 	.string "It’s time to play again!$"
 
 Kanto_SixIsland_WaterPath_Text_847160C::
-	.string "MIA: Hello, POKéMON!\n"
+	.string "MIA: Hello, MOéMON!\n"
 	.string "It’s time to battle again!$"

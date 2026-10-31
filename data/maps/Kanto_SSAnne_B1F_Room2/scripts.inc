@@ -15,11 +15,11 @@ Kanto_SSAnne_B1F_Room2_EventScript_846BB3B::
 	end
 
 Kanto_SSAnne_B1F_Room2_Text_84247FB::
-	.string "Even us sailors have POKéMON, too!$"
+	.string "Even us sailors have MOéMON, too!$"
 
 Kanto_SSAnne_B1F_Room2_Text_842481E::
 	.string "Okay, you’re not bad.$"
 
 Kanto_SSAnne_B1F_Room2_Text_8424834::
-	.string "We caught all our POKéMON while\n"
+	.string "We caught all our MOéMON while\n"
 	.string "we were out at sea.$"

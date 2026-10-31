@@ -86,8 +86,8 @@ Kanto_SaffronCity_PokemonTrainerFanClub_EventScript_841F513::
 
 Kanto_SaffronCity_PokemonTrainerFanClub_Text_844D471::
 	.string "We’re trying to complete\n"
-	.string "Kanto’s Pokédex.\p"
-	.string "Even if you own a Pokémon from\n"
+	.string "Kanto’s MOéDEX.\p"
+	.string "Even if you own a MOéMON from\n"
 	.string "another region, you must obtain or\p"
 	.string "evolve it here to register it\n"
 	.string "in our regional collection.\p"
@@ -110,7 +110,7 @@ Kanto_SaffronCity_PokemonTrainerFanClub_Text_844D5D2::
 Kanto_SaffronCity_PokemonTrainerFanClub_Text_844D649::
 	.string "The lab on Cinnabar Island can\n"
 	.string "revive many different fossils.\p"
-	.string "Some Pokémon even need two\n"
+	.string "Some MOéMON even need two\n"
 	.string "compatible pieces to be restored!$"
 
 Kanto_SaffronCity_PokemonTrainerFanClub_Text_844D6C4::
@@ -128,13 +128,13 @@ Kanto_SaffronCity_PokemonTrainerFanClub_Text_844D72E::
 Kanto_SaffronCity_PokemonTrainerFanClub_Text_844D78D::
 	.string "On Seven Island, there’s a cave\n"
 	.string "with seven boulders and switches.\p"
-	.string "Bring a Pokémon that can use\n"
+	.string "Bring a MOéMON that can use\n"
 	.string "Strength. That puzzle is linked\p"
 	.string "to the secret of the Tanoby Ruins.$"
 
 Kanto_SaffronCity_PokemonTrainerFanClub_Text_844D82F::
 	.string "I love music that brings\n"
-	.string "people and Pokémon together.\p"
+	.string "people and MOéMON together.\p"
 	.string "I’m always looking for\n"
 	.string "new places to dance!$"
 
@@ -147,12 +147,12 @@ Kanto_SaffronCity_PokemonTrainerFanClub_Text_844D891::
 	.string "the celebration...$"
 
 Kanto_SaffronCity_PokemonTrainerFanClub_Text_844D933::
-	.string "I love Pokémon dolls!\p"
+	.string "I love MOéMON dolls!\p"
 	.string "Someday, I want a collection\n"
 	.string "big enough to fill this house!$"
 
 Kanto_SaffronCity_PokemonTrainerFanClub_Text_844D985::
-	.string "I love Lorelei’s Pokémon dolls!\p"
+	.string "I love Lorelei’s MOéMON dolls!\p"
 	.string "Her collection starts growing after\n"
 	.string "you beat the Kanto League twice.\p"
 	.string "The last one appears after twenty\n"

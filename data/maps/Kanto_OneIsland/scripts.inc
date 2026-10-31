@@ -138,7 +138,7 @@ Kanto_OneIsland_Text_8431938::
 	.string "My granddaughter was in a tizzy\n"
 	.string "over CELIO’s friend.\p"
 	.string "Something about a famous\n"
-	.string "POKéMANIAC?\p"
+	.string "MOéMANIAC?\p"
 	.string "I’m not sure what that means, but\n"
 	.string "CELIO is quite the man!$"
 
@@ -165,8 +165,8 @@ Kanto_OneIsland_Text_8431BCB::
 	.string "Friends Gather at Knot Island$"
 
 Kanto_OneIsland_Text_8431BF4::
-	.string "Expanding the POKéMON World!\n"
-	.string "POKéMON NET CENTER$"
+	.string "Expanding the MOéMON World!\n"
+	.string "MOéMON NET CENTER$"
 
 Kanto_OneIsland_Text_8431C34::
 	.string "Hi, sight-seeing, are you?\n"

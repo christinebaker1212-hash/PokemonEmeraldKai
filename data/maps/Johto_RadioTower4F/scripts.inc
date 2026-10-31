@@ -130,7 +130,7 @@ Johto_RadioTower4F_Text_83D8A27::
 
 Johto_RadioTower4F_Text_83D8A58::
 	.string "MARY: Please tune into me on PROF.\n"
-	.string "OAK’S POKéMON TALK show!$"
+	.string "OAK’S MOéMON TALK show!$"
 
 Johto_RadioTower4F_Text_83D8AA4::
 	.string "You plan to rescue the DIRECTOR?\p"
@@ -144,8 +144,8 @@ Johto_RadioTower4F_Text_83D8B0D::
 	.string "I don’t believe it! I was beaten!$"
 
 Johto_RadioTower4F_Text_83D8BF1::
-	.string "Don’t I think POKéMON are cute?\p"
-	.string "I’ll think my POKéMON are cute--\p"
+	.string "Don’t I think MOéMON are cute?\p"
+	.string "I’ll think my MOéMON are cute--\p"
 	.string "after they beat yours!$"
 
 Johto_RadioTower4F_Text_83D8C49::
@@ -153,7 +153,7 @@ Johto_RadioTower4F_Text_83D8C49::
 
 Johto_RadioTower4F_Text_83D8C65::
 	.string "I love my beautiful self!\p"
-	.string "Who cares about POKéMON?$"
+	.string "Who cares about MOéMON?$"
 
 Johto_RadioTower4F_Text_83D8C98::
 	.string "Most excellent.\p"

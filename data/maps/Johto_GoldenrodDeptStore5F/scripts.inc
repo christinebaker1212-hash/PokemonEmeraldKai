@@ -78,11 +78,11 @@ Johto_GoldenrodDeptStore5F_Mart_83D3ED4:
 
 Johto_GoldenrodDeptStore5F_Text_83D445B::
 	.string "During the day, a lady comes to check\n"
-	.string "out POKéMON.\p"
+	.string "out MOéMON.\p"
 	.string "She even gives away TMs!$"
 
 Johto_GoldenrodDeptStore5F_Text_83D44A7::
-	.string "You can’t rename a POKéMON you get\n"
+	.string "You can’t rename a MOéMON you get\n"
 	.string "in a trade.\p"
 	.string "The name is a reflection of the\n"
 	.string "original trainer’s feelings for it.$"

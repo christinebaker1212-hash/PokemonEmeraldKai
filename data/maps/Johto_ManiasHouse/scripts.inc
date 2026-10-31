@@ -40,21 +40,21 @@ Johto_ManiasHouse_Text_83CB26F::
 	.string "A guy about your age with piercing\n"
 	.string "eyes and long hair came in.\p"
 	.string "He scared me into giving him my\n"
-	.string "prized POKéMON!\p"
+	.string "prized MOéMON!\p"
 	.string "I still have one left, but what if\n"
 	.string "he comes back?\p"
 	.string "You look strong. Would you like\n"
-	.string "to take my POKéMON with you?$"
+	.string "to take my MOéMON with you?$"
 
 Johto_ManiasHouse_Text_83CB3BE::
 	.string "Oh, no… What’ll I do if he comes\n"
 	.string "back?$"
 
 Johto_ManiasHouse_Text_83CB472::
-	.string "I want my POKéMON to travel with you.\n"
+	.string "I want my MOéMON to travel with you.\n"
 	.string "You can keep it for good!\p"
 	.string "Just promise to take good care of it.$"
 
 Johto_ManiasHouse_Text_83CB521::
-	.string "For POKéMON, happiness is being\n"
+	.string "For MOéMON, happiness is being\n"
 	.string "with a person who treats them well.$"

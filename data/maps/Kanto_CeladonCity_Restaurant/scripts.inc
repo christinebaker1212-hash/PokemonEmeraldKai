@@ -56,7 +56,7 @@ Kanto_CeladonCity_Restaurant_Text_8447A24::
 	.string "right now.$"
 
 Kanto_CeladonCity_Restaurant_Text_8447A53::
-	.string "My POKéMON are weak, so I often\n"
+	.string "My MOéMON are weak, so I often\n"
 	.string "have to go to the DRUGSTORE.$"
 
 Kanto_CeladonCity_Restaurant_Text_8447A90::

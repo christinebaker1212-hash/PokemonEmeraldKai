@@ -80,18 +80,18 @@ Kanto_Route16_NorthEntrance_2F_Text_844FF31::
 Kanto_Route16_NorthEntrance_2F_Text_844FF86::
 	.string "Hi! Remember me?\n"
 	.string "I’m one of PROF. OAK’s AIDES.\p"
-	.string "If your POKéDEX has complete data\n"
+	.string "If your MOéDEX has complete data\n"
 	.string "on 40 species, I’m supposed to\l"
 	.string "give you a reward.\p"
 	.string "PROF. OAK entrusted me with an\n"
 	.string "AMULET COIN for you.\p"
 	.string "So, {PLAYER}, let me ask you.\p"
 	.string "Have you gathered data on at least\n"
-	.string "40 kinds of POKéMON?$"
+	.string "40 kinds of MOéMON?$"
 
 Kanto_Route16_NorthEntrance_2F_Text_845008D::
 	.string "Great! You have caught or owned\n"
-	.string "{STR_VAR_3} kinds of POKéMON!\p"
+	.string "{STR_VAR_3} kinds of MOéMON!\p"
 	.string "Congratulations!\n"
 	.string "Here you go!$"
 
@@ -101,6 +101,6 @@ Kanto_Route16_NorthEntrance_2F_Text_84500E0::
 
 Kanto_Route16_NorthEntrance_2F_Text_845010B::
 	.string "An AMULET COIN is an item to be\n"
-	.string "held by a POKéMON.\p"
-	.string "If the POKéMON appears in a winning\n"
+	.string "held by a MOéMON.\p"
+	.string "If the MOéMON appears in a winning\n"
 	.string "battle, you will earn more money.$"

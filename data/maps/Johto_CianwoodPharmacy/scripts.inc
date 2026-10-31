@@ -30,10 +30,10 @@ Johto_CianwoodPharmacy_EventScript_83CB9A2::
 	end
 
 Johto_CianwoodPharmacy_Text_83CB9AD::
-	.string "Your POKéMON appear to be fine.\p"
+	.string "Your MOéMON appear to be fine.\p"
 	.string "Is something worrying you?\p"
 	.string "…\p"
-	.string "The LIGHTHOUSE POKéMON is in\n"
+	.string "The LIGHTHOUSE MOéMON is in\n"
 	.string "trouble?\p"
 	.string "I got it!\p"
 	.string "This ought to do the trick.$"

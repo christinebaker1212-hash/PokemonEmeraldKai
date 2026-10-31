@@ -163,14 +163,14 @@ Kanto_FuchsiaCity_EventScript_8471C9C::
 
 Kanto_FuchsiaCity_Text_843074A::
 	.string "Did you try the SAFARI GAME?\p"
-	.string "There are some rare POKéMON that\n"
+	.string "There are some rare MOéMON that\n"
 	.string "can only be caught there.$"
 
 Kanto_FuchsiaCity_Text_84307A2::
 	.string "The SAFARI ZONE has a zoo in front\n"
 	.string "of the entrance.\p"
 	.string "Out back is the SAFARI GAME for\n"
-	.string "catching POKéMON.$"
+	.string "catching MOéMON.$"
 
 Kanto_FuchsiaCity_Text_8430808::
 	.string "ERIK: Where’s SARA?\n"
@@ -180,26 +180,26 @@ Kanto_FuchsiaCity_Text_8430836::
 	.string "That item ball in there…\n"
 	.string "Were you wanting that?\p"
 	.string "Me, too!\n"
-	.string "…Huh? That’s a POKéMON?$"
+	.string "…Huh? That’s a MOéMON?$"
 
 Kanto_FuchsiaCity_Text_8430887::
 	.string "FUCHSIA CITY\n"
 	.string "Behold! It’s Passion Pink!$"
 
 Kanto_FuchsiaCity_Text_84308AF::
-	.string "POKéMON PARADISE\n"
+	.string "MOéMON PARADISE\n"
 	.string "SAFARI ZONE$"
 
 Kanto_FuchsiaCity_Text_84308CC::
 	.string "SAFARI GAME\n"
-	.string "POKéMON-U-CATCH!$"
+	.string "MOéMON-U-CATCH!$"
 
 Kanto_FuchsiaCity_Text_84308E9::
 	.string "SAFARI ZONE\n"
 	.string "WARDEN’S HOME$"
 
 Kanto_FuchsiaCity_Text_8430944::
-	.string "FUCHSIA CITY POKéMON GYM\n"
+	.string "FUCHSIA CITY MOéMON GYM\n"
 	.string "LEADER: KOGA\l"
 	.string "The Poisonous Ninja Master$"
 
@@ -213,7 +213,7 @@ Kanto_FuchsiaCity_Text_84309B5::
 
 Kanto_FuchsiaCity_Text_84309E2::
 	.string "Name: KANGASKHAN\p"
-	.string "A maternal POKéMON that raises its\n"
+	.string "A maternal MOéMON that raises its\n"
 	.string "young in a pouch on its belly.$"
 
 Kanto_FuchsiaCity_Text_8430A35::
@@ -226,16 +226,16 @@ Kanto_FuchsiaCity_Text_8430A63::
 
 Kanto_FuchsiaCity_Text_8430A8A::
 	.string "Name: OMANYTE\n"
-	.string "An extremely rare POKéMON that was\l"
+	.string "An extremely rare MOéMON that was\l"
 	.string "regenerated from a fossil.$"
 
 Kanto_FuchsiaCity_Text_8430AD6::
 	.string "Name: KABUTO\n"
-	.string "An extremely rare POKéMON that was\l"
+	.string "An extremely rare MOéMON that was\l"
 	.string "regenerated from a fossil.$"
 
 Kanto_FuchsiaCity_Text_8430C99::
 	.string "My father is the GYM LEADER of\n"
 	.string "this town.\p"
-	.string "I’m training to use POISON POKéMON\n"
+	.string "I’m training to use POISON MOéMON\n"
 	.string "as well as my father.$"

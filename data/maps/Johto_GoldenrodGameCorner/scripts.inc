@@ -412,7 +412,7 @@ Johto_GoldenrodGameCorner_Text_82F6845::
 
 Johto_GoldenrodGameCorner_Text_835E3D6::
 	.string "Hm? You don’t seem to have any room\n"
-	.string "for this POKéMON.$"
+	.string "for this MOéMON.$"
 
 Johto_GoldenrodGameCorner_Text_8361655::
 	.string "Do you want to give a nickname to\n"
@@ -422,7 +422,7 @@ Johto_GoldenrodGameCorner_Text_83D542A::
 	.string "This is GOLDENROD GAME CORNER.$"
 
 Johto_GoldenrodGameCorner_Text_83D5449::
-	.string "All POKéMON prizes are at the\n"
+	.string "All MOéMON prizes are at the\n"
 	.string "counter to the right.\p"
 	.string "My colleague will show you the list!$"
 
@@ -470,7 +470,7 @@ Johto_GoldenrodGameCorner_Text_83D569F::
 	.string "But the payout is much lower.$"
 
 Johto_GoldenrodGameCorner_Text_83D5724::
-	.string "I taught ICE BEAM to my POKéMON.\p"
+	.string "I taught ICE BEAM to my MOéMON.\p"
 	.string "It was hard to get enough coins for\n"
 	.string "it, but it was worth it.$"
 

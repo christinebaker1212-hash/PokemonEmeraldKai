@@ -69,7 +69,7 @@ Kanto_SevenIsland_TanobyRuins_Text_843D379::
 	.string "why it was built in the first place.$"
 
 Kanto_SevenIsland_TanobyRuins_Text_843D3F1::
-	.string "A mystic POKéMON is said to sleep\n"
+	.string "A mystic MOéMON is said to sleep\n"
 	.string "inside here.$"
 
 Kanto_SevenIsland_TanobyRuins_Text_843D420::
@@ -79,7 +79,7 @@ Kanto_SevenIsland_TanobyRuins_Text_843D43D::
 	.string "I hear there are other ruins like\n"
 	.string "the one here.\p"
 	.string "Might they be the resting places\n"
-	.string "of other mystic POKéMON?$"
+	.string "of other mystic MOéMON?$"
 
 Kanto_SevenIsland_TanobyRuins_Text_843D4A7::
 	.string "CLIFFORD is teaching me how to\n"
@@ -102,7 +102,7 @@ Kanto_SevenIsland_TanobyRuins_Text_843D585::
 	.string "My, how extraordinary.$"
 
 Kanto_SevenIsland_TanobyRuins_Text_843D59C::
-	.string "Ah, so you are studying POKéMON\n"
+	.string "Ah, so you are studying MOéMON\n"
 	.string "on your own…\p"
 	.string "Yes, you certainly are quite the\n"
 	.string "extraordinary person, indeed.$"
@@ -112,7 +112,7 @@ Kanto_SevenIsland_TanobyRuins_Text_8471B79::
 	.string "this stone chamber?$"
 
 Kanto_SevenIsland_TanobyRuins_Text_8471BB0::
-	.string "A mystic POKéMON is said to sleep\n"
+	.string "A mystic MOéMON is said to sleep\n"
 	.string "inside here.$"
 
 Kanto_SevenIsland_TanobyRuins_Text_8471BDF::

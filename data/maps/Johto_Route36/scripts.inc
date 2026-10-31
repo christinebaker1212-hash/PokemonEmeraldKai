@@ -257,7 +257,7 @@ Johto_Route36_Text_83F1DE2::
 
 Johto_Route36_Text_83F1E04::
 	.string "Be careful at night on this route!\p"
-	.string "I saw a POKéMON that looked like\n"
+	.string "I saw a MOéMON that looked like\n"
 	.string "GROWLITHE, but it had a scary aura\l"
 	.string "to it.$"
 
@@ -265,7 +265,7 @@ Johto_Route36_Text_83F1E72::
 	.string "That odd tree disappeared without\n"
 	.string "a trace.\p"
 	.string "Oh! That tree was really a\n"
-	.string "POKéMON?$"
+	.string "MOéMON?$"
 
 Johto_Route36_Text_83F1EC1::
 	.string "I’m going to read your thoughts!$"
@@ -279,7 +279,7 @@ Johto_Route36_Text_83F1EF1::
 
 Johto_Route36_Text_83F1F33::
 	.string "Thanks to my studies, I’m ready\n"
-	.string "for any POKéMON!$"
+	.string "for any MOéMON!$"
 
 Johto_Route36_Text_83F1F64::
 	.string "Oops! Computation error?$"
@@ -302,7 +302,7 @@ Johto_Route36_Text_83F204F::
 	.string "Here. You can have this.$"
 
 Johto_Route36_Text_83F2068::
-	.string "ARTHUR: A POKéMON that uses ROCK-\n"
+	.string "ARTHUR: A MOéMON that uses ROCK-\n"
 	.string "type moves should hold on to that.\p"
 	.string "It pumps up ROCK-type attacks.$"
 
@@ -316,8 +316,8 @@ Johto_Route36_Text_83F2115::
 
 Johto_Route36_Text_83F2132::
 	.string "TRAINER TIPS\n"
-	.string "POKéMON stats vary--even within\l"
+	.string "MOéMON stats vary--even within\l"
 	.string "the same species.\p"
 	.string "Their stats may be similar at first.\p"
 	.string "However, differences will become\n"
-	.string "pronounced as the POKéMON grow.$"
+	.string "pronounced as the MOéMON grow.$"

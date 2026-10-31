@@ -158,12 +158,12 @@ Kanto_ViridianCity_Gym_Text_843F856::
 	.string "I will keep training here at my GYM.$"
 
 Kanto_ViridianCity_Gym_Text_843F93A::
-	.string "The EARTHBADGE makes POKéMON of\n"
+	.string "The EARTHBADGE makes MOéMON of\n"
 	.string "any level obey without question.\p"
 	.string "It is evidence of your mastery as\n"
-	.string "a POKéMON TRAINER.\p"
+	.string "a MOéMON TRAINER.\p"
 	.string "With it, you can challenge the\n"
-	.string "POKéMON LEAGUE.\p"
+	.string "MOéMON LEAGUE.\p"
 	.string "Also, take this gift for\n"
 	.string "your LEAGUE challenge.$"
 
@@ -174,7 +174,7 @@ Kanto_ViridianCity_Gym_Text_843FA0F::
 Kanto_ViridianCity_Gym_Text_843FA1F::
 	.string "It boosts the holder’s Attack,\n"
 	.string "but locks it into one move until\l"
-	.string "you switch POKéMON.$"
+	.string "you switch MOéMON.$"
 
 Kanto_ViridianCity_Gym_Text_843FA73::
 	.string "You do not have space for this!$"
@@ -202,7 +202,7 @@ Kanto_ViridianCity_Gym_Text_843FB35::
 	.string "I’m still not worthy!$"
 
 Kanto_ViridianCity_Gym_Text_843FB4B::
-	.string "POKéMON and I, we make wonderful\n"
+	.string "MOéMON and I, we make wonderful\n"
 	.string "music together!$"
 
 Kanto_ViridianCity_Gym_Text_843FB7C::
@@ -220,7 +220,7 @@ Kanto_ViridianCity_Gym_Text_843FBF1::
 	.string "Aiyah!$"
 
 Kanto_ViridianCity_Gym_Text_843FBF8::
-	.string "If my POKéMON were as good at\n"
+	.string "If my MOéMON were as good at\n"
 	.string "karate as I…$"
 
 Kanto_ViridianCity_Gym_Text_843FC23::
@@ -241,11 +241,11 @@ Kanto_ViridianCity_Gym_Text_843FCB2::
 	.string "Ayah!$"
 
 Kanto_ViridianCity_Gym_Text_843FCB8::
-	.string "The POKéMON LEAGUE?\n"
+	.string "The MOéMON LEAGUE?\n"
 	.string "You? Don’t get cocky!$"
 
 Kanto_ViridianCity_Gym_Text_843FCE2::
-	.string "Your POKéMON will cower at the\n"
+	.string "Your MOéMON will cower at the\n"
 	.string "crack of my whip!$"
 
 Kanto_ViridianCity_Gym_Text_843FD13::
@@ -265,7 +265,7 @@ Kanto_ViridianCity_Gym_Text_843FD85::
 	.string "I was beaten?$"
 
 Kanto_ViridianCity_Gym_Text_843FD93::
-	.string "You can go on to the POKéMON\n"
+	.string "You can go on to the MOéMON\n"
 	.string "LEAGUE only by defeating our GYM\l"
 	.string "LEADER!$"
 
@@ -278,20 +278,20 @@ Kanto_ViridianCity_Gym_Text_843FDD9::
 	.string "This will be the toughest of all\l"
 	.string "the GYM LEADERS.\p"
 	.string "Also, I heard that the TRAINERS\n"
-	.string "here like GROUND-type POKéMON.$"
+	.string "here like GROUND-type MOéMON.$"
 
 Kanto_ViridianCity_Gym_Text_843FEAE::
 	.string "Blow me away! GIOVANNI was the\n"
 	.string "GYM LEADER of VIRIDIAN?$"
 
 Kanto_ViridianCity_Gym_Text_843FEE5::
-	.string "VIRIDIAN POKéMON GYM\n"
+	.string "VIRIDIAN MOéMON GYM\n"
 	.string "LEADER: ?\p"
 	.string "WINNING TRAINERS:\n"
 	.string "BLUE$"
 
 Kanto_ViridianCity_Gym_Text_843FF1B::
-	.string "VIRIDIAN POKéMON GYM\n"
+	.string "VIRIDIAN MOéMON GYM\n"
 	.string "LEADER: GIOVANNI\p"
 	.string "WINNING TRAINERS:\n"
 	.string "BLUE, {PLAYER}$"

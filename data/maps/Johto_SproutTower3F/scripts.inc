@@ -172,10 +172,10 @@ Johto_SproutTower3F_Text_83FA915::
 	.string "as a trainer.\p"
 	.string "As promised, here is your HM.\p"
 	.string "But let me say this: You should\n"
-	.string "treat your POKéMON better.\p"
+	.string "treat your MOéMON better.\p"
 	.string "The way you battle is far too\n"
 	.string "harsh.\p"
-	.string "POKéMON are not tools of war…$"
+	.string "MOéMON are not tools of war…$"
 
 Johto_SproutTower3F_Text_83FA9DD::
 	.string "…\n"
@@ -184,11 +184,11 @@ Johto_SproutTower3F_Text_83FA9DD::
 	.string "he’s weak.\p"
 	.string "It stands to reason.\p"
 	.string "I’d never lose to fools who babble\n"
-	.string "about being nice to POKéMON.\p"
+	.string "about being nice to MOéMON.\p"
 	.string "I only care about strong\n"
-	.string "POKéMON that can win.\p"
+	.string "MOéMON that can win.\p"
 	.string "I really couldn’t care less\n"
-	.string "about weak POKéMON.$"
+	.string "about weak MOéMON.$"
 
 Johto_SproutTower3F_Text_83FAAC4::
 	.string "SILVER used an ESCAPE ROPE!$"
@@ -197,18 +197,18 @@ Johto_SproutTower3F_Text_83FAAE0::
 	.string "So good of you to come here!\p"
 	.string "SPROUT TOWER is a place of\n"
 	.string "training.\p"
-	.string "People and POKéMON test their\n"
+	.string "People and MOéMON test their\n"
 	.string "bonds to build a bright future\l"
 	.string "together.\p"
 	.string "I am the final test.\p"
 	.string "Allow me to check the ties\n"
-	.string "between your POKéMON and you!$"
+	.string "between your MOéMON and you!$"
 
 Johto_SproutTower3F_Text_83FABB7::
 	.string "Ah, excellent!$"
 
 Johto_SproutTower3F_Text_83FABC6::
-	.string "You and your POKéMON have passed\n"
+	.string "You and your MOéMON have passed\n"
 	.string "the tower’s test.$"
 
 Johto_SproutTower3F_Text_83FABF9::
@@ -222,21 +222,21 @@ Johto_SproutTower3F_Text_83FAC3F::
 
 Johto_SproutTower3F_Text_83FAC6C::
 	.string "I train to find enlightenment\n"
-	.string "in POKéMON!$"
+	.string "in MOéMON!$"
 
 Johto_SproutTower3F_Text_83FAC96::
 	.string "My training is incomplete…$"
 
 Johto_SproutTower3F_Text_83FACB1::
-	.string "As POKéMON grow stronger,\n"
+	.string "As MOéMON grow stronger,\n"
 	.string "so does the trainer.\p"
 	.string "No, wait. As the trainer\n"
 	.string "grows stronger, so do the\l"
-	.string "POKéMON.$"
+	.string "MOéMON.$"
 
 Johto_SproutTower3F_Text_83FAD1C::
 	.string "Let me see how much you trust\n"
-	.string "your POKéMON.$"
+	.string "your MOéMON.$"
 
 Johto_SproutTower3F_Text_83FAD48::
 	.string "Yes, your trust is real!$"

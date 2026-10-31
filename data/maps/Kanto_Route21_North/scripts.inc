@@ -76,7 +76,7 @@ Kanto_Route21_North_Text_843867A::
 
 Kanto_Route21_North_Text_8438680::
 	.string "I can’t catch anything good.\n"
-	.string "Not one good POKéMON to be had!$"
+	.string "Not one good MOéMON to be had!$"
 
 Kanto_Route21_North_Text_84386BD::
 	.string "I got a big haul!\n"
@@ -113,7 +113,7 @@ Kanto_Route21_North_Text_8438A15::
 Kanto_Route21_North_Text_8438A3F::
 	.string "LIL: Huh? A battle?\n"
 	.string "I can’t be bothered to do it alone.\l"
-	.string "Bring two POKéMON, won’t you?$"
+	.string "Bring two MOéMON, won’t you?$"
 
 Kanto_Route21_North_Text_8438A95::
 	.string "IAN: My sis doesn’t get enough\n"
@@ -130,7 +130,7 @@ Kanto_Route21_North_Text_8438AF3::
 
 Kanto_Route21_North_Text_8438B31::
 	.string "IAN: We want a two-on-two battle.\n"
-	.string "So can you bring two POKéMON?$"
+	.string "So can you bring two MOéMON?$"
 
 Kanto_Route21_North_Text_84706AE::
 	.string "You want to know if the fish are\n"

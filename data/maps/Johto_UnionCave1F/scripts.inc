@@ -88,7 +88,7 @@ Johto_UnionCave1F_EventScript_83FDC24::
 
 Johto_UnionCave1F_Text_83FDC31::
 	.string "You’re headed to AZALEA, are you?\p"
-	.string "Let my POKéMON see if you are good\n"
+	.string "Let my MOéMON see if you are good\n"
 	.string "enough to battle.$"
 
 Johto_UnionCave1F_Text_83FDC88::
@@ -96,20 +96,20 @@ Johto_UnionCave1F_Text_83FDC88::
 
 Johto_UnionCave1F_Text_83FDC94::
 	.string "All right, then! I’ve decided.\p"
-	.string "I’m not leaving until my POKéMON\n"
+	.string "I’m not leaving until my MOéMON\n"
 	.string "get tougher!$"
 
 Johto_UnionCave1F_Text_83FDCE1::
 	.string "I roam far and wide in search of\n"
-	.string "POKéMON.\p"
-	.string "Are you looking for POKéMON too?\p"
+	.string "MOéMON.\p"
+	.string "Are you looking for MOéMON too?\p"
 	.string "Then you’re my collecting rival!$"
 
 Johto_UnionCave1F_Text_83FDD4D::
-	.string "Ugh. My poor POKéMON…$"
+	.string "Ugh. My poor MOéMON…$"
 
 Johto_UnionCave1F_Text_83FDD63::
-	.string "Every Friday, you can hear POKéMON\n"
+	.string "Every Friday, you can hear MOéMON\n"
 	.string "roars from deep inside the cave.$"
 
 Johto_UnionCave1F_Text_83FDDA7::
@@ -122,11 +122,11 @@ Johto_UnionCave1F_Text_83FDDE2::
 Johto_UnionCave1F_Text_83FDDFD::
 	.string "I was conned into buying a\n"
 	.string "SLOWPOKETAIL.\p"
-	.string "I feel sorry for the poor POKéMON.$"
+	.string "I feel sorry for the poor MOéMON.$"
 
 Johto_UnionCave1F_Text_83FDE49::
 	.string "ZUBAT’s SUPERSONIC keeps confusing\n"
-	.string "my POKéMON.\p"
+	.string "my MOéMON.\p"
 	.string "I’m seriously upset about that!$"
 
 Johto_UnionCave1F_Text_83FDE98::
@@ -138,12 +138,12 @@ Johto_UnionCave1F_Text_83FDEA6::
 
 Johto_UnionCave1F_Text_83FDEE5::
 	.string "If it’s light, a cave isn’t scary.\p"
-	.string "If you’re strong, POKéMON aren’t\n"
+	.string "If you’re strong, MOéMON aren’t\n"
 	.string "scary.$"
 
 Johto_UnionCave1F_Text_83FDF30::
 	.string "FLASH!$"
 
 Johto_UnionCave1F_Text_83FDF37::
-	.string "It’s my POKéMON’s fire that lights\n"
+	.string "It’s my MOéMON’s fire that lights\n"
 	.string "up this cave.$"

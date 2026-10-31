@@ -20,7 +20,7 @@ Johto_OlivineMart_EventScript_83E6716::
 	end
 
 Johto_OlivineMart_Text_83E6723::
-	.string "Do your POKéMON already know\n"
+	.string "Do your MOéMON already know\n"
 	.string "the move for carrying people\l"
 	.string "across water?$"
 

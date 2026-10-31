@@ -71,7 +71,7 @@ Kanto_Route18_EventScript_845B7CB::
 
 Kanto_Route18_Text_8437928::
 	.string "I always check every grassy area\n"
-	.string "for new POKéMON.$"
+	.string "for new MOéMON.$"
 
 Kanto_Route18_Text_843795A::
 	.string "Tch!$"
@@ -87,7 +87,7 @@ Kanto_Route18_Text_843799B::
 	.string "I had to bug you!$"
 
 Kanto_Route18_Text_84379AD::
-	.string "I collect sea POKéMON on weekends\n"
+	.string "I collect sea MOéMON on weekends\n"
 	.string "because the sea is so close.$"
 
 Kanto_Route18_Text_84379EC::
@@ -99,7 +99,7 @@ Kanto_Route18_Text_8437A0E::
 
 Kanto_Route18_Text_8437A14::
 	.string "This is my fave area for catching\n"
-	.string "POKéMON.$"
+	.string "MOéMON.$"
 
 Kanto_Route18_Text_8437A3F::
 	.string "ROUTE 18\n"
@@ -112,7 +112,7 @@ Kanto_Route18_Text_8437A64::
 
 Kanto_Route18_Text_84700D1::
 	.string "I’ve been checking every grassy\n"
-	.string "area for new POKéMON.\p"
+	.string "area for new MOéMON.\p"
 	.string "But it’s not always easy…$"
 
 Kanto_Route18_Text_8470121::

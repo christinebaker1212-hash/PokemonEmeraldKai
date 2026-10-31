@@ -31,6 +31,6 @@ Kanto_FiveIsland_PokemonCenter_1F_Text_8454152::
 
 Kanto_FiveIsland_PokemonCenter_1F_Text_8454195::
 	.string "You’re on a quest to catch every\n"
-	.string "single kind of POKéMON?\p"
+	.string "single kind of MOéMON?\p"
 	.string "…How incredible. Please tell me if\n"
 	.string "you catch a strong one!$"

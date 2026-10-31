@@ -32,19 +32,19 @@ Johto_GoldenrodHappinessRater_Text_82E8C7B::
 	.string "have their maximum power: 102.\p"
 	.string "Their power does not depend on\n"
 	.string "friendship.\p"
-	.string "POKéMON no longer evolve through\n"
+	.string "MOéMON no longer evolve through\n"
 	.string "friendship.\p"
 	.string "For example, RIOLU evolves into\n"
 	.string "LUCARIO at level 28.\p"
-	.string "Check the POKéDEX to see how\n"
-	.string "each POKéMON evolves.$"
+	.string "Check the MOéDEX to see how\n"
+	.string "each MOéMON evolves.$"
 
 Johto_GoldenrodHappinessRater_Text_83D67E0::
 	.string "I keep losing in battles, and my\n"
-	.string "POKéMON end up fainting…\p"
-	.string "Maybe that’s why my POKéMON don’t\n"
+	.string "MOéMON end up fainting…\p"
+	.string "Maybe that’s why my MOéMON don’t\n"
 	.string "like me much…$"
 
 Johto_GoldenrodHappinessRater_Text_83D684A::
-	.string "When I use an item on my POKéMON,\n"
+	.string "When I use an item on my MOéMON,\n"
 	.string "it acts really glad!$"

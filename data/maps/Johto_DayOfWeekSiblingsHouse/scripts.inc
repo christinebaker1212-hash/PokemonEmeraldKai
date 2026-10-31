@@ -30,7 +30,7 @@ Johto_DayOfWeekSiblingsHouse_Text_83EC1DC::
 
 Johto_DayOfWeekSiblingsHouse_Text_83EC205::
 	.string "To my brothers and sisters:\p"
-	.string "We take pride in serving POKéMON\n"
+	.string "We take pride in serving MOéMON\n"
 	.string "trainers.\p"
 	.string "When trainers talk to you, give\n"
 	.string "them something useful.\p"

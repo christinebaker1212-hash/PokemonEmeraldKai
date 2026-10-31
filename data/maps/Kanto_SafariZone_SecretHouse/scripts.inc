@@ -47,7 +47,7 @@ Kanto_SafariZone_SecretHouse_Text_8428593::
 
 Kanto_SafariZone_SecretHouse_Text_84285C1::
 	.string "A PRISM SCALE can make a certain\n"
-	.string "POKéMON evolve.\p"
+	.string "MOéMON evolve.\p"
 	.string "You earned it by reaching this\n"
 	.string "house. Congratulations!$"
 

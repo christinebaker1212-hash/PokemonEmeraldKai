@@ -301,7 +301,7 @@ Johto_OlivineGym_Text_83E4F77::
 Johto_OlivineGym_Text_83E4FCD::
 	.string "JASMINE, the GYM LEADER, is at the\n"
 	.string "LIGHTHOUSE.\p"
-	.string "She’s been tending to a sick POKéMON.\p"
+	.string "She’s been tending to a sick MOéMON.\p"
 	.string "A strong trainer has to be\n"
 	.string "compassionate.$"
 
@@ -327,7 +327,7 @@ Johto_OlivineGym_Text_83E52BB::
 	.string "{PLAYER} received MINERALBADGE.$"
 
 Johto_OlivineGym_Text_83E52D5::
-	.string "MINERALBADGE raises POKéMON’s \n"
+	.string "MINERALBADGE raises MOéMON’s \n"
 	.string "SPECIAL DEFENSE.\p"
 	.string "…Um… Please take this too…$"
 
@@ -342,9 +342,9 @@ Johto_OlivineGym_Text_83E5398::
 	.string "but good luck…$"
 
 Johto_OlivineGym_Text_83E54BF::
-	.string "OLIVINE CITY POKéMON GYM$"
+	.string "OLIVINE CITY MOéMON GYM$"
 
 Johto_OlivineGym_Text_83E54D8::
-	.string "OLIVINE CITY POKéMON GYM\p"
+	.string "OLIVINE CITY MOéMON GYM\p"
 	.string "JASMINE’S CERTIFIED TRAINERS:\n"
 	.string "{PLAYER}$"

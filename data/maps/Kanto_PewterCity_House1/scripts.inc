@@ -40,9 +40,9 @@ Kanto_PewterCity_House1_Text_84418D3::
 	.string "NIDORAN, sit!$"
 
 Kanto_PewterCity_House1_Text_84418E1::
-	.string "Our POKéMON’s an outsider, so it’s\n"
+	.string "Our MOéMON’s an outsider, so it’s\n"
 	.string "finicky and hard to handle.\p"
-	.string "An outsider is a POKéMON that you\n"
+	.string "An outsider is a MOéMON that you\n"
 	.string "get in a trade.\p"
 	.string "It grows fast, but it may ignore an\n"
 	.string "unskilled TRAINER in battle.\p"

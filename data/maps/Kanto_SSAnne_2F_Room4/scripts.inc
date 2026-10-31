@@ -22,14 +22,14 @@ Kanto_SSAnne_2F_Room4_EventScript_846BB2E::
 
 Kanto_SSAnne_2F_Room4_Text_84244C9::
 	.string "Which do you find more worthy,\n"
-	.string "a strong or a rare POKéMON?$"
+	.string "a strong or a rare MOéMON?$"
 
 Kanto_SSAnne_2F_Room4_Text_8424504::
 	.string "I must salute you!$"
 
 Kanto_SSAnne_2F_Room4_Text_8424517::
 	.string "Personally, I prefer strong and\n"
-	.string "rare POKéMON.$"
+	.string "rare MOéMON.$"
 
 Kanto_SSAnne_2F_Room4_Text_8424545::
 	.string "I don’t believe I saw you at the\n"
@@ -39,5 +39,5 @@ Kanto_SSAnne_2F_Room4_Text_842456D::
 	.string "Take it easy!$"
 
 Kanto_SSAnne_2F_Room4_Text_842457B::
-	.string "Oh, I adore your strong POKéMON!\n"
+	.string "Oh, I adore your strong MOéMON!\n"
 	.string "Oh, how I envy you for them!$"

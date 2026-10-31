@@ -80,7 +80,7 @@ Kanto_CeladonCity_Condominiums_3F_Text_84463C7::
 
 Kanto_CeladonCity_Condominiums_3F_Text_8446422::
 	.string "I’m the game designer!\p"
-	.string "Register every NATIONAL POKéDEX\n"
+	.string "Register every NATIONAL MOéDEX\n"
 	.string "species as caught in KANTO.\p"
 	.string "Catches from other regions don’t\n"
 	.string "count toward this diploma.\p"
@@ -88,7 +88,7 @@ Kanto_CeladonCity_Condominiums_3F_Text_8446422::
 
 Kanto_CeladonCity_Condominiums_3F_Text_84464CF::
 	.string "You’ve completed the NATIONAL\n"
-	.string "POKéDEX with your KANTO catches!\p"
+	.string "MOéDEX with your KANTO catches!\p"
 	.string "Congratulations!\n"
 	.string "This diploma is for you!$"
 

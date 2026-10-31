@@ -375,17 +375,17 @@ Kanto_CinnabarIsland_Text_8430D7C::
 	.string "Scientists conduct experiments \n"
 	.string "in the burned-out building.\p"
 	.string "You know, the one they call the\n"
-	.string "POKéMON MANSION.$"
+	.string "MOéMON MANSION.$"
 
 Kanto_CinnabarIsland_Text_8430DE9::
 	.string "CINNABAR ISLAND\n"
 	.string "The Fiery Town of Burning Desire$"
 
 Kanto_CinnabarIsland_Text_8430E1A::
-	.string "POKéMON LAB$"
+	.string "MOéMON LAB$"
 
 Kanto_CinnabarIsland_Text_8430E26::
-	.string "CINNABAR ISLAND POKéMON GYM\n"
+	.string "CINNABAR ISLAND MOéMON GYM\n"
 	.string "LEADER: BLAINE\l"
 	.string "The Hotheaded Quiz Master!$"
 
@@ -415,7 +415,7 @@ Kanto_CinnabarIsland_Text_8430FD4::
 	.string "What, are you too busy?\p"
 	.string "Well, all right.\n"
 	.string "The boat hasn’t arrived yet anyway.\p"
-	.string "I’ll be waiting at the POKéMON\n"
+	.string "I’ll be waiting at the MOéMON\n"
 	.string "CENTER over there.\p"
 	.string "Come see me when you’re done with\n"
 	.string "your business here.$"

@@ -208,7 +208,7 @@ Johto_RuinsOfAlphResearchCenter_Text_83F6FA1::
 
 Johto_RuinsOfAlphResearchCenter_Text_83F75AF::
 	.string "I’ve been trying to develop a device\n"
-	.string "that resurrects POKéMON from fossils…\p"
+	.string "that resurrects MOéMON from fossils…\p"
 	.string "And, it’s working!$"
 
 Johto_RuinsOfAlphResearchCenter_Text_83F76AD::
@@ -228,9 +228,9 @@ Johto_RuinsOfAlphResearchCenter_Text_83F77E2::
 
 Johto_RuinsOfAlphResearchCenter_Text_83F78E0::
 	.string "Thanks for waiting!\p"
-	.string "Your fossilized POKéMON has been\n"
+	.string "Your fossilized MOéMON has been\n"
 	.string "brought back to life!\p"
-	.string "The fossil was an ancient POKéMON.\n"
+	.string "The fossil was an ancient MOéMON.\n"
 	.string "{STR_VAR_2}, it was!$"
 
 Johto_RuinsOfAlphResearchCenter_Text_83F795A::

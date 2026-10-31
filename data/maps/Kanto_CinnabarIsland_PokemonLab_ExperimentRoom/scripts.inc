@@ -162,7 +162,7 @@ Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_Text_844A22D::
 	.string "Hiya!\p"
 	.string "I am important doctor.\n"
 	.string "Yes, very much so, indeed.\p"
-	.string "Here, I study rare POKéMON fossils.\n"
+	.string "Here, I study rare MOéMON fossils.\n"
 	.string "All the time, I study.\p"
 	.string "You!\n"
 	.string "Have you a fossil for me?$"

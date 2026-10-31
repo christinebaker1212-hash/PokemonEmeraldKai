@@ -52,22 +52,22 @@ Kanto_VermilionCity_PokemonCenter_1F_EventScript_8459202::
 
 Kanto_VermilionCity_PokemonCenter_1F_Text_844421B::
 	.string "Even if they are the same level,\n"
-	.string "POKéMON can have very different\l"
+	.string "MOéMON can have very different\l"
 	.string "stats and abilities.\p"
-	.string "A POKéMON raised by a TRAINER is\n"
+	.string "A MOéMON raised by a TRAINER is\n"
 	.string "stronger than one in the wild.$"
 
 Kanto_VermilionCity_PokemonCenter_1F_Text_84442B1::
-	.string "My POKéMON was poisoned!\n"
+	.string "My MOéMON was poisoned!\n"
 	.string "It fainted while we were walking!$"
 
 Kanto_VermilionCity_PokemonCenter_1F_Text_84442EC::
 	.string "It is true that a higher-level\n"
-	.string "POKéMON will be more powerful…\p"
-	.string "But, all POKéMON will have weak\n"
+	.string "MOéMON will be more powerful…\p"
+	.string "But, all MOéMON will have weak\n"
 	.string "points against specific types.\p"
 	.string "So, there appears to be no\n"
-	.string "universally strong POKéMON.$"
+	.string "universally strong MOéMON.$"
 
 Kanto_VermilionCity_PokemonCenter_1F_Text_84443A0::
 	.string "I collect useful training items.\p"
@@ -77,10 +77,10 @@ Kanto_VermilionCity_PokemonCenter_1F_Text_84443A0::
 
 Kanto_VermilionCity_PokemonCenter_1F_Text_8444410::
 	.string "An ABILITY PATCH can change a\n"
-	.string "POKéMON to its Hidden Ability.\p"
+	.string "MOéMON to its Hidden Ability.\p"
 	.string "Choose carefully when you use it!$"
 
 Kanto_VermilionCity_PokemonCenter_1F_Text_844446F::
 	.string "That ABILITY PATCH can reveal a\n"
-	.string "POKéMON’s Hidden Ability.\p"
+	.string "MOéMON’s Hidden Ability.\p"
 	.string "It’s rare, so use it wisely.$"

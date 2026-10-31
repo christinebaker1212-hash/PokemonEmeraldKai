@@ -317,7 +317,7 @@ Kanto_VermilionCity_Gym_Text_8444BFB::
 	.string "doing here?\p"
 	.string "You won’t live long in combat!\n"
 	.string "Not with your puny power!\p"
-	.string "I tell you, kid, electric POKéMON\n"
+	.string "I tell you, kid, electric MOéMON\n"
 	.string "saved me during the war!\p"
 	.string "They zapped my enemies into\n"
 	.string "paralysis!\p"
@@ -327,12 +327,12 @@ Kanto_VermilionCity_Gym_Text_8444CE5::
 	.string "A little word of advice, kid!\p"
 	.string "Electricity is sure powerful!\p"
 	.string "But, it’s useless against GROUND-\n"
-	.string "type POKéMON!$"
+	.string "type MOéMON!$"
 
 Kanto_VermilionCity_Gym_Text_8444D51::
 	.string "The THUNDERBADGE cranks up your\n"
-	.string "POKéMON’s SPEED!\p"
-	.string "It also lets your POKéMON FLY\n"
+	.string "MOéMON’s SPEED!\p"
+	.string "It also lets your MOéMON FLY\n"
 	.string "lightning-quick anytime, kid!\p"
 	.string "You’re special, kid!\n"
 	.string "Take this!$"
@@ -344,7 +344,7 @@ Kanto_VermilionCity_Gym_Text_8444DDE::
 Kanto_VermilionCity_Gym_Text_8444DEE::
 	.string "It boosts the holder’s Speed,\n"
 	.string "but locks it into one move until\l"
-	.string "you switch POKéMON.$"
+	.string "you switch MOéMON.$"
 
 Kanto_VermilionCity_Gym_Text_8444E41::
 	.string "Yo, kid, make room in your BAG!$"
@@ -404,8 +404,8 @@ Kanto_VermilionCity_Gym_Text_8445112::
 	.string "People refer to him as the\n"
 	.string "Lightning American!\p"
 	.string "He’s an expert on electric\n"
-	.string "POKéMON.\p"
-	.string "BIRD/WATER-type POKéMON match\n"
+	.string "MOéMON.\p"
+	.string "BIRD/WATER-type MOéMON match\n"
 	.string "poorly against the ELECTRIC type.\p"
 	.string "Beware of paralysis, too.\p"
 	.string "LT. SURGE is very cautious.\p"
@@ -417,13 +417,13 @@ Kanto_VermilionCity_Gym_Text_844524A::
 	.string "That match was electric!$"
 
 Kanto_VermilionCity_Gym_Text_8445269::
-	.string "VERMILION POKéMON GYM\n"
+	.string "VERMILION MOéMON GYM\n"
 	.string "LEADER: LT. SURGE\p"
 	.string "WINNING TRAINERS:\n"
 	.string "BLUE$"
 
 Kanto_VermilionCity_Gym_Text_84452A8::
-	.string "VERMILION POKéMON GYM\n"
+	.string "VERMILION MOéMON GYM\n"
 	.string "LEADER: LT. SURGE\p"
 	.string "WINNING TRAINERS:\n"
 	.string "BLUE, {PLAYER}$"

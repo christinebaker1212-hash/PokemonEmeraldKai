@@ -376,7 +376,7 @@ Johto_TeamRocketBaseB1F_Text_83E949F::
 
 Johto_TeamRocketBaseB1F_Text_83E94C0::
 	.string "Surveillance cams are in the\n"
-	.string "POKéMON statues.\p"
+	.string "MOéMON statues.\p"
 	.string "We’ll keep appearing until you\n"
 	.string "trip a secret switch.$"
 

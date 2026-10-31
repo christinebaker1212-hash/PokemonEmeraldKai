@@ -44,16 +44,16 @@ Johto_EcruteakItemfinderHouse_Text_83CE9D8::
 Johto_EcruteakItemfinderHouse_Text_83CE9FD::
 	.string "In ECRUTEAK, there were two towers.\p"
 	.string "Each tower was the roost of\n"
-	.string "powerful flying POKéMON.\p"
+	.string "powerful flying MOéMON.\p"
 	.string "But one of the towers burned to\n"
 	.string "the ground.\p"
-	.string "The two POKéMON haven’t been seen\n"
+	.string "The two MOéMON haven’t been seen\n"
 	.string "since…\p"
 	.string "Keep reading?$"
 
 Johto_EcruteakItemfinderHouse_Text_83CEAB9::
 	.string "ECRUTEAK was also home to three\n"
-	.string "POKéMON that raced around the town.\p"
+	.string "MOéMON that raced around the town.\p"
 	.string "They were said to have been born\n"
 	.string "of water, lightning and fire.\p"
 	.string "But they could not contain their\n"

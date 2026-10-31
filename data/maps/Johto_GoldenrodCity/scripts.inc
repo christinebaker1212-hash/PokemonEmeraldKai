@@ -299,7 +299,7 @@ Johto_GoldenrodCity_Text_83D28BC::
 
 Johto_GoldenrodCity_Text_83D2901::
 	.string "That man inside rates your\n"
-	.string "POKéMON nicknames.\p"
+	.string "MOéMON nicknames.\p"
 	.string "He can even rename them.$"
 
 Johto_GoldenrodCity_Text_83D2948::
@@ -322,7 +322,7 @@ Johto_GoldenrodCity_Text_83D29E7::
 	.string "What? It’s none of your business!$"
 
 Johto_GoldenrodCity_Text_83D2A24::
-	.string "POKéMON? They’re just tools\n"
+	.string "MOéMON? They’re just tools\n"
 	.string "we use to make money!$"
 
 Johto_GoldenrodCity_Text_83D2A56::
@@ -344,11 +344,11 @@ Johto_GoldenrodCity_Text_83D2B08::
 	.string "GOLDENROD CITY RADIO TOWER$"
 
 Johto_GoldenrodCity_Text_83D2B23::
-	.string "Full Selection of POKéMON Goods!\p"
+	.string "Full Selection of MOéMON Goods!\p"
 	.string "GOLDENROD CITY DEPT.STORE$"
 
 Johto_GoldenrodCity_Text_83D2B5E::
-	.string "GOLDENROD CITY POKéMON GYM\n"
+	.string "GOLDENROD CITY MOéMON GYM\n"
 	.string "LEADER: WHITNEY\p"
 	.string "The Incredibly Pretty Girl!$"
 
@@ -362,7 +362,7 @@ Johto_GoldenrodCity_Text_83D2BFB::
 
 Johto_GoldenrodCity_Text_83D2C27::
 	.string "NAME RATER\p"
-	.string "Get Your POKéMON Nicknames Rated$"
+	.string "Get Your MOéMON Nicknames Rated$"
 
 Johto_GoldenrodCity_Text_83D2C68::
 	.string "UNDERGROUND ENTRANCE$"

@@ -8,5 +8,5 @@ Kanto_Route15_WestEntrance_1F_EventScript_84200ED::
 
 Kanto_Route15_WestEntrance_1F_Text_844F9FA::
 	.string "Are you the kid who’s working on\n"
-	.string "a POKéDEX?\p"
+	.string "a MOéDEX?\p"
 	.string "PROF. OAK’s AIDE came by here.$"

@@ -100,25 +100,25 @@ Kanto_PokemonLeague_LoreleisRoom_EventScript_8412409::
 	end
 
 Kanto_PokemonLeague_LoreleisRoom_Text_842865B::
-	.string "Welcome to the POKéMON LEAGUE.\p"
+	.string "Welcome to the MOéMON LEAGUE.\p"
 	.string "I am LORELEI of the ELITE FOUR.\p"
 	.string "No one can best me when it comes\n"
-	.string "to icy POKéMON.\p"
+	.string "to icy MOéMON.\p"
 	.string "Freezing moves are powerful.\p"
-	.string "Your POKéMON will be at my mercy\n"
+	.string "Your MOéMON will be at my mercy\n"
 	.string "when they are frozen solid.\p"
 	.string "Hahaha!\n"
 	.string "Are you ready?{PLAY_BGM 0x022A}$"
 
 Kanto_PokemonLeague_LoreleisRoom_Text_8428740::
-	.string "Welcome to the POKéMON LEAGUE.\p"
+	.string "Welcome to the MOéMON LEAGUE.\p"
 	.string "I, LORELEI of the ELITE FOUR,\n"
 	.string "have returned!\p"
 	.string "You know how it goes.\n"
 	.string "No one can best me when it comes\l"
-	.string "to icy POKéMON.\p"
+	.string "to icy MOéMON.\p"
 	.string "Freezing moves are powerful.\p"
-	.string "Your POKéMON will be at my mercy\n"
+	.string "Your MOéMON will be at my mercy\n"
 	.string "when they are frozen solid.\p"
 	.string "Hahaha!\n"
 	.string "Are you ready?{PLAY_BGM 0x022A}$"
@@ -130,4 +130,4 @@ Kanto_PokemonLeague_LoreleisRoom_Text_8428867::
 	.string "You’re better than I thought.\n"
 	.string "Go on ahead.\p"
 	.string "You only got a taste of the\n"
-	.string "POKéMON LEAGUE’s power.$"
+	.string "MOéMON LEAGUE’s power.$"

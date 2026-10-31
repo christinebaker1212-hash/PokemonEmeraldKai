@@ -123,7 +123,7 @@ Kanto_CeladonCity_Gym_Text_84472A6::
 	.string "I am the LEADER of CELADON GYM.\p"
 	.string "I am a student of the art of\n"
 	.string "flower arranging.\p"
-	.string "My POKéMON are solely of the\n"
+	.string "My MOéMON are solely of the\n"
 	.string "GRASS type.\p"
 	.string "…Oh, I’m sorry, I had no idea that\n"
 	.string "you wished to challenge me.\p"
@@ -137,15 +137,15 @@ Kanto_CeladonCity_Gym_Text_84473F2::
 	.string "RAINBOWBADGE.$"
 
 Kanto_CeladonCity_Gym_Text_844744A::
-	.string "You are cataloging POKéMON?\n"
+	.string "You are cataloging MOéMON?\n"
 	.string "I must say I’m impressed.\p"
-	.string "I would never collect POKéMON if\n"
+	.string "I would never collect MOéMON if\n"
 	.string "they were unattractive.$"
 
 Kanto_CeladonCity_Gym_Text_84474B9::
 	.string "The RAINBOWBADGE will make\n"
-	.string "POKéMON up to Lv. 50 obey.\p"
-	.string "It also allows POKéMON to use\n"
+	.string "MOéMON up to Lv. 50 obey.\p"
+	.string "It also allows MOéMON to use\n"
 	.string "STRENGTH in and out of battle.\p"
 	.string "Please also take this with you.$"
 
@@ -154,7 +154,7 @@ Kanto_CeladonCity_Gym_Text_844754C::
 	.string "{STR_VAR_1}!$"
 
 Kanto_CeladonCity_Gym_Text_844755C::
-	.string "A POKéMON holding it restores more\n"
+	.string "A MOéMON holding it restores more\n"
 	.string "HP with draining moves.$"
 
 Kanto_CeladonCity_Gym_Text_8447597::
@@ -180,10 +180,10 @@ Kanto_CeladonCity_Gym_Text_8447656::
 	.string "My makeup!$"
 
 Kanto_CeladonCity_Gym_Text_8447661::
-	.string "GRASS-type POKéMON are tough\n"
+	.string "GRASS-type MOéMON are tough\n"
 	.string "against the WATER type.\p"
 	.string "They also have an edge on ROCK-\n"
-	.string "and GROUND-type POKéMON.$"
+	.string "and GROUND-type MOéMON.$"
 
 Kanto_CeladonCity_Gym_Text_84476CF::
 	.string "…Weren’t you peeking in here\n"
@@ -198,7 +198,7 @@ Kanto_CeladonCity_Gym_Text_844770B::
 
 Kanto_CeladonCity_Gym_Text_8447745::
 	.string "Look, look!\n"
-	.string "See my POKéMON!\p"
+	.string "See my MOéMON!\p"
 	.string "I like the GRASS type.\n"
 	.string "I like how they’re easy to raise.$"
 
@@ -206,7 +206,7 @@ Kanto_CeladonCity_Gym_Text_844779A::
 	.string "No!$"
 
 Kanto_CeladonCity_Gym_Text_844779E::
-	.string "We only use GRASS-type POKéMON at\n"
+	.string "We only use GRASS-type MOéMON at\n"
 	.string "our GYM.\p"
 	.string "Why? We also use them for making\n"
 	.string "flower arrangements!$"
@@ -214,7 +214,7 @@ Kanto_CeladonCity_Gym_Text_844779E::
 Kanto_CeladonCity_Gym_Text_84477FF::
 	.string "Oh, hey!\p"
 	.string "We don’t like BUG- or FIRE-type\n"
-	.string "POKéMON in here!$"
+	.string "MOéMON in here!$"
 
 Kanto_CeladonCity_Gym_Text_8447839::
 	.string "Oh!\n"
@@ -226,7 +226,7 @@ Kanto_CeladonCity_Gym_Text_8447842::
 
 Kanto_CeladonCity_Gym_Text_8447881::
 	.string "Pleased to meet you.\n"
-	.string "My hobby is POKéMON training.$"
+	.string "My hobby is MOéMON training.$"
 
 Kanto_CeladonCity_Gym_Text_84478B4::
 	.string "Oh!\n"
@@ -247,17 +247,17 @@ Kanto_CeladonCity_Gym_Text_844796C::
 	.string "Beaten!$"
 
 Kanto_CeladonCity_Gym_Text_8447978::
-	.string "I didn’t bring my best POKéMON.\n"
+	.string "I didn’t bring my best MOéMON.\n"
 	.string "Wait until next time!$"
 
 Kanto_CeladonCity_Gym_Text_84479AE::
-	.string "CELADON POKéMON GYM\n"
+	.string "CELADON MOéMON GYM\n"
 	.string "LEADER: ERIKA\p"
 	.string "WINNING TRAINERS:\n"
 	.string "BLUE$"
 
 Kanto_CeladonCity_Gym_Text_84479E7::
-	.string "CELADON POKéMON GYM\n"
+	.string "CELADON MOéMON GYM\n"
 	.string "LEADER: ERIKA\p"
 	.string "WINNING TRAINERS:\n"
 	.string "BLUE, {PLAYER}$"

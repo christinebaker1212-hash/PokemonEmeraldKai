@@ -127,7 +127,7 @@ Kanto_VictoryRoad_2F_Text_8424EE2::
 
 Kanto_VictoryRoad_2F_Text_8424EF4::
 	.string "I can beat you when it comes to\n"
-	.string "knowledge about POKéMON!$"
+	.string "knowledge about MOéMON!$"
 
 Kanto_VictoryRoad_2F_Text_8424F2D::
 	.string "This here is VICTORY ROAD.\n"

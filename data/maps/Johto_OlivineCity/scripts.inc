@@ -197,11 +197,11 @@ Johto_OlivineCity_Text_83E40FC::
 	.string "Speaking of weaklings, the\n"
 	.string "city’s GYM LEADER isn’t here,\l"
 	.string "and is supposedly taking care\l"
-	.string "of a sick POKéMON at the\l"
+	.string "of a sick MOéMON at the\l"
 	.string "LIGHTHOUSE.\p"
 	.string "Humph! Boo-hoo!\n"
-	.string "Just let sick POKéMON go!\p"
-	.string "A POKéMON that can’t battle\n"
+	.string "Just let sick MOéMON go!\p"
+	.string "A MOéMON that can’t battle\n"
 	.string "is worthless!\p"
 	.string "Why don’t you go train at the\n"
 	.string "LIGHTHOUSE?\p"
@@ -233,7 +233,7 @@ Johto_OlivineCity_Text_83E4429::
 	.string "no ship can sail.$"
 
 Johto_OlivineCity_Text_83E44D3::
-	.string "Wow, you have a POKéDEX!\n"
+	.string "Wow, you have a MOéDEX!\n"
 	.string "That’s really cool!$"
 
 Johto_OlivineCity_Text_83E4532::
@@ -243,7 +243,7 @@ Johto_OlivineCity_Text_83E4532::
 	.string "Hah! That’s a load of crud.\p"
 	.string "There’s no way PRYCE could\n"
 	.string "hurt JASMINE’s STEEL-type\l"
-	.string "POKéMON!\p"
+	.string "MOéMON!\p"
 	.string "Bureaucracy if you ask me.\p"
 	.string "She’s something to be feared,\n"
 	.string "that’s for sure!$"
@@ -257,7 +257,7 @@ Johto_OlivineCity_Text_83E4646::
 	.string "FAST SHIP PIER$"
 
 Johto_OlivineCity_Text_83E4662::
-	.string "OLIVINE CITY POKéMON GYM\n"
+	.string "OLIVINE CITY MOéMON GYM\n"
 	.string "LEADER: JASMINE\p"
 	.string "The Steel-Clad Defense Girl$"
 

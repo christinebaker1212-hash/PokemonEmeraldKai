@@ -27,5 +27,5 @@ Johto_EcruteakMart_Text_83CEBC9::
 	.string "our EEVEE in the same way…$"
 
 Johto_EcruteakMart_Text_83CEC56::
-	.string "If you use REVIVE, a POKéMON that’s\n"
+	.string "If you use REVIVE, a MOéMON that’s\n"
 	.string "fainted will wake right up.$"

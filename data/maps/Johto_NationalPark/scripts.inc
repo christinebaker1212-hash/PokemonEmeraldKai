@@ -116,27 +116,27 @@ Johto_NationalPark_Text_83E0CCD::
 Johto_NationalPark_Text_83E0D25::
 	.string "Look! Check out my bag!\p"
 	.string "I printed out my favorites from my\n"
-	.string "POKéDEX and stuck them on my bag.$"
+	.string "MOéDEX and stuck them on my bag.$"
 
 Johto_NationalPark_Text_83E0DB8::
 	.string "Pay attention, please!\p"
 	.string "…Oops, I have to quit thinking like\n"
 	.string "a teacher all the time.\p"
-	.string "You must be a POKéMON trainer.\p"
+	.string "You must be a MOéMON trainer.\p"
 	.string "Since you’re working so hard, I\n"
 	.string "want you to have this.$"
 
 Johto_NationalPark_Text_83E0E61::
-	.string "Let a POKéMON hold that QUICK CLAW.\p"
+	.string "Let a MOéMON hold that QUICK CLAW.\p"
 	.string "Sometimes it will strike first\n"
 	.string "during battle.$"
 
 Johto_NationalPark_Text_83E0EB3::
 	.string "I’m playing with stickers I printed\n"
-	.string "from my POKéDEX.$"
+	.string "from my MOéDEX.$"
 
 Johto_NationalPark_Text_83E0EE8::
-	.string "I get the other guy’s POKéDEX sticker\n"
+	.string "I get the other guy’s MOéDEX sticker\n"
 	.string "if I win.$"
 
 Johto_NationalPark_Text_83E0F18::
@@ -144,10 +144,10 @@ Johto_NationalPark_Text_83E0F18::
 	.string "never go into the grass.\p"
 	.string "Trainers always want to battle…\p"
 	.string "You must have been in many battles.\n"
-	.string "Let me heal your POKéMON for you.$"
+	.string "Let me heal your MOéMON for you.$"
 
 Johto_NationalPark_Text_83E1040::
-	.string "The world of POKéMON is deep.\p"
+	.string "The world of MOéMON is deep.\p"
 	.string "There are still lots of things we\n"
 	.string "don’t know.\p"
 	.string "But I know more than you do!$"
@@ -159,10 +159,10 @@ Johto_NationalPark_Text_83E10B7::
 	.string "There is a lot to learn.\p"
 	.string "For example…\p"
 	.string "There are 50 kinds of TMs.\p"
-	.string "Traded POKéMON level up faster.$"
+	.string "Traded MOéMON level up faster.$"
 
 Johto_NationalPark_Text_83E1118::
-	.string "My POKéMON are simply darling.\p"
+	.string "My MOéMON are simply darling.\p"
 	.string "Let me tell you how proud my\n"
 	.string "darlings make me.$"
 
@@ -170,19 +170,19 @@ Johto_NationalPark_Text_83E1166::
 	.string "I can beat you in pride, but…$"
 
 Johto_NationalPark_Text_83E1184::
-	.string "I must say, your POKéMON are quite\n"
+	.string "I must say, your MOéMON are quite\n"
 	.string "cute, too.$"
 
 Johto_NationalPark_Text_83E11B2::
-	.string "We adore our POKéMON, even if they\n"
+	.string "We adore our MOéMON, even if they\n"
 	.string "dislike us.\p"
 	.string "That’s what being a FAN is about.$"
 
 Johto_NationalPark_Text_83E1203::
-	.string "M-my POKéMON!$"
+	.string "M-my MOéMON!$"
 
 Johto_NationalPark_Text_83E1211::
-	.string "I lost the battle, but my POKéMON win\n"
+	.string "I lost the battle, but my MOéMON win\n"
 	.string "the prize for being most lovely.$"
 
 Johto_NationalPark_Text_83E1258::

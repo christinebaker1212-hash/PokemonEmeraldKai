@@ -92,7 +92,7 @@ Johto_Route47_Text_83F66D4::
 Johto_Route47_Text_83F6728::
 	.string "I’m not good with large crowds, so\n"
 	.string "I’m camping out here with my\l"
-	.string "POKéMON!$"
+	.string "MOéMON!$"
 
 Johto_Route47_Text_83F6771::
 	.string "I should be headed deeper into the\n"

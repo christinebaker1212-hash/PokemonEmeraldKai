@@ -97,7 +97,7 @@ Kanto_Route10_EventScript_845A4D5::
 
 Kanto_Route10_Text_8434E51::
 	.string "Wow, you came all the way here?\n"
-	.string "Maybe you’re a POKéMANIAC, too?\l"
+	.string "Maybe you’re a MOéMANIAC, too?\l"
 	.string "Want to see my collection?$"
 
 Kanto_Route10_Text_8434EAC::
@@ -105,7 +105,7 @@ Kanto_Route10_Text_8434EAC::
 	.string "I’m not angry!$"
 
 Kanto_Route10_Text_8434EC2::
-	.string "I have more rare POKéMON at home!$"
+	.string "I have more rare MOéMON at home!$"
 
 Kanto_Route10_Text_8434EE4::
 	.string "Ha-hahah-ah-ha!$"
@@ -122,18 +122,18 @@ Kanto_Route10_Text_8434F27::
 
 Kanto_Route10_Text_8434F4D::
 	.string "Hi, kid!\n"
-	.string "Want to see my POKéMON?$"
+	.string "Want to see my MOéMON?$"
 
 Kanto_Route10_Text_8434F6E::
 	.string "Oh, no!\n"
-	.string "My POKéMON!$"
+	.string "My MOéMON!$"
 
 Kanto_Route10_Text_8434F82::
 	.string "I don’t like you.\n"
 	.string "I don’t like anyone better than me!$"
 
 Kanto_Route10_Text_8434FB8::
-	.string "I’ve been out at a POKéMON GYM\n"
+	.string "I’ve been out at a MOéMON GYM\n"
 	.string "a few times.\p"
 	.string "…But I always lose.$"
 
@@ -142,7 +142,7 @@ Kanto_Route10_Text_8434FF8::
 	.string "After all my training!$"
 
 Kanto_Route10_Text_8435014::
-	.string "I noticed some POKéMANIACS\n"
+	.string "I noticed some MOéMANIACS\n"
 	.string "prowling around.\p"
 	.string "Can you imagine? Them?\n"
 	.string "Up here in the mountains?$"
@@ -166,9 +166,9 @@ Kanto_Route10_Text_8435102::
 	.string "I wasn’t up for it.$"
 
 Kanto_Route10_Text_8435125::
-	.string "The POKéMON here in the mountains\n"
+	.string "The MOéMON here in the mountains\n"
 	.string "are so chunky…\p"
-	.string "I wish there were pink POKéMON\n"
+	.string "I wish there were pink MOéMON\n"
 	.string "with a floral pattern!$"
 
 Kanto_Route10_Text_843518C::
@@ -183,7 +183,7 @@ Kanto_Route10_Text_84351BC::
 
 Kanto_Route10_Text_846F0A0::
 	.string "Wow, you came here again?\n"
-	.string "Maybe you’re a POKéMANIAC, too?\l"
+	.string "Maybe you’re a MOéMANIAC, too?\l"
 	.string "Want to see my collection?$"
 
 Kanto_Route10_Text_846F0F5::
@@ -192,10 +192,10 @@ Kanto_Route10_Text_846F0F5::
 
 Kanto_Route10_Text_846F11C::
 	.string "Hi, kid!\n"
-	.string "Did I show you my POKéMON?$"
+	.string "Did I show you my MOéMON?$"
 
 Kanto_Route10_Text_846F140::
-	.string "I went out to a POKéMON GYM again.\p"
+	.string "I went out to a MOéMON GYM again.\p"
 	.string "…But I lost as usual.$"
 
 Kanto_Route10_Text_846F179::
