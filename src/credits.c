@@ -1570,6 +1570,20 @@ static void DeterminePokemonToShow(void)
     for (dexNum = j; dexNum < NATIONAL_DEX_COUNT; dexNum++)
         sCreditsData->caughtMonIds[dexNum] = NATIONAL_DEX_NONE;
 
+    // Moemon Kai: nothing caught in this region's POKéDEX (Random() % 0 below): the party's own POKéMON
+    if (j == 0)
+    {
+        u8 i;
+        for (i = 0; i < PARTY_SIZE; i++)
+        {
+            u16 sp = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL);
+            if (sp != SPECIES_NONE && !GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG, NULL))
+                sCreditsData->caughtMonIds[j++] = SpeciesToNationalPokedexNum(sp);
+        }
+        if (j == 0)
+            sCreditsData->caughtMonIds[j++] = starter ? starter : 1;
+    }
+
     // Cap the number of Pokémon we care about to NUM_MON_SLIDES, the max we show in the credits scene (-1 for the starter)
     sCreditsData->numCaughtMon = j;
     if (sCreditsData->numCaughtMon < NUM_MON_SLIDES)

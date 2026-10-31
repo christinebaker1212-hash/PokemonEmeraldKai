@@ -587,9 +587,13 @@ u8 MP_Gen_OfAbility(u16 ability)
 }
 
 // The generation moves and abilities follow: the region's cap, down to Gen 3 (the default)
+// What a POKéMON, move, item or ability may be (SEALED past it): the GENERATION, never below Gen 3. JOHTO's / KANTO's
+// Gen 2 cap at GENERATION 3 (MP_Gen_Cap) is for the POKéMON the region shows (wild, trainers, evolutions) only: every
+// POKéMON has an ability and the items are Gen 3's, so a Gen 2 limit there would seal every team
 static u8 UseCap(void)
 {
-    return MP_Gen_Cap(MP_Region_Current());
+    u8 cap = MP_Gen_Cap(MP_Region_Current());
+    return cap < 3 ? 3 : cap;
 }
 
 bool8 MP_Gen_MoveAllowed(u16 move)

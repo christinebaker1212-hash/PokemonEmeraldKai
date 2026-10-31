@@ -1,0 +1,6 @@
+# KANTO's HALL OF FAME (no POKéMON caught: the credits used to divide by zero) rolls the credits to the end
+MODE=1
+TMO=500
+ENV_A="MOEMON_DEBUG_PARTY=6:60 MOEMON_DEBUG_REGION=2"
+EXPECT_A=("Soft Reset called")
+UNEXPECT_A=("SIGFPE" "crash")

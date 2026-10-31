@@ -4,8 +4,6 @@
 #include "event_data.h"
 #include "qz_specials.h"
 
-QZ_STUB(QzAfterCreditsReset)
-QZ_STUB(QzDoCredits)
 QZ_STUB(QzDreamEventEligibility)
 QZ_STUB(QzEndDreamEvent)
 QZ_STUB(QzGiovanniStoryCanStart)

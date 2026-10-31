@@ -3,7 +3,9 @@
 // every name this file defines).
 #include <stdio.h>
 #include "global.h"
+#include "credits.h"
 #include "event_data.h"
+#include "load_save.h"
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
 #include "field_screen_effect.h"
@@ -1015,3 +1017,23 @@ u16 QzChooseStarterJohto(void) { return QzChooseStarter_(); }
 u16 QzChooseStarterKanto(void) { return QzChooseStarter_(); }
 u16 QzGiveStarterJohto(void) { return gSpecialVar_Result = QzGiveStarter_(); }
 u16 QzGiveStarterKanto(void) { return gSpecialVar_Result = QzGiveStarter_(); }
+
+// ---------------------------------------------------------------------------------------------- credits
+// Moemon Kai: Quetzal's credits (Emerald's here). After RED on MT. SILVER (QzAfterCreditsReset) the party is healed and
+// the game saved at home before they roll, as the games did; the credits end at the title screen.
+u16 QzDoCredits(void)
+{
+    SetMainCallback2(CB2_StartCreditsSequence);
+    return 0;
+}
+
+u16 QzAfterCreditsReset(void)
+{
+    HealPlayerParty();
+    SetContinueGameWarpStatus();
+    SetContinueGameWarpToHealLocation(MP_Region_Current() == REGION_KANTO ? HEAL_LOCATION_KANTO_PALLET_TOWN
+                                                                         : HEAL_LOCATION_JOHTO_NEW_BARK_TOWN);
+    TrySavingData(SAVE_NORMAL);
+    SetMainCallback2(CB2_StartCreditsSequence);
+    return 0;
+}

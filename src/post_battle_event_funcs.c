@@ -7,6 +7,7 @@
 #include "overworld.h"
 #include "script_pokemon_util.h"
 #include "tv.h"
+#include "mp_region.h"
 #include "constants/heal_locations.h"
 
 int GameClear(void)
@@ -20,7 +21,17 @@ int GameClear(void)
 
     HealPlayerParty();
 
-    if (FlagGet(FLAG_SYS_GAME_CLEAR) == TRUE)
+    if (MP_Region_Current() != REGION_HOENN)
+    {
+        // Moemon Kai: JOHTO's / KANTO's League (QzSaveLeagueVictoryRecord marked it cleared): HOENN's own game
+        // clear stays as it was; the HALL OF FAME has records if any other region was cleared before
+        u8 r;
+        gHasHallOfFameRecords = FlagGet(FLAG_SYS_GAME_CLEAR);
+        for (r = REGION_HOENN + 1; r < REGION_COUNT; r++)
+            if (r != MP_Region_Current() && MP_Region_Cleared(r))
+                gHasHallOfFameRecords = TRUE;
+    }
+    else if (FlagGet(FLAG_SYS_GAME_CLEAR) == TRUE)
     {
         gHasHallOfFameRecords = TRUE;
     }
@@ -35,7 +46,11 @@ int GameClear(void)
 
     SetContinueGameWarpStatus();
 
-    if (gSaveBlock2Ptr->playerGender == MALE)
+    if (MP_Region_Current() == REGION_JOHTO)   // Moemon Kai: home in the region's own first town
+        SetContinueGameWarpToHealLocation(HEAL_LOCATION_JOHTO_NEW_BARK_TOWN);
+    else if (MP_Region_Current() == REGION_KANTO)
+        SetContinueGameWarpToHealLocation(HEAL_LOCATION_KANTO_PALLET_TOWN);
+    else if (gSaveBlock2Ptr->playerGender == MALE)
         SetContinueGameWarpToHealLocation(HEAL_LOCATION_LITTLEROOT_TOWN_BRENDANS_HOUSE_2F);
     else
         SetContinueGameWarpToHealLocation(HEAL_LOCATION_LITTLEROOT_TOWN_MAYS_HOUSE_2F);
