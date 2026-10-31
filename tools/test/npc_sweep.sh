@@ -37,11 +37,12 @@ for g in range(g0, g1 + 1):
         lines = ['pressuntil A field 5000', 'wait 30', 'mp teach 0 44', 'mp teach 1 44', 'mp battlestyle 1']
         for what, x, y in spots:
             # A through what it says and any battle (A keeps the battle cursor on FIGHT and the first move); B out of
-            # menus and questions; a card game still going is conceded; START then A to close a naming screen; B again
+            # menus and questions; a card game still going is conceded; START then A to close a naming screen; B, A (a
+            # long scene still going) and B again
             lines += ['mp warp %d,%d,%d,%d' % (g, n, x, y + 1), 'wait 40', 'mp face up', 'mash A 40 8',
                       'pressuntil A field 7000', 'mp cards concede', 'mp ygo concede', 'mp tt concede',
                       'pressuntil A field 1500', 'pressuntil B field 600', 'press START 4', 'wait 30', 'press A 4',
-                      'wait 60', 'pressuntil B field 600', 'wait 20', 'mp ctx', 'mp sweepnote %s' % what.replace(' ', '_')]
+                      'wait 60', 'pressuntil B field 600', 'pressuntil A field 3000', 'pressuntil B field 600', 'wait 20', 'mp ctx', 'mp sweepnote %s' % what.replace(' ', '_')]
         lines += ['mp savesum', 'quit']
         open(os.path.join(out, 'scripts', name + '.txt'), 'w').write('\n'.join(lines) + '\n')
         region = 0 if g < 34 else (1 if g < 36 else 2)

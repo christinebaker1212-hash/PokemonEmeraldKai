@@ -1,0 +1,59 @@
+pressuntil A field 5000
+wait 60
+mp regionclear 0
+mp additem 265 1
+mp setvar 20789 3
+mp warp 9,9,8,11
+wait 120
+mp face up
+wait 10
+press A 3
+wait 20
+pressuntil A multichoice 2000
+wait 20
+press DOWN 3
+wait 10
+press A 3
+wait 30
+pressuntil A multichoice 2000
+wait 20
+shot out_regions
+press DOWN 3
+wait 10
+press A 3
+wait 30
+pressuntil A partymenu 3000
+wait 60
+press DOWN 3
+wait 10
+press A 3
+watchlog region: travel 0 -> 1
+pressuntillog A 3000 region: travel 0 -> 1
+pressuntil B field 3000
+wait 60
+shot out_arrived
+mp where
+mp regioninfo
+mp regionclear 1
+mp setvar 20789 3
+mp warp 35,12,8,16
+wait 120
+mp face down
+wait 10
+press A 3
+wait 20
+pressuntil A multichoice 2000
+wait 20
+shot back_regions
+press DOWN 3
+wait 10
+press A 3
+wait 30
+watchlog region: travel 1 -> 0
+pressuntillog A 3000 region: travel 1 -> 0
+pressuntil B field 3000
+wait 60
+shot back_arrived
+mp where
+mp regioninfo
+quit

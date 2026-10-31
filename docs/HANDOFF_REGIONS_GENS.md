@@ -53,25 +53,33 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
   The sweep skips card duelists (their own tests); check them in JOHTO / KANTO as part of the cards step.
 - SAFFRON's MAGNET TRAIN counter (test region_train_saffron).
 - Friends follow the host's trip (test region_coop_follow).
+- Regions' first-arrival setup (Quetzal's hidden-at-start objects) and GIOVANNI-story flag refresh on JOHTO warps.
+- Six cross-region round trips (tools/test/gen_region_trips.py, tests region_trip_*); story_johto plays JOHTO's
+  opening to the starter.
 - 3x2 borders for KANTO's seven FireRed layouts; door animations: none in Quetzal either (left as is).
 - 1.61.1 released (the seal fix, contest, puzzles, credits, GAME RULES gimmick rows).
 
 ## Next steps
-1. Check the 1.61.2 release run finished (GitHub Actions release.yml on the default branch).
+1. Ship 1.61.3 (hotfix: JOHTO mart clerks, CUT, KURT's shop, Triple Triad sellers crashed; plus the extras since
+   1.61.2) once the NPC sweep's report is worked through: bump include/mp_version.h, tools/release/notes/v1.61.3.md,
+   tests, Windows build, fast-forward the default branch, check the release run.
 2. Extras still open (task list):
-   - Quetzal postgame events, still stubs in src/qz_specials_stub.c (each logs and re-enables the script, so
-     none freezes, but the events don't happen): GIOVANNI's story (time travel to the past), QzTimeTravelChoosePartyMon. Port them from
-     the Quetzal ROM (the ROM is not in the repo; tools/quetzal_rip/dis_special.py ROM sNNN
-     disassembles a special) and docs/quetzal/SPECIALS.md (move each from the stub file to src/qz_*.c;
+   - Quetzal's two story modes, still stubs in src/qz_specials_stub.c (each logs and re-enables the script, so
+     none freezes, but the events don't happen): GIOVANNI's past (Tohjo Falls -> RadioTower; the player plays as
+     GIOVANNI, swapped teams, a partner multi battle) and BILL's time travel (Goldenrod; the player plays as CELEBI).
+     Port them from the Quetzal ROM (not in the repo; tools/quetzal_rip/dis_special.py ROM sNNN disassembles a
+     special) and docs/quetzal/SPECIALS.md / JOHTO.md section 13 (move each from the stub file to src/qz_*.c;
      tools/quetzal_port/import.py regenerates the stub list from what src/qz_*.c defines).
-   - Sightseeing walk on first arrival,
-     per-region co-op shared PCs.
+   - Sightseeing walk on first arrival (a guide in the port city before the ride to the first town).
+   - Per-region co-op shared PCs (the server's 14 shared boxes, one set per region).
 3. Playthroughs of JOHTO and KANTO from a new game (MOEMON_DEBUG_REGION=1 / 2): story order, every gym, rival,
    key event; plus an automated sweep that talks to every NPC / sign / trigger of every Johto and Kanto map
    (tools/test/npc_sweep.sh does this now: run it, fix what it reports) and greps logs for "not ported",
    crashes, stuck script contexts.
-4. Cross-region playthroughs in all six directions (item 3 above): tickets / boats / trains between regions,
-   per-region state kept, levels, PCs, return trips.
+4. Cross-region playthroughs in all six directions (item 3 above): the round trips pass (region_trip_*); still to do:
+   play each destination's opening after a first arrival by boat (party not empty: story_johto-style), and extend
+   story_johto past the starter (ROUTE 29, MR. POKeMON, the rival) plus a KANTO one (OAK, the parcel).
+   Also port Quetzal's legendary unlock conditions (COOP_NOTES "JOHTO and KANTO": special 704 / 757's kind switch).
 5. The GENERATION audit (item 4 above): a script under tools/ that, for each GEN 3-9, lists species obtainable from
    wild tables (all three regions, by MP_Gen pools), static / gift / trade scripts, prizes (GAME CORNERS, contests,
    MoeGatcha), evolutions and breeding of those; and every item's sources (marts by GEN, pickups, held items,

@@ -1287,3 +1287,22 @@ u16 QzSSAnneExteriorEventStep(void)
     }
     return 0;
 }
+
+// Quetzal's per-map refresh of GIOVANNI's-story objects (its special 693, which its map loading runs on every JOHTO
+// warp; mp_region.c MP_Region_OnMapLoaded here). GIOVANNI's past isn't ported, so this is the present's state: the
+// story's people stay hidden, the dream's two at the INDIGO PLATEAU / VICTORY ROAD gate show in a dream only, and
+// ELM's lab's ARCEUS (FLAG_QZ_0x131F) is hidden until its own scene shows it.
+u16 QzGiovanniStoryUpdateFlags(void)
+{
+    u8 group = gSaveBlock1Ptr->location.mapGroup, num = gSaveBlock1Ptr->location.mapNum;
+    FlagSet(FLAG_QZ_0x10D4);   // TOHJO FALLS
+    FlagSet(FLAG_QZ_0x131E);
+    FlagSet(0x14A9);           // RADIO TOWER 5F
+    FlagSet(0x131D);
+    if (FlagGet(FLAG_QZ_0x1425) && ((group == 34 && num == 96) || (group == 35 && num == 20)))
+        FlagClear(FLAG_QZ_0x1321);
+    else
+        FlagSet(FLAG_QZ_0x1321);
+    FlagSet(FLAG_QZ_0x131F);
+    return 0;
+}

@@ -981,6 +981,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
                gMPlayInfo_BGM.songHeader ? gMPlayInfo_BGM.songHeader->trackCount : 0, SOUND_INFO_PTR->maxChans,
                (unsigned)gMPlayInfo_BGM.status, gMPlayInfo_BGM.trackCount, (unsigned)gMPlayInfo_BGM.clock);
     }
+    else if (strcmp(cmd, "getvar") == 0)
+        printf("[test] var 0x%X = %d\n", (unsigned)strtol(arg, NULL, 0), VarGet((u16)strtol(arg, NULL, 0)));   // getvar ID
     else if (strcmp(cmd, "getflag") == 0)
     {
         // getflag N - whether an event flag is set (2151 = FLAG_BADGE01_GET)

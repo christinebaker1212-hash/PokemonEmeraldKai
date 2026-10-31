@@ -128,6 +128,27 @@ u8 MP_Region_StartChoice(void)
 }
 
 // End of NewGameInitData: JOHTO starts in NEW BARK's house, KANTO in PALLET's (their own opening scripts run there)
+#include "../data/qz_region_init.h"
+
+// JOHTO / KANTO set up as Quetzal does on a region's first arrival (its new game, or the first trip there): the people
+// and objects that start hidden, story variables; then the guard flag, so only once. Every arrival sets one more flag.
+static void MP_Region_Arrive(u8 region)
+{
+    u32 i;
+    if (region == REGION_HOENN || region > ARRAY_COUNT(sQzRegionInit))
+        return;
+    if (!FlagGet(sQzRegionInit[region - 1].guard))
+    {
+        for (i = 0; i < sQzRegionInit[region - 1].nFlags; i++)
+            FlagSet(sQzRegionInit[region - 1].flags[i]);
+        for (i = 0; i < sQzRegionInit[region - 1].nVars; i++)
+            VarSet(sQzRegionInit[region - 1].vars[i][0], sQzRegionInit[region - 1].vars[i][1]);
+        FlagSet(sQzRegionInit[region - 1].guard);
+        MPNet_Log("region: %s set up (%d flags)", region == 1 ? "JOHTO" : "KANTO", sQzRegionInit[region - 1].nFlags);
+    }
+    FlagSet(sQzRegionInit[region - 1].arrival);
+}
+
 void MP_Region_StartNewGame(void)
 {
     const char *env = getenv("MOEMON_DEBUG_REGION");
@@ -135,6 +156,7 @@ void MP_Region_StartNewGame(void)
         sStartRegion = atoi(env) % REGION_COUNT;
     gRegionState.current = sStartRegion;
     gRegionState.started = 1 << sStartRegion;
+    MP_Region_Arrive(sStartRegion);
     if (sStartRegion != REGION_HOENN)
     {
         MP_Region_GoToStartHouse(sStartRegion);
@@ -505,6 +527,7 @@ void MP_Region_Travel(u8 from, u8 to)
         MP_Region_FitMon(&gPlayerParty[i], to);
     gRegionState.current = to;
     gRegionState.started |= 1 << to;
+    MP_Region_Arrive(to);
     MP_SendRoomRules();   // a host's room goes with them: friends still in the old region are told and leave
     MPNet_Log("region: travel %d -> %d (PC boxes swapped, party at its levels there)", from, to);
 }
@@ -1051,6 +1074,11 @@ void MP_Region_OnMapLoaded(void)
 {
     u8 cur = MP_Region_Current();
     MP_Gen_ReturnHeldItems();   // GENERATION: held items past it go back to the bag
+    if (cur == REGION_JOHTO)
+    {
+        u16 QzGiovanniStoryUpdateFlags(void);
+        QzGiovanniStoryUpdateFlags();   // Quetzal refreshes these on every JOHTO warp (its special 693)
+    }
     if (cur != REGION_HOENN)
     {
         void Tt_MapSetup(void);

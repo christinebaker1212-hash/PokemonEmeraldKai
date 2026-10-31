@@ -1,0 +1,35 @@
+pressuntil A field 5000
+wait 60
+mp setvar 0x5003 1
+mp warp 35,1,10,2
+wait 60
+press DOWN 20
+wait 30
+pressuntil A field 4000
+mp getvar 0x5003
+shot mom
+mp warp 35,0,6,11
+wait 200
+mp where
+press UP 100
+wait 30
+mp where
+mp ctx
+shot lab1
+mp getvar 0x5004
+pressuntil A field 9000
+mp getvar 0x5004
+mp warp 35,0,8,5
+wait 150
+mp face up
+press A 4
+pressuntil A multichoice 2000
+wait 30
+shot starters
+press A 4
+wait 60
+pressuntil A field 6000
+mp getvar 0x5004
+mp party
+shot lab2
+quit

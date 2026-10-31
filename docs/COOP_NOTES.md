@@ -2785,6 +2785,16 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   (mp_main.c sFollowRegion -> qz_specials.c MP_Region_FollowHost: customs keeps their first POKeMON, the port or the
   first town the first time); with no room in the GLOBAL PC they leave as before. Harness `mp travel R`. Test
   region_coop_follow.
+- A region's first arrival (its new game or the first trip there) runs Quetzal's setup: the people and objects that
+  start hidden and a few story variables, then its guard flag (JOHTO 0x1422, KANTO 0x2269), plus a flag on every
+  arrival (mp_region.c MP_Region_Arrive; data src/data/qz_region_init.h from tools/quetzal_rip/region_init.py ROM ->
+  quetzal_rip/data/region_init.json -> tools/quetzal_port/gen_region_init.py). Saves already under way aren't touched.
+- QzGiovanniStoryUpdateFlags (Quetzal's special 693) runs on every JOHTO warp (MP_Region_OnMapLoaded), as Quetzal's
+  map loading does: it keeps GIOVANNI's-story people and ELM's lab's ARCEUS hidden (they stood there from 1.60).
+- Not ported yet: Quetzal's per-legendary unlock conditions (special 704's kind switch at 0x082AA38C, 45 kinds;
+  KANTO's at 0x082AE79C): RefreshStatics shows every one not yet caught or beaten (save MELOETTA, DARKRAI, MEW's).
+- Cross-region trips: tools/test/gen_region_trips.py writes region_trip_<from>_<to> (all six, there and back by the
+  real clerks). story_johto plays JOHTO's opening (house, MOM, ELM, the starter); harness mp getvar.
 - tools/test/npc_sweep.sh talks to every person and reads every sign on every map (harness `mp sweepnote`); it
   reports crashes, hangs, scripts still holding the player and stubs reached.
 - Not done yet: Quetzal's other postgame events (GIOVANNI's past and the time travel: still stubs that log and go on), FRLG door animations, 3x2 map
