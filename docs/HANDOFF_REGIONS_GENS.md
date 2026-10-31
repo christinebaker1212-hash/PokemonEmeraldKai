@@ -146,3 +146,8 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
    new Pokemon (Gens 4-9); the modern Gen 4-9 cries sourced and added with a GBA sound filter pass; a token icon for
    Yu-Gi-Oh! tokens (ids past YGO_CARD_COUNT); SEALED (past the GENERATION) Pokemon marked with an icon and/or tint in
    the party, PC and summary.
+13. (The user, after 12:) the department stores are redundant: both clerks of a floor sell the same extended list
+   (shop.c sMpShopExtras is keyed by map only: LILYCOVE 3F's two clerks both get every battle item and MEGA STONE;
+   GOLDENROD / CELADON the same). Spread the extended selection through the department store (each clerk / floor its
+   own theme), and give sensible POKe MARTs in HOENN, JOHTO and KANTO a smaller selection that grows with progression
+   (badges).
