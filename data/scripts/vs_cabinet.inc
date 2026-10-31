@@ -1,29 +1,119 @@
-@ Moemon Fight: the VS cabinet in MAUVILLE's GAME CORNER, two slot machines back to back (the right
-@ block's bottom row). Sitting down offers WAIT FOR 2P or FIGHT CPU; a friend already sitting at the
-@ other seat gets asked instead (src/mp/mp_fight.c, docs/FIGHT_DECISIONS.md). The west seat plays
-@ the left side.
-EventScript_VsCabinetWest::
+@ Moemon Fight: the GAME CENTER 3F's VS cabinets, the five back-to-back pairs in the middle of the floor (each pair is
+@ one cabinet with a seat on each side: the west seat plays 1P, the left side; the east seat 2P). Row 8 plays
+@ SUPER STREET FIGHTER II X, 9 VAMPIRE SAVIOR, 10 CYBERBOTS, 12 STREET FIGHTER ALPHA 3 (CPS-2 arcade boards,
+@ include/arcade.h, from each player's own ROM set in the "arcade" folder beside the game), 11 the MUGEN cabinet,
+@ "a weird bootleg" (src/mp/mp_fight.c CABINET_*,
+@ docs/FIGHT_DECISIONS.md). Each says which game it is first. Sitting down offers WAIT FOR 2P or 1P play; a friend
+@ already sitting at the other side gets asked instead.
+EventScript_GcVsSsf2xWest::
+	setvar VAR_0x8005, 1
 	setvar VAR_0x8004, 0
+	lockall
+	msgbox VsCabinet_Text_Ssf2x, MSGBOX_DEFAULT
 	goto EventScript_VsCabinet
 	end
 
-EventScript_VsCabinetEast::
+EventScript_GcVsSsf2xEast::
+	setvar VAR_0x8005, 1
 	setvar VAR_0x8004, 1
+	lockall
+	msgbox VsCabinet_Text_Ssf2x, MSGBOX_DEFAULT
+	goto EventScript_VsCabinet
+	end
+
+EventScript_GcVsVampireWest::
+	setvar VAR_0x8005, 2
+	setvar VAR_0x8004, 0
+	lockall
+	msgbox VsCabinet_Text_Vampire, MSGBOX_DEFAULT
+	goto EventScript_VsCabinet
+	end
+
+EventScript_GcVsVampireEast::
+	setvar VAR_0x8005, 2
+	setvar VAR_0x8004, 1
+	lockall
+	msgbox VsCabinet_Text_Vampire, MSGBOX_DEFAULT
+	goto EventScript_VsCabinet
+	end
+
+EventScript_GcVsCyberbotsWest::
+	setvar VAR_0x8005, 3
+	setvar VAR_0x8004, 0
+	lockall
+	msgbox VsCabinet_Text_Cyberbots, MSGBOX_DEFAULT
+	goto EventScript_VsCabinet
+	end
+
+EventScript_GcVsCyberbotsEast::
+	setvar VAR_0x8005, 3
+	setvar VAR_0x8004, 1
+	lockall
+	msgbox VsCabinet_Text_Cyberbots, MSGBOX_DEFAULT
+	goto EventScript_VsCabinet
+	end
+
+EventScript_GcVsMugenWest::
+	setvar VAR_0x8005, 4
+	setvar VAR_0x8004, 0
+	lockall
+	msgbox VsCabinet_Text_Mugen, MSGBOX_DEFAULT
+	goto EventScript_VsCabinet
+	end
+
+EventScript_GcVsMugenEast::
+	setvar VAR_0x8005, 4
+	setvar VAR_0x8004, 1
+	lockall
+	msgbox VsCabinet_Text_Mugen, MSGBOX_DEFAULT
+	goto EventScript_VsCabinet
+	end
+
+EventScript_GcVsAlpha3West::
+	setvar VAR_0x8005, 5
+	setvar VAR_0x8004, 0
+	lockall
+	msgbox VsCabinet_Text_Alpha3, MSGBOX_DEFAULT
+	goto EventScript_VsCabinet
+	end
+
+EventScript_GcVsAlpha3East::
+	setvar VAR_0x8005, 5
+	setvar VAR_0x8004, 1
+	lockall
+	msgbox VsCabinet_Text_Alpha3, MSGBOX_DEFAULT
 	goto EventScript_VsCabinet
 	end
 
 EventScript_VsCabinet::
-	lockall
+	special MP_Fight_CabinetReady
+	goto_if_eq VAR_RESULT, 0, EventScript_VsCabinet_NoSet
 	special MP_Fight_SeatCheck
 	goto_if_eq VAR_RESULT, 1, EventScript_VsCabinet_Challenge
 	goto_if_eq VAR_RESULT, 2, EventScript_VsCabinet_Taken
 	goto_if_eq VAR_RESULT, 3, EventScript_VsCabinet_InUse
+	goto_if_eq VAR_0x8005, 4, EventScript_VsCabinet_MugenMenu
+	message VsCabinet_Text_Play
+	waitmessage
+	multichoice 18, 6, MULTI_ARCADE_CABINET, FALSE
+	switch VAR_RESULT
+	case 0, EventScript_VsCabinet_Wait
+	case 1, EventScript_VsCabinet_Cpu
+	releaseall
+	end
+
+EventScript_VsCabinet_MugenMenu::
 	message VsCabinet_Text_Sit
 	waitmessage
 	multichoice 19, 6, MULTI_VS_CABINET, FALSE
 	switch VAR_RESULT
 	case 0, EventScript_VsCabinet_Wait
 	case 1, EventScript_VsCabinet_Cpu
+	releaseall
+	end
+
+EventScript_VsCabinet_NoSet::
+	msgbox VsCabinet_Text_NoSet, MSGBOX_DEFAULT
 	releaseall
 	end
 
@@ -107,9 +197,53 @@ EventScript_VsCabinet_NoContest::
 	end
 
 EventScript_VsCabinet_Packs::
+	goto_if_ne VAR_0x8005, 4, EventScript_VsCabinet_PacksArcade
 	msgbox VsCabinet_Text_Packs, MSGBOX_DEFAULT
 	releaseall
 	end
+
+EventScript_VsCabinet_PacksArcade::
+	msgbox VsCabinet_Text_PacksArcade, MSGBOX_DEFAULT
+	releaseall
+	end
+
+VsCabinet_Text_Ssf2x:
+	.string "SUPER STREET FIGHTER II X\n"
+	.string "CAPCOM's arcade fighter, 1994.\p"
+	.string "Sixteen world warriors, now with\n"
+	.string "SUPER COMBOS.$"
+
+VsCabinet_Text_Alpha3:
+	.string "STREET FIGHTER ALPHA 3\n"
+	.string "CAPCOM's arcade fighter, 1998.\p"
+	.string "Pick a fighting style, then fight\n"
+	.string "the biggest cast of the ALPHA games.$"
+
+VsCabinet_Text_Vampire:
+	.string "VAMPIRE SAVIOR\n"
+	.string "CAPCOM's arcade fighter, 1997.\p"
+	.string "Creatures of the night battle it out\n"
+	.string "in a demon lord's world.$"
+
+VsCabinet_Text_Cyberbots:
+	.string "CYBERBOTS\n"
+	.string "CAPCOM's arcade fighter, 1995.\p"
+	.string "Pilots in giant robots slug it out,\n"
+	.string "arms and legs flying.$"
+
+VsCabinet_Text_Mugen:
+	.string "A VS cabinet with no name on it.\n"
+	.string "A weird bootleg.$"
+
+VsCabinet_Text_Play:
+	.string "START puts in a coin and starts.\n"
+	.string "Hold START to stand up.$"
+
+VsCabinet_Text_NoSet:
+	.string "The screen is dark. This cabinet\n"
+	.string "needs {STR_VAR_1}'s ROM set.\p"
+	.string "Put {STR_VAR_2} in the\n"
+	.string "arcade folder next to the game.$"
 
 VsCabinet_Text_Sit:
 	.string "It's a VS cabinet!\n"
@@ -132,6 +266,10 @@ VsCabinet_Text_InUse:
 VsCabinet_Text_Packs:
 	.string "{STR_VAR_1}'s fight files aren't\n"
 	.string "the same as yours. No fight…$"
+
+VsCabinet_Text_PacksArcade:
+	.string "{STR_VAR_1} doesn't have this\n"
+	.string "game's ROM set. No match…$"
 
 VsCabinet_Text_Won:
 	.string "YOU WIN!$"

@@ -126,6 +126,7 @@
 #define MULTI_GAME_CENTER_FLOORS           115   // Moemon Co-op: the GAME CENTER's elevator: 1F / 2F / 3F / EXIT
 #define MULTI_DANCE_MACHINE                116   // Moemon Rhythm: PLAY ALONE / WAIT FOR 2P / CANCEL
 #include "constants/script_menu_qz.h"   // Moemon Kai: Quetzal's menus, 117+
+#define MULTI_ARCADE_CABINET               224   // Moemon Fight: the GAME CENTER's arcade boards: WAIT FOR 2P / PLAY ALONE / CANCEL
 
 // Lilycove SS Tidal Multichoice Selections
 #define SSTIDAL_SELECTION_SLATEPORT        0

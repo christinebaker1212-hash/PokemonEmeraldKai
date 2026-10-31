@@ -28,7 +28,8 @@
 #include "text.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
-#include "mf_engine.h"
+#include "arcade.h"
+#include "fight_engine.h"   // (mf_engine.h, or an arcade board)
 #include "platform/fight.h"
 
 void MPNet_Log(const char *fmt, ...);
@@ -66,7 +67,11 @@ enum
 enum { SEAT_EMPTY, SEAT_WAITING, SEAT_CPU, SEAT_FIGHTING };
 enum { NET_OFF, NET_ASKING, NET_STARTING, NET_RUNNING };
 
-#define CABINET_ID        0       // MAUVILLE's GAME CORNER (the only one so far)
+// The GAME CENTER 3F's VS cabinets, rows 8-12 of its back-to-back pairs, one game each (VAR_0x8005 from
+// data/scripts/vs_cabinet.inc; 0 was MAUVILLE's, before 1.62.0)
+enum { CABINET_SSF2X = 1, CABINET_VAMPIRE, CABINET_CYBERBOTS, CABINET_MUGEN, CABINET_ALPHA3, CABINET_COUNT };
+static u8 sCabinet = CABINET_MUGEN;
+#define CABINET_ID sCabinet
 #define SEAT_RESEND       60      // frames between our seat messages
 #define SEAT_TTL          150     // a friend's seat without a message for this long is empty
 #define ASK_FRAMES        (60 * 6)
@@ -207,6 +212,14 @@ static void SetNameVar(s8 id)
     gStringVar1[MP_NAME_LEN] = EOS;
 }
 
+// The arcade game on our screen + 1 (ARCADE_*), 0 none: friends' SPECTATE panels show it only if they have its set
+u8 MP_Fight_ArcadeShown(void)
+{
+    if (!sRunning || !FE_ARCADE)
+        return 0;
+    return FE_GAME + 1;
+}
+
 void MP_Fight_TestPress(u16 buttons)
 {
     sTestButtons = buttons;
@@ -263,6 +276,35 @@ static s8 FriendInSeat(u8 seat, bool8 waitingOnly)
         return i;
     }
     return -1;
+}
+
+// Which engine runs a cabinet (include/fight_engine.h)
+static u8 KindFor(u8 cabinet)
+{
+    switch (cabinet)
+    {
+    case CABINET_SSF2X:
+        return FIGHT_KIND_ARCADE + ARCADE_SSF2X;
+    case CABINET_ALPHA3:
+        return FIGHT_KIND_ARCADE + ARCADE_SFA3;
+    case CABINET_VAMPIRE:
+        return FIGHT_KIND_ARCADE + ARCADE_VAMPIRE_SAVIOR;
+    case CABINET_CYBERBOTS:
+        return FIGHT_KIND_ARCADE + ARCADE_CYBERBOTS;
+    default:
+        return FIGHT_KIND_MUGEN;
+    }
+}
+
+static void UseCabinet(u8 cabinet)
+{
+    if (cabinet == 0 || cabinet >= CABINET_COUNT)
+        cabinet = CABINET_MUGEN;
+    if (sCabinet != cabinet)
+        sHaveMyPack = FALSE;
+    sCabinet = cabinet;
+    if (!sRunning)
+        gFightKind = KindFor(cabinet);
 }
 
 // Every frame (mp_main.c): our seat repeated, friends' seats aging, the bubbles
@@ -326,7 +368,7 @@ static void ReadMyPack(bool8 again)
 {
     if (sHaveMyPack && !again)
         return;
-    MfEngine_PackSummary(CABINET_NAME, &sMyPack);
+    FightEngine_PackSummary(CABINET_NAME, &sMyPack);
     sHaveMyPack = TRUE;
     MPNet_Log("fight: pack %08x, %d characters, %d stages", sMyPack.core, sMyPack.chars, sMyPack.stages);
 }
@@ -445,7 +487,7 @@ static void Finish(u8 result)
 // How many frames ahead of them we are: our frame against theirs as it must be by now
 static s32 FramesAhead(void)
 {
-    return (s32)MfEngine_FrameCount() - (s32)(sNet.peerFrame + sNet.rtt16 / 32);
+    return (s32)FightEngine_FrameCount() - (s32)(sNet.peerFrame + sNet.rtt16 / 32);
 }
 
 static void SendInput(void)
@@ -454,7 +496,7 @@ static void SendInput(void)
     static int sMuteAt = -1;
     if (sMuteAt < 0)
         sMuteAt = getenv("MOEMON_FIGHT_TEST_MUTE") != NULL ? atoi(getenv("MOEMON_FIGHT_TEST_MUTE")) : 0;
-    if (sMuteAt > 0 && MfEngine_FrameCount() >= (u32)sMuteAt)
+    if (sMuteAt > 0 && FightEngine_FrameCount() >= (u32)sMuteAt)
         return;
 
     u8 p[1 + 4 + 4 + 1 + 2 * SEND_MAX + 4 + 4 + 4 + 4 + 7 + 8];
@@ -482,7 +524,7 @@ static void SendInput(void)
     }
     p[9] = n;
     Put32(q, sNet.remoteLast);
-    Put32(q + 4, MfEngine_FrameCount());
+    Put32(q + 4, FightEngine_FrameCount());
     Put32(q + 8, sNet.sentHashFrame);
     Put32(q + 12, sNet.sentHash);
     q[16] = (u16)sTick;
@@ -615,7 +657,7 @@ static void KeepHash(u32 frame)
     u8 i = (frame / HASH_EVERY) % HASH_KEEP;
 
     sNet.hashFrame[i] = frame;
-    sNet.hashVal[i] = MfEngine_Hash();
+    sNet.hashVal[i] = FightEngine_Hash();
     sNet.sentHashFrame = frame;
     sNet.sentHash = sNet.hashVal[i];
 }
@@ -704,9 +746,9 @@ static void RsStart(u32 from)
 
 static void RequestResync(void)
 {
-    u32 cur = MfEngine_FrameCount();
+    u32 cur = FightEngine_FrameCount();
 
-    if (sRs.stage != RS_NONE || sNet.stage != NET_RUNNING || !MfEngine_Kept(NULL))
+    if (sRs.stage != RS_NONE || sNet.stage != NET_RUNNING || !FightEngine_Kept(NULL))
         return;   // only during the match (its frames are kept)
     if (sNet.side == 0)
         RsStart(cur > sNet.peerFrame ? cur : sNet.peerFrame);
@@ -717,7 +759,7 @@ static void RequestResync(void)
 // What the other game's button packets say about it
 static void RsOnInput(u32 at, u32 ask)
 {
-    u32 cur = MfEngine_FrameCount();
+    u32 cur = FightEngine_FrameCount();
 
     if (sNet.side == 0)
     {
@@ -748,7 +790,7 @@ static void RsSendState(void)
     u32 first, i;
     int r;
 
-    if (!MfEngine_StateInfo(&info))
+    if (!FightEngine_StateInfo(&info))
         return;
     Put32(body, sRs.at);
     PutInfo(body + 4, &info);
@@ -758,7 +800,7 @@ static void RsSendState(void)
         for (first = 0; first < info.pages[r]; first += RS_HASH_CHUNK)
         {
             u16 count = info.pages[r] - first < RS_HASH_CHUNK ? info.pages[r] - first : RS_HASH_CHUNK;
-            MfEngine_StateHashes(r, first, count, hashes);
+            FightEngine_StateHashes(r, first, count, hashes);
             body[0] = r;
             Put32(body + 1, first);
             body[5] = count;
@@ -787,7 +829,7 @@ static void RsServe(void)
     bool8 ok, globals;
     int r;
 
-    if (!MfEngine_StateInfo(&info))
+    if (!FightEngine_StateInfo(&info))
         return;
     ok = info.heapBase == sRs.theirs.heapBase;
     globals = ok && info.layout == sRs.theirs.layout && info.globalsSize == sRs.theirs.globalsSize;
@@ -798,7 +840,7 @@ static void RsServe(void)
         for (first = 0; ok && first < info.pages[r]; first += RS_HASH_CHUNK)
         {
             u32 n = info.pages[r] - first < RS_HASH_CHUNK ? info.pages[r] - first : RS_HASH_CHUNK;
-            MfEngine_StateHashes(r, first, n, mine);
+            FightEngine_StateHashes(r, first, n, mine);
             for (i = 0; i < n; i++)
             {
                 u32 page = first + i;
@@ -818,7 +860,7 @@ static void RsServe(void)
         r = diff[i] >> 31;
         body[0] = r;
         Put32(body + 1, diff[i] & 0x7FFFFFFF);
-        MfEngine_StatePage(r, diff[i] & 0x7FFFFFFF, body + 5);
+        FightEngine_StatePage(r, diff[i] & 0x7FFFFFFF, body + 5);
         RsSend(RS_MSG_PAGE, body, 5 + MF_STATE_PAGE);
     }
     Put32(end, ok ? count : 0xFFFFFFFF);
@@ -871,8 +913,8 @@ static void OnResync(u8 from, const u8 *d, u16 len)
         if (sNet.side == 0 || sRs.stage != RS_SENT || len < 5 + MF_STATE_PAGE)
             break;
         if (!sRs.begun)
-            sRs.begun = MfEngine_StateBegin();
-        if (MfEngine_StatePut(d[0], Get32(d + 1), d + 5))
+            sRs.begun = FightEngine_StateBegin();
+        if (FightEngine_StatePut(d[0], Get32(d + 1), d + 5))
             sRs.pages++;
         break;
     case RS_MSG_END:
@@ -883,8 +925,8 @@ static void OnResync(u8 from, const u8 *d, u16 len)
             struct MfStateInfo info;
             GetInfo(d + 4, &info);
             if (!sRs.begun)
-                sRs.begun = MfEngine_StateBegin();
-            MfEngine_StateEnd(&info);
+                sRs.begun = FightEngine_StateBegin();
+            FightEngine_StateEnd(&info);
             sRs.done++;
             sRs.lastAt = sRs.at;
             MPNet_Log("fight: desync: the host's state loaded after frame %u (%u pages)", sRs.at, sRs.pages);
@@ -916,7 +958,7 @@ static void RsStep(u32 cur)
         RsForgetHashes();
         return;
     }
-    if (sRs.stage != RS_HOLD || cur != sRs.at || sNet.remoteLast < sRs.at || sNet.rollbackFrom != 0 || !MfEngine_Ready())
+    if (sRs.stage != RS_HOLD || cur != sRs.at || sNet.remoteLast < sRs.at || sNet.rollbackFrom != 0 || !FightEngine_Ready())
         return;
     if (sNet.side != 0)
         RsSendState();
@@ -978,7 +1020,7 @@ static void BeginOnline(void)
     SetSeatState(SEAT_FIGHTING);
     MPNet_Log("fight: online with player %d, side %d, seed %u, input delay %d", sNet.peer, sNet.side, sNet.seed,
               sNet.delay);
-    if (!MfEngine_Begin(&session))
+    if (!FightEngine_Begin(&session))
     {
         Finish(FIGHT_RESULT_BROKEN);
         return;
@@ -991,7 +1033,7 @@ static void BeginOnline(void)
 static void EndOnline(void)
 {
     u8 p[6];
-    int engine = MfEngine_Result();
+    int engine = FightEngine_Result();
     u8 result = sNet.dropped ? FIGHT_RESULT_NO_CONTEST : ResultFor(engine);
 
     p[0] = MPR_FIGHT_END;
@@ -1011,11 +1053,11 @@ static void EndOnline(void)
 // Goes back to the frame before the first wrong guess and runs the frames since again
 static void RollBack(void)
 {
-    u32 cur = MfEngine_FrameCount(), to = sNet.rollbackFrom - 1, oldest = 0, f;
+    u32 cur = FightEngine_FrameCount(), to = sNet.rollbackFrom - 1, oldest = 0, f;
     u16 buttons[2];
 
     sNet.rollbackFrom = 0;
-    if (!MfEngine_Kept(&oldest) || to < oldest || !MfEngine_RollBack(to))
+    if (!FightEngine_Kept(&oldest) || to < oldest || !FightEngine_RollBack(to))
     {
         sNet.desyncs++;
         MPNet_Log("fight: couldn't go back to frame %u (at %u, oldest %u)", to, cur, oldest);
@@ -1028,7 +1070,7 @@ static void RollBack(void)
     for (f = to + 1; f <= cur; f++)
     {
         ButtonsFor(f, buttons);
-        MfEngine_StepQuiet(buttons);
+        FightEngine_StepQuiet(buttons);
         if (f <= sNet.remoteLast && f % HASH_EVERY == 0)
             KeepHash(f);
     }
@@ -1068,11 +1110,11 @@ static void TestDesync(u32 cur)
         sPokeAt = 0;
         return;
     }
-    if (sPokeAt == 0 && MfEngine_Kept(NULL))
+    if (sPokeAt == 0 && FightEngine_Kept(NULL))
         sPokeAt = cur + atoi(env);
-    if (sPokeAt != 0 && cur == sPokeAt && MfEngine_Ready())
+    if (sPokeAt != 0 && cur == sPokeAt && FightEngine_Ready())
     {
-        MfEngine_TestPoke(-7);
+        FightEngine_TestPoke(-7);
         MPNet_Log("fight: test: player 1's life changed here alone at frame %u", cur);
         sPokeAt = 0xFFFFFFFF;
     }
@@ -1086,46 +1128,46 @@ static bool8 NetStep(void)
     u32 ms = Fight_Ms();
 
     if (sLastMs != 0 && ms - sLastMs > 250)
-        MPNet_Log("fight: %u ms since the last frame (frame %u, ready %d)", ms - sLastMs, MfEngine_FrameCount(),
-                  MfEngine_Ready());
+        MPNet_Log("fight: %u ms since the last frame (frame %u, ready %d)", ms - sLastMs, FightEngine_FrameCount(),
+                  FightEngine_Ready());
     sLastMs = ms;
 
     if (sNet.stage == NET_STARTING)
     {
         // our CPU fight is ending (MfEngine_Cancel): then the friend's fight
-        if (!MfEngine_IsActive())
+        if (!FightEngine_IsActive())
             BeginOnline();
         return TRUE;
     }
-    if (!MfEngine_IsActive())
+    if (!FightEngine_IsActive())
     {
         EndOnline();
         return FALSE;
     }
     if (sNet.heard == 120)
         MPNet_Log("fight: nothing from player %d for 2 s (frame %u, theirs to %u, ours to %u, ready %d, udp %d, "
-                  "%d bytes queued)", sNet.peer, MfEngine_FrameCount(), sNet.remoteLast, sNet.localLast,
-                  MfEngine_Ready(), sNet.udpUp, MPNet_ClientQueued());
+                  "%d bytes queued)", sNet.peer, FightEngine_FrameCount(), sNet.remoteLast, sNet.localLast,
+                  FightEngine_Ready(), sNet.udpUp, MPNet_ClientQueued());
     if (!sNet.dropped && (++sNet.heard >= DROP_FRAMES || !FriendValid(sNet.peer)))
     {
         // they're gone: no contest
         sNet.dropped = TRUE;
         MPNet_Log("fight: player %d dropped out", sNet.peer);
-        MfEngine_Cancel();
+        FightEngine_Cancel();
     }
     if (sNet.dropped)
         return TRUE;
     Overlay();
 
     PumpUdp();
-    cur = MfEngine_FrameCount();
+    cur = FightEngine_FrameCount();
     if (sTick % 600 == 0)
         MPNet_Log("fight: frame %u, theirs to %u (their frame %u), ours to %u, %u rollbacks, %u frames there and back,"
                   " %d ahead (they're %d)", cur, sNet.remoteLast, sNet.peerFrame, sNet.localLast, sNet.rollbacks,
                   sNet.rtt16 / 16, FramesAhead(), sNet.peerAhead);
     // the input delay follows the ping on the select screen (the frames a message takes, 1 to 3); it only grows, as
     // buttons already sent can't be taken back
-    if (sNet.rtt16 != 0 && !MfEngine_Kept(NULL))
+    if (sNet.rtt16 != 0 && !FightEngine_Kept(NULL))
     {
         u8 want = (sNet.rtt16 / 16 + 1) / 2;
         want = want < 1 ? 1 : want > 3 ? 3 : want;
@@ -1149,17 +1191,17 @@ static bool8 NetStep(void)
     TestDesync(cur);
     RsStep(cur);
     next = cur + 1;
-    if (MfEngine_Ready() && (sRs.stage == RS_NONE || next <= sRs.at))
+    if (FightEngine_Ready() && (sRs.stage == RS_NONE || next <= sRs.at))
     {
         bool8 known = next <= sNet.remoteLast;
-        bool8 guess = !known && next - sNet.remoteLast <= MAX_AHEAD && MfEngine_Kept(&oldest)
+        bool8 guess = !known && next - sNet.remoteLast <= MAX_AHEAD && FightEngine_Kept(&oldest)
                       && oldest <= sNet.remoteLast;
         // further ahead of them than they are of us: wait a frame now and then so they catch up
         bool8 ahead = FramesAhead() - sNet.peerAhead >= 2 && sTick % 4 == 0;
         if ((known || guess) && !ahead)
         {
             ButtonsFor(next, buttons);
-            if (MfEngine_Step(buttons) && known && next % HASH_EVERY == 0)
+            if (FightEngine_Step(buttons) && known && next % HASH_EVERY == 0)
                 KeepHash(next);
         }
     }
@@ -1181,7 +1223,7 @@ static void OnInput(u8 from, const u8 *d, u16 len)
         return;
     sNet.heard = 0;
     first = last - n + 1;
-    simulated = MfEngine_FrameCount();
+    simulated = FightEngine_FrameCount();
     for (i = 0, f = first; i < n; i++, f++)
     {
         u16 b = d[10 + 2 * i] | (d[11 + 2 * i] << 8);
@@ -1260,7 +1302,7 @@ static void OnAsk(u8 from, const u8 *d, u16 len)
         return;
     }
     // our rules for both of us
-    if (!MfEngine_CabinetText(CABINET_NAME, sCabinetText, sizeof(sCabinetText)))
+    if (!FightEngine_CabinetText(CABINET_NAME, sCabinetText, sizeof(sCabinetText)))
         sCabinetText[0] = 0;
     sNet.peer = from;
     sNet.session = session;
@@ -1271,11 +1313,11 @@ static void OnAsk(u8 from, const u8 *d, u16 len)
     sNet.delay = 1;
     SendAnswer(from, session, 1, sNet.seed, d[7] | (d[8] << 8));
     PlaySE(SE_SUCCESS);
-    if (sSeatState == SEAT_CPU && MfEngine_IsActive())
+    if (sSeatState == SEAT_CPU && FightEngine_IsActive())
     {
         // a friend sat down during our CPU fight: it ends, theirs begins
         MPNet_Log("fight: player %d joins, the CPU fight ends", from);
-        MfEngine_Cancel();
+        FightEngine_Cancel();
         sNet.stage = NET_STARTING;
         sRunning = TRUE;
     }
@@ -1422,7 +1464,7 @@ bool8 MP_Fight_Step(void)
         sHoldGame = FALSE;
         Fight_Show(TRUE);
     }
-    if (sCrt == CRT_ON && MfEngine_Frame() != NULL)
+    if (sCrt == CRT_ON && FightEngine_Frame() != NULL)
     {
         Fight_Crt(CRT_ON, sCrtTime, CRT_ON_FRAMES);
         if (++sCrtTime > CRT_ON_FRAMES)
@@ -1442,32 +1484,34 @@ static bool8 Step(void)
         return NetStep();
     if (!sRunning)
         return FALSE;
-    if (!MfEngine_IsActive())
+    if (!FightEngine_IsActive())
     {
         // the fight is over: back to the GAME CORNER, the script goes on
-        u8 result = ResultFor(MfEngine_Result());
-        MPNet_Log("fight: result %d (engine %d, seat %d)", result, MfEngine_Result(), sSeat);
+        u8 result = ResultFor(FightEngine_Result());
+        MPNet_Log("fight: result %d (engine %d, seat %d)", result, FightEngine_Result(), sSeat);
         if (result == FIGHT_RESULT_BROKEN)
-            MPNet_Log("fight: %s", MfEngine_Error());
+            MPNet_Log("fight: %s", FightEngine_Error());
         Tally(result, FALSE);
         Finish(result);
         return FALSE;
     }
     buttons[sSeat] = Fight_PollButtons() | sTestButtons;
-    MfEngine_Step(buttons);
+    FightEngine_Step(buttons);
     return TRUE;
 }
 
 // ---------------------------------------------------------------------------
 // Specials
 
-// VAR_0x8004: the seat. VAR_RESULT: 0 nobody else here, 1 a friend waits at the other seat (STR_VAR_1),
-// 2 a friend is in this seat, 3 friends are fighting here
+// VAR_0x8005: the cabinet (CABINET_*), VAR_0x8004: the seat (0 west = 1P, the left side; 1 east = 2P).
+// VAR_RESULT: 0 nobody else here, 1 a friend waits at the other seat (STR_VAR_1), 2 a friend is in this seat,
+// 3 friends are fighting here
 void MP_Fight_SeatCheck(void)
 {
     u8 seat = gSpecialVar_0x8004 & 1;
     s8 other, here;
 
+    UseCabinet(gSpecialVar_0x8005);
     sSitAt = seat;
     gSpecialVar_Result = 0;
     if (!MP_IsConnected())
@@ -1487,6 +1531,27 @@ void MP_Fight_SeatCheck(void)
     }
 }
 
+// VAR_0x8005: the cabinet. VAR_RESULT: 1 it works; 0 an arcade game's ROM set isn't there (STR_VAR_1: the game,
+// STR_VAR_2: its zips)
+void MP_Fight_CabinetReady(void)
+{
+    u8 kind;
+    char why[160];
+
+    UseCabinet(gSpecialVar_0x8005);
+    kind = KindFor(sCabinet);
+    gSpecialVar_Result = 1;
+    if (kind < FIGHT_KIND_ARCADE)
+        return;
+    MP_AsciiToGame(gStringVar1, Arcade_Title(kind - FIGHT_KIND_ARCADE), 32);
+    MP_AsciiToGame(gStringVar2, Arcade_SetFiles(kind - FIGHT_KIND_ARCADE), 64);
+    if (!Arcade_Check(kind - FIGHT_KIND_ARCADE, why, sizeof(why)))
+    {
+        MPNet_Log("fight: %s: %s", Arcade_Title(kind - FIGHT_KIND_ARCADE), why);
+        gSpecialVar_Result = 0;
+    }
+}
+
 void MP_Fight_StartCpu(void)
 {
     struct MfSession session;
@@ -1498,7 +1563,7 @@ void MP_Fight_StartCpu(void)
     session.seed = (unsigned int)rand();
     strcpy(session.cabinet, "mauville_gc");
     sResult = FIGHT_RESULT_NONE;
-    if (!MfEngine_Begin(&session))
+    if (!FightEngine_Begin(&session))
     {
         sResult = FIGHT_RESULT_BROKEN;
         ScriptContext_Enable();

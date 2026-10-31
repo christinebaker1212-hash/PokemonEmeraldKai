@@ -29,8 +29,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_GAMEBOY_KID",
-      "x": 2,
-      "y": 10,
+      "x": 1,
+      "y": 9,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_RIGHT",
       "movement_range_x": 0,
@@ -42,8 +42,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_NINJA_BOY",
-      "x": 5,
-      "y": 8,
+      "x": 6,
+      "y": 9,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
       "movement_range_x": 0,
@@ -144,7 +144,7 @@
       "y": 8,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_EAST",
-      "script": "RustboroCity_GameCenter_3F_EventScript_Console"
+      "script": "EventScript_GcVsSsf2xWest"
     },
     {
       "type": "sign",
@@ -152,7 +152,7 @@
       "y": 9,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_EAST",
-      "script": "RustboroCity_GameCenter_3F_EventScript_Console"
+      "script": "EventScript_GcVsVampireWest"
     },
     {
       "type": "sign",
@@ -160,7 +160,7 @@
       "y": 10,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_EAST",
-      "script": "RustboroCity_GameCenter_3F_EventScript_Console"
+      "script": "EventScript_GcVsCyberbotsWest"
     },
     {
       "type": "sign",
@@ -168,7 +168,7 @@
       "y": 11,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_EAST",
-      "script": "RustboroCity_GameCenter_3F_EventScript_Console"
+      "script": "EventScript_GcVsMugenWest"
     },
     {
       "type": "sign",
@@ -176,7 +176,7 @@
       "y": 12,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_EAST",
-      "script": "RustboroCity_GameCenter_3F_EventScript_Console"
+      "script": "EventScript_GcVsAlpha3West"
     },
     {
       "type": "sign",
@@ -184,7 +184,7 @@
       "y": 8,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_WEST",
-      "script": "RustboroCity_GameCenter_3F_EventScript_Console"
+      "script": "EventScript_GcVsSsf2xEast"
     },
     {
       "type": "sign",
@@ -192,7 +192,7 @@
       "y": 9,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_WEST",
-      "script": "RustboroCity_GameCenter_3F_EventScript_Console"
+      "script": "EventScript_GcVsVampireEast"
     },
     {
       "type": "sign",
@@ -200,7 +200,7 @@
       "y": 10,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_WEST",
-      "script": "RustboroCity_GameCenter_3F_EventScript_Console"
+      "script": "EventScript_GcVsCyberbotsEast"
     },
     {
       "type": "sign",
@@ -208,7 +208,7 @@
       "y": 11,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_WEST",
-      "script": "RustboroCity_GameCenter_3F_EventScript_Console"
+      "script": "EventScript_GcVsMugenEast"
     },
     {
       "type": "sign",
@@ -216,7 +216,7 @@
       "y": 12,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_WEST",
-      "script": "RustboroCity_GameCenter_3F_EventScript_Console"
+      "script": "EventScript_GcVsAlpha3East"
     },
     {
       "type": "sign",

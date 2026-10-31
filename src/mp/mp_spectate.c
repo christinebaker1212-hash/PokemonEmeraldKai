@@ -31,6 +31,8 @@
 #include "overworld.h"
 #include "script.h"
 #include "sound.h"
+#include "mp_fight.h"
+#include "arcade.h"
 #include "string_util.h"
 #include "task.h"
 #include "text.h"
@@ -69,6 +71,10 @@ enum {
 #define FRAMEF_KEY   1   // this update starts a full frame
 #define FRAMEF_SHIFT 2   // first move the picture: new (x, y) = old (x + shiftX, y + shiftY)
 #define FRAMEF_LAST  4   // the update's last message (always sent: viewers know the sender is there)
+// Bits 3-5: an arcade game on the sender's screen + 1 (include/arcade.h). A viewer without that game's ROM set
+// doesn't show the picture: the card stays on CONNECTING... until the game is off the screen
+#define FRAMEF_ARCADE_SHIFT 3
+#define FRAMEF_ARCADE_MASK  (7 << FRAMEF_ARCADE_SHIFT)
 #define PANEL_SEND_EVERY 4   // 15 updates a second when only panels watch
 #define SEND_BACKLOG (24 * 1024)   // more than this still waiting to go out: skip a picture (the game's own messages first)
 
@@ -417,7 +423,7 @@ static void StreamFrame(void)
         sOut[0] = MPR_SPEC_FRAME;
         sOut[1] = sStream.seq & 0xFF;
         sOut[2] = sStream.seq >> 8;
-        sOut[3] = flags;
+        sOut[3] = flags | (MP_Fight_ArcadeShown() << FRAMEF_ARCADE_SHIFT);
         sOut[4] = sStream.lastSong & 0xFF;
         sOut[5] = sStream.lastSong >> 8;
         sOut[7] = (flags & FRAMEF_SHIFT) ? (u8)(s8)ox : 0;
@@ -747,12 +753,24 @@ static bool8 ApplyUpdate(u16 *buf, bool8 *gotKey, const u8 *data, u16 len)
     return TRUE;
 }
 
+// An arcade game's picture the local player has no ROM set for (FRAMEF_ARCADE_*): not shown
+static bool8 ArcadeHidden(const u8 *data)
+{
+    u8 game = (data[3] & FRAMEF_ARCADE_MASK) >> FRAMEF_ARCADE_SHIFT;
+    return game != 0 && !Arcade_HasSet(game - 1);
+}
+
 static void ApplyFrame(const u8 *data, u16 len)
 {
     u16 song;
     sWatch.updates++;
     if (len < FRAME_HEADER)
         return;
+    if (ArcadeHidden(data))
+    {
+        sWatch.gotFrame = FALSE;   // CONNECTING... (as the panel)
+        return;
+    }
     if (!ApplyUpdate(sWatch.frame, &sWatch.gotFrame, data, len) || !sWatch.gotFrame)
         return;
     song = data[4] | (data[5] << 8);
@@ -776,6 +794,7 @@ static struct
     u8 shown[DISPLAY_PANEL_MAX];            // player ids on the cards, in order
     u8 count;
     bool8 gotKey[MP_MAX_PLAYERS];
+    bool8 arcadeHidden[MP_MAX_PLAYERS];    // their screen shows an arcade game we have no set for
     bool8 changed[MP_MAX_PLAYERS];
     bool8 labelChanged[MP_MAX_PLAYERS];
     u16 heard[MP_MAX_PLAYERS];              // frames since their last update
@@ -791,6 +810,7 @@ static void Panel_Forget(u8 id)
 {
     sPanel.subscribed &= ~(1 << id);
     sPanel.gotKey[id] = FALSE;
+    sPanel.arcadeHidden[id] = FALSE;
     sPanel.heard[id] = 0;
     sPanel.labelKey[id] = 0;
 }
@@ -800,6 +820,21 @@ static void Panel_OnFrame(u8 from, const u8 *data, u16 len)
     if (from >= MP_MAX_PLAYERS || !(sPanel.subscribed & (1 << from)))
         return;
     sPanel.heard[from] = 0;
+    if (len >= FRAME_HEADER && ArcadeHidden(data))
+    {
+        // a game we don't have: CONNECTING... (the picture isn't kept) until it's off their screen
+        if (sPanel.gotKey[from] || !sPanel.arcadeHidden[from])
+            MPNet_Log("spectate panel: player %d is playing an arcade game we have no set for", from + 1);
+        sPanel.gotKey[from] = FALSE;
+        sPanel.arcadeHidden[from] = TRUE;
+        sPanel.changed[from] = TRUE;
+        return;
+    }
+    if (sPanel.arcadeHidden[from])
+    {
+        sPanel.arcadeHidden[from] = FALSE;
+        SendSimple(from, MPR_SPEC_PANEL_JOIN);   // a whole picture again, now
+    }
     if (ApplyUpdate(sPanel.frame[from], &sPanel.gotKey[from], data, len))
     {
         // the update's last message: the picture is complete (they're split at 255 tiles / MAX_PAYLOAD)

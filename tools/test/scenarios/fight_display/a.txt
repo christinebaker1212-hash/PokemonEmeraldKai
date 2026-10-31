@@ -4,6 +4,8 @@ press RIGHT 2
 wait 20
 press A 2
 wait 60
+press A 2
+wait 60
 press DOWN 2
 wait 10
 press A 2

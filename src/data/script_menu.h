@@ -771,6 +771,13 @@ static const struct MenuAction MultichoiceList_DanceMachine[] =
     {gText_Cancel2},
 };
 
+static const struct MenuAction MultichoiceList_ArcadeCabinet[] =
+{
+    {gText_MpFightWait2P},
+    {gText_MpDanceAlone},
+    {gText_Cancel2},
+};
+
 static const struct MenuAction MultichoiceList_VsCabinet[] =
 {
     {gText_MpFightWait2P},
@@ -929,6 +936,7 @@ static const struct MultichoiceListStruct sMultichoiceLists[] =
     [MULTI_GAME_CENTER_FLOORS]         = MULTICHOICE(MultichoiceList_GameCenterFloors),
     [MULTI_DANCE_MACHINE]              = MULTICHOICE(MultichoiceList_DanceMachine),
 #include "script_menu_qz_entries.h"   // Moemon Kai: Quetzal's menus
+    [MULTI_ARCADE_CABINET]             = MULTICHOICE(MultichoiceList_ArcadeCabinet),
 };
 
 static const u8 sText_QzStd_1E[] = _("MEDICINE");
