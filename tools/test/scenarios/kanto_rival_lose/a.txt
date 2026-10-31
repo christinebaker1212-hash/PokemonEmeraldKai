@@ -1,0 +1,60 @@
+pressuntil A field 5000
+wait 60
+mp clearflag 2144
+mp clearflag 2145
+mp startmenu
+mp teach 0 45
+mp battlestyle 1
+mp getvar 0x5118
+mp warp 37,57,12,2
+wait 120
+mp face up
+wait 10
+press UP 8
+wait 60
+pressuntil A field 12000
+mp where
+mp getvar 0x5118
+wait 200
+pressuntil A field 12000
+shot lab
+mp getvar 0x511A
+mp where
+mp warp 37,122,7,4
+wait 120
+mp face right
+wait 10
+press A 4
+pressuntil A multichoice 6000
+shot starters
+press A 4
+wait 60
+pressuntil A field 12000
+mash A 200 10
+pressuntil A field 12000
+mp where
+mp getvar 0x5118
+mp party
+mp getflag 2144
+mp getflag 2145
+mp startmenu
+mp setvar 0x511A 3
+mp hp 1 0
+mp hp 2 0
+mp hp 3 0
+mp hp 4 0
+mp hp 5 0
+mp warp 37,122,6,7
+wait 120
+pressuntil B field 600
+press DOWN 8
+wait 120
+pressuntil A action 3000
+mp battlerhp 0 1
+
+mash A 400 10
+pressuntil A field 12000
+wait 60
+mp getvar 0x511A
+mp where
+quit

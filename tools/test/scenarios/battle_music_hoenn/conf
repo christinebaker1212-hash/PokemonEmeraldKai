@@ -1,0 +1,6 @@
+# A wild battle's music in HOENN: Emerald's own (MUS_VS_WILD) .
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_REGION=0"
+EXPECT_A=("bgm song 474 ")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -1,0 +1,7 @@
+# KANTO's first rival battle (Quetzal's trainerbattle 13: FireRed's early rival battle) in OAK's lab: the player loses: BLUE's own winning text in battle, no whiting out;
+# no intro text, and the lab's scene goes on by itself afterwards (var 0x511A = 4 without talking to BLUE again).
+MODE=1
+TMO=500
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_BATTLETEXT=1"
+EXPECT_A=("BLUE: Yeah! Am I great or what?" "var 0x511A = 4" "where map 37.122")
+UNEXPECT_A=("WHAT? Unbelievable" "whited out" "scurried" "[crash]" "TIMEOUT")

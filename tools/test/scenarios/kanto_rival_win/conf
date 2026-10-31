@@ -1,0 +1,7 @@
+# KANTO's first rival battle (Quetzal's trainerbattle 13: FireRed's early rival battle) in OAK's lab: the player wins: BLUE's defeat text in the battle's end;
+# no intro text, and the lab's scene goes on by itself afterwards (var 0x511A = 4 without talking to BLUE again).
+MODE=1
+TMO=500
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_TEST_FOE_HP1=1 MOEMON_BATTLETEXT=1"
+EXPECT_A=("WHAT? Unbelievable! I picked the wrong POK" "bgm song 509 " "var 0x511A = 4" "where map 37.122")
+UNEXPECT_A=("Am I great" "[crash]" "TIMEOUT")

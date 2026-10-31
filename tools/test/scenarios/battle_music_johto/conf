@@ -1,0 +1,6 @@
+# A wild battle's music in JOHTO: FireRed / LeafGreen's (MUS_RG_VS_WILD), as Quetzal played .
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("bgm song 510 ")
+UNEXPECT_A=("[crash]" "TIMEOUT")
