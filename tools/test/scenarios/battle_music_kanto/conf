@@ -1,0 +1,6 @@
+# A wild battle's music in KANTO: FireRed / LeafGreen's (MUS_RG_VS_WILD, 510); JOHTO has its own
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_REGION=2"
+EXPECT_A=("bgm song 510 ")
+UNEXPECT_A=("[crash]" "TIMEOUT")

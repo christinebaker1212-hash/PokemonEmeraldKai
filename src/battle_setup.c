@@ -575,6 +575,21 @@ void BattleSetup_StartLatiBattle(void)
     TryUpdateGymLeaderRematchFromWild();
 }
 
+// Moemon Kai: in JOHTO, RAIKOU, ENTEI and SUICUNE battle to their own songs
+static u16 MpJohtoBeastSong(u16 species)
+{
+    if (MP_Region_Current() == REGION_JOHTO)
+    {
+        if (species == SPECIES_RAIKOU)
+            return MUS_JOHTO_VS_RAIKOU;
+        if (species == SPECIES_ENTEI)
+            return MUS_JOHTO_VS_ENTEI;
+        if (species == SPECIES_SUICUNE)
+            return MUS_JOHTO_VS_SUICUNE;
+    }
+    return MUS_RG_VS_LEGEND;
+}
+
 void BattleSetup_StartLegendaryBattle(void)
 {
     LockPlayerFieldControls();
@@ -585,8 +600,8 @@ void BattleSetup_StartLegendaryBattle(void)
     {
     default:
         // Moemon Kai: any other legendary (JOHTO / KANTO's stand on the map): FireRed's legendary theme, not GROUDON's
-        // battle (Emerald's default)
-        CreateBattleStartTask(B_TRANSITION_BLUR, MUS_RG_VS_LEGEND);
+        // battle (Emerald's default); JOHTO's beasts their own (HeartGold / SoulSilver's)
+        CreateBattleStartTask(B_TRANSITION_BLUR, MpJohtoBeastSong(GetMonData(&gEnemyParty[0], MON_DATA_SPECIES, NULL)));
         break;
     case SPECIES_MEWTWO:
         CreateBattleStartTask(B_TRANSITION_BLUR, MUS_RG_VS_MEWTWO);

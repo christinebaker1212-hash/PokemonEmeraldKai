@@ -673,6 +673,32 @@ gSongTable::
 	song mus_johto_encounter_swimmer, MUSIC_PLAYER_BGM, 0
 	song mus_johto_encounter_hiker, MUSIC_PLAYER_BGM, 0
 	song mus_johto_encounter_champion, MUSIC_PLAYER_BGM, 0
+@ Moemon Kai: JOHTO's own battle and victory songs: each the FireRed / Emerald song's data under its own name, so a
+@ music/<name>.kaisong (HeartGold / SoulSilver's) replaces it in JOHTO only
+	.set mus_johto_vs_wild, mus_rg_vs_wild
+	.set mus_johto_vs_trainer, mus_rg_vs_trainer
+	.set mus_johto_vs_gym_leader, mus_rg_vs_gym_leader
+	.set mus_johto_vs_rival, mus_rg_vs_trainer
+	.set mus_johto_vs_rocket, mus_rg_vs_trainer
+	.set mus_johto_vs_champion, mus_rg_vs_champion
+	.set mus_johto_vs_raikou, mus_rg_vs_legend
+	.set mus_johto_vs_entei, mus_rg_vs_legend
+	.set mus_johto_vs_suicune, mus_rg_vs_legend
+	.set mus_johto_victory_wild, mus_victory_wild
+	.set mus_johto_victory_trainer, mus_victory_trainer
+	.set mus_johto_victory_gym_leader, mus_victory_gym_leader
+	song mus_johto_vs_wild, MUSIC_PLAYER_BGM, 0
+	song mus_johto_vs_trainer, MUSIC_PLAYER_BGM, 0
+	song mus_johto_vs_gym_leader, MUSIC_PLAYER_BGM, 0
+	song mus_johto_vs_rival, MUSIC_PLAYER_BGM, 0
+	song mus_johto_vs_rocket, MUSIC_PLAYER_BGM, 0
+	song mus_johto_vs_champion, MUSIC_PLAYER_BGM, 0
+	song mus_johto_vs_raikou, MUSIC_PLAYER_BGM, 0
+	song mus_johto_vs_entei, MUSIC_PLAYER_BGM, 0
+	song mus_johto_vs_suicune, MUSIC_PLAYER_BGM, 0
+	song mus_johto_victory_wild, MUSIC_PLAYER_BGM, 0
+	song mus_johto_victory_trainer, MUSIC_PLAYER_BGM, 0
+	song mus_johto_victory_gym_leader, MUSIC_PLAYER_BGM, 0
 @ end of Johto music
 
 	.align 2

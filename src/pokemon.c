@@ -6716,6 +6716,27 @@ void ClearBattleMonForms(void)
 // and LUGIA's): the CHAMPION's, the gym leaders' and ELITE FOUR's, every other trainer's, the wild one
 static u16 MpRegionBattleBGM(void)
 {
+    if (MP_Region_Current() == REGION_JOHTO)
+    {
+        // JOHTO's own (HeartGold / SoulSilver's, music/mus_johto_vs_*.kaisong): the ELITE FOUR battle to the gym theme
+        if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER))
+            return MUS_JOHTO_VS_WILD;
+        switch (gTrainers[gTrainerBattleOpponent_A].trainerClass)
+        {
+        case TRAINER_CLASS_CHAMPION:
+            return MUS_JOHTO_VS_CHAMPION;
+        case TRAINER_CLASS_LEADER:
+        case TRAINER_CLASS_ELITE_FOUR:
+            return MUS_JOHTO_VS_GYM_LEADER;
+        case TRAINER_CLASS_QZ_RIVAL:
+            return MUS_JOHTO_VS_RIVAL;
+        case TRAINER_CLASS_QZ_TEAM_ROCKET:
+        case TRAINER_CLASS_QZ_ROCKET_ADMIN:
+            return MUS_JOHTO_VS_ROCKET;
+        default:
+            return MUS_JOHTO_VS_TRAINER;
+        }
+    }
     if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER))
         return MUS_RG_VS_WILD;
     switch (gTrainers[gTrainerBattleOpponent_A].trainerClass)
@@ -6728,6 +6749,25 @@ static u16 MpRegionBattleBGM(void)
     default:
         return MUS_RG_VS_TRAINER;
     }
+}
+
+// Moemon Kai: a victory song in JOHTO is its own (HeartGold / SoulSilver's); elsewhere the song as asked
+u16 MP_RegionVictorySong(u16 song)
+{
+    if (MP_Region_Current() != REGION_JOHTO || (gBattleTypeFlags & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_TRAINER_HILL)))
+        return song;
+    switch (song)
+    {
+    case MUS_VICTORY_WILD:
+        return MUS_JOHTO_VICTORY_WILD;
+    case MUS_VICTORY_TRAINER:
+    case MUS_VICTORY_AQUA_MAGMA:
+        return MUS_JOHTO_VICTORY_TRAINER;
+    case MUS_VICTORY_GYM_LEADER:
+    case MUS_VICTORY_LEAGUE:
+        return MUS_JOHTO_VICTORY_GYM_LEADER;
+    }
+    return song;
 }
 
 u16 GetBattleBGM(void)

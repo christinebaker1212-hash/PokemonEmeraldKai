@@ -599,6 +599,20 @@
 #define MUS_JOHTO_ENCOUNTER_SWIMMER 663
 #define MUS_JOHTO_ENCOUNTER_HIKER   664
 #define MUS_JOHTO_ENCOUNTER_CHAMPION 665
+// Moemon Kai: JOHTO's own battle and victory songs (HeartGold / SoulSilver's, from music/*.kaisong; without one
+// each plays the FireRed / Emerald song it stands in for: sound/song_table.inc)
+#define MUS_JOHTO_VS_WILD            666
+#define MUS_JOHTO_VS_TRAINER         667
+#define MUS_JOHTO_VS_GYM_LEADER      668
+#define MUS_JOHTO_VS_RIVAL           669
+#define MUS_JOHTO_VS_ROCKET          670
+#define MUS_JOHTO_VS_CHAMPION        671
+#define MUS_JOHTO_VS_RAIKOU          672
+#define MUS_JOHTO_VS_ENTEI           673
+#define MUS_JOHTO_VS_SUICUNE         674
+#define MUS_JOHTO_VICTORY_WILD       675
+#define MUS_JOHTO_VICTORY_TRAINER    676
+#define MUS_JOHTO_VICTORY_GYM_LEADER 677
 // end of Johto music
 
 #define MUS_ROUTE118                0x7FFF  // Map is split into 2 music sections. controlled by GetCurrLocationDefaultMusic().
