@@ -19,7 +19,12 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
    limited to the species of the GENERATION (GEN 3: 386, GEN 4: 493, GEN 5: 649, GEN 6: 721, GEN 7: 809,
    GEN 8: 905, GEN 9: 1025). Note Kai's species ids are not national numbers past 386 (Gen 4 = 387-493 in Kai's
    own order, Gens 5-9 = species 519-1050): count by national dex number (SpeciesToNationalPokedexNum).
-5. Keep this file up to date after each commit.
+5. After 4: every card of every card game (POKéMON TCG, Yu-Gi-Oh!, Triple Triad) obtainable in some way in every
+   region (HOENN, JOHTO, KANTO): shops, duelists' prizes, packs, trades. Every NPC that can be challenged to a card
+   game must always be reachable to talk to (not behind a counter / blocked, not hidden by flags after events).
+   A GAME CENTER in JOHTO and KANTO too, placed where it fits best in each region.
+6. Final pass: audit the achievements and add more for each region.
+7. Keep this file up to date after each commit.
 
 ## Done
 - 1.61.0 released (Gens 5-9, gimmicks, GENERATION).
@@ -52,3 +57,8 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
    MoeGatcha), evolutions and breeding of those; and every item's sources (marts by GEN, pickups, held items,
    hidden / ball items). Fill the gaps (wild slots, trades, prizes). Then cap the POKéDEX's NATIONAL count and
    lists at the GEN (pokedex.c, the dex completion checks / diplomas, MoeGatcha). Tests per GEN.
+6. Cards in every region (item 5 above): list where each card comes from per region (tools/card_guide data,
+   tcg_field.c / ygo_field.c / tt_field.c pickers, shops); add sellers / duelists / packs in JOHTO and KANTO where
+   a card is missing; check every challengeable NPC's position and visibility flags (an automated walk-up test);
+   pick each region's GAME CENTER spot (e.g. GOLDENROD's / CELADON's game corners' neighbours) and place it.
+7. Achievements (item 6 above): audit mp_achieve.c against JOHTO / KANTO content, add per-region ones.
