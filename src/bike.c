@@ -1,5 +1,6 @@
 #include "global.h"
 #include "mp.h"
+#include "mp_region.h"
 #include "bike.h"
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
@@ -1059,7 +1060,11 @@ void Bike_HandleBumpySlopeJump(void)
 
 bool32 IsRunningDisallowed(u8 metatile)
 {
-    if (!gMapHeader.allowRunning || IsRunningDisallowedByMetatile(metatile) == TRUE)
+    // Moemon Kai: some of JOHTO's outdoor maps (Moemon Quetzal's) forbid running in towns and on routes; outdoors
+    // there running is always allowed (the user's call, 1.62.2). Indoor maps keep their flag; HOENN keeps Emerald's
+    bool8 regionRuns = MP_Region_OfGroup(gSaveBlock1Ptr->location.mapGroup) != REGION_HOENN
+                       && IsMapTypeOutdoors(gMapHeader.mapType);
+    if ((!gMapHeader.allowRunning && !regionRuns) || IsRunningDisallowedByMetatile(metatile) == TRUE)
         return TRUE;
     else
         return FALSE;
