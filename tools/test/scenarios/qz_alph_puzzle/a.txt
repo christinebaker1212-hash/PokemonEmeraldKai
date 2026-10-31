@@ -1,0 +1,22 @@
+pressuntil A field 5000
+wait 60
+mp face up
+wait 10
+press A 2
+waitlog 600 alph puzzle 0: open
+wait 60
+shot alph_open
+press A 2
+wait 10
+press RIGHT 2
+wait 6
+press DOWN 2
+wait 6
+press A 2
+wait 30
+shot alph_done
+waitlog 600 alph puzzle 0: solved
+pressuntil A field 3000
+wait 200
+mp where
+quit

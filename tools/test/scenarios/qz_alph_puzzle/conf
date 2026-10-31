@@ -1,0 +1,8 @@
+# The RUINS OF ALPH's KABUTO panel: its sliding puzzle (every piece placed but one here) is solved with A, RIGHT, DOWN,
+# A; the floor opens and the player drops into the inner chamber. Shots: the board before and after
+MODE=1
+WARP=35,62,21,5
+TMO=200
+ENV_A="MOEMON_ALPH_EASY=1 MOEMON_DEBUG_PARTY=158:20"
+EXPECT_A=("alph puzzle 0: open" "alph puzzle 0: solved" "where map 35.59")
+UNEXPECT_A=("[crash]")
