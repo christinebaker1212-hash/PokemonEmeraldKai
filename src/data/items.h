@@ -696,7 +696,7 @@ const struct Item gItems[] =
     {
         .name = _("LOVE BALL"),
         .itemId = ITEM_LOVE_BALL,
-        .price = 0,
+        .price = 300,   // Moemon Kai: sold in JOHTO
         .description = sLoveBallDesc,
         .pocket = POCKET_POKE_BALLS,
         .type = ITEM_POKE_BALL - FIRST_BALL,
@@ -709,7 +709,7 @@ const struct Item gItems[] =
     {
         .name = _("FRIEND BALL"),
         .itemId = ITEM_FRIEND_BALL,
-        .price = 0,
+        .price = 300,   // Moemon Kai: sold in JOHTO
         .description = sFriendBallDesc,
         .pocket = POCKET_POKE_BALLS,
         .type = ITEM_POKE_BALL - FIRST_BALL,
@@ -722,7 +722,7 @@ const struct Item gItems[] =
     {
         .name = _("FAST BALL"),
         .itemId = ITEM_FAST_BALL,
-        .price = 0,
+        .price = 300,   // Moemon Kai: sold in JOHTO
         .description = sFastBallDesc,
         .pocket = POCKET_POKE_BALLS,
         .type = ITEM_POKE_BALL - FIRST_BALL,
@@ -735,7 +735,7 @@ const struct Item gItems[] =
     {
         .name = _("LEVEL BALL"),
         .itemId = ITEM_LEVEL_BALL,
-        .price = 0,
+        .price = 300,   // Moemon Kai: sold in JOHTO
         .description = sLevelBallDesc,
         .pocket = POCKET_POKE_BALLS,
         .type = ITEM_POKE_BALL - FIRST_BALL,
@@ -748,7 +748,7 @@ const struct Item gItems[] =
     {
         .name = _("LURE BALL"),
         .itemId = ITEM_LURE_BALL,
-        .price = 0,
+        .price = 300,   // Moemon Kai: sold in JOHTO
         .description = sLureBallDesc,
         .pocket = POCKET_POKE_BALLS,
         .type = ITEM_POKE_BALL - FIRST_BALL,
@@ -761,7 +761,7 @@ const struct Item gItems[] =
     {
         .name = _("HEAVY BALL"),
         .itemId = ITEM_HEAVY_BALL,
-        .price = 0,
+        .price = 300,   // Moemon Kai: sold in JOHTO
         .description = sHeavyBallDesc,
         .pocket = POCKET_POKE_BALLS,
         .type = ITEM_POKE_BALL - FIRST_BALL,
@@ -774,7 +774,7 @@ const struct Item gItems[] =
     {
         .name = _("MOON BALL"),
         .itemId = ITEM_MOON_BALL,
-        .price = 0,
+        .price = 300,   // Moemon Kai: sold in JOHTO
         .description = sMoonBallDesc,
         .pocket = POCKET_POKE_BALLS,
         .type = ITEM_POKE_BALL - FIRST_BALL,
@@ -787,7 +787,7 @@ const struct Item gItems[] =
     {
         .name = _("DREAM BALL"),
         .itemId = ITEM_DREAM_BALL,
-        .price = 0,
+        .price = 1000,   // Moemon Kai: sold in JOHTO
         .description = sDreamBallDesc,
         .pocket = POCKET_POKE_BALLS,
         .type = ITEM_POKE_BALL - FIRST_BALL,
@@ -3435,7 +3435,7 @@ const struct Item gItems[] =
     {
         .name = _("METEORITE"),
         .itemId = ITEM_METEORITE,
-        .price = 0,
+        .price = 1000,   // Moemon Kai: sold in JOHTO
         .description = sMeteoriteDesc,
         .importance = 1,
         .pocket = POCKET_KEY_ITEMS,

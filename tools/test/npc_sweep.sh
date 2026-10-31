@@ -30,13 +30,13 @@ for g in range(g0, g1 + 1):
                 spots.append(('sign %s' % b['script'], b['x'], b['y']))
         if not spots:
             continue
-        lines = ['pressuntil A field 5000', 'wait 30', 'mp teach 0 129', 'mp teach 1 129']
+        lines = ['pressuntil A field 5000', 'wait 30', 'mp teach 0 44', 'mp teach 1 44', 'mp battlestyle 1']
         for what, x, y in spots:
-            # A through what it says; then B until the player is free (NO to questions, out of menus); a battle still
-            # going needs A again; then B once more for what follows it
+            # A through what it says and any battle (A keeps the battle cursor on FIGHT and the first move); B out of
+            # menus and questions; START then A to close a naming screen; B again
             lines += ['mp warp %d,%d,%d,%d' % (g, n, x, y + 1), 'wait 40', 'mp face up', 'mash A 40 8',
-                      'pressuntil B field 600', 'pressuntil A field 1500', 'pressuntil B field 900', 'wait 20', 'mp ctx',
-                      'mp sweepnote %s' % what.replace(' ', '_')]
+                      'pressuntil A field 7000', 'pressuntil B field 600', 'press START 4', 'wait 30', 'press A 4',
+                      'wait 60', 'pressuntil B field 600', 'wait 20', 'mp ctx', 'mp sweepnote %s' % what.replace(' ', '_')]
         lines += ['mp savesum', 'quit']
         open(os.path.join(out, 'scripts', name + '.txt'), 'w').write('\n'.join(lines) + '\n')
         region = 0 if g < 34 else (1 if g < 36 else 2)
@@ -45,7 +45,7 @@ PY
 [ -n "$LIMIT" ] && { head -n "$LIMIT" "$D/maps.txt" > "$D/m"; mv "$D/m" "$D/maps.txt"; }
 one() {   # one GROUP NUM REGION COUNT NAME
     local d="$D/run_$5"; mkdir -p "$d"
-    local t=$(( 60 + $4 * 40 ))
+    local t=$(( 60 + $4 * 60 ))
     (cd "$d" && env SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_TEST="$D/scripts/$5.txt" MOEMON_SHOTDIR="$d" \
         MOEMON_SKIP_COOP_SETUP=1 MOEMON_DEBUG_QUICKSTART=1 MOEMON_DEBUG_WARP="$1,$2,1,1" MOEMON_DEBUG_REGION="${REGION:-$3}" \
         MOEMON_DEBUG_PARTY=6:100,9:100 MOEMON_TEST_FOE_HP1=1 MOEMON_COOP_CONFIG="$d/a.ini" MOEMON_CONTROLS_CONFIG="$d/c.ini" \

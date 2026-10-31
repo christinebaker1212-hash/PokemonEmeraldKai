@@ -48,6 +48,8 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
   (qz_specials.c; tests qz_dream, qz_dream_kanto). DARKRAI's statics show only in a dream (RefreshStatics).
 - The S.S. ANNE truck and MEW (test qz_mew_truck).
 - HEADBUTT trees and ROCK SMASH in JOHTO / KANTO (test qz_headbutt); tools/test/npc_sweep.sh.
+- The NPC sweep's first finds, fixed: every JOHTO mart clerk crashed (badge marts), CUT on JOHTO's trees crashed,
+  KURT's / the underground shops divided by a zero price.
 - 1.61.1 released (the seal fix, contest, puzzles, credits, GAME RULES gimmick rows).
 
 ## Next steps

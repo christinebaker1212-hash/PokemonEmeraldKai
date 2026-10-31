@@ -2764,6 +2764,13 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   MP_Headbutt_IsTree / MP_HeadbuttWildEncounter; slots 50/15/15/10/10, the table's rate as a percent, species the
   GENERATION shows). Trees: tools/quetzal_port/gen_headbutt_trees.py (per outdoor map, its unwalkable tree-colored
   metatiles; --show draws them). Test qz_headbutt.
+- Badge marts: Quetzal's `pokemart 0` sells one of nine lists by the region's badge count (src/data/qz_badge_marts.h
+  from quetzal_rip/data/badge_marts.json: tools/quetzal_rip/badge_marts.py ROM, tools/quetzal_port/gen_badge_marts.py;
+  shop.c MP_ShopItems takes NULL as that). It crashed every JOHTO mart clerk before 1.62.
+- FireRed's cuttable tree and breakable rock sprites get Emerald's obstacle animations (gen_objects.py
+  OBSTACLE_ANIMS): with the plain still animations CUT crashed on JOHTO's trees.
+- A shop item without a price (KURT's Apricorn balls had none) no longer divides by zero; they cost 300 (DREAM BALL
+  and METEORITE 1000).
 - tools/test/npc_sweep.sh talks to every person and reads every sign on every map (harness `mp sweepnote`); it
   reports crashes, hangs, scripts still holding the player and stubs reached.
 - Not done yet: Quetzal's other postgame events (GIOVANNI's past and the time travel: still stubs that log and go on), FRLG door animations, 3x2 map

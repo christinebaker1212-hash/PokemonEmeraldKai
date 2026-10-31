@@ -1054,7 +1054,8 @@ static void Task_BuyHowManyDialogueInit(u8 taskId)
     BuyMenuPrintItemQuantityAndPrice(taskId);
     ScheduleBgCopyTilemapToVram(0);
 
-    maxQuantity = GetMoney(&gSaveBlock1Ptr->money) / sShopData->totalCost;
+    // Moemon Kai: an item sold for nothing (JOHTO's KURT) has no money limit
+    maxQuantity = sShopData->totalCost ? GetMoney(&gSaveBlock1Ptr->money) / sShopData->totalCost : MP_BAG_ITEM_CAPACITY;
 
     if (maxQuantity > MP_BAG_ITEM_CAPACITY)
         sShopData->maxQuantity = MP_BAG_ITEM_CAPACITY;
@@ -1306,11 +1307,18 @@ static const struct { u16 map; const u16 *items; u8 count; } sMpShopExtras[] = {
     {MAP_KANTO_CELADON_CITY_DEPARTMENT_STORE_3F, sMpShopGimmickItems, ARRAY_COUNT(sMpShopGimmickItems)},
 };
 
+#include "data/qz_badge_marts.h"
+
 static const u16 *MP_ShopItems(const u16 *items)
 {
     static u16 sItems[192];
     u16 here = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
     u32 i, j, k, n = 0;
+    if (items == NULL)   // Moemon Kai: JOHTO / KANTO's `pokemart 0`: the list for the region's badge count (Quetzal's)
+    {
+        u8 badges = MP_Region_BadgeCount(MP_Region_Current());
+        items = sQzBadgeMarts[badges < ARRAY_COUNT(sQzBadgeMarts) ? badges : ARRAY_COUNT(sQzBadgeMarts) - 1];
+    }
     for (i = 0; items[i] != ITEM_NONE && n < ARRAY_COUNT(sItems) - 1; i++)
         if (MP_Gen_ItemAllowed(items[i]))
             sItems[n++] = items[i];

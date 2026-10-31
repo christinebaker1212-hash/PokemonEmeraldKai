@@ -4533,7 +4533,7 @@ static const struct ObjectEventGraphicsInfo sObjectEventGraphicsInfo_Qz82 = {
     .tracks = TRACKS_NONE,
     .oam = &gObjectEventBaseOam_16x16,
     .subspriteTables = sOamTables_16x16,
-    .anims = sAnimTable_Inanimate,
+    .anims = sAnimTable_CuttableTree,
     .images = sPicTable_Qz82,
     .affineAnims = gDummySpriteAffineAnimTable,
 };

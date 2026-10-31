@@ -135,7 +135,7 @@
     {
         .name = _("SPORT BALL"),
         .itemId = ITEM_SPORT_BALL,
-        .price = 0,
+        .price = 300,   // Moemon Kai: sold in JOHTO
         .description = sSportBallDesc,
         .importance = 1,
         .pocket = POCKET_KEY_ITEMS,
