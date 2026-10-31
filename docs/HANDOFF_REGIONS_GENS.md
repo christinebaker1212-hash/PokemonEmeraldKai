@@ -160,3 +160,4 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
 15. AFTER EVERYTHING (the user): the save and its sidecars crowd the exe's folder. Without changing any file or its
    format, move them into a tidy folder structure; the auto-updater (and the game) moves existing files there.
    Then up to 3 completely isolated save files, each in its own folder (save + all sidecars), so they never mix.
+   The slot is chosen on the title screen: the save files are listed there as additional files to pick (the user).
