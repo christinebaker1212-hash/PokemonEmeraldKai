@@ -22,6 +22,7 @@ def die(msg):
 # ---------------------------------------------------------------- voicegroups
 
 def parse_args(rest):
+    rest = re.sub(r'/\*.*?\*/', '', rest).split('@')[0]   # (comments: Johto's drum sets name their keys)
     return [a.strip() for a in rest.split(',')] if rest.strip() else []
 
 def num(s):

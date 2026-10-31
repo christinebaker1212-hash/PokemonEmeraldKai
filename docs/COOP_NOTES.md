@@ -3168,3 +3168,19 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
 - Script numbers the import can't translate (a number set into a var, then additem VAR): check with a scan of
   `setvar VAR_0x80xx, N` before item / species / move commands; OAK's 5 POKé BALLS and RED's gift were the two.
 - QzBufferLastReceivedMonForNickname reads gMpLastGivenMonPlace / Slot (pokemon.c GiveMonToPlayer), not VAR_RESULT.
+
+## JOHTO's music from HeartGold / SoulSilver
+- music/mus_johto_*.kaisong: HGSS's songs (the user's 2SF rip, not in the repository) through Moemon Music Studio's
+  command line (tools/kaisong/hgss_johto.py RIP: the track -> song table). They replace JOHTO's own MUS_JOHTO_* songs
+  (towns, routes, places, encounters, HO-OH / LUGIA), which only JOHTO plays; JOHTO's songs with no HGSS counterpart
+  (MT. SILVER, the UNDERGROUND, CLIFF CAVE, jingles) stay Quetzal's. KANTO keeps FireRed / LeafGreen's.
+- JOHTO's own battle and victory songs, MUS_JOHTO_VS_WILD .. MUS_JOHTO_VICTORY_GYM_LEADER (666-677): sound/song_table.inc
+  makes each a name of its own for the FireRed / Emerald song it stands in for (`.set`), so a .kaisong of that name
+  replaces it in JOHTO only and without one it plays as before. pokemon.c MpRegionBattleBGM picks them in JOHTO (wild,
+  trainer, gym leader and ELITE FOUR, CHAMPION, rival = TRAINER_CLASS_QZ_RIVAL, Team Rocket = QZ_TEAM_ROCKET /
+  QZ_ROCKET_ADMIN); MP_RegionVictorySong wraps the victory songs (battle_main.c, battle_script_commands.c); battle_setup.c
+  MpJohtoBeastSong gives RAIKOU, ENTEI and SUICUNE their own. After adding a song name run tools/kaisong/gen.py (the
+  game's name table, src/data/mp_kaisong_names.h; the release runs it) or the game logs "no music called".
+- tools/moemon_music/gen_soundfont.py skips comments in voicegroup lines (JOHTO's drum sets name their keys).
+- Tests: battle_music_johto (666 from its .kaisong), battle_music_kanto (510, unchanged).
+

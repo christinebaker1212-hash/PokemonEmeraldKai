@@ -1,4 +1,5 @@
 #include "global.h"
+u16 MP_RegionVictorySong(u16 song);   // Moemon Kai (pokemon.c)
 #include "battle_gen4.h"
 #include "battle_gen59.h"
 #include "battle_gimmick.h"
@@ -3505,7 +3506,7 @@ static void MpCoopExpStep(void)
         if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gBattleStruct->wildVictorySong && !sMpCatchExpPercent)
         {
             BattleStopLowHpSound();
-            PlayBGM(MUS_VICTORY_WILD);
+            PlayBGM(MP_RegionVictorySong(MUS_VICTORY_WILD));   // Moemon Kai: JOHTO's own
             gBattleStruct->wildVictorySong++;
         }
         // gains in buffer 1 (u16 per slot), boosted mask in buffer 2: each screen words it (BufferStringBattle)
@@ -3751,7 +3752,7 @@ static void Cmd_getexp(void)
                  && !sMpCatchExpPercent)
                 {
                     BattleStopLowHpSound();
-                    PlayBGM(MUS_VICTORY_WILD);
+                    PlayBGM(MP_RegionVictorySong(MUS_VICTORY_WILD));   // Moemon Kai: JOHTO's own
                     gBattleStruct->wildVictorySong++;
                 }
 
@@ -7119,7 +7120,7 @@ static void Cmd_various(void)
             gBattleOutcome = B_OUTCOME_MON_TELEPORTED;
         break;
     case VARIOUS_PLAY_TRAINER_DEFEATED_MUSIC:
-        BtlController_EmitPlayFanfareOrBGM(B_COMM_TO_CONTROLLER, gMpCoopBattle ? MP_Coop_VictorySong() : MUS_VICTORY_TRAINER, TRUE);
+        BtlController_EmitPlayFanfareOrBGM(B_COMM_TO_CONTROLLER, gMpCoopBattle ? MP_Coop_VictorySong() : MP_RegionVictorySong(MUS_VICTORY_TRAINER), TRUE);
         MarkBattlerForControllerExec(gActiveBattler);
         break;
     case VARIOUS_MP_COOP_CAUGHT_ONE:

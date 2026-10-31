@@ -13,6 +13,60 @@ Files in this repository's `music` folder ship with every update.
 |---|---|---|---|
 | `mus_game_corner@rustboro_city_game_center_1f.kaisong` | mus_game_corner | Rustboro City Game Center 1F | Lamb Chop |
 | `mus_game_corner@rustboro_city_game_center_3f.kaisong` | mus_game_corner | Rustboro City Game Center 3F | Lamb Chop |
+| `mus_johto_azalea.kaisong` | mus_johto_azalea | everywhere | Azalea Town |
+| `mus_johto_burned_tower.kaisong` | mus_johto_burned_tower | everywhere | Burned Tower |
+| `mus_johto_cave.kaisong` | mus_johto_cave | everywhere | Union Cave |
+| `mus_johto_cherrygrove.kaisong` | mus_johto_cherrygrove | everywhere | Yoshino City |
+| `mus_johto_cianwood.kaisong` | mus_johto_cianwood | everywhere | Cianwood City |
+| `mus_johto_dance_theater.kaisong` | mus_johto_dance_theater | everywhere | Dance Theater |
+| `mus_johto_dragons_den.kaisong` | mus_johto_dragons_den | everywhere | Dragon's Den |
+| `mus_johto_ecruteak.kaisong` | mus_johto_ecruteak | everywhere | Ecruteak City |
+| `mus_johto_elms_lab.kaisong` | mus_johto_elms_lab | everywhere | Professor Elm's Lab |
+| `mus_johto_encounter_lass.kaisong` | mus_johto_encounter_lass | everywhere | Encounter! Innocent Cutie |
+| `mus_johto_encounter_nerd.kaisong` | mus_johto_encounter_nerd | everywhere | Encounter! Suspicious Person |
+| `mus_johto_encounter_rocket.kaisong` | mus_johto_encounter_rocket | everywhere | Encounter! Team Rocket |
+| `mus_johto_encounter_sage.kaisong` | mus_johto_encounter_sage | everywhere | Encounter! Devout Monk |
+| `mus_johto_encounter_youngster.kaisong` | mus_johto_encounter_youngster | everywhere | Encounter! Enthusiastic Youth |
+| `mus_johto_follow_me.kaisong` | mus_johto_follow_me | everywhere | Come With Me |
+| `mus_johto_game_corner.kaisong` | mus_johto_game_corner | everywhere | Game Corner |
+| `mus_johto_goldenrod.kaisong` | mus_johto_goldenrod | everywhere | Goldenrod City |
+| `mus_johto_gym.kaisong` | mus_johto_gym | everywhere | Gym |
+| `mus_johto_ice_path.kaisong` | mus_johto_ice_path | everywhere | Ice Cave |
+| `mus_johto_indigo_plateau.kaisong` | mus_johto_indigo_plateau | everywhere | Pokemon League |
+| `mus_johto_national_park.kaisong` | mus_johto_national_park | everywhere | National Park |
+| `mus_johto_new_bark.kaisong` | mus_johto_new_bark | everywhere | Wakaba Town |
+| `mus_johto_pokecenter.kaisong` | mus_johto_pokecenter | everywhere | Pokemon Center |
+| `mus_johto_pokemart.kaisong` | mus_johto_pokemart | everywhere | Friendly Shop |
+| `mus_johto_prof_oak.kaisong` | mus_johto_prof_oak | everywhere | Professor Oak |
+| `mus_johto_rival_appears.kaisong` | mus_johto_rival_appears | everywhere | Rival! |
+| `mus_johto_rocket_hideout.kaisong` | mus_johto_rocket_hideout | everywhere | Rocket Hideout |
+| `mus_johto_route26.kaisong` | mus_johto_route26 | everywhere | Route 26 |
+| `mus_johto_route29.kaisong` | mus_johto_route29 | everywhere | Route 29 |
+| `mus_johto_route30.kaisong` | mus_johto_route30 | everywhere | Route 30 |
+| `mus_johto_route34.kaisong` | mus_johto_route34 | everywhere | Route 34 |
+| `mus_johto_route38.kaisong` | mus_johto_route38 | everywhere | Route 38 |
+| `mus_johto_route42.kaisong` | mus_johto_route42 | everywhere | Route 42 |
+| `mus_johto_ruins_of_alph.kaisong` | mus_johto_ruins_of_alph | everywhere | Ruins of Alph |
+| `mus_johto_safari_gate.kaisong` | mus_johto_safari_gate | everywhere | Safari Zone Gate |
+| `mus_johto_safari_zone.kaisong` | mus_johto_safari_zone | everywhere | Safari Zone |
+| `mus_johto_sprout_tower.kaisong` | mus_johto_sprout_tower | everywhere | Sprout Tower |
+| `mus_johto_tin_tower.kaisong` | mus_johto_tin_tower | everywhere | Tin Tower |
+| `mus_johto_victory_gym_leader.kaisong` | mus_johto_victory_gym_leader | everywhere | Victory Against Gym Leader |
+| `mus_johto_victory_road.kaisong` | mus_johto_victory_road | everywhere | Victory Road |
+| `mus_johto_victory_trainer.kaisong` | mus_johto_victory_trainer | everywhere | Victory Against Trainer! |
+| `mus_johto_victory_wild.kaisong` | mus_johto_victory_wild | everywhere | Victory Against Wild Pokemon! |
+| `mus_johto_violet.kaisong` | mus_johto_violet | everywhere | Violet City |
+| `mus_johto_vs_champion.kaisong` | mus_johto_vs_champion | everywhere | Battle! Champion |
+| `mus_johto_vs_entei.kaisong` | mus_johto_vs_entei | everywhere | Battle! Entei |
+| `mus_johto_vs_gym_leader.kaisong` | mus_johto_vs_gym_leader | everywhere | Battle! Gym Leader (Johto) |
+| `mus_johto_vs_ho_oh.kaisong` | mus_johto_vs_ho_oh | everywhere | Battle! Ho-Oh |
+| `mus_johto_vs_lugia.kaisong` | mus_johto_vs_lugia | everywhere | Battle! Lugia |
+| `mus_johto_vs_raikou.kaisong` | mus_johto_vs_raikou | everywhere | Battle! Raikou |
+| `mus_johto_vs_rival.kaisong` | mus_johto_vs_rival | everywhere | Battle! Rival |
+| `mus_johto_vs_rocket.kaisong` | mus_johto_vs_rocket | everywhere | Battle! Team Rocket |
+| `mus_johto_vs_suicune.kaisong` | mus_johto_vs_suicune | everywhere | Battle! Suicune |
+| `mus_johto_vs_trainer.kaisong` | mus_johto_vs_trainer | everywhere | Battle! Trainer (Johto) |
+| `mus_johto_vs_wild.kaisong` | mus_johto_vs_wild | everywhere | Battle! Wild Pokemon (Johto) |
 | `mus_poke_mart@rustboro_city_game_center_2f.kaisong` | mus_poke_mart | Rustboro City Game Center 2F | Lamb Chop |
 | `mus_rg_vs_trainer@tt.kaisong` | mus_rg_vs_trainer | tt | Shuffle or Boogie |
 | `mus_victory_trainer@tt.kaisong` | mus_victory_trainer | tt | The Winner |
@@ -42,13 +96,13 @@ Files in this repository's `music` folder ship with every update.
 - Field and battle code (by map): Battles (a POKéMON is caught)
 
 ### mus_victory_wild (353)
-- Field and battle code (by map): Battles, Coop
+- Field and battle code (by map): Coop
 
 ### mus_victory_gym_leader (354)
 - Field and battle code (by map): Battles, Coop
 
 ### mus_victory_league (355)
-- Field and battle code (by map): Battles, Coop
+- Field and battle code (by map): Coop
 
 ### mus_c_comm_center (356)
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
@@ -161,7 +215,7 @@ Files in this repository's `music` folder ship with every update.
 - Field and battle code (by map): Overworld
 
 ### mus_cycling (403)
-- Scenes: BERRY BLENDER [berry_blender]
+- Scenes: BERRY BLENDER [berry_blender], Qz specials [qz_specials]
 - Events: Route 110 [route110]
 - Field and battle code (by map): Option menu, Riding a BIKE
 
@@ -233,7 +287,7 @@ Custom: `mus_victory_trainer@tt.kaisong`
 - A trainer spots you: 15 places<details><summary>show</summary>Mauville City Gym [mauville_city_gym], Mossdeep City Gym [mossdeep_city_gym], Mt Pyre 2F [mt_pyre_2f], Mt Pyre 5F [mt_pyre_5f], Mt Pyre 6F [mt_pyre_6f], Route 110 [route110], Route 110 Trick House Puzzle 7 [route110_trick_house_puzzle7], Route 113 [route113], Route 114 [route114], Route 115 [route115], Route 117 [route117], Route 119 [route119], Route 120 [route120], Route 121 [route121], Route 123 [route123]</details>
 
 ### mus_victory_aqua_magma (424)
-- Field and battle code (by map): Battles, Coop
+- Field and battle code (by map): Coop
 
 ### mus_cable_car (425)
 - Scenes: Cable car [cable_car]
@@ -506,17 +560,18 @@ Custom: `mus_vs_aqua_magma_leader@ygo.kaisong`
 - Map music: Kanto Indigo Plateau Exterior [kanto_indigo_plateau_exterior], Kanto Pokemon League Champions Room [kanto_pokemon_league_champions_room], Kanto Pokemon League Lances Room [kanto_pokemon_league_lances_room], Kanto Route 23 [kanto_route23]
 
 ### mus_rg_vs_gym_leader (508)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Field and battle code (by map): Battles
 
 ### mus_rg_vs_trainer (509)
 Custom: `mus_rg_vs_trainer@tt.kaisong`
 - Scenes: TRIPLE TRIAD [tt]
+- Field and battle code (by map): Battles
 
 ### mus_rg_vs_wild (510)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Field and battle code (by map): Battles
 
 ### mus_rg_vs_champion (511)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Field and battle code (by map): Battles
 
 ### mus_rg_pallet (512)
 - Map music: Kanto Pallet Town [kanto_pallet_town], Kanto Pallet Town Players House 1F [kanto_pallet_town_players_house_1f], Kanto Pallet Town Players House 2F [kanto_pallet_town_players_house_2f], Kanto Pallet Town Rivals House [kanto_pallet_town_rivals_house]
@@ -625,10 +680,10 @@ Custom: `mus_rg_vs_trainer@tt.kaisong`
 - Battles: wild Deoxys
 
 ### mus_rg_vs_mewtwo (552)
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Battles: wild Mewtwo
 
 ### mus_rg_vs_legend (553)
-- Battles: wild Lugia / Ho-Oh
+- Field and battle code (by map): Trainer battles
 
 ### mus_rg_encounter_gym_leader (554)
 - Events: Kanto Cerulean Cave B1F [kanto_cerulean_cave_b1f], Kanto Mt Ember Summit [kanto_mt_ember_summit], Kanto Mt Moon B2F [kanto_mt_moon_b2f], Kanto Power Plant [kanto_power_plant], Kanto Seafoam Islands B4F [kanto_seafoam_islands_b4f]
@@ -650,96 +705,126 @@ Custom: `mus_rg_vs_trainer@tt.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_new_bark (611)
+Custom: `mus_johto_new_bark.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_cherrygrove (612)
+Custom: `mus_johto_cherrygrove.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_violet (613)
+Custom: `mus_johto_violet.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_azalea (614)
+Custom: `mus_johto_azalea.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_goldenrod (615)
+Custom: `mus_johto_goldenrod.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_ecruteak (616)
+Custom: `mus_johto_ecruteak.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_cianwood (617)
+Custom: `mus_johto_cianwood.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_route29 (618)
+Custom: `mus_johto_route29.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_route30 (619)
+Custom: `mus_johto_route30.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_route34 (620)
+Custom: `mus_johto_route34.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_route38 (621)
+Custom: `mus_johto_route38.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_route42 (622)
+Custom: `mus_johto_route42.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_route26 (623)
+Custom: `mus_johto_route26.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_pokecenter (624)
+Custom: `mus_johto_pokecenter.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_pokemart (625)
+Custom: `mus_johto_pokemart.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_gym (626)
+Custom: `mus_johto_gym.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_elms_lab (627)
+Custom: `mus_johto_elms_lab.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_dance_theater (628)
+Custom: `mus_johto_dance_theater.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_game_corner (629)
+Custom: `mus_johto_game_corner.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_sprout_tower (630)
+Custom: `mus_johto_sprout_tower.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_cave (631)
+Custom: `mus_johto_cave.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_ruins_of_alph (632)
+Custom: `mus_johto_ruins_of_alph.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_national_park (633)
+Custom: `mus_johto_national_park.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_burned_tower (634)
+Custom: `mus_johto_burned_tower.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_tin_tower (635)
+Custom: `mus_johto_tin_tower.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_mt_silver (636)
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_rocket_hideout (637)
+Custom: `mus_johto_rocket_hideout.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_ice_path (638)
+Custom: `mus_johto_ice_path.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_dragons_den (639)
+Custom: `mus_johto_dragons_den.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_victory_road (640)
+Custom: `mus_johto_victory_road.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_indigo_plateau (641)
+Custom: `mus_johto_indigo_plateau.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_underground (642)
@@ -749,18 +834,23 @@ Custom: `mus_rg_vs_trainer@tt.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_safari_gate (644)
+Custom: `mus_johto_safari_gate.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_safari_zone (645)
+Custom: `mus_johto_safari_zone.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_prof_oak (646)
+Custom: `mus_johto_prof_oak.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_follow_me (647)
+Custom: `mus_johto_follow_me.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_rival_appears (648)
+Custom: `mus_johto_rival_appears.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_rival_departs (649)
@@ -773,9 +863,11 @@ Custom: `mus_rg_vs_trainer@tt.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_vs_ho_oh (652)
+Custom: `mus_johto_vs_ho_oh.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_vs_lugia (653)
+Custom: `mus_johto_vs_lugia.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_legend_appears (654)
@@ -785,18 +877,23 @@ Custom: `mus_rg_vs_trainer@tt.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_encounter_lass (657)
+Custom: `mus_johto_encounter_lass.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_encounter_youngster (658)
+Custom: `mus_johto_encounter_youngster.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_encounter_nerd (659)
+Custom: `mus_johto_encounter_nerd.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_encounter_sage (660)
+Custom: `mus_johto_encounter_sage.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_encounter_rocket (661)
+Custom: `mus_johto_encounter_rocket.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_johto_encounter_cooltrainer (662)
@@ -810,3 +907,51 @@ Custom: `mus_rg_vs_trainer@tt.kaisong`
 
 ### mus_johto_encounter_champion (665)
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_vs_wild (666)
+Custom: `mus_johto_vs_wild.kaisong`
+- Field and battle code (by map): Battles
+
+### mus_johto_vs_trainer (667)
+Custom: `mus_johto_vs_trainer.kaisong`
+- Field and battle code (by map): Battles
+
+### mus_johto_vs_gym_leader (668)
+Custom: `mus_johto_vs_gym_leader.kaisong`
+- Field and battle code (by map): Battles
+
+### mus_johto_vs_rival (669)
+Custom: `mus_johto_vs_rival.kaisong`
+- Field and battle code (by map): Battles
+
+### mus_johto_vs_rocket (670)
+Custom: `mus_johto_vs_rocket.kaisong`
+- Field and battle code (by map): Battles
+
+### mus_johto_vs_champion (671)
+Custom: `mus_johto_vs_champion.kaisong`
+- Field and battle code (by map): Battles
+
+### mus_johto_vs_raikou (672)
+Custom: `mus_johto_vs_raikou.kaisong`
+- Field and battle code (by map): Trainer battles
+
+### mus_johto_vs_entei (673)
+Custom: `mus_johto_vs_entei.kaisong`
+- Field and battle code (by map): Trainer battles
+
+### mus_johto_vs_suicune (674)
+Custom: `mus_johto_vs_suicune.kaisong`
+- Field and battle code (by map): Trainer battles
+
+### mus_johto_victory_wild (675)
+Custom: `mus_johto_victory_wild.kaisong`
+- Field and battle code (by map): Battles
+
+### mus_johto_victory_trainer (676)
+Custom: `mus_johto_victory_trainer.kaisong`
+- Field and battle code (by map): Battles
+
+### mus_johto_victory_gym_leader (677)
+Custom: `mus_johto_victory_gym_leader.kaisong`
+- Field and battle code (by map): Battles
