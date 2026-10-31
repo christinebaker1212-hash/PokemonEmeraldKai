@@ -191,7 +191,17 @@ MoeGatcha reel and banners (mp_gatcha.c): teaser cells never repeat an icon with
 (IconKey: item id, set's first item, 0x8000|species; PickVaried keeps the best of 24 tries for small pools; StartSpin
 fixes the prize and its forced neighbours first, then fills from center+7 so cells with live icons stay). STANDARD's
 R/SR/UR/EX pools are rebuilt on opening by SetupStandard from the day number (sDailyMons 4 a day in turn,
-sDailyLegends a 7-day table with no species twice a day); the tagline takes turns with "TODAY'S UR / R". PICKUP
+sDailyLegends a 7-day table with no species twice a day); the tagline takes turns with "TODAY'S UR / R".
+Banners by GENERATION (1.61.4; GatchaGen = the region's cap, never below 3, the room host's online): GEN 3 is the
+MoeGatcha as it always was. Every pull, the reel and the dump go through DefAllowed / DefWeight (an item past the
+generation, GatchaItemGen: MEGA STONES 6, Z-CRYSTALS 7; a Moemon past it), so the pools may list later things. Each later
+generation adds one daily Moemon (R, shiny at SR) and one daily legend (UR, EX) from sGenDailyMons / sGenDailyLegends
+(EV_SPECIES* kinds carry the species in qty: Lv 20, 5 for starters, 50 fateful for legends), two PICKUPs (its legends,
+its starters: appended after the random one, so GEN 3's weeks and vote indices stay the same; the rotation and the vote
+use the allowed ones, AllowedPickup), held / evolution items (sRareItems), MEGA STONES / Z-CRYSTALS (sSSuper), POWER
+items (TRAINING, GEN 4), and random Moemon up to MP_Gen_DexCount with the later legends (sLaterLegendDex). The later
+items in the old pools (EVIOLITE, QUICK POWDER, the region treats) now wait for their GENERATION. `mp gatchadump`;
+tests gatcha_gen3, gatcha_gen9 (tools/test/check_gatcha_gen.py). PICKUP
 reroll vote: relays MPR_GATCHA_FIRST (230) GV_ASK/ANSWER/RESULT/STATE; the asker counts YES, ends once the majority is
 certain (or 45 s), draws a random different PICKUP and sends it in GV_RESULT; "gatcha:votewk" (week+1) /
 "gatcha:votepick" override the rotation (ThisWeeksPickupIndex: `mp pickup` override, then the vote); two askers at

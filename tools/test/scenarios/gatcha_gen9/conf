@@ -1,0 +1,7 @@
+# MoeGatcha at GEN 9: each later generation adds a daily Moemon and legend, two PICKUPs, held items, MEGA STONES (6) and
+# Z-CRYSTALS (7)
+MODE=1
+GEN=9
+TMO=120
+EXPECT_A=("gatchadump gen 9")
+CHECK="python3 tools/test/check_gatcha_gen.py 9"

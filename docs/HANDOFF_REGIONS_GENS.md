@@ -137,7 +137,7 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
    partner) and a KANTO multi battle with a friend in the room (LANCE / GIOVANNI / ETHAN battles 12-14).
 10. THE ABSOLUTE LAST PASS, after everything is committed and built: MoeGatcha - every banner by GENERATION, Gen 3
    (today's banners) as the base: newer POKeMON / items join each banner as the GENERATION rises (mp_gatcha.c;
-   RandomSpecies is still 1-386 at every GENERATION).
+   RandomSpecies is still 1-386 at every GENERATION). DONE (COOP_NOTES "Banners by GENERATION"; tests gatcha_gen3 / 9).
 11. THE FINAL PASS AFTER THE MOEGATCHA ONE (the user, once everything else is finished, pushed, built and updated):
    every Moemon must have an equivalent POKeMON battle sprite. The user switched from Moemon appearance to POKeMON
    appearance and a battle showed nothing at all, and the game locked up. Check every species' front / back picture

@@ -65,6 +65,7 @@
 #include "constants/species.h"
 #include "constants/region_map_sections.h"
 #include "platform_text.h"
+#include "mp_region.h"
 
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
@@ -135,6 +136,10 @@ enum {
     EV_GYARADOS, EV_OLD_MEW, EV_GS_CELEBI, EV_CHANNEL_JIRACHI, EV_FARAWAY_MEW, EV_BIRTH_DEOXYS, EV_XD_LUGIA,
     EV_RANDOM,         // a random Moemon (not legendary), picked at the pull: def->qty is the species
     EV_RANDOM_LEGEND,   // a random legendary, picked at the pull
+    // GENERATION 4-9's Moemon: def->qty is the species (set with the banner; the level by kind)
+    EV_SPECIES,         // an everyday one (Lv 20)
+    EV_SPECIES_STARTER, // a first partner (Lv 5)
+    EV_SPECIES_LEGEND,  // a legendary or mythical one (Lv 50, met in a fateful encounter)
 };
 
 // PICKUP Moemon: OT GACHA, ID No. 23195 (secret ID 40613)
@@ -222,6 +227,9 @@ static const struct EventMon sEventMons[] = {
     [EV_XD_LUGIA]      = {"XD LUGIA", SPECIES_LUGIA, 50, NO_MOVES, NULL, 0, FALSE},
     [EV_RANDOM]       = {NULL, SPECIES_NONE, 20, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
     [EV_RANDOM_LEGEND] = {NULL, SPECIES_NONE, 50, NO_MOVES, "GACHA", GACHA_OT_ID, TRUE},
+    [EV_SPECIES]         = {NULL, SPECIES_NONE, 20, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_SPECIES_STARTER] = {NULL, SPECIES_NONE, 5, NO_MOVES, "GACHA", GACHA_OT_ID, FALSE},
+    [EV_SPECIES_LEGEND]  = {NULL, SPECIES_NONE, 50, NO_MOVES, "GACHA", GACHA_OT_ID, TRUE},
 };
 
 enum { K_ITEM, K_MONEY, K_MON, K_SET, K_FX };   // K_SET: several items at once (sSets); K_FX: a ball effect piece
@@ -250,12 +258,31 @@ static bool8 IsRandomEv(u16 ev)
 }
 
 // The Moemon a prize gives (a random one keeps its species in qty; 0 = not picked yet)
+static bool8 IsSpeciesEv(u16 ev)
+{
+    return ev == EV_SPECIES || ev == EV_SPECIES_STARTER || ev == EV_SPECIES_LEGEND;
+}
+
 static u16 DefSpecies(const struct PrizeDef *def)
 {
-    return IsRandomEv(def->id) ? def->qty : sEventMons[def->id].species;
+    return IsRandomEv(def->id) || IsSpeciesEv(def->id) ? def->qty : sEventMons[def->id].species;
+}
+
+// The banners follow the GENERATION (the room host's online): GEN 3 is the MoeGatcha as it always was, each later one
+// adds its Moemon (STANDARD's daily picks, PICKUPs, random ones) and items; prizes past it never come up
+static u8 GatchaGen(void)
+{
+    u8 g = MP_Gen_Cap(MP_Region_Current());
+    return g < 3 ? 3 : g;
 }
 
 static const u16 sLegendDex[] = {144, 145, 146, 150, 151, 243, 244, 245, 249, 250, 251, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386};
+
+// GENERATION 4-9's legendary and mythical Moemon (national numbers, first-last)
+static const u16 sLaterLegendDex[][2] = {
+    {480, 493}, {494, 494}, {638, 649}, {716, 721}, {772, 773}, {785, 809}, {888, 898}, {905, 905},
+    {1001, 1004}, {1007, 1008}, {1014, 1017}, {1024, 1025},
+};
 
 static bool8 IsLegendSpecies(u16 species)
 {
@@ -263,19 +290,52 @@ static bool8 IsLegendSpecies(u16 species)
     for (i = 0; i < ARRAY_COUNT(sLegendDex); i++)
         if (sLegendDex[i] == n)
             return TRUE;
+    for (i = 0; i < ARRAY_COUNT(sLaterLegendDex); i++)
+        if (n >= sLaterLegendDex[i][0] && n <= sLaterLegendDex[i][1])
+            return TRUE;
     return FALSE;
 }
 
 static u16 RandomSpecies(bool8 legend)
 {
+    u16 dex = MP_Gen_DexCount();   // 386 at GEN 3 ... 1025 at GEN 9
     if (legend)
-        return NationalPokedexNumToSpecies(sLegendDex[Random() % ARRAY_COUNT(sLegendDex)]);
+    {
+        u16 n = ARRAY_COUNT(sLegendDex), i, pick;
+        for (i = 0; i < ARRAY_COUNT(sLaterLegendDex); i++)
+            if (sLaterLegendDex[i][1] <= dex)
+                n += sLaterLegendDex[i][1] - sLaterLegendDex[i][0] + 1;
+        pick = Random() % n;
+        if (pick < ARRAY_COUNT(sLegendDex))
+            return NationalPokedexNumToSpecies(sLegendDex[pick]);
+        pick -= ARRAY_COUNT(sLegendDex);
+        for (i = 0; i < ARRAY_COUNT(sLaterLegendDex); i++)
+        {
+            u16 len = sLaterLegendDex[i][1] - sLaterLegendDex[i][0] + 1;
+            if (sLaterLegendDex[i][1] > dex)
+                continue;
+            if (pick < len)
+                return NationalPokedexNumToSpecies(sLaterLegendDex[i][0] + pick);
+            pick -= len;
+        }
+        return NationalPokedexNumToSpecies(sLegendDex[0]);
+    }
     for (;;)
     {
-        u16 species = NationalPokedexNumToSpecies(1 + Random() % 386);
+        u16 species = NationalPokedexNumToSpecies(1 + Random() % dex);
         if (species != SPECIES_NONE && !IsLegendSpecies(species) && species != SPECIES_UNOWN)
             return species;
     }
+}
+
+// The generation an item comes from, as far as the MoeGatcha goes: MEGA STONES from 6, Z-CRYSTALS from 7
+static u8 GatchaItemGen(u16 item)
+{
+    if (item >= ITEM_VENUSAURITE && item <= ITEM_DIANCITE)
+        return 6;
+    if (item >= ITEM_NORMALIUM_Z && item <= ITEM_FAIRIUM_Z)
+        return 7;
+    return MP_Gen_OfItem(item);
 }
 
 
@@ -328,6 +388,18 @@ static const struct PrizeDef sRareItems[] = {
     ITEM(ITEM_SITRUS_BERRY, 3, 4), ITEM(ITEM_LUM_BERRY, 2, 4), ITEM(ITEM_CORNN_BERRY, 2, 1), ITEM(ITEM_MAGOST_BERRY, 2, 1),
     ITEM(ITEM_RABUTA_BERRY, 2, 1), ITEM(ITEM_NOMEL_BERRY, 2, 1), ITEM(ITEM_SPELON_BERRY, 2, 1), ITEM(ITEM_PAMTRE_BERRY, 2, 1),
     ITEM(ITEM_WATMEL_BERRY, 2, 1), ITEM(ITEM_DURIN_BERRY, 2, 1), ITEM(ITEM_BELUE_BERRY, 2, 1),
+    // Later generations' held items and evolution items (only from their GENERATION on)
+    ITEM(ITEM_LIFE_ORB, 1, 3), ITEM(ITEM_CHOICE_SCARF, 1, 2), ITEM(ITEM_CHOICE_SPECS, 1, 2), ITEM(ITEM_FOCUS_SASH, 1, 2),
+    ITEM(ITEM_EXPERT_BELT, 1, 2), ITEM(ITEM_SHINY_STONE, 1, 2), ITEM(ITEM_DUSK_STONE, 1, 2), ITEM(ITEM_DAWN_STONE, 1, 2),
+    ITEM(ITEM_RAZOR_CLAW, 1, 1), ITEM(ITEM_RAZOR_FANG, 1, 1), ITEM(ITEM_PROTECTOR, 1, 1), ITEM(ITEM_ELECTIRIZER, 1, 1),
+    ITEM(ITEM_MAGMARIZER, 1, 1), ITEM(ITEM_DUBIOUS_DISC, 1, 1), ITEM(ITEM_REAPER_CLOTH, 1, 1), ITEM(ITEM_OVAL_STONE, 1, 1),
+    ITEM(ITEM_ROCKY_HELMET, 1, 2), ITEM(ITEM_AIR_BALLOON, 1, 2),                                   // GEN 5
+    ITEM(ITEM_ASSAULT_VEST, 1, 2), ITEM(ITEM_WEAKNESS_POLICY, 1, 2), ITEM(ITEM_SACHET, 1, 1),
+    ITEM(ITEM_WHIPPED_DREAM, 1, 1),                                                                // GEN 6
+    ITEM(ITEM_ICE_STONE, 1, 2),                                                                    // GEN 7
+    ITEM(ITEM_HEAVY_DUTY_BOOTS, 1, 2), ITEM(ITEM_SWEET_APPLE, 1, 1), ITEM(ITEM_TART_APPLE, 1, 1),
+    ITEM(ITEM_CRACKED_POT, 1, 1),                                                                  // GEN 8
+    ITEM(ITEM_BOOSTER_ENERGY, 1, 2), ITEM(ITEM_METAL_ALLOY, 1, 1),                                 // GEN 9
 };
 static const struct PrizeDef sSuperItems[] = {
     ITEM(ITEM_PP_MAX, 2, 10), ITEM(ITEM_RARE_CANDY, 4, 12), MONEY(10000, 10), ITEM(ITEM_LEFTOVERS, 1, 6),
@@ -337,8 +409,9 @@ static const struct PrizeDef sSuperItems[] = {
     ITEM(ITEM_LIECHI_BERRY, 1, 2), ITEM(ITEM_GANLON_BERRY, 1, 2), ITEM(ITEM_SALAC_BERRY, 1, 2),
     ITEM(ITEM_PETAYA_BERRY, 1, 2), ITEM(ITEM_APICOT_BERRY, 1, 2),
 };
-static struct PrizeDef sRare[ARRAY_COUNT(sRareItems) + DAILY_MONS];
-static struct PrizeDef sSuper[ARRAY_COUNT(sSuperItems) + DAILY_MONS];
+#define LATER_GENS 6   // GENERATION 4-9: one more daily Moemon and one more daily legend each
+static struct PrizeDef sRare[ARRAY_COUNT(sRareItems) + DAILY_MONS + LATER_GENS];
+static struct PrizeDef sSuper[ARRAY_COUNT(sSuperItems) + DAILY_MONS + LATER_GENS];
 static const struct PrizeDef sSSuper[] = {
     ITEM(ITEM_MASTER_BALL, 1, 5), ITEM(ITEM_RARE_CANDY, 8, 10), MONEY(20000, 10), ITEM(ITEM_PP_MAX, 5, 8),
     SET(SET_VITAMINS, 2, 8),
@@ -347,10 +420,48 @@ static const struct PrizeDef sSSuper[] = {
     ITEM(ITEM_PUMKIN_BERRY, 2, 2), ITEM(ITEM_DRASH_BERRY, 2, 2), ITEM(ITEM_EGGANT_BERRY, 2, 2), ITEM(ITEM_STRIB_BERRY, 2, 2),
     ITEM(ITEM_CHILAN_BERRY, 2, 2), ITEM(ITEM_NUTPEA_BERRY, 2, 2), ITEM(ITEM_GINEMA_BERRY, 2, 2), ITEM(ITEM_KUO_BERRY, 2, 2),
     ITEM(ITEM_YAGO_BERRY, 2, 2), ITEM(ITEM_TOUGA_BERRY, 2, 2), ITEM(ITEM_NINIKU_BERRY, 2, 2), ITEM(ITEM_TOPO_BERRY, 2, 2),
+    // MEGA STONES (GEN 6 on) and Z-CRYSTALS (GEN 7 on)
+    ITEM(ITEM_VENUSAURITE, 1, 1), ITEM(ITEM_CHARIZARDITE_X, 1, 1), ITEM(ITEM_CHARIZARDITE_Y, 1, 1),
+    ITEM(ITEM_BLASTOISINITE, 1, 1), ITEM(ITEM_GENGARITE, 1, 1), ITEM(ITEM_GYARADOSITE, 1, 1), ITEM(ITEM_TYRANITARITE, 1, 1),
+    ITEM(ITEM_SCEPTILITE, 1, 1), ITEM(ITEM_BLAZIKENITE, 1, 1), ITEM(ITEM_SWAMPERTITE, 1, 1), ITEM(ITEM_GARDEVOIRITE, 1, 1),
+    ITEM(ITEM_SALAMENCITE, 1, 1), ITEM(ITEM_METAGROSSITE, 1, 1), ITEM(ITEM_LUCARIONITE, 1, 1), ITEM(ITEM_GARCHOMPITE, 1, 1),
+    ITEM(ITEM_NORMALIUM_Z, 1, 1), ITEM(ITEM_FIRIUM_Z, 1, 1), ITEM(ITEM_WATERIUM_Z, 1, 1), ITEM(ITEM_GRASSIUM_Z, 1, 1),
+    ITEM(ITEM_ELECTRIUM_Z, 1, 1), ITEM(ITEM_PSYCHIUM_Z, 1, 1), ITEM(ITEM_DRAGONIUM_Z, 1, 1), ITEM(ITEM_FAIRIUM_Z, 1, 1),
 };
 // Legendary and mythical Moemon: UR only, shiny ones EX only
-static struct PrizeDef sUltra[DAILY_LEGENDS];
-static struct PrizeDef sEx[DAILY_LEGENDS];
+static struct PrizeDef sUltra[DAILY_LEGENDS + LATER_GENS];
+static struct PrizeDef sEx[DAILY_LEGENDS + LATER_GENS];
+static u8 sDailyMonCount = DAILY_MONS, sDailyLegendCount = DAILY_LEGENDS;   // today's, with the later generations'
+
+// Each later GENERATION's daily Moemon and legend, in turn day by day (0 ends a list)
+static const u16 sGenDailyMons[LATER_GENS][6] = {
+    {SPECIES_RIOLU, SPECIES_MUNCHLAX, SPECIES_BONSLY, SPECIES_MIME_JR, SPECIES_HAPPINY, SPECIES_ROTOM},
+    {SPECIES_ZORUA, SPECIES_LARVESTA, SPECIES_DEINO, SPECIES_AXEW, SPECIES_EMOLGA},
+    {SPECIES_GOOMY, SPECIES_NOIBAT, SPECIES_DEDENNE, SPECIES_HONEDGE, SPECIES_FLABEBE},
+    {SPECIES_MIMIKYU, SPECIES_JANGMO_O, SPECIES_ROCKRUFF, SPECIES_SANDYGAST},
+    {SPECIES_DREEPY, SPECIES_ROLYCOLY, SPECIES_TOXEL, SPECIES_YAMPER, SPECIES_IMPIDIMP},
+    {SPECIES_TINKATINK, SPECIES_FIDOUGH, SPECIES_CHARCADET, SPECIES_FRIGIBAX, SPECIES_GIMMIGHOUL},
+};
+static const u16 sGenDailyLegends[LATER_GENS][9] = {
+    {SPECIES_DIALGA, SPECIES_PALKIA, SPECIES_GIRATINA, SPECIES_HEATRAN, SPECIES_DARKRAI, SPECIES_SHAYMIN, SPECIES_ARCEUS,
+     SPECIES_MANAPHY, SPECIES_CRESSELIA},
+    {SPECIES_VICTINI, SPECIES_RESHIRAM, SPECIES_ZEKROM, SPECIES_KYUREM, SPECIES_KELDEO, SPECIES_MELOETTA, SPECIES_GENESECT,
+     SPECIES_LANDORUS},
+    {SPECIES_XERNEAS, SPECIES_YVELTAL, SPECIES_ZYGARDE, SPECIES_DIANCIE, SPECIES_HOOPA, SPECIES_VOLCANION},
+    {SPECIES_SOLGALEO, SPECIES_LUNALA, SPECIES_NECROZMA, SPECIES_MAGEARNA, SPECIES_MARSHADOW, SPECIES_ZERAORA,
+     SPECIES_TAPU_KOKO},
+    {SPECIES_ZACIAN, SPECIES_ZAMAZENTA, SPECIES_ETERNATUS, SPECIES_CALYREX, SPECIES_ZARUDE, SPECIES_REGIELEKI,
+     SPECIES_REGIDRAGO},
+    {SPECIES_KORAIDON, SPECIES_MIRAIDON, SPECIES_TERAPAGOS, SPECIES_PECHARUNT, SPECIES_OGERPON},
+};
+
+static u16 GenDaily(const u16 *list, u8 max, s32 day)
+{
+    u8 n = 0;
+    while (n < max && list[n] != SPECIES_NONE)
+        n++;
+    return n ? list[day % n] : SPECIES_NONE;
+}
 
 // Four a day, in turn (the two PICHU and the two PIKACHU never on the same day)
 static const u8 sDailyMons[] = {
@@ -414,6 +525,21 @@ static void SetupStandard(void)
         sUltra[i] = (struct PrizeDef)MON(legends[i], LegendWeight(legends[i]));
         sEx[i] = (struct PrizeDef)SHINY(legends[i], LegendWeight(legends[i]));
     }
+    // GENERATION 4 on: each later generation brings one more Moemon (R, shiny at SR) and one more legend (UR, EX)
+    sDailyMonCount = DAILY_MONS;
+    sDailyLegendCount = DAILY_LEGENDS;
+    for (i = 0; i < LATER_GENS && 4 + i <= GatchaGen(); i++)
+    {
+        u16 mon = GenDaily(sGenDailyMons[i], ARRAY_COUNT(sGenDailyMons[i]), StandardDay());
+        u16 legend = GenDaily(sGenDailyLegends[i], ARRAY_COUNT(sGenDailyLegends[i]), StandardDay());
+        n = ARRAY_COUNT(sRareItems) + sDailyMonCount;
+        sRare[n] = (struct PrizeDef){K_MON, EV_SPECIES, mon, 4, FALSE};
+        sSuper[ARRAY_COUNT(sSuperItems) + sDailyMonCount] = (struct PrizeDef){K_MON, EV_SPECIES, mon, 3, TRUE};
+        sDailyMonCount++;
+        sUltra[sDailyLegendCount] = (struct PrizeDef){K_MON, EV_SPECIES_LEGEND, legend, 10, FALSE};
+        sEx[sDailyLegendCount] = (struct PrizeDef){K_MON, EV_SPECIES_LEGEND, legend, 10, TRUE};
+        sDailyLegendCount++;
+    }
 }
 
 void MP_Gatcha_SetDay(s32 day)
@@ -434,6 +560,9 @@ static const struct PrizeDef sTrainRare[] = {
     ITEM(ITEM_RARE_CANDY, 2, 14), ITEM(ITEM_HP_UP, 5, 3), ITEM(ITEM_PROTEIN, 5, 3), ITEM(ITEM_IRON, 5, 3),
     ITEM(ITEM_CALCIUM, 5, 3), ITEM(ITEM_ZINC, 5, 3), ITEM(ITEM_CARBOS, 5, 3), ITEM(ITEM_PP_UP, 3, 8),
     ITEM(ITEM_LUCKY_EGG, 1, 5), ITEM(ITEM_MACHO_BRACE, 1, 5), ITEM(ITEM_EXP_SHARE, 1, 5),
+    // GEN 4 on: the POWER items, each training one stat
+    ITEM(ITEM_POWER_WEIGHT, 1, 2), ITEM(ITEM_POWER_BRACER, 1, 2), ITEM(ITEM_POWER_BELT, 1, 2),
+    ITEM(ITEM_POWER_LENS, 1, 2), ITEM(ITEM_POWER_BAND, 1, 2), ITEM(ITEM_POWER_ANKLET, 1, 2),
 };
 static const struct PrizeDef sTrainSuper[] = {
     ITEM(ITEM_RARE_CANDY, 4, 14), ITEM(ITEM_PP_MAX, 3, 10), SET(SET_VITAMINS, 1, 12),
@@ -491,7 +620,7 @@ static const struct PrizeDef sBallEx[] = {
 
 // PICKUP banner: a new one every week. Every UR is one of its Moemon (picked
 // at random each time), every EX one of them shiny
-struct Pickup { u8 mons[3]; u8 count; };
+struct Pickup { u8 mons[3]; u8 count; u16 species[3]; };   // species: EV_SPECIES* ones (later generations)
 static const struct Pickup sPickups[] = {
     {{EV_G_MEW, EV_G_MEWTWO}, 2},
     {{EV_G_CELEBI}, 1},
@@ -512,7 +641,54 @@ static const struct Pickup sPickups[] = {
     {{EV_G_LUGIA, EV_G_HOOH}, 2},
     {{EV_G_LATIOS, EV_G_LATIAS}, 2},
     {{EV_RANDOM}, 1},   // a random SHINY Moemon (EX: a random shiny legendary)
+    // Later GENERATIONs' (only from their generation on; GEN 3 keeps the ones above, in the same weeks)
+#define LEGENDS3(a, b, c) {{EV_SPECIES_LEGEND, EV_SPECIES_LEGEND, EV_SPECIES_LEGEND}, 3, {SPECIES_##a, SPECIES_##b, SPECIES_##c}}
+#define STARTERS(a, b, c) {{EV_SPECIES_STARTER, EV_SPECIES_STARTER, EV_SPECIES_STARTER}, 3, {SPECIES_##a, SPECIES_##b, SPECIES_##c}}
+    LEGENDS3(DIALGA, PALKIA, GIRATINA), STARTERS(TURTWIG, CHIMCHAR, PIPLUP),
+    LEGENDS3(RESHIRAM, ZEKROM, KYUREM), STARTERS(SNIVY, TEPIG, OSHAWOTT),
+    LEGENDS3(XERNEAS, YVELTAL, ZYGARDE), STARTERS(CHESPIN, FENNEKIN, FROAKIE),
+    LEGENDS3(SOLGALEO, LUNALA, NECROZMA), STARTERS(ROWLET, LITTEN, POPPLIO),
+    LEGENDS3(ZACIAN, ZAMAZENTA, ETERNATUS), STARTERS(GROOKEY, SCORBUNNY, SOBBLE),
+    LEGENDS3(KORAIDON, MIRAIDON, TERAPAGOS), STARTERS(SPRIGATITO, FUECOCO, QUAXLY),
+#undef LEGENDS3
+#undef STARTERS
 };
+
+static u16 PickupSpecies(const struct Pickup *pu, u8 i)
+{
+    return pu->species[i] != SPECIES_NONE ? pu->species[i] : sEventMons[pu->mons[i]].species;
+}
+
+// A PICKUP comes up from the GENERATION of its newest Moemon
+static bool8 PickupAllowed(u8 index)
+{
+    const struct Pickup *pu = &sPickups[index];
+    u8 i;
+    if (index >= ARRAY_COUNT(sPickups))
+        return FALSE;
+    for (i = 0; i < pu->count; i++)
+        if (pu->mons[i] != EV_RANDOM && MP_Gen_OfSpecies(PickupSpecies(pu, i)) > GatchaGen())
+            return FALSE;
+    return TRUE;
+}
+
+static u8 AllowedPickupCount(void)
+{
+    u8 i, n = 0;
+    for (i = 0; i < ARRAY_COUNT(sPickups); i++)
+        n += PickupAllowed(i);
+    return n;
+}
+
+// The n-th PICKUP the GENERATION allows
+static u8 AllowedPickup(u8 n)
+{
+    u8 i;
+    for (i = 0; i < ARRAY_COUNT(sPickups); i++)
+        if (PickupAllowed(i) && n-- == 0)
+            return i;
+    return 0;
+}
 static struct PrizeDef sPickupUltra[3];
 static struct PrizeDef sPickupEx[3];
 static u8 sPickupCount;
@@ -562,6 +738,7 @@ static struct BannerDef sBanners[BANNER_COUNT] = {
 };
 
 static u8 sBanner;   // the banner shown (kept between visits)
+static void SetupBanners(void);
 
 static s8 sPickupOverride = -1;   // test builds: mp pickup N
 
@@ -597,9 +774,9 @@ static u8 ThisWeeksPickupIndex(void)
     s8 voted = VotedPickup();
     if (sPickupOverride >= 0 && sPickupOverride < (s8)ARRAY_COUNT(sPickups))
         return sPickupOverride;
-    if (voted >= 0)
+    if (voted >= 0 && PickupAllowed(voted))
         return voted;
-    return MP_WeekNumber() % ARRAY_COUNT(sPickups);
+    return AllowedPickup(MP_WeekNumber() % AllowedPickupCount());
 }
 
 static const struct Pickup *ThisWeeksPickup(void)
@@ -623,7 +800,7 @@ static void PickupLabel(u8 index, char *out, int size)
     {
         u8 name[POKEMON_NAME_LENGTH + 1];
         char a[16];
-        GetSpeciesName(name, sEventMons[pu->mons[i]].species);
+        GetSpeciesName(name, PickupSpecies(pu, i));
         MP_GameToAscii(a, name, POKEMON_NAME_LENGTH);
         n += snprintf(out + n, size - n, "%s%s", i ? "/" : "", a);
     }
@@ -644,6 +821,8 @@ static void SetupPickup(void)
     {
         sPickupUltra[i] = (struct PrizeDef)MON(pu->mons[i], 1);
         sPickupEx[i] = (struct PrizeDef)SHINY(pu->mons[i], 1);
+        if (pu->species[i] != SPECIES_NONE)
+            sPickupUltra[i].qty = sPickupEx[i].qty = pu->species[i];
     }
     if (pu->mons[0] == EV_RANDOM)
     {
@@ -892,20 +1071,44 @@ void MP_Gatcha_GrantFree(void)
     }
 }
 
+// A prize the GENERATION allows: its items, its Moemon
+static bool8 DefAllowed(const struct PrizeDef *def)
+{
+    u8 gen = GatchaGen(), i;
+    switch (def->kind)
+    {
+    case K_ITEM:
+        return GatchaItemGen(def->id) <= gen;
+    case K_SET:
+        for (i = 0; i < ARRAY_COUNT(sSets[0]); i++)
+            if (sSets[def->id][i] != ITEM_NONE && GatchaItemGen(sSets[def->id][i]) > gen)
+                return FALSE;
+        return TRUE;
+    case K_MON:
+        return DefSpecies(def) == SPECIES_NONE || MP_Gen_OfSpecies(DefSpecies(def)) <= gen;
+    }
+    return TRUE;
+}
+
+static u16 DefWeight(const struct PrizeDef *def)
+{
+    return DefAllowed(def) ? def->weight : 0;
+}
+
 static const struct PrizeDef *PickFromPool(u8 rarity)
 {
     const struct Pool *pool = BannerPool(rarity);
     u16 total = 0, i, pick;
     for (i = 0; i < pool->count; i++)
-        total += pool->defs[i].weight;
+        total += DefWeight(&pool->defs[i]);
     if (total == 0)
         return &pool->defs[0];
     pick = Random() % total;
     for (i = 0; i < pool->count; i++)
     {
-        if (pick < pool->defs[i].weight)
+        if (pick < DefWeight(&pool->defs[i]))
             return &pool->defs[i];
-        pick -= pool->defs[i].weight;
+        pick -= DefWeight(&pool->defs[i]);
     }
     return &pool->defs[0];
 }
@@ -2395,37 +2598,39 @@ static void DrawBannerLine(void)
             {
                 u8 name[POKEMON_NAME_LENGTH + 1];
                 char a[16];
-                GetSpeciesName(name, sEventMons[pu->mons[i]].species);
+                GetSpeciesName(name, PickupSpecies(pu, i));
                 MP_GameToAscii(a, name, POKEMON_NAME_LENGTH);
                 n += snprintf(line + n, sizeof(line) - n, "%s%s", i ? "/" : " ", a);
             }
         }
     }
-    else if (sBanner == BANNER_STANDARD && sG->tagPage % 5 != 0)
+    else if (sBanner == BANNER_STANDARD && sG->tagPage % (1 + (sDailyLegendCount + 2) / 3 + (sDailyMonCount + 1) / 2) != 0)
     {
-        // Taking turns with the tagline: today's legends, then today's event Moemon
-        u8 page = sG->tagPage % 5, mons[DAILY_MONS], i, from, count;
-        const u8 *evs;
+        // Taking turns with the tagline: today's legends three a page, then today's event Moemon two a page (more of
+        // both at later GENERATIONs)
+        u8 legendPages = (sDailyLegendCount + 2) / 3;
+        u8 page = sG->tagPage % (1 + legendPages + (sDailyMonCount + 1) / 2) - 1, i, from, count;
+        const struct PrizeDef *defs;
         int n;
-        if (page <= 2)
+        if (page < legendPages)
         {
-            evs = TodaysLegends();
-            from = (page - 1) * 3;
-            count = 3;
+            defs = sUltra;
+            from = page * 3;
+            count = min(3, sDailyLegendCount - from);
             n = snprintf(line, sizeof(line), "TODAY'S UR:");
         }
         else
         {
-            evs = TodaysMons(mons);
-            from = (page - 3) * 2;
-            count = 2;
+            defs = sRare + ARRAY_COUNT(sRareItems);
+            from = (page - legendPages) * 2;
+            count = min(2, sDailyMonCount - from);
             n = snprintf(line, sizeof(line), "TODAY'S R:");
         }
         for (i = from; i < from + count; i++)
         {
             u8 name[POKEMON_NAME_LENGTH + 1];
             char a[16];
-            GetSpeciesName(name, sEventMons[evs[i]].species);
+            GetSpeciesName(name, DefSpecies(&defs[i]));
             MP_GameToAscii(a, name, POKEMON_NAME_LENGTH);
             n += snprintf(line + n, sizeof(line) - n, "%s%s", i == from ? " " : "/", a);
         }
@@ -2473,7 +2678,7 @@ static void ShowPickupPic(void)
     if (sBanner == BANNER_PICKUP && !PickupIsRandom())
     {
         const struct Pickup *pu = ThisWeeksPickup();
-        u16 species = sEventMons[pu->mons[sG->pickupShown % pu->count]].species;
+        u16 species = PickupSpecies(pu, sG->pickupShown % pu->count);
         u8 slot = AllocSpritePalette(TAG_PICKUP_PAL);
         u16 id;
         if (slot == 0xFF)
@@ -3486,10 +3691,11 @@ static void FinishVote(bool8 cancelled)
     if (passed)
     {
         // The surprise: any PICKUP but this week's
-        u8 cur = ThisWeeksPickupIndex();
-        pickup = Random() % (ARRAY_COUNT(sPickups) - 1);
-        if (pickup >= cur)
-            pickup++;
+        u8 cur = ThisWeeksPickupIndex(), n = AllowedPickupCount(), k;
+        k = n > 1 ? Random() % (n - 1) : 0;
+        pickup = AllowedPickup(k);
+        if (pickup >= cur && n > 1)
+            pickup = AllowedPickup(k + 1);   // (cur is one of the allowed ones: skip it)
     }
     msg[0] = GV_RESULT;
     msg[1] = sVote.id;
@@ -3720,16 +3926,68 @@ void MP_Gatcha_VoteUpdate(void)
     }
 }
 
+// Today's STANDARD (with the GENERATION's additions) and this week's PICKUP
+static void SetupBanners(void)
+{
+    SetupStandard();
+    sBanners[BANNER_STANDARD].pools[R_R].count = ARRAY_COUNT(sRareItems) + sDailyMonCount;
+    sBanners[BANNER_STANDARD].pools[R_SR].count = ARRAY_COUNT(sSuperItems) + sDailyMonCount;
+    sBanners[BANNER_STANDARD].pools[R_UR].count = sDailyLegendCount;
+    sBanners[BANNER_STANDARD].pools[R_EX].count = sDailyLegendCount;
+    SetupPickup();
+}
+
+// Test builds (mp gatchadump): every banner's prizes the GENERATION allows, by rarity (i = item, m = Moemon species,
+// s = a set, $ = money, f = a ball effect piece; * = shiny), and this week's PICKUP
+void MP_Gatcha_DebugDump(void)
+{
+    u8 b, r, keep = sBanner;
+    u16 i;
+    SetupBanners();
+    printf("[test] gatchadump gen %d day %d pickup %d of %d allowed\n", GatchaGen(), (int)StandardDay(),
+           ThisWeeksPickupIndex(), AllowedPickupCount());
+    for (b = 0; b < BANNER_COUNT; b++)
+    {
+        sBanner = b;
+        for (r = 0; r < R_COUNT; r++)
+        {
+            const struct Pool *pool = BannerPool(r);
+            printf("[test] gatchadump %s %s:", sBanners[b].name, sRarityShort[r]);
+            for (i = 0; i < pool->count; i++)
+            {
+                const struct PrizeDef *d = &pool->defs[i];
+                if (!DefWeight(d))
+                    continue;
+                if (d->kind == K_ITEM)
+                    printf(" i%d", d->id);
+                else if (d->kind == K_MON)
+                    printf(" m%d%s", DefSpecies(d), d->shiny ? "*" : "");
+                else if (d->kind == K_SET)
+                    printf(" s%d", d->id);
+                else if (d->kind == K_MONEY)
+                    printf(" $%u", (unsigned)d->qty);
+                else
+                    printf(" f");
+            }
+            printf("\n");
+        }
+    }
+    sBanner = keep;
+}
+
 // Test builds (mp gatchagive EV SHINY): give one event Moemon, as a pull would
-void MP_Gatcha_DebugGive(u8 ev, bool8 shiny)
+void MP_Gatcha_DebugGive(u8 ev, bool8 shiny, u16 species)
 {
     struct PrizeDef def = {K_MON, ev, 1, 1, shiny};
     struct Result res;
-    if (ev >= ARRAY_COUNT(sEventMons) || IsRandomEv(ev))
+    if (ev >= ARRAY_COUNT(sEventMons) || IsRandomEv(ev) || (IsSpeciesEv(ev) && species == SPECIES_NONE))
         return;
+    if (IsSpeciesEv(ev))
+        def.qty = species;
     memset(&res, 0, sizeof(res));
     GiveEventMon(&def, &res);
     printf("[test] gatchagive %d: %s\n", ev, res.note);
+    printf("[test] gatchagive got species %d level %d shiny %d fateful %d\n", (int)DefSpecies(&def), (int)sEventMons[ev].level, shiny, sEventMons[ev].fateful);
 }
 
 // Test builds (mp gatchareel): the icons in view and the closest repeat
@@ -4312,8 +4570,7 @@ static void CB2_InitGatcha(void)
     sG->pickupPic = 0xFFFF;
     sG->legendPic = 0xFFFF;
     sShakeX = sShakeY = 0;
-    SetupStandard();
-    SetupPickup();
+    SetupBanners();
     memset(sIconItem, 0, sizeof(sIconItem));
     sBg1Map = AllocZeroed(64 * 32 * 2);
     sBg3Map = AllocZeroed(32 * 32 * 2);

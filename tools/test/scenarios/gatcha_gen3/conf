@@ -1,0 +1,6 @@
+# MoeGatcha at GEN 3: the banners as they always were (19 PICKUPs, six legends a day), nothing from a later generation
+MODE=1
+GEN=3
+TMO=120
+EXPECT_A=("gatchadump gen 3")
+CHECK="python3 tools/test/check_gatcha_gen.py 3"

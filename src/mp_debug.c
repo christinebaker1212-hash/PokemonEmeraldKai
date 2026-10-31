@@ -802,11 +802,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "gatchagive") == 0)
     {
-        // gatchagive EV [SHINY] - an event Moemon from the MoeGatcha list (EV_* order in mp_gatcha.c)
-        void MP_Gatcha_DebugGive(u8 ev, bool8 shiny);
-        int ev = 0, sh = 0;
-        sscanf(arg, "%d %d", &ev, &sh);
-        MP_Gatcha_DebugGive(ev, sh);
+        // gatchagive EV [SHINY [SPECIES]] - an event Moemon from the MoeGatcha list (EV_* order in mp_gatcha.c; the
+        // EV_SPECIES* kinds of the later GENERATIONs take the species)
+        void MP_Gatcha_DebugGive(u8 ev, bool8 shiny, u16 species);
+        int ev = 0, sh = 0, sp = 0;
+        sscanf(arg, "%d %d %d", &ev, &sh, &sp);
+        MP_Gatcha_DebugGive(ev, sh, sp);
     }
     else if (strcmp(cmd, "gatchareel") == 0)
     {
@@ -1851,6 +1852,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         void MP_Linkx_OpenUnion(void);
         MP_Linkx_OpenUnion();
+    }
+    else if (strcmp(cmd, "gatchadump") == 0)
+    {
+        // gatchadump - every banner's prizes at the GENERATION (mp gen N first to pick one)
+        void MP_Gatcha_DebugDump(void);
+        MP_Gatcha_DebugDump();
     }
     else if (strcmp(cmd, "gatcha") == 0)
     {
