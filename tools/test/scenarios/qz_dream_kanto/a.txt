@@ -1,0 +1,24 @@
+pressuntil A field 5000
+wait 60
+mp teach 0 129
+mp dexcatch 488
+mp regionclear 2
+mp warp 36,29,5,5
+wait 120
+mp face left
+mash A 30 20
+wait 200
+mp getflag 10539
+shot dream
+mp warp 36,29,3,4
+wait 120
+mp face up
+shot darkrai
+mash A 200 20
+wait 300
+mp warp 36,29,5,5
+wait 120
+shot woke
+mp getflag 10539
+mp getflag 10541
+quit

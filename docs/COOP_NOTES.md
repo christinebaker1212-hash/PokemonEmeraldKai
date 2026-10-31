@@ -2749,8 +2749,14 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   (2 = end, 3 = return) and cut 41 KANTO scripts short (the S.S. ANNE captain, OAK's LAB...). check_scripts.py fails on
   any used command with arguments mapped to nop / nop1. Test qz_textcolor.
 - MELOETTA's CHANSEY Dance (1.61.2): QzSevaultHouseEventEligibility (Quetzal's rule). Test qz_meloetta_dance.
-- Not done yet: Quetzal's other postgame events (GIOVANNI's past, time travel, the dream events, the S.S. ANNE dream and
-  departure, PALLET's postgame: still stubs that log and go on), HEADBUTT trees, FRLG door animations, 3x2 map
+- The DARKRAI dreams: CRESSELIA caught, DARKRAI not. JOHTO: the bed at home (QzDreamEventEligibility: 1 first time,
+  2 when a beaten DARKRAI waits again; sleeping during the dream wakes you), FLAG_QZ_0x1425 = dreaming, DARKRAI in DARK
+  CAVE's BLACKTHORN side, QzEndDreamEvent after its battle. KANTO (after its LEAGUE): the S.S. ANNE cabin's bed,
+  FLAG_QZ_0x292B, DARKRAI in the room; QzSSAnneRoom6OnResume ends a dream whose DARKRAI is done. RefreshStatics shows
+  DARKRAI only in its dream. Tests qz_dream, qz_dream_kanto.
+- PALLET's bed: ARCEUS appears once to a full team at Lv 100 after KANTO's LEAGUE (QzPalletPostgameEventEligibility).
+- Not done yet: Quetzal's other postgame events (GIOVANNI's past, time travel, the S.S. ANNE departure: still stubs
+  that log and go on), HEADBUTT trees, FRLG door animations, 3x2 map
   borders, the sightseeing walk on a first arrival, a SAFFRON station, everyone following the host on a trip,
   per-region co-op shared PCs. The plan for what's left: docs/HANDOFF_REGIONS_GENS.md.
 

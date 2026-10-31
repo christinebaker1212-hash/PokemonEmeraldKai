@@ -1,0 +1,8 @@
+# KANTO's DARKRAI dream on the S.S. ANNE: the cabin's bed after the LEAGUE with CRESSELIA caught (FLAG_QZ_0x292B =
+# 10539), DARKRAI in the room; once it's beaten the dream ends on coming back in (10539 off, the woman back: 10541 off)
+MODE=1
+GEN=9
+TMO=180
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=6:80 MOEMON_TEST_FOE_HP1=1"
+EXPECT_A=("flag 10539 = 1" "flag 10539 = 0" "flag 10541 = 0")
+UNEXPECT_A=("[crash]" "not ported")

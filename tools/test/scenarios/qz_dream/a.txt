@@ -1,0 +1,22 @@
+pressuntil A field 5000
+wait 60
+mp teach 0 129
+mp dexcatch 488
+mp warp 35,2,2,6
+wait 120
+mp face left
+mash A 30 20
+wait 200
+mp getflag 5157
+shot dream
+mp warp 34,31,32,33
+wait 150
+shot cave
+mp face up
+mash A 200 20
+wait 400
+shot home
+mp where
+mp getflag 5157
+mp getflag 4897
+quit

@@ -371,7 +371,8 @@ static u16 RefreshStatics(void)
         if (!HereIs(e))
             continue;
         if (FlagGet(e->doneFlag) || !MP_Gen_Allowed(e->species)
-         || (e->region == 2 && e->species == SPECIES_MELOETTA && !FlagGet(FLAG_QZ_0x2924)))   // after the CHANSEY Dance
+         || (e->region == 2 && e->species == SPECIES_MELOETTA && !FlagGet(FLAG_QZ_0x2924))   // after the CHANSEY Dance
+         || (e->species == SPECIES_DARKRAI && !FlagGet(e->region == 1 ? FLAG_QZ_0x1425 : FLAG_QZ_0x292B)))   // in a dream
             FlagSet(e->objFlag);
         else
             FlagClear(e->objFlag);
@@ -1105,5 +1106,112 @@ u16 QzSevaultHouseEventEligibility(void)
                 return 0;
     }
     gSpecialVar_Result = TRUE;
+    return 0;
+}
+
+// PALLET TOWN's bed after the LEAGUE: ARCEUS appears to a full team at Lv 100 (Quetzal's rule; once, FLAG_QZ_0x2E13)
+u16 QzPalletPostgameEventEligibility(void)
+{
+    u32 i;
+    gSpecialVar_Result = FALSE;
+    if (FlagGet(FLAG_QZ_0x2E13) || !MP_Region_Cleared(REGION_KANTO) || !MP_Gen_Allowed(SPECIES_ARCEUS))
+        return 0;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        u16 sp = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES_OR_EGG);
+        if (sp == SPECIES_NONE || sp == SPECIES_EGG || GetMonData(&gPlayerParty[i], MON_DATA_LEVEL) != MAX_LEVEL)
+            return 0;
+    }
+    gSpecialVar_Result = TRUE;
+    return 0;
+}
+
+// The DARKRAI dreams. JOHTO: the bed at home, once CRESSELIA is caught: "A shadow smothers your dreams", the world
+// as it was (FLAG_QZ_0x1425 on), DARKRAI in DARK CAVE's BLACKTHORN side; beating or catching it wakes you
+// (QzEndDreamEvent), and sleeping at home again during the dream wakes you too. A beaten DARKRAI comes back in the
+// next dream ("The memory of that nightmare still lingers"). KANTO: the S.S. ANNE's cabin, the same with
+// FLAG_QZ_0x292B and DARKRAI in the room.
+#define QZ_FLAG_JOHTO_DARKRAI_DONE 0x1239
+#define QZ_FLAG_KANTO_DARKRAI_DONE 0x2929
+#define QZ_FLAG_KANTO_WOKE         0x292C
+
+static bool8 Caught(u16 species)
+{
+    return GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_GET_CAUGHT);
+}
+
+static bool8 DreamAllowed(void)
+{
+    return MP_Gen_Allowed(SPECIES_DARKRAI) && Caught(SPECIES_CRESSELIA) && !Caught(SPECIES_DARKRAI)
+        && !FlagGet(FLAG_QZ_0x1318);   // (not in GIOVANNI's past)
+}
+
+u16 QzEndDreamEvent(void)
+{
+    FlagClear(FLAG_QZ_0x1425);
+    FlagSet(FLAG_QZ_0x1321);
+    return 0;
+}
+
+u16 QzDreamEventEligibility(void)
+{
+    gSpecialVar_Result = 0;
+    if (FlagGet(FLAG_QZ_0x1425))
+    {
+        QzEndDreamEvent();   // sleeping during the dream: you wake up
+        return 0;
+    }
+    if (DreamAllowed())
+        gSpecialVar_Result = FlagGet(QZ_FLAG_JOHTO_DARKRAI_DONE) ? 2 : 1;
+    return 0;
+}
+
+u16 QzStartDreamEvent(void)
+{
+    HealPlayerParty();
+    FlagClear(QZ_FLAG_JOHTO_DARKRAI_DONE);   // a DARKRAI beaten in an earlier dream waits again
+    FlagSet(FLAG_QZ_0x1425);
+    return 0;
+}
+
+static void SSAnneWake(void)
+{
+    FlagClear(FLAG_QZ_0x292B);
+    FlagSet(FLAG_QZ_0x2928);
+    FlagClear(FLAG_QZ_0x292D);
+    FlagSet(QZ_FLAG_KANTO_WOKE);
+}
+
+u16 QzSSAnneDreamEventEligibility(void)
+{
+    gSpecialVar_Result = DreamAllowed() && !FlagGet(FLAG_QZ_0x1425) && MP_Region_Cleared(REGION_KANTO);
+    return 0;
+}
+
+u16 QzSSAnneDreamEventStart(void)
+{
+    HealPlayerParty();
+    FlagClear(QZ_FLAG_KANTO_WOKE);
+    FlagClear(QZ_FLAG_KANTO_DARKRAI_DONE);
+    FlagSet(FLAG_QZ_0x292B);
+    return 0;
+}
+
+u16 QzSSAnneDreamEventEnd(void)
+{
+    SSAnneWake();
+    return 0;
+}
+
+// The cabin on entering: the woman is away during the dream; a dream whose DARKRAI is caught or beaten ends
+u16 QzSSAnneRoom6OnResume(void)
+{
+    if (FlagGet(FLAG_QZ_0x292B) && FlagGet(QZ_FLAG_KANTO_DARKRAI_DONE))
+        SSAnneWake();
+    if (FlagGet(FLAG_QZ_0x292B))
+        FlagSet(FLAG_QZ_0x292D);
+    else
+        FlagClear(FLAG_QZ_0x292D);
+    RefreshStatics();
     return 0;
 }

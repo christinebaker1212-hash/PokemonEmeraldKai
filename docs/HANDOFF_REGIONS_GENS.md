@@ -44,14 +44,16 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
   tools/quetzal_rip/var_sprites.py for the sprites only scripts name.
 - MELOETTA's CHANSEY Dance in SEVAULT CANYON (QzSevaultHouseEventEligibility; test qz_meloetta_dance).
 - 1.61.2 released with those.
+- The DARKRAI dreams (JOHTO's bed at home -> DARK CAVE; KANTO's S.S. ANNE cabin) and PALLET's ARCEUS vision
+  (qz_specials.c; tests qz_dream, qz_dream_kanto). DARKRAI's statics show only in a dream (RefreshStatics).
 - 1.61.1 released (the seal fix, contest, puzzles, credits, GAME RULES gimmick rows).
 
 ## Next steps
 1. Check the 1.61.2 release run finished (GitHub Actions release.yml on the default branch).
 2. Extras still open (task list):
    - Quetzal postgame events, still stubs in src/qz_specials_stub.c (each logs and re-enables the script, so
-     none freezes, but the events don't happen): GIOVANNI's story (time travel to the past), dream events,
-     SS ANNE dream / exterior events, PALLET postgame, QzTimeTravelChoosePartyMon. Port them from
+     none freezes, but the events don't happen): GIOVANNI's story (time travel to the past), the S.S. ANNE exterior
+     (departure) event, QzTimeTravelChoosePartyMon. Port them from
      the Quetzal ROM (the ROM is not in the repo; tools/quetzal_rip/dis_special.py ROM sNNN
      disassembles a special) and docs/quetzal/SPECIALS.md (move each from the stub file to src/qz_*.c;
      tools/quetzal_port/import.py regenerates the stub list from what src/qz_*.c defines).
