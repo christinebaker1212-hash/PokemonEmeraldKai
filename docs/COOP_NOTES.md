@@ -2573,9 +2573,10 @@ Moemon Music Studio's `.kaisong` exports (format and loading: docs/KAISONG_FORMA
   then `mp musiclock 1`: the test-only `gMpTestMusicLock` in m4a.c stops the overworld from changing the BGM while it is
   measured) and prints how loud each plays; `--write` puts the difference in the file's INFO `gain=` (dB). Files with
   the same music (a hash of every chunk but INFO, as the game's `KaiFile.music`) are one group: measured once, one gain
-  (the mean of their songs' levels), so the music doesn't jump where the game plays it on from one to the other. The
-  release and dev release workflows run it (`--reference 0 --write --passes 2`, about 3 minutes) on the game they
-  built, into the copies they ship: nobody runs it by hand, and re-exported songs get theirs again. The game applies
+  (the mean of their songs' levels), so the music doesn't jump where the game plays it on from one to the other. Until
+  1.62.0 the release and dev release workflows ran it (`--reference 0 --write --passes 2`) on the shipped copies; it
+  never took effect there and then hung the 1.62.0 release, so (the user's call, 1.62.1) no workflow runs it: the
+  gains in music/ ship as they are, and the tool is run by hand when wanted. The game applies
   the gain per voice in music_player.c ChnVolSetAsm (`sChnGain`, from MP_Kaisong_Gain of the player's song header;
   256 = unchanged, so the game's own songs and the bit-exact studio comparisons stay the same). kaisong_test.sh check 6.
 - **Same music, no restart** (1.52.2). `MP_Kaisong_SameMusic(song, warp)`: the file that would play there holds the
@@ -3085,7 +3086,9 @@ Old saves need nothing: eggs and Unown keep their real species in the save.
 - Moves past the cap are skipped when learning (MonTryLearningNewMove, GiveBoxMonInitialMoveset, the relearner,
   CanMonLearnTMTutor, day care egg moves); evolutions into a later generation's species wait.
 - HOENN's pools by GENERATION (tools/moemon_gen59/gen_hoenn_modern.py -> src/data/hoenn_modern.h, applied in
-  mp_region.c): each wild table gives one of its rarer slots to each generation 4-9 (a newer Pokémon sharing a type,
+  mp_region.c): each wild table gives one of its rarer slots to each generation 4-9 (1.62.1: the slots of generations
+  past the cap go, in turn, to the species of those within it, so newer POKéMON are about 19% of ROUTE 104 at GEN 4
+  as at GEN 9; `mp wildroll N` counts them) (a newer Pokémon sharing a type,
   the same evolution stage, never a legendary; pseudo-legendary lines only where the slot is Lv. 30+); about half of
   trainers' team members get a newer stand-in from a generation of their own (crc32-picked), bosses keep their ace.
   JOHTO / KANTO use Quetzal's own modern tables.
