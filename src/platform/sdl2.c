@@ -885,7 +885,7 @@ static void UpdateInternalClock(void)
     internalClock.month = BinToBcd(time->tm_mon + 1);
     internalClock.day = BinToBcd(time->tm_mday);
     internalClock.dayOfWeek = BinToBcd(time->tm_wday);
-    internalClock.hour = BinToBcd(time->tm_hour);
+    internalClock.hour = BinToBcd(getenv("MOEMON_DEBUG_HOUR") ? atoi(getenv("MOEMON_DEBUG_HOUR")) % 24 : time->tm_hour);   // tests: a fixed hour
     internalClock.minute = BinToBcd(time->tm_min);
     internalClock.second = BinToBcd(time->tm_sec);
 }
