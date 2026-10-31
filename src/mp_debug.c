@@ -2597,6 +2597,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf(" %d", FlagGet(FLAG_BADGE01_GET + b));
         printf("  money %u\n", (unsigned)GetMoney(&gSaveBlock1Ptr->money));
     }
+    else if (strcmp(cmd, "sweepnote") == 0)
+        printf("[test] sweepnote %s\n", arg);   // sweepnote WORDS: a label in the log (tools/test/npc_sweep.sh)
     else if (strcmp(cmd, "ctx") == 0)
     {
         extern int Platform_InputContext(void);

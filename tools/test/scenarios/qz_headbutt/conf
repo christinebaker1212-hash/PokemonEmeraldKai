@@ -1,0 +1,7 @@
+# HEADBUTT on a JOHTO tree (ROUTE 29): asked, then sometimes a POKeMON falls out (eight tries)
+MODE=1
+GEN=3
+TMO=240
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=6:60 MOEMON_TEST_FOE_HP1=1"
+EXPECT_A=("life battle: begin")
+UNEXPECT_A=("[crash]")

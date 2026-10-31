@@ -1,0 +1,74 @@
+pressuntil A field 5000
+wait 60
+mp teach 0 29
+mp teach 1 129
+mp warp 35,33,10,12
+wait 120
+mp face up
+shot tree
+press A 4
+wait 60
+press A 4
+wait 60
+press A 4
+wait 200
+pressuntil A field 1500
+wait 30
+press A 4
+wait 60
+press A 4
+wait 60
+press A 4
+wait 200
+pressuntil A field 1500
+wait 30
+press A 4
+wait 60
+press A 4
+wait 60
+press A 4
+wait 200
+pressuntil A field 1500
+wait 30
+press A 4
+wait 60
+press A 4
+wait 60
+press A 4
+wait 200
+pressuntil A field 1500
+wait 30
+press A 4
+wait 60
+press A 4
+wait 60
+press A 4
+wait 200
+pressuntil A field 1500
+wait 30
+press A 4
+wait 60
+press A 4
+wait 60
+press A 4
+wait 200
+pressuntil A field 1500
+wait 30
+press A 4
+wait 60
+press A 4
+wait 60
+press A 4
+wait 200
+pressuntil A field 1500
+wait 30
+press A 4
+wait 60
+press A 4
+wait 60
+press A 4
+wait 200
+pressuntil A field 1500
+wait 30
+mp where
+quit

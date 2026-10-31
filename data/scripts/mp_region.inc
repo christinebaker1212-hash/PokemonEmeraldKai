@@ -117,3 +117,44 @@ gText_QzBugContestLeft::
 	.string "Bug-Catching Contest is over.\p"
 	.string "Your catches are in the PC and your\n"
 	.string "party is back with you.$"
+
+@ Moemon Kai: HEADBUTT on JOHTO's / KANTO's trees (field_control_avatar.c, wild_encounter.c MP_Headbutt_IsTree): a
+@ POKeMON may fall out (the map's tree table)
+EventScript_QzHeadbuttTree::
+	lockall
+	checkpartymove MOVE_HEADBUTT
+	goto_if_eq VAR_RESULT, PARTY_SIZE, EventScript_QzHeadbuttEnd
+	bufferpartymonnick STR_VAR_1, VAR_RESULT
+	msgbox gText_QzHeadbuttAsk, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, EventScript_QzHeadbuttEnd
+	msgbox gText_QzHeadbuttUsed, MSGBOX_DEFAULT
+	closemessage
+	playse SE_M_HEADBUTT
+	setvar VAR_0x8004, 0
+	setvar VAR_0x8005, 1
+	setvar VAR_0x8006, 6
+	setvar VAR_0x8007, 2
+	special ShakeCamera
+	waitstate
+	special MP_HeadbuttWildEncounter
+	goto_if_eq VAR_RESULT, FALSE, EventScript_QzHeadbuttNothing
+	waitstate
+	releaseall
+	end
+
+EventScript_QzHeadbuttNothing::
+	msgbox gText_QzHeadbuttNothing, MSGBOX_DEFAULT
+EventScript_QzHeadbuttEnd::
+	closemessage
+	releaseall
+	end
+
+gText_QzHeadbuttAsk::
+	.string "A POKéMON could be up in this tree.\n"
+	.string "Want to use HEADBUTT?$"
+
+gText_QzHeadbuttUsed::
+	.string "{STR_VAR_1} did a HEADBUTT!$"
+
+gText_QzHeadbuttNothing::
+	.string "Nope.\nNothing happened…$"

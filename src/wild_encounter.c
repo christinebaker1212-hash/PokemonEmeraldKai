@@ -18,6 +18,8 @@
 #include "script.h"
 #include "tv.h"
 #include "wild_encounter.h"
+#include "party_menu.h"
+#include "constants/moves.h"
 #include "constants/abilities.h"
 #include "constants/game_stat.h"
 #include "constants/items.h"
@@ -692,10 +694,92 @@ bool8 StandardWildEncounter(u16 curMetatileBehavior, u16 prevMetatileBehavior)
     return FALSE;
 }
 
+// Moemon Kai: JOHTO's / KANTO's tree and rock table (Quetzal's 5-slot ROCK SMASH table, src/data/wild_headbutt_qz.h):
+// ROCK SMASH where a map has no rock table of its own, and HEADBUTT on the map's trees (qz_headbutt_trees.h, the
+// trees found by tools/quetzal_port/gen_headbutt_trees.py)
+#include "data/wild_headbutt_qz.h"
+#include "data/qz_headbutt_trees.h"
+
+static int QzTreeTable(void)
+{
+    u16 map = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
+    int i;
+    for (i = 0; i < (int)ARRAY_COUNT(sHeadbuttEncounters); i++)
+        if (sHeadbuttEncounters[i].map == map)
+            return i;
+    return -1;
+}
+
+// a slot by 50 / 15 / 15 / 10 / 10, among the POKeMON the GENERATION shows here; FALSE: none or no luck
+static bool8 QzTreeEncounter(void)
+{
+    static const u8 sRates[5] = {50, 15, 15, 10, 10};
+    int t = QzTreeTable(), i, roll, total = 0;
+    u16 species[5];
+    if (t < 0 || Random() % 100 >= sHeadbuttEncounters[t].rate)
+        return FALSE;
+    for (i = 0; i < 5; i++)
+    {
+        species[i] = MP_Gen_StandIn(sHeadbuttEncounters[t].mons[i].species);
+        if (MP_Gen_Allowed(species[i]))
+            total += sRates[i];
+    }
+    if (total == 0)
+        return FALSE;
+    roll = Random() % total;
+    for (i = 0; i < 5; i++)
+    {
+        if (!MP_Gen_Allowed(species[i]))
+            continue;
+        if (roll < sRates[i])
+            break;
+        roll -= sRates[i];
+    }
+    if (i == 5 || !IsWildLevelAllowedByRepel(sHeadbuttEncounters[t].mons[i].minLevel))
+        return FALSE;
+    CreateWildMon(species[i], ChooseWildMonLevel(&sHeadbuttEncounters[t].mons[i]));
+    BattleSetup_StartWildBattle();
+    return TRUE;
+}
+
+// the tile the player faces is one of this map's trees, and someone in the party knows HEADBUTT
+bool8 MP_Headbutt_IsTree(s16 x, s16 y)
+{
+    u16 map = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
+    u16 mt = MapGridGetMetatileIdAt(x, y);
+    u32 i, k;
+    for (i = 0; i < ARRAY_COUNT(sHeadbuttTrees); i++)
+    {
+        if (sHeadbuttTrees[i].map != map)
+            continue;
+        for (k = 0; k < sHeadbuttTrees[i].count; k++)
+            if (sHeadbuttTrees[i].ids[k] == mt)
+                break;
+        if (k == sHeadbuttTrees[i].count)
+            return FALSE;
+        for (k = 0; k < PARTY_SIZE; k++)
+            if (GetMonData(&gPlayerParty[k], MON_DATA_SPECIES) != SPECIES_NONE && !GetMonData(&gPlayerParty[k], MON_DATA_IS_EGG)
+             && MonKnowsMove(&gPlayerParty[k], MOVE_HEADBUTT))
+                return TRUE;
+        return FALSE;
+    }
+    return FALSE;
+}
+
+void MP_HeadbuttWildEncounter(void)
+{
+    gSpecialVar_Result = QzTreeEncounter();
+}
+
 void RockSmashWildEncounter(void)
 {
     u16 headerId = GetCurrentMapWildMonHeaderId();
 
+    if ((headerId == HEADER_NONE || gWildMonHeaders[headerId].rockSmashMonsInfo == NULL) && QzTreeTable() >= 0)
+    {
+        gSpecialVar_Result = QzTreeEncounter();   // Moemon Kai
+        return;
+    }
     if (headerId != HEADER_NONE)
     {
         const struct WildPokemonInfo *wildPokemonInfo = gWildMonHeaders[headerId].rockSmashMonsInfo;

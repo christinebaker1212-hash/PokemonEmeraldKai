@@ -31,6 +31,8 @@ extern const struct WildPokemonHeader gWildMonHeaders[];
 void DisableWildEncounters(bool8 disabled);
 bool8 StandardWildEncounter(u16 curMetatileBehavior, u16 prevMetatileBehavior);
 bool8 SweetScentWildEncounter(void);
+bool8 MP_Headbutt_IsTree(s16 x, s16 y);   // Moemon Kai: a JOHTO / KANTO tree to HEADBUTT (a party POKeMON knows it)
+void MP_HeadbuttWildEncounter(void);
 bool8 DoesCurrentMapHaveFishingMons(void);
 void FishingWildEncounter(u8 rod);
 u16 GetLocalWildMon(bool8 *isWaterMon);

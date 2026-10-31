@@ -2758,7 +2758,15 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
 - The S.S. ANNE's truck: a Lv 100 NIDOKING leading with STRENGTH after KANTO's LEAGUE, MEW not caught
   (QzSSAnneExteriorEventCheck); ShiftTruck moves its metatiles (Quetzal's own: layout columns 55-57, rows 1-3);
   FLAG_QZ_0x2931 keeps it moved; MEW's static shows only then. Test qz_mew_truck.
-- Not done yet: Quetzal's other postgame events (GIOVANNI's past and the time travel: still stubs that log and go on), HEADBUTT trees, FRLG door animations, 3x2 map
+- HEADBUTT and ROCK SMASH: Quetzal's 5-slot ROCK SMASH table (src/data/wild_headbutt_qz.h; its maps' own
+  rockSmashMonsInfo are empty) feeds ROCK SMASH where a map has no rock table and HEADBUTT on trees: A facing a tree
+  while a party POKeMON knows HEADBUTT (field_control_avatar.c -> EventScript_QzHeadbuttTree; wild_encounter.c
+  MP_Headbutt_IsTree / MP_HeadbuttWildEncounter; slots 50/15/15/10/10, the table's rate as a percent, species the
+  GENERATION shows). Trees: tools/quetzal_port/gen_headbutt_trees.py (per outdoor map, its unwalkable tree-colored
+  metatiles; --show draws them). Test qz_headbutt.
+- tools/test/npc_sweep.sh talks to every person and reads every sign on every map (harness `mp sweepnote`); it
+  reports crashes, hangs, scripts still holding the player and stubs reached.
+- Not done yet: Quetzal's other postgame events (GIOVANNI's past and the time travel: still stubs that log and go on), FRLG door animations, 3x2 map
   borders, the sightseeing walk on a first arrival, a SAFFRON station, everyone following the host on a trip,
   per-region co-op shared PCs. The plan for what's left: docs/HANDOFF_REGIONS_GENS.md.
 
