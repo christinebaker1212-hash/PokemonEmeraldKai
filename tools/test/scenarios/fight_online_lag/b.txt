@@ -158,7 +158,7 @@ wait 12
 fpress A 3
 wait 10
 watchlog fight: online result
-waitlog 6000
+waitlog 9000
 wait 120
 shot after_b
 quit
