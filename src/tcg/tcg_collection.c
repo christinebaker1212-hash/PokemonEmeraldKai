@@ -201,15 +201,12 @@ unsigned Tcg_PointCost(unsigned card)
      * come only from the trainers who hold them, holos only from packs and trades; Basic Energy is free. */
     return def && card > 6 && Boosted(def) && def->kind != TCG_ENERGY && def->rarity < 2 ? sPointCost[def->rarity & 3] : 0;
 }
-/* The GAME CENTER CARD SHOP's price in money: every card of the four sets but the holos, and the promo cards (the
- * GAME CENTER is in every region: a promo its trainer gives only in HOENN can be had anywhere, at a price) */
+/* The GAME CENTER CARD SHOP's price in money: every card of the four sets but the holos (promo cards come from the
+ * trainers who hold them, in every region: tcg_field.c sQzSpecials) */
 static const unsigned sShopPrice[] = {300, 800, 4000, 0};
-#define PROMO_PRICE 12000
 unsigned Tcg_ShopPrice(unsigned card)
 {
     const struct TcgCard *def = Tcg_Card(card);
-    if (def && card > 6 && def->set == TCG_SET_PROMO && def->kind != TCG_ENERGY)
-        return PROMO_PRICE;
     return def && card > 6 && Boosted(def) && def->kind != TCG_ENERGY && !Tcg_IsHolo(card) ? sShopPrice[def->rarity & 3] : 0;
 }
 unsigned Tcg_Spare(const struct TcgCollection *c, unsigned card)

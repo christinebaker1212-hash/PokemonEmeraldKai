@@ -91,6 +91,24 @@ TCG_SPECIALS = [
     ('NOLAND', 'Factory Head', 'outside the Battle Factory, Battle Frontier', 'after winning the Factory silver symbol; about half the Brains are out each day'),
     ('LUCY', 'Pike Queen', 'outside the Battle Pike, Battle Frontier', 'after winning the Pike silver symbol; about half the Brains are out each day'),
 ]
+# JOHTO's and KANTO's special trainers, each in one of HOENN's slots (tcg_field.c sQzSpecials, read from the source):
+# slot -> [(region, name, title, when)]
+SPECIAL_SLOTS = ['ROXANNE', 'BRAWLY', 'WATTSON', 'FLANNERY', 'NORMAN', 'WINONA', 'TATE_LIZA', 'JUAN', 'SIDNEY', 'PHOEBE',
+                 'GLACIA', 'DRAKE', 'WALLACE', 'STEVEN', 'RIVAL', 'WALLY']
+QZ_WHEN = {'FLAG': 'after you win their BADGE', 'TRAINER': 'after you beat them in a Pokémon battle',
+           'CLEARED': 'after you become Champion', 'NONE': 'any time'}
+QZ_SPECIALS = {}
+_src = open(Path(__file__).resolve().parent.parent.parent / 'src/tcg/tcg_field.c', encoding='utf-8').read()
+_src = _src[_src.index('sQzSpecials[] = {'):]
+_src = _src[:_src.index('};')]
+_region = 'JOHTO'
+for _line in _src.split('\n'):
+    if '// KANTO' in _line:
+        _region = 'KANTO'
+    _m = re.search(r'TCG_SPECIAL_(\w+), REQ_(\w+), \w+, "([^"]*)", "([^"]*)"', _line)
+    if _m:
+        QZ_SPECIALS.setdefault(SPECIAL_SLOTS.index(_m.group(1)), []).append(
+            (_region, _m.group(3), _m.group(4).title(), QZ_WHEN[_m.group(2)]))
 # (tcg_ui.c sSetPromos: 75% of a booster's cards; GYM_SWEEP_BIT: every Gym Leader's deck beaten)
 SET_PROMOS = [64, 118, 145, 200, 319, 421, 315, 384, 418, 401, 441]
 GYM_PROMO = 102
@@ -166,6 +184,10 @@ for i, sp in enumerate(tcg['special']):
         if who in YGO_E4:
             promo_src[sp['promo']].append(
                 'Or beat %s in a YU-GI-OH! duel for the first time: they hand over this card too.' % who)
+        for region, qwho, qtitle, qwhen in QZ_SPECIALS.get(i, []):
+            promo_src[sp['promo']].append(
+                'In %s: beat %s%s in a POKéMON card duel for the first time (they duel %s; same deck).' %
+                (region, qwho, ' (%s)' % qtitle if qtitle else '', qwhen))
 for i, p in enumerate(SET_PROMOS):
     promo_src.setdefault(p, []).append(
         'Own 75%% of the %s booster set\'s cards, then claim it under PRIZES at a CARD CLUB counter or the '
@@ -450,8 +472,7 @@ Packs are the only way to get <b>holo</b> cards (apart from trading with a frien
 <li><b>CARD CLUB counters</b> (Oldale and Mauville POKéMON MARTS, the Lilycove DEPARTMENT STORE): trade in spare
 cards for CARD POINTS (CP) and buy any common or uncommon card with them.</li>
 <li><b>GAME CENTER 2F CARD SHOP</b> (Rustboro City; in JOHTO and KANTO, by the attendant in GOLDENROD's and
-CELADON's GAME CORNERS): one copy of every non-holo card of the booster sets and of every promo card for money,
-the structure and theme decks, and the CARD CLUB counter's services.</li>
+CELADON's GAME CORNERS): one copy of every non-holo card of the booster sets for money, the structure and theme decks, and the CARD CLUB counter's services.</li>
 <li><b>Starter deck.</b> Your first deck (Ember, Tidal or Garden Friends). Basic Energy is always free.</li></ul>
 <h3>YU-GI-OH!</h3><ul>
 <li><b>Booster packs</b> from every win, and from the CARD CLUB for CP.</li>
@@ -490,6 +511,15 @@ for i, (who, title, where, when) in enumerate(TCG_SPECIALS):
     p = tcg['special'][i]['promo']
     st_rows.append([who, title or '-', where, when, tname(cards[p]) if p else '-'])
 page.append(table('pkmn-trainers', ['Trainer', 'Title', 'Where', 'Duels you', 'First-win promo'], st_rows))
+qz_rows = []
+for i, (who, title, where, when) in enumerate(TCG_SPECIALS):
+    p = tcg['special'][i]['promo']
+    for region, qwho, qtitle, qwhen in QZ_SPECIALS.get(i, []):
+        qz_rows.append([region, qwho, qtitle or '-', who, qwhen, tname(cards[p]) if p else '-'])
+page.append('<p>In JOHTO and KANTO, their own trainers play these decks: each stands in for one of HOENN\'s above and '
+            'hands over the same promo card the first time you beat them (once, in whichever region you win it first).</p>')
+page.append(table('pkmn-trainers-regions', ['Region', 'Trainer', 'Title', "Plays the deck of", 'Duels you',
+                                            'First-win promo'], qz_rows))
 page.append('<p class="soft">Each Frontier Brain waits outside their own facility once you hold its silver symbol. About half of the Brains you have beaten are out on any day, and the lineup shifts daily.</p>')
 if non_promo_special:
     page.append('<h3>Other cards outside packs, shops and ordinary duelists</h3>')

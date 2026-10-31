@@ -130,8 +130,9 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
    Cards: DONE (every card at the GAME CENTER, reachable from every region: COOP_NOTES "Every card in every region").
    GAME CENTER: DONE for JOHTO / KANTO (an attendant in GOLDENROD's / CELADON's GAME CORNER, 2F and 3F only, by the
    user's rule; COOP_NOTES "The GAME CENTER"). Still to do here: a per-region card audit (which cards only come from
-   HOENN's special trainers: TCG promos (now sold at the GAME CENTER), YGO signatures, TT 4-/5-star cards - the user:
-   NO seller gets these, the GAME CENTER's included) and JOHTO / KANTO counterparts (their gym
+   HOENN's special trainers: TCG promos (DONE: JOHTO / KANTO's special trainers, tcg_field.c sQzSpecials - the user:
+   promos are won from the respective trainers as in HOENN, never sold), YGO signatures, TT 4-/5-star cards (NO
+   seller gets these) and JOHTO / KANTO counterparts (their gym
    leaders, Elite Four, champions, rivals as special duelists giving the same prizes), checked by a tool like
    obtain_audit.py over the card guide's dumps (tools/card_guide).
 7. Achievements (item 6 above): JOHTO / KANTO tabs added (32 achievements; COOP_NOTES "Achievements for JOHTO and

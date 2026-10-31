@@ -44,6 +44,8 @@
 #include "constants/trainers.h"
 #include "tcg/integration.h"
 #include "tcg/npc.h"
+#include "mp_region.h"
+#include "constants/qz_port.h"
 #include "tcg/card_ids.h"
 #include "tcg/scale.h"
 #include "ygo/integration.h"
@@ -237,6 +239,95 @@ static const struct Special sSpecials[TCG_SPECIAL_COUNT] = {
     [TCG_SPECIAL_LUCY] = {OBJ_EVENT_GFX_LUCY, 0, REQ_NONE, 0, "LUCY", "PIKE QUEEN", 11, 0, MUS_VS_FRONTIER_BRAIN, sText_LucyYes, NULL},
 };
 
+// Moemon Kai: JOHTO's and KANTO's special trainers. Each stands in for one of HOENN's (slot): that one's deck, promo
+// card and "beaten" mark, so a promo is won the same way in every region - beat its trainer at cards once (it is
+// given once, wherever it was won first). Paired by role so HOENN's rules read the same (a region's eight leaders fill
+// the eight leader slots: "beat all eight GYM LEADERS" still means its own; Elite Four for Elite Four, CHAMPION,
+// rival), then by type within the role (FALKNER - WINONA's birds, JASMINE - WATTSON's MAGNEMITE, KOGA - SIDNEY's
+// GENGAR...); each wants its own region's badge, Elite Four win or League, as HOENN's do.
+enum { REQ_FLAG = REQ_CHAMPION + 1, REQ_CLEARED };
+struct QzSpecial
+{
+    u16 gfx;
+    u8 slot, req;
+    u16 reqArg;
+    const char *name, *title;
+    u16 music;
+    const u8 *accept, *refuse;
+};
+static const u8 sText_FalknerYes[] = _("Cards? My father loved this game.\nMy flying deck will blow you away!");
+static const u8 sText_BugsyYes[] = _("I've studied this deck as closely\nas any bug! Let's duel!");
+static const u8 sText_WhitneyYes[] = _("Ooh, a card duel? Fun! But don't\nyou dare make me cry this time!");
+static const u8 sText_MortyYes[] = _("I foresaw a duel today...\nShow me what your cards can see.");
+static const u8 sText_ChuckYes[] = _("WAHAHAH! Cards train the mind like\nthe waterfall trains the body!");
+static const u8 sText_JasmineYes[] = _("Um... a card duel? I'd like that.\nMy deck is as hard as steel.");
+static const u8 sText_PryceYes[] = _("Hmm... these old hands still know\nthe cards. Come, let us play.");
+static const u8 sText_ClairYes[] = _("Cards? Fine. Just don't expect me\nto go easy on you!");
+static const u8 sText_JLeaderNo[] = _("Win my GYM's BADGE first.\nThen we'll talk about cards.");
+static const u8 sText_WillYes[] = _("My psychic deck reads every move.\nI accept your challenge.");
+static const u8 sText_KogaJYes[] = _("Fwahahaha! The ninja's way works\nwith cards as well! Begin!");
+static const u8 sText_BrunoYes[] = _("Cards, eh? I'll face you with all\nthe strength I have! Hoo hah!");
+static const u8 sText_KarenYes[] = _("Strong cards, weak cards...\nA true duelist plays her favorites.");
+static const u8 sText_LanceYes[] = _("A card duel? As CHAMPION, I accept.\nShow me your deck's spirit!");
+static const u8 sText_LanceNo[] = _("Reach the CHAMPION's room first.\nThen we'll duel with cards.");
+static const u8 sText_SilverYes[] = _("Hmph. You play cards too?\nThen I'll beat you at this as well!");
+static const u8 sText_RedYes[] = _("...\n...!");
+static const u8 sText_ElmYes[] = _("Cards? I research those too!\nFor science, let's duel!");
+static const u8 sText_BrockYes[] = _("My rock-hard willpower shows in\nmy deck, too! Let's duel!");
+static const u8 sText_MistyYes[] = _("A card duel? My water deck will\nwash you right out!");
+static const u8 sText_SurgeYes[] = _("Hey, kid! Cards? My deck'll shock\nyou like it did my enemies in war!");
+static const u8 sText_ErikaYes[] = _("Oh, how lovely... a card duel.\nMy deck is my garden. Please.");
+static const u8 sText_KogaKYes[] = _("A ninja's deck strikes from the\nshadows. Prepare yourself!");
+static const u8 sText_SabrinaYes[] = _("I saw you challenge me in a vision.\nVery well. Let us duel.");
+static const u8 sText_BlaineYes[] = _("Hah! A duel? My deck burns hotter\nthan any volcano! Bring it!");
+static const u8 sText_GiovanniYes[] = _("Cards... a game of control.\nI will show you true power.");
+static const u8 sText_KLeaderNo[] = _("Earn my BADGE first.\nThen I'll duel you with cards.");
+static const u8 sText_LoreleiYes[] = _("Cards? My deck is as cold as\nmy MOéMON. Shall we?");
+static const u8 sText_AgathaYes[] = _("Hee hee! Cards? This old woman\ncan still teach you a thing or two!");
+static const u8 sText_LanceKYes[] = _("My dragon deck awaits.\nLet's see if you can tame it!");
+static const u8 sText_EliteKNo[] = _("Defeat me at the POKéMON LEAGUE\nfirst. Then we'll play cards.");
+static const u8 sText_BlueYes[] = _("Smell ya later? Nah, let's duel!\nMy deck's the best in the world!");
+static const u8 sText_OakYes[] = _("Oh ho! You play cards too?\nI'm not too old for a duel!");
+static const u8 sText_BillYes[] = _("Hey, a fellow card fan! I've got\na deck I put together myself!");
+
+static const struct QzSpecial sQzSpecials[] = {
+    // JOHTO: its eight leaders in HOENN's eight leader slots (badge flags 0x11B2-0x11B9), its ELITE FOUR in HOENN's
+    // (once beaten), LANCE in the CHAMPION's, SILVER in the rival's; RED (MT. SILVER) stands in for STEVEN, ELM for WALLY
+    {OBJ_EVENT_GFX_QZ_16019, TCG_SPECIAL_WINONA, REQ_FLAG, 0x11B2, "FALKNER", "LEADER", MUS_VS_GYM_LEADER, sText_FalknerYes, sText_JLeaderNo},
+    {OBJ_EVENT_GFX_QZ_16009, TCG_SPECIAL_ROXANNE, REQ_FLAG, 0x11B3, "BUGSY", "LEADER", MUS_VS_GYM_LEADER, sText_BugsyYes, sText_JLeaderNo},
+    {OBJ_EVENT_GFX_QZ_16060, TCG_SPECIAL_NORMAN, REQ_FLAG, 0x11B4, "WHITNEY", "LEADER", MUS_VS_GYM_LEADER, sText_WhitneyYes, sText_JLeaderNo},
+    {OBJ_EVENT_GFX_QZ_16035, TCG_SPECIAL_TATE_LIZA, REQ_FLAG, 0x11B5, "MORTY", "LEADER", MUS_VS_GYM_LEADER, sText_MortyYes, sText_JLeaderNo},
+    {OBJ_EVENT_GFX_QZ_16012, TCG_SPECIAL_BRAWLY, REQ_FLAG, 0x11B6, "CHUCK", "LEADER", MUS_VS_GYM_LEADER, sText_ChuckYes, sText_JLeaderNo},
+    {OBJ_EVENT_GFX_QZ_16026, TCG_SPECIAL_WATTSON, REQ_FLAG, 0x11B7, "JASMINE", "LEADER", MUS_VS_GYM_LEADER, sText_JasmineYes, sText_JLeaderNo},
+    {OBJ_EVENT_GFX_QZ_16045, TCG_SPECIAL_JUAN, REQ_FLAG, 0x11B8, "PRYCE", "LEADER", MUS_VS_GYM_LEADER, sText_PryceYes, sText_JLeaderNo},
+    {OBJ_EVENT_GFX_QZ_16013, TCG_SPECIAL_FLANNERY, REQ_FLAG, 0x11B9, "CLAIR", "LEADER", MUS_VS_GYM_LEADER, sText_ClairYes, sText_JLeaderNo},
+    {OBJ_EVENT_GFX_QZ_16061, TCG_SPECIAL_GLACIA, REQ_TRAINER, TRAINER_QZ_4832, "WILL", "ELITE FOUR", MUS_VS_ELITE_FOUR, sText_WillYes, sText_EliteNo},
+    {OBJ_EVENT_GFX_QZ_16030, TCG_SPECIAL_SIDNEY, REQ_TRAINER, TRAINER_QZ_4479, "KOGA", "ELITE FOUR", MUS_VS_ELITE_FOUR, sText_KogaJYes, sText_EliteNo},
+    {OBJ_EVENT_GFX_QZ_16008, TCG_SPECIAL_DRAKE, REQ_TRAINER, TRAINER_QZ_4475, "BRUNO", "ELITE FOUR", MUS_VS_ELITE_FOUR, sText_BrunoYes, sText_EliteNo},
+    {OBJ_EVENT_GFX_QZ_16028, TCG_SPECIAL_PHOEBE, REQ_TRAINER, TRAINER_QZ_4477, "KAREN", "ELITE FOUR", MUS_VS_ELITE_FOUR, sText_KarenYes, sText_EliteNo},
+    {OBJ_EVENT_GFX_QZ_16032, TCG_SPECIAL_WALLACE, REQ_CLEARED, REGION_JOHTO, "LANCE", "CHAMPION", MUS_VS_CHAMPION, sText_LanceYes, sText_LanceNo},
+    {OBJ_EVENT_GFX_QZ_16053, TCG_SPECIAL_RIVAL, REQ_NONE, 0, "SILVER", "", MUS_VS_RIVAL, sText_SilverYes, NULL},
+    {OBJ_EVENT_GFX_QZ_10027, TCG_SPECIAL_STEVEN, REQ_NONE, 0, "RED", "", MUS_VS_CHAMPION, sText_RedYes, NULL},
+    {OBJ_EVENT_GFX_QZ_16042, TCG_SPECIAL_WALLY, REQ_NONE, 0, "PROF. ELM", "", MUS_VS_TRAINER, sText_ElmYes, NULL},
+    // KANTO: the same by role (badge flags 0x2100-0x2107); BLUE, rival and CHAMPION in one, in the rival's slot;
+    // PROF. OAK stands in for STEVEN, BILL for WALLY
+    {OBJ_EVENT_GFX_QZ_16111, TCG_SPECIAL_ROXANNE, REQ_FLAG, 0x2100, "BROCK", "LEADER", MUS_VS_GYM_LEADER, sText_BrockYes, sText_KLeaderNo},
+    {OBJ_EVENT_GFX_QZ_16163, TCG_SPECIAL_JUAN, REQ_FLAG, 0x2101, "MISTY", "LEADER", MUS_VS_GYM_LEADER, sText_MistyYes, sText_KLeaderNo},
+    {OBJ_EVENT_GFX_QZ_16154, TCG_SPECIAL_WATTSON, REQ_FLAG, 0x2102, "LT. SURGE", "LEADER", MUS_VS_GYM_LEADER, sText_SurgeYes, sText_KLeaderNo},
+    {OBJ_EVENT_GFX_QZ_16131, TCG_SPECIAL_WINONA, REQ_FLAG, 0x2103, "ERIKA", "LEADER", MUS_VS_GYM_LEADER, sText_ErikaYes, sText_KLeaderNo},
+    {OBJ_EVENT_GFX_QZ_16146, TCG_SPECIAL_BRAWLY, REQ_FLAG, 0x2104, "KOGA", "LEADER", MUS_VS_GYM_LEADER, sText_KogaKYes, sText_KLeaderNo},
+    {OBJ_EVENT_GFX_QZ_16192, TCG_SPECIAL_TATE_LIZA, REQ_FLAG, 0x2105, "SABRINA", "LEADER", MUS_VS_GYM_LEADER, sText_SabrinaYes, sText_KLeaderNo},
+    {OBJ_EVENT_GFX_QZ_16108, TCG_SPECIAL_FLANNERY, REQ_FLAG, 0x2106, "BLAINE", "LEADER", MUS_VS_GYM_LEADER, sText_BlaineYes, sText_KLeaderNo},
+    {OBJ_EVENT_GFX_QZ_16138, TCG_SPECIAL_NORMAN, REQ_FLAG, 0x2107, "GIOVANNI", "LEADER", MUS_VS_GYM_LEADER, sText_GiovanniYes, sText_KLeaderNo},
+    {OBJ_EVENT_GFX_QZ_16153, TCG_SPECIAL_GLACIA, REQ_TRAINER, TRAINER_QZ_8602, "LORELEI", "ELITE FOUR", MUS_VS_ELITE_FOUR, sText_LoreleiYes, sText_EliteKNo},
+    {OBJ_EVENT_GFX_QZ_16112, TCG_SPECIAL_SIDNEY, REQ_TRAINER, TRAINER_QZ_8603, "BRUNO", "ELITE FOUR", MUS_VS_ELITE_FOUR, sText_BrunoYes, sText_EliteKNo},
+    {OBJ_EVENT_GFX_QZ_16100, TCG_SPECIAL_PHOEBE, REQ_TRAINER, TRAINER_QZ_8604, "AGATHA", "ELITE FOUR", MUS_VS_ELITE_FOUR, sText_AgathaYes, sText_EliteKNo},
+    {OBJ_EVENT_GFX_QZ_16147, TCG_SPECIAL_DRAKE, REQ_TRAINER, TRAINER_QZ_8605, "LANCE", "ELITE FOUR", MUS_VS_ELITE_FOUR, sText_LanceKYes, sText_EliteKNo},
+    {OBJ_EVENT_GFX_QZ_16109, TCG_SPECIAL_RIVAL, REQ_NONE, 0, "BLUE", "", MUS_VS_RIVAL, sText_BlueYes, NULL},
+    {OBJ_EVENT_GFX_QZ_16184, TCG_SPECIAL_STEVEN, REQ_NONE, 0, "PROF. OAK", "", MUS_VS_TRAINER, sText_OakYes, NULL},
+    {OBJ_EVENT_GFX_QZ_16106, TCG_SPECIAL_WALLY, REQ_NONE, 0, "BILL", "", MUS_VS_TRAINER, sText_BillYes, NULL},
+};
+
 unsigned Tcg_SpecialPromo(unsigned special)
 {
     return special < TCG_SPECIAL_COUNT ? gTcgSpecialPromos[special] : 0;
@@ -415,6 +506,9 @@ unsigned Tcg_LookGfx(const struct ObjectEvent *npc)
 {
     u16 g = OBJ_GFX_ID(npc);
     u32 i;
+    for (i = 0; i < ARRAY_COUNT(sQzSpecials); i++)
+        if (sQzSpecials[i].gfx == g)
+            return g;   // (a special trainer is no look-alike townsperson: the other card games leave them to theirs)
     if (g >= OBJ_EVENT_GFX_QZ_FIRST)
         for (i = 0; i < ARRAY_COUNT(sQzCardLooks); i++)
             if (sQzCardLooks[i].qz == g)
@@ -874,44 +968,59 @@ static const u8 *AskCards(struct ObjectEvent *npc, const u8 *script, u8 *answer,
         else
             sYgoLine = NULL;
     }
-    // Someone with a deck of their own
-    for (i = 0; i < TCG_SPECIAL_COUNT; i++)
+    // Someone with a deck of their own: HOENN's special trainers, then JOHTO's and KANTO's in their slots
+    for (i = 0; i < TCG_SPECIAL_COUNT + ARRAY_COUNT(sQzSpecials); i++)
     {
-        const struct Special *s = &sSpecials[i];
+        const struct Special *s;
+        const struct QzSpecial *q = i >= TCG_SPECIAL_COUNT ? &sQzSpecials[i - TCG_SPECIAL_COUNT] : NULL;
+        unsigned slot = q ? q->slot : i;
+        u8 req;
+        u16 reqArg;
         bool8 ok = TRUE;
-        if (OBJ_GFX_ID(npc) != s->gfx && (!s->gfx2 || OBJ_GFX_ID(npc) != s->gfx2))
+        s = &sSpecials[slot];
+        if (q ? OBJ_GFX_ID(npc) != q->gfx
+              : (OBJ_GFX_ID(npc) != s->gfx && (!s->gfx2 || OBJ_GFX_ID(npc) != s->gfx2)))
             continue;
-        if (s->req == REQ_BADGE)
-            ok = FlagGet(FLAG_BADGE01_GET + s->reqArg);
-        else if (s->req == REQ_TRAINER)
-            ok = FlagGet(TRAINER_FLAG(s->reqArg));
-        else if (s->req == REQ_CHAMPION)
+        req = q ? q->req : s->req;
+        reqArg = q ? q->reqArg : s->reqArg;
+        if (req == REQ_BADGE)
+            ok = FlagGet(FLAG_BADGE01_GET + reqArg);
+        else if (req == REQ_TRAINER)
+            ok = FlagGet(TRAINER_FLAG(reqArg));
+        else if (req == REQ_CHAMPION)
             ok = FlagGet(FLAG_IS_CHAMPION);
+        else if (req == REQ_FLAG)
+            ok = FlagGet(reqArg);
+        else if (req == REQ_CLEARED)
+            ok = MP_Region_Cleared(reqArg);
         if (!ok)
         {
             *answer = ASK_NO;
-            return s->refuse;
+            return q ? q->refuse : s->refuse;
         }
-        snprintf(o->name, sizeof(o->name), "%s", s->name ? s->name
-                 : OBJ_GFX_ID(npc) == OBJ_EVENT_GFX_RIVAL_MAY_NORMAL ? "MAY" : "BRENDAN");
-        snprintf(o->title, sizeof(o->title), "%s", s->title);
-        o->deck = gTcgSpecialDecks[i].cards;
-        o->key = 0xFF000000u | i;
-        o->special = i;
+        if (q)
+            snprintf(o->name, sizeof(o->name), "%s", q->name);
+        else
+            snprintf(o->name, sizeof(o->name), "%s", s->name ? s->name
+                     : OBJ_GFX_ID(npc) == OBJ_EVENT_GFX_RIVAL_MAY_NORMAL ? "MAY" : "BRENDAN");
+        snprintf(o->title, sizeof(o->title), "%s", q ? q->title : s->title);
+        o->deck = gTcgSpecialDecks[slot].cards;
+        o->key = q ? 0xFE000000u | (i - TCG_SPECIAL_COUNT) : 0xFF000000u | slot;   // (records and quotes are the person's)
+        o->special = slot;
         o->mat = s->mat;
         o->matType = s->matType;
-        o->music = s->music;
-        o->promo = gTcgSpecialPromos[i];
-        o->pack = i % TCG_PACK_TYPES;
+        o->music = q ? q->music : s->music;
+        o->promo = gTcgSpecialPromos[slot];
+        o->pack = slot % TCG_PACK_TYPES;
         o->pool = TCG_SCALE_POOL_SPECIAL;
         o->pick = h;
         o->prizes = 6;   // (the full game: LEADERS and the like)
         o->voice = QUOTE_VOICE_REFINED;
-        snprintf(o->quoteWho, sizeof(o->quoteWho), "%s", s->name ? s->name : "RIVAL");
+        snprintf(o->quoteWho, sizeof(o->quoteWho), "%s", q ? q->name : s->name ? s->name : "RIVAL");
         Tcg_FitOpponent(o, NULL);
         *answer = sYgoLine ? ASK_WHICH : ASK_DUEL;
         sGames = sYgoLine ? GAME_PKMN | GAME_YGO : GAME_PKMN;
-        return sYgoLine ? sYgoLine : Hello(o, s->accept, h);
+        return sYgoLine ? sYgoLine : Hello(o, q ? q->accept : s->accept, h);
     }
     o->special = TCG_SPECIAL_NONE;
     for (i = 0; i < ARRAY_COUNT(sPeople); i++)

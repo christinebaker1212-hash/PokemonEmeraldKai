@@ -1,0 +1,39 @@
+pressuntil A field 5000
+wait 400
+mp textspeed 2
+mp cards starter 0
+mp register 399
+mp warp 35,103,9,5
+wait 90
+mp face up
+wait 4
+press SELECT 2
+wait 90
+rendershot falkner_no
+mash B 8 20
+wait 60
+mp setflag 0x11B2
+press SELECT 2
+wait 120
+rendershot falkner_ask
+mash A 6 30
+wait 120
+rendershot falkner_challenge
+mp cards concede
+pressuntil A field 3000
+pressuntil B field 600
+wait 60
+mp warp 38,5,6,6
+wait 120
+mp face up
+wait 4
+mp setflag 0x2100
+press SELECT 2
+wait 120
+mash A 6 30
+wait 120
+rendershot brock_challenge
+mp cards concede
+pressuntil A field 3000
+mp where
+quit

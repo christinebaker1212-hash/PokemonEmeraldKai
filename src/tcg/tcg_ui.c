@@ -351,7 +351,7 @@ void Tcg_OpenNpcChallenge(const struct TcgOpponent *opponent)
     Open(UI_CHALLENGE);
     U.cursor = c->activeDeck;
     U.matchFor = -1;
-    printf("[tcg] challenge: %s, special %u\n", U.opp.name, U.opp.special);
+    printf("[tcg] challenge: %s, special %u, promo %u\n", U.opp.name, U.opp.special, U.opp.promo);
 }
 void Tcg_OpenStarterReveal(void)
 {

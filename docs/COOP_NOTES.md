@@ -2049,12 +2049,19 @@ ACTOR LEVEL [P]` picks the pursuit. Test garden_doing.
   HO-OH, CELEBI, MEWTWO and MEW (the static encounters' "done" flags: caught or beaten), and in JOURNEY "WORLD
   TRAVELER" (AK_STARTED: all three regions visited) and "TRIPLE CROWN" (CHAMPION of all three). Quetzal's flags are
   numbers here (0x11B2...): they live in the region side file and FlagGet reads them in any region. Test ach_regions.
-- Every card in every region (1.61.3): with the GAME CENTER reachable from JOHTO / KANTO, its 2F CARD SHOP also sells
-  one copy of each POKéMON promo card (tcg_collection.c Tcg_ShopPrice, 12000: the 44 promos came only from HOENN's
-  special trainers and prizes). Triple Triad's 4- and 5-star cards are NOT sold there (the user's rule: no seller has
-  them; they stay with the players who carry them). Yu-Gi-Oh! needed nothing (every card is in a booster, a shop or a
-  deck, and GOLDENROD's / CELADON's stores have CARD CLUB duelists). Test gc_cards_everywhere (harness mp cardshop);
-  the card guide (tools/card_guide) says so.
+- Every card in every region (1.61.3), by HOENN's rules (the user: don't change how a card is had): POKeMON promo
+  cards come from beating special trainers, so JOHTO and KANTO have theirs (tcg_field.c sQzSpecials): each stands in
+  for one of HOENN's slots - its deck, its promo, its "beaten" / "promo given" bits (a promo is given once, in
+  whichever region it's won first) - with its own name, lines, record key (0xFE000000 | row) and requirement (its
+  region's badge flag 0x11B2+ / 0x2100+, an ELITE FOUR win, MP_Region_Cleared for LANCE). Paired by role first, so
+  HOENN's rules read the same (a region's eight leaders fill the eight leader slots: "beat all eight GYM LEADERS" means
+  its own; ELITE FOUR for ELITE FOUR, CHAMPION, rival), then by type within the role (FALKNER - WINONA's birds,
+  JASMINE - WATTSON's MAGNEMITE, PRYCE - JUAN's water, KOGA - SIDNEY's GENGAR...). KANTO's BLUE is rival and CHAMPION
+  in one sprite: the rival's slot (WALLACE's has no promo). RED / PROF. OAK stand in for STEVEN, PROF. ELM / BILL for
+  WALLY. Tcg_LookGfx leaves these sprites as they are, so Yu-Gi-Oh! and Triple Triad don't take them for look-alike
+  townsfolk. The GAME CENTER sells no promo and no 4- or 5-star Triple Triad card. Test cards_region_specials (the
+  log's "challenge: NAME, special N, promo P"); gc_cards_everywhere; the card guide lists them (gen_guide.py reads
+  sQzSpecials). Yu-Gi-Oh! needed nothing (every card is in a booster, a shop or a deck).
 - JOHTO's and KANTO's GAME CENTER (1.61.3): HOENN's 2F and 3F, no 1F and no ROOFTOP (the user's rule: HOENN's tower
   keeps its four floors; a region without a tower of its own gets an attendant and 2F / 3F only). The attendants
   stand in GOLDENROD's and CELADON's GAME CORNERS at (12, 2) (map.json objects added after the import: put them back
