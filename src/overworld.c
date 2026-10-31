@@ -1,4 +1,5 @@
 #include "global.h"
+#include "qz_specials.h"
 #include "mp_region.h"
 #include "mp_kaisong.h"
 #include "mp.h"
@@ -1506,6 +1507,11 @@ static void DoCB1_Overworld(u16 newKeys, u16 heldKeys)
     }
     FieldClearPlayerInput(&inputStruct);
     FieldGetPlayerInput(&inputStruct, newKeys, heldKeys);
+    if (!ArePlayerFieldControlsLocked() && QzBugContest_FieldCheck())
+    {
+        LockPlayerFieldControls();   // Moemon Kai: the Bug-Catching Contest is over (src/qz_bugcontest.c)
+        return;
+    }
     if (!ArePlayerFieldControlsLocked())
     {
         if (ProcessPlayerFieldInput(&inputStruct) == 1)

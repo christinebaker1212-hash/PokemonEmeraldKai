@@ -90,3 +90,30 @@ gText_MagnetTrainRide::
 gText_MagnetTrainDeparts::
 	.string "The MAGNET TRAIN for SAFFRON CITY\n"
 	.string "is now departing!$"
+
+@ Moemon Kai: the Bug-Catching Contest's end by time, the fifth catch or the last SAFARI BALL (src/qz_bugcontest.c):
+@ on to the judging (Quetzal's own script from here)
+EventScript_QzBugContestOver::
+	lockall
+	playse SE_DING_DONG
+	msgbox gText_QzBugContestOver, MSGBOX_DEFAULT
+	closemessage
+	goto Johto_NationalParkBugContest_EventScript_83C33FA
+
+@ ...and leaving the park during it (the catches went to the PC, the party is back)
+EventScript_QzBugContestLeft::
+	lockall
+	msgbox gText_QzBugContestLeft, MSGBOX_DEFAULT
+	releaseall
+	end
+
+gText_QzBugContestOver::
+	.string "ANNOUNCER: BEEEP!\p"
+	.string "The Bug-Catching Contest is over!\n"
+	.string "Please return to the judges.$"
+
+gText_QzBugContestLeft::
+	.string "You left the NATIONAL PARK, so the\n"
+	.string "Bug-Catching Contest is over.\p"
+	.string "Your catches are in the PC and your\n"
+	.string "party is back with you.$"

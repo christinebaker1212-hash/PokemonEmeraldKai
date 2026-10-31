@@ -1,5 +1,6 @@
 #include "mp_version.h"
 #include "global.h"
+#include "qz_specials.h"
 #include "mp.h"
 #include "mp_garden.h"   // Moemon Co-op: START > GARDEN
 #include "platform/display.h" // Moemon Kai PC: START > DISPLAY
@@ -343,7 +344,8 @@ static void BuildNormalStartMenu(void)
     }
 
     AddStartMenuAction(MENU_ACTION_PLAYER);
-    AddStartMenuAction(MENU_ACTION_SAVE);
+    if (!QzBugContest_Active())   // Moemon Kai: no saving with the party kept aside for the Bug-Catching Contest
+        AddStartMenuAction(MENU_ACTION_SAVE);
     AddStartMenuAction(MENU_ACTION_OPTION);
     // Moemon Co-op: CO-OP isn't here; its own button opens it (C, or Y/Triangle). GARDEN once it's been found.
     if (MP_Garden_QuickTravelShown())

@@ -6,6 +6,7 @@
 // SAFARI ZONE, BATTLE PIKE / PYRAMID...), never over an older save file from a
 // new game that wasn't saved by hand yet, and not during the intro truck ride.
 #include "global.h"
+#include "qz_specials.h"
 #include "mp.h"
 #include "battle_pike.h"
 #include "battle_pyramid.h"
@@ -46,7 +47,7 @@ static bool8 CanSaveHere(void)
     if (gPlayerAvatar.tileTransitionState != T_NOT_MOVING)
         return FALSE;
     // Places the START menu has no SAVE in
-    if (IsOverworldLinkActive() || InUnionRoom() || GetSafariZoneFlag() || InBattlePike()
+    if (IsOverworldLinkActive() || InUnionRoom() || GetSafariZoneFlag() || InBattlePike() || QzBugContest_Active()
      || CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE || InMultiPartnerRoom())
         return FALSE;
     if (FlagGet(FLAG_MP_SKIP_TRUCK))

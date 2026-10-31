@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "global.h"
+#include "qz_specials.h"
 #include "battle_gimmick.h"
 #include "mp.h"
 #include "mp_life_battle.h"
@@ -242,7 +243,7 @@ void MP_BattleRefreshActionPrompt(void)
 static bool8 MpQuickBallReady(void)
 {
     s32 ball = MP_SaveData_Get("ball:last");
-    if (!MP_IsBallItem(ball) || ball == ITEM_SAFARI_BALL || !CheckBagHasItem(ball, 1))
+    if (!MP_IsBallItem(ball) || (ball == ITEM_SAFARI_BALL && !QzBugContest_Active()) || !CheckBagHasItem(ball, 1))
         return FALSE;
     if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild)
         return FALSE;

@@ -172,8 +172,10 @@ u16 *GetVarPointer(u16 id)
         return MP_Region_VarPointer(id);   // Moemon Kai: Johto / Kanto vars (mp_region.c)
     else if (id < SPECIAL_VARS_START)
         return &gSaveBlock1Ptr->vars[id - VARS_START];
-    else
+    else if (id <= SPECIAL_VARS_END)
         return gSpecialVars[id - SPECIAL_VARS_START];
+    else
+        return NULL;   // Moemon Kai: past the table (Quetzal's scripts write -1 as "the warp's own spot"): the value itself
 }
 
 u16 VarGet(u16 id)

@@ -7466,6 +7466,12 @@ u8 *MonSpritesGfxManager_GetSpritePtr(u8 managerId, u8 spriteNum)
     }
 }
 
+// Moemon Kai: straight to the PC (MON_GIVEN_TO_PC, or MON_CANT_GIVE when every box is full)
+u8 MP_SendMonToPC(struct Pokemon *mon)
+{
+    return CopyMonToPC(mon);
+}
+
 // Moemon Co-op: like GiveMonToPlayer, but the Pokémon keeps its original
 // trainer (a friend's Pokémon from a trade or the shared PC)
 u8 MP_GiveMonKeepOT(struct Pokemon *mon)

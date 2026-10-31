@@ -5,18 +5,6 @@
 #include "qz_specials.h"
 
 QZ_STUB(QzAfterCreditsReset)
-QZ_STUB(QzBugContestBufferPlaceWinner)
-QZ_STUB(QzBugContestCheckState)
-QZ_STUB(QzBugContestChooseFromBag)
-QZ_STUB(QzBugContestClearFlag1)
-QZ_STUB(QzBugContestEnd)
-QZ_STUB(QzBugContestGetCaughtCount)
-QZ_STUB(QzBugContestGetFlag2)
-QZ_STUB(QzBugContestGetFlag3)
-QZ_STUB(QzBugContestGetPlayerPlace)
-QZ_STUB(QzBugContestJudge)
-QZ_STUB(QzBugContestReleaseCaught)
-QZ_STUB(QzBugContestStart)
 QZ_STUB(QzDoCredits)
 QZ_STUB(QzDreamEventEligibility)
 QZ_STUB(QzEndDreamEvent)
