@@ -3297,6 +3297,13 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   levels from res/field/encounters) into src/data/wild_encounters.json as gSinnoh_* entries (154 places): grass 12
   slots and surfing 5 as in Emerald; fishing OLD 2 / GOOD 3 / SUPER 5 of Platinum's 5 a rod. Not yet: Platinum's
   day / night grass slots, swarms, the POKé RADAR, GBA-slot tables. ROUTE 201: STARLY, BIDOOF, KRICKETOT.
+- Words: tools/sinnoh/build_text.py makes sinnoh/platinum_text.pak from the decomp's message banks (res/text, English;
+  fetch_decomp.sh parts 3) when the release is built (make_pack.sh; package.sh ships it in sinnoh/): never in the
+  repository. The game's character set (charmap.txt; no glyph: '?'), "\n" a new line, "\r" a scroll, "\f" a new
+  page, string buffers 0-2 STR_VAR_1-3, deflated ("S3TZ"). Banks are numbered by file name (bank_numbers(), the
+  pinned commit). A script's text is PLACEHOLDER_BEGIN, PLACEHOLDER_ID_SINNOH_TEXT (0x40), bank and message as two
+  7-bit bytes each (sinnoh_text_bytes()): StringExpandPlaceholders asks src/sinnoh/s3d_text.c S3D_Text for it
+  ("Message missing" without the pack). `mp s3dtext BANK MSG` shows one (the log has its length only).
 - Not yet: animated textures (prop animations are linked to models in Platinum's code, not its data), billboard props, Platinum's door
   animations, the buildings' people and signs (step 4), speed (about 6 ms a frame), Windows not built with it yet.
 - Test: tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM] (the 3D picture against render_ref.py: mean under 8 of 765 a

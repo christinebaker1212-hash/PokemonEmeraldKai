@@ -19,6 +19,8 @@ void S3D_CommitOam(void);
 bool8 S3D_IsSinnohGroup(u8 mapGroup);
 float S3D_TestGround(s32 mapX, s32 mapY, float near);   // tests: the ground's height at a point (map pixels), NaN none           // a SINNOH map (its own music, battle songs...)
 u16 S3D_MapMusic(u16 song);                      // a SINNOH map's song by night (Platinum's own night versions)
+// SINNOH's text pack: a message of a bank (tools/sinnoh/build_text.py; "Message missing" without the pack)
+const u8 *S3D_Text(u16 bank, u16 msg);
 // The blocks of a map's layout: a SINNOH map's come from the pack (Platinum's collision), others are the layout's
 const u16 *S3D_LayoutBlocks(const struct MapLayout *layout);
 
