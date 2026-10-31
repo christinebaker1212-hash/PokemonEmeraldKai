@@ -92,8 +92,8 @@ def look_matrix(target):
 def lit(color_mats, light_block, normal, vtx_color):
     _, lights, (dif, amb, spe, emi) = light_block
     acc = np.array(emi, dtype=float)
-    for on, lc, ld in lights:
-        if not on:
+    for k, (on, lc, ld) in enumerate(lights):
+        if not on or not (color_mats.lights & (1 << k)):   # (the material's own light switches)
             continue
         lc = np.array(lc, dtype=float)
         level = max(0.0, -float(np.dot(ld, normal)))

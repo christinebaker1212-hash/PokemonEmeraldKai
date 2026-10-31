@@ -39,7 +39,8 @@
     "gMapGroup_Kanto1",
     "gMapGroup_Kanto2",
     "gMapGroup_Kanto3",
-    "gMapGroup_Kanto4"
+    "gMapGroup_Kanto4",
+    "gMapGroup_Sinnoh"
   ],
   "gMapGroup_TownsAndRoutes": [
     "PetalburgCity",
@@ -1374,5 +1375,9 @@
     "Kanto_MtMoon_Route4Cave",
     "Kanto_CinnabarIsland_PrimalChamber",
     "Kanto_CeruleanCave_RayquazaChamber"
+  ],
+  "gMapGroup_Sinnoh": [
+    "Sinnoh_TwinleafTown",
+    "Sinnoh_Route201"
   ]
 }

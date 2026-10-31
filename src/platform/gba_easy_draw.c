@@ -32,6 +32,10 @@ extern void (*const gIntrTable[])(void);
 
 // Moemon Co-op: mp_mappic.c draws map pictures into the field's BG lines (NULL when no picture is in view)
 void (*gMpMapPicLine)(int line, uint16_t layers[4][DISPLAY_WIDTH]);
+// Moemon Kai: SINNOH's 3D engine (src/sinnoh/s3d.c) draws the field's picture into the BG lines (NULL off its maps)
+void (*gMpS3dLine)(int line, uint16_t layers[4][DISPLAY_WIDTH]);
+// ... and hides a sprite's pixel where the 3D map is in front of it (NULL off its maps)
+bool (*gMpS3dOamHidden)(int oamIndex, int x, int line);
 
 struct scanlineData {
     uint16_t layers[4][DISPLAY_WIDTH];
@@ -485,6 +489,9 @@ static void PutObjPixel(struct scanlineData *scanline, uint16_t *pixels, struct 
                         bool is8BPP)
 {
     bool winShouldBlendPixel;
+    // Moemon Kai: in a SINNOH 3D scene the map in front of a sprite hides it
+    if (gMpS3dOamHidden && !isObjWin && gMpS3dOamHidden((int)(oam - (struct OamData *)OAM), global_x, vcount))
+        return;
     // Moemon Co-op: the Pokémon in battle weather (mp_battleweather.c)
     if (gMpScenePixel && !is8BPP && gMpSceneObjPal[oam->paletteNum & 63])
         color = gMpScenePixel(color, global_x, vcount, TRUE);
@@ -846,6 +853,8 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
         // Moemon Co-op: full-color pictures pinned to the map (mp_mappic.c: the GAME CENTER), past the GBA's tiles
         if (gMpMapPicLine)
             gMpMapPicLine(vcount, scanline.layers);
+        if (gMpS3dLine)   // Moemon Kai: SINNOH's 3D maps
+            gMpS3dLine(vcount, scanline.layers);
         
         break;
     case 1:

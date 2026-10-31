@@ -3168,3 +3168,43 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
 - Script numbers the import can't translate (a number set into a var, then additem VAR): check with a scan of
   `setvar VAR_0x80xx, N` before item / species / move commands; OAK's 5 POKé BALLS and RED's gift were the two.
 - QzBufferLastReceivedMonForNickname reads gMpLastGivenMonPlace / Slot (pokemon.c GiveMonToPlayer), not VAR_RESULT.
+
+## SINNOH's 3D engine (proof of concept)
+- Plan and rules: docs/SINNOH_HANDOFF.md. Tools in tools/sinnoh/ read the user's Platinum ROM (nds.py: the cartridge's
+  file system and NARCs; platinum.py: map matrices and land data; nitro.py: Nitro models BMD0 and textures BTX0, every
+  texture format, the render commands and display lists flattened to triangles). render_ref.py draws a reference
+  picture offline (numpy); build_pack.py writes the 3D pack the game reads (format in its docstring): textures as RGBA,
+  meshes (per material group: texture, repeat / flip, alpha, polygon id, culling, light switches, mode, triangles with
+  positions, texel coordinates, colors and normals), the area light sets (data/arealight.narc's text: per time block 4
+  lights, then diffuse / ambient / specular / emission), and per matrix cell its block mesh, props (build_model.narc
+  meshes with their transforms) and the field engine's 32x32 map blocks from Platinum's terrain attributes (bit 15
+  collision, low byte the behavior: Platinum's numbers match Emerald's for grass, water, sand, ledges; a General
+  tileset metatile with that behavior is used). Each cell's area (so texture set, prop textures, lights) comes from
+  pokeplatinum's map header table (include/data/map_headers.h), so build_pack.py needs a pokeplatinum checkout too.
+- The pack is never committed (/sinnoh/ is ignored); the game reads sinnoh/platinum3d.pak beside it or
+  MOEMON_S3D_PAK. Without it the SINNOH maps keep their placeholder layouts (every cell blocked).
+- Maps: tools/sinnoh/gen_maps.py makes the field engine's maps (group 40: MAP_SINNOH_TWINLEAF_TOWN 32x32 from matrix
+  cell (3, 27), MAP_SINNOH_ROUTE201 64x32 from (3, 26), connected) with placeholder blocks; fieldmap.c asks
+  S3D_LayoutBlocks for a layout's blocks (the map and its connections), which gives the pack's for SINNOH maps. Script
+  file data/event_scripts_sinnoh.s. They count as HOENN for regions for now (MP_Region_OfGroup).
+- Drawing (src/sinnoh/s3d.c): S3D_Update each overworld frame (after the camera) finds the map and Emerald's camera
+  (mp_mappic.c's formula: screen (x, y) is map pixel (camX + x, camY + y), 16 a tile = Platinum's units) and sets the
+  view: Platinum's default field camera (666.92 away, 59.05 degrees down, half fov 8.09 degrees at the DS's 96-pixel
+  half height, so one unit a pixel at the target) looking at the player's tile centre (their sprite's middle, 8 above
+  its feet), drawn where Emerald shows the player. gba_easy_draw.c calls gMpS3dLine for each line: on line 0 it renders
+  the 3x3 cells around the target (opaque groups then translucent; a translucent pixel isn't drawn twice by the same
+  polygon id, the DS's rule that keeps overlapping shadows even; textures modulate the lit vertex colors; lighting per
+  vertex for the current light block, cached), then each line puts the picture (through the BG palettes' fade, as
+  mp_mappic.c) in BG3 and clears BG1 / BG2. BG0 (text) and sprites go on top.
+- Sprites: sprite.c UpdateOamCoords moves each camera-following sprite (coordOffsetEnabled) to where its spot on the
+  ground shows in the 3D view (S3D_PlaceSprite: feet - 8 = tile centre -> world -> projected, + 8), and notes its depth
+  per OAM entry (S3D_NoteOam, committed with the OAM in LoadOam); PutObjPixel asks gMpS3dOamHidden: a sprite is an
+  upright card, a pixel dy above its feet dy * tan(59.05) nearer, hidden where the 3D depth is nearer still (trees and
+  roofs in front of whoever stands behind them, as on the DS).
+- Light blocks: Platinum's rule (area_light.c): the first block whose end time is past now, in 2-second units of the
+  day; MOEMON_S3D_HOUR fixes the hour for tests.
+- Not yet: BDHC heights (all at the block's altitude), animated textures, billboard props, the rest of the matrix
+  (build_pack.py's window), speed (about 6 ms a frame), Windows not built with it yet.
+- Test: tools/sinnoh/test_poc.sh ROM POKEPLATINUM_DIR (the 3D picture against render_ref.py: mean under 8 of 765 a
+  pixel, now 2.9; a house's wall; TWINLEAF to ROUTE 201).
+

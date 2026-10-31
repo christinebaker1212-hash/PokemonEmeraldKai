@@ -10477,6 +10477,26 @@
       "border_filepath": "data/layouts/Kanto_CeruleanCave_RayquazaChamber/border.bin",
       "blockdata_filepath": "data/layouts/Kanto_CeruleanCave_RayquazaChamber/map.bin",
       "quetzal": true
+    },
+    {
+      "id": "LAYOUT_SINNOH_TWINLEAF_TOWN",
+      "name": "Sinnoh_TwinleafTown_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Petalburg",
+      "border_filepath": "data/layouts/Sinnoh_TwinleafTown/border.bin",
+      "blockdata_filepath": "data/layouts/Sinnoh_TwinleafTown/map.bin"
+    },
+    {
+      "id": "LAYOUT_SINNOH_ROUTE201",
+      "name": "Sinnoh_Route201_Layout",
+      "width": 64,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Petalburg",
+      "border_filepath": "data/layouts/Sinnoh_Route201/border.bin",
+      "blockdata_filepath": "data/layouts/Sinnoh_Route201/map.bin"
     }
   ]
 }

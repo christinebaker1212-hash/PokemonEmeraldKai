@@ -3,7 +3,15 @@
 Queued after the 1.61.6 release and the KANTO / JOHTO sweep (the user's plan, 2026-10-31).
 
 ## Where things stand
-- This is planning only: no Sinnoh code exists yet. Start any work from the latest default branch.
+- Proof of concept done (2026-10-31, branch sinnoh-work pushed to claude/exciting-sagan-17lq9j): TWINLEAF TOWN and
+  ROUTE 201 drawn by the new 3D engine from the user's ROM, walked with Platinum's collision, the player and every field
+  sprite standing in the scene (hidden by trees and roofs in front of them), lit by the area's lights for the hour.
+  tools/sinnoh/test_poc.sh checks it against the offline reference render. COOP_NOTES "SINNOH's 3D engine" has the
+  how. Next: heights (BDHC), the rest of the map matrix, animated textures (water), buildings' doors and warps,
+  speed (about 6 ms a frame now), then data (step 3) and scripts (step 4).
+- OPEN QUESTION for the user: how players get the 3D pack. Nothing from the ROM is committed (this file's rule), so
+  either each player points the game at their own Platinum ROM and it builds the pack on first use, or the pack is
+  built from the user's ROM by the release and shipped. Asked 2026-10-31.
 - Read CLAUDE.md, BUILDING_COOP.md, docs/REGIONS_PLAN.md and COOP_NOTES ("JOHTO and KANTO",
   "Gen 4 battles", "Gens 5-9 and GENERATION", "The GAME CENTER") first.
 - Reference decomp: https://github.com/pret/pokeplatinum

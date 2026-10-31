@@ -3,6 +3,7 @@
 #include "battle_pyramid.h"
 #include "bg.h"
 #include "fieldmap.h"
+#include "s3d.h"   // Moemon Kai: SINNOH
 #include "fldeff.h"
 #include "fldeff_misc.h"
 #include "frontier_util.h"
@@ -125,7 +126,7 @@ static void InitMapLayoutData(const struct MapHeader *mapHeader)
     if (gBackupMapLayout.width * gBackupMapLayout.height > MAX_MAP_DATA_SIZE)
         return;
 
-    InitBackupMapLayoutData(mapLayout->map, mapLayout->width, mapLayout->height);
+    InitBackupMapLayoutData(S3D_LayoutBlocks(mapLayout), mapLayout->width, mapLayout->height);   // Moemon Kai: SINNOH's from the 3D pack
     InitBackupMapLayoutConnections(mapHeader);
 }
 
@@ -189,7 +190,7 @@ static void FillConnection(s32 x, s32 y, const struct MapHeader *connectedMapHea
     s32 mapWidth;
 
     mapWidth = connectedMapHeader->mapLayout->width;
-    src = &connectedMapHeader->mapLayout->map[mapWidth * y2 + x2];
+    src = &S3D_LayoutBlocks(connectedMapHeader->mapLayout)[mapWidth * y2 + x2];   // Moemon Kai: SINNOH's from the 3D pack
     dest = &gBackupMapLayout.map[gBackupMapLayout.width * y + x];
 
     for (i = 0; i < height; i++)

@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "global.h"
 #include "sprite.h"
+#include "s3d.h"   // Moemon Kai: SINNOH
 #include "mp_bigsprite.h"
 #include "main.h"
 #include "palette.h"
@@ -357,8 +358,17 @@ void UpdateOamCoords(void)
         {
             if (sprite->coordOffsetEnabled)
             {
-                sprite->oam.x = sprite->x + sprite->x2 + sprite->centerToCornerVecX + gSpriteCoordOffsetX;
-                sprite->oam.y = sprite->y + sprite->y2 + sprite->centerToCornerVecY + gSpriteCoordOffsetY;
+                s32 x = sprite->x + sprite->x2 + gSpriteCoordOffsetX, y = sprite->y + sprite->y2 + gSpriteCoordOffsetY;
+                if (S3D_Active())
+                {
+                    // Moemon Kai: on a SINNOH 3D map a field sprite stands where its spot on the ground is in the view
+                    s32 feet = y - sprite->centerToCornerVecY, nx, ny;
+                    S3D_PlaceSprite(x, feet, &nx, &ny, &gS3dSpriteDepth[i]);
+                    gS3dSpriteFeet[i] = ny;
+                    x = nx, y = ny + sprite->centerToCornerVecY;
+                }
+                sprite->oam.x = x + sprite->centerToCornerVecX;
+                sprite->oam.y = y + sprite->centerToCornerVecY;
             }
             else
             {
@@ -683,6 +693,7 @@ void LoadOam(void)
     {
         CpuCopy32(gMain.oamBuffer, (void *)OAM, sizeof(gMain.oamBuffer));
         MP_BigSprite_CommitOam();   // Moemon PC: the big sprites' list goes with it
+        S3D_CommitOam();            // Moemon Kai: and the sprites' depths in a SINNOH 3D scene
     }
 }
 
@@ -1798,6 +1809,7 @@ bool8 AddSpriteToOamBuffer(struct Sprite *sprite, u16 *oamIndex)
     u16 first = *oamIndex;
     bool8 full = AddSpriteToOamBufferInner(sprite, oamIndex);
     MP_BigSprite_NoteClip(sprite, first, *oamIndex);   // Moemon PC: its entries stop at its clip line
+    S3D_NoteOam(sprite - gSprites, first, *oamIndex);   // Moemon Kai: its depth in a SINNOH 3D scene
     return full;
 }
 
