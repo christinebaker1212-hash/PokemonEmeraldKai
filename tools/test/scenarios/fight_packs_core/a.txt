@@ -6,6 +6,8 @@ wait 20
 press A 2
 wait 60
 press A 2
+wait 60
+press A 2
 wait 30
 barrier seated 2
 barrier asked 2

@@ -2,8 +2,8 @@
 # "WAITING FOR BOB... N" counting down and the bad connection icon, then ends as no contest; so does BOB's
 MODE=2
 TMO=600
-WARP=10,3,6,9
-WARP_B=10,3,9,9
+WARP=11,19,2,11
+WARP_B=11,19,5,11
 ENV_A="MOEMON_FIGHT_ROUNDS=1 MOEMON_FIGHT_TIME=60"
 ENV_B="MOEMON_FIGHT_ROUNDS=1 MOEMON_FIGHT_TIME=60 MOEMON_FIGHT_TEST_MUTE=1100"
 EXPECT_A=("fight: player 1 dropped out" "fight: online result 7")

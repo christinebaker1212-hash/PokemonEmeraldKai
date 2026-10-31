@@ -16,6 +16,8 @@ enum
 {
     ARCADE_VAMPIRE_SAVIOR,
     ARCADE_CYBERBOTS,
+    ARCADE_SSF2X,
+    ARCADE_SFA3,
     ARCADE_GAME_COUNT
 };
 
@@ -40,13 +42,15 @@ const char *Arcade_Title(int game);        // "VAMPIRE SAVIOR"
 const char *Arcade_SetFiles(int game);     // the zips it needs, for the player: "vsav.zip and vsavj.zip"
 // Whether the player's set loads (false: why, in a line for the log; Arcade_SetFiles for the player)
 bool Arcade_Check(int game, char *why, size_t whySize);
+// The same, remembered until the zips change: cheap enough to ask every frame
+bool Arcade_HasSet(int game);
 
 bool Arcade_Open(int game);                 // the board of that game, reset (false: its set doesn't load)
 void Arcade_Close(void);
 bool Arcade_IsOpen(void);
 // One frame of the board (59.6 a second) with both players' controls
 void Arcade_Frame(uint16_t p1, uint16_t p2);
-const uint32_t *Arcade_Picture(void);       // ARCADE_WIDTH x ARCADE_HEIGHT, 0x00RRGGBB
+const uint32_t *Arcade_Picture(void);       // ARCADE_WIDTH x ARCADE_HEIGHT, 0x00BBGGRR (red in the low byte)
 // The frame's sound: stereo pairs at Arcade_SampleRate(); takes up to maxPairs, returns how many
 int Arcade_TakeAudio(int16_t *out, int maxPairs);
 int Arcade_SampleRate(void);

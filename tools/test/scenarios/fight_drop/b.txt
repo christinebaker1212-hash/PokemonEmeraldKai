@@ -6,6 +6,8 @@ wait 120
 press LEFT 2
 wait 20
 press A 2
+wait 60
+press A 2
 wait 100
 press A 2
 watchlog fight: online with

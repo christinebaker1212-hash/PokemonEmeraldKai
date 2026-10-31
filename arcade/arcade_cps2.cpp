@@ -10,6 +10,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <sys/stat.h>
 
 #include "cps2recomp/machine/machine.h"
 #include "cps2recomp/machine/romset.h"
@@ -41,6 +42,19 @@ const ArcadeGame kGames[ARCADE_GAME_COUNT] = {
      "cyb.13m:f0dce192 cyb.15m:187aa39c cyb.17m:8a0e4b12 cyb.19m:34b62612 cyb.14m:c1537957 cyb.16m:15349e86 "
      "cyb.18m:d83e977d cyb.20m:77cdad5c",
      "cyb.01:9c0fb079 cyb.02:51cb0c4e", "cyb.11m:362ccab2 cyb.12m:7066e9cc", "cybots.key:9bbcbef3"},
+    // (the graphics: three banks of four, 2 MB then 1 MB files, appended in order as the board maps them)
+    {"SUPER STREET FIGHTER II X", "ssf2xj", "ssf2t", "ssf2t.zip and ssf2xj.zip",
+     "sfxj.03d:50b52b37 sfxj.04a:af7767b4 sfxj.05:f4ff18f5 sfxj.06b:413477c2 sfxj.07a:a18b3d83 sfxj.08:2de76f10 "
+     "sfx.09:642fae3f",
+     "sfx.13m:cf94d275 sfx.15m:5eb703af sfx.17m:ffa60e0f sfx.19m:34e825c5 sfx.14m:b7cc32e7 sfx.16m:8376ad18 "
+     "sfx.18m:f5b1b336 sfx.20m:459d5c6b sfx.21m:e32854af sfx.23m:760f2927 sfx.25m:1ee90208 sfx.27m:f814400f",
+     "sfx.01:b47b8835 sfx.02:0022633f", "sfx.11m:9bdbd476 sfx.12m:a05e3aab", "ssf2xj.key:160d1424"},
+    {"STREET FIGHTER ALPHA 3", "sfa3", "sfa3", "sfa3.zip",
+     "sz3e.03c:9762b206 sz3e.04c:5ad3f721 sz3.05c:57fd0a40 sz3.06c:f6305f8b sz3.07c:6eab0f6f sz3.08c:910c4a3b "
+     "sz3.09c:b29e5199 sz3.10b:deb2ff52",
+     "sz3.13m:0f7a60d9 sz3.15m:8e933741 sz3.17m:d6e98147 sz3.19m:f31a728a sz3.14m:5ff98297 sz3.16m:52b5bdee "
+     "sz3.18m:40631ed5 sz3.20m:763409b4",
+     "sz3.01:de810084 sz3.02:72445dc4", "sz3.11m:1c89eed1 sz3.12m:f392b13a", "sfa3.key:54fa39c6"},
 };
 
 // The board keeps a reference to its set: g_roms lives as long as g_machine (and is freed after it)
@@ -94,6 +108,31 @@ bool Arcade_Check(int game, char *why, size_t whySize)
     if (why && whySize)
         snprintf(why, whySize, "%s", error.c_str());
     return false;
+}
+
+// Whether the player has the set, as Arcade_Check, remembered until the zips change (their sizes and times): cheap
+// enough for every frame (the SPECTATE panel asks it of the friends' arcade pictures)
+bool Arcade_HasSet(int game)
+{
+    static struct { bool known, ok; long long key; } sKnown[ARCADE_GAME_COUNT];
+    struct stat st;
+    long long key = 1469598103934665603LL;
+    if (game < 0 || game >= ARCADE_GAME_COUNT)
+        return false;
+    std::string set = SetPath(game);
+    std::string parent = set.substr(0, set.find_last_of('/') + 1) + kGames[game].parent + ".zip";
+    for (const std::string &path : {set, parent}) {
+        if (stat(path.c_str(), &st) == 0)
+            key = (key ^ (long long)st.st_size ^ ((long long)st.st_mtime << 20)) * 1099511628211LL;
+        else
+            key = (key ^ 7) * 1099511628211LL;
+    }
+    if (!sKnown[game].known || sKnown[game].key != key) {
+        sKnown[game].ok = Arcade_Check(game, nullptr, 0);
+        sKnown[game].key = key;
+        sKnown[game].known = true;
+    }
+    return sKnown[game].ok;
 }
 
 bool Arcade_Open(int game)

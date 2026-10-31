@@ -259,7 +259,7 @@
       "y": 9,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_EAST",
-      "script": "EventScript_VsCabinetWest"
+      "script": "MauvilleCity_GameCorner_EventScript_SlotMachine8"
     },
     {
       "type": "sign",
@@ -283,7 +283,7 @@
       "y": 9,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_WEST",
-      "script": "EventScript_VsCabinetEast"
+      "script": "MauvilleCity_GameCorner_EventScript_SlotMachine11"
     },
     {
       "type": "sign",

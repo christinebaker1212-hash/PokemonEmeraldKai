@@ -4,6 +4,8 @@ press RIGHT 2
 wait 20
 press A 2
 wait 60
+press A 2
+wait 60
 shot sit_menu
 press DOWN 2
 wait 10

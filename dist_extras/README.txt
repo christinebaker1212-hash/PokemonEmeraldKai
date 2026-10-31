@@ -1108,7 +1108,7 @@ CONTROLS
   BUTTON ICONS  the button pictures in help lines: AUTO (the keyboard or
                 controller you used last), or always KEYBOARD, XBOX,
                 PLAYSTATION or NINTENDO
-  FIGHT BUTTONS the VS cabinet's buttons (see VS CABINET): ARCADE when
+  FIGHT BUTTONS the VS cabinets' buttons (see VS CABINETS): ARCADE when
                 they're the usual ones. A opens a page with each punch and
                 kick; A on one, then press the key or controller button
                 you want for it (one already used by another punch or kick
@@ -1466,40 +1466,72 @@ the elevator are behind her.
   2F CARD SHOP    Singles, structure decks and card duels (see CARD DUELS),
                   a Yu-Gi-Oh! clerk (see YU-GI-OH!) and a TRIPLE TRIAD
                   seller with two players beside him (see TRIPLE TRIAD).
-  3F GAMES        A DANCE machine (see DANCE MACHINE), consoles, TVs, arcade
-                  cabinets (coming soon) and a COIN counter: 50 COINS for
-                  1000 (you'll need a COIN CASE).
+  3F GAMES        A DANCE machine (see DANCE MACHINE), five VS cabinets
+                  (see VS CABINETS), TVs, arcade cabinets (coming soon) and
+                  a COIN counter: 50 COINS for 1000 (you'll need a COIN
+                  CASE).
   ROOFTOP         The SKY LOUNGE: people taking a break, and drinks.
 
-VS CABINET
-----------
-MAUVILLE CITY's GAME CORNER has a fighting game: the two slot machines at
-the right end of the bottom row, back to back, are a VS cabinet (a STREET
-FIGHTER EX PLUS screen with SUPER STREET FIGHTER II X characters).
+VS CABINETS
+-----------
+The GAME CENTER's 3F (RUSTBORO CITY) has five VS cabinets: the back-to-back
+row in the middle of the floor, a seat on each side. Each plays one game and
+says which when you sit down:
+  Row 1 (top)     SUPER STREET FIGHTER II X (CAPCOM arcade, 1994)
+  Row 2           VAMPIRE SAVIOR (CAPCOM arcade, 1997)
+  Row 3           CYBERBOTS (CAPCOM arcade, 1995)
+  Row 4           A weird bootleg (the MUGEN cabinet, see below)
+  Row 5           STREET FIGHTER ALPHA 3 (CAPCOM arcade, 1998)
+The west seat plays 1P (the left side), the east seat 2P.
   Sit down        A at a seat: WAIT FOR 2P (a "Fight me!" balloon goes up
-                  over you; B stands up) or FIGHT CPU.
-  Challenge       A at the other seat while a friend waits: "Fight NAME?"
-                  A friend who sits down during your CPU fight ends it, and
-                  you both go to the character select.
-  The fight       Both pick at once; the stage is picked for you and named
-                  on the VS screen. First to win 2 rounds. Afterwards you
-                  stand up beside the cabinet.
+                  over you; B stands up), or play alone (PLAY ALONE on the
+                  CAPCOM cabinets, FIGHT CPU on the bootleg).
+  Challenge       A at the other side while a friend waits: "Fight NAME?"
+                  A friend who sits down while you play alone ends your game,
+                  and you both start again together.
   Buttons         Light / medium / heavy punch and kick, arcade style:
                   keyboard U I O (punches) and J K L (kicks), ENTER = start,
                   arrows or WASD to move. Controller: X Y RB (punches),
                   A B RT (kicks), START, D-Pad or left stick. Change them in
                   OPTIONS > CONTROLS > FIGHT BUTTONS.
-  Online          The fight runs on both PCs and fixes up small delays as
-                  it goes (rollback), so it stays smooth. A signal icon in
-                  the corner means the connection is struggling; if your
+  Online          The game runs on both PCs and fixes up small delays as it
+                  goes (rollback), so it stays smooth. A signal icon in the
+                  corner means the connection is struggling; if your
                   friend's game goes quiet, "Waiting for NAME... 10" counts
-                  down and the fight ends with no contest. Friends see the
-                  fight in their SPECTATE panel.
+                  down and the game ends with no contest.
+
+The CAPCOM cabinets
+  ROM sets        These four are the real arcade games, run from your own
+                  copies of their ROM sets (MAME's zips), which the game
+                  doesn't come with. Put them in the arcade folder next to
+                  the game:
+                    SUPER STREET FIGHTER II X   ssf2t.zip and ssf2xj.zip
+                    VAMPIRE SAVIOR              vsav.zip and vsavj.zip
+                    CYBERBOTS                   cybots.zip
+                    STREET FIGHTER ALPHA 3      sfa3.zip
+                  A cabinet whose set isn't there tells you which files it
+                  needs. Files are found by their contents, so a set named
+                  differently inside still works. Both players need the set
+                  to play together.
+  Playing         START puts in a coin and starts, as on a free-play
+                  cabinet (in a game, it's the game's own START too). Hold
+                  START for 2 seconds to stand up.
+  Spectating      Friends who have the game's set see it in their SPECTATE
+                  panel; friends who don't see a blank screen saying
+                  CONNECTING... until you're done.
+  Credits         The arcade boards are cps2recomp's (GPL-3.0):
+                  ARCADE_CREDITS.txt.
+
+The bootleg (MUGEN)
+  The fight       A STREET FIGHTER EX PLUS screen with SUPER STREET FIGHTER
+                  II X characters. Both pick at once; the stage is picked for
+                  you and named on the VS screen. First to win 2 rounds.
   Different files Fighters or stages that aren't the same on both PCs are
                   greyed out (and never picked at random). If the fight
                   game itself differs, you're told so and no fight starts.
   Wins            Wins and losses show on the back of your TRAINER CARD
-                  (VS FIGHTS), and there are achievements for them.
+                  (VS FIGHTS), and there are achievements for them. Friends
+                  see the fight in their SPECTATE panel.
   Your own        The fighters, stages and screen are in the mugen folder
                   next to the game, a standard MUGEN layout: add a fighter
                   to chars and a line to STREETFIGHTER-EX-PLUS\SFEX-SELECT.def.
@@ -1777,8 +1809,10 @@ FILES
                              next to the game, handy when reporting bugs)
   moemon_display.ini         display settings (written by the game)
   moemon_controls.ini        controller and fight button settings
-  mugen\                     the VS cabinet's fighting game (characters,
-                             stages, screen, cabinets.ini)
+  arcade\                    your ROM sets for the GAME CENTER's CAPCOM VS
+                             cabinets (see VS CABINETS)
+  mugen\                     the bootleg VS cabinet's fighting game
+                             (characters, stages, screen, cabinets.ini)
   stepmania\                 the DANCE machine's songs (downloaded by the
                              machine the first time; add your own in Songs)
   saves\                     your three save files (slot1, slot2, slot3)

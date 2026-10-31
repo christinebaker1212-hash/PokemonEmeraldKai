@@ -2139,6 +2139,44 @@ ACTOR LEVEL [P]` picks the pursuit. Test garden_doing.
   floor (MP_Region_GameCenterOtherFloor) and 3F's stairs up say the ROOFTOP is closed (MP_Region_WarpClosed in
   TryStartWarpEventScript). Tests gc_johto, gc_kanto, garden_johto.
 
+## The GAME CENTER's arcade cabinets (1.62.0)
+
+The five back-to-back pairs in the middle of the GAME CENTER 3F (rows 8-12, bg events at x 3 facing east = the west
+seat, 1P, and x 4 facing west = the east seat, 2P) are VS cabinets, one game each (data/scripts/vs_cabinet.inc,
+mp_fight.c CABINET_*): 8 SUPER STREET FIGHTER II X, 9 VAMPIRE SAVIOR, 10 CYBERBOTS, 11 the MUGEN cabinet ("A weird
+bootleg", moved here from MAUVILLE's GAME CORNER, whose (7,9)/(8,9) are slot machines again), 12 STREET FIGHTER ALPHA
+3. Each cabinet names its game in a message first. The two Gamer NPCs stand beside the row, out of the chairs.
+
+- The CAPCOM games are CPS-2 boards: arcade/cps2recomp (tmcleroy's cps2recomp 1.2.0, GPL-3.0: machine, video, QSound
+  and Z80 sound, runtime; the 68000 always interpreted, nothing of the games translated or kept) through the C bridge
+  arcade/arcade_cps2.cpp / include/arcade.h (Arcade_*). Built by the Makefile's ARCADE_* rule (C++20, -iquote so the
+  game's include/strings.h doesn't shadow the system one). Credits: dist_extras/ARCADE_CREDITS.txt.
+- **ROM sets are the player's**: never in the repository or the downloads (the user declined shipping them through the
+  updater; nothing can). The bridge reads `<set>.zip` with its parent's zip beside it from the "arcade" folder next to
+  the exe (Updater_ExeFile("arcade"); tests: MOEMON_ARCADE_DIR), files found by CRC (kGames: MAME's names and CRCs:
+  vsavj + vsav, cybots, ssf2xj + ssf2t (graphics: three banks of four, 2 MB then 1 MB files), sfa3). Arcade_Check says
+  why a set doesn't load; Arcade_HasSet is the same remembered until the zips' sizes / times change. The release ships
+  an empty arcade folder with a note. The machine keeps a reference to its RomSet: the bridge owns it as long as the
+  machine (a stack RomSet crashed on the first frame). Picture() is 0x00BBGGRR.
+- include/fight_engine.h: mp_fight.c and fight_platform.c call FightEngine_*, which answer from the MUGEN engine or,
+  for gFightKind >= FIGHT_KIND_ARCADE, from src/platform/arcade_fight.c (ArcFight_*: the board with the MUGEN engine's
+  calls). So the CRT on / off, the 480x320 picture through display.c, the sound in place of the game's, spectating,
+  1P play, online VS with rollback (a save state kept per frame once the 300-frame boot is over: until then frames run
+  on known buttons only, so the input delay settles) and desync recovery (the save state as the "globals" region in 4
+  KB pages, the cabinet's START handling in MfStateInfo.host) are all the MUGEN cabinet's code.
+- The picture is shown 4:3 (384x224 to 427x320, bilinear, black sides). The board's 24 kHz sound is stretched over
+  each game frame's samples (frame-locked: no drift). Buttons: X Y Z = LP MP HP, A B C = LK MK HK. START: a coin
+  (frames 0-4) then the board's START (8-14, and while held); held 120 frames leaves (MF_RESULT_CANCELLED, no
+  result message); online the leave counts 12 frames later, past any guessed buttons (it rolls back with the state).
+- Seats and online: the protocol's cabinet byte is the CABINET_* id (0 was MAUVILLE's), so two cabinets never mix. The
+  pack check: a board's MfPack core is 0xA2C0DE00 + game when the set loads, 0 otherwise, so a friend without it gets
+  "NAME doesn't have this game's ROM set" (FIGHT_RESULT_PACKS).
+- SPECTATE (mp_spectate.c): frames carry the arcade game on the sender's screen + 1 in FRAMEF bits 3-5
+  (MP_Fight_ArcadeShown). A viewer without that set (Arcade_HasSet) doesn't apply them: the card shows CONNECTING...
+  until the game is off that screen, then asks for a whole picture (the user's rule).
+- Tests: `mp arcade GAME FRAMES` (harness: opens a board, runs it, prints sound, lit pixels and a RAM hash); the fight_*
+  scenarios now sit at row 11 (the MUGEN cabinet). The CAPCOM games can only be tested with the sets (scratch only).
+
 ## The VS cabinet: MUGEN fights (1.31.0, 1.33.0)
 Decisions and the as-built record: docs/FIGHT_DECISIONS.md. Where things are:
 - `fight/`: the engine (mugen-unleashed, a C rebuild of MUGEN 1.1b1) with `compat/` (SDL 1.2 / SDL_mixer on

@@ -8,7 +8,7 @@
 #include <string.h>
 #include <SDL2/SDL.h>
 #include "global.h"
-#include "mf_engine.h"
+#include "fight_engine.h"   // (mf_engine.h, or an arcade board)
 #include "platform/fight.h"
 
 static SDL_Texture *sCanvas;
@@ -482,7 +482,7 @@ void Fight_Hold(int on)
 // The picture is shown (Fight_Canvas): the engine is running or its last picture is held
 static int Fight_Showing(void)
 {
-    return sShow && (MfEngine_IsActive() || sHold);
+    return sShow && (FightEngine_IsActive() || sHold);
 }
 
 // (the effect itself: src/platform/crt_effect.c, shared with the DANCE machine)
@@ -497,9 +497,9 @@ static const unsigned short *ApplyCrt(const unsigned short *src)
 // (*version changes when any of it does)
 static const unsigned short *Fight_Picture(unsigned int *version)
 {
-    const unsigned short *frame = sHold && !MfEngine_IsActive() ? sHeld : MfEngine_Frame();
+    const unsigned short *frame = sHold && !FightEngine_IsActive() ? sHeld : FightEngine_Frame();
 
-    *version = MfEngine_FrameSerial() * 2654435761u ^ sOverlayVersion ^ (unsigned int)sHold << 30
+    *version = FightEngine_FrameSerial() * 2654435761u ^ sOverlayVersion ^ (unsigned int)sHold << 30
                ^ (unsigned int)(sCrtPhase * 1000 + sCrtTime) * 40503u;
     if (frame == NULL)
     {
@@ -607,7 +607,7 @@ const unsigned short *Fight_Frame(void)
     const unsigned short *f;
     int x, y;
 
-    if (!MfEngine_IsActive() || (f = MfEngine_Frame()) == NULL)
+    if (!FightEngine_IsActive() || (f = FightEngine_Frame()) == NULL)
         return NULL;
     for (y = 0; y < DISPLAY_HEIGHT; y++)
     {
@@ -634,13 +634,13 @@ void Fight_MixAudio(float *stereo, int frames, int rate)
     static short sMix[4096 * 2];
     int i;
 
-    if (!MfEngine_IsActive())
+    if (!FightEngine_IsActive())
         return;
     while (frames > 0)
     {
         int n = frames > 4096 ? 4096 : frames;
         memset(sMix, 0, (size_t)n * 2 * sizeof(short));
-        MfEngine_MixAudio(sMix, n, rate);
+        FightEngine_MixAudio(sMix, n, rate);
         for (i = 0; i < n * 2; i++)
             stereo[i] = sMix[i] / 32768.0f;
         stereo += n * 2;

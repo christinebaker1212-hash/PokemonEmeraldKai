@@ -234,7 +234,10 @@ sold); who plays which game tt_field.c Tt_FieldPick before tcg_field.c's own; "<
 games and trades with friends (tt_net.c over relay type 14, request kinds 4-5; scenarios tt_online, tt_trade);
 docs/TT_DECISIONS.md, COOP_NOTES "Triple Triad"; tests tools/tt/test.sh, tools/tt/test_ui.sh).
 
-Also the VS cabinet (MAUVILLE GAME CORNER's two slot machines at (7,9)/(8,9)): MUGEN fights in fight/ (mugen-unleashed engine,
+Also the GAME CENTER 3F's five VS cabinets (rows 8-12 of the back-to-back pairs: four CAPCOM CPS-2 games from each
+player's own ROM sets in the "arcade" folder through arcade/cps2recomp + arcade/arcade_cps2.cpp, include/arcade.h,
+src/platform/arcade_fight.c and include/fight_engine.h; never commit or ship a ROM; COOP_NOTES "The GAME CENTER's arcade
+cabinets") and the MUGEN one ("A weird bootleg", row 11): MUGEN fights in fight/ (mugen-unleashed engine,
 include/mf_engine.h), src/platform/fight_platform.c, src/mp/mp_fight.c; online with rollback (dirty pages of a fixed-address heap
 region + the engine's globals section), the pack check by file hashes, desync recovery by page diff, OPTIONS > CONTROLS > FIGHT
 BUTTONS; content in mugen/ (its sounds GBA sound by tools/fight/gba_audio.py; a stage's song kept under the voices by

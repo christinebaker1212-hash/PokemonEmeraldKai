@@ -4,8 +4,8 @@
 # agree again to the end (check.sh)
 MODE=2
 TMO=600
-WARP=10,3,6,9
-WARP_B=10,3,9,9
+WARP=11,19,2,11
+WARP_B=11,19,5,11
 ENV_A="MOEMON_FIGHT_ROUNDS=1 MOEMON_FIGHT_TIME=20"
 ENV_B="MOEMON_FIGHT_ROUNDS=1 MOEMON_FIGHT_TIME=20 MOEMON_FIGHT_TEST_DESYNC=120"
 EXPECT_A=("fight: desync at" "fight: desync: both games stop after frame" "fight: desync: the state sent after frame" "fight: desync: both games go on" "fight: online result")
