@@ -648,6 +648,11 @@ void Fight_MixAudio(float *stereo, int frames, int rate)
     }
 }
 
+int Fight_LowLatency(void)
+{
+    return Fight_Showing();
+}
+
 unsigned int Fight_Ms(void)
 {
     return SDL_GetTicks();
