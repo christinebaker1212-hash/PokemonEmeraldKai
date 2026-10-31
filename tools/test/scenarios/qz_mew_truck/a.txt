@@ -1,0 +1,15 @@
+pressuntil A field 5000
+wait 60
+mp setmove 0 0 70
+mp regionclear 2
+mp setvar 20789 2
+mp warp 36,4,56,4
+wait 120
+shot before
+mp face up
+mash A 120 20
+wait 300
+shot after
+mp getflag 10545
+mp getflag 10543
+quit

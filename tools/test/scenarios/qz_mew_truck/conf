@@ -1,0 +1,8 @@
+# The truck by the S.S. ANNE: a Lv 100 NIDOKING with STRENGTH pushes it after KANTO's LEAGUE (FLAG_QZ_0x2931 = 10545)
+# and MEW comes out to battle (its done flag 0x292F = 10543)
+MODE=1
+GEN=9
+TMO=180
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=34:100 MOEMON_TEST_FOE_HP1=1"
+EXPECT_A=("flag 10545 = 1" "flag 10543 = 1")
+UNEXPECT_A=("[crash]" "not ported")

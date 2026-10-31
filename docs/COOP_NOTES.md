@@ -2755,8 +2755,10 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   FLAG_QZ_0x292B, DARKRAI in the room; QzSSAnneRoom6OnResume ends a dream whose DARKRAI is done. RefreshStatics shows
   DARKRAI only in its dream. Tests qz_dream, qz_dream_kanto.
 - PALLET's bed: ARCEUS appears once to a full team at Lv 100 after KANTO's LEAGUE (QzPalletPostgameEventEligibility).
-- Not done yet: Quetzal's other postgame events (GIOVANNI's past, time travel, the S.S. ANNE departure: still stubs
-  that log and go on), HEADBUTT trees, FRLG door animations, 3x2 map
+- The S.S. ANNE's truck: a Lv 100 NIDOKING leading with STRENGTH after KANTO's LEAGUE, MEW not caught
+  (QzSSAnneExteriorEventCheck); ShiftTruck moves its metatiles (Quetzal's own: layout columns 55-57, rows 1-3);
+  FLAG_QZ_0x2931 keeps it moved; MEW's static shows only then. Test qz_mew_truck.
+- Not done yet: Quetzal's other postgame events (GIOVANNI's past and the time travel: still stubs that log and go on), HEADBUTT trees, FRLG door animations, 3x2 map
   borders, the sightseeing walk on a first arrival, a SAFFRON station, everyone following the host on a trip,
   per-region co-op shared PCs. The plan for what's left: docs/HANDOFF_REGIONS_GENS.md.
 

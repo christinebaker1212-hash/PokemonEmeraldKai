@@ -372,7 +372,8 @@ static u16 RefreshStatics(void)
             continue;
         if (FlagGet(e->doneFlag) || !MP_Gen_Allowed(e->species)
          || (e->region == 2 && e->species == SPECIES_MELOETTA && !FlagGet(FLAG_QZ_0x2924))   // after the CHANSEY Dance
-         || (e->species == SPECIES_DARKRAI && !FlagGet(e->region == 1 ? FLAG_QZ_0x1425 : FLAG_QZ_0x292B)))   // in a dream
+         || (e->species == SPECIES_DARKRAI && !FlagGet(e->region == 1 ? FLAG_QZ_0x1425 : FLAG_QZ_0x292B))   // in a dream
+         || (e->region == 2 && e->species == SPECIES_MEW && e->group == 36 && !FlagGet(FLAG_QZ_0x2931)))   // under the truck
             FlagSet(e->objFlag);
         else
             FlagClear(e->objFlag);
@@ -1213,5 +1214,59 @@ u16 QzSSAnneRoom6OnResume(void)
     else
         FlagClear(FLAG_QZ_0x292D);
     RefreshStatics();
+    return 0;
+}
+
+// The truck by the S.S. ANNE (KANTO, once the ship has sailed): a Lv 100 NIDOKING leading that knows STRENGTH pushes it
+// after KANTO's LEAGUE, while MEW isn't caught (Quetzal's rule); MEW waits under it. The truck's metatiles slide left
+// two steps (QzSSAnneExteriorEventStep 1, 2) and stay there (FLAG_QZ_0x2931).
+#include "field_camera.h"
+static bool8 OnSSAnneExterior(void)
+{
+    return gSaveBlock1Ptr->location.mapGroup == 36 && gSaveBlock1Ptr->location.mapNum == 4;
+}
+
+static void ShiftTruck(u8 n)
+{
+    const struct MapLayout *l = gMapHeader.mapLayout;
+    s32 x, y;
+    for (y = 1; y <= 3; y++)
+    {
+        for (x = 53; x <= 57; x++)
+            MapGridSetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET, l->map[y * l->width + 52]);
+        for (x = 55; x <= 57; x++)
+            MapGridSetMetatileIdAt(x - n + MAP_OFFSET, y + MAP_OFFSET, l->map[y * l->width + x]);
+    }
+}
+
+u16 QzSSAnneExteriorEventCheck(void)
+{
+    struct Pokemon *lead = &gPlayerParty[0];
+    u32 k;
+    gSpecialVar_Result = FALSE;
+    if (!OnSSAnneExterior() || FlagGet(FLAG_QZ_0x2931) || FlagGet(FLAG_QZ_0x1425) || FlagGet(FLAG_QZ_0x1318)
+     || Caught(SPECIES_MEW) || !MP_Region_Cleared(REGION_KANTO)
+     || GetMonData(lead, MON_DATA_SPECIES_OR_EGG) != SPECIES_NIDOKING || GetMonData(lead, MON_DATA_LEVEL) != MAX_LEVEL)
+        return 0;
+    for (k = 0; k < MAX_MON_MOVES; k++)
+        if (GetMonData(lead, MON_DATA_MOVE1 + k) == MOVE_STRENGTH)
+            gSpecialVar_Result = TRUE;
+    return 0;
+}
+
+u16 QzSSAnneExteriorEventInit(void)
+{
+    if (OnSSAnneExterior())
+        ShiftTruck(FlagGet(FLAG_QZ_0x2931) ? 2 : 0);
+    return 0;
+}
+
+u16 QzSSAnneExteriorEventStep(void)
+{
+    if (OnSSAnneExterior() && gSpecialVar_0x8004 >= 1 && gSpecialVar_0x8004 <= 2)
+    {
+        ShiftTruck(gSpecialVar_0x8004);
+        DrawWholeMapView();
+    }
     return 0;
 }
