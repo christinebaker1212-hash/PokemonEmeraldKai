@@ -2573,9 +2573,10 @@ Moemon Music Studio's `.kaisong` exports (format and loading: docs/KAISONG_FORMA
   then `mp musiclock 1`: the test-only `gMpTestMusicLock` in m4a.c stops the overworld from changing the BGM while it is
   measured) and prints how loud each plays; `--write` puts the difference in the file's INFO `gain=` (dB). Files with
   the same music (a hash of every chunk but INFO, as the game's `KaiFile.music`) are one group: measured once, one gain
-  (the mean of their songs' levels), so the music doesn't jump where the game plays it on from one to the other. The
-  release and dev release workflows run it (`--reference 0 --write --passes 2`, about 3 minutes) on the game they
-  built, into the copies they ship: nobody runs it by hand, and re-exported songs get theirs again. The game applies
+  (the mean of their songs' levels), so the music doesn't jump where the game plays it on from one to the other. Until
+  1.62.0 the release and dev release workflows ran it (`--reference 0 --write --passes 2`) on the shipped copies; it
+  never took effect there and then hung the 1.62.0 release, so (the user's call, 1.62.1) no workflow runs it: the
+  gains in music/ ship as they are, and the tool is run by hand when wanted. The game applies
   the gain per voice in music_player.c ChnVolSetAsm (`sChnGain`, from MP_Kaisong_Gain of the player's song header;
   256 = unchanged, so the game's own songs and the bit-exact studio comparisons stay the same). kaisong_test.sh check 6.
 - **Same music, no restart** (1.52.2). `MP_Kaisong_SameMusic(song, warp)`: the file that would play there holds the
