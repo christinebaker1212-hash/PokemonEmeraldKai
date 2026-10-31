@@ -1869,6 +1869,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_Linkx_OpenUnion(void);
         MP_Linkx_OpenUnion();
     }
+    else if (strcmp(cmd, "crycheck") == 0)
+    {
+        // crycheck - every species' cry is in the cry tables, forward and reversed, with a sample
+        void MP_CryCheck(void);
+        MP_CryCheck();
+    }
     else if (strcmp(cmd, "monartcheck") == 0)
     {
         // monartcheck - every species has OPTIONS > CREATURES POKEMON battle pictures (mp_monart_data.c)

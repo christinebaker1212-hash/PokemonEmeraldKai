@@ -1029,6 +1029,10 @@ next to its box in every battle (Single, Double and Triple): the second type
 behind, the first type in front of it. OFF (the default) leaves the battle
 screen as it always was.
 
+The cries of POKeMON from Generation 4 on are their newest cries from the
+PokeAPI cries collection (github.com/PokeAPI/cries: gathered from Showdown,
+Veekun and The Sounds Resource), filtered and leveled to sound like the
+Generation 3 cries on the GBA.
 Extra trainer pictures come from play.pokemonshowdown.com/sprites/trainers.
 The Platinum, Diamond/Pearl and Gold/Silver/Crystal back pictures were ripped
 by MufasaKong. CREATE uses a fan-made trainer customization parts kit for the

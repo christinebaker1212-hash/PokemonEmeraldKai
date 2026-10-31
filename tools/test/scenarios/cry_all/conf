@@ -1,0 +1,5 @@
+# Every species has a cry the game can play (forward and reversed): the cry tables reach past 512 (Gens 5-9).
+MODE=1
+TMO=60
+EXPECT_A=("cries in the tables, 0 without one")
+UNEXPECT_A=("has none" "[crash]")

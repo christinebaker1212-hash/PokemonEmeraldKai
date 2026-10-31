@@ -2950,6 +2950,12 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   per-region co-op shared PCs. The plan for what's left: docs/HANDOFF_REGIONS_GENS.md.
 
 ## Gens 5-9 and GENERATION (1.61.0)
+- Cries (1.61.5): PlayCryInternal reads any of the cry tables' 128-entry blocks (it stopped at block 3, so cry ids
+  512 and up, most of Gens 5-9, played nothing; MP_CRY_COUNT from the table labels; `mp crycheck`, test cry_all).
+  The Gen 4-9 cries are their newest (tools/moemon_cries/fetch_cries.py from github.com/PokeAPI/cries
+  latest/<id>.ogg, mapped by the cry file names; gba_cries.py: silence trimmed, 80 Hz - 4.4 kHz, 10512 Hz like
+  Gen 3, the loud part's RMS matched to the Gen 3 cries' median with soft peaks, 8-bit; the build packs them with
+  wav2agb -c). Rerun both after adding a species' cry.
 Pokémon 494-1025 (species 519-1050: VICTINI..PECHARUNT; the EGG is 1051 and Unown's letters follow), moves 468-847,
 abilities 125-311, items 508-552 and the FAIRY type (18), from pokeemerald-expansion's data and Moemon Quetzal's art.
 Old saves need nothing: eggs and Unown keep their real species in the save.

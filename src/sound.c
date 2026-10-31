@@ -1,5 +1,6 @@
 // Moemon Kai: defines the song functions mp_kaisong_scene.h wraps
 #define MP_KAISONG_NO_SCENE
+#include <stdio.h>
 #include "global.h"
 #include "gba/m4a_internal.h"
 #include "sound.h"
@@ -29,6 +30,8 @@ COMMON_DATA bool8 gDisableMusic = 0;
 
 extern struct ToneData gCryTable[];
 extern struct ToneData gCryTable_Reverse[];
+// Moemon Kai: the cries in each table (sound/cry_tables.inc: the reverse table follows the forward one)
+#define MP_CRY_COUNT ((u32)(gCryTable_Reverse - gCryTable))
 
 static void Task_Fanfare(u8 taskId);
 static void CreateFanfareTask(void);
@@ -506,23 +509,28 @@ void PlayCryInternal(u16 species, s8 pan, s8 volume, u8 priority, u8 mode)
     #define GET_CRY(speciesIndex, tableId, reversed) \
         ((reversed) ? &gCryTable_Reverse[(128 * (tableId)) + (speciesIndex)] : &gCryTable[(128 * (tableId)) + (speciesIndex)])
 
-    switch (table)
-    {
-    case 0:
-        gMPlay_PokemonCry = SetPokemonCryTone(GET_CRY(index, 0, reverse));
-        break;
-    case 1:
-        gMPlay_PokemonCry = SetPokemonCryTone(GET_CRY(index, 1, reverse));
-        break;
-    case 2:
-        gMPlay_PokemonCry = SetPokemonCryTone(GET_CRY(index, 2, reverse));
-        break;
-    case 3:
-        gMPlay_PokemonCry = SetPokemonCryTone(GET_CRY(index, 3, reverse));
-        break;
-    }
+    // Moemon Kai: any table (the switch stopped at 3, so cries 512 and up, most of Gens 5-9, never played)
+    if (species < MP_CRY_COUNT)
+        gMPlay_PokemonCry = SetPokemonCryTone(GET_CRY(index, table, reverse));
 
     #undef GET_CRY
+}
+
+// Moemon Kai (tests: mp crycheck): every species' cry is in both tables and has a sample
+void MP_CryCheck(void)
+{
+    u32 species, bad = 0, n = 0;
+    for (species = 1; species < NUM_SPECIES; species++)
+    {
+        u32 cry = SpeciesToCryId(species - 1);
+        n++;
+        if (cry >= MP_CRY_COUNT || !gCryTable[cry].wav || !gCryTable_Reverse[cry].wav)
+        {
+            if (bad++ < 10)
+                printf("[test] crycheck: species %u cry %u (of %u) has none\n", species, cry, MP_CRY_COUNT);
+        }
+    }
+    printf("[test] crycheck: %u species, %u cries in the tables, %u without one\n", n, MP_CRY_COUNT, bad);
 }
 
 bool8 IsCryFinished(void)

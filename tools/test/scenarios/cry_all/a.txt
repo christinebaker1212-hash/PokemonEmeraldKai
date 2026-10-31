@@ -1,0 +1,4 @@
+pressuntil A field 5000
+mp crycheck
+wait 5
+quit
