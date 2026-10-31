@@ -3210,6 +3210,12 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   `setvar VAR_0x80xx, N` before item / species / move commands; OAK's 5 POKé BALLS and RED's gift were the two.
 - QzBufferLastReceivedMonForNickname reads gMpLastGivenMonPlace / Slot (pokemon.c GiveMonToPlayer), not VAR_RESULT.
 
+## Running outdoors in JOHTO and KANTO (1.62.2)
+- Some of Moemon Quetzal's outdoor maps forbid running (allow_running false on 21 JOHTO towns / routes: CHERRYGROVE
+  CITY, ROUTE 23 and 26, the NATIONAL PARK, the SAFARI ZONE, MT. SILVER's outside...). The user called that silly:
+  bike.c IsRunningDisallowed ignores the map flag on outdoor maps (IsMapTypeOutdoors: town, city, route, ocean route)
+  outside HOENN, so re-imported maps need no edit. Indoor maps keep no running (the user's rule), caves keep their
+  flag, HOENN keeps Emerald's; metatiles that forbid running still do.
 ## SINNOH's 3D engine (proof of concept)
 - Plan and rules: docs/SINNOH_HANDOFF.md. The data comes from pret/pokeplatinum (source.py: its map blocks, matrices,
   areas, props, texture sets and lights as files; fetch_decomp.sh gets them at a pinned commit, make_pack.sh fetches and
