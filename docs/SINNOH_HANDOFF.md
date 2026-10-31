@@ -83,7 +83,7 @@ perspective camera. The engine draws those models as Platinum does instead of pi
    compared against reference pictures), then inside the game: one Sinnoh map drawn in 3D with billboarded sprites.
 2. Collision and height: Platinum's tile permissions -> Emerald behaviours; BDHC -> heights under objects, bridge
    layers.
-3. Data converters: trainers, wild, items, marts, text, music; small new systems for Honey Trees, Poké Radar,
+3. Data converters: trainers, wild, items, marts, text; small new systems for Honey Trees, Poké Radar,
    swarms and the Great Marsh; Rock Climb and Defog as field moves.
 4. Scripts: convert the common commands, write the cutscenes by hand. This is the bulk of the work
    (Team Galactic, the lakes, Spear Pillar, the Distortion World; the Distortion World's own gravity and camera
@@ -97,6 +97,14 @@ perspective camera. The engine draws those models as Platinum does instead of pi
   they are, so nothing else changes size.
 - Native resolution first (the game's 240x160, with display.c's usual scaling and filters); a higher-resolution 3D
   option may come later.
+
+## Music
+The user has Sinnoh's music and will upload it later as files Moemon Music Studio reads (tools/moemon_music/: it
+plays 2SF rips and the rest through its vendored emulators). Wait for those rather than taking the music from the
+ROM. They go through the studio into .kaisong songs in music/ (`<song>@<place>` for each Sinnoh map, battle and
+scene), picked up by tools/kaisong/gen.py's tables (docs/SONG_TABLE.md) and leveled by tools/kaisong/loudness.py as
+the release does; check with tools/test/kaisong_test.sh and tools/kaisong/test_scenes.py (CLAUDE.md "Moemon Music
+Studio work": no agents for the studio's work).
 
 ## First step
 A proof of concept: Twinleaf Town + Route 201 drawn by the 3D engine from the user's ROM, the LOOK walking on
