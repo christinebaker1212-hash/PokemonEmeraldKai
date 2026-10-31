@@ -3896,6 +3896,14 @@ static void PrintNotEggInfo(void)
         else
             SetMonPicBackgroundPalette(TRUE);
     }
+    if (MP_Gen_SealedMon(mon))
+    {
+        // Moemon Kai: past the GENERATION (its species, a move or its ability): SEALED where its number is, in red
+        static const u8 sRed[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_RED, TEXT_COLOR_LIGHT_RED};
+        FillWindowPixelBuffer(PSS_LABEL_WINDOW_PORTRAIT_DEX_NUMBER, PIXEL_FILL(0));
+        AddTextPrinterParameterized4(PSS_LABEL_WINDOW_PORTRAIT_DEX_NUMBER, FONT_SMALL, 0, 2, 0, 0, sRed, 0, gText_MpSealed);
+        PutWindowTilemap(PSS_LABEL_WINDOW_PORTRAIT_DEX_NUMBER);
+    }
     StringCopy(gStringVar1, gText_LevelSymbol);
     ConvertIntToDecimalStringN(gStringVar2, summary->level, STR_CONV_MODE_LEFT_ALIGN, 3);
     StringAppend(gStringVar1, gStringVar2);

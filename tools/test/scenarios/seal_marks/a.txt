@@ -1,0 +1,26 @@
+pressuntil A field 5000
+wait 30
+mp boxput 1 0 508 50
+mp boxput 1 1 280 30
+press START 2
+wait 20
+press DOWN 2
+wait 10
+press A 2
+wait 90
+shot party
+press A 2
+wait 20
+press A 2
+wait 120
+shot sumok
+press DOWN 2
+wait 60
+shot sumsealed
+pressuntil B field 600
+wait 30
+mp pc
+pressuntil A pcstorage 3000
+wait 200
+shot pc
+quit

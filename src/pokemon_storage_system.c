@@ -5350,7 +5350,10 @@ static struct Sprite *CreateMonIconSprite(u16 species, u32 personality, s16 x, s
     {
         // Moemon Co-op: a nicknamed Pokémon's icon in its Stadium hue (mp_hue.c)
         s16 hue = MP_Hue_FindByPersonality(personality);
-        if (hue != 0)
+        MP_FreeUnusedGrayIconPalettes();
+        if (MP_Gen_SealedSpecies(species))   // Moemon Kai: SEALED, past the GENERATION: faded gray
+            template.paletteTag = MP_GrayIconPaletteTag(gMonIconPaletteIndices[species]);
+        else if (hue != 0)
         {
             MP_Hue_FreeUnusedIconPalettes();
             template.paletteTag = MP_Hue_IconPaletteTag(template.paletteTag, gMonIconPalettes[gMonIconPaletteIndices[species]], hue);

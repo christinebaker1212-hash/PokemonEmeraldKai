@@ -126,6 +126,7 @@
 #define PARTYBOX_DESC_LEARNED     10
 #define PARTYBOX_DESC_HAVE        11
 #define PARTYBOX_DESC_DONT_HAVE   12
+#define PARTYBOX_DESC_SEALED      13   // Moemon Kai: past the GENERATION
 
 #define SELECTWINDOW_ACTIONS  0
 #define SELECTWINDOW_ITEM     1

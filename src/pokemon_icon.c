@@ -3,6 +3,7 @@
 #include "data/pokemon_graphics/gen59_tables.h"   // Moemon Kai: Gen 5-9
 #include "graphics.h"
 #include "mp.h"
+#include "mp_region.h"
 #include "mail.h"
 #include "palette.h"
 #include "pokemon_icon.h"
@@ -1032,6 +1033,49 @@ static const u16 sSpriteImageSizes[3][4] =
     },
 };
 
+// Moemon Kai: a SEALED species' icon (past the GENERATION: it can't battle) in a faded gray of its palette. One gray
+// palette per icon palette, tags MP_GRAY_ICON_TAG + index, let go when no icon shows them any more.
+#define MP_GRAY_ICON_TAG 0x5C40
+void MP_FreeUnusedGrayIconPalettes(void)
+{
+    u32 i, s;
+    for (i = 0; i < 6; i++)
+    {
+        u8 slot = IndexOfSpritePaletteTag(MP_GRAY_ICON_TAG + i);
+        bool8 used = FALSE;
+        if (slot == 0xFF)
+            continue;
+        for (s = 0; s < MAX_SPRITES && !used; s++)
+            if (gSprites[s].inUse && gSprites[s].oam.paletteNum == slot)
+                used = TRUE;
+        if (!used)
+            FreeSpritePaletteByTag(MP_GRAY_ICON_TAG + i);
+    }
+}
+
+u16 MP_GrayIconPaletteTag(u8 index)
+{
+    struct SpritePalette sp;
+    u16 pal[16], tag = MP_GRAY_ICON_TAG + index;
+    u32 i;
+    if (index >= 6)
+        return POKE_ICON_BASE_PAL_TAG;
+    if (IndexOfSpritePaletteTag(tag) != 0xFF)
+        return tag;
+    for (i = 0; i < 16; i++)
+    {
+        u16 c = gMonIconPaletteTable[index].data[i];
+        u32 r = c & 31, g = (c >> 5) & 31, b = (c >> 10) & 31, y = (r * 30 + g * 59 + b * 11) / 100;
+        y = (y * 3 + 20) / 4;   // faded: lighter and flatter
+        pal[i] = y | (y << 5) | (y << 10);
+    }
+    sp.data = pal;
+    sp.tag = tag;
+    if (LoadSpritePalette(&sp) == 0xFF)
+        return POKE_ICON_BASE_PAL_TAG + index;
+    return tag;
+}
+
 u8 CreateMonIcon(u16 species, void (*callback)(struct Sprite *), s16 x, s16 y, u8 subpriority, u32 personality, bool32 handleDeoxys)
 {
     u8 spriteId;
@@ -1051,7 +1095,10 @@ u8 CreateMonIcon(u16 species, void (*callback)(struct Sprite *), s16 x, s16 y, u
     {
         // Moemon Co-op: a nicknamed Pokémon's icon in its Stadium hue (mp_hue.c)
         s16 hue = MP_Hue_FindByPersonality(personality);
-        if (hue != 0)
+        MP_FreeUnusedGrayIconPalettes();
+        if (MP_Gen_SealedSpecies(species))   // Moemon Kai: SEALED, past the GENERATION: faded gray
+            iconTemplate.paletteTag = MP_GrayIconPaletteTag(gMonIconPaletteIndices[species]);
+        else if (hue != 0)
         {
             MP_Hue_FreeUnusedIconPalettes();
             iconTemplate.paletteTag = MP_Hue_IconPaletteTag(iconTemplate.paletteTag,

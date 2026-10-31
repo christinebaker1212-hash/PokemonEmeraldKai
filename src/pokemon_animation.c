@@ -960,7 +960,8 @@ static void SetPosForRotation(struct Sprite *sprite, u16 index, s16 amplitudeX, 
 
 u8 GetSpeciesBackAnimSet(u16 species)
 {
-    if (sSpeciesToBackAnimSet[species] != BACK_ANIM_NONE)
+    // Moemon Kai: the table stops at the original species; later ones (Gens 4-9) read past its end
+    if (species < ARRAY_COUNT(sSpeciesToBackAnimSet) && sSpeciesToBackAnimSet[species] != BACK_ANIM_NONE)
         return sSpeciesToBackAnimSet[species] - 1;
     else
         return 0;
@@ -986,6 +987,8 @@ static void Task_HandleMonAnimation(u8 taskId)
         for (i = 2; i < ARRAY_COUNT(sprite->data); i++)
             sprite->data[i] = 0;
 
+        if ((u16)gTasks[taskId].tAnimId >= ARRAY_COUNT(sMonAnimFunctions))
+            gTasks[taskId].tAnimId = 0; // Moemon Kai: never past the table
         sprite->callback = sMonAnimFunctions[gTasks[taskId].tAnimId];
         sIsSummaryAnim = FALSE;
 
@@ -1012,7 +1015,7 @@ void StartMonSummaryAnimation(struct Sprite *sprite, u8 frontAnimId)
 {
     // sDontFlip is expected to still be FALSE here, not explicitly cleared
     sIsSummaryAnim = TRUE;
-    sprite->callback = sMonAnimFunctions[frontAnimId];
+    sprite->callback = sMonAnimFunctions[frontAnimId < ARRAY_COUNT(sMonAnimFunctions) ? frontAnimId : 0];
 }
 
 void LaunchAnimationTaskForBackSprite(struct Sprite *sprite, u8 backAnimSet)
@@ -1027,7 +1030,7 @@ void LaunchAnimationTaskForBackSprite(struct Sprite *sprite, u8 backAnimSet)
 
     // * 3 below because each back anim has 3 variants depending on nature
     animId = 3 * backAnimSet + sBackAnimNatureModTable[nature];
-    gTasks[taskId].tAnimId = sBackAnimationIds[animId];
+    gTasks[taskId].tAnimId = animId < ARRAY_COUNT(sBackAnimationIds) ? sBackAnimationIds[animId] : 0;
 }
 
 #undef tState

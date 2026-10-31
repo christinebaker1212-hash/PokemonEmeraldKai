@@ -464,6 +464,7 @@ const u8 gText_NotAble2[] = _("NOT ABLE!");
 const u8 gText_Learned[] = _("LEARNED");
 const u8 gText_Have[] = _("HAVE");
 const u8 gText_DontHave[] = _("DON'T HAVE");
+const u8 gText_MpSealed[] = _("SEALED");   // Moemon Kai: past the GENERATION (party menu)
 const u8 gText_Fourth[] = _("FOURTH");
 const u8 gText_PkmnCantParticipate[] = _("That MOéMON can't participate.{PAUSE_UNTIL_PRESS}");
 const u8 gText_CancelParticipation[] = _("Cancel participation?");

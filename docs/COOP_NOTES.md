@@ -2976,7 +2976,10 @@ Old saves need nothing: eggs and Unown keep their real species in the save.
   take it from 6). Moves and abilities past the cap don't work (greyed in CheckMoveLimitations; MP_Gen_FitBattler),
   down to Gen 3, the default (the user's rule: the restrictions reach Gen 3 whatever a save has). A party Pokémon whose species, a move or its ability is past
   the cap is SEALED: it can't battle (MP_Gen_SealedMon / MP_SEALED beside the battle code's EGG checks; the party menu
-  says why). Items have generations too (MP_Gen_OfItem; 0 = Kai's own and the story items): held ones past the cap go
+  says SEALED in its description slot, PARTYBOX_DESC_SEALED). Marks: a sealed species' icon uses a gray copy of its
+  palette in the party menu and the PC (pokemon_icon.c MP_GrayIconPaletteTag, tags 0x5C40+; the PC's own icon
+  palettes in CreateMonIconSprite), and its summary shows SEALED in red where the number goes (test seal_marks).
+  Items have generations too (MP_Gen_OfItem; 0 = Kai's own and the story items): held ones past the cap go
   back to the bag when it drops (MP_Gen_ReturnHeldItems on map loads and OPTIONS), and in the bag they can't be used,
   given or used from a registered button (item_menu.c ItemLaterGen). Not done yet: sealed Pokémon in trades and
   online.

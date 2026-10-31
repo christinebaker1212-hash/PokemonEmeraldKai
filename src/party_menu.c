@@ -913,8 +913,17 @@ static void MpDrawTeamBadge(u8 slot)
     AddTextPrinterParameterized3(sPartyMenuBoxes[slot].windowId, FONT_SMALL, x + 1, y - MP_TEAM_BADGE_TEXT_UP, sBadgeColors, 0, str);
 }
 
+static void DisplayPartyPokemonDescriptionData(u8 slot, u8 stringID);
+
 static void DisplayPartyPokemonData(u8 slot)
 {
+    if (MP_Gen_SealedMon(&gPlayerParty[slot]))
+    {
+        // Moemon Kai: past the GENERATION (its species, a move or its ability): SEALED where the HP would be
+        DisplayPartyPokemonDescriptionData(slot, PARTYBOX_DESC_SEALED);
+        MpDrawTeamBadge(slot);
+        return;
+    }
     if (GetMonData(&gPlayerParty[slot], MON_DATA_IS_EGG))
     {
         sPartyMenuBoxes[slot].infoRects->blitFunc(sPartyMenuBoxes[slot].windowId, 0, 0, 0, 0, TRUE);

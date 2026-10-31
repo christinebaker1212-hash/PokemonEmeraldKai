@@ -1,0 +1,9 @@
+# SEALED marks at GENERATION 3: DIALGA (Gen 4) has a gray icon in the party and the PC and SEALED in red on its
+# summary; TORCHIC beside it doesn't. The party screen says SEALED for it and for SPRIGATITO.
+MODE=1
+GEN=3
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=280:30,508:50,931:10"
+EXPECT_A=("boxput 1 0: 508")
+UNEXPECT_A=("[crash]")
+CHECK="python3 tools/test/scenarios/seal_marks/check.py"
