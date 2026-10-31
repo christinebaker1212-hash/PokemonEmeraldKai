@@ -50,6 +50,7 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
 - HEADBUTT trees and ROCK SMASH in JOHTO / KANTO (test qz_headbutt); tools/test/npc_sweep.sh.
 - The NPC sweep's first finds, fixed: every JOHTO mart clerk crashed (badge marts), CUT on JOHTO's trees crashed,
   KURT's / the underground shops divided by a zero price.
+- 3x2 borders for KANTO's seven FireRed layouts; door animations: none in Quetzal either (left as is).
 - 1.61.1 released (the seal fix, contest, puzzles, credits, GAME RULES gimmick rows).
 
 ## Next steps
@@ -60,7 +61,6 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
      the Quetzal ROM (the ROM is not in the repo; tools/quetzal_rip/dis_special.py ROM sNNN
      disassembles a special) and docs/quetzal/SPECIALS.md (move each from the stub file to src/qz_*.c;
      tools/quetzal_port/import.py regenerates the stub list from what src/qz_*.c defines).
-   - FRLG door animations, 3x2 map borders.
    - Sightseeing walk on first arrival, SAFFRON station, everyone following the host on a region trip,
      per-region co-op shared PCs.
 3. Playthroughs of JOHTO and KANTO from a new game (MOEMON_DEBUG_REGION=1 / 2): story order, every gym, rival,

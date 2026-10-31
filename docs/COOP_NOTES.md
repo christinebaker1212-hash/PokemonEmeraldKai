@@ -2771,6 +2771,10 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   OBSTACLE_ANIMS): with the plain still animations CUT crashed on JOHTO's trees.
 - A shop item without a price (KURT's Apricorn balls had none) no longer divides by zero; they cost 300 (DREAM BALL
   and METEORITE 1000).
+- Borders: KANTO's seven FireRed layouts with 3x2 borders (VIRIDIAN FOREST, the SAFARI ZONE, BERRY FOREST, PATTERN
+  BUSH) repeat them 3 wide (fieldmap.c GetBorderBlockAt); every other map's border is 2x2.
+- Doors: Quetzal has no door animations for JOHTO / KANTO's tiles either (its door table is Emerald's; a second
+  8-entry one is never used), so their doors open without one.
 - tools/test/npc_sweep.sh talks to every person and reads every sign on every map (harness `mp sweepnote`); it
   reports crashes, hangs, scripts still holding the player and stubs reached.
 - Not done yet: Quetzal's other postgame events (GIOVANNI's past and the time travel: still stubs that log and go on), FRLG door animations, 3x2 map

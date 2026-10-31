@@ -49,7 +49,29 @@ static const struct MapConnection *GetIncomingConnection(u8 direction, s32 x, s3
 static bool8 IsPosInIncomingConnectingMap(u8 direction, s32 x, s32 y, const struct MapConnection *connection);
 static bool8 IsCoordInIncomingConnectingMap(s32 coord, s32 srcMax, s32 destMax, s32 offset);
 
-#define GetBorderBlockAt(x, y) (gMapHeader.mapLayout->border[((x + 1) & 1) + (((y + 1) & 1) << 1)] | MAPGRID_IMPASSABLE)
+// Moemon Kai: KANTO's forests and SAFARI ZONE (Quetzal's FireRed layouts) have 3x2 borders; the rest 2x2
+extern const u16 Kanto_ViridianForest_Layout_Border[], Kanto_SafariZone_Center_Layout_Border[],
+    Kanto_SafariZone_East_Layout_Border[], Kanto_SafariZone_North_Layout_Border[], Kanto_SafariZone_West_Layout_Border[],
+    Kanto_ThreeIsland_BerryForest_Layout_Border[], Kanto_SixIsland_PatternBush_Layout_Border[];
+static u16 GetBorderBlockAt(s32 x, s32 y)
+{
+    const u16 *border = gMapHeader.mapLayout->border;
+    s32 w = 2;
+    if (border == Kanto_ViridianForest_Layout_Border || border == Kanto_SafariZone_Center_Layout_Border
+     || border == Kanto_SafariZone_East_Layout_Border || border == Kanto_SafariZone_North_Layout_Border
+     || border == Kanto_SafariZone_West_Layout_Border || border == Kanto_ThreeIsland_BerryForest_Layout_Border
+     || border == Kanto_SixIsland_PatternBush_Layout_Border)
+    {
+        s32 bx = (x - MAP_OFFSET) % 3, by = (y - MAP_OFFSET) % 2;   // as FireRed counts them
+        w = 3;
+        if (bx < 0)
+            bx += 3;
+        if (by < 0)
+            by += 2;
+        return border[bx + by * w] | MAPGRID_IMPASSABLE;
+    }
+    return border[((x + 1) & 1) + (((y + 1) & 1) << 1)] | MAPGRID_IMPASSABLE;
+}
 
 #define AreCoordsWithinMapGridBounds(x, y) (x >= 0 && x < gBackupMapLayout.width && y >= 0 && y < gBackupMapLayout.height)
 
