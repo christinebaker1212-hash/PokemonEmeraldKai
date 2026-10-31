@@ -67,7 +67,7 @@ u16 QzHoennPostHealEventCheck(void) { return 0; }
 u16 QzResetFollowerObjects(void) { return 0; }   // Kai's followers aren't objects
 u16 QzSetEnemyMonOverrides(void) { return 0; }
 
-// Gym leaders' rematch teams: Kai's level scaling and difficulty do that job
+// Gym leaders' and the ELITE FOUR's legendary teams: Quetzal's GYM TEAMS setting (off by default; Kai has no such option yet)
 static u16 QzUseAltGymLeaderTeam_(void) { return FALSE; }
 
 // HMs work without badges in Kai (mp_heldhm.c)
