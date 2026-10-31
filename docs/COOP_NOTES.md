@@ -3085,7 +3085,9 @@ Old saves need nothing: eggs and Unown keep their real species in the save.
 - Moves past the cap are skipped when learning (MonTryLearningNewMove, GiveBoxMonInitialMoveset, the relearner,
   CanMonLearnTMTutor, day care egg moves); evolutions into a later generation's species wait.
 - HOENN's pools by GENERATION (tools/moemon_gen59/gen_hoenn_modern.py -> src/data/hoenn_modern.h, applied in
-  mp_region.c): each wild table gives one of its rarer slots to each generation 4-9 (a newer Pokémon sharing a type,
+  mp_region.c): each wild table gives one of its rarer slots to each generation 4-9 (1.62.1: the slots of generations
+  past the cap go, in turn, to the species of those within it, so newer POKéMON are about 19% of ROUTE 104 at GEN 4
+  as at GEN 9; `mp wildroll N` counts them) (a newer Pokémon sharing a type,
   the same evolution stage, never a legendary; pseudo-legendary lines only where the slot is Lv. 30+); about half of
   trainers' team members get a newer stand-in from a generation of their own (crc32-picked), bosses keep their ace.
   JOHTO / KANTO use Quetzal's own modern tables.

@@ -1098,7 +1098,8 @@ static const struct Trainer *ModernTeam(u16 trainerNum)
 
 // ---------------------------------------------------------------------------------------------------- HOENN by GENERATION
 // HOENN has no newer tables of its own: tools/moemon_gen59/gen_hoenn_modern.py gives rarer wild slots and some team
-// members a generation 4-9 and a newer POKéMON of the same type and stage; each shows from its generation on
+// members a generation 4-9 and a newer POKéMON of the same type and stage; each shows from its generation on (wild:
+// the slots of generations not on yet go to those that are)
 #include "../data/hoenn_modern.h"
 
 static const struct WildPokemonInfo *HoennModernWild(const struct WildPokemonInfo *info)
@@ -1106,23 +1107,37 @@ static const struct WildPokemonInfo *HoennModernWild(const struct WildPokemonInf
     static struct WildPokemon sMons[12];
     static struct WildPokemonInfo sInfo;
     u8 cap = MP_Gen_Cap(REGION_HOENN);
+    u16 allowed[8];
+    u32 i, nAllowed = 0, next = 0;
     bool8 any = FALSE;
-    u32 i;
+    // The generations that are on (in order): their own slots, and the slots of those that aren't on taken in turn,
+    // so the newer POKéMON are as common at GEN 4 as at GEN 9 (the user's call, 1.62.1)
     for (i = 0; i < ARRAY_COUNT(sHoennModernWild); i++)
     {
         const struct HoennModernWild *e = &sHoennModernWild[i];
-        if (e->info != info || e->gen > cap || !MP_Gen_Allowed(e->species))
+        if (e->info == info && e->gen <= cap && MP_Gen_Allowed(e->species) && nAllowed < ARRAY_COUNT(allowed))
+            allowed[nAllowed++] = e->species;
+    }
+    if (nAllowed == 0)
+        return info;
+    for (i = 0; i < ARRAY_COUNT(sHoennModernWild); i++)
+    {
+        const struct HoennModernWild *e = &sHoennModernWild[i];
+        u16 species;
+        if (e->info != info)
             continue;
+        if (e->gen <= cap && MP_Gen_Allowed(e->species))
+            species = e->species;
+        else
+            species = allowed[next++ % nAllowed];
         if (!any)
         {
             memcpy(sMons, info->wildPokemon, min(e->count, ARRAY_COUNT(sMons)) * sizeof(sMons[0]));
             any = TRUE;
         }
         if (e->slot < ARRAY_COUNT(sMons))
-            sMons[e->slot].species = e->species;   // (the table is in generation order: a later one wins its slot)
+            sMons[e->slot].species = species;   // (the table is in generation order: a later one wins its slot)
     }
-    if (!any)
-        return info;
     sInfo.encounterRate = info->encounterRate;
     sInfo.wildPokemon = sMons;
     return &sInfo;
