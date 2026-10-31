@@ -10479,3 +10479,61 @@ const u8 gMonFrontAnimIdsTable_Pokemon[NUM_SPECIES - 1] =
     GEN4_PK_ANIMID   // Moemon Kai: Gen 4
     GEN59_PK_ANIMID   // Moemon Kai: Gen 5-9
 };
+
+// Test builds (mp monartcheck): every species' POKeMON-style battle data (OPTIONS > CREATURES POKeMON) is there, next
+// to Kai's: front / back picture, both palettes, the front animation; the tables cover every species
+#include <stdio.h>
+extern const struct CompressedSpriteSheet gMonFrontPicTable_Moe[], gMonBackPicTable_Moe[];
+extern const struct CompressedSpritePalette gMonPaletteTable_Moe[];
+void MP_MonArt_Check(void)
+{
+    u32 s, bad = 0;
+    printf("[test] monartcheck tables front %u back %u pal %u shiny %u fcoords %u bcoords %u anims %u species %u\n",
+           (unsigned)ARRAY_COUNT(gMonFrontPicTable_Pokemon), (unsigned)ARRAY_COUNT(gMonBackPicTable_Pokemon),
+           (unsigned)ARRAY_COUNT(gMonPaletteTable_Pokemon), (unsigned)ARRAY_COUNT(gMonShinyPaletteTable_Pokemon),
+           (unsigned)ARRAY_COUNT(gMonFrontPicCoords_Pokemon), (unsigned)ARRAY_COUNT(gMonBackPicCoords_Pokemon),
+           (unsigned)ARRAY_COUNT(gMonFrontAnimsPtrTable_Pokemon), (unsigned)NUM_SPECIES);
+    for (s = 1; s < NUM_SPECIES; s++)
+    {
+        const char *what = NULL;
+        if (s >= ARRAY_COUNT(gMonFrontPicTable_Pokemon) || gMonFrontPicTable_Pokemon[s].data == NULL)
+            what = "front";
+        else if (s >= ARRAY_COUNT(gMonBackPicTable_Pokemon) || gMonBackPicTable_Pokemon[s].data == NULL)
+            what = "back";
+        else if (s >= ARRAY_COUNT(gMonPaletteTable_Pokemon) || gMonPaletteTable_Pokemon[s].data == NULL)
+            what = "palette";
+        else if (s >= ARRAY_COUNT(gMonShinyPaletteTable_Pokemon) || gMonShinyPaletteTable_Pokemon[s].data == NULL)
+            what = "shiny palette";
+        else if (s >= ARRAY_COUNT(gMonFrontPicCoords_Pokemon) || s >= ARRAY_COUNT(gMonBackPicCoords_Pokemon))
+            what = "coords";
+        else if (s >= ARRAY_COUNT(gMonFrontAnimsPtrTable_Pokemon) || gMonFrontAnimsPtrTable_Pokemon[s] == NULL)
+            what = "animation";
+        if (what != NULL)
+        {
+            printf("[test] monartcheck species %u: no POKEMON %s (MOEMON front %s)\n", (unsigned)s, what,
+                   gMonFrontPicTable_Moe[s].data ? "there" : "missing too");
+            bad++;
+        }
+    }
+    // the compressed data itself: an LZ77 header (0x10) and a size a battle picture can have
+    for (s = 1; s < NUM_SPECIES; s++)
+    {
+        const u8 *f = (const u8 *)gMonFrontPicTable_Pokemon[s].data, *b = (const u8 *)gMonBackPicTable_Pokemon[s].data;
+        const u8 *p = (const u8 *)gMonPaletteTable_Pokemon[s].data, *sp = (const u8 *)gMonShinyPaletteTable_Pokemon[s].data;
+        u32 fs, bs, ps, ss;
+        if (!f || !b || !p || !sp)
+            continue;
+        fs = f[1] | (f[2] << 8) | (f[3] << 16);
+        bs = b[1] | (b[2] << 8) | (b[3] << 16);
+        ps = p[1] | (p[2] << 8) | (p[3] << 16);
+        ss = sp[1] | (sp[2] << 8) | (sp[3] << 16);
+        if (f[0] != 0x10 || b[0] != 0x10 || p[0] != 0x10 || sp[0] != 0x10
+         || (fs != 0x800 && fs != 0x1000) || bs != 0x800 || ps != 32 || ss != 32)
+        {
+            printf("[test] monartcheck species %u: data front %02x/%u back %02x/%u pal %02x/%u shiny %02x/%u\n", (unsigned)s,
+                   f[0], (unsigned)fs, b[0], (unsigned)bs, p[0], (unsigned)ps, sp[0], (unsigned)ss);
+            bad++;
+        }
+    }
+    printf("[test] monartcheck: %u species without a full POKEMON picture\n", (unsigned)bad);
+}

@@ -1293,6 +1293,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] hold: slot %d item %d\n", slot, item);
         }
     }
+    else if (strcmp(cmd, "setmon") == 0)
+    {
+        // setmon SLOT SPECIES LEVEL - a new party Moemon of that species in SLOT (tests that go through every species)
+        int slot = 0, species = 1, level = 50;
+        sscanf(arg, "%d %d %d", &slot, &species, &level);
+        if (slot >= 0 && slot < PARTY_SIZE && species > 0 && species < NUM_SPECIES)
+        {
+            CreateMon(&gPlayerParty[slot], species, level, 32, 0, 0, OT_ID_PLAYER_ID, 0);
+            CalculatePlayerPartyCount();
+        }
+    }
     else if (strcmp(cmd, "species") == 0)
     {
         // mp species SLOT - logs a party Pokémon's species and held item
@@ -1854,6 +1865,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         void MP_Linkx_OpenUnion(void);
         MP_Linkx_OpenUnion();
+    }
+    else if (strcmp(cmd, "monartcheck") == 0)
+    {
+        // monartcheck - every species has OPTIONS > CREATURES POKEMON battle pictures (mp_monart_data.c)
+        void MP_MonArt_Check(void);
+        MP_MonArt_Check();
     }
     else if (strcmp(cmd, "gatchadump") == 0)
     {
