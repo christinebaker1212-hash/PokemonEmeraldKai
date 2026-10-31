@@ -832,9 +832,19 @@ static void CB2_InitBattleInternal(void)
     }
     else if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED)))
     {
+        if (MP_QzSoloMulti())
+        {
+            // (one trainer's whole team: the second slot sends out its back half)
+            gBattleTypeFlags &= ~BATTLE_TYPE_TWO_OPPONENTS;
+            CreateNPCTrainerParty(&gEnemyParty[0], gTrainerBattleOpponent_A, TRUE);
+            gBattleTypeFlags |= BATTLE_TYPE_TWO_OPPONENTS;
+        }
+        else
+        {
         CreateNPCTrainerParty(&gEnemyParty[0], gTrainerBattleOpponent_A, TRUE);
         if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
             CreateNPCTrainerParty(&gEnemyParty[PARTY_SIZE / 2], gTrainerBattleOpponent_B, FALSE);
+        }
         SetWildMonHeldItem();
     }
 
@@ -2210,9 +2220,24 @@ static void SpriteCB_UnusedBattleInit_Main(struct Sprite *sprite)
 }
 
 // Moemon Kai: a JOHTO / KANTO trainer's team where the battle wants it (battle_tower.c: a partner's half of the party)
+// Moemon Kai: Quetzal's multi battles against ONE trainer beside an in-game partner (battle_tower.c 13 / 14): Emerald's
+// two-opponent multi with the same trainer in both slots - their whole team, the back half in the second slot; one
+// picture, one intro line, and at the end one trainer's words and prize (the flag is dropped when the battle is won)
+bool8 MP_QzSoloMulti(void)
+{
+    return (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS) && gTrainerBattleOpponent_A != 0
+        && gTrainerBattleOpponent_A == gTrainerBattleOpponent_B;
+}
+
 u8 MP_CreateTrainerPartyAt(struct Pokemon *party, u16 trainerNum)
 {
-    return CreateNPCTrainerParty(party, trainerNum, FALSE);
+    // (an in-game partner's half of the party: TWO_OPPONENTS caps the team at three, whatever the battle's flags)
+    u32 flags = gBattleTypeFlags;
+    u8 n;
+    gBattleTypeFlags |= BATTLE_TYPE_TWO_OPPONENTS;
+    n = CreateNPCTrainerParty(party, trainerNum, FALSE);
+    gBattleTypeFlags = flags;
+    return n;
 }
 
 static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 firstTrainer)
@@ -2365,6 +2390,11 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
                 {
                     SetMonData(&party[i], MON_DATA_HP, &one);
                     SetMonData(&party[i], MON_DATA_MAX_HP, &one);   // (a FULL RESTORE heals it to 1)
+                    if (getenv("MOEMON_TEST_FOE_WEAK"))   // (and hits for next to nothing: multi battles' tests)
+                    {
+                        SetMonData(&party[i], MON_DATA_ATK, &one);
+                        SetMonData(&party[i], MON_DATA_SPATK, &one);
+                    }
                 }
         }
     }
@@ -5469,6 +5499,8 @@ static void HandleEndTurn_BattleWon(void)
     else if (gBattleTypeFlags & BATTLE_TYPE_TRAINER && !(gBattleTypeFlags & BATTLE_TYPE_LINK))
     {
         BattleStopLowHpSound();
+        if (MP_QzSoloMulti())
+            gBattleTypeFlags &= ~BATTLE_TYPE_TWO_OPPONENTS;   // Moemon Kai: one trainer's defeat and prize
         gBattlescriptCurrInstr = BattleScript_LocalTrainerBattleWon;
 
         switch (gTrainers[gTrainerBattleOpponent_A].trainerClass)

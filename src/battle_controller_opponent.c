@@ -1319,6 +1319,8 @@ static void OpponentHandleDrawTrainerPic(void)
     {
         xPos = 176;
     }
+    if (MP_QzSoloMulti())
+        xPos = 176;   // Moemon Kai: one trainer beside a partner: one picture (the second slot's is hidden below)
 
     DecompressTrainerFrontPic(trainerPicId, gActiveBattler);
     SetMultiuseSpriteTemplateToTrainerBack(trainerPicId, GetBattlerPosition(gActiveBattler));
@@ -1335,6 +1337,8 @@ static void OpponentHandleDrawTrainerPic(void)
     // Moemon Co-op: the trainer is drawn for both opponent slots; show it once (two trainers: both)
     if (gMpCoopBattle && !MP_Coop_TwoTrainers() && (GetBattlerPosition(gActiveBattler) != B_POSITION_OPPONENT_LEFT || gMpCoopWild))
         gSprites[gBattlerSpriteIds[gActiveBattler]].invisible = TRUE; // wild doubles: no trainer at all
+    if (MP_QzSoloMulti() && GetBattlerPosition(gActiveBattler) != B_POSITION_OPPONENT_LEFT)
+        gSprites[gBattlerSpriteIds[gActiveBattler]].invisible = TRUE;   // Moemon Kai: one trainer beside a partner
 
     gBattlerControllerFuncs[gActiveBattler] = CompleteOnBattlerSpriteCallbackDummy;
 }

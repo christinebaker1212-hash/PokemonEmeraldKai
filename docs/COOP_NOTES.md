@@ -2845,6 +2845,20 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   LANCE is shown from behind like STEVEN (MP_PartnerShowsBack / MP_PartnerBackPic in battle_tower.c: a partner
   listed in sQzPartnerLooks gets its LOOK's back picture, mp_avatar.c MP_Avatar_NamedBackPic, in the Triple Battle
   second ally's slot, free when no friend is in the battle); any other partner keeps the Frontier layout.
+- GIOVANNI's alternate past (JOHTO postgame; qz_specials.c, Quetzal's specials 693-703 and 792 read from its ROM -
+  note Emerald's order FlagSet 0x80E4788, FlagToggle, FlagClear 0x80E47D8, FlagGet 0x80E4800; earlier notes had Set /
+  Clear swapped): GIOVANNI at TOHJO FALLS asks a player in Team Rocket's colors (mp_avatar.c
+  MP_Avatar_LocalIsTeamRocket: the GIOVANNI, ROCKET GRUNT, JESSIE and JAMES LOOKs, as Quetzal asks for its Rocket
+  characters; the LOOK isn't changed) with CELEBI leading (its ILEX FOREST encounter done, 0x11FA), JOHTO's League beaten,
+  no dream and no friends in the room. FLAG 0x1318 = in the past, 0x1319 = done, VAR 0x506C = the step (5, 1 after the
+  RADIO TOWER battle, 2 after home, 3 after SILVER, 4 done), 0x5076 = the scene to play. Special battles 13 (beside
+  GIOVANNI against ETHAN) and 14 (beside SILVER against GIOVANNI) are multi battles against ONE trainer: Emerald's
+  two-opponent multi with the same trainer in both slots (battle_main.c MP_QzSoloMulti: the whole team, the back half in
+  the second slot; one picture, one intro line, one defeat and prize); partners from the LOOKs' back pictures; the
+  party comes back after (HandleSpecialTrainerBattleEnd). 693 refreshes who stands where on every JOHTO map load.
+  The ARCEUS chamber's item (700) wants six level 100 legendaries and every other JOHTO / KANTO legendary caught or beaten
+  at the GENERATION. Tests story_giovanni (the whole story), story_giovanni_no. Test-only MOEMON_TEST_FOE_WEAK: foes'
+  Attack / Sp. Atk at 1 too.
 - A special that is done when it returns (a JOHTO / KANTO special with nothing to wait for, every stub) calls
   ScriptContext_Enable at once; Emerald's waitstate right after it then stopped the script for good (S.S. ANNE's
   departure froze the player on the dock). ScrCmd_special / specialvar note when the special enabled the script

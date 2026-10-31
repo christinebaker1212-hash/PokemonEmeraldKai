@@ -99,4 +99,6 @@ extern const u8 gStatusConditionString_LoveJpn[8];
 
 extern const u8 *const gStatusConditionStringsTable[7][2];
 
+bool8 MP_QzSoloMulti(void);   // Moemon Kai: one trainer beside an in-game partner (battle_main.c)
+
 #endif // GUARD_BATTLE_MAIN_H

@@ -1414,6 +1414,8 @@ u16 MP_Avatar_NamedBackPic(const char *name);
 // The partners with a back picture among the LOOKs (mp_chars_gfx.h): shown from behind, like STEVEN
 static const struct { u16 trainer; const char *look; } sQzPartnerLooks[] = {
     {TRAINER_QZ_4959, "kai_lance"},
+    {TRAINER_QZ_4990, "kai_giovanni"},
+    {TRAINER_QZ_4992, "kai_silver"},
 };
 
 static void SetQzPartner(u16 trainer)
@@ -2039,7 +2041,9 @@ static void HandleSpecialTrainerBattleEnd(void)
         CopyEReaderTrainerFarewellMessage();
         break;
     case 12:
-        // Moemon Kai: Quetzal's multi battle beside LANCE: the picked Pokemon go back to their own slots (EXP, HP)
+    case 13:
+    case 14:
+        // Moemon Kai: Quetzal's multi battles beside LANCE, GIOVANNI or SILVER: the picked Pokemon go back to their own slots (EXP, HP)
         // and the rest of the party returns, as Emerald's STEVEN battle does in its script (Quetzal's doesn't)
         for (i = 0; i < MULTI_PARTY_SIZE; i++)
         {
@@ -2196,9 +2200,17 @@ void DoSpecialTrainerBattle(void)
         break;
     case 13:
     case 14:
-        gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE;
+        // Quetzal's GIOVANNI story at the RADIO TOWER: beside GIOVANNI against ETHAN (13), beside SILVER against
+        // GIOVANNI (14); one trainer with a full team on the other side
+        gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE | BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_MULTI
+                         | BATTLE_TYPE_INGAME_PARTNER;
         gTrainerBattleOpponent_A = gSpecialVar_0x8004 == 13 ? TRAINER_QZ_4989 : TRAINER_QZ_4962;
-        gTrainerBattleOpponent_B = 0;
+        gTrainerBattleOpponent_B = gTrainerBattleOpponent_A;   // (the same trainer in both slots: battle_main.c MP_QzSoloMulti)
+        SetQzPartner(gSpecialVar_0x8004 == 13 ? TRAINER_QZ_4990 : TRAINER_QZ_4992);
+        gPartnerTrainerId = TRAINER_QZ_PARTNER;
+        for (i = MULTI_PARTY_SIZE; i < PARTY_SIZE; i++)
+            ZeroMonData(&gPlayerParty[i]);
+        MP_CreateTrainerPartyAt(&gPlayerParty[MULTI_PARTY_SIZE], sQzPartnerTrainer);
         CreateTask(Task_StartBattleAfterTransition, 1);
         PlayMapChosenOrBattleBGM(0);
         BattleTransition_StartOnField(B_TRANSITION_MAGMA);

@@ -1,0 +1,110 @@
+pressuntil A field 5000
+wait 400
+mp textspeed 2
+mp sprite kai_rocket_grunt_m
+mp regionclear 1
+mp setflag 0x11FA
+mp teach 0 98
+
+mp teach 1 98
+mp teach 2 98
+mp battlestyle 1
+mp warp 35,94,5,5
+wait 120
+mp face up
+wait 4
+mp objat 5 4
+press A 4
+wait 30
+pressuntil A yesno 3000
+shot ask
+press A 4
+pressuntil A partymenu 9000
+mp getflag 4888
+mp getvar 0x506C
+mp where
+wait 30
+press DOWN 4
+wait 10
+press A 4
+wait 20
+press A 4
+wait 30
+press DOWN 4
+wait 10
+press A 4
+wait 20
+press A 4
+wait 30
+press DOWN 4
+wait 10
+shot pick
+press A 4
+waitfor battle 3000
+mash A 600 8
+pressuntil A field 9000
+mash A 40 8
+pressuntil A field 3000
+mp getvar 0x506C
+mp ctx
+mp where
+mp party
+shot after13
+mp warp 35,1,9,7
+wait 60
+pressuntil A field 9000
+mash A 60 8
+pressuntil A field 6000
+mp getvar 0x506C
+mp getvar 0x5076
+mp where
+shot house
+mp warp 34,123,20,12
+wait 60
+pressuntil A battle 6000
+mash A 600 8
+pressuntil A field 9000
+mash A 60 8
+pressuntil A field 6000
+mp getvar 0x506C
+mp where
+mp ctx
+shot silver
+mp warp 34,83,25,13
+wait 120
+mp face up
+wait 4
+press A 4
+pressuntil A partymenu 6000
+wait 30
+press DOWN 4
+wait 10
+press A 4
+wait 20
+press A 4
+wait 30
+press DOWN 4
+wait 10
+press A 4
+wait 20
+press A 4
+wait 30
+press DOWN 4
+wait 10
+press A 4
+waitfor battle 3000
+mash A 600 8
+pressuntil A field 9000
+mash A 60 8
+pressuntil A field 6000
+mp getvar 0x506C
+mp getflag 4888
+mp getflag 4889
+mp where
+mp ctx
+mp party
+shot end
+mp warp 35,94,5,5
+wait 120
+mp objat 5 4
+quit

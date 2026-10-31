@@ -1,0 +1,16 @@
+pressuntil A field 5000
+wait 400
+mp textspeed 2
+mp regionclear 1
+mp setflag 0x11FA
+mp battlestyle 1
+mp warp 35,94,5,5
+wait 120
+mp face up
+wait 4
+press A 4
+pressuntil A battle 4000
+wait 200
+mp getvar 0x506C
+mp getflag 4888
+quit

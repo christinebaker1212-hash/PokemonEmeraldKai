@@ -1353,30 +1353,206 @@ u16 QzSSAnneExteriorEventStep(void)
     return 0;
 }
 
-// Quetzal's per-map refresh of GIOVANNI's-story objects (its special 693, which its map loading runs on every JOHTO
-// warp; mp_region.c MP_Region_OnMapLoaded here). GIOVANNI's past isn't ported, so this is the present's state: the
-// story's people stay hidden, the dream's two at the INDIGO PLATEAU / VICTORY ROAD gate show in a dream only, and
-// ELM's lab's ARCEUS (FLAG_QZ_0x131F) is hidden until its own scene shows it.
-// NEW BARK's house on arriving (Quetzal's special 697): two of GIOVANNI's-past people stay hidden (0x14A1, 0x14A2).
-// Quetzal shows them, and starts that story's scene (var 0x5076), only once GIOVANNI's past can begin: not ported
+// ---------------------------------------------------------------------------------------- GIOVANNI's alternate past
+// Quetzal's specials 693-703 and 792 (read from its ROM: Emerald's FlagSet / FlagClear order, 0x80E4788 / 0x80E47D8).
+// GIOVANNI at TOHJO FALLS asks a player dressed in Team Rocket's colors, with CELEBI leading their party, to answer his
+// men's call at the RADIO TOWER in an alternate past: FLAG_QZ_0x1318 = in that past ("GIOVANNI mode"), 0x1319 = the
+// story is over (its end, 698), VAR 0x506C = its step (5 at the start, 1 after the battle beside GIOVANNI, 3 for the
+// last battle beside SILVER, 4 when done), 0x5076 = the RADIO TOWER / NEW BARK scene to play, 0x5075 / 0x506D the
+// player's look in / before the past (Quetzal's character ids; Kai keeps the player's LOOK as it is: the story asks for
+// a Team Rocket LOOK to begin, as Quetzal asks for its Rocket characters).
+#define GIOVANNI_PAST FLAG_QZ_0x1318
+#define GIOVANNI_DONE 0x1319
+
+static bool8 InGiovanniPast(void) { return FlagGet(GIOVANNI_PAST); }
+u16 QzGiovanniStoryItemAvailable(void);
+
+static bool8 OnMap(u8 group, u8 num)
+{
+    return gSaveBlock1Ptr->location.mapGroup == group && gSaveBlock1Ptr->location.mapNum == num;
+}
+
+// Quetzal's 0x82A2DD8 (its Rocket characters): Kai's Team Rocket LOOKs
+static bool8 RocketLook(void)
+{
+    bool8 MP_Avatar_LocalIsTeamRocket(void);
+    return MP_Avatar_LocalIsTeamRocket();
+}
+
+// Quetzal's 0x82A2E54: CELEBI can take the player through time - not in a link or with friends in the room, not in a
+// dream (0x1425), not already in the past, this region's League beaten, CELEBI leading the party (or anywhere in it)
+// and its own encounter done (0x11FA: caught or met in ILEX FOREST)
+static bool8 CelebiCanTravel(bool8 leadOnly)
+{
+    u8 i, n = leadOnly ? 1 : PARTY_SIZE;
+    if (IsOverworldLinkActive() || FlagGet(FLAG_QZ_0x1425) || InGiovanniPast())
+        return FALSE;
+    if (MP_IsConnected())
+        for (i = 0; i < MP_MAX_PLAYERS; i++)
+            if (gMpPlayers[i].present)
+                return FALSE;   // (Quetzal: "disconnect from multiplayer" first)
+    if (!MP_Region_Cleared(MP_Region_Current()))
+        return FALSE;
+    for (i = 0; i < n; i++)
+        if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES_OR_EGG) == SPECIES_CELEBI)
+            return FlagGet(0x11FA);
+    return FALSE;
+}
+
+// Quetzal's per-map refresh (693, on every JOHTO map load; mp_region.c MP_Region_OnMapLoaded): who stands where
+u16 QzGiovanniStoryUpdateFlags(void)
+{
+    if (OnMap(35, 94))   // TOHJO FALLS: GIOVANNI waits once the League is beaten, before and after his story
+    {
+        if (!InGiovanniPast() && MP_Region_Cleared(MP_Region_Current())
+         && (FlagGet(GIOVANNI_DONE) || VarGet(VAR_QZ_0x506C) == 0))
+            FlagClear(FLAG_QZ_0x10D4);
+        else
+            FlagSet(FLAG_QZ_0x10D4);
+    }
+    if (InGiovanniPast() && !FlagGet(GIOVANNI_DONE))   // the RADIO TOWER's GIOVANNI, in the past
+        FlagClear(FLAG_QZ_0x131E);
+    else
+        FlagSet(FLAG_QZ_0x131E);
+    if (OnMap(34, 83))   // RADIO TOWER 5F: the first battle's opponent
+    {
+        if (InGiovanniPast() && (VarGet(VAR_QZ_0x506C) == 5 || FlagGet(GIOVANNI_DONE)))
+            FlagClear(0x14A9);
+        else
+            FlagSet(0x14A9);
+    }
+    if (OnMap(35, 116))   // the RUINS OF ALPH's ARCEUS chamber: its item, in the past
+    {
+        QzGiovanniStoryItemAvailable();
+        if (gSpecialVar_Result)
+            FlagClear(0x131D);
+        else
+            FlagSet(0x131D);
+    }
+    if ((InGiovanniPast() || FlagGet(FLAG_QZ_0x1425)) && (OnMap(34, 96) || OnMap(35, 20)))
+        FlagClear(FLAG_QZ_0x1321);   // (the INDIGO PLATEAU / VICTORY ROAD gate people of the past and the dream)
+    else
+        FlagSet(FLAG_QZ_0x1321);
+    FlagSet(FLAG_QZ_0x131F);   // ELM's lab's ARCEUS: its own scene shows it
+    return 0;
+}
+
+// 697: NEW BARK's house on arriving: GIOVANNI's-past people (0x14A1, 0x14A2) stand there only in the past, the first
+// once the RADIO TOWER battle is won (and the house's scene, VAR 0x5076 = 2, plays)
 u16 QzGiovanniStoryNewBarkHouseFlags(void)
 {
     FlagSet(0x14A1);
     FlagSet(0x14A2);
+    if (InGiovanniPast())
+    {
+        FlagClear(0x14A2);
+        if (!FlagGet(GIOVANNI_DONE) && VarGet(VAR_QZ_0x506C) == 1)
+        {
+            FlagClear(0x14A1);
+            if (VarGet(VAR_QZ_0x5076) != 4)
+                VarSet(VAR_QZ_0x5076, 2);
+        }
+    }
     return 0;
 }
 
-u16 QzGiovanniStoryUpdateFlags(void)
+// 694: GIOVANNI asks the player to come along
+u16 QzGiovanniStoryCanStart(void)
 {
-    u8 group = gSaveBlock1Ptr->location.mapGroup, num = gSaveBlock1Ptr->location.mapNum;
-    FlagSet(FLAG_QZ_0x10D4);   // TOHJO FALLS
-    FlagSet(FLAG_QZ_0x131E);
-    FlagSet(0x14A9);           // RADIO TOWER 5F
+    gSpecialVar_Result = !FlagGet(GIOVANNI_DONE) && VarGet(VAR_QZ_0x506C) == 0 && CelebiCanTravel(TRUE) && RocketLook();
+    return gSpecialVar_Result;
+}
+
+// 792: TOHJO FALLS' radio: CELEBI can go back to the past once the story has begun
+u16 QzGiovanniStoryTohjoSignCheck(void)
+{
+    gSpecialVar_Result = (FlagGet(GIOVANNI_DONE) || VarGet(VAR_QZ_0x506C) != 0) && CelebiCanTravel(FALSE);
+    return gSpecialVar_Result;
+}
+
+// 695: into the past (the script then warps to the RADIO TOWER 5F, or NEW BARK for a later step)
+u16 QzGiovanniStoryStart(void)
+{
+    if (InGiovanniPast())
+        return 0;
+    VarSet(VAR_QZ_0x5076, 0);
+    FlagSet(GIOVANNI_PAST);
+    if (FlagGet(GIOVANNI_DONE))
+    {
+        VarSet(VAR_QZ_0x506C, 4);
+        return 0;
+    }
+    if (VarGet(VAR_QZ_0x506C) == 0)
+        VarSet(VAR_QZ_0x506C, 5);
+    if (VarGet(VAR_QZ_0x506C) == 5)
+        VarSet(VAR_QZ_0x5076, 1);   // the RADIO TOWER's first scene
+    return 0;
+}
+
+// 699: back to the present (the script warps to TOHJO FALLS or home)
+u16 QzGiovanniStoryEnterPast(void)
+{
+    FlagClear(GIOVANNI_PAST);
+    VarSet(VAR_QZ_0x5076, 0);
+    return 0;
+}
+
+// 698: the story's end (after the battle beside SILVER): done, and back to the present
+u16 QzGiovanniStoryEnd(void)
+{
+    FlagSet(0x131C);
+    FlagSet(GIOVANNI_DONE);
+    VarSet(VAR_QZ_0x506C, 4);
+    QzGiovanniStoryEnterPast();
+    VarSet(VAR_QZ_0x5076, 3);
+    return 0;
+}
+
+// 700: the ARCEUS chamber's item, in the past, for a team of six level 100 legendaries once every other legendary of
+// JOHTO and KANTO (at this GENERATION) is caught or beaten (Quetzal's 0x82A2FC0, 0x82A2F6C, 0x82AA84C)
+u16 QzGiovanniStoryItemAvailable(void)
+{
+    u32 i, k;
+    gSpecialVar_Result = FALSE;
+    if (!InGiovanniPast() || FlagGet(0x131A))
+        return 0;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        u16 species = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES_OR_EGG);
+        bool8 legendary = FALSE;
+        if (!species || GetMonData(&gPlayerParty[i], MON_DATA_LEVEL) != MAX_LEVEL)
+            return 0;
+        for (k = 0; k < ARRAY_COUNT(sQzStatics) && !legendary; k++)
+            legendary = sQzStatics[k].species == species;
+        if (!legendary)
+            return 0;
+    }
+    for (k = 0; k < ARRAY_COUNT(sQzStatics); k++)
+        if (sQzStatics[k].species != SPECIES_ARCEUS && sQzStatics[k].gen <= MP_Gen_Cap(sQzStatics[k].region)
+         && !FlagGet(sQzStatics[k].doneFlag))
+            return 0;
+    gSpecialVar_Result = TRUE;
+    return 0;
+}
+
+// 701: the item taken
+u16 QzGiovanniStoryItemTaken(void)
+{
+    FlagSet(0x131A);
     FlagSet(0x131D);
-    if (FlagGet(FLAG_QZ_0x1425) && ((group == 34 && num == 96) || (group == 35 && num == 20)))
-        FlagClear(FLAG_QZ_0x1321);
-    else
-        FlagSet(FLAG_QZ_0x1321);
+    return 0;
+}
+
+// 702 / 703: back in the present, ELM's scene about it (once)
+u16 QzGiovanniStoryElmCheck(void)
+{
+    gSpecialVar_Result = FlagGet(0x131A) && !FlagGet(0x131B) && !InGiovanniPast();
+    return gSpecialVar_Result;
+}
+
+u16 QzGiovanniStoryElmDone(void)
+{
+    FlagSet(0x131B);
     FlagSet(FLAG_QZ_0x131F);
     return 0;
 }

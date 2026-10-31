@@ -1,0 +1,7 @@
+# GIOVANNI's past doesn't begin for a player without Team Rocket's colors (Quetzal's rule; story_giovanni has them):
+# he battles them as he did before (no question asked), and the story stays where it was
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_WARP=35,94,1,1 MOEMON_DEBUG_PARTY=251:100,6:100,9:100 MOEMON_TEST_FOE_HP1=1 MOEMON_TEST_FOE_WEAK=1"
+EXPECT_A=("var 0x506C = 0" "flag 4888 = 0")
+UNEXPECT_A=("[crash]" "TIMEOUT" "yesno")

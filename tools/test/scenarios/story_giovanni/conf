@@ -1,0 +1,10 @@
+# JOHTO's postgame story, GIOVANNI's alternate past (Quetzal's specials 693-703, 792 in qz_specials.c), from TOHJO
+# FALLS to the end: in a Team Rocket LOOK with CELEBI leading and JOHTO's League beaten, GIOVANNI asks; the past
+# (FLAG 0x1318) starts at the RADIO TOWER 5F: beside GIOVANNI against ETHAN (special battle 13, one trainer: the second
+# opponent slot is the same trainer), then home (the grunt and MOM), SILVER in NEW BARK, and beside SILVER against
+# GIOVANNI (battle 14); the end sends the player home, out of the past, the story done (0x1319), GIOVANNI back at TOHJO
+MODE=1
+TMO=700
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_WARP=35,94,1,1 MOEMON_DEBUG_PARTY=251:100,6:100,9:100 MOEMON_TEST_FOE_HP1=1 MOEMON_TEST_FOE_WEAK=1"
+EXPECT_A=("objat 5,4: local 1" "flag 4888 = 1" "var 0x506C = 5" "var 0x506C = 1" "var 0x506C = 2" "var 0x506C = 3" "var 0x506C = 4" "flag 4888 = 0" "flag 4889 = 1" "where map 35.1 xy 9,7" "ctx 1 free 1")
+UNEXPECT_A=("[crash]" "TIMEOUT" "heap] out of memory")

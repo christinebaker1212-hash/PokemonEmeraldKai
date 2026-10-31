@@ -4,15 +4,6 @@
 #include "event_data.h"
 #include "qz_specials.h"
 
-QZ_STUB(QzGiovanniStoryCanStart)
-QZ_STUB(QzGiovanniStoryElmCheck)
-QZ_STUB(QzGiovanniStoryElmDone)
-QZ_STUB(QzGiovanniStoryEnd)
-QZ_STUB(QzGiovanniStoryEnterPast)
-QZ_STUB(QzGiovanniStoryItemAvailable)
-QZ_STUB(QzGiovanniStoryItemTaken)
-QZ_STUB(QzGiovanniStoryStart)
-QZ_STUB(QzGiovanniStoryTohjoSignCheck)
 QZ_STUB(QzTimeTravelChoosePartyMon)
 QZ_STUB(QzTimeTravelEventEligibility)
 QZ_STUB(QzTimeTravelEventStart)

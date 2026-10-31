@@ -2566,6 +2566,21 @@ u16 MP_LocalFrontPicOr(u16 defaultPic)
     return pic == 0xFFFF ? defaultPic : pic;
 }
 
+// Moemon Kai: is the player wearing Team Rocket's colors (GIOVANNI's past in JOHTO asks for it, as Quetzal asks for
+// its Rocket characters: qz_specials.c)
+bool8 MP_Avatar_LocalIsTeamRocket(void)
+{
+    static const char *const sRocket[] = {"kai_giovanni", "kai_rocket_grunt_m", "kai_rocket_grunt_f", "kai_jessie", "kai_james"};
+    struct MpAppearance app = GetLocalAppearance();
+    const struct MpCharDef *c = CharOf(&app);
+    u32 i;
+    if (c)
+        for (i = 0; i < ARRAY_COUNT(sRocket); i++)
+            if (strcmp(c->cfg, sRocket[i]) == 0)
+                return TRUE;
+    return FALSE;
+}
+
 // A character's back picture by its LOOK name (e.g. "kai_lance") for an in-game partner (JOHTO / KANTO's multi
 // battles), in a Triple Battle's second-ally slot (free in a battle with no friends), 0xFFFF = none
 u16 MP_Avatar_NamedBackPic(const char *name)

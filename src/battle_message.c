@@ -2266,7 +2266,9 @@ void BufferStringBattle(u16 stringID)
             }
             else
             {
-                if (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER)
+                if (MP_QzSoloMulti())
+                    stringPtr = sText_Trainer1WantsToBattle;   // Moemon Kai: one trainer beside a partner
+                else if (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER)
                     stringPtr = sText_TwoTrainersWantToBattle;
                 else if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)
                     stringPtr = sText_TwoTrainersWantToBattle;
@@ -2321,6 +2323,8 @@ void BufferStringBattle(u16 stringID)
                     stringPtr = sText_MpTrainerSentOutThree;
                 else if (gMpCoopBattle && MP_Coop_TwoTrainers())
                     stringPtr = sText_TwoTrainersSentPkmn;
+                else if (MP_QzSoloMulti())
+                    stringPtr = sText_Trainer1SentOutTwoPkmn;   // Moemon Kai: one trainer beside a partner
                 else if (gMpCoopBattle)
                     stringPtr = sText_Trainer1SentOutTwoPkmn;
                 else if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS)

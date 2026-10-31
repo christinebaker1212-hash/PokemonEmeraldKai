@@ -87,6 +87,7 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
    1.61.2) once the NPC sweep's report is worked through: bump include/mp_version.h, tools/release/notes/v1.61.3.md,
    tests, Windows build, fast-forward the default branch, check the release run.
 2. Extras still open (task list):
+   - GIOVANNI's past: DONE (COOP_NOTES "GIOVANNI's alternate past"; tests story_giovanni, story_giovanni_no).
    - Quetzal's two story modes, still stubs in src/qz_specials_stub.c (each logs and re-enables the script, so
      none freezes, but the events don't happen): GIOVANNI's past (Tohjo Falls -> RadioTower; the player plays as
      GIOVANNI, swapped teams, a partner multi battle) and BILL's time travel (Goldenrod; the player plays as CELEBI).
