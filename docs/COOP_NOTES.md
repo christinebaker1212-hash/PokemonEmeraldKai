@@ -2767,8 +2767,11 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
 - Badge marts: Quetzal's `pokemart 0` sells one of nine lists by the region's badge count (src/data/qz_badge_marts.h
   from quetzal_rip/data/badge_marts.json: tools/quetzal_rip/badge_marts.py ROM, tools/quetzal_port/gen_badge_marts.py;
   shop.c MP_ShopItems takes NULL as that). It crashed every JOHTO mart clerk before 1.62.
-- FireRed's cuttable tree and breakable rock sprites get Emerald's obstacle animations (gen_objects.py
-  OBSTACLE_ANIMS): with the plain still animations CUT crashed on JOHTO's trees.
+- The cuttable trees and breakable rocks get Emerald's obstacle animations (gen_objects.py OBSTACLE_ANIMS: JOHTO's
+  82 / 86, KANTO's FireRed 16127 / 16190): with plain still animations CUT and ROCK SMASH crashed.
+- In-game trades in JOHTO / KANTO are Quetzal's 17 (src/data/qz_ingame_trades.h from tools/quetzal_port/gen_trades.py,
+  trade.c InGameTrade); Emerald's table of four was read past its end and crashed. Test qz_trade. The trade screen's
+  VBlank no longer touches its freed data (every in-game trade could crash on a PC).
 - A shop item without a price (KURT's Apricorn balls had none) no longer divides by zero; they cost 300 (DREAM BALL
   and METEORITE 1000).
 - Borders: KANTO's seven FireRed layouts with 3x2 borders (VIRIDIAN FOREST, the SAFARI ZONE, BERRY FOREST, PATTERN

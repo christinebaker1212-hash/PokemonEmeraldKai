@@ -1,0 +1,7 @@
+# KANTO's in-game trades are Quetzal's (CERULEAN: a PSYDUCK for JYNX); with Emerald's table the trade read past
+# its end and crashed
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=54:20"
+EXPECT_A=("party: 124(")
+UNEXPECT_A=("[crash]")

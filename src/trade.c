@@ -308,6 +308,7 @@ static void SpriteCB_BouncingPokeballDepartEnd(struct Sprite *);
 static void SpriteCB_BouncingPokeballArrive(struct Sprite *);
 static void BufferInGameTradeMonName(void);
 static void GetInGameTradeMail(struct Mail *, const struct InGameTrade *);
+static const struct InGameTrade *InGameTrade(u16 which);
 static void CB2_UpdateLinkTrade(void);
 static void CB2_WaitTradeComplete(void);
 static void CB2_SaveAndEndTrade(void);
@@ -2743,7 +2744,8 @@ static void SetTradeGpuRegs(void)
 
 static void VBlankCB_TradeAnim(void)
 {
-    SetTradeGpuRegs();
+    if (sTradeAnim != NULL)   // Moemon Co-op: freed a frame before the field takes the VBlank (a GBA read address 0)
+        SetTradeGpuRegs();
     LoadOam();
     ProcessSpriteCopyRequests();
     TransferPlttBuffer();
@@ -3349,7 +3351,7 @@ static void BufferTradeSceneStrings(void)
     }
     else
     {
-        ingameTrade = &sIngameTrades[gSpecialVar_0x8004];
+        ingameTrade = InGameTrade(gSpecialVar_0x8004);
         StringCopy(gStringVar1, ingameTrade->otName);
         StringCopy_Nickname(gStringVar3, ingameTrade->nickname);
         GetMonData(&gPlayerParty[gSpecialVar_0x8005], MON_DATA_NICKNAME, name);
@@ -4534,9 +4536,19 @@ static void SpriteCB_BouncingPokeballArrive(struct Sprite *sprite)
     }
 }
 
+// Moemon Kai: JOHTO / KANTO's scripts number Quetzal's trades (src/data/qz_ingame_trades.h); HOENN's are Emerald's
+#include "mp_region.h"
+#include "data/qz_ingame_trades.h"
+static const struct InGameTrade *InGameTrade(u16 which)
+{
+    if (MP_Region_Current() != REGION_HOENN)
+        return &sQzIngameTrades[which < ARRAY_COUNT(sQzIngameTrades) ? which : 0];
+    return &sIngameTrades[which < ARRAY_COUNT(sIngameTrades) ? which : 0];
+}
+
 u16 GetInGameTradeSpeciesInfo(void)
 {
-    const struct InGameTrade *inGameTrade = &sIngameTrades[gSpecialVar_0x8004];
+    const struct InGameTrade *inGameTrade = InGameTrade(gSpecialVar_0x8004);
     StringCopy(gStringVar1, gSpeciesNames[inGameTrade->requestedSpecies]);
     StringCopy(gStringVar2, gSpeciesNames[inGameTrade->species]);
     return inGameTrade->requestedSpecies;
@@ -4545,7 +4557,7 @@ u16 GetInGameTradeSpeciesInfo(void)
 static void BufferInGameTradeMonName(void)
 {
     u8 nickname[max(32, POKEMON_NAME_BUFFER_SIZE)];
-    const struct InGameTrade *inGameTrade = &sIngameTrades[gSpecialVar_0x8004];
+    const struct InGameTrade *inGameTrade = InGameTrade(gSpecialVar_0x8004);
     GetMonData(&gPlayerParty[gSpecialVar_0x8005], MON_DATA_NICKNAME, nickname);
     StringCopy_Nickname(gStringVar1, nickname);
     StringCopy(gStringVar2, gSpeciesNames[inGameTrade->species]);
@@ -4553,7 +4565,7 @@ static void BufferInGameTradeMonName(void)
 
 static void CreateInGameTradePokemonInternal(u8 whichPlayerMon, u8 whichInGameTrade)
 {
-    const struct InGameTrade *inGameTrade = &sIngameTrades[whichInGameTrade];
+    const struct InGameTrade *inGameTrade = InGameTrade(whichInGameTrade);
     u8 level = GetMonData(&gPlayerParty[whichPlayerMon], MON_DATA_LEVEL);
 
     struct Mail mail;

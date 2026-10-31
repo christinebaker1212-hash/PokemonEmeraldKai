@@ -50,6 +50,7 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
 - HEADBUTT trees and ROCK SMASH in JOHTO / KANTO (test qz_headbutt); tools/test/npc_sweep.sh.
 - The NPC sweep's first finds, fixed: every JOHTO mart clerk crashed (badge marts), CUT on JOHTO's trees crashed,
   KURT's / the underground shops divided by a zero price, JOHTO / KANTO's Triple Triad sellers crashed.
+  KANTO's CUT / ROCK SMASH objects and every JOHTO / KANTO in-game trade crashed (fixed; test qz_trade).
   The sweep skips card duelists (their own tests); check them in JOHTO / KANTO as part of the cards step.
 - SAFFRON's MAGNET TRAIN counter (test region_train_saffron).
 - Friends follow the host's trip (test region_coop_follow).

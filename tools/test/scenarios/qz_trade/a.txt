@@ -1,0 +1,16 @@
+pressuntil A field 5000
+wait 60
+mp warp 38,13,2,3
+wait 150
+mp face up
+press A 4
+pressuntil A partymenu 3000
+wait 60
+press A 4
+wait 30
+press A 4
+watchlog party
+pressuntil A field 9000
+wait 60
+mp party
+quit

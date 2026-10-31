@@ -9321,7 +9321,7 @@ static const struct ObjectEventGraphicsInfo sObjectEventGraphicsInfo_Qz16127 = {
     .tracks = TRACKS_NONE,
     .oam = &gObjectEventBaseOam_16x16,
     .subspriteTables = sOamTables_16x16,
-    .anims = sAnimTable_Inanimate,
+    .anims = sAnimTable_CuttableTree,
     .images = sPicTable_Qz16127,
     .affineAnims = gDummySpriteAffineAnimTable,
 };
@@ -10366,7 +10366,7 @@ static const struct ObjectEventGraphicsInfo sObjectEventGraphicsInfo_Qz16190 = {
     .tracks = TRACKS_NONE,
     .oam = &gObjectEventBaseOam_16x16,
     .subspriteTables = sOamTables_16x16,
-    .anims = sAnimTable_Inanimate,
+    .anims = sAnimTable_BreakableRock,
     .images = sPicTable_Qz16190,
     .affineAnims = gDummySpriteAffineAnimTable,
 };

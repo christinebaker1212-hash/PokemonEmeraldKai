@@ -28,8 +28,10 @@ BASE_OAM = {'16x16': '16x16', '16x32': '16x32', '32x32': '32x32', '64x64': '64x6
 SHADOW = {16: 'SHADOW_SIZE_S', 32: 'SHADOW_SIZE_M', 64: 'SHADOW_SIZE_L'}
 # Quetzal's 6-frame Pokémon sheet -> the standard 9 frames (down, up, side, down walk x2, up walk x2, side walk x2)
 SIX = [0, 4, 2, 1, 1, 5, 5, 3, 3]
-# field obstacles with an animation of their own (CUT, ROCK SMASH): FireRed's frames are in Emerald's order
-OBSTACLE_ANIMS = {82: 'sAnimTable_CuttableTree', 86: 'sAnimTable_BreakableRock'}
+# field obstacles with an animation of their own (CUT, ROCK SMASH: JOHTO's 82 / 86, KANTO's FireRed 16127 / 16190):
+# FireRed's frames are in Emerald's order
+OBSTACLE_ANIMS = {82: 'sAnimTable_CuttableTree', 86: 'sAnimTable_BreakableRock', 16127: 'sAnimTable_CuttableTree',
+                  16190: 'sAnimTable_BreakableRock'}
 
 
 def read(p):
