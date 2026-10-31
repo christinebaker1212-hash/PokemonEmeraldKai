@@ -890,16 +890,33 @@ static const struct {u16 map; s8 x, y;} sRegionPorts[REGION_COUNT] = {
 // GLOBAL PC; EventScript_RegionCustoms picked it). RESULT 1: the boat leaves (the script waits), 0: not allowed.
 #define TRIP_TRAIN 0x7A   // VAR_0x8007 for the MAGNET TRAIN (EventScript_MagnetTrain*): GOLDENROD <-> SAFFRON, no ticket
 
+static u16 TravelNow(u8 to, u8 keep, bool8 train);
+
 static u16 QzTravelToRegion_(void)
 {
-    u8 to = gSpecialVar_0x8004, from = MP_Region_Current(), keep = gSpecialVar_0x8005, i;
-    bool8 first;
+    u8 to = gSpecialVar_0x8004, from = MP_Region_Current(), keep = gSpecialVar_0x8005;
     bool8 train = gSpecialVar_0x8007 == TRIP_TRAIN;
     gSpecialVar_0x8007 = 0;
     if (to >= REGION_COUNT || to == from)
         return 0;
     if (train ? !MP_Region_Cleared(from) : !(QzGetReachableRegionsMask_() & (1 << to)))
         return 0;
+    return TravelNow(to, keep, train);
+}
+
+// Online, a friend in the room follows the host's trip (mp_main.c): customs keeps their first POKeMON, the rest go to
+// the GLOBAL PC; they come in at the region's port (or its first town the first time). FALSE: no room in the GLOBAL PC
+bool8 MP_Region_FollowHost(u8 to)
+{
+    if (to >= REGION_COUNT || to == MP_Region_Current())
+        return FALSE;
+    return TravelNow(to, 0, FALSE);
+}
+
+static u16 TravelNow(u8 to, u8 keep, bool8 train)
+{
+    u8 from = MP_Region_Current(), i;
+    bool8 first;
     if (keep >= PARTY_SIZE || !GetMonData(&gPlayerParty[keep], MON_DATA_SANITY_HAS_SPECIES))
         keep = 0;
     if (MP_Region_GlobalFree() < CalculatePlayerPartyCount() - 1)

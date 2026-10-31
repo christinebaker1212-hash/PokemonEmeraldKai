@@ -1,0 +1,10 @@
+# The host's trip takes the room along: ALICE (host) travels to JOHTO; BOB, in the room, follows (his first POKeMON
+# comes, the rest wait in the GLOBAL PC) instead of leaving
+MODE=2
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=6:50,9:50"
+ENV_B="MOEMON_DEBUG_PARTY=3:50,25:50"
+EXPECT_A=("travel 1: 1")
+EXPECT_B=("region: following the host to JOHTO")
+UNEXPECT_B=("[crash]" "leaving")
+UNEXPECT_A=("[crash]")

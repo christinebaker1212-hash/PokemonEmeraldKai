@@ -2780,6 +2780,11 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
 - SAFFRON's MAGNET TRAIN counter: an attendant by the POKeMON CENTER (data/maps/Kanto_SaffronCity/map.json, added
   after the import: put it back if import.py runs again) runs EventScript_MagnetTrainSaffron to GOLDENROD once KANTO's
   League is beaten (QzTravelToRegion's train lands at the other city's POKeMON CENTER). Test region_train_saffron.
+- The host's trip takes the room along: MPR_RULES carry the host's region as the trip sets off (gRegionState.current;
+  the warp lands later); a friend already in the room who hears a new region from the same host follows when free
+  (mp_main.c sFollowRegion -> qz_specials.c MP_Region_FollowHost: customs keeps their first POKeMON, the port or the
+  first town the first time); with no room in the GLOBAL PC they leave as before. Harness `mp travel R`. Test
+  region_coop_follow.
 - tools/test/npc_sweep.sh talks to every person and reads every sign on every map (harness `mp sweepnote`); it
   reports crashes, hangs, scripts still holding the player and stubs reached.
 - Not done yet: Quetzal's other postgame events (GIOVANNI's past and the time travel: still stubs that log and go on), FRLG door animations, 3x2 map

@@ -52,6 +52,7 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
   KURT's / the underground shops divided by a zero price, JOHTO / KANTO's Triple Triad sellers crashed.
   The sweep skips card duelists (their own tests); check them in JOHTO / KANTO as part of the cards step.
 - SAFFRON's MAGNET TRAIN counter (test region_train_saffron).
+- Friends follow the host's trip (test region_coop_follow).
 - 3x2 borders for KANTO's seven FireRed layouts; door animations: none in Quetzal either (left as is).
 - 1.61.1 released (the seal fix, contest, puzzles, credits, GAME RULES gimmick rows).
 
@@ -63,7 +64,7 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
      the Quetzal ROM (the ROM is not in the repo; tools/quetzal_rip/dis_special.py ROM sNNN
      disassembles a special) and docs/quetzal/SPECIALS.md (move each from the stub file to src/qz_*.c;
      tools/quetzal_port/import.py regenerates the stub list from what src/qz_*.c defines).
-   - Sightseeing walk on first arrival, everyone following the host on a region trip,
+   - Sightseeing walk on first arrival,
      per-region co-op shared PCs.
 3. Playthroughs of JOHTO and KANTO from a new game (MOEMON_DEBUG_REGION=1 / 2): story order, every gym, rival,
    key event; plus an automated sweep that talks to every NPC / sign / trigger of every Johto and Kanto map

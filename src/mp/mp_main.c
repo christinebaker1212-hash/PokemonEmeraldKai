@@ -137,6 +137,7 @@ static u8 sRoomGeneration = 3;        // Moemon Kai: the room's GENERATION (MPR_
 static u8 sRoomGimmicks = 0;         // Moemon Kai: the room's GIMMICKS (MPR_RULES last byte)
 static u8 OwnGimmicks(void);
 static u8 sLeaveForRegion;   // Moemon Kai: 1 + the host's region when it isn't ours (we leave the room)
+static u8 sFollowRegion;    // Moemon Kai: 1 + the region the host just travelled to (we follow when free)
 // The game clock: online it's the host's PC clock (MPR_CLOCK), offline our own
 static bool8 sHostClockHeard;
 static s64 sHostClockOffset;      // the host's local time minus our time(NULL), in seconds
@@ -1323,7 +1324,13 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
             sRoomMoveSplit = len >= 4 + MP_SCALE_COUNT ? data[3 + MP_SCALE_COUNT] != 0 : TRUE;   // Moemon Kai: MOVE KIND after the level rules
             if (len >= 5 + MP_SCALE_COUNT && data[4 + MP_SCALE_COUNT] < REGION_COUNT
              && data[4 + MP_SCALE_COUNT] != MP_Region_Current())
-                sLeaveForRegion = 1 + data[4 + MP_SCALE_COUNT];   // Moemon Kai: the room is in another region
+            {
+                // Moemon Kai: the room is in another region. Our host travelling there: we follow; else we leave
+                if (sRoomRulesHeard && sRoomHostId == from)
+                    sFollowRegion = 1 + data[4 + MP_SCALE_COUNT];
+                else
+                    sLeaveForRegion = 1 + data[4 + MP_SCALE_COUNT];
+            }
             sRoomGeneration = len >= 6 + MP_SCALE_COUNT && data[5 + MP_SCALE_COUNT] >= 3 && data[5 + MP_SCALE_COUNT] <= 9
                             ? data[5 + MP_SCALE_COUNT] : 3;   // Moemon Kai: GENERATION
             sRoomGimmicks = len >= 7 + MP_SCALE_COUNT ? data[6 + MP_SCALE_COUNT] : 0;   // Moemon Kai: GIMMICKS (AUTO before)
@@ -1455,7 +1462,8 @@ static void SendWelcome(u8 id)
         LevelRulesFromEnv();
         memcpy(rules + 4, gMpConfig.scale, MP_SCALE_COUNT - 1);
         rules[3 + MP_SCALE_COUNT] = OwnMoveSplit();
-        rules[4 + MP_SCALE_COUNT] = MP_Region_Current();   // Moemon Kai: the room is in its host's region
+        // Moemon Kai: the room is in its host's region (a trip's, as it sets off: the warp lands after this)
+        rules[4 + MP_SCALE_COUNT] = gRegionState.current < REGION_COUNT ? gRegionState.current : MP_Region_Current();
         rules[5 + MP_SCALE_COUNT] = OwnGeneration();
         rules[6 + MP_SCALE_COUNT] = OwnGimmicks();
         MP_SendRelay(id, rules, sizeof(rules));
@@ -1665,7 +1673,7 @@ void MP_SendRoomRules(void)
     u8 i;
     if (!sLobby.creator || sLobby.state != MP_LOBBY_IN_ROOM)
         return;
-    rules[4 + MP_SCALE_COUNT] = MP_Region_Current();
+    rules[4 + MP_SCALE_COUNT] = gRegionState.current < REGION_COUNT ? gRegionState.current : MP_Region_Current();   // (a trip's, as it sets off)
     rules[0] = MPR_RULES;
     rules[1] = OwnPadding();
     rules[2] = OwnAnimSpeed();
@@ -2057,6 +2065,27 @@ void MP_FrameEnd(void)
 
 void MP_FrameUpdate(void)
 {
+    if (sFollowRegion && MP_IsInOverworld() && MP_IsLocalFree())
+    {
+        // Moemon Kai: the host's trip: everyone in the room follows (docs/REGIONS_PLAN.md "Co-op")
+        static const char *const sNames[REGION_COUNT] = {"HOENN", "JOHTO", "KANTO"};
+        bool8 MP_Region_FollowHost(u8 to);
+        u8 to = sFollowRegion - 1;
+        char msg[128];
+        sFollowRegion = 0;
+        if (to != MP_Region_Current())
+        {
+            if (MP_Region_FollowHost(to))
+            {
+                snprintf(msg, sizeof(msg), "Your host set off for %s, and you follow!\fYour first POK~MON comes along; "
+                         "the others wait in the GLOBAL PC.", sNames[to]);
+                MPNet_Log("region: following the host to %s", sNames[to]);
+                MP_ShowNotice(msg);
+            }
+            else
+                sLeaveForRegion = 1 + to;   // no room in the GLOBAL PC: we stay, and leave the room
+        }
+    }
     if (sLeaveForRegion)
     {
         // Moemon Kai: a room is in its host's region (docs/REGIONS_PLAN.md "Co-op")
