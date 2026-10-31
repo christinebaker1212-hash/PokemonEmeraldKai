@@ -64,6 +64,9 @@ typedef struct { u32 count; S3dLightBlock *b; } S3dLightSet;
 typedef struct { s16 mesh; float m[12]; } S3dProp;
 // hn / h: the ground's heights at each tile's centre (BDHC; more than one: a bridge over the ground), lowest first
 typedef struct { s16 mesh, alt; u16 light, nprops; S3dProp *props; u16 blocks[32 * 32]; u8 hn[32 * 32]; float h[32 * 32][3]; } S3dCell;
+// A Platinum matrix: 0 the region, others the buildings (each kept once; maps name theirs in sMaps); the cells kept
+// start at (x0, z0)
+typedef struct S3dMatrix { u16 number, width, height, x0, z0; S3dCell *cells; } S3dMatrix;
 
 static struct
 {
@@ -72,8 +75,8 @@ static struct
     S3dTex *tex;
     S3dMesh *mesh;
     S3dLightSet *light;
-    u16 width, height, x0, z0;   // the cells kept: matrix cells (x0, z0) on
-    S3dCell *cells;
+    u32 nmat;
+    struct S3dMatrix *mat;
 } sPack;
 
 // SINNOH's maps: the matrix cell of each one's top-left block and its size in blocks
@@ -131,7 +134,7 @@ static void LoadPack(void)
         return;
     }
     r.p += 4;
-    if (TakeU32(&r) != 2)
+    if (TakeU32(&r) != 3)
     {
         printf("[s3d] %s: another pack version\n", path);
         free(data);
@@ -192,14 +195,20 @@ static void LoadPack(void)
             Take(&r, pad, 4);
         }
     }
-    sPack.width = TakeU16(&r);
-    sPack.height = TakeU16(&r);
-    sPack.x0 = TakeU16(&r);
-    sPack.z0 = TakeU16(&r);
-    sPack.cells = calloc((u32)sPack.width * sPack.height, sizeof(S3dCell));
-    for (i = 0; i < (u32)sPack.width * sPack.height && !r.bad; i++)
+    sPack.nmat = TakeU32(&r);
+    sPack.mat = calloc(sPack.nmat ? sPack.nmat : 1, sizeof(S3dMatrix));
+    for (k = 0; k < sPack.nmat && !r.bad; k++)
     {
-        S3dCell *c = &sPack.cells[i];
+    S3dMatrix *mt = &sPack.mat[k];
+    mt->number = TakeU16(&r);
+    mt->width = TakeU16(&r);
+    mt->height = TakeU16(&r);
+    mt->x0 = TakeU16(&r);
+    mt->z0 = TakeU16(&r);
+    mt->cells = calloc((u32)mt->width * mt->height, sizeof(S3dCell));
+    for (i = 0; i < (u32)mt->width * mt->height && !r.bad; i++)
+    {
+        S3dCell *c = &mt->cells[i];
         Take(&r, &c->mesh, 2);
         Take(&r, &c->alt, 2);
         c->light = TakeU16(&r);
@@ -214,6 +223,7 @@ static void LoadPack(void)
         Take(&r, c->hn, sizeof(c->hn));
         Take(&r, c->h, sizeof(c->h));
     }
+    }
     free(data);
     if (r.bad)
     {
@@ -221,17 +231,34 @@ static void LoadPack(void)
         return;
     }
     sPack.ok = TRUE;
-    printf("[s3d] %s: %u textures, %u meshes, %ux%u cells from (%u, %u)\n", path, sPack.ntex, sPack.nmesh, sPack.width,
-           sPack.height, sPack.x0, sPack.z0);
+    printf("[s3d] %s: %u textures, %u meshes, %u matrices\n", path, sPack.ntex, sPack.nmesh, sPack.nmat);
 }
+
+static const S3dMatrix *MatrixNumbered(u16 number)
+{
+    u32 i;
+    for (i = 0; sPack.ok && i < sPack.nmat; i++)
+        if (sPack.mat[i].number == number)
+            return &sPack.mat[i];
+    return NULL;
+}
+
+static const S3dCell *CellIn(const S3dMatrix *mt, s32 cx, s32 cz)
+{
+    if (mt == NULL)
+        return NULL;
+    cx -= mt->x0;
+    cz -= mt->z0;
+    if (cx < 0 || cz < 0 || cx >= mt->width || cz >= mt->height)
+        return NULL;
+    return &mt->cells[cz * mt->width + cx];
+}
+
+static const S3dMatrix *sCurMat;   // the matrix of the map the player is on
 
 static const S3dCell *Cell(s32 cx, s32 cz)
 {
-    cx -= sPack.x0;
-    cz -= sPack.z0;
-    if (!sPack.ok || cx < 0 || cz < 0 || cx >= sPack.width || cz >= sPack.height)
-        return NULL;
-    return &sPack.cells[cz * sPack.width + cx];
+    return CellIn(sCurMat, cx, cz);
 }
 
 // ------------------------------------------------------------------------------------------------ the ground's height
@@ -280,7 +307,8 @@ static s32 MapIndex(u8 group, u8 num)
 
 bool8 S3D_IsSinnohGroup(u8 mapGroup)
 {
-    return mapGroup == MAP_GROUP(MAP_SINNOH_TWINLEAF_TOWN);
+    // group 40 (outdoors) and the buildings' groups after it (tools/sinnoh/gen_maps.py)
+    return mapGroup >= MAP_GROUP(MAP_SINNOH_TWINLEAF_TOWN) && mapGroup < MAP_GROUP(MAP_SINNOH_TWINLEAF_TOWN) + SINNOH_GROUPS;
 }
 
 // Platinum's towns and routes have night versions of their songs (20:00 to 4:00), picked as the map's music starts
@@ -319,7 +347,7 @@ const u16 *S3D_LayoutBlocks(const struct MapLayout *layout)
             for (bz = 0; bz < sMaps[i].bh; bz++)
                 for (bx = 0; bx < sMaps[i].bw; bx++)
                 {
-                    const S3dCell *c = Cell(sMaps[i].cx + bx, sMaps[i].cz + bz);
+                    const S3dCell *c = CellIn(MatrixNumbered(sMaps[i].mat), sMaps[i].cx + bx, sMaps[i].cz + bz);
                     for (y = 0; y < 32; y++)
                         for (x = 0; x < 32; x++)
                             sBlocks[i][(bz * 32 + y) * w + bx * 32 + x] = c ? c->blocks[y * 32 + x] : layout->map[0];
@@ -804,6 +832,7 @@ float S3D_TestGround(s32 mapX, s32 mapY, float near)
         LoadPack();
     if (!sPack.ok)
         return NAN;
+    sCurMat = MatrixNumbered(sMaps[map].mat);
     return GroundAt(sMaps[map].cx * BLOCK + mapX, sMaps[map].cz * BLOCK + mapY, near);
 }
 
@@ -825,6 +854,7 @@ void S3D_Update(void)
     if (sView.map != map)
         sView.havePlayerH = FALSE;   // (a new map: its own ground)
     sView.map = map;
+    sCurMat = MatrixNumbered(sMaps[map].mat);
     sView.frame++;
     FindCamera();
     SetupView();

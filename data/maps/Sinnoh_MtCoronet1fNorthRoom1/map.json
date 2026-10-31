@@ -1,0 +1,49 @@
+{
+  "id": "MAP_SINNOH_MT_CORONET1F_NORTH_ROOM1",
+  "name": "Sinnoh_MtCoronet1fNorthRoom1",
+  "layout": "LAYOUT_SINNOH_MT_CORONET1F_NORTH_ROOM1",
+  "music": "MUS_SINNOH_MT_CORONET",
+  "region_map_section": "MAPSEC_NONE",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 21,
+      "y": 61,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_MT_CORONET1F_TUNNEL_ROOM",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 11,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_MT_CORONET_B1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 2,
+      "y": 41,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE211_WEST",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 29,
+      "y": 35,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE211_EAST",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

@@ -14,7 +14,29 @@
   "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
   "connections": [],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 15,
+      "y": 19,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_IRON_ISLAND_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 21,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_IRON_ISLAND1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 7,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_IRON_ISLAND_B3F",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

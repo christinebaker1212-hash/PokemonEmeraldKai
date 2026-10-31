@@ -1,0 +1,35 @@
+{
+  "id": "MAP_SINNOH_ROUTE218_GATE_TO_CANALAVE_CITY",
+  "name": "Sinnoh_Route218GateToCanalaveCity",
+  "layout": "LAYOUT_SINNOH_ROUTE218_GATE_TO_CANALAVE_CITY",
+  "music": "MUS_SINNOH_ROUTE203",
+  "region_map_section": "MAPSEC_NONE",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 1,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_CANALAVE_CITY",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 10,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE218",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

@@ -1,0 +1,35 @@
+{
+  "id": "MAP_SINNOH_ETERNA_CITY_GYM",
+  "name": "Sinnoh_EternaCityGym",
+  "layout": "LAYOUT_SINNOH_ETERNA_CITY_GYM",
+  "music": "MUS_SINNOH_GYM",
+  "region_map_section": "MAPSEC_NONE",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 11,
+      "y": 27,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ETERNA_CITY",
+      "dest_warp_id": "10"
+    },
+    {
+      "x": 11,
+      "y": 0,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ETERNA_CITY_DP_GYM",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

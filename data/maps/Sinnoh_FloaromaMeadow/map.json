@@ -1,0 +1,56 @@
+{
+  "id": "MAP_SINNOH_FLOAROMA_MEADOW",
+  "name": "Sinnoh_FloaromaMeadow",
+  "layout": "LAYOUT_SINNOH_FLOAROMA_MEADOW",
+  "music": "MUS_SINNOH_FLOAROMA",
+  "region_map_section": "MAPSEC_NONE",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 50,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_FLOAROMA_TOWN",
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 51,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_FLOAROMA_TOWN",
+      "dest_warp_id": "6"
+    },
+    {
+      "x": 39,
+      "y": 45,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_FLOAROMA_MEADOW_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 12,
+      "y": 54,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_FLOAROMA_TOWN",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 13,
+      "y": 54,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_FLOAROMA_TOWN",
+      "dest_warp_id": "8"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

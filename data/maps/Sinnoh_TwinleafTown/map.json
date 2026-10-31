@@ -20,7 +20,36 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 9,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_TWINLEAF_TOWN_RIVAL_HOUSE1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 20,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_TWINLEAF_TOWN_PLAYER_HOUSE1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 20,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_TWINLEAF_TOWN_NORTHEAST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 10,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_TWINLEAF_TOWN_SOUTHWEST_HOUSE",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

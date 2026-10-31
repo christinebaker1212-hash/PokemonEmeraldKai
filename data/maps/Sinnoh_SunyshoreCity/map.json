@@ -25,7 +25,92 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 17,
+      "y": 26,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SUNYSHORE_MARKET",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 51,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SUNYSHORE_CITY_NORTHEAST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 13,
+      "y": 32,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SUNYSHORE_CITY_WEST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 0,
+      "y": 54,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE222_GATE_TO_SUNYSHORE_CITY",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 43,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SUNYSHORE_CITY_NORTHWEST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 21,
+      "y": 32,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SUNYSHORE_CITY_MART",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 0,
+      "y": 55,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE222_GATE_TO_SUNYSHORE_CITY",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 56,
+      "y": 35,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SUNYSHORE_CITY_EAST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 54,
+      "y": 54,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VISTA_LIGHTHOUSE_ELEVATOR",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 28,
+      "y": 48,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SUNYSHORE_CITY_POKECENTER1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 13,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SUNYSHORE_CITY_GYM_ROOM1",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 18,
+      "y": 26,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SUNYSHORE_MARKET",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

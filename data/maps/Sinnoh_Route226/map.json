@@ -30,7 +30,29 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 67,
+      "y": 19,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE226_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 95,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE228_GATE_TO_ROUTE226",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 95,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE228_GATE_TO_ROUTE226",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

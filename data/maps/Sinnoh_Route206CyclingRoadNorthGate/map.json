@@ -1,0 +1,63 @@
+{
+  "id": "MAP_SINNOH_ROUTE206_CYCLING_ROAD_NORTH_GATE",
+  "name": "Sinnoh_Route206CyclingRoadNorthGate",
+  "layout": "LAYOUT_SINNOH_ROUTE206_CYCLING_ROAD_NORTH_GATE",
+  "music": "MUS_SINNOH_ROUTE206",
+  "region_map_section": "MAPSEC_NONE",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 7,
+      "y": 2,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ETERNA_CITY",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 7,
+      "y": 12,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE206",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 6,
+      "y": 12,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE206",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 8,
+      "y": 12,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE206",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 6,
+      "y": 2,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ETERNA_CITY",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 8,
+      "y": 2,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ETERNA_CITY",
+      "dest_warp_id": "8"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

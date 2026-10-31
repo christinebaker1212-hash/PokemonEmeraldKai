@@ -25,7 +25,22 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 53,
+      "y": 8,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_MT_CORONET1F_SOUTH",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 60,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_MT_CORONET2F",
+      "dest_warp_id": "1"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

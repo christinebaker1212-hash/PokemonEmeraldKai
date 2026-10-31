@@ -25,7 +25,64 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 10,
+      "y": 54,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_POKEMON_LEAGUE_SOUTH_POKECENTER1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 15,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_POKEMON_LEAGUE_NORTH_POKECENTER1F",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 19,
+      "y": 53,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VICTORY_ROAD1F",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 21,
+      "y": 38,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VICTORY_ROAD1F",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 18,
+      "y": 53,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VICTORY_ROAD1F",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 20,
+      "y": 53,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VICTORY_ROAD1F",
+      "dest_warp_id": "7"
+    },
+    {
+      "x": 21,
+      "y": 37,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VICTORY_ROAD1F",
+      "dest_warp_id": "8"
+    },
+    {
+      "x": 21,
+      "y": 39,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VICTORY_ROAD1F",
+      "dest_warp_id": "8"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

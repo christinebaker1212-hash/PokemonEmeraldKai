@@ -25,7 +25,29 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 0,
+      "y": 54,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE209_GATE_TO_HEARTHOME_CITY",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 0,
+      "y": 55,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE209_GATE_TO_HEARTHOME_CITY",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 56,
+      "y": 8,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE209_LOST_TOWER1F",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

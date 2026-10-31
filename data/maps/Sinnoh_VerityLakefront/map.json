@@ -20,7 +20,36 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 49,
+      "y": 43,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_LAKE_VERITY_LOW_WATER",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 48,
+      "y": 43,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_LAKE_VERITY_LOW_WATER",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 48,
+      "y": 43,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_LAKE_VERITY",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 49,
+      "y": 43,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_LAKE_VERITY",
+      "dest_warp_id": "2"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

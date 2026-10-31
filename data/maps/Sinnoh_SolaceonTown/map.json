@@ -25,7 +25,71 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 9,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_POKEMON_DAY_CARE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 35,
+      "y": 8,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SOLACEON_TOWN_NORTHEAST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 27,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SOLACEON_TOWN_POKEMON_NEWS_PRESS",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 21,
+      "y": 6,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SOLACEON_TOWN_NORTH_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 37,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SOLACEON_TOWN_EAST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 22,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SOLACEON_TOWN_POKECENTER1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 27,
+      "y": 25,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SOLACEON_TOWN_MART",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 53,
+      "y": 12,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SOLACEON_RUINS_MANIAC_TUNNEL_ROOM",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 51,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SOLACEON_RUINS_ROOM1",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

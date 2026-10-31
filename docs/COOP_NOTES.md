@@ -3274,8 +3274,19 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   target stands on the ground under the player (sView.playerH) and every field sprite on the ground under its feet
   (S3D_PlaceSprite with its sprite id: sSpriteH keeps each one's layer). render_ref.py targets the same height.
   `mp s3dground X Y [NEAR]` reads it (map pixels). TWINLEAF's ground is 16, its pond 8.
-- Not yet: animated textures, billboard props, doors / warps and the buildings' insides, speed (about 6 ms a frame),
-  Windows not built with it yet.
+- Buildings (pack version 3): tools/sinnoh/places.py decides which of Platinum's headers become maps (outdoor places on
+  matrix 0; buildings, caves and the rest each on a matrix of their own, often shared: every POKéMON CENTER one;
+  left out: the Underground, GTS, PAL PARK, Wi-Fi, the Communication Club, Super Contests, the Poffin House and the
+  UNUSED / UNKNOWN leftovers). The pack holds every matrix a kept place uses, once, under its Platinum number (248;
+  a building's area from the first place using it); sMaps names each map's matrix and s3d.c looks cells up in the
+  current map's (CellIn / MatrixNumbered). gen_maps.py puts the 433 buildings in groups 41-44, 120 a group: a warp
+  keeps its map number as an s8, so a group holds at most 127 (157 crashed UpdateEscapeWarp); SINNOH_GROUPS in
+  s3d_maps.h for S3D_IsSinnohGroup. Every place's warps come from its events file (res/field/events, fetched since
+  fetch_decomp.sh's parts 2), the region's coordinates made local, warps into places left out dropped. The pack
+  stamps warp tiles: Platinum's south mat (0x65) stays Emerald's south arrow warp (General metatile 0x024), every
+  other warp (doors 0x69, cave mouths, stairs, escalators) warps when stepped on (non-animated door, 0x0A7).
+- Not yet: the pack is 93 MB (textures as RGBA: to compress), animated textures, billboard props, Platinum's door
+  animations, the buildings' people and signs (step 4), speed (about 6 ms a frame), Windows not built with it yet.
 - Test: tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM] (the 3D picture against render_ref.py: mean under 8 of 765 a
   pixel, now 2.9; a house's wall; TWINLEAF to ROUTE 201; the ground's heights; with a ROM, its pack the same as the
   decomp's).

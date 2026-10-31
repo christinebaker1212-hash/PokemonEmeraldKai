@@ -25,7 +25,120 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 26,
+      "y": 20,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_OREBURGH_CITY_GYM",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 47,
+      "y": 20,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_OREBURGH_CITY_POKECENTER1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 29,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_OREBURGH_CITY_MART",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 15,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_OREBURGH_CITY_NORTHWEST_HOUSE1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 17,
+      "y": 20,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_OREBURGH_CITY_WEST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 37,
+      "y": 16,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_OREBURGH_CITY_MIDDLE_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 49,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_MINING_MUSEUM",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 56,
+      "y": 28,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_OREBURGH_CITY_EAST_HOUSE1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 22,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_OREBURGH_CITY_NORTH_HOUSE1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 51,
+      "y": 36,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_OREBURGH_CITY_SOUTH_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 2,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_OREBURGH_GATE1F",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 44,
+      "y": 59,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_OREBURGH_MINE_B1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 45,
+      "y": 59,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_OREBURGH_MINE_B1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 46,
+      "y": 59,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_OREBURGH_MINE_B1F",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 47,
+      "y": 59,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_OREBURGH_MINE_B1F",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 48,
+      "y": 59,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_OREBURGH_MINE_B1F",
+      "dest_warp_id": "2"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

@@ -1,0 +1,35 @@
+{
+  "id": "MAP_SINNOH_RAVAGED_PATH",
+  "name": "Sinnoh_RavagedPath",
+  "layout": "LAYOUT_SINNOH_RAVAGED_PATH",
+  "music": "MUS_SINNOH_MT_CORONET",
+  "region_map_section": "MAPSEC_NONE",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 19,
+      "y": 50,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE204_SOUTH",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 28,
+      "y": 44,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE204_NORTH",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

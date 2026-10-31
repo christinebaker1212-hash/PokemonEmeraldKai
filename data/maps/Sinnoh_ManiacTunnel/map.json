@@ -1,0 +1,35 @@
+{
+  "id": "MAP_SINNOH_MANIAC_TUNNEL",
+  "name": "Sinnoh_ManiacTunnel",
+  "layout": "LAYOUT_SINNOH_MANIAC_TUNNEL",
+  "music": "MUS_SINNOH_ETERNA_FOREST",
+  "region_map_section": "MAPSEC_NONE",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 92,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE214",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 2,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SOLACEON_RUINS_MANIAC_TUNNEL_ROOM",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

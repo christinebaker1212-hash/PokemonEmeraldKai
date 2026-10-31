@@ -9,7 +9,9 @@ in map_groups.json / layouts.json, and the 3D engine's table of where each one l
 
     python3 -I tools/sinnoh/gen_maps.py POKEPLATINUM_DIR      (run from the repository; safe to run again)
 
-A place covering an L of matrix cells (ETERNA CITY, OREBURGH CITY, ROUTE 209, ROUTE 224) becomes the rectangle around
+Buildings (each its own matrix, tools/sinnoh/places.py) go in groups 41 on, 120 a group (a warp's map number is an
+s8), by name. Every place gets
+its warps from its events file (warps into places left out are dropped). A place covering an L of matrix cells (ETERNA CITY, OREBURGH CITY, ROUTE 209, ROUTE 224) becomes the rectangle around
 it; the corner left over is the matrix's filler (sea, mountains), blocked. Maps whose rectangles touch are connected.
 Map numbers stay as they were (TWINLEAF TOWN 0, ROUTE 201 1); new places are added after the last.
 """
@@ -20,11 +22,13 @@ import struct
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from source import open_source, NONE  # noqa: E402
+from source import open_source  # noqa: E402
+from places import places as kept_places, events  # noqa: E402
 
-GROUP = 'gMapGroup_Sinnoh'
+GROUP = 'gMapGroup_Sinnoh'                      # the outdoor places
+INDOOR_GROUP = 'gMapGroup_SinnohIndoor%d'       # the buildings, PER_GROUP a group (1, 2, 3...)
+PER_GROUP = 120                 # (a warp keeps its map number as an s8: at most 127 maps a group)
 BLOCKED = 0x0001 | (1 << 10) | (3 << 12)   # metatile 1, collision, elevation 3
-FILLER = 'MAP_HEADER_EVERYWHERE'
 
 # Platinum's day songs -> SINNOH's song slots (tools/kaisong/sinnoh_songs.py; S3D_MapMusic plays <slot>_night by night)
 MUSIC = {
@@ -37,7 +41,18 @@ MUSIC = {
     'SEQ_ROAD_A_D_sseq': 'route201', 'SEQ_ROAD_B_D_sseq': 'route203', 'SEQ_ROAD_C_D_sseq': 'route205',
     'SEQ_ROAD_D_D_sseq': 'route206', 'SEQ_ROAD_E_D_sseq': 'route209', 'SEQ_ROAD_F_D_sseq': 'route210',
     'SEQ_ROAD_SNOW_D_sseq': 'route216', 'SEQ_ROAD_BZA_D_sseq': 'route228',
-    'SEQ_D_02_sseq': 'lake', 'SEQ_D_03_sseq': 'lake',
+    'SEQ_D_LAKE_sseq': 'lake', 'SEQ_D_RYAYHY_sseq': 'cavern_on_the_lake',
+    # buildings, caves and the rest
+    'SEQ_PC_01_sseq': 'pokecenter', 'SEQ_FS_sseq': 'pokemart', 'SEQ_GYM_sseq': 'gym', 'SEQ_KENKYUJO_sseq': 'research_lab',
+    'SEQ_D_01_sseq': 'victory_road', 'SEQ_D_02_sseq': 'eterna_forest', 'SEQ_D_03_sseq': 'cavern_on_the_lake',
+    'SEQ_D_04_sseq': 'oreburgh_mine', 'SEQ_D_05_sseq': 'mt_coronet', 'SEQ_D_06_sseq': 'iron_mountain',
+    'SEQ_D_MOUNT1_sseq': 'mt_coronet', 'SEQ_D_MOUNT2_sseq': 'spear_pillar', 'SEQ_D_GINLOBBY_sseq': 'galactic_building',
+    'SEQ_D_AGITO_sseq': 'galactic_hideout', 'SEQ_THE_EVENT04_sseq': 'galactic_hideout_deep',
+    'SEQ_D_LEAGUE_sseq': 'league_showdown', 'SEQ_BLD_DENDO_sseq': 'hall_of_fame', 'SEQ_D_SAFARI_sseq': 'great_marsh',
+    'SEQ_D_KOUEN_sseq': 'amity_square', 'SEQ_BLD_GAME_sseq': 'game_corner', 'SEQ_BLD_TV_sseq': 'jubilife',
+    'SEQ_BF_TOWWER_sseq': 'battle_tower', 'SEQ_PL_BF_FACTORY_sseq': 'battle_tower', 'SEQ_PL_BF_STAGE_sseq': 'battle_tower',
+    'SEQ_PL_BF_CASTLE_sseq': 'battle_tower', 'SEQ_PL_BF_ROULETTE_sseq': 'battle_tower',
+    'SEQ_PL_D_GIRATINA_sseq': 'distortion_world', 'SEQ_AUS_sseq': 'arceus', 'SEQ_SILENCE_FIELD_sseq': 'villa',
 }
 # Platinum's overworld weather -> Emerald's
 WEATHER = {
@@ -58,40 +73,48 @@ def ident(header):
 
 
 def places(src, root):
-    m = src.matrix(0)
-    cells = {}
-    for z in range(m.height):
-        for x in range(m.width):
-            lid, header, _ = m.cell(x, z)
-            if lid == NONE or not header or header == FILLER:
-                continue
-            cells.setdefault(header, []).append((x, z))
-    text = open(os.path.join(root, 'include/data/map_headers.h')).read()
     out = []
-    for header, cs in cells.items():
-        block = re.search(r'\[%s\] = \{(.*?)\n    \}' % header, text, re.S).group(1)
-        field = lambda k: re.search(r'\.%s = (\w+)' % k, block).group(1)   # noqa: E731
+    for kp in kept_places(src, root):
+        header, f, cs = kp['header'], kp['fields'], kp['cells']
         xs, zs = [c[0] for c in cs], [c[1] for c in cs]
         const, camel = ident(header)
-        ptype = field('mapType')
+        ptype = f.get('mapType')
         if ptype == 'MAP_TYPE_TOWN_CITY':
             mtype = 'MAP_TYPE_CITY' if 'CITY' in const else 'MAP_TYPE_TOWN'
         elif ptype == 'MAP_TYPE_CAVE':
             mtype = 'MAP_TYPE_UNDERGROUND'
+        elif ptype == 'MAP_TYPE_INDOORS':
+            mtype = 'MAP_TYPE_INDOOR'
         else:
             mtype = 'MAP_TYPE_ROUTE'
         out.append({'header': header, 'id': 'MAP_SINNOH_' + const, 'name': 'Sinnoh_' + camel,
+                    'matrix': kp['matrix'], 'outdoor': kp['outdoor'], 'place': kp,
                     'x0': min(xs), 'z0': min(zs), 'x1': max(xs), 'z1': max(zs),
-                    'music': 'MUS_SINNOH_' + MUSIC.get(field('dayMusicID'), 'route201').upper(),
-                    'type': mtype, 'weather': WEATHER.get(field('weather'), 'WEATHER_SUNNY'),
-                    'bike': field('isBikeAllowed') == 'TRUE'})
+                    'music': 'MUS_SINNOH_' + MUSIC.get(f.get('dayMusicID'), 'twinleaf').upper(),
+                    'type': mtype, 'weather': WEATHER.get(f.get('weather'), 'WEATHER_SUNNY'),
+                    'bike': f.get('isBikeAllowed') == 'TRUE'})
+    return out
+
+
+def warps(p, ids, root):
+    """The place's warps as the field engine's: local tiles, the kept place each leads to (warps to places left out
+    are dropped) and the warp there"""
+    out = []
+    for w in events(root, p['place'])['warp_events']:
+        dest = ids.get(w['dest_header_id'])
+        if dest is None:
+            continue
+        out.append({'x': w['x'] - p['x0'] * 32, 'y': w['z'] - p['z0'] * 32, 'elevation': 0, 'dest_map': dest,
+                    'dest_warp_id': str(w['dest_warp_id'])})
     return out
 
 
 def connections(p, every):
     conns = []
+    if not p['outdoor']:
+        return conns
     for q in every:
-        if q is p:
+        if q is p or not q['outdoor']:
             continue
         if q['z1'] + 1 == p['z0'] or q['z0'] == p['z1'] + 1:        # above / below, overlapping in x
             if q['x0'] <= p['x1'] and q['x1'] >= p['x0']:
@@ -108,14 +131,32 @@ def main():
     root = sys.argv[1]
     src = open_source(root)
     every = places(src, root)
+    ids = {p['header']: p['id'] for p in every}
     groups = json.load(open('data/maps/map_groups.json'))
     layouts = json.load(open('data/layouts/layouts.json'))
+    # the outdoor places in group 40 (numbers kept), the buildings after them in groups of PER_GROUP (by name, so a
+    # building's number only changes when places are added before it)
+    outdoor = [p for p in every if p['outdoor']]
+    indoor = sorted((p for p in every if not p['outdoor']), key=lambda p: p['name'])
     if GROUP not in groups:
         groups['group_order'].append(GROUP)
         groups[GROUP] = []
     known = groups[GROUP]
-    every.sort(key=lambda p: (p['name'] not in known, known.index(p['name']) if p['name'] in known else 0, p['name']))
-    for p in every:
+    outdoor.sort(key=lambda p: (p['name'] not in known, known.index(p['name']) if p['name'] in known else 0, p['name']))
+    for p in outdoor:
+        if p['name'] not in known:
+            known.append(p['name'])
+    order = list(groups['group_order'])
+    for g in [g for g in order if g.startswith('gMapGroup_SinnohIndoor')]:
+        groups['group_order'].remove(g)
+        del groups[g]
+    nindoor = (len(indoor) + PER_GROUP - 1) // PER_GROUP
+    at = groups['group_order'].index(GROUP) + 1
+    for k in range(nindoor):
+        name = INDOOR_GROUP % (k + 1)
+        groups['group_order'].insert(at + k, name)
+        groups[name] = [p['name'] for p in indoor[k * PER_GROUP:(k + 1) * PER_GROUP]]
+    for p in outdoor + indoor:
         bw, bh = p['x1'] - p['x0'] + 1, p['z1'] - p['z0'] + 1
         w, h = 32 * bw, 32 * bh
         layout_id = 'LAYOUT_' + p['id'][4:]
@@ -133,33 +174,35 @@ def main():
         old = json.load(open(path)) if os.path.exists(path) else {}
         m = {'id': p['id'], 'name': p['name'], 'layout': layout_id, 'music': p['music'],
              'region_map_section': 'MAPSEC_NONE', 'requires_flash': False, 'weather': p['weather'],
-             'map_type': p['type'], 'allow_cycling': p['bike'], 'allow_escaping': False, 'allow_running': True,
-             'show_map_name': False, 'battle_scene': 'MAP_BATTLE_SCENE_NORMAL',
+             'map_type': p['type'], 'allow_cycling': p['bike'], 'allow_escaping': not p['outdoor'],
+             'allow_running': True, 'show_map_name': False, 'battle_scene': 'MAP_BATTLE_SCENE_NORMAL',
              'connections': connections(p, every)}
-        for k in ('object_events', 'warp_events', 'coord_events', 'bg_events'):   # (events added by hand stay)
+        m['object_events'] = old.get('object_events', [])
+        m['warp_events'] = warps(p, ids, root)
+        for k in ('coord_events', 'bg_events'):   # (events added by hand stay)
             m[k] = old.get(k, [])
         json.dump(m, open(path, 'w'), indent=2)
         open(path, 'a').write('\n')
         if not os.path.exists(mdir + '/scripts.inc'):
             open(mdir + '/scripts.inc', 'w').write('%s_MapScripts::\n\t.byte 0\n' % p['name'])
-        if p['name'] not in known:
-            known.append(p['name'])
     json.dump(groups, open('data/maps/map_groups.json', 'w'), indent=2)
     open('data/maps/map_groups.json', 'a').write('\n')
     json.dump(layouts, open('data/layouts/layouts.json', 'w'), indent=2)
     open('data/layouts/layouts.json', 'a').write('\n')
-    # the maps' scripts, and the 3D engine's table (map, its top-left matrix cell, its size in cells)
+    # the maps' scripts, and the 3D engine's table (map, its matrix, its top-left cell there, its size in cells)
+    names = known + [p['name'] for p in indoor]
     path = 'data/event_scripts_sinnoh.s'
     text = open(path).read()
     head = text[:text.index('\t.include "data/maps/Sinnoh_')]
-    open(path, 'w').write(head + ''.join('\t.include "data/maps/%s/scripts.inc"\n' % n for n in known))
-    rows = ''.join('    {%s, %d, %d, %d, %d},\n' % (p['id'], p['x0'], p['z0'], p['x1'] - p['x0'] + 1, p['z1'] - p['z0'] + 1)
-                   for p in every)
+    open(path, 'w').write(head + ''.join('\t.include "data/maps/%s/scripts.inc"\n' % n for n in names))
+    rows = ''.join('    {%s, %d, %d, %d, %d, %d},\n' % (p['id'], p['matrix'], p['x0'], p['z0'], p['x1'] - p['x0'] + 1,
+                                                       p['z1'] - p['z0'] + 1) for p in outdoor + indoor)
     open('src/sinnoh/s3d_maps.h', 'w').write(
-        '// Generated by tools/sinnoh/gen_maps.py: each SINNOH map, the matrix cell of its top-left block and its size\n'
-        '// in blocks (src/sinnoh/s3d.c)\n'
-        'static const struct { u16 map; u8 cx, cz, bw, bh; } sMaps[] = {\n' + rows + '};\n')
-    print('%d maps: %s' % (len(every), ', '.join(p['name'] for p in every)))
+        '// Generated by tools/sinnoh/gen_maps.py: each SINNOH map, its Platinum matrix (0 the region), the cell of its\n'
+        '// top-left block there and its size in blocks (src/sinnoh/s3d.c)\n'
+        '#define SINNOH_GROUPS %d   // group 40 and the buildings\' groups after it\n' % (1 + nindoor) +
+        'static const struct { u16 map, mat; u8 cx, cz, bw, bh; } sMaps[] = {\n' + rows + '};\n')
+    print('%d maps (%d outdoor, %d buildings in %d groups)' % (len(every), len(outdoor), len(indoor), nindoor))
 
 
 if __name__ == '__main__':

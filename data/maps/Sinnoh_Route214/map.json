@@ -30,7 +30,43 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 14,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE214_GATE_TO_VEILSTONE_CITY",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 15,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE214_GATE_TO_VEILSTONE_CITY",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 9,
+      "y": 30,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_RUIN_MANIAC_CAVE_SHORT",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 9,
+      "y": 30,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_RUIN_MANIAC_CAVE_LONG",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 9,
+      "y": 30,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_MANIAC_TUNNEL",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

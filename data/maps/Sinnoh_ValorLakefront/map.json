@@ -30,7 +30,57 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 34,
+      "y": 54,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_RESTAURANT",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 43,
+      "y": 45,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_GRAND_LAKE_VALOR_LAKEFRONT_EAST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 18,
+      "y": 55,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_GRAND_LAKE_VALOR_LAKEFRONT_WEST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 45,
+      "y": 24,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_LAKE_VALOR_DRAINED",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 45,
+      "y": 25,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_LAKE_VALOR_DRAINED",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 45,
+      "y": 24,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_LAKE_VALOR",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 45,
+      "y": 25,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_LAKE_VALOR",
+      "dest_warp_id": "4"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

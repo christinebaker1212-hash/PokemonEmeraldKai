@@ -25,7 +25,64 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 6,
+      "y": 12,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE213_GATE_TO_PASTORIA_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 6,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE213_GATE_TO_PASTORIA_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 23,
+      "y": 34,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_FOOTSTEP_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 66,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_GRAND_LAKE_ROUTE213_LOBBY",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 66,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_GRAND_LAKE_ROUTE213_LOBBY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 70,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_GRAND_LAKE_ROUTE213_EAST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 61,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_GRAND_LAKE_ROUTE213_NORTHWEST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 72,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_GRAND_LAKE_ROUTE213_NORTHEAST_HOUSE",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

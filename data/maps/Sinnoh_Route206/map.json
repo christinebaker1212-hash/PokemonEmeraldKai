@@ -25,7 +25,106 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 14,
+      "y": 112,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE206_CYCLING_ROAD_SOUTH_GATE",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 15,
+      "y": 112,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE206_CYCLING_ROAD_SOUTH_GATE",
+      "dest_warp_id": "4"
+    },
+    {
+      "x": 14,
+      "y": 105,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE206_CYCLING_ROAD_SOUTH_GATE",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 15,
+      "y": 105,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE206_CYCLING_ROAD_SOUTH_GATE",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 16,
+      "y": 0,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE206_CYCLING_ROAD_NORTH_GATE",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 17,
+      "y": 0,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE206_CYCLING_ROAD_NORTH_GATE",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 12,
+      "y": 105,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE206_CYCLING_ROAD_SOUTH_GATE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 13,
+      "y": 105,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE206_CYCLING_ROAD_SOUTH_GATE",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 16,
+      "y": 105,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE206_CYCLING_ROAD_SOUTH_GATE",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 17,
+      "y": 105,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE206_CYCLING_ROAD_SOUTH_GATE",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 13,
+      "y": 112,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE206_CYCLING_ROAD_SOUTH_GATE",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 16,
+      "y": 112,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE206_CYCLING_ROAD_SOUTH_GATE",
+      "dest_warp_id": "5"
+    },
+    {
+      "x": 11,
+      "y": 35,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_WAYWARD_CAVE1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 22,
+      "y": 31,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_WAYWARD_CAVE1F",
+      "dest_warp_id": "1"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

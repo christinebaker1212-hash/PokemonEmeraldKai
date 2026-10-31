@@ -35,7 +35,29 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 14,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ETERNA_FOREST",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 15,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ETERNA_FOREST",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 22,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE205_HOUSE",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

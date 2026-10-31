@@ -30,7 +30,71 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 24,
+      "y": 49,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_FLOAROMA_TOWN_MART",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 16,
+      "y": 58,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_FLOAROMA_TOWN_POKECENTER1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 20,
+      "y": 43,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_FLOWER_SHOP",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 24,
+      "y": 58,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_FLOAROMA_TOWN_SOUTHEAST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 11,
+      "y": 46,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_FLOAROMA_TOWN_MIDDLE_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 20,
+      "y": 4,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_FLOAROMA_MEADOW",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 21,
+      "y": 4,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_FLOAROMA_MEADOW",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 2,
+      "y": 33,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_FLOAROMA_MEADOW",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 3,
+      "y": 33,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_FLOAROMA_MEADOW",
+      "dest_warp_id": "4"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

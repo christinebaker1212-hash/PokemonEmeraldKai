@@ -1,0 +1,133 @@
+{
+  "id": "MAP_SINNOH_BATTLE_FRONTIER",
+  "name": "Sinnoh_BattleFrontier",
+  "layout": "LAYOUT_SINNOH_BATTLE_FRONTIER",
+  "music": "MUS_SINNOH_FIGHT_AREA",
+  "region_map_section": "MAPSEC_NONE",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_TOWN",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 48,
+      "y": 17,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_BATTLE_TOWER",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 49,
+      "y": 17,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_BATTLE_TOWER",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 77,
+      "y": 34,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_BATTLE_FACTORY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 77,
+      "y": 35,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_BATTLE_FACTORY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 19,
+      "y": 34,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_BATTLE_HALL",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 19,
+      "y": 35,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_BATTLE_HALL",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 33,
+      "y": 62,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_BATTLE_CASTLE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 33,
+      "y": 63,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_BATTLE_CASTLE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 64,
+      "y": 62,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_BATTLE_ARCADE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 64,
+      "y": 63,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_BATTLE_ARCADE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 48,
+      "y": 52,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_BATTLE_FRONTIER_GATE_TO_FIGHT_AREA",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 49,
+      "y": 52,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_BATTLE_FRONTIER_GATE_TO_FIGHT_AREA",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 73,
+      "y": 34,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_BATTLE_FACTORY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 23,
+      "y": 34,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_BATTLE_HALL",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 60,
+      "y": 62,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_BATTLE_ARCADE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 36,
+      "y": 62,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_BATTLE_CASTLE",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

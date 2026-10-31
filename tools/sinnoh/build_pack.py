@@ -10,7 +10,7 @@ POKEPLATINUM_DIR is a pret/pokeplatinum checkout (source.py): it holds every map
 light set Platinum has, so no ROM is needed; the release builds the pack from it (tools/sinnoh/fetch_decomp.sh). Built
 from the ROM instead, the pack is the same, byte for byte (tools/sinnoh/test_poc.sh checks it when given a ROM).
 
-Format (little endian), version 2:
+Format (little endian), version 3:
   "S3DP" u32 version
   u32 textures:  each u16 w, u16 h, then w*h u32 RGBA (alpha 0-255)
   u32 meshes:    each f32 centre x y z, f32 radius, u32 groups:
@@ -19,7 +19,8 @@ Format (little endian), version 2:
                    then 3 vertices each: f32 x y z, f32 u v (texels), u8 r g b (0-31) pad, f32 nx ny nz
   u32 light sets: each u32 blocks: u32 end time (2-second units of the day), 4 lights (u8 on r g b, f32 dx dy dz),
                    then diffuse, ambient, specular, emission (u8 r g b each), u8 pad x 4
-  matrix: u16 width, height, u16 x0, z0 (the cells kept start here); per kept cell (row by row):
+  u32 matrices: each u16 Platinum's matrix number (0: the region; others: buildings, tools/sinnoh/places.py), u16 width,
+          height, u16 x0, z0 (the cells kept start here); per kept cell (row by row):
           s16 mesh (-1 none), s16 altitude, u16 light set, u16 props; props: s16 mesh, f32 3x4 transform (rows);
           then the cell's 32x32 map blocks (u16, the field engine's: metatile | collision << 10 | elevation << 12)
           from Platinum's terrain attributes (bit 15 collision, low byte the behavior: Platinum's behaviors share
@@ -38,8 +39,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import nitro  # noqa: E402
 from platinum import Land  # noqa: E402
 from source import open_source, NONE  # noqa: E402
+from places import places, events  # noqa: E402
 
-VERSION = 2
+VERSION = 3
 
 # Platinum behavior -> a General tileset metatile with the same Emerald behavior (tall grass, water, sand, ledges...)
 BEHAVIOR_METATILE = {0x02: 0x00D, 0x03: 0x015, 0x10: 0x02D, 0x15: 0x02C, 0x16: 0x0C8, 0x17: 0x13B, 0x21: 0x11C,
@@ -84,9 +86,20 @@ def heights(land):
     return out
 
 
-def blocks(land):
+# Warp tiles (from every kept place's events): a mat walked off southward keeps Emerald's south arrow warp (0x65, the
+# same number in both games); every other warp (doors, cave mouths, stairs, escalators...) warps when stepped on, as
+# Emerald's non-animated door does
+SOUTH_MAT = 0x024      # General metatile with MB_SOUTH_ARROW_WARP
+STEP_WARP = 0x0A7      # General metatile with MB_NON_ANIMATED_DOOR
+
+
+def blocks(land, warps=None):
+    """warps: {tile index: Platinum behavior} of the warp tiles in this block"""
     out = []
-    for a in land.attrs:
+    for i, a in enumerate(land.attrs):
+        if warps and i in warps:
+            out.append((SOUTH_MAT if warps[i] == 0x65 else STEP_WARP) | (3 << 12))
+            continue
         b = a & 0xFF
         mt = BEHAVIOR_METATILE.get(b, 0x001)
         if b in WATER:
@@ -110,7 +123,11 @@ class Pack:
             tex0.digest = hashlib.sha1(tex0.d[tex0.o:]).digest()
         key = (tex0.digest, mat.texture, mat.palette)
         if key not in self.tex_ids:
-            w, h, px = tex0.decode(mat.texture, mat.palette)
+            try:
+                w, h, px = tex0.decode(mat.texture, mat.palette)
+            except KeyError as e:   # (a palette the set doesn't have: that surface is drawn with its colors only)
+                print('texture %s: no palette %s in its set; untextured' % (mat.texture, e))
+                return -1
             self.tex_ids[key] = len(self.textures)
             self.textures.append((w, h, px))
         return self.tex_ids[key]
@@ -138,7 +155,7 @@ class Pack:
         return self.mesh_ids[key]
 
 
-def write(path, pack, light_sets, cells, window):
+def write(path, pack, light_sets, matrices):
     out = bytearray(b'S3DP' + struct.pack('<I', VERSION))
     out += struct.pack('<I', len(pack.textures))
     for w, h, px in pack.textures:
@@ -163,16 +180,17 @@ def write(path, pack, light_sets, cells, window):
             for col in cols:
                 out += struct.pack('<3B', *col)
             out += b'\0' * 4
-    x0, z0, x1, z1 = window
-    out += struct.pack('<4H', x1 - x0 + 1, z1 - z0 + 1, x0, z0)
-    for mesh, alt, light, props, blk, hts in cells:
-        out += struct.pack('<hhHH', mesh, alt, light, len(props))
-        for pm, m in props:
-            out += struct.pack('<h12f', pm, *m)
-        out += struct.pack('<1024H', *blk)
-        out += bytes(len(h) for h in hts)
-        for h in hts:
-            out += struct.pack('<3f', *(h + [0.0] * (3 - len(h))))
+    out += struct.pack('<I', len(matrices))
+    for number, (x0, z0, x1, z1), cells in matrices:
+        out += struct.pack('<5H', number, x1 - x0 + 1, z1 - z0 + 1, x0, z0)
+        for mesh, alt, light, props, blk, hts in cells:
+            out += struct.pack('<hhHH', mesh, alt, light, len(props))
+            for pm, m in props:
+                out += struct.pack('<h12f', pm, *m)
+            out += struct.pack('<1024H', *blk)
+            out += bytes(len(h) for h in hts)
+            for h in hts:
+                out += struct.pack('<3f', *(h + [0.0] * (3 - len(h))))
     open(path, 'wb').write(out)
     return len(out)
 
@@ -182,53 +200,79 @@ def main():
     rom = None
     if args[0] == '--rom':
         rom, args = args[1], args[2:]
-    src = open_source(rom, decomp=args[0]) if rom else open_source(args[0])
+    decomp = args[0]
+    src = open_source(rom, decomp=decomp) if rom else open_source(decomp)
     out_path = args[1]
     mx = src.matrix(0)
-    # the cells of map matrix 0 from (X0, Z0) to (X1, Z1); default: all of it
+    # matrix 0's cells from (X0, Z0) to (X1, Z1) (default: all of it), then every building's matrix
     window = [int(x) for x in args[2:6]] if len(args) >= 6 else [0, 0, mx.width - 1, mx.height - 1]
-    x0, z0, x1, z1 = window
     pack = Pack()
     light_index = {}
     light_sets = []
     tex_cache = {}
-    cells = []
-    for z in range(z0, z1 + 1):
-        for x in range(x0, x1 + 1):
-            lid, header, alt = mx.cell(x, z)
-            if lid == NONE:
-                cells.append((-1, 0, 0, [], [0x0001 | (1 << 10) | (3 << 12)] * 1024, [[] for _ in range(1024)]))
+
+    # every kept place's warp tiles: {(matrix, cell x, cell z): {tile index: behavior}}
+    kept = places(src, decomp)
+    warp_tiles = {}
+    for p in kept:
+        for w in events(decomp, p)['warp_events']:
+            x, z = w['x'], w['z']
+            mt = src.matrix(p['matrix'])
+            if x // 32 >= mt.width or z // 32 >= mt.height or mt.cell(x // 32, z // 32)[0] == NONE:
                 continue
-            prop_set, tex_set, light_set = src.area_of(header)
-            if light_set not in light_index:
-                light_index[light_set] = len(light_sets)
-                light_sets.append(src.lights(light_set))
-            if ('map', tex_set) not in tex_cache:
-                tex_cache[('map', tex_set)] = nitro.btx0(src.map_textures(tex_set))
-            if ('bm', prop_set) not in tex_cache:
-                tex_cache[('bm', prop_set)] = nitro.btx0(src.prop_textures(prop_set))
-            land = Land(src.land(lid))
-            mesh = pack.mesh(('land', lid, tex_set), nitro.Bmd0(land.model), tex_cache[('map', tex_set)])
-            props = []
-            for pr in land.props:
-                if pr.model >= src.prop_count():
-                    continue
-                bmd = nitro.Bmd0(src.prop_model(pr.model))
-                ptex = bmd.tex or tex_cache[('bm', prop_set)]
-                pm = pack.mesh(('prop', pr.model, prop_set), bmd, ptex)
-                ry = math.radians(pr.rot[1])
-                cy, sy = math.cos(ry), math.sin(ry)
-                sx, sy_, sz = pr.scale
-                m = [cy * sx, 0.0, sy * sz, pr.pos[0],
-                     0.0, sy_, 0.0, pr.pos[1],
-                     -sy * sx, 0.0, cy * sz, pr.pos[2]]
-                props.append((pm, m))
-            cells.append((mesh, alt, light_index[light_set], props, blocks(land), heights(land)))
-            print('cell (%d,%d): land %d %s (textures %d, props %d, lights %d), %d props'
-                  % (x, z, lid, header, tex_set, prop_set, light_set, len(props)))
-    size = write(out_path, pack, light_sets, cells, window)
-    print('%s: %d textures, %d meshes, %d light sets, %d bytes' % (out_path, len(pack.textures), len(pack.meshes),
-                                                                 len(light_sets), size))
+            land = Land(src.land(mt.cell(x // 32, z // 32)[0]))
+            warp_tiles.setdefault((p['matrix'], x // 32, z // 32), {})[(z % 32) * 32 + x % 32] = \
+                land.attrs[(z % 32) * 32 + x % 32] & 0xFF
+
+    def cell(lid, header, alt, where=None):
+        if lid == NONE or header is None:
+            return (-1, 0, 0, [], [0x0001 | (1 << 10) | (3 << 12)] * 1024, [[] for _ in range(1024)])
+        prop_set, tex_set, light_set = src.area_of(header)
+        if light_set not in light_index:
+            light_index[light_set] = len(light_sets)
+            light_sets.append(src.lights(light_set))
+        if ('map', tex_set) not in tex_cache:
+            tex_cache[('map', tex_set)] = nitro.btx0(src.map_textures(tex_set))
+        if ('bm', prop_set) not in tex_cache:
+            tex_cache[('bm', prop_set)] = nitro.btx0(src.prop_textures(prop_set))
+        land = Land(src.land(lid))
+        mesh = pack.mesh(('land', lid, tex_set), nitro.Bmd0(land.model), tex_cache[('map', tex_set)])
+        props = []
+        for pr in land.props:
+            if pr.model >= src.prop_count():
+                continue
+            bmd = nitro.Bmd0(src.prop_model(pr.model))
+            ptex = bmd.tex or tex_cache[('bm', prop_set)]
+            pm = pack.mesh(('prop', pr.model, prop_set), bmd, ptex)
+            ry = math.radians(pr.rot[1])
+            cy, sy = math.cos(ry), math.sin(ry)
+            sx, sy_, sz = pr.scale
+            m = [cy * sx, 0.0, sy * sz, pr.pos[0],
+                 0.0, sy_, 0.0, pr.pos[1],
+                 -sy * sx, 0.0, cy * sz, pr.pos[2]]
+            props.append((pm, m))
+        return (mesh, alt, light_index[light_set], props, blocks(land, warp_tiles.get(where)), heights(land))
+
+    matrices = []
+    x0, z0, x1, z1 = window
+    matrices.append((0, (x0, z0, x1, z1), [cell(*mx.cell(x, z), where=(0, x, z))
+                                           for z in range(z0, z1 + 1) for x in range(x0, x1 + 1)]))
+    # the buildings: each matrix once, its area from the first kept place that uses it (shared ones look alike)
+    owner = {}
+    for p in kept:
+        if not p['outdoor'] and p['matrix'] not in owner:
+            owner[p['matrix']] = p['header']
+    for n in sorted(owner):
+        m = src.matrix(n)
+        cells = []
+        for z in range(m.height):
+            for x in range(m.width):
+                lid, _, alt = m.cell(x, z)
+                cells.append(cell(lid, owner[n], alt, where=(n, x, z)))
+        matrices.append((n, (0, 0, m.width - 1, m.height - 1), cells))
+    size = write(out_path, pack, light_sets, matrices)
+    print('%s: %d textures, %d meshes, %d light sets, %d matrices, %d bytes' % (
+        out_path, len(pack.textures), len(pack.meshes), len(light_sets), len(matrices), size))
 
 
 if __name__ == '__main__':

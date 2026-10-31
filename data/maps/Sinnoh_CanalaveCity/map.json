@@ -20,7 +20,85 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 7,
+      "y": 27,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_CANALAVE_CITY_GYM",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 26,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_CANALAVE_CITY_POKECENTER1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 21,
+      "y": 36,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_CANALAVE_CITY_MART",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 5,
+      "y": 14,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_CANALAVE_LIBRARY1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 22,
+      "y": 44,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_CANALAVE_CITY_SOUTHEAST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 26,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_CANALAVE_CITY_HARBOR_INN",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 7,
+      "y": 44,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_CANALAVE_CITY_SAILOR_ELDRITCH_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 31,
+      "y": 50,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE218_GATE_TO_CANALAVE_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 31,
+      "y": 51,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE218_GATE_TO_CANALAVE_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 21,
+      "y": 28,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_CANALAVE_CITY_EAST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 6,
+      "y": 36,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_CANALAVE_CITY_WEST_HOUSE",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

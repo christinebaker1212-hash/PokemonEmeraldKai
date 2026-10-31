@@ -1,0 +1,35 @@
+{
+  "id": "MAP_SINNOH_NEWMOON_ISLAND_FOREST",
+  "name": "Sinnoh_NewmoonIslandForest",
+  "layout": "LAYOUT_SINNOH_NEWMOON_ISLAND_FOREST",
+  "music": "MUS_SINNOH_CAVERN_ON_THE_LAKE",
+  "region_map_section": "MAPSEC_NONE",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": false,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 16,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_NEWMOON_ISLAND",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 17,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_NEWMOON_ISLAND",
+      "dest_warp_id": "1"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

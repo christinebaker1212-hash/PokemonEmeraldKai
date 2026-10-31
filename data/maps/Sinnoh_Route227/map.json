@@ -25,7 +25,15 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 4,
+      "y": 46,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE227_HOUSE",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

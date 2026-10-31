@@ -30,7 +30,85 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 17,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ETERNA_CITY_POKECENTER1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 21,
+      "y": 36,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ETERNA_CITY_MART",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 22,
+      "y": 27,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_CYCLE_SHOP",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 17,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_TEAM_GALACTIC_ETERNA_BUILDING1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 27,
+      "y": 36,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ETERNA_CITY_CONDOMINIUMS1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 10,
+      "y": 50,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ETERNA_CITY_SOUTH_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 39,
+      "y": 25,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ETERNA_CITY_EAST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 28,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ETERNA_CITY_HERB_SHOP",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 16,
+      "y": 57,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE206_CYCLING_ROAD_NORTH_GATE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 17,
+      "y": 57,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE206_CYCLING_ROAD_NORTH_GATE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 24,
+      "y": 50,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ETERNA_CITY_GYM",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

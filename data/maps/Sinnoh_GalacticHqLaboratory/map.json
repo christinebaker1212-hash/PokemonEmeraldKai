@@ -1,0 +1,35 @@
+{
+  "id": "MAP_SINNOH_GALACTIC_HQ_LABORATORY",
+  "name": "Sinnoh_GalacticHqLaboratory",
+  "layout": "LAYOUT_SINNOH_GALACTIC_HQ_LABORATORY",
+  "music": "MUS_SINNOH_GALACTIC_HIDEOUT_DEEP",
+  "region_map_section": "MAPSEC_NONE",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 1,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_GALACTIC_HQ4F",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 36,
+      "y": 2,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_GALACTIC_HQ_CONTROL_ROOM",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

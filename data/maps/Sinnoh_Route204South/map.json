@@ -25,7 +25,15 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 11,
+      "y": 1,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_RAVAGED_PATH",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

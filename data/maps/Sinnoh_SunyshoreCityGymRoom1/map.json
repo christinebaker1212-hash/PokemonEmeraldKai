@@ -1,0 +1,35 @@
+{
+  "id": "MAP_SINNOH_SUNYSHORE_CITY_GYM_ROOM1",
+  "name": "Sinnoh_SunyshoreCityGymRoom1",
+  "layout": "LAYOUT_SINNOH_SUNYSHORE_CITY_GYM_ROOM1",
+  "music": "MUS_SINNOH_GYM",
+  "region_map_section": "MAPSEC_NONE",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 8,
+      "y": 14,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SUNYSHORE_CITY",
+      "dest_warp_id": "12"
+    },
+    {
+      "x": 8,
+      "y": 2,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SUNYSHORE_CITY_GYM_ROOM2",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

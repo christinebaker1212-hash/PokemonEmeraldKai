@@ -25,7 +25,64 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 22,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE225_GATE_TO_FIGHT_AREA",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 23,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE225_GATE_TO_FIGHT_AREA",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 46,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_BATTLE_FRONTIER_GATE_TO_FIGHT_AREA",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 47,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_BATTLE_FRONTIER_GATE_TO_FIGHT_AREA",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 46,
+      "y": 22,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_FIGHT_AREA_MIDDLE_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 46,
+      "y": 28,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_FIGHT_AREA_SOUTH_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 39,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_FIGHT_AREA_POKECENTER1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 52,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_FIGHT_AREA_MART",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

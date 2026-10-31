@@ -1,0 +1,56 @@
+{
+  "id": "MAP_SINNOH_LAKE_ACUITY",
+  "name": "Sinnoh_LakeAcuity",
+  "layout": "LAYOUT_SINNOH_LAKE_ACUITY",
+  "music": "MUS_SINNOH_GALACTIC_BUILDING",
+  "region_map_section": "MAPSEC_NONE",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_UNDERGROUND",
+  "allow_cycling": false,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 11,
+      "y": 50,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ACUITY_LAKEFRONT",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 32,
+      "y": 32,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ACUITY_CAVERN",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 12,
+      "y": 50,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ACUITY_LAKEFRONT",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 14,
+      "y": 50,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ACUITY_LAKEFRONT",
+      "dest_warp_id": "2"
+    },
+    {
+      "x": 15,
+      "y": 50,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ACUITY_LAKEFRONT",
+      "dest_warp_id": "3"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

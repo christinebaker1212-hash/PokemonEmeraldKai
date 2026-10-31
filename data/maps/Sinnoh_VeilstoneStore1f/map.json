@@ -1,0 +1,49 @@
+{
+  "id": "MAP_SINNOH_VEILSTONE_STORE1F",
+  "name": "Sinnoh_VeilstoneStore1f",
+  "layout": "LAYOUT_SINNOH_VEILSTONE_STORE1F",
+  "music": "MUS_SINNOH_POKEMART",
+  "region_map_section": "MAPSEC_NONE",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": false,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 10,
+      "y": 12,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VEILSTONE_CITY",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 12,
+      "y": 8,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VEILSTONE_STORE2F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 15,
+      "y": 2,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VEILSTONE_STORE_ELEVATOR",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 7,
+      "y": 8,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VEILSTONE_STORE_B1F",
+      "dest_warp_id": "0"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

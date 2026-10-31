@@ -25,7 +25,29 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 22,
+      "y": 93,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE225_GATE_TO_FIGHT_AREA",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 23,
+      "y": 93,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE225_GATE_TO_FIGHT_AREA",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 9,
+      "y": 48,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE225_HOUSE",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

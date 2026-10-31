@@ -25,7 +25,43 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 12,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_BATTLEGROUND",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 15,
+      "y": 28,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SURVIVAL_AREA_SOUTH_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 16,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SURVIVAL_AREA_NORTH_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 19,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SURVIVAL_AREA_POKECENTER1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 23,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SURVIVAL_AREA_MART",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

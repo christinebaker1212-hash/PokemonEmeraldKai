@@ -25,7 +25,127 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 6,
+      "y": 22,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE215_GATE_TO_VEILSTONE_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 6,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE215_GATE_TO_VEILSTONE_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 34,
+      "y": 47,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_GAME_CORNER",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 29,
+      "y": 27,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VEILSTONE_STORE1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 29,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VEILSTONE_CITY_GALACTIC_WAREHOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 44,
+      "y": 47,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VEILSTONE_CITY_PRIZE_EXCHANGE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 18,
+      "y": 47,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VEILSTONE_CITY_SOUTHWEST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 24,
+      "y": 47,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VEILSTONE_CITY_SOUTHEAST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 39,
+      "y": 26,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VEILSTONE_CITY_NORTHWEST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 45,
+      "y": 26,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VEILSTONE_CITY_NORTHEAST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 45,
+      "y": 35,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VEILSTONE_CITY_POKECENTER1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 46,
+      "y": 62,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE214_GATE_TO_VEILSTONE_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 47,
+      "y": 62,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE214_GATE_TO_VEILSTONE_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 12,
+      "y": 35,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VEILSTONE_CITY_GYM",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 42,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_GALACTIC_HQ1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 45,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_GALACTIC_HQ1F",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 48,
+      "y": 13,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_GALACTIC_HQ1F",
+      "dest_warp_id": "2"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

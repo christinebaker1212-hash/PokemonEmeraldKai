@@ -1,0 +1,35 @@
+{
+  "id": "MAP_SINNOH_ROUTE222_GATE_TO_SUNYSHORE_CITY",
+  "name": "Sinnoh_Route222GateToSunyshoreCity",
+  "layout": "LAYOUT_SINNOH_ROUTE222_GATE_TO_SUNYSHORE_CITY",
+  "music": "MUS_SINNOH_ROUTE209",
+  "region_map_section": "MAPSEC_NONE",
+  "requires_flash": false,
+  "weather": "WEATHER_SUNNY",
+  "map_type": "MAP_TYPE_INDOOR",
+  "allow_cycling": true,
+  "allow_escaping": true,
+  "allow_running": true,
+  "show_map_name": false,
+  "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
+  "connections": [],
+  "object_events": [],
+  "warp_events": [
+    {
+      "x": 1,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE222",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 10,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SUNYSHORE_CITY",
+      "dest_warp_id": "3"
+    }
+  ],
+  "coord_events": [],
+  "bg_events": []
+}

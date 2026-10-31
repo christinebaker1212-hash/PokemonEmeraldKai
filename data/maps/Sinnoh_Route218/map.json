@@ -25,7 +25,36 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 6,
+      "y": 18,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE218_GATE_TO_CANALAVE_CITY",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 6,
+      "y": 19,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE218_GATE_TO_CANALAVE_CITY",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 57,
+      "y": 22,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE218_GATE_TO_JUBILIFE_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 57,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE218_GATE_TO_JUBILIFE_CITY",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

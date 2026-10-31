@@ -35,7 +35,85 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 52,
+      "y": 19,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_JUBILIFE_CITY_CONDOMINIUMS1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 52,
+      "y": 40,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_JUBILIFE_CITY_POKECENTER1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 36,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_JUBILIFE_TV1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 39,
+      "y": 52,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_JUBILIFE_CITY_SOUTH_HOUSE1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 17,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_POKETCH_CO1F",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 51,
+      "y": 30,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_JUBILIFE_CITY_MART",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 40,
+      "y": 40,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_TRAINERS_SCHOOL",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 13,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_POKETCH_CO1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 12,
+      "y": 52,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_JUBILIFE_CITY_SOUTHWEST_HOUSE1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 0,
+      "y": 22,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE218_GATE_TO_JUBILIFE_CITY",
+      "dest_warp_id": "1"
+    },
+    {
+      "x": 0,
+      "y": 23,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE218_GATE_TO_JUBILIFE_CITY",
+      "dest_warp_id": "1"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

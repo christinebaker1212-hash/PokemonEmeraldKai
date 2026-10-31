@@ -64,8 +64,10 @@ class Decomp:
             for x in range(w):
                 name = m['maps'][z][x]
                 land.append(NONE if name == 'MAP_NONE' else _num(name))
-                headers.append(m['headers'][z][x] if 'headers' in m else None)
-                alt.append(m['altitudes'][z][x] if 'altitudes' in m else 0)
+                # (a building's matrix has no per-cell headers or altitudes: the header that uses it gives its area)
+                hs, al = m.get('headers') or [], m.get('altitudes') or []
+                headers.append(hs[z][x] if z < len(hs) and x < len(hs[z]) else None)
+                alt.append(al[z][x] if z < len(al) and x < len(al[z]) else 0)
         return _Matrix(w, h, land, headers, alt)
 
     def land(self, n):

@@ -30,7 +30,43 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 27,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SANDGEM_TOWN_MART",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 17,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SANDGEM_TOWN_POKECENTER1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 8,
+      "y": 10,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SANDGEM_TOWN_POKEMON_RESEARCH_LAB",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 16,
+      "y": 22,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SANDGEM_TOWN_COUNTERPART_HOUSE1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 7,
+      "y": 22,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SANDGEM_TOWN_HOUSE",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

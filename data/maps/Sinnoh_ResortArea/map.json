@@ -20,7 +20,36 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 22,
+      "y": 21,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VILLA",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 10,
+      "y": 7,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_RESORT_AREA_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 24,
+      "y": 5,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_RESORT_AREA_RIBBON_SYNDICATE1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 2,
+      "y": 24,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_RESORT_AREA_POKECENTER1F",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

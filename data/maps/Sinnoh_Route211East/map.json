@@ -20,7 +20,15 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 3,
+      "y": 15,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_MT_CORONET1F_NORTH_ROOM1",
+      "dest_warp_id": "3"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

@@ -25,7 +25,50 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 15,
+      "y": 3,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_CELESTIC_TOWN_NORTH_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 2,
+      "y": 3,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_CELESTIC_TOWN_NORTHWEST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 25,
+      "y": 3,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_CELESTIC_TOWN_NORTHEAST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 6,
+      "y": 26,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_CELESTIC_TOWN_SOUTHWEST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 15,
+      "y": 9,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_CELESTIC_TOWN_CAVE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 24,
+      "y": 26,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_CELESTIC_TOWN_POKECENTER1F",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

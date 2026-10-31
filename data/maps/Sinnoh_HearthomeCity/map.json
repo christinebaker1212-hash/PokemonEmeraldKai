@@ -30,7 +30,134 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 10,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_HEARTHOME_CITY_WEST_GATE_TO_AMITY_SQUARE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 11,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_HEARTHOME_CITY_WEST_GATE_TO_AMITY_SQUARE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 52,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_HEARTHOME_CITY_EAST_GATE_TO_AMITY_SQUARE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 53,
+      "y": 11,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_HEARTHOME_CITY_EAST_GATE_TO_AMITY_SQUARE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 17,
+      "y": 25,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_HEARTHOME_CITY_POKECENTER1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 22,
+      "y": 25,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_HEARTHOME_CITY_NORTHWEST_HOUSE",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 46,
+      "y": 38,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_HEARTHOME_CITY_SOUTHEAST_HOUSE1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 51,
+      "y": 25,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_HEARTHOME_CITY_GYM_ENTRANCE_ROOM",
+      "dest_warp_id": "3"
+    },
+    {
+      "x": 12,
+      "y": 37,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_FOREIGN_BUILDING",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 29,
+      "y": 38,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_HEARTHOME_CITY_MART",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 40,
+      "y": 38,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_HEARTHOME_CITY_POKEMON_FAN_CLUB",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 38,
+      "y": 25,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_HEARTHOME_CITY_NORTHEAST_HOUSE1F",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 6,
+      "y": 54,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE208_GATE_TO_HEARTHOME_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 10,
+      "y": 57,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE212_GATE_TO_HEARTHOME_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 11,
+      "y": 57,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE212_GATE_TO_HEARTHOME_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 57,
+      "y": 55,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE209_GATE_TO_HEARTHOME_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 6,
+      "y": 55,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE208_GATE_TO_HEARTHOME_CITY",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 57,
+      "y": 54,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_ROUTE209_GATE_TO_HEARTHOME_CITY",
+      "dest_warp_id": "0"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }

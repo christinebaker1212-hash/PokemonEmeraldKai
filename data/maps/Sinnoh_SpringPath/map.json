@@ -20,7 +20,22 @@
     }
   ],
   "object_events": [],
-  "warp_events": [],
+  "warp_events": [
+    {
+      "x": 26,
+      "y": 41,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SENDOFF_SPRING",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 27,
+      "y": 41,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_SENDOFF_SPRING",
+      "dest_warp_id": "1"
+    }
+  ],
   "coord_events": [],
   "bg_events": []
 }
