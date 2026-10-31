@@ -3017,8 +3017,15 @@ Old saves need nothing: eggs and Unown keep their real species in the save.
   (gGen59Field.heroSlots). Approximations: PARENTAL BOND = one hit at x1.25, MAGIC BOUNCE blocks instead of
   reflecting, the primal weathers are lasting rain / sun, DANCER copies the stat dances only, ILLUSION does nothing.
   Tests gen59_forms, gen59_exit, gen59_dancer.
-- Items: marts sell the newer battle / evolution items by GENERATION (shop.c MP_ShopItems, sMpShopExtras by map),
-  PICKUP's 95-97 rolls give an allowed newer item.
+- Items: marts sell the newer battle / evolution items by GENERATION (shop.c MP_ShopItems), PICKUP's 95-97 rolls
+  give an allowed newer item. Shops (1.61.5): JOHTO sells Pokemon Crystal's lists (GOLDENROD's clerks and the town
+  marts) and KANTO FireRed / LeafGreen's (CELADON, the towns, the SEVII ISLANDS) as Kai's items (sMpBaseLists; nothing
+  those games had that Kai doesn't, no older item they didn't sell), plus only the GEN 4+ items of the clerk's own
+  Quetzal list (MP_Gen_OfItem); a clerk Quetzal added sells only those (empty at GEN 3: just CANCEL). Clerks are known
+  by the map and the first item of their Quetzal list (MP_REGION_LIST for `pokemart 0`). The newer items are spread
+  over the department stores' clerks by theme and over the town marts by place (sMpShopExtras: MP_EXTRA per clerk,
+  MP_TOWN per mart), each from a badge count of that region. `mp shopdump`, `mp givebadges REGION`; tests
+  shop_lists_gen3 / gen9 (tools/test/check_shop_lists.py).
 - Everything obtainable at each GENERATION (1.61.3): tools/moemon_gen59/obtain_audit.py models every source
   (each region's wild tables as mp_region.c picks them, HEADBUTT, statics, the scripts' gifts / wild battles / eggs,
   starters, in-game trades, the Bug-Catching Contest, MoeGatcha's fixed prizes, evolutions, breeding) and
@@ -3078,7 +3085,7 @@ src/battle_gen59.c, settings / pictures / menu text / AI in src/battle_gimmick.c
   Pokémon is drawn again; MP_Gimmick_YDelta gives a MEGA picture its own height (GetBattlerYDelta).
 - Items 553-617: 47 MEGA STONES (CHARIZARDITE X / Y are CHARZARDITE X / Y: 13 letters) and 18 Z-CRYSTALS (type
   order, MYSTERY skipped), tools/moemon_gen59/gen_items.py MEGA / ZCRYSTALS; generation 0 (only their gimmick's
-  setting counts: MP_Gimmick_ItemAllowed); sold at LILYCOVE 3F, GOLDENROD 3F, CELADON 3F (shop.c sMpShopGimmickItems).
+  setting counts: MP_Gimmick_ItemAllowed); sold at LILYCOVE 3F, GOLDENROD 5F, CELADON 5F from 6 badges (shop.c sMpMegaStones / sMpZCrystals).
 - Tests: gimmick_mega, gimmick_dynamax, gimmick_z, gimmick_ai.
 ## Save layout and migration (1.60.1)
 The save (SaveBlock1/2, storage) must keep the same bytes on Linux and Windows and from version to version. 1.60.0 added

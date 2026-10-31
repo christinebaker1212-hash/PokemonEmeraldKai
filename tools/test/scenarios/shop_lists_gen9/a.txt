@@ -1,0 +1,5 @@
+pressuntil A field 5000
+mp givebadges 1
+mp givebadges 2
+mp shopdump
+quit

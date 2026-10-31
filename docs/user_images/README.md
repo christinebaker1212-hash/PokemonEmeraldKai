@@ -50,3 +50,4 @@ Numbered in the order they were sent. Add new ones with the next number and a li
 | 53 | A POKéMON card duel won (YOU WIN! vs. LASS): the result box cuts off its last line under the LASS's quote | the result box fits its text; Yu-Gi-Oh!'s win screen made the same (1.56.1) |
 | 54 | A Yu-Gi-Oh! duel's Battle Phase: the red strip naming the card under the cursor (Change of Heart, SPELL CARD) in the middle band | fade that strip while a phase banner plays (1.56.2) |
 | 55 | (sent in chat, no file) KANTO Route 2: an ARCEUS standing on the path in front of the player; the battle it starts is against a VICTINI | the right POKéMON in the event, and the event only when it should be there |
+| 56 | (sent in chat, no file) A wild battle stuck at its intro with OPTIONS > CREATURES: POKEMON (1.61.4): the trainer back picture holding the ball, the grass circles, no wild POKéMON, the text box empty | every battle begins with its POKéMON shown |

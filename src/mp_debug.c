@@ -1367,9 +1367,10 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "givebadges") == 0)
     {
-        int b;
+        // givebadges [REGION] - all 8 badges (HOENN's, or region 1 JOHTO / 2 KANTO's)
+        int b, region = *arg ? atoi(arg) : 0;
         for (b = 0; b < 8; b++)
-            FlagSet(FLAG_BADGE01_GET + b);
+            FlagSet(region ? MP_Region_BadgeFlag(region, b) : FLAG_BADGE01_GET + b);
     }
     else if (strcmp(cmd, "photo") == 0)
     {
@@ -1868,6 +1869,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         void MP_Linkx_OpenUnion(void);
         MP_Linkx_OpenUnion();
+    }
+    else if (strcmp(cmd, "shopdump") == 0)
+    {
+        // shopdump - every department store clerk's and town mart's list now (shop.c MP_ShopDump)
+        void MP_ShopDump(void);
+        MP_ShopDump();
     }
     else if (strcmp(cmd, "crycheck") == 0)
     {

@@ -1,0 +1,3 @@
+pressuntil A field 5000
+mp shopdump
+quit

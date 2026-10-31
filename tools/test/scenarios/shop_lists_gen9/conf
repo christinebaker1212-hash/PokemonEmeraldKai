@@ -1,0 +1,8 @@
+# The shops' lists at GEN 9 with JOHTO's and KANTO's badges: GOLDENROD and JOHTO's marts on Crystal's lists, KANTO's on FireRed /
+# LeafGreen's, the newer items only with GENERATION and badges (tools/test/check_shop_lists.py).
+MODE=1
+GEN=9
+TMO=60
+EXPECT_A=("shop ")
+UNEXPECT_A=("[crash]")
+CHECK="python3 tools/test/check_shop_lists.py 9"
