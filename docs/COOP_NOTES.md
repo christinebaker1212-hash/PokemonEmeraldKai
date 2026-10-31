@@ -2051,8 +2051,8 @@ ACTOR LEVEL [P]` picks the pursuit. Test garden_doing.
   numbers here (0x11B2...): they live in the region side file and FlagGet reads them in any region. Test ach_regions.
 - Every card in every region (1.61.3): with the GAME CENTER reachable from JOHTO / KANTO, its 2F CARD SHOP also sells
   one copy of each POKéMON promo card (tcg_collection.c Tcg_ShopPrice, 12000: the 44 promos came only from HOENN's
-  special trainers and prizes) and its Triple Triad seller adds every 4- and 5-star card only special players carry
-  (tt_ui.c ShopList, Tt_SinglePrice 8000 / 20000). Yu-Gi-Oh! needed nothing (every card is in a booster, a shop or a
+  special trainers and prizes). Triple Triad's 4- and 5-star cards are NOT sold there (the user's rule: no seller has
+  them; they stay with the players who carry them). Yu-Gi-Oh! needed nothing (every card is in a booster, a shop or a
   deck, and GOLDENROD's / CELADON's stores have CARD CLUB duelists). Test gc_cards_everywhere (harness mp cardshop);
   the card guide (tools/card_guide) says so.
 - JOHTO's and KANTO's GAME CENTER (1.61.3): HOENN's 2F and 3F, no 1F and no ROOFTOP (the user's rule: HOENN's tower

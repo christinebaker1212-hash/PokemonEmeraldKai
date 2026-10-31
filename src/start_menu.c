@@ -320,6 +320,27 @@ static void BuildStartMenuActions(void)
     }
 }
 
+// Moemon Kai (tests, harness mp startmenu): the START menu's rows as they'd show now, and the NATIONAL DEX
+void MP_StartMenuDebug(void)
+{
+    u8 i, keepNum = sNumStartMenuActions, keep[ARRAY_COUNT(sCurrentStartMenuActions)];
+    memcpy(keep, sCurrentStartMenuActions, sizeof(keep));
+    BuildStartMenuActions();
+    printf("[test] startmenu:");
+    for (i = 0; i < sNumStartMenuActions; i++)
+    {
+        if (sCurrentStartMenuActions[i] == MENU_ACTION_POKEDEX)
+            printf(" POKEDEX");
+        else if (sCurrentStartMenuActions[i] == MENU_ACTION_POKEMON)
+            printf(" POKEMON");
+        else
+            printf(" #%d", sCurrentStartMenuActions[i]);
+    }
+    printf(" national %d\n", IsNationalPokedexEnabled());
+    sNumStartMenuActions = keepNum;
+    memcpy(sCurrentStartMenuActions, keep, sizeof(keep));
+}
+
 static void AddStartMenuAction(u8 action)
 {
     AppendToList(sCurrentStartMenuActions, &sNumStartMenuActions, action);

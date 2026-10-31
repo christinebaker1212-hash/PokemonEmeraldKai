@@ -1,0 +1,19 @@
+pressuntil A field 5000
+wait 400
+mp startmenu
+mp setvar 0x511A 7
+mp warp 37,122,6,11
+wait 120
+pressuntil A field 12000
+mash A 100 10
+pressuntil A field 12000
+mp getvar 0x511A
+mp getflag 2145
+mp startmenu
+mp ctx
+press START 4
+wait 40
+shot menu
+press B 4
+wait 20
+quit

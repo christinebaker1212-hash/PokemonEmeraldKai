@@ -3,6 +3,7 @@ wait 60
 mp clearflag 2144
 mp clearflag 2145
 mp clearflag 2240
+mp startmenu
 mp setvar 0x5003 1
 mp warp 35,1,10,2
 wait 60
@@ -37,5 +38,6 @@ mp getvar 0x5004
 mp party
 mp getflag 2144
 mp getflag 2145
+mp startmenu
 shot lab2
 quit

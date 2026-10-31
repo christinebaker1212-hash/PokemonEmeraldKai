@@ -1,0 +1,7 @@
+# KANTO: OAK hands over the POKeDEX after the PARCEL (VAR 0x511A = 7) and makes it the NATIONAL DEX; the START menu
+# keeps POKeDEX and POKeMON (from the starter scene, story_kanto) and the NATIONAL DEX is on (harness mp startmenu)
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=4:10"
+EXPECT_A=("national 0" "var 0x511A = 8" "startmenu: POKEDEX POKEMON #2 #4 #5 #6 #7 national 1" "ctx 1 free 1")
+UNEXPECT_A=("[crash]" "TIMEOUT" "not ported")

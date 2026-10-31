@@ -130,9 +130,22 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
    Cards: DONE (every card at the GAME CENTER, reachable from every region: COOP_NOTES "Every card in every region").
    GAME CENTER: DONE for JOHTO / KANTO (an attendant in GOLDENROD's / CELADON's GAME CORNER, 2F and 3F only, by the
    user's rule; COOP_NOTES "The GAME CENTER"). Still to do here: a per-region card audit (which cards only come from
-   HOENN's special trainers: TCG promos, YGO signatures, TT 5-star cards) and JOHTO / KANTO counterparts (their gym
+   HOENN's special trainers: TCG promos (now sold at the GAME CENTER), YGO signatures, TT 4-/5-star cards - the user:
+   NO seller gets these, the GAME CENTER's included) and JOHTO / KANTO counterparts (their gym
    leaders, Elite Four, champions, rivals as special duelists giving the same prizes), checked by a tool like
    obtain_audit.py over the card guide's dumps (tools/card_guide).
 7. Achievements (item 6 above): JOHTO / KANTO tabs added (32 achievements; COOP_NOTES "Achievements for JOHTO and
    KANTO"). Could add more: story beats (RADIO TOWER, SILPH CO., S.S. ANNE, the SEVII ISLANDS), the Bug-Catching
    Contest, the RUINS OF ALPH puzzles, the GAME CORNERS.
+8. (The user, during the playthrough tests:) run state passes beside the story checks: after each story milestone,
+   check what the player sees changed with it - the START menu's rows and the NATIONAL DEX (harness mp startmenu,
+   now in story_johto / story_kanto / story_kanto_dex), RUNNING SHOES, badges on the trainer card, FLY / the Town
+   Map, the BAG's key items. The user found KANTO's menu without POKeDEX / POKeMON after the starter and the NATIONAL
+   DEX on 1.61.2: the system-flag fix in 1.61.3 covers it (tests above), so it is not a known issue.
+9. FINAL, FINAL PASS (the user's): be absolutely certain 2 and 3 players don't break any script or battle - every
+   JOHTO / KANTO story scene, special battle (LANCE's multi battle uses the Triple Battle second ally's back picture
+   slot: check with a friend in the room / in the battle), co-op doubles and triples, joining a battle, followers,
+   region travel together; two- and three-client runs of the story sweep's scenes (MOEMON_LOBBY, barrier).
+10. THE ABSOLUTE LAST PASS, after everything is committed and built: MoeGatcha - every banner by GENERATION, Gen 3
+   (today's banners) as the base: newer POKeMON / items join each banner as the GENERATION rises (mp_gatcha.c;
+   RandomSpecies is still 1-386 at every GENERATION).

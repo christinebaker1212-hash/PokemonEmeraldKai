@@ -1551,22 +1551,6 @@ static unsigned ShopList(uint16_t *out)
     {
         for (i = 0; stock[i]; i++)
             out[n++] = stock[i];
-        // Moemon Kai: the GAME CENTER (in every region) also has the cards only special players carry, so every card
-        // can be had in JOHTO and KANTO too
-        if (gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_RUSTBORO_CITY_GAME_CENTER_2F)
-         && gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_RUSTBORO_CITY_GAME_CENTER_2F))
-        {
-            unsigned s, k, j;
-            for (s = 0; s < TT_SPECIAL_COUNT; s++)
-                for (k = 0; gTtSpecialCards[s][k]; k++)
-                {
-                    uint16_t id = gTtSpecialCards[s][k];
-                    for (j = 0; j < n && out[j] != id; j++)
-                        ;
-                    if (j == n && Tt_Card(id) && Tt_Card(id)->stars >= 4)
-                        out[n++] = id;
-                }
-        }
     }
     else if (U.shopTab == 2)
     {

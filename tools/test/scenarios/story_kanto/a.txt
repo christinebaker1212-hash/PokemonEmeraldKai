@@ -2,6 +2,7 @@ pressuntil A field 5000
 wait 60
 mp clearflag 2144
 mp clearflag 2145
+mp startmenu
 mp teach 0 44
 mp battlestyle 1
 mp getvar 0x5118
@@ -36,6 +37,7 @@ mp getvar 0x5118
 mp party
 mp getflag 2144
 mp getflag 2145
+mp startmenu
 shot after
 mp ctx
 quit

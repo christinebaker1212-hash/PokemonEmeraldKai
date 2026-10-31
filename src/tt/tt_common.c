@@ -109,8 +109,7 @@ unsigned Tt_PackPrice(unsigned pack)
 }
 unsigned Tt_SinglePrice(unsigned id)
 {
-    // (4 and 5 stars: only the GAME CENTER's seller, for the cards only special players carry: tt_ui.c ShopList)
-    static const unsigned sPrices[TT_MAX_STARS + 1] = {0, 400, 1000, 2600, 8000, 20000};
+    static const unsigned sPrices[TT_MAX_STARS + 1] = {0, 400, 1000, 2600, 0, 0};
     const struct TtCard *c = Tt_Card(id);
-    return c ? sPrices[c->stars] : 0;
+    return c && c->stars <= 3 ? sPrices[c->stars] : 0;
 }

@@ -4,5 +4,5 @@
 MODE=1
 TMO=300
 ENV_A="MOEMON_DEBUG_REGION=1"
-EXPECT_A=("var 0x5003 = 2" "flag 2240 = 1" "where map 35.0 xy 6,4" "var 0x5004 = 1" "party: 280(" "flag 2144 = 1" "flag 2145 = 1")
+EXPECT_A=("var 0x5003 = 2" "flag 2240 = 1" "where map 35.0 xy 6,4" "var 0x5004 = 1" "party: 280(" "flag 2144 = 1" "flag 2145 = 1" "startmenu: #" "startmenu: POKEDEX POKEMON")
 UNEXPECT_A=("[crash]" "TIMEOUT" "not ported")

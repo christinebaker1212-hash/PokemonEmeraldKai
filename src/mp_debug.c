@@ -1838,6 +1838,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_Gatcha_Open(void);
         MP_Gatcha_Open();
     }
+    else if (strcmp(cmd, "startmenu") == 0)
+    {
+        // startmenu - the START menu's rows now (POKEDEX / POKEMON by name, others by action number) and the NATIONAL DEX
+        void MP_StartMenuDebug(void);
+        MP_StartMenuDebug();
+    }
     else if (strcmp(cmd, "menu") == 0)
     {
         // menu PAGE - open the CO-OP menu on a page (0 main, 1 look, ...)
