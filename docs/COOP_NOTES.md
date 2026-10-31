@@ -2864,6 +2864,10 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   time-travel menu, the passage object and its scenes are gone), GOLDENROD lost its phone call about it, and Quetzal's
   ten QzTimeTravel* specials and johto_shared.inc's time-travel scripts are gone (data/qz_specials.inc too). If
   tools/quetzal_port/import.py runs again they come back: remove them again. Test qz_bill_house.
+- TEAM PADDING (FILL) and the GENERATION: the extra Moemon (mp_coop.c PickFillerSpecies, at a co-op battle's start or
+  when a friend joins one) is never past the GENERATION or the region's cap (MP_Gen_SealedSpecies / MP_Gen_Allowed);
+  a player saw REUNICLUS at GEN 3. Level scaling's trainer evolutions stop before a sealed species too
+  (mp_levelscale.c MP_LevelScale_Evolve). Test coop_fill_gen3 (tools/test/check_fill_gen.py reads the padded team).
 - A special that is done when it returns (a JOHTO / KANTO special with nothing to wait for, every stub) calls
   ScriptContext_Enable at once; Emerald's waitstate right after it then stopped the script for good (S.S. ANNE's
   departure froze the player on the dock). ScrCmd_special / specialvar note when the special enabled the script

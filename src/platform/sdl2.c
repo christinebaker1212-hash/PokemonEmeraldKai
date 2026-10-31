@@ -83,10 +83,10 @@ static u16 sMashKeys = 0;
 static unsigned long sFrameCounter = 0;
 unsigned long Platform_FrameCount(void) { return sFrameCounter; }
 static char sShotDir[400] = ".";
-// barrier NAME COUNT: wait until COUNT clients (sharing the screenshot folder) got there, so their next lines run
+// barrier NAME COUNT [MAXFRAMES]: wait until COUNT clients (sharing the screenshot folder) got there, so their next lines run
 // on the same frame (a test that needs two players to do something at the very same moment)
 static char sBarrierName[64];
-static int sBarrierCount, sBarrierFrames;
+static int sBarrierCount, sBarrierFrames, sBarrierMax;
 static u16 ParseTestKeys(const char *s);
 static void TestHarnessStep(void);
 static bool SpectateStep(void);
@@ -1111,7 +1111,7 @@ static void TestHarnessStep(void)
                     have++;
             closedir(d);
         }
-        if (have < sBarrierCount && ++sBarrierFrames < 60 * 120)
+        if (have < sBarrierCount && ++sBarrierFrames < sBarrierMax)
             return;
         printf("[test] frame %lu: barrier %s %s\n", sFrameCounter, sBarrierName, have < sBarrierCount ? "TIMEOUT" : "passed");
         fflush(stdout);
@@ -1387,6 +1387,8 @@ static void TestHarnessStep(void)
             snprintf(sBarrierName, sizeof(sBarrierName), "%s", arg);
             sBarrierCount = n > 1 ? n : 2;
             sBarrierFrames = 0;
+            sBarrierMax = 60 * 120;   // (barrier NAME COUNT [MAXFRAMES]: how long to wait, 7200 frames by default)
+            sscanf(line, "%*s %*s %*d %d", &sBarrierMax);
             snprintf(path, sizeof(path), "%s/barrier_%s_%llu", sShotDir, sBarrierName,
                      (unsigned long long)SDL_GetPerformanceCounter());
             f = fopen(path, "w");

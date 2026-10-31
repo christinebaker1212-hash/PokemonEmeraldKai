@@ -8,6 +8,8 @@
 # advance; look at the list), NOFIRE (nothing ran: the trigger didn't start a script).
 # usage: tools/test/story_sweep.sh [FIRST_GROUP LAST_GROUP]   (default 34 39: JOHTO and KANTO)
 #   JOBS=n games at once (default 4), ONLY=MapName[,MapName...], KEEP=1 keeps every run folder, BIN=the game
+#   PLAYERS=2|3: the same with one or two friends in the room (runN.sh: a local server), standing in the map while the
+#   host plays its scenes; a friend's crash, out-of-memory heap or desync is a FAIL too (FRIEND in the report)
 . "$(dirname "$0")/common.sh"
 G0=${1:-34}; G1=${2:-39}; JOBS=${JOBS:-4}
 D="$OUT/story_sweep"; rm -rf "$D"; mkdir -p "$D"
@@ -111,18 +113,39 @@ for g in range(g0, g1 + 1):
                       'pressuntil A field 1500', 'pressuntil B field 600', 'press START 4', 'wait 30', 'press A 4',
                       'wait 60', 'pressuntil B field 600', 'pressuntil A field 3000', 'pressuntil B field 600', 'wait 20',
                       'mp ctx', 'mp getvar 0x%X' % vid, 'mp sweepnote %s' % note]
-        lines += ['mp savesum', 'quit']
+        lines += ['mp savesum', 'barrier end %s 2000000' % os.environ.get('PLAYERS', '1'), 'quit']
         open(os.path.join(out, 'scripts', name + '.txt'), 'w').write('\n'.join(lines) + '\n')
         region = 0 if g < 34 else (1 if g < 36 else 2)
-        print(g, n, region, len(events), name)
+        stand = landing or (events[0][5], events[0][6])
+        print(g, n, region, len(events), name, stand[0], stand[1])
 PY
-one() {   # one GROUP NUM REGION COUNT NAME
+one() {   # one GROUP NUM REGION COUNT NAME STANDX STANDY
     local d="$D/run_$5"; mkdir -p "$d"
     local t=$(( 90 + $4 * 120 ))
+    if [ "${PLAYERS:-1}" -gt 1 ]; then
+        # the host plays the map's scenes (a.txt); friends join the room, stand in the map until it's done (barrier)
+        cp "$D/scripts/$5.txt" "$d/a.txt"
+        local c
+        for c in b c d; do
+            [ "$c" = b ] || [ "$c" = c -a "$PLAYERS" -ge 3 ] || [ "$c" = d -a "$PLAYERS" -ge 4 ] || continue
+            printf 'pressuntil A field 5000\nwait 400\nmp warp %s,%s,%s,%s\nwait 60\nbarrier end %s 2000000\nmp ctx\nmp where\nquit\n' \
+                "$1" "$2" "$6" "$7" "$PLAYERS" > "$d/$c.txt"
+        done
+        local envs="MOEMON_DEBUG_REGION=${REGION:-$3} MOEMON_DEBUG_PARTY=6:100,9:100 MOEMON_TEST_FOE_HP1=1"
+        TMO=$(( t + 60 )) FPS=${FPS:-240} WARP="$1,$2,1,1" ENV_A="$envs" ENV_B="$envs" ENV_C="$envs" ENV_D="$envs" \
+            bash "$REPO/tools/test/runN.sh" "$PLAYERS" "$d" > "$d/run.txt" 2>&1
+        cp "$d/a.log" "$d/log.txt"
+        for c in b c d; do
+            [ -f "$d/$c.log" ] || continue
+            grep -q "\[crash\]\|Segmentation\|\[heap\] out of memory\|desync" "$d/$c.log" && echo "FAIL $1.$2 $5: FRIEND $c crashed or desynced"
+            grep -q "^\[test\] ctx .* free 1" "$d/$c.log" || echo "FAIL $1.$2 $5: FRIEND $c not free at the end (or never got there)"
+        done
+    else
     (cd "$d" && env SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_TEST="$D/scripts/$5.txt" MOEMON_SHOTDIR="$d" \
         MOEMON_SKIP_COOP_SETUP=1 MOEMON_DEBUG_QUICKSTART=1 MOEMON_DEBUG_WARP="$1,$2,1,1" MOEMON_DEBUG_REGION="${REGION:-$3}" \
         MOEMON_DEBUG_PARTY=6:100,9:100 MOEMON_TEST_FOE_HP1=1 MOEMON_COOP_CONFIG="$d/a.ini" MOEMON_CONTROLS_CONFIG="$d/c.ini" \
         MOEMON_SAVE="$d/a.sav" timeout -k 5 "$t" "$BIN" > "$d/log.txt" 2>&1)
+    fi
     local rc=$? why=""
     [ $rc = 124 ] || [ $rc = 137 ] && why="hang (timeout)"
     [ -z "$why" ] && [ $rc != 0 ] && why="exit $rc"
@@ -159,7 +182,7 @@ PY
     if [ -n "$why" ]; then cp "$d/log.txt" "$D/$5.log"; echo "FAIL $1.$2 $5: $why"; fi
     [ -n "$KEEP" ] || rm -rf "$d"
 }
-export -f one; export D BIN REGION KEEP
+export -f one; export D BIN REGION KEEP PLAYERS FPS REPO
 total=$(wc -l < "$D/maps.txt")
 events=$(awk '{s+=$4} END{print s}' "$D/maps.txt")
 xargs -P "$JOBS" -L 1 bash -c 'one "$@"' _ < "$D/maps.txt" | tee "$D/report.txt"

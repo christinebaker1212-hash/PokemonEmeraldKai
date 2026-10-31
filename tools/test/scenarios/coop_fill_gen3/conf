@@ -1,0 +1,15 @@
+# TEAM PADDING (FILL) at GEN 3: the extra Moemon a trainer gets is never past the GENERATION (a player saw REUNICLUS at
+# GEN 3): tri_padded at GEN 3, every Moemon in the padded team checked (tools/test/check_fill_gen.py)
+GEN=3
+CHECK="python3 tools/test/check_fill_gen.py 3"
+MODE=3
+WARP=11,3,3,10
+WARP_B=11,3,3,11
+WARP_C=11,3,1,10
+TMO=400
+ENV_A="MOEMON_DEBUG_PARTY=283:46,280:40"
+ENV_B="MOEMON_DEBUG_PARTY=283:46,280:40"
+ENV_C="MOEMON_DEBUG_PARTY=283:46,280:40"
+EXPECT_A=("asking whether to wait for a third player" "(and another: triple)" "party 2 -> 3" "co-op: battle over, outcome 1")
+EXPECT_B=("room rules from player 1: team padding on" "co-op battle link: 3 games" "co-op: battle over, outcome 1, prize")
+EXPECT_C=("co-op battle link: 3 games" "co-op: battle over, outcome 1, prize")

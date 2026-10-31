@@ -1,0 +1,10 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+press UP 2
+wait 30
+press A 2
+pressuntillog A 6000 joins the battle against trainer
+pressuntillog A 20000 co-op: battle over
+wait 300
+quit

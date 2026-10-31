@@ -27,6 +27,7 @@
 #include "global.h"
 #include "random.h"
 #include "mp.h"
+#include "mp_region.h"
 #include "mp_join.h"
 #include "item.h"
 #include "map_name_popup.h"
@@ -1816,6 +1817,8 @@ static u16 PickFillerSpecies(struct Pokemon *src, u8 slot, u16 trainerId)
                 continue;
             if (IS_GEN4_SPECIES(species) && !IS_GEN4_SPECIES(srcSpecies))
                 continue;   // Moemon Kai: Gen 4 Moemon only where the game puts them (after the ELITE FOUR, other regions)
+            if (MP_Gen_SealedSpecies(species) || !MP_Gen_Allowed(species))
+                continue;   // Moemon Kai: nothing past the GENERATION (or the region's own cap)
             if (species == SPECIES_SHEDINJA || species == SPECIES_UNOWN || species == SPECIES_DITTO
              || gSpeciesInfo[species].eggGroups[0] == EGG_GROUP_NO_EGGS_DISCOVERED)
                 continue;
@@ -1858,6 +1861,7 @@ static void PadTrainer(u16 trainerId, u8 base, u8 n)
     gEnemyParty[ace] = gEnemyParty[ace - 1];
     src = n >= 2 ? &gEnemyParty[ace - 2] : &gEnemyParty[ace];
     species = PickFillerSpecies(src, n - 1, trainerId);
+    MPNet_Log("coop: filler %d into slot %d (ace %d)", species, ace - 1, ace);
     CreateMon(&gEnemyParty[ace - 1], species, GetMonData(src, MON_DATA_LEVEL), GetMonData(src, MON_DATA_ATK_IV), TRUE,
               Random32(), OT_ID_RANDOM_NO_SHINY, 0);
 }
@@ -4223,6 +4227,10 @@ bool8 MP_Coop_JoinTrainerOk(void)
     u16 trainerB = gMpCoopBattle ? (sCoop.twoTrainers ? sCoop.trainerIdB : 0)
                                  : ((gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS) ? gTrainerBattleOpponent_B : 0);
     if (!JoinTrainerIdOk(trainer) || (trainerB != 0 && !JoinTrainerIdOk(trainerB)))
+        return FALSE;
+    // a battle beside an in-game partner (STEVEN; JOHTO's LANCE, GIOVANNI, SILVER: battle_tower.c special battles) has
+    // no seat to give, and its trainerbattle mode is an earlier battle's
+    if (!gMpCoopBattle && (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER))
         return FALSE;
     switch (mode)
     {
