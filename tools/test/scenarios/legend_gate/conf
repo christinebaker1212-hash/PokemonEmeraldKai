@@ -1,0 +1,8 @@
+# Before a region's LEAGUE only the legendaries its own games give then are out: KANTO's ARTICUNO (SEAFOAM) is there,
+# the GALARIAN ARTICUNO and the ENTEI of KANTO are hidden until the LEAGUE is beaten, then shown
+MODE=1
+GEN=9
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=2"
+EXPECT_A=("flag 8568 = 0" "flag 9057 = 1" "flag 9018 = 1" "flag 9057 = 0" "flag 9018 = 0")
+UNEXPECT_A=("[crash]" "flag 8568 = 1")

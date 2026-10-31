@@ -1,4 +1,5 @@
 pressuntil A field 5000
+mp regionclear 1
 wait 60
 mp teach 0 129
 mp dexcatch 488
@@ -13,6 +14,8 @@ mp warp 34,31,32,33
 wait 150
 shot cave
 mp face up
+pressuntil A action 3000
+mp battlerhp 1 1
 mash A 200 20
 wait 400
 shot home

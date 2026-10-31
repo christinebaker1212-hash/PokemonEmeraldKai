@@ -388,7 +388,21 @@ static bool8 ArceusTrialWaits(const struct QzStatic *e)
     return FALSE;
 }
 
-// On entering a map: a done Pokémon stays hidden; one of a later generation than the region shows waits (MP_Gen_Cap)
+// Before a region's LEAGUE is beaten only the legendaries its own games let you catch then are out: JOHTO's RAIKOU,
+// ENTEI and SUICUNE (Crystal), KANTO's ARTICUNO, ZAPDOS and MOLTRES (FireRed / LeafGreen; not their GALARIAN forms).
+// Every other one waits for the LEAGUE (Quetzal shows them all from the start)
+static bool8 PreLeagueLegend(const struct QzStatic *e)
+{
+    if (e->region == REGION_JOHTO)
+        return e->species == SPECIES_RAIKOU || e->species == SPECIES_ENTEI || e->species == SPECIES_SUICUNE;
+    if (e->region == REGION_KANTO)
+        return e->gen == 0 && (e->species == SPECIES_ARTICUNO || e->species == SPECIES_ZAPDOS || e->species == SPECIES_MOLTRES);
+    return FALSE;
+}
+
+// On entering a map: a done Pokémon stays hidden; one of a later generation than the region shows waits (MP_Gen_Cap);
+// one its region's own games give only after the LEAGUE waits for it (PreLeagueLegend; none is part of the story
+// before it: only its own map's scripts and the postgame's read their flags)
 static u16 RefreshStatics(void)
 {
     u32 i;
@@ -398,6 +412,7 @@ static u16 RefreshStatics(void)
         if (!HereIs(e))
             continue;
         if (FlagGet(e->doneFlag) || !MP_Gen_Allowed(e->species) || MP_Gen_Cap(e->region) < e->gen   // (a form: GALARIAN ARTICUNO...)
+         || (!MP_Region_Cleared(e->region) && !PreLeagueLegend(e))
          || (e->region == 2 && e->species == SPECIES_MELOETTA && !FlagGet(FLAG_QZ_0x2924))   // after the CHANSEY Dance
          || (e->species == SPECIES_DARKRAI && !FlagGet(e->region == 1 ? FLAG_QZ_0x1425 : FLAG_QZ_0x292B))   // in a dream
          || (e->region == 2 && e->species == SPECIES_MEW && e->group == 36 && !FlagGet(FLAG_QZ_0x2931))   // under the truck
@@ -1187,7 +1202,7 @@ u16 QzSevaultHouseEventEligibility(void)
     u32 i, j, k;
     bool8 sing = FALSE;
     gSpecialVar_Result = FALSE;
-    if (FlagGet(FLAG_QZ_0x2924) || !MP_Gen_Allowed(SPECIES_MELOETTA)
+    if (FlagGet(FLAG_QZ_0x2924) || !MP_Gen_Allowed(SPECIES_MELOETTA) || !MP_Region_Cleared(REGION_KANTO)
      || GetSetPokedexFlag(SpeciesToNationalPokedexNum(SPECIES_MELOETTA), FLAG_GET_CAUGHT))
         return 0;
     if (GetMonData(&gPlayerParty[0], MON_DATA_SPECIES_OR_EGG) != SPECIES_CHANSEY
@@ -1246,7 +1261,8 @@ static bool8 Caught(u16 species)
 static bool8 DreamAllowed(void)
 {
     return MP_Gen_Allowed(SPECIES_DARKRAI) && Caught(SPECIES_CRESSELIA) && !Caught(SPECIES_DARKRAI)
-        && !FlagGet(FLAG_QZ_0x1318);   // (not in GIOVANNI's past)
+        && !FlagGet(FLAG_QZ_0x1318)   // (not in GIOVANNI's past)
+        && MP_Region_Cleared(MP_Region_Current());   // (DARKRAI waits for the LEAGUE: RefreshStatics)
 }
 
 u16 QzEndDreamEvent(void)

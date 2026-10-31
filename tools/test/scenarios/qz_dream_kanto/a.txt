@@ -14,6 +14,8 @@ mp warp 36,29,3,4
 wait 120
 mp face up
 shot darkrai
+pressuntil A action 3000
+mp battlerhp 1 1
 mash A 200 20
 wait 300
 mp warp 36,29,5,5

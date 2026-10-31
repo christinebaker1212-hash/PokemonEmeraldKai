@@ -906,6 +906,11 @@ match. sdl2.c BackUpSaveFile rotates "<save>.bakN.bag" with the backups, and loa
   battle_music_hoenn / _johto.
 - qz_specials.c ArceusTrialWaits: KANTO's 17 ARCEUS trial objects stay hidden until FLAG_QZ_0x2E13 (ARCEUS's visit
   to the PALLET bedroom), ALTERING CAVE's Normal-type one (0x2E15) until the 17 are done. Test arceus_trials.
+- Legendaries wait for the LEAGUE: RefreshStatics shows a region's statics only once MP_Region_Cleared(region), save
+  PreLeagueLegend's (what the region's own games give before the LEAGUE: JOHTO's RAIKOU / ENTEI / SUICUNE, KANTO's
+  ARTICUNO / ZAPDOS / MOLTRES, not their GALARIAN forms). The dreams (DreamAllowed) and the CHANSEY Dance wait too.
+  Test legend_gate; the event tests run `mp regionclear` first. Wild battles ignore MOEMON_TEST_FOE_HP1 (trainers'
+  parties only): the dream tests set DARKRAI's HP with `mp battlerhp 1 1`.
 - Achievements: jalph (FL_ALPH 0x1076-0x1079), jbugwin (qz_bugcontest.c, first place), jmeloetta / jdarkrai /
   kmeloetta / kdarkrai (the statics' done flags), karceus (FL_ARCEUS_TRIALS: the 17 done flags), karceusn (0x2E16).
 
@@ -2980,7 +2985,8 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
 - QzGiovanniStoryUpdateFlags (Quetzal's special 693) runs on every JOHTO warp (MP_Region_OnMapLoaded), as Quetzal's
   map loading does: it keeps GIOVANNI's-story people and ELM's lab's ARCEUS hidden (they stood there from 1.60).
 - Not ported yet: Quetzal's per-legendary unlock conditions (special 704's kind switch at 0x082AA38C, 45 kinds;
-  KANTO's at 0x082AE79C): RefreshStatics shows every one not yet caught or beaten (save MELOETTA, DARKRAI, MEW's).
+  KANTO's at 0x082AE79C): RefreshStatics shows every one not yet caught or beaten after the LEAGUE (save MELOETTA,
+  DARKRAI, MEW's; 1.61.6: PreLeagueLegend's before it).
 - Cross-region trips: tools/test/gen_region_trips.py writes region_trip_<from>_<to> (all six, there and back by the
   real clerks). story_johto plays JOHTO's opening (house, MOM, ELM, the starter); harness mp getvar.
 - tools/test/npc_sweep.sh talks to every person and reads every sign on every map (harness `mp sweepnote`); it
