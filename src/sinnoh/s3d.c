@@ -6,8 +6,8 @@
 // windows (BG0) and the sprites go on top as on any map. Field sprites (the ones that follow the camera) are moved to
 // where their spot on the ground is in the 3D view (sprite.c UpdateOamCoords -> S3D_PlaceSprite).
 //
-// The world comes from the 3D pack built from the player's Platinum ROM (tools/sinnoh/build_pack.py; nothing from the
-// ROM is in the repository): meshes in Platinum's units (16 a tile, a block of 32x32 tiles is 512 wide, centred on
+// The world comes from the 3D pack (sinnoh/platinum3d.pak beside the game) the release builds from pret/pokeplatinum
+// (tools/sinnoh/make_pack.sh; nothing of it is in the repository): meshes in Platinum's units (16 a tile, a block of 32x32 tiles is 512 wide, centred on
 // its middle), textures as RGBA, the area lights, and per matrix cell its block, props and the field engine's map
 // blocks (collision and behaviors) that S3D_LayoutBlocks gives the map loader in place of the layout's placeholders.
 //
@@ -33,6 +33,7 @@
 #include "constants/maps.h"
 
 extern void (*gMpS3dLine)(int line, u16 layers[4][DISPLAY_WIDTH]);
+const char *Updater_ExeFile(const char *name);
 extern bool (*gMpS3dOamHidden)(int oamIndex, int x, int line);
 
 #define W DISPLAY_WIDTH
@@ -105,7 +106,7 @@ static void LoadPack(void)
     u32 i, j, k;
     sPack.tried = TRUE;
     if (path == NULL)
-        path = "sinnoh/platinum3d.pak";
+        path = Updater_ExeFile("sinnoh/platinum3d.pak");   // (beside the game, as music/)
     f = fopen(path, "rb");
     if (f == NULL)
         return;

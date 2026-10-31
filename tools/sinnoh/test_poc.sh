@@ -1,13 +1,14 @@
 #!/bin/bash
-# SINNOH's 3D engine, end to end (needs the user's Platinum ROM and a pret/pokeplatinum checkout; nothing from the ROM
-# is kept): builds the 3D pack, then in the game
+# SINNOH's 3D engine, end to end: builds the 3D pack from a pret/pokeplatinum checkout (tools/sinnoh/fetch_decomp.sh
+# makes one), then in the game
 #   1. TWINLEAF TOWN in 3D at noon matches the offline reference picture (tools/sinnoh/render_ref.py) pixel for pixel
 #      within rounding (the player's own spot left out)
 #   2. Platinum's collision: walking up into the player's house stops at its wall
 #   3. walking north out of TWINLEAF reaches ROUTE 201 (the maps' connection) with the 3D view following
-# usage: tools/sinnoh/test_poc.sh PLATINUM_ROM POKEPLATINUM_DIR   (BIN=the game, default ./pokeemerald64)
-ROM="${1:?usage: test_poc.sh PLATINUM_ROM POKEPLATINUM_DIR}"
-SRC="${2:?usage: test_poc.sh PLATINUM_ROM POKEPLATINUM_DIR}"
+#   and, given a Platinum ROM too, that the pack built from the cartridge is the same, byte for byte
+# usage: tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [PLATINUM_ROM]   (BIN=the game, default ./pokeemerald64)
+SRC="${1:?usage: test_poc.sh POKEPLATINUM_DIR [PLATINUM_ROM]}"
+ROM="$2"
 REPO="$(cd "$(dirname "$0")/../.." && pwd)"
 OUT="${OUT:-$(mktemp -d)}"
 mkdir -p "$OUT"
@@ -15,7 +16,11 @@ export BIN="${BIN:-$REPO/pokeemerald64}"
 fail=0
 check() { if eval "$2"; then echo "ok   $1"; else echo "FAIL $1"; fail=$((fail + 1)); fi; }
 
-python3 -I "$REPO/tools/sinnoh/build_pack.py" "$ROM" "$SRC" "$OUT/platinum3d.pak" > "$OUT/pack.log" || { echo "FAIL pack"; exit 1; }
+python3 -I "$REPO/tools/sinnoh/build_pack.py" "$SRC" "$OUT/platinum3d.pak" > "$OUT/pack.log" || { echo "FAIL pack"; exit 1; }
+if [ -n "$ROM" ]; then
+    python3 -I "$REPO/tools/sinnoh/build_pack.py" --rom "$ROM" "$SRC" "$OUT/from_rom.pak" > "$OUT/pack_rom.log"
+    check "the pack from the ROM is the decomp's, byte for byte" "cmp -s '$OUT/platinum3d.pak' '$OUT/from_rom.pak'"
+fi
 run() {   # NAME SCRIPT
     mkdir -p "$OUT/$1"
     printf '%b' "$2" > "$OUT/$1/a.txt"
@@ -23,7 +28,7 @@ run() {   # NAME SCRIPT
 }
 
 run look 'pressuntil A field 5000\nwait 30\nmp warp 40,0,14,9\nwait 200\nshot frame\nquit\n'
-python3 -I "$REPO/tools/sinnoh/render_ref.py" "$ROM" "$OUT/look/ref.png" 0 110 873 12 > /dev/null
+python3 -I "$REPO/tools/sinnoh/render_ref.py" "$SRC" "$OUT/look/ref.png" 0 110 873 12 > /dev/null
 check "TWINLEAF in 3D matches the reference" "python3 -I - '$OUT/look' <<'EOF'
 import sys
 import numpy as np

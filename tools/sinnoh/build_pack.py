@@ -2,11 +2,13 @@
 """The SINNOH 3D pack: Platinum's map blocks, their props and textures, flattened for the game's 3D engine
 (src/sinnoh/s3d.c reads it; docs/SINNOH_HANDOFF.md).
 
-    python3 -I tools/sinnoh/build_pack.py ROM POKEPLATINUM_DIR OUT.pak [X0 Z0 X1 Z1]
+    python3 -I tools/sinnoh/build_pack.py POKEPLATINUM_DIR OUT.pak [X0 Z0 X1 Z1]
+    python3 -I tools/sinnoh/build_pack.py --rom ROM POKEPLATINUM_DIR OUT.pak [...]   (the same from the cartridge)
         the cells of map matrix 0 from (X0, Z0) to (X1, Z1) (default: around TWINLEAF TOWN and ROUTE 201)
 
-POKEPLATINUM_DIR is a pret/pokeplatinum checkout: its map header table (include/data/map_headers.h,
-generated/map_headers.txt) gives each cell's area, so its texture set, prop textures and lights.
+POKEPLATINUM_DIR is a pret/pokeplatinum checkout (source.py): it holds every map block, texture set, prop model and
+light set Platinum has, so no ROM is needed; the release builds the pack from it (tools/sinnoh/fetch_decomp.sh). Built
+from the ROM instead, the pack is the same, byte for byte (tools/sinnoh/test_poc.sh checks it when given a ROM).
 
 Format (little endian), version 1:
   "S3DP" u32 version
@@ -23,17 +25,16 @@ Format (little endian), version 1:
           from Platinum's terrain attributes (bit 15 collision, low byte the behavior: Platinum's behaviors share
           Emerald's numbers for the common ones, so the metatile is one of the General tileset's with that behavior)
 """
+import hashlib
 import math
 import os
-import re
 import struct
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from nds import Rom  # noqa: E402
 import nitro  # noqa: E402
-from platinum import Land, Matrix, LAND, MATRIX, AREA, MAP_TEX, AREA_BM_TEX, BUILD_MODEL  # noqa: E402
-from render_ref import parse_lights  # noqa: E402
+from platinum import Land  # noqa: E402
+from source import open_source, NONE  # noqa: E402
 
 VERSION = 1
 
@@ -55,18 +56,8 @@ def blocks(land):
     return out
 
 
-def header_areas(src):
-    order = [ln.strip() for ln in open(os.path.join(src, 'generated/map_headers.txt')) if ln.strip()]
-    text = open(os.path.join(src, 'include/data/map_headers.h')).read()
-    areas = {}
-    for m in re.finditer(r'\[(MAP_HEADER_\w+)\] = \{\s*\.areaDataArchiveID = area_data_(\d+)', text):
-        areas[m.group(1)] = int(m.group(2))
-    return [areas.get(name, 0) for name in order]
-
-
 class Pack:
-    def __init__(self, rom):
-        self.rom = rom
+    def __init__(self):
         self.textures = []
         self.tex_ids = {}
         self.meshes = []
@@ -75,7 +66,9 @@ class Pack:
     def texture(self, tex0, mat):
         if tex0 is None or not mat.texture or mat.texture not in tex0.textures:
             return -1
-        key = (id(tex0), mat.texture, mat.palette)
+        if not hasattr(tex0, 'digest'):   # (by content: an object's id() is reused once it's freed)
+            tex0.digest = hashlib.sha1(tex0.d[tex0.o:]).digest()
+        key = (tex0.digest, mat.texture, mat.palette)
         if key not in self.tex_ids:
             w, h, px = tex0.decode(mat.texture, mat.palette)
             self.tex_ids[key] = len(self.textures)
@@ -142,19 +135,16 @@ def write(path, pack, light_sets, cells, window):
 
 
 def main():
-    rom = Rom(sys.argv[1])
-    areas = header_areas(sys.argv[2])
-    out_path = sys.argv[3]
-    window = [int(x) for x in sys.argv[4:8]] if len(sys.argv) >= 8 else [1, 23, 6, 29]
+    args = sys.argv[1:]
+    rom = None
+    if args[0] == '--rom':
+        rom, args = args[1], args[2:]
+    src = open_source(rom, decomp=args[0]) if rom else open_source(args[0])
+    out_path = args[1]
+    window = [int(x) for x in args[2:6]] if len(args) >= 6 else [1, 23, 6, 29]
     x0, z0, x1, z1 = window
-    pack = Pack(rom)
-    land_narc = rom.narc(LAND)
-    area_narc = rom.narc(AREA)
-    tex_narc = rom.narc(MAP_TEX)
-    bm_tex_narc = rom.narc(AREA_BM_TEX)
-    builds = rom.narc(BUILD_MODEL)
-    lights_narc = rom.narc('data/arealight.narc')
-    mx = Matrix(rom.narc(MATRIX)[0])
+    pack = Pack()
+    mx = src.matrix(0)
     light_index = {}
     light_sets = []
     tex_cache = {}
@@ -162,25 +152,24 @@ def main():
     for z in range(z0, z1 + 1):
         for x in range(x0, x1 + 1):
             lid, header, alt = mx.cell(x, z)
-            if lid == 0xFFFF:
+            if lid == NONE:
                 cells.append((-1, 0, 0, [], [0x0001 | (1 << 10) | (3 << 12)] * 1024))
                 continue
-            area = areas[header] if header is not None and header < len(areas) else 0
-            prop_set, tex_set, light_set = struct.unpack_from('<HHH', area_narc[area], 0)
+            prop_set, tex_set, light_set = src.area_of(header)
             if light_set not in light_index:
                 light_index[light_set] = len(light_sets)
-                light_sets.append(parse_lights(lights_narc[light_set].decode('latin-1')))
+                light_sets.append(src.lights(light_set))
             if ('map', tex_set) not in tex_cache:
-                tex_cache[('map', tex_set)] = nitro.btx0(tex_narc[tex_set])
+                tex_cache[('map', tex_set)] = nitro.btx0(src.map_textures(tex_set))
             if ('bm', prop_set) not in tex_cache:
-                tex_cache[('bm', prop_set)] = nitro.btx0(bm_tex_narc[prop_set])
-            land = Land(land_narc[lid])
+                tex_cache[('bm', prop_set)] = nitro.btx0(src.prop_textures(prop_set))
+            land = Land(src.land(lid))
             mesh = pack.mesh(('land', lid, tex_set), nitro.Bmd0(land.model), tex_cache[('map', tex_set)])
             props = []
             for pr in land.props:
-                if pr.model >= len(builds):
+                if pr.model >= src.prop_count():
                     continue
-                bmd = nitro.Bmd0(builds[pr.model])
+                bmd = nitro.Bmd0(src.prop_model(pr.model))
                 ptex = bmd.tex or tex_cache[('bm', prop_set)]
                 pm = pack.mesh(('prop', pr.model, prop_set), bmd, ptex)
                 ry = math.radians(pr.rot[1])
@@ -191,8 +180,8 @@ def main():
                      -sy * sx, 0.0, cy * sz, pr.pos[2]]
                 props.append((pm, m))
             cells.append((mesh, alt, light_index[light_set], props, blocks(land)))
-            print('cell (%d,%d): land %d header %d area %d (tex %d props %d lights %d), %d props'
-                  % (x, z, lid, header, area, tex_set, prop_set, light_set, len(props)))
+            print('cell (%d,%d): land %d %s (textures %d, props %d, lights %d), %d props'
+                  % (x, z, lid, header, tex_set, prop_set, light_set, len(props)))
     size = write(out_path, pack, light_sets, cells, window)
     print('%s: %d textures, %d meshes, %d light sets, %d bytes' % (out_path, len(pack.textures), len(pack.meshes),
                                                                  len(light_sets), size))

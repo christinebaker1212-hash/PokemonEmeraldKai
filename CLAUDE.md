@@ -4,9 +4,10 @@ Native PC build of Moemon Emerald Kai v1.0 with online 4-player co-op and PvP.
 Based on Kurausukun's `pc_port` branch of pret/pokeemerald (commit 1165825), SDL2.
 
 SINNOH (Pokémon Platinum as a third region in a new 3D engine, the PÓKETCH): in progress, `docs/SINNOH_HANDOFF.md`. The 3D
-engine (src/sinnoh/s3d.c, include/s3d.h) draws Platinum's own map models from a pack built from the user's ROM
-(tools/sinnoh/build_pack.py; never committed: sinnoh/ is ignored); TWINLEAF TOWN and ROUTE 201 (group 40) walk;
-tools/sinnoh/test_poc.sh ROM POKEPLATINUM_DIR; COOP_NOTES "SINNOH's 3D engine".
+engine (src/sinnoh/s3d.c, include/s3d.h) draws Platinum's own map models from sinnoh/platinum3d.pak, built from
+pret/pokeplatinum at a pinned commit by tools/sinnoh/make_pack.sh (run it before playing SINNOH from a build; the release
+runs it and ships the pack; never committed: sinnoh/ is ignored; no ROM needed); TWINLEAF TOWN and ROUTE 201 (group 40)
+walk; tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM]; COOP_NOTES "SINNOH's 3D engine".
 
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
 card duels).

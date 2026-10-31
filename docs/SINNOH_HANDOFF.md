@@ -9,15 +9,17 @@ Queued after the 1.61.6 release and the KANTO / JOHTO sweep (the user's plan, 20
   tools/sinnoh/test_poc.sh checks it against the offline reference render. COOP_NOTES "SINNOH's 3D engine" has the
   how. Next: heights (BDHC), the rest of the map matrix, animated textures (water), buildings' doors and warps,
   speed (about 6 ms a frame now), then data (step 3) and scripts (step 4).
-- OPEN QUESTION for the user: how players get the 3D pack. Nothing from the ROM is committed (this file's rule), so
-  either each player points the game at their own Platinum ROM and it builds the pack on first use, or the pack is
-  built from the user's ROM by the release and shipped. Asked 2026-10-31.
+- DECIDED (the user, 2026-10-31): the 3D data comes from pret/pokeplatinum, not a ROM. The decomp holds every map
+  block, texture set, prop model and light set as files (byte for byte the ROM's), so tools/sinnoh/make_pack.sh fetches
+  it at a pinned commit (fetch_decomp.sh) and build_pack.py converts it; the release does that and ships
+  sinnoh/platinum3d.pak beside the game. Players need nothing. Still nothing of it in this repository; the ROM path
+  (build_pack.py --rom) stays for cross-checks.
 - Read CLAUDE.md, BUILDING_COOP.md, docs/REGIONS_PLAN.md and COOP_NOTES ("JOHTO and KANTO",
   "Gen 4 battles", "Gens 5-9 and GENERATION", "The GAME CENTER") first.
 - Reference decomp: https://github.com/pret/pokeplatinum
-- The user's ROM: Google Drive file 13njqEG8nKIltrVkMAgXtM5E6X3dV33as,
-  "Pokemon - Platinum Version (USA) (Rev 1).zip" (about 51 MB; the .nds inside). Download it into its own folder
-  outside the repo; tools read it; ROM-derived files are never committed (same rule as the Quetzal rip).
+- Data: pret/pokeplatinum (tools/sinnoh/fetch_decomp.sh, pinned commit). The user's ROM, for cross-checks only:
+  Google Drive file 13njqEG8nKIltrVkMAgXtM5E6X3dV33as, "Pokemon - Platinum Version (USA) (Rev 1).zip" (about 51 MB;
+  the .nds inside), downloaded into its own folder outside the repo. Nothing from either is committed.
 
 ## The goal
 Add SINNOH as a third region beside JOHTO / KANTO, built from Pokémon Platinum:

@@ -3170,8 +3170,10 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
 - QzBufferLastReceivedMonForNickname reads gMpLastGivenMonPlace / Slot (pokemon.c GiveMonToPlayer), not VAR_RESULT.
 
 ## SINNOH's 3D engine (proof of concept)
-- Plan and rules: docs/SINNOH_HANDOFF.md. Tools in tools/sinnoh/ read the user's Platinum ROM (nds.py: the cartridge's
-  file system and NARCs; platinum.py: map matrices and land data; nitro.py: Nitro models BMD0 and textures BTX0, every
+- Plan and rules: docs/SINNOH_HANDOFF.md. The data comes from pret/pokeplatinum (source.py: its map blocks, matrices,
+  areas, props, texture sets and lights as files; fetch_decomp.sh gets them at a pinned commit, make_pack.sh fetches and
+  converts). A Platinum ROM gives the same files byte for byte (nds.py: the cartridge's file system and NARCs;
+  platinum.py: map matrices and land data; build_pack.py / render_ref.py --rom). nitro.py: Nitro models BMD0 and textures BTX0, every
   texture format, the render commands and display lists flattened to triangles). render_ref.py draws a reference
   picture offline (numpy); build_pack.py writes the 3D pack the game reads (format in its docstring): textures as RGBA,
   meshes (per material group: texture, repeat / flip, alpha, polygon id, culling, light switches, mode, triangles with
@@ -3180,9 +3182,11 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   meshes with their transforms) and the field engine's 32x32 map blocks from Platinum's terrain attributes (bit 15
   collision, low byte the behavior: Platinum's numbers match Emerald's for grass, water, sand, ledges; a General
   tileset metatile with that behavior is used). Each cell's area (so texture set, prop textures, lights) comes from
-  pokeplatinum's map header table (include/data/map_headers.h), so build_pack.py needs a pokeplatinum checkout too.
-- The pack is never committed (/sinnoh/ is ignored); the game reads sinnoh/platinum3d.pak beside it or
-  MOEMON_S3D_PAK. Without it the SINNOH maps keep their placeholder layouts (every cell blocked).
+  pokeplatinum's map header table (include/data/map_headers.h). Textures are shared by content (a temporary model's
+  id() is reused once freed, which had two props share a texture), so the pack is the same on every run.
+- The pack is never committed (/sinnoh/ is ignored); the release runs make_pack.sh and package.sh ships it in sinnoh/.
+  The game reads sinnoh/platinum3d.pak beside it (Updater_ExeFile, as music/) or MOEMON_S3D_PAK. Without it the SINNOH
+  maps keep their placeholder layouts (every cell blocked).
 - Maps: tools/sinnoh/gen_maps.py makes the field engine's maps (group 40: MAP_SINNOH_TWINLEAF_TOWN 32x32 from matrix
   cell (3, 27), MAP_SINNOH_ROUTE201 64x32 from (3, 26), connected) with placeholder blocks; fieldmap.c asks
   S3D_LayoutBlocks for a layout's blocks (the map and its connections), which gives the pack's for SINNOH maps. Script
@@ -3205,6 +3209,6 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   day; MOEMON_S3D_HOUR fixes the hour for tests.
 - Not yet: BDHC heights (all at the block's altitude), animated textures, billboard props, the rest of the matrix
   (build_pack.py's window), speed (about 6 ms a frame), Windows not built with it yet.
-- Test: tools/sinnoh/test_poc.sh ROM POKEPLATINUM_DIR (the 3D picture against render_ref.py: mean under 8 of 765 a
-  pixel, now 2.9; a house's wall; TWINLEAF to ROUTE 201).
+- Test: tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM] (the 3D picture against render_ref.py: mean under 8 of 765 a
+  pixel, now 2.9; a house's wall; TWINLEAF to ROUTE 201; with a ROM, its pack the same as the decomp's).
 

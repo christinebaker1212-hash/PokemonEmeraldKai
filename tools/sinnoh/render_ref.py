@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Offline reference picture of a Platinum map with its own 3D models, at the game's 240x160 (slow, for checking).
 
-    python3 -I tools/sinnoh/render_ref.py ROM OUT.png [MATRIX TILE_X TILE_Z [HOUR]]
+    python3 -I tools/sinnoh/render_ref.py POKEPLATINUM_DIR OUT.png [MATRIX TILE_X TILE_Z [HOUR]]
+    python3 -I tools/sinnoh/render_ref.py --rom ROM POKEPLATINUM_DIR OUT.png [...]   (from the cartridge)
         default: Twinleaf Town (matrix 0, the player's house door), noon
 
 The camera is Platinum's default field camera (pokeplatinum src/overlay005/field_camera.c: 666.92 units away, 59.05
@@ -10,16 +11,14 @@ degrees down) at the DS's own pixel scale (one unit a pixel at the target: 16 pi
 """
 import math
 import os
-import struct
 import sys
 
 import numpy as np
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from nds import Rom  # noqa: E402
 import nitro  # noqa: E402
-from platinum import (Land, Matrix, LAND, MATRIX, AREA, MAP_TEX, AREA_BUILD, AREA_BM_TEX, BUILD_MODEL)  # noqa: E402
+from platinum import Land  # noqa: E402
 
 W, H = 240, 160
 DIST = 666.922119140625
@@ -52,18 +51,15 @@ def parse_lights(text):
 
 
 class Scene:
-    def __init__(self, rom):
-        self.rom = rom
-        self.land = rom.narc(LAND)
-        self.texsets = rom.narc(MAP_TEX)
-        self.builds = rom.narc(BUILD_MODEL)
-        self.bm_tex = rom.narc(AREA_BM_TEX)
-        self.area = rom.narc(AREA)
-        self.lights = rom.narc('data/arealight.narc')
+    def __init__(self, src):
+        self.src = src
         self.tex_cache = {}
+        self.sets = {}
 
     def texture(self, tex0, key, mat):
-        k = (id(tex0), mat.texture, mat.palette)
+        if tex0 is not None and not hasattr(tex0, 'digest'):   # (by content: an object's id() is reused once freed)
+            tex0.digest = hash(bytes(tex0.d[tex0.o:]))
+        k = (tex0.digest if tex0 is not None else None, mat.texture, mat.palette)
         if k not in self.tex_cache:
             if tex0 is None or mat.texture not in tex0.textures:
                 self.tex_cache[k] = None
@@ -71,6 +67,15 @@ class Scene:
                 w, h, px = tex0.decode(mat.texture, mat.palette)
                 self.tex_cache[k] = np.array(px, dtype=np.uint8).reshape(h, w, 4)
         return self.tex_cache[k]
+
+    def area(self, header):
+        """(map textures, prop textures, light blocks) of a map header's area."""
+        prop_set, tex_set, light_set = self.src.area_of(header)
+        k = (prop_set, tex_set, light_set)
+        if k not in self.sets:
+            self.sets[k] = (nitro.btx0(self.src.map_textures(tex_set)), nitro.btx0(self.src.prop_textures(prop_set)),
+                            self.src.lights(light_set))
+        return self.sets[k]
 
 
 def look_matrix(target):
@@ -101,18 +106,13 @@ def lit(color_mats, light_block, normal, vtx_color):
     return np.minimum(acc, 31.0)
 
 
-def render(rom, out, matrix_id=0, tile_x=None, tile_z=None, hour=12):
-    sc = Scene(rom)
-    mx = Matrix(sc.rom.narc(MATRIX)[matrix_id])
+def render(src, out, matrix_id=0, tile_x=None, tile_z=None, hour=12):
+    sc = Scene(src)
+    mx = src.matrix(matrix_id)
     if tile_x is None:
         tile_x, tile_z = 3 * 32 + 12, 27 * 32 + 9   # Twinleaf Town, by the player's house
-    area_id = 6
-    a = sc.area[area_id]
-    prop_set, tex_set, light_set = struct.unpack_from('<HHH', a, 0)
-    tex0 = nitro.btx0(sc.texsets[tex_set])
-    bm_tex0 = nitro.btx0(sc.bm_tex[prop_set])
-    blocks = parse_lights(sc.lights[light_set].decode('latin-1'))
     secs = hour * 3600 // 2
+    _, _, blocks = sc.area(mx.cell(tile_x // 32, tile_z // 32)[1])
     lb = next((b for b in blocks if b[0] > secs), blocks[-1])
 
     target = np.array([tile_x * 16 + 8.0, 0.0, tile_z * 16 + 8.0])
@@ -128,19 +128,20 @@ def render(rom, out, matrix_id=0, tile_x=None, tile_z=None, hour=12):
         for bx in range(bx0 - 1, bx0 + 2):
             if not (0 <= bx < mx.width and 0 <= bz < mx.height):
                 continue
-            lid, _, alt = mx.cell(bx, bz)
+            lid, header, alt = mx.cell(bx, bz)
             if lid == 0xFFFF:
                 continue
-            land = Land(sc.land[lid])
+            tex0, bm_tex0, _ = sc.area(header)
+            land = Land(src.land(lid))
             centre = np.array([bx * BLOCK + 256.0, alt * 16.0, bz * BLOCK + 256.0])
             for model in nitro.Bmd0(land.model).models:
                 for mi, ts in model.draw().items():
                     mat = model.materials[mi]
                     tris.append((centre, None, ts, sc.texture(tex0, 'map', mat), mat))
             for pr in land.props:
-                if pr.model >= len(sc.builds):
+                if pr.model >= src.prop_count():
                     continue
-                bmd = nitro.Bmd0(sc.builds[pr.model])
+                bmd = nitro.Bmd0(src.prop_model(pr.model))
                 ptex = bmd.tex or bm_tex0
                 ry = math.radians(pr.rot[1])
                 rot = np.array([[math.cos(ry), 0, math.sin(ry)], [0, 1, 0], [-math.sin(ry), 0, math.cos(ry)]])
@@ -251,12 +252,19 @@ def wrap(i, size, repeat, flip):
 
 
 def main():
-    rom = Rom(sys.argv[1])
-    args = [int(x) for x in sys.argv[3:]]
-    if len(args) >= 3:
-        render(rom, sys.argv[2], args[0], args[1], args[2], args[3] if len(args) > 3 else 12)
+    from source import open_source
+    args = sys.argv[1:]
+    if args[0] == '--rom':
+        src = open_source(args[1], decomp=args[2])
+        args = args[3:]
     else:
-        render(rom, sys.argv[2])
+        src = open_source(args[0])
+        args = args[1:]
+    nums = [int(x) for x in args[1:]]
+    if len(nums) >= 3:
+        render(src, args[0], nums[0], nums[1], nums[2], nums[3] if len(nums) > 3 else 12)
+    else:
+        render(src, args[0])
 
 
 if __name__ == '__main__':

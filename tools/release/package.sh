@@ -3,7 +3,7 @@
 #   windows: needs pokeemerald64.exe (make winwsl) and SDL2.dll (SDL2_DLL, default ./SDL2/x86_64-w64-mingw32/bin/SDL2.dll)
 #   linux:   needs pokeemerald64 (make linux)
 # Writes OUTDIR/MoemonEmeraldKaiCoop-<platform>.zip: one folder, MoemonEmeraldKaiCoop/, with the game, the
-# player docs, the VS cabinet's mugen/ folder, custom music (music/), the standalone server and moemon_release.txt (the updater only runs in a folder that has it).
+# player docs, the VS cabinet's mugen/ folder, custom music (music/), SINNOH's 3D pack (sinnoh/), the standalone server and moemon_release.txt (the updater only runs in a folder that has it).
 set -e
 cd "$(dirname "$0")/../.."
 PLAT=${1:?usage: package.sh windows|linux OUTDIR}
@@ -41,6 +41,11 @@ mkdir -p "$P/mugen"
 mkdir -p "$P/music"
 cp music/*.kaisong "$P/music/" 2>/dev/null || true
 cp docs/SONG_TABLE.md "$P/music/SONG_TABLE.md"
+# SINNOH's 3D pack (tools/sinnoh/make_pack.sh builds it from pret/pokeplatinum; the release runs it first)
+if [ -f sinnoh/platinum3d.pak ]; then
+    mkdir -p "$P/sinnoh"
+    cp sinnoh/platinum3d.pak "$P/sinnoh/"
+fi
 printf 'Moemon Emerald Kai Co-op %s (%s)\nThe game checks for updates when it starts (AutoUpdate = 0 in moemon_coop.ini turns that off).\n' "$VER ($CHANNEL)" "$PLAT" > "$P/moemon_release.txt"
 ZIP="$OUT/MoemonEmeraldKaiCoop-$PLAT.zip"
 rm -f "$ZIP"
