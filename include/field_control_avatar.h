@@ -32,6 +32,7 @@ int SetCableClubWarp(void);
 u8 TrySetDiveWarp(void);
 const u8 *GetInteractedLinkPlayerScript(struct MapPosition *position, u8 metatileBehavior, u8 direction);
 const u8 *GetCoordEventScriptAtMapPosition(struct MapPosition *position);
+void TryRunBoulderSwitchScript(s16 x, s16 y);   // Moemon Kai: FireRed's boulder switches
 void ClearPoisonStepCounter(void);
 
 #endif // GUARD_FIELDCONTROLAVATAR_H

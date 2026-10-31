@@ -261,8 +261,11 @@ bool8 ScriptContext_RunScript(void)
 }
 
 // Sets up a new script in the global context and enables the context
+u32 gMpScriptStarts;   // Moemon Kai: scripts started (the harness's mp sweepmark / sweepnote, tools/test/story_sweep.sh)
+
 void ScriptContext_SetupScript(const u8 *ptr)
 {
+    gMpScriptStarts++;
     MP_Qol_OnScriptStart(ptr);   // Moemon Co-op QoL: scripts seen before can be sped through
     InitScriptContext(&sGlobalScriptContext, gScriptCmdTable, gScriptCmdTableEnd);
     SetupBytecodeScript(&sGlobalScriptContext, ptr);

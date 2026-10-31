@@ -1,6 +1,6 @@
 pressuntil A field 5000
 wait 60
-mp warp 34,73,13,3
+mp warp 34,73,12,3
 wait 120
 mp face up
 shot passage

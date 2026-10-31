@@ -9,6 +9,8 @@
 #include "field_effect.h"
 #include "field_effect_helpers.h"
 #include "field_player_avatar.h"
+#include "field_control_avatar.h"
+#include "fldeff.h"
 #include "fieldmap.h"
 #include "menu.h"
 #include "metatile_behavior.h"
@@ -759,7 +761,7 @@ static bool8 TryPushBoulder(s16 x, s16 y, u8 direction)
     {
         u8 objectEventId = GetObjectEventIdByXY(x, y);
 
-        if (objectEventId != OBJECT_EVENTS_COUNT && OBJ_GFX_ID(&gObjectEvents[objectEventId]) == OBJ_EVENT_GFX_PUSHABLE_BOULDER)
+        if (objectEventId != OBJECT_EVENTS_COUNT && MP_ObstacleGfxIs(OBJ_GFX_ID(&gObjectEvents[objectEventId]), OBJ_EVENT_GFX_PUSHABLE_BOULDER))   // Moemon Kai: JOHTO's / KANTO's boulders too
         {
             x = gObjectEvents[objectEventId].currentCoords.x;
             y = gObjectEvents[objectEventId].currentCoords.y;
@@ -1548,6 +1550,8 @@ static bool8 PushBoulder_End(struct Task *task, struct ObjectEvent *player, stru
         gPlayerAvatar.preventStep = FALSE;
         UnlockPlayerFieldControls();
         DestroyTask(FindTaskIdByFunc(Task_PushBoulder));
+        // Moemon Kai: a boulder on a FireRed switch (KANTO's VICTORY ROAD, the TANOBY KEY)
+        TryRunBoulderSwitchScript(boulder->currentCoords.x - MAP_OFFSET, boulder->currentCoords.y - MAP_OFFSET);
     }
     return FALSE;
 }

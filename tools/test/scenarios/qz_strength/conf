@@ -1,0 +1,7 @@
+# STRENGTH pushes JOHTO's / KANTO's boulders (Quetzal's own sprites: fldeff_rocksmash.c MP_ObstacleGfxIs), and a boulder
+# stopping on a FireRed switch runs its trigger (VICTORY ROAD 1F's barrier opens: VAR 0x5136 becomes 100)
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=6:60"
+EXPECT_A=("objat 7,18: local" "objat 7,18: none" "objat 7,17: local" "var 0x5136 = 100" "ctx 1 free 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

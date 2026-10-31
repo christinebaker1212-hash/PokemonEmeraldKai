@@ -62,6 +62,11 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
 - 1.61.1 released (the seal fix, contest, puzzles, credits, GAME RULES gimmick rows). 1.61.2 released.
 - The MOéMON GARDEN and the GAME CENTER floors are shared by every region (no trip into HOENN from JOHTO / KANTO;
   back out where the player came in): tests garden_johto, gc_johto, gc_kanto.
+- New-game breaks found by tools/quetzal_port/story_vars.py and checks around it (all fixed, COOP_NOTES "JOHTO and
+  KANTO"): Quetzal's system flags (POKéMON / POKéDEX / RUNNING SHOES / STRENGTH) weren't Emerald's; STRENGTH couldn't
+  push Quetzal's boulders and FireRed's boulder switches never ran; GOLDENROD's elevator couldn't be entered;
+  NEW BARK's house special was a stub. tools/test/story_sweep.sh (fires all ~500 story triggers) is the next check:
+  run it, work through its report (FAIL / HELD / NOFIRE / STILL), as with npc_sweep.sh.
 - NPC sweep recheck of the 67 maps: all pass; the last holds fixed (TRAINER TOWER sign, CERULEAN's badge list) or
   B-ignoring menus with an EXIT row (not bugs).
 - GENERATION audit (item 4): tools/moemon_gen59/obtain_audit.py + item_audit.py, run by regress.sh; every POKéMON

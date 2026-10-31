@@ -372,6 +372,24 @@ static bool8 LoadFrom(const char *path)
     return ok;
 }
 
+// Saves from before 1.61.3 kept Quetzal's system flags in the region flags (0x2A05 POKeMON, 0x2A06 POKeDEX,
+// 0x2A08 STRENGTH, 0x2A0A RUNNING SHOES): they're Emerald's own now (constants/qz_port.h)
+static void MoveQuetzalSystemFlags(void)
+{
+    static const u16 sMoves[][2] = {{0x2A05, FLAG_SYS_POKEMON_GET}, {0x2A06, FLAG_SYS_POKEDEX_GET},
+                                    {0x2A08, FLAG_SYS_USE_STRENGTH}, {0x2A0A, FLAG_SYS_B_DASH}};
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sMoves); i++)
+    {
+        if (FlagGet(sMoves[i][0]))
+        {
+            if (sMoves[i][1] != FLAG_SYS_USE_STRENGTH)
+                FlagSet(sMoves[i][1]);
+            FlagClear(sMoves[i][0]);
+        }
+    }
+}
+
 void MP_Region_LoadFromSave(void)
 {
     char path[600];
@@ -395,6 +413,7 @@ void MP_Region_LoadFromSave(void)
                     FlagSet(TRAINER_FLAG(sMoved[k][1]));
                     FlagClear(TRAINER_FLAG(sMoved[k][0]));
                 }
+            MoveQuetzalSystemFlags();
             MP_SaveFix_Migrate(sSaveFormat);
             return;
         }

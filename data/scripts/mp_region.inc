@@ -245,3 +245,26 @@ gText_GameCenterGuideGo::
 gText_GameCenterGuideNo::
 	.string "Any time! The GAME CENTER is always\n"
 	.string "open.$"
+
+@ GOLDENROD's department store elevator (Quetzal's ran in its own code): the panel lists B1F-6F
+@ (qz_specials.c QzGoldenrodElevatorMenu), the doors then open on the floor picked (the dynamic warp)
+EventScript_GoldenrodElevator::
+	lockall
+	message gText_GoldenrodElevatorWhich
+	waitmessage
+	special QzGoldenrodElevatorMenu
+	waitstate
+	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, EventScript_GoldenrodElevator_Done
+	specialvar VAR_RESULT, QzGoldenrodElevatorGo
+	goto_if_eq VAR_RESULT, 0, EventScript_GoldenrodElevator_Done
+	closemessage
+	waitse
+	special MoveElevator
+	waitstate
+EventScript_GoldenrodElevator_Done::
+	closemessage
+	releaseall
+	end
+
+gText_GoldenrodElevatorWhich::
+	.string "Which floor would you like?$"

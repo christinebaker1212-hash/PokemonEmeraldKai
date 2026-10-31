@@ -54,9 +54,10 @@ static const struct MapPic sPics[] = {
     {MAP_RUSTBORO_CITY_GAME_CENTER_2F, 0, 0, 208, 272, sGameCenter2F, BLACK, sGameCenter2FOver},
     {MAP_RUSTBORO_CITY_GAME_CENTER_3F, 0, 0, 208, 272, sGameCenter3F, BLACK, sGameCenter3FOver},
     {MAP_RUSTBORO_CITY_GAME_CENTER_ROOFTOP, 0, 0, 288, 256, sGameCenterRooftop, SKY, NULL},
-    // JOHTO's / KANTO's way up to the GAME CENTER: elevator doors on the wall behind the attendant at (13, 2)
-    {MAP_JOHTO_GOLDENROD_GAME_CORNER, 13 * 16 - 8, 6, 32, 26, sGameCenterPassage, 0, NULL},
-    {MAP_KANTO_CELADON_CITY_GAME_CORNER, 13 * 16 - 8, 6, 32, 26, sGameCenterPassage, 0, NULL},
+    // JOHTO's / KANTO's way up to the GAME CENTER: elevator doors on the wall behind the attendant at (12, 2) (CELADON's:
+    // right of the poster at (11, 0), the attendant at its left door; he stands clear of the row to the basement stairs)
+    {MAP_JOHTO_GOLDENROD_GAME_CORNER, 12 * 16 - 8, 6, 32, 26, sGameCenterPassage, 0, NULL},
+    {MAP_KANTO_CELADON_CITY_GAME_CORNER, 12 * 16, 6, 32, 26, sGameCenterPassage, 0, NULL},
 };
 
 #define MAX_SHOWN 4

@@ -2046,8 +2046,8 @@ ACTOR LEVEL [P]` picks the pursuit. Test garden_doing.
   single, a duel asked by talking, elevator, rooftop, exit). Debug: mp face DIR, mp textspeed N.
 - JOHTO's and KANTO's GAME CENTER (1.61.3): HOENN's 2F and 3F, no 1F and no ROOFTOP (the user's rule: HOENN's tower
   keeps its four floors; a region without a tower of its own gets an attendant and 2F / 3F only). The attendants
-  stand in GOLDENROD's and CELADON's GAME CORNERS at (13, 2) (map.json objects added after the import: put them back
-  if import.py runs again) with 2F's elevator doors pinned on the wall behind them (passage.png, cut from 2f.png by
+  stand in GOLDENROD's and CELADON's GAME CORNERS at (12, 2) (map.json objects added after the import: put them back
+  if import.py runs again; CELADON's stands clear of the row along the wall to the basement stairs at (15, 2)) with 2F's elevator doors pinned on the wall behind them (passage.png, cut from 2f.png by
   gen_gamecenter.py PASSAGE; sPics). EventScript_GameCenterGuide sets VAR_GAME_CENTER_PAID and warps to 2F's stairs.
   The floors are shared maps (mp_region.c MP_Region_IsSharedMap: with the MOéMON GARDEN): MP_Region_Current there is
   the region the player came from (no trip, no PC swap), MP_Region_NoteWarp (overworld.c ApplyCurrentWarp) keeps
@@ -2793,6 +2793,23 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   8-entry one is never used), so their doors open without one.
 - Triple Triad sellers in JOHTO / KANTO stock what MAUVILLE's / LILYCOVE's do (Tt_PoolOf, as their players' hands):
   gTtSellerStock has HOENN's eight shelves only, and the seller crashed on the missing ones.
+- Quetzal's system flags (FireRed's, from 0xA50) that the engine reads are Emerald's own (constants/qz_port.h, from
+  import.py QZ_SYS_FLAGS): 0xA78 POKéMON received, 0xA79 POKéDEX, 0xAA1 STRENGTH in use, 0xAD8 RUNNING SHOES. They
+  sat in the region flags (0x2A05/06/08/0A), so a JOHTO / KANTO new game had no POKéMON / POKéDEX in the START menu
+  and couldn't run; mp_region.c MoveQuetzalSystemFlags moves a save's old copies (test story_johto checks them).
+- STRENGTH: JOHTO's / KANTO's boulders are Quetzal's sprites (OBJ_EVENT_GFX_QZ_87, QZ_16186); fldeff_rocksmash.c
+  MP_ObstacleGfxIs counts them (and Quetzal's rocks and trees) as Emerald's for the push and the party menu's field
+  moves. FireRed's boulder switches (step triggers waiting for 99: VICTORY ROAD, the TANOBY KEY) run when a pushed
+  boulder stops on them (field_control_avatar.c TryRunBoulderSwitchScript, from FireRed's
+  HandleBoulderActivateVictoryRoadSwitch). Test qz_strength (harness mp objat X Y, mp boulderswitch X Y).
+- GOLDENROD's department store elevator was Quetzal's own code (its panel had no script, and each floor's door warp
+  sat a row above the door): EventScript_GoldenrodElevator + qz_specials.c QzGoldenrodElevatorMenu / Go list B1F-6F
+  and set the elevator's way out; the floors' warps are on the doors (9, 4), B1F got one at (10, 6). Quetzal's
+  arrival scene (VAR 0x5015 = 1) isn't used. Test qz_goldenrod_elevator.
+- Story triggers: tools/quetzal_port/story_vars.py (run by regress.sh) checks every JOHTO / KANTO step trigger and frame
+  script waits for a value some script or the code sets (KNOWN lists the ones that rightly don't, checked against
+  the ROM); tools/test/story_sweep.sh fires each trigger in the game (its variable set, the player stepping on it)
+  and reports any that hold the player, don't start or don't move their variable on (harness mp sweepmark).
 - KANTO's TRAINER TOWER records sign: FireRed's ShowLinkBattleRecords with VAR_0x8004 = 1 is its tower's records
   screen; Emerald's TRAINER HILL records stand in (battle_records.c; test qz_tower_records). FireRed's list kept open
   after a choice (CERULEAN's badge describer) took no input once drawn again: QzReturnToListMenu now also calls

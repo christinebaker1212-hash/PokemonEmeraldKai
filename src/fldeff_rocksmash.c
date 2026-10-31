@@ -6,6 +6,7 @@
 #include "field_effect.h"
 #include "field_player_avatar.h"
 #include "fldeff.h"
+#include "constants/qz_port.h"
 #include "item_use.h"
 #include "overworld.h"
 #include "party_menu.h"
@@ -27,14 +28,31 @@ static void Task_DoFieldMove_RunFunc(u8 taskId);
 static void FieldCallback_RockSmash(void);
 static void FieldMove_RockSmash(void);
 
-bool8 CheckObjectGraphicsInFrontOfPlayer(u8 graphicsId)
+// Moemon Kai: JOHTO's / KANTO's (Quetzal's) trees, rocks and boulders are their own sprites: they count as Emerald's
+bool8 MP_ObstacleGfxIs(u16 objGfx, u16 graphicsId)
+{
+    if (objGfx == graphicsId)
+        return TRUE;
+    switch (graphicsId)
+    {
+    case OBJ_EVENT_GFX_PUSHABLE_BOULDER:
+        return objGfx == OBJ_EVENT_GFX_QZ_87 || objGfx == OBJ_EVENT_GFX_QZ_16186;
+    case OBJ_EVENT_GFX_BREAKABLE_ROCK:
+        return objGfx == OBJ_EVENT_GFX_QZ_86 || objGfx == OBJ_EVENT_GFX_QZ_16190;
+    case OBJ_EVENT_GFX_CUTTABLE_TREE:
+        return objGfx == OBJ_EVENT_GFX_QZ_82 || objGfx == OBJ_EVENT_GFX_QZ_16127;
+    }
+    return FALSE;
+}
+
+bool8 CheckObjectGraphicsInFrontOfPlayer(u16 graphicsId)
 {
     u8 objEventId;
 
     GetXYCoordsOneStepInFrontOfPlayer(&gPlayerFacingPosition.x, &gPlayerFacingPosition.y);
     gPlayerFacingPosition.elevation = PlayerGetElevation();
     objEventId = GetObjectEventIdByPosition(gPlayerFacingPosition.x, gPlayerFacingPosition.y, gPlayerFacingPosition.elevation);
-    if (OBJ_GFX_ID(&gObjectEvents[objEventId]) != graphicsId)
+    if (!MP_ObstacleGfxIs(OBJ_GFX_ID(&gObjectEvents[objEventId]), graphicsId))
     {
         return FALSE;
     }

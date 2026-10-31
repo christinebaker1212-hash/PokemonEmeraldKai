@@ -543,6 +543,8 @@ gSpecials::
 	def_special MP_Coop_JoinCheck
 	def_special MP_HeadbuttWildEncounter
 	def_special MP_Region_GameCenterOtherFloor
+	def_special QzGoldenrodElevatorMenu
+	def_special QzGoldenrodElevatorGo
 	def_special MP_GatchaTicketForItem
 	def_special MP_GatchaBuyTicket
 	def_special MP_Rematch_Reward

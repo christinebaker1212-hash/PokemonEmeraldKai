@@ -1112,12 +1112,12 @@
 #define FLAG_QZ_0x2EB6                           0x2EB6
 #define FLAG_QZ_0x2EB7                           0x2EB7
 #define FLAG_QZ_0x51                             0x2A04
-#define FLAG_QZ_0xA78                            0x2A05
-#define FLAG_QZ_0xA79                            0x2A06
+#define FLAG_QZ_0xA78                            FLAG_SYS_POKEMON_GET
+#define FLAG_QZ_0xA79                            FLAG_SYS_POKEDEX_GET
 #define FLAG_QZ_0xA98                            0x2A07
-#define FLAG_QZ_0xAA1                            0x2A08
+#define FLAG_QZ_0xAA1                            FLAG_SYS_USE_STRENGTH
 #define FLAG_QZ_0xAC3                            0x2A09
-#define FLAG_QZ_0xAD8                            0x2A0A
+#define FLAG_QZ_0xAD8                            FLAG_SYS_B_DASH
 #define FLAG_QZ_0xAD9                            0x2A0B
 #define FLAG_QZ_GEN_CAPPED                       0x2CFF
 #define FLAG_QZ_KANTO_HIDDEN_ITEM_0              0x2B00

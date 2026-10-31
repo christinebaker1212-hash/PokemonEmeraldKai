@@ -1,0 +1,27 @@
+pressuntil A field 5000
+wait 60
+mp warp 34,64,9,5
+wait 120
+mp face up
+wait 10
+press UP 8
+wait 300
+mp where
+mp warp 34,63,1,2
+wait 60
+mp face left
+press A 4
+wait 120
+press A 4
+wait 400
+pressuntil A field 1500
+mp where
+mp warp 34,63,2,5
+wait 60
+mp face down
+wait 10
+press DOWN 8
+wait 300
+mp where
+mp ctx
+quit

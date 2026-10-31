@@ -1,0 +1,7 @@
+# GOLDENROD's department store elevator: the door on 1F leads in (the warp sat a row above the door), the panel lists
+# B1F-6F and the elevator opens on B1F (reached before only through the underground warehouse)
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=6:50"
+EXPECT_A=("where map 34.63" "where map 34.62" "ctx 1 free 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

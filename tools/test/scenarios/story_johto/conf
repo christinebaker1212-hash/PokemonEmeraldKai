@@ -1,4 +1,8 @@
+# JOHTO's opening from a new game: MOM sends the player to ELM (and gives the RUNNING SHOES), ELM's lab scene plays,
+# the starter is chosen; the story sets Emerald's own POKeMON / POKeDEX / RUNNING SHOES flags (Quetzal's system flags,
+# constants/qz_port.h), so the START menu has POKeMON and POKeDEX and the player can run
 MODE=1
 TMO=300
 ENV_A="MOEMON_DEBUG_REGION=1"
-EXPECT_A=()
+EXPECT_A=("var 0x5003 = 2" "flag 2240 = 1" "where map 35.0 xy 6,4" "var 0x5004 = 1" "party: 280(" "flag 2144 = 1" "flag 2145 = 1")
+UNEXPECT_A=("[crash]" "TIMEOUT" "not ported")

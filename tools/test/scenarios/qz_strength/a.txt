@@ -1,0 +1,19 @@
+pressuntil A field 5000
+wait 60
+mp warp 36,39,7,19
+wait 120
+mp setflag 2185
+mp objat 7 18
+mp face up
+wait 10
+press UP 8
+wait 120
+mp objat 7 18
+mp objat 7 17
+mp getvar 0x5136
+mp boulderswitch 20 16
+wait 120
+pressuntil A field 1500
+mp getvar 0x5136
+mp ctx
+quit

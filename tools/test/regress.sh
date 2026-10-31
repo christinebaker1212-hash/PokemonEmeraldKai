@@ -18,6 +18,7 @@ python3 "$TOOLS/check_scripts.py" || { echo "FAIL scripts"; exit 1; }
 # Every POKeMON and item can be had at each GENERATION (tools/moemon_gen59/obtain_audit.py, item_audit.py)
 python3 "$REPO/tools/moemon_gen59/obtain_audit.py" > "$OUT/audit_obtain.txt" || { echo "FAIL obtainable: $OUT/audit_obtain.txt"; exit 1; }
 python3 "$REPO/tools/moemon_gen59/item_audit.py" > "$OUT/audit_items.txt" || { echo "FAIL items: $OUT/audit_items.txt"; exit 1; }
+python3 "$REPO/tools/quetzal_port/story_vars.py" > "$OUT/story_vars.txt" || { echo "FAIL story triggers: $OUT/story_vars.txt"; exit 1; }
 echo "obtainable: ok"
 names=("$@"); all=0; [ ${#names[@]} = 0 ] && { names=($(ls "$TOOLS/scenarios")); all=1; }
 

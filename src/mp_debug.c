@@ -5,6 +5,7 @@
 #include <string.h>
 #include "global.h"
 #include "mp_region.h"
+#include "field_control_avatar.h"
 #include "battle_gen4.h"
 #include "mp_kaisong.h"
 #include "gba/m4a_internal.h"
@@ -2631,7 +2632,18 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("  money %u\n", (unsigned)GetMoney(&gSaveBlock1Ptr->money));
     }
     else if (strcmp(cmd, "sweepnote") == 0)
-        printf("[test] sweepnote %s\n", arg);   // sweepnote WORDS: a label in the log (tools/test/npc_sweep.sh)
+    {
+        // sweepnote WORDS: a label in the log (tools/test/npc_sweep.sh, story_sweep.sh) and the scripts started since
+        // the last sweepmark
+        extern u32 gMpScriptStarts;
+        printf("[test] sweepnote %s starts %u\n", arg, (unsigned)gMpScriptStarts);
+    }
+    else if (strcmp(cmd, "sweepmark") == 0)
+    {
+        extern u32 gMpScriptStarts;
+        gMpScriptStarts = 0;
+        printf("[test] sweepmark\n");
+    }
     else if (strcmp(cmd, "ctx") == 0)
     {
         extern int Platform_InputContext(void);
@@ -2732,6 +2744,25 @@ void MP_TestCommand(const char *cmd, const char *arg)
         for (i = 0; i < EASY_CHAT_BATTLE_WORDS_COUNT; i++)
             printf(" %04x", gSaveBlock1Ptr->easyChatBattleLost[i]);
         printf("\n");
+    }
+    else if (strcmp(cmd, "objat") == 0)
+    {
+        // objat X Y: the object standing on a map cell (local id, graphics), or none
+        int x = 0, y = 0;
+        u8 id;
+        sscanf(arg, "%d %d", &x, &y);
+        id = GetObjectEventIdByXY(x + MAP_OFFSET, y + MAP_OFFSET);
+        if (id < OBJECT_EVENTS_COUNT)
+            printf("[test] objat %d,%d: local %d gfx %d\n", x, y, gObjectEvents[id].localId, OBJ_GFX_ID(&gObjectEvents[id]));
+        else
+            printf("[test] objat %d,%d: none\n", x, y);
+    }
+    else if (strcmp(cmd, "boulderswitch") == 0)
+    {
+        // boulderswitch X Y: as if a pushed boulder stopped on that cell (FireRed's switches)
+        int x = 0, y = 0;
+        sscanf(arg, "%d %d", &x, &y);
+        TryRunBoulderSwitchScript(x, y);
     }
     else if (strcmp(cmd, "objs") == 0)
     {

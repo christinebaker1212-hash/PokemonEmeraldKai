@@ -45,7 +45,8 @@ bool8 SetUpFieldMove_Dig(void);
 bool8 FldEff_UseDig(void);
 
 // rock smash
-bool8 CheckObjectGraphicsInFrontOfPlayer(u8 graphicsId);
+bool8 CheckObjectGraphicsInFrontOfPlayer(u16 graphicsId);
+bool8 MP_ObstacleGfxIs(u16 objGfx, u16 graphicsId);   // Moemon Kai: Quetzal's trees, rocks and boulders count
 u8 CreateFieldMoveTask(void);
 bool8 SetUpFieldMove_RockSmash(void);
 bool8 FldEff_UseRockSmash(void);

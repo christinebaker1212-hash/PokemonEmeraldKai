@@ -37,6 +37,10 @@ FLAG_LOW_BASE = 0x2A00       # Quetzal's flags below 0x1000 (reused Emerald numb
 FLAG_HIDDEN_BASE = 0x2B00    # FLAG_QZ_KANTO_HIDDEN_ITEM_<n>
 FLAG_GEN_CAPPED = 0x2CFF
 VAR_LOW_BASE = 0x5200        # Quetzal's vars in Emerald's range 0x40xx: 0x5200 + n
+# Quetzal's system flags (FireRed's, from 0xA50) the engine reads: Emerald's own. (Their old slots stay counted
+# below so the other low flags keep their numbers; mp_region.c moves a save's old copies over.)
+QZ_SYS_FLAGS = {'FLAG_QZ_0xA78': 'FLAG_SYS_POKEMON_GET', 'FLAG_QZ_0xA79': 'FLAG_SYS_POKEDEX_GET',
+                'FLAG_QZ_0xAA1': 'FLAG_SYS_USE_STRENGTH', 'FLAG_QZ_0xAD8': 'FLAG_SYS_B_DASH'}
 
 
 def rip_path(rel):
@@ -184,6 +188,9 @@ def write_constants(texts):
                  % (FLAG_LOW_BASE, FLAG_HIDDEN_BASE))
     for f in flags:
         v = flag_value(f)
+        if f in QZ_SYS_FLAGS:
+            lines.append('#define %-40s %s' % (f, QZ_SYS_FLAGS[f]))
+            continue
         if v is None:
             v = FLAG_LOW_BASE + low.index(f)
         lines.append('#define %-40s 0x%X' % (f, v))

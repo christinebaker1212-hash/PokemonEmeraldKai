@@ -18,6 +18,7 @@
 #include "mp.h"
 #include "mp_region.h"
 #include "overworld.h"
+#include "strings.h"
 #include "pokedex.h"
 #include "pokemon.h"
 #include "pokemon_storage_system.h"
@@ -623,6 +624,60 @@ static u16 QzGetElevatorFloorCursor_(void)
 {
     u8 floor = ElevatorFloor();
     return floor >= 4 && floor <= 14 ? 14 - floor : 0;
+}
+
+// GOLDENROD's department store elevator (Quetzal's ran in its own code: the rip has no panel script). The panel
+// (data/scripts/mp_region.inc EventScript_GoldenrodElevator) lists B1F-6F; the floor picked becomes the elevator's
+// way out (the dynamic warp: each floor's door at (9, 4), B1F's at (10, 6)). Floors in Emerald's numbering (B1F 3)
+static const struct { u16 map; u8 x, y; const u8 *name; } sGoldenrodFloors[] = {
+    {MAP_JOHTO_GOLDENROD_DEPT_STORE_B1F, 10, 6, gText_B1F}, {MAP_JOHTO_GOLDENROD_DEPT_STORE1F, 9, 4, gText_1F},
+    {MAP_JOHTO_GOLDENROD_DEPT_STORE2F, 9, 4, gText_2F}, {MAP_JOHTO_GOLDENROD_DEPT_STORE3F, 9, 4, gText_3F},
+    {MAP_JOHTO_GOLDENROD_DEPT_STORE4F, 9, 4, gText_4F}, {MAP_JOHTO_GOLDENROD_DEPT_STORE5F, 9, 4, gText_5F},
+    {MAP_JOHTO_GOLDENROD_DEPT_STORE6F, 9, 4, gText_6F},
+};
+static u8 sGoldenrodPick;
+extern u16 (*gQzScrollResult)(u16 choice);
+
+static u8 GoldenrodFloorNow(void)
+{
+    u8 i;
+    for (i = 0; i < ARRAY_COUNT(sGoldenrodFloors); i++)
+        if (MAP_GROUP(sGoldenrodFloors[i].map) == gSaveBlock1Ptr->dynamicWarp.mapGroup
+         && MAP_NUM(sGoldenrodFloors[i].map) == gSaveBlock1Ptr->dynamicWarp.mapNum)
+            return i;
+    return 1;
+}
+
+static u16 GoldenrodPicked(u16 row)
+{
+    sGoldenrodPick = row;
+    return row < ARRAY_COUNT(sGoldenrodFloors) ? row : MULTI_B_PRESSED;
+}
+
+u16 QzGoldenrodElevatorMenu(void)
+{
+    u8 i;
+    for (i = 0; i < ARRAY_COUNT(sGoldenrodFloors); i++)
+        gQzScrollOptions[i] = sGoldenrodFloors[i].name;
+    gQzScrollOptions[i] = gText_Exit;
+    gQzScrollCount = i + 1;
+    gQzScrollResult = GoldenrodPicked;
+    gSpecialVar_0x8004 = SCROLL_MULTI_QZ_DYNAMIC;
+    ShowScrollableMultichoice();
+    return 0;
+}
+
+// VAR_RESULT 1: another floor (MoveElevator's VAR_0x8005 / 0x8006 are set: from, to)
+u16 QzGoldenrodElevatorGo(void)
+{
+    u8 now = GoldenrodFloorNow(), to = sGoldenrodPick;
+    if (to >= ARRAY_COUNT(sGoldenrodFloors) || to == now)
+        return gSpecialVar_Result = 0;
+    SetDynamicWarpWithCoords(0, MAP_GROUP(sGoldenrodFloors[to].map), MAP_NUM(sGoldenrodFloors[to].map), WARP_ID_NONE,
+                             sGoldenrodFloors[to].x, sGoldenrodFloors[to].y);
+    gSpecialVar_0x8005 = now + 3;
+    gSpecialVar_0x8006 = to + 3;
+    return gSpecialVar_Result = 1;
 }
 
 // FireRed's script lists: 0 the badges (Cerulean's house), 1 Silph Co.'s floors; waitstate, VAR_RESULT = the row
@@ -1295,6 +1350,15 @@ u16 QzSSAnneExteriorEventStep(void)
 // warp; mp_region.c MP_Region_OnMapLoaded here). GIOVANNI's past isn't ported, so this is the present's state: the
 // story's people stay hidden, the dream's two at the INDIGO PLATEAU / VICTORY ROAD gate show in a dream only, and
 // ELM's lab's ARCEUS (FLAG_QZ_0x131F) is hidden until its own scene shows it.
+// NEW BARK's house on arriving (Quetzal's special 697): two of GIOVANNI's-past people stay hidden (0x14A1, 0x14A2).
+// Quetzal shows them, and starts that story's scene (var 0x5076), only once GIOVANNI's past can begin: not ported
+u16 QzGiovanniStoryNewBarkHouseFlags(void)
+{
+    FlagSet(0x14A1);
+    FlagSet(0x14A2);
+    return 0;
+}
+
 u16 QzGiovanniStoryUpdateFlags(void)
 {
     u8 group = gSaveBlock1Ptr->location.mapGroup, num = gSaveBlock1Ptr->location.mapNum;

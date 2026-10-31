@@ -984,6 +984,23 @@ static const u8 *GetCoordEventScriptAtPosition(struct MapHeader *mapHeader, u16 
     return NULL;
 }
 
+// Moemon Kai: FireRed's HandleBoulderActivateVictoryRoadSwitch. A step trigger waiting for the value 99 (which no
+// script sets: KANTO's VICTORY ROAD switches, the TANOBY KEY) is pressed by a boulder pushed onto it, not by the player
+void TryRunBoulderSwitchScript(s16 x, s16 y)
+{
+    s32 i;
+    const struct CoordEvent *coordEvents = gMapHeader.events->coordEvents;
+    for (i = 0; i < gMapHeader.events->coordEventCount; i++)
+    {
+        if (coordEvents[i].x == x && coordEvents[i].y == y && coordEvents[i].index == 99 && coordEvents[i].script != NULL
+         && coordEvents[i].trigger != TRIGGER_RUN_IMMEDIATELY)
+        {
+            ScriptContext_SetupScript(coordEvents[i].script);
+            return;
+        }
+    }
+}
+
 const u8 *GetCoordEventScriptAtMapPosition(struct MapPosition *position)
 {
     return GetCoordEventScriptAtPosition(&gMapHeader, position->x - MAP_OFFSET, position->y - MAP_OFFSET, position->elevation);
