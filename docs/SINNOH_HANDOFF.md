@@ -19,6 +19,22 @@ Add SINNOH as a third region beside JOHTO / KANTO, built from Pokémon Platinum:
 - The PÓKETCH as a KEY ITEM: registerable to a hotkey, also reachable from the menu, drawn as an overlay
   on the main screen, mouse control or controller controls while focused (no second screen), usable in every region.
 
+## Full feature parity (the user, 2026-10-31)
+Sinnoh gets everything JOHTO and KANTO got:
+- All three card games playable there (POKéMON cards, YU-GI-OH!, TRIPLE TRIAD): card players, a CARD CLUB / GAME
+  CENTER equivalent, sellers, cards obtainable in the region (as COOP_NOTES "Cards from all three games ... in every
+  region").
+- Wild POKéMON pools that grow with GENERATION up to Gen 9 (as gen_hoenn_modern.py / gen_modern.py), trainers too.
+- Every existing item by GENERATION: shops, pickups, held items, hidden items, trainers' items.
+- Co-op, achievements, MoeGatcha, level scaling, followers, the Garden and the rest work there as in the other regions.
+
+Removed, with the scripts behind them (they will never work here): PAL PARK, the GTS, Wi-Fi features (the Wi-Fi
+Club, the Plaza, the Battle Tower's Wi-Fi rooms, Mystery Gift by Wi-Fi...). Removed where a Kai feature replaces
+them: BALL SEALS (the POKé BALL page's styles and ball effects), and anything else the co-op features supersede.
+Features that Gen 3 also has use the Gen 3 versions: POKéMON CONTESTS (not Super Contests), and the like. The
+Underground and Super Contests in step 6 below are dropped unless the user asks again.
+A new TRAINER CARD for Sinnoh comes later (the user's own design).
+
 ## What the game already gives us
 - Regions: mp_region.c, "<save>.region", converters (tools/quetzal_port/), region chain from 1.61.4:
   after a League's credits play goes on from the save; beating a region's League lifts its level reset;
@@ -47,7 +63,7 @@ Add SINNOH as a third region beside JOHTO / KANTO, built from Pokémon Platinum:
 4. Scripts: convert the common commands, write the cutscenes by hand. This is the bulk of the work
    (Team Galactic, the lakes, Spear Pillar, the Distortion World).
 5. PÓKETCH Key Item and its apps (touch apps use the D-pad cursor or mouse). Self-contained, can come early.
-6. Optional later: Underground, Super Contests.
+6. Not planned: Super Contests (Gen 3 contests instead); the Underground only if the user asks.
 
 ## First step
 A proof of concept: Twinleaf Town + Route 201 pre-rendered, the LOOK walking with correct collision,
