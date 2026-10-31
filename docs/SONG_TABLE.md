@@ -69,34 +69,133 @@ Files in this repository's `music` folder ship with every update.
 | `mus_johto_vs_wild.kaisong` | mus_johto_vs_wild | everywhere | Battle! Wild Pokemon (Johto) |
 | `mus_poke_mart@rustboro_city_game_center_2f.kaisong` | mus_poke_mart | Rustboro City Game Center 2F | Lamb Chop |
 | `mus_rg_vs_trainer@tt.kaisong` | mus_rg_vs_trainer | tt | Shuffle or Boogie |
+| `mus_sinnoh_amity_square.kaisong` | mus_sinnoh_amity_square | everywhere | Amity Square |
+| `mus_sinnoh_arceus.kaisong` | mus_sinnoh_arceus | everywhere | Beginning Dimension - Arceus |
+| `mus_sinnoh_azure_flute.kaisong` | mus_sinnoh_azure_flute | everywhere | Azure Flute |
+| `mus_sinnoh_battle_tower.kaisong` | mus_sinnoh_battle_tower | everywhere | Battle Tower |
+| `mus_sinnoh_bicycle.kaisong` | mus_sinnoh_bicycle | everywhere | Bicycle |
 | `mus_sinnoh_canalave.kaisong` | mus_sinnoh_canalave | everywhere | Canalave City (Daytime) |
 | `mus_sinnoh_canalave_night.kaisong` | mus_sinnoh_canalave_night | everywhere | Canalave City (Nighttime) |
+| `mus_sinnoh_cavern_on_the_lake.kaisong` | mus_sinnoh_cavern_on_the_lake | everywhere | Cavern on the Lake |
+| `mus_sinnoh_cynthia.kaisong` | mus_sinnoh_cynthia | everywhere | Champion Cynthia |
+| `mus_sinnoh_dawn.kaisong` | mus_sinnoh_dawn | everywhere | Dawn |
+| `mus_sinnoh_distortion_world.kaisong` | mus_sinnoh_distortion_world | everywhere | Distortion World |
+| `mus_sinnoh_elite_four_appear.kaisong` | mus_sinnoh_elite_four_appear | everywhere | The Elite Four Appear! |
+| `mus_sinnoh_encounter_ace_trainer.kaisong` | mus_sinnoh_encounter_ace_trainer | everywhere | Encounter! Ace Trainer |
+| `mus_sinnoh_encounter_aroma_lady.kaisong` | mus_sinnoh_encounter_aroma_lady | everywhere | Encounter! Aroma Lady |
+| `mus_sinnoh_encounter_artist.kaisong` | mus_sinnoh_encounter_artist | everywhere | Encounter! Artist |
+| `mus_sinnoh_encounter_biker.kaisong` | mus_sinnoh_encounter_biker | everywhere | Encounter! Biker |
+| `mus_sinnoh_encounter_collector.kaisong` | mus_sinnoh_encounter_collector | everywhere | Encounter! Pokemon Collector |
+| `mus_sinnoh_encounter_gambler.kaisong` | mus_sinnoh_encounter_gambler | everywhere | Encounter! Gambler |
+| `mus_sinnoh_encounter_hiker.kaisong` | mus_sinnoh_encounter_hiker | everywhere | Encounter! Hiker |
+| `mus_sinnoh_encounter_kid.kaisong` | mus_sinnoh_encounter_kid | everywhere | Encounter! Kid |
+| `mus_sinnoh_encounter_martial_artist.kaisong` | mus_sinnoh_encounter_martial_artist | everywhere | Encounter! Martial Artist |
+| `mus_sinnoh_encounter_miniskirt.kaisong` | mus_sinnoh_encounter_miniskirt | everywhere | Encounter! Miniskirt |
+| `mus_sinnoh_encounter_sailor.kaisong` | mus_sinnoh_encounter_sailor | everywhere | Encounter! Sailor |
+| `mus_sinnoh_encounter_twins.kaisong` | mus_sinnoh_encounter_twins | everywhere | Encounter! Twins |
+| `mus_sinnoh_ending.kaisong` | mus_sinnoh_ending | everywhere | Ending |
 | `mus_sinnoh_eterna.kaisong` | mus_sinnoh_eterna | everywhere | Eterna City (Daytime) |
+| `mus_sinnoh_eterna_forest.kaisong` | mus_sinnoh_eterna_forest | everywhere | Eterna Forest |
 | `mus_sinnoh_eterna_night.kaisong` | mus_sinnoh_eterna_night | everywhere | Eterna City (Nighttime) |
 | `mus_sinnoh_fight_area.kaisong` | mus_sinnoh_fight_area | everywhere | Fight Area (Daytime) |
 | `mus_sinnoh_fight_area_night.kaisong` | mus_sinnoh_fight_area_night | everywhere | Fight Area (Nighttime) |
 | `mus_sinnoh_floaroma.kaisong` | mus_sinnoh_floaroma | everywhere | Floaroma Town (Daytime) |
 | `mus_sinnoh_floaroma_night.kaisong` | mus_sinnoh_floaroma_night | everywhere | Floaroma Town (Nighttime) |
+| `mus_sinnoh_follow_me.kaisong` | mus_sinnoh_follow_me | everywhere | Come With Me |
+| `mus_sinnoh_forest_house.kaisong` | mus_sinnoh_forest_house | everywhere | Forest House |
+| `mus_sinnoh_galactic_appears.kaisong` | mus_sinnoh_galactic_appears | everywhere | Team Galactic Appears |
+| `mus_sinnoh_galactic_building.kaisong` | mus_sinnoh_galactic_building | everywhere | Team Galactic Building |
+| `mus_sinnoh_galactic_hideout.kaisong` | mus_sinnoh_galactic_hideout | everywhere | Team Galactic Hideout |
+| `mus_sinnoh_galactic_hideout_deep.kaisong` | mus_sinnoh_galactic_hideout_deep | everywhere | Deep Within the Hideout |
+| `mus_sinnoh_game_corner.kaisong` | mus_sinnoh_game_corner | everywhere | Game Corner |
+| `mus_sinnoh_giratina_appears.kaisong` | mus_sinnoh_giratina_appears | everywhere | Giratina Appears! |
+| `mus_sinnoh_giratina_appears_2.kaisong` | mus_sinnoh_giratina_appears_2 | everywhere | Giratina Appears! Part 2 |
+| `mus_sinnoh_great_marsh.kaisong` | mus_sinnoh_great_marsh | everywhere | Great Marsh |
+| `mus_sinnoh_gym.kaisong` | mus_sinnoh_gym | everywhere | Pokemon Gym |
+| `mus_sinnoh_hall_of_fame.kaisong` | mus_sinnoh_hall_of_fame | everywhere | Hall of Fame |
 | `mus_sinnoh_hearthome.kaisong` | mus_sinnoh_hearthome | everywhere | Hearthome City (Daytime) |
 | `mus_sinnoh_hearthome_night.kaisong` | mus_sinnoh_hearthome_night | everywhere | Hearthome City (Nighttime) |
+| `mus_sinnoh_iron_mountain.kaisong` | mus_sinnoh_iron_mountain | everywhere | Iron Mountain |
 | `mus_sinnoh_jubilife.kaisong` | mus_sinnoh_jubilife | everywhere | Jubilife City (Daytime) |
 | `mus_sinnoh_jubilife_night.kaisong` | mus_sinnoh_jubilife_night | everywhere | Jubilife City (Nighttime) |
+| `mus_sinnoh_lake.kaisong` | mus_sinnoh_lake | everywhere | Lake |
+| `mus_sinnoh_lake_encounter.kaisong` | mus_sinnoh_lake_encounter | everywhere | Encounter at the Lake! |
 | `mus_sinnoh_league.kaisong` | mus_sinnoh_league | everywhere | Pokemon League (Daytime) |
 | `mus_sinnoh_league_night.kaisong` | mus_sinnoh_league_night | everywhere | Pokemon League (Nighttime) |
+| `mus_sinnoh_league_showdown.kaisong` | mus_sinnoh_league_showdown | everywhere | Showdown! Pokemon League |
+| `mus_sinnoh_legendary_appears.kaisong` | mus_sinnoh_legendary_appears | everywhere | The Legendary Pokemon Appears! |
+| `mus_sinnoh_lets_go_together.kaisong` | mus_sinnoh_lets_go_together | everywhere | Let's Go Together! |
+| `mus_sinnoh_looker.kaisong` | mus_sinnoh_looker | everywhere | Looker's Theme |
+| `mus_sinnoh_lucas.kaisong` | mus_sinnoh_lucas | everywhere | Lucas |
+| `mus_sinnoh_mt_coronet.kaisong` | mus_sinnoh_mt_coronet | everywhere | Mt. Coronet |
+| `mus_sinnoh_natural_disaster.kaisong` | mus_sinnoh_natural_disaster | everywhere | Natural Disaster! |
 | `mus_sinnoh_oreburgh.kaisong` | mus_sinnoh_oreburgh | everywhere | Oreburgh City (Daytime) |
+| `mus_sinnoh_oreburgh_gate.kaisong` | mus_sinnoh_oreburgh_gate | everywhere | Oreburgh Gate |
+| `mus_sinnoh_oreburgh_mine.kaisong` | mus_sinnoh_oreburgh_mine | everywhere | Oreburgh Mine |
 | `mus_sinnoh_oreburgh_night.kaisong` | mus_sinnoh_oreburgh_night | everywhere | Oreburgh City (Nighttime) |
+| `mus_sinnoh_pokecenter.kaisong` | mus_sinnoh_pokecenter | everywhere | Pokemon Center (Daytime) |
+| `mus_sinnoh_pokecenter_night.kaisong` | mus_sinnoh_pokecenter_night | everywhere | Pokemon Center (Nighttime) |
+| `mus_sinnoh_pokemart.kaisong` | mus_sinnoh_pokemart | everywhere | Pokemart |
+| `mus_sinnoh_research_lab.kaisong` | mus_sinnoh_research_lab | everywhere | Research Lab |
+| `mus_sinnoh_rival.kaisong` | mus_sinnoh_rival | everywhere | Rival |
+| `mus_sinnoh_route201.kaisong` | mus_sinnoh_route201 | everywhere | Route 201 (Daytime) |
+| `mus_sinnoh_route201_night.kaisong` | mus_sinnoh_route201_night | everywhere | Route 201 (Nighttime) |
+| `mus_sinnoh_route203.kaisong` | mus_sinnoh_route203 | everywhere | Route 203 (Daytime) |
+| `mus_sinnoh_route203_night.kaisong` | mus_sinnoh_route203_night | everywhere | Route 203 (Nighttime) |
+| `mus_sinnoh_route205.kaisong` | mus_sinnoh_route205 | everywhere | Route 205 (Daytime) |
+| `mus_sinnoh_route205_night.kaisong` | mus_sinnoh_route205_night | everywhere | Route 205 (Nighttime) |
+| `mus_sinnoh_route206.kaisong` | mus_sinnoh_route206 | everywhere | Route 206 (Daytime) |
+| `mus_sinnoh_route206_night.kaisong` | mus_sinnoh_route206_night | everywhere | Route 206 (Nighttime) |
+| `mus_sinnoh_route209.kaisong` | mus_sinnoh_route209 | everywhere | Route 209 (Daytime) |
+| `mus_sinnoh_route209_night.kaisong` | mus_sinnoh_route209_night | everywhere | Route 209 (Nighttime) |
+| `mus_sinnoh_route210.kaisong` | mus_sinnoh_route210 | everywhere | Route 210 (Daytime) |
+| `mus_sinnoh_route210_night.kaisong` | mus_sinnoh_route210_night | everywhere | Route 210 (Nighttime) |
+| `mus_sinnoh_route216.kaisong` | mus_sinnoh_route216 | everywhere | Route 216 (Midday) |
+| `mus_sinnoh_route216_night.kaisong` | mus_sinnoh_route216_night | everywhere | Route 216 (Nighttime) |
+| `mus_sinnoh_route225.kaisong` | mus_sinnoh_route225 | everywhere | Route 225 (Daytime) |
+| `mus_sinnoh_route225_night.kaisong` | mus_sinnoh_route225_night | everywhere | Route 225 (Nighttime) |
+| `mus_sinnoh_route228.kaisong` | mus_sinnoh_route228 | everywhere | Route 228 (Daytime) |
+| `mus_sinnoh_route228_night.kaisong` | mus_sinnoh_route228_night | everywhere | Route 228 (Nighttime) |
 | `mus_sinnoh_sandgem.kaisong` | mus_sinnoh_sandgem | everywhere | Sandgem Town (Daytime) |
 | `mus_sinnoh_sandgem_night.kaisong` | mus_sinnoh_sandgem_night | everywhere | Sandgem Town (Nighttime) |
 | `mus_sinnoh_snowpoint.kaisong` | mus_sinnoh_snowpoint | everywhere | Snowpoint City (Daytime) |
 | `mus_sinnoh_snowpoint_night.kaisong` | mus_sinnoh_snowpoint_night | everywhere | Snowpoint City (Nighttime) |
 | `mus_sinnoh_solaceon.kaisong` | mus_sinnoh_solaceon | everywhere | Solaceon Town (Daytime) |
 | `mus_sinnoh_solaceon_night.kaisong` | mus_sinnoh_solaceon_night | everywhere | Solaceon Town (Nighttime) |
+| `mus_sinnoh_spear_pillar.kaisong` | mus_sinnoh_spear_pillar | everywhere | Spear Pillar |
 | `mus_sinnoh_sunyshore.kaisong` | mus_sinnoh_sunyshore | everywhere | Sunnyshore City (Daytime) |
 | `mus_sinnoh_sunyshore_night.kaisong` | mus_sinnoh_sunyshore_night | everywhere | Sunyshore City (Nighttime) |
+| `mus_sinnoh_surf.kaisong` | mus_sinnoh_surf | everywhere | Surfing |
 | `mus_sinnoh_twinleaf.kaisong` | mus_sinnoh_twinleaf | everywhere | Twinleaf Town (Daytime) |
 | `mus_sinnoh_twinleaf_night.kaisong` | mus_sinnoh_twinleaf_night | everywhere | Twinleaf Town (Nighttime) |
+| `mus_sinnoh_valor_lakefront.kaisong` | mus_sinnoh_valor_lakefront | everywhere | Valor Lakefront (Daytime) |
+| `mus_sinnoh_valor_lakefront_night.kaisong` | mus_sinnoh_valor_lakefront_night | everywhere | Valor Lakefront (Nighttime) |
 | `mus_sinnoh_veilstone.kaisong` | mus_sinnoh_veilstone | everywhere | Veilstone City (Daytime) |
 | `mus_sinnoh_veilstone_night.kaisong` | mus_sinnoh_veilstone_night | everywhere | Veilstone City (Nighttime) |
+| `mus_sinnoh_victory_champion.kaisong` | mus_sinnoh_victory_champion | everywhere | Champion Defeated! |
+| `mus_sinnoh_victory_elite_four.kaisong` | mus_sinnoh_victory_elite_four | everywhere | Elite Four Defeated! |
+| `mus_sinnoh_victory_galactic.kaisong` | mus_sinnoh_victory_galactic | everywhere | Team Galactic Defeated! |
+| `mus_sinnoh_victory_gym_leader.kaisong` | mus_sinnoh_victory_gym_leader | everywhere | Gym Leader Defeated! |
+| `mus_sinnoh_victory_road.kaisong` | mus_sinnoh_victory_road | everywhere | Victory Road |
+| `mus_sinnoh_victory_trainer.kaisong` | mus_sinnoh_victory_trainer | everywhere | Trainer Defeated! |
+| `mus_sinnoh_victory_wild.kaisong` | mus_sinnoh_victory_wild | everywhere | Wild Pokemon Defeated! |
+| `mus_sinnoh_villa.kaisong` | mus_sinnoh_villa | everywhere | Villa - Twinleaf Town Music Box |
+| `mus_sinnoh_vs_arceus.kaisong` | mus_sinnoh_vs_arceus | everywhere | Battle! Arceus! |
+| `mus_sinnoh_vs_champion.kaisong` | mus_sinnoh_vs_champion | everywhere | Battle! Champion |
+| `mus_sinnoh_vs_dialga_palkia.kaisong` | mus_sinnoh_vs_dialga_palkia | everywhere | Battle! Dialga & Palkia |
+| `mus_sinnoh_vs_elite_four.kaisong` | mus_sinnoh_vs_elite_four | everywhere | Battle! Elite Four |
+| `mus_sinnoh_vs_frontier_brain.kaisong` | mus_sinnoh_vs_frontier_brain | everywhere | Battle! Frontier Brain |
+| `mus_sinnoh_vs_galactic.kaisong` | mus_sinnoh_vs_galactic | everywhere | Battle! Team Galactic |
+| `mus_sinnoh_vs_galactic_boss.kaisong` | mus_sinnoh_vs_galactic_boss | everywhere | Battle! Team Galactic Boss |
+| `mus_sinnoh_vs_galactic_commander.kaisong` | mus_sinnoh_vs_galactic_commander | everywhere | Battle! Team Galactic Commander |
+| `mus_sinnoh_vs_giratina.kaisong` | mus_sinnoh_vs_giratina | everywhere | Battle! Giratina |
+| `mus_sinnoh_vs_gym_leader.kaisong` | mus_sinnoh_vs_gym_leader | everywhere | Battle! Gym Leader |
+| `mus_sinnoh_vs_lake_guardians.kaisong` | mus_sinnoh_vs_lake_guardians | everywhere | Battle! Uxie, Mesprit & Azelf |
+| `mus_sinnoh_vs_legendary.kaisong` | mus_sinnoh_vs_legendary | everywhere | Battle! Legendary Pokemon |
+| `mus_sinnoh_vs_regis.kaisong` | mus_sinnoh_vs_regis | everywhere | Battle! Regirock, Regiice & Registeel |
+| `mus_sinnoh_vs_rival.kaisong` | mus_sinnoh_vs_rival | everywhere | Battle! Rival |
+| `mus_sinnoh_vs_trainer.kaisong` | mus_sinnoh_vs_trainer | everywhere | Battle! Trainer |
+| `mus_sinnoh_vs_wild.kaisong` | mus_sinnoh_vs_wild | everywhere | Battle! Wild Pokemon |
 | `mus_victory_trainer@tt.kaisong` | mus_victory_trainer | tt | The Winner |
 | `mus_vs_aqua_magma@ygo.kaisong` | mus_vs_aqua_magma | ygo | 003C SEQ_DU_D_01 |
 | `mus_vs_aqua_magma_leader@ygo.kaisong` | mus_vs_aqua_magma_leader | ygo | 0042 SEQ_DU_D_07 |
@@ -1097,298 +1196,397 @@ Custom: `mus_sinnoh_fight_area_night.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_valor_lakefront (706)
+Custom: `mus_sinnoh_valor_lakefront.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_valor_lakefront_night (707)
+Custom: `mus_sinnoh_valor_lakefront_night.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_route201 (708)
+Custom: `mus_sinnoh_route201.kaisong`
 - Map music: Sinnoh Route 201 [sinnoh_route201]
 
 ### mus_sinnoh_route201_night (709)
+Custom: `mus_sinnoh_route201_night.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_route203 (710)
+Custom: `mus_sinnoh_route203.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_route203_night (711)
+Custom: `mus_sinnoh_route203_night.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_route205 (712)
+Custom: `mus_sinnoh_route205.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_route205_night (713)
+Custom: `mus_sinnoh_route205_night.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_route206 (714)
+Custom: `mus_sinnoh_route206.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_route206_night (715)
+Custom: `mus_sinnoh_route206_night.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_route209 (716)
+Custom: `mus_sinnoh_route209.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_route209_night (717)
+Custom: `mus_sinnoh_route209_night.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_route210 (718)
+Custom: `mus_sinnoh_route210.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_route210_night (719)
+Custom: `mus_sinnoh_route210_night.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_route216 (720)
+Custom: `mus_sinnoh_route216.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_route216_night (721)
+Custom: `mus_sinnoh_route216_night.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_route225 (722)
+Custom: `mus_sinnoh_route225.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_route225_night (723)
+Custom: `mus_sinnoh_route225_night.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_route228 (724)
+Custom: `mus_sinnoh_route228.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_route228_night (725)
+Custom: `mus_sinnoh_route228_night.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_surf (726)
+Custom: `mus_sinnoh_surf.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_bicycle (727)
+Custom: `mus_sinnoh_bicycle.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_lake (728)
+Custom: `mus_sinnoh_lake.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_research_lab (729)
+Custom: `mus_sinnoh_research_lab.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_pokecenter (730)
+Custom: `mus_sinnoh_pokecenter.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_pokecenter_night (731)
+Custom: `mus_sinnoh_pokecenter_night.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_pokemart (732)
+Custom: `mus_sinnoh_pokemart.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_oreburgh_gate (733)
+Custom: `mus_sinnoh_oreburgh_gate.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_oreburgh_mine (734)
+Custom: `mus_sinnoh_oreburgh_mine.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_gym (735)
+Custom: `mus_sinnoh_gym.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_eterna_forest (736)
+Custom: `mus_sinnoh_eterna_forest.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_galactic_building (737)
+Custom: `mus_sinnoh_galactic_building.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_galactic_hideout (738)
+Custom: `mus_sinnoh_galactic_hideout.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_galactic_hideout_deep (739)
+Custom: `mus_sinnoh_galactic_hideout_deep.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_mt_coronet (740)
+Custom: `mus_sinnoh_mt_coronet.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_spear_pillar (741)
+Custom: `mus_sinnoh_spear_pillar.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_victory_road (742)
+Custom: `mus_sinnoh_victory_road.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_forest_house (743)
+Custom: `mus_sinnoh_forest_house.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_great_marsh (744)
+Custom: `mus_sinnoh_great_marsh.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_game_corner (745)
+Custom: `mus_sinnoh_game_corner.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_cavern_on_the_lake (746)
+Custom: `mus_sinnoh_cavern_on_the_lake.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_amity_square (747)
+Custom: `mus_sinnoh_amity_square.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_battle_tower (748)
+Custom: `mus_sinnoh_battle_tower.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_iron_mountain (749)
+Custom: `mus_sinnoh_iron_mountain.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_league_showdown (750)
+Custom: `mus_sinnoh_league_showdown.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_distortion_world (751)
+Custom: `mus_sinnoh_distortion_world.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_villa (752)
+Custom: `mus_sinnoh_villa.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_rival (753)
+Custom: `mus_sinnoh_rival.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_dawn (754)
+Custom: `mus_sinnoh_dawn.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_lucas (755)
+Custom: `mus_sinnoh_lucas.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_lake_encounter (756)
+Custom: `mus_sinnoh_lake_encounter.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_follow_me (757)
+Custom: `mus_sinnoh_follow_me.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_lets_go_together (758)
+Custom: `mus_sinnoh_lets_go_together.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_galactic_appears (759)
+Custom: `mus_sinnoh_galactic_appears.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_legendary_appears (760)
+Custom: `mus_sinnoh_legendary_appears.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_natural_disaster (761)
+Custom: `mus_sinnoh_natural_disaster.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_elite_four_appear (762)
+Custom: `mus_sinnoh_elite_four_appear.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_cynthia (763)
+Custom: `mus_sinnoh_cynthia.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_hall_of_fame (764)
+Custom: `mus_sinnoh_hall_of_fame.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_ending (765)
+Custom: `mus_sinnoh_ending.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_looker (766)
+Custom: `mus_sinnoh_looker.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_giratina_appears (767)
+Custom: `mus_sinnoh_giratina_appears.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_giratina_appears_2 (768)
+Custom: `mus_sinnoh_giratina_appears_2.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_azure_flute (769)
+Custom: `mus_sinnoh_azure_flute.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_arceus (770)
+Custom: `mus_sinnoh_arceus.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_encounter_kid (771)
+Custom: `mus_sinnoh_encounter_kid.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_encounter_miniskirt (772)
+Custom: `mus_sinnoh_encounter_miniskirt.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_encounter_twins (773)
+Custom: `mus_sinnoh_encounter_twins.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_encounter_biker (774)
+Custom: `mus_sinnoh_encounter_biker.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_encounter_hiker (775)
+Custom: `mus_sinnoh_encounter_hiker.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_encounter_ace_trainer (776)
+Custom: `mus_sinnoh_encounter_ace_trainer.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_encounter_martial_artist (777)
+Custom: `mus_sinnoh_encounter_martial_artist.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_encounter_sailor (778)
+Custom: `mus_sinnoh_encounter_sailor.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_encounter_aroma_lady (779)
+Custom: `mus_sinnoh_encounter_aroma_lady.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_encounter_collector (780)
+Custom: `mus_sinnoh_encounter_collector.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_encounter_gambler (781)
+Custom: `mus_sinnoh_encounter_gambler.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_encounter_artist (782)
+Custom: `mus_sinnoh_encounter_artist.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_vs_wild (783)
+Custom: `mus_sinnoh_vs_wild.kaisong`
 - Field and battle code (by map): Battles
 
 ### mus_sinnoh_vs_trainer (784)
+Custom: `mus_sinnoh_vs_trainer.kaisong`
 - Field and battle code (by map): Battles
 
 ### mus_sinnoh_vs_rival (785)
+Custom: `mus_sinnoh_vs_rival.kaisong`
 - Field and battle code (by map): Battles
 
 ### mus_sinnoh_vs_gym_leader (786)
+Custom: `mus_sinnoh_vs_gym_leader.kaisong`
 - Field and battle code (by map): Battles
 
 ### mus_sinnoh_vs_galactic (787)
+Custom: `mus_sinnoh_vs_galactic.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_vs_galactic_commander (788)
+Custom: `mus_sinnoh_vs_galactic_commander.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_vs_galactic_boss (789)
+Custom: `mus_sinnoh_vs_galactic_boss.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_vs_dialga_palkia (790)
+Custom: `mus_sinnoh_vs_dialga_palkia.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_vs_lake_guardians (791)
+Custom: `mus_sinnoh_vs_lake_guardians.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_vs_legendary (792)
+Custom: `mus_sinnoh_vs_legendary.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_vs_elite_four (793)
+Custom: `mus_sinnoh_vs_elite_four.kaisong`
 - Field and battle code (by map): Battles
 
 ### mus_sinnoh_vs_champion (794)
+Custom: `mus_sinnoh_vs_champion.kaisong`
 - Field and battle code (by map): Battles
 
 ### mus_sinnoh_vs_arceus (795)
+Custom: `mus_sinnoh_vs_arceus.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_vs_giratina (796)
+Custom: `mus_sinnoh_vs_giratina.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_vs_regis (797)
+Custom: `mus_sinnoh_vs_regis.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_vs_frontier_brain (798)
+Custom: `mus_sinnoh_vs_frontier_brain.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_victory_wild (799)
+Custom: `mus_sinnoh_victory_wild.kaisong`
 - Field and battle code (by map): Battles
 
 ### mus_sinnoh_victory_trainer (800)
+Custom: `mus_sinnoh_victory_trainer.kaisong`
 - Field and battle code (by map): Battles
 
 ### mus_sinnoh_victory_gym_leader (801)
+Custom: `mus_sinnoh_victory_gym_leader.kaisong`
 - Field and battle code (by map): Battles
 
 ### mus_sinnoh_victory_galactic (802)
+Custom: `mus_sinnoh_victory_galactic.kaisong`
 - Field and battle code (by map): Battles
 
 ### mus_sinnoh_victory_elite_four (803)
+Custom: `mus_sinnoh_victory_elite_four.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
 
 ### mus_sinnoh_victory_champion (804)
+Custom: `mus_sinnoh_victory_champion.kaisong`
 - Field and battle code (by map): Battles
