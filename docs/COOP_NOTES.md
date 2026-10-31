@@ -2800,7 +2800,7 @@ MEGA EVOLUTION, Z-MOVES, DYNAMAX and TERASTALLIZATION (include/battle_gimmick.h;
 src/battle_gen59.c, settings / pictures / menu text / AI in src/battle_gimmick.c).
 - Settings: gMpConfig.gimmicks, 2 bits each (GIMMICK_SET_AUTO / ON / OFF; AUTO = on from its generation: 6, 7, 8, 9),
   "gimmicks" in the config; OPTIONS > GAME rows MEGA EVOLUTION / Z-MOVES / DYNAMAX / TERASTALLIZE; HOST A GAME > GAME
-  RULES > GIMMICKS (AUTO / ALL ON / ALL OFF presets); online the host's (MPR_RULES' last byte, protocol 68).
+  RULES > MEGA EVOLUTION / Z-MOVES / DYNAMAX / TERASTALLIZE rows (the rules list scrolls: RULE_VISIBLE); online the host's (MPR_RULES' last byte, protocol 68).
   MP_Gimmick_Setting / MP_Gimmick_On. Tests: MOEMON_GIMMICKS=dddd (MEGA Z DYNAMAX TERA, 0 AUTO 1 ON 2 OFF).
 - One gimmick a battle per trainer (Owner(): the side, or the battler in multi / co-op / triple / two-opponent
   battles). The engine sends what a battler may use in the move menu's byte 3 (BtlController_EmitChooseMove:
