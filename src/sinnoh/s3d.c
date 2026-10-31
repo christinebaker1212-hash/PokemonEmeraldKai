@@ -36,6 +36,8 @@
 
 extern void (*gMpS3dLine)(int line, u16 layers[4][DISPLAY_WIDTH]);
 const char *Updater_ExeFile(const char *name);
+unsigned long long SDL_GetPerformanceCounter(void);
+unsigned long long SDL_GetPerformanceFrequency(void);
 int uncompress(unsigned char *dest, unsigned long *destLen, const unsigned char *source, unsigned long sourceLen);   // (zlib)
 extern bool (*gMpS3dOamHidden)(int oamIndex, int x, int line);
 
@@ -828,8 +830,29 @@ static void S3dLine(int line, u16 layers[4][DISPLAY_WIDTH])
         return;
     if (line == 0)
     {
+        // MOEMON_S3D_PERF: the time a frame's 3D picture takes, averaged over 120 frames
+        static int sPerf = -1, sCount;
+        static unsigned long long sSum, sMax;
+        unsigned long long t0 = 0;
+        if (sPerf < 0)
+            sPerf = getenv("MOEMON_S3D_PERF") != NULL;
+        if (sPerf)
+            t0 = SDL_GetPerformanceCounter();
         FindFade();
         Render();
+        if (sPerf)
+        {
+            unsigned long long dt = SDL_GetPerformanceCounter() - t0;
+            sSum += dt;
+            sMax = dt > sMax ? dt : sMax;
+            if (++sCount == 120)
+            {
+                double f = (double)SDL_GetPerformanceFrequency() / 1000.0;
+                printf("[s3d] perf: %.2f ms a frame (worst %.2f)\n", sSum / f / sCount, sMax / f);
+                sCount = 0;
+                sSum = sMax = 0;
+            }
+        }
     }
     for (x = 0; x < W; x++)
     {

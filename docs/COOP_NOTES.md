@@ -3287,7 +3287,11 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   other warp (doors 0x69, cave mouths, stairs, escalators) warps when stepped on (non-animated door, 0x0A7).
 - The pack file is "S3DZ" + the pack deflated (zlib, already in the game for the fight engine): 93 MB -> 7 MB, inflated
   in about a quarter of a second when the first SINNOH map loads (s3d.c LoadPack).
-- Not yet: animated textures, billboard props, Platinum's door
+- Wild POKéMON: tools/sinnoh/gen_wild.py POKEPLATINUM_DIR puts each kept place's base encounter table (species and
+  levels from res/field/encounters) into src/data/wild_encounters.json as gSinnoh_* entries (154 places): grass 12
+  slots and surfing 5 as in Emerald; fishing OLD 2 / GOOD 3 / SUPER 5 of Platinum's 5 a rod. Not yet: Platinum's
+  day / night grass slots, swarms, the POKé RADAR, GBA-slot tables. ROUTE 201: STARLY, BIDOOF, KRICKETOT.
+- Not yet: animated textures (prop animations are linked to models in Platinum's code, not its data), billboard props, Platinum's door
   animations, the buildings' people and signs (step 4), speed (about 6 ms a frame), Windows not built with it yet.
 - Test: tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM] (the 3D picture against render_ref.py: mean under 8 of 765 a
   pixel, now 2.9; a house's wall; TWINLEAF to ROUTE 201; the ground's heights; with a ROM, its pack the same as the
