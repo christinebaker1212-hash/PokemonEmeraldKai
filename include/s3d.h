@@ -6,9 +6,10 @@ struct MapLayout;
 
 void S3D_Update(void);                           // every overworld frame: is this map drawn in 3D, and from where
 bool8 S3D_Active(void);                          // this frame's field is drawn by the 3D engine
-// A field sprite's place on the 3D ground: (x, feetY) on Emerald's screen -> where the 3D view shows that spot, and
-// its depth there (0: not on a 3D map)
-void S3D_PlaceSprite(s32 x, s32 feetY, s32 *outX, s32 *outY, float *depth);
+// A field sprite's place on the 3D ground: (x, feetY) on Emerald's screen -> where the 3D view shows that spot at the
+// ground's height there (BDHC), and its depth (0: not on a 3D map). spriteId: whose (each keeps the bridge layer it's
+// on); 0xFFFF none
+void S3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float *depth);
 // Sprites stand in the 3D scene as upright cards: sprite.c notes each sprite's depth and feet for its OAM entries,
 // LoadOam commits them with the OAM, and the renderer hides a sprite pixel the 3D map is in front of
 extern float gS3dSpriteDepth[];

@@ -10,7 +10,7 @@ POKEPLATINUM_DIR is a pret/pokeplatinum checkout (source.py): it holds every map
 light set Platinum has, so no ROM is needed; the release builds the pack from it (tools/sinnoh/fetch_decomp.sh). Built
 from the ROM instead, the pack is the same, byte for byte (tools/sinnoh/test_poc.sh checks it when given a ROM).
 
-Format (little endian), version 1:
+Format (little endian), version 2:
   "S3DP" u32 version
   u32 textures:  each u16 w, u16 h, then w*h u32 RGBA (alpha 0-255)
   u32 meshes:    each f32 centre x y z, f32 radius, u32 groups:
@@ -23,7 +23,10 @@ Format (little endian), version 1:
           s16 mesh (-1 none), s16 altitude, u16 light set, u16 props; props: s16 mesh, f32 3x4 transform (rows);
           then the cell's 32x32 map blocks (u16, the field engine's: metatile | collision << 10 | elevation << 12)
           from Platinum's terrain attributes (bit 15 collision, low byte the behavior: Platinum's behaviors share
-          Emerald's numbers for the common ones, so the metatile is one of the General tileset's with that behavior)
+          Emerald's numbers for the common ones, so the metatile is one of the General tileset's with that behavior);
+          then the ground's heights at each tile's centre (row by row): u8 count (0-3) per tile, then f32 heights x3
+          per tile, lowest first (more than one: a bridge over the ground). From the block's BDHC (its plates: a
+          rectangle in x, z around the block's centre and the plane the ground follows there); world heights.
 """
 import hashlib
 import math
@@ -36,12 +39,49 @@ import nitro  # noqa: E402
 from platinum import Land  # noqa: E402
 from source import open_source, NONE  # noqa: E402
 
-VERSION = 1
+VERSION = 2
 
 # Platinum behavior -> a General tileset metatile with the same Emerald behavior (tall grass, water, sand, ledges...)
 BEHAVIOR_METATILE = {0x02: 0x00D, 0x03: 0x015, 0x10: 0x02D, 0x15: 0x02C, 0x16: 0x0C8, 0x17: 0x13B, 0x21: 0x11C,
                      0x38: 0x086, 0x39: 0x085, 0x3B: 0x087}
 WATER = (0x10, 0x15)
+
+
+def heights(land):
+    """The ground's heights at each tile's centre from the block's BDHC: every plate whose rectangle holds the point
+    gives the height of its plane there (x, z from the block's centre, 16 units a tile). Up to 3, lowest first."""
+    b = land.bdhc
+    out = [[] for _ in range(1024)]
+    if len(b) < 16 or b[:4] != b'BDHC':
+        return out
+    npt, nnrm, ncon, npl = struct.unpack_from('<4H', b, 4)
+    p = 16
+    pts = [struct.unpack_from('<2i', b, p + 8 * i) for i in range(npt)]
+    p += 8 * npt
+    nrm = [struct.unpack_from('<3i', b, p + 12 * i) for i in range(nnrm)]
+    p += 12 * nnrm
+    con = [struct.unpack_from('<i', b, p + 4 * i)[0] for i in range(ncon)]
+    p += 4 * ncon
+    plates = []
+    for i in range(npl):
+        a, c, ni, ci = struct.unpack_from('<4H', b, p + 8 * i)
+        if a >= npt or c >= npt or ni >= nnrm or ci >= ncon or nrm[ni][1] == 0:
+            continue
+        (ax, az), (cx, cz) = pts[a], pts[c]
+        plates.append((min(ax, cx) / 4096, max(ax, cx) / 4096, min(az, cz) / 4096, max(az, cz) / 4096,
+                       nrm[ni][0] / 4096, nrm[ni][1] / 4096, nrm[ni][2] / 4096, con[ci] / 4096))
+    for tz in range(32):
+        z = tz * 16 - 256 + 8
+        for tx in range(32):
+            x = tx * 16 - 256 + 8
+            hs = []
+            for x0, x1, z0, z1, nx, ny, nz, k in plates:
+                if x0 <= x <= x1 and z0 <= z <= z1:
+                    h = round(-(nx * x + nz * z + k) / ny, 2)
+                    if all(abs(h - o) > 2 for o in hs):
+                        hs.append(h)
+            out[tz * 32 + tx] = sorted(hs)[:3]
+    return out
 
 
 def blocks(land):
@@ -125,11 +165,14 @@ def write(path, pack, light_sets, cells, window):
             out += b'\0' * 4
     x0, z0, x1, z1 = window
     out += struct.pack('<4H', x1 - x0 + 1, z1 - z0 + 1, x0, z0)
-    for mesh, alt, light, props, blk in cells:
+    for mesh, alt, light, props, blk, hts in cells:
         out += struct.pack('<hhHH', mesh, alt, light, len(props))
         for pm, m in props:
             out += struct.pack('<h12f', pm, *m)
         out += struct.pack('<1024H', *blk)
+        out += bytes(len(h) for h in hts)
+        for h in hts:
+            out += struct.pack('<3f', *(h + [0.0] * (3 - len(h))))
     open(path, 'wb').write(out)
     return len(out)
 
@@ -153,7 +196,7 @@ def main():
         for x in range(x0, x1 + 1):
             lid, header, alt = mx.cell(x, z)
             if lid == NONE:
-                cells.append((-1, 0, 0, [], [0x0001 | (1 << 10) | (3 << 12)] * 1024))
+                cells.append((-1, 0, 0, [], [0x0001 | (1 << 10) | (3 << 12)] * 1024, [[] for _ in range(1024)]))
                 continue
             prop_set, tex_set, light_set = src.area_of(header)
             if light_set not in light_index:
@@ -179,7 +222,7 @@ def main():
                      0.0, sy_, 0.0, pr.pos[1],
                      -sy * sx, 0.0, cy * sz, pr.pos[2]]
                 props.append((pm, m))
-            cells.append((mesh, alt, light_index[light_set], props, blocks(land)))
+            cells.append((mesh, alt, light_index[light_set], props, blocks(land), heights(land)))
             print('cell (%d,%d): land %d %s (textures %d, props %d, lights %d), %d props'
                   % (x, z, lid, header, tex_set, prop_set, light_set, len(props)))
     size = write(out_path, pack, light_sets, cells, window)

@@ -62,7 +62,8 @@ typedef struct { u8 on, r, g, b; float d[3]; } S3dLight;
 typedef struct { u32 start; S3dLight l[4]; u8 col[4][3]; } S3dLightBlock;   // start: its END time (2-second units); diffuse, ambient, specular, emission
 typedef struct { u32 count; S3dLightBlock *b; } S3dLightSet;
 typedef struct { s16 mesh; float m[12]; } S3dProp;
-typedef struct { s16 mesh, alt; u16 light, nprops; S3dProp *props; u16 blocks[32 * 32]; } S3dCell;
+// hn / h: the ground's heights at each tile's centre (BDHC; more than one: a bridge over the ground), lowest first
+typedef struct { s16 mesh, alt; u16 light, nprops; S3dProp *props; u16 blocks[32 * 32]; u8 hn[32 * 32]; float h[32 * 32][3]; } S3dCell;
 
 static struct
 {
@@ -133,7 +134,7 @@ static void LoadPack(void)
         return;
     }
     r.p += 4;
-    if (TakeU32(&r) != 1)
+    if (TakeU32(&r) != 2)
     {
         printf("[s3d] %s: another pack version\n", path);
         free(data);
@@ -213,6 +214,8 @@ static void LoadPack(void)
             Take(&r, c->props[j].m, 48);
         }
         Take(&r, c->blocks, sizeof(c->blocks));
+        Take(&r, c->hn, sizeof(c->hn));
+        Take(&r, c->h, sizeof(c->h));
     }
     free(data);
     if (r.bad)
@@ -232,6 +235,37 @@ static const S3dCell *Cell(s32 cx, s32 cz)
     if (!sPack.ok || cx < 0 || cz < 0 || cx >= sPack.width || cz >= sPack.height)
         return NULL;
     return &sPack.cells[cz * sPack.width + cx];
+}
+
+// ------------------------------------------------------------------------------------------------ the ground's height
+// A tile's ground height (world tile coordinates, 16 units a tile): of its heights, the one nearest `near` (an object
+// on a bridge stays on it, one under it stays under); `near` itself where the block has none
+static float TileHeight(s32 gtx, s32 gtz, float near)
+{
+    s32 cx = gtx >= 0 ? gtx / 32 : -((31 - gtx) / 32), cz = gtz >= 0 ? gtz / 32 : -((31 - gtz) / 32);
+    const S3dCell *c = Cell(cx, cz);
+    u32 t, i, best = 0;
+    if (c == NULL)
+        return near;
+    t = (gtz - cz * 32) * 32 + (gtx - cx * 32);
+    if (c->hn[t] == 0)
+        return near;
+    for (i = 1; i < c->hn[t] && i < 3; i++)
+        if (fabsf(c->h[t][i] - near) < fabsf(c->h[t][best] - near))
+            best = i;
+    return c->h[t][best];
+}
+
+// The ground's height under a world point: the tile centres around it, blended (slopes and stairs as smooth as the
+// DS shows them while someone walks)
+static float GroundAt(float wx, float wz, float near)
+{
+    float fx = (wx - 8.0f) / 16.0f, fz = (wz - 8.0f) / 16.0f;
+    s32 tx = (s32)floorf(fx), tz = (s32)floorf(fz);
+    float ax = fx - tx, az = fz - tz;
+    float h00 = TileHeight(tx, tz, near), h10 = TileHeight(tx + 1, tz, near);
+    float h01 = TileHeight(tx, tz + 1, near), h11 = TileHeight(tx + 1, tz + 1, near);
+    return (h00 * (1 - ax) + h10 * ax) * (1 - az) + (h01 * (1 - ax) + h11 * ax) * az;
 }
 
 static s32 MapIndex(u8 group, u8 num)
@@ -302,7 +336,10 @@ static struct
     s32 map;                 // sMaps index
     s32 camX, camY;          // Emerald's screen (0, 0) in the map's pixels
     float originX, originZ;  // the map's (0, 0) in Platinum's world
-    float tx, ty, tz;        // the target (the player's tile centre)
+    float tx, ty, tz;        // the target (the player's tile centre, on the ground)
+    float playerH;           // the player's ground height last frame (which layer of a bridge they're on)
+    bool8 havePlayerH;
+    u8 frame;                // counts S3D_Update calls
     float ax, ay;            // where the target is on the screen
     float focal;
     float right[3], up[3], fwd[3], eye[3];
@@ -337,7 +374,10 @@ static void SetupView(void)
     sView.originZ = sMaps[sView.map].cz * BLOCK;
     sView.tx = sView.originX + sView.camX + sView.ax;
     sView.tz = sView.originZ + sView.camY + sView.ay;
-    sView.ty = 0.0f;
+    // the target is on the ground (BDHC), on the layer the player was on (a bridge, or under it)
+    sView.ty = GroundAt(sView.tx, sView.tz, sView.havePlayerH ? sView.playerH : 0.0f);
+    sView.playerH = sView.ty;
+    sView.havePlayerH = TRUE;
     sView.eye[0] = sView.tx;
     sView.eye[1] = sView.ty + CAM_DIST * sp;
     sView.eye[2] = sView.tz + CAM_DIST * cp;
@@ -362,11 +402,31 @@ static bool8 Project(float x, float y, float z, float *sx, float *sy, float *dep
     return TRUE;
 }
 
-void S3D_PlaceSprite(s32 x, s32 feetY, s32 *outX, s32 *outY, float *depth)
+// Each sprite's ground height last frame (the bridge layer it's on), NaN when it has none yet
+static float sSpriteH[MAX_SPRITES];
+static u8 sSpriteHFrame[MAX_SPRITES];
+
+void S3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float *depth)
 {
-    float sx, sy, d;
+    float sx, sy, d, h, near = sView.ty;
     float wx = sView.originX + sView.camX + x, wz = sView.originZ + sView.camY + feetY - 8;
-    if (!sView.active || !Project(wx, 0.0f, wz, &sx, &sy, &d))
+    if (!sView.active)
+    {
+        *outX = x;
+        *outY = feetY;
+        *depth = 0.0f;
+        return;
+    }
+    // (a sprite not placed in the last few frames starts from the player's layer)
+    if (spriteId < MAX_SPRITES && (u8)(sView.frame - sSpriteHFrame[spriteId]) <= 2)
+        near = sSpriteH[spriteId];
+    h = GroundAt(wx, wz, near);
+    if (spriteId < MAX_SPRITES)
+    {
+        sSpriteH[spriteId] = h;
+        sSpriteHFrame[spriteId] = sView.frame;
+    }
+    if (!Project(wx, h, wz, &sx, &sy, &d))
     {
         *outX = x;
         *outY = feetY;
@@ -749,7 +809,10 @@ void S3D_Update(void)
     gMpS3dOamHidden = sView.active && !getenv("MOEMON_S3D_NOHIDE") ? OamHidden : NULL;
     if (!sView.active)
         return;
+    if (sView.map != map)
+        sView.havePlayerH = FALSE;   // (a new map: its own ground)
     sView.map = map;
+    sView.frame++;
     FindCamera();
     SetupView();
     if (getenv("MOEMON_S3D_TRACE"))
@@ -757,8 +820,8 @@ void S3D_Update(void)
         const struct Sprite *sp = &gSprites[gObjectEvents[gPlayerAvatar.objectEventId].spriteId];
         s32 px, py;
         float pd;
-        S3D_PlaceSprite(sp->x + sp->x2 + gSpriteCoordOffsetX, sp->y + sp->y2 + gSpriteCoordOffsetY - sp->centerToCornerVecY, &px, &py, &pd);
-        printf("[s3d] cam %d,%d anchor %.1f,%.1f target %.1f,%.1f sprite %d+%d+%d,%d+%d+%d c2c %d -> %d,%d\n", sView.camX,
+        S3D_PlaceSprite(0xFFFF, sp->x + sp->x2 + gSpriteCoordOffsetX, sp->y + sp->y2 + gSpriteCoordOffsetY - sp->centerToCornerVecY, &px, &py, &pd);
+        printf("[s3d] ground %.1f cam %d,%d anchor %.1f,%.1f target %.1f,%.1f sprite %d+%d+%d,%d+%d+%d c2c %d -> %d,%d\n", sView.ty, sView.camX,
                sView.camY, sView.ax, sView.ay, sView.tx, sView.tz, sp->x, sp->x2, gSpriteCoordOffsetX, sp->y, sp->y2,
                gSpriteCoordOffsetY, sp->centerToCornerVecY, px, py);
     }

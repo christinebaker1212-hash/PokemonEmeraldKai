@@ -19,6 +19,7 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import nitro  # noqa: E402
 from platinum import Land  # noqa: E402
+from source import NONE  # noqa: E402
 
 W, H = 240, 160
 DIST = 666.922119140625
@@ -115,7 +116,13 @@ def render(src, out, matrix_id=0, tile_x=None, tile_z=None, hour=12):
     _, _, blocks = sc.area(mx.cell(tile_x // 32, tile_z // 32)[1])
     lb = next((b for b in blocks if b[0] > secs), blocks[-1])
 
-    target = np.array([tile_x * 16 + 8.0, 0.0, tile_z * 16 + 8.0])
+    # the target on the ground, as the game puts it (BDHC: the height at the tile's centre nearest 0 on arrival)
+    from platinum import Land
+    from build_pack import heights
+    lid = mx.cell(tile_x // 32, tile_z // 32)[0]
+    hs = heights(Land(src.land(lid)))[(tile_z % 32) * 32 + tile_x % 32] if lid != NONE else []
+    ground = min(hs, key=abs) if hs else 0.0
+    target = np.array([tile_x * 16 + 8.0, ground, tile_z * 16 + 8.0])
     view = look_matrix(target)
     color = np.zeros((H, W, 3), dtype=np.float32)
     color[:] = (0, 0, 0)

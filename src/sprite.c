@@ -363,7 +363,7 @@ void UpdateOamCoords(void)
                 {
                     // Moemon Kai: on a SINNOH 3D map a field sprite stands where its spot on the ground is in the view
                     s32 feet = y - sprite->centerToCornerVecY, nx, ny;
-                    S3D_PlaceSprite(x, feet, &nx, &ny, &gS3dSpriteDepth[i]);
+                    S3D_PlaceSprite(i, x, feet, &nx, &ny, &gS3dSpriteDepth[i]);
                     gS3dSpriteFeet[i] = ny;
                     x = nx, y = ny + sprite->centerToCornerVecY;
                 }
