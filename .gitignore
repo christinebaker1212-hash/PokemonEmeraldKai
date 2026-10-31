@@ -48,6 +48,7 @@ prefabs.json
 pokeemerald64
 pokeemerald64.exe
 *.sav
+saves/
 moemon_server
 moemon_server.exe
 .claude/worktrees/
