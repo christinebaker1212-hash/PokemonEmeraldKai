@@ -74,6 +74,7 @@
 #include "constants/items.h"
 #include "constants/songs.h"
 #include "constants/trainers.h"
+#include "constants/qz_port.h"
 #include "constants/flags.h"
 
 extern const u8 EventScript_MpCoopLearnMove[];
@@ -158,9 +159,72 @@ struct LearnLater
 const u8 *MP_FindTrainerEndScript(u16 trainerId);   // battle_setup.c
 static const u8 *sPendingScript;   // a gym leader's badge script to run for the partner
 
+// Moemon Kai: JOHTO's and KANTO's gym leaders (their usual and their alternate team), the badge and the script
+// that runs after their first battle (where their own script goes on after the battle command)
+extern const u8 Johto_VioletGym_EventScript_83FF117[];
+extern const u8 Johto_AzaleaGym_EventScript_83C4C1A[];
+extern const u8 Johto_GoldenrodGym_EventScript_83D5919[];
+extern const u8 Johto_EcruteakGym_EventScript_83CDCCB[];
+extern const u8 Johto_CianwoodGym_EventScript_83CA55E[];
+extern const u8 Johto_OlivineGym_EventScript_83E5064[];
+extern const u8 Johto_MahoganyGym_EventScript_83DE683[];
+extern const u8 Johto_BlackthornGym1F_EventScript_83C7418[];
+extern const u8 Kanto_PewterCity_Gym_EventScript_841A5B6[];
+extern const u8 Kanto_CeruleanCity_Gym_EventScript_841AAD2[];
+extern const u8 Kanto_VermilionCity_Gym_EventScript_841B972[];
+extern const u8 Kanto_CeladonCity_Gym_EventScript_841D2EF[];
+extern const u8 Kanto_FuchsiaCity_Gym_EventScript_841D70C[];
+extern const u8 Kanto_SaffronCity_Gym_EventScript_841EE9D[];
+extern const u8 Kanto_CinnabarIsland_Gym_EventScript_841DC0C[];
+extern const u8 Kanto_ViridianCity_Gym_EventScript_8419EEB[];
+static const struct { u16 trainer, badge; const u8 *script; } sQzGymLeaders[] =
+{
+    {TRAINER_QZ_4115, FLAG_QZ_0x11B2, Johto_VioletGym_EventScript_83FF117},
+    {TRAINER_QZ_4963, FLAG_QZ_0x11B2, Johto_VioletGym_EventScript_83FF117},
+    {TRAINER_QZ_4692, FLAG_QZ_0x11B3, Johto_AzaleaGym_EventScript_83C4C1A},
+    {TRAINER_QZ_4964, FLAG_QZ_0x11B3, Johto_AzaleaGym_EventScript_83C4C1A},
+    {TRAINER_QZ_4700, FLAG_QZ_0x11B4, Johto_GoldenrodGym_EventScript_83D5919},
+    {TRAINER_QZ_4965, FLAG_QZ_0x11B4, Johto_GoldenrodGym_EventScript_83D5919},
+    {TRAINER_QZ_4704, FLAG_QZ_0x11B5, Johto_EcruteakGym_EventScript_83CDCCB},
+    {TRAINER_QZ_4966, FLAG_QZ_0x11B5, Johto_EcruteakGym_EventScript_83CDCCB},
+    {TRAINER_QZ_4606, FLAG_QZ_0x11B6, Johto_CianwoodGym_EventScript_83CA55E},
+    {TRAINER_QZ_4967, FLAG_QZ_0x11B6, Johto_CianwoodGym_EventScript_83CA55E},
+    {TRAINER_QZ_4747, FLAG_QZ_0x11B7, Johto_OlivineGym_EventScript_83E5064},
+    {TRAINER_QZ_4971, FLAG_QZ_0x11B7, Johto_OlivineGym_EventScript_83E5064},
+    {TRAINER_QZ_4803, FLAG_QZ_0x11B8, Johto_MahoganyGym_EventScript_83DE683},
+    {TRAINER_QZ_4975, FLAG_QZ_0x11B8, Johto_MahoganyGym_EventScript_83DE683},
+    {TRAINER_QZ_4637, FLAG_QZ_0x11B9, Johto_BlackthornGym1F_EventScript_83C7418},
+    {TRAINER_QZ_4976, FLAG_QZ_0x11B9, Johto_BlackthornGym1F_EventScript_83C7418},
+    {TRAINER_QZ_8606, FLAG_QZ_0x2100, Kanto_PewterCity_Gym_EventScript_841A5B6},
+    {TRAINER_QZ_8607, FLAG_QZ_0x2101, Kanto_CeruleanCity_Gym_EventScript_841AAD2},
+    {TRAINER_QZ_8608, FLAG_QZ_0x2102, Kanto_VermilionCity_Gym_EventScript_841B972},
+    {TRAINER_QZ_8609, FLAG_QZ_0x2103, Kanto_CeladonCity_Gym_EventScript_841D2EF},
+    {TRAINER_QZ_8610, FLAG_QZ_0x2104, Kanto_FuchsiaCity_Gym_EventScript_841D70C},
+    {TRAINER_QZ_8612, FLAG_QZ_0x2105, Kanto_SaffronCity_Gym_EventScript_841EE9D},
+    {TRAINER_QZ_8611, FLAG_QZ_0x2106, Kanto_CinnabarIsland_Gym_EventScript_841DC0C},
+    {TRAINER_QZ_8542, FLAG_QZ_0x2107, Kanto_ViridianCity_Gym_EventScript_8419EEB},
+};
+
+static u8 QzGymLeader(u16 trainerId)
+{
+    u8 i;
+    for (i = 0; i < ARRAY_COUNT(sQzGymLeaders); i++)
+        if (sQzGymLeaders[i].trainer == trainerId)
+            return i;
+    return 0xFF;
+}
+
+// Any trainer of the three regions (HOENN's, then JOHTO's and KANTO's after FIRST_QZ_TRAINER)
+bool8 MP_IsRealTrainer(u16 trainerId)
+{
+    return IS_REAL_TRAINER(trainerId);
+}
+
 // The badge a gym leader gives (0: not a gym leader)
 static u16 GymBadgeFlag(u16 trainerId)
 {
+    if (QzGymLeader(trainerId) != 0xFF)
+        return sQzGymLeaders[QzGymLeader(trainerId)].badge;
     switch (trainerId)
     {
     case TRAINER_ROXANNE_1:       return FLAG_BADGE01_GET;
@@ -180,7 +244,10 @@ const u8 *MP_FindTrainerEndScriptOnMap(u16 trainerId, u16 mapGroup, u16 mapNum);
 static const u8 *GymLeaderEndScript(u16 trainerId)
 {
     u16 map;
-    const u8 *script = MP_FindTrainerEndScript(trainerId);   // (in the gym: this map's)
+    const u8 *script;
+    if (QzGymLeader(trainerId) != 0xFF)
+        return sQzGymLeaders[QzGymLeader(trainerId)].script;
+    script = MP_FindTrainerEndScript(trainerId);   // (in the gym: this map's)
     if (script != NULL)
         return script;
     switch (trainerId)
@@ -398,6 +465,30 @@ static void SetNameVar(u8 id)
     else
         StringCopyN(gStringVar1, gMpPlayers[id].name, MP_NAME_LEN);
     gStringVar1[MP_NAME_LEN] = EOS;
+}
+
+// How much of a text fits in MAX bytes: all of it, else up to the end of the last whole paragraph that fits (never
+// half a control code: a speech cut after {PAUSE_MUSIC} and before {RESUME_MUSIC} left the music paused)
+u16 MP_TextFitLength(const u8 *s, u16 max)
+{
+    u16 i = 0, lastPara = 0, lastChar = 0;
+    if (s == NULL)
+        return 0;
+    while (s[i] != EOS)
+    {
+        u16 n = 1;
+        if (s[i] == EXT_CTRL_CODE_BEGIN)
+            n = 1 + GetExtCtrlCodeLength(s[i + 1]);
+        else if (s[i] == PLACEHOLDER_BEGIN)
+            n = 2;
+        if (i + n > max)
+            return lastPara != 0 ? lastPara : lastChar;
+        if (s[i] == CHAR_PROMPT_CLEAR)
+            lastPara = i;   // (the text ends where the next paragraph would start)
+        i += n;
+        lastChar = i;
+    }
+    return i;
 }
 
 static void Send(u8 to, const u8 *data, u16 len)
@@ -773,17 +864,21 @@ static void AcceptRequester(void)
     buf[10] = sCoop.twoTrainers ? (sCoop.trainerIdB >> 8) : 0;
     // the lose texts as this game has them (the second trainer's after the first's)
     lose = GetTrainerALoseText();
-    while (lose != NULL && len < LOSE_TEXT_MAX && lose[len] != EOS)
     {
-        buf[11 + len] = lose[len];
-        len++;
+        u16 fit = MP_TextFitLength(lose, LOSE_TEXT_MAX);
+        while (len < fit)
+        {
+            buf[11 + len] = lose[len];
+            len++;
+        }
     }
     buf[11 + len++] = EOS;
     if (sCoop.twoTrainers)
     {
-        u16 k = 0;
+        u16 k = 0, fit;
         lose = GetTrainerBLoseText();
-        while (lose != NULL && k < LOSE_TEXT_MAX && lose[k] != EOS)
+        fit = MP_TextFitLength(lose, LOSE_TEXT_MAX);
+        while (k < fit)
             buf[11 + len++] = lose[k++];
     }
     buf[11 + len++] = EOS;
@@ -1460,7 +1555,7 @@ static void UpdateBattling(void)
 {
     u8 i;
     bool8 on = gMain.inBattle && (gBattleTypeFlags & BATTLE_TYPE_TRAINER) && gBattleOutcome == 0
-            && gTrainerBattleOpponent_A != 0 && gTrainerBattleOpponent_A < TRAINERS_COUNT
+            && MP_IsRealTrainer(gTrainerBattleOpponent_A)
             && (gMpCoopBattle ? sCoop.isMaster : !gNetLinkActive);
     // (a gym leader or other story trainer has no trainer object to spot anyone: localId 0, but friends can JOIN)
     for (i = 0; i < MP_MAX_PLAYERS; i++)
@@ -1764,6 +1859,7 @@ bool8 MP_Coop_IsBossTrainer(u16 trainerId)
     case TRAINER_CLASS_MAGMA_LEADER:
     case TRAINER_CLASS_ELITE_FOUR:
     case TRAINER_CLASS_CHAMPION:
+    case TRAINER_CLASS_QZ_ROCKET_ADMIN:   // Moemon Kai: ARIANA, PROTON, PETREL, ARCHER, GIOVANNI
         return TRUE;
     }
     return GymBadgeFlag(trainerId) != 0 || MP_Rematch_IsRematchTrainer(trainerId);
@@ -2312,13 +2408,16 @@ static bool8 IsLoss(u8 outcome)
 // rival or Team Aqua / Magma member whose script after the battle moves the story on
 static bool8 OrdinaryTrainer(u16 trainerId)
 {
-    if (trainerId == 0 || trainerId >= TRAINERS_COUNT || MP_Coop_IsBossTrainer(trainerId))
+    if (!MP_IsRealTrainer(trainerId) || MP_Coop_IsBossTrainer(trainerId))
         return FALSE;
     switch (gTrainers[trainerId].trainerClass)
     {
     case TRAINER_CLASS_RIVAL:
     case TRAINER_CLASS_TEAM_AQUA:
     case TRAINER_CLASS_TEAM_MAGMA:
+    case TRAINER_CLASS_QZ_RIVAL:          // Moemon Kai: JOHTO's and KANTO's story trainers
+    case TRAINER_CLASS_QZ_TEAM_ROCKET:
+    case TRAINER_CLASS_QZ_ROCKET_ADMIN:
         return FALSE;
     }
     return TRUE;
@@ -2607,7 +2706,7 @@ static void OnAccepted(u8 from, const u8 *data, u16 len)
     pos++;
     if (pos + 2 <= len)
         MP_BattleWeather_SetMasterField(data[pos] | (data[pos + 1] << 8));   // (the master's field weather)
-    if (sCoop.trainerId >= TRAINERS_COUNT || trainerB >= TRAINERS_COUNT)
+    if ((sCoop.trainerId != 0 && !MP_IsRealTrainer(sCoop.trainerId)) || (trainerB != 0 && !MP_IsRealTrainer(trainerB)))
         return;
     sCoop.twoTrainers = trainerB != 0;
     sCoop.trainerIdB = trainerB;
@@ -4208,7 +4307,7 @@ u8 MP_Coop_Seat(void)
 // keep their own event scripts (a friend can still battle them on their own later).
 static bool8 JoinTrainerIdOk(u16 trainer)
 {
-    if (trainer == 0 || trainer >= TRAINERS_COUNT)
+    if (!MP_IsRealTrainer(trainer))
         return FALSE;
     switch (gTrainers[trainer].trainerClass)
     {

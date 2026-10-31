@@ -361,6 +361,8 @@
 // Moemon Kai: Johto / Kanto (tools/quetzal_port/gen_trainers.py)
 #define FIRST_QZ_TRAINER 864
 #define QZ_TRAINERS_COUNT 797
+// any trainer of the three regions (HOENN's, then JOHTO's and KANTO's)
+#define IS_REAL_TRAINER(id) (((id) != 0 && (id) < TRAINERS_COUNT) || ((id) >= FIRST_QZ_TRAINER && (id) < FIRST_QZ_TRAINER + QZ_TRAINERS_COUNT))
 #define TRAINER_CLASS_QZ_BURGLAR 66
 #define TRAINER_CLASS_QZ_FIREBREATHER 67
 #define TRAINER_CLASS_QZ_JUGGLER 68

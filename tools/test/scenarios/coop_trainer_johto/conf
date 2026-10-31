@@ -1,0 +1,12 @@
+# JOHTO: ALICE talks to a VIOLET GYM trainer and waits for a partner (YES), BOB walks up behind and joins: co-op
+# double to the end, and the trainer counts as beaten on both games
+MODE=2
+WARP=35,103,12,10
+WARP_B=35,103,12,12
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=283:46"
+EXPECT_A=("joins the battle against trainer" "co-op: battle over, outcome 1" "flag 12411 = 1")
+EXPECT_B=("is waiting for a partner" "co-op: battle over, outcome 1" "flag 12411 = 1")
+UNEXPECT_A=("crash")
+UNEXPECT_B=("crash")

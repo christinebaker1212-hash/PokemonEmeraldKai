@@ -1,0 +1,24 @@
+pressuntil A field 5000
+wait 200
+mp warp 37,59,15,18
+wait 120
+mp teach 0 55
+waitfor online 6000
+mp getflag 0x2100
+waitlog 30000 co-op: player 1 is battling trainer
+wait 120
+mp joinask 1
+waitlog 30000 join: we're in the battle
+pressuntil A action 8000
+wait 20
+rendershot b_joined
+pressuntillog A 40000 co-op: battle over
+pressuntil A field 6000
+waitlog 3000 runs for us
+mash A 60 20
+pressuntil A field 6000
+wait 60
+rendershot b_after
+mp getflag 0x2100
+wait 200
+quit

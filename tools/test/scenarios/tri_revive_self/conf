@@ -1,0 +1,13 @@
+# Co-op wild triple: both of CARL's Pokemon faint one after the other, ALICE revives the last one out:
+# CARL is asked to send it out (it isn't "already in battle"); a second REVIVE on the other one later
+MODE=3
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+WARP_C=0,16,13,12
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=283:60"
+ENV_B="MOEMON_DEBUG_PARTY=283:60"
+ENV_C="MOEMON_DEBUG_PARTY=280:30,280:30 MOEMON_PARTYTRACE=1 MOEMON_DEBUG_FOE_MOVE=0 MOEMON_DEBUG_FOE_MOVEID=332 MOEMON_DEBUG_FOE_TARGET=0"
+EXPECT_A=("co-op: battle over")
+EXPECT_B=("co-op: battle over")
+EXPECT_C=("co-op item 24 on party slot 1: hp 0 -> 34" "co-op item 24 on party slot 0: hp 0 -> 34" "co-op: battle over")

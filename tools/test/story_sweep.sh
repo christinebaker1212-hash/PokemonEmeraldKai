@@ -5,7 +5,8 @@
 # (battles too: foes at 1 HP; card games conceded) and checks the game is free again and the variable moved on.
 # Reports: FAIL (crash, hang, out-of-memory heap), HELD (a script still holding the player), STUB (a special that isn't
 # ported), STILL (the variable didn't change: a guard that pushes the player back, or a story event that didn't
-# advance; look at the list), NOFIRE (nothing ran: the trigger didn't start a script).
+# advance; look at the list), NOFIRE (nothing ran: the trigger didn't start a script), ENDS (the League's credits
+# close the game, as designed), OWN (a friend stopped by a scene of their own: the same happens with them alone).
 # usage: tools/test/story_sweep.sh [FIRST_GROUP LAST_GROUP]   (default 34 39: JOHTO and KANTO)
 #   JOBS=n games at once (default 4), ONLY=MapName[,MapName...], KEEP=1 keeps every run folder, BIN=the game
 #   PLAYERS=2|3: the same with one or two friends in the room (runN.sh: a local server), standing in the map while the
@@ -138,7 +139,19 @@ one() {   # one GROUP NUM REGION COUNT NAME STANDX STANDY
         for c in b c d; do
             [ -f "$d/$c.log" ] || continue
             grep -q "\[crash\]\|Segmentation\|\[heap\] out of memory\|desync" "$d/$c.log" && echo "FAIL $1.$2 $5: FRIEND $c crashed or desynced"
-            grep -q "^\[test\] ctx .* free 1" "$d/$c.log" || echo "FAIL $1.$2 $5: FRIEND $c not free at the end (or never got there)"
+            grep -q "^\[test\] ctx .* free 1" "$d/$c.log" && continue
+            if grep -q "Soft Reset called" "$d/a.log"; then
+                echo "ENDS $1.$2 $5: the host's credits closed the game (friend $c left waiting, as expected)"; continue
+            fi
+            # the friend alone on the map: a scene of their own (their save is earlier in the story) locks them too
+            mkdir -p "$d/alone_$c"
+            printf 'pressuntil A field 5000\nwait 400\nmp warp %s,%s,%s,%s\nwait 1500\nmp ctx\nquit\n' "$1" "$2" "$6" "$7" > "$d/alone_$c/a.txt"
+            TMO=200 bash "$REPO/tools/test/run1.sh" "$d/alone_$c" MOEMON_DEBUG_REGION="${REGION:-$3}" MOEMON_DEBUG_PARTY=6:100,9:100 > /dev/null 2>&1
+            if grep -q "^\[test\] ctx .* free 0" "$d/alone_$c/log.txt"; then
+                echo "OWN $1.$2 $5: friend $c is in a scene of their own (the same alone on the map)"
+            else
+                echo "FAIL $1.$2 $5: FRIEND $c not free at the end (or never got there)"
+            fi
         done
     else
     (cd "$d" && env SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_TEST="$D/scripts/$5.txt" MOEMON_SHOTDIR="$d" \
@@ -152,6 +165,7 @@ one() {   # one GROUP NUM REGION COUNT NAME STANDX STANDY
     grep -q "\[heap\] out of memory" "$d/log.txt" && why="${why:+$why, }heap out of memory"
     [ -e "$d/crash_log.txt" ] && why="${why:+$why, }crash_log.txt"
     grep -q "^\[test\] savesum:" "$d/log.txt" || why="${why:-did not finish}"
+    grep -q "Soft Reset called" "$d/log.txt" && [ "$why" = "did not finish" ] && { echo "ENDS $1.$2 $5: the credits closed the game"; why=""; }
     # per event: free after it? did a script run after the mark? did the variable change from the trigger value?
     python3 - "$d/log.txt" "$1.$2 $5" <<'PY'
 import re, sys
@@ -187,6 +201,6 @@ total=$(wc -l < "$D/maps.txt")
 events=$(awk '{s+=$4} END{print s}' "$D/maps.txt")
 xargs -P "$JOBS" -L 1 bash -c 'one "$@"' _ < "$D/maps.txt" | tee "$D/report.txt"
 nf=$(grep -c "^FAIL" "$D/report.txt"); nh=$(grep -c "^HELD" "$D/report.txt"); ns=$(grep -c "^STILL" "$D/report.txt")
-nn=$(grep -c "^NOFIRE" "$D/report.txt")
-echo "story sweep: $events triggers on $total maps; $nf maps failed, $nh held, $nn didn't fire, $ns left the variable (groups $G0-$G1)"
+nn=$(grep -c "^NOFIRE" "$D/report.txt"); no=$(grep -c "^OWN" "$D/report.txt")
+echo "story sweep: $events triggers on $total maps; $nf maps failed, $nh held, $nn didn't fire, $ns left the variable, $no friends in scenes of their own (groups $G0-$G1)"
 [ "$nf" = 0 ]

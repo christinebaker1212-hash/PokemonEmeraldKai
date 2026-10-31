@@ -1253,15 +1253,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "teach") == 0)
     {
-        // mp teach SLOT MOVE: replaces the first move
-        int slot = atoi(arg), move = 0;
+        // mp teach SLOT MOVE [MOVESLOT]: replaces the first move (or move MOVESLOT 0-3)
+        int slot = atoi(arg), move = 0, which = 0;
         const char *sp = strchr(arg, ' ');
         if (sp)
-            move = atoi(sp + 1);
-        if (slot >= 0 && slot < PARTY_SIZE && move > 0 && move < MOVES_COUNT)
+            sscanf(sp + 1, "%d %d", &move, &which);
+        if (slot >= 0 && slot < PARTY_SIZE && move > 0 && move < MOVES_COUNT && which >= 0 && which < MAX_MON_MOVES)
         {
             u16 m = move;
-            SetMonData(&gPlayerParty[slot], MON_DATA_MOVE1, &m);
+            u8 pp = gBattleMoves[move].pp;
+            SetMonData(&gPlayerParty[slot], MON_DATA_MOVE1 + which, &m);
+            SetMonData(&gPlayerParty[slot], MON_DATA_PP1 + which, &pp);
             printf("[test] teach: slot %d move %d\n", slot, move);
         }
     }
@@ -1306,6 +1308,21 @@ void MP_TestCommand(const char *cmd, const char *arg)
             for (i = 0; i < MAX_MON_MOVES; i++)
                 SetMonMoveSlot(&gPlayerParty[slot], m[i], i);
             printf("[test] moves: slot %d = %d %d %d %d\n", slot, m[0], m[1], m[2], m[3]);
+        }
+    }
+    else if (strcmp(cmd, "battlerhp") == 0)
+    {
+        // battlerhp BATTLER HP - a battler's HP in the running battle (and its party slot's): 0 = it faints at the turn's
+        // end (the game running the battle: the co-op master)
+        int b = 0, v = 0;
+        sscanf(arg, "%d %d", &b, &v);
+        if (gMain.inBattle && b >= 0 && b < gBattlersCount)
+        {
+            u16 hp = v;
+            gBattleMons[b].hp = hp;
+            SetMonData(GetBattlerSide(b) == B_SIDE_PLAYER ? &gPlayerParty[gBattlerPartyIndexes[b]]
+                                                          : &gEnemyParty[gBattlerPartyIndexes[b]], MON_DATA_HP, &hp);
+            printf("[test] battlerhp: battler %d = %d\n", b, v);
         }
     }
     else if (strcmp(cmd, "hp") == 0)
@@ -2295,6 +2312,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d %d", &id, &qty);
         printf("[test] item %d x%d: %s\n", id, qty, AddBagItem(id, qty) ? "ok" : "FAILED");
     }
+    else if (strcmp(cmd, "unitem") == 0)
+    {
+        // unitem ID - take every one of an item out of the bag
+        int id = atoi(arg);
+        u16 n = CountTotalItemQuantityInBag(id);
+        printf("[test] unitem %d x%d: %s\n", id, n, n == 0 || RemoveBagItem(id, n) ? "ok" : "FAILED");
+    }
     else if (strcmp(cmd, "badegg") == 0)
     {
         // badegg SLOT - break a party Pokemon the way co-op catches broke (OT ID overwritten)
@@ -2666,8 +2690,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
     else if (strcmp(cmd, "ctx") == 0)
     {
         extern int Platform_InputContext(void);
+        extern const u8 *MP_ScriptCurrentPtr(void);
+        extern const u8 *const gStdScripts[];
         printf("[test] ctx %d free %d overworld %d locked %d script %d fade %d\n", Platform_InputContext(), MP_IsLocalFree(),
                MP_IsInOverworld(), ArePlayerFieldControlsLocked(), ScriptContext_IsEnabled(), gPaletteFade.active);
+        // the script's place as an offset from gStdScripts (nm the game for the label: tools/test/script_at.sh)
+        if (ScriptContext_IsEnabled() && MP_ScriptCurrentPtr())
+            printf("[test] ctx script at gStdScripts%+ld\n", (long)((const u8 *)MP_ScriptCurrentPtr() - (const u8 *)gStdScripts));
     }
     else if (strcmp(cmd, "event") == 0)
     {

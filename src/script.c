@@ -498,3 +498,9 @@ void InitRamScript_NoObjectEvent(u8 *script, u16 scriptSize)
         scriptSize = sizeof(gSaveBlock1Ptr->ramScript.data.script);
     InitRamScript(script, scriptSize, MAP_GROUP(MAP_UNDEFINED), MAP_NUM(MAP_UNDEFINED), NO_OBJECT);
 }
+
+// Moemon Co-op tests: where the global script is (harness `mp ctx`)
+const u8 *MP_ScriptCurrentPtr(void)
+{
+    return sGlobalScriptContext.scriptPtr;
+}

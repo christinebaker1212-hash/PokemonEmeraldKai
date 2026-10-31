@@ -2519,7 +2519,11 @@ bool8 MP_IsPartyIdOnSide(u8 battler, u8 partyId)
     {
         if (GetBattlerSide(b) != GetBattlerSide(battler))
             continue;
-        if (gBattlerPartyIndexes[b] == partyId || *(gBattleStruct->monToSwitchIntoId + b) == partyId)
+        // A battler with nothing out (absent, or its Pokemon fainted) doesn't hold the last one it had:
+        // revived, that one can come back in
+        if (gAbsentBattlerFlags & gBitTable[b])
+            continue;
+        if ((gBattlerPartyIndexes[b] == partyId && gBattleMons[b].hp != 0) || *(gBattleStruct->monToSwitchIntoId + b) == partyId)
             return TRUE;
     }
     return FALSE;

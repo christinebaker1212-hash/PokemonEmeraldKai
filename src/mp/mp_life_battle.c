@@ -120,7 +120,7 @@ static bool8 IsBossClass(u8 cls)
 
 static u8 TrainerClassOf(u16 trainer)
 {
-    return trainer != 0 && trainer < TRAINERS_COUNT ? gTrainers[trainer].trainerClass : 0;
+    return IS_REAL_TRAINER(trainer) ? gTrainers[trainer].trainerClass : 0;
 }
 
 // The first species of its evolution family (May's TORCHIC and later COMBUSKEN are one rival)

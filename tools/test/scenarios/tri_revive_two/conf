@@ -1,0 +1,13 @@
+# Co-op wild triple: ALICE's and BOB's only Pokemon faint, CARL (whose game runs the battle) revives one
+# a turn; each comes back out on every screen at the end of that turn
+MODE=3
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+WARP_C=0,16,13,12
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=280:30"
+ENV_B="MOEMON_DEBUG_PARTY=280:30"
+ENV_C="MOEMON_DEBUG_PARTY=283:60 MOEMON_PARTYTRACE=1 MOEMON_DEBUG_FOE_MOVE=0 MOEMON_DEBUG_FOE_MOVEID=332 MOEMON_DEBUG_FOE_TARGET=2,4"
+EXPECT_A=("co-op: battle over")
+EXPECT_B=("co-op: battle over")
+EXPECT_C=("co-op item 24 on party slot 2: hp 0 -> 34" "co-op item 24 on party slot 4: hp 0 -> 34" "co-op: battle over")

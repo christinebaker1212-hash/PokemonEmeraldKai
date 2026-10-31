@@ -7270,14 +7270,14 @@ void HandleSetPokedexFlag(u16 nationalNum, u8 caseId, u32 personality)
 
 const u8 *GetTrainerClassNameFromId(u16 trainerId)
 {
-    if (trainerId >= TRAINERS_COUNT)
+    if (!IS_REAL_TRAINER(trainerId))   // Moemon Kai: JOHTO's / KANTO's too
         trainerId = TRAINER_NONE;
     return gTrainerClassNames[gTrainers[trainerId].trainerClass];
 }
 
 const u8 *GetTrainerNameFromId(u16 trainerId)
 {
-    if (trainerId >= TRAINERS_COUNT)
+    if (!IS_REAL_TRAINER(trainerId))   // Moemon Kai: JOHTO's / KANTO's too
         trainerId = TRAINER_NONE;
     return gTrainers[trainerId].trainerName;
 }

@@ -1,0 +1,17 @@
+pressuntil A field 5000
+wait 200
+mp warp 35,103,12,12
+wait 120
+waitfor online 6000
+waitlog 4000 is waiting for a partner
+wait 30
+press UP 12
+wait 20
+shot b_walk
+waitfor action 8000
+pressuntillog A 15000 co-op: battle over
+wait 300
+pressuntil A field 3000
+wait 60
+mp getflag 0x307B
+quit

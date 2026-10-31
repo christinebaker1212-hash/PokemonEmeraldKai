@@ -435,6 +435,16 @@ MOEMON_DEBUG_FOE_HP=1 and MOEMON_DEBUG_FOE_MOVE=2), tri_roar (WHIRLWIND only); M
 gBattlerPartyIndexes, monToSwitchIntoId and absent battlers on every change, tools/test/check_partytrace.py checks them.
 Intro: CONTROLLER_LOADMONSPRITE is LINK_SYNC_ALL (battle_controllers.c LinkSyncKind); as an owner command a joiner
 replayed the wild Pokémon's slide-ins one after another.
+Revived after having nothing out (1.61.4): a player whose last Pokemon fainted is marked absent; a friend's REVIVE on
+one of theirs brings them back at the end of the turn (HandleFaintedMonActions case 0). MP_IsPartyIdOnSide skips an
+absent battler and one whose Pokemon fainted (gBattleMons hp 0), so the last one out counts as a replacement once
+revived (it used to stay "on the field": no prompt, while the host's screen already drew it); the send-out menu
+(party_menu.c TrySwitchInPokemon) doesn't call the fainted battler's own Pokemon "already in battle". Tests
+tri_revive_self (one player's two Pokemon faint one after the other, the last one out revived, then the other),
+tri_revive_two (two friends with nothing out, revived one a turn by the host), tri_revive_bench (the first one to
+faint revived), coop_revive (the doubles case). Harness: MOEMON_DEBUG_FOE_MOVEID=MOVE puts a move in every foe's first
+slot (the master's engine), MOEMON_DEBUG_FOE_TARGET=B[,B...] = each foe's battler to attack (the foe's own entry, else
+the first still standing), `mp teach SLOT MOVE [MOVESLOT]`, `mp unitem ID`, `mp battlerhp B HP`.
 
 Grouped stat moves (doubles and triples, any battle): a status move hitting several Pokémon (MOVE_TARGET_BOTH /
 FOES_AND_ALLY: Growl, Tail Whip, Leer, String Shot, Sweet Scent) records each target in BattleScript_EffectStatDown
@@ -2746,6 +2756,16 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   personal PC and fits levels (MP_Region_FitBoxMon: Lv 5 the first time); entering another region on foot does the
   same (MP_Region_OnMapLoaded). First trips go to MP_Region_GoToStartHouse.
 - New game: PROF. BIRCH's region question (main_menu.c), MP_Region_StartNewGame; harness MOEMON_DEBUG_REGION=N.
+- Co-op with JOHTO's / KANTO's trainers (1.61.4): their ids are FIRST_QZ_TRAINER (864) on, past TRAINERS_COUNT, and
+  every co-op check used to stop at TRAINERS_COUNT (no MPR_COOP_BATTLING: friends couldn't JOIN; no badge for a
+  friend; trainer names / classes as TRAINER_NONE). IS_REAL_TRAINER (constants/trainers.h) / MP_IsRealTrainer take
+  both ranges. Their classes are HOENN's numbers (LEADER 32, ELITE_FOUR 31, CHAMPION 38, RIVAL 50), so the joining
+  rules (no E4 / Champion) and boss boosts hold; QZ_RIVAL / QZ_TEAM_ROCKET / QZ_ROCKET_ADMIN are story trainers too.
+  Gym leaders: mp_coop.c sQzGymLeaders (both teams of each JOHTO leader, KANTO's eight: badge flag and the script that
+  follows the first battle, for a friend who joined). gDisplayedStringBattle is 1024 (was 300: BROCK's 340-letter
+  defeat speech overran it, harmless alone, a crash in co-op as it hit gBattleMsgDataPtr); the speech sent to friends
+  (240 bytes, in the protocol) is cut at a whole paragraph by MP_TextFitLength. Tests join_gym_johto (FALKNER),
+  join_gym_kanto (BROCK).
 - Generations per region: HOENN Gen 1-3, JOHTO / KANTO Gen 1-2 (gMpGenSetting raises them; MP_Gen_Cap / Allowed /
   StandIn; Johto / Kanto tables swap to the Gen 2 cap: MP_Region_WildInfo / TrainerData, tools/quetzal_port/gen_gen2.py;
   evolutions into a later generation wait: GetEvolutionTargetSpecies).

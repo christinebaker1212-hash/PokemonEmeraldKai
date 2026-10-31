@@ -1,0 +1,73 @@
+pressuntil A field 5000
+mp teach 0 150
+mp teach 0 61 1
+waitfor online 6000
+mp unitem 13
+mp unitem 14
+mp unitem 17
+mp unitem 26
+mp item 24 3
+waitlog 3000 co-op wild: joining
+pressuntil A action 4000
+wait 10
+press A 2
+wait 30
+press A 2
+wait 60
+waitfor action 9000
+wait 10
+press A 2
+wait 30
+press A 2
+wait 60
+waitfor action 9000
+wait 30
+shot a_turn3
+press RIGHT 2
+wait 10
+press A 2
+wait 300
+shot a_bag
+press RIGHT 2
+wait 20
+shot a_bag2
+press A 2
+wait 60
+press A 2
+waitfor partymenu 600
+wait 20
+shot a_pm
+press A 2
+wait 120
+shot a_used
+waitfor action 12000
+shot a_turn4
+press RIGHT 2
+wait 10
+press A 2
+wait 300
+press A 2
+wait 60
+press A 2
+waitfor partymenu 600
+wait 20
+shot a_pm4
+press A 2
+wait 120
+waitfor action 12000
+shot a_turn5
+press LEFT 2
+wait 5
+press UP 2
+wait 5
+press A 2
+wait 20
+press RIGHT 2
+wait 10
+press A 2
+wait 20
+press A 2
+wait 300
+pressuntillog A 12000 co-op: battle over
+wait 300
+quit

@@ -1020,6 +1020,8 @@ void MP_Coop_PrepareTrainerParty(u16 trainerId);
 void MP_Coop_FinishTrainerParty(u16 trainerId);
 void MP_Coop_FinishTwoTrainerParty(u16 trainerA, u16 trainerB);
 bool8 MP_Coop_IsBossTrainer(u16 trainerId);
+bool8 MP_IsRealTrainer(u16 trainerId);   // HOENN's trainers and JOHTO's / KANTO's (FIRST_QZ_TRAINER on)
+u16 MP_TextFitLength(const u8 *s, u16 max);   // how much of a text fits in MAX bytes (whole paragraphs, no half codes)
 bool8 MP_Coop_TrainerBattleBoost(void);           // a co-op trainer battle: items and smarter AI (battle_ai_script_commands.c)   // caves and dungeons (no shared PC, no paid rescue)
 void MP_Store_OnMessage(const u8 *data, u16 len);
 s32 MP_Counter_Get(const char *key);

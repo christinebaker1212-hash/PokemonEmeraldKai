@@ -1,4 +1,6 @@
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "global.h"
 #include "battle_gimmick.h"
 #include "mp.h"
@@ -64,7 +66,33 @@ static void OpponentHandlePrintSelectionString(void);
 static void OpponentHandleChooseAction(void);
 static void OpponentHandleYesNoBox(void);
 static void OpponentHandleChooseMove(void);
+static u8 DebugFoeTarget(void)
+{
+    // the foe's own entry (first foe: the first, second foe: the second...) while that one stands, else the first standing
+    const char *e = getenv("MOEMON_DEBUG_FOE_TARGET"), *own = e;
+    int k = gActiveBattler / 2;
+    while (own && k-- > 0 && (own = strchr(own, ',')) != NULL)
+        own++;
+    if (own && *own)
+    {
+        int b = atoi(own);
+        if (b >= 0 && b < gBattlersCount && !(gAbsentBattlerFlags & gBitTable[b]) && gBattleMons[b].hp != 0)
+            return b;
+    }
+    while (e && *e)
+    {
+        int b = atoi(e);
+        if (b >= 0 && b < gBattlersCount && !(gAbsentBattlerFlags & gBitTable[b]) && gBattleMons[b].hp != 0)
+            return b;
+        e = strchr(e, ',');
+        if (e)
+            e++;
+    }
+    return 0xFF;
+}
+
 static void OpponentHandleChooseItem(void);
+static u8 DebugFoeTarget(void);
 static void OpponentHandleChoosePokemon(void);
 static void OpponentHandleCmd23(void);
 static void OpponentHandleHealthBarUpdate(void);
@@ -1585,8 +1613,16 @@ static void OpponentHandleChooseMove(void)
         if (gBattleTypeFlags & (BATTLE_TYPE_TRAINER | BATTLE_TYPE_FIRST_BATTLE | BATTLE_TYPE_SAFARI | BATTLE_TYPE_ROAMER))
         {
 
+            if (getenv("MOEMON_DEBUG_FOE_MOVEID") && atoi(getenv("MOEMON_DEBUG_FOE_MOVEID")) > 0)
+            {
+                // Moemon Co-op tests: as for wild Moemon below
+                gBattleMons[gActiveBattler].moves[0] = moveInfo->moves[0] = atoi(getenv("MOEMON_DEBUG_FOE_MOVEID"));
+                gBattleMons[gActiveBattler].pp[0] = 30;
+            }
             BattleAI_SetupAIData(ALL_MOVES_MASK);
             chosenMoveId = BattleAI_ChooseMoveOrAction();
+            if (chosenMoveId < MAX_MON_MOVES && DebugFoeTarget() < gBattlersCount)
+                gBattlerTarget = DebugFoeTarget();
             {
                 // Moemon Co-op tests: MOEMON_DEBUG_FOE_MOVE=SLOT makes the trainer use that move slot when it has one
                 const char *force = getenv("MOEMON_DEBUG_FOE_MOVE");
@@ -1630,9 +1666,27 @@ static void OpponentHandleChooseMove(void)
                 chosenMoveId = MOD(Random(), MAX_MON_MOVES);
                 move = moveInfo->moves[chosenMoveId];
             } while (move == MOVE_NONE);
+            {
+                // Moemon Co-op tests: MOEMON_DEBUG_FOE_MOVE=SLOT for wild Moemon too; MOEMON_DEBUG_FOE_MOVEID=MOVE
+                // puts that move in the first slot (only the master's engine reads it)
+                const char *force = getenv("MOEMON_DEBUG_FOE_MOVE");
+                if (getenv("MOEMON_DEBUG_FOE_MOVEID") && atoi(getenv("MOEMON_DEBUG_FOE_MOVEID")) > 0)
+                {
+                    gBattleMons[gActiveBattler].moves[0] = atoi(getenv("MOEMON_DEBUG_FOE_MOVEID"));
+                    gBattleMons[gActiveBattler].pp[0] = 30;
+                    move = moveInfo->moves[chosenMoveId = 0] = gBattleMons[gActiveBattler].moves[0];
+                }
+                if (force && atoi(force) >= 0 && atoi(force) < MAX_MON_MOVES && moveInfo->moves[atoi(force)] != MOVE_NONE)
+                    move = moveInfo->moves[chosenMoveId = atoi(force)];
+            }
 
+            if (getenv("MOEMON_DEBUG_FOE_TARGET"))
+                printf("[test] foe %d: move %d slot %d, target %d\n", gActiveBattler, move, chosenMoveId, DebugFoeTarget());
             if (gBattleMoves[move].target & (MOVE_TARGET_USER_OR_SELECTED | MOVE_TARGET_USER))
                 BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, (chosenMoveId) | (gActiveBattler << 8));
+            else if (DebugFoeTarget() < gBattlersCount)
+                // Moemon Co-op tests: MOEMON_DEBUG_FOE_TARGET=B[,B...]: wild Moemon attack the first of these still standing
+                BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, (chosenMoveId) | (DebugFoeTarget() << 8));
             else if (IS_TRIPLE_BATTLE())   // Moemon Co-op: any of the three
                 BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, (chosenMoveId) | (GetRandomFoe(gActiveBattler) << 8));
             else if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)

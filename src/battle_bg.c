@@ -791,7 +791,7 @@ void DrawMainBattleBackground(void)
     }
     else
     {
-        if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild && gTrainerBattleOpponent_A < TRAINERS_COUNT)
+        if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild && IS_REAL_TRAINER(gTrainerBattleOpponent_A))
         {
             u8 trainerClass = gTrainers[gTrainerBattleOpponent_A].trainerClass;
             if (trainerClass == TRAINER_CLASS_LEADER)
@@ -1242,7 +1242,7 @@ bool8 LoadChosenBattleElement(u8 caseId)
         }
         else
         {
-            if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild && gTrainerBattleOpponent_A < TRAINERS_COUNT)
+            if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild && IS_REAL_TRAINER(gTrainerBattleOpponent_A))
             {
                 u8 trainerClass = gTrainers[gTrainerBattleOpponent_A].trainerClass;
                 if (trainerClass == TRAINER_CLASS_LEADER)
@@ -1304,7 +1304,7 @@ bool8 LoadChosenBattleElement(u8 caseId)
         }
         else
         {
-            if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild && gTrainerBattleOpponent_A < TRAINERS_COUNT)
+            if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild && IS_REAL_TRAINER(gTrainerBattleOpponent_A))
             {
                 u8 trainerClass = gTrainers[gTrainerBattleOpponent_A].trainerClass;
                 if (trainerClass == TRAINER_CLASS_LEADER)
@@ -1366,7 +1366,7 @@ bool8 LoadChosenBattleElement(u8 caseId)
         }
         else
         {
-            if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild && gTrainerBattleOpponent_A < TRAINERS_COUNT)
+            if ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) && !gMpCoopWild && IS_REAL_TRAINER(gTrainerBattleOpponent_A))
             {
                 u8 trainerClass = gTrainers[gTrainerBattleOpponent_A].trainerClass;
                 if (trainerClass == TRAINER_CLASS_LEADER)

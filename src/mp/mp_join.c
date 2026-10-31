@@ -437,7 +437,8 @@ static void SendSnapshots(const struct MpJoinPlan *plan)
     if (lose != NULL)
     {
         u16 i;
-        for (i = 0; i < JOIN_LOSE_TEXT_MAX && lose[i] != EOS; i++)
+        u16 fit = MP_TextFitLength(lose, JOIN_LOSE_TEXT_MAX);   // (whole paragraphs)
+        for (i = 0; i < fit; i++)
             snap->loseText[i] = lose[i];
         snap->loseText[i] = EOS;
         snap->haveLoseText = TRUE;
@@ -446,7 +447,8 @@ static void SendSnapshots(const struct MpJoinPlan *plan)
     if (lose != NULL)
     {
         u16 i;
-        for (i = 0; i < JOIN_LOSE_TEXT_MAX && lose[i] != EOS; i++)
+        u16 fit = MP_TextFitLength(lose, JOIN_LOSE_TEXT_MAX);   // (whole paragraphs)
+        for (i = 0; i < fit; i++)
             snap->loseTextB[i] = lose[i];
         snap->loseTextB[i] = EOS;
         snap->haveLoseTextB = TRUE;

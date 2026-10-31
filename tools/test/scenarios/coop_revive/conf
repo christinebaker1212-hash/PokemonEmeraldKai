@@ -1,0 +1,10 @@
+# Co-op wild double: both of ALICE's Pokemon faint one after the other (no one left to send out), BOB
+# uses a REVIVE on the last one; ALICE is asked to send it out and does, and both screens show it
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=280:30,280:30"
+ENV_B="MOEMON_DEBUG_PARTY=283:60 MOEMON_PARTYTRACE=1 MOEMON_DEBUG_FOE_MOVE=0 MOEMON_DEBUG_FOE_MOVEID=332 MOEMON_DEBUG_FOE_TARGET=2"
+EXPECT_A=("co-op: battle over")
+EXPECT_B=("co-op item 24 on party slot 4: hp 0 -> 34" "co-op: battle over")

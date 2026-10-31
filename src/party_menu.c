@@ -6507,6 +6507,9 @@ static bool8 TrySwitchInPokemon(void)
     }
     for (i = 0; i < gBattlersCount; i++)
     {
+        // Moemon Co-op: sending out for a battler whose Pokemon fainted, that Pokemon (revived since) isn't in battle
+        if (gPartyMenu.action == PARTY_ACTION_SEND_OUT && i == gBattlerInMenuId)
+            continue;
         if (GetBattlerSide(i) == B_SIDE_PLAYER && GetPartyIdFromBattleSlot(slot) == gBattlerPartyIndexes[i])
         {
             GetMonNickname(&gPlayerParty[slot], gStringVar1);

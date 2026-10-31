@@ -127,6 +127,14 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
    JOHTO / KANTO story scene, special battle (LANCE's multi battle uses the Triple Battle second ally's back picture
    slot: check with a friend in the room / in the battle), co-op doubles and triples, joining a battle, followers,
    region travel together; two- and three-client runs of the story sweep's scenes (MOEMON_LOBBY, barrier).
+   Done so far: FILL / TEAM PADDING respects the GENERATION (coop_fill_gen3); a REVIVE on a friend with nothing out
+   in co-op doubles / triples brings their Pokemon back on every screen (COOP_NOTES "Revived after having nothing
+   out"; tests coop_revive, tri_revive_*). The two-player story sweep (tools/test/story_sweep.sh PLAYERS=2) ran over
+   JOHTO and KANTO.
+   Also done: JOHTO / KANTO trainers in co-op (joinable, badges for friends, BROCK's long speech crash: COOP_NOTES
+   "JOHTO and KANTO", tests join_gym_johto / join_gym_kanto). The PLAYERS=2 sweep is clean (0 FAIL; OWN = a friend's
+   own scene, ENDS = the credits). Left: PLAYERS=3 sweep; a co-op team-up with a JOHTO route trainer (wait for a
+   partner) and a KANTO multi battle with a friend in the room (LANCE / GIOVANNI / ETHAN battles 12-14).
 10. THE ABSOLUTE LAST PASS, after everything is committed and built: MoeGatcha - every banner by GENERATION, Gen 3
    (today's banners) as the base: newer POKeMON / items join each banner as the GENERATION rises (mp_gatcha.c;
    RandomSpecies is still 1-386 at every GENERATION).
