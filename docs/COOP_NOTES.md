@@ -2768,7 +2768,9 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   from quetzal_rip/data/badge_marts.json: tools/quetzal_rip/badge_marts.py ROM, tools/quetzal_port/gen_badge_marts.py;
   shop.c MP_ShopItems takes NULL as that). It crashed every JOHTO mart clerk before 1.62.
 - The cuttable trees and breakable rocks get Emerald's obstacle animations (gen_objects.py OBSTACLE_ANIMS: JOHTO's
-  82 / 86, KANTO's FireRed 16127 / 16190): with plain still animations CUT and ROCK SMASH crashed.
+  82 / 86, KANTO's FireRed 16127 / 16190): with plain still animations CUT and ROCK SMASH crashed. FireRed's nurse
+  (16170) keeps her 10th frame and Emerald's nurse animation: KANTO's nurses bow (nurse_joy_bow), and without the
+  frame the heal script waited forever (test qz_nurse_kanto).
 - In-game trades in JOHTO / KANTO are Quetzal's 17 (src/data/qz_ingame_trades.h from tools/quetzal_port/gen_trades.py,
   trade.c InGameTrade); Emerald's table of four was read past its end and crashed. Test qz_trade. The trade screen's
   VBlank no longer touches its freed data (every in-game trade could crash on a PC).

@@ -3900,6 +3900,7 @@ static const struct SpriteFrameImage sPicTable_Qz16170[] = {
     overworld_frame(gObjectEventPic_Qz16170, 2, 4, 6),
     overworld_frame(gObjectEventPic_Qz16170, 2, 4, 7),
     overworld_frame(gObjectEventPic_Qz16170, 2, 4, 8),
+    overworld_frame(gObjectEventPic_Qz16170, 2, 4, 9),
 };
 
 static const struct SpriteFrameImage sPicTable_Qz16171[] = {
@@ -10024,7 +10025,7 @@ static const struct ObjectEventGraphicsInfo sObjectEventGraphicsInfo_Qz16170 = {
     .tracks = TRACKS_FOOT,
     .oam = &gObjectEventBaseOam_16x32,
     .subspriteTables = sOamTables_16x32,
-    .anims = sAnimTable_Standard,
+    .anims = sAnimTable_Nurse,
     .images = sPicTable_Qz16170,
     .affineAnims = gDummySpriteAffineAnimTable,
 };

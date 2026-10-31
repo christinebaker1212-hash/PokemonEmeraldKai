@@ -31,7 +31,8 @@ SIX = [0, 4, 2, 1, 1, 5, 5, 3, 3]
 # field obstacles with an animation of their own (CUT, ROCK SMASH: JOHTO's 82 / 86, KANTO's FireRed 16127 / 16190):
 # FireRed's frames are in Emerald's order
 OBSTACLE_ANIMS = {82: 'sAnimTable_CuttableTree', 86: 'sAnimTable_BreakableRock', 16127: 'sAnimTable_CuttableTree',
-                  16190: 'sAnimTable_BreakableRock'}
+                  16190: 'sAnimTable_BreakableRock', 16170: 'sAnimTable_Nurse'}
+NURSE = 16170   # FireRed's nurse: the 10th frame is her bow (nurse_joy_bow in KANTO's POKeMON CENTERs)
 
 
 def read(p):
@@ -105,7 +106,9 @@ def main():
                     % (name, s['id'], tw, th))
         frames = s['frames']
         inanimate = s['inanimate'] or frames == 1
-        if frames == 6 and not inanimate:
+        if s['id'] == NURSE:
+            order = list(range(10))
+        elif frames == 6 and not inanimate:
             order = SIX
         elif inanimate:
             order = list(range(frames))

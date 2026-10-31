@@ -1,0 +1,7 @@
+# KANTO's nurses (FireRed's nurse sprite, with her bow): healing at VIRIDIAN's POKeMON CENTER ends with the player free
+# (without the bow frame the script waited forever)
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=6:50"
+EXPECT_A=("ctx 1 free 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

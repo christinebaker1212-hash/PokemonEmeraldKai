@@ -4,7 +4,7 @@
 # and check the game is free again. Reports a crash, a hang, an out-of-memory heap, a script still holding the
 # player, and specials that aren't ported.
 # usage: tools/test/npc_sweep.sh [FIRST_GROUP LAST_GROUP]   (default 34 39: JOHTO and KANTO)
-#   JOBS=n games at once (default 4), LIMIT=n only the first n maps, ONLY=MapName one map, REGION=0|1|2 (default: the
+#   JOBS=n games at once (default 4), LIMIT=n only the first n maps, ONLY=MapName[,MapName...] only those, REGION=0|1|2 (default: the
 #   map group's region), KEEP=1 keeps every run folder; a failed map's log stays in $OUT/npc_sweep/<map>.log
 . "$(dirname "$0")/common.sh"
 G0=${1:-34}; G1=${2:-39}; JOBS=${JOBS:-4}
@@ -19,7 +19,7 @@ CARD_SCRIPTS = ('EventScript_CardClub', 'EventScript_TtPlayer', 'EventScript_TtQ
 os.makedirs(os.path.join(out, 'scripts'), exist_ok=True)
 for g in range(g0, g1 + 1):
     for n, name in enumerate(groups[groups['group_order'][g]]):
-        if only and name != only:
+        if only and name not in only.split(','):
             continue
         m = json.load(open(os.path.join(repo, 'data/maps', name, 'map.json')))
         spots = []
