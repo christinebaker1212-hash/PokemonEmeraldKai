@@ -13,9 +13,10 @@ Queued after the 1.61.6 release and the KANTO / JOHTO sweep (the user's plan, 20
 
 ## The goal
 Add SINNOH as a third region beside JOHTO / KANTO, built from Pokémon Platinum:
-- Shown in its ORIGINAL Platinum look (no Gen 3 redraw)
+- Shown in its ORIGINAL Platinum look, in 3D: a new 3D engine draws Platinum's own map models (scope change,
+  2026-10-31: replaces the earlier plan of pre-rendered pictures)
 - The game's EXISTING battle system as is (Gen 4 species, moves, abilities and items are already in).
-- New work: overworld (pictures, collision, height), scripts/story, data.
+- New work: the 3D engine, overworld (models, collision, height), scripts/story, data.
 - The PÓKETCH as a KEY ITEM: registerable to a hotkey, also reachable from the menu, drawn as an overlay
   on the main screen, mouse control or controller controls while focused (no second screen), usable in every region.
 
@@ -50,27 +51,60 @@ A new TRAINER CARD for Sinnoh comes later (the user's own design).
 - Saves: since 1.61.5 there are three save files, each in its own folder under saves/ (saves/slot1...),
   with all its sidecar files. Any new Sinnoh sidecar belongs in that slot folder.
   Save layout never changes (tools/test/save_layout.py); migrations go in mp_savefix.c.
-- Map pictures past the GBA's tile limits with an "over" layer: mp_mappic.c (GAME CENTER).
 - Frame overlays (mp_compass.c, mp_ballfx.c) and registered-item hotkeys, which the PÓKETCH can reuse.
+- mp_mappic.c (GAME CENTER: pictures pinned to maps): not used for Sinnoh any more (the 3D engine draws it).
+
+## The 3D engine (scope change, 2026-10-31)
+Platinum's overworld is real 3D (the DS GPU): map blocks of 32x32 tiles, each a textured model, plus building
+models, texture / pattern animations (water, flowers), per-area lights that follow the time of day, and a tilted
+perspective camera. The engine draws those models as Platinum does instead of pictures made from them.
+- Data, read from the ROM by tools (never committed): the map matrix (which block sits where, per map),
+  land_data blocks (model NSBMD, tile permissions, BDHC height data, the block's building list), building models
+  (build_model), textures (NSBTX), texture and pattern animations (NSBTA / NSBTP), area lights and the camera
+  per map. Reference: pokeplatinum's src/field/, src/overlay*/ (map_matrix, land_data, bdhc, area_data).
+  A converter turns them into a compact form the game loads at run time (like graphics/ygo/edo.pak).
+- Renderer: a DS-like software rasterizer (textured triangles / quads, vertex colors, alpha, the DS's per-polygon
+  lights, fog, depth) drawing into the game's own frame. Software, so everything that reads the frame keeps working:
+  display.c's scaling and filters, SPECTATE streaming and pop-outs, `shot`, headless tests with the dummy video driver,
+  Wine. The DS drew about 2048 polygons at 256x192 a frame: easily done on the CPU.
+- Sprites: the overworld objects (players, the LOOK, followers, NPCs, co-op friends, nametags, emotes) stand in the
+  3D scene as camera-facing billboards at their tile and height, hidden behind the map where it's in front of
+  them, as on the DS. The frame overlays (mp_compass.c, mp_ballfx.c, the PÓKETCH) stay drawn over the frame.
+- The game logic stays on Emerald's grid: Sinnoh maps are still maps of the field engine (map headers, events,
+  warps, scripts, connections, object events, the collision grid from Platinum's tile permissions), so movement,
+  scripts, co-op sync, followers and the rest need no new logic. The 3D engine replaces only how a Sinnoh map is
+  drawn, plus heights: BDHC gives the ground's height under each object (slopes, stairs, bridges, Mt. Coronet,
+  the League), used for drawing and for which layer of a bridge an object is on.
+- Camera: Platinum's per-map camera (distance, angle, field of view) and the scripted camera moves of cutscenes.
+- Battles, menus and everything else stay as they are (2D, 240x160).
 
 ## The plan (high level)
-1. Maps: pre-render Platinum's 3D maps offline (orthographic camera at Platinum's tilt, so the
-   16x16 grid stays exact) and show them through mp_mappic.c with "over" layers; looping frames for water etc.
-2. Collision and height: Platinum's tile permissions -> Emerald behaviours; BDHC heights -> elevations
-   and sprite offsets (stairs, slopes, bridges, Mt. Coronet, the League).
-3. Data converters: trainers, wild, items, marts, text, music; small new systems for Honey Trees,
-   Poké Radar, swarms and the Great Marsh; Rock Climb and Defog as field moves.
+1. The 3D engine: ROM reader + converter, the software renderer, a test viewer (a map block from a command line,
+   compared against reference pictures), then inside the game: one Sinnoh map drawn in 3D with billboarded sprites.
+2. Collision and height: Platinum's tile permissions -> Emerald behaviours; BDHC -> heights under objects, bridge
+   layers.
+3. Data converters: trainers, wild, items, marts, text, music; small new systems for Honey Trees, Poké Radar,
+   swarms and the Great Marsh; Rock Climb and Defog as field moves.
 4. Scripts: convert the common commands, write the cutscenes by hand. This is the bulk of the work
-   (Team Galactic, the lakes, Spear Pillar, the Distortion World).
+   (Team Galactic, the lakes, Spear Pillar, the Distortion World; the Distortion World's own gravity and camera
+   need the 3D engine's camera moves).
 5. PÓKETCH Key Item and its apps (touch apps use the D-pad cursor or mouse). Self-contained, can come early.
 6. Not planned: Super Contests (Gen 3 contests instead); the Underground only if the user asks.
 
+## Open questions for the user (defaults in brackets)
+- The picture size: Platinum's screen is 256x192 (4:3), the game's 240x160 (3:2). [Draw Sinnoh at 240x160 with
+  Platinum's camera and its field of view widened to fit, so everything else (menus, battles, spectate) is
+  unchanged.]
+- How sharp: the DS's own resolution, or the 3D drawn at the window's size. [The game's resolution, filters as
+  for the rest of the game; a higher-resolution option later.]
+
 ## First step
-A proof of concept: Twinleaf Town + Route 201 pre-rendered, the LOOK walking with correct collision,
-warp in from HOENN, from the user's ROM above.
+A proof of concept: Twinleaf Town + Route 201 drawn by the 3D engine from the user's ROM, the LOOK walking on
+them with correct collision and height, warp in from HOENN.
 
 ## Risks
-Scripts are the biggest job; height/BDHC is the most likely to surprise; needs the user's ROM.
+The 3D engine is new and large (the DS GPU's look: texture formats, lighting, fog, edge cases); scripts are still
+the biggest job; BDHC heights and the camera in cutscenes are the most likely to surprise; it needs the user's ROM.
 
 ## Rules to keep
 Main update, not a dev update; bump MP_PROTOCOL_VERSION on protocol changes; mark stock-file hooks

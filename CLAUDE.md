@@ -3,7 +3,7 @@
 Native PC build of Moemon Emerald Kai v1.0 with online 4-player co-op and PvP.
 Based on Kurausukun's `pc_port` branch of pret/pokeemerald (commit 1165825), SDL2.
 
-SINNOH (Pokémon Platinum as a third region, the PÓKETCH): planned, not started: `docs/SINNOH_HANDOFF.md`.
+SINNOH (Pokémon Platinum as a third region in a new 3D engine, the PÓKETCH): planned, not started: `docs/SINNOH_HANDOFF.md`.
 
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
 card duels).
