@@ -976,14 +976,17 @@ static u16 QzGetReachableRegionsMask_(void)
     u8 cur = MP_Region_Current();
     if (!MP_Region_Cleared(cur) || !CheckBagHasItem(ITEM_SS_TICKET, 1))
         return 0;
-    return ((1 << REGION_COUNT) - 1) & ~(1 << cur);
+    // (SINNOH isn't on the boat's list until its story is in: docs/SINNOH_HANDOFF.md)
+    return ((1 << REGION_COUNT) - 1) & ~(1 << cur) & ~(1 << REGION_SINNOH);
 }
 
-// Where each region's boat comes in: HOENN at SLATEPORT's harbor, JOHTO at OLIVINE's port, KANTO at VERMILION
+// Where each region's boat comes in: HOENN at SLATEPORT's harbor, JOHTO at OLIVINE's port, KANTO at VERMILION, SINNOH
+// at CANALAVE
 static const struct {u16 map; s8 x, y;} sRegionPorts[REGION_COUNT] = {
     {MAP_SLATEPORT_CITY_HARBOR, 8, 11},
     {MAP_JOHTO_OLIVINE_PORT, 8, 16},
     {MAP_KANTO_VERMILION_CITY, 23, 32},
+    {MAP_SINNOH_CANALAVE_CITY, 8, 62},   // (CANALAVE's south dock)
 };
 
 // VAR_0x8004 = the region, VAR_0x8005 = the party slot of the one Pokémon who comes (customs: the others go to the

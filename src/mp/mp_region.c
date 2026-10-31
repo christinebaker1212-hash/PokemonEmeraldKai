@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "global.h"
+#include "s3d.h"   // Moemon Kai: SINNOH's map groups
 #include "event_data.h"
 #include "mp.h"
 #include "mp_region.h"
@@ -53,6 +54,14 @@ struct RegionLevel
     u8 cur;
     u16 filler;
 };
+struct RegionLevel3   // (the side file's LVLS records before SINNOH: 3 regions)
+{
+    u32 pers, otid;
+    u32 exp[3];
+    u8 has;
+    u8 cur;
+    u16 filler;
+};
 #define MAX_REGION_LEVELS 8192
 static struct RegionLevel sLevels[MAX_REGION_LEVELS];
 static u32 sLevelCount;
@@ -65,6 +74,8 @@ u8 MP_Region_OfGroup(u8 group)
         return REGION_JOHTO;
     if (group >= MAP_GROUP(MAP_JOHTO_NEW_BARK_TOWN) + 2 && group <= MAP_GROUP(MAP_JOHTO_NEW_BARK_TOWN) + 5)
         return REGION_KANTO;
+    if (S3D_IsSinnohGroup(group))
+        return REGION_SINNOH;
     return REGION_HOENN;
 }
 
@@ -293,7 +304,7 @@ void MP_Region_WriteSidecar(void)
             fwrite(c, sizeof(c), 1, f);
             fwrite(&sGlobalPC, sizeof(sGlobalPC), 1, f);
         }
-        c[0] = CHUNK('L', 'V', 'L', 'S');
+        c[0] = CHUNK('L', 'V', 'L', '4');   // (LVLS before SINNOH: 3 regions' EXP a record, read and converted)
         c[1] = sLevelCount * sizeof(sLevels[0]);
         fwrite(c, sizeof(c), 1, f);
         fwrite(sLevels, sizeof(sLevels[0]), sLevelCount, f);
@@ -358,12 +369,30 @@ static bool8 LoadFrom(const char *path)
                 if (fread(&format, sizeof(format), 1, f) == 1)
                     sSaveFormat = format > 255 ? 255 : format;
             }
-            else if (c[0] == CHUNK('L', 'V', 'L', 'S') && c[1] % sizeof(sLevels[0]) == 0)
+            else if (c[0] == CHUNK('L', 'V', 'L', '4') && c[1] % sizeof(sLevels[0]) == 0)
             {
                 u32 n = c[1] / sizeof(sLevels[0]);
                 if (n > MAX_REGION_LEVELS)
                     n = MAX_REGION_LEVELS;
                 sLevelCount = fread(sLevels, sizeof(sLevels[0]), n, f);
+            }
+            else if (c[0] == CHUNK('L', 'V', 'L', 'S') && c[1] % sizeof(struct RegionLevel3) == 0)
+            {
+                // a side file from before SINNOH: 3 regions' EXP a record
+                u32 n = c[1] / sizeof(struct RegionLevel3), i;
+                struct RegionLevel3 old;
+                if (n > MAX_REGION_LEVELS)
+                    n = MAX_REGION_LEVELS;
+                for (i = 0; i < n && fread(&old, sizeof(old), 1, f) == 1; i++)
+                {
+                    memset(&sLevels[i], 0, sizeof(sLevels[i]));
+                    sLevels[i].pers = old.pers;
+                    sLevels[i].otid = old.otid;
+                    memcpy(sLevels[i].exp, old.exp, sizeof(old.exp));
+                    sLevels[i].has = old.has;
+                    sLevels[i].cur = old.cur;
+                }
+                sLevelCount = i;
             }
             fseek(f, next, SEEK_SET);
         }
@@ -438,7 +467,7 @@ void MP_Region_LoadFromSave(void)
 }
 
 // ---------------------------------------------------------------------------------------------------- progress
-static const u16 sBadgeFlags[REGION_COUNT] = {FLAG_BADGE01_GET, FLAG_QZ_0x11B2, FLAG_QZ_0x2100};
+static const u16 sBadgeFlags[REGION_COUNT] = {FLAG_BADGE01_GET, FLAG_QZ_0x11B2, FLAG_QZ_0x2100, FLAG_SINNOH_BADGE01};
 
 u16 MP_Region_BadgeFlag(u8 region, u8 badge)
 {
@@ -731,6 +760,8 @@ u8 MP_Gen_Cap(u8 region)
     u8 g = gMpGenSetting ? gMpGenSetting : MP_Generation();
     if (g < 3)
         g = 3;
+    if (region == REGION_SINNOH)
+        return g < 4 ? 4 : g;   // (Platinum's own Pokémon are Gen 1-4: GEN 3 is its vanilla too)
     if (region != REGION_HOENN && g <= 3)
         return 2;
     return g;

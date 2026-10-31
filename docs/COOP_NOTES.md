@@ -3248,9 +3248,9 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   wherever two rectangles touch; music from the header's day song (MUSIC: SEQ -> slot), type and weather from the
   header (WEATHER), placeholder blocks; it also writes src/sinnoh/s3d_maps.h (sMaps) and data/event_scripts_sinnoh.s's
   includes, and keeps events already in a map.json. MAX_MAP_DATA_SIZE is 16384 (SEABREAK PATH is 32x256); the pack
-  covers the whole matrix (45 MB, 7 s to build); fieldmap.c asks
+  covers the whole matrix; fieldmap.c asks
   S3D_LayoutBlocks for a layout's blocks (the map and its connections), which gives the pack's for SINNOH maps. Script
-  file data/event_scripts_sinnoh.s. They count as HOENN for regions for now (MP_Region_OfGroup).
+  file data/event_scripts_sinnoh.s.
 - Drawing (src/sinnoh/s3d.c): S3D_Update each overworld frame (after the camera) finds the map and Emerald's camera
   (mp_mappic.c's formula: screen (x, y) is map pixel (camX + x, camY + y), 16 a tile = Platinum's units) and sets the
   view: Platinum's default field camera (666.92 away, 59.05 degrees down, half fov 8.09 degrees at the DS's 96-pixel
@@ -3287,6 +3287,12 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   other warp (doors 0x69, cave mouths, stairs, escalators) warps when stepped on (non-animated door, 0x0A7).
 - The pack file is "S3DZ" + the pack deflated (zlib, already in the game for the fight engine): 93 MB -> 7 MB, inflated
   in about a quarter of a second when the first SINNOH map loads (s3d.c LoadPack).
+- SINNOH is REGION_SINNOH (3, REGION_COUNT 4): MP_Region_OfGroup gives it for groups 40-44 (S3D_IsSinnohGroup). Its
+  GENERATION cap is never below 4 (Platinum's own POKéMON are Gen 1-4, so GEN 3 is its vanilla too). Its flags start
+  at REGION_SINNOH_FLAGS 0x3000 (Quetzal's end at 0x2EB7): FLAG_SINNOH_BADGE01.. its badges. Its boat comes in at
+  CANALAVE's south dock (8, 62), but it isn't on the boat's list (QzGetReachableRegionsMask_) until its story is in.
+  The region side file's level records hold 4 regions' EXP now: chunk LVL4; an old LVLS chunk (3 regions,
+  struct RegionLevel3) is read and converted. Names: "SINNOH" in mp_main.c's lists.
 - Wild POKéMON: tools/sinnoh/gen_wild.py POKEPLATINUM_DIR puts each kept place's base encounter table (species and
   levels from res/field/encounters) into src/data/wild_encounters.json as gSinnoh_* entries (154 places): grass 12
   slots and surfing 5 as in Emerald; fishing OLD 2 / GOOD 3 / SUPER 5 of Platinum's 5 a rod. Not yet: Platinum's

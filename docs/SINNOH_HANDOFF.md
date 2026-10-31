@@ -9,8 +9,11 @@ Queued after the 1.61.6 release and the KANTO / JOHTO sweep (the user's plan, 20
   tools/sinnoh/test_poc.sh checks it against the offline reference render. COOP_NOTES "SINNOH's 3D engine" has the
   how. Heights (BDHC) done: the camera and every sprite stand on Platinum's ground (COOP_NOTES). Every outdoor map of the
   matrix is in (66, connected; tools/sinnoh/gen_maps.py). The buildings too (433 maps in groups
-  41-44), with every place's warps: doors lead in, mats out. The pack ships compressed (7 MB). Next: animated textures
-  (water), speed (about 6 ms a frame now), then data (step 3) and scripts (step 4).
+  41-44), with every place's warps: doors lead in, mats out. The pack ships compressed (7 MB). SINNOH is a region of its own
+  (REGION_SINNOH: GENERATION cap 4+, badges from flag 0x3000, CANALAVE's dock for the boat, off the boat's list
+  until its story is in), with Platinum's wild POKéMON (gen_wild.py). Next: data (step 3: trainers, items, marts),
+  scripts and text (step 4, converted at build time like the 3D pack: never in the repository), the PÓKETCH (step 5);
+  animated textures and Platinum's door animations when there's time (the 3D picture takes 4-5 ms a frame).
 - DECIDED (the user, 2026-10-31): the 3D data comes from pret/pokeplatinum, not a ROM. The decomp holds every map
   block, texture set, prop model and light set as files (byte for byte the ROM's), so tools/sinnoh/make_pack.sh fetches
   it at a pinned commit (fetch_decomp.sh) and build_pack.py converts it; the release does that and ships

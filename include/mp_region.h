@@ -5,14 +5,18 @@
 #define REGION_HOENN 0
 #define REGION_JOHTO 1
 #define REGION_KANTO 2
-#define REGION_COUNT 3
+#define REGION_SINNOH 3   // Pokémon Platinum's (src/sinnoh/, docs/SINNOH_HANDOFF.md): groups 40-44
+#define REGION_COUNT 4
 
 // A Pokémon met in JOHTO: its MET_GAME (MON_DATA_MET_LOCATION holds the low byte of the JOHTO map section)
 #define MP_METGAME_JOHTO 14
 
-// Johto / Kanto flags and vars past the save block's (tools/quetzal_port/import.py places them)
+// Johto / Kanto flags and vars past the save block's (tools/quetzal_port/import.py places them, up to 0x2EB7); SINNOH's
+// from 0x3000 (REGION_SINNOH_FLAGS: its 8 badges first)
 #define REGION_FLAGS_START 0x1000
 #define REGION_FLAGS_END   0x4000   // SPECIAL_FLAGS_START
+#define REGION_SINNOH_FLAGS 0x3000
+#define FLAG_SINNOH_BADGE01 (REGION_SINNOH_FLAGS + 0)   // .. + 7
 #define REGION_FLAG_BYTES  ((REGION_FLAGS_END - REGION_FLAGS_START) / 8)
 #define REGION_VARS_START  0x5000
 #define REGION_VARS_COUNT  0x300
