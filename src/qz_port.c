@@ -285,6 +285,7 @@ bool8 ScrCmd_qz_checkmultiplayerorflag(struct ScriptContext *ctx)
 u16 QzSpecialStub(const char *name)
 {
     printf("[qz] special %s not ported\n", name);
-    ScriptContext_Enable();   // in case the script waits on it (waitstate)
+    gSpecialVar_Result = 0;   // "not available": every caller's path for 0 leaves the story as it is
+    ScriptContext_Enable();   // in case the script waits on it (waitstate: scrcmd.c lets it go on)
     return 0;
 }

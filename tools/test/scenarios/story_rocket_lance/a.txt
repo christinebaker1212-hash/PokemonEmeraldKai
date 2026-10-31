@@ -1,0 +1,37 @@
+pressuntil A field 5000
+wait 400
+mp teach 0 44
+mp teach 1 44
+mp teach 2 44
+mp battlestyle 1
+mp warp 35,22,15,18
+wait 20
+waitfor field 900
+mp setvar 0x500C 12
+mp steptrigger 15 18
+pressuntil A partymenu 6000
+wait 30
+press A 4
+wait 20
+press A 4
+wait 30
+press DOWN 4
+wait 10
+press DOWN 4
+wait 10
+press DOWN 4
+wait 10
+shot pick
+press A 4
+waitfor battle 3000
+wait 200
+mp party
+shot battle
+mash A 600 8
+pressuntil A field 9000
+mp getvar 0x500C
+mp ctx
+mp where
+mp party
+shot end
+quit

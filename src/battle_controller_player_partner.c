@@ -1299,9 +1299,9 @@ static void PlayerPartnerHandleDrawTrainerPic(void)
     s16 xPos, yPos;
     u32 trainerPicId;
 
-    if (gPartnerTrainerId == TRAINER_STEVEN_PARTNER)
+    if (MP_PartnerShowsBack())   // Moemon Kai: STEVEN, or LANCE in JOHTO (battle_tower.c)
     {
-        trainerPicId = TRAINER_BACK_PIC_STEVEN;
+        trainerPicId = MP_PartnerBackPic();
         xPos = 90;
         yPos = (8 - gTrainerBackPicCoords[trainerPicId].size) * 4 + 80;
     }
@@ -1313,7 +1313,7 @@ static void PlayerPartnerHandleDrawTrainerPic(void)
     }
 
     // Use back pic only if the partner is Steven
-    if (gPartnerTrainerId == TRAINER_STEVEN_PARTNER)
+    if (MP_PartnerShowsBack())
     {
         DecompressTrainerBackPic(trainerPicId, gActiveBattler);
         SetMultiuseSpriteTemplateToTrainerBack(trainerPicId, GetBattlerPosition(gActiveBattler));
@@ -1792,9 +1792,9 @@ static void PlayerPartnerHandleIntroTrainerBallThrow(void)
     StartSpriteAnim(&gSprites[gBattlerSpriteIds[gActiveBattler]], 1);
 
     paletteNum = AllocSpritePalette(0xD6F9);
-    if (gPartnerTrainerId == TRAINER_STEVEN_PARTNER)
+    if (MP_PartnerShowsBack())
     {
-        u8 spriteId = TRAINER_BACK_PIC_STEVEN;
+        u16 spriteId = MP_PartnerBackPic();
         LoadCompressedPalette(gTrainerBackPicPaletteTable[spriteId].data, OBJ_PLTT_ID(paletteNum), PLTT_SIZE_4BPP);
     }
     else

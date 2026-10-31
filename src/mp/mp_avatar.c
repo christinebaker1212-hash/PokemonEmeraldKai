@@ -2566,6 +2566,20 @@ u16 MP_LocalFrontPicOr(u16 defaultPic)
     return pic == 0xFFFF ? defaultPic : pic;
 }
 
+// A character's back picture by its LOOK name (e.g. "kai_lance") for an in-game partner (JOHTO / KANTO's multi
+// battles), in a Triple Battle's second-ally slot (free in a battle with no friends), 0xFFFF = none
+u16 MP_Avatar_NamedBackPic(const char *name)
+{
+    static u8 sStdBuf[4 * TRAINER_PIC_SIZE];
+    u16 pal[16];
+    u8 sel = MP_Avatar_ParseBackSel(name);
+    if (sel == 0 || sel == BACK_NONE || !BackChoiceTiles(sel - 1, sStdBuf, pal))
+        return 0xFFFF;
+    BackFramesToWide(sStdBuf, gMpPartner2BackTiles);
+    MP_Pack_WriteLz77Literal((u8 *)gMpPartner2BackPalLz, pal, 32);
+    return TRAINER_BACK_PIC_MP_PARTNER2;
+}
+
 u16 MP_Avatar_LocalBackPic(void)
 {
     struct MpAppearance app = GetLocalAppearance();

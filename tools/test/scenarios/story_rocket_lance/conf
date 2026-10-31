@@ -1,0 +1,8 @@
+# JOHTO's TEAM ROCKET HIDEOUT B2F: LANCE joins the player against ARIANA and a grunt (Quetzal's special battle 12, a
+# multi battle with an in-game partner): the player picks Pokemon (ChooseHalfPartyForBattle), LANCE's own team fights
+# beside them, the story moves on (VAR 0x500C 12 -> 13) and the whole party is back afterwards
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_WARP=35,22,1,1 MOEMON_DEBUG_PARTY=6:100,9:100,3:100 MOEMON_TEST_FOE_HP1=1"
+EXPECT_A=("steptrigger 15,18: runs" "var 0x500C = 13" "free 1" "where map 35.22" ") 9(274/274 ball 4 style 0000 fx 0000/0 friend 70) 3(287/287" "friend 70) 0 0 149(")
+UNEXPECT_A=("[crash]" "TIMEOUT" "not ported" "BAD EGG")

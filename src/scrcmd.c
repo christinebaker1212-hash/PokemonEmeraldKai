@@ -140,19 +140,29 @@ bool8 ScrCmd_gotonative(struct ScriptContext *ctx)
     return TRUE;
 }
 
+// Moemon Kai: a special that is already done when it returns (a JOHTO / KANTO special with nothing to wait for, a
+// stub) calls ScriptContext_Enable at once; the script's next waitstate would then stop it for good. Where the
+// command right after such a special is waitstate, it lets the script go on (sDoneSpecialAt = that command)
+extern u32 gMpScriptEnables;
+static const u8 *sDoneSpecialAt;
+
 bool8 ScrCmd_special(struct ScriptContext *ctx)
 {
     u16 index = ScriptReadHalfword(ctx);
+    u32 enables = gMpScriptEnables;
 
     gSpecials[index]();
+    sDoneSpecialAt = gMpScriptEnables != enables ? ctx->scriptPtr : NULL;
     return FALSE;
 }
 
 bool8 ScrCmd_specialvar(struct ScriptContext *ctx)
 {
     u16 *var = GetVarPointer(ScriptReadHalfword(ctx));
+    u32 enables = gMpScriptEnables;
 
     *var = gSpecials[ScriptReadHalfword(ctx)]();
+    sDoneSpecialAt = gMpScriptEnables != enables ? ctx->scriptPtr : NULL;
     return FALSE;
 }
 
@@ -171,6 +181,11 @@ bool8 ScrCmd_callnative(struct ScriptContext *ctx)
 
 bool8 ScrCmd_waitstate(struct ScriptContext *ctx)
 {
+    if (sDoneSpecialAt && ctx->scriptPtr - 1 == sDoneSpecialAt)   // Moemon Kai: the special before it is done
+    {
+        sDoneSpecialAt = NULL;
+        return FALSE;
+    }
     ScriptContext_Stop();
     return TRUE;
 }

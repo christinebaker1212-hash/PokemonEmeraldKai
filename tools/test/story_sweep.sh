@@ -78,6 +78,12 @@ for g in range(g0, g1 + 1):
                     break
             if landing:
                 break
+        # frame tables' scripts start in the script context; warp-into tables' run at once (no start to see)
+        warp_tables = set(re.findall(r'map_script MAP_SCRIPT_ON_WARP_INTO_MAP_TABLE, (\w+)', text))
+        table_of = {}
+        for label, body in re.findall(r'^(\w+):\n((?:\s*map_script_2 [^\n]*\n)+)', text, re.M):
+            for script in re.findall(r'map_script_2 \w+, \w+, (\w+)', body):
+                table_of[script] = label
         for v, val, script in re.findall(r'map_script_2 (\w+), (\w+), (\w+)', text):
             vid = var_id(v)
             if vid is None or landing is None:
@@ -86,7 +92,8 @@ for g in range(g0, g1 + 1):
                 val = int(val, 0)
             except ValueError:
                 continue
-            events.append(('frame', vid, val, landing[0], landing[1], landing[0], landing[1], 'down', script, 0))
+            kind = 'warp' if table_of.get(script) in warp_tables else 'frame'
+            events.append((kind, vid, val, landing[0], landing[1], landing[0], landing[1], 'down', script, 0))
         if not events:
             continue
         lines = ['pressuntil A field 5000', 'wait 400', 'mp teach 0 44', 'mp teach 1 44', 'mp battlestyle 1']   # (the start's achievements toast takes the first input)
@@ -94,13 +101,13 @@ for g in range(g0, g1 + 1):
             note = '%s_%s_%d,%d_0x%X=%d' % (kind, script, x, y, vid, val)
             if kind == 'step':
                 # the player on the trigger's cell, facing the way they'd have come; the trigger run as a step would
-                lines += ['mp warp %d,%d,%d,%d' % (g, n, x, y), 'wait 40']
+                lines += ['mp warp %d,%d,%d,%d' % (g, n, x, y), 'wait 20', 'waitfor field 900', 'wait 10']
                 if vid:
                     lines.append('mp setvar 0x%X %d' % (vid, val))
                 lines += ['mp face %s' % d, 'wait 4', 'mp sweepmark', 'mp steptrigger %d %d' % (x, y), 'wait 30']
             else:
                 lines += ['mp setvar 0x%X %d' % (vid, val), 'mp sweepmark', 'mp warp %d,%d,%d,%d' % (g, n, fx, fy), 'wait 60']
-            lines += ['mash A 40 8', 'pressuntil A field 7000', 'mp cards concede', 'mp ygo concede', 'mp tt concede',
+            lines += ['mash A 40 8', 'pressuntil A field 20000', 'mp cards concede', 'mp ygo concede', 'mp tt concede',
                       'pressuntil A field 1500', 'pressuntil B field 600', 'press START 4', 'wait 30', 'press A 4',
                       'wait 60', 'pressuntil B field 600', 'pressuntil A field 3000', 'pressuntil B field 600', 'wait 20',
                       'mp ctx', 'mp getvar 0x%X' % vid, 'mp sweepnote %s' % note]
@@ -141,9 +148,10 @@ for l in log:
         want = int(note.rsplit('=', 1)[1])
         if free is False:
             print('HELD %s: %s' % (sys.argv[2], note))
-        if not ran:
+        # (a trigger with no variable and a warp-into script run at once, outside the script context)
+        if not ran and '_0x0=' not in note and not note.startswith('warp_'):
             print('NOFIRE %s: %s' % (sys.argv[2], note))
-        elif val is not None and val == want:
+        elif val is not None and val == want and '_0x0=' not in note:
             print('STILL %s: %s' % (sys.argv[2], note))
 PY
     local np=$(grep -o "special [A-Za-z0-9_]* not ported" "$d/log.txt" | sort -u | awk '{print $2}' | tr '\n' ' ')

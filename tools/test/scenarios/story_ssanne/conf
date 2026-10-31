@@ -1,0 +1,9 @@
+# KANTO's S.S. ANNE sails (VAR 0x5135 = 1 on its dock): the player walks down the pier, the ship leaves
+# (QzDoSSAnneDepartureCutscene, done at once) and the player is back in VERMILION (its scene moves the story to 3), free. The special called
+# ScriptContext_Enable before the script's waitstate, which then stopped the script for good (scrcmd.c now lets a
+# waitstate after a finished special go on)
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_WARP=36,4,1,1"
+EXPECT_A=("var 0x5135 = 3" "where map 37.62 xy 23,32" "ctx 1 free 1")
+UNEXPECT_A=("[crash]" "TIMEOUT" "not ported")

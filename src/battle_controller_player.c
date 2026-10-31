@@ -2888,7 +2888,7 @@ static void PlayerHandleDrawTrainerPic(void)
         if (IS_TRIPLE_BATTLE())   // Moemon Co-op: three trainers, left / center / right
             xPos = MpTripleTrainerX(gActiveBattler);
 
-        if (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && gPartnerTrainerId != TRAINER_STEVEN_PARTNER)
+        if (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && !MP_PartnerShowsBack())
         {
             xPos = 90;
             yPos = (8 - gTrainerFrontPicCoords[trainerPicId].size) * 4 + 80;
@@ -2906,7 +2906,7 @@ static void PlayerHandleDrawTrainerPic(void)
     }
 
     // Use front pic table for any tag battles unless your partner is Steven.
-    if (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && gPartnerTrainerId != TRAINER_STEVEN_PARTNER)
+    if (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && !MP_PartnerShowsBack())
     {
         trainerPicId = MP_LocalFrontPicOr(PlayerGenderToFrontTrainerPicId(gSaveBlock2Ptr->playerGender)); // Moemon Co-op
         DecompressTrainerFrontPic(trainerPicId, gActiveBattler);

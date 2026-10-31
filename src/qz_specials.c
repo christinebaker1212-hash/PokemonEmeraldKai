@@ -54,7 +54,14 @@ static u16 QzIsItemRandomizerOn_(void) { return FALSE; }
 u16 QzRandomizeItemInVar8000(void) { return 0; }
 static u16 QzIsSaveFlag2F4Bit4Set_(void) { return FALSE; }
 u16 QzIncrementChallengeCounterVar(void) { return 0; }
-u16 QzBackupPartyForOptionBattle(void) { ScriptContext_Enable(); return 0; }   // a script waits on it
+// The ROCKET HIDEOUT's multi battle beside LANCE: pick three POKeMON, as for STEVEN's (the script waits; VAR_RESULT 0 =
+// backed out). It was a stub, and the script asked again forever behind a black screen
+u16 QzBackupPartyForOptionBattle(void)
+{
+    void ChooseHalfPartyForBattle(void);
+    ChooseHalfPartyForBattle();
+    return 0;
+}
 u16 QzQzEnemyMonEventFixup(void) { return 0; }
 u16 QzHoennPostHealEventCheck(void) { return 0; }
 u16 QzResetFollowerObjects(void) { return 0; }   // Kai's followers aren't objects

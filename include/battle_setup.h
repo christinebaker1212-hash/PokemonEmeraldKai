@@ -17,6 +17,8 @@ extern const struct RematchTrainer gRematchTable[REMATCH_TABLE_ENTRIES];
 extern u16 gTrainerBattleOpponent_A;
 extern u16 gTrainerBattleOpponent_B;
 extern u16 gPartnerTrainerId;
+bool8 MP_PartnerShowsBack(void);   // Moemon Kai: STEVEN or a JOHTO / KANTO partner shown from behind (battle_tower.c)
+u16 MP_PartnerBackPic(void);
 
 void BattleSetup_StartWildBattle(void);
 void BattleSetup_StartBattlePikeWildBattle(void);

@@ -748,7 +748,7 @@ static void CB2_InitBattleInternal(void)
 
     gBattle_WIN0H = DISPLAY_WIDTH;
 
-    if (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && gPartnerTrainerId != TRAINER_STEVEN_PARTNER)
+    if (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && !MP_PartnerShowsBack())
     {
         gBattle_WIN0V = DISPLAY_HEIGHT - 1;
         gBattle_WIN1H = DISPLAY_WIDTH;
@@ -2209,6 +2209,12 @@ static void SpriteCB_UnusedBattleInit_Main(struct Sprite *sprite)
     }
 }
 
+// Moemon Kai: a JOHTO / KANTO trainer's team where the battle wants it (battle_tower.c: a partner's half of the party)
+u8 MP_CreateTrainerPartyAt(struct Pokemon *party, u16 trainerNum)
+{
+    return CreateNPCTrainerParty(party, trainerNum, FALSE);
+}
+
 static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 firstTrainer)
 {
     u32 nameHash = 0;
@@ -2354,8 +2360,8 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum, bool8 fir
         if (getenv("MOEMON_TEST_FOE_HP1"))   // Moemon Kai (tests only: tools/test/trainer_sweep.sh): foes at 1 HP
         {
             u16 one = 1;
-            for (i = 0; i < PARTY_SIZE; i++)
-                if (GetMonData(&party[i], MON_DATA_SPECIES))
+            for (i = 0; i < monsCount && party + i < gEnemyParty + PARTY_SIZE; i++)   // (the enemy's only, never past it)
+                if (party >= gEnemyParty && GetMonData(&party[i], MON_DATA_SPECIES))
                 {
                     SetMonData(&party[i], MON_DATA_HP, &one);
                     SetMonData(&party[i], MON_DATA_MAX_HP, &one);   // (a FULL RESTORE heals it to 1)

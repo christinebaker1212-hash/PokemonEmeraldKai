@@ -1,0 +1,11 @@
+pressuntil A field 5000
+wait 60
+mp setvar 0x502A 6
+mp warp 35,16,6,12
+wait 120
+mash A 400 10
+mash A 400 10
+mash A 400 10
+mash A 400 10
+mp where
+quit

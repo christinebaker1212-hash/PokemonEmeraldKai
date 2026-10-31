@@ -15,6 +15,7 @@
 #include <string.h>
 #include "global.h"
 #include "mp.h"
+#include "mp_region.h"
 #include "event_data.h"
 #include "money.h"
 #include "overworld.h"
@@ -42,13 +43,15 @@ enum {
     AK_OWNED,    // POKéMON in the party and the PC
     AK_FRIEND,   // a party POKéMON at full friendship
     AK_MONEY,    // money held right now
+    AK_CLEARED,  // regions whose League is beaten (arg: one region + 1, or 0 for how many)
+    AK_STARTED,  // regions the player has been to
 };
 
 // The menu's tabs
-enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, C_CARDS, C_YUGIOH, C_TRIAD, C_DANCE, NUM_ACH_CATS };
-static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "BATTLE", "CATCHING", "HOENN", "TOGETHER", "EXTRAS", "CARDS", "YU-GI-OH!", "TRIPLE TRIAD", "DANCE"};
+enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, C_CARDS, C_YUGIOH, C_TRIAD, C_DANCE, C_JOHTO, C_KANTO, NUM_ACH_CATS };
+static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "BATTLE", "CATCHING", "HOENN", "TOGETHER", "EXTRAS", "CARDS", "YU-GI-OH!", "TRIPLE TRIAD", "DANCE", "JOHTO", "KANTO"};
 
-enum { FL_HMS, FL_RODS, FL_LANDMARKS, FL_SILVER, FL_GOLD };
+enum { FL_HMS, FL_RODS, FL_LANDMARKS, FL_SILVER, FL_GOLD, FL_JOHTO_BEASTS, FL_KANTO_BIRDS, FL_JOHTO_BADGES, FL_KANTO_BADGES };
 enum { DL_STARTERS, DL_FOSSILS, DL_LEGENDS };
 
 struct Achievement
@@ -86,7 +89,17 @@ static const u16 sFlagsGold[] = {
     FLAG_SYS_TOWER_GOLD, FLAG_SYS_DOME_GOLD, FLAG_SYS_PALACE_GOLD, FLAG_SYS_ARENA_GOLD, FLAG_SYS_FACTORY_GOLD,
     FLAG_SYS_PIKE_GOLD, FLAG_SYS_PYRAMID_GOLD,
 };
+// JOHTO / KANTO (Quetzal's flags, kept in the region side file): badges, and the static encounters' "done" flags
+// (caught or beaten: src/data/qz_static_encounters.h)
+static const u16 sFlagsJohtoBeasts[] = {0x11EB, 0x11EE, 0x11F1};   // RAIKOU, ENTEI, SUICUNE
+static const u16 sFlagsKantoBirds[] = {0x2133, 0x213B, 0x2138};    // ARTICUNO, ZAPDOS, MOLTRES
+static const u16 sFlagsJohtoBadges[] = {0x11B2, 0x11B3, 0x11B4, 0x11B5, 0x11B6, 0x11B7, 0x11B8, 0x11B9};
+static const u16 sFlagsKantoBadges[] = {0x2100, 0x2101, 0x2102, 0x2103, 0x2104, 0x2105, 0x2106, 0x2107};
 static const struct { const u16 *list; u8 count; } sFlagLists[] = {
+    [FL_JOHTO_BEASTS] = {sFlagsJohtoBeasts, ARRAY_COUNT(sFlagsJohtoBeasts)},
+    [FL_KANTO_BIRDS] = {sFlagsKantoBirds, ARRAY_COUNT(sFlagsKantoBirds)},
+    [FL_JOHTO_BADGES] = {sFlagsJohtoBadges, ARRAY_COUNT(sFlagsJohtoBadges)},
+    [FL_KANTO_BADGES] = {sFlagsKantoBadges, ARRAY_COUNT(sFlagsKantoBadges)},
     [FL_HMS] = {sFlagsHMs, ARRAY_COUNT(sFlagsHMs)},
     [FL_RODS] = {sFlagsRods, ARRAY_COUNT(sFlagsRods)},
     [FL_LANDMARKS] = {sFlagsLandmarks, ARRAY_COUNT(sFlagsLandmarks)},
@@ -390,6 +403,38 @@ static const struct Achievement sAch[] = {
     {"ddrvs1", "DANCE BATTLE", "Beat a friend in VERSUS.", AK_COUNT, 0, 1, 0, C_DANCE},
     {"ddrvs25", "DANCE FLOOR LEGEND", "Beat friends in VERSUS 25 times.", AK_COUNT, 0, 25, 2, C_DANCE},
     {"ddrcredit50", "REGULAR", "Play 50 credits on the DANCE machine.", AK_COUNT, 0, 50, 1, C_DANCE},
+    // JOHTO and KANTO (1.61.3)
+    {"travel3", "WORLD TRAVELER", "Visit HOENN, JOHTO and KANTO.", AK_STARTED, 0, 3, 1, C_JOURNEY},
+    {"champion3", "TRIPLE CROWN", "Become CHAMPION of HOENN, JOHTO and KANTO.", AK_CLEARED, 0, 3, 2, C_JOURNEY},
+    {"jstart", "NEW BARK DAYS", "Get your first POK~MON from PROF. ELM.", AK_FLAG, 0x11D1, 1, 0, C_JOHTO},
+    {"jbadge1", "ZEPHYR BADGE", "Beat FALKNER in VIOLET CITY.", AK_FLAG, 0x11B2, 1, 0, C_JOHTO},
+    {"jbadge2", "HIVE BADGE", "Beat BUGSY in AZALEA TOWN.", AK_FLAG, 0x11B3, 1, 0, C_JOHTO},
+    {"jbadge3", "PLAIN BADGE", "Beat WHITNEY in GOLDENROD CITY.", AK_FLAG, 0x11B4, 1, 0, C_JOHTO},
+    {"jbadge4", "FOG BADGE", "Beat MORTY in ECRUTEAK CITY.", AK_FLAG, 0x11B5, 1, 1, C_JOHTO},
+    {"jbadge5", "STORM BADGE", "Beat CHUCK in CIANWOOD CITY.", AK_FLAG, 0x11B6, 1, 0, C_JOHTO},
+    {"jbadge6", "MINERAL BADGE", "Beat JASMINE in OLIVINE CITY.", AK_FLAG, 0x11B7, 1, 0, C_JOHTO},
+    {"jbadge7", "GLACIER BADGE", "Beat PRYCE in MAHOGANY TOWN.", AK_FLAG, 0x11B8, 1, 0, C_JOHTO},
+    {"jbadge8", "RISING BADGE", "Earn CLAIR's badge in BLACKTHORN CITY.", AK_FLAG, 0x11B9, 1, 1, C_JOHTO},
+    {"jbadges", "JOHTO'S EIGHT", "Hold all eight JOHTO badges.", AK_FLAGS, FL_JOHTO_BADGES, 8, 1, C_JOHTO},
+    {"jchampion", "JOHTO CHAMPION", "Beat JOHTO's ELITE FOUR and CHAMPION.", AK_CLEARED, 1 + 1, 1, 2, C_JOHTO},
+    {"jbeasts", "LEGENDARY BEASTS", "Face RAIKOU, ENTEI and SUICUNE in JOHTO.", AK_FLAGS, FL_JOHTO_BEASTS, 3, 2, C_JOHTO},
+    {"jlugia", "SILVER WING", "Face LUGIA in JOHTO.", AK_FLAG, 0x11F4, 1, 1, C_JOHTO},
+    {"jhooh", "RAINBOW WING", "Face HO-OH in JOHTO.", AK_FLAG, 0x11F7, 1, 1, C_JOHTO},
+    {"jcelebi", "VOICE OF THE FOREST", "Face CELEBI in JOHTO.", AK_FLAG, 0x11FA, 1, 1, C_JOHTO},
+    {"kstart", "PALLET BEGINNINGS", "Get your first POK~MON from PROF. OAK.", AK_FLAG, 0x21E8, 1, 0, C_KANTO},
+    {"kbadge1", "BOULDER BADGE", "Beat BROCK in PEWTER CITY.", AK_FLAG, 0x2100, 1, 0, C_KANTO},
+    {"kbadge2", "CASCADE BADGE", "Beat MISTY in CERULEAN CITY.", AK_FLAG, 0x2101, 1, 0, C_KANTO},
+    {"kbadge3", "THUNDER BADGE", "Beat LT. SURGE in VERMILION CITY.", AK_FLAG, 0x2102, 1, 0, C_KANTO},
+    {"kbadge4", "RAINBOW BADGE", "Beat ERIKA in CELADON CITY.", AK_FLAG, 0x2103, 1, 1, C_KANTO},
+    {"kbadge5", "SOUL BADGE", "Beat KOGA in FUCHSIA CITY.", AK_FLAG, 0x2104, 1, 0, C_KANTO},
+    {"kbadge6", "MARSH BADGE", "Beat SABRINA in SAFFRON CITY.", AK_FLAG, 0x2105, 1, 0, C_KANTO},
+    {"kbadge7", "VOLCANO BADGE", "Beat BLAINE on CINNABAR ISLAND.", AK_FLAG, 0x2106, 1, 0, C_KANTO},
+    {"kbadge8", "EARTH BADGE", "Beat the leader of VIRIDIAN CITY.", AK_FLAG, 0x2107, 1, 1, C_KANTO},
+    {"kbadges", "KANTO'S EIGHT", "Hold all eight KANTO badges.", AK_FLAGS, FL_KANTO_BADGES, 8, 1, C_KANTO},
+    {"kchampion", "KANTO CHAMPION", "Beat KANTO's ELITE FOUR and CHAMPION.", AK_CLEARED, 2 + 1, 1, 2, C_KANTO},
+    {"kbirds", "LEGENDARY BIRDS", "Face ARTICUNO, ZAPDOS and MOLTRES in KANTO.", AK_FLAGS, FL_KANTO_BIRDS, 3, 2, C_KANTO},
+    {"kmewtwo", "GENETIC MASTERPIECE", "Face MEWTWO in KANTO.", AK_FLAG, 0x2137, 1, 2, C_KANTO},
+    {"kmew", "UNDER THE TRUCK", "Find MEW in KANTO.", AK_FLAG, 0x292F, 1, 2, C_KANTO},
 };
 
 #define NUM_ACH ARRAY_COUNT(sAch)
@@ -513,6 +558,13 @@ static s32 Progress(const struct Achievement *a)
     case AK_OWNED:   return Owned();
     case AK_FRIEND:  return FullFriendship();
     case AK_MONEY:   return GetMoney(&gSaveBlock1Ptr->money);
+    case AK_CLEARED:
+        if (a->arg)
+            return MP_Region_Cleared(a->arg - 1) ? 1 : 0;
+        return MP_Region_Cleared(REGION_HOENN) + MP_Region_Cleared(REGION_JOHTO) + MP_Region_Cleared(REGION_KANTO);
+    case AK_STARTED:
+        return ((gRegionState.started >> REGION_HOENN) & 1) + ((gRegionState.started >> REGION_JOHTO) & 1)
+             + ((gRegionState.started >> REGION_KANTO) & 1);
     case AK_FLAG:   return FlagGet(a->arg) ? 1 : 0;
     case AK_STAT:   return GetGameStat(a->arg);
     case AK_CAUGHT: return GetNationalPokedexCount(FLAG_GET_CAUGHT);

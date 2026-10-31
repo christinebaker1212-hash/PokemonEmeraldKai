@@ -1,0 +1,15 @@
+pressuntil A field 5000
+wait 400
+mp setvar 0x5135 1
+mp warp 36,4,31,6
+wait 300
+pressuntil A field 3000
+wait 30
+mash A 60 10
+pressuntil A field 3000
+wait 30
+mp getvar 0x5135
+mp where
+mp ctx
+shot end
+quit

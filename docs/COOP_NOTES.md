@@ -2044,6 +2044,11 @@ ACTOR LEVEL [P]` picks the pursuit. Test garden_doing.
   offset a whole tile at once; wrapping at 256 drew the picture's far side down the screen's left edge for a step).
 - Tests gc_look (pictures, clerks behind counters, the Town Map), gc_visit (gate, admission, stairs, shop deck and
   single, a duel asked by talking, elevator, rooftop, exit). Debug: mp face DIR, mp textspeed N.
+- Achievements for JOHTO and KANTO (1.61.3, mp_achieve.c): their own tabs (C_JOHTO, C_KANTO) with the first
+  POKéMON, each badge, all eight, the CHAMPION (AK_CLEARED: MP_Region_Cleared), the legendary beasts / birds, LUGIA,
+  HO-OH, CELEBI, MEWTWO and MEW (the static encounters' "done" flags: caught or beaten), and in JOURNEY "WORLD
+  TRAVELER" (AK_STARTED: all three regions visited) and "TRIPLE CROWN" (CHAMPION of all three). Quetzal's flags are
+  numbers here (0x11B2...): they live in the region side file and FlagGet reads them in any region. Test ach_regions.
 - Every card in every region (1.61.3): with the GAME CENTER reachable from JOHTO / KANTO, its 2F CARD SHOP also sells
   one copy of each POKéMON promo card (tcg_collection.c Tcg_ShopPrice, 12000: the 44 promos came only from HOENN's
   special trainers and prizes) and its Triple Triad seller adds every 4- and 5-star card only special players carry
@@ -2821,6 +2826,23 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   script waits for a value some script or the code sets (KNOWN lists the ones that rightly don't, checked against
   the ROM); tools/test/story_sweep.sh fires each trigger in the game (its variable set, the player stepping on it)
   and reports any that hold the player, don't start or don't move their variable on (harness mp sweepmark).
+- JOHTO's TEAM ROCKET HIDEOUT B2F: LANCE fights beside the player against ARIANA and a grunt. Quetzal's special battle
+  12 (battle_tower.c DoSpecialTrainerBattle: a multi battle with an in-game partner, TRAINER_QZ_PARTNER standing in
+  for any Quetzal partner: its name, class and picture come from gTrainers[sQzPartnerTrainer]; the partner's team is
+  built in party slots 3-5 by MP_CreateTrainerPartyAt). QzBackupPartyForOptionBattle is Emerald's
+  ChooseHalfPartyForBattle (pick 1-3). Quetzal's script never calls LoadPlayerParty after the battle, so the battle's
+  end (HandleSpecialTrainerBattleEnd case 12) puts the picked Pokemon back in their own slots and the rest of the party
+  with them, as Emerald's STEVEN script does with frontier_saveparty + LoadPlayerParty. Test story_rocket_lance.
+  (The test-only MOEMON_TEST_FOE_HP1 used to write six Pokemon from the second trainer's slot 3, past the enemy party
+  into the player's: it now stops at the trainer's own team.)
+  LANCE is shown from behind like STEVEN (MP_PartnerShowsBack / MP_PartnerBackPic in battle_tower.c: a partner
+  listed in sQzPartnerLooks gets its LOOK's back picture, mp_avatar.c MP_Avatar_NamedBackPic, in the Triple Battle
+  second ally's slot, free when no friend is in the battle); any other partner keeps the Frontier layout.
+- A special that is done when it returns (a JOHTO / KANTO special with nothing to wait for, every stub) calls
+  ScriptContext_Enable at once; Emerald's waitstate right after it then stopped the script for good (S.S. ANNE's
+  departure froze the player on the dock). ScrCmd_special / specialvar note when the special enabled the script
+  (script.c gMpScriptEnables) and a waitstate that is the very next command goes on (scrcmd.c). Stubs answer
+  VAR_RESULT 0, the "not available" path of every caller. Test story_ssanne.
 - KANTO's TRAINER TOWER records sign: FireRed's ShowLinkBattleRecords with VAR_0x8004 = 1 is its tower's records
   screen; Emerald's TRAINER HILL records stand in (battle_records.c; test qz_tower_records). FireRed's list kept open
   after a choice (CERULEAN's badge describer) took no input once drawn again: QzReturnToListMenu now also calls

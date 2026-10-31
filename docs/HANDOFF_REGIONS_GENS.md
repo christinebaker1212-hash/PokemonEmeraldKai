@@ -74,6 +74,14 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
   DEX is limited to the GENERATION (MP_Gen_DexCount). Caveat: the audits read sources from the data; they don't
   prove a place is reachable in the story (a static behind a postgame flag counts).
 
+- Story sweep round 3 fixes: JOHTO's ROCKET HIDEOUT multi battle beside LANCE (Quetzal's special battle 12; the party
+  comes back after it; LANCE shown from behind with his LOOK's back picture; test story_rocket_lance); a special done
+  at once (ScriptContext_Enable) before a waitstate froze the script (scrcmd.c; S.S. ANNE's departure, every stub;
+  test story_ssanne); stubs answer VAR_RESULT 0 ("not available"); JOHTO's HALL OF FAME (test region_hof_johto);
+  achievements for JOHTO / KANTO (test ach_regions). The test-only MOEMON_TEST_FOE_HP1 no longer writes into the
+  player's party in two-trainer battles. story_sweep.sh: on-warp scripts and no-variable triggers aren't NOFIRE;
+  20000 frames per event (the DANCE THEATER's five battles).
+
 ## Next steps
 1. Ship 1.61.3 (hotfix: JOHTO mart clerks, CUT, KURT's shop, Triple Triad sellers crashed; plus the extras since
    1.61.2) once the NPC sweep's report is worked through: bump include/mp_version.h, tools/release/notes/v1.61.3.md,
@@ -102,9 +110,12 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
 6. Cards in every region (item 5 above): list where each card comes from per region (tools/card_guide data,
    tcg_field.c / ygo_field.c / tt_field.c pickers, shops); add sellers / duelists / packs in JOHTO and KANTO where
    a card is missing; check every challengeable NPC's position and visibility flags (an automated walk-up test);
+   Cards: DONE (every card at the GAME CENTER, reachable from every region: COOP_NOTES "Every card in every region").
    GAME CENTER: DONE for JOHTO / KANTO (an attendant in GOLDENROD's / CELADON's GAME CORNER, 2F and 3F only, by the
    user's rule; COOP_NOTES "The GAME CENTER"). Still to do here: a per-region card audit (which cards only come from
    HOENN's special trainers: TCG promos, YGO signatures, TT 5-star cards) and JOHTO / KANTO counterparts (their gym
    leaders, Elite Four, champions, rivals as special duelists giving the same prizes), checked by a tool like
    obtain_audit.py over the card guide's dumps (tools/card_guide).
-7. Achievements (item 6 above): audit mp_achieve.c against JOHTO / KANTO content, add per-region ones.
+7. Achievements (item 6 above): JOHTO / KANTO tabs added (32 achievements; COOP_NOTES "Achievements for JOHTO and
+   KANTO"). Could add more: story beats (RADIO TOWER, SILPH CO., S.S. ANNE, the SEVII ISLANDS), the Bug-Catching
+   Contest, the RUINS OF ALPH puzzles, the GAME CORNERS.

@@ -1,0 +1,7 @@
+# JOHTO's HALL OF FAME (its frame script at VAR 0x502A = 6, as after the CHAMPION): the records screen, then the
+# credits to the end (the game resets, as after HOENN's)
+MODE=1
+TMO=500
+ENV_A="MOEMON_DEBUG_PARTY=6:60 MOEMON_DEBUG_REGION=1"
+EXPECT_A=("Soft Reset called")
+UNEXPECT_A=("SIGFPE" "crash" "not ported")

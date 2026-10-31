@@ -280,8 +280,11 @@ void ScriptContext_Stop(void)
 }
 
 // Puts the script into running mode.
+u32 gMpScriptEnables;   // Moemon Kai: counts ScriptContext_Enable calls (scrcmd.c ScrCmd_special)
+
 void ScriptContext_Enable(void)
 {
+    gMpScriptEnables++;
     sGlobalScriptContextStatus = CONTEXT_RUNNING;
     LockPlayerFieldControls();
 }

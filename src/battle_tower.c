@@ -1,4 +1,6 @@
 #include "global.h"
+#include "constants/qz_port.h"
+#include "load_save.h"
 #include "battle_tower.h"
 #include "apprentice.h"
 #include "event_data.h"
@@ -1401,10 +1403,48 @@ void PutNewBattleTowerRecord(struct EmeraldBattleTowerRecord *newRecordEm)
     gSaveBlock2Ptr->frontier.towerRecords[slotIds[i]] = *newRecord;
 }
 
+// Moemon Kai: Quetzal's multi battles beside a JOHTO / KANTO trainer (DoSpecialTrainerBattle 12-14): that trainer, shown
+// and named as a Frontier partner is (front picture), with its own team in the party's second half
+#define TRAINER_QZ_PARTNER (TRAINER_STEVEN_PARTNER + 1)
+static u16 sQzPartnerTrainer;
+static u16 sQzPartnerBackPic = 0xFFFF;
+u8 MP_CreateTrainerPartyAt(struct Pokemon *party, u16 trainerNum);
+u16 MP_Avatar_NamedBackPic(const char *name);
+
+// The partners with a back picture among the LOOKs (mp_chars_gfx.h): shown from behind, like STEVEN
+static const struct { u16 trainer; const char *look; } sQzPartnerLooks[] = {
+    {TRAINER_QZ_4959, "kai_lance"},
+};
+
+static void SetQzPartner(u16 trainer)
+{
+    u32 i;
+    sQzPartnerTrainer = trainer;
+    sQzPartnerBackPic = 0xFFFF;
+    for (i = 0; i < ARRAY_COUNT(sQzPartnerLooks); i++)
+        if (sQzPartnerLooks[i].trainer == trainer)
+            sQzPartnerBackPic = MP_Avatar_NamedBackPic(sQzPartnerLooks[i].look);
+}
+
+// Is the in-game partner shown from behind (STEVEN, LANCE), the battle laid out as STEVEN's? Else as a Frontier
+// partner's (front pictures for both)
+bool8 MP_PartnerShowsBack(void)
+{
+    return gPartnerTrainerId == TRAINER_STEVEN_PARTNER
+        || (gPartnerTrainerId == TRAINER_QZ_PARTNER && sQzPartnerBackPic != 0xFFFF);
+}
+
+u16 MP_PartnerBackPic(void)
+{
+    return gPartnerTrainerId == TRAINER_STEVEN_PARTNER ? TRAINER_BACK_PIC_STEVEN : sQzPartnerBackPic;
+}
+
 u8 GetFrontierTrainerFrontSpriteId(u16 trainerId)
 {
     SetFacilityPtrsGetLevel();
 
+    if (trainerId == TRAINER_QZ_PARTNER)
+        return gTrainers[sQzPartnerTrainer].trainerPic;
     if (trainerId == TRAINER_EREADER)
     {
         return gFacilityClassToPicIndex[gSaveBlock2Ptr->frontier.ereaderTrainer.facilityClass];
@@ -1437,6 +1477,9 @@ u8 GetFrontierOpponentClass(u16 trainerId)
 {
     u8 trainerClass = 0;
     SetFacilityPtrsGetLevel();
+
+    if (trainerId == TRAINER_QZ_PARTNER)
+        return gTrainers[sQzPartnerTrainer].trainerClass;
 
     if (trainerId == TRAINER_EREADER)
     {
@@ -1515,6 +1558,12 @@ void GetFrontierTrainerName(u8 *dst, u16 trainerId)
 {
     s32 i = 0;
     SetFacilityPtrsGetLevel();
+
+    if (trainerId == TRAINER_QZ_PARTNER)
+    {
+        StringCopy(dst, gTrainers[sQzPartnerTrainer].trainerName);
+        return;
+    }
 
     if (trainerId == TRAINER_EREADER)
     {
@@ -1989,6 +2038,17 @@ static void HandleSpecialTrainerBattleEnd(void)
     case SPECIAL_BATTLE_EREADER:
         CopyEReaderTrainerFarewellMessage();
         break;
+    case 12:
+        // Moemon Kai: Quetzal's multi battle beside LANCE: the picked Pokemon go back to their own slots (EXP, HP)
+        // and the rest of the party returns, as Emerald's STEVEN battle does in its script (Quetzal's doesn't)
+        for (i = 0; i < MULTI_PARTY_SIZE; i++)
+        {
+            u16 slot = gSaveBlock2Ptr->frontier.selectedPartyMons[i] - 1;
+            if (slot < PARTY_SIZE && GetMonData(&gPlayerParty[i], MON_DATA_SPECIES))
+                gSaveBlock1Ptr->playerParty[slot] = gPlayerParty[i];
+        }
+        LoadPlayerParty();
+        break;
     }
 
     SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
@@ -2118,6 +2178,30 @@ void DoSpecialTrainerBattle(void)
         CreateTask(Task_StartBattleAfterTransition, 1);
         PlayMapChosenOrBattleBGM(0);
         BattleTransition_StartOnField(GetSpecialBattleTransition(B_TRANSITION_GROUP_B_PIKE));
+        break;
+    // Moemon Kai: Quetzal's multi battles (its special 249 has these three more): 12 the ROCKET HIDEOUT's two
+    // executives beside LANCE; 13 / 14 GIOVANNI's past (not ported: a double battle against the one trainer)
+    case 12:
+        gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE | BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_MULTI | BATTLE_TYPE_INGAME_PARTNER;
+        gTrainerBattleOpponent_A = TRAINER_QZ_4223;
+        gTrainerBattleOpponent_B = TRAINER_QZ_4219;
+        SetQzPartner(TRAINER_QZ_4959);
+        gPartnerTrainerId = TRAINER_QZ_PARTNER;
+        for (i = MULTI_PARTY_SIZE; i < PARTY_SIZE; i++)
+            ZeroMonData(&gPlayerParty[i]);
+        MP_CreateTrainerPartyAt(&gPlayerParty[MULTI_PARTY_SIZE], sQzPartnerTrainer);
+        CreateTask(Task_StartBattleAfterTransition, 1);
+        PlayMapChosenOrBattleBGM(0);
+        BattleTransition_StartOnField(B_TRANSITION_MAGMA);
+        break;
+    case 13:
+    case 14:
+        gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE;
+        gTrainerBattleOpponent_A = gSpecialVar_0x8004 == 13 ? TRAINER_QZ_4989 : TRAINER_QZ_4962;
+        gTrainerBattleOpponent_B = 0;
+        CreateTask(Task_StartBattleAfterTransition, 1);
+        PlayMapChosenOrBattleBGM(0);
+        BattleTransition_StartOnField(B_TRANSITION_MAGMA);
         break;
     case SPECIAL_BATTLE_STEVEN:
         gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE | BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_MULTI | BATTLE_TYPE_INGAME_PARTNER;

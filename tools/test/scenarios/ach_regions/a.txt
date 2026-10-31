@@ -1,0 +1,23 @@
+pressuntil A field 5000
+wait 120
+mp setflag 0x11B2
+mp setflag 0x2100
+mp setflag 0x11EB
+mp setflag 0x11EE
+mp setflag 0x11F1
+wait 400
+mp ach
+mp achmenu 10
+wait 90
+shot johto
+press DOWN 4
+wait 10
+press DOWN 4
+wait 20
+shot johto2
+press B 4
+wait 60
+mp achmenu 11
+wait 90
+shot kanto
+quit
