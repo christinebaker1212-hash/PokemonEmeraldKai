@@ -52,8 +52,8 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
    - Quetzal postgame events, still stubs in src/qz_specials_stub.c (each logs and re-enables the script, so
      none freezes, but the events don't happen): GIOVANNI's story (time travel to the past), dream events,
      SS ANNE dream / exterior events, PALLET postgame, QzTimeTravelChoosePartyMon. Port them from
-     the Quetzal ROM (the ROM is not in the repo; a disassembler sketch: capstone over gSpecials at 0x082BEE04,
-     see COOP_NOTES "JOHTO and KANTO") and docs/quetzal/SPECIALS.md (move each from the stub file to src/qz_*.c;
+     the Quetzal ROM (the ROM is not in the repo; tools/quetzal_rip/dis_special.py ROM sNNN
+     disassembles a special) and docs/quetzal/SPECIALS.md (move each from the stub file to src/qz_*.c;
      tools/quetzal_port/import.py regenerates the stub list from what src/qz_*.c defines).
    - HEADBUTT trees, FRLG door animations, 3x2 map borders.
    - Sightseeing walk on first arrival, SAFFRON station, everyone following the host on a region trip,
