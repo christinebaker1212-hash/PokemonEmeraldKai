@@ -129,7 +129,8 @@ one() {   # one GROUP NUM REGION COUNT NAME STANDX STANDY
         local c
         for c in b c d; do
             [ "$c" = b ] || [ "$c" = c -a "$PLAYERS" -ge 3 ] || [ "$c" = d -a "$PLAYERS" -ge 4 ] || continue
-            printf 'pressuntil A field 5000\nwait 400\nmp warp %s,%s,%s,%s\nwait 60\nbarrier end %s 2000000\nmp ctx\nmp where\nquit\n' \
+            # (after the barrier: a short scene of the friend's own on arriving may still be playing)
+            printf 'pressuntil A field 5000\nwait 400\nmp warp %s,%s,%s,%s\nwait 60\nbarrier end %s 2000000\nwaitfor free 1500\nmp ctx\nmp where\nquit\n' \
                 "$1" "$2" "$6" "$7" "$PLAYERS" > "$d/$c.txt"
         done
         local envs="MOEMON_DEBUG_REGION=${REGION:-$3} MOEMON_DEBUG_PARTY=6:100,9:100 MOEMON_TEST_FOE_HP1=1"

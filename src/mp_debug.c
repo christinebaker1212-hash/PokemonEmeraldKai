@@ -291,6 +291,8 @@ int MP_TestCondition(const char *name)
     }
     if (strcmp(name, "battle") == 0)
         return gMain.inBattle;
+    if (strcmp(name, "free") == 0)   // on the field and free to move (no script, menu or fade)
+        return MP_IsLocalFree();
     if (strcmp(name, "surfing") == 0)   // surfing and free to move
         return (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_SURFING) && MP_IsLocalFree();
     if (strcmp(name, "multichoice") == 0)   // a script's multichoice menu is up
