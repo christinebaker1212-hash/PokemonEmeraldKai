@@ -2766,6 +2766,14 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   personal PC and fits levels (MP_Region_FitBoxMon: Lv 5 the first time); entering another region on foot does the
   same (MP_Region_OnMapLoaded). First trips go to MP_Region_GoToStartHouse.
 - New game: PROF. BIRCH's region question (main_menu.c), MP_Region_StartNewGame; harness MOEMON_DEBUG_REGION=N.
+- After a League (1.61.4): GameClear (post_battle_event_funcs.c) calls MP_Region_LeagueLevels: every Pokemon with a
+  level record in that region takes its best EXP in every region it has been in (party, own boxes, GLOBAL PC, away
+  PCs); a region it hasn't been to still starts it at Lv 5 (the user's rule). The credits end in credits.c
+  Task_CreditsSoftReset: the save is loaded again (LoadGameSave, region sidecar too) and CB2_ContinueSavedGame, no
+  title screen and no exit (co-op stays connected; only an unreadable save still resets). Tests region_chain_* from
+  tools/test/gen_region_chain.py (checked by check_region_chain.py: badges, League, credits, customs keeping the Lv 70
+  one, Lv 5 on arrival, the best level after the League, the GLOBAL PC linked only where cleared), region_hof*,
+  hoenn_national_dex (HOENN's POKeDEX comes with the NATIONAL DEX; older saves get it on loading).
 - Co-op with JOHTO's / KANTO's trainers (1.61.4): their ids are FIRST_QZ_TRAINER (864) on, past TRAINERS_COUNT, and
   every co-op check used to stop at TRAINERS_COUNT (no MPR_COOP_BATTLING: friends couldn't JOIN; no badge for a
   friend; trainer names / classes as TRAINER_NONE). IS_REAL_TRAINER (constants/trainers.h) / MP_IsRealTrainer take

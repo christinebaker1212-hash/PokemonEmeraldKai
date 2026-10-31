@@ -20,6 +20,7 @@ int GameClear(void)
     } ribbonCounts[6];
 
     HealPlayerParty();
+    MP_Region_LeagueLevels(MP_Region_Current());   // Moemon Kai: the Pokémon that came here keep their best level
 
     if (MP_Region_Current() != REGION_HOENN)
     {

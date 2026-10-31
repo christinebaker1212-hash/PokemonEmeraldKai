@@ -22,6 +22,12 @@
 #include "pokedex.h"
 #include "event_data.h"
 #include "random.h"
+#include "save.h"
+#include "load_save.h"
+#include "new_game.h"
+#include "overworld.h"
+#include "sprite.h"
+#include "mp.h"
 
 #define COLOR_DARK_GREEN RGB(7, 11, 6)
 #define COLOR_LIGHT_GREEN RGB(13, 20, 12)
@@ -691,10 +697,31 @@ static void Task_CreditsTheEnd6(u8 taskId)
 
 #undef tDelay
 
+// Moemon Kai: after the credits the game goes on from the save the HALL OF FAME just made, without the title screen
+// (as a soft reset and CONTINUE would, but the game never closes: friends in the room stay connected). Only an
+// unreadable save falls back to the old reset.
 static void Task_CreditsSoftReset(u8 taskId)
 {
-    if (!gPaletteFade.active)
+    if (gPaletteFade.active)
+        return;
+    SetSaveBlocksPointers(GetSaveBlocksPointersBaseOffset());
+    ResetMenuAndMonGlobals();
+    Save_ResetSaveCounters();
+    LoadGameSave(SAVE_NORMAL);
+    if (gSaveFileStatus == SAVE_STATUS_EMPTY || gSaveFileStatus == SAVE_STATUS_CORRUPT)
+    {
         SoftReset(RESET_ALL);
+        return;
+    }
+    SetPokemonCryStereo(gSaveBlock2Ptr->optionsSound);
+    MPNet_Log("credits: over, the game goes on from the save");
+    ResetTasks();
+    ResetSpriteData();
+    FreeAllSpritePalettes();
+    ResetPaletteFade();
+    gPlttBufferUnfaded[0] = RGB_BLACK;
+    gPlttBufferFaded[0] = RGB_BLACK;
+    SetMainCallback2(CB2_ContinueSavedGame);
 }
 
 static void ResetGpuAndVram(void)

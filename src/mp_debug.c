@@ -2064,6 +2064,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // pctags - the PC's tags and the group being held
         MP_PcStorage_LogTags();
     }
+    else if (strcmp(cmd, "setlevel") == 0)
+    {
+        // setlevel SLOT LEVEL - a party Moemon at that level (its EXP from its growth rate)
+        int slot = 0, lv = 5;
+        sscanf(arg, "%d %d", &slot, &lv);
+        if (slot >= 0 && slot < PARTY_SIZE && lv >= 1 && lv <= MAX_LEVEL && GetMonData(&gPlayerParty[slot], MON_DATA_SPECIES))
+        {
+            u32 exp = gExperienceTables[gSpeciesInfo[GetMonData(&gPlayerParty[slot], MON_DATA_SPECIES)].growthRate][lv];
+            SetMonData(&gPlayerParty[slot], MON_DATA_EXP, &exp);
+            CalculateMonStats(&gPlayerParty[slot]);
+            printf("[test] setlevel: slot %d level %d\n", slot, (int)GetMonData(&gPlayerParty[slot], MON_DATA_LEVEL));
+        }
+    }
     else if (strcmp(cmd, "candy") == 0)
     {
         // candy TYPE N - N candies of a type (TYPE -1: every type)
@@ -2594,8 +2607,9 @@ void MP_TestCommand(const char *cmd, const char *arg)
         for (i = 0; i < PARTY_SIZE; i++)
             if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES))
                 printf(" %d:L%d", (int)GetMonData(&gPlayerParty[i], MON_DATA_SPECIES), (int)GetMonData(&gPlayerParty[i], MON_DATA_LEVEL));
-        printf(" box1 %d%s\n", (int)GetBoxMonData(&MP_PersonalStorage()->boxes[0][0], MON_DATA_SPECIES),
-               gPokemonStoragePtr == MP_PersonalStorage() ? " (own boxes)" : " (other boxes shown)");
+        printf(" box1 %d%s badges %d linked %d\n", (int)GetBoxMonData(&MP_PersonalStorage()->boxes[0][0], MON_DATA_SPECIES),
+               gPokemonStoragePtr == MP_PersonalStorage() ? " (own boxes)" : " (other boxes shown)",
+               MP_Region_BadgeCount(MP_Region_Current()), MP_Region_Cleared(MP_Region_Current()));
     }
     else if (strcmp(cmd, "pcmenu") == 0)
     {

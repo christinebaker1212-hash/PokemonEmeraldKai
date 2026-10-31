@@ -151,7 +151,8 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
    GOLDENROD / CELADON the same). Spread the extended selection through the department store (each clerk / floor its
    own theme), and give sensible POKe MARTs in HOENN, JOHTO and KANTO a smaller selection that grows with progression
    (badges).
-14. Instead of full cross-region playthroughs (item 4; the user, once the PLAYERS=3 sweep is clean): the NATIONAL DEX
+14. DONE (region_chain_hoenn_johto_kanto, region_chain_kanto_johto_hoenn; the best-level rule after a League and the
+   credits going on without closing, both the user's). Instead of full cross-region playthroughs (item 4; the user, once the PLAYERS=3 sweep is clean): the NATIONAL DEX
    given at the start of a HOENN game (only the GENERATION's Pokemon shown), then one scripted chain per order
    (HOENN -> JOHTO -> KANTO and one other order): all badges + the Elite Four (forced by script) in a region, customs
    refusing two Pokemon and passing one Lv 70, Lv 5 on arrival, the 8 badges + Elite Four + credits there, GLOBAL PC

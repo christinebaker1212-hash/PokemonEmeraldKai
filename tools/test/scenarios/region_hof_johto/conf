@@ -3,5 +3,5 @@
 MODE=1
 TMO=500
 ENV_A="MOEMON_DEBUG_PARTY=6:60 MOEMON_DEBUG_REGION=1"
-EXPECT_A=("Soft Reset called")
+EXPECT_A=("credits: over, the game goes on from the save" "region: League of region 1 beaten")
 UNEXPECT_A=("SIGFPE" "crash" "not ported")

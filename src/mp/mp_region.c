@@ -599,6 +599,70 @@ void MP_Region_FitAll(void)
             MP_Region_FitBoxMon(&st->boxes[b][p], region);
 }
 
+// A region's League beaten (GameClear): every Pokémon that has been in that region takes the higher of its levels, in
+// every region it has been in (the Lv 5 start only lasts until the new region's League; a region it hasn't been to
+// still starts it at Lv 5). The user's rule (1.61.4).
+static void LeagueLevelsIn(struct BoxPokemon *b, struct Pokemon *mon)
+{
+    struct RegionLevel *e;
+    u32 exp;
+    if (!GetBoxMonData(b, MON_DATA_SANITY_HAS_SPECIES) || GetBoxMonData(b, MON_DATA_IS_EGG))
+        return;
+    e = FindLevels(GetBoxMonData(b, MON_DATA_PERSONALITY), GetBoxMonData(b, MON_DATA_OT_ID));
+    if (e == NULL || !(e->has & (1 << e->cur)))
+        return;
+    exp = e->exp[e->cur];
+    if (GetBoxMonData(b, MON_DATA_EXP) == exp)
+        return;
+    SetBoxMonData(b, MON_DATA_EXP, &exp);
+    if (mon != NULL)
+    {
+        u16 hp;
+        CalculateMonStats(mon);
+        hp = GetMonData(mon, MON_DATA_MAX_HP);
+        SetMonData(mon, MON_DATA_HP, &hp);
+    }
+}
+
+void MP_Region_LeagueLevels(u8 region)
+{
+    struct PokemonStorage *own = MP_PersonalStorage();
+    u32 i, b, p, raised = 0;
+    u8 r;
+    if (region >= REGION_COUNT)
+        return;
+    MP_Region_FitAll();   // (records the party's and boxes' EXP here first)
+    for (i = 0; i < sLevelCount; i++)
+    {
+        struct RegionLevel *e = &sLevels[i];
+        u32 best = 0;
+        if (!(e->has & (1 << region)))
+            continue;
+        for (r = 0; r < REGION_COUNT; r++)
+            if ((e->has & (1 << r)) && e->exp[r] > best)
+                best = e->exp[r];
+        for (r = 0; r < REGION_COUNT; r++)
+            if ((e->has & (1 << r)) && e->exp[r] != best)
+            {
+                e->exp[r] = best;
+                raised++;
+            }
+    }
+    for (i = 0; i < PARTY_SIZE; i++)
+        LeagueLevelsIn(&gPlayerParty[i].box, &gPlayerParty[i]);
+    for (b = 0; b < TOTAL_BOXES_COUNT; b++)
+        for (p = 0; p < IN_BOX_COUNT; p++)
+        {
+            LeagueLevelsIn(&own->boxes[b][p], NULL);
+            if (sGlobalValid)
+                LeagueLevelsIn(&sGlobalPC.boxes[b][p], NULL);
+            for (r = 0; r < REGION_COUNT; r++)
+                if (sAwayValid & (1 << r))
+                    LeagueLevelsIn(&sAwayPC[r].boxes[b][p], NULL);
+        }
+    MPNet_Log("region: League of region %d beaten: %u level(s) raised to the Pokemon's best", region, raised);
+}
+
 // ---------------------------------------------------------------------------------------------------- travel
 // Leaving "from" for "to": the personal PC's boxes change places, the party takes the new region's levels
 void MP_Region_Travel(u8 from, u8 to)
