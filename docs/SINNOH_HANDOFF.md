@@ -91,12 +91,12 @@ perspective camera. The engine draws those models as Platinum does instead of pi
 5. PÓKETCH Key Item and its apps (touch apps use the D-pad cursor or mouse). Self-contained, can come early.
 6. Not planned: Super Contests (Gen 3 contests instead); the Underground only if the user asks.
 
-## Open questions for the user (defaults in brackets)
-- The picture size: Platinum's screen is 256x192 (4:3), the game's 240x160 (3:2). [Draw Sinnoh at 240x160 with
-  Platinum's camera and its field of view widened to fit, so everything else (menus, battles, spectate) is
-  unchanged.]
-- How sharp: the DS's own resolution, or the 3D drawn at the window's size. [The game's resolution, filters as
-  for the rest of the game; a higher-resolution option later.]
+## Decided (the user, 2026-10-31)
+- The map screen is Emerald's: Sinnoh is drawn at 240x160 (Platinum's camera fitted to it: its field of view
+  widened from 256x192's 4:3 to 3:2, the same height of the world shown). Emerald's battle system and menus stay as
+  they are, so nothing else changes size.
+- Native resolution first (the game's 240x160, with display.c's usual scaling and filters); a higher-resolution 3D
+  option may come later.
 
 ## First step
 A proof of concept: Twinleaf Town + Route 201 drawn by the 3D engine from the user's ROM, the LOOK walking on
