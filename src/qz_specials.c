@@ -370,7 +370,8 @@ static u16 RefreshStatics(void)
         const struct QzStatic *e = &sQzStatics[i];
         if (!HereIs(e))
             continue;
-        if (FlagGet(e->doneFlag) || !MP_Gen_Allowed(e->species))
+        if (FlagGet(e->doneFlag) || !MP_Gen_Allowed(e->species)
+         || (e->region == 2 && e->species == SPECIES_MELOETTA && !FlagGet(FLAG_QZ_0x2924)))   // after the CHANSEY Dance
             FlagSet(e->objFlag);
         else
             FlagClear(e->objFlag);
@@ -1035,5 +1036,74 @@ u16 QzAfterCreditsReset(void)
                                                                          : HEAL_LOCATION_JOHTO_NEW_BARK_TOWN);
     TrySavingData(SAVE_NORMAL);
     SetMainCallback2(CB2_StartCreditsSequence);
+    return 0;
+}
+
+#include "constants/moves.h"
+extern const struct Evolution gEvolutionTable[][EVOS_PER_MON];
+
+// SEVAULT CANYON's house: MELOETTA joins the CHANSEY Dance when a full team dances along: a CHANSEY leads, holding a
+// LUCKY PUNCH and knowing SING, and five others of different families each know a dance (Quetzal's rule)
+static u16 FamilyBase(u16 species)
+{
+    u32 depth, i, j;
+    for (depth = 0; depth < 4; depth++)
+    {
+        u16 from = SPECIES_NONE;
+        for (i = 1; i < NUM_SPECIES && from == SPECIES_NONE; i++)
+            for (j = 0; j < EVOS_PER_MON; j++)
+                if (gEvolutionTable[i][j].targetSpecies == species && gEvolutionTable[i][j].method != 0)
+                {
+                    from = i;
+                    break;
+                }
+        if (from == SPECIES_NONE)
+            break;
+        species = from;
+    }
+    return species;
+}
+
+static bool8 KnowsDance(struct Pokemon *mon)
+{
+    static const u16 sDanceMoves[] = {MOVE_SWORDS_DANCE, MOVE_PETAL_DANCE, MOVE_FEATHER_DANCE, MOVE_TEETER_DANCE,
+        MOVE_DRAGON_DANCE, MOVE_LUNAR_DANCE, MOVE_QUIVER_DANCE, MOVE_FIERY_DANCE, MOVE_REVELATION_DANCE,
+        MOVE_CLANGOROUS_SOUL, MOVE_VICTORY_DANCE, MOVE_AQUA_STEP};
+    u32 i, k;
+    for (i = 0; i < MAX_MON_MOVES; i++)
+        for (k = 0; k < ARRAY_COUNT(sDanceMoves); k++)
+            if (GetMonData(mon, MON_DATA_MOVE1 + i) == sDanceMoves[k])
+                return TRUE;
+    return FALSE;
+}
+
+u16 QzSevaultHouseEventEligibility(void)
+{
+    u16 base[PARTY_SIZE];
+    u32 i, j, k;
+    bool8 sing = FALSE;
+    gSpecialVar_Result = FALSE;
+    if (FlagGet(FLAG_QZ_0x2924) || !MP_Gen_Allowed(SPECIES_MELOETTA)
+     || GetSetPokedexFlag(SpeciesToNationalPokedexNum(SPECIES_MELOETTA), FLAG_GET_CAUGHT))
+        return 0;
+    if (GetMonData(&gPlayerParty[0], MON_DATA_SPECIES_OR_EGG) != SPECIES_CHANSEY
+     || GetMonData(&gPlayerParty[0], MON_DATA_HELD_ITEM) != ITEM_LUCKY_PUNCH)
+        return 0;
+    for (k = 0; k < MAX_MON_MOVES; k++)
+        if (GetMonData(&gPlayerParty[0], MON_DATA_MOVE1 + k) == MOVE_SING)
+            sing = TRUE;
+    if (!sing)
+        return 0;
+    for (i = 1; i < PARTY_SIZE; i++)
+    {
+        u16 sp = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES_OR_EGG);
+        if (sp == SPECIES_NONE || sp == SPECIES_EGG || !KnowsDance(&gPlayerParty[i]))
+            return 0;
+        base[i] = FamilyBase(sp);
+        for (j = 1; j < i; j++)
+            if (base[j] == base[i])
+                return 0;
+    }
+    gSpecialVar_Result = TRUE;
     return 0;
 }

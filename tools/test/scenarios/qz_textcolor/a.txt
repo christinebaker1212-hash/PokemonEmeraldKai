@@ -1,0 +1,11 @@
+pressuntil A field 5000
+wait 60
+mp warp 36,11,5,5
+wait 120
+mp face up
+shot start
+mash A 120 20
+wait 200
+shot end
+mp getflag 8526
+quit

@@ -1,0 +1,24 @@
+pressuntil A field 5000
+wait 60
+mp hold 0 222
+mp setmove 0 0 47
+mp setmove 1 0 14
+mp setmove 2 0 14
+mp setmove 3 0 14
+mp setmove 4 0 14
+mp setmove 5 0 14
+mp warp 39,33,2,5
+wait 120
+shot before
+mp face up
+mash A 60 20
+wait 300
+shot after
+mp warp 39,33,5,3
+wait 150
+shot back
+mp face right
+mash A 40 10
+wait 300
+shot battle
+quit

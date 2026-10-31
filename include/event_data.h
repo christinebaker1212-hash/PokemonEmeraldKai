@@ -22,6 +22,7 @@ u16 *GetVarPointer(u16 id);
 u16 VarGet(u16 id);
 bool8 VarSet(u16 id, u16 value);
 u8 VarGetObjectEventGraphicsId(u8 id);
+u16 QzVarGraphicsId(u8 id);   // Moemon Kai: JOHTO / KANTO's graphics variables (0xFFFF: Kai's own)
 u8 *GetFlagPointer(u16 id);
 u8 FlagSet(u16 id);
 u8 FlagClear(u16 id);

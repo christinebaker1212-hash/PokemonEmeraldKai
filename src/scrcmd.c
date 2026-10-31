@@ -103,6 +103,14 @@ bool8 ScrCmd_nop1(struct ScriptContext *ctx)
     return FALSE;
 }
 
+// Moemon Kai: FireRed's textcolor (JOHTO / KANTO scripts): skips its color. As nop1 it ran the color as the next
+// command, so textcolor 2 / 3 ended or returned from the script (MELOETTA's dance, 40 more)
+bool8 ScrCmd_textcolor(struct ScriptContext *ctx)
+{
+    ScriptReadByte(ctx);
+    return FALSE;
+}
+
 bool8 ScrCmd_end(struct ScriptContext *ctx)
 {
     StopScript(ctx);

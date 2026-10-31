@@ -195,6 +195,25 @@ bool8 VarSet(u16 id, u16 value)
     return TRUE;
 }
 
+// Moemon Kai: JOHTO / KANTO keep Quetzal's graphics variables: VAR_OBJ_GFX_ID_0 is its VAR 0x4010 (VAR_QZ_0x4010), or
+// VAR 0x513E on VIRIDIAN CITY, BIRTH ISLAND and FUCHSIA CITY, holding Quetzal's own graphics ids (src/data/object_events
+// /qz_gfx_ids.h turns them into Kai's). 0xFFFF: not one of those (Kai's own variables then)
+#include "constants/qz_port.h"
+#include "mp_region.h"
+#include "data/object_events/qz_gfx_ids.h"
+u16 QzVarGraphicsId(u8 id)
+{
+    u16 loc = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum, v;
+    u32 i;
+    if (id != 0 || MP_Region_OfGroup(gSaveBlock1Ptr->location.mapGroup) == REGION_HOENN)
+        return 0xFFFF;
+    v = VarGet(loc == ((37 << 8) | 58) || loc == ((37 << 8) | 53) || loc == ((37 << 8) | 64) ? VAR_QZ_0x513E : VAR_QZ_0x4010);
+    for (i = 0; i < ARRAY_COUNT(sQzGfxIds); i++)
+        if (sQzGfxIds[i][0] == v)
+            return sQzGfxIds[i][1];
+    return 0xFFFF;
+}
+
 u8 VarGetObjectEventGraphicsId(u8 id)
 {
     u8 gfx = VarGet(VAR_OBJ_GFX_ID_0 + id);

@@ -1294,6 +1294,32 @@
   "matches": "kai graphics/object_events/pics/people/mystery_event_deliveryman.png"
  },
  {
+  "id": 232,
+  "const": "OBJ_EVENT_GFX_QZ_232",
+  "used_by": [
+   "(a script's graphics variable)"
+  ],
+  "maps_using": 1,
+  "tile_tag": 65535,
+  "palette_tag": 4382,
+  "reflection_palette_tag": 4607,
+  "size": 512,
+  "width": 32,
+  "height": 32,
+  "palette_slot": 10,
+  "shadow_size": 1,
+  "inanimate": false,
+  "disable_reflection_palette_load": false,
+  "tracks": 1,
+  "oam": "0x906E1EC",
+  "subsprite_tables": "0x906E2C4",
+  "anims": "0x906DDB0",
+  "affine_anims": "0x84CAF80",
+  "info_addr": "0x90706C4",
+  "frames": 9,
+  "matches": "kai graphics/object_events/pics/pokemon/deoxys.png"
+ },
+ {
   "id": 233,
   "const": "OBJ_EVENT_GFX_QZ_233",
   "used_by": [
@@ -2667,6 +2693,37 @@
   }
  },
  {
+  "id": 729,
+  "const": "OBJ_EVENT_GFX_QZ_729",
+  "used_by": [
+   "(a script's graphics variable)"
+  ],
+  "maps_using": 1,
+  "tile_tag": 65535,
+  "palette_tag": 5994,
+  "reflection_palette_tag": 5995,
+  "size": 512,
+  "width": 32,
+  "height": 32,
+  "palette_slot": 2,
+  "shadow_size": 1,
+  "inanimate": false,
+  "disable_reflection_palette_load": false,
+  "tracks": 1,
+  "oam": "0x906E1EC",
+  "subsprite_tables": "0x906E2C4",
+  "anims": "0x906DBCC",
+  "affine_anims": "0x84CAF80",
+  "info_addr": "0x9074AF8",
+  "frames": 6,
+  "matches": null,
+  "pokemon": {
+   "species_id": 473,
+   "name": "Mamoswine",
+   "shiny": false
+  }
+ },
+ {
   "id": 736,
   "const": "OBJ_EVENT_GFX_QZ_736",
   "used_by": [
@@ -3439,6 +3496,37 @@
   "pokemon": {
    "species_id": 647,
    "name": "Keldeo",
+   "shiny": false
+  }
+ },
+ {
+  "id": 904,
+  "const": "OBJ_EVENT_GFX_QZ_904",
+  "used_by": [
+   "(a script's graphics variable)"
+  ],
+  "maps_using": 1,
+  "tile_tag": 65535,
+  "palette_tag": 6344,
+  "reflection_palette_tag": 6345,
+  "size": 512,
+  "width": 32,
+  "height": 32,
+  "palette_slot": 2,
+  "shadow_size": 1,
+  "inanimate": false,
+  "disable_reflection_palette_load": false,
+  "tracks": 1,
+  "oam": "0x906E1EC",
+  "subsprite_tables": "0x906E2C4",
+  "anims": "0x906DBCC",
+  "affine_anims": "0x84CAF80",
+  "info_addr": "0x9076394",
+  "frames": 6,
+  "matches": null,
+  "pokemon": {
+   "species_id": 648,
+   "name": "Meloetta",
    "shiny": false
   }
  },
@@ -9440,6 +9528,32 @@
   "matches": "pokefirered graphics/object_events/pics/pokemon/jigglypuff.png"
  },
  {
+  "id": 16144,
+  "const": "OBJ_EVENT_GFX_QZ_16144",
+  "used_by": [
+   "(a script's graphics variable)"
+  ],
+  "maps_using": 1,
+  "tile_tag": 65535,
+  "palette_tag": 4384,
+  "reflection_palette_tag": 4607,
+  "size": 128,
+  "width": 16,
+  "height": 16,
+  "palette_slot": 2,
+  "shadow_size": 1,
+  "inanimate": false,
+  "disable_reflection_palette_load": false,
+  "tracks": 1,
+  "oam": "0x906E1CC",
+  "subsprite_tables": "0x906E21C",
+  "anims": "0x906DDB0",
+  "affine_anims": "0x84CAF80",
+  "info_addr": "0x90E9EF0",
+  "frames": 9,
+  "matches": null
+ },
+ {
   "id": 16145,
   "const": "OBJ_EVENT_GFX_QZ_16145",
   "used_by": [
@@ -10199,6 +10313,32 @@
   "matches": "pokefirered graphics/object_events/pics/people/old_man_2.png"
  },
  {
+  "id": 16174,
+  "const": "OBJ_EVENT_GFX_QZ_16174",
+  "used_by": [
+   "(a script's graphics variable)"
+  ],
+  "maps_using": 1,
+  "tile_tag": 65535,
+  "palette_tag": 4385,
+  "reflection_palette_tag": 4607,
+  "size": 512,
+  "width": 32,
+  "height": 32,
+  "palette_slot": 3,
+  "shadow_size": 1,
+  "inanimate": false,
+  "disable_reflection_palette_load": false,
+  "tracks": 1,
+  "oam": "0x906E1EC",
+  "subsprite_tables": "0x906E2C4",
+  "anims": "0x906DDB0",
+  "affine_anims": "0x84CAF80",
+  "info_addr": "0x90EA328",
+  "frames": 9,
+  "matches": null
+ },
+ {
   "id": 16175,
   "const": "OBJ_EVENT_GFX_QZ_16175",
   "used_by": [
@@ -10230,6 +10370,32 @@
   "info_addr": "0x90EA34C",
   "frames": 9,
   "matches": "pokefirered graphics/object_events/pics/people/old_woman.png"
+ },
+ {
+  "id": 16176,
+  "const": "OBJ_EVENT_GFX_QZ_16176",
+  "used_by": [
+   "(a script's graphics variable)"
+  ],
+  "maps_using": 1,
+  "tile_tag": 65535,
+  "palette_tag": 4384,
+  "reflection_palette_tag": 4607,
+  "size": 128,
+  "width": 16,
+  "height": 16,
+  "palette_slot": 2,
+  "shadow_size": 1,
+  "inanimate": false,
+  "disable_reflection_palette_load": false,
+  "tracks": 1,
+  "oam": "0x906E1CC",
+  "subsprite_tables": "0x906E21C",
+  "anims": "0x906DDB0",
+  "affine_anims": "0x84CAF80",
+  "info_addr": "0x90EA370",
+  "frames": 9,
+  "matches": null
  },
  {
   "id": 16177,

@@ -2726,9 +2726,33 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
 - Harness: mp gensetting N / regioninfo / regionclear R / regionreload / wildroll N / pcmenu / setvar ID V; waitfor multichoice.
 - Tests: region_walk, region_fly, region_travel, region_globalpc, region_gens, region_starter, region_newgame,
   region_train, region_coop.
-- Not done yet: the Bug-Catching Contest, Ruins of Alph puzzles, Quetzal's postgame and time-travel events (their
-  specials are still stubs), HEADBUTT trees, FRLG door animations, 3x2 map borders, the sightseeing walk on a first
-  arrival, a SAFFRON station, everyone following the host on a trip, per-region co-op shared PCs.
+- Bug-Catching Contest (1.61.1): src/qz_bugcontest.c (the lead alone, 30 SAFARI BALLS, 8 minutes or
+  MOEMON_BUGCONTEST_FRAMES, up to five catches, all kept; judged against four contestants; SAVE and autosave off while
+  it runs; QzBugContest_FieldCheck in DoCB1_Overworld ends it). Test qz_bugcontest.
+- RUINS OF ALPH puzzles (1.61.1): src/qz_alphpuzzle.c (6x6 board, 16 pieces cut from the species' front picture;
+  MOEMON_ALPH_EASY). Test qz_alph_puzzle.
+- LEAGUE credits (1.61.1): QzDoCredits / QzAfterCreditsReset; post_battle_event_funcs.c GameClear is region-aware
+  (JOHTO / KANTO never set HOENN's FLAG_SYS_GAME_CLEAR; CONTINUE in NEW BARK / PALLET). Test region_hof.
+- What may battle at GEN 3 in JOHTO / KANTO: never below Gen 3 (mp_region.c UseCap); the regions' Gen 2 cap is for
+  their wild / trainer pools only.
+- Later generations on the maps (1.61.2): the Gen 4 cap hid every Gen 5-9 overworld POKéMON with FLAG_QZ_GEN_CAPPED;
+  tools/quetzal_port/gen_later_objects.py puts Quetzal's flags back and writes src/data/qz_later_objects.h, which
+  MP_Gen_ObjectHidden (event_object_movement.c spawn checks) uses to hide each until its GENERATION. gen_static.py
+  reads Kai's species list as it is now (216 statics). Rerun both after import.py. Test region_later_mons.
+  Quetzal's KANTO statics each have their own availability condition (its KantoStaticEncountersRefresh switch);
+  RefreshStatics only shows what isn't done, plus MELOETTA's (after the CHANSEY Dance, FLAG_QZ_0x2924).
+- Graphics variables (1.61.2): Quetzal's scripts store its own graphics ids in VAR 0x4010 (VAR_QZ_0x4010), or 0x513E on
+  VIRIDIAN / BIRTH ISLAND / FUCHSIA; event_data.c QzVarGraphicsId maps them through src/data/object_events/qz_gfx_ids.h
+  (gen_objects.py). Sprites only scripts name come from tools/quetzal_rip/var_sprites.py ROM; they're imported last so
+  older graphics ids never move.
+- FireRed's `textcolor COLOR` (1.61.2) has its own handler that skips the color: as nop1 the color ran as a command
+  (2 = end, 3 = return) and cut 41 KANTO scripts short (the S.S. ANNE captain, OAK's LAB...). check_scripts.py fails on
+  any used command with arguments mapped to nop / nop1. Test qz_textcolor.
+- MELOETTA's CHANSEY Dance (1.61.2): QzSevaultHouseEventEligibility (Quetzal's rule). Test qz_meloetta_dance.
+- Not done yet: Quetzal's other postgame events (GIOVANNI's past, time travel, the dream events, the S.S. ANNE dream and
+  departure, PALLET's postgame: still stubs that log and go on), HEADBUTT trees, FRLG door animations, 3x2 map
+  borders, the sightseeing walk on a first arrival, a SAFFRON station, everyone following the host on a trip,
+  per-region co-op shared PCs. The plan for what's left: docs/HANDOFF_REGIONS_GENS.md.
 
 ## Gens 5-9 and GENERATION (1.61.0)
 Pokémon 494-1025 (species 519-1050: VICTINI..PECHARUNT; the EGG is 1051 and Unown's letters follow), moves 468-847,

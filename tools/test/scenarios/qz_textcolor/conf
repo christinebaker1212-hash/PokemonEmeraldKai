@@ -1,0 +1,7 @@
+# FireRed's textcolor in KANTO's scripts skips its color: the S.S. ANNE's captain finishes his scene (it used to stop
+# at "textcolor 3", which ran as a return) and sets his flag (FLAG_QZ_0x214E = 8526)
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=6:50"
+EXPECT_A=("flag 8526 = 1")
+UNEXPECT_A=("[crash]")

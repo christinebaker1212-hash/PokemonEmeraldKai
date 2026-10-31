@@ -338,6 +338,11 @@ const u32 gObjectEventPic_Qz16218[] = INCGFX_U32("graphics/object_events/pics/qz
 const u32 gObjectEventPic_Qz16219[] = INCGFX_U32("graphics/object_events/pics/qz/gfx_16219.png", ".4bpp", "-mwidth 2 -mheight 4");
 const u32 gObjectEventPic_Qz16220[] = INCGFX_U32("graphics/object_events/pics/qz/gfx_16220.png", ".4bpp", "-mwidth 2 -mheight 4");
 const u32 gObjectEventPic_Qz16221[] = INCGFX_U32("graphics/object_events/pics/qz/gfx_16221.png", ".4bpp", "-mwidth 4 -mheight 4");
+const u32 gObjectEventPic_Qz729[] = INCGFX_U32("graphics/object_events/pics/qz/gfx_729.png", ".4bpp", "-mwidth 4 -mheight 4");
+const u32 gObjectEventPic_Qz904[] = INCGFX_U32("graphics/object_events/pics/qz/gfx_904.png", ".4bpp", "-mwidth 4 -mheight 4");
+const u32 gObjectEventPic_Qz16144[] = INCGFX_U32("graphics/object_events/pics/qz/gfx_16144.png", ".4bpp", "-mwidth 2 -mheight 2");
+const u32 gObjectEventPic_Qz16174[] = INCGFX_U32("graphics/object_events/pics/qz/gfx_16174.png", ".4bpp", "-mwidth 4 -mheight 4");
+const u32 gObjectEventPic_Qz16176[] = INCGFX_U32("graphics/object_events/pics/qz/gfx_16176.png", ".4bpp", "-mwidth 2 -mheight 2");
 
 const u16 gObjectEventPal_Qz000[] = INCGFX_U16("graphics/object_events/palettes/qz/pal_000.pal", ".gbapal");
 const u16 gObjectEventPal_Qz001[] = INCGFX_U16("graphics/object_events/palettes/qz/pal_001.pal", ".gbapal");
@@ -529,6 +534,8 @@ const u16 gObjectEventPal_Qz186[] = INCGFX_U16("graphics/object_events/palettes/
 const u16 gObjectEventPal_Qz187[] = INCGFX_U16("graphics/object_events/palettes/qz/pal_187.pal", ".gbapal");
 const u16 gObjectEventPal_Qz188[] = INCGFX_U16("graphics/object_events/palettes/qz/pal_188.pal", ".gbapal");
 const u16 gObjectEventPal_Qz189[] = INCGFX_U16("graphics/object_events/palettes/qz/pal_189.pal", ".gbapal");
+const u16 gObjectEventPal_Qz190[] = INCGFX_U16("graphics/object_events/palettes/qz/pal_190.pal", ".gbapal");
+const u16 gObjectEventPal_Qz191[] = INCGFX_U16("graphics/object_events/palettes/qz/pal_191.pal", ".gbapal");
 
 static const struct SpriteFrameImage sPicTable_Qz59[] = {
     overworld_frame(gObjectEventPic_Qz59, 2, 2, 0),
@@ -4412,6 +4419,66 @@ static const struct SpriteFrameImage sPicTable_Qz16221[] = {
     overworld_frame(gObjectEventPic_Qz16221, 4, 4, 6),
     overworld_frame(gObjectEventPic_Qz16221, 4, 4, 7),
     overworld_frame(gObjectEventPic_Qz16221, 4, 4, 8),
+};
+
+static const struct SpriteFrameImage sPicTable_Qz729[] = {
+    overworld_frame(gObjectEventPic_Qz729, 4, 4, 0),
+    overworld_frame(gObjectEventPic_Qz729, 4, 4, 4),
+    overworld_frame(gObjectEventPic_Qz729, 4, 4, 2),
+    overworld_frame(gObjectEventPic_Qz729, 4, 4, 1),
+    overworld_frame(gObjectEventPic_Qz729, 4, 4, 1),
+    overworld_frame(gObjectEventPic_Qz729, 4, 4, 5),
+    overworld_frame(gObjectEventPic_Qz729, 4, 4, 5),
+    overworld_frame(gObjectEventPic_Qz729, 4, 4, 3),
+    overworld_frame(gObjectEventPic_Qz729, 4, 4, 3),
+};
+
+static const struct SpriteFrameImage sPicTable_Qz904[] = {
+    overworld_frame(gObjectEventPic_Qz904, 4, 4, 0),
+    overworld_frame(gObjectEventPic_Qz904, 4, 4, 4),
+    overworld_frame(gObjectEventPic_Qz904, 4, 4, 2),
+    overworld_frame(gObjectEventPic_Qz904, 4, 4, 1),
+    overworld_frame(gObjectEventPic_Qz904, 4, 4, 1),
+    overworld_frame(gObjectEventPic_Qz904, 4, 4, 5),
+    overworld_frame(gObjectEventPic_Qz904, 4, 4, 5),
+    overworld_frame(gObjectEventPic_Qz904, 4, 4, 3),
+    overworld_frame(gObjectEventPic_Qz904, 4, 4, 3),
+};
+
+static const struct SpriteFrameImage sPicTable_Qz16144[] = {
+    overworld_frame(gObjectEventPic_Qz16144, 2, 2, 0),
+    overworld_frame(gObjectEventPic_Qz16144, 2, 2, 1),
+    overworld_frame(gObjectEventPic_Qz16144, 2, 2, 2),
+    overworld_frame(gObjectEventPic_Qz16144, 2, 2, 3),
+    overworld_frame(gObjectEventPic_Qz16144, 2, 2, 4),
+    overworld_frame(gObjectEventPic_Qz16144, 2, 2, 5),
+    overworld_frame(gObjectEventPic_Qz16144, 2, 2, 6),
+    overworld_frame(gObjectEventPic_Qz16144, 2, 2, 7),
+    overworld_frame(gObjectEventPic_Qz16144, 2, 2, 8),
+};
+
+static const struct SpriteFrameImage sPicTable_Qz16174[] = {
+    overworld_frame(gObjectEventPic_Qz16174, 4, 4, 0),
+    overworld_frame(gObjectEventPic_Qz16174, 4, 4, 1),
+    overworld_frame(gObjectEventPic_Qz16174, 4, 4, 2),
+    overworld_frame(gObjectEventPic_Qz16174, 4, 4, 3),
+    overworld_frame(gObjectEventPic_Qz16174, 4, 4, 4),
+    overworld_frame(gObjectEventPic_Qz16174, 4, 4, 5),
+    overworld_frame(gObjectEventPic_Qz16174, 4, 4, 6),
+    overworld_frame(gObjectEventPic_Qz16174, 4, 4, 7),
+    overworld_frame(gObjectEventPic_Qz16174, 4, 4, 8),
+};
+
+static const struct SpriteFrameImage sPicTable_Qz16176[] = {
+    overworld_frame(gObjectEventPic_Qz16176, 2, 2, 0),
+    overworld_frame(gObjectEventPic_Qz16176, 2, 2, 1),
+    overworld_frame(gObjectEventPic_Qz16176, 2, 2, 2),
+    overworld_frame(gObjectEventPic_Qz16176, 2, 2, 3),
+    overworld_frame(gObjectEventPic_Qz16176, 2, 2, 4),
+    overworld_frame(gObjectEventPic_Qz16176, 2, 2, 5),
+    overworld_frame(gObjectEventPic_Qz16176, 2, 2, 6),
+    overworld_frame(gObjectEventPic_Qz16176, 2, 2, 7),
+    overworld_frame(gObjectEventPic_Qz16176, 2, 2, 8),
 };
 
 static const struct ObjectEventGraphicsInfo sObjectEventGraphicsInfo_Qz59 = {
@@ -10855,6 +10922,101 @@ static const struct ObjectEventGraphicsInfo sObjectEventGraphicsInfo_Qz16221 = {
     .affineAnims = gDummySpriteAffineAnimTable,
 };
 
+static const struct ObjectEventGraphicsInfo sObjectEventGraphicsInfo_Qz729 = {
+    .tileTag = TAG_NONE,
+    .paletteTag = 0xA0BE,
+    .reflectionPaletteTag = OBJ_EVENT_PAL_TAG_NONE,
+    .size = 512,
+    .width = 32,
+    .height = 32,
+    .paletteSlot = PALSLOT_QZ,
+    .shadowSize = SHADOW_SIZE_M,
+    .inanimate = FALSE,
+    .disableReflectionPaletteLoad = TRUE,
+    .tracks = TRACKS_FOOT,
+    .oam = &gObjectEventBaseOam_32x32,
+    .subspriteTables = sOamTables_32x32,
+    .anims = sAnimTable_Standard,
+    .images = sPicTable_Qz729,
+    .affineAnims = gDummySpriteAffineAnimTable,
+};
+
+static const struct ObjectEventGraphicsInfo sObjectEventGraphicsInfo_Qz904 = {
+    .tileTag = TAG_NONE,
+    .paletteTag = 0xA0BF,
+    .reflectionPaletteTag = OBJ_EVENT_PAL_TAG_NONE,
+    .size = 512,
+    .width = 32,
+    .height = 32,
+    .paletteSlot = PALSLOT_QZ,
+    .shadowSize = SHADOW_SIZE_M,
+    .inanimate = FALSE,
+    .disableReflectionPaletteLoad = TRUE,
+    .tracks = TRACKS_FOOT,
+    .oam = &gObjectEventBaseOam_32x32,
+    .subspriteTables = sOamTables_32x32,
+    .anims = sAnimTable_Standard,
+    .images = sPicTable_Qz904,
+    .affineAnims = gDummySpriteAffineAnimTable,
+};
+
+static const struct ObjectEventGraphicsInfo sObjectEventGraphicsInfo_Qz16144 = {
+    .tileTag = TAG_NONE,
+    .paletteTag = 0xA0A0,
+    .reflectionPaletteTag = OBJ_EVENT_PAL_TAG_NONE,
+    .size = 128,
+    .width = 16,
+    .height = 16,
+    .paletteSlot = PALSLOT_QZ,
+    .shadowSize = SHADOW_SIZE_S,
+    .inanimate = FALSE,
+    .disableReflectionPaletteLoad = TRUE,
+    .tracks = TRACKS_FOOT,
+    .oam = &gObjectEventBaseOam_16x16,
+    .subspriteTables = sOamTables_16x16,
+    .anims = sAnimTable_Standard,
+    .images = sPicTable_Qz16144,
+    .affineAnims = gDummySpriteAffineAnimTable,
+};
+
+static const struct ObjectEventGraphicsInfo sObjectEventGraphicsInfo_Qz16174 = {
+    .tileTag = TAG_NONE,
+    .paletteTag = 0xA0A7,
+    .reflectionPaletteTag = OBJ_EVENT_PAL_TAG_NONE,
+    .size = 512,
+    .width = 32,
+    .height = 32,
+    .paletteSlot = PALSLOT_QZ,
+    .shadowSize = SHADOW_SIZE_M,
+    .inanimate = FALSE,
+    .disableReflectionPaletteLoad = TRUE,
+    .tracks = TRACKS_FOOT,
+    .oam = &gObjectEventBaseOam_32x32,
+    .subspriteTables = sOamTables_32x32,
+    .anims = sAnimTable_Standard,
+    .images = sPicTable_Qz16174,
+    .affineAnims = gDummySpriteAffineAnimTable,
+};
+
+static const struct ObjectEventGraphicsInfo sObjectEventGraphicsInfo_Qz16176 = {
+    .tileTag = TAG_NONE,
+    .paletteTag = 0xA0A0,
+    .reflectionPaletteTag = OBJ_EVENT_PAL_TAG_NONE,
+    .size = 128,
+    .width = 16,
+    .height = 16,
+    .paletteSlot = PALSLOT_QZ,
+    .shadowSize = SHADOW_SIZE_S,
+    .inanimate = FALSE,
+    .disableReflectionPaletteLoad = TRUE,
+    .tracks = TRACKS_FOOT,
+    .oam = &gObjectEventBaseOam_16x16,
+    .subspriteTables = sOamTables_16x16,
+    .anims = sAnimTable_Standard,
+    .images = sPicTable_Qz16176,
+    .affineAnims = gDummySpriteAffineAnimTable,
+};
+
 static const struct ObjectEventGraphicsInfo *const sQzObjectEventGraphicsInfoPointers[] = {
     &sObjectEventGraphicsInfo_Qz59,
     &sObjectEventGraphicsInfo_Qz60,
@@ -11195,6 +11357,11 @@ static const struct ObjectEventGraphicsInfo *const sQzObjectEventGraphicsInfoPoi
     &sObjectEventGraphicsInfo_Qz16219,
     &sObjectEventGraphicsInfo_Qz16220,
     &sObjectEventGraphicsInfo_Qz16221,
+    &sObjectEventGraphicsInfo_Qz729,
+    &sObjectEventGraphicsInfo_Qz904,
+    &sObjectEventGraphicsInfo_Qz16144,
+    &sObjectEventGraphicsInfo_Qz16174,
+    &sObjectEventGraphicsInfo_Qz16176,
 };
 
 static const struct SpritePalette sQzObjectEventPalettes[] = {
@@ -11388,5 +11555,7 @@ static const struct SpritePalette sQzObjectEventPalettes[] = {
     {gObjectEventPal_Qz187, 0xA0BB},
     {gObjectEventPal_Qz188, 0xA0BC},
     {gObjectEventPal_Qz189, 0xA0BD},
+    {gObjectEventPal_Qz190, 0xA0BE},
+    {gObjectEventPal_Qz191, 0xA0BF},
     {NULL, TAG_NONE},
 };

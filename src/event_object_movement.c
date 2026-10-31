@@ -1978,7 +1978,10 @@ const struct ObjectEventGraphicsInfo *GetObjectEventGraphicsInfo(u16 graphicsId)
     u8 bard;
 
     if (graphicsId >= OBJ_EVENT_GFX_VARS && graphicsId <= OBJ_EVENT_GFX_VAR_F)
-        graphicsId = VarGetObjectEventGraphicsId(graphicsId - OBJ_EVENT_GFX_VARS);
+    {
+        u16 qz = QzVarGraphicsId(graphicsId - OBJ_EVENT_GFX_VARS);   // Moemon Kai: JOHTO / KANTO's
+        graphicsId = qz != 0xFFFF ? qz : VarGetObjectEventGraphicsId(graphicsId - OBJ_EVENT_GFX_VARS);
+    }
 
     if (graphicsId >= OBJ_EVENT_GFX_QZ_FIRST)   // Moemon Kai: Johto / Kanto sprites (16-bit ids)
         return QzObjectEventGraphicsInfo(graphicsId);
@@ -2007,7 +2010,10 @@ const struct ObjectEventGraphicsInfo *GetObjectEventGraphicsInfo(u16 graphicsId)
 static void SetObjectEventDynamicGraphicsId(struct ObjectEvent *objectEvent)
 {
     if (OBJ_GFX_ID(objectEvent) >= OBJ_EVENT_GFX_VARS && OBJ_GFX_ID(objectEvent) <= OBJ_EVENT_GFX_VAR_F)
-        SET_OBJ_GFX_ID(objectEvent, VarGetObjectEventGraphicsId(OBJ_GFX_ID(objectEvent) - OBJ_EVENT_GFX_VARS));
+    {
+        u16 qz = QzVarGraphicsId(OBJ_GFX_ID(objectEvent) - OBJ_EVENT_GFX_VARS);   // Moemon Kai: JOHTO / KANTO's
+        SET_OBJ_GFX_ID(objectEvent, qz != 0xFFFF ? qz : VarGetObjectEventGraphicsId(OBJ_GFX_ID(objectEvent) - OBJ_EVENT_GFX_VARS));
+    }
 }
 
 void SetObjectInvisibility(u8 localId, u8 mapNum, u8 mapGroup, bool8 invisible)

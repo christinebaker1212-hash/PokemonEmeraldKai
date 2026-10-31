@@ -38,15 +38,22 @@ filter sees only 300 files a push, so run release.yml by workflow_dispatch on th
   static encounters, hidden by the rip's Gen 4 cap, are back from their GENERATION on
   (tools/quetzal_port/gen_later_objects.py + gen_static.py; mp_region.c MP_Gen_ObjectHidden; test region_later_mons).
   Rerun both after tools/quetzal_port/import.py.
+- KANTO's FireRed `textcolor` ran its color as a command (2 = end, 3 = return) and cut 41 scripts short (S.S. ANNE
+  captain, OAK's LAB...): ScrCmd_textcolor; check_scripts.py guards it (test qz_textcolor).
+- Graphics variables (VIRIDIAN's old man, FUCHSIA, BIRTH ISLAND, ICE PATH, MELOETTA): event_data.c QzVarGraphicsId,
+  tools/quetzal_rip/var_sprites.py for the sprites only scripts name.
+- MELOETTA's CHANSEY Dance in SEVAULT CANYON (QzSevaultHouseEventEligibility; test qz_meloetta_dance).
+- 1.61.2 released with those.
 - 1.61.1 released (the seal fix, contest, puzzles, credits, GAME RULES gimmick rows).
 
 ## Next steps
-1. Check the 1.61.1 release run finished (GitHub Actions release.yml on the default branch).
+1. Check the 1.61.2 release run finished (GitHub Actions release.yml on the default branch).
 2. Extras still open (task list):
    - Quetzal postgame events, still stubs in src/qz_specials_stub.c (each logs and re-enables the script, so
      none freezes, but the events don't happen): GIOVANNI's story (time travel to the past), dream events,
-     SS ANNE dream / exterior events, SEVAULT house, PALLET postgame, QzTimeTravelChoosePartyMon. Port them from
-     the Quetzal disassembly notes in docs/quetzal/ (move each from the stub file to src/qz_*.c;
+     SS ANNE dream / exterior events, PALLET postgame, QzTimeTravelChoosePartyMon. Port them from
+     the Quetzal ROM (the ROM is not in the repo; a disassembler sketch: capstone over gSpecials at 0x082BEE04,
+     see COOP_NOTES "JOHTO and KANTO") and docs/quetzal/SPECIALS.md (move each from the stub file to src/qz_*.c;
      tools/quetzal_port/import.py regenerates the stub list from what src/qz_*.c defines).
    - HEADBUTT trees, FRLG door animations, 3x2 map borders.
    - Sightseeing walk on first arrival, SAFFRON station, everyone following the host on a region trip,

@@ -1,0 +1,8 @@
+# SEVAULT CANYON's house (KANTO): MELOETTA joins the CHANSEY Dance for a CHANSEY with a LUCKY PUNCH and SING leading five
+# dancers of different families, then stays to be battled
+MODE=1
+GEN=9
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=113:50,6:50,9:50,3:50,25:50,150:50"
+EXPECT_A=("life battle: begin")
+UNEXPECT_A=("[crash]" "not ported")
