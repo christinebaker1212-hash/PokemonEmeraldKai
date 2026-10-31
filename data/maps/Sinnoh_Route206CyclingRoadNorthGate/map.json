@@ -51,7 +51,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "0x0",
-      "flag": "0x3180"
+      "flag": "0x3FFF"
     }
   ],
   "warp_events": [
@@ -98,79 +98,6 @@
       "dest_warp_id": "8"
     }
   ],
-  "coord_events": [
-    {
-      "type": "trigger",
-      "x": 5,
-      "y": 8,
-      "elevation": 0,
-      "var": "0x51E4",
-      "var_value": "0",
-      "script": "0x0"
-    },
-    {
-      "type": "trigger",
-      "x": 6,
-      "y": 8,
-      "elevation": 0,
-      "var": "0x51E4",
-      "var_value": "0",
-      "script": "0x0"
-    },
-    {
-      "type": "trigger",
-      "x": 7,
-      "y": 8,
-      "elevation": 0,
-      "var": "0x51E4",
-      "var_value": "0",
-      "script": "0x0"
-    },
-    {
-      "type": "trigger",
-      "x": 8,
-      "y": 8,
-      "elevation": 0,
-      "var": "0x51E4",
-      "var_value": "0",
-      "script": "0x0"
-    },
-    {
-      "type": "trigger",
-      "x": 5,
-      "y": 6,
-      "elevation": 0,
-      "var": "0x51E4",
-      "var_value": "1",
-      "script": "0x0"
-    },
-    {
-      "type": "trigger",
-      "x": 6,
-      "y": 6,
-      "elevation": 0,
-      "var": "0x51E4",
-      "var_value": "1",
-      "script": "0x0"
-    },
-    {
-      "type": "trigger",
-      "x": 7,
-      "y": 6,
-      "elevation": 0,
-      "var": "0x51E4",
-      "var_value": "1",
-      "script": "0x0"
-    },
-    {
-      "type": "trigger",
-      "x": 8,
-      "y": 6,
-      "elevation": 0,
-      "var": "0x51E4",
-      "var_value": "1",
-      "script": "0x0"
-    }
-  ],
+  "coord_events": [],
   "bg_events": []
 }

@@ -25,7 +25,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "0x0",
-      "flag": "0x31AD"
+      "flag": "0x3FFF"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SCIENTIST_1",
@@ -37,7 +37,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_SandgemTownPokemonResearchLab_EventScript_Person2",
       "flag": "0"
     },
     {
@@ -50,11 +50,11 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_SandgemTownPokemonResearchLab_EventScript_Person3",
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_1",
+      "graphics_id": "OBJ_EVENT_GFX_MAY_NORMAL",
       "x": 7,
       "y": 14,
       "elevation": 3,
@@ -64,10 +64,10 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "0x0",
-      "flag": "0x31AB"
+      "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_1",
+      "graphics_id": "OBJ_EVENT_GFX_GENTLEMAN",
       "x": 7,
       "y": 14,
       "elevation": 3,
@@ -77,7 +77,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "0x0",
-      "flag": "0x31AC"
+      "flag": "0x3FFF"
     }
   ],
   "warp_events": [
@@ -97,7 +97,7 @@
       "y": 2,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
-      "script": "0x0"
+      "script": "Sinnoh_SandgemTownPokemonResearchLab_EventScript_Bg1"
     },
     {
       "type": "sign",
@@ -105,7 +105,7 @@
       "y": 2,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
-      "script": "0x0"
+      "script": "Sinnoh_SandgemTownPokemonResearchLab_EventScript_Bg2"
     },
     {
       "type": "sign",
@@ -113,7 +113,7 @@
       "y": 2,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
-      "script": "0x0"
+      "script": "Sinnoh_SandgemTownPokemonResearchLab_EventScript_Bg3"
     },
     {
       "type": "sign",
@@ -121,7 +121,7 @@
       "y": 2,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
-      "script": "0x0"
+      "script": "Sinnoh_SandgemTownPokemonResearchLab_EventScript_Bg4"
     },
     {
       "type": "sign",
@@ -129,7 +129,7 @@
       "y": 2,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
-      "script": "0x0"
+      "script": "Sinnoh_SandgemTownPokemonResearchLab_EventScript_Bg5"
     },
     {
       "type": "sign",
@@ -137,7 +137,7 @@
       "y": 2,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
-      "script": "0x0"
+      "script": "Sinnoh_SandgemTownPokemonResearchLab_EventScript_Bg6"
     }
   ]
 }

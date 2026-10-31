@@ -31,6 +31,9 @@ GROUP = 'gMapGroup_Sinnoh'                      # the outdoor places
 INDOOR_GROUP = 'gMapGroup_SinnohIndoor%d'       # the buildings, PER_GROUP a group (1, 2, 3...)
 PER_GROUP = 120                 # (a warp keeps its map number as an s8: at most 127 maps a group)
 BLOCKED = 0x0001 | (1 << 10) | (3 << 12)   # metatile 1, collision, elevation 3
+# the tilesets only give behaviors (the 3D engine draws the picture): General's, and this secondary one's counter, PC and
+# TV (tools/sinnoh/build_pack.py BEHAVIOR_METATILE)
+SECONDARY = 'gTileset_Johto_GoldenrodUndergroundEntrances'
 
 # Platinum's day songs -> SINNOH's song slots (tools/kaisong/sinnoh_songs.py; S3D_MapMusic plays <slot>_night by night)
 MUSIC = {
@@ -101,60 +104,76 @@ def places(src, root):
 
 
 
-def entry_script(n):
-    """The script a person, sign or trigger runs: none yet. SINNOH's people and their words are written for this game,
-    not taken from Platinum's scripts (docs/SINNOH_HANDOFF.md step 4): a map's own scripts.inc gives them theirs."""
-    return '0x0'
+def labels(name):
+    """The scripts a map's own scripts.inc has (SINNOH's words are written for this game, not taken from Platinum's
+    scripts: docs/SINNOH_HANDOFF.md step 4). A person, sign or trigger runs <map>_EventScript_Person<n> / _Sign<n> /
+    _Bg<n> / _Trigger<n> when the file has it (n: its number in Platinum's lists, from 1)"""
+    path = 'data/maps/%s/scripts.inc' % name
+    if not os.path.exists(path):
+        return set()
+    return set(re.findall(r'^(\w+)::', open(path, encoding='utf-8').read(), re.M))
 
 
-def own_script(n):
-    return isinstance(n, int) and 1 <= n <= 255
-
-
-def people(p, root):
+def people(p, root, have):
     """The place's people: where they stand, the game's closest sprite (tools/sinnoh/sprites.py), how they move, their
-    hide flag (SINNOH's number, tools/sinnoh/ids.py) and their script entry. Local ids follow Platinum's order (the
-    script pack refers to them so); those with nothing to show stay, invisible, to keep the order."""
+    hide flag (SINNOH's number, tools/sinnoh/ids.py) and their script. Local ids follow Platinum's order; those with
+    nothing to show stay, invisible (FLAG_SINNOH_HIDDEN, 0x3FFF, always set), to keep the order: signs (read as the
+    map's signs), a neighbor's people Platinum loads early, and anyone the story shows or hides (a hide flag) until
+    their script is written."""
     out = []
-    for o in events(root, p['place'])['object_events']:
+    for i, o in enumerate(events(root, p['place'])['object_events']):
+        label = '%s_EventScript_Person%d' % (p['name'], i + 1)
         gfx = sprites.sprite(o['graphics_id'])
-        flag = ids.flag(root, o['hidden_flag']) if isinstance(o.get('hidden_flag'), str) else None
+        hide = o.get('hidden_flag')
+        flag = ids.flag(root, hide) if isinstance(hide, str) and hide.startswith('FLAG_') else None
+        ghost = isinstance(hide, str) and hide.startswith('MAP_HEADER_')
+        if gfx is None or ghost or (flag and label not in have):
+            flag_s = '0x3FFF'
+        else:
+            flag_s = ('0x%X' % flag) if flag else '0'
         out.append({'graphics_id': gfx or 'OBJ_EVENT_GFX_ITEM_BALL', 'x': o['x'] - p['x0'] * 32, 'y': o['z'] - p['z0'] * 32,
                     'elevation': 3, 'movement_type': sprites.movement(o['movement_type']),
                     'movement_range_x': o.get('movement_range_x', 0), 'movement_range_y': o.get('movement_range_z', 0),
                     'trainer_type': 'TRAINER_TYPE_NONE', 'trainer_sight_or_berry_tree_id': '0',
-                    'script': entry_script(o['script']),
-                    # (0x3FFF: FLAG_SINNOH_HIDDEN, always set: nothing to show here)
-                    'flag': ('0x%X' % flag) if flag else ('0x3FFF' if gfx is None else '0')})
+                    'script': label if label in have else '0x0', 'flag': flag_s})
     return out
 
 
-def signs(p, root):
+def signs(p, root, have):
+    """Platinum's signs are people (a signpost, a mailbox, a book): each is a sign where it stands; then its own signs"""
     facing = {'BG_EVENT_DIR_NORTH': 'BG_EVENT_PLAYER_FACING_NORTH', 'BG_EVENT_DIR_SOUTH': 'BG_EVENT_PLAYER_FACING_SOUTH',
               'BG_EVENT_DIR_WEST': 'BG_EVENT_PLAYER_FACING_WEST', 'BG_EVENT_DIR_EAST': 'BG_EVENT_PLAYER_FACING_EAST'}
     out = []
-    for b in events(root, p['place'])['bg_events']:
-        if b.get('type') != 0 or not own_script(b['script']):
-            continue      # (hidden items and shared scripts: later)
+    ev = events(root, p['place'])
+    for i, o in enumerate(ev['object_events']):
+        label = '%s_EventScript_Sign%d' % (p['name'], i + 1)
+        if sprites.sign(o['graphics_id']) and label in have:
+            out.append({'type': 'sign', 'x': o['x'] - p['x0'] * 32, 'y': o['z'] - p['z0'] * 32, 'elevation': 0,
+                        'player_facing_dir': 'BG_EVENT_PLAYER_FACING_ANY', 'script': label})
+    for i, b in enumerate(ev['bg_events']):
+        label = '%s_EventScript_Bg%d' % (p['name'], i + 1)
+        if b.get('type') != 0 or label not in have:
+            continue      # (hidden items: later)
         out.append({'type': 'sign', 'x': b['x'] - p['x0'] * 32, 'y': b['z'] - p['z0'] * 32, 'elevation': 0,
                     'player_facing_dir': facing.get(b['player_facing_dir'], 'BG_EVENT_PLAYER_FACING_ANY'),
-                    'script': entry_script(b['script'])})
+                    'script': label})
     return out
 
 
-def triggers(p, root):
-    """Platinum's coord events cover an area: the game's are one tile each"""
+def triggers(p, root, have):
+    """Platinum's coord events cover an area: the game's are one tile each. Only those with a script of this game's"""
     out = []
-    for c in events(root, p['place'])['coord_events']:
+    for i, c in enumerate(events(root, p['place'])['coord_events']):
+        label = '%s_EventScript_Trigger%d' % (p['name'], i + 1)
         v = ids.var(root, c['var']) if isinstance(c.get('var'), str) else None
-        if v is None or not own_script(c['script']):
+        if v is None or label not in have:
             continue
         for dz in range(max(1, c.get('length', 1))):
             for dx in range(max(1, c.get('width', 1))):
                 out.append({'type': 'trigger', 'x': c['x'] - p['x0'] * 32 + dx, 'y': c['z'] - p['z0'] * 32 + dz,
                             'elevation': 0, 'var': v if isinstance(v, str) else '0x%X' % v,
                             'var_value': str(int(c['value'])) if isinstance(c['value'], (bool, int)) else str(c['value']),
-                            'script': entry_script(c['script'])})
+                            'script': label})
     return out
 
 
@@ -227,7 +246,7 @@ def main():
         open(ldir + '/map.bin', 'wb').write(struct.pack('<H', BLOCKED) * (w * h))
         open(ldir + '/border.bin', 'wb').write(struct.pack('<H', BLOCKED) * 4)
         entry = {'id': layout_id, 'name': p['name'] + '_Layout', 'width': w, 'height': h,
-                 'primary_tileset': 'gTileset_General', 'secondary_tileset': 'gTileset_Petalburg',
+                 'primary_tileset': 'gTileset_General', 'secondary_tileset': SECONDARY,
                  'border_filepath': ldir + '/border.bin', 'blockdata_filepath': ldir + '/map.bin'}
         layouts['layouts'] = [l for l in layouts['layouts'] if l.get('id') != layout_id] + [entry]
         mdir = 'data/maps/' + p['name']
@@ -239,10 +258,11 @@ def main():
              'map_type': p['type'], 'allow_cycling': p['bike'], 'allow_escaping': not p['outdoor'],
              'allow_running': True, 'show_map_name': False, 'battle_scene': 'MAP_BATTLE_SCENE_NORMAL',
              'connections': connections(p, every)}
-        m['object_events'] = people(p, root)
+        have = labels(p['name'])
+        m['object_events'] = people(p, root, have)
         m['warp_events'] = warps(p, map_ids, root)
-        m['coord_events'] = triggers(p, root)
-        m['bg_events'] = signs(p, root)
+        m['coord_events'] = triggers(p, root, have)
+        m['bg_events'] = signs(p, root, have)
         json.dump(m, open(path, 'w'), indent=2)
         open(path, 'a').write('\n')
         if not os.path.exists(mdir + '/scripts.inc'):

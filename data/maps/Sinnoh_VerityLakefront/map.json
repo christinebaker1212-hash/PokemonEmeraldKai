@@ -64,25 +64,6 @@
       "dest_warp_id": "2"
     }
   ],
-  "coord_events": [
-    {
-      "type": "trigger",
-      "x": 48,
-      "y": 44,
-      "elevation": 0,
-      "var": "0x5256",
-      "var_value": "0",
-      "script": "0x0"
-    },
-    {
-      "type": "trigger",
-      "x": 49,
-      "y": 44,
-      "elevation": 0,
-      "var": "0x5256",
-      "var_value": "0",
-      "script": "0x0"
-    }
-  ],
+  "coord_events": [],
   "bg_events": []
 }

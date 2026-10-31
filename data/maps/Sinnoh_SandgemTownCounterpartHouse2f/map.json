@@ -31,7 +31,7 @@
       "y": 3,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
-      "script": "0x0"
+      "script": "Sinnoh_SandgemTownCounterpartHouse2f_EventScript_Bg1"
     }
   ]
 }

@@ -3303,8 +3303,24 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   closest sprite and movement (tools/sinnoh/sprites.py, our own table; things that aren't people stay as hidden
   objects, flag 0x3FFF FLAG_SINNOH_HIDDEN, set when a SINNOH map loads, so the local ids keep Platinum's order), hide
   flags and coord variables as SINNOH numbers (tools/sinnoh/ids.py: flags from 0x3008, variables from 0x5180; only
-  numbers reach the repository). Nobody has a script yet: SINNOH's people and their words are to be written for
-  this game, not translated from Platinum's scripts. `mp hideobjs` hides every object (test_poc's picture).
+  numbers reach the repository). The sprite table uses the game's own sprite when it has one of the same name
+  (YOUNGSTER, LASS, HIKER, TEALA...), then the closest; POKeMON standing in the world get the nearest the game has.
+  Who shows: anyone the story shows or hides (a hide flag in Platinum) stays hidden until their script is written,
+  and so do a neighbor's people Platinum loads early (hidden_flag MAP_HEADER_*). Signs, mailboxes and books are
+  Platinum objects: each becomes a sign event where it stands once it has words. `mp hideobjs` hides every object
+  (test_poc's picture).
+- Words (1.62.x, sinnoh-work): every person / sign / bg / trigger runs <map>_EventScript_Person<n> / _Sign<n> / _Bg<n>
+  / _Trigger<n> when the map's scripts.inc has it (n: its place in Platinum's lists, from 1), else nothing (a trigger
+  without a script isn't placed). tools/sinnoh/words.py holds the words (original writing; '|' a new page; ('nurse',)
+  a healer, ('mart',) a clerk with pokemart 0, the region's badge list as JOHTO's); tools/sinnoh/gen_words.py writes
+  them into the maps' scripts.inc between its markers (wrapped by the font's widths to 200 pixels, straight quotes
+  made curly), then gen_maps.py gives each its script. tools/sinnoh/who.py PLATINUM_DIR PLACE lists who and what is
+  on a place and their numbers (Platinum's script entry names hint at what a spot is: a TV, a fridge). Written so far:
+  TWINLEAF TOWN (and its houses), ROUTE 201, SANDGEM TOWN (houses, MART, MOéMON CENTER, the lab).
+- Tiles: SINNOH's layouts use the General tileset and gTileset_Johto_GoldenrodUndergroundEntrances (only for behaviors:
+  the 3D engine draws the picture): Platinum's table / PC / TV behaviors (0x80 / 0x83 / 0x86, the game's MB_COUNTER /
+  MB_PC / MB_TELEVISION numbers) get that secondary's metatiles (build_pack.py BEHAVIOR_METATILE), so a nurse or clerk
+  behind a counter is talked to across it. Test sinnoh_words.
 - Wild POKéMON: tools/sinnoh/gen_wild.py POKEPLATINUM_DIR puts each kept place's base encounter table (species and
   levels from res/field/encounters) into src/data/wild_encounters.json as gSinnoh_* entries (154 places): grass 12
   slots and surfing 5 as in Emerald; fishing OLD 2 / GOOD 3 / SUPER 5 of Platinum's 5 a rod. Not yet: Platinum's

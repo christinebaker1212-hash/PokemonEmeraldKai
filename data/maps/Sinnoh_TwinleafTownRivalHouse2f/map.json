@@ -25,7 +25,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "0x0",
-      "flag": "0x31D9"
+      "flag": "0x3FFF"
     }
   ],
   "warp_events": [
@@ -45,7 +45,7 @@
       "y": 4,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
-      "script": "0x0"
+      "script": "Sinnoh_TwinleafTownRivalHouse2f_EventScript_Bg1"
     },
     {
       "type": "sign",
@@ -53,7 +53,7 @@
       "y": 4,
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
-      "script": "0x0"
+      "script": "Sinnoh_TwinleafTownRivalHouse2f_EventScript_Bg2"
     }
   ]
 }

@@ -1,0 +1,8 @@
+# SINNOH's people talk (their words written for this game: tools/sinnoh/words.py, gen_words.py): SANDGEM TOWN's
+# MOéMON CENTER nurse is talked to across the counter (Platinum's table tiles as the game's counter: build_pack.py
+# BEHAVIOR_METATILE) and starts her script. Needs the 3D pack (tools/sinnoh/make_pack.sh): without it every tile is
+# blocked and has no counter.
+MODE=1
+TMO=60
+EXPECT_A=("ctx 2 free 0 overworld 1 locked 1 script 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -45,9 +45,12 @@ from places import places, events  # noqa: E402
 
 VERSION = 3
 
-# Platinum behavior -> a General tileset metatile with the same Emerald behavior (tall grass, water, sand, ledges...)
+# Platinum behavior -> a metatile with the same Emerald behavior: the General tileset's (tall grass, water, sand,
+# ledges...) and, from 0x200, the secondary tileset SINNOH's layouts use (gen_maps.py SECONDARY: a counter, so the
+# people behind one are talked to across it, a PC and a TV)
 BEHAVIOR_METATILE = {0x02: 0x00D, 0x03: 0x015, 0x10: 0x02D, 0x15: 0x02C, 0x16: 0x0C8, 0x17: 0x13B, 0x21: 0x11C,
-                     0x38: 0x086, 0x39: 0x085, 0x3B: 0x087}
+                     0x38: 0x086, 0x39: 0x085, 0x3B: 0x087,
+                     0x80: 0x219, 0x83: 0x25B, 0x86: 0x2A9}
 WATER = (0x10, 0x15)
 
 

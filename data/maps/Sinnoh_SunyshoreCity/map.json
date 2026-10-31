@@ -39,7 +39,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_1",
+      "graphics_id": "OBJ_EVENT_GFX_POKEFAN_F",
       "x": 24,
       "y": 46,
       "elevation": 3,
@@ -143,7 +143,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_1",
+      "graphics_id": "OBJ_EVENT_GFX_WOMAN_3",
       "x": 25,
       "y": 5,
       "elevation": 3,
@@ -257,10 +257,10 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "0x0",
-      "flag": "0x3346"
+      "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_1",
+      "graphics_id": "OBJ_EVENT_GFX_MAN_3",
       "x": 13,
       "y": 12,
       "elevation": 3,
@@ -270,7 +270,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "0x0",
-      "flag": "0x31CB"
+      "flag": "0x3FFF"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -296,7 +296,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "0x0",
-      "flag": "0x31CC"
+      "flag": "0x3FFF"
     }
   ],
   "warp_events": [
@@ -385,52 +385,6 @@
       "dest_warp_id": "0"
     }
   ],
-  "coord_events": [
-    {
-      "type": "trigger",
-      "x": 21,
-      "y": 7,
-      "elevation": 0,
-      "var": "0x5244",
-      "var_value": "2",
-      "script": "0x0"
-    },
-    {
-      "type": "trigger",
-      "x": 22,
-      "y": 7,
-      "elevation": 0,
-      "var": "0x5244",
-      "var_value": "2",
-      "script": "0x0"
-    },
-    {
-      "type": "trigger",
-      "x": 23,
-      "y": 7,
-      "elevation": 0,
-      "var": "0x5244",
-      "var_value": "2",
-      "script": "0x0"
-    },
-    {
-      "type": "trigger",
-      "x": 24,
-      "y": 7,
-      "elevation": 0,
-      "var": "0x5244",
-      "var_value": "2",
-      "script": "0x0"
-    },
-    {
-      "type": "trigger",
-      "x": 25,
-      "y": 7,
-      "elevation": 0,
-      "var": "0x5244",
-      "var_value": "2",
-      "script": "0x0"
-    }
-  ],
+  "coord_events": [],
   "bg_events": []
 }
