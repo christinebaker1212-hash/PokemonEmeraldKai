@@ -224,6 +224,11 @@ u16 QzBugContestJudge(void)
             if (sBug.board[i].name == gSaveBlock2Ptr->playerName)
                 tmp = sBug.board[i], sBug.board[i] = sBug.board[3], sBug.board[3] = tmp;
     MPNet_Log("bug contest: judged, player %d (score %d)", sBug.playerPlace, sBug.board[sBug.playerPlace - 1].score);
+    if (sBug.playerPlace == 1)
+    {
+        void MP_Achieve_Unlock(const char *id);
+        MP_Achieve_Unlock("jbugwin");   // Moemon Kai: BUG-CATCHING CHAMP (mp_achieve.c)
+    }
     return gSpecialVar_Result = sBug.playerPlace;
 }
 

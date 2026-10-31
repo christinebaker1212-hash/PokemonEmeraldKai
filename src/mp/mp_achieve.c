@@ -51,7 +51,8 @@ enum {
 enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, C_CARDS, C_YUGIOH, C_TRIAD, C_DANCE, C_JOHTO, C_KANTO, NUM_ACH_CATS };
 static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "BATTLE", "CATCHING", "HOENN", "TOGETHER", "EXTRAS", "CARDS", "YU-GI-OH!", "TRIPLE TRIAD", "DANCE", "JOHTO", "KANTO"};
 
-enum { FL_HMS, FL_RODS, FL_LANDMARKS, FL_SILVER, FL_GOLD, FL_JOHTO_BEASTS, FL_KANTO_BIRDS, FL_JOHTO_BADGES, FL_KANTO_BADGES };
+enum { FL_HMS, FL_RODS, FL_LANDMARKS, FL_SILVER, FL_GOLD, FL_JOHTO_BEASTS, FL_KANTO_BIRDS, FL_JOHTO_BADGES, FL_KANTO_BADGES,
+       FL_ALPH, FL_ARCEUS_TRIALS };
 enum { DL_STARTERS, DL_FOSSILS, DL_LEGENDS };
 
 struct Achievement
@@ -95,10 +96,17 @@ static const u16 sFlagsJohtoBeasts[] = {0x11EB, 0x11EE, 0x11F1};   // RAIKOU, EN
 static const u16 sFlagsKantoBirds[] = {0x2133, 0x213B, 0x2138};    // ARTICUNO, ZAPDOS, MOLTRES
 static const u16 sFlagsJohtoBadges[] = {0x11B2, 0x11B3, 0x11B4, 0x11B5, 0x11B6, 0x11B7, 0x11B8, 0x11B9};
 static const u16 sFlagsKantoBadges[] = {0x2100, 0x2101, 0x2102, 0x2103, 0x2104, 0x2105, 0x2106, 0x2107};
+// The RUINS OF ALPH's four sliding puzzles solved (KABUTO, HO-OH, OMANYTE, AERODACTYL chambers)
+static const u16 sFlagsAlph[] = {0x1076, 0x1077, 0x1078, 0x1079};
+// KANTO's 17 ARCEUS trials done (qz_static_encounters.h: the ARCEUS entries' done flags, not ALTERING CAVE's 0x2E16)
+static const u16 sFlagsArceusTrials[] = {0x2E19, 0x2E1B, 0x2E1D, 0x2E1F, 0x2E21, 0x2E23, 0x2E25, 0x2E27, 0x2E29, 0x2E2B,
+                                         0x2E2D, 0x2E2F, 0x2E31, 0x2E33, 0x2E35, 0x2E37, 0x2E39};
 static const struct { const u16 *list; u8 count; } sFlagLists[] = {
     [FL_JOHTO_BEASTS] = {sFlagsJohtoBeasts, ARRAY_COUNT(sFlagsJohtoBeasts)},
     [FL_KANTO_BIRDS] = {sFlagsKantoBirds, ARRAY_COUNT(sFlagsKantoBirds)},
     [FL_JOHTO_BADGES] = {sFlagsJohtoBadges, ARRAY_COUNT(sFlagsJohtoBadges)},
+    [FL_ALPH] = {sFlagsAlph, ARRAY_COUNT(sFlagsAlph)},
+    [FL_ARCEUS_TRIALS] = {sFlagsArceusTrials, ARRAY_COUNT(sFlagsArceusTrials)},
     [FL_KANTO_BADGES] = {sFlagsKantoBadges, ARRAY_COUNT(sFlagsKantoBadges)},
     [FL_HMS] = {sFlagsHMs, ARRAY_COUNT(sFlagsHMs)},
     [FL_RODS] = {sFlagsRods, ARRAY_COUNT(sFlagsRods)},
@@ -421,6 +429,10 @@ static const struct Achievement sAch[] = {
     {"jlugia", "SILVER WING", "Face LUGIA in JOHTO.", AK_FLAG, 0x11F4, 1, 1, C_JOHTO},
     {"jhooh", "RAINBOW WING", "Face HO-OH in JOHTO.", AK_FLAG, 0x11F7, 1, 1, C_JOHTO},
     {"jcelebi", "VOICE OF THE FOREST", "Face CELEBI in JOHTO.", AK_FLAG, 0x11FA, 1, 1, C_JOHTO},
+    {"jalph", "ANCIENT PUZZLES", "Solve all four RUINS OF ALPH puzzles.", AK_FLAGS, FL_ALPH, 4, 1, C_JOHTO},
+    {"jbugwin", "BUG-CATCHING CHAMP", "Win first place in the Bug-Catching Contest.", AK_EVENT, 0, 1, 1, C_JOHTO},
+    {"jmeloetta", "THE MELODY", "Face MELOETTA in JOHTO.", AK_FLAG, 0x1263, 1, 1, C_JOHTO},
+    {"jdarkrai", "A BAD DREAM", "Face DARKRAI in JOHTO.", AK_FLAG, 0x1239, 1, 1, C_JOHTO},
     {"kstart", "PALLET BEGINNINGS", "Get your first POK~MON from PROF. OAK.", AK_FLAG, 0x21E8, 1, 0, C_KANTO},
     {"kbadge1", "BOULDER BADGE", "Beat BROCK in PEWTER CITY.", AK_FLAG, 0x2100, 1, 0, C_KANTO},
     {"kbadge2", "CASCADE BADGE", "Beat MISTY in CERULEAN CITY.", AK_FLAG, 0x2101, 1, 0, C_KANTO},
@@ -435,6 +447,10 @@ static const struct Achievement sAch[] = {
     {"kbirds", "LEGENDARY BIRDS", "Face ARTICUNO, ZAPDOS and MOLTRES in KANTO.", AK_FLAGS, FL_KANTO_BIRDS, 3, 2, C_KANTO},
     {"kmewtwo", "GENETIC MASTERPIECE", "Face MEWTWO in KANTO.", AK_FLAG, 0x2137, 1, 2, C_KANTO},
     {"kmew", "UNDER THE TRUCK", "Find MEW in KANTO.", AK_FLAG, 0x292F, 1, 2, C_KANTO},
+    {"kmeloetta", "CHANSEY DANCE", "Face MELOETTA in KANTO.", AK_FLAG, 0x2922, 1, 1, C_KANTO},
+    {"kdarkrai", "NIGHTMARE AT SEA", "Face DARKRAI in KANTO.", AK_FLAG, 0x2929, 1, 1, C_KANTO},
+    {"karceus", "ARCEUS TRIALS", "Complete all seventeen ARCEUS trials in KANTO.", AK_FLAGS, FL_ARCEUS_TRIALS, 17, 2, C_KANTO},
+    {"karceusn", "THE ORIGINAL ONE", "Face the Normal-type ARCEUS in ALTERING CAVE.", AK_FLAG, 0x2E16, 1, 2, C_KANTO},
 };
 
 #define NUM_ACH ARRAY_COUNT(sAch)

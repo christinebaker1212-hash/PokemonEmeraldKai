@@ -892,6 +892,23 @@ match. sdl2.c BackUpSaveFile rotates "<save>.bakN.bag" with the backups, and loa
   and erases the file's "pokeemerald.sav*" files (SaveSlots_Erase; the file in use restarts empty). Harness
   condition "mainmenu". Test tools/test/save_slots.sh (a scratch game folder: the move, the switch, the erase).
 
+## KANTO's rival battles, regional music, the ARCEUS trials (1.61.6)
+- Quetzal's trainerbattle 13 (qz_trainerbattle_13: BLUE in OAK's lab and on ROUTE 22) is FireRed's
+  TRAINER_BATTLE_EARLY_RIVAL: trainer, flags (1 heal after), the text when the player wins, the text when the rival
+  wins. battle_setup.c sQzEarlyRivalBattleParams / EventScript_QzEarlyRivalBattle: no intro, the script goes on
+  after the battle; a loss shows the rival's text (battle_main.c -> BattleScript_LocalBattleLostPrintTrainersWinText,
+  battle_message.c B_TXT_TRAINER1_WIN_TEXT) and doesn't white out (CB2_EndTrainerBattle). Tests kanto_rival_win /
+  kanto_rival_lose.
+- Music: pokemon.c GetBattleBGM in JOHTO / KANTO -> MpRegionBattleBGM (MUS_RG_VS_WILD / TRAINER / GYM_LEADER for
+  leaders and the ELITE FOUR / CHAMPION); Quetzal trainers' FireRed encounter music ids (0-13) play FireRed's
+  encounter themes (PlayTrainerEncounterMusic), 14-23 JOHTO's. BattleSetup_StartLegendaryBattle's default was
+  GROUDON's battle: now MUS_RG_VS_LEGEND (MEWTWO MUS_RG_VS_MEWTWO, LUGIA / HO-OH JOHTO's own in JOHTO). Tests
+  battle_music_hoenn / _johto.
+- qz_specials.c ArceusTrialWaits: KANTO's 17 ARCEUS trial objects stay hidden until FLAG_QZ_0x2E13 (ARCEUS's visit
+  to the PALLET bedroom), ALTERING CAVE's Normal-type one (0x2E15) until the 17 are done. Test arceus_trials.
+- Achievements: jalph (FL_ALPH 0x1076-0x1079), jbugwin (qz_bugcontest.c, first place), jmeloetta / jdarkrai /
+  kmeloetta / kdarkrai (the statics' done flags), karceus (FL_ARCEUS_TRIALS: the 17 done flags), karceusn (0x2E16).
+
 ## Battle intro diagnostics (1.61.5)
 - src/mp/mp_battlediag.c, on with AllowSmallTweaks = 1 (or MOEMON_BATTLEDIAG=1). battle_main.c BattleMainCB1 names
   the intro step (MpIntroStage: GET MONS DATA ... EVENTS BEFORE FIRST TURN, NULL at the action menu); sound.c

@@ -3,5 +3,5 @@
 MODE=1
 TMO=60
 ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=6:50"
-EXPECT_A=("achievement: jbadge1" "achievement: kbadge1" "achievement: jbeasts" " JOHTO " " KANTO ")
-UNEXPECT_A=("[crash]" "achievement: kbirds" "achievement: champion3")
+EXPECT_A=("achievement: jalph" "achievement: kdarkrai" "achievement: jbadge1" "achievement: kbadge1" "achievement: jbeasts" " JOHTO " " KANTO ")
+UNEXPECT_A=("[crash]" "achievement: karceus" "achievement: jbugwin" "achievement: kbirds" "achievement: champion3")
