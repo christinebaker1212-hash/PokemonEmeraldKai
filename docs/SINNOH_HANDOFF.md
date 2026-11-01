@@ -3,6 +3,14 @@
 Queued after the 1.61.6 release and the KANTO / JOHTO sweep (the user's plan, 2026-10-31).
 
 ## Where things stand
+- 2026-11-01, the latest: SINNOH is complete as planned. All eight gyms' moving puzzles (PASTORIA's water, SUNYSHORE's
+  gears, CANALAVE's platforms, ETERNA's clock, VEILSTONE's bags, SNOWPOINT's sloped ice, HEARTHOME's dark rooms), the
+  field obstacles (CUT / ROCK SMASH / STRENGTH with SINNOH's own HM badges), the story's people coming and going with it
+  (tools/sinnoh/story_people.py: 256 hide flags), the DISTORTION WORLD (a scene in GIRATINA's arena: CYRUS, GIRATINA,
+  CYNTHIA), fossils at the MINING MUSEUM, and the BATTLE FRONTIER's five facilities (TOWER, FACTORY through the game's
+  own halls, HALL, CASTLE, ARCADE). Left out on purpose: the Underground, Super Contests, Wi-Fi, the VILLA, the Frontier
+  Brains' and the HALL MATRON's teams, the DISTORTION WORLD's walking on walls. What's next is the release: merge
+  sinnoh-work into the main branch, the Windows build, a version and its notes (the user's call).
 - Proof of concept done (2026-10-31, branch sinnoh-work pushed to claude/exciting-sagan-17lq9j): TWINLEAF TOWN and
   ROUTE 201 drawn by the new 3D engine from the user's ROM, walked with Platinum's collision, the player and every field
   sprite standing in the scene (hidden by trees and roofs in front of them), lit by the area's lights for the hour.

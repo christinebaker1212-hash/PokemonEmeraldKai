@@ -3,7 +3,11 @@
 Native PC build of Moemon Emerald Kai v1.0 with online 4-player co-op and PvP.
 Based on Kurausukun's `pc_port` branch of pret/pokeemerald (commit 1165825), SDL2.
 
-SINNOH (Pokémon Platinum as a third region in a new 3D engine, the PÓKETCH): in progress, `docs/SINNOH_HANDOFF.md`. The 3D
+SINNOH (Pokémon Platinum as a third region in a new 3D engine, the PÓKETCH): playable start to finish, `docs/SINNOH_HANDOFF.md`;
+everything per feature in COOP_NOTES (its SINNOH sections: story people tools/sinnoh/story_people.py, the gyms that move
+src/sinnoh/s3d_gyms.c, the DISTORTION WORLD scene, the BATTLE FRONTIER's five: TOWER, FACTORY (the game's own halls,
+shared maps), HALL s3d_hall.c, CASTLE / ARCADE s3d_frontier.c). Left out: the Underground, Super Contests, Wi-Fi, the
+VILLA, the Frontier Brains' and HALL MATRON's teams, the DISTORTION WORLD's walk on walls (a scene in GIRATINA's arena). The 3D
 engine (src/sinnoh/s3d.c, include/s3d.h) draws Platinum's own map models from sinnoh/platinum3d.pak, built from
 pret/pokeplatinum at a pinned commit by tools/sinnoh/make_pack.sh (run it before playing SINNOH from a build; the release
 runs it and ships the pack; never committed: sinnoh/ is ignored; no ROM needed); TWINLEAF TOWN and ROUTE 201 (group 40)
