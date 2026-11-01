@@ -3348,6 +3348,9 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   0x3320 + n) and its TM (flag 0x3770 + n: ROARK TM76, GARDENIA TM86, FANTINA TM65, MAYLENE TM60, WAKE TM55,
   BYRON TM91, CANDICE TM72, VOLKNER TM57). Their words are written for this game; badges promise nothing about
   HMs (this game has no HM restrictions). Test sinnoh_gym (MOEMON_DEBUG_REGION=3: levels are per region).
+  Co-op: SINNOH's trainers can be joined (IS_REAL_TRAINER knows their range), and the leaders are in mp_coop.c
+  sQzGymLeaders (badge FLAG_SINNOH_BADGE01 + n, the gym script's _Defeated), so a friend who joins gets the badge
+  and the TM too. Test sinnoh_coop_gym (a test that starts in SINNOH begins in TWINLEAF's house: warp after start).
 - The LEAGUE (words.py ELITE / CHAMPION, the ('e4', n) and ('champion',) kinds): its rooms connect through their own
   elevator rooms (those have doors). Each of the ELITE FOUR battles when talked to; the CHAMPION waits until all four
   are beaten (their trainer flags), then battles; the win runs Quetzal_EventScript_835F6E4 (the region cleared, a

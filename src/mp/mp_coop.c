@@ -161,6 +161,15 @@ static const u8 *sPendingScript;   // a gym leader's badge script to run for the
 
 // Moemon Kai: JOHTO's and KANTO's gym leaders (their usual and their alternate team), the badge and the script
 // that runs after their first battle (where their own script goes on after the battle command)
+// SINNOH's (tools/sinnoh/words.py GYMS: the badge is FLAG_SINNOH_BADGE01 + n; gen_words.py gym()'s _Defeated)
+extern const u8 Sinnoh_OreburghCityGym_EventScript_Person1_Defeated[];
+extern const u8 Sinnoh_EternaCityGym_EventScript_Person2_Defeated[];
+extern const u8 Sinnoh_HearthomeCityGymLeaderRoom_EventScript_Person1_Defeated[];
+extern const u8 Sinnoh_VeilstoneCityGym_EventScript_Person1_Defeated[];
+extern const u8 Sinnoh_PastoriaCityGym_EventScript_Person1_Defeated[];
+extern const u8 Sinnoh_CanalaveCityGym_EventScript_Person5_Defeated[];
+extern const u8 Sinnoh_SnowpointCityGym_EventScript_Person1_Defeated[];
+extern const u8 Sinnoh_SunyshoreCityGymRoom3_EventScript_Person1_Defeated[];
 extern const u8 Johto_VioletGym_EventScript_83FF117[];
 extern const u8 Johto_AzaleaGym_EventScript_83C4C1A[];
 extern const u8 Johto_GoldenrodGym_EventScript_83D5919[];
@@ -203,6 +212,14 @@ static const struct { u16 trainer, badge; const u8 *script; } sQzGymLeaders[] =
     {TRAINER_QZ_8612, FLAG_QZ_0x2105, Kanto_SaffronCity_Gym_EventScript_841EE9D},
     {TRAINER_QZ_8611, FLAG_QZ_0x2106, Kanto_CinnabarIsland_Gym_EventScript_841DC0C},
     {TRAINER_QZ_8542, FLAG_QZ_0x2107, Kanto_ViridianCity_Gym_EventScript_8419EEB},
+    {TRAINER_SINNOH_LEADER_ROARK, FLAG_SINNOH_BADGE01 + 0, Sinnoh_OreburghCityGym_EventScript_Person1_Defeated},
+    {TRAINER_SINNOH_LEADER_GARDENIA, FLAG_SINNOH_BADGE01 + 1, Sinnoh_EternaCityGym_EventScript_Person2_Defeated},
+    {TRAINER_SINNOH_LEADER_FANTINA, FLAG_SINNOH_BADGE01 + 2, Sinnoh_HearthomeCityGymLeaderRoom_EventScript_Person1_Defeated},
+    {TRAINER_SINNOH_LEADER_MAYLENE, FLAG_SINNOH_BADGE01 + 3, Sinnoh_VeilstoneCityGym_EventScript_Person1_Defeated},
+    {TRAINER_SINNOH_LEADER_WAKE, FLAG_SINNOH_BADGE01 + 4, Sinnoh_PastoriaCityGym_EventScript_Person1_Defeated},
+    {TRAINER_SINNOH_LEADER_BYRON, FLAG_SINNOH_BADGE01 + 5, Sinnoh_CanalaveCityGym_EventScript_Person5_Defeated},
+    {TRAINER_SINNOH_LEADER_CANDICE, FLAG_SINNOH_BADGE01 + 6, Sinnoh_SnowpointCityGym_EventScript_Person1_Defeated},
+    {TRAINER_SINNOH_LEADER_VOLKNER, FLAG_SINNOH_BADGE01 + 7, Sinnoh_SunyshoreCityGymRoom3_EventScript_Person1_Defeated},
 };
 
 static u8 QzGymLeader(u16 trainerId)

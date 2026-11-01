@@ -1,0 +1,12 @@
+# SINNOH's gym leaders can be joined and share their badge (mp_coop.c sQzGymLeaders' SINNOH rows): ALICE challenges
+# ROARK (OREBURGH GYM), BOB asks to join and she lets him in; ALICE only knows GROWL, BOB's WATER GUN wins it. Both
+# get the COAL BADGE (flag 0x3320 = 13088): ALICE by her own script, BOB by his copy of the leader's "you won" one.
+# Needs the 3D pack.
+MODE=2
+TMO=500
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=283:46"
+EXPECT_A=("join: our player said yes" "join: battle now 2 seats (was 1)" "join: everyone is in" "co-op: battle over, outcome 1" "flag 13088 = 1")
+EXPECT_B=("co-op: player 1 is battling trainer 2067" "join: we're in the battle (seat 1 of 2)" "co-op: battle over, outcome 1" "flag 13088 = 1")
+UNEXPECT_A=("crash" "BAD EGG" "important one")
+UNEXPECT_B=("crash" "BAD EGG" "important one" "can't be joined" "Couldn't join")
