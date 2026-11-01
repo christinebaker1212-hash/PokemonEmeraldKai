@@ -14,6 +14,7 @@ engine**, lets you pick and tune the instruments, and exports the song in a form
 | GBS (+ .m3u) | Game Boy | Game_Music_Emu | the four channels' registers; they become the game's own Game Boy voices (the GBA has the same channels) |
 | 2SF, mini2sf | Nintendo DS | vio2sf's DeSmuME | the 16 SPU channels: sample (PCM8/16, IMA-ADPCM), timer, volume, pan; PSG squares and noise |
 | SPC | Super Nintendo | Game_Music_Emu (SPC700 + S-DSP) | the S-DSP's 8 voices: each key-on, the sample its SRCN names in the directory (start, loop), pitch, envelope and volume, echo; samples decoded from the sound RAM as the DSP decodes them (BRR) |
+| VGM, VGZ | Sega Genesis / Mega Drive | Game_Music_Emu (Nuked-OPN2 YM2612, SN76489) | the log of register writes, read directly: the YM2612's 6 FM channels (key-ons, frequency, the 4-operator patch: each patch becomes an instrument, the patch alone played by Nuked-OPN2 at middle C and looped over whole periods; the carriers' total levels as the volume, a key-off fading at their release rate), the DAC's drum hits cut from the PCM data bank, the SN76489's squares and noise as the GBA's Game Boy channels (levels as the Genesis mixes them) |
 | GSF, minigsf | Game Boy Advance | VBA-M (in_gsf) | games on MP2K (the game's own engine): the song and voicegroup read from the ROM, unchanged |
 | ISH + ISD, DSP | GameCube (Pokemon Colosseum, XD) | decoded here (DSP-ADPCM) | streamed recordings: no notes to read, so the song is the recording (see below) |
 
