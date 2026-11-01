@@ -3366,7 +3366,8 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   src/data/sinnoh_modern.h, HOENN's rules with generations 5-9 (Platinum's tables are Gen 4 already; GEN 3 and 4 show
   them as they are), and a slot whose POKéMON is wild nowhere else in SINNOH stays. mp_region.c ModernWild /
   HoennModernTeam take the table and region. Test sinnoh_gens.
-- Gym leaders (tools/sinnoh/words.py GYMS, the ('gym', n) kind; gen_words.py gym()): the eight leaders, the ELITE FOUR
+- Gym leaders (tools/sinnoh/words.py GYMS in Platinum's order: MAYLENE 3rd, WAKE 4th, FANTINA 5th, CANALAVE's BYRON 6th;
+  the ('gym', n) kind; gen_words.py gym()): the eight leaders, the ELITE FOUR
   and the CHAMPION are trainers too (gen_trainers.py SPECIAL, ids after the route trainers; pictures the closest the
   game has). A leader battles (NO_MUSIC: SINNOH's gym leader theme plays by class), then gives the badge (flag
   0x3320 + n) and its TM (flag 0x3770 + n: ROARK TM76, GARDENIA TM86, FANTINA TM65, MAYLENE TM60, WAKE TM55,
@@ -3424,7 +3425,10 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   the opponent and link opponent controllers after the stand-in's sprite is made, loads Platinum's colors into its
   palette slot and draws the 80x80 picture whole with mpBig (feet at the game's height). Breakable rocks, CUT trees,
   boulders and item balls keep the game's own (their animations); the big legendaries and the grunts in a row aren't
-  taken yet. tools/sinnoh/png8.py reads the PNGs without Pillow. Test sinnoh_pics.
+  taken yet. tools/sinnoh/png8.py reads the PNGs without Pillow. Test sinnoh_pics. Anything that goes by a person's
+  look (the card games' who-plays-what, tcg_field.c Tcg_LookGfx and sPicOfGfx) reads a Platinum sprite as its stand-in;
+  a trainer's card challenge screen shows Platinum's picture cut to 64x64 (S3D_Gfx_TrainerPicPixels; test
+  sinnoh_card_pic).
 - Wild POKéMON: tools/sinnoh/gen_wild.py POKEPLATINUM_DIR puts each kept place's base encounter table (species and
   levels from res/field/encounters) into src/data/wild_encounters.json as gSinnoh_* entries (154 places): grass 12
   slots and surfing 5 as in Emerald; fishing OLD 2 / GOOD 3 / SUPER 5 of Platinum's 5 a rod. Not yet: Platinum's

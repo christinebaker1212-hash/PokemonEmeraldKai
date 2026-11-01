@@ -131,6 +131,23 @@ void S3D_Gfx_TrainerPic(struct Sprite *sprite, u16 trainerId, u16 standIn)
     printf("[test] sinnoh battle picture: trainer %d picture %d\n", trainerId, pic);
 }
 
+// A SINNOH trainer's Platinum picture for other screens (the card games' challenge screen): 80x80, rows of 40 bytes
+// (4 bits a pixel, the low nibble first), and its 16 colors; FALSE: none (another trainer, or no pack)
+bool8 S3D_Gfx_TrainerPicPixels(u16 trainerId, const u8 **pixels, const u16 **pal)
+{
+    u8 pic;
+    if (trainerId < FIRST_SINNOH_TRAINER || trainerId >= FIRST_SINNOH_TRAINER + SINNOH_TRAINERS_COUNT)
+        return FALSE;
+    pic = sSinnohTrainerPics[trainerId - FIRST_SINNOH_TRAINER];
+    if (!sGfx.tried)
+        Load();
+    if (!sGfx.ok || pic >= SINNOH_PIC_COUNT)
+        return FALSE;
+    *pixels = sGfx.pics[pic].big.frame + 8;
+    *pal = sGfx.pics[pic].pal;
+    return TRUE;
+}
+
 // The battle's opponent trainer picture for BATTLER (battle controllers): the trainer it belongs to
 void S3D_Gfx_BattleTrainerPic(struct Sprite *sprite, u8 battler, u16 standIn)
 {

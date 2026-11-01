@@ -1,0 +1,9 @@
+# SINNOH's people play cards by their sprite's look-alike (tcg_field.c Tcg_LookGfx), and a trainer's card challenge
+# screen shows Platinum's battle picture (tcg_field.c CaptureChallengePic,
+# s3d_gfx.c S3D_Gfx_TrainerPicPixels): ROUTE 202's YOUNGSTER TRISTAN, beaten, is asked with the CARD CASE. Needs both
+# packs. Shot c_challenge.png.
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=283:60"
+EXPECT_A=("challenge picture: SINNOH trainer")
+UNEXPECT_A=("[crash]")

@@ -30,9 +30,9 @@ WORDS = {
     'Sinnoh_SunyshoreCityGymRoom3': {'Person1': ('gym', 7)},
     'Sinnoh_SnowpointCityGym': {'Person1': ('gym', 6)},
     'Sinnoh_CanalaveCityGym': {'Person5': ('gym', 5)},
-    'Sinnoh_PastoriaCityGym': {'Person1': ('gym', 4)},
-    'Sinnoh_VeilstoneCityGym': {'Person1': ('gym', 3)},
-    'Sinnoh_HearthomeCityGymLeaderRoom': {'Person1': ('gym', 2)},
+    'Sinnoh_PastoriaCityGym': {'Person1': ('gym', 3)},
+    'Sinnoh_VeilstoneCityGym': {'Person1': ('gym', 2)},
+    'Sinnoh_HearthomeCityGymLeaderRoom': {'Person1': ('gym', 4)},
     'Sinnoh_EternaCityGym': {'Person2': ('gym', 1)},
     'Sinnoh_OreburghCityGym': {'Person1': ('gym', 0)},
     # ------------------------------------------------------------------ TWINLEAF TOWN
@@ -177,7 +177,7 @@ WORDS = {
 
 
 # The gym leaders, in badge order: (trainer, badge, TM, intro, defeat, badge info, TM words, after)
-GYMS = [
+GYMS = [  # in Platinum's order: the n-th is the (n + 1)-th badge (CANALAVE's BYRON the 6th)
     ('TRAINER_SINNOH_LEADER_ROARK', 'COAL BADGE', 'ITEM_TM76',
      "Welcome to the OREBURGH GYM! I'm ROARK, the LEADER here.|I spend my mornings in the mine and my afternoons in "
      "here. Both make you tough. Let's see how tough you are!",
@@ -192,12 +192,6 @@ GYMS = [
      "The FOREST BADGE! It's shaped like a leaf from the oldest tree in ETERNA FOREST.",
      "And this is GRASS KNOT. The heavier your foe, the harder it trips. Big MOéMON hate it!",
      "Have you walked through ETERNA FOREST? It's spooky, but I love it. The trees there are older than the city."),
-    ('TRAINER_SINNOH_LEADER_FANTINA', 'RELIC BADGE', 'ITEM_TM65',
-     "Bonjour! I am FANTINA. My GHOST MOéMON and I, we dance in the dark!|Tonight you will dance with us. Allez!",
-     "Ah... the music stops.",
-     "The RELIC BADGE is yours. It is very old, and very lovely. Like my GHOSTS.",
-     "Take this as well. SHADOW CLAW: a quick slash from the shadows that finds the weak spot.",
-     "You dance well in battle. Come to the CONTEST HALL some time, yes? We dance there too."),
     ('TRAINER_SINNOH_LEADER_MAYLENE', 'COBBLE BADGE', 'ITEM_TM60',
      "I'm MAYLENE. I've trained here since I was small.|I won't hold anything back. If you're ready, so am I!",
      "I'm not strong enough yet...",
@@ -210,6 +204,12 @@ GYMS = [
      "The FEN BADGE! Shaped like a raindrop! It's slippery, so don't drop it in the marsh! WAHAHA!",
      "And this! BRINE: it hits hardest when your foe is already half worn out. Like me right now!",
      "Wahaha! What a match! I'm going to the GREAT MARSH to cool off. Come splash around some time!"),
+    ('TRAINER_SINNOH_LEADER_FANTINA', 'RELIC BADGE', 'ITEM_TM65',
+     "Bonjour! I am FANTINA. My GHOST MOéMON and I, we dance in the dark!|Tonight you will dance with us. Allez!",
+     "Ah... the music stops.",
+     "The RELIC BADGE is yours. It is very old, and very lovely. Like my GHOSTS.",
+     "Take this as well. SHADOW CLAW: a quick slash from the shadows that finds the weak spot.",
+     "You dance well in battle. Come to the CONTEST HALL some time, yes? We dance there too."),
     ('TRAINER_SINNOH_LEADER_BYRON', 'MINE BADGE', 'ITEM_TM91',
      "So you're the one who's been climbing through SINNOH! I'm BYRON. My STEEL MOéMON are as hard as the mountains "
      "I dig in.|Show me what you're made of!",

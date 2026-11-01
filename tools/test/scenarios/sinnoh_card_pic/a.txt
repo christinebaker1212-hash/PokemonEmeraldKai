@@ -1,0 +1,22 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp cards starter 0
+mp register 399
+mp setflag 0x390E
+mp warp 40,20,6,14
+wait 200
+mp face up
+wait 4
+press A 2
+wait 60
+rendershot c_talk
+mash B 6 20
+wait 30
+press SELECT 2
+wait 120
+rendershot c_ask
+press A 2
+wait 90
+rendershot c_challenge
+quit

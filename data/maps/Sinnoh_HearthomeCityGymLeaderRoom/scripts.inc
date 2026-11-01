@@ -4,7 +4,7 @@ Sinnoh_HearthomeCityGymLeaderRoom_MapScripts::
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_HearthomeCityGymLeaderRoom_EventScript_Person1::
 	trainerbattle_single TRAINER_SINNOH_LEADER_FANTINA, Sinnoh_HearthomeCityGymLeaderRoom_Text_Person1Intro, Sinnoh_HearthomeCityGymLeaderRoom_Text_Person1Defeat, Sinnoh_HearthomeCityGymLeaderRoom_EventScript_Person1_Defeated, NO_MUSIC
-	goto_if_unset 0x3772, Sinnoh_HearthomeCityGymLeaderRoom_EventScript_Person1_GiveTm
+	goto_if_unset 0x3774, Sinnoh_HearthomeCityGymLeaderRoom_EventScript_Person1_GiveTm
 	msgbox Sinnoh_HearthomeCityGymLeaderRoom_Text_Person1After, MSGBOX_DEFAULT
 	release
 	end
@@ -14,14 +14,14 @@ Sinnoh_HearthomeCityGymLeaderRoom_EventScript_Person1_Defeated::
 	waitmessage
 	call Common_EventScript_PlayGymBadgeFanfare
 	msgbox Sinnoh_HearthomeCityGymLeaderRoom_Text_Person1BadgeInfo, MSGBOX_DEFAULT
-	setflag 0x3322
+	setflag 0x3324
 	goto Sinnoh_HearthomeCityGymLeaderRoom_EventScript_Person1_GiveTm
 	end
 
 Sinnoh_HearthomeCityGymLeaderRoom_EventScript_Person1_GiveTm::
 	giveitem ITEM_TM65
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3772
+	setflag 0x3774
 	msgbox Sinnoh_HearthomeCityGymLeaderRoom_Text_Person1Tm, MSGBOX_DEFAULT
 	release
 	end

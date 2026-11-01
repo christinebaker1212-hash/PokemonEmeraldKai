@@ -500,12 +500,17 @@ static const u8 *Hello(struct TcgOpponent *o, const u8 *usual, u32 h)
 {
     return CardTable_Hello(o->key, QUOTE_GAME_POKEMON, o->quoteWho[0] ? o->quoteWho : NULL, o->voice, usual, h);
 }
-// Moemon Kai: Johto's and Kanto's people by look (their sprites' Kai look-alikes: tools/quetzal_port/gen_cardlooks.py)
+// Moemon Kai: Johto's and Kanto's people by look (their sprites' Kai look-alikes: tools/quetzal_port/gen_cardlooks.py);
+// SINNOH's by their sprites' stand-ins (tools/sinnoh/build_gfx.py --names)
 #include "../data/qz_card_looks.h"
+#include "constants/sinnoh_gfx.h"
+#include "../data/sinnoh_gfx_standins.h"
 unsigned Tcg_LookGfx(const struct ObjectEvent *npc)
 {
     u16 g = OBJ_GFX_ID(npc);
     u32 i;
+    if (g >= OBJ_EVENT_GFX_SINNOH_FIRST && g < OBJ_EVENT_GFX_SINNOH_FIRST + SINNOH_SPRITE_COUNT)
+        return sSinnohStandIns[g - OBJ_EVENT_GFX_SINNOH_FIRST];   // Moemon Kai: SINNOH's people by their look-alike
     for (i = 0; i < ARRAY_COUNT(sQzSpecials); i++)
         if (sQzSpecials[i].gfx == g)
             return g;   // (a special trainer is no look-alike townsperson: the other card games leave them to theirs)
@@ -829,6 +834,8 @@ static bool8 DecodeTrainerPic(struct TcgOpponent *o, u16 pic)
     return TRUE;
 }
 
+bool8 S3D_Gfx_TrainerPicPixels(u16 trainerId, const u8 **pixels, const u16 **pal);
+
 // The challenge screen's picture of someone on the map: their battle picture, else their sprite
 static void CaptureChallengePic(struct TcgOpponent *o, struct ObjectEvent *npc)
 {
@@ -837,11 +844,32 @@ static void CaptureChallengePic(struct TcgOpponent *o, struct ObjectEvent *npc)
     if (npc->trainerType != TRAINER_TYPE_NONE && script && script[0] == 0x5C)   // trainerbattle
     {
         u16 id = script[2] | script[3] << 8;
+        const u8 *px;
+        const u16 *pal;
+        if (S3D_Gfx_TrainerPicPixels(id, &px, &pal))
+        {
+            // Moemon Kai: a SINNOH trainer's own picture (src/sinnoh/s3d_gfx.c): its 80x80 cut to the 64x64 a battle
+            // picture is here, head and shoulders kept
+            int x, y;
+            for (y = 0; y < 64; y++)
+                for (x = 0; x < 64; x++)
+                {
+                    u8 c = px[y * 40 + (x + 8) / 2];
+                    u16 rgb;
+                    c = ((x + 8) & 1) ? c >> 4 : c & 15;
+                    rgb = pal[c];
+                    o->portrait[y * 64 + x] = !c ? 0 : 0xFF000000u | (u32)((rgb & 31) * 255 / 31) << 16
+                                            | (u32)(((rgb >> 5) & 31) * 255 / 31) << 8 | (u32)(((rgb >> 10) & 31) * 255 / 31);
+                }
+            o->portraitW = o->portraitH = 64;
+            printf("[tcg] challenge picture: SINNOH trainer %u, Platinum's picture\n", id);
+            return;
+        }
         if (Tcg_IsTrainerId(id))
             pic = gTrainers[id].trainerPic;
     }
-    if (pic == 0xFFFF && OBJ_GFX_ID(npc) < ARRAY_COUNT(sPicOfGfx) && sPicOfGfx[OBJ_GFX_ID(npc)])
-        pic = sPicOfGfx[OBJ_GFX_ID(npc)] - 1;
+    if (pic == 0xFFFF && Tcg_LookGfx(npc) < ARRAY_COUNT(sPicOfGfx) && sPicOfGfx[Tcg_LookGfx(npc)])
+        pic = sPicOfGfx[Tcg_LookGfx(npc)] - 1;
     printf("[tcg] challenge picture: graphics %u, trainer picture %d\n", OBJ_GFX_ID(npc), pic == 0xFFFF ? -1 : pic);
     if (pic != 0xFFFF && DecodeTrainerPic(o, pic))
         return;
