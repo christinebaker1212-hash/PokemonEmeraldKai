@@ -1047,9 +1047,9 @@ static void DrawHint(void)
     else if (opt == OPT_SPRITESCALE)
         snprintf(ascii, sizeof(ascii), "A: SINNOH'S PEOPLE, FOLLOWERS, THE GARDEN");
     else if (opt == OPT_SS_FOLLOW)
-        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.scaleFollowers ? "SMALL ONES AT THEIR POKEDEX HEIGHT" : "AS THEIR SPRITES ARE");
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.scaleFollowers ? "SMALL PMD ONES CLOSER TO TRUE SIZE" : "PMD PICTURES AS THEY ARE");
     else if (opt == OPT_SS_GARDEN)
-        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.scaleGarden ? "SMALL ONES AT THEIR POKEDEX HEIGHT" : "AS THEIR SPRITES ARE");
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.scaleGarden ? "SMALL PMD ONES CLOSER TO TRUE SIZE" : "PMD PICTURES AS THEY ARE");
     else if (opt == OPT_SURFMUSIC)
         snprintf(ascii, sizeof(ascii), "OFF: THE MAP'S SONG SURFING AND DIVING");
     else if (opt == OPT_LEVELSCALE)
