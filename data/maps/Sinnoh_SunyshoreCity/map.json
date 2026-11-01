@@ -357,6 +357,13 @@
       "dest_warp_id": "0"
     },
     {
+      "x": 54,
+      "y": 54,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_VISTA_LIGHTHOUSE_ELEVATOR",
+      "dest_warp_id": "0"
+    },
+    {
       "x": 28,
       "y": 48,
       "elevation": 0,

@@ -1,0 +1,8 @@
+# SINNOH's elevators (src/sinnoh/s3d_elevator.c, tools/sinnoh/gen_maps.py elevators): VEILSTONE's store from 1F, the
+# attendant's floor menu, 5F, and its doors open on 5F; the VISTA LIGHTHOUSE's from SUNYSHORE by the panel this game
+# adds, to the top. Needs the 3D pack. Shots e_out.png, v_top.png.
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("[test] elevator: floor 4 -> 0" "[test] where map 44.58 xy 15,3" "[test] elevator: floor 1 -> 0" "[test] where map 44.69 xy 6,10")
+UNEXPECT_A=("[crash]")

@@ -126,6 +126,13 @@
       "elevation": 0,
       "dest_map": "MAP_SINNOH_HEARTHOME_CITY",
       "dest_warp_id": "11"
+    },
+    {
+      "x": 18,
+      "y": 2,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_HEARTHOME_CITY_NORTHEAST_HOUSE_ELEVATOR",
+      "dest_warp_id": "0"
     }
   ],
   "coord_events": [],

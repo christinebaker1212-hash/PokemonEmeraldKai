@@ -609,5 +609,7 @@ gSpecials::
 	def_special MP_RegionFirstVisit
 	def_special MP_Fight_CabinetReady   @ Moemon Fight: the GAME CENTER's arcade cabinets
 	def_special Sinnoh_LegendsRefresh   @ Moemon Kai: SINNOH's legendaries on the map (src/sinnoh/s3d_legends.c)
+	def_special Sinnoh_ElevatorMenu   @ Moemon Kai: SINNOH's elevators (src/sinnoh/s3d_elevator.c)
+	def_special Sinnoh_ElevatorGo
 	def_special Sinnoh_InGreatMarsh   @ Moemon Kai: the GREAT MARSH's SAFARI GAME ends at its gate (src/sinnoh/s3d_legends.c)
 	.include "data/qz_specials.inc"   @ Moemon Kai: Quetzal's specials (Johto / Kanto)

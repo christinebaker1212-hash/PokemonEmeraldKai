@@ -3468,6 +3468,15 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   daily POKéMON: each area one of 32 picks a day (day + Trainer ID) in the 5% slots 6-7 while the SAFARI GAME is on,
   the second list after SINNOH's LEAGUE (Sinnoh_GreatMarshDaily; `mp marshdaily`). The marsh is 128x160 tiles:
   MAX_MAP_DATA_SIZE is 32768 (fieldmap.h; a map past it gets no grid at all: no walls, grass or warps). Test sinnoh_marsh.
+- Elevators (2026-11-01): Platinum's run by script; here gen_maps.py elevators() finds them (a place with a warp to
+  MAP_HEADER_DYNAMIC) and their floors (the places with a door into one; sorted by their names' B1F / nF, a place outside
+  as 1F, anything else TOP: VISTA LIGHTHOUSE), keeps their doors as Emerald's MAP_DYNAMIC warp (SetupWarp sets it to
+  the floor the player came from) and points the attendant and the panel (1,5; added where Platinum has none) at
+  Sinnoh_EventScript_Elevator (data/scripts/sinnoh_elevators.inc): the floor menu (s3d_elevator.c Sinnoh_ElevatorMenu,
+  SCROLL_MULTI_QZ_DYNAMIC), MoveElevator, the dynamic warp set to the floor's door (Sinnoh_ElevatorGo). Six: VEILSTONE's
+  store (B1F-5F), JUBILIFE TV, the RIBBON SYNDICATE, the VISTA LIGHTHOUSE and two HEARTHOME houses (the LEAGUE's are
+  corridors with doors). Test sinnoh_elevator. Gyms: tools/sinnoh/reach.py finds every leader and trainer reachable on
+  foot; Platinum's moving parts (PASTORIA's water, CANALAVE's lifts, SUNYSHORE's gears, HEARTHOME's doors) don't move.
 - The three card games in SINNOH: its people play by their sprite's look-alike (tcg_field.c Tcg_LookGfx: the specials
   first, then sSinnohStandIns), so the townsfolk and beaten trainers duel as JOHTO's and KANTO's do. Special card
   trainers (sQzSpecials' SINNOH rows): the eight leaders by role and type (ROARK - ROXANNE, MAYLENE - BRAWLY, WAKE -

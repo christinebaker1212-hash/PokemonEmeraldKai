@@ -88,6 +88,13 @@
       "elevation": 0,
       "dest_map": "MAP_SINNOH_JUBILIFE_TV2F_GALLERY",
       "dest_warp_id": "0"
+    },
+    {
+      "x": 18,
+      "y": 2,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_JUBILIFE_TV_ELEVATOR",
+      "dest_warp_id": "0"
     }
   ],
   "coord_events": [],

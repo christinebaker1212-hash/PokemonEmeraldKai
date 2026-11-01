@@ -1,0 +1,61 @@
+pressuntil A field 5000
+wait 30
+mp warp 44,54,15,3
+wait 60
+waitfor field 1000
+mp face up
+press UP 1
+wait 120
+waitfor field 600
+mp where
+wait 200
+press LEFT 12
+wait 40
+mp where
+mp face left
+press A 1
+wait 90
+press A 1
+wait 400
+pressuntil A field 1500
+mp face right
+press RIGHT 12
+wait 30
+press DOWN 12
+wait 120
+waitfor field 600
+wait 30
+mp where
+shot e_out
+wait 30
+mp warp 40,60,54,55
+wait 60
+waitfor field 1000
+mp face up
+press UP 12
+wait 120
+waitfor field 600
+wait 200
+mp where
+press LEFT 12
+wait 30
+press LEFT 12
+wait 30
+mp face up
+mp where
+press A 1
+wait 90
+press A 1
+wait 400
+pressuntil A field 1500
+press RIGHT 12
+wait 30
+press RIGHT 12
+wait 30
+press DOWN 12
+wait 120
+waitfor field 600
+wait 30
+mp where
+shot v_top
+quit
