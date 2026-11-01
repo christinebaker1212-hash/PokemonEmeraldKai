@@ -184,6 +184,8 @@ typedef struct {
     float peak;
     int shift;                     // frames it moves to sit on the song's beat grid (steady_rhythm)
     int track;                     // the MIDI track it goes on
+    int flat;                      // held at one pitch (flatSemis), not following the chip's (a GB arpeggio's chord note)
+    float flatSemis;
 } Note;
 
 #define SILENT 1e-6f
@@ -698,7 +700,91 @@ static int stream_build(Rip *r, RipSong *out, float gain, char *err, int errlen)
     return 1;
 }
 
-int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, char *err, int errlen) {
+// For a Game Boy channel played by a GBA instrument:
+//  - a note struck again and again every frame or two (a driver's tremolo or buzz) is one held note: an
+//    instrument restarting its sample 30 times a second is a machine gun;
+//  - an arpeggio (the pitch cycling through two to four notes a frame or three at a time, the chip's way to
+//    play a chord on one channel) is the chord: its notes held together, each at its own steady pitch, at
+//    the arpeggio's level spread over them.
+// Pitch bends that move (vibrato, slides) stay: an instrument follows those as the chip does.
+static void gb_for_instruments(Rip *r, Note **pnotes, int *pnn, int *pcap, const int *slotOf, int ns, const uint8_t *instSlots,
+                               float gain, float aref) {
+    Note *notes = *pnotes;
+    int nn = *pnn, nv = r->nvoices;
+    #define IS_INST(n) ((n)->sample < ns && slotOf[(n)->sample] >= 0 && instSlots[slotOf[(n)->sample]] && \
+                        (r->samples[(n)->sample].kind == RIPS_SQUARE || r->samples[(n)->sample].kind == RIPS_WAVE))
+    // retriggers: the same note again within a frame of a note up to 3 frames long
+    for (int i = 0; i < nn; i++) {
+        Note *a = &notes[i];
+        if (!IS_INST(a) || a->f1 <= a->f0 || a->f1 - a->f0 > 3) continue;
+        for (int j = i + 1; j < nn; j++) {
+            Note *b = &notes[j];
+            if (b->voice != a->voice) continue;
+            if (b->f0 > a->f1 + 1) break;
+            if (b->sample != a->sample || b->key != a->key || b->f1 - b->f0 > 3 || b->f1 <= b->f0) break;
+            if (b->f1 > a->f1) a->f1 = b->f1;
+            if (b->peak > a->peak) a->peak = b->peak;
+            b->f1 = b->f0;                       // gone (dropped below)
+        }
+    }
+    // arpeggios: steps of 1-3 frames between two to four pitches, at least 6 steps
+    int extra = 0;
+    for (int i = 0; i < nn; i++) {
+        Note *n = &notes[i];
+        if (!IS_INST(n) || n->f1 - n->f0 < 6) continue;
+        float pk[8];
+        int cnt[8] = {0}, npk = 0, changes = 0, runs = 0, runLen = 0, prev = -1000, longest = 0;
+        for (int f = n->f0; f < n->f1; f++) {
+            float p = semis_at(r, nv, n->voice, f, n->sample);
+            if (p < -999) continue;
+            int q = (int)lroundf(p);
+            int k = -1;
+            for (int m = 0; m < npk; m++) if (fabsf(pk[m] - q) < 0.5f) k = m;
+            if (k < 0 && npk < 8) { k = npk; pk[npk++] = (float)q; }
+            if (k >= 0) cnt[k]++;
+            if (prev > -1000 && q != prev) { changes++; runs++; if (runLen > longest) longest = runLen; runLen = 0; }
+            runLen++;
+            prev = q;
+        }
+        if (npk < 2 || npk > 4 || changes < 6 || longest > 3) continue;
+        // a chord: each pitch as its own steady note (the most played first, as this note)
+        int order[8];
+        for (int m = 0; m < npk; m++) order[m] = m;
+        for (int a2 = 0; a2 < npk; a2++) for (int b2 = a2 + 1; b2 < npk; b2++) if (cnt[order[b2]] > cnt[order[a2]]) { int t = order[a2]; order[a2] = order[b2]; order[b2] = t; }
+        float share = 1.0f / sqrtf((float)npk);
+        n->flat = 1;
+        n->flatSemis = pk[order[0]];
+        n->key = (int)pk[order[0]];
+        n->peak *= share;
+        int vel = (int)ceilf(127.0f * n->peak * gain / aref);
+        n->vel = vel < 1 ? 1 : vel > 127 ? 127 : vel;
+        for (int m = 1; m < npk; m++) {
+            if (nn + extra + 1 > *pcap) {
+                int cap = *pcap * 2;
+                Note *nb = realloc(notes, sizeof(Note) * (size_t)cap);
+                if (!nb) break;
+                notes = nb;
+                *pcap = cap;
+                n = &notes[i];
+            }
+            Note c = *n;
+            c.flatSemis = pk[order[m]];
+            c.key = (int)pk[order[m]];
+            notes[nn + extra++] = c;
+        }
+    }
+    nn += extra;
+    // drop the merged-away notes, back in time order
+    int w = 0;
+    for (int i = 0; i < nn; i++) if (notes[i].f1 > notes[i].f0) notes[w++] = notes[i];
+    nn = w;
+    qsort(notes, nn, sizeof(Note), note_cmp);
+    #undef IS_INST
+    *pnotes = notes;
+    *pnn = nn;
+}
+
+int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, const uint8_t *instSlots, char *err, int errlen) {
     memset(out, 0, sizeof *out);
     if (r->streamPcm) {
         for (int i = 0; i < 128; i++) { out->slotSample[i] = -1; out->gm[i] = -1; out->orig[i] = VOICE_PLACEHOLDER; }
@@ -846,6 +932,10 @@ int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, char *err, in
         n->vel = vel < 1 ? 1 : vel > 127 ? 127 : vel;
     }
     free(tmp);
+
+    // Game Boy channels played by a GBA instrument (Convert GB > GBA): the chip's tricks made for pure waves,
+    // turned into what they mean musically, so a sampled instrument doesn't stutter or warble through them
+    if (r->kind == RIP_GBS && instSlots) gb_for_instruments(r, &notes, &nn, &capN, slotOf, ns, instSlots, gain, aref);
 
     // how each instrument is played: register, envelope, note length
     for (int si = 0; si < nslots; si++) {
@@ -1151,7 +1241,7 @@ int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, char *err, in
             int v = n->voice, sh = n->shift;
             // the bend range this note needs (the game's bends go to 63/64 of it)
             float maxDev = 0;
-            for (int f = n->f0; f < n->f1; f++) {
+            for (int f = n->f0; f < n->f1 && !n->flat; f++) {
                 float p = note_semis(r, nv, v, f, n->sample, n->f0, n->f1);
                 if (p < -999) continue;
                 float d = fabsf(p - n->key);
@@ -1220,7 +1310,7 @@ int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, char *err, in
                 // the pitch in 64ths of a semitone: the bend's 7 bits (steps of range / 64) get close, the
                 // track's fine tune (TUNE, CC 24: 1/64 semitone, +-1 semitone) makes up the rest
                 int bend = lastBend < 0 ? 8192 : lastBend, tune = lastTune < 0 ? 64 : lastTune;
-                float pf = note_semis(r, nv, v, f, n->sample, n->f0, n->f1);
+                float pf = n->flat ? n->flatSemis : note_semis(r, nv, v, f, n->sample, n->f0, n->f1);
                 if (pf > -999) {
                     int units = (int)lroundf((pf - n->key) * 64.0f);
                     int bv = (int)lroundf((float)units / range);

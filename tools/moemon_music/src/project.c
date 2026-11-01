@@ -243,12 +243,26 @@ int project_rip_sync_drums(Project *p)
 {
     if (!p->isRip || p->ripKind != RIP_GBS || !p->rip) return 0;
     int want = 0;
-    for (int s = 0; s < 128; s++)
-        if (p->voiceSet[s] && (p->ripOrig[s].type & 7) == 4 && p->ripGm[s].type != 0xFF && voice_same(&p->voice[s], &p->ripGm[s])) want = 1;
-    if (want == p->ripGbaDrums) return 0;
+    uint8_t inst[128] = {0};
+    for (int s = 0; s < 128; s++) {
+        if (!p->voiceSet[s]) continue;
+        int t = p->ripOrig[s].type & 7;
+        if (t == 4 && p->ripGm[s].type != 0xFF && voice_same(&p->voice[s], &p->ripGm[s])) want = 1;
+        // a square or wave channel played by a GBA instrument (not its own Game Boy voice)
+        if (t >= 1 && t <= 3 && !voice_same(&p->voice[s], &p->ripOrig[s])) inst[s] = 1;
+    }
+    if (want == p->ripGbaDrums && !memcmp(inst, p->ripInstSlots, sizeof inst)) return 0;
+    int was = p->ripGbaDrums;
+    uint8_t wasInst[128];
+    memcpy(wasInst, p->ripInstSlots, sizeof wasInst);
     p->ripGbaDrums = want;
+    memcpy(p->ripInstSlots, inst, sizeof inst);
     char err[256];
-    if (!project_rip_regain(p, p->ripGain, err, sizeof(err))) { p->ripGbaDrums = !want; return 0; }
+    if (!project_rip_regain(p, p->ripGain, err, sizeof(err))) {
+        p->ripGbaDrums = was;
+        memcpy(p->ripInstSlots, wasInst, sizeof wasInst);
+        return 0;
+    }
     return 1;
 }
 
@@ -263,7 +277,7 @@ int project_rip_regain(Project *p, float gain, char *err, int errlen)
     if (!p->rip) { snprintf(err, errlen, "the rip isn't loaded"); return 0; }
     if (p->ripKind == RIP_GSF) { snprintf(err, errlen, "GBA songs play at their own volume"); return 0; }
     RipSong song;
-    if (!rip_song_build(p->rip, &song, gain, p->ripGbaDrums, err, errlen)) return 0;
+    if (!rip_song_build(p->rip, &song, gain, p->ripGbaDrums, p->ripKind == RIP_GBS ? p->ripInstSlots : NULL, err, errlen)) return 0;
     Midi m;
     if (!midi_parse(&m, song.mid, song.midLen, err, errlen)) { rip_song_free(&song); return 0; }
     midi_free(&p->midi);
@@ -359,7 +373,7 @@ int project_load_rip(Project *p, const char *path, const char *biosDir, int gbsT
     if (!rip_load(r, path, biosDir, gbsTrack, 0, err, errlen)) { free(r); return 0; }
     if (r->kind == RIP_GSF) return load_gsf(p, r, path, err, errlen);
     RipSong song;
-    if (!rip_song_build(r, &song, 1.0f, 0, err, errlen)) { rip_free(r); free(r); return 0; }
+    if (!rip_song_build(r, &song, 1.0f, 0, NULL, err, errlen)) { rip_free(r); free(r); return 0; }
     Project np;
     project_init(&np);
     np.midiData = song.mid;

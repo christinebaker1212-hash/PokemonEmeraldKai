@@ -61,6 +61,9 @@ GBA songs on MP2K need none of that: their own commands and samples come straigh
   original's level (matched over the 150 ms the ear takes a drum's loudness from).
   Levels are matched in the engine, panning included, then brought down together so none goes past
   a volume of 127 (Game Boy channels play louder than samples). Per channel: **Orig** / **GBA**.
+  A square or wave channel played by a GBA instrument gets notes made for an instrument: the chip's
+  arpeggio (a chord played one note a frame) is the chord, held; a note retriggered every frame or two
+  (a buzz) is one held note. Vibrato and slides stay pitch bends, as on the chip.
 - Exports carry the original samples: `.kaisong` version 2 (`SMPL` / `WAVE` chunks), decomp WAVs.
 
 - **Plays like the game.** `src/engine.c` is the game's MP2K engine (`src/music_player.c`,

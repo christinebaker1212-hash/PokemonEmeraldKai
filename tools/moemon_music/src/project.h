@@ -52,6 +52,7 @@ typedef struct {
     float ripGain;            // the loudness match (studio_match_rip)
     int ripNativeRate;        // the console's own output rate (Hi-Fi mixes at it)
     int ripGbaDrums;          // GBS: the MIDI plays the noise channels as the drum kits made for them (GB > GBA)
+    uint8_t ripInstSlots[128];  // GBS: the square / wave slots a GBA instrument plays (the MIDI made for instruments)
     float ripCgbNorm;         // GBS: the level of a slot left on its Game Boy channel once others are GBA instruments
     int8_t octave[128];       // each slot's notes moved by whole octaves (-4..4)
     int16_t trackLock[CONV_MAX_CAND];   // a track playing one slot all through (-1 = its own instrument changes)

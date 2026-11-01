@@ -41,7 +41,9 @@ typedef struct {
 // Builds the MIDI and the instruments. gain scales every note (1 = the chip's own level, as the
 // translation measures it; studio_match_rip finds the gain that matches the original's loudness).
 // gbaDrums: Game Boy noise notes go to the kits made for them (Convert GB > GBA), as drum hits.
-int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, char *err, int errlen);
+// instSlots (Game Boy rips): the square / wave voice slots a GBA instrument plays, whose notes are made for an
+// instrument (an arpeggio as its chord, a fast retrigger as one note); NULL = none.
+int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, const uint8_t *instSlots, char *err, int errlen);
 void rip_song_free(RipSong *s);
 
 // Analysis used by the build (and tests)

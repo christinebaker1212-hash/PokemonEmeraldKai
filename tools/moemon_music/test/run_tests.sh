@@ -71,6 +71,41 @@ printf 'hifi=0\n' > "$T/hifi.ini"
 MMS_DEFAULTS="$T/hifi.ini" "$B" --save "$T/tiny.gbs" "$T/tiny_lofi.mmsproj"
 grep -q '^hifi=0$' "$T/tiny_lofi.mmsproj"
 
+echo "== GB > GBA: an arpeggio becomes its chord, a buzz of retriggers one note (a Game Boy song made here)"
+python3 test/make_test_gbs_arp.py "$T/arp.gbs"
+"$B" --save "$T/arp.gbs" "$T/arp_gb.mmsproj"
+printf 'gb_to_gba=1\n' > "$T/gba.ini"
+MMS_DEFAULTS="$T/gba.ini" "$B" --save "$T/arp.gbs" "$T/arp_gba.mmsproj"
+python3 - "$T/arp_gb.mmsproj" "$T/arp_gba.mmsproj" <<'PY'
+import sys, base64, struct
+def notes(p):
+    t = open(p, 'rb').read().decode('latin1'); i = t.index('\nmidi=') + 6
+    d = base64.b64decode(t[i:].split('\nend')[0].replace('\n', ''))
+    def vlq(i):
+        v = 0
+        while True:
+            b = d[i]; i += 1; v = v << 7 | b & 127
+            if b < 128: return v, i
+    i = 14; out = []
+    while i < len(d):
+        ln = struct.unpack('>I', d[i + 4:i + 8])[0]; j = i + 8; e = j + ln; i = e; st = 0; keys = []
+        while j < e:
+            _, j = vlq(j); b = d[j]
+            if b == 0xFF: n, k = vlq(j + 2); j = k + n; continue
+            if b & 0x80: st = b; j += 1
+            if st & 0xF0 in (0xC0, 0xD0): j += 1; continue
+            a, c = d[j], d[j + 1]; j += 2
+            if st & 0xF0 == 0x90 and c: keys.append(a)
+        out.append(keys)
+    return [k for k in out if k]
+gb, gba = notes(sys.argv[1]), notes(sys.argv[2])
+assert max(len(k) for k in gb) > 1000, 'the GB voices keep every retrigger'
+assert len(gba) == 4, gba and [len(k) for k in gba]          # the buzz, and the arpeggio's three chord notes
+chord = sorted(set(k for t in gba[1:] for k in t))
+assert chord == [60, 64, 67], chord
+assert len(gba[0]) < 400, len(gba[0])
+PY
+
 # Rips aren't in the repository: MMS_RIPS=folder runs these on every rip in it (and MMS_BIOS=folder with a
 # PlayStation 2 BIOS for PSF / PSF2). Each must convert, sound within 4.5 dB of its emulator band by
 # band, export a .kaisong the reader accepts and come back the same from its project.
