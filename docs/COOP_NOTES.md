@@ -3338,8 +3338,14 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   clerk ('mart',) on maps words.py doesn't cover (roles()). tools/sinnoh/gen_heal.py (after gen_maps.py): a heal
   location a CENTER (18), in front of its door in the town, appended to src/data/heal_locations.json after JOHTO's /
   KANTO's, and each CENTER 1F's OnTransition sets it (setrespawn). Test sinnoh_whiteout.
+- Gym leaders (tools/sinnoh/words.py GYMS, the ('gym', n) kind; gen_words.py gym()): the eight leaders, the ELITE FOUR
+  and the CHAMPION are trainers too (gen_trainers.py SPECIAL, ids after the route trainers; pictures the closest the
+  game has). A leader battles (NO_MUSIC: SINNOH's gym leader theme plays by class), then gives the badge (flag
+  0x3320 + n) and its TM (flag 0x3770 + n: ROARK TM76, GARDENIA TM86, FANTINA TM65, MAYLENE TM60, WAKE TM55,
+  BYRON TM91, CANDICE TM72, VOLKNER TM57). Their words are written for this game; badges promise nothing about
+  HMs (this game has no HM restrictions). Test sinnoh_gym (MOEMON_DEBUG_REGION=3: levels are per region).
 - Flags (moved 2026-11-01: JOHTO's / KANTO's trainers' "beaten" flags are 0x3000-0x331C): SINNOH's badges
-  0x3320-0x3327, ids.py's flags 0x3328-0x377F, trainers 0x3780-0x3DFF, hidden items 0x3E00-0x3FFE, FLAG_SINNOH_HIDDEN
+  0x3320-0x3327, ids.py's flags 0x3328-0x376F, gym TMs given 0x3770-0x3777, trainers 0x3780-0x3DFF, hidden items 0x3E00-0x3FFE, FLAG_SINNOH_HIDDEN
   0x3FFF.
 - Tiles: SINNOH's layouts use the General tileset and gTileset_Johto_GoldenrodUndergroundEntrances (only for behaviors:
   the 3D engine draws the picture): Platinum's table / PC / TV behaviors (0x80 / 0x83 / 0x86, the game's MB_COUNTER /

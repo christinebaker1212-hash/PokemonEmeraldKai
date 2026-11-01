@@ -7,10 +7,19 @@ WORDS[map][key]: key Person<n> / Sign<n> / Bg<n> (the numbers who.py prints), va
   - a text: a person talks (faces the player), a sign is read. '|' starts a new page; lines wrap by themselves.
   - ('nurse',): the POKéMON CENTER's nurse heals the party.
   - ('mart',): a clerk sells what the region's badges allow (pokemart 0, as JOHTO's and KANTO's clerks).
+  - ('gym', n): the n-th gym leader (GYMS[n]): battles, gives the badge (flag 0x3320 + n) and a TM (flag 0x3770 + n).
 MOéMON's words like HOENN's (MOéMON, MOéDEX, POKé BALL kept): OPTIONS > CREATURES swaps them back.
 """
 
 WORDS = {
+    'Sinnoh_SunyshoreCityGymRoom3': {'Person1': ('gym', 7)},
+    'Sinnoh_SnowpointCityGym': {'Person1': ('gym', 6)},
+    'Sinnoh_CanalaveCityGym': {'Person5': ('gym', 5)},
+    'Sinnoh_PastoriaCityGym': {'Person1': ('gym', 4)},
+    'Sinnoh_VeilstoneCityGym': {'Person1': ('gym', 3)},
+    'Sinnoh_HearthomeCityGymLeaderRoom': {'Person1': ('gym', 2)},
+    'Sinnoh_EternaCityGym': {'Person2': ('gym', 1)},
+    'Sinnoh_OreburghCityGym': {'Person1': ('gym', 0)},
     # ------------------------------------------------------------------ TWINLEAF TOWN
     'Sinnoh_TwinleafTown': {
         'Person1': "The wind off the lake smells like rain today.|My MOéMON curl up by the fire when it does. "
@@ -148,3 +157,61 @@ WORDS = {
         'Bg6': "A fridge for samples. One shelf is just labeled \"LUNCH. DO NOT STUDY.\"",
     },
 }
+
+
+# The gym leaders, in badge order: (trainer, badge, TM, intro, defeat, badge info, TM words, after)
+GYMS = [
+    ('TRAINER_SINNOH_LEADER_ROARK', 'COAL BADGE', 'ITEM_TM76',
+     "Welcome to the OREBURGH GYM! I'm ROARK, the LEADER here.|I spend my mornings in the mine and my afternoons in "
+     "here. Both make you tough. Let's see how tough you are!",
+     "Crushed... like gravel!",
+     "That's the COAL BADGE. It's made from OREBURGH coal, pressed hard. Like you pressed me!",
+     "Take this too. STEALTH ROCK scatters sharp stones that hurt every MOéMON your foe sends out.",
+     "The mine runs right under the city. Every rock down there has a story. Your battle's one of them now."),
+    ('TRAINER_SINNOH_LEADER_GARDENIA', 'FOREST BADGE', 'ITEM_TM86',
+     "Hi there! I'm GARDENIA. I grow MOéMON the way I grow flowers: with sunshine and a little stubbornness!|"
+     "Ready to see what's blooming?",
+     "Wilted... but in a nice way.",
+     "The FOREST BADGE! It's shaped like a leaf from the oldest tree in ETERNA FOREST.",
+     "And this is GRASS KNOT. The heavier your foe, the harder it trips. Big MOéMON hate it!",
+     "Have you walked through ETERNA FOREST? It's spooky, but I love it. The trees there are older than the city."),
+    ('TRAINER_SINNOH_LEADER_FANTINA', 'RELIC BADGE', 'ITEM_TM65',
+     "Bonjour! I am FANTINA. My GHOST MOéMON and I, we dance in the dark!|Tonight you will dance with us. Allez!",
+     "Ah... the music stops.",
+     "The RELIC BADGE is yours. It is very old, and very lovely. Like my GHOSTS.",
+     "Take this as well. SHADOW CLAW: a quick slash from the shadows that finds the weak spot.",
+     "You dance well in battle. Come to the CONTEST HALL some time, yes? We dance there too."),
+    ('TRAINER_SINNOH_LEADER_MAYLENE', 'COBBLE BADGE', 'ITEM_TM60',
+     "I'm MAYLENE. I've trained here since I was small.|I won't hold anything back. If you're ready, so am I!",
+     "I'm not strong enough yet...",
+     "This is the COBBLE BADGE. Every LEADER of this GYM has handed it out with pride. Now I have too.",
+     "Please take this. DRAIN PUNCH takes some of the foe's strength for your own.",
+     "Thank you for that battle. I'm going to train even harder. You should too!"),
+    ('TRAINER_SINNOH_LEADER_WAKE', 'FEN BADGE', 'ITEM_TM55',
+     "I am CRASHER WAKE! The wave that crashes over every challenger!|Can you ride it? Let's find out! WAHAHA!",
+     "The wave crashed over me!",
+     "The FEN BADGE! Shaped like a raindrop! It's slippery, so don't drop it in the marsh! WAHAHA!",
+     "And this! BRINE: it hits hardest when your foe is already half worn out. Like me right now!",
+     "Wahaha! What a match! I'm going to the GREAT MARSH to cool off. Come splash around some time!"),
+    ('TRAINER_SINNOH_LEADER_BYRON', 'MINE BADGE', 'ITEM_TM91',
+     "So you're the one who's been climbing through SINNOH! I'm BYRON. My STEEL MOéMON are as hard as the mountains "
+     "I dig in.|Show me what you're made of!",
+     "Cracked my shell, you did!",
+     "The MINE BADGE. Forged from iron dug out of the hills behind CANALAVE.",
+     "And FLASH CANNON: a burst of light from a STEEL MOéMON's body. It may lower the foe's SP. DEF.",
+     "My son runs the gym in OREBURGH. Tell him his old man got beaten fair and square. He'll laugh about it."),
+    ('TRAINER_SINNOH_LEADER_CANDICE', 'ICICLE BADGE', 'ITEM_TM72',
+     "I'm CANDICE! In SNOWPOINT we say it's all about focus. Diamond-hard focus!|"
+     "And right now I'm focused on beating you!",
+     "Brr... I lost my focus!",
+     "Here's the ICICLE BADGE! Don't worry, it never melts.",
+     "AVALANCHE is yours too. Get hit first, then hit back twice as hard. Cool, right?",
+     "Your focus is amazing! Come back when it's snowing. That's when SNOWPOINT is prettiest."),
+    ('TRAINER_SINNOH_LEADER_VOLKNER', 'BEACON BADGE', 'ITEM_TM57',
+     "I'm VOLKNER. I've been bored a long time. Nobody gives me a real battle any more.|"
+     "Maybe you're different. Light me up.",
+     "...Now that was a battle.",
+     "The BEACON BADGE. It's the last badge in SINNOH. Shine bright with it.",
+     "Take CHARGE BEAM too. It may raise your SP. ATK as it hits.",
+     "Thanks. I remember why I liked battling. The MOéMON LEAGUE is past VICTORY ROAD. Go show them that spark."),
+]

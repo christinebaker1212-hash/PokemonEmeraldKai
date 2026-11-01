@@ -1,0 +1,17 @@
+pressuntil A field 5000
+wait 30
+mp teach 0 61
+mp warp 42,73,5,4
+wait 200
+mp face up
+press A 4
+pressuntil A action 4000
+shot roark
+mash A 120 10
+pressuntil A field 6000
+wait 60
+mp getflag 0x3320
+mp getflag 0x3770
+mp bagqty 643
+shot after
+quit

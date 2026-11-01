@@ -14,7 +14,10 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from words import WORDS  # noqa: E402
+from words import WORDS, GYMS  # noqa: E402
+
+BADGE_FLAGS = 0x3320       # FLAG_SINNOH_BADGE01 (include/mp_region.h)
+GYM_TM_FLAGS = 0x3770      # a leader's TM given (ids.py's flags stay below)
 
 BEGIN = '@ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---\n'
 END = '@ --- end of SINNOH words ---\n'
@@ -84,10 +87,34 @@ def script(name, key, value, widths):
     if isinstance(value, tuple) and value[0] == 'mart':
         return ('%s::\n\tlock\n\tfaceplayer\n\tmessage gText_HowMayIServeYou\n\twaitmessage\n\tpokemart 0x0\n'
                 '\tmsgbox gText_PleaseComeAgain, MSGBOX_DEFAULT\n\trelease\n\tend\n\n' % label, '')
+    if isinstance(value, tuple) and value[0] == 'gym':
+        return gym(name, key, value[1], widths)
     text = '%s_Text_%s' % (name, key)
     kind = 'MSGBOX_NPC' if key.startswith('Person') else 'MSGBOX_SIGN'
     return ('%s::\n\tmsgbox %s, %s\n\tend\n\n' % (label, text, kind),
             '%s:\n%s\n' % (text, wrap(value, widths, '%s %s' % (name, key))))
+
+
+def gym(name, key, n, widths):
+    """A gym leader: the battle, then the badge and the TM (each once), then the after words"""
+    trainer, badge, tm, intro, defeat, info, tmwords, after = GYMS[n]
+    label = '%s_EventScript_%s' % (name, key)
+    t = '%s_Text_%s' % (name, key)
+    leader = trainer.split('_')[-1]
+    code = ('%s::\n\ttrainerbattle_single %s, %sIntro, %sDefeat, %s_Defeated, NO_MUSIC\n'
+            '\tgoto_if_unset 0x%X, %s_GiveTm\n\tmsgbox %sAfter, MSGBOX_DEFAULT\n\trelease\n\tend\n\n'
+            '%s_Defeated::\n\tmessage %sBadge\n\twaitmessage\n\tcall Common_EventScript_PlayGymBadgeFanfare\n'
+            '\tmsgbox %sBadgeInfo, MSGBOX_DEFAULT\n\tsetflag 0x%X\n\tgoto %s_GiveTm\n\tend\n\n'
+            '%s_GiveTm::\n\tgiveitem %s\n\tgoto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull\n'
+            '\tsetflag 0x%X\n\tmsgbox %sTm, MSGBOX_DEFAULT\n\trelease\n\tend\n\n'
+            % (label, trainer, t, t, label, GYM_TM_FLAGS + n, label, t,
+               label, t, t, BADGE_FLAGS + n, label,
+               label, tm, GYM_TM_FLAGS + n, t))
+    texts = ''
+    for suffix, words in (('Intro', intro), ('Defeat', defeat), ('BadgeInfo', info), ('Tm', tmwords),
+                          ('After', after), ('Badge', '{PLAYER} received the %s from %s.' % (badge, leader))):
+        texts += '%s%s:\n%s\n' % (t, suffix, wrap(words, widths, '%s %s' % (name, key)))
+    return code, texts
 
 
 def roles(root):

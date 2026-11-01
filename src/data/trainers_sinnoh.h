@@ -4835,3 +4835,159 @@
         .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohYoungCoupleTyAndSue),
     },
 
+    [TRAINER_SINNOH_LEADER_ROARK] =
+    {
+        .trainerClass = TRAINER_CLASS_LEADER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_QZ_243,
+        .trainerName = _("ROARK"),
+        .items = {ITEM_POTION, ITEM_POTION, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohLeaderRoark),
+    },
+
+    [TRAINER_SINNOH_LEADER_GARDENIA] =
+    {
+        .trainerClass = TRAINER_CLASS_LEADER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_212,
+        .trainerName = _("GARDENIA"),
+        .items = {ITEM_SUPER_POTION, ITEM_SUPER_POTION, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohLeaderGardenia),
+    },
+
+    [TRAINER_SINNOH_LEADER_FANTINA] =
+    {
+        .trainerClass = TRAINER_CLASS_LEADER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_206,
+        .trainerName = _("FANTINA"),
+        .items = {ITEM_SUPER_POTION, ITEM_SUPER_POTION, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohLeaderFantina),
+    },
+
+    [TRAINER_SINNOH_LEADER_MAYLENE] =
+    {
+        .trainerClass = TRAINER_CLASS_LEADER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_BATTLE_GIRL,
+        .trainerName = _("MAYLENE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohLeaderMaylene),
+    },
+
+    [TRAINER_SINNOH_LEADER_WAKE] =
+    {
+        .trainerClass = TRAINER_CLASS_LEADER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_QZ_205,
+        .trainerName = _("WAKE"),
+        .items = {ITEM_HYPER_POTION, ITEM_HYPER_POTION, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohLeaderWake),
+    },
+
+    [TRAINER_SINNOH_LEADER_BYRON] =
+    {
+        .trainerClass = TRAINER_CLASS_LEADER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_QZ_247,
+        .trainerName = _("BYRON"),
+        .items = {ITEM_HYPER_POTION, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohLeaderByron),
+    },
+
+    [TRAINER_SINNOH_LEADER_CANDICE] =
+    {
+        .trainerClass = TRAINER_CLASS_LEADER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_258,
+        .trainerName = _("CANDICE"),
+        .items = {ITEM_HYPER_POTION, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohLeaderCandice),
+    },
+
+    [TRAINER_SINNOH_LEADER_VOLKNER] =
+    {
+        .trainerClass = TRAINER_CLASS_LEADER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_QZ_256,
+        .trainerName = _("VOLKNER"),
+        .items = {ITEM_HYPER_POTION, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohLeaderVolkner),
+    },
+
+    [TRAINER_SINNOH_ELITE_FOUR_AARON] =
+    {
+        .trainerClass = TRAINER_CLASS_ELITE_FOUR,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_BUG_MANIAC,
+        .trainerName = _("AARON"),
+        .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohEliteFourAaron),
+    },
+
+    [TRAINER_SINNOH_ELITE_FOUR_BERTHA] =
+    {
+        .trainerClass = TRAINER_CLASS_ELITE_FOUR,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_216,
+        .trainerName = _("BERTHA"),
+        .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohEliteFourBertha),
+    },
+
+    [TRAINER_SINNOH_ELITE_FOUR_FLINT] =
+    {
+        .trainerClass = TRAINER_CLASS_ELITE_FOUR,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_QZ_116,
+        .trainerName = _("FLINT"),
+        .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohEliteFourFlint),
+    },
+
+    [TRAINER_SINNOH_ELITE_FOUR_LUCIAN] =
+    {
+        .trainerClass = TRAINER_CLASS_ELITE_FOUR,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_QZ_100,
+        .trainerName = _("LUCIAN"),
+        .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohEliteFourLucian),
+    },
+
+    [TRAINER_SINNOH_CHAMPION_CYNTHIA] =
+    {
+        .trainerClass = TRAINER_CLASS_CHAMPION,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_171,
+        .trainerName = _("CYNTHIA"),
+        .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_FULL_RESTORE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohChampionCynthia),
+    },
+
