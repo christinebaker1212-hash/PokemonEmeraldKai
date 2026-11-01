@@ -3499,7 +3499,17 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   (gS3dObjectHeightHook by local id, hidden above the player's floor) and trainers see only their own floor
   (trainer_see.c S3D_Gyms_SeesPlayer). gen_gyms.py walks the gym as the game does and stops if anyone is out of reach.
   `mp gym [solve]`: the state, and a walk from the door by every step and button with the real collision (who and
-  which doors are reached, after how many buttons). Tests sinnoh_gym_pastoria, sinnoh_gym_sunyshore, sinnoh_gym_canalave.
+  which doors are reached, after how many buttons). Tests sinnoh_gym_pastoria, sinnoh_gym_sunyshore, sinnoh_gym_canalave,
+  sinnoh_gym_eterna.
+  ETERNA: the flower clock's hands (Platinum's angle math: the minute hand a full turn per trainer beaten, the hour
+  hand a quarter, 4 minutes a frame the shortest way) lift and lower walls in the clock's area (x5-17 y7-19 and the
+  fountain row y19); the state is the count of the gym's three trainers beaten (HasTrainerBeenFought) or 4 with the
+  badge, so it needs no var; the hour hand's tip is a ledge jump (field_player_avatar.c S3D_Gyms_JumpAt). A change of
+  state runs Sinnoh_EventScript_EternaClock (the special Sinnoh_EternaClock turns the hands while the player waits).
+  gen_gyms.py eterna_check walks each state from the door and stops if the next trainer is out of reach.
+- SINNOH trainers who battle when talked to (tools/sinnoh/gen_trainers.py TALK: the ETERNA gym's three, the TRAINERS'
+  SCHOOL's kids, the POKéMON MANSION's maids, the RESTAURANT's diners; new classes MAID and CAMERAMAN): gen_maps.py
+  talk_trainer() gives the object whose Platinum script battles one the trainer's own script (no sight line).
 - TOWN MAP and FLY (2026-11-01): tools/sinnoh/gen_townmap.py (run by gen_maps.py) gives every SINNOH map its section
   from Platinum's location label (the header's mapLabelTextID: 120 places, MAPSEC_SINNOH_FIRST 0x140, names written from
   the labels' words) and writes include/constants/region_map_sections_sinnoh.h + src/data/region_map/sinnoh_region_map.h.
