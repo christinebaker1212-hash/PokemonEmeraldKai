@@ -577,6 +577,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // life show|remember|minutes|trait|count|save|load|reveal|journal ... (mp_life.c)
         MP_Life_Debug(arg);
     }
+    else if (strcmp(cmd, "dexorder") == 0)
+    {
+        // dexorder MODE ORDER: the POKéDEX list's mode (0 HOENN, 1 NATIONAL) and order (1 A-Z: only seen ones)
+        int mode = 0, order = 0;
+        sscanf(arg, "%d %d", &mode, &order);
+        if (mode == 1 && !IsNationalPokedexEnabled())
+            EnableNationalPokedex();
+        gSaveBlock2Ptr->pokedex.mode = mode;
+        gSaveBlock2Ptr->pokedex.order = order;
+        printf("[test] dex mode %d order %d\n", mode, order);
+    }
     else if (strcmp(cmd, "dexcount") == 0)
     {
         // dexcount: the NATIONAL DEX's size at the GENERATION and the counts in it (pokedex.c)

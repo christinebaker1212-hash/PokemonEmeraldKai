@@ -1,0 +1,47 @@
+pressuntil A field 5000
+wait 60
+mp dexcatch 1
+mp dexcatch 161
+mp dexcatch 629
+mp dexorder 1 1
+press START 2
+wait 30
+press A 2
+wait 150
+shot a_list
+press A 2
+wait 150
+press RIGHT 2
+wait 20
+press A 2
+wait 150
+shot a_bulbasaur
+press B 2
+wait 80
+press B 2
+wait 80
+press DOWN 2
+wait 30
+press A 2
+wait 150
+press A 2
+wait 150
+shot a_sentret
+press SELECT 2
+wait 150
+shot a_sentret2
+press B 2
+wait 80
+press B 2
+wait 80
+press DOWN 2
+wait 30
+press A 2
+wait 150
+press A 2
+wait 150
+shot a_vullaby
+press SELECT 2
+wait 150
+shot a_vullaby2
+quit

@@ -3093,6 +3093,14 @@ Old saves need nothing: eggs and Unown keep their real species in the save.
   online.
 - Moves past the cap are skipped when learning (MonTryLearningNewMove, GiveBoxMonInitialMoveset, the relearner,
   CanMonLearnTMTutor, day care egg moves); evolutions into a later generation's species wait.
+- The POKéDEX's AREA (pokedex_area_screen.c): every region's wild tables as the game uses them (mp_region.c
+  MP_Region_WildInfoIn: a table seen as its region shows it, the GENERATION's newer slots, JOHTO's / KANTO's own tables,
+  no starters), JOHTO's / KANTO's HEADBUTT trees (wild_encounter.c MP_HeadbuttTable), on HOENN's, JOHTO's, KANTO's or a
+  Sevii Islands map (region_map.c MP_RegionMap_AreaShow / AreaGfx: the town maps' art, their 64x64 affine map's top-left
+  32x32 as a text map; areas not in a map's layout get a marker at their box). It opens on the player's region if the
+  species is there, else the first map with it; SELECT / UP / DOWN go to the next. Before, it read Emerald's own tables
+  only (nothing past 386, nor JOHTO / KANTO), and its glow was built against whatever map the Town Map showed last.
+  `mp dexorder MODE ORDER`; test dex_area.
 - No starters in the wild (the user's call: five in an hour was too many): a starter line's slot in any wild table
   (Quetzal's JOHTO / KANTO tables, the newer generations' slots) gives the nearest earlier slot's POKéMON at its own
   levels (mp_region.c sStarterLines, MP_WildSlotSpecies; wild_encounter.c's land, water, ROCK SMASH, fishing and

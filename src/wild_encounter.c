@@ -700,6 +700,20 @@ bool8 StandardWildEncounter(u16 curMetatileBehavior, u16 prevMetatileBehavior)
 #include "data/wild_headbutt_qz.h"
 #include "data/qz_headbutt_trees.h"
 
+// The POKéDEX's AREA: tree table I's map, and whether SPECIES is in it (as the region shows it); FALSE past the end
+bool8 MP_HeadbuttTable(u32 i, u16 species, u16 *map, bool8 *has)
+{
+    u32 k;
+    if (i >= ARRAY_COUNT(sHeadbuttEncounters))
+        return FALSE;
+    *map = sHeadbuttEncounters[i].map;
+    *has = FALSE;
+    for (k = 0; k < 5; k++)
+        if (MP_Gen_StandInIn(sHeadbuttEncounters[i].mons[k].species, MP_Region_OfGroup(*map >> 8)) == species)
+            *has = TRUE;
+    return TRUE;
+}
+
 static int QzTreeTable(void)
 {
     u16 map = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;

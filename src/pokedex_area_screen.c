@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "global.h"
 #include "bg.h"
 #include "event_data.h"
@@ -16,6 +17,7 @@
 #include "trig.h"
 #include "pokedex_area_region_map.h"
 #include "wild_encounter.h"
+#include "mp_region.h"
 #include "constants/region_map_sections.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
@@ -89,15 +91,19 @@ struct
     /*0xF70*/ u8 charBuffer[64];
     /*0xFB0*/ struct Sprite *areaUnknownSprites[3];
     /*0xFBC*/ u8 areaUnknownGraphicsBuffer[0x600];
+    u8 map;        // Moemon Kai: the region map shown (region_map.c's QZMAP_*: HOENN, JOHTO, KANTO, the Sevii Islands)
+    u8 mapsWith;   // the maps the species is found on (bits)
 } static EWRAM_DATA *sPokedexAreaScreen = NULL;
 
 static void FindMapsWithMon(u16);
 static void BuildAreaGlowTilemap(void);
 static void SetAreaHasMon(u16, u16);
 static void SetSpecialMapHasMon(u16, u16);
+static void SetQzAreaHasMon(u16, u16);
 static mapsec_u16_t GetRegionMapSectionId(u8, u8);
 static bool8 MapHasSpecies(const struct WildPokemonHeader *, u16);
 static bool8 MonListHasSpecies(const struct WildPokemonInfo *, u16, u16);
+static EWRAM_DATA u8 sAreaRegion = 0;   // Moemon Kai: the region of the table being read
 static void DoAreaGlow(void);
 static void Task_ShowPokedexAreaScreen(u8);
 static void CreateAreaMarkerSprites(void);
@@ -250,6 +256,7 @@ static void FindMapsWithMon(u16 species)
         sPokedexAreaScreen->alteringCaveId = 0;
 
     roamer = &gSaveBlock1Ptr->roamer;
+    sPokedexAreaScreen->mapsWith = 0;
     if (species != roamer->species)
     {
         sPokedexAreaScreen->numOverworldAreas = 0;
@@ -271,6 +278,9 @@ static void FindMapsWithMon(u16 species)
         {
             if (species == sFeebasData[i][0])
             {
+                sPokedexAreaScreen->mapsWith |= 1;
+                if (sPokedexAreaScreen->map != 0)
+                    continue;   // (Moemon Kai: HOENN's)
                 switch (sFeebasData[i][1])
                 {
                 case MAP_GROUP_TOWNS_AND_ROUTES:
@@ -285,20 +295,42 @@ static void FindMapsWithMon(u16 species)
         }
 
         // Add regular species to the area map
+        // Moemon Kai: every region's tables as the game uses them (MP_Region_WildInfoIn: the GENERATION's newer
+        // slots, JOHTO's / KANTO's own tables, no starters), HEADBUTT trees too; only the shown map's areas are kept,
+        // the others only say the species is there (mapsWith)
         for (i = 0; gWildMonHeaders[i].mapGroup != MAP_GROUP(MAP_UNDEFINED); i++)
         {
-            if (MapHasSpecies(&gWildMonHeaders[i], species))
+            u8 group = gWildMonHeaders[i].mapGroup, num = gWildMonHeaders[i].mapNum;
+            u8 map = MP_RegionMap_MapOf(GetRegionMapSectionId(group, num));
+            if (map >= 8 || !MapHasSpecies(&gWildMonHeaders[i], species))
+                continue;
+            sPokedexAreaScreen->mapsWith |= 1 << map;
+            if (map != sPokedexAreaScreen->map)
+                continue;
+            if (map != 0)
+                SetQzAreaHasMon(group, num);
+            else switch (group)
             {
-                switch (gWildMonHeaders[i].mapGroup)
-                {
-                case MAP_GROUP_TOWNS_AND_ROUTES:
-                    SetAreaHasMon(gWildMonHeaders[i].mapGroup, gWildMonHeaders[i].mapNum);
-                    break;
-                case MAP_GROUP_DUNGEONS:
-                case MAP_GROUP_SPECIAL_AREA:
-                    SetSpecialMapHasMon(gWildMonHeaders[i].mapGroup, gWildMonHeaders[i].mapNum);
-                    break;
-                }
+            case MAP_GROUP_TOWNS_AND_ROUTES:
+                SetAreaHasMon(group, num);
+                break;
+            case MAP_GROUP_DUNGEONS:
+            case MAP_GROUP_SPECIAL_AREA:
+                SetSpecialMapHasMon(group, num);
+                break;
+            }
+        }
+        {
+            u16 map16;
+            bool8 has;
+            for (i = 0; MP_HeadbuttTable(i, species, &map16, &has); i++)
+            {
+                u8 map = MP_RegionMap_MapOf(GetRegionMapSectionId(map16 >> 8, map16 & 0xFF));
+                if (!has || map >= 8)
+                    continue;
+                sPokedexAreaScreen->mapsWith |= 1 << map;
+                if (map == sPokedexAreaScreen->map)
+                    SetQzAreaHasMon(map16 >> 8, map16 & 0xFF);
             }
         }
     }
@@ -306,7 +338,8 @@ static void FindMapsWithMon(u16 species)
     {
         // This is the roamer's species, show where the roamer is currently
         sPokedexAreaScreen->numSpecialAreas = 0;
-        if (roamer->active)
+        sPokedexAreaScreen->mapsWith = 1;   // (Moemon Kai: HOENN's roamer)
+        if (roamer->active && sPokedexAreaScreen->map == 0)
         {
             GetRoamerLocation(&sPokedexAreaScreen->overworldAreasWithMons[0].mapGroup, &sPokedexAreaScreen->overworldAreasWithMons[0].mapNum);
             sPokedexAreaScreen->overworldAreasWithMons[0].regionMapSectionId = Overworld_GetMapHeaderByGroupAndId(sPokedexAreaScreen->overworldAreasWithMons[0].mapGroup, sPokedexAreaScreen->overworldAreasWithMons[0].mapNum)->regionMapSectionId;
@@ -317,6 +350,28 @@ static void FindMapsWithMon(u16 species)
             sPokedexAreaScreen->numOverworldAreas = 0;
         }
     }
+}
+
+// Moemon Kai: an area on JOHTO's / KANTO's maps: a glow where the map's layout has its section, a marker elsewhere
+static void SetQzAreaHasMon(u16 mapGroup, u16 mapNum)
+{
+    mapsec_u16_t sec = GetRegionMapSectionId(mapGroup, mapNum);
+    u16 x, y, i;
+    for (y = 0; y < AREA_SCREEN_HEIGHT; y++)
+        for (x = 0; x < AREA_SCREEN_WIDTH; x++)
+            if (GetRegionMapSecIdAt(x, y) == sec)
+            {
+                for (i = 0; i < sPokedexAreaScreen->numOverworldAreas; i++)
+                    if (sPokedexAreaScreen->overworldAreasWithMons[i].regionMapSectionId == sec)
+                        return;
+                SetAreaHasMon(mapGroup, mapNum);
+                return;
+            }
+    for (i = 0; i < sPokedexAreaScreen->numSpecialAreas; i++)
+        if (sPokedexAreaScreen->specialAreaRegionMapSectionIds[i] == sec)
+            return;
+    if (sPokedexAreaScreen->numSpecialAreas < MAX_AREA_MARKERS)
+        sPokedexAreaScreen->specialAreaRegionMapSectionIds[sPokedexAreaScreen->numSpecialAreas++] = sec;
 }
 
 static void SetAreaHasMon(u16 mapGroup, u16 mapNum)
@@ -385,6 +440,7 @@ static bool8 MapHasSpecies(const struct WildPokemonHeader *info, u16 species)
             return FALSE;
     }
 
+    sAreaRegion = MP_Region_OfGroup(info->mapGroup);
     if (MonListHasSpecies(info->landMonsInfo, species, NUM_LAND_MONS_ENCOUNTER_SLOTS))
         return TRUE;
     if (MonListHasSpecies(info->waterMonsInfo, species, NUM_WATER_MONS_ENCOUNTER_SLOTS))
@@ -407,9 +463,10 @@ static bool8 MonListHasSpecies(const struct WildPokemonInfo *info, u16 species, 
     u16 i;
     if (info != NULL)
     {
+        info = MP_Region_WildInfoIn(info, sAreaRegion);   // Moemon Kai: as the game uses it there
         for (i = 0; i < size; i++)
         {
-            if (info->wildPokemon[i].species == species)
+            if (MP_WildSlotSpecies(info, i) == species)
                 return TRUE;
         }
     }
@@ -587,6 +644,18 @@ void ShowPokedexAreaScreen(u16 species, u8 *screenSwitchState)
     sPokedexAreaScreen = AllocZeroed(sizeof(*sPokedexAreaScreen));
     sPokedexAreaScreen->species = species;
     sPokedexAreaScreen->screenSwitchState = screenSwitchState;
+    // Moemon Kai: the player's own region's map if the species is there, else the first that has it
+    sPokedexAreaScreen->map = MP_RegionMap_PlayerMap();
+    MP_RegionMap_AreaShow(sPokedexAreaScreen->map);
+    FindMapsWithMon(species);
+    if (sPokedexAreaScreen->mapsWith != 0 && !(sPokedexAreaScreen->mapsWith & (1 << sPokedexAreaScreen->map)))
+    {
+        u8 m = 0;
+        while (!(sPokedexAreaScreen->mapsWith & (1 << m)))
+            m++;
+        sPokedexAreaScreen->map = m;
+    }
+    MP_RegionMap_AreaShow(sPokedexAreaScreen->map);
     screenSwitchState[0] = 0;
     taskId = CreateTask(Task_ShowPokedexAreaScreen, 0);
     gTasks[taskId].tState = 0;
@@ -640,6 +709,9 @@ static void Task_ShowPokedexAreaScreen(u8 taskId)
     case 10:
         SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_BG0 | BLDCNT_EFFECT_BLEND | BLDCNT_TGT2_BG0 | BLDCNT_TGT2_ALL);
         StartAreaGlow();
+        printf("[test] dex area: species %d map %d maps with %d areas %d markers %d\n", sPokedexAreaScreen->species,
+               sPokedexAreaScreen->map, sPokedexAreaScreen->mapsWith, sPokedexAreaScreen->numOverworldAreas,
+               sPokedexAreaScreen->numSpecialAreas);
         ShowBg(2);
         ShowBg(3); // TryShowPokedexAreaMap will have done this already
         SetGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON);
@@ -676,6 +748,11 @@ static void Task_HandlePokedexAreaScreenInput(u8 taskId)
             gTasks[taskId].data[1] = 2;
             PlaySE(SE_DEX_PAGE);
         }
+        else if (JOY_NEW(SELECT_BUTTON | DPAD_UP | DPAD_DOWN) && (sPokedexAreaScreen->mapsWith & ~(1 << sPokedexAreaScreen->map)))
+        {
+            gTasks[taskId].data[1] = 3;   // Moemon Kai: the next map the species is on
+            PlaySE(SE_DEX_PAGE);
+        }
         else
             return;
         break;
@@ -686,6 +763,20 @@ static void Task_HandlePokedexAreaScreenInput(u8 taskId)
         if (gPaletteFade.active)
             return;
         DestroyAreaScreenSprites();
+        if (gTasks[taskId].data[1] == 3)
+        {
+            u8 m = sPokedexAreaScreen->map;
+            do
+                m = (m + 1) % 8;
+            while (!(sPokedexAreaScreen->mapsWith & (1 << m)));
+            sPokedexAreaScreen->map = m;
+            MP_RegionMap_AreaShow(m);
+            FreePokedexAreaMapBgNum();
+            sPokedexAreaScreen->numAreaMarkerSprites = 0;
+            gTasks[taskId].func = Task_ShowPokedexAreaScreen;
+            gTasks[taskId].tState = 0;
+            return;
+        }
         sPokedexAreaScreen->screenSwitchState[0] = gTasks[taskId].data[1];
         ResetPokedexAreaMapBg();
         DestroyTask(taskId);
@@ -718,11 +809,13 @@ static void CreateAreaMarkerSprites(void)
     numSprites = 0;
     for (i = 0; i < sPokedexAreaScreen->numSpecialAreas; i++)
     {
+        u16 bx, by, bw, bh;
         mapSecId = sPokedexAreaScreen->specialAreaRegionMapSectionIds[i];
-        x = 8 * (gRegionMapEntries[mapSecId].x + 1) + 4;
-        y = 8 * (gRegionMapEntries[mapSecId].y) + 28;
-        x += 4 * (gRegionMapEntries[mapSecId].width - 1);
-        y += 4 * (gRegionMapEntries[mapSecId].height - 1);
+        MP_RegionMap_AreaBox(mapSecId, &bx, &by, &bw, &bh);   // Moemon Kai: on the map shown
+        x = 8 * (bx + 1) + 4;
+        y = 8 * (by) + 28;
+        x += 4 * (bw - 1);
+        y += 4 * (bh - 1);
         spriteId = CreateSprite(&sAreaMarkerSpriteTemplate, x, y, 0);
         if (spriteId != MAX_SPRITES)
         {

@@ -82,9 +82,13 @@ bool8 MP_Region_IsSharedMap(u8 group, u8 num)
     return FALSE;
 }
 
+static s8 sRegionAsked = -1;   // MP_Region_WildInfoIn: the region a table is looked at as
+
 u8 MP_Region_Current(void)
 {
     u8 group = gSaveBlock1Ptr->location.mapGroup;
+    if (sRegionAsked >= 0)
+        return sRegionAsked;
     if (MP_Region_IsSharedMap(group, gSaveBlock1Ptr->location.mapNum) && gRegionState.current < REGION_COUNT)
         return gRegionState.current;
     return MP_Region_OfGroup(group);
@@ -1011,6 +1015,23 @@ bool8 MP_IsStarterLine(u16 species)
         if (sStarterLines[i] == species)
             return TRUE;
     return FALSE;
+}
+
+// A wild table as the game uses it in REGION (the POKéDEX's AREA, from wherever the player is)
+const struct WildPokemonInfo *MP_Region_WildInfoIn(const struct WildPokemonInfo *info, u8 region)
+{
+    sRegionAsked = region;
+    info = MP_Region_WildInfo(info);
+    sRegionAsked = -1;
+    return info;
+}
+
+u16 MP_Gen_StandInIn(u16 species, u8 region)
+{
+    sRegionAsked = region;
+    species = MP_Gen_StandIn(species);
+    sRegionAsked = -1;
+    return species;
 }
 
 u16 MP_WildSlotSpecies(const struct WildPokemonInfo *info, u8 index)
