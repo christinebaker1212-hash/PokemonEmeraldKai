@@ -157,7 +157,7 @@ TEAMING UP FOR A DOUBLE BATTLE
   never grew and daily events never came round (SKIP THE INTRO also left
   them off). Old saves are fixed when loaded: Berry trees carry on from where
   they are (no years of growth at once) and daily events get one new day.
-* LEVEL SCALING (OPTIONS > GAME, ON at first): wild Moemon and trainers keep
+* LEVEL SCALING (OPTIONS > BATTLE, ON at first): wild Moemon and trainers keep
   up with your team, so you can't out-level the whole game. Your team's level
   is the average of your three highest-level Moemon (in a co-op battle, of
   everyone's teams). Trainers' strongest Moemon are at that level, Gym
@@ -913,7 +913,7 @@ The MOEMON GARDEN's Moemon use the PMD Collab's overworld sprites (the
 Pokemon Mystery Dungeon style, every one of the 386): drawn whole at their
 real size, with their own walking, idle, sleeping, eating, sparring,
 hopping, twirling and more animations for whatever they're doing.
-OPTIONS > GAME > FOLLOWERS: DEFAULT (the original sprites for the MOEMON
+OPTIONS > DISPLAY > FOLLOWERS: DEFAULT (the original sprites for the MOEMON
 following you, PMD in the GARDEN), PMD (everywhere) or ORIGINAL
 (everywhere). Shiny ones have their shiny
 colors (and female ones their own look where the collab drew one), and a
@@ -1074,23 +1074,35 @@ Older 144x32 / 288x32 walking sheets still work.
 
 OPTIONS (START > OPTIONS, or OPTIONS on the title screen)
 ---------------------------------------------------------
-Every setting in one place, in four tabs: L / R switches tabs, Up / Down picks a
+Every setting in one place, in five tabs: L / R switches tabs, Up / Down picks a
 row, Left / Right (or A) changes it, B or CLOSE leaves. The line at the bottom
 says what the row does.
-GAME      TEXT SPEED, BATTLE SCENE, BATTLE STYLE, SOUND, BUTTON MODE, FRAME,
-          TYPE ICONS, NAME CASE, CREATURES (as before), and
+GAME      reading, sound and the card games: TEXT SPEED, FRAME, NAME CASE,
+          CREATURES, BUTTON MODE, SOUND (as before), and
   BIKE MUSIC    ON: the cycling song on a bike. OFF: the map's own song.
   SURF MUSIC    ON: the surfing and underwater songs. OFF: surfing keeps the
                 map's song, and diving keeps the song of the sea above.
-DISPLAY
+  CARD SCALING, CARD ART, CARD BACKS: see the card games below.
+BATTLE    how battles look, then their rules: BATTLE SCENE, BATTLE STYLE,
+          BATTLE ANIMS (below), TYPE ICONS, LEVEL SCALING, GENERATION, MOVE
+          KIND, MEGA EVOLUTION, Z-MOVES, DYNAMAX, TERASTALLIZE
+DISPLAY   the window, then how the field looks (FOLLOWERS, SPRITE SCALING,
+          SHADOWS)
   FULLSCREEN    borderless fullscreen (also F11 or Alt+Enter)
   WINDOW SCALE  1x to 10x
   SCALING       PIXEL PERFECT (whole-number zoom, sharpest),
                 SHARP FIT (fills the screen, still crisp),
-                STRETCH (fills the screen exactly)
+                STRETCH (fills the screen exactly). The GAME CENTER's games
+                follow it too: their own 4:3 picture, with black beside it,
+                or at STRETCH filling the whole screen.
   FILTER        OFF, SCANLINES, LCD GRID
   VSYNC         on/off
-  BATTLE ANIMS  CLASSIC (the original animations) or MODERN (the same
+  FOLLOWERS     which pictures followers use (DEFAULT, PMD, ORIGINAL)
+  SPRITE SCALING  A opens its page: SINNOH PEOPLE, and FOLLOWERS / GARDEN
+                MOEMON: A turns the shrinking on or off, Left / Right sets how
+                close small PMD pictures come to their true size (5% to 100%)
+  SHADOWS       a soft shadow under people and Moemon
+BATTLE ANIMS (on BATTLE): CLASSIC (the original animations) or MODERN (the same
                 animations with glowing effects, trails, shockwaves and
                 bursts of each type's colors when a move hits). Only your
                 screen changes: friends on either setting stay in step, and
@@ -1280,7 +1292,7 @@ them stands the CARD CLUB's Yu-Gi-Oh! duelist (see YU-GI-OH! below).
                   RIGHT picks MOEMON, YU-GI-OH! or TRIAD), or the CARD CASE
                   button in front of them (the game whose side the case was
                   on).
-  Card art        OPTIONS > DISPLAY > CARD ART: PRINTED ART (the printed
+  Card art        OPTIONS > GAME > CARD ART: PRINTED ART (the printed
                   pictures in Game Boy card frames), GAME BOY (the Game Boy
                   pictures) or FULL CARD (the whole printed cards). CARD
                   BACKS: PRINTED or PIXEL. The few cards that were only ever
@@ -1379,7 +1391,7 @@ those of the Starter Decks and the English boosters up to the end of 2003.
                   in twenty-four, as in 2002-2003. Rarities show on the cards:
                   a silver name for Rare, shiny art for Super, gold for Ultra,
                   a rainbow for Secret.
-  Card art        CARD ART and CARD BACKS (OPTIONS > DISPLAY) work for these
+  Card art        CARD ART and CARD BACKS (OPTIONS > GAME) work for these
                   cards too: GAME BOY shows Stairway to the Destined Duel's
                   pictures, and CARD BACKS: PRINTED the real card back.
   Friends         CO-OP > FRIENDS > a friend > CARD DUEL or CARD TRADE with

@@ -134,12 +134,12 @@ from before 1.18.1 the TMs their flags prove they got and no longer have, from t
 Also catch EXP (a catch gives EXP scaled by the damage dealt: BattleScript_MpCatchExp; tests catch_exp, coop_catch_exp)
 and BATTLE FLAG phrases ("Set phrases, or plant?", the save's easy chat battle phrases sent with MPR_ARRIVED /
 BATTLE_GO, MPR_PHRASE_READY; the loser keeps their money; test flag_phrases).
-Also OPTIONS in tabs (option_menu.c: GAME / DISPLAY / CONTROLS / CO-OP rows, L/R tabs; replaces START > SETTINGS and
+Also OPTIONS in tabs (option_menu.c: GAME / BATTLE / DISPLAY / CONTROLS / CO-OP rows since 1.63.14, L/R tabs; replaces START > SETTINGS and
 CO-OP > SPECTATE) with BIKE MUSIC / SURF MUSIC (overworld.c MpRideMusic), BUTTON ICONS (gamepad.c) and MOENAV CALLS
 (match_call.c SelectMatchCallTrainer); tests options_tabs, music_options, spec_menu.
 Also POKéDEX entries from Ruby, Sapphire, Emerald and FireRed as one long text (pokedex.c TEXT tab: MpDexBuild / MpDexDraw,
 reading mode UP/DOWN/B; data from tools/moemon_dex into src/data/pokemon/mp_dex_more.h and mp_dex_bar.h; test dex_text).
-Also FF8-style level scaling (mp_levelscale.c: OPTIONS > GAME > LEVEL SCALING and its page of settings MP_SCALE_*, the host's
+Also FF8-style level scaling (mp_levelscale.c: OPTIONS > BATTLE > LEVEL SCALING and its page of settings MP_SCALE_*, the host's
 online, set on HOST A GAME > GAME RULES; the team's top-3 average, co-op seats average via MpState.top3; trainers, wild (halfway
 by default), scripted wild; badge caps, boss margins, trainer evolutions, a raised wild one's evolved form as a rare encounter;
 tests levelscale_*, coop_levelscale, host_rules).

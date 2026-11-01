@@ -10,6 +10,8 @@ press A 2
 wait 120
 press R 2
 wait 20
+press R 2
+wait 20
 press DOWN 2
 wait 5
 press DOWN 2
@@ -33,6 +35,13 @@ wait 5
 press A 2
 wait 10
 shot p_changed
+press LEFT 2
+wait 10
+press A 2
+wait 10
+press A 2
+wait 10
+shot p_95
 press B 2
 wait 20
 shot p_back

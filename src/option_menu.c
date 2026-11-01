@@ -42,7 +42,9 @@ enum
     WIN_OPTIONS
 };
 
-enum { TAB_GAME, TAB_DISPLAY, TAB_CONTROLS, TAB_COOP, TAB_COUNT };
+// (1.63.14, the user: friendlier, nothing removed) GAME: text, sound, cards; BATTLE: the battles' look and rules; DISPLAY:
+// the window, then how the field looks; CONTROLS; CO-OP
+enum { TAB_GAME, TAB_BATTLE, TAB_DISPLAY, TAB_CONTROLS, TAB_COOP, TAB_COUNT };
 
 // What a row sets
 enum
@@ -149,10 +151,11 @@ static const u16 sOptionMenuText_Pal[] = INCGFX_U16("graphics/interface/option_m
 static const u8 sEqualSignGfx[] = INCGFX_U8("graphics/interface/option_menu_equals_sign.png", ".4bpp");
 
 static const u8 sText_TabGame[] = _("GAME");
+static const u8 sText_TabBattle[] = _("BATTLE");
 static const u8 sText_TabDisplay[] = _("DISPLAY");
 static const u8 sText_TabControls[] = _("CONTROLS");
 static const u8 sText_TabCoop[] = _("CO-OP");
-static const u8 *const sTabNames[TAB_COUNT] = {sText_TabGame, sText_TabDisplay, sText_TabControls, sText_TabCoop};
+static const u8 *const sTabNames[TAB_COUNT] = {sText_TabGame, sText_TabBattle, sText_TabDisplay, sText_TabControls, sText_TabCoop};
 
 static const u8 sText_TypeIcons[] = _("TYPE ICONS");
 static const u8 sText_NameCase[] = _("NAME CASE");
@@ -397,39 +400,41 @@ static void BuildRows(void)
     }
     switch (sTab)
     {
-    case TAB_GAME:
+    case TAB_GAME:   // reading, sound, the card games
         AddRow(OPT_TEXTSPEED, 0);
+        AddRow(OPT_FRAME, 0);
+        AddRow(OPT_NAMECASE, 0);
+        AddRow(OPT_CREATURES, 0);
+        AddRow(OPT_BUTTONMODE, 0);
+        AddRow(OPT_SOUND, 0);
+        AddRow(OPT_BIKEMUSIC, 0);
+        AddRow(OPT_SURFMUSIC, 0);
+        AddRow(OPT_CARDSCALE, 0);
+        AddRow(OPT_CARDART, 0);
+        AddRow(OPT_CARDBACK, 0);
+        break;
+    case TAB_BATTLE:   // how battles look, then their rules
         AddRow(OPT_BATTLESCENE, 0);
         AddRow(OPT_BATTLESTYLE, 0);
-        AddRow(OPT_MOVESPLIT, 0);   // Moemon Kai: Gen 4's physical / special split
+        AddRow(OPT_BATTLEANIMS, 0);
+        AddRow(OPT_TYPEICONS, 0);
+        AddRow(OPT_LEVELSCALE, 0);
         AddRow(OPT_GENERATION, 0);  // Moemon Kai: which generations' Pokémon, moves and types (mp_region.c)
+        AddRow(OPT_MOVESPLIT, 0);   // Moemon Kai: Gen 4's physical / special split
         AddRow(OPT_MEGA, 0);
         AddRow(OPT_ZMOVES, 0);
         AddRow(OPT_DYNAMAX, 0);
         AddRow(OPT_TERA, 0);
-        AddRow(OPT_SOUND, 0);
-        AddRow(OPT_BUTTONMODE, 0);
-        AddRow(OPT_FRAME, 0);
-        AddRow(OPT_TYPEICONS, 0);
-        AddRow(OPT_NAMECASE, 0);
-        AddRow(OPT_CREATURES, 0);
-        AddRow(OPT_FOLLOWSPRITES, 0);
-        AddRow(OPT_BIKEMUSIC, 0);
-        AddRow(OPT_SURFMUSIC, 0);
-        AddRow(OPT_LEVELSCALE, 0);
-        AddRow(OPT_CARDSCALE, 0);
         break;
-    case TAB_DISPLAY:
+    case TAB_DISPLAY:   // the window, then the field's look
         AddRow(OPT_FULLSCREEN, 0);
         AddRow(OPT_WINSCALE, 0);
         AddRow(OPT_SCALING, 0);
         AddRow(OPT_FILTER, 0);
         AddRow(OPT_VSYNC, 0);
-        AddRow(OPT_BATTLEANIMS, 0);
+        AddRow(OPT_FOLLOWSPRITES, 0);
         AddRow(OPT_SPRITESCALE, 0);
         AddRow(OPT_SHADOWS, 0);
-        AddRow(OPT_CARDART, 0);
-        AddRow(OPT_CARDBACK, 0);
         break;
     case TAB_CONTROLS:
         AddRow(OPT_PADSELECT, 0);
@@ -807,8 +812,14 @@ static void Change(u8 row, int dir)
     case OPT_AUTOSAVE:    if (MOEMON_DEV_BUILD) break; gMpConfig.autosaveMinutes = sAutosaveSteps[Wrap(AutosaveIndex() + dir, ARRAY_COUNT(sAutosaveSteps))]; break;
     case OPT_FLAGRANGE:   gMpConfig.trainerRange = Wrap(gMpConfig.trainerRange - 1 + dir, 8) + 1; break;
     case OPT_BIKEMUSIC:   gMpConfig.bikeMusic = !gMpConfig.bikeMusic; break;
-    case OPT_SS_FOLLOW:   ScaleChange(&gMpConfig.scaleFollowers, &gMpConfig.scaleFollowersPct, dir); break;
-    case OPT_SS_GARDEN:   ScaleChange(&gMpConfig.scaleGarden, &gMpConfig.scaleGardenPct, dir); break;
+    case OPT_SS_FOLLOW:
+        ScaleChange(&gMpConfig.scaleFollowers, &gMpConfig.scaleFollowersPct, dir);
+        MPNet_Log("sprite scaling: followers %s %d%%", gMpConfig.scaleFollowers ? "on" : "off", gMpConfig.scaleFollowersPct);
+        break;
+    case OPT_SS_GARDEN:
+        ScaleChange(&gMpConfig.scaleGarden, &gMpConfig.scaleGardenPct, dir);
+        MPNet_Log("sprite scaling: garden %s %d%%", gMpConfig.scaleGarden ? "on" : "off", gMpConfig.scaleGardenPct);
+        break;
     case OPT_SPRITESCALE: break;   // A opens its page
     case OPT_FOLLOWSPRITES:
         gMpConfig.followerSprites = Wrap(gMpConfig.followerSprites + dir, MP_FOLLOW_SPRITES_COUNT);
@@ -1089,7 +1100,7 @@ static void DrawHint(void)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.noShadows ? "NO SHADOWS UNDER PEOPLE AND MOEMON" : "A SOFT SHADOW UNDER PEOPLE AND MOEMON");
     else if (opt == OPT_SS_FOLLOW || opt == OPT_SS_GARDEN)
     {
-        u8 pct = opt == OPT_SS_FOLLOW ? gMpConfig.scaleFollowers : gMpConfig.scaleGarden;
+        u8 pct = opt == OPT_SS_FOLLOW ? MP_SCALE_FOLLOWERS_NOW() : MP_SCALE_GARDEN_NOW();
         if (pct == 0)
             snprintf(ascii, sizeof(ascii), "A: ON/OFF  OFF: PMD PICTURES AS THEY ARE");
         else
@@ -1185,7 +1196,7 @@ static void DrawHeader(void)
     else if (sScalePage)
     {
         u8 buf[40];
-        u8 *p = StringCopy(buf, sTabNames[TAB_GAME]);
+        u8 *p = StringCopy(buf, sTabNames[TAB_BATTLE]);
         *p++ = CHAR_SPACE;
         *p++ = CHAR_GREATER_THAN;
         *p++ = CHAR_SPACE;
@@ -1205,7 +1216,16 @@ static void DrawHeader(void)
     }
     else
     {
-        // the tabs, the one shown in red
+        // the tabs, the one shown in red, spread over the header (1.63.14: five; the gaps shrink to fit)
+        int total = 0, gap;
+        for (i = 0; i < TAB_COUNT; i++)
+            total += GetStringWidth(FONT_NORMAL, sTabNames[i], 0);
+        x = 4;
+        gap = (26 * 8 - 8 - total) / (TAB_COUNT - 1);   // (the header window is 26 tiles wide)
+        if (gap > 16)
+            gap = 16;
+        if (gap < 4)
+            gap = 4;
         for (i = 0; i < TAB_COUNT; i++)
         {
             u8 dst[24];
@@ -1221,7 +1241,7 @@ static void DrawHeader(void)
                 dst[j++] = *t++;
             dst[j] = EOS;
             AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, dst, x, 1, TEXT_SKIP_DRAW, NULL);
-            x += GetStringWidth(FONT_NORMAL, sTabNames[i], 0) + 16;
+            x += GetStringWidth(FONT_NORMAL, sTabNames[i], 0) + gap;
         }
     }
     CopyWindowToVram(WIN_HEADER, COPYWIN_FULL);
@@ -1454,7 +1474,7 @@ static void Task_OptionMenuProcessInput(u8 taskId)
     {
         PlaySE(SE_SELECT);
         sScalePage = TRUE;
-        GoTo(TAB_GAME, 0, 0);
+        GoTo(TAB_BATTLE, 0, 0);
         return;
     }
     else if (sScalePage && (JOY_NEW(B_BUTTON | START_BUTTON) || (JOY_NEW(A_BUTTON) && opt == OPT_SC_BACK)))
@@ -1462,7 +1482,7 @@ static void Task_OptionMenuProcessInput(u8 taskId)
         u8 i;
         PlaySE(SE_SELECT);
         sScalePage = FALSE;
-        GoTo(TAB_GAME, 0, 0);
+        GoTo(TAB_BATTLE, 0, 0);
         for (i = 0; i < sRowCount; i++)   // back on its row
             if (sRows[i].opt == OPT_LEVELSCALE)
                 sSel = i;

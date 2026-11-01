@@ -264,7 +264,7 @@ TK_*; MPR_T_INVITE carries it, protocol 58), then the round robin as before. Car
 opens both games' deck pick with the round's session (0x40000000 | tid | round | ids), the lower id invites; the result
 comes back once through MP_Tourney_OnCardResult (a finished duel; leaving it: a loss for whoever left). The ready check
 is the CARD CASE and the deck in use (Tcg_TourneyNotReady). Debug `mp tourney`; tests tcg_tourney, tourney_battles.
-Level scaling (1.19.0, mp_levelscale.c; OPTIONS > GAME > LEVEL SCALING, gMpConfig.levelScaling / ini level_scaling,
+Level scaling (1.19.0, mp_levelscale.c; OPTIONS > BATTLE > LEVEL SCALING, gMpConfig.levelScaling / ini level_scaling,
 on by default; online the host's, MPR_RULES byte 3, re-sent by MP_SendRoomRules when the host changes it): the team's
 level = MP_LevelScale_Top3 (average of the 3 highest-level party Pokémon, eggs left out); in a co-op battle the average
 of every seat's (MpState.top3, wire byte 39, protocol 46). Trainers (battle_main.c CreateNPCTrainerParty): the party's
@@ -289,7 +289,7 @@ PAST 8 BADGES: capped until the League then free (the old rule), free, always ca
 A wild Pokémon raised past its evolution level stays the area's own (the normal encounter); 1 in 10 (personality >> 8
 % 10 == 0, so every game in a co-op battle agrees) is the evolved form, a rare encounter (RareEvolvedForm; log
 "level scale: a rare evolved form"; env MOEMON_SCALE_RARE=1 always / 0 never, tests).
-Who sets them: playing alone, OPTIONS > GAME > LEVEL SCALING (A opens its page: GAME > LEVEL SCALING header, the six
+Who sets them: playing alone, OPTIONS > BATTLE > LEVEL SCALING (A opens its page: GAME > LEVEL SCALING header, the six
 rows, BACK; L / R off on the page; log "level scaling rule N: V"); in a room, its host: HOST A GAME > GAME RULES
 (mp_setup.c SCR_RULES, replacing the TEAM PADDING / BATTLE SPEED rows: those two plus the six; logs "setup: game
 rules", "setup: rule N now V"). A friend's rows show the host's values, locked. MPR_RULES = [id, padding, anim,
@@ -725,7 +725,7 @@ no diagonal rows or turning steps; SPIN looks down, right, up, left). Hops (HOP,
 sheets' rise (made for a top-down dungeon) is cut to a third (MpBigSprite.lift, UpdateLift: the lowest frame's bottom
 is the ground). Fast (running, biking): a walk whose whole cycle is over 30 frames gets an extra tick every other frame;
 quicker ones keep their pace (1.21 doubled every walk: some ran far too fast).
-OPTIONS > GAME > FOLLOWERS (gMpConfig.followerSprites, ini follower_sprites, MP_PmdWanted): DEFAULT the original Moemon
+OPTIONS > DISPLAY > FOLLOWERS (gMpConfig.followerSprites, ini follower_sprites, MP_PmdWanted): DEFAULT the original Moemon
 sprite for followers on the map and PMD for the Garden's Pokémon, PMD both, ORIGINAL both; switching rebuilds the
 sprites at once (MP_Follower_Update / Draw compare pmdOn). Tests: MOEMON_FOLLOWER_SPRITES (the starting value),
 `mp followsprites N`; follow_sprites, pmd_depth. Standing with nothing to do: a DEEPBREATH every 12 s,
@@ -1955,7 +1955,7 @@ SLOW START, AQUA RING, ROOST, choice lock, METRONOME count, LAST RESORT slots, a
 (TAILWIND, LUCKY CHANT, TOXIC SPIKES, STEALTH ROCK, HEALING WISH / LUNAR DANCE) and gGen4Field (GRAVITY, TRICK ROOM,
 COPYCAT's last move, the move-end bits). All reset at battle start (MP_Gen4_BattleStart); a switch-in resets the battler
 (BATON PASS keeps what Gen 4 passes).
-- Physical / special: OPTIONS > GAME > MOVE KIND (GEN 3 by type, GEN 4 by move: gMoveCategories); online the host's
+- Physical / special: OPTIONS > BATTLE > MOVE KIND (GEN 3 by type, GEN 4 by move: gMoveCategories); online the host's
   (MPR_RULES byte 4, protocol 49). MP_IsPhysicalMove decides; Counter / Mirror Coat / Hustle follow it.
 - Moves 355-467 have effects 214-266. struct BattleMove.effect is a u16 since then (a u8 wrapped 256+ around:
   SHADOW FORCE ran "ATTACK UP"). The scripts use one command, `gen4 MODE, ptr` (0xFE, constants/battle_gen4.h G4_*):
@@ -2509,7 +2509,7 @@ walk (red: checked against the FLOORS grid; row 6 in front of the arcade cabinet
   local server), tools/rhythm/test.sh (every chart).
 
 ## BATTLE ANIMS > MODERN (mp_modernanim.c; 1.43.0)
-OPTIONS > DISPLAY > BATTLE ANIMS: CLASSIC / MODERN (gMpConfig.battleAnims, ini battle_anims; MOEMON_BATTLE_ANIMS for
+OPTIONS > BATTLE > BATTLE ANIMS: CLASSIC / MODERN (gMpConfig.battleAnims, ini battle_anims; MOEMON_BATTLE_ANIMS for
 tests). This game only: the Classic animation script always runs (same sprites, tasks, sounds, frame count), MODERN
 draws over the finished picture (sdl2.c VDraw after the battle weather), so friends on either setting stay in step.
 Every animation through LaunchBattleAnimation: moves, general (stat changes, weather, Leech Seed...), status; battles
@@ -3076,7 +3076,7 @@ Old saves need nothing: eggs and Unown keep their real species in the save.
   MULTISCALE, FLUFFY, REGENERATOR, IRON BARBS... Items: ASSAULT VEST, ROCKY HELMET, AIR BALLOON, WEAKNESS POLICY,
   HEAVY-DUTY BOOTS, ABSORB BULB / CELL BATTERY / SNOWBALL, PIXIE PLATE, FAIRY FEATHER, FLOAT STONE.
 - Followers: Quetzal's overworld sprites for 387-1025 (tools/moemon_gen4/gen_followers.py; OGERPON has none).
-- GENERATION: OPTIONS > GAME > GENERATION and HOST A GAME > GAME RULES (gMpConfig.generation 3-9, "generation" in
+- GENERATION: OPTIONS > BATTLE > GENERATION and HOST A GAME > GAME RULES (gMpConfig.generation 3-9, "generation" in
   the config; online the host's: MPR_RULES' last byte, protocol 67). MP_Gen_Cap: HOENN shows up to it, JOHTO / KANTO
   Gen 1-2 at 3, up to it from 4. From 5, JOHTO / KANTO wild slots and trainers' Pokémon are Quetzal's own where their
   generation is allowed, the Gen 4 cap's elsewhere (tools/quetzal_port/gen_modern.py -> src/data/wild_qz_modern.h,
@@ -3472,6 +3472,12 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   so the struct it allocated was never freed (a leak per POKeMON CENTER entered). Test nurse_no_union (CHERRYGROVE).
 
 ## 1.63.14: every follower style placed as PMD, one shadow size, SPRITE SCALING in 5% steps, GAME CENTER pictures
+- OPTIONS in five tabs (the user: friendlier, nothing removed): GAME (TEXT SPEED, FRAME, NAME CASE, CREATURES, BUTTON
+  MODE, SOUND, BIKE / SURF MUSIC, CARD SCALING / ART / BACKS), BATTLE (BATTLE SCENE / STYLE / ANIMS, TYPE ICONS, LEVEL
+  SCALING's page, GENERATION, MOVE KIND, the four gimmicks), DISPLAY (the window's five, FOLLOWERS, SPRITE SCALING's
+  page, SHADOWS), CONTROLS, CO-OP. The header spreads the five names over its 26 tiles. `mp optionstab N`: 0 GAME,
+  1 BATTLE, 2 DISPLAY, 3 CONTROLS, 4 CO-OP. Tests options_tabs, levelscale_options, sprite_scaling_page (SPRITE
+  SCALING's A / LEFT with the real keys), fight_buttons, spec_menu walk the new places.
 - GAME CENTER games follow OPTIONS > DISPLAY > SCALING (the user): PIXEL PERFECT / SHARP FIT show a VS cabinet's
   480x320 as the game picture (the game's 4:3 in the middle, black beside it), STRETCH only that 4:3 picture over the
   window (display.c srcRect from platform/fight.h Fight_ContentSpan: FIGHT_ARCADE_PIC_W 427, MUGEN's MF_GAME_W 426).

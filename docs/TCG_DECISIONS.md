@@ -60,7 +60,7 @@ override `TCG_IMPLEMENTATION.md`'s "Agreed scope" where they differ.
 | 23 | Mat style | A cloth play mat with a motif |
 | 24 | Prizes | 2 x 3, slightly overlapping, as in docs/user_images/37.webp |
 | 25 | Opponent's cards | Turned to face them; HP plates and damage numbers upright |
-| 26 | Art setting | OPTIONS > DISPLAY > CARD ART, used everywhere |
+| 26 | Art setting | OPTIONS > GAME > CARD ART, used everywhere |
 | 27 | Prize shown | Flips over big in the middle, then slides into the hand |
 | 28 | Music | Matches the opponent (Gym Leader music for leaders, trainer music, a calm theme online) |
 | 29 | Full collection | A unique Moemon gift, a gold CARD CASE and a star on the TRAINER CARD |

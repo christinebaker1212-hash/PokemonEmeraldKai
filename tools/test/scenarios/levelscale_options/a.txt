@@ -8,11 +8,15 @@ press UP 2
 wait 10
 press A 2
 wait 120
-press UP 2
+press R 2
 wait 10
-press UP 2
+press DOWN 2
 wait 10
-press UP 2
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press DOWN 2
 wait 10
 press A 2
 wait 30

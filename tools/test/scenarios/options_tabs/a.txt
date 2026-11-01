@@ -14,6 +14,9 @@ wait 20
 shot o_game
 press R 2
 wait 20
+shot o_battle
+press R 2
+wait 20
 shot o_display
 press R 2
 wait 20
@@ -47,6 +50,8 @@ wait 5
 press RIGHT 2
 wait 20
 shot o_coop
+press L 2
+wait 20
 press L 2
 wait 20
 press L 2

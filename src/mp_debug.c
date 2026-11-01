@@ -832,7 +832,7 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "optionstab") == 0)
     {
-        // optionstab N: OPTIONS (open) shows tab N (0 GAME, 1 DISPLAY, 2 CONTROLS, 3 CO-OP)
+        // optionstab N: OPTIONS (open) shows tab N (0 GAME, 1 BATTLE, 2 DISPLAY, 3 CONTROLS, 4 CO-OP)
         void MP_Options_DebugTab(u8 tab);
         MP_Options_DebugTab(atoi(arg));
     }

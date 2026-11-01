@@ -16,6 +16,8 @@ wait 10
 press R 2
 wait 10
 press R 2
+wait 10
+press R 2
 wait 30
 shot a_coop_off
 press A 2

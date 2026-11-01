@@ -61,7 +61,7 @@ Yu-Gi-Oh! table too (5.2). A drawn
   Prize card is held up in the middle ("PRIZE CARD"); Trainers that change the hand
   (PROFESSOR OAK, BILL...) slide the hand up; after a Knock Out the cursor waits on the
   Bench. Tips in the first duels (`TcgBoard_Tutorial`).
-- **Card art** (`tcg_gfx.c`, `G_SetArtMode` / `G_SetBackMode`): OPTIONS > DISPLAY > CARD ART
+- **Card art** (`tcg_gfx.c`, `G_SetArtMode` / `G_SetBackMode`): OPTIONS > GAME > CARD ART
   (`card_art` in the ini) is PRINTED ART (the printed illustration in the Game Boy frame, the
   default), GAME BOY (the Game Boy picture in it) or FULL CARD (the whole printed card); CARD
   BACKS (`card_back`) is PRINTED or PIXEL. All of it is built into the exe: the Game Boy
