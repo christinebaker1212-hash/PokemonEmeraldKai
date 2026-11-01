@@ -29,6 +29,7 @@
 #include "daycare.h"
 #include "item.h"
 #include "berry.h"
+#include "mail.h"
 #include "constants/event_objects.h"
 #include "constants/berry.h"
 #include "constants/items.h"
@@ -102,13 +103,18 @@ static struct
     u8 coinFrames, coinSide;
     u32 swStart, swElapsed;
     bool8 swRunning;
+    u16 swHold;
     s16 dowseX, dowseY;
     u8 dowseFrames;
     s8 dowseFoundX, dowseFoundY;
     u8 grab;               // the MARKING MAP's marker being moved (0xFF none)
     u8 movesType[3];       // the MOVE TESTER's attacking type and the two defending ones (0xFF: none)
+    u8 movesPressed, movesPressTime;
     u8 matchA, matchB;     // the MATCHUP CHECKER's two party slots
+    u8 matchScore;         // (0xFF: not asked)
+    u16 matchTime;
     s32 roulAngle, roulSpeed;
+    bool8 roulStopping;
     u32 timerEnd, timerLeft; // the KITCHEN TIMER (frames)
     bool8 timerRunning;
     u8 ringing;            // the KITCHEN TIMER / ALARM ringing (frames left)
@@ -218,19 +224,71 @@ static void Screen(const char *name)
         memset(sCanvas, 0, sizeof(sCanvas));
 }
 
-static void Cell(const char *sheet, u16 cell, s32 x, s32 y)
+// A cell at (X, Y) of the LCD; FLIP 1 mirrors it left-right and 2 up-down, around its point (Platinum's flips)
+static void CellF(const char *sheet, u16 cell, s32 x, s32 y, u8 flip)
 {
     s16 cx, cy;
     u16 w, h, i, j;
     const u8 *px;
-    if (!S3D_Gfx_PoketchCell(sheet, cell, &cx, &cy, &w, &h, &px))
+    if (cell == 0xFFFF || !S3D_Gfx_PoketchCell(sheet, cell, &cx, &cy, &w, &h, &px))
         return;
     for (j = 0; j < h; j++)
         for (i = 0; i < w; i++)
         {
-            s32 X = x + cx + i, Y = y + cy + j;
+            s32 X = x + ((flip & 1) ? -(cx + i) - 1 : cx + i), Y = y + ((flip & 2) ? -(cy + j) - 1 : cy + j);
             if (px[j * w + i] != 255 && X >= 0 && X < PW && Y >= 0 && Y < PH)
                 sCanvas[Y][X] = px[j * w + i];
+        }
+}
+
+static void Cell(const char *sheet, u16 cell, s32 x, s32 y)
+{
+    CellF(sheet, cell, x, y, 0);
+}
+
+u16 S3D_Gfx_PoketchAnimCell(const char *sheet, u16 seq, u32 t);   // (s3d_gfx.c)
+
+// Platinum's sprite: animation ANIM of SHEET at its point (DX, DY) on the DS's screen (the LCD is at (16, 16) there),
+// T frames into the animation
+static void Spr(const char *sheet, u16 anim, s32 dx, s32 dy, u8 flip, u32 t)
+{
+    CellF(sheet, S3D_Gfx_PoketchAnimCell(sheet, anim, t), dx - 16, dy - 16, flip);
+}
+
+// A cell turned by ANGLE (65536 a turn, as Platinum's) around its point at (X, Y): the ANALOG WATCH's hands, the
+// ROULETTE's arrow
+static void CellRot(const char *sheet, u16 cell, s32 x, s32 y, u32 angle)
+{
+    static const s16 sSin64[65] = {0, 6, 13, 19, 25, 31, 38, 44, 50, 56, 62, 68, 74, 80, 86, 92, 98, 104, 109, 115, 121,
+        126, 132, 137, 142, 147, 152, 157, 162, 167, 172, 177, 181, 185, 190, 194, 198, 202, 206, 209, 213, 216, 220,
+        223, 226, 229, 231, 234, 237, 239, 241, 243, 245, 247, 248, 250, 251, 252, 253, 254, 255, 255, 256, 256, 256};
+    s16 cx, cy;
+    u16 w, h;
+    const u8 *px;
+    s32 a = (angle >> 8) & 255, sn, cs, r, i, j;
+    if (!S3D_Gfx_PoketchCell(sheet, cell, &cx, &cy, &w, &h, &px))
+        return;
+    sn = a < 64 ? sSin64[a] : a < 128 ? sSin64[128 - a] : a < 192 ? -sSin64[a - 128] : -sSin64[256 - a];
+    a = (a + 64) & 255;
+    cs = a < 64 ? sSin64[a] : a < 128 ? sSin64[128 - a] : a < 192 ? -sSin64[a - 128] : -sSin64[256 - a];
+    r = 0;
+    for (i = 0; i < 4; i++)
+    {
+        s32 ox = (i & 1) ? cx + w : cx, oy = (i & 2) ? cy + h : cy, d = ox * ox + oy * oy;
+        if (d > r)
+            r = d;
+    }
+    for (r = 1; r * r < (s32)(r * 0) + 0x7FFFFFFF && r * r <= (s32)0x7FFF; r++)
+        if (r * r >= (s32)(cx * cx + cy * cy) && r * r >= (s32)((cx + w) * (cx + w) + (cy + h) * (cy + h))
+         && r * r >= (s32)((cx + w) * (cx + w) + cy * cy) && r * r >= (s32)(cx * cx + (cy + h) * (cy + h)))
+            break;
+    for (j = -r; j <= r; j++)
+        for (i = -r; i <= r; i++)
+        {
+            // (the picture's pixel that lands here: turned back by the angle; the DS turns clockwise on screen)
+            s32 sx = (i * cs + j * sn) / 256 - cx, sy = (-i * sn + j * cs) / 256 - cy;
+            if (sx >= 0 && sx < w && sy >= 0 && sy < h && px[sy * w + sx] != 255 && x + i >= 0 && x + i < PW && y + j >= 0 && y + j < PH)
+                sCanvas[y + j][x + i] = px[sy * w + sx];
         }
 }
 
@@ -303,17 +361,13 @@ static void Watch(void)
 
 static void Analog(void)
 {
-    static const s8 sSin[60] = {0, 10, 21, 31, 41, 50, 59, 67, 74, 81, 87, 91, 95, 98, 99, 100, 99, 98, 95, 91, 87, 81,
-                                74, 67, 59, 50, 41, 31, 21, 10, 0, -10, -21, -31, -41, -50, -59, -67, -74, -81, -87, -91,
-                                -95, -98, -99, -100, -99, -98, -95, -91, -87, -81, -74, -67, -59, -50, -41, -31, -21, -10};
     u32 h, m;
     RtcCalcLocalTime();
     m = gLocalTime.minutes;
-    h = (gLocalTime.hours % 12) * 5 + m / 12;
+    h = (gLocalTime.hours % 12) * 30 + m / 2;
     Screen("analog_watch");
-    Line(100, 84, 100 + sSin[h] * 36 / 100, 84 - sSin[(h + 15) % 60] * 36 / 100, 3, 4);
-    Line(100, 84, 100 + sSin[m] * 56 / 100, 84 - sSin[(m + 15) % 60] * 56 / 100, 3, 2);
-    Fill(97, 81, 6, 6, 3);
+    CellRot("analog_watch", 1, 100, 84, h * 65536 / 360);   // (Platinum's hour hand, 360 places; the minute hand 60)
+    CellRot("analog_watch", 0, 100, 84, m * 65536 / 60);
 }
 
 // The CALCULATOR: Platinum's keys (7 8 9 C / 4 5 6 + - / 1 2 3 x / / 0 . =), 32 pixels a column from x 16, y 32
@@ -407,7 +461,7 @@ static void Memo(void)
     s32 x, y, r = sP.memoTool ? 4 : 1;
     if (sP.touchNew && sP.sx >= MEMO_W)
     {
-        sP.memoTool = sP.sy >= PH / 2;
+        sP.memoTool = sP.sy < PH / 2;   // (Platinum's: the ERASER above, the PENCIL below)
         PlaySE(SE_SELECT);
     }
     else if (sP.touch && sP.sx < MEMO_W)
@@ -428,14 +482,14 @@ static void Memo(void)
         for (x = 0; x < MEMO_W; x++)
             if (sP.memo[(y * MEMO_W + x) / 8] & (1 << ((y * MEMO_W + x) % 8)))
                 sCanvas[y][x] = 3;
-    Cell("memo_pad", sP.memoTool == 0 ? 0 : 2, 176, 40);
-    Cell("memo_pad", sP.memoTool == 1 ? 1 : 3, 176, 120);
+    Spr("memo_pad", sP.memoTool == 1 ? 1 : 0, 192, 56, 0, 0);
+    Spr("memo_pad", sP.memoTool == 0 ? 3 : 2, 192, 136, 0, 0);
 }
 
 static void Pedometer(void)
 {
     u32 steps = GetGameStat(GAME_STAT_STEPS) - sP.stepBase;
-    bool8 down = sP.touch && TouchIn(64, 80, 64, 64);
+    bool8 down = sP.touch && TouchIn(66, 80, 64, 64);
     if (sP.touchNew && down)
     {
         sP.stepBase = GetGameStat(GAME_STAT_STEPS);
@@ -443,7 +497,7 @@ static void Pedometer(void)
     }
     Screen("pedometer");
     Digits(136, 48, steps > 99999 ? 99999 : steps, 5, TRUE);
-    Cell("pedometer", down ? 1 : 0, 96, 112);
+    Spr("pedometer", down ? 1 : 0, 114, 128, 0, 0);
 }
 
 // A POKéMON's icon in the LCD's shades (its 32x32 picture, each color by its lightness)
@@ -481,6 +535,8 @@ static void Party(void)
         u32 hp = GetMonData(mon, MON_DATA_HP), max = GetMonData(mon, MON_DATA_MAX_HP);
         char buf[12];
         MonIcon(species, GetMonData(mon, MON_DATA_PERSONALITY), x, y + ((sP.frame / 16 + i) & 1));
+        if (GetMonData(mon, MON_DATA_HELD_ITEM) != ITEM_NONE)   // (Platinum's marks: a held item, or MAIL)
+            Spr("party_status", ItemIsMail(GetMonData(mon, MON_DATA_HELD_ITEM)) ? 1 : 0, x + 16 + 28, y + 16 + 28, 0, 0);
         if (species == SPECIES_EGG)
             continue;
         Fill(x + 36, y + 14, 50, 8, 3);
@@ -496,7 +552,7 @@ static void Party(void)
 
 static void Counter(void)
 {
-    bool8 down = sP.touch && TouchIn(64, 88, 64, 64);
+    bool8 down = sP.touch && TouchIn(66, 80, 64, 64);
     if (sP.touchNew && down)
     {
         sP.counter = sP.counter >= 9999 ? 0 : sP.counter + 1;
@@ -506,12 +562,12 @@ static void Counter(void)
         sP.counter = 0;
     Screen("counter");
     Digits(128, 44, sP.counter, 4, TRUE);
-    Cell("counter", down ? 1 : 0, 96, 120);
+    Spr("counter", down ? 1 : 0, 114, 128, 0, 0);
 }
 
 static void Coin(void)
 {
-    if (sP.touchNew && sP.coinFrames == 0 && TouchIn(48, 32, 96, 96))
+    if (sP.touchNew && sP.coinFrames == 0 && TouchIn(56, 72, 80, 80))
     {
         sP.coinFrames = 40;
         sP.coinSide = Random() & 1;
@@ -520,51 +576,71 @@ static void Coin(void)
     Screen("coin_toss");
     if (sP.coinFrames)
     {
-        static const u8 sSpin[4] = {0, 1, 2, 1};
+        // (Platinum's spin while it's in the air, up and back down)
         sP.coinFrames--;
-        Cell("coin_toss", sSpin[(sP.coinFrames / 3) % 4], 96, 72 - (sP.coinFrames > 20 ? 40 - sP.coinFrames : sP.coinFrames));
+        Spr("coin_toss", 0, 112, 144 - (sP.coinFrames > 20 ? 40 - sP.coinFrames : sP.coinFrames) * 3, 0, 40 - sP.coinFrames);
+        if (sP.coinFrames == 0)
+            PlaySE(SE_BALL_BOUNCE_2);
     }
     else
-        Cell("coin_toss", sP.coinSide ? 2 : 0, 96, 72);
+        Spr("coin_toss", sP.coinSide ? 2 : 1, 112, 144, 0, 0);
 }
 
 static void ColorChanger(void)
 {
-    s32 i;
-    if (sP.touchNew && sP.sy >= 112 && sP.sy < 144 && sP.sx >= 16 && sP.sx < 176)
+    if (sP.touch && sP.sy >= 112 && sP.sy < 152 && sP.sx >= 32 && sP.sx < 160)
     {
-        sP.color = (sP.sx - 16) * 8 / 160;
-        PlaySE(SE_SELECT);
+        u8 c = (sP.sx - 32) / 16;
+        if (c != sP.color)
+            sP.color = c, PlaySE(SE_SELECT);
     }
     Screen("color_changer");
-    for (i = 0; i < 8; i++)
-        if (i == sP.color)
-            Cell("color_changer", 0, 26 + i * 20, 128);
+    Spr("color_changer", 0, 56 + sP.color * 16, 148, 0, 0);
 }
 
 // The STOPWATCH: Platinum's Voltorb starts and stops it when touched; SELECT (stopped) sets it back to 0
+// The STOPWATCH: Platinum's Voltorb starts and stops it when tapped; held, it blinks, faster, and blows up: back to 0
 static void Stopwatch(void)
 {
-    u32 t = sP.swElapsed + (sP.swRunning ? gMain.vblankCounter1 - sP.swStart : 0), cs = t * 100 / 60;
-    if (sP.touchNew && TouchIn(48, 56, 96, 100))
+    u32 t = sP.swElapsed + (sP.swRunning ? gMain.vblankCounter1 - sP.swStart : 0), cs = t * 100 / 60, anim;
+    bool8 on = sP.touch && TouchIn(56, 48, 80, 80);
+    if (on)
+        sP.swHold++;
+    else
     {
-        if (sP.swRunning)
-            sP.swElapsed = t, sP.swRunning = FALSE;
-        else
-            sP.swStart = gMain.vblankCounter1, sP.swRunning = TRUE;
-        PlaySE(SE_SELECT);
+        if (sP.swHold > 0 && sP.swHold < 30)
+        {
+            if (sP.swRunning)
+                sP.swElapsed = t, sP.swRunning = FALSE;
+            else
+                sP.swStart = gMain.vblankCounter1, sP.swRunning = TRUE;
+            PlaySE(SE_SELECT);
+        }
+        if (sP.swHold < 150)
+            sP.swHold = 0;
     }
-    if ((sP.newKeys & SELECT_BUTTON) && !sP.swRunning)
+    if (sP.swHold >= 150)   // (the explosion and after)
     {
-        sP.swElapsed = 0;
-        PlaySE(SE_SELECT);
+        if (sP.swHold == 150)
+        {
+            sP.swElapsed = 0, sP.swRunning = FALSE, t = cs = 0;
+            PlaySE(SE_M_EXPLOSION);
+        }
+        if (++sP.swHold > 150 + 24 + 80)
+            sP.swHold = 0;
     }
+    anim = sP.swHold >= 150 + 24 ? 16 : sP.swHold >= 150 ? 15 : sP.swHold >= 90 ? 14 : sP.swHold >= 30 ? 13 : sP.swRunning ? 12 : 11;
     Screen("stopwatch");
-    if (cs >= 100 * 60 * 100)
-        cs = 100 * 60 * 100 - 1;
-    Digits(64, 48, cs / 6000, 2, TRUE);
-    Digits(112, 48, cs / 100 % 60, 2, TRUE);
-    Digits(160, 48, cs % 100, 2, TRUE);
+    if (cs >= 100 * 3600 * 100)
+        cs = 100 * 3600 * 100 - 1;
+    {
+        u32 d[8] = {cs / 360000 / 10 % 10, cs / 360000 % 10, cs / 6000 % 60 / 10, cs / 6000 % 10, cs / 100 % 60 / 10,
+                    cs / 100 % 10, cs % 100 / 10, cs % 10}, i;
+        static const u8 sX[8] = {32, 48, 80, 96, 128, 144, 176, 192};
+        for (i = 0; i < 8; i++)
+            Spr("stopwatch", d[i], sX[i], 40, 0, 0);
+    }
+    Spr("stopwatch", anim, 112, 96, 0, sP.swHold >= 150 ? sP.swHold - 150 : sP.frame);
 }
 
 static void Dowsing(void)
@@ -573,8 +649,8 @@ static void Dowsing(void)
     s32 i, px, py;
     if (sP.touchNew)
     {
-        // the LCD shows the 15x12 tiles around the player (12 pixels a tile); an item within 2 tiles of the touch shows
-        sP.dowseX = sP.sx, sP.dowseY = sP.sy, sP.dowseFrames = 60, sP.dowseFoundX = -128;
+        // the LCD shows the 16x13 tiles around the player (12 pixels a tile); an item within 2 tiles of the touch shows
+        sP.dowseX = sP.sx, sP.dowseY = sP.sy, sP.dowseFrames = 72, sP.dowseFoundX = -128;
         px = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x - MAP_OFFSET + (sP.sx - PW / 2) / 12;
         py = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y - MAP_OFFSET + (sP.sy - PH / 2) / 12;
         PlaySE(SE_DOWNPOUR_STOP);
@@ -593,9 +669,9 @@ static void Dowsing(void)
     if (sP.dowseFrames)
     {
         sP.dowseFrames--;
-        Cell("dowsing_machine", 3 - sP.dowseFrames / 15, sP.dowseX, sP.dowseY);
-        if (sP.dowseFoundX != -128 && (sP.dowseFrames & 8))
-            Cell("dowsing_machine", 0, sP.dowseX + sP.dowseFoundX * 12, sP.dowseY + sP.dowseFoundY * 12);
+        Spr("dowsing_machine", 0, sP.dowseX + 16, sP.dowseY + 16, 0, 72 - sP.dowseFrames);
+        if (sP.dowseFoundX != -128)
+            Spr("dowsing_machine", 1, sP.dowseX + 16 + sP.dowseFoundX * 12, sP.dowseY + 16 + sP.dowseFoundY * 12, 0, sP.frame);
     }
 }
 
@@ -631,15 +707,10 @@ static void LinkSearcher(void)
     s32 i, row = 0;
     char name[MP_NAME_LEN + 2];
     Screen("link_searcher");
-    if (!MP_IsConnected())
-    {
-        Text(40, 70, "NO ONE NEARBY", 3, 2);
-        return;
-    }
-    for (i = 0; i < MP_MAX_PLAYERS; i++)
+    for (i = 0; MP_IsConnected() && i < MP_MAX_PLAYERS && row < 3; i++)
     {
         struct MpPlayer *p = &gMpPlayers[i];
-        s32 bars;
+        s32 bars, b;
         if (i == gMpLocalId || !p->present)
             continue;
         MP_GameToAscii(name, p->name, MP_NAME_LEN);
@@ -649,13 +720,14 @@ static void LinkSearcher(void)
             bars = 2;
         else
             bars = 1;
-        Text(16, 16 + row * 36, name, 3, 2);
-        for (s32 b = 0; b < 4; b++)
-            Fill(140 + b * 10, 30 + row * 36 - b * 5, 7, 5 + b * 5, b < bars ? 3 : 1);
+        Text(12, 6 + row * 18, name, 3, 2);
+        for (b = 0; b < 4; b++)
+            Fill(150 + b * 8, 16 + row * 18 - b * 3, 6, 3 + b * 3, b < bars ? 3 : 1);
         row++;
     }
-    if (row == 0)
-        Text(40, 70, "NO ONE NEARBY", 3, 2);
+    // Platinum's DS and its waves (searching: a friend in the room), or its "no one" mark
+    Spr("link_searcher", 3, 112, 150, 0, 0);
+    Spr("link_searcher", row ? 1 : 2, 112, 102, 0, sP.frame);
 }
 
 
@@ -674,7 +746,8 @@ static void Friendship(void)
         if (sP.touch && species != SPECIES_EGG && TouchIn(x, y, 32, 32))
         {
             u8 f = GetMonData(mon, MON_DATA_FRIENDSHIP);
-            Cell("friendship_checker", f >= 200 ? 3 : f >= 150 ? 2 : f >= 70 ? 1 : 4, x + 16, y - 4);
+            // (Platinum's hearts over it: more, and livelier, the closer it is)
+            Spr("friendship_checker", f >= 200 ? 2 : f >= 150 ? 1 : f >= 70 ? 0 : 3, x + 32, y + 12, 0, sP.frame);
             if (sP.touchNew)
                 PlayCry_Normal(species, 0);
         }
@@ -682,26 +755,31 @@ static void Friendship(void)
 }
 
 // DAY-CARE CHECKER: the two POKéMON at the DAY CARE, their levels now, and an EGG when there is one
+// DAY-CARE CHECKER: the two POKéMON at the DAY CARE (their levels with the steps walked, Platinum's digits and gender
+// marks), and the EGG when there is one
 static void Daycare(void)
 {
-    u8 i;
-    char buf[8];
+    u8 i, k;
     Screen("daycare_checker");
     for (i = 0; i < DAYCARE_MON_COUNT; i++)
     {
         struct BoxPokemon box = gSaveBlock1Ptr->daycare.mons[i].mon;
         u16 species = GetBoxMonData(&box, MON_DATA_SPECIES);
-        u32 exp;
+        u32 exp, level, g;
         if (species == SPECIES_NONE)
             continue;
         exp = GetBoxMonData(&box, MON_DATA_EXP) + gSaveBlock1Ptr->daycare.mons[i].steps;
         SetBoxMonData(&box, MON_DATA_EXP, &exp);
-        snprintf(buf, sizeof(buf), "%d", (int)GetLevelFromBoxMonExp(&box));
-        Text(26 + i * 98, 8, buf, 0, 2);
-        MonIcon(species, GetBoxMonData(&box, MON_DATA_PERSONALITY), 24 + i * 96, 52);
+        level = GetLevelFromBoxMonExp(&box);
+        for (k = 0; k < 3; k++)
+            if (k == 2 || level >= (k == 0 ? 100u : 10u))
+                Spr("daycare_checker", k == 0 ? level / 100 : k == 1 ? level / 10 % 10 : level % 10, 48 + i * 104 + k * 16, 40, 0, 0);
+        g = GetGenderFromSpeciesAndPersonality(species, GetBoxMonData(&box, MON_DATA_PERSONALITY));
+        Spr("daycare_checker", g == MON_MALE ? 10 : g == MON_FEMALE ? 11 : 12, 96 + i * 104, 40, 0, 0);
+        MonIcon(species, GetBoxMonData(&box, MON_DATA_PERSONALITY), 40 + i * 112 - 16, 112 - 16 + ((sP.frame / 16 + i) & 1));
     }
     if (gSaveBlock1Ptr->daycare.offspringPersonality)
-        Cell("daycare_checker", 12, 96, 130);
+        MonIcon(SPECIES_EGG, 0, 96 - 16, 120 - 16);
 }
 
 // POKéMON HISTORY: the last twelve caught or hatched
@@ -751,8 +829,8 @@ static void RegionGridMap(void)
             if (sTypes[y][x])
                 Fill(12 + x * 6 + (sTypes[y][x] == 1), 35 + y * 6 + (sTypes[y][x] == 1), sTypes[y][x] == 1 ? 4 : 6,
                      sTypes[y][x] == 1 ? 4 : 6, sTypes[y][x] == 1 ? 1 : 3);
-    if (px >= 0 && ((sP.frame / 20) & 1))
-        Cell("map", 0, 12 + px * 6 + 3, 35 + py * 6 + 3);
+    if (px >= 0)
+        Spr("map", 18, 12 + px * 6 + 3 + 16, 35 + py * 6 + 3 + 16, 0, sP.frame);
 }
 
 static void MarkingMap(void)
@@ -773,12 +851,12 @@ static void MarkingMap(void)
     {
         Screen("marking_map");
         if (S3D_PlayerMatrixCell(&cx, &cz) && ((sP.frame / 20) & 1))
-            Cell("map", 0, 10 + 6 * cx + 3, 8 + 6 * (cz - 5) + 3);
+            Spr("map", 18, 10 + 6 * cx + 3 + 16, 8 + 6 * (cz - 5) + 3 + 16, 0, sP.frame);
     }
     else
         RegionGridMap();
     for (i = 0; i < 6; i++)
-        Cell("map", 2 + i, sP.markX[i] + 8, sP.markY[i] + 8);
+        Spr("map", 1 + i, sP.markX[i] + 16, sP.markY[i] + 16, 0, 0);
 }
 
 // MOVE TESTER: an attacking type against one or two types: how well it works
@@ -796,166 +874,238 @@ static u8 TypeCount(void)
     return MP_Gen_Cap(MP_Region_Current()) >= 6 ? NUMBER_OF_MON_TYPES : TYPE_FAIRY;
 }
 
+// MOVE TESTER: Platinum's screen: the move's type below (its arrows change it), the target's one or two types above,
+// and how well it works in the bubble
 static void MoveTester(void)
 {
-    char buf[24];
+    static const u8 sArrowX[3][2] = {{28, 116}, {108, 196}, {108, 196}}, sArrowY[3] = {128, 40, 72};
+    char buf[16];
     u32 mult, k, n = TypeCount();
     for (k = 0; k < 3; k++)
     {
-        s32 y = 10 + k * 34;
-        if (sP.touchNew && sP.sy >= y && sP.sy < y + 28)
-        {
-            s32 d = sP.sx < PW / 2 ? -1 : 1, v = sP.movesType[k] == 0xFF ? (s32)n : sP.movesType[k];
-            do
-                v = (v + d + n + (k == 2) * 1) % (n + (k == 2));
-            while (v == TYPE_MYSTERY);
-            sP.movesType[k] = v == (s32)n ? 0xFF : v;
-            PlaySE(SE_SELECT);
-        }
+        u8 side;
+        for (side = 0; side < 2; side++)
+            if (sP.touchNew && TouchIn(sArrowX[k][side] - 16 - 12, sArrowY[k] - 16 - 16, 24, 32))
+            {
+                s32 d = side ? 1 : -1, v = sP.movesType[k] == 0xFF ? (s32)n : sP.movesType[k];
+                do
+                    v = (v + d + n + (k == 2)) % (n + (k == 2));
+                while (v == TYPE_MYSTERY);
+                sP.movesType[k] = v == (s32)n ? 0xFF : v;
+                sP.movesPressed = k * 2 + side, sP.movesPressTime = 8;
+                PlaySE(SE_SELECT);
+            }
     }
-    Fill(0, 0, PW, PH, 0);
+    if (sP.movesPressTime)
+        sP.movesPressTime--;
+    Screen("move_tester");
     for (k = 0; k < 3; k++)
     {
-        s32 y = 10 + k * 34;
-        const char *label = k == 0 ? "MOVE" : "TARGET";
-        Fill(4, y, PW - 8, 28, k == 0 ? 1 : 0);
-        Fill(4, y, PW - 8, 1, 3), Fill(4, y + 27, PW - 8, 1, 3), Fill(4, y, 1, 28, 3), Fill(PW - 5, y, 1, 28, 3);
-        Text(8, y + 3, label, 2, 1);
-        Text(10, y + 11, "<", 3, 2);
-        Text(PW - 18, y + 11, ">", 3, 2);
+        s32 cx = (sArrowX[k][0] + sArrowX[k][1]) / 2 - 16;
         if (sP.movesType[k] == 0xFF)
             snprintf(buf, sizeof(buf), "-");
         else
             MP_GameToAscii(buf, gTypeNames[sP.movesType[k]], TYPE_NAME_LENGTH);
-        Text(PW / 2 - (s32)strlen(buf) * 4, y + 10, buf, 3, 2);
+        Text(cx - (s32)strlen(buf) * 4, sArrowY[k] - 16 - 5, buf, 3, 2);
+        Spr("move_tester", sP.movesPressTime && sP.movesPressed == k * 2 ? 1 : 0, sArrowX[k][0], sArrowY[k], 0, 0);
+        Spr("move_tester", sP.movesPressTime && sP.movesPressed == k * 2 + 1 ? 3 : 2, sArrowX[k][1], sArrowY[k], 0, 0);
     }
     mult = TypeMult(sP.movesType[0], sP.movesType[1]);
     if (sP.movesType[2] != 0xFF && sP.movesType[2] != sP.movesType[1])
         mult = mult * TypeMult(sP.movesType[0], sP.movesType[2]) / 10;
-    snprintf(buf, sizeof(buf), "X%d%s", (int)(mult / 10), mult % 10 == 5 ? ".5" : mult % 10 ? ".25" : "");
-    if (mult < 10 && mult % 5)
-        snprintf(buf, sizeof(buf), "X0.25");
-    Text(PW / 2 - (s32)strlen(buf) * 6, 118, buf, 3, 3);
-    Text(PW / 2 - 40, 142, mult == 0 ? "NO EFFECT" : mult > 10 ? "SUPER" : mult < 10 ? "NOT VERY" : "NORMAL", 2, 2);
+    // (in the bubble: Platinum's marks, two for super effective, one for normal, none for less; and the number)
+    if (mult > 10)
+        Spr("move_tester", 5, 44, 48, 0, 0);
+    else if (mult == 10)
+        Spr("move_tester", 4, 44, 48, 0, 0);
+    if (mult == 0)
+        snprintf(buf, sizeof(buf), "X0");
+    else if (mult < 10)
+        snprintf(buf, sizeof(buf), mult == 5 ? "X.5" : "X.25");
+    else
+        snprintf(buf, sizeof(buf), "X%d", (int)(mult / 10));
+    Text(30, 24, buf, 3, 2);
 }
 
 // MATCHUP CHECKER: two of the party (touch a side to change it) and how well they'd get along at the DAY CARE
+// MATCHUP CHECKER: two of the party (tap one to change it); the button asks, and Platinum's heart meter answers
 static void Matchup(void)
 {
-    u8 n = CalculatePlayerPartyCount(), k, score;
+    u8 n = CalculatePlayerPartyCount(), k;
     if (n == 0)
     {
-        Fill(0, 0, PW, PH, 0);
+        Screen("matchup_checker");
         return;
     }
-    if (sP.touchNew && sP.sy < 100)
+    if (sP.touchNew && TouchIn(8, 100, 64, 48))
+        sP.matchA = (sP.matchA + 1) % n, sP.matchScore = 0xFF, PlaySE(SE_SELECT);
+    if (sP.touchNew && TouchIn(120, 100, 64, 48))
+        sP.matchB = (sP.matchB + 1) % n, sP.matchScore = 0xFF, PlaySE(SE_SELECT);
+    if (sP.touchNew && TouchIn(64, 116, 64, 32))
     {
-        u8 *slot = sP.sx < PW / 2 ? &sP.matchA : &sP.matchB;
-        *slot = (*slot + 1) % n;
+        sP.matchA %= n, sP.matchB %= n;
+        sP.matchScore = sP.matchA == sP.matchB ? 0 : MP_Daycare_Compatibility(&gPlayerParty[sP.matchA].box, &gPlayerParty[sP.matchB].box);
+        sP.matchTime = 0;
         PlaySE(SE_SELECT);
     }
     sP.matchA %= n, sP.matchB %= n;
+    sP.matchTime++;
     Screen("matchup_checker");
     for (k = 0; k < 2; k++)
         MonIcon(GetMonData(&gPlayerParty[k ? sP.matchB : sP.matchA], MON_DATA_SPECIES_OR_EGG),
-                GetMonData(&gPlayerParty[k ? sP.matchB : sP.matchA], MON_DATA_PERSONALITY), 24 + k * 112, 40);
-    score = sP.matchA == sP.matchB ? 0 : MP_Daycare_Compatibility(&gPlayerParty[sP.matchA].box, &gPlayerParty[sP.matchB].box);
-    // (Platinum's hearts: none, one, two or three)
-    Cell("matchup_checker", score >= 70 ? 3 : score >= 50 ? 2 : score >= 20 ? 1 : 0, 96, 128);
+                GetMonData(&gPlayerParty[k ? sP.matchB : sP.matchA], MON_DATA_PERSONALITY), (k ? 176 : 48) - 32, 140 - 32);
+    Spr("matchup_checker", sP.touch && TouchIn(64, 116, 64, 32) ? 10 : 9, 112, 148, 0, 0);
+    if (sP.matchScore == 0xFF)
+    {
+        Spr("matchup_checker", 0, 112, 32, 0, 0);
+        Spr("matchup_checker", 5, 48, 88, 0, 0);
+        Spr("matchup_checker", 6, 176, 88, 0, 0);
+    }
+    else
+    {
+        u8 hearts = sP.matchScore >= 70 ? 3 : sP.matchScore >= 50 ? 2 : sP.matchScore >= 20 ? 1 : 0;
+        Spr("matchup_checker", hearts, 112, 32, 0, sP.matchTime);
+        // (the LUVDISC swim to each other the better they get along)
+        Spr("matchup_checker", hearts >= 2 ? 7 : 5, 48 + (hearts >= 2 ? (sP.matchTime < 40 ? sP.matchTime : 40) / 2 : 0), 88, 0, sP.matchTime);
+        Spr("matchup_checker", hearts >= 2 ? 8 : 6, 176 - (hearts >= 2 ? (sP.matchTime < 40 ? sP.matchTime : 40) / 2 : 0), 88, 0, sP.matchTime);
+    }
 }
 
 // ROULETTE: draw on the wheel, then touch the button to spin it
+// ROULETTE: draw on the wheel; Platinum's PLAY spins its arrow, STOP slows it to a stop, CLEAR wipes the drawing
 static void Roulette(void)
 {
     s32 x, y, r = 1;
-    static const s8 sSinT[16] = {0, 38, 71, 92, 100, 92, 71, 38, 0, -38, -71, -92, -100, -92, -71, -38};
-    if (sP.touchNew && sP.sx >= 152)
-    {
-        sP.roulSpeed = 600 + (Random() % 400);
-        PlaySE(SE_SELECT);
-    }
-    else if (sP.touch && sP.sx < 152)
+    if (sP.touchNew && TouchIn(155, 18, 32, 32))
+        sP.roulSpeed = 1200 + (Random() % 400), sP.roulStopping = FALSE, PlaySE(SE_SELECT);
+    else if (sP.touchNew && TouchIn(155, 64, 32, 32))
+        sP.roulStopping = TRUE, PlaySE(SE_SELECT);
+    else if (sP.touchNew && TouchIn(155, 110, 32, 32))
+        memset(sP.memo, 0, sizeof(sP.memo)), PlaySE(SE_SELECT);
+    else if (sP.touch && sP.sx < 150)
         for (y = sP.sy - r; y <= sP.sy + r; y++)
             for (x = sP.sx - r; x <= sP.sx + r; x++)
                 if (x >= 0 && x < MEMO_W && y >= 0 && y < PH)
                     sP.memo[(y * MEMO_W + x) / 8] |= 1 << ((y * MEMO_W + x) % 8);
-    if (sP.newKeys & SELECT_BUTTON)
-        memset(sP.memo, 0, sizeof(sP.memo));
     if (sP.roulSpeed > 0)
     {
-        sP.roulAngle = (sP.roulAngle + sP.roulSpeed / 40) % 1024;
-        sP.roulSpeed -= 4;
-        if (sP.roulSpeed <= 0)
-            PlaySE(SE_DING_DONG);
+        sP.roulAngle = (sP.roulAngle + sP.roulSpeed) & 0xFFFF;
+        if (sP.roulStopping)
+        {
+            sP.roulSpeed -= 12;
+            if (sP.roulSpeed <= 0)
+                sP.roulSpeed = 0, PlaySE(SE_DING_DONG);
+        }
     }
     Screen("roulette");
     for (y = 0; y < PH; y++)
-        for (x = 0; x < 152; x++)
+        for (x = 0; x < 150; x++)
             if (sP.memo[(y * MEMO_W + x) / 8] & (1 << ((y * MEMO_W + x) % 8)))
                 sCanvas[y][x] = 3;
-    {
-        u32 a = sP.roulAngle * 16 / 1024;   // (16 directions)
-        Line(76, 80, 76 + sSinT[a] * 60 / 100, 80 - sSinT[(a + 4) % 16] * 60 / 100, 3, 3);
-    }
+    CellRot("roulette", 0, 80, 80, sP.roulAngle);
+    Spr("roulette", sP.touch && TouchIn(155, 18, 32, 32) ? 2 : 1, 187, 50, 0, 0);
+    Spr("roulette", sP.touch && TouchIn(155, 64, 32, 32) ? 4 : 3, 187, 96, 0, 0);
+    Spr("roulette", sP.touch && TouchIn(155, 110, 32, 32) ? 6 : 5, 187, 142, 0, 0);
 }
 
 // KITCHEN TIMER: set the minutes and seconds with the arrows, then start; Snorlax wakes when it's up
+// KITCHEN TIMER: Platinum's arrows set each digit, START / STOP / RESET; Snorlax's arms go up when it rings
 static void Timer(void)
 {
+    static const u8 sX[4] = {80, 96, 128, 144};
     u32 left = sP.timerRunning ? (sP.timerEnd > gMain.vblankCounter1 ? sP.timerEnd - gMain.vblankCounter1 : 0) : sP.timerLeft;
+    u32 secs, d[4], k;
     if (sP.timerRunning && left == 0)
         sP.timerRunning = FALSE, sP.timerLeft = 0, sP.ringing = 180;
+    secs = (left + 59) / 60;
+    d[0] = secs / 600 % 10, d[1] = secs / 60 % 10, d[2] = secs % 60 / 10, d[3] = secs % 10;
     if (sP.touchNew)
     {
-        if (TouchIn(56, 128, 80, 32))
-        {
-            if (sP.timerRunning)
-                sP.timerLeft = left, sP.timerRunning = FALSE;
-            else if (sP.timerLeft)
-                sP.timerEnd = gMain.vblankCounter1 + sP.timerLeft, sP.timerRunning = TRUE;
-            sP.ringing = 0;
-            PlaySE(SE_SELECT);
-        }
-        else if (!sP.timerRunning && sP.sy >= 48 && sP.sy < 128)
-        {
-            s32 step = sP.sx < PW / 2 ? 60 * 60 : 60, d = sP.sy < 92 ? 1 : -1;
-            s32 v = (s32)sP.timerLeft + d * step;
-            sP.timerLeft = v < 0 ? 0 : v > 99 * 3600 + 59 * 60 ? 99 * 3600 + 59 * 60 : v;
-            PlaySE(SE_SELECT);
-        }
+        if (TouchIn(0, 128, 64, 32) && !sP.timerRunning && sP.timerLeft)
+            sP.timerEnd = gMain.vblankCounter1 + sP.timerLeft, sP.timerRunning = TRUE, sP.ringing = 0, PlaySE(SE_SELECT);
+        else if (TouchIn(64, 128, 64, 32) && sP.timerRunning)
+            sP.timerLeft = left, sP.timerRunning = FALSE, PlaySE(SE_SELECT);
+        else if (TouchIn(128, 128, 64, 32) && !sP.timerRunning)
+            sP.timerLeft = 0, sP.ringing = 0, PlaySE(SE_SELECT);
+        else if (!sP.timerRunning)
+            for (k = 0; k < 4; k++)
+            {
+                s32 up = TouchIn(sX[k] - 16 - 8, 88 - 16 - 10, 16, 20), down = TouchIn(sX[k] - 16 - 8, 136 - 16 - 10, 16, 20);
+                if (up || down)
+                {
+                    static const u32 sStep[4] = {600, 60, 10, 1}, sMax[4] = {9, 9, 5, 9};
+                    s32 v = (s32)d[k] + (up ? 1 : -1);
+                    v = v < 0 ? (s32)sMax[k] : v > (s32)sMax[k] ? 0 : v;
+                    secs = secs + (v - (s32)d[k]) * (s32)sStep[k];
+                    sP.timerLeft = secs * 60;
+                    d[k] = v;
+                    PlaySE(SE_SELECT);
+                }
+            }
     }
     Screen("kitchen_timer");
-    left = (left + 59) / 60;
-    Digits(92, 94, left / 60 % 100, 2, TRUE);
-    Digits(132, 94, left % 60, 2, TRUE);
-    if (!sP.timerRunning)
+    for (k = 0; k < 4; k++)
     {
-        Cell("kitchen_timer", 4, 76, 66);
-        Cell("kitchen_timer", 4, 116, 66);
-        Cell("kitchen_timer", 5, 76, 122);
-        Cell("kitchen_timer", 5, 116, 122);
+        Spr("digits", d[k], sX[k], 112, 0, 0);
+        if (!sP.timerRunning)
+        {
+            Spr("kitchen_timer", 4, sX[k], 88, 0, sP.frame);
+            Spr("kitchen_timer", 4, sX[k], 136, 2, sP.frame);
+        }
     }
-    Cell("kitchen_timer", sP.timerRunning ? 9 : 7, 96, 144);
+    {
+        bool8 up = sP.ringing && (sP.ringing / 12) & 1;
+        Spr("kitchen_timer", up ? 2 : 3, 48, 56, 0, 0);
+        Spr("kitchen_timer", up ? 0 : 1, 176, 56, 0, 0);
+    }
+    Spr("kitchen_timer", sP.timerRunning || (sP.touch && TouchIn(0, 128, 64, 32)) ? 6 : 5, 48, 160, 0, 0);
+    Spr("kitchen_timer", sP.touch && TouchIn(64, 128, 64, 32) ? 8 : 7, 112, 160, 0, 0);
+    Spr("kitchen_timer", sP.touch && TouchIn(128, 128, 64, 32) ? 10 : 9, 176, 160, 0, 0);
 }
 
 // ALARM CLOCK: the time it rings (touch the upper / lower half of the hours or minutes) and the switch on the right
+// ALARM CLOCK: Platinum's SET switch on the right; set, it shows the alarm's time with arrows to change it (otherwise
+// the time now); ringing, the ears wave, the eyes open and the digits blink
 static void Alarm(void)
 {
+    u32 h, m;
+    bool8 ring = sP.ringing != 0;
     if (sP.touchNew)
     {
-        if (sP.sx >= 160)
-            sP.alarmOn ^= 1, sP.ringing = 0;
-        else if (sP.sx < 80)
-            sP.alarmH = (sP.alarmH + (sP.sy < 128 ? 1 : 23)) % 24;
-        else
-            sP.alarmM = (sP.alarmM + (sP.sy < 128 ? 1 : 59)) % 60;
-        PlaySE(SE_SELECT);
+        if (TouchIn(160, 56, 32, 64))
+            sP.alarmOn ^= 1, sP.ringing = 0, PlaySE(SE_SELECT);
+        else if (sP.alarmOn && TouchIn(40, 88, 32, 32))
+            sP.alarmH = (sP.alarmH + 1) % 24, PlaySE(SE_SELECT);
+        else if (sP.alarmOn && TouchIn(40, 132, 32, 28))
+            sP.alarmH = (sP.alarmH + 23) % 24, PlaySE(SE_SELECT);
+        else if (sP.alarmOn && TouchIn(88, 88, 32, 32))
+            sP.alarmM = (sP.alarmM + 1) % 60, PlaySE(SE_SELECT);
+        else if (sP.alarmOn && TouchIn(88, 132, 32, 28))
+            sP.alarmM = (sP.alarmM + 59) % 60, PlaySE(SE_SELECT);
     }
+    RtcCalcLocalTime();
+    h = sP.alarmOn ? sP.alarmH : gLocalTime.hours;
+    m = sP.alarmOn ? sP.alarmM : gLocalTime.minutes;
     Screen("alarm_clock");
-    Digits(76, 128, sP.alarmH, 2, TRUE);
-    Digits(120, 128, sP.alarmM, 2, TRUE);
-    Fill(162, 20, 26, 12, sP.alarmOn ? 0 : 3);
-    Text(166, 22, sP.alarmOn ? "ON" : "OFF", sP.alarmOn ? 3 : 0, 2);
+    Spr("alarm_clock", sP.alarmOn ? 2 : 3, 192, 104, 0, 0);
+    Spr("alarm_clock", ring ? 1 : 0, 48, 48, 0, sP.frame);
+    Spr("alarm_clock", ring ? 1 : 0, 144, 48, 1, sP.frame);
+    Spr("alarm_clock", sP.alarmOn || ring ? 4 : 5, 56, 80, 0, 0);
+    Spr("alarm_clock", sP.alarmOn || ring ? 4 : 5, 136, 80, 1, 0);
+    if (sP.alarmOn && !ring)
+    {
+        Spr("alarm_clock", 6, 72, 120, 0, sP.frame);
+        Spr("alarm_clock", 6, 72, 164, 2, sP.frame);
+        Spr("alarm_clock", 6, 120, 120, 0, sP.frame);
+        Spr("alarm_clock", 6, 120, 164, 2, sP.frame);
+    }
+    if (!ring || (sP.frame / 15) & 1)
+    {
+        Spr("digits", h / 10, 64, 144, 0, 0);
+        Spr("digits", h % 10, 80, 144, 0, 0);
+        Spr("digits", m / 10, 112, 144, 0, 0);
+        Spr("digits", m % 10, 128, 144, 0, 0);
+    }
 }
 
 // The KITCHEN TIMER and the ALARM ring wherever the POKéTCH is (it opens on the one ringing)
@@ -1010,13 +1160,13 @@ static void Dots(void)
 // BACKLIGHT: its switch lights the LCD
 static void Backlight(void)
 {
-    if (sP.touchNew && TouchIn(48, 40, 96, 80))
+    if (sP.touchNew && TouchIn(56, 56, 80, 64))
     {
         sP.backlight ^= 1;
         PlaySE(SE_SELECT);
     }
     Screen("backlight_toggle");
-    Cell("backlight_toggle", sP.backlight ? 1 : 0, 96, 80);
+    Spr("backlight_toggle", sP.backlight ? 1 : 0, 112, 104, 0, 0);
 }
 
 // BERRY SEARCHER: the map's BERRY trees around (6 pixels a tile, the player in the middle): ripe ones blink
@@ -1099,14 +1249,14 @@ static u8 Targets(struct Target *t)
                     t[n++] = (struct Target){16 + c * 32, 32 + r * 32,
                                              (c == 3 && sCalcKeys[r][3] == sCalcKeys[r][4]) || (c == 0 && r == 3) ? 62 : 30, 30};
         break;
-    case APP_PEDOMETER: t[n++] = (struct Target){64, 80, 64, 64}; break;
-    case APP_COUNTER: t[n++] = (struct Target){64, 88, 64, 64}; break;
-    case APP_COIN: t[n++] = (struct Target){64, 40, 64, 64}; break;
-    case APP_STOPWATCH: t[n++] = (struct Target){48, 56, 96, 100}; break;
-    case APP_BACKLIGHT: t[n++] = (struct Target){48, 40, 96, 80}; break;
+    case APP_PEDOMETER: t[n++] = (struct Target){66, 80, 64, 64}; break;
+    case APP_COUNTER: t[n++] = (struct Target){66, 80, 64, 64}; break;
+    case APP_COIN: t[n++] = (struct Target){56, 96, 80, 56}; break;
+    case APP_STOPWATCH: t[n++] = (struct Target){56, 48, 80, 80}; break;
+    case APP_BACKLIGHT: t[n++] = (struct Target){56, 56, 80, 64}; break;
     case APP_COLOR:
         for (i = 0; i < 8; i++)
-            t[n++] = (struct Target){16 + i * 20, 116, 20, 24};
+            t[n++] = (struct Target){32 + i * 16, 116, 16, 32};
         break;
     case APP_PARTY:
         for (i = 0; i < CalculatePlayerPartyCount(); i++)
@@ -1122,29 +1272,40 @@ static u8 Targets(struct Target *t)
                 t[n++] = (struct Target){12 + (i % 4) * 44, 8 + (i / 4) * 50, 32, 32};
         break;
     case APP_MOVES:
+    {
+        static const u8 sArrowX[3][2] = {{28, 116}, {108, 196}, {108, 196}}, sArrowY[3] = {128, 40, 72};
         for (r = 0; r < 3; r++)
-        {
-            t[n++] = (struct Target){4, 10 + r * 34, PW / 2 - 4, 28};
-            t[n++] = (struct Target){PW / 2, 10 + r * 34, PW / 2 - 4, 28};
-        }
+            for (c = 0; c < 2; c++)
+                t[n++] = (struct Target){sArrowX[r][c] - 28, sArrowY[r] - 32, 24, 32};
         break;
+    }
     case APP_MATCHUP:
-        t[n++] = (struct Target){8, 24, 80, 70};
-        t[n++] = (struct Target){104, 24, 80, 70};
+        t[n++] = (struct Target){8, 100, 64, 48};
+        t[n++] = (struct Target){64, 116, 64, 32};
+        t[n++] = (struct Target){120, 100, 64, 48};
         break;
     case APP_TIMER:
-        t[n++] = (struct Target){60, 52, 32, 30};
-        t[n++] = (struct Target){100, 52, 32, 30};
-        t[n++] = (struct Target){60, 104, 32, 24};
-        t[n++] = (struct Target){100, 104, 32, 24};
-        t[n++] = (struct Target){56, 128, 80, 32};
+    {
+        static const u8 sX[4] = {80, 96, 128, 144};
+        if (!sP.timerRunning)
+            for (i = 0; i < 4; i++)
+            {
+                t[n++] = (struct Target){sX[i] - 24, 62, 16, 20};
+                t[n++] = (struct Target){sX[i] - 24, 110, 16, 20};
+            }
+        for (i = 0; i < 3; i++)
+            t[n++] = (struct Target){i * 64, 128, 64, 32};
         break;
+    }
     case APP_ALARM:
-        t[n++] = (struct Target){40, 96, 40, 30};
-        t[n++] = (struct Target){84, 96, 40, 30};
-        t[n++] = (struct Target){40, 130, 40, 28};
-        t[n++] = (struct Target){84, 130, 40, 28};
-        t[n++] = (struct Target){160, 8, 32, 48};
+        if (sP.alarmOn)
+        {
+            t[n++] = (struct Target){40, 88, 32, 32};
+            t[n++] = (struct Target){40, 132, 32, 28};
+            t[n++] = (struct Target){88, 88, 32, 32};
+            t[n++] = (struct Target){88, 132, 32, 28};
+        }
+        t[n++] = (struct Target){160, 56, 32, 64};
         break;
     }
     return n;

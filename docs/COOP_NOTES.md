@@ -3515,6 +3515,20 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   here: the TRAINER COUNTER, Platinum's POKé RADAR chains.) Badges count from any region (the most in one): the POKéTCH works the same in HOENN, JOHTO and KANTO.
   "<save>.poketch" (version 2): the app, color, pedometer start, counter, memo, dots, markers, history, alarm,
   backlight. Tests: `mp poketch APP`, `mp poketchtap X,Y`; scenarios sinnoh_poketch, poketch_regions.
+  Views and controls (2026-11-01, the user's design): hidden / SMALL (3/8, bottom right, 3/4 opaque; the FRIEND
+  FINDER's radar is top right) / LARGE (7/8, opaque, the field around it): the right stick (gamepad.c flicks,
+  INPUT_ACTION_POKETCH_*; keyboard I / K / J / L) up / down / the apps; its click (O) the cursor mode while it shows
+  (hidden: the FRIEND FINDER). Cursor mode takes the D-pad / left stick, A, B (ends it), L / R, SELECT; apps with
+  buttons lock it to them (Targets, a blinking frame), the others get a free pointer. It only shows on the field with
+  the player free (Available). Art: the decomp's sprite PNGs (built with their cell files) hold each object's picture
+  once, stacked top to bottom in tile order a pixel apart (build_poketch.py cells(): groups); the STOPWATCH's sheet is
+  a compressed NCGR (Ncgr: LZ10, its sprites counting from the shared digits' 80 tiles); double-size turning OAMs keep
+  their picture in the middle; every sheet's animations ride along (S3D_Gfx_PoketchAnimCell: Platinum's playback
+  modes) and each app draws Platinum's sprites where its graphics.c puts them (Spr: DS screen points, the LCD at
+  16, 16): KITCHEN TIMER arms / arrows / START STOP RESET, ALARM CLOCK switch / ears / eyes / arrows, STOPWATCH
+  Voltorb (tap: start / stop; held: blinks, faster, blows up: 0), ANALOG WATCH hands (CellRot), ROULETTE arrow and
+  PLAY / STOP / CLEAR, DAY-CARE digits and gender marks, MATCHUP CHECKER meter / LUVDISC / button, MOVE TESTER arrows
+  and marks, LINK SEARCHER waves, PARTY item / MAIL marks, FRIENDSHIP hearts, MARKING MAP markers.
 - The three card games in SINNOH: its people play by their sprite's look-alike (tcg_field.c Tcg_LookGfx: the specials
   first, then sSinnohStandIns), so the townsfolk and beaten trainers duel as JOHTO's and KANTO's do. Special card
   trainers (sQzSpecials' SINNOH rows): the eight leaders by role and type (ROARK - ROXANNE, MAYLENE - BRAWLY, WAKE -

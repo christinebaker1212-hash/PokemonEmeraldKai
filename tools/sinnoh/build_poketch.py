@@ -22,7 +22,7 @@ SCREENS = ['alarm_clock', 'analog_watch', 'backlight_toggle', 'berry_searcher', 
            'stopwatch', 'trainer_counter']
 TILES = {'analog_watch': 'watch_bg_tiles', 'digital_watch': 'watch_bg_tiles', 'berry_searcher': 'map_bg_tiles',
          'marking_map': 'map_bg_tiles'}
-SHEETS = ['alarm_clock', 'analog_watch', 'backlight_toggle', 'calendar', 'coin_toss', 'color_changer', 'counter',
+SHEETS = ['stopwatch', 'alarm_clock', 'analog_watch', 'backlight_toggle', 'calendar', 'coin_toss', 'color_changer', 'counter',
           'daycare_checker', 'digits', 'dowsing_machine', 'friendship_checker', 'kitchen_timer', 'link_searcher', 'map',
           'matchup_checker', 'memo_pad', 'move_tester', 'party_status', 'pedometer', 'roulette', 'trainer_counter']
 OBJ = {(0, 0): (8, 8), (0, 1): (16, 16), (0, 2): (32, 32), (0, 3): (64, 64), (1, 0): (16, 8), (1, 1): (32, 8),
@@ -56,12 +56,75 @@ def screen(D, name, tiles):
     return bytes(out)
 
 
+class Ncgr:
+    """A compressed character file (the STOPWATCH's, kept as .NCGR.lz): its 4bpp tiles, read like png8.Image"""
+    def __init__(self, path):
+        d = open(path, 'rb').read()
+        assert d[0] == 0x10, path
+        size = d[1] | d[2] << 8 | d[3] << 16
+        out, p = bytearray(), 4
+        while len(out) < size:
+            flags = d[p]
+            p += 1
+            for bit in range(8):
+                if len(out) >= size:
+                    break
+                if flags & (0x80 >> bit):
+                    n = (d[p] >> 4) + 3
+                    disp = ((d[p] & 15) << 8 | d[p + 1]) + 1
+                    p += 2
+                    for _ in range(n):
+                        out.append(out[-disp])
+                else:
+                    out.append(d[p])
+                    p += 1
+        assert out[:4] == b'RGCN', path
+        char = out.index(b'RAHC')
+        off = struct.unpack_from('<I', out, char + 0x1C)[0]
+        size = struct.unpack_from('<I', out, char + 0x18)[0]
+        self.data = bytes(out[char + 8 + off:char + 8 + off + size])
+        self.w, self.h = 8, len(self.data) // 32 * 8   # (one tile a row: the 1D order)
+
+    def px(self, x, y):
+        b = self.data[(y // 8) * 32 + (y % 8) * 4 + x // 2]
+        return b >> 4 if x & 1 else b & 15
+
+
+def sequences(D, name):
+    """[(loop start, playback mode, [(cell, delay)...])] of the sheet's animations"""
+    a = json.load(open(D + name + '_anim.json'))
+    res = a.get('animationResults', [])
+    out = []
+    for q in a['sequences']:
+        frames = [((res[f['resultId']]['index'] if f['resultId'] < len(res) else f['resultId']), f['frameDelay'])
+                  for f in q['frameData']]
+        out.append((q.get('loopStartFrame', 0), q.get('playbackMode', 1), frames))
+    return out
+
+
 def cells(D, name):
     """[(x, y, w, h, shade bytes)] of each cell of the sheet (its OAM pieces drawn together)"""
-    t = png8.Image(D + name + '.png')
+    lz = os.path.exists(D + name + '.NCGR.lz')
+    t = Ncgr(D + name + '.NCGR.lz') if lz else png8.Image(D + name + '.png')
     tw, count = t.w // 8, (t.w // 8) * (t.h // 8)
     cj = json.load(open(D + name + '_cell.json'))
     unit = 1 << cj.get('mappingType', 0)
+    # The decomp's sheet PNGs (built with their cell files) hold each object's picture once, top to bottom in the
+    # order of their tiles, a pixel apart: {first tile: (its picture's top in the PNG, its width)}
+    groups = {}
+    base = 0
+    if lz:   # (its sprites count from the shared digits' 80 tiles, loaded before it)
+        base = min(o['Attr2']['CharName'] * unit for c in cj['cells'] for o in c['OAM'])
+    if not lz:
+        objs = {}
+        for c in cj['cells']:
+            for o in c['OAM']:
+                w, h = OBJ[(o['Attr0']['Shape'], o['Attr1']['Size'])]
+                objs.setdefault(o['Attr2']['CharName'] * unit, (w, h))
+        top = 0
+        for n in sorted(objs):
+            groups[n] = (top, objs[n][0])
+            top += objs[n][1] + 1
     out = []
     for c in cj['cells']:
         pieces = []
@@ -72,7 +135,9 @@ def cells(D, name):
             x = x - 512 if x >= 256 else x
             y = y - 256 if y >= 128 else y
             flips = 0 if a0.get('Rotation') else a1.get('RotationScaling', 0)
-            pieces.append((x, y, w, h, a2['CharName'] * unit, flips & 8, flips & 16))
+            if a0.get('Rotation') and a0.get('SizeDisable'):
+                x, y = x + w // 2, y + h // 2   # (a turning one shown double size: its picture is in the middle)
+            pieces.append((x, y, w, h, a2['CharName'] * unit - base, flips & 8, flips & 16))
         if not pieces:
             out.append((0, 0, 1, 1, b'\xff'))
             continue
@@ -84,10 +149,19 @@ def cells(D, name):
             for oy in range(h):
                 for ox in range(w):
                     sx, sy = (w - 1 - ox if hf else ox), (h - 1 - oy if vf else oy)
-                    n = tile + (sy // 8) * (w // 8) + sx // 8
-                    if n >= count:
-                        continue
-                    v = t.px((n % tw) * 8 + sx % 8, (n // tw) * 8 + sy % 8)
+                    if groups:
+                        g = max(k for k in groups if k <= tile)
+                        top, gw = groups[g]
+                        rel = tile - g + (sy // 8) * (w // 8) + sx // 8   # (tiles into its picture, a row at a time)
+                        X, Y = (rel % (gw // 8)) * 8 + sx % 8, top + (rel // (gw // 8)) * 8 + sy % 8
+                        if X >= t.w or Y >= t.h:
+                            continue
+                        v = t.px(X, Y)
+                    else:
+                        n = tile + (sy // 8) * (w // 8) + sx // 8
+                        if n >= count:
+                            continue
+                        v = t.px((n % tw) * 8 + sx % 8, (n // tw) * 8 + sy % 8)
                     if v:
                         px[(y - y0 + oy) * W + (x - x0 + ox)] = shade(v, True)
         out.append((x0, y0, W, H, bytes(px)))
@@ -125,6 +199,11 @@ def section(root):
         out += s.encode()[:16].ljust(16, b'\0') + struct.pack('<H', len(cs))
         for x, y, w, h, px in cs:
             out += struct.pack('<hhHH', x, y, w, h) + px
+        # then its animations: u16 count, each u8 frames, loop start, playback mode, then (cell, delay) a frame
+        qs = [] if s == 'bigdigits' else sequences(D, s)
+        out += struct.pack('<H', len(qs))
+        for loop, mode, frames in qs:
+            out += struct.pack('<3B', len(frames), loop, mode) + b''.join(struct.pack('<2B', c, min(dl, 255)) for c, dl in frames)
     return bytes(out)
 
 

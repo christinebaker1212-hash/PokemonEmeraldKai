@@ -217,44 +217,103 @@ const u8 *S3D_Gfx_PoketchScreen(const char *name)
     return NULL;
 }
 
-// Cell CELL of the POKéTCH's sprite sheet SHEET: its top-left from the sprite's point, size and shade bytes (255 clear)
-bool8 S3D_Gfx_PoketchCell(const char *sheet, u16 cell, s16 *x, s16 *y, u16 *w, u16 *h, const u8 **px)
+// The POKéTCH's sprite sheet SHEET: its first cell's bytes (and the cell count); NULL: none
+static const u8 *PoketchSheet(const char *sheet, u32 *cellCount)
 {
     const u8 *p;
-    u32 i, n, k, cells;
+    u32 i, n, k, cells, seqs;
     if (!sGfx.tried)
         Load();
     if (!sGfx.ok || (p = sGfx.poketch) == NULL)
-        return FALSE;
+        return NULL;
     n = p[0] | p[1] << 8;
     p += 2 + n * (16 + 192 * 160);
     if (p + 2 > sGfx.poketchEnd)
-        return FALSE;
+        return NULL;
     n = p[0] | p[1] << 8;
     p += 2;
-    for (i = 0; i < n; i++)
+    for (i = 0; i < n && p + 18 <= sGfx.poketchEnd; i++)
     {
         bool8 want = strncmp((const char *)p, sheet, 16) == 0;
         cells = p[16] | p[17] << 8;
         p += 18;
-        for (k = 0; k < cells; k++)
-        {
-            u16 cw = p[4] | p[5] << 8, ch = p[6] | p[7] << 8;
-            if (p + 8 + cw * ch > sGfx.poketchEnd)
-                return FALSE;
-            if (want && k == cell)
-            {
-                *x = (s16)(p[0] | p[1] << 8);
-                *y = (s16)(p[2] | p[3] << 8);
-                *w = cw;
-                *h = ch;
-                *px = p + 8;
-                return TRUE;
-            }
-            p += 8 + cw * ch;
-        }
         if (want)
-            return FALSE;
+        {
+            *cellCount = cells;
+            return p;
+        }
+        for (k = 0; k < cells && p + 8 <= sGfx.poketchEnd; k++)
+            p += 8 + (p[4] | p[5] << 8) * (p[6] | p[7] << 8);
+        seqs = p[0] | p[1] << 8;
+        p += 2;
+        for (k = 0; k < seqs && p + 3 <= sGfx.poketchEnd; k++)
+            p += 3 + p[0] * 2;
     }
-    return FALSE;
+    return NULL;
+}
+
+// Cell CELL of the POKéTCH's sprite sheet SHEET: its top-left from the sprite's point, size and shade bytes (255 clear)
+bool8 S3D_Gfx_PoketchCell(const char *sheet, u16 cell, s16 *x, s16 *y, u16 *w, u16 *h, const u8 **px)
+{
+    u32 cells, k;
+    const u8 *p = PoketchSheet(sheet, &cells);
+    if (p == NULL || cell >= cells)
+        return FALSE;
+    for (k = 0; k < cell; k++)
+        p += 8 + (p[4] | p[5] << 8) * (p[6] | p[7] << 8);
+    if (p + 8 > sGfx.poketchEnd)
+        return FALSE;
+    *x = (s16)(p[0] | p[1] << 8);
+    *y = (s16)(p[2] | p[3] << 8);
+    *w = p[4] | p[5] << 8;
+    *h = p[6] | p[7] << 8;
+    *px = p + 8;
+    return p + 8 + *w * *h <= sGfx.poketchEnd;
+}
+
+// Animation SEQ of SHEET at frame T (Platinum's playback: 1 once, holding the last frame; 2 looping from its loop
+// start; 3 there and back once; 4 there and back): the cell it shows; 0xFFFF none
+u16 S3D_Gfx_PoketchAnimCell(const char *sheet, u16 seq, u32 t)
+{
+    u32 cells, k, total = 0, nf, loop, mode, i;
+    const u8 *p = PoketchSheet(sheet, &cells), *f;
+    if (p == NULL)
+        return 0xFFFF;
+    for (k = 0; k < cells; k++)
+        p += 8 + (p[4] | p[5] << 8) * (p[6] | p[7] << 8);
+    if (seq >= (u32)(p[0] | p[1] << 8))
+        return seq < cells ? seq : 0xFFFF;   // (a sheet without animations: the cell of that number)
+    p += 2;
+    for (k = 0; k < seq; k++)
+        p += 3 + p[0] * 2;
+    nf = p[0], loop = p[1], mode = p[2], f = p + 3;
+    if (nf == 0)
+        return 0xFFFF;
+    for (i = 0; i < nf; i++)
+        total += f[i * 2 + 1] ? f[i * 2 + 1] : 1;
+    if (mode == 3 || mode == 4)   // (there and back: the frames forward then backward)
+    {
+        u32 round = total * 2;
+        t = mode == 3 && t >= round ? round - 1 : t % round;
+        if (t >= total)
+            t = round - 1 - t;
+    }
+    else if (mode == 2)
+    {
+        u32 head = 0;
+        for (i = 0; i < loop && i < nf; i++)
+            head += f[i * 2 + 1] ? f[i * 2 + 1] : 1;
+        if (t >= total)
+            t = head + (t - head) % (total - head ? total - head : 1);
+    }
+    else if (t >= total)
+        t = total - 1;
+    for (i = 0; i < nf; i++)
+    {
+        u32 d = f[i * 2 + 1] ? f[i * 2 + 1] : 1;
+        if (t < d)
+            return f[i * 2];
+        t -= d;
+    }
+    return f[(nf - 1) * 2];
 }
