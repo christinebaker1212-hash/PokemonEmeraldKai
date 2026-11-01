@@ -55,7 +55,20 @@ Sinnoh_GameCorner_EventScript_Bg13::
 	end
 
 Sinnoh_GameCorner_EventScript_Person1::
-	msgbox Sinnoh_GameCorner_Text_Person1, MSGBOX_NPC
+	lock
+	faceplayer
+	goto_if_set 0x3DB1, Sinnoh_GameCorner_EventScript_Person1_Given
+	msgbox Sinnoh_GameCorner_Text_Person1, MSGBOX_DEFAULT
+	msgbox Sinnoh_GameCorner_Text_Person1Gift, MSGBOX_DEFAULT
+	giveitem ITEM_TM64, 1
+	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
+	setflag 0x3DB1
+	release
+	end
+
+Sinnoh_GameCorner_EventScript_Person1_Given::
+	msgbox Sinnoh_GameCorner_Text_Person1, MSGBOX_DEFAULT
+	release
 	end
 
 Sinnoh_GameCorner_EventScript_Person2::
@@ -141,6 +154,10 @@ Sinnoh_GameCorner_Text_Person1:
 	.string "Welcome to the GAME CORNER! The\n"
 	.string "machines are being repaired today.\l"
 	.string "Come back another time!$"
+
+Sinnoh_GameCorner_Text_Person1Gift:
+	.string "Sorry for the trouble. Here's a little\n"
+	.string "something while you wait.$"
 
 Sinnoh_GameCorner_Text_Person2:
 	.string "A slot machine. The reels are dark: it's\n"

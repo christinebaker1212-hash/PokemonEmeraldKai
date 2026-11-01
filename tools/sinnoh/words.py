@@ -93,8 +93,7 @@ WORDS = {
     'Sinnoh_Route201': {
         'Person1': "Wild MOéMON hide in the tall grass. Stay on the path if your team is tired.|"
                    "Or don't! Running into them is half the fun.",
-        'Person2': "I'm handing out samples, but I've run out!|The POKé MART in SANDGEM has the real thing. "
-                   "It's just east of here.",
+        'Person2': "I'm handing out samples from the POKé MART in SANDGEM! It's just east of here.",
         'Sign4': "ROUTE 201|West: TWINLEAF TOWN",
         'Sign5': "ROUTE 201|East: SANDGEM TOWN",
         'Person10': "I'm practicing my throws. POKé BALLS fly better when your MOéMON has worn the wild one "

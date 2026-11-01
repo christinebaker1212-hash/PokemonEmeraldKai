@@ -27,7 +27,20 @@ Sinnoh_TrainersSchool_EventScript_Person5::
 	end
 
 Sinnoh_TrainersSchool_EventScript_Person7::
-	msgbox Sinnoh_TrainersSchool_Text_Person7, MSGBOX_NPC
+	lock
+	faceplayer
+	goto_if_set 0x3DDD, Sinnoh_TrainersSchool_EventScript_Person7_Given
+	msgbox Sinnoh_TrainersSchool_Text_Person7, MSGBOX_DEFAULT
+	msgbox Sinnoh_TrainersSchool_Text_Person7Gift, MSGBOX_DEFAULT
+	giveitem ITEM_POTION, 1
+	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
+	setflag 0x3DDD
+	release
+	end
+
+Sinnoh_TrainersSchool_EventScript_Person7_Given::
+	msgbox Sinnoh_TrainersSchool_Text_Person7, MSGBOX_DEFAULT
+	release
 	end
 
 Sinnoh_TrainersSchool_EventScript_Person8::
@@ -71,6 +84,10 @@ Sinnoh_TrainersSchool_Text_Person5:
 Sinnoh_TrainersSchool_Text_Person7:
 	.string "My notes are full of type charts. I\n"
 	.string "drew little MOéMON in the margins too.$"
+
+Sinnoh_TrainersSchool_Text_Person7Gift:
+	.string "Here, I have an extra POTION from\n"
+	.string "class. Take it!$"
 
 Sinnoh_TrainersSchool_Text_Person8:
 	.string "I want to be a gym leader when I grow\n"

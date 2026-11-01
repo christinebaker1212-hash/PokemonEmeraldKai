@@ -47,7 +47,20 @@ Sinnoh_VeilstoneCity_EventScript_Person22::
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Person23::
-	msgbox Sinnoh_VeilstoneCity_Text_Person23, MSGBOX_NPC
+	lock
+	faceplayer
+	goto_if_set 0x3DDF, Sinnoh_VeilstoneCity_EventScript_Person23_Given
+	msgbox Sinnoh_VeilstoneCity_Text_Person23, MSGBOX_DEFAULT
+	msgbox Sinnoh_VeilstoneCity_Text_Person23Gift, MSGBOX_DEFAULT
+	giveitem ITEM_TM63, 1
+	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
+	setflag 0x3DDF
+	release
+	end
+
+Sinnoh_VeilstoneCity_EventScript_Person23_Given::
+	msgbox Sinnoh_VeilstoneCity_Text_Person23, MSGBOX_DEFAULT
+	release
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Person29::
@@ -145,6 +158,10 @@ Sinnoh_VeilstoneCity_Text_Person22:
 Sinnoh_VeilstoneCity_Text_Person23:
 	.string "I came to VEILSTONE to get tough. The\n"
 	.string "stairs alone are a workout!$"
+
+Sinnoh_VeilstoneCity_Text_Person23Gift:
+	.string "A TOUGH TRAINER deserves a TOUGH TM.\n"
+	.string "Here!$"
 
 Sinnoh_VeilstoneCity_Text_Person29:
 	.string "Training under the stars is the best.\n"

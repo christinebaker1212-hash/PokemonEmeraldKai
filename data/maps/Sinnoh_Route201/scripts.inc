@@ -12,7 +12,20 @@ Sinnoh_Route201_EventScript_Person1::
 	end
 
 Sinnoh_Route201_EventScript_Person2::
-	msgbox Sinnoh_Route201_Text_Person2, MSGBOX_NPC
+	lock
+	faceplayer
+	goto_if_set 0x3DC6, Sinnoh_Route201_EventScript_Person2_Given
+	msgbox Sinnoh_Route201_Text_Person2, MSGBOX_DEFAULT
+	msgbox Sinnoh_Route201_Text_Person2Gift, MSGBOX_DEFAULT
+	giveitem ITEM_POTION, 1
+	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
+	setflag 0x3DC6
+	release
+	end
+
+Sinnoh_Route201_EventScript_Person2_Given::
+	msgbox Sinnoh_Route201_Text_Person2, MSGBOX_DEFAULT
+	release
 	end
 
 Sinnoh_Route201_EventScript_Person10::
@@ -42,10 +55,12 @@ Sinnoh_Route201_Text_Person1:
 	.string "fun.$"
 
 Sinnoh_Route201_Text_Person2:
-	.string "I'm handing out samples, but I've run\n"
-	.string "out!\p"
-	.string "The POKé MART in SANDGEM has the real\n"
-	.string "thing. It's just east of here.$"
+	.string "I'm handing out samples from the POKé\n"
+	.string "MART in SANDGEM! It's just east of\l"
+	.string "here.$"
+
+Sinnoh_Route201_Text_Person2Gift:
+	.string "Here, have a free POTION!$"
 
 Sinnoh_Route201_Text_Person10:
 	.string "I'm practicing my throws. POKé BALLS\n"

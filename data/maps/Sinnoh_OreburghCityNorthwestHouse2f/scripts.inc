@@ -11,7 +11,20 @@ Sinnoh_OreburghCityNorthwestHouse2f_EventScript_Person2::
 	end
 
 Sinnoh_OreburghCityNorthwestHouse2f_EventScript_Person3::
-	msgbox Sinnoh_OreburghCityNorthwestHouse2f_Text_Person3, MSGBOX_NPC
+	lock
+	faceplayer
+	goto_if_set 0x3DC0, Sinnoh_OreburghCityNorthwestHouse2f_EventScript_Person3_Given
+	msgbox Sinnoh_OreburghCityNorthwestHouse2f_Text_Person3, MSGBOX_DEFAULT
+	msgbox Sinnoh_OreburghCityNorthwestHouse2f_Text_Person3Gift, MSGBOX_DEFAULT
+	giveitem ITEM_DUSK_BALL, 1
+	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
+	setflag 0x3DC0
+	release
+	end
+
+Sinnoh_OreburghCityNorthwestHouse2f_EventScript_Person3_Given::
+	msgbox Sinnoh_OreburghCityNorthwestHouse2f_Text_Person3, MSGBOX_DEFAULT
+	release
 	end
 
 Sinnoh_OreburghCityNorthwestHouse2f_EventScript_Person4::
@@ -29,6 +42,10 @@ Sinnoh_OreburghCityNorthwestHouse2f_Text_Person2:
 Sinnoh_OreburghCityNorthwestHouse2f_Text_Person3:
 	.string "Did you see the GYM? It's carved right\n"
 	.string "into the rock. I think it's so cool.$"
+
+Sinnoh_OreburghCityNorthwestHouse2f_Text_Person3Gift:
+	.string "Want this BALL? It works best in dark\n"
+	.string "places, like the mine!$"
 
 Sinnoh_OreburghCityNorthwestHouse2f_Text_Person4:
 	.string "PSYDUCK: Psy...\p"

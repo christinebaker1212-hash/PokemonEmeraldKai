@@ -3589,6 +3589,12 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   starts the count Platinum keeps of Underground talks, here 32 battles of any kind (VAR_SINNOH_SPIRITOMB 0x52F2 = the
   battle stat + 1 then; the tower's words change at 8 / 15 / 22 / 29), then SPIRITOMB Lv. 25; not caught, the count
   starts again. Tests sinnoh_drifloon, sinnoh_spiritomb.
+- Gifts (2026-11-01, tools/sinnoh/gifts.py): the people who hand over an item in Platinum (its scripts'
+  Common_GiveItemQuantity, followed through their GoTos) and have words of their own here give it once: their words,
+  then a line of this game's (gifts.py LINES; gen_words.py stops if one is missing), the item, flag 0x3DA0 + the
+  gift's place in the sorted list (65 found, 42 people with words: TMs, the OLD / GOOD / SUPER RODs, held items,
+  balls...). Story people, gym leaders and items the game hasn't (the JOURNAL, COUPONS, POFFIN CASE...) are left out,
+  and Platinum's conditions (a time, a POKéMON shown) aren't asked. Test sinnoh_gift.
 - Words: SINNOH's people, signs and story are written for this game (in its scripts, MOéMON's words like HOENN's, so
   OPTIONS > CREATURES swaps them back like any text); nothing of Platinum's text is used or shipped (decided
   2026-10-31: the earlier text pack built from the decomp's message banks is gone).

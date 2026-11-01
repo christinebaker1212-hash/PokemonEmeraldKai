@@ -27,7 +27,20 @@ Sinnoh_OreburghCity_EventScript_Person16::
 	end
 
 Sinnoh_OreburghCity_EventScript_Person17::
-	msgbox Sinnoh_OreburghCity_Text_Person17, MSGBOX_NPC
+	lock
+	faceplayer
+	goto_if_set 0x3DBC, Sinnoh_OreburghCity_EventScript_Person17_Given
+	msgbox Sinnoh_OreburghCity_Text_Person17, MSGBOX_DEFAULT
+	msgbox Sinnoh_OreburghCity_Text_Person17Gift, MSGBOX_DEFAULT
+	giveitem ITEM_SUPER_POTION, 1
+	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
+	setflag 0x3DBC
+	release
+	end
+
+Sinnoh_OreburghCity_EventScript_Person17_Given::
+	msgbox Sinnoh_OreburghCity_Text_Person17, MSGBOX_DEFAULT
+	release
 	end
 
 Sinnoh_OreburghCity_EventScript_Person18::
@@ -116,6 +129,10 @@ Sinnoh_OreburghCity_Text_Person16:
 Sinnoh_OreburghCity_Text_Person17:
 	.string "Break time! Ten minutes, then back to\n"
 	.string "the mine.$"
+
+Sinnoh_OreburghCity_Text_Person17Gift:
+	.string "Here, a little something from the\n"
+	.string "first-aid box. Miners share!$"
 
 Sinnoh_OreburghCity_Text_Person18:
 	.string "I came here to camp, but there's coal\n"

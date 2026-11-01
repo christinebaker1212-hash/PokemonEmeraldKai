@@ -15,7 +15,20 @@ Sinnoh_FloaromaTown_EventScript_Person3::
 	end
 
 Sinnoh_FloaromaTown_EventScript_Person4::
-	msgbox Sinnoh_FloaromaTown_Text_Person4, MSGBOX_NPC
+	lock
+	faceplayer
+	goto_if_set 0x3DAD, Sinnoh_FloaromaTown_EventScript_Person4_Given
+	msgbox Sinnoh_FloaromaTown_Text_Person4, MSGBOX_DEFAULT
+	msgbox Sinnoh_FloaromaTown_Text_Person4Gift, MSGBOX_DEFAULT
+	giveitem ITEM_GRACIDEA, 1
+	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
+	setflag 0x3DAD
+	release
+	end
+
+Sinnoh_FloaromaTown_EventScript_Person4_Given::
+	msgbox Sinnoh_FloaromaTown_Text_Person4, MSGBOX_DEFAULT
+	release
 	end
 
 Sinnoh_FloaromaTown_EventScript_Person5::
@@ -56,6 +69,11 @@ Sinnoh_FloaromaTown_Text_Person4:
 	.string "The flower shop sells little gifts you\n"
 	.string "can give your MOéMON to carry. They're\l"
 	.string "adorable.$"
+
+Sinnoh_FloaromaTown_Text_Person4Gift:
+	.string "Oh, and someone left this flower with\n"
+	.string "me. It's meant for a very special\l"
+	.string "MOéMON. Take it!$"
 
 Sinnoh_FloaromaTown_Text_Person5:
 	.string "I sneezed so many times walking\n"

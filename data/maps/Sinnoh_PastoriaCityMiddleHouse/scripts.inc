@@ -7,7 +7,20 @@ Sinnoh_PastoriaCityMiddleHouse_EventScript_Person1::
 	end
 
 Sinnoh_PastoriaCityMiddleHouse_EventScript_Person2::
-	msgbox Sinnoh_PastoriaCityMiddleHouse_Text_Person2, MSGBOX_NPC
+	lock
+	faceplayer
+	goto_if_set 0x3DC3, Sinnoh_PastoriaCityMiddleHouse_EventScript_Person2_Given
+	msgbox Sinnoh_PastoriaCityMiddleHouse_Text_Person2, MSGBOX_DEFAULT
+	msgbox Sinnoh_PastoriaCityMiddleHouse_Text_Person2Gift, MSGBOX_DEFAULT
+	giveitem ITEM_MACHO_BRACE, 1
+	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
+	setflag 0x3DC3
+	release
+	end
+
+Sinnoh_PastoriaCityMiddleHouse_EventScript_Person2_Given::
+	msgbox Sinnoh_PastoriaCityMiddleHouse_Text_Person2, MSGBOX_DEFAULT
+	release
 	end
 
 Sinnoh_PastoriaCityMiddleHouse_Text_Person1:
@@ -17,5 +30,9 @@ Sinnoh_PastoriaCityMiddleHouse_Text_Person1:
 Sinnoh_PastoriaCityMiddleHouse_Text_Person2:
 	.string "I caught a SKORUPI in the marsh! Okay,\n"
 	.string "it caught me first. Then I caught it.$"
+
+Sinnoh_PastoriaCityMiddleHouse_Text_Person2Gift:
+	.string "It made me so strong, I don't need it\n"
+	.string "anymore. Here!$"
 
 @ --- end of SINNOH words ---

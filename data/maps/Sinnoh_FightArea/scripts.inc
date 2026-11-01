@@ -25,7 +25,20 @@ Sinnoh_FightArea_EventScript_Person6_Sail0::
 	end
 
 Sinnoh_FightArea_EventScript_Person7::
-	msgbox Sinnoh_FightArea_Text_Person7, MSGBOX_NPC
+	lock
+	faceplayer
+	goto_if_set 0x3DAA, Sinnoh_FightArea_EventScript_Person7_Given
+	msgbox Sinnoh_FightArea_Text_Person7, MSGBOX_DEFAULT
+	msgbox Sinnoh_FightArea_Text_Person7Gift, MSGBOX_DEFAULT
+	giveitem ITEM_SUPER_ROD, 1
+	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
+	setflag 0x3DAA
+	release
+	end
+
+Sinnoh_FightArea_EventScript_Person7_Given::
+	msgbox Sinnoh_FightArea_Text_Person7, MSGBOX_DEFAULT
+	release
 	end
 
 Sinnoh_FightArea_EventScript_Person14::
@@ -94,6 +107,10 @@ Sinnoh_FightArea_Text_Person6Off:
 Sinnoh_FightArea_Text_Person7:
 	.string "The fish out here are as tough as the\n"
 	.string "TRAINERS. I've lost three rods today!$"
+
+Sinnoh_FightArea_Text_Person7Gift:
+	.string "Here, take my spare rod. A good one!\n"
+	.string "You'll hook the big ones with it.$"
 
 Sinnoh_FightArea_Text_Person14:
 	.string "Everyone here came to battle. Even\n"

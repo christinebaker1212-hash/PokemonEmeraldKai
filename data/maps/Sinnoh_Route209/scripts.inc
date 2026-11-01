@@ -23,7 +23,20 @@ Sinnoh_Route209_EventScript_Person22::
 	end
 
 Sinnoh_Route209_EventScript_Person29::
-	msgbox Sinnoh_Route209_Text_Person29, MSGBOX_NPC
+	lock
+	faceplayer
+	goto_if_set 0x3DCA, Sinnoh_Route209_EventScript_Person29_Given
+	msgbox Sinnoh_Route209_Text_Person29, MSGBOX_DEFAULT
+	msgbox Sinnoh_Route209_Text_Person29Gift, MSGBOX_DEFAULT
+	giveitem ITEM_GOOD_ROD, 1
+	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
+	setflag 0x3DCA
+	release
+	end
+
+Sinnoh_Route209_EventScript_Person29_Given::
+	msgbox Sinnoh_Route209_Text_Person29, MSGBOX_DEFAULT
+	release
 	end
 
 Sinnoh_Route209_EventScript_Sign10::
@@ -46,6 +59,10 @@ Sinnoh_Route209_Text_Person22:
 Sinnoh_Route209_Text_Person29:
 	.string "I fish here every morning. The mist on\n"
 	.string "the water makes everything quiet.$"
+
+Sinnoh_Route209_Text_Person29Gift:
+	.string "You don't have a good rod? Take my old\n"
+	.string "one. Patience does the rest!$"
 
 Sinnoh_Route209_Text_Sign10:
 	.string "ROUTE 209\p"

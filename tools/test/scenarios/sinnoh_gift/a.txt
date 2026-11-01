@@ -1,0 +1,17 @@
+pressuntil A field 5000
+wait 30
+mp warp 43,40,4,9
+wait 60
+waitfor field 1000
+mp gencheck 262
+mp face up
+press A 1
+wait 60
+pressuntil A field 2000
+wait 20
+mp face up
+press A 1
+wait 60
+pressuntil A field 2000
+mp gencheck 262
+quit

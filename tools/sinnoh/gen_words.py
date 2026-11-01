@@ -15,6 +15,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from words import WORDS, GYMS, ELITE, CHAMPION  # noqa: E402
+import gifts  # noqa: E402
 
 BADGE_FLAGS = 0x3320       # FLAG_SINNOH_BADGE01 (include/mp_region.h)
 GYM_TM_FLAGS = 0x3770      # a leader's TM given (ids.py's flags stay below)
@@ -101,9 +102,27 @@ def script(name, key, value, widths):
     if isinstance(value, tuple) and value[0] == 'boat':
         return boat(name, key, value[1], widths)
     text = '%s_Text_%s' % (name, key)
+    if ROOT[0] and key.startswith('Person') and (name, key) in gifts.gifts(ROOT[0]):
+        return gift(name, key, value, widths, *gifts.gifts(ROOT[0])[(name, key)])
     kind = 'MSGBOX_NPC' if key.startswith('Person') else 'MSGBOX_SIGN'
     return ('%s::\n\tmsgbox %s, %s\n\tend\n\n' % (label, text, kind),
             '%s:\n%s\n' % (text, wrap(value, widths, '%s %s' % (name, key))))
+
+
+def gift(name, key, words, widths, item, count, flag):
+    """A person with a gift (Platinum's): their words and the item the first time, then their words"""
+    label, t = '%s_EventScript_%s' % (name, key), '%s_Text_%s' % (name, key)
+    line = gifts.line(name, key)
+    if not line:
+        sys.exit('%s %s gives %s: no words for it yet (tools/sinnoh/gifts.py LINES)' % (name, key, item))
+    code = ('%s::\n\tlock\n\tfaceplayer\n\tgoto_if_set 0x%X, %s_Given\n\tmsgbox %s, MSGBOX_DEFAULT\n'
+            '\tmsgbox %sGift, MSGBOX_DEFAULT\n\tgiveitem %s, %d\n'
+            '\tgoto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull\n\tsetflag 0x%X\n\trelease\n\tend\n\n'
+            '%s_Given::\n\tmsgbox %s, MSGBOX_DEFAULT\n\trelease\n\tend\n\n'
+            % (label, flag, label, t, t, item, count, flag, label, t))
+    texts = ('%s:\n%s\n%sGift:\n%s\n' % (t, wrap(words, widths, '%s %s' % (name, key)), t,
+                                         wrap(line, widths, '%s %s' % (name, key))))
+    return code, texts
 
 
 def gym(name, key, n, widths):

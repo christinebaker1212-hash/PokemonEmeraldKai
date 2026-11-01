@@ -715,7 +715,7 @@ INDOOR = {
     'Sinnoh_Route214GateToVeilstoneCity': {'Person1': "VEILSTONE's just past here. The cliffs keep the wind out of the city."},
     'Sinnoh_Route216House': {'Person1': "Get warm by the fire. The snow outside won't let up any time soon.", 'Person2': 'We keep this house open for travelers. Nobody should be stuck out in the cold.'},
     'Sinnoh_Route217WestHouse': {'Person1': 'I got lost in the snow and found this house. Best mistake I ever made.'},
-    'Sinnoh_Route218GateToJubilifeCity': {'Person1': 'I keep watch at this gate. Mostly I just say hello.', 'Person2': 'The fishing on ROUTE 218 is great. Bring a GOOD ROD!'},
+    'Sinnoh_Route218GateToJubilifeCity': {'Person1': 'I keep watch at this gate. Mostly I just say hello.', 'Person2': 'The fishing on ROUTE 218 is great. Every TRAINER should try it once!'},
     'Sinnoh_Route218GateToCanalaveCity': {'Person1': "CANALAVE's just through here. Mind the drawbridge!"},
     'Sinnoh_Route221House': {'Person1': 'The park up the road is still being built. They say MOéMON from far away will live there.'},
     'Sinnoh_Route222WestHouse': {'Person1': "PIKACHU: Pika!|It's waving at you.", 'Person2': "PIKACHU: Pika pi!|It's chasing its tail.", 'Person3': "PIKACHU: Chu!|It's napping in a sunny spot.", 'Person4': "PIKACHU: Pika pika!|It's playing with a ball of yarn.", 'Person5': 'PIKACHU: Pi!|Its cheeks spark a little.', 'Person6': 'Welcome to the PIKACHU FAN CLUB! As you can see, we take PIKACHU very seriously.'},

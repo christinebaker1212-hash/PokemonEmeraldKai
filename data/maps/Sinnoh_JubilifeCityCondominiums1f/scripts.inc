@@ -15,7 +15,20 @@ Sinnoh_JubilifeCityCondominiums1f_EventScript_Person3::
 	end
 
 Sinnoh_JubilifeCityCondominiums1f_EventScript_Person4::
-	msgbox Sinnoh_JubilifeCityCondominiums1f_Text_Person4, MSGBOX_NPC
+	lock
+	faceplayer
+	goto_if_set 0x3DBA, Sinnoh_JubilifeCityCondominiums1f_EventScript_Person4_Given
+	msgbox Sinnoh_JubilifeCityCondominiums1f_Text_Person4, MSGBOX_DEFAULT
+	msgbox Sinnoh_JubilifeCityCondominiums1f_Text_Person4Gift, MSGBOX_DEFAULT
+	giveitem ITEM_QUICK_CLAW, 1
+	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
+	setflag 0x3DBA
+	release
+	end
+
+Sinnoh_JubilifeCityCondominiums1f_EventScript_Person4_Given::
+	msgbox Sinnoh_JubilifeCityCondominiums1f_Text_Person4, MSGBOX_DEFAULT
+	release
 	end
 
 Sinnoh_JubilifeCityCondominiums1f_Text_Person1:
@@ -34,5 +47,9 @@ Sinnoh_JubilifeCityCondominiums1f_Text_Person3:
 Sinnoh_JubilifeCityCondominiums1f_Text_Person4:
 	.string "I just moved in. My neighbors are so\n"
 	.string "friendly, and so are their MOéMON.$"
+
+Sinnoh_JubilifeCityCondominiums1f_Text_Person4Gift:
+	.string "This was a housewarming gift, but I\n"
+	.string "have two. Please, take one!$"
 
 @ --- end of SINNOH words ---

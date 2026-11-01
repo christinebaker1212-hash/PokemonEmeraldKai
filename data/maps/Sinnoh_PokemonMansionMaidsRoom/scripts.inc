@@ -27,7 +27,20 @@ Sinnoh_PokemonMansionMaidsRoom_EventScript_Bg7::
 	end
 
 Sinnoh_PokemonMansionMaidsRoom_EventScript_Person2::
-	msgbox Sinnoh_PokemonMansionMaidsRoom_Text_Person2, MSGBOX_NPC
+	lock
+	faceplayer
+	goto_if_set 0x3DC5, Sinnoh_PokemonMansionMaidsRoom_EventScript_Person2_Given
+	msgbox Sinnoh_PokemonMansionMaidsRoom_Text_Person2, MSGBOX_DEFAULT
+	msgbox Sinnoh_PokemonMansionMaidsRoom_Text_Person2Gift, MSGBOX_DEFAULT
+	giveitem ITEM_SOOTHE_BELL, 1
+	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
+	setflag 0x3DC5
+	release
+	end
+
+Sinnoh_PokemonMansionMaidsRoom_EventScript_Person2_Given::
+	msgbox Sinnoh_PokemonMansionMaidsRoom_Text_Person2, MSGBOX_DEFAULT
+	release
 	end
 
 Sinnoh_PokemonMansionMaidsRoom_EventScript_Person3::
@@ -61,6 +74,10 @@ Sinnoh_PokemonMansionMaidsRoom_Text_Bg7:
 Sinnoh_PokemonMansionMaidsRoom_Text_Person2:
 	.string "This is the maids' room. Shh, someone's\n"
 	.string "napping!$"
+
+Sinnoh_PokemonMansionMaidsRoom_Text_Person2Gift:
+	.string "Here, this bell is too loud for the\n"
+	.string "maids' room. Your MOéMON will love it.$"
 
 Sinnoh_PokemonMansionMaidsRoom_Text_Person3:
 	.string "We work hard, but the master treats us\n"
