@@ -164,8 +164,11 @@ Johto_ElmsLab_EventScript_83E1E20::
 	msgbox Johto_ElmsLab_Text_83E2711, MSGBOX_DEFAULT
 	closemessage
 	setvar VAR_QZ_0x5004, 1
-	release
-	end
+	@ Moemon Kai: the player walks to the table's middle and the table opens (qz_specials.c QzWalkToStarterTable)
+	special QzWalkToStarterTable
+	waitmovement LOCALID_PLAYER
+	setvar VAR_QZ_0x5000, 1
+	goto Johto_ElmsLab_EventScript_83E1ECF
 
 @ Johto_ElmsLab trigger at 5,8 (VAR_QZ_0x5004 == 1)
 @ Johto_ElmsLab trigger at 6,8 (VAR_QZ_0x5004 == 1)

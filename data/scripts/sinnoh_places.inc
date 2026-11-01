@@ -1041,6 +1041,78 @@ Sinnoh_Text_RowanTalk:
 	.string "what you see.$"
 
 @ A story battle with no POKéMON in the party (tools/sinnoh/legends.py): not yet
+@ BARRY's mom's visit (once, a new game's or the boat's first time leaving the house): stepping next to the door mat,
+@ she comes in, the player is pushed back a step the way they came, she talks, walks out and is gone (object 2 of
+@ the house's 1F, on the mat; tools/sinnoh/gen_maps.py EXTRA_TRIGGERS)
+Sinnoh_EventScript_RivalMomVisit::
+	lockall
+	setvar 0x52F0, 3   @ (VAR_SINNOH_ARRIVAL: her visit played; the trigger needs 2)
+	setflag 0x3D3A
+	playse SE_EXIT
+	clearflag 0x34F6
+	addobject 2
+	specialvar VAR_RESULT, GetPlayerFacingDirection
+	call_if_eq VAR_RESULT, DIR_SOUTH, Sinnoh_EventScript_RivalMomPushUp
+	call_if_eq VAR_RESULT, DIR_WEST, Sinnoh_EventScript_RivalMomPushRight
+	call_if_eq VAR_RESULT, DIR_EAST, Sinnoh_EventScript_RivalMomPushLeft
+	call_if_eq VAR_RESULT, DIR_NORTH, Sinnoh_EventScript_RivalMomPushDown
+	applymovement 2, Sinnoh_Movement_RivalMomIn
+	waitmovement 0
+	msgbox Sinnoh_TwinleafTownPlayerHouse1f_Text_Person2, MSGBOX_DEFAULT
+	closemessage
+	applymovement 2, Sinnoh_Movement_RivalMomOut
+	waitmovement 0
+	playse SE_EXIT
+	removeobject 2
+	setflag 0x34F6
+	releaseall
+	end
+
+Sinnoh_EventScript_RivalMomPushUp:
+	applymovement LOCALID_PLAYER, Sinnoh_Movement_PushedUp
+	waitmovement 0
+	return
+Sinnoh_EventScript_RivalMomPushRight:
+	applymovement LOCALID_PLAYER, Sinnoh_Movement_PushedRight
+	waitmovement 0
+	return
+Sinnoh_EventScript_RivalMomPushLeft:
+	applymovement LOCALID_PLAYER, Sinnoh_Movement_PushedLeft
+	waitmovement 0
+	return
+Sinnoh_EventScript_RivalMomPushDown:
+	applymovement LOCALID_PLAYER, Sinnoh_Movement_PushedDown
+	waitmovement 0
+	return
+
+Sinnoh_Movement_PushedUp:
+	lock_facing_direction
+	walk_fast_up
+	unlock_facing_direction
+	step_end
+Sinnoh_Movement_PushedRight:
+	lock_facing_direction
+	walk_fast_right
+	unlock_facing_direction
+	step_end
+Sinnoh_Movement_PushedLeft:
+	lock_facing_direction
+	walk_fast_left
+	unlock_facing_direction
+	step_end
+Sinnoh_Movement_PushedDown:
+	lock_facing_direction
+	walk_fast_down
+	unlock_facing_direction
+	step_end
+Sinnoh_Movement_RivalMomIn:
+	walk_up
+	face_player
+	step_end
+Sinnoh_Movement_RivalMomOut:
+	walk_down
+	step_end
+
 Sinnoh_EventScript_StoryNoTeam::
 	msgbox Sinnoh_Text_StoryNoTeam, MSGBOX_DEFAULT
 	release

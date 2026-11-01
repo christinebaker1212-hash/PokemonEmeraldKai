@@ -34,7 +34,7 @@ def _r(lo, hi=99, need=None, unless=None, time=None):
 SHOW = {
     # ------------------------------------------------------------------ the start (no badge yet)
     'TWINLEAF_TOWN_RIVAL': NEVER, 'TWINLEAF_TOWN_RIVAL_HOUSE_2F_RIVAL': NEVER,
-    'TWINLEAF_TOWN_PLAYER_HOUSE_2F_RIVAL': NEVER, 'TWINLEAF_TOWN_PLAYER_HOUSE_1F_RIVAL_MOM': _r(0, 1),
+    'TWINLEAF_TOWN_PLAYER_HOUSE_2F_RIVAL': NEVER, 'TWINLEAF_TOWN_PLAYER_HOUSE_1F_RIVAL_MOM': _r(99, 0),   # (hidden, her flag kept: her visit's scene shows her)
     'ROUTE_201_PROF_ROWAN': NEVER, 'ROUTE_201_COUNTERPART': NEVER, 'ROUTE_201_BRIEFCASE': _r(0, need='NEW_GAME', unless='STARTER'),
     'LAKE_VERITY_PROF_ROWAN': _r(0, 1), 'LAKE_VERITY_COUNTERPART': _r(0, 1),
     'SANDGEM_TOWN_RIVAL': NEVER, 'SANDGEM_TOWN_PROF_ROWAN': NEVER, 'SANDGEM_TOWN_COUNTERPART': _r(0, 1),

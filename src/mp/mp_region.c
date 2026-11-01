@@ -1435,10 +1435,16 @@ static const struct Trainer *HoennModernTeam(u16 trainerNum, const struct HoennM
     return &sCopy;
 }
 
+u16 QzKantoRivalTrainer(u16 trainerNum, bool8 *isBlue);   // qz_specials.c
+
 const struct Trainer *MP_Region_TrainerData(u16 trainerNum)
 {
     static struct Trainer sCopy;
     u32 i;
+    bool8 isBlue;
+    u16 blue = QzKantoRivalTrainer(trainerNum, &isBlue);
+    if (isBlue)   // BLUE: FireRed's team for the player's starter, at every GENERATION (qz_specials.c)
+        return &gTrainers[blue];
     if (trainerNum < MAX_TRAINERS_COUNT && MP_Region_Current() == REGION_HOENN && MP_Gen_Cap(REGION_HOENN) >= 4)
         return HoennModernTeam(trainerNum, sHoennModernTrainers, ARRAY_COUNT(sHoennModernTrainers), REGION_HOENN);
     if (trainerNum >= FIRST_SINNOH_TRAINER && trainerNum < FIRST_SINNOH_TRAINER + SINNOH_TRAINERS_COUNT)

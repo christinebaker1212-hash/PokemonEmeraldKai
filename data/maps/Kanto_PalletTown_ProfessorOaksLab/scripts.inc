@@ -236,8 +236,12 @@ Kanto_PalletTown_ProfessorOaksLab_EventScript_8419162::
 	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843DFD5, MSGBOX_DEFAULT
 	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E41E, MSGBOX_DEFAULT
 	setvar VAR_QZ_0x511A, 2
-	releaseall
-	end
+	@ Moemon Kai: the player walks to the table's middle and the table opens (qz_specials.c QzWalkToStarterTable)
+	closemessage
+	special QzWalkToStarterTable
+	waitmovement LOCALID_PLAYER
+	setvar VAR_TEMP_1, 1
+	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_8419AFD
 
 @ Kanto_PalletTown_ProfessorOaksLab trigger at 5,8 (VAR_QZ_0x511A == 2)
 @ Kanto_PalletTown_ProfessorOaksLab trigger at 6,8 (VAR_QZ_0x511A == 2)
@@ -884,22 +888,24 @@ Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D17::
 	textcolor 0
 	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E054, MSGBOX_DEFAULT
 	removeobject 7
+	bufferspeciesname 0, SPECIES_CHARMANDER   @ Moemon Kai: the ball BLUE took (FireRed's order on the table)
 	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D48
 
 Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D29::
 	textcolor 0
 	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E054, MSGBOX_DEFAULT
 	removeobject 6
+	bufferspeciesname 0, SPECIES_SQUIRTLE   @ Moemon Kai: the ball BLUE took (FireRed's order on the table)
 	goto Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D48
 
 Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D3B::
 	textcolor 0
 	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E054, MSGBOX_DEFAULT
 	removeobject 5
+	bufferspeciesname 0, SPECIES_BULBASAUR   @ Moemon Kai: the ball BLUE took (FireRed's order on the table)
 
 Kanto_PalletTown_ProfessorOaksLab_EventScript_8419D48::
 	textcolor 3
-	bufferspeciesname 0, SPECIES_SQUIRTLE
 	message Kanto_PalletTown_ProfessorOaksLab_Text_843E074
 	waitmessage
 	playfanfare MUS_RG_OBTAIN_KEY_ITEM

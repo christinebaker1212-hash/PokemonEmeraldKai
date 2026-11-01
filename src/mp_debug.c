@@ -271,6 +271,11 @@ int MP_TestCondition(const char *name)
         bool8 MP_IntroRegionMenu_Active(void);
         return MP_IntroRegionMenu_Active();
     }
+    if (strcmp(name, "startertable") == 0)   // the KANTO / JOHTO starter table, choosing
+    {
+        bool8 MP_StarterTable_Active(void);
+        return MP_StarterTable_Active();
+    }
     if (strcmp(name, "introlook") == 0)
     {
         bool8 MP_IntroLook_Active(void);

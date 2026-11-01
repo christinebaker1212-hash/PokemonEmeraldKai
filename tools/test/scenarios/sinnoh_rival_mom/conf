@@ -1,0 +1,9 @@
+# BARRY's mom's visit in the player's house in TWINLEAF (data/scripts/sinnoh_places.inc Sinnoh_EventScript_RivalMomVisit,
+# tools/sinnoh/gen_maps.py EXTRA_TRIGGERS): stepping next to the door mat, she comes in, the player is pushed back a step
+# (to 6,8), she talks and leaves; VAR_SINNOH_ARRIVAL goes 2 -> 3 and the door lets the player out (TWINLEAF TOWN, 40.0).
+# Before 1.63.2 she stood on the mat and nobody could leave. Shot mom.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("var 0x52F0 = 2" "where map 44.37 xy 6,8" "var 0x52F0 = 3" "where map 40.0 ")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -192,10 +192,11 @@ for root in ('data/maps', 'data/scripts'):
 STARTERS = []   # (region, species)
 for s in re.findall(r'SPECIES_(\w+)', re.search(r'sStarterMon\[STARTER_MON_COUNT\] =\s*\{(.*?)\}', rd('src/starter_choose.c'), re.S).group(1)):
     STARTERS.append((HOENN, s))
-qzs = re.search(r'static const u16 sQzStarters\[\] = \{(.*?)\};', rd('src/qz_specials.c'), re.S).group(1)
-for s in re.findall(r'SPECIES_(\w+)', qzs):
-    STARTERS.append((JOHTO, s))
-    STARTERS.append((KANTO, s))
+# JOHTO's and KANTO's lab tables (qz_specials.c sQzTableStarters: ELM's row, then OAK's)
+qzs = re.search(r'sQzTableStarters\[\]\[3\] = \{(.*?)\};', rd('src/qz_specials.c'), re.S).group(1)
+for region, row in zip((JOHTO, KANTO), re.findall(r'\{([^{}]*)\}', qzs)):
+    for s in re.findall(r'SPECIES_(\w+)', row):
+        STARTERS.append((region, s))
 
 TRADES = []
 for m in re.finditer(r'\.species = SPECIES_(\w+)', rd('src/data/trade.h')):

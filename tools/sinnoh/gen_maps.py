@@ -148,8 +148,17 @@ EXTRA_PEOPLE = {
 
 # Platinum's people changed for this game's scripts: {map: {Platinum's object number: fields}}. The SINNOH BATTLE
 # TOWER's room: the opponent is Emerald's tower opponent (VAR_OBJ_GFX_ID_0, its hide flag), the player's stand-in
-# hidden (the player walks in)
+# hidden (the player walks in). (BARRY's mom stays on the player's house's door mat, where her visit starts:
+# EXTRA_TRIGGERS)
 OVERRIDES = {
+    # people Platinum stands on a door for a scene this game doesn't play (they shut players in or out):
+    # CRASHER WAKE on PASTORIA's gym door (shown with 3 badges: the 4th is in there) and VEILSTONE's, the sailor on
+    # his house's only door, the policemen on STARK MOUNTAIN's room's only way out
+    'Sinnoh_PastoriaCity': {28: {'x': 12, 'y': 28, 'movement_type': 'MOVEMENT_TYPE_FACE_DOWN'}},
+    'Sinnoh_VeilstoneCity': {26: {'x': 11, 'y': 36, 'movement_type': 'MOVEMENT_TYPE_FACE_DOWN'}},
+    'Sinnoh_CanalaveCitySailorEldritchHouse': {3: {'x': 3, 'y': 7, 'movement_type': 'MOVEMENT_TYPE_FACE_DOWN'}},
+    'Sinnoh_StarkMountainRoom3': {8: {'x': 6, 'y': 16, 'movement_type': 'MOVEMENT_TYPE_FACE_DOWN'},
+                                  9: {'x': 8, 'y': 16, 'movement_type': 'MOVEMENT_TYPE_FACE_DOWN'}},
     'Sinnoh_BattleTowerBattleRoom': {2: {'graphics_id': 'OBJ_EVENT_GFX_VAR_0', 'flag': 'FLAG_HIDE_BATTLE_TOWER_OPPONENT',
                                          'movement_type': 'MOVEMENT_TYPE_FACE_DOWN', 'script': '0x0'},
                                      3: {'flag': '0x3FFF'}},
@@ -288,9 +297,22 @@ def signs(p, root, have):
     return out
 
 
+# Triggers of this game's own: BARRY's mom's visit in the player's house (data/scripts/sinnoh_places.inc
+# Sinnoh_EventScript_RivalMomVisit, once: the three tiles next to the door mat, while VAR_SINNOH_ARRIVAL is 2 (in
+# SINNOH); the visit sets it to 3. A trigger whose script only ends still holds the player on its tile here, so the
+# var turns it off, not a check in the script)
+EXTRA_TRIGGERS = {
+    'Sinnoh_TwinleafTownPlayerHouse1f': [(6, 9), (5, 10), (7, 10)],
+}
+EXTRA_TRIGGER_SCRIPT = {
+    'Sinnoh_TwinleafTownPlayerHouse1f': 'Sinnoh_EventScript_RivalMomVisit',
+}
+
+
 def triggers(p, root, have):
     """Platinum's coord events cover an area: the game's are one tile each. Only those with a script of this game's"""
-    out = []
+    out = [{'type': 'trigger', 'x': x, 'y': y, 'elevation': 0, 'var': '0x52F0', 'var_value': '2',
+            'script': EXTRA_TRIGGER_SCRIPT[p['name']]} for x, y in EXTRA_TRIGGERS.get(p['name'], [])]
     for i, c in enumerate(events(root, p['place'])['coord_events']):
         label = '%s_EventScript_Trigger%d' % (p['name'], i + 1)
         v = ids.var(root, c['var']) if isinstance(c.get('var'), str) else None

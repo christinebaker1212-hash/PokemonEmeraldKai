@@ -11,17 +11,9 @@ about 14x5 pixels, under the player's feet, see-through).
   A until the run ends: its fixed turn count broke when the tower's draw changed with the date.
 - Check the release run on Actions (release.yml on claude/clever-clarke-hqati2) and that v1.63.1 has both zips.
 
-## 2. KANTO / JOHTO starter table (docs/user_images/57.png)
-- Today: OAK's (Kanto_PalletTown_ProfessorOaksLab, balls = objects 5-7 at (8..10, 4)) and ELM's labs
-  (Johto_ElmsLab, objects 4-6 at (8..10, 4)) open a 36-name list from any ball (src/qz_specials.c QzChooseStarter_,
-  `special QzChooseStarterKanto/Johto` + waitstate, RESULT = species, then the region's own give script).
-- Wanted: when the professor tells you to choose, the player walks by themselves to the middle of the table (9,5,
-  facing up) and a screen opens: the table of the mock-up with three POKé BALLS, Emerald's hand cursor
-  (src/starter_choose.c: the hand, the ball wiggle, the POKéMON's picture in its circle and "Do you choose...?"),
-  only the region's three: BULBASAUR / CHARMANDER / SQUIRTLE, CHIKORITA / CYNDAQUIL / TOTODILE. After it the
-  region's normal scripts carry on (VAR_LAST_TALKED set to the chosen ball's object so `removeobject` takes the right
-  ball). Talking to a ball later (after B) opens the same screen. Don't break the scripts: keep the RESULT /
-  VAR_TEMP_2 contract.
+## 2. KANTO / JOHTO starter table (DONE, 1.63.2): COOP_NOTES "The KANTO / JOHTO starter table and BLUE's teams"
+- Also BLUE's teams as FireRed's in every battle (the user: "match it across the entire game"), and in 1.63.2 the
+  SINNOH door fixes (BARRY's mom's visit scene; COOP_NOTES "SINNOH: nobody stands on a door").
 
 ## 3. SINNOH: Platinum's 3D briefcase (after 2)
 - pokeplatinum src/choose_starter/choose_starter_app.c; models res/prebuilt/graphic/ev_pokeselect.narc (0 BCA case
@@ -69,4 +61,5 @@ about 14x5 pixels, under the player's feet, see-through).
   JOHTO's HGSS music.
 - 1.63.0's release build fix (a letter the game's font lacks), re-queued, published with both zips and update.txt.
 - NEW GAME in SINNOH + region menu order: released as 1.63.1 (task 1).
-- Pending: tasks 2-7 above.
+- 1.63.2: the starter table, BLUE's FireRed teams, SINNOH's door fixes.
+- Pending: tasks 3-7 above.

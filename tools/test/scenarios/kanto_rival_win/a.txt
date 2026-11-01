@@ -16,18 +16,11 @@ pressuntil A field 12000
 mp where
 mp getvar 0x5118
 wait 200
-pressuntil A field 12000
-shot lab
-mp getvar 0x511A
-mp where
-mp warp 37,122,7,4
-wait 120
-mp face right
-wait 10
-press A 4
-pressuntil A multichoice 6000
+pressuntil A startertable 12000
 shot starters
-press A 4
+press A 2
+wait 70
+press A 2
 wait 60
 pressuntil A field 12000
 mash A 200 10

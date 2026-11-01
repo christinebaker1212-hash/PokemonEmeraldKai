@@ -864,6 +864,10 @@ void VDraw(void)
     DrawFrame(image);
     MP_Candy_Composite(image);      // Moemon Co-op: the CANDY JAR's picture under everything drawn
     MP_BagUI_Composite(image);      // ... and the BAG's
+    {
+        void MP_StarterTable_Composite(u16 *frame);
+        MP_StarterTable_Composite(image);   // ... and the KANTO / JOHTO starter table's (starter_choose.c)
+    }
     MP_BattleWeather_Composite(image);   // ... battle weather the whole battle long
     MP_ModernAnim_Composite(image);      // ... BATTLE ANIMS > MODERN: glows, trails and impacts over the animation
     MP_TriCards_Composite(image);   // Moemon Co-op: Triple Battle cards over the frame

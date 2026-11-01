@@ -41,6 +41,7 @@ static void Task_WaitForStarterSprite(u8 taskId);
 static void Task_AskConfirmStarter(u8 taskId);
 static void Task_HandleConfirmStarterInput(u8 taskId);
 static void Task_DeclineStarter(u8 taskId);
+static void Task_LeaveTable(u8 taskId);
 static void Task_MoveStarterChooseCursor(u8 taskId);
 static void Task_CreateStarterLabel(u8 taskId);
 static void CreateStarterPokemonLabel(u8 selection);
@@ -50,6 +51,17 @@ static void SpriteCB_Pokeball(struct Sprite *sprite);
 static void SpriteCB_StarterPokemon(struct Sprite *sprite);
 
 static u16 sStarterLabelWindowId;
+
+// Moemon Kai: the KANTO / JOHTO starter table (the user's mock-up, docs/user_images/57.png): the same screen with the
+// lab's table drawn in full color under the layers (MP_StarterTable_Composite), the balls in a row, the region's
+// three POKéMON, and B to step back from the table. MP_StarterTable_Open starts it; the result is the ball's index
+// (0-2) in gSpecialVar_Result, 0xFFFF for B.
+#include "mp/mp_startable_gfx.h"
+static bool8 sTableMode;
+static u16 sTableSpecies[STARTER_MON_COUNT];
+static const u8 sText_TableChoose[] = _("Which MOéMON will you choose?\nB: step back from the table");
+#define TABLE_HAND_Y 26
+#define TABLE_LABEL_TOP 10
 
 const u16 gBirchBagGrass_Pal[] = INCGFX_U16("graphics/starter_choose/tiles.png", ".gbapal");
 static const u16 sPokeballSelection_Pal[] = INCGFX_U16("graphics/starter_choose/pokeball_selection.png", ".gbapal");
@@ -348,6 +360,91 @@ static const struct SpriteTemplate sSpriteTemplate_StarterCircle =
 };
 
 // .text
+static u16 StarterSpecies(u16 selection)
+{
+    extern u16 GetStarterPokemon(u16 chosenStarterId);
+    if (sTableMode)
+        return sTableSpecies[selection < STARTER_MON_COUNT ? selection : 0];
+    return GetStarterPokemon(selection);
+}
+
+static u8 BallX(u8 selection)
+{
+    return sTableMode ? sStarterTableBallX[selection] : sPokeballCoords[selection][0];
+}
+
+static u8 BallY(u8 selection)
+{
+    return sTableMode ? STARTER_TABLE_BALL_Y : sPokeballCoords[selection][1];
+}
+
+void MP_StarterTable_Open(const u16 *species, MainCallback back)
+{
+    u8 i;
+    for (i = 0; i < STARTER_MON_COUNT; i++)
+        sTableSpecies[i] = species[i];
+    sTableMode = TRUE;
+    gMain.savedCallback = back;
+    SetMainCallback2(CB2_ChooseStarter);
+}
+
+bool8 MP_StarterTable_Active(void)   // (tests: harness condition "startertable": choosing, no fade)
+{
+    return sTableMode && gMain.callback2 != NULL && FuncIsActiveTask(Task_HandleStarterChooseInput) && !gPaletteFade.active;
+}
+
+// The table under everything drawn (sdl2.c, as the BAG's picture): the backdrop is white, its faded color says how
+// far the fade to black has gone; inside the label's window it is darkened as the GBA's blend does there (BLDY 7).
+void MP_StarterTable_Composite(u16 *frame)
+{
+    s8 fadeOf[32];
+    u16 bd = 0x7FFF, winH, winV;
+    int i, x, y, coeff;
+    if (!sTableMode || gMain.callback2 != CB2_StarterChoose)
+        return;
+    for (i = 0; i < DISPLAY_WIDTH * DISPLAY_HEIGHT; i++)
+        if (!(frame[i] & 0x8000))
+        {
+            bd = frame[i];
+            break;
+        }
+    memset(fadeOf, -1, sizeof(fadeOf));
+    for (coeff = 16; coeff >= 0; coeff--)
+        fadeOf[31 + ((-31 * coeff) >> 4)] = coeff;
+    coeff = fadeOf[bd & 0x1F];
+    if (coeff < 0)
+        coeff = 0;
+    winH = GetGpuReg(REG_OFFSET_WIN0H);
+    winV = GetGpuReg(REG_OFFSET_WIN0V);
+    for (y = 0; y < DISPLAY_HEIGHT; y++)
+    {
+        u16 *row = &frame[y * DISPLAY_WIDTH];
+        bool8 inV = y >= (winV >> 8) && y < (winV & 0xFF);
+        for (x = 0; x < DISPLAY_WIDTH; x++)
+        {
+            u16 c;
+            s32 r, g, b;
+            if (row[x] & 0x8000)
+                continue;
+            c = sStarterTable_Colors[sStarterTable_Bg[y][x]];
+            r = c & 0x1F, g = (c >> 5) & 0x1F, b = (c >> 10) & 0x1F;
+            if (inV && x >= (winH >> 8) && x < (winH & 0xFF))
+            {
+                r -= (r * 7) >> 4;
+                g -= (g * 7) >> 4;
+                b -= (b * 7) >> 4;
+            }
+            if (coeff)
+            {
+                r += (-r * coeff) >> 4;
+                g += (-g * coeff) >> 4;
+                b += (-b * coeff) >> 4;
+            }
+            row[x] = r | (g << 5) | (b << 10) | 0x8000;
+        }
+    }
+}
+
 u16 GetStarterPokemon(u16 chosenStarterId)
 {
     if (chosenStarterId > STARTER_MON_COUNT)
@@ -397,9 +494,12 @@ void CB2_ChooseStarter(void)
     DmaFill32(3, 0, OAM, OAM_SIZE);
     DmaFill16(3, 0, PLTT, PLTT_SIZE);
 
-    LZ77UnCompVram(gBirchBagGrass_Gfx, (void *)VRAM);
-    LZ77UnCompVram(gBirchBagTilemap, (void *)(BG_SCREEN_ADDR(6)));
-    LZ77UnCompVram(gBirchGrassTilemap, (void *)(BG_SCREEN_ADDR(7)));
+    if (!sTableMode)   // (Moemon Kai: the table is drawn by MP_StarterTable_Composite)
+    {
+        LZ77UnCompVram(gBirchBagGrass_Gfx, (void *)VRAM);
+        LZ77UnCompVram(gBirchBagTilemap, (void *)(BG_SCREEN_ADDR(6)));
+        LZ77UnCompVram(gBirchGrassTilemap, (void *)(BG_SCREEN_ADDR(7)));
+    }
 
     ResetBgsAndClearDma3BusyFlags(0);
     InitBgsFromTemplates(0, sBgTemplates, ARRAY_COUNT(sBgTemplates));
@@ -417,6 +517,11 @@ void CB2_ChooseStarter(void)
 
     LoadPalette(GetOverworldTextboxPalettePtr(), BG_PLTT_ID(14), PLTT_SIZE_4BPP);
     LoadPalette(gBirchBagGrass_Pal, BG_PLTT_ID(0), sizeof(gBirchBagGrass_Pal));
+    if (sTableMode)
+    {
+        static const u16 white = RGB_WHITE;
+        LoadPalette(&white, BG_PLTT_ID(0), PLTT_SIZEOF(1));   // (the backdrop: MP_StarterTable_Composite reads the fade from it)
+    }
     LoadCompressedSpriteSheet(&sSpriteSheet_PokeballSelect[0]);
     LoadCompressedSpriteSheet(&sSpriteSheet_StarterCircle[0]);
     LoadSpritePalettes(sSpritePalettes_StarterChoose);
@@ -433,29 +538,37 @@ void CB2_ChooseStarter(void)
     SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_BG1 | BLDCNT_TGT1_BG2 | BLDCNT_TGT1_BG3 | BLDCNT_TGT1_OBJ | BLDCNT_TGT1_BD | BLDCNT_EFFECT_DARKEN);
     SetGpuReg(REG_OFFSET_BLDALPHA, 0);
     SetGpuReg(REG_OFFSET_BLDY, 7);
+    if (sTableMode)   // (Moemon Kai: no blend: MP_StarterTable_Composite darkens the label's window itself)
+    {
+        SetGpuReg(REG_OFFSET_BLDCNT, 0);
+        SetGpuReg(REG_OFFSET_BLDY, 0);
+    }
     SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_WIN0_ON | DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
 
     ShowBg(0);
-    ShowBg(2);
-    ShowBg(3);
+    if (!sTableMode)
+    {
+        ShowBg(2);
+        ShowBg(3);
+    }
 
     taskId = CreateTask(Task_StarterChoose, 0);
     gTasks[taskId].tStarterSelection = 1;
 
     // Create hand sprite
-    spriteId = CreateSprite(&sSpriteTemplate_Hand, 120, 56, 2);
+    spriteId = CreateSprite(&sSpriteTemplate_Hand, 120, sTableMode ? TABLE_HAND_Y : 56, 2);
     gSprites[spriteId].data[0] = taskId;
 
     // Create three Poké Ball sprites
-    spriteId = CreateSprite(&sSpriteTemplate_Pokeball, sPokeballCoords[0][0], sPokeballCoords[0][1], 2);
+    spriteId = CreateSprite(&sSpriteTemplate_Pokeball, BallX(0), BallY(0), 2);
     gSprites[spriteId].sTaskId = taskId;
     gSprites[spriteId].sBallId = 0;
 
-    spriteId = CreateSprite(&sSpriteTemplate_Pokeball, sPokeballCoords[1][0], sPokeballCoords[1][1], 2);
+    spriteId = CreateSprite(&sSpriteTemplate_Pokeball, BallX(1), BallY(1), 2);
     gSprites[spriteId].sTaskId = taskId;
     gSprites[spriteId].sBallId = 1;
 
-    spriteId = CreateSprite(&sSpriteTemplate_Pokeball, sPokeballCoords[2][0], sPokeballCoords[2][1], 2);
+    spriteId = CreateSprite(&sSpriteTemplate_Pokeball, BallX(2), BallY(2), 2);
     gSprites[spriteId].sTaskId = taskId;
     gSprites[spriteId].sBallId = 2;
 
@@ -475,7 +588,7 @@ static void Task_StarterChoose(u8 taskId)
 {
     CreateStarterPokemonLabel(gTasks[taskId].tStarterSelection);
     DrawStdFrameWithCustomTileAndPalette(0, FALSE, 0x2A8, 0xD);
-    AddTextPrinterParameterized(0, FONT_NORMAL, gText_BirchInTrouble, 0, 1, 0, NULL);
+    AddTextPrinterParameterized(0, FONT_NORMAL, sTableMode ? sText_TableChoose : gText_BirchInTrouble, 0, 1, 0, NULL);
     PutWindowTilemap(0);
     ScheduleBgCopyTilemapToVram(0);
     gTasks[taskId].func = Task_HandleStarterChooseInput;
@@ -485,6 +598,8 @@ static void Task_HandleStarterChooseInput(u8 taskId)
 {
     u8 selection = gTasks[taskId].tStarterSelection;
 
+    if (sTableMode && gPaletteFade.active)   // (Moemon Kai: no press from the lab's text picks a ball while it fades in)
+        return;
     if (JOY_NEW(A_BUTTON))
     {
         u8 spriteId;
@@ -492,16 +607,23 @@ static void Task_HandleStarterChooseInput(u8 taskId)
         ClearStarterLabel();
 
         // Create white circle background
-        spriteId = CreateSprite(&sSpriteTemplate_StarterCircle, sPokeballCoords[selection][0], sPokeballCoords[selection][1], 1);
+        spriteId = CreateSprite(&sSpriteTemplate_StarterCircle, BallX(selection), BallY(selection), 1);
         gTasks[taskId].tCircleSpriteId = spriteId;
 
         // Create Pokémon sprite
-        spriteId = CreatePokemonFrontSprite(GetStarterPokemon(gTasks[taskId].tStarterSelection), sPokeballCoords[selection][0], sPokeballCoords[selection][1]);
+        spriteId = CreatePokemonFrontSprite(StarterSpecies(gTasks[taskId].tStarterSelection), BallX(selection), BallY(selection));
         gSprites[spriteId].affineAnims = &sAffineAnims_StarterPokemon;
         gSprites[spriteId].callback = SpriteCB_StarterPokemon;
 
         gTasks[taskId].tPkmnSpriteId = spriteId;
         gTasks[taskId].func = Task_WaitForStarterSprite;
+    }
+    else if (sTableMode && JOY_NEW(B_BUTTON))   // Moemon Kai: step back from the table
+    {
+        PlaySE(SE_SELECT);
+        ClearStarterLabel();
+        gSpecialVar_Result = 0xFFFF;
+        gTasks[taskId].func = Task_LeaveTable;
     }
     else if (JOY_NEW(DPAD_LEFT) && selection > 0)
     {
@@ -527,7 +649,7 @@ static void Task_WaitForStarterSprite(u8 taskId)
 
 static void Task_AskConfirmStarter(u8 taskId)
 {
-    PlayCry_Normal(GetStarterPokemon(gTasks[taskId].tStarterSelection), 0);
+    PlayCry_Normal(StarterSpecies(gTasks[taskId].tStarterSelection), 0);
     FillWindowPixelBuffer(0, PIXEL_FILL(1));
     AddTextPrinterParameterized(0, FONT_NORMAL, gText_ConfirmStarterChoice, 0, 1, 0, NULL);
     ScheduleBgCopyTilemapToVram(0);
@@ -544,6 +666,12 @@ static void Task_HandleConfirmStarterInput(u8 taskId)
     case 0:  // YES
         // Return the starter choice and exit.
         gSpecialVar_Result = gTasks[taskId].tStarterSelection;
+        if (sTableMode)   // Moemon Kai: fade out to the lab (the field fades back in)
+        {
+            BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+            gTasks[taskId].func = Task_LeaveTable;
+            break;
+        }
         ResetAllPicSprites();
         SetMainCallback2(gMain.savedCallback);
         break;
@@ -562,6 +690,20 @@ static void Task_HandleConfirmStarterInput(u8 taskId)
     }
 }
 
+static void Task_LeaveTable(u8 taskId)
+{
+    if (!gPaletteFade.active && gPaletteFade.y == 0 && gSpecialVar_Result == 0xFFFF)
+    {
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);   // (B: start the fade)
+        return;
+    }
+    if (gPaletteFade.active)
+        return;
+    sTableMode = FALSE;
+    ResetAllPicSprites();
+    SetMainCallback2(gMain.savedCallback);
+}
+
 static void Task_DeclineStarter(u8 taskId)
 {
     gTasks[taskId].func = Task_StarterChoose;
@@ -575,13 +717,19 @@ static void CreateStarterPokemonLabel(u8 selection)
     s32 width;
     u8 labelLeft, labelRight, labelTop, labelBottom;
 
-    u16 species = GetStarterPokemon(selection);
+    u16 species = StarterSpecies(selection);
     CopyMonCategoryText(SpeciesToNationalPokedexNum(species), categoryText);
     speciesName = gSpeciesNames[species];
 
     winTemplate = sWindowTemplate_StarterLabel;
     winTemplate.tilemapLeft = sStarterLabelCoords[selection][0];
     winTemplate.tilemapTop = sStarterLabelCoords[selection][1];
+    if (sTableMode)   // under the ball (13 tiles wide, centered on it, kept on screen)
+    {
+        s32 left = (BallX(selection) - 52) / 8;
+        winTemplate.tilemapLeft = left < 0 ? 0 : left > 30 - 13 ? 30 - 13 : left;
+        winTemplate.tilemapTop = TABLE_LABEL_TOP;
+    }
 
     sStarterLabelWindowId = AddWindow(&winTemplate);
     FillWindowPixelBuffer(sStarterLabelWindowId, PIXEL_FILL(0));
@@ -595,10 +743,12 @@ static void CreateStarterPokemonLabel(u8 selection)
     PutWindowTilemap(sStarterLabelWindowId);
     ScheduleBgCopyTilemapToVram(0);
 
-    labelLeft = sStarterLabelCoords[selection][0] * 8 - 4;
-    labelRight = (sStarterLabelCoords[selection][0] + 13) * 8 + 4;
-    labelTop = sStarterLabelCoords[selection][1] * 8;
-    labelBottom = (sStarterLabelCoords[selection][1] + 4) * 8;
+    labelLeft = winTemplate.tilemapLeft * 8 - 4;
+    labelRight = (winTemplate.tilemapLeft + 13) * 8 + 4;
+    labelTop = winTemplate.tilemapTop * 8;
+    labelBottom = (winTemplate.tilemapTop + 4) * 8;
+    if (winTemplate.tilemapLeft == 0)
+        labelLeft = 0;
     SetGpuReg(REG_OFFSET_WIN0H, WIN_RANGE(labelLeft, labelRight));
     SetGpuReg(REG_OFFSET_WIN0V, WIN_RANGE(labelTop, labelBottom));
 }
@@ -638,8 +788,8 @@ static u8 CreatePokemonFrontSprite(u16 species, u8 x, u8 y)
 static void SpriteCB_SelectionHand(struct Sprite *sprite)
 {
     // Float up and down above selected Poké Ball
-    sprite->x = sCursorCoords[gTasks[sprite->data[0]].tStarterSelection][0];
-    sprite->y = sCursorCoords[gTasks[sprite->data[0]].tStarterSelection][1];
+    sprite->x = sTableMode ? BallX(gTasks[sprite->data[0]].tStarterSelection) : sCursorCoords[gTasks[sprite->data[0]].tStarterSelection][0];
+    sprite->y = sTableMode ? TABLE_HAND_Y : sCursorCoords[gTasks[sprite->data[0]].tStarterSelection][1];
     sprite->y2 = Sin(sprite->data[1], 8);
     sprite->data[1] = (u8)(sprite->data[1]) + 4;
 }

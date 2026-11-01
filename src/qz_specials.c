@@ -27,6 +27,11 @@
 #include "save.h"
 #include "script.h"
 #include "script_pokemon_util.h"
+#include "script_movement.h"
+#include "task.h"
+#include "palette.h"
+#include "constants/event_object_movement.h"
+#include "constants/event_objects.h"
 #include "sound.h"
 #include "string_util.h"
 #include "constants/flags.h"
@@ -34,6 +39,7 @@
 #include "constants/items.h"
 #include "constants/qz_port.h"
 #include "constants/species.h"
+#include "constants/rgb.h"
 
 u8 GetDirectionToFace(s16 x, s16 y, s16 targetX, s16 targetY);
 void ChangePokemonNickname(void);
@@ -1090,71 +1096,161 @@ u16 QzTravelToRegion(void) { return gSpecialVar_Result = QzTravelToRegion_(); }
 u16 QzSaveLeagueVictoryRecord(void) { return gSpecialVar_Result = QzSaveLeagueVictoryRecord_(); }
 
 // ---------------------------------------------------------------------------------------------------- starters
-// Quetzal's starter choice (ELM / OAK): any of its 36 starters (gifts.json starter_choices) of the generations the
-// region shows (Gen 1-2 by default) (docs/REGIONS_PLAN.md "Gen 4"). A list of names; RESULT = the species, 0 for B.
-extern u16 (*gQzScrollResult)(u16 choice);
-static const u16 sQzStarters[] = {
-    SPECIES_BULBASAUR,
-    SPECIES_CHARMANDER,
-    SPECIES_SQUIRTLE,
-    SPECIES_PIKACHU,
-    SPECIES_ZUBAT,
-    SPECIES_GASTLY,
-    SPECIES_DITTO,
-    SPECIES_EEVEE,
-    SPECIES_PORYGON,
-    SPECIES_CHIKORITA,
-    SPECIES_CYNDAQUIL,
-    SPECIES_TOTODILE,
-    SPECIES_TOGEPI,
-    SPECIES_SNEASEL,
-    SPECIES_SWINUB,
-    SPECIES_TYROGUE,
-    SPECIES_ELEKID,
-    SPECIES_MAGBY,
-    SPECIES_TREECKO,
-    SPECIES_TORCHIC,
-    SPECIES_MUDKIP,
-    SPECIES_RALTS,
-    SPECIES_AZURILL,
-    SPECIES_ARON,
-    SPECIES_ELECTRIKE,
-    SPECIES_TRAPINCH,
-    SPECIES_SPHEAL,
-    SPECIES_TURTWIG,
-    SPECIES_CHIMCHAR,
-    SPECIES_PIPLUP,
-    SPECIES_BUIZEL,
-    SPECIES_HAPPINY,
-    SPECIES_MUNCHLAX,
-    SPECIES_RIOLU,
-    SPECIES_SNOVER,
-    SPECIES_ROTOM,
+// Moemon Kai: the lab's table (the user's design): the region's three starters on Emerald's choosing screen in table
+// mode (starter_choose.c MP_StarterTable_Open). The balls are the map's objects at (8, 4), (9, 4), (10, 4): left to
+// right as on the screen. Afterwards RESULT = the species (0 for B), VAR_TEMP_1 = the ball (0-2, OAK's script picks
+// BLUE's ball from it) and LAST_TALKED = that ball's object, so `removeobject VAR_LAST_TALKED` takes the right one.
+#define QZ_TABLE_X 8
+#define QZ_TABLE_Y 4
+static const u16 sQzTableStarters[][3] = {
+    {SPECIES_CYNDAQUIL, SPECIES_TOTODILE, SPECIES_CHIKORITA},   // JOHTO (ELM), as on the original games' desk
+    {SPECIES_BULBASAUR, SPECIES_SQUIRTLE, SPECIES_CHARMANDER},  // KANTO (OAK), FireRed's order: BLUE's walk to the
+                                                                // ball strong against yours counts on it
 };
-static u16 sQzStarterRows[ARRAY_COUNT(sQzStarters)];
-static u8 sQzStarterNames[ARRAY_COUNT(sQzStarters)][POKEMON_NAME_LENGTH + 1];
 
-static u16 QzStarterPicked(u16 row)
+// BLUE's battles in KANTO as FireRed has them: each in three versions by the starter BLUE took (SQUIRTLE, BULBASAUR,
+// CHARMANDER: the one strong against the player's), FireRed's teams (tools/moemon_starters/frlg_rival.py). The scripts
+// name the SQUIRTLE one; MP_Region_TrainerData (mp_region.c) reads the version for the player's starter, at every
+// GENERATION. A save whose starter isn't one of the three (from before the table) keeps the SQUIRTLE one.
+static const u16 sQzBlueBattles[][3] = {
+    {TRAINER_QZ_8518, TRAINER_QZ_8519, TRAINER_QZ_8520},   // OAK's lab
+    {TRAINER_QZ_8521, TRAINER_QZ_8522, TRAINER_QZ_8523},   // ROUTE 22
+    {TRAINER_QZ_8524, TRAINER_QZ_8525, TRAINER_QZ_8526},   // CERULEAN
+    {TRAINER_QZ_8618, TRAINER_QZ_8619, TRAINER_QZ_8620},   // S.S. ANNE
+    {TRAINER_QZ_8621, TRAINER_QZ_8622, TRAINER_QZ_8623},   // POKéMON TOWER
+    {TRAINER_QZ_8624, TRAINER_QZ_8625, TRAINER_QZ_8626},   // SILPH CO.
+    {TRAINER_QZ_8627, TRAINER_QZ_8628, TRAINER_QZ_8629},   // ROUTE 22, before the LEAGUE
+    {TRAINER_QZ_8630, TRAINER_QZ_8631, TRAINER_QZ_8632},   // the CHAMPION
+};
+
+// The version BLUE has (0 SQUIRTLE, 1 BULBASAUR, 2 CHARMANDER) from the player's starter (VAR_QZ_0x5146)
+static u8 QzBlueVersion(void)
 {
-    return row < gQzScrollCount ? sQzStarterRows[row] : 0;
+    switch (VarGet(VAR_QZ_0x5146))
+    {
+    case SPECIES_BULBASAUR:  return 2;
+    case SPECIES_SQUIRTLE:   return 1;
+    }
+    return 0;
 }
 
-static u16 QzChooseStarter_(void)
+// The trainer whose team BLUE brings (trainerNum itself if it isn't one of BLUE's battles); *isBlue: it is
+u16 QzKantoRivalTrainer(u16 trainerNum, bool8 *isBlue)
 {
-    u8 i, n = 0;
-    for (i = 0; i < ARRAY_COUNT(sQzStarters) && n < QZ_SCROLL_MAX; i++)
+    u32 i, j;
+    for (i = 0; i < ARRAY_COUNT(sQzBlueBattles); i++)
+        for (j = 0; j < 3; j++)
+            if (sQzBlueBattles[i][j] == trainerNum)
+            {
+                *isBlue = TRUE;
+                return sQzBlueBattles[i][QzBlueVersion()];
+            }
+    *isBlue = FALSE;
+    return trainerNum;
+}
+static u8 sQzTableRegion;
+
+static void CB2_QzTableDone(void)
+{
+    u16 ball = gSpecialVar_Result;
+    if (ball < 3)
     {
-        if (!MP_Gen_Allowed(sQzStarters[i]))
-            continue;
-        sQzStarterRows[n] = sQzStarters[i];
-        GetSpeciesName(sQzStarterNames[n], sQzStarters[i]);
-        gQzScrollOptions[n] = sQzStarterNames[n];
-        n++;
+        u8 i;
+        const struct ObjectEventTemplate *t = gMapHeader.events->objectEvents;
+        gSpecialVar_Result = sQzTableStarters[sQzTableRegion][ball];
+        VarSet(VAR_TEMP_1, ball);
+        for (i = 0; i < gMapHeader.events->objectEventCount; i++)
+            if (t[i].x == QZ_TABLE_X + ball && t[i].y == QZ_TABLE_Y)
+                gSpecialVar_LastTalked = t[i].localId;
     }
-    gQzScrollCount = n;
-    gQzScrollResult = QzStarterPicked;
-    gSpecialVar_0x8004 = SCROLL_MULTI_QZ_DYNAMIC;
-    ShowScrollableMultichoice();
+    else
+    {
+        gSpecialVar_Result = 0;
+    }
+    SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+}
+
+static void Task_QzOpenTable(u8 taskId)
+{
+    void MP_StarterTable_Open(const u16 *species, MainCallback back);
+    if (gPaletteFade.active)
+        return;
+    DestroyTask(taskId);
+    MP_StarterTable_Open(sQzTableStarters[sQzTableRegion], CB2_QzTableDone);
+}
+
+static u16 QzChooseStarter_(u8 region)
+{
+    sQzTableRegion = region;
+    BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+    CreateTask(Task_QzOpenTable, 10);
+    return 0;
+}
+
+// The player walks by themselves to the table's middle and faces it, when the professor says to choose: to the first
+// tile below the middle ball they can stand on (9, 5 in both labs),
+// by the shortest way around the room's furniture and people (a search over the map's collision). The script waits
+// with `waitmovement LOCALID_PLAYER` (`waitmovement 0` would wait on the last applymovement's object).
+#define QZ_WALK_W 24
+#define QZ_WALK_H 20
+static u8 sQzWalk[48];
+
+static bool8 QzWalkFree(s16 x, s16 y)
+{
+    if (x < 0 || y < 0 || x >= QZ_WALK_W || y >= QZ_WALK_H || x >= gMapHeader.mapLayout->width || y >= gMapHeader.mapLayout->height)
+        return FALSE;
+    if (MapGridGetCollisionAt(x + MAP_OFFSET, y + MAP_OFFSET))
+        return FALSE;
+    return GetObjectEventIdByXY(x + MAP_OFFSET, y + MAP_OFFSET) == OBJECT_EVENTS_COUNT;
+}
+
+u16 QzWalkToStarterTable(void)
+{
+    static const s8 sDx[4] = {0, 0, -1, 1}, sDy[4] = {1, -1, 0, 0};
+    static const u8 sStep[4] = {MOVEMENT_ACTION_WALK_NORMAL_DOWN, MOVEMENT_ACTION_WALK_NORMAL_UP,
+                                MOVEMENT_ACTION_WALK_NORMAL_LEFT, MOVEMENT_ACTION_WALK_NORMAL_RIGHT};
+    static u8 sFrom[QZ_WALK_H][QZ_WALK_W];   // the direction taken to reach a tile + 1, 0: not reached
+    static u16 sQueue[QZ_WALK_W * QZ_WALK_H];
+    struct ObjectEvent *player = &gObjectEvents[gPlayerAvatar.objectEventId];
+    s16 px = player->currentCoords.x - MAP_OFFSET, py = player->currentCoords.y - MAP_OFFSET;
+    s16 tx = QZ_TABLE_X + 1, ty, x, y;
+    u16 head = 0, tail = 0;
+    u8 n = 0, path[40], len = 0, d;
+
+    for (ty = QZ_TABLE_Y + 1; ty < QZ_TABLE_Y + 4 && !QzWalkFree(tx, ty) && !(tx == px && ty == py); ty++)
+        ;
+    memset(sFrom, 0, sizeof(sFrom));
+    if (px >= 0 && py >= 0 && px < QZ_WALK_W && py < QZ_WALK_H)
+    {
+        sFrom[py][px] = 5;   // (the start)
+        sQueue[tail++] = py * QZ_WALK_W + px;
+    }
+    while (head < tail && !sFrom[ty][tx])
+    {
+        u16 at = sQueue[head++];
+        for (d = 0; d < 4; d++)
+        {
+            x = at % QZ_WALK_W + sDx[d], y = at / QZ_WALK_W + sDy[d];
+            if (QzWalkFree(x, y) && !sFrom[y][x])
+            {
+                sFrom[y][x] = d + 1;
+                sQueue[tail++] = y * QZ_WALK_W + x;
+            }
+        }
+    }
+    if (sFrom[ty][tx])   // back from the table to the start
+        for (x = tx, y = ty; sFrom[y][x] != 5 && len < ARRAY_COUNT(path); len++)
+        {
+            d = sFrom[y][x] - 1;
+            path[len] = d;
+            x -= sDx[d], y -= sDy[d];
+        }
+    while (len > 0 && n < ARRAY_COUNT(sQzWalk) - 2)
+        sQzWalk[n++] = sStep[path[--len]];
+    sQzWalk[n++] = MOVEMENT_ACTION_FACE_UP;
+    sQzWalk[n] = MOVEMENT_ACTION_STEP_END;
+    printf("[qz] walk to the table: from %d,%d to %d,%d in %d steps\n", px, py, tx, ty, n - 1);
+    ScriptMovement_StartObjectMovementScript(LOCALID_PLAYER, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, sQzWalk);
     return 0;
 }
 
@@ -1167,8 +1263,8 @@ static u16 QzGiveStarter_(void)
     return ScriptGiveMon(species, 5, ITEM_NONE, 0, 0, 0);
 }
 
-u16 QzChooseStarterJohto(void) { return QzChooseStarter_(); }
-u16 QzChooseStarterKanto(void) { return QzChooseStarter_(); }
+u16 QzChooseStarterJohto(void) { return QzChooseStarter_(0); }
+u16 QzChooseStarterKanto(void) { return QzChooseStarter_(1); }
 u16 QzGiveStarterJohto(void) { return gSpecialVar_Result = QzGiveStarter_(); }
 u16 QzGiveStarterKanto(void) { return gSpecialVar_Result = QzGiveStarter_(); }
 

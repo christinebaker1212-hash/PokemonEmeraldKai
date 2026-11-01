@@ -6500,7 +6500,7 @@
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
         .aiFlags = 0x7,
-        .party = ITEM_CUSTOM_MOVES(sParty_Qz8518),
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_Qz8518),
     },
 
     [TRAINER_QZ_8519] =
@@ -6572,7 +6572,7 @@
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
         .aiFlags = 0x7,
-        .party = ITEM_CUSTOM_MOVES(sParty_Qz8524),
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_Qz8524),
     },
 
     [TRAINER_QZ_8525] =
@@ -7568,7 +7568,7 @@
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
         .aiFlags = 0x7,
-        .party = ITEM_CUSTOM_MOVES(sParty_Qz8618),
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_Qz8618),
     },
 
     [TRAINER_QZ_8619] =
@@ -7604,7 +7604,7 @@
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
         .aiFlags = 0x7,
-        .party = ITEM_CUSTOM_MOVES(sParty_Qz8621),
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_Qz8621),
     },
 
     [TRAINER_QZ_8622] =
@@ -7640,7 +7640,7 @@
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
         .aiFlags = 0x7,
-        .party = ITEM_CUSTOM_MOVES(sParty_Qz8624),
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_Qz8624),
     },
 
     [TRAINER_QZ_8625] =
@@ -7676,7 +7676,7 @@
         .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
         .doubleBattle = FALSE,
         .aiFlags = 0x7,
-        .party = ITEM_CUSTOM_MOVES(sParty_Qz8627),
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_Qz8627),
     },
 
     [TRAINER_QZ_8628] =

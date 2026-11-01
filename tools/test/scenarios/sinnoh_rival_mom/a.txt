@@ -1,0 +1,24 @@
+pressuntil A field 5000
+mp textspeed 2
+wait 60
+mp getvar 0x52F0
+mp warp 44,37,6,7
+wait 90
+waitfor field 1000
+press DOWN 16
+wait 20
+press DOWN 16
+wait 30
+shot mom
+pressuntil A field 3000
+wait 90
+mp where
+mp getvar 0x52F0
+press DOWN 16
+wait 40
+press DOWN 16
+wait 40
+press DOWN 16
+wait 90
+mp where
+quit

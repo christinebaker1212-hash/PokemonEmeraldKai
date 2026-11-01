@@ -3275,6 +3275,38 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   (Sinnoh_EventScript_RowanLab) then gives the POKéDEX and 5 POKé BALLS to a player without one.
 - Debug `mp emptyparty` (party and POKéDEX flag cleared); test sinnoh_newgame.
 
+## The KANTO / JOHTO starter table and BLUE's teams (1.63.2)
+- The user's design (docs/user_images/57.png): OAK's / ELM's "choose one" ends with the player walking to the table's
+  middle (qz_specials.c QzWalkToStarterTable: a path search over the map's collision and people to the first free
+  tile below the middle ball, (9, 5) in both labs; the scripts wait with `waitmovement LOCALID_PLAYER`, since
+  `waitmovement 0` waits on the last applymovement's object and let the table open mid-walk) and Emerald's starter
+  screen in table mode (starter_choose.c MP_StarterTable_Open: the hand, the ball's wiggle, the label, the preview
+  circle and YES / NO are Emerald's own; B steps back from the table). The table is drawn in full color under the
+  layers (MP_StarterTable_Composite, src/mp/mp_startable_gfx.h from tools/moemon_starters/gen_table.py: the mock-up with
+  its balls and hand painted out along the table's elliptical light bands, the right half the left mirrored).
+- `special QzChooseStarterKanto/Johto` + `waitstate` keep their contract: RESULT the species (0 for B), plus VAR_TEMP_1
+  the ball (0-2) and LAST_TALKED the ball's object (map objects at (8..10, 4)), so the region's own scripts go on.
+  Only the region's three: KANTO BULBASAUR, SQUIRTLE, CHARMANDER (FireRed's order), JOHTO CYNDAQUIL, TOTODILE,
+  CHIKORITA (sQzTableStarters; obtain_audit.py reads it). Harness condition `startertable`. Tests region_starter,
+  region_starter_walk, kanto_rival_win / _lose.
+- BLUE as in FireRed: he takes the ball strong against yours (OAK's script already walks him to it in FireRed's ball
+  order; his line names it), and every BLUE battle (lab, ROUTE 22 twice, CERULEAN, S.S. ANNE, POKéMON TOWER, SILPH CO.,
+  the CHAMPION) brings the version for his starter: qz_specials.c sQzBlueBattles / QzKantoRivalTrainer, read by
+  mp_region.c MP_Region_TrainerData before the GEN 3 / GEN 5+ copies (FireRed's teams at every GENERATION). Quetzal had
+  rewritten the SQUIRTLE versions; tools/moemon_starters/frlg_rival.py sets all 24 to FireRed's (pret/pokefirered's
+  src/data/trainer_parties.h; --check to compare; re-run after re-importing Quetzal's trainers).
+
+## SINNOH: nobody stands on a door (1.63.2)
+- Platinum starts some people on a door mat for a scene; without the scene they shut players in or out. BARRY's mom
+  in the player's house (she stood on the only door): her visit plays as in Platinum (sinnoh_places.inc
+  Sinnoh_EventScript_RivalMomVisit: stepping next to the mat, she comes in, the player is pushed back a step the way
+  they came, she talks, walks out and is gone; triggers from gen_maps.py EXTRA_TRIGGERS while VAR_SINNOH_ARRIVAL is 2,
+  the visit sets 3: a trigger whose script only ends still holds the player on its tile, so its var turns it off).
+  Moved beside the door (gen_maps.py OVERRIDES): CRASHER WAKE at PASTORIA's gym (with 3 badges: the 4th was shut in)
+  and VEILSTONE's, the sailor in CANALAVE (his house's only door), STARK MOUNTAIN's policemen (the room's only way out).
+  A scan for people on warp tiles is in the commit that did this; the rest are hidden for good (0x3FFF) or block on
+  purpose until a story battle. Test sinnoh_rival_mom.
+
 ## SINNOH's 3D engine
 - Plan and rules: docs/SINNOH_HANDOFF.md. The data comes from pret/pokeplatinum (source.py: its map blocks, matrices,
   areas, props, texture sets and lights as files; fetch_decomp.sh gets them at a pinned commit, make_pack.sh fetches and

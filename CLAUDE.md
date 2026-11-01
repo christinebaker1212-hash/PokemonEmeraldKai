@@ -15,8 +15,8 @@ runs it and ships the pack; never committed: sinnoh/ is ignored; no ROM needed);
 walk; tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM]; COOP_NOTES "SINNOH's 3D engine"; its people's sprites and battle pictures
 in sinnoh/platinum_gfx.pak (tools/sinnoh/build_gfx.py, src/sinnoh/s3d_gfx.c; test sinnoh_pics).
 
-**Open work (2026-11-01): `docs/NEXT_TASKS.md`** (1.63.1 release, KANTO / JOHTO starter table, SINNOH briefcase, drop
-shadows, settings per save file): read it and carry on in its order.
+**Open work (2026-11-01): `docs/NEXT_TASKS.md`** (SINNOH briefcase, drop shadows, settings per save file, card NEW
+tags, 40 PC boxes): read it and carry on in its order.
 
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
 card duels).
@@ -276,6 +276,9 @@ Elite Four's and the Champion's can be joined (MP_Coop_JoinTrainerOk; test join_
 
 Also JOHTO and KANTO (1.60.0, Moemon Quetzal's regions capped to Gen 4: docs/REGIONS_PLAN.md, COOP_NOTES "JOHTO and
 KANTO"; src/mp/mp_region.c and "<save>.region", src/qz_specials.c, tools/quetzal_port/; tests region_*).
+Also the lab's starter table in KANTO / JOHTO and BLUE's teams as FireRed's (1.63.2: starter_choose.c table mode,
+qz_specials.c QzWalkToStarterTable / sQzBlueBattles, tools/moemon_starters; COOP_NOTES "The KANTO / JOHTO starter
+table and BLUE's teams"; tests region_starter*, kanto_rival_*).
 Also Gens 5-9 (1.61.0: species 519-1050, moves 468-847, abilities 125-311 as u16, items 508-552, FAIRY; u32 learnsets;
 src/battle_gen59.c with per-move data gGen59Moves and the generic G59 scripts; tools/moemon_gen58, tools/moemon_gen59) and
 the GENERATION setting (3-9, default 3, OPTIONS > GAME and HOST A GAME > GAME RULES, the host's online; mp_region.c MP_Gen_*:

@@ -352,8 +352,8 @@
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_CRASHER_WAKE",
-      "x": 12,
-      "y": 35,
+      "x": 11,
+      "y": 36,
       "elevation": 3,
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 2,

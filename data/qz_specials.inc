@@ -22,6 +22,7 @@
 	def_special QzChooseItemFromBagForFossil
 	def_special QzChooseStarterJohto
 	def_special QzChooseStarterKanto
+	def_special QzWalkToStarterTable
 	def_special QzClearRadioTowerFlag14A3
 	def_special QzClearSeagallopRestrictions
 	def_special QzClearStaticFlagAfterWildBattle
