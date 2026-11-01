@@ -36,7 +36,7 @@ so each note starts on the frame nearest its exact musical position; each note o
 in two, and pitch bends for the rest with a bend range per note just wide enough, so notes stay in
 tune at the game's 7 bits of bend; its volume each frame as expression, pan) and **the original instruments**: each sample, at
 about the GBA's 13379 Hz as you hear it (a sample usually played low keeps more detail) and 8-bit like
-the game's, with its loop. The loop is found from where the key-ons start repeating. The whole song
+the game's, with its loop. The loop is found in the original sound: each game frame's spectrum, the period at which the song repeats (the notes' own repeat is tried too), the earliest frame from which it keeps repeating, and the period to the sample by matching the waveform one period apart (a loop a frame off would be heard every time it loops); the loop starts at the first note from there. A song that doesn't clearly repeat gets no loop. **custom** sets a rip's loop by time, to the game frame (-1s / -f / +f / +1s, the mouse wheel, or **here**: where the song is playing), and **Hear the loop** plays the last 3 seconds and the jump. The whole song
 is then matched to the original's loudness (Game Boy channels keep the hardware's own levels).
 GBA songs on MP2K need none of that: their own commands and samples come straight from the ROM.
 

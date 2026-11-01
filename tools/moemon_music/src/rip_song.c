@@ -20,6 +20,7 @@
 #include "inst.h"
 #include "engine.h"
 #include "rip_drums.h"
+#include "rip_loop.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -308,7 +309,8 @@ static int find_loop(const Note *notes, int nn, int nframes, int *ls, int *le) {
             (void)ok;
             if (start < 0) start = 0;
             // the repeating part has to be long enough to be the song, not a fade-out
-            if (lastF - start < 2 * p - 2) continue;
+            // (a rip often holds the loop exactly twice, the second time cut a little short by its length)
+            if (lastF - start < 2 * p - p / 10) continue;
             // and a real loop: at least 3 seconds with a dozen notes in it (a jingle's last bars can look
             // like a short repeat)
             if (p < 180) continue;
@@ -916,7 +918,7 @@ int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, char *err, in
     if (r->kind == RIP_USF && getenv("MMS_RHYTHM")) steady_rhythm(notes, nn);
     qsort(notes, nn, sizeof(Note), note_cmp);
 
-    // the loop (on the moved notes)
+    // the loop: the notes' repeat, checked against (and timed by) the original sound's own repeat
     int ls = 0, le = 0;
     {
         Note *moved = malloc(sizeof(Note) * (size_t)nn);
@@ -924,6 +926,17 @@ int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, char *err, in
             for (int i = 0; i < nn; i++) { moved[i] = notes[i]; moved[i].f0 += notes[i].shift; moved[i].f1 += notes[i].shift; }
             out->hasLoop = find_loop(moved, nn, nf + 2, &ls, &le);
             free(moved);
+        }
+        int cand[1] = {le - ls}, aStart = 0;
+        double period = 0;
+        if (!getenv("MMS_NOTES_LOOP") && rip_loop_find(r, cand, out->hasLoop ? 1 : 0, &aStart, &period, getenv("MMS_LOOP_DEBUG") != NULL)) {
+            // start at the first note at or after where the sound starts repeating (a clean place to come back
+            // to), and loop one period (to the nearest frame) later
+            int s = -1;
+            for (int i = 0; i < nn; i++) if (notes[i].f0 + notes[i].shift >= aStart && (s < 0 || notes[i].f0 + notes[i].shift < s)) s = notes[i].f0 + notes[i].shift;
+            if (s < 0) s = aStart;
+            int e = s + (int)lround(period);
+            if (e <= nf + 2) { ls = s; le = e; out->hasLoop = 1; }
         }
     }
     if (out->hasLoop) { out->loopStart = (uint32_t)ls; out->loopEnd = (uint32_t)le; }

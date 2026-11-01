@@ -926,6 +926,39 @@ static void draw_slots(void)
 }
 
 static const char *LOOP_LABELS[] = {"from the MIDI", "none", "whole song", "custom"};
+static const char *LOOP_LABELS_RIP[] = {"found", "none", "whole song", "custom"};
+
+// a rip's time (one MIDI tick a game frame) as m:ss.cc
+static void rip_time(char *out, size_t n, uint32_t frame)
+{
+    double s = frame * (double)ENG_FRAME_SAMPLES / ENG_RATE;
+    int m = (int)(s / 60);
+    snprintf(out, n, "%d:%05.2f", m, s - m * 60);
+}
+
+// One end of a rip's custom loop: its time, nudged a game frame or a second at a time, or set to where the
+// song is playing. Returns 1 when it changed.
+static int rip_loop_point(int x, int y, const char *label, uint32_t *v, uint32_t lo, uint32_t hi)
+{
+    char t[40];
+    rip_time(t, sizeof t, *v);
+    text(x, y + 2, label, C_DIM);
+    int bx = x + 48;
+    long nv = (long)*v;
+    if (button(bx, y, 34, 20, "-1s", *v > lo)) nv -= 60;
+    if (button(bx + 36, y, 28, 20, "-f", *v > lo)) nv -= 1;
+    fill(bx + 66, y, 86, 20, C_ROW);
+    text(bx + 66 + (86 - textw(t)) / 2, y + 2, t, C_TEXT);
+    if (button(bx + 154, y, 28, 20, "+f", *v < hi)) nv += 1;
+    if (button(bx + 184, y, 34, 20, "+1s", *v < hi)) nv += 60;
+    if (wheel && hot(bx + 66, y, 86, 20)) nv += wheel > 0 ? 1 : -1;
+    if (button(bx + 222, y, 50, 20, "here", have_song())) nv = song_pos();   // where it's playing now
+    if (nv < (long)lo) nv = (long)lo;
+    if (nv > (long)hi) nv = (long)hi;
+    if ((uint32_t)nv == *v) return 0;
+    *v = (uint32_t)nv;
+    return 1;
+}
 
 static void draw_song(void)
 {
@@ -998,7 +1031,7 @@ static void draw_song(void)
     for (int i = 0; i < 4; i++) {
         int bx = lx + 50 + i * 128;
         if (p->loopMode == i) fill(bx - 2, ly - 2, 124, 26, C_ACCENT);
-        if (button(bx, ly, 120, 22, LOOP_LABELS[i], 1) && p->loopMode != i) {
+        if (button(bx, ly, 120, 22, (p->isRip ? LOOP_LABELS_RIP : LOOP_LABELS)[i], 1) && p->loopMode != i) {
             if (i == LOOP_CUSTOM && !p->loopEnd) {
                 p->loopStart = S.c.hasLoop ? S.c.loopStartTick : 0;
                 p->loopEnd = S.c.hasLoop ? S.c.loopEndTick : S.c.endTick;
@@ -1011,7 +1044,27 @@ static void draw_song(void)
     ly += 34;
     int bar = S.p.midi.division * 4;   // a 4/4 bar in MIDI ticks
     if (bar <= 0) bar = 1920;
-    if (p->loopMode == LOOP_CUSTOM) {
+    if (p->loopMode == LOOP_CUSTOM && p->isRip) {
+        // a rip's loop by time, to the game frame (its MIDI has one tick a frame), not by bars
+        uint32_t endMax = S.c.endTick + 2;
+        int c1 = rip_loop_point(lx + 50, ly, "Start", &p->loopStart, 0, endMax - 2);
+        // hear the jump: from three seconds before the end, through it
+        if (button(lx + 400, ly, 150, 20, "Hear the loop", have_song() && p->loopEnd > 180)) {
+            play_from((long)p->loopEnd - 180);
+            sPlaying = E.playing;
+        }
+        ly += 26;
+        int c2 = rip_loop_point(lx + 50, ly, "End", &p->loopEnd, 1, endMax);
+        if (c1 || c2) {
+            if (p->loopEnd <= p->loopStart) p->loopEnd = p->loopStart + 1;
+            p->dirty = 1;
+            rebuild();
+        }
+        char a[40], m[160];
+        rip_time(a, sizeof a, p->loopEnd - p->loopStart);
+        snprintf(m, sizeof m, "a %s loop", a);
+        text(lx + 400, ly + 2, m, C_DIM);
+    } else if (p->loopMode == LOOP_CUSTOM) {
         int ls = (int)(p->loopStart / (uint32_t)bar) + 1, le = (int)((p->loopEnd + (uint32_t)bar - 1) / (uint32_t)bar) + 1;
         int maxBar = (int)(S.c.endTick / (uint32_t)bar) + 2;
         int c1 = stepper(lx + 50, ly, "Start bar", &ls, 1, maxBar, 1, NULL);
@@ -1026,7 +1079,12 @@ static void draw_song(void)
         text(lx + 470, ly + 2, "(bars of 4 beats)", C_DIM);
     } else {
         char m[200];
-        if (S.c.hasLoop)
+        if (S.c.hasLoop && p->isRip) {
+            char a[40], b[40];
+            rip_time(a, sizeof a, S.c.loopEndTick);
+            rip_time(b, sizeof b, S.c.loopStartTick);
+            snprintf(m, sizeof(m), "Loops from %s back to %s (custom: set it yourself).", a, b);
+        } else if (S.c.hasLoop)
             snprintf(m, sizeof(m), "Loops from beat %u back to beat %u.", S.c.loopEndTick / (uint32_t)S.p.midi.division + 1,
                      S.c.loopStartTick / (uint32_t)S.p.midi.division + 1);
         else snprintf(m, sizeof(m), p->loopMode == LOOP_NONE ? "Plays once and stops." : "The MIDI has no loop markers: it plays once.");
