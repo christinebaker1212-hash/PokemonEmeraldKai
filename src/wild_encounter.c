@@ -474,9 +474,9 @@ static bool8 TryGenerateWildMon(const struct WildPokemonInfo *wildMonInfo, u8 ar
 
     // Moemon Co-op: today's outbreak species shows up often on its route
     if (area == WILD_AREA_LAND)
-        CreateWildMon(MP_Events_MaybeOutbreak(wildMonInfo->wildPokemon[wildMonIndex].species), level);
+        CreateWildMon(MP_Events_MaybeOutbreak(MP_WildSlotSpecies(wildMonInfo, wildMonIndex)), level);
     else
-        CreateWildMon(wildMonInfo->wildPokemon[wildMonIndex].species, level);
+        CreateWildMon(MP_WildSlotSpecies(wildMonInfo, wildMonIndex), level);   // Moemon Kai: no starters in the wild
     return TRUE;
 }
 
@@ -488,8 +488,8 @@ static u16 GenerateFishingWildMon(const struct WildPokemonInfo *wildMonInfo, u8 
     wildMonInfo = MP_Region_WildInfo(wildMonInfo);   // Moemon Kai: JOHTO / KANTO before Gen 4 (mp_region.c)
     level = ChooseWildMonLevel(&wildMonInfo->wildPokemon[wildMonIndex]);
 
-    CreateWildMon(wildMonInfo->wildPokemon[wildMonIndex].species, level);
-    return wildMonInfo->wildPokemon[wildMonIndex].species;
+    CreateWildMon(MP_WildSlotSpecies(wildMonInfo, wildMonIndex), level);   // Moemon Kai: no starters in the wild
+    return MP_WildSlotSpecies(wildMonInfo, wildMonIndex);
 }
 
 static bool8 SetUpMassOutbreakEncounter(u8 flags)
@@ -1096,7 +1096,7 @@ bool8 MP_RollExtraLandMon(struct Pokemon *out)
     keep = gEnemyParty[0];
     index = ChooseWildMonIndex_Land();
     level = ChooseWildMonLevel(&info->wildPokemon[index]);
-    CreateWildMon(MP_Events_MaybeOutbreak(info->wildPokemon[index].species), level);
+    CreateWildMon(MP_Events_MaybeOutbreak(MP_WildSlotSpecies(info, index)), level);
     *out = gEnemyParty[0];
     gEnemyParty[0] = keep;
     return TRUE;

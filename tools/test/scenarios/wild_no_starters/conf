@@ -1,0 +1,7 @@
+# First partners are wild nowhere (mp_region.c MP_WildSlotSpecies): JOHTO's ROUTE 36 had BULBASAUR and CHARMANDER
+# in its 1% slots; 2000 rolls at GEN 3 and at GEN 9 (where the newer slots join in) bring none of any starter line
+MODE=1
+GEN=3
+TMO=120
+CHECK="python3 tools/test/scenarios/wild_no_starters/check.py"
+UNEXPECT_A=("[crash]")

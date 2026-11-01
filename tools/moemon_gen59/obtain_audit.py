@@ -6,7 +6,8 @@
 Reads the game's own tables (no ROM): wild tables of HOENN, JOHTO and KANTO as mp_region.c picks them by GENERATION
 (HOENN's base tables + hoenn_modern.h's slots; JOHTO / KANTO's Gen 2 tables at GEN 3, the Gen 4 cap's at 4, Quetzal's
 own from 5), HEADBUTT trees, statics (qz_static_encounters.h) and the scripts' gifts / wild battles / eggs, starters,
-in-game trades, the Bug-Catching Contest, MoeGatcha's fixed prizes and the extra sources listed in EXTRA below;
+in-game trades, the Bug-Catching Contest, MoeGatcha's fixed prizes, the Outbreak's starters (no starter line
+is ever wild) and the extra sources listed in EXTRA below;
 then evolutions (any method; items are the item audit's business) and breeding (an egg hatches the family's first
 stage the GENERATION allows; incense babies need their incense).
 
@@ -214,6 +215,12 @@ EXTRA = [
 ]
 
 
+_reg = rd('src/mp/mp_region.c')
+STARTER_LINES = set(re.findall(r'SPECIES_(\w+)', re.search(r'sStarterLines\[\] = \{(.*?)\};', _reg, re.S).group(1)))
+OUTBREAK_STARTERS = re.findall(r'SPECIES_(\w+)', re.search(r'sOutbreakStarters\[\] = \{(.*?)\};',
+                                                       rd('src/mp/mp_events.c'), re.S).group(1))
+
+
 def obtainable(g):
     """species -> set of how-strings (only species with gen <= g)"""
     got = defaultdict(set)
@@ -235,7 +242,8 @@ def obtainable(g):
             mod = MODERN[key]
             sp = [mod[i] if i < len(mod) and mod[i] and gen_of(mod[i]) <= g else sp[i] for i in range(len(sp))]
         for s in sp:
-            add(region, s, 'wild ' + field.split('_')[0])
+            if s not in STARTER_LINES:   # (never in a wild slot: mp_region.c MP_WildSlotSpecies)
+                add(region, s, 'wild ' + field.split('_')[0])
     for region, sp in HEADBUTT:
         for s in sp:
             add(region, stand_in(s, cap(region, g)), 'headbutt')
@@ -252,6 +260,8 @@ def obtainable(g):
         add(region, s, 'bug contest')
     for s in GATCHA:
         add(HOENN, s, 'MoeGatcha prize')
+    for s in OUTBREAK_STARTERS:
+        add(HOENN, s, 'outbreak')
     for region, s, how in EXTRA:
         add(region, s, how)
 

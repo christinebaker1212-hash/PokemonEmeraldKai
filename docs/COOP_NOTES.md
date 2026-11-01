@@ -3093,6 +3093,12 @@ Old saves need nothing: eggs and Unown keep their real species in the save.
   online.
 - Moves past the cap are skipped when learning (MonTryLearningNewMove, GiveBoxMonInitialMoveset, the relearner,
   CanMonLearnTMTutor, day care egg moves); evolutions into a later generation's species wait.
+- No starters in the wild (the user's call: five in an hour was too many): a starter line's slot in any wild table
+  (Quetzal's JOHTO / KANTO tables, the newer generations' slots) gives the nearest earlier slot's POKéMON at its own
+  levels (mp_region.c sStarterLines, MP_WildSlotSpecies; wild_encounter.c's land, water, ROCK SMASH, fishing and
+  extra rolls). They come from the daily Outbreak instead: one day in four is a starter's (mp_events.c
+  sOutbreakStarters, the generations HOENN's cap allows), and from the MoeGatcha. obtain_audit.py knows both rules.
+  Test wild_no_starters.
 - HOENN's pools by GENERATION (tools/moemon_gen59/gen_hoenn_modern.py -> src/data/hoenn_modern.h, applied in
   mp_region.c): each wild table gives one of its rarer slots to each generation 4-9 (1.62.1: the slots of generations
   past the cap go, in turn, to the species of those within it, so newer POKéMON are about 19% of ROUTE 104 at GEN 4

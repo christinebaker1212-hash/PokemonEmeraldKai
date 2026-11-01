@@ -24,6 +24,7 @@
 #include <string.h>
 #include <time.h>
 #include "global.h"
+#include "mp_region.h"
 #include "mp.h"
 #include "mp_net.h"
 #include "event_data.h"
@@ -593,11 +594,20 @@ static void RaceAdd(u8 type, s32 value)
 // Outbreak
 
 static const u16 sOutbreakSpecies[] = {
-    SPECIES_PIKACHU, SPECIES_EEVEE, SPECIES_BULBASAUR, SPECIES_CHARMANDER, SPECIES_SQUIRTLE,
-    SPECIES_CHIKORITA, SPECIES_CYNDAQUIL, SPECIES_TOTODILE, SPECIES_DRATINI, SPECIES_LARVITAR,
+    SPECIES_PIKACHU, SPECIES_EEVEE, SPECIES_DRATINI, SPECIES_LARVITAR,
     SPECIES_SCYTHER, SPECIES_TOGEPI, SPECIES_MAREEP, SPECIES_TEDDIURSA, SPECIES_HOUNDOUR,
     SPECIES_SNEASEL, SPECIES_GROWLITHE, SPECIES_VULPIX, SPECIES_GASTLY, SPECIES_CHANSEY,
     SPECIES_PINECO, SPECIES_SUNKERN, SPECIES_HOPPIP, SPECIES_SNUBBULL, SPECIES_PHANPY,
+};
+
+// First partners are wild nowhere else (mp_region.c MP_WildSlotSpecies): one outbreak day in four is one of them,
+// from the generations the GENERATION setting shows in HOENN
+static const u16 sOutbreakStarters[] = {
+    SPECIES_BULBASAUR, SPECIES_CHARMANDER, SPECIES_SQUIRTLE, SPECIES_CHIKORITA, SPECIES_CYNDAQUIL, SPECIES_TOTODILE,
+    SPECIES_TREECKO, SPECIES_TORCHIC, SPECIES_MUDKIP, SPECIES_TURTWIG, SPECIES_CHIMCHAR, SPECIES_PIPLUP,
+    SPECIES_SNIVY, SPECIES_TEPIG, SPECIES_OSHAWOTT, SPECIES_CHESPIN, SPECIES_FENNEKIN, SPECIES_FROAKIE,
+    SPECIES_ROWLET, SPECIES_LITTEN, SPECIES_POPPLIO, SPECIES_GROOKEY, SPECIES_SCORBUNNY, SPECIES_SOBBLE,
+    SPECIES_SPRIGATITO, SPECIES_FUECOCO, SPECIES_QUAXLY,
 };
 
 static const u16 sOutbreakMaps[] = {
@@ -611,6 +621,16 @@ static void TodaysOutbreak(u16 *species, u16 *map)
     u32 h = Hash(MP_Lobby_RoomName(), (u32)TodayUTC() * 40503u + 7);
     *species = sOutbreakSpecies[h % ARRAY_COUNT(sOutbreakSpecies)];
     *map = sOutbreakMaps[(h / 97) % ARRAY_COUNT(sOutbreakMaps)];
+    if ((h / 2003) % 4 == 0)
+    {
+        u16 shown[ARRAY_COUNT(sOutbreakStarters)];
+        u32 i, n = 0;
+        for (i = 0; i < ARRAY_COUNT(sOutbreakStarters); i++)
+            if (MP_Gen_OfSpecies(sOutbreakStarters[i]) <= MP_Gen_Cap(REGION_HOENN))
+                shown[n++] = sOutbreakStarters[i];
+        if (n > 0)
+            *species = shown[(h / 8009) % n];
+    }
 }
 
 static bool8 IsTodaysOutbreak(u16 species)
