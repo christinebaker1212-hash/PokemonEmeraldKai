@@ -1,0 +1,10 @@
+# Jumping a ledge with OPTIONS > SHADOWS on adds no second shadow (1.63.13): the game's own jump shadow
+# (FLDEFF_SHADOW, event_object_movement.c DoShadowFieldEffect) is left out, the soft drop shadow stays under the
+# player. ROUTE 101's ledge at (8,6): jumped with SHADOWS on (no jump shadow), then with them off (the jump shadow
+# as the game draws it). Shots jump_*.
+MODE=1
+WARP=0,16,8,5
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=280:10"
+EXPECT_A=("shadowwatch jump shadows 0" "shadowwatch jump shadows 1" "ctx 1 free 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

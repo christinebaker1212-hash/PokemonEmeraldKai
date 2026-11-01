@@ -1,0 +1,14 @@
+pressuntil A field 5000
+wait 60
+mp shadowwatch 60
+press DOWN 4
+shotburst jump 24 3
+wait 60
+mp warp 0,16,9,5
+wait 60
+mp shadows 0
+mp shadowwatch 60
+press DOWN 4
+wait 70
+mp ctx
+quit

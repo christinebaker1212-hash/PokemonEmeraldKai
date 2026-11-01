@@ -60,6 +60,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped (and their MOéMON GARDEN records travel) |
 | `nurse_no_union` | CHERRYGROVE's nurse heals a game started in JOHTO: she never says "It appears as if <junk> is playing right now" (the wireless UNION ROOM check; flag 0x2A07 stays clear) |
 | `pmd_scale_hop` | a scaled PMD follower (PIKACHU, FOLLOWERS: PMD everywhere) mid-hop is drawn whole: check.py counts its rows and pixels (its lower part was cut off) |
+| `ledge_shadow` | ROUTE 101's ledge jumped with SHADOWS on (no jump shadow, the drop shadow stays) and off (the game's own jump shadow) |
 | `blender` / `crush` | BERRY GAMES invite, accept, play to the results |
 | `contest` | link CONTEST at the Lilycove counter, start to finish (long) |
 | `card_base` | FRIENDS > TRAINER CARD and VISIT SECRET BASE |

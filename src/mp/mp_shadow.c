@@ -16,6 +16,7 @@
 #include "mp.h"
 #include "mp_bigsprite.h"
 #include "mp_pmd.h"
+#include "field_effect_helpers.h"
 #include "constants/event_objects.h"
 
 #define TAG_SHADOW 0x5AD0
@@ -236,10 +237,12 @@ static bool8 InWater(s16 x, s16 y)
 // a hop's y2) for N frames: the lowest and highest gap, and the frames they had none
 static u16 sWatch;
 static struct { s16 min, max; u16 missing; } sW[2];
+static u8 sWatchJump;   // the most of the game's own jump shadows (FLDEFF_SHADOW) seen at once
 void MP_Shadow_Watch(u16 frames)
 {
     u32 k;
     sWatch = frames;
+    sWatchJump = 0;
     for (k = 0; k < 2; k++)
         sW[k].min = 0x7FFF, sW[k].max = -0x7FFF, sW[k].missing = 0;
 }
@@ -276,7 +279,14 @@ static void Watch(void)
             follower = i;
     WatchOne(0, gObjectEvents[gPlayerAvatar.objectEventId].spriteId);
     WatchOne(1, follower);
+    for (i = 0, k = 0; i < MAX_SPRITES; i++)
+        if (gSprites[i].inUse && gSprites[i].callback == UpdateShadowFieldEffect)
+            k++;
+    if (k > sWatchJump)
+        sWatchJump = k;
     if (--sWatch == 0)
+        printf("[test] shadowwatch jump shadows %u\n", (unsigned)sWatchJump);
+    if (sWatch == 0)
         for (k = 0; k < 2; k++)
             if (sW[k].max >= sW[k].min || sW[k].missing)
                 printf("[test] shadowwatch %s gap %d..%d (moved %d) missing %u\n", k ? "follower" : "player", sW[k].min,

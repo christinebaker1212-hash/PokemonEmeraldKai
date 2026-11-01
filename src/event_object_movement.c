@@ -9002,6 +9002,9 @@ u32 StartFieldEffectForObjectEvent(u8 fieldEffectId, struct ObjectEvent *objectE
 
 static void DoShadowFieldEffect(struct ObjectEvent *objectEvent)
 {
+    // Moemon Kai: OPTIONS > SHADOWS draws a shadow under everyone already (mp_shadow.c), so a jump (ledges) adds none
+    if (!gMpConfig.noShadows)
+        return;
     if (!objectEvent->hasShadow)
     {
         objectEvent->hasShadow = TRUE;
