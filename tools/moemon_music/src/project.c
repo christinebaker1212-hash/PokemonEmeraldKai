@@ -396,7 +396,7 @@ int project_load_rip(Project *p, const char *path, const char *biosDir, int gbsT
     np.drumsFirst = 0;
     np.masterVol = 127;
     np.reverb = song.reverb;
-    np.loopMode = song.hasLoop ? LOOP_CUSTOM : LOOP_NONE;
+    np.loopMode = song.hasLoop ? LOOP_MARKERS : LOOP_NONE;   // "found" (the MIDI's markers); custom starts from it
     np.loopStart = song.loopStart;
     np.loopEnd = song.loopEnd;
     for (int s = 0; s < 128; s++) {

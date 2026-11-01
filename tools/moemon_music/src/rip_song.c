@@ -1398,9 +1398,13 @@ int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, const uint8_t
     free(tr);
     out->mid = mf.b;
     out->midLen = mf.n;
-    // reverb: a light one when the original sends most of its voices to its reverb
+    // reverb: when the original sends most of its voices to its reverb; as deep as the original's (its reverb
+    // output level, where the capture reads one: SPC's echo, PS1's EVOL; 0.5 = the GBA's usual 50), else 50
     long rv = 0, all = 0;
     for (size_t k = 0; k < (size_t)nf * nv; k++) if (r->vf[k].sample >= 0 && r->vf[k].l + r->vf[k].r > SILENT) { all++; if (r->vf[k].flags & RIPV_REVERB) rv++; }
-    if (all && rv * 2 > all) out->reverb = 50;
+    if (all && rv * 2 > all) {
+        long amt = r->reverb > 0 ? lround(r->reverb * 100) : 50;
+        out->reverb = (int)(amt < 15 ? 15 : amt > 90 ? 90 : amt);
+    }
     return 1;
 }

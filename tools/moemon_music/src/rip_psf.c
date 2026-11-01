@@ -216,6 +216,13 @@ static void psx_snapshot(RipEmu *e, RipVF *out) {
         uint32_t vmixl = core ? spucore_getreg(core, SPUREG_VMIXL) : 0;
         uint32_t vmixr = core ? spucore_getreg(core, SPUREG_VMIXR) : 0;
         uint32_t vmixe = core ? spucore_getreg(core, SPUREG_VMIXE) : 0;
+        // the reverb: only heard while it's on; how much of it comes out (EVOL) as the song's reverb amount
+        if (core && !spucore_getflag(core, SPUREG_FLAG_REVERB_ENABLE)) vmixe = 0;
+        if (vmixe) {
+            float ev = (fabsf((float)(int16_t)spucore_getreg(core, SPUREG_EVOLL)) +
+                        fabsf((float)(int16_t)spucore_getreg(core, SPUREG_EVOLR))) / 65536.0f;
+            if (ev > p->rip->reverb) p->rip->reverb = ev > 1 ? 1 : ev;
+        }
         uint32_t noise = core ? spucore_getreg(core, SPUREG_NOISE) : 0;
         for (int i = 0; i < 24; i++) {
             PsxVoice *v = &p->v[c * 24 + i];
