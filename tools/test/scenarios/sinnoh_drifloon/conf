@@ -1,0 +1,8 @@
+# DRIFLOON at the VALLEY WINDWORKS on Fridays (tools/sinnoh/legends.py FRIDAYS, s3d_legends.c): with a SINNOH BADGE it
+# floats by the door on a Friday (Lv. 15) and not on other days. Needs the 3D pack.
+MODE=1
+TMO=90
+GEN=4
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=25:40 MOEMON_TEST_FRIDAY=1"
+EXPECT_A=("species 450 level 15")
+UNEXPECT_A=("[crash]" "TIMEOUT")

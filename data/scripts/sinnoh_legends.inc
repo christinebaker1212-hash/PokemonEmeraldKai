@@ -359,6 +359,38 @@ Sinnoh_EventScript_LegendPalkia_Ran:
 	goto Common_EventScript_LegendaryFlewAway
 	end
 
+Sinnoh_EventScript_LegendDrifloon::
+	lock
+	faceplayer
+	waitse
+	playmoncry SPECIES_DRIFLOON, CRY_MODE_ENCOUNTER
+	delay 40
+	waitmoncry
+	setwildbattle SPECIES_DRIFLOON, 15
+	setflag FLAG_SYS_CTRL_OBJ_DELETE
+	special BattleSetup_StartLegendaryBattle
+	waitstate
+	clearflag FLAG_SYS_CTRL_OBJ_DELETE
+	specialvar VAR_RESULT, GetBattleOutcome
+	goto_if_eq VAR_RESULT, B_OUTCOME_WON, Sinnoh_EventScript_LegendDrifloon_Gone
+	goto_if_eq VAR_RESULT, B_OUTCOME_RAN, Sinnoh_EventScript_LegendDrifloon_Ran
+	goto_if_eq VAR_RESULT, B_OUTCOME_PLAYER_TELEPORTED, Sinnoh_EventScript_LegendDrifloon_Ran
+	setflag 0x3D32
+	special Sinnoh_FridayMet
+	release
+	end
+
+Sinnoh_EventScript_LegendDrifloon_Gone:
+	setflag 0x3D32
+	special Sinnoh_FridayMet
+	goto Common_EventScript_RemoveStaticPokemon
+	end
+
+Sinnoh_EventScript_LegendDrifloon_Ran:
+	setvar VAR_0x8004, SPECIES_DRIFLOON
+	goto Common_EventScript_LegendaryFlewAway
+	end
+
 Sinnoh_EventScript_Story0::
 	lock
 	faceplayer

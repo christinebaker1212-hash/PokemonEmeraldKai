@@ -3,7 +3,7 @@ Sinnoh_Route208_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Route208_EventScript_Person23::
-	msgbox Sinnoh_Route208_Text_Person23, MSGBOX_NPC
+	goto Sinnoh_EventScript_OddKeystoneGiver
 	end
 
 Sinnoh_Route208_EventScript_Sign11::
@@ -21,10 +21,6 @@ Sinnoh_Route208_EventScript_Sign13::
 Sinnoh_Route208_EventScript_Sign24::
 	msgbox Sinnoh_Route208_Text_Sign24, MSGBOX_SIGN
 	end
-
-Sinnoh_Route208_Text_Person23:
-	.string "Hyah! I train on this bridge. The river\n"
-	.string "below keeps me focused.$"
 
 Sinnoh_Route208_Text_Sign11:
 	.string "ROUTE 208\p"

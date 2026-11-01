@@ -188,3 +188,134 @@ Sinnoh_Text_MrBacklotToday:
 Sinnoh_Text_MrBacklotNo:
 	.string "Hmph! Your loss. The finest garden\n"
 	.string "in SINNOH, and you won't hear of it!$"
+
+@ ROUTE 208's BLACK BELT: the ODD KEYSTONE (once; flag 0x3D31)
+Sinnoh_EventScript_OddKeystoneGiver::
+	lock
+	faceplayer
+	goto_if_set 0x3D31, Sinnoh_EventScript_OddKeystoneGiven
+	msgbox Sinnoh_Text_OddKeystoneGive, MSGBOX_DEFAULT
+	giveitem ITEM_ODD_KEYSTONE
+	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
+	setflag 0x3D31
+	msgbox Sinnoh_Text_OddKeystoneGiven, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_EventScript_OddKeystoneGiven::
+	msgbox Sinnoh_Text_OddKeystoneGiven, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_Text_OddKeystoneGive:
+	.string "Hyah! I train on this bridge. The river\n"
+	.string "below keeps me focused.\p"
+	.string "I pulled this odd stone out of the\n"
+	.string "water. It's no use to me. Take it!$"
+
+Sinnoh_Text_OddKeystoneGiven:
+	.string "That stone came from somewhere old.\n"
+	.string "There's a crumbling tower on ROUTE 209,\l"
+	.string "south of SOLACEON. Maybe it fits there?$"
+
+@ ROUTE 209's HALLOWED TOWER: the ODD KEYSTONE on top, then the spirits gather as the player battles (32
+@ battles: src/sinnoh/s3d_wild.c Sinnoh_SpiritombTower), and SPIRITOMB comes out (Lv. 25)
+Sinnoh_EventScript_HallowedTower::
+	lockall
+	specialvar VAR_RESULT, Sinnoh_SpiritombTower
+	goto_if_eq VAR_RESULT, 6, Sinnoh_EventScript_HallowedTowerSpiritomb
+	goto_if_eq VAR_RESULT, 5, Sinnoh_EventScript_HallowedTower5
+	goto_if_eq VAR_RESULT, 4, Sinnoh_EventScript_HallowedTower4
+	goto_if_eq VAR_RESULT, 3, Sinnoh_EventScript_HallowedTower3
+	goto_if_eq VAR_RESULT, 2, Sinnoh_EventScript_HallowedTower2
+	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_HallowedTower1
+	checkitem ITEM_ODD_KEYSTONE
+	goto_if_eq VAR_RESULT, FALSE, Sinnoh_EventScript_HallowedTowerBroken
+	msgbox Sinnoh_Text_HallowedTowerAsk, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Sinnoh_EventScript_HallowedTowerEnd
+	removeitem ITEM_ODD_KEYSTONE
+	special Sinnoh_SpiritombPlace
+	msgbox Sinnoh_Text_HallowedTowerPlaced, MSGBOX_DEFAULT
+Sinnoh_EventScript_HallowedTowerEnd::
+	releaseall
+	end
+
+Sinnoh_EventScript_HallowedTowerBroken::
+	msgbox Sinnoh_Text_HallowedTowerBroken, MSGBOX_DEFAULT
+	releaseall
+	end
+
+Sinnoh_EventScript_HallowedTower1::
+	msgbox Sinnoh_Text_HallowedTower1, MSGBOX_DEFAULT
+	releaseall
+	end
+
+Sinnoh_EventScript_HallowedTower2::
+	msgbox Sinnoh_Text_HallowedTower2, MSGBOX_DEFAULT
+	releaseall
+	end
+
+Sinnoh_EventScript_HallowedTower3::
+	msgbox Sinnoh_Text_HallowedTower3, MSGBOX_DEFAULT
+	releaseall
+	end
+
+Sinnoh_EventScript_HallowedTower4::
+	msgbox Sinnoh_Text_HallowedTower4, MSGBOX_DEFAULT
+	releaseall
+	end
+
+Sinnoh_EventScript_HallowedTower5::
+	msgbox Sinnoh_Text_HallowedTower5, MSGBOX_DEFAULT
+	releaseall
+	end
+
+Sinnoh_EventScript_HallowedTowerSpiritomb::
+	waitse
+	playmoncry SPECIES_SPIRITOMB, CRY_MODE_ENCOUNTER
+	msgbox Sinnoh_Text_HallowedTowerCry, MSGBOX_DEFAULT
+	waitmoncry
+	closemessage
+	setwildbattle SPECIES_SPIRITOMB, 25
+	special BattleSetup_StartLegendaryBattle
+	waitstate
+	special Sinnoh_SpiritombAfter
+	releaseall
+	end
+
+Sinnoh_Text_HallowedTowerBroken:
+	.string "A small tower of stacked stones, very\n"
+	.string "old. The stone on top is missing.$"
+
+Sinnoh_Text_HallowedTowerAsk:
+	.string "A small tower of stacked stones. The\n"
+	.string "stone on top is missing.\p"
+	.string "Put the ODD KEYSTONE on top?$"
+
+Sinnoh_Text_HallowedTowerPlaced:
+	.string "{PLAYER} set the ODD KEYSTONE on the\n"
+	.string "tower. It fits as if it always had.\p"
+	.string "The air around the tower feels a\n"
+	.string "little colder...$"
+
+Sinnoh_Text_HallowedTower1:
+	.string "The tower stands quiet with its\n"
+	.string "keystone on top.$"
+
+Sinnoh_Text_HallowedTower2:
+	.string "The stones of the tower seem to have\n"
+	.string "moved, just a little...$"
+
+Sinnoh_Text_HallowedTower3:
+	.string "A faint sound, like crying, comes from\n"
+	.string "inside the tower...$"
+
+Sinnoh_Text_HallowedTower4:
+	.string "The tower is trembling!$"
+
+Sinnoh_Text_HallowedTower5:
+	.string "Something is inside the tower. You can\n"
+	.string "feel it watching you...$"
+
+Sinnoh_Text_HallowedTowerCry:
+	.string "Bwaaaaagh!$"

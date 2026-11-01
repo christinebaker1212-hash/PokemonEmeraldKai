@@ -19,6 +19,9 @@ import ids  # noqa: E402
 
 DONE_FLAGS = 0x3D00   # (free: the trainers' flags end at 0x391F, the hidden items' start at 0x3E00)
 LEAGUE = 0xFF
+FRIDAYS = 0xFE        # every Friday from the 1st BADGE (TEAM GALACTIC gone from the VALLEY WINDWORKS), once a Friday
+# "done" flags past the first 12 (0x3D0C-0x3D0F are the REGIS' and ROTOM's, the map scripts'): a row's own
+OWN_DONE = {'DRIFLOON': 0x3D32}
 # (map, its Platinum object number, species, level, the SINNOH badges it waits for, LEAGUE: SINNOH cleared)
 LEGENDS = [
     ('Sinnoh_AcuityCavern', 1, 'UXIE', 50, 7),
@@ -35,6 +38,8 @@ LEGENDS = [
     # the top of SPEAR PILLAR after the LEAGUE, beside where CYRUS waits in the story (('at', x, z): Platinum's tiles)
     ('Sinnoh_SpearPillar', ('at', 29, 28), 'DIALGA', 70, LEAGUE),
     ('Sinnoh_SpearPillar', ('at', 33, 28), 'PALKIA', 70, LEAGUE),
+    # not a legendary: Platinum's Friday DRIFLOON at the VALLEY WINDWORKS' door (s3d_legends.c FRIDAYS)
+    ('Sinnoh_ValleyWindworksOutside', 5, 'DRIFLOON', 15, FRIDAYS),
 ]
 EXTRA_FLAGS = 0x3D80  # the hide flags of the ones this game adds (('at', x, z)), one each
 
@@ -162,7 +167,8 @@ def main():
         p = by_name[m]
         obj = object_flag(root, events(root, p['place']), n)
         assert obj, '%s: no hide flag for its object %d' % (m, n)
-        done = DONE_FLAGS + k
+        done = OWN_DONE.get(species, DONE_FLAGS + k)
+        assert done < 0x3D0C or species in OWN_DONE, species
         map_const = json.load(open('data/maps/%s/map.json' % m))['id']
         rows.append('    {MAP_GROUP(%s), MAP_NUM(%s), SPECIES_%s, 0x%X, 0x%X, %d},\n'
                     % (map_const, map_const, species, obj, done, badges))
@@ -178,6 +184,8 @@ def main():
                    '%s_Gone:\n\tsetflag 0x%X\n\tgoto Common_EventScript_RemoveStaticPokemon\n\tend\n\n'
                    '%s_Ran:\n\tsetvar VAR_0x8004, SPECIES_%s\n\tgoto Common_EventScript_LegendaryFlewAway\n\tend\n\n'
                    % (lab, species, species, level, lab, lab, lab, done, lab, done, lab, species))
+        if badges == FRIDAYS:   # (the day it was met: s3d_legends.c clears its flag on a later day)
+            inc[-1] = inc[-1].replace('\tsetflag 0x%X\n' % done, '\tsetflag 0x%X\n\tspecial Sinnoh_FridayMet\n' % done)
         # the map's on-load hook: shown or hidden (above the generated words, kept by gen_words.py)
         hook(m)
     for k, (m, n, trainers, badges, words) in enumerate(STORY):
@@ -215,7 +223,7 @@ def main():
         hook(m)
     open('src/data/sinnoh_legends.h', 'w').write(
         head + "// SINNOH's legendaries on the map (src/sinnoh/s3d_legends.c): where, which, the object's flag, its "
-        "\"done\" flag and the\n// SINNOH badges it waits for (0xFF: the LEAGUE)\n"
+        "\"done\" flag and the\n// SINNOH badges it waits for (0xFF: the LEAGUE, 0xFE: Fridays from the 1st)\n"
         'static const struct { u8 group, num; u16 species; u16 objFlag, doneFlag; u8 badges; } sSinnohLegends[] = {\n'
         + ''.join(rows) + '};\n')
     open('data/scripts/sinnoh_legends.inc', 'w').write(''.join(inc))

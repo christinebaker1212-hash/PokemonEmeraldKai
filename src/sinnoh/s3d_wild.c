@@ -24,6 +24,9 @@
 #include "pokemon.h"
 #include "script_pokemon_util.h"
 #include "string_util.h"
+#include "battle.h"
+#include "constants/battle.h"
+#include "constants/game_stat.h"
 #include "../data/sinnoh_wild_extra.h"
 
 #define FLAG_SINNOH_SWARMS 0x3D30   // the twin told of swarms (tools/sinnoh: free between the story's and FLY's flags)
@@ -357,4 +360,37 @@ void Sinnoh_HoneyDebugAge(u32 minutes, s32 group)
         if (group >= 0 && group <= 3)
             sHoney.trees[tree].group = group;
     }
+}
+
+// ------------------------------------------------------------------------------------------------ the HALLOWED TOWER
+// ROUTE 209's tower (data/scripts/sinnoh_wild.inc): Platinum's SPIRITOMB comes when 32 people were talked to in its
+// Underground; here when the player has fought 32 battles since the ODD KEYSTONE went on the tower (any battles: the
+// spirits gather where TRAINERS and POKéMON clash). VAR_RESULT: 0 no keystone, 1-5 the tower's signs (Platinum's steps
+// at 8 / 15 / 22 / 29), 6 SPIRITOMB is there
+u16 Sinnoh_SpiritombTower(void)
+{
+    u32 n;
+    if (VarGet(VAR_SINNOH_SPIRITOMB) == 0)
+        return gSpecialVar_Result = 0;
+    n = GetGameStat(GAME_STAT_TOTAL_BATTLES) + 1 - VarGet(VAR_SINNOH_SPIRITOMB);
+    if (n > 0x8000)   // (a count from before the stat wrapped)
+        n = 32;
+    MPNet_Log("sinnoh: hallowed tower: %u battles", n);
+    return gSpecialVar_Result = n >= 32 ? 6 : n >= 29 ? 5 : n >= 22 ? 4 : n >= 15 ? 3 : n >= 8 ? 2 : 1;
+}
+
+u16 Sinnoh_SpiritombPlace(void)
+{
+    VarSet(VAR_SINNOH_SPIRITOMB, (GetGameStat(GAME_STAT_TOTAL_BATTLES) + 1) & 0xFFFF);
+    return 0;
+}
+
+// After the battle: caught, the tower is quiet (the keystone with it); otherwise the spirits gather again
+u16 Sinnoh_SpiritombAfter(void)
+{
+    if (gBattleOutcome == B_OUTCOME_CAUGHT)
+        VarSet(VAR_SINNOH_SPIRITOMB, 0);
+    else
+        Sinnoh_SpiritombPlace();
+    return 0;
 }

@@ -2,6 +2,7 @@
 // their map (special Sinnoh_LegendsRefresh) one is shown unless it was caught or beaten, or its time hasn't come:
 // UXIE, AZELF, MESPRIT and GIRATINA from the 7th BADGE (when Platinum's story gives them), the others once SINNOH's
 // LEAGUE is beaten
+#include <stdlib.h>
 #include "global.h"
 #include "event_data.h"
 #include "mp_region.h"
@@ -12,6 +13,22 @@
 #include "pokemon.h"
 #include "../data/sinnoh_legends.h"
 
+#define FRIDAYS 0xFE   // (tools/sinnoh/legends.py)
+
+// The PC's calendar (the room host's online): day 1 is 1 January 2000, a Saturday
+static bool8 IsFriday(void)
+{
+    if (getenv("MOEMON_TEST_FRIDAY") != NULL)   // (tests)
+        return atoi(getenv("MOEMON_TEST_FRIDAY")) != 0;
+    return (RtcGetLocalDayCount() + 5) % 7 == 5;
+}
+
+u16 Sinnoh_FridayMet(void)
+{
+    VarSet(VAR_SINNOH_FRIDAY_DAY, RtcGetLocalDayCount() + 1);
+    return 0;
+}
+
 u16 Sinnoh_LegendsRefresh(void)
 {
     u32 i;
@@ -20,10 +37,21 @@ u16 Sinnoh_LegendsRefresh(void)
         bool8 shown;
         if (sSinnohLegends[i].group != gSaveBlock1Ptr->location.mapGroup || sSinnohLegends[i].num != gSaveBlock1Ptr->location.mapNum)
             continue;
+        if (sSinnohLegends[i].badges == FRIDAYS)
+        {
+            // (DRIFLOON: met once a Friday. Its battle sets its "done" flag and the day (Sinnoh_FridayMet); a later
+            // day clears them)
+            if (FlagGet(sSinnohLegends[i].doneFlag) && VarGet(VAR_SINNOH_FRIDAY_DAY) != RtcGetLocalDayCount() + 1)
+            {
+                FlagClear(sSinnohLegends[i].doneFlag);
+                VarSet(VAR_SINNOH_FRIDAY_DAY, 0);
+            }
+        }
         shown = !FlagGet(sSinnohLegends[i].doneFlag)
              && (sSinnohLegends[i].species == SPECIES_NONE || MP_Gen_Allowed(sSinnohLegends[i].species))
              && (sSinnohLegends[i].badges == 0xFF ? MP_Region_Cleared(REGION_SINNOH)
-                                                    : MP_Region_BadgeCount(REGION_SINNOH) >= sSinnohLegends[i].badges);
+               : sSinnohLegends[i].badges == FRIDAYS ? IsFriday() && MP_Region_BadgeCount(REGION_SINNOH) >= 1
+                                                      : MP_Region_BadgeCount(REGION_SINNOH) >= sSinnohLegends[i].badges);
         if (shown)
             FlagClear(sSinnohLegends[i].objFlag);
         else

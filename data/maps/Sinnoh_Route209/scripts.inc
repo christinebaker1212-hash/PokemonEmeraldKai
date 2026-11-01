@@ -3,19 +3,19 @@ Sinnoh_Route209_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Route209_EventScript_Bg3::
-	msgbox Sinnoh_Route209_Text_Bg3, MSGBOX_SIGN
+	goto Sinnoh_EventScript_HallowedTower
 	end
 
 Sinnoh_Route209_EventScript_Bg4::
-	msgbox Sinnoh_Route209_Text_Bg4, MSGBOX_SIGN
+	goto Sinnoh_EventScript_HallowedTower
 	end
 
 Sinnoh_Route209_EventScript_Bg5::
-	msgbox Sinnoh_Route209_Text_Bg5, MSGBOX_SIGN
+	goto Sinnoh_EventScript_HallowedTower
 	end
 
 Sinnoh_Route209_EventScript_Bg6::
-	msgbox Sinnoh_Route209_Text_Bg6, MSGBOX_SIGN
+	goto Sinnoh_EventScript_HallowedTower
 	end
 
 Sinnoh_Route209_EventScript_Person22::
@@ -37,26 +37,6 @@ Sinnoh_Route209_EventScript_Sign11::
 Sinnoh_Route209_EventScript_Sign32::
 	msgbox Sinnoh_Route209_Text_Sign32, MSGBOX_SIGN
 	end
-
-Sinnoh_Route209_Text_Bg3:
-	.string "A small stone shrine, worn by the\n"
-	.string "weather. Someone left fresh flowers\l"
-	.string "here.$"
-
-Sinnoh_Route209_Text_Bg4:
-	.string "A small stone shrine, worn by the\n"
-	.string "weather. Someone left fresh flowers\l"
-	.string "here.$"
-
-Sinnoh_Route209_Text_Bg5:
-	.string "A small stone shrine, worn by the\n"
-	.string "weather. Someone left fresh flowers\l"
-	.string "here.$"
-
-Sinnoh_Route209_Text_Bg6:
-	.string "A small stone shrine, worn by the\n"
-	.string "weather. Someone left fresh flowers\l"
-	.string "here.$"
 
 Sinnoh_Route209_Text_Person22:
 	.string "There's an old tower on this route.\n"

@@ -1,0 +1,26 @@
+pressuntil A field 5000
+wait 30
+mp warp 40,28,53,30
+wait 60
+waitfor field 1000
+mp face up
+press A 1
+wait 60
+pressuntil A field 2000
+wait 20
+mp warp 40,29,54,43
+wait 60
+waitfor field 1000
+mp face up
+press A 1
+wait 60
+pressuntil A field 2000
+wait 20
+mp gamestat 7 40
+mp face up
+press A 1
+wait 30
+pressuntil A action 3000
+mp bhp
+shot t_spiritomb
+quit

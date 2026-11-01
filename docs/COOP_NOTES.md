@@ -3582,6 +3582,13 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   LEAGUE, MR. BACKLOT (the POKéMON MANSION's office) tells once a day of a new POKéMON from Platinum's 16 (not one of
   the two there, allowed by the GENERATION), which lives in the garden's grass slot 6, the one before in slot 7
   (Sinnoh_TrophyGardenToday / Add; kept with the HONEY trees). Test sinnoh_trophy.
+- DRIFLOON and SPIRITOMB (2026-11-01): DRIFLOON floats by the VALLEY WINDWORKS' door on Fridays from the 1st BADGE
+  (legends.py row FRIDAYS 0xFE, done flag 0x3D32; its battle sets VAR_SINNOH_FRIDAY_DAY 0x52F1 through special
+  Sinnoh_FridayMet and a later day clears the flag; the weekday from the day count, day 1 = 1 Jan 2000, a Saturday;
+  MOEMON_TEST_FRIDAY). ROUTE 208's BLACK BELT gives the ODD KEYSTONE (flag 0x3D31); on ROUTE 209's HALLOWED TOWER it
+  starts the count Platinum keeps of Underground talks, here 32 battles of any kind (VAR_SINNOH_SPIRITOMB 0x52F2 = the
+  battle stat + 1 then; the tower's words change at 8 / 15 / 22 / 29), then SPIRITOMB Lv. 25; not caught, the count
+  starts again. Tests sinnoh_drifloon, sinnoh_spiritomb.
 - Words: SINNOH's people, signs and story are written for this game (in its scripts, MOéMON's words like HOENN's, so
   OPTIONS > CREATURES swaps them back like any text); nothing of Platinum's text is used or shipped (decided
   2026-10-31: the earlier text pack built from the decomp's message banks is gone).

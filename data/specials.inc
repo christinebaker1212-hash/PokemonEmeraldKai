@@ -622,4 +622,8 @@ gSpecials::
 	def_special Sinnoh_HoneyTreeMon
 	def_special Sinnoh_TrophyGardenToday
 	def_special Sinnoh_TrophyGardenAdd
+	def_special Sinnoh_FridayMet
+	def_special Sinnoh_SpiritombTower
+	def_special Sinnoh_SpiritombPlace
+	def_special Sinnoh_SpiritombAfter
 	.include "data/qz_specials.inc"   @ Moemon Kai: Quetzal's specials (Johto / Kanto)
