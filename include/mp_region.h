@@ -11,11 +11,13 @@
 // A Pokémon met in JOHTO: its MET_GAME (MON_DATA_MET_LOCATION holds the low byte of the JOHTO map section)
 #define MP_METGAME_JOHTO 14
 
-// Johto / Kanto flags and vars past the save block's (tools/quetzal_port/import.py places them, up to 0x2EB7); SINNOH's
-// from 0x3000 (REGION_SINNOH_FLAGS: its 8 badges first)
+// Johto / Kanto flags and vars past the save block's (tools/quetzal_port/import.py places them, up to 0x2EB7; their
+// trainers' "beaten" flags 0x3000-0x3319, QZ_TRAINER_FLAGS_START); SINNOH's from 0x3320 (REGION_SINNOH_FLAGS: its 8
+// badges, then tools/sinnoh/ids.py's flags from 0x3328, its trainers' from 0x3780 (SINNOH_TRAINER_FLAGS_START), its
+// hidden items' from 0x3E00 (tools/sinnoh/items.py))
 #define REGION_FLAGS_START 0x1000
 #define REGION_FLAGS_END   0x4000   // SPECIAL_FLAGS_START
-#define REGION_SINNOH_FLAGS 0x3000
+#define REGION_SINNOH_FLAGS 0x3320
 #define FLAG_SINNOH_BADGE01 (REGION_SINNOH_FLAGS + 0)   // .. + 7
 #define FLAG_SINNOH_HIDDEN  0x3FFF   // always set (s3d.c S3D_LayoutBlocks): Platinum's objects that aren't people here
 #define REGION_FLAG_BYTES  ((REGION_FLAGS_END - REGION_FLAGS_START) / 8)

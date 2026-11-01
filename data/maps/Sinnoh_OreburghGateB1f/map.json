@@ -22,9 +22,9 @@
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN_AND_UP",
       "movement_range_x": 0,
       "movement_range_y": 0,
-      "trainer_type": "TRAINER_TYPE_NONE",
-      "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "trainer_type": "TRAINER_TYPE_NORMAL",
+      "trainer_sight_or_berry_tree_id": "3",
+      "script": "Sinnoh_EventScript_TrVeteranGrant",
       "flag": "0"
     },
     {
@@ -168,7 +168,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Sinnoh_EventScript_Tm01",
-      "flag": "0x3291"
+      "flag": "0x35B1"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -181,7 +181,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Sinnoh_EventScript_EarthPlate",
-      "flag": "0x3290"
+      "flag": "0x35B0"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -194,7 +194,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Sinnoh_EventScript_Tm31",
-      "flag": "0x3292"
+      "flag": "0x35B2"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -207,7 +207,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Sinnoh_EventScript_Tm70",
-      "flag": "0x3293"
+      "flag": "0x35B3"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_CYCLING_TRIATHLETE_F",
@@ -233,7 +233,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Sinnoh_EventScript_BigPearl",
-      "flag": "0x328F"
+      "flag": "0x35AF"
     }
   ],
   "warp_events": [

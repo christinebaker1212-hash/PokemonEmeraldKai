@@ -48,9 +48,9 @@
       "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
       "movement_range_x": 0,
       "movement_range_y": 0,
-      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_type": "TRAINER_TYPE_NORMAL",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_EventScript_TrGalacticGruntTeamGalacticEternaBuilding2f2",
       "flag": "0x3FFF"
     },
     {
@@ -61,9 +61,9 @@
       "movement_type": "MOVEMENT_TYPE_FACE_UP",
       "movement_range_x": 0,
       "movement_range_y": 0,
-      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_type": "TRAINER_TYPE_NORMAL",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_EventScript_TrGalacticGruntTeamGalacticEternaBuilding2f1",
       "flag": "0x3FFF"
     },
     {
@@ -77,7 +77,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Sinnoh_EventScript_XSpeed",
-      "flag": "0x3349"
+      "flag": "0x3669"
     }
   ],
   "warp_events": [

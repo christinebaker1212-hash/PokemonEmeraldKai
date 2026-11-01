@@ -3295,14 +3295,14 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   in about a quarter of a second when the first SINNOH map loads (s3d.c LoadPack).
 - SINNOH is REGION_SINNOH (3, REGION_COUNT 4): MP_Region_OfGroup gives it for groups 40-44 (S3D_IsSinnohGroup). Its
   GENERATION cap is never below 4 (Platinum's own POKéMON are Gen 1-4, so GEN 3 is its vanilla too). Its flags start
-  at REGION_SINNOH_FLAGS 0x3000 (Quetzal's end at 0x2EB7): FLAG_SINNOH_BADGE01.. its badges. Its boat comes in at
+  at REGION_SINNOH_FLAGS 0x3320 (Quetzal's end at 0x2EB7, its trainers' "beaten" flags at 0x3000-0x3319): FLAG_SINNOH_BADGE01.. its badges. Its boat comes in at
   CANALAVE's south dock (8, 62), but it isn't on the boat's list (QzGetReachableRegionsMask_) until its story is in.
   The region side file's level records hold 4 regions' EXP now: chunk LVL4; an old LVLS chunk (3 regions,
   struct RegionLevel3) is read and converted. Names: "SINNOH" in mp_main.c's lists.
 - People, signs and coord events (gen_maps.py from each place's events file): where they stand (local tiles), the game's
   closest sprite and movement (tools/sinnoh/sprites.py, our own table; things that aren't people stay as hidden
   objects, flag 0x3FFF FLAG_SINNOH_HIDDEN, set when a SINNOH map loads, so the local ids keep Platinum's order), hide
-  flags and coord variables as SINNOH numbers (tools/sinnoh/ids.py: flags from 0x3008, variables from 0x5180; only
+  flags and coord variables as SINNOH numbers (tools/sinnoh/ids.py: flags from 0x3328, variables from 0x5180; only
   numbers reach the repository). The sprite table uses the game's own sprite when it has one of the same name
   (YOUNGSTER, LASS, HIKER, TEALA...), then the closest; POKeMON standing in the world get the nearest the game has.
   Who shows: anyone the story shows or hides (a hide flag in Platinum) stays hidden until their script is written,
@@ -3323,6 +3323,20 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   items' table) is a hidden_item bg event with flag 0x3E00 + k (ids.py's flags stay below: gen_maps.py asserts it).
   Platinum's names that differ (PARLYZ_HEAL...) are renamed; story keys stay hidden. Anything placed outside the place's
   map (Platinum lists some past a place's edge) is left out. 326 item balls, 232 hidden items. Test sinnoh_items.
+- Trainers (tools/sinnoh/gen_trainers.py POKEPLATINUM_DIR, then gen_maps.py): the 403 trainers standing on maps, with
+  Platinum's parties (species, levels, held items, moves, battle items; res/trainers/data) as the game's trainers from
+  id 1664 (FIRST_SINNOH_TRAINER, after JOHTO's / KANTO's that end at 1660; TRAINER_SINNOH_<name>,
+  include/constants/trainers_sinnoh.h). "Beaten" flags from 0x3780 (TRAINER_FLAG's SINNOH branch,
+  include/constants/flags.h). Classes the game has are used; 17 new from 78 (TRAINER_CLASS_SINNOH_*: WORKER,
+  VETERAN, GALACTIC...; names and prize money in src/data/text/trainer_class_names_sinnoh.h), with pictures the game
+  already has (Emerald's or JOHTO's). SINNOH's encounter themes are music ids 24-36 (battle_setup.c). What they say
+  is written for this game: tools/sinnoh/trainer_words.py, a few lines a kind of trainer, picked by name. Each gets
+  Sinnoh_EventScript_Tr<Name> in data/scripts/sinnoh_trainers.inc (trainerbattle_single / _double), its object the
+  trainer type and Platinum's sight range. Trainers the story shows (a hide flag) stay hidden until their scenes are
+  written (31). IS_REAL_TRAINER and Tcg_IsTrainerId know the range. Test sinnoh_trainer.
+- Flags (moved 2026-11-01: JOHTO's / KANTO's trainers' "beaten" flags are 0x3000-0x331C): SINNOH's badges
+  0x3320-0x3327, ids.py's flags 0x3328-0x377F, trainers 0x3780-0x3DFF, hidden items 0x3E00-0x3FFE, FLAG_SINNOH_HIDDEN
+  0x3FFF.
 - Tiles: SINNOH's layouts use the General tileset and gTileset_Johto_GoldenrodUndergroundEntrances (only for behaviors:
   the 3D engine draws the picture): Platinum's table / PC / TV behaviors (0x80 / 0x83 / 0x86, the game's MB_COUNTER /
   MB_PC / MB_TELEVISION numbers) get that secondary's metatiles (build_pack.py BEHAVIOR_METATILE), so a nurse or clerk

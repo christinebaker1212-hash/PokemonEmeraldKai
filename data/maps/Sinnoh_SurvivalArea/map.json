@@ -153,7 +153,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Sinnoh_EventScript_RareCandy",
-      "flag": "0x3347"
+      "flag": "0x3667"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -166,7 +166,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Sinnoh_EventScript_RedShard",
-      "flag": "0x3348"
+      "flag": "0x3668"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL",

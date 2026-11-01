@@ -1655,6 +1655,20 @@ void PlayTrainerEncounterMusic(void)
 
     if (sTrainerBattleMode != TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC
         && sTrainerBattleMode != TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE_NO_MUSIC
+        && GetTrainerEncounterMusicId(trainerId) >= TRAINER_ENCOUNTER_MUSIC_SINNOH_FIRST
+        && GetTrainerEncounterMusicId(trainerId) < TRAINER_ENCOUNTER_MUSIC_SINNOH_FIRST + 13)
+    {
+        // Moemon Kai: SINNOH's encounter themes (tools/sinnoh/gen_trainers.py MUSIC)
+        static const u16 sSinnoh[] = {
+            MUS_SINNOH_ENCOUNTER_KID, MUS_SINNOH_ENCOUNTER_MINISKIRT, MUS_SINNOH_ENCOUNTER_TWINS,
+            MUS_SINNOH_ENCOUNTER_BIKER, MUS_SINNOH_ENCOUNTER_HIKER, MUS_SINNOH_ENCOUNTER_ACE_TRAINER,
+            MUS_SINNOH_ENCOUNTER_MARTIAL_ARTIST, MUS_SINNOH_ENCOUNTER_SAILOR, MUS_SINNOH_ENCOUNTER_AROMA_LADY,
+            MUS_SINNOH_ENCOUNTER_COLLECTOR, MUS_SINNOH_ENCOUNTER_GAMBLER, MUS_SINNOH_ENCOUNTER_ARTIST,
+            MUS_SINNOH_GALACTIC_APPEARS};
+        PlayNewMapMusic(sSinnoh[GetTrainerEncounterMusicId(trainerId) - TRAINER_ENCOUNTER_MUSIC_SINNOH_FIRST]);
+    }
+    else if (sTrainerBattleMode != TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC
+        && sTrainerBattleMode != TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE_NO_MUSIC
         && trainerId >= FIRST_QZ_TRAINER && GetTrainerEncounterMusicId(trainerId) < TRAINER_ENCOUNTER_MUSIC_QZ_FIRST)
     {
         // Moemon Kai: JOHTO / KANTO's trainers with FireRed's encounter music ids: FireRed's themes (its

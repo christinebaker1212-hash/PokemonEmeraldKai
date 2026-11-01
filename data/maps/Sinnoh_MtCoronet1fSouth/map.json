@@ -77,7 +77,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Sinnoh_EventScript_Protein",
-      "flag": "0x327A"
+      "flag": "0x359A"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -90,7 +90,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Sinnoh_EventScript_DawnStone",
-      "flag": "0x3279"
+      "flag": "0x3599"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_MAXIE",

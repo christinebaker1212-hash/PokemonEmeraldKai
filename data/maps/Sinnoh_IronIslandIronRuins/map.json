@@ -25,7 +25,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Sinnoh_EventScript_MetalCoat",
-      "flag": "0x326F"
+      "flag": "0x358F"
     }
   ],
   "warp_events": [

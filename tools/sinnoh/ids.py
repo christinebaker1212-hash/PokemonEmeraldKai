@@ -1,6 +1,6 @@
 """SINNOH's numbers for Platinum's flags and variables, shared by tools/sinnoh/gen_maps.py (the people's hide flags, the coord
 events' variables) and gen_scripts.py (the script pack): every flag / variable name Platinum's scripts and events use,
-in name order, from REGION_SINNOH_FLAGS + 8 (after the 8 badges, include/mp_region.h) and from SINNOH_VARS_START.
+in name order, from REGION_SINNOH_FLAGS + 8 (after the 8 badges, include/mp_region.h; 0x3328) and from SINNOH_VARS_START.
 Only the numbers reach the repository's files; the names stay in the decomp.
 
 Names the game shares with Platinum's scripts as special variables (VAR_RESULT, VAR_0x8000-0x800F...) keep the game's
@@ -10,8 +10,8 @@ import json
 import os
 import re
 
-FLAGS_START = 0x3008          # REGION_SINNOH_FLAGS (0x3000) + the 8 badges
-FLAGS_END = 0x4000            # REGION_FLAGS_END
+FLAGS_START = 0x3328          # REGION_SINNOH_FLAGS (0x3320) + the 8 badges (JOHTO / KANTO trainers' flags end at 0x3319)
+FLAGS_END = 0x3780            # SINNOH's trainers' flags start there (include/constants/flags.h)
 VARS_START = 0x5180           # past Quetzal's region vars (up to 0x514A)
 VARS_END = 0x5300             # REGION_VARS_START + REGION_VARS_COUNT
 SPECIAL_VAR = re.compile(r'^VAR_(0x8[0-9A-Fa-f]{3}|RESULT|FACING|SPECIAL_\w+)$')

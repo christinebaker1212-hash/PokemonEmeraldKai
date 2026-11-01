@@ -25,7 +25,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Sinnoh_EventScript_DuskStone",
-      "flag": "0x3356"
+      "flag": "0x3676"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -38,7 +38,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Sinnoh_EventScript_Hm02",
-      "flag": "0x3357"
+      "flag": "0x3677"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",

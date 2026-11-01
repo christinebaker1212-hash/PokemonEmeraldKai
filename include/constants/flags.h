@@ -1353,7 +1353,12 @@
 // Moemon Kai: trainers past MAX_TRAINERS_COUNT (Johto / Kanto, FIRST_QZ_TRAINER) keep their flags from 0x3000,
 // in the region side file (src/mp/mp_region.c). Always go through TRAINER_FLAG.
 #define QZ_TRAINER_FLAGS_START 0x3000
-#define TRAINER_FLAG(id) ((id) < MAX_TRAINERS_COUNT ? TRAINER_FLAGS_START + (id) : QZ_TRAINER_FLAGS_START + (id) - MAX_TRAINERS_COUNT)
+// SINNOH's trainers (from id 1664, FIRST_SINNOH_TRAINER: tools/sinnoh/gen_trainers.py) have theirs from 0x3780
+#define SINNOH_TRAINER_FIRST_ID 1664
+#define SINNOH_TRAINER_FLAGS_START 0x3780
+#define TRAINER_FLAG(id) ((id) < MAX_TRAINERS_COUNT ? TRAINER_FLAGS_START + (id) \
+                          : (id) >= SINNOH_TRAINER_FIRST_ID ? SINNOH_TRAINER_FLAGS_START + (id) - SINNOH_TRAINER_FIRST_ID \
+                          : QZ_TRAINER_FLAGS_START + (id) - MAX_TRAINERS_COUNT)
 
 // System Flags
 

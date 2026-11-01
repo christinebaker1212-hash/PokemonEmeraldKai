@@ -10261,4 +10261,5 @@ const struct Trainer gTrainers[] = {
         .party = NO_ITEM_DEFAULT_MOVES(sParty_MayLinkPlaceholder),
     },
 #include "trainers_qz.h"   // Moemon Kai: Johto / Kanto trainers (tools/quetzal_port/gen_trainers.py)
+#include "trainers_sinnoh.h"   // Moemon Kai: SINNOH's trainers (tools/sinnoh/gen_trainers.py)
 };

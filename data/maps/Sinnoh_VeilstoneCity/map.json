@@ -270,7 +270,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Sinnoh_EventScript_FullIncense",
-      "flag": "0x3355"
+      "flag": "0x3675"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -283,7 +283,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Sinnoh_EventScript_RareCandy",
-      "flag": "0x3358"
+      "flag": "0x3678"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_MAGMA_MEMBER_M",
@@ -387,7 +387,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Sinnoh_EventScript_StarPiece",
-      "flag": "0x3359"
+      "flag": "0x3679"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",

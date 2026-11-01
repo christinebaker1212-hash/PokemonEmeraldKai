@@ -324,6 +324,7 @@ const union AnimCmd *const gAnims_MonPic[MAX_MON_PIC_FRAMES] =
 #include "data/trainer_parties.h"
 #include "constants/qz_port.h"
 #include "data/trainer_parties_qz.h"   // Moemon Kai: Johto / Kanto
+#include "data/trainer_parties_sinnoh.h"   // Moemon Kai: SINNOH
 #include "data/text/trainer_class_names.h"
 #include "data/trainers.h"
 #include "data/text/species_names.h"

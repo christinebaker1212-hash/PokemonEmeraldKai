@@ -10,11 +10,12 @@ Queued after the 1.61.6 release and the KANTO / JOHTO sweep (the user's plan, 20
   how. Heights (BDHC) done: the camera and every sprite stand on Platinum's ground (COOP_NOTES). Every outdoor map of the
   matrix is in (66, connected; tools/sinnoh/gen_maps.py). The buildings too (433 maps in groups
   41-44), with every place's warps: doors lead in, mats out. The pack ships compressed (7 MB). SINNOH is a region of its own
-  (REGION_SINNOH: GENERATION cap 4+, badges from flag 0x3000, CANALAVE's dock for the boat, off the boat's list
+  (REGION_SINNOH: GENERATION cap 4+, badges from flag 0x3320, CANALAVE's dock for the boat, off the boat's list
   until its story is in), with Platinum's wild POKéMON (gen_wild.py). Next: data (step 3: trainers, items, marts),
   scripts and text (step 4: original writing for this game, committed per map; DECIDED 2026-10-31: nothing of
   Platinum's scripts or text is converted, committed or shipped; tools/sinnoh/words.py + gen_words.py, who.py to see
-  a map's people: TWINLEAF, ROUTE 201 and SANDGEM written, COOP_NOTES "Words"), the PÓKETCH (step 5);
+  a map's people: TWINLEAF, ROUTE 201 and SANDGEM written, COOP_NOTES "Words"; done 2026-11-01: item balls, hidden
+  items, the 403 route trainers with lines of their own, TM51-TM92), the PÓKETCH (step 5);
   animated textures and Platinum's door animations when there's time (the 3D picture takes 4-5 ms a frame).
 - DECIDED (the user, 2026-10-31): the 3D data comes from pret/pokeplatinum, not a ROM. The decomp holds every map
   block, texture set, prop model and light set as files (byte for byte the ROM's), so tools/sinnoh/make_pack.sh fetches

@@ -4,6 +4,8 @@
 #include "constants/event_objects.h"
 #include "constants/flags.h"
 #include "constants/items.h"
+#include "constants/trainers.h"
+#include "constants/battle_setup.h"
 #include "constants/vars.h"
 	.include "asm/macros.inc"
 	.include "constants/constants.inc"
@@ -13,6 +15,7 @@
 	.section script_data, "aw"
 
 	.include "data/scripts/sinnoh_items.inc"
+	.include "data/scripts/sinnoh_trainers.inc"
 	.include "data/maps/Sinnoh_TwinleafTown/scripts.inc"
 	.include "data/maps/Sinnoh_Route201/scripts.inc"
 	.include "data/maps/Sinnoh_AcuityLakefront/scripts.inc"

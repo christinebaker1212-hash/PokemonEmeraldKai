@@ -2,6 +2,7 @@
 #include "global.h"
 #include "mp_region.h"
 #include "data/text/trainer_class_names_qz.h"   // Moemon Kai: QZ_TRAINER_MONEY
+#include "data/text/trainer_class_names_sinnoh.h"   // Moemon Kai: SINNOH_TRAINER_MONEY
 #include "battle_gen4.h"
 #include "battle_gen59.h"   // Moemon Kai: Gen 5-9
 #include "battle_gimmick.h"
@@ -557,6 +558,7 @@ const struct TrainerMoney gTrainerMoneyTable[] =
     {TRAINER_CLASS_YOUNG_COUPLE, 8},
     {TRAINER_CLASS_WINSTRATE, 10},
     QZ_TRAINER_MONEY   // Moemon Kai: Johto / Kanto classes
+    SINNOH_TRAINER_MONEY   // Moemon Kai: SINNOH classes
     {0xFF, 5}, // Any trainer class not listed above uses this
 };
 

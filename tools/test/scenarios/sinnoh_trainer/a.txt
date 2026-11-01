@@ -1,0 +1,23 @@
+pressuntil A field 5000
+wait 30
+mp teach 0 61
+mp warp 40,20,6,16
+wait 200
+press UP 6
+wait 40
+shot spotted
+pressuntil A action 3000
+shot battle
+mash A 60 10
+pressuntil A field 4000
+wait 60
+mp getflag 0x390E
+shot afterbattle
+mp ctx
+mp face up
+press UP 4
+wait 20
+press A 4
+wait 60
+shot after
+quit

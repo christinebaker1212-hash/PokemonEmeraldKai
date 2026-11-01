@@ -26,6 +26,7 @@ from source import open_source  # noqa: E402
 from places import places as kept_places, events  # noqa: E402
 import ids  # noqa: E402
 import items  # noqa: E402
+import gen_trainers  # noqa: E402
 import sprites  # noqa: E402
 
 GROUP = 'gMapGroup_Sinnoh'                      # the outdoor places
@@ -137,6 +138,10 @@ def people(p, root, have):
         flag = ids.flag(root, hide) if isinstance(hide, str) and hide.startswith('FLAG_') else None
         ghost = isinstance(hide, str) and hide.startswith('MAP_HEADER_')
         script = label if label in have else '0x0'
+        trainer = isinstance(o['script'], str) and o['script'].startswith('TRAINER_')
+        if trainer:
+            # a trainer: its battle script (data/scripts/sinnoh_trainers.inc, tools/sinnoh/gen_trainers.py) and sight
+            script = gen_trainers.label(o['script'])
         ball = items.ball(root, o['script']) if o['graphics_id'].endswith('POKEBALL') else None
         if ball and not inside(p, o['x'], o['z']):
             ball = None
@@ -154,7 +159,8 @@ def people(p, root, have):
         out.append({'graphics_id': gfx or 'OBJ_EVENT_GFX_ITEM_BALL', 'x': o['x'] - p['x0'] * 32, 'y': o['z'] - p['z0'] * 32,
                     'elevation': 3, 'movement_type': sprites.movement(o['movement_type']),
                     'movement_range_x': o.get('movement_range_x', 0), 'movement_range_y': o.get('movement_range_z', 0),
-                    'trainer_type': 'TRAINER_TYPE_NONE', 'trainer_sight_or_berry_tree_id': '0',
+                    'trainer_type': 'TRAINER_TYPE_NORMAL' if trainer else 'TRAINER_TYPE_NONE',
+                    'trainer_sight_or_berry_tree_id': str((o.get('data') or [0])[0]) if trainer else '0',
                     'script': script, 'flag': flag_s})
     return out
 
@@ -311,6 +317,8 @@ def main():
     head = text[:text.index('\t.include "data/maps/Sinnoh_')]
     if 'sinnoh_items.inc' not in head:
         head += '\t.include "data/scripts/sinnoh_items.inc"\n'
+    if 'sinnoh_trainers.inc' not in head:
+        head += '\t.include "data/scripts/sinnoh_trainers.inc"\n'
     open(path, 'w').write(head + ''.join('\t.include "data/maps/%s/scripts.inc"\n' % n for n in names))
     rows = ''.join('    {%s, %d, %d, %d, %d, %d},\n' % (p['id'], p['matrix'], p['x0'], p['z0'], p['x1'] - p['x0'] + 1,
                                                        p['z1'] - p['z0'] + 1) for p in outdoor + indoor)

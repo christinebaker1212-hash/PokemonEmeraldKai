@@ -25,7 +25,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Sinnoh_EventScript_Tm87",
-      "flag": "0x329A"
+      "flag": "0x35BA"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_MAN_2",

@@ -519,7 +519,8 @@ unsigned Tcg_LookGfx(const struct ObjectEvent *npc)
 // A trainer id with a struct in gTrainers (Kai's, then Johto's / Kanto's)
 int Tcg_IsTrainerId(unsigned id)
 {
-    return id < TRAINERS_COUNT || (id >= FIRST_QZ_TRAINER && id < FIRST_QZ_TRAINER + QZ_TRAINERS_COUNT + 1);
+    return id < TRAINERS_COUNT || (id >= FIRST_QZ_TRAINER && id < FIRST_QZ_TRAINER + QZ_TRAINERS_COUNT + 1)
+        || (id >= FIRST_SINNOH_TRAINER && id < FIRST_SINNOH_TRAINER + SINNOH_TRAINERS_COUNT);   // Moemon Kai: SINNOH
 }
 
 unsigned Tcg_VoiceOf(unsigned graphicsId)

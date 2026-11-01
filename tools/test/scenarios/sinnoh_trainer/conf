@@ -1,0 +1,8 @@
+# SINNOH's trainers (tools/sinnoh/gen_trainers.py): ROUTE 202's YOUNGSTER TRISTAN (Platinum's party: a STARLY) spots the
+# player, says his line (written for this game), battles, and once beaten his flag is set (0x3780 + his id past
+# FIRST_SINNOH_TRAINER: 0x390E = 14606). Needs the 3D pack (tools/sinnoh/make_pack.sh) for the ground.
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=283:60"
+EXPECT_A=("[test] flag 14606 = 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")
