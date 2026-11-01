@@ -48,11 +48,11 @@ enum {
 };
 
 // The menu's tabs
-enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, C_CARDS, C_YUGIOH, C_TRIAD, C_DANCE, C_JOHTO, C_KANTO, NUM_ACH_CATS };
-static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "BATTLE", "CATCHING", "HOENN", "TOGETHER", "EXTRAS", "CARDS", "YU-GI-OH!", "TRIPLE TRIAD", "DANCE", "JOHTO", "KANTO"};
+enum { C_JOURNEY, C_BATTLE, C_CATCH, C_HOENN, C_TOGETHER, C_EXTRAS, C_CARDS, C_YUGIOH, C_TRIAD, C_DANCE, C_JOHTO, C_KANTO, C_SINNOH, NUM_ACH_CATS };
+static const char *const sCatNames[NUM_ACH_CATS] = {"JOURNEY", "BATTLE", "CATCHING", "HOENN", "TOGETHER", "EXTRAS", "CARDS", "YU-GI-OH!", "TRIPLE TRIAD", "DANCE", "JOHTO", "KANTO", "SINNOH"};
 
 enum { FL_HMS, FL_RODS, FL_LANDMARKS, FL_SILVER, FL_GOLD, FL_JOHTO_BEASTS, FL_KANTO_BIRDS, FL_JOHTO_BADGES, FL_KANTO_BADGES,
-       FL_ALPH, FL_ARCEUS_TRIALS };
+       FL_ALPH, FL_ARCEUS_TRIALS, FL_SINNOH_BADGES, FL_SINNOH_LAKES, FL_SINNOH_CREATION };
 enum { DL_STARTERS, DL_FOSSILS, DL_LEGENDS };
 
 struct Achievement
@@ -101,7 +101,15 @@ static const u16 sFlagsAlph[] = {0x1076, 0x1077, 0x1078, 0x1079};
 // KANTO's 17 ARCEUS trials done (qz_static_encounters.h: the ARCEUS entries' done flags, not ALTERING CAVE's 0x2E16)
 static const u16 sFlagsArceusTrials[] = {0x2E19, 0x2E1B, 0x2E1D, 0x2E1F, 0x2E21, 0x2E23, 0x2E25, 0x2E27, 0x2E29, 0x2E2B,
                                          0x2E2D, 0x2E2F, 0x2E31, 0x2E33, 0x2E35, 0x2E37, 0x2E39};
+// SINNOH: its badges (REGION_SINNOH_FLAGS, Platinum's order) and its legendaries' "done" flags (tools/sinnoh/legends.py:
+// 0x3D00 + their place in LEGENDS)
+static const u16 sFlagsSinnohBadges[] = {0x3320, 0x3321, 0x3322, 0x3323, 0x3324, 0x3325, 0x3326, 0x3327};
+static const u16 sFlagsSinnohLakes[] = {0x3D00, 0x3D01, 0x3D02};    // UXIE, AZELF, MESPRIT
+static const u16 sFlagsSinnohCreation[] = {0x3D0A, 0x3D0B};        // DIALGA, PALKIA
 static const struct { const u16 *list; u8 count; } sFlagLists[] = {
+    [FL_SINNOH_BADGES] = {sFlagsSinnohBadges, ARRAY_COUNT(sFlagsSinnohBadges)},
+    [FL_SINNOH_LAKES] = {sFlagsSinnohLakes, ARRAY_COUNT(sFlagsSinnohLakes)},
+    [FL_SINNOH_CREATION] = {sFlagsSinnohCreation, ARRAY_COUNT(sFlagsSinnohCreation)},
     [FL_JOHTO_BEASTS] = {sFlagsJohtoBeasts, ARRAY_COUNT(sFlagsJohtoBeasts)},
     [FL_KANTO_BIRDS] = {sFlagsKantoBirds, ARRAY_COUNT(sFlagsKantoBirds)},
     [FL_JOHTO_BADGES] = {sFlagsJohtoBadges, ARRAY_COUNT(sFlagsJohtoBadges)},
@@ -449,6 +457,26 @@ static const struct Achievement sAch[] = {
     {"kmew", "UNDER THE TRUCK", "Find MEW in KANTO.", AK_FLAG, 0x292F, 1, 2, C_KANTO},
     {"kmeloetta", "CHANSEY DANCE", "Face MELOETTA in KANTO.", AK_FLAG, 0x2922, 1, 1, C_KANTO},
     {"kdarkrai", "NIGHTMARE AT SEA", "Face DARKRAI in KANTO.", AK_FLAG, 0x2929, 1, 1, C_KANTO},
+    {"travel4", "WORLD TOUR", "Visit HOENN, JOHTO, KANTO and SINNOH.", AK_STARTED, 0xFF, 4, 1, C_JOURNEY},
+    {"champion4", "GRAND CHAMPION", "Become CHAMPION of all four regions.", AK_CLEARED, 0xFF, 4, 2, C_JOURNEY},
+    {"sarrive", "ACROSS THE SEA", "Arrive in SINNOH at CANALAVE's port.", AK_STARTED, 3 + 1, 1, 0, C_SINNOH},
+    {"sbadge1", "COAL BADGE", "Beat ROARK in OREBURGH CITY.", AK_FLAG, 0x3320, 1, 0, C_SINNOH},
+    {"sbadge2", "FOREST BADGE", "Beat GARDENIA in ETERNA CITY.", AK_FLAG, 0x3321, 1, 0, C_SINNOH},
+    {"sbadge3", "COBBLE BADGE", "Beat MAYLENE in VEILSTONE CITY.", AK_FLAG, 0x3322, 1, 0, C_SINNOH},
+    {"sbadge4", "FEN BADGE", "Beat CRASHER WAKE in PASTORIA CITY.", AK_FLAG, 0x3323, 1, 1, C_SINNOH},
+    {"sbadge5", "RELIC BADGE", "Beat FANTINA in HEARTHOME CITY.", AK_FLAG, 0x3324, 1, 0, C_SINNOH},
+    {"sbadge6", "MINE BADGE", "Beat BYRON in CANALAVE CITY.", AK_FLAG, 0x3325, 1, 0, C_SINNOH},
+    {"sbadge7", "ICICLE BADGE", "Beat CANDICE in SNOWPOINT CITY.", AK_FLAG, 0x3326, 1, 0, C_SINNOH},
+    {"sbadge8", "BEACON BADGE", "Beat VOLKNER in SUNYSHORE CITY.", AK_FLAG, 0x3327, 1, 1, C_SINNOH},
+    {"sbadges", "SINNOH'S EIGHT", "Hold all eight SINNOH badges.", AK_FLAGS, FL_SINNOH_BADGES, 8, 1, C_SINNOH},
+    {"schampion", "SINNOH CHAMPION", "Beat SINNOH's ELITE FOUR and CYNTHIA.", AK_CLEARED, 3 + 1, 1, 2, C_SINNOH},
+    {"slakes", "LAKE GUARDIANS", "Face UXIE, AZELF and MESPRIT in their caverns.", AK_FLAGS, FL_SINNOH_LAKES, 3, 2, C_SINNOH},
+    {"sgiratina", "THE TORN WORLD", "Face GIRATINA in TURNBACK CAVE.", AK_FLAG, 0x3D03, 1, 1, C_SINNOH},
+    {"screation", "TIME AND SPACE", "Face DIALGA and PALKIA at SPEAR PILLAR.", AK_FLAGS, FL_SINNOH_CREATION, 2, 2, C_SINNOH},
+    {"sheatran", "LAVA DOME", "Face HEATRAN in STARK MOUNTAIN.", AK_FLAG, 0x3D04, 1, 1, C_SINNOH},
+    {"sregigigas", "THE COLOSSAL", "Face REGIGIGAS under SNOWPOINT TEMPLE.", AK_FLAG, 0x3D05, 1, 1, C_SINNOH},
+    {"scresselia", "LUNAR WING", "Face CRESSELIA on FULLMOON ISLAND.", AK_FLAG, 0x3D06, 1, 1, C_SINNOH},
+    {"sarceus", "THE ORIGIN", "Face ARCEUS in the HALL OF ORIGIN.", AK_FLAG, 0x3D09, 1, 2, C_SINNOH},
     {"karceus", "ARCEUS TRIALS", "Complete all seventeen ARCEUS trials in KANTO.", AK_FLAGS, FL_ARCEUS_TRIALS, 17, 2, C_KANTO},
     {"karceusn", "THE ORIGINAL ONE", "Face the Normal-type ARCEUS in ALTERING CAVE.", AK_FLAG, 0x2E16, 1, 2, C_KANTO},
 };
@@ -575,10 +603,18 @@ static s32 Progress(const struct Achievement *a)
     case AK_FRIEND:  return FullFriendship();
     case AK_MONEY:   return GetMoney(&gSaveBlock1Ptr->money);
     case AK_CLEARED:
+        if (a->arg == 0xFF)   // (all four)
+            return MP_Region_Cleared(REGION_HOENN) + MP_Region_Cleared(REGION_JOHTO) + MP_Region_Cleared(REGION_KANTO)
+                 + MP_Region_Cleared(REGION_SINNOH);
         if (a->arg)
             return MP_Region_Cleared(a->arg - 1) ? 1 : 0;
         return MP_Region_Cleared(REGION_HOENN) + MP_Region_Cleared(REGION_JOHTO) + MP_Region_Cleared(REGION_KANTO);
-    case AK_STARTED:
+    case AK_STARTED:   // (arg: one region + 1, 0xFF all four, 0 the first three)
+        if (a->arg == 0xFF)
+            return ((gRegionState.started >> REGION_HOENN) & 1) + ((gRegionState.started >> REGION_JOHTO) & 1)
+                 + ((gRegionState.started >> REGION_KANTO) & 1) + ((gRegionState.started >> REGION_SINNOH) & 1);
+        if (a->arg)
+            return (gRegionState.started >> (a->arg - 1)) & 1;
         return ((gRegionState.started >> REGION_HOENN) & 1) + ((gRegionState.started >> REGION_JOHTO) & 1)
              + ((gRegionState.started >> REGION_KANTO) & 1);
     case AK_FLAG:   return FlagGet(a->arg) ? 1 : 0;

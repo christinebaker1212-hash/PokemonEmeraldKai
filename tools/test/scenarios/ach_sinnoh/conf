@@ -1,0 +1,7 @@
+# SINNOH's achievements (mp_achieve.c C_SINNOH): arriving, a badge and the lake trio unlock theirs; WORLD TOUR and
+# GRAND CHAMPION want all four regions. Shot sinnoh.png (the tab).
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=283:50"
+EXPECT_A=("achievement: sarrive" "achievement: sbadge1" "achievement: slakes" " SINNOH ")
+UNEXPECT_A=("[crash]" "achievement: travel4" "achievement: champion4" "achievement: sbadges")

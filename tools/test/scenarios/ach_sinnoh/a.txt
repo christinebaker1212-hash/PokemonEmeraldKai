@@ -1,0 +1,12 @@
+pressuntil A field 5000
+wait 120
+mp setflag 0x3320
+mp setflag 0x3D00
+mp setflag 0x3D01
+mp setflag 0x3D02
+wait 400
+mp ach
+mp achmenu 12
+wait 90
+shot sinnoh
+quit
