@@ -3458,6 +3458,16 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   and stand-in. DIALGA and PALKIA (Platinum brings them by script) stand at the top of SPEAR PILLAR after the LEAGUE:
   objects this game adds (legends.py ('at', x, z), gen_maps.py; hide flags 0x3D80 + n). Not yet: the REGIS' ruins,
   ROTOM. Tests sinnoh_legends, sinnoh_legends_pillar.
+- The GREAT MARSH (2026-11-01): Platinum's six marsh headers share matrix 240, one block each, so the game keeps the
+  player on GREAT_MARSH6's map for the whole marsh: gen_maps.py marsh_merge gives it the other five's people, item balls,
+  signs and hidden items; the wild POKéMON are the block's underfoot (wild_encounter.c GetCurrentMapWildMonHeaderId ->
+  s3d_legends.c Sinnoh_GreatMarshWildMap; the border counts as the nearest area). The SAFARI GAME is Emerald's
+  (safari_zone.c: 30 SAFARI BALLS, 500 steps): PASTORIA's gate counter (the gate's Trigger1, ¥500) starts it, and
+  data/scripts/safari_zone.inc ends it at the gate in SINNOH (special Sinnoh_InGreatMarsh: RETIRE, time's up, out of
+  balls); walking out through the marsh's door asks (VAR_SAFARI_ZONE_STATE 3, the gate's ON_TRANSITION). Platinum's
+  daily POKéMON: each area one of 32 picks a day (day + Trainer ID) in the 5% slots 6-7 while the SAFARI GAME is on,
+  the second list after SINNOH's LEAGUE (Sinnoh_GreatMarshDaily; `mp marshdaily`). The marsh is 128x160 tiles:
+  MAX_MAP_DATA_SIZE is 32768 (fieldmap.h; a map past it gets no grid at all: no walls, grass or warps). Test sinnoh_marsh.
 - The three card games in SINNOH: its people play by their sprite's look-alike (tcg_field.c Tcg_LookGfx: the specials
   first, then sSinnohStandIns), so the townsfolk and beaten trainers duel as JOHTO's and KANTO's do. Special card
   trainers (sQzSpecials' SINNOH rows): the eight leaders by role and type (ROARK - ROXANNE, MAYLENE - BRAWLY, WAKE -

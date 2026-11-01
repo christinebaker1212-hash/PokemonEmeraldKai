@@ -2004,6 +2004,16 @@ void MP_TestCommand(const char *cmd, const char *arg)
                    gSaveBlock2Ptr->localTimeOffset.hours, gSaveBlock2Ptr->localTimeOffset.minutes);
         }
     }
+    else if (strcmp(cmd, "marshdaily") == 0)
+    {
+        // marshdaily - the GREAT MARSH's daily Pokemon today, areas 1-6 (src/sinnoh/s3d_legends.c)
+        u16 Sinnoh_GreatMarshDailySpecies(u8 area);
+        int k;
+        printf("[test] marsh daily:");
+        for (k = 0; k < 6; k++)
+            printf(" %d", Sinnoh_GreatMarshDailySpecies(k));
+        printf("\n");
+    }
     else if (strcmp(cmd, "where") == 0)
     {
         struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];

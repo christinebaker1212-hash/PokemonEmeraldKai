@@ -1,0 +1,61 @@
+pressuntil A field 5000
+wait 30
+mp marshdaily
+mp warp 42,96,5,8
+wait 60
+waitfor field 1000
+mp face up
+press UP 1
+wait 20
+waitfor field 300
+press UP 1
+wait 60
+pressuntil A field 3000
+wait 60
+mp where
+mp getflag 2188
+mp warp 41,102,48,40
+wait 60
+waitfor field 1000
+mp where
+mp landwild
+wait 300
+press A 1
+wait 200
+press RIGHT 1
+wait 5
+press DOWN 1
+wait 5
+press A 1
+pressuntil B field 3000
+wait 30
+press START 1
+wait 30
+press A 1
+wait 140
+shot m_retire
+wait 100
+press A 1
+wait 60
+pressuntil A field 3000
+wait 60
+mp where
+mp getflag 2188
+mp face up
+press UP 1
+wait 60
+pressuntil A field 3000
+wait 60
+mp where
+mp face down
+press DOWN 1
+wait 30
+press DOWN 1
+wait 200
+shot m_walkout
+pressuntil A field 3000
+wait 60
+mp where
+mp getflag 2188
+shot m_out
+quit

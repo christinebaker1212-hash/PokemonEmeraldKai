@@ -306,9 +306,19 @@ static u8 ChooseWildMonLevel(const struct WildPokemon *wildPokemon)
     return MP_LevelScale_Wild(min + rand);   // Moemon Co-op: level scaling (mp_levelscale.c)
 }
 
+bool8 Sinnoh_GreatMarshWildMap(u8 *group, u8 *num);
+u16 Sinnoh_GreatMarshDaily(u16 species, u8 index);
+
 static u16 GetCurrentMapWildMonHeaderId(void)
 {
     u16 i;
+    u8 group, num;
+    if (Sinnoh_GreatMarshWildMap(&group, &num))   // Moemon Kai: the GREAT MARSH's area underfoot (s3d_legends.c)
+    {
+        for (i = 0; gWildMonHeaders[i].mapGroup != MAP_GROUP(MAP_UNDEFINED); i++)
+            if (gWildMonHeaders[i].mapGroup == group && gWildMonHeaders[i].mapNum == num)
+                return i;
+    }
 
     for (i = 0; ; i++)
     {
@@ -473,8 +483,8 @@ static bool8 TryGenerateWildMon(const struct WildPokemonInfo *wildMonInfo, u8 ar
         return FALSE;
 
     // Moemon Co-op: today's outbreak species shows up often on its route
-    if (area == WILD_AREA_LAND)
-        CreateWildMon(MP_Events_MaybeOutbreak(MP_WildSlotSpecies(wildMonInfo, wildMonIndex)), level);
+    if (area == WILD_AREA_LAND)   // (Moemon Kai: the GREAT MARSH's daily Pokemon in its SAFARI GAME, s3d_legends.c)
+        CreateWildMon(MP_Events_MaybeOutbreak(Sinnoh_GreatMarshDaily(MP_WildSlotSpecies(wildMonInfo, wildMonIndex), wildMonIndex)), level);
     else
         CreateWildMon(MP_WildSlotSpecies(wildMonInfo, wildMonIndex), level);   // Moemon Kai: no starters in the wild
     return TRUE;
@@ -1110,7 +1120,7 @@ bool8 MP_RollExtraLandMon(struct Pokemon *out)
     keep = gEnemyParty[0];
     index = ChooseWildMonIndex_Land();
     level = ChooseWildMonLevel(&info->wildPokemon[index]);
-    CreateWildMon(MP_Events_MaybeOutbreak(MP_WildSlotSpecies(info, index)), level);
+    CreateWildMon(MP_Events_MaybeOutbreak(Sinnoh_GreatMarshDaily(MP_WildSlotSpecies(info, index), index)), level);
     *out = gEnemyParty[0];
     gEnemyParty[0] = keep;
     return TRUE;

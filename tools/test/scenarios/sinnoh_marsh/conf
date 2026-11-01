@@ -1,0 +1,9 @@
+# The GREAT MARSH's SAFARI GAME (PASTORIA's gate: data/maps/Sinnoh_PastoriaCityObservatoryGate1f/scripts.inc; the
+# marsh as one map, its areas' wild Pokemon and daily picks: src/sinnoh/s3d_legends.c): the counter takes ¥500 and
+# sends the player into the marsh with SAFARI mode on; area 1's Pokemon there; a SAFARI battle; RETIRE brings them back
+# to the gate (mode off); walking out through the marsh's door asks and ends it too. Needs the 3D pack. Shots m_*.png.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_MONEY=5000 MOEMON_DEBUG_PARTY=150:100"
+EXPECT_A=("[test] where map 41.102 xy 68,117" "[test] flag 2188 = 1" "[test] where map 42.96 xy 5,7" "[test] flag 2188 = 0" "[test] marsh daily:")
+UNEXPECT_A=("[crash]")

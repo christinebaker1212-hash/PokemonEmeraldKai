@@ -240,6 +240,32 @@ def triggers(p, root, have):
     return out
 
 
+# The GREAT MARSH: Platinum's six headers share one matrix (each a block of it, its own people, items and wild
+# Pokemon). The game's player stays on the 6th's map (the gate's warp leads there) for the whole marsh: it holds the
+# other five's people, items and signs too, and the wild Pokemon are the block's (src/sinnoh/s3d_legends.c
+# Sinnoh_GreatMarshArea)
+MARSH_MAP = 'Sinnoh_GreatMarsh6'
+
+
+def marsh_merge(m, every, root):
+    def spot(e):
+        return (e['x'], e['y'])
+    shown = {spot(o) for o in m['object_events'] if o['flag'] != '0x3FFF'}
+    signed = {spot(b) for b in m['bg_events']}
+    for q in every:
+        if not q['name'].startswith('Sinnoh_GreatMarsh') or q['name'] == MARSH_MAP:
+            continue
+        have = labels(q['name'])
+        for o in people(q, root, have):
+            if o['flag'] != '0x3FFF' and spot(o) not in shown:
+                m['object_events'].append(o)
+                shown.add(spot(o))
+        for b in signs(q, root, have):
+            if spot(b) not in signed:
+                m['bg_events'].append(b)
+                signed.add(spot(b))
+
+
 def kept_warps(p, ids, root):
     """[(Platinum's warp number, warp)] of the place's warps that lead to kept places with a way out of their own (an
     elevator room has none: Platinum's elevators run by script, so its doors stay shut until those are written)"""
@@ -350,6 +376,8 @@ def main():
         m['warp_events'] = warps(p, map_ids, root, numbers)
         m['coord_events'] = triggers(p, root, have)
         m['bg_events'] = signs(p, root, have)
+        if p['name'] == MARSH_MAP:
+            marsh_merge(m, every, root)
         json.dump(m, open(path, 'w'), indent=2)
         open(path, 'a').write('\n')
         if not os.path.exists(mdir + '/scripts.inc'):

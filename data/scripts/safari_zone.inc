@@ -1,19 +1,39 @@
 SafariZone_EventScript_OutOfBallsMidBattle::
 	setvar VAR_SAFARI_ZONE_STATE, 1
 	special ExitSafariMode
+	specialvar VAR_RESULT, Sinnoh_InGreatMarsh   @ Moemon Kai: SINNOH's GREAT MARSH ends at PASTORIA's gate
+	goto_if_eq VAR_RESULT, TRUE, SafariZone_EventScript_OutOfBallsMidBattleMarsh
 	setwarp MAP_ROUTE121_SAFARI_ZONE_ENTRANCE, 2, 5
+	end
+
+SafariZone_EventScript_OutOfBallsMidBattleMarsh::
+	setwarp MAP_SINNOH_PASTORIA_CITY_OBSERVATORY_GATE1F, 5, 3
 	end
 
 SafariZone_EventScript_Exit::
 	setvar VAR_SAFARI_ZONE_STATE, 1
 	special ExitSafariMode
+	specialvar VAR_RESULT, Sinnoh_InGreatMarsh
+	goto_if_eq VAR_RESULT, TRUE, SafariZone_EventScript_ExitMarsh
 	warp MAP_ROUTE121_SAFARI_ZONE_ENTRANCE, 2, 5
+	waitstate
+	end
+
+SafariZone_EventScript_ExitMarsh::
+	warp MAP_SINNOH_PASTORIA_CITY_OBSERVATORY_GATE1F, 5, 3
 	waitstate
 	end
 
 SafariZone_EventScript_RetirePrompt::
 	lockall
+	specialvar VAR_RESULT, Sinnoh_InGreatMarsh
+	goto_if_eq VAR_RESULT, TRUE, SafariZone_EventScript_RetirePromptMarsh
 	msgbox SafariZone_Text_WouldYouLikeToExit, MSGBOX_YESNO
+	goto SafariZone_EventScript_RetireAnswer
+
+SafariZone_EventScript_RetirePromptMarsh::
+	msgbox SafariZone_Text_WouldYouLikeToExitMarsh, MSGBOX_YESNO
+SafariZone_EventScript_RetireAnswer::
 	goto_if_eq VAR_RESULT, YES, SafariZone_EventScript_Retire
 	releaseall
 	end
@@ -74,6 +94,10 @@ SafariZone_EventScript_PokeblockPresent::
 SafariZone_Text_WouldYouLikeToExit:
 	.string "Would you like to exit the SAFARI\n"
 	.string "ZONE right now?$"
+
+SafariZone_Text_WouldYouLikeToExitMarsh:
+	.string "Would you like to leave the GREAT\n"
+	.string "MARSH right now?$"
 
 SafariZone_Text_TimesUp:
 	.string "Ding-dong! Time's up!\n"

@@ -17,7 +17,7 @@ Queued after the 1.61.6 release and the KANTO / JOHTO sweep (the user's plan, 20
   a map's people: TWINLEAF, ROUTE 201 and SANDGEM written, COOP_NOTES "Words"; done 2026-11-01: item balls, hidden
   items, the 403 route trainers with lines of their own, TM51-TM92, the gym leaders, the ELITE FOUR and the CHAMPION
   (the region cleared), boats inside SINNOH and the boat from the other regions: SINNOH is playable from start to
-  HALL OF FAME), the PÓKETCH (step 5);
+  HALL OF FAME; the GREAT MARSH's SAFARI GAME with Platinum's daily POKéMON), the PÓKETCH (step 5);
   animated textures and Platinum's door animations when there's time (the 3D picture takes 4-5 ms a frame).
 - DECIDED (the user, 2026-10-31): the 3D data comes from pret/pokeplatinum, not a ROM. The decomp holds every map
   block, texture set, prop model and light set as files (byte for byte the ROM's), so tools/sinnoh/make_pack.sh fetches
