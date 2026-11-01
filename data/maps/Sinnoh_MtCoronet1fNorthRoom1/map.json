@@ -167,8 +167,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_RareCandy",
+      "flag": "0x3276"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -180,8 +180,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Tm69",
+      "flag": "0x3278"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -193,8 +193,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_EscapeRope",
+      "flag": "0x3274"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -206,8 +206,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Tm02",
+      "flag": "0x3277"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_MAGMA_MEMBER_F",
@@ -258,8 +258,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_IceHeal",
+      "flag": "0x3275"
     }
   ],
   "warp_events": [
@@ -293,5 +293,46 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 14,
+      "y": 9,
+      "elevation": 0,
+      "item": "ITEM_RED_SHARD",
+      "flag": "0x3E41"
+    },
+    {
+      "type": "hidden_item",
+      "x": 23,
+      "y": 35,
+      "elevation": 0,
+      "item": "ITEM_STAR_PIECE",
+      "flag": "0x3E42"
+    },
+    {
+      "type": "hidden_item",
+      "x": 15,
+      "y": 38,
+      "elevation": 0,
+      "item": "ITEM_STARDUST",
+      "flag": "0x3E40"
+    },
+    {
+      "type": "hidden_item",
+      "x": 4,
+      "y": 41,
+      "elevation": 0,
+      "item": "ITEM_ENERGY_POWDER",
+      "flag": "0x3E3E"
+    },
+    {
+      "type": "hidden_item",
+      "x": 12,
+      "y": 59,
+      "elevation": 0,
+      "item": "ITEM_NUGGET",
+      "flag": "0x3E3F"
+    }
+  ]
 }

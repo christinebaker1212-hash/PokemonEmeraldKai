@@ -334,8 +334,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_DireHit",
+      "flag": "0x328D"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -347,8 +347,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_YellowShard",
+      "flag": "0x328E"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ZIGZAGOON_1",
@@ -505,5 +505,14 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 35,
+      "y": 36,
+      "elevation": 0,
+      "item": "ITEM_PEARL",
+      "flag": "0x3E57"
+    }
+  ]
 }

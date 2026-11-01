@@ -1,0 +1,21 @@
+pressuntil A field 5000
+wait 30
+mp bagqty 4
+mp warp 40,21,19,15
+wait 200
+mp face up
+press A 4
+pressuntil A field 1500
+wait 30
+mp bagqty 4
+mp warp 40,21,19,15
+wait 200
+mp ctx
+mp warp 40,14,40,60
+wait 200
+mp face up
+press A 4
+pressuntil A field 1500
+wait 30
+mp bagqty 108
+quit

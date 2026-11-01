@@ -1407,6 +1407,7 @@ const s8 gNatureStatTable[NUM_NATURES][NUM_NATURE_STATS] =
 };
 
 #include "data/pokemon/tmhm_learnsets.h"
+#include "data/pokemon/tm2_learnsets.h"   // Moemon Kai: TM51-TM92
 #include "data/pokemon/trainer_class_lookups.h"
 #include "data/pokemon/cry_ids.h"
 #include "data/pokemon/experience_tables.h"
@@ -6540,6 +6541,9 @@ u32 CanMonLearnTMHM(struct Pokemon *mon, u8 tm)
         return 0;
     }
 
+    if (tm >= NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES)   // Moemon Kai: TM51-TM92
+        return tm < NUM_TMHMS && species < NUM_SPECIES
+            && ((gTm2Learnsets[species] >> (tm - NUM_TECHNICAL_MACHINES - NUM_HIDDEN_MACHINES)) & 1);
     // Fewer than 64 moves, use GF's method (for matching).
     if (sizeof(struct TMHMLearnset) <= 8)
     {
@@ -6568,6 +6572,9 @@ u32 CanSpeciesLearnTMHM(u16 species, u8 tm)
     {
         return 0;
     }
+    if (tm >= NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES)   // Moemon Kai: TM51-TM92
+        return tm < NUM_TMHMS && species < NUM_SPECIES
+            && ((gTm2Learnsets[species] >> (tm - NUM_TECHNICAL_MACHINES - NUM_HIDDEN_MACHINES)) & 1);
     // Fewer than 64 moves, use GF's method (for matching).
     if (sizeof(struct TMHMLearnset) <= 8)
     {

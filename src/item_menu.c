@@ -1023,7 +1023,7 @@ static void GetItemNameFromPocket(u8 *dest, u16 itemId)
     {
     case TMHM_POCKET:
         StringCopy(gStringVar2, gMoveNames[ItemIdToBattleMoveId(itemId)]);
-        if (itemId >= ITEM_HM01)
+        if (MP_IS_ITEM_HM(itemId))   // Moemon Kai: TM51-TM92 come after the HMs
         {
             // Get HM number
             ConvertIntToDecimalStringN(gStringVar1, itemId - ITEM_HM01 + 1, STR_CONV_MODE_LEADING_ZEROS, 1);
@@ -1032,7 +1032,8 @@ static void GetItemNameFromPocket(u8 *dest, u16 itemId)
         else
         {
             // Get TM number
-            ConvertIntToDecimalStringN(gStringVar1, itemId - ITEM_TM01 + 1, STR_CONV_MODE_LEADING_ZEROS, 2);
+            ConvertIntToDecimalStringN(gStringVar1, itemId >= ITEM_TM51 ? itemId - ITEM_TM51 + 51 : itemId - ITEM_TM01 + 1,
+                                       STR_CONV_MODE_LEADING_ZEROS, 2);
             StringExpandPlaceholders(dest, gText_NumberItem_TMBerry);
         }
         break;

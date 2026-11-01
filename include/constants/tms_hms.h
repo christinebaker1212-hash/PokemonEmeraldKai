@@ -67,4 +67,9 @@
     FOREACH_TM(F) \
     FOREACH_HM(F)
 
+// Moemon Kai: TM51-TM92 (FOREACH_TM2, tools/moemon_tms/gen_tm2.py), after the HMs in the TM / HM index; their learnsets
+// are gTm2Learnsets (FLASH_TM is TM70, FLASH)
+#include "constants/tms_hms_tm2.h"
+#define MOVE_FLASH_TM MOVE_FLASH
+
 #endif

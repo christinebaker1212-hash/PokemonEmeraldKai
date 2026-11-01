@@ -25,6 +25,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from source import open_source  # noqa: E402
 from places import places as kept_places, events  # noqa: E402
 import ids  # noqa: E402
+import items  # noqa: E402
 import sprites  # noqa: E402
 
 GROUP = 'gMapGroup_Sinnoh'                      # the outdoor places
@@ -114,6 +115,14 @@ def labels(name):
     return set(re.findall(r'^(\w+)::', open(path, encoding='utf-8').read(), re.M))
 
 
+used_items = set()   # (item, count) of every item ball: data/scripts/sinnoh_items.inc
+
+
+def inside(p, x, z):
+    """A Platinum spot (whole-matrix tiles) inside the place's map"""
+    return 0 <= x - p['x0'] * 32 < 32 * (p['x1'] - p['x0'] + 1) and 0 <= z - p['z0'] * 32 < 32 * (p['z1'] - p['z0'] + 1)
+
+
 def people(p, root, have):
     """The place's people: where they stand, the game's closest sprite (tools/sinnoh/sprites.py), how they move, their
     hide flag (SINNOH's number, tools/sinnoh/ids.py) and their script. Local ids follow Platinum's order; those with
@@ -127,7 +136,18 @@ def people(p, root, have):
         hide = o.get('hidden_flag')
         flag = ids.flag(root, hide) if isinstance(hide, str) and hide.startswith('FLAG_') else None
         ghost = isinstance(hide, str) and hide.startswith('MAP_HEADER_')
-        if gfx is None or ghost or (flag and label not in have):
+        script = label if label in have else '0x0'
+        ball = items.ball(root, o['script']) if o['graphics_id'].endswith('POKEBALL') else None
+        if ball and not inside(p, o['x'], o['z']):
+            ball = None
+        if ball:
+            # an item ball: the shared script for its item (data/scripts/sinnoh_items.inc), its flag set once taken
+            assert flag, '%s: item ball without a flag' % label
+            script = items.script_label(*ball)
+            used_items.add(ball)
+            flag_s = '0x%X' % flag
+        elif gfx is None or ghost or (flag and label not in have) or o['graphics_id'].endswith('POKEBALL') \
+                or not inside(p, o['x'], o['z']):
             flag_s = '0x3FFF'
         else:
             flag_s = ('0x%X' % flag) if flag else '0'
@@ -135,7 +155,7 @@ def people(p, root, have):
                     'elevation': 3, 'movement_type': sprites.movement(o['movement_type']),
                     'movement_range_x': o.get('movement_range_x', 0), 'movement_range_y': o.get('movement_range_z', 0),
                     'trainer_type': 'TRAINER_TYPE_NONE', 'trainer_sight_or_berry_tree_id': '0',
-                    'script': label if label in have else '0x0', 'flag': flag_s})
+                    'script': script, 'flag': flag_s})
     return out
 
 
@@ -147,13 +167,21 @@ def signs(p, root, have):
     ev = events(root, p['place'])
     for i, o in enumerate(ev['object_events']):
         label = '%s_EventScript_Sign%d' % (p['name'], i + 1)
-        if sprites.sign(o['graphics_id']) and label in have:
+        if sprites.sign(o['graphics_id']) and label in have and inside(p, o['x'], o['z']):
             out.append({'type': 'sign', 'x': o['x'] - p['x0'] * 32, 'y': o['z'] - p['z0'] * 32, 'elevation': 0,
                         'player_facing_dir': 'BG_EVENT_PLAYER_FACING_ANY', 'script': label})
     for i, b in enumerate(ev['bg_events']):
         label = '%s_EventScript_Bg%d' % (p['name'], i + 1)
+        if not inside(p, b['x'], b['z']):
+            continue
+        hid = items.buried(root, b['script']) if b.get('type') == 2 else None
+        if hid:
+            item, count, flag = hid    # (a count above 1 is given as 1: the game's hidden items hold one)
+            out.append({'type': 'hidden_item', 'x': b['x'] - p['x0'] * 32, 'y': b['z'] - p['z0'] * 32, 'elevation': 0,
+                        'item': item, 'flag': '0x%X' % flag})
+            continue
         if b.get('type') != 0 or label not in have:
-            continue      # (hidden items: later)
+            continue
         out.append({'type': 'sign', 'x': b['x'] - p['x0'] * 32, 'y': b['z'] - p['z0'] * 32, 'elevation': 0,
                     'player_facing_dir': facing.get(b['player_facing_dir'], 'BG_EVENT_PLAYER_FACING_ANY'),
                     'script': label})
@@ -166,7 +194,7 @@ def triggers(p, root, have):
     for i, c in enumerate(events(root, p['place'])['coord_events']):
         label = '%s_EventScript_Trigger%d' % (p['name'], i + 1)
         v = ids.var(root, c['var']) if isinstance(c.get('var'), str) else None
-        if v is None or label not in have:
+        if v is None or label not in have or not inside(p, c['x'], c['z']):
             continue
         for dz in range(max(1, c.get('length', 1))):
             for dx in range(max(1, c.get('width', 1))):
@@ -273,9 +301,16 @@ def main():
     open('data/layouts/layouts.json', 'a').write('\n')
     # the maps' scripts, and the 3D engine's table (map, its matrix, its top-left cell there, its size in cells)
     names = known + [p['name'] for p in indoor]
+    path = 'data/scripts/sinnoh_items.inc'
+    open(path, 'w').write('@ Generated by tools/sinnoh/gen_maps.py: SINNOH\'s item balls, one script an item (tools/sinnoh/items.py)\n' +
+                          ''.join('%s::\n\tfinditem %s, %d\n\tend\n\n' % (items.script_label(i, c), i, c)
+                                  for i, c in sorted(used_items)))
+    assert ids.FLAGS_START + ids.counts(root)[0] <= items.HIDDEN_FLAGS, 'SINNOH flags run into the hidden items\''
     path = 'data/event_scripts_sinnoh.s'
     text = open(path).read()
     head = text[:text.index('\t.include "data/maps/Sinnoh_')]
+    if 'sinnoh_items.inc' not in head:
+        head += '\t.include "data/scripts/sinnoh_items.inc"\n'
     open(path, 'w').write(head + ''.join('\t.include "data/maps/%s/scripts.inc"\n' % n for n in names))
     rows = ''.join('    {%s, %d, %d, %d, %d, %d},\n' % (p['id'], p['matrix'], p['x0'], p['z0'], p['x1'] - p['x0'] + 1,
                                                        p['z1'] - p['z0'] + 1) for p in outdoor + indoor)

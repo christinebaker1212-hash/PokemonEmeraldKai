@@ -24,8 +24,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_BlueShard",
+      "flag": "0x325B"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -69,5 +69,14 @@
   ],
   "warp_events": [],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 90,
+      "y": 39,
+      "elevation": 0,
+      "item": "ITEM_TOXIC_PLATE",
+      "flag": "0x3ED3"
+    }
+  ]
 }

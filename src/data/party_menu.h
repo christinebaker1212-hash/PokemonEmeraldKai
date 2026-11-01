@@ -1182,5 +1182,6 @@ static const u8 *const sUnused_StatStrings[] =
 static const u16 sTMHMMoves[] =
 {
     FOREACH_TMHM(TMHM_MOVE)
+    FOREACH_TM2(TMHM_MOVE)   // Moemon Kai: TM51-TM92
 };
 #undef TMHM_MOVE

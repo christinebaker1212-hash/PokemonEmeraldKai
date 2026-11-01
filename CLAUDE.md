@@ -275,6 +275,8 @@ sets GEN). Also the battle GIMMICKS (1.61.0: MEGA EVOLUTION, Z-MOVES, DYNAMAX, T
 the end of battle_gen59.c, src/battle_gimmick.c; START in the move list; one a battle per trainer; AUTO / ON / OFF each,
 the host's online; MEGA forms aren't species: src/data/mp_megas.h from tools/moemon_gimmicks/gen_megas.py, pictures through
 B_ANIM_MP_GIMMICK on every screen; items 553-617): COOP_NOTES "The battle GIMMICKS"; tests gimmick_*.
+Also TM51-TM92 (items 618-659, after the HMs; TMHM_INDEX / TMHM_ITEM, gTm2Learnsets; tools/moemon_tms/gen_tm2.py; COOP_NOTES
+"TM51-TM92"; test tm_new).
 Saves never change layout: tools/test/save_layout.py (gcc + MinGW, run by regress.sh and the release) must pass; old
 formats are converted on load by src/mp/mp_savefix.c (MP_SAVE_FORMAT in the sidecar; COOP_NOTES "Save layout and
 migration"; tools/test/save_compat.sh).

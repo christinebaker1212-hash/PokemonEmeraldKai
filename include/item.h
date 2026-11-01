@@ -84,6 +84,7 @@ u8 GetItemSecondaryId(u16 itemId);
  *   ITEM_HM_CUT,
  *   ...
  * }; */
+u16 MP_ItemNumberOrder(u16 item);   // Moemon Kai: TMs in number order, then the HMs (item.c)
 #define ENUM_TM(id) CAT(ITEM_TM_, id),
 #define ENUM_HM(id) CAT(ITEM_HM_, id),
 enum
@@ -93,6 +94,9 @@ enum
 
     ENUM_HM_START_ = ITEM_HM01 - 1,
     FOREACH_HM(ENUM_HM)
+
+    ENUM_TM2_START_ = ITEM_TM51 - 1,   // Moemon Kai
+    FOREACH_TM2(ENUM_TM)
 };
 #undef ENUM_TM
 #undef ENUM_HM

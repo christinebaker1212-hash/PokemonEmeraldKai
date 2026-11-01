@@ -143,5 +143,38 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 41,
+      "y": 7,
+      "elevation": 0,
+      "item": "ITEM_STAR_PIECE",
+      "flag": "0x3E54"
+    },
+    {
+      "type": "hidden_item",
+      "x": 44,
+      "y": 10,
+      "elevation": 0,
+      "item": "ITEM_STAR_PIECE",
+      "flag": "0x3E5C"
+    },
+    {
+      "type": "hidden_item",
+      "x": 13,
+      "y": 29,
+      "elevation": 0,
+      "item": "ITEM_BLUE_SHARD",
+      "flag": "0x3E59"
+    },
+    {
+      "type": "hidden_item",
+      "x": 31,
+      "y": 33,
+      "elevation": 0,
+      "item": "ITEM_MAX_POTION",
+      "flag": "0x3E5A"
+    }
+  ]
 }

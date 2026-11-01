@@ -2241,7 +2241,7 @@ static u8 CanMonLearnTMTutor(struct Pokemon *mon, u16 item, u8 tutor)
 
     if (item >= ITEM_TM01)
     {
-        if (!CanMonLearnTMHM(mon, item - ITEM_TM01))
+        if (!CanMonLearnTMHM(mon, TMHM_INDEX(item)))   // Moemon Kai: TM51-TM92 too
             return CANNOT_LEARN_MOVE;
         else
             move = ItemIdToBattleMoveId(item);
@@ -5118,7 +5118,7 @@ void ItemUseCB_PPUp(u8 taskId, TaskFunc task)
 
 u16 ItemIdToBattleMoveId(u16 item)
 {
-    u16 tmNumber = item - ITEM_TM01;
+    u16 tmNumber = TMHM_INDEX(item);   // Moemon Kai: TM51-TM92 too
     return sTMHMMoves[tmNumber];
 }
 

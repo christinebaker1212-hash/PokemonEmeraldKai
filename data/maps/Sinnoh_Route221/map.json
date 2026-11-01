@@ -121,8 +121,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Protein",
+      "flag": "0x3302"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -134,8 +134,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Tm81",
+      "flag": "0x3304"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -147,8 +147,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_UltraBall",
+      "flag": "0x3305"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -212,8 +212,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_PureIncense",
+      "flag": "0x3303"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_HIKER",
@@ -252,5 +252,46 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 43,
+      "y": 27,
+      "elevation": 0,
+      "item": "ITEM_HYPER_POTION",
+      "flag": "0x3E32"
+    },
+    {
+      "type": "hidden_item",
+      "x": 40,
+      "y": 1,
+      "elevation": 0,
+      "item": "ITEM_BIG_MUSHROOM",
+      "flag": "0x3E31"
+    },
+    {
+      "type": "hidden_item",
+      "x": 56,
+      "y": 25,
+      "elevation": 0,
+      "item": "ITEM_ULTRA_BALL",
+      "flag": "0x3EBE"
+    },
+    {
+      "type": "hidden_item",
+      "x": 84,
+      "y": 23,
+      "elevation": 0,
+      "item": "ITEM_CARBOS",
+      "flag": "0x3EBF"
+    },
+    {
+      "type": "hidden_item",
+      "x": 48,
+      "y": 21,
+      "elevation": 0,
+      "item": "ITEM_MAX_REVIVE",
+      "flag": "0x3EC0"
+    }
+  ]
 }

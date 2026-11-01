@@ -56,8 +56,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Nugget",
+      "flag": "0x329F"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_BEAUTY",
@@ -299,5 +299,14 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 22,
+      "y": 25,
+      "elevation": 0,
+      "item": "ITEM_NUGGET",
+      "flag": "0x3E92"
+    }
+  ]
 }

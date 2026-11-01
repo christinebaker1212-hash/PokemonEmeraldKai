@@ -65,5 +65,14 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 54,
+      "y": 49,
+      "elevation": 0,
+      "item": "ITEM_TINY_MUSHROOM",
+      "flag": "0x3EA0"
+    }
+  ]
 }

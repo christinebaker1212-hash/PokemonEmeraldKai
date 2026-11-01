@@ -24,8 +24,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Tm26",
+      "flag": "0x336C"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -37,8 +37,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Tm32",
+      "flag": "0x336D"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -50,8 +50,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Revive",
+      "flag": "0x336B"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -63,8 +63,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_EscapeRope",
+      "flag": "0x336A"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_LITTLE_GIRL",
@@ -384,5 +384,54 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 72,
+      "y": 15,
+      "elevation": 0,
+      "item": "ITEM_YELLOW_SHARD",
+      "flag": "0x3E06"
+    },
+    {
+      "type": "hidden_item",
+      "x": 74,
+      "y": 34,
+      "elevation": 0,
+      "item": "ITEM_GREAT_BALL",
+      "flag": "0x3E09"
+    },
+    {
+      "type": "hidden_item",
+      "x": 17,
+      "y": 43,
+      "elevation": 0,
+      "item": "ITEM_RED_SHARD",
+      "flag": "0x3E08"
+    },
+    {
+      "type": "hidden_item",
+      "x": 43,
+      "y": 29,
+      "elevation": 0,
+      "item": "ITEM_GREEN_SHARD",
+      "flag": "0x3EA2"
+    },
+    {
+      "type": "hidden_item",
+      "x": 55,
+      "y": 41,
+      "elevation": 0,
+      "item": "ITEM_SUPER_POTION",
+      "flag": "0x3ED0"
+    },
+    {
+      "type": "hidden_item",
+      "x": 92,
+      "y": 51,
+      "elevation": 0,
+      "item": "ITEM_BLUE_SHARD",
+      "flag": "0x3ED1"
+    }
+  ]
 }

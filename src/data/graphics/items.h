@@ -664,6 +664,7 @@ const u32 gItemIconPalette_PoisonTMHM[] = INCGFX_U32("graphics/items/icon_palett
 const u32 gItemIconPalette_IceTMHM[] = INCGFX_U32("graphics/items/icon_palettes/ice_tm_hm.pal", ".gbapal.lz");
 
 const u32 gItemIconPalette_GrassTMHM[] = INCGFX_U32("graphics/items/icon_palettes/grass_tm_hm.pal", ".gbapal.lz");
+const u32 gItemIconPalette_BugTMHM[] = INCGFX_U32("graphics/items/icon_palettes/bug_tm_hm.pal", ".gbapal.lz");   // Moemon Kai: TM51-TM92
 
 const u32 gItemIconPalette_FireTMHM[] = INCGFX_U32("graphics/items/icon_palettes/fire_tm_hm.pal", ".gbapal.lz");
 

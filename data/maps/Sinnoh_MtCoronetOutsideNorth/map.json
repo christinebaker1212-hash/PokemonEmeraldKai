@@ -130,5 +130,46 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 41,
+      "y": 44,
+      "elevation": 0,
+      "item": "ITEM_STAR_PIECE",
+      "flag": "0x3E54"
+    },
+    {
+      "type": "hidden_item",
+      "x": 44,
+      "y": 47,
+      "elevation": 0,
+      "item": "ITEM_STAR_PIECE",
+      "flag": "0x3E5C"
+    },
+    {
+      "type": "hidden_item",
+      "x": 33,
+      "y": 9,
+      "elevation": 0,
+      "item": "ITEM_STARDUST",
+      "flag": "0x3E55"
+    },
+    {
+      "type": "hidden_item",
+      "x": 19,
+      "y": 12,
+      "elevation": 0,
+      "item": "ITEM_FULL_RESTORE",
+      "flag": "0x3E56"
+    },
+    {
+      "type": "hidden_item",
+      "x": 43,
+      "y": 17,
+      "elevation": 0,
+      "item": "ITEM_MOON_STONE",
+      "flag": "0x3E58"
+    }
+  ]
 }

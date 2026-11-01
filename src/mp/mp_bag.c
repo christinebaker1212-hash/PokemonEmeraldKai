@@ -372,7 +372,7 @@ static int CompareItems(u16 a, u16 b, u8 mode)
         d = (int)sObtained[b < ITEMS_COUNT ? b : 0] - (int)sObtained[a < ITEMS_COUNT ? a : 0];
         break;
     }
-    return d ? d : (int)a - (int)b;   // then by number (ID: only that)
+    return d ? d : (int)MP_ItemNumberOrder(a) - (int)MP_ItemNumberOrder(b);   // then by number (ID: only that; TM51 after TM50)
 }
 
 // Puts a pocket in its sort order (the empty slots stay at the end). Stable,

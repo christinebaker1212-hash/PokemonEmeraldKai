@@ -1,0 +1,7 @@
+# SINNOH's items on the ground (tools/sinnoh/items.py): ROUTE 203's item ball (a POKé BALL) is picked up, and stays
+# gone when the player comes back; JUBILIFE CITY's hidden STARDUST is found by pressing A on its spot. Needs the 3D
+# pack (tools/sinnoh/make_pack.sh) for the ground's collision.
+MODE=1
+TMO=90
+EXPECT_A=("[test] bagqty 4: 5" "[test] bagqty 4: 6" "[test] bagqty 108: 1")
+UNEXPECT_A=("[crash]" "TIMEOUT" "[test] bagqty 108: 0")

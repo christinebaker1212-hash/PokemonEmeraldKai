@@ -401,8 +401,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Tm25",
+      "flag": "0x3272"
     }
   ],
   "warp_events": [
@@ -429,5 +429,14 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 12,
+      "y": 15,
+      "elevation": 0,
+      "item": "ITEM_HP_UP",
+      "flag": "0x3E39"
+    }
+  ]
 }

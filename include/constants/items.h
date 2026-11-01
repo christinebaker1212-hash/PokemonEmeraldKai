@@ -716,7 +716,51 @@
 #define FIRST_GEN59_ITEM ITEM_ICE_STONE
 #define LAST_GEN59_ITEM ITEM_FAIRIUM_Z
 
-#define ITEMS_COUNT 618
+// Moemon Kai: TM51-TM92 (Diamond, Pearl and Platinum's), after TM01-TM50 and the HMs (tools/moemon_tms/gen_tm2.py)
+#define ITEM_TM51 618
+#define ITEM_TM52 619
+#define ITEM_TM53 620
+#define ITEM_TM54 621
+#define ITEM_TM55 622
+#define ITEM_TM56 623
+#define ITEM_TM57 624
+#define ITEM_TM58 625
+#define ITEM_TM59 626
+#define ITEM_TM60 627
+#define ITEM_TM61 628
+#define ITEM_TM62 629
+#define ITEM_TM63 630
+#define ITEM_TM64 631
+#define ITEM_TM65 632
+#define ITEM_TM66 633
+#define ITEM_TM67 634
+#define ITEM_TM68 635
+#define ITEM_TM69 636
+#define ITEM_TM70 637
+#define ITEM_TM71 638
+#define ITEM_TM72 639
+#define ITEM_TM73 640
+#define ITEM_TM74 641
+#define ITEM_TM75 642
+#define ITEM_TM76 643
+#define ITEM_TM77 644
+#define ITEM_TM78 645
+#define ITEM_TM79 646
+#define ITEM_TM80 647
+#define ITEM_TM81 648
+#define ITEM_TM82 649
+#define ITEM_TM83 650
+#define ITEM_TM84 651
+#define ITEM_TM85 652
+#define ITEM_TM86 653
+#define ITEM_TM87 654
+#define ITEM_TM88 655
+#define ITEM_TM89 656
+#define ITEM_TM90 657
+#define ITEM_TM91 658
+#define ITEM_TM92 659
+
+#define ITEMS_COUNT 660
 // end of Gen 5-9 items
 
 // A special item id associated with "Cancel"/"Exit" etc. in a list of items or decorations
@@ -765,6 +809,12 @@
 
 #define NUM_TECHNICAL_MACHINES 50
 #define NUM_HIDDEN_MACHINES     8
+#define NUM_TECHNICAL_MACHINES_2 42   // Moemon Kai: TM51-TM92
+#define NUM_TMHMS (NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES + NUM_TECHNICAL_MACHINES_2)
+// a TM / HM item <-> its index (TM01-TM50 0-49, HM01-HM08 50-57, TM51-TM92 58-99: the learnset bits and sTMHMMoves)
+#define IS_ITEM_TMHM(item) (((item) >= ITEM_TM01 && (item) <= ITEM_HM08) || ((item) >= ITEM_TM51 && (item) <= ITEM_TM92))
+#define TMHM_INDEX(item) ((item) >= ITEM_TM51 ? (item) - ITEM_TM51 + NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES : (item) - ITEM_TM01)
+#define TMHM_ITEM(index) ((index) >= NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES ? (index) - NUM_TECHNICAL_MACHINES - NUM_HIDDEN_MACHINES + ITEM_TM51 : (index) + ITEM_TM01)
 
 #define MAX_BAG_ITEM_CAPACITY  99
 #define MAX_PC_ITEM_CAPACITY   999

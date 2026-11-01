@@ -871,6 +871,8 @@ u8 MP_Gen_OfItem(u16 item)
         return 3;   // (it does the trade evolutions of every generation: pokemon.c)
     if (item >= ITEM_CARD_CASE + 1 && item <= ITEM_ROWAP_BERRY)
         return 4;
+    if (item >= ITEM_TM51 && item <= ITEM_TM92)
+        return 4;   // (Diamond, Pearl and Platinum's TMs)
     if (item >= ITEM_ICE_STONE && item < ITEM_ICE_STONE + ARRAY_COUNT(sGen59))
         return sGen59[item - ITEM_ICE_STONE];
     return 0;

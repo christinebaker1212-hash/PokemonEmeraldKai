@@ -4858,4 +4858,5 @@ const struct Item gItems[] =
 #include "items_gen4_berries.h"   // Moemon Kai: Gen 4 berries
 #include "items_qz.h"   // Moemon Kai: Johto / Kanto items
 #include "items_gen59.h"   // Moemon Kai: Gen 5-9 items
+#include "items_tm2.h"   // Moemon Kai: TM51-TM92
 };

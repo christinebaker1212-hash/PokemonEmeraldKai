@@ -1,0 +1,7 @@
+# TM51-TM92 (items 618-659, after the HMs): the BAG's TM pocket lists them in number order (TM01, TM58, TM92, then
+# HM01), and TM58 (ENDURE, which TORCHIC learns by Platinum's TM list) is taught from the BAG and stays there.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("[test] bagview 3: 289 625 659 339" "[test] monmoves: slot 0 species 280 moves 10 45 203 0" "[test] bagqty 625: 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

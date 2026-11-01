@@ -683,9 +683,9 @@ static void BuildEggMoveset(struct Pokemon *egg, struct BoxPokemon *father, stru
     {
         if (sHatchedEggFatherMoves[i] != MOVE_NONE)
         {
-            for (j = 0; j < NUM_TECHNICAL_MACHINES + NUM_HIDDEN_MACHINES; j++)
+            for (j = 0; j < NUM_TMHMS; j++)   // Moemon Kai: TM51-TM92 too
             {
-                if (sHatchedEggFatherMoves[i] == ItemIdToBattleMoveId(ITEM_TM01 + j) && CanMonLearnTMHM(egg, j))
+                if (sHatchedEggFatherMoves[i] == ItemIdToBattleMoveId(TMHM_ITEM(j)) && CanMonLearnTMHM(egg, j))
                 {
                     if (MP_Gen_MoveAllowed(sHatchedEggFatherMoves[i]) && GiveMoveToMon(egg, sHatchedEggFatherMoves[i]) == MON_HAS_MAX_MOVES)   // Moemon Kai: GENERATION
                         DeleteFirstMoveAndGiveMoveToMon(egg, sHatchedEggFatherMoves[i]);

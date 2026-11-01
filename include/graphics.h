@@ -3838,6 +3838,7 @@ extern const u32 gItemIconPalette_NormalTMHM[];
 extern const u32 gItemIconPalette_PoisonTMHM[];
 extern const u32 gItemIconPalette_IceTMHM[];
 extern const u32 gItemIconPalette_GrassTMHM[];
+extern const u32 gItemIconPalette_BugTMHM[];
 extern const u32 gItemIconPalette_FireTMHM[];
 extern const u32 gItemIconPalette_DarkTMHM[];
 extern const u32 gItemIconPalette_SteelTMHM[];

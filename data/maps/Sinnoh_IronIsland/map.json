@@ -65,5 +65,14 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 18,
+      "y": 24,
+      "elevation": 0,
+      "item": "ITEM_STAR_PIECE",
+      "flag": "0x3E33"
+    }
+  ]
 }

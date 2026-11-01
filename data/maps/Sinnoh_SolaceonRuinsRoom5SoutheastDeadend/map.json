@@ -24,5 +24,14 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 4,
+      "y": 3,
+      "elevation": 0,
+      "item": "ITEM_THUNDER_STONE",
+      "flag": "0x3E26"
+    }
+  ]
 }

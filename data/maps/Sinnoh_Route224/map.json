@@ -35,8 +35,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_RazorClaw",
+      "flag": "0x3311"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -48,8 +48,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_RareCandy",
+      "flag": "0x3310"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -61,8 +61,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_DestinyKnot",
+      "flag": "0x330E"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_GENTLEMAN",
@@ -256,8 +256,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_RepeatBall",
+      "flag": "0x3312"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -269,8 +269,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_PpMax",
+      "flag": "0x330F"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -282,8 +282,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_UltraBall",
+      "flag": "0x3313"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -295,8 +295,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Upgrade",
+      "flag": "0x3314"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_GIRL_3",
@@ -322,5 +322,62 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 17,
+      "y": 50,
+      "elevation": 0,
+      "item": "ITEM_RARE_CANDY",
+      "flag": "0x3E7C"
+    },
+    {
+      "type": "hidden_item",
+      "x": 35,
+      "y": 55,
+      "elevation": 0,
+      "item": "ITEM_PEARL",
+      "flag": "0x3E7D"
+    },
+    {
+      "type": "hidden_item",
+      "x": 44,
+      "y": 50,
+      "elevation": 0,
+      "item": "ITEM_HEART_SCALE",
+      "flag": "0x3E7E"
+    },
+    {
+      "type": "hidden_item",
+      "x": 50,
+      "y": 53,
+      "elevation": 0,
+      "item": "ITEM_BIG_PEARL",
+      "flag": "0x3E7F"
+    },
+    {
+      "type": "hidden_item",
+      "x": 53,
+      "y": 49,
+      "elevation": 0,
+      "item": "ITEM_PEARL",
+      "flag": "0x3EAA"
+    },
+    {
+      "type": "hidden_item",
+      "x": 19,
+      "y": 83,
+      "elevation": 0,
+      "item": "ITEM_ZINC",
+      "flag": "0x3EAB"
+    },
+    {
+      "type": "hidden_item",
+      "x": 44,
+      "y": 47,
+      "elevation": 0,
+      "item": "ITEM_ULTRA_BALL",
+      "flag": "0x3EAC"
+    }
+  ]
 }

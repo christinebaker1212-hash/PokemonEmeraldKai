@@ -58,5 +58,22 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 27,
+      "y": 16,
+      "elevation": 0,
+      "item": "ITEM_FULL_RESTORE",
+      "flag": "0x3E66"
+    },
+    {
+      "type": "hidden_item",
+      "x": 27,
+      "y": 23,
+      "elevation": 0,
+      "item": "ITEM_RARE_CANDY",
+      "flag": "0x3E65"
+    }
+  ]
 }

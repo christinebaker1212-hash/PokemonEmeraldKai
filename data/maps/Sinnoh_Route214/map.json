@@ -261,8 +261,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_RareCandy",
+      "flag": "0x32E7"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -274,8 +274,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_MaxRepel",
+      "flag": "0x32E6"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -287,8 +287,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_RedShard",
+      "flag": "0x32E8"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -300,8 +300,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_BigRoot",
+      "flag": "0x32E4"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -391,8 +391,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Magmarizer",
+      "flag": "0x32E5"
     }
   ],
   "warp_events": [
@@ -433,5 +433,30 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 20,
+      "y": 55,
+      "elevation": 0,
+      "item": "ITEM_CARBOS",
+      "flag": "0x3E2B"
+    },
+    {
+      "type": "hidden_item",
+      "x": 30,
+      "y": 41,
+      "elevation": 0,
+      "item": "ITEM_BIG_MUSHROOM",
+      "flag": "0x3E2A"
+    },
+    {
+      "type": "hidden_item",
+      "x": 18,
+      "y": 64,
+      "elevation": 0,
+      "item": "ITEM_RAZOR_FANG",
+      "flag": "0x3EA8"
+    }
+  ]
 }

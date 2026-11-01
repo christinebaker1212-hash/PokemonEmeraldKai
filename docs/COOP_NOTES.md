@@ -3317,6 +3317,12 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   made curly), then gen_maps.py gives each its script. tools/sinnoh/who.py PLATINUM_DIR PLACE lists who and what is
   on a place and their numbers (Platinum's script entry names hint at what a spot is: a TV, a fridge). Written so far:
   TWINLEAF TOWN (and its houses), ROUTE 201, SANDGEM TOWN (houses, MART, MOéMON CENTER, the lab).
+- Items on the ground (tools/sinnoh/items.py): an item ball (Platinum script 7000 + k, the k-th entry of its visible
+  items' list) gets the shared script for its item (data/scripts/sinnoh_items.inc, `finditem`, written by gen_maps.py)
+  and keeps its Platinum "obtained" flag as a SINNOH number; a hidden item (script 8000 + k, the k-th of its hidden
+  items' table) is a hidden_item bg event with flag 0x3E00 + k (ids.py's flags stay below: gen_maps.py asserts it).
+  Platinum's names that differ (PARLYZ_HEAL...) are renamed; story keys stay hidden. Anything placed outside the place's
+  map (Platinum lists some past a place's edge) is left out. 326 item balls, 232 hidden items. Test sinnoh_items.
 - Tiles: SINNOH's layouts use the General tileset and gTileset_Johto_GoldenrodUndergroundEntrances (only for behaviors:
   the 3D engine draws the picture): Platinum's table / PC / TV behaviors (0x80 / 0x83 / 0x86, the game's MB_COUNTER /
   MB_PC / MB_TELEVISION numbers) get that secondary's metatiles (build_pack.py BEHAVIOR_METATILE), so a nurse or clerk
@@ -3358,3 +3364,19 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   (MOEMON_S3D_HOUR in tests). Battles on a SINNOH map: pokemon.c MpSinnohBattleBGM, victories MP_RegionVictorySong.
 - Tests sinnoh_music, sinnoh_music_night.
 
+
+## TM51-TM92 (sinnoh-work)
+- Diamond, Pearl and Platinum's TMs past Emerald's 50, as items 618-659 (ITEM_TM51..ITEM_TM92) beside TM01-TM50 and
+  the HMs: tools/moemon_tms/gen_tm2.py writes include/constants/tms_hms_tm2.h (FOREACH_TM2; TM70 is FLASH_TM =
+  MOVE_FLASH, since FLASH is also HM05), src/data/items_tm2.h, src/data/text/item_descriptions_tm2.h (written for this
+  game), src/data/item_icons_tm2.h (the TM disc in the move's type colors; BUG's palette is new:
+  graphics/items/icon_palettes/bug_tm_hm.pal) and src/data/pokemon/tm2_learnsets.h.
+- The TM / HM index: TM01-TM50 0-49, HM01-HM08 50-57, TM51-TM92 58-99 (TMHM_INDEX / TMHM_ITEM / IS_ITEM_TMHM,
+  NUM_TMHMS in include/constants/items.h; sTMHMMoves has all 100). Who learns 58-99: gTm2Learnsets (u64 a species,
+  bit k = TM(51 + k)), checked by CanMonLearnTMHM / CanSpeciesLearnTMHM, so the generated TM/HM learnsets stay as they
+  are. Species 1-493 from Platinum's TM lists (tools/moemon_gen4/gen4_data.json), the newer ones from their teachable
+  moves (tools/moemon_gen59/species.json).
+- Anything that took TMs as one block now uses those: the BAG's number ("No51"), HM checks (MP_IS_ITEM_HM), the
+  daycare's egg moves, BufferTMHMMoveName, ItemIdToBattleMoveId. The TM pocket sorts by number with the HMs last
+  (item.c MP_ItemNumberOrder, also mp_bag.c's tie-break) and holds 128 kinds (MP_BAG_TMHM_COUNT; the slots past the
+  save block's 64 are in "<save>.bag"). MP_Gen_OfItem: 4. Test tm_new.

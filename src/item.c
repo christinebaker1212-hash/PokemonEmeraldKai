@@ -25,6 +25,7 @@ EWRAM_DATA struct BagPocket gBagPockets[POCKETS_COUNT] = {0};
 #include "data/text/item_descriptions_gen4.h"   // Moemon Kai: Gen 4 items
 #include "data/text/item_descriptions_gen4_berries.h"   // Moemon Kai: Gen 4 berries
 #include "data/text/item_descriptions_gen59.h"   // Moemon Kai: Gen 5-9 items
+#include "data/text/item_descriptions_tm2.h"   // Moemon Kai: TM51-TM92
 #include "data/text/item_descriptions_qz.h"   // Moemon Kai: Johto / Kanto items
 #include "data/items.h"
 
@@ -612,6 +613,16 @@ void CompactItemsInBagPocket(struct BagPocket *bagPocket)
     }
 }
 
+// Moemon Kai: TMs in number order (TM51-TM92 come after TM50 though their ids are past the HMs), then the HMs
+u16 MP_ItemNumberOrder(u16 item)
+{
+    if (item >= ITEM_TM51 && item <= ITEM_TM92)
+        return ITEM_TM50 + 1 + item - ITEM_TM51;
+    if (item >= ITEM_HM01 && item <= ITEM_HM08)
+        return ITEM_TM50 + 1 + NUM_TECHNICAL_MACHINES_2 + item - ITEM_HM01;
+    return item;
+}
+
 void SortBerriesOrTMHMs(struct BagPocket *bagPocket)
 {
     u16 i, j;
@@ -624,7 +635,7 @@ void SortBerriesOrTMHMs(struct BagPocket *bagPocket)
             {
                 if (GetBagItemQuantity(&bagPocket->itemSlots[j].quantity) == 0)
                     continue;
-                if (bagPocket->itemSlots[i].itemId <= bagPocket->itemSlots[j].itemId)
+                if (MP_ItemNumberOrder(bagPocket->itemSlots[i].itemId) <= MP_ItemNumberOrder(bagPocket->itemSlots[j].itemId))
                     continue;
             }
             SwapItemSlots(&bagPocket->itemSlots[i], &bagPocket->itemSlots[j]);

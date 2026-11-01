@@ -31,5 +31,14 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 10,
+      "y": 8,
+      "elevation": 0,
+      "item": "ITEM_FULL_RESTORE",
+      "flag": "0x3EB3"
+    }
+  ]
 }

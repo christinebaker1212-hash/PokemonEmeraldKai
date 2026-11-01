@@ -180,6 +180,14 @@
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
       "script": "Sinnoh_TwinleafTown_EventScript_Sign7"
+    },
+    {
+      "type": "hidden_item",
+      "x": 11,
+      "y": 29,
+      "elevation": 0,
+      "item": "ITEM_ODD_KEYSTONE",
+      "flag": "0x3EC9"
     }
   ]
 }

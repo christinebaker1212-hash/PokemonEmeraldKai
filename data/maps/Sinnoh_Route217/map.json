@@ -165,8 +165,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Hm08",
+      "flag": "0x32F6"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -178,8 +178,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Iron",
+      "flag": "0x32F7"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -191,8 +191,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Tm07",
+      "flag": "0x32F9"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -243,8 +243,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_BlueShard",
+      "flag": "0x32F5"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -256,8 +256,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_UltraBall",
+      "flag": "0x32FA"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -269,8 +269,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_RareCandy",
+      "flag": "0x32F8"
     }
   ],
   "warp_events": [
@@ -290,5 +290,86 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 4,
+      "y": 76,
+      "elevation": 0,
+      "item": "ITEM_IRON",
+      "flag": "0x3E48"
+    },
+    {
+      "type": "hidden_item",
+      "x": 28,
+      "y": 35,
+      "elevation": 0,
+      "item": "ITEM_MAX_REVIVE",
+      "flag": "0x3E49"
+    },
+    {
+      "type": "hidden_item",
+      "x": 3,
+      "y": 43,
+      "elevation": 0,
+      "item": "ITEM_ULTRA_BALL",
+      "flag": "0x3EC1"
+    },
+    {
+      "type": "hidden_item",
+      "x": 16,
+      "y": 98,
+      "elevation": 0,
+      "item": "ITEM_REVIVAL_HERB",
+      "flag": "0x3EC2"
+    },
+    {
+      "type": "hidden_item",
+      "x": 17,
+      "y": 52,
+      "elevation": 0,
+      "item": "ITEM_MAX_REPEL",
+      "flag": "0x3EC3"
+    },
+    {
+      "type": "hidden_item",
+      "x": 25,
+      "y": 68,
+      "elevation": 0,
+      "item": "ITEM_ULTRA_BALL",
+      "flag": "0x3EC4"
+    },
+    {
+      "type": "hidden_item",
+      "x": 11,
+      "y": 63,
+      "elevation": 0,
+      "item": "ITEM_PROTEIN",
+      "flag": "0x3EC5"
+    },
+    {
+      "type": "hidden_item",
+      "x": 30,
+      "y": 47,
+      "elevation": 0,
+      "item": "ITEM_MAX_POTION",
+      "flag": "0x3EC6"
+    },
+    {
+      "type": "hidden_item",
+      "x": 26,
+      "y": 92,
+      "elevation": 0,
+      "item": "ITEM_FULL_HEAL",
+      "flag": "0x3EC7"
+    },
+    {
+      "type": "hidden_item",
+      "x": 0,
+      "y": 81,
+      "elevation": 0,
+      "item": "ITEM_NUGGET",
+      "flag": "0x3EC8"
+    }
+  ]
 }

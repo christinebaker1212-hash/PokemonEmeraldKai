@@ -183,8 +183,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_MaxRepel",
+      "flag": "0x32C9"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -196,8 +196,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_SuperRepel",
+      "flag": "0x32CB"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -222,8 +222,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_NestBall",
+      "flag": "0x32CA"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -326,8 +326,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_HyperPotion",
+      "flag": "0x32C8"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -444,5 +444,46 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 5,
+      "y": 29,
+      "elevation": 0,
+      "item": "ITEM_FULL_HEAL",
+      "flag": "0x3E27"
+    },
+    {
+      "type": "hidden_item",
+      "x": 11,
+      "y": 18,
+      "elevation": 0,
+      "item": "ITEM_ULTRA_BALL",
+      "flag": "0x3E95"
+    },
+    {
+      "type": "hidden_item",
+      "x": 21,
+      "y": 63,
+      "elevation": 0,
+      "item": "ITEM_RARE_CANDY",
+      "flag": "0x3E9A"
+    },
+    {
+      "type": "hidden_item",
+      "x": 22,
+      "y": 27,
+      "elevation": 0,
+      "item": "ITEM_HYPER_POTION",
+      "flag": "0x3EBD"
+    },
+    {
+      "type": "hidden_item",
+      "x": 29,
+      "y": 17,
+      "elevation": 0,
+      "item": "ITEM_ULTRA_BALL",
+      "flag": "0x3ECA"
+    }
+  ]
 }

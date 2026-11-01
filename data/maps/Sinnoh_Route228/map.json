@@ -113,8 +113,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Protector",
+      "flag": "0x3324"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -126,8 +126,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Iron",
+      "flag": "0x3323"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -139,8 +139,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_ShinyStone",
+      "flag": "0x3327"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -152,8 +152,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_ShedShell",
+      "flag": "0x3326"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -165,8 +165,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Tm37",
+      "flag": "0x3328"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -422,5 +422,54 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 25,
+      "y": 82,
+      "elevation": 0,
+      "item": "ITEM_CALCIUM",
+      "flag": "0x3E8E"
+    },
+    {
+      "type": "hidden_item",
+      "x": 6,
+      "y": 37,
+      "elevation": 0,
+      "item": "ITEM_FULL_RESTORE",
+      "flag": "0x3E90"
+    },
+    {
+      "type": "hidden_item",
+      "x": 13,
+      "y": 45,
+      "elevation": 0,
+      "item": "ITEM_STAR_PIECE",
+      "flag": "0x3E8F"
+    },
+    {
+      "type": "hidden_item",
+      "x": 12,
+      "y": 14,
+      "elevation": 0,
+      "item": "ITEM_RARE_CANDY",
+      "flag": "0x3ECD"
+    },
+    {
+      "type": "hidden_item",
+      "x": 10,
+      "y": 6,
+      "elevation": 0,
+      "item": "ITEM_MAX_REPEL",
+      "flag": "0x3ECE"
+    },
+    {
+      "type": "hidden_item",
+      "x": 7,
+      "y": 84,
+      "elevation": 0,
+      "item": "ITEM_PP_MAX",
+      "flag": "0x3ECF"
+    }
+  ]
 }

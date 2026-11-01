@@ -269,8 +269,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_FullIncense",
+      "flag": "0x3355"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -282,8 +282,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_RareCandy",
+      "flag": "0x3358"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_MAGMA_MEMBER_M",
@@ -386,8 +386,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_StarPiece",
+      "flag": "0x3359"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",
@@ -538,5 +538,22 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 16,
+      "y": 16,
+      "elevation": 0,
+      "item": "ITEM_CALCIUM",
+      "flag": "0x3E29"
+    },
+    {
+      "type": "hidden_item",
+      "x": 26,
+      "y": 23,
+      "elevation": 0,
+      "item": "ITEM_PP_UP",
+      "flag": "0x3E28"
+    }
+  ]
 }

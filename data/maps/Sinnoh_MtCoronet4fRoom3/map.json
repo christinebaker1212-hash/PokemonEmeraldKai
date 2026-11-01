@@ -31,5 +31,14 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 11,
+      "y": 8,
+      "elevation": 0,
+      "item": "ITEM_MAX_ELIXIR",
+      "flag": "0x3E64"
+    }
+  ]
 }

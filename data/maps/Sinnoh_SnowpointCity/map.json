@@ -173,8 +173,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_UltraBall",
+      "flag": "0x332F"
     }
   ],
   "warp_events": [
@@ -229,5 +229,14 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 29,
+      "y": 28,
+      "elevation": 0,
+      "item": "ITEM_RARE_CANDY",
+      "flag": "0x3EB2"
+    }
+  ]
 }

@@ -461,8 +461,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Potion",
+      "flag": "0x3270"
     }
   ],
   "warp_events": [
@@ -545,5 +545,14 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 40,
+      "y": 59,
+      "elevation": 0,
+      "item": "ITEM_STARDUST",
+      "flag": "0x3EA1"
+    }
+  ]
 }

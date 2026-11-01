@@ -295,8 +295,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_FullHeal",
+      "flag": "0x32D6"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -308,8 +308,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Tm84",
+      "flag": "0x32DB"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -321,8 +321,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Tm62",
+      "flag": "0x32DA"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -334,8 +334,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Zinc",
+      "flag": "0x32DC"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -347,8 +347,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_HyperPotion",
+      "flag": "0x32D7"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -360,8 +360,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Tm06",
+      "flag": "0x32D9"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -373,8 +373,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Revive",
+      "flag": "0x32D8"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -581,8 +581,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Elixir",
+      "flag": "0x32D5"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -594,8 +594,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_BlueShard",
+      "flag": "0x32D4"
     }
   ],
   "warp_events": [
@@ -608,5 +608,70 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 45,
+      "y": 26,
+      "elevation": 0,
+      "item": "ITEM_MAX_ETHER",
+      "flag": "0x3E13"
+    },
+    {
+      "type": "hidden_item",
+      "x": 113,
+      "y": 3,
+      "elevation": 0,
+      "item": "ITEM_DAWN_STONE",
+      "flag": "0x3E1A"
+    },
+    {
+      "type": "hidden_item",
+      "x": 86,
+      "y": 19,
+      "elevation": 0,
+      "item": "ITEM_FULL_HEAL",
+      "flag": "0x3E19"
+    },
+    {
+      "type": "hidden_item",
+      "x": 85,
+      "y": 25,
+      "elevation": 0,
+      "item": "ITEM_RARE_CANDY",
+      "flag": "0x3E15"
+    },
+    {
+      "type": "hidden_item",
+      "x": 123,
+      "y": 7,
+      "elevation": 0,
+      "item": "ITEM_HYPER_POTION",
+      "flag": "0x3E18"
+    },
+    {
+      "type": "hidden_item",
+      "x": 79,
+      "y": 15,
+      "elevation": 0,
+      "item": "ITEM_MAX_REPEL",
+      "flag": "0x3E17"
+    },
+    {
+      "type": "hidden_item",
+      "x": 122,
+      "y": 3,
+      "elevation": 0,
+      "item": "ITEM_ULTRA_BALL",
+      "flag": "0x3E16"
+    },
+    {
+      "type": "hidden_item",
+      "x": 23,
+      "y": 24,
+      "elevation": 0,
+      "item": "ITEM_BIG_MUSHROOM",
+      "flag": "0x3E14"
+    }
+  ]
 }

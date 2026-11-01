@@ -152,8 +152,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_PokeBall",
+      "flag": "0x32B3"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -165,8 +165,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Revive",
+      "flag": "0x32B4"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -178,8 +178,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Iron",
+      "flag": "0x32B2"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -360,8 +360,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_SuperPotion",
+      "flag": "0x32B5"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -373,8 +373,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_TimerBall",
+      "flag": "0x32B6"
     }
   ],
   "warp_events": [
@@ -394,5 +394,46 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 25,
+      "y": 15,
+      "elevation": 0,
+      "item": "ITEM_RARE_CANDY",
+      "flag": "0x3E0C"
+    },
+    {
+      "type": "hidden_item",
+      "x": 61,
+      "y": 21,
+      "elevation": 0,
+      "item": "ITEM_RED_SHARD",
+      "flag": "0x3E08"
+    },
+    {
+      "type": "hidden_item",
+      "x": 11,
+      "y": 7,
+      "elevation": 0,
+      "item": "ITEM_POKE_BALL",
+      "flag": "0x3E5B"
+    },
+    {
+      "type": "hidden_item",
+      "x": 49,
+      "y": 8,
+      "elevation": 0,
+      "item": "ITEM_GREAT_BALL",
+      "flag": "0x3E97"
+    },
+    {
+      "type": "hidden_item",
+      "x": 50,
+      "y": 14,
+      "elevation": 0,
+      "item": "ITEM_NUGGET",
+      "flag": "0x3F00"
+    }
+  ]
 }

@@ -191,8 +191,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_GreatBall",
+      "flag": "0x32BC"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -204,8 +204,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_HyperPotion",
+      "flag": "0x32BD"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -217,8 +217,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Tm47",
+      "flag": "0x32C2"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -230,8 +230,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Calcium",
+      "flag": "0x32BA"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -243,8 +243,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Tm19",
+      "flag": "0x32C1"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -451,8 +451,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_Ether",
+      "flag": "0x32BB"
     }
   ],
   "warp_events": [
@@ -479,5 +479,38 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 53,
+      "y": 22,
+      "elevation": 0,
+      "item": "ITEM_STARDUST",
+      "flag": "0x3E21"
+    },
+    {
+      "type": "hidden_item",
+      "x": 10,
+      "y": 42,
+      "elevation": 0,
+      "item": "ITEM_GREAT_BALL",
+      "flag": "0x3E20"
+    },
+    {
+      "type": "hidden_item",
+      "x": 38,
+      "y": 38,
+      "elevation": 0,
+      "item": "ITEM_REVIVE",
+      "flag": "0x3E23"
+    },
+    {
+      "type": "hidden_item",
+      "x": 27,
+      "y": 50,
+      "elevation": 0,
+      "item": "ITEM_SUPER_REPEL",
+      "flag": "0x3E99"
+    }
+  ]
 }

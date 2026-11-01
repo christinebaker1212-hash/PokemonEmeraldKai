@@ -128,8 +128,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_AdamantOrb",
+      "flag": "0x327F"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -141,8 +141,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_EventScript_LustrousOrb",
+      "flag": "0x3280"
     }
   ],
   "warp_events": [
@@ -183,5 +183,62 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 5,
+      "y": 6,
+      "elevation": 0,
+      "item": "ITEM_SUN_STONE",
+      "flag": "0x3E5D"
+    },
+    {
+      "type": "hidden_item",
+      "x": 19,
+      "y": 3,
+      "elevation": 0,
+      "item": "ITEM_FULL_HEAL",
+      "flag": "0x3E5E"
+    },
+    {
+      "type": "hidden_item",
+      "x": 29,
+      "y": 12,
+      "elevation": 0,
+      "item": "ITEM_MAX_REVIVE",
+      "flag": "0x3E5F"
+    },
+    {
+      "type": "hidden_item",
+      "x": 26,
+      "y": 18,
+      "elevation": 0,
+      "item": "ITEM_HEAL_POWDER",
+      "flag": "0x3E62"
+    },
+    {
+      "type": "hidden_item",
+      "x": 29,
+      "y": 24,
+      "elevation": 0,
+      "item": "ITEM_YELLOW_SHARD",
+      "flag": "0x3E61"
+    },
+    {
+      "type": "hidden_item",
+      "x": 38,
+      "y": 14,
+      "elevation": 0,
+      "item": "ITEM_STARDUST",
+      "flag": "0x3E60"
+    },
+    {
+      "type": "hidden_item",
+      "x": 59,
+      "y": 3,
+      "elevation": 0,
+      "item": "ITEM_STONE_PLATE",
+      "flag": "0x3E63"
+    }
+  ]
 }
