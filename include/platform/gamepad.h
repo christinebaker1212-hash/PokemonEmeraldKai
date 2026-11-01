@@ -39,7 +39,13 @@ enum {
     INPUT_ACTION_PING,                                         // left stick click / V: "look here!" on the tile ahead
     INPUT_ACTION_ITEM_X,                                       // west button / F: the extra registered key item
     INPUT_ACTION_PC_TAG,                                       // west button / F in the PC's boxes: TAG
-    INPUT_ACTION_FRIEND_FINDER,                                // right stick click / G: show / hide the FRIEND FINDER
+    INPUT_ACTION_FRIEND_FINDER,                                // G: show / hide the FRIEND FINDER
+    INPUT_ACTION_RSTICK_CLICK,                                 // right stick click: the POKéTCH's cursor while it shows, else the FRIEND FINDER
+    INPUT_ACTION_POKETCH_UP,                                   // right stick up / I: the POKéTCH small, then large
+    INPUT_ACTION_POKETCH_DOWN,                                 // right stick down / K: small, then hidden
+    INPUT_ACTION_POKETCH_LEFT,                                 // right stick left / J: the app before
+    INPUT_ACTION_POKETCH_RIGHT,                                // right stick right / L: the app after
+    INPUT_ACTION_POKETCH_CURSOR,                               // O: the POKéTCH's cursor on / off
 };
 #define INPUT_ACTION_EMOTE_KEY_COUNT 8
 

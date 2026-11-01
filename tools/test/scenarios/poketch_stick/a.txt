@@ -1,0 +1,50 @@
+pressuntil A field 5000
+wait 30
+mp poketchstick 0
+wait 10
+mp additem 660 1
+mp poketchstick 0
+wait 20
+shot s_small
+mp face down
+press DOWN 16
+wait 20
+mp where
+mp poketchstick 3
+wait 10
+mp poketchstick 0
+wait 20
+shot s_large
+mp poketchstick 4
+wait 10
+press RIGHT 1
+wait 5
+press DOWN 1
+wait 5
+shot s_cursor
+press A 1
+wait 10
+mp poketchstick 4
+wait 5
+mp poketchstick 2
+wait 5
+mp poketchstick 2
+wait 5
+mp poketchstick 2
+wait 5
+mp poketchstick 4
+wait 5
+press RIGHT 30
+wait 5
+shot s_free
+press B 1
+wait 5
+mp poketchstick 1
+wait 10
+shot s_back_small
+mp poketchstick 1
+wait 10
+shot s_hidden
+mp poketchstick 4
+wait 10
+quit

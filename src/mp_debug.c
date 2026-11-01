@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "platform/gamepad.h"
 #include "global.h"
 unsigned int SDL_GetTicks(void);
 #include "arcade.h"   // Moemon Kai: the GAME CENTER's arcade boards
@@ -2009,6 +2010,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // poketch APP - the POKéTCH open on app APP (src/sinnoh/poketch.c)
         void MP_Poketch_Debug(u8 app);
         MP_Poketch_Debug(atoi(arg));
+    }
+    else if (strcmp(cmd, "poketchstick") == 0)
+    {
+        // poketchstick DIR - the right stick: 0 up, 1 down, 2 left, 3 right, 4 its click
+        extern void Platform_ContextAction(int action);
+        int d = atoi(arg);
+        Platform_ContextAction(d == 4 ? INPUT_ACTION_RSTICK_CLICK : INPUT_ACTION_POKETCH_UP + d);
     }
     else if (strcmp(cmd, "poketchtap") == 0)
     {

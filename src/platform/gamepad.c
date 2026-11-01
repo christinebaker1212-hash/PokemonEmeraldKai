@@ -35,6 +35,7 @@
 
 #define MAX_PADS 4
 #define STICK_DEAD   0.45f   // walking
+#define STICK_FLICK 0.6f   // (Moemon Kai: a right stick flick for the POKéTCH)
 #define STICK_RUN    0.88f   // pushed all the way: run
 #define TRIGGER_ON   0.5f
 #define TURBO_PERIOD 6       // frames per A press while LT is held
@@ -604,7 +605,20 @@ u16 Gamepad_Poll(int *fastForward)
             if (pressed & BTN(SDL_CONTROLLER_BUTTON_LEFTSTICK))
                 Platform_ContextAction(INPUT_ACTION_PING);
             if (pressed & BTN(SDL_CONTROLLER_BUTTON_RIGHTSTICK))
-                Platform_ContextAction(INPUT_ACTION_FRIEND_FINDER);
+                Platform_ContextAction(INPUT_ACTION_RSTICK_CLICK);
+            // Moemon Kai: right stick flicks: the POKéTCH up / down (shown small, large, hidden) and its apps
+            {
+                static int sFlick = -1;   // the direction held (-1: back near the middle)
+                int dir = -1;
+                if (rx * rx + ry * ry > STICK_FLICK * STICK_FLICK)
+                    dir = rx * rx > ry * ry ? (rx < 0 ? 2 : 3) : (ry < 0 ? 0 : 1);
+                if (dir >= 0 && sFlick < 0)
+                    Platform_ContextAction(INPUT_ACTION_POKETCH_UP + dir);
+                if (dir >= 0)
+                    sFlick = dir;
+                else if (rx * rx + ry * ry < STICK_DEAD * STICK_DEAD)
+                    sFlick = -1;
+            }
             if (sAnalogRun && lx * lx + ly * ly > STICK_RUN * STICK_RUN)
                 run = 1;
             if (run)

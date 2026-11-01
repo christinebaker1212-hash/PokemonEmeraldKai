@@ -1058,8 +1058,8 @@ static const u8 sCardCaseDesc[] = _(
     "Use it to browse or play.");
 
 static const u8 sPoketchDesc[] = _(
-    "A watch of handy apps. Use it\n"
-    "anywhere: L and R change apps.");
+    "Handy apps on your wrist. The\n"
+    "right stick shows and works it.");
 
 static const u8 sCandyJarDesc[] = _(
     "Keeps the candies released MOéMON leave behind.");

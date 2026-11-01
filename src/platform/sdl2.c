@@ -763,6 +763,15 @@ void ProcessEvents(void)
                  && Platform_InputContext() == INPUT_CONTEXT_OVERWORLD)
                     Platform_ContextAction(INPUT_ACTION_FRIEND_FINDER);
                 break;
+            case SDLK_i: case SDLK_k: case SDLK_j: case SDLK_l: case SDLK_o:
+                // Moemon Kai: the POKéTCH (the right stick on a controller): I up, K down, J / L its apps, O the cursor
+                if (!(event.key.keysym.mod & (KMOD_CTRL | KMOD_ALT)) && !event.key.repeat
+                 && Platform_InputContext() == INPUT_CONTEXT_OVERWORLD)
+                    Platform_ContextAction(event.key.keysym.sym == SDLK_o ? INPUT_ACTION_POKETCH_CURSOR
+                                         : event.key.keysym.sym == SDLK_i ? INPUT_ACTION_POKETCH_UP
+                                         : event.key.keysym.sym == SDLK_k ? INPUT_ACTION_POKETCH_DOWN
+                                         : event.key.keysym.sym == SDLK_j ? INPUT_ACTION_POKETCH_LEFT : INPUT_ACTION_POKETCH_RIGHT);
+                break;
             case SDLK_1: case SDLK_2: case SDLK_3: case SDLK_4:
             case SDLK_5: case SDLK_6: case SDLK_7: case SDLK_8:
                 // Moemon Co-op: emotes (1-4) and your phrases (5-8)

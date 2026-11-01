@@ -43,6 +43,7 @@ extern char gPlatformSavePath[];
 #define PH 160
 #define PX 24          // the LCD's left on the game's screen
 #define MEMO_W 160     // the MEMO PAD's drawing area (its tools on the right)
+enum { VIEW_HIDDEN, VIEW_SMALL, VIEW_LARGE };
 
 enum
 {
@@ -74,7 +75,9 @@ static struct
 {
     bool8 loaded;
     char path[256];
-    bool8 open;
+    u8 view;               // VIEW_HIDDEN / _SMALL / _LARGE (the right stick up / down)
+    bool8 cursor;          // the cursor mode (the right stick click): it takes the D-pad and A
+    u8 target;             // the UI element the cursor is on, in apps that have them
     u8 app;
     s16 sx, sy;            // the stylus, in the LCD's pixels
     bool8 touch, touchNew;
@@ -111,6 +114,7 @@ static struct
     u8 ringing;            // the KITCHEN TIMER / ALARM ringing (frames left)
     u8 pressed;            // the button held down (an app's own numbering; 0xFF none)
     u8 testTap;            // (tests: frames left of a touch at the stylus, `mp poketchtap`)
+    bool8 mouseWas;
 } sP;
 
 static u8 sCanvas[PH][PW];
@@ -961,8 +965,8 @@ static void CheckRinging(void)
     if (sP.timerRunning && gMain.vblankCounter1 >= sP.timerEnd)
     {
         sP.timerRunning = FALSE, sP.timerLeft = 0, sP.ringing = 180;
-        if (!sP.open && MP_IsLocalFree())
-            sP.open = TRUE, sP.app = APP_TIMER;
+        if (sP.view == VIEW_HIDDEN && MP_IsLocalFree())
+            sP.view = VIEW_SMALL, sP.app = APP_TIMER;
     }
     if (sP.alarmOn && (sP.frame % 60) == 0)
     {
@@ -970,8 +974,8 @@ static void CheckRinging(void)
         if (gLocalTime.hours == sP.alarmH && gLocalTime.minutes == sP.alarmM && sLastMinute != gLocalTime.minutes)
         {
             sP.ringing = 180;
-            if (!sP.open && MP_IsLocalFree())
-                sP.open = TRUE, sP.app = APP_ALARM;
+            if (sP.view == VIEW_HIDDEN && MP_IsLocalFree())
+                sP.view = VIEW_SMALL, sP.app = APP_ALARM;
         }
         sLastMinute = gLocalTime.minutes;
     }
@@ -1080,28 +1084,102 @@ static void DrawApp(void)
 }
 
 // ------------------------------------------------------------------------------------------------- open / input
+// The UI elements an app's cursor goes between (no list: a free cursor, the MEMO PAD's kind)
+struct Target { u8 x, y, w, h; };
+
+static u8 Targets(struct Target *t)
+{
+    u8 n = 0, i, r, c;
+    switch (sP.app)
+    {
+    case APP_CALC:
+        for (r = 0; r < 4; r++)
+            for (c = 0; c < 5; c++)
+                if (!(c == 4 && sCalcKeys[r][3] == sCalcKeys[r][4]) && !(c == 1 && r == 3))
+                    t[n++] = (struct Target){16 + c * 32, 32 + r * 32,
+                                             (c == 3 && sCalcKeys[r][3] == sCalcKeys[r][4]) || (c == 0 && r == 3) ? 62 : 30, 30};
+        break;
+    case APP_PEDOMETER: t[n++] = (struct Target){64, 80, 64, 64}; break;
+    case APP_COUNTER: t[n++] = (struct Target){64, 88, 64, 64}; break;
+    case APP_COIN: t[n++] = (struct Target){64, 40, 64, 64}; break;
+    case APP_STOPWATCH: t[n++] = (struct Target){48, 56, 96, 100}; break;
+    case APP_BACKLIGHT: t[n++] = (struct Target){48, 40, 96, 80}; break;
+    case APP_COLOR:
+        for (i = 0; i < 8; i++)
+            t[n++] = (struct Target){16 + i * 20, 116, 20, 24};
+        break;
+    case APP_PARTY:
+        for (i = 0; i < CalculatePlayerPartyCount(); i++)
+            t[n++] = (struct Target){8 + (i % 2) * 96, 6 + (i / 2) * 52, 88, 46};
+        break;
+    case APP_FRIENDSHIP:
+        for (i = 0; i < CalculatePlayerPartyCount(); i++)
+            t[n++] = (struct Target){16 + (i % 3) * 56, 24 + (i / 3) * 64, 32, 32};
+        break;
+    case APP_HISTORY:
+        for (i = 0; i < ARRAY_COUNT(sP.histSpecies); i++)
+            if (sP.histSpecies[i] != SPECIES_NONE)
+                t[n++] = (struct Target){12 + (i % 4) * 44, 8 + (i / 4) * 50, 32, 32};
+        break;
+    case APP_MOVES:
+        for (r = 0; r < 3; r++)
+        {
+            t[n++] = (struct Target){4, 10 + r * 34, PW / 2 - 4, 28};
+            t[n++] = (struct Target){PW / 2, 10 + r * 34, PW / 2 - 4, 28};
+        }
+        break;
+    case APP_MATCHUP:
+        t[n++] = (struct Target){8, 24, 80, 70};
+        t[n++] = (struct Target){104, 24, 80, 70};
+        break;
+    case APP_TIMER:
+        t[n++] = (struct Target){60, 52, 32, 30};
+        t[n++] = (struct Target){100, 52, 32, 30};
+        t[n++] = (struct Target){60, 104, 32, 24};
+        t[n++] = (struct Target){100, 104, 32, 24};
+        t[n++] = (struct Target){56, 128, 80, 32};
+        break;
+    case APP_ALARM:
+        t[n++] = (struct Target){40, 96, 40, 30};
+        t[n++] = (struct Target){84, 96, 40, 30};
+        t[n++] = (struct Target){40, 130, 40, 28};
+        t[n++] = (struct Target){84, 130, 40, 28};
+        t[n++] = (struct Target){160, 8, 32, 48};
+        break;
+    }
+    return n;
+}
+
+// The locked cursor to the next element in direction (DX, DY): the nearest whose middle lies that way
+static void MoveTarget(const struct Target *t, u8 n, s32 dx, s32 dy)
+{
+    s32 cx = t[sP.target].x + t[sP.target].w / 2, cy = t[sP.target].y + t[sP.target].h / 2, best = 0x7FFFFFFF, i;
+    for (i = 0; i < n; i++)
+    {
+        s32 ox = t[i].x + t[i].w / 2 - cx, oy = t[i].y + t[i].h / 2 - cy, along = ox * dx + oy * dy, side, d;
+        if (i == sP.target || along <= 0)
+            continue;
+        side = dx ? oy : ox;
+        d = along + (side < 0 ? -side : side) * 3;
+        if (d < best)
+            best = d, sP.target = i;
+    }
+}
+
+// Shown on the field while the player is free to move (a script, a menu or another screen hides it for the while)
+static bool8 Available(void)
+{
+    return gMain.callback2 == CB2_Overworld && !gPaletteFade.active && MP_IsLocalFree();
+}
+
+static bool8 Shown(void)
+{
+    return sP.loaded && sP.view != VIEW_HIDDEN && Available();
+}
+
 bool8 MP_Poketch_IsOpen(void)
 {
-    return sP.open;
-}
-
-void MP_Poketch_Open(void)
-{
-    LoadState();
-    if (!AppUnlocked(sP.app))
-        sP.app = APP_WATCH;
-    sP.open = TRUE;
-    PlaySE(SE_POKENAV_ON);
-    printf("[test] poketch: open, app %d\n", sP.app);
-}
-
-void MP_Poketch_Close(void)
-{
-    if (!sP.open)
-        return;
-    sP.open = FALSE;
-    SaveState();
-    PlaySE(SE_POKENAV_OFF);
+    return Shown();
 }
 
 static void ChangeApp(s8 dir)
@@ -1115,87 +1193,187 @@ static void ChangeApp(s8 dir)
     }
     sP.app = app;
     sP.pressed = 0xFF;
+    sP.target = 0;
     PlaySE(SE_DEX_PAGE);
     printf("[test] poketch: app %d\n", sP.app);
 }
 
-// Shown and taking the buttons: on the field, free to move (a script or another screen closes it)
-static bool8 Active(void)
+// Using the item (the BAG, a registered button): large, with the cursor
+void MP_Poketch_Open(void)
 {
-    return sP.open && gMain.callback2 == CB2_Overworld && !gPaletteFade.active;
+    LoadState();
+    if (!AppUnlocked(sP.app))
+        sP.app = APP_WATCH;
+    sP.view = VIEW_LARGE;
+    sP.cursor = TRUE;
+    PlaySE(SE_POKENAV_ON);
+    printf("[test] poketch: open, app %d\n", sP.app);
+}
+
+void MP_Poketch_Close(void)
+{
+    if (sP.view == VIEW_HIDDEN)
+        return;
+    sP.view = VIEW_HIDDEN;
+    sP.cursor = FALSE;
+    SaveState();
+    PlaySE(SE_POKENAV_OFF);
+}
+
+// The right stick (gamepad.c; I / K / J / L on the keyboard): DIR 0 up (shows it small, then large), 1 down (small,
+// then hidden), 2 / 3 the app before / after. Only when the player could have it out (on the field, free to move).
+void MP_Poketch_Stick(u8 dir)
+{
+    if (!Available() || !CheckBagHasItem(ITEM_POKETCH, 1))
+        return;
+    LoadState();
+    if (!AppUnlocked(sP.app))
+        sP.app = APP_WATCH;
+    if (dir == 0 && sP.view < VIEW_LARGE)
+    {
+        sP.view++;
+        PlaySE(sP.view == VIEW_SMALL ? SE_POKENAV_ON : SE_SELECT);
+    }
+    else if (dir == 1 && sP.view > VIEW_HIDDEN)
+    {
+        if (sP.view == VIEW_SMALL)
+            MP_Poketch_Close();
+        else
+            sP.view--, PlaySE(SE_SELECT);
+    }
+    else if (dir >= 2 && sP.view != VIEW_HIDDEN)
+        ChangeApp(dir == 3 ? 1 : -1);
+    printf("[test] poketch: view %d app %d cursor %d\n", sP.view, sP.app, sP.cursor);
+}
+
+// The right stick click (O on the keyboard) while it shows: the cursor mode on / off. FALSE: hidden (the click is the
+// FRIEND FINDER's)
+bool8 MP_Poketch_StickClick(void)
+{
+    if (!Shown())
+        return FALSE;
+    sP.cursor = !sP.cursor;
+    sP.target = 0;
+    sP.touch = FALSE;
+    PlaySE(sP.cursor ? SE_PIN : SE_BALL_TRAY_EXIT);
+    printf("[test] poketch: cursor %d\n", sP.cursor);
+    return TRUE;
+}
+
+// Where the LCD is on the screen in each view and its scale (Q8)
+static void LcdRect(s32 *x, s32 *y, s32 *scale)
+{
+    if (sP.view == VIEW_LARGE)
+        *x = 31, *y = 10, *scale = 224;    // (192x160 at 7/8: 168x140, in a 194x156 case)
+    else
+        *x = 158, *y = 93, *scale = 96;    // (3/8: 72x60, bottom right)
 }
 
 void MP_Poketch_FilterKeys(void)
 {
-    s32 mx, my;
-    bool8 down, wasTouch;
+    s32 mx, my, lx, ly, scale;
+    bool8 down, wasTouch, mouseMoved;
+    struct Target t[24];
+    u8 n;
     if (sP.loaded && gMain.callback2 == CB2_Overworld)
         CheckRinging();
-    if (!sP.open)
-        return;
-    if (gMain.callback2 == CB2_Overworld && !gPaletteFade.active && !MP_IsLocalFree())
+    if (!Shown())
     {
-        MP_Poketch_Close();   // (a script began: an NPC talks, a trainer spots the player...)
+        if (sP.cursor && sP.loaded && gMain.callback2 == CB2_Overworld && !MP_IsLocalFree())
+            sP.cursor = FALSE;   // (a script began: the controls are the game's again)
         return;
     }
-    if (!Active())
-        return;
-    sP.newKeys = gMain.newKeys, sP.heldKeys = gMain.heldKeys, sP.repKeys = gMain.newAndRepeatedKeys;
-    gMain.newKeys = gMain.heldKeys = gMain.newAndRepeatedKeys = 0;
     sP.frame++;
     wasTouch = sP.touch;
-    if (sP.newKeys & B_BUTTON)
+    sP.touch = FALSE;
+    sP.newKeys = sP.heldKeys = sP.repKeys = 0;
+    n = Targets(t);
+    if (sP.target >= n)
+        sP.target = 0;
+    if (sP.cursor)
     {
-        MP_Poketch_Close();
-        return;
-    }
-    if (sP.newKeys & (L_BUTTON | R_BUTTON))
-        ChangeApp(sP.newKeys & R_BUTTON ? 1 : -1);
-    if (sP.heldKeys & DPAD_ANY)
-    {
-        s32 v = (sP.heldKeys & (DPAD_ANY)) && sP.cursorTimer > 40 ? 4 : 2;
-        if (sP.heldKeys & DPAD_LEFT) sP.sx -= v;
-        if (sP.heldKeys & DPAD_RIGHT) sP.sx += v;
-        if (sP.heldKeys & DPAD_UP) sP.sy -= v;
-        if (sP.heldKeys & DPAD_DOWN) sP.sy += v;
-        sP.sx = sP.sx < 0 ? 0 : sP.sx >= PW ? PW - 1 : sP.sx;
-        sP.sy = sP.sy < 0 ? 0 : sP.sy >= PH ? PH - 1 : sP.sy;
-        if (sP.cursorTimer < 250)
-            sP.cursorTimer += 2;
-    }
-    else if (sP.cursorTimer > 120)
-        sP.cursorTimer = 120;
-    sP.touch = (sP.heldKeys & A_BUTTON) != 0;
-    if (sP.testTap)
-        sP.touch = --sP.testTap > 0;
-    if (Platform_PoketchMouse(&mx, &my, &down) || down)
-    {
-        if (mx >= 240 - PX + 2 && mx < 240 && my >= 40 && my < 120)   // (the side button)
+        // it takes the D-pad (the left stick), A, B (leaves the cursor mode), L / R and SELECT
+        u16 taken = DPAD_ANY | A_BUTTON | B_BUTTON | L_BUTTON | R_BUTTON | SELECT_BUTTON;
+        sP.newKeys = gMain.newKeys & taken, sP.heldKeys = gMain.heldKeys & taken, sP.repKeys = gMain.newAndRepeatedKeys & taken;
+        gMain.newKeys &= ~taken, gMain.heldKeys &= ~taken, gMain.newAndRepeatedKeys &= ~taken;
+        if (sP.newKeys & B_BUTTON)
         {
-            if (down && !wasTouch)
-                ChangeApp(1);
-            sP.touch = down;
-            sP.touchNew = FALSE;
+            sP.cursor = FALSE;
+            PlaySE(SE_BALL_TRAY_EXIT);
             return;
         }
-        if (mx >= PX && mx < PX + PW)
+        if (sP.newKeys & (L_BUTTON | R_BUTTON))
+            ChangeApp(sP.newKeys & R_BUTTON ? 1 : -1), n = Targets(t);
+        if (n && !sP.testTap)
         {
-            sP.sx = mx - PX, sP.sy = my;
-            sP.touch = sP.touch || down;
+            // apps with buttons: the cursor goes from one to the next
+            if (sP.repKeys & DPAD_LEFT) MoveTarget(t, n, -1, 0);
+            if (sP.repKeys & DPAD_RIGHT) MoveTarget(t, n, 1, 0);
+            if (sP.repKeys & DPAD_UP) MoveTarget(t, n, 0, -1);
+            if (sP.repKeys & DPAD_DOWN) MoveTarget(t, n, 0, 1);
+            sP.sx = t[sP.target].x + t[sP.target].w / 2, sP.sy = t[sP.target].y + t[sP.target].h / 2;
+        }
+        else if (sP.heldKeys & DPAD_ANY)
+        {
+            s32 v = sP.cursorTimer > 40 ? 4 : 2;
+            if (sP.heldKeys & DPAD_LEFT) sP.sx -= v;
+            if (sP.heldKeys & DPAD_RIGHT) sP.sx += v;
+            if (sP.heldKeys & DPAD_UP) sP.sy -= v;
+            if (sP.heldKeys & DPAD_DOWN) sP.sy += v;
+            sP.sx = sP.sx < 0 ? 0 : sP.sx >= PW ? PW - 1 : sP.sx;
+            sP.sy = sP.sy < 0 ? 0 : sP.sy >= PH ? PH - 1 : sP.sy;
+            if (sP.cursorTimer < 250)
+                sP.cursorTimer += 2;
+        }
+        else
             sP.cursorTimer = 0;
+        sP.touch = (sP.heldKeys & A_BUTTON) != 0;
+    }
+    if (sP.testTap)
+        sP.touch = --sP.testTap > 0;
+    // the mouse: on the large one it touches where it points; a click on the small one makes it large
+    mouseMoved = Platform_PoketchMouse(&mx, &my, &down);
+    LcdRect(&lx, &ly, &scale);
+    if ((mouseMoved || down) && mx >= lx && my >= ly && mx < lx + PW * scale / 256 && my < ly + PH * scale / 256)
+    {
+        if (sP.view == VIEW_SMALL)
+        {
+            if (down && !sP.mouseWas)
+                sP.view = VIEW_LARGE, PlaySE(SE_SELECT);
+        }
+        else
+        {
+            sP.sx = (mx - lx) * 256 / scale, sP.sy = (my - ly) * 256 / scale;
+            sP.touch = sP.touch || down;
         }
     }
+    else if (down && !sP.mouseWas && sP.view == VIEW_LARGE && mx >= lx + PW * scale / 256 && mx < lx + PW * scale / 256 + 18
+             && my >= ly + 30 && my < ly + 110)
+        ChangeApp(1);   // (the side button)
+    sP.mouseWas = down;
     sP.touchNew = sP.touch && !wasTouch;
-    if (sP.cursorTimer && !(sP.heldKeys & DPAD_ANY))
-        sP.cursorTimer--;
 }
 
 // ------------------------------------------------------------------------------------------------- the picture
+static u16 Blend(u16 a, u16 b, u32 alpha)   // (alpha of 16: a)
+{
+    u32 r = ((a & 31) * alpha + (b & 31) * (16 - alpha)) / 16, g = ((a >> 5 & 31) * alpha + (b >> 5 & 31) * (16 - alpha)) / 16;
+    u32 bl = ((a >> 10 & 31) * alpha + (b >> 10 & 31) * (16 - alpha)) / 16;
+    return r | g << 5 | bl << 10 | 0x8000;
+}
+
+static void Put(u16 *frame, s32 x, s32 y, u16 c, u32 alpha)
+{
+    if (x >= 0 && x < DISPLAY_WIDTH && y >= 0 && y < DISPLAY_HEIGHT)
+        frame[y * DISPLAY_WIDTH + x] = alpha >= 16 ? (c | 0x8000) : Blend(c, frame[y * DISPLAY_WIDTH + x], alpha);
+}
+
 void MP_Poketch_Composite(u16 *frame)
 {
-    s32 x, y;
-    u16 lcd[4];
-    if (!Active())
+    s32 x, y, lx, ly, scale, lw, lh, cx0, cy0, cx1, cy1, side, n;
+    u32 alpha, lcdR[4], lcdG[4], lcdB[4];
+    struct Target t[24];
+    if (!Shown())
         return;
     DrawApp();
     sP.touchNew = FALSE;
@@ -1206,32 +1384,69 @@ void MP_Poketch_Composite(u16 *frame)
             r += (255 - r) / 4, g += (255 - g) / 4, b += (255 - b) / 4;
         if (sP.ringing && (sP.ringing / 10) & 1)   // (ringing: the LCD flashes)
             r = 255 - r, g = 255 - g, b = 255 - b;
-        lcd[x] = (r >> 3) | (g >> 3) << 5 | (b >> 3) << 10 | 0x8000;
+        lcdR[x] = r, lcdG[x] = g, lcdB[x] = b;
     }
-    for (y = 0; y < PH; y++)
-    {
-        u16 *row = frame + y * DISPLAY_WIDTH;
-        for (x = 0; x < PW; x++)
-            row[PX + x] = lcd[sCanvas[y][x]];
-        // the case: Platinum's red, its side button on the right
-        for (x = 0; x < PX; x++)
+    LcdRect(&lx, &ly, &scale);
+    lw = PW * scale / 256, lh = PH * scale / 256;
+    alpha = sP.view == VIEW_LARGE ? 16 : 12;   // (the small one lets the field show through a little)
+    side = sP.view == VIEW_LARGE ? 18 : 7;
+    // the case: Platinum's red around the LCD, its side button on the right
+    cx0 = lx - (sP.view == VIEW_LARGE ? 8 : 3), cy0 = ly - (sP.view == VIEW_LARGE ? 8 : 3);
+    cx1 = lx + lw + side, cy1 = ly + lh + (sP.view == VIEW_LARGE ? 8 : 3);
+    for (y = cy0; y < cy1; y++)
+        for (x = cx0; x < cx1; x++)
         {
-            bool8 edge = x == PX - 1 || x == 0;
-            row[x] = edge ? RGB(14, 4, 6) | 0x8000 : RGB(29, 10, 11) | 0x8000;
-            row[PX + PW + x] = (x == 0 || x == PX - 1) ? RGB(14, 4, 6) | 0x8000 : RGB(29, 10, 11) | 0x8000;
-            if (y >= 40 && y < 120 && x >= 4 && x < PX - 4)
-                row[PX + PW + x] = (y == 40 || y == 119 || x == 4 || x == PX - 5) ? RGB(16, 4, 6) | 0x8000
-                                 : (x < 8 ? RGB(31, 20, 20) : RGB(31, 14, 15)) | 0x8000;
+            bool8 corner = (x - cx0 < 3 || cx1 - 1 - x < 3) && (y - cy0 < 3 || cy1 - 1 - y < 3)
+                        && (x - cx0) + (y - cy0) < 3 + (cx1 - 1 - x) * 0;
+            bool8 edge = x == cx0 || x == cx1 - 1 || y == cy0 || y == cy1 - 1;
+            s32 bx0 = lx + lw + 3, bx1 = cx1 - 3, by0 = ly + lh / 5, by1 = ly + lh * 4 / 5;
+            u16 c = edge ? RGB(14, 4, 6) : RGB(29, 10, 11);
+            if (corner && ((x == cx0 || x == cx1 - 1) && (y == cy0 || y == cy1 - 1)))
+                continue;
+            if (x >= bx0 && x < bx1 && y >= by0 && y < by1)
+                c = (y == by0 || y == by1 - 1 || x == bx0 || x == bx1 - 1) ? RGB(16, 4, 6)
+                  : (x < bx0 + 3 ? RGB(31, 20, 20) : RGB(31, 14, 15));
+            if (x >= lx && x < lx + lw && y >= ly && y < ly + lh)
+                continue;
+            Put(frame, x, y, c, alpha);
         }
+    // the LCD, scaled smoothly (each pixel the average of the LCD pixels it covers)
+    n = (256 + scale - 1) / scale;   // samples a side
+    for (y = 0; y < lh; y++)
+        for (x = 0; x < lw; x++)
+        {
+            u32 r = 0, g = 0, b = 0, k = 0, i, j;
+            for (j = 0; j < (u32)n; j++)
+                for (i = 0; i < (u32)n; i++)
+                {
+                    s32 sx = ((x * 256 + (i * 256 + 128) / n) * 256 / scale) >> 8, sy = ((y * 256 + (j * 256 + 128) / n) * 256 / scale) >> 8;
+                    u8 v = sCanvas[sy < PH ? sy : PH - 1][sx < PW ? sx : PW - 1];
+                    r += lcdR[v], g += lcdG[v], b += lcdB[v], k++;
+                }
+            Put(frame, lx + x, ly + y, RGB(r / k >> 3, g / k >> 3, b / k >> 3), alpha);
+        }
+    if (!sP.cursor)
+        return;
+    // the cursor: a white and black frame on the element it's locked to, or a pointer (both blink a little)
+    n = Targets(t);
+    if (n && sP.target < n)
+    {
+        s32 x0 = lx + t[sP.target].x * scale / 256 - 1, y0 = ly + t[sP.target].y * scale / 256 - 1;
+        s32 x1 = lx + (t[sP.target].x + t[sP.target].w) * scale / 256, y1 = ly + (t[sP.target].y + t[sP.target].h) * scale / 256;
+        u16 c = (sP.frame / 12) & 1 ? RGB(31, 31, 31) : RGB(31, 22, 4);
+        for (x = x0; x <= x1; x++)
+            Put(frame, x, y0, c, 16), Put(frame, x, y1, c, 16), Put(frame, x, y0 - 1, RGB(2, 2, 2), 16), Put(frame, x, y1 + 1, RGB(2, 2, 2), 16);
+        for (y = y0; y <= y1; y++)
+            Put(frame, x0, y, c, 16), Put(frame, x1, y, c, 16), Put(frame, x0 - 1, y, RGB(2, 2, 2), 16), Put(frame, x1 + 1, y, RGB(2, 2, 2), 16);
     }
-    if (sP.cursorTimer)   // the stylus
-        for (y = 0; y < 7; y++)
-            for (x = 0; x <= y && x < 5; x++)
-            {
-                s32 X = PX + sP.sx + x, Y = sP.sy + y;
-                if (X < PX + PW && Y < PH)
-                    frame[Y * DISPLAY_WIDTH + X] = (x == 0 || x == y || y == 6) ? RGB(31, 31, 31) | 0x8000 : RGB(2, 2, 2) | 0x8000;
-            }
+    else
+    {
+        s32 px = lx + sP.sx * scale / 256, py = ly + sP.sy * scale / 256;
+        for (y = 0; y < 9; y++)
+            for (x = 0; x <= y && x < 6; x++)
+                Put(frame, px + x, py + y, (x == 0 || x == y || y == 8) ? RGB(2, 2, 2)
+                                         : ((sP.frame / 12) & 1 ? RGB(31, 31, 31) : RGB(31, 22, 4)), 16);
+    }
 }
 
 // Tests: `mp poketch APP` (opens it on app APP)

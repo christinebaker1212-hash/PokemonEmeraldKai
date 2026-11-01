@@ -1,0 +1,10 @@
+# The POKéTCH on the right stick (src/sinnoh/poketch.c MP_Poketch_Stick / _StickClick, gamepad.c; I / K / J / L / O):
+# nothing without the item; up shows it small (the player still walks), right changes the app, up again makes it
+# large; the click starts the cursor (locked to the CALCULATOR's keys), again ends it; left goes back through the apps
+# (to the LINK SEARCHER, a free cursor); down twice hides it, and then the click is the FRIEND FINDER's again.
+# Shots s_*.png.
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_PARTY=25:30"
+EXPECT_A=("[test] poketch: view 1 app 0 cursor 0" "[test] where map 0.10 xy 10,11" "[test] poketch: view 2 app 1 cursor 0" "[test] poketch: cursor 1" "[test] poketch: view 0 app 12 cursor 0")
+UNEXPECT_A=("[crash]")

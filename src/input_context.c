@@ -12,6 +12,9 @@
 
 bool8 NamingScreen_IsActive(void);
 
+void MP_Poketch_Stick(u8 dir);   // Moemon Kai (src/sinnoh/poketch.c)
+bool8 MP_Poketch_StickClick(void);
+
 int Platform_InputContext(void)
 {
     if (Tcg_IsActive())
@@ -72,6 +75,19 @@ void Platform_ContextAction(int action)
         break;
     case INPUT_ACTION_FRIEND_FINDER:
         MP_Compass_Toggle();
+        break;
+    case INPUT_ACTION_RSTICK_CLICK:   // Moemon Kai: the POKéTCH's cursor while it shows (src/sinnoh/poketch.c)
+        if (!MP_Poketch_StickClick())
+            MP_Compass_Toggle();
+        break;
+    case INPUT_ACTION_POKETCH_CURSOR:
+        MP_Poketch_StickClick();
+        break;
+    case INPUT_ACTION_POKETCH_UP:
+    case INPUT_ACTION_POKETCH_DOWN:
+    case INPUT_ACTION_POKETCH_LEFT:
+    case INPUT_ACTION_POKETCH_RIGHT:
+        MP_Poketch_Stick(action - INPUT_ACTION_POKETCH_UP);
         break;
     case INPUT_ACTION_ITEM_X:
         gMpItemXPressed = 20;   // used by the field input (field_control_avatar.c)
