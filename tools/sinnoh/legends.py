@@ -106,6 +106,7 @@ def story_people_header(root):
     import story_people as sp
     assert len(sp.DONE) == len(STORY), 'story_people.DONE must name every STORY battle'
     done = {n: STORY_FLAGS + k for k, n in enumerate(sp.DONE)}
+    done.update(sp.EXTRA_DONE)
     rows = []
     for name, (lo, hi, need, unless, time) in sorted(sp.SHOW.items()):
         if sp.SHOW[name] == sp.NEVER:

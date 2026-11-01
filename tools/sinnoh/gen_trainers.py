@@ -112,6 +112,10 @@ for _t, _pic, _f in (('COMMANDER_MARS_VALLEY_WINDWORKS', 'AQUA_ADMIN_F', 1),
                      ('COMMANDER_MARS_STARK_MOUNTAIN', 'AQUA_ADMIN_F', 1), ('COMMANDER_JUPITER_STARK_MOUNTAIN', 'AQUA_ADMIN_F', 1),
                      ('GALACTIC_BOSS_CYRUS_CELESTIC_TOWN_RUINS', 'MAGMA_LEADER_MAXIE', 0)):
     STORY_TRAINERS['TRAINER_' + _t] = ('S:GALACTIC_BOSS' if 'BOSS' in _t else 'S:COMMANDER', _pic, _f, 'GALACTIC')
+# ... and the story's added later, after every other (ids and "beaten" flags of those above stay put): CYRUS in the
+# DISTORTION WORLD (tools/sinnoh/distortion.py)
+LATE_STORY = {'TRAINER_GALACTIC_BOSS_CYRUS_DISTORTION_WORLD': ('S:GALACTIC_BOSS', 'MAGMA_LEADER_MAXIE', 0, 'GALACTIC')}
+STORY_TRAINERS.update(LATE_STORY)
 RENAME = {'ITEM_X_DEFENSE': 'ITEM_X_DEFEND', 'MOVE_SMOKE_SCREEN': 'MOVE_SMOKESCREEN', 'MOVE_SOFTBOILED': 'MOVE_SOFT_BOILED', 'MOVE_HIGH_JUMP_KICK': 'MOVE_HI_JUMP_KICK',
           'ITEM_PARLYZ_HEAL': 'ITEM_PARALYZE_HEAL'}
 
@@ -167,7 +171,8 @@ def main():
             bad.add(name)
         return name
 
-    trainers = sorted(placed(root)) + list(SPECIAL) + list(STORY_TRAINERS) + [t for t in TALK if t not in placed(root)]
+    trainers = sorted(placed(root)) + list(SPECIAL) + [t for t in STORY_TRAINERS if t not in LATE_STORY] \
+        + [t for t in TALK if t not in placed(root)] + list(LATE_STORY)
     widths = letter_widths()
     consts, entries, parties, script = [], [], [], []
     pics = []   # Platinum's battle picture of each (its class's, include/constants/sinnoh_gfx.h)

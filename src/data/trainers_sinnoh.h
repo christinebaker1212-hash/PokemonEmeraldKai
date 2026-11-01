@@ -5639,3 +5639,15 @@
         .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohVeteranEmanuel),
     },
 
+    [TRAINER_SINNOH_GALACTIC_BOSS_CYRUS_DISTORTION_WORLD] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_GALACTIC_BOSS,
+        .encounterMusic_gender = 36,
+        .trainerPic = TRAINER_PIC_MAGMA_LEADER_MAXIE,
+        .trainerName = _("CYRUS"),
+        .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohGalacticBossCyrusDistortionWorld),
+    },
+

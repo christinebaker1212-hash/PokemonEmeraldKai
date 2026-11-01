@@ -130,6 +130,15 @@ def inside(p, x, z):
 # People this game adds to a place, after Platinum's (their local ids follow): the GAME CENTER's attendant (as in
 # GOLDENROD's and CELADON's GAME CORNERS: data/scripts/mp_region.inc EventScript_GameCenterGuide)
 EXTRA_PEOPLE = {
+    # the DISTORTION WORLD's arena (data/scripts/sinnoh_places.inc): CYRUS, GIRATINA and CYNTHIA on Platinum's rock
+    'Sinnoh_DistortionWorldGiratinaRoom': [
+        {'graphics_id': 'OBJ_EVENT_GFX_SINNOH_CYRUS', 'x': 15, 'y': 25, 'movement_type': 'MOVEMENT_TYPE_FACE_DOWN',
+         'script': 'Sinnoh_EventScript_DistortionCyrus', 'flag': '0x3D34'},
+        {'graphics_id': 'OBJ_EVENT_GFX_SINNOH_GIRATINA_ALTERED', 'x': 15, 'y': 22, 'movement_type': 'MOVEMENT_TYPE_FACE_DOWN',
+         'script': 'Sinnoh_EventScript_DistortionGiratina', 'flag': '0x3D36'},
+        {'graphics_id': 'OBJ_EVENT_GFX_SINNOH_CYNTHIA', 'x': 18, 'y': 26, 'movement_type': 'MOVEMENT_TYPE_FACE_LEFT',
+         'script': 'Sinnoh_EventScript_DistortionCynthia'},
+    ],
     'Sinnoh_VeilstoneCityPrizeExchange': [
         {'graphics_id': 'OBJ_EVENT_GFX_SINNOH_UNUSED_RECEPTIONIST', 'x': 7, 'y': 4, 'movement_type': 'MOVEMENT_TYPE_FACE_DOWN',
          'script': 'EventScript_GameCenterGuide'},
@@ -246,7 +255,7 @@ def people(p, root, have):
         out.append({'graphics_id': e['graphics_id'], 'x': e['x'], 'y': e['y'], 'elevation': 3,
                     'movement_type': e['movement_type'], 'movement_range_x': 0, 'movement_range_y': 0,
                     'trainer_type': 'TRAINER_TYPE_NONE', 'trainer_sight_or_berry_tree_id': '0',
-                    'script': e['script'], 'flag': '0'})
+                    'script': e['script'], 'flag': e.get('flag', '0')})
     return out
 
 

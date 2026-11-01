@@ -19,6 +19,9 @@ DONE = ['RIVAL_201', 'RIVAL_203', 'MARS_WINDWORKS', 'JUPITER_ETERNA', 'RIVAL_209
         'MARS_VERITY', 'SATURN_VALOR', 'SATURN_HQ', 'CYRUS_HQ', 'SPEAR_PILLAR', 'RIVAL_LEAGUE', 'RIVAL_SURVIVAL',
         'RIVAL_FIGHT', 'STARK', 'CYRUS_CELESTIC']
 
+# ... and the story's own flags past those (the DISTORTION WORLD: data/scripts/sinnoh_places.inc)
+EXTRA_DONE = {'DISTORTION': 0x3D35}
+
 LEAGUE = 9
 NEVER = (99, 99, None, None, None)
 ALWAYS = (0, 99, None, None, None)
@@ -121,7 +124,7 @@ SHOW = {
     'MT_CORONET_1F_NORTH_ROOM_1_GRUNT_F': _r(7, unless='SPEAR_PILLAR'),
     'MT_CORONET_2F_LOOKER': _r(7, unless='SPEAR_PILLAR'),
     'SPEAR_PILLAR_GRUNTS': _r(7, unless='SPEAR_PILLAR'), 'SPEAR_PILLAR_MARS_JUPITER': _r(7, unless='SPEAR_PILLAR'),
-    'SPEAR_PILLAR_RIVAL': _r(7, unless='SPEAR_PILLAR'), 'SPEAR_PILLAR_CYRUS': _r(7, need='SPEAR_PILLAR'),
+    'SPEAR_PILLAR_RIVAL': _r(7, unless='SPEAR_PILLAR'), 'SPEAR_PILLAR_CYRUS': _r(7, need='SPEAR_PILLAR', unless='DISTORTION'),
     'SPEAR_PILLAR_DISTORTED_CYNTHIA': NEVER, 'SPEAR_PILLAR_DISTORTED_MESPRIT': NEVER,
     'SPEAR_PILLAR_DISTORTED_TEAM_GALACTIC': NEVER,
     # ------------------------------------------------------------------ SNOWPOINT, SUNYSHORE (6-8 BADGES)
@@ -463,8 +466,7 @@ STORY_WORDS = {
         'Person4': "Did you feel that? The ground's humming. Something big is coming.",
         'Person5': "JUPITER: MARS, together! This one's too much for either of us alone.",
         'Person6': "BARRY: I made it! Whoa, look at them all. Let's take them on together!",
-        'Person2': "CYRUS: You stopped my commanders. You will not stop the world from changing.|"
-                   "...Yet the red chains are broken, and the sky is still the same sky. Perhaps you have won."},
+        'Person2': ('script', 'Sinnoh_EventScript_DistortionEnter')},
     'Sinnoh_SnowpointCity': {
         'Person8': "CANDICE: A visitor in SNOWPOINT! I'm CANDICE, the GYM LEADER here.|"
                    "Snow's no reason to stay inside! Come show me what you've got at the GYM!"},

@@ -12,7 +12,7 @@ Sinnoh_SpearPillar_EventScript_Person1::
 	end
 
 Sinnoh_SpearPillar_EventScript_Person2::
-	msgbox Sinnoh_SpearPillar_Text_Person2, MSGBOX_NPC
+	goto Sinnoh_EventScript_DistortionEnter
 	end
 
 Sinnoh_SpearPillar_EventScript_Person4::
@@ -30,13 +30,6 @@ Sinnoh_SpearPillar_EventScript_Person6::
 Sinnoh_SpearPillar_Text_Person1:
 	.string "SPEAR PILLAR is ours! The BOSS is\n"
 	.string "calling the POKéMON of time and space!$"
-
-Sinnoh_SpearPillar_Text_Person2:
-	.string "CYRUS: You stopped my commanders. You\n"
-	.string "will not stop the world from changing.\p"
-	.string "...Yet the red chains are broken, and\n"
-	.string "the sky is still the same sky. Perhaps\l"
-	.string "you have won.$"
 
 Sinnoh_SpearPillar_Text_Person4:
 	.string "Did you feel that? The ground's\n"

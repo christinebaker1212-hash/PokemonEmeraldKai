@@ -320,3 +320,164 @@ Sinnoh_EventScript_VeilstoneBag::
 	waitstate
 	releaseall
 	end
+
+@ The DISTORTION WORLD (tools/sinnoh/story_people.py, gen_maps.py EXTRA_PEOPLE): after MARS and JUPITER fall at SPEAR
+@ PILLAR, CYRUS is pulled through a tear in the sky; the player follows into GIRATINA's arena (Platinum's own 3D room),
+@ battles CYRUS, then meets GIRATINA, and CYNTHIA leads them home. Flags: 0x3D34 CYRUS beaten there, 0x3D35 the
+@ DISTORTION WORLD done, 0x3D36 its GIRATINA met (caught: 0x3D03, TURNBACK CAVE's GIRATINA too, as Platinum's).
+Sinnoh_EventScript_DistortionEnter::
+	lock
+	faceplayer
+	msgbox Sinnoh_Text_DistortionCyrus1, MSGBOX_DEFAULT
+	closemessage
+	waitse
+	playmoncry SPECIES_GIRATINA, CRY_MODE_ENCOUNTER
+	setvar VAR_0x8004, 2
+	setvar VAR_0x8005, 2
+	setvar VAR_0x8006, 16
+	setvar VAR_0x8007, 3
+	special ShakeCamera
+	waitstate
+	waitmoncry
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	msgbox Sinnoh_Text_DistortionTear, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Sinnoh_EventScript_DistortionNotYet
+	closemessage
+	playse SE_WARP_IN
+	warp MAP_SINNOH_DISTORTION_WORLD_GIRATINA_ROOM, 15, 28
+	waitstate
+	release
+	end
+
+Sinnoh_EventScript_DistortionNotYet:
+	msgbox Sinnoh_Text_DistortionNotYet, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_EventScript_DistortionCyrus::
+	lock
+	faceplayer
+	msgbox Sinnoh_Text_DistortionCyrus2, MSGBOX_DEFAULT
+	trainerbattle_no_intro TRAINER_SINNOH_GALACTIC_BOSS_CYRUS_DISTORTION_WORLD, Sinnoh_Text_DistortionCyrusDefeat
+	msgbox Sinnoh_Text_DistortionCyrus3, MSGBOX_DEFAULT
+	closemessage
+	setflag 0x3D34
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	release
+	end
+
+Sinnoh_EventScript_DistortionGiratina::
+	lock
+	goto_if_unset 0x3D34, Sinnoh_EventScript_DistortionGiratinaWaits
+	faceplayer
+	waitse
+	playmoncry SPECIES_GIRATINA, CRY_MODE_ENCOUNTER
+	delay 40
+	waitmoncry
+	setwildbattle SPECIES_GIRATINA, 47
+	setflag FLAG_SYS_CTRL_OBJ_DELETE
+	special BattleSetup_StartLegendaryBattle
+	waitstate
+	clearflag FLAG_SYS_CTRL_OBJ_DELETE
+	setflag 0x3D36
+	specialvar VAR_RESULT, GetBattleOutcome
+	goto_if_eq VAR_RESULT, B_OUTCOME_CAUGHT, Sinnoh_EventScript_DistortionGiratinaCaught
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	msgbox Sinnoh_Text_DistortionGiratinaGone, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_EventScript_DistortionGiratinaCaught:
+	setflag 0x3D03
+	removeobject VAR_LAST_TALKED
+	release
+	end
+
+Sinnoh_EventScript_DistortionGiratinaWaits:
+	msgbox Sinnoh_Text_DistortionGiratinaWaits, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_EventScript_DistortionCynthia::
+	lock
+	faceplayer
+	goto_if_set 0x3D36, Sinnoh_EventScript_DistortionCynthiaHome
+	msgbox Sinnoh_Text_DistortionCynthia1, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Sinnoh_EventScript_DistortionCynthiaStay
+	closemessage
+	goto Sinnoh_EventScript_DistortionLeave
+
+Sinnoh_EventScript_DistortionCynthiaStay:
+	msgbox Sinnoh_Text_DistortionCynthiaStay, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_EventScript_DistortionCynthiaHome:
+	msgbox Sinnoh_Text_DistortionCynthia2, MSGBOX_DEFAULT
+	closemessage
+	setflag 0x3D35
+
+Sinnoh_EventScript_DistortionLeave:
+	playse SE_WARP_IN
+	warp MAP_SINNOH_SPEAR_PILLAR, 31, 50
+	waitstate
+	release
+	end
+
+Sinnoh_Text_DistortionCyrus1:
+	.string "CYRUS: The red chains are broken, and still\n"
+	.string "the sky answers me. Do you hear it?\p"
+	.string "Something has been watching from the other\n"
+	.string "side of this world all along.$"
+
+Sinnoh_Text_DistortionTear:
+	.string "A shadow tore the sky open and dragged\n"
+	.string "CYRUS through!\p"
+	.string "The tear hangs in the air, twisting.\n"
+	.string "Will you follow him?$"
+
+Sinnoh_Text_DistortionNotYet:
+	.string "The tear in the sky hums softly.\n"
+	.string "It doesn't look like it will close.$"
+
+Sinnoh_Text_DistortionCyrus2:
+	.string "CYRUS: So this is the world on the other\n"
+	.string "side. Up is down. Time does not move.\p"
+	.string "There is no spirit here. Only stillness.\n"
+	.string "It is everything I wanted. Stand aside!$"
+
+Sinnoh_Text_DistortionCyrusDefeat:
+	.string "Even here, your heart wins out...$"
+
+Sinnoh_Text_DistortionCyrus3:
+	.string "CYRUS: This world has a master, and it\n"
+	.string "isn't me. I will find another way.\p"
+	.string "Go. GIRATINA is waiting for you.$"
+
+Sinnoh_Text_DistortionGiratinaWaits:
+	.string "GIRATINA watches from the shadows,\n"
+	.string "unmoving. CYRUS stands in the way.$"
+
+Sinnoh_Text_DistortionGiratinaGone:
+	.string "GIRATINA slipped back into the shadows\n"
+	.string "of its world.$"
+
+Sinnoh_Text_DistortionCynthia1:
+	.string "CYNTHIA: I followed the tear after you.\n"
+	.string "This is the world behind our world.\p"
+	.string "We can't stay long. Shall we go back now?$"
+
+Sinnoh_Text_DistortionCynthiaStay:
+	.string "CYNTHIA: All right. I'll wait right here.\n"
+	.string "Be careful.$"
+
+Sinnoh_Text_DistortionCynthia2:
+	.string "CYNTHIA: The world feels calmer. GIRATINA\n"
+	.string "was keeping the balance, I think.\p"
+	.string "Thank you. Let's go home together.$"

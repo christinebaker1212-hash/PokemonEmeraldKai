@@ -3357,6 +3357,15 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   (overworld.c, before the map's on-transition script). Their words are STORY_WORDS (merged into words.py's WORDS);
   gen_maps.py places a story person with its flag once it has a script (trainers have theirs). Platinum's gifts from
   them have LINES (gifts.py; the POKé RADAR and the BICYCLE are given once). Test sinnoh_story_people.
+- The DISTORTION WORLD (2026-11-01, data/scripts/sinnoh_places.inc): Platinum walks it on walls and ceilings through
+  its own 14,000-line system (overlay009), so here it's a scene in GIRATINA's arena, Platinum's own 3D room (a rock
+  path in the void; s3d_gyms.c GYM_DISTORTION keeps steps to its rows 23-28, and field_player_avatar.c never jumps a
+  ledge a SINNOH place blocks). With SPEAR PILLAR's MARS and JUPITER beaten, CYRUS there (Sinnoh_EventScript_
+  DistortionEnter) is pulled through a tear; the player follows, battles CYRUS (TRAINER_SINNOH_GALACTIC_BOSS_CYRUS_
+  DISTORTION_WORLD, Platinum's team, gen_trainers.py LATE_STORY: after every other SINNOH trainer so no id moves;
+  flag 0x3D34), meets GIRATINA (Lv47; 0x3D36; caught also sets TURNBACK CAVE's done flag 0x3D03, else that one
+  stays), and CYNTHIA takes them back to SPEAR PILLAR (0x3D35, story_people.EXTRA_DONE 'DISTORTION': CYRUS is gone
+  from SPEAR PILLAR after). The arena's people: gen_maps.py EXTRA_PEOPLE (with a flag). Test sinnoh_distortion.
 - Field obstacles (2026-11-01): Platinum's CUT trees, ROCK SMASH rocks and STRENGTH boulders (690) are the game's
   own (gen_maps.py OBSTACLES: EventScript_CutTree / _RockSmash / _StrengthBoulder, no flag, back each time the map
   loads as in both games). HM badges are the region's: MP_Region_FieldMoveBadge (mp_region.c) gives HOENN's badge for

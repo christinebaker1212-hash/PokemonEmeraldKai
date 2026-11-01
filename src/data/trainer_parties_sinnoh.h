@@ -2431,3 +2431,11 @@ static const struct TrainerMonNoItemCustomMoves sParty_SinnohVeteranEmanuel[] = 
     {.iv = 100, .lvl = 28, .species = SPECIES_BRONZOR, .moves = {MOVE_EXTRASENSORY, MOVE_TACKLE, MOVE_CONFUSE_RAY, MOVE_NONE}},
 };
 
+static const struct TrainerMonItemCustomMoves sParty_SinnohGalacticBossCyrusDistortionWorld[] = {
+    {.iv = 250, .lvl = 45, .species = SPECIES_HOUNDOOM, .heldItem = ITEM_NONE, .moves = {MOVE_FLAMETHROWER, MOVE_DARK_PULSE, MOVE_WILL_O_WISP, MOVE_THUNDER_FANG}},
+    {.iv = 250, .lvl = 47, .species = SPECIES_HONCHKROW, .heldItem = ITEM_NONE, .moves = {MOVE_DRILL_PECK, MOVE_NIGHT_SLASH, MOVE_HEAT_WAVE, MOVE_PSYCHIC}},
+    {.iv = 250, .lvl = 46, .species = SPECIES_CROBAT, .heldItem = ITEM_NONE, .moves = {MOVE_CROSS_POISON, MOVE_AIR_SLASH, MOVE_TOXIC, MOVE_CONFUSE_RAY}},
+    {.iv = 250, .lvl = 46, .species = SPECIES_GYARADOS, .heldItem = ITEM_NONE, .moves = {MOVE_GIGA_IMPACT, MOVE_WATERFALL, MOVE_ICE_FANG, MOVE_EARTHQUAKE}},
+    {.iv = 250, .lvl = 48, .species = SPECIES_WEAVILE, .heldItem = ITEM_SITRUS_BERRY, .moves = {MOVE_NIGHT_SLASH, MOVE_ICE_PUNCH, MOVE_FAKE_OUT, MOVE_X_SCISSOR}},
+};
+
