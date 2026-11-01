@@ -18,6 +18,10 @@ Sinnoh_Route228SouthHouse_EventScript_Bg4::
 	msgbox Sinnoh_Route228SouthHouse_Text_Bg4, MSGBOX_SIGN
 	end
 
+Sinnoh_Route228SouthHouse_EventScript_Person1::
+	msgbox Sinnoh_Route228SouthHouse_Text_Person1, MSGBOX_NPC
+	end
+
 Sinnoh_Route228SouthHouse_Text_Bg1:
 	.string "The shelves are packed with books\n"
 	.string "about MOéMON and the places they\l"
@@ -37,5 +41,9 @@ Sinnoh_Route228SouthHouse_Text_Bg4:
 	.string "The shelves are packed with books\n"
 	.string "about MOéMON and the places they\l"
 	.string "live.$"
+
+Sinnoh_Route228SouthHouse_Text_Person1:
+	.string "Welcome, traveler. Have a seat out of\n"
+	.string "the sand.$"
 
 @ --- end of SINNOH words ---

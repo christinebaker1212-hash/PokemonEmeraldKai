@@ -34,6 +34,10 @@ Sinnoh_ForeignBuilding_EventScript_Person8::
 	msgbox Sinnoh_ForeignBuilding_Text_Person8, MSGBOX_NPC
 	end
 
+Sinnoh_ForeignBuilding_EventScript_Person9::
+	msgbox Sinnoh_ForeignBuilding_Text_Person9, MSGBOX_NPC
+	end
+
 Sinnoh_ForeignBuilding_Text_Person1:
 	.string "This building was built by people from\n"
 	.string "far away. It still has their style.$"
@@ -65,5 +69,9 @@ Sinnoh_ForeignBuilding_Text_Person7:
 Sinnoh_ForeignBuilding_Text_Person8:
 	.string "I can feel... calm here. Very calm.\n"
 	.string "Very... zzz.$"
+
+Sinnoh_ForeignBuilding_Text_Person9:
+	.string "I come here every week. It's the\n"
+	.string "quietest place in HEARTHOME.$"
 
 @ --- end of SINNOH words ---

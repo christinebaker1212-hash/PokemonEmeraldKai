@@ -256,12 +256,13 @@ def no_twice():
     """A map written twice in WORDS would lose the first one's words (a dict keeps the last): refuse"""
     import ast
     import collections
-    tree = ast.parse(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'words.py'), encoding='utf-8').read())
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Assign) and getattr(node.targets[0], 'id', '') == 'WORDS':
-            twice = [k for k, n in collections.Counter(k.value for k in node.value.keys).items() if n > 1]
-            if twice:
-                sys.exit('words.py has these maps twice: %s' % ' '.join(twice))
+    for f, var in (('words.py', 'WORDS'), ('words_outdoor.py', 'OUTDOOR'), ('words_indoor.py', 'INDOOR')):
+        tree = ast.parse(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), f), encoding='utf-8').read())
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Assign) and getattr(node.targets[0], 'id', '') == var:
+                twice = [k for k, n in collections.Counter(k.value for k in node.value.keys).items() if n > 1]
+                if twice:
+                    sys.exit('%s has these maps twice: %s' % (f, ' '.join(twice)))
 
 
 def main():

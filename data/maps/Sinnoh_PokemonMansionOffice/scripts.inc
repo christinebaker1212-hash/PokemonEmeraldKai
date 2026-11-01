@@ -10,6 +10,14 @@ Sinnoh_PokemonMansionOffice_EventScript_Bg2::
 	msgbox Sinnoh_PokemonMansionOffice_Text_Bg2, MSGBOX_SIGN
 	end
 
+Sinnoh_PokemonMansionOffice_EventScript_Person2::
+	msgbox Sinnoh_PokemonMansionOffice_Text_Person2, MSGBOX_NPC
+	end
+
+Sinnoh_PokemonMansionOffice_EventScript_Person3::
+	msgbox Sinnoh_PokemonMansionOffice_Text_Person3, MSGBOX_NPC
+	end
+
 Sinnoh_PokemonMansionOffice_Text_Bg1:
 	.string "A stone statue of a MOéMON. It looks\n"
 	.string "as if it's guarding something.$"
@@ -17,5 +25,15 @@ Sinnoh_PokemonMansionOffice_Text_Bg1:
 Sinnoh_PokemonMansionOffice_Text_Bg2:
 	.string "It's full of handwriting. It doesn't\n"
 	.string "seem polite to read it.$"
+
+Sinnoh_PokemonMansionOffice_Text_Person2:
+	.string "Welcome! This mansion is my pride and\n"
+	.string "joy. Look around, but don't break\l"
+	.string "anything!$"
+
+Sinnoh_PokemonMansionOffice_Text_Person3:
+	.string "I've been the master's butler for\n"
+	.string "forty years. He's never once been on\l"
+	.string "time.$"
 
 @ --- end of SINNOH words ---

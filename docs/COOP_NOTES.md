@@ -3318,7 +3318,9 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   on a place and their numbers (Platinum's script entry names hint at what a spot is: a TV, a fridge). Written so far:
   TWINLEAF TOWN (and its houses), ROUTE 201, SANDGEM TOWN (houses, MART, MOéMON CENTER, the lab); every town's
   and route's people and signs (tools/sinnoh/words_outdoor.py OUTDOOR, merged into WORDS). tools/sinnoh/todo.py
-  POKEPLATINUM_DIR [outdoor|indoor] lists what's left (2026-11-01: the buildings' 942).
+  POKEPLATINUM_DIR [outdoor|indoor] lists what's left: nothing since 2026-11-01 (1362 people and signs). The
+  buildings' are tools/sinnoh/words_indoor.py: KINDS (bookshelves, beds, statues, gym guides...: by Platinum's script
+  entry name) and INDOOR (each map's people). gen_words.py refuses a map written twice in any of the three files.
 - Items on the ground (tools/sinnoh/items.py): an item ball (Platinum script 7000 + k, the k-th entry of its visible
   items' list) gets the shared script for its item (data/scripts/sinnoh_items.inc, `finditem`, written by gen_maps.py)
   and keeps its Platinum "obtained" flag as a SINNOH number; a hidden item (script 8000 + k, the k-th of its hidden

@@ -26,6 +26,14 @@ Sinnoh_PokemonMansionMaidsRoom_EventScript_Bg7::
 	msgbox Sinnoh_PokemonMansionMaidsRoom_Text_Bg7, MSGBOX_SIGN
 	end
 
+Sinnoh_PokemonMansionMaidsRoom_EventScript_Person2::
+	msgbox Sinnoh_PokemonMansionMaidsRoom_Text_Person2, MSGBOX_NPC
+	end
+
+Sinnoh_PokemonMansionMaidsRoom_EventScript_Person3::
+	msgbox Sinnoh_PokemonMansionMaidsRoom_Text_Person3, MSGBOX_NPC
+	end
+
 Sinnoh_PokemonMansionMaidsRoom_Text_Bg2:
 	.string "A soft, tidy bed. It looks very\n"
 	.string "comfortable.$"
@@ -49,5 +57,14 @@ Sinnoh_PokemonMansionMaidsRoom_Text_Bg6:
 Sinnoh_PokemonMansionMaidsRoom_Text_Bg7:
 	.string "A soft, tidy bed. It looks very\n"
 	.string "comfortable.$"
+
+Sinnoh_PokemonMansionMaidsRoom_Text_Person2:
+	.string "This is the maids' room. Shh, someone's\n"
+	.string "napping!$"
+
+Sinnoh_PokemonMansionMaidsRoom_Text_Person3:
+	.string "We work hard, but the master treats us\n"
+	.string "well. And the cook makes the best\l"
+	.string "POFFINS.$"
 
 @ --- end of SINNOH words ---
