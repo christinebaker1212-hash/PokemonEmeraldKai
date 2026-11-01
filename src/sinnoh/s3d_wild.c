@@ -394,3 +394,22 @@ u16 Sinnoh_SpiritombAfter(void)
         Sinnoh_SpiritombPlace();
     return 0;
 }
+
+// ------------------------------------------------------------------------------------------------- the POKé RADAR
+// Grass slot INDEX's POKéMON in a POKé RADAR encounter (src/mp/mp_pokeradar.c): Platinum's radar ones in slots 4, 5,
+// 10 and 11 where the slot still holds the table's (SPECIES: the slot's as Sinnoh_LandSlot gives it)
+u16 Sinnoh_RadarSlot(u16 species, u8 index)
+{
+    static const u8 sSlots[] = {4, 5, 10, 11};
+    u32 i, k;
+    if (MP_Region_Current() != REGION_SINNOH)
+        return species;
+    for (k = 0; k < ARRAY_COUNT(sSlots) && sSlots[k] != index; k++)
+        ;
+    if (k == ARRAY_COUNT(sSlots))
+        return species;
+    for (i = 0; i < ARRAY_COUNT(sRadar); i++)
+        if (sRadar[i].map == CurrentMap() && sRadar[i].base[k] == species && MP_Gen_Allowed(sRadar[i].radar[k]))
+            return sRadar[i].radar[k];
+    return species;
+}

@@ -28,6 +28,8 @@ Sinnoh_FightArea_EventScript_Person7::
 	lock
 	faceplayer
 	goto_if_set 0x3DAA, Sinnoh_FightArea_EventScript_Person7_Given
+	checkitem ITEM_SUPER_ROD
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_FightArea_EventScript_Person7_Given
 	msgbox Sinnoh_FightArea_Text_Person7, MSGBOX_DEFAULT
 	msgbox Sinnoh_FightArea_Text_Person7Gift, MSGBOX_DEFAULT
 	giveitem ITEM_SUPER_ROD, 1

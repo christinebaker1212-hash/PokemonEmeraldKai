@@ -29,12 +29,12 @@ Sinnoh_TrainersSchool_EventScript_Person5::
 Sinnoh_TrainersSchool_EventScript_Person7::
 	lock
 	faceplayer
-	goto_if_set 0x3DDD, Sinnoh_TrainersSchool_EventScript_Person7_Given
+	goto_if_set 0x3DDE, Sinnoh_TrainersSchool_EventScript_Person7_Given
 	msgbox Sinnoh_TrainersSchool_Text_Person7, MSGBOX_DEFAULT
 	msgbox Sinnoh_TrainersSchool_Text_Person7Gift, MSGBOX_DEFAULT
 	giveitem ITEM_POTION, 1
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DDD
+	setflag 0x3DDE
 	release
 	end
 

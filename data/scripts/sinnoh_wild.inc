@@ -319,3 +319,50 @@ Sinnoh_Text_HallowedTower5:
 
 Sinnoh_Text_HallowedTowerCry:
 	.string "Bwaaaaagh!$"
+
+@ SANDGEM's LAB: PROF. ROWAN's aide gives the POKé RADAR once SINNOH's LEAGUE is beaten (flag 0x3D33)
+Sinnoh_EventScript_RadarAide::
+	lock
+	faceplayer
+	specialvar VAR_RESULT, Sinnoh_LeagueDone
+	goto_if_eq VAR_RESULT, FALSE, Sinnoh_EventScript_RadarAideBefore
+	goto_if_set 0x3D33, Sinnoh_EventScript_RadarAideGiven
+	msgbox Sinnoh_Text_RadarAideGive, MSGBOX_DEFAULT
+	giveitem ITEM_POKE_RADAR
+	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
+	setflag 0x3D33
+	msgbox Sinnoh_Text_RadarAideHow, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_EventScript_RadarAideBefore::
+	msgbox Sinnoh_Text_RadarAideBefore, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_EventScript_RadarAideGiven::
+	msgbox Sinnoh_Text_RadarAideHow, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_Text_RadarAideBefore:
+	.string "The professor is out in the field\n"
+	.string "again.\p"
+	.string "He says you can't study MOéMON from\n"
+	.string "behind a desk. He's right, but\l"
+	.string "someone has to file all this!$"
+
+Sinnoh_Text_RadarAideGive:
+	.string "Oh! The new CHAMPION! The professor\n"
+	.string "left something here for you.\p"
+	.string "It's a device he's been testing. He\n"
+	.string "says it's wasted on a desk!$"
+
+Sinnoh_Text_RadarAideHow:
+	.string "Use the POKé RADAR in tall grass, and\n"
+	.string "patches nearby start to shake.\p"
+	.string "Step into one to meet a MOéMON. Beat\n"
+	.string "or catch it, and the grass shakes\l"
+	.string "again, often with the same kind.\p"
+	.string "Keep the chain going and some patches\n"
+	.string "may even sparkle!$"

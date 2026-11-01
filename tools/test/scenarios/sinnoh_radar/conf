@@ -1,0 +1,9 @@
+# The POKé RADAR (src/mp/mp_pokeradar.c): used in ROUTE 201's grass it shakes patches; a step into one is a battle,
+# won it makes a chain of 1 and new patches at once (made to sparkle by `mp radar shiny`), and the next patch brings
+# the same POKéMON, shiny; the POKéTCH's TRAINER COUNTER shows the chain (shot t_counter.png). Needs the 3D pack.
+MODE=1
+TMO=150
+GEN=4
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=25:60"
+EXPECT_A=("radar: 4 patches (chain 0)" "radar: chain 1 of" "patches (chain 1) sparkling" "shiny 1" "poketch: app 25")
+UNEXPECT_A=("[crash]" "TIMEOUT" "chain of")

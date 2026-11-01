@@ -31,7 +31,7 @@ Sinnoh_SandgemTownPokemonResearchLab_EventScript_Person2::
 	end
 
 Sinnoh_SandgemTownPokemonResearchLab_EventScript_Person3::
-	msgbox Sinnoh_SandgemTownPokemonResearchLab_Text_Person3, MSGBOX_NPC
+	goto Sinnoh_EventScript_RadarAide
 	end
 
 Sinnoh_SandgemTownPokemonResearchLab_Text_Bg1:
@@ -66,12 +66,5 @@ Sinnoh_SandgemTownPokemonResearchLab_Text_Person2:
 	.string "Some evolve with a stone, some with a\n"
 	.string "friend, and some just when they're\l"
 	.string "good and ready.$"
-
-Sinnoh_SandgemTownPokemonResearchLab_Text_Person3:
-	.string "The professor is out in the field\n"
-	.string "again.\p"
-	.string "He says you can't study MOéMON from\n"
-	.string "behind a desk. He's right, but someone\l"
-	.string "has to file all this!$"
 
 @ --- end of SINNOH words ---

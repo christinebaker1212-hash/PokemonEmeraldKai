@@ -9,12 +9,12 @@ Sinnoh_SolaceonTownPokemonNewsPress_EventScript_Bg1::
 Sinnoh_SolaceonTownPokemonNewsPress_EventScript_Person1::
 	lock
 	faceplayer
-	goto_if_set 0x3DDA, Sinnoh_SolaceonTownPokemonNewsPress_EventScript_Person1_Given
+	goto_if_set 0x3DDB, Sinnoh_SolaceonTownPokemonNewsPress_EventScript_Person1_Given
 	msgbox Sinnoh_SolaceonTownPokemonNewsPress_Text_Person1, MSGBOX_DEFAULT
 	msgbox Sinnoh_SolaceonTownPokemonNewsPress_Text_Person1Gift, MSGBOX_DEFAULT
 	giveitem ITEM_HEART_SCALE, 1
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DDA
+	setflag 0x3DDB
 	release
 	end
 

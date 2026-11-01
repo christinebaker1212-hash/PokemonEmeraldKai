@@ -10,7 +10,7 @@ has 10 slots (OLD ROD 2, GOOD ROD 3, SUPER ROD 5), Platinum 5 a rod: the first 2
 
 Platinum's grass slots 2 and 3 change by the time of day (the table's are the morning's) and slots 0 and 1 hold the
 day's swarm on its route: src/data/sinnoh_wild_extra.h (src/sinnoh/s3d_wild.c), with the swarms' routes and the
-HONEY trees' POKéMON and the TROPHY GARDEN's daily ones. (The POKé RADAR's and a GBA game's slots aren't used.)
+HONEY trees' POKéMON, the TROPHY GARDEN's daily ones and the POKé RADAR's. (A GBA game's slots aren't used.)
 """
 import json
 import os
@@ -73,7 +73,10 @@ def map_id(name):
     return 'MAP_SINNOH_' + ident('MAP_HEADER_' + name)[0]
 
 
-def write_extra(root, timed):
+RADAR_SLOTS = (4, 5, 10, 11)   # (the grass slots the POKé RADAR's POKéMON take, Platinum's)
+
+
+def write_extra(root, timed, radar):
     honey = json.load(open(os.path.join(root, 'res/field/encounters/encounters_honey_tree.json')))
     trophy = json.load(open(os.path.join(root, 'res/field/encounters/encounters_trophy_garden.json')))
     rows = ''.join('    {%s, {%s}, {%s}, {%s}, {%s}},\n' % (m, ', '.join(b), ', '.join(d), ', '.join(n), ', '.join(w))
@@ -90,7 +93,10 @@ def write_extra(root, timed):
                                                             ('common', 'uncommon', 'rare')) + '};\n\n'
         '// the TROPHY GARDEN: MR. BACKLOT\'s daily POKéMON, in its grass slots 6-7 (the table\'s: sTrophyBase)\n'
         'static const u16 sTrophyBase[2] = {%s};\n' % ', '.join(e['species'] for e in trophy['land_encounters'][6:8]) +
-        'static const u16 sTrophyMons[] = {\n' + ''.join('    %s,\n' % m for m in trophy['daily_encounters']) + '};\n')
+        'static const u16 sTrophyMons[] = {\n' + ''.join('    %s,\n' % m for m in trophy['daily_encounters']) + '};\n\n'
+        '// the POKé RADAR\'s POKéMON in grass slots 4, 5, 10 and 11 (the table\'s: base), in its encounters only\n'
+        'static const struct SinnohRadarSlots { u16 map; u16 base[4], radar[4]; } sRadar[] = {\n'
+        + ''.join('    {%s, {%s}, {%s}},\n' % (m, ', '.join(b), ', '.join(r)) for m, b, r in radar if b != r) + '};\n')
 
 
 def main():
@@ -102,6 +108,7 @@ def main():
     headers['encounters'] = [e for e in headers['encounters'] if not e.get('base_label', '').startswith(LABEL)]
     added = 0
     timed = []
+    radar = []
     for p in sorted(places(src, root), key=lambda p: p['header']):
         name = p['fields'].get('wildEncountersArchiveID')
         file = os.path.join(root, 'res/field/encounters', (name or '') + '.json')
@@ -113,6 +120,8 @@ def main():
         for key, t in (('land_mons', land(d)), ('water_mons', water(d)), ('fishing_mons', fishing(d))):
             if t:
                 entry[key] = t
+        if 'land_mons' in entry and d.get('radar') and len(d['radar']) == 4:
+            radar.append((entry['map'], [d['land_encounters'][k]['species'] for k in RADAR_SLOTS], d['radar']))
         if 'land_mons' in entry:
             base = [e['species'] for e in d['land_encounters'][:4]]
             day, night, swarm = d.get('day') or base[2:4], d.get('night') or base[2:4], d.get('swarms') or base[:2]
@@ -123,7 +132,7 @@ def main():
             added += 1
     json.dump(data, open(path, 'w'), indent=2)
     open(path, 'a').write('\n')
-    write_extra(root, sorted(timed))
+    write_extra(root, sorted(timed), sorted(radar))
     print('%d SINNOH places with wild POKéMON (%d with timed / swarm slots)' % (added, len(timed)))
 
 

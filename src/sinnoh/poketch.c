@@ -50,7 +50,7 @@ enum
 {
     APP_WATCH, APP_CALC, APP_MEMO, APP_PEDOMETER, APP_PARTY, APP_COUNTER, APP_ANALOG, APP_COIN, APP_COLOR, APP_STOPWATCH,
     APP_DOWSING, APP_CALENDAR, APP_LINK, APP_FRIENDSHIP, APP_DAYCARE, APP_HISTORY, APP_MAP, APP_MOVES, APP_MATCHUP,
-    APP_ROULETTE, APP_TIMER, APP_ALARM, APP_DOTS, APP_BACKLIGHT, APP_BERRIES, APP_COUNT
+    APP_ROULETTE, APP_TIMER, APP_ALARM, APP_DOTS, APP_BACKLIGHT, APP_BERRIES, APP_RADAR, APP_COUNT
 };
 static const struct { u8 badges; } sApps[APP_COUNT] = {
     [APP_WATCH] = {0}, [APP_CALC] = {0}, [APP_MEMO] = {0}, [APP_PEDOMETER] = {0}, [APP_PARTY] = {0},
@@ -58,6 +58,7 @@ static const struct { u8 badges; } sApps[APP_COUNT] = {
     [APP_DOWSING] = {2}, [APP_CALENDAR] = {4}, [APP_LINK] = {0}, [APP_FRIENDSHIP] = {1}, [APP_DAYCARE] = {2},
     [APP_HISTORY] = {3}, [APP_MAP] = {3}, [APP_MOVES] = {4}, [APP_MATCHUP] = {5}, [APP_ROULETTE] = {5},
     [APP_TIMER] = {6}, [APP_ALARM] = {6}, [APP_DOTS] = {7}, [APP_BACKLIGHT] = {0}, [APP_BERRIES] = {2},
+    [APP_RADAR] = {0},   // (the TRAINER COUNTER: with the POKé RADAR)
 };
 
 // The LCD's colors, lightest first: GREEN (Platinum's own) and the COLOR CHANGER's others
@@ -94,6 +95,7 @@ static struct
     u8 markX[6], markY[6];             // the MARKING MAP's markers
     u16 histSpecies[12];               // POKéMON HISTORY: the last caught / hatched, newest first
     u32 histPersonality[12];
+    u16 radarSpecies[3], radarChain[3];   // the TRAINER COUNTER's best three POKé RADAR chains
     u8 alarmH, alarmM, alarmOn, backlight;
     // per app, not remembered
     s32 calcValue, calcEntry;
@@ -133,6 +135,8 @@ struct SaveFile
     // version 2
     u8 dots[24 * 20 / 4]; u8 markX[6], markY[6]; u16 histSpecies[12]; u32 histPersonality[12];
     u8 alarmH, alarmM, alarmOn, backlight;
+    // version 3
+    u16 radarSpecies[3], radarChain[3];
 };
 #define SAVE_V1_SIZE offsetof(struct SaveFile, dots)
 
@@ -159,9 +163,14 @@ static void LoadState(void)
     if ((fp = fopen(path, "rb")) == NULL)
         return;
     memset(&f, 0, sizeof(f));
-    if (fread(&f, 1, sizeof(f), fp) >= SAVE_V1_SIZE && f.magic == SAVE_MAGIC && (f.version == 1 || f.version == 2))
+    if (fread(&f, 1, sizeof(f), fp) >= SAVE_V1_SIZE && f.magic == SAVE_MAGIC && f.version >= 1 && f.version <= 3)
     {
-        if (f.version == 2)
+        if (f.version >= 3)
+        {
+            memcpy(sP.radarSpecies, f.radarSpecies, sizeof(sP.radarSpecies));
+            memcpy(sP.radarChain, f.radarChain, sizeof(sP.radarChain));
+        }
+        if (f.version >= 2)
         {
             memcpy(sP.dots, f.dots, sizeof(sP.dots));
             memcpy(sP.markX, f.markX, 6), memcpy(sP.markY, f.markY, 6);
@@ -180,7 +189,7 @@ static void LoadState(void)
 
 static void SaveState(void)
 {
-    struct SaveFile f = {SAVE_MAGIC, 2, sP.color, sP.app, sP.stepBase, sP.counter, 0};
+    struct SaveFile f = {SAVE_MAGIC, 3, sP.color, sP.app, sP.stepBase, sP.counter, 0};
     FILE *fp;
     memcpy(f.memo, sP.memo, sizeof(f.memo));
     memcpy(f.dots, sP.dots, sizeof(f.dots));
@@ -188,6 +197,8 @@ static void SaveState(void)
     memcpy(f.histSpecies, sP.histSpecies, sizeof(f.histSpecies));
     memcpy(f.histPersonality, sP.histPersonality, sizeof(f.histPersonality));
     f.alarmH = sP.alarmH, f.alarmM = sP.alarmM, f.alarmOn = sP.alarmOn, f.backlight = sP.backlight;
+    memcpy(f.radarSpecies, sP.radarSpecies, sizeof(f.radarSpecies));
+    memcpy(f.radarChain, sP.radarChain, sizeof(f.radarChain));
     if ((fp = fopen(sP.path, "wb")) != NULL)
     {
         fwrite(&f, sizeof(f), 1, fp);
@@ -202,6 +213,8 @@ static bool8 AppUnlocked(u8 app)
     for (r = 0; r < REGION_COUNT; r++)
         if (MP_Region_BadgeCount(r) > most)
             most = MP_Region_BadgeCount(r);
+    if (app == APP_RADAR && !CheckBagHasItem(ITEM_POKE_RADAR, 1))
+        return FALSE;
     return most >= sApps[app].badges;
 }
 
@@ -810,6 +823,64 @@ static void History(void)
         }
 }
 
+// TRAINER COUNTER: the POKé RADAR's chain now (its POKéMON and count, at the top) and the best three (src/mp/mp_pokeradar.c);
+// a touch on one plays its cry (Platinum's places: icons at (96, 32), (112, 80), (176, 96), (48, 104) and their
+// 8-pixel digits at (144, 40), (100, 144), (164, 160), (36, 168) on the DS's screen)
+static void SmallDigits(s32 dx, s32 dy, u32 value)
+{
+    u32 i;
+    for (i = 0; i < 3; i++)
+    {
+        u32 d = (value / (i == 0 ? 100 : i == 1 ? 10 : 1)) % 10;
+        Spr("trainer_counter", d, dx + 8 * i, dy, 0, 0);
+    }
+}
+
+static void TrainerCounter(void)
+{
+    static const s16 sIcon[4][2] = {{96, 32}, {112, 80}, {176, 96}, {48, 104}};
+    static const s16 sDigits[4][2] = {{144, 40}, {100, 144}, {164, 160}, {36, 168}};
+    u16 species[4], chain[4];
+    u32 i;
+    chain[0] = MP_PokeRadar_Chain(&species[0]);
+    for (i = 0; i < 3; i++)
+        species[i + 1] = sP.radarSpecies[i], chain[i + 1] = sP.radarChain[i];
+    Screen("trainer_counter");
+    for (i = 0; i < 4; i++)
+    {
+        s32 x = sIcon[i][0] - 16 - 16, y = sIcon[i][1] - 16 - 16;
+        if (chain[i] == 0 || species[i] == SPECIES_NONE)
+            continue;
+        MonIcon(species[i], 0, x, y + (i == 0 && ((sP.frame / 16) & 1)));
+        SmallDigits(sDigits[i][0], sDigits[i][1], chain[i] > 999 ? 999 : chain[i]);
+        if (sP.touchNew && TouchIn(x, y, 32, 32))
+            PlayCry_Normal(species[i], 0);
+    }
+}
+
+// A chain grew or ended (mp_pokeradar.c): the best three are kept (one a POKéMON: its best)
+void MP_Poketch_RadarChain(u16 species, u16 chain, bool8 ended)
+{
+    u32 i, low = 0;
+    (void)ended;
+    LoadState();
+    for (i = 0; i < 3; i++)
+        if (sP.radarSpecies[i] == species && sP.radarChain[i] > 0)
+        {
+            if (chain > sP.radarChain[i])
+                sP.radarChain[i] = chain, SaveState();
+            return;
+        }
+    for (i = 1; i < 3; i++)
+        if (sP.radarChain[i] < sP.radarChain[low])
+            low = i;
+    if (chain > sP.radarChain[low])
+    {
+        sP.radarSpecies[low] = species, sP.radarChain[low] = chain;
+        SaveState();
+    }
+}
+
 // MARKING MAP: SINNOH, where the player is (blinking) and six markers to move around (Platinum's map cells: matrix
 // cell (x, z) at (10 + 6x, 8 + 6(z - 5)))
 bool8 S3D_PlayerMatrixCell(s32 *cx, s32 *cz);   // (s3d.c)
@@ -1230,6 +1301,7 @@ static void DrawApp(void)
     case APP_DOTS: Dots(); break;
     case APP_BACKLIGHT: Backlight(); break;
     case APP_BERRIES: BerrySearcher(); break;
+    case APP_RADAR: TrainerCounter(); break;
     }
 }
 

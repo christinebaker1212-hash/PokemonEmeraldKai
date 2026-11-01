@@ -728,6 +728,27 @@ void ItemUseOutOfBattle_Honey(u8 taskId)
     SetUpItemUseOnFieldCallback(taskId);
 }
 
+// Moemon Kai: the POKé RADAR (src/mp/mp_pokeradar.c): the grass around shakes
+static void ItemUseOnFieldCB_PokeRadar(u8 taskId)
+{
+    MP_PokeRadar_Start();
+    ScriptUnfreezeObjectEvents();
+    UnlockPlayerFieldControls();
+    DestroyTask(taskId);
+}
+
+void ItemUseOutOfBattle_PokeRadar(u8 taskId)
+{
+    const u8 *why = MP_PokeRadar_CantUse();
+    if (why != NULL)
+    {
+        DisplayCannotUseItemMessage(taskId, gTasks[taskId].tUsingRegisteredKeyItem, why);
+        return;
+    }
+    sItemUseOnFieldCB = ItemUseOnFieldCB_PokeRadar;
+    SetUpItemUseOnFieldCallback(taskId);
+}
+
 void ItemUseOutOfBattle_CandyJar(u8 taskId)
 {
     if (gTasks[taskId].tUsingRegisteredKeyItem != TRUE)

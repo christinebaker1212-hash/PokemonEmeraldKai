@@ -696,6 +696,7 @@ static void CB2_EndWildBattle(void)
     CpuFill16(0, (void *)(BG_PLTT), BG_PLTT_SIZE);
     ResetOamRange(0, OAM_ENTRY_COUNT);   // Moemon PC: all 256 (128 left the rest zeroed: an 8x8 tile at 0,0)
     MP_Events_OnWildEnd(gBattleOutcome, &gEnemyParty[0]); // Moemon Co-op: team goals
+    MP_PokeRadar_BattleEnd(gBattleOutcome);               // Moemon Kai: the POKé RADAR's chain (mp_pokeradar.c)
 
     if (IsPlayerDefeated(gBattleOutcome) == TRUE && CurrentBattlePyramidLocation() == PYRAMID_LOCATION_NONE && !InBattlePike())
     {

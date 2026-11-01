@@ -115,11 +115,12 @@ def gift(name, key, words, widths, item, count, flag):
     line = gifts.line(name, key)
     if not line:
         sys.exit('%s %s gives %s: no words for it yet (tools/sinnoh/gifts.py LINES)' % (name, key, item))
-    code = ('%s::\n\tlock\n\tfaceplayer\n\tgoto_if_set 0x%X, %s_Given\n\tmsgbox %s, MSGBOX_DEFAULT\n'
-            '\tmsgbox %sGift, MSGBOX_DEFAULT\n\tgiveitem %s, %d\n'
+    has = ('\tcheckitem %s\n\tgoto_if_eq VAR_RESULT, TRUE, %s_Given\n' % (item, label)) if item in gifts.KEY else ''
+    code = ('%s::\n\tlock\n\tfaceplayer\n\tgoto_if_set 0x%X, %s_Given\n' % (label, flag, label) + has +
+            '\tmsgbox %s, MSGBOX_DEFAULT\n\tmsgbox %sGift, MSGBOX_DEFAULT\n\tgiveitem %s, %d\n'
             '\tgoto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull\n\tsetflag 0x%X\n\trelease\n\tend\n\n'
             '%s_Given::\n\tmsgbox %s, MSGBOX_DEFAULT\n\trelease\n\tend\n\n'
-            % (label, flag, label, t, t, item, count, flag, label, t))
+            % (t, t, item, count, flag, label, t))
     texts = ('%s:\n%s\n%sGift:\n%s\n' % (t, wrap(words, widths, '%s %s' % (name, key)), t,
                                          wrap(line, widths, '%s %s' % (name, key))))
     return code, texts

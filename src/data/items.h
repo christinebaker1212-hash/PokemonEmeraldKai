@@ -4871,4 +4871,17 @@ const struct Item gItems[] =
         .type = ITEM_USE_FIELD,
         .fieldUseFunc = ItemUseOutOfBattle_Poketch,
     },
+
+    [ITEM_POKE_RADAR] =
+    {
+        .name = _("POKé RADAR"),
+        .itemId = ITEM_POKE_RADAR,
+        .price = 0,
+        .description = sPokeRadarDesc,
+        .importance = 1,
+        .registrability = TRUE,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_FIELD,
+        .fieldUseFunc = ItemUseOutOfBattle_PokeRadar,
+    },
 };

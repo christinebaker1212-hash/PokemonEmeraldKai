@@ -2026,6 +2026,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d,%d", &x, &y);
         MP_Poketch_DebugTap(x, y);
     }
+    else if (strcmp(cmd, "radar") == 0)
+    {
+        // radar [shiny|charge] - the POKé RADAR: its patches and chain, or the next patches sparkling, or a full battery
+        MP_PokeRadar_Debug(arg);
+    }
     else if (strcmp(cmd, "honeyage") == 0)
     {
         // honeyage N - this place's HONEY tree's HONEY as if put on N minutes ago (src/sinnoh/s3d_wild.c)

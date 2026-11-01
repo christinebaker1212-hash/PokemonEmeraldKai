@@ -16,8 +16,9 @@ import items  # noqa: E402
 
 GIFT_FLAGS = 0x3DA0   # (free: the legendaries' added objects' 0x3D80-0x3D8F; the hidden items' start at 0x3E00)
 GIFT_FLAGS_END = 0x3E00
-SKIP = {'ITEM_JOURNAL', 'ITEM_PARCEL', 'ITEM_TOWN_MAP', 'ITEM_COIN_CASE', 'ITEM_HM06'}   # (the TOWN MAP and COIN CASE
-#   are the game's own already; HMs come from the HOENN story: no HM restrictions)
+SKIP = {'ITEM_JOURNAL', 'ITEM_PARCEL', 'ITEM_TOWN_MAP', 'ITEM_HM06'}   # (the TOWN MAP is the game's own already; HMs
+#   come from the HOENN story: no HM restrictions)
+KEY = {'ITEM_COIN_CASE', 'ITEM_OLD_ROD', 'ITEM_GOOD_ROD', 'ITEM_SUPER_ROD'}   # (one is enough: not given to a player who has it)
 
 
 # What each says as their item changes hands (the person's own words come first: tools/sinnoh/words.py)
@@ -64,6 +65,7 @@ LINES = {
     'SurvivalAreaSouthHouse Person1': "You've got the spirit of a fighter! Take this TM.",
     'TrainersSchool Person7': "Here, I have an extra POTION from class. Take it!",
     'VeilstoneCity Person23': "A TOUGH TRAINER deserves a TOUGH TM. Here!",
+    'VeilstoneCitySoutheastHouse Person1': "You'll need somewhere to keep your COINS for the GAME CORNER. Take this!",
 }
 
 

@@ -1118,6 +1118,43 @@ u16 MP_LandSlotSpecies(u8 index)
     return Sinnoh_LandSlot(MP_WildSlotSpecies(info, index), index);
 }
 
+// Moemon Kai: a POKé RADAR encounter (src/mp/mp_pokeradar.c) into gEnemyParty[0]: CHAIN's species (SPECIES_NONE: a grass
+// slot's, Platinum's radar POKéMON in slots 4, 5, 10, 11 in SINNOH) at a slot's level, shiny when SHINY; its species
+u16 MP_RadarWildMon(u16 chain, bool8 shiny)
+{
+    u16 Sinnoh_RadarSlot(u16 species, u8 index);
+    u16 headerId = GetCurrentMapWildMonHeaderId(), species;
+    const struct WildPokemonInfo *info;
+    u8 index, level;
+    if (headerId == HEADER_NONE || (info = gWildMonHeaders[headerId].landMonsInfo) == NULL)
+        return SPECIES_NONE;
+    info = MP_Region_WildInfo(info);
+    index = ChooseWildMonIndex_Land();
+    level = ChooseWildMonLevel(&info->wildPokemon[index]);
+    species = chain != SPECIES_NONE ? chain : Sinnoh_RadarSlot(Sinnoh_LandSlot(MP_WildSlotSpecies(info, index), index), index);
+    CreateWildMon(species, level);
+    if (shiny && !IsMonShiny(&gEnemyParty[0]))
+    {
+        // the same POKéMON made again with a personality that's shiny for the player and keeps its nature
+        u32 otId = gSaveBlock2Ptr->playerTrainerId[0] | gSaveBlock2Ptr->playerTrainerId[1] << 8
+                 | gSaveBlock2Ptr->playerTrainerId[2] << 16 | (u32)gSaveBlock2Ptr->playerTrainerId[3] << 24;
+        u8 nature = GetNature(&gEnemyParty[0]);
+        u16 sp = GetMonData(&gEnemyParty[0], MON_DATA_SPECIES);
+        u8 lv = GetMonData(&gEnemyParty[0], MON_DATA_LEVEL);
+        u32 p, tries;
+        for (tries = 0; tries < 1000; tries++)
+        {
+            u16 hi = Random();
+            u16 lo = (u16)((otId >> 16) ^ (otId & 0xFFFF) ^ hi ^ (Random() & 7));
+            p = ((u32)hi << 16) | lo;
+            if (p % NUM_NATURES == nature)
+                break;
+        }
+        CreateMon(&gEnemyParty[0], sp, lv, USE_RANDOM_IVS, TRUE, p, OT_ID_PLAYER_ID, 0);
+    }
+    return GetMonData(&gEnemyParty[0], MON_DATA_SPECIES);
+}
+
 bool8 MP_RollExtraLandMon(struct Pokemon *out)
 {
     u16 headerId = GetCurrentMapWildMonHeaderId();

@@ -1061,6 +1061,9 @@ static const u8 sPoketchDesc[] = _(
     "Handy apps on your wrist. The\n"
     "right stick shows and works it.");
 
+static const u8 sPokeRadarDesc[] = _(
+    "Shakes the grass where MOéMON hide. Find the same one again and again.");
+
 static const u8 sCandyJarDesc[] = _(
     "Keeps the candies released MOéMON leave behind.");
 

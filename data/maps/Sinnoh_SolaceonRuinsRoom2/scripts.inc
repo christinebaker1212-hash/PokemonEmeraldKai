@@ -5,12 +5,12 @@ Sinnoh_SolaceonRuinsRoom2_MapScripts::
 Sinnoh_SolaceonRuinsRoom2_EventScript_Person1::
 	lock
 	faceplayer
-	goto_if_set 0x3DD9, Sinnoh_SolaceonRuinsRoom2_EventScript_Person1_Given
+	goto_if_set 0x3DDA, Sinnoh_SolaceonRuinsRoom2_EventScript_Person1_Given
 	msgbox Sinnoh_SolaceonRuinsRoom2_Text_Person1, MSGBOX_DEFAULT
 	msgbox Sinnoh_SolaceonRuinsRoom2_Text_Person1Gift, MSGBOX_DEFAULT
 	giveitem ITEM_GREEN_SHARD, 1
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DD9
+	setflag 0x3DDA
 	release
 	end
 

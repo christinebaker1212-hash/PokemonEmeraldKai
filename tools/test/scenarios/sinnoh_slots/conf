@@ -1,0 +1,6 @@
+# VEILSTONE's GAME CORNER (data/scripts/sinnoh_places.inc): with a COIN CASE its machines play Emerald's slots.
+# Shot t_slots.png. Needs the 3D pack.
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=3"
+UNEXPECT_A=("[crash]" "TIMEOUT")

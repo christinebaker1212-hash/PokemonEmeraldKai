@@ -26,6 +26,8 @@ Sinnoh_Route209_EventScript_Person29::
 	lock
 	faceplayer
 	goto_if_set 0x3DCA, Sinnoh_Route209_EventScript_Person29_Given
+	checkitem ITEM_GOOD_ROD
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_Route209_EventScript_Person29_Given
 	msgbox Sinnoh_Route209_Text_Person29, MSGBOX_DEFAULT
 	msgbox Sinnoh_Route209_Text_Person29Gift, MSGBOX_DEFAULT
 	giveitem ITEM_GOOD_ROD, 1

@@ -1551,6 +1551,7 @@ static void OverworldBasic(void)
     S3D_Update();         // Moemon Kai: SINNOH's maps drawn in 3D (src/sinnoh/s3d.c)
     MP_Piggy_Update();    // Moemon Co-op: riding piggyback
     MP_Emote_Update();
+    MP_PokeRadar_Update(); // Moemon Kai: the POKé RADAR's shaking grass (mp_pokeradar.c)
     BuildOamBuffer();
     UpdatePaletteFade();
     UpdateTilesetAnimations();

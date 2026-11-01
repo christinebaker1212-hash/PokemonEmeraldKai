@@ -726,6 +726,18 @@ void RestartWildEncounterImmunitySteps(void)
 
 static bool8 CheckStandardWildEncounter(u16 metatileBehavior)
 {
+    // Moemon Kai: the POKé RADAR's shaking grass (src/mp/mp_pokeradar.c): a step into a patch is its encounter (even
+    // right after a battle: the chain goes on); while the patches shake no other grass has one
+    switch (MP_PokeRadar_Step())
+    {
+    case 1:
+        sWildEncounterImmunitySteps = 0;
+        sPrevMetatileBehavior = metatileBehavior;
+        return TRUE;
+    case 2:
+        sPrevMetatileBehavior = metatileBehavior;
+        return FALSE;
+    }
     if (sWildEncounterImmunitySteps < 4)
     {
         sWildEncounterImmunitySteps++;

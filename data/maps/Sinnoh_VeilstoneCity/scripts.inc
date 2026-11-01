@@ -49,12 +49,12 @@ Sinnoh_VeilstoneCity_EventScript_Person22::
 Sinnoh_VeilstoneCity_EventScript_Person23::
 	lock
 	faceplayer
-	goto_if_set 0x3DDF, Sinnoh_VeilstoneCity_EventScript_Person23_Given
+	goto_if_set 0x3DE0, Sinnoh_VeilstoneCity_EventScript_Person23_Given
 	msgbox Sinnoh_VeilstoneCity_Text_Person23, MSGBOX_DEFAULT
 	msgbox Sinnoh_VeilstoneCity_Text_Person23Gift, MSGBOX_DEFAULT
 	giveitem ITEM_TM63, 1
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DDF
+	setflag 0x3DE0
 	release
 	end
 

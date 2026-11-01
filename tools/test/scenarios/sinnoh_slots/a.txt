@@ -1,0 +1,11 @@
+pressuntil A field 5000
+wait 30
+mp register 260
+mp warp 41,90,11,6
+wait 60
+waitfor field 1000
+mp face right
+press A 1
+wait 240
+shot t_slots
+quit

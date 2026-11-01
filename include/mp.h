@@ -1467,4 +1467,13 @@ void MP_BallFxEditor_Open(struct BoxPokemon *target, void (*exitCb)(void));
 
 #include "mp_life.h"   // MOéMON GARDEN, the A-Life
 
+// The POKé RADAR (src/mp/mp_pokeradar.c)
+const u8 *MP_PokeRadar_CantUse(void);
+void MP_PokeRadar_Start(void);
+void MP_PokeRadar_Update(void);
+u8 MP_PokeRadar_Step(void);
+void MP_PokeRadar_BattleEnd(u8 outcome);
+u16 MP_PokeRadar_Chain(u16 *species);
+void MP_PokeRadar_Debug(const char *arg);
+
 #endif // GUARD_MP_H

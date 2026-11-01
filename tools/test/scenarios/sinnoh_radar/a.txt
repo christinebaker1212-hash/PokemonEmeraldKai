@@ -1,0 +1,41 @@
+pressuntil A field 5000
+wait 30
+mp regionclear 3
+mp teach 0 85
+mp register 661
+mp warp 40,1,44,12
+wait 60
+waitfor field 1000
+press SELECT 1
+wait 90
+shot t_patches
+mp radar
+mp radar near 3
+mp face right
+press RIGHT 8
+wait 30
+pressuntil A action 4000
+mp radar shiny
+press A 1
+wait 30
+press A 1
+pressuntil A field 8000
+wait 60
+mp radar
+mp radar near 2
+mp face left
+press LEFT 8
+wait 30
+pressuntil A action 4000
+mp bhp
+shot t_shiny
+press A 1
+wait 30
+press A 1
+pressuntil A field 8000
+wait 60
+mp poketch 25
+mp poketchstick 0
+wait 30
+rendershot t_counter
+quit

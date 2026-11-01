@@ -160,9 +160,7 @@ WORDS = {
     'Sinnoh_SandgemTownPokemonResearchLab': {
         'Person2': "We study how MOéMON evolve.|Some evolve with a stone, some with a friend, "
                    "and some just when they're good and ready.",
-        'Person3': "The professor is out in the field again.|"
-                   "He says you can't study MOéMON from behind a desk. He's right, but someone has to file "
-                   "all this!",
+        'Person3': ('script', 'Sinnoh_EventScript_RadarAide'),   # (the POKé RADAR: data/scripts/sinnoh_wild.inc)
         'Bg1': "A thick book: \"A TRAINER'S FIRST RULE: Take care of your MOéMON, and they'll take care "
                "of you.\"",
         'Bg2': "A thick book: \"A TRAINER'S SECOND RULE: Never stop being curious.\"",

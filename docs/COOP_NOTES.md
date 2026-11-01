@@ -3511,8 +3511,8 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   region's own town map as cells: region_map.c MP_RegionMap_PoketchGrid) 3, MOVE TESTER (gTypeEffectiveness, FAIRY
   from GEN 6) 4, MATCHUP CHECKER (daycare.c MP_Daycare_Compatibility) and ROULETTE 5, KITCHEN TIMER and ALARM CLOCK
   (they ring, flash the LCD and open the POKéTCH on their app wherever the player is: CheckRinging) 6, DOT ARTIST 7,
-  BACKLIGHT 0, BERRY SEARCHER (the map's BERRY trees around the player, 6 pixels a tile; ripe ones blink) 2. (Not
-  here: the TRAINER COUNTER, Platinum's POKé RADAR chains.) Badges count from any region (the most in one): the POKéTCH works the same in HOENN, JOHTO and KANTO.
+  BACKLIGHT 0, BERRY SEARCHER (the map's BERRY trees around the player, 6 pixels a tile; ripe ones blink) 2, TRAINER
+  COUNTER (the POKé RADAR's chains) with the POKé RADAR. Badges count from any region (the most in one): the POKéTCH works the same in HOENN, JOHTO and KANTO.
   "<save>.poketch" (version 2): the app, color, pedometer start, counter, memo, dots, markers, history, alarm,
   backlight. Tests: `mp poketch APP`, `mp poketchtap X,Y`; scenarios sinnoh_poketch, poketch_regions.
   Views and controls (2026-11-01, the user's design): hidden / SMALL (3/8, bottom right, 3/4 opaque; the FRIEND
@@ -3594,7 +3594,25 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   then a line of this game's (gifts.py LINES; gen_words.py stops if one is missing), the item, flag 0x3DA0 + the
   gift's place in the sorted list (65 found, 42 people with words: TMs, the OLD / GOOD / SUPER RODs, held items,
   balls...). Story people, gym leaders and items the game hasn't (the JOURNAL, COUPONS, POFFIN CASE...) are left out,
-  and Platinum's conditions (a time, a POKéMON shown) aren't asked. Test sinnoh_gift.
+  and Platinum's conditions (a time, a POKéMON shown) aren't asked; gifts.py KEY items (the COIN CASE, the rods) skip a
+  player who has one. Test sinnoh_gift.
+- VEILSTONE's GAME CORNER (data/scripts/sinnoh_places.inc): its 12 machines (Platinum's bg events 1-12) play Emerald's
+  slots (GetSlotMachineId, playslotmachine) and its counter sells COINS through MAUVILLE's script; the COIN CASE from
+  VEILSTONE's southeast house (a gift). Test sinnoh_slots.
+- The POKé RADAR (2026-11-01, src/mp/mp_pokeradar.c; ITEM_POKE_RADAR 661, ITEMS_COUNT 662, the DEVON SCOPE's icon):
+  SANDGEM LAB's aide gives it after the LEAGUE (flag 0x3D33). It works in any region's tall grass, not on a bike or in
+  the water, with a 50-step battery: up to four patches, one at each distance 1-4, rustle (Emerald's tall grass field
+  effect, every 40 frames; a shiny patch every 24 with FLDEFF_SPARKLE). field_control_avatar.c CheckStandardWildEncounter
+  asks MP_PokeRadar_Step first (before the 4 steps' immunity after a battle): a step into a patch makes the battle
+  (wild_encounter.c MP_RadarWildMon: a grass slot's species, SINNOH's radar ones in slots 4/5/10/11 through
+  s3d_wild.c Sinnoh_RadarSlot, or the chain's; shiny made with a personality that keeps the nature); while patches
+  shake no other grass has an encounter, and 12 steps without one ends it. Beaten or caught (battle_setup.c
+  CB2_EndWildBattle -> MP_PokeRadar_BattleEnd) the chain grows and new patches come at once (MP_PokeRadar_Update in
+  OverworldBasic); a patch brings the chain's POKéMON 68-98% (the farther, the likelier); sparkling odds
+  round(65535 / (8200 - 200 c)) in 65536, chain c up to 40 (1 in 200). Another POKéMON, running, losing, leaving the
+  map or a bike ends it. The POKéTCH's TRAINER COUNTER (APP_RADAR, shown with the radar in the bag) draws the chain
+  and the best three (Platinum's podium screen; "<save>.poketch" version 3). `mp radar [shiny|charge|find|near D]`;
+  test sinnoh_radar.
 - Words: SINNOH's people, signs and story are written for this game (in its scripts, MOéMON's words like HOENN's, so
   OPTIONS > CREATURES swaps them back like any text); nothing of Platinum's text is used or shipped (decided
   2026-10-31: the earlier text pack built from the decomp's message banks is gone).

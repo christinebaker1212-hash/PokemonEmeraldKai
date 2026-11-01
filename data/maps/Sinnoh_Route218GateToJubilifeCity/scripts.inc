@@ -10,6 +10,8 @@ Sinnoh_Route218GateToJubilifeCity_EventScript_Person2::
 	lock
 	faceplayer
 	goto_if_set 0x3DD2, Sinnoh_Route218GateToJubilifeCity_EventScript_Person2_Given
+	checkitem ITEM_OLD_ROD
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_Route218GateToJubilifeCity_EventScript_Person2_Given
 	msgbox Sinnoh_Route218GateToJubilifeCity_Text_Person2, MSGBOX_DEFAULT
 	msgbox Sinnoh_Route218GateToJubilifeCity_Text_Person2Gift, MSGBOX_DEFAULT
 	giveitem ITEM_OLD_ROD, 1
