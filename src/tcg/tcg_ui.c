@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>   // (floorf, lroundf: the booster carousel; MinGW needs it said)
 #include "global.h"
 #include "item.h"
 #include "money.h"
