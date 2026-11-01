@@ -7,7 +7,48 @@ The GAME CENTER's CAPCOM VS cabinets in Moemon Emerald Kai Co-op run on cps2reco
                is in the game's source repository (arcade/cps2recomp), with its LICENSE.
 
 The games themselves are not part of Moemon Emerald Kai Co-op: each player supplies their own ROM sets in the arcade
-folder. SUPER STREET FIGHTER II X, VAMPIRE SAVIOR, CYBERBOTS and STREET FIGHTER ALPHA 3 are CAPCOM's.
+folder. SUPER STREET FIGHTER II X, VAMPIRE SAVIOR, CYBERBOTS and STREET FIGHTER ALPHA 3 are CAPCOM's; PUZZLE BOBBLE is
+TAITO's.
+
+PUZZLE BOBBLE's cabinet (the Astro City on the GAME CENTER's 3F) runs on a Taito B board written for the game
+(arcade/taitob): cps2recomp's 68000 and Z80 and its 93C46 EEPROM, the hardware as MAME describes it (taito_b.cpp,
+tc0180vcu.cpp, taitoio.cpp, taitosnd.cpp: Nicola Salmoria, Jarek Burczynski and the MAME team; BSD-3-Clause and
+GPL-2.0+), and its YM2610B sound chip from ymfm:
+
+  ymfm         Copyright (c) 2021, Aaron Giles
+               https://github.com/aaronsgiles/ymfm  (vendored in arcade/ymfm, unchanged)
+
+```
+BSD 3-Clause License
+
+Copyright (c) 2021, Aaron Giles
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+```
 
 cps2recomp's notices for the parts it took from other projects follow.
 

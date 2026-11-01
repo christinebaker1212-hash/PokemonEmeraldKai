@@ -1092,11 +1092,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
     else if (strcmp(cmd, "arcade") == 0)
     {
         // arcade GAME FRAMES - Moemon Kai: open the GAME CENTER's arcade board GAME (include/arcade.h) from the player's
-        // set (MOEMON_ARCADE_DIR in tests), run it FRAMES frames (a coin and START along the way) and say what it did
+        // set (MOEMON_ARCADE_DIR in tests), run it FRAMES frames (a coin and START along the way) and say what it did;
+        // with a FILE.bmp, its last picture there (1.64.0)
         int game = 0, frames = 0, f;
         long pairs = 0;
         static int16_t sAudio[8192];
-        sscanf(arg, "%d %d", &game, &frames);
+        char picPath[256] = "";
+        sscanf(arg, "%d %d %255s", &game, &frames, picPath);
         if (!Arcade_Open(game))
         {
             printf("[test] arcade %d: no board\n", game);
@@ -1123,10 +1125,22 @@ void MP_TestCommand(const char *cmd, const char *arg)
         {
             const uint32_t *pic = Arcade_Picture();
             uint32_t lit = 0, i;
-            for (i = 0; i < ARCADE_WIDTH * ARCADE_HEIGHT; i++)
+            int pw, ph;
+            Arcade_PictureSize(&pw, &ph);
+            for (i = 0; i < (uint32_t)(pw * ph); i++)
                 lit += (pic[i] & 0xFFFFFF) != 0;
             printf("[test] arcade %d (%s): %d frames, %ld sound pairs at %d Hz, %u lit pixels, ram hash %08x\n", game,
                    Arcade_Title(game), frames, pairs, Arcade_SampleRate(), lit, Arcade_Hash());
+            if (picPath[0])
+            {
+                SDL_Surface *surf = SDL_CreateRGBSurfaceWithFormatFrom((void *)pic, pw, ph, 32, pw * 4, SDL_PIXELFORMAT_ABGR8888);
+                if (surf)
+                {
+                    SDL_SaveBMP(surf, picPath);
+                    SDL_FreeSurface(surf);
+                    printf("[test] arcade picture %dx%d: %s\n", pw, ph, picPath);
+                }
+            }
         }
         Arcade_Close();
     }
@@ -1151,9 +1165,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
             {
                 const uint32_t *pic;
                 uint32_t h = 2166136261u, i;
+                int pw, ph;
                 Arcade_Frame(run && f < 4 ? buttons : 0, 0);
                 pic = Arcade_Picture();
-                for (i = 0; i < ARCADE_WIDTH * ARCADE_HEIGHT; i++)
+                Arcade_PictureSize(&pw, &ph);
+                for (i = 0; i < (uint32_t)(pw * ph); i++)
                     h = (h ^ pic[i]) * 16777619u;
                 sHash[run][f] = h;
             }

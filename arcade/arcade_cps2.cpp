@@ -1,4 +1,5 @@
-// Moemon Kai: the GAME CENTER's arcade games (include/arcade.h). A CPS-2 board from cps2recomp (arcade/cps2recomp:
+// Moemon Kai: the GAME CENTER's arcade games (include/arcade.h), each on its own board behind one bridge (1.64.0: the CPS-2
+// games, and PUZZLE BOBBLE's Taito B board, arcade/taitob/taitob.h). A CPS-2 board from cps2recomp (arcade/cps2recomp:
 // GPL-3.0, its machine, video, QSound and Z80; the 68000 always in its interpreter, since the games' own code is
 // never translated or kept here) running the ROM set the player put in the "arcade" folder beside the game. A set is
 // read from <set>.zip, with the files it shares with its parent set from <parent>.zip (as ROM collections keep them);
@@ -15,6 +16,7 @@
 #include "cps2recomp/machine/machine.h"
 #include "cps2recomp/machine/romset.h"
 #include "cps2recomp/runtime/state.h"
+#include "taitob/taitob.h"
 #include "arcade.h"
 
 extern "C" const char *Updater_ExeFile(const char *name);
@@ -29,7 +31,7 @@ struct ArcadeGame {
 };
 
 // The sets these boards are made from (MAME's names and CRC32s; the same as the cps2recomp ports')
-const ArcadeGame kGames[ARCADE_GAME_COUNT] = {
+const ArcadeGame kGames[ARCADE_PBOBBLE] = {
     {"VAMPIRE SAVIOR", "vsavj", "vsav", "vsav.zip and vsavj.zip",
      "vm3j.03d:2a2e74a4 vm3j.04d:1c2427bc vm3j.05a:95ce88d5 vm3j.06b:2c4297e0 vm3j.07b:a38aaae7 vm3j.08a:5773e5c9 "
      "vm3j.09b:d064f8b9 vm3j.10b:434518e9",
@@ -57,18 +59,95 @@ const ArcadeGame kGames[ARCADE_GAME_COUNT] = {
      "sz3.01:de810084 sz3.02:72445dc4", "sz3.11m:1c89eed1 sz3.12m:f392b13a", "sfa3.key:54fa39c6"},
 };
 
-// The board keeps a reference to its set: g_roms lives as long as g_machine (and is freed after it)
-std::unique_ptr<RomSet> g_roms;
-std::unique_ptr<Machine> g_machine;
+// (1.64.0) The other boards' sets: MAME's names and CRC32s, each file's part in order (the zips: the set's, then its
+// parent's)
+struct OtherGame {
+    const char *title, *files;
+    std::vector<std::string> zips;
+    std::vector<RomFile> roms;
+};
+const OtherGame &Other(int game)
+{
+    static const OtherGame kPbobble = {
+        "PUZZLE BOBBLE", "pbobble.zip", {"pbobble"},
+        {{"pb-ic18.ic18", 0x5de14f49}, {"pb-ic2.ic2", 0x2abe07d1},   // 68000 program: even / odd bytes
+         {"pb-ic27.ic27", 0x26efa4c4},                               // Z80
+         {"pb-ic14.ic14", 0x55f90ea4}, {"pb-ic9.ic9", 0x3253aac9},    // TC0180VCU
+         {"pb-ic15.ic15", 0x0840cbc4}}};                             // ADPCM
+    static const OtherGame kNone = {"", "", {}, {}};
+    return game == ARCADE_PBOBBLE ? kPbobble : kNone;
+}
+bool IsCps2(int game)
+{
+    return game >= 0 && game < ARCADE_PBOBBLE;
+}
+
+// A running board, whichever it is
+struct Board {
+    virtual ~Board() = default;
+    virtual void Frame(uint16_t p1, uint16_t p2) = 0;
+    virtual const uint32_t *Picture() = 0;
+    virtual int Width() const = 0;
+    virtual int Height() const = 0;
+    virtual std::vector<int16_t> &Audio() = 0;
+    virtual int SampleRate() const = 0;
+    virtual void Serialize(Archive &ar) = 0;
+    virtual uint32_t Hash() const = 0;
+};
+
+struct Cps2Board : Board {
+    // (the board keeps a reference to its set: the set lives as long as the machine, and is freed after it)
+    std::unique_ptr<RomSet> roms;
+    std::unique_ptr<Machine> machine;
+    void Frame(uint16_t p1, uint16_t p2) override {
+        machine->players[0] = p1;
+        machine->players[1] = p2;
+        machine->RunFrame();
+    }
+    const uint32_t *Picture() override { return machine->Picture(); }
+    int Width() const override { return ARCADE_WIDTH; }
+    int Height() const override { return ARCADE_HEIGHT; }
+    std::vector<int16_t> &Audio() override { return machine->audio; }
+    int SampleRate() const override { return (int)QSound::kSampleRate; }
+    void Serialize(Archive &ar) override { machine->Serialize(ar); }
+    uint32_t Hash() const override {
+        uint32_t h = 2166136261u;
+        for (uint8_t b : machine->ram)
+            h = (h ^ b) * 16777619u;
+        return h;
+    }
+    ~Cps2Board() override {
+        machine.reset();
+        roms.reset();
+    }
+};
+
+struct TaitoBBoard : Board {
+    std::unique_ptr<taitob::Board> board;
+    void Frame(uint16_t p1, uint16_t p2) override { board->RunFrame(p1, p2); }
+    const uint32_t *Picture() override { return board->Picture(); }
+    int Width() const override { return taitob::Board::kWidth; }
+    int Height() const override { return taitob::Board::kHeight; }
+    std::vector<int16_t> &Audio() override { return board->audio; }
+    int SampleRate() const override { return (int)board->SampleRate(); }
+    void Serialize(Archive &ar) override { board->Serialize(ar); }
+    uint32_t Hash() const override { return board->Hash(); }
+};
+
+std::unique_ptr<Board> g_board;
 int g_game = -1;
 size_t g_audioAt = 0;
 std::vector<uint8_t> g_state;
 
-std::string SetPath(int game)
+std::string Folder()
 {
     const char *dir = getenv("MOEMON_ARCADE_DIR");
-    std::string folder = dir && dir[0] ? dir : Arcade_Folder();
-    return folder + "/" + kGames[game].set + ".zip";
+    return dir && dir[0] ? dir : Arcade_Folder();
+}
+
+std::string SetPath(int game)
+{
+    return Folder() + "/" + kGames[game].set + ".zip";
 }
 
 bool Load(int game, RomSet &roms, std::string &error)
@@ -76,6 +155,28 @@ bool Load(int game, RomSet &roms, std::string &error)
     const ArcadeGame &g = kGames[game];
     const RomList list = ParseRomList(g.program, g.graphics, g.soundProgram, g.samples, g.key, g.set, g.parent);
     return LoadRomSet(SetPath(game), list, roms, error);
+}
+
+// PUZZLE BOBBLE's parts from its files
+std::unique_ptr<Board> OpenTaitoB(int game, std::string &error)
+{
+    const OtherGame &g = Other(game);
+    std::vector<std::vector<uint8_t>> f;
+    if (!ReadZipFiles(Folder(), g.zips, g.roms, &f, error))
+        return nullptr;
+    taitob::Roms roms;
+    roms.program.assign(0x80000, 0xFF);
+    for (size_t i = 0; i < 0x40000 && i < f[0].size() && i < f[1].size(); i++) {
+        roms.program[i * 2] = f[0][i];       // (ROM_LOAD16_BYTE: ic18 the even bytes, the words' tops)
+        roms.program[i * 2 + 1] = f[1][i];
+    }
+    roms.sound = f[2];
+    roms.graphics = f[3];
+    roms.graphics.insert(roms.graphics.end(), f[4].begin(), f[4].end());
+    roms.samples = f[5];
+    auto b = std::make_unique<TaitoBBoard>();
+    b->board = std::make_unique<taitob::Board>(std::move(roms));
+    return b;
 }
 
 } // namespace
@@ -89,28 +190,36 @@ const char *Arcade_Folder(void)
 
 const char *Arcade_Title(int game)
 {
-    return game >= 0 && game < ARCADE_GAME_COUNT ? kGames[game].title : "";
+    if (IsCps2(game))
+        return kGames[game].title;
+    return game >= 0 && game < ARCADE_GAME_COUNT ? Other(game).title : "";
 }
 
 const char *Arcade_SetFiles(int game)
 {
-    return game >= 0 && game < ARCADE_GAME_COUNT ? kGames[game].files : "";
+    if (IsCps2(game))
+        return kGames[game].files;
+    return game >= 0 && game < ARCADE_GAME_COUNT ? Other(game).files : "";
 }
 
-// From the zips' lists of files only (CheckRomSet): the cabinet asks it while its message is on screen, and unpacking
-// the whole set there held the game up. The set is read in full by Arcade_Open, once the game is chosen.
+// From the zips' lists of files only (CheckRomSet / ReadZipFiles): the cabinet asks it while its message is on screen,
+// and unpacking the whole set there held the game up. The set is read in full by Arcade_Open, once the game is chosen.
 bool Arcade_Check(int game, char *why, size_t whySize)
 {
     std::string error;
+    bool ok;
     if (game < 0 || game >= ARCADE_GAME_COUNT)
         return false;
-    const ArcadeGame &g = kGames[game];
-    const RomList list = ParseRomList(g.program, g.graphics, g.soundProgram, g.samples, g.key, g.set, g.parent);
-    if (CheckRomSet(SetPath(game), list, error))
-        return true;
-    if (why && whySize)
+    if (IsCps2(game)) {
+        const ArcadeGame &g = kGames[game];
+        const RomList list = ParseRomList(g.program, g.graphics, g.soundProgram, g.samples, g.key, g.set, g.parent);
+        ok = CheckRomSet(SetPath(game), list, error);
+    } else {
+        ok = ReadZipFiles(Folder(), Other(game).zips, Other(game).roms, nullptr, error);
+    }
+    if (!ok && why && whySize)
         snprintf(why, whySize, "%s", error.c_str());
-    return false;
+    return ok;
 }
 
 // Whether the player has the set, as Arcade_Check, remembered until the zips change (their sizes and times): cheap
@@ -120,11 +229,16 @@ bool Arcade_HasSet(int game)
     static struct { bool known, ok; long long key; } sKnown[ARCADE_GAME_COUNT];
     struct stat st;
     long long key = 1469598103934665603LL;
+    std::vector<std::string> paths;
     if (game < 0 || game >= ARCADE_GAME_COUNT)
         return false;
-    std::string set = SetPath(game);
-    std::string parent = set.substr(0, set.find_last_of('/') + 1) + kGames[game].parent + ".zip";
-    for (const std::string &path : {set, parent}) {
+    if (IsCps2(game)) {
+        paths = {SetPath(game), Folder() + "/" + kGames[game].parent + ".zip"};
+    } else {
+        for (const std::string &z : Other(game).zips)
+            paths.push_back(Folder() + "/" + z + ".zip");
+    }
+    for (const std::string &path : paths) {
         if (stat(path.c_str(), &st) == 0)
             key = (key ^ (long long)st.st_size ^ ((long long)st.st_mtime << 20)) * 1099511628211LL;
         else
@@ -144,56 +258,67 @@ bool Arcade_Open(int game)
     Arcade_Close();
     if (game < 0 || game >= ARCADE_GAME_COUNT)
         return false;
-    g_roms = std::make_unique<RomSet>();
-    if (!Load(game, *g_roms, error)) {
-        printf("[arcade] %s: %s\n", kGames[game].title, error.c_str());
-        g_roms.reset();
-        return false;
+    if (IsCps2(game)) {
+        auto b = std::make_unique<Cps2Board>();
+        b->roms = std::make_unique<RomSet>();
+        if (!Load(game, *b->roms, error)) {
+            printf("[arcade] %s: %s\n", kGames[game].title, error.c_str());
+            return false;
+        }
+        b->machine = std::make_unique<Machine>(*b->roms);
+        b->machine->Reset();
+        g_board = std::move(b);
+    } else {
+        g_board = OpenTaitoB(game, error);
+        if (!g_board) {
+            printf("[arcade] %s: %s\n", Arcade_Title(game), error.c_str());
+            return false;
+        }
     }
-    g_machine = std::make_unique<Machine>(*g_roms);
-    g_machine->Reset();
     g_game = game;
     g_audioAt = 0;
-    printf("[arcade] %s: the board is on\n", kGames[game].title);
+    printf("[arcade] %s: the board is on\n", Arcade_Title(game));
     return true;
 }
 
 void Arcade_Close(void)
 {
-    g_machine.reset();
-    g_roms.reset();
+    g_board.reset();
     g_game = -1;
 }
 
 bool Arcade_IsOpen(void)
 {
-    return g_machine != nullptr;
+    return g_board != nullptr;
 }
 
 void Arcade_Frame(uint16_t p1, uint16_t p2)
 {
-    if (!g_machine)
-        return;
-    g_machine->players[0] = p1;
-    g_machine->players[1] = p2;
-    g_machine->RunFrame();
+    if (g_board)
+        g_board->Frame(p1, p2);
 }
 
 const uint32_t *Arcade_Picture(void)
 {
-    return g_machine ? g_machine->Picture() : nullptr;
+    return g_board ? g_board->Picture() : nullptr;
+}
+
+void Arcade_PictureSize(int *w, int *h)
+{
+    *w = g_board ? g_board->Width() : ARCADE_WIDTH;
+    *h = g_board ? g_board->Height() : ARCADE_HEIGHT;
 }
 
 int Arcade_SampleRate(void)
 {
-    return (int)QSound::kSampleRate;
+    return g_board ? g_board->SampleRate() : (int)QSound::kSampleRate;
 }
 
 int Arcade_TakeAudio(int16_t *out, int maxPairs)
 {
-    if (!g_machine)
+    if (!g_board)
         return 0;
-    std::vector<int16_t> &a = g_machine->audio;
+    std::vector<int16_t> &a = g_board->Audio();
     size_t pairs = (a.size() - g_audioAt) / 2;
     if (pairs > (size_t)maxPairs)
         pairs = maxPairs;
@@ -208,11 +333,11 @@ int Arcade_TakeAudio(int16_t *out, int maxPairs)
 
 size_t Arcade_SaveState(uint8_t *buf, size_t cap)
 {
-    if (!g_machine)
+    if (!g_board)
         return 0;
     g_state.clear();
     Archive ar(g_state, true);
-    g_machine->Serialize(ar);
+    g_board->Serialize(ar);
     if (g_state.size() > cap)
         return 0;
     memcpy(buf, g_state.data(), g_state.size());
@@ -221,24 +346,19 @@ size_t Arcade_SaveState(uint8_t *buf, size_t cap)
 
 bool Arcade_LoadState(const uint8_t *buf, size_t size)
 {
-    if (!g_machine)
+    if (!g_board)
         return false;
     g_state.assign(buf, buf + size);
     Archive ar(g_state, false);
-    g_machine->Serialize(ar);
-    g_machine->audio.clear();
+    g_board->Serialize(ar);
+    g_board->Audio().clear();
     g_audioAt = 0;
     return ar.Ok();
 }
 
 uint32_t Arcade_Hash(void)
 {
-    uint32_t h = 2166136261u;
-    if (!g_machine)
-        return 0;
-    for (uint8_t b : g_machine->ram)
-        h = (h ^ b) * 16777619u;
-    return h;
+    return g_board ? g_board->Hash() : 0;
 }
 
 } // extern "C"

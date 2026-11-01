@@ -18,6 +18,7 @@ enum
     ARCADE_CYBERBOTS,
     ARCADE_SSF2X,
     ARCADE_SFA3,
+    ARCADE_PBOBBLE,       // (1.64.0) PUZZLE BOBBLE, a Taito B board (arcade/taitob): the 3F's Astro City cabinet
     ARCADE_GAME_COUNT
 };
 
@@ -35,7 +36,7 @@ enum
 #define ARCADE_START  (1 << 10)
 #define ARCADE_COIN   (1 << 11)
 
-#define ARCADE_WIDTH  384
+#define ARCADE_WIDTH  384   // a CPS-2's picture (the largest); each board's own: Arcade_PictureSize
 #define ARCADE_HEIGHT 224
 
 const char *Arcade_Title(int game);        // "VAMPIRE SAVIOR"
@@ -50,7 +51,8 @@ void Arcade_Close(void);
 bool Arcade_IsOpen(void);
 // One frame of the board (59.6 a second) with both players' controls
 void Arcade_Frame(uint16_t p1, uint16_t p2);
-const uint32_t *Arcade_Picture(void);       // ARCADE_WIDTH x ARCADE_HEIGHT, 0x00BBGGRR (red in the low byte)
+const uint32_t *Arcade_Picture(void);       // Arcade_PictureSize, 0x00BBGGRR (red in the low byte)
+void Arcade_PictureSize(int *w, int *h);    // the open board's picture (a CPS-2's 384x224, a Taito B's 320x224)
 // The frame's sound: stereo pairs at Arcade_SampleRate(); takes up to maxPairs, returns how many
 int Arcade_TakeAudio(int16_t *out, int maxPairs);
 int Arcade_SampleRate(void);

@@ -85,6 +85,27 @@ EventScript_GcVsAlpha3East::
 	goto EventScript_VsCabinet
 	end
 
+@ (1.64.0) The Astro City cabinets on the 3F's top right wall: one seat each, the game played alone (START puts in a
+@ coin; hold START to stand up). (10,5) PUZZLE BOBBLE (a Taito B board, arcade/taitob).
+EventScript_GcPuzzleBobble::
+	setvar VAR_0x8005, 6
+	setvar VAR_0x8004, 0
+	lockall
+	msgbox VsCabinet_Text_PuzzleBobble, MSGBOX_DEFAULT
+	goto EventScript_AstroCabinet
+	end
+
+EventScript_AstroCabinet::
+	special MP_Fight_CabinetReady
+	goto_if_eq VAR_RESULT, 0, EventScript_VsCabinet_NoSet
+	special MP_Fight_SeatCheck
+	goto_if_eq VAR_RESULT, 2, EventScript_VsCabinet_Taken
+	goto_if_eq VAR_RESULT, 3, EventScript_VsCabinet_InUse
+	msgbox VsCabinet_Text_PlayAstro, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, EventScript_VsCabinet_Release
+	goto EventScript_VsCabinet_Cpu
+	end
+
 EventScript_VsCabinet::
 	special MP_Fight_CabinetReady
 	goto_if_eq VAR_RESULT, 0, EventScript_VsCabinet_NoSet
@@ -230,6 +251,16 @@ VsCabinet_Text_Cyberbots:
 	.string "CAPCOM's arcade fighter, 1995.\p"
 	.string "Pilots in giant robots slug it out,\n"
 	.string "arms and legs flying.$"
+
+VsCabinet_Text_PuzzleBobble:
+	.string "PUZZLE BOBBLE\n"
+	.string "TAITO's arcade puzzler, 1994.\p"
+	.string "Aim and fire bubbles; three of a\n"
+	.string "color pop!$"
+
+VsCabinet_Text_PlayAstro:
+	.string "START puts in a coin and starts.\n"
+	.string "Hold START to stand up. Play?$"
 
 VsCabinet_Text_Mugen:
 	.string "A VS cabinet with no name on it.\n"

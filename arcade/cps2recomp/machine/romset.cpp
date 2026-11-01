@@ -538,4 +538,40 @@ bool LoadRomSet(const std::string &path, const RomList &list, RomSet &set, std::
     return true;
 }
 
+// Moemon Co-op: files of any board's set by checksum from its zips in FOLDER (the first zip found must open). OUT null:
+// only whether each is listed (as CheckRomSet); else each read, in the order asked
+bool ReadZipFiles(const std::string &folder, const std::vector<std::string> &zips, const std::vector<RomFile> &files,
+                  std::vector<std::vector<uint8_t>> *out, std::string &error) {
+    Places places;
+    for (size_t n = 0; n < zips.size(); n++) {
+        Zip zip;
+        if (zip.Open(folder + "/" + zips[n] + ".zip")) {
+            places.zips.push_back(std::move(zip));
+        } else if (n == 0) {
+            error = "there is no " + folder + "/" + zips[n] + ".zip";
+            return false;
+        }
+    }
+    if (out)
+        out->clear();
+    for (const RomFile &file : files) {
+        if (!out) {
+            bool found = false;
+            for (const Zip &zip : places.zips)
+                for (const Zip::Entry &e : zip.entries)
+                    found = found || e.crc == file.crc;
+            if (!found) {
+                error = "the set has no " + file.name;
+                return false;
+            }
+            continue;
+        }
+        std::vector<uint8_t> data;
+        if (!ReadFile(places, file, data, error))
+            return false;
+        out->push_back(std::move(data));
+    }
+    return true;
+}
+
 } // namespace cps2recomp

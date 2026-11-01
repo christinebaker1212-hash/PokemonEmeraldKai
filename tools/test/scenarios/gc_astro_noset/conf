@@ -1,0 +1,9 @@
+# The 3F's Astro City cabinet at (10,5) is PUZZLE BOBBLE (1.64.0, a Taito B board): it names its game, and without the
+# player's ROM set it says which zip to put in the arcade folder (MP_Fight_CabinetReady logs why), then lets go.
+# Shots name, noset. (Play itself needs the set: tools/test/README.md "arcade sets".)
+MODE=1
+WARP=11,19,10,6
+TMO=60
+ENV_A="MOEMON_ARCADE_DIR=/nonexistent"
+EXPECT_A=("fight: PUZZLE BOBBLE: there is no /nonexistent/pbobble.zip" "ctx 1 free 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -88,5 +88,9 @@ RomList ParseRomList(const char *program, const char *graphics, const char *soun
 bool LoadRomSet(const std::string &path, const RomList &list, RomSet &set, std::string &error);
 // Moemon Co-op: the same question from the zips' lists of files only (nothing unpacked or checked byte by byte)
 bool CheckRomSet(const std::string &path, const RomList &list, std::string &error);
+// Moemon Co-op: other boards' sets: FILES (by checksum) from FOLDER/<zip>.zip for each of ZIPS (the set's first); OUT
+// null only checks that each is listed
+bool ReadZipFiles(const std::string &folder, const std::vector<std::string> &zips, const std::vector<RomFile> &files,
+                  std::vector<std::vector<uint8_t>> *out, std::string &error);
 
 } // namespace cps2recomp

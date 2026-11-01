@@ -113,50 +113,53 @@ static uint16_t BoardButtons(int p, unsigned short b)
 }
 
 // ---------------------------------------------------------------------------------------------------------------
-// The picture: 384x224 (0x00BBGGRR) to 427x320, each output pixel from its four nearest (bilinear), RGB565
+// The picture: the board's (a CPS-2's 384x224, a Taito B's 320x224; 0x00BBGGRR) to 427x320, each output pixel from its
+// four nearest (bilinear), RGB565
 
 static void Picture(void)
 {
-    static int sReady;
+    static int sReadyW, sReadyH;
     static uint16_t xi[PIC_W], xw[PIC_W], yi[MF_SCREEN_H], yw[MF_SCREEN_H];
     const uint32_t *src = Arcade_Picture();
-    int x, y;
+    int x, y, srcW, srcH;
 
     if (src == NULL)
         return;
-    if (!sReady)
+    Arcade_PictureSize(&srcW, &srcH);
+    if (sReadyW != srcW || sReadyH != srcH)
     {
         for (x = 0; x < PIC_W; x++)
         {
-            int f = (int)(((x + 0.5) * ARCADE_WIDTH / PIC_W - 0.5) * 256);
+            int f = (int)(((x + 0.5) * srcW / PIC_W - 0.5) * 256);
             if (f < 0)
                 f = 0;
-            if (f > (ARCADE_WIDTH - 1) * 256)
-                f = (ARCADE_WIDTH - 1) * 256;
+            if (f > (srcW - 1) * 256)
+                f = (srcW - 1) * 256;
             xi[x] = (uint16_t)(f >> 8);
             xw[x] = (uint16_t)(f & 255);
         }
         for (y = 0; y < MF_SCREEN_H; y++)
         {
-            int f = (int)(((y + 0.5) * ARCADE_HEIGHT / MF_SCREEN_H - 0.5) * 256);
+            int f = (int)(((y + 0.5) * srcH / MF_SCREEN_H - 0.5) * 256);
             if (f < 0)
                 f = 0;
-            if (f > (ARCADE_HEIGHT - 1) * 256)
-                f = (ARCADE_HEIGHT - 1) * 256;
+            if (f > (srcH - 1) * 256)
+                f = (srcH - 1) * 256;
             yi[y] = (uint16_t)(f >> 8);
             yw[y] = (uint16_t)(f & 255);
         }
-        sReady = 1;
+        sReadyW = srcW;
+        sReadyH = srcH;
     }
     for (y = 0; y < MF_SCREEN_H; y++)
     {
-        const uint32_t *r0 = src + yi[y] * ARCADE_WIDTH;
-        const uint32_t *r1 = yi[y] + 1 < ARCADE_HEIGHT ? r0 + ARCADE_WIDTH : r0;
+        const uint32_t *r0 = src + yi[y] * srcW;
+        const uint32_t *r1 = yi[y] + 1 < srcH ? r0 + srcW : r0;
         unsigned int wy = yw[y];
         unsigned short *out = sPicture + y * MF_SCREEN_W + PIC_X;
         for (x = 0; x < PIC_W; x++)
         {
-            unsigned int i = xi[x], j = i + 1 < ARCADE_WIDTH ? i + 1 : i, wx = xw[x];
+            unsigned int i = xi[x], j = i + 1 < (unsigned int)srcW ? i + 1 : i, wx = xw[x];
             uint32_t a = r0[i], b = r0[j], c = r1[i], d = r1[j];
             unsigned int w00 = (256 - wx) * (256 - wy), w01 = wx * (256 - wy), w10 = (256 - wx) * wy, w11 = wx * wy;
             // (the board's colors are 0x00BBGGRR)

@@ -59,6 +59,7 @@ void Z80::Reset() {
     sp = 0xFFFF;
     i = refresh = 0;
     iff1 = iff2 = halted = false;
+    m_nmiLine = m_nmiPending = false; // (Moemon Co-op)
     mode = 0;
     m_interrupt = false;
     m_afterEI = false;
@@ -398,6 +399,16 @@ bool Z80::BlockCompare(int step, bool repeat) {
 
 // Takes the interrupt if the line is up and interrupts are on; the cycles that took (0: none taken)
 unsigned Z80::TakeInterrupt() {
+    if (m_nmiPending) {
+        // Moemon Co-op: the NMI, whatever IFF1 says; IFF2 keeps what IFF1 was for RETN
+        m_nmiPending = false;
+        halted = false;
+        iff1 = false;
+        refresh++;
+        Push(pc);
+        pc = 0x0066;
+        return 11;
+    }
     if (!(m_interrupt && iff1 && !m_afterEI)) {
         return 0;
     }
@@ -831,6 +842,10 @@ void Z80::Serialize(Archive &ar) {
     ar.Pod(m_interrupt);
     ar.Pod(m_afterEI);
     ar.Pod(cycles);
+    if (hasNmi) {   // (Moemon Co-op)
+        ar.Pod(m_nmiLine);
+        ar.Pod(m_nmiPending);
+    }
 }
 
 } // namespace cps2recomp

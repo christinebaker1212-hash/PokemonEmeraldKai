@@ -56,6 +56,18 @@ public:
     void RaiseInterrupt() {
         m_interrupt = true;
     }
+    // Moemon Co-op: the NMI line (a Taito board's sound link): taken once on each rise, at 0066h. Saved in states only
+    // on boards that set hasNmi (a CPS-2's states keep their layout)
+    void SetNmiLine(bool on) {
+        if (on && !m_nmiLine)
+            m_nmiPending = true;
+        m_nmiLine = on;
+    }
+    bool hasNmi = false;
+    // Moemon Co-op: a level-triggered line let go before the CPU took it (a Taito board's YM2610)
+    void LowerInterrupt() {
+        m_interrupt = false;
+    }
     // One instruction or interrupt; the clock cycles it took (not added to `cycles`)
     unsigned Step();
     // Runs until `cycles` reaches `until` (a little past it: to the end of the instruction or block)
@@ -167,6 +179,7 @@ public:
 
 private:
     bool m_interrupt = false;
+    bool m_nmiLine = false, m_nmiPending = false; // (Moemon Co-op)
     bool m_afterEI = false; // (interrupts are taken one instruction after EI)
     unsigned m_cycles = 0;
     bool m_jumped = false;  // the instruction went somewhere the translator cannot follow

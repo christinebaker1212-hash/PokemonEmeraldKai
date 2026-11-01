@@ -1,0 +1,14 @@
+pressuntil A field 5000
+wait 60
+mp face up
+wait 10
+press A 4
+wait 60
+shot name
+press A 4
+wait 60
+shot noset
+mash B 6 10
+wait 30
+mp ctx
+quit
