@@ -3471,7 +3471,7 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   says no (there's no wireless UNION ROOM), and InitUnionRoom only clears the name: its Task_InitUnionRoom is a stub,
   so the struct it allocated was never freed (a leak per POKeMON CENTER entered). Test nurse_no_union (CHERRYGROVE).
 
-## 1.63.14: every follower style placed as PMD, one shadow size
+## 1.63.14: every follower style placed as PMD, one shadow size, SPRITE SCALING in 5% steps
 - mp_shadow.c MP_SpriteStandShift: a follower's or Garden POKeMON's own (GBA-size) sprite stands as a PMD picture
   does: its first frame's lowest row on the player's line (PMD_GROUND_DY + PMD_FEET_DY below its tile's middle, as
   mp_pmd.c UpdateLift), the middle of its pixels for the facing (anim dir * 2, hFlip mirrored) on its point
@@ -3479,6 +3479,10 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   mp_garden_life.c (DrawDoing's feet from MP_SpriteFeetRow). Scaled, such a sprite shrinks toward that feet row and
   point (mp_bigsprite.c MP_BigSprite_NoteScale, sprites marked mpCastShadow), as a PMD picture toward its feet.
 - Shadows: every POKeMON's is the player's oval (the user: the same size as the player's), any style or size.
+- SPRITE SCALING in 5% steps: gMpConfig.scaleFollowers / scaleGarden are how far (0-100%, MP_SCALE_STEP) a small
+  PMD picture goes toward its POKeDEX height (MP_SpriteScale_ForMon: art - (art - target) * percent / 100); OPTIONS
+  rows step them with LEFT / RIGHT (0% shows OFF). Config files from before keep 1 = ON: followers 100%, the GARDEN
+  50% (mp_main.c ScalePercent). `mp spritescale F G` takes percents (1 = the old ON).
 
 ## 1.63.13: scaled PMD pictures drawn whole, ledge shadows, VS cabinet seats
 - gba_easy_draw.c DrawBigSprite skipped every screen line outside the big sprite's full-size picture before it looked

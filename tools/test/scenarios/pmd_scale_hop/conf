@@ -7,6 +7,6 @@ MODE=1
 WARP=0,0,20,17
 TMO=120
 ENV_A="MOEMON_DEBUG_PARTY=25:15 MOEMON_FOLLOWER_SPRITES=1"
-EXPECT_A=("follow 0 -> 1" "sprite scaling: followers 1")
+EXPECT_A=("follow 0 -> 1" "sprite scaling: followers 100")
 UNEXPECT_A=("[crash]" "TIMEOUT")
 CHECK="python3 tools/test/scenarios/pmd_scale_hop/check.py"

@@ -252,7 +252,7 @@ struct MpConfig
     u8 finderOn;              // ... shown (the right stick click / G shows and hides it)
     u8 followerSprites;       // OPTIONS > GAME > FOLLOWERS: MP_FOLLOW_SPRITES_*
     u8 sinnohSprites;         // Moemon Kai: OPTIONS > DISPLAY > SPRITE SCALING > SINNOH PEOPLE: MP_SINNOH_SPRITES_* (event_object_movement.c)
-    u8 scaleFollowers;        // OPTIONS > DISPLAY > SPRITE SCALING > FOLLOWERS: at their POKeDEX height (mp_spritescale.c)
+    u8 scaleFollowers;        // OPTIONS > DISPLAY > SPRITE SCALING > FOLLOWERS: % of the way to their POKeDEX height (mp_spritescale.c)
     u8 scaleGarden;           // ... > GARDEN POKeMON: the same in the MOeMON GARDEN
     u8 cardArt;               // OPTIONS > DISPLAY > CARD ART: MP_CARD_ART_* (src/tcg/tcg_gfx.h G_ART_*)
     u8 scale[MP_SCALE_COUNT - 1];   // LEVEL SCALING's settings past ON / OFF (MP_SCALE_WILD..), HOST A GAME > GAME RULES or OPTIONS

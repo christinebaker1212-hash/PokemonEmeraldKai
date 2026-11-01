@@ -10,12 +10,14 @@
 #define MP_TRAINER_HEIGHT_PX 21   // ... and how tall the player's sprite is (Brendan's, standing)
 #define MP_SCALE_MIN_PX 16        // nothing smaller than 3/4 of the player (the user's call)
 
-u16 MP_SpriteScale_ForMon(u16 dexNum, u16 artHeightPx, bool8 slight);   // Q8, 0: as drawn (slight: half the way)
+u16 MP_SpriteScale_ForMon(u16 dexNum, u16 artHeightPx, u8 percent);   // Q8, 0: as drawn (PERCENT of the way down)
 u16 MP_SpriteScale_TiledHeight(const u8 *tiles, u8 size);     // a size x size 4bpp tiled frame's drawn height
 u16 MP_SpriteScale_BigHeight(const u8 *frame, u8 bpp);        // an mp_bigsprite frame's drawn height
-// A follower's / GARDEN POKeMON's scale (Q8, 0: as drawn) when ON, worked out once per POKeMON and kind of sprite
+// How far toward their POKeDEX height (OPTIONS > DISPLAY > SPRITE SCALING: 0-100%, in steps of MP_SCALE_STEP; 1.63.14)
+#define MP_SCALE_STEP 5
+// A follower's / GARDEN POKeMON's scale (Q8, 0: as drawn) PERCENT of the way toward its height, worked out once per POKeMON and kind of sprite
 // (*KEY / *VALUE keep it): its PMD picture (PMD: its height from the ground point) or its sprite (TILES, SIZE)
 struct MpPmdView;
-u16 MP_SpriteScale_Mon(bool8 on, bool8 slight, u16 dex, const struct MpPmdView *pmd, const u8 *tiles, u8 size, u32 *key, u16 *value);
+u16 MP_SpriteScale_Mon(u8 percent, u16 dex, const struct MpPmdView *pmd, const u8 *tiles, u8 size, u32 *key, u16 *value);
 
 #endif // GUARD_MP_SPRITESCALE_H

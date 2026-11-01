@@ -14,6 +14,7 @@
 #include "save_slots.h"
 #include "mp_region.h"
 #include "mp.h"
+#include "mp_spritescale.h"
 #include "mp_fight.h"
 #include "mp_pmd.h"
 #include "main.h"
@@ -321,6 +322,19 @@ bool8 MP_ConfigAllowsTweaks(void)
 
 static int sMainAutosaveMinutes;
 
+// SPRITE SCALING's percent from the config: 1 is a file from before 1.63.14 (ON: LEGACY, the full way for followers,
+// half for the GARDEN), anything else rounded to a 5% step
+static u8 ScalePercent(int v, u8 legacy)
+{
+    if (v == 1)
+        return legacy;
+    if (v <= 0)
+        return 0;
+    if (v >= 100)
+        return 100;
+    return (u8)((v + MP_SCALE_STEP / 2) / MP_SCALE_STEP * MP_SCALE_STEP);
+}
+
 static void LoadConfig(void)
 {
     FILE *f;
@@ -343,8 +357,8 @@ static void LoadConfig(void)
     gMpConfig.animSpeed = 30;
     gMpConfig.spectateScale = 1;
     gMpConfig.bikeMusic = TRUE;
-    gMpConfig.scaleFollowers = FALSE;  // (SPRITE SCALING: followers as drawn, the GARDEN's slightly smaller)
-    gMpConfig.scaleGarden = TRUE;
+    gMpConfig.scaleFollowers = 0;   // (SPRITE SCALING: followers as drawn, the GARDEN's half the way to their height)
+    gMpConfig.scaleGarden = 50;
     gMpConfig.surfMusic = TRUE;
     memset(gMpConfig.phrases, 0xFF, sizeof(gMpConfig.phrases));
     gMpConfig.quickStock[0] = 0;   // Hello!
@@ -444,8 +458,8 @@ static void LoadConfig(void)
         else if (strcmp(key, "sinnoh_sprites") == 0)
             gMpConfig.sinnohSprites = strcmp(val, "gen3") == 0 ? MP_SINNOH_SPRITES_GEN3
                                     : strcmp(val, "mixed") == 0 ? MP_SINNOH_SPRITES_MIXED : MP_SINNOH_SPRITES_GEN4;
-        else if (strcmp(key, "scale_followers") == 0) gMpConfig.scaleFollowers = atoi(val) != 0;
-        else if (strcmp(key, "scale_garden") == 0) gMpConfig.scaleGarden = atoi(val) != 0;
+        else if (strcmp(key, "scale_followers") == 0) gMpConfig.scaleFollowers = ScalePercent(atoi(val), 100);
+        else if (strcmp(key, "scale_garden") == 0) gMpConfig.scaleGarden = ScalePercent(atoi(val), 50);
         else if (strcmp(key, "spectate_friend") == 0)
         {
             // spectate_friend = SIDE SIZE POPOUT SHOW NAME

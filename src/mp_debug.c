@@ -640,12 +640,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "spritescale") == 0)
     {
-        // spritescale FOLLOWERS GARDEN: OPTIONS > DISPLAY > SPRITE SCALING (1 on, 0 off)
+        // spritescale FOLLOWERS GARDEN: OPTIONS > DISPLAY > SPRITE SCALING, % of the way to their POKeDEX height
+        // (0 off; 1 as the old ON: followers 100, the GARDEN 50)
         int f = 1, g = 1;
         sscanf(arg, "%d %d", &f, &g);
-        gMpConfig.scaleFollowers = f != 0;
-        gMpConfig.scaleGarden = g != 0;
-        printf("[test] sprite scaling: followers %d garden %d\n", f != 0, g != 0);
+        gMpConfig.scaleFollowers = f == 1 ? 100 : f < 0 ? 0 : f > 100 ? 100 : f;
+        gMpConfig.scaleGarden = g == 1 ? 50 : g < 0 ? 0 : g > 100 ? 100 : g;
+        printf("[test] sprite scaling: followers %d garden %d\n", gMpConfig.scaleFollowers, gMpConfig.scaleGarden);
     }
     else if (strcmp(cmd, "dexorder") == 0)
     {

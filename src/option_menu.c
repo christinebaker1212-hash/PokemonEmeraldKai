@@ -13,6 +13,7 @@
 #include "international_string_util.h"
 #include "list_menu.h"
 #include "mp.h"
+#include "mp_spritescale.h"
 #include "main.h"
 #include "menu.h"
 #include "palette.h"
@@ -503,7 +504,7 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         names[0] = gText_ButtonTypeNormal, names[1] = gText_ButtonTypeLR, names[2] = gText_ButtonTypeLEqualsA;
         return 3;
     case OPT_TYPEICONS: case OPT_FULLSCREEN: case OPT_VSYNC: case OPT_ANALOGRUN: case OPT_RUMBLE: case OPT_SPECPANEL:
-    case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_CARDSCALE: case OPT_SS_FOLLOW: case OPT_SS_GARDEN: case OPT_SHADOWS:
+    case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_CARDSCALE: case OPT_SHADOWS:
         names[0] = sText_Off, names[1] = sText_On;
         return 2;
     case OPT_NAMECASE:
@@ -675,6 +676,20 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
             MP_AsciiToGame(buf, ascii, 12);
         }
         break;
+    case OPT_SS_FOLLOW:
+    case OPT_SS_GARDEN:   // (1.63.14: how far, in 5% steps)
+        {
+            u8 pct = opt == OPT_SS_FOLLOW ? gMpConfig.scaleFollowers : gMpConfig.scaleGarden;
+            char ascii[16];
+            if (pct == 0)
+                StringCopy(buf, sText_Off);
+            else
+            {
+                snprintf(ascii, sizeof(ascii), "%d%%", pct);
+                MP_AsciiToGame(buf, ascii, 12);
+            }
+        }
+        break;
     default:
         return 0;   // BACK, CLOSE: no value
     }
@@ -710,8 +725,8 @@ static u8 Current(u8 row)
     case OPT_FR_SHOW:     return MP_Spectate_Friend(arg, FALSE)->show != 0;
     case OPT_FR_PLACE:    return FriendPlace(MP_Spectate_Friend(arg, FALSE));
     case OPT_BIKEMUSIC:   return gMpConfig.bikeMusic != 0;
-    case OPT_SS_FOLLOW:   return gMpConfig.scaleFollowers != 0;
-    case OPT_SS_GARDEN:   return gMpConfig.scaleGarden != 0;
+    case OPT_SS_FOLLOW:   return 0;   // (one value shown: its percent)
+    case OPT_SS_GARDEN:   return 0;
     case OPT_SPRITESCALE: return 0;   // (the page has the settings)
     case OPT_SURFMUSIC:   return gMpConfig.surfMusic != 0;
     case OPT_LEVELSCALE:  return 0;   // (the page has the settings)
@@ -729,6 +744,13 @@ static u8 Current(u8 row)
     case OPT_SHADOWS:     return !gMpConfig.noShadows;
     }
     return 0;
+}
+
+// SPRITE SCALING: 0-100% in 5% steps, round from 100 to OFF and back
+static u8 ScaleStep(u8 pct, int dir)
+{
+    int n = 100 / MP_SCALE_STEP + 1;
+    return (u8)(Wrap(pct / MP_SCALE_STEP + dir, n) * MP_SCALE_STEP);
 }
 
 // Left / Right (dir -1 / +1), or A (+1)
@@ -777,8 +799,8 @@ static void Change(u8 row, int dir)
     case OPT_AUTOSAVE:    if (MOEMON_DEV_BUILD) break; gMpConfig.autosaveMinutes = sAutosaveSteps[Wrap(AutosaveIndex() + dir, ARRAY_COUNT(sAutosaveSteps))]; break;
     case OPT_FLAGRANGE:   gMpConfig.trainerRange = Wrap(gMpConfig.trainerRange - 1 + dir, 8) + 1; break;
     case OPT_BIKEMUSIC:   gMpConfig.bikeMusic = !gMpConfig.bikeMusic; break;
-    case OPT_SS_FOLLOW:   gMpConfig.scaleFollowers = !gMpConfig.scaleFollowers; break;
-    case OPT_SS_GARDEN:   gMpConfig.scaleGarden = !gMpConfig.scaleGarden; break;
+    case OPT_SS_FOLLOW:   gMpConfig.scaleFollowers = ScaleStep(gMpConfig.scaleFollowers, dir); break;
+    case OPT_SS_GARDEN:   gMpConfig.scaleGarden = ScaleStep(gMpConfig.scaleGarden, dir); break;
     case OPT_SPRITESCALE: break;   // A opens its page
     case OPT_FOLLOWSPRITES:
         gMpConfig.followerSprites = Wrap(gMpConfig.followerSprites + dir, MP_FOLLOW_SPRITES_COUNT);
@@ -1057,10 +1079,16 @@ static void DrawHint(void)
         snprintf(ascii, sizeof(ascii), "A: SINNOH'S PEOPLE, FOLLOWERS, THE GARDEN");
     else if (opt == OPT_SHADOWS)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.noShadows ? "NO SHADOWS UNDER PEOPLE AND MOEMON" : "A SOFT SHADOW UNDER PEOPLE AND MOEMON");
-    else if (opt == OPT_SS_FOLLOW)
-        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.scaleFollowers ? "SMALL PMD ONES CLOSER TO TRUE SIZE" : "PMD PICTURES AS THEY ARE");
-    else if (opt == OPT_SS_GARDEN)
-        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.scaleGarden ? "SMALL PMD ONES A LITTLE SMALLER" : "PMD PICTURES AS THEY ARE");
+    else if (opt == OPT_SS_FOLLOW || opt == OPT_SS_GARDEN)
+    {
+        u8 pct = opt == OPT_SS_FOLLOW ? gMpConfig.scaleFollowers : gMpConfig.scaleGarden;
+        if (pct == 0)
+            snprintf(ascii, sizeof(ascii), "PMD PICTURES AS THEY ARE");
+        else if (pct == 100)
+            snprintf(ascii, sizeof(ascii), "SMALL PMD ONES AT TRUE SIZE");
+        else
+            snprintf(ascii, sizeof(ascii), "SMALL PMD ONES %d%% OF THE WAY", pct);
+    }
     else if (opt == OPT_SURFMUSIC)
         snprintf(ascii, sizeof(ascii), "OFF: THE MAP'S SONG SURFING AND DIVING");
     else if (opt == OPT_LEVELSCALE)
