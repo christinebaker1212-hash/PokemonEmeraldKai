@@ -311,6 +311,121 @@ def veilstone_check(root, bags, tires, track):
     print('VEILSTONE: everyone reached (%d states of the bags)' % len(states))
 
 
+def snowpoint(root):
+    """SNOWPOINT: its snowballs (Platinum's objects of that look: hidden by gen_maps, drawn and broken here) and its
+    fences (behavior 0x49: no step north or south into, out of or across it; 0x4A: none west or east)"""
+    src = open_source(root)
+    p = [q for q in places(src, root) if q['name'] == 'Sinnoh_SnowpointCityGym'][0]
+    ev = json.load(open(os.path.join(root, 'res/field/events/events_snowpoint_city_gym.json')))
+    balls = [(o['x'], o['z']) for o in ev['object_events'] if o['graphics_id'] == 'OBJ_EVENT_GFX_SNOWBALL']
+    fences = [(x, y, b - 0x49) for x, y, b in tiles_with(src, p, {0x49, 0x4A})]
+    assert balls and fences
+    slopes = snow_slopes(src, p)
+    snowpoint_check(root, src, p, ev, balls, fences, slopes)
+    return ['', '// SNOWPOINT: its ice\'s slopes as Platinum sees them half a step ahead (a tile two hex digits: 2 bits a way,',
+            '// north, south, west, east from the low bits; 1 up, 2 down)',
+            'static const char sSnowpointSlope[32][65] = {%s};' % ',\n    '.join(
+                '"%s"' % ''.join('%02X' % slopes[y * 32 + x] for x in range(32)) for y in range(32)),
+            '// its snowballs {x, y}, its fences {x, y, 0 no step north-south / 1 no step west-east}',
+            'static const u8 sSnowpointBalls[%d][2] = {%s};' % (len(balls), ', '.join('{%d, %d}' % b for b in balls)),
+            'static const u8 sSnowpointFences[%d][3] = {%s};' % (len(fences), ', '.join('{%d, %d, %d}' % f for f in fences))]
+
+
+def snow_slopes(src, p):
+    """Per tile, going each way (Platinum's order) whether the floor half a step ahead (4 units, Platinum's look) is
+    higher (1) or lower (2) than at the centre: 2 bits a way"""
+    from build_pack import heights
+    (bx, by, land), = blocks(src, p)
+    here = heights(land)
+    ahead = [heights(land, dx * 4, dy * 4) for dx, dy in VEIL_DIRS]
+    out = []
+    for t in range(1024):
+        v = 0
+        if land.attrs[t] & 0xFF == 0x20 and here[t]:
+            for d in range(4):
+                if ahead[d][t]:
+                    a, h = ahead[d][t][0], here[t][0]
+                    v |= (1 if a > h + 0.5 else 2 if a < h - 0.5 else 0) << (2 * d)
+        out.append(v)
+    return out
+
+
+def snow_slide(walls, ice, slopes, fences, balls, x, y, d):
+    """A slide from X, Y going D (just stepped onto ice), as field_player_avatar.c SnowpointSlip slides: where it stops
+    and the snowballs it breaks"""
+    dx, dy = VEIL_DIRS[d]
+    s, broke, steps = 0, set(), 0
+
+    def blocked(fx, fy, tx, ty):
+        a, b = fences.get((fx, fy)), fences.get((tx, ty))
+        ns = fx == tx
+        return (tx, ty) in walls or ((tx, ty) in balls and (tx, ty) not in broke) \
+            or ((a == 0 or b == 0) and ns) or ((a == 1 or b == 1) and not ns)
+
+    while (x, y) in ice and steps < 200:
+        steps += 1
+        v = (slopes[y * 32 + x] >> (2 * VEIL_DIRS.index((dx, dy)))) & 3
+        sl = 1 if v == 1 else -1 if v == 2 else 0
+        if s >= 1 and steps > 1 and (x + dx, y + dy) in balls:
+            broke.add((x + dx, y + dy))
+        back = False
+        if blocked(x, y, x + dx, y + dy):
+            if sl <= 0:
+                break
+            back = True
+        elif sl > 0:
+            if s == 0:
+                back = True
+            else:
+                s -= 1
+        elif sl < 0:
+            s = min(3, s + 1)
+        if back:
+            dx, dy, s = -dx, -dy, 0
+            if blocked(x, y, x + dx, y + dy):
+                break
+        x, y = x + dx, y + dy
+    return x, y, broke
+
+
+def snowpoint_check(root, src, p, ev, balls, fences, slopes):
+    """Walking and sliding as the game does (snow_slide) reaches each of Platinum's trainers and CANDICE from the door:
+    stops the generator if not; prints the way to CANDICE"""
+    from collections import deque
+    (bx, by, land), = blocks(src, p)
+    people = [(o['x'], o['z']) for o in ev['object_events'] if o['graphics_id'] != 'OBJ_EVENT_GFX_SNOWBALL']
+    walls = {(x, y) for x in range(32) for y in range(32) if land.attrs[y * 32 + x] & 0x8000} | set(people)
+    walls |= {(x, y) for x in range(-1, 33) for y in (-1, 32)} | {(x, y) for x in (-1, 32) for y in range(-1, 33)}
+    ice = {(x, y) for x in range(32) for y in range(32) if land.attrs[y * 32 + x] & 0xFF == 0x20}
+    fence = {(x, y): k for x, y, k in fences}
+    door = [(w['x'], w['z']) for w in ev['warp_events']][0]
+    start = ((door[0], door[1] - 1), frozenset())
+    seen, todo, met = {start: None}, deque([start]), set()
+    while todo:
+        (x, y), broken = st = todo.popleft()
+        live = set(balls) - broken
+        met |= {q for q in people if abs(q[0] - x) + abs(q[1] - y) == 1}
+        for d, (dx, dy) in enumerate(VEIL_DIRS):
+            a, b = fence.get((x, y)), fence.get((x + dx, y + dy))
+            if (x + dx, y + dy) in walls or (x + dx, y + dy) in live or ((a == 0 or b == 0) and dx == 0) \
+                    or ((a == 1 or b == 1) and dx != 0):
+                continue
+            nx, ny, broke = snow_slide(walls, ice, slopes, fence, live, x + dx, y + dy, d)
+            nst = ((nx, ny), broken | frozenset(broke))
+            if nst not in seen:
+                seen[nst] = (st, 'NSWE'[d])
+                todo.append(nst)
+    out = [q for q in people if q not in met]
+    assert not out, 'SNOWPOINT: out of reach %s (%d states)' % (out, len(seen))
+    goal = people[0]
+    st = min((s for s in seen if abs(s[0][0] - goal[0]) + abs(s[0][1] - goal[1]) == 1), key=lambda s: len(s[1]))
+    way = []
+    while seen[st]:
+        st, m = seen[st]
+        way.append(m)
+    print('SNOWPOINT: everyone reached (%d states); to CANDICE: %s' % (len(seen), ''.join(reversed(way))))
+
+
 def ident(name):
     return name.replace('fx:', '').replace('.nsbmd', '').upper()
 
@@ -338,6 +453,7 @@ def main():
     out += canalave(root)
     out += eterna(root)
     out += veilstone(root)
+    out += snowpoint(root)
     open('src/data/sinnoh_gyms.h', 'w').write('\n'.join(out) + '\n')
     print('%d models; PASTORIA: %d deep tiles, %d gates, %d buttons' % (len(gymprops.model_names()), len(deep), len(gates),
                                                                      len(buttons)))

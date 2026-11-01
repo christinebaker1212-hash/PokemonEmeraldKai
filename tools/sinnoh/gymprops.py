@@ -17,6 +17,7 @@ GYM_MODELS = {
                                              'sunyshore_gear_vertical_alt.nsbmd'],
     'MAP_HEADER_ETERNA_CITY_GYM': ['eterna_gym_model_clock_hour_hand.nsbmd', 'eterna_gym_model_clock_minute_hand.nsbmd'],
     'MAP_HEADER_VEILSTONE_CITY_GYM': ['fx:veilstone_gym_sandbag.nsbmd', 'fx:veilstone_gym_tire_stack.nsbmd'],
+    'MAP_HEADER_SNOWPOINT_CITY_GYM': ['fx:snowpoint_gym_snowball.nsbmd'],
 }
 
 

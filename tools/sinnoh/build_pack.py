@@ -64,9 +64,10 @@ ROCK_CLIMB = (0x4B, 0x4C)      # walkable: this game has no HM restrictions (and
 WATER = (0x10, 0x13, 0x15)     # surfable (0x13: a waterfall, climbed with WATERFALL)
 
 
-def heights(land):
+def heights(land, ox=0, oz=0):
     """The ground's heights at each tile's centre from the block's BDHC: every plate whose rectangle holds the point
-    gives the height of its plane there (x, z from the block's centre, 16 units a tile). Up to 3, lowest first."""
+    gives the height of its plane there (x, z from the block's centre, 16 units a tile). Up to 3, lowest first. (OX,
+    OZ: at that offset from each centre instead)"""
     b = land.bdhc
     out = [[] for _ in range(1024)]
     if len(b) < 16 or b[:4] != b'BDHC':
@@ -88,9 +89,9 @@ def heights(land):
         plates.append((min(ax, cx) / 4096, max(ax, cx) / 4096, min(az, cz) / 4096, max(az, cz) / 4096,
                        nrm[ni][0] / 4096, nrm[ni][1] / 4096, nrm[ni][2] / 4096, con[ci] / 4096))
     for tz in range(32):
-        z = tz * 16 - 256 + 8
+        z = tz * 16 - 256 + 8 + oz
         for tx in range(32):
-            x = tx * 16 - 256 + 8
+            x = tx * 16 - 256 + 8 + ox
             hs = []
             for x0, x1, z0, z1, nx, ny, nz, k in plates:
                 if x0 <= x <= x1 and z0 <= z <= z1:

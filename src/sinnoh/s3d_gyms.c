@@ -41,7 +41,7 @@ struct CanalavePlatform { u16 model; u8 ax, ay, az, bx, by, bz, floorA, floorB, 
 #define VAR_SINNOH_CANALAVE_HI 0x52F6   // (bits 16-23)
 #define VAR_SINNOH_CANALAVE_FLOOR 0x52F7   // the floor the player is on
 
-enum { GYM_NONE, GYM_PASTORIA, GYM_SUNYSHORE, GYM_CANALAVE, GYM_ETERNA, GYM_VEILSTONE };
+enum { GYM_NONE, GYM_PASTORIA, GYM_SUNYSHORE, GYM_CANALAVE, GYM_ETERNA, GYM_VEILSTONE, GYM_SNOWPOINT };
 
 static struct
 {
@@ -908,6 +908,129 @@ u16 Sinnoh_VeilstoneBag(void)
     return 0;
 }
 
+// ------------------------------------------------------------------------------------------------------ SNOWPOINT
+// An ice bowl (Platinum's): a slide speeds up down a slope and slows up one, and slides back down when it runs out of
+// speed (field_player_avatar.c SnowpointSlip asks S3D_Gyms_IceSlope); a slide at speed (1+) or a moving bike breaks a
+// snowball it runs into. Fences let steps by only one way. The snowballs stay broken until the player comes in from
+// somewhere else (Platinum's objects: a battle keeps them).
+#define SNOW_SLOT 0
+
+static struct
+{
+    u32 broken;     // the snowballs broken (bits)
+    u16 lastMap;
+    u8 frames[32];  // each snowball breaking: its frame (0: not breaking)
+    u8 task;        // the task that sinks them (0xFF none)
+} sSnow;
+
+static s32 SnowBallAt(s32 x, s32 y)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sSnowpointBalls); i++)
+        if (!((sSnow.broken >> i) & 1) && sSnowpointBalls[i][0] == x && sSnowpointBalls[i][1] == y)
+            return i;
+    return -1;
+}
+
+static void SnowProps(void)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sSnowpointBalls); i++)
+    {
+        u8 x = sSnowpointBalls[i][0], y = sSnowpointBalls[i][1];
+        float h = S3D_TileFloor(x, y, 0);
+        h = h == h ? h : 0;
+        if (sSnow.frames[i])
+            S3D_DynProp(SNOW_SLOT + i, S3D_MODEL_SNOWPOINT_GYM_SNOWBALL, sG.ox + x * 16 + 8, h - sSnow.frames[i] * 2.5f,
+                        sG.oz + y * 16 + 8, sSnow.frames[i] * 9.0f);
+        else if ((sSnow.broken >> i) & 1)
+            S3D_DynPropHide(SNOW_SLOT + i);
+        else
+            S3D_DynProp(SNOW_SLOT + i, S3D_MODEL_SNOWPOINT_GYM_SNOWBALL, sG.ox + x * 16 + 8, h, sG.oz + y * 16 + 8, 0);
+    }
+}
+
+static void SnowLoad(u16 map)
+{
+    if (sSnow.lastMap != map)
+        sSnow.broken = 0;
+    sSnow.lastMap = map;
+    memset(sSnow.frames, 0, sizeof(sSnow.frames));
+    sSnow.task = 0xFF;
+    SnowProps();
+}
+
+static s32 SnowFence(s32 x, s32 y)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sSnowpointFences); i++)
+        if (sSnowpointFences[i][0] == x && sSnowpointFences[i][1] == y)
+            return sSnowpointFences[i][2];
+    return -1;
+}
+
+static bool8 SnowBlocked(s32 fx, s32 fy, s32 tx, s32 ty)
+{
+    s32 a = SnowFence(fx, fy), b = SnowFence(tx, ty);
+    bool8 northSouth = fx == tx;
+    // (Platinum's: a step is blocked by the tile it leaves or the one it enters)
+    if ((a == 0 || b == 0) && northSouth)
+        return TRUE;
+    if ((a == 1 || b == 1) && !northSouth)
+        return TRUE;
+    return SnowBallAt(tx, ty) >= 0;
+}
+
+// Where a slide going DIRECTION from X, Y (map coords + 7) goes: +1 up a slope, -1 down, 0 level (Platinum's look:
+// the floor half a step ahead, from its plates: sSnowpointSlope)
+s8 S3D_Gyms_IceSlope(s16 x, s16 y, u8 direction)
+{
+    u8 d = VeilFromDir(direction), v;
+    if (sG.gym != GYM_SNOWPOINT)
+        return 0;
+    x -= MAP_OFFSET, y -= MAP_OFFSET;
+    if (x < 0 || y < 0 || x >= 32 || y >= 32)
+        return 0;
+    v = sSnowpointSlope[y][x * 2] , v = (u8)(((v <= '9' ? v - '0' : v - 'A' + 10) << 4)
+        | (sSnowpointSlope[y][x * 2 + 1] <= '9' ? sSnowpointSlope[y][x * 2 + 1] - '0' : sSnowpointSlope[y][x * 2 + 1] - 'A' + 10));
+    v = (v >> (2 * d)) & 3;
+    return v == 1 ? 1 : v == 2 ? -1 : 0;
+}
+
+static void Task_SnowBreak(u8 taskId)
+{
+    u32 i, busy = 0;
+    for (i = 0; i < ARRAY_COUNT(sSnowpointBalls); i++)
+        if (sSnow.frames[i] && ++sSnow.frames[i] > 10)
+            sSnow.frames[i] = 0;
+        else if (sSnow.frames[i])
+            busy++;
+    SnowProps();
+    if (busy == 0)
+    {
+        sSnow.task = 0xFF;
+        DestroyTask(taskId);
+    }
+}
+
+// Something runs into X, Y (map coords + 7) fast: a snowball there breaks
+void S3D_Gyms_BreakAt(s16 x, s16 y)
+{
+    s32 i;
+    if (sG.gym != GYM_SNOWPOINT)
+        return;
+    i = SnowBallAt(x - MAP_OFFSET, y - MAP_OFFSET);
+    if (i < 0)
+        return;
+    MPNet_Log("gym: SNOWPOINT's snowball %d broken", i);
+    sSnow.broken |= 1 << i;   // (out of the way at once; the pieces sink as the player goes through)
+    sSnow.frames[i] = 1;
+    PlaySE(SE_M_ROCK_THROW);
+    if (sSnow.task == 0xFF || !FuncIsActiveTask(Task_SnowBreak))
+        sSnow.task = CreateTask(Task_SnowBreak, 80);
+    SnowProps();
+}
+
 // ------------------------------------------------------------------------------------------------------ all gyms
 void S3D_Gyms_MapLoaded(void)
 {
@@ -945,8 +1068,15 @@ void S3D_Gyms_MapLoaded(void)
         sG.gym = GYM_VEILSTONE;
         VeilLoad(map);
     }
+    else if (map == MAP_SINNOH_SNOWPOINT_CITY_GYM)
+    {
+        sG.gym = GYM_SNOWPOINT;
+        SnowLoad(map);
+    }
     if (sG.gym != GYM_VEILSTONE)
         sVeil.lastMap = map;
+    if (sG.gym != GYM_SNOWPOINT)
+        sSnow.lastMap = map;
     if (sG.gym == GYM_PASTORIA || sG.gym == GYM_CANALAVE)
         gS3dHeightHook = HeightHook;
 }
@@ -1027,6 +1157,9 @@ bool8 S3D_Gyms_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY)
     case GYM_VEILSTONE:
         blocked = VeilBlocked(toX - MAP_OFFSET, toY - MAP_OFFSET);
         break;
+    case GYM_SNOWPOINT:
+        blocked = SnowBlocked(fromX - MAP_OFFSET, fromY - MAP_OFFSET, toX - MAP_OFFSET, toY - MAP_OFFSET);
+        break;
     }
     if (getenv("MOEMON_GYM_TRACE"))
         printf("[gym] step %d,%d -> %d,%d: %s (player at %.0f)\n", fromX - MAP_OFFSET, fromY - MAP_OFFSET, toX - MAP_OFFSET,
@@ -1058,6 +1191,8 @@ void S3D_Gyms_Debug(const char *arg)
             n += snprintf(line + n, sizeof(line) - n, " %d,%d", sVeil.x[i], sVeil.y[i]);
         printf("[test] VEILSTONE bags%s stacks %03X\n", line, sVeil.tires);
     }
+    if (sG.gym == GYM_SNOWPOINT)
+        printf("[test] SNOWPOINT snowballs broken %05X\n", sSnow.broken);
     if (sG.gym == GYM_PASTORIA && strcmp(arg, "solve") == 0)
     {
         static u8 sSeen[3][64][32];

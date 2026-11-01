@@ -49,6 +49,7 @@ static void npc_clear_strange_bits(struct ObjectEvent *);
 static void MovePlayerAvatarUsingKeypadInput(u8, u16, u16);
 static void PlayerAllowForcedMovementIfMovingSameDirection(void);
 static bool8 TryDoMetatileBehaviorForcedMovement(void);
+static u8 sIceSpeed;   // Moemon Kai: SNOWPOINT's gym ice (Platinum's): a slide's speed, 0-3 (SnowpointSlip)
 static u8 GetForcedMovementByMetatileBehavior(void);
 
 static bool8 ForcedMovement_None(void);
@@ -483,8 +484,63 @@ static bool8 DoForcedMovementInCurrentDirection(void (*moveFunc)(u8))
     return DoForcedMovement(playerObjEvent->movementDirection, moveFunc);
 }
 
+// Moemon Kai: SNOWPOINT's gym ice (Platinum's): down a slope the slide speeds up, up one it slows down, and with no
+// speed left it slides back down (facing on up the slope); a collision going up a slope sends it back too
+static bool8 SnowpointSlip(void)
+{
+    struct ObjectEvent *obj = &gObjectEvents[gPlayerAvatar.objectEventId];
+    u8 dir = obj->movementDirection, collision;
+    s8 slope = S3D_Gyms_IceSlope(obj->currentCoords.x, obj->currentCoords.y, dir);
+    bool8 back = FALSE;
+
+    if (!(gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_FORCED_MOVE))
+        sIceSpeed = 0;   // (a slide starts)
+    obj->disableAnim = TRUE;
+    collision = CheckForPlayerAvatarCollision(dir);
+    gPlayerAvatar.flags |= PLAYER_AVATAR_FLAG_FORCED_MOVE;
+    if (collision)
+    {
+        if (slope <= 0 || collision >= COLLISION_STOP_SURFING)
+        {
+            sIceSpeed = 0;
+            return DoForcedMovement(dir, PlayerWalkFast);   // (stops it as any slide stops)
+        }
+        back = TRUE;
+    }
+    else if (slope > 0)
+    {
+        if (sIceSpeed == 0)
+            back = TRUE;
+        else
+            sIceSpeed--;
+    }
+    else if (slope < 0 && sIceSpeed < 3)
+    {
+        sIceSpeed++;
+    }
+    if (back)
+    {
+        u8 face = obj->facingDirection;
+        dir = GetOppositeDirection(dir);
+        sIceSpeed = 0;
+        if (CheckForPlayerAvatarCollision(dir))
+            return DoForcedMovement(GetOppositeDirection(dir), PlayerWalkFast);
+        gPlayerAvatar.runningState = MOVING;
+        obj->facingDirectionLocked = TRUE;
+        PlayerWalkNormal(dir);
+        obj->facingDirection = face;
+        return TRUE;
+    }
+    obj->facingDirectionLocked = FALSE;
+    gPlayerAvatar.runningState = MOVING;
+    (sIceSpeed >= 2 ? PlayerWalkFaster : PlayerWalkFast)(dir);
+    return TRUE;
+}
+
 static bool8 ForcedMovement_Slip(void)
 {
+    if (((gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum) == MAP_SINNOH_SNOWPOINT_CITY_GYM)
+        return SnowpointSlip();
     return DoForcedMovementInCurrentDirection(PlayerWalkFast);
 }
 
@@ -697,7 +753,12 @@ static u8 CheckForPlayerAvatarStaticCollision(u8 direction)
 
 u8 CheckForObjectEventCollision(struct ObjectEvent *objectEvent, s16 x, s16 y, u8 direction, u8 metatileBehavior)
 {
-    u8 collision = GetCollisionAtCoords(objectEvent, x, y, direction);
+    u8 collision;
+    if (objectEvent->isPlayer && ((sIceSpeed >= 1 && (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_FORCED_MOVE))
+                                  || ((gPlayerAvatar.flags & (PLAYER_AVATAR_FLAG_MACH_BIKE | PLAYER_AVATAR_FLAG_ACRO_BIKE))
+                                      && gPlayerAvatar.bikeSpeed >= 1)))
+        S3D_Gyms_BreakAt(x, y);   // Moemon Kai: SNOWPOINT's snowballs break when run into fast
+    collision = GetCollisionAtCoords(objectEvent, x, y, direction);
     if (collision == COLLISION_NONE && objectEvent->isPlayer && MP_Garden_ActorAt(x, y))
         collision = COLLISION_OBJECT_EVENT;   // Moemon Co-op: a MOéMON GARDEN Pokémon stands there
     if (collision == COLLISION_ELEVATION_MISMATCH && CanStopSurfing(x, y, direction))

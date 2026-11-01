@@ -3515,6 +3515,16 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   way. Bags and stacks block steps and trainers' sight; their state is kept in RAM for the map (a battle keeps it,
   coming in from elsewhere resets it, as Platinum's). gen_gyms.py veilstone_check pushes bags every way and stops if
   anyone is out of reach. `mp gym` prints the bags and stacks; test sinnoh_gym_veilstone.
+  SNOWPOINT: Platinum's ice bowl. A slide's speed (0-3, field_player_avatar.c SnowpointSlip in place of the plain
+  ice slip on this map) goes up a step down a slope and down a step up one; with none left, or blocked going up, the
+  player slides back down facing on up the slope (Platinum's PlayerAvatar_TileMove_Ice). Slopes are Platinum's look
+  half a step ahead on its floor plates (gen_gyms.py snow_slopes -> sSnowpointSlope; build_pack.py heights() takes an
+  offset), not tile centres: the ice between two stair tiles is level. Its 19 snowballs (Platinum's objects, hidden by
+  gen_maps: drawn here with Platinum's model) block; a slide at speed 1+ or a bike at speed breaks one it runs into
+  (CheckForObjectEventCollision -> S3D_Gyms_BreakAt), several in a row. Its fences (0x49 / 0x4A) block steps
+  north-south / west-east into, out of or across them (the stairs). Broken snowballs stay broken until the player comes
+  in from elsewhere. gen_gyms.py snowpoint_check walks and slides the gym as the game does, stops if anyone is out of
+  reach and prints the way to CANDICE; test sinnoh_gym_snowpoint.
 - SINNOH trainers who battle when talked to (tools/sinnoh/gen_trainers.py TALK: the ETERNA gym's three, the TRAINERS'
   SCHOOL's kids, the POKéMON MANSION's maids, the RESTAURANT's diners; new classes MAID and CAMERAMAN): gen_maps.py
   talk_trainer() gives the object whose Platinum script battles one the trainer's own script (no sight line).

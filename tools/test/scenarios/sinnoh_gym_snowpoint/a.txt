@@ -1,0 +1,14 @@
+pressuntil A field 5000
+wait 30
+mp warp 43,65,17,6
+wait 90
+waitfor field 1000
+mp gym
+shot t_snow0
+press DOWN 8
+shotburst t_slide 60 6
+wait 120
+mp gym
+mp pos
+shot t_snow1
+quit

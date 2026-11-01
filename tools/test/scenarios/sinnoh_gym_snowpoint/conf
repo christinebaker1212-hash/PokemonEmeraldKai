@@ -1,0 +1,8 @@
+# SNOWPOINT's gym (src/sinnoh/s3d_gyms.c, field_player_avatar.c SnowpointSlip): from the rim's dry tile at 17,6 a slide
+# south down the slope gathers speed and breaks the column of snowballs at 17,17-20 (Platinum's slopes from its floor
+# plates: sSnowpointSlope; gen_gyms.py snowpoint_check solves the whole gym). Shots t_snow0-1.png, t_slide*.png.
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("SNOWPOINT snowballs broken 00000" "SNOWPOINT's snowball 13 broken" "SNOWPOINT's snowball 15 broken")
+UNEXPECT_A=("[crash]" "TIMEOUT")
