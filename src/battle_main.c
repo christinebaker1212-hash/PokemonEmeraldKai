@@ -738,6 +738,19 @@ static void CB2_InitBattleInternal(void)
 
     MP_Gimmick_ResetPictures();   // Moemon Kai: no MEGA pictures from the last battle
 
+    extern char *getenv(const char *name);
+    if ((gBattleTypeFlags & BATTLE_TYPE_FRONTIER) && getenv("MOEMON_TEST_FOE_HP1"))
+    {
+        // Moemon Kai (tests only): the frontier's foes at 1 HP too (their parties don't come from CreateNPCTrainerParty)
+        u16 one = 1;
+        for (i = 0; i < PARTY_SIZE; i++)
+            if (GetMonData(&gEnemyParty[i], MON_DATA_SPECIES))
+            {
+                SetMonData(&gEnemyParty[i], MON_DATA_HP, &one);
+                SetMonData(&gEnemyParty[i], MON_DATA_MAX_HP, &one);
+            }
+    }
+
     SetHBlankCallback(NULL);
     SetVBlankCallback(NULL);
 

@@ -5,14 +5,11 @@ Written so another session can carry on if this one runs out. Work in a worktree
 The user's mock-ups: docs/user_images/57.png (the starter table) and the drop shadow (sent in chat: a soft dark oval,
 about 14x5 pixels, under the player's feet, see-through).
 
-## 1. Release 1.63.1: a NEW GAME in SINNOH (state: implemented and tested, release not yet pushed)
-- Done: BIRCH's region menu KANTO, JOHTO, HOENN, SINNOH (cursor on HOENN); SINNOH starts in TWINLEAF's bedroom with no
-  team, ROUTE 201's briefcase gives TURTWIG / CHIMCHAR / PIPLUP, ROWAN gives the POKéDEX and 5 POKé BALLS; no wild
-  battles and no story battles without a team. COOP_NOTES "A new game in SINNOH"; test sinnoh_newgame passes.
-- Left: `tools/test/regress.sh sinnoh_tower` timed out in a run of every sinnoh_ / region_ test (twice); check whether
-  it fails on 1.63.0 too (then it isn't this change) before releasing. Then bump MOEMON_VERSION to 1.63.1, add
-  tools/release/notes/v1.63.1.md (protocol unchanged: plays with 1.63.0), run gen_patchnotes.py, ff-merge into `live`
-  and push it to the default branch.
+## 1. Release 1.63.1: a NEW GAME in SINNOH (DONE: pushed to the default branch 2026-11-01)
+- BIRCH's region menu KANTO, JOHTO, HOENN, SINNOH; SINNOH's new game (COOP_NOTES "A new game in SINNOH"). The
+  sinnoh_tower test now sets the frontier's foes to 1 HP (MOEMON_TEST_FOE_HP1 in CB2_InitBattleInternal) and presses
+  A until the run ends: its fixed turn count broke when the tower's draw changed with the date.
+- Check the release run on Actions (release.yml on claude/clever-clarke-hqati2) and that v1.63.1 has both zips.
 
 ## 2. KANTO / JOHTO starter table (docs/user_images/57.png)
 - Today: OAK's (Kanto_PalletTown_ProfessorOaksLab, balls = objects 5-7 at (8..10, 4)) and ELM's labs
@@ -71,5 +68,5 @@ about 14x5 pixels, under the player's feet, see-through).
   CORNER, card players, SINNOH PEOPLE and SPRITE SCALING options, POKéDEX AREA, starters out of the wild, TM51-TM92,
   JOHTO's HGSS music.
 - 1.63.0's release build fix (a letter the game's font lacks), re-queued, published with both zips and update.txt.
-- NEW GAME in SINNOH + region menu order: done, release 1.63.1 pending (task 1).
+- NEW GAME in SINNOH + region menu order: released as 1.63.1 (task 1).
 - Pending: tasks 2-7 above.

@@ -1,9 +1,9 @@
 pressuntil A field 5000
 wait 30
 mp textspeed 2
-mp teach 0 98
-mp teach 1 98
-mp teach 2 98
+mp teach 0 242
+mp teach 1 242
+mp teach 2 242
 mp warp 41,8,15,6
 wait 60
 waitfor field 1000
@@ -43,132 +43,7 @@ wait 10
 press A 1
 shotburst t_room 900 60
 pressuntil A battle 6000
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
-pressuntil A action 8000
-mp battlerhp 1 1
-mp battlerhp 0 440
-press A 1
-wait 20
-press A 1
+pressuntil A field 60000
 pressuntil A field 20000
 wait 120
 pressuntil A field 6000
