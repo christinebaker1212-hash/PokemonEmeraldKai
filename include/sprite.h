@@ -253,6 +253,7 @@ struct Sprite
     struct MpBigSprite *mpBig;
     bool8 mpClipOn;         // Moemon PC: nothing of it drawn from screen line mpClipY down (in water, in the ground)
     s16 mpClipY;
+    u16 mpScale;            // Moemon Co-op: drawn this much smaller (Q8: 128 = half; 0 = as it is), smoothly (mp_spritescale.h)
 };
 
 struct OamMatrix

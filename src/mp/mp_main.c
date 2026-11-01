@@ -340,6 +340,8 @@ static void LoadConfig(void)
     gMpConfig.animSpeed = 30;
     gMpConfig.spectateScale = 1;
     gMpConfig.bikeMusic = TRUE;
+    gMpConfig.scaleFollowers = TRUE;   // (SPRITE SCALING: on unless turned off)
+    gMpConfig.scaleGarden = TRUE;
     gMpConfig.surfMusic = TRUE;
     memset(gMpConfig.phrases, 0xFF, sizeof(gMpConfig.phrases));
     gMpConfig.quickStock[0] = 0;   // Hello!
@@ -435,6 +437,8 @@ static void LoadConfig(void)
         else if (strcmp(key, "follower_sprites") == 0)
             gMpConfig.followerSprites = strcmp(val, "pmd") == 0 ? MP_FOLLOW_SPRITES_PMD
                                       : strcmp(val, "original") == 0 ? MP_FOLLOW_SPRITES_ORIGINAL : MP_FOLLOW_SPRITES_DEFAULT;
+        else if (strcmp(key, "scale_followers") == 0) gMpConfig.scaleFollowers = atoi(val) != 0;
+        else if (strcmp(key, "scale_garden") == 0) gMpConfig.scaleGarden = atoi(val) != 0;
         else if (strcmp(key, "spectate_friend") == 0)
         {
             // spectate_friend = SIDE SIZE POPOUT SHOW NAME
@@ -565,6 +569,9 @@ void MP_SaveConfig(void)
         "friend_finder = %s\nfriend_finder_shown = %d\n"
         "; OPTIONS > GAME > FOLLOWERS: default (the original sprites on the map, PMD in the MOEMON GARDEN), pmd or original\n"
         "follower_sprites = %s\n"
+        "; OPTIONS > DISPLAY > SPRITE SCALING: followers and the GARDEN's POKEMON smaller than a trainer drawn at their\n"
+        "; POKEDEX height (1) or as their sprites are (0)\n"
+        "scale_followers = %d\nscale_garden = %d\n"
         "; OPTIONS > DISPLAY > CARD ART: printed_art (the printed pictures in the Game Boy frame), gameboy (the Game Boy\n"
         "; pictures in it) or full_card (the whole printed cards)\n"
         "card_art = %s\n"
@@ -587,6 +594,7 @@ void MP_SaveConfig(void)
         gMpConfig.finderStyle == MP_FINDER_ARROWS ? "arrows" : gMpConfig.finderStyle == MP_FINDER_RADAR ? "radar" : "both",
         gMpConfig.finderOn,
         gMpConfig.followerSprites == MP_FOLLOW_SPRITES_PMD ? "pmd" : gMpConfig.followerSprites == MP_FOLLOW_SPRITES_ORIGINAL ? "original" : "default",
+        gMpConfig.scaleFollowers, gMpConfig.scaleGarden,
         gMpConfig.cardArt == MP_CARD_ART_GAME_BOY ? "gameboy" : gMpConfig.cardArt == MP_CARD_ART_FULL_CARD ? "full_card"
                                                                                                          : "printed_art",
         gMpConfig.cardBack == MP_CARD_BACK_PIXEL ? "pixel" : "printed", gMpConfig.cardScaling,

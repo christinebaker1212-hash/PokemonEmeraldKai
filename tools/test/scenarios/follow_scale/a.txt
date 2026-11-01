@@ -1,0 +1,22 @@
+pressuntil A field 5000
+wait 30
+mp follow 0
+wait 60
+press RIGHT 16
+wait 40
+shot s_pikachu
+mp follow 1
+wait 60
+shot s_raichu
+mp follow 2
+wait 60
+shot s_azumarill
+mp follow 3
+wait 60
+shot s_alakazam
+mp follow 0
+wait 60
+mp spritescale 0 0
+wait 30
+shot s_pikachu_off
+quit

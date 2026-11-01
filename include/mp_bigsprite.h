@@ -34,6 +34,9 @@ bool8 MP_BigSprite_AddOam(struct Sprite *sprite, u16 *oamIndex);  // ... a big s
 void MP_BigSprite_CommitOam(void);                                // LoadOam: the list goes with the OAM
 const struct MpBigOam *MP_BigSprite_Oam(u16 index);               // the renderer (gba_easy_draw.c)
 void MP_BigSprite_NoteClip(struct Sprite *sprite, u16 first, u16 end);   // AddSpriteToOamBuffer: its OAM entries' clip
+void MP_BigSprite_NoteScale(struct Sprite *sprite, u16 first, u16 end);  // ... and their scale (sprite->mpScale)
+// the renderer: an OAM entry's scale (Q8; 0: none) and the point it shrinks around (the bottom middle of its sprite)
+u16 MP_BigSprite_OamScale(u16 oamIndex, s16 *ax, s16 *ay);
 int MP_BigSprite_OamClipY(u16 oamIndex);                         // the renderer: the line it stops at (a big number: none)
 
 #define MP_BIG_OAM_SHAPE 3   // OAM shape 3 is "prohibited" on the GBA: a big sprite's entry, tileNum = its index

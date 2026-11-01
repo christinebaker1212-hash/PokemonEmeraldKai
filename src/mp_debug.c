@@ -577,6 +577,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // life show|remember|minutes|trait|count|save|load|reveal|journal ... (mp_life.c)
         MP_Life_Debug(arg);
     }
+    else if (strcmp(cmd, "spritescale") == 0)
+    {
+        // spritescale FOLLOWERS GARDEN: OPTIONS > DISPLAY > SPRITE SCALING (1 on, 0 off)
+        int f = 1, g = 1;
+        sscanf(arg, "%d %d", &f, &g);
+        gMpConfig.scaleFollowers = f != 0;
+        gMpConfig.scaleGarden = g != 0;
+        printf("[test] sprite scaling: followers %d garden %d\n", f != 0, g != 0);
+    }
     else if (strcmp(cmd, "dexorder") == 0)
     {
         // dexorder MODE ORDER: the POKéDEX list's mode (0 HOENN, 1 NATIONAL) and order (1 A-Z: only seen ones)

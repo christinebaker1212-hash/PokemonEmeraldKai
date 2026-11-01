@@ -246,6 +246,8 @@ struct MpConfig
     u8 finderStyle;           // OPTIONS > CO-OP > FRIEND FINDER: MP_FINDER_* (mp_compass.c)
     u8 finderOn;              // ... shown (the right stick click / G shows and hides it)
     u8 followerSprites;       // OPTIONS > GAME > FOLLOWERS: MP_FOLLOW_SPRITES_*
+    u8 scaleFollowers;        // OPTIONS > DISPLAY > SPRITE SCALING > FOLLOWERS: at their POKeDEX height (mp_spritescale.c)
+    u8 scaleGarden;           // ... > GARDEN POKeMON: the same in the MOeMON GARDEN
     u8 cardArt;               // OPTIONS > DISPLAY > CARD ART: MP_CARD_ART_* (src/tcg/tcg_gfx.h G_ART_*)
     u8 scale[MP_SCALE_COUNT - 1];   // LEVEL SCALING's settings past ON / OFF (MP_SCALE_WILD..), HOST A GAME > GAME RULES or OPTIONS
     u8 cardBack;              // OPTIONS > DISPLAY > CARD BACKS: MP_CARD_BACK_* (src/tcg/tcg_gfx.h G_BACK_*)

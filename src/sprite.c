@@ -1798,6 +1798,7 @@ bool8 AddSpriteToOamBuffer(struct Sprite *sprite, u16 *oamIndex)
     u16 first = *oamIndex;
     bool8 full = AddSpriteToOamBufferInner(sprite, oamIndex);
     MP_BigSprite_NoteClip(sprite, first, *oamIndex);   // Moemon PC: its entries stop at its clip line
+    MP_BigSprite_NoteScale(sprite, first, *oamIndex);  // Moemon Co-op: and are drawn smaller (mp_spritescale.h)
     return full;
 }
 
