@@ -19,6 +19,7 @@
 // Settings are stored in moemon_display.ini next to the exe
 // ($MOEMON_DISPLAY_CONFIG overrides the path).
 #include <limits.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -54,6 +55,7 @@ struct DisplayConfig
     int scaleMode;
     int filter;
     int vsync;
+    int color;        // DISPLAY_COLOR_* (1.63.14; last in the struct: the initializer below leaves it 0, DEFAULT)
     int winW, winH;   // windowed size, restored when leaving fullscreen
     int winX, winY;   // windowed position, POS_UNSET = centered
     int maximized;    // the window was maximized
@@ -69,6 +71,7 @@ static int sHadConfigFile;
 static SDL_Window *sWindow;
 static SDL_Renderer *sRenderer;
 static SDL_Texture *sGameTex;    // 240x160 game frame, nearest
+static SDL_Texture *sColorTex;   // the same in its COLOR (1.63.14; ARGB8888)
 static SDL_Texture *sScaleTex;   // 240*kx x 160*ky render target, linear
 static SDL_Texture *sOverlayTex; // filter pattern, same size as the enlarged frame
 static int sScaleKx, sScaleKy, sScaleSrcW, sScaleSrcH;
@@ -111,6 +114,7 @@ static void DestroyAllPopouts(void);
 
 static const char *const sScaleNames[DISPLAY_SCALE_COUNT] = {"pixel_perfect", "sharp_fit", "stretch"};
 static const char *const sFilterNames[DISPLAY_FILTER_COUNT] = {"off", "scanlines", "lcd_grid"};
+static const char *const sColorNames[DISPLAY_COLOR_COUNT] = {"default", "gba_corrected", "gba_sp", "gba_sp101", "nds"};
 
 static int Clamp(int v, int lo, int hi)
 {
@@ -185,6 +189,7 @@ static void LoadConfig(void)
         else if (strcmp(key, "scaling") == 0)          sCfg.scaleMode = ParseEnum(val, sScaleNames, DISPLAY_SCALE_COUNT, sCfg.scaleMode);
         else if (strcmp(key, "filter") == 0)           sCfg.filter = ParseEnum(val, sFilterNames, DISPLAY_FILTER_COUNT, sCfg.filter);
         else if (strcmp(key, "vsync") == 0)            sCfg.vsync = ParseBool(val);
+        else if (strcmp(key, "color") == 0)            sCfg.color = ParseEnum(val, sColorNames, DISPLAY_COLOR_COUNT, sCfg.color);
         else if (strcmp(key, "window_width") == 0)     sCfg.winW = atoi(val);
         else if (strcmp(key, "window_height") == 0)    sCfg.winH = atoi(val);
         else if (strcmp(key, "window_x") == 0)         sCfg.winX = ParsePos(val);
@@ -228,6 +233,8 @@ static void WriteConfig(void)
         "; filter = off, scanlines or lcd_grid\n"
         "filter = %s\n"
         "vsync = %d\n"
+        "; color = default, gba_corrected, gba_sp, gba_sp101 or nds (the game picture as that screen showed it)\n"
+        "color = %s\n"
         "; last window size and position (delete these lines to reset)\n"
         "window_width = %d\n"
         "window_height = %d\n"
@@ -235,7 +242,7 @@ static void WriteConfig(void)
         "window_y = %s\n"
         "window_maximized = %d\n",
         sCfg.fullscreen, DISPLAY_MAX_WINDOW_SCALE, sCfg.windowScale,
-        sScaleNames[sCfg.scaleMode], sFilterNames[sCfg.filter], sCfg.vsync,
+        sScaleNames[sCfg.scaleMode], sFilterNames[sCfg.filter], sCfg.vsync, sColorNames[sCfg.color],
         sCfg.winW, sCfg.winH, xs, ys, sCfg.maximized);
     fclose(f);
 }
@@ -401,6 +408,9 @@ static void DestroyTextures(void)
     }
     if (sGameTex)
         SDL_DestroyTexture(sGameTex);
+    if (sColorTex)
+        SDL_DestroyTexture(sColorTex);
+    sColorTex = NULL;
     if (sScaleTex)
         SDL_DestroyTexture(sScaleTex);
     if (sOverlayTex)
@@ -411,8 +421,66 @@ static void DestroyTextures(void)
     sOverlayFilter = -1;
 }
 
+// COLOR (1.63.14): each of the game's 32768 colors as a handheld's screen showed it. Pokefan531's color-correction
+// shaders (libretro slang-shaders handheld/shaders/color, public domain; by hunterk, optimized by crashGG), their sRGB
+// profiles: linear light (gamma 2.2), times the screen's matrix and brightness, back out at 1/2.2 plus the shader's
+// "screen darkness" (darken / 2.2^2). Rows: what each of R, G, B out takes of R, G, B in.
+static const struct ColorProfile
+{
+    float m[3][3], lum, darken;
+} sColorProfiles[DISPLAY_COLOR_COUNT] = {
+    [DISPLAY_COLOR_GBA] = {{{0.905f, 0.195f, -0.10f}, {0.10f, 0.65f, 0.25f}, {0.1575f, 0.1425f, 0.70f}}, 0.91f, 1.0f},
+    [DISPLAY_COLOR_GBA_SP] = {{{0.905f, 0.195f, -0.10f}, {0.10f, 0.65f, 0.25f}, {0.1575f, 0.1425f, 0.70f}}, 0.91f, 0.0f},
+    [DISPLAY_COLOR_GBA_SP101] = {{{0.96f, 0.11f, -0.07f}, {0.0325f, 0.89f, 0.0775f}, {0.001f, -0.03f, 1.029f}}, 0.935f, 0.0f},
+    [DISPLAY_COLOR_NDS] = {{{0.835f, 0.27f, -0.105f}, {0.10f, 0.6375f, 0.2625f}, {0.105f, 0.175f, 0.72f}}, 0.905f, 0.0f},
+};
+static Uint32 sColorLut[0x8000];
+static int sColorLutFor = -1;
+static Uint32 sColorPixels[GBA_W * GBA_H];
+
+static void BuildColorLut(int color)
+{
+    const struct ColorProfile *p = &sColorProfiles[color];
+    float lin[32], outGamma = 1.0f / 2.2f + p->darken / (2.2f * 2.2f);
+    int i, c;
+    if (sColorLutFor == color)
+        return;
+    for (i = 0; i < 32; i++)
+        lin[i] = powf(i / 31.0f, 2.2f);
+    for (i = 0; i < 0x8000; i++)
+    {
+        float in[3] = {lin[i & 31], lin[(i >> 5) & 31], lin[(i >> 10) & 31]};
+        Uint32 rgb = 0xFF000000u;
+        for (c = 0; c < 3; c++)
+        {
+            float v = (p->m[c][0] * in[0] + p->m[c][1] * in[1] + p->m[c][2] * in[2]) * p->lum;
+            v = v < 0 ? 0 : v > 1 ? 1 : v;
+            rgb |= (Uint32)(powf(v, outGamma) * 255.0f + 0.5f) << (16 - c * 8);
+        }
+        sColorLut[i] = rgb;
+    }
+    sColorLutFor = color;
+}
+
+// The frame in its COLOR (ARGB8888 into sColorTex); FALSE: shown as it is
+static int UploadColored(const void *pixels)
+{
+    const Uint16 *src = pixels;
+    int i;
+    if (sCfg.color <= DISPLAY_COLOR_DEFAULT || sCfg.color >= DISPLAY_COLOR_COUNT || sColorTex == NULL || pixels == NULL)
+        return 0;
+    BuildColorLut(sCfg.color);
+    for (i = 0; i < GBA_W * GBA_H; i++)
+        sColorPixels[i] = sColorLut[src[i] & 0x7FFF];
+    SDL_UpdateTexture(sColorTex, NULL, sColorPixels, GBA_W * 4);
+    return 1;
+}
+
 static int CreateGameTexture(void)
 {
+    sColorTex = CreateTex(SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, GBA_W, GBA_H, 0);
+    if (sColorTex)
+        SDL_SetTextureBlendMode(sColorTex, SDL_BLENDMODE_NONE);
     sGameTex = CreateTex(SDL_PIXELFORMAT_ABGR1555, SDL_TEXTUREACCESS_STREAMING, GBA_W, GBA_H, 0);
     if (sGameTex == NULL)
     {
@@ -422,7 +490,10 @@ static int CreateGameTexture(void)
     // The frame is always opaque, whatever the alpha bit says.
     SDL_SetTextureBlendMode(sGameTex, SDL_BLENDMODE_NONE);
     if (sLastFrame)
+    {
         SDL_UpdateTexture(sGameTex, NULL, sLastFrame, GBA_W * 2);
+        UploadColored(sLastFrame);
+    }
     return 0;
 }
 
@@ -488,26 +559,43 @@ static int EnsureScaleTex(int kx, int ky, int srcW, int srcH)
 
 // Darkness of one screen row (or column) inside a game pixel that is k screen
 // pixels tall. Light: only the last row, plus a softer one at big scales.
-static Uint8 ScanlineAlpha(int pos, int k)
+// The filters (1.63.14, the user: better than plain dark lines). A multiply mask (SDL_BLENDMODE_MOD) over each picture
+// pixel's kx x ky screen pixels, channel by channel (0-255: how much of the picture is kept there):
+//   SCANLINES: a CRT beam's soft shape across each row (bright a little above its middle, dark between rows), and
+//              from 3 columns a pixel an aperture grille's red / green / blue stripes, gently
+//   LCD GRID:  each pixel a cell of red / green / blue sub-pixel stripes (from 3 columns), a soft dark line at its
+//              right and bottom edges (from 3; the next line in lighter from 8), as on a handheld's screen
+// tools/test/scenarios/fight_display/check.py computes the same numbers.
+static void FilterMask(int filter, int px, int kx, int py, int ky, Uint8 out[3])
 {
-    if (k < 2)
-        return 0;
-    if (pos == k - 1)
-        return 72;
-    if (k >= 6 && pos == k - 2)
-        return 32;
-    return 0;
-}
-
-static Uint8 GridAlpha(int pos, int k)
-{
-    if (k < 3)
-        return 0;
-    if (pos == k - 1)
-        return 60;
-    if (k >= 8 && pos == k - 2)
-        return 24;
-    return 0;
+    float m[3] = {1, 1, 1}, row = 1;
+    int c;
+    if (filter == DISPLAY_FILTER_SCANLINES)
+    {
+        if (ky >= 2)
+        {
+            float t = (py + 0.5f) / ky - 0.45f;
+            row = 0.38f + 0.62f * expf(-t * t / (2 * 0.21f * 0.21f));
+        }
+        if (kx >= 3)
+            for (c = 0; c < 3; c++)
+                m[c] = (px * 3 / kx) % 3 == c ? 1.0f : 0.86f;
+    }
+    else if (filter == DISPLAY_FILTER_LCD_GRID)
+    {
+        float gx = 1, gy = 1;
+        if (kx >= 3)
+        {
+            gx = px == kx - 1 ? 0.70f : kx >= 8 && px == kx - 2 ? 0.88f : 1.0f;
+            for (c = 0; c < 3; c++)
+                m[c] = (px * 3 / kx) % 3 == c ? 1.0f : 0.80f;
+        }
+        if (ky >= 3)
+            gy = py == ky - 1 ? 0.70f : ky >= 8 && py == ky - 2 ? 0.88f : 1.0f;
+        row = gx < gy ? gx : gy;
+    }
+    for (c = 0; c < 3; c++)
+        out[c] = (Uint8)(m[c] * row * 255.0f + 0.5f);
 }
 
 // The filter's overlay (scanlines or the LCD grid) over each of the picture's srcW x srcH pixels
@@ -515,7 +603,6 @@ static int EnsureOverlay(int kx, int ky, int srcW, int srcH)
 {
     int w = srcW * kx, h = srcH * ky, x, y;
     Uint32 *pixels;
-    Uint8 colA[MAX_PRESCALE + 1];
 
     if (sOverlayTex && sOverlayKx == kx && sOverlayKy == ky && sOverlayFilter == sCfg.filter && sOverlaySrcW == srcW &&
         sOverlaySrcH == srcH)
@@ -529,25 +616,21 @@ static int EnsureOverlay(int kx, int ky, int srcW, int srcH)
     pixels = malloc((size_t)w * h * sizeof(Uint32));
     if (pixels == NULL)
         return 0;
-    for (x = 0; x < kx; x++)
-        colA[x] = (sCfg.filter == DISPLAY_FILTER_LCD_GRID) ? GridAlpha(x, kx) : 0;
     for (y = 0; y < h; y++)
     {
-        Uint8 rowA = (sCfg.filter == DISPLAY_FILTER_LCD_GRID) ? GridAlpha(y % ky, ky) : ScanlineAlpha(y % ky, ky);
         Uint32 *row = pixels + (size_t)y * w;
         for (x = 0; x < w; x++)
         {
-            Uint8 a = colA[x % kx];
-            if (rowA > a)
-                a = rowA;
-            row[x] = (Uint32)a << 24; // black with alpha (ARGB8888)
+            Uint8 mk[3];
+            FilterMask(sCfg.filter, x % kx, kx, y % ky, ky, mk);
+            row[x] = 0xFF000000u | (Uint32)mk[0] << 16 | (Uint32)mk[1] << 8 | mk[2];   // (ARGB8888, multiplied in)
         }
     }
     sOverlayTex = CreateTex(SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, w, h, 0);
     if (sOverlayTex)
     {
         SDL_UpdateTexture(sOverlayTex, NULL, pixels, w * (int)sizeof(Uint32));
-        SDL_SetTextureBlendMode(sOverlayTex, SDL_BLENDMODE_BLEND);
+        SDL_SetTextureBlendMode(sOverlayTex, SDL_BLENDMODE_MOD);
         sOverlayKx = kx;
         sOverlayKy = ky;
         sOverlayFilter = sCfg.filter;
@@ -1258,8 +1341,8 @@ static void RenderToBackbuffer(void)
     sFilterShown = 0;
     // Moemon Kai: the card screens are the game picture while they're open (src/tcg/tcg_ui.c)
     gameTex = sGameTex ? Tcg_Canvas(sRenderer, sGameTex) : NULL;
-    if (gameTex == NULL)
-        gameTex = sGameTex;
+    if (gameTex == NULL)   // (the game's picture: in its COLOR when one is chosen)
+        gameTex = sCfg.color != DISPLAY_COLOR_DEFAULT && sColorTex && sColorLutFor == sCfg.color ? sColorTex : sGameTex;
     SDL_SetRenderTarget(sRenderer, NULL);
     if (sPanelCount > 0)
         SDL_SetRenderDrawColor(sRenderer, 17, 19, 26, 255);   // beside the game: the panel's slate, darker
@@ -1577,6 +1660,7 @@ void Display_UploadFrame(const void *pixels)
     sLastFrame = pixels;
     if (sGameTex)
         SDL_UpdateTexture(sGameTex, NULL, pixels, GBA_W * 2);
+    UploadColored(pixels);
     sDirty = 1;
 }
 
@@ -1682,6 +1766,7 @@ void Display_TestCommand(const char *key, int value)
     else if (strcmp(key, "scale") == 0)   Display_SetWindowScale(value);
     else if (strcmp(key, "mode") == 0)    Display_SetScaleMode(value);
     else if (strcmp(key, "filter") == 0)  Display_SetFilter(value);
+    else if (strcmp(key, "color") == 0)   Display_SetColor(value);
     else if (strcmp(key, "vsync") == 0)   Display_SetVSync(value);
     else if (strcmp(key, "save") == 0)    Display_SaveSettings();
     else if (strcmp(key, "toggle") == 0)  Display_ToggleFullscreen();
@@ -1927,6 +2012,19 @@ int Display_IsFilterShown(void)
     return sFilterShown;
 }
 
+int Display_GetColor(void)
+{
+    return sCfg.color;
+}
+
+void Display_SetColor(int color)
+{
+    sCfg.color = Clamp(color, 0, DISPLAY_COLOR_COUNT - 1);
+    if (sLastFrame)
+        Display_UploadFrame(sLastFrame);   // (the picture again in its new colors)
+    sDirty = 1;
+}
+
 int Display_GetVSync(void)
 {
     return sCfg.vsync;
@@ -1970,6 +2068,9 @@ int Display_GetScaleMode(void) { return sScaleMode; }
 void Display_SetScaleMode(int mode) { sScaleMode = mode; }
 int Display_GetFilter(void) { return sFilter; }
 void Display_SetFilter(int filter) { sFilter = filter; }
+static int sColor;
+int Display_GetColor(void) { return sColor; }
+void Display_SetColor(int color) { sColor = color; }
 int Display_IsFilterShown(void) { return sFilter != DISPLAY_FILTER_OFF; }
 int Display_GetVSync(void) { return sVSync; }
 void Display_SetVSync(int on) { sVSync = on ? 1 : 0; }

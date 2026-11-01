@@ -1,0 +1,26 @@
+pressuntil A field 5000
+wait 60
+display mode 0
+display filter 0
+winsize 720 480
+display color 0
+wait 6
+shot b0
+rendershot c0
+display color 1
+wait 6
+shot b1
+rendershot c1
+display color 2
+wait 6
+shot b2
+rendershot c2
+display color 3
+wait 6
+shot b3
+rendershot c3
+display color 4
+wait 6
+shot b4
+rendershot c4
+quit

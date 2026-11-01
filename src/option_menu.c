@@ -74,6 +74,7 @@ enum
     OPT_WINSCALE,
     OPT_SCALING,
     OPT_FILTER,
+    OPT_COLOR,        // Moemon Kai: DISPLAY > COLOR, a handheld's screen colors (display.c, 1.63.14)
     OPT_VSYNC,
     OPT_CARDART,
     OPT_CARDBACK,
@@ -164,6 +165,7 @@ static const u8 sText_Fullscreen[] = _("FULLSCREEN");
 static const u8 sText_WinScale[] = _("WINDOW SCALE");
 static const u8 sText_Scaling[] = _("SCALING");
 static const u8 sText_Filter[] = _("FILTER");
+static const u8 sText_Color[] = _("COLOR");
 static const u8 sText_VSync[] = _("VSYNC");
 static const u8 sText_CardArt[] = _("CARD ART");
 static const u8 sText_CardArtPrinted[] = _("PRINTED ART");
@@ -431,6 +433,7 @@ static void BuildRows(void)
         AddRow(OPT_WINSCALE, 0);
         AddRow(OPT_SCALING, 0);
         AddRow(OPT_FILTER, 0);
+        AddRow(OPT_COLOR, 0);
         AddRow(OPT_VSYNC, 0);
         AddRow(OPT_FOLLOWSPRITES, 0);
         AddRow(OPT_SPRITESCALE, 0);
@@ -681,6 +684,12 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
             MP_AsciiToGame(buf, ascii, 12);
         }
         break;
+    case OPT_COLOR:
+        {
+            static const char *const names[DISPLAY_COLOR_COUNT] = {"DEFAULT", "GBA CORRECTED", "GBA SP", "GBA SP 101", "NDS"};
+            MP_AsciiToGame(buf, names[Display_GetColor() % DISPLAY_COLOR_COUNT], 16);
+        }
+        break;
     case OPT_SS_FOLLOW:
     case OPT_SS_GARDEN:   // (1.63.14: how far, in 5% steps)
         {
@@ -719,6 +728,7 @@ static u8 Current(u8 row)
     case OPT_FULLSCREEN:  return Display_GetFullscreen() != 0;
     case OPT_SCALING:     return Display_GetScaleMode();
     case OPT_FILTER:      return Display_GetFilter();
+    case OPT_COLOR:       return 0;   // (one value shown)
     case OPT_VSYNC:       return Display_GetVSync() != 0;
     case OPT_CARDART:     return gMpConfig.cardArt % MP_CARD_ART_COUNT;
     case OPT_CARDBACK:    return gMpConfig.cardBack != 0;
@@ -792,6 +802,7 @@ static void Change(u8 row, int dir)
     case OPT_WINSCALE:    Display_SetWindowScale(Wrap(Display_GetWindowScale() - 1 + dir, Display_GetMaxWindowScale()) + 1); break;
     case OPT_SCALING:     Display_SetScaleMode(Wrap(Display_GetScaleMode() + dir, DISPLAY_SCALE_COUNT)); break;
     case OPT_FILTER:      Display_SetFilter(Wrap(Display_GetFilter() + dir, DISPLAY_FILTER_COUNT)); break;
+    case OPT_COLOR:       Display_SetColor(Wrap(Display_GetColor() + dir, DISPLAY_COLOR_COUNT)); break;
     case OPT_VSYNC:       Display_SetVSync(!Display_GetVSync()); break;
     case OPT_CARDART:     gMpConfig.cardArt = Wrap(gMpConfig.cardArt % MP_CARD_ART_COUNT + dir, MP_CARD_ART_COUNT); break;
     case OPT_CARDBACK:    gMpConfig.cardBack = !gMpConfig.cardBack; break;
@@ -921,6 +932,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_WINSCALE:    return sText_WinScale;
     case OPT_SCALING:     return sText_Scaling;
     case OPT_FILTER:      return sText_Filter;
+    case OPT_COLOR:       return sText_Color;
     case OPT_VSYNC:       return sText_VSync;
     case OPT_CARDART:     return sText_CardArt;
     case OPT_CARDBACK:    return sText_CardBacks;
@@ -1056,6 +1068,13 @@ static void DrawHint(void)
         snprintf(ascii, sizeof(ascii), "A: CHANGE ITS KEY OR PAD BUTTON");
     else if (opt == OPT_FB_DEFAULTS)
         snprintf(ascii, sizeof(ascii), "ARROWS / WASD / D-PAD / STICK MOVE");
+    else if (opt == OPT_COLOR)
+    {
+        static const char *const hints[DISPLAY_COLOR_COUNT] = {
+            "THE GAME'S OWN COLORS", "AS THE FIRST GBA'S UNLIT SCREEN", "AS THE GBA SP'S FRONT-LIT SCREEN",
+            "AS THE BACKLIT GBA SP (AGS-101)", "AS A NINTENDO DS SCREEN"};
+        snprintf(ascii, sizeof(ascii), "%s", hints[Display_GetColor() % DISPLAY_COLOR_COUNT]);
+    }
     else if (opt == OPT_FILTER && Display_GetFilter() != DISPLAY_FILTER_OFF && !Display_IsFilterShown())
         snprintf(ascii, sizeof(ascii), "WINDOW TOO SMALL FOR THE FILTER");
     else if (opt == OPT_PADSELECT)

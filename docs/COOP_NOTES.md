@@ -3478,6 +3478,16 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   page, SHADOWS), CONTROLS, CO-OP. The header spreads the five names over its 26 tiles. `mp optionstab N`: 0 GAME,
   1 BATTLE, 2 DISPLAY, 3 CONTROLS, 4 CO-OP. Tests options_tabs, levelscale_options, sprite_scaling_page (SPRITE
   SCALING's A / LEFT with the real keys), fight_buttons, spec_menu walk the new places.
+- OPTIONS > DISPLAY > COLOR (display.c BuildColorLut / UploadColored): DEFAULT, GBA CORRECTED, GBA SP, GBA SP 101, NDS
+  from Pokefan531's color-correction shaders (libretro slang-shaders handheld/shaders/color, public domain): linear
+  light (2.2), the screen's 3x3 matrix and brightness, out at 1/2.2 + darkness / 4.84 (GBA CORRECTED: darkness 1.0, the
+  unlit GBA; GBA SP: the same profile without it). A 32768-entry table turns each frame into sColorTex (ARGB8888);
+  card screens and spectating keep using the game's own texture. Config `color` in moemon_display.ini; `display
+  color N` in the harness. Test display_color (each mode exact against check.py's own working).
+- FILTER redone (the user: better than cheap lines): display.c FilterMask, a multiply mask (SDL_BLENDMODE_MOD) per
+  screen pixel of a picture pixel: SCANLINES a beam's soft rows (0.38-1.0, brightest a little above the middle) and
+  from 3 columns a grille (other channels 0.86); LCD GRID sub-pixel stripes (0.80) and soft cell edges (0.70, the
+  next line 0.88 from 8). fight_display's check.py works out the same mask.
 - GAME CENTER games follow OPTIONS > DISPLAY > SCALING (the user): PIXEL PERFECT / SHARP FIT show a VS cabinet's
   480x320 as the game picture (the game's 4:3 in the middle, black beside it), STRETCH only that 4:3 picture over the
   window (display.c srcRect from platform/fight.h Fight_ContentSpan: FIGHT_ARCADE_PIC_W 427, MUGEN's MF_GAME_W 426).

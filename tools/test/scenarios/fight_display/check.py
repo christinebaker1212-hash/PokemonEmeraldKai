@@ -6,8 +6,8 @@
 #   MUGEN cabinet's 426 columns in the middle, MF_GAME_W)
 #   a whole multiple of the fight's picture: nearest, exact; otherwise sharp-bilinear (nearest to the next whole
 #   multiple, then linear down to the size)
-#   filters: scanlines (the last row of each picture pixel darker, alpha 72) or the LCD grid (last row and column,
-#   alpha 60), drawn when there are enough screen pixels per picture pixel (2 rows / 3x3)
+#   filters: display.c FilterMask's multiply mask (mask() below: a CRT beam's rows and grille, or the LCD's cells and
+#   sub-pixel stripes), drawn when there are enough screen pixels per picture pixel (2 rows / 3x3)
 # The harness saves screenshots as 2x PNGs; they are read back at their own size.
 import os
 import sys
@@ -57,17 +57,36 @@ def linear(src, dw, dh):
     return top * (1 - fy) + bot * fy
 
 
-def overlay(kx, ky, filt, sw=SRC_W, sh=SRC_H):
-    def scan(p, k):
-        return 72 if k >= 2 and p == k - 1 else 32 if k >= 6 and p == k - 2 else 0
+def mask(filt, px, kx, py, ky):
+    """display.c FilterMask (1.63.14): how much of each channel a filter keeps at screen pixel (px, py) of a picture
+    pixel's kx x ky, as the byte it uploads"""
+    import math
+    m, row = [1.0, 1.0, 1.0], 1.0
+    f32 = np.float32
+    if filt == 'scan':
+        if ky >= 2:
+            t = f32((py + 0.5) / ky) - f32(0.45)
+            row = f32(0.38) + f32(0.62) * f32(math.exp(-t * t / (2 * f32(0.21) * f32(0.21))))
+        if kx >= 3:
+            m = [1.0 if (px * 3 // kx) % 3 == c else 0.86 for c in range(3)]
+    elif filt == 'grid':
+        gx = gy = 1.0
+        if kx >= 3:
+            gx = 0.70 if px == kx - 1 else 0.88 if kx >= 8 and px == kx - 2 else 1.0
+            m = [1.0 if (px * 3 // kx) % 3 == c else 0.80 for c in range(3)]
+        if ky >= 3:
+            gy = 0.70 if py == ky - 1 else 0.88 if ky >= 8 and py == ky - 2 else 1.0
+        row = min(gx, gy)
+    return [int(f32(m[c]) * f32(row) * f32(255.0) + f32(0.5)) for c in range(3)]
 
-    def grid(p, k):
-        return 60 if k >= 3 and p == k - 1 else 24 if k >= 8 and p == k - 2 else 0
-    a = np.zeros((sh * ky, sw * kx))
+
+def overlay(kx, ky, filt, sw=SRC_W, sh=SRC_H):
+    """The multiply mask over the whole kx x ky enlargement (0-255 per channel)"""
+    cell = np.zeros((ky, kx, 3))
     for y in range(ky):
         for x in range(kx):
-            a[y::ky, x::kx] = max(grid(y, ky), grid(x, kx)) if filt == 'grid' else scan(y, ky)
-    return a
+            cell[y, x] = mask(filt, x, kx, y, ky)
+    return np.tile(cell, (sh, sw, 1))
 
 
 def expect(src, mode, filt, w, h):
@@ -83,7 +102,7 @@ def expect(src, mode, filt, w, h):
     if filt != 'off':
         on = (ky >= 2 if filt == 'scan' else kx >= 3 and ky >= 3) if exact else dw >= sw * 3 and dh >= sh * 3
     if on:
-        big = big * (255 - overlay(kx, ky, filt, sw, sh)[:, :, None]) / 255.0
+        big = big * overlay(kx, ky, filt, sw, sh) / 255.0   # (SDL_BLENDMODE_MOD)
     out = big if exact else linear(big, dw, dh)
     return (x, y, dw, dh), exact, out
 

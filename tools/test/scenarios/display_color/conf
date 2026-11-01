@@ -1,0 +1,8 @@
+# OPTIONS > DISPLAY > COLOR (1.63.14): the game picture in each handheld's colors (display.c BuildColorLut: Pokefan531's
+# color-correction profiles). The window at exactly 3x (PIXEL PERFECT, nearest) against check.py's own working of each
+# profile over the game's frame of the same moment (shots b0-b4): DEFAULT the frame as it is, GBA CORRECTED, GBA SP, GBA SP 101, NDS.
+MODE=1
+WARP=0,0,10,12
+TMO=60
+UNEXPECT_A=("[crash]" "TIMEOUT")
+CHECK="python3 tools/test/scenarios/display_color/check.py"

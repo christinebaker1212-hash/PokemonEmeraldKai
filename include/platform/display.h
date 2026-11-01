@@ -18,6 +18,17 @@ enum {
     DISPLAY_FILTER_COUNT
 };
 
+// COLOR (1.63.14): the game picture's colors as a handheld's screen showed them (Pokefan531's color-correction
+// shaders' sRGB profiles, public domain: display.c BuildColorLut)
+enum {
+    DISPLAY_COLOR_DEFAULT,       // as the game's colors are
+    DISPLAY_COLOR_GBA,           // GBA CORRECTED: the original GBA's unlit screen (its "darkness" 1.0)
+    DISPLAY_COLOR_GBA_SP,        // the GBA SP's front-lit screen (the GBA profile, no darkening)
+    DISPLAY_COLOR_GBA_SP101,     // the backlit GBA SP (AGS-101)
+    DISPLAY_COLOR_NDS,           // a Nintendo DS
+    DISPLAY_COLOR_COUNT
+};
+
 #define DISPLAY_MAX_WINDOW_SCALE 10
 
 int Display_GetFullscreen(void);
@@ -31,6 +42,8 @@ void Display_SetScaleMode(int mode);
 int Display_GetFilter(void);
 void Display_SetFilter(int filter);
 int Display_IsFilterShown(void);       // 0 if the window is too small for the filter
+int Display_GetColor(void);            // DISPLAY_COLOR_*
+void Display_SetColor(int color);
 int Display_GetVSync(void);
 void Display_SetVSync(int on);
 void Display_SaveSettings(void);
