@@ -51,3 +51,4 @@ Numbered in the order they were sent. Add new ones with the next number and a li
 | 54 | A Yu-Gi-Oh! duel's Battle Phase: the red strip naming the card under the cursor (Change of Heart, SPELL CARD) in the middle band | fade that strip while a phase banner plays (1.56.2) |
 | 55 | (sent in chat, no file) KANTO Route 2: an ARCEUS standing on the path in front of the player; the battle it starts is against a VICTINI | the right POKéMON in the event, and the event only when it should be there |
 | 56 | (sent in chat, no file) A wild battle stuck at its intro with OPTIONS > CREATURES: POKEMON (1.61.4): the trainer back picture holding the ball, the grass circles, no wild POKéMON, the text box empty | every battle begins with its POKéMON shown |
+| 57 | 57.png: the starter table for KANTO and JOHTO: three POKé BALLS on a green-topped table, the hand cursor over the middle one | choosing the starter from the lab table with Emerald-style hand, wiggling balls and preview |

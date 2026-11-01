@@ -36,6 +36,10 @@ Sinnoh_Route201_EventScript_Person12::
 	msgbox Sinnoh_Route201_Text_Person12, MSGBOX_NPC
 	end
 
+Sinnoh_Route201_EventScript_Person13::
+	goto Sinnoh_EventScript_Briefcase
+	end
+
 Sinnoh_Route201_EventScript_Sign4::
 	msgbox Sinnoh_Route201_Text_Sign4, MSGBOX_SIGN
 	end

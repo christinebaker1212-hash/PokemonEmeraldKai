@@ -595,6 +595,8 @@ bool8 StandardWildEncounter(u16 curMetatileBehavior, u16 prevMetatileBehavior)
 
     if (sWildEncountersDisabled == TRUE)
         return FALSE;
+    if (CalculatePlayerPartyCount() == 0)
+        return FALSE;   // Moemon Kai: no POKéMON yet (a new game in SINNOH, before ROUTE 201's briefcase)
 
     headerId = GetCurrentMapWildMonHeaderId();
     if (headerId == HEADER_NONE)

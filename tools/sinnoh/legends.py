@@ -224,6 +224,8 @@ def main():
         lab = story_label(k)
         intro, defeat, after = words
         out = '%s::\n\tlock\n\tfaceplayer\n' % lab
+        # (no battle without a POKéMON: a new game begun in SINNOH meets BARRY before ROUTE 201's briefcase)
+        out += '\tgetpartysize\n\tgoto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_StoryNoTeam\n'
         for i, t in enumerate(trainers):
             last = i == len(trainers) - 1
             nxt = '%s_Won' % lab if last else '%s_Next%d' % (lab, i + 1)

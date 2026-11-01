@@ -22,6 +22,8 @@
 #define FLAG_SINNOH_BADGE01 (REGION_SINNOH_FLAGS + 0)   // .. + 7
 #define VAR_SINNOH_FRIDAY_DAY 0x52F1   // the day (+1) DRIFLOON was met on, its Friday (src/sinnoh/s3d_legends.c)
 #define VAR_SINNOH_SPIRITOMB  0x52F2   // the HALLOWED TOWER: the battle count +1 when the ODD KEYSTONE went in (0: not in)
+#define FLAG_SINNOH_NEW_GAME 0x3D38   // a new game begun in SINNOH (ROUTE 201's briefcase is there for it)
+#define FLAG_SINNOH_STARTER  0x3D39   // ... its first POKéMON picked from the briefcase
 #define VAR_SINNOH_ARRIVAL  0x52F0   // 1: just off the first boat to SINNOH (the harbor sailor takes them to TWINLEAF), 2: done
 #define FLAG_SINNOH_HIDDEN  0x3FFF   // always set (s3d.c S3D_LayoutBlocks): Platinum's objects that aren't people here
 #define REGION_FLAG_BYTES  ((REGION_FLAGS_END - REGION_FLAGS_START) / 8)

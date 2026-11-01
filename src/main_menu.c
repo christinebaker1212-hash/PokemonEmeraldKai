@@ -411,12 +411,12 @@ static const struct WindowTemplate sNewGameBirchSpeechTextWindows[] =
         .paletteNum = 15,
         .baseBlock = 0x85
     },
-    {   // Moemon Kai: HOENN / JOHTO / KANTO
+    {   // Moemon Kai: HOENN / JOHTO / KANTO / SINNOH
         .bg = 0,
         .tilemapLeft = 3,
         .tilemapTop = 3,
-        .width = 6,
-        .height = 6,
+        .width = 7,
+        .height = 8,
         .paletteNum = 15,
         .baseBlock = 0x110
     },
@@ -2042,15 +2042,21 @@ static void Task_NewGameBirchSpeech_WaitAskSkip(u8 taskId)
 
 // Moemon Kai: a new game can start in any region (docs/REGIONS_PLAN.md). JOHTO and KANTO start at home in NEW BARK /
 // PALLET (mp_region.c MP_Region_StartNewGame); SKIP THE INTRO is HOENN's.
-static const u8 sText_Birch_AskRegion[] = _("Now, where will your journey begin?\pHere in HOENN, far off in JOHTO,\nor in KANTO?");
+static const u8 sText_Birch_AskRegion[] = _("Now, where will your journey begin?\pIn KANTO, in JOHTO, here in HOENN,\nor in SINNOH?");
 static const u8 sText_Hoenn[] = _("HOENN");
 static const u8 sText_Johto[] = _("JOHTO");
 static const u8 sText_Kanto[] = _("KANTO");
+static const u8 sText_Sinnoh[] = _("SINNOH");
+// (the user's order: KANTO, JOHTO, HOENN, SINNOH; sRegionMenuRegions maps each row to its region; the cursor starts on
+// HOENN, the game's own)
 static const struct MenuAction sMenuActions_Region[] = {
-    {sText_Hoenn, {NULL}},
-    {sText_Johto, {NULL}},
     {sText_Kanto, {NULL}},
+    {sText_Johto, {NULL}},
+    {sText_Hoenn, {NULL}},
+    {sText_Sinnoh, {NULL}},   // (SINNOH starts in TWINLEAF's house: mp_region.c MP_Region_StartNewGame)
 };
+static const u8 sRegionMenuRegions[] = {REGION_KANTO, REGION_JOHTO, REGION_HOENN, REGION_SINNOH};
+#define REGION_MENU_FIRST_ROW 2
 #define WIN_REGION 3
 
 static void Task_NewGameBirchSpeech_ProcessRegionMenu(u8 taskId)
@@ -2060,6 +2066,7 @@ static void Task_NewGameBirchSpeech_ProcessRegionMenu(u8 taskId)
         return;
     PlaySE(SE_SELECT);
     NewGameBirchSpeech_ClearGenderWindow(WIN_REGION, TRUE);
+    choice = sRegionMenuRegions[choice];
     MP_Region_SetStartRegion(choice);
     if (choice == REGION_HOENN)
     {
@@ -2085,7 +2092,7 @@ static void Task_NewGameBirchSpeech_WaitAskRegion(u8 taskId)
         DrawMainMenuWindowBorder(&sNewGameBirchSpeechTextWindows[WIN_REGION], 0xF3);
         FillWindowPixelBuffer(WIN_REGION, PIXEL_FILL(1));
         PrintMenuTable(WIN_REGION, ARRAY_COUNT(sMenuActions_Region), sMenuActions_Region);
-        InitMenuInUpperLeftCornerNormal(WIN_REGION, ARRAY_COUNT(sMenuActions_Region), 0);
+        InitMenuInUpperLeftCornerNormal(WIN_REGION, ARRAY_COUNT(sMenuActions_Region), REGION_MENU_FIRST_ROW);
         PutWindowTilemap(WIN_REGION);
         CopyWindowToVram(WIN_REGION, COPYWIN_FULL);
         gTasks[taskId].func = Task_NewGameBirchSpeech_ProcessRegionMenu;

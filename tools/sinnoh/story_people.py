@@ -20,7 +20,7 @@ DONE = ['RIVAL_201', 'RIVAL_203', 'MARS_WINDWORKS', 'JUPITER_ETERNA', 'RIVAL_209
         'RIVAL_FIGHT', 'STARK', 'CYRUS_CELESTIC']
 
 # ... and the story's own flags past those (the DISTORTION WORLD: data/scripts/sinnoh_places.inc)
-EXTRA_DONE = {'DISTORTION': 0x3D35}
+EXTRA_DONE = {'DISTORTION': 0x3D35, 'NEW_GAME': 0x3D38, 'STARTER': 0x3D39}   # (a new game begun in SINNOH, its first POKéMON)
 
 LEAGUE = 9
 NEVER = (99, 99, None, None, None)
@@ -35,7 +35,7 @@ SHOW = {
     # ------------------------------------------------------------------ the start (no badge yet)
     'TWINLEAF_TOWN_RIVAL': NEVER, 'TWINLEAF_TOWN_RIVAL_HOUSE_2F_RIVAL': NEVER,
     'TWINLEAF_TOWN_PLAYER_HOUSE_2F_RIVAL': NEVER, 'TWINLEAF_TOWN_PLAYER_HOUSE_1F_RIVAL_MOM': _r(0, 1),
-    'ROUTE_201_PROF_ROWAN': NEVER, 'ROUTE_201_COUNTERPART': NEVER, 'ROUTE_201_BRIEFCASE': NEVER,
+    'ROUTE_201_PROF_ROWAN': NEVER, 'ROUTE_201_COUNTERPART': NEVER, 'ROUTE_201_BRIEFCASE': _r(0, need='NEW_GAME', unless='STARTER'),
     'LAKE_VERITY_PROF_ROWAN': _r(0, 1), 'LAKE_VERITY_COUNTERPART': _r(0, 1),
     'SANDGEM_TOWN_RIVAL': NEVER, 'SANDGEM_TOWN_PROF_ROWAN': NEVER, 'SANDGEM_TOWN_COUNTERPART': _r(0, 1),
     'SANDGEM_TOWN_LAB_PROF_ROWAN': ALWAYS, 'SANDGEM_TOWN_LAB_COUNTERPART': _r(1),
@@ -224,10 +224,9 @@ STORY_WORDS = {
     'Sinnoh_SandgemTown': {
         'Person5': "Hi! I help PROF. ROWAN with his research.|"
                    "The lab's right there. He'll want to hear all about the POKéMON where you come from!"},
+    'Sinnoh_Route201': {'Person13': ('script', 'Sinnoh_EventScript_Briefcase')},
     'Sinnoh_SandgemTownPokemonResearchLab': {
-        'Person1': "PROF. ROWAN: Welcome to my lab. Sit, if you can find a chair under the papers.|"
-                   "SINNOH's POKéMON evolve in ways the world is only starting to understand. "
-                   "Travel far, and tell me what you see.",
+        'Person1': ('script', 'Sinnoh_EventScript_RowanLab'),
         'Person4': "We've been following TEAM GALACTIC's movements for the PROFESSOR.|"
                    "Whatever they want with the lakes, it can't be good.",
         'Person5': "PROF. OAK: Oh ho! You must be the TRAINER who cleared SINNOH's LEAGUE.|"

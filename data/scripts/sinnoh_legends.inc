@@ -394,6 +394,8 @@ Sinnoh_EventScript_LegendDrifloon_Ran:
 Sinnoh_EventScript_Story0::
 	lock
 	faceplayer
+	getpartysize
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_StoryNoTeam
 	specialvar VAR_RESULT, Sinnoh_RivalVersion
 	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_Story0_V0_0
 	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_Story0_V0_1
@@ -430,6 +432,8 @@ Sinnoh_EventScript_Story0_After:
 Sinnoh_EventScript_Story1::
 	lock
 	faceplayer
+	getpartysize
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_StoryNoTeam
 	specialvar VAR_RESULT, Sinnoh_RivalVersion
 	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_Story1_V0_0
 	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_Story1_V0_1
@@ -466,6 +470,8 @@ Sinnoh_EventScript_Story1_After:
 Sinnoh_EventScript_Story2::
 	lock
 	faceplayer
+	getpartysize
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_StoryNoTeam
 	trainerbattle_single TRAINER_SINNOH_COMMANDER_MARS_VALLEY_WINDWORKS, Sinnoh_EventScript_Story2_Intro, Sinnoh_EventScript_Story2_Defeat, Sinnoh_EventScript_Story2_Won
 	end
 Sinnoh_EventScript_Story2_Won::
@@ -492,6 +498,8 @@ Sinnoh_EventScript_Story2_After:
 Sinnoh_EventScript_Story3::
 	lock
 	faceplayer
+	getpartysize
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_StoryNoTeam
 	trainerbattle_single TRAINER_SINNOH_COMMANDER_JUPITER_TEAM_GALACTIC_ETERNA_BUILDING, Sinnoh_EventScript_Story3_Intro, Sinnoh_EventScript_Story3_Defeat, Sinnoh_EventScript_Story3_Won
 	end
 Sinnoh_EventScript_Story3_Won::
@@ -517,6 +525,8 @@ Sinnoh_EventScript_Story3_After:
 Sinnoh_EventScript_Story4::
 	lock
 	faceplayer
+	getpartysize
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_StoryNoTeam
 	specialvar VAR_RESULT, Sinnoh_RivalVersion
 	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_Story4_V0_0
 	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_Story4_V0_1
@@ -553,6 +563,8 @@ Sinnoh_EventScript_Story4_After:
 Sinnoh_EventScript_Story5::
 	lock
 	faceplayer
+	getpartysize
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_StoryNoTeam
 	specialvar VAR_RESULT, Sinnoh_RivalVersion
 	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_Story5_V0_0
 	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_Story5_V0_1
@@ -589,6 +601,8 @@ Sinnoh_EventScript_Story5_After:
 Sinnoh_EventScript_Story6::
 	lock
 	faceplayer
+	getpartysize
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_StoryNoTeam
 	specialvar VAR_RESULT, Sinnoh_RivalVersion
 	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_Story6_V0_0
 	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_Story6_V0_1
@@ -625,6 +639,8 @@ Sinnoh_EventScript_Story6_After:
 Sinnoh_EventScript_Story7::
 	lock
 	faceplayer
+	getpartysize
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_StoryNoTeam
 	trainerbattle_single TRAINER_SINNOH_COMMANDER_MARS_LAKE_VERITY, Sinnoh_EventScript_Story7_Intro, Sinnoh_EventScript_Story7_Defeat, Sinnoh_EventScript_Story7_Won
 	end
 Sinnoh_EventScript_Story7_Won::
@@ -650,6 +666,8 @@ Sinnoh_EventScript_Story7_After:
 Sinnoh_EventScript_Story8::
 	lock
 	faceplayer
+	getpartysize
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_StoryNoTeam
 	trainerbattle_single TRAINER_SINNOH_COMMANDER_SATURN_VALOR_CAVERN, Sinnoh_EventScript_Story8_Intro, Sinnoh_EventScript_Story8_Defeat, Sinnoh_EventScript_Story8_Won
 	end
 Sinnoh_EventScript_Story8_Won::
@@ -675,6 +693,8 @@ Sinnoh_EventScript_Story8_After:
 Sinnoh_EventScript_Story9::
 	lock
 	faceplayer
+	getpartysize
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_StoryNoTeam
 	trainerbattle_single TRAINER_SINNOH_COMMANDER_SATURN_GALACTIC_HQ, Sinnoh_EventScript_Story9_Intro, Sinnoh_EventScript_Story9_Defeat, Sinnoh_EventScript_Story9_Won
 	end
 Sinnoh_EventScript_Story9_Won::
@@ -700,6 +720,8 @@ Sinnoh_EventScript_Story9_After:
 Sinnoh_EventScript_Story10::
 	lock
 	faceplayer
+	getpartysize
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_StoryNoTeam
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_BOSS_CYRUS_GALACTIC_HQ, Sinnoh_EventScript_Story10_Intro, Sinnoh_EventScript_Story10_Defeat, Sinnoh_EventScript_Story10_Won
 	end
 Sinnoh_EventScript_Story10_Won::
@@ -725,6 +747,8 @@ Sinnoh_EventScript_Story10_After:
 Sinnoh_EventScript_Story11::
 	lock
 	faceplayer
+	getpartysize
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_StoryNoTeam
 	trainerbattle_single TRAINER_SINNOH_COMMANDER_MARS_SPEAR_PILLAR, Sinnoh_EventScript_Story11_Intro, Sinnoh_EventScript_Story11_Defeat, Sinnoh_EventScript_Story11_Next1
 	end
 Sinnoh_EventScript_Story11_Next1:
@@ -753,6 +777,8 @@ Sinnoh_EventScript_Story11_After:
 Sinnoh_EventScript_Story12::
 	lock
 	faceplayer
+	getpartysize
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_StoryNoTeam
 	specialvar VAR_RESULT, Sinnoh_RivalVersion
 	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_Story12_V0_0
 	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_Story12_V0_1
@@ -789,6 +815,8 @@ Sinnoh_EventScript_Story12_After:
 Sinnoh_EventScript_Story13::
 	lock
 	faceplayer
+	getpartysize
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_StoryNoTeam
 	specialvar VAR_RESULT, Sinnoh_RivalVersion
 	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_Story13_V0_0
 	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_Story13_V0_1
@@ -825,6 +853,8 @@ Sinnoh_EventScript_Story13_After:
 Sinnoh_EventScript_Story14::
 	lock
 	faceplayer
+	getpartysize
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_StoryNoTeam
 	specialvar VAR_RESULT, Sinnoh_RivalVersion
 	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_Story14_V0_0
 	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_Story14_V0_1
@@ -861,6 +891,8 @@ Sinnoh_EventScript_Story14_After:
 Sinnoh_EventScript_Story15::
 	lock
 	faceplayer
+	getpartysize
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_StoryNoTeam
 	trainerbattle_single TRAINER_SINNOH_COMMANDER_MARS_STARK_MOUNTAIN, Sinnoh_EventScript_Story15_Intro, Sinnoh_EventScript_Story15_Defeat, Sinnoh_EventScript_Story15_Next1
 	end
 Sinnoh_EventScript_Story15_Next1:
@@ -890,6 +922,8 @@ Sinnoh_EventScript_Story15_After:
 Sinnoh_EventScript_Story16::
 	lock
 	faceplayer
+	getpartysize
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_StoryNoTeam
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_BOSS_CYRUS_CELESTIC_TOWN_RUINS, Sinnoh_EventScript_Story16_Intro, Sinnoh_EventScript_Story16_Defeat, Sinnoh_EventScript_Story16_Won
 	end
 Sinnoh_EventScript_Story16_Won::

@@ -27,22 +27,7 @@ Sinnoh_SandgemTownPokemonResearchLab_EventScript_Bg6::
 	end
 
 Sinnoh_SandgemTownPokemonResearchLab_EventScript_Person1::
-	lock
-	faceplayer
-	goto_if_set 0x3DD8, Sinnoh_SandgemTownPokemonResearchLab_EventScript_Person1_Given
-	checkitem ITEM_POKE_RADAR
-	goto_if_eq VAR_RESULT, TRUE, Sinnoh_SandgemTownPokemonResearchLab_EventScript_Person1_Given
-	msgbox Sinnoh_SandgemTownPokemonResearchLab_Text_Person1, MSGBOX_DEFAULT
-	msgbox Sinnoh_SandgemTownPokemonResearchLab_Text_Person1Gift, MSGBOX_DEFAULT
-	giveitem ITEM_POKE_RADAR, 1
-	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DD8
-	release
-	end
-
-Sinnoh_SandgemTownPokemonResearchLab_EventScript_Person1_Given::
-	msgbox Sinnoh_SandgemTownPokemonResearchLab_Text_Person1, MSGBOX_DEFAULT
-	release
+	goto Sinnoh_EventScript_RowanLab
 	end
 
 Sinnoh_SandgemTownPokemonResearchLab_EventScript_Person2::
@@ -87,17 +72,6 @@ Sinnoh_SandgemTownPokemonResearchLab_Text_Bg5:
 Sinnoh_SandgemTownPokemonResearchLab_Text_Bg6:
 	.string "A fridge for samples. One shelf is just\n"
 	.string "labeled “LUNCH. DO NOT STUDY.”$"
-
-Sinnoh_SandgemTownPokemonResearchLab_Text_Person1:
-	.string "PROF. ROWAN: Welcome to my lab. Sit, if\n"
-	.string "you can find a chair under the papers.\p"
-	.string "SINNOH's POKéMON evolve in ways the\n"
-	.string "world is only starting to understand.\l"
-	.string "Travel far, and tell me what you see.$"
-
-Sinnoh_SandgemTownPokemonResearchLab_Text_Person1Gift:
-	.string "Here, a POKé RADAR. It finds POKéMON\n"
-	.string "hiding in the grass. Use it well.$"
 
 Sinnoh_SandgemTownPokemonResearchLab_Text_Person2:
 	.string "We study how MOéMON evolve.\p"

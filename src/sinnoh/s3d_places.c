@@ -4,6 +4,8 @@
 #include "global.h"
 #include "event_data.h"
 #include "item.h"
+#include "pokemon.h"
+#include "constants/species.h"
 #include "script.h"
 #include "script_menu.h"
 #include "string_util.h"
@@ -125,4 +127,29 @@ u16 Sinnoh_BpBuy(void)
     gSaveBlock2Ptr->frontier.battlePoints -= gSpecialVar_0x8006;
     AddBagItem(gSpecialVar_0x8005, 1);
     return gSpecialVar_Result = 0;
+}
+
+// PROF. ROWAN's briefcase on ROUTE 201 (a new game begun in SINNOH): Platinum's three (waitstate; VAR_RESULT the
+// species, or 0 backed out)
+static const u16 sStarters[] = {SPECIES_TURTWIG, SPECIES_CHIMCHAR, SPECIES_PIPLUP};
+static u8 sStarterNames[ARRAY_COUNT(sStarters)][POKEMON_NAME_LENGTH + 1];
+
+static u16 StarterPicked(u16 row)
+{
+    return row < ARRAY_COUNT(sStarters) ? sStarters[row] : 0;
+}
+
+u16 Sinnoh_StarterMenu(void)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sStarters); i++)
+    {
+        GetSpeciesName(sStarterNames[i], sStarters[i]);
+        gQzScrollOptions[i] = sStarterNames[i];
+    }
+    gQzScrollCount = i;
+    gQzScrollResult = StarterPicked;
+    gSpecialVar_0x8004 = SCROLL_MULTI_QZ_DYNAMIC;
+    ShowScrollableMultichoice();
+    return 0;
 }

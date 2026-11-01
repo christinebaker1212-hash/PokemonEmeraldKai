@@ -649,4 +649,5 @@ gSpecials::
 	def_special Sinnoh_FrontierBattle
 	def_special Sinnoh_FrontierWon
 	def_special Sinnoh_FrontierEnd
+	def_special Sinnoh_StarterMenu
 	.include "data/qz_specials.inc"   @ Moemon Kai: Quetzal's specials (Johto / Kanto)

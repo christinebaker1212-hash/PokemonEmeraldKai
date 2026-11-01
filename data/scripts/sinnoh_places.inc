@@ -919,3 +919,133 @@ Sinnoh_Text_FrontierAlready:
 
 Sinnoh_Text_FrontierBye:
 	.string "Come back anytime!$"
+
+@ A new game begun in SINNOH (mp_region.c MP_Region_StartNewGame): PROF. ROWAN's briefcase on ROUTE 201 holds
+@ Platinum's three (Sinnoh_StarterMenu); one picked sets FLAG_SINNOH_STARTER (0x3D39). The briefcase is shown only for
+@ that new game, until then (tools/sinnoh/story_people.py ROUTE_201_BRIEFCASE).
+Sinnoh_EventScript_Briefcase::
+	lock
+	msgbox Sinnoh_Text_Briefcase, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Sinnoh_EventScript_BriefcaseLeave
+	msgbox Sinnoh_Text_BriefcaseWhich, MSGBOX_DEFAULT
+	special Sinnoh_StarterMenu
+	waitstate
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_BriefcaseLeave
+	copyvar VAR_TEMP_2, VAR_RESULT
+	givemon VAR_TEMP_2, 5
+	goto_if_eq VAR_RESULT, MON_CANT_GIVE, Sinnoh_EventScript_BriefcaseLeave
+	setflag 0x3D39
+	bufferspeciesname STR_VAR_1, VAR_TEMP_2
+	playfanfare MUS_OBTAIN_ITEM
+	message Sinnoh_Text_BriefcaseGot
+	waitmessage
+	waitfanfare
+	msgbox Sinnoh_Text_BriefcaseNick, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Sinnoh_EventScript_BriefcaseDone
+	setvar VAR_0x8004, 0
+	call Common_EventScript_NameReceivedPartyMon
+
+Sinnoh_EventScript_BriefcaseDone:
+	msgbox Sinnoh_Text_BriefcaseAfter, MSGBOX_DEFAULT
+	closemessage
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	release
+	end
+
+Sinnoh_EventScript_BriefcaseLeave:
+	msgbox Sinnoh_Text_BriefcaseLeave, MSGBOX_DEFAULT
+	release
+	end
+
+@ PROF. ROWAN in SANDGEM's lab: the POKéDEX and five POKé BALLS for a TRAINER who has none yet; else his words
+Sinnoh_EventScript_RowanLab::
+	lock
+	faceplayer
+	goto_if_set FLAG_SYS_POKEDEX_GET, Sinnoh_EventScript_RowanTalk
+	getpartysize
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_RowanNoTeam
+	msgbox Sinnoh_Text_RowanDex, MSGBOX_DEFAULT
+	playfanfare MUS_OBTAIN_ITEM
+	message Sinnoh_Text_RowanGotDex
+	waitmessage
+	waitfanfare
+	setflag FLAG_SYS_POKEDEX_GET
+	special SetUnlockedPokedexFlags
+	msgbox Sinnoh_Text_RowanBalls, MSGBOX_DEFAULT
+	giveitem ITEM_POKE_BALL, 5
+	msgbox Sinnoh_Text_RowanGo, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_EventScript_RowanNoTeam:
+	msgbox Sinnoh_Text_RowanNoTeam, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_EventScript_RowanTalk:
+	msgbox Sinnoh_Text_RowanTalk, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_Text_Briefcase:
+	.string "Someone left a briefcase here. A tag\n"
+	.string "on it reads “PROF. ROWAN.”\p"
+	.string "Three POKé BALLS are tucked inside.\n"
+	.string "Will you take a look?$"
+
+Sinnoh_Text_BriefcaseWhich:
+	.string "Which MOéMON will you choose?$"
+
+Sinnoh_Text_BriefcaseGot:
+	.string "{PLAYER} chose {STR_VAR_1}!$"
+
+Sinnoh_Text_BriefcaseNick:
+	.string "Give a nickname to {STR_VAR_1}?$"
+
+Sinnoh_Text_BriefcaseAfter:
+	.string "Better bring the briefcase back to\n"
+	.string "PROF. ROWAN's lab in SANDGEM TOWN.$"
+
+Sinnoh_Text_BriefcaseLeave:
+	.string "It's not yours... but the grass ahead\n"
+	.string "rustles with wild MOéMON.$"
+
+Sinnoh_Text_RowanDex:
+	.string "PROF. ROWAN: So you found my briefcase,\n"
+	.string "and a partner in it. Hm.\p"
+	.string "I can see it trusts you already.\n"
+	.string "Keep it. And take this as well.$"
+
+Sinnoh_Text_RowanGotDex:
+	.string "{PLAYER} received the MOéDEX!$"
+
+Sinnoh_Text_RowanBalls:
+	.string "The MOéDEX records every MOéMON you\n"
+	.string "meet. These will help you catch them.$"
+
+Sinnoh_Text_RowanGo:
+	.string "SINNOH is wide, and its MOéMON are\n"
+	.string "many. Go and see them all.$"
+
+Sinnoh_Text_RowanNoTeam:
+	.string "PROF. ROWAN: A TRAINER without a\n"
+	.string "MOéMON? I left my briefcase out on\l"
+	.string "ROUTE 201. See if it's still there.$"
+
+Sinnoh_Text_RowanTalk:
+	.string "PROF. ROWAN: SINNOH's MOéMON evolve in\n"
+	.string "ways the world is only starting to\l"
+	.string "understand. Travel far, and tell me\l"
+	.string "what you see.$"
+
+@ A story battle with no POKéMON in the party (tools/sinnoh/legends.py): not yet
+Sinnoh_EventScript_StoryNoTeam::
+	msgbox Sinnoh_Text_StoryNoTeam, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_Text_StoryNoTeam:
+	.string "You don't have a MOéMON yet!\n"
+	.string "Come back once you do.$"

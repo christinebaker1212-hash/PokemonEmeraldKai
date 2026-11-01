@@ -2084,6 +2084,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf(" %d", Sinnoh_GreatMarshDailySpecies(k));
         printf("\n");
     }
+    else if (strcmp(cmd, "emptyparty") == 0)
+    {
+        // emptyparty: no POKéMON at all (a new game before its first one: SINNOH's ROUTE 201 briefcase)
+        ZeroPlayerPartyMons();
+        CalculatePlayerPartyCount();
+        FlagClear(FLAG_SYS_POKEDEX_GET);
+        printf("[test] emptyparty\n");
+    }
     else if (strcmp(cmd, "hall") == 0)
     {
         void Sinnoh_HallDebug(void);

@@ -3263,6 +3263,18 @@ places of the game's own data/scripts/sinnoh_places.inc, the frontier s3d_hall.c
 Every generator is re-run from the repository with the decomp's folder: `python3 -I tools/sinnoh/<gen>.py
 POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
 
+## A new game in SINNOH (1.63.1)
+- BIRCH's region menu (main_menu.c sMenuActions_Region / sRegionMenuRegions) lists KANTO, JOHTO, HOENN, SINNOH in that
+  order (REGION_MENU_FIRST_ROW: the cursor starts on HOENN); rows map to REGION_* through sRegionMenuRegions.
+- MP_Region_StartNewGame SINNOH: the player wakes in TWINLEAF's house 2F (8,5) with no POKéMON, B-dash on, the heal
+  spot TWINLEAF, VAR_SINNOH_ARRIVAL 2 (as if the boat had brought them) and FLAG_SINNOH_NEW_GAME (0x3D38).
+- No team: StandardWildEncounter gives no wild battles while the party is empty; every story battle (legends.py) and
+  BARRY first checks getpartysize -> Sinnoh_EventScript_StoryNoTeam.
+- ROUTE 201's briefcase (story_people.py ROUTE_201_BRIEFCASE, need NEW_GAME unless STARTER): Sinnoh_EventScript_Briefcase,
+  the special Sinnoh_StarterMenu (TURTWIG / CHIMCHAR / PIPLUP, Lv. 5), FLAG_SINNOH_STARTER (0x3D39). PROF. ROWAN's lab
+  (Sinnoh_EventScript_RowanLab) then gives the POKéDEX and 5 POKé BALLS to a player without one.
+- Debug `mp emptyparty` (party and POKéDEX flag cleared); test sinnoh_newgame.
+
 ## SINNOH's 3D engine
 - Plan and rules: docs/SINNOH_HANDOFF.md. The data comes from pret/pokeplatinum (source.py: its map blocks, matrices,
   areas, props, texture sets and lights as files; fetch_decomp.sh gets them at a pinned commit, make_pack.sh fetches and
