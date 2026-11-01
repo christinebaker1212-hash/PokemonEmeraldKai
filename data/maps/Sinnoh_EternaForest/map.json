@@ -380,6 +380,22 @@
   "coord_events": [],
   "bg_events": [
     {
+      "type": "sign",
+      "x": 29,
+      "y": 82,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_EternaForest_EventScript_Sign13"
+    },
+    {
+      "type": "sign",
+      "x": 76,
+      "y": 72,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_EternaForest_EventScript_Sign14"
+    },
+    {
       "type": "hidden_item",
       "x": 80,
       "y": 9,

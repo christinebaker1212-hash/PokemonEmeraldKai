@@ -112,6 +112,14 @@
   "coord_events": [],
   "bg_events": [
     {
+      "type": "sign",
+      "x": 72,
+      "y": 113,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_GreatMarsh6_EventScript_Sign2"
+    },
+    {
       "type": "hidden_item",
       "x": 91,
       "y": 113,

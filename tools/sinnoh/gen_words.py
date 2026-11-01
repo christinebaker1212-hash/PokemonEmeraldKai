@@ -221,14 +221,34 @@ def roles(root):
     from source import open_source
     from gen_maps import places
     from places import events
+    import sprites
+    import who
+    from words_indoor import kind
     out = {}
     for p in places(open_source(root), root):
-        for i, o in enumerate(events(root, p['place'])['object_events']):
+        ev = events(root, p['place'])
+        names = who.entries(root, p['place']['header'][len('MAP_HEADER_'):].lower())
+
+        def entry(n):
+            e = names[n - 1] if isinstance(n, int) and 1 <= n <= len(names) else ''
+            return e.split('_', 1)[1] if '_' in e else ''
+        for i, o in enumerate(ev['object_events']):
             gfx = o['graphics_id']
             if gfx.endswith('POKECENTER_NURSE'):
                 out.setdefault(p['name'], {})['Person%d' % (i + 1)] = ('nurse',)
             elif gfx.endswith(('CASHIER_F', 'CASHIER_M')) and p['name'].endswith('Mart'):
                 out.setdefault(p['name'], {})['Person%d' % (i + 1)] = ('mart',)
+            else:
+                # the things every building of a kind has, and gym guides (tools/sinnoh/words_indoor.py KINDS)
+                words = kind(p['name'], entry(o['script'])) if not isinstance(o.get('hidden_flag'), str) or \
+                    not o['hidden_flag'].startswith(('FLAG_', 'MAP_HEADER_')) else None
+                if words:
+                    key = ('Sign%d' if sprites.sign(gfx) else 'Person%d') % (i + 1)
+                    out.setdefault(p['name'], {})[key] = words
+        for i, b in enumerate(ev['bg_events']):
+            words = kind(p['name'], entry(b['script'])) if b.get('type') == 0 else None
+            if words:
+                out.setdefault(p['name'], {})['Bg%d' % (i + 1)] = words
     return out
 
 

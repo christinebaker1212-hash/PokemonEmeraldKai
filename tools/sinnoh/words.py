@@ -272,10 +272,12 @@ def _merge():
     import sys
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from words_outdoor import OUTDOOR
-    for name, entries in OUTDOOR.items():
-        mine = WORDS.setdefault(name, {})
-        for key, value in entries.items():
-            mine.setdefault(key, value)
+    from words_indoor import INDOOR
+    for more in (OUTDOOR, INDOOR):
+        for name, entries in more.items():
+            mine = WORDS.setdefault(name, {})
+            for key, value in entries.items():
+                mine.setdefault(key, value)
 
 
 _merge()

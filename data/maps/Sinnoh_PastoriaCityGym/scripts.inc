@@ -2,6 +2,14 @@ Sinnoh_PastoriaCityGym_MapScripts::
 	.byte 0
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
+Sinnoh_PastoriaCityGym_EventScript_Bg1::
+	msgbox Sinnoh_PastoriaCityGym_Text_Bg1, MSGBOX_SIGN
+	end
+
+Sinnoh_PastoriaCityGym_EventScript_Bg2::
+	msgbox Sinnoh_PastoriaCityGym_Text_Bg2, MSGBOX_SIGN
+	end
+
 Sinnoh_PastoriaCityGym_EventScript_Person1::
 	trainerbattle_single TRAINER_SINNOH_LEADER_WAKE, Sinnoh_PastoriaCityGym_Text_Person1Intro, Sinnoh_PastoriaCityGym_Text_Person1Defeat, Sinnoh_PastoriaCityGym_EventScript_Person1_Defeated, NO_MUSIC
 	goto_if_unset 0x3774, Sinnoh_PastoriaCityGym_EventScript_Person1_GiveTm
@@ -25,6 +33,18 @@ Sinnoh_PastoriaCityGym_EventScript_Person1_GiveTm::
 	msgbox Sinnoh_PastoriaCityGym_Text_Person1Tm, MSGBOX_DEFAULT
 	release
 	end
+
+Sinnoh_PastoriaCityGym_EventScript_Person2::
+	msgbox Sinnoh_PastoriaCityGym_Text_Person2, MSGBOX_NPC
+	end
+
+Sinnoh_PastoriaCityGym_Text_Bg1:
+	.string "PASTORIA CITY MOéMON GYM\p"
+	.string "LEADER: CRASHER WAKE$"
+
+Sinnoh_PastoriaCityGym_Text_Bg2:
+	.string "PASTORIA CITY MOéMON GYM\p"
+	.string "LEADER: CRASHER WAKE$"
 
 Sinnoh_PastoriaCityGym_Text_Person1Intro:
 	.string "I am CRASHER WAKE! The wave that\n"
@@ -53,5 +73,10 @@ Sinnoh_PastoriaCityGym_Text_Person1After:
 Sinnoh_PastoriaCityGym_Text_Person1Badge:
 	.string "{PLAYER} received the FEN BADGE from\n"
 	.string "WAKE.$"
+
+Sinnoh_PastoriaCityGym_Text_Person2:
+	.string "CRASHER WAKE's WATER MOéMON make big\n"
+	.string "waves. GRASS and ELECTRIC moves will\l"
+	.string "calm them down!$"
 
 @ --- end of SINNOH words ---

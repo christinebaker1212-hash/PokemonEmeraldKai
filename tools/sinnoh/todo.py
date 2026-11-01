@@ -16,6 +16,7 @@ from places import events  # noqa: E402
 import sprites  # noqa: E402
 import who  # noqa: E402
 from words import WORDS  # noqa: E402
+from words_indoor import kind  # noqa: E402
 
 
 def todo(root, p):
@@ -33,7 +34,9 @@ def todo(root, p):
         key = ('Sign%d' if sign else 'Person%d') % (i + 1)
         mo = m['object_events'][i]
         hide = o.get('hidden_flag')
-        if key in have or not what(o['script']):
+        if key in have or not what(o['script']) or o['graphics_id'].endswith(('POKECENTER_NURSE', 'CASHIER_F', 'CASHIER_M')):
+            continue
+        if kind(name, what(o['script']).split('_', 1)[-1]):
             continue
         if isinstance(hide, str) and hide.startswith(('FLAG_', 'MAP_HEADER_')):
             continue          # (a story person, or a neighbor's)
@@ -42,7 +45,8 @@ def todo(root, p):
             continue
         out.append('%s %s  %s' % (key, o['graphics_id'][14:], what(o['script'])))
     for i, b in enumerate(ev['bg_events']):
-        if b.get('type') == 0 and 'Bg%d' % (i + 1) not in have and what(b['script']):
+        if b.get('type') == 0 and 'Bg%d' % (i + 1) not in have and what(b['script']) \
+                and not kind(name, what(b['script']).split('_', 1)[-1]):
             out.append('Bg%d  %s' % (i + 1, what(b['script'])))
     return out
 

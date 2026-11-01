@@ -2,6 +2,18 @@ Sinnoh_CanalaveCityGym_MapScripts::
 	.byte 0
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
+Sinnoh_CanalaveCityGym_EventScript_Bg1::
+	msgbox Sinnoh_CanalaveCityGym_Text_Bg1, MSGBOX_SIGN
+	end
+
+Sinnoh_CanalaveCityGym_EventScript_Bg2::
+	msgbox Sinnoh_CanalaveCityGym_Text_Bg2, MSGBOX_SIGN
+	end
+
+Sinnoh_CanalaveCityGym_EventScript_Person2::
+	msgbox Sinnoh_CanalaveCityGym_Text_Person2, MSGBOX_NPC
+	end
+
 Sinnoh_CanalaveCityGym_EventScript_Person5::
 	trainerbattle_single TRAINER_SINNOH_LEADER_BYRON, Sinnoh_CanalaveCityGym_Text_Person5Intro, Sinnoh_CanalaveCityGym_Text_Person5Defeat, Sinnoh_CanalaveCityGym_EventScript_Person5_Defeated, NO_MUSIC
 	goto_if_unset 0x3775, Sinnoh_CanalaveCityGym_EventScript_Person5_GiveTm
@@ -25,6 +37,19 @@ Sinnoh_CanalaveCityGym_EventScript_Person5_GiveTm::
 	msgbox Sinnoh_CanalaveCityGym_Text_Person5Tm, MSGBOX_DEFAULT
 	release
 	end
+
+Sinnoh_CanalaveCityGym_Text_Bg1:
+	.string "CANALAVE CITY MOéMON GYM\p"
+	.string "LEADER: BYRON$"
+
+Sinnoh_CanalaveCityGym_Text_Bg2:
+	.string "CANALAVE CITY MOéMON GYM\p"
+	.string "LEADER: BYRON$"
+
+Sinnoh_CanalaveCityGym_Text_Person2:
+	.string "BYRON's STEEL MOéMON shrug off lots\n"
+	.string "of moves. FIRE, FIGHTING and GROUND\l"
+	.string "moves get through!$"
 
 Sinnoh_CanalaveCityGym_Text_Person5Intro:
 	.string "So you're the one who's been climbing\n"
