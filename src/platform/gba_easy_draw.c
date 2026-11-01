@@ -707,11 +707,13 @@ static void DrawBigSprite(struct scanlineData *scanline, struct OamData *oam, ui
         return;
     // affine and scaled (sprite->mpScale: a POKeMON's entrance, its reflection): the turned picture, then made
     // smaller toward its anchor (1.63.11: drawn full size until the entrance ended, reflections always)
-    if (isAffine)
-        sc = MP_BigSprite_OamScale((uint16_t)(oam - (struct OamData *)OAM), &sax, &say);
+    sc = MP_BigSprite_OamScale((uint16_t)(oam - (struct OamData *)OAM), &sax, &say);
+    // (not affine and scaled: DrawScaledEntry below keeps to the smaller picture's own lines. The picture shrinks
+    // toward its anchor, the feet, so a frame drawn above them (a hop, a step's bob) comes down past the full-size
+    // picture's bottom: testing the full-size lines here cut its lower half off)
     if (isAffine ? ((int)vcount < (sc ? say + (e->gy - e->reach - say) * sc / 256 - 1 : e->gy - e->reach)
                     || (int)vcount > (sc ? say + (e->gy + e->reach - say) * sc / 256 + 1 : e->gy + e->reach))
-                 : ((int)vcount < e->top || (int)vcount >= e->top + e->h))
+                 : (!sc && ((int)vcount < e->top || (int)vcount >= e->top + e->h)))
         return;
     if (isAffine)
     {
@@ -724,17 +726,12 @@ static void DrawBigSprite(struct scanlineData *scanline, struct OamData *oam, ui
     pixels = scanline->spriteLayers[oam->priority];
     palette = (uint16_t *)(PLTT + 0x200) + oam->paletteNum * 16;
     stride = e->bpp == 4 ? (e->w + 1) / 2 : e->w;
-    if (!isAffine)
+    if (!isAffine && sc)
     {
-        s16 ax, ay;
-        u16 scale = MP_BigSprite_OamScale((uint16_t)(oam - (struct OamData *)OAM), &ax, &ay);
-        if (scale)
-        {
-            struct BigFetch f = {e, palette};
-            DrawScaledEntry(scanline, pixels, oam, vcount, windowsEnabled, blendMode, isSemiTransparent, isObjWin,
-                            e->left, e->top, e->w, e->h, scale, ax, ay, FetchBigTexel, &f);
-            return;
-        }
+        struct BigFetch f = {e, palette};
+        DrawScaledEntry(scanline, pixels, oam, vcount, windowsEnabled, blendMode, isSemiTransparent, isObjWin,
+                        e->left, e->top, e->w, e->h, sc, sax, say, FetchBigTexel, &f);
+        return;
     }
     ty0 = vcount - e->top;
     if (isAffine)   // turned around its point (a reflection mirrors at the feet; effects turn it about its middle)

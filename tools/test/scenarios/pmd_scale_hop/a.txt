@@ -1,0 +1,14 @@
+pressuntil A field 5000
+wait 30
+mp spritescale 1 1
+mp follow 0
+wait 60
+press LEFT 48
+wait 60
+shot hop
+press START 4
+wait 30
+press B 4
+wait 60
+shot after_menu
+quit

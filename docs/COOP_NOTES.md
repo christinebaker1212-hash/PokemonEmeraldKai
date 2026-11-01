@@ -3471,6 +3471,14 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   says no (there's no wireless UNION ROOM), and InitUnionRoom only clears the name: its Task_InitUnionRoom is a stub,
   so the struct it allocated was never freed (a leak per POKeMON CENTER entered). Test nurse_no_union (CHERRYGROVE).
 
+## 1.63.13: scaled PMD pictures drawn whole
+- gba_easy_draw.c DrawBigSprite skipped every screen line outside the big sprite's full-size picture before it looked
+  at sprite->mpScale. A scaled picture shrinks toward its anchor (a PMD picture's feet), so a frame drawn above the
+  feet (a hop, a walk's bob, the frames followers play after a menu or a message) comes down past the full-size
+  picture's bottom, and those lines were never drawn: its lower part vanished (SPRITE SCALING on, PMD pictures only:
+  the GBA-size sprites go straight to DrawScaledEntry, which keeps to the smaller picture's own lines). Test
+  pmd_scale_hop (PIKACHU mid-hop: 10 rows whole, 8 cut).
+
 ## SINNOH's 3D engine
 - Plan and rules: docs/SINNOH_HANDOFF.md. The data comes from pret/pokeplatinum (source.py: its map blocks, matrices,
   areas, props, texture sets and lights as files; fetch_decomp.sh gets them at a pinned commit, make_pack.sh fetches and

@@ -1,0 +1,12 @@
+# A scaled PMD follower draws whole when its picture is above its feet (1.63.13): SPRITE SCALING shrinks a PMD
+# picture toward its feet, so a hop (or a step's bob) brings it down past where the full-size picture ends, and
+# gba_easy_draw.c DrawBigSprite skipped those lines (its lower half vanished: hopping, walking up and down, and
+# after menus, when followers hop about). PIKACHU (FOLLOWERS: PMD everywhere, scaling on) mid-hop beside the player:
+# check.py counts its pixels in shot hop (cut in half: ~200; whole: ~300).
+MODE=1
+WARP=0,0,20,17
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=25:15 MOEMON_FOLLOWER_SPRITES=1"
+EXPECT_A=("follow 0 -> 1" "sprite scaling: followers 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")
+CHECK="python3 tools/test/scenarios/pmd_scale_hop/check.py"
