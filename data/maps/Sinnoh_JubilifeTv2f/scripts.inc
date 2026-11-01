@@ -10,6 +10,10 @@ Sinnoh_JubilifeTv2f_EventScript_Person2::
 	msgbox Sinnoh_JubilifeTv2f_Text_Person2, MSGBOX_NPC
 	end
 
+Sinnoh_JubilifeTv2f_EventScript_Person3::
+	msgbox Sinnoh_JubilifeTv2f_Text_Person3, MSGBOX_NPC
+	end
+
 Sinnoh_JubilifeTv2f_EventScript_Person4::
 	msgbox Sinnoh_JubilifeTv2f_Text_Person4, MSGBOX_NPC
 	end
@@ -22,6 +26,11 @@ Sinnoh_JubilifeTv2f_Text_Person1:
 Sinnoh_JubilifeTv2f_Text_Person2:
 	.string "This floor has our gallery. Viewers\n"
 	.string "send us photos of their MOéMON!$"
+
+Sinnoh_JubilifeTv2f_Text_Person3:
+	.string "We're always looking for stories! A\n"
+	.string "TRAINER who sailed all the way to\l"
+	.string "SINNOH? That's a good one.$"
 
 Sinnoh_JubilifeTv2f_Text_Person4:
 	.string "I came to complain about a show. Then\n"

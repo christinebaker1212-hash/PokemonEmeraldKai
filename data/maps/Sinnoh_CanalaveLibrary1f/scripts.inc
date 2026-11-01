@@ -94,6 +94,10 @@ Sinnoh_CanalaveLibrary1f_EventScript_Person2::
 	msgbox Sinnoh_CanalaveLibrary1f_Text_Person2, MSGBOX_NPC
 	end
 
+Sinnoh_CanalaveLibrary1f_EventScript_Person3::
+	msgbox Sinnoh_CanalaveLibrary1f_Text_Person3, MSGBOX_NPC
+	end
+
 Sinnoh_CanalaveLibrary1f_Text_Bg1:
 	.string "The shelves are packed with books\n"
 	.string "about MOéMON and the places they\l"
@@ -197,5 +201,10 @@ Sinnoh_CanalaveLibrary1f_Text_Person2:
 	.string "I come here every day after school.\n"
 	.string "It's so quiet... you can hear the pages\l"
 	.string "turn.$"
+
+Sinnoh_CanalaveLibrary1f_Text_Person3:
+	.string "LUCIAN: Hm? Oh, I'm off duty. Even the\n"
+	.string "ELITE FOUR need a good book now and\l"
+	.string "then.$"
 
 @ --- end of SINNOH words ---

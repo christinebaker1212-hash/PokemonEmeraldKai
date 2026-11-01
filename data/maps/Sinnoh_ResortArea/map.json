@@ -199,8 +199,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_ResortArea_EventScript_Person14",
+      "flag": "0x3486"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_PROF_ROWAN",
@@ -212,8 +212,8 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_ResortArea_EventScript_Person15",
+      "flag": "0x3484"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_GARDENIA",
@@ -225,8 +225,8 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_ResortArea_EventScript_Person16",
+      "flag": "0x3482"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_BYRON",
@@ -238,8 +238,8 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_ResortArea_EventScript_Person17",
+      "flag": "0x3481"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_ROARK",
@@ -251,8 +251,8 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_ResortArea_EventScript_Person18",
+      "flag": "0x3485"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_MAYLENE",
@@ -264,8 +264,8 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_ResortArea_EventScript_Person19",
+      "flag": "0x3483"
     }
   ],
   "warp_events": [

@@ -42,6 +42,10 @@ Sinnoh_HearthomeCity_EventScript_Person11::
 	msgbox Sinnoh_HearthomeCity_Text_Person11, MSGBOX_NPC
 	end
 
+Sinnoh_HearthomeCity_EventScript_Person22::
+	msgbox Sinnoh_HearthomeCity_Text_Person22, MSGBOX_NPC
+	end
+
 Sinnoh_HearthomeCity_EventScript_Person27::
 	msgbox Sinnoh_HearthomeCity_Text_Person27, MSGBOX_NPC
 	end
@@ -52,6 +56,14 @@ Sinnoh_HearthomeCity_EventScript_Person28::
 
 Sinnoh_HearthomeCity_EventScript_Person30::
 	msgbox Sinnoh_HearthomeCity_Text_Person30, MSGBOX_NPC
+	end
+
+Sinnoh_HearthomeCity_EventScript_Person32::
+	msgbox Sinnoh_HearthomeCity_Text_Person32, MSGBOX_NPC
+	end
+
+Sinnoh_HearthomeCity_EventScript_Person33::
+	msgbox Sinnoh_HearthomeCity_Text_Person33, MSGBOX_NPC
 	end
 
 Sinnoh_HearthomeCity_EventScript_Person35::
@@ -145,6 +157,11 @@ Sinnoh_HearthomeCity_Text_Person11:
 	.string "It's stuffing its cheeks with\n"
 	.string "something.$"
 
+Sinnoh_HearthomeCity_Text_Person22:
+	.string "HEARTHOME is the friendliest city\n"
+	.string "around. Even the HIKERS stop to say\l"
+	.string "hello.$"
+
 Sinnoh_HearthomeCity_Text_Person27:
 	.string "I came to HEARTHOME to make friends.\n"
 	.string "My MOéMON made three before I made\l"
@@ -158,6 +175,15 @@ Sinnoh_HearthomeCity_Text_Person30:
 	.string "I'm looking for the perfect POFFIN\n"
 	.string "recipe. I think it's mostly about\l"
 	.string "patience.$"
+
+Sinnoh_HearthomeCity_Text_Person32:
+	.string "BUNEARY looks up at you curiously,\n"
+	.string "then hops back to its trainer.$"
+
+Sinnoh_HearthomeCity_Text_Person33:
+	.string "I'm KEIRA! I love walking my BUNEARY in\n"
+	.string "AMITY SQUARE. It's the best place in\l"
+	.string "the world!$"
 
 Sinnoh_HearthomeCity_Text_Person35:
 	.string "The light here at sunset is perfect\n"

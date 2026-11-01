@@ -36,6 +36,10 @@ Sinnoh_VeilstoneStoreB1f_EventScript_Person9::
 	msgbox Sinnoh_VeilstoneStoreB1f_Text_Person9, MSGBOX_NPC
 	end
 
+Sinnoh_VeilstoneStoreB1f_EventScript_Person10::
+	msgbox Sinnoh_VeilstoneStoreB1f_Text_Person10, MSGBOX_NPC
+	end
+
 Sinnoh_VeilstoneStoreB1f_Text_Bg1:
 	.string "A directory of the floors in this\n"
 	.string "building.$"
@@ -59,5 +63,13 @@ Sinnoh_VeilstoneStoreB1f_Text_Person8:
 Sinnoh_VeilstoneStoreB1f_Text_Person9:
 	.string "A gentleman never shops in a hurry. I\n"
 	.string "take my time down here.$"
+
+Sinnoh_VeilstoneStoreB1f_Text_Person10:
+	.string "PROF. ROWAN: Even a PROFESSOR needs\n"
+	.string "to restock. These POTIONS are for the\l"
+	.string "lab's POKéMON.\p"
+	.string "Keep traveling. Your notes on\n"
+	.string "SINNOH's POKéMON have been most\l"
+	.string "useful.$"
 
 @ --- end of SINNOH words ---

@@ -35,6 +35,10 @@ Sinnoh_PastoriaCity_EventScript_Person20::
 	msgbox Sinnoh_PastoriaCity_Text_Person20, MSGBOX_NPC
 	end
 
+Sinnoh_PastoriaCity_EventScript_Person22::
+	msgbox Sinnoh_PastoriaCity_Text_Person22, MSGBOX_NPC
+	end
+
 Sinnoh_PastoriaCity_EventScript_Person24::
 	msgbox Sinnoh_PastoriaCity_Text_Person24, MSGBOX_NPC
 	end
@@ -45,6 +49,14 @@ Sinnoh_PastoriaCity_EventScript_Person25::
 
 Sinnoh_PastoriaCity_EventScript_Person26::
 	msgbox Sinnoh_PastoriaCity_Text_Person26, MSGBOX_NPC
+	end
+
+Sinnoh_PastoriaCity_EventScript_Person28::
+	msgbox Sinnoh_PastoriaCity_Text_Person28, MSGBOX_NPC
+	end
+
+Sinnoh_PastoriaCity_EventScript_Person29::
+	msgbox Sinnoh_PastoriaCity_Text_Person29, MSGBOX_NPC
 	end
 
 Sinnoh_PastoriaCity_EventScript_Sign5::
@@ -93,6 +105,11 @@ Sinnoh_PastoriaCity_Text_Person20:
 	.string "This city smells like rain and grass. I\n"
 	.string "love it.$"
 
+Sinnoh_PastoriaCity_Text_Person22:
+	.string "I'm totally not hiding from TEAM\n"
+	.string "GALACTIC's bosses. I'm resting. In a\l"
+	.string "bush.$"
+
 Sinnoh_PastoriaCity_Text_Person24:
 	.string "My parasol keeps the marsh mist off.\n"
 	.string "My MOéMON hides under it too.$"
@@ -105,6 +122,16 @@ Sinnoh_PastoriaCity_Text_Person25:
 Sinnoh_PastoriaCity_Text_Person26:
 	.string "The roads around PASTORIA are muddy.\n"
 	.string "Good for training your footwork!$"
+
+Sinnoh_PastoriaCity_Text_Person28:
+	.string "WAKE: You're the TRAINER everyone's\n"
+	.string "talking about! I'm CRASHER WAKE,\l"
+	.string "PASTORIA's GYM LEADER!\p"
+	.string "Come splash around in my GYM anytime!$"
+
+Sinnoh_PastoriaCity_Text_Person29:
+	.string "CROAGUNK puffs out its cheeks and\n"
+	.string "croaks.$"
 
 Sinnoh_PastoriaCity_Text_Sign5:
 	.string "PASTORIA CITY\p"

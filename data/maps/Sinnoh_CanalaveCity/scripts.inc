@@ -64,6 +64,14 @@ Sinnoh_CanalaveCity_EventScript_Person11::
 	msgbox Sinnoh_CanalaveCity_Text_Person11, MSGBOX_NPC
 	end
 
+Sinnoh_CanalaveCity_EventScript_Person13::
+	msgbox Sinnoh_CanalaveCity_Text_Person13, MSGBOX_NPC
+	end
+
+Sinnoh_CanalaveCity_EventScript_Person14::
+	msgbox Sinnoh_CanalaveCity_Text_Person14, MSGBOX_NPC
+	end
+
 Sinnoh_CanalaveCity_EventScript_Person15::
 	goto EventScript_SinnohRegionBoat
 	end
@@ -103,6 +111,10 @@ Sinnoh_CanalaveCity_EventScript_Person17_Sail2::
 	warp MAP_SINNOH_NEWMOON_ISLAND, 24, 21
 	waitstate
 	releaseall
+	end
+
+Sinnoh_CanalaveCity_EventScript_Person19::
+	msgbox Sinnoh_CanalaveCity_Text_Person19, MSGBOX_NPC
 	end
 
 Sinnoh_CanalaveCity_EventScript_Sign5::
@@ -162,6 +174,15 @@ Sinnoh_CanalaveCity_Text_Person11:
 	.string "years. The fish here are smarter than\l"
 	.string "they look.$"
 
+Sinnoh_CanalaveCity_Text_Person13:
+	.string "The PROFESSOR wants us all at the\n"
+	.string "library. Something about the lakes!$"
+
+Sinnoh_CanalaveCity_Text_Person14:
+	.string "PROF. ROWAN: The library holds a book\n"
+	.string "about SINNOH's three lakes. I must\l"
+	.string "read it at once.$"
+
 Sinnoh_CanalaveCity_Text_Person17Ask0:
 	.string "Shall I take you to IRON ISLAND?$"
 
@@ -177,6 +198,11 @@ Sinnoh_CanalaveCity_Text_Person17Bye:
 
 Sinnoh_CanalaveCity_Text_Person17Off:
 	.string "All aboard! Hold on tight!$"
+
+Sinnoh_CanalaveCity_Text_Person19:
+	.string "BARRY: The library! The PROFESSOR's\n"
+	.string "calling a meeting. Hurry up, I'll fine\l"
+	.string "you if you're late!$"
 
 Sinnoh_CanalaveCity_Text_Sign5:
 	.string "CANALAVE LIBRARY\p"

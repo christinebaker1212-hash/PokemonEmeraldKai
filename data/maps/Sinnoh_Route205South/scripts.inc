@@ -6,6 +6,22 @@ Sinnoh_Route205South_EventScript_Person9::
 	msgbox Sinnoh_Route205South_Text_Person9, MSGBOX_NPC
 	end
 
+Sinnoh_Route205South_EventScript_Person13::
+	msgbox Sinnoh_Route205South_Text_Person13, MSGBOX_NPC
+	end
+
+Sinnoh_Route205South_EventScript_Person14::
+	msgbox Sinnoh_Route205South_Text_Person14, MSGBOX_NPC
+	end
+
+Sinnoh_Route205South_EventScript_Person19::
+	msgbox Sinnoh_Route205South_Text_Person19, MSGBOX_NPC
+	end
+
+Sinnoh_Route205South_EventScript_Person32::
+	msgbox Sinnoh_Route205South_Text_Person32, MSGBOX_NPC
+	end
+
 Sinnoh_Route205South_EventScript_Sign7::
 	msgbox Sinnoh_Route205South_Text_Sign7, MSGBOX_SIGN
 	end
@@ -21,6 +37,24 @@ Sinnoh_Route205South_EventScript_Sign10::
 Sinnoh_Route205South_Text_Person9:
 	.string "I caught a COMBEE in the honey trees!\n"
 	.string "Its friends were not happy about it.$"
+
+Sinnoh_Route205South_Text_Person13:
+	.string "TEAM GALACTIC is busy at the\n"
+	.string "WINDWORKS. Nobody gets through!$"
+
+Sinnoh_Route205South_Text_Person14:
+	.string "We're guarding the road. From what?\n"
+	.string "From you, I guess.$"
+
+Sinnoh_Route205South_Text_Person19:
+	.string "My daddy works at the WINDWORKS...\n"
+	.string "Some scary people in space suits went\l"
+	.string "in, and he hasn't come out.$"
+
+Sinnoh_Route205South_Text_Person32:
+	.string "The windmills here turn all day long. I\n"
+	.string "like to count them. I always lose\l"
+	.string "track at eleven.$"
 
 Sinnoh_Route205South_Text_Sign7:
 	.string "ROUTE 205\p"

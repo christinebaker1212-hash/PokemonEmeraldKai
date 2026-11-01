@@ -34,6 +34,18 @@ Sinnoh_CelesticTown_EventScript_Person2::
 	msgbox Sinnoh_CelesticTown_Text_Person2, MSGBOX_NPC
 	end
 
+Sinnoh_CelesticTown_EventScript_Person3::
+	msgbox Sinnoh_CelesticTown_Text_Person3, MSGBOX_NPC
+	end
+
+Sinnoh_CelesticTown_EventScript_Person4::
+	msgbox Sinnoh_CelesticTown_Text_Person4, MSGBOX_NPC
+	end
+
+Sinnoh_CelesticTown_EventScript_Person5::
+	msgbox Sinnoh_CelesticTown_Text_Person5, MSGBOX_NPC
+	end
+
 Sinnoh_CelesticTown_EventScript_Person9::
 	msgbox Sinnoh_CelesticTown_Text_Person9, MSGBOX_NPC
 	end
@@ -84,6 +96,22 @@ Sinnoh_CelesticTown_Text_Person2:
 	.string "My grandma tells stories about MOéMON\n"
 	.string "that made time and space. Do you\l"
 	.string "believe them?$"
+
+Sinnoh_CelesticTown_Text_Person3:
+	.string "This shrine has an old painting of a\n"
+	.string "legend. The BOSS wants it. Very badly.$"
+
+Sinnoh_CelesticTown_Text_Person4:
+	.string "Our town keeps the oldest stories of\n"
+	.string "SINNOH. Some people want to use them\l"
+	.string "for their own ends.$"
+
+Sinnoh_CelesticTown_Text_Person5:
+	.string "CYNTHIA: This is my grandmother's\n"
+	.string "town. The ruins here tell how time and\l"
+	.string "space began.\p"
+	.string "If TEAM GALACTIC wants these\n"
+	.string "stories, they want something terrible.$"
 
 Sinnoh_CelesticTown_Text_Person9:
 	.string "The shrine in the cave behind town is\n"

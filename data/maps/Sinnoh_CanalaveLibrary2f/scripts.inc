@@ -146,6 +146,10 @@ Sinnoh_CanalaveLibrary2f_EventScript_Person1::
 	msgbox Sinnoh_CanalaveLibrary2f_Text_Person1, MSGBOX_NPC
 	end
 
+Sinnoh_CanalaveLibrary2f_EventScript_Person2::
+	msgbox Sinnoh_CanalaveLibrary2f_Text_Person2, MSGBOX_NPC
+	end
+
 Sinnoh_CanalaveLibrary2f_Text_Bg1:
 	.string "The shelves are packed with books\n"
 	.string "about MOéMON and the places they\l"
@@ -297,5 +301,9 @@ Sinnoh_CanalaveLibrary2f_Text_Person1:
 	.string "I'm reading every book about MOéMON\n"
 	.string "in this library. I'm on shelf two. Of\l"
 	.string "fifty.$"
+
+Sinnoh_CanalaveLibrary2f_Text_Person2:
+	.string "I came to read about mountains. Now\n"
+	.string "I'm too tired to climb one.$"
 
 @ --- end of SINNOH words ---

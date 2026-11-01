@@ -29,6 +29,7 @@ import items  # noqa: E402
 import gen_trainers  # noqa: E402
 import sprites  # noqa: E402
 import legends  # noqa: E402
+import story_people  # noqa: E402
 import gen_townmap  # noqa: E402
 
 GROUP = 'gMapGroup_Sinnoh'                      # the outdoor places
@@ -211,6 +212,9 @@ def people(p, root, have):
                         'trainer_type': 'TRAINER_TYPE_NONE', 'trainer_sight_or_berry_tree_id': '0',
                         'script': legend, 'flag': '0x%X' % flag})
             continue
+        # a story person (tools/sinnoh/story_people.py): shown by the story (Sinnoh_StoryRefresh sets its flag)
+        story = story_people.SHOW.get(hide[len('FLAG_HIDE_'):]) if isinstance(hide, str) and hide.startswith('FLAG_HIDE_') \
+            else None
         ball = items.ball(root, o['script']) if o['graphics_id'].endswith('POKEBALL') else None
         if ball and not inside(p, o['x'], o['z']):
             ball = None
@@ -220,8 +224,8 @@ def people(p, root, have):
             script = items.script_label(*ball)
             used_items.add(ball)
             flag_s = '0x%X' % flag
-        elif gfx is None or ghost or (flag and label not in have) or o['graphics_id'].endswith('POKEBALL') \
-                or not inside(p, o['x'], o['z']):
+        elif gfx is None or ghost or story == story_people.NEVER or o['graphics_id'].endswith('POKEBALL') \
+                or (flag and not (story and (trainer or talk)) and label not in have) or not inside(p, o['x'], o['z']):
             flag_s = '0x3FFF'
         else:
             flag_s = ('0x%X' % flag) if flag else '0'

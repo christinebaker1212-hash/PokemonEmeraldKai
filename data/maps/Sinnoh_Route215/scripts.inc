@@ -19,6 +19,14 @@ Sinnoh_Route215_EventScript_Person24_Given::
 	release
 	end
 
+Sinnoh_Route215_EventScript_Person26::
+	msgbox Sinnoh_Route215_Text_Person26, MSGBOX_NPC
+	end
+
+Sinnoh_Route215_EventScript_Person27::
+	msgbox Sinnoh_Route215_Text_Person27, MSGBOX_NPC
+	end
+
 Sinnoh_Route215_EventScript_Sign9::
 	msgbox Sinnoh_Route215_Text_Sign9, MSGBOX_SIGN
 	end
@@ -38,6 +46,14 @@ Sinnoh_Route215_Text_Person24:
 Sinnoh_Route215_Text_Person24Gift:
 	.string "You train in the rain too? Then you've\n"
 	.string "earned this TM!$"
+
+Sinnoh_Route215_Text_Person26:
+	.string "I'm running laps till sunrise. Battles?\n"
+	.string "Not till morning!$"
+
+Sinnoh_Route215_Text_Person27:
+	.string "Night runs are my favorite. No\n"
+	.string "battling though. Too sleepy.$"
 
 Sinnoh_Route215_Text_Sign9:
 	.string "ROUTE 215\p"

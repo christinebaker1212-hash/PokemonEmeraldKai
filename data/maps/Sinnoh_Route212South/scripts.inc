@@ -14,6 +14,10 @@ Sinnoh_Route212South_EventScript_Person40::
 	msgbox Sinnoh_Route212South_Text_Person40, MSGBOX_NPC
 	end
 
+Sinnoh_Route212South_EventScript_Person41::
+	msgbox Sinnoh_Route212South_Text_Person41, MSGBOX_NPC
+	end
+
 Sinnoh_Route212South_EventScript_Sign10::
 	msgbox Sinnoh_Route212South_Text_Sign10, MSGBOX_SIGN
 	end
@@ -38,6 +42,10 @@ Sinnoh_Route212South_Text_Person39:
 Sinnoh_Route212South_Text_Person40:
 	.string "There are rare MOéMON hiding in the\n"
 	.string "marsh grass. I've seen their tails!$"
+
+Sinnoh_Route212South_Text_Person41:
+	.string "The rain keeps the troublemakers\n"
+	.string "home. By night, though... watch out.$"
 
 Sinnoh_Route212South_Text_Sign10:
 	.string "ROUTE 212\p"

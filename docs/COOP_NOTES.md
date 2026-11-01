@@ -3346,6 +3346,17 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   POKEPLATINUM_DIR [outdoor|indoor] lists what's left: nothing since 2026-11-01 (1362 people and signs). The
   buildings' are tools/sinnoh/words_indoor.py: KINDS (bookshelves, beds, statues, gym guides...: by Platinum's script
   entry name) and INDOOR (each map's people). gen_words.py refuses a map written twice in any of the three files.
+- Story people (2026-11-01, tools/sinnoh/story_people.py): the people and trainers Platinum shows and hides with its
+  story (a hide flag: 256 of them: BARRY, ROWAN and the assistant, CYNTHIA, LOOKER, the commanders and grunts in
+  JUBILIFE, the WINDWORKS, ETERNA, VEILSTONE, the lakes, the HQ, MT. CORONET, SPEAR PILLAR, STARK MOUNTAIN, the
+  hostages, RILEY, BUCK, PALMER...) each show while Platinum's story would have them there, judged by SINNOH's
+  badges (9 = cleared), a story battle beaten or not (legends.py STORY, named in story_people.DONE) and day / night
+  (POLICEMEN battle by night and only talk by day, JOGGERS the other way round). NEVER: scenes the game has no use
+  for (cutscene stand-ins, blockades, Wi-Fi, the VILLA, the RESTAURANT's paired diners). legends.py writes
+  src/data/sinnoh_story_people.h; s3d_legends.c Sinnoh_StoryRefresh sets or clears every flag as a SINNOH map loads
+  (overworld.c, before the map's on-transition script). Their words are STORY_WORDS (merged into words.py's WORDS);
+  gen_maps.py places a story person with its flag once it has a script (trainers have theirs). Platinum's gifts from
+  them have LINES (gifts.py; the POKé RADAR and the BICYCLE are given once). Test sinnoh_story_people.
 - Field obstacles (2026-11-01): Platinum's CUT trees, ROCK SMASH rocks and STRENGTH boulders (690) are the game's
   own (gen_maps.py OBSTACLES: EventScript_CutTree / _RockSmash / _StrengthBoulder, no flag, back each time the map
   loads as in both games). HM badges are the region's: MP_Region_FieldMoveBadge (mp_region.c) gives HOENN's badge for

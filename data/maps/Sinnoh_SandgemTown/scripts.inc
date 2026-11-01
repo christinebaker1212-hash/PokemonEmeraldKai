@@ -14,6 +14,10 @@ Sinnoh_SandgemTown_EventScript_Person3::
 	msgbox Sinnoh_SandgemTown_Text_Person3, MSGBOX_NPC
 	end
 
+Sinnoh_SandgemTown_EventScript_Person5::
+	msgbox Sinnoh_SandgemTown_Text_Person5, MSGBOX_NPC
+	end
+
 Sinnoh_SandgemTown_EventScript_Sign6::
 	msgbox Sinnoh_SandgemTown_Text_Sign6, MSGBOX_SIGN
 	end
@@ -50,6 +54,13 @@ Sinnoh_SandgemTown_Text_Person3:
 	.string "of ROUTE 219.\p"
 	.string "You'll need a MOéMON that can SURF to\n"
 	.string "get much farther, though.$"
+
+Sinnoh_SandgemTown_Text_Person5:
+	.string "Hi! I help PROF. ROWAN with his\n"
+	.string "research.\p"
+	.string "The lab's right there. He'll want to\n"
+	.string "hear all about the POKéMON where you\l"
+	.string "come from!$"
 
 Sinnoh_SandgemTown_Text_Sign6:
 	.string "MOéMON RESEARCH LAB$"

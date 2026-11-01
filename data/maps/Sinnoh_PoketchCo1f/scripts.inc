@@ -41,6 +41,10 @@ Sinnoh_PoketchCo1f_EventScript_Person1::
 	msgbox Sinnoh_PoketchCo1f_Text_Person1, MSGBOX_NPC
 	end
 
+Sinnoh_PoketchCo1f_EventScript_Person2::
+	msgbox Sinnoh_PoketchCo1f_Text_Person2, MSGBOX_NPC
+	end
+
 Sinnoh_PoketchCo1f_EventScript_Person3::
 	msgbox Sinnoh_PoketchCo1f_Text_Person3, MSGBOX_NPC
 	end
@@ -53,6 +57,11 @@ Sinnoh_PoketchCo1f_Text_Person1:
 	.string "We design watches for TRAINERS here.\n"
 	.string "Each one has little apps that help on\l"
 	.string "a journey.$"
+
+Sinnoh_PoketchCo1f_Text_Person2:
+	.string "I'm here to interview the PRESIDENT\n"
+	.string "about the newest PÓKETCH app. He\l"
+	.string "keeps showing me the clock.$"
 
 Sinnoh_PoketchCo1f_Text_Person3:
 	.string "Welcome! Please enjoy your visit.$"

@@ -42,6 +42,14 @@ Sinnoh_GalacticHqLaboratory_EventScript_Bg10::
 	msgbox Sinnoh_GalacticHqLaboratory_Text_Bg10, MSGBOX_SIGN
 	end
 
+Sinnoh_GalacticHqLaboratory_EventScript_Person1::
+	msgbox Sinnoh_GalacticHqLaboratory_Text_Person1, MSGBOX_NPC
+	end
+
+Sinnoh_GalacticHqLaboratory_EventScript_Person2::
+	msgbox Sinnoh_GalacticHqLaboratory_Text_Person2, MSGBOX_NPC
+	end
+
 Sinnoh_GalacticHqLaboratory_Text_Bg1:
 	.string "A machine that keeps records. Its\n"
 	.string "screen is dark for now.$"
@@ -81,5 +89,15 @@ Sinnoh_GalacticHqLaboratory_Text_Bg9:
 Sinnoh_GalacticHqLaboratory_Text_Bg10:
 	.string "A machine that keeps records. Its\n"
 	.string "screen is dark for now.$"
+
+Sinnoh_GalacticHqLaboratory_Text_Person1:
+	.string "Our machines pull the power out of\n"
+	.string "POKéMON. It's very efficient. Don't\l"
+	.string "look at me like that.$"
+
+Sinnoh_GalacticHqLaboratory_Text_Person2:
+	.string "I just do the math. The math says this\n"
+	.string "is a bad idea. Nobody listens to the\l"
+	.string "math.$"
 
 @ --- end of SINNOH words ---

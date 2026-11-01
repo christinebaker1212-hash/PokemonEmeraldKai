@@ -6,8 +6,16 @@ Sinnoh_Route218GateToCanalaveCity_EventScript_Person1::
 	msgbox Sinnoh_Route218GateToCanalaveCity_Text_Person1, MSGBOX_NPC
 	end
 
+Sinnoh_Route218GateToCanalaveCity_EventScript_Person2::
+	msgbox Sinnoh_Route218GateToCanalaveCity_Text_Person2, MSGBOX_NPC
+	end
+
 Sinnoh_Route218GateToCanalaveCity_Text_Person1:
 	.string "CANALAVE's just through here. Mind\n"
 	.string "the drawbridge!$"
+
+Sinnoh_Route218GateToCanalaveCity_Text_Person2:
+	.string "I'm studying the sea breeze. It smells\n"
+	.string "of salt and adventure. Mostly salt.$"
 
 @ --- end of SINNOH words ---

@@ -27,6 +27,10 @@ Sinnoh_SnowpointCityPokecenter1f_EventScript_Person4::
 	msgbox Sinnoh_SnowpointCityPokecenter1f_Text_Person4, MSGBOX_NPC
 	end
 
+Sinnoh_SnowpointCityPokecenter1f_EventScript_Person5::
+	msgbox Sinnoh_SnowpointCityPokecenter1f_Text_Person5, MSGBOX_NPC
+	end
+
 Sinnoh_SnowpointCityPokecenter1f_Text_Person2:
 	.string "It's so warm in here! I could stay all\n"
 	.string "day.$"
@@ -39,5 +43,10 @@ Sinnoh_SnowpointCityPokecenter1f_Text_Person4:
 	.string "PSYDUCK: Psy...\p"
 	.string "It's shivering a little, but happy to\n"
 	.string "be inside.$"
+
+Sinnoh_SnowpointCityPokecenter1f_Text_Person5:
+	.string "MAYLENE: I came north to train in the\n"
+	.string "snow. Cold is good for focus!\p"
+	.string "Achoo! ...Mostly good.$"
 
 @ --- end of SINNOH words ---

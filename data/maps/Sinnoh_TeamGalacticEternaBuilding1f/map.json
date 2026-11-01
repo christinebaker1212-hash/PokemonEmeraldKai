@@ -24,8 +24,8 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_TeamGalacticEternaBuilding1f_EventScript_Person1",
+      "flag": "0x340E"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_GRUNT_M",
@@ -37,8 +37,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_TeamGalacticEternaBuilding1f_EventScript_Person2",
+      "flag": "0x340E"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_GRUNT_M",
@@ -51,7 +51,7 @@
       "trainer_type": "TRAINER_TYPE_NORMAL",
       "trainer_sight_or_berry_tree_id": "3",
       "script": "Sinnoh_EventScript_TrGalacticGruntTeamGalacticEternaBuilding1f1",
-      "flag": "0x3FFF"
+      "flag": "0x340E"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_GRUNT_F",
@@ -64,7 +64,7 @@
       "trainer_type": "TRAINER_TYPE_NORMAL",
       "trainer_sight_or_berry_tree_id": "3",
       "script": "Sinnoh_EventScript_TrGalacticGruntTeamGalacticEternaBuilding1f2",
-      "flag": "0x3FFF"
+      "flag": "0x340E"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_GRUNT_M",
@@ -76,8 +76,8 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_TeamGalacticEternaBuilding1f_EventScript_Person5",
+      "flag": "0x34EF"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_LOOKER",
@@ -89,8 +89,8 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_TeamGalacticEternaBuilding1f_EventScript_Person6",
+      "flag": "0x34F0"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",

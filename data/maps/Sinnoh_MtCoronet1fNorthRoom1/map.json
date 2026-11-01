@@ -219,8 +219,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_MtCoronet1fNorthRoom1_EventScript_Person16",
+      "flag": "0x3458"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_GRUNT_M",
@@ -232,8 +232,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_MtCoronet1fNorthRoom1_EventScript_Person17",
+      "flag": "0x3457"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_GRUNT_M",
@@ -245,8 +245,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_MtCoronet1fNorthRoom1_EventScript_Person18",
+      "flag": "0x3457"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",

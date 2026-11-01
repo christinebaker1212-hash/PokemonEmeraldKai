@@ -30,8 +30,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_ValleyWindworksOutside_EventScript_Person1",
+      "flag": "0x34FE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -108,8 +108,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_ValleyWindworksOutside_EventScript_Person7",
+      "flag": "0x34FF"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",

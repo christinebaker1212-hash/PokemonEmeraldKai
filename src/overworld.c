@@ -819,6 +819,7 @@ void LoadMapFromCameraTransition(u8 mapGroup, u8 mapNum)
     ChooseAmbientCrySpecies();
     SetDefaultFlashLevel();
     Overworld_ClearSavedMusic();
+    Sinnoh_StoryRefresh();   // Moemon Kai: SINNOH's story people for where the story is (src/sinnoh/s3d_legends.c)
     RunOnTransitionMapScript();
     InitMap();
     S3D_Gyms_MapLoaded();   // Moemon Kai (src/sinnoh/s3d_gyms.c)
@@ -874,6 +875,7 @@ static void LoadMapFromWarp(bool32 a1)
         FlagClear(FLAG_SYS_USE_FLASH);
     SetDefaultFlashLevel();
     Overworld_ClearSavedMusic();
+    Sinnoh_StoryRefresh();   // Moemon Kai: SINNOH's story people for where the story is (src/sinnoh/s3d_legends.c)
     RunOnTransitionMapScript();
     UpdateLocationHistoryForRoamer();
     RoamerMoveToOtherLocationSet();

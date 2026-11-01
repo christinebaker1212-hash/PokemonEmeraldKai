@@ -12,6 +12,8 @@
 #include "rtc.h"
 #include "pokemon.h"
 #include "../data/sinnoh_legends.h"
+#include "../data/sinnoh_story_people.h"
+#include "s3d.h"
 
 #define FRIDAYS 0xFE   // (tools/sinnoh/legends.py)
 
@@ -58,6 +60,32 @@ u16 Sinnoh_LegendsRefresh(void)
             FlagSet(sSinnohLegends[i].objFlag);
     }
     return 0;
+}
+
+// SINNOH's story people (tools/sinnoh/story_people.py SHOW): each hide flag set or cleared by where the story is, as
+// a SINNOH map loads (overworld.c, before the map's own on-transition script and before its people are placed)
+void Sinnoh_StoryRefresh(void)
+{
+    u32 i;
+    u8 badges, hour;
+    bool8 night;
+    if (!S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+        return;
+    badges = MP_Region_Cleared(REGION_SINNOH) ? 9 : MP_Region_BadgeCount(REGION_SINNOH);
+    RtcCalcLocalTime();
+    hour = gLocalTime.hours;
+    night = hour >= 20 || hour < 4;   // (Platinum's night)
+    for (i = 0; i < ARRAY_COUNT(sSinnohStoryPeople); i++)
+    {
+        const struct SinnohStoryPerson *p = &sSinnohStoryPeople[i];
+        bool8 shown = badges >= p->from && badges < p->before
+                   && (p->need == 0 || FlagGet(p->need)) && (p->unless == 0 || !FlagGet(p->unless))
+                   && (p->time == 0 || (p->time == 2) == night);
+        if (shown)
+            FlagClear(p->flag);
+        else
+            FlagSet(p->flag);
+    }
 }
 
 // The GREAT MARSH (tools/sinnoh/gen_maps.py marsh_merge): the player stays on the 6th area's map for the whole marsh,

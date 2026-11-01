@@ -19,6 +19,10 @@ Sinnoh_Route210South_EventScript_Person22_Given::
 	release
 	end
 
+Sinnoh_Route210South_EventScript_Person31::
+	msgbox Sinnoh_Route210South_Text_Person31, MSGBOX_NPC
+	end
+
 Sinnoh_Route210South_EventScript_Sign11::
 	msgbox Sinnoh_Route210South_Text_Sign11, MSGBOX_SIGN
 	end
@@ -35,6 +39,10 @@ Sinnoh_Route210South_Text_Person22:
 Sinnoh_Route210South_Text_Person22Gift:
 	.string "If you get lost in the fog, this TM will\n"
 	.string "help you fly out of it!$"
+
+Sinnoh_Route210South_Text_Person31:
+	.string "I only battle in daylight. At night I\n"
+	.string "just run and think about soup.$"
 
 Sinnoh_Route210South_Text_Sign11:
 	.string "ROUTE 210\p"

@@ -6,9 +6,18 @@ Sinnoh_Battleground_EventScript_Person1::
 	msgbox Sinnoh_Battleground_Text_Person1, MSGBOX_NPC
 	end
 
+Sinnoh_Battleground_EventScript_Person2::
+	msgbox Sinnoh_Battleground_Text_Person2, MSGBOX_NPC
+	end
+
 Sinnoh_Battleground_Text_Person1:
 	.string "The BATTLEGROUND is where top\n"
 	.string "TRAINERS come to battle for fun.\l"
 	.string "You'd fit right in.$"
+
+Sinnoh_Battleground_Text_Person2:
+	.string "BUCK: Battleground's my favorite\n"
+	.string "place to warm up. Wanna see me warm\l"
+	.string "up? It's very warm.$"
 
 @ --- end of SINNOH words ---

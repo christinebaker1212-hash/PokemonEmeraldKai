@@ -15,6 +15,10 @@ Sinnoh_EternaCityPokecenter1f_EventScript_Person2::
 	msgbox Sinnoh_EternaCityPokecenter1f_Text_Person2, MSGBOX_NPC
 	end
 
+Sinnoh_EternaCityPokecenter1f_EventScript_Person3::
+	msgbox Sinnoh_EternaCityPokecenter1f_Text_Person3, MSGBOX_NPC
+	end
+
 Sinnoh_EternaCityPokecenter1f_EventScript_Person4::
 	setvar VAR_0x800B, 4
 	call Common_EventScript_PkmnCenterNurse
@@ -36,6 +40,10 @@ Sinnoh_EternaCityPokecenter1f_Text_Person2:
 	.string "I'm going to challenge GARDENIA! My\n"
 	.string "FIGHTING MOéMON... wait, is that a good\l"
 	.string "idea?$"
+
+Sinnoh_EternaCityPokecenter1f_Text_Person3:
+	.string "BUNEARY bounces on the spot, ears\n"
+	.string "flopping.$"
 
 Sinnoh_EternaCityPokecenter1f_Text_Person5:
 	.string "ETERNA's flowers are lovely, but the\n"

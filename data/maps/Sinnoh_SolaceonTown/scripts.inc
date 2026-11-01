@@ -26,6 +26,10 @@ Sinnoh_SolaceonTown_EventScript_Person15::
 	msgbox Sinnoh_SolaceonTown_Text_Person15, MSGBOX_NPC
 	end
 
+Sinnoh_SolaceonTown_EventScript_Person19::
+	msgbox Sinnoh_SolaceonTown_Text_Person19, MSGBOX_NPC
+	end
+
 Sinnoh_SolaceonTown_EventScript_Sign5::
 	msgbox Sinnoh_SolaceonTown_Text_Sign5, MSGBOX_SIGN
 	end
@@ -63,6 +67,11 @@ Sinnoh_SolaceonTown_Text_Person9:
 Sinnoh_SolaceonTown_Text_Person15:
 	.string "My MOéMON pulls the cart, I steer. We\n"
 	.string "make a good team.$"
+
+Sinnoh_SolaceonTown_Text_Person19:
+	.string "BARRY: SOLACEON's ruins have UNOWN all\n"
+	.string "over the walls! I tried to read them.\l"
+	.string "They said 'GO AWAY'. Probably.$"
 
 Sinnoh_SolaceonTown_Text_Sign5:
 	.string "SOLACEON TOWN\p"

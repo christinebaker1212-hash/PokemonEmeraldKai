@@ -14,6 +14,10 @@ Sinnoh_HearthomeCityWestGateToAmitySquare_EventScript_Person3::
 	msgbox Sinnoh_HearthomeCityWestGateToAmitySquare_Text_Person3, MSGBOX_NPC
 	end
 
+Sinnoh_HearthomeCityWestGateToAmitySquare_EventScript_Person4::
+	msgbox Sinnoh_HearthomeCityWestGateToAmitySquare_Text_Person4, MSGBOX_NPC
+	end
+
 Sinnoh_HearthomeCityWestGateToAmitySquare_Text_Person1:
 	.string "Welcome! Please enjoy your visit.$"
 
@@ -24,5 +28,10 @@ Sinnoh_HearthomeCityWestGateToAmitySquare_Text_Person2:
 Sinnoh_HearthomeCityWestGateToAmitySquare_Text_Person3:
 	.string "PIKACHU: Pika!\p"
 	.string "It's eager to go into the park.$"
+
+Sinnoh_HearthomeCityWestGateToAmitySquare_Text_Person4:
+	.string "I'm writing a piece on AMITY SQUARE.\n"
+	.string "Every POKéMON there seems to be\l"
+	.string "smiling.$"
 
 @ --- end of SINNOH words ---

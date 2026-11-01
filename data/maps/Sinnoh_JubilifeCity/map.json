@@ -136,8 +136,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_JubilifeCity_EventScript_Person8",
+      "flag": "0x3441"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -266,8 +266,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_JubilifeCity_EventScript_Person18",
+      "flag": "0x3444"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_GRUNT_M",
@@ -279,8 +279,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_JubilifeCity_EventScript_Person19",
+      "flag": "0x3444"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -357,8 +357,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_JubilifeCity_EventScript_Person25",
+      "flag": "0x343E"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_CLOWN",
@@ -370,8 +370,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_JubilifeCity_EventScript_Person26",
+      "flag": "0x343E"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_M",
@@ -396,8 +396,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_JubilifeCity_EventScript_Person28",
+      "flag": "0x343F"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_KID_WITH_NDS",
@@ -435,8 +435,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_JubilifeCity_EventScript_Person31",
+      "flag": "0x3440"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_LOOKER",
@@ -448,8 +448,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_JubilifeCity_EventScript_Person32",
+      "flag": "0x3442"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",

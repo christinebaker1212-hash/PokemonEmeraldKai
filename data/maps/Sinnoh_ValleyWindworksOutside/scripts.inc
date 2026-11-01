@@ -11,12 +11,31 @@ Sinnoh_ValleyWindworksOutside_EventScript_Bg2::
 	msgbox Sinnoh_ValleyWindworksOutside_Text_Bg2, MSGBOX_SIGN
 	end
 
+Sinnoh_ValleyWindworksOutside_EventScript_Person1::
+	msgbox Sinnoh_ValleyWindworksOutside_Text_Person1, MSGBOX_NPC
+	end
+
+Sinnoh_ValleyWindworksOutside_EventScript_Person7::
+	msgbox Sinnoh_ValleyWindworksOutside_Text_Person7, MSGBOX_NPC
+	end
+
 Sinnoh_ValleyWindworksOutside_EventScript_Sign2::
 	msgbox Sinnoh_ValleyWindworksOutside_Text_Sign2, MSGBOX_SIGN
 	end
 
 Sinnoh_ValleyWindworksOutside_Text_Bg2:
 	.string "The door is locked.$"
+
+Sinnoh_ValleyWindworksOutside_Text_Person1:
+	.string "The WINDWORKS is closed! TEAM\n"
+	.string "GALACTIC orders. Shoo!$"
+
+Sinnoh_ValleyWindworksOutside_Text_Person7:
+	.string "LOOKER: TEAM GALACTIC has taken the\n"
+	.string "WINDWORKS. Its energy could power\l"
+	.string "something very large.\p"
+	.string "Their leader inside is a woman called\n"
+	.string "MARS. Be careful.$"
 
 Sinnoh_ValleyWindworksOutside_Text_Sign2:
 	.string "VALLEY WINDWORKS\p"

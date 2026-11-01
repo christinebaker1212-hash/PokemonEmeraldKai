@@ -106,7 +106,7 @@
       "trainer_type": "TRAINER_TYPE_NORMAL",
       "trainer_sight_or_berry_tree_id": "2",
       "script": "Sinnoh_EventScript_TrJoggerWyatt",
-      "flag": "0x3FFF"
+      "flag": "0x34A7"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_POKEMON_BREEDER_M",
@@ -430,8 +430,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_Route210South_EventScript_Person31",
+      "flag": "0x34A8"
     }
   ],
   "warp_events": [

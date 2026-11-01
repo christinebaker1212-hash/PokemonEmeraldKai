@@ -22,6 +22,10 @@ Sinnoh_HearthomeCityPokemonFanClub_EventScript_Person5::
 	msgbox Sinnoh_HearthomeCityPokemonFanClub_Text_Person5, MSGBOX_NPC
 	end
 
+Sinnoh_HearthomeCityPokemonFanClub_EventScript_Person6::
+	msgbox Sinnoh_HearthomeCityPokemonFanClub_Text_Person6, MSGBOX_NPC
+	end
+
 Sinnoh_HearthomeCityPokemonFanClub_Text_Person1:
 	.string "Welcome to the MOéMON FAN CLUB! Tell\n"
 	.string "me all about your MOéMON. I'll listen\l"
@@ -43,5 +47,10 @@ Sinnoh_HearthomeCityPokemonFanClub_Text_Person4:
 Sinnoh_HearthomeCityPokemonFanClub_Text_Person5:
 	.string "CLEFAIRY: Pippi!\p"
 	.string "It waves its little hand at you.$"
+
+Sinnoh_HearthomeCityPokemonFanClub_Text_Person6:
+	.string "The FAN CLUB is my favorite beat.\n"
+	.string "Everyone here has a story about their\l"
+	.string "POKéMON.$"
 
 @ --- end of SINNOH words ---

@@ -269,7 +269,8 @@ def _merge():
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from words_outdoor import OUTDOOR
     from words_indoor import INDOOR
-    for more in (OUTDOOR, INDOOR):
+    from story_people import STORY_WORDS
+    for more in (OUTDOOR, INDOOR, STORY_WORDS):
         for name, entries in more.items():
             mine = WORDS.setdefault(name, {})
             for key, value in entries.items():

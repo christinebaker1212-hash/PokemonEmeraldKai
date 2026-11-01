@@ -247,6 +247,10 @@ Sinnoh_BattleTower_EventScript_Person12::
 	msgbox Sinnoh_BattleTower_Text_Person12, MSGBOX_NPC
 	end
 
+Sinnoh_BattleTower_EventScript_Person13::
+	msgbox Sinnoh_BattleTower_Text_Person13, MSGBOX_NPC
+	end
+
 Sinnoh_BattleTower_EventScript_Person15::
 	msgbox Sinnoh_BattleTower_Text_Person15, MSGBOX_NPC
 	end
@@ -296,6 +300,11 @@ Sinnoh_BattleTower_Text_Person11:
 Sinnoh_BattleTower_Text_Person12:
 	.string "The tower is so tall. I wonder how far\n"
 	.string "you have to win to get to the top.$"
+
+Sinnoh_BattleTower_Text_Person13:
+	.string "I'm covering the BATTLE TOWER's\n"
+	.string "records. Some of these streaks are\l"
+	.string "legendary.$"
 
 Sinnoh_BattleTower_Text_Person15:
 	.string "I can tell how your MOéMON's stats\n"

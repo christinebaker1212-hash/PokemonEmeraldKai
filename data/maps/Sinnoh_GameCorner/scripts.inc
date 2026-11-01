@@ -86,6 +86,10 @@ Sinnoh_GameCorner_EventScript_Person8::
 	msgbox Sinnoh_GameCorner_Text_Person8, MSGBOX_NPC
 	end
 
+Sinnoh_GameCorner_EventScript_Person9::
+	msgbox Sinnoh_GameCorner_Text_Person9, MSGBOX_NPC
+	end
+
 Sinnoh_GameCorner_Text_Bg13:
 	.string "A notice on the wall.$"
 
@@ -119,5 +123,11 @@ Sinnoh_GameCorner_Text_Person8:
 	.string "My daughter runs the GYM. She trains\n"
 	.string "so hard. I come here to... train too. My\l"
 	.string "luck, that is.$"
+
+Sinnoh_GameCorner_Text_Person9:
+	.string "LOOKER: Do not mind me. I am simply a\n"
+	.string "normal visitor who enjoys... slots. Yes.\p"
+	.string "TEAM GALACTIC's people come here to\n"
+	.string "relax. I am listening.$"
 
 @ --- end of SINNOH words ---

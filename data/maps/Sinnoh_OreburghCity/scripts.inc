@@ -18,6 +18,10 @@ Sinnoh_OreburghCity_EventScript_Person3::
 	msgbox Sinnoh_OreburghCity_Text_Person3, MSGBOX_NPC
 	end
 
+Sinnoh_OreburghCity_EventScript_Person4::
+	msgbox Sinnoh_OreburghCity_Text_Person4, MSGBOX_NPC
+	end
+
 Sinnoh_OreburghCity_EventScript_Person5::
 	msgbox Sinnoh_OreburghCity_Text_Person5, MSGBOX_NPC
 	end
@@ -116,6 +120,13 @@ Sinnoh_OreburghCity_Text_Person3:
 	.string "The MINING MUSEUM tells the whole\n"
 	.string "story of OREBURGH. Even the fossils\l"
 	.string "have a corner.$"
+
+Sinnoh_OreburghCity_Text_Person4:
+	.string "BARRY: The GYM LEADER's down in the\n"
+	.string "mine. I'm going to beat him the second\l"
+	.string "he's back!\p"
+	.string "...After I stock up on POTIONS. And\n"
+	.string "maybe a snack.$"
 
 Sinnoh_OreburghCity_Text_Person5:
 	.string "Have you been to the GYM yet? ROARK\n"

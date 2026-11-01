@@ -6,12 +6,20 @@ Sinnoh_Route213_EventScript_Person30::
 	msgbox Sinnoh_Route213_Text_Person30, MSGBOX_NPC
 	end
 
+Sinnoh_Route213_EventScript_Person31::
+	msgbox Sinnoh_Route213_Text_Person31, MSGBOX_NPC
+	end
+
 Sinnoh_Route213_EventScript_Person32::
 	msgbox Sinnoh_Route213_Text_Person32, MSGBOX_NPC
 	end
 
 Sinnoh_Route213_EventScript_Person33::
 	msgbox Sinnoh_Route213_Text_Person33, MSGBOX_NPC
+	end
+
+Sinnoh_Route213_EventScript_Person34::
+	msgbox Sinnoh_Route213_Text_Person34, MSGBOX_NPC
 	end
 
 Sinnoh_Route213_EventScript_Sign16::
@@ -30,6 +38,11 @@ Sinnoh_Route213_Text_Person30:
 	.string "The beach is great for fishing. The\n"
 	.string "waves bring everything right to you.$"
 
+Sinnoh_Route213_Text_Person31:
+	.string "LAKE VALOR's going to be big news\n"
+	.string "soon. Real big. Boom-big. Forget I said\l"
+	.string "that.$"
+
 Sinnoh_Route213_Text_Person32:
 	.string "I could lie on this sand all day. My\n"
 	.string "MOéMON already is.$"
@@ -37,6 +50,11 @@ Sinnoh_Route213_Text_Person32:
 Sinnoh_Route213_Text_Person33:
 	.string "Someone left a shell collection by the\n"
 	.string "hotel. I'm adding to it!$"
+
+Sinnoh_Route213_Text_Person34:
+	.string "LOOKER: TEAM GALACTIC is planning\n"
+	.string "something at LAKE VALOR. I can feel it\l"
+	.string "in my mustache.$"
 
 Sinnoh_Route213_Text_Sign16:
 	.string "ROUTE 213\p"

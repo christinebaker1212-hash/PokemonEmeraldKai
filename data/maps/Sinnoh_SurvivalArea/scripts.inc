@@ -27,6 +27,10 @@ Sinnoh_SurvivalArea_EventScript_Person8::
 	msgbox Sinnoh_SurvivalArea_Text_Person8, MSGBOX_NPC
 	end
 
+Sinnoh_SurvivalArea_EventScript_Person9::
+	msgbox Sinnoh_SurvivalArea_Text_Person9, MSGBOX_NPC
+	end
+
 Sinnoh_SurvivalArea_EventScript_Sign1::
 	msgbox Sinnoh_SurvivalArea_Text_Sign1, MSGBOX_SIGN
 	end
@@ -50,6 +54,11 @@ Sinnoh_SurvivalArea_Text_Person6:
 Sinnoh_SurvivalArea_Text_Person8:
 	.string "I'm filming a show about the BATTLE\n"
 	.string "ZONE. Wave at the camera!$"
+
+Sinnoh_SurvivalArea_Text_Person9:
+	.string "BUCK: The FRONTIER's tough, but STARK\n"
+	.string "MOUNTAIN's tougher. I'll see you up\l"
+	.string "there!$"
 
 Sinnoh_SurvivalArea_Text_Sign1:
 	.string "SURVIVAL AREA\p"

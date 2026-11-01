@@ -10,6 +10,22 @@ Sinnoh_Route212North_EventScript_Person24::
 	msgbox Sinnoh_Route212North_Text_Person24, MSGBOX_NPC
 	end
 
+Sinnoh_Route212North_EventScript_Person25::
+	msgbox Sinnoh_Route212North_Text_Person25, MSGBOX_NPC
+	end
+
+Sinnoh_Route212North_EventScript_Person26::
+	msgbox Sinnoh_Route212North_Text_Person26, MSGBOX_NPC
+	end
+
+Sinnoh_Route212North_EventScript_Person27::
+	msgbox Sinnoh_Route212North_Text_Person27, MSGBOX_NPC
+	end
+
+Sinnoh_Route212North_EventScript_Person28::
+	msgbox Sinnoh_Route212North_Text_Person28, MSGBOX_NPC
+	end
+
 Sinnoh_Route212North_EventScript_Sign9::
 	msgbox Sinnoh_Route212North_Text_Sign9, MSGBOX_SIGN
 	end
@@ -29,6 +45,23 @@ Sinnoh_Route212North_Text_Person23:
 Sinnoh_Route212North_Text_Person24:
 	.string "The mansion's owner has a rare MOéMON\n"
 	.string "statue. I'd love just one look!$"
+
+Sinnoh_Route212North_Text_Person25:
+	.string "Patrolling by day is quiet. At night,\n"
+	.string "though, I check every TRAINER who\l"
+	.string "walks by.$"
+
+Sinnoh_Route212North_Text_Person26:
+	.string "Daytime duty is easy. Come by at night\n"
+	.string "and we'll see how tough you are.$"
+
+Sinnoh_Route212North_Text_Person27:
+	.string "Everything's calm on ROUTE 212. That's\n"
+	.string "how I like it.$"
+
+Sinnoh_Route212North_Text_Person28:
+	.string "I'm on day patrol. My battle shift\n"
+	.string "starts after sunset.$"
 
 Sinnoh_Route212North_Text_Sign9:
 	.string "ROUTE 212\p"

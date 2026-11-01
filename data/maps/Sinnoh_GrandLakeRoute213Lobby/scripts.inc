@@ -10,6 +10,10 @@ Sinnoh_GrandLakeRoute213Lobby_EventScript_Person2::
 	msgbox Sinnoh_GrandLakeRoute213Lobby_Text_Person2, MSGBOX_NPC
 	end
 
+Sinnoh_GrandLakeRoute213Lobby_EventScript_Person3::
+	msgbox Sinnoh_GrandLakeRoute213Lobby_Text_Person3, MSGBOX_NPC
+	end
+
 Sinnoh_GrandLakeRoute213Lobby_Text_Person1:
 	.string "Welcome to HOTEL GRAND LAKE! The\n"
 	.string "rooms all face the sea.$"
@@ -17,5 +21,10 @@ Sinnoh_GrandLakeRoute213Lobby_Text_Person1:
 Sinnoh_GrandLakeRoute213Lobby_Text_Person2:
 	.string "I keep the peace around here. It's\n"
 	.string "mostly lost sunglasses.$"
+
+Sinnoh_GrandLakeRoute213Lobby_Text_Person3:
+	.string "LOOKER: This hotel has a fine view of\n"
+	.string "LAKE VALOR. And of anyone sneaking\l"
+	.string "toward it.$"
 
 @ --- end of SINNOH words ---

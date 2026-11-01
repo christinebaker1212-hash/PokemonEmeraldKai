@@ -35,6 +35,14 @@ Sinnoh_FloaromaTown_EventScript_Person5::
 	msgbox Sinnoh_FloaromaTown_Text_Person5, MSGBOX_NPC
 	end
 
+Sinnoh_FloaromaTown_EventScript_Person8::
+	msgbox Sinnoh_FloaromaTown_Text_Person8, MSGBOX_NPC
+	end
+
+Sinnoh_FloaromaTown_EventScript_Person9::
+	msgbox Sinnoh_FloaromaTown_Text_Person9, MSGBOX_NPC
+	end
+
 Sinnoh_FloaromaTown_EventScript_Person13::
 	msgbox Sinnoh_FloaromaTown_Text_Person13, MSGBOX_NPC
 	end
@@ -78,6 +86,15 @@ Sinnoh_FloaromaTown_Text_Person4Gift:
 Sinnoh_FloaromaTown_Text_Person5:
 	.string "I sneezed so many times walking\n"
 	.string "through the meadow. Worth it, though!$"
+
+Sinnoh_FloaromaTown_Text_Person8:
+	.string "TEAM GALACTIC's taking the sweet\n"
+	.string "HONEY from the MEADOW. It's for...\l"
+	.string "science!$"
+
+Sinnoh_FloaromaTown_Text_Person9:
+	.string "Don't look at me like that. Honey is\n"
+	.string "very important to our plans. Very.$"
 
 Sinnoh_FloaromaTown_Text_Person13:
 	.string "I set up my tent in the meadow. Waking\n"

@@ -18,13 +18,21 @@ GIFT_FLAGS = 0x3DA0   # (free: the legendaries' added objects' 0x3D80-0x3D8F; th
 GIFT_FLAGS_END = 0x3E00
 SKIP = {'ITEM_JOURNAL', 'ITEM_PARCEL', 'ITEM_TOWN_MAP', 'ITEM_HM06'}   # (the TOWN MAP is the game's own already; HMs
 #   come from the HOENN story: no HM restrictions)
-KEY = {'ITEM_COIN_CASE', 'ITEM_OLD_ROD', 'ITEM_GOOD_ROD', 'ITEM_SUPER_ROD'}   # (one is enough: not given to a player who has it)
+KEY = {'ITEM_COIN_CASE', 'ITEM_OLD_ROD', 'ITEM_GOOD_ROD', 'ITEM_SUPER_ROD', 'ITEM_POKE_RADAR', 'ITEM_BICYCLE'}   # (one is enough: not given to a player who has it)
 
 
 # What each says as their item changes hands (the person's own words come first: tools/sinnoh/words.py)
 LINES = {
+    'Route217NortheastHouse Person1': 'And take this charm too. It keeps the cold spirits away. Mostly.',
+    'Route206CyclingRoadNorthGate Person3': 'For my study, take this EXP. SHARE. Report back how your team grows!',
+    'OreburghMineB1f Person4': "I dug up this warm plate. It's yours if you want it!",
+    'MtCoronet2f Person6': 'Take this BLACK FLUTE. I found it on the way up. A detective notices these things.',
+    'IronIslandHouse Person1': 'Gahaha! A METAL COAT for you, dug from this very island!',
+    'GrandLakeValorLakefrontEastHouse Person1': 'Take this WHITE FLUTE. Its sound makes the grass rustle with POKéMON.',
+    'EternaCitySouthHouse Person1': 'Here, take this UPGRADE. A curious little gadget. Some POKéMON love it!',
     'Cafe Person2': "Here, have a few bottles on the house. Fresh from the farm!",
     'CanalaveCitySoutheastHouse Person2': "You look like you train hard too. Take this TM. It's served me well.",
+    'CycleShop Person1': "As thanks for saving my CLEFAIRY, take a BIKE! On the house!",
     'CelesticTownNorthwestHouse Person3': "The elder gave me these glasses, but they suit a clever MOéMON better. Here.",
     'CelesticTownPokecenter1f Person4': "Visitors to the shrine should have one of these. Take it!",
     'EternaCityCondominiums2f Person1': "Grandpa says the old stories hold old moves too. He wants you to have this TM.",
@@ -37,6 +45,7 @@ LINES = {
     'GrandLakeRoute213NorthwestHouse Person1': "Since I'm not working, you can have my act. It's on this TM!",
     'GreatMarsh6 Person3': "I dug this out of the mud. Odd red stone. Maybe you know what it's for?",
     'HearthomeCitySoutheastHouse2f Person1': "A bell that rings like the sea. CLEFAIRY doesn't need it. Here!",
+    'IronIsland Person2': "Take this HM. STRENGTH will move the boulders down in the mine.",
     'JubilifeCityCondominiums1f Person4': "This was a housewarming gift, but I have two. Please, take one!",
     'OreburghCity Person17': "Here, a little something from the first-aid box. Miners share!",
     'OreburghCityEastHouse2f Person1': "I traded a lump of coal for this BALL. You can have it!",
@@ -45,6 +54,7 @@ LINES = {
     'PastoriaCityMiddleHouse Person2': "It made me so strong, I don't need it anymore. Here!",
     'PastoriaCityNortheastHouse Person1': "My sister made scarves for every MOéMON we know. Here's a spare!",
     'PokemonMansionMaidsRoom Person2': "Here, this bell is too loud for the maids' room. Your MOéMON will love it.",
+    'SandgemTownPokemonResearchLab Person1': "Here, a POKé RADAR. It finds POKéMON hiding in the grass. Use it well.",
     'Route201 Person2': "Here, have a free POTION!",
     'Route204North Person11': "This TM blows like that breeze. Take it!",
     'Route209 Person29': "You don't have a good rod? Take my old one. Patience does the rest!",

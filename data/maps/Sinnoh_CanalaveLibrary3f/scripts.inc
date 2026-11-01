@@ -98,6 +98,18 @@ Sinnoh_CanalaveLibrary3f_EventScript_Person2::
 	msgbox Sinnoh_CanalaveLibrary3f_Text_Person2, MSGBOX_NPC
 	end
 
+Sinnoh_CanalaveLibrary3f_EventScript_Person3::
+	msgbox Sinnoh_CanalaveLibrary3f_Text_Person3, MSGBOX_NPC
+	end
+
+Sinnoh_CanalaveLibrary3f_EventScript_Person4::
+	msgbox Sinnoh_CanalaveLibrary3f_Text_Person4, MSGBOX_NPC
+	end
+
+Sinnoh_CanalaveLibrary3f_EventScript_Person5::
+	msgbox Sinnoh_CanalaveLibrary3f_Text_Person5, MSGBOX_NPC
+	end
+
 Sinnoh_CanalaveLibrary3f_Text_Bg1:
 	.string "An old book of SINNOH's stories. It\n"
 	.string "tells of MOéMON that shaped the land,\l"
@@ -239,5 +251,22 @@ Sinnoh_CanalaveLibrary3f_Text_Person2:
 	.string "I'm looking for a book about the\n"
 	.string "strongest MOéMON ever. All the books\l"
 	.string "say different things!$"
+
+Sinnoh_CanalaveLibrary3f_Text_Person3:
+	.string "PROF. ROWAN: The book is clear. The\n"
+	.string "three lakes hold three POKéMON:\l"
+	.string "knowledge, emotion and willpower.\p"
+	.string "If TEAM GALACTIC seizes them, they\n"
+	.string "could seize far more. We must split up\l"
+	.string "and protect every lake.$"
+
+Sinnoh_CanalaveLibrary3f_Text_Person4:
+	.string "I'll head to LAKE VERITY. It's the\n"
+	.string "closest to home!$"
+
+Sinnoh_CanalaveLibrary3f_Text_Person5:
+	.string "BARRY: I'm taking LAKE ACUITY! Up\n"
+	.string "north where it's cold! Don't worry\l"
+	.string "about me!$"
 
 @ --- end of SINNOH words ---

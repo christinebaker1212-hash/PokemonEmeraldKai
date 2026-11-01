@@ -26,6 +26,10 @@ Sinnoh_JubilifeTv3fGlobalRankingRoom_EventScript_Person3::
 	msgbox Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Person3, MSGBOX_NPC
 	end
 
+Sinnoh_JubilifeTv3fGlobalRankingRoom_EventScript_Person4::
+	msgbox Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Person4, MSGBOX_NPC
+	end
+
 Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Bg1:
 	.string "A machine that keeps records. Its\n"
 	.string "screen is dark for now.$"
@@ -50,5 +54,9 @@ Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Person2:
 Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Person3:
 	.string "I check the rankings every week. I\n"
 	.string "like to see who's catching up.$"
+
+Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Person4:
+	.string "This room keeps records from all over.\n"
+	.string "Some of them are frankly unbelievable.$"
 
 @ --- end of SINNOH words ---

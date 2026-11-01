@@ -23,6 +23,10 @@ Sinnoh_Route222_EventScript_Person26_Given::
 	release
 	end
 
+Sinnoh_Route222_EventScript_Person30::
+	msgbox Sinnoh_Route222_Text_Person30, MSGBOX_NPC
+	end
+
 Sinnoh_Route222_EventScript_Sign12::
 	msgbox Sinnoh_Route222_Text_Sign12, MSGBOX_SIGN
 	end
@@ -50,6 +54,10 @@ Sinnoh_Route222_Text_Person26:
 Sinnoh_Route222_Text_Person26Gift:
 	.string "Since you're my guest on my beach,\n"
 	.string "here's a TM. Money is no object!$"
+
+Sinnoh_Route222_Text_Person30:
+	.string "The beach is quiet by day. Night\n"
+	.string "patrol's where the action is.$"
 
 Sinnoh_Route222_Text_Sign12:
 	.string "ROUTE 222\p"

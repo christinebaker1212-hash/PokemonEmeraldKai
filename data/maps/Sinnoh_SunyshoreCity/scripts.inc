@@ -26,6 +26,14 @@ Sinnoh_SunyshoreCity_EventScript_Person10::
 	msgbox Sinnoh_SunyshoreCity_Text_Person10, MSGBOX_NPC
 	end
 
+Sinnoh_SunyshoreCity_EventScript_Person19::
+	msgbox Sinnoh_SunyshoreCity_Text_Person19, MSGBOX_NPC
+	end
+
+Sinnoh_SunyshoreCity_EventScript_Person21::
+	msgbox Sinnoh_SunyshoreCity_Text_Person21, MSGBOX_NPC
+	end
+
 Sinnoh_SunyshoreCity_EventScript_Sign5::
 	msgbox Sinnoh_SunyshoreCity_Text_Sign5, MSGBOX_SIGN
 	end
@@ -80,6 +88,18 @@ Sinnoh_SunyshoreCity_Text_Person10:
 	.string "came to see this city's lighthouse.\p"
 	.string "It's beautiful. I'll tell everyone back\n"
 	.string "home about it.$"
+
+Sinnoh_SunyshoreCity_Text_Person19:
+	.string "FLINT: Hey! I'm FLINT, of the ELITE\n"
+	.string "FOUR. VOLKNER's my friend. He's been\l"
+	.string "bored lately.\p"
+	.string "Beat him and wake him up, would you?\n"
+	.string "He needs a battle that lights him up.$"
+
+Sinnoh_SunyshoreCity_Text_Person21:
+	.string "BARRY: SUNYSHORE has solar panels on\n"
+	.string "the roads! I tried running on them.\l"
+	.string "Felt like I was going faster!$"
 
 Sinnoh_SunyshoreCity_Text_Sign5:
 	.string "SUNYSHORE MARKET\p"

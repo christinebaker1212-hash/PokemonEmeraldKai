@@ -88,7 +88,7 @@
       "trainer_type": "TRAINER_TYPE_NORMAL",
       "trainer_sight_or_berry_tree_id": "3",
       "script": "Sinnoh_EventScript_TrPolicemanBobby",
-      "flag": "0x3FFF"
+      "flag": "0x34AD"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_POLICEMAN",
@@ -101,7 +101,7 @@
       "trainer_type": "TRAINER_TYPE_NORMAL",
       "trainer_sight_or_berry_tree_id": "3",
       "script": "Sinnoh_EventScript_TrPolicemanAlex",
-      "flag": "0x3FFF"
+      "flag": "0x34AB"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_POLICEMAN",
@@ -114,7 +114,7 @@
       "trainer_type": "TRAINER_TYPE_NORMAL",
       "trainer_sight_or_berry_tree_id": "2",
       "script": "Sinnoh_EventScript_TrPolicemanDylan",
-      "flag": "0x3FFF"
+      "flag": "0x34B1"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_POLICEMAN",
@@ -127,7 +127,7 @@
       "trainer_type": "TRAINER_TYPE_NORMAL",
       "trainer_sight_or_berry_tree_id": "2",
       "script": "Sinnoh_EventScript_TrPolicemanCaleb",
-      "flag": "0x3FFF"
+      "flag": "0x34AF"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -347,8 +347,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_Route212North_EventScript_Person25",
+      "flag": "0x34AE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_POLICEMAN",
@@ -360,8 +360,8 @@
       "movement_range_y": 4,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_Route212North_EventScript_Person26",
+      "flag": "0x34AC"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_POLICEMAN",
@@ -373,8 +373,8 @@
       "movement_range_y": 6,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_Route212North_EventScript_Person27",
+      "flag": "0x34B2"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_POLICEMAN",
@@ -386,8 +386,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_Route212North_EventScript_Person28",
+      "flag": "0x34B0"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",

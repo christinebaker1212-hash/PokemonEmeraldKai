@@ -42,6 +42,10 @@ Sinnoh_BattleHall_EventScript_Person10::
 	msgbox Sinnoh_BattleHall_Text_Person10, MSGBOX_NPC
 	end
 
+Sinnoh_BattleHall_EventScript_Person11::
+	msgbox Sinnoh_BattleHall_Text_Person11, MSGBOX_NPC
+	end
+
 Sinnoh_BattleHall_EventScript_Person12::
 	msgbox Sinnoh_BattleHall_Text_Person12, MSGBOX_NPC
 	end
@@ -91,6 +95,10 @@ Sinnoh_BattleHall_Text_Person9:
 
 Sinnoh_BattleHall_Text_Person10:
 	.string "I'm here to cheer on my friends! Go go!$"
+
+Sinnoh_BattleHall_Text_Person11:
+	.string "The BATTLE HALL's crowd is the\n"
+	.string "loudest in SINNOH!$"
 
 Sinnoh_BattleHall_Text_Person12:
 	.string "My bug MOéMON will win the HALL! Bugs\n"

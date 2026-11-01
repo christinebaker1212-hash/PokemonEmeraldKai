@@ -41,6 +41,14 @@ Sinnoh_Route209_EventScript_Person29_Given::
 	release
 	end
 
+Sinnoh_Route209_EventScript_Person30::
+	msgbox Sinnoh_Route209_Text_Person30, MSGBOX_NPC
+	end
+
+Sinnoh_Route209_EventScript_Person31::
+	msgbox Sinnoh_Route209_Text_Person31, MSGBOX_NPC
+	end
+
 Sinnoh_Route209_EventScript_Sign10::
 	msgbox Sinnoh_Route209_Text_Sign10, MSGBOX_SIGN
 	end
@@ -65,6 +73,14 @@ Sinnoh_Route209_Text_Person29:
 Sinnoh_Route209_Text_Person29Gift:
 	.string "You don't have a good rod? Take my old\n"
 	.string "one. Patience does the rest!$"
+
+Sinnoh_Route209_Text_Person30:
+	.string "Night jogging is peaceful. Too dark to\n"
+	.string "battle, though. Come back by day!$"
+
+Sinnoh_Route209_Text_Person31:
+	.string "Running at night keeps me cool. I'm\n"
+	.string "too out of breath to battle anyway.$"
 
 Sinnoh_Route209_Text_Sign10:
 	.string "ROUTE 209\p"

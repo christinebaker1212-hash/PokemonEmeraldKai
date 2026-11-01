@@ -35,6 +35,10 @@ Sinnoh_SnowpointCity_EventScript_Person7::
 	msgbox Sinnoh_SnowpointCity_Text_Person7, MSGBOX_NPC
 	end
 
+Sinnoh_SnowpointCity_EventScript_Person8::
+	msgbox Sinnoh_SnowpointCity_Text_Person8, MSGBOX_NPC
+	end
+
 Sinnoh_SnowpointCity_EventScript_Person10::
 	msgbox Sinnoh_SnowpointCity_Text_Person10, MSGBOX_NPC
 	end
@@ -74,6 +78,12 @@ Sinnoh_SnowpointCity_Text_Person7:
 	.string "The temple north of the city is very\n"
 	.string "old. Only people who have the LEAGUE's\l"
 	.string "blessing may go inside.$"
+
+Sinnoh_SnowpointCity_Text_Person8:
+	.string "CANDICE: A visitor in SNOWPOINT! I'm\n"
+	.string "CANDICE, the GYM LEADER here.\p"
+	.string "Snow's no reason to stay inside! Come\n"
+	.string "show me what you've got at the GYM!$"
 
 Sinnoh_SnowpointCity_Text_Person10:
 	.string "We make snow sculptures of MOéMON\n"

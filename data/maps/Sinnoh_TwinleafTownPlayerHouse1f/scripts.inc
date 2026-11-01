@@ -38,6 +38,10 @@ Sinnoh_TwinleafTownPlayerHouse1f_EventScript_Person1::
 	msgbox Sinnoh_TwinleafTownPlayerHouse1f_Text_Person1, MSGBOX_NPC
 	end
 
+Sinnoh_TwinleafTownPlayerHouse1f_EventScript_Person2::
+	msgbox Sinnoh_TwinleafTownPlayerHouse1f_Text_Person2, MSGBOX_NPC
+	end
+
 Sinnoh_TwinleafTownPlayerHouse1f_Text_Bg1:
 	.string "A cooking show is on.\p"
 	.string "“...and that's how you make a POFFIN\n"
@@ -87,5 +91,12 @@ Sinnoh_TwinleafTownPlayerHouse1f_Text_Person1:
 	.string "past ROUTE 201. Come home whenever\l"
 	.string "you're tired. I always cook too much\l"
 	.string "anyway.$"
+
+Sinnoh_TwinleafTownPlayerHouse1f_Text_Person2:
+	.string "Oh, hello! I live next door. My son\n"
+	.string "BARRY ran off again before breakfast.\p"
+	.string "If you see a blur of yellow and orange\n"
+	.string "heading north, that's him. Tell him\l"
+	.string "lunch is at noon!$"
 
 @ --- end of SINNOH words ---

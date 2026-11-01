@@ -174,6 +174,10 @@ Sinnoh_BattleFrontier_EventScript_Person29::
 	msgbox Sinnoh_BattleFrontier_Text_Person29, MSGBOX_NPC
 	end
 
+Sinnoh_BattleFrontier_EventScript_Person30::
+	msgbox Sinnoh_BattleFrontier_Text_Person30, MSGBOX_NPC
+	end
+
 Sinnoh_BattleFrontier_EventScript_Sign1::
 	msgbox Sinnoh_BattleFrontier_Text_Sign1, MSGBOX_SIGN
 	end
@@ -360,6 +364,11 @@ Sinnoh_BattleFrontier_Text_Person28:
 Sinnoh_BattleFrontier_Text_Person29:
 	.string "I came all the way from SNOWPOINT for\n"
 	.string "this. It's so warm here!$"
+
+Sinnoh_BattleFrontier_Text_Person30:
+	.string "The BATTLE FRONTIER is the place to\n"
+	.string "see the toughest TRAINERS. Got a\l"
+	.string "story for me?$"
 
 Sinnoh_BattleFrontier_Text_Sign1:
 	.string "TRAINER TIPS\p"

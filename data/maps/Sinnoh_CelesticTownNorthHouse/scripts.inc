@@ -10,6 +10,10 @@ Sinnoh_CelesticTownNorthHouse_EventScript_Person1::
 	msgbox Sinnoh_CelesticTownNorthHouse_Text_Person1, MSGBOX_NPC
 	end
 
+Sinnoh_CelesticTownNorthHouse_EventScript_Person2::
+	msgbox Sinnoh_CelesticTownNorthHouse_Text_Person2, MSGBOX_NPC
+	end
+
 Sinnoh_CelesticTownNorthHouse_EventScript_Person3::
 	msgbox Sinnoh_CelesticTownNorthHouse_Text_Person3, MSGBOX_NPC
 	end
@@ -25,6 +29,11 @@ Sinnoh_CelesticTownNorthHouse_Text_Bg1:
 Sinnoh_CelesticTownNorthHouse_Text_Person1:
 	.string "The people of CELESTIC have kept the\n"
 	.string "old stories for generations.$"
+
+Sinnoh_CelesticTownNorthHouse_Text_Person2:
+	.string "I'm the elder of CELESTIC. My\n"
+	.string "granddaughter visits now and then.\l"
+	.string "She's quite the TRAINER.$"
 
 Sinnoh_CelesticTownNorthHouse_Text_Person3:
 	.string "I want to be a historian like my\n"

@@ -22,6 +22,10 @@ Sinnoh_JubilifeTv3fGroupRankingRoom_EventScript_Person2::
 	msgbox Sinnoh_JubilifeTv3fGroupRankingRoom_Text_Person2, MSGBOX_NPC
 	end
 
+Sinnoh_JubilifeTv3fGroupRankingRoom_EventScript_Person3::
+	msgbox Sinnoh_JubilifeTv3fGroupRankingRoom_Text_Person3, MSGBOX_NPC
+	end
+
 Sinnoh_JubilifeTv3fGroupRankingRoom_Text_Bg1:
 	.string "A machine that keeps records. Its\n"
 	.string "screen is dark for now.$"
@@ -43,5 +47,10 @@ Sinnoh_JubilifeTv3fGroupRankingRoom_Text_Person2:
 	.string "Groups train together and climb\n"
 	.string "together. That's how you get to the\l"
 	.string "top!$"
+
+Sinnoh_JubilifeTv3fGroupRankingRoom_Text_Person3:
+	.string "Groups of TRAINERS compete for the\n"
+	.string "best records here. Teamwork wins,\l"
+	.string "every time.$"
 
 @ --- end of SINNOH words ---

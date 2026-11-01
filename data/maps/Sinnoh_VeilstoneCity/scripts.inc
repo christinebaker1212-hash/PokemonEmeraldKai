@@ -42,6 +42,18 @@ Sinnoh_VeilstoneCity_EventScript_Person6::
 	msgbox Sinnoh_VeilstoneCity_Text_Person6, MSGBOX_NPC
 	end
 
+Sinnoh_VeilstoneCity_EventScript_Person7::
+	msgbox Sinnoh_VeilstoneCity_Text_Person7, MSGBOX_NPC
+	end
+
+Sinnoh_VeilstoneCity_EventScript_Person8::
+	msgbox Sinnoh_VeilstoneCity_Text_Person8, MSGBOX_NPC
+	end
+
+Sinnoh_VeilstoneCity_EventScript_Person21::
+	msgbox Sinnoh_VeilstoneCity_Text_Person21, MSGBOX_NPC
+	end
+
 Sinnoh_VeilstoneCity_EventScript_Person22::
 	msgbox Sinnoh_VeilstoneCity_Text_Person22, MSGBOX_NPC
 	end
@@ -61,6 +73,22 @@ Sinnoh_VeilstoneCity_EventScript_Person23::
 Sinnoh_VeilstoneCity_EventScript_Person23_Given::
 	msgbox Sinnoh_VeilstoneCity_Text_Person23, MSGBOX_DEFAULT
 	release
+	end
+
+Sinnoh_VeilstoneCity_EventScript_Person24::
+	msgbox Sinnoh_VeilstoneCity_Text_Person24, MSGBOX_NPC
+	end
+
+Sinnoh_VeilstoneCity_EventScript_Person25::
+	msgbox Sinnoh_VeilstoneCity_Text_Person25, MSGBOX_NPC
+	end
+
+Sinnoh_VeilstoneCity_EventScript_Person26::
+	msgbox Sinnoh_VeilstoneCity_Text_Person26, MSGBOX_NPC
+	end
+
+Sinnoh_VeilstoneCity_EventScript_Person27::
+	msgbox Sinnoh_VeilstoneCity_Text_Person27, MSGBOX_NPC
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Person29::
@@ -150,6 +178,19 @@ Sinnoh_VeilstoneCity_Text_Person6:
 	.string "See those big rocks? People say they\n"
 	.string "fell from the sky a long time ago.$"
 
+Sinnoh_VeilstoneCity_Text_Person7:
+	.string "TEAM GALACTIC's headquarters are\n"
+	.string "somewhere in this city. Please be\l"
+	.string "careful!$"
+
+Sinnoh_VeilstoneCity_Text_Person8:
+	.string "This warehouse is TEAM GALACTIC\n"
+	.string "property. Hands off!$"
+
+Sinnoh_VeilstoneCity_Text_Person21:
+	.string "The warehouse is locked tight. Not\n"
+	.string "that I lost the key. Nope.$"
+
 Sinnoh_VeilstoneCity_Text_Person22:
 	.string "My guitar sounds great bouncing off\n"
 	.string "these cliffs. Listen! ...Okay, maybe\l"
@@ -162,6 +203,29 @@ Sinnoh_VeilstoneCity_Text_Person23:
 Sinnoh_VeilstoneCity_Text_Person23Gift:
 	.string "A TOUGH TRAINER deserves a TOUGH TM.\n"
 	.string "Here!$"
+
+Sinnoh_VeilstoneCity_Text_Person24:
+	.string "I'm supposed to be guarding the\n"
+	.string "STORAGE KEY. I'm doing great. Totally\l"
+	.string "great.$"
+
+Sinnoh_VeilstoneCity_Text_Person25:
+	.string "Our HQ is the biggest building in\n"
+	.string "VEILSTONE. Can't miss it. Please miss\l"
+	.string "it.$"
+
+Sinnoh_VeilstoneCity_Text_Person26:
+	.string "WAKE: Hah! TEAM GALACTIC grabbed\n"
+	.string "some POKéMON and ran into that\l"
+	.string "warehouse!\p"
+	.string "I'll be standing guard. Nobody gets\n"
+	.string "past CRASHER WAKE!$"
+
+Sinnoh_VeilstoneCity_Text_Person27:
+	.string "LOOKER: TEAM GALACTIC's headquarters\n"
+	.string "stands right here in VEILSTONE.\p"
+	.string "I am gathering clues. Clue number one:\n"
+	.string "they really like the color blue.$"
 
 Sinnoh_VeilstoneCity_Text_Person29:
 	.string "Training under the stars is the best.\n"

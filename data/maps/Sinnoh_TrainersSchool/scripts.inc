@@ -14,6 +14,10 @@ Sinnoh_TrainersSchool_EventScript_Person1::
 	msgbox Sinnoh_TrainersSchool_Text_Person1, MSGBOX_NPC
 	end
 
+Sinnoh_TrainersSchool_EventScript_Person2::
+	msgbox Sinnoh_TrainersSchool_Text_Person2, MSGBOX_NPC
+	end
+
 Sinnoh_TrainersSchool_EventScript_Person3::
 	msgbox Sinnoh_TrainersSchool_Text_Person3, MSGBOX_NPC
 	end
@@ -65,6 +69,13 @@ Sinnoh_TrainersSchool_Text_Person1:
 	.string "Welcome to the TRAINERS' SCHOOL! Feel\n"
 	.string "free to look around and read the\l"
 	.string "boards.$"
+
+Sinnoh_TrainersSchool_Text_Person2:
+	.string "BARRY: Oh! It's you! I was teaching\n"
+	.string "these kids how to battle.\p"
+	.string "Well, they were teaching me, kind of.\n"
+	.string "Anyway! I'm off to OREBURGH! Last one\l"
+	.string "there pays a fine!$"
 
 Sinnoh_TrainersSchool_Text_Person3:
 	.string "We learned about status today. A\n"

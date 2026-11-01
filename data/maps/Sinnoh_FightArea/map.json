@@ -139,8 +139,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_FightArea_EventScript_Person9",
+      "flag": "0x3418"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
@@ -347,8 +347,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_FightArea_EventScript_Person25",
+      "flag": "0x3416"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_FLINT",
@@ -360,8 +360,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_FightArea_EventScript_Person26",
+      "flag": "0x3416"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_PALMER",
@@ -373,8 +373,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_FightArea_EventScript_Person27",
+      "flag": "0x3419"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_BLACK_BELT",
@@ -386,8 +386,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_FightArea_EventScript_Person28",
+      "flag": "0x3416"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_F",
@@ -399,8 +399,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_FightArea_EventScript_Person29",
+      "flag": "0x3416"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_M",
@@ -412,8 +412,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_FightArea_EventScript_Person30",
+      "flag": "0x3416"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_BATTLE_GIRL",
@@ -425,8 +425,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_FightArea_EventScript_Person31",
+      "flag": "0x3416"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_SAILOR",
@@ -438,8 +438,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_FightArea_EventScript_Person32",
+      "flag": "0x3416"
     }
   ],
   "warp_events": [

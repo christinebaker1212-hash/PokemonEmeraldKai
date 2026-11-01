@@ -61,8 +61,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_CelesticTown_EventScript_Person3",
+      "flag": "0x33FE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_EXPERT_F",
@@ -74,8 +74,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_CelesticTown_EventScript_Person4",
+      "flag": "0x33FD"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_SINNOH_CYNTHIA",
@@ -87,8 +87,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
-      "flag": "0x3FFF"
+      "script": "Sinnoh_CelesticTown_EventScript_Person5",
+      "flag": "0x33FC"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_ITEM_BALL",
