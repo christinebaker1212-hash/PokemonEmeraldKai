@@ -1,0 +1,10 @@
+# SINNOH by GENERATION (gen_hoenn_modern.py, sinnoh_modern.h): ROUTE 202's rarer slots bring generation 5-9 POKéMON at
+# GEN 9 and none at GEN 4 (Platinum's own); ROARK's first POKéMON at GEN 9 is NACLI (957), his ace RAMPARDOS stays.
+# Needs the 3D pack.
+MODE=1
+GEN=9
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=150:100,150:100"
+EXPECT_A=("trainer battle 2067" "battler 1 hp")
+UNEXPECT_A=("[crash]" "TIMEOUT")
+CHECK="python3 tools/test/scenarios/sinnoh_gens/check.py"

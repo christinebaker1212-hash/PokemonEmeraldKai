@@ -3348,6 +3348,10 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   own goods, the VEILSTONE store's counters, the ETERNA herb shop). gen_words.py roles() reads each vendor's Platinum
   script (gen_marts.vendor_kind) for ('mart',) or ('martlist', label). Items the game lacks (Platinum's mail) are left
   out. `mp shopdump` prints "shop here:" with the list. Test sinnoh_marts.
+- SINNOH by GENERATION: tools/moemon_gen59/gen_hoenn_modern.py (after gen_wild.py / gen_trainers.py) also writes
+  src/data/sinnoh_modern.h, HOENN's rules with generations 5-9 (Platinum's tables are Gen 4 already; GEN 3 and 4 show
+  them as they are), and a slot whose POKéMON is wild nowhere else in SINNOH stays. mp_region.c ModernWild /
+  HoennModernTeam take the table and region. Test sinnoh_gens.
 - Gym leaders (tools/sinnoh/words.py GYMS, the ('gym', n) kind; gen_words.py gym()): the eight leaders, the ELITE FOUR
   and the CHAMPION are trainers too (gen_trainers.py SPECIAL, ids after the route trainers; pictures the closest the
   game has). A leader battles (NO_MUSIC: SINNOH's gym leader theme plays by class), then gives the badge (flag

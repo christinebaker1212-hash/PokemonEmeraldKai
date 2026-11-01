@@ -1023,12 +1023,15 @@ static bool8 RegionUsesModern(void)
 }
 
 static const struct WildPokemonInfo *HoennModernWild(const struct WildPokemonInfo *info);
+static const struct WildPokemonInfo *SinnohModernWild(const struct WildPokemonInfo *info);
 
 const struct WildPokemonInfo *MP_Region_WildInfo(const struct WildPokemonInfo *info)
 {
     u32 i;
     if (info != NULL && MP_Region_Current() == REGION_HOENN && MP_Gen_Cap(REGION_HOENN) >= 4)
         return HoennModernWild(info);
+    if (info != NULL && MP_Region_Current() == REGION_SINNOH)
+        return MP_Gen_Cap(REGION_SINNOH) >= 5 ? SinnohModernWild(info) : info;
     if (info != NULL && RegionUsesModern())
     {
         // Quetzal's own Pokémon where their generation is allowed, the Gen 4 cap's elsewhere
@@ -1141,30 +1144,32 @@ static const struct Trainer *ModernTeam(u16 trainerNum)
 // ---------------------------------------------------------------------------------------------------- HOENN by GENERATION
 // HOENN has no newer tables of its own: tools/moemon_gen59/gen_hoenn_modern.py gives rarer wild slots and some team
 // members a generation 4-9 and a newer POKéMON of the same type and stage; each shows from its generation on (wild:
-// the slots of generations not on yet go to those that are)
+// the slots of generations not on yet go to those that are). SINNOH the same with generations 5-9 (sinnoh_modern.h).
 #include "../data/hoenn_modern.h"
+#include "../data/sinnoh_modern.h"
 
-static const struct WildPokemonInfo *HoennModernWild(const struct WildPokemonInfo *info)
+static const struct WildPokemonInfo *ModernWild(const struct WildPokemonInfo *info, const struct HoennModernWild *table,
+                                                u32 count, u8 region)
 {
     static struct WildPokemon sMons[12];
     static struct WildPokemonInfo sInfo;
-    u8 cap = MP_Gen_Cap(REGION_HOENN);
+    u8 cap = MP_Gen_Cap(region);
     u16 allowed[8];
     u32 i, nAllowed = 0, next = 0;
     bool8 any = FALSE;
     // The generations that are on (in order): their own slots, and the slots of those that aren't on taken in turn,
     // so the newer POKéMON are as common at GEN 4 as at GEN 9 (the user's call, 1.62.1)
-    for (i = 0; i < ARRAY_COUNT(sHoennModernWild); i++)
+    for (i = 0; i < count; i++)
     {
-        const struct HoennModernWild *e = &sHoennModernWild[i];
+        const struct HoennModernWild *e = &table[i];
         if (e->info == info && e->gen <= cap && MP_Gen_Allowed(e->species) && nAllowed < ARRAY_COUNT(allowed))
             allowed[nAllowed++] = e->species;
     }
     if (nAllowed == 0)
         return info;
-    for (i = 0; i < ARRAY_COUNT(sHoennModernWild); i++)
+    for (i = 0; i < count; i++)
     {
-        const struct HoennModernWild *e = &sHoennModernWild[i];
+        const struct HoennModernWild *e = &table[i];
         u16 species;
         if (e->info != info)
             continue;
@@ -1183,6 +1188,16 @@ static const struct WildPokemonInfo *HoennModernWild(const struct WildPokemonInf
     sInfo.encounterRate = info->encounterRate;
     sInfo.wildPokemon = sMons;
     return &sInfo;
+}
+
+static const struct WildPokemonInfo *HoennModernWild(const struct WildPokemonInfo *info)
+{
+    return ModernWild(info, sHoennModernWild, ARRAY_COUNT(sHoennModernWild), REGION_HOENN);
+}
+
+static const struct WildPokemonInfo *SinnohModernWild(const struct WildPokemonInfo *info)
+{
+    return ModernWild(info, sSinnohModernWild, ARRAY_COUNT(sSinnohModernWild), REGION_SINNOH);
 }
 
 // The last 4 level-up moves up to LVL the GENERATION allows (as a POKéMON made at that level knows)
@@ -1212,12 +1227,12 @@ static void LevelUpMoves(u16 species, u8 lvl, u16 *moves)
     }
 }
 
-static const struct Trainer *HoennModernTeam(u16 trainerNum)
+static const struct Trainer *HoennModernTeam(u16 trainerNum, const struct HoennModernMon *table, u32 count, u8 region)
 {
     static struct Trainer sCopy;
     static struct TrainerMonItemCustomMoves sCustom[PARTY_SIZE];
     const struct Trainer *t = &gTrainers[trainerNum];
-    u8 cap = MP_Gen_Cap(REGION_HOENN);
+    u8 cap = MP_Gen_Cap(region);
     bool8 any = FALSE, custom = (t->partyFlags & F_TRAINER_PARTY_CUSTOM_MOVESET) != 0;
     u32 i, j;
 
@@ -1246,9 +1261,9 @@ static const struct Trainer *HoennModernTeam(u16 trainerNum)
         }
         if (!custom)
             LevelUpMoves(m->species, m->lvl, m->moves);   // (the copy always names its moves)
-        for (i = 0; i < ARRAY_COUNT(sHoennModernTrainers); i++)
+        for (i = 0; i < count; i++)
         {
-            const struct HoennModernMon *e = &sHoennModernTrainers[i];
+            const struct HoennModernMon *e = &table[i];
             if (e->trainerId == trainerNum && e->slot == j && e->gen <= cap && MP_Gen_Allowed(e->species))
             {
                 m->species = e->species;
@@ -1270,7 +1285,13 @@ const struct Trainer *MP_Region_TrainerData(u16 trainerNum)
     static struct Trainer sCopy;
     u32 i;
     if (trainerNum < MAX_TRAINERS_COUNT && MP_Region_Current() == REGION_HOENN && MP_Gen_Cap(REGION_HOENN) >= 4)
-        return HoennModernTeam(trainerNum);
+        return HoennModernTeam(trainerNum, sHoennModernTrainers, ARRAY_COUNT(sHoennModernTrainers), REGION_HOENN);
+    if (trainerNum >= FIRST_SINNOH_TRAINER && trainerNum < FIRST_SINNOH_TRAINER + SINNOH_TRAINERS_COUNT)
+    {
+        if (MP_Gen_Cap(REGION_SINNOH) >= 5)
+            return HoennModernTeam(trainerNum, sSinnohModernTrainers, ARRAY_COUNT(sSinnohModernTrainers), REGION_SINNOH);
+        return &gTrainers[trainerNum];
+    }
     if (trainerNum >= sQzGen2Parties[0].trainerId && RegionUsesModern())
         return ModernTeam(trainerNum);
     if (trainerNum < sQzGen2Parties[0].trainerId || !RegionUsesGen2())

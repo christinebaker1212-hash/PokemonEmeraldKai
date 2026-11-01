@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""HOENN's wild POKéMON and trainers' teams by GENERATION: src/data/hoenn_modern.h (mp_region.c).
+"""HOENN's and SINNOH's wild POKéMON and trainers' teams by GENERATION: src/data/hoenn_modern.h and
+src/data/sinnoh_modern.h (mp_region.c).
 
     python3 tools/moemon_gen59/gen_hoenn_modern.py
 
@@ -13,6 +14,8 @@ JOHTO and KANTO take Quetzal's own tables as GENERATION rises (wild_qz_modern.h.
   GENERATION and above it is a newer POKéMON chosen the same way (no two alike in a team). Gym Leaders', the Elite
   Four's, the Champion's, the teams' leaders' and the rival's last POKéMON (their ace) stay.
 Deterministic (crc32 of the place), so a table never changes between runs.
+SINNOH (Platinum's tables, tools/sinnoh/gen_wild.py / gen_trainers.py) is Gen 4 already: the same slots take
+generations 5-9 (run this after those), and a slot whose POKéMON is wild nowhere else in SINNOH stays as it is.
 """
 import json
 import os
@@ -21,6 +24,7 @@ import zlib
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 OUT = os.path.join(REPO, 'src', 'data', 'hoenn_modern.h')
+OUT_SINNOH = os.path.join(REPO, 'src', 'data', 'sinnoh_modern.h')
 WILD_SLOTS = {   # field -> {generation: slot}
     'land_mons': {4: 6, 5: 7, 6: 8, 7: 9, 8: 10, 9: 11},
     'water_mons': {4: 2, 5: 3, 6: 4, 7: 2, 8: 3, 9: 4},
@@ -106,6 +110,13 @@ def evolutions():
 
 
 def main():
+    build('HOENN')
+    build('SINNOH')
+
+
+def build(region):
+    sinnoh = region == 'SINNOH'
+    first = 5 if sinnoh else 4          # (the first generation past the region's own)
     ids = species_ids()
     info = species_info(ids)
     parent, children = evolutions()
@@ -157,38 +168,54 @@ def main():
     # ---- wild
     w = json.loads(read('src/data/wild_encounters.json'))
     wild_rows = []
+    tables = []
     for grp in w['wild_encounter_groups']:
         if grp['label'] != 'gWildMonHeaders':
             continue
         for e in grp['encounters']:
             m = e.get('map', '')
-            if not m or m.startswith('MAP_JOHTO') or m.startswith('MAP_KANTO'):
+            if not m or m.startswith(('MAP_JOHTO', 'MAP_KANTO')) or m.startswith('MAP_SINNOH') != sinnoh:
                 continue
+            tables.append(e)
+    left = {}   # SINNOH: how many slots still hold each species
+    for e in tables:
+        for field in WILD_SLOTS:
+            for x in e.get(field, {}).get('mons', []):
+                left[x['species']] = left.get(x['species'], 0) + 1
+    for e in tables:
+        if True:
             for field, slots in WILD_SLOTS.items():
                 if field not in e:
                     continue
                 mons = e[field]['mons']
                 used = {x['species'] for x in mons}
                 label = '%s_%s' % (e['base_label'][1:], FIELD_INFO[field])
+                done = set()
                 for g in sorted(slots):
                     slot = slots[g]
-                    if slot >= len(mons):
+                    if slot >= len(mons) or g < first:
                         continue
                     orig = mons[slot]['species']
-                    if generation(ids.get(orig, 0)) >= 4:
+                    if generation(ids.get(orig, 0)) >= first:
                         continue
+                    if sinnoh and slot not in done and left[orig] <= 1:
+                        continue          # (the only place it's wild)
                     c = pick(orig, g, '%s:%d:%d' % (label, slot, g), used, mons[slot]['min_level'] < 30)
-                    if g == 9 and field == 'land_mons' and e['base_label'] in PARADOX:
+                    if g == 9 and field == 'land_mons' and e['base_label'] in PARADOX and not sinnoh:
                         c = 'SPECIES_' + PARADOX[e['base_label']]
                     if c:
                         used.add(c)
                         wild_rows.append((label, len(mons), slot, g, c))
+                        if slot not in done:
+                            done.add(slot)
+                            left[orig] -= 1
 
     # ---- trainers
-    trainers = read('src/data/trainers.h')
-    parties = read('src/data/trainer_parties.h')
+    trainers = read('src/data/trainers_sinnoh.h' if sinnoh else 'src/data/trainers.h')
+    parties = read('src/data/trainer_parties_sinnoh.h' if sinnoh else 'src/data/trainer_parties.h')
     ids_tr = {m.group(1): int(m.group(2)) for m in
-              re.finditer(r'#define\s+(TRAINER_\w+)\s+(\d+)\s*$', read('include/constants/opponents.h'), re.M)}
+              re.finditer(r'#define\s+(TRAINER_\w+)\s+(\d+)\s*$',
+                          read('include/constants/trainers_sinnoh.h' if sinnoh else 'include/constants/opponents.h'), re.M)}
     party_species = {m.group(1): re.findall(r'\.species\s*=\s*(SPECIES_\w+)', m.group(2)) for m in
                      re.finditer(r'static const struct \w+ (sParty_\w+)\[\]\s*=\s*\{(.*?)\n\};', parties, re.S)}
     tr_rows = []
@@ -207,34 +234,40 @@ def main():
         for j, orig in enumerate(team):
             if boss and j == len(team) - 1:
                 continue
-            if generation(ids.get(orig, 0)) >= 4:
+            if generation(ids.get(orig, 0)) >= first:
                 continue
             h = zlib.crc32(('%d:%d' % (tid, j)).encode())
             if h % 100 >= 55:
                 continue
-            g = 4 + (h // 100) % 6
+            g = first + (h // 100) % (10 - first)
             c = pick(orig, g, 'T%d:%d:%d' % (tid, j, g), used)
             if c:
                 used.add(c)
                 tr_rows.append((tid, m.group(1), j, g, c))
 
     out = ['// Generated by tools/moemon_gen59/gen_hoenn_modern.py. Do not edit.',
-           '// HOENN by GENERATION: a slot / team member takes its newer POKéMON from its generation on (mp_region.c).', '']
+           '// %s by GENERATION: a slot / team member takes its newer POKéMON from its generation on (mp_region.c).'
+           % region, '']
     for lbl in sorted({r[0] for r in wild_rows}):
         out.append('extern const struct WildPokemonInfo g%s;' % lbl)
-    out += ['', 'struct HoennModernWild { const struct WildPokemonInfo *info; u8 count, slot, gen; u16 species; };',
-            'static const struct HoennModernWild sHoennModernWild[] =', '{']
+    name = 'Sinnoh' if sinnoh else 'Hoenn'
+    out += ['']
+    if not sinnoh:
+        out.append('struct HoennModernWild { const struct WildPokemonInfo *info; u8 count, slot, gen; u16 species; };')
+    out += ['static const struct HoennModernWild s%sModernWild[] =' % name, '{']
     for lbl, n, slot, g, c in wild_rows:
         out.append('    {&g%s, %d, %d, %d, %s},' % (lbl, n, slot, g, c))
-    out += ['};', '', 'struct HoennModernMon { u16 trainerId; u8 slot, gen; u16 species; };',
-            'static const struct HoennModernMon sHoennModernTrainers[] =', '{']
-    for tid, name, j, g, c in sorted(tr_rows):
-        out.append('    {%s, %d, %d, %s},' % (name, j, g, c))
     out += ['};', '']
-    open(OUT, 'w', encoding='utf-8').write('\n'.join(out))
+    if not sinnoh:
+        out.append('struct HoennModernMon { u16 trainerId; u8 slot, gen; u16 species; };')
+    out += ['static const struct HoennModernMon s%sModernTrainers[] =' % name, '{']
+    for tid, tname, j, g, c in sorted(tr_rows):
+        out.append('    {%s, %d, %d, %s},' % (tname, j, g, c))
+    out += ['};', '']
+    open(OUT_SINNOH if sinnoh else OUT, 'w', encoding='utf-8').write('\n'.join(out))
     from collections import Counter
-    print('hoenn modern: %d wild slots, %d trainer POKéMON; by generation wild %s trainers %s' % (
-        len(wild_rows), len(tr_rows), dict(sorted(Counter(r[3] for r in wild_rows).items())),
+    print('%s modern: %d wild slots, %d trainer POKéMON; by generation wild %s trainers %s' % (
+        region.lower(), len(wild_rows), len(tr_rows), dict(sorted(Counter(r[3] for r in wild_rows).items())),
         dict(sorted(Counter(r[3] for r in tr_rows).items()))))
 
 
