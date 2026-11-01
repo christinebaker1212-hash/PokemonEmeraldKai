@@ -1,0 +1,110 @@
+pressuntil A field 5000
+wait 30
+mp battlestyle 1
+mp moves 0 58
+mp moves 1 58
+mp moves 2 58
+mp moves 3 58
+mp moves 4 58
+mp moves 5 58
+mp warp 42,105,8,12
+wait 200
+mp face up
+press A 4
+wait 90
+shot notyet
+pressuntil B field 2000
+mp setflag 0x391B
+mp setflag 0x391C
+mp setflag 0x391D
+mp setflag 0x391E
+press A 4
+pressuntil A action 4000
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+wait 600
+mp regioninfo
+shot hof
+mash A 100 20
+wait 300
+mp regioninfo
+shot after
+quit

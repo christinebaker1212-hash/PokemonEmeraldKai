@@ -8,10 +8,17 @@ WORDS[map][key]: key Person<n> / Sign<n> / Bg<n> (the numbers who.py prints), va
   - ('nurse',): the POKéMON CENTER's nurse heals the party.
   - ('mart',): a clerk sells what the region's badges allow (pokemart 0, as JOHTO's and KANTO's clerks).
   - ('gym', n): the n-th gym leader (GYMS[n]): battles, gives the badge (flag 0x3320 + n) and a TM (flag 0x3770 + n).
+  - ('e4', n): the n-th of the ELITE FOUR (ELITE[n]); ('champion',): the CHAMPION (CHAMPION), once all four are
+    beaten; winning makes SINNOH cleared and plays the HALL OF FAME and the credits.
 MOéMON's words like HOENN's (MOéMON, MOéDEX, POKé BALL kept): OPTIONS > CREATURES swaps them back.
 """
 
 WORDS = {
+    'Sinnoh_PokemonLeagueChampionRoom': {'Person1': ('champion',)},
+    'Sinnoh_PokemonLeagueLucianRoom': {'Person1': ('e4', 3)},
+    'Sinnoh_PokemonLeagueFlintRoom': {'Person1': ('e4', 2)},
+    'Sinnoh_PokemonLeagueBerthaRoom': {'Person1': ('e4', 1)},
+    'Sinnoh_PokemonLeagueAaronRoom': {'Person1': ('e4', 0)},
     'Sinnoh_SunyshoreCityGymRoom3': {'Person1': ('gym', 7)},
     'Sinnoh_SnowpointCityGym': {'Person1': ('gym', 6)},
     'Sinnoh_CanalaveCityGym': {'Person5': ('gym', 5)},
@@ -215,3 +222,35 @@ GYMS = [
      "Take CHARGE BEAM too. It may raise your SP. ATK as it hits.",
      "Thanks. I remember why I liked battling. The MOéMON LEAGUE is past VICTORY ROAD. Go show them that spark."),
 ]
+
+
+# The ELITE FOUR, in the order their rooms come: (trainer, intro, defeat, after)
+ELITE = [
+    ('TRAINER_SINNOH_ELITE_FOUR_AARON',
+     "I'm AARON of the ELITE FOUR. BUG MOéMON are small, and people think that makes them weak.|"
+     "They're wrong. Let me show you how wrong!",
+     "My bugs fought beautifully...",
+     "Go on to the next room. BERTHA is waiting. She's tougher than she looks."),
+    ('TRAINER_SINNOH_ELITE_FOUR_BERTHA',
+     "Well, well. Another young one made it past AARON. I'm BERTHA.|"
+     "My GROUND MOéMON have been with me a long, long time. Let's see if you can move a mountain!",
+     "Oh my. The mountain moved.",
+     "You remind me of myself, long ago. Go on, dear. FLINT will keep you warm."),
+    ('TRAINER_SINNOH_ELITE_FOUR_FLINT',
+     "I'm FLINT! My FIRE MOéMON burn hot, and so do I!|Are you ready to get scorched?",
+     "Burned out...",
+     "That was hot! LUCIAN's next. He reads a lot. Don't let him bore you before the battle starts!"),
+    ('TRAINER_SINNOH_ELITE_FOUR_LUCIAN',
+     "I am LUCIAN. I was reading, but a battle with you will be a better story.|"
+     "Let's see how this chapter ends.",
+     "An unexpected ending.",
+     "The CHAMPION is beyond this room. She is the strongest TRAINER I know. Go and write your own ending."),
+]
+
+# The CHAMPION: (trainer, intro, defeat, the words after the win, before the HALL OF FAME)
+CHAMPION = ('TRAINER_SINNOH_CHAMPION_CYNTHIA',
+            "Welcome. I'm CYNTHIA, the CHAMPION of SINNOH.|You beat all four of the ELITE FOUR. I can tell your "
+            "MOéMON trust you completely.|I won't hold anything back. Neither should you!",
+            "Brilliant... truly brilliant.",
+            "You are SINNOH's new CHAMPION. Your MOéMON fought with everything they had, and so did you.|"
+            "Come. The HALL OF FAME is waiting for your team.")

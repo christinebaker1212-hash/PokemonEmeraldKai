@@ -38,7 +38,7 @@ def grid(src, p):
 
 
 def free(a):
-    return a is not None and (not (a & 0x8000) or (a & 0xFF) in (0x4B, 0x4C))   # (ROCK CLIMB walls: walkable)
+    return a is not None and (not (a & 0x8000) or (a & 0xFF) in (0x4B, 0x4C, 0x13))   # (ROCK CLIMB walls, waterfalls)
 
 
 def check(src, p):

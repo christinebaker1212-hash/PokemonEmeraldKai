@@ -1,0 +1,8 @@
+# SINNOH's CHAMPION (tools/sinnoh/words.py CHAMPION, gen_words.py champion()): she waits until the ELITE FOUR are
+# beaten (their trainer flags 0x391B-0x391E), then battles; the win makes SINNOH cleared (region 3, bit 8) and starts
+# the HALL OF FAME. Needs the 3D pack.
+MODE=1
+TMO=600
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=150:100,150:100,150:100,150:100,150:100,150:100"
+EXPECT_A=("cleared 8")
+UNEXPECT_A=("[crash]" "TIMEOUT")

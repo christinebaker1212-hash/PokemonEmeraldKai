@@ -14,7 +14,7 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from words import WORDS, GYMS  # noqa: E402
+from words import WORDS, GYMS, ELITE, CHAMPION  # noqa: E402
 
 BADGE_FLAGS = 0x3320       # FLAG_SINNOH_BADGE01 (include/mp_region.h)
 GYM_TM_FLAGS = 0x3770      # a leader's TM given (ids.py's flags stay below)
@@ -89,6 +89,10 @@ def script(name, key, value, widths):
                 '\tmsgbox gText_PleaseComeAgain, MSGBOX_DEFAULT\n\trelease\n\tend\n\n' % label, '')
     if isinstance(value, tuple) and value[0] == 'gym':
         return gym(name, key, value[1], widths)
+    if isinstance(value, tuple) and value[0] == 'e4':
+        return elite(name, key, value[1], widths)
+    if isinstance(value, tuple) and value[0] == 'champion':
+        return champion(name, key, widths)
     text = '%s_Text_%s' % (name, key)
     kind = 'MSGBOX_NPC' if key.startswith('Person') else 'MSGBOX_SIGN'
     return ('%s::\n\tmsgbox %s, %s\n\tend\n\n' % (label, text, kind),
@@ -114,6 +118,48 @@ def gym(name, key, n, widths):
     for suffix, words in (('Intro', intro), ('Defeat', defeat), ('BadgeInfo', info), ('Tm', tmwords),
                           ('After', after), ('Badge', '{PLAYER} received the %s from %s.' % (badge, leader))):
         texts += '%s%s:\n%s\n' % (t, suffix, wrap(words, widths, '%s %s' % (name, key)))
+    return code, texts
+
+
+def trainer_flag(trainer):
+    """A SINNOH trainer's "beaten" flag (TRAINER_FLAG in include/constants/flags.h)"""
+    text = open('include/constants/trainers_sinnoh.h').read()
+    first = int(re.search(r'#define FIRST_SINNOH_TRAINER (\d+)', text).group(1))
+    tid = int(re.search(r'#define %s +(\d+)' % trainer, text).group(1))
+    return 0x3780 + tid - first
+
+
+def elite(name, key, n, widths):
+    trainer, intro, defeat, after = ELITE[n]
+    label, t = '%s_EventScript_%s' % (name, key), '%s_Text_%s' % (name, key)
+    code = ('%s::\n\ttrainerbattle_single %s, %sIntro, %sDefeat, %s_Defeated, NO_MUSIC\n'
+            '\tmsgbox %sAfter, MSGBOX_NPC\n\tend\n\n%s_Defeated::\n\tmsgbox %sAfter, MSGBOX_DEFAULT\n\trelease\n\tend\n\n'
+            % (label, trainer, t, t, label, t, label, t))
+    texts = ''.join('%s%s:\n%s\n' % (t, sfx, wrap(w, widths, name)) for sfx, w in
+                    (('Intro', intro), ('Defeat', defeat), ('After', after)))
+    return code, texts
+
+
+def champion(name, key, widths):
+    """The CHAMPION: after all four, the battle; the win makes SINNOH cleared (Quetzal_EventScript_835F6E4: the
+    region's record, then a save) and plays the HALL OF FAME (special GameClear), back at the LEAGUE's CENTER after"""
+    trainer, intro, defeat, after = CHAMPION
+    label, t = '%s_EventScript_%s' % (name, key), '%s_Text_%s' % (name, key)
+    checks = ''.join('\tgoto_if_unset 0x%X, %s_NotYet\n' % (trainer_flag(e[0]), label) for e in ELITE)
+    north = open('data/maps/Sinnoh_PokemonLeagueNorthPokecenter1f/scripts.inc').read()
+    heal = re.search(r'setrespawn (\w+)', north).group(1)     # (the LEAGUE's own CENTER: tools/sinnoh/gen_heal.py)
+    code = ('%s::\n%s\ttrainerbattle_single %s, %sIntro, %sDefeat, %s_Defeated, NO_MUSIC\n'
+            '\tmsgbox %sAgain, MSGBOX_NPC\n\tend\n\n'
+            '%s_NotYet::\n\tmsgbox %sNotYet, MSGBOX_NPC\n\tend\n\n'
+            '%s_Defeated::\n\tmsgbox %sAfter, MSGBOX_DEFAULT\n\tcloseMessage\n'
+            '\tcall Quetzal_EventScript_835F6E4\n\tsetrespawn %s\n'
+            '\tfadescreenspeed 1, 24\n\tspecial GameClear\n\twaitstate\n\treleaseall\n\tend\n\n'
+            % (label, checks, trainer, t, t, label, t, label, t, label, t, heal)).replace('closeMessage', 'closemessage')
+    texts = ''.join('%s%s:\n%s\n' % (t, sfx, wrap(w, widths, name)) for sfx, w in
+                    (('Intro', intro), ('Defeat', defeat), ('After', after),
+                     ('NotYet', "Welcome to the CHAMPION's room. Come back once you've beaten all four of the "
+                                "ELITE FOUR. I'll be waiting."),
+                     ('Again', "That battle was one of my best. Come back and challenge me any time.")))
     return code, texts
 
 

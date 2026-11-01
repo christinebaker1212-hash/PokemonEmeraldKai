@@ -1458,6 +1458,22 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] battlerhp: battler %d = %d\n", b, v);
         }
     }
+    else if (strcmp(cmd, "foehp") == 0)
+    {
+        // foehp HP - every foe's HP in the running battle (its party and the ones out), for tests of long battles
+        int v = atoi(arg), i;
+        u16 hp = v;
+        if (gMain.inBattle)
+        {
+            for (i = 0; i < PARTY_SIZE; i++)
+                if (GetMonData(&gEnemyParty[i], MON_DATA_SPECIES) && GetMonData(&gEnemyParty[i], MON_DATA_HP))
+                    SetMonData(&gEnemyParty[i], MON_DATA_HP, &hp);
+            for (i = 0; i < gBattlersCount; i++)
+                if (GetBattlerSide(i) == B_SIDE_OPPONENT && gBattleMons[i].hp)
+                    gBattleMons[i].hp = hp;
+            printf("[test] foehp: %d\n", v);
+        }
+    }
     else if (strcmp(cmd, "hp") == 0)
     {
         // mp hp SLOT VALUE (0: it fainted now, for REVIVE's cursor); mp partyhp: every slot's HP and status

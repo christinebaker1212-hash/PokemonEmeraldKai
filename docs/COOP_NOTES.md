@@ -3344,6 +3344,12 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   0x3320 + n) and its TM (flag 0x3770 + n: ROARK TM76, GARDENIA TM86, FANTINA TM65, MAYLENE TM60, WAKE TM55,
   BYRON TM91, CANDICE TM72, VOLKNER TM57). Their words are written for this game; badges promise nothing about
   HMs (this game has no HM restrictions). Test sinnoh_gym (MOEMON_DEBUG_REGION=3: levels are per region).
+- The LEAGUE (words.py ELITE / CHAMPION, the ('e4', n) and ('champion',) kinds): its rooms connect through their own
+  elevator rooms (those have doors). Each of the ELITE FOUR battles when talked to; the CHAMPION waits until all four
+  are beaten (their trainer flags), then battles; the win runs Quetzal_EventScript_835F6E4 (the region cleared, a
+  save), sets the respawn to the LEAGUE's CENTER and plays the HALL OF FAME and credits (special GameClear), as
+  JOHTO's and KANTO's do. `mp foehp HP` sets every foe's HP in a battle (tests; a foe's healing items undo it).
+  Test sinnoh_champion.
 - Flags (moved 2026-11-01: JOHTO's / KANTO's trainers' "beaten" flags are 0x3000-0x331C): SINNOH's badges
   0x3320-0x3327, ids.py's flags 0x3328-0x376F, gym TMs given 0x3770-0x3777, trainers 0x3780-0x3DFF, hidden items 0x3E00-0x3FFE, FLAG_SINNOH_HIDDEN
   0x3FFF.
