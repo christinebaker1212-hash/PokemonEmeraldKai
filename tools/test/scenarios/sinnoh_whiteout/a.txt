@@ -1,0 +1,13 @@
+pressuntil A field 5000
+wait 30
+mp warp 42,24,8,9
+wait 200
+mp warp 40,20,6,16
+wait 200
+press UP 6
+pressuntil A action 3000
+mash A 80 10
+pressuntil A field 5000
+wait 120
+mp where
+quit

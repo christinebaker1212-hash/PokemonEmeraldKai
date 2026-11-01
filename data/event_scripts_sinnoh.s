@@ -4,9 +4,11 @@
 #include "constants/event_objects.h"
 #include "constants/flags.h"
 #include "constants/items.h"
+#include "constants/heal_locations.h"
 #include "constants/trainers.h"
 #include "constants/battle_setup.h"
 #include "constants/vars.h"
+#include "constants/map_scripts.h"
 	.include "asm/macros.inc"
 	.include "constants/constants.inc"
 

@@ -4,7 +4,10 @@ there, wrapped to the message box by the game's own letter widths (src/fonts.c, 
 markers in data/maps/<map>/scripts.inc is this script's; anything else in the file (the map's own scripts, a story
 scene) stays. Then run gen_maps.py so each person / sign gets its script.
 
-    python3 -I tools/sinnoh/gen_words.py        (run from the repository; safe to run again)
+    python3 -I tools/sinnoh/gen_words.py [POKEPLATINUM_DIR]     (run from the repository; safe to run again)
+
+Given Platinum's events (POKEPLATINUM_DIR), every MOéMON CENTER nurse heals and every MART clerk sells, on any map
+words.py doesn't already give them words (roles()).
 """
 import os
 import re
@@ -87,10 +90,31 @@ def script(name, key, value, widths):
             '%s:\n%s\n' % (text, wrap(value, widths, '%s %s' % (name, key))))
 
 
+def roles(root):
+    """{map: {Person<n>: role}} for the people every map of their kind has: nurses and MART clerks"""
+    from source import open_source
+    from gen_maps import places
+    from places import events
+    out = {}
+    for p in places(open_source(root), root):
+        for i, o in enumerate(events(root, p['place'])['object_events']):
+            gfx = o['graphics_id']
+            if gfx.endswith('POKECENTER_NURSE'):
+                out.setdefault(p['name'], {})['Person%d' % (i + 1)] = ('nurse',)
+            elif gfx.endswith(('CASHIER_F', 'CASHIER_M')) and p['name'].endswith('Mart'):
+                out.setdefault(p['name'], {})['Person%d' % (i + 1)] = ('mart',)
+    return out
+
+
 def main():
     widths = letter_widths()
     done = 0
-    for name, entries in WORDS.items():
+    words = {k: dict(v) for k, v in WORDS.items()}
+    if len(sys.argv) > 1:
+        for name, found in roles(sys.argv[1]).items():
+            for key, role in found.items():
+                words.setdefault(name, {}).setdefault(key, role)
+    for name, entries in words.items():
         path = 'data/maps/%s/scripts.inc' % name
         if not os.path.exists(path):
             sys.exit('%s: no such map' % name)
@@ -105,7 +129,7 @@ def main():
         new = old.rstrip('\n') + '\n\n' + BEGIN + scripts + texts + END
         open(path, 'w', encoding='utf-8').write(new)
         done += len(entries)
-    print('%d maps, %d people and signs with words' % (len(WORDS), done))
+    print('%d maps, %d people and signs with words' % (len(words), done))
 
 
 if __name__ == '__main__':

@@ -341,6 +341,114 @@
       "map": "MAP_KANTO_VIRIDIAN_CITY",
       "x": 26,
       "y": 27
+    },
+    {
+      "id": "HEAL_LOCATION_SINNOH_CANALAVE_CITY",
+      "map": "MAP_SINNOH_CANALAVE_CITY",
+      "x": 26,
+      "y": 19
+    },
+    {
+      "id": "HEAL_LOCATION_SINNOH_CELESTIC_TOWN",
+      "map": "MAP_SINNOH_CELESTIC_TOWN",
+      "x": 24,
+      "y": 27
+    },
+    {
+      "id": "HEAL_LOCATION_SINNOH_ETERNA_CITY",
+      "map": "MAP_SINNOH_ETERNA_CITY",
+      "x": 17,
+      "y": 19
+    },
+    {
+      "id": "HEAL_LOCATION_SINNOH_FIGHT_AREA",
+      "map": "MAP_SINNOH_FIGHT_AREA",
+      "x": 39,
+      "y": 14
+    },
+    {
+      "id": "HEAL_LOCATION_SINNOH_FLOAROMA_TOWN",
+      "map": "MAP_SINNOH_FLOAROMA_TOWN",
+      "x": 16,
+      "y": 59
+    },
+    {
+      "id": "HEAL_LOCATION_SINNOH_HEARTHOME_CITY",
+      "map": "MAP_SINNOH_HEARTHOME_CITY",
+      "x": 17,
+      "y": 26
+    },
+    {
+      "id": "HEAL_LOCATION_SINNOH_JUBILIFE_CITY",
+      "map": "MAP_SINNOH_JUBILIFE_CITY",
+      "x": 52,
+      "y": 41
+    },
+    {
+      "id": "HEAL_LOCATION_SINNOH_OREBURGH_CITY",
+      "map": "MAP_SINNOH_OREBURGH_CITY",
+      "x": 47,
+      "y": 21
+    },
+    {
+      "id": "HEAL_LOCATION_SINNOH_PASTORIA_CITY",
+      "map": "MAP_SINNOH_PASTORIA_CITY",
+      "x": 24,
+      "y": 16
+    },
+    {
+      "id": "HEAL_LOCATION_SINNOH_POKEMON_LEAGUE",
+      "map": "MAP_SINNOH_POKEMON_LEAGUE",
+      "x": 15,
+      "y": 16
+    },
+    {
+      "id": "HEAL_LOCATION_SINNOH_POKEMON_LEAGUE_2",
+      "map": "MAP_SINNOH_POKEMON_LEAGUE",
+      "x": 10,
+      "y": 55
+    },
+    {
+      "id": "HEAL_LOCATION_SINNOH_RESORT_AREA",
+      "map": "MAP_SINNOH_RESORT_AREA",
+      "x": 2,
+      "y": 25
+    },
+    {
+      "id": "HEAL_LOCATION_SINNOH_SANDGEM_TOWN",
+      "map": "MAP_SINNOH_SANDGEM_TOWN",
+      "x": 17,
+      "y": 11
+    },
+    {
+      "id": "HEAL_LOCATION_SINNOH_SNOWPOINT_CITY",
+      "map": "MAP_SINNOH_SNOWPOINT_CITY",
+      "x": 27,
+      "y": 42
+    },
+    {
+      "id": "HEAL_LOCATION_SINNOH_SOLACEON_TOWN",
+      "map": "MAP_SINNOH_SOLACEON_TOWN",
+      "x": 22,
+      "y": 17
+    },
+    {
+      "id": "HEAL_LOCATION_SINNOH_SUNYSHORE_CITY",
+      "map": "MAP_SINNOH_SUNYSHORE_CITY",
+      "x": 28,
+      "y": 49
+    },
+    {
+      "id": "HEAL_LOCATION_SINNOH_SURVIVAL_AREA",
+      "map": "MAP_SINNOH_SURVIVAL_AREA",
+      "x": 19,
+      "y": 19
+    },
+    {
+      "id": "HEAL_LOCATION_SINNOH_VEILSTONE_CITY",
+      "map": "MAP_SINNOH_VEILSTONE_CITY",
+      "x": 45,
+      "y": 36
     }
   ]
 }

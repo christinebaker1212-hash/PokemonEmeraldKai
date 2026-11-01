@@ -3334,6 +3334,10 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   Sinnoh_EventScript_Tr<Name> in data/scripts/sinnoh_trainers.inc (trainerbattle_single / _double), its object the
   trainer type and Platinum's sight range. Trainers the story shows (a hide flag) stay hidden until their scenes are
   written (31). IS_REAL_TRAINER and Tcg_IsTrainerId know the range. Test sinnoh_trainer.
+- MOéMON CENTERs and MARTs everywhere: gen_words.py POKEPLATINUM_DIR gives every nurse ('nurse',) and every MART's
+  clerk ('mart',) on maps words.py doesn't cover (roles()). tools/sinnoh/gen_heal.py (after gen_maps.py): a heal
+  location a CENTER (18), in front of its door in the town, appended to src/data/heal_locations.json after JOHTO's /
+  KANTO's, and each CENTER 1F's OnTransition sets it (setrespawn). Test sinnoh_whiteout.
 - Flags (moved 2026-11-01: JOHTO's / KANTO's trainers' "beaten" flags are 0x3000-0x331C): SINNOH's badges
   0x3320-0x3327, ids.py's flags 0x3328-0x377F, trainers 0x3780-0x3DFF, hidden items 0x3E00-0x3FFE, FLAG_SINNOH_HIDDEN
   0x3FFF.

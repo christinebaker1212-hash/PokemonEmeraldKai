@@ -1,0 +1,8 @@
+# SINNOH's MOéMON CENTERs set where a whiteout brings the player (tools/sinnoh/gen_heal.py): after stepping into
+# JUBILIFE CITY's CENTER, losing to ROUTE 202's YOUNGSTER TRISTAN brings the player back in front of that CENTER.
+# Needs the 3D pack (tools/sinnoh/make_pack.sh).
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=283:1"
+EXPECT_A=("[test] where map 40.14 xy 52,41")
+UNEXPECT_A=("[crash]" "TIMEOUT")
