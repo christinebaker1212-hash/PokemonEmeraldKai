@@ -7,7 +7,8 @@ JOHTO and KANTO take Quetzal's own tables as GENERATION rises (wild_qz_modern.h.
 - Wild: each table gives one of its rarer slots to each generation 4-9 (land 5% 5% 4% 4% 1% 1%; water and ROCK SMASH
   5% 4% 1% twice over; fishing one slot per rod and two more), the common slots stay. The slot's newer POKéMON shares
   a type with the one it stands in for (its first type first) and is at the same evolution stage; never a legendary,
-  mythical, ULTRA BEAST or paradox POKéMON, and no species twice in a table. The paradox POKéMON have their own
+  mythical, ULTRA BEAST, paradox or starter POKéMON (starters are fine on trainers' teams), and no species twice
+  in a table. The paradox POKéMON have their own
   places at GENERATION 9 (PARADOX: one each, the 1% land slot).
 - Trainers: a team member has an even chance of a generation 4-9 of its own (about half of them in all): at that
   GENERATION and above it is a newer POKéMON chosen the same way (no two alike in a team). Gym Leaders', the Elite
@@ -124,6 +125,9 @@ def main():
         no_eggs = 'EGG_GROUP_NO_EGGS_DISCOVERED' in i['eggs']
         return no_eggs and s not in parent and s not in children or i['catch'] <= 3
 
+    # first partners are never wild (mp_region.c sStarterLines): no wild slot takes one (trainers may have them)
+    starters = set(re.findall(r'(SPECIES_\w+)', re.search(r'sStarterLines\[\] = \{(.*?)\};',
+                                                        read('src/mp/mp_region.c'), re.S).group(1)))
     pool = {}   # generation -> species fit for the wild / trainers
     for s, sid in ids.items():
         g = generation(sid)
@@ -132,14 +136,14 @@ def main():
     for g in pool:
         pool[g].sort(key=lambda s: ids[s])
 
-    def pick(orig, g, salt, avoid, low=False):
+    def pick(orig, g, salt, avoid, low=False, wild=False):
         if orig not in info:
             return None
         ot = info[orig]['types']
         st, final = stage(orig), orig not in children
         best, best_score = [], 0
         for c in pool.get(g, []):
-            if c in avoid or (low and c[len('SPECIES_'):] in PSEUDO):
+            if c in avoid or (wild and c in starters) or (low and c[len('SPECIES_'):] in PSEUDO):
                 continue
             ct = info[c]['types']
             score = 4 if ct[0] == ot[0] else 3 if ot[0] in ct else 2 if ot[1] in ct else 0
@@ -177,7 +181,7 @@ def main():
                     orig = mons[slot]['species']
                     if generation(ids.get(orig, 0)) >= 4:
                         continue
-                    c = pick(orig, g, '%s:%d:%d' % (label, slot, g), used, mons[slot]['min_level'] < 30)
+                    c = pick(orig, g, '%s:%d:%d' % (label, slot, g), used, mons[slot]['min_level'] < 30, wild=True)
                     if g == 9 and field == 'land_mons' and e['base_label'] in PARADOX:
                         c = 'SPECIES_' + PARADOX[e['base_label']]
                     if c:
