@@ -623,6 +623,21 @@ static u16 keys;
 void Platform_TextInputEvent(const char *utf8);
 int Platform_TextInputKeyDown(int sym, int mod);
 
+static int sMouseX, sMouseY, sMouseDown, sMouseMoved;
+
+// Moemon Kai: the mouse in the game picture's pixels for the POKéTCH (FALSE: it hasn't moved or clicked since)
+bool8 Platform_PoketchMouse(s32 *x, s32 *y, bool8 *down)
+{
+    int Display_WindowToGame(int wx, int wy, int *gx, int *gy);
+    int gx, gy, moved = sMouseMoved;
+    sMouseMoved = 0;
+    *down = FALSE;
+    if (!Display_WindowToGame(sMouseX, sMouseY, &gx, &gy))
+        return FALSE;
+    *x = gx, *y = gy, *down = sMouseDown != 0;
+    return moved;
+}
+
 void ProcessEvents(void)
 {
     SDL_Event event;
@@ -662,6 +677,14 @@ void ProcessEvents(void)
             break;
         case SDL_TEXTINPUT:
             Platform_TextInputEvent(event.text.text);
+            break;
+        case SDL_MOUSEMOTION:   // Moemon Kai: the mouse touches the POKéTCH (src/sinnoh/poketch.c)
+            sMouseX = event.motion.x, sMouseY = event.motion.y, sMouseMoved = 1;
+            break;
+        case SDL_MOUSEBUTTONDOWN:
+        case SDL_MOUSEBUTTONUP:
+            if (event.button.button == SDL_BUTTON_LEFT)
+                sMouseX = event.button.x, sMouseY = event.button.y, sMouseDown = event.type == SDL_MOUSEBUTTONDOWN, sMouseMoved = 1;
             break;
         case SDL_DROPFILE:
             // Moemon Co-op: drop a sprite sheet onto the window to wear it
@@ -839,6 +862,10 @@ void VDraw(void)
     MP_LegacyAnim_Composite(image); // ... GENESIS / EPOCH BALL throws (Red's / Crystal's own)
     MP_Compass_Composite(image);    // ... arrows toward friends off screen
     MP_BallFx_Composite(image);          // ... ball effects (not bound by the GBA's sprites or palettes)
+    {
+        void MP_Poketch_Composite(u16 *frame);
+        MP_Poketch_Composite(image);     // Moemon Kai: the POKéTCH while it's open (src/sinnoh/poketch.c)
+    }
     MP_BattleOverlay_Composite(image);   // ... and the battle emotes over everything
     MP_Spectate_PanelSync();             // ... friends' screens in the panel under ours (CO-OP > SPECTATE)
     if (!sTestMode)

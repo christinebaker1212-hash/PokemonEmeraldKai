@@ -4859,4 +4859,16 @@ const struct Item gItems[] =
 #include "items_qz.h"   // Moemon Kai: Johto / Kanto items
 #include "items_gen59.h"   // Moemon Kai: Gen 5-9 items
 #include "items_tm2.h"   // Moemon Kai: TM51-TM92
+    [ITEM_POKETCH] =
+    {
+        .name = _("POKéTCH"),
+        .itemId = ITEM_POKETCH,
+        .price = 0,
+        .description = sPoketchDesc,
+        .importance = 1,
+        .registrability = TRUE,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_FIELD,
+        .fieldUseFunc = ItemUseOutOfBattle_Poketch,
+    },
 };

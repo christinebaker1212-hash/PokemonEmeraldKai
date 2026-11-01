@@ -694,6 +694,24 @@ static void Task_OpenRegisteredCandyJar(u8 taskId)
     }
 }
 
+// Moemon Kai: the POKéTCH (src/sinnoh/poketch.c) opens over the field: from the bag once back there, or at once
+void ItemUseOutOfBattle_Poketch(u8 taskId)
+{
+    void MP_Poketch_Open(void);
+    MP_Poketch_Open();
+    if (gTasks[taskId].tUsingRegisteredKeyItem != TRUE)
+    {
+        gBagMenu->newScreenCallback = CB2_ReturnToField;
+        Task_FadeAndCloseBagMenu(taskId);
+    }
+    else
+    {
+        ScriptUnfreezeObjectEvents();
+        UnlockPlayerFieldControls();
+        DestroyTask(taskId);
+    }
+}
+
 void ItemUseOutOfBattle_CandyJar(u8 taskId)
 {
     if (gTasks[taskId].tUsingRegisteredKeyItem != TRUE)

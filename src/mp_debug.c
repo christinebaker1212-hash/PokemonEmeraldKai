@@ -2004,6 +2004,20 @@ void MP_TestCommand(const char *cmd, const char *arg)
                    gSaveBlock2Ptr->localTimeOffset.hours, gSaveBlock2Ptr->localTimeOffset.minutes);
         }
     }
+    else if (strcmp(cmd, "poketch") == 0)
+    {
+        // poketch APP - the POKéTCH open on app APP (src/sinnoh/poketch.c)
+        void MP_Poketch_Debug(u8 app);
+        MP_Poketch_Debug(atoi(arg));
+    }
+    else if (strcmp(cmd, "poketchtap") == 0)
+    {
+        // poketchtap X,Y - a touch on the open POKéTCH at its LCD's X, Y
+        void MP_Poketch_DebugTap(s16 x, s16 y);
+        int x = 0, y = 0;
+        sscanf(arg, "%d,%d", &x, &y);
+        MP_Poketch_DebugTap(x, y);
+    }
     else if (strcmp(cmd, "marshdaily") == 0)
     {
         // marshdaily - the GREAT MARSH's daily Pokemon today, areas 1-6 (src/sinnoh/s3d_legends.c)

@@ -1,0 +1,40 @@
+pressuntil A field 5000
+wait 30
+mp warp 43,4,18,6
+wait 60
+waitfor field 1000
+mp face up
+press A 1
+wait 60
+pressuntil A field 3000
+wait 30
+shot g_after
+mp poketch 1
+wait 10
+mp poketchtap 30,46
+wait 10
+mp poketchtap 126,78
+wait 10
+mp poketchtap 30,110
+wait 10
+mp poketchtap 140,142
+wait 10
+shot g_calc
+mp poketch 3
+wait 10
+mp warp 40,54,17,12
+wait 60
+waitfor field 1000
+mp poketch 3
+wait 5
+mp where
+press B 1
+wait 20
+mp face down
+press DOWN 40
+wait 40
+mp where
+mp poketch 3
+wait 10
+shot g_steps
+quit

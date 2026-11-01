@@ -325,6 +325,10 @@ static void ReadKeys(void)
 
     // Moemon Co-op: the battle emote pick takes the buttons while it's open
     MP_BattleChat_FilterKeys();
+    {
+        void MP_Poketch_FilterKeys(void);
+        MP_Poketch_FilterKeys();   // Moemon Kai: the POKéTCH takes the buttons while it's open (src/sinnoh/poketch.c)
+    }
 
     if (JOY_NEW(gMain.watchedKeysMask))
         gMain.watchedKeysPressed = TRUE;

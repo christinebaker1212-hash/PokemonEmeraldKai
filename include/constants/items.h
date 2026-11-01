@@ -759,8 +759,9 @@
 #define ITEM_TM90 657
 #define ITEM_TM91 658
 #define ITEM_TM92 659
+#define ITEM_POKETCH 660   // Moemon Kai: SINNOH's watch of apps (src/sinnoh/poketch.c)
 
-#define ITEMS_COUNT 660
+#define ITEMS_COUNT 661
 // end of Gen 5-9 items
 
 // A special item id associated with "Cancel"/"Exit" etc. in a list of items or decorations

@@ -31,6 +31,8 @@ static struct
     struct SinnohPic pics[SINNOH_PIC_COUNT];
     const u16 *town[2];    // the TOWN MAP's pages (tools/sinnoh/gen_townmap.py picture), RGB555
     u16 townW, townH;
+    const u8 *poketch;     // the POKéTCH's art (tools/sinnoh/build_poketch.py: "PKCH")
+    const u8 *poketchEnd;
 } sGfx;
 
 static void Load(void)
@@ -109,7 +111,13 @@ static void Load(void)
             sGfx.townH = h;
             sGfx.town[0] = (const u16 *)(p + 10);
             sGfx.town[1] = (const u16 *)(p + 10 + w * h * 2);
+            p += 10 + pages * w * h * 2;
         }
+    }
+    if (p + 4 <= end && memcmp(p, "PKCH", 4) == 0)
+    {
+        sGfx.poketch = p + 4;
+        sGfx.poketchEnd = end;
     }
     sGfx.ok = TRUE;
     return;
@@ -190,4 +198,63 @@ bool8 S3D_Gfx_TownMap(u8 page, const u16 **pixels, u16 *w, u16 *h)
     *w = sGfx.townW;
     *h = sGfx.townH;
     return TRUE;
+}
+
+// The POKéTCH's app screen NAME: 192x160 shade bytes (0 lightest .. 3 darkest); NULL: none
+const u8 *S3D_Gfx_PoketchScreen(const char *name)
+{
+    const u8 *p;
+    u32 i, n;
+    if (!sGfx.tried)
+        Load();
+    if (!sGfx.ok || (p = sGfx.poketch) == NULL)
+        return NULL;
+    n = p[0] | p[1] << 8;
+    p += 2;
+    for (i = 0; i < n && p + 16 + 192 * 160 <= sGfx.poketchEnd; i++, p += 16 + 192 * 160)
+        if (strncmp((const char *)p, name, 16) == 0)
+            return p + 16;
+    return NULL;
+}
+
+// Cell CELL of the POKéTCH's sprite sheet SHEET: its top-left from the sprite's point, size and shade bytes (255 clear)
+bool8 S3D_Gfx_PoketchCell(const char *sheet, u16 cell, s16 *x, s16 *y, u16 *w, u16 *h, const u8 **px)
+{
+    const u8 *p;
+    u32 i, n, k, cells;
+    if (!sGfx.tried)
+        Load();
+    if (!sGfx.ok || (p = sGfx.poketch) == NULL)
+        return FALSE;
+    n = p[0] | p[1] << 8;
+    p += 2 + n * (16 + 192 * 160);
+    if (p + 2 > sGfx.poketchEnd)
+        return FALSE;
+    n = p[0] | p[1] << 8;
+    p += 2;
+    for (i = 0; i < n; i++)
+    {
+        bool8 want = strncmp((const char *)p, sheet, 16) == 0;
+        cells = p[16] | p[17] << 8;
+        p += 18;
+        for (k = 0; k < cells; k++)
+        {
+            u16 cw = p[4] | p[5] << 8, ch = p[6] | p[7] << 8;
+            if (p + 8 + cw * ch > sGfx.poketchEnd)
+                return FALSE;
+            if (want && k == cell)
+            {
+                *x = (s16)(p[0] | p[1] << 8);
+                *y = (s16)(p[2] | p[3] << 8);
+                *w = cw;
+                *h = ch;
+                *px = p + 8;
+                return TRUE;
+            }
+            p += 8 + cw * ch;
+        }
+        if (want)
+            return FALSE;
+    }
+    return FALSE;
 }

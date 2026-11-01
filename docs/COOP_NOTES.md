@@ -3492,6 +3492,20 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   loaded. FLY spots: the places with a heal location, each unlocked by flag 0x3D40 + n set on arriving
   (s3d_townmap.c Sinnoh_TownMapArrive from MP_Region_OnMapLoaded). Met location: MP_METGAME_SINNOH (13) with the
   section's number past MAPSEC_SINNOH_FIRST (mp_region.c MP_Region_TagMet, the summary screen). Test sinnoh_townmap.
+- The POKéTCH (2026-11-01; ITEM_POKETCH 660, a key item usable in every region, registrable): src/sinnoh/poketch.c.
+  PÓKETCH Co.'s president (JUBILIFE, 1F) gives it. It draws over the field's picture (MP_Poketch_Composite from VDraw)
+  as Platinum's 192x160 LCD between a red case with the side button, and takes the buttons while open
+  (MP_Poketch_FilterKeys from ReadKeys): L / R or the side button change apps, B closes, the D-pad moves a stylus and
+  A touches; a mouse click touches where it points (sdl2.c Platform_PoketchMouse, display.c Display_WindowToGame).
+  A script starting (an NPC, a trainer) closes it. The art is Platinum's own (tools/sinnoh/build_poketch.py: every
+  app screen from its tilemap and tiles, every sprite sheet's cells from their OAM pieces, as 4 LCD shades; the
+  DIGITAL WATCH's 8x8-block digits from its 320-wide screen, kept in 32-tile blocks) in sinnoh/platinum_gfx.pak
+  ("PKCH" after "TOWN"; fetch_decomp.sh PARTS 5), colored by the COLOR CHANGER's 8 LCD colors. Apps (badges to unlock):
+  DIGITAL WATCH, CALCULATOR, MEMO PAD, PEDOMETER (GAME_STAT_STEPS), PARTY (icons in shades, HP; touch: the cry),
+  LINK SEARCHER (co-op friends, bars by how near) 0; COUNTER, ANALOG WATCH, COIN TOSS 1; COLOR CHANGER, DOWSING
+  MACHINE (hidden items within 2 tiles of the touch, 12 pixels a tile around the player) 2; STOPWATCH (touch the
+  Voltorb) 3; CALENDAR (the PC's date) 4. "<save>.poketch": the app, color, pedometer start, counter, memo.
+  Tests: `mp poketch APP`, `mp poketchtap X,Y`; scenario sinnoh_poketch.
 - The three card games in SINNOH: its people play by their sprite's look-alike (tcg_field.c Tcg_LookGfx: the specials
   first, then sSinnohStandIns), so the townsfolk and beaten trainers duel as JOHTO's and KANTO's do. Special card
   trainers (sQzSpecials' SINNOH rows): the eight leaders by role and type (ROARK - ROXANNE, MAYLENE - BRAWLY, WAKE -

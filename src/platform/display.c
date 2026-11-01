@@ -1227,6 +1227,25 @@ static void DrawPanel(const struct PanelLayout *L, int outW, int outH)
 static SDL_Rect sLastGameRect;   // where the last frame drew the game (tests)
 static int sLastPanelH;
 
+// Moemon Kai: a window point in the game picture's pixels (240x160); 0 outside it (the POKéTCH's mouse)
+int Display_WindowToGame(int wx, int wy, int *gx, int *gy)
+{
+    int ww = 0, wh = 0, ow = 0, oh = 0;
+    if (sWindow == NULL || sRenderer == NULL || sLastGameRect.w <= 0 || sLastGameRect.h <= 0)
+        return 0;
+    SDL_GetWindowSize(sWindow, &ww, &wh);
+    SDL_GetRendererOutputSize(sRenderer, &ow, &oh);
+    if (ww <= 0 || wh <= 0)
+        return 0;
+    wx = wx * ow / ww - sLastGameRect.x;
+    wy = wy * oh / wh - sLastGameRect.y;
+    if (wx < 0 || wy < 0 || wx >= sLastGameRect.w || wy >= sLastGameRect.h)
+        return 0;
+    *gx = wx * GBA_W / sLastGameRect.w;
+    *gy = wy * GBA_H / sLastGameRect.h;
+    return 1;
+}
+
 static void RenderToBackbuffer(void)
 {
     int outW = 0, outH = 0, kx, ky, exact, filterOn, fullW, fullH, gameX = 0, gameY = 0, srcW = GBA_W, srcH = GBA_H;

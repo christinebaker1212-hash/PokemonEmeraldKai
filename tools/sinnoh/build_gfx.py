@@ -255,6 +255,9 @@ def main():
     for k in range(len(gen_townmap.PAGES)):
         for row in gen_townmap.picture(root, k):
             out += struct.pack('<%dH' % len(row), *row)
+    # the POKéTCH's app screens and sprites (tools/sinnoh/build_poketch.py)
+    import build_poketch
+    out += build_poketch.section(root)
     open(out_path, 'wb').write(out)
     print('%s: %d sprites, %d battle pictures, %d bytes' % (out_path, len(sh), len(pics), len(out)))
 
