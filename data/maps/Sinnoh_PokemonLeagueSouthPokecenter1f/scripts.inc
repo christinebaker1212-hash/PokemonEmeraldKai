@@ -15,4 +15,21 @@ Sinnoh_PokemonLeagueSouthPokecenter1f_EventScript_Person1::
 	release
 	end
 
+Sinnoh_PokemonLeagueSouthPokecenter1f_EventScript_Person2::
+	msgbox Sinnoh_PokemonLeagueSouthPokecenter1f_Text_Person2, MSGBOX_NPC
+	end
+
+Sinnoh_PokemonLeagueSouthPokecenter1f_EventScript_Person3::
+	msgbox Sinnoh_PokemonLeagueSouthPokecenter1f_Text_Person3, MSGBOX_NPC
+	end
+
+Sinnoh_PokemonLeagueSouthPokecenter1f_Text_Person2:
+	.string "VICTORY ROAD is no joke. Rest up here\n"
+	.string "before you go in.$"
+
+Sinnoh_PokemonLeagueSouthPokecenter1f_Text_Person3:
+	.string "I made it through VICTORY ROAD once.\n"
+	.string "My MOéMON were so tired they slept for\l"
+	.string "a day.$"
+
 @ --- end of SINNOH words ---

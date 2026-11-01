@@ -15,4 +15,20 @@ Sinnoh_PastoriaCityPokecenter1f_EventScript_Person1::
 	release
 	end
 
+Sinnoh_PastoriaCityPokecenter1f_EventScript_Person2::
+	msgbox Sinnoh_PastoriaCityPokecenter1f_Text_Person2, MSGBOX_NPC
+	end
+
+Sinnoh_PastoriaCityPokecenter1f_EventScript_Person3::
+	msgbox Sinnoh_PastoriaCityPokecenter1f_Text_Person3, MSGBOX_NPC
+	end
+
+Sinnoh_PastoriaCityPokecenter1f_Text_Person2:
+	.string "I train in the marsh. The mud slows you\n"
+	.string "down, so your legs get stronger!$"
+
+Sinnoh_PastoriaCityPokecenter1f_Text_Person3:
+	.string "CRASHER WAKE waved at me in the\n"
+	.string "street once. He's so loud and nice!$"
+
 @ --- end of SINNOH words ---

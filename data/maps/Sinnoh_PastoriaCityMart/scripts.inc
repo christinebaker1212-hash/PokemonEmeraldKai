@@ -16,6 +16,14 @@ Sinnoh_PastoriaCityMart_EventScript_Person1::
 	release
 	end
 
+Sinnoh_PastoriaCityMart_EventScript_Person2::
+	msgbox Sinnoh_PastoriaCityMart_Text_Person2, MSGBOX_NPC
+	end
+
+Sinnoh_PastoriaCityMart_EventScript_Person3::
+	msgbox Sinnoh_PastoriaCityMart_Text_Person3, MSGBOX_NPC
+	end
+
 Sinnoh_PastoriaCityMart_EventScript_Person4::
 	lock
 	faceplayer
@@ -29,5 +37,14 @@ Sinnoh_PastoriaCityMart_EventScript_Person4::
 Sinnoh_PastoriaCityMart_Text_Bg1:
 	.string "A carving of a grinning MOéMON. Its\n"
 	.string "cheeks look puffed up.$"
+
+Sinnoh_PastoriaCityMart_Text_Person2:
+	.string "I'm buying POKé BALLS for the GREAT\n"
+	.string "MARSH. Wait, you can't use your own\l"
+	.string "there? Oh no...$"
+
+Sinnoh_PastoriaCityMart_Text_Person3:
+	.string "My mom sent me for groceries. I'm\n"
+	.string "buying MOéMON food first, though.$"
 
 @ --- end of SINNOH words ---

@@ -12,6 +12,14 @@ Sinnoh_SnowpointCityMart_EventScript_Person1::
 	release
 	end
 
+Sinnoh_SnowpointCityMart_EventScript_Person2::
+	msgbox Sinnoh_SnowpointCityMart_Text_Person2, MSGBOX_NPC
+	end
+
+Sinnoh_SnowpointCityMart_EventScript_Person3::
+	msgbox Sinnoh_SnowpointCityMart_Text_Person3, MSGBOX_NPC
+	end
+
 Sinnoh_SnowpointCityMart_EventScript_Person5::
 	lock
 	faceplayer
@@ -21,5 +29,13 @@ Sinnoh_SnowpointCityMart_EventScript_Person5::
 	msgbox gText_PleaseComeAgain, MSGBOX_DEFAULT
 	release
 	end
+
+Sinnoh_SnowpointCityMart_Text_Person2:
+	.string "I'm buying BURN HEALS. Not for burns.\n"
+	.string "They're just warm to hold.$"
+
+Sinnoh_SnowpointCityMart_Text_Person3:
+	.string "Bundle up and stock up! That's\n"
+	.string "SNOWPOINT's motto.$"
 
 @ --- end of SINNOH words ---

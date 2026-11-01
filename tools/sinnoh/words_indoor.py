@@ -417,4 +417,298 @@ INDOOR = {
         'Person7': "Such a lovely building. The bells ring every evening.",
         'Person8': "I can feel... calm here. Very calm. Very... zzz.",
     },
+    # ------------------------------------------------------------------ PASTORIA CITY
+    'Sinnoh_PastoriaCityMart': {
+        'Person2': "I'm buying POKé BALLS for the GREAT MARSH. Wait, you can't use your own there? Oh no...",
+        'Person3': "My mom sent me for groceries. I'm buying MOéMON food first, though.",
+    },
+    'Sinnoh_PastoriaCityPokecenter1f': {
+        'Person2': "I train in the marsh. The mud slows you down, so your legs get stronger!",
+        'Person3': "CRASHER WAKE waved at me in the street once. He's so loud and nice!",
+    },
+    'Sinnoh_PastoriaCityPokecenter2f': {
+        'Person4': "I'm painting the marsh from the window. It's a different color every hour.",
+    },
+    'Sinnoh_PastoriaCityObservatoryGate1f': {
+        'Person3': "Go up to the observatory! You can see the whole GREAT MARSH from there.",
+    },
+    'Sinnoh_PastoriaCityObservatoryGate2f': {
+        'Person1': "Look through the binoculars! Sometimes you can spot rare MOéMON in the reeds.",
+        'Person2': "I saw a CROAGUNK sitting on a rock out there. It was just... grinning.",
+        'Person3': "I've been watching the marsh all morning. It's better than TV.",
+        'Person4': "The marsh looks so peaceful from up here. It's a lot muddier down there!",
+    },
+    'Sinnoh_PastoriaCitySouthwestHouse': {
+        'Person1': "We grow BERRIES in the backyard. The marsh air makes them extra juicy.",
+        'Person2': "I'm going to be a marsh ranger! I'll know every MOéMON out there by name.",
+    },
+    'Sinnoh_PastoriaCityMiddleHouse': {
+        'Person1': "When I was a boy, the marsh came right up to the door. The town's grown a lot.",
+        'Person2': "I caught a SKORUPI in the marsh! Okay, it caught me first. Then I caught it.",
+    },
+    'Sinnoh_PastoriaCityEastHouse': {
+        'Person1': "I know every move a MOéMON could ever learn. Ask me about any of them! ...Later. I'm busy.",
+        'Person2': "My uncle knows so many moves. He forgets where he put his glasses, though.",
+    },
+    'Sinnoh_PastoriaCityNorthHouse': {
+        'Person1': "I study marsh MOéMON. They're tougher than they look, especially in the deep mud.",
+        'Person2': "PSYDUCK: Psy psy...|It's sitting in a puddle, perfectly content.",
+        'Person3': "I'm trading with a friend in VEILSTONE! The link cable reaches all the way!",
+    },
+    'Sinnoh_PastoriaCityNortheastHouse': {
+        'Person1': "My sister and I both want to beat CRASHER WAKE. Whoever does it first gets dessert.",
+        'Person2': "I'm going to win! My brother still can't get past WAKE's GYARADOS.",
+        'Person3': "PACHIRISU: Chi!|It's cheering for someone.",
+    },
+    # ------------------------------------------------------------------ VEILSTONE CITY
+    'Sinnoh_VeilstoneCityPokecenter1f': {
+        'Person2': "The department store is the best thing in VEILSTONE. Well, after the MOéMON CENTER, darling.",
+        'Person3': "MAYLENE trains every day at the GYM. I watch through the window sometimes!",
+    },
+    'Sinnoh_GameCorner': {
+        'Person1': "Welcome to the GAME CORNER! The machines are being repaired today. Come back another time!",
+        'Person3': "I used to play here every day. Now I just come for the music.",
+        'Person4': "I came to town to sell vegetables and ended up here. Don't tell my wife.",
+        'Person5': "The flashing lights give me ideas for songs. Ding ding ding! ...See?",
+        'Person6': "After a long shift, I come here to relax. The machines don't mind if I just watch.",
+        'Person7': "Someone dropped a POKé BALL near the machines once. I've been looking for more ever since.",
+        'Person8': "My daughter runs the GYM. She trains so hard. I come here to... train too. My luck, that is.",
+    },
+    'Sinnoh_VeilstoneStore1f': {
+        'Person1': "Welcome to the VEILSTONE DEPARTMENT STORE! Every floor has something for TRAINERS.",
+        'Person2': "I'm here for a gift for my wife. Five floors and I still don't know what to get.",
+        'Person3': "This store has everything. I came for one thing and forgot what it was.",
+        'Person4': "Shopping is a sport, darling. And I'm a champion.",
+    },
+    'Sinnoh_VeilstoneStore2f': {
+        'Person1': "This floor has all the medicine. I always buy more than I need. Just in case!",
+        'Person2': "I'm buying POKé BALLS. I want to catch every bug in ETERNA FOREST!",
+        'Person4': "Welcome to the second floor! For TRAINERS on the go.",
+        'Person7': "My mom gave me money for a REPEL. I'm getting a NET BALL instead. Shh.",
+    },
+    'Sinnoh_VeilstoneStore3f': {
+        'Person1': "Welcome to the third floor! TMs to teach your MOéMON new tricks.",
+        'Person2': "I want every TM! My piggy bank says otherwise.",
+        'Person3': "I'm looking for a TM that teaches SING. My MOéMON has the voice for it!",
+        'Person6': "Teaching your MOéMON a new move is like giving it a new toy. They love it!",
+    },
+    'Sinnoh_VeilstoneStore4f': {
+        'Person1': "I'm buying a toy for my MOéMON. It's a squeaky one. My mom's going to love it.",
+        'Person2': "Dolls of MOéMON! I have to have the PIKACHU one!",
+        'Person3': "Welcome to the fourth floor! Decorations and dolls for your room.",
+        'Person6': "I'm here to look at the dolls. Just to look! ...Okay, maybe buy one.",
+    },
+    'Sinnoh_VeilstoneStore5f': {
+        'Person1': "The view from the top floor is great! You can see the whole city.",
+        'Person2': "I come up here to rest my feet after shopping. Five floors is a lot!",
+        'Person3': "I've been to every floor twice. This store is a treasure hunt!",
+        'Person4': "I collect the store's shopping bags. They change the design every season!",
+    },
+    'Sinnoh_VeilstoneCityPrizeExchange': {
+        'Person2': "I won a prize once. It was a POTION. I'm still proud of it.",
+        'Person3': "In my day, prizes were fancier. But I still come to look.",
+    },
+    'Sinnoh_VeilstoneCitySoutheastHouse': {
+        'Person1': "I juggle POKé BALLS for fun! ...Empty ones. Mostly.",
+        'Person2': "I train in the GYM every day. MAYLENE says I've got the right spirit!",
+    },
+    'Sinnoh_VeilstoneCityNorthwestHouse': {
+        'Person1': "My grandma's BUNEARY likes me more than her. It's a little awkward.",
+        'Person2': "BUNEARY has lived with me for years. It still hops like a baby.",
+        'Person3': "BUNEARY: Bun!|It's hopping in place.",
+    },
+    'Sinnoh_VeilstoneCityNortheastHouse': {
+        'Person1': "The rocks in the city fell from the sky long ago. I wonder what's inside them.",
+        'Person2': "My husband talks about those rocks every day. Every single day.",
+    },
+    'Sinnoh_VeilstoneCitySouthwestHouse': {
+        'Person1': "I love living by the cliffs. The wind sounds like music at night.",
+        'Person2': "My PACHIRISU sleeps in my hood. It's warmer than a bed.",
+        'Person3': "PACHIRISU: Chipa?|It peeks out from behind the chair.",
+    },
+    'Sinnoh_Route215GateToVeilstoneCity': {
+        'Person1': "The old stones in VEILSTONE are covered in markings. I'm trying to read them.",
+    },
+    # ------------------------------------------------------------------ SUNYSHORE CITY
+    'Sinnoh_SunyshoreCityPokecenter1f': {
+        'Person2': "I've lived by the sea all my life. The waves here are the gentlest in SINNOH.",
+        'Person3': "VOLKNER used to battle everyone who came. Now he just looks bored. Maybe you can help!",
+        'Person4': "The solar walkways power the whole city. Even this MOéMON CENTER!",
+    },
+    'Sinnoh_SunyshoreCityMart': {
+        'Person2': "I'm going to explore the ruins north of here. Bring ESCAPE ROPES, I say!",
+        'Person3': "A sailor always stocks up before a long trip. Even if it's just to the next town!",
+    },
+    'Sinnoh_SunyshoreMarket': {
+        'Person1': "The market's stalls change every day. Come back tomorrow for something new!",
+        'Person2': "I found a shell shaped like a STARMIE here once. Best day of my life.",
+        'Person3': "Sailors from all over sell their things here. You never know what you'll find.",
+        'Person4': "Welcome! These seals go on your POKé BALLS. Pretty, aren't they?",
+        'Person5': "I came for the fish, but I'm staying for the sunsets.",
+    },
+    'Sinnoh_SunyshoreCityNortheastHouse': {
+        'Person1': "I'm JULIA! I travel around making my MOéMON look their absolute best.",
+    },
+    'Sinnoh_SunyshoreCityWestHouse': {
+        'Person1': "We're all waiting for VOLKNER to battle us. He's been in a slump lately.",
+        'Person2': "I make the kids laugh while they wait. Look, a POKé BALL behind your ear!",
+        'Person3': "VOLKNER's the strongest LEADER in SINNOH. That's why he's last!",
+        'Person4': "I bring snacks for the kids. Waiting is hungry work.",
+        'Person5': "I'm going to be the first one to beat VOLKNER this year! ...After you, maybe.",
+        'Person6': "VOLKNER waved at me once! I didn't wash that hand for a week.",
+        'Person7': "Electric MOéMON are the coolest. Zap zap!",
+    },
+    'Sinnoh_SunyshoreCityNorthwestHouse': {
+        'Person1': "Fifty years by the sea. I still watch the sunset every night.",
+        'Person2': "He says that every evening. I watch with him anyway.",
+    },
+    'Sinnoh_SunyshoreCityEastHouse': {
+        'Person1': "I study solar energy. SUNYSHORE gets more sun than any town in SINNOH.",
+    },
+    'Sinnoh_VistaLighthouse': {
+        'Person1': "The lighthouse guides ships home. VOLKNER sometimes comes up here to think.",
+        'Person2': "From the top you can see the MOéMON LEAGUE! It's so far away...",
+    },
+    # ------------------------------------------------------------------ SNOWPOINT CITY
+    'Sinnoh_SnowpointCityMart': {
+        'Person2': "I'm buying BURN HEALS. Not for burns. They're just warm to hold.",
+        'Person3': "Bundle up and stock up! That's SNOWPOINT's motto.",
+    },
+    'Sinnoh_SnowpointCityPokecenter1f': {
+        'Person2': "It's so warm in here! I could stay all day.",
+        'Person3': "CANDICE trains outside in the snow. She says it builds focus.",
+        'Person4': "PSYDUCK: Psy...|It's shivering a little, but happy to be inside.",
+    },
+    'Sinnoh_SnowpointCityWestHouse': {
+        'Person1': "I came north to train. My MOéMON hates the cold. We're working on it.",
+        'Person2': "I'm MINDY! I love trading MOéMON with TRAINERS from far away.",
+    },
+    'Sinnoh_SnowpointCityEastHouse': {
+        'Person1': "The temple to the north is very old. They say a great MOéMON sleeps deep inside.",
+        'Person2': "I climbed down from the mountains just for a hot drink. Worth it.",
+    },
+    # ------------------------------------------------------------------ MOéMON LEAGUE
+    'Sinnoh_PokemonLeagueSouthPokecenter1f': {
+        'Person2': "VICTORY ROAD is no joke. Rest up here before you go in.",
+        'Person3': "I made it through VICTORY ROAD once. My MOéMON were so tired they slept for a day.",
+    },
+    'Sinnoh_PokemonLeagueNorthPokecenter1f': {
+        'Person1': "Beyond this door are the ELITE FOUR. Once you go in, there's no coming back until it's over.|"
+                   "Make sure your team is ready!",
+        'Person5': "I've challenged the ELITE FOUR five times. I'm getting closer every time!",
+        'Person7': "I play a song for every TRAINER who goes in. Good luck!",
+    },
+    # ------------------------------------------------------------------ BATTLE ZONE
+    'Sinnoh_FightAreaPokecenter1f': {
+        'Person2': "I sing to keep my MOéMON's spirits up. They battle better when they're happy!",
+        'Person3': "Welcome! Everyone here is a TRAINER. Even the cooks!",
+        'Person4': "The FRONTIER is the toughest place in SINNOH. I'm training here until I'm ready.",
+    },
+    'Sinnoh_FightAreaMart': {
+        'Person1': "Even clowns need POTIONS out here. Battles everywhere!",
+        'Person2': "I shop here before every challenge, darling. A lady must be prepared.",
+    },
+    'Sinnoh_Route225GateToFightArea': {
+        'Person1': "The routes past here are wild. Only strong TRAINERS should go.",
+        'Person2': "My father bought me a ticket to the BATTLE ZONE. I'm going to win everything!",
+    },
+    'Sinnoh_FightAreaMiddleHouse': {
+        'Person1': "Welcome! TRAINERS from all over stay in the BATTLE ZONE to train.",
+        'Person2': "I study the battles at the FRONTIER. I've filled ten notebooks!",
+        'Person3': "I'm going to be a FRONTIER BRAIN someday!",
+    },
+    'Sinnoh_FightAreaSouthHouse': {
+        'Person1': "My TORCHIC came all the way from HOENN with me. It loves the warm weather here.",
+        'Person2': "TORCHIC: Torchic!|It's flapping its little wings.",
+        'Person3': "He talks about HOENN all the time. I've never been, but it sounds lovely.",
+        'Person4': "Items can turn a battle around. A good held item is half the battle!",
+    },
+    # ------------------------------------------------------------------ caves, gates and others
+    'Sinnoh_OreburghMineB1f': {
+        'Person1': "Careful down here! The carts don't stop for anyone.",
+        'Person3': "My dad works here! I'm bringing him his lunch.",
+    },
+    'Sinnoh_OreburghMineB2f': {
+        'Person8': "My MACHOP do the heavy lifting. I just tell them where to put it!",
+        'Person9': "MACHOP: Ma-chop!|It's carrying a big rock.",
+        'Person10': "MACHOP: Chop!|It's taking a break, sitting on a cart.",
+        'Person11': "MACHOP: Machop!|It flexes proudly.",
+    },
+    'Sinnoh_ValleyWindworksBuilding': {
+        'Person3': "The windmills make power for the towns nearby. The wind here never stops!",
+    },
+    'Sinnoh_EternaForest': {
+        'Person2': "The forest is so big! Follow the light. That's how you find the way out.",
+    },
+    'Sinnoh_FuegoIronworksBuilding': {
+        'Person5': "Welcome to FUEGO IRONWORKS! My MOéMON and I make iron here, the old way.",
+    },
+    'Sinnoh_SolaceonRuinsRoom2': {
+        'Person1': "These ruins go on forever! I keep finding new rooms.",
+    },
+    'Sinnoh_AmitySquare': {
+        'Person1': "Welcome to AMITY SQUARE! Enjoy a walk with your MOéMON.",
+        'Person2': "Welcome to AMITY SQUARE! Enjoy a walk with your MOéMON.",
+        'Person7': "My DRIFLOON follows me everywhere. Even into the bath!",
+        'Person8': "DRIFLOON: Fuwa...|It's floating gently in the breeze.",
+        'Person9': "HAPPINY: Happi!|It's carrying a little round stone.",
+        'Person10': "My HAPPINY loves to collect round stones. It thinks they're eggs!",
+        'Person11': "My PIKACHU and I come here every Sunday. It knows the way better than I do.",
+        'Person12': "PIKACHU: Pika!|It's chasing a leaf.",
+        'Person13': "My CLEFAIRY dances under the trees. Isn't it cute?",
+        'Person14': "CLEFAIRY: Pi pi!|It's spinning in a circle.",
+        'Person16': "Your MOéMON might find something on the paths. It has a good nose!",
+    },
+    'Sinnoh_FloaromaMeadow': {
+        'Person3': "The honey trees here attract all sorts of MOéMON. Slather some on and wait!",
+    },
+    'Sinnoh_FloaromaMeadowHouse': {
+        'Person1': "We sell honey from the meadow! It's the sweetest in SINNOH.",
+        'Person2': "I helped collect the honey today! I only got stung twice.",
+    },
+    'Sinnoh_OreburghGate1f': {
+        'Person11': "This cave connects JUBILIFE and OREBURGH. Watch out for ZUBAT!",
+    },
+    'Sinnoh_OreburghGateB1f': {
+        'Person16': "The lower floor has rocks you'll need to smash. Come back when you can!",
+    },
+    'Sinnoh_RuinManiacCaveShort': {
+        'Person2': "I'm digging a tunnel to find old ruins! It's slow work.",
+    },
+    'Sinnoh_Restaurant': {
+        'Person19': "Welcome to the SEVEN STARS! Every dinner comes with a view of the lake.",
+    },
+    'Sinnoh_GrandLakeValorLakefrontWestHouse': {
+        'Person1': "I make games for a living. My best ideas come while watching MOéMON play.",
+    },
+    'Sinnoh_Route205House': {
+        'Person1': "Welcome! Rest your feet. The forest path is long.",
+        'Person2': "I caught a WURMPLE today! It's sleeping in my hat.",
+    },
+    'Sinnoh_Route206CyclingRoadSouthGate': {
+        'Person3': "The cycling road is downhill all the way south! Wheee!",
+    },
+    'Sinnoh_Route208House': {
+        'Person1': "I've grown BERRIES my whole life. Each one has its own taste, and its own story.",
+    },
+    'Sinnoh_BattleTower': {
+        'Person1': "Welcome to the BATTLE TOWER. Challenges open soon. Please come back!",
+        'Person2': "Welcome to the BATTLE TOWER. Challenges with a partner open soon!",
+        'Person5': "I'm sketching the TRAINERS who come here. The tower inspires them.",
+        'Person6': "I run here every morning to get ready for my challenge!",
+        'Person7': "I'm here to cheer on my favorite TRAINERS! Go go go!",
+        'Person8': "I'll be the TOWER's champion! As soon as it opens!",
+        'Person9': "PIKACHU: Pika!|It's sitting on its TRAINER's shoulder.",
+        'Person10': "PIKACHU: Chu!|It's looking around excitedly.",
+        'Person11': "I'm keeping notes on every battle. I'm going to beat the tower someday!",
+        'Person12': "The tower is so tall. I wonder how far you have to win to get to the top.",
+        'Person15': "I can tell how your MOéMON's stats grew. Come back once the tower is open!",
+    },
+    'Sinnoh_GalacticHq1f': {
+        'Person1': "What are you doing here? Visitors aren't allowed! ...Well, look around, but don't touch.",
+        'Person2': "I do research here. It's all very serious science. Very serious.",
+        'Person8': "Our uniforms are space themed. Aren't they cool? Be honest.",
+        'Person9': "I just started working here. I'm not really sure what we do yet.",
+    },
 }
+
