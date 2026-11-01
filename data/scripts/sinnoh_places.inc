@@ -481,3 +481,103 @@ Sinnoh_Text_DistortionCynthia2:
 	.string "CYNTHIA: The world feels calmer. GIRATINA\n"
 	.string "was keeping the balance, I think.\p"
 	.string "Thank you. Let's go home together.$"
+
+@ OREBURGH's MINING MUSEUM: its fossil scientist brings fossils back (JOHTO's / KANTO's specials, src/qz_specials.c:
+@ Lv 20, as Platinum), and gives the player one SKULL or ARMOR FOSSIL first (flag 0x3D37; Platinum's come from the
+@ Underground, which this game hasn't)
+Sinnoh_EventScript_FossilScientist::
+	lock
+	faceplayer
+	goto_if_set 0x3D37, Sinnoh_EventScript_FossilAsk
+	msgbox Sinnoh_Text_FossilGift, MSGBOX_DEFAULT
+	random 2
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_FossilGiftArmor
+	giveitem ITEM_SKULL_FOSSIL
+	goto Sinnoh_EventScript_FossilGiven
+
+Sinnoh_EventScript_FossilGiftArmor:
+	giveitem ITEM_ARMOR_FOSSIL
+
+Sinnoh_EventScript_FossilGiven:
+	goto_if_eq VAR_RESULT, FALSE, Sinnoh_EventScript_FossilEnd
+	setflag 0x3D37
+
+Sinnoh_EventScript_FossilAsk:
+	special QzBagHasFossil
+	goto_if_eq VAR_RESULT, FALSE, Sinnoh_EventScript_FossilNone
+	msgbox Sinnoh_Text_FossilAsk, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Sinnoh_EventScript_FossilNo
+	special QzChooseItemFromBagForFossil
+	waitstate
+	goto_if_eq VAR_ITEM_ID, 0, Sinnoh_EventScript_FossilNo
+	special QzIsSelectedItemFossil
+	goto_if_eq VAR_RESULT, FALSE, Sinnoh_EventScript_FossilNotOne
+	special QzGiveRevivedFossilMon
+	goto_if_eq VAR_RESULT, MON_CANT_GIVE, Sinnoh_EventScript_FossilFull
+	bufferitemname STR_VAR_2, VAR_ITEM_ID
+	removeitem VAR_ITEM_ID, 1
+	bufferspeciesname STR_VAR_1, VAR_0x800A
+	msgbox Sinnoh_Text_FossilWorking, MSGBOX_DEFAULT
+	closemessage
+	fadescreen FADE_TO_BLACK
+	playfanfare MUS_OBTAIN_ITEM
+	waitfanfare
+	fadescreen FADE_FROM_BLACK
+	msgbox Sinnoh_Text_FossilDone, MSGBOX_DEFAULT
+
+Sinnoh_EventScript_FossilEnd:
+	release
+	end
+
+Sinnoh_EventScript_FossilNone:
+	msgbox Sinnoh_Text_FossilNone, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_EventScript_FossilNo:
+	msgbox Sinnoh_Text_FossilNo, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_EventScript_FossilNotOne:
+	msgbox Sinnoh_Text_FossilNotOne, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_EventScript_FossilFull:
+	msgbox Sinnoh_Text_FossilFull, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_Text_FossilGift:
+	.string "I study fossils from the mine. Here,\n"
+	.string "start your own collection with this!$"
+
+Sinnoh_Text_FossilAsk:
+	.string "Fossils hold the shapes of ancient\n"
+	.string "POKéMON. My machine can wake them up.\p"
+	.string "Do you have a fossil for me?$"
+
+Sinnoh_Text_FossilWorking:
+	.string "The {STR_VAR_2}! Wonderful.\n"
+	.string "Into the machine it goes...$"
+
+Sinnoh_Text_FossilDone:
+	.string "There! The {STR_VAR_1} is awake, and it's\n"
+	.string "yours. Take good care of it!$"
+
+Sinnoh_Text_FossilNone:
+	.string "Fossils hold the shapes of ancient\n"
+	.string "POKéMON. Bring me one, and I'll wake it.$"
+
+Sinnoh_Text_FossilNo:
+	.string "Come back whenever you like. The past\n"
+	.string "isn't going anywhere.$"
+
+Sinnoh_Text_FossilNotOne:
+	.string "Hm, that's not a fossil. Not even a\n"
+	.string "very old one.$"
+
+Sinnoh_Text_FossilFull:
+	.string "You've no room for another POKéMON,\n"
+	.string "not even in your PC. Make some space!$"

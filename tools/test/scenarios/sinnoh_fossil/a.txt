@@ -1,0 +1,23 @@
+pressuntil A field 5000
+mp textspeed 2
+wait 30
+mp warp 42,46,6,4
+wait 90
+waitfor field 1000
+mp face up
+press A 4
+pressuntil A yesno 3000
+wait 20
+shot t_ask
+press A 4
+wait 120
+shot t_bag
+press DOWN 2
+wait 10
+press A 4
+wait 30
+pressuntil A field 6000
+wait 30
+shot t_done
+mp party
+quit

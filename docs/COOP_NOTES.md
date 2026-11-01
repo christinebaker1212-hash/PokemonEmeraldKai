@@ -3357,6 +3357,9 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   (overworld.c, before the map's on-transition script). Their words are STORY_WORDS (merged into words.py's WORDS);
   gen_maps.py places a story person with its flag once it has a script (trainers have theirs). Platinum's gifts from
   them have LINES (gifts.py; the POKé RADAR and the BICYCLE are given once). Test sinnoh_story_people.
+- Fossils (2026-11-01): OREBURGH's MINING MUSEUM scientist (Sinnoh_EventScript_FossilScientist) gives one SKULL or
+  ARMOR FOSSIL (flag 0x3D37; Platinum's come from the Underground, which this game hasn't) and wakes any fossil the
+  game knows at Lv 20 with JOHTO's / KANTO's specials (src/qz_specials.c sFossils). Test sinnoh_fossil.
 - The DISTORTION WORLD (2026-11-01, data/scripts/sinnoh_places.inc): Platinum walks it on walls and ceilings through
   its own 14,000-line system (overlay009), so here it's a scene in GIRATINA's arena, Platinum's own 3D room (a rock
   path in the void; s3d_gyms.c GYM_DISTORTION keeps steps to its rows 23-28, and field_player_avatar.c never jumps a

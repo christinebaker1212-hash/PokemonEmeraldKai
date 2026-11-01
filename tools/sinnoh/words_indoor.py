@@ -272,7 +272,7 @@ INDOOR = {
         'Person1': "Before machines, MOéMON helped carry the coal. MACHOP were the best workers.",
         'Person2': "Look at the old helmets! They had little candles on them!",
         'Person3': "I'm doing a school report on the mine. I've written three pages about rocks!",
-        'Person4': "I study fossils from the mine. Bring me any you find, and I'll tell you all about them.",
+        'Person4': ('script', 'Sinnoh_EventScript_FossilScientist'),
         'Person5': "The museum tells OREBURGH's story so well. I learned so much!",
         'Person6': "My MOéMON loves the coal display. It keeps sniffing it.",
         'Person7': "I came for the fossil corner. It's smaller than I hoped, but it's very good.",

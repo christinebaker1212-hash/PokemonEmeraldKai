@@ -143,7 +143,7 @@ Sinnoh_MiningMuseum_EventScript_Person3::
 	end
 
 Sinnoh_MiningMuseum_EventScript_Person4::
-	msgbox Sinnoh_MiningMuseum_Text_Person4, MSGBOX_NPC
+	goto Sinnoh_EventScript_FossilScientist
 	end
 
 Sinnoh_MiningMuseum_EventScript_Person5::
@@ -312,11 +312,6 @@ Sinnoh_MiningMuseum_Text_Person2:
 Sinnoh_MiningMuseum_Text_Person3:
 	.string "I'm doing a school report on the mine.\n"
 	.string "I've written three pages about rocks!$"
-
-Sinnoh_MiningMuseum_Text_Person4:
-	.string "I study fossils from the mine. Bring me\n"
-	.string "any you find, and I'll tell you all\l"
-	.string "about them.$"
 
 Sinnoh_MiningMuseum_Text_Person5:
 	.string "The museum tells OREBURGH's story so\n"

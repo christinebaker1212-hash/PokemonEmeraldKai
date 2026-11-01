@@ -1,0 +1,8 @@
+# OREBURGH's MINING MUSEUM (data/scripts/sinnoh_places.inc Sinnoh_EventScript_FossilScientist): the scientist gives a
+# SKULL or ARMOR FOSSIL (flag 0x3D37), asks for a fossil, the bag opens on the KEY ITEMS, and the chosen fossil wakes
+# as CRANIDOS or SHIELDON (Lv 20) in the party. Shots t_ask, t_bag, t_done.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("friend 70) 43")
+UNEXPECT_A=("[crash]" "TIMEOUT")
