@@ -15,7 +15,7 @@
   "connections": [],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_LINK_RECEPTIONIST",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_FRONTIER_SINGLE_ATTENDANT",
       "x": 14,
       "y": 5,
       "elevation": 3,
@@ -28,7 +28,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_LINK_RECEPTIONIST",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_FRONTIER_MULTI_ATTENDANT",
       "x": 15,
       "y": 5,
       "elevation": 3,
@@ -41,7 +41,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_PSYCHIC_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_PSYCHIC",
       "x": 19,
       "y": 9,
       "elevation": 3,
@@ -54,7 +54,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_4",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_WAITRESS",
       "x": 2,
       "y": 12,
       "elevation": 3,
@@ -67,7 +67,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_CAMPER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_CAMPER",
       "x": 2,
       "y": 14,
       "elevation": 3,
@@ -80,7 +80,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BEAUTY",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BEAUTY",
       "x": 4,
       "y": 14,
       "elevation": 3,
@@ -93,7 +93,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_HIKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_WORKER",
       "x": 12,
       "y": 3,
       "elevation": 3,
@@ -106,7 +106,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BUG_CATCHER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BUG_CATCHER",
       "x": 7,
       "y": 11,
       "elevation": 3,
@@ -119,7 +119,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_TUBER_F",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_TUBER_F",
       "x": 21,
       "y": 14,
       "elevation": 3,
@@ -132,7 +132,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_2",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_PARASOL_LADY",
       "x": 19,
       "y": 6,
       "elevation": 3,
@@ -145,7 +145,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_HIKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_HIKER",
       "x": 13,
       "y": 8,
       "elevation": 3,
@@ -158,7 +158,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_HIKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_HIKER",
       "x": 13,
       "y": 9,
       "elevation": 3,

@@ -15,7 +15,7 @@
   "connections": [],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_LASS",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_LASS",
       "x": 11,
       "y": 9,
       "elevation": 3,
@@ -28,7 +28,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_NURSE",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POKECENTER_NURSE",
       "x": 8,
       "y": 4,
       "elevation": 3,
@@ -41,7 +41,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_2",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POKEMON_BREEDER_F",
       "x": 2,
       "y": 6,
       "elevation": 3,
@@ -80,7 +80,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BUG_CATCHER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BUG_CATCHER",
       "x": 14,
       "y": 5,
       "elevation": 3,
@@ -93,7 +93,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SCIENTIST_1",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SCIENTIST_M",
       "x": 15,
       "y": 5,
       "elevation": 3,

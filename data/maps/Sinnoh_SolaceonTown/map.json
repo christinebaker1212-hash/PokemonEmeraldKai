@@ -26,7 +26,7 @@
   ],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_GIRL_1",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_COWGIRL",
       "x": 19,
       "y": 12,
       "elevation": 3,
@@ -39,7 +39,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_TWIN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_TWIN",
       "x": 7,
       "y": 18,
       "elevation": 3,
@@ -52,7 +52,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_2",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_RANCHER",
       "x": 25,
       "y": 19,
       "elevation": 3,
@@ -65,7 +65,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_EXPERT_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_EXPERT_M",
       "x": 11,
       "y": 8,
       "elevation": 3,
@@ -117,7 +117,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_GIRL_1",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_COWGIRL",
       "x": 15,
       "y": 13,
       "elevation": 3,
@@ -130,7 +130,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_HIKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_RUIN_MANIAC",
       "x": 14,
       "y": 19,
       "elevation": 3,
@@ -208,7 +208,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_2",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_RANCHER",
       "x": 25,
       "y": 10,
       "elevation": 3,
@@ -221,7 +221,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_AZURILL",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BUNEARY",
       "x": 5,
       "y": 19,
       "elevation": 3,
@@ -234,7 +234,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_AZURILL",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BUNEARY",
       "x": 8,
       "y": 12,
       "elevation": 3,
@@ -247,7 +247,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_PIKACHU",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_PACHIRISU",
       "x": 9,
       "y": 15,
       "elevation": 3,
@@ -260,7 +260,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BARRY",
       "x": 16,
       "y": 19,
       "elevation": 3,

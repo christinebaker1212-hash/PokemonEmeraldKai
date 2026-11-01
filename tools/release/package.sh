@@ -49,6 +49,10 @@ if [ -f sinnoh/platinum3d.pak ]; then
     mkdir -p "$P/sinnoh"
     cp sinnoh/platinum3d.pak "$P/sinnoh/"
 fi
+if [ -f sinnoh/platinum_gfx.pak ]; then   # (SINNOH's people as Platinum draws them, tools/sinnoh/build_gfx.py)
+    mkdir -p "$P/sinnoh"
+    cp sinnoh/platinum_gfx.pak "$P/sinnoh/"
+fi
 printf 'Moemon Emerald Kai Co-op %s (%s)\nThe game checks for updates when it starts (AutoUpdate = 0 in moemon_coop.ini turns that off).\n' "$VER ($CHANNEL)" "$PLAT" > "$P/moemon_release.txt"
 ZIP="$OUT/MoemonEmeraldKaiCoop-$PLAT.zip"
 rm -f "$ZIP"

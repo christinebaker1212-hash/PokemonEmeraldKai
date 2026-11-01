@@ -1,0 +1,18 @@
+pressuntil A field 5000
+wait 30
+mp warp 42,24,8,9
+wait 200
+shot p_center
+mp battlestyle 1
+mp trainer 2067
+wait 100
+shot p_intro1
+wait 40
+shot p_intro2
+wait 60
+shot p_intro3
+wait 60
+shot p_intro4
+wait 60
+shot p_intro5
+quit

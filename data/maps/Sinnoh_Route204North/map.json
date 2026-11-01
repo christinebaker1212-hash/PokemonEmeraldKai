@@ -26,7 +26,7 @@
   ],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_BUG_CATCHER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BUG_CATCHER",
       "x": 22,
       "y": 13,
       "elevation": 3,
@@ -39,7 +39,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_2",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POKEMON_BREEDER_F",
       "x": 17,
       "y": 20,
       "elevation": 3,
@@ -52,7 +52,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_TWIN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_TWIN",
       "x": 15,
       "y": 7,
       "elevation": 3,
@@ -65,7 +65,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_TWIN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_TWIN",
       "x": 16,
       "y": 7,
       "elevation": 3,
@@ -78,7 +78,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_YOUNGSTER",
       "x": 15,
       "y": 28,
       "elevation": 3,
@@ -117,7 +117,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_YOUNGSTER",
       "x": 13,
       "y": 34,
       "elevation": 3,
@@ -156,7 +156,7 @@
       "flag": "0x35C5"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_F",
       "x": 31,
       "y": 4,
       "elevation": 3,

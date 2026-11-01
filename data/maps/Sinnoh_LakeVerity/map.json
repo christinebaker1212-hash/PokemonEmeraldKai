@@ -15,7 +15,7 @@
   "connections": [],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAGMA_MEMBER_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_GRUNT_M",
       "x": 43,
       "y": 49,
       "elevation": 3,
@@ -28,7 +28,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAGMA_MEMBER_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_GRUNT_M",
       "x": 48,
       "y": 43,
       "elevation": 3,
@@ -41,7 +41,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAGMA_MEMBER_F",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_GRUNT_F",
       "x": 50,
       "y": 49,
       "elevation": 3,
@@ -54,7 +54,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAGMA_MEMBER_F",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_GRUNT_F",
       "x": 53,
       "y": 43,
       "elevation": 3,
@@ -80,7 +80,7 @@
       "flag": "0x3593"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_PROF_BIRCH",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_PROF_ROWAN",
       "x": 53,
       "y": 39,
       "elevation": 3,
@@ -106,7 +106,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAGMA_MEMBER_F",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_MARS",
       "x": 55,
       "y": 38,
       "elevation": 3,
@@ -119,7 +119,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAGMA_MEMBER_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_GRUNT_M",
       "x": 47,
       "y": 51,
       "elevation": 3,

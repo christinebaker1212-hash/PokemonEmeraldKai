@@ -15,7 +15,7 @@
   "connections": [],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_3",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_CRASHER_WAKE",
       "x": 13,
       "y": 4,
       "elevation": 3,
@@ -28,7 +28,7 @@
       "flag": "0x346B"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_1",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_GYM_GUIDE",
       "x": 15,
       "y": 40,
       "elevation": 3,
@@ -41,7 +41,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_TUBER_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_TUBER_M",
       "x": 11,
       "y": 33,
       "elevation": 3,
@@ -54,7 +54,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SAILOR",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SAILOR",
       "x": 7,
       "y": 22,
       "elevation": 3,
@@ -67,7 +67,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_TUBER_F",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_TUBER_F",
       "x": 21,
       "y": 33,
       "elevation": 3,
@@ -80,7 +80,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SAILOR",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SAILOR",
       "x": 5,
       "y": 8,
       "elevation": 3,
@@ -93,7 +93,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_FISHERMAN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_FISHERMAN",
       "x": 19,
       "y": 18,
       "elevation": 3,
@@ -106,7 +106,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_FISHERMAN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_FISHERMAN",
       "x": 9,
       "y": 11,
       "elevation": 3,

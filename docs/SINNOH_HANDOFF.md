@@ -55,6 +55,8 @@ them: BALL SEALS (the POKé BALL page's styles and ball effects), and anything e
 Features that Gen 3 also has use the Gen 3 versions: POKéMON CONTESTS (not Super Contests), and the like. The
 Underground and Super Contests in step 6 below are dropped unless the user asks again.
 A new TRAINER CARD for Sinnoh comes later (the user's own design).
+People look as in Platinum (the user, 2026-11-01): its overworld sprites and trainers' battle pictures from the decomp,
+in sinnoh/platinum_gfx.pak (tools/sinnoh/build_gfx.py; COOP_NOTES).
 
 ## What the game already gives us
 - Regions: mp_region.c, "<save>.region", converters (tools/quetzal_port/), region chain from 1.61.4:

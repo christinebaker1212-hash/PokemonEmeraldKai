@@ -1,0 +1,8 @@
+# SINNOH's people as Platinum draws them (tools/sinnoh/build_gfx.py -> sinnoh/platinum_gfx.pak, src/sinnoh/s3d_gfx.c):
+# a POKéMON CENTER's nurse and people with Platinum's sprites; ROARK's battle picture is Platinum's (picture 56,
+# 80x80 through the big-sprite renderer). Needs both packs (tools/sinnoh/make_pack.sh). Shots p_*.png.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=150:100"
+EXPECT_A=("sinnoh battle picture: trainer 2067 picture 56")
+UNEXPECT_A=("[crash]" "isn't a SINNOH graphics pack" "another graphics pack")

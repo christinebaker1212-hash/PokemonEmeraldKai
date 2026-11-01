@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+void S3D_Gfx_BattleTrainerPic(struct Sprite *sprite, u8 battler, u16 standIn);   // Moemon Kai (src/sinnoh/s3d_gfx.c)
 #include "battle_gimmick.h"
 #include "mp.h"
 #include "mp_life_battle.h"
@@ -1362,6 +1363,7 @@ static void OpponentHandleDrawTrainerPic(void)
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.paletteNum = IndexOfSpritePaletteTag(gTrainerFrontPicPaletteTable[trainerPicId].tag);
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.affineParam = trainerPicId;
     gSprites[gBattlerSpriteIds[gActiveBattler]].callback = SpriteCB_TrainerSlideIn;
+    S3D_Gfx_BattleTrainerPic(&gSprites[gBattlerSpriteIds[gActiveBattler]], gActiveBattler, trainerPicId);   // Moemon Kai: Platinum's picture
     // Moemon Co-op: the trainer is drawn for both opponent slots; show it once (two trainers: both)
     if (gMpCoopBattle && !MP_Coop_TwoTrainers() && (GetBattlerPosition(gActiveBattler) != B_POSITION_OPPONENT_LEFT || gMpCoopWild))
         gSprites[gBattlerSpriteIds[gActiveBattler]].invisible = TRUE; // wild doubles: no trainer at all
@@ -1438,6 +1440,7 @@ static void OpponentHandleTrainerSlide(void)
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.paletteNum = IndexOfSpritePaletteTag(gTrainerFrontPicPaletteTable[trainerPicId].tag);
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.affineParam = trainerPicId;
     gSprites[gBattlerSpriteIds[gActiveBattler]].callback = SpriteCB_TrainerSlideIn;
+    S3D_Gfx_BattleTrainerPic(&gSprites[gBattlerSpriteIds[gActiveBattler]], gActiveBattler, trainerPicId);   // Moemon Kai: Platinum's picture
 
     gBattlerControllerFuncs[gActiveBattler] = CompleteOnBankSpriteCallbackDummy2;
 }

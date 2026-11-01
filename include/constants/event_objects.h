@@ -279,6 +279,7 @@
 
 // Moemon Kai: Johto / Kanto sprites, 16-bit ids (the object's high byte sits in what was padding: OBJ_GFX_ID)
 #define OBJ_EVENT_GFX_QZ_FIRST 0x100
+#include "constants/sinnoh_gfx.h"   // Moemon Kai: OBJ_EVENT_GFX_SINNOH_* (0x400+), Platinum's sprites
 
 #define SHADOW_SIZE_S   0
 #define SHADOW_SIZE_M   1

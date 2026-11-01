@@ -21,7 +21,7 @@
   ],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_3",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_SNOW_M",
       "x": 67,
       "y": 18,
       "elevation": 3,
@@ -34,7 +34,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_SNOW_F",
       "x": 40,
       "y": 21,
       "elevation": 3,
@@ -47,7 +47,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BLACK_BELT",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BLACK_BELT",
       "x": 49,
       "y": 8,
       "elevation": 3,
@@ -60,7 +60,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_1",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SKIER_M",
       "x": 62,
       "y": 8,
       "elevation": 3,
@@ -73,7 +73,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_3",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_SNOW_M",
       "x": 11,
       "y": 10,
       "elevation": 3,
@@ -86,7 +86,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_SNOW_F",
       "x": 56,
       "y": 27,
       "elevation": 3,
@@ -99,7 +99,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_1",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SKIER_F",
       "x": 54,
       "y": 1,
       "elevation": 3,
@@ -112,7 +112,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_1",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SKIER_M",
       "x": 23,
       "y": 18,
       "elevation": 3,
@@ -125,7 +125,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_1",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SKIER_F",
       "x": 78,
       "y": 7,
       "elevation": 3,

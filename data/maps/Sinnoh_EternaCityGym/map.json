@@ -15,7 +15,7 @@
   "connections": [],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_1",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_GYM_GUIDE",
       "x": 9,
       "y": 25,
       "elevation": 3,
@@ -28,7 +28,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_PICNICKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_GARDENIA",
       "x": 11,
       "y": 3,
       "elevation": 3,
@@ -41,7 +41,7 @@
       "flag": "0x3410"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_LASS",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_LASS",
       "x": 14,
       "y": 22,
       "elevation": 3,
@@ -54,7 +54,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_2",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POKEMON_BREEDER_F",
       "x": 20,
       "y": 17,
       "elevation": 3,
@@ -67,7 +67,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_2",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POKEMON_BREEDER_F",
       "x": 2,
       "y": 7,
       "elevation": 3,

@@ -15,7 +15,7 @@
   "connections": [],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_OLD_MAN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_OLD_MAN",
       "x": 7,
       "y": 6,
       "elevation": 3,
@@ -28,7 +28,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BUG_CATCHER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BUG_CATCHER",
       "x": 5,
       "y": 5,
       "elevation": 3,

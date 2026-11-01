@@ -15,7 +15,7 @@
   "connections": [],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAGMA_MEMBER_F",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_JUPITER",
       "x": 14,
       "y": 6,
       "elevation": 3,
@@ -28,7 +28,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_AZURILL",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_CLEFAIRY",
       "x": 13,
       "y": 5,
       "elevation": 3,
@@ -41,7 +41,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_POKEFAN_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POKEFAN_M",
       "x": 14,
       "y": 9,
       "elevation": 3,
@@ -54,7 +54,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_AZURILL",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BUNEARY",
       "x": 15,
       "y": 5,
       "elevation": 3,

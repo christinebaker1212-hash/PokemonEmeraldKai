@@ -579,6 +579,21 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // life show|remember|minutes|trait|count|save|load|reveal|journal ... (mp_life.c)
         MP_Life_Debug(arg);
     }
+    else if (strcmp(cmd, "objpal") == 0)
+    {
+        // objpal MINGFX: each object with a graphics id from MINGFX on: its graphics id, its sprite's palette slot and colors (shown, unfaded)
+        u8 id;
+        for (id = 0; id < OBJECT_EVENTS_COUNT; id++)
+        if (gObjectEvents[id].active && OBJ_GFX_ID(&gObjectEvents[id]) >= atoi(arg))
+        {
+            struct Sprite *sp = &gSprites[gObjectEvents[id].spriteId];
+            int k, slot = sp->oam.paletteNum;
+            printf("[test] objpal %d: gfx %#x slot %d tag %#x:", id, (int)OBJ_GFX_ID(&gObjectEvents[id]), slot, GetSpritePaletteTagByPaletteNum(slot));
+            for (k = 0; k < 16; k++)
+                printf(" %04x/%04x", gPlttBufferFaded[OBJ_PLTT_ID(slot) + k], gPlttBufferUnfaded[OBJ_PLTT_ID(slot) + k]);
+            printf("\n");
+        }
+    }
     else if (strcmp(cmd, "dexorder") == 0)
     {
         // dexorder MODE ORDER: the POKéDEX list's mode (0 HOENN, 1 NATIONAL) and order (1 A-Z: only seen ones)

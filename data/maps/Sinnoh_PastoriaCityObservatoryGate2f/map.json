@@ -15,7 +15,7 @@
   "connections": [],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_F",
       "x": 5,
       "y": 10,
       "elevation": 3,
@@ -28,7 +28,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BUG_CATCHER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BUG_CATCHER",
       "x": 4,
       "y": 5,
       "elevation": 3,
@@ -41,7 +41,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_POKEFAN_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POKEFAN_M",
       "x": 3,
       "y": 9,
       "elevation": 3,
@@ -54,7 +54,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_PICNICKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_PICNICKER",
       "x": 7,
       "y": 5,
       "elevation": 3,

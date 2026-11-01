@@ -1,4 +1,5 @@
 #include "global.h"
+void S3D_Gfx_BattleTrainerPic(struct Sprite *sprite, u8 battler, u16 standIn);   // Moemon Kai (src/sinnoh/s3d_gfx.c)
 #include "mp.h"
 #include "mp_life_battle.h"
 #include "battle.h"
@@ -1314,6 +1315,7 @@ static void LinkOpponentHandleDrawTrainerPic(void)
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.paletteNum = IndexOfSpritePaletteTag(gTrainerFrontPicPaletteTable[trainerPicId].tag);
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.affineParam = trainerPicId;
     gSprites[gBattlerSpriteIds[gActiveBattler]].callback = SpriteCB_TrainerSlideIn;
+    S3D_Gfx_BattleTrainerPic(&gSprites[gBattlerSpriteIds[gActiveBattler]], gActiveBattler, trainerPicId);   // Moemon Kai: Platinum's picture
     if (gMpCoopBattle && !MP_Coop_TwoTrainers() && (GetBattlerPosition(gActiveBattler) != B_POSITION_OPPONENT_LEFT || gMpCoopWild))
         gSprites[gBattlerSpriteIds[gActiveBattler]].invisible = TRUE; // wild doubles: no trainer at all
 
@@ -1341,6 +1343,7 @@ static void LinkOpponentHandleTrainerSlide(void)
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.paletteNum = IndexOfSpritePaletteTag(gTrainerFrontPicPaletteTable[trainerPicId].tag);
     gSprites[gBattlerSpriteIds[gActiveBattler]].oam.affineParam = trainerPicId;
     gSprites[gBattlerSpriteIds[gActiveBattler]].callback = SpriteCB_TrainerSlideIn;
+    S3D_Gfx_BattleTrainerPic(&gSprites[gBattlerSpriteIds[gActiveBattler]], gActiveBattler, trainerPicId);   // Moemon Kai: Platinum's picture
 
     gBattlerControllerFuncs[gActiveBattler] = CompleteOnBankSpriteCallbackDummy2; // this line is redundant, because LinkOpponentBufferExecCompleted changes the battle battler function
     LinkOpponentBufferExecCompleted();

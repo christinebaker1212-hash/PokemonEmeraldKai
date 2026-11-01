@@ -26,7 +26,7 @@
   ],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_RICH_BOY",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_RICH_BOY",
       "x": 24,
       "y": 44,
       "elevation": 3,
@@ -39,7 +39,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BEAUTY",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_LADY",
       "x": 26,
       "y": 44,
       "elevation": 3,
@@ -52,7 +52,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_GENTLEMAN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_GENTLEMAN",
       "x": 7,
       "y": 60,
       "elevation": 3,
@@ -65,7 +65,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BEAUTY",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SOCIALITE",
       "x": 10,
       "y": 60,
       "elevation": 3,
@@ -78,7 +78,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_4",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POLICEMAN",
       "x": 10,
       "y": 23,
       "elevation": 3,
@@ -91,7 +91,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_4",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POLICEMAN",
       "x": 10,
       "y": 41,
       "elevation": 3,
@@ -104,7 +104,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_4",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POLICEMAN",
       "x": 12,
       "y": 51,
       "elevation": 3,
@@ -117,7 +117,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_4",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POLICEMAN",
       "x": 18,
       "y": 61,
       "elevation": 3,
@@ -312,7 +312,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_YOUNGSTER",
       "x": 13,
       "y": 69,
       "elevation": 3,
@@ -325,7 +325,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_FAT_MAN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_COLLECTOR",
       "x": 6,
       "y": 12,
       "elevation": 3,
@@ -338,7 +338,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_4",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POLICEMAN",
       "x": 10,
       "y": 23,
       "elevation": 3,
@@ -351,7 +351,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_4",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POLICEMAN",
       "x": 10,
       "y": 41,
       "elevation": 3,
@@ -364,7 +364,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_4",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POLICEMAN",
       "x": 12,
       "y": 51,
       "elevation": 3,
@@ -377,7 +377,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_4",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POLICEMAN",
       "x": 18,
       "y": 61,
       "elevation": 3,

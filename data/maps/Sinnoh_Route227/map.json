@@ -65,7 +65,7 @@
       "flag": "0x3642"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BARRY",
       "x": 3,
       "y": 49,
       "elevation": 3,
@@ -78,7 +78,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_3",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_CRASHER_WAKE",
       "x": 2,
       "y": 49,
       "elevation": 3,
@@ -91,7 +91,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_3",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_M",
       "x": 20,
       "y": 52,
       "elevation": 3,
@@ -104,7 +104,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_F",
       "x": 11,
       "y": 55,
       "elevation": 3,
@@ -117,7 +117,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BLACK_BELT",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BLACK_BELT",
       "x": 28,
       "y": 10,
       "elevation": 3,
@@ -130,7 +130,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_F",
       "x": 16,
       "y": 39,
       "elevation": 3,
@@ -169,7 +169,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BOY_3",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BUCK",
       "x": 22,
       "y": 19,
       "elevation": 3,

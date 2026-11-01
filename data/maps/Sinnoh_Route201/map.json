@@ -31,7 +31,7 @@
   ],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_2",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POKEMON_BREEDER_M",
       "x": 27,
       "y": 22,
       "elevation": 3,
@@ -44,7 +44,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MART_EMPLOYEE",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_CASHIER_M",
       "x": 44,
       "y": 10,
       "elevation": 3,
@@ -57,7 +57,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BARRY",
       "x": 16,
       "y": 23,
       "elevation": 3,
@@ -96,7 +96,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_PROF_BIRCH",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_PROF_ROWAN",
       "x": 9,
       "y": 21,
       "elevation": 3,
@@ -135,7 +135,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_GUITARIST",
       "x": 12,
       "y": 37,
       "elevation": 3,
@@ -148,7 +148,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SCHOOL_KID_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SCHOOL_KID_M",
       "x": 57,
       "y": 15,
       "elevation": 3,
@@ -174,7 +174,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_LASS",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_LASS",
       "x": 46,
       "y": 23,
       "elevation": 3,
@@ -187,7 +187,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BIRCHS_BAG",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BRIEFCASE",
       "x": 16,
       "y": 22,
       "elevation": 3,

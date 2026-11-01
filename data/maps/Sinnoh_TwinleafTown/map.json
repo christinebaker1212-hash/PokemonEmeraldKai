@@ -21,7 +21,7 @@
   ],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_2",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POKEMON_BREEDER_F",
       "x": 23,
       "y": 14,
       "elevation": 3,
@@ -34,7 +34,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_FAT_MAN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_COLLECTOR",
       "x": 12,
       "y": 25,
       "elevation": 3,
@@ -47,7 +47,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BARRY",
       "x": 9,
       "y": 11,
       "elevation": 3,
@@ -60,7 +60,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_GUITARIST",
       "x": 12,
       "y": 5,
       "elevation": 3,

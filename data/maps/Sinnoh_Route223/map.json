@@ -26,7 +26,7 @@
   ],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_SWIMMER_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SWIMMER_M",
       "x": 5,
       "y": 56,
       "elevation": 3,
@@ -39,7 +39,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SWIMMER_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SWIMMER_M",
       "x": 12,
       "y": 74,
       "elevation": 3,
@@ -52,7 +52,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SWIMMER_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SWIMMER_M",
       "x": 29,
       "y": 47,
       "elevation": 3,
@@ -65,7 +65,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SWIMMER_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SWIMMER_M",
       "x": 22,
       "y": 81,
       "elevation": 3,
@@ -78,7 +78,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SWIMMER_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SWIMMER_M",
       "x": 18,
       "y": 14,
       "elevation": 3,
@@ -91,7 +91,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SWIMMER_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SWIMMER_M",
       "x": 12,
       "y": 90,
       "elevation": 3,
@@ -104,7 +104,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SWIMMER_F",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SWIMMER_F",
       "x": 15,
       "y": 115,
       "elevation": 3,
@@ -117,7 +117,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SWIMMER_F",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SWIMMER_F",
       "x": 19,
       "y": 107,
       "elevation": 3,
@@ -130,7 +130,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SWIMMER_F",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SWIMMER_F",
       "x": 15,
       "y": 81,
       "elevation": 3,
@@ -143,7 +143,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SWIMMER_F",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SWIMMER_F",
       "x": 16,
       "y": 60,
       "elevation": 3,
@@ -156,7 +156,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SWIMMER_F",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SWIMMER_F",
       "x": 23,
       "y": 28,
       "elevation": 3,
@@ -169,7 +169,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SWIMMER_F",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SWIMMER_F",
       "x": 11,
       "y": 34,
       "elevation": 3,
@@ -208,7 +208,7 @@
       "flag": "0x362D"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SAILOR",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SAILOR",
       "x": 15,
       "y": 47,
       "elevation": 3,
@@ -221,7 +221,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_3",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_JASMINE",
       "x": 21,
       "y": 132,
       "elevation": 3,

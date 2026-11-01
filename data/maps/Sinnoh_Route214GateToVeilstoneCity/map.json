@@ -15,7 +15,7 @@
   "connections": [],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_2",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_MIDDLE_AGED_MAN",
       "x": 6,
       "y": 8,
       "elevation": 3,
@@ -28,7 +28,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_REPORTER_F",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_REPORTER",
       "x": 4,
       "y": 4,
       "elevation": 3,

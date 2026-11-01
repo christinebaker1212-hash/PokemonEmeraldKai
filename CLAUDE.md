@@ -7,7 +7,8 @@ SINNOH (Pokémon Platinum as a third region in a new 3D engine, the PÓKETCH): i
 engine (src/sinnoh/s3d.c, include/s3d.h) draws Platinum's own map models from sinnoh/platinum3d.pak, built from
 pret/pokeplatinum at a pinned commit by tools/sinnoh/make_pack.sh (run it before playing SINNOH from a build; the release
 runs it and ships the pack; never committed: sinnoh/ is ignored; no ROM needed); TWINLEAF TOWN and ROUTE 201 (group 40)
-walk; tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM]; COOP_NOTES "SINNOH's 3D engine".
+walk; tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM]; COOP_NOTES "SINNOH's 3D engine"; its people's sprites and battle pictures
+in sinnoh/platinum_gfx.pak (tools/sinnoh/build_gfx.py, src/sinnoh/s3d_gfx.c; test sinnoh_pics).
 
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
 card duels).

@@ -15,7 +15,7 @@
   "connections": [],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_EXPERT_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_EXPERT_M",
       "x": 13,
       "y": 17,
       "elevation": 3,
@@ -210,7 +210,7 @@
       "flag": "0x35B3"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_CYCLING_TRIATHLETE_F",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_CYCLIST_F",
       "x": 37,
       "y": 12,
       "elevation": 3,

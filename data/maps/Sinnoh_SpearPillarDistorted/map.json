@@ -15,7 +15,7 @@
   "connections": [],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_3",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_CYNTHIA",
       "x": 31,
       "y": 30,
       "elevation": 3,
@@ -41,7 +41,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAGMA_MEMBER_F",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_JUPITER",
       "x": 29,
       "y": 33,
       "elevation": 3,
@@ -54,7 +54,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAGMA_MEMBER_F",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_MARS",
       "x": 33,
       "y": 33,
       "elevation": 3,
@@ -67,7 +67,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAGMA_MEMBER_F",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_GRUNT_F",
       "x": 30,
       "y": 48,
       "elevation": 3,
@@ -80,7 +80,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAGMA_MEMBER_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_GRUNT_M",
       "x": 32,
       "y": 48,
       "elevation": 3,

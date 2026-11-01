@@ -15,7 +15,7 @@
   "connections": [],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_TEALA",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_TEALA",
       "x": 7,
       "y": 4,
       "elevation": 3,
@@ -28,7 +28,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_TEALA",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_TEALA",
       "x": 12,
       "y": 4,
       "elevation": 3,
@@ -41,7 +41,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_TEALA",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_TEALA",
       "x": 3,
       "y": 4,
       "elevation": 3,

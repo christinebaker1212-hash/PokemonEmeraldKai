@@ -1,6 +1,8 @@
-"""Platinum's overworld sprite and movement names -> the game's own (tools/sinnoh/gen_maps.py, SINNOH's people). The game
-has no Platinum sprites yet: each person gets the closest one it has, by kind (a trainer class, an item ball, a rock);
-signs, mailboxes and books are read where they stand (sign()).
+"""Platinum's overworld sprite and movement names -> the game's own (tools/sinnoh/gen_maps.py, SINNOH's people). A person
+whose sprite sheet is in sinnoh/platinum_gfx.pak (tools/sinnoh/build_gfx.py; the names in include/constants/sinnoh_gfx.h)
+is drawn as Platinum draws them (OBJ_EVENT_GFX_SINNOH_*); each also has the closest sprite the game has (standin(): by
+kind, a trainer class, an item ball, a rock), shown when the pack isn't there (src/data/sinnoh_gfx_standins.h).
+Signs, mailboxes and books are read where they stand (sign()).
 """
 import os
 import re
@@ -75,11 +77,32 @@ MOVEMENT = {
 }
 
 
+_platinum = None
+
+
+def platinum_sheets():
+    """Platinum's sprite sheets in the pack, by name (upper case)"""
+    global _platinum
+    if _platinum is None:
+        here = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        path = os.path.join(here, 'include/constants/sinnoh_gfx.h')
+        text = open(path).read() if os.path.exists(path) else ''
+        _platinum = re.findall(r'#define OBJ_EVENT_GFX_SINNOH_(\w+)\s+\(', text)
+    return _platinum
+
+
 def sprite(platinum):
     """The game's OBJ_EVENT_GFX_ name for a Platinum sprite, or None: not shown as a person"""
     name = platinum[len('OBJ_EVENT_GFX_'):] if platinum.startswith('OBJ_EVENT_GFX_') else platinum
     if HIDDEN.search(name):
         return None
+    if name in platinum_sheets():
+        return 'OBJ_EVENT_GFX_SINNOH_' + name
+    return standin(name)
+
+
+def standin(name):
+    """The closest sprite the game has itself"""
     if name in SPRITES:
         return 'OBJ_EVENT_GFX_' + SPRITES[name]
     if name in own() and not name.startswith('VAR_'):

@@ -31,7 +31,7 @@
   ],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_FISHERMAN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_FISHERMAN",
       "x": 39,
       "y": 42,
       "elevation": 3,
@@ -44,7 +44,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_POKEFAN_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POKEFAN_M",
       "x": 29,
       "y": 51,
       "elevation": 3,
@@ -57,7 +57,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_2",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POKEMON_BREEDER_F",
       "x": 51,
       "y": 38,
       "elevation": 3,
@@ -83,7 +83,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_2",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POKEMON_BREEDER_M",
       "x": 43,
       "y": 22,
       "elevation": 3,
@@ -96,7 +96,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_POKEFAN_F",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POKEFAN_F",
       "x": 43,
       "y": 32,
       "elevation": 3,
@@ -109,7 +109,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_ARTIST",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ARTIST",
       "x": 22,
       "y": 33,
       "elevation": 3,
@@ -122,7 +122,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BATTLE_GIRL",
       "x": 28,
       "y": 32,
       "elevation": 3,
@@ -135,7 +135,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BATTLE_GIRL",
       "x": 15,
       "y": 42,
       "elevation": 3,
@@ -148,7 +148,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_HIKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_HIKER",
       "x": 10,
       "y": 22,
       "elevation": 3,
@@ -161,7 +161,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_PIKACHU",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_PACHIRISU",
       "x": 10,
       "y": 23,
       "elevation": 3,
@@ -278,7 +278,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_POKEFAN_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POKEFAN_M",
       "x": 57,
       "y": 54,
       "elevation": 3,
@@ -291,7 +291,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_HIKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_HIKER",
       "x": 57,
       "y": 55,
       "elevation": 3,
@@ -304,7 +304,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_HIKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_HIKER",
       "x": 53,
       "y": 53,
       "elevation": 3,
@@ -369,7 +369,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_2",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POKEMON_BREEDER_F",
       "x": 15,
       "y": 29,
       "elevation": 3,
@@ -382,7 +382,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BLACK_BELT",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BLACK_BELT",
       "x": 24,
       "y": 17,
       "elevation": 3,
@@ -408,7 +408,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_2",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POKEMON_BREEDER_M",
       "x": 26,
       "y": 43,
       "elevation": 3,
@@ -434,7 +434,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_AZURILL",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BUNEARY",
       "x": 22,
       "y": 53,
       "elevation": 3,
@@ -447,7 +447,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BEAUTY",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_IDOL",
       "x": 22,
       "y": 53,
       "elevation": 3,
@@ -460,7 +460,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_1",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_GYM_GUIDE",
       "x": 51,
       "y": 26,
       "elevation": 3,
@@ -473,7 +473,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_ARTIST",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ARTIST",
       "x": 35,
       "y": 36,
       "elevation": 3,
@@ -486,7 +486,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BLACK_BELT",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BLACK_BELT",
       "x": 54,
       "y": 27,
       "elevation": 3,

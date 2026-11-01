@@ -26,7 +26,7 @@
   ],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_FISHERMAN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_FISHERMAN",
       "x": 59,
       "y": 19,
       "elevation": 3,
@@ -39,7 +39,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_FISHERMAN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_FISHERMAN",
       "x": 52,
       "y": 15,
       "elevation": 3,
@@ -52,7 +52,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_FISHERMAN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_FISHERMAN",
       "x": 51,
       "y": 24,
       "elevation": 3,
@@ -65,7 +65,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_3",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_M",
       "x": 103,
       "y": 23,
       "elevation": 3,
@@ -78,7 +78,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_F",
       "x": 9,
       "y": 10,
       "elevation": 3,
@@ -91,7 +91,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_3",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_M",
       "x": 9,
       "y": 13,
       "elevation": 3,
@@ -104,7 +104,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_4",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POLICEMAN",
       "x": 26,
       "y": 6,
       "elevation": 3,
@@ -117,7 +117,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SCIENTIST_1",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SCIENTIST_M",
       "x": 10,
       "y": 24,
       "elevation": 3,
@@ -130,7 +130,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_FAT_MAN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_COLLECTOR",
       "x": 44,
       "y": 21,
       "elevation": 3,
@@ -429,7 +429,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SCIENTIST_1",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SCIENTIST_M",
       "x": 93,
       "y": 7,
       "elevation": 3,
@@ -442,7 +442,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_2",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_PARASOL_LADY",
       "x": 72,
       "y": 16,
       "elevation": 3,
@@ -455,7 +455,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_2",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_PARASOL_LADY",
       "x": 80,
       "y": 5,
       "elevation": 3,
@@ -507,7 +507,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SCHOOL_KID_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SCHOOL_KID_M",
       "x": 46,
       "y": 12,
       "elevation": 3,
@@ -520,7 +520,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BEAUTY",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_LADY",
       "x": 95,
       "y": 19,
       "elevation": 3,
@@ -533,7 +533,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_FAT_MAN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_COLLECTOR",
       "x": 122,
       "y": 20,
       "elevation": 3,
@@ -546,7 +546,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_4",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POLICEMAN",
       "x": 26,
       "y": 6,
       "elevation": 3,

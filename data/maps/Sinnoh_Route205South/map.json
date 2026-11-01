@@ -36,7 +36,7 @@
   ],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_HIKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_HIKER",
       "x": 18,
       "y": 61,
       "elevation": 3,
@@ -49,7 +49,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_2",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POKEMON_BREEDER_F",
       "x": 23,
       "y": 57,
       "elevation": 3,
@@ -62,7 +62,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_CAMPER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_CAMPER",
       "x": 23,
       "y": 70,
       "elevation": 3,
@@ -75,7 +75,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_PICNICKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_PICNICKER",
       "x": 23,
       "y": 43,
       "elevation": 3,
@@ -88,7 +88,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_HIKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_HIKER",
       "x": 16,
       "y": 34,
       "elevation": 3,
@@ -101,7 +101,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BATTLE_GIRL",
       "x": 15,
       "y": 22,
       "elevation": 3,
@@ -140,7 +140,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BUG_CATCHER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BUG_CATCHER",
       "x": 17,
       "y": 8,
       "elevation": 3,
@@ -192,7 +192,7 @@
       "flag": "0x35CD"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAGMA_MEMBER_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_GRUNT_M",
       "x": 26,
       "y": 77,
       "elevation": 3,
@@ -205,7 +205,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAGMA_MEMBER_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_GRUNT_M",
       "x": 24,
       "y": 77,
       "elevation": 3,
@@ -270,7 +270,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_TWIN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_TWIN",
       "x": 19,
       "y": 85,
       "elevation": 3,
@@ -296,7 +296,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_PICNICKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_PICNICKER",
       "x": 16,
       "y": 19,
       "elevation": 3,
@@ -309,7 +309,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_CAMPER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_CAMPER",
       "x": 14,
       "y": 49,
       "elevation": 3,
@@ -439,7 +439,7 @@
       "flag": "0x35CB"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_YOUNGSTER",
       "x": 20,
       "y": 77,
       "elevation": 3,

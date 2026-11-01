@@ -28,7 +28,7 @@
       "flag": "0x35BA"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_2",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_MIDDLE_AGED_MAN",
       "x": 16,
       "y": 8,
       "elevation": 3,
@@ -41,7 +41,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_OLD_MAN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_OLD_MAN",
       "x": 15,
       "y": 8,
       "elevation": 3,
@@ -54,7 +54,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_4",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POLICEMAN",
       "x": 17,
       "y": 4,
       "elevation": 3,

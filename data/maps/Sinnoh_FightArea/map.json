@@ -91,7 +91,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SAILOR",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SAILOR",
       "x": 26,
       "y": 26,
       "elevation": 3,
@@ -104,7 +104,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_FISHERMAN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_FISHERMAN",
       "x": 20,
       "y": 7,
       "elevation": 3,
@@ -117,7 +117,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BARRY",
       "x": 20,
       "y": 18,
       "elevation": 3,
@@ -130,7 +130,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BOY_3",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BUCK",
       "x": 49,
       "y": 10,
       "elevation": 3,
@@ -195,7 +195,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_2",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POKEMON_BREEDER_M",
       "x": 44,
       "y": 24,
       "elevation": 3,
@@ -208,7 +208,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_3",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_M",
       "x": 50,
       "y": 12,
       "elevation": 3,
@@ -221,7 +221,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_F",
       "x": 49,
       "y": 17,
       "elevation": 3,
@@ -234,7 +234,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_TWIN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_TWIN",
       "x": 42,
       "y": 15,
       "elevation": 3,
@@ -247,7 +247,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BATTLE_GIRL",
       "x": 34,
       "y": 16,
       "elevation": 3,
@@ -260,7 +260,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SAILOR",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SAILOR",
       "x": 11,
       "y": 19,
       "elevation": 3,
@@ -273,7 +273,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BLACK_BELT",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BLACK_BELT",
       "x": 40,
       "y": 18,
       "elevation": 3,
@@ -312,7 +312,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_3",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_M",
       "x": 21,
       "y": 13,
       "elevation": 3,
@@ -325,7 +325,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BLACK_BELT",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BLACK_BELT",
       "x": 22,
       "y": 13,
       "elevation": 3,
@@ -338,7 +338,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_VOLKNER",
       "x": 47,
       "y": 8,
       "elevation": 3,
@@ -351,7 +351,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_3",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_FLINT",
       "x": 46,
       "y": 8,
       "elevation": 3,
@@ -364,7 +364,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_GENTLEMAN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_PALMER",
       "x": 47,
       "y": 7,
       "elevation": 3,
@@ -377,7 +377,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BLACK_BELT",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BLACK_BELT",
       "x": 44,
       "y": 13,
       "elevation": 3,
@@ -390,7 +390,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_F",
       "x": 43,
       "y": 12,
       "elevation": 3,
@@ -403,7 +403,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_3",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_M",
       "x": 43,
       "y": 11,
       "elevation": 3,
@@ -416,7 +416,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BATTLE_GIRL",
       "x": 49,
       "y": 12,
       "elevation": 3,
@@ -429,7 +429,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SAILOR",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SAILOR",
       "x": 49,
       "y": 11,
       "elevation": 3,

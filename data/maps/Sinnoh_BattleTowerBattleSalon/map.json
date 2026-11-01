@@ -15,7 +15,7 @@
   "connections": [],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_TEALA",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_TEALA",
       "x": 8,
       "y": 1,
       "elevation": 3,
@@ -28,7 +28,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_2",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_CHERYL",
       "x": 13,
       "y": 10,
       "elevation": 3,
@@ -41,7 +41,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_LITTLE_GIRL",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_MIRA",
       "x": 4,
       "y": 6,
       "elevation": 3,
@@ -54,7 +54,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_4",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_RILEY",
       "x": 11,
       "y": 8,
       "elevation": 3,
@@ -67,7 +67,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_GIRL_3",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_MARLEY",
       "x": 2,
       "y": 10,
       "elevation": 3,
@@ -80,7 +80,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BOY_3",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BUCK",
       "x": 7,
       "y": 9,
       "elevation": 3,

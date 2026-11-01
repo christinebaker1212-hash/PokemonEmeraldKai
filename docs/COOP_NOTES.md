@@ -3412,6 +3412,19 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   the 3D engine draws the picture): Platinum's table / PC / TV behaviors (0x80 / 0x83 / 0x86, the game's MB_COUNTER /
   MB_PC / MB_TELEVISION numbers) get that secondary's metatiles (build_pack.py BEHAVIOR_METATILE), so a nurse or clerk
   behind a counter is talked to across it. Test sinnoh_words.
+- People as Platinum draws them: tools/sinnoh/build_gfx.py (make_pack.sh runs it; fetch_decomp.sh PARTS 3 fetches
+  res/graphics/field_sprites and the trainers' front.png) writes sinnoh/platinum_gfx.pak beside the 3D pack, never
+  committed, shipped by package.sh: 151 overworld sheets (Platinum's 16 walking frames as the game's 9; the nurse's bow
+  as frame 9 for sAnimTable_Nurse; still 32x32 / 16x16 objects) and 105 class battle pictures (80x80, frame 0). The
+  committed side is names only: include/constants/sinnoh_gfx.h (`--names`: OBJ_EVENT_GFX_SINNOH_* = 0x400 + n: object events keep 12 bits of an id,
+  SINNOH_PIC_*), src/data/sinnoh_gfx_standins.h (each one's stand-in, sprites.py standin()) and
+  src/data/sinnoh_trainer_pics.h (gen_trainers.py: each trainer's class picture). event_object_movement.c
+  SinnohGraphicsInfo builds a graphics info from the pack (palette tag 0xB800 + n, loaded like JOHTO's / KANTO's by
+  QzLoadObjectPalette); without the pack the stand-in. Battles: src/sinnoh/s3d_gfx.c S3D_Gfx_BattleTrainerPic, called by
+  the opponent and link opponent controllers after the stand-in's sprite is made, loads Platinum's colors into its
+  palette slot and draws the 80x80 picture whole with mpBig (feet at the game's height). Breakable rocks, CUT trees,
+  boulders and item balls keep the game's own (their animations); the big legendaries and the grunts in a row aren't
+  taken yet. tools/sinnoh/png8.py reads the PNGs without Pillow. Test sinnoh_pics.
 - Wild POKéMON: tools/sinnoh/gen_wild.py POKEPLATINUM_DIR puts each kept place's base encounter table (species and
   levels from res/field/encounters) into src/data/wild_encounters.json as gSinnoh_* entries (154 places): grass 12
   slots and surfing 5 as in Emerald; fishing OLD 2 / GOOD 3 / SUPER 5 of Platinum's 5 a rod. Not yet: Platinum's

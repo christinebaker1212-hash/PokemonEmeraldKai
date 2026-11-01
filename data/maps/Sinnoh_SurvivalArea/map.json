@@ -65,7 +65,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_HIKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_RUIN_MANIAC",
       "x": 19,
       "y": 30,
       "elevation": 3,
@@ -78,7 +78,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BATTLE_GIRL",
       "x": 12,
       "y": 21,
       "elevation": 3,
@@ -91,7 +91,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_YOUNGSTER",
       "x": 27,
       "y": 18,
       "elevation": 3,
@@ -117,7 +117,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_CAMERAMAN",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_CAMERAMAN",
       "x": 11,
       "y": 28,
       "elevation": 3,
@@ -130,7 +130,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BOY_3",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BUCK",
       "x": 12,
       "y": 19,
       "elevation": 3,
@@ -169,7 +169,7 @@
       "flag": "0x3668"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BARRY",
       "x": 11,
       "y": 19,
       "elevation": 3,

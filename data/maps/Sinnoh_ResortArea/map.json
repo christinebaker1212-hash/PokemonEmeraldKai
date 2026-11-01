@@ -60,7 +60,7 @@
       "flag": "0x35BF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BEAUTY",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BEAUTY",
       "x": 6,
       "y": 10,
       "elevation": 3,
@@ -73,7 +73,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BEAUTY",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BEAUTY",
       "x": 22,
       "y": 11,
       "elevation": 3,
@@ -86,7 +86,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BLACK_BELT",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BLACK_BELT",
       "x": 9,
       "y": 29,
       "elevation": 3,
@@ -99,7 +99,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ACE_TRAINER_F",
       "x": 6,
       "y": 23,
       "elevation": 3,
@@ -164,7 +164,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SWIMMER_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SWIMMER_M",
       "x": 16,
       "y": 7,
       "elevation": 3,
@@ -190,7 +190,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_SCHOOL_KID_M",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SCHOOL_KID_M",
       "x": 16,
       "y": 25,
       "elevation": 3,
@@ -203,7 +203,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_PROF_BIRCH",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_PROF_ROWAN",
       "x": 21,
       "y": 25,
       "elevation": 3,
@@ -216,7 +216,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_PICNICKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_GARDENIA",
       "x": 22,
       "y": 25,
       "elevation": 3,
@@ -229,7 +229,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_HIKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BYRON",
       "x": 23,
       "y": 25,
       "elevation": 3,
@@ -242,7 +242,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_HIKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_ROARK",
       "x": 22,
       "y": 24,
       "elevation": 3,
@@ -255,7 +255,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_MAYLENE",
       "x": 22,
       "y": 26,
       "elevation": 3,

@@ -26,7 +26,7 @@
   ],
   "object_events": [
     {
-      "graphics_id": "OBJ_EVENT_GFX_HIKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_HIKER",
       "x": 47,
       "y": 26,
       "elevation": 3,
@@ -39,7 +39,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_LASS",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_SCHOOL_KID_F",
       "x": 32,
       "y": 18,
       "elevation": 3,
@@ -52,7 +52,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_POKEFAN_F",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_POKEFAN_F",
       "x": 45,
       "y": 38,
       "elevation": 3,
@@ -65,7 +65,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_RIVAL_BRENDAN_NORMAL",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BARRY",
       "x": 26,
       "y": 21,
       "elevation": 3,
@@ -78,7 +78,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_YOUNGSTER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_YOUNGSTER",
       "x": 10,
       "y": 16,
       "elevation": 3,
@@ -221,7 +221,7 @@
       "flag": "0x3FFF"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_HIKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_WORKER",
       "x": 11,
       "y": 25,
       "elevation": 3,
@@ -234,7 +234,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_HIKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_WORKER",
       "x": 56,
       "y": 57,
       "elevation": 3,
@@ -247,7 +247,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_CAMPER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_CAMPER",
       "x": 36,
       "y": 19,
       "elevation": 3,
@@ -260,7 +260,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_HIKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_WORKER",
       "x": 37,
       "y": 39,
       "elevation": 3,
@@ -273,7 +273,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_HIKER",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_WORKER",
       "x": 50,
       "y": 41,
       "elevation": 3,
@@ -286,7 +286,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_MAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_GUITARIST",
       "x": 23,
       "y": 13,
       "elevation": 3,
@@ -299,7 +299,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BATTLE_GIRL",
       "x": 36,
       "y": 23,
       "elevation": 3,
@@ -312,7 +312,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_ZIGZAGOON_1",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_MACHOP",
       "x": 55,
       "y": 56,
       "elevation": 3,
@@ -351,7 +351,7 @@
       "flag": "0x35AE"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_ZIGZAGOON_1",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_MACHOP",
       "x": 56,
       "y": 46,
       "elevation": 3,
@@ -364,7 +364,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_ZIGZAGOON_1",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_MACHOP",
       "x": 35,
       "y": 45,
       "elevation": 3,
@@ -377,7 +377,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_WOMAN_5",
+      "graphics_id": "OBJ_EVENT_GFX_SINNOH_BATTLE_GIRL",
       "x": 51,
       "y": 21,
       "elevation": 3,
