@@ -11,6 +11,10 @@
 
 #define MF_SCREEN_W 480
 #define MF_SCREEN_H 320
+// (1.63.14) MUGEN's own picture: 4:3 at the screen's height, in the middle of the 480x320 one (black beside it);
+// packs are shown as they were made (no wider view, no HUD moved, no screen sides filled), and display.c's STRETCH
+// fills the window with it (the user: the display's scaling rules over any fitting)
+#define MF_GAME_W 426
 
 // A player's buttons for one frame
 #define MF_BTN_UP     0x0001

@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include "arcade.h"
 #include "fight_engine.h"
+#include "platform/fight.h"   // (FIGHT_ARCADE_PIC_W)
 
 unsigned char gFightKind;
 
@@ -23,7 +24,7 @@ unsigned char gFightKind;
 #define KEEP          12      // frames kept for rollback (mp_fight.c guesses up to 8 ahead)
 #define LEAVE_FRAMES  120     // START held this long leaves
 #define LEAVE_SURE    12      // frames after that before it counts (past any guess)
-#define PIC_W         427     // the board's picture at 4:3 in the fight picture
+#define PIC_W         FIGHT_ARCADE_PIC_W   // the board's picture at 4:3 in the fight picture
 #define PIC_X         ((MF_SCREEN_W - PIC_W) / 2)
 #define STATE_CAP     (8u << 20)
 

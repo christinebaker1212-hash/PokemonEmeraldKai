@@ -22,7 +22,11 @@ void Fight_BindWrite(void *file);                         // a FILE *
 // filtered as the game's 240x160 is
 #define FIGHT_CANVAS_W 480
 #define FIGHT_CANVAS_H 320
+#define FIGHT_ARCADE_PIC_W 427   // an arcade board's picture at 4:3 in it (MUGEN's: MF_GAME_W)
 struct SDL_Texture *Fight_Canvas(struct SDL_Renderer *r);
+// The game's own 4:3 picture in the canvas (x, w; the full height), black beside it: PIXEL PERFECT and SHARP FIT show
+// the whole canvas as the game picture is shown, STRETCH this part over the window (1.63.14)
+void Fight_ContentSpan(int *x, int *w);
 int Fight_SaveCanvasBMP(const char *path);  // tests: that picture as a BMP (0 saved)
 void Fight_DestroyTextures(void);
 // The fight as a 240x160 GBA frame, else NULL (spectating)

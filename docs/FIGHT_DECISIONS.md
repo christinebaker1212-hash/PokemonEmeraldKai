@@ -252,6 +252,14 @@ Where the plan below changed on the way:
 - `Platform_GetFrame` gives spectators a 240x160 reduction while a fight is on.
 
 ### Screen fitting
+**Replaced in 1.63.14** (the user: the display's scaling rules over any fitting attempts; revert MUGEN's): MUGEN draws
+its own 4:3 picture, MF_GAME_W x 320 (426), in the middle of the 480x320 with black beside it, as the arcade boards'
+(427). Packs keep their own camera width (no wider view), the HUD stays where the pack has it (MfFit_Hud and
+cabinets.ini's `hud.top` aren't applied) and the 4:3 screens' sides aren't filled (Host_SidesWanted). display.c shows the
+canvas as the game picture at PIXEL PERFECT and SHARP FIT, and at STRETCH only the game's 4:3 picture
+(Fight_ContentSpan) over the whole window. The pack summary's core mixes in MF_GAME_W, so builds before it say the
+fight files differ instead of desyncing. What follows is the 3:2 design as it was.
+
 - `mugen.cfg` sizes are forced to 480x320.
 - Packs keep their `localcoord`. The scale is 320 / localcoord height, and the camera width is
   480 / scale. A 320x240 stage gets about 20 more stage pixels on each side.

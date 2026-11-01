@@ -2,7 +2,8 @@
 # Moemon Fight's display test (fight_display): each rendershot (the window) against the fightshot of the same frame
 # (the fight's own 480x320 picture), rendered here the way display.c renders the game's 240x160 in that mode:
 #   PIXEL PERFECT: the GBA screen's biggest whole multiple, centred; the fight inside it at half that
-#   SHARP FIT / STRETCH: 3:2 fitted / the whole window
+#   SHARP FIT / STRETCH: 3:2 fitted / the whole window, STRETCH with only the game's own 4:3 picture (1.63.14: the
+#   MUGEN cabinet's 426 columns in the middle, MF_GAME_W)
 #   a whole multiple of the fight's picture: nearest, exact; otherwise sharp-bilinear (nearest to the next whole
 #   multiple, then linear down to the size)
 #   filters: scanlines (the last row of each picture pixel darker, alpha 72) or the LCD grid (last row and column,
@@ -15,6 +16,7 @@ import numpy as np
 from PIL import Image
 
 GBA_W, GBA_H, SRC_W, SRC_H = 240, 160, 480, 320
+GAME_W = 426   # MUGEN's own picture (include/mf_engine.h MF_GAME_W), centred in the 480x320
 
 
 def load(path):
@@ -55,13 +57,13 @@ def linear(src, dw, dh):
     return top * (1 - fy) + bot * fy
 
 
-def overlay(kx, ky, filt):
+def overlay(kx, ky, filt, sw=SRC_W, sh=SRC_H):
     def scan(p, k):
         return 72 if k >= 2 and p == k - 1 else 32 if k >= 6 and p == k - 2 else 0
 
     def grid(p, k):
         return 60 if k >= 3 and p == k - 1 else 24 if k >= 8 and p == k - 2 else 0
-    a = np.zeros((SRC_H * ky, SRC_W * kx))
+    a = np.zeros((sh * ky, sw * kx))
     for y in range(ky):
         for x in range(kx):
             a[y::ky, x::kx] = max(grid(y, ky), grid(x, kx)) if filt == 'grid' else scan(y, ky)
@@ -70,14 +72,18 @@ def overlay(kx, ky, filt):
 
 def expect(src, mode, filt, w, h):
     x, y, dw, dh = dst_rect(mode, w, h)
-    kx, ky = -(-dw // SRC_W), -(-dh // SRC_H)
-    exact = dw == SRC_W * kx and dh == SRC_H * ky
+    if mode == 'stretch':
+        left = (SRC_W - GAME_W) // 2
+        src = src[:, left:left + GAME_W]
+    sh, sw = src.shape[:2]
+    kx, ky = -(-dw // sw), -(-dh // sh)
+    exact = dw == sw * kx and dh == sh * ky
     big = src.repeat(ky, 0).repeat(kx, 1)
     on = False
     if filt != 'off':
-        on = (ky >= 2 if filt == 'scan' else kx >= 3 and ky >= 3) if exact else dw >= SRC_W * 3 and dh >= SRC_H * 3
+        on = (ky >= 2 if filt == 'scan' else kx >= 3 and ky >= 3) if exact else dw >= sw * 3 and dh >= sh * 3
     if on:
-        big = big * (255 - overlay(kx, ky, filt)[:, :, None]) / 255.0
+        big = big * (255 - overlay(kx, ky, filt, sw, sh)[:, :, None]) / 255.0
     out = big if exact else linear(big, dw, dh)
     return (x, y, dw, dh), exact, out
 

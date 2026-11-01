@@ -3471,7 +3471,14 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   says no (there's no wireless UNION ROOM), and InitUnionRoom only clears the name: its Task_InitUnionRoom is a stub,
   so the struct it allocated was never freed (a leak per POKeMON CENTER entered). Test nurse_no_union (CHERRYGROVE).
 
-## 1.63.14: every follower style placed as PMD, one shadow size, SPRITE SCALING in 5% steps
+## 1.63.14: every follower style placed as PMD, one shadow size, SPRITE SCALING in 5% steps, GAME CENTER pictures
+- GAME CENTER games follow OPTIONS > DISPLAY > SCALING (the user): PIXEL PERFECT / SHARP FIT show a VS cabinet's
+  480x320 as the game picture (the game's 4:3 in the middle, black beside it), STRETCH only that 4:3 picture over the
+  window (display.c srcRect from platform/fight.h Fight_ContentSpan: FIGHT_ARCADE_PIC_W 427, MUGEN's MF_GAME_W 426).
+  MUGEN's 3:2 fitting is gone (FIGHT_DECISIONS "Screen fitting"): its picture is 4:3 (mf_host.c MfHost_ConfigLoaded,
+  MfHost_Present centres it), no wider camera, no HUD moved, no screen sides filled. The countdown and signal overlays
+  stay inside the 4:3 picture. The DANCE machine and the card games draw the whole 240x160 game picture already, so
+  they follow every mode as the game does. Test fight_display (STRETCH: the 426 middle columns over the window).
 - mp_shadow.c MP_SpriteStandShift: a follower's or Garden POKeMON's own (GBA-size) sprite stands as a PMD picture
   does: its first frame's lowest row on the player's line (PMD_GROUND_DY + PMD_FEET_DY below its tile's middle, as
   mp_pmd.c UpdateLift), the middle of its pixels for the facing (anim dir * 2, hFlip mirrored) on its point

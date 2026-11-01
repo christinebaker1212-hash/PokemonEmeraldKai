@@ -327,20 +327,21 @@ void MfHost_ConfigLoaded(void)
     BgmPluginEntry *plugin;
     DynArray *plugins;
 
-    /* the picture: the software renderer, 480x320 */
+    /* the picture: the software renderer, 4:3 at 320 high (1.63.14: MF_GAME_W; it was the whole 480x320, the view
+     * widened and the HUD moved out to its edges); MfHost_Present puts it in the middle of the 480x320 */
     g->render_mode = RENDER_SYSTEM;
     g->depth = 16;
     g->video_flags = 0;
-    g->video_width = MF_SCREEN_W;
+    g->video_width = MF_GAME_W;
     g->video_height = MF_SCREEN_H;
     g->stage_fit = 0;
     g->system_fit = 0;
     g->safe_mode = 0;
-    g->game_width = MF_SCREEN_W;
+    g->game_width = MF_GAME_W;
     g->game_height = MF_SCREEN_H;
-    g->game_coord[0] = MF_SCREEN_W;
+    g->game_coord[0] = MF_GAME_W;
     g->game_coord[1] = MF_SCREEN_H;
-    g->game_coord[2] = (MF_SCREEN_W - 1) / 2;
+    g->game_coord[2] = (MF_GAME_W - 1) / 2;
     g->game_coord[3] = (MF_SCREEN_H - 1) / 2;
     memcpy(g_gameCoord, g->game_coord, sizeof(g_gameCoord));
     g->game_speed = 60;
@@ -439,7 +440,9 @@ static SDL_Surface *Host_Target(void)
 
 static int Host_SidesWanted(void)
 {
-    return sMotifScreen && g_mfMotifOffsetX > 0 && !g_game->skip_draw;
+    /* (1.63.14) never: the picture is the pack's 4:3 with black beside it, as an arcade board's (the sides were filled
+     * with the screen's background while the picture was the whole 3:2) */
+    return 0;
 }
 
 void MfHost_KeepBackground(void)
@@ -544,16 +547,18 @@ void MfHost_Present(const SDL_Surface *surface)
     if (w < MF_SCREEN_W || h < MF_SCREEN_H) {
         memset(dst, 0, sizeof(sFrames[0]));
     }
+    /* (1.63.14) the 4:3 picture in the middle */
+    dst += (MF_SCREEN_W - w) / 2;
     for (y = 0; y < h; y++) {
         memcpy(dst + y * MF_SCREEN_W, (const unsigned char *)surface->pixels + y * surface->pitch, (size_t)w * 2);
     }
     if (sMotifScreen && g_mfMotifOffsetX > 0 && !sSidesDone) {
         /* a screen without a background (MfHost_FillSides): what slides past its 4:3 edges isn't shown */
         int right = g_mfMotifOffsetX + (int)floor(g_game->motif_coord[0] * g_game->motif_scale + 0.5);
-        for (y = 0; y < MF_SCREEN_H; y++) {
-            memset(dst + y * MF_SCREEN_W, 0, (size_t)g_mfMotifOffsetX * 2);
-            if (right < MF_SCREEN_W) {
-                memset(dst + y * MF_SCREEN_W + right, 0, (size_t)(MF_SCREEN_W - right) * 2);
+        for (y = 0; y < h; y++) {   /* (within the picture: dst is its left edge) */
+            memset(dst + y * MF_SCREEN_W, 0, (size_t)(g_mfMotifOffsetX < w ? g_mfMotifOffsetX : w) * 2);
+            if (right < w) {
+                memset(dst + y * MF_SCREEN_W + right, 0, (size_t)(w - right) * 2);
             }
         }
     }
@@ -914,8 +919,7 @@ static void Host_ApplyCabinet(const char *cabinet)
         ini = Ini_Open("cabinets.ini");
     }
     if (ini == NULL) {
-        MfFit_Hud(hud_top);
-        return;
+        return;   /* (1.63.14: the HUD is the pack's own, as MfHost_FitMotif leaves it: no MfFit_Hud) */
     }
     if (Ini_SelectGroup(ini, cabinet) != -1) {
         if (Ini_GetInt(ini, "hud.top", &v) && v >= -1 && v <= 80) {
@@ -954,7 +958,7 @@ static void Host_ApplyCabinet(const char *cabinet)
     if (getenv("MOEMON_FIGHT_TIME") != NULL && atoi(getenv("MOEMON_FIGHT_TIME")) >= 5) {
         g->time = atoi(getenv("MOEMON_FIGHT_TIME"));
     }
-    MfFit_Hud(hud_top);
+    (void)hud_top;   /* (1.63.14: cabinets.ini's hud.top and MfFit_Hud no longer move the pack's HUD) */
 }
 
 /*

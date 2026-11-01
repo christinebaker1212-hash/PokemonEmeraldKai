@@ -283,7 +283,7 @@ int MfEngine_PackSummary(const char *cabinet, struct MfPack *out)
     char motif[0x200], select[0x200], stages[0x400], real[0x400], line[0x400];
     static char extra[MF_PACK_MAX][0x80], own[MF_PACK_MAX][0x80];
     int extraCount = 0, ownCount = 0, inChars = 0, inExtra = 0, i;
-    u64h core = 0xC0DE;
+    u64h core = 0xC0DE ^ ((u64h)MF_GAME_W << 16);   /* (1.63.14: the 4:3 picture: older builds' fights differ) */
     FILE *f;
 
     memset(out, 0, sizeof(*out));

@@ -493,6 +493,12 @@ static const unsigned short *ApplyCrt(const unsigned short *src)
     return sCrt;
 }
 
+void Fight_ContentSpan(int *x, int *w)
+{
+    *w = gFightKind >= FIGHT_KIND_ARCADE ? FIGHT_ARCADE_PIC_W : MF_GAME_W;
+    *x = (MF_SCREEN_W - *w) / 2;
+}
+
 // The picture to show: the engine's (or the one held), with the messages over it and the CRT effect
 // (*version changes when any of it does)
 static const unsigned short *Fight_Picture(unsigned int *version)
@@ -513,15 +519,19 @@ static const unsigned short *Fight_Picture(unsigned int *version)
     memcpy(sComposed, frame, sizeof(sComposed));
     if (sOverlayText[0] != '\0')
     {
-        int w = (int)strlen(sOverlayText) * 12;
+        int w = (int)strlen(sOverlayText) * 12, cx, cw;
         int x = (MF_SCREEN_W - w) / 2, y = MF_SCREEN_H / 2 - 8;
-        Darken(0, y - 10, MF_SCREEN_W, 36);
+        Fight_ContentSpan(&cx, &cw);
+        Darken(cx, y - 10, cw, 36);   // (over the game's own picture: STRETCH shows only that)
         DrawText(sOverlayText, x, y);
     }
     if (sOverlaySignal)
     {
-        // four bars, one lit (red): the connection is poor
-        int x = MF_SCREEN_W - 8 - 26, y = MF_SCREEN_H - 8 - 20, i;
+        // four bars, one lit (red): the connection is poor (inside the game's own picture)
+        int cx, cw, i;
+        int x, y = MF_SCREEN_H - 8 - 20;
+        Fight_ContentSpan(&cx, &cw);
+        x = cx + cw - 8 - 26;
         Darken(x - 4, y - 4, 34, 28);
         for (i = 0; i < 4; i++)
             Fill(x + i * 7, y + 20 - (i + 1) * 5, 5, (i + 1) * 5, i == 0 ? 0xF800 : 0x52AA);

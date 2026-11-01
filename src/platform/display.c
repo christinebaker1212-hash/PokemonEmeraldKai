@@ -1249,7 +1249,8 @@ int Display_WindowToGame(int wx, int wy, int *gx, int *gy)
 static void RenderToBackbuffer(void)
 {
     int outW = 0, outH = 0, kx, ky, exact, filterOn, fullW, fullH, gameX = 0, gameY = 0, srcW = GBA_W, srcH = GBA_H;
-    SDL_Rect dst;
+    SDL_Rect dst, srcRect;
+    const SDL_Rect *src = NULL;   // (the part of the game picture shown: all of it but a fight's at STRETCH)
     SDL_Texture *gameTex;
     int panelH = 0;
     struct PanelLayout L;
@@ -1297,6 +1298,16 @@ static void RenderToBackbuffer(void)
             gameTex = fight;
             srcW = FIGHT_CANVAS_W;
             srcH = FIGHT_CANVAS_H;
+            // (1.63.14) STRETCH: the game's own 4:3 picture (an arcade board's, MUGEN's) over the whole window, not
+            // the canvas with its black sides; the other modes show the canvas as the game picture is shown
+            if (sCfg.scaleMode == DISPLAY_SCALE_STRETCH)
+            {
+                Fight_ContentSpan(&srcRect.x, &srcRect.w);
+                srcRect.y = 0;
+                srcRect.h = FIGHT_CANVAS_H;
+                srcW = srcRect.w;
+                src = &srcRect;
+            }
         }
     }
     kx = CeilDiv(dst.w, srcW);
@@ -1324,14 +1335,14 @@ static void RenderToBackbuffer(void)
 
     if (exact)
     {
-        SDL_RenderCopy(sRenderer, gameTex, NULL, &dst);
+        SDL_RenderCopy(sRenderer, gameTex, src, &dst);
         if (filterOn)
             SDL_RenderCopy(sRenderer, sOverlayTex, NULL, &dst);
     }
     else if (sTargetsSupported && EnsureScaleTex(kx, ky, srcW, srcH) && SDL_SetRenderTarget(sRenderer, sScaleTex) == 0)
     {
         // Sharp-bilinear: whole-number nearest enlarge, then linear to the output rect.
-        SDL_RenderCopy(sRenderer, gameTex, NULL, NULL);
+        SDL_RenderCopy(sRenderer, gameTex, src, NULL);
         if (filterOn)
             SDL_RenderCopy(sRenderer, sOverlayTex, NULL, NULL);
         SDL_SetRenderTarget(sRenderer, NULL);
@@ -1339,7 +1350,7 @@ static void RenderToBackbuffer(void)
     }
     else
     {
-        SDL_RenderCopy(sRenderer, gameTex, NULL, &dst);
+        SDL_RenderCopy(sRenderer, gameTex, src, &dst);
         filterOn = 0;
     }
     sFilterShown = filterOn;
