@@ -167,6 +167,10 @@ def talk_trainer(root, p, o):
     return None
 
 
+OBSTACLES = {'OBJ_EVENT_GFX_CUT_TREE': 'EventScript_CutTree', 'OBJ_EVENT_GFX_ROCK_SMASH': 'EventScript_RockSmash',
+             'OBJ_EVENT_GFX_STRENGTH_BOULDER': 'EventScript_StrengthBoulder'}
+
+
 def people(p, root, have):
     """The place's people: where they stand, the game's closest sprite (tools/sinnoh/sprites.py), how they move, their
     hide flag (SINNOH's number, tools/sinnoh/ids.py) and their script. Local ids follow Platinum's order; those with
@@ -190,6 +194,15 @@ def people(p, root, have):
             # (one who battles when talked to: gen_trainers.py TALK; no sight)
             script = gen_trainers.label(talk)
             hide = None if not isinstance(hide, str) or not hide.startswith('FLAG_') else hide
+        obstacle = OBSTACLES.get(o['graphics_id'])
+        if obstacle and gfx and inside(p, o['x'], o['z']):
+            # a CUT tree, a ROCK SMASH rock or a STRENGTH boulder: the game's own script; no flag, so it's back each
+            # time the map loads (as Platinum's and the game's own)
+            out.append({'graphics_id': gfx, 'x': o['x'] - p['x0'] * 32, 'y': o['z'] - p['z0'] * 32, 'elevation': 3,
+                        'movement_type': 'MOVEMENT_TYPE_NONE', 'movement_range_x': 0, 'movement_range_y': 0,
+                        'trainer_type': 'TRAINER_TYPE_NONE', 'trainer_sight_or_berry_tree_id': '0',
+                        'script': obstacle, 'flag': '0'})
+            continue
         legend = legends.scripts().get((p['name'], i + 1))
         if legend:
             # a legendary: its battle (tools/sinnoh/legends.py), shown by its hide flag (Sinnoh_LegendsRefresh)

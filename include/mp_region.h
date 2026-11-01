@@ -43,6 +43,9 @@ extern struct RegionState gRegionState;
 u8 MP_Region_OfGroup(u8 group);
 u16 MP_Region_BadgeFlag(u8 region, u8 badge);
 u8 MP_Region_BadgeCount(u8 region);
+u16 MP_Region_FieldMoveBadge(u8 hm);    // an HM's badge flag (0 cut .. 7 waterfall; Platinum's on a SINNOH map)
+bool8 MP_Region_HasFieldMoveBadge(u8 hm);
+u16 MP_FieldMoveHasBadge(void);          // special: VAR_0x8004 -> VAR_RESULT
 bool8 MP_Region_Cleared(u8 region);
 void MP_Region_SetCleared(u8 region);
 bool8 MP_Region_AnyCleared(void);   // an Elite Four beaten in any region (the GLOBAL PC)

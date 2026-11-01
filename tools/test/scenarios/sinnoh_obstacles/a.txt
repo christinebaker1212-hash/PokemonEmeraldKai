@@ -1,0 +1,28 @@
+pressuntil A field 5000
+mp textspeed 2
+mp teach 0 249
+mp setflag 0x3320
+wait 30
+mp warp 42,85,19,7
+wait 90
+waitfor field 1000
+press UP 4
+wait 10
+press UP 20
+wait 20
+mp where
+shot t_rock0
+press A 2
+waitfor yesno 600
+shot t_rockA
+press A 2
+press A 2
+wait 200
+mash A 6 10
+waitfor field 1000
+wait 30
+press UP 20
+wait 30
+mp where
+shot t_rock1
+quit

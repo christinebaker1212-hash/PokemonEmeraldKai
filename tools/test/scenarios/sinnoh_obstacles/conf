@@ -1,0 +1,8 @@
+# SINNOH's field obstacles (tools/sinnoh/gen_maps.py OBSTACLES): the ROCK SMASH rock at OREBURGH GATE 1F 19,6 blocks the
+# way north from 19,7 until it's smashed (the game's own EventScript_RockSmash, with SINNOH's COAL BADGE, flag
+# 0x3320: MP_Region_FieldMoveBadge), then the player walks on through.
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=74:30"
+EXPECT_A=("where map 42.85 xy 19,7" "where map 42.85 xy 19,5")
+UNEXPECT_A=("[crash]" "TIMEOUT")

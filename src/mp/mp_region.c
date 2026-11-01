@@ -507,6 +507,30 @@ u16 MP_Region_BadgeFlag(u8 region, u8 badge)
     return sBadgeFlags[region] + badge;
 }
 
+// The badge an HM's field move waits for (FIELD_MOVE_CUT .. FIELD_MOVE_WATERFALL: the game's badge order): HOENN's,
+// but on a SINNOH map Platinum's (CUT the FOREST BADGE, FLASH and ROCK SMASH the COAL BADGE, STRENGTH the MINE BADGE,
+// SURF and DIVE the FEN BADGE, FLY the COBBLE BADGE, WATERFALL the BEACON BADGE)
+u16 MP_Region_FieldMoveBadge(u8 hm)
+{
+    static const u8 sSinnoh[8] = {1, 0, 0, 5, 3, 2, 3, 7};
+    if (hm >= 8)
+        return 0;
+    if (MP_Region_OfGroup(gSaveBlock1Ptr->location.mapGroup) == REGION_SINNOH)
+        return MP_Region_BadgeFlag(REGION_SINNOH, sSinnoh[hm]);
+    return FLAG_BADGE01_GET + hm;
+}
+
+bool8 MP_Region_HasFieldMoveBadge(u8 hm)
+{
+    return FlagGet(MP_Region_FieldMoveBadge(hm));
+}
+
+// (scripts: VAR_0x8004 the field move's badge index -> VAR_RESULT)
+u16 MP_FieldMoveHasBadge(void)
+{
+    return MP_Region_HasFieldMoveBadge(gSpecialVar_0x8004);
+}
+
 u8 MP_Region_BadgeCount(u8 region)
 {
     u8 i, n = 0;

@@ -634,4 +634,5 @@ gSpecials::
 	def_special Sinnoh_CanalaveRide
 	def_special Sinnoh_EternaClock
 	def_special Sinnoh_VeilstoneBag
+	def_special MP_FieldMoveHasBadge
 	.include "data/qz_specials.inc"   @ Moemon Kai: Quetzal's specials (Johto / Kanto)

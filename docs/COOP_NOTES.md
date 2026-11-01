@@ -3346,6 +3346,13 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   POKEPLATINUM_DIR [outdoor|indoor] lists what's left: nothing since 2026-11-01 (1362 people and signs). The
   buildings' are tools/sinnoh/words_indoor.py: KINDS (bookshelves, beds, statues, gym guides...: by Platinum's script
   entry name) and INDOOR (each map's people). gen_words.py refuses a map written twice in any of the three files.
+- Field obstacles (2026-11-01): Platinum's CUT trees, ROCK SMASH rocks and STRENGTH boulders (690) are the game's
+  own (gen_maps.py OBSTACLES: EventScript_CutTree / _RockSmash / _StrengthBoulder, no flag, back each time the map
+  loads as in both games). HM badges are the region's: MP_Region_FieldMoveBadge (mp_region.c) gives HOENN's badge for
+  a field move (the game's order, FIELD_MOVE_CUT .. WATERFALL), and on a SINNOH map Platinum's (CUT FOREST, FLASH and
+  ROCK SMASH COAL, STRENGTH MINE, SURF and DIVE FEN, FLY COBBLE, WATERFALL BEACON); the party menu, the SURF /
+  WATERFALL / DIVE prompts (field_control_avatar.c) and field_move_scripts.inc (special MP_FieldMoveHasBadge) ask it.
+  Test sinnoh_obstacles.
 - Items on the ground (tools/sinnoh/items.py): an item ball (Platinum script 7000 + k, the k-th entry of its visible
   items' list) gets the shared script for its item (data/scripts/sinnoh_items.inc, `finditem`, written by gen_maps.py)
   and keeps its Platinum "obtained" flag as a SINNOH number; a hidden item (script 8000 + k, the k-th of its hidden
