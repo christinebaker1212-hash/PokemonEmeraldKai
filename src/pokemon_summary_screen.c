@@ -4282,6 +4282,11 @@ static void BufferMonTrainerMemo(void)
             GetMapName(metLocationString, MAPSEC_JOHTO_FIRST + sum->metLocation, 0);   // Moemon Kai: met in JOHTO
             DynamicPlaceholderTextUtil_SetPlaceholderPtr(4, metLocationString);
         }
+        else if (sum->metGame == MP_METGAME_SINNOH && sum->metLocation < MAPSEC_SINNOH_END - MAPSEC_SINNOH_FIRST)
+        {
+            GetMapName(metLocationString, MAPSEC_SINNOH_FIRST + sum->metLocation, 0);   // Moemon Kai: met in SINNOH
+            DynamicPlaceholderTextUtil_SetPlaceholderPtr(4, metLocationString);
+        }
         else if (sum->metLocation < MAPSEC_NONE)
         {
             GetMapNameHandleAquaHideout(metLocationString, sum->metLocation);

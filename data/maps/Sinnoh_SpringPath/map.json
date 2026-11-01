@@ -3,7 +3,7 @@
   "name": "Sinnoh_SpringPath",
   "layout": "LAYOUT_SINNOH_SPRING_PATH",
   "music": "MUS_SINNOH_ROUTE210",
-  "region_map_section": "MAPSEC_NONE",
+  "region_map_section": "MAPSEC_SINNOH_SPRING_PATH",
   "requires_flash": false,
   "weather": "WEATHER_SUNNY",
   "map_type": "MAP_TYPE_ROUTE",

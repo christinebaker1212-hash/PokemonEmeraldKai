@@ -3,7 +3,7 @@
   "name": "Sinnoh_Route217NortheastHouse",
   "layout": "LAYOUT_SINNOH_ROUTE217_NORTHEAST_HOUSE",
   "music": "MUS_SINNOH_ROUTE216",
-  "region_map_section": "MAPSEC_NONE",
+  "region_map_section": "MAPSEC_SINNOH_ROUTE_217",
   "requires_flash": false,
   "weather": "WEATHER_SUNNY",
   "map_type": "MAP_TYPE_INDOOR",

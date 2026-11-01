@@ -117,6 +117,7 @@ u8 MP_RegionMap_PlayerMap(void);
 u8 MP_RegionMap_MapOf(mapsec_u16_t mapsec);
 void MP_RegionMap_AreaBox(mapsec_u16_t mapsec, u16 *x, u16 *y, u16 *w, u16 *h);
 bool8 MP_RegionMap_AreaGfx(const u32 **gfx, const u32 **tilemap, const u16 **pal);
+void MP_RegionMap_AreaPicture(u8 bg);   // Moemon Kai: SINNOH's TOWN MAP picture on the AREA page's BG
 void PokedexAreaScreen_UpdateRegionMapVariablesAndVideoRegs(s16 x, s16 y);
 void CB2_OpenFlyMap(void);
 bool8 IsRegionMapZoomed(void);

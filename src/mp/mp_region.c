@@ -1380,6 +1380,13 @@ void MP_Region_TagMet(struct BoxPokemon *b)
     u8 game = MP_METGAME_JOHTO;
     if (gMapHeader.regionMapSectionId >= MAPSEC_JOHTO_FIRST && gMapHeader.regionMapSectionId < MAPSEC_JOHTO_END)
         SetBoxMonData(b, MON_DATA_MET_GAME, &game);
+    if (gMapHeader.regionMapSectionId >= MAPSEC_SINNOH_FIRST && gMapHeader.regionMapSectionId < MAPSEC_SINNOH_END)
+    {
+        u8 loc = gMapHeader.regionMapSectionId - MAPSEC_SINNOH_FIRST;   // (SINNOH's met location: n past its first)
+        game = MP_METGAME_SINNOH;
+        SetBoxMonData(b, MON_DATA_MET_GAME, &game);
+        SetBoxMonData(b, MON_DATA_MET_LOCATION, &loc);
+    }
 }
 
 // A map of another region was entered without the boat (ROUTE 22's gate, the debug warp): the same change of PC
@@ -1392,6 +1399,11 @@ void MP_Region_OnMapLoaded(void)
     {
         u16 QzGiovanniStoryUpdateFlags(void);
         QzGiovanniStoryUpdateFlags();   // Quetzal refreshes these on every JOHTO warp (its special 693)
+    }
+    if (cur == REGION_SINNOH)
+    {
+        void Sinnoh_TownMapArrive(void);
+        Sinnoh_TownMapArrive();   // FLY: the SINNOH towns visited (src/sinnoh/s3d_townmap.c)
     }
     if (cur != REGION_HOENN)
     {

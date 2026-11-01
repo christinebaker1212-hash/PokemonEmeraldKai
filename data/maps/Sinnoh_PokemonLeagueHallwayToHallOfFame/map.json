@@ -3,7 +3,7 @@
   "name": "Sinnoh_PokemonLeagueHallwayToHallOfFame",
   "layout": "LAYOUT_SINNOH_POKEMON_LEAGUE_HALLWAY_TO_HALL_OF_FAME",
   "music": "MUS_SINNOH_HALL_OF_FAME",
-  "region_map_section": "MAPSEC_NONE",
+  "region_map_section": "MAPSEC_SINNOH_POKEMON_LEAGUE",
   "requires_flash": false,
   "weather": "WEATHER_SUNNY",
   "map_type": "MAP_TYPE_INDOOR",

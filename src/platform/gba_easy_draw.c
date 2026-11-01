@@ -34,6 +34,10 @@ extern void (*const gIntrTable[])(void);
 void (*gMpMapPicLine)(int line, uint16_t layers[4][DISPLAY_WIDTH]);
 // Moemon Kai: SINNOH's 3D engine (src/sinnoh/s3d.c) draws the field's picture into the BG lines (NULL off its maps)
 void (*gMpS3dLine)(int line, uint16_t layers[4][DISPLAY_WIDTH]);
+// ... and SINNOH's TOWN MAP picture over a BG (src/sinnoh/s3d_townmap.c): BG gMpBgPictureBg's line LINE, its texture
+// point for x = 0 and the step a pixel (1/256 of a texel; the affine BG's matrix, or a text BG's scroll)
+void (*gMpBgPictureLine)(int line, uint16_t *layer, int32_t x0, int32_t y0, int32_t dx, int32_t dy);
+int gMpBgPictureBg = -1;
 // ... and hides a sprite's pixel where the 3D map is in front of it (NULL off its maps)
 bool (*gMpS3dOamHidden)(int oamIndex, int x, int line);
 
@@ -985,6 +989,8 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
                 uint16_t bgvoffs = *(uint16_t *)(REG_ADDR_BG0VOFS + bgnum * 4);
                 
                 RenderBGScanline(bgnum, scanline.bgcnts[bgnum], bghoffs, bgvoffs, vcount, scanline.layers[bgnum]);
+                if (gMpBgPictureLine && bgnum == gMpBgPictureBg)
+                    gMpBgPictureLine(vcount, scanline.layers[bgnum], (bghoffs & 0x1FF) << 8, ((bgvoffs + vcount) & 0x1FF) << 8, 256, 0);
             }
         }
         // Moemon Co-op: full-color pictures pinned to the map (mp_mappic.c: the GAME CENTER), past the GBA's tiles
@@ -1000,6 +1006,14 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
         if (isbgEnabled(bgnum))
         {
             RenderRotScaleBGScanline(bgnum, scanline.bgcnts[bgnum], REG_BG2X, REG_BG2Y, vcount, scanline.layers[bgnum]);
+            if (gMpBgPictureLine && gMpBgPictureBg == 2)   // Moemon Kai: SINNOH's TOWN MAP
+            {
+                int32_t bx = getBgX(2), by = getBgY(2);
+                bx = (bx & (1 << 27)) ? bx | 0xF0000000 : bx;
+                by = (by & (1 << 27)) ? by | 0xF0000000 : by;
+                gMpBgPictureLine(vcount, scanline.layers[bgnum], bx + vcount * (s16)getBgPB(2), by + vcount * (s16)getBgPD(2),
+                                 (s16)getBgPA(2), (s16)getBgPC(2));
+            }
         }
         // BG0 and BG1 are text mode
         for (bgnum = 1; bgnum >= 0; bgnum--)
@@ -1010,6 +1024,8 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
                 uint16_t bgvoffs = *(uint16_t *)(REG_ADDR_BG0VOFS + bgnum * 4);
                 
                 RenderBGScanline(bgnum, scanline.bgcnts[bgnum], bghoffs, bgvoffs, vcount, scanline.layers[bgnum]);
+                if (gMpBgPictureLine && bgnum == gMpBgPictureBg)
+                    gMpBgPictureLine(vcount, scanline.layers[bgnum], (bghoffs & 0x1FF) << 8, ((bgvoffs + vcount) & 0x1FF) << 8, 256, 0);
             }
         }
         break;

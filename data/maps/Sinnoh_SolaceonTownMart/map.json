@@ -3,7 +3,7 @@
   "name": "Sinnoh_SolaceonTownMart",
   "layout": "LAYOUT_SINNOH_SOLACEON_TOWN_MART",
   "music": "MUS_SINNOH_POKEMART",
-  "region_map_section": "MAPSEC_NONE",
+  "region_map_section": "MAPSEC_SINNOH_SOLACEON_TOWN",
   "requires_flash": false,
   "weather": "WEATHER_SUNNY",
   "map_type": "MAP_TYPE_INDOOR",

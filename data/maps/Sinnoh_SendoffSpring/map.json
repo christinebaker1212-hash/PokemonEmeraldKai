@@ -3,7 +3,7 @@
   "name": "Sinnoh_SendoffSpring",
   "layout": "LAYOUT_SINNOH_SENDOFF_SPRING",
   "music": "MUS_SINNOH_ROUTE210",
-  "region_map_section": "MAPSEC_NONE",
+  "region_map_section": "MAPSEC_SINNOH_SENDOFF_SPRING",
   "requires_flash": false,
   "weather": "WEATHER_SUNNY",
   "map_type": "MAP_TYPE_UNDERGROUND",

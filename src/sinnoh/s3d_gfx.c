@@ -29,6 +29,8 @@ static struct
     u8 *data;
     struct SinnohSprite sprites[SINNOH_SPRITE_COUNT];
     struct SinnohPic pics[SINNOH_PIC_COUNT];
+    const u16 *town[2];    // the TOWN MAP's pages (tools/sinnoh/gen_townmap.py picture), RGB555
+    u16 townW, townH;
 } sGfx;
 
 static void Load(void)
@@ -97,6 +99,18 @@ static void Load(void)
         sGfx.pics[i].big.colorCount = 16;
         p += 24 + 32 + 8 + 80 * 40;
     }
+    // then the TOWN MAP: "TOWN", width, height, pages (u16 each), the pages' RGB555 pixels (a pack without it: none)
+    if (p + 10 <= end && memcmp(p, "TOWN", 4) == 0)
+    {
+        u32 w = p[4] | p[5] << 8, h = p[6] | p[7] << 8, pages = p[8] | p[9] << 8;
+        if (pages >= 2 && p + 10 + pages * w * h * 2 <= end)
+        {
+            sGfx.townW = w;
+            sGfx.townH = h;
+            sGfx.town[0] = (const u16 *)(p + 10);
+            sGfx.town[1] = (const u16 *)(p + 10 + w * h * 2);
+        }
+    }
     sGfx.ok = TRUE;
     return;
 bad:
@@ -163,4 +177,17 @@ void S3D_Gfx_BattleTrainerPic(struct Sprite *sprite, u8 battler, u16 standIn)
     if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER) || ((gBattleTypeFlags & BATTLE_TYPE_LINK) && !gMpCoopBattle))
         return;
     S3D_Gfx_TrainerPic(sprite, second ? gTrainerBattleOpponent_B : gTrainerBattleOpponent_A, standIn);
+}
+
+// The TOWN MAP's page PAGE (0 NORTH, 1 SOUTH): W x H RGB555 pixels; FALSE: none (no pack, or one without it)
+bool8 S3D_Gfx_TownMap(u8 page, const u16 **pixels, u16 *w, u16 *h)
+{
+    if (!sGfx.tried)
+        Load();
+    if (!sGfx.ok || page > 1 || sGfx.town[page] == NULL)
+        return FALSE;
+    *pixels = sGfx.town[page];
+    *w = sGfx.townW;
+    *h = sGfx.townH;
+    return TRUE;
 }

@@ -140,11 +140,20 @@ static const u8 sRegionMapPlayerIcon_MayGfx[] = INCGFX_U8("graphics/pokenav/regi
 #define QZMAP_HOENN 0
 #define QZMAP_JOHTO 1
 #define QZMAP_KANTO 2   // 3-5: the Sevii Islands
-#define QZMAP_COUNT 6
+#define QZMAP_KANTO_END 6
+#define QZMAP_SINNOH_NORTH 6   // SINNOH: two pages (tools/sinnoh/gen_townmap.py), its picture drawn in full color by
+#define QZMAP_SINNOH_SOUTH 7   // src/sinnoh/s3d_townmap.c over the map's background
+#define QZMAP_COUNT 8
 struct QzMapPlace { mapsec_u16_t mapsec; u8 map, x, y, width, height; };
 struct QzFlyDest { mapsec_u16_t mapsec; u8 map; u8 heal; u16 flag; };
 #include "mp_region.h"
 #include "data/region_map/qz_region_maps.h"
+#include "data/region_map/sinnoh_region_map.h"
+#define IS_SINNOH_PAGE(m) ((m) >= QZMAP_SINNOH_NORTH && (m) <= QZMAP_SINNOH_SOUTH)
+void S3D_TownMapShowOn(u8 page, int bg, s32 offX, s32 offY);   // (src/sinnoh/s3d_townmap.c: the page's picture; 0xFF none)
+#define TOWNMAP_OFF_X 0   // (the full view's BG2 texture point at the screen's top-left)
+#define TOWNMAP_OFF_Y 0
+extern const u16 gS3dTownMapPal[];
 static u8 sShownMap;    // QZMAP_*
 static u8 sPlayerMap;   // the map the player is on
 static struct RegionMapLocation sQzBox;
@@ -531,6 +540,9 @@ static const struct QzMapPlace *QzPlace(mapsec_u16_t mapsec, u8 map)
     for (i = 0; i < ARRAY_COUNT(sQzMapPlaces); i++)
         if (sQzMapPlaces[i].mapsec == mapsec && (map == QZMAP_COUNT || sQzMapPlaces[i].map == map))
             return &sQzMapPlaces[i];
+    for (i = 0; i < ARRAY_COUNT(sSinnohMapPlaces); i++)
+        if (sSinnohMapPlaces[i].mapsec == mapsec && (map == QZMAP_COUNT || sSinnohMapPlaces[i].map == map))
+            return &sSinnohMapPlaces[i];
     return NULL;
 }
 
@@ -588,7 +600,9 @@ static void ChooseShownMap(void)
     if (region == REGION_JOHTO)
         sPlayerMap = QZMAP_JOHTO;
     else if (region == REGION_KANTO)
-        sPlayerMap = (map >= QZMAP_KANTO && map < QZMAP_COUNT) ? map : QZMAP_KANTO;
+        sPlayerMap = (map >= QZMAP_KANTO && map < QZMAP_KANTO_END) ? map : QZMAP_KANTO;
+    else if (region == REGION_SINNOH)
+        sPlayerMap = IS_SINNOH_PAGE(map) ? map : QZMAP_SINNOH_NORTH;
     else
         sPlayerMap = QZMAP_HOENN;
     sShownMap = sPlayerMap;
@@ -604,8 +618,11 @@ const u8 *MP_RegionMap_Title(void)
 {
     static const u8 sJohto[] = _("JOHTO");
     static const u8 sKanto[] = _("KANTO");
+    static const u8 sSinnoh[] = _("SINNOH");
     if (sShownMap == QZMAP_JOHTO)
         return sJohto;
+    if (IS_SINNOH_PAGE(sShownMap))
+        return sSinnoh;
     if (sShownMap >= QZMAP_KANTO)
         return sKanto;
     return gText_Hoenn;
@@ -668,13 +685,19 @@ void MP_RegionMap_AreaBox(mapsec_u16_t mapsec, u16 *x, u16 *y, u16 *w, u16 *h)
     *x = b->x, *y = b->y, *w = b->width, *h = b->height;
 }
 
+// The POKéDEX's AREA page: SINNOH's picture on its BG (unscrolled: the texture point (0, 0) at the screen's top-left)
+void MP_RegionMap_AreaPicture(u8 bg)
+{
+    S3D_TownMapShowOn(IS_SINNOH_PAGE(sShownMap) ? sShownMap - QZMAP_SINNOH_NORTH : 0xFF, bg, 0, 0);
+}
+
 bool8 MP_RegionMap_AreaGfx(const u32 **gfx, const u32 **tilemap, const u16 **pal)
 {
     if (sShownMap == QZMAP_HOENN)
         return FALSE;
-    *gfx = sQzMapGfx[sShownMap - 1].gfx;
-    *tilemap = sQzMapGfx[sShownMap - 1].tilemap;
-    *pal = sQzMapGfx[sShownMap - 1].pal;
+    *gfx = sQzMapGfx[IS_SINNOH_PAGE(sShownMap) ? 0 : sShownMap - 1].gfx;
+    *tilemap = sQzMapGfx[IS_SINNOH_PAGE(sShownMap) ? 0 : sShownMap - 1].tilemap;
+    *pal = IS_SINNOH_PAGE(sShownMap) ? gS3dTownMapPal : sQzMapGfx[sShownMap - 1].pal;
     return TRUE;
 }
 
@@ -691,16 +714,20 @@ void ShowRegionMapForPokedexAreaScreen(struct RegionMap *regionMap)
 
 static const u32 *MapGfx(void)
 {
-    return sShownMap == QZMAP_HOENN ? sRegionMapBg_GfxLZ : sQzMapGfx[sShownMap - 1].gfx;
+    return sShownMap == QZMAP_HOENN ? sRegionMapBg_GfxLZ : sQzMapGfx[IS_SINNOH_PAGE(sShownMap) ? 0 : sShownMap - 1].gfx;
 }
 
 static const u32 *MapTilemap(void)
 {
-    return sShownMap == QZMAP_HOENN ? sRegionMapBg_TilemapLZ : sQzMapGfx[sShownMap - 1].tilemap;
+    return sShownMap == QZMAP_HOENN ? sRegionMapBg_TilemapLZ : sQzMapGfx[IS_SINNOH_PAGE(sShownMap) ? 0 : sShownMap - 1].tilemap;
 }
 
 static const u16 *MapPal(void)
 {
+    S3D_TownMapShowOn(IS_SINNOH_PAGE(sShownMap) ? sShownMap - QZMAP_SINNOH_NORTH : 0xFF, sRegionMap->bgNum,
+                      TOWNMAP_OFF_X, TOWNMAP_OFF_Y);
+    if (IS_SINNOH_PAGE(sShownMap))
+        return gS3dTownMapPal;
     return sShownMap == QZMAP_HOENN ? sRegionMapBg_Pal : sQzMapGfx[sShownMap - 1].pal;
 }
 
@@ -814,7 +841,10 @@ static void QzTurnMap(s8 dir)
 {
     mapsec_u16_t mapSecId;
 
-    sShownMap = QZMAP_KANTO + (sShownMap - QZMAP_KANTO + (QZMAP_COUNT - QZMAP_KANTO) + dir) % (QZMAP_COUNT - QZMAP_KANTO);
+    if (IS_SINNOH_PAGE(sShownMap))
+        sShownMap = sShownMap == QZMAP_SINNOH_NORTH ? QZMAP_SINNOH_SOUTH : QZMAP_SINNOH_NORTH;
+    else
+        sShownMap = QZMAP_KANTO + (sShownMap - QZMAP_KANTO + (QZMAP_KANTO_END - QZMAP_KANTO) + dir) % (QZMAP_KANTO_END - QZMAP_KANTO);
     LZ77UnCompVram(MapGfx(), (u16 *)BG_CHAR_ADDR(sRegionMap->bgManaged ? sRegionMap->charBaseIdx : 2));
     LZ77UnCompVram(MapTilemap(), (u16 *)BG_SCREEN_ADDR(sRegionMap->bgManaged ? sRegionMap->mapBaseIdx : 28));
     LoadPalette(MapPal(), BG_PLTT_ID(7), 3 * PLTT_SIZE_4BPP);
@@ -1157,6 +1187,8 @@ static mapsec_u16_t GetMapSecIdAt(u16 x, u16 y)
     }
     y -= MAPCURSOR_Y_MIN;
     x -= MAPCURSOR_X_MIN;
+    if (IS_SINNOH_PAGE(sShownMap))
+        return sSinnohMapLayouts[sShownMap - QZMAP_SINNOH_NORTH][y][x];   // Moemon Kai
     if (sShownMap != QZMAP_HOENN)
         return sQzMapLayouts[sShownMap - 1][y][x];   // Moemon Kai
     return sRegionMap_MapSectionLayout[y][x];
@@ -1377,6 +1409,9 @@ static const struct QzFlyDest *QzFlyDestOf(mapsec_u16_t mapSecId)
     for (i = 0; i < ARRAY_COUNT(sQzFlyDests); i++)
         if (sQzFlyDests[i].mapsec == mapSecId)
             return &sQzFlyDests[i];
+    for (i = 0; i < ARRAY_COUNT(sSinnohFlyDests); i++)
+        if (sSinnohFlyDests[i].mapsec == mapSecId)
+            return &sSinnohFlyDests[i];
     return NULL;
 }
 
@@ -1823,6 +1858,10 @@ u8 *GetMapName(u8 *dest, mapsec_u16_t regionMapId, u16 padLength)
     {
         str = StringCopy(dest, gJohtoMapSectionNames[regionMapId - MAPSEC_JOHTO_FIRST]);   // Moemon Kai
     }
+    else if (regionMapId >= MAPSEC_SINNOH_FIRST && regionMapId < MAPSEC_SINNOH_END)
+    {
+        str = StringCopy(dest, gSinnohMapSectionNames[regionMapId - MAPSEC_SINNOH_FIRST]);   // Moemon Kai
+    }
     else
     {
         if (padLength == 0)
@@ -2096,11 +2135,12 @@ static void CreateFlyDestIcons(void)
     {
         // Moemon Kai: Johto's / Kanto's towns
         u32 i;
-        for (i = 0; i < ARRAY_COUNT(sQzFlyDests); i++)
+        for (i = 0; i < ARRAY_COUNT(sQzFlyDests) + ARRAY_COUNT(sSinnohFlyDests); i++)
         {
-            if (sQzFlyDests[i].map != sShownMap)
+            const struct QzFlyDest *d = i < ARRAY_COUNT(sQzFlyDests) ? &sQzFlyDests[i] : &sSinnohFlyDests[i - ARRAY_COUNT(sQzFlyDests)];
+            if (d->map != sShownMap)
                 continue;
-            mapSecId = sQzFlyDests[i].mapsec;
+            mapSecId = d->mapsec;
             GetMapSecDimensions(mapSecId, &x, &y, &width, &height);
             x = (x + MAPCURSOR_X_MIN) * 8 + 4;
             y = (y + MAPCURSOR_Y_MIN) * 8 + 4;
@@ -2114,7 +2154,7 @@ static void CreateFlyDestIcons(void)
             if (spriteId != MAX_SPRITES)
             {
                 gSprites[spriteId].oam.shape = shape;
-                if (QzCanFlyTo(&sQzFlyDests[i]))
+                if (QzCanFlyTo(d))
                     gSprites[spriteId].callback = SpriteCB_FlyDestIcon;
                 else
                     shape += 3;

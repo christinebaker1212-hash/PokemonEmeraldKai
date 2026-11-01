@@ -3,7 +3,7 @@
   "name": "Sinnoh_JubilifeCitySouthHouse2f",
   "layout": "LAYOUT_SINNOH_JUBILIFE_CITY_SOUTH_HOUSE2F",
   "music": "MUS_SINNOH_JUBILIFE",
-  "region_map_section": "MAPSEC_NONE",
+  "region_map_section": "MAPSEC_SINNOH_JUBILIFE_CITY",
   "requires_flash": false,
   "weather": "WEATHER_SUNNY",
   "map_type": "MAP_TYPE_INDOOR",

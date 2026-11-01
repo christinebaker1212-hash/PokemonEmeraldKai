@@ -3,7 +3,7 @@
   "name": "Sinnoh_NewmoonIslandForest",
   "layout": "LAYOUT_SINNOH_NEWMOON_ISLAND_FOREST",
   "music": "MUS_SINNOH_CAVERN_ON_THE_LAKE",
-  "region_map_section": "MAPSEC_NONE",
+  "region_map_section": "MAPSEC_SINNOH_NEWMOON_ISLAND",
   "requires_flash": false,
   "weather": "WEATHER_SUNNY",
   "map_type": "MAP_TYPE_UNDERGROUND",

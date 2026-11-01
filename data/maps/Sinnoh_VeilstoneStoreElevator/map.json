@@ -3,7 +3,7 @@
   "name": "Sinnoh_VeilstoneStoreElevator",
   "layout": "LAYOUT_SINNOH_VEILSTONE_STORE_ELEVATOR",
   "music": "MUS_SINNOH_POKEMART",
-  "region_map_section": "MAPSEC_NONE",
+  "region_map_section": "MAPSEC_SINNOH_VEILSTONE_STORE",
   "requires_flash": false,
   "weather": "WEATHER_SUNNY",
   "map_type": "MAP_TYPE_INDOOR",

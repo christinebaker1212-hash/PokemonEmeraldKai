@@ -249,6 +249,12 @@ def main():
         for y in range(80):
             for x in range(0, 80, 2):
                 out.append((px(x, y) & 15) | (px(x + 1, y) & 15) << 4)
+    # the TOWN MAP's two pages (tools/sinnoh/gen_townmap.py picture: Platinum's town map art, scaled)
+    import gen_townmap
+    out += b'TOWN' + struct.pack('<3H', gen_townmap.TEX_W, gen_townmap.TEX_H, len(gen_townmap.PAGES))
+    for k in range(len(gen_townmap.PAGES)):
+        for row in gen_townmap.picture(root, k):
+            out += struct.pack('<%dH' % len(row), *row)
     open(out_path, 'wb').write(out)
     print('%s: %d sprites, %d battle pictures, %d bytes' % (out_path, len(sh), len(pics), len(out)))
 

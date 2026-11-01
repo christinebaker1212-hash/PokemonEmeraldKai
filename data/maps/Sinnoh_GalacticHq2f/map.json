@@ -3,7 +3,7 @@
   "name": "Sinnoh_GalacticHq2f",
   "layout": "LAYOUT_SINNOH_GALACTIC_HQ2F",
   "music": "MUS_SINNOH_GALACTIC_HIDEOUT",
-  "region_map_section": "MAPSEC_NONE",
+  "region_map_section": "MAPSEC_SINNOH_GALACTIC_HQ",
   "requires_flash": false,
   "weather": "WEATHER_SUNNY",
   "map_type": "MAP_TYPE_INDOOR",

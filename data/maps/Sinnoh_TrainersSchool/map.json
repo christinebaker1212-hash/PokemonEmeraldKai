@@ -3,7 +3,7 @@
   "name": "Sinnoh_TrainersSchool",
   "layout": "LAYOUT_SINNOH_TRAINERS_SCHOOL",
   "music": "MUS_SINNOH_JUBILIFE",
-  "region_map_section": "MAPSEC_NONE",
+  "region_map_section": "MAPSEC_SINNOH_TRAINERS_SCHOOL",
   "requires_flash": false,
   "weather": "WEATHER_SUNNY",
   "map_type": "MAP_TYPE_INDOOR",

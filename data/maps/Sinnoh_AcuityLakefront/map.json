@@ -3,7 +3,7 @@
   "name": "Sinnoh_AcuityLakefront",
   "layout": "LAYOUT_SINNOH_ACUITY_LAKEFRONT",
   "music": "MUS_SINNOH_ROUTE216",
-  "region_map_section": "MAPSEC_NONE",
+  "region_map_section": "MAPSEC_SINNOH_ACUITY_LAKEFRONT",
   "requires_flash": false,
   "weather": "WEATHER_SNOW",
   "map_type": "MAP_TYPE_ROUTE",

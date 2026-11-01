@@ -3,7 +3,7 @@
   "name": "Sinnoh_CanalaveCityPokecenter2f",
   "layout": "LAYOUT_SINNOH_CANALAVE_CITY_POKECENTER2F",
   "music": "MUS_SINNOH_POKECENTER",
-  "region_map_section": "MAPSEC_NONE",
+  "region_map_section": "MAPSEC_SINNOH_CANALAVE_CITY",
   "requires_flash": false,
   "weather": "WEATHER_SUNNY",
   "map_type": "MAP_TYPE_INDOOR",

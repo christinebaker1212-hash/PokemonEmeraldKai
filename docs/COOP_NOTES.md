@@ -3477,6 +3477,21 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   store (B1F-5F), JUBILIFE TV, the RIBBON SYNDICATE, the VISTA LIGHTHOUSE and two HEARTHOME houses (the LEAGUE's are
   corridors with doors). Test sinnoh_elevator. Gyms: tools/sinnoh/reach.py finds every leader and trainer reachable on
   foot; Platinum's moving parts (PASTORIA's water, CANALAVE's lifts, SUNYSHORE's gears, HEARTHOME's doors) don't move.
+- TOWN MAP and FLY (2026-11-01): tools/sinnoh/gen_townmap.py (run by gen_maps.py) gives every SINNOH map its section
+  from Platinum's location label (the header's mapLabelTextID: 120 places, MAPSEC_SINNOH_FIRST 0x140, names written from
+  the labels' words) and writes include/constants/region_map_sections_sinnoh.h + src/data/region_map/sinnoh_region_map.h.
+  Platinum's town map grid is matrix 0's cells (res/town_map/town_map_data.json blocks), 28 x 23 rows: the game's grid
+  is 28 x 15, so SINNOH is two pages, NORTH (rows 6-20) and SOUTH (rows 14-28), region_map.c QZMAP_SINNOH_NORTH /
+  _SOUTH (6 / 7), L / R between them; a place off Platinum's grid sits on the cell of its door from outside. The
+  picture: Platinum's top screen map (tiles + its sea-and-land and roads screens; the decomp's gray sheets keep each
+  pixel's color as 15 - its gray level) scaled 8/7 onto the game's 8-pixel grid, at twice the full view's resolution,
+  built into sinnoh/platinum_gfx.pak ("TOWN" after the battle pictures; build_gfx.py, fetch_decomp.sh PARTS 4) and
+  drawn by the renderer's picture hook (gba_easy_draw.c gMpBgPictureLine: BG gMpBgPictureBg's texture points, so the
+  region map's affine BG2 scroll / zoom and the AREA page's text BG both work). The BG's palette (gS3dTownMapPal) is a
+  white, a black and a signature: the picture follows the fades through the two and stops when another palette is
+  loaded. FLY spots: the places with a heal location, each unlocked by flag 0x3D40 + n set on arriving
+  (s3d_townmap.c Sinnoh_TownMapArrive from MP_Region_OnMapLoaded). Met location: MP_METGAME_SINNOH (13) with the
+  section's number past MAPSEC_SINNOH_FIRST (mp_region.c MP_Region_TagMet, the summary screen). Test sinnoh_townmap.
 - The three card games in SINNOH: its people play by their sprite's look-alike (tcg_field.c Tcg_LookGfx: the specials
   first, then sSinnohStandIns), so the townsfolk and beaten trainers duel as JOHTO's and KANTO's do. Special card
   trainers (sQzSpecials' SINNOH rows): the eight leaders by role and type (ROARK - ROXANNE, MAYLENE - BRAWLY, WAKE -

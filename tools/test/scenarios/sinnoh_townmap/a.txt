@@ -1,0 +1,38 @@
+pressuntil A field 5000
+wait 30
+mp warp 40,0,10,10
+wait 60
+waitfor field 1000
+mp getflag 0x3D40
+mp setflag 0x3D4C
+mp flymap
+wait 200
+press RIGHT 2
+wait 20
+press RIGHT 2
+wait 20
+press UP 2
+wait 30
+shot f_pick
+press A 1
+wait 400
+waitfor field 1000
+mp where
+shot f_there
+mp dexcatch 399
+mp dexorder 1 1
+press START 2
+wait 30
+press A 2
+wait 150
+press A 2
+wait 150
+press RIGHT 2
+wait 20
+press A 2
+wait 150
+shot d_bidoof
+press SELECT 2
+wait 150
+shot d_bidoof2
+quit

@@ -3,7 +3,7 @@
   "name": "Sinnoh_Restaurant",
   "layout": "LAYOUT_SINNOH_RESTAURANT",
   "music": "MUS_SINNOH_VALOR_LAKEFRONT",
-  "region_map_section": "MAPSEC_NONE",
+  "region_map_section": "MAPSEC_SINNOH_RESTAURANT",
   "requires_flash": false,
   "weather": "WEATHER_SUNNY",
   "map_type": "MAP_TYPE_INDOOR",

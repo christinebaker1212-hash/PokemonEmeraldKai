@@ -29,6 +29,7 @@ import items  # noqa: E402
 import gen_trainers  # noqa: E402
 import sprites  # noqa: E402
 import legends  # noqa: E402
+import gen_townmap  # noqa: E402
 
 GROUP = 'gMapGroup_Sinnoh'                      # the outdoor places
 INDOOR_GROUP = 'gMapGroup_SinnohIndoor%d'       # the buildings, PER_GROUP a group (1, 2, 3...)
@@ -421,6 +422,7 @@ def main():
         groups[name] = [p['name'] for p in indoor[k * PER_GROUP:(k + 1) * PER_GROUP]]
     numbers = {p['id']: {pi: k for k, (pi, _) in enumerate(kept_warps(p, map_ids, root))} for p in every}
     lifts = elevators(every, root)
+    town = gen_townmap.write(root, every)   # (each map's TOWN MAP section, and the TOWN MAP's tables)
     for p in outdoor + indoor:
         bw, bh = p['x1'] - p['x0'] + 1, p['z1'] - p['z0'] + 1
         w, h = 32 * bw, 32 * bh
@@ -438,7 +440,7 @@ def main():
         path = mdir + '/map.json'
         old = json.load(open(path)) if os.path.exists(path) else {}
         m = {'id': p['id'], 'name': p['name'], 'layout': layout_id, 'music': p['music'],
-             'region_map_section': 'MAPSEC_NONE', 'requires_flash': False, 'weather': p['weather'],
+             'region_map_section': gen_townmap.mapsec_of(town, p['place']), 'requires_flash': False, 'weather': p['weather'],
              'map_type': p['type'], 'allow_cycling': p['bike'], 'allow_escaping': not p['outdoor'],
              'allow_running': True, 'show_map_name': False, 'battle_scene': 'MAP_BATTLE_SCENE_NORMAL',
              'connections': connections(p, every)}

@@ -3,7 +3,7 @@
   "name": "Sinnoh_RuinManiacCaveShort",
   "layout": "LAYOUT_SINNOH_RUIN_MANIAC_CAVE_SHORT",
   "music": "MUS_SINNOH_OREBURGH_MINE",
-  "region_map_section": "MAPSEC_NONE",
+  "region_map_section": "MAPSEC_SINNOH_RUIN_MANIAC_CAVE",
   "requires_flash": false,
   "weather": "WEATHER_SUNNY",
   "map_type": "MAP_TYPE_UNDERGROUND",

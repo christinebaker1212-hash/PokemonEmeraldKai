@@ -43,6 +43,7 @@ void LoadPokedexAreaMapGfx(const struct PokedexAreaMapTemplate *template)
         SetBgAttribute(template->bg, BG_ATTR_PALETTEMODE, 1);
         CpuCopy32(qzPal, &gPlttBufferUnfaded[BG_PLTT_ID(7)], 3 * PLTT_SIZE_4BPP);
         *sPokedexAreaMapBgNum = template->bg;
+        MP_RegionMap_AreaPicture(template->bg);   // (SINNOH's: its picture over this BG)
         return;
     }
     if (mode == 0)

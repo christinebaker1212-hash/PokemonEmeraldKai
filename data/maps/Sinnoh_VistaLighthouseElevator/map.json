@@ -3,7 +3,7 @@
   "name": "Sinnoh_VistaLighthouseElevator",
   "layout": "LAYOUT_SINNOH_VISTA_LIGHTHOUSE_ELEVATOR",
   "music": "MUS_SINNOH_SUNYSHORE",
-  "region_map_section": "MAPSEC_NONE",
+  "region_map_section": "MAPSEC_SINNOH_VISTA_LIGHTHOUSE",
   "requires_flash": false,
   "weather": "WEATHER_SUNNY",
   "map_type": "MAP_TYPE_INDOOR",

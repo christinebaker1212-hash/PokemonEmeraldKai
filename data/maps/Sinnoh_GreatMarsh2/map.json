@@ -3,7 +3,7 @@
   "name": "Sinnoh_GreatMarsh2",
   "layout": "LAYOUT_SINNOH_GREAT_MARSH2",
   "music": "MUS_SINNOH_GREAT_MARSH",
-  "region_map_section": "MAPSEC_NONE",
+  "region_map_section": "MAPSEC_SINNOH_GREAT_MARSH",
   "requires_flash": false,
   "weather": "WEATHER_SUNNY",
   "map_type": "MAP_TYPE_ROUTE",

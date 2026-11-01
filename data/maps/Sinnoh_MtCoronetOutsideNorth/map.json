@@ -3,7 +3,7 @@
   "name": "Sinnoh_MtCoronetOutsideNorth",
   "layout": "LAYOUT_SINNOH_MT_CORONET_OUTSIDE_NORTH",
   "music": "MUS_SINNOH_MT_CORONET",
-  "region_map_section": "MAPSEC_NONE",
+  "region_map_section": "MAPSEC_SINNOH_MT_CORONET",
   "requires_flash": false,
   "weather": "WEATHER_SUNNY",
   "map_type": "MAP_TYPE_ROUTE",

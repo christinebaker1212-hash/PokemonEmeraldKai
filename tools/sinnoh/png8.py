@@ -20,7 +20,7 @@ class Image:
                 self.palette = [tuple(body[i:i + 3]) for i in range(0, len(body), 3)]
             elif kind == b'IDAT':
                 idat += body
-        self.paletted = ctype == 3 and not interlace
+        self.paletted = ctype in (0, 3) and not interlace   # (0: gray levels as the indices, as the decomp's 4bpp sheets)
         self.size = (self.w, self.h)
         self.mode = 'P' if self.paletted else '?'
         if not self.paletted:
