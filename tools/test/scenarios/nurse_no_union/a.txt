@@ -1,0 +1,15 @@
+pressuntil A field 5000
+wait 60
+mp getflag 0x2A07
+mp warp 34,21,7,4
+wait 150
+mp face up
+press A 4
+wait 400
+shot nurse_says
+mash A 30 12
+pressuntil B field 3000
+wait 30
+mp getflag 0x2A07
+mp ctx
+quit

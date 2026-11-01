@@ -3462,6 +3462,15 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   the past (qz_specials.c QzGiovanniRockets, on every JOHTO map load and QzSetGiovanniModeFlag14A4, which cleared it).
   Test johto_no_rockets.
 
+## 1.63.12: the nurse's UNION ROOM check
+- After healing, the nurse scripts (Hoenn's pkmn_center_nurse.inc, KANTO's / JOHTO's qz shared scripts) ask special
+  BufferUnionRoomPlayerName whether a friend is waiting in the wireless UNION ROOM (and say so once per save:
+  FLAG_NURSE_UNION_ROOM_REMINDER, FLAG_QZ_0x220D, FLAG_QZ_0xA98). union_room.c's sUnionRoomPlayerName is zeros on PC
+  until a map's ON_RESUME runs special InitUnionRoom (CableClub_OnResume: HOENN's and KANTO's centers; JOHTO's don't),
+  and zeros aren't EOS: the special said yes and StringCopy read on past the buffer for the name. On PC it now always
+  says no (there's no wireless UNION ROOM), and InitUnionRoom only clears the name: its Task_InitUnionRoom is a stub,
+  so the struct it allocated was never freed (a leak per POKeMON CENTER entered). Test nurse_no_union (CHERRYGROVE).
+
 ## SINNOH's 3D engine
 - Plan and rules: docs/SINNOH_HANDOFF.md. The data comes from pret/pokeplatinum (source.py: its map blocks, matrices,
   areas, props, texture sets and lights as files; fetch_decomp.sh gets them at a pinned commit, make_pack.sh fetches and

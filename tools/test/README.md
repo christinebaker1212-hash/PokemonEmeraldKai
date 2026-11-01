@@ -58,6 +58,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `anim_classic` | every move animation on BATTLE ANIMS > CLASSIC, each one's length logged (`MOEMON_ANIM_FRAMES`), shots of a few |
 | `anim_modern` | the same on MODERN (run after anim_classic): `tools/test/check_anim_frames.sh` checks all 716 lengths match, no crash |
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped (and their MOéMON GARDEN records travel) |
+| `nurse_no_union` | CHERRYGROVE's nurse heals a game started in JOHTO: she never says "It appears as if <junk> is playing right now" (the wireless UNION ROOM check; flag 0x2A07 stays clear) |
 | `blender` / `crush` | BERRY GAMES invite, accept, play to the results |
 | `contest` | link CONTEST at the Lilycove counter, start to finish (long) |
 | `card_base` | FRIENDS > TRAINER CARD and VISIT SECRET BASE |

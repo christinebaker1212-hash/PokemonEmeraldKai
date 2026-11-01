@@ -3296,6 +3296,11 @@ void InitUnionRoom(void)
     struct WirelessLink_URoom *data;
 
     sUnionRoomPlayerName[0] = EOS;
+#ifdef PORTABLE
+    // Moemon Co-op: Task_InitUnionRoom is a stub on PC, so nothing would ever free the struct allocated below: every
+    // POKeMON CENTER entered (their maps run this on resume) leaked one.
+    return;
+#endif
     CreateTask(Task_InitUnionRoom, 0);
     sWirelessLinkMain.uRoom = sWirelessLinkMain.uRoom; // Needed to match.
     sWirelessLinkMain.uRoom = data = AllocZeroed(sizeof(struct WirelessLink_URoom));
@@ -3380,6 +3385,13 @@ static void Task_InitUnionRoom(u8 taskId)
 
 bool16 BufferUnionRoomPlayerName(void)
 {
+#ifdef PORTABLE
+    // Moemon Co-op: there is no wireless UNION ROOM on PC, so nobody is ever waiting there. The buffer is all zeros
+    // (not EOS) until a map runs InitUnionRoom (HOENN's and KANTO's POKeMON CENTERs do, JOHTO's don't), and the
+    // nurse said "It appears as if <the memory after it> is playing right now" (test nurse_no_union).
+    sUnionRoomPlayerName[0] = EOS;
+    return FALSE;
+#endif
     if (sUnionRoomPlayerName[0] != EOS)
     {
         StringCopy(gStringVar1, sUnionRoomPlayerName);
