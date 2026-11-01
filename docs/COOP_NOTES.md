@@ -965,7 +965,10 @@ depends on the kind of item uses GetItemPocket(item) (the context menu, TM data,
 pocket shown. GetItemListPosition (item.c RemoveBagItem's hint) maps the cursor back to its save slot (SlotPlace).
 SELECT moves an item within its view: it goes before the item it's dropped on in the save pocket (after the view's last
 one at the end), the others keep their places, and that save pocket's sort order becomes MANUAL; START sorts the save
-pocket (ITEMS, MEDICINE and BATTLE ITEMS share one order). FAVORITES has neither. Every pocket's item menu has FAVORITE /
+pocket (ITEMS, MEDICINE and BATTLE ITEMS share one order). FAVORITES has its own order (1.63.14): sort "pocket"
+POCKETS_COUNT (bag:sort5, MANUAL unless chosen) and each favorite's place (bag:fr<item>, given when marked, bag:frnext);
+mp_bag.c SortFavorites orders the view, MP_Bag_FavoriteMove (SELECT) renumbers them as they show (`mp bagfav ITEM [0]`;
+test bag_fav_sort). Every pocket's item menu has FAVORITE /
 UNFAVORITE (ACTION_FAVORITE, its label set by OpenContextMenu; 2x2 menus fill their blank, ITEMS gets a 2x3 one); the
 item menus sit over the list (15 tiles wide for UNFAVORITE). Wally's tutorial opens on MEDICINE (the POTION) and goes
 right to POKé BALLS. berry_tag_screen.c follows the BERRIES view with BAG_LIST_ROWS rows.

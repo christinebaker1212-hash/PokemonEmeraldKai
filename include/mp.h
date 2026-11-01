@@ -389,6 +389,7 @@ enum { MP_BAGSORT_TYPE, MP_BAGSORT_ID, MP_BAGSORT_ABC, MP_BAGSORT_OLDEST, MP_BAG
 u8 MP_Bag_SortMode(u8 pocket);
 void MP_Bag_SetSortMode(u8 pocket, u8 mode);
 void MP_Bag_Sort(u8 pocket);
+void MP_Bag_FavoriteMove(u16 item, u16 before);   // FAVORITES' own order (sort "pocket" POCKETS_COUNT)
 bool8 MP_Bag_IsNew(u16 item);
 void MP_Bag_ClearNew(u16 item);
 void MP_Bag_NoteAdded(u16 item);

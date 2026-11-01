@@ -985,14 +985,14 @@ static const u8 sText_SortPocketBy[] = _("Sort this pocket by...");
 static const u8 sText_StartSort[] = _("{START_BUTTON}");
 static const u8 sText_Sort[] = _("SORT:");
 
-// (pocketId: the pocket shown; its sort order is its save pocket's, and FAVORITES has none)
+// (pocketId: the pocket shown; its sort order is its save pocket's, FAVORITES' its own: "pocket" POCKETS_COUNT)
 static void DrawSortHint(u8 pocketId)
 {
     u8 storage = MP_Bag_ViewPocket(pocketId);
     if (gBagMenu == NULL || IsWallysBag())
         return;
     FillWindowPixelBuffer(WIN_SORT_HINT, PIXEL_FILL(0));
-    if (storage < POCKETS_COUNT)
+    if (storage <= POCKETS_COUNT)
     {
         // {START} / SORT / the order, three short lines left of the bag
         BagMenu_Print(WIN_SORT_HINT, FONT_SMALL, sText_StartSort, 4, 0, 0, 0, TEXT_SKIP_DRAW, COLORID_POCKET_NAME);
@@ -1426,7 +1426,7 @@ static void Task_BagMenu_HandleInput(u8 taskId)
                 return;
             }
             // Moemon Co-op: START picks the pocket's sort order
-            if (JOY_NEW(START_BUTTON) && !IsWallysBag() && MP_Bag_ViewPocket(gBagPosition.pocket) < POCKETS_COUNT)
+            if (JOY_NEW(START_BUTTON) && !IsWallysBag() && MP_Bag_ViewPocket(gBagPosition.pocket) <= POCKETS_COUNT)
             {
                 PlaySE(SE_SELECT);
                 OpenSortMenu(taskId);
@@ -1566,9 +1566,11 @@ static bool8 CanSwapItems(void)
      || gBagPosition.location == ITEMMENULOCATION_BATTLE)
     {
         // TMHMs and berries are numbered, and so may not be swapped
-        // (Moemon Co-op: unless the pocket's sort order is MANUAL; FAVORITES is in its pockets' orders)
+        // (Moemon Co-op: unless the pocket's sort order is MANUAL; FAVORITES has its own order: 1.63.14)
         u8 storage = MP_Bag_ViewPocket(gBagPosition.pocket);
-        if (storage >= POCKETS_COUNT)
+        if (storage == POCKETS_COUNT)
+            return TRUE;
+        if (storage > POCKETS_COUNT)
             return FALSE;
         if ((storage != TMHM_POCKET && storage != BERRIES_POCKET) || MP_Bag_SortMode(storage) == MP_BAGSORT_MANUAL)
             return TRUE;
@@ -1649,6 +1651,23 @@ static void DoItemSwap(u8 taskId)
         // the item goes before the one it was dropped on there (or after the pocket's last), the others staying
         u8 storage, p2;
         u16 from, to;
+        if (MP_Bag_ViewPocket(gBagPosition.pocket) == POCKETS_COUNT)
+        {
+            // FAVORITES (1.63.14): its own order; the item goes before the one it was dropped on (or to the end)
+            MP_Bag_FavoriteMove(ViewItem(tListPosition), realPos < sViewCount[gBagPosition.pocket] ? ViewItem(realPos) : ITEM_NONE);
+            UpdatePocketItemList(ITEMS_POCKET);
+            gBagMenu->toSwapPos = NOT_SWAPPING;
+            DestroyListMenuTask(tListTaskId, scrollPos, cursorPos);
+            if (tListPosition < realPos)
+                gBagPosition.cursorPosition[gBagPosition.pocket]--;
+            LoadBagItemListBuffers(gBagPosition.pocket);
+            tListTaskId = ListMenuInit(&gMultiuseListMenuTemplate, *scrollPos, *cursorPos);
+            SetItemMenuSwapLineInvisibility(TRUE);
+            CreatePocketSwitchArrowPair();
+            DrawSortHint(gBagPosition.pocket);
+            gTasks[taskId].func = Task_BagMenu_HandleInput;
+            return;
+        }
         SlotPlace(ViewSlot(gBagPosition.pocket, tListPosition), &storage, &from);
         if (realPos < sViewCount[gBagPosition.pocket])
             SlotPlace(ViewSlot(gBagPosition.pocket, realPos), &p2, &to);
@@ -2230,6 +2249,7 @@ static void CloseSortMenu(u8 taskId, bool8 sorted)
         UpdatePocketItemList(gBagPosition.pocket);
         LoadBagItemListBuffers(gBagPosition.pocket);
         tListTaskId = ListMenuInit(&gMultiuseListMenuTemplate, *scrollPos, *cursorPos);
+        DrawSortHint(gBagPosition.pocket);
     }
     else
     {

@@ -1,0 +1,54 @@
+pressuntil A field 5000
+wait 200
+mp item 13 3
+mp item 4 5
+mp item 139 4
+mp bagfav 139
+mp bagfav 4
+mp bagfav 13
+wait 10
+mp bagview 7
+press START 2
+wait 30
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press A 2
+wait 90
+press LEFT 2
+wait 30
+shot fav_marked
+press SELECT 2
+wait 20
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press SELECT 2
+wait 30
+shot fav_moved
+mp bagview 7
+press START 2
+wait 30
+press UP 2
+wait 6
+press LEFT 2
+wait 6
+press A 2
+wait 30
+shot fav_abc
+mp bagview 7
+press START 2
+wait 30
+press DOWN 2
+wait 6
+press RIGHT 2
+wait 6
+press A 2
+wait 30
+shot fav_manual
+mp bagview 7
+quit

@@ -1712,6 +1712,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_ItemDesc_Debug(void);
         MP_ItemDesc_Debug();
     }
+    else if (strcmp(cmd, "bagfav") == 0)
+    {
+        // bagfav ITEM [0] - marks an item FAVORITE (0: takes it out), as its menu in the BAG does
+        int item = 0, on = 1;
+        sscanf(arg, "%d %d", &item, &on);
+        MP_Bag_SetFavorite(item, on != 0);
+    }
     else if (strcmp(cmd, "bagview") == 0)
     {
         // bagview VIEW - the item numbers one of the BAG's eight pockets shows (MP_BAGVIEW_*), in its order

@@ -816,7 +816,9 @@ HANDY EXTRAS (they save time, they don't make the game easier)
   BERRIES, BATTLE ITEMS, KEY ITEMS and FAVORITES. LEFT / RIGHT (or L / R)
   go from one to the next, round and round; the row of icons shows where you
   are. FAVORITE in an item's menu puts it in FAVORITES too (as many items as
-  you like, from every pocket); UNFAVORITE takes it out again.
+  you like, from every pocket); UNFAVORITE takes it out again. FAVORITES
+  keeps its own order: the order you marked them, SELECT moves one, and
+  START sorts it like any pocket (MANUAL brings back your own order).
 * Bag: START sorts the pocket you're in: TYPE (medicine, things used on a
   Moemon, battle items, field items, hold items, mail, the rest), ID, ABC,
   OLDEST or NEWEST (when you got it), or MANUAL (your own order: move items

@@ -311,21 +311,22 @@ static u8 DefaultSort(u8 pocket)
     return (pocket == TMHM_POCKET || pocket == BERRIES_POCKET) ? MP_BAGSORT_ID : MP_BAGSORT_MANUAL;
 }
 
+// (1.63.14: pocket POCKETS_COUNT is FAVORITES' own order, MANUAL unless one is chosen)
 u8 MP_Bag_SortMode(u8 pocket)
 {
     char key[16];
     s32 v;
-    if (pocket >= POCKETS_COUNT)
+    if (pocket > POCKETS_COUNT)
         return MP_BAGSORT_MANUAL;
     snprintf(key, sizeof(key), SORT_KEY, pocket);
     v = MP_SaveData_Get(key);
-    return (v >= 1 && v <= MP_BAGSORT_COUNT) ? v - 1 : DefaultSort(pocket);
+    return (v >= 1 && v <= MP_BAGSORT_COUNT) ? v - 1 : pocket == POCKETS_COUNT ? MP_BAGSORT_MANUAL : DefaultSort(pocket);
 }
 
 void MP_Bag_SetSortMode(u8 pocket, u8 mode)
 {
     char key[16];
-    if (pocket >= POCKETS_COUNT || mode >= MP_BAGSORT_COUNT)
+    if (pocket > POCKETS_COUNT || mode >= MP_BAGSORT_COUNT)
         return;
     snprintf(key, sizeof(key), SORT_KEY, pocket);
     MP_SaveData_Set(key, mode + 1);
@@ -455,8 +456,43 @@ u8 MP_Bag_PocketView(u8 pocket)
     return pocket < POCKETS_COUNT ? sViewOf[pocket] : MP_BAGVIEW_ITEMS;
 }
 
+static s32 FavoriteRank(u16 item);
+
+// FAVORITES' stacks in its own order (1.63.14): MANUAL by each favorite's place (MP_Bag_FavoriteMove; marked ones
+// after, in the order they were marked; ones from before ranks, after those, in pocket order), else by the sort chosen
+// for it (START), as the pockets' own sorts compare. Stable: an item's stacks stay together in their order.
+static void SortFavorites(struct ItemSlot **slots, u16 n)
+{
+    u8 mode = MP_Bag_SortMode(POCKETS_COUNT);
+    u16 i, j;
+    for (i = 1; i < n; i++)
+    {
+        struct ItemSlot *cur = slots[i];
+        j = i;
+        while (j > 0)
+        {
+            u16 a = slots[j - 1]->itemId, b = cur->itemId;
+            int d;
+            if (mode == MP_BAGSORT_MANUAL)
+            {
+                s32 ra = FavoriteRank(a), rb = FavoriteRank(b);
+                d = (ra == 0) != (rb == 0) ? (ra == 0 ? 1 : -1) : (ra > rb) - (ra < rb);
+            }
+            else
+            {
+                d = a == b ? 0 : CompareItems(a, b, mode);
+            }
+            if (d <= 0)
+                break;
+            slots[j] = slots[j - 1];
+            j--;
+        }
+        slots[j] = cur;
+    }
+}
+
 // A view's stacks in order, as the slots they are in the save's pockets (each pocket compacted and in its sort order
-// first: MP_Bag_Sort). FAVORITES: in pocket order, each pocket's own order.
+// first: MP_Bag_Sort). FAVORITES: in its own order (SortFavorites).
 u16 MP_Bag_ViewSlots(u8 view, struct ItemSlot **out, u16 max)
 {
     u16 n = 0;
@@ -475,11 +511,53 @@ u16 MP_Bag_ViewSlots(u8 view, struct ItemSlot **out, u16 max)
                 out[n++] = &sPockets[p].big[i];
         }
     }
+    if (view == MP_BAGVIEW_FAVORITES)
+        SortFavorites(out, n);
     return n;
 }
 
 // FAVORITES: marked in the item's menu (FAVORITE / UNFAVORITE), kept with the save's other BAG settings
 #define FAV_KEY "bag:fav%d"
+#define FAV_RANK_KEY "bag:fr%d"    // (1.63.14) a favorite's place in FAVORITES' MANUAL order (0: none yet)
+#define FAV_NEXT_KEY "bag:frnext"  // the last place given
+
+static s32 FavoriteRank(u16 item)
+{
+    char key[16];
+    snprintf(key, sizeof(key), FAV_RANK_KEY, item);
+    return MP_SaveData_Get(key);
+}
+
+// SELECT in FAVORITES (1.63.14): ITEM goes before BEFORE (ITEM_NONE: to the end), the others keep their order; the
+// order becomes MANUAL, every favorite numbered as it now shows
+void MP_Bag_FavoriteMove(u16 item, u16 before)
+{
+    static struct ItemSlot *slots[MP_BAG_ITEMS_COUNT + MP_BAG_KEYITEMS_COUNT + MP_BAG_POKEBALLS_COUNT + MP_BAG_TMHM_COUNT
+                                  + MP_BAG_BERRIES_COUNT];
+    static u16 order[ARRAY_COUNT(slots) + 1];
+    u16 n = 0, count, i;
+    char key[16];
+    if (item == before)
+        return;
+    count = MP_Bag_ViewSlots(MP_BAGVIEW_FAVORITES, slots, ARRAY_COUNT(slots));
+    for (i = 0; i < count; i++)   // its items, each once, as they show, without ITEM
+        if (slots[i]->itemId != item && (n == 0 || order[n - 1] != slots[i]->itemId))
+            order[n++] = slots[i]->itemId;
+    for (i = 0; i < n && order[i] != before; i++)
+        ;
+    memmove(&order[i + 1], &order[i], (n - i) * sizeof(order[0]));
+    order[i] = item;
+    n++;
+    MPNet_Log("bag: favorite %d moved to place %d of %d", item, i + 1, n);
+    MP_Bag_SetSortMode(POCKETS_COUNT, MP_BAGSORT_MANUAL);
+    for (i = 0; i < n; i++)
+    {
+        snprintf(key, sizeof(key), FAV_RANK_KEY, order[i]);
+        if (MP_SaveData_Get(key) != i + 1)
+            MP_SaveData_Set(key, i + 1);
+    }
+    MP_SaveData_Set(FAV_NEXT_KEY, n);
+}
 
 bool8 MP_Bag_IsFavorite(u16 item)
 {
@@ -500,5 +578,17 @@ void MP_Bag_SetFavorite(u16 item, bool8 on)
     bits = MP_SaveData_Get(key);
     bits = on ? (bits | (1 << (item % 31))) : (bits & ~(1 << (item % 31)));
     MP_SaveData_Set(key, bits);
+    // its place in FAVORITES' own order: last when marked, none when not
+    snprintf(key, sizeof(key), FAV_RANK_KEY, item);
+    if (on && MP_SaveData_Get(key) == 0)
+    {
+        s32 next = MP_SaveData_Get(FAV_NEXT_KEY) + 1;
+        MP_SaveData_Set(FAV_NEXT_KEY, next);
+        MP_SaveData_Set(key, next);
+    }
+    else if (!on && MP_SaveData_Get(key) != 0)
+    {
+        MP_SaveData_Set(key, 0);
+    }
     MPNet_Log("bag: item %d %s", item, on ? "now a favorite" : "no longer a favorite");
 }
