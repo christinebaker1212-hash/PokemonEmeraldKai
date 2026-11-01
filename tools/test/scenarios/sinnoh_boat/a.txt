@@ -1,0 +1,16 @@
+pressuntil A field 5000
+wait 30
+mp warp 40,3,12,46
+wait 200
+mp face right
+press A 4
+wait 90
+shot ask
+press A 4
+wait 60
+press A 4
+pressuntil A field 3000
+wait 120
+mp where
+shot iron
+quit

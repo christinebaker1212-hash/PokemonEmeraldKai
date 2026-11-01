@@ -93,6 +93,8 @@ def script(name, key, value, widths):
         return elite(name, key, value[1], widths)
     if isinstance(value, tuple) and value[0] == 'champion':
         return champion(name, key, widths)
+    if isinstance(value, tuple) and value[0] == 'boat':
+        return boat(name, key, value[1], widths)
     text = '%s_Text_%s' % (name, key)
     kind = 'MSGBOX_NPC' if key.startswith('Person') else 'MSGBOX_SIGN'
     return ('%s::\n\tmsgbox %s, %s\n\tend\n\n' % (label, text, kind),
@@ -163,6 +165,55 @@ def champion(name, key, widths):
     return code, texts
 
 
+_landing = {}
+
+
+def landing(root, dest):
+    """Where a boat to dest lands: a free tile beside dest's first sailor (tools/sinnoh/reach.py's collision)"""
+    if dest not in _landing:
+        import json
+        from source import open_source
+        from gen_maps import places
+        import reach
+        src = open_source(root)
+        p = next(p for p in places(src, root) if p['name'] == dest)
+        g = reach.grid(src, p)[0]
+        m = json.load(open('data/maps/%s/map.json' % dest))
+        sailor = next(o for o in m['object_events'] if o['graphics_id'].endswith('SAILOR'))
+        x, y = sailor['x'], sailor['y']
+        _landing[dest] = next((x + dx, y + dy) for dx, dy in ((0, 1), (1, 0), (-1, 0), (0, -1))
+                              if reach.free(g.get((x + dx, y + dy))) and (g.get((x + dx, y + dy)) & 0xFF) not in (0x10, 0x15))
+    return _landing[dest]
+
+
+PLACE_NAMES = {'Sinnoh_IronIsland': 'IRON ISLAND', 'Sinnoh_CanalaveCity': 'CANALAVE CITY',
+               'Sinnoh_FullmoonIsland': 'FULLMOON ISLAND', 'Sinnoh_NewmoonIsland': 'NEWMOON ISLAND',
+               'Sinnoh_FightArea': 'the BATTLE ZONE', 'Sinnoh_SnowpointCity': 'SNOWPOINT CITY'}
+
+
+def boat(name, key, dests, widths):
+    """A sailor: asks about each place the boat goes, in turn; YES sails there"""
+    label, t = '%s_EventScript_%s' % (name, key), '%s_Text_%s' % (name, key)
+    code = '%s::\n\tlock\n\tfaceplayer\n' % label
+    texts = ''
+    for i, d in enumerate(dests):
+        x, y = landing(ROOT[0], d)
+        code += ('\tmsgbox %sAsk%d, MSGBOX_YESNO\n\tgoto_if_eq VAR_RESULT, YES, %s_Sail%d\n' % (t, i, label, i))
+        texts += '%sAsk%d:\n%s\n' % (t, i, wrap('Shall I take you to %s?' % PLACE_NAMES[d], widths, name))
+    code += '\tmsgbox %sBye, MSGBOX_DEFAULT\n\trelease\n\tend\n\n' % t
+    texts += '%sBye:\n%s\n' % (t, wrap("Come back any time. The sea's always here.", widths, name))
+    for i, d in enumerate(dests):
+        x, y = landing(ROOT[0], d)
+        code += ('%s_Sail%d::\n\tmsgbox %sOff, MSGBOX_DEFAULT\n\tcloseMessage\n\twarp MAP_%s, %d, %d\n\twaitstate\n'
+                 '\treleaseall\n\tend\n\n' % (label, i, t, 'SINNOH_' + re.sub(r'(?<=[a-z0-9])([A-Z])', r'_\1', d[7:]).upper(), x, y)
+                 ).replace('closeMessage', 'closemessage')
+    texts += '%sOff:\n%s\n' % (t, wrap("All aboard! Hold on tight!", widths, name))
+    return code, texts
+
+
+ROOT = [None]
+
+
 def roles(root):
     """{map: {Person<n>: role}} for the people every map of their kind has: nurses and MART clerks"""
     from source import open_source
@@ -179,11 +230,25 @@ def roles(root):
     return out
 
 
+def no_twice():
+    """A map written twice in WORDS would lose the first one's words (a dict keeps the last): refuse"""
+    import ast
+    import collections
+    tree = ast.parse(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'words.py'), encoding='utf-8').read())
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign) and getattr(node.targets[0], 'id', '') == 'WORDS':
+            twice = [k for k, n in collections.Counter(k.value for k in node.value.keys).items() if n > 1]
+            if twice:
+                sys.exit('words.py has these maps twice: %s' % ' '.join(twice))
+
+
 def main():
+    no_twice()
     widths = letter_widths()
     done = 0
     words = {k: dict(v) for k, v in WORDS.items()}
     if len(sys.argv) > 1:
+        ROOT[0] = sys.argv[1]
         for name, found in roles(sys.argv[1]).items():
             for key, role in found.items():
                 words.setdefault(name, {}).setdefault(key, role)

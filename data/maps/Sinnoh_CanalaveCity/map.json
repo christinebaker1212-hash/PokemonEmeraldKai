@@ -238,7 +238,7 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_CanalaveCity_EventScript_Person17",
       "flag": "0"
     },
     {
