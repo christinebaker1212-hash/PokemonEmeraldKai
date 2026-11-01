@@ -31,7 +31,12 @@ LEGENDS = [
     ('Sinnoh_NewmoonIslandForest', 1, 'DARKRAI', 40, LEAGUE),
     ('Sinnoh_FlowerParadise', 1, 'SHAYMIN', 30, LEAGUE),
     ('Sinnoh_HallOfOrigin', 1, 'ARCEUS', 80, LEAGUE),
+    # Platinum brings these by script (MT. CORONET's top leading to SPEAR PILLAR's other versions): here they stand at
+    # the top of SPEAR PILLAR after the LEAGUE, beside where CYRUS waits in the story (('at', x, z): Platinum's tiles)
+    ('Sinnoh_SpearPillar', ('at', 29, 28), 'DIALGA', 70, LEAGUE),
+    ('Sinnoh_SpearPillar', ('at', 33, 28), 'PALKIA', 70, LEAGUE),
 ]
+EXTRA_FLAGS = 0x3D80  # the hide flags of the ones this game adds (('at', x, z)), one each
 
 
 def label(species):
@@ -40,10 +45,21 @@ def label(species):
 
 def scripts():
     """{(map, object number): script label} for gen_maps.py"""
-    return {(m, n): label(s) for m, n, s, _, _ in LEGENDS}
+    return {(m, n): label(s) for m, n, s, _, _ in LEGENDS if not isinstance(n, tuple)}
+
+
+def added(name):
+    """The objects this game adds to place NAME: [(x, z in Platinum's tiles, species, script label, hide flag)]"""
+    out = []
+    for k, (m, n, s, _, _) in enumerate(LEGENDS):
+        if m == name and isinstance(n, tuple):
+            out.append((n[1], n[2], s, label(s), EXTRA_FLAGS + k))
+    return out
 
 
 def object_flag(root, place_events, n):
+    if isinstance(n, tuple):
+        return EXTRA_FLAGS + [k for k, e in enumerate(LEGENDS) if e[1] is n][0]
     hide = place_events['object_events'][n - 1].get('hidden_flag')
     return ids.flag(root, hide) if isinstance(hide, str) and hide.startswith('FLAG_') else None
 

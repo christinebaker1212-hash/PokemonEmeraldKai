@@ -299,3 +299,63 @@ Sinnoh_EventScript_LegendArceus_Ran:
 	goto Common_EventScript_LegendaryFlewAway
 	end
 
+Sinnoh_EventScript_LegendDialga::
+	lock
+	faceplayer
+	waitse
+	playmoncry SPECIES_DIALGA, CRY_MODE_ENCOUNTER
+	delay 40
+	waitmoncry
+	setwildbattle SPECIES_DIALGA, 70
+	setflag FLAG_SYS_CTRL_OBJ_DELETE
+	special BattleSetup_StartLegendaryBattle
+	waitstate
+	clearflag FLAG_SYS_CTRL_OBJ_DELETE
+	specialvar VAR_RESULT, GetBattleOutcome
+	goto_if_eq VAR_RESULT, B_OUTCOME_WON, Sinnoh_EventScript_LegendDialga_Gone
+	goto_if_eq VAR_RESULT, B_OUTCOME_RAN, Sinnoh_EventScript_LegendDialga_Ran
+	goto_if_eq VAR_RESULT, B_OUTCOME_PLAYER_TELEPORTED, Sinnoh_EventScript_LegendDialga_Ran
+	setflag 0x3D0A
+	release
+	end
+
+Sinnoh_EventScript_LegendDialga_Gone:
+	setflag 0x3D0A
+	goto Common_EventScript_RemoveStaticPokemon
+	end
+
+Sinnoh_EventScript_LegendDialga_Ran:
+	setvar VAR_0x8004, SPECIES_DIALGA
+	goto Common_EventScript_LegendaryFlewAway
+	end
+
+Sinnoh_EventScript_LegendPalkia::
+	lock
+	faceplayer
+	waitse
+	playmoncry SPECIES_PALKIA, CRY_MODE_ENCOUNTER
+	delay 40
+	waitmoncry
+	setwildbattle SPECIES_PALKIA, 70
+	setflag FLAG_SYS_CTRL_OBJ_DELETE
+	special BattleSetup_StartLegendaryBattle
+	waitstate
+	clearflag FLAG_SYS_CTRL_OBJ_DELETE
+	specialvar VAR_RESULT, GetBattleOutcome
+	goto_if_eq VAR_RESULT, B_OUTCOME_WON, Sinnoh_EventScript_LegendPalkia_Gone
+	goto_if_eq VAR_RESULT, B_OUTCOME_RAN, Sinnoh_EventScript_LegendPalkia_Ran
+	goto_if_eq VAR_RESULT, B_OUTCOME_PLAYER_TELEPORTED, Sinnoh_EventScript_LegendPalkia_Ran
+	setflag 0x3D0B
+	release
+	end
+
+Sinnoh_EventScript_LegendPalkia_Gone:
+	setflag 0x3D0B
+	goto Common_EventScript_RemoveStaticPokemon
+	end
+
+Sinnoh_EventScript_LegendPalkia_Ran:
+	setvar VAR_0x8004, SPECIES_PALKIA
+	goto Common_EventScript_LegendaryFlewAway
+	end
+

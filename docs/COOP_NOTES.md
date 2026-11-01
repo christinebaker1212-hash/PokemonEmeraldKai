@@ -3450,8 +3450,9 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   CAVE) from the 7th BADGE (Platinum gives them in its story then); HEATRAN, REGIGIGAS (Lv. 1, as Platinum), CRESSELIA,
   DARKRAI, SHAYMIN and ARCEUS after the LEAGUE. Their sprites are Platinum's (build_gfx.py: 32-wide sheets' and the
   64-wide big ones' first frame, kind 4: 64x64), JOHTO's / KANTO's GBA ones (Quetzal's QZ_736-749) as the Gen 3 look
-  and stand-in. Not yet: DIALGA and PALKIA at SPEAR PILLAR (Platinum brings them by script, not as standing objects),
-  the REGIS' ruins, ROTOM. Test sinnoh_legends.
+  and stand-in. DIALGA and PALKIA (Platinum brings them by script) stand at the top of SPEAR PILLAR after the LEAGUE:
+  objects this game adds (legends.py ('at', x, z), gen_maps.py; hide flags 0x3D80 + n). Not yet: the REGIS' ruins,
+  ROTOM. Tests sinnoh_legends, sinnoh_legends_pillar.
 - The three card games in SINNOH: its people play by their sprite's look-alike (tcg_field.c Tcg_LookGfx: the specials
   first, then sSinnohStandIns), so the townsfolk and beaten trainers duel as JOHTO's and KANTO's do. Special card
   trainers (sQzSpecials' SINNOH rows): the eight leaders by role and type (ROARK - ROXANNE, MAYLENE - BRAWLY, WAKE -

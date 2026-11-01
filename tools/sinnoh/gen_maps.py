@@ -181,6 +181,11 @@ def people(p, root, have):
                     'trainer_type': 'TRAINER_TYPE_NORMAL' if trainer else 'TRAINER_TYPE_NONE',
                     'trainer_sight_or_berry_tree_id': str((o.get('data') or [0])[0]) if trainer else '0',
                     'script': script, 'flag': flag_s})
+    for x, z, species, script, flag in legends.added(p['name']):
+        out.append({'graphics_id': 'OBJ_EVENT_GFX_SINNOH_' + species, 'x': x - p['x0'] * 32, 'y': z - p['z0'] * 32,
+                    'elevation': 3, 'movement_type': 'MOVEMENT_TYPE_FACE_DOWN', 'movement_range_x': 0,
+                    'movement_range_y': 0, 'trainer_type': 'TRAINER_TYPE_NONE', 'trainer_sight_or_berry_tree_id': '0',
+                    'script': script, 'flag': '0x%X' % flag})
     for e in EXTRA_PEOPLE.get(p['name'], []):
         out.append({'graphics_id': e['graphics_id'], 'x': e['x'], 'y': e['y'], 'elevation': 3,
                     'movement_type': e['movement_type'], 'movement_range_x': 0, 'movement_range_y': 0,

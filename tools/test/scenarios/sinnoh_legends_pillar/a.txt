@@ -1,0 +1,12 @@
+pressuntil A field 5000
+wait 30
+mp warp 43,104,31,31
+wait 200
+mp getflag 0x3D8A
+mp regionclear 3
+mp warp 43,104,31,31
+wait 200
+mp getflag 0x3D8A
+mp getflag 0x3D8B
+shot p_pillar
+quit
