@@ -5,6 +5,6 @@
 MODE=1
 TMO=200
 ENV_A="MOEMON_DEBUG_PARTY=280:30,258:25,252:20"
-EXPECT_A=("region: travel 0 -> 1" "where map 35.2 xy 4,4" "region 1 cleared 1 started 3 global free 418 party: 258:L5 box1 0 (own boxes)"
-          "region: travel 1 -> 0" "where map 9.9 xy 8,11" "region 0 cleared 3 started 3 global free 418 party: 258:L25")
+EXPECT_A=("region: travel 0 -> 1" "where map 35.2 xy 4,4" "region 1 cleared 1 started 3 global free 1198 party: 258:L5 box1 0 (own boxes)"
+          "region: travel 1 -> 0" "where map 9.9 xy 8,11" "region 0 cleared 3 started 3 global free 1198 party: 258:L25")
 UNEXPECT_A=("[crash]" "region: no side file")
