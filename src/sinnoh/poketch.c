@@ -28,6 +28,9 @@
 #include "battle_main.h"
 #include "daycare.h"
 #include "item.h"
+#include "berry.h"
+#include "constants/event_objects.h"
+#include "constants/berry.h"
 #include "constants/items.h"
 #include "constants/pokemon.h"
 
@@ -45,14 +48,14 @@ enum
 {
     APP_WATCH, APP_CALC, APP_MEMO, APP_PEDOMETER, APP_PARTY, APP_COUNTER, APP_ANALOG, APP_COIN, APP_COLOR, APP_STOPWATCH,
     APP_DOWSING, APP_CALENDAR, APP_LINK, APP_FRIENDSHIP, APP_DAYCARE, APP_HISTORY, APP_MAP, APP_MOVES, APP_MATCHUP,
-    APP_ROULETTE, APP_TIMER, APP_ALARM, APP_DOTS, APP_BACKLIGHT, APP_COUNT
+    APP_ROULETTE, APP_TIMER, APP_ALARM, APP_DOTS, APP_BACKLIGHT, APP_BERRIES, APP_COUNT
 };
 static const struct { u8 badges; } sApps[APP_COUNT] = {
     [APP_WATCH] = {0}, [APP_CALC] = {0}, [APP_MEMO] = {0}, [APP_PEDOMETER] = {0}, [APP_PARTY] = {0},
     [APP_COUNTER] = {1}, [APP_ANALOG] = {1}, [APP_COIN] = {1}, [APP_COLOR] = {2}, [APP_STOPWATCH] = {3},
     [APP_DOWSING] = {2}, [APP_CALENDAR] = {4}, [APP_LINK] = {0}, [APP_FRIENDSHIP] = {1}, [APP_DAYCARE] = {2},
     [APP_HISTORY] = {3}, [APP_MAP] = {3}, [APP_MOVES] = {4}, [APP_MATCHUP] = {5}, [APP_ROULETTE] = {5},
-    [APP_TIMER] = {6}, [APP_ALARM] = {6}, [APP_DOTS] = {7}, [APP_BACKLIGHT] = {0},
+    [APP_TIMER] = {6}, [APP_ALARM] = {6}, [APP_DOTS] = {7}, [APP_BACKLIGHT] = {0}, [APP_BERRIES] = {2},
 };
 
 // The LCD's colors, lightest first: GREEN (Platinum's own) and the COLOR CHANGER's others
@@ -1012,6 +1015,38 @@ static void Backlight(void)
     Cell("backlight_toggle", sP.backlight ? 1 : 0, 96, 80);
 }
 
+// BERRY SEARCHER: the map's BERRY trees around (6 pixels a tile, the player in the middle): ripe ones blink
+static void BerrySearcher(void)
+{
+    const struct MapEvents *ev = gMapHeader.events;
+    s32 i, px = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x - MAP_OFFSET;
+    s32 py = gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y - MAP_OFFSET;
+    Fill(0, 0, PW, PH, 0);
+    for (i = (PW / 2) % 6; i < PW; i += 6)
+        Fill(i, 0, 1, PH, 1);
+    for (i = (PH / 2) % 6; i < PH; i += 6)
+        Fill(0, i, PW, 1, 1);
+    for (i = 0; ev != NULL && i < ev->objectEventCount; i++)
+    {
+        const struct ObjectEventTemplate *t = &ev->objectEvents[i];
+        s32 x, y;
+        u8 stage;
+        if (TEMPLATE_GFX_ID(t) != OBJ_EVENT_GFX_BERRY_TREE)
+            continue;
+        x = PW / 2 + (t->x - px) * 6, y = PH / 2 + (t->y - py) * 6;
+        stage = GetStageByBerryTreeId(t->trainerRange_berryTreeId);
+        if (stage == BERRY_STAGE_BERRIES)
+        {
+            if ((sP.frame / 15) & 1)
+                Fill(x - 3, y - 3, 7, 7, 3);
+        }
+        else
+            Fill(x - 2, y - 2, 5, 5, stage == BERRY_STAGE_NO_BERRY ? 2 : 3);
+    }
+    Fill(PW / 2 - 3, PH / 2 - 3, 7, 7, 3);
+    Fill(PW / 2 - 1, PH / 2 - 1, 3, 3, 0);
+}
+
 static void DrawApp(void)
 {
     switch (sP.app)
@@ -1040,6 +1075,7 @@ static void DrawApp(void)
     case APP_ALARM: Alarm(); break;
     case APP_DOTS: Dots(); break;
     case APP_BACKLIGHT: Backlight(); break;
+    case APP_BERRIES: BerrySearcher(); break;
     }
 }
 

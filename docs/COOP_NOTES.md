@@ -3511,7 +3511,8 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   region's own town map as cells: region_map.c MP_RegionMap_PoketchGrid) 3, MOVE TESTER (gTypeEffectiveness, FAIRY
   from GEN 6) 4, MATCHUP CHECKER (daycare.c MP_Daycare_Compatibility) and ROULETTE 5, KITCHEN TIMER and ALARM CLOCK
   (they ring, flash the LCD and open the POKéTCH on their app wherever the player is: CheckRinging) 6, DOT ARTIST 7,
-  BACKLIGHT 0. Badges count from any region (the most in one): the POKéTCH works the same in HOENN, JOHTO and KANTO.
+  BACKLIGHT 0, BERRY SEARCHER (the map's BERRY trees around the player, 6 pixels a tile; ripe ones blink) 2. (Not
+  here: the TRAINER COUNTER, Platinum's POKé RADAR chains.) Badges count from any region (the most in one): the POKéTCH works the same in HOENN, JOHTO and KANTO.
   "<save>.poketch" (version 2): the app, color, pedometer start, counter, memo, dots, markers, history, alarm,
   backlight. Tests: `mp poketch APP`, `mp poketchtap X,Y`; scenarios sinnoh_poketch, poketch_regions.
 - The three card games in SINNOH: its people play by their sprite's look-alike (tcg_field.c Tcg_LookGfx: the specials
