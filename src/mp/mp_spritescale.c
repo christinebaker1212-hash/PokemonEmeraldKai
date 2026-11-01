@@ -1,6 +1,7 @@
-// Moemon Co-op: followers and the GARDEN's POKeMON at their POKeDEX height next to a trainer (include/mp_spritescale.h;
-// OPTIONS > DISPLAY > SPRITE SCALING turns each on and off). Only ever smaller: a POKeMON as tall as a trainer or
-// taller keeps its sprite (ALAKAZAM, ONIX); a small one drawn big (PIKACHU, RAICHU, AZUMARILL) comes down to scale.
+// Moemon Co-op: followers' and the GARDEN's PMD pictures toward their POKeDEX height next to a trainer
+// (include/mp_spritescale.h; OPTIONS > DISPLAY > SPRITE SCALING turns each on and off). Only ever smaller: a POKeMON as
+// tall as a trainer or taller keeps its picture (ALAKAZAM, ONIX); a small one drawn big (PIKACHU, RAICHU, AZUMARILL)
+// comes down, to just shorter than the player at the least.
 #include <stdio.h>
 #include "global.h"
 #include "pokedex.h"
@@ -67,8 +68,8 @@ u16 MP_SpriteScale_BigHeight(const u8 *frame, u8 bpp)
 u16 MP_SpriteScale_Mon(bool8 on, u16 dex, const struct MpPmdView *pmd, const u8 *tiles, u8 size, u32 *key, u16 *value)
 {
     u32 k = (u32)dex << 8 | (pmd != NULL) << 7 | size | 1u << 31;
-    if (!on || dex == 0)
-        return 0;
+    if (!on || dex == 0 || pmd == NULL)
+        return 0;   // (only the PMD pictures: the game's own follower sprites keep their size)
     if (*key != k)
     {
         *key = k;

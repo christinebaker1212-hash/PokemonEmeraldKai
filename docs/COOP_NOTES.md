@@ -3094,10 +3094,12 @@ Old saves need nothing: eggs and Unown keep their real species in the save.
 - Moves past the cap are skipped when learning (MonTryLearningNewMove, GiveBoxMonInitialMoveset, the relearner,
   CanMonLearnTMTutor, day care egg moves); evolutions into a later generation's species wait.
 - OPTIONS > DISPLAY > SPRITE SCALING (a page, option_menu.c sSpritePage): FOLLOWERS and GARDEN MOéMON, each on or off
-  (gMpConfig.scaleFollowers / scaleGarden, ini scale_followers / scale_garden; on by default). A POKéMON shorter than a
-  trainer (MP_TRAINER_HEIGHT_DM 15, drawn MP_TRAINER_HEIGHT_PX 21 tall: Brendan standing) is drawn at its POKéDEX height
-  beside one (at least MP_SCALE_MIN_PX 8), measured against its own sprite's drawn height (or its PMD picture's), worked
-  out once a POKéMON (mp_spritescale.c MP_SpriteScale_Mon); one as tall or taller keeps its sprite (ALAKAZAM, ONIX).
+  (gMpConfig.scaleFollowers / scaleGarden, ini scale_followers / scale_garden; on by default). Only the PMD pictures
+  (the game's own follower sprites are drawn to a trainer's scale already; the user's call): a POKéMON shorter than a
+  trainer (MP_TRAINER_HEIGHT_DM 15, drawn MP_TRAINER_HEIGHT_PX 21 tall: Brendan standing) comes down toward its POKéDEX
+  height beside one, never below just shorter than the player (MP_SCALE_MIN_PX 18: smaller was too small), measured
+  against its PMD picture's drawn height, worked out once a POKéMON (mp_spritescale.c MP_SpriteScale_Mon); one as tall
+  or taller keeps its picture (ALAKAZAM, ONIX).
   Any sprite can be drawn smaller: struct Sprite mpScale (Q8), noted per OAM entry with the point it shrinks around (the
   bottom middle of all its entries: mp_bigsprite.c MP_BigSprite_NoteScale), drawn by gba_easy_draw.c DrawScaledEntry:
   each pixel the average of the ones it covers, kept where half of it is covered (no dropped pixels), for ordinary
