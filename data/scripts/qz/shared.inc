@@ -224,6 +224,9 @@ Quetzal_EventScript_83F0976::
 	end
 
 Quetzal_EventScript_840F954::
+	setvar VAR_0x8001, 0xFE   @ Moemon Kai: with SINNOH on the list (or leaving it), the menus that have it
+	specialvar VAR_RESULT, MP_RegionBoatAsk
+	goto_if_eq VAR_RESULT, 1, EventScript_RegionPickAll
 	specialvar VAR_RESULT, QzGetReachableRegionsMask
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 1, Quetzal_EventScript_840F9AD

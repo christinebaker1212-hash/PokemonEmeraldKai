@@ -11,6 +11,7 @@ WORDS[map][key]: key Person<n> / Sign<n> / Bg<n> (the numbers who.py prints), va
   - ('e4', n): the n-th of the ELITE FOUR (ELITE[n]); ('champion',): the CHAMPION (CHAMPION), once all four are
     beaten; winning makes SINNOH cleared and plays the HALL OF FAME and the credits.
   - ('boat', [maps]): a sailor who sails to each of those maps (asked in turn), landing beside its own sailor.
+  - ('script', LABEL): a person who runs a script of the game's own (LABEL), e.g. EventScript_SinnohRegionBoat.
 MOéMON's words like HOENN's (MOéMON, MOéDEX, POKé BALL kept): OPTIONS > CREATURES swaps them back.
 """
 
@@ -20,7 +21,7 @@ WORDS = {
     'Sinnoh_NewmoonIsland': {'Person1': ('boat', ['Sinnoh_CanalaveCity'])},
     'Sinnoh_FullmoonIsland': {'Person1': ('boat', ['Sinnoh_CanalaveCity'])},
     'Sinnoh_IronIsland': {'Person1': ('boat', ['Sinnoh_CanalaveCity'])},
-    'Sinnoh_CanalaveCity': {'Person17': ('boat', ['Sinnoh_IronIsland', 'Sinnoh_FullmoonIsland', 'Sinnoh_NewmoonIsland'])},
+    'Sinnoh_CanalaveCity': {'Person15': ('script', 'EventScript_SinnohRegionBoat'), 'Person17': ('boat', ['Sinnoh_IronIsland', 'Sinnoh_FullmoonIsland', 'Sinnoh_NewmoonIsland'])},
     'Sinnoh_PokemonLeagueChampionRoom': {'Person1': ('champion',)},
     'Sinnoh_PokemonLeagueLucianRoom': {'Person1': ('e4', 3)},
     'Sinnoh_PokemonLeagueFlintRoom': {'Person1': ('e4', 2)},

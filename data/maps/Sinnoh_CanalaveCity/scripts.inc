@@ -2,6 +2,10 @@ Sinnoh_CanalaveCity_MapScripts::
 	.byte 0
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
+Sinnoh_CanalaveCity_EventScript_Person15::
+	goto EventScript_SinnohRegionBoat
+	end
+
 Sinnoh_CanalaveCity_EventScript_Person17::
 	lock
 	faceplayer

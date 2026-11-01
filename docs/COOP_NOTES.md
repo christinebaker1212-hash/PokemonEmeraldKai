@@ -3350,6 +3350,15 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   save), sets the respawn to the LEAGUE's CENTER and plays the HALL OF FAME and credits (special GameClear), as
   JOHTO's and KANTO's do. `mp foehp HP` sets every foe's HP in a battle (tests; a foe's healing items undo it).
   Test sinnoh_champion.
+- The boat (2026-11-01): SINNOH is on the boat's list (QzGetReachableRegionsMask_: a cleared region and the S.S.
+  TICKET). With SINNOH on the list or the boat leaving it, Quetzal_EventScript_840F954 goes to
+  EventScript_RegionPickAll (data/scripts/mp_region.inc): the other three regions' ports, MULTI_REGIONS_FROM_*
+  (the first two in the order the menus without SINNOH had; MP_RegionBoatPick maps the choice back), then customs
+  and QzTravelToRegion as before. SINNOH's port is CANALAVE's dock (11, 22, beside the harbor sailor, whose
+  ('script', 'EventScript_SinnohRegionBoat') sails out); the first visit lands there too (MP_Region_GoToStartHouse:
+  no opening of its own), CANALAVE's CENTER the place to come back to. Test region_trip_hoenn_sinnoh.
+- Boats inside SINNOH: ('boat', [maps]) sailors in CANALAVE (IRON ISLAND, FULLMOON, NEWMOON), SNOWPOINT and the
+  BATTLE ZONE, and back. Test sinnoh_boat.
 - Flags (moved 2026-11-01: JOHTO's / KANTO's trainers' "beaten" flags are 0x3000-0x331C): SINNOH's badges
   0x3320-0x3327, ids.py's flags 0x3328-0x376F, gym TMs given 0x3770-0x3777, trainers 0x3780-0x3DFF, hidden items 0x3E00-0x3FFE, FLAG_SINNOH_HIDDEN
   0x3FFF.

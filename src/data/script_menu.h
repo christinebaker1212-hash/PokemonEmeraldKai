@@ -771,6 +771,21 @@ static const struct MenuAction MultichoiceList_DanceMachine[] =
     {gText_Cancel2},
 };
 
+// Moemon Kai: the boat between regions, from each region (the ports: data/scripts/mp_region.inc EventScript_RegionPickAll)
+static const u8 sRegionPortSlateport[] = _("SLATEPORT (HOENN)");
+static const u8 sRegionPortOlivine[] = _("OLIVINE (JOHTO)");
+static const u8 sRegionPortVermilion[] = _("VERMILION (KANTO)");
+static const u8 sRegionPortCanalave[] = _("CANALAVE (SINNOH)");
+// (the first two as the menus without SINNOH had them; src/qz_specials.c MP_RegionBoatPick follows this order)
+static const struct MenuAction MultichoiceList_RegionsFromHoenn[] = {
+    {sRegionPortVermilion}, {sRegionPortOlivine}, {sRegionPortCanalave}, {gText_Exit}};
+static const struct MenuAction MultichoiceList_RegionsFromJohto[] = {
+    {sRegionPortVermilion}, {sRegionPortSlateport}, {sRegionPortCanalave}, {gText_Exit}};
+static const struct MenuAction MultichoiceList_RegionsFromKanto[] = {
+    {sRegionPortOlivine}, {sRegionPortSlateport}, {sRegionPortCanalave}, {gText_Exit}};
+static const struct MenuAction MultichoiceList_RegionsFromSinnoh[] = {
+    {sRegionPortSlateport}, {sRegionPortOlivine}, {sRegionPortVermilion}, {gText_Exit}};
+
 static const struct MenuAction MultichoiceList_ArcadeCabinet[] =
 {
     {gText_MpFightWait2P},
@@ -937,6 +952,10 @@ static const struct MultichoiceListStruct sMultichoiceLists[] =
     [MULTI_DANCE_MACHINE]              = MULTICHOICE(MultichoiceList_DanceMachine),
 #include "script_menu_qz_entries.h"   // Moemon Kai: Quetzal's menus
     [MULTI_ARCADE_CABINET]             = MULTICHOICE(MultichoiceList_ArcadeCabinet),
+    [MULTI_REGIONS_FROM_HOENN]         = MULTICHOICE(MultichoiceList_RegionsFromHoenn),
+    [MULTI_REGIONS_FROM_JOHTO]         = MULTICHOICE(MultichoiceList_RegionsFromJohto),
+    [MULTI_REGIONS_FROM_KANTO]         = MULTICHOICE(MultichoiceList_RegionsFromKanto),
+    [MULTI_REGIONS_FROM_SINNOH]        = MULTICHOICE(MultichoiceList_RegionsFromSinnoh),
 };
 
 static const u8 sText_QzStd_1E[] = _("MEDICINE");

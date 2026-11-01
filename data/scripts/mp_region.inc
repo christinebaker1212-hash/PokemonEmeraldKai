@@ -268,3 +268,50 @@ EventScript_GoldenrodElevator_Done::
 
 gText_GoldenrodElevatorWhich::
 	.string "Which floor would you like?$"
+
+@ The boat's list with SINNOH on it (Quetzal_EventScript_840F954 comes here once SINNOH can be sailed to): the other
+@ three regions' ports. RESULT = the region (0 HOENN .. 3 SINNOH), 0x7F: EXIT (as that script's own menus)
+EventScript_RegionPickAll::
+	setvar VAR_0x8001, 0xFF
+	specialvar VAR_0x8002, MP_RegionBoatAsk   @ (0xFF: the region the player is in)
+	message Quetzal_Text_840FAE5
+	waitmessage
+	goto_if_eq VAR_0x8002, 1, EventScript_RegionPickAll_Johto
+	goto_if_eq VAR_0x8002, 2, EventScript_RegionPickAll_Kanto
+	goto_if_eq VAR_0x8002, 3, EventScript_RegionPickAll_Sinnoh
+	multichoice 12, 2, MULTI_REGIONS_FROM_HOENN, FALSE
+	goto EventScript_RegionPickAll_Pick
+
+EventScript_RegionPickAll_Johto::
+	multichoice 12, 2, MULTI_REGIONS_FROM_JOHTO, FALSE
+	goto EventScript_RegionPickAll_Pick
+
+EventScript_RegionPickAll_Kanto::
+	multichoice 12, 2, MULTI_REGIONS_FROM_KANTO, FALSE
+	goto EventScript_RegionPickAll_Pick
+
+EventScript_RegionPickAll_Sinnoh::
+	multichoice 12, 2, MULTI_REGIONS_FROM_SINNOH, FALSE
+EventScript_RegionPickAll_Pick::
+	specialvar VAR_RESULT, MP_RegionBoatPick   @ (the choice -> the region, 0x7F: EXIT)
+	return
+
+@ CANALAVE's harbor sailor: the boat to the other regions (SINNOH's port)
+EventScript_SinnohRegionBoat::
+	lock
+	faceplayer
+	specialvar VAR_RESULT, QzGetReachableRegionsMask
+	goto_if_eq VAR_RESULT, 0, EventScript_SinnohRegionBoat_NotYet
+	call Quetzal_EventScript_840F954
+	goto_if_eq VAR_RESULT, 0x7F, EventScript_RegionCustoms_Cancel
+	goto Quetzal_EventScript_840FA9D
+
+EventScript_SinnohRegionBoat_NotYet::
+	msgbox gText_SinnohRegionBoatNotYet, MSGBOX_DEFAULT
+	release
+	end
+
+gText_SinnohRegionBoatNotYet::
+	.string "This boat sails to faraway regions.\p"
+	.string "Come back with an S.S. TICKET once\n"
+	.string "you're the CHAMPION of SINNOH.$"

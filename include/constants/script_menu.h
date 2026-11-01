@@ -127,6 +127,11 @@
 #define MULTI_DANCE_MACHINE                116   // Moemon Rhythm: PLAY ALONE / WAIT FOR 2P / CANCEL
 #include "constants/script_menu_qz.h"   // Moemon Kai: Quetzal's menus, 117+
 #define MULTI_ARCADE_CABINET               224   // Moemon Fight: the GAME CENTER's arcade boards: WAIT FOR 2P / PLAY ALONE / CANCEL
+// Moemon Kai: the boat between regions with SINNOH on it, from each region (EventScript_RegionPickAll): the other three
+#define MULTI_REGIONS_FROM_HOENN           225
+#define MULTI_REGIONS_FROM_JOHTO           226
+#define MULTI_REGIONS_FROM_KANTO           227
+#define MULTI_REGIONS_FROM_SINNOH          228
 
 // Lilycove SS Tidal Multichoice Selections
 #define SSTIDAL_SELECTION_SLATEPORT        0

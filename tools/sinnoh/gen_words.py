@@ -93,6 +93,8 @@ def script(name, key, value, widths):
         return elite(name, key, value[1], widths)
     if isinstance(value, tuple) and value[0] == 'champion':
         return champion(name, key, widths)
+    if isinstance(value, tuple) and value[0] == 'script':
+        return '%s::\n\tgoto %s\n\tend\n\n' % (label, value[1]), ''
     if isinstance(value, tuple) and value[0] == 'boat':
         return boat(name, key, value[1], widths)
     text = '%s_Text_%s' % (name, key)

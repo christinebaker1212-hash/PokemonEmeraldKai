@@ -195,6 +195,12 @@ void MP_Region_GoToStartHouse(u8 region)
         SetWarpDestination(MAP_GROUP(MAP_KANTO_PALLET_TOWN_PLAYERS_HOUSE_2F), MAP_NUM(MAP_KANTO_PALLET_TOWN_PLAYERS_HOUSE_2F), WARP_ID_NONE, 6, 6);
         SetLastHealLocationWarp(HEAL_LOCATION_KANTO_PALLET_TOWN);
     }
+    else if (region == REGION_SINNOH)
+    {
+        // SINNOH has no opening of its own: the boat comes in at CANALAVE's dock, its CENTER the place to come back to
+        SetWarpDestination(MAP_GROUP(MAP_SINNOH_CANALAVE_CITY), MAP_NUM(MAP_SINNOH_CANALAVE_CITY), WARP_ID_NONE, 11, 22);
+        SetLastHealLocationWarp(HEAL_LOCATION_SINNOH_CANALAVE_CITY);
+    }
 }
 
 // The region picked on PROF. BIRCH's question (before the new game starts)

@@ -40,6 +40,8 @@
 	def_special QzGetElevatorFloorCursor
 	def_special QzGetPokedexCount
 	def_special QzGetReachableRegionsMask
+	def_special MP_RegionBoatAsk
+	def_special MP_RegionBoatPick
 	def_special QzGetRegionBadgeCount
 	def_special QzGetRivalStarterSpecies
 	def_special QzGetSeagallopMenuSelection
