@@ -95,6 +95,65 @@ def sunyshore(root):
     return lines
 
 
+def canalave(root):
+    """CANALAVE: its 24 platforms {model, A x y z, B x y z (tiles), floor A, floor B, starts at B}, each floor's
+    collision (Platinum's tables: 1 a wall), each person's floor (the events' heights: 10 tiles a floor)"""
+    text = open(os.path.join(root, 'src/overlay008/gym_features.c'), encoding='utf-8').read()
+    m = re.search(r'sCanalavePlatformPaths\[[^]]*\]\s*=\s*\{(.*?)\n\};', text, re.S)
+    plats = []
+    for body in re.findall(r'\{\s*\.modelID(.*?)\n    \}', m.group(1), re.S):
+        f = dict(re.findall(r'\.(\w+)\s*=\s*([^,\n]+)', '.modelID' + body))
+        a = dict(re.findall(r'\.(\w)\s*=\s*(\d+)', re.search(r'positionA\s*=\s*\{([^}]*)\}', body).group(1)))
+        b = dict(re.findall(r'\.(\w)\s*=\s*(\d+)', re.search(r'positionB\s*=\s*\{([^}]*)\}', body).group(1)))
+        plats.append((ident(f['modelID'].strip().replace('_nsbmd', '.nsbmd')), a['x'], a['y'], a['z'], b['x'], b['y'], b['z'],
+                      f['floorA'].strip(), f['floorB'].strip(), int(f['startInPositionB'].strip() == 'TRUE')))
+    cm = re.search(r'sCanalaveGymCollisionMaps\[4\]\[[^]]*\]\s*=\s*\{(.*?)\n\};', text, re.S).group(1)
+    floors = [[int(v) for v in re.findall(r'\d+', blk)] for blk in re.findall(r'\{([^{}]*)\}', cm)]
+    assert len(floors) == 4 and all(len(f) == 1024 for f in floors), [len(f) for f in floors]
+    ev = json.load(open(os.path.join(root, 'res/field/events/events_canalave_city_gym.json')))
+    people = [o.get('y', 0) // 10 for o in ev['object_events']]
+    lines = ['', '// CANALAVE: its platforms {model, A x y z, B x y z (tiles), floor A, floor B, starts at B}, each floor\'s',
+             '// collision as bits (a row a u32, bit x: a wall), each person\'s floor (Platinum\'s object order)']
+    lines.append('static const struct CanalavePlatform sCanalavePlatforms[] = {%s};' % ', '.join(
+        '{S3D_MODEL_%s, %s, %s, %s, %s, %s, %s, %s, %s, %d}' % p for p in plats))
+    lines.append('static const u32 sCanalaveWalls[4][32] = {%s};' % ', '.join(
+        '{%s}' % ', '.join('0x%08X' % sum(1 << x for x in range(32) if f[y * 32 + x]) for y in range(32)) for f in floors))
+    lines.append('static const u8 sCanalaveFloorOf[] = {%s};' % ', '.join(str(v) for v in people))
+    canalave_check(plats, floors, ev['object_events'])
+    return lines
+
+
+def canalave_check(plats, floors, objects):
+    """The gym as s3d_gyms.c walks it (each floor's walls; a platform stepped on carries the player to its other end)
+    reaches everyone from the door: stops the generator if not"""
+    from collections import deque
+    pl = [(int(a), int(b), int(c), int(d), int(e), int(f)) for _, a, b, c, d, e, f, _, _, _ in plats]
+    start = (16, 26, 0, 0)
+    seen, todo = {start}, deque([start])
+    while todo:
+        x, y, fl, moved = todo.popleft()
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            nx, ny = x + dx, y + dy
+            if not (0 <= nx < 32 and 0 <= ny < 32) or floors[fl][ny * 32 + nx]:
+                continue
+            st = (nx, ny, fl, moved)
+            for i, p in enumerate(pl):
+                at_b = plats[i][9] ^ ((moved >> i) & 1)
+                px, py, pz = p[3:6] if at_b else p[0:3]
+                if (px, pz) == (nx, ny) and int(py) // 10 == fl:
+                    ox, oy, oz = p[0:3] if at_b else p[3:6]
+                    st = (ox, oz, int(oy) // 10, moved ^ (1 << i))
+                    break
+            if st not in seen:
+                seen.add(st)
+                todo.append(st)
+    where = {(s[0], s[1], s[2]) for s in seen}
+    for o in objects:
+        f = o.get('y', 0) // 10
+        assert any((o['x'] + dx, o['z'] + dy, f) in where for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))), \
+            'CANALAVE: %s at %d,%d (floor %d) out of reach' % (o['graphics_id'], o['x'], o['z'], f)
+
+
 def ident(name):
     return name.replace('.nsbmd', '').upper()
 
@@ -119,6 +178,7 @@ def main():
     out.append('static const u8 sPastoriaGates[][3] = {%s};' % ', '.join('{%d, %d, %d}' % t for t in gates))
     out.append('static const u8 sPastoriaButtons[][3] = {%s};' % ', '.join('{%d, %d, %d}' % t for t in sorted(buttons)))
     out += sunyshore(root)
+    out += canalave(root)
     open('src/data/sinnoh_gyms.h', 'w').write('\n'.join(out) + '\n')
     print('%d models; PASTORIA: %d deep tiles, %d gates, %d buttons' % (len(gymprops.model_names()), len(deep), len(gates),
                                                                      len(buttons)))

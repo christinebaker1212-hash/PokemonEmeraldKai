@@ -34,8 +34,11 @@ void S3D_DynPropsClear(void);
 bool8 S3D_MapOrigin(float *x, float *z);
 // A gym's own ground heights (map tiles; NaN: the block's), asked with the height the object is nearest
 extern float (*gS3dHeightHook)(s32 mapX, s32 mapY, float h);
+extern float (*gS3dObjectHeightHook)(u8 localId, float h);   // a gym's people's heights by local id (NaN: the ground's)
+void S3D_PlayerWorld(float *x, float *z);       // the player in the map's matrix world
 void S3D_Gyms_MapLoaded(void);                    // a map's grid is (re)built: a gym's state on it (s3d_gyms.c)
 void S3D_Gyms_Update(void);                       // every overworld frame
+bool8 S3D_Gyms_SeesPlayer(u8 localId);            // a gym's trainer can see the player (same floor)
 bool8 S3D_Gyms_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY);   // a gym's own rules for a step (map coords + 7)
 float S3D_PlayerHeight(void);                    // the ground height the player stands at (NaN: unknown)
 float S3D_TileFloor(s32 mapX, s32 mapY, float near);   // the block's ground height on a map tile nearest NEAR (NaN: none)

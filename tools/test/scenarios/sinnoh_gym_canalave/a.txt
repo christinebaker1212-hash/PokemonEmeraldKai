@@ -1,0 +1,22 @@
+pressuntil A field 5000
+wait 30
+mp warp 41,18,16,26
+wait 90
+waitfor field 1000
+mp gym
+mp warp 41,18,11,14
+wait 60
+waitfor field 1000
+shot t_ground
+mp face up
+press UP 12
+wait 10
+waitfor field 3000
+wait 30
+mp gym
+mp face up
+press UP 12
+wait 30
+mp where
+shot t_up
+quit

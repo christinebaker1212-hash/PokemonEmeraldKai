@@ -90,6 +90,7 @@ static struct
 typedef struct { bool8 on; s16 mesh; float m[12]; } S3dDynProp;
 static S3dDynProp sDyn[S3D_DYN_PROPS];
 float (*gS3dHeightHook)(s32 mapX, s32 mapY, float h);
+float (*gS3dObjectHeightHook)(u8 localId, float h);
 
 // SINNOH's maps: the matrix cell of each one's top-left block and its size in blocks
 #include "s3d_maps.h"   // sMaps: each SINNOH map and where it lies on the matrix (tools/sinnoh/gen_maps.py)
@@ -498,6 +499,19 @@ void S3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
     if (spriteId < MAX_SPRITES && (u8)(sView.frame - sSpriteHFrame[spriteId]) <= 2)
         near = sSpriteH[spriteId];
     h = GroundAt(wx, wz, near);
+    if (gS3dObjectHeightHook != NULL && spriteId < MAX_SPRITES)
+    {
+        // (a gym's people on its own floors: by who they are)
+        u32 i;
+        for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+            if (gObjectEvents[i].active && gObjectEvents[i].spriteId == spriteId && !gObjectEvents[i].isPlayer)
+            {
+                float oh = gS3dObjectHeightHook(gObjectEvents[i].localId, h);
+                if (oh == oh)
+                    h = oh;
+                break;
+            }
+    }
     if (spriteId < MAX_SPRITES)
     {
         sSpriteH[spriteId] = h;
@@ -854,6 +868,12 @@ void S3D_DynPropHide(u8 slot)
 void S3D_DynPropsClear(void)
 {
     memset(sDyn, 0, sizeof(sDyn));
+}
+
+// Where the player is in the map's matrix world (the camera's target: smooth while walking)
+void S3D_PlayerWorld(float *x, float *z)
+{
+    *x = sView.tx, *z = sView.tz;
 }
 
 // The ground height the player stands at (the last frame's; NaN: not known yet)

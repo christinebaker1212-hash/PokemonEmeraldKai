@@ -1,4 +1,5 @@
 #include "global.h"
+#include "s3d.h"   // Moemon Kai
 #include "mp.h"
 #include "battle_setup.h"
 #include "event_data.h"
@@ -331,6 +332,8 @@ static u8 GetTrainerApproachDistance(struct ObjectEvent *trainerObj)
     u8 approachDistance;
 
     PlayerGetDestCoords(&x, &y);
+    if (!S3D_Gyms_SeesPlayer(trainerObj->localId))
+        return 0;   // Moemon Kai: on another floor of a SINNOH gym (src/sinnoh/s3d_gyms.c)
     if (trainerObj->trainerType == TRAINER_TYPE_NORMAL)  // can only see in one direction
     {
         approachDistance = sDirectionalApproachDistanceFuncs[trainerObj->facingDirection - 1](trainerObj, trainerObj->trainerRange_berryTreeId, x, y);

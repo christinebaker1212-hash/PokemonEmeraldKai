@@ -28,12 +28,16 @@
 #include "constants/songs.h"
 #include <string.h>
 struct SunyshoreGear { u16 model; u8 x, y, z, start, clockwise, upright; };
+struct CanalavePlatform { u16 model; u8 ax, ay, az, bx, by, bz, floorA, floorB, startB; };
 #include "../data/sinnoh_gyms.h"
 
 #define VAR_SINNOH_PASTORIA 0x52F3   // the water's level + 1 (0: Platinum's start, the middle)
 #define VAR_SINNOH_SUNYSHORE 0x52F4  // the gears' quarter turn in the room the player is in
+#define VAR_SINNOH_CANALAVE_LO 0x52F5   // the platforms moved from where they start (bits 0-15)
+#define VAR_SINNOH_CANALAVE_HI 0x52F6   // (bits 16-23)
+#define VAR_SINNOH_CANALAVE_FLOOR 0x52F7   // the floor the player is on
 
-enum { GYM_NONE, GYM_PASTORIA, GYM_SUNYSHORE };
+enum { GYM_NONE, GYM_PASTORIA, GYM_SUNYSHORE, GYM_CANALAVE };
 
 static struct
 {
@@ -44,6 +48,10 @@ static struct
     u8 room;               // SUNYSHORE: the room (0-2)
     float turned, turnTo;  // ... the gears' turn now and where it's going (degrees from the quarter turn's start)
     s8 turnWay;
+    u8 ride;               // CANALAVE: the platform being ridden (+1; 0 none)
+    float rideY;           // ... its height now
+    s16 rideSteps;         // ... the tiles still to go along (a platform that moves sideways)
+    u8 rideDir;
 } sG;
 
 static u16 CurrentMap(void)
@@ -107,9 +115,11 @@ static float PastoriaHeight(s32 x, s32 y, float near)
     return PoolHeight(x, y, near, sG.water);
 }
 
+static float CanalaveHeight(s32 x, s32 y, float near);
+
 static float HeightHook(s32 x, s32 y, float near)
 {
-    return sG.gym == GYM_PASTORIA ? PastoriaHeight(x, y, near) : NAN;
+    return sG.gym == GYM_PASTORIA ? PastoriaHeight(x, y, near) : sG.gym == GYM_CANALAVE ? CanalaveHeight(x, y, near) : NAN;
 }
 
 static void PastoriaGates(void)
@@ -317,12 +327,213 @@ u16 Sinnoh_SunyshoreTurn(void)
     return 0;
 }
 
+// ------------------------------------------------------------------------------------------------------ CANALAVE
+// Four floors, 10 tiles apart (160 units): the ground floor is the block's, the three above Platinum's run-time floor
+// props, shown only once the player is up to them. 24 platforms: stepped on, a lift carries the player up or down to
+// its other floor, a sideways one along to its other end (Platinum's paths). Each floor has its own walls (Platinum's
+// tables: the map's own grid walls are lifted in this gym); people stand on their own floors.
+#define CANALAVE_FLOOR_H 160.0f
+
+static u32 CanalaveMoved(void)
+{
+    return VarGet(VAR_SINNOH_CANALAVE_LO) | (u32)VarGet(VAR_SINNOH_CANALAVE_HI) << 16;
+}
+
+static bool8 CanalaveAtB(u32 i)
+{
+    return sCanalavePlatforms[i].startB ^ ((CanalaveMoved() >> i) & 1);
+}
+
+static u8 CanalaveFloor(void)
+{
+    return VarGet(VAR_SINNOH_CANALAVE_FLOOR) % 4;
+}
+
+static void CanalavePlatformAt(u32 i, s32 *x, s32 *y, s32 *z)
+{
+    const struct CanalavePlatform *p = &sCanalavePlatforms[i];
+    bool8 b = CanalaveAtB(i);
+    *x = b ? p->bx : p->ax, *y = b ? p->by : p->ay, *z = b ? p->bz : p->az;
+}
+
+// The props: floors above shown up to the player's height, the platforms on the floors shown
+static void CanalaveProps(void)
+{
+    float eye = sG.ride ? sG.rideY : CanalaveFloor() * CANALAVE_FLOOR_H;
+    u32 i, k;
+    static const u16 sFloors[3] = {S3D_MODEL_CANALAVE_GYM_SECOND_FLOOR, S3D_MODEL_CANALAVE_GYM_THIRD_FLOOR,
+                                   S3D_MODEL_CANALAVE_GYM_FOURTH_FLOOR};
+    for (k = 0; k < 3; k++)
+    {
+        if (eye >= 16.0f + CANALAVE_FLOOR_H * k)
+            S3D_DynProp(k, sFloors[k], sG.ox + 256, CANALAVE_FLOOR_H * (k + 1), sG.oz + 256, 0);
+        else
+            S3D_DynPropHide(k);
+    }
+    for (i = 0; i < ARRAY_COUNT(sCanalavePlatforms) && 3 + i < S3D_DYN_PROPS; i++)
+    {
+        s32 x, y, z;
+        float fy;
+        CanalavePlatformAt(i, &x, &y, &z);
+        fy = y * 16.0f;
+        if (sG.ride == i + 1)
+        {
+            float px, pz;
+            S3D_PlayerWorld(&px, &pz);
+            if (sG.rideSteps >= 0 && sG.rideDir != 0)
+                S3D_DynProp(3 + i, sCanalavePlatforms[i].model, px, fy, pz, 0);   // (along with the player)
+            else
+                S3D_DynProp(3 + i, sCanalavePlatforms[i].model, sG.ox + x * 16 + 8, sG.rideY, sG.oz + z * 16 + 8, 0);
+            continue;
+        }
+        if (fy <= eye + 8.0f || fy < 16.0f)
+            S3D_DynProp(3 + i, sCanalavePlatforms[i].model, sG.ox + x * 16 + 8, fy, sG.oz + z * 16 + 8, 0);
+        else
+            S3D_DynPropHide(3 + i);
+    }
+}
+
+static float CanalaveHeight(s32 x, s32 y, float near)
+{
+    if (sG.ride && sG.rideDir == 0)
+        return sG.rideY;
+    return CanalaveFloor() ? CanalaveFloor() * CANALAVE_FLOOR_H : NAN;
+}
+
+static float CanalavePersonHeight(u8 localId, float h)
+{
+    return localId >= 1 && localId <= ARRAY_COUNT(sCanalaveFloorOf) ? sCanalaveFloorOf[localId - 1] * CANALAVE_FLOOR_H : NAN;
+}
+
+static bool8 CanalaveWall(u8 floor, s32 x, s32 y)
+{
+    return x < 0 || y < 0 || x >= 32 || y >= 32 || ((sCanalaveWalls[floor][y] >> x) & 1);
+}
+
+// People on floors above the player's (and theirs) aren't seen
+static void CanalavePeople(void)
+{
+    u32 i;
+    float eye = sG.ride ? sG.rideY : CanalaveFloor() * CANALAVE_FLOOR_H;
+    for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+    {
+        struct ObjectEvent *o = &gObjectEvents[i];
+        if (!o->active || o->isPlayer || o->localId < 1 || o->localId > ARRAY_COUNT(sCanalaveFloorOf))
+            continue;
+        o->invisible = sCanalaveFloorOf[o->localId - 1] * CANALAVE_FLOOR_H > eye + 8.0f;
+    }
+}
+
+static void CanalaveLoad(void)
+{
+    s32 x, y;
+    // (from the door: the gym as Platinum sets it up, on the ground floor)
+    if (gSaveBlock1Ptr->pos.x == 16 && gSaveBlock1Ptr->pos.y >= 26)
+    {
+        VarSet(VAR_SINNOH_CANALAVE_LO, 0);
+        VarSet(VAR_SINNOH_CANALAVE_HI, 0);
+        VarSet(VAR_SINNOH_CANALAVE_FLOOR, 0);
+    }
+    for (y = 0; y < 32; y++)
+        for (x = 0; x < 32; x++)
+            MapGridSetMetatileImpassabilityAt(x + MAP_OFFSET, y + MAP_OFFSET, FALSE);
+    sG.ride = 0;
+    CanalaveProps();
+    gS3dObjectHeightHook = CanalavePersonHeight;
+}
+
+static s32 CanalavePlatformUnder(s32 x, s32 z)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sCanalavePlatforms); i++)
+    {
+        s32 px, py, pz;
+        CanalavePlatformAt(i, &px, &py, &pz);
+        if (px == x && pz == z && py / 10 == CanalaveFloor())
+            return i;
+    }
+    return -1;
+}
+
+static void Task_CanalaveRide(u8 taskId)
+{
+    const struct CanalavePlatform *p = &sCanalavePlatforms[sG.ride - 1];
+    bool8 b = CanalaveAtB(sG.ride - 1);   // (where it goes: already toggled)
+    struct ObjectEvent *player = &gObjectEvents[gPlayerAvatar.objectEventId];
+    if (sG.rideDir == 0)
+    {
+        float to = (b ? p->by : p->ay) * 16.0f;
+        sG.rideY += sG.rideY < to ? 8.0f : -8.0f;
+        if ((sG.rideY >= to && (b ? p->by : p->ay) * 16.0f >= (b ? p->ay : p->by) * 16.0f)
+         || (sG.rideY <= to && (b ? p->by : p->ay) * 16.0f <= (b ? p->ay : p->by) * 16.0f))
+        {
+            sG.rideY = to;
+            VarSet(VAR_SINNOH_CANALAVE_FLOOR, (b ? p->floorB : p->floorA) % 4);
+            goto done;
+        }
+    }
+    else if (!ObjectEventIsHeldMovementActive(player) || ObjectEventClearHeldMovementIfFinished(player))
+    {
+        if (sG.rideSteps <= 0)
+            goto done;
+        ObjectEventSetHeldMovement(player, MOVEMENT_ACTION_WALK_FAST_DOWN + sG.rideDir - 1);
+        sG.rideSteps--;
+    }
+    CanalaveProps();
+    CanalavePeople();
+    return;
+done:
+    m4aSongNumStop(SE_ELEVATOR);
+    PlaySE(SE_CLICK);
+    sG.ride = 0;
+    PlayerGetDestCoords(&sG.lastX, &sG.lastY);
+    sG.lastX -= MAP_OFFSET, sG.lastY -= MAP_OFFSET;
+    CanalaveProps();
+    CanalavePeople();
+    DestroyTask(taskId);
+    ScriptContext_Enable();
+}
+
+// The platform under the player moves (its script: data/scripts/sinnoh_places.inc; VAR_0x8004 the platform)
+u16 Sinnoh_CanalaveRide(void)
+{
+    u32 i = gSpecialVar_0x8004, moved;
+    const struct CanalavePlatform *p;
+    s32 x, y, z;
+    if (sG.gym != GYM_CANALAVE || i >= ARRAY_COUNT(sCanalavePlatforms))
+    {
+        ScriptContext_Enable();
+        return 0;
+    }
+    p = &sCanalavePlatforms[i];
+    CanalavePlatformAt(i, &x, &y, &z);
+    moved = CanalaveMoved() ^ (1u << i);
+    VarSet(VAR_SINNOH_CANALAVE_LO, moved & 0xFFFF);
+    VarSet(VAR_SINNOH_CANALAVE_HI, moved >> 16);
+    sG.ride = i + 1;
+    sG.rideY = y * 16.0f;
+    sG.rideDir = 0;
+    sG.rideSteps = 0;
+    if (p->ax != p->bx || p->az != p->bz)
+    {
+        // (sideways: the player is carried tile by tile to the other end; DIR_SOUTH 1, NORTH 2, WEST 3, EAST 4)
+        s32 tx = CanalaveAtB(i) ? p->bx : p->ax, tz = CanalaveAtB(i) ? p->bz : p->az;
+        sG.rideDir = tx > x ? DIR_EAST : tx < x ? DIR_WEST : tz > z ? DIR_SOUTH : DIR_NORTH;
+        sG.rideSteps = tx > x ? tx - x : tx < x ? x - tx : tz > z ? tz - z : z - tz;
+    }
+    MPNet_Log("gym: CANALAVE platform %d from %d,%d,%d (floor %d)", i, x, y, z, CanalaveFloor());
+    PlaySE(SE_ELEVATOR);
+    CreateTask(Task_CanalaveRide, 80);
+    return 0;
+}
+
 // ------------------------------------------------------------------------------------------------------ all gyms
 void S3D_Gyms_MapLoaded(void)
 {
     u16 map = CurrentMap();
     S3D_DynPropsClear();
     gS3dHeightHook = NULL;
+    gS3dObjectHeightHook = NULL;
     sG.gym = GYM_NONE;
     sG.lastX = sG.lastY = -1;
     if (!S3D_MapOrigin(&sG.ox, &sG.oz))
@@ -338,7 +549,12 @@ void S3D_Gyms_MapLoaded(void)
         sG.gym = GYM_SUNYSHORE;
         SunyshoreLoad(map == MAP_SINNOH_SUNYSHORE_CITY_GYM_ROOM1 ? 0 : map == MAP_SINNOH_SUNYSHORE_CITY_GYM_ROOM2 ? 1 : 2);
     }
-    if (sG.gym == GYM_PASTORIA)
+    else if (map == MAP_SINNOH_CANALAVE_CITY_GYM)
+    {
+        sG.gym = GYM_CANALAVE;
+        CanalaveLoad();
+    }
+    if (sG.gym == GYM_PASTORIA || sG.gym == GYM_CANALAVE)
         gS3dHeightHook = HeightHook;
 }
 
@@ -347,6 +563,8 @@ void S3D_Gyms_Update(void)
     s16 x, y;
     if (sG.gym == GYM_NONE)
         return;
+    if (sG.gym == GYM_CANALAVE)
+        CanalavePeople();
     if (gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x != gObjectEvents[gPlayerAvatar.objectEventId].previousCoords.x
      || gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y != gObjectEvents[gPlayerAvatar.objectEventId].previousCoords.y)
         ;   // (mid-step)
@@ -365,6 +583,16 @@ void S3D_Gyms_Update(void)
             extern const u8 Sinnoh_EventScript_PastoriaButton[];
             gSpecialVar_0x8004 = level;
             ScriptContext_SetupScript(Sinnoh_EventScript_PastoriaButton);
+        }
+    }
+    else if (sG.gym == GYM_CANALAVE)
+    {
+        s32 i = CanalavePlatformUnder(x, y);
+        if (i >= 0)
+        {
+            extern const u8 Sinnoh_EventScript_CanalaveRide[];
+            gSpecialVar_0x8004 = i;
+            ScriptContext_SetupScript(Sinnoh_EventScript_CanalaveRide);
         }
     }
     else if (sG.gym == GYM_SUNYSHORE)
@@ -390,6 +618,9 @@ bool8 S3D_Gyms_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY)
     case GYM_SUNYSHORE:
         blocked = SunyshoreBlocked(toX - MAP_OFFSET, toY - MAP_OFFSET, SunyshoreTurn());
         break;
+    case GYM_CANALAVE:
+        blocked = sG.ride == 0 && CanalaveWall(CanalaveFloor(), toX - MAP_OFFSET, toY - MAP_OFFSET);
+        break;
     }
     if (getenv("MOEMON_GYM_TRACE"))
         printf("[gym] step %d,%d -> %d,%d: %s (player at %.0f)\n", fromX - MAP_OFFSET, fromY - MAP_OFFSET, toX - MAP_OFFSET,
@@ -399,12 +630,20 @@ bool8 S3D_Gyms_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY)
 
 static void ReportReached(const u8 *seen, u32 states);
 
+// A trainer sees the player only on the player's floor (CANALAVE)
+bool8 S3D_Gyms_SeesPlayer(u8 localId)
+{
+    if (sG.gym == GYM_CANALAVE && localId >= 1 && localId <= ARRAY_COUNT(sCanalaveFloorOf))
+        return sCanalaveFloorOf[localId - 1] == CanalaveFloor() && !sG.ride;
+    return TRUE;
+}
+
 // (tests: `mp gym`: the gym's state; `mp gym solve`: PASTORIA walked from the door by every step and button, with the
 // gym's own rules and the map's walls: which trainers and the leader are reached, after how many buttons)
 void S3D_Gyms_Debug(const char *arg)
 {
-    printf("[test] gym %d: water %.0f (level %d) room %d turn %d\n", sG.gym, sG.water, PastoriaLevel(), sG.room + 1,
-           SunyshoreTurn());
+    printf("[test] gym %d: water %.0f (level %d) room %d turn %d floor %d moved %06X\n", sG.gym, sG.water, PastoriaLevel(),
+           sG.room + 1, SunyshoreTurn(), CanalaveFloor(), CanalaveMoved());
     if (sG.gym == GYM_PASTORIA && strcmp(arg, "solve") == 0)
     {
         static u8 sSeen[3][64][32];

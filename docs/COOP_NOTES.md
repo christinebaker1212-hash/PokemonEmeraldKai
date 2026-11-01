@@ -3491,8 +3491,15 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   SUNYSHORE: three rooms of gears (Platinum's gear tables and collision regions, read from gym_features.c), a room's
   quarter turn VAR_SINNOH_SUNYSHORE 0x52F4 (its own start 2 / 1 / 0, or 0 from its entrance: the save's pos at load);
   buttons turn every gear a quarter, back one or a half (5.625 degrees a frame), upright gears about the east-west axis.
+  CANALAVE: four floors 160 units apart (the three above Platinum's run-time floor props, shown once the player is
+  up to them), 24 platforms (Platinum's paths: a lift to its other floor, a sideways one carries the player along to its
+  other end tile by tile, MOVEMENT_ACTION_WALK_FAST); their state VAR_SINNOH_CANALAVE_LO / _HI 0x52F5-0x52F6 (moved
+  from Platinum's start), the player's floor VAR_SINNOH_CANALAVE_FLOOR 0x52F7 (both reset from the door). The map's
+  own walls are lifted: each floor's walls are Platinum's tables (sCanalaveWalls bits); people stand on their floors
+  (gS3dObjectHeightHook by local id, hidden above the player's floor) and trainers see only their own floor
+  (trainer_see.c S3D_Gyms_SeesPlayer). gen_gyms.py walks the gym as the game does and stops if anyone is out of reach.
   `mp gym [solve]`: the state, and a walk from the door by every step and button with the real collision (who and
-  which doors are reached, after how many buttons). Tests sinnoh_gym_pastoria, sinnoh_gym_sunyshore.
+  which doors are reached, after how many buttons). Tests sinnoh_gym_pastoria, sinnoh_gym_sunyshore, sinnoh_gym_canalave.
 - TOWN MAP and FLY (2026-11-01): tools/sinnoh/gen_townmap.py (run by gen_maps.py) gives every SINNOH map its section
   from Platinum's location label (the header's mapLabelTextID: 120 places, MAPSEC_SINNOH_FIRST 0x140, names written from
   the labels' words) and writes include/constants/region_map_sections_sinnoh.h + src/data/region_map/sinnoh_region_map.h.

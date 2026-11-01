@@ -296,3 +296,11 @@ Sinnoh_EventScript_SunyshoreButton::
 	waitstate
 	releaseall
 	end
+
+@ CANALAVE's gym: the platform stepped on carries the player (src/sinnoh/s3d_gyms.c Sinnoh_CanalaveRide)
+Sinnoh_EventScript_CanalaveRide::
+	lockall
+	special Sinnoh_CanalaveRide
+	waitstate
+	releaseall
+	end

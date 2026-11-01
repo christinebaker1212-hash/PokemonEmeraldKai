@@ -631,4 +631,5 @@ gSpecials::
 	def_special Sinnoh_BpBuy
 	def_special Sinnoh_PastoriaWater
 	def_special Sinnoh_SunyshoreTurn
+	def_special Sinnoh_CanalaveRide
 	.include "data/qz_specials.inc"   @ Moemon Kai: Quetzal's specials (Johto / Kanto)
