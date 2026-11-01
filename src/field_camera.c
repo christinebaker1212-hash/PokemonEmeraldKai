@@ -238,8 +238,10 @@ static void DrawMetatileAt(const struct MapLayout *mapLayout, u16 offset, int x,
 
     if (metatileId > NUM_METATILES_TOTAL)
         metatileId = 0;
-    if (metatileId >= S3D_METATILE_BEHAVIOR)
-        metatileId = 1;   // Moemon Kai: SINNOH's tiles carry a behavior, not art (the 3D engine draws SINNOH)
+    // Moemon Kai: SINNOH's tiles carry a behavior, not art (the 3D engine draws SINNOH); only there: HOENN's secondary
+    // tilesets use these numbers for their own art (1.63.0-1.63.8 drew their buildings, bridges and paths as grass)
+    if (metatileId >= S3D_METATILE_BEHAVIOR && S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+        metatileId = 1;
     if (metatileId < Fieldmap_PrimaryMetatiles(mapLayout))   // Moemon Kai: FRLG split
     {
         metatiles = mapLayout->primaryTileset->metatiles;
