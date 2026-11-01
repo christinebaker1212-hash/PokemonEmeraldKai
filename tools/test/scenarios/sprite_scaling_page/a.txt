@@ -1,0 +1,39 @@
+pressuntil A field 5000
+wait 60
+press START 2
+wait 30
+press UP 2
+wait 10
+press UP 2
+wait 10
+press A 2
+wait 120
+press R 2
+wait 20
+press DOWN 2
+wait 5
+press DOWN 2
+wait 5
+press DOWN 2
+wait 5
+press DOWN 2
+wait 5
+press DOWN 2
+wait 5
+press DOWN 2
+wait 10
+shot p_display
+press A 2
+wait 20
+shot p_page
+press LEFT 2
+wait 10
+press DOWN 2
+wait 5
+press A 2
+wait 10
+shot p_changed
+press B 2
+wait 20
+shot p_back
+quit

@@ -1810,6 +1810,7 @@ bool8 AddSpriteToOamBuffer(struct Sprite *sprite, u16 *oamIndex)
     bool8 full = AddSpriteToOamBufferInner(sprite, oamIndex);
     MP_BigSprite_NoteClip(sprite, first, *oamIndex);   // Moemon PC: its entries stop at its clip line
     S3D_NoteOam(sprite - gSprites, first, *oamIndex);   // Moemon Kai: its depth in a SINNOH 3D scene
+    MP_BigSprite_NoteScale(sprite, first, *oamIndex);  // Moemon Co-op: and are drawn smaller (mp_spritescale.h)
     return full;
 }
 

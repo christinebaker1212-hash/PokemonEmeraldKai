@@ -2049,7 +2049,7 @@ static const struct ObjectEventGraphicsInfo *SinnohGen3Info(u16 i, u16 gfx)
     return &sChar[i];
 }
 
-// OPTIONS > DISPLAY > SINNOH PEOPLE: GEN 4 Platinum's; MIXED a true Gen 3 equivalent, else Platinum's smaller; GEN 3
+// OPTIONS > DISPLAY > SPRITE SCALING > SINNOH PEOPLE: GEN 4 Platinum's; MIXED a true Gen 3 equivalent, else Platinum's smaller; GEN 3
 // the Gen 3 equivalent, else the closest Gen 3 sprite (the stand-in, also shown without the pack)
 static const struct ObjectEventGraphicsInfo *SinnohGraphicsInfo(u16 i)
 {

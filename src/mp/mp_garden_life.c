@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "mp_spritescale.h"
 #include "mp.h"
 #include "mp_pmd.h"
 #include "mp_garden.h"
@@ -70,6 +71,8 @@ struct Actor
     bool8 pmdOn;
     u8 pdir, pturn;
     struct MpPmdView pmd;
+    u32 scaleKey;           // OPTIONS > DISPLAY > SPRITE SCALING: its scale, worked out once (mp_spritescale.c)
+    u16 scale;
     struct SpriteFrameImage frames[8];
     struct SpriteTemplate tmpl;
     struct Coords16 prev, cur, target;
@@ -902,6 +905,9 @@ static void Draw(struct Actor *a)
         }
         sp->oam.paletteNum = pal;
     }
+    // Moemon Co-op: OPTIONS > DISPLAY > SPRITE SCALING > GARDEN POKeMON: its POKeDEX height next to a trainer
+    sp->mpScale = MP_SpriteScale_Mon(gMpConfig.scaleGarden, a->dex, a->pmdOn ? &a->pmd : NULL, a->frames[0].data, a->size,
+                                     &a->scaleKey, &a->scale);
     ax = a->prev.x * 256 + (a->cur.x - a->prev.x) * a->moved * 16;
     ay = a->prev.y * 256 + (a->cur.y - a->prev.y) * a->moved * 16;
     sp->x = os->x + (s16)((ax - sL.ovx) * 16 / 256);

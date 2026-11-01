@@ -1,0 +1,14 @@
+pressuntil A field 5000
+wait 30
+mp setflag 0x390E
+mp warp 40,20,6,16
+wait 200
+mp follow 0
+wait 60
+press DOWN 16
+wait 40
+shot sf_on
+mp spritescale 0 0
+wait 20
+shot sf_off
+quit

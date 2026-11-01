@@ -16,10 +16,19 @@ static u16 sPendingCount, sLiveCount;
 #define NO_CLIP 0x7FFF
 static s16 sPendingClip[OAM_ENTRY_COUNT], sLiveClip[OAM_ENTRY_COUNT];
 static bool8 sPendingAnyClip, sLiveAnyClip;
+// ... and be drawn smaller (sprite->mpScale), around the bottom middle of all of them
+struct ScaleNote { u16 scale; s16 ax, ay; };
+static struct ScaleNote sPendingScale[OAM_ENTRY_COUNT], sLiveScale[OAM_ENTRY_COUNT];
+static bool8 sPendingAnyScale, sLiveAnyScale;
 
 void MP_BigSprite_BeginOam(void)
 {
     sPendingCount = 0;
+    if (sPendingAnyScale)
+    {
+        memset(sPendingScale, 0, sizeof(sPendingScale));
+        sPendingAnyScale = FALSE;
+    }
     if (sPendingAnyClip)
     {
         u16 i;
@@ -42,6 +51,63 @@ void MP_BigSprite_NoteClip(struct Sprite *sprite, u16 first, u16 end)
     }
     for (i = first; i < end && i < OAM_ENTRY_COUNT; i++)
         sPendingClip[i] = sprite->mpClipY;
+}
+
+// Any sprite's OAM entries can be drawn smaller (sprite->mpScale), around the bottom middle of all of them
+
+static void EntryRect(u16 i, s32 *x0, s32 *y0, s32 *x1, s32 *y1)
+{
+    static const u8 sSizes[3][4][2] = {{{8, 8}, {16, 16}, {32, 32}, {64, 64}}, {{16, 8}, {32, 8}, {32, 16}, {64, 32}},
+                                       {{8, 16}, {8, 32}, {16, 32}, {32, 64}}};
+    const struct OamData *oam = &gMain.oamBuffer[i];
+    s32 x, y;
+    if (oam->shape == MP_BIG_OAM_SHAPE)
+    {
+        const struct MpBigOam *e = &sPending[oam->tileNum];
+        *x0 = e->left, *y0 = e->top, *x1 = e->left + e->w, *y1 = e->top + e->h;
+        return;
+    }
+    x = oam->x >= DISPLAY_WIDTH ? (s32)oam->x - 512 : oam->x;
+    y = oam->y >= DISPLAY_HEIGHT ? (s32)oam->y - 256 : oam->y;
+    *x0 = x, *y0 = y;
+    *x1 = x + sSizes[oam->shape % 3][oam->size][0];
+    *y1 = y + sSizes[oam->shape % 3][oam->size][1];
+}
+
+void MP_BigSprite_NoteScale(struct Sprite *sprite, u16 first, u16 end)
+{
+    s32 x0 = 0x7FFF, y0 = 0x7FFF, x1 = -0x7FFF, y1 = -0x7FFF, a, b, c, d;
+    u16 i;
+    if (sprite->mpScale == 0 || sprite->mpScale >= 256 || first >= end)
+        return;
+    if (!sPendingAnyScale)
+    {
+        memset(sPendingScale, 0, sizeof(sPendingScale));
+        sPendingAnyScale = TRUE;
+    }
+    for (i = first; i < end && i < OAM_ENTRY_COUNT; i++)
+    {
+        EntryRect(i, &a, &b, &c, &d);
+        if (a < x0) x0 = a;
+        if (b < y0) y0 = b;
+        if (c > x1) x1 = c;
+        if (d > y1) y1 = d;
+    }
+    for (i = first; i < end && i < OAM_ENTRY_COUNT; i++)
+    {
+        sPendingScale[i].scale = sprite->mpScale;
+        sPendingScale[i].ax = (x0 + x1) / 2;
+        sPendingScale[i].ay = y1;
+    }
+}
+
+u16 MP_BigSprite_OamScale(u16 oamIndex, s16 *ax, s16 *ay)
+{
+    if (!sLiveAnyScale || oamIndex >= OAM_ENTRY_COUNT || sLiveScale[oamIndex].scale == 0)
+        return 0;
+    *ax = sLiveScale[oamIndex].ax;
+    *ay = sLiveScale[oamIndex].ay;
+    return sLiveScale[oamIndex].scale;
 }
 
 int MP_BigSprite_OamClipY(u16 oamIndex)
@@ -118,6 +184,9 @@ void MP_BigSprite_CommitOam(void)
     memcpy(sLive, sPending, sPendingCount * sizeof(sLive[0]));
     sLiveCount = sPendingCount;
     sLiveAnyClip = sPendingAnyClip;
+    sLiveAnyScale = sPendingAnyScale;
+    if (sPendingAnyScale)
+        memcpy(sLiveScale, sPendingScale, sizeof(sLiveScale));
     if (sPendingAnyClip)
         memcpy(sLiveClip, sPendingClip, sizeof(sLiveClip));
 }

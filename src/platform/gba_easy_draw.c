@@ -543,6 +543,116 @@ static void PutObjPixel(struct scanlineData *scanline, uint16_t *pixels, struct 
     }
 }
 
+// Moemon Co-op: an OAM entry drawn smaller (sprite->mpScale, mp_spritescale.h): each pixel the average of the ones it
+// covers (shrunk around the sprite's bottom middle), kept where at least half of it is covered: smooth, nothing dropped.
+// FETCH gives a texel's colour (FALSE: transparent) in the entry's own w x h picture.
+typedef bool (*TexelFetch)(const void *ctx, int tx, int ty, uint16_t *color);
+static void DrawScaledEntry(struct scanlineData *scanline, uint16_t *pixels, struct OamData *oam, uint16_t vcount,
+                            bool windowsEnabled, unsigned int blendMode, bool isSemiTransparent, bool isObjWin,
+                            int x0, int y0, int w, int h, u16 scale, s16 ax, s16 ay, TexelFetch fetch, const void *ctx)
+{
+    float s = scale / 256.0f, inv = 256.0f / scale;
+    float top = ay + (y0 - ay) * s, bottom = ay + (y0 + h - ay) * s;
+    float left = ax + (x0 - ax) * s, right = ax + (x0 + w - ax) * s;
+    float sy0, sy1;
+    int gx, gx0, gx1;
+    if ((float)vcount + 1 <= top || (float)vcount >= bottom)
+        return;
+    sy0 = ay + ((float)vcount - ay) * inv - y0;
+    sy1 = sy0 + inv;
+    gx0 = (int)left;
+    gx1 = (int)right + 1;
+    if (gx0 < 0)
+        gx0 = 0;
+    if (gx1 > DISPLAY_WIDTH)
+        gx1 = DISPLAY_WIDTH;
+    for (gx = gx0; gx < gx1; gx++)
+    {
+        float sx0 = ax + ((float)gx - ax) * inv - x0, sx1 = sx0 + inv;
+        float r = 0, g = 0, b = 0, cover = 0;
+        int ty, tx;
+        for (ty = (int)sy0 - (sy0 < 0); ty < sy1; ty++)
+        {
+            float cy = (sy1 < ty + 1 ? sy1 : ty + 1) - (sy0 > ty ? sy0 : ty);
+            if (cy <= 0 || ty < 0 || ty >= h)
+                continue;
+            for (tx = (int)sx0 - (sx0 < 0); tx < sx1; tx++)
+            {
+                float cx = (sx1 < tx + 1 ? sx1 : tx + 1) - (sx0 > tx ? sx0 : tx), wgt;
+                uint16_t c;
+                if (cx <= 0 || tx < 0 || tx >= w || !fetch(ctx, tx, ty, &c))
+                    continue;
+                wgt = cx * cy;
+                r += (c & 31) * wgt;
+                g += ((c >> 5) & 31) * wgt;
+                b += ((c >> 10) & 31) * wgt;
+                cover += wgt;
+            }
+        }
+        if (cover * 2 < inv * inv)
+            continue;
+        PutObjPixel(scanline, pixels, oam, (uint16_t)((int)(r / cover + 0.5f) | (int)(g / cover + 0.5f) << 5
+                                                     | (int)(b / cover + 0.5f) << 10),
+                    gx, vcount, windowsEnabled, blendMode, isSemiTransparent, isObjWin, FALSE);
+    }
+}
+
+struct ObjFetch { const struct OamData *oam; int w, h; };
+static bool FetchObjTexel(const void *ctx, int tx, int ty, uint16_t *color)
+{
+    const struct ObjFetch *f = ctx;
+    const struct OamData *oam = f->oam;
+    const uint8_t *tiles = (const uint8_t *)(VRAM_ + 0x10000);
+    const uint16_t *palette = (const uint16_t *)(PLTT + 0x200);
+    int block;
+    uint16_t pixel;
+    if ((oam->matrixNum >> 3) & 1)
+        tx = f->w - tx - 1;
+    if ((oam->matrixNum >> 4) & 1)
+        ty = f->h - ty - 1;
+    block = (ty / 8) * (REG_DISPCNT & 0x40 ? (f->w / 8) : 16) + tx / 8;
+    if (!(oam->bpp & 1))
+    {
+        pixel = tiles[(block + oam->tileNum) * 32 + (ty % 8) * 4 + (tx % 8) / 2];
+        pixel = (tx & 1) ? pixel >> 4 : pixel & 0xF;
+        palette += oam->paletteNum * 16;
+    }
+    else
+    {
+        pixel = tiles[(block * 2 + oam->tileNum) * 32 + (ty % 8) * 8 + tx % 8];
+    }
+    if (pixel == 0)
+        return false;
+    *color = palette[pixel];
+    return true;
+}
+
+struct BigFetch { const struct MpBigOam *e; const uint16_t *palette; };
+static bool FetchBigTexel(const void *ctx, int tx, int ty, uint16_t *color)
+{
+    const struct BigFetch *f = ctx;
+    const struct MpBigOam *e = f->e;
+    int stride = e->bpp == 4 ? (e->w + 1) / 2 : e->w;
+    uint8_t idx;
+    if (e->hflip)
+        tx = e->w - 1 - tx;
+    if (e->vflip)
+        ty = e->h - 1 - ty;
+    if (e->bpp == 4)
+    {
+        idx = e->pixels[ty * stride + tx / 2];
+        idx = (tx & 1) ? idx >> 4 : idx & 0xF;
+    }
+    else
+    {
+        idx = e->pixels[ty * stride + tx];
+    }
+    if (idx == 0)
+        return false;
+    *color = idx < 16 ? f->palette[idx] : e->big->extraShown[idx - 16];
+    return true;
+}
+
 // Moemon PC: a big sprite (mp_bigsprite.h) on this line: its whole picture, in its OAM entry's place
 static void DrawBigSprite(struct scanlineData *scanline, struct OamData *oam, uint16_t vcount, bool windowsEnabled,
                           unsigned int blendMode)
@@ -571,6 +681,18 @@ static void DrawBigSprite(struct scanlineData *scanline, struct OamData *oam, ui
     pixels = scanline->spriteLayers[oam->priority];
     palette = (uint16_t *)(PLTT + 0x200) + oam->paletteNum * 16;
     stride = e->bpp == 4 ? (e->w + 1) / 2 : e->w;
+    if (!isAffine)
+    {
+        s16 ax, ay;
+        u16 scale = MP_BigSprite_OamScale((uint16_t)(oam - (struct OamData *)OAM), &ax, &ay);
+        if (scale)
+        {
+            struct BigFetch f = {e, palette};
+            DrawScaledEntry(scanline, pixels, oam, vcount, windowsEnabled, blendMode, isSemiTransparent, isObjWin,
+                            e->left, e->top, e->w, e->h, scale, ax, ay, FetchBigTexel, &f);
+            return;
+        }
+    }
     ty0 = vcount - e->top;
     if (isAffine)   // turned around its point (a reflection mirrors at the feet; effects turn it about its middle)
     {
@@ -682,6 +804,21 @@ static void DrawSprites(struct scanlineData* scanline, uint16_t vcount, bool win
         else
         {
             continue; // prohibited, do not draw
+        }
+
+        if (!isAffine)   // Moemon Co-op: drawn smaller (sprite->mpScale), smoothly
+        {
+            s16 ax, ay;
+            u16 scale = MP_BigSprite_OamScale(i, &ax, &ay);
+            if (scale)
+            {
+                struct ObjFetch f = {oam, width, height};
+                int32_t sx = oam->x >= DISPLAY_WIDTH ? (int32_t)oam->x - 512 : oam->x;
+                int32_t sy = oam->y >= DISPLAY_HEIGHT ? (int32_t)oam->y - 256 : oam->y;
+                DrawScaledEntry(scanline, scanline->spriteLayers[oam->priority], oam, vcount, windowsEnabled, blendMode,
+                                isSemiTransparent, isObjWin, sx, sy, width, height, scale, ax, ay, FetchObjTexel, &f);
+                continue;
+            }
         }
 
         int rect_width = width;

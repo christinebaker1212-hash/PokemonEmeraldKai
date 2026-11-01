@@ -3093,6 +3093,15 @@ Old saves need nothing: eggs and Unown keep their real species in the save.
   online.
 - Moves past the cap are skipped when learning (MonTryLearningNewMove, GiveBoxMonInitialMoveset, the relearner,
   CanMonLearnTMTutor, day care egg moves); evolutions into a later generation's species wait.
+- OPTIONS > DISPLAY > SPRITE SCALING (a page, option_menu.c sSpritePage): FOLLOWERS and GARDEN MOéMON, each on or off
+  (gMpConfig.scaleFollowers / scaleGarden, ini scale_followers / scale_garden; on by default). A POKéMON shorter than a
+  trainer (MP_TRAINER_HEIGHT_DM 15, drawn MP_TRAINER_HEIGHT_PX 21 tall: Brendan standing) is drawn at its POKéDEX height
+  beside one (at least MP_SCALE_MIN_PX 8), measured against its own sprite's drawn height (or its PMD picture's), worked
+  out once a POKéMON (mp_spritescale.c MP_SpriteScale_Mon); one as tall or taller keeps its sprite (ALAKAZAM, ONIX).
+  Any sprite can be drawn smaller: struct Sprite mpScale (Q8), noted per OAM entry with the point it shrinks around (the
+  bottom middle of all its entries: mp_bigsprite.c MP_BigSprite_NoteScale), drawn by gba_easy_draw.c DrawScaledEntry:
+  each pixel the average of the ones it covers, kept where half of it is covered (no dropped pixels), for ordinary
+  and big (PMD) sprites; not with affine ones. `mp spritescale F G`; test follow_scale.
 - The POKéDEX's AREA (pokedex_area_screen.c): every region's wild tables as the game uses them (mp_region.c
   MP_Region_WildInfoIn: a table seen as its region shows it, the GENERATION's newer slots, JOHTO's / KANTO's own tables,
   no starters), JOHTO's / KANTO's HEADBUTT trees (wild_encounter.c MP_HeadbuttTable), on HOENN's, JOHTO's, KANTO's or a
@@ -3429,7 +3438,7 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   look (the card games' who-plays-what, tcg_field.c Tcg_LookGfx and sPicOfGfx) reads a Platinum sprite as its stand-in;
   a trainer's card challenge screen shows Platinum's picture cut to 64x64 (S3D_Gfx_TrainerPicPixels; test
   sinnoh_card_pic).
-- OPTIONS > DISPLAY > SINNOH PEOPLE (gMpConfig.sinnohSprites, ini sinnoh_sprites; the player's own, not the host's):
+- OPTIONS > DISPLAY > SPRITE SCALING > SINNOH PEOPLE (gMpConfig.sinnohSprites, ini sinnoh_sprites; the player's own, not the host's):
   GEN 4 Platinum's sprites; MIXED a true Gen 3 equivalent where there is one, else Platinum's sprite made smaller;
   GEN 3 Gen 3 sprites for everyone (the equivalent, else the closest stand-in). The equivalents (tools/sinnoh/sprites.py
   GEN3 -> src/data/sinnoh_gfx_gen3.h): the sprite Emerald's maps give the same trainer class (cooltrainers MAN_3 /

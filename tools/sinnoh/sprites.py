@@ -41,7 +41,7 @@ SPRITES = {
     'MACHOP': 'ZIGZAGOON_1', 'CROAGUNK': 'ZIGZAGOON_1', 'STARLY': 'WINGULL', 'DRIFLOON': 'WINGULL',
     'SHROOMISH': 'ZIGZAGOON_1', 'TORCHIC': 'ZIGZAGOON_1',
 }
-# Platinum sprites that have a true Gen 3 equivalent (OPTIONS > DISPLAY > SINNOH PEOPLE: GEN 3, and MIXED, which shows
+# Platinum sprites that have a true Gen 3 equivalent (OPTIONS > DISPLAY > SPRITE SCALING > SINNOH PEOPLE: GEN 3, and MIXED, which shows
 # the others' Platinum sprite smaller): the sprite Emerald gives the same trainer class (measured from Emerald's maps:
 # a class's trainers' sprites), the same job, the same Pokemon, or the character's own GBA-style look (kai_*: the
 # characters from Moemon's other branch, src/mp/mp_chars_gfx.h). Everyone else has only a stand-in (SPRITES).

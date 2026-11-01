@@ -102,6 +102,10 @@ enum
     OPT_FB_BIND,      // the FIGHT BUTTONS page: a fight button (arg: FIGHT_BIND_*)
     OPT_FB_DEFAULTS,
     OPT_FB_BACK,
+    OPT_SPRITESCALE,  // Moemon Co-op: DISPLAY > SPRITE SCALING (A: its page)
+    OPT_SS_FOLLOW,    // the SPRITE SCALING page (mp_spritescale.c)
+    OPT_SS_GARDEN,
+    OPT_SS_BACK,
     OPT_CLOSE,
 };
 #define SC_RULE(opt) ((opt) - OPT_SC_ON)
@@ -115,6 +119,7 @@ static EWRAM_DATA u16 sTop = 0;
 static EWRAM_DATA u8 sFriendPage = 0;      // 0: the CO-OP tab, 1 + player id: that friend's page
 static EWRAM_DATA bool8 sScalePage = 0;    // GAME > LEVEL SCALING's page
 static EWRAM_DATA bool8 sFightPage = 0;    // CONTROLS > FIGHT BUTTONS' page
+static EWRAM_DATA bool8 sSpritePage = 0;   // DISPLAY > SPRITE SCALING's page
 static EWRAM_DATA u8 sFightQuiet = 0;      // frames of no input after a fight button was chosen
 static EWRAM_DATA u8 sCoopCursor = 0;      // where the CO-OP tab's cursor was before a friend's page
 static EWRAM_DATA u8 sArrowTask = 0;
@@ -239,6 +244,9 @@ static const u8 sText_Show[] = _("SHOW");
 static const u8 sText_Place[] = _("PLACE");
 static const u8 sText_Size[] = _("SIZE");
 static const u8 sText_Back[] = _("BACK");
+static const u8 sText_SpriteScale[] = _("SPRITE SCALING");
+static const u8 sText_SsFollowers[] = _("FOLLOWERS");
+static const u8 sText_SsGarden[] = _("GARDEN MOéMON");
 static const u8 sText_Close[] = _("CLOSE");
 
 static const u8 sText_On[] = _("ON");
@@ -360,6 +368,14 @@ static void BuildRows(void)
             AddRow(i, 0);
         return;
     }
+    if (sSpritePage)
+    {
+        AddRow(OPT_SINNOHSPRITES, 0);   // Moemon Kai: SINNOH's people (event_object_movement.c)
+        AddRow(OPT_SS_FOLLOW, 0);
+        AddRow(OPT_SS_GARDEN, 0);
+        AddRow(OPT_SS_BACK, 0);
+        return;
+    }
     if (sFightPage)
     {
         for (i = 0; i < FIGHT_BIND_COUNT; i++)
@@ -407,7 +423,7 @@ static void BuildRows(void)
         AddRow(OPT_FILTER, 0);
         AddRow(OPT_VSYNC, 0);
         AddRow(OPT_BATTLEANIMS, 0);
-        AddRow(OPT_SINNOHSPRITES, 0);
+        AddRow(OPT_SPRITESCALE, 0);
         AddRow(OPT_CARDART, 0);
         AddRow(OPT_CARDBACK, 0);
         break;
@@ -484,7 +500,7 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         names[0] = gText_ButtonTypeNormal, names[1] = gText_ButtonTypeLR, names[2] = gText_ButtonTypeLEqualsA;
         return 3;
     case OPT_TYPEICONS: case OPT_FULLSCREEN: case OPT_VSYNC: case OPT_ANALOGRUN: case OPT_RUMBLE: case OPT_SPECPANEL:
-    case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_CARDSCALE:
+    case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_CARDSCALE: case OPT_SS_FOLLOW: case OPT_SS_GARDEN:
         names[0] = sText_Off, names[1] = sText_On;
         return 2;
     case OPT_NAMECASE:
@@ -691,6 +707,9 @@ static u8 Current(u8 row)
     case OPT_FR_SHOW:     return MP_Spectate_Friend(arg, FALSE)->show != 0;
     case OPT_FR_PLACE:    return FriendPlace(MP_Spectate_Friend(arg, FALSE));
     case OPT_BIKEMUSIC:   return gMpConfig.bikeMusic != 0;
+    case OPT_SS_FOLLOW:   return gMpConfig.scaleFollowers != 0;
+    case OPT_SS_GARDEN:   return gMpConfig.scaleGarden != 0;
+    case OPT_SPRITESCALE: return 0;   // (the page has the settings)
     case OPT_SURFMUSIC:   return gMpConfig.surfMusic != 0;
     case OPT_LEVELSCALE:  return 0;   // (the page has the settings)
     case OPT_SC_ON: case OPT_SC_WILD: case OPT_SC_TRAINERS: case OPT_SC_BOSS: case OPT_SC_CAPS: case OPT_SC_PAST8:
@@ -754,6 +773,9 @@ static void Change(u8 row, int dir)
     case OPT_AUTOSAVE:    if (MOEMON_DEV_BUILD) break; gMpConfig.autosaveMinutes = sAutosaveSteps[Wrap(AutosaveIndex() + dir, ARRAY_COUNT(sAutosaveSteps))]; break;
     case OPT_FLAGRANGE:   gMpConfig.trainerRange = Wrap(gMpConfig.trainerRange - 1 + dir, 8) + 1; break;
     case OPT_BIKEMUSIC:   gMpConfig.bikeMusic = !gMpConfig.bikeMusic; break;
+    case OPT_SS_FOLLOW:   gMpConfig.scaleFollowers = !gMpConfig.scaleFollowers; break;
+    case OPT_SS_GARDEN:   gMpConfig.scaleGarden = !gMpConfig.scaleGarden; break;
+    case OPT_SPRITESCALE: break;   // A opens its page
     case OPT_FOLLOWSPRITES:
         gMpConfig.followerSprites = Wrap(gMpConfig.followerSprites + dir, MP_FOLLOW_SPRITES_COUNT);
         MPNet_Log("follower sprites: %d", gMpConfig.followerSprites);
@@ -886,6 +908,10 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_FB_BIND:     return sFightButtonNames[sRows[row].arg % FIGHT_BIND_COUNT];
     case OPT_FB_DEFAULTS: return sText_FbDefaults;
     case OPT_FB_BACK:     return sText_Back;
+    case OPT_SPRITESCALE: return sText_SpriteScale;
+    case OPT_SS_FOLLOW:   return sText_SsFollowers;
+    case OPT_SS_GARDEN:   return sText_SsGarden;
+    case OPT_SS_BACK:     return sText_Back;
     case OPT_MOENAV:      return sText_MoeNav;
     case OPT_FINDER:      return sText_Finder;
     case OPT_FR_SHOW:     return sText_Show;
@@ -1018,6 +1044,12 @@ static void DrawHint(void)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.sinnohSprites == MP_SINNOH_SPRITES_GEN3 ? "GEN 3 SPRITES FOR EVERYONE"
                  : gMpConfig.sinnohSprites == MP_SINNOH_SPRITES_MIXED ? "GEN 3 MATCHES, OTHERS PLATINUM'S SHRUNK"
                  : "PLATINUM'S OWN SPRITES");
+    else if (opt == OPT_SPRITESCALE)
+        snprintf(ascii, sizeof(ascii), "A: SINNOH'S PEOPLE, FOLLOWERS, THE GARDEN");
+    else if (opt == OPT_SS_FOLLOW)
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.scaleFollowers ? "SMALL ONES AT THEIR POKEDEX HEIGHT" : "AS THEIR SPRITES ARE");
+    else if (opt == OPT_SS_GARDEN)
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.scaleGarden ? "SMALL ONES AT THEIR POKEDEX HEIGHT" : "AS THEIR SPRITES ARE");
     else if (opt == OPT_SURFMUSIC)
         snprintf(ascii, sizeof(ascii), "OFF: THE MAP'S SONG SURFING AND DIVING");
     else if (opt == OPT_LEVELSCALE)
@@ -1095,6 +1127,16 @@ static void DrawHeader(void)
         StringCopy(p, sText_FightKeys);
         AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, buf, 8, 1, TEXT_SKIP_DRAW, NULL);
     }
+    else if (sSpritePage)
+    {
+        u8 buf[40];
+        u8 *p = StringCopy(buf, sTabNames[TAB_DISPLAY]);
+        *p++ = CHAR_SPACE;
+        *p++ = CHAR_GREATER_THAN;
+        *p++ = CHAR_SPACE;
+        StringCopy(p, sText_SpriteScale);
+        AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, buf, 8, 1, TEXT_SKIP_DRAW, NULL);
+    }
     else if (sScalePage)
     {
         u8 buf[40];
@@ -1151,7 +1193,7 @@ static void HighlightRow(void)
 static u32 ShownKey(void)
 {
     u32 key = 5381 + sRowCount * 7 + sTab * 131 + sFriendPage * 977 + sScalePage * 31 + Gamepad_IsSelecting()
-            + sFightPage * 53 + Fight_BindListening() * 3001;
+            + sFightPage * 53 + sSpritePage * 61 + Fight_BindListening() * 3001;
     u8 i, j;
     for (i = 0; i < sRowCount; i++)
     {
@@ -1301,6 +1343,7 @@ void CB2_InitOptionMenu(void)
             gSaveBlock2Ptr->optionsWindowFrameType = 0;
         sScalePage = FALSE;
         sFightPage = FALSE;
+        sSpritePage = FALSE;
         GoTo(TAB_GAME, 0, 0);
         gMain.state++;
         break;
@@ -1356,7 +1399,7 @@ static void Task_OptionMenuProcessInput(u8 taskId)
         GoTo(TAB_COOP, 0, 0);   // that friend left
         return;
     }
-    else if (!sFriendPage && !sScalePage && !sFightPage && JOY_NEW(L_BUTTON | R_BUTTON))
+    else if (!sFriendPage && !sScalePage && !sFightPage && !sSpritePage && JOY_NEW(L_BUTTON | R_BUTTON))
     {
         PlaySE(SE_SELECT);
         GoTo(Wrap(sTab + (JOY_NEW(R_BUTTON) ? 1 : -1), TAB_COUNT), 0, 0);
@@ -1377,6 +1420,26 @@ static void Task_OptionMenuProcessInput(u8 taskId)
         GoTo(TAB_GAME, 0, 0);
         for (i = 0; i < sRowCount; i++)   // back on its row
             if (sRows[i].opt == OPT_LEVELSCALE)
+                sSel = i;
+        RedrawAll();
+        return;
+    }
+    else if (JOY_NEW(A_BUTTON) && opt == OPT_SPRITESCALE)
+    {
+        PlaySE(SE_SELECT);
+        sSpritePage = TRUE;
+        MPNet_Log("sprite scaling page");
+        GoTo(TAB_DISPLAY, 0, 0);
+        return;
+    }
+    else if (sSpritePage && (JOY_NEW(B_BUTTON | START_BUTTON) || (JOY_NEW(A_BUTTON) && opt == OPT_SS_BACK)))
+    {
+        u8 i;
+        PlaySE(SE_SELECT);
+        sSpritePage = FALSE;
+        GoTo(TAB_DISPLAY, 0, 0);
+        for (i = 0; i < sRowCount; i++)   // back on its row
+            if (sRows[i].opt == OPT_SPRITESCALE)
                 sSel = i;
         RedrawAll();
         return;

@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "mp_spritescale.h"
 #include "mp.h"
 #include "map_name_popup.h"
 #include "main.h"
@@ -116,6 +117,8 @@ struct FollowerSlot
     u8 pdir;                 // PMD_DIR_* shown
     u8 pturn;                // frames until its next 45-degree step toward the facing it wants
     struct MpPmdView pmd;
+    u32 scaleKey;             // OPTIONS > DISPLAY > SPRITE SCALING: its scale, worked out once (mp_spritescale.c)
+    u16 scale;
 };
 
 static EWRAM_DATA struct FollowerSlot sSlots[NUM_SLOTS];
@@ -634,6 +637,9 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
         }
         fs->oam.paletteNum = palSlot;
     }
+    // Moemon Co-op: OPTIONS > DISPLAY > SPRITE SCALING > FOLLOWERS: its POKeDEX height next to its trainer
+    fs->mpScale = MP_SpriteScale_Mon(gMpConfig.scaleFollowers, s->dex, s->pmdOn ? &s->pmd : NULL,
+                                     s->frames[0].data, s->gfx->size, &s->scaleKey, &s->scale);
     if (!s->placed || s->ownerObj != ownerObj)
     {
         s->ownerObj = ownerObj;

@@ -19,7 +19,7 @@ Format (little endian): "S3DG" u32 version 2
   u16 sprites: each char name[24] (Platinum's, lower case), u8 kind (0 walking: 9 frames 32x32, 1 still 32x32,
                2 still 16x16, 3 walking with a bow: 10 frames, the POKeMON CENTER nurse), u8 pad, u16 palette[16]
                (BGR555; 0 transparent), then the frames as GBA 4bpp tiles; then the smaller copy (OPTIONS >
-               DISPLAY > SINNOH PEOPLE: MIXED; shrink()): u16 palette[16], the same frames
+               DISPLAY > SPRITE SCALING > SINNOH PEOPLE: MIXED; shrink()): u16 palette[16], the same frames
   u16 pictures: each char name[24] (the class folder), u16 palette[16], then an mp_bigsprite frame:
                s16 dx, s16 dy, u16 w, u16 h, h rows of (w + 1) / 2 bytes (low nibble first)
 """

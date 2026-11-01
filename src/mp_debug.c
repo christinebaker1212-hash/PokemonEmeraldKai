@@ -581,7 +581,7 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "sinnohsprites") == 0)
     {
-        // sinnohsprites N: OPTIONS > DISPLAY > SINNOH PEOPLE (0 GEN 4, 1 MIXED, 2 GEN 3; the map's people at the next map)
+        // sinnohsprites N: OPTIONS > DISPLAY > SPRITE SCALING > SINNOH PEOPLE (0 GEN 4, 1 MIXED, 2 GEN 3; the map's people at the next map)
         gMpConfig.sinnohSprites = atoi(arg) % 3;
         printf("[test] sinnoh sprites %d\n", gMpConfig.sinnohSprites);
     }
@@ -600,6 +600,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
                 printf(" %04x/%04x", gPlttBufferFaded[OBJ_PLTT_ID(slot) + k], gPlttBufferUnfaded[OBJ_PLTT_ID(slot) + k]);
             printf("\n");
         }
+    }
+    else if (strcmp(cmd, "spritescale") == 0)
+    {
+        // spritescale FOLLOWERS GARDEN: OPTIONS > DISPLAY > SPRITE SCALING (1 on, 0 off)
+        int f = 1, g = 1;
+        sscanf(arg, "%d %d", &f, &g);
+        gMpConfig.scaleFollowers = f != 0;
+        gMpConfig.scaleGarden = g != 0;
+        printf("[test] sprite scaling: followers %d garden %d\n", f != 0, g != 0);
     }
     else if (strcmp(cmd, "dexorder") == 0)
     {

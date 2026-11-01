@@ -1,0 +1,9 @@
+# OPTIONS > DISPLAY > SPRITE SCALING > FOLLOWERS (mp_spritescale.c): small POKéMON follow at their POKéDEX height next
+# to the trainer (PIKACHU 0.4 m, RAICHU and AZUMARILL 0.8 m come down; ALAKAZAM 1.5 m, a trainer's height, stays as
+# drawn), smoothly (gba_easy_draw.c DrawScaledEntry); OFF shows the sprites as they are. Shots s_*.png.
+MODE=1
+WARP=0,16,9,11
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=25:20,26:20,184:20,65:20"
+EXPECT_A=("sprite scale: #25 sprite height 4 dm" "sprite scale: #65 sprite height 15 dm -> 0/256")
+UNEXPECT_A=("[crash]")
