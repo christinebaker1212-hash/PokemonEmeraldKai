@@ -3564,8 +3564,24 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   picks; the map's people change at the next map. `mp sinnohsprites N`; test sinnoh_people.
 - Wild POKéMON: tools/sinnoh/gen_wild.py POKEPLATINUM_DIR puts each kept place's base encounter table (species and
   levels from res/field/encounters) into src/data/wild_encounters.json as gSinnoh_* entries (154 places): grass 12
-  slots and surfing 5 as in Emerald; fishing OLD 2 / GOOD 3 / SUPER 5 of Platinum's 5 a rod. Not yet: Platinum's
-  day / night grass slots, swarms, the POKé RADAR, GBA-slot tables. ROUTE 201: STARLY, BIDOOF, KRICKETOT.
+  slots and surfing 5 as in Emerald; fishing OLD 2 / GOOD 3 / SUPER 5 of Platinum's 5 a rod. ROUTE 201: STARLY,
+  BIDOOF, KRICKETOT. Not used: the POKé RADAR's and GBA-slot tables.
+- Time of day, swarms and HONEY trees (2026-11-01, src/sinnoh/s3d_wild.c; tables in src/data/sinnoh_wild_extra.h from
+  gen_wild.py): grass slots 2-3 are the table's in the morning (4:00-9:59), Platinum's day ones 10:00-19:59 and night
+  ones after (the game clock, the room host's online). Swarms: once the LEAGUE is beaten, the twin in SANDGEM's house
+  by the LAB (data/scripts/sinnoh_wild.inc; flag 0x3D30) tells of the day's: one of Platinum's 22 swarm routes a day
+  (day + Trainer ID, only routes whose swarm the GENERATION allows), slots 0-1 its swarm all day. All in
+  wild_encounter.c's land slot hook Sinnoh_LandSlot (after the GREAT MARSH's dailies); a slot already changed from
+  Platinum's table (the GENERATION's own POKéMON) is left alone. HONEY trees: gen_maps.py honey_tree finds Platinum's
+  honey_tree prop on 21 maps (2x2 tiles; its point is the bottom-right tile) and makes its two lower tiles north-facing
+  signs (Sinnoh_EventScript_HoneyTree): HONEY on it, then 6-24 hours on the player's own clock (MP_ClockShift, as BERRY
+  trees) a POKéMON (Lv. 5-15) from groups A / B / C (MUNCHLAX on four trees from the Trainer ID) at Platinum's odds,
+  10% nothing; the trees are a chunk HONY in "<save>.region". FLOAROMA MEADOW's POKéFAN sells HONEY, and HONEY used in
+  the field anywhere draws a wild POKéMON as SWEET SCENT (item_use.c ItemUseOutOfBattle_Honey). `mp landslots`,
+  `mp swarm N`, `mp honeyage N[,G]`; tests sinnoh_wild_time, sinnoh_honey, honey_use. The TROPHY GARDEN: after the
+  LEAGUE, MR. BACKLOT (the POKéMON MANSION's office) tells once a day of a new POKéMON from Platinum's 16 (not one of
+  the two there, allowed by the GENERATION), which lives in the garden's grass slot 6, the one before in slot 7
+  (Sinnoh_TrophyGardenToday / Add; kept with the HONEY trees). Test sinnoh_trophy.
 - Words: SINNOH's people, signs and story are written for this game (in its scripts, MOéMON's words like HOENN's, so
   OPTIONS > CREATURES swaps them back like any text); nothing of Platinum's text is used or shipped (decided
   2026-10-31: the earlier text pack built from the decomp's message banks is gone).

@@ -1,0 +1,10 @@
+# SINNOH's grass by the time of day and the daily swarm (src/sinnoh/s3d_wild.c): ROUTE 206 at night has KRICKETUNE and
+# ZUBAT in slots 2-3; after the LEAGUE the twin in SANDGEM tells of the day's swarm (forced to ROUTE 206: LARVITAR),
+# which then fills slots 0-1 there. Needs the 3D pack.
+MODE=1
+TMO=120
+HOUR=22
+GEN=4
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("land slots: 77 74 427 41" "swarm news: species 246 on map 40.26" "land slots: 246 246 427 41")
+UNEXPECT_A=("[crash]")

@@ -7,7 +7,7 @@ Sinnoh_SandgemTownCounterpartHouse1f_EventScript_Person1::
 	end
 
 Sinnoh_SandgemTownCounterpartHouse1f_EventScript_Person2::
-	msgbox Sinnoh_SandgemTownCounterpartHouse1f_Text_Person2, MSGBOX_NPC
+	goto Sinnoh_EventScript_SwarmTwin
 	end
 
 Sinnoh_SandgemTownCounterpartHouse1f_Text_Person1:
@@ -15,11 +15,5 @@ Sinnoh_SandgemTownCounterpartHouse1f_Text_Person1:
 	.string "lab.\p"
 	.string "Always running errands for the\n"
 	.string "professor. I'm proud as can be.$"
-
-Sinnoh_SandgemTownCounterpartHouse1f_Text_Person2:
-	.string "My big sister knows the name of every\n"
-	.string "MOéMON!\p"
-	.string "Well, almost every one. She says there\n"
-	.string "are always more.$"
 
 @ --- end of SINNOH words ---

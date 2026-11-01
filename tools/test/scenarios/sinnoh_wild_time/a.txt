@@ -1,0 +1,21 @@
+pressuntil A field 5000
+wait 30
+mp warp 40,26,21,73
+wait 60
+waitfor field 1000
+mp landslots
+mp regionclear 3
+mp swarm 3
+mp warp 43,55,5,8
+wait 60
+waitfor field 1000
+mp face up
+press A 1
+wait 60
+pressuntil A field 2000
+wait 20
+mp warp 40,26,21,73
+wait 60
+waitfor field 1000
+mp landslots
+quit

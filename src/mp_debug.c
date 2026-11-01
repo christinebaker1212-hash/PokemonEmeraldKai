@@ -2026,6 +2026,32 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d,%d", &x, &y);
         MP_Poketch_DebugTap(x, y);
     }
+    else if (strcmp(cmd, "honeyage") == 0)
+    {
+        // honeyage N - this place's HONEY tree's HONEY as if put on N minutes ago (src/sinnoh/s3d_wild.c)
+        void Sinnoh_HoneyDebugAge(u32 minutes, s32 group);
+        const char *g = strchr(arg, ',');
+        Sinnoh_HoneyDebugAge(atoi(arg), g ? atoi(g + 1) : -1);
+    }
+    else if (strcmp(cmd, "swarm") == 0)
+    {
+        // swarm N - today's SINNOH swarm on route N of Platinum's list (src/sinnoh/s3d_wild.c sSwarmMaps)
+        void Sinnoh_DebugSwarm(u8 r);
+        Sinnoh_DebugSwarm(atoi(arg));
+    }
+    else if (strcmp(cmd, "landslots") == 0)
+    {
+        // landslots - grass slots 0-3 here as SINNOH changes them (time of day, swarm): the species
+        u16 MP_LandSlotSpecies(u8 index);
+        u16 sp[4];
+        int k;
+        for (k = 0; k < 4; k++)
+            sp[k] = MP_LandSlotSpecies(k);
+        printf("[test] land slots: %d %d %d %d\n", sp[0], sp[1], sp[2], sp[3]);
+        sp[0] = MP_LandSlotSpecies(6);
+        sp[1] = MP_LandSlotSpecies(7);
+        printf("[test] land slots 6-7: %d %d\n", sp[0], sp[1]);
+    }
     else if (strcmp(cmd, "marshdaily") == 0)
     {
         // marshdaily - the GREAT MARSH's daily Pokemon today, areas 1-6 (src/sinnoh/s3d_legends.c)
@@ -2884,12 +2910,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // wildroll N: N land Pokémon from this map's table, as wild encounters would pick (species list)
         bool8 MP_RollExtraLandMon(struct Pokemon *out);
         struct Pokemon mon;
-        int i, n = atoi(arg);
-        printf("[test] wildroll:");
+        int i, k = 0, n = atoi(arg);
+        static char sLine[8 * 2000];
+        k = snprintf(sLine, sizeof(sLine), "[test] wildroll:");   // (one line: the clock's own log lines come between rolls)
         for (i = 0; i < n; i++)
-            if (MP_RollExtraLandMon(&mon))
-                printf(" %d", (int)GetMonData(&mon, MON_DATA_SPECIES));
-        printf("\n");
+            if (MP_RollExtraLandMon(&mon) && k < (int)sizeof(sLine) - 8)
+                k += snprintf(sLine + k, sizeof(sLine) - k, " %d", (int)GetMonData(&mon, MON_DATA_SPECIES));
+        printf("%s\n", sLine);
         if (n > 0)
             printf("[test] wildroll met game %d location %d\n", (int)GetMonData(&mon, MON_DATA_MET_GAME), (int)GetMonData(&mon, MON_DATA_MET_LOCATION));
     }

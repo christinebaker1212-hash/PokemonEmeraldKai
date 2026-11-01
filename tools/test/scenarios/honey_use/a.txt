@@ -1,0 +1,13 @@
+pressuntil A field 5000
+wait 30
+mp warp 0,16,13,12
+wait 60
+waitfor field 1000
+mp register 401
+mp bag
+press SELECT 1
+wait 30
+pressuntil A action 2000
+mp bag
+shot t_honey_use
+quit

@@ -468,6 +468,22 @@
       "elevation": 0,
       "item": "ITEM_IRON",
       "flag": "0x3EB7"
+    },
+    {
+      "type": "sign",
+      "x": 14,
+      "y": 4,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_EventScript_HoneyTree"
+    },
+    {
+      "type": "sign",
+      "x": 15,
+      "y": 4,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_EventScript_HoneyTree"
     }
   ]
 }

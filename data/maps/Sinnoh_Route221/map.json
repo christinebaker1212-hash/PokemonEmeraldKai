@@ -300,6 +300,22 @@
       "elevation": 0,
       "item": "ITEM_MAX_REVIVE",
       "flag": "0x3EC0"
+    },
+    {
+      "type": "sign",
+      "x": 50,
+      "y": 15,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_EventScript_HoneyTree"
+    },
+    {
+      "type": "sign",
+      "x": 51,
+      "y": 15,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_EventScript_HoneyTree"
     }
   ]
 }

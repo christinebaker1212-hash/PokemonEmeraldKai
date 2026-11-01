@@ -616,4 +616,10 @@ gSpecials::
 	def_special Sinnoh_IsNight
 	def_special Sinnoh_RivalVersion   @ Moemon Kai: BARRY's team (src/sinnoh/s3d_legends.c)
 	def_special Sinnoh_InGreatMarsh   @ Moemon Kai: the GREAT MARSH's SAFARI GAME ends at its gate (src/sinnoh/s3d_legends.c)
+	def_special Sinnoh_SwarmNews   @ Moemon Kai: SINNOH's swarms, HONEY trees (src/sinnoh/s3d_wild.c)
+	def_special Sinnoh_HoneyTreeState
+	def_special Sinnoh_HoneySlather
+	def_special Sinnoh_HoneyTreeMon
+	def_special Sinnoh_TrophyGardenToday
+	def_special Sinnoh_TrophyGardenAdd
 	.include "data/qz_specials.inc"   @ Moemon Kai: Quetzal's specials (Johto / Kanto)

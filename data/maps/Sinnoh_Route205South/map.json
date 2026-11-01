@@ -508,6 +508,22 @@
       "elevation": 0,
       "item": "ITEM_STARDUST",
       "flag": "0x3ED9"
+    },
+    {
+      "type": "sign",
+      "x": 20,
+      "y": 76,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_EventScript_HoneyTree"
+    },
+    {
+      "type": "sign",
+      "x": 21,
+      "y": 76,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_EventScript_HoneyTree"
     }
   ]
 }

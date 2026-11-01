@@ -58,6 +58,10 @@ void MP_Region_SetStartRegion(u8 region);   // a new game's region (PROF. BIRCH'
 void MP_Region_StartNewGame(void);
 void MP_Region_GoToStartHouse(u8 region);  // the warp to JOHTO's / KANTO's first house (NEW BARK, PALLET)          // end of NewGameInitData: JOHTO / KANTO start at home there
 void MP_Region_WriteSidecar(void);   // "<save>.region", after the save file is written
+// SINNOH's HONEY trees, kept in "<save>.region" (src/sinnoh/s3d_wild.c)
+void Sinnoh_HoneyReset(void);
+const void *Sinnoh_HoneyData(u32 *size);
+void Sinnoh_HoneyLoad(const void *data, u32 size);
 void MP_Region_LoadFromSave(void);
 struct PokemonStorage;
 struct BoxPokemon;

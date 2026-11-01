@@ -317,6 +317,28 @@ def elevator_panel(m):
                            'player_facing_dir': 'BG_EVENT_PLAYER_FACING_ANY', 'script': ELEVATOR_SCRIPT})
 
 
+# HONEY trees: Platinum's is a map prop (model honey_tree.nsbmd), two tiles square, faced from below; here the two
+# tiles of its trunk are signs for the north-facing player (Sinnoh_EventScript_HoneyTree, data/scripts/sinnoh_wild.inc;
+# src/sinnoh/s3d_wild.c knows the tree by the map)
+HONEY_SCRIPT = 'Sinnoh_EventScript_HoneyTree'
+
+
+def honey_tree(m, p, src):
+    from platinum import Land
+    model = src._props.index('honey_tree.nsbmd')
+    mat = src.matrix(p['matrix'])
+    for cx, cz in p['place']['cells']:
+        for pr in Land(src.land(mat.cell(cx, cz)[0])).props:
+            if pr.model != model:
+                continue
+            tx, tz = int(pr.pos[0] // 16 + 16), int(pr.pos[2] // 16 + 16)   # (the prop's point: its bottom-right tile)
+            for dx in (-1, 0):
+                x, y = (cx - p['x0']) * 32 + tx + dx, (cz - p['z0']) * 32 + tz
+                m['bg_events'] = [b for b in m['bg_events'] if (b['x'], b['y']) != (x, y)]
+                m['bg_events'].append({'type': 'sign', 'x': x, 'y': y, 'elevation': 0,
+                                       'player_facing_dir': 'BG_EVENT_PLAYER_FACING_NORTH', 'script': HONEY_SCRIPT})
+
+
 def write_elevators(lifts):
     rows, names = [], {}
     for name, (e, floors) in sorted(lifts.items()):
@@ -453,6 +475,7 @@ def main():
             marsh_merge(m, every, root)
         if p['name'] in lifts:
             elevator_panel(m)
+        honey_tree(m, p, src)
         json.dump(m, open(path, 'w'), indent=2)
         open(path, 'a').write('\n')
         if not os.path.exists(mdir + '/scripts.inc'):
@@ -479,6 +502,8 @@ def main():
         head += '\t.include "data/scripts/sinnoh_trainers.inc"\n'
     if 'sinnoh_elevators.inc' not in head:
         head += '\t.include "data/scripts/sinnoh_elevators.inc"\n'
+    if 'sinnoh_wild.inc' not in head:
+        head += '\t.include "data/scripts/sinnoh_wild.inc"\n'
     open(path, 'w').write(head + ''.join('\t.include "data/maps/%s/scripts.inc"\n' % n for n in names))
     rows = ''.join('    {%s, %d, %d, %d, %d, %d},\n' % (p['id'], p['matrix'], p['x0'], p['z0'], p['x1'] - p['x0'] + 1,
                                                        p['z1'] - p['z0'] + 1) for p in outdoor + indoor)

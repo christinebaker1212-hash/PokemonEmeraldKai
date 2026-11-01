@@ -69,6 +69,7 @@
 	.include "data/scripts/sinnoh_marts.inc"
 	.include "data/scripts/sinnoh_legends.inc"
 	.include "data/scripts/sinnoh_elevators.inc"
+	.include "data/scripts/sinnoh_wild.inc"
 	.include "data/maps/Sinnoh_TwinleafTown/scripts.inc"
 	.include "data/maps/Sinnoh_Route201/scripts.inc"
 	.include "data/maps/Sinnoh_AcuityLakefront/scripts.inc"

@@ -307,7 +307,7 @@ static u8 ChooseWildMonLevel(const struct WildPokemon *wildPokemon)
 }
 
 bool8 Sinnoh_GreatMarshWildMap(u8 *group, u8 *num);
-u16 Sinnoh_GreatMarshDaily(u16 species, u8 index);
+u16 Sinnoh_LandSlot(u16 species, u8 index);   // Moemon Kai: SINNOH (src/sinnoh/s3d_wild.c)
 
 static u16 GetCurrentMapWildMonHeaderId(void)
 {
@@ -484,7 +484,7 @@ static bool8 TryGenerateWildMon(const struct WildPokemonInfo *wildMonInfo, u8 ar
 
     // Moemon Co-op: today's outbreak species shows up often on its route
     if (area == WILD_AREA_LAND)   // (Moemon Kai: the GREAT MARSH's daily Pokemon in its SAFARI GAME, s3d_legends.c)
-        CreateWildMon(MP_Events_MaybeOutbreak(Sinnoh_GreatMarshDaily(MP_WildSlotSpecies(wildMonInfo, wildMonIndex), wildMonIndex)), level);
+        CreateWildMon(MP_Events_MaybeOutbreak(Sinnoh_LandSlot(MP_WildSlotSpecies(wildMonInfo, wildMonIndex), wildMonIndex)), level);
     else
         CreateWildMon(MP_WildSlotSpecies(wildMonInfo, wildMonIndex), level);   // Moemon Kai: no starters in the wild
     return TRUE;
@@ -1107,6 +1107,17 @@ static void ApplyCleanseTagEncounterRateMod(u32 *encRate)
 
 // Moemon Co-op: a second Pokémon from this map's grass for a 2-on-2 co-op wild
 // battle (mp_coop.c). gEnemyParty[0] is kept as it was.
+// Moemon Kai (tests: `mp landslots`): grass slot INDEX's species here as an encounter would have it (0: no grass)
+u16 MP_LandSlotSpecies(u8 index)
+{
+    u16 headerId = GetCurrentMapWildMonHeaderId();
+    const struct WildPokemonInfo *info;
+    if (headerId == HEADER_NONE || (info = gWildMonHeaders[headerId].landMonsInfo) == NULL)
+        return 0;
+    info = MP_Region_WildInfo(info);
+    return Sinnoh_LandSlot(MP_WildSlotSpecies(info, index), index);
+}
+
 bool8 MP_RollExtraLandMon(struct Pokemon *out)
 {
     u16 headerId = GetCurrentMapWildMonHeaderId();
@@ -1120,7 +1131,7 @@ bool8 MP_RollExtraLandMon(struct Pokemon *out)
     keep = gEnemyParty[0];
     index = ChooseWildMonIndex_Land();
     level = ChooseWildMonLevel(&info->wildPokemon[index]);
-    CreateWildMon(MP_Events_MaybeOutbreak(Sinnoh_GreatMarshDaily(MP_WildSlotSpecies(info, index), index)), level);
+    CreateWildMon(MP_Events_MaybeOutbreak(Sinnoh_LandSlot(MP_WildSlotSpecies(info, index), index)), level);
     *out = gEnemyParty[0];
     gEnemyParty[0] = keep;
     return TRUE;

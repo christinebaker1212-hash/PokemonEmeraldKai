@@ -696,6 +696,22 @@
       "elevation": 0,
       "item": "ITEM_BIG_MUSHROOM",
       "flag": "0x3E14"
+    },
+    {
+      "type": "sign",
+      "x": 87,
+      "y": 13,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_EventScript_HoneyTree"
+    },
+    {
+      "type": "sign",
+      "x": 88,
+      "y": 13,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_EventScript_HoneyTree"
     }
   ]
 }

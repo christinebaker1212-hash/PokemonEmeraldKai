@@ -245,6 +245,22 @@
       "elevation": 0,
       "item": "ITEM_HONEY",
       "flag": "0x3EDD"
+    },
+    {
+      "type": "sign",
+      "x": 36,
+      "y": 45,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_EventScript_HoneyTree"
+    },
+    {
+      "type": "sign",
+      "x": 37,
+      "y": 45,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_EventScript_HoneyTree"
     }
   ]
 }

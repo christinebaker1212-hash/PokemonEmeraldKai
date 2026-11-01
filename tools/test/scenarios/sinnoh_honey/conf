@@ -1,0 +1,10 @@
+# A HONEY tree (src/sinnoh/s3d_wild.c, data/scripts/sinnoh_wild.inc): ROUTE 206's, HONEY spread on it, nothing yet;
+# six hours later (mp honeyage) a POKéMON is in it and a wild battle starts. Grass at noon: GLIGAR and PONYTA in slots
+# 2-3. Needs the 3D pack. Shot t_honey.png.
+MODE=1
+TMO=120
+HOUR=12
+GEN=4
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=25:40"
+EXPECT_A=("land slots: 77 74 207 77" "honey tree 2: species")
+UNEXPECT_A=("[crash]")

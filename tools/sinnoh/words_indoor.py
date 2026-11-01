@@ -650,7 +650,7 @@ INDOOR = {
         'Person16': "Your MOéMON might find something on the paths. It has a good nose!",
     },
     'Sinnoh_FloaromaMeadow': {
-        'Person3': "The honey trees here attract all sorts of MOéMON. Slather some on and wait!",
+        'Person3': ('script', 'Sinnoh_EventScript_HoneySeller'),   # (data/scripts/sinnoh_wild.inc)
     },
     'Sinnoh_FloaromaMeadowHouse': {
         'Person1': "We sell honey from the meadow! It's the sweetest in SINNOH.",
@@ -704,7 +704,7 @@ INDOOR = {
     'Sinnoh_Route210GrandmaWilmaHouse': {'Person1': "Oh, a visitor! Sit, sit. I don't get many people up here in the fog.|My grandson used to visit every summer. Now he's off being a famous TRAINER somewhere."},
     'Sinnoh_PokemonMansion': {'Person1': "Welcome to the MOéMON MANSION. The master's office is straight ahead.", 'Person2': "The garden out back is the master's pride. MOéMON from all over live there.", 'Person3': "Please enjoy the mansion. Don't touch the statues, though!", 'Person4': 'I polish every vase in this house. It takes all week, then I start again.', 'Person7': 'The master collects MOéMON statues. He has over a hundred!'},
     'Sinnoh_PokemonMansionMaidsRoom': {'Person2': "This is the maids' room. Shh, someone's napping!", 'Person3': 'We work hard, but the master treats us well. And the cook makes the best POFFINS.'},
-    'Sinnoh_PokemonMansionOffice': {'Person2': "Welcome! This mansion is my pride and joy. Look around, but don't break anything!", 'Person3': "I've been the master's butler for forty years. He's never once been on time."},
+    'Sinnoh_PokemonMansionOffice': {'Person2': ('script', 'Sinnoh_EventScript_MrBacklot'), 'Person3': "I've been the master's butler for forty years. He's never once been on time."},
     'Sinnoh_Route212House': {'Person1': 'It never stops raining here. My MOéMON loves it, though.', 'Person2': "I came down from the mountains to escape the snow. Now it's rain instead!", 'Person3': "I've got a rain coat and rain boots and a rain hat! I'm ready!"},
     'Sinnoh_Route213GateToPastoriaCity': {'Person1': 'The beach is just ahead. Take your shoes off and enjoy!', 'Person2': "I'm going to build a sandcastle as big as the hotel!"},
     'Sinnoh_FootstepHouse': {'Person1': "I can read a MOéMON's footprints. They tell me how it feels about its TRAINER.|Yours look very happy."},

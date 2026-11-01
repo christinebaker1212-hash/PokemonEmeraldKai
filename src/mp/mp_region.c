@@ -246,6 +246,7 @@ void MP_Region_StartNewGame(void)
         sStartRegion = atoi(env) % REGION_COUNT;
     gRegionState.current = sStartRegion;
     gRegionState.started = 1 << sStartRegion;
+    Sinnoh_HoneyReset();
     MP_Region_Arrive(sStartRegion);
     if (sStartRegion != REGION_HOENN)
     {
@@ -323,6 +324,15 @@ void MP_Region_WriteSidecar(void)
         fwrite(c, sizeof(c), 1, f);
         fwrite(sLevels, sizeof(sLevels[0]), sLevelCount, f);
         {
+            // SINNOH's HONEY trees (src/sinnoh/s3d_wild.c)
+            u32 size;
+            const void *honey = Sinnoh_HoneyData(&size);
+            c[0] = CHUNK('H', 'O', 'N', 'Y');
+            c[1] = size;
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(honey, size, 1, f);
+        }
+        {
             u32 format = MP_SAVE_FORMAT;   // the save's own layout version (mp_savefix.h)
             c[0] = CHUNK('S', 'A', 'V', 'F');
             c[1] = sizeof(format);
@@ -376,6 +386,12 @@ static bool8 LoadFrom(const char *path)
             else if (c[0] == CHUNK('G', 'L', 'P', 'C') && c[1] == sizeof(sGlobalPC))
             {
                 sGlobalValid = fread(&sGlobalPC, sizeof(sGlobalPC), 1, f) == 1;
+            }
+            else if (c[0] == CHUNK('H', 'O', 'N', 'Y') && c[1] <= 1024)
+            {
+                u8 buf[1024];
+                if (fread(buf, c[1], 1, f) == 1)
+                    Sinnoh_HoneyLoad(buf, c[1]);
             }
             else if (c[0] == CHUNK('S', 'A', 'V', 'F') && c[1] == sizeof(u32))
             {
@@ -449,6 +465,7 @@ void MP_Region_LoadFromSave(void)
 {
     char path[600];
     int i;
+    Sinnoh_HoneyReset();
     for (i = 0; i <= 3; i++)
     {
         if (i == 0)

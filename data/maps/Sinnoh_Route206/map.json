@@ -471,6 +471,22 @@
       "elevation": 0,
       "item": "ITEM_TINY_MUSHROOM",
       "flag": "0x3E05"
+    },
+    {
+      "type": "sign",
+      "x": 21,
+      "y": 72,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_EventScript_HoneyTree"
+    },
+    {
+      "type": "sign",
+      "x": 22,
+      "y": 72,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_EventScript_HoneyTree"
     }
   ]
 }

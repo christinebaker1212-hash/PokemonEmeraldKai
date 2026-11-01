@@ -152,8 +152,7 @@ WORDS = {
     'Sinnoh_SandgemTownCounterpartHouse1f': {
         'Person1': "My grandchild helps out at the MOéMON lab.|"
                    "Always running errands for the professor. I'm proud as can be.",
-        'Person2': "My big sister knows the name of every MOéMON!|"
-                   "Well, almost every one. She says there are always more.",
+        'Person2': ('script', 'Sinnoh_EventScript_SwarmTwin'),   # (her words: data/scripts/sinnoh_wild.inc)
     },
     'Sinnoh_SandgemTownCounterpartHouse2f': {
         'Bg1': "The PC is open to a page of notes on how MOéMON grow.|"

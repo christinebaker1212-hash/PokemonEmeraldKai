@@ -38,6 +38,7 @@
 #include "string_util.h"
 #include "task.h"
 #include "text.h"
+#include "constants/field_effects.h"
 #include "constants/event_bg.h"
 #include "constants/event_objects.h"
 #include "constants/item_effects.h"
@@ -117,6 +118,7 @@ static void SetUpItemUseCallback(u8 taskId)
 }
 
 // Moemon Co-op: BATTLE FLAG (Trainer Mode)
+static void RemoveUsedItem(void);
 static void SetUpItemUseOnFieldCallback(u8 taskId);
 static void ItemUseOnFieldCB_BattleFlag(u8 taskId);
 static void Task_BattleFlagMessageDone(u8 taskId);
@@ -710,6 +712,20 @@ void ItemUseOutOfBattle_Poketch(u8 taskId)
         UnlockPlayerFieldControls();
         DestroyTask(taskId);
     }
+}
+
+// Moemon Kai: HONEY used in the field draws a wild POKéMON, as SWEET SCENT does (Platinum's own use)
+static void ItemUseOnFieldCB_Honey(u8 taskId)
+{
+    RemoveUsedItem();
+    DestroyTask(taskId);
+    FieldEffectStart(FLDEFF_SWEET_SCENT);
+}
+
+void ItemUseOutOfBattle_Honey(u8 taskId)
+{
+    sItemUseOnFieldCB = ItemUseOnFieldCB_Honey;
+    SetUpItemUseOnFieldCallback(taskId);
 }
 
 void ItemUseOutOfBattle_CandyJar(u8 taskId)

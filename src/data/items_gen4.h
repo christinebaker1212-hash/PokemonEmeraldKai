@@ -19,8 +19,8 @@
         .price = 100,
         .description = sHoneyDesc,
         .pocket = POCKET_ITEMS,
-        .type = ITEM_USE_BAG_MENU,
-        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .type = ITEM_USE_FIELD,
+        .fieldUseFunc = ItemUseOutOfBattle_Honey,   // (Moemon Kai: SWEET SCENT's draw)
     },
 
     [ITEM_ARMOR_FOSSIL] =
