@@ -42,7 +42,7 @@ the game's, with its loop. The loop is found in the original sound: each game fr
 is then matched to the original's loudness (Game Boy channels keep the hardware's own levels).
 GBA songs on MP2K need none of that: their own commands and samples come straight from the ROM.
 
-- **Kai / Original** (next to Play): hear the song in the game's engine, or the console's own sound
+- **GBA / Original** (next to Play, or Tab): hear the song in the game's engine, or the console's own sound
   from its emulator, at the same place.
 - **All original / All GM** (SONG): each original instrument, or the closest General MIDI instrument
   of the game (compared by harmonic make-up, whether notes hold or die away, and the instrument's
@@ -107,6 +107,20 @@ game build does, and writes `build/gen/` (the program embeds it; nothing else sh
 `src/font.h` and `src/fonts.bin` are checked in (`gen_font.py` remakes them from DejaVu Sans Mono).
 
 ## Using it
+
+Two tabs at the top left, remembered between runs:
+
+- **LISTEN**: a player. NOW PLAYING shows the song (title, game, composer, console, its length and
+  loop, **Hear the loop**) and the big **GBA / Original** switch (Tab: the same moment of the song in
+  the other version; the choice carries on to the next song). The open song's folder is the PLAYLIST
+  (every file the studio plays, a Game Boy file's songs one by one; **Open folder...**, **< Prev** /
+  **Next >**, Page Up / Down). AFTER A SONG: **Repeat it**, **Next song** or **Stop** after 1-9 times
+  through its loop (with a fade out), and **Shuffle**. **Convert this song >** goes on to CONVERT.
+  The tracks' **M** / **S** work here too.
+- **CONVERT**: making a song for the game. The steps under the buttons say how far it is and take you
+  there when clicked: 1 the song, 2 its instruments (how many aren't the original's), 3 its loop (plays
+  the jump), 4 where it plays (opens the picker), 5 whether it fits the game's player (tracks, voices),
+  6 export the `.kaisong`.
 
 Open a MIDI (or drop one on the window). TRACKS lists each MIDI channel: **M** leaves it out of
 the song, **S** plays it alone, **...** shows its instrument changes ("+2" = two changes): lock the

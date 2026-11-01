@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <dirent.h>
 #include <SDL.h>
 #include "studio.h"
 #include "inst.h"
@@ -44,6 +45,20 @@ static int sPendingPos = ENG_FRAME_SAMPLES;
 static int sPreviewFrames;        // auditions stop by themselves after this many frames
 static int sHolding;              // a hold-to-hear button or piano key is down
 static int sOriginal;             // rips: hear the console's own sound instead of the game engine
+// the two ways to use the studio: LISTEN (a player: the originals and their GBA versions, a folder at a time)
+// and CONVERT (making a song for the game, step by step)
+enum { MODE_LISTEN, MODE_CONVERT };
+static int sMode = MODE_CONVERT;
+enum { AFTER_REPEAT, AFTER_NEXT, AFTER_STOP };
+static int sAfter = AFTER_NEXT;   // LISTEN: what comes after a song
+static int sLoops = 2;            // ... the next song after this many times through
+static int sShuffle;
+static int sFadeLeft, sFadeTotal; // engine frames of the fade out before the next song (0 = none)
+static int sAdvance;              // the fade is over: on to the next song
+static int sAdvancePlay;          // the song opened next plays at once
+static int sExported;             // CONVERT: exported since the last change (the last step's tick)
+static int sEdits;                // changes since the song was opened (a new song counts as unsaved, but
+                                  // moving on in the playlist only asks when something was changed)
 
 static char sStatus[512] = "Open a MIDI file (or drop one on the window) to start.";
 static int sSelSlot = -1;
@@ -64,7 +79,7 @@ static int sConfirmAction;        // what "Discard" continues with
 static char sConfirmText[256];
 
 enum { ACT_OPEN_MIDI = 1, ACT_OPEN_PROJECT, ACT_SAVE_AS, ACT_EXPORT_KAISONG, ACT_EXPORT_DECOMP, ACT_QUIT, ACT_OPEN_DROPPED,
-       ACT_BIOS_FOLDER };
+       ACT_BIOS_FOLDER, ACT_OPEN_LIST, ACT_OPEN_FOLDER };
 static char sGbsPath[1024];       // a .gbs waiting for its track number
 static int sGbsTrack;
 static char sDropped[1024];
@@ -74,7 +89,7 @@ static int sQuit;
 static int mx, my, mDown, mPressed, mReleased, pressX, pressY, wheel, dblClick;
 static Uint32 lastClickTime;
 static char sTyped[64];
-static int kBackspace, kEnter, kEsc, kUp, kDown, kPgUp, kPgDn, kSpace;
+static int kBackspace, kEnter, kEsc, kUp, kDown, kPgUp, kPgDn, kSpace, kTab;
 
 // colours
 typedef struct { Uint8 r, g, b; } Col;
@@ -97,6 +112,7 @@ static void audio_cb(void *u, Uint8 *stream, int len)
             if (sPlaying) {
                 if (E.playing) sFrames++;
                 else sPlaying = 0;
+                if (sFadeTotal) { if (sFadeLeft > 0) sFadeLeft--; else sAdvance = 1; }
             }
             if (sPreviewFrames > 0 && --sPreviewFrames == 0 && !sHolding) eng_preview_off(&E);
             sPendingPos = 0;
@@ -116,6 +132,7 @@ static void audio_cb(void *u, Uint8 *stream, int len)
                 r += (rp->pcm[k * 2 + 1] * (1 - fr) + rp->pcm[k * 2 + 3] * fr) / 32768.0f;
             }
         }
+        if (sFadeTotal) { float g = (float)sFadeLeft / sFadeTotal; l *= g * g; r *= g * g; }
         out[i * 2] = l > 1 ? 1 : l < -1 ? -1 : l;
         out[i * 2 + 1] = r > 1 ? 1 : r < -1 ? -1 : r;
         sPendingPos++;
@@ -141,6 +158,7 @@ static void play_from(long frame)
     lock();
     // keep the preview track's sound going across the swap
     eng_copy(&E, &sSeek);
+    sFadeLeft = sFadeTotal = 0;
     sFrames = done;
     sPlaying = E.playing;
     sPendingPos = ENG_FRAME_SAMPLES;
@@ -152,6 +170,7 @@ static void stop_song(void)
     lock();
     eng_stop(&E);
     sPlaying = 0;
+    sFadeLeft = sFadeTotal = 0;
     unlock();
 }
 
@@ -191,6 +210,8 @@ static void rebuild(void)
     int was = sPlaying;
     long pos = song_pos();
     stop_song();
+    sExported = 0;
+    sEdits++;
     if (!studio_rebuild(&S))
         snprintf(sStatus, sizeof(sStatus), "%s", S.msg);
     update_mute_mask();
@@ -211,6 +232,8 @@ static void voices_changed(void)
         rebuild();
         return;
     }
+    sExported = 0;
+    sEdits++;
     lock();
     studio_refresh_voices(&S);
     eng_refresh_instruments(&E);
@@ -398,6 +421,8 @@ static void set_status(const char *fmt, const char *a)
 
 static void after_open(const char *path)
 {
+    sExported = 0;
+    sEdits = 0;
     sSelSlot = -1;
     sTrackScroll = sSlotScroll = 0;
     S.p.solo = 0;
@@ -413,7 +438,7 @@ static void after_open(const char *path)
     else if (S.p.isRip && S.p.ripKind == RIP_GBS)
         snprintf(m, sizeof(m), "Opened %s: the Game Boy's channels, which the GBA has too. Convert GB > GBA (SONG) makes them GBA instruments.", path_base(path));
     else if (S.p.isRip)
-        snprintf(m, sizeof(m), "Opened %s: %d instruments from the original, at its volume. Play, then Original to compare with the console.", path_base(path), S.p.ncustom);
+        snprintf(m, sizeof(m), "Opened %s: %d instruments from the original, at its volume. Play, then Original (Tab) to compare with the console.", path_base(path), S.p.ncustom);
     else if (S.p.target[0] && !S.p.gmFixes) snprintf(m, sizeof(m), "Opened %s: a game song, with the game's own instruments and settings.", path_base(path));
     else snprintf(m, sizeof(m), "Opened %s. Each instrument starts as the closest match from the game; click one to change it.", path_base(path));
     snprintf(sStatus, sizeof(sStatus), "%s", m);
@@ -446,6 +471,139 @@ static void open_path_track(const char *path, int gbsTrack);
 
 static void open_path(const char *path) { open_path_track(path, -1); }
 
+// ------------------------------------------------------------------ the playlist (LISTEN)
+// The folder of the song that's open: every song in it the studio plays (a Game Boy file's songs one by one),
+// in name order.
+
+typedef struct { char *path; char name[200]; int track; } PlayItem;
+static PlayItem *sList;
+static int sListN, sListCap, sListCur = -1, sListScroll, sListPending = -1;
+static char sListDir[1024];
+static int *sShuffleOrder;   // a shuffled order of the list (sShuffle)
+
+static int is_music(const char *path)
+{
+    if (ends_with(path, ".mid") || ends_with(path, ".midi")) return 1;
+    // the _lib files hold a set's shared data, not songs; a playlist of Game Boy songs is its .gbs
+    if (ends_with(path, "lib") || ends_with(path, ".m3u")) return 0;
+    return rip_kind_of(path) >= 0;
+}
+
+static int name_cmp(const void *a, const void *b)
+{
+    const PlayItem *x = a, *y = b;
+    for (const char *p = x->name, *q = y->name;; p++, q++) {
+        int c = tolower((unsigned char)*p), d = tolower((unsigned char)*q);
+        if (c != d || !c) return c != d ? c - d : x->track - y->track;
+    }
+}
+
+static void list_add(const char *path, const char *name, int track)
+{
+    if (sListN == sListCap) {
+        int nc = sListCap ? sListCap * 2 : 64;
+        PlayItem *n = realloc(sList, sizeof(PlayItem) * (size_t)nc);
+        if (!n) return;
+        sList = n;
+        sListCap = nc;
+    }
+    PlayItem *it = &sList[sListN++];
+    size_t pl = strlen(path) + 1;
+    it->path = malloc(pl);
+    if (!it->path) { sListN--; return; }
+    memcpy(it->path, path, pl);
+    it->track = track;
+    if (track >= 0) snprintf(it->name, sizeof(it->name), "%s  #%d", name, track + 1);
+    else snprintf(it->name, sizeof(it->name), "%s", name);
+}
+
+static void list_clear(void)
+{
+    for (int i = 0; i < sListN; i++) free(sList[i].path);
+    sListN = 0;
+    sListCur = -1;
+    sListScroll = 0;
+    sListDir[0] = 0;
+    free(sShuffleOrder);
+    sShuffleOrder = NULL;
+}
+
+static void list_shuffle(void)
+{
+    free(sShuffleOrder);
+    sShuffleOrder = sListN ? malloc(sizeof(int) * (size_t)sListN) : NULL;
+    if (!sShuffleOrder) return;
+    for (int i = 0; i < sListN; i++) sShuffleOrder[i] = i;
+    for (int i = sListN - 1; i > 0; i--) {
+        int j = rand() % (i + 1), t = sShuffleOrder[i];
+        sShuffleOrder[i] = sShuffleOrder[j];
+        sShuffleOrder[j] = t;
+    }
+}
+
+// the folder part of a path ("" = the current folder) and its separator
+static void dir_of(const char *path, char *dir, int n)
+{
+    snprintf(dir, n, "%s", path);
+    char *a = strrchr(dir, '/'), *b = strrchr(dir, '\\');
+    if (b > a) a = b;
+    if (a) a[1] = 0; else dir[0] = 0;
+}
+
+static void list_scan(const char *dir)
+{
+    list_clear();
+    snprintf(sListDir, sizeof(sListDir), "%s", dir);
+    DIR *d = opendir(dir[0] ? dir : ".");
+    if (!d) return;
+    struct dirent *e;
+    while ((e = readdir(d))) {
+        if (e->d_name[0] == '.') continue;
+        char full[1400];
+        snprintf(full, sizeof(full), "%s%s", dir, e->d_name);
+        if (!is_music(full)) continue;
+        if (ends_with(full, ".gbs")) {
+            // its songs: the header's count (byte 4)
+            unsigned char h[8] = {0};
+            FILE *f = fopen(full, "rb");
+            size_t got = f ? fread(h, 1, sizeof h, f) : 0;
+            if (f) fclose(f);
+            int n = (got >= 5 && !memcmp(h, "GBS", 3)) ? h[4] : 0;
+            for (int t = 0; t < n; t++) list_add(full, e->d_name, t);
+            continue;
+        }
+        list_add(full, e->d_name, -1);
+    }
+    closedir(d);
+    qsort(sList, (size_t)sListN, sizeof(PlayItem), name_cmp);
+    if (sShuffle) list_shuffle();
+}
+
+// after opening a song: its folder's list, and where it is in it
+static void list_sync(const char *path, int track)
+{
+    if (!is_music(path)) { sListCur = -1; return; }
+    char dir[1024];
+    dir_of(path, dir, sizeof(dir));
+    if (strcmp(dir, sListDir) || !sListN) list_scan(dir);
+    sListCur = -1;
+    for (int i = 0; i < sListN; i++)
+        if (!strcmp(sList[i].path, path) && (sList[i].track < 0 || sList[i].track == (track < 0 ? 0 : track))) { sListCur = i; break; }
+}
+
+// the song before / after the open one (in the shuffled order when shuffling)
+static int list_step(int dir)
+{
+    if (!sListN) return -1;
+    if (sListCur < 0) return dir > 0 ? 0 : sListN - 1;
+    if (sShuffle && sShuffleOrder) {
+        int at = 0;
+        for (int i = 0; i < sListN; i++) if (sShuffleOrder[i] == sListCur) at = i;
+        return sShuffleOrder[(at + dir + sListN) % sListN];
+    }
+    return (sListCur + dir + sListN) % sListN;
+}
+
 static void open_path_track(const char *path, int gbsTrack)
 {
     // a .gbs holds many songs: ask which first
@@ -456,6 +614,7 @@ static void open_path_track(const char *path, int gbsTrack)
         return;
     }
     stop_song();
+    int wasOriginal = sOriginal;
     sOriginal = 0;
     int kind = rip_kind_of(path);
     if (kind >= 0) {
@@ -479,6 +638,24 @@ static void open_path_track(const char *path, int gbsTrack)
     S.song.voices = S.voices;
     for (int i = 0; i < S.c.ntracks; i++) S.song.data[i] = S.c.data[i];
     after_open(path);
+    list_sync(path, gbsTrack);
+    // LISTEN: the next song plays the same version (GBA or the original) as the last
+    if (sMode == MODE_LISTEN && wasOriginal && S.p.rip && S.p.rip->pcm) { sOriginal = 1; update_mute_mask(); }
+}
+
+// Kai (the GBA: Moemon's engine) or the original (the console's own sound), at the same moment of the song
+static void set_original(int on)
+{
+    if (!S.p.isRip || !have_song() || sOriginal == on) return;
+    if (on && !S.p.rip) {
+        busy("Playing the original through its console's emulator...");
+        char err[512] = "";
+        if (!project_reload_rip(&S.p, g_biosDir, err, sizeof(err))) { set_status("Can't play the original: %s", err); return; }
+    }
+    sOriginal = on;
+    update_mute_mask();
+    set_status("%s", on ? "Original: the console's own sound (from its emulator). Tab: the GBA version."
+                        : "GBA: the song as Moemon's sound engine plays it. Tab: the original.");
 }
 
 static void ask_path(int action, const char *def)
@@ -531,6 +708,7 @@ static void do_export_kaisong(const char *path)
         if (a) *a = 0; else snprintf(dir, sizeof(dir), ".");
         int table = export_song_table(dir, err, sizeof(err));
         snprintf(sStatus, sizeof(sStatus), "Exported %s%s. %s", path_base(p), table ? " and its folder's SONG_TABLE.md" : "", warn);
+        sExported = 1;
     }
     else set_status("Couldn't export: %s", err);
 }
@@ -591,10 +769,44 @@ static void run_action(int act)
         if (r > 0) { snprintf(g_biosDir, sizeof(g_biosDir), "%s", path); settings_save(); set_status("BIOS folder: %s", g_biosDir); }
         else if (r < 0) ask_path(act, g_biosDir);
         break;
+    case ACT_OPEN_LIST:
+        // a song of the playlist (playing at once when one was playing, or when LISTEN moves on by itself)
+        if (sListPending >= 0 && sListPending < sListN) {
+            int play = sPlaying || sAdvancePlay;
+            char lp[1024];
+            snprintf(lp, sizeof lp, "%s", sList[sListPending].path);
+            int track = sList[sListPending].track;
+            sAdvancePlay = 0;
+            open_path_track(lp, track);
+            if (play && have_song()) play_from(0);
+        }
+        sListPending = -1;
+        break;
+    case ACT_OPEN_FOLDER:
+        r = dlg_folder(path, sizeof(path), "A folder of music to listen to");
+        if (r > 0) {
+            size_t l = strlen(path);
+            if (l && path[l - 1] != '/' && path[l - 1] != '\\' && l + 1 < sizeof(path)) { path[l] = strchr(path, '\\') ? '\\' : '/'; path[l + 1] = 0; }
+            list_scan(path);
+            if (!sListN) set_status("Nothing the studio plays in %s.", path);
+            else { sListPending = sShuffle && sShuffleOrder ? sShuffleOrder[0] : 0; run_action(ACT_OPEN_LIST); }
+        } else if (r < 0) set_status("%s", "No folder picker here: open a song, and its folder is the playlist.");
+        break;
     case ACT_QUIT:
         sQuit = 1;
         break;
     }
+}
+
+static void guarded(int act);
+
+// opens a song of the playlist (asking first about unsaved changes)
+static void list_open(int i)
+{
+    if (i < 0 || i >= sListN) return;
+    sListPending = i;
+    if (sEdits) guarded(ACT_OPEN_LIST);
+    else run_action(ACT_OPEN_LIST);
 }
 
 // asks first when there are unsaved changes
@@ -614,10 +826,33 @@ static void guarded(int act)
 static void draw_top(void)
 {
     fill(0, 0, W, 44, C_PANEL);
-    text(14, 14, "Moemon Music Studio", C_ACCENT);
-    int x = 190;
+    // the two ways to use it, as tabs
+    static const char *const modes[2] = {"LISTEN", "CONVERT"};
+    for (int i = 0; i < 2; i++) {
+        int tx = 10 + i * 92;
+        if (sMode == i) fill(tx - 2, 6, 90, 32, C_ACCENT);
+        if (button(tx, 8, 86, 28, modes[i], 1) && sMode != i) {
+            sMode = i;
+            settings_save();
+            set_status("%s", i == MODE_LISTEN ? "LISTEN: the GBA version and the original (Tab switches), the song's folder as a playlist."
+                                              : "CONVERT: the steps above lead from the song to a .kaisong for the game.");
+        }
+    }
+    int x = 200;
     if (button(x, 8, 104, 28, "Open...", 1)) guarded(ACT_OPEN_MIDI);
     x += 110;
+    if (sMode == MODE_LISTEN) {
+        if (button(x, 8, 140, 28, "Open folder...", 1)) guarded(ACT_OPEN_FOLDER);
+        x += 146;
+        if (button(x, 8, 80, 28, "< Prev", sListN > 0)) list_open(list_step(-1));
+        x += 86;
+        if (button(x, 8, 80, 28, "Next >", sListN > 0)) list_open(list_step(1));
+        x += 86;
+        if (button(W - 180, 8, 90, 28, "Defaults", 1)) sModal = MODAL_DEFAULTS;
+        if (button(W - 84, 8, 36, 28, "Aa", 1)) sModal = MODAL_DISPLAY;
+        if (button(W - 44, 8, 32, 28, "?", 1)) sModal = MODAL_HELP;
+        return;
+    }
     if (button(x, 8, 120, 28, "Open Project", 1)) guarded(ACT_OPEN_PROJECT);
     x += 126;
     if (button(x, 8, 64, 28, "Save", have_song())) {
@@ -656,16 +891,7 @@ static void draw_transport(void)
         for (int i = 0; i < 2; i++) {
             int bx2 = 184 + i * 86;
             if (sOriginal == i) fill(bx2 - 2, y + 6, 84, 34, C_ACCENT);
-            if (button(bx2, y + 8, 80, 30, i ? "Original" : "Kai", 1) && sOriginal != i) {
-                if (i && !S.p.rip) {
-                    busy("Playing the original through its console's emulator...");
-                    char err[512] = "";
-                    if (!project_reload_rip(&S.p, g_biosDir, err, sizeof(err))) { set_status("Can't play the original: %s", err); continue; }
-                }
-                sOriginal = i;
-                update_mute_mask();
-                set_status("%s", i ? "Original: the console's own sound (from its emulator)." : "Kai: the song as Moemon's sound engine plays it.");
-            }
+            if (button(bx2, y + 8, 80, 30, i ? "Original" : "GBA", 1)) set_original(i);
         }
     }
     char t[64], tt[32];
@@ -724,9 +950,9 @@ static int distinct_changes(const ConvCand *cd)
     return n;
 }
 
-static void draw_tracks(void)
+static void draw_tracks(int y, int h)
 {
-    int x = 10, y = 104, w = 620, h = 456;
+    int x = 10, w = 620;
     panel(x, y, w, h, "TRACKS");
     text(x + 90, y + 6, "M = leave out of the song   S = listen alone", C_DIM);
     if (!have_song() && !S.c.ncand) { text(x + 14, y + 40, "No song yet.", C_DIM); return; }
@@ -810,9 +1036,9 @@ static void octave_stepper(int x, int y)
     }
 }
 
-static void draw_slots(void)
+static void draw_slots(int y, int h)
 {
-    int x = 640, y = 104, w = 630, h = 456;
+    int x = 640, w = 630;
     panel(x, y, w, h, "INSTRUMENTS");
     text(x + 130, y + 6, "voice slot / from the MIDI / game instrument", C_DIM);
     int used[128], n = 0;
@@ -993,10 +1219,12 @@ static void draw_song(void)
         S.song.reverb = project_reverb_byte(p);
         lock(); E.reverb = rev < 0 ? 0 : (uint8_t)rev; unlock();
         p->dirty = 1;
+        sEdits++;
     }
     if (stepper(col1 + 300, row, "Priority", &p->priority, 0, 255, 1, NULL)) {
         S.song.priority = (uint8_t)p->priority;
         p->dirty = 1;
+        sEdits++;
     }
 
     row += 30;
@@ -1106,6 +1334,7 @@ static void draw_song(void)
             if (!button(bx, ly, bw, 24, g ? (gb ? "Convert GB > GBA" : "All GM") : (gb ? "Game Boy" : "All original"), 1)) continue;
             stop_song();
             project_rip_instruments(p, g);
+            sEdits++;
             busy("Matching the original's loudness...");
             studio_rebuild(&S);
             studio_match_rip(&S);
@@ -1120,6 +1349,230 @@ static void draw_song(void)
         project_default_voices(p, &S.c, 1);
         voices_changed();
     }
+}
+
+
+// ------------------------------------------------------------------ CONVERT: the steps
+
+// One step: its number and state (0 = still to do, 1 = done, 2 = a choice worth a look). Returns 1 when clicked.
+static int step_chip(int *x, int y, int n, const char *label, int state)
+{
+    char t[200];
+    snprintf(t, sizeof t, "%d  %s", n, label);
+    int w = textw(t) + 28;
+    Col c = state == 1 ? C_OK : state == 0 ? C_WARN : C_DIM;
+    int ho = hot(*x, y, w, 26);
+    fill(*x, y, w, 26, ho ? C_BTNHOT : C_BTN);
+    frame_rect(*x, y, w, 26, ho ? C_ACCENT : c);
+    fill(*x + 7, y + 9, 8, 8, c);
+    text(*x + 20, y + 5, t, C_TEXT);
+    int hit = clicked(*x, y, w, 26);
+    *x += w;
+    if (n < 6) text(*x + 3, y + 5, ">", C_DIM);
+    *x += 14;
+    return hit;
+}
+
+// The way from a song to the game, left to right: each step says how far it is, and a click goes there.
+static void draw_steps(int y)
+{
+    fill(0, y - 4, W, 34, C_BG);
+    if (!have_song()) {
+        text(12, y + 5, "1 Open a song  >  2 Instruments  >  3 Loop  >  4 Where it plays  >  5 Fits the GBA  >  6 Export .kaisong", C_DIM);
+        return;
+    }
+    Project *p = &S.p;
+    int x = 10;
+    char t[160];
+    // 1: the song
+    char title[40];
+    snprintf(title, sizeof title, "%s", p->title[0] ? p->title : p->midiName);
+    if (strlen(title) > 20) memcpy(title + 18, "..", 3);
+    snprintf(t, sizeof t, "Song: %s", title);
+    if (step_chip(&x, y, 1, t, 1)) guarded(ACT_OPEN_MIDI);
+    // 2: the instruments: how many aren't the original's (rips) / are the game's (MIDIs)
+    int used = 0, changed = 0;
+    for (int i = 0; i < 128; i++) {
+        if (!S.c.slotUsed[i]) continue;
+        used++;
+        if (p->isRip && !voice_same(&p->voice[i], &p->ripOrig[i])) changed++;
+    }
+    if (!p->isRip) snprintf(t, sizeof t, "Instruments: %d from the game", used);
+    else if (p->ripKind == RIP_GSF) snprintf(t, sizeof t, "Instruments: the game's own");
+    else if (!changed) snprintf(t, sizeof t, "Instruments: all original");
+    else snprintf(t, sizeof t, "Instruments: %d of %d changed", changed, used);
+    if (step_chip(&x, y, 2, t, 2))
+        set_status("%s", p->isRip ? "INSTRUMENTS (right): click one and Change... it, Orig / GM; SONG > All original / All GM for every one."
+                                  : "INSTRUMENTS (right): click one and Change... it; SONG > All to GM matches resets them.");
+    // 3: the loop
+    if (S.c.hasLoop) {
+        char a[40];
+        rip_time(a, sizeof a, S.c.loopEndTick - S.c.loopStartTick);
+        if (p->isRip) snprintf(t, sizeof t, "Loop: %s", a);
+        else snprintf(t, sizeof t, "Loop: %s", p->loopMode == LOOP_CUSTOM ? "custom" : p->loopMode == LOOP_WHOLE ? "whole song" : "the MIDI's");
+    } else snprintf(t, sizeof t, "Loop: none");
+    if (step_chip(&x, y, 3, t, S.c.hasLoop ? 1 : 2)) {
+        if (S.c.hasLoop && p->loopEnd > 180 && S.c.loopEndTick > 180) {
+            play_from((long)S.c.loopEndTick - 180);   // hear the jump
+            set_status("%s", "The loop's jump, from three seconds before it. SONG > Loop: custom sets it to the game frame.");
+        } else set_status("%s", "No loop: the song plays once. SONG > Loop: whole song or custom makes it loop.");
+    }
+    // 4: where it plays
+    if (p->target[0]) snprintf(t, sizeof t, "Plays at: %.24s", p->place[0] ? p->place : p->target);
+    else snprintf(t, sizeof t, "Where it plays: pick it");
+    if (step_chip(&x, y, 4, t, p->target[0] ? 1 : 0)) open_place_picker();
+    // 5: fits the game's player
+    int limit = p->moreTracks ? ENG_MAX_TRACKS : ENG_GAME_TRACKS, issues = 0;
+    if (S.c.ntracks > limit) issues++;
+    if (S.c.dropped) issues++;
+    if (S.peakVoices >= p->voices) issues++;
+    if (issues) snprintf(t, sizeof t, "Fits: %d to check", issues);
+    else snprintf(t, sizeof t, "Fits the GBA");
+    if (step_chip(&x, y, 5, t, issues ? 0 : 1)) {
+        char m[500] = "";
+        if (S.c.ntracks > limit) snprintf(m + strlen(m), sizeof m - strlen(m), "%d tracks, %d play: mute some (M). ", S.c.ntracks, limit);
+        if (S.c.dropped) snprintf(m + strlen(m), sizeof m - strlen(m), "%d track(s) left out. ", S.c.dropped);
+        if (S.peakVoices >= p->voices) snprintf(m + strlen(m), sizeof m - strlen(m), "All %d voices busy at times: some notes get cut. ", p->voices);
+        if (!m[0]) snprintf(m, sizeof m, "%d tracks, up to %d voices at once: it plays as heard here.", S.c.ntracks, S.peakVoices);
+        set_status("%s", m);
+    }
+    // 6: export
+    if (step_chip(&x, y, 6, sExported ? "Exported" : "Export .kaisong", sExported ? 1 : 2)) run_action(ACT_EXPORT_KAISONG);
+}
+
+// ------------------------------------------------------------------ LISTEN
+
+// text at k times the size (the font's own sharper glyphs where it has them)
+static void text_big(int x, int y, int w, const char *s, Col c, int k)
+{
+    int font = sFontChoice, sc = font == FONT_PIXEL ? 1 : (sFontNow * k > 3 ? 3 : sFontNow * k);
+    SDL_Texture *t = sFonts[font][sc - 1];
+    SDL_SetTextureColorMod(t, c.r, c.g, c.b);
+    int maxc = w / (8 * k), n = 0;
+    for (; *s && n < maxc; s++, n++) {
+        unsigned ch = (unsigned char)*s;
+        if (ch < 32 || ch > 126) ch = '?';
+        if (n == maxc - 1 && s[1]) ch = '.';
+        SDL_Rect src = {(int)(ch - 32) * 8 * sc, 0, 8 * sc, 16 * sc}, dst = {x + n * 8 * k, y, 8 * k, 16 * k};
+        SDL_RenderCopy(sRen, t, &src, &dst);
+    }
+}
+
+static void draw_now_playing(int x, int y, int w, int h)
+{
+    panel(x, y, w, h, "NOW PLAYING");
+    if (!have_song()) {
+        text(x + 16, y + 40, "Open a song, or a folder of them (Open folder...).", C_DIM);
+        text(x + 16, y + 62, "MIDI, PSF / PSF2, USF, GBS, 2SF, GSF, GameCube, SPC, VGM.", C_DIM);
+        text(x + 16, y + 92, "A rip plays two ways: GBA (Moemon's sound engine, as the game", C_DIM);
+        text(x + 16, y + 112, "would play it) and Original (the console itself). Tab switches", C_DIM);
+        text(x + 16, y + 132, "between them at the same moment of the song.", C_DIM);
+        return;
+    }
+    const Project *p = &S.p;
+    const Rip *r = p->rip;
+    int ty = y + 32;
+    text_big(x + 16, ty, w - 32, p->title[0] ? p->title : p->midiName, C_TEXT, 2);
+    ty += 40;
+    char line[400];
+    if (r && (r->game[0] || r->artist[0])) {
+        if (r->game[0]) { textfit(x + 16, ty, w - 32, r->game, C_ACCENT); ty += 20; }
+        snprintf(line, sizeof line, "%s%s%s", r->artist, r->artist[0] && r->year[0] ? ", " : "", r->year);
+        if (line[0]) { textfit(x + 16, ty, w - 32, line, C_TEXT); ty += 20; }
+    } else if (p->ripInfo[0]) { textfit(x + 16, ty, w - 32, p->ripInfo, C_TEXT); ty += 20; }
+    if (p->isRip) snprintf(line, sizeof line, "%s (%s)", r && r->console[0] ? r->console : rip_kind_name(p->ripKind), rip_kind_name(p->ripKind));
+    else snprintf(line, sizeof line, "MIDI: only its GBA version (no original to compare)");
+    textfit(x + 16, ty, w - 32, line, C_DIM);
+    ty += 20;
+    if (sListCur >= 0) textfit(x + 16, ty, w - 32, sList[sListCur].name, C_DIM);
+    // length and loop
+    ty = y + 160;
+    char a[40], b[40], c[40];
+    rip_time(a, sizeof a, (uint32_t)S.totalFrames);
+    if (S.loopStartFrame >= 0) {
+        rip_time(b, sizeof b, (uint32_t)S.loopStartFrame);
+        rip_time(c, sizeof c, (uint32_t)(S.totalFrames - S.loopStartFrame));
+        snprintf(line, sizeof line, "%s, then loops back to %s (a %s loop)", a, b, c);
+    } else snprintf(line, sizeof line, "%s, plays once", a);
+    textfit(x + 16, ty + 3, w - 190, line, C_TEXT);
+    if (S.loopStartFrame >= 0 && button(x + w - 166, ty, 150, 22, "Hear the loop", S.totalFrames > 180))
+        play_from(S.totalFrames - 180);
+    // GBA or the original
+    ty += 36;
+    static const char *const ab[2] = {"GBA: Moemon's engine", "Original: the console"};
+    for (int i = 0; i < 2; i++) {
+        int bx = x + 16 + i * 296, bw = 288;
+        int ok = i == 0 || p->isRip;
+        if (sOriginal == i) fill(bx - 3, ty - 3, bw + 6, 42, C_ACCENT);
+        if (button(bx, ty, bw, 36, ab[i], ok)) set_original(i);
+    }
+    text(x + 16, ty + 46, p->isRip ? "Tab switches between them at the same moment of the song." : "", C_DIM);
+}
+
+static void draw_playlist(int x, int y, int w, int h)
+{
+    panel(x, y, w, h, "PLAYLIST");
+    char hd[1200];
+    if (sListN) snprintf(hd, sizeof hd, "%d in %s", sListN, sListDir[0] ? sListDir : "this folder");
+    else hd[0] = 0;
+    textfit(x + 100, y + 6, w - 116, hd, C_DIM);
+    if (!sListN) { text(x + 16, y + 40, "The songs in the open song's folder show here.", C_DIM); return; }
+    int rowH = 22, top = y + 30, rows = (h - 36) / rowH;
+    static int lastCur = -2;
+    if (sListCur != lastCur) {   // keep the open song in sight
+        lastCur = sListCur;
+        if (sListCur >= 0 && (sListCur < sListScroll || sListCur >= sListScroll + rows)) sListScroll = sListCur - rows / 2;
+    }
+    if (wheel && hot(x, y, w, h)) sListScroll -= wheel * 3;
+    if (sListScroll > sListN - rows) sListScroll = sListN - rows;
+    if (sListScroll < 0) sListScroll = 0;
+    for (int r = 0; r < rows && sListScroll + r < sListN; r++) {
+        int i = sListScroll + r, ry = top + r * rowH;
+        int ho = hot(x + 6, ry, w - 22, rowH - 2);
+        fill(x + 6, ry, w - 22, rowH - 2, i == sListCur ? C_SEL : ho ? C_HOT : C_ROW);
+        char n[16];
+        snprintf(n, sizeof n, "%3d", i + 1);
+        text(x + 10, ry + 3, n, C_DIM);
+        if (i == sListCur && sPlaying) text(x + 40, ry + 3, ">", C_ACCENT);
+        textfit(x + 56, ry + 3, w - 84, sList[i].name, i == sListCur ? C_TEXT : C_TEXT);
+        if (clicked(x + 6, ry, w - 22, rowH - 2) && i != sListCur) list_open(i);
+    }
+    scrollbar(x + w - 12, top, rows * rowH, sListN, rows, &sListScroll);
+}
+
+static void draw_playback(int x, int y, int w, int h)
+{
+    panel(x, y, w, h, "AFTER A SONG");
+    static const char *const after[3] = {"Repeat it", "Next song", "Stop"};
+    int bx = x + 16, by = y + 32;
+    for (int i = 0; i < 3; i++) {
+        if (sAfter == i) fill(bx + i * 116 - 2, by - 2, 112, 28, C_ACCENT);
+        if (button(bx + i * 116, by, 108, 24, after[i], 1) && sAfter != i) { sAfter = i; settings_save(); }
+    }
+    if (sAfter != AFTER_REPEAT) {
+        char lab[24];
+        snprintf(lab, sizeof lab, "%dx", sLoops);
+        if (stepper(bx + 364, by + 2, "after", &sLoops, 1, 9, 1, lab)) settings_save();
+        text(bx + 364, by + 26, "times through a loop", C_DIM);
+    }
+    by += 42;
+    if (checkbox(bx, by + 4, "Shuffle", &sShuffle)) {
+        if (sShuffle) list_shuffle();
+        settings_save();
+    }
+    if (button(x + w - 236, by, 220, 26, "Convert this song >", have_song())) {
+        sMode = MODE_CONVERT;
+        settings_save();
+        set_status("%s", "CONVERT: the steps above lead from the song to a .kaisong for the game.");
+    }
+}
+
+static void draw_listen(void)
+{
+    draw_now_playing(10, 104, 620, 268);
+    draw_tracks(380, 378);
+    draw_playlist(640, 104, 630, 540);
+    draw_playback(640, 652, 630, 106);
 }
 
 static void draw_status(void)
@@ -1512,17 +1965,22 @@ static void draw_confirm(void)
 
 static void draw_help(void)
 {
-    int x, y, w = 900, h = 590;
+    int x, y, w = 900, h = 700;
     modal_box(&x, &y, w, h, "MOEMON MUSIC STUDIO " STUDIO_VERSION);
     static const char *lines[] = {
         "Plays MIDI files with Moemon Emerald Kai's own instruments and sound engine, so a song",
         "sounds here as it will in the game (5 sample voices + 4 Game Boy channels, 10 tracks;",
         "SONG > GBA accurate off: up to 64 tracks and 64 sample voices, which the game can't play yet).",
         "",
+        "LISTEN (top left): a player. GBA / Original (Tab) switch at the same moment of the song; the open",
+        "   song's folder is the playlist (Prev / Next, Page Up / Down), and after a song: repeat, the next",
+        "   one after a loop or two, or stop. Convert this song > goes on to CONVERT.",
+        "CONVERT: making a song for the game; the steps under the buttons say what's left, click one.",
+        "",
         "1. Open... a MIDI (or drop it on the window). Each MIDI instrument starts as the game",
         "   instrument closest to its General MIDI sound; drums use a game drum kit.",
-        "   Or a PSF / PSF2 / USF / GBS / 2SF / GSF / GameCube rip: it plays in its console's emulator once and",
-        "   comes in with its original instruments. Kai / Original compares; All GM swaps instruments.",
+        "   Or a PSF / PSF2 / USF / GBS / 2SF / GSF / GameCube / SPC / VGM rip: it plays in its console's",
+        "   emulator once and comes in with its original instruments. All GM swaps instruments.",
         "2. Click an instrument and Change... it, or tune its envelope and Octave. Hold to hear / keys Z-M.",
         "3. M leaves a track out of the song, S plays a track alone.",
         "4. SONG: pick the game song it replaces, its volume, reverb and loop.",
@@ -1533,7 +1991,7 @@ static void draw_help(void)
         "The game's own MIDIs (sound/songs/midi) open with their real instruments and settings",
         "and convert exactly like the game build converts them.",
         "",
-        "Space: play / pause.  Esc: close a window.  Mouse wheel: scroll lists and change numbers.",
+        "Space: play / pause.  Tab: GBA / Original.  Esc: close a window.  Wheel: scroll lists, change numbers.",
         "Aa (top right): the font (Pixel, Smooth, Bold) and the window size. Defaults: settings every",
         "song you open starts with. Game Boy songs: Convert GB > GBA makes their channels GBA instruments.",
     };
@@ -1606,6 +2064,10 @@ static void settings_load(void)
             snprintf(g_biosDir, sizeof(g_biosDir), "%s", line + 5);
             g_biosDir[strcspn(g_biosDir, "\r\n")] = 0;
         }
+        if (sscanf(line, "mode=%d", &v) == 1 && (v == MODE_LISTEN || v == MODE_CONVERT)) sMode = v;
+        if (sscanf(line, "after=%d", &v) == 1 && v >= 0 && v <= AFTER_STOP) sAfter = v;
+        if (sscanf(line, "loops=%d", &v) == 1 && v >= 1 && v <= 9) sLoops = v;
+        if (sscanf(line, "shuffle=%d", &v) == 1) sShuffle = v != 0;
         if (sscanf(line, "window=%d", &v) == 1) {
             for (int i = 0; i < NUM_WIN_SIZES; i++) if (WIN_SIZES[i] == v) sWinSize = i;
         }
@@ -1633,7 +2095,8 @@ static void settings_save(void)
     settings_path(path, sizeof(path));
     FILE *f = fopen(path, "w");
     if (!f) return;
-    fprintf(f, "font=%d\nwindow=%d\nbios=%s\n", sFontChoice, WIN_SIZES[sWinSize], g_biosDir);
+    fprintf(f, "font=%d\nwindow=%d\nbios=%s\nmode=%d\nafter=%d\nloops=%d\nshuffle=%d\n", sFontChoice, WIN_SIZES[sWinSize], g_biosDir,
+            sMode, sAfter, sLoops, sShuffle);
     fclose(f);
 }
 
@@ -1901,6 +2364,29 @@ static void draw_track_changes(void)
     if (button(x + w - 120, y + h - 44, 104, 30, "Close", 1) || kEsc || kEnter) sModal = MODAL_NONE;
 }
 
+// LISTEN: after the song (a loop played sLoops times, or the end of one that doesn't loop): fade out, then
+// the next song, or stop; Repeat lets it loop on
+static void listen_after_song(void)
+{
+    static int wasPlaying;
+    int playing = sPlaying;
+    if (have_song() && sAfter != AFTER_REPEAT) {
+        if (playing && !sFadeTotal && S.loopStartFrame >= 0 && S.totalFrames > S.loopStartFrame) {
+            long through = S.totalFrames + (long)(sLoops - 1) * (S.totalFrames - S.loopStartFrame);
+            if (sFrames >= through) { lock(); sFadeTotal = sFadeLeft = 6 * 60; unlock(); }
+        }
+        int ended = wasPlaying && !playing && S.loopStartFrame < 0 && sFrames >= S.totalFrames - 2;
+        if (sAdvance || ended) {
+            sAdvance = 0;
+            stop_song();
+            if (sAfter == AFTER_NEXT && sListN) { sAdvancePlay = 1; list_open(list_step(1)); }
+            else sFrames = 0;
+        }
+    } else if (have_song() && wasPlaying && !playing && S.loopStartFrame < 0 && sFrames >= S.totalFrames - 2)
+        play_from(0);   // Repeat a song that doesn't loop
+    wasPlaying = sPlaying;
+}
+
 int ui_main(int argc, char **argv)
 {
     // Windows: draw at the screen's real pixels instead of letting display scaling stretch (and blur) the window
@@ -1911,6 +2397,7 @@ int ui_main(int argc, char **argv)
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
     settings_load();
+    if (getenv("MMS_TEST_MODE")) sMode = strcmp(getenv("MMS_TEST_MODE"), "listen") ? MODE_CONVERT : MODE_LISTEN;   // tests: a view
     {
         char dp[1024];
         defaults_path(dp, sizeof(dp));
@@ -1962,7 +2449,7 @@ int ui_main(int argc, char **argv)
 
     while (!sQuit) {
         mPressed = mReleased = wheel = dblClick = 0;
-        kBackspace = kEnter = kEsc = kUp = kDown = kPgUp = kPgDn = kSpace = 0;
+        kBackspace = kEnter = kEsc = kUp = kDown = kPgUp = kPgDn = kSpace = kTab = 0;
         sTyped[0] = 0;
         SDL_Event ev;
         while (SDL_PollEvent(&ev)) {
@@ -1999,6 +2486,7 @@ int ui_main(int argc, char **argv)
                 case SDLK_PAGEUP: kPgUp = 1; break;
                 case SDLK_PAGEDOWN: kPgDn = 1; break;
                 case SDLK_SPACE: kSpace = 1; break;
+                case SDLK_TAB: kTab = 1; break;
                 default: break;
                 }
                 if (!ev.key.repeat) handle_piano(ev.key.keysym.sym, 1);
@@ -2019,6 +2507,12 @@ int ui_main(int argc, char **argv)
             if (sPlaying) pause_song();
             else play_from(sFrames >= S.totalFrames && S.loopStartFrame < 0 ? 0 : sFrames);
         }
+        if (kTab && sModal == MODAL_NONE && S.p.isRip) set_original(!sOriginal);
+        if (sMode == MODE_LISTEN && sModal == MODAL_NONE) {
+            if (kPgUp && sListN) list_open(list_step(-1));
+            if (kPgDn && sListN) list_open(list_step(1));
+            listen_after_song();
+        }
 
         sFontNow = font_scale();
         color(C_BG);
@@ -2026,9 +2520,13 @@ int ui_main(int argc, char **argv)
         sInModal = 0;
         draw_top();
         draw_transport();
-        draw_tracks();
-        draw_slots();
-        draw_song();
+        if (sMode == MODE_LISTEN) draw_listen();
+        else {
+            draw_steps(104);
+            draw_tracks(136, 424);
+            draw_slots(136, 424);
+            draw_song();
+        }
         draw_status();
         sInModal = 1;
         switch (sModal) {
@@ -2046,7 +2544,10 @@ int ui_main(int argc, char **argv)
         SDL_RenderPresent(sRen);
         if (getenv("MMS_SHOT")) {   // tests: save a screenshot and quit
             static int frames;
-            if (++frames == atoi(getenv("MMS_SHOT_FRAME") ? getenv("MMS_SHOT_FRAME") : "10")) {
+            // after a number of frames, or of seconds (MMS_SHOT_SECONDS: tests of what happens while a song plays)
+            int due = getenv("MMS_SHOT_SECONDS") ? SDL_GetTicks() >= (Uint32)(atof(getenv("MMS_SHOT_SECONDS")) * 1000)
+                                                 : ++frames == atoi(getenv("MMS_SHOT_FRAME") ? getenv("MMS_SHOT_FRAME") : "10");
+            if (due) {
                 int ow = W, oh = H;
                 SDL_GetRendererOutputSize(sRen, &ow, &oh);
                 SDL_Surface *sh = SDL_CreateRGBSurfaceWithFormat(0, ow, oh, 32, SDL_PIXELFORMAT_ARGB8888);
