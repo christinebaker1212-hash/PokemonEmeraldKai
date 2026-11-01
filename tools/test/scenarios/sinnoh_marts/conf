@@ -1,0 +1,7 @@
+# SINNOH's common clerk (tools/sinnoh/gen_marts.py, shop.c's `pokemart 0` in SINNOH): Platinum's list by the region's
+# badges. With none: POKé BALL, POTION, ANTIDOTE, PARALYZE HEAL; with all eight, the whole list (FULL RESTORE and
+# MAX REPEL among them). SANDGEM's clerk opens the shop. Needs the 3D pack.
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_GEN=4"
+EXPECT_A=("[test] shop here: 4 13 14 18" "[test] shop here: 4 3 2 13 22 21 20 19 24 14 18 17 15 16 23 85 86 83 84")

@@ -25,7 +25,7 @@ Sinnoh_CanalaveCityMart_EventScript_Person5::
 	faceplayer
 	message gText_HowMayIServeYou
 	waitmessage
-	pokemart 0x0
+	pokemart Sinnoh_Mart_Canalave
 	msgbox gText_PleaseComeAgain, MSGBOX_DEFAULT
 	release
 	end

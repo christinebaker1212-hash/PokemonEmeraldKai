@@ -26,6 +26,26 @@ Sinnoh_VeilstoneStore1f_EventScript_Person4::
 	msgbox Sinnoh_VeilstoneStore1f_Text_Person4, MSGBOX_NPC
 	end
 
+Sinnoh_VeilstoneStore1f_EventScript_Person5::
+	lock
+	faceplayer
+	message gText_HowMayIServeYou
+	waitmessage
+	pokemart Sinnoh_Mart_Veilstone1fRight
+	msgbox gText_PleaseComeAgain, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_VeilstoneStore1f_EventScript_Person6::
+	lock
+	faceplayer
+	message gText_HowMayIServeYou
+	waitmessage
+	pokemart Sinnoh_Mart_Veilstone1fLeft
+	msgbox gText_PleaseComeAgain, MSGBOX_DEFAULT
+	release
+	end
+
 Sinnoh_VeilstoneStore1f_Text_Bg1:
 	.string "A notice on the wall.$"
 

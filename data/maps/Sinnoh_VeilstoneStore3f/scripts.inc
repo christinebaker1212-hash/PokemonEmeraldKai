@@ -18,6 +18,26 @@ Sinnoh_VeilstoneStore3f_EventScript_Person3::
 	msgbox Sinnoh_VeilstoneStore3f_Text_Person3, MSGBOX_NPC
 	end
 
+Sinnoh_VeilstoneStore3f_EventScript_Person4::
+	lock
+	faceplayer
+	message gText_HowMayIServeYou
+	waitmessage
+	pokemart Sinnoh_Mart_Veilstone3fUp
+	msgbox gText_PleaseComeAgain, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_VeilstoneStore3f_EventScript_Person5::
+	lock
+	faceplayer
+	message gText_HowMayIServeYou
+	waitmessage
+	pokemart Sinnoh_Mart_Veilstone3fDown
+	msgbox gText_PleaseComeAgain, MSGBOX_DEFAULT
+	release
+	end
+
 Sinnoh_VeilstoneStore3f_EventScript_Person6::
 	msgbox Sinnoh_VeilstoneStore3f_Text_Person6, MSGBOX_NPC
 	end

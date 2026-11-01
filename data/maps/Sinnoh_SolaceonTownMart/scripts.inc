@@ -25,7 +25,7 @@ Sinnoh_SolaceonTownMart_EventScript_Person4::
 	faceplayer
 	message gText_HowMayIServeYou
 	waitmessage
-	pokemart 0x0
+	pokemart Sinnoh_Mart_Solaceon
 	msgbox gText_PleaseComeAgain, MSGBOX_DEFAULT
 	release
 	end

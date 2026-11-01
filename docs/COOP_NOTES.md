@@ -3342,6 +3342,12 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   clerk ('mart',) on maps words.py doesn't cover (roles()). tools/sinnoh/gen_heal.py (after gen_maps.py): a heal
   location a CENTER (18), in front of its door in the town, appended to src/data/heal_locations.json after JOHTO's /
   KANTO's, and each CENTER 1F's OnTransition sets it (setrespawn). Test sinnoh_whiteout.
+- What the MARTs sell (tools/sinnoh/gen_marts.py POKEPLATINUM_DIR, before gen_words.py): Platinum's common clerk list
+  with the badges each item waits for (src/data/sinnoh_marts.h; shop.c MP_ShopItems builds it for `pokemart 0` on a
+  SINNOH map by the region's badges) and 20 specialty lists (data/scripts/sinnoh_marts.inc, Sinnoh_Mart_<Id>: a town's
+  own goods, the VEILSTONE store's counters, the ETERNA herb shop). gen_words.py roles() reads each vendor's Platinum
+  script (gen_marts.vendor_kind) for ('mart',) or ('martlist', label). Items the game lacks (Platinum's mail) are left
+  out. `mp shopdump` prints "shop here:" with the list. Test sinnoh_marts.
 - Gym leaders (tools/sinnoh/words.py GYMS, the ('gym', n) kind; gen_words.py gym()): the eight leaders, the ELITE FOUR
   and the CHAMPION are trainers too (gen_trainers.py SPECIAL, ids after the route trainers; pictures the closest the
   game has). A leader battles (NO_MUSIC: SINNOH's gym leader theme plays by class), then gives the badge (flag

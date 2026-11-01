@@ -84,6 +84,9 @@ def script(name, key, value, widths):
     if isinstance(value, tuple) and value[0] == 'nurse':
         return ('%s::\n\tsetvar VAR_0x800B, %d\n\tcall Common_EventScript_PkmnCenterNurse\n\twaitmessage\n'
                 '\twaitbuttonpress\n\trelease\n\tend\n\n' % (label, local), '')
+    if isinstance(value, tuple) and value[0] == 'martlist':
+        return ('%s::\n\tlock\n\tfaceplayer\n\tmessage gText_HowMayIServeYou\n\twaitmessage\n\tpokemart %s\n'
+                '\tmsgbox gText_PleaseComeAgain, MSGBOX_DEFAULT\n\trelease\n\tend\n\n' % (label, value[1]), '')
     if isinstance(value, tuple) and value[0] == 'mart':
         return ('%s::\n\tlock\n\tfaceplayer\n\tmessage gText_HowMayIServeYou\n\twaitmessage\n\tpokemart 0x0\n'
                 '\tmsgbox gText_PleaseComeAgain, MSGBOX_DEFAULT\n\trelease\n\tend\n\n' % label, '')
@@ -224,20 +227,26 @@ def roles(root):
     import sprites
     import who
     from words_indoor import kind
+    from gen_marts import vendor_kind
     out = {}
     for p in places(open_source(root), root):
         ev = events(root, p['place'])
         names = who.entries(root, p['place']['header'][len('MAP_HEADER_'):].lower())
 
+        def full(n):
+            return names[n - 1] if isinstance(n, int) and 1 <= n <= len(names) else ''
+
         def entry(n):
-            e = names[n - 1] if isinstance(n, int) and 1 <= n <= len(names) else ''
+            e = full(n)
             return e.split('_', 1)[1] if '_' in e else ''
+        vendors = vendor_kind(root, p['place']['header'][len('MAP_HEADER_'):].lower())
         for i, o in enumerate(ev['object_events']):
             gfx = o['graphics_id']
             if gfx.endswith('POKECENTER_NURSE'):
                 out.setdefault(p['name'], {})['Person%d' % (i + 1)] = ('nurse',)
-            elif gfx.endswith(('CASHIER_F', 'CASHIER_M')) and p['name'].endswith('Mart'):
-                out.setdefault(p['name'], {})['Person%d' % (i + 1)] = ('mart',)
+            elif vendors.get(full(o['script'])):
+                # a clerk: the common list or a specialty list, as Platinum's own script says (gen_marts.py)
+                out.setdefault(p['name'], {})['Person%d' % (i + 1)] = vendors[full(o['script'])]
             else:
                 # the things every building of a kind has, and gym guides (tools/sinnoh/words_indoor.py KINDS)
                 words = kind(p['name'], entry(o['script'])) if not isinstance(o.get('hidden_flag'), str) or \

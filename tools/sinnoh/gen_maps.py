@@ -341,6 +341,8 @@ def main():
     head = text[:text.index('\t.include "data/maps/Sinnoh_')]
     if 'sinnoh_items.inc' not in head:
         head += '\t.include "data/scripts/sinnoh_items.inc"\n'
+    if 'sinnoh_marts.inc' not in head:
+        head += '\t.include "data/scripts/sinnoh_marts.inc"\n'
     if 'sinnoh_trainers.inc' not in head:
         head += '\t.include "data/scripts/sinnoh_trainers.inc"\n'
     open(path, 'w').write(head + ''.join('\t.include "data/maps/%s/scripts.inc"\n' % n for n in names))

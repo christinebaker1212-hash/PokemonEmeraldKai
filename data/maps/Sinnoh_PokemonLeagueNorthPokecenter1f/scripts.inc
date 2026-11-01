@@ -11,6 +11,26 @@ Sinnoh_PokemonLeagueNorthPokecenter1f_EventScript_Person1::
 	msgbox Sinnoh_PokemonLeagueNorthPokecenter1f_Text_Person1, MSGBOX_NPC
 	end
 
+Sinnoh_PokemonLeagueNorthPokecenter1f_EventScript_Person2::
+	lock
+	faceplayer
+	message gText_HowMayIServeYou
+	waitmessage
+	pokemart 0x0
+	msgbox gText_PleaseComeAgain, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_PokemonLeagueNorthPokecenter1f_EventScript_Person3::
+	lock
+	faceplayer
+	message gText_HowMayIServeYou
+	waitmessage
+	pokemart Sinnoh_Mart_PokemonLeague
+	msgbox gText_PleaseComeAgain, MSGBOX_DEFAULT
+	release
+	end
+
 Sinnoh_PokemonLeagueNorthPokecenter1f_EventScript_Person4::
 	setvar VAR_0x800B, 4
 	call Common_EventScript_PkmnCenterNurse

@@ -6,6 +6,16 @@ Sinnoh_EternaCityHerbShop_EventScript_Person1::
 	msgbox Sinnoh_EternaCityHerbShop_Text_Person1, MSGBOX_NPC
 	end
 
+Sinnoh_EternaCityHerbShop_EventScript_Person2::
+	lock
+	faceplayer
+	message gText_HowMayIServeYou
+	waitmessage
+	pokemart Sinnoh_Mart_EternaHouse
+	msgbox gText_PleaseComeAgain, MSGBOX_DEFAULT
+	release
+	end
+
 Sinnoh_EternaCityHerbShop_EventScript_Person3::
 	msgbox Sinnoh_EternaCityHerbShop_Text_Person3, MSGBOX_NPC
 	end

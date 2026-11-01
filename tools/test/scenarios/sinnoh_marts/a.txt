@@ -1,0 +1,21 @@
+pressuntil A field 5000
+wait 30
+mp warp 43,58,4,5
+wait 200
+mp shopdump
+mp setflag 0x3320
+mp setflag 0x3321
+mp setflag 0x3322
+mp setflag 0x3323
+mp setflag 0x3324
+mp setflag 0x3325
+mp setflag 0x3326
+mp setflag 0x3327
+mp shopdump
+mp face left
+press A 4
+wait 90
+press A 4
+wait 60
+shot mart
+quit

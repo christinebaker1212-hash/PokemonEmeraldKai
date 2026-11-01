@@ -18,6 +18,16 @@ Sinnoh_VeilstoneStoreB1f_EventScript_Person5::
 	msgbox Sinnoh_VeilstoneStoreB1f_Text_Person5, MSGBOX_NPC
 	end
 
+Sinnoh_VeilstoneStoreB1f_EventScript_Person6::
+	lock
+	faceplayer
+	message gText_HowMayIServeYou
+	waitmessage
+	pokemart Sinnoh_Mart_VeilstoneB1f
+	msgbox gText_PleaseComeAgain, MSGBOX_DEFAULT
+	release
+	end
+
 Sinnoh_VeilstoneStoreB1f_EventScript_Person8::
 	msgbox Sinnoh_VeilstoneStoreB1f_Text_Person8, MSGBOX_NPC
 	end

@@ -1477,6 +1477,8 @@ static void MP_ShopAdd(u16 *out, u32 *n, u32 cap, u16 item)
         out[(*n)++] = item;
 }
 
+#include "data/sinnoh_marts.h"   // Moemon Kai: SINNOH's common clerk
+
 static const u16 *MP_ShopItems(const u16 *items)
 {
     static u16 sItems[192];
@@ -1485,7 +1487,19 @@ static const u16 *MP_ShopItems(const u16 *items)
     u8 badges = MP_Region_BadgeCount(MP_Region_Current());
     u16 first;
     const u16 *base = NULL;
-    if (items == NULL)   // Moemon Kai: JOHTO / KANTO's `pokemart 0`: the list for the region's badge count (Quetzal's)
+    if (items == NULL && MP_Region_Current() == REGION_SINNOH)
+    {
+        // Moemon Kai: SINNOH's common clerk: Platinum's list, each item from its badge count (tools/sinnoh/gen_marts.py)
+        static u16 sSinnoh[ARRAY_COUNT(sSinnohCommonMart) + 1];
+        u32 k, m = 0;
+        for (k = 0; k < ARRAY_COUNT(sSinnohCommonMart); k++)
+            if (badges >= sSinnohCommonMart[k].badges)
+                sSinnoh[m++] = sSinnohCommonMart[k].item;
+        sSinnoh[m] = ITEM_NONE;
+        items = sSinnoh;
+        first = MP_REGION_LIST;
+    }
+    else if (items == NULL)   // Moemon Kai: JOHTO / KANTO's `pokemart 0`: the list for the region's badge count (Quetzal's)
     {
         items = sQzBadgeMarts[badges < ARRAY_COUNT(sQzBadgeMarts) ? badges : ARRAY_COUNT(sQzBadgeMarts) - 1];
         first = MP_REGION_LIST;
@@ -1548,6 +1562,14 @@ void MP_ShopDump(void)
     }
     gSaveBlock1Ptr->location.mapGroup = saved >> 8;
     gSaveBlock1Ptr->location.mapNum = saved & 0xFF;
+    {
+        // (and the region's own common clerk here: `pokemart 0`)
+        const u16 *out = MP_ShopItems(NULL);
+        printf("[test] shop here:");
+        for (i = 0; out[i] != ITEM_NONE; i++)
+            printf(" %u", out[i]);
+        printf("\n");
+    }
 }
 
 void CreatePokemartMenu(const u16 *itemsForSale)
