@@ -3,11 +3,11 @@ Sinnoh_BattleCastle_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_BattleCastle_EventScript_Person1::
-	msgbox Sinnoh_BattleCastle_Text_Person1, MSGBOX_NPC
+	goto Sinnoh_EventScript_CastleCounter
 	end
 
 Sinnoh_BattleCastle_EventScript_Person2::
-	msgbox Sinnoh_BattleCastle_Text_Person2, MSGBOX_NPC
+	goto Sinnoh_EventScript_CastleCounter
 	end
 
 Sinnoh_BattleCastle_EventScript_Person3::
@@ -37,16 +37,6 @@ Sinnoh_BattleCastle_EventScript_Person8::
 Sinnoh_BattleCastle_EventScript_Person9::
 	msgbox Sinnoh_BattleCastle_Text_Person9, MSGBOX_NPC
 	end
-
-Sinnoh_BattleCastle_Text_Person1:
-	.string "Welcome! This facility is getting\n"
-	.string "ready for challengers. Please come\l"
-	.string "back soon!$"
-
-Sinnoh_BattleCastle_Text_Person2:
-	.string "Welcome! This facility is getting\n"
-	.string "ready for challengers. Please come\l"
-	.string "back soon!$"
 
 Sinnoh_BattleCastle_Text_Person3:
 	.string "In the BATTLE CASTLE, you spend\n"

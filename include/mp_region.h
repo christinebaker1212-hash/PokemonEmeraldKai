@@ -69,6 +69,9 @@ const void *Sinnoh_HoneyData(u32 *size);
 void Sinnoh_HallReset(void);          // SINNOH's BATTLE HALL record (s3d_hall.c), chunk HALL
 const void *Sinnoh_HallData(u32 *size);
 void Sinnoh_HallLoad(const void *data, u32 size);
+void Sinnoh_FrontierReset(void);      // SINNOH's BATTLE CASTLE's / ARCADE's records (s3d_frontier.c), chunk FRNT
+const void *Sinnoh_FrontierData(u32 *size);
+void Sinnoh_FrontierLoad(const void *data, u32 size);
 void Sinnoh_HoneyLoad(const void *data, u32 size);
 void MP_Region_LoadFromSave(void);
 struct PokemonStorage;

@@ -251,6 +251,7 @@ void MP_Region_StartNewGame(void)
     gRegionState.started = 1 << sStartRegion;
     Sinnoh_HoneyReset();
     Sinnoh_HallReset();
+    Sinnoh_FrontierReset();
     MP_Region_Arrive(sStartRegion);
     if (sStartRegion != REGION_HOENN)
     {
@@ -337,6 +338,15 @@ void MP_Region_WriteSidecar(void)
             fwrite(honey, size, 1, f);
         }
         {
+            // SINNOH's BATTLE CASTLE's and ARCADE's records (src/sinnoh/s3d_frontier.c)
+            u32 size;
+            const void *frontier = Sinnoh_FrontierData(&size);
+            c[0] = CHUNK('F', 'R', 'N', 'T');
+            c[1] = size;
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(frontier, size, 1, f);
+        }
+        {
             // SINNOH's BATTLE HALL record (src/sinnoh/s3d_hall.c)
             u32 size;
             const void *hall = Sinnoh_HallData(&size);
@@ -405,6 +415,12 @@ static bool8 LoadFrom(const char *path)
                 u8 buf[1024];
                 if (fread(buf, c[1], 1, f) == 1)
                     Sinnoh_HoneyLoad(buf, c[1]);
+            }
+            else if (c[0] == CHUNK('F', 'R', 'N', 'T') && c[1] <= 1024)
+            {
+                u8 buf[1024];
+                if (fread(buf, c[1], 1, f) == 1)
+                    Sinnoh_FrontierLoad(buf, c[1]);
             }
             else if (c[0] == CHUNK('H', 'A', 'L', 'L') && c[1] <= 1024)
             {
@@ -486,6 +502,7 @@ void MP_Region_LoadFromSave(void)
     int i;
     Sinnoh_HoneyReset();
     Sinnoh_HallReset();
+    Sinnoh_FrontierReset();
     for (i = 0; i <= 3; i++)
     {
         if (i == 0)

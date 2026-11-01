@@ -641,4 +641,12 @@ gSpecials::
 	def_special Sinnoh_HallBattle
 	def_special Sinnoh_HallWon
 	def_special Sinnoh_HallEnd
+	def_special Sinnoh_FrontierInfo
+	def_special Sinnoh_FrontierAddMon
+	def_special Sinnoh_CastleMenu
+	def_special Sinnoh_CastleBuy
+	def_special Sinnoh_ArcadeSpin
+	def_special Sinnoh_FrontierBattle
+	def_special Sinnoh_FrontierWon
+	def_special Sinnoh_FrontierEnd
 	.include "data/qz_specials.inc"   @ Moemon Kai: Quetzal's specials (Johto / Kanto)

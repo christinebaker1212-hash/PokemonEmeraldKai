@@ -1,0 +1,8 @@
+# SINNOH's BATTLE ARCADE (src/sinnoh/s3d_frontier.c, Sinnoh_EventScript_ArcadeCounter): three POKéMON chosen, the
+# board lands on its event (MOEMON_TEST_ARCADE=2: the foes poisoned) before the battle, the battle is won and the next
+# spin comes. Shot t_second.
+MODE=1
+TMO=400
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=6:60,9:60,3:60 MOEMON_TEST_ARCADE=2"
+EXPECT_A=("frontier: facility 1 team 6 9 3" "frontier: arcade event 2" "frontier: battle won" "frontier: facility 1 streak 1")
+UNEXPECT_A=("[crash]")

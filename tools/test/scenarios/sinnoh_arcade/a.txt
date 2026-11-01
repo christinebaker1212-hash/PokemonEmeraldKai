@@ -1,0 +1,53 @@
+pressuntil A field 5000
+mp textspeed 2
+mp battlestyle 1
+mp moves 0 58
+mp moves 1 58
+mp moves 2 58
+wait 30
+mp warp 41,2,14,6
+wait 90
+waitfor field 1000
+mp face up
+press A 4
+pressuntil A yesno 3000
+wait 20
+press A 4
+pressuntil A partymenu 3000
+wait 30
+press A 4
+wait 40
+pressuntil A partymenu 3000
+wait 30
+press DOWN 2
+wait 10
+press A 4
+wait 40
+pressuntil A partymenu 3000
+wait 30
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press A 4
+wait 40
+pressuntil A action 4000
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+pressuntil A action 6000
+shot t_second
+quit

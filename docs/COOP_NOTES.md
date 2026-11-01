@@ -3357,6 +3357,16 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   (overworld.c, before the map's on-transition script). Their words are STORY_WORDS (merged into words.py's WORDS);
   gen_maps.py places a story person with its flag once it has a script (trainers have theirs). Platinum's gifts from
   them have LINES (gifts.py; the POKé RADAR and the BICYCLE are given once). Test sinnoh_story_people.
+- The BATTLE CASTLE and BATTLE ARCADE (2026-11-01, src/sinnoh/s3d_frontier.c, Sinnoh_EventScript_CastleCounter /
+  _ArcadeCounter, VAR_0x8008 the facility through the script): Platinum's ideas on the game's frontier pieces. Three
+  POKéMON chosen (copies at Lv 50: the party never changes; no EGG or legend) battle sets of seven frontier trainers
+  (FillFrontierTrainerParty at FRONTIER_LVL_50; the trainer's band of the 300 rises every set), HP and PP carried
+  through a set, BP 3 + sets won (10 at most) for each set, the next set healed. CASTLE: CP for each win (10, +5 with
+  none fainted, +2 each above half HP), spent before a battle on REST (10 CP) or BERRIES (a SITRUS BERRY each, 6 CP).
+  ARCADE: the board lands on one of 18 events for the next battle (healing, a status on either side, sun / rain /
+  sandstorm through the field weather the battle starts with, +3 levels either side, berries either side, a free
+  win, a bonus BP); MOEMON_TEST_ARCADE=N fixes it for tests. Records in "<save>.region" chunk FRNT. Not here: their
+  Frontier Brains (no data for their teams). Tests sinnoh_castle, sinnoh_arcade.
 - The BATTLE HALL (2026-11-01, src/sinnoh/s3d_hall.c, Sinnoh_EventScript_HallCounter): Platinum's rules with the
   game's own pieces. One POKéMON (Lv 30+, no legend: gFrontierBannedSpecies or a catch rate of 5 or less) picks the
   type of each opponent from a list with each type's rank (17 types, FAIRY from GEN 6); ten ranks a type. The

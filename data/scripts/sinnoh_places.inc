@@ -733,3 +733,189 @@ Sinnoh_Text_HallNotThat:
 
 Sinnoh_Text_HallBye:
 	.string "Come back whenever you're ready!$"
+
+@ SINNOH's BATTLE CASTLE and BATTLE ARCADE (src/sinnoh/s3d_frontier.c): three POKéMON at Lv 50, sets of seven
+@ battles. VAR_0x8008 the facility (0 CASTLE, 1 ARCADE) for the whole challenge.
+Sinnoh_EventScript_CastleCounter::
+	lock
+	faceplayer
+	setvar VAR_0x8008, 0
+	msgbox Sinnoh_Text_CastleWelcome, MSGBOX_DEFAULT
+	goto Sinnoh_EventScript_FrontierCounter
+
+Sinnoh_EventScript_ArcadeCounter::
+	lock
+	faceplayer
+	setvar VAR_0x8008, 1
+	msgbox Sinnoh_Text_ArcadeWelcome, MSGBOX_DEFAULT
+
+Sinnoh_EventScript_FrontierCounter:
+	copyvar VAR_0x8004, VAR_0x8008
+	special Sinnoh_FrontierInfo
+	msgbox Sinnoh_Text_FrontierRecord, MSGBOX_DEFAULT
+	msgbox Sinnoh_Text_FrontierAsk, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Sinnoh_EventScript_FrontierBye
+
+Sinnoh_EventScript_FrontierChoose:
+	msgbox Sinnoh_Text_FrontierChoose, MSGBOX_DEFAULT
+	special ChoosePartyMon
+	waitstate
+	goto_if_ge VAR_0x8004, PARTY_SIZE, Sinnoh_EventScript_FrontierBye
+	special Sinnoh_FrontierAddMon
+	goto_if_eq VAR_RESULT, 10, Sinnoh_EventScript_FrontierNotThat
+	goto_if_eq VAR_RESULT, 11, Sinnoh_EventScript_FrontierAlready
+	goto_if_lt VAR_RESULT, 3, Sinnoh_EventScript_FrontierChoose
+	msgbox Sinnoh_Text_FrontierReady, MSGBOX_DEFAULT
+
+Sinnoh_EventScript_FrontierNext:
+	goto_if_eq VAR_0x8008, 1, Sinnoh_EventScript_ArcadeBoard
+	msgbox Sinnoh_Text_CastleWhat, MSGBOX_DEFAULT
+	special Sinnoh_CastleMenu
+	waitstate
+	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, Sinnoh_EventScript_FrontierStop
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_FrontierFight
+	copyvar VAR_0x8004, VAR_RESULT
+	special Sinnoh_CastleBuy
+	goto_if_eq VAR_RESULT, FALSE, Sinnoh_EventScript_CastleTooFew
+	msgbox Sinnoh_Text_CastleBought, MSGBOX_DEFAULT
+	goto Sinnoh_EventScript_FrontierNext
+
+Sinnoh_EventScript_CastleTooFew:
+	msgbox Sinnoh_Text_CastleTooFew, MSGBOX_DEFAULT
+	goto Sinnoh_EventScript_FrontierNext
+
+Sinnoh_EventScript_ArcadeBoard:
+	msgbox Sinnoh_Text_ArcadeSpin, MSGBOX_DEFAULT
+	playse SE_ROULETTE_BALL
+	special Sinnoh_ArcadeSpin
+	waitse
+	msgbox Sinnoh_Text_ArcadeLanded, MSGBOX_DEFAULT
+
+Sinnoh_EventScript_FrontierFight:
+	msgbox Sinnoh_Text_FrontierGo, MSGBOX_DEFAULT
+	closemessage
+	special Sinnoh_FrontierBattle
+	waitstate
+	goto_if_eq VAR_RESULT, FALSE, Sinnoh_EventScript_FrontierLost
+	special Sinnoh_FrontierWon
+	goto_if_ne VAR_RESULT, 0, Sinnoh_EventScript_FrontierSetWon
+	goto_if_eq VAR_0x8008, 1, Sinnoh_EventScript_FrontierWonPlain
+	msgbox Sinnoh_Text_CastleWon, MSGBOX_DEFAULT
+	goto Sinnoh_EventScript_FrontierNext
+
+Sinnoh_EventScript_FrontierWonPlain:
+	msgbox Sinnoh_Text_FrontierWon, MSGBOX_DEFAULT
+	goto Sinnoh_EventScript_FrontierNext
+
+Sinnoh_EventScript_FrontierSetWon:
+	playfanfare MUS_OBTAIN_B_POINTS
+	msgbox Sinnoh_Text_FrontierSetWon, MSGBOX_DEFAULT
+	waitfanfare
+	msgbox Sinnoh_Text_FrontierGoOn, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, YES, Sinnoh_EventScript_FrontierNext
+
+Sinnoh_EventScript_FrontierStop:
+	msgbox Sinnoh_Text_FrontierStopAsk, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Sinnoh_EventScript_FrontierNext
+	special Sinnoh_FrontierEnd
+	msgbox Sinnoh_Text_FrontierStopped, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_EventScript_FrontierLost:
+	special Sinnoh_FrontierEnd
+	msgbox Sinnoh_Text_FrontierLost, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_EventScript_FrontierNotThat:
+	msgbox Sinnoh_Text_FrontierNotThat, MSGBOX_DEFAULT
+	goto Sinnoh_EventScript_FrontierChoose
+
+Sinnoh_EventScript_FrontierAlready:
+	msgbox Sinnoh_Text_FrontierAlready, MSGBOX_DEFAULT
+	goto Sinnoh_EventScript_FrontierChoose
+
+Sinnoh_EventScript_FrontierBye:
+	msgbox Sinnoh_Text_FrontierBye, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_Text_CastleWelcome:
+	.string "Welcome to the BATTLE CASTLE.\p"
+	.string "Here, HP isn't restored between battles.\n"
+	.string "Win CASTLE POINTS, and spend them on\l"
+	.string "rest or berries for your team.$"
+
+Sinnoh_Text_ArcadeWelcome:
+	.string "Welcome to the BATTLE ARCADE!\p"
+	.string "Before every battle, our board spins and\n"
+	.string "lands on an event. Good or bad, it's\l"
+	.string "all part of the game!$"
+
+Sinnoh_Text_FrontierRecord:
+	.string "Your streak here is {STR_VAR_1}.\n"
+	.string "Your best is {STR_VAR_2}.$"
+
+Sinnoh_Text_FrontierAsk:
+	.string "Bring three MOéMON. They battle at\n"
+	.string "Lv. 50, in sets of seven. Ready?$"
+
+Sinnoh_Text_FrontierChoose:
+	.string "Choose a MOéMON for your team.$"
+
+Sinnoh_Text_FrontierReady:
+	.string "Your team is set. Good luck!$"
+
+Sinnoh_Text_CastleWhat:
+	.string "You have {STR_VAR_3} CP. What will you do?$"
+
+Sinnoh_Text_CastleBought:
+	.string "Done! You have {STR_VAR_3} CP left.$"
+
+Sinnoh_Text_CastleTooFew:
+	.string "You don't have enough CP for that.$"
+
+Sinnoh_Text_ArcadeSpin:
+	.string "Round and round the board goes...$"
+
+Sinnoh_Text_ArcadeLanded:
+	.string "It landed on {STR_VAR_1}!$"
+
+Sinnoh_Text_FrontierGo:
+	.string "Your opponent is waiting. Go!$"
+
+Sinnoh_Text_FrontierWon:
+	.string "That's battle {STR_VAR_1} won!$"
+
+Sinnoh_Text_CastleWon:
+	.string "That's battle {STR_VAR_1} won!\n"
+	.string "You earned {STR_VAR_2} CP.$"
+
+Sinnoh_Text_FrontierSetWon:
+	.string "Seven wins in a row! Here are\n"
+	.string "{STR_VAR_3} BATTLE POINTS. Your team is healed.$"
+
+Sinnoh_Text_FrontierGoOn:
+	.string "Will you keep going?$"
+
+Sinnoh_Text_FrontierStopAsk:
+	.string "End your challenge? Your streak will\n"
+	.string "start over.$"
+
+Sinnoh_Text_FrontierStopped:
+	.string "Your challenge ends at {STR_VAR_1} wins.\n"
+	.string "Thanks for playing!$"
+
+Sinnoh_Text_FrontierLost:
+	.string "Your streak ends at {STR_VAR_1} wins.\n"
+	.string "Come back and try again!$"
+
+Sinnoh_Text_FrontierNotThat:
+	.string "That one can't enter, sorry.$"
+
+Sinnoh_Text_FrontierAlready:
+	.string "That one is already on your team.$"
+
+Sinnoh_Text_FrontierBye:
+	.string "Come back anytime!$"

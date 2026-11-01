@@ -3,11 +3,11 @@ Sinnoh_BattleArcade_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_BattleArcade_EventScript_Person1::
-	msgbox Sinnoh_BattleArcade_Text_Person1, MSGBOX_NPC
+	goto Sinnoh_EventScript_ArcadeCounter
 	end
 
 Sinnoh_BattleArcade_EventScript_Person2::
-	msgbox Sinnoh_BattleArcade_Text_Person2, MSGBOX_NPC
+	goto Sinnoh_EventScript_ArcadeCounter
 	end
 
 Sinnoh_BattleArcade_EventScript_Person3::
@@ -49,16 +49,6 @@ Sinnoh_BattleArcade_EventScript_Person11::
 Sinnoh_BattleArcade_EventScript_Person12::
 	msgbox Sinnoh_BattleArcade_Text_Person12, MSGBOX_NPC
 	end
-
-Sinnoh_BattleArcade_Text_Person1:
-	.string "Welcome! This facility is getting\n"
-	.string "ready for challengers. Please come\l"
-	.string "back soon!$"
-
-Sinnoh_BattleArcade_Text_Person2:
-	.string "Welcome! This facility is getting\n"
-	.string "ready for challengers. Please come\l"
-	.string "back soon!$"
 
 Sinnoh_BattleArcade_Text_Person3:
 	.string "The BATTLE ARCADE's roulette changes\n"
