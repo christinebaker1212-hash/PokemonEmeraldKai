@@ -92,6 +92,11 @@ class Decomp:
     def prop_model(self, n):
         return open(self._path('res/field/props/models', self._props[n]), 'rb').read()
 
+    def field_effect(self, name):
+        """A field effect model of Platinum's (res/graphics/field_effects; None: not fetched)"""
+        path = self._path('res/graphics/field_effects', name)
+        return open(path, 'rb').read() if os.path.exists(path) else None
+
     def lights(self, n):
         blocks = []
         for b in json.load(open(self._path('res/field/lighting', 'lighting_set_%03d.json' % n))):
@@ -148,6 +153,9 @@ class RomSource:
     def prop_model(self, n):
         from platinum import BUILD_MODEL
         return self._n(BUILD_MODEL)[n]
+
+    def field_effect(self, name):
+        return self.decomp.field_effect(name)
 
     def lights(self, n):
         from render_ref import parse_lights

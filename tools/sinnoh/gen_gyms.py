@@ -214,8 +214,105 @@ def canalave_check(plats, floors, objects):
             'CANALAVE: %s at %d,%d (floor %d) out of reach' % (o['graphics_id'], o['x'], o['z'], f)
 
 
+VEIL_DIRS = ((0, -1), (0, 1), (-1, 0), (1, 0))   # (Platinum's order: north, south, west, east)
+
+
+def veilstone(root):
+    """VEILSTONE: its punching bags and tire stacks (Platinum's tables, as tiles: Platinum places each object two tiles
+    north of the table's spot), and how a bag may move on each tile (Platinum's table: 0 free, 1 not there, 2 not
+    north-south, 3 not west-east, 4 stops there, 5 not west)"""
+    text = open(os.path.join(root, 'src/overlay008/gym_features.c'), encoding='utf-8').read()
+    def coords(name):
+        m = re.search(r'%s\[[^]]*\]\s*=\s*\{(.*?)\n\};' % name, text, re.S).group(1)
+        return [(int(x), int(z) - 2) for x, z in re.findall(r'\.x\s*=\s*(\d+),\s*\.z\s*=\s*(\d+)', m)]
+    bags, tires = coords('sPunchingBagPositions'), coords('sTireStackPositions')
+    m = re.search(r'sVeilstoneTileBehaviors\[[^]]*\]\s*=\s*\{(.*?)\n\};', text, re.S).group(1)
+    track = [int(v) for v in re.findall(r'\d+', m.split('\n', 1)[1] if m.startswith('\n') else m)]
+    assert len(bags) == 9 and len(tires) == 11 and len(track) == 1024, (len(bags), len(tires), len(track))
+    veilstone_check(root, bags, tires, track)
+    return ['', '// VEILSTONE: its punching bags and tire stacks {x, y}, how a bag may move on each tile (a digit a tile:',
+            '// 0 free, 1 not there, 2 not north-south, 3 not west-east, 4 stops there, 5 not west)',
+            'static const u8 sVeilstoneBags[%d][2] = {%s};' % (len(bags), ', '.join('{%d, %d}' % b for b in bags)),
+            'static const u8 sVeilstoneTires[%d][2] = {%s};' % (len(tires), ', '.join('{%d, %d}' % t for t in tires)),
+            'static const char sVeilstoneTrack[32][33] = {%s};' % ',\n    '.join(
+                '"%s"' % ''.join(str(v) for v in track[y * 32:y * 32 + 32]) for y in range(32))]
+
+
+def veil_flags(track, tires, x, y, d):
+    """Platinum's flags for a bag on X, Y going D: 1 can't, 2 a tire stack ahead, 4 stops here"""
+    dx, dy = VEIL_DIRS[d]
+    b, f = track[y * 32 + x], 0
+    if b == 4:
+        f |= 4
+    elif (b == 2 and d < 2) or (b == 3 and d >= 2) or (b == 5 and d == 2):
+        f |= 1
+    if track[(y + dy) * 32 + x + dx] == 1:
+        f |= 1
+    if (x + dx, y + dy) in tires:
+        f |= 2
+    return f
+
+
+def veil_push(track, tires, x, y, d):
+    """Where a bag hit on X, Y going D stops, and the tire stack it knocks over (or None)"""
+    dx, dy = VEIL_DIRS[d]
+    f = veil_flags(track, tires, x, y, d)
+    if f not in (0, 4):
+        return x, y, None
+    while True:
+        x, y = x + dx, y + dy
+        f = veil_flags(track, tires, x, y, d)
+        if f:
+            return x, y, ((x + dx, y + dy) if f & 2 else None)
+
+
+def veilstone_check(root, bags, tires, track):
+    """Pushing bags as s3d_gyms.c does reaches each of Platinum's trainers and MAYLENE from the door: stops the
+    generator if not"""
+    from collections import deque
+    src = open_source(root)
+    p = [q for q in places(src, root) if q['name'] == 'Sinnoh_VeilstoneCityGym'][0]
+    (bx, by, land), = blocks(src, p)
+    ev = json.load(open(os.path.join(root, 'res/field/events/events_veilstone_city_gym.json')))
+    people = [(o['x'], o['z']) for o in ev['object_events']]
+    door = [(w['x'], w['z']) for w in ev['warp_events']][0]
+    start = (door[0], door[1] - 1)
+    def reach(bs, ts):
+        walls = set(bs) | set(ts) | set(people)
+        seen, todo = {start}, deque([start])
+        while todo:
+            x, y = todo.popleft()
+            for dx, dy in VEIL_DIRS:
+                n = (x + dx, y + dy)
+                if 0 <= n[0] < 32 and 0 <= n[1] < 32 and n not in seen and n not in walls \
+                        and not land.attrs[n[1] * 32 + n[0]] & 0x8000:
+                    seen.add(n)
+                    todo.append(n)
+        return seen
+    first = (tuple(bags), frozenset(tires))
+    states, todo, met = {first}, deque([first]), set()
+    while todo:
+        bs, ts = todo.popleft()
+        here = reach(bs, ts)
+        met |= {q for q in people if any((q[0] + dx, q[1] + dy) in here for dx, dy in VEIL_DIRS)}
+        for i, (x, y) in enumerate(bs):
+            for d, (dx, dy) in enumerate(VEIL_DIRS):
+                if (x - dx, y - dy) not in here:
+                    continue
+                nx, ny, tire = veil_push(track, ts, x, y, d)
+                if (nx, ny) == (x, y):
+                    continue
+                st = (bs[:i] + ((nx, ny),) + bs[i + 1:], ts - {tire} if tire else ts)
+                if st not in states:
+                    states.add(st)
+                    todo.append(st)
+    out = [q for q in people if q not in met]
+    assert not out, 'VEILSTONE: out of reach %s (%d states)' % (out, len(states))
+    print('VEILSTONE: everyone reached (%d states of the bags)' % len(states))
+
+
 def ident(name):
-    return name.replace('.nsbmd', '').upper()
+    return name.replace('fx:', '').replace('.nsbmd', '').upper()
 
 
 def main():
@@ -225,7 +322,7 @@ def main():
     out = ['// Generated by tools/sinnoh/gen_gyms.py from pret/pokeplatinum: SINNOH\'s gyms that move (src/sinnoh/s3d_gyms.c)', '']
     out.append('// Platinum\'s model numbers of the props its gyms load at run time (the pack\'s named meshes)')
     for n in gymprops.model_names():
-        out.append('#define S3D_MODEL_%s %d' % (ident(n), src._props.index(n)))
+        out.append('#define S3D_MODEL_%s %d' % (ident(n), gymprops.number(src, n)))
     out.append('')
     p = by['Sinnoh_PastoriaCityGym']
     deep = [(x, y) for x, y, b in tiles_with(src, p, {0x59})]
@@ -240,6 +337,7 @@ def main():
     out += sunyshore(root)
     out += canalave(root)
     out += eterna(root)
+    out += veilstone(root)
     open('src/data/sinnoh_gyms.h', 'w').write('\n'.join(out) + '\n')
     print('%d models; PASTORIA: %d deep tiles, %d gates, %d buttons' % (len(gymprops.model_names()), len(deep), len(gates),
                                                                      len(buttons)))

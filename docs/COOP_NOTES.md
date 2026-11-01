@@ -3507,6 +3507,14 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   badge, so it needs no var; the hour hand's tip is a ledge jump (field_player_avatar.c S3D_Gyms_JumpAt). A change of
   state runs Sinnoh_EventScript_EternaClock (the special Sinnoh_EternaClock turns the hands while the player waits).
   gen_gyms.py eterna_check walks each state from the door and stops if the next trainer is out of reach.
+  VEILSTONE: nine punching bags on tracks and eleven tire stacks (Platinum's tables, each object two tiles north of
+  its table spot as Platinum places it; models from Platinum's field effects: gymprops.py "fx:" names, numbered
+  0x8000 +, fetch_decomp.sh PARTS 6). Walking into a bag hits it (field_player_avatar.c S3D_Gyms_PushAt ->
+  Sinnoh_EventScript_VeilstoneBag): it slides the way it was hit by Platinum's track table (sVeilstoneTrack: 1 off the
+  track, 2 / 3 / 5 not that way, 4 a stop) at Platinum's speeds, swinging from its top, and knocks over a stack in its
+  way. Bags and stacks block steps and trainers' sight; their state is kept in RAM for the map (a battle keeps it,
+  coming in from elsewhere resets it, as Platinum's). gen_gyms.py veilstone_check pushes bags every way and stops if
+  anyone is out of reach. `mp gym` prints the bags and stacks; test sinnoh_gym_veilstone.
 - SINNOH trainers who battle when talked to (tools/sinnoh/gen_trainers.py TALK: the ETERNA gym's three, the TRAINERS'
   SCHOOL's kids, the POKéMON MANSION's maids, the RESTAURANT's diners; new classes MAID and CAMERAMAN): gen_maps.py
   talk_trainer() gives the object whose Platinum script battles one the trainer's own script (no sight line).

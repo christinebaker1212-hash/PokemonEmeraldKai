@@ -299,8 +299,15 @@ def main():
         if ('bm', prop_set) not in tex_cache:
             tex_cache[('bm', prop_set)] = nitro.btx0(src.prop_textures(prop_set))
         for name in names:
-            model = src._props.index(name)
-            bmd = nitro.Bmd0(src.prop_model(model))
+            model = gymprops.number(src, name)
+            if name.startswith('fx:'):
+                data = src.field_effect(name[3:])
+                if data is None:
+                    print('no %s (fetch_decomp.sh PARTS 6): left out' % name)
+                    continue
+                bmd = nitro.Bmd0(data)
+            else:
+                bmd = nitro.Bmd0(src.prop_model(model))
             named.append((model, pack.mesh(('prop', model, prop_set), bmd, bmd.tex or tex_cache[('bm', prop_set)])))
     size = write(out_path, pack, light_sets, matrices, named)
     print('%s: %d textures, %d meshes, %d light sets, %d matrices, %d bytes' % (

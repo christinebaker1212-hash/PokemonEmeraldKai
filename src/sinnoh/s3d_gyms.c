@@ -41,7 +41,7 @@ struct CanalavePlatform { u16 model; u8 ax, ay, az, bx, by, bz, floorA, floorB, 
 #define VAR_SINNOH_CANALAVE_HI 0x52F6   // (bits 16-23)
 #define VAR_SINNOH_CANALAVE_FLOOR 0x52F7   // the floor the player is on
 
-enum { GYM_NONE, GYM_PASTORIA, GYM_SUNYSHORE, GYM_CANALAVE, GYM_ETERNA };
+enum { GYM_NONE, GYM_PASTORIA, GYM_SUNYSHORE, GYM_CANALAVE, GYM_ETERNA, GYM_VEILSTONE };
 
 static struct
 {
@@ -646,6 +646,268 @@ bool8 S3D_Gyms_JumpAt(s16 x, s16 y, u8 direction)
     return j[2] ? (direction == DIR_NORTH || direction == DIR_SOUTH) : (direction == DIR_WEST || direction == DIR_EAST);
 }
 
+// ------------------------------------------------------------------------------------------------------ VEILSTONE
+// Punching bags on tracks: walking into one hits it, and it slides the way it was hit along its track until a stop
+// (Platinum's table: sVeilstoneTrack), knocking over a tire stack in its way. The bags and stacks stay as the player
+// left them until the player comes in from somewhere else (as Platinum's: a battle keeps them).
+#define VEIL_BAG_TOP 67.0f   // (the bag's model hangs from its top)
+#define VEIL_SLOT_TIRE 9
+
+static struct
+{
+    u8 x[ARRAY_COUNT(sVeilstoneBags)], y[ARRAY_COUNT(sVeilstoneBags)];
+    u16 tires;                // the stacks still standing (bits)
+    u16 lastMap;              // the map the gym's state is for
+    s8 bag, d;                // a bag moving (-1 none) and its way (Platinum's order: north, south, west, east)
+    float off, speed, swing;  // ... how far it has slid from its tile, its speed, its lean (degrees)
+    u16 frames;
+    u8 tiles, moving;
+    s8 tire;                  // a stack falling (-1 none)
+    u8 tireFrames;
+} sVeil;
+
+static const s8 sVeilDir[4][2] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+
+static u8 VeilFromDir(u8 direction)
+{
+    return direction == DIR_NORTH ? 0 : direction == DIR_SOUTH ? 1 : direction == DIR_WEST ? 2 : 3;
+}
+
+static s32 VeilBagAt(s32 x, s32 y)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sVeilstoneBags); i++)
+        if (sVeil.x[i] == x && sVeil.y[i] == y)
+            return i;
+    return -1;
+}
+
+static s32 VeilTireAt(s32 x, s32 y)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sVeilstoneTires); i++)
+        if (((sVeil.tires >> i) & 1) && sVeilstoneTires[i][0] == x && sVeilstoneTires[i][1] == y)
+            return i;
+    return -1;
+}
+
+static u8 VeilTrack(s32 x, s32 y)
+{
+    return (x < 0 || y < 0 || x >= 32 || y >= 32) ? 1 : sVeilstoneTrack[y][x] - '0';
+}
+
+// Platinum's flags for a bag on X, Y going D: 1 it can't, 2 a stack ahead, 4 it stops here
+static u8 VeilFlags(s32 x, s32 y, u8 d)
+{
+    u8 b = VeilTrack(x, y), f = 0;
+    if (b == 4)
+        f |= 4;
+    else if ((b == 2 && d < 2) || (b == 3 && d >= 2) || (b == 5 && d == 2))
+        f |= 1;
+    if (VeilTrack(x + sVeilDir[d][0], y + sVeilDir[d][1]) == 1)
+        f |= 1;
+    if (VeilTireAt(x + sVeilDir[d][0], y + sVeilDir[d][1]) >= 0)
+        f |= 2;
+    return f;
+}
+
+static u8 VeilDistance(s32 x, s32 y, u8 d)
+{
+    u8 f = VeilFlags(x, y, d), n = 0;
+    if (f != 0 && f != 4)
+        return 0;
+    do
+    {
+        x += sVeilDir[d][0], y += sVeilDir[d][1];
+        n++;
+        f = VeilFlags(x, y, d);
+    } while (f == 0 && n < 32);
+    return n;
+}
+
+static float VeilFloor(s32 x, s32 y)
+{
+    float h = S3D_TileFloor(x, y, 0);
+    return (h == h ? h : 0) + 6;   // (Platinum's: a little over the floor)
+}
+
+// A bag hanging from its top, leaning LEAN degrees the way D (its bottom swung that way)
+static void VeilBagProp(u32 i, float px, float pz, u8 d, float lean)
+{
+    float top = VeilFloor(sVeil.x[i], sVeil.y[i]) + VEIL_BAG_TOP, a = lean * 3.14159265f / 180.0f;
+    float ox = 0, oz = 0, tilt, turn;
+    if (d < 2)   // (north / south: the lean is about the east-west axis)
+        turn = 0, tilt = d == 0 ? lean : -lean, oz = (d == 0 ? -1 : 1) * VEIL_BAG_TOP * sinf(a);
+    else
+        turn = 90, tilt = d == 2 ? lean : -lean, ox = (d == 2 ? -1 : 1) * VEIL_BAG_TOP * sinf(a);
+    S3D_DynPropTurned(i, S3D_MODEL_VEILSTONE_GYM_SANDBAG, px + ox, top - VEIL_BAG_TOP * cosf(a), pz + oz, tilt, turn);
+}
+
+static void VeilProps(void)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sVeilstoneBags); i++)
+    {
+        float px = sG.ox + sVeil.x[i] * 16 + 8, pz = sG.oz + sVeil.y[i] * 16 + 8;
+        if ((s32)i == sVeil.bag)
+            VeilBagProp(i, px + sVeilDir[sVeil.d][0] * sVeil.off, pz + sVeilDir[sVeil.d][1] * sVeil.off, sVeil.d, sVeil.swing);
+        else
+            VeilBagProp(i, px, pz, 0, 0);
+    }
+    for (i = 0; i < ARRAY_COUNT(sVeilstoneTires); i++)
+    {
+        u8 x = sVeilstoneTires[i][0], y = sVeilstoneTires[i][1];
+        if ((s32)i == sVeil.tire)
+        {
+            // (falling over the way the bag came: tipped about its base, then gone)
+            float t = sVeil.tireFrames * 90.0f / 12.0f, sink = sVeil.tireFrames > 12 ? (sVeil.tireFrames - 12) * 2.0f : 0;
+            u8 d = sVeil.d;
+            S3D_DynPropTurned(VEIL_SLOT_TIRE + i, S3D_MODEL_VEILSTONE_GYM_TIRE_STACK, sG.ox + x * 16 + 8,
+                              VeilFloor(x, y) - 6 - sink, sG.oz + y * 16 + 8, d == 0 || d == 3 ? -fminf(t, 90) : fminf(t, 90),
+                              d < 2 ? 0 : 90);
+        }
+        else if ((sVeil.tires >> i) & 1)
+            S3D_DynProp(VEIL_SLOT_TIRE + i, S3D_MODEL_VEILSTONE_GYM_TIRE_STACK, sG.ox + x * 16 + 8, VeilFloor(x, y) - 6,
+                        sG.oz + y * 16 + 8, 0);
+        else
+            S3D_DynPropHide(VEIL_SLOT_TIRE + i);
+    }
+}
+
+static void VeilLoad(u16 map)
+{
+    u32 i;
+    if (sVeil.lastMap != map)
+    {
+        // (in from somewhere else: everything back where Platinum puts it)
+        for (i = 0; i < ARRAY_COUNT(sVeilstoneBags); i++)
+            sVeil.x[i] = sVeilstoneBags[i][0], sVeil.y[i] = sVeilstoneBags[i][1];
+        sVeil.tires = (1 << ARRAY_COUNT(sVeilstoneTires)) - 1;
+    }
+    sVeil.lastMap = map;
+    sVeil.bag = sVeil.tire = -1;
+    VeilProps();
+}
+
+static bool8 VeilBlocked(s32 x, s32 y)
+{
+    return VeilBagAt(x, y) >= 0 || VeilTireAt(x, y) >= 0;
+}
+
+static void Task_VeilBag(u8 taskId)
+{
+    s32 i = sVeil.bag;
+    u8 d = sVeil.d;
+    sVeil.frames++;
+    if (sVeil.moving == 0)
+    {
+        // (hit where it can't go: it swings and comes back)
+        sVeil.swing = 14.0f * sinf(sVeil.frames * 0.35f) * expf(-sVeil.frames / 14.0f);
+        if (sVeil.frames >= 40)
+            goto done;
+    }
+    else if (sVeil.moving == 1)
+    {
+        // (Platinum's slide: slow for half a second, then faster up to 2 units a frame; a stop on each tile it reaches)
+        if (sVeil.frames < 30)
+            sVeil.speed += 1.0f / 60;
+        else if (sVeil.frames < 36)
+        {
+            if (sVeil.speed < 1)
+                sVeil.speed += sVeil.speed;
+        }
+        else if (sVeil.speed < 2)
+            sVeil.speed = 2;
+        if (sVeil.frames == 30)
+            PlaySE(SE_M_STRENGTH);
+        sVeil.off += sVeil.speed;
+        sVeil.swing = -fminf(sVeil.frames, 12) * 1.5f;   // (the bottom trails)
+        if ((u8)(sVeil.off / 16) > sVeil.tiles)
+        {
+            u8 f;
+            sVeil.tiles++;
+            sVeil.x[i] += sVeilDir[d][0], sVeil.y[i] += sVeilDir[d][1];
+            sVeil.off -= 16;
+            f = VeilFlags(sVeil.x[i], sVeil.y[i], d);
+            if (f)
+            {
+                sVeil.off = 0;
+                sVeil.moving = 2;
+                sVeil.frames = 0;
+                m4aSongNumStop(SE_M_STRENGTH);
+                PlaySE(SE_M_MEGA_KICK);
+                if (f & 2)
+                {
+                    sVeil.tire = VeilTireAt(sVeil.x[i] + sVeilDir[d][0], sVeil.y[i] + sVeilDir[d][1]);
+                    sVeil.tireFrames = 0;
+                    PlaySE(SE_M_ROCK_THROW);
+                }
+            }
+        }
+    }
+    else
+    {
+        // (stopped: the bag swings on, a stack in its way falls)
+        sVeil.swing = 16.0f * sinf(sVeil.frames * 0.35f) * expf(-sVeil.frames / 12.0f);
+        if (sVeil.tire >= 0 && ++sVeil.tireFrames > 20)
+        {
+            sVeil.tires &= ~(1 << sVeil.tire);
+            MPNet_Log("gym: VEILSTONE's stack %d knocked over", sVeil.tire);
+            sVeil.tire = -1;
+        }
+        if (sVeil.frames >= 36 && sVeil.tire < 0)
+            goto done;
+    }
+    VeilProps();
+    return;
+done:
+    MPNet_Log("gym: VEILSTONE's bag %d at %d,%d", i, sVeil.x[i], sVeil.y[i]);
+    sVeil.bag = -1;
+    sVeil.swing = 0;
+    VeilProps();
+    DestroyTask(taskId);
+    ScriptContext_Enable();
+}
+
+// The player walks into a bag: it's hit (the script waits for it: Sinnoh_EventScript_VeilstoneBag)
+bool8 S3D_Gyms_PushAt(s16 x, s16 y, u8 direction)
+{
+    s32 i;
+    if (sG.gym != GYM_VEILSTONE || sVeil.bag >= 0 || !MP_IsLocalFree())
+        return FALSE;
+    i = VeilBagAt(x - MAP_OFFSET, y - MAP_OFFSET);
+    if (i < 0)
+        return FALSE;
+    {
+        extern const u8 Sinnoh_EventScript_VeilstoneBag[];
+        gSpecialVar_0x8004 = i;
+        gSpecialVar_0x8005 = VeilFromDir(direction);
+        ScriptContext_SetupScript(Sinnoh_EventScript_VeilstoneBag);
+    }
+    return TRUE;
+}
+
+u16 Sinnoh_VeilstoneBag(void)
+{
+    struct ObjectEvent *player = &gObjectEvents[gPlayerAvatar.objectEventId];
+    u8 d = gSpecialVar_0x8005;
+    if (sG.gym != GYM_VEILSTONE || gSpecialVar_0x8004 >= ARRAY_COUNT(sVeilstoneBags))
+    {
+        ScriptContext_Enable();
+        return 0;
+    }
+    sVeil.bag = gSpecialVar_0x8004, sVeil.d = d;
+    sVeil.off = sVeil.swing = 0, sVeil.speed = 1.0f / 60, sVeil.frames = 0, sVeil.tiles = 0;
+    sVeil.moving = VeilDistance(sVeil.x[sVeil.bag], sVeil.y[sVeil.bag], d) ? 1 : 0;
+    sVeil.tire = -1;
+    ObjectEventClearHeldMovementIfFinished(player);
+    ObjectEventSetHeldMovement(player, (sVeil.moving ? GetWalkInPlaceSlowMovementAction : GetWalkInPlaceFastMovementAction)(
+        d == 0 ? DIR_NORTH : d == 1 ? DIR_SOUTH : d == 2 ? DIR_WEST : DIR_EAST));
+    PlaySE(SE_M_COMET_PUNCH);
+    CreateTask(Task_VeilBag, 80);
+    return 0;
+}
+
 // ------------------------------------------------------------------------------------------------------ all gyms
 void S3D_Gyms_MapLoaded(void)
 {
@@ -678,6 +940,13 @@ void S3D_Gyms_MapLoaded(void)
         sG.gym = GYM_ETERNA;
         EternaLoad();
     }
+    else if (map == MAP_SINNOH_VEILSTONE_CITY_GYM)
+    {
+        sG.gym = GYM_VEILSTONE;
+        VeilLoad(map);
+    }
+    if (sG.gym != GYM_VEILSTONE)
+        sVeil.lastMap = map;
     if (sG.gym == GYM_PASTORIA || sG.gym == GYM_CANALAVE)
         gS3dHeightHook = HeightHook;
 }
@@ -755,6 +1024,9 @@ bool8 S3D_Gyms_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY)
     case GYM_ETERNA:
         blocked = EternaBlocked(toX - MAP_OFFSET, toY - MAP_OFFSET);
         break;
+    case GYM_VEILSTONE:
+        blocked = VeilBlocked(toX - MAP_OFFSET, toY - MAP_OFFSET);
+        break;
     }
     if (getenv("MOEMON_GYM_TRACE"))
         printf("[gym] step %d,%d -> %d,%d: %s (player at %.0f)\n", fromX - MAP_OFFSET, fromY - MAP_OFFSET, toX - MAP_OFFSET,
@@ -778,6 +1050,14 @@ void S3D_Gyms_Debug(const char *arg)
 {
     printf("[test] gym %d: water %.0f (level %d) room %d turn %d floor %d moved %06X clock %d\n", sG.gym, sG.water,
            PastoriaLevel(), sG.room + 1, SunyshoreTurn(), CanalaveFloor(), CanalaveMoved(), sG.clockShown);
+    if (sG.gym == GYM_VEILSTONE)
+    {
+        char line[256];
+        u32 i, n = 0;
+        for (i = 0; i < ARRAY_COUNT(sVeilstoneBags); i++)
+            n += snprintf(line + n, sizeof(line) - n, " %d,%d", sVeil.x[i], sVeil.y[i]);
+        printf("[test] VEILSTONE bags%s stacks %03X\n", line, sVeil.tires);
+    }
     if (sG.gym == GYM_PASTORIA && strcmp(arg, "solve") == 0)
     {
         static u8 sSeen[3][64][32];

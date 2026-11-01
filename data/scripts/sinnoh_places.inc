@@ -312,3 +312,11 @@ Sinnoh_EventScript_EternaClock::
 	waitstate
 	releaseall
 	end
+
+@ VEILSTONE's gym: a punching bag hit (src/sinnoh/s3d_gyms.c Sinnoh_VeilstoneBag)
+Sinnoh_EventScript_VeilstoneBag::
+	lockall
+	special Sinnoh_VeilstoneBag
+	waitstate
+	releaseall
+	end

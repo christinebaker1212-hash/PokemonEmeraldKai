@@ -40,6 +40,7 @@ void S3D_Gyms_MapLoaded(void);                    // a map's grid is (re)built: 
 void S3D_Gyms_Update(void);                       // every overworld frame
 bool8 S3D_Gyms_SeesPlayer(u8 localId);            // a gym's trainer can see the player (same floor)
 bool8 S3D_Gyms_JumpAt(s16 x, s16 y, u8 direction);   // a step there jumps (ETERNA's hour hand; map coords + 7)
+bool8 S3D_Gyms_PushAt(s16 x, s16 y, u8 direction);   // walking into it hits it (VEILSTONE's bags; map coords + 7)
 bool8 S3D_Gyms_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY);   // a gym's own rules for a step (map coords + 7)
 float S3D_PlayerHeight(void);                    // the ground height the player stands at (NaN: unknown)
 float S3D_TileFloor(s32 mapX, s32 mapY, float near);   // the block's ground height on a map tile nearest NEAR (NaN: none)

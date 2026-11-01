@@ -710,6 +710,8 @@ u8 CheckForObjectEventCollision(struct ObjectEvent *objectEvent, s16 x, s16 y, u
     }
     if (collision == COLLISION_OBJECT_EVENT && TryPushBoulder(x, y, direction))
         return COLLISION_PUSHED_BOULDER;
+    if (objectEvent->isPlayer && S3D_Gyms_PushAt(x, y, direction))
+        return COLLISION_PUSHED_BOULDER;   // Moemon Kai: VEILSTONE's punching bags (src/sinnoh/s3d_gyms.c)
 
     if (collision == COLLISION_NONE)
     {

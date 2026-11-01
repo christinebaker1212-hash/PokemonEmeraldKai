@@ -1,0 +1,20 @@
+pressuntil A field 5000
+wait 30
+mp warp 44,45,7,7
+wait 90
+waitfor field 1000
+mp gym
+shot t_bag0
+press RIGHT 24
+wait 40
+shot t_bag1
+wait 30
+shot t_bag2
+waitfor field 1000
+wait 30
+mp gym
+shot t_bag3
+press DOWN 30
+wait 10
+mp gym
+quit
