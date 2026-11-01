@@ -62,7 +62,7 @@ struct DisplayConfig
 };
 
 static struct DisplayConfig sCfg = {
-    0, 3, DISPLAY_SCALE_SHARP_FIT, DISPLAY_FILTER_OFF, 1, 0, 0, POS_UNSET, POS_UNSET, 0
+    0, 3, DISPLAY_SCALE_SHARP_FIT, DISPLAY_FILTER_MATCH, 1, 0, 0, POS_UNSET, POS_UNSET, 0
 };
 static char sConfigPath[1024] = CONFIG_NAME;
 static int sPersist = 1;         // 0 in test mode without $MOEMON_DISPLAY_CONFIG
@@ -113,7 +113,8 @@ static void DestroyPopout(struct Popout *p);
 static void DestroyAllPopouts(void);
 
 static const char *const sScaleNames[DISPLAY_SCALE_COUNT] = {"pixel_perfect", "sharp_fit", "stretch"};
-static const char *const sFilterNames[DISPLAY_FILTER_COUNT] = {"off", "scanlines", "lcd_grid"};
+static const char *const sFilterNames[DISPLAY_FILTER_COUNT] = {"off", "scanlines", "lcd_grid", "gba_grid", "gba_sp_grid",
+                                                              "gba_sp101_grid", "nds_grid", "match"};
 static const char *const sColorNames[DISPLAY_COLOR_COUNT] = {"default", "gba_corrected", "gba_sp", "gba_sp101", "nds"};
 
 static int Clamp(int v, int lo, int hi)
@@ -168,6 +169,7 @@ static int ParsePos(const char *v)
 static void LoadConfig(void)
 {
     char line[256];
+    int hadColor = 0;
     FILE *f = fopen(sConfigPath, "r");
     if (f == NULL)
         return;
@@ -189,7 +191,7 @@ static void LoadConfig(void)
         else if (strcmp(key, "scaling") == 0)          sCfg.scaleMode = ParseEnum(val, sScaleNames, DISPLAY_SCALE_COUNT, sCfg.scaleMode);
         else if (strcmp(key, "filter") == 0)           sCfg.filter = ParseEnum(val, sFilterNames, DISPLAY_FILTER_COUNT, sCfg.filter);
         else if (strcmp(key, "vsync") == 0)            sCfg.vsync = ParseBool(val);
-        else if (strcmp(key, "color") == 0)            sCfg.color = ParseEnum(val, sColorNames, DISPLAY_COLOR_COUNT, sCfg.color);
+        else if (strcmp(key, "color") == 0)            sCfg.color = ParseEnum(val, sColorNames, DISPLAY_COLOR_COUNT, sCfg.color), hadColor = 1;
         else if (strcmp(key, "window_width") == 0)     sCfg.winW = atoi(val);
         else if (strcmp(key, "window_height") == 0)    sCfg.winH = atoi(val);
         else if (strcmp(key, "window_x") == 0)         sCfg.winX = ParsePos(val);
@@ -197,6 +199,21 @@ static void LoadConfig(void)
         else if (strcmp(key, "window_maximized") == 0) sCfg.maximized = ParseBool(val);
     }
     fclose(f);
+    // a file from before COLOR (1.63.14) wrote filter = off as its default: MATCH now (the same look until COLOR is set)
+    if (!hadColor && sCfg.filter == DISPLAY_FILTER_OFF)
+        sCfg.filter = DISPLAY_FILTER_MATCH;
+}
+
+// The filter drawn: MATCH is the COLOR's own screen grid (DEFAULT: none)
+static int ShownFilter(void)
+{
+    static const unsigned char sGridOf[DISPLAY_COLOR_COUNT] = {
+        DISPLAY_FILTER_OFF, DISPLAY_FILTER_GRID_GBA, DISPLAY_FILTER_GRID_GBA_SP, DISPLAY_FILTER_GRID_GBA_SP101,
+        DISPLAY_FILTER_GRID_NDS,
+    };
+    if (sCfg.filter != DISPLAY_FILTER_MATCH)
+        return sCfg.filter;
+    return sCfg.color >= 0 && sCfg.color < DISPLAY_COLOR_COUNT ? sGridOf[sCfg.color] : DISPLAY_FILTER_OFF;
 }
 
 static void WriteConfig(void)
@@ -581,17 +598,25 @@ static void FilterMask(int filter, int px, int kx, int py, int ky, Uint8 out[3])
             for (c = 0; c < 3; c++)
                 m[c] = (px * 3 / kx) % 3 == c ? 1.0f : 0.86f;
     }
-    else if (filter == DISPLAY_FILTER_LCD_GRID)
+    else if (filter >= DISPLAY_FILTER_LCD_GRID && filter <= DISPLAY_FILTER_GRID_NDS)
     {
+        // each screen's grid: its cell edge, the next line in (from 8), its sub-pixel stripes (the original GBA's dark
+        // grid the plainest to see, the backlit SP 101's the finest)
+        static const float sGrid[][3] = {
+            [DISPLAY_FILTER_LCD_GRID] = {0.70f, 0.88f, 0.80f},       [DISPLAY_FILTER_GRID_GBA] = {0.58f, 0.82f, 0.78f},
+            [DISPLAY_FILTER_GRID_GBA_SP] = {0.66f, 0.86f, 0.80f},    [DISPLAY_FILTER_GRID_GBA_SP101] = {0.84f, 0.94f, 0.88f},
+            [DISPLAY_FILTER_GRID_NDS] = {0.76f, 0.90f, 0.84f},
+        };
+        const float *g = sGrid[filter];
         float gx = 1, gy = 1;
         if (kx >= 3)
         {
-            gx = px == kx - 1 ? 0.70f : kx >= 8 && px == kx - 2 ? 0.88f : 1.0f;
+            gx = px == kx - 1 ? g[0] : kx >= 8 && px == kx - 2 ? g[1] : 1.0f;
             for (c = 0; c < 3; c++)
-                m[c] = (px * 3 / kx) % 3 == c ? 1.0f : 0.80f;
+                m[c] = (px * 3 / kx) % 3 == c ? 1.0f : g[2];
         }
         if (ky >= 3)
-            gy = py == ky - 1 ? 0.70f : ky >= 8 && py == ky - 2 ? 0.88f : 1.0f;
+            gy = py == ky - 1 ? g[0] : ky >= 8 && py == ky - 2 ? g[1] : 1.0f;
         row = gx < gy ? gx : gy;
     }
     for (c = 0; c < 3; c++)
@@ -604,7 +629,7 @@ static int EnsureOverlay(int kx, int ky, int srcW, int srcH)
     int w = srcW * kx, h = srcH * ky, x, y;
     Uint32 *pixels;
 
-    if (sOverlayTex && sOverlayKx == kx && sOverlayKy == ky && sOverlayFilter == sCfg.filter && sOverlaySrcW == srcW &&
+    if (sOverlayTex && sOverlayKx == kx && sOverlayKy == ky && sOverlayFilter == ShownFilter() && sOverlaySrcW == srcW &&
         sOverlaySrcH == srcH)
         return 1;
     if (sOverlayTex)
@@ -622,7 +647,7 @@ static int EnsureOverlay(int kx, int ky, int srcW, int srcH)
         for (x = 0; x < w; x++)
         {
             Uint8 mk[3];
-            FilterMask(sCfg.filter, x % kx, kx, y % ky, ky, mk);
+            FilterMask(ShownFilter(), x % kx, kx, y % ky, ky, mk);
             row[x] = 0xFF000000u | (Uint32)mk[0] << 16 | (Uint32)mk[1] << 8 | mk[2];   // (ARGB8888, multiplied in)
         }
     }
@@ -633,7 +658,7 @@ static int EnsureOverlay(int kx, int ky, int srcW, int srcH)
         SDL_SetTextureBlendMode(sOverlayTex, SDL_BLENDMODE_MOD);
         sOverlayKx = kx;
         sOverlayKy = ky;
-        sOverlayFilter = sCfg.filter;
+        sOverlayFilter = ShownFilter();
         sOverlaySrcW = srcW;
         sOverlaySrcH = srcH;
     }
@@ -1407,10 +1432,10 @@ static void RenderToBackbuffer(void)
     }
 
     // Filters need a few screen pixels per game pixel to look right.
-    if (sCfg.filter == DISPLAY_FILTER_OFF)
+    if (ShownFilter() == DISPLAY_FILTER_OFF)
         filterOn = 0;
     else if (exact)
-        filterOn = (sCfg.filter == DISPLAY_FILTER_SCANLINES) ? (ky >= 2) : (kx >= 3 && ky >= 3);
+        filterOn = (ShownFilter() == DISPLAY_FILTER_SCANLINES) ? (ky >= 2) : (kx >= 3 && ky >= 3);
     else
         filterOn = (dst.w >= srcW * 3 && dst.h >= srcH * 3);
     if (filterOn)

@@ -23,4 +23,18 @@ display color 4
 wait 6
 shot b4
 rendershot c4
+display color 1
+display filter 7
+wait 6
+shot g1
+rendershot m1
+display color 4
+wait 6
+shot g2
+rendershot m2
+display color 1
+display filter 6
+wait 6
+shot g3
+rendershot m3
 quit

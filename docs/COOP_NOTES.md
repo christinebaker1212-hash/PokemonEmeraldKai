@@ -3487,6 +3487,10 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   unlit GBA; GBA SP: the same profile without it). A 32768-entry table turns each frame into sColorTex (ARGB8888);
   card screens and spectating keep using the game's own texture. Config `color` in moemon_display.ini; `display
   color N` in the harness. Test display_color (each mode exact against check.py's own working).
+- Screen grids per handheld (the user: matching the COLOR by default, mixed as liked): FILTER GBA / GBA SP / SP 101 / NDS
+  GRID (display.c FilterMask's sGrid: cell edge, the next line in from 8, sub-pixel stripes) and MATCH (ShownFilter:
+  the COLOR's own grid, DEFAULT none), the default; a moemon_display.ini from before COLOR (no `color` line) loads
+  `filter = off` as MATCH. display_color checks MATCH and a mixed pair pixel for pixel.
 - FILTER redone (the user: better than cheap lines): display.c FilterMask, a multiply mask (SDL_BLENDMODE_MOD) per
   screen pixel of a picture pixel: SCANLINES a beam's soft rows (0.38-1.0, brightest a little above the middle) and
   from 3 columns a grille (other channels 0.86); LCD GRID sub-pixel stripes (0.80) and soft cell edges (0.70, the

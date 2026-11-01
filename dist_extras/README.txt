@@ -1097,9 +1097,12 @@ DISPLAY   the window, then how the field looks (FOLLOWERS, SPRITE SCALING,
                 STRETCH (fills the screen exactly). The GAME CENTER's games
                 follow it too: their own 4:3 picture, with black beside it,
                 or at STRETCH filling the whole screen.
-  FILTER        OFF, SCANLINES (a CRT's soft beam rows, and from 3x its
-                red / green / blue grille), LCD GRID (a handheld screen's
-                cells with red / green / blue sub-pixel stripes)
+  FILTER        MATCH COLOR (the first time: the screen grid of the COLOR
+                you chose, none for DEFAULT), OFF, SCANLINES (a CRT's soft
+                beam rows, and from 3x its red / green / blue grille), LCD
+                GRID (cells with red / green / blue sub-pixel stripes), or
+                one handheld's own grid with any COLOR: GBA GRID (the
+                plainest), GBA SP GRID, SP 101 GRID (the finest), NDS GRID
   COLOR         the game's colors as a handheld screen showed them:
                 DEFAULT, GBA CORRECTED (the first GBA's unlit screen),
                 GBA SP, GBA SP 101 (the backlit one) or NDS. The color

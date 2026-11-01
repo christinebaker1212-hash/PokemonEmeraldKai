@@ -267,8 +267,6 @@ static const u8 sText_CreaturesPokemon[] = _("POKéMON");
 static const u8 sText_PixelPerfect[] = _("PIXEL PERFECT");
 static const u8 sText_SharpFit[] = _("SHARP FIT");
 static const u8 sText_Stretch[] = _("STRETCH");
-static const u8 sText_Scanlines[] = _("SCANLINES");
-static const u8 sText_LcdGrid[] = _("LCD GRID");
 static const u8 sText_All[] = _("ALL");
 static const u8 sText_PressAButton[] = _("PRESS A BUTTON");
 static const u8 sText_ABottom[] = _("A = BOTTOM");
@@ -546,9 +544,6 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
     case OPT_SCALING:
         names[0] = sText_PixelPerfect, names[1] = sText_SharpFit, names[2] = sText_Stretch;
         return 3;
-    case OPT_FILTER:
-        names[0] = sText_Off, names[1] = sText_Scanlines, names[2] = sText_LcdGrid;
-        return 3;
     case OPT_FR_PLACE:
         {
             u8 i;
@@ -684,6 +679,13 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
             MP_AsciiToGame(buf, ascii, 12);
         }
         break;
+    case OPT_FILTER:
+        {
+            static const char *const names[DISPLAY_FILTER_COUNT] = {"OFF", "SCANLINES", "LCD GRID", "GBA GRID",
+                                                                     "GBA SP GRID", "SP 101 GRID", "NDS GRID", "MATCH COLOR"};
+            MP_AsciiToGame(buf, names[Display_GetFilter() % DISPLAY_FILTER_COUNT], 16);
+        }
+        break;
     case OPT_COLOR:
         {
             static const char *const names[DISPLAY_COLOR_COUNT] = {"DEFAULT", "GBA CORRECTED", "GBA SP", "GBA SP 101", "NDS"};
@@ -727,7 +729,7 @@ static u8 Current(u8 row)
     case OPT_CREATURES:   return gSaveBlock2Ptr->optionsPokemonArt != 0;
     case OPT_FULLSCREEN:  return Display_GetFullscreen() != 0;
     case OPT_SCALING:     return Display_GetScaleMode();
-    case OPT_FILTER:      return Display_GetFilter();
+    case OPT_FILTER:      return 0;   // (one value shown: 1.63.14, eight of them)
     case OPT_COLOR:       return 0;   // (one value shown)
     case OPT_VSYNC:       return Display_GetVSync() != 0;
     case OPT_CARDART:     return gMpConfig.cardArt % MP_CARD_ART_COUNT;
@@ -1074,6 +1076,11 @@ static void DrawHint(void)
             "THE GAME'S OWN COLORS", "AS THE FIRST GBA'S UNLIT SCREEN", "AS THE GBA SP'S FRONT-LIT SCREEN",
             "AS THE BACKLIT GBA SP (AGS-101)", "AS A NINTENDO DS SCREEN"};
         snprintf(ascii, sizeof(ascii), "%s", hints[Display_GetColor() % DISPLAY_COLOR_COUNT]);
+    }
+    else if (opt == OPT_FILTER && Display_GetFilter() == DISPLAY_FILTER_MATCH)
+    {
+        static const char *const grids[DISPLAY_COLOR_COUNT] = {"NONE", "GBA", "GBA SP", "SP 101", "NDS"};
+        snprintf(ascii, sizeof(ascii), "THE COLOR'S OWN SCREEN GRID: %s", grids[Display_GetColor() % DISPLAY_COLOR_COUNT]);
     }
     else if (opt == OPT_FILTER && Display_GetFilter() != DISPLAY_FILTER_OFF && !Display_IsFilterShown())
         snprintf(ascii, sizeof(ascii), "WINDOW TOO SMALL FOR THE FILTER");

@@ -1,6 +1,8 @@
 # OPTIONS > DISPLAY > COLOR (1.63.14): the game picture in each handheld's colors (display.c BuildColorLut: Pokefan531's
 # color-correction profiles). The window at exactly 3x (PIXEL PERFECT, nearest) against check.py's own working of each
 # profile over the game's frame of the same moment (shots b0-b4): DEFAULT the frame as it is, GBA CORRECTED, GBA SP, GBA SP 101, NDS.
+# Then FILTER: MATCH draws the COLOR's own screen grid (GBA CORRECTED: the GBA's, NDS: the NDS's), and an NDS grid goes
+# with GBA CORRECTED too (mix and match): each against the profile times the grid's mask (shots g1-g3 / m1-m3).
 MODE=1
 WARP=0,0,10,12
 TMO=60

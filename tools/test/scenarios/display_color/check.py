@@ -37,6 +37,30 @@ def main(d):
         ok = err.max() <= 3
         print('color %d: worst %d, mean %.2f %s' % (i, err.max(), err.mean(), 'ok' if ok else 'BAD'))
         bad += not ok
+    # the screen grids at 3x (display.c FilterMask): MATCH takes the COLOR's own, and any grid goes with any COLOR
+    GRIDS = {'gba': (0.58, 0.82, 0.78), 'nds': (0.76, 0.90, 0.84)}
+    for name, color, grid in (('m1', 1, 'gba'), ('m2', 4, 'nds'), ('m3', 1, 'nds')):
+        base = load(os.path.join(d, 'g' + name[1] + '.png'))
+        k = base.shape[1] // 240
+        five = np.round(base[::k, ::k] * 31 / 255)
+        m, lum, dark = PROFILES[color]
+        out = np.clip(np.einsum('ij,yxj->yxi', np.array(m), (five / 31) ** 2.2) * lum, 0, 1)
+        ref = np.floor(out ** (1 / 2.2 + dark / 4.84) * 255 + 0.5).repeat(3, 0).repeat(3, 1)
+        g = GRIDS[grid]
+        cell = np.ones((3, 3, 3))
+        for y in range(3):
+            for x in range(3):
+                row = min(g[0] if x == 2 else 1.0, g[0] if y == 2 else 1.0)
+                for ch in range(3):
+                    cell[y, x, ch] = int(np.float32(1.0 if x == ch else g[2]) * np.float32(row) * np.float32(255) + np.float32(0.5))
+        ref = np.floor(ref * np.tile(cell, (160, 240, 1)) / 255)
+        win = load(os.path.join(d, name + '.png'))
+        win = win[::win.shape[1] // 720, ::win.shape[1] // 720]
+        err = np.abs(win - ref)
+        ok = np.percentile(err, 99.9) <= 2
+        print('%s (color %d, %s grid): 99.9%% %.1f, mean %.2f %s' % (name, color, grid, np.percentile(err, 99.9), err.mean(),
+                                                                     'ok' if ok else 'BAD'))
+        bad += not ok
     # the profiles really differ from the frame and from each other
     shots = [load(os.path.join(d, 'c%d.png' % i)) for i in range(5)]
     for i in range(5):
