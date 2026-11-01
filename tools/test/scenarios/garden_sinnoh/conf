@@ -1,0 +1,7 @@
+# The MOéMON GARDEN from SINNOH (as from JOHTO: garden_johto): quick travel from ROUTE 202 goes there with the player
+# still in SINNOH, and the Garden's escalator leads back to where they left from. Needs both packs.
+MODE=1
+TMO=180
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("garden: quick travel there" "where map 0.57" "where map 40.20 xy 6,30" "region 3 " "ctx 1 free 1")
+UNEXPECT_A=("[crash]" "region 0 " "stuck")

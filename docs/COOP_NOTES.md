@@ -3443,6 +3443,11 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   look (the card games' who-plays-what, tcg_field.c Tcg_LookGfx and sPicOfGfx) reads a Platinum sprite as its stand-in;
   a trainer's card challenge screen shows Platinum's picture cut to 64x64 (S3D_Gfx_TrainerPicPixels; test
   sinnoh_card_pic).
+- Kai's own features in SINNOH: achievements (mp_achieve.c C_SINNOH: arriving, each badge, all eight, CHAMPION, the
+  lake trio, GIRATINA, DIALGA and PALKIA, HEATRAN, REGIGIGAS, CRESSELIA, ARCEUS; WORLD TOUR / GRAND CHAMPION for all
+  four regions: AK_STARTED / AK_CLEARED arg 0xFF; test ach_sinnoh); the MOéMON GARDEN by quick travel as from JOHTO
+  (its escalator back to where the player left: test garden_sinnoh); co-op gyms (sinnoh_coop_gym), followers and
+  their SPRITE SCALING, MoeGatcha (region-free) as everywhere.
 - Legendaries on the map (tools/sinnoh/legends.py before gen_maps.py; src/sinnoh/s3d_legends.c): Platinum's standing
   ones where it stands them, with Emerald's static encounter script each (data/scripts/sinnoh_legends.inc) and a
   "done" flag 0x3D00 + n (caught or beaten). Their maps' OnTransition (special Sinnoh_LegendsRefresh) shows one unless
