@@ -682,8 +682,8 @@ INDOOR = {
         'Person3': "The cycling road is downhill all the way south! Wheee!",
     },
     'Sinnoh_BattleTower': {
-        'Person1': "Welcome to the BATTLE TOWER. Challenges open soon. Please come back!",
-        'Person2': "Welcome to the BATTLE TOWER. Challenges with a partner open soon!",
+        'Person1': ('script', 'Sinnoh_BattleTower_EventScript_Singles'),   # (the single battles: its map's scripts)
+        'Person2': "Welcome to the BATTLE TOWER. Battles with a partner aren't open yet. The single battle counter is!",
         'Person5': "I'm sketching the TRAINERS who come here. The tower inspires them.",
         'Person6': "I run here every morning to get ready for my challenge!",
         'Person7': "I'm here to cheer on my favorite TRAINERS! Go go go!",

@@ -2029,6 +2029,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d,%d", &x, &y);
         MP_Poketch_DebugTap(x, y);
     }
+    else if (strcmp(cmd, "tower") == 0)
+    {
+        // tower - the BATTLE TOWER's single battle streaks (level 50, open) and the BATTLE POINTS
+        printf("[test] tower: streak %d / streak %d, bp %d\n", gSaveBlock2Ptr->frontier.towerWinStreaks[0][0],
+               gSaveBlock2Ptr->frontier.towerWinStreaks[0][1], gSaveBlock2Ptr->frontier.battlePoints);
+    }
     else if (strcmp(cmd, "radar") == 0)
     {
         // radar [shiny|charge] - the POKé RADAR: its patches and chain, or the next patches sparkling, or a full battery

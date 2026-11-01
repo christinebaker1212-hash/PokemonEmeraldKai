@@ -3601,6 +3601,14 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   VEILSTONE's southeast house (a gift). The PRIZE EXCHANGE trades COINS for Platinum's 19 prizes at half its prices
   (the COIN CASE holds 9999: TM68 at that) in a scrolling list (src/sinnoh/s3d_places.c Sinnoh_PrizeMenu, the
   dynamic scroll multichoice). Tests sinnoh_slots, sinnoh_prizes.
+- The SINNOH BATTLE TOWER (2026-11-01): its single battle counter runs Emerald's tower (tower_init, tower_setopponent,
+  BattleFrontier_BattleTowerBattleRoom_EventScript_DoTowerBattle, frontier_givepoints...: the same records, streaks and
+  BATTLE POINTS as HOENN's tower) in Platinum's rooms: data/maps/Sinnoh_BattleTower (the counter, the ON_FRAME
+  won / lost / quit handling) and Sinnoh_BattleTowerBattleRoom (the player walks in, the opponent from the back door,
+  Platinum's paths; healed and asked between battles). gen_maps.py OVERRIDES makes the room's opponent Emerald's
+  (OBJ_EVENT_GFX_VAR_0, FLAG_HIDE_BATTLE_TOWER_OPPONENT) and hides Platinum's stand-in for the player. Not here: the
+  partner counter, PALMER (Emerald's brain logic isn't asked), the other four buildings (Platinum's own kinds of
+  battle). `mp tower`; test sinnoh_tower (7 wins with `mp battlerhp`).
 - The POKé RADAR (2026-11-01, src/mp/mp_pokeradar.c; ITEM_POKE_RADAR 661, ITEMS_COUNT 662, the DEVON SCOPE's icon):
   SANDGEM LAB's aide gives it after the LEAGUE (flag 0x3D33). It works in any region's tall grass, not on a bike or in
   the water, with a 50-step battery: up to four patches, one at each distance 1-4, rustle (Emerald's tall grass field

@@ -136,6 +136,16 @@ EXTRA_PEOPLE = {
 }
 
 
+# Platinum's people changed for this game's scripts: {map: {Platinum's object number: fields}}. The SINNOH BATTLE
+# TOWER's room: the opponent is Emerald's tower opponent (VAR_OBJ_GFX_ID_0, its hide flag), the player's stand-in
+# hidden (the player walks in)
+OVERRIDES = {
+    'Sinnoh_BattleTowerBattleRoom': {2: {'graphics_id': 'OBJ_EVENT_GFX_VAR_0', 'flag': 'FLAG_HIDE_BATTLE_TOWER_OPPONENT',
+                                         'movement_type': 'MOVEMENT_TYPE_FACE_DOWN', 'script': '0x0'},
+                                     3: {'flag': '0x3FFF'}},
+}
+
+
 def people(p, root, have):
     """The place's people: where they stand, the game's closest sprite (tools/sinnoh/sprites.py), how they move, their
     hide flag (SINNOH's number, tools/sinnoh/ids.py) and their script. Local ids follow Platinum's order; those with
@@ -187,6 +197,8 @@ def people(p, root, have):
                     'elevation': 3, 'movement_type': 'MOVEMENT_TYPE_FACE_DOWN', 'movement_range_x': 0,
                     'movement_range_y': 0, 'trainer_type': 'TRAINER_TYPE_NONE', 'trainer_sight_or_berry_tree_id': '0',
                     'script': script, 'flag': '0x%X' % flag})
+    for n, fields in OVERRIDES.get(p['name'], {}).items():
+        out[n - 1].update(fields)
     for e in EXTRA_PEOPLE.get(p['name'], []):
         out.append({'graphics_id': e['graphics_id'], 'x': e['x'], 'y': e['y'], 'elevation': 3,
                     'movement_type': e['movement_type'], 'movement_range_x': 0, 'movement_range_y': 0,

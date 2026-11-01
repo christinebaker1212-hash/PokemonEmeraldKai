@@ -1,0 +1,10 @@
+# The SINNOH BATTLE TOWER (data/maps/Sinnoh_BattleTower, Sinnoh_BattleTowerBattleRoom: Emerald's tower battles in
+# Platinum's rooms): OPEN LEVEL, three POKéMON picked, the game saved, the battle room, seven opponents (each left with 1 HP by
+# `mp battlerhp`), then back at the counter with BATTLE POINTS, the streak 7. Shots t_room.png (the first opponent), t_tower_end.png.
+# Needs the 3D pack.
+MODE=1
+TMO=600
+GEN=4
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=143:100,248:100,149:100"
+EXPECT_A=("where map 41.8 xy 15,6" "streak 7, bp 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")
