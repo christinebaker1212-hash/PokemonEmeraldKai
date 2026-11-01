@@ -1,0 +1,39 @@
+pressuntil A field 5000
+wait 30
+mp additem 660 1
+mp register 660
+press SELECT 1
+wait 60
+shot r_open
+press B 1
+wait 20
+mp setflag 0x867
+mp setflag 0x868
+mp setflag 0x869
+mp setflag 0x86A
+mp setflag 0x86B
+mp setflag 0x86C
+mp setflag 0x86D
+mp setflag 0x86E
+mp poketch 16
+wait 30
+shot r_map
+mp poketch 20
+wait 5
+mp poketchtap 140,60
+wait 5
+mp poketchtap 96,144
+wait 10
+shot r_timer
+mp poketchtap 96,144
+wait 5
+mp poketch 13
+wait 20
+shot r_friend
+press B 1
+wait 30
+mp face down
+press DOWN 20
+wait 30
+mp where
+quit

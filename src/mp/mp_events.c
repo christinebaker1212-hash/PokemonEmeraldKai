@@ -859,7 +859,11 @@ void MP_Events_OnWildEnd(u8 outcome, struct Pokemon *mon)
 {
     u8 level = mon ? GetMonData(mon, MON_DATA_LEVEL) : 0;
     if (outcome == B_OUTCOME_CAUGHT && mon)
+    {
+        void MP_Poketch_OnCatch(struct Pokemon *mon);
         MP_Achieve_OnCatch(mon, IsTodaysOutbreak(GetMonData(mon, MON_DATA_SPECIES)));
+        MP_Poketch_OnCatch(mon);   // Moemon Kai: the POKéTCH's POKéMON HISTORY (src/sinnoh/poketch.c)
+    }
     if (outcome == B_OUTCOME_CAUGHT)
     {
         // today's goals count offline too (on the save)

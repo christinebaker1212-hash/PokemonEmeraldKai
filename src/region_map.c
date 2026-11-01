@@ -685,6 +685,28 @@ void MP_RegionMap_AreaBox(mapsec_u16_t mapsec, u16 *x, u16 *y, u16 *w, u16 *h)
     *x = b->x, *y = b->y, *w = b->width, *h = b->height;
 }
 
+// The POKéTCH's MARKING MAP outside SINNOH (src/sinnoh/poketch.c): the player's region's town map as its grid of
+// cells (0 nothing, 1 a route, 2 a town) and the player's cell (-1: not on it)
+void MP_RegionMap_PoketchGrid(u8 types[MAP_HEIGHT][MAP_WIDTH], s8 *px, s8 *py)
+{
+    mapsec_u16_t sec;
+    u8 x, y;
+    ChooseShownMap();
+    for (y = 0; y < MAP_HEIGHT; y++)
+        for (x = 0; x < MAP_WIDTH; x++)
+        {
+            sec = GetMapSecIdAt(x + MAPCURSOR_X_MIN, y + MAPCURSOR_Y_MIN);
+            types[y][x] = sec == MAPSEC_NONE ? 0 : GetMapsecType(sec) >= MAPSECTYPE_CITY_CANFLY ? 2 : 1;
+        }
+    sec = PlayerMapSecForMap();
+    *px = *py = -1;
+    if (MapSecShown(sec))
+    {
+        const struct RegionMapLocation *b = MapSecBox(sec);
+        *px = b->x + b->width / 2, *py = b->y + b->height / 2;
+    }
+}
+
 // The POKéDEX's AREA page: SINNOH's picture on its BG (unscrolled: the texture point (0, 0) at the screen's top-left)
 void MP_RegionMap_AreaPicture(u8 bg)
 {

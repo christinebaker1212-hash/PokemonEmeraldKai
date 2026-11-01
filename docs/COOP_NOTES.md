@@ -3504,8 +3504,16 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   DIGITAL WATCH, CALCULATOR, MEMO PAD, PEDOMETER (GAME_STAT_STEPS), PARTY (icons in shades, HP; touch: the cry),
   LINK SEARCHER (co-op friends, bars by how near) 0; COUNTER, ANALOG WATCH, COIN TOSS 1; COLOR CHANGER, DOWSING
   MACHINE (hidden items within 2 tiles of the touch, 12 pixels a tile around the player) 2; STOPWATCH (touch the
-  Voltorb) 3; CALENDAR (the PC's date) 4. "<save>.poketch": the app, color, pedometer start, counter, memo.
-  Tests: `mp poketch APP`, `mp poketchtap X,Y`; scenario sinnoh_poketch.
+  Voltorb) 3; CALENDAR (the PC's date) 4; then FRIENDSHIP CHECKER (touch: hearts by friendship) 1, DAY-CARE CHECKER
+  (levels with the steps walked, the EGG) 2, POKéMON HISTORY (the last 12 caught or hatched: MP_Poketch_OnCatch from
+  mp_events.c / egg_hatch.c, only with the POKéTCH in the bag) 3, MARKING MAP (6 markers to drag; in SINNOH Platinum's
+  map with the player's cell, matrix cell (x, z) at (10 + 6x, 8 + 6(z - 5)): s3d.c S3D_PlayerMatrixCell; elsewhere the
+  region's own town map as cells: region_map.c MP_RegionMap_PoketchGrid) 3, MOVE TESTER (gTypeEffectiveness, FAIRY
+  from GEN 6) 4, MATCHUP CHECKER (daycare.c MP_Daycare_Compatibility) and ROULETTE 5, KITCHEN TIMER and ALARM CLOCK
+  (they ring, flash the LCD and open the POKéTCH on their app wherever the player is: CheckRinging) 6, DOT ARTIST 7,
+  BACKLIGHT 0. Badges count from any region (the most in one): the POKéTCH works the same in HOENN, JOHTO and KANTO.
+  "<save>.poketch" (version 2): the app, color, pedometer start, counter, memo, dots, markers, history, alarm,
+  backlight. Tests: `mp poketch APP`, `mp poketchtap X,Y`; scenarios sinnoh_poketch, poketch_regions.
 - The three card games in SINNOH: its people play by their sprite's look-alike (tcg_field.c Tcg_LookGfx: the specials
   first, then sSinnohStandIns), so the townsfolk and beaten trainers duel as JOHTO's and KANTO's do. Special card
   trainers (sQzSpecials' SINNOH rows): the eight leaders by role and type (ROARK - ROXANNE, MAYLENE - BRAWLY, WAKE -

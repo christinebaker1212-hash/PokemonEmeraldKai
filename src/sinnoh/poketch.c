@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <stddef.h>
 #include "global.h"
 #include "main.h"
 #include "event_data.h"
@@ -24,6 +25,11 @@
 #include "constants/rgb.h"
 #include "mp.h"
 #include "mp_region.h"
+#include "battle_main.h"
+#include "daycare.h"
+#include "item.h"
+#include "constants/items.h"
+#include "constants/pokemon.h"
 
 const u8 *S3D_Gfx_PoketchScreen(const char *name);
 bool8 S3D_Gfx_PoketchCell(const char *sheet, u16 cell, s16 *x, s16 *y, u16 *w, u16 *h, const u8 **px);
@@ -38,12 +44,15 @@ extern char gPlatformSavePath[];
 enum
 {
     APP_WATCH, APP_CALC, APP_MEMO, APP_PEDOMETER, APP_PARTY, APP_COUNTER, APP_ANALOG, APP_COIN, APP_COLOR, APP_STOPWATCH,
-    APP_DOWSING, APP_CALENDAR, APP_LINK, APP_COUNT
+    APP_DOWSING, APP_CALENDAR, APP_LINK, APP_FRIENDSHIP, APP_DAYCARE, APP_HISTORY, APP_MAP, APP_MOVES, APP_MATCHUP,
+    APP_ROULETTE, APP_TIMER, APP_ALARM, APP_DOTS, APP_BACKLIGHT, APP_COUNT
 };
 static const struct { u8 badges; } sApps[APP_COUNT] = {
     [APP_WATCH] = {0}, [APP_CALC] = {0}, [APP_MEMO] = {0}, [APP_PEDOMETER] = {0}, [APP_PARTY] = {0},
     [APP_COUNTER] = {1}, [APP_ANALOG] = {1}, [APP_COIN] = {1}, [APP_COLOR] = {2}, [APP_STOPWATCH] = {3},
-    [APP_DOWSING] = {2}, [APP_CALENDAR] = {4}, [APP_LINK] = {0},
+    [APP_DOWSING] = {2}, [APP_CALENDAR] = {4}, [APP_LINK] = {0}, [APP_FRIENDSHIP] = {1}, [APP_DAYCARE] = {2},
+    [APP_HISTORY] = {3}, [APP_MAP] = {3}, [APP_MOVES] = {4}, [APP_MATCHUP] = {5}, [APP_ROULETTE] = {5},
+    [APP_TIMER] = {6}, [APP_ALARM] = {6}, [APP_DOTS] = {7}, [APP_BACKLIGHT] = {0},
 };
 
 // The LCD's colors, lightest first: GREEN (Platinum's own) and the COLOR CHANGER's others
@@ -74,6 +83,11 @@ static struct
     u32 stepBase;
     u16 counter;
     u8 memo[MEMO_W * PH / 8];
+    u8 dots[24 * 20 / 4];              // the DOT ARTIST's 24x20 dots, 2 bits each
+    u8 markX[6], markY[6];             // the MARKING MAP's markers
+    u16 histSpecies[12];               // POKéMON HISTORY: the last caught / hatched, newest first
+    u32 histPersonality[12];
+    u8 alarmH, alarmM, alarmOn, backlight;
     // per app, not remembered
     s32 calcValue, calcEntry;
     u8 calcOp, calcDigits;
@@ -85,6 +99,13 @@ static struct
     s16 dowseX, dowseY;
     u8 dowseFrames;
     s8 dowseFoundX, dowseFoundY;
+    u8 grab;               // the MARKING MAP's marker being moved (0xFF none)
+    u8 movesType[3];       // the MOVE TESTER's attacking type and the two defending ones (0xFF: none)
+    u8 matchA, matchB;     // the MATCHUP CHECKER's two party slots
+    s32 roulAngle, roulSpeed;
+    u32 timerEnd, timerLeft; // the KITCHEN TIMER (frames)
+    bool8 timerRunning;
+    u8 ringing;            // the KITCHEN TIMER / ALARM ringing (frames left)
     u8 pressed;            // the button held down (an app's own numbering; 0xFF none)
     u8 testTap;            // (tests: frames left of a touch at the stylus, `mp poketchtap`)
 } sP;
@@ -93,7 +114,14 @@ static u8 sCanvas[PH][PW];
 
 // ------------------------------------------------------------------------------------------------- remembered state
 #define SAVE_MAGIC 0x50544B50   // "PKTP"
-struct SaveFile { u32 magic; u16 version; u8 color, app; u32 stepBase; u16 counter, pad; u8 memo[MEMO_W * PH / 8]; };
+struct SaveFile
+{
+    u32 magic; u16 version; u8 color, app; u32 stepBase; u16 counter, pad; u8 memo[MEMO_W * PH / 8];
+    // version 2
+    u8 dots[24 * 20 / 4]; u8 markX[6], markY[6]; u16 histSpecies[12]; u32 histPersonality[12];
+    u8 alarmH, alarmM, alarmOn, backlight;
+};
+#define SAVE_V1_SIZE offsetof(struct SaveFile, dots)
 
 static void LoadState(void)
 {
@@ -109,10 +137,25 @@ static void LoadState(void)
     sP.stepBase = GetGameStat(GAME_STAT_STEPS);
     sP.pressed = 0xFF;
     sP.sx = PW / 2, sP.sy = PH / 2;
+    sP.grab = 0xFF;
+    sP.movesType[0] = 1, sP.movesType[1] = 0, sP.movesType[2] = 0xFF;
+    sP.matchB = 1;
+    for (u32 i = 0; i < 6; i++)
+        sP.markX[i] = 172, sP.markY[i] = 16 + i * 24;
+    sP.alarmH = 7;
     if ((fp = fopen(path, "rb")) == NULL)
         return;
-    if (fread(&f, sizeof(f), 1, fp) == 1 && f.magic == SAVE_MAGIC && f.version == 1)
+    memset(&f, 0, sizeof(f));
+    if (fread(&f, 1, sizeof(f), fp) >= SAVE_V1_SIZE && f.magic == SAVE_MAGIC && (f.version == 1 || f.version == 2))
     {
+        if (f.version == 2)
+        {
+            memcpy(sP.dots, f.dots, sizeof(sP.dots));
+            memcpy(sP.markX, f.markX, 6), memcpy(sP.markY, f.markY, 6);
+            memcpy(sP.histSpecies, f.histSpecies, sizeof(sP.histSpecies));
+            memcpy(sP.histPersonality, f.histPersonality, sizeof(sP.histPersonality));
+            sP.alarmH = f.alarmH % 24, sP.alarmM = f.alarmM % 60, sP.alarmOn = f.alarmOn, sP.backlight = f.backlight;
+        }
         sP.color = f.color % 8;
         sP.app = f.app % APP_COUNT;
         sP.stepBase = f.stepBase;
@@ -124,9 +167,14 @@ static void LoadState(void)
 
 static void SaveState(void)
 {
-    struct SaveFile f = {SAVE_MAGIC, 1, sP.color, sP.app, sP.stepBase, sP.counter, 0};
+    struct SaveFile f = {SAVE_MAGIC, 2, sP.color, sP.app, sP.stepBase, sP.counter, 0};
     FILE *fp;
     memcpy(f.memo, sP.memo, sizeof(f.memo));
+    memcpy(f.dots, sP.dots, sizeof(f.dots));
+    memcpy(f.markX, sP.markX, 6), memcpy(f.markY, sP.markY, 6);
+    memcpy(f.histSpecies, sP.histSpecies, sizeof(f.histSpecies));
+    memcpy(f.histPersonality, sP.histPersonality, sizeof(f.histPersonality));
+    f.alarmH = sP.alarmH, f.alarmM = sP.alarmM, f.alarmOn = sP.alarmOn, f.backlight = sP.backlight;
     if ((fp = fopen(sP.path, "wb")) != NULL)
     {
         fwrite(&f, sizeof(f), 1, fp);
@@ -134,9 +182,14 @@ static void SaveState(void)
     }
 }
 
+// Apps come with badges from any region: the most the player has in one (the POKéTCH works in every region)
 static bool8 AppUnlocked(u8 app)
 {
-    return MP_Region_BadgeCount(REGION_SINNOH) >= sApps[app].badges;
+    u8 r, most = 0;
+    for (r = 0; r < REGION_COUNT; r++)
+        if (MP_Region_BadgeCount(r) > most)
+            most = MP_Region_BadgeCount(r);
+    return most >= sApps[app].badges;
 }
 
 // ------------------------------------------------------------------------------------------------- drawing
@@ -598,6 +651,367 @@ static void LinkSearcher(void)
         Text(40, 70, "NO ONE NEARBY", 3, 2);
 }
 
+
+// FRIENDSHIP CHECKER: the party wanders; a touch on one shows its hearts
+static void Friendship(void)
+{
+    u8 i, n = CalculatePlayerPartyCount();
+    Fill(0, 0, PW, PH, 0);
+    for (i = 0; i < n; i++)
+    {
+        struct Pokemon *mon = &gPlayerParty[i];
+        u16 species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG);
+        s32 t = sP.frame + i * 97, x = 16 + (i % 3) * 56 + ((t / 40) % 4 == 1 ? 4 : (t / 40) % 4 == 3 ? -4 : 0);
+        s32 y = 24 + (i / 3) * 64 + ((t / 8) & 1);
+        MonIcon(species, GetMonData(mon, MON_DATA_PERSONALITY), x, y);
+        if (sP.touch && species != SPECIES_EGG && TouchIn(x, y, 32, 32))
+        {
+            u8 f = GetMonData(mon, MON_DATA_FRIENDSHIP);
+            Cell("friendship_checker", f >= 200 ? 3 : f >= 150 ? 2 : f >= 70 ? 1 : 4, x + 16, y - 4);
+            if (sP.touchNew)
+                PlayCry_Normal(species, 0);
+        }
+    }
+}
+
+// DAY-CARE CHECKER: the two POKéMON at the DAY CARE, their levels now, and an EGG when there is one
+static void Daycare(void)
+{
+    u8 i;
+    char buf[8];
+    Screen("daycare_checker");
+    for (i = 0; i < DAYCARE_MON_COUNT; i++)
+    {
+        struct BoxPokemon box = gSaveBlock1Ptr->daycare.mons[i].mon;
+        u16 species = GetBoxMonData(&box, MON_DATA_SPECIES);
+        u32 exp;
+        if (species == SPECIES_NONE)
+            continue;
+        exp = GetBoxMonData(&box, MON_DATA_EXP) + gSaveBlock1Ptr->daycare.mons[i].steps;
+        SetBoxMonData(&box, MON_DATA_EXP, &exp);
+        snprintf(buf, sizeof(buf), "%d", (int)GetLevelFromBoxMonExp(&box));
+        Text(26 + i * 98, 8, buf, 0, 2);
+        MonIcon(species, GetBoxMonData(&box, MON_DATA_PERSONALITY), 24 + i * 96, 52);
+    }
+    if (gSaveBlock1Ptr->daycare.offspringPersonality)
+        Cell("daycare_checker", 12, 96, 130);
+}
+
+// POKéMON HISTORY: the last twelve caught or hatched
+void MP_Poketch_OnCatch(struct Pokemon *mon)
+{
+    u32 i;
+    if (!CheckBagHasItem(ITEM_POKETCH, 1))
+        return;
+    LoadState();
+    for (i = ARRAY_COUNT(sP.histSpecies) - 1; i > 0; i--)
+        sP.histSpecies[i] = sP.histSpecies[i - 1], sP.histPersonality[i] = sP.histPersonality[i - 1];
+    sP.histSpecies[0] = GetMonData(mon, MON_DATA_SPECIES);
+    sP.histPersonality[0] = GetMonData(mon, MON_DATA_PERSONALITY);
+    SaveState();
+}
+
+static void History(void)
+{
+    u32 i;
+    Fill(0, 0, PW, PH, 0);
+    for (i = 0; i < ARRAY_COUNT(sP.histSpecies); i++)
+        if (sP.histSpecies[i] != SPECIES_NONE)
+        {
+            s32 x = 12 + (i % 4) * 44, y = 8 + (i / 4) * 50;
+            MonIcon(sP.histSpecies[i], sP.histPersonality[i], x, y + ((sP.frame / 16 + i) & 1));
+            if (sP.touchNew && TouchIn(x, y, 32, 32))
+                PlayCry_Normal(sP.histSpecies[i], 0);
+        }
+}
+
+// MARKING MAP: SINNOH, where the player is (blinking) and six markers to move around (Platinum's map cells: matrix
+// cell (x, z) at (10 + 6x, 8 + 6(z - 5)))
+bool8 S3D_PlayerMatrixCell(s32 *cx, s32 *cz);   // (s3d.c)
+u8 MP_Daycare_Compatibility(const struct BoxPokemon *a, const struct BoxPokemon *b);   // (daycare.c)
+void MP_RegionMap_PoketchGrid(u8 types[15][28], s8 *px, s8 *py);   // (region_map.c)
+
+// Outside SINNOH the map is the region's own town map as cells, 6 pixels each: routes and towns
+static void RegionGridMap(void)
+{
+    static u8 sTypes[15][28];
+    s8 px, py;
+    s32 x, y;
+    MP_RegionMap_PoketchGrid(sTypes, &px, &py);
+    Fill(0, 0, PW, PH, 0);
+    for (y = 0; y < 15; y++)
+        for (x = 0; x < 28; x++)
+            if (sTypes[y][x])
+                Fill(12 + x * 6 + (sTypes[y][x] == 1), 35 + y * 6 + (sTypes[y][x] == 1), sTypes[y][x] == 1 ? 4 : 6,
+                     sTypes[y][x] == 1 ? 4 : 6, sTypes[y][x] == 1 ? 1 : 3);
+    if (px >= 0 && ((sP.frame / 20) & 1))
+        Cell("map", 0, 12 + px * 6 + 3, 35 + py * 6 + 3);
+}
+
+static void MarkingMap(void)
+{
+    s32 i, cx, cz;
+    if (sP.touchNew)
+        for (i = 5; i >= 0; i--)
+            if (sP.sx >= sP.markX[i] - 8 && sP.sx < sP.markX[i] + 8 && sP.sy >= sP.markY[i] - 8 && sP.sy < sP.markY[i] + 8)
+            {
+                sP.grab = i;
+                break;
+            }
+    if (!sP.touch)
+        sP.grab = 0xFF;
+    if (sP.grab != 0xFF)
+        sP.markX[sP.grab] = sP.sx < 4 ? 4 : sP.sx > PW - 4 ? PW - 4 : sP.sx, sP.markY[sP.grab] = sP.sy < 4 ? 4 : sP.sy > PH - 4 ? PH - 4 : sP.sy;
+    if (MP_Region_Current() == REGION_SINNOH)
+    {
+        Screen("marking_map");
+        if (S3D_PlayerMatrixCell(&cx, &cz) && ((sP.frame / 20) & 1))
+            Cell("map", 0, 10 + 6 * cx + 3, 8 + 6 * (cz - 5) + 3);
+    }
+    else
+        RegionGridMap();
+    for (i = 0; i < 6; i++)
+        Cell("map", 2 + i, sP.markX[i] + 8, sP.markY[i] + 8);
+}
+
+// MOVE TESTER: an attacking type against one or two types: how well it works
+static u16 TypeMult(u8 atk, u8 def)
+{
+    u32 i;
+    for (i = 0; i + 2 < ARRAY_COUNT(gTypeEffectiveness) && gTypeEffectiveness[i] != TYPE_ENDTABLE; i += 3)
+        if (gTypeEffectiveness[i] == atk && gTypeEffectiveness[i + 1] == def)
+            return gTypeEffectiveness[i + 2];
+    return 10;
+}
+
+static u8 TypeCount(void)
+{
+    return MP_Gen_Cap(MP_Region_Current()) >= 6 ? NUMBER_OF_MON_TYPES : TYPE_FAIRY;
+}
+
+static void MoveTester(void)
+{
+    char buf[24];
+    u32 mult, k, n = TypeCount();
+    for (k = 0; k < 3; k++)
+    {
+        s32 y = 10 + k * 34;
+        if (sP.touchNew && sP.sy >= y && sP.sy < y + 28)
+        {
+            s32 d = sP.sx < PW / 2 ? -1 : 1, v = sP.movesType[k] == 0xFF ? (s32)n : sP.movesType[k];
+            do
+                v = (v + d + n + (k == 2) * 1) % (n + (k == 2));
+            while (v == TYPE_MYSTERY);
+            sP.movesType[k] = v == (s32)n ? 0xFF : v;
+            PlaySE(SE_SELECT);
+        }
+    }
+    Fill(0, 0, PW, PH, 0);
+    for (k = 0; k < 3; k++)
+    {
+        s32 y = 10 + k * 34;
+        const char *label = k == 0 ? "MOVE" : "TARGET";
+        Fill(4, y, PW - 8, 28, k == 0 ? 1 : 0);
+        Fill(4, y, PW - 8, 1, 3), Fill(4, y + 27, PW - 8, 1, 3), Fill(4, y, 1, 28, 3), Fill(PW - 5, y, 1, 28, 3);
+        Text(8, y + 3, label, 2, 1);
+        Text(10, y + 11, "<", 3, 2);
+        Text(PW - 18, y + 11, ">", 3, 2);
+        if (sP.movesType[k] == 0xFF)
+            snprintf(buf, sizeof(buf), "-");
+        else
+            MP_GameToAscii(buf, gTypeNames[sP.movesType[k]], TYPE_NAME_LENGTH);
+        Text(PW / 2 - (s32)strlen(buf) * 4, y + 10, buf, 3, 2);
+    }
+    mult = TypeMult(sP.movesType[0], sP.movesType[1]);
+    if (sP.movesType[2] != 0xFF && sP.movesType[2] != sP.movesType[1])
+        mult = mult * TypeMult(sP.movesType[0], sP.movesType[2]) / 10;
+    snprintf(buf, sizeof(buf), "X%d%s", (int)(mult / 10), mult % 10 == 5 ? ".5" : mult % 10 ? ".25" : "");
+    if (mult < 10 && mult % 5)
+        snprintf(buf, sizeof(buf), "X0.25");
+    Text(PW / 2 - (s32)strlen(buf) * 6, 118, buf, 3, 3);
+    Text(PW / 2 - 40, 142, mult == 0 ? "NO EFFECT" : mult > 10 ? "SUPER" : mult < 10 ? "NOT VERY" : "NORMAL", 2, 2);
+}
+
+// MATCHUP CHECKER: two of the party (touch a side to change it) and how well they'd get along at the DAY CARE
+static void Matchup(void)
+{
+    u8 n = CalculatePlayerPartyCount(), k, score;
+    if (n == 0)
+    {
+        Fill(0, 0, PW, PH, 0);
+        return;
+    }
+    if (sP.touchNew && sP.sy < 100)
+    {
+        u8 *slot = sP.sx < PW / 2 ? &sP.matchA : &sP.matchB;
+        *slot = (*slot + 1) % n;
+        PlaySE(SE_SELECT);
+    }
+    sP.matchA %= n, sP.matchB %= n;
+    Screen("matchup_checker");
+    for (k = 0; k < 2; k++)
+        MonIcon(GetMonData(&gPlayerParty[k ? sP.matchB : sP.matchA], MON_DATA_SPECIES_OR_EGG),
+                GetMonData(&gPlayerParty[k ? sP.matchB : sP.matchA], MON_DATA_PERSONALITY), 24 + k * 112, 40);
+    score = sP.matchA == sP.matchB ? 0 : MP_Daycare_Compatibility(&gPlayerParty[sP.matchA].box, &gPlayerParty[sP.matchB].box);
+    // (Platinum's hearts: none, one, two or three)
+    Cell("matchup_checker", score >= 70 ? 3 : score >= 50 ? 2 : score >= 20 ? 1 : 0, 96, 128);
+}
+
+// ROULETTE: draw on the wheel, then touch the button to spin it
+static void Roulette(void)
+{
+    s32 x, y, r = 1;
+    static const s8 sSinT[16] = {0, 38, 71, 92, 100, 92, 71, 38, 0, -38, -71, -92, -100, -92, -71, -38};
+    if (sP.touchNew && sP.sx >= 152)
+    {
+        sP.roulSpeed = 600 + (Random() % 400);
+        PlaySE(SE_SELECT);
+    }
+    else if (sP.touch && sP.sx < 152)
+        for (y = sP.sy - r; y <= sP.sy + r; y++)
+            for (x = sP.sx - r; x <= sP.sx + r; x++)
+                if (x >= 0 && x < MEMO_W && y >= 0 && y < PH)
+                    sP.memo[(y * MEMO_W + x) / 8] |= 1 << ((y * MEMO_W + x) % 8);
+    if (sP.newKeys & SELECT_BUTTON)
+        memset(sP.memo, 0, sizeof(sP.memo));
+    if (sP.roulSpeed > 0)
+    {
+        sP.roulAngle = (sP.roulAngle + sP.roulSpeed / 40) % 1024;
+        sP.roulSpeed -= 4;
+        if (sP.roulSpeed <= 0)
+            PlaySE(SE_DING_DONG);
+    }
+    Screen("roulette");
+    for (y = 0; y < PH; y++)
+        for (x = 0; x < 152; x++)
+            if (sP.memo[(y * MEMO_W + x) / 8] & (1 << ((y * MEMO_W + x) % 8)))
+                sCanvas[y][x] = 3;
+    {
+        u32 a = sP.roulAngle * 16 / 1024;   // (16 directions)
+        Line(76, 80, 76 + sSinT[a] * 60 / 100, 80 - sSinT[(a + 4) % 16] * 60 / 100, 3, 3);
+    }
+}
+
+// KITCHEN TIMER: set the minutes and seconds with the arrows, then start; Snorlax wakes when it's up
+static void Timer(void)
+{
+    u32 left = sP.timerRunning ? (sP.timerEnd > gMain.vblankCounter1 ? sP.timerEnd - gMain.vblankCounter1 : 0) : sP.timerLeft;
+    if (sP.timerRunning && left == 0)
+        sP.timerRunning = FALSE, sP.timerLeft = 0, sP.ringing = 180;
+    if (sP.touchNew)
+    {
+        if (TouchIn(56, 128, 80, 32))
+        {
+            if (sP.timerRunning)
+                sP.timerLeft = left, sP.timerRunning = FALSE;
+            else if (sP.timerLeft)
+                sP.timerEnd = gMain.vblankCounter1 + sP.timerLeft, sP.timerRunning = TRUE;
+            sP.ringing = 0;
+            PlaySE(SE_SELECT);
+        }
+        else if (!sP.timerRunning && sP.sy >= 48 && sP.sy < 128)
+        {
+            s32 step = sP.sx < PW / 2 ? 60 * 60 : 60, d = sP.sy < 92 ? 1 : -1;
+            s32 v = (s32)sP.timerLeft + d * step;
+            sP.timerLeft = v < 0 ? 0 : v > 99 * 3600 + 59 * 60 ? 99 * 3600 + 59 * 60 : v;
+            PlaySE(SE_SELECT);
+        }
+    }
+    Screen("kitchen_timer");
+    left = (left + 59) / 60;
+    Digits(92, 94, left / 60 % 100, 2, TRUE);
+    Digits(132, 94, left % 60, 2, TRUE);
+    if (!sP.timerRunning)
+    {
+        Cell("kitchen_timer", 4, 76, 66);
+        Cell("kitchen_timer", 4, 116, 66);
+        Cell("kitchen_timer", 5, 76, 122);
+        Cell("kitchen_timer", 5, 116, 122);
+    }
+    Cell("kitchen_timer", sP.timerRunning ? 9 : 7, 96, 144);
+}
+
+// ALARM CLOCK: the time it rings (touch the upper / lower half of the hours or minutes) and the switch on the right
+static void Alarm(void)
+{
+    if (sP.touchNew)
+    {
+        if (sP.sx >= 160)
+            sP.alarmOn ^= 1, sP.ringing = 0;
+        else if (sP.sx < 80)
+            sP.alarmH = (sP.alarmH + (sP.sy < 128 ? 1 : 23)) % 24;
+        else
+            sP.alarmM = (sP.alarmM + (sP.sy < 128 ? 1 : 59)) % 60;
+        PlaySE(SE_SELECT);
+    }
+    Screen("alarm_clock");
+    Digits(76, 128, sP.alarmH, 2, TRUE);
+    Digits(120, 128, sP.alarmM, 2, TRUE);
+    Fill(162, 20, 26, 12, sP.alarmOn ? 0 : 3);
+    Text(166, 22, sP.alarmOn ? "ON" : "OFF", sP.alarmOn ? 3 : 0, 2);
+}
+
+// The KITCHEN TIMER and the ALARM ring wherever the POKéTCH is (it opens on the one ringing)
+static void CheckRinging(void)
+{
+    static u8 sLastMinute = 0xFF;
+    if (sP.timerRunning && gMain.vblankCounter1 >= sP.timerEnd)
+    {
+        sP.timerRunning = FALSE, sP.timerLeft = 0, sP.ringing = 180;
+        if (!sP.open && MP_IsLocalFree())
+            sP.open = TRUE, sP.app = APP_TIMER;
+    }
+    if (sP.alarmOn && (sP.frame % 60) == 0)
+    {
+        RtcCalcLocalTime();
+        if (gLocalTime.hours == sP.alarmH && gLocalTime.minutes == sP.alarmM && sLastMinute != gLocalTime.minutes)
+        {
+            sP.ringing = 180;
+            if (!sP.open && MP_IsLocalFree())
+                sP.open = TRUE, sP.app = APP_ALARM;
+        }
+        sLastMinute = gLocalTime.minutes;
+    }
+    if (sP.ringing)
+    {
+        if ((sP.ringing % 30) == 0)
+            PlaySE(SE_DING_DONG);
+        sP.ringing--;
+    }
+}
+
+// DOT ARTIST: touch a dot to darken it (lightest after darkest)
+static void Dots(void)
+{
+    s32 x, y;
+    if (sP.touchNew)
+    {
+        u32 i = (sP.sy / 8) * 24 + sP.sx / 8, v = (sP.dots[i / 4] >> ((i % 4) * 2)) & 3;
+        sP.dots[i / 4] = (sP.dots[i / 4] & ~(3 << ((i % 4) * 2))) | (((v + 1) & 3) << ((i % 4) * 2));
+    }
+    if (sP.newKeys & SELECT_BUTTON)
+        memset(sP.dots, 0, sizeof(sP.dots));
+    for (y = 0; y < 20; y++)
+        for (x = 0; x < 24; x++)
+        {
+            u32 i = y * 24 + x;
+            Fill(x * 8, y * 8, 8, 8, (sP.dots[i / 4] >> ((i % 4) * 2)) & 3);
+            Fill(x * 8 + 7, y * 8, 1, 8, 1), Fill(x * 8, y * 8 + 7, 8, 1, 1);
+        }
+}
+
+// BACKLIGHT: its switch lights the LCD
+static void Backlight(void)
+{
+    if (sP.touchNew && TouchIn(48, 40, 96, 80))
+    {
+        sP.backlight ^= 1;
+        PlaySE(SE_SELECT);
+    }
+    Screen("backlight_toggle");
+    Cell("backlight_toggle", sP.backlight ? 1 : 0, 96, 80);
+}
+
 static void DrawApp(void)
 {
     switch (sP.app)
@@ -615,6 +1029,17 @@ static void DrawApp(void)
     case APP_DOWSING: Dowsing(); break;
     case APP_CALENDAR: Calendar(); break;
     case APP_LINK: LinkSearcher(); break;
+    case APP_FRIENDSHIP: Friendship(); break;
+    case APP_DAYCARE: Daycare(); break;
+    case APP_HISTORY: History(); break;
+    case APP_MAP: MarkingMap(); break;
+    case APP_MOVES: MoveTester(); break;
+    case APP_MATCHUP: Matchup(); break;
+    case APP_ROULETTE: Roulette(); break;
+    case APP_TIMER: Timer(); break;
+    case APP_ALARM: Alarm(); break;
+    case APP_DOTS: Dots(); break;
+    case APP_BACKLIGHT: Backlight(); break;
     }
 }
 
@@ -668,6 +1093,8 @@ void MP_Poketch_FilterKeys(void)
 {
     s32 mx, my;
     bool8 down, wasTouch;
+    if (sP.loaded && gMain.callback2 == CB2_Overworld)
+        CheckRinging();
     if (!sP.open)
         return;
     if (gMain.callback2 == CB2_Overworld && !gPaletteFade.active && !MP_IsLocalFree())
@@ -737,7 +1164,14 @@ void MP_Poketch_Composite(u16 *frame)
     DrawApp();
     sP.touchNew = FALSE;
     for (x = 0; x < 4; x++)
-        lcd[x] = (sColors[sP.color][x][0] >> 3) | (sColors[sP.color][x][1] >> 3) << 5 | (sColors[sP.color][x][2] >> 3) << 10 | 0x8000;
+    {
+        u32 r = sColors[sP.color][x][0], g = sColors[sP.color][x][1], b = sColors[sP.color][x][2];
+        if (sP.backlight)   // (the BACKLIGHT: a quarter of the way to white)
+            r += (255 - r) / 4, g += (255 - g) / 4, b += (255 - b) / 4;
+        if (sP.ringing && (sP.ringing / 10) & 1)   // (ringing: the LCD flashes)
+            r = 255 - r, g = 255 - g, b = 255 - b;
+        lcd[x] = (r >> 3) | (g >> 3) << 5 | (b >> 3) << 10 | 0x8000;
+    }
     for (y = 0; y < PH; y++)
     {
         u16 *row = frame + y * DISPLAY_WIDTH;

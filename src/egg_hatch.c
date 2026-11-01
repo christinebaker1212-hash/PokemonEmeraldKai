@@ -389,6 +389,10 @@ static void AddHatchedMonToParty(u8 id)
     metLocation = GetCurrentRegionMapSectionId();
     SetMonData(mon, MON_DATA_MET_LOCATION, &metLocation);
     MP_Region_TagMet(&mon->box);   // Moemon Kai: hatched in JOHTO
+    {
+        void MP_Poketch_OnCatch(struct Pokemon *mon);
+        MP_Poketch_OnCatch(mon);   // Moemon Kai: the POKéTCH's POKéMON HISTORY
+    }
 
     MonRestorePP(mon);
     CalculateMonStats(mon);

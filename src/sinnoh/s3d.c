@@ -912,3 +912,24 @@ void S3D_Update(void)
                gSpriteCoordOffsetY, sp->centerToCornerVecY, px, py);
     }
 }
+
+// The player's cell on SINNOH's world matrix (the POKéTCH's MARKING MAP): outdoors where they stand, indoors the place
+// they came in from (the escape warp's map); FALSE: neither is on the matrix
+bool8 S3D_PlayerMatrixCell(s32 *cx, s32 *cz)
+{
+    s32 i = MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
+    if (i >= 0 && sMaps[i].mat == 0)
+    {
+        *cx = sMaps[i].cx + (gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x - MAP_OFFSET) / 32;
+        *cz = sMaps[i].cz + (gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y - MAP_OFFSET) / 32;
+        return TRUE;
+    }
+    i = MapIndex(gSaveBlock1Ptr->escapeWarp.mapGroup, gSaveBlock1Ptr->escapeWarp.mapNum);
+    if (i >= 0 && sMaps[i].mat == 0)
+    {
+        *cx = sMaps[i].cx + (gSaveBlock1Ptr->escapeWarp.x >= 0 ? gSaveBlock1Ptr->escapeWarp.x / 32 : 0);
+        *cz = sMaps[i].cz + (gSaveBlock1Ptr->escapeWarp.y >= 0 ? gSaveBlock1Ptr->escapeWarp.y / 32 : 0);
+        return TRUE;
+    }
+    return FALSE;
+}
