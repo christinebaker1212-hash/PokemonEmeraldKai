@@ -187,7 +187,9 @@ void Tcg_ForgetSidecars(void)
     void Ygo_ForgetSidecar(void);
     void Tt_ForgetSidecar(void);
     void TcgSearch_Forget(void);
+    void CardNew_Forget(void);
     sLoaded = 0;
+    CardNew_Forget();
     Ygo_ForgetSidecar();
     Tt_ForgetSidecar();
     TcgSearch_Forget();

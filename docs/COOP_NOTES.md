@@ -3356,6 +3356,16 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   nothing and kept the last file's sectors in the buffer ("erased due to corruption" after switching to an empty one).
 - tools/test/save_slots.sh covers it (the switch in place, file 2's own settings copy).
 
+## NEW in the BINDER, centered booster packs (1.63.6)
+- src/tcg/tcg_new.c ("<save>.cardnew", per game a byte per card: the copies the BINDER has shown; owner = the POKeMON
+  collection's, a new game on the save starts again): a card owned more times than that shows NEW in its game's
+  BINDER (tcg_ui.c / ygo_ui.c BinderScreen, tt_ui.c ListScreen; not the shops' singles lists); the cursor on it makes it
+  seen. No add site is hooked: packs, prizes, trades, wins all count. The first time (no file) everything owned counts
+  as seen. Tcg_ForgetSidecars forgets it with the save file. `mp cards newcount`; test cards_new.
+- BOOSTER PACKS (POKeMON, Yu-Gi-Oh!): the chosen pack in the middle, the others on both sides, gliding to the cursor
+  (PacksScreen: a float position eased 35% a frame; no glide when the screen opens). Triple Triad's packs screen is a
+  list beside the chosen pack already. Test cards_packs_center.
+
 ## SINNOH's 3D engine
 - Plan and rules: docs/SINNOH_HANDOFF.md. The data comes from pret/pokeplatinum (source.py: its map blocks, matrices,
   areas, props, texture sets and lights as files; fetch_decomp.sh gets them at a pinned commit, make_pack.sh fetches and

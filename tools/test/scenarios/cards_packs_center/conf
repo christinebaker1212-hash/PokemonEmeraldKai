@@ -1,0 +1,6 @@
+# BOOSTER PACKS with the chosen pack in the middle (tcg_ui.c / ygo_ui.c PacksScreen: a carousel gliding to the cursor):
+# the POKeMON case's packs at the first, the second and the fifth pack. Shots packs_0, packs_1, packs_4.
+MODE=1
+TMO=120
+EXPECT_A=("packs_4.bmp ok")
+UNEXPECT_A=("[crash]" "TIMEOUT")

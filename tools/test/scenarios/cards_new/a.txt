@@ -1,0 +1,24 @@
+pressuntil A field 5000
+wait 30
+mp cards starter 0
+mp cards case
+wait 60
+press DOWN 2
+wait 10
+press A 2
+wait 40
+rendershot binder_before
+mp cards newcount
+press B 2
+wait 20
+mp cards giveall
+press A 2
+wait 40
+rendershot binder_new
+mp cards newcount
+press RIGHT 2
+wait 10
+press RIGHT 2
+wait 20
+rendershot binder_moved
+quit

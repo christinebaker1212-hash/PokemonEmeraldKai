@@ -22,11 +22,8 @@ about 14x5 pixels, under the player's feet, see-through).
 ## 5. Settings per save file, switching in place (DONE, 1.63.5): COOP_NOTES "Settings per save file, and switching
 save files in place"
 
-## 6. Card games: NEW tags and centered booster packs (the user, 2026-11-01)
-- In the BINDER (all three card games: src/tcg/tcg_ui.c, src/ygo/ygo_ui.c, src/tt/), a "NEW" tag on every card
-  obtained recently (until it has been looked at in the BINDER; kept in each game's sidecar).
-- On every booster pack screen (GAME CENTER CARD SHOP, the CARD CLUB counters, Yu-Gi-Oh! / Triple Triad sellers), the
-  pack under the cursor sits in the middle of the screen while choosing (the row scrolls to keep it centered).
+## 6. Card games: NEW tags and centered booster packs (DONE, 1.63.6): COOP_NOTES "NEW in the BINDER, centered
+booster packs"
 
 ## 7. 40 PC boxes (the user, 2026-11-01, "the final task")
 - The player's own PC (14 boxes today, in the save: the layout can't change, tools/test/save_layout.py): 40 boxes, the
@@ -47,4 +44,5 @@ save files in place"
 - 1.63.3: SINNOH's briefcase.
 - 1.63.4: drop shadows, small followers in tall grass, big followers' reflections.
 - 1.63.5: settings per save file, SAVE FILE switches in place.
-- Pending: tasks 6-7 above.
+- 1.63.6: NEW in the BINDER, centered booster packs.
+- Pending: task 7 above.

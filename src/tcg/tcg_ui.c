@@ -31,6 +31,7 @@
 #include "tcg_ui_kit.h"
 #include "tcg_guide.h"
 #include "tcg_search.h"
+#include "tcg_new.h"
 #include "platform_text.h"
 #include "tcg_structure_decks.h"
 #include "ygo/integration.h"
@@ -2067,6 +2068,14 @@ static void BinderScreen(void)
             G_RoundFill(x + 14, y + 17, G_DigitsWidth(line, 0, 1) + 4, 9, 0x1c2c48, 230);
             G_Digits(x + 16, y + 19, line, 0, 1, 0xe0f0ff, 255);
         }
+        if (U.showAll != GC_BINDER && U.showAll != SHOP_BINDER && card > 6)
+        {
+            /* Moemon Kai: NEW until the cursor has been on it (tcg_new.c) */
+            if (on && count)
+                CardNew_Saw(CARDNEW_POKEMON, card, count);
+            else if (CardNew_Is(CARDNEW_POKEMON, card, count))
+                CardNew_Badge(x - 2, y - 2, U.frame);
+        }
         if (U.showAll == GC_BINDER && GcSingleSold(card))
         {
             /* the shop's one copy is gone */
@@ -2318,23 +2327,34 @@ static void PacksScreen(void)
     char line[96];
     Background();
     TopBar("BOOSTER PACKS");
-    /* four at a time out of the eleven, the row following the cursor */
+    /* Moemon Kai: the chosen pack in the middle, the others on both sides, gliding over as the cursor moves */
     {
-        int start = U.cursor - 1 < 0 ? 0 : U.cursor - 1 > TCG_PACK_TYPES - 4 ? TCG_PACK_TYPES - 4 : U.cursor - 1;
-        for (i = 0; i < 4; i++)
+        static float sPos;
+        static unsigned sLast;
+        int k, base;
+        if (U.frame != sLast + 1)
+            sPos = (float)U.cursor;   /* (the screen just opened: no glide in) */
+        sLast = U.frame;
+        sPos += ((float)U.cursor - sPos) * 0.35f;
+        if (fabsf((float)U.cursor - sPos) < 0.02f)
+            sPos = (float)U.cursor;
+        base = (int)floorf(sPos);
+        for (k = base - 3; k <= base + 3; k++)
         {
-            unsigned pack = (unsigned)start + i;
-            int x = 10 + i * 57, on = (int)pack == U.cursor;
+            unsigned pack = (unsigned)k;
+            int x = 120 - 22 + (int)lroundf(((float)k - sPos) * 57), on = k == U.cursor;
             int bob = on ? (int)(fabsf(sinf(U.frame * 0.1f)) * 3) : 0;
+            if (k < 0 || k >= TCG_PACK_TYPES || x < -50 || x > 240)
+                continue;
             PackArt(x, 26 - bob, pack, on);
             snprintf(line, sizeof(line), "x%u", c->packs[pack]);
             G_TextAlign(x + 22, 88, TA_CENTER, c->packs[pack] ? G_WHITE : 0xc0d8c8, 0x204030, line, TF_SMALL);
             if (on)
                 G_Frame(x - 3, 26 - bob - 2, 50, 64, 0xe82820, 255);
         }
-        if (start > 0)
+        if (U.cursor > 0)
             G_TextAlign(4, 50, TA_CENTER, G_WHITE, 0x204030, "<", TF_SMALL);
-        if (start < TCG_PACK_TYPES - 4)
+        if (U.cursor < TCG_PACK_TYPES - 1)
             G_TextAlign(236, 50, TA_CENTER, G_WHITE, 0x204030, ">", TF_SMALL);
         for (i = 0; i < TCG_PACK_TYPES; i++)
             G_FillA(120 - TCG_PACK_TYPES * 3 + (int)i * 6, 100, 4, 4, (int)i == U.cursor ? 0xf8f8f8 : 0x5a7868, 255);
@@ -4318,6 +4338,14 @@ void Tcg_Debug(const char *command)
     if (!strcmp(command, "case"))
     {
         Tcg_OpenCase(NULL);
+        return;
+    }
+    if (!strcmp(command, "newcount"))   /* Moemon Kai: how many POKeMON cards show NEW (tcg_new.c) */
+    {
+        unsigned k, count = 0;
+        for (k = 1; k <= TCG_CARD_COUNT; k++)
+            count += (unsigned)CardNew_Is(CARDNEW_POKEMON, k, c->owned[k]);
+        printf("[test] cardnew: %u new\n", count);
         return;
     }
     /* SEARCH & SORT: search text T / sort N / desc / owned / filter I V / clear; shown: the list as it stands */

@@ -29,6 +29,7 @@
 #include "../tcg/tcg_ui_kit.h"
 #include "../tcg/tcg_guide.h"
 #include "../tcg/tcg_search.h"
+#include "../tcg/tcg_new.h"
 #include "ygo_board.h"
 #include "ygo_internal.h"
 #include "ygo_gfx.h"
@@ -1788,6 +1789,14 @@ static void BinderScreen(void)
             G_RoundFill(x + 14, y + 33, G_DigitsWidth(line, 0, 1) + 4, 9, 0x1c2c48, 230);
             G_Digits(x + 16, y + 35, line, 0, 1, 0xe0f0ff, 255);
         }
+        if (Y.showAll != GC_BINDER && Y.showAll != SHOP_BINDER)
+        {
+            /* Moemon Kai: NEW until the cursor has been on it (tcg_new.c) */
+            if (on && count)
+                CardNew_Saw(CARDNEW_YUGIOH, card, count);
+            else if (CardNew_Is(CARDNEW_YUGIOH, card, count))
+                CardNew_Badge(x - 2, y - 2, Y.frame);
+        }
         if (Y.showAll == GC_BINDER && GcSingleSold(card))
         {
             /* the clerk's one copy is gone */
@@ -2024,23 +2033,40 @@ static unsigned PackSets(uint8_t *out)
 static void PacksScreen(void)
 {
     uint8_t sets[YGO_SET_COUNT];
-    unsigned n = PackSets(sets), i;
-    int first = Y.cursor < 2 ? 0 : Y.cursor - 2;
+    unsigned n = PackSets(sets);
     char line[128];
     TcgUi_Background();
     TcgUi_TopBar("BOOSTER PACKS");
-    if (first > (int)n - 4)
-        first = (int)n > 4 ? (int)n - 4 : 0;
-    for (i = 0; i < 4 && first + (int)i < (int)n; i++)
+    /* Moemon Kai: the chosen pack in the middle, the others on both sides, gliding over as the cursor moves */
     {
-        unsigned set = sets[first + (int)i];
-        int x = 10 + (int)i * 57, on = first + (int)i == Y.cursor;
-        int bob = on ? (int)(fabsf(sinf(Y.frame * 0.1f)) * 3) : 0;
-        PackArt(x, 26 - bob, set, on);
-        snprintf(line, sizeof(line), "x%u", C()->packs[set]);
-        G_TextAlign(x + 22, 88, TA_CENTER, C()->packs[set] ? G_WHITE : 0xc0d8c8, 0x204030, line, TF_SMALL);
-        if (on)
-            G_Frame(x - 3, 26 - bob - 2, 50, 64, 0xe82820, 255);
+        static float sPos;
+        static int sLast;
+        int k, base;
+        if (Y.frame != sLast + 1)
+            sPos = (float)Y.cursor;   /* (the screen just opened: no glide in) */
+        sLast = Y.frame;
+        sPos += ((float)Y.cursor - sPos) * 0.35f;
+        if (fabsf((float)Y.cursor - sPos) < 0.02f)
+            sPos = (float)Y.cursor;
+        base = (int)floorf(sPos);
+        for (k = base - 3; k <= base + 3; k++)
+        {
+            unsigned set;
+            int x = 120 - 22 + (int)lroundf(((float)k - sPos) * 57), on = k == Y.cursor, bob;
+            if (k < 0 || k >= (int)n || x < -50 || x > 240)
+                continue;
+            set = sets[k];
+            bob = on ? (int)(fabsf(sinf(Y.frame * 0.1f)) * 3) : 0;
+            PackArt(x, 26 - bob, set, on);
+            snprintf(line, sizeof(line), "x%u", C()->packs[set]);
+            G_TextAlign(x + 22, 88, TA_CENTER, C()->packs[set] ? G_WHITE : 0xc0d8c8, 0x204030, line, TF_SMALL);
+            if (on)
+                G_Frame(x - 3, 26 - bob - 2, 50, 64, 0xe82820, 255);
+        }
+        if (Y.cursor > 0)
+            G_TextAlign(4, 50, TA_CENTER, G_WHITE, 0x204030, "<", TF_SMALL);
+        if (Y.cursor < (int)n - 1)
+            G_TextAlign(236, 50, TA_CENTER, G_WHITE, 0x204030, ">", TF_SMALL);
     }
     if (n)
     {

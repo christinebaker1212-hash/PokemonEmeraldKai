@@ -32,6 +32,7 @@
 #include "../tcg/tcg_ui_kit.h"
 #include "../tcg/tcg_guide.h"
 #include "../tcg/tcg_search.h"
+#include "../tcg/tcg_new.h"
 #include "tt_board.h"
 #include "tt_gfx.h"
 
@@ -1152,6 +1153,11 @@ static void ListScreen(void)
             G_RoundFill(x + 5, y, 20, 20, 0x30404c, 220);
             G_TextAlign(x + 15, y + 4, TA_CENTER, 0x8098a8, G_NO_SHADOW, "?", TF_NARROW);
         }
+        /* Moemon Kai: NEW until the cursor has been on it (tcg_new.c) */
+        if (on && Owned(card))
+            CardNew_Saw(CARDNEW_TRIAD, card, Owned(card));
+        else if (CardNew_Is(CARDNEW_TRIAD, card, Owned(card)))
+            CardNew_Badge(x + 1, y - 3, U.frame);
         if (Owned(card) > 1)
         {
             snprintf(line, sizeof(line), "x%u", Owned(card));

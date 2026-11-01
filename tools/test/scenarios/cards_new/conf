@@ -1,0 +1,7 @@
+# NEW in the BINDER (src/tcg/tcg_new.c, "<save>.cardnew"): the POKeMON BINDER opened once (everything owned counts as
+# seen), then every card given (`mp cards giveall`): the BINDER again shows NEW on the cards got since, but not on the
+# one under the cursor (looked at). Shots binder_before, binder_new, binder_moved.
+MODE=1
+TMO=120
+EXPECT_A=("cardnew: 0 new" "cardnew: 410 new")
+UNEXPECT_A=("[crash]" "TIMEOUT")
