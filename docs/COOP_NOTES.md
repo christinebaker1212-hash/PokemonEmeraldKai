@@ -3372,7 +3372,10 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   SINNOH map by the region's badges) and 20 specialty lists (data/scripts/sinnoh_marts.inc, Sinnoh_Mart_<Id>: a town's
   own goods, the VEILSTONE store's counters, the ETERNA herb shop). gen_words.py roles() reads each vendor's Platinum
   script (gen_marts.vendor_kind) for ('mart',) or ('martlist', label). Items the game lacks (Platinum's mail) are left
-  out. `mp shopdump` prints "shop here:" with the list. Test sinnoh_marts.
+  out. `mp shopdump` prints "shop here:" with the list. Test sinnoh_marts. Newer items by GENERATION as in the
+  other regions (shop.c sMpShopExtras' SINNOH rows): VEILSTONE's store by clerk as LILYCOVE's, and each town mart's
+  common clerk a few that suit the town from SINNOH's badges (MP_COMMON: only the `pokemart 0` clerk). PICKUP, held
+  items and Platinum's own field, hidden and trainers' items need nothing more (all Gen 4 or region-free).
 - SINNOH by GENERATION: tools/moemon_gen59/gen_hoenn_modern.py (after gen_wild.py / gen_trainers.py) also writes
   src/data/sinnoh_modern.h, HOENN's rules with generations 5-9 (Platinum's tables are Gen 4 already; GEN 3 and 4 show
   them as they are), and a slot whose POKéMON is wild nowhere else in SINNOH stays. mp_region.c ModernWild /

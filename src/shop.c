@@ -1317,6 +1317,9 @@ static const u16 sMpZCrystals[] = {
 #define MP_EXTRA(m, first, badges, list) {MAP_##m, first, badges, list, ARRAY_COUNT(list)}
 #define MP_TOWN(m, badges, ...) {MAP_##m, MP_ANY_CLERK, badges, (const u16[]){__VA_ARGS__}, \
                                  ARRAY_COUNT(((const u16[]){__VA_ARGS__}))}
+#define MP_REGION_LIST 0xFFFE
+#define MP_COMMON(m, badges, ...) {MAP_##m, MP_REGION_LIST, badges, (const u16[]){__VA_ARGS__}, \
+                                   ARRAY_COUNT(((const u16[]){__VA_ARGS__}))}   // (just the `pokemart 0` clerk)
 // (the badges each kind waits for in its region: mail and curios at once, training items from 2, the battle items
 // from 3-4, evolution items from 4-5, MEGA STONES and Z-CRYSTALS from 6)
 static const struct { u16 map; u16 firstItem; u8 badges; const u16 *items; u8 count; } sMpShopExtras[] = {
@@ -1380,6 +1383,29 @@ static const struct { u16 map; u16 firstItem; u8 badges; const u16 *items; u8 co
     MP_TOWN(KANTO_FOUR_ISLAND_MART, 7, ITEM_ICY_ROCK, ITEM_SNOWBALL),
     MP_TOWN(KANTO_SIX_ISLAND_MART, 7, ITEM_RAZOR_CLAW, ITEM_OVAL_STONE),
     MP_TOWN(KANTO_SEVEN_ISLAND_MART, 7, ITEM_EXPERT_BELT, ITEM_FOCUS_SASH),
+
+    // SINNOH: VEILSTONE's store by clerk as LILYCOVE's (each known by the first item of their Platinum list), the town
+    // marts' common clerk (`pokemart 0`) a few that suit the town, from SINNOH's badge count
+    MP_EXTRA(SINNOH_VEILSTONE_STORE1F, ITEM_POKE_BALL, 4, sMpEvoStones),
+    MP_EXTRA(SINNOH_VEILSTONE_STORE1F, ITEM_POKE_BALL, 5, sMpEvoTrade),
+    MP_EXTRA(SINNOH_VEILSTONE_STORE1F, ITEM_POTION, 0, sMpMail),
+    MP_EXTRA(SINNOH_VEILSTONE_STORE1F, ITEM_POTION, 0, sMpCurios),
+    MP_EXTRA(SINNOH_VEILSTONE_STORE2F, ITEM_PROTEIN, 2, sMpTraining),
+    MP_EXTRA(SINNOH_VEILSTONE_STORE2F, ITEM_PROTEIN, 6, sMpZCrystals),
+    MP_EXTRA(SINNOH_VEILSTONE_STORE2F, ITEM_X_SPEED, 3, sMpConsumables),
+    MP_EXTRA(SINNOH_VEILSTONE_STORE2F, ITEM_X_SPEED, 6, sMpMegaStones),
+    MP_EXTRA(SINNOH_VEILSTONE_STORE3F, ITEM_TM38, 4, sMpOffense),
+    MP_EXTRA(SINNOH_VEILSTONE_STORE3F, ITEM_TM83, 4, sMpDefense),
+    MP_COMMON(SINNOH_OREBURGH_CITY_MART, 1, ITEM_SMOOTH_ROCK, ITEM_SHED_SHELL),
+    MP_COMMON(SINNOH_FLOAROMA_TOWN_MART, 1, ITEM_BIG_ROOT, ITEM_GRASSY_SEED, ITEM_MISTY_SEED),
+    MP_COMMON(SINNOH_ETERNA_CITY_MART, 2, ITEM_OVAL_STONE, ITEM_SHINY_STONE),
+    MP_COMMON(SINNOH_HEARTHOME_CITY_MART, 3, ITEM_REAPER_CLOTH, ITEM_DUSK_STONE),
+    MP_COMMON(SINNOH_SOLACEON_TOWN_MART, 3, ITEM_PSYCHIC_SEED, ITEM_LIGHT_CLAY),
+    MP_COMMON(SINNOH_PASTORIA_CITY_MART, 4, ITEM_BLACK_SLUDGE, ITEM_TOXIC_ORB, ITEM_DAMP_ROCK),
+    MP_COMMON(SINNOH_CANALAVE_CITY_MART, 5, ITEM_IRON_BALL, ITEM_FLOAT_STONE, ITEM_AIR_BALLOON),
+    MP_COMMON(SINNOH_SNOWPOINT_CITY_MART, 6, ITEM_ICY_ROCK, ITEM_SNOWBALL, ITEM_ICE_STONE),
+    MP_COMMON(SINNOH_SUNYSHORE_CITY_MART, 7, ITEM_CELL_BATTERY, ITEM_ELECTRIC_SEED, ITEM_ELECTIRIZER),
+    MP_COMMON(SINNOH_POKEMON_LEAGUE_NORTH_POKECENTER1F, 8, ITEM_WEAKNESS_POLICY, ITEM_ASSAULT_VEST, ITEM_ROCKY_HELMET),
 };
 
 // JOHTO and KANTO sell what Pokemon Crystal (JOHTO: pret/pokecrystal data/items/marts.asm) and FireRed / LeafGreen
@@ -1387,7 +1413,6 @@ static const struct { u16 map; u16 firstItem; u8 badges; const u16 *items; u8 co
 // doesn't: Crystal's mail, SLOWPOKETAIL, RAGECANDYBAR, its punch TMs), plus only the items of Quetzal's own list
 // from GEN 4 on (MP_Gen_OfItem; GENERATION decides). A clerk Quetzal added sells only those. Clerks are known by the
 // first item of their Quetzal list (MP_REGION_LIST: a `pokemart 0` clerk).
-#define MP_REGION_LIST 0xFFFE
 #define MP_LIST(...) ((const u16[]){__VA_ARGS__, ITEM_NONE})
 #define MP_BASE(m, first, ...) {MAP_##m, first, 0, MP_LIST(__VA_ARGS__)}
 #define MP_BASE_BADGES(m, first, badges, ...) {MAP_##m, first, badges, MP_LIST(__VA_ARGS__)}
