@@ -51,6 +51,19 @@ about 14x5 pixels, under the player's feet, see-through).
   region, sim, search...; display / controls / co-op settings) and go back to the title screen. Every module that
   caches a sidecar must drop its cache (Tcg_GetCollection keys by owner; check the others).
 
+## 6. Card games: NEW tags and centered booster packs (the user, 2026-11-01)
+- In the BINDER (all three card games: src/tcg/tcg_ui.c, src/ygo/ygo_ui.c, src/tt/), a "NEW" tag on every card
+  obtained recently (until it has been looked at in the BINDER; kept in each game's sidecar).
+- On every booster pack screen (GAME CENTER CARD SHOP, the CARD CLUB counters, Yu-Gi-Oh! / Triple Triad sellers), the
+  pack under the cursor sits in the middle of the screen while choosing (the row scrolls to keep it centered).
+
+## 7. 40 PC boxes (the user, 2026-11-01, "the final task")
+- The player's own PC (14 boxes today, in the save: the layout can't change, tools/test/save_layout.py): 40 boxes, the
+  26 more in a sidecar ("<save>.boxes" or the like, converted by mp_savefix.c) that MP_PersonalStorage() / the box
+  screen read as boxes 15-40; box names and wallpapers too.
+- The shared PC (mp_sharedbox.c: 14 boxes mirrored from the server) and the Global PC (the server's): 40 boxes each;
+  the server (tools/mp_server) keeps them; protocol bump (MP_PROTOCOL_VERSION).
+
 ## Task list to date (this session's work, all done unless marked)
 - SINNOH region (1.63.0, released): 3D engine, maps, people and words, trainers, gyms (moving puzzles), LEAGUE,
   HALL OF FAME, story people, legendaries, the DISTORTION WORLD, fossils, field obstacles, the POKéTCH, FLY and the
@@ -59,4 +72,4 @@ about 14x5 pixels, under the player's feet, see-through).
   JOHTO's HGSS music.
 - 1.63.0's release build fix (a letter the game's font lacks), re-queued, published with both zips and update.txt.
 - NEW GAME in SINNOH + region menu order: done, release 1.63.1 pending (task 1).
-- Pending: tasks 2, 3, 4, 5 above.
+- Pending: tasks 2-7 above.
