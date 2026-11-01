@@ -3443,6 +3443,15 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   look (the card games' who-plays-what, tcg_field.c Tcg_LookGfx and sPicOfGfx) reads a Platinum sprite as its stand-in;
   a trainer's card challenge screen shows Platinum's picture cut to 64x64 (S3D_Gfx_TrainerPicPixels; test
   sinnoh_card_pic).
+- Legendaries on the map (tools/sinnoh/legends.py before gen_maps.py; src/sinnoh/s3d_legends.c): Platinum's standing
+  ones where it stands them, with Emerald's static encounter script each (data/scripts/sinnoh_legends.inc) and a
+  "done" flag 0x3D00 + n (caught or beaten). Their maps' OnTransition (special Sinnoh_LegendsRefresh) shows one unless
+  done, past the GENERATION or not yet: UXIE (ACUITY CAVERN), AZELF (VALOR), MESPRIT (VERITY) and GIRATINA (TURNBACK
+  CAVE) from the 7th BADGE (Platinum gives them in its story then); HEATRAN, REGIGIGAS (Lv. 1, as Platinum), CRESSELIA,
+  DARKRAI, SHAYMIN and ARCEUS after the LEAGUE. Their sprites are Platinum's (build_gfx.py: 32-wide sheets' and the
+  64-wide big ones' first frame, kind 4: 64x64), JOHTO's / KANTO's GBA ones (Quetzal's QZ_736-749) as the Gen 3 look
+  and stand-in. Not yet: DIALGA and PALKIA at SPEAR PILLAR (Platinum brings them by script, not as standing objects),
+  the REGIS' ruins, ROTOM. Test sinnoh_legends.
 - The three card games in SINNOH: its people play by their sprite's look-alike (tcg_field.c Tcg_LookGfx: the specials
   first, then sSinnohStandIns), so the townsfolk and beaten trainers duel as JOHTO's and KANTO's do. Special card
   trainers (sQzSpecials' SINNOH rows): the eight leaders by role and type (ROARK - ROXANNE, MAYLENE - BRAWLY, WAKE -

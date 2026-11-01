@@ -608,4 +608,5 @@ gSpecials::
 	def_special MP_RegionPartyCount
 	def_special MP_RegionFirstVisit
 	def_special MP_Fight_CabinetReady   @ Moemon Fight: the GAME CENTER's arcade cabinets
+	def_special Sinnoh_LegendsRefresh   @ Moemon Kai: SINNOH's legendaries on the map (src/sinnoh/s3d_legends.c)
 	.include "data/qz_specials.inc"   @ Moemon Kai: Quetzal's specials (Johto / Kanto)

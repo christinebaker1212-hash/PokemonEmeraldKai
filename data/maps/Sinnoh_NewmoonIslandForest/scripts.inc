@@ -1,2 +1,7 @@
 Sinnoh_NewmoonIslandForest_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, Sinnoh_NewmoonIslandForest_OnTransition
 	.byte 0
+
+Sinnoh_NewmoonIslandForest_OnTransition:
+	special Sinnoh_LegendsRefresh
+	end

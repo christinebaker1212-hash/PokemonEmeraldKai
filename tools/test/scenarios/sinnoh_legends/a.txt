@@ -1,0 +1,26 @@
+pressuntil A field 5000
+wait 30
+mp warp 44,43,16,16
+wait 200
+mp getflag 0x3500
+shot l_none
+mp setflag 0x3320
+mp setflag 0x3321
+mp setflag 0x3322
+mp setflag 0x3323
+mp setflag 0x3324
+mp setflag 0x3325
+mp setflag 0x3326
+mp warp 44,43,16,16
+wait 200
+mp getflag 0x3500
+shot l_azelf
+mp face up
+mp battlestyle 1
+press UP 2
+wait 10
+press A 2
+pressuntil A action 3000
+mp bhp
+shot l_battle
+quit

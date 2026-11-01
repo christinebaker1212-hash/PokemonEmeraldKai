@@ -71,7 +71,7 @@ static void Load(void)
         if (p + 26 + 32 > end)
             goto bad;
         kind = p[24];
-        frames = kind == 0 ? 9 * 512 : kind == 3 ? 10 * 512 : kind == 1 ? 512 : 128;
+        frames = kind == 0 ? 9 * 512 : kind == 3 ? 10 * 512 : kind == 1 ? 512 : kind == 4 ? 2048 : 128;
         if (p + 26 + 2 * (32 + frames) > end)
             goto bad;
         sGfx.sprites[i].kind = kind;

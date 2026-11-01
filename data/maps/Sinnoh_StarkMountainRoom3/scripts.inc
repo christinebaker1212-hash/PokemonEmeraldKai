@@ -1,2 +1,7 @@
 Sinnoh_StarkMountainRoom3_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, Sinnoh_StarkMountainRoom3_OnTransition
 	.byte 0
+
+Sinnoh_StarkMountainRoom3_OnTransition:
+	special Sinnoh_LegendsRefresh
+	end

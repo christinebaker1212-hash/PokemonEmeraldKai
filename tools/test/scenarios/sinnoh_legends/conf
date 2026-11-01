@@ -1,0 +1,8 @@
+# SINNOH's legendaries on the map (tools/sinnoh/legends.py, src/sinnoh/s3d_legends.c): VALOR CAVERN's AZELF isn't there
+# before the 7th BADGE (its object's flag 0x3500 set), is with 7 (cleared), and talking to it starts its battle
+# (Lv. 50). Needs both packs. Shots l_*.png.
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=150:100"
+EXPECT_A=("[test] flag 13568 = 1" "[test] flag 13568 = 0" "battler 1 hp" "species 507 level 50")
+UNEXPECT_A=("[crash]")

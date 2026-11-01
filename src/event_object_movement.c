@@ -2008,22 +2008,22 @@ static const struct ObjectEventGraphicsInfo *SinnohPackInfo(u16 i, bool8 small)
     frames = kind == 0 ? 9 : kind == 3 ? 10 : 1;   // (3: the nurse, her bow as frame 9)
     for (f = 0; f < frames; f++)
     {
-        sImages[small][i][f].data = tiles + f * (kind == 2 ? 128 : 512);
-        sImages[small][i][f].size = kind == 2 ? 128 : 512;
+        sImages[small][i][f].data = tiles + f * (kind == 2 ? 128 : kind == 4 ? 2048 : 512);
+        sImages[small][i][f].size = kind == 2 ? 128 : kind == 4 ? 2048 : 512;
     }
     info->tileTag = TAG_NONE;
     info->paletteTag = (small ? SINNOH_PAL_TAG_SMALL : SINNOH_PAL_TAG) + i;
     info->reflectionPaletteTag = OBJ_EVENT_PAL_TAG_NONE;
-    info->size = kind == 2 ? 128 : 512;
-    info->width = kind == 2 ? 16 : 32;
-    info->height = kind == 2 ? 16 : 32;
+    info->size = kind == 2 ? 128 : kind == 4 ? 2048 : 512;   // (4: a big legendary, still 64x64)
+    info->width = kind == 2 ? 16 : kind == 4 ? 64 : 32;
+    info->height = kind == 2 ? 16 : kind == 4 ? 64 : 32;
     info->paletteSlot = PALSLOT_QZ;
-    info->shadowSize = kind == 2 ? SHADOW_SIZE_S : SHADOW_SIZE_M;
-    info->inanimate = kind == 1 || kind == 2;
+    info->shadowSize = kind == 2 ? SHADOW_SIZE_S : kind == 4 ? SHADOW_SIZE_L : SHADOW_SIZE_M;
+    info->inanimate = kind == 1 || kind == 2 || kind == 4;
     info->disableReflectionPaletteLoad = TRUE;
     info->tracks = kind == 0 || kind == 3 ? TRACKS_FOOT : TRACKS_NONE;
-    info->oam = kind == 2 ? &gObjectEventBaseOam_16x16 : &gObjectEventBaseOam_32x32;
-    info->subspriteTables = kind == 2 ? sOamTables_16x16 : sOamTables_32x32;
+    info->oam = kind == 2 ? &gObjectEventBaseOam_16x16 : kind == 4 ? &gObjectEventBaseOam_64x64 : &gObjectEventBaseOam_32x32;
+    info->subspriteTables = kind == 2 ? sOamTables_16x16 : kind == 4 ? sOamTables_64x64 : sOamTables_32x32;
     info->anims = kind == 0 ? sAnimTable_Standard : kind == 3 ? sAnimTable_Nurse : sAnimTable_Inanimate;
     info->images = sImages[small][i];
     info->affineAnims = gDummySpriteAffineAnimTable;

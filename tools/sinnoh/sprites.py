@@ -63,16 +63,18 @@ GEN3 = {
     'BRIEFCASE': 'BIRCHS_BAG',
     # characters
     'CYNTHIA': 'kai_cynthia', 'CYRUS': 'kai_cyrus', 'MARS': 'kai_mars', 'PROF_OAK': 'kai_prof_oak',
-    # POKeMON
-    'PIKACHU': 'PIKACHU', 'SKITTY': 'SKITTY',
+    # POKeMON; the legendaries in JOHTO's / KANTO's own GBA sprites (Moemon Quetzal's)
+    'PIKACHU': 'PIKACHU', 'SKITTY': 'SKITTY', 'UXIE': 'QZ_736', 'MESPRIT': 'QZ_737', 'AZELF': 'QZ_738',
+    'DIALGA': 'QZ_739', 'PALKIA': 'QZ_740', 'HEATRAN': 'QZ_741', 'REGIGIGAS': 'QZ_742', 'GIRATINA_ALTERED': 'QZ_743',
+    'CRESSELIA': 'QZ_744', 'DARKRAI': 'QZ_747', 'SHAYMIN': 'QZ_748', 'ARCEUS': 'QZ_749',
 }
 
 # kinds of thing that are no person to see (Platinum draws them, or they mean nothing here yet); SIGNS are read where they
 # stand (gen_maps.py turns them into the map's signs)
 SIGNS = re.compile(r'SIGNPOST|SIGNBOARD|MAILBOX|BOOK$')
 HIDDEN = re.compile(r'SIGN|VENT|BOLLARD|SNOWBALL|WIFI|INVISIBLE|BERRY_SOIL|MAILBOX|BOOK$|DOOR|CAVE_PAINTING|_ROCK$|'
-                    r'ROTOM|WALL_|BABY_IN_PRAM|^VAR_[1-9A-F]$|ARCEUS|AZELF|MESPRIT|UXIE|DARKRAI|CRESSELIA|SHAYMIN|'
-                    r'GIRATINA|HEATRAN|REGIGIGAS')
+                    r'ROTOM|WALL_|BABY_IN_PRAM|^VAR_[1-9A-F]$|GIRATINA_ORIGIN')
+# (the legendaries stand where Platinum puts them: tools/sinnoh/legends.py gives them their battles and when they show)
 
 _own = None
 
@@ -139,12 +141,14 @@ def gen3(name):
         table = table[:table.index('\n};')]
         chars = re.findall(r'^\s*\{"[^"]*", "(kai_\w+)"', table, re.M)
         return 'MP_GFX_CHAR_FIRST + %d' % chars.index(g)
-    assert g in own(), g
+    assert g in own() or g.startswith('QZ_'), g
     return 'OBJ_EVENT_GFX_' + g
 
 
 def standin(name):
     """The closest sprite the game has itself"""
+    if GEN3.get(name, '').startswith('QZ_'):
+        return 'OBJ_EVENT_GFX_' + GEN3[name]
     if name in SPRITES:
         return 'OBJ_EVENT_GFX_' + SPRITES[name]
     if name in own() and not name.startswith('VAR_'):

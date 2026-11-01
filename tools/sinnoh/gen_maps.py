@@ -28,6 +28,7 @@ import ids  # noqa: E402
 import items  # noqa: E402
 import gen_trainers  # noqa: E402
 import sprites  # noqa: E402
+import legends  # noqa: E402
 
 GROUP = 'gMapGroup_Sinnoh'                      # the outdoor places
 INDOOR_GROUP = 'gMapGroup_SinnohIndoor%d'       # the buildings, PER_GROUP a group (1, 2, 3...)
@@ -152,6 +153,14 @@ def people(p, root, have):
         if trainer:
             # a trainer: its battle script (data/scripts/sinnoh_trainers.inc, tools/sinnoh/gen_trainers.py) and sight
             script = gen_trainers.label(o['script'])
+        legend = legends.scripts().get((p['name'], i + 1))
+        if legend:
+            # a legendary: its battle (tools/sinnoh/legends.py), shown by its hide flag (Sinnoh_LegendsRefresh)
+            out.append({'graphics_id': gfx, 'x': o['x'] - p['x0'] * 32, 'y': o['z'] - p['z0'] * 32, 'elevation': 3,
+                        'movement_type': 'MOVEMENT_TYPE_FACE_DOWN', 'movement_range_x': 0, 'movement_range_y': 0,
+                        'trainer_type': 'TRAINER_TYPE_NONE', 'trainer_sight_or_berry_tree_id': '0',
+                        'script': legend, 'flag': '0x%X' % flag})
+            continue
         ball = items.ball(root, o['script']) if o['graphics_id'].endswith('POKEBALL') else None
         if ball and not inside(p, o['x'], o['z']):
             ball = None

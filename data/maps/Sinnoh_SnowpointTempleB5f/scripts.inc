@@ -1,2 +1,7 @@
 Sinnoh_SnowpointTempleB5f_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, Sinnoh_SnowpointTempleB5f_OnTransition
 	.byte 0
+
+Sinnoh_SnowpointTempleB5f_OnTransition:
+	special Sinnoh_LegendsRefresh
+	end
