@@ -39,6 +39,7 @@ press B 4
 mash B 10 10
 waitfor field 2000
 mp getflag 0x3D39
+mp getflag 2144
 mp party
 mp warp 43,62,7,6
 wait 90

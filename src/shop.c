@@ -31,6 +31,7 @@
 #include "party_menu.h"
 #include "scanline_effect.h"
 #include "script.h"
+#include "s3d.h"   // Moemon Kai: SINNOH's 3D maps behind the BUY screen
 #include "shop.h"
 #include "sound.h"
 #include "sprite.h"
@@ -417,8 +418,33 @@ static void Task_ShopMenu(u8 taskId)
 #define tItemId     data[5]
 #define tListTaskId data[7]
 
+// Moemon Kai: on a SINNOH 3D map the BUY screen shows the field's last 3D picture (s3d.c S3D_ShopPicture) and its
+// people where that picture had them, all moved as Emerald moves the map so the player stands where it puts them
+static struct { bool8 on; s16 x[OBJECT_EVENTS_COUNT], y[OBJECT_EVENTS_COUNT]; u8 shown[OBJECT_EVENTS_COUNT]; s16 dx, dy; } sMp3d;
+
+static void Mp3dRecord(void)
+{
+    u32 i;
+    sMp3d.on = S3D_Active();
+    for (i = 0; i < OBJECT_EVENTS_COUNT && sMp3d.on; i++)
+    {
+        const struct ObjectEvent *e = &gObjectEvents[i];
+        const struct Sprite *sp;
+        sMp3d.shown[i] = FALSE;
+        if (!e->active || e->invisible || e->spriteId >= MAX_SPRITES)
+            continue;
+        sp = &gSprites[e->spriteId];
+        if (!sp->inUse || sp->invisible)
+            continue;
+        sMp3d.x[i] = (sp->oam.x >= 256 ? sp->oam.x - 512 : sp->oam.x) - sp->centerToCornerVecX;   // (its middle)
+        sMp3d.y[i] = (sp->oam.y >= 160 ? sp->oam.y - 256 : sp->oam.y) - sp->centerToCornerVecY;
+        sMp3d.shown[i] = TRUE;
+    }
+}
+
 static void Task_HandleShopMenuBuy(u8 taskId)
 {
+    Mp3dRecord();   // Moemon Kai
     gTasks[taskId].ptr.funcPtr = CB2_InitBuyMenu;
     gTasks[taskId].func = Task_GoToBuyOrSellMenu;
     FadeScreen(FADE_TO_BLACK, 0);
@@ -784,8 +810,24 @@ static void BuyMenuDrawGraphics(void)
 static void BuyMenuDrawMapGraphics(void)
 {
     BuyMenuCollectObjectEventData();
+    if (sMp3d.on)   // Moemon Kai: the player's spot here less where the 3D picture had them
+    {
+        u8 i, player = gPlayerAvatar.objectEventId;
+        sMp3d.on = FALSE;
+        for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+            if (sShopData->viewportObjects[i][OBJ_EVENT_ID] == player && sMp3d.shown[player])
+            {
+                const struct ObjectEventGraphicsInfo *info = GetObjectEventGraphicsInfo(OBJ_GFX_ID(&gObjectEvents[player]));
+                sMp3d.dx = sShopData->viewportObjects[i][X_COORD] * 16 + 8 - sMp3d.x[player];
+                sMp3d.dy = sShopData->viewportObjects[i][Y_COORD] * 16 + 48 - info->height / 2 - sMp3d.y[player];
+                sMp3d.on = TRUE;
+            }
+    }
     BuyMenuDrawObjectEvents();
-    BuyMenuDrawMapBg();
+    if (sMp3d.on)
+        S3D_ShopPicture(TRUE, sMp3d.dx, sMp3d.dy);
+    else
+        BuyMenuDrawMapBg();
 }
 
 static void BuyMenuDrawMapBg(void)
@@ -911,12 +953,21 @@ static void BuyMenuDrawObjectEvents(void)
 
         graphicsInfo = GetObjectEventGraphicsInfo(OBJ_GFX_ID(&gObjectEvents[sShopData->viewportObjects[i][OBJ_EVENT_ID]]));
 
-        spriteId = CreateObjectGraphicsSprite(
-            OBJ_GFX_ID(&gObjectEvents[sShopData->viewportObjects[i][OBJ_EVENT_ID]]),
-            SpriteCallbackDummy,
-            (u16)sShopData->viewportObjects[i][X_COORD] * 16 + 8,
-            (u16)sShopData->viewportObjects[i][Y_COORD] * 16 + 48 - graphicsInfo->height / 2,
-            2);
+        {
+            u8 id = sShopData->viewportObjects[i][OBJ_EVENT_ID];
+            s16 sx = sShopData->viewportObjects[i][X_COORD] * 16 + 8;
+            s16 sy = sShopData->viewportObjects[i][Y_COORD] * 16 + 48 - graphicsInfo->height / 2;
+            if (sMp3d.on)   // Moemon Kai: where the 3D picture had them
+            {
+                if (!sMp3d.shown[id])
+                    continue;
+                sx = sMp3d.x[id] + sMp3d.dx;
+                sy = sMp3d.y[id] + sMp3d.dy;
+            }
+            spriteId = CreateObjectGraphicsSprite(OBJ_GFX_ID(&gObjectEvents[id]), SpriteCallbackDummy, sx, sy, 2);
+        }
+        if (spriteId == MAX_SPRITES)
+            continue;
 
         if (BuyMenuCheckIfObjectEventOverlapsMenuBg(sShopData->viewportObjects[i]) == TRUE)
         {
@@ -1219,6 +1270,8 @@ static void Task_ExitBuyMenu(u8 taskId)
     {
         RemoveMoneyLabelObject();
         BuyMenuFreeMemory();
+        S3D_ShopPicture(FALSE, 0, 0);   // Moemon Kai
+        sMp3d.on = FALSE;
         SetMainCallback2(CB2_ReturnToField);
         DestroyTask(taskId);
     }

@@ -3383,6 +3383,27 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
 - Tests tools/test/pc_boxes.sh (boxes 1 / 15 / 40 and box 33 in use across a save; no side file; a backup's; another
   save's), scenario shared_pc_v2 (a MOEST2 file; SHARED40 on screen), region_globalpc (1200 free). `mp curbox [N]`.
 
+## 1.63.8: SINNOH polish, softer shadows
+- Shadows (mp_shadow.c, gba_easy_draw.c ShadowPixel): a quarter darker than the ground (was half); the feet come
+  from the lowest row of every frame of the sprite's animation (SteadyBottom, remembered per sprite while its
+  pictures stay), not the frame shown, so running up / down doesn't move them. `mp shadowwatch N`: the player's
+  shadow's gap over N frames (test shadows: "moved 0").
+- The briefcase's glove (build_starter.py cursor_image): its RAHC data starts 0x18 + offset into the NCGR (was 0x10:
+  8 bytes early, every row shifted). The release's pack is built again (make_pack.sh).
+- SINNOH's briefcase starter sets FLAG_SYS_POKEMON_GET (sinnoh_places.inc); mp_region.c SinnohStarterMenuFlag gives
+  saves with FLAG_SINNOH_STARTER (0x3D39) theirs on loading. Test sinnoh_newgame.
+- The 3D view draws on CB2_OverworldBasic too (s3d.c OnField: battle_transition.c runs the field there), so a battle's
+  opening keeps the map. Wavy transitions don't bend it (a picture, not the BG's scroll).
+- POKé MART BUY screen (shop.c Mp3dRecord / BuyMenuDrawMapGraphics, s3d.c S3D_ShopPicture): on a 3D map the field's
+  last 3D picture (s3d.c sColor, faded as the screen fades) moved so the player stands where Emerald's layout puts
+  them, and the people at their 3D spots moved the same; no metatiles. CreateObjectGraphicsSprite loads JOHTO / KANTO /
+  SINNOH palettes too (QzLoadObjectPalette: the clerk was black). Test sinnoh_marts shot buy.
+- POKéMON CENTER healing (src/sinnoh/s3d_heal.c, field_effect.c FldEff_PokecenterHeal): Platinum's
+  pokecenter_healing_machine_mini_pokeball model (packed as a named mesh: gymprops.py) in dynamic prop slots 30-35, one a
+  ball every 16 frames with SE_BALL, Platinum's offsets (x +-4.5, z -4.5/0/+4.5, y 12) from the machine, which stands at
+  (-22.2, -14.5) from the nurse's tile middle ((-24, -12) in the LEAGUE's north CENTER); then they blink every 8
+  frames while MUS_HEAL plays (Platinum's flash is a material animation). `mp healballs`; test sinnoh_heal.
+
 ## SINNOH's 3D engine
 - Plan and rules: docs/SINNOH_HANDOFF.md. The data comes from pret/pokeplatinum (source.py: its map blocks, matrices,
   areas, props, texture sets and lights as files; fetch_decomp.sh gets them at a pinned commit, make_pack.sh fetches and

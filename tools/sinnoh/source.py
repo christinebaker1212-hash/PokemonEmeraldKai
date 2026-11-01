@@ -97,6 +97,15 @@ class Decomp:
         path = self._path('res/graphics/field_effects', name)
         return open(path, 'rb').read() if os.path.exists(path) else None
 
+    def tex_anims(self):
+        """Platinum's animated map textures (fldtanime.narc: member 0 the list, then each one's frames; None: not
+        fetched, fetch_decomp.sh PARTS 8)"""
+        path = self._path('res/prebuilt/data/fldtanime.narc')
+        if not os.path.exists(path):
+            return None
+        from nds import Narc
+        return Narc(open(path, 'rb').read())
+
     def lights(self, n):
         blocks = []
         for b in json.load(open(self._path('res/field/lighting', 'lighting_set_%03d.json' % n))):
@@ -156,6 +165,9 @@ class RomSource:
 
     def field_effect(self, name):
         return self.decomp.field_effect(name)
+
+    def tex_anims(self):
+        return self._n('data/fldtanime.narc')
 
     def lights(self, n):
         from render_ref import parse_lights

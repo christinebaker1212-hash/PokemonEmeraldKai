@@ -1595,6 +1595,8 @@ static void MakeSpriteTemplateFromObjectEventTemplate(const struct ObjectEventTe
 }
 
 // Used to create a sprite using a graphicsId associated with object events.
+u8 QzLoadObjectPalette(u16 tag);
+
 u8 CreateObjectGraphicsSprite(u16 graphicsId, void (*callback)(struct Sprite *), s16 x, s16 y, u8 subpriority)
 {
     struct SpriteTemplate *spriteTemplate;
@@ -1605,7 +1607,11 @@ u8 CreateObjectGraphicsSprite(u16 graphicsId, void (*callback)(struct Sprite *),
     spriteTemplate = Alloc(sizeof(struct SpriteTemplate));
     CopyObjectGraphicsInfoToSpriteTemplate(graphicsId, callback, spriteTemplate, &subspriteTables);
     if (spriteTemplate->paletteTag != TAG_NONE)
+    {
         LoadObjectEventPalette(spriteTemplate->paletteTag);
+        if (IndexOfSpritePaletteTag(spriteTemplate->paletteTag) == 0xFF)   // Moemon Kai: JOHTO's, KANTO's, SINNOH's own
+            QzLoadObjectPalette(spriteTemplate->paletteTag);               // (1.63.8: a SINNOH clerk was black in a BUY screen)
+    }
 
     spriteId = CreateSprite(spriteTemplate, x, y, subpriority);
     Free(spriteTemplate);

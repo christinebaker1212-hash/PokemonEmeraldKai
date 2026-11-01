@@ -583,6 +583,16 @@ void MP_TestCommand(const char *cmd, const char *arg)
                 n++;
         printf("[test] shadows %s: %u\n", gMpConfig.noShadows ? "off" : "on", (unsigned)n);
     }
+    else if (strcmp(cmd, "healballs") == 0)   // healballs - the balls SINNOH's healing machine has set so far (s3d_heal.c)
+    {
+        u8 S3D_Heal_Shown(void);
+        printf("[test] healballs %d\n", S3D_Heal_Shown());
+    }
+    else if (strcmp(cmd, "shadowwatch") == 0)   // shadowwatch N - how far the player's shadow moves against them (mp_shadow.c)
+    {
+        void MP_Shadow_Watch(u16 frames);
+        MP_Shadow_Watch(atoi(arg));
+    }
     else if (strcmp(cmd, "followsprites") == 0)
     {
         // followsprites N - OPTIONS > GAME > FOLLOWERS: 0 default, 1 pmd, 2 original

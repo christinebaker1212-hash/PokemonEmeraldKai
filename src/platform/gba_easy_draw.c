@@ -505,8 +505,11 @@ static uint16_t ShadowPixel(struct scanlineData *scanline, int prnum, int x)
             }
         }
 found:
-    // half: about the mock-up's shadow on grass
-    return ((c & 0x1F) >> 1) | ((((c >> 5) & 0x1F) >> 1) << 5) | ((((c >> 10) & 0x1F) >> 1) << 10);
+    // a quarter darker (1.63.8: the user asked for half the 1.63.4 shadow's strength)
+    {
+        unsigned int r = c & 0x1F, g = (c >> 5) & 0x1F, b = (c >> 10) & 0x1F;
+        return (r * 3 >> 2) | ((g * 3 >> 2) << 5) | ((b * 3 >> 2) << 10);
+    }
 }
 
 // One sprite pixel of `color` at global_x on this line: battle weather, the dark cave's window, OBJ windows, blending,

@@ -1,0 +1,20 @@
+pressuntil A field 5000
+wait 30
+mp warp 42,24,8,8
+wait 200
+press UP 40
+wait 20
+press A 4
+pressuntil A yesno 1500
+wait 20
+press A 4
+mash A 6 20
+wait 90
+mp healballs
+shot heal_balls
+mash A 40 12
+pressuntil B field 2000
+wait 30
+mp where
+shot heal_done
+quit

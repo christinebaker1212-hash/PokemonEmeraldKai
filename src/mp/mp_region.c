@@ -513,6 +513,16 @@ static void MoveQuetzalSystemFlags(void)
     }
 }
 
+// SINNOH's briefcase starter didn't give the START menu's MOeMON before 1.63.8: saves that took it get it on loading
+static void SinnohStarterMenuFlag(void)
+{
+    if (FlagGet(0x3D39) && !FlagGet(FLAG_SYS_POKEMON_GET))   // (FLAG_SINNOH_STARTER: sinnoh_places.inc)
+    {
+        FlagSet(FLAG_SYS_POKEMON_GET);
+        MPNet_Log("region: the START menu's MOeMON for SINNOH's starter");
+    }
+}
+
 // HOENN's POKeDEX comes with the NATIONAL DEX (1.61.4: before, only after HOENN's League); saves that got BIRCH's
 // POKeDEX without it get it on loading (it shows the GENERATION's POKeMON: MP_Gen_DexCount). JOHTO / KANTO give theirs
 // in their own scripts.
@@ -554,6 +564,7 @@ void MP_Region_LoadFromSave(void)
             MoveQuetzalSystemFlags();
             MP_SaveFix_Migrate(sSaveFormat);
             GiveNationalDex();
+            SinnohStarterMenuFlag();
             return;
         }
     }

@@ -995,10 +995,48 @@ static inline u16 Darkened(u16 c, int x, int line)
     return out;
 }
 
+// The field, also while a battle's opening plays (battle_transition.c runs on CB2_OverworldBasic: 1.63.8, the map
+// was gone behind it)
+static bool8 OnField(void)
+{
+    return gMain.callback2 == CB2_Overworld || gMain.callback2 == CB2_OverworldBasic;
+}
+
+static void S3dLine(int line, u16 layers[4][DISPLAY_WIDTH]);
+
+// A POKé MART's BUY screen (shop.c): the field's last 3D picture behind it, moved by (dx, dy) as the screen moves
+// the map (1.63.8: Emerald's own map tiles showed there, garbled)
+static struct { bool8 on; s16 dx, dy; } sShopPic;
+void S3D_ShopPicture(bool8 on, s16 dx, s16 dy)
+{
+    sShopPic.on = on && sView.active;
+    sShopPic.dx = dx, sShopPic.dy = dy;
+    if (sShopPic.on)
+        gMpS3dLine = S3dLine;
+}
+
+static void ShopLine(int line, u16 layers[4][DISPLAY_WIDTH])
+{
+    s32 x, sy = line - sShopPic.dy;
+    if (line == 0)
+        FindFade();
+    for (x = 0; x < W; x++)
+    {
+        s32 sx = x - sShopPic.dx;
+        layers[3][x] = (sy >= 0 && sy < H && sx >= 0 && sx < W) ? Faded(sColor[sy][sx]) : Faded(0);
+        layers[2][x] = 0;
+    }
+}
+
 static void S3dLine(int line, u16 layers[4][DISPLAY_WIDTH])
 {
     s32 x;
-    if (!sView.active || gMain.callback2 != CB2_Overworld)
+    if (sShopPic.on && !OnField())
+    {
+        ShopLine(line, layers);
+        return;
+    }
+    if (!sView.active || !OnField())
         return;
     if (line == 0)
     {
@@ -1051,7 +1089,7 @@ float S3D_TestGround(s32 mapX, s32 mapY, float near)
 
 bool8 S3D_Active(void)
 {
-    return sView.active && gMain.callback2 == CB2_Overworld;
+    return sView.active && OnField();
 }
 
 void S3D_Update(void)
@@ -1060,6 +1098,7 @@ void S3D_Update(void)
     if (map >= 0 && !sPack.tried)
         LoadPack();
     sView.active = map >= 0 && sPack.ok;
+    sShopPic.on = FALSE;   // (back on the field)
     gMpS3dLine = sView.active ? S3dLine : NULL;
     gMpS3dOamHidden = sView.active && !getenv("MOEMON_S3D_NOHIDE") ? OamHidden : NULL;
     if (!sView.active)

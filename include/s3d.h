@@ -5,7 +5,9 @@
 struct MapLayout;
 
 void S3D_Update(void);                           // every overworld frame: is this map drawn in 3D, and from where
-bool8 S3D_Active(void);                          // this frame's field is drawn by the 3D engine
+bool8 S3D_Active(void);
+bool8 S3D_Heal_Start(u8 count);   // field_effect.c FldEff_PokecenterHeal: SINNOH's machine (s3d_heal.c); FALSE: not here
+void S3D_ShopPicture(bool8 on, s16 dx, s16 dy);   // shop.c's BUY screen: the field's last 3D picture behind it, moved                          // this frame's field is drawn by the 3D engine
 // A field sprite's place on the 3D ground: (x, feetY) on Emerald's screen -> where the 3D view shows that spot at the
 // ground's height there (BDHC), and its depth (0: not on a 3D map). spriteId: whose (each keeps the bridge layer it's
 // on); 0xFFFF none

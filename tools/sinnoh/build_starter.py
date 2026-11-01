@@ -276,7 +276,7 @@ def cursor_image(narc):
     """Platinum's glove (NARC 10: 32x32 in 1D tiles, palette 11) as 32*32 RGB555 (bit 15: drawn)"""
     d = narc[10]
     size, off = struct.unpack_from('<II', d, 0x28)
-    ch = d[0x10 + off:0x10 + off + size]
+    ch = d[0x18 + off:0x18 + off + size]   # (the offset counts from after the RAHC block's name and size)
     pd = narc[11][0x28:]
     pal = [struct.unpack_from('<H', pd, 2 * i)[0] for i in range(16)]
     px = [0] * (32 * 32)

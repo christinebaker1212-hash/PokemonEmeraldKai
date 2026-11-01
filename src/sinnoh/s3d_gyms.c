@@ -37,6 +37,11 @@ struct SunyshoreGear { u16 model; u8 x, y, z, start, clockwise, upright; };
 struct CanalavePlatform { u16 model; u8 ax, ay, az, bx, by, bz, floorA, floorB, startB; };
 #include "../data/sinnoh_gyms.h"
 
+u16 S3D_Gyms_HealBallModel(void)   // (the healing machine's balls: s3d_heal.c)
+{
+    return S3D_MODEL_POKECENTER_HEALING_MACHINE_MINI_POKEBALL;
+}
+
 #define VAR_SINNOH_PASTORIA 0x52F3   // the water's level + 1 (0: Platinum's start, the middle)
 #define VAR_SINNOH_SUNYSHORE 0x52F4  // the gears' quarter turn in the room the player is in
 #define VAR_SINNOH_CANALAVE_LO 0x52F5   // the platforms moved from where they start (bits 0-15)

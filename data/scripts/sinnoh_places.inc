@@ -935,6 +935,7 @@ Sinnoh_EventScript_Briefcase::
 	givemon VAR_TEMP_2, 5
 	goto_if_eq VAR_RESULT, MON_CANT_GIVE, Sinnoh_EventScript_BriefcaseLeave
 	setflag 0x3D39
+	setflag FLAG_SYS_POKEMON_GET   @ (1.63.8: the START menu's MOéMON)
 	bufferspeciesname STR_VAR_1, VAR_TEMP_2
 	playfanfare MUS_OBTAIN_ITEM
 	message Sinnoh_Text_BriefcaseGot

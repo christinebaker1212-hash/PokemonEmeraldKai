@@ -15,6 +15,12 @@ shot littleroot_off
 mp shadows 1
 wait 10
 mp shadows
+mp shadowwatch 40
+press B+UP 40
+wait 10
+mp shadowwatch 40
+press B+DOWN 40
+wait 10
 mp warp 40,0,14,22
 waitfor field 600
 wait 90

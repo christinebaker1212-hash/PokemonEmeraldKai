@@ -154,10 +154,15 @@ class Tex0:
         p = self.pal_data + self.palettes[name]
         return [rgb555(u16(self.d, p + 2 * i)) for i in range(count)]
 
-    def decode(self, tex_name, pal_name):
-        """RGBA rows (0-255) for a texture with a palette (None for DIRECT textures)."""
+    def decode(self, tex_name, pal_name, frame=None):
+        """RGBA rows (0-255) for a texture with a palette (None for DIRECT textures). FRAME (another Tex0, a texture
+        name in it): its texels drawn with this texture's palette (Platinum's animated map textures: fldtanime)."""
         t = self.textures[tex_name]
-        d = self.d
+        pd = self.d   # (the palette's bytes)
+        d, tex_data, cmp_data, cmp_idx, off = self.d, self.tex_data, self.cmp_data, self.cmp_idx, t.offset
+        if frame is not None:
+            src, name = frame
+            d, tex_data, cmp_data, cmp_idx, off = src.d, src.tex_data, src.cmp_data, src.cmp_idx, src.textures[name].offset
         w, h, f = t.width, t.height, t.format
         out = [(0, 0, 0, 0)] * (w * h)
 
@@ -166,7 +171,7 @@ class Tex0:
             return (r * 255 // 31, g * 255 // 31, b * 255 // 31, a)
 
         if f == 7:   # direct color
-            base = self.tex_data + t.offset
+            base = tex_data + off
             for i in range(w * h):
                 v = u16(d, base + 2 * i)
                 out[i] = c8(rgb555(v), 255 if v & 0x8000 else 0)
@@ -174,11 +179,11 @@ class Tex0:
         palbase = self.pal_data + self.palettes[pal_name]
 
         def pal(i):
-            return rgb555(u16(d, palbase + 2 * i))
+            return rgb555(u16(pd, palbase + 2 * i))
 
         if f == 5:   # 4x4 compressed
-            texel = self.cmp_data + t.offset
-            idx = self.cmp_idx + t.offset // 2
+            texel = cmp_data + off
+            idx = cmp_idx + off // 2
             bw = w // 4
             for by in range(h // 4):
                 for bx in range(bw):
@@ -187,7 +192,7 @@ class Tex0:
                     pi = u16(d, idx + 2 * blk)
                     mode = pi >> 14
                     pa = palbase + (pi & 0x3FFF) * 4
-                    cols = [rgb555(u16(d, pa + 2 * k)) for k in range(4)]
+                    cols = [rgb555(u16(pd, pa + 2 * k)) for k in range(4)]
                     c0, c1 = cols[0], cols[1]
                     if mode == 0:
                         cl = [c8(cols[0]), c8(cols[1]), c8(cols[2]), (0, 0, 0, 0)]
@@ -205,7 +210,7 @@ class Tex0:
                             k = (bits >> (2 * (yy * 4 + xx))) & 3
                             out[(by * 4 + yy) * w + bx * 4 + xx] = cl[k]
             return w, h, out
-        base = self.tex_data + t.offset
+        base = tex_data + off
         if f == 2:   # 4 colors
             for i in range(w * h):
                 k = (d[base + i // 4] >> (2 * (i % 4))) & 3

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "s3d.h"
 #include "data.h"
 #include "mp.h"
 #include "decompress.h"
@@ -1037,6 +1038,8 @@ bool8 FldEff_PokecenterHeal(void)
     struct Task *task;
 
     nPokemon = CalculatePlayerPartyCount();
+    if (S3D_Heal_Start(nPokemon))   // Moemon Kai: SINNOH's machine, as Platinum plays it (src/sinnoh/s3d_heal.c)
+        return FALSE;
     task = &gTasks[CreateTask(Task_PokecenterHeal, 0xff)];
     task->tNumMons = nPokemon;
     task->tFirstBallX = 93;

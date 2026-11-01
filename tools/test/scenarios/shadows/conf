@@ -1,8 +1,8 @@
 # OPTIONS > DISPLAY > SHADOWS (mp_shadow.c; gba_easy_draw.c ShadowPixel darkens under them): in LITTLEROOT the player,
 # the people and the follower each have one (the count with the follower out), none with the option OFF, and back
-# ON again; in SINNOH's 3D TWINLEAF too. Shots littleroot, littleroot_off, twinleaf.
+# ON again; running up and down the player's shadow never moves against them (shadowwatch); in SINNOH's 3D TWINLEAF too. Shots littleroot, littleroot_off, twinleaf.
 MODE=1
 TMO=120
 ENV_A="MOEMON_DEBUG_PARTY=280:10"
-EXPECT_A=("shadows on: " "shadows off: 0" "where map 40.0")
-UNEXPECT_A=("[crash]" "TIMEOUT" "shadows on: 0")
+EXPECT_A=("shadows on: " "shadows off: 0" "shadowwatch gap" "where map 40.0")
+UNEXPECT_A=("[crash]" "TIMEOUT" "shadows on: 0" "(moved 1)" "(moved 2)" "(moved 3)" "(moved 4)")

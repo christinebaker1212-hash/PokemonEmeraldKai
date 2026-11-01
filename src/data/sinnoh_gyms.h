@@ -29,6 +29,7 @@
 #define S3D_MODEL_HEARTHOME_GYM_HINT_MOON 32776
 #define S3D_MODEL_HEARTHOME_GYM_HINT_STAR 32777
 #define S3D_MODEL_HEARTHOME_GYM_HINT_HEART 32778
+#define S3D_MODEL_POKECENTER_HEALING_MACHINE_MINI_POKEBALL 517
 
 // PASTORIA: the deep water's tiles, the gates (open at water level 0 low, 1 middle, 2 high), the buttons
 // (the water to that level)
