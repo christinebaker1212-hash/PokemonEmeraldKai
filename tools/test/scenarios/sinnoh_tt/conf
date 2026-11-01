@@ -1,0 +1,7 @@
+# TRIPLE TRIAD in SINNOH (tt_field.c Tt_CurrentRegion: all of SINNOH is TT_REGION_SINNOH, rules OPEN, ELEMENTAL and
+# SAME WALL; its players carry LAVARIDGE's cards): a SINNOH townsperson who plays it says the region's rules.
+MODE=1
+TMO=100
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("tt region: SINNOH")
+UNEXPECT_A=("[crash]")

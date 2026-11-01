@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "global.h"
+#include "mp_region.h"
 #include "event_data.h"
 #include "event_object_movement.h"
 #include "item.h"
@@ -79,7 +80,8 @@ static unsigned RegionOfMapsec(unsigned mapsec)
 }
 unsigned Tt_CurrentRegion(void)
 {
-    unsigned r = RegionOfMapsec(gMapHeader.regionMapSectionId);
+    unsigned r = MP_Region_Current() == REGION_SINNOH ? TT_REGION_SINNOH   // Moemon Kai: all of SINNOH
+               : RegionOfMapsec(gMapHeader.regionMapSectionId);
     if (r < TT_REGIONS)
         sLastRegion = r;
     return sLastRegion;   // (a secret base, a building of no town: the region last seen)

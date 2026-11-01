@@ -51,13 +51,16 @@ static unsigned Take(const uint16_t *list, unsigned n, unsigned start, unsigned 
     return have;
 }
 
-// The card pool a region's players carry: JOHTO's are MAUVILLE's kind, KANTO's LILYCOVE's (gen_pools.py makes HOENN's 8)
+// The card pool a region's players carry: JOHTO's are MAUVILLE's kind, KANTO's LILYCOVE's, SINNOH's LAVARIDGE's
+// (gen_pools.py makes HOENN's 8)
 unsigned Tt_PoolOf(unsigned region)
 {
     if (region == TT_REGION_JOHTO)
         return TT_REGION_MAUVILLE;
     if (region == TT_REGION_KANTO)
         return TT_REGION_LILYCOVE;
+    if (region == TT_REGION_SINNOH)
+        return TT_REGION_LAVARIDGE;
     return region <= TT_REGION_EVER_GRANDE ? region : 0;
 }
 

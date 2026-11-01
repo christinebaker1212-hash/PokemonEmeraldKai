@@ -1,0 +1,23 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp warp 44,51,7,5
+wait 200
+mp face up
+wait 4
+shot g_attendant
+press A 2
+wait 60
+mash A 8 20
+wait 200
+pressuntil A field 2000
+wait 60
+mp where
+shot g_2f
+press LEFT 40
+wait 30
+press LEFT 40
+wait 300
+mp where
+shot g_back
+quit

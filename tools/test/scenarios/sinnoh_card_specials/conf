@@ -1,0 +1,7 @@
+# SINNOH's special card trainers (tcg_field.c sQzSpecials): ROARK turns the CARD CASE down before his BADGE, then duels
+# with ROXANNE's slot (special 0); BYRON (CANALAVE, the 6th BADGE) with NORMAN's (4). Needs both packs.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=283:50"
+EXPECT_A=("challenge: ROARK, special 0" "challenge: BYRON, special 4")
+UNEXPECT_A=("[crash]" "TIMEOUT")

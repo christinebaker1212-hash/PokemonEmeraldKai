@@ -91,7 +91,7 @@ TCG_SPECIALS = [
     ('NOLAND', 'Factory Head', 'outside the Battle Factory, Battle Frontier', 'after winning the Factory silver symbol; about half the Brains are out each day'),
     ('LUCY', 'Pike Queen', 'outside the Battle Pike, Battle Frontier', 'after winning the Pike silver symbol; about half the Brains are out each day'),
 ]
-# JOHTO's and KANTO's special trainers, each in one of HOENN's slots (tcg_field.c sQzSpecials, read from the source):
+# JOHTO's, KANTO's and SINNOH's special trainers, each in one of HOENN's slots (tcg_field.c sQzSpecials, read from the source):
 # slot -> [(region, name, title, when)]
 SPECIAL_SLOTS = ['ROXANNE', 'BRAWLY', 'WATTSON', 'FLANNERY', 'NORMAN', 'WINONA', 'TATE_LIZA', 'JUAN', 'SIDNEY', 'PHOEBE',
                  'GLACIA', 'DRAKE', 'WALLACE', 'STEVEN', 'RIVAL', 'WALLY']
@@ -105,6 +105,8 @@ _region = 'JOHTO'
 for _line in _src.split('\n'):
     if '// KANTO' in _line:
         _region = 'KANTO'
+    if '// SINNOH' in _line:
+        _region = 'SINNOH'
     _m = re.search(r'TCG_SPECIAL_(\w+), REQ_(\w+), \w+, "([^"]*)", "([^"]*)"', _line)
     if _m:
         QZ_SPECIALS.setdefault(SPECIAL_SLOTS.index(_m.group(1)), []).append(

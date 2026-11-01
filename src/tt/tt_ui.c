@@ -2881,6 +2881,13 @@ void Tt_Debug(const char *command)
         c->queenRegion = (uint8_t)a, Tt_QueenPlaced();
     else if (!strcmp(command, "favor"))
         c->flags |= TT_FLAG_QUEEN_FAVOR;
+    else if (!strcmp(command, "region"))
+    {
+        /* the region here and its rules */
+        unsigned r = Tt_CurrentRegion();
+        printf("[tt] tt region: %s rules %x trade %u\n", Tt_RegionName(r), r < TT_REGIONS ? c->regionRules[r] : 0,
+               r < TT_REGIONS ? c->regionTrade[r] : 0);
+    }
     else if (!strcmp(command, "world"))
     {
         /* HOENN's rules as this game sees them (the host's in a friend's room) */

@@ -124,6 +124,16 @@ def inside(p, x, z):
     return 0 <= x - p['x0'] * 32 < 32 * (p['x1'] - p['x0'] + 1) and 0 <= z - p['z0'] * 32 < 32 * (p['z1'] - p['z0'] + 1)
 
 
+# People this game adds to a place, after Platinum's (their local ids follow): the GAME CENTER's attendant (as in
+# GOLDENROD's and CELADON's GAME CORNERS: data/scripts/mp_region.inc EventScript_GameCenterGuide)
+EXTRA_PEOPLE = {
+    'Sinnoh_VeilstoneCityPrizeExchange': [
+        {'graphics_id': 'OBJ_EVENT_GFX_SINNOH_UNUSED_RECEPTIONIST', 'x': 7, 'y': 4, 'movement_type': 'MOVEMENT_TYPE_FACE_DOWN',
+         'script': 'EventScript_GameCenterGuide'},
+    ],
+}
+
+
 def people(p, root, have):
     """The place's people: where they stand, the game's closest sprite (tools/sinnoh/sprites.py), how they move, their
     hide flag (SINNOH's number, tools/sinnoh/ids.py) and their script. Local ids follow Platinum's order; those with
@@ -162,6 +172,11 @@ def people(p, root, have):
                     'trainer_type': 'TRAINER_TYPE_NORMAL' if trainer else 'TRAINER_TYPE_NONE',
                     'trainer_sight_or_berry_tree_id': str((o.get('data') or [0])[0]) if trainer else '0',
                     'script': script, 'flag': flag_s})
+    for e in EXTRA_PEOPLE.get(p['name'], []):
+        out.append({'graphics_id': e['graphics_id'], 'x': e['x'], 'y': e['y'], 'elevation': 3,
+                    'movement_type': e['movement_type'], 'movement_range_x': 0, 'movement_range_y': 0,
+                    'trainer_type': 'TRAINER_TYPE_NONE', 'trainer_sight_or_berry_tree_id': '0',
+                    'script': e['script'], 'flag': '0'})
     return out
 
 

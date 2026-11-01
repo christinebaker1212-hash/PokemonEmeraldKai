@@ -11,7 +11,7 @@
 
 #define R(x) TT_RULE_BIT(TT_RULE_##x)
 static const char *const sRegionNames[TT_REGIONS] = {
-    "PETALBURG", "RUSTBORO", "SLATEPORT", "MAUVILLE", "LAVARIDGE", "LILYCOVE", "SOOTOPOLIS", "EVER GRANDE", "JOHTO", "KANTO",
+    "PETALBURG", "RUSTBORO", "SLATEPORT", "MAUVILLE", "LAVARIDGE", "LILYCOVE", "SOOTOPOLIS", "EVER GRANDE", "JOHTO", "KANTO", "SINNOH",
 };
 // Each region's own rules at the start, as Final Fantasy VIII's regions had theirs
 static const uint32_t sStartRules[TT_REGIONS] = {
@@ -25,10 +25,11 @@ static const uint32_t sStartRules[TT_REGIONS] = {
     [TT_REGION_EVER_GRANDE] = R(OPEN) | R(SAME) | R(PLUS) | R(SUDDEN_DEATH) | R(SAME_WALL) | R(ELEMENTAL),
     [TT_REGION_JOHTO] = R(OPEN) | R(SAME) | R(FALLEN_ACE),
     [TT_REGION_KANTO] = R(OPEN) | R(PLUS) | R(SUDDEN_DEATH),
+    [TT_REGION_SINNOH] = R(OPEN) | R(ELEMENTAL) | R(SAME_WALL),
 };
 static const uint8_t sStartTrade[TT_REGIONS] = {
     TT_TRADE_ONE, TT_TRADE_ONE, TT_TRADE_ONE, TT_TRADE_DIFF, TT_TRADE_ONE, TT_TRADE_DIFF, TT_TRADE_DIRECT, TT_TRADE_ONE,
-    TT_TRADE_ONE, TT_TRADE_DIFF,
+    TT_TRADE_ONE, TT_TRADE_DIFF, TT_TRADE_ONE,
 };
 const char *Tt_RegionName(unsigned region) { return region < TT_REGIONS ? sRegionNames[region] : "HOENN"; }
 uint32_t Tt_RegionStartRules(unsigned region) { return region < TT_REGIONS ? sStartRules[region] : 0; }

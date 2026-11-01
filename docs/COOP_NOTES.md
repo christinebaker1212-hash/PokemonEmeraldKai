@@ -3440,6 +3440,17 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   look (the card games' who-plays-what, tcg_field.c Tcg_LookGfx and sPicOfGfx) reads a Platinum sprite as its stand-in;
   a trainer's card challenge screen shows Platinum's picture cut to 64x64 (S3D_Gfx_TrainerPicPixels; test
   sinnoh_card_pic).
+- The three card games in SINNOH: its people play by their sprite's look-alike (tcg_field.c Tcg_LookGfx: the specials
+  first, then sSinnohStandIns), so the townsfolk and beaten trainers duel as JOHTO's and KANTO's do. Special card
+  trainers (sQzSpecials' SINNOH rows): the eight leaders by role and type (ROARK - ROXANNE, MAYLENE - BRAWLY, WAKE -
+  JUAN, FANTINA - TATE & LIZA, VOLKNER - WATTSON, GARDENIA - WINONA, CANDICE - FLANNERY, BYRON - NORMAN; badge flags
+  0x3320+), the ELITE FOUR (once beaten), CYNTHIA (MP_Region_Cleared), BARRY the rival (shown once his scenes are
+  written), PROF. ROWAN for STEVEN, JOHTO's JASMINE (SUNYSHORE) for WALLY; SINNOH's battle songs; their challenge
+  screens show Platinum's pictures (SinnohSpecialTrainer). The GAME CENTER: an attendant in VEILSTONE's PRIZE EXCHANGE
+  (tools/sinnoh/gen_maps.py EXTRA_PEOPLE, EventScript_GameCenterGuide), back down to it by the stairs. TRIPLE TRIAD:
+  all of SINNOH is TT_REGION_SINNOH (OPEN, ELEMENTAL, SAME WALL; LAVARIDGE's pool), protocol 69 (the world rules sent
+  online have 11 regions; the .tt file keeps its count). The card guide lists SINNOH's specials. Tests
+  sinnoh_card_specials, sinnoh_card_pic, sinnoh_gamecenter, sinnoh_tt.
 - OPTIONS > DISPLAY > SPRITE SCALING > SINNOH PEOPLE (gMpConfig.sinnohSprites, ini sinnoh_sprites; the player's own, not the host's):
   GEN 4 Platinum's sprites; MIXED a true Gen 3 equivalent where there is one, else Platinum's sprite made smaller;
   GEN 3 Gen 3 sprites for everyone (the equivalent, else the closest stand-in). The equivalents (tools/sinnoh/sprites.py

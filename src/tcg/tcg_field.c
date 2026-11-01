@@ -289,6 +289,26 @@ static const u8 sText_EliteKNo[] = _("Defeat me at the POKéMON LEAGUE\nfirst. T
 static const u8 sText_BlueYes[] = _("Smell ya later? Nah, let's duel!\nMy deck's the best in the world!");
 static const u8 sText_OakYes[] = _("Oh ho! You play cards too?\nI'm not too old for a duel!");
 static const u8 sText_BillYes[] = _("Hey, a fellow card fan! I've got\na deck I put together myself!");
+// SINNOH's (written for this game)
+static const u8 sText_RoarkYes[] = _("Cards? Sure! I sort my deck like\nI sort fossils: carefully!");
+static const u8 sText_GardeniaYes[] = _("A card duel? Yes! My deck's grown\nwild like the ETERNA FOREST!");
+static const u8 sText_MayleneYes[] = _("I train my mind with cards, too.\nNo holding back, all right?");
+static const u8 sText_WakeYes[] = _("WAHAHAHA! CRASHER WAKE plays cards\nlike he battles: with a SPLASH!");
+static const u8 sText_FantinaYes[] = _("Ah, les cartes! I adore them!\nMy deck dances. Shall we?");
+static const u8 sText_ByronYes[] = _("Gwahahaha! My deck is as tough as\nSTEEL! Try to dent it, kid!");
+static const u8 sText_CandiceYes[] = _("Cards? Focus! Focus! I'll beat you\nwith a cool head and a hot deck!");
+static const u8 sText_VolknerYes[] = _("Finally, something that gets me\nfired up again. Let's duel.");
+static const u8 sText_SLeaderNo[] = _("Win my GYM's BADGE first.\nCards come after that.");
+static const u8 sText_AaronYes[] = _("Bugs are beautiful, and so is this\ndeck. I'll show you!");
+static const u8 sText_BerthaYes[] = _("Ah ha ha! A duel with an old lady?\nHow sweet. Don't go easy!");
+static const u8 sText_FlintYes[] = _("Cards! Now THAT lights my fire!\nLet's burn it up!");
+static const u8 sText_LucianYes[] = _("I'll mark my page. A duel, then.\nI've read every card I own.");
+static const u8 sText_EliteSNo[] = _("Face me in the POKéMON LEAGUE\nfirst. Then we'll play cards.");
+static const u8 sText_CynthiaYes[] = _("A card duel... I've been hoping\nsomeone would ask. Let's begin.");
+static const u8 sText_CynthiaNo[] = _("Become CHAMPION first.\nThen I'll duel you with cards.");
+static const u8 sText_BarryYes[] = _("Cards?! I'm gonna win! And if I\ndon't, I'm fining you, got it?!");
+static const u8 sText_RowanYes[] = _("Hmm. A card duel. Very well.\nObserve, and learn something.");
+static const u8 sText_JasmineSYes[] = _("Oh, a card duel? Even here in\nSINNOH? I'd like that very much.");
 
 static const struct QzSpecial sQzSpecials[] = {
     // JOHTO: its eight leaders in HOENN's eight leader slots (badge flags 0x11B2-0x11B9), its ELITE FOUR in HOENN's
@@ -326,6 +346,26 @@ static const struct QzSpecial sQzSpecials[] = {
     {OBJ_EVENT_GFX_QZ_16109, TCG_SPECIAL_RIVAL, REQ_NONE, 0, "BLUE", "", MUS_VS_RIVAL, sText_BlueYes, NULL},
     {OBJ_EVENT_GFX_QZ_16184, TCG_SPECIAL_STEVEN, REQ_NONE, 0, "PROF. OAK", "", MUS_VS_TRAINER, sText_OakYes, NULL},
     {OBJ_EVENT_GFX_QZ_16106, TCG_SPECIAL_WALLY, REQ_NONE, 0, "BILL", "", MUS_VS_TRAINER, sText_BillYes, NULL},
+    // SINNOH: by role (badge flags 0x3320-0x3327, Platinum's order), then type (ROARK - ROXANNE's rock, MAYLENE -
+    // BRAWLY's fighting, WAKE - JUAN's water, FANTINA - TATE & LIZA's spirits, VOLKNER - WATTSON's electric,
+    // GARDENIA - WINONA's, CANDICE - FLANNERY's, BYRON - NORMAN's); BARRY the rival; PROF. ROWAN stands in for STEVEN,
+    // JOHTO's JASMINE (visiting SUNYSHORE) for WALLY. The sprite ids are Platinum's people whatever SINNOH PEOPLE shows
+    {OBJ_EVENT_GFX_SINNOH_ROARK, TCG_SPECIAL_ROXANNE, REQ_FLAG, 0x3320, "ROARK", "LEADER", MUS_SINNOH_VS_GYM_LEADER, sText_RoarkYes, sText_SLeaderNo},
+    {OBJ_EVENT_GFX_SINNOH_GARDENIA, TCG_SPECIAL_WINONA, REQ_FLAG, 0x3321, "GARDENIA", "LEADER", MUS_SINNOH_VS_GYM_LEADER, sText_GardeniaYes, sText_SLeaderNo},
+    {OBJ_EVENT_GFX_SINNOH_MAYLENE, TCG_SPECIAL_BRAWLY, REQ_FLAG, 0x3322, "MAYLENE", "LEADER", MUS_SINNOH_VS_GYM_LEADER, sText_MayleneYes, sText_SLeaderNo},
+    {OBJ_EVENT_GFX_SINNOH_CRASHER_WAKE, TCG_SPECIAL_JUAN, REQ_FLAG, 0x3323, "WAKE", "LEADER", MUS_SINNOH_VS_GYM_LEADER, sText_WakeYes, sText_SLeaderNo},
+    {OBJ_EVENT_GFX_SINNOH_FANTINA, TCG_SPECIAL_TATE_LIZA, REQ_FLAG, 0x3324, "FANTINA", "LEADER", MUS_SINNOH_VS_GYM_LEADER, sText_FantinaYes, sText_SLeaderNo},
+    {OBJ_EVENT_GFX_SINNOH_BYRON, TCG_SPECIAL_NORMAN, REQ_FLAG, 0x3325, "BYRON", "LEADER", MUS_SINNOH_VS_GYM_LEADER, sText_ByronYes, sText_SLeaderNo},
+    {OBJ_EVENT_GFX_SINNOH_CANDICE, TCG_SPECIAL_FLANNERY, REQ_FLAG, 0x3326, "CANDICE", "LEADER", MUS_SINNOH_VS_GYM_LEADER, sText_CandiceYes, sText_SLeaderNo},
+    {OBJ_EVENT_GFX_SINNOH_VOLKNER, TCG_SPECIAL_WATTSON, REQ_FLAG, 0x3327, "VOLKNER", "LEADER", MUS_SINNOH_VS_GYM_LEADER, sText_VolknerYes, sText_SLeaderNo},
+    {OBJ_EVENT_GFX_SINNOH_AARON, TCG_SPECIAL_SIDNEY, REQ_TRAINER, TRAINER_SINNOH_ELITE_FOUR_AARON, "AARON", "ELITE FOUR", MUS_SINNOH_VS_ELITE_FOUR, sText_AaronYes, sText_EliteSNo},
+    {OBJ_EVENT_GFX_SINNOH_BERTHA, TCG_SPECIAL_GLACIA, REQ_TRAINER, TRAINER_SINNOH_ELITE_FOUR_BERTHA, "BERTHA", "ELITE FOUR", MUS_SINNOH_VS_ELITE_FOUR, sText_BerthaYes, sText_EliteSNo},
+    {OBJ_EVENT_GFX_SINNOH_FLINT, TCG_SPECIAL_DRAKE, REQ_TRAINER, TRAINER_SINNOH_ELITE_FOUR_FLINT, "FLINT", "ELITE FOUR", MUS_SINNOH_VS_ELITE_FOUR, sText_FlintYes, sText_EliteSNo},
+    {OBJ_EVENT_GFX_SINNOH_LUCIAN, TCG_SPECIAL_PHOEBE, REQ_TRAINER, TRAINER_SINNOH_ELITE_FOUR_LUCIAN, "LUCIAN", "ELITE FOUR", MUS_SINNOH_VS_ELITE_FOUR, sText_LucianYes, sText_EliteSNo},
+    {OBJ_EVENT_GFX_SINNOH_CYNTHIA, TCG_SPECIAL_WALLACE, REQ_CLEARED, REGION_SINNOH, "CYNTHIA", "CHAMPION", MUS_SINNOH_VS_CHAMPION, sText_CynthiaYes, sText_CynthiaNo},
+    {OBJ_EVENT_GFX_SINNOH_BARRY, TCG_SPECIAL_RIVAL, REQ_NONE, 0, "BARRY", "", MUS_SINNOH_VS_RIVAL, sText_BarryYes, NULL},
+    {OBJ_EVENT_GFX_SINNOH_PROF_ROWAN, TCG_SPECIAL_STEVEN, REQ_NONE, 0, "PROF. ROWAN", "", MUS_SINNOH_VS_TRAINER, sText_RowanYes, NULL},
+    {OBJ_EVENT_GFX_SINNOH_JASMINE, TCG_SPECIAL_WALLY, REQ_NONE, 0, "JASMINE", "", MUS_SINNOH_VS_TRAINER, sText_JasmineSYes, NULL},
 };
 
 unsigned Tcg_SpecialPromo(unsigned special)
@@ -509,11 +549,11 @@ unsigned Tcg_LookGfx(const struct ObjectEvent *npc)
 {
     u16 g = OBJ_GFX_ID(npc);
     u32 i;
-    if (g >= OBJ_EVENT_GFX_SINNOH_FIRST && g < OBJ_EVENT_GFX_SINNOH_FIRST + SINNOH_SPRITE_COUNT)
-        return sSinnohStandIns[g - OBJ_EVENT_GFX_SINNOH_FIRST];   // Moemon Kai: SINNOH's people by their look-alike
     for (i = 0; i < ARRAY_COUNT(sQzSpecials); i++)
         if (sQzSpecials[i].gfx == g)
             return g;   // (a special trainer is no look-alike townsperson: the other card games leave them to theirs)
+    if (g >= OBJ_EVENT_GFX_SINNOH_FIRST && g < OBJ_EVENT_GFX_SINNOH_FIRST + SINNOH_SPRITE_COUNT)
+        return sSinnohStandIns[g - OBJ_EVENT_GFX_SINNOH_FIRST];   // Moemon Kai: SINNOH's people by their look-alike
     if (g >= OBJ_EVENT_GFX_QZ_FIRST)
         for (i = 0; i < ARRAY_COUNT(sQzCardLooks); i++)
             if (sQzCardLooks[i].qz == g)
@@ -837,13 +877,33 @@ static bool8 DecodeTrainerPic(struct TcgOpponent *o, u16 pic)
 bool8 S3D_Gfx_TrainerPicPixels(u16 trainerId, const u8 **pixels, const u16 **pal);
 
 // The challenge screen's picture of someone on the map: their battle picture, else their sprite
+// Moemon Kai: SINNOH's leaders, ELITE FOUR and CHAMPION battle from their gyms' and rooms' scripts, not trainerbattle:
+// their trainer ids, for their battle pictures
+static u16 SinnohSpecialTrainer(u16 gfx)
+{
+    static const u16 sPairs[][2] = {
+        {OBJ_EVENT_GFX_SINNOH_ROARK, TRAINER_SINNOH_LEADER_ROARK}, {OBJ_EVENT_GFX_SINNOH_GARDENIA, TRAINER_SINNOH_LEADER_GARDENIA},
+        {OBJ_EVENT_GFX_SINNOH_MAYLENE, TRAINER_SINNOH_LEADER_MAYLENE}, {OBJ_EVENT_GFX_SINNOH_CRASHER_WAKE, TRAINER_SINNOH_LEADER_WAKE},
+        {OBJ_EVENT_GFX_SINNOH_FANTINA, TRAINER_SINNOH_LEADER_FANTINA}, {OBJ_EVENT_GFX_SINNOH_BYRON, TRAINER_SINNOH_LEADER_BYRON},
+        {OBJ_EVENT_GFX_SINNOH_CANDICE, TRAINER_SINNOH_LEADER_CANDICE}, {OBJ_EVENT_GFX_SINNOH_VOLKNER, TRAINER_SINNOH_LEADER_VOLKNER},
+        {OBJ_EVENT_GFX_SINNOH_AARON, TRAINER_SINNOH_ELITE_FOUR_AARON}, {OBJ_EVENT_GFX_SINNOH_BERTHA, TRAINER_SINNOH_ELITE_FOUR_BERTHA},
+        {OBJ_EVENT_GFX_SINNOH_FLINT, TRAINER_SINNOH_ELITE_FOUR_FLINT}, {OBJ_EVENT_GFX_SINNOH_LUCIAN, TRAINER_SINNOH_ELITE_FOUR_LUCIAN},
+        {OBJ_EVENT_GFX_SINNOH_CYNTHIA, TRAINER_SINNOH_CHAMPION_CYNTHIA},
+    };
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sPairs); i++)
+        if (sPairs[i][0] == gfx)
+            return sPairs[i][1];
+    return 0;
+}
+
 static void CaptureChallengePic(struct TcgOpponent *o, struct ObjectEvent *npc)
 {
     const u8 *script = NpcScript(npc);
     u16 pic = 0xFFFF;
-    if (npc->trainerType != TRAINER_TYPE_NONE && script && script[0] == 0x5C)   // trainerbattle
+    if (SinnohSpecialTrainer(OBJ_GFX_ID(npc)) || (npc->trainerType != TRAINER_TYPE_NONE && script && script[0] == 0x5C))
     {
-        u16 id = script[2] | script[3] << 8;
+        u16 id = SinnohSpecialTrainer(OBJ_GFX_ID(npc)) ? SinnohSpecialTrainer(OBJ_GFX_ID(npc)) : script[2] | script[3] << 8;
         const u8 *px;
         const u16 *pal;
         if (S3D_Gfx_TrainerPicPixels(id, &px, &pal))

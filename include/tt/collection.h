@@ -24,6 +24,7 @@ enum
     TT_REGION_EVER_GRANDE, /* EVER GRANDE, VICTORY ROAD, the BATTLE FRONTIER */
     TT_REGION_JOHTO,       /* Moemon Kai: all of JOHTO */
     TT_REGION_KANTO,       /* Moemon Kai: all of KANTO and the SEVII ISLANDS */
+    TT_REGION_SINNOH,      /* Moemon Kai: all of SINNOH (the .tt file keeps its count: older files read as before) */
     TT_REGIONS,
     TT_REGION_NONE = 0xFF
 };

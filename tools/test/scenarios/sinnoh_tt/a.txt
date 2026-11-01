@@ -1,0 +1,7 @@
+pressuntil A field 5000
+wait 30
+mp tt starter
+mp warp 40,20,10,40
+wait 200
+mp tt region
+quit
