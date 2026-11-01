@@ -3525,6 +3525,13 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   north-south / west-east into, out of or across them (the stairs). Broken snowballs stay broken until the player comes
   in from elsewhere. gen_gyms.py snowpoint_check walks and slides the gym as the game does, stops if anyone is out of
   reach and prints the way to CANDICE; test sinnoh_gym_snowpoint.
+  HEARTHOME: Platinum's dark rooms. The 3D picture is dimmed (s3d.c S3D_SetDarkness: Platinum's fog 109 of 127 ->
+  0.2, 119 in the second trainer room -> 0.12, 91 with FANTINA's badge -> 0.35) but for screen circles of light set
+  every frame around the player and each trainer and ahead of them where they face (their lamps; sprites aren't
+  dimmed). In each trainer room one door is right, drawn with the clue's tile (Platinum's tables of where it may lie,
+  never under a person) each time the player comes in from another room (a battle keeps them); the clue is Platinum's
+  hint model of the right door's symbol on the floor, found by walking the dark. A wrong door's warp is redirected to
+  the entrance room's warp 1 (field_control_avatar.c SetupWarp -> S3D_Gyms_RedirectWarp); test sinnoh_gym_hearthome.
 - SINNOH trainers who battle when talked to (tools/sinnoh/gen_trainers.py TALK: the ETERNA gym's three, the TRAINERS'
   SCHOOL's kids, the POKéMON MANSION's maids, the RESTAURANT's diners; new classes MAID and CAMERAMAN): gen_maps.py
   talk_trainer() gives the object whose Platinum script battles one the trainer's own script (no sight line).

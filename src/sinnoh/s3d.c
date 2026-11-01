@@ -961,6 +961,40 @@ static inline u16 Faded(u16 c)
     return out;
 }
 
+// A dark room (HEARTHOME's gym): the 3D picture LEVEL as bright as it is, but for circles of light {x, y, radius} on
+// the screen (the people's lamps: Platinum's fog and flashlights; s3d_gyms.c sets them every frame)
+static struct { float level; u8 n; s16 lights[S3D_DARK_LIGHTS][3]; } sDark;
+
+void S3D_SetDarkness(float level, const s16 (*lights)[3], u8 n)
+{
+    sDark.level = level;
+    sDark.n = n > S3D_DARK_LIGHTS ? S3D_DARK_LIGHTS : n;
+    if (n)
+        memcpy(sDark.lights, lights, sDark.n * sizeof(sDark.lights[0]));
+}
+
+static inline u16 Darkened(u16 c, int x, int line)
+{
+    float lit = sDark.level;
+    u32 i, ch, out = 0x8000;
+    for (i = 0; i < sDark.n && lit < 1.0f; i++)
+    {
+        float dx = x - sDark.lights[i][0], dy = line - sDark.lights[i][1], r = sDark.lights[i][2];
+        float d2 = dx * dx + dy * dy, f;
+        if (d2 >= r * r)
+            continue;
+        f = 1.0f - sqrtf(d2) / r;   // (soft to the edge)
+        f = f > 0.4f ? 1.0f : f / 0.4f;
+        f = sDark.level + (1.0f - sDark.level) * f;
+        lit = f > lit ? f : lit;
+    }
+    if (lit >= 1.0f)
+        return c;
+    for (ch = 0; ch < 3; ch++)
+        out |= ((u32)(((c >> (5 * ch)) & 31) * lit + 0.5f)) << (5 * ch);
+    return out;
+}
+
 static void S3dLine(int line, u16 layers[4][DISPLAY_WIDTH])
 {
     s32 x;
@@ -994,7 +1028,7 @@ static void S3dLine(int line, u16 layers[4][DISPLAY_WIDTH])
     }
     for (x = 0; x < W; x++)
     {
-        layers[3][x] = Faded(sColor[line][x]);
+        layers[3][x] = Faded(sDark.level > 0 ? Darkened(sColor[line][x], x, line) : sColor[line][x]);
         layers[2][x] = 0;
         layers[1][x] = 0;
     }

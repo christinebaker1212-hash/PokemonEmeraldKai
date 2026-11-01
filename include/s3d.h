@@ -31,6 +31,8 @@ bool8 S3D_DynProp(u8 slot, u16 model, float x, float y, float z, float turn);
 bool8 S3D_DynPropTurned(u8 slot, u16 model, float x, float y, float z, float tilt, float turn);
 void S3D_DynPropHide(u8 slot);
 void S3D_DynPropsClear(void);
+#define S3D_DARK_LIGHTS 40
+void S3D_SetDarkness(float level, const s16 (*lights)[3], u8 n);   // a dark room (0: none) lit around {x, y, radius}
 bool8 S3D_MapOrigin(float *x, float *z);
 // A gym's own ground heights (map tiles; NaN: the block's), asked with the height the object is nearest
 extern float (*gS3dHeightHook)(s32 mapX, s32 mapY, float h);
@@ -41,6 +43,7 @@ void S3D_Gyms_Update(void);                       // every overworld frame
 bool8 S3D_Gyms_SeesPlayer(u8 localId);            // a gym's trainer can see the player (same floor)
 bool8 S3D_Gyms_JumpAt(s16 x, s16 y, u8 direction);   // a step there jumps (ETERNA's hour hand; map coords + 7)
 bool8 S3D_Gyms_PushAt(s16 x, s16 y, u8 direction);   // walking into it hits it (VEILSTONE's bags; map coords + 7)
+void S3D_Gyms_RedirectWarp(s16 x, s16 y);       // a warp from there (map coords + 7): a gym's wrong door
 void S3D_Gyms_BreakAt(s16 x, s16 y);              // something runs into it fast (SNOWPOINT's snowballs)
 s8 S3D_Gyms_IceSlope(s16 x, s16 y, u8 direction);   // SNOWPOINT's ice: +1 a slide goes up a slope there, -1 down
 bool8 S3D_Gyms_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY);   // a gym's own rules for a step (map coords + 7)

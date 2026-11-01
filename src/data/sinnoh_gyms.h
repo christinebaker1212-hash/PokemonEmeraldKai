@@ -21,6 +21,14 @@
 #define S3D_MODEL_VEILSTONE_GYM_SANDBAG 32768
 #define S3D_MODEL_VEILSTONE_GYM_TIRE_STACK 32769
 #define S3D_MODEL_SNOWPOINT_GYM_SNOWBALL 32770
+#define S3D_MODEL_HEARTHOME_GYM_HINT_CIRCLE 32771
+#define S3D_MODEL_HEARTHOME_GYM_HINT_SQUARE 32772
+#define S3D_MODEL_HEARTHOME_GYM_HINT_TRIANGLE 32773
+#define S3D_MODEL_HEARTHOME_GYM_HINT_SUN 32774
+#define S3D_MODEL_HEARTHOME_GYM_HINT_TARGET 32775
+#define S3D_MODEL_HEARTHOME_GYM_HINT_MOON 32776
+#define S3D_MODEL_HEARTHOME_GYM_HINT_STAR 32777
+#define S3D_MODEL_HEARTHOME_GYM_HINT_HEART 32778
 
 // PASTORIA: the deep water's tiles, the gates (open at water level 0 low, 1 middle, 2 high), the buttons
 // (the water to that level)
@@ -130,3 +138,12 @@ static const char sSnowpointSlope[32][65] = {"0000000000000000000000000000000000
 // its snowballs {x, y}, its fences {x, y, 0 no step north-south / 1 no step west-east}
 static const u8 sSnowpointBalls[19][2] = {{12, 18}, {10, 21}, {17, 19}, {11, 16}, {11, 14}, {11, 11}, {11, 8}, {13, 8}, {10, 8}, {12, 8}, {9, 4}, {13, 4}, {10, 15}, {17, 17}, {17, 18}, {17, 20}, {12, 21}, {9, 8}, {20, 23}};
 static const u8 sSnowpointFences[13][3] = {{11, 5, 1}, {11, 7, 1}, {19, 8, 0}, {11, 10, 1}, {16, 11, 0}, {11, 13, 1}, {13, 14, 0}, {9, 16, 0}, {11, 17, 1}, {6, 19, 0}, {11, 20, 1}, {3, 22, 0}, {11, 23, 1}};
+
+// HEARTHOME: its trainer rooms {area x, y, w, h where the clue may lie, first door's symbol, doors}, where in
+// each area the clue may lie ('0'), each room's doors {x, y, symbol: circle, square, triangle, sun, donut, moon,
+// star, heart}
+static const char sHearthClue1[8][16] = {"111111111111111", "111111111111111", "111011111110111", "010001111100100", "010001111100100", "011101000001110", "011100111001110", "111111111111111"};
+static const u8 sHearthDoors1[3][3] = {{4, 2, 0}, {8, 2, 1}, {12, 2, 2}};
+static const char sHearthClue2[20][28] = {"011111111111111111111111110", "011111111111111111111111110", "011111000111010100011000010", "011111000000010000000111110", "011111000000010000000111110", "000100111111111111111001000", "000100111101111111111001000", "111011111000010000111110000", "111011111000010000111110000", "000001110011101110011111000", "000001110011101110011111000", "000000011110000011110111111", "000000011110010011110111111", "000000000100010001000001000", "000000000111111111000001000", "111111100001111110001111111", "111111101110010011101111111", "111111101110010011101111111", "111111100100111001001111111", "111111111111111111111111111"};
+static const u8 sHearthDoors2[5][3] = {{4, 2, 3}, {9, 2, 4}, {14, 2, 5}, {19, 2, 6}, {24, 2, 7}};
+static const u8 sHearthRooms[2][6] = {{1, 3, 15, 8, 0, 3}, {1, 3, 27, 20, 3, 5}};

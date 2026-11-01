@@ -18,6 +18,8 @@ GYM_MODELS = {
     'MAP_HEADER_ETERNA_CITY_GYM': ['eterna_gym_model_clock_hour_hand.nsbmd', 'eterna_gym_model_clock_minute_hand.nsbmd'],
     'MAP_HEADER_VEILSTONE_CITY_GYM': ['fx:veilstone_gym_sandbag.nsbmd', 'fx:veilstone_gym_tire_stack.nsbmd'],
     'MAP_HEADER_SNOWPOINT_CITY_GYM': ['fx:snowpoint_gym_snowball.nsbmd'],
+    'MAP_HEADER_HEARTHOME_CITY_GYM_TRAINER_ROOM_1': ['fx:hearthome_gym_hint_%s.nsbmd' % n for n in (
+        'circle', 'square', 'triangle', 'sun', 'target', 'moon', 'star', 'heart')],   # (the clue: Platinum's door order)
 }
 
 

@@ -1,0 +1,7 @@
+# HEARTHOME's gym (src/sinnoh/s3d_gyms.c): the first trainer room is dark but for the lamps; its right door and its
+# clue are drawn on coming in; the square door (8,2) leads on if it's the right one, else back to the entrance room.
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("HEARTHOME's room 1: door" "HEARTHOME room 1 door")
+UNEXPECT_A=("[crash]" "TIMEOUT")

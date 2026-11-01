@@ -426,6 +426,30 @@ def snowpoint_check(root, src, p, ev, balls, fences, slopes):
     print('SNOWPOINT: everyone reached (%d states); to CANDICE: %s' % (len(seen), ''.join(reversed(way))))
 
 
+def hearthome(root):
+    """HEARTHOME: its two trainer rooms (Platinum's layouts: the area its clue may lie in, its first door's symbol
+    and how many doors), where the clue may lie (Platinum's tables: '0' it may), and each room's doors {x, y, symbol}"""
+    text = open(os.path.join(root, 'src/overlay008/gym_features.c'), encoding='utf-8').read()
+    syms = {'CIRCLE': 0, 'SQUARE': 1, 'TRIANGLE': 2, 'SUN': 3, 'DONUT': 4, 'MOOM': 5, 'STAR': 6, 'HEART': 7}
+    out = ['', '// HEARTHOME: its trainer rooms {area x, y, w, h where the clue may lie, first door\'s symbol, doors}, where in',
+           '// each area the clue may lie (\'0\'), each room\'s doors {x, y, symbol: circle, square, triangle, sun, donut, moon,',
+           '// star, heart}']
+    rooms = []
+    for n, (w, h) in ((1, (15, 8)), (2, (27, 20))):
+        m = re.search(r'sTrainerRoom%dCluePositions\[[^]]*\]\s*=\s*\{(.*?)\n\};' % n, text, re.S).group(1)
+        vals = [int(v) for v in re.findall(r'\d+', m)]
+        assert len(vals) == w * h
+        out.append('static const char sHearthClue%d[%d][%d] = {%s};' % (n, h, w + 1, ', '.join(
+            '"%s"' % ''.join(str(v) for v in vals[y * w:y * w + w]) for y in range(h))))
+        d = re.search(r'sTrainerRoom%dDoors\[\]\s*=\s*\{(.*?)\n\};' % n, text, re.S).group(1)
+        doors = [(int(x), int(z), syms[i]) for i, x, z in re.findall(
+            r'HEARTHOME_DOOR_ID_(\w+), \.x = (\d+), \.z = (\d+)', d) if i != 'EXIT']
+        rooms.append((1, 3, w, h, doors[0][2], len(doors)))
+        out.append('static const u8 sHearthDoors%d[%d][3] = {%s};' % (n, len(doors), ', '.join('{%d, %d, %d}' % t for t in doors)))
+    out.append('static const u8 sHearthRooms[2][6] = {%s};' % ', '.join('{%d, %d, %d, %d, %d, %d}' % r for r in rooms))
+    return out
+
+
 def ident(name):
     return name.replace('fx:', '').replace('.nsbmd', '').upper()
 
@@ -454,6 +478,7 @@ def main():
     out += eterna(root)
     out += veilstone(root)
     out += snowpoint(root)
+    out += hearthome(root)
     open('src/data/sinnoh_gyms.h', 'w').write('\n'.join(out) + '\n')
     print('%d models; PASTORIA: %d deep tiles, %d gates, %d buttons' % (len(gymprops.model_names()), len(deep), len(gates),
                                                                      len(buttons)))

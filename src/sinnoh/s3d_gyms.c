@@ -26,6 +26,8 @@
 #include "fieldmap.h"
 #include "mp.h"
 #include "script.h"
+#include "overworld.h"
+#include "random.h"
 #include "sound.h"
 #include "task.h"
 #include "constants/map_groups.h"
@@ -41,7 +43,7 @@ struct CanalavePlatform { u16 model; u8 ax, ay, az, bx, by, bz, floorA, floorB, 
 #define VAR_SINNOH_CANALAVE_HI 0x52F6   // (bits 16-23)
 #define VAR_SINNOH_CANALAVE_FLOOR 0x52F7   // the floor the player is on
 
-enum { GYM_NONE, GYM_PASTORIA, GYM_SUNYSHORE, GYM_CANALAVE, GYM_ETERNA, GYM_VEILSTONE, GYM_SNOWPOINT };
+enum { GYM_NONE, GYM_PASTORIA, GYM_SUNYSHORE, GYM_CANALAVE, GYM_ETERNA, GYM_VEILSTONE, GYM_SNOWPOINT, GYM_HEARTHOME };
 
 static struct
 {
@@ -1031,11 +1033,121 @@ void S3D_Gyms_BreakAt(s16 x, s16 y)
     SnowProps();
 }
 
+// ------------------------------------------------------------------------------------------------------ HEARTHOME
+// Dark rooms (Platinum's fog: the floor a fifth as bright, less with FANTINA's badge, more in the second room) where
+// each person carries a lamp lighting ahead; in each trainer room one door is right (Platinum's: a new one each time
+// the player comes in) and a clue on the floor somewhere in the dark shows its symbol; a wrong door leads back to the
+// entrance room (S3D_Gyms_RedirectWarp from field_control_avatar.c SetupWarp).
+static struct
+{
+    u16 lastMap;
+    s8 room;          // the trainer room (0-1; -1 another of the gym's rooms)
+    u8 door;          // ... its right door's symbol, the clue's tile
+    u8 clueX, clueY;
+} sHearth;
+
+static bool8 HearthMap(u16 map)
+{
+    return map == MAP_SINNOH_HEARTHOME_CITY_GYM_ENTRANCE_ROOM || map == MAP_SINNOH_HEARTHOME_CITY_GYM_LEADER_ROOM
+        || map == MAP_SINNOH_HEARTHOME_CITY_GYM_TRAINER_ROOM1 || map == MAP_SINNOH_HEARTHOME_CITY_GYM_TRAINER_ROOM2;
+}
+
+static bool8 HearthClueOk(s32 room, s32 x, s32 y)
+{
+    const u8 *r = sHearthRooms[room];
+    u32 i;
+    if (x < r[0] || y < r[1] || x >= r[0] + r[2] || y >= r[1] + r[3])
+        return FALSE;
+    if ((room == 0 ? sHearthClue1[y - r[1]][x - r[0]] : sHearthClue2[y - r[1]][x - r[0]]) != '0')
+        return FALSE;
+    for (i = 0; i < gMapHeader.events->objectEventCount; i++)   // (not under anyone: Platinum's)
+        if (gMapHeader.events->objectEvents[i].x == x && gMapHeader.events->objectEvents[i].y == y)
+            return FALSE;
+    return TRUE;
+}
+
+static void HearthLoad(u16 map)
+{
+    s32 room = map == MAP_SINNOH_HEARTHOME_CITY_GYM_TRAINER_ROOM1 ? 0 : map == MAP_SINNOH_HEARTHOME_CITY_GYM_TRAINER_ROOM2 ? 1 : -1;
+    if (sHearth.lastMap != map && room >= 0)
+    {
+        // (in from another room: Platinum draws the right door and the clue's place again)
+        const u8 *r = sHearthRooms[room];
+        u32 tries = 0;
+        sHearth.door = r[4] + Random() % r[5];
+        do
+            sHearth.clueX = r[0] + Random() % r[2], sHearth.clueY = r[1] + Random() % r[3];
+        while (!HearthClueOk(room, sHearth.clueX, sHearth.clueY) && ++tries < 10000);
+        MPNet_Log("gym: HEARTHOME's room %d: door %d, clue at %d,%d", room + 1, sHearth.door, sHearth.clueX, sHearth.clueY);
+    }
+    sHearth.lastMap = map;
+    sHearth.room = room;
+    if (room >= 0)
+    {
+        float h = S3D_TileFloor(sHearth.clueX, sHearth.clueY, 0);
+        S3D_DynProp(0, S3D_MODEL_HEARTHOME_GYM_HINT_CIRCLE + sHearth.door, sG.ox + sHearth.clueX * 16 + 8, (h == h ? h : 0) - 3,
+                    sG.oz + sHearth.clueY * 16 + 8 - 4, 0);
+    }
+}
+
+// The people's lamps where they are on the screen this frame
+static void HearthLights(void)
+{
+    static s16 sLights[S3D_DARK_LIGHTS][3];
+    u32 i, n = 0;
+    float level = 0.2f;   // (Platinum's fog: 109 of 127)
+    if (FlagGet(FLAG_SINNOH_BADGE01 + 4))
+        level = 0.35f;    // (91: the RELIC BADGE)
+    else if (sHearth.room == 1)
+        level = 0.12f;    // (119)
+    for (i = 0; i < OBJECT_EVENTS_COUNT && n + 2 <= S3D_DARK_LIGHTS; i++)
+    {
+        struct ObjectEvent *o = &gObjectEvents[i];
+        struct Sprite *sp;
+        s16 x, y, dx = 0, dy = 0;
+        if (!o->active || o->invisible || o->spriteId >= MAX_SPRITES)
+            continue;
+        if (!o->isPlayer && o->trainerType == 0)
+            continue;   // (the lamps are the player's and the trainers')
+        sp = &gSprites[o->spriteId];
+        x = sp->x + sp->x2 + gSpriteCoordOffsetX;
+        y = sp->y + sp->y2 + gSpriteCoordOffsetY - sp->centerToCornerVecY - 8;
+        switch (o->facingDirection)
+        {
+        case DIR_NORTH: dy = -1; break;
+        case DIR_SOUTH: dy = 1; break;
+        case DIR_WEST: dx = -1; break;
+        default: dx = 1; break;
+        }
+        sLights[n][0] = x, sLights[n][1] = y, sLights[n][2] = 22, n++;
+        sLights[n][0] = x + dx * 26, sLights[n][1] = y + dy * 22, sLights[n][2] = 30, n++;   // (the lamp's light ahead)
+    }
+    S3D_SetDarkness(level, (const s16 (*)[3])sLights, n);
+}
+
+void S3D_Gyms_RedirectWarp(s16 x, s16 y)
+{
+    const u8 (*doors)[3];
+    u32 i, n;
+    if (sG.gym != GYM_HEARTHOME || sHearth.room < 0)
+        return;
+    doors = sHearth.room == 0 ? sHearthDoors1 : sHearthDoors2;
+    n = sHearth.room == 0 ? ARRAY_COUNT(sHearthDoors1) : ARRAY_COUNT(sHearthDoors2);
+    for (i = 0; i < n; i++)
+        if (doors[i][0] == x - MAP_OFFSET && doors[i][1] == y - MAP_OFFSET && doors[i][2] != sHearth.door)
+        {
+            MPNet_Log("gym: HEARTHOME's wrong door (%d): back to the entrance", doors[i][2]);
+            SetWarpDestinationToMapWarp(MAP_SINNOH_HEARTHOME_CITY_GYM_ENTRANCE_ROOM >> 8,
+                                        MAP_SINNOH_HEARTHOME_CITY_GYM_ENTRANCE_ROOM & 0xFF, 1);
+        }
+}
+
 // ------------------------------------------------------------------------------------------------------ all gyms
 void S3D_Gyms_MapLoaded(void)
 {
     u16 map = CurrentMap();
     S3D_DynPropsClear();
+    S3D_SetDarkness(0, NULL, 0);
     gS3dHeightHook = NULL;
     gS3dObjectHeightHook = NULL;
     sG.gym = GYM_NONE;
@@ -1073,8 +1185,15 @@ void S3D_Gyms_MapLoaded(void)
         sG.gym = GYM_SNOWPOINT;
         SnowLoad(map);
     }
+    else if (HearthMap(map))
+    {
+        sG.gym = GYM_HEARTHOME;
+        HearthLoad(map);
+    }
     if (sG.gym != GYM_VEILSTONE)
         sVeil.lastMap = map;
+    if (sG.gym != GYM_HEARTHOME)
+        sHearth.lastMap = map;
     if (sG.gym != GYM_SNOWPOINT)
         sSnow.lastMap = map;
     if (sG.gym == GYM_PASTORIA || sG.gym == GYM_CANALAVE)
@@ -1088,6 +1207,8 @@ void S3D_Gyms_Update(void)
         return;
     if (sG.gym == GYM_CANALAVE)
         CanalavePeople();
+    if (sG.gym == GYM_HEARTHOME)
+        HearthLights();
     if (sG.gym == GYM_ETERNA && sG.clockShown != EternaState() && MP_IsLocalFree())
     {
         // (a trainer or the leader just beaten: the clock moves)
@@ -1193,6 +1314,8 @@ void S3D_Gyms_Debug(const char *arg)
     }
     if (sG.gym == GYM_SNOWPOINT)
         printf("[test] SNOWPOINT snowballs broken %05X\n", sSnow.broken);
+    if (sG.gym == GYM_HEARTHOME)
+        printf("[test] HEARTHOME room %d door %d clue %d,%d\n", sHearth.room + 1, sHearth.door, sHearth.clueX, sHearth.clueY);
     if (sG.gym == GYM_PASTORIA && strcmp(arg, "solve") == 0)
     {
         static u8 sSeen[3][64][32];
