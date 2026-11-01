@@ -3529,6 +3529,12 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   Voltorb (tap: start / stop; held: blinks, faster, blows up: 0), ANALOG WATCH hands (CellRot), ROULETTE arrow and
   PLAY / STOP / CLEAR, DAY-CARE digits and gender marks, MATCHUP CHECKER meter / LUVDISC / button, MOVE TESTER arrows
   and marks, LINK SEARCHER waves, PARTY item / MAIL marks, FRIENDSHIP hearts, MARKING MAP markers.
+- The REGIS and ROTOM (2026-11-01): ROCK PEAK, ICEBERG and IRON RUINS work as Platinum's (after SINNOH's LEAGUE, with
+  REGIGIGAS in the party, the room's seven dots walked over, then the statue: REGIROCK / REGICE / REGISTEEL Lv. 30;
+  the dots are Platinum's coord events on its VAR_MAP_LOCAL_0x01-07, reset on entering; done flags 0x3D0C-0x3D0E).
+  The OLD CHATEAU's TV gives ROTOM (Lv. 20) at night (20:00-4:00) until caught (0x3D0F). Their scripts sit above the
+  maps' generated words (gen_words.py skips a script already written there). Specials Sinnoh_LeagueDone,
+  Sinnoh_PartyHasRegigigas, Sinnoh_IsNight. Tests sinnoh_regi, sinnoh_rotom.
 - The three card games in SINNOH: its people play by their sprite's look-alike (tcg_field.c Tcg_LookGfx: the specials
   first, then sSinnohStandIns), so the townsfolk and beaten trainers duel as JOHTO's and KANTO's do. Special card
   trainers (sQzSpecials' SINNOH rows): the eight leaders by role and type (ROARK - ROXANNE, MAYLENE - BRAWLY, WAKE -

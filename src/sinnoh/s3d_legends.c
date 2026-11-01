@@ -9,6 +9,7 @@
 #include "constants/map_groups.h"
 #include "fieldmap.h"
 #include "rtc.h"
+#include "pokemon.h"
 #include "../data/sinnoh_legends.h"
 
 u16 Sinnoh_LegendsRefresh(void)
@@ -107,4 +108,25 @@ u16 Sinnoh_GreatMarshDaily(u16 species, u8 index)
         return species;
     daily = Sinnoh_GreatMarshDailySpecies(num - MAP_NUM(MAP_SINNOH_GREAT_MARSH1));
     return MP_Gen_Allowed(daily) ? daily : species;
+}
+
+// The REGIS' ruins and the OLD CHATEAU's ROTOM (data/maps/Sinnoh_*Ruins, Sinnoh_OldChateauBackMiddleWestRoom)
+u16 Sinnoh_LeagueDone(void)
+{
+    return MP_Region_Cleared(REGION_SINNOH);
+}
+
+u16 Sinnoh_PartyHasRegigigas(void)
+{
+    u32 i;
+    for (i = 0; i < PARTY_SIZE; i++)
+        if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES_OR_EGG) == SPECIES_REGIGIGAS)
+            return TRUE;
+    return FALSE;
+}
+
+u16 Sinnoh_IsNight(void)   // (SINNOH's night: 20:00 to 4:00, as its night music)
+{
+    RtcCalcLocalTime();
+    return gLocalTime.hours >= 20 || gLocalTime.hours < 4;
 }

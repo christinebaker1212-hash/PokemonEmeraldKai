@@ -292,7 +292,10 @@ def main():
         if BEGIN in old:
             old = old[:old.index(BEGIN)] + old[old.index(END) + len(END):]
         scripts, texts = '', ''
+        mine = set(re.findall(r'^(\w+)::', old, re.M))   # (scripts written above the words: theirs win)
         for key in sorted(entries, key=lambda k: (re.sub(r'\d', '', k), int(re.sub(r'\D', '', k) or 0))):
+            if '%s_EventScript_%s' % (name, key) in mine:
+                continue
             s, t = script(name, key, entries[key], widths)
             scripts += s
             texts += t

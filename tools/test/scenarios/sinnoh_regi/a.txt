@@ -1,0 +1,70 @@
+pressuntil A field 5000
+wait 30
+mp regionclear 3
+mp warp 42,20,7,10
+wait 60
+waitfor field 1000
+mp face left
+press LEFT 32
+wait 20
+waitfor field 300
+mp face up
+press UP 16
+wait 20
+waitfor field 300
+mp face up
+press UP 32
+wait 20
+waitfor field 300
+mp face left
+press LEFT 16
+wait 20
+waitfor field 300
+mp face up
+press UP 32
+wait 20
+waitfor field 300
+mp face right
+press RIGHT 16
+wait 20
+waitfor field 300
+mp face right
+press RIGHT 64
+wait 20
+waitfor field 300
+mp face down
+press DOWN 32
+wait 20
+waitfor field 300
+mp face right
+press RIGHT 16
+wait 20
+waitfor field 300
+mp face down
+press DOWN 32
+wait 20
+waitfor field 300
+mp face left
+press LEFT 16
+wait 20
+waitfor field 300
+mp face left
+press LEFT 32
+wait 20
+waitfor field 300
+mp face up
+press UP 32
+wait 20
+waitfor field 300
+mp face up
+press UP 80
+wait 20
+waitfor field 300
+mp where
+mp face up
+press A 1
+wait 60
+pressuntil A action 3000
+mp bhp
+shot r_battle
+quit

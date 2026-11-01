@@ -1,0 +1,12 @@
+pressuntil A field 5000
+wait 30
+mp warp 42,66,11,4
+wait 60
+waitfor field 1000
+mp face up
+press A 1
+wait 60
+pressuntil A action 3000
+mp bhp
+shot t_rotom
+quit
