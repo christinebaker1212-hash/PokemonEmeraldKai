@@ -3357,6 +3357,10 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   (overworld.c, before the map's on-transition script). Their words are STORY_WORDS (merged into words.py's WORDS);
   gen_maps.py places a story person with its flag once it has a script (trainers have theirs). Platinum's gifts from
   them have LINES (gifts.py; the POKé RADAR and the BICYCLE are given once). Test sinnoh_story_people.
+- The BATTLE FACTORY (2026-11-01): SINNOH's FACTORY counter (Sinnoh_EventScript_FactoryGuide) leads into the game's
+  own BATTLE FACTORY (rental battles, Platinum's rules too); its lobby, pre-battle and battle rooms are maps shared by
+  every region (mp_region.c MP_Region_IsSharedMap), so the player stays in SINNOH there (no PC swap) and the lobby's
+  door leads back to SINNOH's FACTORY (MP_Region_SharedExit). Test sinnoh_factory.
 - Fossils (2026-11-01): OREBURGH's MINING MUSEUM scientist (Sinnoh_EventScript_FossilScientist) gives one SKULL or
   ARMOR FOSSIL (flag 0x3D37; Platinum's come from the Underground, which this game hasn't) and wakes any fossil the
   game knows at Lv 20 with JOHTO's / KANTO's specials (src/qz_specials.c sFossils). Test sinnoh_fossil.

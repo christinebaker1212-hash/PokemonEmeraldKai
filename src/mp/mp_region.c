@@ -85,7 +85,10 @@ u8 MP_Region_OfGroup(u8 group)
 bool8 MP_Region_IsSharedMap(u8 group, u8 num)
 {
     static const u16 sShared[] = {MAP_MOEMON_GARDEN, MAP_RUSTBORO_CITY_GAME_CENTER_1F, MAP_RUSTBORO_CITY_GAME_CENTER_2F,
-                                  MAP_RUSTBORO_CITY_GAME_CENTER_3F, MAP_RUSTBORO_CITY_GAME_CENTER_ROOFTOP};
+                                  MAP_RUSTBORO_CITY_GAME_CENTER_3F, MAP_RUSTBORO_CITY_GAME_CENTER_ROOFTOP,
+                                  // (the BATTLE FACTORY's halls: SINNOH's BATTLE FACTORY leads into them)
+                                  MAP_BATTLE_FRONTIER_BATTLE_FACTORY_LOBBY, MAP_BATTLE_FRONTIER_BATTLE_FACTORY_PRE_BATTLE_ROOM,
+                                  MAP_BATTLE_FRONTIER_BATTLE_FACTORY_BATTLE_ROOM};
     u32 i;
     for (i = 0; i < ARRAY_COUNT(sShared); i++)
         if (MAP_GROUP(sShared[i]) == group && MAP_NUM(sShared[i]) == num)

@@ -581,3 +581,31 @@ Sinnoh_Text_FossilNotOne:
 Sinnoh_Text_FossilFull:
 	.string "You've no room for another POKéMON,\n"
 	.string "not even in your PC. Make some space!$"
+
+@ SINNOH's BATTLE FACTORY: its counter leads into the game's own BATTLE FACTORY halls (rental battles: the same rules
+@ as Platinum's), shared by every region (mp_region.c MP_Region_IsSharedMap): their door leads back here
+Sinnoh_EventScript_FactoryGuide::
+	lock
+	faceplayer
+	msgbox Sinnoh_Text_FactoryGuide, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Sinnoh_EventScript_FactoryNo
+	closemessage
+	playse SE_EXIT
+	warp MAP_BATTLE_FRONTIER_BATTLE_FACTORY_LOBBY, 9, 10
+	waitstate
+	release
+	end
+
+Sinnoh_EventScript_FactoryNo:
+	msgbox Sinnoh_Text_FactoryNo, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_Text_FactoryGuide:
+	.string "Welcome to the BATTLE FACTORY!\n"
+	.string "Here you battle with rental MOéMON.\p"
+	.string "Shall I show you to the rental halls?$"
+
+Sinnoh_Text_FactoryNo:
+	.string "Come back whenever you're ready to\n"
+	.string "borrow a new team!$"
