@@ -71,7 +71,7 @@ printf 'hifi=0\n' > "$T/hifi.ini"
 MMS_DEFAULTS="$T/hifi.ini" "$B" --save "$T/tiny.gbs" "$T/tiny_lofi.mmsproj"
 grep -q '^hifi=0$' "$T/tiny_lofi.mmsproj"
 
-echo "== GB > GBA: an arpeggio becomes its chord, a buzz of retriggers one note (a Game Boy song made here)"
+echo "== GB > GBA: an arpeggio becomes its chord, a buzz of retriggers one note, duty switches one instrument (a Game Boy song made here)"
 python3 test/make_test_gbs_arp.py "$T/arp.gbs"
 "$B" --save "$T/arp.gbs" "$T/arp_gb.mmsproj"
 printf 'gb_to_gba=1\n' > "$T/gba.ini"

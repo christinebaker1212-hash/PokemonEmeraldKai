@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """A Game Boy song (GBS) with the chip's tricks, for the GB > GBA tests: square 2 plays a C-E-G arpeggio (its
-frequency cycling every frame without a retrigger) struck every 64 frames, and square 1 retriggers one note
+frequency cycling every frame without a retrigger, and its duty too) struck every 64 frames, and square 1 retriggers one note
 every other frame for 16 frames (a buzz).
 usage: make_test_gbs_arp.py OUT.gbs"""
 import struct, sys
@@ -19,6 +19,7 @@ play = bytes([
     0x38, 0x01, 0xAF, 0x77,
     0x21, 0x80, 0x04, 0x85, 0x6F, 0x7E,          # its frequency's low byte from the table at $0480
     0xE0, 0x18, 0x3E, 0x06, 0xE0, 0x19,          # NR23, NR24 = $06 (no trigger)
+    0x78, 0xE6, 0x03, 0x0F, 0x0F, 0xE0, 0x16,    # NR21: the duty cycling every frame (counter & 3), no retrigger
     0x78, 0xE6, 0x3F, 0x20, 0x0C,                # every 64 frames: strike square 2
     0x3E, 0xF0, 0xE0, 0x17, 0x3E, 0x80, 0xE0, 0x16, 0x3E, 0x86, 0xE0, 0x19,
     0x78, 0xE6, 0x3F, 0xFE, 0x20, 0xD8, 0xFE, 0x30, 0xD0, 0xCB, 0x40, 0xC0,   # frames 32-47, even: square 1 again

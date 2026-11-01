@@ -186,6 +186,7 @@ typedef struct {
     int track;                     // the MIDI track it goes on
     int flat;                      // held at one pitch (flatSemis), not following the chip's (a GB arpeggio's chord note)
     float flatSemis;
+    int mixed;                     // a Game Boy square note across duty switches (gb_for_instruments)
 } Note;
 
 #define SILENT 1e-6f
@@ -223,11 +224,18 @@ static float semis_of(const Rip *r, const RipVF *x) {
     return k;
 }
 
+// the same sound for a note: the sample, or another duty of a Game Boy square (a duty switched mid-note is
+// the same note: gb_for_instruments joins them; within any other note the sample never changes)
+static int same_sound(const Rip *r, int a, int b) {
+    if (a == b) return 1;
+    return a >= 0 && b >= 0 && r->samples[a].kind == RIPS_SQUARE && r->samples[b].kind == RIPS_SQUARE;
+}
+
 // a voice's pitch in a frame (semitones), -1000 when it isn't playing `sample` at a known pitch
 static float semis_at(const Rip *r, int nv, int v, int f, int sample) {
     if (f < 0 || f >= r->nframes) return -1000;
     const RipVF *x = &r->vf[(size_t)f * nv + v];
-    if (x->sample != sample || x->rate <= 0) return -1000;
+    if (!same_sound(r, x->sample, sample) || x->rate <= 0) return -1000;
     return semis_of(r, x);
 }
 
@@ -713,6 +721,41 @@ static void gb_for_instruments(Rip *r, Note **pnotes, int *pnn, int *pcap, const
     int nn = *pnn, nv = r->nvoices;
     #define IS_INST(n) ((n)->sample < ns && slotOf[(n)->sample] >= 0 && instSlots[slotOf[(n)->sample]] && \
                         (r->samples[(n)->sample].kind == RIPS_SQUARE || r->samples[(n)->sample].kind == RIPS_WAVE))
+    // a square's duty switched without a retrigger (Pokemon Gold / Silver / Crystal cycle it every frame or
+    // so): the same note going on, not a new one each time
+    for (int i = 0; i < nn; i++) {
+        Note *a = &notes[i];
+        if (!IS_INST(a) || r->samples[a->sample].kind != RIPS_SQUARE || a->f1 <= a->f0) continue;
+        for (int j = i + 1; j < nn; j++) {
+            Note *b = &notes[j];
+            if (b->voice != a->voice) continue;
+            if (b->f0 != a->f1 || b->f1 <= b->f0 || r->samples[b->sample].kind != RIPS_SQUARE) break;
+            if (r->vf[(size_t)b->f0 * nv + b->voice].keyon) break;
+            a->f1 = b->f1;
+            if (b->peak > a->peak) a->peak = b->peak;
+            a->mixed = 1;
+            b->f1 = b->f0;                       // gone (dropped below)
+        }
+    }
+    // such a note is the channel's instrument: the duty it plays most over all of them (one instrument, not
+    // one for whichever duty each note happened to start on)
+    long *cnt = calloc((size_t)r->nsamples, sizeof(long));
+    for (int v = 0; v < nv && cnt; v++) {
+        memset(cnt, 0, sizeof(long) * (size_t)r->nsamples);
+        int best = -1;
+        for (int i = 0; i < nn; i++) {
+            const Note *n = &notes[i];
+            if (n->voice != v || !n->mixed) continue;
+            for (int f = n->f0; f < n->f1; f++) {
+                int s = r->vf[(size_t)f * nv + v].sample;
+                if (s < 0 || s >= ns || slotOf[s] < 0 || r->samples[s].kind != RIPS_SQUARE) continue;
+                if (++cnt[s] > (best >= 0 ? cnt[best] : 0)) best = s;
+            }
+        }
+        if (best < 0) continue;
+        for (int i = 0; i < nn; i++) if (notes[i].voice == v && notes[i].mixed) notes[i].sample = best;
+    }
+    free(cnt);
     // retriggers: the same note again within a frame of a note up to 3 frames long
     for (int i = 0; i < nn; i++) {
         Note *a = &notes[i];
@@ -1299,7 +1342,7 @@ int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, const uint8_t
             lastBend = lastTune = -1;            // each note sends its pitch at its start (a loop can jump to it)
             for (int f = n->f0; f < n->f1; f++) {
                 const RipVF *x = &r->vf[(size_t)f * nv + v];
-                float a = x->sample == n->sample ? amp_of(r, x) : 0;
+                float a = same_sound(r, x->sample, n->sample) ? amp_of(r, x) : 0;
                 int expr = (int)lroundf(127.0f * a / velA);
                 if (expr > 127) expr = 127;
                 if (expr < 0) expr = 0;
