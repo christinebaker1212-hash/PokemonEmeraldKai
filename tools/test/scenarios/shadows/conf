@@ -4,5 +4,5 @@
 MODE=1
 TMO=120
 ENV_A="MOEMON_DEBUG_PARTY=280:10"
-EXPECT_A=("shadows on: " "shadows off: 0" "shadowwatch gap" "where map 40.0")
-UNEXPECT_A=("[crash]" "TIMEOUT" "shadows on: 0" "(moved 1)" "(moved 2)" "(moved 3)" "(moved 4)")
+EXPECT_A=("shadows on: " "shadows off: 0" "shadowwatch player gap" "shadowwatch follower gap" "where map 40.0")
+UNEXPECT_A=("[crash]" "TIMEOUT" "shadows on: 0" "(moved 1)" "(moved 2)" "(moved 3)" "(moved 4)" "missing 1" "missing 2" "missing 3")
