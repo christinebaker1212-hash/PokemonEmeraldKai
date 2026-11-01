@@ -3357,6 +3357,17 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   (overworld.c, before the map's on-transition script). Their words are STORY_WORDS (merged into words.py's WORDS);
   gen_maps.py places a story person with its flag once it has a script (trainers have theirs). Platinum's gifts from
   them have LINES (gifts.py; the POKé RADAR and the BICYCLE are given once). Test sinnoh_story_people.
+- The BATTLE HALL (2026-11-01, src/sinnoh/s3d_hall.c, Sinnoh_EventScript_HallCounter): Platinum's rules with the
+  game's own pieces. One POKéMON (Lv 30+, no legend: gFrontierBannedSpecies or a catch rate of 5 or less) picks the
+  type of each opponent from a list with each type's rank (17 types, FAIRY from GEN 6); ten ranks a type. The
+  opponent: Platinum's level formula (BattleHall_CalcOpponentsLevel: the player's level less three square roots, plus
+  the rank and half the types battled, never above the player's), IVs 8 + 2 a rank, a POKéMON of that type from the
+  rank's groups (the type's POKéMON the GENERATION allows, sorted by base stat total in four: ranks 1-2 the weakest
+  group ... 9-10 the strongest two), held by a frontier trainer of the rank's strength (gBattleFrontierTrainers,
+  BATTLE_TYPE_FRONTIER: no EXP, no prize, a loss ends the streak). The chosen POKéMON alone in the party for the
+  battle, healed after. 3 + streak/10 BP (10 at most) every 10 wins. Record (species, personality, ranks, streak,
+  best) in "<save>.region" chunk HALL; another POKéMON starts a new one. Not here: Platinum's HALL MATRON (no data
+  for her team). `mp hall`; test sinnoh_hall.
 - The BATTLE FACTORY (2026-11-01): SINNOH's FACTORY counter (Sinnoh_EventScript_FactoryGuide) leads into the game's
   own BATTLE FACTORY (rental battles, Platinum's rules too); its lobby, pre-battle and battle rooms are maps shared by
   every region (mp_region.c MP_Region_IsSharedMap), so the player stays in SINNOH there (no PC swap) and the lobby's

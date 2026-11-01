@@ -1,0 +1,9 @@
+# SINNOH's BATTLE HALL (src/sinnoh/s3d_hall.c, data/scripts/sinnoh_places.inc Sinnoh_EventScript_HallCounter): one
+# POKéMON (Lv 60 here) picks a type (NORMAL, the first row), battles a frontier trainer's one POKéMON of that type
+# at Platinum's level for rank 1, wins (streak 1, NORMAL rank 1), then stops: the streak and ranks start over.
+# Shots t_party, t_types, t_next.
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=6:60"
+EXPECT_A=("hall: type 0 rank 1" "hall: battle won" "hall: streak 1, type 0 rank 1" "hall: the challenge ends at 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

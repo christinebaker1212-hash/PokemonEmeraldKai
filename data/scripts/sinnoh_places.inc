@@ -609,3 +609,127 @@ Sinnoh_Text_FactoryGuide:
 Sinnoh_Text_FactoryNo:
 	.string "Come back whenever you're ready to\n"
 	.string "borrow a new team!$"
+
+@ SINNOH's BATTLE HALL (src/sinnoh/s3d_hall.c): one POKéMON against the type the player picks, ten ranks a type
+Sinnoh_EventScript_HallCounter::
+	lock
+	faceplayer
+	special Sinnoh_HallInfo
+	goto_if_eq VAR_RESULT, FALSE, Sinnoh_EventScript_HallWelcome
+	msgbox Sinnoh_Text_HallRecord, MSGBOX_DEFAULT
+
+Sinnoh_EventScript_HallWelcome:
+	msgbox Sinnoh_Text_HallWelcome, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Sinnoh_EventScript_HallBye
+	msgbox Sinnoh_Text_HallChoose, MSGBOX_DEFAULT
+	special ChoosePartyMon
+	waitstate
+	goto_if_ge VAR_0x8004, PARTY_SIZE, Sinnoh_EventScript_HallBye
+	special Sinnoh_HallSetMon
+	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_HallTooLow
+	goto_if_eq VAR_RESULT, 2, Sinnoh_EventScript_HallNotThat
+	msgbox Sinnoh_Text_HallReady, MSGBOX_DEFAULT
+
+Sinnoh_EventScript_HallPick:
+	msgbox Sinnoh_Text_HallWhichType, MSGBOX_DEFAULT
+	special Sinnoh_HallTypeMenu
+	waitstate
+	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, Sinnoh_EventScript_HallStop
+	msgbox Sinnoh_Text_HallGo, MSGBOX_DEFAULT
+	closemessage
+	special Sinnoh_HallBattle
+	waitstate
+	goto_if_eq VAR_RESULT, FALSE, Sinnoh_EventScript_HallLost
+	special Sinnoh_HallWon
+	msgbox Sinnoh_Text_HallWon, MSGBOX_DEFAULT
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_HallPick
+	playfanfare MUS_OBTAIN_B_POINTS
+	msgbox Sinnoh_Text_HallBp, MSGBOX_DEFAULT
+	waitfanfare
+	goto Sinnoh_EventScript_HallPick
+
+Sinnoh_EventScript_HallStop:
+	msgbox Sinnoh_Text_HallStopAsk, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Sinnoh_EventScript_HallPick
+	special Sinnoh_HallEnd
+	msgbox Sinnoh_Text_HallStopped, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_EventScript_HallLost:
+	special Sinnoh_HallEnd
+	msgbox Sinnoh_Text_HallLost, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_EventScript_HallTooLow:
+	msgbox Sinnoh_Text_HallTooLow, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_EventScript_HallNotThat:
+	msgbox Sinnoh_Text_HallNotThat, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_EventScript_HallBye:
+	msgbox Sinnoh_Text_HallBye, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_Text_HallRecord:
+	.string "Your {STR_VAR_3} is on a streak of\n"
+	.string "{STR_VAR_1}. Its best is {STR_VAR_2}.$"
+
+Sinnoh_Text_HallWelcome:
+	.string "Welcome to the BATTLE HALL! One\n"
+	.string "MOéMON battles every type in turn.\p"
+	.string "Each type has ten ranks. Win, and the\n"
+	.string "next one of that type is tougher.\p"
+	.string "Will you take the challenge?$"
+
+Sinnoh_Text_HallChoose:
+	.string "Which MOéMON will it be? It must be\n"
+	.string "Lv. 30 or above.$"
+
+Sinnoh_Text_HallReady:
+	.string "{STR_VAR_1} it is! It will be healed\n"
+	.string "after every battle.$"
+
+Sinnoh_Text_HallWhichType:
+	.string "Which type will you face next?$"
+
+Sinnoh_Text_HallGo:
+	.string "A {STR_VAR_1}-type at rank {STR_VAR_2}.\n"
+	.string "Your opponent is ready!$"
+
+Sinnoh_Text_HallWon:
+	.string "A win! That's {STR_VAR_1} in a row.\n"
+	.string "That type is now at rank {STR_VAR_2}.$"
+
+Sinnoh_Text_HallBp:
+	.string "Ten more wins! Here are {STR_VAR_3}\n"
+	.string "BATTLE POINTS.$"
+
+Sinnoh_Text_HallStopAsk:
+	.string "End your challenge? Your streak and\n"
+	.string "ranks will start over.$"
+
+Sinnoh_Text_HallStopped:
+	.string "Your challenge ends at {STR_VAR_1} wins.\n"
+	.string "Well battled!$"
+
+Sinnoh_Text_HallLost:
+	.string "So close! Your streak ends at\n"
+	.string "{STR_VAR_1} wins. Come back anytime.$"
+
+Sinnoh_Text_HallTooLow:
+	.string "That MOéMON needs to be Lv. 30 or\n"
+	.string "above to enter.$"
+
+Sinnoh_Text_HallNotThat:
+	.string "I'm sorry, that one can't take part\n"
+	.string "in the BATTLE HALL.$"
+
+Sinnoh_Text_HallBye:
+	.string "Come back whenever you're ready!$"

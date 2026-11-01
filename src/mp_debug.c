@@ -2084,6 +2084,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf(" %d", Sinnoh_GreatMarshDailySpecies(k));
         printf("\n");
     }
+    else if (strcmp(cmd, "hall") == 0)
+    {
+        void Sinnoh_HallDebug(void);
+        Sinnoh_HallDebug();   // SINNOH's BATTLE HALL record (src/sinnoh/s3d_hall.c)
+    }
     else if (strcmp(cmd, "where") == 0)
     {
         struct ObjectEvent *me = &gObjectEvents[gPlayerAvatar.objectEventId];

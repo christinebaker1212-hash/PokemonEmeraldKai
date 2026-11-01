@@ -250,6 +250,7 @@ void MP_Region_StartNewGame(void)
     gRegionState.current = sStartRegion;
     gRegionState.started = 1 << sStartRegion;
     Sinnoh_HoneyReset();
+    Sinnoh_HallReset();
     MP_Region_Arrive(sStartRegion);
     if (sStartRegion != REGION_HOENN)
     {
@@ -336,6 +337,15 @@ void MP_Region_WriteSidecar(void)
             fwrite(honey, size, 1, f);
         }
         {
+            // SINNOH's BATTLE HALL record (src/sinnoh/s3d_hall.c)
+            u32 size;
+            const void *hall = Sinnoh_HallData(&size);
+            c[0] = CHUNK('H', 'A', 'L', 'L');
+            c[1] = size;
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(hall, size, 1, f);
+        }
+        {
             u32 format = MP_SAVE_FORMAT;   // the save's own layout version (mp_savefix.h)
             c[0] = CHUNK('S', 'A', 'V', 'F');
             c[1] = sizeof(format);
@@ -395,6 +405,12 @@ static bool8 LoadFrom(const char *path)
                 u8 buf[1024];
                 if (fread(buf, c[1], 1, f) == 1)
                     Sinnoh_HoneyLoad(buf, c[1]);
+            }
+            else if (c[0] == CHUNK('H', 'A', 'L', 'L') && c[1] <= 1024)
+            {
+                u8 buf[1024];
+                if (fread(buf, c[1], 1, f) == 1)
+                    Sinnoh_HallLoad(buf, c[1]);
             }
             else if (c[0] == CHUNK('S', 'A', 'V', 'F') && c[1] == sizeof(u32))
             {
@@ -469,6 +485,7 @@ void MP_Region_LoadFromSave(void)
     char path[600];
     int i;
     Sinnoh_HoneyReset();
+    Sinnoh_HallReset();
     for (i = 0; i <= 3; i++)
     {
         if (i == 0)

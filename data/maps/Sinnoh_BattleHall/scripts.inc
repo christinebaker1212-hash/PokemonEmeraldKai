@@ -3,11 +3,11 @@ Sinnoh_BattleHall_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_BattleHall_EventScript_Person1::
-	msgbox Sinnoh_BattleHall_Text_Person1, MSGBOX_NPC
+	goto Sinnoh_EventScript_HallCounter
 	end
 
 Sinnoh_BattleHall_EventScript_Person2::
-	msgbox Sinnoh_BattleHall_Text_Person2, MSGBOX_NPC
+	goto Sinnoh_EventScript_HallCounter
 	end
 
 Sinnoh_BattleHall_EventScript_Person3::
@@ -54,16 +54,6 @@ Sinnoh_BattleHall_EventScript_Person15::
 	msgbox Sinnoh_BattleHall_Text_Person15, MSGBOX_NPC
 	end
 
-Sinnoh_BattleHall_Text_Person1:
-	.string "Welcome! This facility is getting\n"
-	.string "ready for challengers. Please come\l"
-	.string "back soon!$"
-
-Sinnoh_BattleHall_Text_Person2:
-	.string "Welcome! This facility is getting\n"
-	.string "ready for challengers. Please come\l"
-	.string "back soon!$"
-
 Sinnoh_BattleHall_Text_Person3:
 	.string "The BATTLE HALL is all about one\n"
 	.string "MOéMON. How far can it go?$"
@@ -106,7 +96,7 @@ Sinnoh_BattleHall_Text_Person12:
 
 Sinnoh_BattleHall_Text_Person15:
 	.string "I keep the records of the BATTLE\n"
-	.string "HALL. Come back once challenges are\l"
-	.string "open!$"
+	.string "HALL. One MOéMON, every type, ten\l"
+	.string "ranks each. Good luck!$"
 
 @ --- end of SINNOH words ---

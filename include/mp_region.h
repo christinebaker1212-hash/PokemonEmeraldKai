@@ -66,6 +66,9 @@ void MP_Region_WriteSidecar(void);   // "<save>.region", after the save file is 
 // SINNOH's HONEY trees, kept in "<save>.region" (src/sinnoh/s3d_wild.c)
 void Sinnoh_HoneyReset(void);
 const void *Sinnoh_HoneyData(u32 *size);
+void Sinnoh_HallReset(void);          // SINNOH's BATTLE HALL record (s3d_hall.c), chunk HALL
+const void *Sinnoh_HallData(u32 *size);
+void Sinnoh_HallLoad(const void *data, u32 size);
 void Sinnoh_HoneyLoad(const void *data, u32 size);
 void MP_Region_LoadFromSave(void);
 struct PokemonStorage;

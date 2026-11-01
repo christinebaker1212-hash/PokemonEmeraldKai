@@ -635,4 +635,10 @@ gSpecials::
 	def_special Sinnoh_EternaClock
 	def_special Sinnoh_VeilstoneBag
 	def_special MP_FieldMoveHasBadge
+	def_special Sinnoh_HallInfo
+	def_special Sinnoh_HallSetMon
+	def_special Sinnoh_HallTypeMenu
+	def_special Sinnoh_HallBattle
+	def_special Sinnoh_HallWon
+	def_special Sinnoh_HallEnd
 	.include "data/qz_specials.inc"   @ Moemon Kai: Quetzal's specials (Johto / Kanto)
