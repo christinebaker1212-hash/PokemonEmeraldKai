@@ -1,0 +1,7 @@
+# SINNOH's water moves (s3d.c AnimateTextures: Platinum's fldtanime, packed by build_pack.py version 5): on ROUTE 219's
+# beach the sea and the shore's waves show another of their frames 20 frames later. Shots w0, w1 (the water differs).
+# The props that move all the time (version 6: windmills...) are in the pack; VALLEY WINDWORKS shots v0, v1 (turned).
+MODE=1
+TMO=60
+EXPECT_A=("animated, first shows" "where map 40.42" "s3d moving props")
+UNEXPECT_A=("[crash]" "TIMEOUT" "s3dtex 0 animated" "s3d moving props 0")

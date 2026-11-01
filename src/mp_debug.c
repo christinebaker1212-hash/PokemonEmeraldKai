@@ -583,6 +583,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
                 n++;
         printf("[test] shadows %s: %u\n", gMpConfig.noShadows ? "off" : "on", (unsigned)n);
     }
+    else if (strcmp(cmd, "s3dtex") == 0)   // s3dtex - SINNOH's animated map textures: how many, the first's frame now
+    {
+        void S3D_TexAnimInfo(u32 *count, u32 *firstShown);
+        u32 n, shown;
+        S3D_TexAnimInfo(&n, &shown);
+        printf("[test] s3dtex %u animated, first shows %u\n", (unsigned)n, (unsigned)shown);
+    }
     else if (strcmp(cmd, "healballs") == 0)   // healballs - the balls SINNOH's healing machine has set so far (s3d_heal.c)
     {
         u8 S3D_Heal_Shown(void);
@@ -1811,6 +1818,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
         }
         else
             printf("[test] sprite %s: no such look\n", arg);
+    }
+    else if (strcmp(cmd, "saveconfig") == 0)   // saveconfig - write the co-op settings (moemon_coop.ini, the save file's own)
+    {
+        char name[64];
+        MP_SaveConfig();
+        MP_Avatar_SpriteConfigName(&gMpConfig.app, name, sizeof(name));
+        printf("[test] saveconfig sprite %s\n", name);
+    }
+    else if (strcmp(cmd, "lookname") == 0)   // lookname - the look worn now, by its ini name
+    {
+        char name[64];
+        MP_Avatar_SpriteConfigName(&gMpConfig.app, name, sizeof(name));
+        printf("[test] lookname %s\n", name);
     }
     else if (strcmp(cmd, "actiondump") == 0)
     {

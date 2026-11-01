@@ -1,4 +1,6 @@
 #include "global.h"
+#include "s3d.h"
+#include "constants/metatile_behaviors.h"
 #include "cable_club.h"
 #include "event_data.h"
 #include "fieldmap.h"
@@ -264,8 +266,9 @@ static void SetUpWarpExitTask(void)
     behavior = MapGridGetMetatileBehaviorAt(x, y);
     if (MetatileBehavior_IsDoor(behavior) == TRUE)
         func = Task_ExitDoor;
-    else if (MetatileBehavior_IsNonAnimDoor(behavior) == TRUE)
-        func = Task_ExitNonAnimDoor;
+    else if (MetatileBehavior_IsNonAnimDoor(behavior) == TRUE
+          || (MetatileBehavior_IsEscalator(behavior) && S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup)))
+        func = Task_ExitNonAnimDoor;   // (Moemon Kai: SINNOH's escalators step off as its other warps)
     else
         func = Task_ExitNonDoor;
     CreateTask(func, 10);
@@ -364,6 +367,29 @@ static void Task_ExitDoor(u8 taskId)
     }
 }
 
+// Moemon Kai: on SINNOH's maps the player steps on the way they were going (overworld.c keeps their facing through
+// the warp: a cave mouth walked into northward leads on north inside, a side warp on sideways); where that is blocked
+// (stairs, an escalator against the wall) back the other way; neither: they stay (DIR_NONE + 0xFF). Elsewhere DIR_NONE.
+static bool8 SinnohCanStep(s16 x, s16 y, u8 dir)
+{
+    s16 nx = x, ny = y;
+    MoveCoords(dir, &nx, &ny);
+    return MapGridGetCollisionAt(nx, ny) == 0 && !MetatileBehavior_IsNonAnimDoor(MapGridGetMetatileBehaviorAt(nx, ny))
+        && GetObjectEventIdByXY(nx, ny) == OBJECT_EVENTS_COUNT;
+}
+
+static u8 SinnohArrivalDir(s16 x, s16 y)
+{
+    u8 dir = GetPlayerFacingDirection();
+    if (!S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup) || dir < DIR_SOUTH || dir > DIR_EAST)
+        return DIR_NONE;
+    if (SinnohCanStep(x, y, dir))
+        return dir;
+    if (SinnohCanStep(x, y, GetOppositeDirection(dir)))
+        return GetOppositeDirection(dir);
+    return DIR_NONE + 0xFF;
+}
+
 static void Task_ExitNonAnimDoor(u8 taskId)
 {
     struct Task *task = &gTasks[taskId];
@@ -383,8 +409,16 @@ static void Task_ExitNonAnimDoor(u8 taskId)
         {
             u8 objEventId;
             u8 dir = MP_MapPic_ArrivalDir(*x, *y);   // Moemon Co-op: the GAME CENTER's stairs step off sideways
+            if (dir == DIR_NONE)
+                dir = SinnohArrivalDir(*x, *y);
             SetPlayerVisibility(TRUE);
             objEventId = GetObjectEventIdByLocalIdAndMap(LOCALID_PLAYER, 0, 0);
+            if (dir == DIR_NONE + 0xFF)   // (SINNOH: nowhere to step)
+            {
+                UnfreezeObjectEvents();
+                task->tState = 3;
+                break;
+            }
             ObjectEventSetHeldMovement(&gObjectEvents[objEventId], GetWalkNormalMovementAction(dir != DIR_NONE ? dir : GetPlayerFacingDirection()));
             task->tState = 2;
         }
@@ -482,6 +516,48 @@ static bool32 WaitForWeatherFadeIn(void)
     else
         return FALSE;
 }
+
+// Moemon Kai: SINNOH's stairs and escalators (tools/sinnoh/build_pack.py: stairs 0x5E up / 0x5F down, escalators
+// MB_UP_ESCALATOR / MB_DOWN_ESCALATOR by the floors they lead to). The player is carried on the way they were going,
+// and up or down, while the screen fades: walking across the stairs, standing on the escalator (1.63.9: both were a
+// plain warp, the player standing still)
+#define tFrame data[0]
+#define tDx    data[1]
+#define tDy    data[2]
+#define tWalk  data[3]
+static void Task_SinnohRide(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    struct Sprite *sprite = &gSprites[gPlayerAvatar.spriteId];
+    if (tFrame < 48)
+        tFrame++;
+    sprite->x2 = tDx * tFrame / 3;   // (16 pixels on in the first 48 frames: the fade)
+    sprite->y2 = tDy * tFrame / 4;   // (12 up or down)
+    if (tWalk && tFrame == 1)
+        StartSpriteAnim(sprite, GetMoveDirectionAnimNum(GetPlayerFacingDirection()));
+}
+
+bool8 DoSinnohRideWarp(u16 metatileBehavior)
+{
+    u8 dir, taskId;
+    s16 dx = 0, dy = 0;
+    bool8 stairs = metatileBehavior == MB_UNUSED_5E || metatileBehavior == MB_UNUSED_5F;
+    if (!S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup) || !(stairs || MetatileBehavior_IsEscalator(metatileBehavior)))
+        return FALSE;
+    dir = GetPlayerFacingDirection();
+    MoveCoords(dir, &dx, &dy);
+    FreezeObjectEvents();
+    taskId = CreateTask(Task_SinnohRide, 9);
+    gTasks[taskId].tDx = dx;
+    gTasks[taskId].tDy = dy + ((metatileBehavior == MB_UNUSED_5E || metatileBehavior == MB_UP_ESCALATOR) ? -1 : 1);
+    gTasks[taskId].tWalk = stairs;
+    DoWarp();
+    return TRUE;
+}
+#undef tFrame
+#undef tDx
+#undef tDy
+#undef tWalk
 
 void DoWarp(void)
 {

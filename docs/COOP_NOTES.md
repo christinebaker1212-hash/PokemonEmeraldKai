@@ -3404,6 +3404,30 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   (-22.2, -14.5) from the nurse's tile middle ((-24, -12) in the LEAGUE's north CENTER); then they blink every 8
   frames while MUS_HEAL plays (Platinum's flash is a material animation). `mp healballs`; test sinnoh_heal.
 
+## 1.63.9 / 1.63.10: HOENN's tiles, music loops, SINNOH's water, moving props, warps; shadows
+- field_camera.c DrawMetatileAt drew every metatile id from 0x300 (S3D_METATILE_BEHAVIOR) as metatile 1 in every region
+  since 1.63.0; only on SINNOH's maps now (S3D_IsSinnohGroup): HOENN's secondary tilesets use 0x300-0x3FF for their own
+  art (FALLARBOR's BATTLE TENT, ROUTE 104's bridge, RUSTBORO's paths). Anything SINNOH-only asks S3D_IsSinnohGroup
+  (the user: KANTO, JOHTO and HOENN are "GEN 3" maps, SINNOH "GEN 4").
+- Songs made from rips without a loop point loop from the start (tools/kaisong/add_loop.py; --check in kaisong_test.sh:
+  every song in music/ loops but the fanfares).
+- SINNOH's water (pack version 5): Platinum's fldtanime (fetch_decomp.sh PARTS 8): each animated map texture's frames
+  decoded with the map texture's own palette and size (nitro.py decode frame=, the frame file's own header ignored as
+  Platinum copies the bytes), swapped by s3d.c AnimateTextures (Platinum's field frames: 30 a second); a map texture of
+  another size than its frames stays still (one set's "sea"). `mp s3dtex`; test sinnoh_water.
+- Props that move all the time (version 6): Platinum's bm_anime_list (looping, not deferred) joint animations (NSBCA)
+  drawn ahead as a mesh per frame (build_pack.py prop_frames: every 2nd frame, at most 48), s3d.c meshShown picks the
+  frame. Not yet: texture scrolls (NSBTA), texture swaps (NSBTP) and the doors' one-shot animations.
+- SINNOH's warps (build_pack.py warp_behavior; field_screen_effect.c SinnohArrivalDir; overworld.c keeps the facing):
+  Platinum's entrance mats east / west / south are Emerald's arrow warps (same numbers); stairs 0x5E up / 0x5F down
+  (Emerald's unused behaviors, non-animated doors in metatile_behavior.c) and escalators MB_UP / MB_DOWN_ESCALATOR by the
+  floors' names; every other warp a non-animated door. Arriving, the player walks on the way they were going, back the
+  other way if that is blocked, else stands. Stairs and escalators carry the player while the screen fades
+  (DoSinnohRideWarp: walking across and up / down; standing on the escalator). Emerald's own escalators are unchanged.
+- Shadows: people all the user's size (size 0, every LOOK); big (PMD) followers' shadow at their feet point, as wide as
+  their widest frame; small sprites from their first picture's lowest row (standing); in 3D a shadow is flat (s3d.c
+  OamDepth.flat: only a wall in front hides it). `mp shadowwatch` reports both shadows' gap and missing frames.
+
 ## SINNOH's 3D engine
 - Plan and rules: docs/SINNOH_HANDOFF.md. The data comes from pret/pokeplatinum (source.py: its map blocks, matrices,
   areas, props, texture sets and lights as files; fetch_decomp.sh gets them at a pinned commit, make_pack.sh fetches and

@@ -952,6 +952,9 @@ static u8 GetAdjustedInitialDirection(struct InitialPlayerAvatarState *playerStr
         return DIR_EAST;
     else if (MetatileBehavior_IsDeepSouthWarp(metatileBehavior) == TRUE)
         return DIR_NORTH;
+    else if ((MetatileBehavior_IsNonAnimDoor(metatileBehavior) == TRUE || MetatileBehavior_IsEscalator(metatileBehavior) == TRUE)
+          && S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+        return playerStruct->direction;   // Moemon Kai: SINNOH's warps keep the way the player was going (field_screen_effect.c)
     else if (MetatileBehavior_IsNonAnimDoor(metatileBehavior) == TRUE || MetatileBehavior_IsDoor(metatileBehavior) == TRUE)
         return DIR_SOUTH;
     else if (MetatileBehavior_IsSouthArrowWarp(metatileBehavior) == TRUE)

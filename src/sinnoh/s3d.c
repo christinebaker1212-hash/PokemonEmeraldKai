@@ -84,6 +84,16 @@ static struct
     struct S3dMatrix *mat;
     u32 nnamed;
     struct { u16 model; s16 mesh; } *named;   // (version 4) the models the gyms load at run time
+    // (version 5) Platinum's animated map textures (water, shores, lamps: fldtanime): each texture's frames in turn,
+    // for so many of Platinum's field frames (30 a second); shown[t]: the texture drawn for t this frame
+    u32 nanim;
+    struct { u16 tex, nsteps, cycle; u16 (*steps)[2]; } *anim;
+    u16 *shown;
+    // (version 6) props that move all the time (Platinum's looping joint animations: windmills, a ship's screw...): a
+    // mesh per frame, each for `step` of Platinum's frames; meshShown[m]: the mesh drawn for prop mesh m this frame
+    u32 nmoving;
+    struct { u16 mesh, nframes, step; u16 *frames; } *moving;
+    u16 *meshShown;
 } sPack;
 
 // Props this game places at run time (SINNOH's gyms that move: src/sinnoh/s3d_gyms.c), in the current map's world
@@ -164,7 +174,7 @@ static void LoadPack(void)
     }
     r.p += 4;
     version = TakeU32(&r);
-    if (version != 3 && version != 4)
+    if (version < 3 || version > 6)
     {
         printf("[s3d] %s: another pack version\n", path);
         free(data);
@@ -262,6 +272,53 @@ static void LoadPack(void)
         {
             sPack.named[i].model = TakeU16(&r);
             Take(&r, &sPack.named[i].mesh, 2);
+        }
+    }
+    sPack.shown = malloc(sizeof(u16) * (sPack.ntex ? sPack.ntex : 1));
+    for (i = 0; i < sPack.ntex; i++)
+        sPack.shown[i] = i;
+    if (version >= 5)
+    {
+        sPack.nanim = TakeU32(&r);
+        sPack.anim = calloc(sPack.nanim ? sPack.nanim : 1, sizeof(*sPack.anim));
+        for (i = 0; i < sPack.nanim && !r.bad; i++)
+        {
+            sPack.anim[i].tex = TakeU16(&r);
+            sPack.anim[i].nsteps = TakeU16(&r);
+            sPack.anim[i].steps = malloc(4 * (sPack.anim[i].nsteps ? sPack.anim[i].nsteps : 1));
+            for (j = 0; j < sPack.anim[i].nsteps && !r.bad; j++)
+            {
+                sPack.anim[i].steps[j][0] = TakeU16(&r);
+                sPack.anim[i].steps[j][1] = TakeU16(&r);
+                if (sPack.anim[i].steps[j][0] >= sPack.ntex)
+                    sPack.anim[i].steps[j][0] = sPack.anim[i].tex;
+                sPack.anim[i].cycle += sPack.anim[i].steps[j][1];
+            }
+            if (sPack.anim[i].tex >= sPack.ntex)
+                sPack.anim[i].nsteps = 0;
+        }
+    }
+    sPack.meshShown = malloc(sizeof(u16) * (sPack.nmesh ? sPack.nmesh : 1));
+    for (i = 0; i < sPack.nmesh; i++)
+        sPack.meshShown[i] = i;
+    if (version >= 6)
+    {
+        sPack.nmoving = TakeU32(&r);
+        sPack.moving = calloc(sPack.nmoving ? sPack.nmoving : 1, sizeof(*sPack.moving));
+        for (i = 0; i < sPack.nmoving && !r.bad; i++)
+        {
+            sPack.moving[i].mesh = TakeU16(&r);
+            sPack.moving[i].nframes = TakeU16(&r);
+            sPack.moving[i].step = TakeU16(&r);
+            sPack.moving[i].frames = malloc(2 * (sPack.moving[i].nframes ? sPack.moving[i].nframes : 1));
+            for (j = 0; j < sPack.moving[i].nframes && !r.bad; j++)
+            {
+                sPack.moving[i].frames[j] = TakeU16(&r);
+                if (sPack.moving[i].frames[j] >= sPack.nmesh)
+                    sPack.moving[i].frames[j] = sPack.moving[i].mesh;
+            }
+            if (sPack.moving[i].mesh >= sPack.nmesh || sPack.moving[i].step == 0)
+                sPack.moving[i].nframes = 0;
         }
     }
     free(data);
@@ -534,7 +591,7 @@ void S3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
 // so dy * tan(pitch) nearer the camera (about one unit a pixel at the target)
 float gS3dSpriteDepth[MAX_SPRITES];
 s16 gS3dSpriteFeet[MAX_SPRITES];
-typedef struct { float d0; s16 feet; } OamDepth;
+typedef struct { float d0; s16 feet; u8 flat; } OamDepth;   // flat: a shadow lying on the ground (mp_shadow.c)
 static OamDepth sPendingOam[OAM_ENTRY_COUNT], sLiveOam[OAM_ENTRY_COUNT];
 static bool8 sLiveAny;
 
@@ -546,6 +603,7 @@ void S3D_NoteOam(u16 spriteId, u16 first, u16 end)
     {
         sPendingOam[i].d0 = on ? gS3dSpriteDepth[spriteId] : 0.0f;
         sPendingOam[i].feet = on ? gS3dSpriteFeet[spriteId] : 0;
+        sPendingOam[i].flat = on && gSprites[spriteId].mpShadow;
     }
 }
 
@@ -566,6 +624,8 @@ static bool OamHidden(int oamIndex, int x, int line)
     o = &sLiveOam[oamIndex];
     if (o->d0 <= 0.0f)
         return FALSE;
+    if (o->flat)   // (a shadow lies on the ground: all of it as far as its middle, and only a wall in front hides it;
+        return sDepth[line][x] < o->d0 - 16.0f;   //  1.63.9: the ground around hid parts of it as an upright picture's)
     d = o->d0 - (o->feet - line) * 1.6652f;   // tan(59.05 degrees)
     return sDepth[line][x] < d - 6.0f;
 }
@@ -651,7 +711,7 @@ static void DrawTriangle(const SVtx *a, const SVtx *b, const SVtx *c, const S3dG
 {
     float area = (b->x - a->x) * (c->y - a->y) - (c->x - a->x) * (b->y - a->y);
     s32 minx, maxx, miny, maxy, x, y;
-    const S3dTex *t = g->tex >= 0 && (u32)g->tex < sPack.ntex ? &sPack.tex[g->tex] : NULL;
+    const S3dTex *t = g->tex >= 0 && (u32)g->tex < sPack.ntex ? &sPack.tex[sPack.shown[g->tex]] : NULL;
     bool8 clear = g->alpha < 31;
     if (area == 0.0f || g->cull == 3 || (g->cull == 1 && area > 0.0f) || (g->cull == 2 && area < 0.0f))
         return;
@@ -796,8 +856,39 @@ static void DrawMesh(const S3dMesh *mesh, const float *m, float ox, float oy, fl
     }
 }
 
+// Platinum's animated map textures: the frame each one shows now (its field runs at 30 frames a second: one of its
+// frames is two of ours)
+static u32 sTexClock;
+static void AnimateTextures(void)
+{
+    u32 i, j, t;
+    sTexClock++;
+    for (i = 0; i < sPack.nanim; i++)
+    {
+        if (sPack.anim[i].nsteps == 0 || sPack.anim[i].cycle == 0)
+            continue;
+        t = (sTexClock / 2) % sPack.anim[i].cycle;
+        for (j = 0; j + 1 < sPack.anim[i].nsteps && t >= sPack.anim[i].steps[j][1]; j++)
+            t -= sPack.anim[i].steps[j][1];
+        sPack.shown[sPack.anim[i].tex] = sPack.anim[i].steps[j][0];
+    }
+    for (i = 0; i < sPack.nmoving; i++)   // (the props that move: their frame now)
+        if (sPack.moving[i].nframes)
+            sPack.meshShown[sPack.moving[i].mesh]
+                = sPack.moving[i].frames[(sTexClock / 2 / sPack.moving[i].step) % sPack.moving[i].nframes];
+}
+
+// `mp s3dtex`: how many textures are animated, and what the first shows (tests)
+void S3D_TexAnimInfo(u32 *count, u32 *firstShown)
+{
+    printf("[test] s3d moving props %u\n", (unsigned)sPack.nmoving);
+    *count = sPack.nanim;
+    *firstShown = sPack.nanim ? sPack.shown[sPack.anim[0].tex] : 0;
+}
+
 static void Render(void)
 {
+    AnimateTextures();
     s32 bx = (s32)floorf(sView.tx / BLOCK), bz = (s32)floorf(sView.tz / BLOCK), cx, cz;
     u32 i, pass;
     for (i = 0; i < W * H; i++)
@@ -821,7 +912,7 @@ static void Render(void)
                 DrawMesh(&sPack.mesh[c->mesh], NULL, ox, oy, oz, pass);
                 for (i = 0; i < c->nprops; i++)
                     if (c->props[i].mesh >= 0 && (u32)c->props[i].mesh < sPack.nmesh)
-                        DrawMesh(&sPack.mesh[c->props[i].mesh], c->props[i].m, ox, oy, oz, pass);
+                        DrawMesh(&sPack.mesh[sPack.meshShown[c->props[i].mesh]], c->props[i].m, ox, oy, oz, pass);
             }
     for (pass = 0; pass < 2; pass++)
         for (i = 0; i < S3D_DYN_PROPS; i++)

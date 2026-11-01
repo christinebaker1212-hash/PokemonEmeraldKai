@@ -1,0 +1,16 @@
+pressuntil A field 5000
+wait 30
+mp warp 40,42,12,10
+wait 200
+mp where
+mp s3dtex
+shot w0
+wait 20
+mp s3dtex
+shot w1
+mp warp 40,62,19,16
+wait 200
+shot v0
+wait 16
+shot v1
+quit

@@ -97,6 +97,19 @@ class Decomp:
         path = self._path('res/graphics/field_effects', name)
         return open(path, 'rb').read() if os.path.exists(path) else None
 
+    def prop_anims(self, model):
+        """A prop model's animations as Platinum's field loads them (bm_anime_list): (looping, [file bytes...]);
+        None: no list fetched (fetch_decomp.sh PARTS 8)"""
+        if not hasattr(self, '_anime_list'):
+            path = self._path('res/prebuilt/arc/bm_anime_list.narc')
+            from nds import Narc
+            self._anime_list = Narc(open(path, 'rb').read()) if os.path.exists(path) else None
+            self._anime_files = [l.strip().strip("',") for l in
+                                 open(self._path('res/field/props/animations/meson.build')) if '.nsb' in l]
+        return _prop_anims(self._anime_list, model,
+                           lambda a: open(self._path('res/field/props/animations', self._anime_files[a]), 'rb').read()
+                           if a < len(self._anime_files) else None)
+
     def tex_anims(self):
         """Platinum's animated map textures (fldtanime.narc: member 0 the list, then each one's frames; None: not
         fetched, fetch_decomp.sh PARTS 8)"""
@@ -169,9 +182,24 @@ class RomSource:
     def tex_anims(self):
         return self._n('data/fldtanime.narc')
 
+    def prop_anims(self, model):
+        anims = self._n('arc/bm_anime.narc')
+        return _prop_anims(self._n('arc/bm_anime_list.narc'), model, lambda a: anims[a] if a < len(anims) else None)
+
     def lights(self, n):
         from render_ref import parse_lights
         return parse_lights(self._n('data/arealight.narc')[n].decode('latin-1'))
+
+
+def _prop_anims(lst, model, read):
+    if lst is None or model >= len(lst):
+        return None
+    d = lst[model]
+    if len(d) < 8 or not d[0]:
+        return (False, [])
+    ids = struct.unpack_from('<%di' % ((len(d) - 4) // 4), d, 4)
+    files = [read(a) for a in ids if a >= 0]
+    return (not (d[1] & 1), [f for f in files if f])
 
 
 def open_source(path, decomp=None):

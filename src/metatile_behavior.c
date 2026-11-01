@@ -263,7 +263,8 @@ bool8 MetatileBehavior_IsNonAnimDoor(u8 metatileBehavior)
 {
     if (metatileBehavior == MB_NON_ANIMATED_DOOR
      || metatileBehavior == MB_WATER_DOOR
-     || metatileBehavior == MB_DEEP_SOUTH_WARP)
+     || metatileBehavior == MB_DEEP_SOUTH_WARP
+     || metatileBehavior == MB_UNUSED_5E || metatileBehavior == MB_UNUSED_5F)   // Moemon Kai: SINNOH's stairs up / down
         return TRUE;
     else
         return FALSE;

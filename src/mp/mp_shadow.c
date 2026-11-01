@@ -6,6 +6,7 @@
 // Garden POKeMON cut off by mpClipOn), for things (inanimate objects) or hidden owners. On SINNOH's 3D maps the shadow
 // stands where its owner does (sprite.c UpdateOamCoords places every field sprite by its feet).
 #include <stdio.h>
+#include <stdlib.h>
 #include "global.h"
 #include "event_object_movement.h"
 #include "fieldmap.h"
@@ -146,40 +147,17 @@ bool8 MP_SpriteDrawnRows(const struct Sprite *sp, u8 *top, u8 *bottom)
     return FrameRows(sp, cmd->frame.imageValue, top, bottom);
 }
 
-// Where a sprite's feet are, the same whatever frame it shows (1.63.8: running up or down lifts the feet in some
-// frames, and a shadow following each frame's lowest row hopped): the lowest row of every frame of its current
-// animation, and of any frame seen before with the same pictures
-static const void *sFeetImages[MAX_SPRITES];
+// Where a sprite's feet are, the same whatever frame it shows: its first picture's lowest row (an object's first
+// picture is it standing, facing down). 1.63.8 took the lowest row of the animation's frames, and the walking frames,
+// a row or two lower, moved the shadow when a follower set off; each frame's own row hopped it while running.
+static const void *sFeetImages[MAX_SPRITES];   // (big sprites: their picture set, and half their widest frame)
 static u8 sFeetBottom[MAX_SPRITES];
 static bool8 SteadyBottom(const struct Sprite *sp, u8 *bottom)
 {
-    u32 id = sp - gSprites, i;
-    u8 top, b, best = 0;
-    bool8 any = FALSE;
-    if (!Readable(sp) || id >= MAX_SPRITES)
+    u8 top;
+    if (!Readable(sp))
         return FALSE;
-    for (i = 0; i < 32; i++)
-    {
-        const union AnimCmd *cmd = &sp->anims[sp->animNum][i];
-        if (cmd->type == -1 || cmd->type == -2)
-            break;
-        if (cmd->type < 0)
-            continue;
-        if (FrameRows(sp, cmd->frame.imageValue, &top, &b))
-        {
-            if (!any || b > best)
-                best = b;
-            any = TRUE;
-        }
-    }
-    if (!any)
-        return FALSE;
-    if (sFeetImages[id] == sp->images && sFeetBottom[id] > best)
-        best = sFeetBottom[id];
-    sFeetImages[id] = sp->images;
-    sFeetBottom[id] = best;
-    *bottom = best;
-    return TRUE;
+    return FrameRows(sp, 0, &top, bottom);
 }
 
 // The owner's feet (sprite coordinates, without its hop) and how wide it is
@@ -188,10 +166,19 @@ static void Feet(const struct Sprite *o, s32 *x, s32 *y, s32 *w)
     *x = o->x + o->x2;
     if (o->mpBig != NULL && o->mpBig->frame != NULL)
     {
+        // a big (PMD) picture's point is its feet on the ground (mp_pmd.c): the shadow stays there whatever the frame's
+        // picture does (1.63.9: its bottom bobbed with the walk, and so did the shadow); as wide as the widest frame
         const u8 *f = o->mpBig->frame;
-        s16 dy = (s16)(f[2] | f[3] << 8);
-        u16 fw = f[4] | f[5] << 8, fh = f[6] | f[7] << 8;
-        *y = o->y + dy + fh;
+        u16 fw = f[4] | f[5] << 8;
+        u32 id = o - gSprites;
+        *y = o->y;
+        if (id < MAX_SPRITES)
+        {
+            if (sFeetImages[id] != (const void *)o->mpBig || fw > sFeetBottom[id] * 2)
+                sFeetBottom[id] = fw / 2;   // (half the width: it fits a u8)
+            sFeetImages[id] = o->mpBig;
+            fw = sFeetBottom[id] * 2;
+        }
         *w = fw;
     }
     else
@@ -206,7 +193,7 @@ static void Feet(const struct Sprite *o, s32 *x, s32 *y, s32 *w)
         *w = *w * o->mpScale / 256;
 }
 
-static void Cast(u8 owner)
+static void Cast(u8 owner, bool8 person)
 {
     struct Sprite *o = &gSprites[owner], *s;
     s32 x, y, w;
@@ -222,7 +209,9 @@ static void Cast(u8 owner)
     }
     s = &gSprites[id];
     Feet(o, &x, &y, &w);
-    size = w <= 16 ? 0 : w <= 32 ? 1 : w <= 48 ? 2 : 3;
+    // people (the player in any LOOK, every NPC, GEN 4 or not): all the same, the user's mock-up oval; POKeMON by their
+    // width (1.63.9)
+    size = person ? 0 : w <= 16 ? 0 : w <= 32 ? 1 : w <= 48 ? 2 : 3;
     StartSpriteAnimIfDifferent(s, size);
     s->x = x;
     s->y = y - 1 - 3;   // (the oval's middle on the feet's last row; it sits 3 below the frame's middle)
@@ -242,31 +231,55 @@ static bool8 InWater(s16 x, s16 y)
     return MetatileBehavior_IsSurfableWaterOrUnderwater(b) || MetatileBehavior_IsDeepOrOceanWater(b);
 }
 
-// `mp shadowwatch N` (test): the player's shadow against the player's sprite for N frames, its lowest and highest gap
+// `mp shadowwatch N` (test): the player's and the follower's shadows against where they stand (their sprite's y, not
+// a hop's y2) for N frames: the lowest and highest gap, and the frames they had none
 static u16 sWatch;
-static s16 sWatchMin, sWatchMax;
+static struct { s16 min, max; u16 missing; } sW[2];
 void MP_Shadow_Watch(u16 frames)
 {
+    u32 k;
     sWatch = frames;
-    sWatchMin = 0x7FFF, sWatchMax = -0x7FFF;
+    for (k = 0; k < 2; k++)
+        sW[k].min = 0x7FFF, sW[k].max = -0x7FFF, sW[k].missing = 0;
+}
+
+static void WatchOne(u32 k, u8 owner)
+{
+    u8 id;
+    if (owner >= MAX_SPRITES)
+        return;
+    id = sShadowOf[owner];
+    if (IsOurs(id) && !gSprites[id].invisible)
+    {
+        s16 gap = gSprites[id].y - gSprites[owner].y;
+        if (getenv("MOEMON_SHADOW_TRACE"))
+            printf("[shadow] %s owner %u y %d shadow %u y %d anim %u\n", k ? "follower" : "player", owner, gSprites[owner].y,
+                   id, gSprites[id].y, gSprites[owner].animNum);
+        if (gap < sW[k].min)
+            sW[k].min = gap;
+        if (gap > sW[k].max)
+            sW[k].max = gap;
+    }
+    else
+        sW[k].missing++;
 }
 
 static void Watch(void)
 {
-    u8 owner = gObjectEvents[gPlayerAvatar.objectEventId].spriteId, id;
-    if (sWatch == 0 || owner >= MAX_SPRITES)
+    u32 i, k;
+    u8 follower = MAX_SPRITES;
+    if (sWatch == 0)
         return;
-    id = sShadowOf[owner];
-    if (IsOurs(id))
-    {
-        s16 gap = (gSprites[id].y + gSprites[id].y2) - (gSprites[owner].y + gSprites[owner].y2);
-        if (gap < sWatchMin)
-            sWatchMin = gap;
-        if (gap > sWatchMax)
-            sWatchMax = gap;
-    }
+    for (i = 0; i < MAX_SPRITES && follower == MAX_SPRITES; i++)
+        if (gSprites[i].inUse && gSprites[i].mpCastShadow && !gSprites[i].invisible)
+            follower = i;
+    WatchOne(0, gObjectEvents[gPlayerAvatar.objectEventId].spriteId);
+    WatchOne(1, follower);
     if (--sWatch == 0)
-        printf("[test] shadowwatch gap %d..%d (moved %d)\n", sWatchMin, sWatchMax, sWatchMax - sWatchMin);
+        for (k = 0; k < 2; k++)
+            if (sW[k].max >= sW[k].min || sW[k].missing)
+                printf("[test] shadowwatch %s gap %d..%d (moved %d) missing %u\n", k ? "follower" : "player", sW[k].min,
+                       sW[k].max, sW[k].max >= sW[k].min ? sW[k].max - sW[k].min : 0, (unsigned)sW[k].missing);
 }
 
 // Every overworld frame, last thing before the OAM is built (overworld.c OverworldBasic)
@@ -299,13 +312,13 @@ void MP_Shadow_Update(void)
                 continue;
             if (InWater(e->currentCoords.x, e->currentCoords.y))
                 continue;
-            Cast(e->spriteId);
+            Cast(e->spriteId, TRUE);
         }
         for (i = 0; i < MAX_SPRITES; i++)   // followers and Garden POKeMON (mp_follower.c marks them)
         {
             struct Sprite *o = &gSprites[i];
             if (o->inUse && o->mpCastShadow && !o->invisible && !o->mpClipOn && !sSeen[i])
-                Cast(i);
+                Cast(i, FALSE);
         }
     }
     for (i = 0; i < MAX_SPRITES; i++)

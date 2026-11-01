@@ -786,6 +786,8 @@ static bool8 TryStartWarpEventScript(struct MapPosition *position, u16 metatileB
         }
         StoreInitialPlayerAvatarState();
         SetupWarp(&gMapHeader, warpEventId, position);
+        if (DoSinnohRideWarp(metatileBehavior))   // Moemon Kai: SINNOH's stairs and escalators (field_screen_effect.c)
+            return TRUE;
         if (MetatileBehavior_IsEscalator(metatileBehavior) == TRUE)
         {
             DoEscalatorWarp(metatileBehavior);

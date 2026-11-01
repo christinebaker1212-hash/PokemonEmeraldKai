@@ -31,9 +31,15 @@ Format (little endian), version 3:
           rectangle in x, z around the block's centre and the plane the ground follows there); world heights.
   (version 4) u32 named meshes: each u16 Platinum's prop model number, s16 mesh: the models Platinum's gyms load at
           run time (tools/sinnoh/gymprops.py), each with its gym's textures
+  (version 5) u32 animated textures: each u16 the texture, u16 frames, then per frame u16 the texture shown, u16 for
+          how many of Platinum's field frames (30 a second); the map's water, shores, lamps... (Platinum's fldtanime:
+          a texture's frames drawn with its own palette, swapped in turn)
+  (version 6) u32 moving props: each u16 the prop's mesh, u16 frames, u16 Platinum frames each, then the frames' meshes
+          (Platinum's looping joint animations, bm_anime: windmills, the steamship's screw...)
 """
 import hashlib
 import math
+import re
 import os
 import struct
 import zlib
@@ -46,7 +52,7 @@ from platinum import Land  # noqa: E402
 from source import open_source, NONE  # noqa: E402
 from places import places, events  # noqa: E402
 
-VERSION = 4
+VERSION = 6
 
 # A block's metatile id carries the tile's behavior: S3D_METATILE_BEHAVIOR (0x300, include/s3d.h) + the game's behavior
 # (fieldmap.c GetMetatileAttributesById), so any of the game's behaviors can be used without a tileset that has it.
@@ -102,11 +108,36 @@ def heights(land, ox=0, oz=0):
     return out
 
 
-# Warp tiles (from every kept place's events): a mat walked off southward keeps Emerald's south arrow warp (0x65, the
-# same number in both games); every other warp (doors, cave mouths, stairs, escalators...) warps when stepped on, as
-# Emerald's non-animated door does
-SOUTH_MAT = 0x65       # MB_SOUTH_ARROW_WARP
+# Warp tiles (from every kept place's events): Platinum's entrance mats walked off southward, eastward or westward keep
+# Emerald's arrow warps (0x65, 0x62, 0x63: the same numbers in both games); every other warp (doors, cave mouths,
+# stairs, escalators...) warps when stepped on, as Emerald's non-animated door does, and the player walks on the way
+# they were going (field_screen_effect.c SinnohArrivalDir)
+ARROW_MATS = (0x62, 0x63, 0x65)   # MB_EAST / WEST / SOUTH_ARROW_WARP (Platinum's WARP_ENTRANCE_EAST / WEST / SOUTH)
 STEP_WARP = 0x60       # MB_NON_ANIMATED_DOOR
+# Platinum's stairs (0x5E / 0x5F) and escalators (0x6A / 0x6B) by where they lead: up or down a floor (the maps'
+# floor names). Stairs: Emerald's unused 0x5E (up) / 0x5F (down), stepped on as a non-animated door (metatile_behavior.c)
+# with a step up or down on the way (field_screen_effect.c); escalators: Emerald's MB_UP_ESCALATOR / MB_DOWN_ESCALATOR
+STAIRS_UP, STAIRS_DOWN = 0x5E, 0x5F
+ESCALATOR_UP, ESCALATOR_DOWN = 0x6A, 0x6B
+
+
+def floor_of(header):
+    m = re.search(r'_(B?)(\d+)F(?:_|$)', header)
+    if m:
+        return -int(m.group(2)) if m.group(1) else int(m.group(2))
+    return 9 if 'ROOFTOP' in header or 'ROOF' in header else 1
+
+
+def warp_behavior(b, header, dest):
+    """The behavior a warp tile gets (Platinum's B, on HEADER's map, leading to DEST's)"""
+    up = floor_of(dest) > floor_of(header)
+    if b in ARROW_MATS:
+        return b
+    if b in (0x5E, 0x5F):
+        return STAIRS_UP if up else STAIRS_DOWN
+    if b in (0x6A, 0x6B):
+        return ESCALATOR_UP if up else ESCALATOR_DOWN
+    return STEP_WARP
 
 
 def blocks(land, warps=None):
@@ -114,7 +145,7 @@ def blocks(land, warps=None):
     out = []
     for i, a in enumerate(land.attrs):
         if warps and i in warps:
-            out.append((METATILE_BEHAVIOR + (SOUTH_MAT if warps[i] == 0x65 else STEP_WARP)) | (3 << 12))
+            out.append((METATILE_BEHAVIOR + warps[i]) | (3 << 12))
             continue
         b = a & 0xFF
         mt = METATILE_BEHAVIOR + BEHAVIOR.get(b, 0)
@@ -128,11 +159,15 @@ def blocks(land, warps=None):
 
 
 class Pack:
-    def __init__(self):
+    def __init__(self, tex_anims=None):
         self.textures = []
         self.tex_ids = {}
         self.meshes = []
         self.mesh_ids = {}
+        self.tex_anims = tex_anims or {}   # texture name: (Tex0 with its frames, [(frame index, duration)...])
+        self.anims = []                    # (texture, [(frame texture, duration)...])
+        self.anim_skipped = set()          # (a map texture of that name another size than the frames: not Platinum's)
+        self.mesh_anims = {}               # a looping prop's mesh: [its frames' meshes] (Platinum's bm_anime, NSBCA)
 
     def texture(self, tex0, mat):
         if tex0 is None or not mat.texture or mat.texture not in tex0.textures:
@@ -148,15 +183,43 @@ class Pack:
                 return -1
             self.tex_ids[key] = len(self.textures)
             self.textures.append((w, h, px))
+            if mat.texture in self.tex_anims:
+                self.animate(tex0, mat, self.tex_ids[key], w, h)
         return self.tex_ids[key]
 
-    def mesh(self, key, bmd, tex0):
+    def animate(self, tex0, mat, base, w, h):
+        frames_tex, steps = self.tex_anims[mat.texture]
+        ids = {}
+        out = []
+        for idx, dur in steps:
+            if idx >= len(frames_tex.order):
+                return
+            if idx not in ids:
+                name = frames_tex.order[idx]
+                if tex_bytes(frames_tex.textures[name]) != tex_bytes(tex0.textures[mat.texture]):
+                    self.anim_skipped.add(mat.texture)
+                    return
+                # (Platinum copies the frame's bytes over the map texture's as they are: read with the map texture's
+                # size and kind, whatever the frame's own header says)
+                try:
+                    fw, fh, fpx = tex0.decode(mat.texture, mat.palette, frame=(frames_tex, name))
+                except (IndexError, KeyError, struct.error):
+                    print('animated texture %s: frame %s is short; still' % (mat.texture, name))
+                    return
+                ids[idx] = len(self.textures)
+                self.textures.append((fw, fh, fpx))
+            out.append((ids[idx], max(1, dur)))
+        if out:
+            self.anims.append((base, out))
+
+    def mesh(self, key, bmd, tex0, anim=None, frame=0):
         if key in self.mesh_ids:
             return self.mesh_ids[key]
         groups = []
         pts = []
         for model in bmd.models:
-            for mi, tris in sorted(model.draw().items()):
+            mats = anim.node_matrices(model, frame) if anim is not None else None
+            for mi, tris in sorted(model.draw(mats).items()):
                 mat = model.materials[mi]
                 cull = {'none': 0, 'back': 1, 'front': 2, 'all': 3}[mat.cull]
                 rs, rt, fs, ft = mat.repeat
@@ -171,6 +234,62 @@ class Pack:
         self.mesh_ids[key] = len(self.meshes)
         self.meshes.append((c, r, groups))
         return self.mesh_ids[key]
+
+
+PROP_FRAME_STEP = 2      # a prop's frames drawn ahead, every second one of Platinum's (15 a second)
+PROP_MAX_FRAMES = 48
+
+
+def prop_frames(src, pack, model, prop_set, bmd, ptex):
+    """A prop that moves all the time in Platinum (its joint animation, NSBCA, loaded with the field: bm_anime_list):
+    (its meshes frame by frame, Platinum's frames each); ([], 0) for one that doesn't"""
+    got = src.prop_anims(model) if hasattr(src, 'prop_anims') else None
+    if not got or not got[0]:
+        return ([], 0)
+    for data in got[1]:
+        if data[:4] != b'BCA0':
+            continue
+        anims = nitro.Bca0(data).anims
+        if not anims or anims[0].frames < 2:
+            continue
+        a = anims[0]
+        step = max(PROP_FRAME_STEP, (a.frames + PROP_MAX_FRAMES - 1) // PROP_MAX_FRAMES)
+        try:
+            return ([pack.mesh(('prop', model, prop_set, 'frame', f), bmd, ptex, a, f) for f in range(0, a.frames, step)],
+                    step)
+        except Exception as e:   # (an animation this reader can't follow: the prop stays still)
+            print('prop %d: its animation left out (%s)' % (model, e))
+            return ([], 0)
+    return ([], 0)
+
+
+def tex_bytes(t):
+    bits = {1: 8, 2: 2, 3: 4, 4: 8, 5: 2, 6: 8, 7: 16}.get(t.format, 0)
+    return t.width * t.height * bits // 8
+
+
+def tex_anims(src):
+    """Platinum's animated map textures (fldtanime.narc): {name: (Tex0 of its frames, [(frame, duration)...])}"""
+    narc = src.tex_anims()
+    if narc is None:
+        print('no fldtanime (fetch_decomp.sh PARTS 8): the water stands still')
+        return {}
+    d = narc[0]
+    count, = struct.unpack_from('<I', d, 0)
+    out = {}
+    for i in range(count):
+        o = 4 + 52 * i
+        name = d[o:o + 16].split(b'\0')[0].decode('latin-1')
+        steps = []
+        for k in range(18):
+            idx, dur = d[o + 16 + 2 * k], d[o + 17 + 2 * k]
+            if idx == 0xFF:
+                break
+            steps.append((idx, dur))
+        tex = nitro.btx0(narc[i + 1])
+        if tex is not None and steps:
+            out[name] = (tex, steps)
+    return out
 
 
 def write(path, pack, light_sets, matrices, named=()):
@@ -212,6 +331,16 @@ def write(path, pack, light_sets, matrices, named=()):
     out += struct.pack('<I', len(named))
     for model, mesh in named:
         out += struct.pack('<Hh', model, mesh)
+    out += struct.pack('<I', len(pack.anims))
+    for base, steps in pack.anims:
+        out += struct.pack('<HH', base, len(steps))
+        for tex, dur in steps:
+            out += struct.pack('<HH', tex, dur)
+    moving = [(m, f, st) for m, (f, st) in sorted(pack.mesh_anims.items()) if f]
+    out += struct.pack('<I', len(moving))
+    for mesh, frames, st in moving:
+        out += struct.pack('<HHH', mesh, len(frames), st)
+        out += struct.pack('<%dH' % len(frames), *frames)
     # stored compressed: "S3DZ", u32 the size of the pack, then the pack deflated (zlib): 88 MB -> about 6
     packed = b'S3DZ' + struct.pack('<I', len(out)) + zlib.compress(bytes(out), 6)
     open(path, 'wb').write(packed)
@@ -229,7 +358,7 @@ def main():
     mx = src.matrix(0)
     # matrix 0's cells from (X0, Z0) to (X1, Z1) (default: all of it), then every building's matrix
     window = [int(x) for x in args[2:6]] if len(args) >= 6 else [0, 0, mx.width - 1, mx.height - 1]
-    pack = Pack()
+    pack = Pack(tex_anims(src))
     light_index = {}
     light_sets = []
     tex_cache = {}
@@ -245,7 +374,7 @@ def main():
                 continue
             land = Land(src.land(mt.cell(x // 32, z // 32)[0]))
             warp_tiles.setdefault((p['matrix'], x // 32, z // 32), {})[(z % 32) * 32 + x % 32] = \
-                land.attrs[(z % 32) * 32 + x % 32] & 0xFF
+                warp_behavior(land.attrs[(z % 32) * 32 + x % 32] & 0xFF, p['header'], w['dest_header_id'])
 
     def cell(lid, header, alt, where=None):
         if lid == NONE or header is None:
@@ -267,6 +396,8 @@ def main():
             bmd = nitro.Bmd0(src.prop_model(pr.model))
             ptex = bmd.tex or tex_cache[('bm', prop_set)]
             pm = pack.mesh(('prop', pr.model, prop_set), bmd, ptex)
+            if pm not in pack.mesh_anims:
+                pack.mesh_anims[pm] = prop_frames(src, pack, pr.model, prop_set, bmd, ptex)
             ry = math.radians(pr.rot[1])
             cy, sy = math.cos(ry), math.sin(ry)
             sx, sy_, sz = pr.scale
@@ -311,8 +442,10 @@ def main():
                 bmd = nitro.Bmd0(src.prop_model(model))
             named.append((model, pack.mesh(('prop', model, prop_set), bmd, bmd.tex or tex_cache[('bm', prop_set)])))
     size = write(out_path, pack, light_sets, matrices, named)
-    print('%s: %d textures, %d meshes, %d light sets, %d matrices, %d bytes' % (
-        out_path, len(pack.textures), len(pack.meshes), len(light_sets), len(matrices), size))
+    if pack.anim_skipped:
+        print('left still (another size than their frames): %s' % ', '.join(sorted(pack.anim_skipped)))
+    print('%s: %d textures (%d animated), %d meshes, %d light sets, %d matrices, %d bytes' % (
+        out_path, len(pack.textures), len(pack.anims), len(pack.meshes), len(light_sets), len(matrices), size))
 
 
 if __name__ == '__main__':
