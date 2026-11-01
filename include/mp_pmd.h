@@ -94,6 +94,7 @@ bool8 MP_Pmd_HasAnim(const struct MpPmdView *v, u8 anim);
 void MP_Pmd_Animate(struct MpPmdView *v, u8 *pdir, u8 *pturn, bool8 walking, u8 face4, u8 pose, bool8 fast);
 u16 MP_Pmd_Reach(const struct MpPmdView *v);                    // half the bigger side of the picture now
 void MP_Pmd_SetSubpriority(struct Sprite *sprite, u8 elevation, u8 subpriority);   // SetObjectSubpriorityByElevation for it
+#define PMD_FEET_DY 7     // the player's lowest row below a PMD ground point: a PMD Pokémon's standing feet go there
 #define PMD_GROUND_DY 8   // a PMD picture's ground point below the old 32x32 frames' center: the tile's middle
 
 #endif // GUARD_MP_PMD_H

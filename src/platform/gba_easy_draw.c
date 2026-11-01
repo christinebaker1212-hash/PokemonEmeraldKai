@@ -485,7 +485,7 @@ static bool winCheckHorizontalBounds(u16 left, u16 right, u16 xpos)
 extern u8 gMpOamFx[256];
 extern u16 *gMpFxLayer;
 static bool sFxSprite;
-extern u8 gMpOamShadow[256];
+extern u8 gMpOamShadowLive[256];
 static bool sShadowSprite;
 
 // Moemon Kai: a shadow sprite's pixel (mp_shadow.c): what the backgrounds show there at the sprite's priority and below,
@@ -816,7 +816,7 @@ static void DrawSprites(struct scanlineData* scanline, uint16_t vcount, bool win
         if ((int)vcount >= MP_BigSprite_OamClipY(i))   // Moemon PC: clipped above this line (in water, in the ground)
             continue;
         sFxSprite = gMpFxLayer != NULL && gMpOamFx[i];   // Moemon Co-op: a battle animation's effect sprite
-        sShadowSprite = gMpOamShadow[i];   // Moemon Kai: a shadow (mp_shadow.c)
+        sShadowSprite = gMpOamShadowLive[i];   // Moemon Kai: a shadow (mp_shadow.c; as LoadOam copied the OAM)
         if (oam->shape == MP_BIG_OAM_SHAPE)   // Moemon PC: a picture of any size (mp_bigsprite.h)
         {
             DrawBigSprite(scanline, oam, vcount, windowsEnabled, blendMode);

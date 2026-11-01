@@ -1696,6 +1696,17 @@ void MP_Avatar_Init(void)
     memcpy(sLocalPalBody, sOrigPalBrendan, 32);
     MP_SetObjectEventPaletteData(OBJ_EVENT_PAL_TAG_MP_BODY, sLocalPalBody);
 
+    sAvatarInit = TRUE;
+    MP_Avatar_SettingsLoaded();
+}
+
+// The co-op settings were (re)loaded (start-up, or the title screen's SAVE FILE switched files: mp_main.c
+// MP_SaveSlotChanged): the look they hold, its CREATE recipe and its own sprite pack set up again (1.63.11: a file
+// switch kept the other file's pack or recipe, and a later save wrote them into this file's settings)
+void MP_Avatar_SettingsLoaded(void)
+{
+    if (!sAvatarInit)
+        return;
     if (gMpConfig.app.base == MP_BASE_CUSTOM)
         gMpConfig.app.base = MP_BASE_DEFAULT;   // old ini files
     if (gMpConfig.app.base == MP_BASE_CREATED)
@@ -1705,6 +1716,7 @@ void MP_Avatar_Init(void)
         gMpConfig.app.recipe = gMpConfig.custom[gMpConfig.app.created - 1];
     }
     gMpConfig.app.hasCustom = FALSE;
+    UnloadLocalPack();
     if (gMpConfig.customSprite[0])
     {
         char err[160];
@@ -1714,7 +1726,7 @@ void MP_Avatar_Init(void)
             printf("[mp] sprite pack not loaded: %s\n", err);
     }
     MP_Avatar_RefreshPackList();
-    sAvatarInit = TRUE;
+    RebuildLocal();
 }
 
 static struct MpAppearance GetLocalAppearance(void)

@@ -186,12 +186,37 @@ static const u8 *FrameRecord(const struct MpPmdView *v)
 
 // The hops and leaps rise a long way in the PMD sheets (made for a top-down dungeon view): on the map their rise is
 // cut to a third (the lowest frame's bottom is the ground; how far above it this frame's bottom is, is the rise)
+// Where the Pokémon's feet are when it stands (facing as it does now): the lowest row of its IDLE frames (the WALK's
+// without one), from the ground point; 0x7FFF: none
+static s16 StandingBottom(const struct MpPmdView *v)
+{
+    const u8 *a = AnimRecord(v->chunk, Resolve(v->chunk, PMD_ANIM_IDLE));
+    u8 frames, dirs, d, i;
+    s16 best = -0x7FFF;
+    if (!a)
+        return 0x7FFF;
+    frames = a[0];
+    dirs = a[1];
+    d = dirs >= 8 ? v->dir & 7 : 0;
+    for (i = 0; i < frames; i++)
+    {
+        const u8 *f = v->chunk->raw + Rd32(a + 4 + ((frames + 3) & ~3) + 4 * (d * frames + i));
+        s16 bottom = (s16)Rd16(f + 2) + (s16)Rd16(f + 6);
+        if (bottom > best)
+            best = bottom;
+    }
+    return best;
+}
+
 static void UpdateLift(struct MpPmdView *v)
 {
     const u8 *a = AnimRecord(v->chunk, v->shown), *f;
-    s16 ground = -0x7FFF, bottom;
+    s16 ground = -0x7FFF, bottom, stand = StandingBottom(v);
     u8 i;
-    v->big.lift = 0;
+    // (1.63.11) its standing feet on the player's: the player's lowest row is PMD_FEET_DY below the ground point
+    // (the tile's middle); before, each species stood as high as its sheet's feet were from its point
+    s16 base = stand == 0x7FFF ? 0 : PMD_FEET_DY + 1 - stand;
+    v->big.lift = base;
     if (!a || !(v->shown == PMD_ANIM_HOP || v->shown == PMD_ANIM_LEAPFORTH || v->shown == PMD_ANIM_ROTATE
              || v->shown == PMD_ANIM_POSE || v->shown == PMD_ANIM_TUMBLE))
         return;
@@ -207,7 +232,7 @@ static void UpdateLift(struct MpPmdView *v)
         return;
     bottom = (s16)Rd16(f + 2) + (s16)Rd16(f + 6);
     if (ground > bottom)
-        v->big.lift = (ground - bottom) * 2 / 3;
+        v->big.lift = base + (ground - bottom) * 2 / 3;
 }
 
 static void Colors(const struct MpPmdChunk *c, bool8 shiny, u16 *out, u16 count)

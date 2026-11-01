@@ -2075,6 +2075,7 @@ void MP_SaveSlotChanged(void)
         sMainAutosaveMinutes = gMpConfig.autosaveMinutes;
         if (MOEMON_DEV_BUILD)
             gMpConfig.autosaveMinutes = 0;
+        MP_Avatar_SettingsLoaded();   // (this file's look, its recipe and sprite pack: not the other file's)
     }
     sLobbyFileRead = FALSE;
     Gamepad_ReloadSettings();

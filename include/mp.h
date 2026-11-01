@@ -520,6 +520,7 @@ bool8 MP_Avatar_HasRide(const struct MpAppearance *app);
 const u8 *MP_Avatar_CharFrame(u16 gfxId, u8 frame, u8 *size, const u16 **pal);
 void MP_Avatar_RestoreSprite(const struct MpAppearance *saved, const char *savedPack);
 int MP_Avatar_ParseSpriteName(const char *name, struct MpAppearance *app); // TRUE when found
+void MP_Avatar_SettingsLoaded(void);   // the co-op settings were (re)loaded: the look set up again from them
 void MP_Avatar_SpriteConfigName(const struct MpAppearance *app, char *out, int len);
 const struct MpSpriteEntry *MP_Avatar_FindCatalog(u16 gfxId);
 // Trainer pics for the trainer card and battles (0xFFFF = game default)

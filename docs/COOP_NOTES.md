@@ -3428,6 +3428,17 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   their widest frame; small sprites from their first picture's lowest row (standing); in 3D a shadow is flat (s3d.c
   OamDepth.flat: only a wall in front hides it). `mp shadowwatch` reports both shadows' gap and missing frames.
 
+## 1.63.11: followers on the player's line, shadow flicker, LOOKS per save file
+- PMD followers / Garden POKeMON: mp_pmd.c UpdateLift lifts every frame by PMD_FEET_DY + 1 - the IDLE frames' lowest row
+  (StandingBottom), so a species' standing feet sit on the player's lowest row (PMD_FEET_DY below the ground point);
+  mp_shadow.c puts a big sprite's shadow on that line.
+- sprite.c LoadOam copies the shadow marks (gMpOamShadowLive) with the OAM: the marks were per OAM entry as the list was
+  built, and a frame whose OAM wasn't copied (a fade's: CB2_Overworld drops the VBlank callback) drew a shadow solid
+  and its owner darkened.
+- mp_avatar.c MP_Avatar_SettingsLoaded (start-up and mp_main.c MP_SaveSlotChanged): the look's CREATE recipe and its
+  sprite pack set up again from the save file's own settings (a switch kept the other file's, and a later save wrote
+  them into this one's). `mp saveconfig`, `mp lookname`.
+
 ## SINNOH's 3D engine
 - Plan and rules: docs/SINNOH_HANDOFF.md. The data comes from pret/pokeplatinum (source.py: its map blocks, matrices,
   areas, props, texture sets and lights as files; fetch_decomp.sh gets them at a pinned commit, make_pack.sh fetches and

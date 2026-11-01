@@ -504,6 +504,7 @@ void CopyMatricesToOamBuffer(void)
 extern u8 gMpOamFx[256];
 extern u16 *gMpFxLayer;
 u8 gMpOamShadow[256];   // Moemon Kai: per OAM entry: a shadow sprite's (mp_shadow.c; gba_easy_draw.c darkens under it)
+u8 gMpOamShadowLive[256];   // ... as the OAM drawn now has them (LoadOam)
 bool8 MP_ModernAnim_IsFxSprite(const struct Sprite *sprite);
 
 void AddSpritesToOamBuffer(void)
@@ -698,6 +699,9 @@ void LoadOam(void)
         CpuCopy32(gMain.oamBuffer, (void *)OAM, sizeof(gMain.oamBuffer));
         MP_BigSprite_CommitOam();   // Moemon PC: the big sprites' list goes with it
         S3D_CommitOam();            // Moemon Kai: and the sprites' depths in a SINNOH 3D scene
+        // Moemon Kai: and which entries are shadows (1.63.11: marked as the list was built, a frame whose OAM wasn't
+        // copied, a fade's, drew a shadow solid and its owner as a shadow)
+        memcpy(gMpOamShadowLive, gMpOamShadow, sizeof(gMpOamShadowLive));
     }
 }
 

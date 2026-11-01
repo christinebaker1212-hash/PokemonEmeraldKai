@@ -15,6 +15,7 @@
 #include "sprite.h"
 #include "mp.h"
 #include "mp_bigsprite.h"
+#include "mp_pmd.h"
 #include "constants/event_objects.h"
 
 #define TAG_SHADOW 0x5AD0
@@ -171,7 +172,7 @@ static void Feet(const struct Sprite *o, s32 *x, s32 *y, s32 *w)
         const u8 *f = o->mpBig->frame;
         u16 fw = f[4] | f[5] << 8;
         u32 id = o - gSprites;
-        *y = o->y;
+        *y = o->y + PMD_FEET_DY + 1;   // (its standing feet: mp_pmd.c UpdateLift puts them on the player's line)
         if (id < MAX_SPRITES)
         {
             if (sFeetImages[id] != (const void *)o->mpBig || fw > sFeetBottom[id] * 2)
