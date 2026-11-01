@@ -130,6 +130,38 @@ Sinnoh_MiningMuseum_EventScript_Bg32::
 	msgbox Sinnoh_MiningMuseum_Text_Bg32, MSGBOX_SIGN
 	end
 
+Sinnoh_MiningMuseum_EventScript_Person1::
+	msgbox Sinnoh_MiningMuseum_Text_Person1, MSGBOX_NPC
+	end
+
+Sinnoh_MiningMuseum_EventScript_Person2::
+	msgbox Sinnoh_MiningMuseum_Text_Person2, MSGBOX_NPC
+	end
+
+Sinnoh_MiningMuseum_EventScript_Person3::
+	msgbox Sinnoh_MiningMuseum_Text_Person3, MSGBOX_NPC
+	end
+
+Sinnoh_MiningMuseum_EventScript_Person4::
+	msgbox Sinnoh_MiningMuseum_Text_Person4, MSGBOX_NPC
+	end
+
+Sinnoh_MiningMuseum_EventScript_Person5::
+	msgbox Sinnoh_MiningMuseum_Text_Person5, MSGBOX_NPC
+	end
+
+Sinnoh_MiningMuseum_EventScript_Person6::
+	msgbox Sinnoh_MiningMuseum_Text_Person6, MSGBOX_NPC
+	end
+
+Sinnoh_MiningMuseum_EventScript_Person7::
+	msgbox Sinnoh_MiningMuseum_Text_Person7, MSGBOX_NPC
+	end
+
+Sinnoh_MiningMuseum_EventScript_Person8::
+	msgbox Sinnoh_MiningMuseum_Text_Person8, MSGBOX_NPC
+	end
+
 Sinnoh_MiningMuseum_Text_Bg1:
 	.string "A panel explains how coal forms: old\n"
 	.string "forests, buried deep, pressed for a\l"
@@ -267,5 +299,41 @@ Sinnoh_MiningMuseum_Text_Bg31:
 Sinnoh_MiningMuseum_Text_Bg32:
 	.string "Rock samples, each with a little label\n"
 	.string "in neat handwriting.$"
+
+Sinnoh_MiningMuseum_Text_Person1:
+	.string "Before machines, MOéMON helped carry\n"
+	.string "the coal. MACHOP were the best\l"
+	.string "workers.$"
+
+Sinnoh_MiningMuseum_Text_Person2:
+	.string "Look at the old helmets! They had\n"
+	.string "little candles on them!$"
+
+Sinnoh_MiningMuseum_Text_Person3:
+	.string "I'm doing a school report on the mine.\n"
+	.string "I've written three pages about rocks!$"
+
+Sinnoh_MiningMuseum_Text_Person4:
+	.string "I study fossils from the mine. Bring me\n"
+	.string "any you find, and I'll tell you all\l"
+	.string "about them.$"
+
+Sinnoh_MiningMuseum_Text_Person5:
+	.string "The museum tells OREBURGH's story so\n"
+	.string "well. I learned so much!$"
+
+Sinnoh_MiningMuseum_Text_Person6:
+	.string "My MOéMON loves the coal display. It\n"
+	.string "keeps sniffing it.$"
+
+Sinnoh_MiningMuseum_Text_Person7:
+	.string "I came for the fossil corner. It's\n"
+	.string "smaller than I hoped, but it's very\l"
+	.string "good.$"
+
+Sinnoh_MiningMuseum_Text_Person8:
+	.string "I worked in the mine when I was young.\n"
+	.string "Seeing these old tools brings it all\l"
+	.string "back.$"
 
 @ --- end of SINNOH words ---

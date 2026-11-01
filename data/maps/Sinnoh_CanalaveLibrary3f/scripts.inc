@@ -90,6 +90,14 @@ Sinnoh_CanalaveLibrary3f_EventScript_Bg22::
 	msgbox Sinnoh_CanalaveLibrary3f_Text_Bg22, MSGBOX_SIGN
 	end
 
+Sinnoh_CanalaveLibrary3f_EventScript_Person1::
+	msgbox Sinnoh_CanalaveLibrary3f_Text_Person1, MSGBOX_NPC
+	end
+
+Sinnoh_CanalaveLibrary3f_EventScript_Person2::
+	msgbox Sinnoh_CanalaveLibrary3f_Text_Person2, MSGBOX_NPC
+	end
+
 Sinnoh_CanalaveLibrary3f_Text_Bg1:
 	.string "An old book of SINNOH's stories. It\n"
 	.string "tells of MOéMON that shaped the land,\l"
@@ -218,5 +226,18 @@ Sinnoh_CanalaveLibrary3f_Text_Bg22:
 	.string "tells of MOéMON that shaped the land,\l"
 	.string "the lakes and the sky, long before\l"
 	.string "people came.$"
+
+Sinnoh_CanalaveLibrary3f_Text_Person1:
+	.string "The oldest stories in SINNOH say\n"
+	.string "three great MOéMON live in the three\l"
+	.string "lakes.\p"
+	.string "Some say they gave people knowledge,\n"
+	.string "feelings and willpower. I think it's\l"
+	.string "true.$"
+
+Sinnoh_CanalaveLibrary3f_Text_Person2:
+	.string "I'm looking for a book about the\n"
+	.string "strongest MOéMON ever. All the books\l"
+	.string "say different things!$"
 
 @ --- end of SINNOH words ---

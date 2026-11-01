@@ -18,6 +18,10 @@ Sinnoh_CycleShop_EventScript_Bg4::
 	msgbox Sinnoh_CycleShop_Text_Bg4, MSGBOX_SIGN
 	end
 
+Sinnoh_CycleShop_EventScript_Person2::
+	msgbox Sinnoh_CycleShop_Text_Person2, MSGBOX_NPC
+	end
+
 Sinnoh_CycleShop_Text_Bg1:
 	.string "It's full of handwriting. It doesn't\n"
 	.string "seem polite to read it.$"
@@ -33,5 +37,9 @@ Sinnoh_CycleShop_Text_Bg3:
 Sinnoh_CycleShop_Text_Bg4:
 	.string "It's full of handwriting. It doesn't\n"
 	.string "seem polite to read it.$"
+
+Sinnoh_CycleShop_Text_Person2:
+	.string "I want a bike so badly! I've been\n"
+	.string "saving up for... a while. A long while.$"
 
 @ --- end of SINNOH words ---

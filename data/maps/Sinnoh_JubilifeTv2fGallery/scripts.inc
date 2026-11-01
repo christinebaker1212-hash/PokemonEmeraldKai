@@ -46,6 +46,18 @@ Sinnoh_JubilifeTv2fGallery_EventScript_Bg11::
 	msgbox Sinnoh_JubilifeTv2fGallery_Text_Bg11, MSGBOX_SIGN
 	end
 
+Sinnoh_JubilifeTv2fGallery_EventScript_Person1::
+	msgbox Sinnoh_JubilifeTv2fGallery_Text_Person1, MSGBOX_NPC
+	end
+
+Sinnoh_JubilifeTv2fGallery_EventScript_Person2::
+	msgbox Sinnoh_JubilifeTv2fGallery_Text_Person2, MSGBOX_NPC
+	end
+
+Sinnoh_JubilifeTv2fGallery_EventScript_Person3::
+	msgbox Sinnoh_JubilifeTv2fGallery_Text_Person3, MSGBOX_NPC
+	end
+
 Sinnoh_JubilifeTv2fGallery_Text_Bg1:
 	.string "A photo of a TRAINER and their\n"
 	.string "MOéMON, smiling together.$"
@@ -89,5 +101,19 @@ Sinnoh_JubilifeTv2fGallery_Text_Bg10:
 Sinnoh_JubilifeTv2fGallery_Text_Bg11:
 	.string "A photo of a TRAINER and their\n"
 	.string "MOéMON, smiling together.$"
+
+Sinnoh_JubilifeTv2fGallery_Text_Person1:
+	.string "I sent in a photo of my MOéMON at the\n"
+	.string "top of MT. CORONET. I hope they hang\l"
+	.string "it up!$"
+
+Sinnoh_JubilifeTv2fGallery_Text_Person2:
+	.string "Every photo here tells a story. That\n"
+	.string "one with the sleeping SNORLAX is my\l"
+	.string "favorite.$"
+
+Sinnoh_JubilifeTv2fGallery_Text_Person3:
+	.string "Look! That's my picture! The one with\n"
+	.string "the flowers!$"
 
 @ --- end of SINNOH words ---
