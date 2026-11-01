@@ -1014,7 +1014,7 @@ void Platform_SetAlarm(u8 *alarmData)
     // TODO
 }
 
-// Moemon Fight: "fpress KEYS N" holds fight buttons (UP DOWN LEFT RIGHT A B C X Y Z START, joined by +)
+// Moemon Fight: "fpress KEYS N" holds fight buttons (UP DOWN LEFT RIGHT A B C X Y Z START COIN, joined by +)
 static bool sFightKeysHeld;
 void MP_Fight_TestPress(u16 buttons);
 static u16 ParseFightKeys(const char *s)
@@ -1022,7 +1022,7 @@ static u16 ParseFightKeys(const char *s)
     static const struct { const char *name; u16 key; } names[] = {
         {"UP", MF_BTN_UP}, {"DOWN", MF_BTN_DOWN}, {"LEFT", MF_BTN_LEFT}, {"RIGHT", MF_BTN_RIGHT},
         {"A", MF_BTN_A}, {"B", MF_BTN_B}, {"C", MF_BTN_C}, {"X", MF_BTN_X}, {"Y", MF_BTN_Y}, {"Z", MF_BTN_Z},
-        {"START", MF_BTN_START},
+        {"START", MF_BTN_START}, {"COIN", MF_BTN_COIN},
     };
     u16 out = 0;
     char buf[200];

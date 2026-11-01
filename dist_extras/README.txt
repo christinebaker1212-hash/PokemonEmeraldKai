@@ -1538,6 +1538,12 @@ The CAPCOM cabinets
                   needs. Files are found by their contents, so a set named
                   differently inside still works. Both players need the set
                   to play together.
+  Astro City      The two arcade cabinets on the 3F's top right wall (the
+                  middle one is always busy) play alone, one seat each:
+                    PUZZLE BOBBLE (left)        pbobble.zip
+                    TETRIS THE GRAND MASTER 2 PLUS (right)
+                                                tgm2p.zip and tgm2.zip
+                  Put them in the same arcade folder.
   Playing         SELECT puts in a coin: one from your COIN CASE (with
                   none left, the screen says NO COINS). START is the game's
                   START. Hold START for 2 seconds to stand up. SELECT can be

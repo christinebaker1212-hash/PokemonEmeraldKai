@@ -1133,11 +1133,30 @@ void MP_TestCommand(const char *cmd, const char *arg)
                    Arcade_Title(game), frames, pairs, Arcade_SampleRate(), lit, Arcade_Hash());
             if (picPath[0])
             {
-                SDL_Surface *surf = SDL_CreateRGBSurfaceWithFormatFrom((void *)pic, pw, ph, 32, pw * 4, SDL_PIXELFORMAT_ABGR8888);
-                if (surf)
+                // a 24-bit BMP of the picture (0x00BBGGRR), bottom row first
+                FILE *bf = fopen(picPath, "wb");
+                if (bf)
                 {
-                    SDL_SaveBMP(surf, picPath);
-                    SDL_FreeSurface(surf);
+                    u8 hd[54] = {'B', 'M'};
+                    int row = pw * 3, pad = (4 - row % 4) % 4, x, y, k;
+                    u32 size = 54 + (u32)(row + pad) * ph;
+                    u32 vals[6] = {size, 54, 40, (u32)pw, (u32)ph, 0};
+                    int at[6] = {2, 10, 14, 18, 22, 0};
+                    for (k = 0; k < 5; k++)
+                        hd[at[k]] = vals[k], hd[at[k] + 1] = vals[k] >> 8, hd[at[k] + 2] = vals[k] >> 16, hd[at[k] + 3] = vals[k] >> 24;
+                    hd[26] = 1, hd[28] = 24;
+                    fwrite(hd, 1, 54, bf);
+                    for (y = ph - 1; y >= 0; y--)
+                    {
+                        for (x = 0; x < pw; x++)
+                        {
+                            u32 c = pic[y * pw + x];
+                            u8 bgr[3] = {(u8)(c >> 16), (u8)(c >> 8), (u8)c};
+                            fwrite(bgr, 1, 3, bf);
+                        }
+                        fwrite("\0\0\0", 1, pad, bf);
+                    }
+                    fclose(bf);
                     printf("[test] arcade picture %dx%d: %s\n", pw, ph, picPath);
                 }
             }

@@ -254,7 +254,10 @@ docs/TT_DECISIONS.md, COOP_NOTES "Triple Triad"; tests tools/tt/test.sh, tools/t
 Also the GAME CENTER 3F's five VS cabinets (rows 9-13 of the back-to-back pairs: four CAPCOM CPS-2 games from each
 player's own ROM sets in the "arcade" folder through arcade/cps2recomp + arcade/arcade_cps2.cpp, include/arcade.h,
 src/platform/arcade_fight.c and include/fight_engine.h; never commit or ship a ROM; COOP_NOTES "The GAME CENTER's arcade
-cabinets") and the MUGEN one ("A weird bootleg", row 12): MUGEN fights in fight/ (mugen-unleashed engine,
+cabinets") and the MUGEN one ("A weird bootleg", row 12), and (1.64.0) the 3F's two Astro City cabinets: PUZZLE BOBBLE
+(arcade/taitob, a Taito B board) and TETRIS THE GRAND MASTER 2 PLUS (arcade/psikyosh: an SH-2 core and Psikyo's PS5V2),
+sound from ymfm (arcade/ymfm), COOP_NOTES "The Astro City cabinets"; on every arcade board SELECT is a coin from the COIN
+CASE: MUGEN fights in fight/ (mugen-unleashed engine,
 include/mf_engine.h), src/platform/fight_platform.c, src/mp/mp_fight.c; online with rollback (dirty pages of a fixed-address heap
 region + the engine's globals section), the pack check by file hashes, desync recovery by page diff, OPTIONS > CONTROLS > FIGHT
 BUTTONS; content in mugen/ (its sounds GBA sound by tools/fight/gba_audio.py; a stage's song kept under the voices by

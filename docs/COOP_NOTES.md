@@ -2190,6 +2190,30 @@ bootleg", moved here from MAUVILLE's GAME CORNER, whose (7,9)/(8,9) are slot mac
   frame / save / load times); the fight_*
   scenarios now sit at row 12 (the MUGEN cabinet). The CAPCOM games can only be tested with the sets (scratch only).
 
+## The Astro City cabinets: PUZZLE BOBBLE and TETRIS THE GRAND MASTER 2 PLUS (1.64.0)
+- The 3F's top right wall (bg events (10,5), (11,5), (12,5) facing north): (10,5) CABINET_PBOBBLE (6), (12,5)
+  CABINET_TGM2 (7); the middle one keeps its sign (the ARCADE FAN stands in front of it). One seat each:
+  data/scripts/vs_cabinet.inc EventScript_AstroCabinet (the game's name, then "Play?": the CPU path, MP_Fight_StartCpu;
+  a friend sitting there is Taken / InUse as at the VS cabinets).
+- The bridge (arcade/arcade_cps2.cpp) has a Board interface: Cps2Board, TaitoBBoard, Ps5Board; Arcade_PictureSize gives
+  each picture (384x224, 320x224, 320x240) and arcade_fight.c scales it to the 427x320 4:3 (tables rebuilt per size).
+  Non-CPS-2 sets are lists of RomFiles by CRC read with cps2recomp's ReadZipFiles (romset.cpp, also a list-only check).
+- arcade/taitob: PUZZLE BOBBLE (MAME "pbobble", the Japanese set): cps2recomp's 68000 (12 MHz) and Z80 (4 MHz, an NMI
+  input added for the TC0140SYT, saved only on boards that set hasNmi), the TC0180VCU (bg / fg 16x16 tilemaps with
+  scroll blocks, 8x8 text, sprites drawn into a frame buffer at vblank, big / zoomed sprites), TC0640FIO inputs, a
+  93C46 (cps2recomp's Eeprom), the YM2610B (ymfm, OPN_FIDELITY_MIN: 55.5 kHz; timers counted in YM clocks). 256 lines
+  a frame; IRQ 3 at vblank, 5 eight lines on (held until acknowledged). ~2 ms a frame.
+- arcade/psikyosh: TGM2 PLUS (tgm2p's program and EEPROM, the rest from tgm2): sh2.cpp an SH-2 interpreter (the
+  SH7604's divide unit; on-chip RAM; autovectored IRL), ps5.cpp the PS5V2 (the PS6406B's 4 background layers with
+  per-line effects, zoomed sprites with alpha and priorities, the line fill / blend layers; the YMF278B from ymfm at
+  37.3 kHz, x4; a 93C56 x8 from the set's .nv). 262 lines at 61.68 Hz; IRL 4 at vblank (cleared by irqctrl), 12 the
+  YMF278B. ~4 ms a frame.
+- arcade/ymfm: ymfm vendored (BSD-3), credited in dist_extras/ARCADE_CREDITS.txt with the boards.
+- Controls on every arcade board (the user): SELECT (fight button COIN) puts in a coin from the COIN CASE, START is
+  START, holding START leaves (see "The GAME CENTER's arcade cabinets").
+- Tests: gc_astro_noset (no set: the cabinet names pbobble.zip); with the sets (scratch only, never committed):
+  `mp arcade 4|5 FRAMES FILE.bmp` and the cabinets played with `fpress COIN` / `fpress START`.
+
 ## The VS cabinet: MUGEN fights (1.31.0, 1.33.0)
 Decisions and the as-built record: docs/FIGHT_DECISIONS.md. Where things are:
 - `fight/`: the engine (mugen-unleashed, a C rebuild of MUGEN 1.1b1) with `compat/` (SDL 1.2 / SDL_mixer on
