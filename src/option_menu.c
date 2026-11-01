@@ -679,7 +679,7 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
     case OPT_SS_FOLLOW:
     case OPT_SS_GARDEN:   // (1.63.14: how far, in 5% steps)
         {
-            u8 pct = opt == OPT_SS_FOLLOW ? gMpConfig.scaleFollowers : gMpConfig.scaleGarden;
+            u8 pct = opt == OPT_SS_FOLLOW ? MP_SCALE_FOLLOWERS_NOW() : MP_SCALE_GARDEN_NOW();
             char ascii[16];
             if (pct == 0)
                 StringCopy(buf, sText_Off);
@@ -746,11 +746,19 @@ static u8 Current(u8 row)
     return 0;
 }
 
-// SPRITE SCALING: 0-100% in 5% steps, round from 100 to OFF and back
-static u8 ScaleStep(u8 pct, int dir)
+// SPRITE SCALING (the user: on and off in one press): A (dir 0) turns it on or off, keeping how far; LEFT / RIGHT
+// change how far, 5-100% in 5% steps (round from 100 to 5), and turn it on
+static void ScaleChange(u8 *on, u8 *pct, int dir)
 {
-    int n = 100 / MP_SCALE_STEP + 1;
-    return (u8)(Wrap(pct / MP_SCALE_STEP + dir, n) * MP_SCALE_STEP);
+    int n = 100 / MP_SCALE_STEP;
+    if (dir == 0)
+    {
+        *on = !*on;
+        return;
+    }
+    if (*on)
+        *pct = (u8)((Wrap(*pct / MP_SCALE_STEP - 1 + dir, n) + 1) * MP_SCALE_STEP);
+    *on = TRUE;
 }
 
 // Left / Right (dir -1 / +1), or A (+1)
@@ -799,8 +807,8 @@ static void Change(u8 row, int dir)
     case OPT_AUTOSAVE:    if (MOEMON_DEV_BUILD) break; gMpConfig.autosaveMinutes = sAutosaveSteps[Wrap(AutosaveIndex() + dir, ARRAY_COUNT(sAutosaveSteps))]; break;
     case OPT_FLAGRANGE:   gMpConfig.trainerRange = Wrap(gMpConfig.trainerRange - 1 + dir, 8) + 1; break;
     case OPT_BIKEMUSIC:   gMpConfig.bikeMusic = !gMpConfig.bikeMusic; break;
-    case OPT_SS_FOLLOW:   gMpConfig.scaleFollowers = ScaleStep(gMpConfig.scaleFollowers, dir); break;
-    case OPT_SS_GARDEN:   gMpConfig.scaleGarden = ScaleStep(gMpConfig.scaleGarden, dir); break;
+    case OPT_SS_FOLLOW:   ScaleChange(&gMpConfig.scaleFollowers, &gMpConfig.scaleFollowersPct, dir); break;
+    case OPT_SS_GARDEN:   ScaleChange(&gMpConfig.scaleGarden, &gMpConfig.scaleGardenPct, dir); break;
     case OPT_SPRITESCALE: break;   // A opens its page
     case OPT_FOLLOWSPRITES:
         gMpConfig.followerSprites = Wrap(gMpConfig.followerSprites + dir, MP_FOLLOW_SPRITES_COUNT);
@@ -1083,11 +1091,9 @@ static void DrawHint(void)
     {
         u8 pct = opt == OPT_SS_FOLLOW ? gMpConfig.scaleFollowers : gMpConfig.scaleGarden;
         if (pct == 0)
-            snprintf(ascii, sizeof(ascii), "PMD PICTURES AS THEY ARE");
-        else if (pct == 100)
-            snprintf(ascii, sizeof(ascii), "SMALL PMD ONES AT TRUE SIZE");
+            snprintf(ascii, sizeof(ascii), "A: ON/OFF  OFF: PMD PICTURES AS THEY ARE");
         else
-            snprintf(ascii, sizeof(ascii), "SMALL PMD ONES %d%% OF THE WAY", pct);
+            snprintf(ascii, sizeof(ascii), "A: ON/OFF  LEFT/RIGHT: %d%% TO TRUE SIZE", pct);
     }
     else if (opt == OPT_SURFMUSIC)
         snprintf(ascii, sizeof(ascii), "OFF: THE MAP'S SONG SURFING AND DIVING");
@@ -1547,7 +1553,8 @@ static void Task_OptionMenuProcessInput(u8 taskId)
     else if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT | A_BUTTON) && opt != OPT_SPECFRIEND && opt != OPT_FIGHTKEYS && opt != OPT_FB_BIND
           && opt != OPT_FB_DEFAULTS)
     {
-        Change(sSel, JOY_NEW(DPAD_LEFT) ? -1 : 1);
+        // (A is +1, as RIGHT, but for SPRITE SCALING's rows, where A turns it on and off: 0)
+        Change(sSel, JOY_NEW(DPAD_LEFT) ? -1 : JOY_NEW(DPAD_RIGHT) || (opt != OPT_SS_FOLLOW && opt != OPT_SS_GARDEN) ? 1 : 0);
         if (opt == OPT_TEXTSPEED || opt == OPT_BUTTONMODE || opt == OPT_FRAME || opt == OPT_NAMECASE || opt == OPT_BATTLESCENE
          || opt == OPT_BATTLESTYLE || opt == OPT_SOUND || opt == OPT_TYPEICONS || opt == OPT_CREATURES)
             ;   // the original options make no sound

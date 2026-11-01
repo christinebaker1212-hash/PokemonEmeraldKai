@@ -639,7 +639,7 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
         fs->oam.paletteNum = palSlot;
     }
     // Moemon Co-op: OPTIONS > DISPLAY > SPRITE SCALING > FOLLOWERS: its POKeDEX height next to its trainer
-    fs->mpScale = MP_SpriteScale_Mon(gMpConfig.scaleFollowers, s->dex, s->pmdOn ? &s->pmd : NULL,
+    fs->mpScale = MP_SpriteScale_Mon(MP_SCALE_FOLLOWERS_NOW(), s->dex, s->pmdOn ? &s->pmd : NULL,
                                      s->frames[0].data, s->gfx->size, &s->scaleKey, &s->scale);
     if (!s->placed || s->ownerObj != ownerObj)
     {

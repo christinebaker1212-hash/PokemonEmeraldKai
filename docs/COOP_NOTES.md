@@ -3479,10 +3479,11 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   mp_garden_life.c (DrawDoing's feet from MP_SpriteFeetRow). Scaled, such a sprite shrinks toward that feet row and
   point (mp_bigsprite.c MP_BigSprite_NoteScale, sprites marked mpCastShadow), as a PMD picture toward its feet.
 - Shadows: every POKeMON's is the player's oval (the user: the same size as the player's), any style or size.
-- SPRITE SCALING in 5% steps: gMpConfig.scaleFollowers / scaleGarden are how far (0-100%, MP_SCALE_STEP) a small
-  PMD picture goes toward its POKeDEX height (MP_SpriteScale_ForMon: art - (art - target) * percent / 100); OPTIONS
-  rows step them with LEFT / RIGHT (0% shows OFF). Config files from before keep 1 = ON: followers 100%, the GARDEN
-  50% (mp_main.c ScalePercent). `mp spritescale F G` takes percents (1 = the old ON).
+- SPRITE SCALING in 5% steps: gMpConfig.scaleFollowers / scaleGarden stay ON / OFF (A turns them on and off in one
+  press: the user's rule), scaleFollowersPct / scaleGardenPct how far a small PMD picture goes toward its POKeDEX height
+  while on (5-100%, MP_SCALE_STEP; LEFT / RIGHT, which also turn it on; MP_SpriteScale_ForMon: art - (art - target) *
+  percent / 100). Config keys scale_followers / scale_garden as before, scale_*_percent new (defaults 100 and 50: the
+  old ON's). `mp spritescale F G`: 0 off, 1 on, more: on at that percent.
 
 ## 1.63.13: scaled PMD pictures drawn whole, ledge shadows, VS cabinet seats
 - gba_easy_draw.c DrawBigSprite skipped every screen line outside the big sprite's full-size picture before it looked

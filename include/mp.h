@@ -252,7 +252,7 @@ struct MpConfig
     u8 finderOn;              // ... shown (the right stick click / G shows and hides it)
     u8 followerSprites;       // OPTIONS > GAME > FOLLOWERS: MP_FOLLOW_SPRITES_*
     u8 sinnohSprites;         // Moemon Kai: OPTIONS > DISPLAY > SPRITE SCALING > SINNOH PEOPLE: MP_SINNOH_SPRITES_* (event_object_movement.c)
-    u8 scaleFollowers;        // OPTIONS > DISPLAY > SPRITE SCALING > FOLLOWERS: % of the way to their POKeDEX height (mp_spritescale.c)
+    u8 scaleFollowers;        // OPTIONS > DISPLAY > SPRITE SCALING > FOLLOWERS: on, how far (scaleFollowersPct, mp_spritescale.c)
     u8 scaleGarden;           // ... > GARDEN POKeMON: the same in the MOeMON GARDEN
     u8 cardArt;               // OPTIONS > DISPLAY > CARD ART: MP_CARD_ART_* (src/tcg/tcg_gfx.h G_ART_*)
     u8 scale[MP_SCALE_COUNT - 1];   // LEVEL SCALING's settings past ON / OFF (MP_SCALE_WILD..), HOST A GAME > GAME RULES or OPTIONS
@@ -260,7 +260,12 @@ struct MpConfig
     u8 cardScaling;           // OPTIONS > GAME > CARD SCALING: card players' decks fit yours (1) or go by badges (0)
     u8 battleAnims;           // OPTIONS > DISPLAY > BATTLE ANIMS: 0 CLASSIC, 1 MODERN (mp_modernanim.c; this game only)
     u8 noShadows;             // OPTIONS > DISPLAY > SHADOWS: 0 ON (shadows under people and POKeMON: mp_shadow.c), 1 OFF
+    u8 scaleFollowersPct;     // SPRITE SCALING (1.63.14): how far toward their POKeDEX height while on, 5-100% (A turns it
+    u8 scaleGardenPct;        // on and off, LEFT / RIGHT change it): followers 100 and the GARDEN 50 unless changed
 };
+// SPRITE SCALING's percent now (0: off)
+#define MP_SCALE_FOLLOWERS_NOW() (gMpConfig.scaleFollowers ? gMpConfig.scaleFollowersPct : 0)
+#define MP_SCALE_GARDEN_NOW() (gMpConfig.scaleGarden ? gMpConfig.scaleGardenPct : 0)
 // CARD ART: the printed illustration in the Game Boy frame (the default), the Game Boy picture in it, or the whole printed card
 enum { MP_CARD_ART_PRINTED_ART, MP_CARD_ART_GAME_BOY, MP_CARD_ART_FULL_CARD, MP_CARD_ART_COUNT };
 // CARD BACKS: the printed back (the default) or the pixel-art one

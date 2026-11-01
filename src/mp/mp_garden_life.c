@@ -909,7 +909,7 @@ static void Draw(struct Actor *a)
         sp->oam.paletteNum = pal;
     }
     // Moemon Co-op: OPTIONS > DISPLAY > SPRITE SCALING > GARDEN POKeMON: its POKeDEX height next to a trainer
-    sp->mpScale = MP_SpriteScale_Mon(gMpConfig.scaleGarden, a->dex, a->pmdOn ? &a->pmd : NULL, a->frames[0].data, a->size,
+    sp->mpScale = MP_SpriteScale_Mon(MP_SCALE_GARDEN_NOW(), a->dex, a->pmdOn ? &a->pmd : NULL, a->frames[0].data, a->size,
                                      &a->scaleKey, &a->scale);
     ax = a->prev.x * 256 + (a->cur.x - a->prev.x) * a->moved * 16;
     ay = a->prev.y * 256 + (a->cur.y - a->prev.y) * a->moved * 16;

@@ -322,14 +322,11 @@ bool8 MP_ConfigAllowsTweaks(void)
 
 static int sMainAutosaveMinutes;
 
-// SPRITE SCALING's percent from the config: 1 is a file from before 1.63.14 (ON: LEGACY, the full way for followers,
-// half for the GARDEN), anything else rounded to a 5% step
-static u8 ScalePercent(int v, u8 legacy)
+// SPRITE SCALING's percent from the config, rounded to a 5% step (5-100)
+static u8 ScalePercent(int v)
 {
-    if (v == 1)
-        return legacy;
-    if (v <= 0)
-        return 0;
+    if (v <= MP_SCALE_STEP)
+        return MP_SCALE_STEP;
     if (v >= 100)
         return 100;
     return (u8)((v + MP_SCALE_STEP / 2) / MP_SCALE_STEP * MP_SCALE_STEP);
@@ -357,8 +354,10 @@ static void LoadConfig(void)
     gMpConfig.animSpeed = 30;
     gMpConfig.spectateScale = 1;
     gMpConfig.bikeMusic = TRUE;
-    gMpConfig.scaleFollowers = 0;   // (SPRITE SCALING: followers as drawn, the GARDEN's half the way to their height)
-    gMpConfig.scaleGarden = 50;
+    gMpConfig.scaleFollowers = FALSE;  // (SPRITE SCALING: followers as drawn, the GARDEN's half the way to their height)
+    gMpConfig.scaleGarden = TRUE;
+    gMpConfig.scaleFollowersPct = 100;
+    gMpConfig.scaleGardenPct = 50;
     gMpConfig.surfMusic = TRUE;
     memset(gMpConfig.phrases, 0xFF, sizeof(gMpConfig.phrases));
     gMpConfig.quickStock[0] = 0;   // Hello!
@@ -458,8 +457,10 @@ static void LoadConfig(void)
         else if (strcmp(key, "sinnoh_sprites") == 0)
             gMpConfig.sinnohSprites = strcmp(val, "gen3") == 0 ? MP_SINNOH_SPRITES_GEN3
                                     : strcmp(val, "mixed") == 0 ? MP_SINNOH_SPRITES_MIXED : MP_SINNOH_SPRITES_GEN4;
-        else if (strcmp(key, "scale_followers") == 0) gMpConfig.scaleFollowers = ScalePercent(atoi(val), 100);
-        else if (strcmp(key, "scale_garden") == 0) gMpConfig.scaleGarden = ScalePercent(atoi(val), 50);
+        else if (strcmp(key, "scale_followers") == 0) gMpConfig.scaleFollowers = atoi(val) != 0;
+        else if (strcmp(key, "scale_garden") == 0) gMpConfig.scaleGarden = atoi(val) != 0;
+        else if (strcmp(key, "scale_followers_percent") == 0) gMpConfig.scaleFollowersPct = ScalePercent(atoi(val));
+        else if (strcmp(key, "scale_garden_percent") == 0) gMpConfig.scaleGardenPct = ScalePercent(atoi(val));
         else if (strcmp(key, "spectate_friend") == 0)
         {
             // spectate_friend = SIDE SIZE POPOUT SHOW NAME
@@ -593,9 +594,9 @@ void MP_SaveConfig(void)
         "; OPTIONS > DISPLAY > SPRITE SCALING > SINNOH PEOPLE: gen4 (Platinum's sprites), mixed (Gen 3 ones where there's the same one,\n"
         "; Platinum's made smaller elsewhere) or gen3 (Gen 3 ones for everyone)\n"
         "sinnoh_sprites = %s\n"
-        "; OPTIONS > DISPLAY > SPRITE SCALING: followers and the GARDEN's POKEMON smaller than a trainer drawn at their\n"
-        "; POKEDEX height (1) or as their sprites are (0)\n"
-        "scale_followers = %d\nscale_garden = %d\n"
+        "; OPTIONS > DISPLAY > SPRITE SCALING: followers and the GARDEN's POKEMON smaller than a trainer drawn toward their\n"
+        "; POKEDEX height (1) or as their sprites are (0), and how far toward it (5-100, in steps of 5)\n"
+        "scale_followers = %d\nscale_garden = %d\nscale_followers_percent = %d\nscale_garden_percent = %d\n"
         "; OPTIONS > DISPLAY > CARD ART: printed_art (the printed pictures in the Game Boy frame), gameboy (the Game Boy\n"
         "; pictures in it) or full_card (the whole printed cards)\n"
         "card_art = %s\n"
@@ -621,7 +622,7 @@ void MP_SaveConfig(void)
         gMpConfig.finderOn,
         gMpConfig.followerSprites == MP_FOLLOW_SPRITES_PMD ? "pmd" : gMpConfig.followerSprites == MP_FOLLOW_SPRITES_ORIGINAL ? "original" : "default",
         gMpConfig.sinnohSprites == MP_SINNOH_SPRITES_GEN3 ? "gen3" : gMpConfig.sinnohSprites == MP_SINNOH_SPRITES_MIXED ? "mixed" : "gen4",
-        gMpConfig.scaleFollowers, gMpConfig.scaleGarden,
+        gMpConfig.scaleFollowers, gMpConfig.scaleGarden, gMpConfig.scaleFollowersPct, gMpConfig.scaleGardenPct,
         gMpConfig.cardArt == MP_CARD_ART_GAME_BOY ? "gameboy" : gMpConfig.cardArt == MP_CARD_ART_FULL_CARD ? "full_card"
                                                                                                          : "printed_art",
         gMpConfig.cardBack == MP_CARD_BACK_PIXEL ? "pixel" : "printed", gMpConfig.cardScaling,
