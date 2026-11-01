@@ -1,8 +1,9 @@
 # A new game begun in SINNOH (mp_region.c MP_Region_StartNewGame; PROF. BIRCH's question, MOEMON_DEBUG_REGION here):
 # it starts in TWINLEAF's house 2F; with no POKéMON (mp emptyparty: no POKéDEX either), BARRY on ROUTE 201 won't
 # battle, PROF. ROWAN's briefcase beside him (story_people.py ROUTE_201_BRIEFCASE: shown for this new game) gives one
-# of Platinum's three at Lv 5 (TURTWIG, the first row; FLAG_SINNOH_STARTER 0x3D39), and ROWAN in SANDGEM's lab gives
-# the POKéDEX (FLAG_SYS_POKEDEX_GET 2145) and five POKé BALLS. Shots t_barry, t_starters.
+# of Platinum's three at Lv 5 on Platinum's briefcase screen (starter_choose.c briefcase mode from the graphics pack's
+# STRT section; TURTWIG, the left ball; FLAG_SINNOH_STARTER 0x3D39), and ROWAN in SANDGEM's lab gives
+# the POKéDEX (FLAG_SYS_POKEDEX_GET 2145) and five POKé BALLS. Shots t_barry, t_case_* (the opening), t_starters, t_left, t_preview.
 MODE=1
 TMO=120
 ENV_A="MOEMON_DEBUG_REGION=3"

@@ -31,6 +31,7 @@ static struct
     struct SinnohPic pics[SINNOH_PIC_COUNT];
     const u16 *town[2];    // the TOWN MAP's pages (tools/sinnoh/gen_townmap.py picture), RGB555
     u16 townW, townH;
+    struct S3dStarterGfx starter;   // the briefcase (tools/sinnoh/build_starter.py: "STRT"; frames NULL: none)
     const u8 *poketch;     // the POKéTCH's art (tools/sinnoh/build_poketch.py: "PKCH")
     const u8 *poketchEnd;
 } sGfx;
@@ -113,6 +114,52 @@ static void Load(void)
             sGfx.town[1] = (const u16 *)(p + 10 + w * h * 2);
             p += 10 + pages * w * h * 2;
         }
+    }
+    if (p + 8 <= end && memcmp(p, "STRT", 4) == 0)
+    {
+        u32 size = p[4] | p[5] << 8 | p[6] << 16 | (u32)p[7] << 24;
+        const u8 *q = p + 8, *qend = p + 8 + size;
+        struct S3dStarterGfx *g = &sGfx.starter;
+        if (qend <= end && q + 8 <= qend)
+        {
+            u32 k, n;
+            g->w = q[0] | q[1] << 8;
+            g->h = q[2] | q[3] << 8;
+            g->openFrames = q[4] | q[5] << 8;
+            g->camFrames = q[6] | q[7] << 8;
+            q += 8;
+            n = (u32)g->w * g->h * 2 * (g->openFrames + g->camFrames);
+            if (q + n + 2 <= qend)
+            {
+                g->frames = (const u16 *)q;
+                q += n;
+                g->bounceFrames = q[0] | q[1] << 8;
+                q += 2;
+                for (k = 0; k < 3 && q + 8 <= qend; k++)
+                {
+                    g->ball[k].x = q[0] | q[1] << 8;
+                    g->ball[k].y = q[2] | q[3] << 8;
+                    g->ball[k].w = q[4] | q[5] << 8;
+                    g->ball[k].h = q[6] | q[7] << 8;
+                    g->ball[k].px = (const u16 *)(q + 8);
+                    q += 8 + (u32)g->ball[k].w * g->ball[k].h * 2 * g->bounceFrames;
+                }
+                if (k == 3 && q + 4 + 2048 + 12 <= qend)
+                {
+                    g->cursor = (const u16 *)(q + 4);
+                    q += 4 + 2048;
+                    for (k = 0; k < 3; k++)
+                    {
+                        g->cursorPos[k][0] = (s16)(q[0] | q[1] << 8);
+                        g->cursorPos[k][1] = (s16)(q[2] | q[3] << 8);
+                        q += 4;
+                    }
+                }
+                else
+                    g->frames = NULL;   // (cut short: none)
+            }
+        }
+        p = qend <= end ? qend : end;
     }
     if (p + 4 <= end && memcmp(p, "PKCH", 4) == 0)
     {
@@ -316,4 +363,12 @@ u16 S3D_Gfx_PoketchAnimCell(const char *sheet, u16 seq, u32 t)
         t -= d;
     }
     return f[(nf - 1) * 2];
+}
+
+// The briefcase's starter screen (NULL: no pack, or one without it)
+const struct S3dStarterGfx *S3D_Gfx_Starter(void)
+{
+    if (!sGfx.tried)
+        Load();
+    return sGfx.ok && sGfx.starter.frames != NULL ? &sGfx.starter : NULL;
 }

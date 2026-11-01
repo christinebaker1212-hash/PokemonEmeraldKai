@@ -60,6 +60,18 @@ static u16 sStarterLabelWindowId;
 static bool8 sTableMode;
 static u16 sTableSpecies[STARTER_MON_COUNT];
 static const u8 sText_TableChoose[] = _("Which MOéMON will you choose?\nB: step back from the table");
+// Moemon Kai: SINNOH's briefcase (Platinum's starter screen, drawn ahead of time from its own models and animations:
+// tools/sinnoh/build_starter.py, s3d_gfx.c S3D_Gfx_Starter): the case opens, the camera comes down on it, Platinum's
+// glove points at the balls and the one under it rocks; the rest is the table mode's (circle, cry, YES / NO).
+#include "s3d.h"
+static bool8 sBriefcase;
+static u8 sChooseTaskId;
+static u16 sBcFrame;     // the picture shown: the opening's frames, then the camera's
+static u16 sBcBounce;    // the ball under the glove: its rocking, counted in frames
+static bool8 sBcChoosing;
+static const u8 sText_BriefcaseChoose[] = _("Which MOéMON will you choose?\nB: close the briefcase");
+static void Task_BriefcaseIntro(u8 taskId);
+void MP_StarterTable_Open(const u16 *species, MainCallback back);
 #define TABLE_HAND_Y 26
 #define TABLE_LABEL_TOP 10
 
@@ -370,12 +382,78 @@ static u16 StarterSpecies(u16 selection)
 
 static u8 BallX(u8 selection)
 {
+    const struct S3dStarterGfx *g = sBriefcase ? S3D_Gfx_Starter() : NULL;
+    if (g != NULL)
+        return g->ball[selection].x + g->ball[selection].w / 2;
     return sTableMode ? sStarterTableBallX[selection] : sPokeballCoords[selection][0];
 }
 
 static u8 BallY(u8 selection)
 {
+    const struct S3dStarterGfx *g = sBriefcase ? S3D_Gfx_Starter() : NULL;
+    if (g != NULL)
+        return g->ball[selection].y + g->ball[selection].h / 2;
     return sTableMode ? STARTER_TABLE_BALL_Y : sPokeballCoords[selection][1];
+}
+
+// SINNOH's briefcase: the same as the table, with Platinum's picture (FALSE: the pack has none, nothing opened)
+bool8 MP_StarterBriefcase_Open(const u16 *species, MainCallback back)
+{
+    if (S3D_Gfx_Starter() == NULL)
+        return FALSE;
+    sBriefcase = TRUE;
+    sBcFrame = 0;
+    sBcBounce = 0;
+    sBcChoosing = FALSE;
+    MP_StarterTable_Open(species, back);
+    return TRUE;
+}
+
+// The briefcase's picture under the layers (from MP_StarterTable_Composite): this frame's, the ball under the glove
+// rocking and the glove over it while choosing
+static void BriefcaseComposite(u16 *frame, s32 coeff)
+{
+    const struct S3dStarterGfx *g = S3D_Gfx_Starter();
+    const u16 *pic;
+    s32 x, y, sel = -1, bx = 0, by = 0, bw = 0, bh = 0, cx = 0, cy = 0;
+    const u16 *patch = NULL;
+    if (g == NULL)
+        return;
+    pic = g->frames + (u32)g->w * g->h * (sBcFrame < g->openFrames + g->camFrames ? sBcFrame : g->openFrames + g->camFrames - 1);
+    if (sBcChoosing)
+    {
+        sel = gTasks[sChooseTaskId].data[0];   // (tStarterSelection)
+        if (sel > 2)
+            sel = 2;
+        bx = g->ball[sel].x, by = g->ball[sel].y, bw = g->ball[sel].w, bh = g->ball[sel].h;
+        patch = g->ball[sel].px + (u32)bw * bh * ((sBcBounce / 2) % g->bounceFrames);
+        cx = g->cursorPos[sel][0] - 16;
+        cy = g->cursorPos[sel][1] - 16 + (Sin((sBcBounce * 4) & 0xFF, 3));
+    }
+    for (y = 0; y < DISPLAY_HEIGHT && y < g->h; y++)
+    {
+        u16 *row = &frame[y * DISPLAY_WIDTH];
+        for (x = 0; x < DISPLAY_WIDTH && x < g->w; x++)
+        {
+            u16 c;
+            s32 r, gr, b;
+            if (row[x] & 0x8000)
+                continue;
+            c = pic[y * g->w + x];
+            if (patch != NULL && x >= bx && x < bx + bw && y >= by && y < by + bh)
+                c = patch[(y - by) * bw + x - bx];
+            if (sel >= 0 && x >= cx && x < cx + 32 && y >= cy && y < cy + 32 && (g->cursor[(y - cy) * 32 + x - cx] & 0x8000))
+                c = g->cursor[(y - cy) * 32 + x - cx];
+            r = c & 0x1F, gr = (c >> 5) & 0x1F, b = (c >> 10) & 0x1F;
+            if (coeff)
+            {
+                r += (-r * coeff) >> 4;
+                gr += (-gr * coeff) >> 4;
+                b += (-b * coeff) >> 4;
+            }
+            row[x] = r | (gr << 5) | (b << 10) | 0x8000;
+        }
+    }
 }
 
 void MP_StarterTable_Open(const u16 *species, MainCallback back)
@@ -414,6 +492,11 @@ void MP_StarterTable_Composite(u16 *frame)
     coeff = fadeOf[bd & 0x1F];
     if (coeff < 0)
         coeff = 0;
+    if (sBriefcase)
+    {
+        BriefcaseComposite(frame, coeff);
+        return;
+    }
     winH = GetGpuReg(REG_OFFSET_WIN0H);
     winV = GetGpuReg(REG_OFFSET_WIN0V);
     for (y = 0; y < DISPLAY_HEIGHT; y++)
@@ -552,24 +635,29 @@ void CB2_ChooseStarter(void)
         ShowBg(3);
     }
 
-    taskId = CreateTask(Task_StarterChoose, 0);
+    taskId = CreateTask(sBriefcase ? Task_BriefcaseIntro : Task_StarterChoose, 0);
     gTasks[taskId].tStarterSelection = 1;
+    sChooseTaskId = taskId;
 
     // Create hand sprite
     spriteId = CreateSprite(&sSpriteTemplate_Hand, 120, sTableMode ? TABLE_HAND_Y : 56, 2);
     gSprites[spriteId].data[0] = taskId;
+    gSprites[spriteId].invisible = sBriefcase;   // (Moemon Kai: the briefcase's picture has Platinum's glove and balls)
 
     // Create three Poké Ball sprites
     spriteId = CreateSprite(&sSpriteTemplate_Pokeball, BallX(0), BallY(0), 2);
     gSprites[spriteId].sTaskId = taskId;
+    gSprites[spriteId].invisible = sBriefcase;
     gSprites[spriteId].sBallId = 0;
 
     spriteId = CreateSprite(&sSpriteTemplate_Pokeball, BallX(1), BallY(1), 2);
     gSprites[spriteId].sTaskId = taskId;
+    gSprites[spriteId].invisible = sBriefcase;
     gSprites[spriteId].sBallId = 1;
 
     spriteId = CreateSprite(&sSpriteTemplate_Pokeball, BallX(2), BallY(2), 2);
     gSprites[spriteId].sTaskId = taskId;
+    gSprites[spriteId].invisible = sBriefcase;
     gSprites[spriteId].sBallId = 2;
 
     sStarterLabelWindowId = WINDOW_NONE;
@@ -588,7 +676,7 @@ static void Task_StarterChoose(u8 taskId)
 {
     CreateStarterPokemonLabel(gTasks[taskId].tStarterSelection);
     DrawStdFrameWithCustomTileAndPalette(0, FALSE, 0x2A8, 0xD);
-    AddTextPrinterParameterized(0, FONT_NORMAL, sTableMode ? sText_TableChoose : gText_BirchInTrouble, 0, 1, 0, NULL);
+    AddTextPrinterParameterized(0, FONT_NORMAL, sBriefcase ? sText_BriefcaseChoose : sTableMode ? sText_TableChoose : gText_BirchInTrouble, 0, 1, 0, NULL);
     PutWindowTilemap(0);
     ScheduleBgCopyTilemapToVram(0);
     gTasks[taskId].func = Task_HandleStarterChooseInput;
@@ -600,10 +688,16 @@ static void Task_HandleStarterChooseInput(u8 taskId)
 
     if (sTableMode && gPaletteFade.active)   // (Moemon Kai: no press from the lab's text picks a ball while it fades in)
         return;
+    if (sBriefcase)   // the glove shows and the ball under it rocks (BriefcaseComposite)
+    {
+        sBcChoosing = TRUE;
+        sBcBounce++;
+    }
     if (JOY_NEW(A_BUTTON))
     {
         u8 spriteId;
 
+        sBcChoosing = FALSE;   // (Platinum hides the glove and stops the ball for the preview)
         ClearStarterLabel();
 
         // Create white circle background
@@ -627,11 +721,17 @@ static void Task_HandleStarterChooseInput(u8 taskId)
     }
     else if (JOY_NEW(DPAD_LEFT) && selection > 0)
     {
+        sBcBounce = 0;
+        if (sBriefcase)
+            PlaySE(SE_SELECT);
         gTasks[taskId].tStarterSelection--;
         gTasks[taskId].func = Task_MoveStarterChooseCursor;
     }
     else if (JOY_NEW(DPAD_RIGHT) && selection < STARTER_MON_COUNT - 1)
     {
+        sBcBounce = 0;
+        if (sBriefcase)
+            PlaySE(SE_SELECT);
         gTasks[taskId].tStarterSelection++;
         gTasks[taskId].func = Task_MoveStarterChooseCursor;
     }
@@ -690,6 +790,37 @@ static void Task_HandleConfirmStarterInput(u8 taskId)
     }
 }
 
+// The briefcase's opening as Platinum plays it at 30 frames a second: a moment on the closed case, the case opening
+// (its opening frames), the camera coming down on it (its camera frames), then choosing
+#define BC_WAIT 36
+static void Task_BriefcaseIntro(u8 taskId)
+{
+    const struct S3dStarterGfx *g = S3D_Gfx_Starter();
+    s16 *t = &gTasks[taskId].data[3];
+    if (g == NULL || JOY_NEW(START_BUTTON))   // (START skips it)
+    {
+        sBcFrame = g ? g->openFrames + g->camFrames - 1 : 0;
+        gTasks[taskId].func = Task_StarterChoose;
+        return;
+    }
+    if (gPaletteFade.active)
+        return;
+    (*t)++;
+    if (*t == BC_WAIT)
+        PlaySE(SE_BALL_OPEN);
+    if (*t >= BC_WAIT)
+    {
+        u16 f = (*t - BC_WAIT) / 2;
+        if (f >= g->openFrames + g->camFrames + 6)   // (and a short look at it)
+        {
+            sBcFrame = g->openFrames + g->camFrames - 1;
+            gTasks[taskId].func = Task_StarterChoose;
+            return;
+        }
+        sBcFrame = f < g->openFrames + g->camFrames ? f : g->openFrames + g->camFrames - 1;
+    }
+}
+
 static void Task_LeaveTable(u8 taskId)
 {
     if (!gPaletteFade.active && gPaletteFade.y == 0 && gSpecialVar_Result == 0xFFFF)
@@ -700,6 +831,8 @@ static void Task_LeaveTable(u8 taskId)
     if (gPaletteFade.active)
         return;
     sTableMode = FALSE;
+    sBriefcase = FALSE;
+    sBcChoosing = FALSE;
     ResetAllPicSprites();
     SetMainCallback2(gMain.savedCallback);
 }
@@ -718,6 +851,8 @@ static void CreateStarterPokemonLabel(u8 selection)
     u8 labelLeft, labelRight, labelTop, labelBottom;
 
     u16 species = StarterSpecies(selection);
+    if (sBriefcase)   // (no labels: Platinum's picture says enough)
+        return;
     CopyMonCategoryText(SpeciesToNationalPokedexNum(species), categoryText);
     speciesName = gSpeciesNames[species];
 
@@ -755,6 +890,8 @@ static void CreateStarterPokemonLabel(u8 selection)
 
 static void ClearStarterLabel(void)
 {
+    if (sStarterLabelWindowId == WINDOW_NONE)   // (Moemon Kai: the briefcase has none)
+        return;
     FillWindowPixelBuffer(sStarterLabelWindowId, PIXEL_FILL(0));
     ClearWindowTilemap(sStarterLabelWindowId);
     RemoveWindow(sStarterLabelWindowId);
@@ -806,12 +943,13 @@ static void SpriteCB_Pokeball(struct Sprite *sprite)
 static void SpriteCB_StarterPokemon(struct Sprite *sprite)
 {
     // Move sprite to upper center of screen
+    // (Moemon Kai: steps of at most the distance left, so it lands from anywhere: the briefcase's balls)
     if (sprite->x > STARTER_PKMN_POS_X)
-        sprite->x -= 4;
+        sprite->x -= min(4, sprite->x - STARTER_PKMN_POS_X);
     if (sprite->x < STARTER_PKMN_POS_X)
-        sprite->x += 4;
+        sprite->x += min(4, STARTER_PKMN_POS_X - sprite->x);
     if (sprite->y > STARTER_PKMN_POS_Y)
-        sprite->y -= 2;
+        sprite->y -= min(2, sprite->y - STARTER_PKMN_POS_Y);
     if (sprite->y < STARTER_PKMN_POS_Y)
-        sprite->y += 2;
+        sprite->y += min(2, STARTER_PKMN_POS_Y - sprite->y);
 }

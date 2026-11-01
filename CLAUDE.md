@@ -4,7 +4,8 @@ Native PC build of Moemon Emerald Kai v1.0 with online 4-player co-op and PvP.
 Based on Kurausukun's `pc_port` branch of pret/pokeemerald (commit 1165825), SDL2.
 
 SINNOH (Pokémon Platinum as a fourth region in a new 3D engine, the POKéTCH): released in 1.63.0 (a NEW GAME can start there
-from 1.63.1: COOP_NOTES "A new game in SINNOH"), `docs/SINNOH_HANDOFF.md`;
+from 1.63.1: COOP_NOTES "A new game in SINNOH"; its starter from Platinum's briefcase screen, pre-drawn from Platinum's
+models: tools/sinnoh/build_starter.py, COOP_NOTES "SINNOH's briefcase"), `docs/SINNOH_HANDOFF.md`;
 everything per feature in COOP_NOTES (its SINNOH sections: story people tools/sinnoh/story_people.py, the gyms that move
 src/sinnoh/s3d_gyms.c, the DISTORTION WORLD scene, the BATTLE FRONTIER's five: TOWER, FACTORY (the game's own halls,
 shared maps), HALL s3d_hall.c, CASTLE / ARCADE s3d_frontier.c). Left out: the Underground, Super Contests, Wi-Fi, the
@@ -15,8 +16,7 @@ runs it and ships the pack; never committed: sinnoh/ is ignored; no ROM needed);
 walk; tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM]; COOP_NOTES "SINNOH's 3D engine"; its people's sprites and battle pictures
 in sinnoh/platinum_gfx.pak (tools/sinnoh/build_gfx.py, src/sinnoh/s3d_gfx.c; test sinnoh_pics).
 
-**Open work (2026-11-01): `docs/NEXT_TASKS.md`** (SINNOH briefcase, drop shadows, settings per save file, card NEW
-tags, 40 PC boxes): read it and carry on in its order.
+**Open work (2026-11-01): `docs/NEXT_TASKS.md`** (drop shadows, settings per save file, card NEW tags, 40 PC boxes): read it and carry on in its order.
 
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
 card duels).

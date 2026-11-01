@@ -3307,6 +3307,25 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   A scan for people on warp tiles is in the commit that did this; the rest are hidden for good (0x3FFF) or block on
   purpose until a story battle. Test sinnoh_rival_mom.
 
+## SINNOH's briefcase: Platinum's starter screen (1.63.3)
+- tools/sinnoh/build_starter.py draws Platinum's own scene ahead of time (pure Python: the release's runner has no
+  Pillow / numpy; ~30 s) from res/prebuilt/graphic/ev_pokeselect.narc (fetch_decomp.sh PARTS 7): the upright case
+  tipping over and opening with the balls hopping in (joint animation 0 on model 1, 41 frames), the cut to the open
+  case (model 8) and the camera's six-frame move (-30 deg / 300 units to -50 deg / 200 at z 36, half fov 22 deg), each
+  ball's rocking (73 frames) as patches, Platinum's glove (NARC 10/11); white light ahead, dark gray edge marking.
+  Into the graphics pack as section STRT (before PKCH; s3d_gfx.c S3D_Gfx_Starter).
+- tools/sinnoh/nitro.py JointAnim / Bca0: NSBCA joint animations (T / R / S tracks, steps 1/2/4 with lastInterp,
+  pivot (Rot3) and 5-value (Rot5) rotations). Rot5: five u16, 13-bit _00 _01 _02 _10 _11 (>>3, fx12) and _12's low 15
+  bits as a 1.15 number from their low 3 bits (v0 highest); its sign bit isn't stored: the row's unit length tells it.
+  Both rotation kinds are stored for row vectors: transposed, as Node's full matrices. Model.draw(node_mats).
+- The screen: starter_choose.c briefcase mode (MP_StarterBriefcase_Open, on top of the table mode): Task_BriefcaseIntro
+  plays the frames at 30 a second (START skips), BriefcaseComposite draws the picture, the ball under the glove
+  rocking and the glove under the GBA layers; Emerald's circle, cry and YES / NO; no labels; B closes the case.
+  Sinnoh_StarterMenu (s3d_places.c) opens it when the pack has it, the list of names when not; VAR_RESULT the species.
+  SpriteCB_StarterPokemon now lands from any spot (steps of at most the distance left). Test sinnoh_newgame.
+- Not taken: Platinum's preview window (NARC 14, a white shape in tiles not yet laid out: Emerald's circle instead)
+  and the glove's own animation (it bobs by a sine).
+
 ## SINNOH's 3D engine
 - Plan and rules: docs/SINNOH_HANDOFF.md. The data comes from pret/pokeplatinum (source.py: its map blocks, matrices,
   areas, props, texture sets and lights as files; fetch_decomp.sh gets them at a pinned commit, make_pack.sh fetches and

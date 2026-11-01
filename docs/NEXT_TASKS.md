@@ -15,11 +15,7 @@ about 14x5 pixels, under the player's feet, see-through).
 - Also BLUE's teams as FireRed's in every battle (the user: "match it across the entire game"), and in 1.63.2 the
   SINNOH door fixes (BARRY's mom's visit scene; COOP_NOTES "SINNOH: nobody stands on a door").
 
-## 3. SINNOH: Platinum's 3D briefcase (after 2)
-- pokeplatinum src/choose_starter/choose_starter_app.c; models res/prebuilt/graphic/ev_pokeselect.narc (0 BCA case
-  opening, 1 closed case, 2/4/6 BCA + 3/5/7 the balls, 8 the open case, 9 the table; tools/sinnoh/nitro.py reads the
-  BMD0s). Needs NSBCA joint animation baked into frames for the pack (build_pack.py), a small scene in s3d, and it
-  replaces Sinnoh_StarterMenu's list (src/sinnoh/s3d_places.c).
+## 3. SINNOH: Platinum's 3D briefcase (DONE, 1.63.3): COOP_NOTES "SINNOH's briefcase: Platinum's starter screen"
 
 ## 4. Drop shadows (an option)
 - OPTIONS > DISPLAY: SHADOWS ON / OFF. A see-through dark oval under the player, every NPC in every region (SINNOH's
@@ -62,4 +58,5 @@ about 14x5 pixels, under the player's feet, see-through).
 - 1.63.0's release build fix (a letter the game's font lacks), re-queued, published with both zips and update.txt.
 - NEW GAME in SINNOH + region menu order: released as 1.63.1 (task 1).
 - 1.63.2: the starter table, BLUE's FireRed teams, SINNOH's door fixes.
-- Pending: tasks 3-7 above.
+- 1.63.3: SINNOH's briefcase.
+- Pending: tasks 4-7 above.

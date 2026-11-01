@@ -20,10 +20,19 @@ press A 4
 pressuntil A yesno 3000
 wait 20
 press A 4
-pressuntil A multichoice 3000
+shotburst t_case 180 30
+pressuntil A startertable 3000
 wait 20
 shot t_starters
-press A 4
+press LEFT 2
+wait 30
+shot t_left
+press A 2
+wait 100
+wait 10
+shot t_preview
+press A 2
+wait 30
 pressuntil A yesno 3000
 wait 20
 press B 4

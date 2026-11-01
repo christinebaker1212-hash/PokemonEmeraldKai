@@ -320,6 +320,7 @@ class Node:
                 r = [[v[0], v[3], v[6]], [v[1], v[4], v[7]], [v[2], v[5], v[8]]]
         if not (flags & 4):
             s = (s32(d, p) / FX12, s32(d, p + 4) / FX12, s32(d, p + 8) / FX12)
+        self.t, self.r, self.s = t, r, s   # (an animation's BASE_* parts)
         self.matrix = mat_trs(t, r, s)
 
 
@@ -362,8 +363,10 @@ class Model:
         self.shapes = [Shape(n, d, shps + u32(e, 0)) for n, e in read_dict(d, shps)]
         self.sbc = d[sbc:mats]
 
-    def draw(self):
-        """{material index: [triangle]}; a triangle = 3 vertices (pos, uv in texels, color 0-31 rgb, normal)."""
+    def draw(self, node_mats=None):
+        """{material index: [triangle]}; a triangle = 3 vertices (pos, uv in texels, color 0-31 rgb, normal).
+        node_mats: {node index: 4x4} in place of the nodes' own (an animation's frame, Bca0.node_matrices)"""
+        node_mats = node_mats or {}
         stack = [mat_identity() for _ in range(32)]
         cur = mat_identity()
         mat = 0
@@ -405,7 +408,7 @@ class Model:
                     n = 6
                 if restore is not None:
                     cur = [row[:] for row in stack[restore]]
-                cur = mat_mul(cur, self.nodes[obj].matrix)
+                cur = mat_mul(cur, node_mats.get(obj, self.nodes[obj].matrix))
                 if store is not None:
                     stack[store] = [row[:] for row in cur]
                 p += n
@@ -525,3 +528,128 @@ class Bmd0:
                     self.models.append(Model(name, d, so + u32(e, 0)))
             elif d[so:so + 4] == b'TEX0':
                 self.tex = Tex0(d, so)
+
+
+# ------------------------------------------------------------------------------------------------ joint animations
+class JointAnim:
+    """One NSBCA joint animation (NNSG3dResJntAnm): per node translation, rotation, scale tracks by frame."""
+
+    def __init__(self, name, d, o):
+        assert d[o:o + 4] == b'J\0AC', d[o:o + 4]
+        self.name = name
+        self.d, self.o = d, o
+        self.frames = u16(d, o + 4)
+        n = u16(d, o + 6)
+        self.rot3 = o + u32(d, o + 12)
+        self.rot5 = o + u32(d, o + 16)
+        self.tags = [o + u16(d, o + 20 + 2 * i) for i in range(n)]
+
+    def _track(self, info, off, frame, fx16):
+        d, o = self.d, self.o
+        step = {0: 1, 1: 2, 2: 4}.get(info >> 30, 1)
+        last = (info >> 16) & 0x1FFF
+        size = 2 if fx16 else 4
+        get = (lambda i: s16(d, o + off + 2 * i) / FX12) if fx16 else (lambda i: s32(d, o + off + 4 * i) / FX12)
+        return self._sample(get, step, last, frame)
+
+    @staticmethod
+    def _sample(get, step, last, frame):
+        if step == 1 or frame >= last:
+            i = frame if step == 1 else last // step + (frame - last)
+            return get(int(i))
+        i, f = divmod(frame, step)
+        a, b = get(int(i)), get(int(i) + 1)
+        if isinstance(a, list):
+            return [[a[r][c] + (b[r][c] - a[r][c]) * f / step for c in range(3)] for r in range(3)]
+        return a + (b - a) * f / step
+
+    def _rot(self, idx):
+        d = self.d
+        if idx & 0x8000:   # a pivot-compressed rotation (Rot3)
+            p = self.rot3 + 6 * (idx & 0x7FFF)
+            info = u16(d, p)
+            m = pivot_matrix(info & 15, (info >> 4) & 15, s16(d, p + 2) / FX12, s16(d, p + 4) / FX12)
+            return [[m[0][i], m[1][i], m[2][i]] for i in range(3)]   # (stored for row vectors, as below)
+        p = self.rot5 + 10 * idx   # five u16: the first two rows, 13 bits each, and _12 from the low 3 bits
+        v = [u16(d, p + 2 * i) for i in range(5)]
+        a = [sign_extend(x >> 3, 13) / FX12 for x in v]
+        # _12: the low 15 bits of a 1.15 number; the row's length (1) tells its sign bit
+        t = (((v[0] & 7) << 12) | ((v[1] & 7) << 9) | ((v[2] & 7) << 6) | ((v[3] & 7) << 3) | (v[4] & 7)) / 32768.0
+        rest = a[3] * a[3] + a[4] * a[4]
+        m12 = min((t, t - 1.0), key=lambda m: abs(rest + m * m - 1.0))
+        r0 = [a[0], a[1], a[2]]
+        r1 = [a[3], a[4], m12]
+        r2 = [r0[1] * r1[2] - r0[2] * r1[1], r0[2] * r1[0] - r0[0] * r1[2], r0[0] * r1[1] - r0[1] * r1[0]]
+        return [[r0[i], r1[i], r2[i]] for i in range(3)]   # (stored for row vectors, as Node's full matrices)
+
+    def node_trs(self, tag, node, frame):
+        """(node index, (t, r, s)) of a tag at FRAME; node: the model's Node for BASE_* parts"""
+        d = self.d
+        flag = u32(d, tag)
+        p = tag + 4
+        nid = flag >> 24
+        t, r, sc = list(node.t), node.r, list(node.s)
+        if flag & 1:   # identity
+            return nid, ((0.0, 0.0, 0.0), [[1.0, 0, 0], [0, 1.0, 0], [0, 0, 1.0]], (1.0, 1.0, 1.0))
+        if flag & 2:
+            t = [0.0, 0.0, 0.0]
+        elif not (flag & 4):
+            for k, const in enumerate((8, 16, 32)):
+                if flag & const:
+                    t[k] = s32(d, p) / FX12
+                    p += 4
+                else:
+                    info, off = u32(d, p), u32(d, p + 4)
+                    p += 8
+                    t[k] = self._track(info, off, frame, bool(info & 0x20000000))
+        if flag & 0x40:
+            r = [[1.0, 0, 0], [0, 1.0, 0], [0, 0, 1.0]]
+        elif not (flag & 0x80):
+            if flag & 0x100:
+                r = self._rot(u16(d, p))
+                p += 4
+            else:
+                info, off = u32(d, p), u32(d, p + 4)
+                p += 8
+                step = {0: 1, 1: 2, 2: 4}.get(info >> 30, 1)
+                last = (info >> 16) & 0x1FFF
+                r = self._sample(lambda i: self._rot(u16(d, self.o + off + 2 * i)), step, last, frame)
+        if flag & 0x200:
+            sc = [1.0, 1.0, 1.0]
+        elif not (flag & 0x400):
+            for k, const in enumerate((0x800, 0x1000, 0x2000)):
+                if flag & const:
+                    sc[k] = s32(d, p) / FX12
+                    p += 8
+                else:
+                    info, off = u32(d, p), u32(d, p + 4)
+                    p += 8
+                    fx16 = bool(info & 0x20000000)
+                    step = {0: 1, 1: 2, 2: 4}.get(info >> 30, 1)
+                    last = (info >> 16) & 0x1FFF
+                    # (scale tracks hold the scale and its inverse side by side)
+                    get = (lambda i, off=off, fx16=fx16: (s16(d, self.o + off + 4 * i) if fx16 else s32(d, self.o + off + 8 * i)) / FX12)
+                    sc[k] = self._sample(get, step, last, frame)
+        return nid, (tuple(t), r, tuple(sc))
+
+    def node_matrices(self, model, frame):
+        """{node index: 4x4} at FRAME for Model.draw"""
+        out = {}
+        for tag in self.tags:
+            nid = u32(self.d, tag) >> 24
+            if nid >= len(model.nodes):
+                continue
+            nid, (t, r, sc) = self.node_trs(tag, model.nodes[nid], frame)
+            out[nid] = mat_trs(t, r, sc)
+        return out
+
+
+class Bca0:
+    def __init__(self, d):
+        assert d[:4] == b'BCA0', d[:4]
+        self.anims = []
+        for i in range(u16(d, 0x0E)):
+            so = u32(d, 0x10 + 4 * i)
+            if d[so:so + 4] == b'JNT0':
+                for name, e in read_dict(d, so + 8):
+                    self.anims.append(JointAnim(name, d, so + u32(e, 0)))

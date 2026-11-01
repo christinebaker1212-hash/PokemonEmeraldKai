@@ -13,6 +13,12 @@
 #include "constants/items.h"
 #include "constants/script_menu.h"
 #include "constants/field_specials.h"
+#include "constants/rgb.h"
+#include "main.h"
+#include "overworld.h"
+#include "palette.h"
+#include "task.h"
+#include "s3d.h"
 
 extern const u8 *gQzScrollOptions[];
 extern u8 gQzScrollCount;
@@ -139,9 +145,32 @@ static u16 StarterPicked(u16 row)
     return row < ARRAY_COUNT(sStarters) ? sStarters[row] : 0;
 }
 
+// Platinum's briefcase screen when the graphics pack has it (starter_choose.c briefcase mode; the balls left to right
+// as in Platinum: TURTWIG, CHIMCHAR, PIPLUP), the list of names when it doesn't
+static void CB2_BriefcaseDone(void)
+{
+    gSpecialVar_Result = gSpecialVar_Result < ARRAY_COUNT(sStarters) ? sStarters[gSpecialVar_Result] : 0;
+    SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+}
+
+static void Task_OpenBriefcase(u8 taskId)
+{
+    bool8 MP_StarterBriefcase_Open(const u16 *species, MainCallback back);
+    if (gPaletteFade.active)
+        return;
+    DestroyTask(taskId);
+    MP_StarterBriefcase_Open(sStarters, CB2_BriefcaseDone);
+}
+
 u16 Sinnoh_StarterMenu(void)
 {
     u32 i;
+    if (S3D_Gfx_Starter() != NULL)
+    {
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+        CreateTask(Task_OpenBriefcase, 10);
+        return 0;
+    }
     for (i = 0; i < ARRAY_COUNT(sStarters); i++)
     {
         GetSpeciesName(sStarterNames[i], sStarters[i]);

@@ -51,4 +51,16 @@ bool8 S3D_Gyms_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY);   // a gym's
 float S3D_PlayerHeight(void);                    // the ground height the player stands at (NaN: unknown)
 float S3D_TileFloor(s32 mapX, s32 mapY, float near);   // the block's ground height on a map tile nearest NEAR (NaN: none)
 
+// The briefcase's starter screen drawn ahead of time (tools/sinnoh/build_starter.py, section STRT of the graphics pack):
+// w x h RGB555 pictures (bit 15: drawn), the opening's frames then the camera's; each ball's bounce as patches
+struct S3dStarterGfx
+{
+    u16 w, h, openFrames, camFrames, bounceFrames;
+    const u16 *frames;
+    struct { u16 x, y, w, h; const u16 *px; } ball[3];
+    const u16 *cursor;   // 32 x 32 RGB555 (bit 15: drawn): Platinum's glove
+    s16 cursorPos[3][2]; // its middle over each ball
+};
+const struct S3dStarterGfx *S3D_Gfx_Starter(void);   // NULL: the pack has none
+
 #endif

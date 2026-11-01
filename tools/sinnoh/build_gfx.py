@@ -15,7 +15,7 @@ their first frame. Sheets of any other shape (the grunts in a row) aren't taken:
 Battle pictures: each trainer class's front picture, its first 80x80 frame, drawn whole by the big-sprite renderer
 (mp_bigsprite.c) over the stand-in's place.
 
-Format (little endian): "S3DG" u32 version 2
+Format (little endian): "S3DG" u32 version 2 (then "TOWN", the TOWN MAP; "STRT", the briefcase: build_starter.py; "PKCH")
   u16 sprites: each char name[24] (Platinum's, lower case), u8 kind (0 walking: 9 frames 32x32, 1 still 32x32,
                2 still 16x16, 3 walking with a bow: 10 frames, the POKeMON CENTER nurse), u8 pad, u16 palette[16]
                (BGR555; 0 transparent), then the frames as GBA 4bpp tiles (4: still 64x64, the big legendaries); then the smaller copy (OPTIONS >
@@ -255,6 +255,11 @@ def main():
     for k in range(len(gen_townmap.PAGES)):
         for row in gen_townmap.picture(root, k):
             out += struct.pack('<%dH' % len(row), *row)
+    # the briefcase's starter screen, drawn ahead of time (tools/sinnoh/build_starter.py; before the POKéTCH's section,
+    # which runs to the end)
+    import build_starter
+    if os.path.exists(os.path.join(root, build_starter.NARC)):
+        out += build_starter.section(root)
     # the POKéTCH's app screens and sprites (tools/sinnoh/build_poketch.py)
     import build_poketch
     out += build_poketch.section(root)
