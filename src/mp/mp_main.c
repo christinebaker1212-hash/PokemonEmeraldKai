@@ -340,7 +340,7 @@ static void LoadConfig(void)
     gMpConfig.animSpeed = 30;
     gMpConfig.spectateScale = 1;
     gMpConfig.bikeMusic = TRUE;
-    gMpConfig.scaleFollowers = TRUE;   // (SPRITE SCALING: on unless turned off)
+    gMpConfig.scaleFollowers = FALSE;  // (SPRITE SCALING: followers as drawn, the GARDEN's slightly smaller)
     gMpConfig.scaleGarden = TRUE;
     gMpConfig.surfMusic = TRUE;
     memset(gMpConfig.phrases, 0xFF, sizeof(gMpConfig.phrases));
