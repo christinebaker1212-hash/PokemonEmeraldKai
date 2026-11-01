@@ -12,7 +12,7 @@ Kanto_LavenderTown_VolunteerPokemonHouse_EventScript_841B123::
 	additem ITEM_POKE_FLUTE, 1
 	goto_if_eq VAR_RESULT, 0, Kanto_LavenderTown_VolunteerPokemonHouse_EventScript_841B187
 	loadword 0, Kanto_LavenderTown_VolunteerPokemonHouse_Text_844391F
-	setorcopyvar VAR_0x8000, 0x2D4
+	setorcopyvar VAR_0x8000, ITEM_POKE_FLUTE
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x212
 	call Quetzal_EventScript_845571E

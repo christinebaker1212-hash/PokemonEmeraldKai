@@ -921,6 +921,16 @@ void MP_TestCommand(const char *cmd, const char *arg)
         VarSet(VAR_0x8004, id);
         ScriptContext_SetupScript(EventScript_MpDebugGiveItem);
     }
+    else if (strcmp(cmd, "qzputaway") == 0)
+    {
+        // qzputaway ID N - KANTO's "put away ... Pocket:" message (Quetzal's script, tests)
+        extern const u8 EventScript_MpDebugQzPutAway[];
+        int id = 0, n = 1;
+        sscanf(arg, "%d %d", &id, &n);
+        VarSet(VAR_0x8000, id);
+        VarSet(VAR_0x8001, n);
+        ScriptContext_SetupScript(EventScript_MpDebugQzPutAway);
+    }
     else if (strcmp(cmd, "additem") == 0)
     {
         // additem ID N - straight into the bag

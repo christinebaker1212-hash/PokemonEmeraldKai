@@ -1,0 +1,7 @@
+# JOHTO's TEAM ROCKET of Quetzal's Giovanni story (the Celebi past: flag 0x14A4 hides them) isn't in CHERRYGROVE on a
+# new game (1.63.11: a ROCKET and a GROWLITHE stood by the POKeMON CENTER with nothing to say): no one at (52,9), (54,10).
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("objat 52,9: none" "objat 54,10: none")
+UNEXPECT_A=("[crash]")

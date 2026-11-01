@@ -36,7 +36,7 @@ Kanto_ViridianCity_Gym_EventScript_8419F28::
 	bufferitemname 0, ITEM_CHOICE_BAND
 	additem ITEM_CHOICE_BAND, 1
 	loadword 0, Kanto_ViridianCity_Gym_Text_843FA0F
-	setorcopyvar VAR_0x8000, 0x1BA
+	setorcopyvar VAR_0x8000, ITEM_CHOICE_BAND
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

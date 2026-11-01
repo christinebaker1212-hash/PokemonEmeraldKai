@@ -239,7 +239,7 @@ Kanto_VermilionCity_Gym_EventScript_841B9B7::
 	bufferitemname 0, ITEM_CHOICE_SCARF
 	additem ITEM_CHOICE_SCARF, 1
 	loadword 0, Kanto_VermilionCity_Gym_Text_8444DDE
-	setorcopyvar VAR_0x8000, 0x1BC
+	setorcopyvar VAR_0x8000, ITEM_CHOICE_SCARF
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

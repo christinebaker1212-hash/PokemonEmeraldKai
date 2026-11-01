@@ -34,7 +34,7 @@ Kanto_CeruleanCity_Gym_EventScript_841AB0A::
 	bufferitemname 0, ITEM_LEFTOVERS
 	additem ITEM_LEFTOVERS, 1
 	loadword 0, Kanto_CeruleanCity_Gym_Text_84426E8
-	setorcopyvar VAR_0x8000, 0x1D8
+	setorcopyvar VAR_0x8000, ITEM_LEFTOVERS
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

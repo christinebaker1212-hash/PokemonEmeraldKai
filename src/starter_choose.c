@@ -54,12 +54,13 @@ static u16 sStarterLabelWindowId;
 
 // Moemon Kai: the KANTO / JOHTO starter table (the user's mock-up, docs/user_images/57.png): the same screen with the
 // lab's table drawn in full color under the layers (MP_StarterTable_Composite), the balls in a row, the region's
-// three POKéMON, and B to step back from the table. MP_StarterTable_Open starts it; the result is the ball's index
-// (0-2) in gSpecialVar_Result, 0xFFFF for B.
+// three POKéMON. MP_StarterTable_Open starts it; the result is the ball's index (0-2) in gSpecialVar_Result (0xFFFF:
+// SINNOH's briefcase put down with B). The table can't be left without a POKéMON (1.63.11: B stepped back from it
+// and the player could walk off).
 #include "mp/mp_startable_gfx.h"
 static bool8 sTableMode;
 static u16 sTableSpecies[STARTER_MON_COUNT];
-static const u8 sText_TableChoose[] = _("Which MOéMON will you choose?\nB: step back from the table");
+static const u8 sText_TableChoose[] = _("Which MOéMON will you choose?");
 // Moemon Kai: SINNOH's briefcase (Platinum's starter screen, drawn ahead of time from its own models and animations:
 // tools/sinnoh/build_starter.py, s3d_gfx.c S3D_Gfx_Starter): the case opens, the camera comes down on it, Platinum's
 // glove points at the balls and the one under it rocks; the rest is the table mode's (circle, cry, YES / NO).
@@ -712,7 +713,7 @@ static void Task_HandleStarterChooseInput(u8 taskId)
         gTasks[taskId].tPkmnSpriteId = spriteId;
         gTasks[taskId].func = Task_WaitForStarterSprite;
     }
-    else if (sTableMode && JOY_NEW(B_BUTTON))   // Moemon Kai: step back from the table
+    else if (sTableMode && sBriefcase && JOY_NEW(B_BUTTON))   // Moemon Kai: put SINNOH's briefcase down
     {
         PlaySE(SE_SELECT);
         ClearStarterLabel();

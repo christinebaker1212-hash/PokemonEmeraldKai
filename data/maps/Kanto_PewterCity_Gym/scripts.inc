@@ -35,7 +35,7 @@ Kanto_PewterCity_Gym_EventScript_841A5F3::
 	bufferitemname 0, ITEM_LEFTOVERS
 	additem ITEM_LEFTOVERS, 1
 	loadword 0, Kanto_PewterCity_Gym_Text_84413AC
-	setorcopyvar VAR_0x8000, 0x1F7
+	setorcopyvar VAR_0x8000, ITEM_ASSAULT_VEST
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

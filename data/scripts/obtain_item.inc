@@ -15,6 +15,13 @@ EventScript_MpDebugGiveItem::
 	release
 	end
 
+@ Moemon Kai (tests: mp qzputaway ID N): KANTO's "put away ... Pocket:" message for item VAR_0x8000
+EventScript_MpDebugQzPutAway::
+	lock
+	call Quetzal_EventScript_845931B
+	release
+	end
+
 @ Moemon Co-op: an important item from someone (key items, HMs, gym leaders' TMs, EXP. SHARE)
 @ comes with a MOEGATCHA TICKET, once per item (MP_GatchaTicketForItem decides)
 EventScript_MpGatchaTicket::

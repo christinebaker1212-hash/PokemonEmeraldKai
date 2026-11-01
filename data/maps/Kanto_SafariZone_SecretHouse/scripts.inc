@@ -11,7 +11,7 @@ Kanto_SafariZone_SecretHouse_EventScript_84121A9::
 	goto_if_eq VAR_RESULT, 0, Kanto_SafariZone_SecretHouse_EventScript_84121F8
 	additem ITEM_DRAGON_SCALE, 1
 	loadword 0, Kanto_SafariZone_SecretHouse_Text_8428593
-	setorcopyvar VAR_0x8000, 0xEA
+	setorcopyvar VAR_0x8000, ITEM_DRAGON_SCALE
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

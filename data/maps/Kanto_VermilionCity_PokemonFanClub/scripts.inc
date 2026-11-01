@@ -24,7 +24,7 @@ Kanto_VermilionCity_PokemonFanClub_EventScript_841B489::
 	additem ITEM_BIKE_VOUCHER, 1
 	goto_if_eq VAR_RESULT, 0, Kanto_VermilionCity_PokemonFanClub_EventScript_841B4D8
 	loadword 0, Kanto_VermilionCity_PokemonFanClub_Text_84447A5
-	setorcopyvar VAR_0x8000, 0x2EC
+	setorcopyvar VAR_0x8000, ITEM_BIKE_VOUCHER
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x212
 	call Quetzal_EventScript_845571E

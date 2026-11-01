@@ -208,6 +208,58 @@ static s16 StandingBottom(const struct MpPmdView *v)
     return best;
 }
 
+// Where the body's middle is across, facing as it does now: the average column of the pixels its IDLE frames draw
+// (the WALK's without one), from the point. The sheets draw a side or back view off the cell's middle, toward its
+// back, and each facing differently; the picture is moved by this so its body stands on its point whichever way it
+// faces (1.63.11). The pixels' average, not the picture's edges: a tail or ears to one side hardly move it (PIKACHU
+// from behind sat a pixel and a half to the left by its edges).
+static s16 StandingMiddle(struct MpPmdView *v)
+{
+    const u8 *a;
+    u8 frames, dirs, d, i;
+    s32 sum = 0, count = 0;
+    u8 face = v->dir & 7;
+    if (v->midKnown & (1 << face))
+        return v->mid[face];
+    a = AnimRecord(v->chunk, Resolve(v->chunk, PMD_ANIM_IDLE));
+    if (!a)
+        return 0;
+    frames = a[0];
+    dirs = a[1];
+    d = dirs >= 8 ? face : 0;
+    for (i = 0; i < frames; i++)
+    {
+        const u8 *f = v->chunk->raw + Rd32(a + 4 + ((frames + 3) & ~3) + 4 * (d * frames + i));
+        s16 x0 = (s16)Rd16(f), w = (s16)Rd16(f + 4), h = (s16)Rd16(f + 6), x, y;
+        const u8 *px = f + 8;
+        s32 stride = v->chunk->bpp == 4 ? (w + 1) / 2 : w;
+        for (y = 0; y < h; y++)
+            for (x = 0; x < w; x++)
+            {
+                u8 c = v->chunk->bpp == 4 ? ((x & 1) ? px[y * stride + x / 2] >> 4 : px[y * stride + x / 2] & 15)
+                                          : px[y * stride + x];
+                if (c)
+                {
+                    sum += 2 * (x0 + x) + 1;   // (the pixel's middle, in half pixels)
+                    count++;
+                }
+            }
+    }
+    v->mid[face] = count ? (sum >= 0 ? (sum + count) / (2 * count) : -((-sum + count) / (2 * count))) : 0;
+    v->midKnown |= 1 << face;
+    return v->mid[face];
+}
+
+// What sprite scaling measures (mp_spritescale.c): its first IDLE frame facing down, the same whatever it's doing
+// when it first shows (1.63.11: the frame shown then, so a follower sent out mid-walk could get another size)
+const u8 *MP_Pmd_ScaleFrame(const struct MpPmdView *v)
+{
+    const u8 *a = AnimRecord(v->chunk, Resolve(v->chunk, PMD_ANIM_IDLE));
+    if (!a)
+        return v->big.frame;
+    return v->chunk->raw + Rd32(a + 4 + ((a[0] + 3) & ~3));
+}
+
 static void UpdateLift(struct MpPmdView *v)
 {
     const u8 *a = AnimRecord(v->chunk, v->shown), *f;
@@ -217,6 +269,7 @@ static void UpdateLift(struct MpPmdView *v)
     // (the tile's middle); before, each species stood as high as its sheet's feet were from its point
     s16 base = stand == 0x7FFF ? 0 : PMD_FEET_DY + 1 - stand;
     v->big.lift = base;
+    v->big.shift = -StandingMiddle(v);
     if (!a || !(v->shown == PMD_ANIM_HOP || v->shown == PMD_ANIM_LEAPFORTH || v->shown == PMD_ANIM_ROTATE
              || v->shown == PMD_ANIM_POSE || v->shown == PMD_ANIM_TUMBLE))
         return;
@@ -296,6 +349,8 @@ bool8 MP_Pmd_Attach(struct MpPmdView *v, struct Sprite *sprite, u16 dex, bool8 f
     if (sprite)
     {
         sprite->mpBig = &v->big;
+        v->big.footed = TRUE;
+        v->big.footY = PMD_FEET_DY + 1;
         sprite->centerToCornerVecX = sprite->centerToCornerVecY = 0;
     }
     return TRUE;
@@ -424,6 +479,16 @@ void MP_Pmd_Animate(struct MpPmdView *v, u8 *pdir, u8 *pturn, bool8 walking, u8 
 
     if (walking || pose != LIFE_POSE_NONE)
         v->idle = 0;
+    // a step's end isn't a stop: the walk goes on for a few frames (between two steps it never stops, so its cycle
+    // runs through both feet; 1.63.11: it went back to IDLE for a frame at every step and the next began the walk
+    // over, showing only its first stride)
+    if (walking)
+        v->stopping = 0;
+    else if (pose == LIFE_POSE_NONE && v->anim == PMD_ANIM_WALK && v->stopping < 6)
+    {
+        v->stopping++;
+        walking = TRUE;
+    }
     if (walking)
         anim = PMD_ANIM_WALK;
     else switch (pose)

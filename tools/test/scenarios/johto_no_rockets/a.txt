@@ -1,0 +1,8 @@
+pressuntil A field 5000
+wait 60
+mp warp 34,16,52,12
+wait 120
+mp objat 52 9
+mp objat 54 10
+shot cherrygrove
+quit

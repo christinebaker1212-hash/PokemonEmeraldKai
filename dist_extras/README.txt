@@ -1172,9 +1172,10 @@ The other buttons change with what's on screen:
                     another page and press X/Square to pin it there.
                     Y/Triangle on a MINE page edits that phrase.
   Text and menus    LT (hold) = keep pressing A, to get through text fast;
-                    X/Square = B, Y/Triangle = SELECT
-  Naming screen     X/Square = delete, Y/Triangle = switch letters
-  PC boxes          X/Square = TAG (F on the keyboard), Y/Triangle = SELECT
+                    X/Square = B
+  Naming screen     X/Square = delete
+  PC boxes          X/Square = TAG (F on the keyboard)
+  SELECT is always Back / Share / - (Y/Triangle never acts as SELECT).
 Button hints on screen show your controller's own buttons (Xbox,
 PlayStation or Nintendo) when you last used it, and the GBA buttons when
 you last used the keyboard.

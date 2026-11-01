@@ -39,7 +39,7 @@ Kanto_Route16_NorthEntrance_2F_EventScript_8420384::
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_8457F8A
 	additem ITEM_AMULET_COIN, 1
 	loadword 0, Kanto_Route16_NorthEntrance_2F_Text_84500E0
-	setorcopyvar VAR_0x8000, 0x1D2
+	setorcopyvar VAR_0x8000, ITEM_AMULET_COIN
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

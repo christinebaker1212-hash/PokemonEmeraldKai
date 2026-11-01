@@ -15,7 +15,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "global.h"
+#include "event_data.h"
 #include "item.h"
+#include "string_util.h"
 #include "mp.h"
 #include "constants/items.h"
 
@@ -423,6 +425,13 @@ u8 MP_Bag_ViewOfItem(u16 item)
     if (GetItemBattleUsage(item) == ITEM_B_USE_OTHER)
         return MP_BAGVIEW_BATTLE;
     return MP_BAGVIEW_ITEMS;
+}
+
+// special MP_BufferItemPocket: STR_VAR_3 = the BAG pocket item VAR_0x8000 shows in (JOHTO's and KANTO's "put away"
+// messages: Quetzal's scripts named its own pockets by its own numbers, so POKe BALLs read MEDICINE; 1.63.11)
+void MP_BufferItemPocket(void)
+{
+    StringCopy(gStringVar3, MP_Bag_ViewName(MP_Bag_ViewOfItem(gSpecialVar_0x8000)));
 }
 
 // The save's pocket a view shows (FAVORITES: POCKETS_COUNT, all of them)

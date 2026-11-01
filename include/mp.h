@@ -395,6 +395,8 @@ struct ItemSlot;
 u8 MP_Bag_ViewOfItem(u16 item);
 u8 MP_Bag_ViewPocket(u8 view);
 u8 MP_Bag_PocketView(u8 pocket);
+const u8 *MP_Bag_ViewName(u8 view);
+void MP_BufferItemPocket(void);
 u16 MP_Bag_ViewSlots(u8 view, struct ItemSlot **out, u16 max);
 bool8 MP_Bag_IsFavorite(u16 item);
 void MP_Bag_SetFavorite(u16 item, bool8 on);

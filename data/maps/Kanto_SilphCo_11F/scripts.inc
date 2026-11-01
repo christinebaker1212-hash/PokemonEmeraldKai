@@ -18,7 +18,7 @@ Kanto_SilphCo_11F_EventScript_8411B3D::
 	goto_if_eq VAR_RESULT, 0, Kanto_SilphCo_11F_EventScript_8411BAD
 	additem ITEM_MASTER_BALL, 1
 	loadword 0, Kanto_SilphCo_11F_Text_84276A4
-	setorcopyvar VAR_0x8000, 4
+	setorcopyvar VAR_0x8000, ITEM_MASTER_BALL
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x212
 	call Quetzal_EventScript_845571E

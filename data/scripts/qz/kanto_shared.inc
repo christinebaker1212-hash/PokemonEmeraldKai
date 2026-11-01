@@ -1418,8 +1418,7 @@ Quetzal_EventScript_845919C::
 
 Quetzal_EventScript_845931B::
 	bufferitemnameplural 1, VAR_0x8000, VAR_0x8001
-	checkitemtype VAR_0x8000
-	call Quetzal_EventScript_8459332
+	special MP_BufferItemPocket   @ Moemon Kai: the BAG's own pocket names (Quetzal's numbers named the wrong ones)
 	msgbox Quetzal_Text_845581F, MSGBOX_DEFAULT
 	return
 

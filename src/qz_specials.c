@@ -239,10 +239,12 @@ static u16 QzVictoryRoadGateCheck_(void)
     return MP_Region_Cleared(REGION_JOHTO) && MP_Region_Cleared(REGION_KANTO);
 }
 
-// Quetzal's Giovanni mode (the Celebi past) and its flags: never on in Kai
+// Quetzal's Giovanni mode (the Celebi past): TEAM ROCKET in CHERRYGROVE, AZALEA, ROUTE 35 and GOLDENROD (flag 0x14A4
+// hides them) only in the past (1.63.11: this cleared it and nothing set it, so they stood there from a new game on)
+static void QzGiovanniRockets(void);
 u16 QzSetGiovanniModeFlag14A4(void)
 {
-    FlagClear(FLAG_QZ_0x14A4);
+    QzGiovanniRockets();
     return 0;
 }
 
@@ -1531,6 +1533,14 @@ u16 QzSSAnneExteriorEventStep(void)
 #define GIOVANNI_DONE 0x1319
 
 static bool8 InGiovanniPast(void) { return FlagGet(GIOVANNI_PAST); }
+
+static void QzGiovanniRockets(void)
+{
+    if (InGiovanniPast())
+        FlagClear(FLAG_QZ_0x14A4);
+    else
+        FlagSet(FLAG_QZ_0x14A4);
+}
 u16 QzGiovanniStoryItemAvailable(void);
 
 static bool8 OnMap(u8 group, u8 num)
@@ -1568,6 +1578,7 @@ static bool8 CelebiCanTravel(bool8 leadOnly)
 // Quetzal's per-map refresh (693, on every JOHTO map load; mp_region.c MP_Region_OnMapLoaded): who stands where
 u16 QzGiovanniStoryUpdateFlags(void)
 {
+    QzGiovanniRockets();
     if (OnMap(35, 94))   // TOHJO FALLS: GIOVANNI waits once the League is beaten, before and after his story
     {
         if (!InGiovanniPast() && MP_Region_Cleared(MP_Region_Current())

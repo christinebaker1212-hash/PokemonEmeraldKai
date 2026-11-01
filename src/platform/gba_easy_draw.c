@@ -700,10 +700,17 @@ static void DrawBigSprite(struct scanlineData *scanline, struct OamData *oam, ui
     int16_t m[2][2] = {{0x100, 0}, {0, 0x100}};
     uint16_t *pixels, *palette;
     int ty0, x0, x1, gx, stride;
+    s16 sax = 0, say = 0;
+    u16 sc = 0;
 
     if (e == NULL)
         return;
-    if (isAffine ? ((int)vcount < e->gy - e->reach || (int)vcount > e->gy + e->reach)
+    // affine and scaled (sprite->mpScale: a POKeMON's entrance, its reflection): the turned picture, then made
+    // smaller toward its anchor (1.63.11: drawn full size until the entrance ended, reflections always)
+    if (isAffine)
+        sc = MP_BigSprite_OamScale((uint16_t)(oam - (struct OamData *)OAM), &sax, &say);
+    if (isAffine ? ((int)vcount < (sc ? say + (e->gy - e->reach - say) * sc / 256 - 1 : e->gy - e->reach)
+                    || (int)vcount > (sc ? say + (e->gy + e->reach - say) * sc / 256 + 1 : e->gy + e->reach))
                  : ((int)vcount < e->top || (int)vcount >= e->top + e->h))
         return;
     if (isAffine)
@@ -734,6 +741,11 @@ static void DrawBigSprite(struct scanlineData *scanline, struct OamData *oam, ui
     {
         x0 = e->gx - e->reach;
         x1 = e->gx + e->reach + 1;
+        if (sc)
+        {
+            x0 = sax + (x0 - sax) * sc / 256 - 1;
+            x1 = sax + (x1 - sax) * sc / 256 + 1;
+        }
     }
     else
     {
@@ -752,6 +764,11 @@ static void DrawBigSprite(struct scanlineData *scanline, struct OamData *oam, ui
         if (isAffine)
         {
             int lx = gx - e->gx, ly = (int)vcount - e->gy;
+            if (sc)
+            {
+                lx = sax + (gx - sax) * 256 / sc - e->gx;
+                ly = say + ((int)vcount - say) * 256 / sc - e->gy;
+            }
             tx = ((m[0][0] * lx + m[0][1] * ly) >> 8) + e->px;
             ty = ((m[1][0] * lx + m[1][1] * ly) >> 8) + e->py;
             if (tx < 0 || ty < 0 || tx >= e->w || ty >= e->h)

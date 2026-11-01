@@ -19,7 +19,7 @@ Kanto_Route12_FishingHouse_EventScript_841FEBD::
 	goto_if_eq VAR_RESULT, 0, Kanto_Route12_FishingHouse_EventScript_841FF0C
 	msgbox Kanto_Route12_FishingHouse_Text_844F4F5, MSGBOX_DEFAULT
 	loadword 0, Kanto_Route12_FishingHouse_Text_844F54C
-	setorcopyvar VAR_0x8000, 0x2C7
+	setorcopyvar VAR_0x8000, ITEM_SUPER_ROD
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

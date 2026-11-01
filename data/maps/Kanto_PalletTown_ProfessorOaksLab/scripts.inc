@@ -664,7 +664,7 @@ Kanto_PalletTown_ProfessorOaksLab_EventScript_841996D::
 	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843EBD8, MSGBOX_DEFAULT
 	additem ITEM_POKE_BALL, 5
 	loadword 0, Kanto_PalletTown_ProfessorOaksLab_Text_843E9EF
-	setorcopyvar VAR_0x8000, 1
+	setorcopyvar VAR_0x8000, ITEM_POKE_BALL
 	setorcopyvar VAR_0x8001, 5
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

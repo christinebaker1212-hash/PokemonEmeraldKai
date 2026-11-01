@@ -11,7 +11,7 @@ Kanto_SaffronCity_MrPsychicsHouse_EventScript_841F101::
 	goto_if_eq VAR_RESULT, 0, Kanto_SaffronCity_MrPsychicsHouse_EventScript_841F150
 	additem ITEM_MOON_STONE, 1
 	loadword 0, Kanto_SaffronCity_MrPsychicsHouse_Text_844C0C7
-	setorcopyvar VAR_0x8000, 0xD9
+	setorcopyvar VAR_0x8000, ITEM_MOON_STONE
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

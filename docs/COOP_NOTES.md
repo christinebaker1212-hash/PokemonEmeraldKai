@@ -3281,7 +3281,7 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   tile below the middle ball, (9, 5) in both labs; the scripts wait with `waitmovement LOCALID_PLAYER`, since
   `waitmovement 0` waits on the last applymovement's object and let the table open mid-walk) and Emerald's starter
   screen in table mode (starter_choose.c MP_StarterTable_Open: the hand, the ball's wiggle, the label, the preview
-  circle and YES / NO are Emerald's own; B steps back from the table). The table is drawn in full color under the
+  circle and YES / NO are Emerald's own; B does nothing: the table is left only with a POKéMON, 1.63.11). The table is drawn in full color under the
   layers (MP_StarterTable_Composite, src/mp/mp_startable_gfx.h from tools/moemon_starters/gen_table.py: the mock-up with
   its balls and hand painted out along the table's elliptical light bands, the right half the left mirrored).
 - `special QzChooseStarterKanto/Johto` + `waitstate` keep their contract: RESULT the species (0 for B), plus VAR_TEMP_1
@@ -3438,6 +3438,29 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
 - mp_avatar.c MP_Avatar_SettingsLoaded (start-up and mp_main.c MP_SaveSlotChanged): the look's CREATE recipe and its
   sprite pack set up again from the save file's own settings (a switch kept the other file's, and a later save wrote
   them into this one's). `mp saveconfig`, `mp lookname`.
+- KANTO's key-item gift script (Quetzal_EventScript_845571E) took the item as Quetzal's raw number in VAR_0x8000
+  (import.py only translated the ones before callstd STD_OBTAIN_ITEM: now these too; 39 scripts fixed), and both
+  regions' "put away ... Pocket:" scripts named Quetzal's own pockets by its numbers: special MP_BufferItemPocket
+  (mp_bag.c) puts the BAG view's name (MP_Bag_ViewOfItem) in STR_VAR_3. CELADON's roof drinks / apples were raw numbers
+  too. `mp qzputaway ID N`; test qz_putaway.
+- gamepad.c: the north button (the CO-OP menu's) is no longer SELECT off the overworld (menus, text, battles, naming,
+  PC): pressed as a message closed or a menu opened it used the registered item. SELECT is the Back button only.
+- PMD walk: MP_Pmd_Animate keeps WALK for up to 6 frames after `walking` drops (MpPmdView.stopping): the follower's
+  walking flag is off for a frame at each step's end, which went to IDLE and restarted the walk (Riolu's frames 0-2 of
+  4: one foot). Horizontal anchor: MpBigSprite.shift = -(the average column of the IDLE frames' pixels for the facing,
+  cached in MpPmdView.mid), so the body's middle is on the sprite's x for every facing (tails and ears hardly count);
+  mp_bigsprite.c adds it. Test pmd_walk_sides.
+- Sprite scaling: a PMD big sprite (MpBigSprite.footed) shrinks toward its point and feet line (x + shift, y + footY),
+  not each frame's picture's bottom middle; the affine path (ball entrance, water reflection) applies sprite->mpScale
+  too (gba_easy_draw.c DrawBigSprite: the turned picture, then shrunk toward the anchor), reflections copy mpScale
+  (mp_followfx.c), and the scale is measured on the first IDLE frame facing down (MP_Pmd_ScaleFrame), never cached
+  before the sheet is in. It used to come out of the ball full size and shrink when the entrance ended.
+- Specials are numbered by their place in data/specials.inc and something reads them by number: add new ones at the
+  end (MP_BufferItemPocket in the middle moved the rest by one and broke the boat to JOHTO: region_travel).
+- KANTO / JOHTO starter table: B does nothing (starter_choose.c: only SINNOH's briefcase is put down with B).
+- JOHTO: flag 0x14A4 hides Quetzal's Giovanni-story ROCKETs (CHERRYGROVE, AZALEA, ROUTE 35, GOLDENROD): set unless in
+  the past (qz_specials.c QzGiovanniRockets, on every JOHTO map load and QzSetGiovanniModeFlag14A4, which cleared it).
+  Test johto_no_rockets.
 
 ## SINNOH's 3D engine
 - Plan and rules: docs/SINNOH_HANDOFF.md. The data comes from pret/pokeplatinum (source.py: its map blocks, matrices,

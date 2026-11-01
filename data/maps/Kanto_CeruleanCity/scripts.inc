@@ -107,7 +107,7 @@ Kanto_CeruleanCity_EventScript_841626F::
 	goto_if_eq VAR_RESULT, 0, Kanto_CeruleanCity_EventScript_84162BB
 	additem ITEM_SUN_STONE, 1
 	loadword 0, Kanto_CeruleanCity_Text_842EF8C
-	setorcopyvar VAR_0x8000, 0xD8
+	setorcopyvar VAR_0x8000, ITEM_SUN_STONE
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

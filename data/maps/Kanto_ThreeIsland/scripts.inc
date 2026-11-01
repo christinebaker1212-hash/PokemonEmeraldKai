@@ -58,7 +58,7 @@ Kanto_ThreeIsland_EventScript_84174B6::
 	checkitemspace ITEM_FULL_RESTORE, 1
 	goto_if_eq VAR_RESULT, 0, Kanto_ThreeIsland_EventScript_8417504
 	loadword 0, Kanto_ThreeIsland_Text_8432A83
-	setorcopyvar VAR_0x8000, 0x20
+	setorcopyvar VAR_0x8000, ITEM_FULL_RESTORE
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

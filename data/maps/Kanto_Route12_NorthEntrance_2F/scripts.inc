@@ -23,7 +23,7 @@ Kanto_Route12_NorthEntrance_2F_EventScript_841FE10::
 	goto_if_eq VAR_RESULT, 0, Kanto_Route12_NorthEntrance_2F_EventScript_841FE80
 	additem ITEM_SHINY_STONE, 1
 	loadword 0, Kanto_Route12_NorthEntrance_2F_Text_844F351
-	setorcopyvar VAR_0x8000, 0xDA
+	setorcopyvar VAR_0x8000, ITEM_SHINY_STONE
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

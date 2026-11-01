@@ -49,7 +49,7 @@ Kanto_Route10_PokemonCenter_1F_EventScript_841FBD9::
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_8457F8A
 	additem ITEM_EVERSTONE, 1
 	loadword 0, Kanto_Route10_PokemonCenter_1F_Text_844EC28
-	setorcopyvar VAR_0x8000, 0xF5
+	setorcopyvar VAR_0x8000, ITEM_EVERSTONE
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

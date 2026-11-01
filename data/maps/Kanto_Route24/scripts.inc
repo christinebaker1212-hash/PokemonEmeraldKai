@@ -51,7 +51,7 @@ Kanto_Route24_EventScript_8418355::
 Kanto_Route24_EventScript_8418396::
 	additem ITEM_NUGGET, 1
 	loadword 0, Kanto_Route24_Text_8438F7C
-	setorcopyvar VAR_0x8000, 0x87
+	setorcopyvar VAR_0x8000, ITEM_NUGGET
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

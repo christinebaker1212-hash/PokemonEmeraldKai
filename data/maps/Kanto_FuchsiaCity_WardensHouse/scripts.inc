@@ -26,7 +26,7 @@ Kanto_FuchsiaCity_WardensHouse_EventScript_841D91B::
 	call_if_eq VAR_RESULT, 1, Kanto_FuchsiaCity_WardensHouse_EventScript_841D97D
 	additem ITEM_NUGGET, 1
 	loadword 0, Kanto_FuchsiaCity_WardensHouse_Text_8448FE3
-	setorcopyvar VAR_0x8000, 0x31B
+	setorcopyvar VAR_0x8000, ITEM_NUGGET
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

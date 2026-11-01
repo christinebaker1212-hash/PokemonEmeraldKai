@@ -37,7 +37,7 @@ Kanto_SaffronCity_Gym_EventScript_841EEE2::
 	bufferitemname 0, ITEM_CHOICE_SPECS
 	additem ITEM_CHOICE_SPECS, 1
 	loadword 0, Kanto_SaffronCity_Gym_Text_844B726
-	setorcopyvar VAR_0x8000, 0x1BB
+	setorcopyvar VAR_0x8000, ITEM_CHOICE_SPECS
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

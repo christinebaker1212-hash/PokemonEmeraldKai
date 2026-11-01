@@ -75,7 +75,7 @@ Kanto_Route11_EastEntrance_2F_EventScript_841FD50::
 	additem ITEM_ITEMFINDER, 1
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_8457F8A
 	loadword 0, Kanto_Route11_EastEntrance_2F_Text_844EFD9
-	setorcopyvar VAR_0x8000, 0x2C8
+	setorcopyvar VAR_0x8000, ITEM_ITEMFINDER
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

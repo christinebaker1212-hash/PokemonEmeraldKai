@@ -10,10 +10,9 @@ pressuntil A startertable 4000
 shot walk_table
 press B 2
 wait 60
-pressuntil B field 2000
-mp where
-press A 2
-pressuntil A startertable 3000
+press B 2
+wait 60
+shot still_table
 press RIGHT 2
 wait 30
 press A 2
@@ -23,4 +22,5 @@ wait 60
 pressuntil B field 4000
 wait 30
 mp party
+mp where
 quit

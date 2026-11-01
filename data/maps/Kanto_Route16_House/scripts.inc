@@ -11,7 +11,7 @@ Kanto_Route16_House_EventScript_84201C1::
 	goto_if_eq VAR_RESULT, 0, Kanto_Route16_House_EventScript_8420210
 	additem ITEM_RAZOR_FANG, 1
 	loadword 0, Kanto_Route16_House_Text_844FD1C
-	setorcopyvar VAR_0x8000, 0x1ED
+	setorcopyvar VAR_0x8000, ITEM_RAZOR_FANG
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

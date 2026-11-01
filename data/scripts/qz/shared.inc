@@ -10,8 +10,8 @@ Quetzal_EventScript_835F702::
 
 Quetzal_EventScript_835FB62::
 	bufferitemnameplural 1, VAR_0x8000, VAR_0x8001
-	checkitemtype VAR_0x8000
-	call Quetzal_EventScript_835FB87
+	special MP_BufferItemPocket   @ Moemon Kai: the BAG's own pocket names (Quetzal's numbers named the wrong ones)
+	call_if_eq VAR_0x8007, 1, Quetzal_EventScript_835FCE0
 	call_if_eq VAR_0x8007, 1, Quetzal_EventScript_835FCC6
 	call_if_eq VAR_0x8007, 0, Quetzal_EventScript_835FCDA
 	return

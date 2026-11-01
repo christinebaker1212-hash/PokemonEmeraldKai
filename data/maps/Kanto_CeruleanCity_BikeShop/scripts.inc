@@ -18,7 +18,7 @@ Kanto_CeruleanCity_BikeShop_EventScript_841AC03::
 	additem ITEM_BICYCLE, 1
 	goto_if_eq VAR_RESULT, 0, Kanto_CeruleanCity_BikeShop_EventScript_841AC4C
 	loadword 0, Kanto_CeruleanCity_BikeShop_Text_8442AE5
-	setorcopyvar VAR_0x8000, 0x2C2
+	setorcopyvar VAR_0x8000, ITEM_BICYCLE
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x212
 	call Quetzal_EventScript_845571E

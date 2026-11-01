@@ -64,7 +64,7 @@ Kanto_MtMoon_B2F_EventScript_8410060::
 	goto_if_eq VAR_RESULT, 0, Kanto_MtMoon_B2F_EventScript_841013F
 	removeobject 1
 	loadword 0, Kanto_MtMoon_B2F_Text_84234B4
-	setorcopyvar VAR_0x8000, 0xA6
+	setorcopyvar VAR_0x8000, ITEM_DOME_FOSSIL
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x212
 	call Quetzal_EventScript_845571E
@@ -95,7 +95,7 @@ Kanto_MtMoon_B2F_EventScript_84100D2::
 	goto_if_eq VAR_RESULT, 0, Kanto_MtMoon_B2F_EventScript_841013F
 	removeobject 2
 	loadword 0, Kanto_MtMoon_B2F_Text_8423499
-	setorcopyvar VAR_0x8000, 0xA5
+	setorcopyvar VAR_0x8000, ITEM_HELIX_FOSSIL
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x212
 	call Quetzal_EventScript_845571E

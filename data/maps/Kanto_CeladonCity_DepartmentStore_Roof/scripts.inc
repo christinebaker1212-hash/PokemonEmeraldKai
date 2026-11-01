@@ -120,22 +120,22 @@ Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C191::
 	end
 
 Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C1D4::
-	setvar VAR_0x8008, 0x23
-	setvar VAR_0x8009, 0xDD
+	setvar VAR_0x8008, ITEM_FRESH_WATER
+	setvar VAR_0x8009, ITEM_SWEET_APPLE
 	goto_if_set FLAG_QZ_0x2169, Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C2D6
 	msgbox Kanto_CeladonCity_DepartmentStore_Roof_Text_8445EBF, MSGBOX_DEFAULT
 	goto Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C237
 
 Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C1F5::
-	setvar VAR_0x8008, 0x24
-	setvar VAR_0x8009, 0xDE
+	setvar VAR_0x8008, ITEM_SODA_POP
+	setvar VAR_0x8009, ITEM_TART_APPLE
 	goto_if_set FLAG_QZ_0x216B, Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C2D6
 	msgbox Kanto_CeladonCity_DepartmentStore_Roof_Text_8445F4F, MSGBOX_DEFAULT
 	goto Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C237
 
 Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C216::
-	setvar VAR_0x8008, 0x25
-	setvar VAR_0x8009, 0x31F
+	setvar VAR_0x8008, ITEM_LEMONADE
+	setvar VAR_0x8009, ITEM_SYRUPY_APPLE
 	goto_if_set FLAG_QZ_0x2170, Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C2D6
 	msgbox Kanto_CeladonCity_DepartmentStore_Roof_Text_8445FB4, MSGBOX_DEFAULT
 	goto Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C237
@@ -156,9 +156,9 @@ Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C237::
 	setorcopyvar VAR_0x8001, 1
 	call Quetzal_EventScript_845931B
 	call Quetzal_EventScript_8456AB7
-	call_if_eq VAR_0x8008, 35, Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C29C
-	call_if_eq VAR_0x8008, 36, Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C2A8
-	call_if_eq VAR_0x8008, 37, Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C2B4
+	call_if_eq VAR_0x8008, ITEM_FRESH_WATER, Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C29C
+	call_if_eq VAR_0x8008, ITEM_SODA_POP, Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C2A8
+	call_if_eq VAR_0x8008, ITEM_LEMONADE, Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C2B4
 	release
 	end
 

@@ -1,0 +1,10 @@
+# PMD followers walking left and right (1.63.11): a RIOLU walks right with the sheet's right-facing walk (dir 2) and
+# left with the left-facing one (dir 6); its walk runs on from step to step (all its frames, both feet: it went back to
+# standing for a frame at each step's end and began again, frames 0-2 only) and its body stays on its point whichever
+# way it faces (MpBigSprite.shift). Shots: r_*, l_*.
+MODE=1
+WARP=0,0,10,12
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=472:15 MOEMON_FOLLOWER_SPRITES=1"
+EXPECT_A=("pmd slot 0: dex 447 on 1 shiny 0 anim 0 shown 0 dir 2" "pmd slot 0: dex 447 on 1 shiny 0 anim 0 shown 0 dir 6")
+UNEXPECT_A=("pmd: sheet")

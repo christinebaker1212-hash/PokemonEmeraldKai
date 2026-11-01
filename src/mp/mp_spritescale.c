@@ -72,10 +72,12 @@ u16 MP_SpriteScale_Mon(bool8 on, bool8 slight, u16 dex, const struct MpPmdView *
     u32 k = (u32)dex << 8 | (pmd != NULL) << 7 | size | (u32)slight << 30 | 1u << 31;
     if (!on || dex == 0 || pmd == NULL)
         return 0;   // (only the PMD pictures: the game's own follower sprites keep their size)
+    if (pmd->chunk == NULL)
+        return 0;   // (its sheet not there yet: measured once it is, not remembered as nothing)
     if (*key != k)
     {
         *key = k;
-        *value = MP_SpriteScale_ForMon(dex, pmd != NULL ? MP_SpriteScale_BigHeight(pmd->big.frame, pmd->big.bpp)
+        *value = MP_SpriteScale_ForMon(dex, pmd != NULL ? MP_SpriteScale_BigHeight(MP_Pmd_ScaleFrame(pmd), pmd->big.bpp)
                                                         : MP_SpriteScale_TiledHeight(tiles, size), slight);
         printf("[mp] sprite scale: #%d %s height %d dm -> %d/256\n", dex, pmd != NULL ? "PMD" : "sprite",
                GetPokedexHeightWeight(dex, 0), *value);

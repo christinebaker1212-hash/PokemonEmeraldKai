@@ -12,6 +12,9 @@ struct MpBigSprite
     u8 bpp;                 // 4 (rows of (w + 1) / 2 bytes, low nibble first) or 8 (rows of w bytes)
     u8 colorCount;          // palette entries (0 = transparent)
     s16 lift;               // pixels the picture is drawn lower than its frame says (a PMD hop's rise, cut down)
+    s16 shift;              // ... and further right (a PMD sheet's body put on its point, the same for every facing)
+    bool8 footed;           // footY is set: sprite->mpScale shrinks it toward its feet (x, y + footY) in every frame,
+    s8 footY;               // its entrance and its reflection (else toward its picture's bottom middle)
     u16 extraShown[240];    // 8 bpp: colors 16-255 as shown now (faded like the palette slot)
 };
 

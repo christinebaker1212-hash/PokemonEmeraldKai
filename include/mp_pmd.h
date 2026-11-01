@@ -71,6 +71,9 @@ struct MpPmdView
     bool8 shiny;
     u16 idle;                   // MP_Pmd_Animate: frames standing with nothing to do
     u8 fastPhase;               // ... running: every other frame
+    u8 stopping;                // ... frames since it stopped walking (the walk goes on through a step's end)
+    u8 midKnown;                // StandingMiddle's cache: bit per facing
+    s8 mid[8];
     struct MpBigSprite big;
     u16 extraOwn[240];          // 8 bpp: colors 16+ before fades (big.extraShown = these, faded)
 };
@@ -85,6 +88,7 @@ void MP_Pmd_SetAnim(struct MpPmdView *v, u8 anim, u8 dir, bool8 loop);
 void MP_Pmd_Tick(struct MpPmdView *v, struct Sprite *sprite);   // once a frame
 bool8 MP_Pmd_Done(const struct MpPmdView *v);                   // a non-looping animation reached its end
 u16 MP_Pmd_Height(const struct MpPmdView *v);                   // how far the picture reaches above the ground point
+const u8 *MP_Pmd_ScaleFrame(const struct MpPmdView *v);          // what sprite scaling measures (standing, facing down)
 u8 MP_Pmd_DirFrom4(u8 fdir);                                    // the followers' DOWN, UP, LEFT, RIGHT -> PMD_DIR_*
 u8 MP_Pmd_DirToward(s16 dx, s16 dy, u8 fallback);               // 8-way, from a vector
 void MP_Pmd_FrameUpdate(void);                                  // frees sheets nobody shows any more

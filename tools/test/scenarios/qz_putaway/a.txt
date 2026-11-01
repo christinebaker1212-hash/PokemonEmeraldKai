@@ -1,0 +1,23 @@
+pressuntil A field 5000
+wait 60
+mp qzputaway 4 5
+wait 120
+press A 2
+wait 120
+shot balls
+mash A 6 20
+wait 30
+mp qzputaway 503 1
+wait 120
+press A 2
+wait 120
+shot parcel
+mash A 6 20
+wait 30
+mp qzputaway 13 1
+wait 120
+press A 2
+wait 120
+shot potion
+mash A 6 20
+quit

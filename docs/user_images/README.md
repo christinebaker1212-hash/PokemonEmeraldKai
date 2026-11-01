@@ -54,3 +54,6 @@ Numbered in the order they were sent. Add new ones with the next number and a li
 | 57 | 57.png: the starter table for KANTO and JOHTO: three POKé BALLS on a green-topped table, the hand cursor over the middle one | choosing the starter from the lab table with Emerald-style hand, wiggling balls and preview |
 | 58 | 58.png: SINNOH's briefcase starter screen: the glove cursor over the left POKé BALL drawn as broken bands of pixels | the glove drawn as Platinum's white pointing hand (1.63.8) |
 | 59 | (sent in chat, no file) A HOENN town (FALLARBOR?): a house drawn right, the building beside it shown as a plain green field, rocks and signs around it | every building drawn with its own tiles (1.63.9) |
+| 60 | 60.png: KANTO, the VIRIDIAN POKé MART after OAK's PARCEL: "RE put away ????????." | the item's name and the right pocket in the put-away message |
+| 61 | 61.png: the same, next page: "????????. Pocket: ITEMS." | (as 60) |
+| 62 | (sent in chat, no file) JOHTO's CHERRYGROVE on a new game: a TEAM ROCKET grunt and a GROWLITHE on the road by the POKéMON CENTER, nothing to say | Quetzal's Giovanni-story Rockets only in the past (1.63.11) |

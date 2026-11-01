@@ -85,13 +85,25 @@ void MP_BigSprite_NoteScale(struct Sprite *sprite, u16 first, u16 end)
         memset(sPendingScale, 0, sizeof(sPendingScale));
         sPendingAnyScale = TRUE;
     }
-    for (i = first; i < end && i < OAM_ENTRY_COUNT; i++)
+    if (sprite->mpBig && sprite->mpBig->footed)
     {
-        EntryRect(i, &a, &b, &c, &d);
-        if (a < x0) x0 = a;
-        if (b < y0) y0 = b;
-        if (c > x1) x1 = c;
-        if (d > y1) y1 = d;
+        // (1.63.11) toward its own point, the same in every frame: a walk's legs or a hop no longer move what it
+        // shrinks toward; a reflection toward the line it mirrors at
+        s32 gx = sprite->x + sprite->x2 + (sprite->coordOffsetEnabled ? gSpriteCoordOffsetX : 0) + sprite->mpBig->shift;
+        s32 gy = sprite->y + sprite->y2 + (sprite->coordOffsetEnabled ? gSpriteCoordOffsetY : 0);
+        x0 = x1 = gx;
+        y1 = MP_IsReflectionSprite(sprite) ? gy + sprite->mpBig->lift : gy + sprite->mpBig->footY;
+    }
+    else
+    {
+        for (i = first; i < end && i < OAM_ENTRY_COUNT; i++)
+        {
+            EntryRect(i, &a, &b, &c, &d);
+            if (a < x0) x0 = a;
+            if (b < y0) y0 = b;
+            if (c > x1) x1 = c;
+            if (d > y1) y1 = d;
+        }
     }
     for (i = first; i < end && i < OAM_ENTRY_COUNT; i++)
     {
@@ -139,7 +151,7 @@ bool8 MP_BigSprite_AddOam(struct Sprite *sprite, u16 *oamIndex)
         return FALSE;
     e->hflip = !(sprite->oam.affineMode & 1) && ((sprite->oam.matrixNum >> 3) & 1);
     e->vflip = !(sprite->oam.affineMode & 1) && ((sprite->oam.matrixNum >> 4) & 1);
-    gx = sprite->x + sprite->x2 + (sprite->coordOffsetEnabled ? gSpriteCoordOffsetX : 0);
+    gx = sprite->x + sprite->x2 + (sprite->coordOffsetEnabled ? gSpriteCoordOffsetX : 0) + big->shift;
     gy = sprite->y + sprite->y2 + (sprite->coordOffsetEnabled ? gSpriteCoordOffsetY : 0) + big->lift;
     e->left = e->hflip ? gx - dx - e->w : gx + dx;   // flips mirror the picture around the sprite's x / y
     e->top = e->vflip ? gy - dy - e->h : gy + dy;

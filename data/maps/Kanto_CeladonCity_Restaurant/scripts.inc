@@ -21,7 +21,7 @@ Kanto_CeladonCity_Restaurant_EventScript_841D465::
 	additem ITEM_COIN_CASE, 1
 	goto_if_eq VAR_RESULT, 0, Kanto_CeladonCity_Restaurant_EventScript_841D4AE
 	loadword 0, Kanto_CeladonCity_Restaurant_Text_8447B76
-	setorcopyvar VAR_0x8000, 0x2CE
+	setorcopyvar VAR_0x8000, ITEM_COIN_CASE
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

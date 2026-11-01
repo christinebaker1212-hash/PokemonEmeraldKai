@@ -18,7 +18,7 @@ Kanto_SSAnne_CaptainsOffice_EventScript_84106B0::
 	msgbox Kanto_SSAnne_CaptainsOffice_Text_8423C91, MSGBOX_DEFAULT
 	additem ITEM_METAL_COAT, 1
 	loadword 0, Kanto_SSAnne_CaptainsOffice_Text_8423D4F
-	setorcopyvar VAR_0x8000, 0x1B9
+	setorcopyvar VAR_0x8000, ITEM_METAL_COAT
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x212
 	call Quetzal_EventScript_845571E

@@ -21,10 +21,11 @@
 //               LB / RB flip pages, west swaps a ready-made phrase, north edits);
 //               right stick click = the same pick, staying open (A sends).
 //   Text, menus and battles   LT (hold) = repeat A, to get through text fast.
-//               In battles and menus the west button is B and the north
-//               button is SELECT.
-//   Naming screen   west = backspace (B), north = switch letters (SELECT).
-//   PC boxes    west = TAG (several Moemon at once), north = SELECT.
+//               In battles and menus the west button is B.
+//   Naming screen   west = backspace (B).
+//   PC boxes    west = TAG (several Moemon at once).
+//   The north button is never SELECT (1.63.11: it was, off the overworld, so pressing it for the CO-OP menu as a
+//   message closed or a menu opened used the registered item: SELECT is Back / Share / - only).
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <string.h>
@@ -634,12 +635,10 @@ u16 Gamepad_Poll(int *fastForward)
             break;
         case INPUT_CONTEXT_NAMING:
             if (buttons & west)  keys |= B_BUTTON;       // backspace
-            if (buttons & north) keys |= SELECT_BUTTON;  // switch letters
             break;
         case INPUT_CONTEXT_PC_STORAGE:
-            // The PC's boxes: west = TAG (pokemon_storage_system.c), north = SELECT
+            // The PC's boxes: west = TAG (pokemon_storage_system.c)
             if (pressed & west)  Platform_ContextAction(INPUT_ACTION_PC_TAG);
-            if (buttons & north) keys |= SELECT_BUTTON;
             break;
         case INPUT_CONTEXT_QUICKPICK:
             // The emote / phrase pick: west = swap / pin a ready-made phrase, north = edit (mp_menu.c)
@@ -648,7 +647,6 @@ u16 Gamepad_Poll(int *fastForward)
             break;
         default:
             if (buttons & west)  keys |= B_BUTTON;
-            if (buttons & north) keys |= SELECT_BUTTON;
             // The card games: RT is INSPECT, and LT's tapping A stays off (it would play cards on its own)
             if (Tcg_IsActive())
             {

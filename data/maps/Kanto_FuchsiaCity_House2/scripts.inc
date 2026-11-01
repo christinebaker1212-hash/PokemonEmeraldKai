@@ -24,7 +24,7 @@ Kanto_FuchsiaCity_House2_EventScript_841D9E7::
 	additem ITEM_GOOD_ROD, 1
 	goto_if_eq VAR_RESULT, 0, Kanto_FuchsiaCity_House2_EventScript_841DA36
 	loadword 0, Kanto_FuchsiaCity_House2_Text_84491A6
-	setorcopyvar VAR_0x8000, 0x2C6
+	setorcopyvar VAR_0x8000, ITEM_GOOD_ROD
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

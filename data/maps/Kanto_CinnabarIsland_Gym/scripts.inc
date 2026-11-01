@@ -80,7 +80,7 @@ Kanto_CinnabarIsland_Gym_EventScript_841DC4C::
 	bufferitemname 0, ITEM_LIFE_ORB
 	additem ITEM_LIFE_ORB, 1
 	loadword 0, Kanto_CinnabarIsland_Gym_Text_844964A
-	setorcopyvar VAR_0x8000, 0x1DF
+	setorcopyvar VAR_0x8000, ITEM_LIFE_ORB
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

@@ -30,7 +30,7 @@ Kanto_ViridianCity_Mart_EventScript_841A206::
 	setvar VAR_QZ_0x513B, 1
 	additem ITEM_PARCEL, 1
 	loadword 0, Kanto_ViridianCity_Mart_Text_84405E5
-	setorcopyvar VAR_0x8000, 0x2EA
+	setorcopyvar VAR_0x8000, ITEM_PARCEL
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x212
 	call Quetzal_EventScript_845571E

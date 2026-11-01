@@ -37,7 +37,7 @@ Kanto_CeladonCity_Gym_EventScript_841D327::
 	bufferitemname 0, ITEM_BIG_ROOT
 	additem ITEM_BIG_ROOT, 1
 	loadword 0, Kanto_CeladonCity_Gym_Text_844754C
-	setorcopyvar VAR_0x8000, 0x1EB
+	setorcopyvar VAR_0x8000, ITEM_BIG_ROOT
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

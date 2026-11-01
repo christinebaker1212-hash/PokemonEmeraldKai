@@ -238,7 +238,7 @@ Kanto_TwoIsland_JoyfulGameCorner_EventScript_84214C1::
 	additem ITEM_MOON_STONE, 1
 	setflag FLAG_QZ_0x2157
 	loadword 0, Kanto_TwoIsland_JoyfulGameCorner_Text_8453057
-	setorcopyvar VAR_0x8000, 0xD9
+	setorcopyvar VAR_0x8000, ITEM_MOON_STONE
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

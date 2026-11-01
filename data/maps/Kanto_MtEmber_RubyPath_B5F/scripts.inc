@@ -41,7 +41,7 @@ Kanto_MtEmber_RubyPath_B5F_EventScript_84139D4::
 	removeobject 1
 	additem ITEM_RUBY, 1
 	loadword 0, Kanto_MtEmber_RubyPath_B5F_Text_842B4CE
-	setorcopyvar VAR_0x8000, 0x2F4
+	setorcopyvar VAR_0x8000, ITEM_RUBY
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x212
 	call Quetzal_EventScript_845571E

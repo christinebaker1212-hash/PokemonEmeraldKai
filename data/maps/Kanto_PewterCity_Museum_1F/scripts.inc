@@ -133,7 +133,7 @@ Kanto_PewterCity_Museum_1F_EventScript_841A4B1::
 	removeobject 4
 	additem ITEM_OLD_AMBER, 1
 	loadword 0, Kanto_PewterCity_Museum_1F_Text_8440BC2
-	setorcopyvar VAR_0x8000, 0xA7
+	setorcopyvar VAR_0x8000, ITEM_OLD_AMBER
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x212
 	call Quetzal_EventScript_845571E

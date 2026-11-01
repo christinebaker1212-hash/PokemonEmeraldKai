@@ -1,0 +1,16 @@
+pressuntil A field 5000
+mp follow 0
+wait 90
+press RIGHT 64
+mp pmd
+shotburst r 48 4
+press RIGHT 64
+mp pmd
+wait 30
+press LEFT 64
+press LEFT 16
+shotburst l 48 4
+press LEFT 64
+mp pmd
+wait 30
+quit

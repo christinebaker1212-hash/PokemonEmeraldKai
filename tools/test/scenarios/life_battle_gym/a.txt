@@ -1,6 +1,7 @@
 pressuntil A field 5000
 wait 60
 mp life temper 0 1 200
+mp teach 0 61
 press UP 2
 wait 30
 pressuntillog A 15000 life battle: line shown

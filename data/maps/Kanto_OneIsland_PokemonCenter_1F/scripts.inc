@@ -103,7 +103,7 @@ Kanto_OneIsland_PokemonCenter_1F_EventScript_8420BFE::
 	msgbox Kanto_OneIsland_PokemonCenter_1F_Text_84516AF, MSGBOX_DEFAULT
 	additem ITEM_TRI_PASS, 1
 	loadword 0, Kanto_OneIsland_PokemonCenter_1F_Text_84528B7
-	setorcopyvar VAR_0x8000, 0x2F1
+	setorcopyvar VAR_0x8000, ITEM_TRI_PASS
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x212
 	call Quetzal_EventScript_845571E

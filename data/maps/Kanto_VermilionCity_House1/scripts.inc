@@ -24,7 +24,7 @@ Kanto_VermilionCity_House1_EventScript_841B3AD::
 	goto_if_eq VAR_RESULT, 0, Kanto_VermilionCity_House1_EventScript_841B3FC
 	msgbox Kanto_VermilionCity_House1_Text_8444096, MSGBOX_DEFAULT
 	loadword 0, Kanto_VermilionCity_House1_Text_84440ED
-	setorcopyvar VAR_0x8000, 0x2C5
+	setorcopyvar VAR_0x8000, ITEM_OLD_ROD
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

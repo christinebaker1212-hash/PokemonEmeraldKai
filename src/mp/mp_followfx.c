@@ -480,6 +480,7 @@ static void SpriteCB_Reflection(struct Sprite *r)
     r->x2 = fs->x2;
     r->y2 = -fs->y2;
     r->coordOffsetEnabled = fs->coordOffsetEnabled;
+    r->mpScale = fs->mpScale;   // (1.63.11: the reflection of a scaled POKeMON was its full size)
 }
 
 #undef sReflStill

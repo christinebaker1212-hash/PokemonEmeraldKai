@@ -300,12 +300,14 @@ class Ids:
         return sub
 
     def fix(self, text, where):
-        # given / found items written as Quetzal numbers
+        # given / found items written as Quetzal numbers (also the key-item fanfare script 845571E: 1.63.11's
+        # OAK's PARCEL showed as ????????)
         def raw(m):
             n = int(m.group(2), 0)
             c = self.item_by_id.get(n)
             return m.group(1) + (self.item(c, where) if c else m.group(2))
-        text = re.sub(r'(setorcopyvar VAR_0x8000, )(0x[0-9A-Fa-f]+|\d+)(?=\n\tsetorcopyvar VAR_0x8001, \w+\n\tcallstd STD_(?:OBTAIN|FIND)_ITEM)',
+        text = re.sub(r'(setorcopyvar VAR_0x8000, )(0x[0-9A-Fa-f]+|\d+)(?=\n\tsetorcopyvar VAR_0x8001, \w+\n\t(?:callstd STD_(?:OBTAIN|FIND)_ITEM|'
+                      r'setorcopyvar VAR_0x8002, \w+\n\tcall Quetzal_EventScript_845571E))',
                       raw, text)
         # species written as Quetzal numbers (national order) for the specials that read VAR_0x8004 as a species
         def raw_species(m):

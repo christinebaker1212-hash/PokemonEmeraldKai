@@ -42,7 +42,8 @@ run_one() {
     elif [ "$MODE" = 2 ]; then
         "$TOOLS/run2.sh" "$d" "${DELAY:-0}" "${JIT:-0}" > "$d/run.txt" 2>&1
     else
-        [ -n "$WARP" ] && export MOEMON_DEBUG_WARP=$WARP
+        # (1.63.11: unset when the scenario has none: a warp left by the scenario before started it elsewhere)
+        if [ -n "$WARP" ]; then export MOEMON_DEBUG_WARP=$WARP; else unset MOEMON_DEBUG_WARP; fi
         "$TOOLS/run1.sh" "$d" $ENV_A > "$d/run.txt" 2>&1; mv "$d/log.txt" "$d/a.log"
     fi
     for e in "${EXPECT_A[@]}"; do grep -qF -- "$e" "$d/a.log" || bad="$bad\n    a.log lacks: $e"; done

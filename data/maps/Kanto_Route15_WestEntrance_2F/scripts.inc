@@ -37,7 +37,7 @@ Kanto_Route15_WestEntrance_2F_EventScript_842011D::
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_8457F8A
 	additem ITEM_LUCKY_EGG, 1
 	loadword 0, Kanto_Route15_WestEntrance_2F_Text_844FB97
-	setorcopyvar VAR_0x8000, 0x1D6
+	setorcopyvar VAR_0x8000, ITEM_LUCKY_EGG
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

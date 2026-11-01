@@ -19,7 +19,7 @@ Kanto_Route2_EastBuilding_EventScript_841F5F6::
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_8457F8A
 	additem ITEM_NUGGET, 1
 	loadword 0, Kanto_Route2_EastBuilding_Text_844DC63
-	setorcopyvar VAR_0x8000, 0xE1
+	setorcopyvar VAR_0x8000, ITEM_NUGGET
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

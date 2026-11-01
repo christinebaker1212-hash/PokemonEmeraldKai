@@ -100,7 +100,7 @@ Kanto_Route25_SeaCottage_EventScript_8420779::
 	additem ITEM_SS_TICKET, 1
 	goto_if_eq VAR_RESULT, 0, Kanto_Route25_SeaCottage_EventScript_84207FB
 	loadword 0, Kanto_Route25_SeaCottage_Text_845073E
-	setorcopyvar VAR_0x8000, 0x2D7
+	setorcopyvar VAR_0x8000, ITEM_SS_TICKET
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x212
 	call Quetzal_EventScript_845571E

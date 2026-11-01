@@ -34,7 +34,7 @@ Kanto_FuchsiaCity_Gym_EventScript_841D744::
 	bufferitemname 0, ITEM_BLACK_SLUDGE
 	additem ITEM_BLACK_SLUDGE, 1
 	loadword 0, Kanto_FuchsiaCity_Gym_Text_844851F
-	setorcopyvar VAR_0x8000, 0x1E7
+	setorcopyvar VAR_0x8000, ITEM_BLACK_SLUDGE
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E

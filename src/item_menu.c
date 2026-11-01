@@ -1543,6 +1543,11 @@ static const u8 *const sViewNames[BAG_VIEWS] = {
     [MP_BAGVIEW_KEY] = sText_ViewKey, [MP_BAGVIEW_FAVORITES] = sText_ViewFavorites,
 };
 
+const u8 *MP_Bag_ViewName(u8 view)
+{
+    return sViewNames[view % BAG_VIEWS];
+}
+
 // The pocket's name, centered on the plate (its white inside is x 5-95)
 static void PrintViewName(void)
 {
