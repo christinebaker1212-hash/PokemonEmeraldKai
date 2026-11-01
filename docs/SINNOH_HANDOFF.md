@@ -1,4 +1,4 @@
-# HANDOFF: Sinnoh (Pokémon Platinum) region for Moemon Emerald Kai Co-op
+# HANDOFF: Sinnoh (Pokémon Platinum) region for Moemon Emerald Kai Co-op (released in 1.63.0)
 
 Queued after the 1.61.6 release and the KANTO / JOHTO sweep (the user's plan, 2026-10-31).
 
@@ -9,8 +9,16 @@ Queued after the 1.61.6 release and the KANTO / JOHTO sweep (the user's plan, 20
   (tools/sinnoh/story_people.py: 256 hide flags), the DISTORTION WORLD (a scene in GIRATINA's arena: CYRUS, GIRATINA,
   CYNTHIA), fossils at the MINING MUSEUM, and the BATTLE FRONTIER's five facilities (TOWER, FACTORY through the game's
   own halls, HALL, CASTLE, ARCADE). Left out on purpose: the Underground, Super Contests, Wi-Fi, the VILLA, the Frontier
-  Brains' and the HALL MATRON's teams, the DISTORTION WORLD's walking on walls. What's next is the release: merge
-  sinnoh-work into the main branch, the Windows build, a version and its notes (the user's call).
+  Brains' and the HALL MATRON's teams, the DISTORTION WORLD's walking on walls.
+- RELEASED as 1.63.0 "Welcome to SINNOH!" (2026-11-01): sinnoh-work merged into the main branch (local `live`, pushed to
+  the default branch claude/clever-clarke-hqati2); protocol 69, so friends online need 1.63.0. The release workflow
+  builds SINNOH's packs itself (tools/sinnoh/make_pack.sh: fetch_decomp.sh PARTS 6 + build_pack.py + build_gfx.py) and
+  ships them in sinnoh/. From here on SINNOH work goes on the main branch like any other feature.
+- Ideas if the user wants more: Platinum's Frontier Brains (their teams would have to be made, Platinum's data isn't
+  fetched), multi battles with the BATTLE SALON's partners in the TOWER, the DISTORTION WORLD's floors walked on
+  walls (overlay009's 14,000 lines), the Underground, Super Contests. Tests to keep green: everything `sinnoh_*`
+  (89 with the region, HM, POKéTCH, TOWER and SIM ones: `NOBUILD=1 JOBS=6 tools/test/regress.sh $(ls
+  tools/test/scenarios | grep -E "^sinnoh_|^poketch|^honey|^region_|^hm_|^tower|^sim_")`).
 - Proof of concept done (2026-10-31, branch sinnoh-work pushed to claude/exciting-sagan-17lq9j): TWINLEAF TOWN and
   ROUTE 201 drawn by the new 3D engine from the user's ROM, walked with Platinum's collision, the player and every field
   sprite standing in the scene (hidden by trees and roofs in front of them), lit by the area's lights for the hour.

@@ -3255,7 +3255,15 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   bike.c IsRunningDisallowed ignores the map flag on outdoor maps (IsMapTypeOutdoors: town, city, route, ocean route)
   outside HOENN, so re-imported maps need no edit. Indoor maps keep no running (the user's rule), caves keep their
   flag, HOENN keeps Emerald's; metatiles that forbid running still do.
-## SINNOH's 3D engine (proof of concept)
+## SINNOH (released in 1.63.0)
+The region from start to HALL OF FAME and its postgame; everything below in this section and the next. Where to start
+for a change: maps and people tools/sinnoh/gen_maps.py, words tools/sinnoh/words*.py + gen_words.py, story people
+story_people.py, trainers gen_trainers.py, legendaries and story battles legends.py, gyms gen_gyms.py + s3d_gyms.c,
+places of the game's own data/scripts/sinnoh_places.inc, the frontier s3d_hall.c / s3d_frontier.c, the engine s3d.c.
+Every generator is re-run from the repository with the decomp's folder: `python3 -I tools/sinnoh/<gen>.py
+POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
+
+## SINNOH's 3D engine
 - Plan and rules: docs/SINNOH_HANDOFF.md. The data comes from pret/pokeplatinum (source.py: its map blocks, matrices,
   areas, props, texture sets and lights as files; fetch_decomp.sh gets them at a pinned commit, make_pack.sh fetches and
   converts). A Platinum ROM gives the same files byte for byte (nds.py: the cartridge's file system and NARCs;

@@ -3,7 +3,7 @@
 Native PC build of Moemon Emerald Kai v1.0 with online 4-player co-op and PvP.
 Based on Kurausukun's `pc_port` branch of pret/pokeemerald (commit 1165825), SDL2.
 
-SINNOH (Pokémon Platinum as a third region in a new 3D engine, the PÓKETCH): playable start to finish, `docs/SINNOH_HANDOFF.md`;
+SINNOH (Pokémon Platinum as a fourth region in a new 3D engine, the POKéTCH): released in 1.63.0, `docs/SINNOH_HANDOFF.md`;
 everything per feature in COOP_NOTES (its SINNOH sections: story people tools/sinnoh/story_people.py, the gyms that move
 src/sinnoh/s3d_gyms.c, the DISTORTION WORLD scene, the BATTLE FRONTIER's five: TOWER, FACTORY (the game's own halls,
 shared maps), HALL s3d_hall.c, CASTLE / ARCADE s3d_frontier.c). Left out: the Underground, Super Contests, Wi-Fi, the
@@ -38,7 +38,10 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
   Every release's notes file starts with `Moemon Emerald Kai Co-op <ver> "<Catchy Title!>": <one-line note>`: that line and the rest
   are the game's PATCH NOTES (CO-OP setup screen only; gen_patchnotes.py at build time; v0.1-v0.4 = the days before 1.0).
   Notes are for players: say what changed in the game, never where it came from (no "the design you sent", mock-ups,
-  tests, file names).
+  tests, file names). The notes can only use letters the game's font has (é yes, Ó no: 1.63.0's first build failed on
+  "PÓKETCH"; the game spells it POKéTCH): before pushing, run `python3 tools/release/gen_patchnotes.py
+  src/data/mp_patchnotes.h tools/release/notes/*.md`. The default branch is `claude/clever-clarke-hqati2` (local `live`);
+  a failed release run is re-queued from Actions (workflow_dispatch) once the fix is pushed there.
 - Dev updates (planned, HANDOFF.md): unless the user asks for a feature with "As a dev update..." or something like it,
   it is a main update: don't test it as a dev update and don't push a dev update.
 - `tools/moemon_import/`: scripts that imported the Kai IPS into the decomp (need the user's ROM; not in the repo)
