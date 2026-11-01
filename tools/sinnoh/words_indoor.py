@@ -497,6 +497,7 @@ INDOOR = {
         'Person4': "I collect the store's shopping bags. They change the design every season!",
     },
     'Sinnoh_VeilstoneCityPrizeExchange': {
+        'Person1': ('script', 'Sinnoh_EventScript_PrizeExchange'),   # (data/scripts/sinnoh_places.inc)
         'Person2': "I won a prize once. It was a POTION. I'm still proud of it.",
         'Person3': "In my day, prizes were fancier. But I still come to look.",
     },

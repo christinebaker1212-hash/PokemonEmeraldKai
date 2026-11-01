@@ -139,3 +139,77 @@ Sinnoh_Text_GameCornerClerk:
 	.string "The slots are hot today!$"
 Sinnoh_Text_GameCornerCoins:
 	.string "Can I get you some COINS?$"
+
+@ VEILSTONE's PRIZE EXCHANGE: COINS for Platinum's prizes (src/sinnoh/s3d_places.c Sinnoh_PrizeMenu)
+Sinnoh_EventScript_PrizeExchange::
+	lock
+	faceplayer
+	msgbox Sinnoh_Text_PrizeWelcome, MSGBOX_DEFAULT
+	checkitem ITEM_COIN_CASE
+	goto_if_eq VAR_RESULT, FALSE, Sinnoh_EventScript_PrizeNoCase
+	showcoinsbox 20, 1
+Sinnoh_EventScript_PrizePick::
+	message Sinnoh_Text_PrizeWhich
+	waitmessage
+	special Sinnoh_PrizeMenu
+	waitstate
+	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, Sinnoh_EventScript_PrizeBye
+	msgbox Sinnoh_Text_PrizeConfirm, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Sinnoh_EventScript_PrizePick
+	checkcoins VAR_TEMP_2
+	goto_if_lt VAR_TEMP_2, VAR_0x8006, Sinnoh_EventScript_PrizeNoCoins
+	checkitemspace VAR_0x8005
+	goto_if_eq VAR_RESULT, FALSE, Sinnoh_EventScript_PrizeNoRoom
+	removecoins VAR_0x8006
+	additem VAR_0x8005
+	updatecoinsbox 20, 1
+	playse SE_SHOP
+	msgbox Sinnoh_Text_PrizeHere, MSGBOX_DEFAULT
+	goto Sinnoh_EventScript_PrizePick
+
+Sinnoh_EventScript_PrizeNoCoins::
+	msgbox Sinnoh_Text_PrizeNoCoins, MSGBOX_DEFAULT
+	goto Sinnoh_EventScript_PrizePick
+
+Sinnoh_EventScript_PrizeNoRoom::
+	msgbox Sinnoh_Text_PrizeNoRoom, MSGBOX_DEFAULT
+	goto Sinnoh_EventScript_PrizePick
+
+Sinnoh_EventScript_PrizeBye::
+	hidecoinsbox 20, 1
+	msgbox Sinnoh_Text_PrizeBye, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_EventScript_PrizeNoCase::
+	msgbox Sinnoh_Text_PrizeNoCase, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_Text_PrizeWelcome:
+	.string "Welcome to the PRIZE EXCHANGE!\n"
+	.string "Trade your COINS for fine prizes.$"
+
+Sinnoh_Text_PrizeWhich:
+	.string "Which prize would you like?$"
+
+Sinnoh_Text_PrizeConfirm:
+	.string "{STR_VAR_1} for {STR_VAR_2} COINS.\n"
+	.string "Is that right?$"
+
+Sinnoh_Text_PrizeHere:
+	.string "Here you are! Enjoy it!$"
+
+Sinnoh_Text_PrizeNoCoins:
+	.string "Oh dear. You don't have enough\n"
+	.string "COINS for that one.$"
+
+Sinnoh_Text_PrizeNoRoom:
+	.string "Your BAG has no room for it.$"
+
+Sinnoh_Text_PrizeBye:
+	.string "Come again with more COINS!$"
+
+Sinnoh_Text_PrizeNoCase:
+	.string "You'll need a COIN CASE to hold\n"
+	.string "COINS before you can trade them.$"

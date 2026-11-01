@@ -3598,7 +3598,9 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   player who has one. Test sinnoh_gift.
 - VEILSTONE's GAME CORNER (data/scripts/sinnoh_places.inc): its 12 machines (Platinum's bg events 1-12) play Emerald's
   slots (GetSlotMachineId, playslotmachine) and its counter sells COINS through MAUVILLE's script; the COIN CASE from
-  VEILSTONE's southeast house (a gift). Test sinnoh_slots.
+  VEILSTONE's southeast house (a gift). The PRIZE EXCHANGE trades COINS for Platinum's 19 prizes at half its prices
+  (the COIN CASE holds 9999: TM68 at that) in a scrolling list (src/sinnoh/s3d_places.c Sinnoh_PrizeMenu, the
+  dynamic scroll multichoice). Tests sinnoh_slots, sinnoh_prizes.
 - The POKé RADAR (2026-11-01, src/mp/mp_pokeradar.c; ITEM_POKE_RADAR 661, ITEMS_COUNT 662, the DEVON SCOPE's icon):
   SANDGEM LAB's aide gives it after the LEAGUE (flag 0x3D33). It works in any region's tall grass, not on a bike or in
   the water, with a 50-step battery: up to four patches, one at each distance 1-4, rustle (Emerald's tall grass field

@@ -3,7 +3,7 @@ Sinnoh_VeilstoneCityPrizeExchange_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_VeilstoneCityPrizeExchange_EventScript_Person1::
-	msgbox Sinnoh_VeilstoneCityPrizeExchange_Text_Person1, MSGBOX_NPC
+	goto Sinnoh_EventScript_PrizeExchange
 	end
 
 Sinnoh_VeilstoneCityPrizeExchange_EventScript_Person2::
@@ -13,9 +13,6 @@ Sinnoh_VeilstoneCityPrizeExchange_EventScript_Person2::
 Sinnoh_VeilstoneCityPrizeExchange_EventScript_Person3::
 	msgbox Sinnoh_VeilstoneCityPrizeExchange_Text_Person3, MSGBOX_NPC
 	end
-
-Sinnoh_VeilstoneCityPrizeExchange_Text_Person1:
-	.string "Welcome! Please enjoy your visit.$"
 
 Sinnoh_VeilstoneCityPrizeExchange_Text_Person2:
 	.string "I won a prize once. It was a POTION.\n"

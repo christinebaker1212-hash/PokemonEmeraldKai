@@ -1,0 +1,8 @@
+# VEILSTONE's PRIZE EXCHANGE (data/scripts/sinnoh_places.inc, src/sinnoh/s3d_places.c): with 600 COINS the first
+# prize (SILK SCARF, 500 COINS) is bought: 100 COINS left and the scarf (item 217) in the bag. Shot t_prizes.png.
+# Needs the 3D pack.
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("coins 100" "bag 1 usable")
+UNEXPECT_A=("[crash]" "TIMEOUT")

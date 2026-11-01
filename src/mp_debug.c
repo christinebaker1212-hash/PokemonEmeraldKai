@@ -894,9 +894,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "coins") == 0)
     {
+        // coins N - set the COINS; coins - print them
         int n = 0;
-        sscanf(arg, "%d", &n);
-        SetCoins(n);
+        if (sscanf(arg, "%d", &n) == 1)
+            SetCoins(n);
+        else
+            printf("[test] coins %d\n", GetCoins());
     }
     else if (strcmp(cmd, "cuttree") == 0 || strcmp(cmd, "smashrock") == 0)
     {

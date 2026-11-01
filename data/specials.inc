@@ -626,4 +626,5 @@ gSpecials::
 	def_special Sinnoh_SpiritombTower
 	def_special Sinnoh_SpiritombPlace
 	def_special Sinnoh_SpiritombAfter
+	def_special Sinnoh_PrizeMenu
 	.include "data/qz_specials.inc"   @ Moemon Kai: Quetzal's specials (Johto / Kanto)

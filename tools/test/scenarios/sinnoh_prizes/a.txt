@@ -1,0 +1,16 @@
+pressuntil A field 5000
+wait 30
+mp register 260
+mp coins 600
+mp warp 44,51,4,5
+wait 60
+waitfor field 1000
+mp face up
+press A 1
+mash A 6 40
+shot t_prizes
+mash A 10 40
+pressuntil B field 3000
+mp coins
+mp gencheck 217
+quit
