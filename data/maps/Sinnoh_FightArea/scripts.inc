@@ -1,5 +1,10 @@
 Sinnoh_FightArea_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, Sinnoh_FightArea_OnTransition
 	.byte 0
+
+Sinnoh_FightArea_OnTransition:
+	special Sinnoh_LegendsRefresh
+	end
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_FightArea_EventScript_Person6::

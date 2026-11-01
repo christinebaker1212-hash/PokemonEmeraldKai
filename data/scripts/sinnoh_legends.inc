@@ -359,3 +359,525 @@ Sinnoh_EventScript_LegendPalkia_Ran:
 	goto Common_EventScript_LegendaryFlewAway
 	end
 
+Sinnoh_EventScript_Story0::
+	lock
+	faceplayer
+	specialvar VAR_RESULT, Sinnoh_RivalVersion
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_Story0_V0_0
+	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_Story0_V0_1
+	goto_if_eq VAR_RESULT, 2, Sinnoh_EventScript_Story0_V0_2
+Sinnoh_EventScript_Story0_V0_0:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_ROUTE_201_CHIMCHAR, Sinnoh_EventScript_Story0_Intro, Sinnoh_EventScript_Story0_Defeat, Sinnoh_EventScript_Story0_Won
+	end
+Sinnoh_EventScript_Story0_V0_1:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_ROUTE_201_PIPLUP, Sinnoh_EventScript_Story0_Intro, Sinnoh_EventScript_Story0_Defeat, Sinnoh_EventScript_Story0_Won
+	end
+Sinnoh_EventScript_Story0_V0_2:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_ROUTE_201_TURTWIG, Sinnoh_EventScript_Story0_Intro, Sinnoh_EventScript_Story0_Defeat, Sinnoh_EventScript_Story0_Won
+	end
+Sinnoh_EventScript_Story0_Won::
+	msgbox Sinnoh_EventScript_Story0_After, MSGBOX_DEFAULT
+	closemessage
+	setflag 0x3D10
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	release
+	end
+
+Sinnoh_EventScript_Story0_Intro:
+	.string "BARRY: There you are! A new TRAINER\n"
+	.string "in SINNOH? Let's see what you've got!$"
+
+Sinnoh_EventScript_Story0_Defeat:
+	.string "Whoa! You're really good!$"
+
+Sinnoh_EventScript_Story0_After:
+	.string "I'm gonna get stronger! Just you wait!$"
+
+Sinnoh_EventScript_Story1::
+	lock
+	faceplayer
+	specialvar VAR_RESULT, Sinnoh_RivalVersion
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_Story1_V0_0
+	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_Story1_V0_1
+	goto_if_eq VAR_RESULT, 2, Sinnoh_EventScript_Story1_V0_2
+Sinnoh_EventScript_Story1_V0_0:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_ROUTE_203_CHIMCHAR, Sinnoh_EventScript_Story1_Intro, Sinnoh_EventScript_Story1_Defeat, Sinnoh_EventScript_Story1_Won
+	end
+Sinnoh_EventScript_Story1_V0_1:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_ROUTE_203_PIPLUP, Sinnoh_EventScript_Story1_Intro, Sinnoh_EventScript_Story1_Defeat, Sinnoh_EventScript_Story1_Won
+	end
+Sinnoh_EventScript_Story1_V0_2:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_ROUTE_203_TURTWIG, Sinnoh_EventScript_Story1_Intro, Sinnoh_EventScript_Story1_Defeat, Sinnoh_EventScript_Story1_Won
+	end
+Sinnoh_EventScript_Story1_Won::
+	msgbox Sinnoh_EventScript_Story1_After, MSGBOX_DEFAULT
+	closemessage
+	setflag 0x3D11
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	release
+	end
+
+Sinnoh_EventScript_Story1_Intro:
+	.string "BARRY: Hey! I've been training! Round\n"
+	.string "two, right now!$"
+
+Sinnoh_EventScript_Story1_Defeat:
+	.string "Again?! How?!$"
+
+Sinnoh_EventScript_Story1_After:
+	.string "OREBURGH's GYM is next. Race you!$"
+
+Sinnoh_EventScript_Story2::
+	lock
+	faceplayer
+	trainerbattle_single TRAINER_SINNOH_COMMANDER_MARS_VALLEY_WINDWORKS, Sinnoh_EventScript_Story2_Intro, Sinnoh_EventScript_Story2_Defeat, Sinnoh_EventScript_Story2_Won
+	end
+Sinnoh_EventScript_Story2_Won::
+	msgbox Sinnoh_EventScript_Story2_After, MSGBOX_DEFAULT
+	closemessage
+	setflag 0x3D12
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	release
+	end
+
+Sinnoh_EventScript_Story2_Intro:
+	.string "MARS: TEAM GALACTIC needs this power\n"
+	.string "plant's energy. Move aside, kid!$"
+
+Sinnoh_EventScript_Story2_Defeat:
+	.string "Ugh! You're tougher than you look.$"
+
+Sinnoh_EventScript_Story2_After:
+	.string "This isn't over. TEAM GALACTIC never\n"
+	.string "gives up!$"
+
+Sinnoh_EventScript_Story3::
+	lock
+	faceplayer
+	trainerbattle_single TRAINER_SINNOH_COMMANDER_JUPITER_TEAM_GALACTIC_ETERNA_BUILDING, Sinnoh_EventScript_Story3_Intro, Sinnoh_EventScript_Story3_Defeat, Sinnoh_EventScript_Story3_Won
+	end
+Sinnoh_EventScript_Story3_Won::
+	msgbox Sinnoh_EventScript_Story3_After, MSGBOX_DEFAULT
+	closemessage
+	setflag 0x3D13
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	release
+	end
+
+Sinnoh_EventScript_Story3_Intro:
+	.string "JUPITER: Breaking into our building?\n"
+	.string "Bold. I'll teach you some manners.$"
+
+Sinnoh_EventScript_Story3_Defeat:
+	.string "Hmph. Not bad at all.$"
+
+Sinnoh_EventScript_Story3_After:
+	.string "Keep meddling and you'll meet our boss.$"
+
+Sinnoh_EventScript_Story4::
+	lock
+	faceplayer
+	specialvar VAR_RESULT, Sinnoh_RivalVersion
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_Story4_V0_0
+	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_Story4_V0_1
+	goto_if_eq VAR_RESULT, 2, Sinnoh_EventScript_Story4_V0_2
+Sinnoh_EventScript_Story4_V0_0:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_ROUTE_209_CHIMCHAR, Sinnoh_EventScript_Story4_Intro, Sinnoh_EventScript_Story4_Defeat, Sinnoh_EventScript_Story4_Won
+	end
+Sinnoh_EventScript_Story4_V0_1:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_ROUTE_209_PIPLUP, Sinnoh_EventScript_Story4_Intro, Sinnoh_EventScript_Story4_Defeat, Sinnoh_EventScript_Story4_Won
+	end
+Sinnoh_EventScript_Story4_V0_2:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_ROUTE_209_TURTWIG, Sinnoh_EventScript_Story4_Intro, Sinnoh_EventScript_Story4_Defeat, Sinnoh_EventScript_Story4_Won
+	end
+Sinnoh_EventScript_Story4_Won::
+	msgbox Sinnoh_EventScript_Story4_After, MSGBOX_DEFAULT
+	closemessage
+	setflag 0x3D14
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	release
+	end
+
+Sinnoh_EventScript_Story4_Intro:
+	.string "BARRY: Two BADGES already? Me too!\n"
+	.string "Let's battle, here and now!$"
+
+Sinnoh_EventScript_Story4_Defeat:
+	.string "No way! Not again!$"
+
+Sinnoh_EventScript_Story4_After:
+	.string "HEARTHOME's GYM is tough. Good luck!$"
+
+Sinnoh_EventScript_Story5::
+	lock
+	faceplayer
+	specialvar VAR_RESULT, Sinnoh_RivalVersion
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_Story5_V0_0
+	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_Story5_V0_1
+	goto_if_eq VAR_RESULT, 2, Sinnoh_EventScript_Story5_V0_2
+Sinnoh_EventScript_Story5_V0_0:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_PASTORIA_CITY_CHIMCHAR, Sinnoh_EventScript_Story5_Intro, Sinnoh_EventScript_Story5_Defeat, Sinnoh_EventScript_Story5_Won
+	end
+Sinnoh_EventScript_Story5_V0_1:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_PASTORIA_CITY_PIPLUP, Sinnoh_EventScript_Story5_Intro, Sinnoh_EventScript_Story5_Defeat, Sinnoh_EventScript_Story5_Won
+	end
+Sinnoh_EventScript_Story5_V0_2:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_PASTORIA_CITY_TURTWIG, Sinnoh_EventScript_Story5_Intro, Sinnoh_EventScript_Story5_Defeat, Sinnoh_EventScript_Story5_Won
+	end
+Sinnoh_EventScript_Story5_Won::
+	msgbox Sinnoh_EventScript_Story5_After, MSGBOX_DEFAULT
+	closemessage
+	setflag 0x3D15
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	release
+	end
+
+Sinnoh_EventScript_Story5_Intro:
+	.string "BARRY: Found you! I'm about to take on\n"
+	.string "WAKE. Warm-up battle!$"
+
+Sinnoh_EventScript_Story5_Defeat:
+	.string "Argh! Fine, fine!$"
+
+Sinnoh_EventScript_Story5_After:
+	.string "WAKE's next! For both of us!$"
+
+Sinnoh_EventScript_Story6::
+	lock
+	faceplayer
+	specialvar VAR_RESULT, Sinnoh_RivalVersion
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_Story6_V0_0
+	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_Story6_V0_1
+	goto_if_eq VAR_RESULT, 2, Sinnoh_EventScript_Story6_V0_2
+Sinnoh_EventScript_Story6_V0_0:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_CANALAVE_CITY_CHIMCHAR, Sinnoh_EventScript_Story6_Intro, Sinnoh_EventScript_Story6_Defeat, Sinnoh_EventScript_Story6_Won
+	end
+Sinnoh_EventScript_Story6_V0_1:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_CANALAVE_CITY_PIPLUP, Sinnoh_EventScript_Story6_Intro, Sinnoh_EventScript_Story6_Defeat, Sinnoh_EventScript_Story6_Won
+	end
+Sinnoh_EventScript_Story6_V0_2:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_CANALAVE_CITY_TURTWIG, Sinnoh_EventScript_Story6_Intro, Sinnoh_EventScript_Story6_Defeat, Sinnoh_EventScript_Story6_Won
+	end
+Sinnoh_EventScript_Story6_Won::
+	msgbox Sinnoh_EventScript_Story6_After, MSGBOX_DEFAULT
+	closemessage
+	setflag 0x3D16
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	release
+	end
+
+Sinnoh_EventScript_Story6_Intro:
+	.string "BARRY: Stop right there! Before BYRON,\n"
+	.string "you face me!$"
+
+Sinnoh_EventScript_Story6_Defeat:
+	.string "You're unbelievable!$"
+
+Sinnoh_EventScript_Story6_After:
+	.string "I'll catch up to you. I swear!$"
+
+Sinnoh_EventScript_Story7::
+	lock
+	faceplayer
+	trainerbattle_single TRAINER_SINNOH_COMMANDER_MARS_LAKE_VERITY, Sinnoh_EventScript_Story7_Intro, Sinnoh_EventScript_Story7_Defeat, Sinnoh_EventScript_Story7_Won
+	end
+Sinnoh_EventScript_Story7_Won::
+	msgbox Sinnoh_EventScript_Story7_After, MSGBOX_DEFAULT
+	closemessage
+	setflag 0x3D17
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	release
+	end
+
+Sinnoh_EventScript_Story7_Intro:
+	.string "MARS: You again! The lake's POKéMON\n"
+	.string "is ours. Out of my way!$"
+
+Sinnoh_EventScript_Story7_Defeat:
+	.string "Not again!$"
+
+Sinnoh_EventScript_Story7_After:
+	.string "MESPRIT's power will be ours anyway!$"
+
+Sinnoh_EventScript_Story8::
+	lock
+	faceplayer
+	trainerbattle_single TRAINER_SINNOH_COMMANDER_SATURN_VALOR_CAVERN, Sinnoh_EventScript_Story8_Intro, Sinnoh_EventScript_Story8_Defeat, Sinnoh_EventScript_Story8_Won
+	end
+Sinnoh_EventScript_Story8_Won::
+	msgbox Sinnoh_EventScript_Story8_After, MSGBOX_DEFAULT
+	closemessage
+	setflag 0x3D18
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	release
+	end
+
+Sinnoh_EventScript_Story8_Intro:
+	.string "SATURN: So you're the TRAINER MARS\n"
+	.string "keeps complaining about.$"
+
+Sinnoh_EventScript_Story8_Defeat:
+	.string "Interesting. Very interesting.$"
+
+Sinnoh_EventScript_Story8_After:
+	.string "Our boss's plan won't wait for you.$"
+
+Sinnoh_EventScript_Story9::
+	lock
+	faceplayer
+	trainerbattle_single TRAINER_SINNOH_COMMANDER_SATURN_GALACTIC_HQ, Sinnoh_EventScript_Story9_Intro, Sinnoh_EventScript_Story9_Defeat, Sinnoh_EventScript_Story9_Won
+	end
+Sinnoh_EventScript_Story9_Won::
+	msgbox Sinnoh_EventScript_Story9_After, MSGBOX_DEFAULT
+	closemessage
+	setflag 0x3D19
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	release
+	end
+
+Sinnoh_EventScript_Story9_Intro:
+	.string "SATURN: You came all the way here?\n"
+	.string "Then let's settle this.$"
+
+Sinnoh_EventScript_Story9_Defeat:
+	.string "I see now why the boss is wary of you.$"
+
+Sinnoh_EventScript_Story9_After:
+	.string "Go on. CYRUS is waiting above.$"
+
+Sinnoh_EventScript_Story10::
+	lock
+	faceplayer
+	trainerbattle_single TRAINER_SINNOH_GALACTIC_BOSS_CYRUS_GALACTIC_HQ, Sinnoh_EventScript_Story10_Intro, Sinnoh_EventScript_Story10_Defeat, Sinnoh_EventScript_Story10_Won
+	end
+Sinnoh_EventScript_Story10_Won::
+	msgbox Sinnoh_EventScript_Story10_After, MSGBOX_DEFAULT
+	closemessage
+	setflag 0x3D1A
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	release
+	end
+
+Sinnoh_EventScript_Story10_Intro:
+	.string "CYRUS: Emotion is a flaw. Let me show\n"
+	.string "you the strength of a cold heart.$"
+
+Sinnoh_EventScript_Story10_Defeat:
+	.string "You fight with your heart... and win.$"
+
+Sinnoh_EventScript_Story10_After:
+	.string "The new world will come all the same.$"
+
+Sinnoh_EventScript_Story11::
+	lock
+	faceplayer
+	trainerbattle_single TRAINER_SINNOH_COMMANDER_MARS_SPEAR_PILLAR, Sinnoh_EventScript_Story11_Intro, Sinnoh_EventScript_Story11_Defeat, Sinnoh_EventScript_Story11_Next1
+	end
+Sinnoh_EventScript_Story11_Next1:
+	trainerbattle_single TRAINER_SINNOH_COMMANDER_JUPITER_SPEAR_PILLAR, Sinnoh_EventScript_Story11_Intro, Sinnoh_EventScript_Story11_Defeat, Sinnoh_EventScript_Story11_Won
+	end
+Sinnoh_EventScript_Story11_Won::
+	msgbox Sinnoh_EventScript_Story11_After, MSGBOX_DEFAULT
+	closemessage
+	setflag 0x3D1B
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	release
+	end
+
+Sinnoh_EventScript_Story11_Intro:
+	.string "MARS: You won't reach the top of\n"
+	.string "SPEAR PILLAR! JUPITER, now!$"
+
+Sinnoh_EventScript_Story11_Defeat:
+	.string "We... lost? Both of us?$"
+
+Sinnoh_EventScript_Story11_After:
+	.string "Go, then. See what CYRUS has done.$"
+
+Sinnoh_EventScript_Story12::
+	lock
+	faceplayer
+	specialvar VAR_RESULT, Sinnoh_RivalVersion
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_Story12_V0_0
+	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_Story12_V0_1
+	goto_if_eq VAR_RESULT, 2, Sinnoh_EventScript_Story12_V0_2
+Sinnoh_EventScript_Story12_V0_0:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_POKEMON_LEAGUE_CHIMCHAR, Sinnoh_EventScript_Story12_Intro, Sinnoh_EventScript_Story12_Defeat, Sinnoh_EventScript_Story12_Won
+	end
+Sinnoh_EventScript_Story12_V0_1:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_POKEMON_LEAGUE_PIPLUP, Sinnoh_EventScript_Story12_Intro, Sinnoh_EventScript_Story12_Defeat, Sinnoh_EventScript_Story12_Won
+	end
+Sinnoh_EventScript_Story12_V0_2:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_POKEMON_LEAGUE_TURTWIG, Sinnoh_EventScript_Story12_Intro, Sinnoh_EventScript_Story12_Defeat, Sinnoh_EventScript_Story12_Won
+	end
+Sinnoh_EventScript_Story12_Won::
+	msgbox Sinnoh_EventScript_Story12_After, MSGBOX_DEFAULT
+	closemessage
+	setflag 0x3D1C
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	release
+	end
+
+Sinnoh_EventScript_Story12_Intro:
+	.string "BARRY: Eight BADGES! Before the LEAGUE,\n"
+	.string "one last battle with me!$"
+
+Sinnoh_EventScript_Story12_Defeat:
+	.string "You're ready. Go be CHAMPION!$"
+
+Sinnoh_EventScript_Story12_After:
+	.string "I'll be cheering for you!$"
+
+Sinnoh_EventScript_Story13::
+	lock
+	faceplayer
+	specialvar VAR_RESULT, Sinnoh_RivalVersion
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_Story13_V0_0
+	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_Story13_V0_1
+	goto_if_eq VAR_RESULT, 2, Sinnoh_EventScript_Story13_V0_2
+Sinnoh_EventScript_Story13_V0_0:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_SURVIVAL_AREA_1_CHIMCHAR, Sinnoh_EventScript_Story13_Intro, Sinnoh_EventScript_Story13_Defeat, Sinnoh_EventScript_Story13_Won
+	end
+Sinnoh_EventScript_Story13_V0_1:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_SURVIVAL_AREA_1_PIPLUP, Sinnoh_EventScript_Story13_Intro, Sinnoh_EventScript_Story13_Defeat, Sinnoh_EventScript_Story13_Won
+	end
+Sinnoh_EventScript_Story13_V0_2:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_SURVIVAL_AREA_1_TURTWIG, Sinnoh_EventScript_Story13_Intro, Sinnoh_EventScript_Story13_Defeat, Sinnoh_EventScript_Story13_Won
+	end
+Sinnoh_EventScript_Story13_Won::
+	msgbox Sinnoh_EventScript_Story13_After, MSGBOX_DEFAULT
+	closemessage
+	setflag 0x3D1D
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	release
+	end
+
+Sinnoh_EventScript_Story13_Intro:
+	.string "BARRY: Hey, CHAMPION! The BATTLE\n"
+	.string "FRONTIER made me tougher. Battle!$"
+
+Sinnoh_EventScript_Story13_Defeat:
+	.string "Still unbeatable...$"
+
+Sinnoh_EventScript_Story13_After:
+	.string "My dad runs the TOWER, you know!$"
+
+Sinnoh_EventScript_Story14::
+	lock
+	faceplayer
+	specialvar VAR_RESULT, Sinnoh_RivalVersion
+	goto_if_eq VAR_RESULT, 0, Sinnoh_EventScript_Story14_V0_0
+	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_Story14_V0_1
+	goto_if_eq VAR_RESULT, 2, Sinnoh_EventScript_Story14_V0_2
+Sinnoh_EventScript_Story14_V0_0:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_FIGHT_AREA_CHIMCHAR, Sinnoh_EventScript_Story14_Intro, Sinnoh_EventScript_Story14_Defeat, Sinnoh_EventScript_Story14_Won
+	end
+Sinnoh_EventScript_Story14_V0_1:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_FIGHT_AREA_PIPLUP, Sinnoh_EventScript_Story14_Intro, Sinnoh_EventScript_Story14_Defeat, Sinnoh_EventScript_Story14_Won
+	end
+Sinnoh_EventScript_Story14_V0_2:
+	trainerbattle_single TRAINER_SINNOH_RIVAL_FIGHT_AREA_TURTWIG, Sinnoh_EventScript_Story14_Intro, Sinnoh_EventScript_Story14_Defeat, Sinnoh_EventScript_Story14_Won
+	end
+Sinnoh_EventScript_Story14_Won::
+	msgbox Sinnoh_EventScript_Story14_After, MSGBOX_DEFAULT
+	closemessage
+	setflag 0x3D1E
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	release
+	end
+
+Sinnoh_EventScript_Story14_Intro:
+	.string "BARRY: Let's team up... after one more\n"
+	.string "battle!$"
+
+Sinnoh_EventScript_Story14_Defeat:
+	.string "Fine! You win again!$"
+
+Sinnoh_EventScript_Story14_After:
+	.string "See you at the FRONTIER!$"
+
+Sinnoh_EventScript_Story15::
+	lock
+	faceplayer
+	trainerbattle_single TRAINER_SINNOH_COMMANDER_MARS_STARK_MOUNTAIN, Sinnoh_EventScript_Story15_Intro, Sinnoh_EventScript_Story15_Defeat, Sinnoh_EventScript_Story15_Next1
+	end
+Sinnoh_EventScript_Story15_Next1:
+	trainerbattle_single TRAINER_SINNOH_COMMANDER_JUPITER_STARK_MOUNTAIN, Sinnoh_EventScript_Story15_Intro, Sinnoh_EventScript_Story15_Defeat, Sinnoh_EventScript_Story15_Won
+	end
+Sinnoh_EventScript_Story15_Won::
+	msgbox Sinnoh_EventScript_Story15_After, MSGBOX_DEFAULT
+	closemessage
+	setflag 0x3D1F
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	release
+	end
+
+Sinnoh_EventScript_Story15_Intro:
+	.string "MARS: CHARON wants HEATRAN's power.\n"
+	.string "JUPITER and I will stop you!$"
+
+Sinnoh_EventScript_Story15_Defeat:
+	.string "Even together...$"
+
+Sinnoh_EventScript_Story15_After:
+	.string "TEAM GALACTIC is finished. Maybe that's\n"
+	.string "for the best.$"
+
+Sinnoh_EventScript_Story16::
+	lock
+	faceplayer
+	trainerbattle_single TRAINER_SINNOH_GALACTIC_BOSS_CYRUS_CELESTIC_TOWN_RUINS, Sinnoh_EventScript_Story16_Intro, Sinnoh_EventScript_Story16_Defeat, Sinnoh_EventScript_Story16_Won
+	end
+Sinnoh_EventScript_Story16_Won::
+	msgbox Sinnoh_EventScript_Story16_After, MSGBOX_DEFAULT
+	closemessage
+	setflag 0x3D20
+	fadescreen FADE_TO_BLACK
+	removeobject VAR_LAST_TALKED
+	fadescreen FADE_FROM_BLACK
+	release
+	end
+
+Sinnoh_EventScript_Story16_Intro:
+	.string "CYRUS: I came back to see this place\n"
+	.string "again. Battle me, CHAMPION.$"
+
+Sinnoh_EventScript_Story16_Defeat:
+	.string "As expected of you.$"
+
+Sinnoh_EventScript_Story16_After:
+	.string "Perhaps a world with spirit isn't\n"
+	.string "so flawed.$"
+

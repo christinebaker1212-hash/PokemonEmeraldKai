@@ -4991,3 +4991,423 @@
         .party = ITEM_CUSTOM_MOVES(sParty_SinnohChampionCynthia),
     },
 
+    [TRAINER_SINNOH_RIVAL_ROUTE_201_CHIMCHAR] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohRivalRoute201Chimchar),
+    },
+
+    [TRAINER_SINNOH_RIVAL_ROUTE_201_PIPLUP] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohRivalRoute201Piplup),
+    },
+
+    [TRAINER_SINNOH_RIVAL_ROUTE_201_TURTWIG] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohRivalRoute201Turtwig),
+    },
+
+    [TRAINER_SINNOH_RIVAL_ROUTE_203_CHIMCHAR] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalRoute203Chimchar),
+    },
+
+    [TRAINER_SINNOH_RIVAL_ROUTE_203_PIPLUP] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalRoute203Piplup),
+    },
+
+    [TRAINER_SINNOH_RIVAL_ROUTE_203_TURTWIG] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalRoute203Turtwig),
+    },
+
+    [TRAINER_SINNOH_RIVAL_ROUTE_209_CHIMCHAR] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalRoute209Chimchar),
+    },
+
+    [TRAINER_SINNOH_RIVAL_ROUTE_209_PIPLUP] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalRoute209Piplup),
+    },
+
+    [TRAINER_SINNOH_RIVAL_ROUTE_209_TURTWIG] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalRoute209Turtwig),
+    },
+
+    [TRAINER_SINNOH_RIVAL_PASTORIA_CITY_CHIMCHAR] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalPastoriaCityChimchar),
+    },
+
+    [TRAINER_SINNOH_RIVAL_PASTORIA_CITY_PIPLUP] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalPastoriaCityPiplup),
+    },
+
+    [TRAINER_SINNOH_RIVAL_PASTORIA_CITY_TURTWIG] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalPastoriaCityTurtwig),
+    },
+
+    [TRAINER_SINNOH_RIVAL_CANALAVE_CITY_CHIMCHAR] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalCanalaveCityChimchar),
+    },
+
+    [TRAINER_SINNOH_RIVAL_CANALAVE_CITY_PIPLUP] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalCanalaveCityPiplup),
+    },
+
+    [TRAINER_SINNOH_RIVAL_CANALAVE_CITY_TURTWIG] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalCanalaveCityTurtwig),
+    },
+
+    [TRAINER_SINNOH_RIVAL_POKEMON_LEAGUE_CHIMCHAR] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalPokemonLeagueChimchar),
+    },
+
+    [TRAINER_SINNOH_RIVAL_POKEMON_LEAGUE_PIPLUP] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalPokemonLeaguePiplup),
+    },
+
+    [TRAINER_SINNOH_RIVAL_POKEMON_LEAGUE_TURTWIG] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalPokemonLeagueTurtwig),
+    },
+
+    [TRAINER_SINNOH_RIVAL_SURVIVAL_AREA_1_CHIMCHAR] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohRivalSurvivalArea1Chimchar),
+    },
+
+    [TRAINER_SINNOH_RIVAL_SURVIVAL_AREA_1_PIPLUP] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohRivalSurvivalArea1Piplup),
+    },
+
+    [TRAINER_SINNOH_RIVAL_SURVIVAL_AREA_1_TURTWIG] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohRivalSurvivalArea1Turtwig),
+    },
+
+    [TRAINER_SINNOH_RIVAL_FIGHT_AREA_CHIMCHAR] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalFightAreaChimchar),
+    },
+
+    [TRAINER_SINNOH_RIVAL_FIGHT_AREA_PIPLUP] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalFightAreaPiplup),
+    },
+
+    [TRAINER_SINNOH_RIVAL_FIGHT_AREA_TURTWIG] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalFightAreaTurtwig),
+    },
+
+    [TRAINER_SINNOH_COMMANDER_MARS_VALLEY_WINDWORKS] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_COMMANDER,
+        .encounterMusic_gender = 36 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_AQUA_ADMIN_F,
+        .trainerName = _("MARS"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohCommanderMarsValleyWindworks),
+    },
+
+    [TRAINER_SINNOH_COMMANDER_JUPITER_TEAM_GALACTIC_ETERNA_BUILDING] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_COMMANDER,
+        .encounterMusic_gender = 36 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_AQUA_ADMIN_F,
+        .trainerName = _("JUPITER"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohCommanderJupiterTeamGalacticEternaBuilding),
+    },
+
+    [TRAINER_SINNOH_COMMANDER_MARS_LAKE_VERITY] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_COMMANDER,
+        .encounterMusic_gender = 36 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_AQUA_ADMIN_F,
+        .trainerName = _("MARS"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohCommanderMarsLakeVerity),
+    },
+
+    [TRAINER_SINNOH_COMMANDER_SATURN_VALOR_CAVERN] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_COMMANDER,
+        .encounterMusic_gender = 36,
+        .trainerPic = TRAINER_PIC_AQUA_ADMIN_M,
+        .trainerName = _("SATURN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohCommanderSaturnValorCavern),
+    },
+
+    [TRAINER_SINNOH_COMMANDER_SATURN_GALACTIC_HQ] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_COMMANDER,
+        .encounterMusic_gender = 36,
+        .trainerPic = TRAINER_PIC_AQUA_ADMIN_M,
+        .trainerName = _("SATURN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohCommanderSaturnGalacticHq),
+    },
+
+    [TRAINER_SINNOH_GALACTIC_BOSS_CYRUS_GALACTIC_HQ] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_GALACTIC_BOSS,
+        .encounterMusic_gender = 36,
+        .trainerPic = TRAINER_PIC_MAGMA_LEADER_MAXIE,
+        .trainerName = _("CYRUS"),
+        .items = {ITEM_HYPER_POTION, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohGalacticBossCyrusGalacticHq),
+    },
+
+    [TRAINER_SINNOH_COMMANDER_MARS_SPEAR_PILLAR] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_COMMANDER,
+        .encounterMusic_gender = 36 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_AQUA_ADMIN_F,
+        .trainerName = _("MARS"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohCommanderMarsSpearPillar),
+    },
+
+    [TRAINER_SINNOH_COMMANDER_JUPITER_SPEAR_PILLAR] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_COMMANDER,
+        .encounterMusic_gender = 36 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_AQUA_ADMIN_F,
+        .trainerName = _("JUPITER"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohCommanderJupiterSpearPillar),
+    },
+
+    [TRAINER_SINNOH_COMMANDER_MARS_STARK_MOUNTAIN] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_COMMANDER,
+        .encounterMusic_gender = 36 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_AQUA_ADMIN_F,
+        .trainerName = _("MARS"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohCommanderMarsStarkMountain),
+    },
+
+    [TRAINER_SINNOH_COMMANDER_JUPITER_STARK_MOUNTAIN] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_COMMANDER,
+        .encounterMusic_gender = 36 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_AQUA_ADMIN_F,
+        .trainerName = _("JUPITER"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohCommanderJupiterStarkMountain),
+    },
+
+    [TRAINER_SINNOH_GALACTIC_BOSS_CYRUS_CELESTIC_TOWN_RUINS] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_GALACTIC_BOSS,
+        .encounterMusic_gender = 36,
+        .trainerPic = TRAINER_PIC_MAGMA_LEADER_MAXIE,
+        .trainerName = _("CYRUS"),
+        .items = {ITEM_HYPER_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohGalacticBossCyrusCelesticTownRuins),
+    },
+

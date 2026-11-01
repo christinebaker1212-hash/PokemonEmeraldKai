@@ -3,6 +3,7 @@ Sinnoh_PokemonLeagueNorthPokecenter1f_MapScripts::
 	.byte 0
 
 Sinnoh_PokemonLeagueNorthPokecenter1f_OnTransition:
+	special Sinnoh_LegendsRefresh
 	setrespawn HEAL_LOCATION_SINNOH_POKEMON_LEAGUE
 	end
 

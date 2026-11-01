@@ -3535,6 +3535,12 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   The OLD CHATEAU's TV gives ROTOM (Lv. 20) at night (20:00-4:00) until caught (0x3D0F). Their scripts sit above the
   maps' generated words (gen_words.py skips a script already written there). Specials Sinnoh_LeagueDone,
   Sinnoh_PartyHasRegigigas, Sinnoh_IsNight. Tests sinnoh_regi, sinnoh_rotom.
+- The story's battles (2026-11-01; tools/sinnoh/legends.py STORY, gen_trainers.py STORY_TRAINERS): BARRY (8 of
+  Platinum's battles, each in its three versions: Sinnoh_RivalVersion by the Trainer ID), MARS, JUPITER, SATURN and
+  CYRUS stand where Platinum's story puts them (their objects' own hide flags, shown by Sinnoh_LegendsRefresh's
+  table: from their SINNOH badge count in Platinum's order, or after the LEAGUE), battle once (two in a row at SPEAR
+  PILLAR and STARK MOUNTAIN) with Platinum's parties and words written for this game, then leave (done flags
+  0x3D10 +). legends.py hook() adds the map's on-load line to scripts it already has. Test sinnoh_story.
 - The three card games in SINNOH: its people play by their sprite's look-alike (tcg_field.c Tcg_LookGfx: the specials
   first, then sSinnohStandIns), so the townsfolk and beaten trainers duel as JOHTO's and KANTO's do. Special card
   trainers (sQzSpecials' SINNOH rows): the eight leaders by role and type (ROARK - ROXANNE, MAYLENE - BRAWLY, WAKE -

@@ -1,6 +1,11 @@
 Sinnoh_CanalaveCity_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, Sinnoh_CanalaveCity_OnTransition
 	map_script MAP_SCRIPT_ON_FRAME_TABLE, Sinnoh_CanalaveCity_OnFrame
 	.byte 0
+
+Sinnoh_CanalaveCity_OnTransition:
+	special Sinnoh_LegendsRefresh
+	end
 
 Sinnoh_CanalaveCity_OnFrame:
 	map_script_2 0x52F0, 1, Sinnoh_CanalaveCity_EventScript_Arrival   @ (VAR_SINNOH_ARRIVAL: the first boat in)

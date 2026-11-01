@@ -614,5 +614,6 @@ gSpecials::
 	def_special Sinnoh_LeagueDone   @ Moemon Kai: the REGIS' ruins, the OLD CHATEAU's ROTOM (src/sinnoh/s3d_legends.c)
 	def_special Sinnoh_PartyHasRegigigas
 	def_special Sinnoh_IsNight
+	def_special Sinnoh_RivalVersion   @ Moemon Kai: BARRY's team (src/sinnoh/s3d_legends.c)
 	def_special Sinnoh_InGreatMarsh   @ Moemon Kai: the GREAT MARSH's SAFARI GAME ends at its gate (src/sinnoh/s3d_legends.c)
 	.include "data/qz_specials.inc"   @ Moemon Kai: Quetzal's specials (Johto / Kanto)

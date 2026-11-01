@@ -35,7 +35,8 @@ NEW = {'WORKER': ('WORKER', 10), 'VETERAN': ('VETERAN', 20), 'SCIENTIST': ('SCIE
        'JOGGER': ('JOGGER', 8), 'CYCLIST': ('CYCLIST', 8), 'GALACTIC': ('GALACTIC', 10),
        'POKE_KID': ('POKé KID', 4), 'DOUBLE_TEAM': ('DOUBLE TEAM', 15), 'BELLE_AND_PA': ('BELLE & PA', 20),
        'WAITRESS': ('WAITRESS', 8), 'COWGIRL': ('COWGIRL', 8), 'SOCIALITE': ('SOCIALITE', 50), 'PI': ('P.I.', 20),
-       'RANCHER': ('RANCHER', 10), 'ROUGHNECK': ('ROUGHNECK', 10), 'ARTIST': ('ARTIST', 12)}
+       'RANCHER': ('RANCHER', 10), 'ROUGHNECK': ('ROUGHNECK', 10), 'ARTIST': ('ARTIST', 12),
+       'COMMANDER': ('COMMANDER', 40), 'GALACTIC_BOSS': ('GALACTIC BOSS', 60)}
 NEW_ID = {k: FIRST_CLASS + i for i, k in enumerate(NEW)}
 # Platinum class -> (the game's class, picture, encounter music, female)
 CLASSES = {
@@ -94,7 +95,22 @@ SPECIAL = {
     'TRAINER_ELITE_FOUR_FLINT': ('ELITE_FOUR', 'QZ_116', 0), 'TRAINER_ELITE_FOUR_LUCIAN': ('ELITE_FOUR', 'QZ_100', 0),
     'TRAINER_CHAMPION_CYNTHIA': ('CHAMPION', 'QZ_171', 1),
 }
-RENAME = {'ITEM_X_DEFENSE': 'ITEM_X_DEFEND', 'MOVE_SOFTBOILED': 'MOVE_SOFT_BOILED', 'MOVE_HIGH_JUMP_KICK': 'MOVE_HI_JUMP_KICK',
+# ... and the story's (tools/sinnoh/legends.py STORY: BARRY in Platinum's three versions, TEAM GALACTIC's commanders
+# and boss): (class, picture, female, encounter music)
+STORY_TRAINERS = {}
+for _place in ('route_201', 'route_203', 'route_209', 'pastoria_city', 'canalave_city', 'pokemon_league',
+               'survival_area_1', 'fight_area'):
+    for _starter in ('chimchar', 'piplup', 'turtwig'):
+        STORY_TRAINERS['TRAINER_RIVAL_%s_%s' % (_place.upper(), _starter.upper())] = ('RIVAL', 'YOUNGSTER', 0, 'ACE_TRAINER')
+for _t, _pic, _f in (('COMMANDER_MARS_VALLEY_WINDWORKS', 'AQUA_ADMIN_F', 1),
+                     ('COMMANDER_JUPITER_TEAM_GALACTIC_ETERNA_BUILDING', 'AQUA_ADMIN_F', 1),
+                     ('COMMANDER_MARS_LAKE_VERITY', 'AQUA_ADMIN_F', 1), ('COMMANDER_SATURN_VALOR_CAVERN', 'AQUA_ADMIN_M', 0),
+                     ('COMMANDER_SATURN_GALACTIC_HQ', 'AQUA_ADMIN_M', 0), ('GALACTIC_BOSS_CYRUS_GALACTIC_HQ', 'MAGMA_LEADER_MAXIE', 0),
+                     ('COMMANDER_MARS_SPEAR_PILLAR', 'AQUA_ADMIN_F', 1), ('COMMANDER_JUPITER_SPEAR_PILLAR', 'AQUA_ADMIN_F', 1),
+                     ('COMMANDER_MARS_STARK_MOUNTAIN', 'AQUA_ADMIN_F', 1), ('COMMANDER_JUPITER_STARK_MOUNTAIN', 'AQUA_ADMIN_F', 1),
+                     ('GALACTIC_BOSS_CYRUS_CELESTIC_TOWN_RUINS', 'MAGMA_LEADER_MAXIE', 0)):
+    STORY_TRAINERS['TRAINER_' + _t] = ('S:GALACTIC_BOSS' if 'BOSS' in _t else 'S:COMMANDER', _pic, _f, 'GALACTIC')
+RENAME = {'ITEM_X_DEFENSE': 'ITEM_X_DEFEND', 'MOVE_SMOKE_SCREEN': 'MOVE_SMOKESCREEN', 'MOVE_SOFTBOILED': 'MOVE_SOFT_BOILED', 'MOVE_HIGH_JUMP_KICK': 'MOVE_HI_JUMP_KICK',
           'ITEM_PARLYZ_HEAL': 'ITEM_PARALYZE_HEAL'}
 
 
@@ -137,7 +153,7 @@ def main():
             bad.add(name)
         return name
 
-    trainers = sorted(placed(root)) + list(SPECIAL)
+    trainers = sorted(placed(root)) + list(SPECIAL) + list(STORY_TRAINERS)
     widths = letter_widths()
     consts, entries, parties, script = [], [], [], []
     pics = []   # Platinum's battle picture of each (its class's, include/constants/sinnoh_gfx.h)
@@ -150,6 +166,8 @@ def main():
         if t in SPECIAL:
             ours, pic, female = SPECIAL[t]
             music = 'ACE_TRAINER'      # (their scripts battle with NO_MUSIC)
+        elif t in STORY_TRAINERS:
+            ours, pic, female, music = STORY_TRAINERS[t]
         else:
             ours, pic, music, female = CLASSES[pclass]
         cls = 'TRAINER_CLASS_SINNOH_' + ours[2:] if ours.startswith('S:') else c('TRAINER_CLASS_' + ours)
@@ -182,8 +200,8 @@ def main():
                        '        .party = %s(%s),\n    },\n\n'
                        % (const, cls, M[music], ' | F_TRAINER_FEMALE' if female else '', c('TRAINER_PIC_' + pic)[12:],
                           name, ', '.join(items), 'TRUE' if d['double_battle'] else 'FALSE', ai, macro, pname))
-        if t in SPECIAL:
-            continue        # (their words are in tools/sinnoh/words.py, with their scripts)
+        if t in SPECIAL or t in STORY_TRAINERS:
+            continue        # (their words are in tools/sinnoh/words.py / legends.py, with their scripts)
         intro, defeat, after = trainer_words.lines(pclass, t)
         lab = label(t)
         base = 'Sinnoh_Text_Tr' + camel(t)

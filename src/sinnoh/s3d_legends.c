@@ -20,7 +20,8 @@ u16 Sinnoh_LegendsRefresh(void)
         bool8 shown;
         if (sSinnohLegends[i].group != gSaveBlock1Ptr->location.mapGroup || sSinnohLegends[i].num != gSaveBlock1Ptr->location.mapNum)
             continue;
-        shown = !FlagGet(sSinnohLegends[i].doneFlag) && MP_Gen_Allowed(sSinnohLegends[i].species)
+        shown = !FlagGet(sSinnohLegends[i].doneFlag)
+             && (sSinnohLegends[i].species == SPECIES_NONE || MP_Gen_Allowed(sSinnohLegends[i].species))
              && (sSinnohLegends[i].badges == 0xFF ? MP_Region_Cleared(REGION_SINNOH)
                                                     : MP_Region_BadgeCount(REGION_SINNOH) >= sSinnohLegends[i].badges);
         if (shown)
@@ -129,4 +130,11 @@ u16 Sinnoh_IsNight(void)   // (SINNOH's night: 20:00 to 4:00, as its night music
 {
     RtcCalcLocalTime();
     return gLocalTime.hours >= 20 || gLocalTime.hours < 4;
+}
+
+// BARRY's team in the story's battles (tools/sinnoh/legends.py STORY): Platinum's three versions (its CHIMCHAR,
+// PIPLUP or TURTWIG line), by the player's Trainer ID
+u16 Sinnoh_RivalVersion(void)
+{
+    return (gSaveBlock2Ptr->playerTrainerId[0] + gSaveBlock2Ptr->playerTrainerId[1]) % 3;
 }
