@@ -2607,6 +2607,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] boxput %d %d: %d\n", box, pos, species);
         }
     }
+    else if (strcmp(cmd, "curbox") == 0)
+    {
+        // curbox [BOX] - the PC's box in use (BOX from 1: set it first), its name and wallpaper
+        struct PokemonStorage *own = MP_PersonalStorage();
+        int box = atoi(arg);
+        char name[32];
+        if (box >= 1 && box <= TOTAL_BOXES_COUNT)
+            own->currentBox = box - 1;
+        MP_GameToAscii(name, own->boxNames[own->currentBox], sizeof(name) - 1);
+        printf("[test] curbox %d %s wallpaper %d\n", own->currentBox + 1, name, own->boxWallpapers[own->currentBox]);
+    }
     else if (strcmp(cmd, "boxmons") == 0)
     {
         // boxmons BOX - the box's Moemon (position:species) and the party's species

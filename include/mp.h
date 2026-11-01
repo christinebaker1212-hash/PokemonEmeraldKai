@@ -978,7 +978,7 @@ bool8 MP_SharedBox_Busy(void);
 void MP_SharedBox_ConnectionLost(void);
 void MP_SharedBox_OnMessage(const u8 *data, u16 len);
 bool8 MP_SharedBox_TakeChanges(u32 *cells);
-u32 MP_SharedBox_TakeInfoChanges(void);
+u8 MP_SharedBox_TakeInfoChanges(u8 box);   // bit 0: renamed, bit 1: new wallpaper
 const char *MP_SharedBox_TakeNote(void);
 const u8 *MP_SharedBox_PutInBy(u8 box, u8 pos);
 const u8 *MP_SharedBox_PutInByMon(const struct BoxPokemon *b);

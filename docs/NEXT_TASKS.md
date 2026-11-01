@@ -25,7 +25,7 @@ save files in place"
 ## 6. Card games: NEW tags and centered booster packs (DONE, 1.63.6): COOP_NOTES "NEW in the BINDER, centered
 booster packs"
 
-## 7. 40 PC boxes (the user, 2026-11-01, "the final task")
+## 7. 40 PC boxes (DONE, 1.63.7; the user, 2026-11-01, "the final task"): COOP_NOTES "40 PC boxes"
 - The player's own PC (14 boxes today, in the save: the layout can't change, tools/test/save_layout.py): 40 boxes, the
   26 more in a sidecar ("<save>.boxes" or the like, converted by mp_savefix.c) that MP_PersonalStorage() / the box
   screen read as boxes 15-40; box names and wallpapers too.
@@ -45,4 +45,5 @@ booster packs"
 - 1.63.4: drop shadows, small followers in tall grass, big followers' reflections.
 - 1.63.5: settings per save file, SAVE FILE switches in place.
 - 1.63.6: NEW in the BINDER, centered booster packs.
-- Pending: task 7 above.
+- 1.63.6's Windows build fix (math.h; the release re-queued).
+- 1.63.7: 40 PC boxes (own, each region's, GLOBAL, shared; protocol 70).

@@ -20,9 +20,9 @@ REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
 REF = os.path.join(REPO, 'tools/test/save_layout.txt')
 FLAGS = ['-std=gnu99', '-iquote', os.path.join(REPO, 'include'), '-DPORTABLE', '-DNONMATCHING', '-DMODERN=1', '-DUBFIX',
          '-DPLATFORM_SDL2', '-DRENDERER_EASY_DRAW', '-DVER_64BIT', '-w', '-c']
-# the structures a save holds whole (SaveBlock1 / 2, the PC), and the ones inside them that changed before
+# the structures a save holds whole (SaveBlock1 / 2, the PC: its 14 boxes, PokemonStorageLegacy since 40), and the ones inside them that changed before
 STRUCTS = [('global.h', 'SaveBlock1'), ('global.h', 'SaveBlock2'), ('global.fieldmap.h', 'ObjectEvent'),
-           ('global.fieldmap.h', 'ObjectEventTemplate'), ('pokemon_storage_system.h', 'PokemonStorage'),
+           ('global.fieldmap.h', 'ObjectEventTemplate'), ('pokemon_storage_system.h', 'PokemonStorageLegacy'),
            ('pokemon.h', 'BoxPokemon'), ('pokemon.h', 'Pokemon'), ('global.h', 'Pokedex'), ('global.h', 'BattleFrontier')]
 
 

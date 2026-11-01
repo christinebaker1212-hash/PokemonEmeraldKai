@@ -3,5 +3,5 @@
 MODE=1
 TMO=150
 ENV_A="MOEMON_DEBUG_PARTY=280:30,258:25"
-EXPECT_A=("box1 0 (other boxes shown)" "global free 420 party: 280:L30 258:L25 box1 0 (own boxes)")
+EXPECT_A=("box1 0 (other boxes shown)" "global free 1200 party: 280:L30 258:L25 box1 0 (own boxes)")
 UNEXPECT_A=("[crash]")

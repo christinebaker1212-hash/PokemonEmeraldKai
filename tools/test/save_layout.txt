@@ -145,11 +145,11 @@ linux ObjectEventTemplate.trainerType 12
 linux ObjectEventTemplate.trainerRange_berryTreeId 14
 linux ObjectEventTemplate.script 16
 linux ObjectEventTemplate.flagId 24
-linux sizeof PokemonStorage 33744
-linux PokemonStorage.currentBox 0
-linux PokemonStorage.boxes 4
-linux PokemonStorage.boxNames 33604
-linux PokemonStorage.boxWallpapers 33730
+linux sizeof PokemonStorageLegacy 33744
+linux PokemonStorageLegacy.currentBox 0
+linux PokemonStorageLegacy.boxes 4
+linux PokemonStorageLegacy.boxNames 33604
+linux PokemonStorageLegacy.boxWallpapers 33730
 linux sizeof BoxPokemon 80
 linux BoxPokemon.personality 0
 linux BoxPokemon.otId 4
@@ -390,11 +390,11 @@ windows ObjectEventTemplate.trainerType 12
 windows ObjectEventTemplate.trainerRange_berryTreeId 14
 windows ObjectEventTemplate.script 16
 windows ObjectEventTemplate.flagId 24
-windows sizeof PokemonStorage 33744
-windows PokemonStorage.currentBox 0
-windows PokemonStorage.boxes 4
-windows PokemonStorage.boxNames 33604
-windows PokemonStorage.boxWallpapers 33730
+windows sizeof PokemonStorageLegacy 33744
+windows PokemonStorageLegacy.currentBox 0
+windows PokemonStorageLegacy.boxes 4
+windows PokemonStorageLegacy.boxNames 33604
+windows PokemonStorageLegacy.boxWallpapers 33730
 windows sizeof BoxPokemon 80
 windows BoxPokemon.personality 0
 windows BoxPokemon.otId 4

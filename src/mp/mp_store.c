@@ -64,8 +64,10 @@ static struct Store *sStores[MAX_STORES];
 static uint8_t sReply[MP_MAX_MSG];
 
 #define FILE_MAGIC_V1 "MOEST1\n"   // 60 Pokemon in a list
-#define FILE_MAGIC "MOEST2\n"      // 14 boxes of 30, box names and wallpapers, the hands
+#define FILE_MAGIC_V2 "MOEST2\n"   // 14 boxes of 30, box names and wallpapers, the hands (before 1.63.7)
+#define FILE_MAGIC "MOEST3\n"      // 40 boxes of 30 (MP_SHARED_BOXES), the same after them
 #define MONS_V1 60
+#define BOXES_V2 14
 
 static void FileName(const uint8_t *key, char *out, size_t size)
 {
@@ -105,7 +107,7 @@ static void Save(struct Store *s)
     }
 }
 
-// "SHARED1".."SHARED14" in the game's characters (A-Z 0xBB.., 0-9 0xA1..), and the stock wallpapers in turn
+// "SHARED1".."SHARED40" in the game's characters (A-Z 0xBB.., 0-9 0xA1..), and the stock wallpapers in turn
 static void DefaultBoxes(struct Store *s)
 {
     static const char sName[] = "SHARED";
@@ -186,6 +188,29 @@ static void Load(struct Store *s)
             memset(s->counters, 0, sizeof(s->counters));
             DefaultBoxes(s);
         }
+        EmptyHandsIntoBoxes(s);
+    }
+    else if (memcmp(magic, FILE_MAGIC_V2, strlen(FILE_MAGIC_V2)) == 0)
+    {
+        // 14 boxes: into the first 14, the other 26 empty
+        size_t mons = BOXES_V2 * MP_SHARED_BOX_SLOTS;
+        if (fread(s->monUsed, 1, mons, f) != mons
+         || fread(s->mons, MP_STORE_MON_BYTES, mons, f) != mons
+         || fread(s->boxNames, MP_STORE_BOXNAME, BOXES_V2, f) != BOXES_V2
+         || fread(s->wallpapers, 1, BOXES_V2, f) != BOXES_V2
+         || fread(s->hands, 1, sizeof(s->hands), f) != sizeof(s->hands)
+         || fread(s->items, 1, sizeof(s->items), f) != sizeof(s->items)
+         || fread(s->counters, 1, sizeof(s->counters), f) != sizeof(s->counters))
+        {
+            MPNet_Log("shared storage file %s is damaged; starting empty", path);
+            memset(s->monUsed, 0, sizeof(s->monUsed));
+            memset(s->hands, 0, sizeof(s->hands));
+            memset(s->items, 0, sizeof(s->items));
+            memset(s->counters, 0, sizeof(s->counters));
+            DefaultBoxes(s);
+        }
+        else
+            MPNet_Log("shared storage file %s: 14 boxes, now %d", path, MP_SHARED_BOXES);
         EmptyHandsIntoBoxes(s);
     }
     else if (memcmp(magic, FILE_MAGIC_V1, strlen(FILE_MAGIC_V1)) == 0)

@@ -5,16 +5,17 @@ import glob, re, struct, sys
 # check.py [any] DIR ("any": just no doubles, for the other shared PC scenarios)
 d = sys.argv[-1]
 any_mode = len(sys.argv) > 2 and sys.argv[1] == "any"
-SLOTS, BLOB, HANDS, HAND = 14 * 30, 112, 4, 36
+BOXES = 40   # (MP_SHARED_BOXES; the store file MOEST3)
+SLOTS, BLOB, HANDS, HAND = BOXES * 30, 112, 4, 36
 store = glob.glob(d + "/coop_store_*.dat")
 if not store:
     sys.exit("no store file")
 raw = open(store[0], "rb").read()
-assert raw.startswith(b"MOEST2\n"), raw[:7]
+assert raw.startswith(b"MOEST3\n"), raw[:7]
 p = 7 + 32
 used = raw[p:p + SLOTS]; p += SLOTS
 mons = raw[p:p + SLOTS * BLOB]; p += SLOTS * BLOB
-p += 14 * 9 + 14
+p += BOXES * 9 + BOXES
 hands = raw[p:p + HANDS * (1 + HAND * BLOB)]
 server = []
 for s in range(SLOTS):

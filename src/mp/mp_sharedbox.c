@@ -1,6 +1,6 @@
 // Moemon Co-op: the shared PC's Pokémon, shown in the PC box screen.
 //
-// The server keeps 14 boxes of 30 (mp_store.c). Here we keep a mirror of them shaped like the game's own
+// The server keeps 40 boxes of 30 (mp_store.c). Here we keep a mirror of them shaped like the game's own
 // PokemonStorage, so the stock box screen can show and change them: while the box screen shows the shared boxes,
 // gPokemonStoragePtr points at the mirror (MP_SharedBox_ShowShared), and the player's own boxes are reached through
 // MP_PersonalStorage() (the save code always uses that).
@@ -69,14 +69,14 @@ static EWRAM_DATA u8 sReleasedCount = 0;
 
 static struct PokemonStorage *sPersonal;   // our own boxes while the mirror is shown
 static bool8 sOpen;                        // the shared PC's Pokémon are in use (box screen, or closing)
-static u16 sLoadedMask;                    // boxes heard from since opening
+static u64 sLoadedMask;                    // boxes heard from since opening (bit per box)
 static bool8 sPending;                     // a transaction is out
 static u16 sSeq;
 static u16 sPendingTimer;
 static bool8 sClosing;                     // the box screen is gone: flush what's left, then done
 static bool8 sChangedForUi;                // boxes changed under the box screen (it redraws what it shows)
 static u32 sChangedCells[TOTAL_BOXES_COUNT];
-static u32 sChangedInfo;                   // boxes whose name (bits 0-15) or wallpaper (16-31) changed under the box screen
+static u8 sChangedInfo[TOTAL_BOXES_COUNT]; // boxes whose name (bit 0) or wallpaper (bit 1) changed under the box screen
 static char sNote[64];                     // a message for the box screen ("Someone else took ...")
 
 // ---------------------------------------------------------------------------
@@ -338,7 +338,7 @@ static void ApplyBox(const u8 *data, u16 len)
     if (sMirror.boxWallpapers[box] == sBaseWallpapers[box])
         sMirror.boxWallpapers[box] = data[2 + MP_STORE_BOXNAME];
     sBaseWallpapers[box] = data[2 + MP_STORE_BOXNAME];
-    if (!(sLoadedMask & (1 << box)))
+    if (!(sLoadedMask & (1ull << box)))
     {
         // first time: just take it
         memcpy(sMirror.boxNames[box], data + 2, MP_STORE_BOXNAME);
@@ -347,9 +347,9 @@ static void ApplyBox(const u8 *data, u16 len)
     else
     {
         if (memcmp(oldName, sMirror.boxNames[box], MP_STORE_BOXNAME) != 0)
-            sChangedInfo |= 1u << box;
+            sChangedInfo[box] |= 1;
         if (oldWallpaper != sMirror.boxWallpapers[box])
-            sChangedInfo |= 1u << (16 + box);
+            sChangedInfo[box] |= 2;
     }
 
     for (i = 0; i < IN_BOX_COUNT; i++)
@@ -358,9 +358,9 @@ static void ApplyBox(const u8 *data, u16 len)
         struct BoxPokemon *m = &sMirror.boxes[box][i];
         bool8 baseUsed = sBaseUsed[slot], truthUsed = fresh[i];
         bool8 remoteChange = (baseUsed != truthUsed) || (baseUsed && memcmp(sBase[slot], sTruth[i], BLOB) != 0);
-        bool8 localChange = (sLoadedMask & (1 << box)) && !MirrorMatchesBase(slot);
+        bool8 localChange = (sLoadedMask & (1ull << box)) && !MirrorMatchesBase(slot);
 
-        if (!localChange || !(sLoadedMask & (1 << box)))
+        if (!localChange || !(sLoadedMask & (1ull << box)))
         {
             if (truthUsed)
                 *m = *(struct BoxPokemon *)sTruth[i];
@@ -422,7 +422,7 @@ static void ApplyBox(const u8 *data, u16 len)
         else
             memset(sBase[slot], 0, BLOB);
     }
-    sLoadedMask |= 1 << box;
+    sLoadedMask |= 1ull << box;
 }
 
 // ---------------------------------------------------------------------------
@@ -802,7 +802,7 @@ void MP_SharedBox_Begin(void)
     memset(sStashLen, 0, sizeof(sStashLen));
     sResultLen = 0;
     memset(sChangedCells, 0, sizeof(sChangedCells));
-    sChangedInfo = 0;
+    memset(sChangedInfo, 0, sizeof(sChangedInfo));
     sHandCount = 0;
     sLostCount = 0;
     sReleasedCount = 0;
@@ -819,7 +819,7 @@ void MP_SharedBox_Begin(void)
 
 bool8 MP_SharedBox_Loaded(void)
 {
-    return sOpen && sLoadedMask == (1 << TOTAL_BOXES_COUNT) - 1;
+    return sOpen && sLoadedMask == (1ull << TOTAL_BOXES_COUNT) - 1;
 }
 
 bool8 MP_SharedBox_IsOpen(void)
@@ -920,11 +920,11 @@ bool8 MP_SharedBox_TakeChanges(u32 *cells)
     return any;
 }
 
-// Boxes whose name (bits 0-15) or wallpaper (bits 16-31) changed under the box screen (cleared once read)
-u32 MP_SharedBox_TakeInfoChanges(void)
+// Whether this box's name (bit 0) or wallpaper (bit 1) changed under the box screen (every box's cleared once read)
+u8 MP_SharedBox_TakeInfoChanges(u8 box)
 {
-    u32 m = sChangedInfo;
-    sChangedInfo = 0;
+    u8 m = box < TOTAL_BOXES_COUNT ? sChangedInfo[box] : 0;
+    memset(sChangedInfo, 0, sizeof(sChangedInfo));
     return m;
 }
 

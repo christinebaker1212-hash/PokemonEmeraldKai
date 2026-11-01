@@ -1,7 +1,10 @@
 #ifndef GUARD_POKEMON_STORAGE_SYSTEM_H
 #define GUARD_POKEMON_STORAGE_SYSTEM_H
 
-#define TOTAL_BOXES_COUNT       14
+// Moemon Kai: 40 boxes (the user, 1.63.7). The save holds the first 14 as it always did (struct PokemonStorageLegacy,
+// save.c); boxes 15-40 and the box in use past 14 are in "<save>.boxes" (mp_boxes.c)
+#define TOTAL_BOXES_COUNT       40
+#define LEGACY_BOXES_COUNT      14
 #define IN_BOX_ROWS             5 // Number of rows, 6 Pokémon per row
 #define IN_BOX_COLUMNS          6 // Number of columns, 5 Pokémon per column
 #define IN_BOX_COUNT            (IN_BOX_ROWS * IN_BOX_COLUMNS)
@@ -24,7 +27,23 @@ struct PokemonStorage
     /*0x83C2*/ u8 boxWallpapers[TOTAL_BOXES_COUNT];
 };
 
+// The PC as a save (and the region side file before 1.63.7) holds it: 14 boxes (the layout never changes)
+struct PokemonStorageLegacy
+{
+    /*0x0000*/ u8 currentBox;
+    /*0x0001*/ struct BoxPokemon boxes[LEGACY_BOXES_COUNT][IN_BOX_COUNT];
+    /*0x8344*/ u8 boxNames[LEGACY_BOXES_COUNT][BOX_NAME_LENGTH + 1];
+    /*0x83C2*/ u8 boxWallpapers[LEGACY_BOXES_COUNT];
+};
+
 extern struct PokemonStorage *gPokemonStoragePtr;
+
+// mp_boxes.c: the 14 the save holds, from and to the 40; boxes 15-40 in their own side file
+void MP_Boxes_ToLegacy(struct PokemonStorageLegacy *dst, const struct PokemonStorage *src);
+// 15-40 empty, named name + number (NULL: "BOX"), the default wallpapers
+void MP_Boxes_FromLegacy(struct PokemonStorage *dst, const struct PokemonStorageLegacy *src, const u8 *name);
+void MP_Boxes_LoadFromSave(const struct PokemonStorageLegacy *saved);   // save.c LoadGameSave: the 14 + "<save>.boxes"
+void MP_Boxes_WriteSidecar(void);   // sdl2.c StoreSaveFile
 
 void DrawTextWindowAndBufferTiles(const u8 *string, void *dst, u8 zero1, u8 zero2, s32 bytesToBuffer);
 u8 CountMonsInBox(u8 boxId);

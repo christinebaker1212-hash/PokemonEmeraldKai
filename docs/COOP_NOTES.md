@@ -3366,6 +3366,23 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   (PacksScreen: a float position eased 35% a frame; no glide when the screen opens). Triple Triad's packs screen is a
   list beside the chosen pack already. Test cards_packs_center.
 
+## 40 PC boxes (1.63.7)
+- TOTAL_BOXES_COUNT 40 (pokemon_storage_system.h). The save still holds 14: its storage sectors are struct
+  PokemonStorageLegacy (save.c's SAVEBLOCK_CHUNKs; tools/test/save_layout.py measures that one, unchanged), packed from
+  MP_PersonalStorage() in UpdateSaveAddresses into a static buffer and unpacked in LoadGameSave (MP_Boxes_LoadFromSave,
+  before MP_Region_LoadFromSave). Boxes 15-40 (POKeMON, names, wallpapers) and a box in use past 14 are in
+  "<save>.boxes" (src/mp/mp_boxes.c; written by sdl2.c StoreSaveFile, backed up as "<save>.bakN.boxes"), with the
+  save's counter and a checksum of the 14: the file written with the save wins, then a backup's that matches, then the
+  newest anyway (never drop POKeMON because the save fell back to its older slot). None: boxes 15-40 empty, BOX15...
+  An older game reading a 1.63.7 save sees its first 14 boxes (a box in use past 14 shows as box 1).
+- Each region's PC and the GLOBAL PC ("<save>.region" chunks PCn / GLPC) are written with 40 boxes; 14-box chunks from
+  before are read and converted (mp_region.c ReadStorage; GLOBAL15...).
+- The shared PC: MP_SHARED_BOXES 40, protocol 70. The server's store file is MOEST3; MOEST2 (14 boxes) loads into
+  the first 14 (mp_store.c). mp_sharedbox.c's per-box masks are 64-bit / per-box arrays (MP_SharedBox_TakeInfoChanges
+  takes the box). shared_pc/check.py reads MOEST3.
+- Tests tools/test/pc_boxes.sh (boxes 1 / 15 / 40 and box 33 in use across a save; no side file; a backup's; another
+  save's), scenario shared_pc_v2 (a MOEST2 file; SHARED40 on screen), region_globalpc (1200 free). `mp curbox [N]`.
+
 ## SINNOH's 3D engine
 - Plan and rules: docs/SINNOH_HANDOFF.md. The data comes from pret/pokeplatinum (source.py: its map blocks, matrices,
   areas, props, texture sets and lights as files; fetch_decomp.sh gets them at a pinned commit, make_pack.sh fetches and

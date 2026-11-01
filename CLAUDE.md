@@ -16,7 +16,8 @@ runs it and ships the pack; never committed: sinnoh/ is ignored; no ROM needed);
 walk; tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM]; COOP_NOTES "SINNOH's 3D engine"; its people's sprites and battle pictures
 in sinnoh/platinum_gfx.pak (tools/sinnoh/build_gfx.py, src/sinnoh/s3d_gfx.c; test sinnoh_pics).
 
-**Open work (2026-11-01): `docs/NEXT_TASKS.md`** (40 PC boxes): read it and carry on in its order.
+**Done (2026-11-01): `docs/NEXT_TASKS.md`**, the user's list through 1.63.7 (40 PC boxes: COOP_NOTES "40 PC boxes"; the save holds
+14, "<save>.boxes" the rest, src/mp/mp_boxes.c; tools/test/pc_boxes.sh).
 
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
 card duels).

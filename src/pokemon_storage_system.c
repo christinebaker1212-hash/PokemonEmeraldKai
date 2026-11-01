@@ -11953,9 +11953,9 @@ static void MpRefreshChangedIcons(void)
 {
     u32 cells[TOTAL_BOXES_COUNT];
     u8 box = StorageGetCurrentBox(), pos;
-    u32 info = MP_SharedBox_TakeInfoChanges();
+    u8 info = MP_SharedBox_TakeInfoChanges(box);
     if (sMpPc.sharedView)
-        sMpPc.look |= ((info >> box) & 1) | (((info >> (16 + box)) & 1) << 1);   // a friend renamed it / changed its wallpaper
+        sMpPc.look |= info & 3;   // a friend renamed it / changed its wallpaper
     if (!MP_SharedBox_TakeChanges(cells) || !sMpPc.sharedView)
         return;
     for (pos = 0; pos < IN_BOX_COUNT; pos++)

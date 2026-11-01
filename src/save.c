@@ -66,22 +66,22 @@ struct
     SAVEBLOCK_CHUNK(struct SaveBlock1, 2),
     SAVEBLOCK_CHUNK(struct SaveBlock1, 3), // SECTOR_ID_SAVEBLOCK1_END
 
-    SAVEBLOCK_CHUNK(struct PokemonStorage, 0), // SECTOR_ID_PKMN_STORAGE_START
-    SAVEBLOCK_CHUNK(struct PokemonStorage, 1),
-    SAVEBLOCK_CHUNK(struct PokemonStorage, 2),
-    SAVEBLOCK_CHUNK(struct PokemonStorage, 3),
-    SAVEBLOCK_CHUNK(struct PokemonStorage, 4),
-    SAVEBLOCK_CHUNK(struct PokemonStorage, 5),
-    SAVEBLOCK_CHUNK(struct PokemonStorage, 6),
-    SAVEBLOCK_CHUNK(struct PokemonStorage, 7),
-    SAVEBLOCK_CHUNK(struct PokemonStorage, 8), // SECTOR_ID_PKMN_STORAGE_END
+    SAVEBLOCK_CHUNK(struct PokemonStorageLegacy, 0), // SECTOR_ID_PKMN_STORAGE_START
+    SAVEBLOCK_CHUNK(struct PokemonStorageLegacy, 1),
+    SAVEBLOCK_CHUNK(struct PokemonStorageLegacy, 2),
+    SAVEBLOCK_CHUNK(struct PokemonStorageLegacy, 3),
+    SAVEBLOCK_CHUNK(struct PokemonStorageLegacy, 4),
+    SAVEBLOCK_CHUNK(struct PokemonStorageLegacy, 5),
+    SAVEBLOCK_CHUNK(struct PokemonStorageLegacy, 6),
+    SAVEBLOCK_CHUNK(struct PokemonStorageLegacy, 7),
+    SAVEBLOCK_CHUNK(struct PokemonStorageLegacy, 8), // SECTOR_ID_PKMN_STORAGE_END
 };
 
 // These will produce an error if a save struct is larger than the space
 // alloted for it in the flash.
 STATIC_ASSERT(sizeof(struct SaveBlock2) <= SECTOR_DATA_SIZE, SaveBlock2FreeSpace);
 STATIC_ASSERT(sizeof(struct SaveBlock1) <= SECTOR_DATA_SIZE * (SECTOR_ID_SAVEBLOCK1_END - SECTOR_ID_SAVEBLOCK1_START + 1), SaveBlock1FreeSpace);
-STATIC_ASSERT(sizeof(struct PokemonStorage) <= SECTOR_DATA_SIZE * (SECTOR_ID_PKMN_STORAGE_END - SECTOR_ID_PKMN_STORAGE_START + 1), PokemonStorageFreeSpace);
+STATIC_ASSERT(sizeof(struct PokemonStorageLegacy) <= SECTOR_DATA_SIZE * (SECTOR_ID_PKMN_STORAGE_END - SECTOR_ID_PKMN_STORAGE_START + 1), PokemonStorageFreeSpace);
 
 COMMON_DATA u16 gLastWrittenSector = 0;
 COMMON_DATA u32 gLastSaveCounter = 0;
@@ -729,6 +729,8 @@ static u16 CalculateChecksum(void *data, u16 size)
     return ((checksum >> 16) + checksum);
 }
 
+static struct PokemonStorageLegacy sSavedStorage;   // Moemon Kai: the boxes as the save holds them
+
 static void UpdateSaveAddresses(void)
 {
     int i = SECTOR_ID_SAVEBLOCK2;
@@ -741,9 +743,11 @@ static void UpdateSaveAddresses(void)
         gRamSaveSectorLocations[i].size = sSaveSlotLayout[i].size;
     }
 
+    // Moemon Kai: the save holds the first 14 of the 40 boxes, as it always did (mp_boxes.c: the rest in "<save>.boxes")
+    MP_Boxes_ToLegacy(&sSavedStorage, MP_PersonalStorage());   // Moemon Co-op: never the shared PC's
     for (; i <= SECTOR_ID_PKMN_STORAGE_END; i++) //setting i to SECTOR_ID_PKMN_STORAGE_START does not match
     {
-        gRamSaveSectorLocations[i].data = (void *)(MP_PersonalStorage()) + sSaveSlotLayout[i].offset;   // Moemon Co-op: never the shared PC's
+        gRamSaveSectorLocations[i].data = (void *)(&sSavedStorage) + sSaveSlotLayout[i].offset;
         gRamSaveSectorLocations[i].size = sSaveSlotLayout[i].size;
     }
 }
@@ -941,6 +945,8 @@ u8 LoadGameSave(u8 saveType)
     case SAVE_NORMAL:
     default:
         status = TryLoadSaveSlot(FULL_SAVE_SLOT, gRamSaveSectorLocations);
+        if (status == SAVE_STATUS_OK)
+            MP_Boxes_LoadFromSave(&sSavedStorage);   // Moemon Kai: the 14 boxes into the 40, then boxes 15-40 (mp_boxes.c)
         if (status == SAVE_STATUS_OK)
             MP_Region_LoadFromSave();   // Moemon Kai: Johto / Kanto flags and vars (mp_region.c); older save layouts
                                         // are brought up to date here (mp_savefix.c), before anything is copied out

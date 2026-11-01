@@ -381,6 +381,20 @@ void MP_Region_WriteSidecar(void)
     rename(tmp, path);
 }
 
+static const u8 sGlobalName[] = _("GLOBAL");   // + 1-40: BOX_NAME_LENGTH (8) letters at most
+
+// A PC's boxes from the side file: 40 (1.63.7 on) or the 14 before, the rest empty (mp_boxes.c)
+static bool8 ReadStorage(FILE *f, u32 size, struct PokemonStorage *dst, const u8 *name)
+{
+    static struct PokemonStorageLegacy sOld;
+    if (size == sizeof(*dst))
+        return fread(dst, sizeof(*dst), 1, f) == 1;
+    if (fread(&sOld, sizeof(sOld), 1, f) != 1)
+        return FALSE;
+    MP_Boxes_FromLegacy(dst, &sOld, name);
+    return TRUE;
+}
+
 static bool8 LoadFrom(const char *path)
 {
     FILE *f = fopen(path, "rb");
@@ -413,15 +427,17 @@ static bool8 LoadFrom(const char *path)
                 break;
             next = ftell(f) + c[1];
             if (c[0] >= CHUNK('P', 'C', '0', ' ') && c[0] < CHUNK('P', 'C', '0' + REGION_COUNT, ' ')
-             && (c[0] & 0xFF00FFFF) == CHUNK('P', 'C', 0, ' ') && c[1] == sizeof(struct PokemonStorage))
+             && (c[0] & 0xFF00FFFF) == CHUNK('P', 'C', 0, ' ')
+             && (c[1] == sizeof(struct PokemonStorage) || c[1] == sizeof(struct PokemonStorageLegacy)))
             {
                 u8 r = ((c[0] >> 16) & 0xFF) - '0';
-                if (fread(&sAwayPC[r], sizeof(sAwayPC[r]), 1, f) == 1)
+                if (ReadStorage(f, c[1], &sAwayPC[r], NULL))
                     sAwayValid |= 1 << r;
             }
-            else if (c[0] == CHUNK('G', 'L', 'P', 'C') && c[1] == sizeof(sGlobalPC))
+            else if (c[0] == CHUNK('G', 'L', 'P', 'C')
+                  && (c[1] == sizeof(sGlobalPC) || c[1] == sizeof(struct PokemonStorageLegacy)))
             {
-                sGlobalValid = fread(&sGlobalPC, sizeof(sGlobalPC), 1, f) == 1;
+                sGlobalValid = ReadStorage(f, c[1], &sGlobalPC, sGlobalName);
             }
             else if (c[0] == CHUNK('H', 'O', 'N', 'Y') && c[1] <= 1024)
             {
@@ -626,10 +642,9 @@ static void ResetStorage(struct PokemonStorage *st, const u8 *name)
 
 struct PokemonStorage *MP_Region_GlobalPC(void)
 {
-    static const u8 sGlobal[] = _("GLOBAL");   // + 1-14: BOX_NAME_LENGTH (8) letters at most
     if (!sGlobalValid)
     {
-        ResetStorage(&sGlobalPC, sGlobal);
+        ResetStorage(&sGlobalPC, sGlobalName);
         sGlobalValid = TRUE;
     }
     return &sGlobalPC;
