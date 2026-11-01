@@ -74,13 +74,6 @@
       "elevation": 0,
       "dest_map": "MAP_SINNOH_VEILSTONE_STORE4F",
       "dest_warp_id": "1"
-    },
-    {
-      "x": 15,
-      "y": 2,
-      "elevation": 0,
-      "dest_map": "MAP_SINNOH_VEILSTONE_STORE_ELEVATOR",
-      "dest_warp_id": "0"
     }
   ],
   "coord_events": [],

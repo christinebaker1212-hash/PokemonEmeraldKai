@@ -33,8 +33,8 @@ GROUP = 'gMapGroup_Sinnoh'                      # the outdoor places
 INDOOR_GROUP = 'gMapGroup_SinnohIndoor%d'       # the buildings, PER_GROUP a group (1, 2, 3...)
 PER_GROUP = 120                 # (a warp keeps its map number as an s8: at most 127 maps a group)
 BLOCKED = 0x0001 | (1 << 10) | (3 << 12)   # metatile 1, collision, elevation 3
-# the tilesets only give behaviors (the 3D engine draws the picture): General's, and this secondary one's counter, PC and
-# TV (tools/sinnoh/build_pack.py BEHAVIOR_METATILE)
+# the tilesets aren't used: the 3D engine draws the picture and each block's metatile id carries its behavior
+# (tools/sinnoh/build_pack.py BEHAVIOR, fieldmap.c GetMetatileAttributesById)
 SECONDARY = 'gTileset_Johto_GoldenrodUndergroundEntrances'
 
 # Platinum's day songs -> SINNOH's song slots (tools/kaisong/sinnoh_songs.py; S3D_MapMusic plays <slot>_night by night)
@@ -211,16 +211,38 @@ def triggers(p, root, have):
     return out
 
 
-def warps(p, ids, root):
+def kept_warps(p, ids, root):
+    """[(Platinum's warp number, warp)] of the place's warps that lead to kept places with a way out of their own (an
+    elevator room has none: Platinum's elevators run by script, so its doors stay shut until those are written)"""
+    return [(i, w) for i, w in enumerate(events(root, p['place'])['warp_events'])
+            if w['dest_header_id'] in ids and w['dest_header_id'] in _exits(ids, root)]
+
+
+_exit_cache = {}
+
+
+def _exits(ids, root):
+    """Headers of the kept places that have a warp to a kept place"""
+    key = id(ids)
+    if key not in _exit_cache:
+        _exit_cache[key] = {h for h, p in _places_by_header.items()
+                            if any(w['dest_header_id'] in ids for w in events(root, p['place'])['warp_events'])}
+    return _exit_cache[key]
+
+
+_places_by_header = {}
+
+
+def warps(p, ids, root, numbers):
     """The place's warps as the field engine's: local tiles, the kept place each leads to (warps to places left out
-    are dropped) and the warp there"""
+    are dropped) and the warp there, renumbered as that place's kept warps are (numbers: {map id: {Platinum's warp
+    number: ours}}); a warp to one that was dropped goes to that place's first"""
     out = []
-    for w in events(root, p['place'])['warp_events']:
-        dest = ids.get(w['dest_header_id'])
-        if dest is None:
-            continue
+    for _, w in kept_warps(p, ids, root):
+        dest = ids[w['dest_header_id']]
+        to = numbers.get(dest, {}).get(w['dest_warp_id'], 0)
         out.append({'x': w['x'] - p['x0'] * 32, 'y': w['z'] - p['z0'] * 32, 'elevation': 0, 'dest_map': dest,
-                    'dest_warp_id': str(w['dest_warp_id'])})
+                    'dest_warp_id': str(to)})
     return out
 
 
@@ -247,6 +269,7 @@ def main():
     src = open_source(root)
     every = places(src, root)
     map_ids = {p['header']: p['id'] for p in every}
+    _places_by_header.update({p['header']: p for p in every})
     groups = json.load(open('data/maps/map_groups.json'))
     layouts = json.load(open('data/layouts/layouts.json'))
     # the outdoor places in group 40 (numbers kept), the buildings after them in groups of PER_GROUP (by name, so a
@@ -271,6 +294,7 @@ def main():
         name = INDOOR_GROUP % (k + 1)
         groups['group_order'].insert(at + k, name)
         groups[name] = [p['name'] for p in indoor[k * PER_GROUP:(k + 1) * PER_GROUP]]
+    numbers = {p['id']: {pi: k for k, (pi, _) in enumerate(kept_warps(p, map_ids, root))} for p in every}
     for p in outdoor + indoor:
         bw, bh = p['x1'] - p['x0'] + 1, p['z1'] - p['z0'] + 1
         w, h = 32 * bw, 32 * bh
@@ -294,7 +318,7 @@ def main():
              'connections': connections(p, every)}
         have = labels(p['name'])
         m['object_events'] = people(p, root, have)
-        m['warp_events'] = warps(p, map_ids, root)
+        m['warp_events'] = warps(p, map_ids, root, numbers)
         m['coord_events'] = triggers(p, root, have)
         m['bg_events'] = signs(p, root, have)
         json.dump(m, open(path, 'w'), indent=2)

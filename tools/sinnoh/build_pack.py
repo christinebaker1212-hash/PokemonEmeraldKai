@@ -25,7 +25,7 @@ Format (little endian), version 3:
           s16 mesh (-1 none), s16 altitude, u16 light set, u16 props; props: s16 mesh, f32 3x4 transform (rows);
           then the cell's 32x32 map blocks (u16, the field engine's: metatile | collision << 10 | elevation << 12)
           from Platinum's terrain attributes (bit 15 collision, low byte the behavior: Platinum's behaviors share
-          Emerald's numbers for the common ones, so the metatile is one of the General tileset's with that behavior);
+          Emerald's numbers for the common ones; the metatile id is 0x300 + the behavior, BEHAVIOR below);
           then the ground's heights at each tile's centre (row by row): u8 count (0-3) per tile, then f32 heights x3
           per tile, lowest first (more than one: a bridge over the ground). From the block's BDHC (its plates: a
           rectangle in x, z around the block's centre and the plane the ground follows there); world heights.
@@ -45,13 +45,20 @@ from places import places, events  # noqa: E402
 
 VERSION = 3
 
-# Platinum behavior -> a metatile with the same Emerald behavior: the General tileset's (tall grass, water, sand,
-# ledges...) and, from 0x200, the secondary tileset SINNOH's layouts use (gen_maps.py SECONDARY: a counter, so the
-# people behind one are talked to across it, a PC and a TV)
-BEHAVIOR_METATILE = {0x02: 0x00D, 0x03: 0x015, 0x10: 0x02D, 0x15: 0x02C, 0x16: 0x0C8, 0x17: 0x13B, 0x21: 0x11C,
-                     0x38: 0x086, 0x39: 0x085, 0x3B: 0x087,
-                     0x80: 0x219, 0x83: 0x25B, 0x86: 0x2A9}
-WATER = (0x10, 0x15)
+# A block's metatile id carries the tile's behavior: S3D_METATILE_BEHAVIOR (0x300, include/s3d.h) + the game's behavior
+# (fieldmap.c GetMetatileAttributesById), so any of the game's behaviors can be used without a tileset that has it.
+# Platinum's behaviors share the game's numbers for the common ones (grass, cave floors with encounters, water,
+# waterfalls, ice, sand, the one-way tiles, ledges, forced walking, arrow warps, counters, PCs, the town map, TVs,
+# bookshelves, shop shelves, trash cans); the rest are plain ground (0).
+METATILE_BEHAVIOR = 0x300
+SAME = {0x02, 0x03, 0x08, 0x0B, 0x0C, 0x10, 0x13, 0x15, 0x16, 0x17, 0x20, 0x21, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36,
+        0x37, 0x38, 0x39, 0x3A, 0x3B, 0x40, 0x41, 0x42, 0x43, 0x62, 0x63, 0x64, 0x65, 0x80, 0x83, 0x85, 0x86, 0xE0,
+        0xE1, 0xE2, 0xE4, 0xE5}
+BEHAVIOR = {b: b for b in SAME}
+BEHAVIOR.update({0x5A: 0x3A, 0x5B: 0x3B, 0x5C: 0x39, 0x5D: 0x38,   # (ledges jumped twice: as ledges)
+                 0xEB: 0xE5, 0xEC: 0xE5})                           # (other shop shelves)
+ROCK_CLIMB = (0x4B, 0x4C)      # walkable: this game has no HM restrictions (and no ROCK CLIMB of its own)
+WATER = (0x10, 0x13, 0x15)     # surfable (0x13: a waterfall, climbed with WATERFALL)
 
 
 def heights(land):
@@ -94,8 +101,8 @@ def heights(land):
 # Warp tiles (from every kept place's events): a mat walked off southward keeps Emerald's south arrow warp (0x65, the
 # same number in both games); every other warp (doors, cave mouths, stairs, escalators...) warps when stepped on, as
 # Emerald's non-animated door does
-SOUTH_MAT = 0x024      # General metatile with MB_SOUTH_ARROW_WARP
-STEP_WARP = 0x0A7      # General metatile with MB_NON_ANIMATED_DOOR
+SOUTH_MAT = 0x65       # MB_SOUTH_ARROW_WARP
+STEP_WARP = 0x60       # MB_NON_ANIMATED_DOOR
 
 
 def blocks(land, warps=None):
@@ -103,12 +110,14 @@ def blocks(land, warps=None):
     out = []
     for i, a in enumerate(land.attrs):
         if warps and i in warps:
-            out.append((SOUTH_MAT if warps[i] == 0x65 else STEP_WARP) | (3 << 12))
+            out.append((METATILE_BEHAVIOR + (SOUTH_MAT if warps[i] == 0x65 else STEP_WARP)) | (3 << 12))
             continue
         b = a & 0xFF
-        mt = BEHAVIOR_METATILE.get(b, 0x001)
+        mt = METATILE_BEHAVIOR + BEHAVIOR.get(b, 0)
         if b in WATER:
             out.append(mt | (1 << 12))                       # surfable: no collision, elevation 1
+        elif b in ROCK_CLIMB:
+            out.append(mt | (3 << 12))
         else:
             out.append(mt | ((1 if a & 0x8000 else 0) << 10) | (3 << 12))
     return out

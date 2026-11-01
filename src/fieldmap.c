@@ -417,6 +417,10 @@ u16 Fieldmap_PrimaryPals(const struct MapLayout *layout)
 u16 GetMetatileAttributesById(u16 metatile)
 {
     u16 split = Fieldmap_PrimaryMetatiles(gMapHeader.mapLayout);
+    // Moemon Kai: SINNOH's tiles carry their behavior in their id (S3D_METATILE_BEHAVIOR + behavior, from Platinum's
+    // terrain attributes: tools/sinnoh/build_pack.py), so any of the game's behaviors can be used there
+    if (metatile >= S3D_METATILE_BEHAVIOR && S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+        return metatile - S3D_METATILE_BEHAVIOR;
     if (metatile < split)
     {
         return gMapHeader.mapLayout->primaryTileset->metatileAttributes[metatile];

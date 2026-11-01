@@ -3347,7 +3347,18 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
 - Flags (moved 2026-11-01: JOHTO's / KANTO's trainers' "beaten" flags are 0x3000-0x331C): SINNOH's badges
   0x3320-0x3327, ids.py's flags 0x3328-0x376F, gym TMs given 0x3770-0x3777, trainers 0x3780-0x3DFF, hidden items 0x3E00-0x3FFE, FLAG_SINNOH_HIDDEN
   0x3FFF.
-- Tiles: SINNOH's layouts use the General tileset and gTileset_Johto_GoldenrodUndergroundEntrances (only for behaviors:
+- Behaviors (2026-11-01): a SINNOH block's metatile id is S3D_METATILE_BEHAVIOR (0x300) + the game's behavior
+  (build_pack.py BEHAVIOR: Platinum's common behaviors share the game's numbers: grass, cave floors with
+  encounters, water, waterfalls, ice, sand, one-way tiles, ledges, forced walking, arrow warps, counters, PCs, TVs,
+  bookshelves...), read back by fieldmap.c GetMetatileAttributesById on SINNOH maps; field_camera.c draws those ids
+  as metatile 1 (the 3D engine draws SINNOH). ROCK CLIMB walls are walkable; waterfalls are surfable.
+- Warps keep their numbers: a warp to a place's N-th Platinum warp goes to that warp's number after the dropped
+  ones (gen_maps.py kept_warps); warps into elevator rooms (no doors of their own, Platinum runs them by script)
+  are left out until elevators are written.
+- Reachability: tools/sinnoh/reach.py POKEPLATINUM_DIR [MAP...] lists the people and items no free tile reaches on
+  their map; `--from MAP X Y` lists the maps a player gets to from there (doors and map edges; water walkable).
+  From CANALAVE's dock: 327 of 499 (2026-11-01).
+- (Superseded) Tiles: SINNOH's layouts use the General tileset and gTileset_Johto_GoldenrodUndergroundEntrances (only for behaviors:
   the 3D engine draws the picture): Platinum's table / PC / TV behaviors (0x80 / 0x83 / 0x86, the game's MB_COUNTER /
   MB_PC / MB_TELEVISION numbers) get that secondary's metatiles (build_pack.py BEHAVIOR_METATILE), so a nurse or clerk
   behind a counter is talked to across it. Test sinnoh_words.

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "s3d.h"   // Moemon Kai: S3D_METATILE_BEHAVIOR
 #include "berry.h"
 #include "bike.h"
 #include "field_camera.h"
@@ -237,6 +238,8 @@ static void DrawMetatileAt(const struct MapLayout *mapLayout, u16 offset, int x,
 
     if (metatileId > NUM_METATILES_TOTAL)
         metatileId = 0;
+    if (metatileId >= S3D_METATILE_BEHAVIOR)
+        metatileId = 1;   // Moemon Kai: SINNOH's tiles carry a behavior, not art (the 3D engine draws SINNOH)
     if (metatileId < Fieldmap_PrimaryMetatiles(mapLayout))   // Moemon Kai: FRLG split
     {
         metatiles = mapLayout->primaryTileset->metatiles;
