@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include "global.h"
 #include "s3d.h"   // Moemon Kai: SINNOH's map groups
+#include "battle_pyramid.h"
 #include "event_data.h"
 #include "mp.h"
 #include "mp_region.h"
@@ -92,9 +93,13 @@ bool8 MP_Region_IsSharedMap(u8 group, u8 num)
     return FALSE;
 }
 
+static s8 sRegionAsked = -1;   // MP_Region_WildInfoIn: the region a table is looked at as
+
 u8 MP_Region_Current(void)
 {
     u8 group = gSaveBlock1Ptr->location.mapGroup;
+    if (sRegionAsked >= 0)
+        return sRegionAsked;
     if (MP_Region_IsSharedMap(group, gSaveBlock1Ptr->location.mapNum) && gRegionState.current < REGION_COUNT)
         return gRegionState.current;
     return MP_Region_OfGroup(group);
@@ -1024,6 +1029,65 @@ static bool8 RegionUsesModern(void)
 
 static const struct WildPokemonInfo *HoennModernWild(const struct WildPokemonInfo *info);
 static const struct WildPokemonInfo *SinnohModernWild(const struct WildPokemonInfo *info);
+
+// ---------------------------------------------------------------------------------------------------- starters
+// First partners are never in a wild slot, in any region (the user's call: they were too easy to find): only the
+// daily Outbreak (mp_events.c) and the MoeGatcha give them. A starter's slot takes the nearest earlier slot's
+// POKéMON (the earlier slots are the common ones), at the slot's own levels.
+static const u16 sStarterLines[] = {
+    SPECIES_BULBASAUR, SPECIES_IVYSAUR, SPECIES_VENUSAUR, SPECIES_CHARMANDER, SPECIES_CHARMELEON, SPECIES_CHARIZARD,
+    SPECIES_SQUIRTLE, SPECIES_WARTORTLE, SPECIES_BLASTOISE, SPECIES_CHIKORITA, SPECIES_BAYLEEF, SPECIES_MEGANIUM,
+    SPECIES_CYNDAQUIL, SPECIES_QUILAVA, SPECIES_TYPHLOSION, SPECIES_TOTODILE, SPECIES_CROCONAW, SPECIES_FERALIGATR,
+    SPECIES_TREECKO, SPECIES_GROVYLE, SPECIES_SCEPTILE, SPECIES_TORCHIC, SPECIES_COMBUSKEN, SPECIES_BLAZIKEN,
+    SPECIES_MUDKIP, SPECIES_MARSHTOMP, SPECIES_SWAMPERT, SPECIES_TURTWIG, SPECIES_GROTLE, SPECIES_TORTERRA,
+    SPECIES_CHIMCHAR, SPECIES_MONFERNO, SPECIES_INFERNAPE, SPECIES_PIPLUP, SPECIES_PRINPLUP, SPECIES_EMPOLEON,
+    SPECIES_SNIVY, SPECIES_SERVINE, SPECIES_SERPERIOR, SPECIES_TEPIG, SPECIES_PIGNITE, SPECIES_EMBOAR,
+    SPECIES_OSHAWOTT, SPECIES_DEWOTT, SPECIES_SAMUROTT, SPECIES_CHESPIN, SPECIES_QUILLADIN, SPECIES_CHESNAUGHT,
+    SPECIES_FENNEKIN, SPECIES_BRAIXEN, SPECIES_DELPHOX, SPECIES_FROAKIE, SPECIES_FROGADIER, SPECIES_GRENINJA,
+    SPECIES_ROWLET, SPECIES_DARTRIX, SPECIES_DECIDUEYE, SPECIES_LITTEN, SPECIES_TORRACAT, SPECIES_INCINEROAR,
+    SPECIES_POPPLIO, SPECIES_BRIONNE, SPECIES_PRIMARINA, SPECIES_GROOKEY, SPECIES_THWACKEY, SPECIES_RILLABOOM,
+    SPECIES_SCORBUNNY, SPECIES_RABOOT, SPECIES_CINDERACE, SPECIES_SOBBLE, SPECIES_DRIZZILE, SPECIES_INTELEON,
+    SPECIES_SPRIGATITO, SPECIES_FLORAGATO, SPECIES_MEOWSCARADA, SPECIES_FUECOCO, SPECIES_CROCALOR, SPECIES_SKELEDIRGE,
+    SPECIES_QUAXLY, SPECIES_QUAXWELL, SPECIES_QUAQUAVAL,
+};
+
+bool8 MP_IsStarterLine(u16 species)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sStarterLines); i++)
+        if (sStarterLines[i] == species)
+            return TRUE;
+    return FALSE;
+}
+
+// A wild table as the game uses it in REGION (the POKéDEX's AREA, from wherever the player is)
+const struct WildPokemonInfo *MP_Region_WildInfoIn(const struct WildPokemonInfo *info, u8 region)
+{
+    sRegionAsked = region;
+    info = MP_Region_WildInfo(info);
+    sRegionAsked = -1;
+    return info;
+}
+
+u16 MP_Gen_StandInIn(u16 species, u8 region)
+{
+    sRegionAsked = region;
+    species = MP_Gen_StandIn(species);
+    sRegionAsked = -1;
+    return species;
+}
+
+u16 MP_WildSlotSpecies(const struct WildPokemonInfo *info, u8 index)
+{
+    s32 i;
+    u16 species = info->wildPokemon[index].species;
+    if (!MP_IsStarterLine(species) || InBattlePyramid_())
+        return species;
+    for (i = (s32)index - 1; i >= 0; i--)
+        if (!MP_IsStarterLine(info->wildPokemon[i].species))
+            return info->wildPokemon[i].species;
+    return species;   // (a table of nothing else)
+}
 
 const struct WildPokemonInfo *MP_Region_WildInfo(const struct WildPokemonInfo *info)
 {

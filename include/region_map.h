@@ -111,6 +111,12 @@ u8 *GetMapNameGeneric(u8 *dest, mapsec_u16_t mapSecId);
 u8 *GetMapNameHandleAquaHideout(u8 *dest, mapsec_u16_t mapSecId);
 mapsec_u16_t CorrectSpecialMapSecId(mapsec_u16_t mapSecId);
 void ShowRegionMapForPokedexAreaScreen(struct RegionMap *regionMap);
+// Moemon Kai: the POKéDEX's AREA page on any region's map (0 HOENN, 1 JOHTO, 2 KANTO, 3-5 the Sevii Islands)
+void MP_RegionMap_AreaShow(u8 map);
+u8 MP_RegionMap_PlayerMap(void);
+u8 MP_RegionMap_MapOf(mapsec_u16_t mapsec);
+void MP_RegionMap_AreaBox(mapsec_u16_t mapsec, u16 *x, u16 *y, u16 *w, u16 *h);
+bool8 MP_RegionMap_AreaGfx(const u32 **gfx, const u32 **tilemap, const u16 **pal);
 void PokedexAreaScreen_UpdateRegionMapVariablesAndVideoRegs(s16 x, s16 y);
 void CB2_OpenFlyMap(void);
 bool8 IsRegionMapZoomed(void);

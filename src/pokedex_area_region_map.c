@@ -5,6 +5,8 @@
 #include "malloc.h"
 #include "palette.h"
 #include "pokedex_area_region_map.h"
+#include "region_map.h"
+#include "decompress.h"
 
 static EWRAM_DATA u8 *sPokedexAreaMapBgNum = NULL;
 
@@ -18,9 +20,31 @@ void LoadPokedexAreaMapGfx(const struct PokedexAreaMapTemplate *template)
 {
     u8 mode;
     void *tilemap;
+    const u32 *qzGfx, *qzTilemap;
+    const u16 *qzPal;
     sPokedexAreaMapBgNum = Alloc(sizeof(sPokedexAreaMapBgNum));
     mode = template->mode;
 
+    if (mode == 0 && MP_RegionMap_AreaGfx(&qzGfx, &qzTilemap, &qzPal))
+    {
+        // Moemon Kai: JOHTO's / KANTO's town map art (its 64x64 affine map: the top-left 32x32 as a text map)
+        static EWRAM_DATA u16 sTilemap[32 * 32];
+        u8 *bytes = Alloc(64 * 64);
+        u32 i;
+        SetBgAttribute(template->bg, BG_ATTR_METRIC, 0);
+        DecompressAndCopyTileDataToVram(template->bg, qzGfx, 0, template->offset, 0);
+        LZ77UnCompWram(qzTilemap, bytes);
+        for (i = 0; i < 32 * 32; i++)
+            sTilemap[i] = bytes[(i / 32) * 64 + (i % 32)];
+        Free(bytes);
+        LoadBgTilemap(template->bg, sTilemap, sizeof(sTilemap), 0);
+        ChangeBgX(template->bg, 0, BG_COORD_SET);
+        ChangeBgY(template->bg, 0, BG_COORD_SET);
+        SetBgAttribute(template->bg, BG_ATTR_PALETTEMODE, 1);
+        CpuCopy32(qzPal, &gPlttBufferUnfaded[BG_PLTT_ID(7)], 3 * PLTT_SIZE_4BPP);
+        *sPokedexAreaMapBgNum = template->bg;
+        return;
+    }
     if (mode == 0)
     {
         SetBgAttribute(template->bg, BG_ATTR_METRIC, 0);

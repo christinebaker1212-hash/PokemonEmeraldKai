@@ -1,0 +1,8 @@
+# The POKéDEX's AREA from the tables the game uses (pokedex_area_screen.c, mp_region.c MP_Region_WildInfoIn): SENTRET
+# (JOHTO's) opens on JOHTO's map from HOENN; VULLABY (a GEN 5 slot of HOENN's routes at GEN 9) on HOENN's, with
+# JOHTO's too (Quetzal's tables); SELECT / UP / DOWN go to the next map with it (KANTO's for SENTRET); BULBASAUR (no starter is wild) is AREA UNKNOWN. Shots a_*.png.
+MODE=1
+GEN=9
+TMO=150
+EXPECT_A=("dex area: species 161 map 1 maps with 6 areas 1" "dex area: species 161 map 2" "dex area: species 654 map 0 maps with 7 areas 1" "dex area: species 654 map 1" "dex area: species 1 map 0 maps with 0 areas 0 markers 0")
+UNEXPECT_A=("[crash]")

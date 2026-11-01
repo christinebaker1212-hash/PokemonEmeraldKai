@@ -640,11 +640,51 @@ void InitRegionMapData(struct RegionMap *regionMap, const struct BgTemplate *tem
     }
 }
 
+// Moemon Kai: the POKéDEX's AREA page shows any region's map (MP_RegionMap_AreaShow first), the player's icon only on
+// the player's own
+static u8 sAreaMap = QZMAP_HOENN;
+
+void MP_RegionMap_AreaShow(u8 map)
+{
+    sAreaMap = sShownMap = map < QZMAP_COUNT ? map : QZMAP_HOENN;
+}
+
+u8 MP_RegionMap_PlayerMap(void)
+{
+    ChooseShownMap();
+    sShownMap = sAreaMap;
+    return sPlayerMap;
+}
+
+u8 MP_RegionMap_MapOf(mapsec_u16_t mapsec)   // 0xFF: on no map
+{
+    u8 map = MapOfMapSec(mapsec);
+    return map < QZMAP_COUNT ? map : 0xFF;
+}
+
+void MP_RegionMap_AreaBox(mapsec_u16_t mapsec, u16 *x, u16 *y, u16 *w, u16 *h)
+{
+    const struct RegionMapLocation *b = MapSecBox(mapsec);
+    *x = b->x, *y = b->y, *w = b->width, *h = b->height;
+}
+
+bool8 MP_RegionMap_AreaGfx(const u32 **gfx, const u32 **tilemap, const u16 **pal)
+{
+    if (sShownMap == QZMAP_HOENN)
+        return FALSE;
+    *gfx = sQzMapGfx[sShownMap - 1].gfx;
+    *tilemap = sQzMapGfx[sShownMap - 1].tilemap;
+    *pal = sQzMapGfx[sShownMap - 1].pal;
+    return TRUE;
+}
+
 void ShowRegionMapForPokedexAreaScreen(struct RegionMap *regionMap)
 {
     sRegionMap = regionMap;
-    sShownMap = sPlayerMap = QZMAP_HOENN;   // Moemon Kai: the POKéDEX's area map is Hoenn's
-    InitMapBasedOnPlayerLocation();
+    ChooseShownMap();   // (the player's map)
+    sShownMap = sAreaMap;
+    if (sShownMap == sPlayerMap)
+        InitMapBasedOnPlayerLocation();
     sRegionMap->playerIconSpritePosX = sRegionMap->cursorPosX;
     sRegionMap->playerIconSpritePosY = sRegionMap->cursorPosY;
 }

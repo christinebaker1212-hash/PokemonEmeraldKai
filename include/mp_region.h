@@ -94,5 +94,9 @@ bool8 MP_Gen_Allowed(u16 species);                 // shown in the region the pl
 bool8 MP_Gen_ObjectHidden(u8 localId);             // a later generation's POKéMON on the map (JOHTO / KANTO)
 u16 MP_Gen_StandIn(u16 species);                   // its nearest earlier form that is
 const struct WildPokemonInfo *MP_Region_WildInfo(const struct WildPokemonInfo *info);   // the Gen 3 table before it
+bool8 MP_IsStarterLine(u16 species);              // a first partner of any generation (or its evolution)
+u16 MP_WildSlotSpecies(const struct WildPokemonInfo *info, u8 index);   // the slot's species, never a starter
+const struct WildPokemonInfo *MP_Region_WildInfoIn(const struct WildPokemonInfo *info, u8 region);   // as seen in REGION
+u16 MP_Gen_StandInIn(u16 species, u8 region);
 const struct Trainer *MP_Region_TrainerData(u16 trainerNum);                            // the Gen 3 team before it
 #endif
