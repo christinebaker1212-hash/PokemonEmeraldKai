@@ -152,7 +152,7 @@
       "movement_range_y": 2,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_PastoriaCity_EventScript_Person10",
       "flag": "0"
     },
     {
@@ -165,7 +165,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_PastoriaCity_EventScript_Person11",
       "flag": "0"
     },
     {
@@ -178,7 +178,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_PastoriaCity_EventScript_Person12",
       "flag": "0"
     },
     {
@@ -191,7 +191,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_PastoriaCity_EventScript_Person13",
       "flag": "0"
     },
     {
@@ -256,7 +256,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_PastoriaCity_EventScript_Person18",
       "flag": "0"
     },
     {
@@ -269,7 +269,7 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_PastoriaCity_EventScript_Person19",
       "flag": "0"
     },
     {
@@ -282,7 +282,7 @@
       "movement_range_y": 3,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_PastoriaCity_EventScript_Person20",
       "flag": "0"
     },
     {
@@ -334,7 +334,7 @@
       "movement_range_y": 2,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_PastoriaCity_EventScript_Person24",
       "flag": "0"
     },
     {
@@ -347,7 +347,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_PastoriaCity_EventScript_Person25",
       "flag": "0"
     },
     {
@@ -360,7 +360,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_PastoriaCity_EventScript_Person26",
       "flag": "0"
     },
     {
@@ -491,6 +491,38 @@
   ],
   "coord_events": [],
   "bg_events": [
+    {
+      "type": "sign",
+      "x": 28,
+      "y": 28,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_PastoriaCity_EventScript_Sign5"
+    },
+    {
+      "type": "sign",
+      "x": 17,
+      "y": 27,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_PastoriaCity_EventScript_Sign6"
+    },
+    {
+      "type": "sign",
+      "x": 37,
+      "y": 10,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_PastoriaCity_EventScript_Sign7"
+    },
+    {
+      "type": "sign",
+      "x": 33,
+      "y": 41,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_PastoriaCity_EventScript_Sign9"
+    },
     {
       "type": "hidden_item",
       "x": 7,

@@ -77,10 +77,15 @@ Sinnoh_TwinleafTownPlayerHouse1f_Text_Bg8:
 	.string "pinch of salt, and a lot of patience.”$"
 
 Sinnoh_TwinleafTownPlayerHouse1f_Text_Person1:
-	.string "Oh! A traveler? Welcome to TWINLEAF.\p"
-	.string "My kid left on a MOéMON journey last\n"
-	.string "spring. The house got so quiet...\p"
-	.string "Stop by any time. I always cook too\n"
-	.string "much anyway.$"
+	.string "Oh! You're the TRAINER from overseas!\n"
+	.string "PROF. ROWAN told me you were coming.\p"
+	.string "The room upstairs is yours while\n"
+	.string "you're in SINNOH. My kid left on a\l"
+	.string "MOéMON journey last spring, so the\l"
+	.string "house got so quiet...\p"
+	.string "PROF. ROWAN's lab is in SANDGEM TOWN,\n"
+	.string "past ROUTE 201. Come home whenever\l"
+	.string "you're tired. I always cook too much\l"
+	.string "anyway.$"
 
 @ --- end of SINNOH words ---

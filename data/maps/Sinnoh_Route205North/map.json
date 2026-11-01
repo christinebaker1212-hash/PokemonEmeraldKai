@@ -100,7 +100,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_Route205North_EventScript_Person6",
       "flag": "0"
     },
     {
@@ -200,6 +200,22 @@
   ],
   "coord_events": [],
   "bg_events": [
+    {
+      "type": "sign",
+      "x": 6,
+      "y": 11,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_Route205North_EventScript_Sign4"
+    },
+    {
+      "type": "sign",
+      "x": 25,
+      "y": 20,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_Route205North_EventScript_Sign5"
+    },
     {
       "type": "hidden_item",
       "x": 29,

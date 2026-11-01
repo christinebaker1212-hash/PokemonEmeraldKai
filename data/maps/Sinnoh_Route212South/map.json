@@ -516,7 +516,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_Route212South_EventScript_Person38",
       "flag": "0"
     },
     {
@@ -529,7 +529,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_Route212South_EventScript_Person39",
       "flag": "0"
     },
     {
@@ -542,7 +542,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_Route212South_EventScript_Person40",
       "flag": "0"
     },
     {
@@ -609,6 +609,30 @@
   ],
   "coord_events": [],
   "bg_events": [
+    {
+      "type": "sign",
+      "x": 122,
+      "y": 13,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_Route212South_EventScript_Sign10"
+    },
+    {
+      "type": "sign",
+      "x": 68,
+      "y": 15,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_Route212South_EventScript_Sign11"
+    },
+    {
+      "type": "sign",
+      "x": 75,
+      "y": 18,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_Route212South_EventScript_Sign42"
+    },
     {
       "type": "hidden_item",
       "x": 45,

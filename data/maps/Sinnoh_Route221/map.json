@@ -254,6 +254,14 @@
   "coord_events": [],
   "bg_events": [
     {
+      "type": "sign",
+      "x": 84,
+      "y": 17,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_Route221_EventScript_Sign7"
+    },
+    {
       "type": "hidden_item",
       "x": 43,
       "y": 27,

@@ -113,12 +113,92 @@
   "coord_events": [],
   "bg_events": [
     {
+      "type": "sign",
+      "x": 16,
+      "y": 54,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_PokemonLeague_EventScript_Sign1"
+    },
+    {
+      "type": "sign",
+      "x": 17,
+      "y": 36,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_PokemonLeague_EventScript_Sign2"
+    },
+    {
       "type": "hidden_item",
       "x": 10,
       "y": 36,
       "elevation": 0,
       "item": "ITEM_SKY_PLATE",
       "flag": "0x3E78"
+    },
+    {
+      "type": "sign",
+      "x": 10,
+      "y": 33,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_PokemonLeague_EventScript_Bg2"
+    },
+    {
+      "type": "sign",
+      "x": 11,
+      "y": 33,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_PokemonLeague_EventScript_Bg3"
+    },
+    {
+      "type": "sign",
+      "x": 19,
+      "y": 33,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_PokemonLeague_EventScript_Bg4"
+    },
+    {
+      "type": "sign",
+      "x": 20,
+      "y": 33,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_PokemonLeague_EventScript_Bg5"
+    },
+    {
+      "type": "sign",
+      "x": 5,
+      "y": 17,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_PokemonLeague_EventScript_Bg6"
+    },
+    {
+      "type": "sign",
+      "x": 6,
+      "y": 17,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_PokemonLeague_EventScript_Bg7"
+    },
+    {
+      "type": "sign",
+      "x": 24,
+      "y": 17,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_PokemonLeague_EventScript_Bg8"
+    },
+    {
+      "type": "sign",
+      "x": 25,
+      "y": 17,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_PokemonLeague_EventScript_Bg9"
     }
   ]
 }

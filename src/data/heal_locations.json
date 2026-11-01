@@ -343,6 +343,12 @@
       "y": 27
     },
     {
+      "id": "HEAL_LOCATION_SINNOH_TWINLEAF_TOWN",
+      "map": "MAP_SINNOH_TWINLEAF_TOWN",
+      "x": 20,
+      "y": 22
+    },
+    {
       "id": "HEAL_LOCATION_SINNOH_CANALAVE_CITY",
       "map": "MAP_SINNOH_CANALAVE_CITY",
       "x": 26,

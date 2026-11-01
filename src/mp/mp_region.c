@@ -197,9 +197,12 @@ void MP_Region_GoToStartHouse(u8 region)
     }
     else if (region == REGION_SINNOH)
     {
-        // SINNOH has no opening of its own: the boat comes in at CANALAVE's dock, its CENTER the place to come back to
+        // SINNOH: the boat comes in at CANALAVE's dock, where the harbor sailor meets the player and takes them to
+        // TWINLEAF TOWN, where the journey starts (CANALAVE's is the sixth GYM): VAR_SINNOH_ARRIVAL 1 runs that
+        // (data/maps/Sinnoh_CanalaveCity/scripts.inc)
         SetWarpDestination(MAP_GROUP(MAP_SINNOH_CANALAVE_CITY), MAP_NUM(MAP_SINNOH_CANALAVE_CITY), WARP_ID_NONE, 11, 22);
-        SetLastHealLocationWarp(HEAL_LOCATION_SINNOH_CANALAVE_CITY);
+        SetLastHealLocationWarp(HEAL_LOCATION_SINNOH_TWINLEAF_TOWN);
+        VarSet(VAR_SINNOH_ARRIVAL, 1);
     }
 }
 

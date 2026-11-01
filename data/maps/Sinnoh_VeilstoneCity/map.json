@@ -35,7 +35,7 @@
       "movement_range_y": 3,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Person1",
       "flag": "0"
     },
     {
@@ -48,7 +48,7 @@
       "movement_range_y": 2,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Person2",
       "flag": "0"
     },
     {
@@ -61,7 +61,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Person3",
       "flag": "0"
     },
     {
@@ -74,7 +74,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Person4",
       "flag": "0"
     },
     {
@@ -87,7 +87,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Person5",
       "flag": "0"
     },
     {
@@ -100,7 +100,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Person6",
       "flag": "0"
     },
     {
@@ -308,7 +308,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Person22",
       "flag": "0"
     },
     {
@@ -321,7 +321,7 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Person23",
       "flag": "0"
     },
     {
@@ -399,7 +399,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Person29",
       "flag": "0"
     },
     {
@@ -412,7 +412,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Person30",
       "flag": "0"
     }
   ],
@@ -540,6 +540,70 @@
   "coord_events": [],
   "bg_events": [
     {
+      "type": "sign",
+      "x": 25,
+      "y": 36,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Sign9"
+    },
+    {
+      "type": "sign",
+      "x": 24,
+      "y": 18,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Sign10"
+    },
+    {
+      "type": "sign",
+      "x": 47,
+      "y": 17,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Sign11"
+    },
+    {
+      "type": "sign",
+      "x": 32,
+      "y": 27,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Sign12"
+    },
+    {
+      "type": "sign",
+      "x": 16,
+      "y": 35,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Sign13"
+    },
+    {
+      "type": "sign",
+      "x": 37,
+      "y": 47,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Sign14"
+    },
+    {
+      "type": "sign",
+      "x": 42,
+      "y": 47,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Sign15"
+    },
+    {
+      "type": "sign",
+      "x": 43,
+      "y": 59,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Sign16"
+    },
+    {
       "type": "hidden_item",
       "x": 16,
       "y": 16,
@@ -554,6 +618,38 @@
       "elevation": 0,
       "item": "ITEM_PP_UP",
       "flag": "0x3E28"
+    },
+    {
+      "type": "sign",
+      "x": 57,
+      "y": 40,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Bg3"
+    },
+    {
+      "type": "sign",
+      "x": 58,
+      "y": 53,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Bg4"
+    },
+    {
+      "type": "sign",
+      "x": 60,
+      "y": 52,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Bg5"
+    },
+    {
+      "type": "sign",
+      "x": 59,
+      "y": 46,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_VeilstoneCity_EventScript_Bg6"
     }
   ]
 }

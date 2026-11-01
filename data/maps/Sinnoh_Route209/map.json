@@ -308,7 +308,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_Route209_EventScript_Person22",
       "flag": "0"
     },
     {
@@ -399,7 +399,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_Route209_EventScript_Person29",
       "flag": "0"
     },
     {
@@ -481,6 +481,30 @@
   "coord_events": [],
   "bg_events": [
     {
+      "type": "sign",
+      "x": 7,
+      "y": 52,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_Route209_EventScript_Sign10"
+    },
+    {
+      "type": "sign",
+      "x": 51,
+      "y": 6,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_Route209_EventScript_Sign11"
+    },
+    {
+      "type": "sign",
+      "x": 52,
+      "y": 37,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_Route209_EventScript_Sign32"
+    },
+    {
       "type": "hidden_item",
       "x": 53,
       "y": 22,
@@ -495,6 +519,38 @@
       "elevation": 0,
       "item": "ITEM_GREAT_BALL",
       "flag": "0x3E20"
+    },
+    {
+      "type": "sign",
+      "x": 54,
+      "y": 41,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_Route209_EventScript_Bg3"
+    },
+    {
+      "type": "sign",
+      "x": 54,
+      "y": 42,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_Route209_EventScript_Bg4"
+    },
+    {
+      "type": "sign",
+      "x": 55,
+      "y": 42,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_Route209_EventScript_Bg5"
+    },
+    {
+      "type": "sign",
+      "x": 55,
+      "y": 41,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_Route209_EventScript_Bg6"
     },
     {
       "type": "hidden_item",

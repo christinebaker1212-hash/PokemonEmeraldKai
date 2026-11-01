@@ -378,6 +378,14 @@
       "elevation": 0,
       "item": "ITEM_ULTRA_BALL",
       "flag": "0x3EAC"
+    },
+    {
+      "type": "sign",
+      "x": 44,
+      "y": 11,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_Route224_EventScript_Bg8"
     }
   ]
 }

@@ -44,6 +44,11 @@ def main():
         else:
             s = re.sub(r'(%s_OnTransition:\n\tsetrespawn )\w+' % name, lambda m: m.group(1) + heal, s)
         open(path, 'w', encoding='utf-8').write(s)
+    # TWINLEAF TOWN, where SINNOH starts (the first visit: MP_Region_GoToStartHouse): in front of that house
+    tw = maps['MAP_SINNOH_TWINLEAF_TOWN'][1]
+    door = next(w for w in tw['warp_events'] if w['dest_map'] == 'MAP_SINNOH_TWINLEAF_TOWN_PLAYER_HOUSE1F')
+    found.insert(0, {'id': 'HEAL_LOCATION_SINNOH_TWINLEAF_TOWN', 'map': 'MAP_SINNOH_TWINLEAF_TOWN', 'x': door['x'],
+                     'y': door['y'] + 1})
     p = 'src/data/heal_locations.json'
     data = json.load(open(p))
     data['heal_locations'] = [h for h in data['heal_locations'] if not h['map'].startswith('MAP_SINNOH_')] + found

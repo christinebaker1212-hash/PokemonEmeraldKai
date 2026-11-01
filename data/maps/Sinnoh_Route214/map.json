@@ -435,6 +435,22 @@
   "coord_events": [],
   "bg_events": [
     {
+      "type": "sign",
+      "x": 12,
+      "y": 16,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_Route214_EventScript_Sign12"
+    },
+    {
+      "type": "sign",
+      "x": 22,
+      "y": 77,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_Route214_EventScript_Sign13"
+    },
+    {
       "type": "hidden_item",
       "x": 20,
       "y": 55,

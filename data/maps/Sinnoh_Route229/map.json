@@ -66,7 +66,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_Route229_EventScript_Person3",
       "flag": "0"
     },
     {
@@ -281,6 +281,14 @@
   "warp_events": [],
   "coord_events": [],
   "bg_events": [
+    {
+      "type": "sign",
+      "x": 32,
+      "y": 18,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_Route229_EventScript_Sign2"
+    },
     {
       "type": "hidden_item",
       "x": 54,

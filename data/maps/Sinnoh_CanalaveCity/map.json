@@ -30,7 +30,7 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_CanalaveCity_EventScript_Person1",
       "flag": "0"
     },
     {
@@ -43,7 +43,7 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_CanalaveCity_EventScript_Person2",
       "flag": "0"
     },
     {
@@ -56,7 +56,7 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_CanalaveCity_EventScript_Person3",
       "flag": "0"
     },
     {
@@ -69,7 +69,7 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_CanalaveCity_EventScript_Person4",
       "flag": "0"
     },
     {
@@ -147,7 +147,7 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_CanalaveCity_EventScript_Person10",
       "flag": "0"
     },
     {
@@ -160,7 +160,7 @@
       "movement_range_y": 1,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_CanalaveCity_EventScript_Person11",
       "flag": "0"
     },
     {
@@ -349,6 +349,62 @@
   ],
   "coord_events": [],
   "bg_events": [
+    {
+      "type": "sign",
+      "x": 3,
+      "y": 18,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_CanalaveCity_EventScript_Sign5"
+    },
+    {
+      "type": "sign",
+      "x": 4,
+      "y": 28,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_CanalaveCity_EventScript_Sign6"
+    },
+    {
+      "type": "sign",
+      "x": 9,
+      "y": 48,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_CanalaveCity_EventScript_Sign7"
+    },
+    {
+      "type": "sign",
+      "x": 22,
+      "y": 50,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_CanalaveCity_EventScript_Sign8"
+    },
+    {
+      "type": "sign",
+      "x": 5,
+      "y": 44,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_CanalaveCity_EventScript_Sign9"
+    },
+    {
+      "type": "sign",
+      "x": 24,
+      "y": 10,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_CanalaveCity_EventScript_Sign18"
+    },
+    {
+      "type": "sign",
+      "x": 27,
+      "y": 8,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_CanalaveCity_EventScript_Bg1"
+    },
     {
       "type": "hidden_item",
       "x": 4,

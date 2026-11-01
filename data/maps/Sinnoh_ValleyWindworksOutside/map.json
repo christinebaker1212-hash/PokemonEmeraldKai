@@ -137,12 +137,28 @@
   "coord_events": [],
   "bg_events": [
     {
+      "type": "sign",
+      "x": 16,
+      "y": 19,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
+      "script": "Sinnoh_ValleyWindworksOutside_EventScript_Sign2"
+    },
+    {
       "type": "hidden_item",
       "x": 12,
       "y": 11,
       "elevation": 0,
       "item": "ITEM_MAX_ELIXIR",
       "flag": "0x3E00"
+    },
+    {
+      "type": "sign",
+      "x": 19,
+      "y": 14,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_ValleyWindworksOutside_EventScript_Bg2"
     }
   ]
 }

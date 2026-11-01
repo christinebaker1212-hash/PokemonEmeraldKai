@@ -48,8 +48,10 @@ WORDS = {
         'Sign7': "It's a mailbox.|It's stuffed with flyers for running shoes.",
     },
     'Sinnoh_TwinleafTownPlayerHouse1f': {
-        'Person1': "Oh! A traveler? Welcome to TWINLEAF.|My kid left on a MOéMON journey last spring. "
-                   "The house got so quiet...|Stop by any time. I always cook too much anyway.",
+        'Person1': "Oh! You're the TRAINER from overseas! PROF. ROWAN told me you were coming.|"
+                   "The room upstairs is yours while you're in SINNOH. My kid left on a MOéMON journey last spring, "
+                   "so the house got so quiet...|PROF. ROWAN's lab is in SANDGEM TOWN, past ROUTE 201. "
+                   "Come home whenever you're tired. I always cook too much anyway.",
         'Bg1': "A cooking show is on.|\"...and that's how you make a POFFIN that even a MUNCHLAX would share!\"",
         'Bg2': "A cooking show is on.|\"...and that's how you make a POFFIN that even a MUNCHLAX would share!\"",
         'Bg3': "The fridge is full of BERRY juice and leftovers labeled \"FOR WHEN YOU VISIT.\"",
@@ -262,3 +264,18 @@ CHAMPION = ('TRAINER_SINNOH_CHAMPION_CYNTHIA',
             "Brilliant... truly brilliant.",
             "You are SINNOH's new CHAMPION. Your MOéMON fought with everything they had, and so did you.|"
             "Come. The HALL OF FAME is waiting for your team.")
+
+
+# The towns' and routes' words (tools/sinnoh/words_outdoor.py): a map's entries above win
+def _merge():
+    import os
+    import sys
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from words_outdoor import OUTDOOR
+    for name, entries in OUTDOOR.items():
+        mine = WORDS.setdefault(name, {})
+        for key, value in entries.items():
+            mine.setdefault(key, value)
+
+
+_merge()

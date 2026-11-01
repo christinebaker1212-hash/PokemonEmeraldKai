@@ -3316,7 +3316,9 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   them into the maps' scripts.inc between its markers (wrapped by the font's widths to 200 pixels, straight quotes
   made curly), then gen_maps.py gives each its script. tools/sinnoh/who.py PLATINUM_DIR PLACE lists who and what is
   on a place and their numbers (Platinum's script entry names hint at what a spot is: a TV, a fridge). Written so far:
-  TWINLEAF TOWN (and its houses), ROUTE 201, SANDGEM TOWN (houses, MART, MOéMON CENTER, the lab).
+  TWINLEAF TOWN (and its houses), ROUTE 201, SANDGEM TOWN (houses, MART, MOéMON CENTER, the lab); every town's
+  and route's people and signs (tools/sinnoh/words_outdoor.py OUTDOOR, merged into WORDS). tools/sinnoh/todo.py
+  POKEPLATINUM_DIR [outdoor|indoor] lists what's left (2026-11-01: the buildings' 942).
 - Items on the ground (tools/sinnoh/items.py): an item ball (Platinum script 7000 + k, the k-th entry of its visible
   items' list) gets the shared script for its item (data/scripts/sinnoh_items.inc, `finditem`, written by gen_maps.py)
   and keeps its Platinum "obtained" flag as a SINNOH number; a hidden item (script 8000 + k, the k-th of its hidden
@@ -3355,8 +3357,12 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   EventScript_RegionPickAll (data/scripts/mp_region.inc): the other three regions' ports, MULTI_REGIONS_FROM_*
   (the first two in the order the menus without SINNOH had; MP_RegionBoatPick maps the choice back), then customs
   and QzTravelToRegion as before. SINNOH's port is CANALAVE's dock (11, 22, beside the harbor sailor, whose
-  ('script', 'EventScript_SinnohRegionBoat') sails out); the first visit lands there too (MP_Region_GoToStartHouse:
-  no opening of its own), CANALAVE's CENTER the place to come back to. Test region_trip_hoenn_sinnoh.
+  ('script', 'EventScript_SinnohRegionBoat') sails out). The first visit (the user's call: CANALAVE's GYM is the
+  sixth, so the journey has to start in TWINLEAF): MP_Region_GoToStartHouse lands the player at the dock with
+  VAR_SINNOH_ARRIVAL (0x52F0) 1; CANALAVE's ON_FRAME table runs Sinnoh_CanalaveCity_EventScript_Arrival (hand
+  written above the generated words in its scripts.inc): the harbor sailor greets them and sails them to TWINLEAF's
+  house (2F, 8, 5), VAR 2; HEAL_LOCATION_SINNOH_TWINLEAF_TOWN (gen_heal.py) is where they come back to until a
+  CENTER. The house's mother is their host (words.py). Test region_trip_hoenn_sinnoh.
 - Boats inside SINNOH: ('boat', [maps]) sailors in CANALAVE (IRON ISLAND, FULLMOON, NEWMOON), SNOWPOINT and the
   BATTLE ZONE, and back. Test sinnoh_boat.
 - Flags (moved 2026-11-01: JOHTO's / KANTO's trainers' "beaten" flags are 0x3000-0x331C): SINNOH's badges
