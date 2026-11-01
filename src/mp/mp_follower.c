@@ -759,8 +759,16 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
             fx += s->pushX;
             fy += PMD_GROUND_DY + s->pushY;
         }
-        else if (s->gfx->size == 64)
-            fy -= 16;
+        else
+        {
+            // (1.63.13) its own sprite stands as a PMD picture would: its standing feet on the player's line, its body's
+            // middle on its point for the way it faces
+            s16 dx, dy;
+            if (MP_SpriteStandShift(fs, (s->autoOn ? s->aDir : s->dir) * 2, &dx, &dy))
+                fx += dx, fy += dy;
+            else if (s->gfx->size == 64)
+                fy -= 16;
+        }
         fs->x = fx;
         fs->y = fy;
         fs->x2 = 0;

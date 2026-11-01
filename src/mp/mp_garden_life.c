@@ -791,6 +791,9 @@ static void DrawDoing(struct Actor *a, struct Sprite *sp)
     u8 wantSink = 0, wantLift = 0;
     bool8 settled = a->moved >= 16, doing = a->act != GA_NONE && (a->phase != 0 || a->owner >= 0);
     s16 feet = sp->y + (a->pmdOn ? 0 : a->size == 64 ? 32 : 16);   // (sprite coordinates: where it stands)
+    s16 row;
+    if (!a->pmdOn && MP_SpriteFeetRow(sp, &row))
+        feet = sp->y + row;   // (1.63.13: under its standing picture's feet, wherever its sprite stands)
 
     if (a->owner >= 0)
         a->inWater = IsWater(a->cur.x, a->cur.y);   // (a friend's: in the water where their game has it)
@@ -911,7 +914,16 @@ static void Draw(struct Actor *a)
     ax = a->prev.x * 256 + (a->cur.x - a->prev.x) * a->moved * 16;
     ay = a->prev.y * 256 + (a->cur.y - a->prev.y) * a->moved * 16;
     sp->x = os->x + (s16)((ax - sL.ovx) * 16 / 256);
-    sp->y = os->y + (s16)((ay - sL.ovy) * 16 / 256) + (a->pmdOn ? PMD_GROUND_DY : a->size == 64 ? -16 : 0);
+    sp->y = os->y + (s16)((ay - sL.ovy) * 16 / 256) + (a->pmdOn ? PMD_GROUND_DY : 0);
+    if (!a->pmdOn)
+    {
+        // (1.63.13) its own sprite stands as a PMD picture would (as a follower's: mp_follower.c)
+        s16 dx, dy;
+        if (MP_SpriteStandShift(sp, a->dir * 2, &dx, &dy))
+            sp->x += dx, sp->y += dy;
+        else if (a->size == 64)
+            sp->y -= 16;
+    }
     a->animTimer++;
     frame = PoseFrame(a, sp);
     if (a->pmdOn)   // the PMD picture moves by itself: no bobbing offsets

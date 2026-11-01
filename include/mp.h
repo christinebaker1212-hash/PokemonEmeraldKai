@@ -1097,6 +1097,8 @@ struct Pokemon;
 void MP_Follower_Update(void);
 void MP_Shadow_Update(void);   // Moemon Kai: shadows under people and POKeMON (mp_shadow.c)
 bool8 MP_SpriteDrawnRows(const struct Sprite *sp, u8 *top, u8 *bottom);   // ... the rows its frame draws
+bool8 MP_SpriteStandShift(const struct Sprite *sp, u8 anim, s16 *dx, s16 *dy);   // a GBA-size POKeMON placed as PMD
+bool8 MP_SpriteFeetRow(const struct Sprite *sp, s16 *row);   // ... the row under its standing feet, below its y
 bool8 MP_Follower_TryInteract(void);
 bool8 MP_Follower_Toggle(struct Pokemon *mon);
 void MP_Follower_OnWalkSteps(void);

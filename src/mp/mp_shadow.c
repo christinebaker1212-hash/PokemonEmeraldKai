@@ -149,6 +149,74 @@ bool8 MP_SpriteDrawnRows(const struct Sprite *sp, u8 *top, u8 *bottom)
     return FrameRows(sp, cmd->frame.imageValue, top, bottom);
 }
 
+// The middle column of a frame's pixels (x2: twice it, so halves count; cached by picture) for MP_SpriteStandShift
+static bool8 FrameMiddle2(const struct Sprite *sp, u16 imageValue, s16 *mid2)
+{
+    static struct { const void *data; s16 mid2; } sCache[64];
+    const struct SpriteFrameImage *img = &sp->images[imageValue];
+    const u8 *d;
+    u32 w, h, x, y, k, n = 0, sum = 0;
+    if (img->data == NULL)
+        return FALSE;
+    k = ((uintptr_t)img->data >> 4) & 63;
+    if (sCache[k].data != img->data)
+    {
+        w = sShapeW[sp->oam.shape][sp->oam.size];
+        h = sShapeH[sp->oam.shape][sp->oam.size];
+        if (img->size < w * h / 2)
+            return FALSE;
+        d = img->data;
+        for (y = 0; y < h; y++)
+            for (x = 0; x < w; x++)
+            {
+                u8 b = d[((y / 8) * (w / 8) + x / 8) * 32 + (y % 8) * 4 + (x % 8) / 2];
+                if ((x & 1) ? b >> 4 : b & 0xF)
+                    n++, sum += x;
+            }
+        sCache[k].mid2 = n ? (s16)((sum * 2 + n / 2) / n) : (s16)(w - 1);
+        sCache[k].data = img->data;
+    }
+    *mid2 = sCache[k].mid2;
+    return TRUE;
+}
+
+// Moemon Kai (1.63.13): a GBA-size POKeMON sprite (a follower's or a Garden POKeMON's original sprite) placed as a PMD
+// picture is (mp_pmd.c UpdateLift): Y, added to a sprite standing at its tile (the old 32x32 frames' center), puts
+// its standing picture's lowest row (its first frame's) on the player's line, PMD_GROUND_DY + PMD_FEET_DY below that;
+// X, added across, puts the middle of the pixels of the frame it stands in for the facing (ANIM) on its point, as a
+// PMD picture's MpBigSprite.shift does. FALSE: a sprite whose pictures can't be read (they stay as they were).
+bool8 MP_SpriteStandShift(const struct Sprite *sp, u8 anim, s16 *dx, s16 *dy)
+{
+    const union AnimCmd *cmd;
+    u8 top, bottom;
+    s16 mid2;
+    u32 w;
+    if (!Readable(sp) || !FrameRows(sp, 0, &top, &bottom))
+        return FALSE;
+    *dy = PMD_GROUND_DY + PMD_FEET_DY - (sp->centerToCornerVecY + bottom);
+    *dx = 0;
+    cmd = &sp->anims[anim][0];
+    if (cmd->type >= 0 && FrameMiddle2(sp, cmd->frame.imageValue, &mid2))
+    {
+        w = sShapeW[sp->oam.shape][sp->oam.size];
+        if (cmd->frame.hFlip)
+            mid2 = (s16)(2 * (w - 1)) - mid2;
+        *dx = -(mid2 - (s16)(w - 1) + (mid2 > (s16)(w - 1) ? 1 : 0)) / 2;   // (to the nearest pixel, either way)
+    }
+    return TRUE;
+}
+
+// Below a sprite's y, the row under its standing picture's feet (its first frame's lowest row + 1): what a scaled
+// POKeMON sprite shrinks toward (mp_bigsprite.c), as a PMD picture shrinks toward its feet
+bool8 MP_SpriteFeetRow(const struct Sprite *sp, s16 *row)
+{
+    u8 top, bottom;
+    if (!Readable(sp) || !FrameRows(sp, 0, &top, &bottom))
+        return FALSE;
+    *row = sp->centerToCornerVecY + bottom + 1;
+    return TRUE;
+}
+
 // Where a sprite's feet are, the same whatever frame it shows: its first picture's lowest row (an object's first
 // picture is it standing, facing down). 1.63.8 took the lowest row of the animation's frames, and the walking frames,
 // a row or two lower, moved the shadow when a follower set off; each frame's own row hopped it while running.
@@ -211,9 +279,10 @@ static void Cast(u8 owner, bool8 person)
     }
     s = &gSprites[id];
     Feet(o, &x, &y, &w);
-    // people (the player in any LOOK, every NPC, GEN 4 or not): all the same, the user's mock-up oval; POKeMON by their
-    // width (1.63.9)
-    size = person ? 0 : w <= 16 ? 0 : w <= 32 ? 1 : w <= 48 ? 2 : 3;
+    // people (the player in any LOOK, every NPC, GEN 4 or not): all the same, the user's mock-up oval; POKeMON too
+    // (1.63.13, the user: every POKeMON's shadow the player's size, whatever its size or style)
+    size = 0;
+    (void)person;
     StartSpriteAnimIfDifferent(s, size);
     s->x = x;
     s->y = y - 1 - 3;   // (the oval's middle on the feet's last row; it sits 3 below the frame's middle)

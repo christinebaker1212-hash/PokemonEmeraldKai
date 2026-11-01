@@ -9,6 +9,7 @@
 #include "mp_bigsprite.h"
 
 bool8 MP_IsReflectionSprite(struct Sprite *sprite);
+bool8 MP_SpriteFeetRow(const struct Sprite *sp, s16 *row);   // mp_shadow.c
 
 static struct MpBigOam sPending[OAM_ENTRY_COUNT], sLive[OAM_ENTRY_COUNT];
 static u16 sPendingCount, sLiveCount;
@@ -77,6 +78,7 @@ static void EntryRect(u16 i, s32 *x0, s32 *y0, s32 *x1, s32 *y1)
 void MP_BigSprite_NoteScale(struct Sprite *sprite, u16 first, u16 end)
 {
     s32 x0 = 0x7FFF, y0 = 0x7FFF, x1 = -0x7FFF, y1 = -0x7FFF, a, b, c, d;
+    s16 feet;
     u16 i;
     if (sprite->mpScale == 0 || sprite->mpScale >= 256 || first >= end)
         return;
@@ -93,6 +95,14 @@ void MP_BigSprite_NoteScale(struct Sprite *sprite, u16 first, u16 end)
         s32 gy = sprite->y + sprite->y2 + (sprite->coordOffsetEnabled ? gSpriteCoordOffsetY : 0);
         x0 = x1 = gx;
         y1 = MP_IsReflectionSprite(sprite) ? gy + sprite->mpBig->lift : gy + sprite->mpBig->footY;
+    }
+    else if (sprite->mpCastShadow && sprite->mpBig == NULL && !MP_IsReflectionSprite(sprite)
+             && MP_SpriteFeetRow(sprite, &feet))
+    {
+        // (1.63.13) a follower's or Garden POKeMON's own sprite: toward its feet and its point (mp_follower.c puts its
+        // body's middle there), the same in every frame, as a PMD picture
+        x0 = x1 = sprite->x + sprite->x2 + (sprite->coordOffsetEnabled ? gSpriteCoordOffsetX : 0);
+        y1 = sprite->y + sprite->y2 + (sprite->coordOffsetEnabled ? gSpriteCoordOffsetY : 0) + feet;
     }
     else
     {
