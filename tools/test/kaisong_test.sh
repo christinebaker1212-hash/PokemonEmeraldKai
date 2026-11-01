@@ -179,6 +179,7 @@ check "  not the other card games'" eval "nloads ygo_online mus_rg_union_room@tc
 check "the TCG with a friend plays its own file" loads tcg_concede_online mus_rg_union_room@tcg
 check "  not the other card games'" eval "nloads tcg_concede_online mus_rg_union_room@ygo && nloads tcg_concede_online mus_rg_union_room@tt"
 check "a new scene is picked up from its source file alone" python3 tools/kaisong/test_scenes.py
+check "every song in music/ loops (the fanfares end)" python3 -I tools/kaisong/add_loop.py --check "$REPO"
 
 for l in "$OUT"/*/log.txt "$OUT"/scene_*/?.log; do
     grep -q "Segmentation\|Aborted\|CRASH\|TIMEOUT" "$l" && { echo "  FAIL $(basename "$(dirname "$l")") crashed"; fails=$((fails+1)); }

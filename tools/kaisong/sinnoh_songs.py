@@ -141,6 +141,10 @@ def convert(diamond, platinum, studio):
         r = subprocess.run([studio, '--export', os.path.join(rips[rip], src[0]), out, song], capture_output=True,
                            text=True)
         ok = r.returncode == 0 and os.path.exists(os.path.join(out, song + '.kaisong'))
+        if ok:   # a rip whose loop point wasn't found: the whole song loops (tools/kaisong/add_loop.py)
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            import add_loop
+            add_loop.add_loop(os.path.join(out, song + '.kaisong'))
         print('%-36s %s %s' % (song, 'ok' if ok else 'FAILED', src[0]), flush=True)
         if not ok:
             failed.append((song, (r.stdout + r.stderr)[-300:]))

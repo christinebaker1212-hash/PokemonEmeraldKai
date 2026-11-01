@@ -1177,10 +1177,16 @@ void MP_TestCommand(const char *cmd, const char *arg)
     else if (strcmp(cmd, "bgm") == 0)
     {
         // bgm - which song the music player plays now, and how many tracks / voices it has
-        printf("[test] bgm song %d tracks %d voices %d status %x player tracks %d clock %u\n",
+        u32 k, busy = 0, cgb = 0;
+        for (k = 0; k < MAX_DIRECTSOUND_CHANNELS; k++)
+            busy += SOUND_INFO_PTR->chans[k].statusFlags != 0;
+        for (k = 0; k < 4; k++)
+            cgb += SOUND_INFO_PTR->cgbChans != NULL && SOUND_INFO_PTR->cgbChans[k].statusFlags != 0;
+        printf("[test] bgm song %d tracks %d voices %d status %x player tracks %d clock %u busy %u cgb %u\n",
                MP_Kaisong_SongOf(gMPlayInfo_BGM.songHeader),
                gMPlayInfo_BGM.songHeader ? gMPlayInfo_BGM.songHeader->trackCount : 0, SOUND_INFO_PTR->maxChans,
-               (unsigned)gMPlayInfo_BGM.status, gMPlayInfo_BGM.trackCount, (unsigned)gMPlayInfo_BGM.clock);
+               (unsigned)gMPlayInfo_BGM.status, gMPlayInfo_BGM.trackCount, (unsigned)gMPlayInfo_BGM.clock,
+               (unsigned)busy, (unsigned)cgb);
     }
     else if (strcmp(cmd, "getvar") == 0)
         printf("[test] var 0x%X = %d\n", (unsigned)strtol(arg, NULL, 0), VarGet((u16)strtol(arg, NULL, 0)));   // getvar ID
