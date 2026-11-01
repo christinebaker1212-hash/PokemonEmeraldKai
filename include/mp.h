@@ -259,6 +259,7 @@ struct MpConfig
     u8 cardBack;              // OPTIONS > DISPLAY > CARD BACKS: MP_CARD_BACK_* (src/tcg/tcg_gfx.h G_BACK_*)
     u8 cardScaling;           // OPTIONS > GAME > CARD SCALING: card players' decks fit yours (1) or go by badges (0)
     u8 battleAnims;           // OPTIONS > DISPLAY > BATTLE ANIMS: 0 CLASSIC, 1 MODERN (mp_modernanim.c; this game only)
+    u8 noShadows;             // OPTIONS > DISPLAY > SHADOWS: 0 ON (shadows under people and POKeMON: mp_shadow.c), 1 OFF
 };
 // CARD ART: the printed illustration in the Game Boy frame (the default), the Game Boy picture in it, or the whole printed card
 enum { MP_CARD_ART_PRINTED_ART, MP_CARD_ART_GAME_BOY, MP_CARD_ART_FULL_CARD, MP_CARD_ART_COUNT };
@@ -1091,6 +1092,8 @@ void MP_Spectate_PanelSync(void);      // sdl2.c VDraw: the panel's cards to the
 // Follower Pokémon (mp_follower.c)
 struct Pokemon;
 void MP_Follower_Update(void);
+void MP_Shadow_Update(void);   // Moemon Kai: shadows under people and POKeMON (mp_shadow.c)
+bool8 MP_SpriteDrawnRows(const struct Sprite *sp, u8 *top, u8 *bottom);   // ... the rows its frame draws
 bool8 MP_Follower_TryInteract(void);
 bool8 MP_Follower_Toggle(struct Pokemon *mon);
 void MP_Follower_OnWalkSteps(void);

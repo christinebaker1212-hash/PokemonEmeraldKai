@@ -254,6 +254,8 @@ struct Sprite
     bool8 mpClipOn;         // Moemon PC: nothing of it drawn from screen line mpClipY down (in water, in the ground)
     s16 mpClipY;
     u16 mpScale;            // Moemon Co-op: drawn this much smaller (Q8: 128 = half; 0 = as it is), smoothly (mp_spritescale.h)
+    bool8 mpShadow;         // Moemon Kai: a shadow: its pixels darken what's under them instead (mp_shadow.c, gba_easy_draw.c)
+    bool8 mpCastShadow;     // ... a shadow goes under it (followers, Garden POKeMON; map objects get one anyway)
 };
 
 struct OamMatrix

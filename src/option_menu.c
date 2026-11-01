@@ -102,6 +102,7 @@ enum
     OPT_FB_BIND,      // the FIGHT BUTTONS page: a fight button (arg: FIGHT_BIND_*)
     OPT_FB_DEFAULTS,
     OPT_FB_BACK,
+    OPT_SHADOWS,      // Moemon Kai: DISPLAY > SHADOWS ON / OFF (mp_shadow.c)
     OPT_SPRITESCALE,  // Moemon Co-op: DISPLAY > SPRITE SCALING (A: its page)
     OPT_SS_FOLLOW,    // the SPRITE SCALING page (mp_spritescale.c)
     OPT_SS_GARDEN,
@@ -245,6 +246,7 @@ static const u8 sText_Place[] = _("PLACE");
 static const u8 sText_Size[] = _("SIZE");
 static const u8 sText_Back[] = _("BACK");
 static const u8 sText_SpriteScale[] = _("SPRITE SCALING");
+static const u8 sText_Shadows[] = _("SHADOWS");
 static const u8 sText_SsFollowers[] = _("FOLLOWERS");
 static const u8 sText_SsGarden[] = _("GARDEN MOéMON");
 static const u8 sText_Close[] = _("CLOSE");
@@ -424,6 +426,7 @@ static void BuildRows(void)
         AddRow(OPT_VSYNC, 0);
         AddRow(OPT_BATTLEANIMS, 0);
         AddRow(OPT_SPRITESCALE, 0);
+        AddRow(OPT_SHADOWS, 0);
         AddRow(OPT_CARDART, 0);
         AddRow(OPT_CARDBACK, 0);
         break;
@@ -500,7 +503,7 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         names[0] = gText_ButtonTypeNormal, names[1] = gText_ButtonTypeLR, names[2] = gText_ButtonTypeLEqualsA;
         return 3;
     case OPT_TYPEICONS: case OPT_FULLSCREEN: case OPT_VSYNC: case OPT_ANALOGRUN: case OPT_RUMBLE: case OPT_SPECPANEL:
-    case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_CARDSCALE: case OPT_SS_FOLLOW: case OPT_SS_GARDEN:
+    case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_CARDSCALE: case OPT_SS_FOLLOW: case OPT_SS_GARDEN: case OPT_SHADOWS:
         names[0] = sText_Off, names[1] = sText_On;
         return 2;
     case OPT_NAMECASE:
@@ -723,6 +726,7 @@ static u8 Current(u8 row)
     case OPT_FINDER:      return gMpConfig.finderStyle % MP_FINDER_COUNT;
     case OPT_FOLLOWSPRITES: return gMpConfig.followerSprites % MP_FOLLOW_SPRITES_COUNT;
     case OPT_SINNOHSPRITES: return 2 - gMpConfig.sinnohSprites % 3;
+    case OPT_SHADOWS:     return !gMpConfig.noShadows;
     }
     return 0;
 }
@@ -779,6 +783,10 @@ static void Change(u8 row, int dir)
     case OPT_FOLLOWSPRITES:
         gMpConfig.followerSprites = Wrap(gMpConfig.followerSprites + dir, MP_FOLLOW_SPRITES_COUNT);
         MPNet_Log("follower sprites: %d", gMpConfig.followerSprites);
+        break;
+    case OPT_SHADOWS:
+        gMpConfig.noShadows = !gMpConfig.noShadows;
+        MPNet_Log("shadows: %d", !gMpConfig.noShadows);
         break;
     case OPT_SINNOHSPRITES:
         gMpConfig.sinnohSprites = 2 - Wrap(2 - gMpConfig.sinnohSprites % 3 + dir, 3);
@@ -888,6 +896,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_BIKEMUSIC:   return sText_BikeMusic;
     case OPT_FOLLOWSPRITES: return sText_Followers;
     case OPT_SINNOHSPRITES: return sText_SinnohPeople;
+    case OPT_SHADOWS: return sText_Shadows;
     case OPT_SC_ON:       return sText_LevelScale;
     case OPT_SC_WILD:     return sText_ScWild;
     case OPT_SC_TRAINERS: return sText_ScTrainers;
@@ -1046,6 +1055,8 @@ static void DrawHint(void)
                  : "PLATINUM'S OWN SPRITES");
     else if (opt == OPT_SPRITESCALE)
         snprintf(ascii, sizeof(ascii), "A: SINNOH'S PEOPLE, FOLLOWERS, THE GARDEN");
+    else if (opt == OPT_SHADOWS)
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.noShadows ? "NO SHADOWS UNDER PEOPLE AND MOEMON" : "A SOFT SHADOW UNDER PEOPLE AND MOEMON");
     else if (opt == OPT_SS_FOLLOW)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.scaleFollowers ? "SMALL PMD ONES CLOSER TO TRUE SIZE" : "PMD PICTURES AS THEY ARE");
     else if (opt == OPT_SS_GARDEN)

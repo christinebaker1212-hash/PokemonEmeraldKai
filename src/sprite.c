@@ -503,6 +503,7 @@ void CopyMatricesToOamBuffer(void)
 // Moemon Co-op: BATTLE ANIMS > MODERN (mp_modernanim.c)
 extern u8 gMpOamFx[256];
 extern u16 *gMpFxLayer;
+u8 gMpOamShadow[256];   // Moemon Kai: per OAM entry: a shadow sprite's (mp_shadow.c; gba_easy_draw.c darkens under it)
 bool8 MP_ModernAnim_IsFxSprite(const struct Sprite *sprite);
 
 void AddSpritesToOamBuffer(void)
@@ -513,6 +514,7 @@ void AddSpritesToOamBuffer(void)
     MP_BigSprite_BeginOam();
     if (gMpFxLayer != NULL)
         memset(gMpOamFx, 0, sizeof(gMpOamFx));
+    memset(gMpOamShadow, 0, sizeof(gMpOamShadow));
     while (i < MAX_SPRITES)
     {
         struct Sprite *sprite = &gSprites[sSpriteOrder[i]];
@@ -523,6 +525,8 @@ void AddSpritesToOamBuffer(void)
             // Moemon Co-op: BATTLE ANIMS > MODERN: this sprite's entries are an animation's effect (mp_modernanim.c)
             if (gMpFxLayer != NULL && MP_ModernAnim_IsFxSprite(sprite) && oamIndex > first && oamIndex <= 256)
                 memset(gMpOamFx + first, 1, oamIndex - first);
+            if (sprite->mpShadow && oamIndex > first && oamIndex <= 256)
+                memset(gMpOamShadow + first, 1, oamIndex - first);
             if (full)
                 return;
         }

@@ -246,6 +246,7 @@ static bool8 CreateSlotSprite(struct FollowerSlot *s)
     s->spriteId = id;
     gSprites[id].data[7] = s - sSlots;
     gSprites[id].coordOffsetEnabled = TRUE;
+    gSprites[id].mpCastShadow = TRUE;   // Moemon Kai: a shadow under it (mp_shadow.c)
     gSprites[id].invisible = TRUE;
     s->anim = 0xFF;
     // The PMD Collab picture when there's one (the Moemon frames above stay as the fallback)
@@ -802,6 +803,14 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
     }
     // Same layer as the owner; behind them when level with them
     fs->oam.priority = os->oam.priority;
+    {
+        // Moemon Kai: a small POKeMON in tall grass stands above the grass's top layer (it covered all of it: the
+        // follower vanished); the grass's own blades still move at its feet
+        u8 top, bottom;
+        if (!s->pmdOn && fs->oam.priority > 1 && MetatileBehavior_IsTallGrass(MapGridGetMetatileBehaviorAt(s->cur.x, s->cur.y))
+         && MP_SpriteDrawnRows(fs, &top, &bottom) && bottom - top < 22)
+            fs->oam.priority = 1;
+    }
     if (s->pmdOn)
     {
         fs->y -= s->pushY;   // (the depth of where it stands, not of the picture drawn back)
@@ -1579,6 +1588,7 @@ u8 MP_Follower_CreateMonSprite(u16 dex, bool8 female, s16 hue, u16 palTag, struc
     id = CreateSprite(tmpl, 0, 0, 0);
     if (id == MAX_SPRITES)
         return MAX_SPRITES;
+    gSprites[id].mpCastShadow = TRUE;   // Moemon Kai: a shadow under it (mp_shadow.c)
     gSprites[id].coordOffsetEnabled = TRUE;
     gSprites[id].invisible = TRUE;
     *size = gfx->size;

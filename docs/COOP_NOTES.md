@@ -3326,6 +3326,20 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
 - Not taken: Platinum's preview window (NARC 14, a white shape in tiles not yet laid out: Emerald's circle instead)
   and the glove's own animation (it bobs by a sine).
 
+## Drop shadows and followers in grass and puddles (1.63.4)
+- OPTIONS > DISPLAY > SHADOWS (gMpConfig.noShadows: 0 ON, the default; ini `shadows`): src/mp/mp_shadow.c gives every
+  person on the field (object events: the player, NPCs in every region, friends) and every follower / Garden POKeMON
+  (sprite->mpCastShadow, set by mp_follower.c's two sprite makers) a shadow sprite: an oval in a 32x16 frame (four
+  sizes by the owner's width) at its feet, subpriority 255 (under every sprite) at the owner's priority (roofs and
+  tree tops cover it). Its pixels darken what the backgrounds show there to half (sprite->mpShadow -> sprite.c
+  gMpOamShadow -> gba_easy_draw.c ShadowPixel), so on SINNOH's 3D maps (drawn into the BG lines) too. None in water,
+  while surfing / diving, for inanimate objects, hidden or clipped (swimming) owners. MP_Shadow_Update runs last in
+  overworld.c OverworldBasic. Test shadows (`mp shadows [0|1]`: the option, or the count of shadows up).
+- MP_SpriteDrawnRows (mp_shadow.c): a sprite's current frame's first and last drawn rows (cached by frame). The shadow
+  sits at the picture's feet; a follower's water / ice reflection mirrors at them (mp_followfx.c SpriteCB_Reflection:
+  a 64x64 POKeMON stands 16 higher in its frame and its reflection was drawn far below); a small follower (drawn
+  rows < 22) in tall grass stands above the grass's top layer (priority 1: the top layer covered it whole).
+
 ## SINNOH's 3D engine
 - Plan and rules: docs/SINNOH_HANDOFF.md. The data comes from pret/pokeplatinum (source.py: its map blocks, matrices,
   areas, props, texture sets and lights as files; fetch_decomp.sh gets them at a pinned commit, make_pack.sh fetches and

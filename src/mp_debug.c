@@ -569,6 +569,20 @@ void MP_TestCommand(const char *cmd, const char *arg)
             GetSetPokedexFlag(nat, FLAG_SET_CAUGHT);
         printf("[test] dex %d seen %d caught %d\n", nat, GetSetPokedexFlag(nat, FLAG_GET_SEEN), GetSetPokedexFlag(nat, FLAG_GET_CAUGHT));
     }
+    else if (strcmp(cmd, "shadows") == 0)   // shadows [0|1] - OPTIONS > DISPLAY > SHADOWS; prints how many are up (mp_shadow.c)
+    {
+        u32 i, n = 0;
+        if (arg[0])
+        {
+            gMpConfig.noShadows = atoi(arg) == 0;
+            printf("[test] shadows set %s\n", gMpConfig.noShadows ? "off" : "on");
+            return;
+        }
+        for (i = 0; i < MAX_SPRITES; i++)
+            if (gSprites[i].inUse && gSprites[i].mpShadow)
+                n++;
+        printf("[test] shadows %s: %u\n", gMpConfig.noShadows ? "off" : "on", (unsigned)n);
+    }
     else if (strcmp(cmd, "followsprites") == 0)
     {
         // followsprites N - OPTIONS > GAME > FOLLOWERS: 0 default, 1 pmd, 2 original

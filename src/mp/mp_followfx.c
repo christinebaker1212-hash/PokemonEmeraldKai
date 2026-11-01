@@ -468,6 +468,13 @@ static void SpriteCB_Reflection(struct Sprite *r)
     r->invisible = fs->invisible || f->hidden;
     r->x = fs->x;
     r->y = fs->mpBig ? fs->y + 6 : fs->y + f->size - 2;   // a PMD picture mirrors at the bottom of its tile, as the player does
+    {
+        // Moemon Kai: mirrored at the picture's own feet (a 64x64 POKeMON's stand higher in their frame: its
+        // reflection was drawn far below)
+        u8 top, bottom;
+        if (!fs->mpBig && MP_SpriteDrawnRows(fs, &top, &bottom) && 2 * (f->size - 1 - bottom) > 2)
+            r->y -= 2 * (f->size - 1 - bottom) - 2;   // (the game's own 2 rows of overlap kept)
+    }
     r->centerToCornerVecX = fs->centerToCornerVecX;
     r->centerToCornerVecY = fs->centerToCornerVecY;
     r->x2 = fs->x2;

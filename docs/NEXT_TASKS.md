@@ -17,13 +17,7 @@ about 14x5 pixels, under the player's feet, see-through).
 
 ## 3. SINNOH: Platinum's 3D briefcase (DONE, 1.63.3): COOP_NOTES "SINNOH's briefcase: Platinum's starter screen"
 
-## 4. Drop shadows (an option)
-- OPTIONS > DISPLAY: SHADOWS ON / OFF. A see-through dark oval under the player, every NPC in every region (SINNOH's
-  3D people too), followers and Garden POKéMON. Not drawn in water / while surfing / diving, for flying or
-  hidden objects; sized by the sprite's width (big PMD sprites larger).
-- Fix with it: some follower POKéMON vanish in tall grass (mp_followfx.c / the grass effect's priority over the
-  follower), and some followers' puddle reflections sit far below where they should (the reflection's y for tall /
-  big sprites: mp_followfx.c, fldeff reflection).
+## 4. Drop shadows (DONE, 1.63.4): COOP_NOTES "Drop shadows and followers in grass and puddles"
 
 ## 5. Settings per save file, and switching save files without restarting
 - moemon_coop.ini, moemon_controls.ini, lobby.txt, moemon_display.ini and the card sidecar (pokeemerald.sav.cards)
@@ -59,4 +53,5 @@ about 14x5 pixels, under the player's feet, see-through).
 - NEW GAME in SINNOH + region menu order: released as 1.63.1 (task 1).
 - 1.63.2: the starter table, BLUE's FireRed teams, SINNOH's door fixes.
 - 1.63.3: SINNOH's briefcase.
-- Pending: tasks 4-7 above.
+- 1.63.4: drop shadows, small followers in tall grass, big followers' reflections.
+- Pending: tasks 5-7 above.

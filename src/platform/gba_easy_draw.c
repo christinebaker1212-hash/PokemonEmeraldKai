@@ -485,6 +485,29 @@ static bool winCheckHorizontalBounds(u16 left, u16 right, u16 xpos)
 extern u8 gMpOamFx[256];
 extern u16 *gMpFxLayer;
 static bool sFxSprite;
+extern u8 gMpOamShadow[256];
+static bool sShadowSprite;
+
+// Moemon Kai: a shadow sprite's pixel (mp_shadow.c): what the backgrounds show there at the sprite's priority and below,
+// darkened (the backdrop if none); sprites drawn after it (everything: shadows come last in the OAM) cover it
+static uint16_t ShadowPixel(struct scanlineData *scanline, int prnum, int x)
+{
+    unsigned int p, k;
+    uint16_t c = *(uint16_t *)PLTT;
+    for (p = prnum; p <= 3; p++)
+        for (k = 0; k < scanline->prioritySortedBgsCount[p]; k++)
+        {
+            char layer = scanline->prioritySortedBgs[p][k];
+            if (isbgEnabled(layer) && getAlphaBit(scanline->layers[layer][x]))
+            {
+                c = scanline->layers[layer][x];
+                goto found;
+            }
+        }
+found:
+    // half: about the mock-up's shadow on grass
+    return ((c & 0x1F) >> 1) | ((((c >> 5) & 0x1F) >> 1) << 5) | ((((c >> 10) & 0x1F) >> 1) << 10);
+}
 
 // One sprite pixel of `color` at global_x on this line: battle weather, the dark cave's window, OBJ windows, blending,
 // then the sprite layer (ordinary sprites and Moemon PC's big sprites share it)
@@ -499,6 +522,12 @@ static void PutObjPixel(struct scanlineData *scanline, uint16_t *pixels, struct 
     // Moemon Co-op: the Pokémon in battle weather (mp_battleweather.c)
     if (gMpScenePixel && !is8BPP && gMpSceneObjPal[oam->paletteNum & 63])
         color = gMpScenePixel(color, global_x, vcount, TRUE);
+    if (sShadowSprite)   // Moemon Kai: a shadow darkens what's under it (ShadowPixel)
+    {
+        if (global_x >= 0 && global_x < DISPLAY_WIDTH)
+            pixels[global_x] = ShadowPixel(scanline, oam->priority, global_x) | (1 << 15);
+        return;
+    }
     
     // Moemon Co-op: co-op notes and bubbles show through a dark cave's darkness
     if (gMpDarkUiPal != 0xFF && !is8BPP && oam->paletteNum == gMpDarkUiPal && global_x >= 0 && global_x < DISPLAY_WIDTH)
@@ -784,6 +813,7 @@ static void DrawSprites(struct scanlineData* scanline, uint16_t vcount, bool win
         if ((int)vcount >= MP_BigSprite_OamClipY(i))   // Moemon PC: clipped above this line (in water, in the ground)
             continue;
         sFxSprite = gMpFxLayer != NULL && gMpOamFx[i];   // Moemon Co-op: a battle animation's effect sprite
+        sShadowSprite = gMpOamShadow[i];   // Moemon Kai: a shadow (mp_shadow.c)
         if (oam->shape == MP_BIG_OAM_SHAPE)   // Moemon PC: a picture of any size (mp_bigsprite.h)
         {
             DrawBigSprite(scanline, oam, vcount, windowsEnabled, blendMode);

@@ -1,0 +1,24 @@
+pressuntil A field 5000
+wait 30
+mp follow 0
+mp warp 0,9,10,10
+waitfor field 600
+wait 60
+press DOWN 16
+wait 40
+mp shadows
+shot littleroot
+mp shadows 0
+wait 10
+mp shadows
+shot littleroot_off
+mp shadows 1
+wait 10
+mp shadows
+mp warp 40,0,14,22
+waitfor field 600
+wait 90
+mp shadows
+mp where
+shot twinleaf
+quit

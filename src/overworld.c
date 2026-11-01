@@ -1556,6 +1556,7 @@ static void OverworldBasic(void)
     MP_Piggy_Update();    // Moemon Co-op: riding piggyback
     MP_Emote_Update();
     MP_PokeRadar_Update(); // Moemon Kai: the POKé RADAR's shaking grass (mp_pokeradar.c)
+    MP_Shadow_Update();   // Moemon Kai: shadows under people and POKéMON (mp_shadow.c)
     BuildOamBuffer();
     UpdatePaletteFade();
     UpdateTilesetAnimations();

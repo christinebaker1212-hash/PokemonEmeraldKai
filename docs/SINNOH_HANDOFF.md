@@ -11,10 +11,9 @@ Queued after the 1.61.6 release and the KANTO / JOHTO sweep (the user's plan, 20
   own halls, HALL, CASTLE, ARCADE). Left out on purpose: the Underground, Super Contests, Wi-Fi, the VILLA, the Frontier
   Brains' and the HALL MATRON's teams, the DISTORTION WORLD's walking on walls.
 - 1.63.1: a NEW GAME can start in SINNOH (BIRCH's menu: KANTO, JOHTO, HOENN, SINNOH): TWINLEAF bedroom, no team,
-  the starter from ROUTE 201's briefcase, the POKéDEX from ROWAN (COOP_NOTES "A new game in SINNOH"). Asked next by
-  the user: Platinum's 3D briefcase screen (pokeplatinum src/choose_starter/choose_starter_app.c; the models are
-  res/prebuilt/graphic/ev_pokeselect.narc: 0 BCA case opening, 1 closed case, 2/4/6 BCA + 3/5/7 the three balls, 8 the
-  open case, 9 the table) in place of Sinnoh_StarterMenu's list: needs NSBCA joint animation baked into frames.
+  the starter from ROUTE 201's briefcase, the POKéDEX from ROWAN (COOP_NOTES "A new game in SINNOH"). 1.63.3: the
+  briefcase is Platinum's own screen, pre-drawn from its models and joint animations (tools/sinnoh/build_starter.py;
+  COOP_NOTES "SINNOH's briefcase: Platinum's starter screen").
 - RELEASED as 1.63.0 "Welcome to SINNOH!" (2026-11-01): sinnoh-work merged into the main branch (local `live`, pushed to
   the default branch claude/clever-clarke-hqati2); protocol 69, so friends online need 1.63.0. The release workflow
   builds SINNOH's packs itself (tools/sinnoh/make_pack.sh: fetch_decomp.sh PARTS 6 + build_pack.py + build_gfx.py) and

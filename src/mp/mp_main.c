@@ -427,6 +427,7 @@ static void LoadConfig(void)
                                                               : MP_CARD_ART_PRINTED_ART;
         else if (strcmp(key, "card_scaling") == 0) gMpConfig.cardScaling = atoi(val) != 0;
         else if (strcmp(key, "battle_anims") == 0) gMpConfig.battleAnims = strcmp(val, "modern") == 0;
+        else if (strcmp(key, "shadows") == 0) gMpConfig.noShadows = atoi(val) == 0;
         else if (strcmp(key, "card_back") == 0)
             gMpConfig.cardBack = strcmp(val, "pixel") == 0 ? MP_CARD_BACK_PIXEL : MP_CARD_BACK_PRINTED;
         else if (strcmp(key, "moenav_calls") == 0) gMpConfig.moenavCalls = strcmp(val, "battles") == 0;
@@ -587,6 +588,8 @@ void MP_SaveConfig(void)
         "card_scaling = %d\n"
         "; OPTIONS > DISPLAY > BATTLE ANIMS: classic or modern (glows, trails and impacts over the same animations)\n"
         "battle_anims = %s\n"
+        "; OPTIONS > DISPLAY > SHADOWS: 1 = a soft shadow under people and POKEMON on the field, 0 = none\n"
+        "shadows = %d\n"
         "; advanced: use a different online lobby server (address or address:port)\n"
         "lobby = %s\n"
         "; your 32 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
@@ -605,7 +608,7 @@ void MP_SaveConfig(void)
         gMpConfig.cardArt == MP_CARD_ART_GAME_BOY ? "gameboy" : gMpConfig.cardArt == MP_CARD_ART_FULL_CARD ? "full_card"
                                                                                                          : "printed_art",
         gMpConfig.cardBack == MP_CARD_BACK_PIXEL ? "pixel" : "printed", gMpConfig.cardScaling,
-        gMpConfig.battleAnims ? "modern" : "classic", gMpConfig.lobby);
+        gMpConfig.battleAnims ? "modern" : "classic", !gMpConfig.noShadows, gMpConfig.lobby);
     {
         int i;
         for (i = 0; i < MP_NUM_PHRASES; i++)
