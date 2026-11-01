@@ -1379,6 +1379,13 @@ void Display_PreInit(void)
         // Automated tests use the defaults and never write the user's file.
         if (getenv("MOEMON_TEST"))
             sPersist = 0;
+        {
+            // Moemon Kai: the save file in use's own (save_slots.c; a copy of the shared one the first time)
+            const char *SaveSlots_File(const char *name, const char *shared);
+            char shared[1024];
+            snprintf(shared, sizeof(shared), "%s", sConfigPath);
+            snprintf(sConfigPath, sizeof(sConfigPath), "%s", SaveSlots_File(CONFIG_NAME, shared));
+        }
     }
     if (sPersist)
         LoadConfig();
@@ -1399,6 +1406,28 @@ void Display_PreInit(void)
         timeBeginPeriod(1); // accurate SDL_Delay(1) for frame pacing with vsync off
     }
 #endif
+}
+
+// Another save file's settings, applied (save_slots.c: switching save files on the title screen)
+void Display_ReloadSettings(void)
+{
+    const char *SaveSlots_File(const char *name, const char *shared);
+    if (!sPersist || getenv("MOEMON_DISPLAY_CONFIG"))
+        return;
+    {
+        char *base = SDL_GetBasePath();
+        char shared[1024];
+        snprintf(shared, sizeof(shared), "%s%s", base ? base : "", CONFIG_NAME);
+        if (base)
+            SDL_free(base);
+        snprintf(sConfigPath, sizeof(sConfigPath), "%s", SaveSlots_File(CONFIG_NAME, shared));
+    }
+    LoadConfig();
+    Display_SetFullscreen(sCfg.fullscreen);
+    Display_SetWindowScale(sCfg.windowScale);
+    Display_SetScaleMode(sCfg.scaleMode);
+    Display_SetFilter(sCfg.filter);
+    Display_SetVSync(sCfg.vsync);
 }
 
 int Display_Init(const char *title)
@@ -1919,6 +1948,7 @@ void Display_SaveSettings(void)
 
 static int sFullscreen, sWindowScale = 3, sScaleMode = DISPLAY_SCALE_SHARP_FIT, sFilter, sVSync = 1;
 
+void Display_ReloadSettings(void) {}
 int Display_GetFullscreen(void) { return sFullscreen; }
 void Display_SetFullscreen(int on) { sFullscreen = on ? 1 : 0; }
 void Display_ToggleFullscreen(void) { sFullscreen = !sFullscreen; }

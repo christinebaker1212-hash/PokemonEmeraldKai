@@ -4,7 +4,9 @@
 // "<save>.bak1"...) live in saves/slot1, saves/slot2 or saves/slot3 beside the game, one save file each, so they
 // never mix. saves/slot.txt remembers the one in use. A save from before (pokeemerald.sav and its files next to the
 // exe) moves into saves/slot1 the first time this version starts, every file as it was. The title screen's
-// SAVE FILE item picks another one: the game starts again on it (nothing of the other file stays in memory).
+// SAVE FILE item picks another one in place (main_menu.c reloads the save; MP_SaveSlotChanged the rest).
+// Settings belong to a save file too (moemon_coop.ini, moemon_controls.ini, moemon_display.ini, lobby.txt:
+// SaveSlots_File): each slot's folder holds its own, copied from the shared one beside the game the first time.
 // --save PATH or MOEMON_SAVE (tests, several clients on one machine) use that path and no slots.
 #include <stdio.h>
 #include <stdlib.h>
@@ -241,10 +243,48 @@ int SaveSlots_Erase(int slot)
     return n;
 }
 
-// The game starts again on save file slot (tests: says so and ends, the next run is on it)
+static void CopyFileTo(const char *from, const char *to)
+{
+    unsigned char buf[4096];
+    size_t n;
+    FILE *in = fopen(from, "rb"), *out;
+    if (in == NULL)
+        return;
+    out = fopen(to, "wb");
+    if (out != NULL)
+    {
+        while ((n = fread(buf, 1, sizeof(buf), in)) > 0)
+            fwrite(buf, 1, n, out);
+        fclose(out);
+        printf("[slots] %s: the shared one copied in\n", to);
+    }
+    fclose(in);
+}
+
+// The save file in use's own copy of a settings file NAME (in its slot's folder; the first time, a copy of SHARED,
+// the one beside the game, when there's one). Without slots (--save / MOEMON_SAVE): SHARED itself.
+const char *SaveSlots_File(const char *name, const char *shared)
+{
+    static char sBuf[4][600];
+    static int sNext;
+    char *out;
+    if (sSlot == 0)
+        return shared;
+    out = sBuf[sNext++ & 3];
+    snprintf(out, 600, SAVES_DIR "/slot%d/%s", sSlot, name);
+    if (!Exists(out) && Exists(shared))
+        CopyFileTo(shared, out);
+    return out;
+}
+
+// The game goes on with save file SLOT in place: the save path and slot.txt (the caller reloads the save itself;
+// MP_SaveSlotChanged reloads the settings and forgets the other file's side data)
 void SaveSlots_Switch(int slot)
 {
+    char dir[64];
     FILE *f;
+    void MP_SaveSlotChanged(void);
+    void Platform_ReopenSaveFile(void);
     if (slot < 1 || slot > SAVE_SLOT_COUNT || sSlot == 0)
         return;
     MakeDir(SAVES_DIR);
@@ -254,36 +294,12 @@ void SaveSlots_Switch(int slot)
         fprintf(f, "%d\n", slot);
         fclose(f);
     }
-    printf("[slots] starting again on save file %d\n", slot);
+    sSlot = slot;
+    SlotDir(slot, dir, sizeof(dir));
+    MakeDir(dir);
+    SlotSave(slot, gPlatformSavePath, 512);
+    Platform_ReopenSaveFile();
+    printf("[slots] now on save file %d: %s\n", slot, gPlatformSavePath);
     fflush(stdout);
-    if (getenv("MOEMON_TEST"))
-        exit(0);
-    {
-        void Display_Shutdown(void);
-        Display_Shutdown();
-        SDL_Quit();
-    }
-#ifdef _WIN32
-    {
-        wchar_t exe[MAX_PATH];
-        STARTUPINFOW si;
-        PROCESS_INFORMATION pi;
-        memset(&si, 0, sizeof(si));
-        si.cb = sizeof(si);
-        GetModuleFileNameW(NULL, exe, MAX_PATH);
-        if (CreateProcessW(exe, GetCommandLineW(), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi))
-        {
-            CloseHandle(pi.hThread);
-            CloseHandle(pi.hProcess);
-        }
-        exit(0);
-    }
-#else
-    if (gPlatformArgv != NULL)
-    {
-        execv("/proc/self/exe", gPlatformArgv);
-        execv(gPlatformArgv[0], gPlatformArgv);
-    }
-    exit(0);
-#endif
+    MP_SaveSlotChanged();
 }

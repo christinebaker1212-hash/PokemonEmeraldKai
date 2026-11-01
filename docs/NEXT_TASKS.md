@@ -19,16 +19,8 @@ about 14x5 pixels, under the player's feet, see-through).
 
 ## 4. Drop shadows (DONE, 1.63.4): COOP_NOTES "Drop shadows and followers in grass and puddles"
 
-## 5. Settings per save file, and switching save files without restarting
-- moemon_coop.ini, moemon_controls.ini, lobby.txt, moemon_display.ini and the card sidecar (pokeemerald.sav.cards)
-  belong to the save file in use (saves/slotN, src/platform/save_slots.c), copied from the shared ones the first
-  time a slot has none. Today: display.c CONFIG_NAME, gamepad.c "moemon_controls.ini", mp_main.c "lobby.txt",
-  updater.c / the co-op config "moemon_coop.ini"; .cards is already "<save>.cards" (tcg_integration.c), so check why
-  it looked shared to the user (keyed by Trainer ID: sCollection.owner).
-- The title screen's SAVE FILE switch restarts the program today (SaveSlots_Switch: execv / CreateProcess). Wanted:
-  switch in place: write slot.txt, set gPlatformSavePath, reload every sidecar and setting (cards, ygo, tt, life,
-  region, sim, search...; display / controls / co-op settings) and go back to the title screen. Every module that
-  caches a sidecar must drop its cache (Tcg_GetCollection keys by owner; check the others).
+## 5. Settings per save file, switching in place (DONE, 1.63.5): COOP_NOTES "Settings per save file, and switching
+save files in place"
 
 ## 6. Card games: NEW tags and centered booster packs (the user, 2026-11-01)
 - In the BINDER (all three card games: src/tcg/tcg_ui.c, src/ygo/ygo_ui.c, src/tt/), a "NEW" tag on every card
@@ -54,4 +46,5 @@ about 14x5 pixels, under the player's feet, see-through).
 - 1.63.2: the starter table, BLUE's FireRed teams, SINNOH's door fixes.
 - 1.63.3: SINNOH's briefcase.
 - 1.63.4: drop shadows, small followers in tall grass, big followers' reflections.
-- Pending: tasks 5-7 above.
+- 1.63.5: settings per save file, SAVE FILE switches in place.
+- Pending: tasks 6-7 above.

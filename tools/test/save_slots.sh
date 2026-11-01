@@ -1,7 +1,8 @@
 #!/bin/bash
 # The saves folder and the three save files (src/platform/save_slots.c), in a scratch game folder:
 #   1. a save made the old way (pokeemerald.sav and its files beside the game) moves into saves/slot1 unchanged
-#   2. the title screen's SAVE FILE item: RIGHT shows file 2 (empty), A starts the game again on it
+#   2. the title screen's SAVE FILE item: RIGHT shows file 2 (empty), A goes on with it in place (its save read, the
+#      menu shown again; its own copy of the shared settings, moemon_controls.ini here)
 #   3. the next start is on saves/slot2: no save there (NEW GAME), file 1 still shows its player
 #   4. ERASE (SELECT on SAVE FILE, A twice) empties file 1 and nothing else
 # usage: tools/test/save_slots.sh [BIN]   (results in /tmp/save_slots_test)
@@ -34,13 +35,19 @@ press RIGHT 2
 wait 20
 shot menu1_file2
 press A 2
-wait 200
+wait 60
+waitfor mainmenu 1200
+wait 30
+shot menu1_after
 quit
 S
+printf 'rumble = 0\n' > "$T/moemon_controls.ini"
 run switch switch.txt
 want switch "moved [0-9]* save file(s) into saves/slot1"
 want switch "save file 1: saves/slot1/pokeemerald.sav"
-want switch "starting again on save file 2"
+want switch "now on save file 2"
+want switch "reached state"
+[ -f "$T/saves/slot2/moemon_controls.ini" ] || { echo "FAIL: save file 2 has no settings of its own"; fail=1; }
 [ -f "$T/pokeemerald.sav" ] && { echo "FAIL: the old save is still beside the game"; fail=1; }
 (cd "$T/saves/slot1" && md5sum pokeemerald.sav* | sort) | diff -q - "$T/before.md5" >/dev/null \
     || { echo "FAIL: the moved files changed"; fail=1; }

@@ -434,6 +434,14 @@ static void ReadSaveFile(char *path)
     }
 }
 
+// Moemon Kai: another save file in place (save_slots.c SaveSlots_Switch): the one open now closed, the new one opened
+// (made if it isn't there) and read into the flash, as at the start
+void Platform_ReopenSaveFile(void)
+{
+    CloseSaveFile();
+    ReadSaveFile(gPlatformSavePath);
+}
+
 // Moemon Co-op: save backups. Before the save file is overwritten the old one is
 // kept as <save>.bak1 (bak1 -> bak2 -> bak3 first), at most once every 10 minutes,
 // so the autosave (mp_autosave.c) doesn't push older backups out too fast.
@@ -550,12 +558,18 @@ void Platform_ReadFlash(u16 sectorNum, u32 offset, u8 *dest, u32 size)
             DBGPRINTF("ReadFlash(sectorNum=0x%04X,offset=0x%08X,size=0x%02X)\n",sectorNum,offset,size);
     }
     FILE * savefile = fopen(gPlatformSavePath, "rb");
+    // Moemon Kai: what isn't in the file (a new, empty save file) reads as the flash copy has it: erased flash (0xFF),
+    // as a real cartridge's (it read nothing, and the buffer kept the last save file's sectors: "corrupt" after the
+    // title screen's SAVE FILE switched to an empty one)
+    u32 at = (sectorNum << gFlash->sector.shift) + offset;
+    if (at + size <= sizeof(FLASH_BASE))
+        memcpy(dest, FLASH_BASE + at, size);
     if (savefile == NULL)
     {
         puts("Error opening save file.");
         return;
     }
-    if (fseek(savefile, (sectorNum << gFlash->sector.shift) + offset, SEEK_SET))
+    if (fseek(savefile, at, SEEK_SET))
     {
         fclose(savefile);
         return;

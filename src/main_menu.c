@@ -28,6 +28,8 @@
 #include "random.h"
 #include "rtc.h"
 #include "save.h"
+#include "new_game.h"
+#include "load_save.h"
 #include "scanline_effect.h"
 #include "sound.h"
 #include "sprite.h"
@@ -180,6 +182,7 @@ static u8 sBirchSpeechMainTaskId;
 // Static ROM declarations
 
 static u32 InitMainMenu(bool8);
+static void MpReloadSave(void);
 static void Task_MainMenuCheckSaveFile(u8);
 static void Task_MainMenuCheckBattery(u8);
 static void Task_WaitForSaveFileErrorWindow(u8);
@@ -563,6 +566,20 @@ static void VBlankCB_MainMenu(void)
     LoadOam();
     ProcessSpriteCopyRequests();
     TransferPlttBuffer();
+}
+
+// Moemon Kai: the save file switched in place (SAVE FILE, save_slots.c): its save read as the game reads one when it
+// starts (intro.c CB2_InitCopyrightScreenAfterBootup; MP_SaveSlotChanged has done the settings and side files)
+static void MpReloadSave(void)
+{
+    void SetPokemonCryStereo(u32 val);
+    SetSaveBlocksPointers(GetSaveBlocksPointersBaseOffset());
+    ResetMenuAndMonGlobals();
+    Save_ResetSaveCounters();
+    LoadGameSave(SAVE_NORMAL);
+    if (gSaveFileStatus == SAVE_STATUS_EMPTY || gSaveFileStatus == SAVE_STATUS_CORRUPT)
+        Sav2_ClearSetDefault();
+    SetPokemonCryStereo(gSaveBlock2Ptr->optionsSound);
 }
 
 void CB2_InitMainMenu(void)
@@ -1022,7 +1039,12 @@ static bool8 HandleMainMenuInput(u8 taskId)
             sMpEraseStep = 0;
             SaveSlots_Erase(sMpSlotShown);
             if (sMpSlotShown == SaveSlots_Current())
-                SaveSlots_Switch(sMpSlotShown);   // (the file in use: the game starts again on it, empty)
+            {
+                SaveSlots_Switch(sMpSlotShown);   // (the file in use: read again, empty, and the menu shown anew)
+                MpReloadSave();
+                SetMainCallback2(CB2_InitMainMenu);
+                return TRUE;
+            }
             MpCloseEraseWindow(tMenuType);
             return TRUE;
         }
@@ -1277,7 +1299,9 @@ static void Task_HandleMainMenuAPressed(u8 taskId)
                 DestroyTask(taskId);
                 break;
             case ACTION_MP_SAVE_FILE:
-                SaveSlots_Switch(sMpSlotShown);   // (the game starts again on it)
+                SaveSlots_Switch(sMpSlotShown);   // Moemon Kai: in place: its save read, the menu shown again on it
+                MpReloadSave();
+                SetMainCallback2(CB2_InitMainMenu);
                 DestroyTask(taskId);
                 break;
             case ACTION_INVALID:

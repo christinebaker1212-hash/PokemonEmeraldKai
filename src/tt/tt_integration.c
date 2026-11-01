@@ -294,3 +294,9 @@ void Tt_WorldReceive(unsigned from, const unsigned char *data, unsigned len)
     sW.timer = 10;   /* (everyone hears it at once) */
 }
 int Tt_WorldFromHost(void) { return sW.using; }
+
+/* Moemon Kai: another save file now (the title screen's SAVE FILE): read its own next time */
+void Tt_ForgetSidecar(void)
+{
+    sLoaded = 0;
+}

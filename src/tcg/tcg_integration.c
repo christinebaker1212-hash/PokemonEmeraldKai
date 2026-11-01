@@ -179,3 +179,16 @@ uint32_t Tcg_DuelSeed(uint32_t *rng)
         *rng = 1;
     return Tcg_Random(rng);
 }
+
+/* Moemon Kai: another save file now (the title screen's SAVE FILE, mp_main.c MP_SaveSlotChanged): the three card
+ * games' collections and the search lines are read from its own files next time */
+void Tcg_ForgetSidecars(void)
+{
+    void Ygo_ForgetSidecar(void);
+    void Tt_ForgetSidecar(void);
+    void TcgSearch_Forget(void);
+    sLoaded = 0;
+    Ygo_ForgetSidecar();
+    Tt_ForgetSidecar();
+    TcgSearch_Forget();
+}

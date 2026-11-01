@@ -17,7 +17,8 @@ void SaveSlots_Init(bool8 readOnly);   // before the save is read: the old save 
 int SaveSlots_Current(void);        // 1-3, 0 with --save / MOEMON_SAVE (no slots)
 void SaveSlots_WriteSummary(void);  // with every save
 bool8 SaveSlots_Summary(int slot, struct SaveSlotSummary *out);
-void SaveSlots_Switch(int slot);    // starts the game again on that save file
+void SaveSlots_Switch(int slot);    // goes on with that save file in place (main_menu.c reloads the save)
+const char *SaveSlots_File(const char *name, const char *shared);   // that save file's own settings file NAME
 int SaveSlots_Erase(int slot);       // every file of that save file gone (how many)
 
 #endif

@@ -16,7 +16,7 @@ runs it and ships the pack; never committed: sinnoh/ is ignored; no ROM needed);
 walk; tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM]; COOP_NOTES "SINNOH's 3D engine"; its people's sprites and battle pictures
 in sinnoh/platinum_gfx.pak (tools/sinnoh/build_gfx.py, src/sinnoh/s3d_gfx.c; test sinnoh_pics).
 
-**Open work (2026-11-01): `docs/NEXT_TASKS.md`** (settings per save file, card NEW tags, 40 PC boxes): read it and carry on in its order.
+**Open work (2026-11-01): `docs/NEXT_TASKS.md`** (card NEW tags and centered booster packs, 40 PC boxes): read it and carry on in its order.
 
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
 card duels).
@@ -276,6 +276,8 @@ Elite Four's and the Champion's can be joined (MP_Coop_JoinTrainerOk; test join_
 
 Also JOHTO and KANTO (1.60.0, Moemon Quetzal's regions capped to Gen 4: docs/REGIONS_PLAN.md, COOP_NOTES "JOHTO and
 KANTO"; src/mp/mp_region.c and "<save>.region", src/qz_specials.c, tools/quetzal_port/; tests region_*).
+Also settings per save file and SAVE FILE switching in place (1.63.5: save_slots.c SaveSlots_File / SaveSlots_Switch,
+mp_main.c MP_SaveSlotChanged, main_menu.c MpReloadSave; COOP_NOTES "Settings per save file"; tools/test/save_slots.sh).
 Also drop shadows (1.63.4: OPTIONS > DISPLAY > SHADOWS, src/mp/mp_shadow.c, sprite->mpShadow darkening in
 gba_easy_draw.c ShadowPixel; COOP_NOTES "Drop shadows and followers in grass and puddles"; test shadows).
 Also the lab's starter table in KANTO / JOHTO and BLUE's teams as FireRed's (1.63.2: starter_choose.c table mode,

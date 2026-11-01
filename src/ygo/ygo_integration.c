@@ -70,3 +70,9 @@ void Ygo_OnlineTick(void)
         YgoNet_Tick(&sOnline, MP_IsConnected() && sOnline.peer < MP_MAX_PLAYERS && gMpPlayers[sOnline.peer].present,
                     SDL_GetTicks());
 }
+
+/* Moemon Kai: another save file now (the title screen's SAVE FILE): read its own next time */
+void Ygo_ForgetSidecar(void)
+{
+    sLoaded = 0;
+}

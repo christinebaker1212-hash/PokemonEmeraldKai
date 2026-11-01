@@ -807,6 +807,8 @@ void Platform_SetAlarm(u8 *alarmData)
     // TODO
 }
 
+void Platform_ReopenSaveFile(void) {}   // (Moemon Kai: save_slots.c; this platform has no slots)
+
 void SoftReset(u32 resetFlags)
 {
     puts("Soft Reset called. Exiting.");

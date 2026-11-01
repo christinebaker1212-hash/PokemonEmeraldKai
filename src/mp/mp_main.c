@@ -11,6 +11,7 @@
 #include "mp_net.h"
 #include "mp_join.h"
 #include "global.h"
+#include "save_slots.h"
 #include "mp_region.h"
 #include "mp.h"
 #include "mp_fight.h"
@@ -33,6 +34,7 @@
 #include "mp_farm.h"
 
 #define CONFIG_FILE "moemon_coop.ini"
+static bool8 sLobbyFileRead;   // lobby.txt read (again after a SAVE FILE switch)
 #define STATE_HEARTBEAT_FRAMES 30
 #define PING_FRAMES (60 * 5)
 #define CONNECT_TIMEOUT_FRAMES (60 * 6)
@@ -288,7 +290,8 @@ static int ParseChoice(const char *v, const char *(*nameFn)(u8), int count)
 
 static const char *ConfigPath(void)
 {
-    return getenv("MOEMON_COOP_CONFIG") ? getenv("MOEMON_COOP_CONFIG") : CONFIG_FILE;
+    // (the save file in use's own: save_slots.c; before the slots are known, the shared one)
+    return getenv("MOEMON_COOP_CONFIG") ? getenv("MOEMON_COOP_CONFIG") : SaveSlots_File(CONFIG_FILE, CONFIG_FILE);
 }
 
 // Before anything is loaded (sdl2.c main: the Windows log console): AllowSmallTweaks = 1?
@@ -653,11 +656,11 @@ const char *MP_OnlineLobbyAddress(void)
     // there once and share the folder, so nobody else has to set anything
     {
         static char sFileLobby[128];
-        static bool8 sFileRead;
-        if (!sFileRead)
+        if (!sLobbyFileRead)
         {
-            FILE *f = fopen("lobby.txt", "r");
-            sFileRead = TRUE;
+            FILE *f = fopen(SaveSlots_File("lobby.txt", "lobby.txt"), "r");   // (the save file's own, as the settings)
+            sFileLobby[0] = 0;
+            sLobbyFileRead = TRUE;
             if (f)
             {
                 char line[128];
@@ -2056,6 +2059,29 @@ static void Lobby_Update(void)
 }
 
 // ---------------------------------------------------------------------------
+
+// Moemon Kai: the title screen's SAVE FILE switched to another save file in place (save_slots.c): out of any room,
+// that file's own settings (moemon_coop.ini, moemon_controls.ini, moemon_display.ini, lobby.txt) and nothing kept
+// of the other file's side data (main_menu.c reloads the save itself)
+void MP_SaveSlotChanged(void)
+{
+    void Gamepad_ReloadSettings(void);
+    void Display_ReloadSettings(void);
+    void Tcg_ForgetSidecars(void);
+    MP_Lobby_Disconnect();
+    if (sInitDone)
+    {
+        LoadConfig();
+        sMainAutosaveMinutes = gMpConfig.autosaveMinutes;
+        if (MOEMON_DEV_BUILD)
+            gMpConfig.autosaveMinutes = 0;
+    }
+    sLobbyFileRead = FALSE;
+    Gamepad_ReloadSettings();
+    Display_ReloadSettings();
+    Tcg_ForgetSidecars();
+    MPNet_Log("save file changed: settings from %s", ConfigPath());
+}
 
 void MP_Init(void)
 {

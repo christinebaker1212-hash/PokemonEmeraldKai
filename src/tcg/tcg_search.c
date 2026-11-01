@@ -595,3 +595,10 @@ void TcgSearch_Debug(unsigned game, const char *what)
     printf("[search] %s: text \"%s\" sort %s %s owned %u narrowed %d\n", sGame[game]->id, s->text,
            sGame[game]->sorts[s->sort].name, s->desc ? "desc" : "asc", s->ownedOnly, TcgSearch_Narrowed(game));
 }
+
+/* Moemon Kai: another save file now (the title screen's SAVE FILE): its own lines next time */
+void TcgSearch_Forget(void)
+{
+    memset(sLoaded, 0, sizeof(sLoaded));
+    sDirty = 0;
+}

@@ -62,7 +62,8 @@ static SDL_GameController *SelectedPad(void);
 static const char *ConfigPath(void)
 {
     const char *p = getenv("MOEMON_CONTROLS_CONFIG");
-    return p ? p : "moemon_controls.ini";
+    const char *SaveSlots_File(const char *name, const char *shared);
+    return p ? p : SaveSlots_File("moemon_controls.ini", "moemon_controls.ini");   // (the save file's own)
 }
 
 // OPTIONS > CONTROLS > BUTTON ICONS
@@ -176,6 +177,12 @@ static void ClosePad(SDL_JoystickID id)
             sPads[i] = NULL;
         }
     }
+}
+
+// Another save file's settings (save_slots.c: switching save files on the title screen)
+void Gamepad_ReloadSettings(void)
+{
+    LoadSettings();
 }
 
 void Gamepad_Init(void)

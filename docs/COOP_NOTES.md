@@ -3340,6 +3340,22 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   a 64x64 POKeMON stands 16 higher in its frame and its reflection was drawn far below); a small follower (drawn
   rows < 22) in tall grass stands above the grass's top layer (priority 1: the top layer covered it whole).
 
+## Settings per save file, and switching save files in place (1.63.5)
+- save_slots.c SaveSlots_File(name, shared): the save file in use's own moemon_coop.ini (mp_main.c ConfigPath),
+  moemon_controls.ini (gamepad.c), moemon_display.ini (display.c Display_PreInit) and lobby.txt (mp_main.c
+  MP_OnlineLobbyAddress) in saves/slotN/, each a copy of the shared one beside the game the first time a slot has none.
+  No slots (--save / MOEMON_SAVE, every test) or the MOEMON_*_CONFIG overrides: the shared / given file as before. The
+  updater's AutoUpdate still reads the shared moemon_coop.ini (app-wide). The card games' and every other side file were
+  already "<save>.<x>" in the slot's folder.
+- The title screen's SAVE FILE no longer starts the program again: SaveSlots_Switch sets the path and slot.txt,
+  Platform_ReopenSaveFile (sdl2.c: the open file and the flash copy, as at the start), MP_SaveSlotChanged (mp_main.c: out
+  of any room, the settings re-read and applied: LoadConfig, Gamepad_ReloadSettings, Display_ReloadSettings; lobby.txt
+  read again; Tcg_ForgetSidecars: the three card collections and SEARCH lines), then main_menu.c MpReloadSave reads the
+  save as intro.c does at boot and the main menu opens on it (ERASE of the file in use the same).
+- sdl2.c ReadFlash: what isn't in the file reads as the flash copy (0xFF, erased flash): a new slot's empty file read
+  nothing and kept the last file's sectors in the buffer ("erased due to corruption" after switching to an empty one).
+- tools/test/save_slots.sh covers it (the switch in place, file 2's own settings copy).
+
 ## SINNOH's 3D engine
 - Plan and rules: docs/SINNOH_HANDOFF.md. The data comes from pret/pokeplatinum (source.py: its map blocks, matrices,
   areas, props, texture sets and lights as files; fetch_decomp.sh gets them at a pinned commit, make_pack.sh fetches and
