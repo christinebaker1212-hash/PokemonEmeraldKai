@@ -908,11 +908,12 @@ int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, char *err, in
         free(d);
     }
 
-    // on the beat, then in time order (as they will be played)
-    // Only the N64's: its music runs on audio frames of its own rate, placed on game frames afterwards (up to
-    // a frame off). Game Boy, DS and PlayStation drivers tick on the console's frames, so their notes already
-    // sit where the original plays them (their own uneven tempo rounding included, which is the song's).
-    if (r->kind == RIP_USF && !getenv("MMS_NO_RHYTHM")) steady_rhythm(notes, nn);
+    // on the beat (MMS_RHYTHM=1 only, for tests), then in time order (as they will be played)
+    // The N64's music runs on audio frames of its own rate; its notes used to be read per audio task (three
+    // sub-frames) and so landed up to a frame off, which the beat grid made up for. Read per sub-frame
+    // (rip_usf.c) and placed on the nearest game frame, they sit closer to the original than the grid puts
+    // them (measured on Pokemon Stadium 1 / 2: 94% of onsets within 10 ms, 83% on the grid).
+    if (r->kind == RIP_USF && getenv("MMS_RHYTHM")) steady_rhythm(notes, nn);
     qsort(notes, nn, sizeof(Note), note_cmp);
 
     // the loop (on the moved notes)

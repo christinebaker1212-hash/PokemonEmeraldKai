@@ -27,6 +27,8 @@ typedef struct {
     uint32_t state;          // its ADPCM decoder state address (0 = slot free)
     int seenTask;            // last task it was in
     int keyon;               // notes started since the last snapshot
+    int konTask;             // the (sub-frame) task its last note started in
+    int sounding;            // decoded this sub-frame (a voice whose sample has ended still mixes, on silence)
     uint32_t book;           // codebook address
     uint32_t load;           // the sample data it read first (DRAM)
     uint32_t pitch;          // Q16.16 at the output rate
@@ -34,6 +36,11 @@ typedef struct {
     int sample;              // RipSample (-1 = not found yet)
     int twoBit;
 } UVoice;
+
+typedef struct {             // one voice's commands in a sub-frame, until its envelope mix
+    int adpcm, init, twoBit, resample;
+    uint32_t state, book, load, pitch;
+} Chain;
 
 typedef struct {             // a voice as one audio task left it
     int16_t sample;
@@ -54,11 +61,17 @@ typedef struct {
     Task *tasks;
     int ntasks, capTasks;
     long aiTotal;            // samples the audio interface has started playing
+    // An audio task makes its buffer in sub-frames (libultra: 184 samples each), every voice decoded,
+    // resampled and mixed again in each; each sub-frame is a Task here, so a note that starts in the
+    // second or third sub-frame starts there (it used to be missed, the voice gliding from the old note).
     int taskKeyon[USF_VOICES];
     int compare, fifo;
     int task;
     uint32_t book, load;
     int cur;                 // the voice the last decode was for
+    int afterSave;           // a sub-frame's output was saved: the next voice command starts the next sub-frame
+    Chain ch;
+    long konWhy[3];          // debugging: notes started by a reset, another sample, sound after silence
     UVoice v[USF_VOICES];
     int debug;
     uint32_t cacheBook[512];     // codebook -> sample, so the RAM is searched once per instrument
@@ -203,7 +216,7 @@ static void end_task(Usf *u) {
         UVoice *v = &u->v[i];
         TaskVoice *x = &t->v[i];
         x->sample = (int16_t)v->sample;
-        x->active = v->state && v->seenTask == u->task && v->sample >= 0;
+        x->active = v->state && v->seenTask == u->task && v->sample >= 0 && v->sounding;
         x->keyon = u->taskKeyon[i] > 0;
         x->rate = (float)(v->pitch / 65536.0 * rate);
         x->l = v->l;
@@ -215,24 +228,90 @@ static void ai_played(uint32_t address, uint32_t length) {
     Usf *u = g_usf;
     if (!u) return;
     uint32_t a = address & 0xFFFFFF;
-    // the newest task that saved its sound there
-    for (int i = u->ntasks - 1; i >= 0 && i >= u->ntasks - 64; i--) {
+    // the (sub-frame) tasks that saved their sound in this buffer: each plays from where its part of it is
+    for (int i = u->ntasks - 1; i >= 0 && i >= u->ntasks - 256; i--) {
         Task *t = &u->tasks[i];
         if (t->play >= 0) continue;
-        for (int k = 0; k < t->nsave; k++)
-            if (a >= t->saveLo[k] && a < t->saveHi[k]) { t->play = u->aiTotal; i = -1; break; }
+        for (int k = 0; k < t->nsave; k++) {
+            if (a >= t->saveLo[k] && a < t->saveHi[k]) { t->play = u->aiTotal; break; }
+            if (t->saveLo[k] > a && t->saveLo[k] < a + length) { t->play = u->aiTotal + (long)((t->saveLo[k] - a) / 4); break; }
+        }
     }
     u->aiTotal += length / 4;
+}
+
+// The next sub-frame starts with the first voice command after its output was saved.
+static void next_subframe(Usf *u) {
+    if (!u->afterSave || u->task <= 0) return;
+    end_task(u);
+    u->task++;
+    begin_task(u);
+    u->afterSave = 0;
+}
+
+// One voice's commands in a sub-frame (decode, resample, envelope mix), kept until its mix says whose they are.
+static void commit_chain(Usf *u, struct hle_t *hle, uint32_t key, float l, float r) {
+    Chain ch = u->ch;
+    memset(&u->ch, 0, sizeof u->ch);
+    int k = -1, freeSlot = -1;
+    for (int i = 0; i < USF_VOICES; i++) {
+        if (u->v[i].state == key) { k = i; break; }
+        if (freeSlot < 0 && (!u->v[i].state || u->v[i].seenTask < u->task - 1800)) freeSlot = i;
+    }
+    if (k < 0) {
+        if (freeSlot < 0) return;
+        k = freeSlot;
+        memset(&u->v[k], 0, sizeof u->v[k]);
+        u->v[k].state = key;
+        u->v[k].sample = -1;
+    }
+    UVoice *v = &u->v[k];
+    int wasSounding = v->sounding && v->seenTask >= u->task - 1;
+    v->seenTask = u->task;
+    v->sounding = ch.adpcm;       // no decode: the voice's sample has ended (its mix runs on silence)
+    if (ch.resample) v->pitch = ch.pitch;
+    v->l = l;
+    v->r = r;
+    if (u->debug && getenv("MMS_USF_VOICE") && k == atoi(getenv("MMS_USF_VOICE")))
+        fprintf(stderr, "task %d voice %d key %06x adpcm %d state %06x init %d book %06x load %06x pitch %u vol %.3f %.3f\n", u->task, k, key,
+                ch.adpcm, ch.state, ch.init, ch.book, ch.load, v->pitch, l, r);
+    if (!ch.adpcm) return;
+    // a note starts: the decoder or resampler starts over, another sample, or sound again after silence
+    int newSample = ch.book != v->book;
+    if (ch.init || newSample || !wasSounding) {
+        u->konWhy[ch.init ? 0 : newSample ? 1 : 2]++;
+        if (v->konTask != u->task) {
+            v->keyon++;
+            v->konTask = u->task;
+            u->taskKeyon[k]++;
+        }
+        v->book = ch.book;
+        v->load = ch.load;
+        v->twoBit = ch.twoBit;
+        if (newSample || v->sample < 0) v->sample = find_sample(u, hle, v);
+    }
 }
 
 static void tap(struct hle_t *hle, int what, uint32_t a, int32_t b, int32_t c, int32_t d) {
     Usf *u = g_usf;
     if (!u) return;
     switch (what) {
+    case ALIST_TAP_CMD:
+        if (u->debug && getenv("MMS_USF_CMDS")) {
+            int from = atoi(getenv("MMS_USF_CMDS"));
+            if (u->task >= from && u->task < from + 3) fprintf(stderr, "cmd task %d: %2u %08x %08x\n", u->task, a, (uint32_t)b, (uint32_t)c);
+        }
+        break;
     case ALIST_TAP_TASK:
+        u->afterSave = 0;
+        if (getenv("MMS_USF_DUMPRAM") && u->task == atoi(getenv("MMS_USF_DUMPTASK") ? getenv("MMS_USF_DUMPTASK") : "600")) {
+            FILE *df = fopen(getenv("MMS_USF_DUMPRAM"), "wb");
+            if (df) { fwrite(hle->dram, 1, 0x800000, df); fclose(df); }
+        }
         if (u->task > 0) end_task(u);
         u->task++;
         u->cur = -1;
+        memset(&u->ch, 0, sizeof u->ch);
         begin_task(u);
         break;
     case ALIST_TAP_SAVE:
@@ -249,58 +328,38 @@ static void tap(struct hle_t *hle, int what, uint32_t a, int32_t b, int32_t c, i
                 }
             if (!merged && t->nsave < 8) { t->saveLo[t->nsave] = lo; t->saveHi[t->nsave] = hi; t->nsave++; }
         }
+        u->afterSave = 1;
         break;
     case ALIST_TAP_BOOK: u->book = a & 0xFFFFFF; break;
     case ALIST_TAP_LOAD: u->load = a & 0xFFFFFF; break;
-    case ALIST_TAP_ADPCM: {
-        uint32_t st = a & 0xFFFFFF;
-        int k = -1, freeSlot = -1;
-        for (int i = 0; i < USF_VOICES; i++) {
-            if (u->v[i].state == st) { k = i; break; }
-            if (freeSlot < 0 && (!u->v[i].state || u->v[i].seenTask < u->task - 600)) freeSlot = i;
+    case ALIST_TAP_ADPCM:
+        next_subframe(u);
+        if (!u->ch.adpcm) {
+            u->ch.adpcm = 1;
+            u->ch.state = a & 0xFFFFFF;
+            u->ch.book = u->book;
+            u->ch.load = u->load;
+            u->ch.twoBit = d;
         }
-        if (k < 0) {
-            if (freeSlot < 0) { u->cur = -1; break; }
-            k = freeSlot;
-            memset(&u->v[k], 0, sizeof u->v[k]);
-            u->v[k].state = st;
-            u->v[k].sample = -1;
-        }
-        UVoice *v = &u->v[k];
-        u->cur = k;
-        int first = v->seenTask != u->task;
-        if (u->debug && getenv("MMS_USF_VOICE") && k == atoi(getenv("MMS_USF_VOICE")))
-            fprintf(stderr, "task %d voice %d state %06x init %d first %d load %06x book %06x lastpitch %u\n", u->task, k, st, b, first,
-                    u->load, u->book, v->pitch);
-        v->seenTask = u->task;
-        if (b && first) {          // a note starts
-            v->keyon++;
-            u->taskKeyon[k]++;
-            v->book = u->book;
-            v->load = u->load;
-            v->twoBit = d;
-            v->sample = find_sample(u, hle, v);
-        } else if (v->book != u->book && first) {
-            v->book = u->book;
-            v->sample = find_sample(u, hle, v);
-        }
+        if (b) u->ch.init = 1;
+        break;
+    case ALIST_TAP_RESAMPLE:
+        next_subframe(u);
+        u->ch.resample = 1;
+        u->ch.pitch = (uint32_t)b;
+        if (c) u->ch.init = 1;
+        break;
+    case ALIST_TAP_ENVMIX: {
+        // libultra: the envelope mixer's state address is the voice's own (its chain: decode, resample, mix)
+        next_subframe(u);
+        int dry = (int16_t)((uint32_t)d >> 16);
+        commit_chain(u, hle, a & 0xFFFFFF, (float)abs((int16_t)b) / 32768.0f * (float)abs(dry) / 32768.0f,
+                     (float)abs((int16_t)c) / 32768.0f * (float)abs(dry) / 32768.0f);
         break;
     }
-    case ALIST_TAP_RESAMPLE:
-        if (u->cur >= 0) u->v[u->cur].pitch = (uint32_t)b;
-        break;
-    case ALIST_TAP_ENVMIX:
-        if (u->cur >= 0) {
-            int dry = (int16_t)((uint32_t)d >> 16);
-            u->v[u->cur].l = (float)abs((int16_t)b) / 32768.0f * (float)abs(dry) / 32768.0f;
-            u->v[u->cur].r = (float)abs((int16_t)c) / 32768.0f * (float)abs(dry) / 32768.0f;
-        }
-        break;
     case ALIST_TAP_ENVMIX_NEAD:
-        if (u->cur >= 0) {
-            u->v[u->cur].l = (uint16_t)b / 65536.0f;
-            u->v[u->cur].r = (uint16_t)c / 65536.0f;
-        }
+        next_subframe(u);
+        commit_chain(u, hle, u->ch.state ? u->ch.state : 0xFFFFFF, (uint16_t)b / 65536.0f, (uint16_t)c / 65536.0f);
         break;
     }
 }
@@ -353,6 +412,7 @@ static void usf_finalize(RipEmu *e) {
             (void)d;
             if (i == 60) break;
         }
+        fprintf(stderr, "\nusf: note starts: %ld reset, %ld new sample, %ld after silence", u->konWhy[0], u->konWhy[1], u->konWhy[2]);
         fprintf(stderr, "\nusf: %d tasks over %ld samples at %.0f Hz = %.2f tasks a second\n", u->ntasks, u->tasks[u->ntasks - 1].play,
                 rate, u->ntasks / (u->tasks[u->ntasks - 1].play / rate));
     }

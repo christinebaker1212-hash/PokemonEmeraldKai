@@ -118,6 +118,7 @@ void alist_process(struct hle_t* hle, const acmd_callback_t abi[], unsigned int 
         w2 = *(alist++);
 
         acmd = (w1 >> 24) & 0x7f;
+        if (alist_tap) alist_tap(hle, ALIST_TAP_CMD, acmd, (int32_t)w1, (int32_t)w2, 0);   /* Moemon Music Studio */
 
         if (acmd < abi_size)
         {

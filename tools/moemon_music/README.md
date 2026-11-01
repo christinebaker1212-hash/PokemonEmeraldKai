@@ -10,7 +10,7 @@ engine**, lets you pick and tune the instruments, and exports the song in a form
 |---|---|---|---|
 | PSF, minipsf | PlayStation | Highly Experimental | the SPU's 24 voices: key-ons, pitch, envelope and volume; samples decoded from sound RAM |
 | PSF2, minipsf2 | PlayStation 2 | Highly Experimental | the same for both SPU2 cores (48 voices) |
-| USF, miniusf | Nintendo 64 | lazyusf2 | the audio microcode's command lists (libultra n_audio, EAD): codebook, decode, pitch, envelope; samples found from the driver's wavetables and decoded (VADPCM) from the ROM |
+| USF, miniusf | Nintendo 64 | lazyusf2 | the audio microcode's command lists (libultra n_audio, EAD), sub-frame by sub-frame (libultra mixes each buffer in 184-sample parts, every voice in each): codebook, decode, pitch, envelope, each voice by its own mixer state (a voice whose sample has ended still mixes, on silence); samples found from the driver's wavetables and decoded (VADPCM) from the ROM |
 | GBS (+ .m3u) | Game Boy | Game_Music_Emu | the four channels' registers; they become the game's own Game Boy voices (the GBA has the same channels) |
 | 2SF, mini2sf | Nintendo DS | vio2sf's DeSmuME | the 16 SPU channels: sample (PCM8/16, IMA-ADPCM), timer, volume, pan; PSG squares and noise |
 | GSF, minigsf | Game Boy Advance | VBA-M (in_gsf) | games on MP2K (the game's own engine): the song and voicegroup read from the ROM, unchanged |

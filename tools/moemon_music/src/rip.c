@@ -206,6 +206,19 @@ static int rip_load_inner(Rip *r, const char *path, const char *biosDir, int gbs
     r->pcmFrames = (int)pos;
     if (e.finalize) e.finalize(&e);
     e.close(&e);
+    if (getenv("MMS_RIP_VF")) {   // debugging: every voice's frames (MMS_RIP_VF=first-last frame)
+        int f0 = 0, f1 = 300;
+        sscanf(getenv("MMS_RIP_VF"), "%d-%d", &f0, &f1);
+        for (int f = f0; f <= f1 && f < r->nframes; f++) {
+            fprintf(stderr, "vf %5d:", f);
+            for (int v = 0; v < r->nvoices; v++) {
+                const RipVF *x = &r->vf[(size_t)f * r->nvoices + v];
+                if (x->sample < 0 && !x->keyon) continue;
+                fprintf(stderr, " %d%s=s%d@%.0f/%.2f", v, x->keyon ? "*" : "", x->sample, x->rate, x->l + x->r);
+            }
+            fprintf(stderr, "\n");
+        }
+    }
     // the tags' fade-out, for the original-instruments player
     if (r->length > 0 && r->fade > 0) {
         long fs = (long)(r->length * e.rate), fe = (long)((r->length + r->fade) * e.rate);
