@@ -1049,7 +1049,7 @@ static void DrawHint(void)
     else if (opt == OPT_SS_FOLLOW)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.scaleFollowers ? "SMALL PMD ONES CLOSER TO TRUE SIZE" : "PMD PICTURES AS THEY ARE");
     else if (opt == OPT_SS_GARDEN)
-        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.scaleGarden ? "SMALL PMD ONES CLOSER TO TRUE SIZE" : "PMD PICTURES AS THEY ARE");
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.scaleGarden ? "SMALL PMD ONES A LITTLE SMALLER" : "PMD PICTURES AS THEY ARE");
     else if (opt == OPT_SURFMUSIC)
         snprintf(ascii, sizeof(ascii), "OFF: THE MAP'S SONG SURFING AND DIVING");
     else if (opt == OPT_LEVELSCALE)
