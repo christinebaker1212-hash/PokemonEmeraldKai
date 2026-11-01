@@ -3608,7 +3608,9 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   Platinum's paths; healed and asked between battles). gen_maps.py OVERRIDES makes the room's opponent Emerald's
   (OBJ_EVENT_GFX_VAR_0, FLAG_HIDE_BATTLE_TOWER_OPPONENT) and hides Platinum's stand-in for the player. Not here: the
   partner counter, PALMER (Emerald's brain logic isn't asked), the other four buildings (Platinum's own kinds of
-  battle). `mp tower`; test sinnoh_tower (7 wins with `mp battlerhp`).
+  battle). `mp tower [BP]`; test sinnoh_tower (7 wins with `mp battlerhp`). The BATTLE FRONTIER's two booths trade
+  BP (the frontier's, HOENN's too) for Platinum's lists: items left, TMs right (s3d_places.c Sinnoh_BpMenu /
+  Sinnoh_BpBuy; the BP in the question, the scroll list covers Emerald's BP window). Test sinnoh_bp.
 - The POKé RADAR (2026-11-01, src/mp/mp_pokeradar.c; ITEM_POKE_RADAR 661, ITEMS_COUNT 662, the DEVON SCOPE's icon):
   SANDGEM LAB's aide gives it after the LEAGUE (flag 0x3D33). It works in any region's tall grass, not on a bike or in
   the water, with a 50-step battery: up to four patches, one at each distance 1-4, rustle (Emerald's tall grass field

@@ -1,0 +1,7 @@
+# The BATTLE FRONTIER's exchange booths (data/scripts/sinnoh_places.inc, src/sinnoh/s3d_places.c): with 5 BP the left
+# booth's first prize (PROTEIN, 1 BP) is bought: 4 BP left, a PROTEIN (item 64) in the bag. Needs the 3D pack.
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("bp 4" "bag 1 usable")
+UNEXPECT_A=("[crash]" "TIMEOUT")

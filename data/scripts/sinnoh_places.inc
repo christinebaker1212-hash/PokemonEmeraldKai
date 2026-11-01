@@ -213,3 +213,70 @@ Sinnoh_Text_PrizeBye:
 Sinnoh_Text_PrizeNoCase:
 	.string "You'll need a COIN CASE to hold\n"
 	.string "COINS before you can trade them.$"
+
+@ The BATTLE FRONTIER's exchange booths: BATTLE POINTS for items (left) and TMs (right): src/sinnoh/s3d_places.c
+Sinnoh_EventScript_BpItems::
+	lock
+	faceplayer
+	setvar VAR_TEMP_3, 0
+	goto Sinnoh_EventScript_BpBooth
+
+Sinnoh_EventScript_BpTms::
+	lock
+	faceplayer
+	setvar VAR_TEMP_3, 1
+Sinnoh_EventScript_BpBooth::
+	msgbox Sinnoh_Text_BpWelcome, MSGBOX_DEFAULT
+Sinnoh_EventScript_BpPick::
+	specialvar VAR_RESULT, GetFrontierBattlePoints
+	buffernumberstring STR_VAR_3, VAR_RESULT
+	message Sinnoh_Text_BpWhich
+	waitmessage
+	copyvar VAR_0x8004, VAR_TEMP_3
+	special Sinnoh_BpMenu
+	waitstate
+	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, Sinnoh_EventScript_BpBye
+	msgbox Sinnoh_Text_BpConfirm, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Sinnoh_EventScript_BpPick
+	special Sinnoh_BpBuy
+	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_BpShort
+	goto_if_eq VAR_RESULT, 2, Sinnoh_EventScript_BpNoRoom
+	playse SE_SHOP
+	msgbox Sinnoh_Text_BpHere, MSGBOX_DEFAULT
+	goto Sinnoh_EventScript_BpPick
+
+Sinnoh_EventScript_BpShort::
+	msgbox Sinnoh_Text_BpShort, MSGBOX_DEFAULT
+	goto Sinnoh_EventScript_BpPick
+
+Sinnoh_EventScript_BpNoRoom::
+	msgbox Sinnoh_Text_PrizeNoRoom, MSGBOX_DEFAULT
+	goto Sinnoh_EventScript_BpPick
+
+Sinnoh_EventScript_BpBye::
+	msgbox Sinnoh_Text_BpBye, MSGBOX_DEFAULT
+	release
+	end
+
+Sinnoh_Text_BpWelcome:
+	.string "Welcome! Here you can trade BATTLE\n"
+	.string "POINTS for prizes.$"
+
+Sinnoh_Text_BpWhich:
+	.string "You have {STR_VAR_3} BP.\n"
+	.string "What would you like?$"
+
+Sinnoh_Text_BpConfirm:
+	.string "{STR_VAR_1} for {STR_VAR_2} BP.\n"
+	.string "Is that right?$"
+
+Sinnoh_Text_BpHere:
+	.string "Here you are! Battle well!$"
+
+Sinnoh_Text_BpShort:
+	.string "You don't have enough BATTLE POINTS\n"
+	.string "for that one yet.$"
+
+Sinnoh_Text_BpBye:
+	.string "Win big at the FRONTIER and come\n"
+	.string "back for more!$"

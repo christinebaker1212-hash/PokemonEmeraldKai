@@ -2031,7 +2031,9 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "tower") == 0)
     {
-        // tower - the BATTLE TOWER's single battle streaks (level 50, open) and the BATTLE POINTS
+        // tower [BP] - the BATTLE TOWER's single battle streaks (level 50, open) and the BATTLE POINTS (BP: set them)
+        if (arg[0] >= '0' && arg[0] <= '9')
+            gSaveBlock2Ptr->frontier.battlePoints = atoi(arg);
         printf("[test] tower: streak %d / streak %d, bp %d\n", gSaveBlock2Ptr->frontier.towerWinStreaks[0][0],
                gSaveBlock2Ptr->frontier.towerWinStreaks[0][1], gSaveBlock2Ptr->frontier.battlePoints);
     }

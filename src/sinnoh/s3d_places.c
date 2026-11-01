@@ -59,3 +59,70 @@ u16 Sinnoh_PrizeMenu(void)
     ShowScrollableMultichoice();
     return 0;
 }
+
+// The BATTLE FRONTIER's exchange booths: Platinum's lists for BATTLE POINTS (the left booth's items, the right one's
+// TMs; the frontier's BP: HOENN's and the BATTLE TOWER's here)
+static const struct { u16 item, bp; } sBpItems[] = {
+    {ITEM_PROTEIN, 1}, {ITEM_CALCIUM, 1}, {ITEM_IRON, 1}, {ITEM_ZINC, 1}, {ITEM_CARBOS, 1}, {ITEM_HP_UP, 1},
+    {ITEM_POWER_BRACER, 16}, {ITEM_POWER_BELT, 16}, {ITEM_POWER_LENS, 16}, {ITEM_POWER_BAND, 16},
+    {ITEM_POWER_ANKLET, 16}, {ITEM_POWER_WEIGHT, 16}, {ITEM_TOXIC_ORB, 16}, {ITEM_FLAME_ORB, 16},
+    {ITEM_WHITE_HERB, 32}, {ITEM_POWER_HERB, 32}, {ITEM_BRIGHT_POWDER, 48}, {ITEM_CHOICE_BAND, 48},
+    {ITEM_FOCUS_BAND, 48}, {ITEM_SCOPE_LENS, 48}, {ITEM_MUSCLE_BAND, 48}, {ITEM_FOCUS_SASH, 48},
+    {ITEM_CHOICE_SCARF, 48}, {ITEM_RAZOR_CLAW, 48}, {ITEM_RAZOR_FANG, 48}, {ITEM_RARE_CANDY, 48},
+};
+static const struct { u16 item, bp; } sBpTms[] = {
+    {ITEM_TM06, 32}, {ITEM_TM73, 32}, {ITEM_TM61, 32}, {ITEM_TM45, 32}, {ITEM_TM40, 40}, {ITEM_TM31, 40},
+    {ITEM_TM08, 48}, {ITEM_TM04, 48}, {ITEM_TM81, 64}, {ITEM_TM30, 64}, {ITEM_TM53, 64}, {ITEM_TM36, 80},
+    {ITEM_TM59, 80}, {ITEM_TM71, 80}, {ITEM_TM26, 80},
+};
+static u8 sBpRows[ARRAY_COUNT(sBpItems)][32];
+static u8 sBpList;
+
+static u16 BpPicked(u16 row)
+{
+    u16 n = sBpList ? ARRAY_COUNT(sBpTms) : ARRAY_COUNT(sBpItems);
+    if (row >= n)
+        return MULTI_B_PRESSED;
+    gSpecialVar_0x8005 = sBpList ? sBpTms[row].item : sBpItems[row].item;
+    gSpecialVar_0x8006 = sBpList ? sBpTms[row].bp : sBpItems[row].bp;
+    CopyItemName(gSpecialVar_0x8005, gStringVar1);
+    ConvertIntToDecimalStringN(gStringVar2, gSpecialVar_0x8006, STR_CONV_MODE_LEFT_ALIGN, 2);
+    return row;
+}
+
+// VAR_0x8004 0: the items, 1: the TMs (waitstate; as Sinnoh_PrizeMenu, the price in BP)
+u16 Sinnoh_BpMenu(void)
+{
+    static const u8 sBp[] = _(" BP");
+    static const u8 sSep[] = _(" ");
+    u32 i, n;
+    sBpList = gSpecialVar_0x8004 != 0;
+    n = sBpList ? ARRAY_COUNT(sBpTms) : ARRAY_COUNT(sBpItems);
+    for (i = 0; i < n; i++)
+    {
+        u16 item = sBpList ? sBpTms[i].item : sBpItems[i].item, bp = sBpList ? sBpTms[i].bp : sBpItems[i].bp;
+        CopyItemName(item, sBpRows[i]);
+        StringAppend(sBpRows[i], sSep);
+        ConvertIntToDecimalStringN(sBpRows[i] + StringLength(sBpRows[i]), bp, STR_CONV_MODE_LEFT_ALIGN, 2);
+        StringAppend(sBpRows[i], sBp);
+        gQzScrollOptions[i] = sBpRows[i];
+    }
+    gQzScrollOptions[i] = gText_Exit;
+    gQzScrollCount = i + 1;
+    gQzScrollResult = BpPicked;
+    gSpecialVar_0x8004 = SCROLL_MULTI_QZ_DYNAMIC;
+    ShowScrollableMultichoice();
+    return 0;
+}
+
+// The pick (VAR_0x8005, its BP VAR_0x8006) bought: VAR_RESULT 0 done, 1 not enough BP, 2 no room in the BAG
+u16 Sinnoh_BpBuy(void)
+{
+    if (gSaveBlock2Ptr->frontier.battlePoints < gSpecialVar_0x8006)
+        return gSpecialVar_Result = 1;
+    if (!CheckBagHasSpace(gSpecialVar_0x8005, 1))
+        return gSpecialVar_Result = 2;
+    gSaveBlock2Ptr->frontier.battlePoints -= gSpecialVar_0x8006;
+    AddBagItem(gSpecialVar_0x8005, 1);
+    return gSpecialVar_Result = 0;
+}

@@ -1,0 +1,21 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp tower 5
+mp warp 41,5,45,44
+wait 60
+waitfor field 1000
+mp face up
+press A 1
+pressuntil A multichoice 3000
+wait 20
+shot t_bp
+press A 1
+pressuntil A yesno 2000
+wait 10
+press A 1
+wait 60
+pressuntil B field 3000
+mp tower
+mp gencheck 64
+quit

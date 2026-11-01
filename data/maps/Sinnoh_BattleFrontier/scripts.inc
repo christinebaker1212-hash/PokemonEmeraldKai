@@ -119,11 +119,11 @@ Sinnoh_BattleFrontier_EventScript_Person11::
 	end
 
 Sinnoh_BattleFrontier_EventScript_Person12::
-	msgbox Sinnoh_BattleFrontier_Text_Person12, MSGBOX_NPC
+	goto Sinnoh_EventScript_BpItems
 	end
 
 Sinnoh_BattleFrontier_EventScript_Person14::
-	msgbox Sinnoh_BattleFrontier_Text_Person14, MSGBOX_NPC
+	goto Sinnoh_EventScript_BpTms
 	end
 
 Sinnoh_BattleFrontier_EventScript_Person15::
@@ -311,16 +311,6 @@ Sinnoh_BattleFrontier_Text_Person10:
 Sinnoh_BattleFrontier_Text_Person11:
 	.string "Hyah! The FRONTIER is the ultimate\n"
 	.string "training ground!$"
-
-Sinnoh_BattleFrontier_Text_Person12:
-	.string "Welcome to the BATTLE FRONTIER! The\n"
-	.string "facilities are getting ready for\l"
-	.string "challengers. Please come back soon!$"
-
-Sinnoh_BattleFrontier_Text_Person14:
-	.string "Welcome to the BATTLE FRONTIER! The\n"
-	.string "facilities are getting ready for\l"
-	.string "challengers. Please come back soon!$"
 
 Sinnoh_BattleFrontier_Text_Person15:
 	.string "I come here every weekend to watch\n"
