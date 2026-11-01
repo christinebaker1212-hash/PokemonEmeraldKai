@@ -28,6 +28,7 @@
 #define MF_BTN_Y      0x0100
 #define MF_BTN_Z      0x0200
 #define MF_BTN_START  0x0400
+#define MF_BTN_COIN   0x0800   // (1.64.0) the arcade boards' coin (SELECT; a coin from the COIN CASE); MUGEN has none
 
 enum
 {

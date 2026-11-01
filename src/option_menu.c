@@ -238,9 +238,10 @@ static const u8 sText_FbLightKick[] = _("LIGHT KICK");
 static const u8 sText_FbMediumKick[] = _("MEDIUM KICK");
 static const u8 sText_FbHeavyKick[] = _("HEAVY KICK");
 static const u8 sText_FbStart[] = _("START");
+static const u8 sText_FbCoin[] = _("COIN (ARCADES)");
 static const u8 *const sFightButtonNames[FIGHT_BIND_COUNT] = {
     sText_FbLightPunch, sText_FbMediumPunch, sText_FbHeavyPunch, sText_FbLightKick, sText_FbMediumKick, sText_FbHeavyKick,
-    sText_FbStart,
+    sText_FbStart, sText_FbCoin,
 };
 static const u8 sText_MoeNav[] = _("MOENAV CALLS");
 static const u8 sText_Finder[] = _("FRIEND FINDER");

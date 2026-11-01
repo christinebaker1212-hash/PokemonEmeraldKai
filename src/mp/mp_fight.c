@@ -26,6 +26,7 @@
 #include "string_util.h"
 #include "task.h"
 #include "text.h"
+#include "coins.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
 #include "arcade.h"
@@ -69,10 +70,43 @@ enum { NET_OFF, NET_ASKING, NET_STARTING, NET_RUNNING };
 
 // The GAME CENTER 3F's VS cabinets, rows 9-13 of its back-to-back pairs, one game each (VAR_0x8005 from
 // data/scripts/vs_cabinet.inc; 0 was MAUVILLE's, before 1.62.0)
-// (1.64.0: CABINET_PBOBBLE, the Astro City cabinet on the 3F's top right wall, (10,5): one seat, PUZZLE BOBBLE)
-enum { CABINET_SSF2X = 1, CABINET_VAMPIRE, CABINET_CYBERBOTS, CABINET_MUGEN, CABINET_ALPHA3, CABINET_PBOBBLE, CABINET_COUNT };
+// (1.64.0: the Astro City cabinets on the 3F's top right wall, one seat each: CABINET_PBOBBLE (10,5) PUZZLE BOBBLE,
+// CABINET_TGM2 (12,5) TETRIS THE GRAND MASTER 2 PLUS)
+enum { CABINET_SSF2X = 1, CABINET_VAMPIRE, CABINET_CYBERBOTS, CABINET_MUGEN, CABINET_ALPHA3, CABINET_PBOBBLE, CABINET_TGM2,
+       CABINET_COUNT };
 static u8 sCabinet = CABINET_MUGEN;
 #define CABINET_ID sCabinet
+
+// (1.64.0, the user) Our buttons for a frame: at an arcade board SELECT (MF_BTN_COIN) puts in a coin from the COIN CASE,
+// counted once each press (only the press's first frame carries the bit; arcade_fight.c gives the board its coin
+// pulse); with none left the screen says so and nothing goes in. MUGEN has no coins.
+static u16 sTestButtons;    // the test harness's buttons (MP_Fight_TestPress)
+static bool8 sCoinWas;
+static u8 sNoCoinsTimer;
+static u16 LocalButtons(void)
+{
+    u16 b = Fight_PollButtons() | sTestButtons;
+    bool8 coin = (b & MF_BTN_COIN) != 0;
+    b &= ~MF_BTN_COIN;
+    if (sNoCoinsTimer && --sNoCoinsTimer == 0)
+        Fight_SetOverlay("", 0);
+    if (coin && !sCoinWas && gFightKind >= FIGHT_KIND_ARCADE)
+    {
+        if (GetCoins() >= 1 && RemoveCoins(1))
+        {
+            b |= MF_BTN_COIN;
+            MPNet_Log("fight: a coin in (%u left)", GetCoins());
+        }
+        else
+        {
+            Fight_SetOverlay("NO COINS", 0);
+            sNoCoinsTimer = 90;
+            MPNet_Log("fight: no coins in the COIN CASE");
+        }
+    }
+    sCoinWas = coin;
+    return b;
+}
 #define SEAT_RESEND       60      // frames between our seat messages
 #define SEAT_TTL          150     // a friend's seat without a message for this long is empty
 #define ASK_FRAMES        (60 * 6)
@@ -136,7 +170,6 @@ static struct
 static u32 sRsHeap[RESYNC_HEAP_PAGES], sRsGlobals[RESYNC_GLOBAL_PAGES];
 static bool8 sHaveMyPack;
 static char sCabinetText[2048];
-static u16 sTestButtons;    // the test harness's buttons (MP_Fight_TestPress)
 static u32 sTick;
 
 static struct
@@ -294,6 +327,8 @@ static u8 KindFor(u8 cabinet)
         return FIGHT_KIND_ARCADE + ARCADE_CYBERBOTS;
     case CABINET_PBOBBLE:
         return FIGHT_KIND_ARCADE + ARCADE_PBOBBLE;
+    case CABINET_TGM2:
+        return FIGHT_KIND_ARCADE + ARCADE_TGM2;
     default:
         return FIGHT_KIND_MUGEN;
     }
@@ -1185,7 +1220,7 @@ static bool8 NetStep(void)
     while (sNet.localLast < cur + 1 + sNet.delay)
     {
         sNet.localLast++;
-        sNet.local[sNet.localLast % HIST] = sNet.localLast <= 1 + sNet.delay ? 0 : (Fight_PollButtons() | sTestButtons);
+        sNet.local[sNet.localLast % HIST] = sNet.localLast <= 1 + sNet.delay ? 0 : LocalButtons();
     }
     if (sNet.rollbackFrom != 0 && sNet.rollbackFrom <= cur)
         RollBack();
@@ -1499,7 +1534,7 @@ static bool8 Step(void)
         Finish(result);
         return FALSE;
     }
-    buttons[sSeat] = Fight_PollButtons() | sTestButtons;
+    buttons[sSeat] = LocalButtons();
     FightEngine_Step(buttons);
     return TRUE;
 }

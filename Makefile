@@ -426,7 +426,7 @@ endif
 # the games come from each player's own ROM sets at run time, include/arcade.h)
 ifeq ($(PORTABLE),1)
   ARCADE_RUNTIME := game spare no_blocks no_game no_z80_blocks recomp recomp_z80
-  ARCADE_SRCS := arcade/arcade_cps2.cpp $(wildcard arcade/cps2recomp/machine/*.cpp) $(wildcard arcade/taitob/*.cpp) \
+  ARCADE_SRCS := arcade/arcade_cps2.cpp $(wildcard arcade/cps2recomp/machine/*.cpp) $(wildcard arcade/taitob/*.cpp) $(wildcard arcade/psikyosh/*.cpp) \
                  $(wildcard arcade/ymfm/*.cpp) \
                  $(wildcard arcade/cps2recomp/video/*.cpp) $(wildcard arcade/cps2recomp/sound/*.cpp) \
                  $(ARCADE_RUNTIME:%=arcade/cps2recomp/runtime/%.cpp) arcade/cps2recomp/recomp-common/settings.cpp

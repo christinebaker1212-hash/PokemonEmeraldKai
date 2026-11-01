@@ -8,7 +8,7 @@ struct SDL_Texture;
 // The local player's MF_BTN_* buttons (keyboard and every controller)
 unsigned short Fight_PollButtons(void);
 // The fight buttons' keys and pad buttons (OPTIONS > CONTROLS > FIGHT BUTTONS; saved by gamepad.c)
-enum { FIGHT_BIND_X, FIGHT_BIND_Y, FIGHT_BIND_Z, FIGHT_BIND_A, FIGHT_BIND_B, FIGHT_BIND_C, FIGHT_BIND_START, FIGHT_BIND_COUNT };
+enum { FIGHT_BIND_X, FIGHT_BIND_Y, FIGHT_BIND_Z, FIGHT_BIND_A, FIGHT_BIND_B, FIGHT_BIND_C, FIGHT_BIND_START, FIGHT_BIND_COIN, FIGHT_BIND_COUNT };
 void Fight_BindListen(int which);           // the next key or pad button pressed becomes this one's
 int Fight_BindListening(void);              // the fight button being chosen + 1, else 0
 int Fight_BindPoll(void);                   // every frame while choosing: 1 chosen, -1 cancelled (Esc / Back / 8 s), 0

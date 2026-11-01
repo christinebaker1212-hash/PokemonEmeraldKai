@@ -47,6 +47,10 @@ public:
     }
     void Serialize(cps2recomp::Archive &ar);
     uint32_t Hash() const;
+    // The board's TEST switch (held: the operator's test menu) and SERVICE button, as read from the next frame on
+    void SetTestSwitch(bool test, bool service = false) {
+        m_test = (test ? 0x20u : 0) | (service ? 0x10u : 0);
+    }
 
     // Sh2Bus
     uint8_t Read8(uint32_t address) override;
@@ -88,13 +92,14 @@ private:
     std::unique_ptr<State> m_s;
     std::vector<uint8_t> m_ymState;
     std::vector<uint32_t> m_picture;
-    uint32_t m_inputs = 0xFFFFFFFF;
+    uint32_t m_inputs = 0xFFFFFFFF, m_test = 0;
 
     // the renderer's own (rebuilt every frame)
     uint32_t m_pens[0x1400] = {};   // the palette as 0x00BBGGRR
     std::vector<uint16_t> m_z;      // the sprites' z buffer
 
     uint32_t IoRead(uint32_t address);
+    void WriteMasked(uint32_t address, uint32_t value, uint32_t mask);
     void EepromWrite(uint8_t data);
     bool EepromDataOut() const;
     void EepromClock();

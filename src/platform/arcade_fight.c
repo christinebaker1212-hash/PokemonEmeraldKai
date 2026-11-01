@@ -31,7 +31,7 @@ unsigned char gFightKind;
 // What the cabinet's own START handling needs to remember (kept with each frame for rollback)
 struct ArcPads
 {
-    int16_t seq[2];      // frames since a START press began its coin-and-start (-1: none)
+    int16_t seq[2];      // frames since a coin went in (-1: none; 1.64.0: SELECT, not START)
     int16_t held[2];     // frames START has been held
     uint32_t leaveAt;    // the frame START had been held long enough (0: not)
     uint8_t prev[2];     // START held on the last frame
@@ -89,22 +89,18 @@ static uint16_t BoardButtons(int p, unsigned short b)
     if (b & MF_BTN_C)
         out |= ARCADE_HK;
 
-    if (start && !sPads.prev[p] && sPads.seq[p] < 0)
+    // (1.64.0, the user: SELECT puts in a coin, START is START, holding START leaves) MF_BTN_COIN comes on the one
+    // frame a coin went in (mp_fight.c took it from the COIN CASE): the board sees it for 5 frames
+    if ((b & MF_BTN_COIN) && sPads.seq[p] < 0)
         sPads.seq[p] = 0;
     if (sPads.seq[p] >= 0)
     {
-        int s = sPads.seq[p];
-        if (s <= 4)
-            out |= ARCADE_COIN;
-        else if (s >= 8)
-            out |= ARCADE_START;
-        if (++sPads.seq[p] > 14)
+        out |= ARCADE_COIN;
+        if (++sPads.seq[p] > 4)
             sPads.seq[p] = -1;
     }
-    else if (start && sPads.held[p] > 14)
-    {
+    if (start)
         out |= ARCADE_START;
-    }
     sPads.held[p] = start ? sPads.held[p] + 1 : 0;
     sPads.prev[p] = (uint8_t)start;
     if (sPads.held[p] == LEAVE_FRAMES && sPads.leaveAt == 0)
@@ -245,7 +241,7 @@ int ArcFight_PackSummary(int game, struct MfPack *out)
     int ok = Arcade_Check(game, why, sizeof(why));
 
     memset(out, 0, sizeof(*out));
-    out->core = ok ? 0xA2C0DE00u + (unsigned int)game : 0;
+    out->core = ok ? 0xA2C1DE00u + (unsigned int)game : 0;   // (1.64.0: SELECT is the coin: older builds' boards differ)
     return ok;
 }
 

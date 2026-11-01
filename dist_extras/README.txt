@@ -1538,9 +1538,10 @@ The CAPCOM cabinets
                   needs. Files are found by their contents, so a set named
                   differently inside still works. Both players need the set
                   to play together.
-  Playing         START puts in a coin and starts, as on a free-play
-                  cabinet (in a game, it's the game's own START too). Hold
-                  START for 2 seconds to stand up.
+  Playing         SELECT puts in a coin: one from your COIN CASE (with
+                  none left, the screen says NO COINS). START is the game's
+                  START. Hold START for 2 seconds to stand up. SELECT can be
+                  changed on OPTIONS > CONTROLS > FIGHT BUTTONS (COIN).
   Spectating      Friends who have the game's set see it in their SPECTATE
                   panel; friends who don't see a blank screen saying
                   CONNECTING... until you're done.

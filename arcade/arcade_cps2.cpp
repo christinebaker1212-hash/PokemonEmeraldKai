@@ -17,6 +17,7 @@
 #include "cps2recomp/machine/romset.h"
 #include "cps2recomp/runtime/state.h"
 #include "taitob/taitob.h"
+#include "psikyosh/ps5.h"
 #include "arcade.h"
 
 extern "C" const char *Updater_ExeFile(const char *name);
@@ -74,8 +75,19 @@ const OtherGame &Other(int game)
          {"pb-ic27.ic27", 0x26efa4c4},                               // Z80
          {"pb-ic14.ic14", 0x55f90ea4}, {"pb-ic9.ic9", 0x3253aac9},    // TC0180VCU
          {"pb-ic15.ic15", 0x0840cbc4}}};                             // ADPCM
+    // TGM2 PLUS: its program and EEPROM from tgm2p.zip, the rest from its parent tgm2.zip
+    static const OtherGame kTgm2 = {
+        "TETRIS THE GRAND MASTER 2 PLUS", "tgm2p.zip and tgm2.zip", {"tgm2p", "tgm2"},
+        {{"2b.u21", 0x38bc626c}, {"1b.u22", 0x7599fb19}, {"tgm2p.default.nv", 0xb2328b40},   // SH-2 program, EEPROM
+         {"81ts_3l.u6", 0xd77cff9c}, {"82ts_3h.u14", 0xf012b583}, {"83ts_4l.u7", 0x078cafc3},
+         {"84ts_4h.u15", 0x1f91446b}, {"85ts_5l.u8", 0x40fbd259}, {"86ts_5h.u16", 0x186c935f},
+         {"87ts_6l.u1", 0xc17dc48a}, {"88ts_6h.u2", 0xe4dba5da}, {"89ts_7l.u19", 0xdab1b2c5},
+         {"90ts_7h.u20", 0xaae696b3}, {"91ts_8l.u28", 0xe953ace1}, {"92ts_8h.u29", 0x9da3b976},
+         {"93ts_9l.u41", 0x233087fe}, {"94ts_9h.u42", 0x9da831c7}, {"95ts_10l.u58", 0x303a5240},
+         {"96ts_10h.u59", 0x2240ebf6},                                                           // the l / h pairs
+         {"97ts_snd.u52", 0x9155eca6}}};                                                         // YMF278B samples
     static const OtherGame kNone = {"", "", {}, {}};
-    return game == ARCADE_PBOBBLE ? kPbobble : kNone;
+    return game == ARCADE_PBOBBLE ? kPbobble : game == ARCADE_TGM2 ? kTgm2 : kNone;
 }
 bool IsCps2(int game)
 {
@@ -134,6 +146,18 @@ struct TaitoBBoard : Board {
     uint32_t Hash() const override { return board->Hash(); }
 };
 
+struct Ps5Board : Board {
+    std::unique_ptr<psikyosh::Board> board;
+    void Frame(uint16_t p1, uint16_t p2) override { board->RunFrame(p1, p2); }
+    const uint32_t *Picture() override { return board->Picture(); }
+    int Width() const override { return psikyosh::Board::kWidth; }
+    int Height() const override { return psikyosh::Board::kHeight; }
+    std::vector<int16_t> &Audio() override { return board->audio; }
+    int SampleRate() const override { return (int)board->SampleRate(); }
+    void Serialize(Archive &ar) override { board->Serialize(ar); }
+    uint32_t Hash() const override { return board->Hash(); }
+};
+
 std::unique_ptr<Board> g_board;
 int g_game = -1;
 size_t g_audioAt = 0;
@@ -176,6 +200,40 @@ std::unique_ptr<Board> OpenTaitoB(int game, std::string &error)
     roms.samples = f[5];
     auto b = std::make_unique<TaitoBBoard>();
     b->board = std::make_unique<taitob::Board>(std::move(roms));
+    return b;
+}
+
+// TGM2 PLUS's parts from its files (the program as the SH-2 sees it: MAME's ROM_LOAD32_WORD_SWAP; the graphics as
+// MAME's "gfx" region: ROM_LOAD32_WORD, from 0xc00000)
+std::unique_ptr<Board> OpenPs5(int game, std::string &error)
+{
+    const OtherGame &g = Other(game);
+    std::vector<std::vector<uint8_t>> f;
+    if (!ReadZipFiles(Folder(), g.zips, g.roms, &f, error))
+        return nullptr;
+    psikyosh::Roms roms;
+    roms.program.assign(0x100000, 0);
+    for (size_t k = 0; k < 0x40000 && 2 * k + 1 < f[0].size() && 2 * k + 1 < f[1].size(); k++) {
+        roms.program[4 * k + 0] = f[0][2 * k + 1];
+        roms.program[4 * k + 1] = f[0][2 * k];
+        roms.program[4 * k + 2] = f[1][2 * k + 1];
+        roms.program[4 * k + 3] = f[1][2 * k];
+    }
+    roms.eeprom = f[2];
+    roms.graphics.assign(0x3000000, 0);
+    for (int pair = 0; pair < 8; pair++) {
+        const std::vector<uint8_t> &l = f[3 + pair * 2], &h = f[4 + pair * 2];
+        const size_t base = 0xc00000 + static_cast<size_t>(pair) * 0x400000;
+        for (size_t k = 0; 2 * k + 1 < l.size() && 2 * k + 1 < h.size(); k++) {
+            roms.graphics[base + 4 * k + 0] = l[2 * k];
+            roms.graphics[base + 4 * k + 1] = l[2 * k + 1];
+            roms.graphics[base + 4 * k + 2] = h[2 * k];
+            roms.graphics[base + 4 * k + 3] = h[2 * k + 1];
+        }
+    }
+    roms.samples = f[19];
+    auto b = std::make_unique<Ps5Board>();
+    b->board = std::make_unique<psikyosh::Board>(std::move(roms));
     return b;
 }
 
@@ -269,7 +327,7 @@ bool Arcade_Open(int game)
         b->machine->Reset();
         g_board = std::move(b);
     } else {
-        g_board = OpenTaitoB(game, error);
+        g_board = game == ARCADE_TGM2 ? OpenPs5(game, error) : OpenTaitoB(game, error);
         if (!g_board) {
             printf("[arcade] %s: %s\n", Arcade_Title(game), error.c_str());
             return false;

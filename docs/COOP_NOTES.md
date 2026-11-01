@@ -2168,9 +2168,11 @@ bootleg", moved here from MAUVILLE's GAME CORNER, whose (7,9)/(8,9) are slot mac
   on known buttons only, so the input delay settles) and desync recovery (the save state as the "globals" region in 4
   KB pages, the cabinet's START handling in MfStateInfo.host) are all the MUGEN cabinet's code.
 - The picture is shown 4:3 (384x224 to 427x320, bilinear, black sides). The board's 24 kHz sound is stretched over
-  each game frame's samples (frame-locked: no drift). Buttons: X Y Z = LP MP HP, A B C = LK MK HK. START: a coin
-  (frames 0-4) then the board's START (8-14, and while held); held 120 frames leaves (MF_RESULT_CANCELLED, no
-  result message); online the leave counts 12 frames later, past any guessed buttons (it rolls back with the state).
+  each game frame's samples (frame-locked: no drift). Buttons: X Y Z = LP MP HP, A B C = LK MK HK. (1.64.0, the user: on every
+  arcade board) SELECT (fight button COIN, MF_BTN_COIN: Backslash / Back) puts in a coin from the COIN CASE (mp_fight.c
+  LocalButtons takes it once a press, the bit on that frame only; NO COINS on screen when there are none; the board
+  sees ARCADE_COIN 5 frames, arcade_fight.c); START is the board's START while held; held 120 frames leaves
+  (MF_RESULT_CANCELLED, no result message); the arcade pack core is 0xA2C1DE00 + game since (older builds' differ); online the leave counts 12 frames later, past any guessed buttons (it rolls back with the state).
 - Seats and online: the protocol's cabinet byte is the CABINET_* id (0 was MAUVILLE's), so two cabinets never mix. The
   pack check: a board's MfPack core is 0xA2C0DE00 + game when the set loads, 0 otherwise, so a friend without it gets
   "NAME doesn't have this game's ROM set" (FIGHT_RESULT_PACKS).

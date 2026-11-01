@@ -19,6 +19,7 @@ enum
     ARCADE_SSF2X,
     ARCADE_SFA3,
     ARCADE_PBOBBLE,       // (1.64.0) PUZZLE BOBBLE, a Taito B board (arcade/taitob): the 3F's Astro City cabinet
+    ARCADE_TGM2,          // (1.64.0) TETRIS THE GRAND MASTER 2 PLUS, Psikyo's PS5V2 (arcade/psikyosh): the other one
     ARCADE_GAME_COUNT
 };
 
@@ -52,7 +53,7 @@ bool Arcade_IsOpen(void);
 // One frame of the board (59.6 a second) with both players' controls
 void Arcade_Frame(uint16_t p1, uint16_t p2);
 const uint32_t *Arcade_Picture(void);       // Arcade_PictureSize, 0x00BBGGRR (red in the low byte)
-void Arcade_PictureSize(int *w, int *h);    // the open board's picture (a CPS-2's 384x224, a Taito B's 320x224)
+void Arcade_PictureSize(int *w, int *h);    // the open board's picture (a CPS-2's 384x224, a Taito B's 320x224, a PS5V2's 320x240)
 // The frame's sound: stereo pairs at Arcade_SampleRate(); takes up to maxPairs, returns how many
 int Arcade_TakeAudio(int16_t *out, int maxPairs);
 int Arcade_SampleRate(void);

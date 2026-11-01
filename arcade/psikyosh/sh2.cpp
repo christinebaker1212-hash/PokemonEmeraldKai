@@ -51,8 +51,8 @@ void Sh2::OnchipWrite(uint32_t a, uint32_t v, int size) {
         case 0x00: s.dvsr = v; return;
         case 0x04: s.dvdntl = v; DivuStart(int32_t(v)); return;   // (32 bits: sign-extended)
         case 0x08: s.dvcr = v & 3; return;
-        case 0x10: s.dvdnth = v; return;
-        case 0x14: s.dvdntl = v; DivuStart(int64_t((uint64_t(s.dvdnth) << 32) | v)); return;
+        case 0x10: case 0x18: s.dvdnth = v; return;   // (and their mirrors at 18 / 1C)
+        case 0x14: case 0x1C: s.dvdntl = v; DivuStart(int64_t((uint64_t(s.dvdnth) << 32) | v)); return;
         default: break;
         }
     }

@@ -85,13 +85,22 @@ EventScript_GcVsAlpha3East::
 	goto EventScript_VsCabinet
 	end
 
-@ (1.64.0) The Astro City cabinets on the 3F's top right wall: one seat each, the game played alone (START puts in a
-@ coin; hold START to stand up). (10,5) PUZZLE BOBBLE (a Taito B board, arcade/taitob).
+@ (1.64.0) The Astro City cabinets on the 3F's top right wall: one seat each, the game played alone (on every arcade
+@ board: SELECT puts in a coin from the COIN CASE, START is START, holding START leaves). (10,5) PUZZLE BOBBLE (a Taito B
+@ board, arcade/taitob), (12,5) TETRIS THE GRAND MASTER 2 PLUS (Psikyo's PS5V2, arcade/psikyosh).
 EventScript_GcPuzzleBobble::
 	setvar VAR_0x8005, 6
 	setvar VAR_0x8004, 0
 	lockall
 	msgbox VsCabinet_Text_PuzzleBobble, MSGBOX_DEFAULT
+	goto EventScript_AstroCabinet
+	end
+
+EventScript_GcTgm2::
+	setvar VAR_0x8005, 7
+	setvar VAR_0x8004, 0
+	lockall
+	msgbox VsCabinet_Text_Tgm2, MSGBOX_DEFAULT
 	goto EventScript_AstroCabinet
 	end
 
@@ -258,17 +267,24 @@ VsCabinet_Text_PuzzleBobble:
 	.string "Aim and fire bubbles; three of a\n"
 	.string "color pop!$"
 
+VsCabinet_Text_Tgm2:
+	.string "TETRIS THE GRAND MASTER 2 PLUS\n"
+	.string "ARIKA's arcade TETRIS, 2000.\p"
+	.string "Blocks fall faster and faster;\n"
+	.string "can you reach the GRAND MASTER?$"
+
 VsCabinet_Text_PlayAstro:
-	.string "START puts in a coin and starts.\n"
-	.string "Hold START to stand up. Play?$"
+	.string "SELECT: a coin from the COIN CASE.\n"
+	.string "START: start. Hold START to leave.\p"
+	.string "Play?$"
 
 VsCabinet_Text_Mugen:
 	.string "A VS cabinet with no name on it.\n"
 	.string "A weird bootleg.$"
 
 VsCabinet_Text_Play:
-	.string "START puts in a coin and starts.\n"
-	.string "Hold START to stand up.$"
+	.string "SELECT: a coin from the COIN CASE.\n"
+	.string "START: start. Hold START to leave.$"
 
 VsCabinet_Text_NoSet:
 	.string "The screen is dark. This cabinet\n"
