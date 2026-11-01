@@ -2,8 +2,8 @@
 # on the select screen (select_a / select_b) and ALICE can't pick him (ken_a: still choosing)
 MODE=2
 TMO=400
-WARP=11,19,2,11
-WARP_B=11,19,5,11
+WARP=11,19,2,12
+WARP_B=11,19,5,12
 python3 "$REPO/tools/test/scenarios/fight_packs/mkpack.py" $OUT/fight_packs_pack char
 ENV_B="MOEMON_MUGEN_DIR=$OUT/fight_packs_pack"
 EXPECT_A=("fight: online with player 1" "fight: 1 characters greyed out")

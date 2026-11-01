@@ -67,7 +67,7 @@ enum
 enum { SEAT_EMPTY, SEAT_WAITING, SEAT_CPU, SEAT_FIGHTING };
 enum { NET_OFF, NET_ASKING, NET_STARTING, NET_RUNNING };
 
-// The GAME CENTER 3F's VS cabinets, rows 8-12 of its back-to-back pairs, one game each (VAR_0x8005 from
+// The GAME CENTER 3F's VS cabinets, rows 9-13 of its back-to-back pairs, one game each (VAR_0x8005 from
 // data/scripts/vs_cabinet.inc; 0 was MAUVILLE's, before 1.62.0)
 enum { CABINET_SSF2X = 1, CABINET_VAMPIRE, CABINET_CYBERBOTS, CABINET_MUGEN, CABINET_ALPHA3, CABINET_COUNT };
 static u8 sCabinet = CABINET_MUGEN;
@@ -1517,7 +1517,9 @@ void MP_Fight_SeatCheck(void)
     gSpecialVar_Result = 0;
     if (!MP_IsConnected())
         return;
-    ReadMyPack(TRUE);   // the files are read again each time someone sits down
+    // the files are read again each time someone sits down, but only once a fight is asked for or answered (Ask,
+    // the challenge's handler): hashing them here held the cabinet's message up
+    sHaveMyPack = FALSE;
     here = FriendInSeat(seat, FALSE);
     other = FriendInSeat(seat ^ 1, FALSE);
     if (here >= 0)

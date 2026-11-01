@@ -4,6 +4,6 @@
 # same frame)
 MODE=1
 TMO=600
-WARP=11,19,2,11
+WARP=11,19,2,12
 ENV_A="MOEMON_FIGHT_SYNC=1"
 CHECK="tools/test/scenarios/fight_display/check.py"

@@ -2141,10 +2141,10 @@ ACTOR LEVEL [P]` picks the pursuit. Test garden_doing.
 
 ## The GAME CENTER's arcade cabinets (1.62.0)
 
-The five back-to-back pairs in the middle of the GAME CENTER 3F (rows 8-12, bg events at x 3 facing east = the west
+The five back-to-back pairs in the middle of the GAME CENTER 3F (rows 9-13 since 1.63.13, 8-12 before, bg events at x 3 facing east = the west
 seat, 1P, and x 4 facing west = the east seat, 2P) are VS cabinets, one game each (data/scripts/vs_cabinet.inc,
-mp_fight.c CABINET_*): 8 SUPER STREET FIGHTER II X, 9 VAMPIRE SAVIOR, 10 CYBERBOTS, 11 the MUGEN cabinet ("A weird
-bootleg", moved here from MAUVILLE's GAME CORNER, whose (7,9)/(8,9) are slot machines again), 12 STREET FIGHTER ALPHA
+mp_fight.c CABINET_*): 9 SUPER STREET FIGHTER II X, 10 VAMPIRE SAVIOR, 11 CYBERBOTS, 12 the MUGEN cabinet ("A weird
+bootleg", moved here from MAUVILLE's GAME CORNER, whose (7,9)/(8,9) are slot machines again), 13 STREET FIGHTER ALPHA
 3. Each cabinet names its game in a message first. The two Gamer NPCs stand beside the row, out of the chairs.
 
 - The CAPCOM games are CPS-2 boards: arcade/cps2recomp (tmcleroy's cps2recomp 1.2.0, GPL-3.0: machine, video, QSound
@@ -2183,7 +2183,7 @@ bootleg", moved here from MAUVILLE's GAME CORNER, whose (7,9)/(8,9) are slot mac
   session: holding START does (the user prefers it).
 - Tests: `mp arcade GAME FRAMES` (harness: opens a board, runs it, prints sound, lit pixels and a RAM hash, then its
   frame / save / load times); the fight_*
-  scenarios now sit at row 11 (the MUGEN cabinet). The CAPCOM games can only be tested with the sets (scratch only).
+  scenarios now sit at row 12 (the MUGEN cabinet). The CAPCOM games can only be tested with the sets (scratch only).
 
 ## The VS cabinet: MUGEN fights (1.31.0, 1.33.0)
 Decisions and the as-built record: docs/FIGHT_DECISIONS.md. Where things are:

@@ -1,7 +1,7 @@
 @ Moemon Fight: the GAME CENTER 3F's VS cabinets, the five back-to-back pairs in the middle of the floor (each pair is
-@ one cabinet with a seat on each side: the west seat plays 1P, the left side; the east seat 2P). Row 8 plays
-@ SUPER STREET FIGHTER II X, 9 VAMPIRE SAVIOR, 10 CYBERBOTS, 12 STREET FIGHTER ALPHA 3 (CPS-2 arcade boards,
-@ include/arcade.h, from each player's own ROM set in the "arcade" folder beside the game), 11 the MUGEN cabinet,
+@ one cabinet with a seat on each side: the west seat plays 1P, the left side; the east seat 2P). Row 9 plays
+@ SUPER STREET FIGHTER II X, 10 VAMPIRE SAVIOR, 11 CYBERBOTS, 13 STREET FIGHTER ALPHA 3 (CPS-2 arcade boards,
+@ include/arcade.h, from each player's own ROM set in the "arcade" folder beside the game), 12 the MUGEN cabinet,
 @ "a weird bootleg" (src/mp/mp_fight.c CABINET_*,
 @ docs/FIGHT_DECISIONS.md). Each says which game it is first. Sitting down offers WAIT FOR 2P or 1P play; a friend
 @ already sitting at the other side gets asked instead.

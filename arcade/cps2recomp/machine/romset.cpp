@@ -289,9 +289,8 @@ RomList ParseRomList(const char *program, const char *graphics, const char *soun
     return list;
 }
 
-bool LoadRomSet(const std::string &path, const RomList &list, RomSet &set, std::string &error) {
-    std::vector<uint8_t> data;
-    Places folder;
+// Moemon Co-op: the zips (or folder) LoadRomSet and CheckRomSet look in
+static bool OpenPlaces(const std::string &path, const RomList &list, Places &folder, std::string &error) {
     {
         struct stat info;
         if (stat(path.c_str(), &info) != 0) {
@@ -326,6 +325,70 @@ bool LoadRomSet(const std::string &path, const RomList &list, RomSet &set, std::
                 return false;
             }
         }
+    }
+    return true;
+}
+
+// Moemon Co-op: whether every file LoadRomSet would read is there, from the zips' lists of files only (checksums and
+// names; loose files by name): nothing unpacked, so it is quick enough to ask while a message is on screen
+bool CheckRomSet(const std::string &path, const RomList &list, std::string &error) {
+    Places folder;
+    if (!OpenPlaces(path, list, folder, error)) {
+        return false;
+    }
+    auto has = [&](const RomFile &file, std::string &why) {
+        for (const Zip &zip : folder.zips) {
+            for (const Zip::Entry &e : zip.entries) {
+                const size_t slash = e.name.find_last_of('/');
+                const std::string base = slash == std::string::npos ? e.name : e.name.substr(slash + 1);
+                if (file.crc ? e.crc == file.crc : base == file.name) {
+                    return true;
+                }
+            }
+        }
+        struct stat info;
+        if (folder.folder.empty()) {
+            why = "the set has no " + file.name + " (it may be in the parent set's zip, which should be beside this one)";
+            return false;
+        }
+        if (stat((folder.folder + "/" + file.name).c_str(), &info) != 0) {
+            why = "missing file: " + folder.folder + "/" + file.name;
+            return false;
+        }
+        return true;
+    };
+    auto hasAll = [&](const std::vector<RomFile> &files, std::string &why) {
+        return std::all_of(files.begin(), files.end(), [&](const RomFile &file) { return has(file, why); });
+    };
+    auto hasProgram = [&](const std::vector<RomFile> &program, const std::vector<RomFile> &key, std::string &why) {
+        if (!hasAll(program, why)) {
+            return false;
+        }
+        if (list.board.cps1) {
+            return true;
+        }
+        if (key.empty()) {
+            why = "the key file is not a CPS-2 key";
+            return false;
+        }
+        return has(key[0], why);
+    };
+    if (!hasProgram(list.program, list.key, error)) {
+        std::string why;
+        if (std::none_of(list.others.begin(), list.others.end(),
+                         [&](const RomList::Other &other) { return hasProgram(other.program, other.key, why); })) {
+            return false;
+        }
+        error.clear();
+    }
+    return hasAll(list.graphics, error) && hasAll(list.soundProgram, error) && hasAll(list.samples, error);
+}
+
+bool LoadRomSet(const std::string &path, const RomList &list, RomSet &set, std::string &error) {
+    std::vector<uint8_t> data;
+    Places folder;
+    if (!OpenPlaces(path, list, folder, error)) {
+        return false;
     }
 
     // Program: the files hold each 16-bit word low byte first; the set's own, else one of its others' (the first

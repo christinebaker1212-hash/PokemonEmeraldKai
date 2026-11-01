@@ -2,7 +2,7 @@
 # numbered tones; the sound the game sends to the device is kept and checked (tones.py: it once ran 8 times too fast)
 MODE=1
 TMO=600
-WARP=11,19,2,11
+WARP=11,19,2,12
 python3 "$REPO/tools/test/scenarios/fight_music/tones.py" pack $OUT/fight_music_pack
 ENV_A="MOEMON_FIGHT_SYNC=1 MOEMON_AUDIO_DUMP=$OUT/fight_music/audio.raw MOEMON_MUGEN_DIR=$OUT/fight_music_pack"
 EXPECT_A=("fight: result")

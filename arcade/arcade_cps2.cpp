@@ -97,13 +97,16 @@ const char *Arcade_SetFiles(int game)
     return game >= 0 && game < ARCADE_GAME_COUNT ? kGames[game].files : "";
 }
 
+// From the zips' lists of files only (CheckRomSet): the cabinet asks it while its message is on screen, and unpacking
+// the whole set there held the game up. The set is read in full by Arcade_Open, once the game is chosen.
 bool Arcade_Check(int game, char *why, size_t whySize)
 {
-    RomSet roms;
     std::string error;
     if (game < 0 || game >= ARCADE_GAME_COUNT)
         return false;
-    if (Load(game, roms, error))
+    const ArcadeGame &g = kGames[game];
+    const RomList list = ParseRomList(g.program, g.graphics, g.soundProgram, g.samples, g.key, g.set, g.parent);
+    if (CheckRomSet(SetPath(game), list, error))
         return true;
     if (why && whySize)
         snprintf(why, whySize, "%s", error.c_str());

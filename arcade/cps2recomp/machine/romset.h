@@ -86,5 +86,7 @@ RomList ParseRomList(const char *program, const char *graphics, const char *soun
 // program is not there, each of its others' is tried (RomSet::set says which was read).
 // False with a message if a file is missing or is not the one expected.
 bool LoadRomSet(const std::string &path, const RomList &list, RomSet &set, std::string &error);
+// Moemon Co-op: the same question from the zips' lists of files only (nothing unpacked or checked byte by byte)
+bool CheckRomSet(const std::string &path, const RomList &list, std::string &error);
 
 } // namespace cps2recomp

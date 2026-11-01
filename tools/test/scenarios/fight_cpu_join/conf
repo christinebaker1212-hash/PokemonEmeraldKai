@@ -2,8 +2,8 @@
 # CPU fight ends and both games go to the select screen, then fight each other (one short round)
 MODE=2
 TMO=600
-WARP=11,19,2,11
-WARP_B=11,19,5,11
+WARP=11,19,2,12
+WARP_B=11,19,5,12
 ENV_A="MOEMON_FIGHT_ROUNDS=1 MOEMON_FIGHT_TIME=20"
 ENV_B="MOEMON_FIGHT_ROUNDS=1 MOEMON_FIGHT_TIME=20"
 EXPECT_A=("fight: player 1 joins, the CPU fight ends" "fight: online with player 1, side 0" "fight: online result")
