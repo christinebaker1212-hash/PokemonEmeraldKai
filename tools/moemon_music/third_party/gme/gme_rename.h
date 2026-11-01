@@ -1,5 +1,5 @@
 // Moemon Music Studio: VBA-M (third_party/vbam_gsf) has its own copy of these classes; this copy
-// gets other names so both can be in one program. Force-included into gme_gbs and rip_gbs.cpp.
+// gets other names so both can be in one program. Force-included into gme and the rip_*.cpp files that use it.
 #define Blip_Buffer gme_Blip_Buffer
 #define Blip_Synth_ gme_Blip_Synth_
 #define Blip_Synth_Fast_ gme_Blip_Synth_Fast_
@@ -16,3 +16,8 @@
 #define Stereo_Buffer gme_Stereo_Buffer
 #define Mono_Buffer gme_Mono_Buffer
 #define Silent_Buffer gme_Silent_Buffer
+
+// Moemon Music Studio: the VGM player's YM2612 is Nuked-OPN2 (the most accurate; LGPL 2.1+)
+#ifndef VGM_YM2612_NUKED
+#define VGM_YM2612_NUKED
+#endif

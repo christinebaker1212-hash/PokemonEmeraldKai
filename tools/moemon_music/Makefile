@@ -18,7 +18,7 @@ CFLAGS  ?= -O2
 CFLAGS  += -std=c99 -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-format-truncation -Isrc -I$(GEN)
 # the consoles' emulators (third_party/README.md): include paths for the files that talk to them
 TPINC   := -I$(TP)/he -I$(TP)/psflib -I$(TP)/lazyusf2 -I$(TP)/zlib -DEMU_COMPILE -DEMU_LITTLE_ENDIAN
-CXXINC  := -I$(TP)/desmume_2sf -I$(TP)/desmume_2sf/desmume -I$(TP)/desmume_2sf/spu -I$(TP) -I$(TP)/gme_gbs -I$(TP)/vbam_gsf -I$(TP)/compat \
+CXXINC  := -I$(TP)/desmume_2sf -I$(TP)/desmume_2sf/desmume -I$(TP)/desmume_2sf/spu -I$(TP) -I$(TP)/gme -I$(TP)/vbam_gsf -I$(TP)/compat \
            -I$(TP)/psflib -I$(TP)/zlib -DBLARGG_LITTLE_ENDIAN=1
 CXXFLAGS ?= -O2
 CXXFLAGS += -std=c++20 -w -Isrc
@@ -33,9 +33,10 @@ TP_USF  := ai/ai_controller api/callbacks debugger/dbg_decoder main/main main/ro
            si/cic si/game_controller si/n64_cic_nus_6105 si/pif si/si_controller usf/usf usf/barray usf/resampler \
            vi/vi_controller
 TP_ZLIB := adler32 crc32 inffast inflate inftrees uncompr zutil
-TP_GME  := Gbs_Emu Gb_Cpu Gb_Apu Gb_Oscs Blip_Buffer Classic_Emu Multi_Buffer Music_Emu Gme_File Data_Reader M3u_Playlist Effects_Buffer
+TP_GME  := Gbs_Emu Gb_Cpu Gb_Apu Gb_Oscs Blip_Buffer Classic_Emu Multi_Buffer Music_Emu Gme_File Data_Reader M3u_Playlist Effects_Buffer \
+           Spc_Emu Snes_Spc Spc_Cpu Spc_Dsp Spc_Filter Fir_Resampler Vgm_Emu Vgm_Emu_Impl Ym2612_Nuked Ym2413_Emu Sms_Apu Dual_Resampler
 TP_C    := $(TP_HE:%=he/%) psflib/psflib psflib/psf2fs $(TP_USF:%=lazyusf2/%) $(TP_ZLIB:%=zlib/%)
-TP_CXX  := $(TP_GME:%=gme_gbs/%) \
+TP_CXX  := $(TP_GME:%=gme/%) \
            $(patsubst $(TP)/%.cpp,%,$(shell find $(TP)/desmume_2sf $(TP)/vbam_gsf -name '*.cpp'))
 
 all: linux
@@ -63,12 +64,18 @@ build/linux/tp/%.o: $(TP)/%.c
 build/linux/tp/%.o: $(TP)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(CXXINC) -I$(dir $<) -c $< -o $@
-build/linux/tp/gme_gbs/%.o: $(TP)/gme_gbs/%.cpp
+build/linux/tp/gme/%.o: $(TP)/gme/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) $(CXXINC) -include $(TP)/gme_gbs/gme_rename.h -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(CXXINC) -include $(TP)/gme/gme_rename.h -c $< -o $@
 build/linux/rip_gbs.o: src/rip_gbs.cpp $(HDRS)
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) $(CXXINC) -include $(TP)/gme_gbs/gme_rename.h -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(CXXINC) -include $(TP)/gme/gme_rename.h -c $< -o $@
+build/linux/rip_spc.o: src/rip_spc.cpp $(HDRS)
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) $(CXXINC) -include $(TP)/gme/gme_rename.h -c $< -o $@
+build/linux/rip_vgm.o: src/rip_vgm.cpp $(HDRS)
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) $(CXXINC) -include $(TP)/gme/gme_rename.h -c $< -o $@
 build/linux/sf_data.o: $(GEN)/sf_data.c src/sf.h
 	@mkdir -p build/linux
 	$(CC) $(CFLAGS) -O0 -c $< -o $@
@@ -96,12 +103,18 @@ build/windows/tp/%.o: $(TP)/%.c
 build/windows/tp/%.o: $(TP)/%.cpp
 	@mkdir -p $(dir $@)
 	$(WCXX) $(CXXFLAGS) $(CXXINC) -I$(dir $<) -c $< -o $@
-build/windows/tp/gme_gbs/%.o: $(TP)/gme_gbs/%.cpp
+build/windows/tp/gme/%.o: $(TP)/gme/%.cpp
 	@mkdir -p $(dir $@)
-	$(WCXX) $(CXXFLAGS) $(CXXINC) -include $(TP)/gme_gbs/gme_rename.h -c $< -o $@
+	$(WCXX) $(CXXFLAGS) $(CXXINC) -include $(TP)/gme/gme_rename.h -c $< -o $@
 build/windows/rip_gbs.o: src/rip_gbs.cpp $(HDRS)
 	@mkdir -p $(dir $@)
-	$(WCXX) $(CXXFLAGS) $(CXXINC) -include $(TP)/gme_gbs/gme_rename.h -c $< -o $@
+	$(WCXX) $(CXXFLAGS) $(CXXINC) -include $(TP)/gme/gme_rename.h -c $< -o $@
+build/windows/rip_spc.o: src/rip_spc.cpp $(HDRS)
+	@mkdir -p $(dir $@)
+	$(WCXX) $(CXXFLAGS) $(CXXINC) -include $(TP)/gme/gme_rename.h -c $< -o $@
+build/windows/rip_vgm.o: src/rip_vgm.cpp $(HDRS)
+	@mkdir -p $(dir $@)
+	$(WCXX) $(CXXFLAGS) $(CXXINC) -include $(TP)/gme/gme_rename.h -c $< -o $@
 build/windows/sf_data.o: $(GEN)/sf_data.c src/sf.h
 	@mkdir -p build/windows
 	$(WCC) $(CFLAGS) -O0 -c $< -o $@

@@ -1,4 +1,4 @@
-// Moemon Music Studio: music ripped from other consoles (PSF, PSF2, USF, GBS, 2SF, GSF).
+// Moemon Music Studio: music ripped from other consoles (PSF, PSF2, USF, GBS, 2SF, GSF, SPC, VGM).
 // Each file plays in an emulator of its console. While it plays, what the sound chip is told is
 // written down a frame at a time (the game's frames, ENG_RATE / ENG_FRAME_SAMPLES): every voice's
 // sample, pitch and volume. rip_song.c turns that into a MIDI and instruments for the studio.
@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-enum { RIP_PSF1, RIP_PSF2, RIP_USF, RIP_GBS, RIP_2SF, RIP_GSF, RIP_GCN, RIP_NUM_KINDS };
+enum { RIP_PSF1, RIP_PSF2, RIP_USF, RIP_GBS, RIP_2SF, RIP_GSF, RIP_GCN, RIP_SPC, RIP_VGM, RIP_NUM_KINDS };
 
 #define RIP_MAX_VOICES 64
 #define RIP_MAX_SECONDS 900          // longest a rip plays (15 minutes)
@@ -110,6 +110,8 @@ int rip_open_usf(RipEmu *e, Rip *r, char *err, int errlen);
 int rip_open_gbs(RipEmu *e, Rip *r, int track, char *err, int errlen);
 int rip_open_2sf(RipEmu *e, Rip *r, char *err, int errlen);
 int rip_open_gsf(RipEmu *e, Rip *r, char *err, int errlen);
+int rip_open_spc(RipEmu *e, Rip *r, char *err, int errlen);
+int rip_open_vgm(RipEmu *e, Rip *r, char *err, int errlen);
 int rip_open_gcn(RipEmu *e, Rip *r, char *err, int errlen);
 
 // psflib tags -> Rip fields (title, artist, game, year, copyright, length, fade...)

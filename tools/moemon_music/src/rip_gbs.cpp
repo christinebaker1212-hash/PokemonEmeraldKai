@@ -1,4 +1,4 @@
-// Moemon Music Studio: GBS (Game Boy) rips, played by Game_Music_Emu (third_party/gme_gbs). The GBA
+// Moemon Music Studio: GBS (Game Boy) rips, played by Game_Music_Emu (third_party/gme). The GBA
 // has the Game Boy's four sound channels, so these become the game's own Game Boy voices: squares
 // with their duty, the wave channel with the song's waves, and noise.
 #include <stdio.h>

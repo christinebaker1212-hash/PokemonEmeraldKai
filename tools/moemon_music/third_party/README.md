@@ -12,7 +12,7 @@ code (`src/`) may also be used under the same terms as the rest of this reposito
 | `lazyusf2/` | Nintendo 64 emulation for USF (Mupen64Plus-based) | Christopher Snowhill; github.com/derselbst/lazyusf2 (mirror) | GPL 2 (Mupen64Plus) |
 | `desmume_2sf/` | Nintendo DS emulation for 2SF (DeSmuME 0.9.9 as modified by vio2sf / in_2sf) | DeSmuME team, Naram Qashat (in_xsf, github.com/CyberBotX/in_xsf) | GPL 2+ (DeSmuME); in_xsf: `desmume_2sf/IN_XSF_LICENSE` |
 | `vbam_gsf/` | Game Boy Advance emulation for GSF (VBA-M as cut down by in_gsf) | VBA-M team, Naram Qashat | GPL 2+ (`vbam_gsf/gpl.txt`) |
-| `gme_gbs/` | Game Boy emulation for GBS (Game_Music_Emu's GBS player) | Shay Green (blargg); github.com/libgme/game-music-emu | LGPL 2.1+ (`gme_gbs/license.txt`) |
+| `gme/` | Game_Music_Emu's GBS (Game Boy), SPC (Super Nintendo: SPC700, S-DSP) and VGM (Sega Genesis: Nuked-OPN2's YM2612, the SN76489) players | Shay Green (blargg), Nuked-OPN2 by Alexey Khokholov; github.com/libgme/game-music-emu (commit f68963b1) | LGPL 2.1+ (`gme/license.txt`) |
 | `zlib/` | zlib's inflate (PSF files are compressed) | Jean-loup Gailly, Mark Adler | zlib (`zlib/LICENSE`) |
 | `compat/` | a helper the in_xsf cores expect | | |
 

@@ -8,7 +8,7 @@
 #include "rip.h"
 #include "engine.h"
 
-static const char *const k_kindNames[RIP_NUM_KINDS] = {"PSF", "PSF2", "USF", "GBS", "2SF", "GSF", "GameCube stream"};
+static const char *const k_kindNames[RIP_NUM_KINDS] = {"PSF", "PSF2", "USF", "GBS", "2SF", "GSF", "GameCube stream", "SPC", "VGM"};
 
 const char *rip_kind_name(int kind) { return kind >= 0 && kind < RIP_NUM_KINDS ? k_kindNames[kind] : "?"; }
 int rip_needs_bios(int kind) { return kind == RIP_PSF1 || kind == RIP_PSF2; }
@@ -43,6 +43,8 @@ int rip_kind_of(const char *path) {
     if (ext_is(path, "2sf") || ext_is(path, "mini2sf") || ext_is(path, "2sflib")) return RIP_2SF;
     if (ext_is(path, "gsf") || ext_is(path, "minigsf") || ext_is(path, "gsflib")) return RIP_GSF;
     if (ext_is(path, "ish") || ext_is(path, "isd") || ext_is(path, "dsp")) return RIP_GCN;
+    if (ext_is(path, "spc")) return RIP_SPC;
+    if (ext_is(path, "vgm") || ext_is(path, "vgz")) return RIP_VGM;
     return -1;
 }
 
@@ -164,6 +166,8 @@ static int rip_load_inner(Rip *r, const char *path, const char *biosDir, int gbs
     case RIP_2SF: ok = rip_open_2sf(&e, r, err, errlen); break;
     case RIP_GSF: ok = rip_open_gsf(&e, r, err, errlen); break;
     case RIP_GCN: ok = rip_open_gcn(&e, r, err, errlen); break;
+    case RIP_SPC: ok = rip_open_spc(&e, r, err, errlen); break;
+    case RIP_VGM: ok = rip_open_vgm(&e, r, err, errlen); break;
     }
     if (!ok) {
         if (!err[0]) snprintf(err, errlen, "couldn't play %s", path);

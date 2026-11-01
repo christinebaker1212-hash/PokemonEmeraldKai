@@ -1,7 +1,7 @@
 # Moemon Music Studio
 
 A desktop program (Linux / Windows, SDL2) that plays MIDI files, and music ripped from other games
-(PSF, PSF2, USF, GBS, 2SF, GSF, GameCube ISH/ISD/DSP), with Moemon Emerald Kai's own instruments **and its own sound
+(PSF, PSF2, USF, GBS, 2SF, GSF, SPC, VGM, GameCube ISH/ISD/DSP), with Moemon Emerald Kai's own instruments **and its own sound
 engine**, lets you pick and tune the instruments, and exports the song in a form the game can use.
 
 ## Music from other games
@@ -13,6 +13,7 @@ engine**, lets you pick and tune the instruments, and exports the song in a form
 | USF, miniusf | Nintendo 64 | lazyusf2 | the audio microcode's command lists (libultra n_audio, EAD), sub-frame by sub-frame (libultra mixes each buffer in 184-sample parts, every voice in each): codebook, decode, pitch, envelope, each voice by its own mixer state (a voice whose sample has ended still mixes, on silence); samples found from the driver's wavetables and decoded (VADPCM) from the ROM |
 | GBS (+ .m3u) | Game Boy | Game_Music_Emu | the four channels' registers; they become the game's own Game Boy voices (the GBA has the same channels) |
 | 2SF, mini2sf | Nintendo DS | vio2sf's DeSmuME | the 16 SPU channels: sample (PCM8/16, IMA-ADPCM), timer, volume, pan; PSG squares and noise |
+| SPC | Super Nintendo | Game_Music_Emu (SPC700 + S-DSP) | the S-DSP's 8 voices: each key-on, the sample its SRCN names in the directory (start, loop), pitch, envelope and volume, echo; samples decoded from the sound RAM as the DSP decodes them (BRR) |
 | GSF, minigsf | Game Boy Advance | VBA-M (in_gsf) | games on MP2K (the game's own engine): the song and voicegroup read from the ROM, unchanged |
 | ISH + ISD, DSP | GameCube (Pokemon Colosseum, XD) | decoded here (DSP-ADPCM) | streamed recordings: no notes to read, so the song is the recording (see below) |
 
