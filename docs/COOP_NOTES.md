@@ -3476,7 +3476,23 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   SCROLL_MULTI_QZ_DYNAMIC), MoveElevator, the dynamic warp set to the floor's door (Sinnoh_ElevatorGo). Six: VEILSTONE's
   store (B1F-5F), JUBILIFE TV, the RIBBON SYNDICATE, the VISTA LIGHTHOUSE and two HEARTHOME houses (the LEAGUE's are
   corridors with doors). Test sinnoh_elevator. Gyms: tools/sinnoh/reach.py finds every leader and trainer reachable on
-  foot; Platinum's moving parts (PASTORIA's water, CANALAVE's lifts, SUNYSHORE's gears, HEARTHOME's doors) don't move.
+  foot; Platinum's moving parts move in the gyms done so far ("Gyms that move" below).
+- Gyms that move (2026-11-01, src/sinnoh/s3d_gyms.c; data src/data/sinnoh_gyms.h from tools/sinnoh/gen_gyms.py):
+  Platinum's overlay008/gym_features.c rewritten for the game's grid. The 3D pack is version 4: a table of named
+  meshes, the models Platinum's gyms load at run time (tools/sinnoh/gymprops.py: each with its gym's textures; rerun
+  tools/sinnoh/make_pack.sh); s3d.c S3D_DynProp / S3D_DynPropTurned draw them in the map's matrix world, gS3dHeightHook
+  gives a gym's own ground heights, S3D_TileFloor / S3D_PlayerHeight the block's. overworld.c calls S3D_Gyms_MapLoaded
+  after every InitMap (a warp, a continue); event_object_movement.c GetCollisionAtCoords asks S3D_Gyms_StepBlocked
+  for each step; S3D_Update calls S3D_Gyms_Update (a step onto a button starts its script: data/scripts/sinnoh_places.inc).
+  PASTORIA: the water floor at 0 / 32 / 64 (VAR_SINNOH_PASTORIA 0x52F3, Platinum's start the middle); in the pool
+  (tiles 1-25 x 2-39) the ground is the floor, or the water where it stands higher and is nearer (Platinum's plate);
+  deep water (0x59) where the water is the ground blocks, a step between heights 20+ apart blocks, the gates (0x56-0x58)
+  open at their level (grid impassability); ten buttons (orange low, green middle, blue high) move it a unit a frame.
+  SUNYSHORE: three rooms of gears (Platinum's gear tables and collision regions, read from gym_features.c), a room's
+  quarter turn VAR_SINNOH_SUNYSHORE 0x52F4 (its own start 2 / 1 / 0, or 0 from its entrance: the save's pos at load);
+  buttons turn every gear a quarter, back one or a half (5.625 degrees a frame), upright gears about the east-west axis.
+  `mp gym [solve]`: the state, and a walk from the door by every step and button with the real collision (who and
+  which doors are reached, after how many buttons). Tests sinnoh_gym_pastoria, sinnoh_gym_sunyshore.
 - TOWN MAP and FLY (2026-11-01): tools/sinnoh/gen_townmap.py (run by gen_maps.py) gives every SINNOH map its section
   from Platinum's location label (the header's mapLabelTextID: 120 places, MAPSEC_SINNOH_FIRST 0x140, names written from
   the labels' words) and writes include/constants/region_map_sections_sinnoh.h + src/data/region_map/sinnoh_region_map.h.

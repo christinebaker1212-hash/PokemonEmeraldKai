@@ -2029,6 +2029,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d,%d", &x, &y);
         MP_Poketch_DebugTap(x, y);
     }
+    else if (strcmp(cmd, "gym") == 0)
+    {
+        // gym - a SINNOH gym that moves: its state (src/sinnoh/s3d_gyms.c)
+        void S3D_Gyms_Debug(const char *arg);
+        S3D_Gyms_Debug(arg);
+    }
     else if (strcmp(cmd, "tower") == 0)
     {
         // tower [BP] - the BATTLE TOWER's single battle streaks (level 50, open) and the BATTLE POINTS (BP: set them)

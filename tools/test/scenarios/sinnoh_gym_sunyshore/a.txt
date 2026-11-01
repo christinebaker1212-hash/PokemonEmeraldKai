@@ -1,0 +1,30 @@
+pressuntil A field 5000
+wait 30
+mp warp 43,113,9,21
+wait 90
+waitfor field 1000
+mp gym solve
+mp warp 43,114,11,25
+wait 90
+waitfor field 1000
+mp gym solve
+mp warp 43,112,8,14
+wait 90
+waitfor field 1000
+mp gym solve
+mp warp 43,112,6,8
+wait 60
+waitfor field 1000
+shot t_gears
+mp face left
+press LEFT 12
+wait 20
+press LEFT 12
+wait 20
+press LEFT 12
+wait 20
+waitfor field 2000
+wait 20
+mp gym
+shot t_turned
+quit

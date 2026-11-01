@@ -629,4 +629,6 @@ gSpecials::
 	def_special Sinnoh_PrizeMenu
 	def_special Sinnoh_BpMenu
 	def_special Sinnoh_BpBuy
+	def_special Sinnoh_PastoriaWater
+	def_special Sinnoh_SunyshoreTurn
 	.include "data/qz_specials.inc"   @ Moemon Kai: Quetzal's specials (Johto / Kanto)

@@ -29,6 +29,8 @@ Format (little endian), version 3:
           then the ground's heights at each tile's centre (row by row): u8 count (0-3) per tile, then f32 heights x3
           per tile, lowest first (more than one: a bridge over the ground). From the block's BDHC (its plates: a
           rectangle in x, z around the block's centre and the plane the ground follows there); world heights.
+  (version 4) u32 named meshes: each u16 Platinum's prop model number, s16 mesh: the models Platinum's gyms load at
+          run time (tools/sinnoh/gymprops.py), each with its gym's textures
 """
 import hashlib
 import math
@@ -39,11 +41,12 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import nitro  # noqa: E402
+import gymprops  # noqa: E402
 from platinum import Land  # noqa: E402
 from source import open_source, NONE  # noqa: E402
 from places import places, events  # noqa: E402
 
-VERSION = 3
+VERSION = 4
 
 # A block's metatile id carries the tile's behavior: S3D_METATILE_BEHAVIOR (0x300, include/s3d.h) + the game's behavior
 # (fieldmap.c GetMetatileAttributesById), so any of the game's behaviors can be used without a tileset that has it.
@@ -169,7 +172,7 @@ class Pack:
         return self.mesh_ids[key]
 
 
-def write(path, pack, light_sets, matrices):
+def write(path, pack, light_sets, matrices, named=()):
     out = bytearray(b'S3DP' + struct.pack('<I', VERSION))
     out += struct.pack('<I', len(pack.textures))
     for w, h, px in pack.textures:
@@ -205,6 +208,9 @@ def write(path, pack, light_sets, matrices):
             out += bytes(len(h) for h in hts)
             for h in hts:
                 out += struct.pack('<3f', *(h + [0.0] * (3 - len(h))))
+    out += struct.pack('<I', len(named))
+    for model, mesh in named:
+        out += struct.pack('<Hh', model, mesh)
     # stored compressed: "S3DZ", u32 the size of the pack, then the pack deflated (zlib): 88 MB -> about 6
     packed = b'S3DZ' + struct.pack('<I', len(out)) + zlib.compress(bytes(out), 6)
     open(path, 'wb').write(packed)
@@ -286,7 +292,17 @@ def main():
                 lid, _, alt = m.cell(x, z)
                 cells.append(cell(lid, owner[n], alt, where=(n, x, z)))
         matrices.append((n, (0, 0, m.width - 1, m.height - 1), cells))
-    size = write(out_path, pack, light_sets, matrices)
+    # the models the gyms load at run time, with their gym's textures
+    named = []
+    for header, names in gymprops.GYM_MODELS.items():
+        prop_set = src.area_of(header)[0]
+        if ('bm', prop_set) not in tex_cache:
+            tex_cache[('bm', prop_set)] = nitro.btx0(src.prop_textures(prop_set))
+        for name in names:
+            model = src._props.index(name)
+            bmd = nitro.Bmd0(src.prop_model(model))
+            named.append((model, pack.mesh(('prop', model, prop_set), bmd, bmd.tex or tex_cache[('bm', prop_set)])))
+    size = write(out_path, pack, light_sets, matrices, named)
     print('%s: %d textures, %d meshes, %d light sets, %d matrices, %d bytes' % (
         out_path, len(pack.textures), len(pack.meshes), len(light_sets), len(matrices), size))
 

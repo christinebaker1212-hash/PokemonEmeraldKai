@@ -82,7 +82,14 @@ static struct
     S3dLightSet *light;
     u32 nmat;
     struct S3dMatrix *mat;
+    u32 nnamed;
+    struct { u16 model; s16 mesh; } *named;   // (version 4) the models the gyms load at run time
 } sPack;
+
+// Props this game places at run time (SINNOH's gyms that move: src/sinnoh/s3d_gyms.c), in the current map's world
+typedef struct { bool8 on; s16 mesh; float m[12]; } S3dDynProp;
+static S3dDynProp sDyn[S3D_DYN_PROPS];
+float (*gS3dHeightHook)(s32 mapX, s32 mapY, float h);
 
 // SINNOH's maps: the matrix cell of each one's top-left block and its size in blocks
 #include "s3d_maps.h"   // sMaps: each SINNOH map and where it lies on the matrix (tools/sinnoh/gen_maps.py)
@@ -111,7 +118,7 @@ static void LoadPack(void)
     long size;
     u8 *data;
     Reader r;
-    u32 i, j, k;
+    u32 i, j, k, version;
     sPack.tried = TRUE;
     if (path == NULL)
         path = Updater_ExeFile("sinnoh/platinum3d.pak");   // (beside the game, as music/)
@@ -155,7 +162,8 @@ static void LoadPack(void)
         return;
     }
     r.p += 4;
-    if (TakeU32(&r) != 3)
+    version = TakeU32(&r);
+    if (version != 3 && version != 4)
     {
         printf("[s3d] %s: another pack version\n", path);
         free(data);
@@ -245,6 +253,16 @@ static void LoadPack(void)
         Take(&r, c->h, sizeof(c->h));
     }
     }
+    if (version >= 4)
+    {
+        sPack.nnamed = TakeU32(&r);
+        sPack.named = calloc(sPack.nnamed ? sPack.nnamed : 1, sizeof(*sPack.named));
+        for (i = 0; i < sPack.nnamed && !r.bad; i++)
+        {
+            sPack.named[i].model = TakeU16(&r);
+            Take(&r, &sPack.named[i].mesh, 2);
+        }
+    }
     free(data);
     if (r.bad)
     {
@@ -276,6 +294,7 @@ static const S3dCell *CellIn(const S3dMatrix *mt, s32 cx, s32 cz)
 }
 
 static const S3dMatrix *sCurMat;   // the matrix of the map the player is on
+static s32 sCurMap;                // (its sMaps index)
 
 static const S3dCell *Cell(s32 cx, s32 cz)
 {
@@ -293,6 +312,13 @@ static float TileHeight(s32 gtx, s32 gtz, float near)
     if (c == NULL)
         return near;
     t = (gtz - cz * 32) * 32 + (gtx - cx * 32);
+    if (gS3dHeightHook != NULL)
+    {
+        // (a gym that moves: its own heights where it has them; NaN: the block's)
+        float h = gS3dHeightHook(gtx - sMaps[sCurMap].cx * 32, gtz - sMaps[sCurMap].cz * 32, near);
+        if (h == h)
+            return h;
+    }
     if (c->hn[t] == 0)
         return near;
     for (i = 1; i < c->hn[t] && i < 3; i++)
@@ -783,6 +809,95 @@ static void Render(void)
                     if (c->props[i].mesh >= 0 && (u32)c->props[i].mesh < sPack.nmesh)
                         DrawMesh(&sPack.mesh[c->props[i].mesh], c->props[i].m, ox, oy, oz, pass);
             }
+    for (pass = 0; pass < 2; pass++)
+        for (i = 0; i < S3D_DYN_PROPS; i++)
+            if (sDyn[i].on)
+                DrawMesh(&sPack.mesh[sDyn[i].mesh], sDyn[i].m, 0, 0, 0, pass);
+}
+
+// ------------------------------------------------------------------------------------------------ run-time props
+// A prop of Platinum's model MODEL in slot SLOT at (X, Y, Z) of the current map's matrix world (Platinum's units: 16 a
+// tile, a block 512 from its matrix's corner), turned TURN degrees about the up axis (as Platinum's): FALSE when the
+// pack hasn't the model (an older pack: the gym stays as it was)
+bool8 S3D_DynProp(u8 slot, u16 model, float x, float y, float z, float turn)
+{
+    return S3D_DynPropTurned(slot, model, x, y, z, 0, turn);
+}
+
+// The same turned TILT degrees about the east-west axis first (an upright gear's), then TURN about the up axis
+bool8 S3D_DynPropTurned(u8 slot, u16 model, float x, float y, float z, float tilt, float turn)
+{
+    u32 i;
+    float a = turn * 3.14159265f / 180.0f, cs = cosf(a), sn = sinf(a);
+    float b = tilt * 3.14159265f / 180.0f, cx = cosf(b), sx = sinf(b);
+    if (slot >= S3D_DYN_PROPS || !sPack.ok)
+        return FALSE;
+    for (i = 0; i < sPack.nnamed && sPack.named[i].model != model; i++)
+        ;
+    if (i == sPack.nnamed || sPack.named[i].mesh < 0 || (u32)sPack.named[i].mesh >= sPack.nmesh)
+        return FALSE;
+    sDyn[slot].on = TRUE;
+    sDyn[slot].mesh = sPack.named[i].mesh;
+    // (rows of Ry * Rx: a point is turned about x, then about y; Platinum's angles)
+    sDyn[slot].m[0] = cs, sDyn[slot].m[1] = sn * sx, sDyn[slot].m[2] = sn * cx, sDyn[slot].m[3] = x;
+    sDyn[slot].m[4] = 0, sDyn[slot].m[5] = cx, sDyn[slot].m[6] = -sx, sDyn[slot].m[7] = y;
+    sDyn[slot].m[8] = -sn, sDyn[slot].m[9] = cs * sx, sDyn[slot].m[10] = cs * cx, sDyn[slot].m[11] = z;
+    return TRUE;
+}
+
+void S3D_DynPropHide(u8 slot)
+{
+    if (slot < S3D_DYN_PROPS)
+        sDyn[slot].on = FALSE;
+}
+
+void S3D_DynPropsClear(void)
+{
+    memset(sDyn, 0, sizeof(sDyn));
+}
+
+// The ground height the player stands at (the last frame's; NaN: not known yet)
+float S3D_PlayerHeight(void)
+{
+    return sView.havePlayerH ? sView.playerH : NAN;
+}
+
+// The block's ground height on a tile of the current map nearest NEAR (a bridge's two layers: the one an object at that
+// height stands on; NaN: none there)
+float S3D_TileFloor(s32 mapX, s32 mapY, float near)
+{
+    s32 map = MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum), gtx, gtz, cx, cz;
+    const S3dCell *c;
+    u32 t;
+    if (map < 0 || !sPack.ok)
+        return NAN;
+    gtx = sMaps[map].cx * 32 + mapX, gtz = sMaps[map].cz * 32 + mapY;
+    cx = gtx / 32, cz = gtz / 32;
+    c = CellIn(MatrixNumbered(sMaps[map].mat), cx, cz);
+    if (c == NULL || mapX < 0 || mapY < 0)
+        return NAN;
+    t = (gtz - cz * 32) * 32 + (gtx - cx * 32);
+    if (c->hn[t] == 0)
+        return NAN;
+    {
+        u32 i, best = 0;
+        for (i = 1; i < c->hn[t] && i < 3; i++)
+            if (fabsf(c->h[t][i] - near) < fabsf(c->h[t][best] - near))
+                best = i;
+        return c->h[t][best];
+    }
+}
+
+// The current map's block (0, 0) corner in its matrix's world (for a gym's run-time props); FALSE: not a SINNOH map
+bool8 S3D_MapOrigin(float *x, float *z)
+{
+    s32 map = MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
+    if (map < 0)
+        return FALSE;
+    if (!sPack.tried)
+        LoadPack();
+    *x = sMaps[map].cx * BLOCK, *z = sMaps[map].cz * BLOCK;
+    return sPack.ok;
 }
 
 // ------------------------------------------------------------------------------------------------ fades, lines
@@ -876,6 +991,7 @@ float S3D_TestGround(s32 mapX, s32 mapY, float near)
     if (!sPack.ok)
         return NAN;
     sCurMat = MatrixNumbered(sMaps[map].mat);
+    sCurMap = map;
     return GroundAt(sMaps[map].cx * BLOCK + mapX, sMaps[map].cz * BLOCK + mapY, near);
 }
 
@@ -898,7 +1014,9 @@ void S3D_Update(void)
         sView.havePlayerH = FALSE;   // (a new map: its own ground)
     sView.map = map;
     sCurMat = MatrixNumbered(sMaps[map].mat);
+    sCurMap = map;
     sView.frame++;
+    S3D_Gyms_Update();
     FindCamera();
     SetupView();
     if (getenv("MOEMON_S3D_TRACE"))

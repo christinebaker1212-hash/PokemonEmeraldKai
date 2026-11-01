@@ -1,4 +1,5 @@
 #include "global.h"
+#include "s3d.h"   // Moemon Kai: SINNOH's gyms that move
 #include "mp_region.h"
 #include "malloc.h"
 #include "battle_pyramid.h"
@@ -4885,6 +4886,8 @@ u8 GetCollisionAtCoords(struct ObjectEvent *objectEvent, s16 x, s16 y, u32 dir)
         return COLLISION_OUTSIDE_RANGE;
     else if (MapGridGetCollisionAt(x, y) || GetMapBorderIdAt(x, y) == CONNECTION_INVALID || IsMetatileDirectionallyImpassable(objectEvent, x, y, direction))
         return COLLISION_IMPASSABLE;
+    else if (S3D_Gyms_StepBlocked(objectEvent->currentCoords.x, objectEvent->currentCoords.y, x, y))
+        return COLLISION_IMPASSABLE;   // Moemon Kai: a SINNOH gym's moving parts (src/sinnoh/s3d_gyms.c)
     else if (objectEvent->trackedByCamera && !CanCameraMoveInDirection(direction))
         return COLLISION_IMPASSABLE;
     else if (IsElevationMismatchAt(objectEvent->currentElevation, x, y))

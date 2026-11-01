@@ -24,5 +24,20 @@ float S3D_TestGround(s32 mapX, s32 mapY, float near);   // tests: the ground's h
 u16 S3D_MapMusic(u16 song);                      // a SINNOH map's song by night (Platinum's own night versions)
 // The blocks of a map's layout: a SINNOH map's come from the pack (Platinum's collision), others are the layout's
 const u16 *S3D_LayoutBlocks(const struct MapLayout *layout);
+// Props placed at run time (SINNOH's gyms that move, src/sinnoh/s3d_gyms.c): Platinum's model by its number, in the
+// map's matrix world (16 units a tile; S3D_MapOrigin: the map's corner there), turned about the up axis in degrees
+#define S3D_DYN_PROPS 40
+bool8 S3D_DynProp(u8 slot, u16 model, float x, float y, float z, float turn);
+bool8 S3D_DynPropTurned(u8 slot, u16 model, float x, float y, float z, float tilt, float turn);
+void S3D_DynPropHide(u8 slot);
+void S3D_DynPropsClear(void);
+bool8 S3D_MapOrigin(float *x, float *z);
+// A gym's own ground heights (map tiles; NaN: the block's), asked with the height the object is nearest
+extern float (*gS3dHeightHook)(s32 mapX, s32 mapY, float h);
+void S3D_Gyms_MapLoaded(void);                    // a map's grid is (re)built: a gym's state on it (s3d_gyms.c)
+void S3D_Gyms_Update(void);                       // every overworld frame
+bool8 S3D_Gyms_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY);   // a gym's own rules for a step (map coords + 7)
+float S3D_PlayerHeight(void);                    // the ground height the player stands at (NaN: unknown)
+float S3D_TileFloor(s32 mapX, s32 mapY, float near);   // the block's ground height on a map tile nearest NEAR (NaN: none)
 
 #endif

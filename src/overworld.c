@@ -821,6 +821,7 @@ void LoadMapFromCameraTransition(u8 mapGroup, u8 mapNum)
     Overworld_ClearSavedMusic();
     RunOnTransitionMapScript();
     InitMap();
+    S3D_Gyms_MapLoaded();   // Moemon Kai (src/sinnoh/s3d_gyms.c)
     CopySecondaryTilesetToVramUsingHeap(gMapHeader.mapLayout);
     LoadSecondaryTilesetPalette(gMapHeader.mapLayout);
 
@@ -882,6 +883,7 @@ static void LoadMapFromWarp(bool32 a1)
         InitTrainerHillMap();
     else
         InitMap();
+    S3D_Gyms_MapLoaded();   // Moemon Kai: SINNOH's gyms that move: their state on the map's grid (src/sinnoh/s3d_gyms.c)
 
     if (a1 != TRUE && isIndoors)
     {
@@ -1854,6 +1856,7 @@ void CB2_ContinueSavedGame(void)
         InitTrainerHillMap();
     else
         InitMapFromSavedGame();
+        S3D_Gyms_MapLoaded();   // Moemon Kai (src/sinnoh/s3d_gyms.c)
     
     #ifdef UBFIX
     CleanupOverworldWindowsAndTilemaps();

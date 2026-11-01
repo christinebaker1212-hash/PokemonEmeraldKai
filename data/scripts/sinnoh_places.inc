@@ -280,3 +280,19 @@ Sinnoh_Text_BpShort:
 Sinnoh_Text_BpBye:
 	.string "Win big at the FRONTIER and come\n"
 	.string "back for more!$"
+
+@ PASTORIA's gym: a button stepped on moves the water (src/sinnoh/s3d_gyms.c Sinnoh_PastoriaWater; VAR_0x8004 the level)
+Sinnoh_EventScript_PastoriaButton::
+	lockall
+	special Sinnoh_PastoriaWater
+	waitstate
+	releaseall
+	end
+
+@ SUNYSHORE's gym: a button turns the room's gears (src/sinnoh/s3d_gyms.c Sinnoh_SunyshoreTurn; VAR_0x8004 quarter turns)
+Sinnoh_EventScript_SunyshoreButton::
+	lockall
+	special Sinnoh_SunyshoreTurn
+	waitstate
+	releaseall
+	end

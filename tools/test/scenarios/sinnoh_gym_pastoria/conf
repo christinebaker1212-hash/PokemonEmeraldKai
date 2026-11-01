@@ -1,0 +1,9 @@
+# PASTORIA's gym (src/sinnoh/s3d_gyms.c): the water drawn at its level (Platinum's run-time water floor, the pack's
+# named meshes), a step onto the orange button lowers it (level 1 -> 0), and walked by the gym's rules from the door
+# every trainer and the leader are reached (the leader after 6 buttons). Shots t_pool.png, t_low.png. Needs the 3D pack
+# (version 4).
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("water 32 (level 1)" "PASTORIA's water to level 0" "water 0 (level 0)" "person 1 at 13,4 reached after 6 buttons")
+UNEXPECT_A=("[crash]" "TIMEOUT" "NOT reached")
