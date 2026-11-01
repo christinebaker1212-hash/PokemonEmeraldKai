@@ -1,4 +1,5 @@
 #include "global.h"
+#include "s3d.h"   // Moemon Kai
 #include "mp_garden.h"
 #include "mp.h"
 #include "main.h"
@@ -702,8 +703,8 @@ u8 CheckForObjectEventCollision(struct ObjectEvent *objectEvent, s16 x, s16 y, u
     if (collision == COLLISION_ELEVATION_MISMATCH && CanStopSurfing(x, y, direction))
         return COLLISION_STOP_SURFING;
 
-    if (ShouldJumpLedge(x, y, direction))
-    {
+    if (ShouldJumpLedge(x, y, direction) || (objectEvent->isPlayer && S3D_Gyms_JumpAt(x, y, direction)))
+    {   // (Moemon Kai: or over ETERNA's hour hand, src/sinnoh/s3d_gyms.c)
         IncrementGameStat(GAME_STAT_JUMPED_DOWN_LEDGES);
         return COLLISION_LEDGE_JUMP;
     }

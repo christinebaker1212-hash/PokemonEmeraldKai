@@ -5411,3 +5411,231 @@
         .party = ITEM_CUSTOM_MOVES(sParty_SinnohGalacticBossCyrusCelesticTownRuins),
     },
 
+    [TRAINER_SINNOH_LASS_CAROLINE] =
+    {
+        .trainerClass = TRAINER_CLASS_LASS,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_LASS,
+        .trainerName = _("CAROLINE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohLassCaroline),
+    },
+
+    [TRAINER_SINNOH_AROMA_LADY_JENNA] =
+    {
+        .trainerClass = TRAINER_CLASS_AROMA_LADY,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_AROMA_LADY,
+        .trainerName = _("JENNA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohAromaLadyJenna),
+    },
+
+    [TRAINER_SINNOH_AROMA_LADY_ANGELA] =
+    {
+        .trainerClass = TRAINER_CLASS_AROMA_LADY,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_AROMA_LADY,
+        .trainerName = _("ANGELA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohAromaLadyAngela),
+    },
+
+    [TRAINER_SINNOH_SCHOOL_KID_CHRISTINE] =
+    {
+        .trainerClass = TRAINER_CLASS_SCHOOL_KID,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_SCHOOL_KID_F,
+        .trainerName = _("CHRISTINE"),
+        .items = {ITEM_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSchoolKidChristine),
+    },
+
+    [TRAINER_SINNOH_SCHOOL_KID_HARRISON] =
+    {
+        .trainerClass = TRAINER_CLASS_SCHOOL_KID,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_SCHOOL_KID_M,
+        .trainerName = _("HARRISON"),
+        .items = {ITEM_X_ATTACK, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohSchoolKidHarrison),
+    },
+
+    [TRAINER_SINNOH_MAID_BELINDA] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_MAID,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_239,
+        .trainerName = _("BELINDA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohMaidBelinda),
+    },
+
+    [TRAINER_SINNOH_MAID_CLARE] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_MAID,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_239,
+        .trainerName = _("CLARE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohMaidClare),
+    },
+
+    [TRAINER_SINNOH_MAID_ELENA] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_MAID,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_239,
+        .trainerName = _("ELENA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohMaidElena),
+    },
+
+    [TRAINER_SINNOH_MAID_EMILY] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_MAID,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_239,
+        .trainerName = _("EMILY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohMaidEmily),
+    },
+
+    [TRAINER_SINNOH_MAID_SOPHIE] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_MAID,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_239,
+        .trainerName = _("SOPHIE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohMaidSophie),
+    },
+
+    [TRAINER_SINNOH_ARTIST_ISMAEL] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_ARTIST,
+        .encounterMusic_gender = 35,
+        .trainerPic = TRAINER_PIC_QZ_210,
+        .trainerName = _("ISMAEL"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohArtistIsmael),
+    },
+
+    [TRAINER_SINNOH_CAMERAMAN_DARRYL] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_CAMERAMAN,
+        .encounterMusic_gender = 33,
+        .trainerPic = TRAINER_PIC_QZ_220,
+        .trainerName = _("DARRYL"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohCameramanDarryl),
+    },
+
+    [TRAINER_SINNOH_COLLECTOR_EUGENE] =
+    {
+        .trainerClass = TRAINER_CLASS_COLLECTOR,
+        .encounterMusic_gender = 33,
+        .trainerPic = TRAINER_PIC_COLLECTOR,
+        .trainerName = _("EUGENE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohCollectorEugene),
+    },
+
+    [TRAINER_SINNOH_GENTLEMAN_LEONARDO] =
+    {
+        .trainerClass = TRAINER_CLASS_GENTLEMAN,
+        .encounterMusic_gender = 34,
+        .trainerPic = TRAINER_PIC_GENTLEMAN,
+        .trainerName = _("LEONARDO"),
+        .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohGentlemanLeonardo),
+    },
+
+    [TRAINER_SINNOH_PI_KENDRICK] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_PI,
+        .encounterMusic_gender = 34,
+        .trainerPic = TRAINER_PIC_QZ_220,
+        .trainerName = _("KENDRICK"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohPiKendrick),
+    },
+
+    [TRAINER_SINNOH_RICH_BOY_ROMAN] =
+    {
+        .trainerClass = TRAINER_CLASS_RICH_BOY,
+        .encounterMusic_gender = 34,
+        .trainerPic = TRAINER_PIC_RICH_BOY,
+        .trainerName = _("ROMAN"),
+        .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohRichBoyRoman),
+    },
+
+    [TRAINER_SINNOH_SCHOOL_KID_ESTEBAN] =
+    {
+        .trainerClass = TRAINER_CLASS_SCHOOL_KID,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_SCHOOL_KID_M,
+        .trainerName = _("ESTEBAN"),
+        .items = {ITEM_X_SP_DEF, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohSchoolKidEsteban),
+    },
+
+    [TRAINER_SINNOH_SCIENTIST_EMILIO] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_SCIENTIST,
+        .encounterMusic_gender = 33,
+        .trainerPic = TRAINER_PIC_QZ_274,
+        .trainerName = _("EMILIO"),
+        .items = {ITEM_X_SPECIAL, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohScientistEmilio),
+    },
+
+    [TRAINER_SINNOH_VETERAN_EMANUEL] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_VETERAN,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_QZ_246,
+        .trainerName = _("EMANUEL"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohVeteranEmanuel),
+    },
+

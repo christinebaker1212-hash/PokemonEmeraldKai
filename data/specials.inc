@@ -632,4 +632,5 @@ gSpecials::
 	def_special Sinnoh_PastoriaWater
 	def_special Sinnoh_SunyshoreTurn
 	def_special Sinnoh_CanalaveRide
+	def_special Sinnoh_EternaClock
 	.include "data/qz_specials.inc"   @ Moemon Kai: Quetzal's specials (Johto / Kanto)

@@ -50,7 +50,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Sinnoh_EternaCityGym_EventScript_Person3",
+      "script": "Sinnoh_EventScript_TrLassCaroline",
       "flag": "0"
     },
     {
@@ -63,7 +63,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Sinnoh_EternaCityGym_EventScript_Person4",
+      "script": "Sinnoh_EventScript_TrAromaLadyJenna",
       "flag": "0"
     },
     {
@@ -76,7 +76,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Sinnoh_EternaCityGym_EventScript_Person5",
+      "script": "Sinnoh_EventScript_TrAromaLadyAngela",
       "flag": "0"
     }
   ],

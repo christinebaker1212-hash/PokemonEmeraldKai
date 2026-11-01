@@ -1,0 +1,14 @@
+pressuntil A field 5000
+wait 30
+mp warp 41,54,11,20
+wait 90
+waitfor field 1000
+mp gym
+shot t_clock0
+mp setflag 0x3943
+wait 120
+waitfor field 2000
+wait 20
+mp gym
+shot t_clock1
+quit

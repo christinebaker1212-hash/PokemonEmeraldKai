@@ -146,6 +146,27 @@ OVERRIDES = {
 }
 
 
+def talk_trainer(root, p, o):
+    """The trainer (gen_trainers.py TALK) a person's Platinum script battles, or None"""
+    import who
+    import gifts
+    s = o['script']
+    if not isinstance(s, int):
+        return None
+    low = p['place']['header'][len('MAP_HEADER_'):].lower()
+    names = who.entries(root, low)
+    if not 1 <= s <= len(names):
+        return None
+    path = os.path.join(root, 'res/field/scripts/scripts_%s.s' % low)
+    if not os.path.exists(path):
+        return None
+    body = gifts._body(open(path, encoding='utf-8', errors='replace').read(), names[s - 1], set())
+    for t in re.findall(r'StartTrainerBattle (TRAINER_\w+)', body):
+        if t in gen_trainers.TALK:
+            return t
+    return None
+
+
 def people(p, root, have):
     """The place's people: where they stand, the game's closest sprite (tools/sinnoh/sprites.py), how they move, their
     hide flag (SINNOH's number, tools/sinnoh/ids.py) and their script. Local ids follow Platinum's order; those with
@@ -164,6 +185,11 @@ def people(p, root, have):
         if trainer:
             # a trainer: its battle script (data/scripts/sinnoh_trainers.inc, tools/sinnoh/gen_trainers.py) and sight
             script = gen_trainers.label(o['script'])
+        talk = talk_trainer(root, p, o)
+        if talk:
+            # (one who battles when talked to: gen_trainers.py TALK; no sight)
+            script = gen_trainers.label(talk)
+            hide = None if not isinstance(hide, str) or not hide.startswith('FLAG_') else hide
         legend = legends.scripts().get((p['name'], i + 1))
         if legend:
             # a legendary: its battle (tools/sinnoh/legends.py), shown by its hide flag (Sinnoh_LegendsRefresh)

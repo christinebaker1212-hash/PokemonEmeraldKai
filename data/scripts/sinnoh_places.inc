@@ -304,3 +304,11 @@ Sinnoh_EventScript_CanalaveRide::
 	waitstate
 	releaseall
 	end
+
+@ ETERNA's gym: the flower clock moves after a trainer or the leader is beaten (src/sinnoh/s3d_gyms.c Sinnoh_EternaClock)
+Sinnoh_EventScript_EternaClock::
+	lockall
+	special Sinnoh_EternaClock
+	waitstate
+	releaseall
+	end

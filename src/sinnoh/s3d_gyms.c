@@ -17,6 +17,10 @@
 #include "s3d.h"
 #include "m4a.h"
 #include "event_data.h"
+#include "battle_setup.h"
+#include "mp_region.h"
+#include "constants/trainers_sinnoh.h"
+#include "constants/trainers.h"
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
 #include "fieldmap.h"
@@ -37,7 +41,7 @@ struct CanalavePlatform { u16 model; u8 ax, ay, az, bx, by, bz, floorA, floorB, 
 #define VAR_SINNOH_CANALAVE_HI 0x52F6   // (bits 16-23)
 #define VAR_SINNOH_CANALAVE_FLOOR 0x52F7   // the floor the player is on
 
-enum { GYM_NONE, GYM_PASTORIA, GYM_SUNYSHORE, GYM_CANALAVE };
+enum { GYM_NONE, GYM_PASTORIA, GYM_SUNYSHORE, GYM_CANALAVE, GYM_ETERNA };
 
 static struct
 {
@@ -52,6 +56,9 @@ static struct
     float rideY;           // ... its height now
     s16 rideSteps;         // ... the tiles still to go along (a platform that moves sideways)
     u8 rideDir;
+    u8 clockShown;         // ETERNA: the state the clock shows
+    float clockMinutes;    // ... its time (minutes past 12), and where it's going
+    float clockTo;
 } sG;
 
 static u16 CurrentMap(void)
@@ -527,6 +534,118 @@ u16 Sinnoh_CanalaveRide(void)
     return 0;
 }
 
+// ------------------------------------------------------------------------------------------------------ ETERNA
+// A flower clock: each of the three trainers beaten, then the leader, moves its hands to Platinum's next time (state
+// 0-4), opening another path across it (Platinum's collision of the clock and of the fountain row by state); the
+// hour hand lies across one tile of the path, hopped over (a ledge jump) along its axis.
+#define ETERNA_X0 5
+#define ETERNA_Y0 7
+#define ETERNA_CENTER_X 11
+#define ETERNA_CENTER_Y 13
+
+static u8 EternaState(void)
+{
+    u8 n = HasTrainerBeenFought(TRAINER_SINNOH_LASS_CAROLINE) + HasTrainerBeenFought(TRAINER_SINNOH_AROMA_LADY_JENNA)
+         + HasTrainerBeenFought(TRAINER_SINNOH_AROMA_LADY_ANGELA);
+    return n + (n == 3 && FlagGet(FLAG_SINNOH_BADGE01 + 1));
+}
+
+// Platinum's hand angles (65536 a turn) for a time, as degrees for the props
+static void EternaHands(void)
+{
+    static const u16 sHour[12] = {0, 0x1559, 0x1559 * 2, 0x4000, 0x1559 * 4, 0x1559 * 5, 0x8000, 0x1559 * 7, 0x1559 * 8,
+                                  0xC000, 0x1559 * 10, 0x1559 * 11};
+    s32 total = (s32)(sG.clockMinutes + 0.5f), hour = (total / 60) % 12, minute = total % 60;
+    u32 m = (minute % 15 == 0 ? sHour[minute / 5] : minute * 1093) + 0x10000 - 0x4000;
+    u32 h = sHour[hour] + (5 * 1093 / 60) * minute + 0x8000;
+    m = (0x10000 - (m & 0xFFFF)) & 0xFFFF, h = (0x10000 - (h & 0xFFFF)) & 0xFFFF;
+    S3D_DynProp(0, S3D_MODEL_ETERNA_GYM_MODEL_CLOCK_HOUR_HAND, sG.ox + ETERNA_CENTER_X * 16 + 8, 12, sG.oz + ETERNA_CENTER_Y * 16 + 8,
+                h * 360.0f / 65536.0f);
+    S3D_DynProp(1, S3D_MODEL_ETERNA_GYM_MODEL_CLOCK_MINUTE_HAND, sG.ox + ETERNA_CENTER_X * 16 + 8, 13, sG.oz + ETERNA_CENTER_Y * 16 + 8,
+                m * 360.0f / 65536.0f);
+}
+
+static float EternaTime(u8 state)
+{
+    return sEternaTimes[state][0] * 60.0f + sEternaTimes[state][1];
+}
+
+static void EternaLoad(void)
+{
+    s32 x, y;
+    sG.clockShown = EternaState();
+    sG.clockMinutes = sG.clockTo = EternaTime(sG.clockShown);
+    // (the clock's and the fountain row's own walls replace the map's there)
+    for (y = ETERNA_Y0; y < ETERNA_Y0 + 13; y++)
+        for (x = ETERNA_X0; x < ETERNA_X0 + 13; x++)
+            MapGridSetMetatileImpassabilityAt(x + MAP_OFFSET, y + MAP_OFFSET, FALSE);
+    for (x = 1; x <= 21; x++)
+        MapGridSetMetatileImpassabilityAt(x + MAP_OFFSET, 19 + MAP_OFFSET, FALSE);
+    EternaHands();
+}
+
+static bool8 EternaBlocked(s32 x, s32 y)
+{
+    u8 st = sG.clockShown;
+    if (x >= ETERNA_X0 && x < ETERNA_X0 + 13 && y >= ETERNA_Y0 && y < ETERNA_Y0 + 13
+     && ((sEternaClock[st][y - ETERNA_Y0] >> (x - ETERNA_X0)) & 1))
+        return TRUE;
+    return y == 19 && x >= 1 && x <= 21 && ((sEternaFountain[st] >> (x - 1)) & 1);
+}
+
+static void Task_EternaClock(u8 taskId)
+{
+    float step = 4.0f, d = sG.clockTo - sG.clockMinutes;
+    if (d > 360.0f)
+        d -= 720.0f;
+    else if (d < -360.0f)
+        d += 720.0f;
+    if (d > step)
+        sG.clockMinutes += step;
+    else if (d < -step)
+        sG.clockMinutes -= step;
+    else
+        sG.clockMinutes = sG.clockTo;
+    if (sG.clockMinutes < 0)
+        sG.clockMinutes += 720.0f;
+    if (sG.clockMinutes >= 720.0f)
+        sG.clockMinutes -= 720.0f;
+    EternaHands();
+    if (sG.clockMinutes == sG.clockTo)
+    {
+        m4aSongNumStop(SE_M_STRENGTH);
+        DestroyTask(taskId);
+        ScriptContext_Enable();
+    }
+}
+
+// The clock moves to its state now (a trainer or the leader beaten: data/scripts/sinnoh_places.inc)
+u16 Sinnoh_EternaClock(void)
+{
+    if (sG.gym != GYM_ETERNA)
+    {
+        ScriptContext_Enable();
+        return 0;
+    }
+    sG.clockShown = EternaState();
+    sG.clockTo = EternaTime(sG.clockShown);
+    MPNet_Log("gym: ETERNA's clock to state %d (%d:%02d)", sG.clockShown, sEternaTimes[sG.clockShown][0], sEternaTimes[sG.clockShown][1]);
+    PlaySE(SE_M_STRENGTH);
+    CreateTask(Task_EternaClock, 80);
+    return 0;
+}
+
+bool8 S3D_Gyms_JumpAt(s16 x, s16 y, u8 direction)
+{
+    const u8 *j;
+    if (sG.gym != GYM_ETERNA || sG.clockShown == 0)
+        return FALSE;
+    j = sEternaJump[sG.clockShown];
+    if (x - MAP_OFFSET != j[0] || y - MAP_OFFSET != j[1])
+        return FALSE;
+    return j[2] ? (direction == DIR_NORTH || direction == DIR_SOUTH) : (direction == DIR_WEST || direction == DIR_EAST);
+}
+
 // ------------------------------------------------------------------------------------------------------ all gyms
 void S3D_Gyms_MapLoaded(void)
 {
@@ -554,6 +673,11 @@ void S3D_Gyms_MapLoaded(void)
         sG.gym = GYM_CANALAVE;
         CanalaveLoad();
     }
+    else if (map == MAP_SINNOH_ETERNA_CITY_GYM)
+    {
+        sG.gym = GYM_ETERNA;
+        EternaLoad();
+    }
     if (sG.gym == GYM_PASTORIA || sG.gym == GYM_CANALAVE)
         gS3dHeightHook = HeightHook;
 }
@@ -565,6 +689,13 @@ void S3D_Gyms_Update(void)
         return;
     if (sG.gym == GYM_CANALAVE)
         CanalavePeople();
+    if (sG.gym == GYM_ETERNA && sG.clockShown != EternaState() && MP_IsLocalFree())
+    {
+        // (a trainer or the leader just beaten: the clock moves)
+        extern const u8 Sinnoh_EventScript_EternaClock[];
+        ScriptContext_SetupScript(Sinnoh_EventScript_EternaClock);
+        return;
+    }
     if (gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.x != gObjectEvents[gPlayerAvatar.objectEventId].previousCoords.x
      || gObjectEvents[gPlayerAvatar.objectEventId].currentCoords.y != gObjectEvents[gPlayerAvatar.objectEventId].previousCoords.y)
         ;   // (mid-step)
@@ -621,6 +752,9 @@ bool8 S3D_Gyms_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY)
     case GYM_CANALAVE:
         blocked = sG.ride == 0 && CanalaveWall(CanalaveFloor(), toX - MAP_OFFSET, toY - MAP_OFFSET);
         break;
+    case GYM_ETERNA:
+        blocked = EternaBlocked(toX - MAP_OFFSET, toY - MAP_OFFSET);
+        break;
     }
     if (getenv("MOEMON_GYM_TRACE"))
         printf("[gym] step %d,%d -> %d,%d: %s (player at %.0f)\n", fromX - MAP_OFFSET, fromY - MAP_OFFSET, toX - MAP_OFFSET,
@@ -642,8 +776,8 @@ bool8 S3D_Gyms_SeesPlayer(u8 localId)
 // gym's own rules and the map's walls: which trainers and the leader are reached, after how many buttons)
 void S3D_Gyms_Debug(const char *arg)
 {
-    printf("[test] gym %d: water %.0f (level %d) room %d turn %d floor %d moved %06X\n", sG.gym, sG.water, PastoriaLevel(),
-           sG.room + 1, SunyshoreTurn(), CanalaveFloor(), CanalaveMoved());
+    printf("[test] gym %d: water %.0f (level %d) room %d turn %d floor %d moved %06X clock %d\n", sG.gym, sG.water,
+           PastoriaLevel(), sG.room + 1, SunyshoreTurn(), CanalaveFloor(), CanalaveMoved(), sG.clockShown);
     if (sG.gym == GYM_PASTORIA && strcmp(arg, "solve") == 0)
     {
         static u8 sSeen[3][64][32];

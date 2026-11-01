@@ -95,6 +95,66 @@ def sunyshore(root):
     return lines
 
 
+def eterna(root):
+    """ETERNA: the clock's five states (0 at the start, one more for each trainer beaten and the leader): its time, its
+    13x13 collision from (5, 7), the fountain row's (y 19, x 1-21), the hour hand's jump tile {x, y, north-south}"""
+    text = open(os.path.join(root, 'src/overlay008/gym_features.c'), encoding='utf-8').read()
+    times = re.findall(r'\.hour\s*=\s*(\d+),\s*\.minute\s*=\s*(\d+)',
+                       re.search(r'sEternaGymClockTimes\[[^]]*\]\s*=\s*\{(.*?)\n\};', text, re.S).group(1))
+    coll = re.search(r'sEternaGymClockCollision\[[^]]*\]\[[^]]*\]\s*=\s*\{(.*?)\n\};', text, re.S).group(1)
+    states = [[int(v) for v in re.findall(r'\d+', b)] for b in re.findall(r'\{([^{}]*)\}', coll)]
+    fount = re.search(r'sEternaGymFountainCollision\[[^]]*\]\[[^]]*\]\s*=\s*\{(.*?)\n\};', text, re.S).group(1)
+    frows = [[int(v) for v in re.findall(r'\d+', b)] for b in re.findall(r'\{([^{}]*)\}', fount)]
+    jumps = re.search(r'sEternaGymHourHandJumpTiles\[[^]]*\]\s*=\s*\{(.*?)\n\};', text, re.S).group(1)
+    jl = [(0, 0, 0)]
+    for b in re.findall(r'\{([^{}]*)\}', jumps):
+        f = dict(re.findall(r'\.(\w+)\s*=\s*(\w+)', b))
+        jl.append((int(f['x']), int(f['z']), int(f['isJumpAxisNorthSouth'] == 'TRUE')))
+    assert len(times) == 5 and len(states) == 5 and all(len(t) == 169 for t in states) and len(frows) == 5 and len(jl) == 5
+    eterna_check(root, states, frows, jl)
+    return ['', '// ETERNA: the clock\'s five states: time {hour, minute}, the clock\'s collision rows (13 bits from x 5, y 7-19),',
+            '// the fountain row\'s (21 bits from x 1, y 19), the hour hand\'s jump tile {x, y, north-south} (state 0: none)',
+            'static const u8 sEternaTimes[5][2] = {%s};' % ', '.join('{%s, %s}' % t for t in times),
+            'static const u16 sEternaClock[5][13] = {%s};' % ', '.join('{%s}' % ', '.join(
+                '0x%04X' % sum(1 << x for x in range(13) if st[y * 13 + x]) for y in range(13)) for st in states),
+            'static const u32 sEternaFountain[5] = {%s};' % ', '.join('0x%06X' % sum(1 << x for x in range(21) if r[x]) for r in frows),
+            'static const u8 sEternaJump[5][3] = {%s};' % ', '.join('{%d, %d, %d}' % j for j in jl)]
+
+
+def eterna_check(root, states, frows, jumps):
+    """Walked as s3d_gyms.c walks it, each state of the clock reaches the next of Platinum's trainers (CAROLINE,
+    JENNA, ANGELA, then GARDENIA) from the door: stops the generator if not"""
+    from collections import deque
+    src = open_source(root)
+    p = [q for q in places(src, root) if q['name'] == 'Sinnoh_EternaCityGym'][0]
+    (bx, by, land), = blocks(src, p)
+    def wall(st, x, y):
+        if not (0 <= x < 32 and 0 <= y < 32):
+            return True
+        if 5 <= x < 18 and 7 <= y < 20:
+            return bool(states[st][(y - 7) * 13 + x - 5])
+        if y == 19 and 1 <= x <= 21:
+            return bool(frows[st][x - 1])
+        return bool(land.attrs[y * 32 + x] & 0x8000)
+    order = [(14, 22), (20, 17), (2, 7), (11, 3)]
+    for st, (tx, ty) in enumerate(order):
+        seen, todo = {(11, 26)}, deque([(11, 26)])   # (inside the door, 11, 27)
+        while todo:
+            x, y = todo.popleft()
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                nx, ny = x + dx, y + dy
+                j = jumps[st]
+                if st and (nx, ny) == (j[0], j[1]) and (dy != 0) == bool(j[2]):
+                    nx, ny = nx + dx, ny + dy   # (over the hour hand)
+                elif wall(st, nx, ny):
+                    continue
+                if (nx, ny) not in seen and not wall(st, nx, ny):
+                    seen.add((nx, ny))
+                    todo.append((nx, ny))
+        assert any((tx + dx, ty + dy) in seen for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))), \
+            'ETERNA: state %d doesn\'t reach %d,%d' % (st, tx, ty)
+
+
 def canalave(root):
     """CANALAVE: its 24 platforms {model, A x y z, B x y z (tiles), floor A, floor B, starts at B}, each floor's
     collision (Platinum's tables: 1 a wall), each person's floor (the events' heights: 10 tiles a floor)"""
@@ -179,6 +239,7 @@ def main():
     out.append('static const u8 sPastoriaButtons[][3] = {%s};' % ', '.join('{%d, %d, %d}' % t for t in sorted(buttons)))
     out += sunyshore(root)
     out += canalave(root)
+    out += eterna(root)
     open('src/data/sinnoh_gyms.h', 'w').write('\n'.join(out) + '\n')
     print('%d models; PASTORIA: %d deep tiles, %d gates, %d buttons' % (len(gymprops.model_names()), len(deep), len(gates),
                                                                      len(buttons)))

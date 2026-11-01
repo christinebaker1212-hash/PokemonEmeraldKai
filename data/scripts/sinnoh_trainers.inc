@@ -6481,3 +6481,308 @@ Sinnoh_Text_TrYoungCoupleTyAndSueNotEnough:
 	.string "There are two of us! Come back when\n"
 	.string "you have two MOéMON that can battle.$"
 
+Sinnoh_EventScript_TrLassCaroline::
+	trainerbattle_single TRAINER_SINNOH_LASS_CAROLINE, Sinnoh_Text_TrLassCarolineIntro, Sinnoh_Text_TrLassCarolineDefeat
+	msgbox Sinnoh_Text_TrLassCarolineAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrLassCarolineIntro:
+	.string "I caught my partner all by myself!\n"
+	.string "Want to see how strong it is?$"
+
+Sinnoh_Text_TrLassCarolineDefeat:
+	.string "It's strong... just not stronger than\n"
+	.string "yours.$"
+
+Sinnoh_Text_TrLassCarolineAfter:
+	.string "Your MOéMON look really happy. How do\n"
+	.string "you do that?$"
+
+Sinnoh_EventScript_TrAromaLadyJenna::
+	trainerbattle_single TRAINER_SINNOH_AROMA_LADY_JENNA, Sinnoh_Text_TrAromaLadyJennaIntro, Sinnoh_Text_TrAromaLadyJennaDefeat
+	msgbox Sinnoh_Text_TrAromaLadyJennaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAromaLadyJennaIntro:
+	.string "Elegance and strength! My team has\n"
+	.string "both. Let me show you!$"
+
+Sinnoh_Text_TrAromaLadyJennaDefeat:
+	.string "Strength was missing today, it seems.$"
+
+Sinnoh_Text_TrAromaLadyJennaAfter:
+	.string "Elegance never loses, even when you\n"
+	.string "lose. Remember that.$"
+
+Sinnoh_EventScript_TrAromaLadyAngela::
+	trainerbattle_single TRAINER_SINNOH_AROMA_LADY_ANGELA, Sinnoh_Text_TrAromaLadyAngelaIntro, Sinnoh_Text_TrAromaLadyAngelaDefeat
+	msgbox Sinnoh_Text_TrAromaLadyAngelaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAromaLadyAngelaIntro:
+	.string "A battle with a traveler! I'll tell\n"
+	.string "everyone about this.$"
+
+Sinnoh_Text_TrAromaLadyAngelaDefeat:
+	.string "I'll leave out the part where I lost.$"
+
+Sinnoh_Text_TrAromaLadyAngelaAfter:
+	.string "Was that your best? It was lovely.\n"
+	.string "Truly.$"
+
+Sinnoh_EventScript_TrSchoolKidChristine::
+	trainerbattle_single TRAINER_SINNOH_SCHOOL_KID_CHRISTINE, Sinnoh_Text_TrSchoolKidChristineIntro, Sinnoh_Text_TrSchoolKidChristineDefeat
+	msgbox Sinnoh_Text_TrSchoolKidChristineAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSchoolKidChristineIntro:
+	.string "My MOéMON and I practiced all morning!\n"
+	.string "Ready?$"
+
+Sinnoh_Text_TrSchoolKidChristineDefeat:
+	.string "We practiced the wrong things...$"
+
+Sinnoh_Text_TrSchoolKidChristineAfter:
+	.string "I'll practice the right things this\n"
+	.string "afternoon. Probably.$"
+
+Sinnoh_EventScript_TrSchoolKidHarrison::
+	trainerbattle_single TRAINER_SINNOH_SCHOOL_KID_HARRISON, Sinnoh_Text_TrSchoolKidHarrisonIntro, Sinnoh_Text_TrSchoolKidHarrisonDefeat
+	msgbox Sinnoh_Text_TrSchoolKidHarrisonAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSchoolKidHarrisonIntro:
+	.string "Hey! You look like you know what\n"
+	.string "you're doing. Show me!$"
+
+Sinnoh_Text_TrSchoolKidHarrisonDefeat:
+	.string "Aww, no fair!$"
+
+Sinnoh_Text_TrSchoolKidHarrisonAfter:
+	.string "I'm gonna train every day after\n"
+	.string "school. Next time I'll win for sure!$"
+
+Sinnoh_EventScript_TrMaidBelinda::
+	trainerbattle_single TRAINER_SINNOH_MAID_BELINDA, Sinnoh_Text_TrMaidBelindaIntro, Sinnoh_Text_TrMaidBelindaDefeat
+	msgbox Sinnoh_Text_TrMaidBelindaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrMaidBelindaIntro:
+	.string "A battle tells you everything about a\n"
+	.string "TRAINER. Let's talk.$"
+
+Sinnoh_Text_TrMaidBelindaDefeat:
+	.string "That said plenty.$"
+
+Sinnoh_Text_TrMaidBelindaAfter:
+	.string "Your team works together like it's one\n"
+	.string "MOéMON. That's rare.$"
+
+Sinnoh_EventScript_TrMaidClare::
+	trainerbattle_single TRAINER_SINNOH_MAID_CLARE, Sinnoh_Text_TrMaidClareIntro, Sinnoh_Text_TrMaidClareDefeat
+	msgbox Sinnoh_Text_TrMaidClareAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrMaidClareIntro:
+	.string "A battle tells you everything about a\n"
+	.string "TRAINER. Let's talk.$"
+
+Sinnoh_Text_TrMaidClareDefeat:
+	.string "That said plenty.$"
+
+Sinnoh_Text_TrMaidClareAfter:
+	.string "Your team works together like it's one\n"
+	.string "MOéMON. That's rare.$"
+
+Sinnoh_EventScript_TrMaidElena::
+	trainerbattle_single TRAINER_SINNOH_MAID_ELENA, Sinnoh_Text_TrMaidElenaIntro, Sinnoh_Text_TrMaidElenaDefeat
+	msgbox Sinnoh_Text_TrMaidElenaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrMaidElenaIntro:
+	.string "The view from here is great, but a good\n"
+	.string "battle is better!$"
+
+Sinnoh_Text_TrMaidElenaDefeat:
+	.string "Great view, great loss.$"
+
+Sinnoh_Text_TrMaidElenaAfter:
+	.string "I come up here to think. Today I'll\n"
+	.string "think about that battle.$"
+
+Sinnoh_EventScript_TrMaidEmily::
+	trainerbattle_single TRAINER_SINNOH_MAID_EMILY, Sinnoh_Text_TrMaidEmilyIntro, Sinnoh_Text_TrMaidEmilyDefeat
+	msgbox Sinnoh_Text_TrMaidEmilyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrMaidEmilyIntro:
+	.string "I've beaten every TRAINER on this\n"
+	.string "road. You're next.$"
+
+Sinnoh_Text_TrMaidEmilyDefeat:
+	.string "You're the first to beat me in a while.$"
+
+Sinnoh_Text_TrMaidEmilyAfter:
+	.string "I'll be waiting at the MOéMON LEAGUE.\n"
+	.string "Don't keep me waiting.$"
+
+Sinnoh_EventScript_TrMaidSophie::
+	trainerbattle_single TRAINER_SINNOH_MAID_SOPHIE, Sinnoh_Text_TrMaidSophieIntro, Sinnoh_Text_TrMaidSophieDefeat
+	msgbox Sinnoh_Text_TrMaidSophieAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrMaidSophieIntro:
+	.string "I don't hold back, even against\n"
+	.string "newcomers. Ready?$"
+
+Sinnoh_Text_TrMaidSophieDefeat:
+	.string "I should've held back less.$"
+
+Sinnoh_Text_TrMaidSophieAfter:
+	.string "Next time I'll bring my best team.\n"
+	.string "You'll need yours too.$"
+
+Sinnoh_EventScript_TrArtistIsmael::
+	trainerbattle_single TRAINER_SINNOH_ARTIST_ISMAEL, Sinnoh_Text_TrArtistIsmaelIntro, Sinnoh_Text_TrArtistIsmaelDefeat
+	msgbox Sinnoh_Text_TrArtistIsmaelAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrArtistIsmaelIntro:
+	.string "A battle with a traveler! I'll tell\n"
+	.string "everyone about this.$"
+
+Sinnoh_Text_TrArtistIsmaelDefeat:
+	.string "I'll leave out the part where I lost.$"
+
+Sinnoh_Text_TrArtistIsmaelAfter:
+	.string "Was that your best? It was lovely.\n"
+	.string "Truly.$"
+
+Sinnoh_EventScript_TrCameramanDarryl::
+	trainerbattle_single TRAINER_SINNOH_CAMERAMAN_DARRYL, Sinnoh_Text_TrCameramanDarrylIntro, Sinnoh_Text_TrCameramanDarrylDefeat
+	msgbox Sinnoh_Text_TrCameramanDarrylAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrCameramanDarrylIntro:
+	.string "I've beaten every TRAINER on this\n"
+	.string "road. You're next.$"
+
+Sinnoh_Text_TrCameramanDarrylDefeat:
+	.string "You're the first to beat me in a while.$"
+
+Sinnoh_Text_TrCameramanDarrylAfter:
+	.string "I'll be waiting at the MOéMON LEAGUE.\n"
+	.string "Don't keep me waiting.$"
+
+Sinnoh_EventScript_TrCollectorEugene::
+	trainerbattle_single TRAINER_SINNOH_COLLECTOR_EUGENE, Sinnoh_Text_TrCollectorEugeneIntro, Sinnoh_Text_TrCollectorEugeneDefeat
+	msgbox Sinnoh_Text_TrCollectorEugeneAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrCollectorEugeneIntro:
+	.string "I've studied MOéMON for years. Time\n"
+	.string "for a field test!$"
+
+Sinnoh_Text_TrCollectorEugeneDefeat:
+	.string "Hmm. The data says I lost.$"
+
+Sinnoh_Text_TrCollectorEugeneAfter:
+	.string "I'll write that battle down in my\n"
+	.string "notebook. Under “lessons.”$"
+
+Sinnoh_EventScript_TrGentlemanLeonardo::
+	trainerbattle_single TRAINER_SINNOH_GENTLEMAN_LEONARDO, Sinnoh_Text_TrGentlemanLeonardoIntro, Sinnoh_Text_TrGentlemanLeonardoDefeat
+	msgbox Sinnoh_Text_TrGentlemanLeonardoAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrGentlemanLeonardoIntro:
+	.string "Oh my, a challenger! How delightful.\n"
+	.string "Shall we?$"
+
+Sinnoh_Text_TrGentlemanLeonardoDefeat:
+	.string "How very rude of my team to lose.$"
+
+Sinnoh_Text_TrGentlemanLeonardoAfter:
+	.string "Do come by for tea some time. My\n"
+	.string "MOéMON adore guests.$"
+
+Sinnoh_EventScript_TrPiKendrick::
+	trainerbattle_single TRAINER_SINNOH_PI_KENDRICK, Sinnoh_Text_TrPiKendrickIntro, Sinnoh_Text_TrPiKendrickDefeat
+	msgbox Sinnoh_Text_TrPiKendrickAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrPiKendrickIntro:
+	.string "Listen to my MOéMON's cry! Isn't it\n"
+	.string "music? Let's battle!$"
+
+Sinnoh_Text_TrPiKendrickDefeat:
+	.string "That was a sad song.$"
+
+Sinnoh_Text_TrPiKendrickAfter:
+	.string "I'll write a song about this. It'll be a\n"
+	.string "slow one.$"
+
+Sinnoh_EventScript_TrRichBoyRoman::
+	trainerbattle_single TRAINER_SINNOH_RICH_BOY_ROMAN, Sinnoh_Text_TrRichBoyRomanIntro, Sinnoh_Text_TrRichBoyRomanDefeat
+	msgbox Sinnoh_Text_TrRichBoyRomanAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrRichBoyRomanIntro:
+	.string "Elegance and strength! My team has\n"
+	.string "both. Let me show you!$"
+
+Sinnoh_Text_TrRichBoyRomanDefeat:
+	.string "Strength was missing today, it seems.$"
+
+Sinnoh_Text_TrRichBoyRomanAfter:
+	.string "Elegance never loses, even when you\n"
+	.string "lose. Remember that.$"
+
+Sinnoh_EventScript_TrSchoolKidEsteban::
+	trainerbattle_single TRAINER_SINNOH_SCHOOL_KID_ESTEBAN, Sinnoh_Text_TrSchoolKidEstebanIntro, Sinnoh_Text_TrSchoolKidEstebanDefeat
+	msgbox Sinnoh_Text_TrSchoolKidEstebanAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSchoolKidEstebanIntro:
+	.string "Stop right there! Nobody walks past\n"
+	.string "me without a battle!$"
+
+Sinnoh_Text_TrSchoolKidEstebanDefeat:
+	.string "Okay, okay, you can walk past!$"
+
+Sinnoh_Text_TrSchoolKidEstebanAfter:
+	.string "Being a road guard is harder than it\n"
+	.string "looks.$"
+
+Sinnoh_EventScript_TrScientistEmilio::
+	trainerbattle_single TRAINER_SINNOH_SCIENTIST_EMILIO, Sinnoh_Text_TrScientistEmilioIntro, Sinnoh_Text_TrScientistEmilioDefeat
+	msgbox Sinnoh_Text_TrScientistEmilioAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrScientistEmilioIntro:
+	.string "Halt! I need to check your TRAINER\n"
+	.string "skills!$"
+
+Sinnoh_Text_TrScientistEmilioDefeat:
+	.string "Your skills check out!$"
+
+Sinnoh_Text_TrScientistEmilioAfter:
+	.string "Carry on, TRAINER. Stay safe out\n"
+	.string "there.$"
+
+Sinnoh_EventScript_TrVeteranEmanuel::
+	trainerbattle_single TRAINER_SINNOH_VETERAN_EMANUEL, Sinnoh_Text_TrVeteranEmanuelIntro, Sinnoh_Text_TrVeteranEmanuelDefeat
+	msgbox Sinnoh_Text_TrVeteranEmanuelAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrVeteranEmanuelIntro:
+	.string "A battle tells you everything about a\n"
+	.string "TRAINER. Let's talk.$"
+
+Sinnoh_Text_TrVeteranEmanuelDefeat:
+	.string "That said plenty.$"
+
+Sinnoh_Text_TrVeteranEmanuelAfter:
+	.string "Your team works together like it's one\n"
+	.string "MOéMON. That's rare.$"
+

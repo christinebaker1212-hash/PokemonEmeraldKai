@@ -36,7 +36,8 @@ NEW = {'WORKER': ('WORKER', 10), 'VETERAN': ('VETERAN', 20), 'SCIENTIST': ('SCIE
        'POKE_KID': ('POKé KID', 4), 'DOUBLE_TEAM': ('DOUBLE TEAM', 15), 'BELLE_AND_PA': ('BELLE & PA', 20),
        'WAITRESS': ('WAITRESS', 8), 'COWGIRL': ('COWGIRL', 8), 'SOCIALITE': ('SOCIALITE', 50), 'PI': ('P.I.', 20),
        'RANCHER': ('RANCHER', 10), 'ROUGHNECK': ('ROUGHNECK', 10), 'ARTIST': ('ARTIST', 12),
-       'COMMANDER': ('COMMANDER', 40), 'GALACTIC_BOSS': ('GALACTIC BOSS', 60)}
+       'COMMANDER': ('COMMANDER', 40), 'GALACTIC_BOSS': ('GALACTIC BOSS', 60), 'MAID': ('MAID', 30),
+       'CAMERAMAN': ('CAMERAMAN', 16)}
 NEW_ID = {k: FIRST_CLASS + i for i, k in enumerate(NEW)}
 # Platinum class -> (the game's class, picture, encounter music, female)
 CLASSES = {
@@ -69,7 +70,8 @@ CLASSES = {
     'BEAUTY': ('BEAUTY', 'BEAUTY', 'AROMA_LADY', 1), 'PARASOL_LADY': ('PARASOL_LADY', 'PARASOL_LADY', 'AROMA_LADY', 1),
     'AROMA_LADY': ('AROMA_LADY', 'AROMA_LADY', 'AROMA_LADY', 1),
     'BELLE_AND_PA': ('S:BELLE_AND_PA', 'OLD_COUPLE', 'TWINS', 1), 'WAITRESS': ('S:WAITRESS', 'QZ_239', 'MINISKIRT', 1),
-    'ARTIST': ('S:ARTIST', 'QZ_210', 'ARTIST', 0),
+    'ARTIST': ('S:ARTIST', 'QZ_210', 'ARTIST', 0), 'MAID': ('S:MAID', 'QZ_239', 'MINISKIRT', 1),
+    'CAMERAMAN': ('S:CAMERAMAN', 'QZ_220', 'COLLECTOR', 0),
     'JOGGER': ('S:JOGGER', 'RUNNING_TRIATHLETE_M', 'BIKER', 0),
     'CYCLIST_MALE': ('S:CYCLIST', 'CYCLING_TRIATHLETE_M', 'BIKER', 0),
     'CYCLIST_FEMALE': ('S:CYCLIST', 'CYCLING_TRIATHLETE_F', 'BIKER', 1),
@@ -114,6 +116,18 @@ RENAME = {'ITEM_X_DEFENSE': 'ITEM_X_DEFEND', 'MOVE_SMOKE_SCREEN': 'MOVE_SMOKESCR
           'ITEM_PARLYZ_HEAL': 'ITEM_PARALYZE_HEAL'}
 
 
+# Trainers who battle when talked to (Platinum's scripts start their battles; their objects aren't trainers in its
+# events): ETERNA's gym (its clock moves as they're beaten), the TRAINERS' SCHOOL, the POKéMON MANSION's maids, the
+# restaurant's diners. Kept after the others (their ids and flags come last); gen_maps.py gives their objects the
+# battle (TALK_SCRIPTS: the Platinum script entry that battles each)
+TALK = ['TRAINER_LASS_CAROLINE', 'TRAINER_AROMA_LADY_JENNA', 'TRAINER_AROMA_LADY_ANGELA',
+        'TRAINER_SCHOOL_KID_CHRISTINE', 'TRAINER_SCHOOL_KID_HARRISON',
+        'TRAINER_MAID_BELINDA', 'TRAINER_MAID_CLARE', 'TRAINER_MAID_ELENA', 'TRAINER_MAID_EMILY', 'TRAINER_MAID_SOPHIE',
+        'TRAINER_ARTIST_ISMAEL', 'TRAINER_CAMERAMAN_DARRYL', 'TRAINER_COLLECTOR_EUGENE', 'TRAINER_GENTLEMAN_LEONARDO',
+        'TRAINER_PI_KENDRICK', 'TRAINER_RICH_BOY_ROMAN', 'TRAINER_SCHOOL_KID_ESTEBAN', 'TRAINER_SCIENTIST_EMILIO',
+        'TRAINER_VETERAN_EMANUEL']
+
+
 def placed(root):
     """{TRAINER_...: Platinum event file name} of every trainer standing on a map"""
     out = {}
@@ -153,7 +167,7 @@ def main():
             bad.add(name)
         return name
 
-    trainers = sorted(placed(root)) + list(SPECIAL) + list(STORY_TRAINERS)
+    trainers = sorted(placed(root)) + list(SPECIAL) + list(STORY_TRAINERS) + [t for t in TALK if t not in placed(root)]
     widths = letter_widths()
     consts, entries, parties, script = [], [], [], []
     pics = []   # Platinum's battle picture of each (its class's, include/constants/sinnoh_gfx.h)

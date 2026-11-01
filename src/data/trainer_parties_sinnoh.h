@@ -2350,3 +2350,84 @@ static const struct TrainerMonItemCustomMoves sParty_SinnohGalacticBossCyrusCele
     {.iv = 250, .lvl = 36, .species = SPECIES_MURKROW, .heldItem = ITEM_SITRUS_BERRY, .moves = {MOVE_DRILL_PECK, MOVE_NIGHT_SHADE, MOVE_ASTONISH, MOVE_FAINT_ATTACK}},
 };
 
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohLassCaroline[] = {
+    {.iv = 20, .lvl = 17, .species = SPECIES_CHERUBI, .moves = {MOVE_TACKLE, MOVE_LEECH_SEED, MOVE_NONE, MOVE_NONE}},
+    {.iv = 20, .lvl = 17, .species = SPECIES_ROSELIA, .moves = {MOVE_MEGA_DRAIN, MOVE_POISON_STING, MOVE_STUN_SPORE, MOVE_NONE}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohAromaLadyJenna[] = {
+    {.iv = 20, .lvl = 15, .species = SPECIES_BUDEW, .moves = {MOVE_ABSORB, MOVE_STUN_SPORE, MOVE_WATER_SPORT, MOVE_NONE}},
+    {.iv = 20, .lvl = 16, .species = SPECIES_BUDEW, .moves = {MOVE_ABSORB, MOVE_STUN_SPORE, MOVE_WATER_SPORT, MOVE_NONE}},
+    {.iv = 20, .lvl = 17, .species = SPECIES_BUDEW, .moves = {MOVE_ABSORB, MOVE_STUN_SPORE, MOVE_WATER_SPORT, MOVE_NONE}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohAromaLadyAngela[] = {
+    {.iv = 20, .lvl = 19, .species = SPECIES_ROSELIA, .moves = {MOVE_MEGA_DRAIN, MOVE_POISON_STING, MOVE_STUN_SPORE, MOVE_NONE}},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohSchoolKidChristine[] = {
+    {.iv = 10, .lvl = 6, .species = SPECIES_BIDOOF},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohSchoolKidHarrison[] = {
+    {.iv = 10, .lvl = 6, .species = SPECIES_STARLY, .moves = {MOVE_QUICK_ATTACK, MOVE_NONE, MOVE_NONE, MOVE_NONE}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohMaidBelinda[] = {
+    {.iv = 0, .lvl = 25, .species = SPECIES_CLEFAIRY, .moves = {MOVE_METRONOME, MOVE_MINIMIZE, MOVE_METEOR_MASH, MOVE_ENDURE}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohMaidClare[] = {
+    {.iv = 0, .lvl = 33, .species = SPECIES_CLEFAIRY, .moves = {MOVE_METRONOME, MOVE_BOUNCE, MOVE_METEOR_MASH, MOVE_ENDURE}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohMaidElena[] = {
+    {.iv = 0, .lvl = 31, .species = SPECIES_CLEFAIRY, .moves = {MOVE_METRONOME, MOVE_SWAGGER, MOVE_METEOR_MASH, MOVE_ENDURE}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohMaidEmily[] = {
+    {.iv = 0, .lvl = 29, .species = SPECIES_CLEFAIRY, .moves = {MOVE_METRONOME, MOVE_ENCORE, MOVE_METEOR_MASH, MOVE_ENDURE}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohMaidSophie[] = {
+    {.iv = 0, .lvl = 27, .species = SPECIES_CLEFAIRY, .moves = {MOVE_METRONOME, MOVE_SING, MOVE_METEOR_MASH, MOVE_ENDURE}},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohArtistIsmael[] = {
+    {.iv = 0, .lvl = 28, .species = SPECIES_KRICKETUNE},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohCameramanDarryl[] = {
+    {.iv = 0, .lvl = 26, .species = SPECIES_MAGNEMITE},
+    {.iv = 0, .lvl = 26, .species = SPECIES_MR_MIME},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohCollectorEugene[] = {
+    {.iv = 0, .lvl = 28, .species = SPECIES_FEEBAS},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohGentlemanLeonardo[] = {
+    {.iv = 0, .lvl = 27, .species = SPECIES_CHATOT, .moves = {MOVE_MIMIC, MOVE_SING, MOVE_FURY_ATTACK, MOVE_ROOST}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohPiKendrick[] = {
+    {.iv = 50, .lvl = 31, .species = SPECIES_RHYHORN, .moves = {MOVE_HORN_DRILL, MOVE_REVERSAL, MOVE_NONE, MOVE_NONE}},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohRichBoyRoman[] = {
+    {.iv = 0, .lvl = 26, .species = SPECIES_LICKITUNG},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohSchoolKidEsteban[] = {
+    {.iv = 0, .lvl = 26, .species = SPECIES_QUAGSIRE, .moves = {MOVE_MUD_BOMB, MOVE_SLAM, MOVE_WATER_GUN, MOVE_AMNESIA}},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohScientistEmilio[] = {
+    {.iv = 0, .lvl = 27, .species = SPECIES_KADABRA},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohVeteranEmanuel[] = {
+    {.iv = 100, .lvl = 28, .species = SPECIES_MACHOKE, .moves = {MOVE_SEISMIC_TOSS, MOVE_LOW_KICK, MOVE_FORESIGHT, MOVE_NONE}},
+    {.iv = 100, .lvl = 28, .species = SPECIES_BRONZOR, .moves = {MOVE_EXTRASENSORY, MOVE_TACKLE, MOVE_CONFUSE_RAY, MOVE_NONE}},
+};
+
