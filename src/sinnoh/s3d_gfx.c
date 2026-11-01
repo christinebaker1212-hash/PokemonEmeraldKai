@@ -20,7 +20,7 @@
 
 const char *Updater_ExeFile(const char *name);
 
-struct SinnohSprite { u8 kind; const u16 *pal; const u8 *frames; };
+struct SinnohSprite { u8 kind; const u16 *pal[2]; const u8 *frames[2]; };   // ([1]: MIXED's smaller copy)
 struct SinnohPic { const u16 *pal; struct MpBigSprite big; };
 
 static struct
@@ -49,7 +49,7 @@ static void Load(void)
     fseek(f, 0, SEEK_SET);
     sGfx.data = malloc(size);
     if (sGfx.data == NULL || fread(sGfx.data, 1, size, f) != (size_t)size || size < 10
-     || memcmp(sGfx.data, "S3DG", 4) != 0 || sGfx.data[4] != 1)
+     || memcmp(sGfx.data, "S3DG", 4) != 0 || sGfx.data[4] != 2)
     {
         fclose(f);
         free(sGfx.data);
@@ -67,13 +67,19 @@ static void Load(void)
     for (i = 0; i < n; i++)
     {
         u8 kind;
+        u32 frames;
         if (p + 26 + 32 > end)
             goto bad;
         kind = p[24];
+        frames = kind == 0 ? 9 * 512 : kind == 3 ? 10 * 512 : kind == 1 ? 512 : 128;
+        if (p + 26 + 2 * (32 + frames) > end)
+            goto bad;
         sGfx.sprites[i].kind = kind;
-        sGfx.sprites[i].pal = (const u16 *)(p + 26);
-        sGfx.sprites[i].frames = p + 26 + 32;
-        p += 26 + 32 + (kind == 0 ? 9 * 512 : kind == 3 ? 10 * 512 : kind == 1 ? 512 : 128);
+        sGfx.sprites[i].pal[0] = (const u16 *)(p + 26);
+        sGfx.sprites[i].frames[0] = p + 26 + 32;
+        sGfx.sprites[i].pal[1] = (const u16 *)(p + 26 + 32 + frames);
+        sGfx.sprites[i].frames[1] = p + 26 + 32 + frames + 32;
+        p += 26 + 2 * (32 + frames);
     }
     if (p + 2 > end)
         goto bad;
@@ -97,15 +103,16 @@ bad:
     printf("[s3d] %s: another graphics pack (rebuild it: tools/sinnoh/make_pack.sh)\n", path);
 }
 
-bool8 S3D_Gfx_Sprite(u16 index, u8 *kind, const u16 **pal, const u8 **frames)
+// Platinum's sprite INDEX (SMALL: MIXED's smaller copy)
+bool8 S3D_Gfx_Sprite(u16 index, bool8 small, u8 *kind, const u16 **pal, const u8 **frames)
 {
     if (!sGfx.tried)
         Load();
     if (!sGfx.ok || index >= SINNOH_SPRITE_COUNT)
         return FALSE;
     *kind = sGfx.sprites[index].kind;
-    *pal = sGfx.sprites[index].pal;
-    *frames = sGfx.sprites[index].frames;
+    *pal = sGfx.sprites[index].pal[small != 0];
+    *frames = sGfx.sprites[index].frames[small != 0];
     return TRUE;
 }
 

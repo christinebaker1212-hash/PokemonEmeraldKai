@@ -56,6 +56,7 @@ enum
     OPT_NAMECASE,
     OPT_CREATURES,
     OPT_FOLLOWSPRITES,
+    OPT_SINNOHSPRITES,  // Moemon Kai: SINNOH PEOPLE: GEN 3 / MIXED / GEN 4 (event_object_movement.c)
     OPT_BIKEMUSIC,
     OPT_SURFMUSIC,
     OPT_LEVELSCALE,
@@ -175,6 +176,8 @@ static const u8 sText_Autosave[] = _("AUTOSAVE");
 static const u8 sText_FlagRange[] = _("FLAG RANGE");
 static const u8 sText_BikeMusic[] = _("BIKE MUSIC");
 static const u8 sText_Followers[] = _("FOLLOWERS");
+static const u8 sText_SinnohPeople[] = _("SINNOH PEOPLE");
+static const u8 sText_Mixed[] = _("MIXED");
 static const u8 sText_FollowDefault[] = _("DEFAULT");
 static const u8 sText_FollowPmd[] = _("PMD");
 static const u8 sText_FollowOriginal[] = _("ORIGINAL");
@@ -188,6 +191,7 @@ static const u8 sText_ZMoves[] = _("Z-MOVES");
 static const u8 sText_Dynamax[] = _("DYNAMAX");
 static const u8 sText_Tera[] = _("TERASTALLIZE");
 static const u8 sText_Gen3[] = _("GEN 3");
+static const u8 sText_Gen4[] = _("GEN 4");
 static const u8 sText_Gen5[] = _("GEN 5");
 static const u8 sText_Gen6[] = _("GEN 6");
 static const u8 sText_Gen7[] = _("GEN 7");
@@ -403,6 +407,7 @@ static void BuildRows(void)
         AddRow(OPT_FILTER, 0);
         AddRow(OPT_VSYNC, 0);
         AddRow(OPT_BATTLEANIMS, 0);
+        AddRow(OPT_SINNOHSPRITES, 0);
         AddRow(OPT_CARDART, 0);
         AddRow(OPT_CARDBACK, 0);
         break;
@@ -535,6 +540,9 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         return 3;
     case OPT_FOLLOWSPRITES:
         names[0] = sText_FollowDefault, names[1] = sText_FollowPmd, names[2] = sText_FollowOriginal;
+        return 3;
+    case OPT_SINNOHSPRITES:   // (shown GEN 3, MIXED, GEN 4; stored the other way round: GEN 4 is 0)
+        names[0] = sText_Gen3, names[1] = sText_Mixed, names[2] = sText_Gen4;
         return 3;
     case OPT_SC_ON: case OPT_SC_CAPS:
         names[0] = sText_Off, names[1] = sText_On;
@@ -695,6 +703,7 @@ static u8 Current(u8 row)
     case OPT_MOENAV:      return gMpConfig.moenavCalls != 0;
     case OPT_FINDER:      return gMpConfig.finderStyle % MP_FINDER_COUNT;
     case OPT_FOLLOWSPRITES: return gMpConfig.followerSprites % MP_FOLLOW_SPRITES_COUNT;
+    case OPT_SINNOHSPRITES: return 2 - gMpConfig.sinnohSprites % 3;
     }
     return 0;
 }
@@ -748,6 +757,10 @@ static void Change(u8 row, int dir)
     case OPT_FOLLOWSPRITES:
         gMpConfig.followerSprites = Wrap(gMpConfig.followerSprites + dir, MP_FOLLOW_SPRITES_COUNT);
         MPNet_Log("follower sprites: %d", gMpConfig.followerSprites);
+        break;
+    case OPT_SINNOHSPRITES:
+        gMpConfig.sinnohSprites = 2 - Wrap(2 - gMpConfig.sinnohSprites % 3 + dir, 3);
+        MPNet_Log("sinnoh sprites: %d", gMpConfig.sinnohSprites);
         break;
     case OPT_SURFMUSIC:   gMpConfig.surfMusic = !gMpConfig.surfMusic; break;
     case OPT_LEVELSCALE:  break;   // A opens its page
@@ -852,6 +865,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_FLAGRANGE:   return sText_FlagRange;
     case OPT_BIKEMUSIC:   return sText_BikeMusic;
     case OPT_FOLLOWSPRITES: return sText_Followers;
+    case OPT_SINNOHSPRITES: return sText_SinnohPeople;
     case OPT_SC_ON:       return sText_LevelScale;
     case OPT_SC_WILD:     return sText_ScWild;
     case OPT_SC_TRAINERS: return sText_ScTrainers;
@@ -1000,6 +1014,10 @@ static void DrawHint(void)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.followerSprites == MP_FOLLOW_SPRITES_PMD ? "PMD PICTURES EVERYWHERE"
                  : gMpConfig.followerSprites == MP_FOLLOW_SPRITES_ORIGINAL ? "THE ORIGINAL SPRITES EVERYWHERE"
                  : "ORIGINAL OUTSIDE, PMD IN THE GARDEN");
+    else if (opt == OPT_SINNOHSPRITES)
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.sinnohSprites == MP_SINNOH_SPRITES_GEN3 ? "GEN 3 SPRITES FOR EVERYONE"
+                 : gMpConfig.sinnohSprites == MP_SINNOH_SPRITES_MIXED ? "GEN 3 MATCHES, OTHERS PLATINUM'S SHRUNK"
+                 : "PLATINUM'S OWN SPRITES");
     else if (opt == OPT_SURFMUSIC)
         snprintf(ascii, sizeof(ascii), "OFF: THE MAP'S SONG SURFING AND DIVING");
     else if (opt == OPT_LEVELSCALE)

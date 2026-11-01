@@ -1959,7 +1959,9 @@ const struct ObjectEventGraphicsInfo *QzObjectEventGraphicsInfo(u16 graphicsId)
 
 #include "constants/sinnoh_gfx.h"
 static u8 SinnohLoadObjectPalette(u16 tag);
-#define SINNOH_PAL_TAG 0xB800   // Moemon Kai: + a Platinum sprite's number (SinnohGraphicsInfo)
+#define SINNOH_PAL_TAG 0xB800         // Moemon Kai: + a Platinum sprite's number (SinnohPackInfo)
+#define SINNOH_PAL_TAG_SMALL 0xB900   // ... its smaller copy's (MIXED)
+#define SINNOH_PAL_TAG_CHAR 0xBA00    // ... a character look standing in for it (SinnohGen3Info)
 
 // A Johto / Kanto sprite's own palette: where it already is, else loaded into a free sprite palette
 u8 QzLoadObjectPalette(u16 tag)
@@ -1968,7 +1970,7 @@ u8 QzLoadObjectPalette(u16 tag)
     u8 slot = IndexOfSpritePaletteTag(tag);
     if (slot != 0xFF)
         return slot;
-    if (tag >= SINNOH_PAL_TAG && tag < SINNOH_PAL_TAG + SINNOH_SPRITE_COUNT)
+    if (tag >= SINNOH_PAL_TAG && (tag & 0xFF) < SINNOH_SPRITE_COUNT && tag < SINNOH_PAL_TAG_CHAR + 0x100)
         return SinnohLoadObjectPalette(tag);   // (Platinum's: from the pack)
     for (i = 0; sQzObjectEventPalettes[i].tag != TAG_NONE; i++)
         if (sQzObjectEventPalettes[i].tag == tag)
@@ -1986,29 +1988,31 @@ u8 QzLoadObjectPalette(u16 tag)
 // JOHTO's / KANTO's); without the pack, the game's own stand-in
 #include "constants/sinnoh_gfx.h"
 #include "data/sinnoh_gfx_standins.h"
-bool8 S3D_Gfx_Sprite(u16 index, u8 *kind, const u16 **pal, const u8 **frames);
+bool8 S3D_Gfx_Sprite(u16 index, bool8 small, u8 *kind, const u16 **pal, const u8 **frames);
+#include "data/sinnoh_gfx_gen3.h"
 
-static const struct ObjectEventGraphicsInfo *SinnohGraphicsInfo(u16 i)
+// Platinum's sprite I from the pack, as Platinum has it (SMALL FALSE) or MIXED's smaller copy; NULL without the pack
+static const struct ObjectEventGraphicsInfo *SinnohPackInfo(u16 i, bool8 small)
 {
-    static struct ObjectEventGraphicsInfo sInfo[SINNOH_SPRITE_COUNT];
-    static struct SpriteFrameImage sImages[SINNOH_SPRITE_COUNT][10];
-    static bool8 sBuilt[SINNOH_SPRITE_COUNT];
+    static struct ObjectEventGraphicsInfo sInfo[2][SINNOH_SPRITE_COUNT];
+    static struct SpriteFrameImage sImages[2][SINNOH_SPRITE_COUNT][10];
+    static bool8 sBuilt[2][SINNOH_SPRITE_COUNT];
     u8 kind, f, frames;
     const u16 *pal;
     const u8 *tiles;
-    struct ObjectEventGraphicsInfo *info = &sInfo[i];
-    if (!S3D_Gfx_Sprite(i, &kind, &pal, &tiles))
-        return GetObjectEventGraphicsInfo(sSinnohStandIns[i]);
-    if (sBuilt[i])
+    struct ObjectEventGraphicsInfo *info = &sInfo[small][i];
+    if (!S3D_Gfx_Sprite(i, small, &kind, &pal, &tiles))
+        return NULL;
+    if (sBuilt[small][i])
         return info;
     frames = kind == 0 ? 9 : kind == 3 ? 10 : 1;   // (3: the nurse, her bow as frame 9)
     for (f = 0; f < frames; f++)
     {
-        sImages[i][f].data = tiles + f * (kind == 2 ? 128 : 512);
-        sImages[i][f].size = kind == 2 ? 128 : 512;
+        sImages[small][i][f].data = tiles + f * (kind == 2 ? 128 : 512);
+        sImages[small][i][f].size = kind == 2 ? 128 : 512;
     }
     info->tileTag = TAG_NONE;
-    info->paletteTag = SINNOH_PAL_TAG + i;
+    info->paletteTag = (small ? SINNOH_PAL_TAG_SMALL : SINNOH_PAL_TAG) + i;
     info->reflectionPaletteTag = OBJ_EVENT_PAL_TAG_NONE;
     info->size = kind == 2 ? 128 : 512;
     info->width = kind == 2 ? 16 : 32;
@@ -2021,19 +2025,54 @@ static const struct ObjectEventGraphicsInfo *SinnohGraphicsInfo(u16 i)
     info->oam = kind == 2 ? &gObjectEventBaseOam_16x16 : &gObjectEventBaseOam_32x32;
     info->subspriteTables = kind == 2 ? sOamTables_16x16 : sOamTables_32x32;
     info->anims = kind == 0 ? sAnimTable_Standard : kind == 3 ? sAnimTable_Nurse : sAnimTable_Inanimate;
-    info->images = sImages[i];
+    info->images = sImages[small][i];
     info->affineAnims = gDummySpriteAffineAnimTable;
-    sBuilt[i] = TRUE;
+    sBuilt[small][i] = TRUE;
     return info;
+}
+
+// A Gen 3 sprite for Platinum's sprite I: the game's own, or a character look's (its own palette, loaded by tag)
+static const struct ObjectEventGraphicsInfo *SinnohGen3Info(u16 i, u16 gfx)
+{
+    static struct ObjectEventGraphicsInfo sChar[SINNOH_SPRITE_COUNT];
+    const struct ObjectEventGraphicsInfo *base;
+    if (gfx < MP_GFX_CHAR_FIRST)
+        return GetObjectEventGraphicsInfo(gfx);
+    base = MP_Avatar_NpcInfo(gfx);
+    if (base == NULL)
+        return GetObjectEventGraphicsInfo(sSinnohStandIns[i]);
+    sChar[i] = *base;
+    sChar[i].paletteTag = SINNOH_PAL_TAG_CHAR + i;
+    sChar[i].paletteSlot = PALSLOT_QZ;
+    sChar[i].reflectionPaletteTag = OBJ_EVENT_PAL_TAG_NONE;
+    sChar[i].disableReflectionPaletteLoad = TRUE;
+    return &sChar[i];
+}
+
+// OPTIONS > DISPLAY > SINNOH PEOPLE: GEN 4 Platinum's; MIXED a true Gen 3 equivalent, else Platinum's smaller; GEN 3
+// the Gen 3 equivalent, else the closest Gen 3 sprite (the stand-in, also shown without the pack)
+static const struct ObjectEventGraphicsInfo *SinnohGraphicsInfo(u16 i)
+{
+    const struct ObjectEventGraphicsInfo *info = NULL;
+    u8 mode = gMpConfig.sinnohSprites;
+    if (mode != MP_SINNOH_SPRITES_GEN4 && sSinnohGen3[i] != 0)
+        return SinnohGen3Info(i, sSinnohGen3[i]);
+    if (mode != MP_SINNOH_SPRITES_GEN3)
+        info = SinnohPackInfo(i, mode == MP_SINNOH_SPRITES_MIXED);
+    return info != NULL ? info : GetObjectEventGraphicsInfo(sSinnohStandIns[i]);
 }
 
 static u8 SinnohLoadObjectPalette(u16 tag)
 {
     u8 kind, slot;
-    const u16 *pal;
+    const u16 *pal = NULL;
     const u8 *tiles;
     struct SpritePalette sp;
-    if (!S3D_Gfx_Sprite(tag - SINNOH_PAL_TAG, &kind, &pal, &tiles))
+    if (tag >= SINNOH_PAL_TAG_CHAR)
+        pal = MP_Avatar_NpcPalette(sSinnohGen3[tag - SINNOH_PAL_TAG_CHAR]);
+    else if (!S3D_Gfx_Sprite(tag & 0xFF, tag >= SINNOH_PAL_TAG_SMALL, &kind, &pal, &tiles))
+        pal = NULL;
+    if (pal == NULL)
         return 0;
     sp.data = pal;
     sp.tag = tag;

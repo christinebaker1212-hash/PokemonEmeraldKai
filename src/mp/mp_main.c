@@ -435,6 +435,9 @@ static void LoadConfig(void)
         else if (strcmp(key, "follower_sprites") == 0)
             gMpConfig.followerSprites = strcmp(val, "pmd") == 0 ? MP_FOLLOW_SPRITES_PMD
                                       : strcmp(val, "original") == 0 ? MP_FOLLOW_SPRITES_ORIGINAL : MP_FOLLOW_SPRITES_DEFAULT;
+        else if (strcmp(key, "sinnoh_sprites") == 0)
+            gMpConfig.sinnohSprites = strcmp(val, "gen3") == 0 ? MP_SINNOH_SPRITES_GEN3
+                                    : strcmp(val, "mixed") == 0 ? MP_SINNOH_SPRITES_MIXED : MP_SINNOH_SPRITES_GEN4;
         else if (strcmp(key, "spectate_friend") == 0)
         {
             // spectate_friend = SIDE SIZE POPOUT SHOW NAME
@@ -565,6 +568,9 @@ void MP_SaveConfig(void)
         "friend_finder = %s\nfriend_finder_shown = %d\n"
         "; OPTIONS > GAME > FOLLOWERS: default (the original sprites on the map, PMD in the MOEMON GARDEN), pmd or original\n"
         "follower_sprites = %s\n"
+        "; OPTIONS > DISPLAY > SINNOH PEOPLE: gen4 (Platinum's sprites), mixed (Gen 3 ones where there's the same one,\n"
+        "; Platinum's made smaller elsewhere) or gen3 (Gen 3 ones for everyone)\n"
+        "sinnoh_sprites = %s\n"
         "; OPTIONS > DISPLAY > CARD ART: printed_art (the printed pictures in the Game Boy frame), gameboy (the Game Boy\n"
         "; pictures in it) or full_card (the whole printed cards)\n"
         "card_art = %s\n"
@@ -587,6 +593,7 @@ void MP_SaveConfig(void)
         gMpConfig.finderStyle == MP_FINDER_ARROWS ? "arrows" : gMpConfig.finderStyle == MP_FINDER_RADAR ? "radar" : "both",
         gMpConfig.finderOn,
         gMpConfig.followerSprites == MP_FOLLOW_SPRITES_PMD ? "pmd" : gMpConfig.followerSprites == MP_FOLLOW_SPRITES_ORIGINAL ? "original" : "default",
+        gMpConfig.sinnohSprites == MP_SINNOH_SPRITES_GEN3 ? "gen3" : gMpConfig.sinnohSprites == MP_SINNOH_SPRITES_MIXED ? "mixed" : "gen4",
         gMpConfig.cardArt == MP_CARD_ART_GAME_BOY ? "gameboy" : gMpConfig.cardArt == MP_CARD_ART_FULL_CARD ? "full_card"
                                                                                                          : "printed_art",
         gMpConfig.cardBack == MP_CARD_BACK_PIXEL ? "pixel" : "printed", gMpConfig.cardScaling,

@@ -3429,6 +3429,16 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   look (the card games' who-plays-what, tcg_field.c Tcg_LookGfx and sPicOfGfx) reads a Platinum sprite as its stand-in;
   a trainer's card challenge screen shows Platinum's picture cut to 64x64 (S3D_Gfx_TrainerPicPixels; test
   sinnoh_card_pic).
+- OPTIONS > DISPLAY > SINNOH PEOPLE (gMpConfig.sinnohSprites, ini sinnoh_sprites; the player's own, not the host's):
+  GEN 4 Platinum's sprites; MIXED a true Gen 3 equivalent where there is one, else Platinum's sprite made smaller;
+  GEN 3 Gen 3 sprites for everyone (the equivalent, else the closest stand-in). The equivalents (tools/sinnoh/sprites.py
+  GEN3 -> src/data/sinnoh_gfx_gen3.h): the sprite Emerald's maps give the same trainer class (cooltrainers MAN_3 /
+  WOMAN_5, BATTLE GIRL GIRL_3, GUITARIST MAN_5...), the same job (NURSE, MART_EMPLOYEE, GYM GUIDE MAN_2...), the same
+  Pokemon, or the character's look from Moemon's other branch (CYNTHIA, CYRUS, MARS, PROF. OAK: MP_GFX_CHAR_FIRST + n,
+  their own palette by tag 0xBA00 + n). The smaller copies are in the pack (version 2: build_gfx.py shrink(): 0.84,
+  Emerald's people being 0.80-0.88 of Platinum's same ones, around the feet; a Catmull-Rom filter widened for shrinking,
+  then 15 colours by k-means from the sprite's own; palette tags 0xB900 + n). event_object_movement.c SinnohGraphicsInfo
+  picks; the map's people change at the next map. `mp sinnohsprites N`; test sinnoh_people.
 - Wild POKéMON: tools/sinnoh/gen_wild.py POKEPLATINUM_DIR puts each kept place's base encounter table (species and
   levels from res/field/encounters) into src/data/wild_encounters.json as gSinnoh_* entries (154 places): grass 12
   slots and surfing 5 as in Emerald; fishing OLD 2 / GOOD 3 / SUPER 5 of Platinum's 5 a rod. Not yet: Platinum's

@@ -1,0 +1,30 @@
+pressuntil A field 5000
+wait 30
+mp sinnohsprites 0
+mp warp 42,24,8,9
+wait 200
+mp objpal 1024
+shot m_center_gen4
+mp warp 42,73,5,4
+wait 200
+mp objpal 1024
+shot m_gym_gen4
+mp sinnohsprites 1
+mp warp 42,24,8,9
+wait 200
+mp objpal 1024
+shot m_center_mixed
+mp warp 42,73,5,4
+wait 200
+mp objpal 1024
+shot m_gym_mixed
+mp sinnohsprites 2
+mp warp 42,24,8,9
+wait 200
+mp objpal 1024
+shot m_center_gen3
+mp warp 42,73,5,4
+wait 200
+mp objpal 1024
+shot m_gym_gen3
+quit

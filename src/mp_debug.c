@@ -579,6 +579,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // life show|remember|minutes|trait|count|save|load|reveal|journal ... (mp_life.c)
         MP_Life_Debug(arg);
     }
+    else if (strcmp(cmd, "sinnohsprites") == 0)
+    {
+        // sinnohsprites N: OPTIONS > DISPLAY > SINNOH PEOPLE (0 GEN 4, 1 MIXED, 2 GEN 3; the map's people at the next map)
+        gMpConfig.sinnohSprites = atoi(arg) % 3;
+        printf("[test] sinnoh sprites %d\n", gMpConfig.sinnohSprites);
+    }
     else if (strcmp(cmd, "objpal") == 0)
     {
         // objpal MINGFX: each object with a graphics id from MINGFX on: its graphics id, its sprite's palette slot and colors (shown, unfaded)
@@ -588,7 +594,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
         {
             struct Sprite *sp = &gSprites[gObjectEvents[id].spriteId];
             int k, slot = sp->oam.paletteNum;
-            printf("[test] objpal %d: gfx %#x slot %d tag %#x:", id, (int)OBJ_GFX_ID(&gObjectEvents[id]), slot, GetSpritePaletteTagByPaletteNum(slot));
+            printf("[test] objpal %d: gfx %#x %dx%d slot %d tag %#x:", id, (int)OBJ_GFX_ID(&gObjectEvents[id]), GetObjectEventGraphicsInfo(OBJ_GFX_ID(&gObjectEvents[id]))->width,
+                   GetObjectEventGraphicsInfo(OBJ_GFX_ID(&gObjectEvents[id]))->height, slot, GetSpritePaletteTagByPaletteNum(slot));
             for (k = 0; k < 16; k++)
                 printf(" %04x/%04x", gPlttBufferFaded[OBJ_PLTT_ID(slot) + k], gPlttBufferUnfaded[OBJ_PLTT_ID(slot) + k]);
             printf("\n");

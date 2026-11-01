@@ -41,6 +41,32 @@ SPRITES = {
     'MACHOP': 'ZIGZAGOON_1', 'CROAGUNK': 'ZIGZAGOON_1', 'STARLY': 'WINGULL', 'DRIFLOON': 'WINGULL',
     'SHROOMISH': 'ZIGZAGOON_1', 'TORCHIC': 'ZIGZAGOON_1',
 }
+# Platinum sprites that have a true Gen 3 equivalent (OPTIONS > DISPLAY > SINNOH PEOPLE: GEN 3, and MIXED, which shows
+# the others' Platinum sprite smaller): the sprite Emerald gives the same trainer class (measured from Emerald's maps:
+# a class's trainers' sprites), the same job, the same Pokemon, or the character's own GBA-style look (kai_*: the
+# characters from Moemon's other branch, src/mp/mp_chars_gfx.h). Everyone else has only a stand-in (SPRITES).
+GEN3 = {
+    'YOUNGSTER': 'YOUNGSTER', 'LASS': 'LASS', 'BUG_CATCHER': 'BUG_CATCHER', 'HIKER': 'HIKER', 'FISHERMAN': 'FISHERMAN',
+    'SWIMMER_M': 'SWIMMER_M', 'SWIMMER_F': 'SWIMMER_F', 'BEAUTY': 'BEAUTY', 'PICNICKER': 'PICNICKER', 'CAMPER': 'CAMPER',
+    'TWIN': 'TWIN', 'BLACK_BELT': 'BLACK_BELT', 'GENTLEMAN': 'GENTLEMAN', 'SAILOR': 'SAILOR', 'TUBER_M': 'TUBER_M',
+    'TUBER_F': 'TUBER_F', 'NINJA_BOY': 'NINJA_BOY', 'PSYCHIC': 'PSYCHIC_M', 'RICH_BOY': 'RICH_BOY', 'EXPERT_M': 'EXPERT_M',
+    'EXPERT_F': 'EXPERT_F', 'POKEFAN_M': 'POKEFAN_M', 'POKEFAN_F': 'POKEFAN_F', 'ACE_TRAINER_M': 'MAN_3',
+    'ACE_TRAINER_F': 'WOMAN_5', 'ACE_TRAINER_SNOW_M': 'MAN_3', 'ACE_TRAINER_SNOW_F': 'WOMAN_5', 'BATTLE_GIRL': 'GIRL_3',
+    'COLLECTOR': 'MANIAC', 'GUITARIST': 'MAN_5', 'LADY': 'WOMAN_2', 'PARASOL_LADY': 'WOMAN_5',
+    'POKEMON_BREEDER_F': 'WOMAN_2', 'POKEMON_BREEDER_M': 'MAN_4', 'RUIN_MANIAC': 'HIKER', 'SCHOOL_KID_M': 'SCHOOL_KID_M',
+    'SCHOOL_KID_F': 'GIRL_3', 'CYCLIST_M': 'CYCLING_TRIATHLETE_M', 'CYCLIST_F': 'CYCLING_TRIATHLETE_F',
+    'JOGGER': 'RUNNING_TRIATHLETE_M', 'GYM_GUIDE': 'MAN_2',
+    # jobs
+    'POKECENTER_NURSE': 'NURSE', 'CASHIER_M': 'MART_EMPLOYEE', 'OLD_MAN': 'OLD_MAN', 'OLD_WOMAN': 'OLD_WOMAN',
+    'ARTIST': 'ARTIST', 'CAMERAMAN': 'CAMERAMAN', 'REPORTER': 'REPORTER_F', 'SCIENTIST_M': 'SCIENTIST_1', 'TEALA': 'TEALA',
+    'KID_WITH_NDS': 'GAMEBOY_KID', 'MYSTERY_GIFT_DELIVERYMAN': 'MYSTERY_GIFT_MAN', 'RECEPTIONIST': 'LINK_RECEPTIONIST',
+    'BRIEFCASE': 'BIRCHS_BAG',
+    # characters
+    'CYNTHIA': 'kai_cynthia', 'CYRUS': 'kai_cyrus', 'MARS': 'kai_mars', 'PROF_OAK': 'kai_prof_oak',
+    # POKeMON
+    'PIKACHU': 'PIKACHU', 'SKITTY': 'SKITTY',
+}
+
 # kinds of thing that are no person to see (Platinum draws them, or they mean nothing here yet); SIGNS are read where they
 # stand (gen_maps.py turns them into the map's signs)
 SIGNS = re.compile(r'SIGNPOST|SIGNBOARD|MAILBOX|BOOK$')
@@ -99,6 +125,22 @@ def sprite(platinum):
     if name in platinum_sheets():
         return 'OBJ_EVENT_GFX_SINNOH_' + name
     return standin(name)
+
+
+def gen3(name):
+    """The C expression of a Platinum sprite's true Gen 3 equivalent, or 0: none"""
+    g = GEN3.get(name)
+    if g is None:
+        return '0'
+    if g.startswith('kai_'):
+        here = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        text = open(os.path.join(here, 'src/mp/mp_chars_gfx.h')).read()
+        table = text[text.index('sMpChars[MP_CHAR_COUNT]'):]
+        table = table[:table.index('\n};')]
+        chars = re.findall(r'^\s*\{"[^"]*", "(kai_\w+)"', table, re.M)
+        return 'MP_GFX_CHAR_FIRST + %d' % chars.index(g)
+    assert g in own(), g
+    return 'OBJ_EVENT_GFX_' + g
 
 
 def standin(name):
