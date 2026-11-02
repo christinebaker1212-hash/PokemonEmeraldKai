@@ -25,6 +25,7 @@
 #define FLAG_SINNOH_NEW_GAME 0x3D38   // a new game begun in SINNOH (ROUTE 201's briefcase is there for it)
 #define FLAG_SINNOH_STARTER  0x3D39   // ... its first POKéMON picked from the briefcase
 #define VAR_SINNOH_STARTER 0x52F8   // the starter picked from ROWAN's briefcase in Platinum's story (its SaveChosenStarter)
+#define VAR_SINNOH_PARTNER_GFX 0x52F9   // SINNOH's walking partner's graphics + 1 (0: none; s3d_scrcmd.c Sinnoh_PartnerUpdate)
 #define FLAG_SINNOH_HAS_PARTNER 0x3D3C   // Platinum's walking partner (SetHasPartner)
 #define FLAG_SINNOH_PLATINUM_STORY 0x3D3B   // this save plays Platinum's own story (its converted map scripts, triggers and story people: tools/sinnoh/gen_scripts.py)
 #define VAR_SINNOH_ARRIVAL  0x52F0   // 1: just off the first boat to SINNOH (the harbor sailor takes them to TWINLEAF), 2: in SINNOH, 3: BARRY's mom's visit played (TWINLEAF's house 1F)

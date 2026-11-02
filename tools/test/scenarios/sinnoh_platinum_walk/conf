@@ -1,0 +1,7 @@
+# Platinum's opening as Platinum plays it (FLAG_SINNOH_PLATINUM_STORY): the TV program ends, BARRY bursts into the
+# player's room (a trigger: VAR_PLAYER_HOUSE_RIVAL_STATE 0x5208 0 -> 1), then mom downstairs (VAR_PLAYER_HOUSE_STATE
+# 0x520A). Needs the packs and the converted scripts (tools/sinnoh/make_pack.sh).
+MODE=1
+TMO=200
+EXPECT_A=("var 0x5208 = 1" "var 0x520A = 1" "ctx 1 free 1 overworld 1 locked 0 script 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

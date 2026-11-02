@@ -599,6 +599,7 @@ struct MapHeader const *const GetDestinationWarpMapHeader(void)
 }
 
 void Sinnoh_PlatinumMapScripts(void);
+void Sinnoh_PartnerUpdate(void);
 
 static void LoadCurrentMapData(void)
 {
@@ -1556,6 +1557,7 @@ static void OverworldBasic(void)
     AnimateSprites();
     CameraUpdate();
     UpdateCameraPanning();
+    Sinnoh_PartnerUpdate(); // Moemon Kai: SINNOH's walking partner across maps (src/sinnoh/s3d_scrcmd.c)
     MP_Follower_Update(); // Moemon Co-op: after the camera, so it lines up with its owner
     MP_Compass_Update();  // Moemon Co-op: arrows toward friends off screen
     MP_MapPic_Update();   // ... full-color map pictures in view (mp_mappic.c: the GAME CENTER)

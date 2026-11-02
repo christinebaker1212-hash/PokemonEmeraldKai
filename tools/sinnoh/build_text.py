@@ -25,8 +25,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(
 from moe_words import moe  # noqa: E402   (HOENN's words: POKéMON -> MOéMON, POKé BALL kept)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-VERSION = 1
+VERSION = 1   # (a message's wait at its end since 2026-11-02: the pack is rebuilt with the game, no reader change)
 EOS, NEWLINE, SCROLL, PAGE = 0xFF, 0xFE, 0xFA, 0xFB
+PAUSE_UNTIL_PRESS = (0xFC, 0x09)   # (charmap.txt: the box waits for A, its arrow shown)
 PLACEHOLDER_BEGIN, STR_VAR = 0xFD, (0x02, 0x03, 0x04)
 PLACEHOLDER_ID_SINNOH_TEXT = 0x40   # include/constants/characters.h
 
@@ -86,7 +87,9 @@ def charmap():
     return out
 
 
-def convert(text, cmap):
+def convert(text, cmap, wait_at_end=True):
+    """WAIT_AT_END: a message ending in Platinum's "\\r" waits for A there, as Platinum's do (a script's Message then
+    CloseMessage); battle lines don't (the battle waits itself)"""
     out = []
     i = 0
     while i < len(text):
@@ -108,8 +111,11 @@ def convert(text, cmap):
             out.append(PAGE)
         else:
             out.append(cmap.get(ch, cmap.get('?', 0xAC)))
-    while out and out[-1] in (NEWLINE, SCROLL, PAGE):   # (no wait at the very end)
+    wait = bool(out) and out[-1] in (SCROLL, PAGE)
+    while out and out[-1] in (NEWLINE, SCROLL, PAGE):
         out.pop()
+    if wait and wait_at_end:
+        out += PAUSE_UNTIL_PRESS
     return bytes(out) + bytes([EOS])
 
 
@@ -138,7 +144,7 @@ def main():
         by = {m.get('type'): m.get('en_US') for m in d.get('messages', [])}
         for kind in TRAINER_TYPES:
             t = text(by.get(kind)) if kind in by else None
-            tr.append(convert(moe(t), cmap) if t is not None else None)
+            tr.append(convert(moe(t), cmap, wait_at_end=False) if t is not None else None)
     banks.append(tr)
     head = bytearray(b'S3DT' + struct.pack('<II', VERSION, len(banks)))
     table_at = len(head)

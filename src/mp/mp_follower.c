@@ -1264,9 +1264,11 @@ void MP_Follower_Update(void)
         bool8 bikeHidden = BikeBall(&sSlots[0], LocalBiking(), &bikeLeaving);
         u8 sound;
         u32 fx;
-        UpdateSlot(&sSlots[0], gPlayerAvatar.objectEventId, LocalHidden() || bikeHidden);
+        // (behind SINNOH's walking partner when one walks with the player: event_object_movement.c FollowPlayer)
+        u8 owner = GetFollowPlayerObjectId() < OBJECT_EVENTS_COUNT ? GetFollowPlayerObjectId() : gPlayerAvatar.objectEventId;
+        UpdateSlot(&sSlots[0], owner, LocalHidden() || bikeHidden);
         fx = MP_Follower_LocalFx(&sound);
-        SlotEffects(&sSlots[0], sLocalToggleSeq, sLeavingState == 2 || bikeLeaving, fx, sound & 7, gPlayerAvatar.objectEventId);
+        SlotEffects(&sSlots[0], sLocalToggleSeq, sLeavingState == 2 || bikeLeaving, fx, sound & 7, owner);
         UpdateLeaving();
     }
 

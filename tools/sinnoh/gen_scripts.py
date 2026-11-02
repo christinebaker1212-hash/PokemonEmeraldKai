@@ -47,7 +47,7 @@ SINNOH_FIRST_NON_EGG, SINNOH_COUNT_ALIVE_EXCEPT, SINNOH_HAS_SPECIES, SINNOH_DAY_
 SINNOH_TIME_OF_DAY, SINNOH_ON_BIKE, SINNOH_STARTER, SINNOH_FACE = 20, 21, 22, 23
 SINNOH_GAME_COMPLETED, SINNOH_DID_NOT_CAPTURE, SINNOH_GET_HOUR, SINNOH_SET_WARP = 24, 25, 26, 27
 SINNOH_SET_BIKE, SINNOH_PARTY_SPECIES, SINNOH_HELD_ITEM, SINNOH_OBJECT_POS, SINNOH_TWO_TRAINERS = 28, 29, 30, 31, 32
-SINNOH_SET_BG, SINNOH_BUFFER_RIVAL_STARTER = 33, 34
+SINNOH_SET_BG, SINNOH_BUFFER_RIVAL_STARTER, SINNOH_MOVEMENT_TYPE, SINNOH_LOCAL_DEX, SINNOH_STOP_MUSIC = 33, 34, 35, 36, 37
 VAR_SINNOH_STARTER = 0x52F8      # (include/mp_region.h: the starter picked from ROWAN's briefcase)
 FLAG_SINNOH_HAS_PARTNER = 0x3D3C   # (include/mp_region.h: Platinum's walking partner, SetHasPartner)
 
@@ -64,7 +64,7 @@ FANFARE = {'SEQ_FANFA4': 'MUS_OBTAIN_ITEM', 'SEQ_FANFA3': 'MUS_OBTAIN_TMHM', 'SE
            'SEQ_ACCE': 'MUS_OBTAIN_ITEM', 'SEQ_POKEWALKER': 'MUS_OBTAIN_ITEM', 'SEQ_BADGE': 'MUS_OBTAIN_BADGE',
            'SEQ_ASA': 'MUS_HEAL', 'SEQ_KEYITEM': 'MUS_OBTAIN_ITEM', 'SEQ_WAZA': 'MUS_OBTAIN_TMHM'}
 
-CONSTANTS = {'TRUE': 1, 'FALSE': 0, 'MENU_YES': 0, 'MENU_NO': 1, 'GENDER_MALE': 0, 'GENDER_FEMALE': 1}
+CONSTANTS = {'TRUE': 1, 'FALSE': 0, 'NO_EXIT_ON_B': 0, 'EXIT_ON_B': 1, 'MENU_YES': 0, 'MENU_NO': 1, 'GENDER_MALE': 0, 'GENDER_FEMALE': 1}
 
 # Platinum's movement actions -> this game's (Platinum's field runs at 30 frames a second, this one at 60: a delay
 # is twice as many frames here)
@@ -99,6 +99,7 @@ def _music_of():
 
 
 MUSIC_OF = _music_of()
+MISSING_MUSIC = set()   # Platinum's songs its scripts play that the game lacks (--report lists them)
 
 
 class Unsupported(Exception):
@@ -325,6 +326,8 @@ class FileConverter:
     def localid(self, x):
         if x in ('LOCALID_PLAYER', 'OBJ_EVENT_ID_PLAYER'):
             return 'OBJ_EVENT_ID_PLAYER'
+        if x == 'LOCALID_FOLLOWER':
+            return '0xF2'                 # (the walking partner on a map it walked into: s3d_scrcmd.c Sinnoh_PartnerUpdate)
         if x in self.localids:
             return str(self.localids[x])
         if re.match(r'^\d+$', x):
@@ -510,9 +513,11 @@ class FileConverter:
                    'IncrementGameRecordTwice', 'LoadDoorAnimation', 'PlayDoorOpenAnimation', 'PlayDoorCloseAnimation',
                    'WaitForAnimation', 'UnloadAnimation', 'UnloadDoorAnimation'):
             return []                       # (the walking partner paused / resumed, objects held: nothing to do here)
-        if cmd == 'SetObjectEventMovementType':
+        if cmd in ('SetObjectEventMovementType', 'SetMovementType'):
+            # (now, as Platinum's; MOVEMENT_TYPE_FOLLOW_PLAYER makes it the walking partner: s3d_scrcmd.c)
             import sprites
-            return ['setobjectmovementtype %s, %s' % (self.localid(a[0]), sprites.movement(a[1]))]
+            kind = a[1] if a[1] == 'MOVEMENT_TYPE_FOLLOW_PLAYER' else sprites.movement(a[1])
+            return [self.sinnoh(SINNOH_MOVEMENT_TYPE, self.localid(a[0]), kind)]
         if cmd == 'SetObjectEventDir':
             return [self.sinnoh(SINNOH_FACE, self.localid(a[0]) if not a[0].startswith('VAR_') else self.var(a[0]),
                                 self.value(a[1]))]
@@ -558,11 +563,16 @@ class FileConverter:
         if cmd in ('PlayMusic', 'SetBGM'):
             mus = MUSIC_OF.get(a[0])
             if mus is None:
-                raise Unsupported('music %s' % a[0])
+                MISSING_MUSIC.add(a[0])
+                return []                   # (a song the game doesn't have yet: docs/SINNOH_HANDOFF.md's list)
             return ['playbgm %s, FALSE' % mus]
-        if cmd in ('StopMusic', 'FadeOutBGM', 'FadeOutMusic'):
-            return ['fadeoutbgm 1']
-        if cmd in ('PlayDefaultMusic', 'RestoreDefaultBGM', 'FadeInBGM'):
+        if cmd == 'StopMusic' or (cmd in ('FadeOutBGM', 'FadeOutMusic') and int(self.value(a[0])) == 0):
+            # (the song stops, as Platinum's: not the game's fadeoutbgm, which only pauses it for a fadeinbgm)
+            frames = int(self.value(a[1])) if cmd != 'StopMusic' and len(a) > 1 else 0
+            return [self.sinnoh(SINNOH_STOP_MUSIC, frames)]
+        if cmd in ('FadeOutBGM', 'FadeOutMusic', 'FadeInBGM'):
+            return []                       # (the song quieter for a while, and back: left as it is)
+        if cmd in ('PlayDefaultMusic', 'RestoreDefaultBGM'):
             return ['fadedefaultbgm']
         if cmd == 'WaitABPadPress':
             return ['waitbuttonpress']
@@ -686,15 +696,27 @@ class FileConverter:
             return []
         if cmd == 'SetObjectFlagIsPersistent':
             return []                       # (this game's objects keep their flags anyway)
+        if cmd in ('GetLocalDexSeenCount', 'GetLocalDexCaughtCount', 'CheckLocalDexCompleted'):
+            mode = {'GetLocalDexSeenCount': 0, 'GetLocalDexCaughtCount': 1, 'CheckLocalDexCompleted': 2}[cmd]
+            return [self.sinnoh(SINNOH_LOCAL_DEX, self.var(a[0]), mode)]
+        if cmd == 'GivePokemon':
+            # (Platinum's success: TRUE unless there's no room anywhere)
+            n = self.next_local()
+            done = '%s%s__given%d' % (PREFIX, self.low, n)
+            item = self.arg(a[2]) if len(a) > 2 else 'ITEM_NONE'
+            return ['givemon %s, %s, %s' % (self.arg(a[0]), self.arg(a[1]), item), 'setvar %s, 1' % self.var(a[3]),
+                    'goto_if_ne VAR_RESULT, MON_CANT_GIVE, %s' % done, 'setvar %s, 0' % self.var(a[3]), '%s:' % done]
+        if cmd == 'EnablePoketch':
+            return ['additem ITEM_POKETCH']   # (Kai's POKéTCH is the key item: src/sinnoh/poketch.c)
+        if cmd in ('AddContestBackdrop', 'SetPlayerState', 'ChangePlayerState'):
+            return []
         if cmd == 'GetPartyMonSpecies':
             return [self.sinnoh(SINNOH_PARTY_SPECIES, self.arg(a[0]), self.var(a[1]))]
         if cmd == 'CheckPartyHasHeldItem':
             return [self.sinnoh(SINNOH_HELD_ITEM, self.arg(a[0]), self.var(a[1]))]
         if cmd == 'SetPlayerBike':
             return [self.sinnoh(SINNOH_SET_BIKE, self.value(a[0]))]
-        if cmd == 'SetMovementType':
-            import sprites
-            return ['setobjectmovementtype %s, %s' % (self.localid(a[0]), sprites.movement(a[1]))]
+
         if cmd == 'CheckDistributionEvent':
             return ['setvar %s, 0' % self.var(a[1])]   # (no distribution events: Platinum without them)
         if cmd == 'MessageInstant':
@@ -1232,6 +1254,7 @@ def report(root):
             else:
                 why[w.split(' ')[0] if not w.startswith(('flag', 'variable', 'value')) else w] += 1
     print('%d of %d script entries convert' % (ok, total))
+    print('songs the game lacks: %s' % ' '.join(sorted(MISSING_MUSIC)))
     for w, k in why.most_common(60):
         print('  %5d  %s' % (k, w))
 

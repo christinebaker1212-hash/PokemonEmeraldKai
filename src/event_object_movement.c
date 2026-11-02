@@ -307,6 +307,7 @@ static void (*const sMovementTypeCallbacks[])(struct Sprite *) =
     [MOVEMENT_TYPE_WALK_SLOWLY_IN_PLACE_UP] = MovementType_WalkSlowlyInPlace,
     [MOVEMENT_TYPE_WALK_SLOWLY_IN_PLACE_LEFT] = MovementType_WalkSlowlyInPlace,
     [MOVEMENT_TYPE_WALK_SLOWLY_IN_PLACE_RIGHT] = MovementType_WalkSlowlyInPlace,
+    [MOVEMENT_TYPE_FOLLOW_PLAYER] = MovementType_FollowPlayer,
 };
 
 static const bool8 sMovementTypeHasRange[NUM_MOVEMENT_TYPES] = {
@@ -435,6 +436,7 @@ const u8 gInitialMovementTypeFacingDirections[] = {
     [MOVEMENT_TYPE_WALK_SLOWLY_IN_PLACE_UP] = DIR_NORTH,
     [MOVEMENT_TYPE_WALK_SLOWLY_IN_PLACE_LEFT] = DIR_WEST,
     [MOVEMENT_TYPE_WALK_SLOWLY_IN_PLACE_RIGHT] = DIR_EAST,
+    [MOVEMENT_TYPE_FOLLOW_PLAYER] = DIR_SOUTH,
 };
 
 #define OBJ_EVENT_PAL_TAG_BRENDAN                 0x1100
@@ -4713,6 +4715,71 @@ bool8 MovementType_Invisible_Step2(struct ObjectEvent *objectEvent, struct Sprit
     return FALSE;
 }
 
+// Moemon Kai: a walking partner (Platinum's MOVEMENT_TYPE_FOLLOW_PLAYER: BARRY on ROUTE 201, DAWN / LUCAS, CHERYL...):
+// steps onto the tile the player just left, as fast as the player goes (walking, running, the bike); farther than a
+// step (a warp, a jump) it's put there. The player walks through it (DoesObjectCollideWithObjectAt), and Kai's own
+// POKéMON follower walks behind it (mp_follower.c)
+static u8 FollowPlayer_Step0(struct ObjectEvent *objectEvent, struct Sprite *sprite);
+static u8 FollowPlayer_Step1(struct ObjectEvent *objectEvent, struct Sprite *sprite);
+static u8 (*const sMovementTypeFuncs_FollowPlayer[])(struct ObjectEvent *, struct Sprite *) = {
+    FollowPlayer_Step0,
+    FollowPlayer_Step1,
+};
+movement_type_def(MovementType_FollowPlayer, sMovementTypeFuncs_FollowPlayer)
+
+u8 GetFollowPlayerObjectId(void)
+{
+    u8 i;
+    for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+        if (gObjectEvents[i].active && gObjectEvents[i].movementType == MOVEMENT_TYPE_FOLLOW_PLAYER && !gObjectEvents[i].isPlayer)
+            return i;
+    return OBJECT_EVENTS_COUNT;
+}
+
+static u8 FollowPlayer_Step0(struct ObjectEvent *objectEvent, struct Sprite *sprite)
+{
+    struct ObjectEvent *player = &gObjectEvents[gPlayerAvatar.objectEventId];
+    s16 dx, dy;
+    u8 dir, action;
+    ClearObjectEventMovement(objectEvent, sprite);
+    if (gPlayerAvatar.objectEventId >= OBJECT_EVENTS_COUNT || objectEvent->heldMovementActive)
+        return FALSE;
+    dx = player->previousCoords.x - objectEvent->currentCoords.x;
+    dy = player->previousCoords.y - objectEvent->currentCoords.y;
+    if ((player->previousCoords.x == player->currentCoords.x && player->previousCoords.y == player->currentCoords.y)
+     || (dx == 0 && dy == 0))
+    {
+        // (standing behind the player: keep facing the way they went)
+        return FALSE;
+    }
+    if (abs(dx) + abs(dy) != 1)
+    {
+        MoveObjectEventToMapCoords(objectEvent, player->previousCoords.x, player->previousCoords.y);
+        return FALSE;
+    }
+    dir = dx > 0 ? DIR_EAST : dx < 0 ? DIR_WEST : dy > 0 ? DIR_SOUTH : DIR_NORTH;
+    if (TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_MACH_BIKE | PLAYER_AVATAR_FLAG_ACRO_BIKE))
+        action = GetWalkFasterMovementAction(dir);
+    else if (TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_DASH))
+        action = GetWalkFastMovementAction(dir);
+    else
+        action = GetWalkNormalMovementAction(dir);
+    ObjectEventSetSingleMovement(objectEvent, sprite, action);
+    sprite->sTypeFuncId = 1;
+    return TRUE;
+}
+
+static u8 FollowPlayer_Step1(struct ObjectEvent *objectEvent, struct Sprite *sprite)
+{
+    if (ObjectEventExecSingleMovementAction(objectEvent, sprite))
+    {
+        objectEvent->singleMovementActive = FALSE;
+        sprite->sTypeFuncId = 0;
+        return TRUE;
+    }
+    return FALSE;
+}
+
 static void ClearObjectEventMovement(struct ObjectEvent *objectEvent, struct Sprite *sprite)
 {
     objectEvent->singleMovementActive = FALSE;
@@ -4961,7 +5028,8 @@ static bool8 DoesObjectCollideWithObjectAt(struct ObjectEvent *objectEvent, s16 
     for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
     {
         curObject = &gObjectEvents[i];
-        if (curObject->active && curObject != objectEvent && !MP_IsMpObjectEvent(curObject) && !MP_IsMpObjectEvent(objectEvent))
+        if (curObject->active && curObject != objectEvent && !MP_IsMpObjectEvent(curObject) && !MP_IsMpObjectEvent(objectEvent)
+         && !(objectEvent->isPlayer && curObject->movementType == MOVEMENT_TYPE_FOLLOW_PLAYER))   // (a walking partner)
         {
             if ((curObject->currentCoords.x == x && curObject->currentCoords.y == y) || (curObject->previousCoords.x == x && curObject->previousCoords.y == y))
             {

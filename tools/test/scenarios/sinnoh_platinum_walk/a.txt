@@ -1,0 +1,39 @@
+pressuntil A field 5000
+wait 30
+mp emptyparty
+mp platinumstory
+mp warp 44,38,8,5
+wait 150
+mash A 12 20
+wait 200
+mash A 6 30
+wait 60
+press DOWN 16
+press LEFT 48
+wait 60
+shot barry1
+mash A 160 15
+wait 200
+shot barry2
+mp getvar 0x5208
+mp ctx
+shot before
+mp bgm
+mp warp 44,37,10,4
+wait 20
+shot w20
+mp bgm
+mp ctx
+wait 60
+shot w80
+wait 120
+shot mom1
+mash A 30 20
+wait 100
+shot mom2
+mash A 30 20
+wait 200
+shot mom3
+mp getvar 0x520A
+mp ctx
+quit

@@ -24,6 +24,7 @@
 #include "menu.h"
 #include "script_menu.h"
 #include "sound.h"
+#include "m4a.h"
 #include "task.h"
 #include "palette.h"
 #include "constants/songs.h"
@@ -67,7 +68,11 @@ enum {
     SINNOH_TWO_TRAINERS,            // ARG, ARG2: two trainers, the script's data 0 / 1 their defeat lines: the battle
     SINNOH_SET_BG,                  // ARG: the map's sign / bg event, ARG2, ARG3: its new tile (Platinum's SetBgEventPos)
     SINNOH_BUFFER_RIVAL_STARTER,    // ARG: a string buffer <- the rival's starter (the one strong against the player's)
+    SINNOH_MOVEMENT_TYPE,           // ARG: an object, ARG2: its movement type now (MOVEMENT_TYPE_FOLLOW_PLAYER: the partner)
+    SINNOH_LOCAL_DEX,               // ARG: a variable <- of Platinum's SINNOH POKéDEX: ARG2 0 the seen, 1 the caught, 2 all seen
+    SINNOH_STOP_MUSIC,              // ARG: Platinum's frames (0: at once): the song fades out and stops; the script waits
 };
+#include "../data/sinnoh_dex.h"
 
 static struct MapEvents sStoryEvents;                 // (Sinnoh_PlatinumMapScripts below)
 static struct ObjectEventTemplate sStoryObjects[64];
@@ -341,6 +346,34 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
                                                                                                           : SPECIES_TURTWIG);
         break;
     }
+    case SINNOH_MOVEMENT_TYPE:
+    {
+        u8 obj;
+        if (TryGetObjectEventIdByLocalIdAndMap(VarGet(arg), gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, &obj))
+            break;
+        if (arg2 == MOVEMENT_TYPE_FOLLOW_PLAYER)
+            VarSet(VAR_SINNOH_PARTNER_GFX, OBJ_GFX_ID(&gObjectEvents[obj]) + 1);   // (+1: 0 is none)
+        else if (gObjectEvents[obj].movementType == MOVEMENT_TYPE_FOLLOW_PLAYER)
+            VarSet(VAR_SINNOH_PARTNER_GFX, 0);
+        SetObjEventTemplateMovementType(VarGet(arg), arg2);
+        SetTrainerMovementType(&gObjectEvents[obj], arg2);
+        break;
+    }
+    case SINNOH_LOCAL_DEX:
+    {
+        u32 i, n = 0;
+        for (i = 0; i < ARRAY_COUNT(sSinnohDex); i++)
+            n += GetSetPokedexFlag(SpeciesToNationalPokedexNum(sSinnohDex[i]), arg2 == 1 ? FLAG_GET_CAUGHT : FLAG_GET_SEEN) != 0;
+        VarSet(arg, arg2 == 2 ? n == ARRAY_COUNT(sSinnohDex) : n);
+        break;
+    }
+    case SINNOH_STOP_MUSIC:
+        if (arg == 0)
+            StopMapMusic();
+        else
+            FadeOutBGM(arg / 8 + 1);   // (m4a's fade: 16 steps of SPEED frames, at 60 frames a second)
+        SetupNativeScript(ctx, IsBGMPausedOrStopped);
+        return TRUE;
     case SINNOH_SET_BIKE:
         if (!arg != !TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_MACH_BIKE | PLAYER_AVATAR_FLAG_ACRO_BIKE))
             GetOnOffBike(PLAYER_AVATAR_FLAG_MACH_BIKE);
@@ -461,4 +494,41 @@ void Sinnoh_PlatinumStoryBegin(void)
 {
     FlagSet(FLAG_SINNOH_PLATINUM_STORY);
     RunScriptImmediately(gSinnohPlatinumNewGame);
+}
+
+// SINNOH's walking partner (Platinum's LOCALID_FOLLOWER: BARRY on ROUTE 201, DAWN / LUCAS, CHERYL...), every frame on
+// the field: the one following the player walks with them into the next map (it then answers to LOCALID_FOLLOWER,
+// 0xF2, there), and comes along through warps (put behind the player again)
+#define LOCALID_SINNOH_FOLLOWER 0xF2
+void Sinnoh_PartnerUpdate(void)
+{
+    u16 gfx = VarGet(VAR_SINNOH_PARTNER_GFX);
+    u8 obj, mapNum = gSaveBlock1Ptr->location.mapNum, mapGroup = gSaveBlock1Ptr->location.mapGroup;
+    struct ObjectEvent *player;
+    if (gfx == 0 || !S3D_IsSinnohGroup(mapGroup) || gPlayerAvatar.objectEventId >= OBJECT_EVENTS_COUNT)
+        return;
+    player = &gObjectEvents[gPlayerAvatar.objectEventId];
+    obj = GetFollowPlayerObjectId();
+    if (obj < OBJECT_EVENTS_COUNT)
+    {
+        if (gObjectEvents[obj].mapNum != mapNum || gObjectEvents[obj].mapGroup != mapGroup)
+        {
+            gObjectEvents[obj].localId = LOCALID_SINNOH_FOLLOWER;
+            gObjectEvents[obj].mapNum = mapNum;
+            gObjectEvents[obj].mapGroup = mapGroup;
+        }
+        return;
+    }
+    if (ArePlayerFieldControlsLocked() || !TryGetObjectEventIdByLocalIdAndMap(LOCALID_SINNOH_FOLLOWER, mapNum, mapGroup, &obj))
+        return;
+    {
+        // (behind the player: the way they came, else any free side)
+        static const s8 sBehind[4][2] = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};   // facing S N W E: minus this is the tile behind
+        u8 d = player->facingDirection >= DIR_SOUTH && player->facingDirection <= DIR_EAST ? player->facingDirection - DIR_SOUTH : 0;
+        s16 x = player->currentCoords.x - sBehind[d][0], y = player->currentCoords.y - sBehind[d][1];
+        obj = SpawnSpecialObjectEventParameterized(gfx - 1, MOVEMENT_TYPE_FOLLOW_PLAYER, LOCALID_SINNOH_FOLLOWER, x, y,
+                                                   player->currentElevation);
+        if (obj < OBJECT_EVENTS_COUNT)
+            ObjectEventTurn(&gObjectEvents[obj], player->facingDirection);
+    }
 }
