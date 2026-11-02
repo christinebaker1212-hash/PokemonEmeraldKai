@@ -1,0 +1,9 @@
+# The encounter audit: no strong POKeMON in early tables' common slots (tools/quetzal_port/gen_wild.py OVERRIDES). At
+# GEN 9, KANTO's ROCK TUNNEL B1F has no KANGASKHAN (115), DRUDDIGON (646), DRAMPA (805) or DURALUDON (909) and MT.
+# MOON B2F no SCYTHER (123); 400 grass rolls each
+MODE=1
+TMO=60
+GEN=9
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=25:20"
+EXPECT_A=("wildroll: ")
+UNEXPECT_A=("[crash]" " 115 " " 646 " " 805 " " 909 " " 123 " " 115$" " 646$" " 805$" " 909$" " 123$")

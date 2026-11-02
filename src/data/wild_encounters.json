@@ -12960,17 +12960,17 @@
               {
                 "min_level": 9,
                 "max_level": 9,
-                "species": "SPECIES_PINSIR"
+                "species": "SPECIES_CATERPIE"
               },
               {
                 "min_level": 12,
                 "max_level": 12,
-                "species": "SPECIES_SCYTHER"
+                "species": "SPECIES_WEEDLE"
               },
               {
                 "min_level": 13,
                 "max_level": 13,
-                "species": "SPECIES_HERACROSS"
+                "species": "SPECIES_ZUBAT"
               },
               {
                 "min_level": 12,
@@ -24145,7 +24145,7 @@
               {
                 "min_level": 17,
                 "max_level": 20,
-                "species": "SPECIES_KANGASKHAN"
+                "species": "SPECIES_ZUBAT"
               },
               {
                 "min_level": 17,

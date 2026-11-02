@@ -96,7 +96,7 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       CUTTER... aren't TMs in this game; HGSS's all are); [ ] other TM givers)
 - [x] SINNOH's time of day in KANTO, JOHTO and HOENN: MORNING / DAY / NIGHT encounters (grass slots 2-3 by Platinum's
       hours: mp_region.c MP_TimeLandSlot, src/data/wild_time.h from tools/quetzal_port/gen_wild_time.py; tests time_wild_*)
-- [~] Encounter audit: no strong Pokémon early, places keep their identity (DIGLETT'S CAVE), no DITTO-like utility early;
+- [x] Encounter audit: no strong Pokémon early, places keep their identity (DIGLETT'S CAVE), no DITTO-like utility early;
       each region's own Pokémon mainly there, the other regions' Pokémon spread where they fit; never remove one already
       found somewhere; FILL never sends OFF GENERATION, OFF REGION very sparingly
       ([x] FILL: TEAM PADDING's POKéMON are the region's own (its wild tables and their evolutions), another region's only
@@ -104,7 +104,11 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       coop_fill_gen3, tri_padded. [x] DIGLETT'S CAVE is FireRed's (DIGLETT, DUGTRIO) at every GENERATION, no DITTO on
       KANTO's ROUTE 1 / 5: tools/quetzal_port/gen_wild.py OVERRIDES, applied by gen_gen2.py / gen_modern.py too; test
       kanto_digletts_cave. [x] Quetzal's DARKRAI dreams (JOHTO's bed, the S.S. ANNE's cabin) don't start: DARKRAI is
-      SINNOH's; a save in one wakes; tests qz_dream*. [ ] the wild tables' audit for strong POKéMON early)
+      SINNOH's; a save in one wakes; tests qz_dream*. [x] no strong POKéMON early: in a table up to level 20 a base stat
+      total of 480+ in a common slot (4% or more) is the original game's POKéMON there (ILEX FOREST's PINSIR, SCYTHER,
+      HERACROSS; ROCK TUNNEL B1F's KANGASKHAN, DRUDDIGON, DURALUDON, DRAMPA; MT. MOON B2F's SCYTHER at GEN 1-2; the
+      RUINS OF ALPH's SIGILYPH; ROUTE 5's COMFEY), Quetzal's 1% rare finds kept; every POKéMON still obtainable at
+      every GENERATION; test early_wild_strong)
 
 ## General
 - [x] Shadows fade with screen transitions (gba_easy_draw.c ShadowKeepForFrame: the share of the backgrounds still shown)

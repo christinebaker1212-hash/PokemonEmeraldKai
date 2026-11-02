@@ -1,0 +1,9 @@
+pressuntil A field 5000
+wait 30
+mp warp 36,82,10,10
+wait 120
+mp wildroll 400
+mp warp 36,3,10,10
+wait 120
+mp wildroll 400
+quit

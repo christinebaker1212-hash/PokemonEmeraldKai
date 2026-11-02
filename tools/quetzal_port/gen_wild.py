@@ -24,7 +24,19 @@ FRLG_DIGLETTS = [('DIGLETT', 18, 18), ('DIGLETT', 19, 19), ('DIGLETT', 17, 17), 
 OVERRIDES = {
     'MAP_KANTO_DIGLETTS_CAVE_B1F': {'land_mons': [(i, 'SPECIES_' + sp, lo, hi) for i, (sp, lo, hi) in enumerate(FRLG_DIGLETTS)]},
     'MAP_KANTO_ROUTE1': {'land_mons': [('SPECIES_DITTO', 'SPECIES_RATTATA', None, None)]},
-    'MAP_KANTO_ROUTE5': {'land_mons': [('SPECIES_DITTO', 'SPECIES_MEOWTH', None, None)]},
+    'MAP_KANTO_ROUTE5': {'land_mons': [('SPECIES_DITTO', 'SPECIES_MEOWTH', None, None),
+                                       ('SPECIES_COMFEY', 'SPECIES_NOCTOWL', None, None)]},
+    # No strong POKeMON early: in a table up to level 20, one with a base stat total of 480+ in a common slot (4% or
+    # more; Quetzal's 1% rare finds stay) becomes the original game's POKeMON for the place (FireRed's / Crystal's)
+    'MAP_JOHTO_ILEX_FOREST': {'land_mons': [('SPECIES_PINSIR', 'SPECIES_CATERPIE', None, None),
+                                            ('SPECIES_SCYTHER', 'SPECIES_WEEDLE', None, None),
+                                            ('SPECIES_HERACROSS', 'SPECIES_ZUBAT', None, None)]},
+    'MAP_JOHTO_RUINS_OF_ALPH_INNER_CHAMBER': {'land_mons': [('SPECIES_SIGILYPH', 'SPECIES_NATU', None, None)]},
+    'MAP_KANTO_MT_MOON_B2F': {'land_mons': [('SPECIES_SCYTHER', 'SPECIES_ZUBAT', None, None)]},
+    'MAP_KANTO_ROCK_TUNNEL_B1F': {'land_mons': [('SPECIES_KANGASKHAN', 'SPECIES_ZUBAT', None, None),
+                                                ('SPECIES_DRUDDIGON', 'SPECIES_ZUBAT', None, None),
+                                                ('SPECIES_DURALUDON', 'SPECIES_HAUNTER', None, None),
+                                                ('SPECIES_DRAMPA', 'SPECIES_MACHOP', None, None)]},
 }
 
 
