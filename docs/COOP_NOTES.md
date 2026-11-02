@@ -4397,4 +4397,6 @@ have givers who stay. Debug `mp hmrescue`; tests hm_rescue, hm_rescue_carried.
   over noon's, so noon is the maps as drawn. Shipped as sinnoh/platinum_daylight.bin (package.sh), never committed.
   Without it, no tint. Off under the test harness unless MOEMON_DAYTINT is set (pixel-compared pictures stay); `mp
   daytint` prints it. Test day_tint.
+- On SINNOH's outdoor maps the same tint goes on the sprites only (the user: the light should tint the sprites as
+  well; its 3D world is lit by s3d.c): gMpSceneLayers 0 there; MOEMON_S3D_HOUR (`mp s3dhour`) sets its hour in tests.
 

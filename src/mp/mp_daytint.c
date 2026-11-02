@@ -1,5 +1,5 @@
 // Moemon Kai: Platinum's time of day in the 2D regions (HOENN, JOHTO, KANTO; the user, 2026-11-02: it must look like
-// Platinum's tinting). SINNOH's 3D maps are lit by Platinum's area lights for the hour (src/sinnoh/s3d.c); here the
+// Platinum's tinting), and on SINNOH's sprites (its 3D world is lit by s3d.c itself). SINNOH's 3D maps are lit by Platinum's area lights for the hour (src/sinnoh/s3d.c); here the
 // same lights give a color per half hour (sinnoh/platinum_daylight.bin, tools/sinnoh/build_daylight.py: flat ground
 // under Platinum's outdoor light set, over noon's), and on an outdoor map the map's layers (BG1-3) and the sprites in
 // the world (OAM priority 1-3: people, POKéMON, field effects; not the text boxes, menus and co-op tags) are drawn in
@@ -54,8 +54,6 @@ static bool8 Wanted(void)
 {
     if (gMain.callback2 != CB2_Overworld || gMain.inBattle)
         return FALSE;
-    if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))   // (SINNOH: its own lights)
-        return FALSE;
     return IsMapTypeOutdoors(gMapHeader.mapType);
 }
 
@@ -75,6 +73,8 @@ void MP_DayTint_Update(void)
         return;   // (another scene effect holds it)
     RtcCalcLocalTime();
     mins = gLocalTime.hours * 60 + gLocalTime.minutes;
+    if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup) && getenv("MOEMON_S3D_HOUR"))
+        mins = atoi(getenv("MOEMON_S3D_HOUR")) * 60;   // (tests: SINNOH's lighting hour, as its 3D world has it)
     half = (mins / 30) % 48;
     next = (half + 1) % 48;
     for (ch = 0; ch < 3; ch++)   // (eased between half hours; 128 in the table = all of it)
@@ -83,7 +83,9 @@ void MP_DayTint_Update(void)
     for (i = 0; i < MAX_SPRITES; i++)
         if (gSprites[i].inUse && !gSprites[i].invisible && gSprites[i].oam.priority >= 1)
             gMpSceneObjPal[gSprites[i].oam.paletteNum & 63] = 1;
-    gMpSceneLayers = 0xE;
+    // SINNOH's 3D world is lit by the area lights itself (s3d.c): there only its sprites take the tint (the user,
+    // 2026-11-02: the light should tint the sprites as well)
+    gMpSceneLayers = S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup) ? 0 : 0xE;
     gMpScenePixel = DayTintPixel;
 }
 
