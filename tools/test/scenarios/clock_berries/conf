@@ -12,3 +12,6 @@ ENV_A="TZ=Asia/Tokyo"
 ENV_B="TZ=America/Los_Angeles"
 EXPECT_B=("clock: time-based events were off (skipped intro): on from now" "[test] berryinfo 2: berry 7 stage 1 next 180 min yield 0 regrow 0 (time events on" "clock: following the host's clock" "(the host's)" "[test] offline" "(ours)" "game time day 9" "rtc status 0000" "[test] berrywait 180" "[test] berryinfo 2: berry 7 stage 2")
 UNEXPECT_B=("berryinfo 2: berry 7 stage 3" "berryinfo 2: berry 7 stage 4" "berryinfo 2: berry 7 stage 5")
+# HOUR=now: the real clocks (the harness pins each game clock to 05:00 of its own day by default; across Tokyo and
+# Los Angeles that pin moved the host clock by a day minus the time difference, failing at some times of day)
+HOUR=now
