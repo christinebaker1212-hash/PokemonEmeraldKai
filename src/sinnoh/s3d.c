@@ -896,6 +896,27 @@ void S3D_TexAnimInfo(u32 *count, u32 *firstShown)
     *firstShown = sPack.nanim ? sPack.shown[sPack.anim[0].tex] : 0;
 }
 
+// A platform lift (s3d_lift.c): the map's props standing in a rectangle of the matrix world drawn at height Y instead
+static struct { bool8 on; float x0, z0, x1, z1, y; } sLift;
+
+void S3D_SetLift(bool8 on, float x0, float z0, float x1, float z1, float y)
+{
+    sLift.on = on, sLift.x0 = x0, sLift.z0 = z0, sLift.x1 = x1, sLift.z1 = z1, sLift.y = y;
+}
+
+static void DrawProp(const S3dProp *pr, float ox, float oy, float oz, u32 pass)
+{
+    const float *m = pr->m;
+    float moved[12];
+    if (sLift.on && ox + m[3] >= sLift.x0 && ox + m[3] < sLift.x1 && oz + m[11] >= sLift.z0 && oz + m[11] < sLift.z1)
+    {
+        memcpy(moved, m, sizeof(moved));
+        moved[7] = sLift.y - oy;
+        m = moved;
+    }
+    DrawMesh(&sPack.mesh[sPack.meshShown[pr->mesh]], m, ox, oy, oz, pass);
+}
+
 static void Render(void)
 {
     AnimateTextures();
@@ -922,7 +943,7 @@ static void Render(void)
                 DrawMesh(&sPack.mesh[c->mesh], NULL, ox, oy, oz, pass);
                 for (i = 0; i < c->nprops; i++)
                     if (c->props[i].mesh >= 0 && (u32)c->props[i].mesh < sPack.nmesh)
-                        DrawMesh(&sPack.mesh[sPack.meshShown[c->props[i].mesh]], c->props[i].m, ox, oy, oz, pass);
+                        DrawProp(&c->props[i], ox, oy, oz, pass);
             }
     for (pass = 0; pass < 2; pass++)
         for (i = 0; i < S3D_DYN_PROPS; i++)

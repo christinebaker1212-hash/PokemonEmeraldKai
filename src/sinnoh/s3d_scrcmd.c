@@ -96,6 +96,7 @@ enum {
     SINNOH_CONTEST,                 // ARG: SUPER CONTESTS' call (s3d_contest.c CC_*), ARG2, ARG3
     SINNOH_WARP_CONTINUE,           // (then a `goto LABEL`, read here, not taken): Platinum's script goes on at LABEL
                                     // once the warp that follows has brought the player to the new map
+    SINNOH_LIFT,                    // ARG: the platform lift's call (s3d_lift.c Sinnoh_LiftCall), ARG2 a variable
 };
 
 u8 gSinnohMessage[1000];
@@ -550,6 +551,16 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
             return TRUE;
         }
         break;
+    case SINNOH_LIFT:
+    {
+        bool8 Sinnoh_LiftCall(u16 op, u16 var);
+        if (Sinnoh_LiftCall(arg, arg2))
+        {
+            ScriptContext_Stop();   // (the lift rides; its end starts the script again: s3d_lift.c)
+            return TRUE;
+        }
+        break;
+    }
     case SINNOH_SEAL:
     {
         void Sinnoh_SealCall(u16 call, u16 a, u16 b);

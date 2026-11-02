@@ -1,0 +1,34 @@
+pressuntil A field 5000
+wait 30
+mp setvar 0x4021 250
+mp warp 42,15,14,48
+wait 120
+waitfor field 1000
+mp lift
+shot i_bottom
+press RIGHT 80
+wait 20
+mp where
+press UP 80
+wait 60
+mp lift
+shot i_ride
+wait 200
+mp lift
+mp where
+shot i_top
+mp ctx
+mp objat 19 45
+mp objat 19 43
+mp objat 19 44
+mp collision 19 45
+mp canstep
+press DOWN 40
+wait 30
+mp where
+press UP 40
+wait 220
+mp lift
+mp where
+shot i_down
+quit

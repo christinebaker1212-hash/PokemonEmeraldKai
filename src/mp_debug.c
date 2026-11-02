@@ -3129,6 +3129,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         Sinnoh_TvForceProgram(atoi(arg));
         printf("[test] tv program %d\n", atoi(arg));
     }
+    else if (strcmp(cmd, "lift") == 0)
+    {
+        // lift: SINNOH's platform lift on this map (s3d_lift.c: which, its floor, height, riding)
+        void Sinnoh_LiftDebug(void);
+        Sinnoh_LiftDebug();
+    }
     else if (strcmp(cmd, "underground") == 0)
     {
         // underground: SINNOH's Underground (where the player went down, the dig spots, SPIRITOMB's counter)
@@ -3221,6 +3227,38 @@ void MP_TestCommand(const char *cmd, const char *arg)
         StringExpandPlaceholders(gStringVar4, sPlaceholder);
         printf("[test] s3dtext %d %d: %d characters\n", bank, msg, (int)StringLength(gStringVar4));
         ShowFieldMessage(sPlaceholder);
+    }
+    else if (strcmp(cmd, "collisionmap") == 0)
+    {
+        // collisionmap X Y W H: the map grid's walls in a rectangle ('#' wall, '.' open), a row a line
+        int x0 = 0, y0 = 0, w = 0, h = 0, x, y;
+        sscanf(arg, "%d %d %d %d", &x0, &y0, &w, &h);
+        for (y = y0; y < y0 + h && y < y0 + 64; y++)
+        {
+            char row[80];
+            for (x = 0; x < w && x < 78; x++)
+                row[x] = MapGridGetCollisionAt(x0 + x + MAP_OFFSET, y + MAP_OFFSET) ? '#' : '.';
+            row[x] = 0;
+            printf("[test] collisionmap %3d: %s\n", y, row);
+        }
+    }
+    else if (strcmp(cmd, "canstep") == 0)
+    {
+        // canstep: the player's collision result each way (0 none; 1 outside range, 2 impassable, 3 elevation, 4 object)
+        struct ObjectEvent *pl = &gObjectEvents[gPlayerAvatar.objectEventId];
+        s16 cx = pl->currentCoords.x, cy = pl->currentCoords.y;
+        printf("[test] canstep: down %d up %d left %d right %d (elevation %d, tile %d)\n",
+               GetCollisionAtCoords(pl, cx, cy + 1, DIR_SOUTH), GetCollisionAtCoords(pl, cx, cy - 1, DIR_NORTH),
+               GetCollisionAtCoords(pl, cx - 1, cy, DIR_WEST), GetCollisionAtCoords(pl, cx + 1, cy, DIR_EAST), pl->currentElevation,
+               MapGridGetElevationAt(pl->currentCoords.x, pl->currentCoords.y));
+    }
+    else if (strcmp(cmd, "collision") == 0)
+    {
+        // collision X Y: the map grid's collision and metatile behavior at map tile (X, Y)
+        int x = 0, y = 0;
+        sscanf(arg, "%d %d", &x, &y);
+        printf("[test] collision %d %d: %d behavior %d\n", x, y, MapGridGetCollisionAt(x + MAP_OFFSET, y + MAP_OFFSET),
+               MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET));
     }
     else if (strcmp(cmd, "s3dground") == 0)
     {

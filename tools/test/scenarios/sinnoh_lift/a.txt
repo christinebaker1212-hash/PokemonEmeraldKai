@@ -1,0 +1,19 @@
+pressuntil A field 5000
+wait 30
+mp warp 42,106,4,15
+wait 120
+waitfor field 1000
+mp lift
+shot l_bottom
+press UP 64
+wait 40
+mp lift
+shot l_ride
+wait 200
+mp lift
+shot l_top
+press UP 120
+wait 120
+mp where
+shot l_after
+quit

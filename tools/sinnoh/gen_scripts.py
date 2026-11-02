@@ -50,7 +50,8 @@ SINNOH_SET_BIKE, SINNOH_PARTY_SPECIES, SINNOH_HELD_ITEM, SINNOH_OBJECT_POS, SINN
 SINNOH_SET_BG, SINNOH_BUFFER_RIVAL_STARTER, SINNOH_MOVEMENT_TYPE, SINNOH_LOCAL_DEX, SINNOH_STOP_MUSIC = 33, 34, 35, 36, 37
 SINNOH_BATTLE_WON, SINNOH_ADD_VAR, SINNOH_BADGE_COUNT, SINNOH_PREVIOUS_MAP, SINNOH_DAYCARE_EGG = 38, 39, 40, 41, 42
 SINNOH_BUFFER_TEXT, SINNOH_QUERY, SINNOH_DEX_RATING, SINNOH_MESSAGE_VAR = 43, 44, 45, 46
-SINNOH_TV, SINNOH_MESSAGE_BANK_VAR, SINNOH_SEAL, SINNOH_FASHION, SINNOH_CONTEST, SINNOH_WARP_CONTINUE = 47, 48, 49, 50, 51, 52   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
+SINNOH_TV, SINNOH_MESSAGE_BANK_VAR, SINNOH_SEAL, SINNOH_FASHION, SINNOH_CONTEST, SINNOH_WARP_CONTINUE = 47, 48, 49, 50, 51, 52
+SINNOH_LIFT = 53   # (the platform lifts: src/sinnoh/s3d_lift.c)   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
 (TVCALL_STATUS, TVCALL_FRAMING, TVCALL_FINISH, TVCALL_SEGMENT_ID, TVCALL_SEGMENT, TVCALL_COMMERCIAL, TVCALL_NEXT,
  TVCALL_INTERVIEW_ID, TVCALL_INTERVIEW_MESSAGE, TVCALL_INTERVIEW_SAVE, TVCALL_INTERVIEW_OK, TVCALL_WORD,
  TVCALL_HIDDEN_ITEM, TVCALL_NAME_RATED, TVCALL_STORAGE, TVCALL_VILLA, TVCALL_AMITY, TVCALL_QUESTION) = range(18)
@@ -573,6 +574,12 @@ class FileConverter:
         if cmd == 'SetCommPlayerDir':
             # (the player turned, Platinum's Underground player being a link one)
             return [self.sinnoh(SINNOH_FACE, 'LOCALID_PLAYER', self.value(a[0]))]
+        if cmd == 'InitPersistedMapFeaturesForPlatformLift':
+            return [self.sinnoh(SINNOH_LIFT, 0)]
+        if cmd == 'CheckPlatformLiftNotUsedWhenEnteredMap':
+            return [self.sinnoh(SINNOH_LIFT, 1, self.var(a[0]))]
+        if cmd == 'TriggerPlatformLift':
+            return [self.sinnoh(SINNOH_LIFT, 2)]   # (the script waits while it rides)
         if cmd == 'Dummy14F':
             return []
         if cmd == 'CheckHasRoomForGoodsInPC':

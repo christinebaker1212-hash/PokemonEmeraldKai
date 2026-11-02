@@ -16,6 +16,8 @@
 #include "global.h"
 #include "s3d.h"
 #include "s3d_underground.h"
+void Sinnoh_Lift_MapLoaded(void);   // (s3d_lift.c)
+void Sinnoh_Lift_Update(void);
 #include "m4a.h"
 #include "event_data.h"
 #include "battle_setup.h"
@@ -1148,6 +1150,12 @@ void S3D_Gyms_RedirectWarp(s16 x, s16 y)
         }
 }
 
+// IRON ISLAND B2F's platform lift, Platinum's run-time prop (s3d_lift.c)
+void S3D_Gyms_LiftProp(float x, float y, float z)
+{
+    S3D_DynProp(0, S3D_MODEL_IRON_ISLAND_PLATFORM_LIFT, x, y, z, 0);
+}
+
 // ------------------------------------------------------------------------------------------------------ all gyms
 void S3D_Gyms_MapLoaded(void)
 {
@@ -1159,6 +1167,7 @@ void S3D_Gyms_MapLoaded(void)
     gS3dObjectHeightHook = NULL;
     sG.gym = GYM_NONE;
     sG.lastX = sG.lastY = -1;
+    Sinnoh_Lift_MapLoaded();   // (the platform lifts: s3d_lift.c)
     if (!S3D_MapOrigin(&sG.ox, &sG.oz))
         return;
     if (map == MAP_SINNOH_PASTORIA_CITY_GYM)
@@ -1213,6 +1222,7 @@ void S3D_Gyms_Update(void)
 {
     s16 x, y;
     Sinnoh_Underground_Update();
+    Sinnoh_Lift_Update();
     if (sG.gym == GYM_NONE)
         return;
     if (sG.gym == GYM_CANALAVE)

@@ -20,6 +20,8 @@ GYM_MODELS = {
     'MAP_HEADER_SNOWPOINT_CITY_GYM': ['fx:snowpoint_gym_snowball.nsbmd'],
     'MAP_HEADER_HEARTHOME_CITY_GYM_TRAINER_ROOM_1': ['fx:hearthome_gym_hint_%s.nsbmd' % n for n in (
         'circle', 'square', 'triangle', 'sun', 'target', 'moon', 'star', 'heart')],   # (the clue: Platinum's door order)
+    # not a gym's: IRON ISLAND B2F's platform lift, loaded at run time (src/sinnoh/s3d_lift.c; the others are their map's)
+    'MAP_HEADER_IRON_ISLAND_B2F_LEFT_ROOM': ['iron_island_platform_lift.nsbmd'],
     # not a gym's: the healing machine's balls in every POKeMON CENTER (src/sinnoh/s3d_heal.c; the CENTERs share textures)
     'MAP_HEADER_JUBILIFE_CITY_POKECENTER_1F': ['pokecenter_healing_machine_mini_pokeball.nsbmd'],
 }
