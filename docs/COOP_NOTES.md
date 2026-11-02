@@ -4121,8 +4121,9 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   fade: the game's card never shows; the Union Room's and the Cable Club's cards stay the game's). It closes by fading
   to black (white back to the FRONTIER PASS) and stays so (MP_CardScreen_Hide from CloseTrainerCard) while the game's
   card fades out behind it. A 480x320 picture like the BADGE CASE's: the card drawn flat into a 456x288 texture, then
-  tilted in perspective as a grid of triangles (SDL_RenderGeometry) by the right stick or the mouse (an idle sway
-  otherwise) and turned over between pages. The trainer picture is read from the game card's window (WIN_TRAINER_PIC's
+  tilted in perspective as a grid of triangles (SDL_RenderGeometry) by the right stick or the mouse pointing at it
+  and turned over between pages; nothing else moves it (no idle sway, the holo follows only the tilt), and let go it
+  settles flat (test card_still). The trainer picture is read from the game card's window (WIN_TRAINER_PIC's
   pixels and BG palette 8): every LOOK as the game draws it.
 - **The designs**: Pokemon Battle Revolution's Battle Pass designs (the user's upload, docs/user_images/63.zip, as
   graphics/moemon/cards/passes/*.png; `tools/moemon_cards/build_passes.py` -> passes.bin "MPAS", built in by

@@ -59,6 +59,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `anim_modern` | the same on MODERN (run after anim_classic): `tools/test/check_anim_frames.sh` checks all 716 lengths match, no crash |
 | `badge_case` | the BADGE CASE (SELECT on the card): badges of three regions won now, six days of fading, rubbed to each look (4 / 2 sparkles, clean, dirty, filthy); shots of the trays and a badge up close; B leaves the card open; a badge up close polished by A held and the stick going round (a virtual pad) |
 | `card_design` | the TRAINER CARD (one design for every region): PROFILE, BADGES & STARS, RECORDS, TEAM & SIGNATURE; MY CARD: a design, its hue, accent, frame, panels, the showcase; a signature drawn on the pad; the card as styled; B back to the map |
+| `card_still` | the TRAINER CARD holds still with nothing pressed, turns with the right stick, settles flat when it's let go (check.py) |
 | `card_designs` | the PROFILE on all 36 Battle Pass designs, the other pages, the four panels, the five frames: kept on the pass's grid (label, emblem, notch) |
 | `card_friends` | two clients: a friend's card with its add-on, as they styled it: their BADGES & STARS, their BADGE CASE on JOHTO, YOU AND BOB; then the album card on MY CARD > FRIENDS' CARDS |
 | `spec_card` | two clients: BOB's SPECTATE panel shows ALICE's TRAINER CARD and her BADGE CASE up close |

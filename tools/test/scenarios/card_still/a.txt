@@ -1,0 +1,19 @@
+pressuntil A field 5000
+wait 60
+mp card
+wait 80
+rendershot still1
+wait 40
+rendershot still2
+vpad
+vaxis rx 100
+vaxis ry -60
+wait 30
+rendershot tilted
+vaxis rx 0
+vaxis ry 0
+wait 90
+rendershot settled
+press B 2
+wait 120
+quit

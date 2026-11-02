@@ -1071,14 +1071,14 @@ static void DrawCard(SDL_Renderer *r, u8 page)
     if (s->holo && C.holo && C.streak)
     {
         // the holo: rainbow foil and a streak of light that move as the card tilts, a few glints
-        SDL_Rect dst = {-120 + (int)(C.tiltX * 90) + (int)(SDL_sinf(C.age * 0.013f) * 20), -100 + (int)(C.tiltY * 70),
+        SDL_Rect dst = {-120 + (int)(C.tiltX * 90), -100 + (int)(C.tiltY * 70),
                         CARD_W + 240, CARD_H + 200};
         SDL_FRect streak;
         int k;
         SDL_SetTextureAlphaMod(C.holo, 34);
         SDL_RenderCopy(r, C.holo, NULL, &dst);
         streak.w = 150, streak.h = 900;
-        streak.x = CARD_W * (0.5f + C.tiltX * 0.9f) + SDL_sinf(C.age * 0.02f) * 40 - 75;
+        streak.x = CARD_W * (0.5f + C.tiltX * 0.9f) - 75;
         streak.y = (CARD_H - 900) / 2.0f;
         SDL_SetTextureAlphaMod(C.streak, 54);
         SDL_RenderCopyExF(r, C.streak, NULL, &streak, 24, NULL, SDL_FLIP_NONE);
@@ -1086,7 +1086,9 @@ static void DrawCard(SDL_Renderer *r, u8 page)
         {
             u32 h = (k + 1) * 2654435761u;
             int x = 20 + (int)(h % (CARD_W - 40)), y = 16 + (int)((h >> 12) % (CARD_H - 32));
-            float tw = SDL_sinf(C.age * 0.07f + k * 1.7f + C.tiltX * 5 + C.tiltY * 3);
+            // (glints only as the card turns: still, it shows none)
+            float turn = G_MinF(1, (SDL_fabsf(C.tiltX) + SDL_fabsf(C.tiltY)) * 4);
+            float tw = 0.55f + (SDL_sinf(k * 1.7f + C.tiltX * 5 + C.tiltY * 3) - 0.55f) * turn;
             if (tw > 0.55f)
             {
                 int len = (int)((tw - 0.55f) * 12);
@@ -1831,29 +1833,36 @@ static void FlipTo(u8 page, s8 dir)
     MPNet_Log("card: page %s", sPageNames[page]);
 }
 
+// The card turns only when the player turns it: the right stick, or the mouse pointing at it (once it has moved);
+// let go (the stick back, the pointer off the card) and it settles flat
 static void Tilt(void)
 {
-    float lx, ly, rx, ry, tx, ty;
-    s32 mx, my;
+    float lx, ly, rx, ry, tx = 0, ty = 0;
+    s32 mx = -1, my = -1;
     bool8 down;
+    bool8 moved = C.mode != MODE_SIGN && Platform_PoketchMouse(&mx, &my, &down);
     Gamepad_Sticks(&lx, &ly, &rx, &ry);
-    if (C.mode != MODE_SIGN && Platform_PoketchMouse(&mx, &my, &down))
-        C.mouseAt = C.age ? C.age : 1;
+    if (moved)
+        C.mouseAt = 1;
     if (sStill)
-        tx = ty = 0;
+        ;
     else if (rx * rx + ry * ry > 0.02f)
         tx = rx, ty = ry;
-    else if (C.mouseAt && C.age - C.mouseAt < 180 && C.mode == MODE_CARD)
+    else if (C.mouseAt && C.mode == MODE_CARD)
     {
-        s32 x, y;
-        Platform_PoketchMouse(&x, &y, &down);
-        tx = G_MaxF(-1, G_MinF(1, (x - 120) / 114.0f));
-        ty = G_MaxF(-1, G_MinF(1, (y - 76) / 72.0f));
+        s32 x = -1, y = -1;   // (left as they are when the pointer is off the window)
+        if (!moved)
+            Platform_PoketchMouse(&x, &y, &down), mx = x, my = y;
+        if (mx >= 6 && mx < 234 && my >= 4 && my < 140)   // (on the card)
+        {
+            tx = G_MaxF(-1, G_MinF(1, (mx - 120) / 114.0f));
+            ty = G_MaxF(-1, G_MinF(1, (my - 71) / 67.0f));
+        }
     }
-    else
-        tx = SDL_sinf(C.age * 0.021f) * 0.22f, ty = SDL_cosf(C.age * 0.016f) * 0.14f;
     C.tiltX += (tx - C.tiltX) * 0.15f;
     C.tiltY += (ty - C.tiltY) * 0.15f;
+    if (SDL_fabsf(C.tiltX) < 0.001f && tx == 0) C.tiltX = 0;
+    if (SDL_fabsf(C.tiltY) < 0.001f && ty == 0) C.tiltY = 0;
 }
 
 bool8 MP_CardScreen_Step(u16 keys)

@@ -1,0 +1,7 @@
+# The TRAINER CARD moves only when the player moves it: two shots 40 frames apart with nothing pressed are the same,
+# the right stick turns it, and it settles flat again once the stick is let go (check.py)
+MODE=1
+TMO=90
+EXPECT_A=("card: own card shown")
+UNEXPECT_A=("[crash]")
+CHECK="python3 tools/test/scenarios/card_still/check.py"
