@@ -88,4 +88,7 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - JOHTO's whirlpools: Kai has no WHIRLPOOL HM (only level-up learners), so one opens for the GLACIERBADGE and a Pokémon
   with WHIRLPOOL or SURF until A4 adds an HM for it (qz_specials.c).
 - ROUTE 4's MEGA PUNCH / MEGA KICK people are move tutors in FireRed (not TM givers), so they teach once, as FireRed's
-  and Kai's tutors do; Quetzal's other "move training from the team menu" stand-ins are untouched until each is checked.
+  and Kai's tutors do. KANTO's other FireRed tutors are back the same way (DOUBLE-EDGE, THUNDER WAVE, ROCK SLIDE,
+  EXPLOSION, DREAM EATER, SOFTBOILED, SUBSTITUTE, SWORDS DANCE, SEISMIC TOSS, METRONOME, BODY SLAM:
+  tools/quetzal_port/fix_move_tutors.py). Still Quetzal's stand-ins: CAPE BRINK's starter tutor and TWO ISLAND's move
+  maniac (FireRed systems of their own) and SAFFRON's COPYCAT (MIMIC, needs her POKé DOLL trade).

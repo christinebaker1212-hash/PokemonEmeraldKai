@@ -187,8 +187,54 @@ Kanto_PewterCity_Museum_1F_EventScript_845D1ED::
 
 @ Kanto_PewterCity_Museum_1F object 6 (local id 6, gfx 0x3F43) at 26,7
 Kanto_PewterCity_Museum_1F_EventScript_8471CAE::
-	msgbox Quetzal_Text_8471CE4, MSGBOX_NPC
+	@ Moemon Kai: FireRed's SEISMIC TOSS tutor (tools/quetzal_port/fix_move_tutors.py), on Kai's move tutors
+	lock
+	faceplayer
+	goto_if_set 0x221B, Kanto_PewterCity_Museum_1F_EventScript_8471CAE_Taught
+	msgbox Kanto_PewterCity_Museum_1F_EventScript_8471CAE_Teach, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Kanto_PewterCity_Museum_1F_EventScript_8471CAE_Declined
+	call MoveTutor_EventScript_CanOnlyBeLearnedOnce
+	goto_if_eq VAR_RESULT, NO, Kanto_PewterCity_Museum_1F_EventScript_8471CAE_Declined
+	msgbox Kanto_PewterCity_Museum_1F_EventScript_8471CAE_WhichMon, MSGBOX_DEFAULT
+	setvar VAR_0x8005, TUTOR_MOVE_SEISMIC_TOSS
+	call MoveTutor_EventScript_OpenPartyMenu
+	goto_if_eq VAR_RESULT, 0, Kanto_PewterCity_Museum_1F_EventScript_8471CAE_Declined
+	setflag 0x221B
+	goto Kanto_PewterCity_Museum_1F_EventScript_8471CAE_Taught
 	end
+
+Kanto_PewterCity_Museum_1F_EventScript_8471CAE_Declined:
+	msgbox Kanto_PewterCity_Museum_1F_EventScript_8471CAE_DeclinedText, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_PewterCity_Museum_1F_EventScript_8471CAE_Taught:
+	msgbox Kanto_PewterCity_Museum_1F_EventScript_8471CAE_TaughtText, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_PewterCity_Museum_1F_EventScript_8471CAE_Teach:
+	.string "The secrets of space…\n"
+	.string "The mysteries of earth…\p"
+	.string "There are so many things about\n"
+	.string "which we know so little.\p"
+	.string "But that should spur us to study\n"
+	.string "harder, not toss in the towel.\p"
+	.string "The only thing you should toss…\p"
+	.string "Well, how about SEISMIC TOSS?\n"
+	.string "Should I teach that to a MOéMON?$"
+
+Kanto_PewterCity_Museum_1F_EventScript_8471CAE_DeclinedText:
+	.string "Is that so?\n"
+	.string "I'm sure you'll be back for it.$"
+
+Kanto_PewterCity_Museum_1F_EventScript_8471CAE_WhichMon:
+	.string "Which MOéMON wants to learn\n"
+	.string "SEISMIC TOSS?$"
+
+Kanto_PewterCity_Museum_1F_EventScript_8471CAE_TaughtText:
+	.string "I hope you won't toss in the towel.\n"
+	.string "Keep it up.$"
 
 Kanto_PewterCity_Museum_1F_Movement_841A491:
 	walk_down

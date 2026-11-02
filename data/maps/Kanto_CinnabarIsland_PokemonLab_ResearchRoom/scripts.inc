@@ -21,8 +21,52 @@ Kanto_CinnabarIsland_PokemonLab_ResearchRoom_EventScript_841E6ED::
 	end
 
 Kanto_CinnabarIsland_PokemonLab_ResearchRoom_EventScript_8471CC0::
-	msgbox Quetzal_Text_8471CE4, MSGBOX_NPC
+	@ Moemon Kai: FireRed's METRONOME tutor (tools/quetzal_port/fix_move_tutors.py), on Kai's move tutors
+	lock
+	faceplayer
+	goto_if_set 0x2220, Kanto_CinnabarIsland_PokemonLab_ResearchRoom_EventScript_8471CC0_Taught
+	msgbox Kanto_CinnabarIsland_PokemonLab_ResearchRoom_EventScript_8471CC0_Teach, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Kanto_CinnabarIsland_PokemonLab_ResearchRoom_EventScript_8471CC0_Declined
+	call MoveTutor_EventScript_CanOnlyBeLearnedOnce
+	goto_if_eq VAR_RESULT, NO, Kanto_CinnabarIsland_PokemonLab_ResearchRoom_EventScript_8471CC0_Declined
+	msgbox Kanto_CinnabarIsland_PokemonLab_ResearchRoom_EventScript_8471CC0_WhichMon, MSGBOX_DEFAULT
+	setvar VAR_0x8005, TUTOR_MOVE_METRONOME
+	call MoveTutor_EventScript_OpenPartyMenu
+	goto_if_eq VAR_RESULT, 0, Kanto_CinnabarIsland_PokemonLab_ResearchRoom_EventScript_8471CC0_Declined
+	setflag 0x2220
+	goto Kanto_CinnabarIsland_PokemonLab_ResearchRoom_EventScript_8471CC0_Taught
 	end
+
+Kanto_CinnabarIsland_PokemonLab_ResearchRoom_EventScript_8471CC0_Declined:
+	msgbox Kanto_CinnabarIsland_PokemonLab_ResearchRoom_EventScript_8471CC0_DeclinedText, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_CinnabarIsland_PokemonLab_ResearchRoom_EventScript_8471CC0_Taught:
+	msgbox Kanto_CinnabarIsland_PokemonLab_ResearchRoom_EventScript_8471CC0_TaughtText, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_CinnabarIsland_PokemonLab_ResearchRoom_EventScript_8471CC0_Teach:
+	.string "Tch-tch-tch!\n"
+	.string "I'll teach you a nifty move.\p"
+	.string "Teach it to a MOéMON, and watch\n"
+	.string "the fun unfold!\p"
+	.string "It's a move called METRONOME.\n"
+	.string "Does it strike your fancy?$"
+
+Kanto_CinnabarIsland_PokemonLab_ResearchRoom_EventScript_8471CC0_DeclinedText:
+	.string "I tell you, it's a lot of fun!$"
+
+Kanto_CinnabarIsland_PokemonLab_ResearchRoom_EventScript_8471CC0_WhichMon:
+	.string "Okay!\n"
+	.string "Which MOéMON should I teach?$"
+
+Kanto_CinnabarIsland_PokemonLab_ResearchRoom_EventScript_8471CC0_TaughtText:
+	.string "Tch-tch-tch!\n"
+	.string "That's the sound of a METRONOME.\p"
+	.string "It tweaks your MOéMON's brain into\n"
+	.string "using moves it doesn't even know.$"
 
 Kanto_CinnabarIsland_PokemonLab_ResearchRoom_Text_8449FC0::
 	.string "EEVEE can evolve into one of three\n"

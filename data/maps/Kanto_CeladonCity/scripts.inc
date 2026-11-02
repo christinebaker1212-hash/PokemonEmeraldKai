@@ -134,8 +134,52 @@ Kanto_CeladonCity_EventScript_846C0A6::
 	end
 
 Kanto_CeladonCity_EventScript_8471C93::
-	msgbox Quetzal_Text_8471CE4, MSGBOX_NPC
+	@ Moemon Kai: FireRed's SOFT BOILED tutor (tools/quetzal_port/fix_move_tutors.py), on Kai's move tutors
+	lock
+	faceplayer
+	goto_if_set 0x220E, Kanto_CeladonCity_EventScript_8471C93_Taught
+	msgbox Kanto_CeladonCity_EventScript_8471C93_Teach, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Kanto_CeladonCity_EventScript_8471C93_Declined
+	call MoveTutor_EventScript_CanOnlyBeLearnedOnce
+	goto_if_eq VAR_RESULT, NO, Kanto_CeladonCity_EventScript_8471C93_Declined
+	msgbox Kanto_CeladonCity_EventScript_8471C93_WhichMon, MSGBOX_DEFAULT
+	setvar VAR_0x8005, TUTOR_MOVE_SOFT_BOILED
+	call MoveTutor_EventScript_OpenPartyMenu
+	goto_if_eq VAR_RESULT, 0, Kanto_CeladonCity_EventScript_8471C93_Declined
+	setflag 0x220E
+	goto Kanto_CeladonCity_EventScript_8471C93_Taught
 	end
+
+Kanto_CeladonCity_EventScript_8471C93_Declined:
+	msgbox Kanto_CeladonCity_EventScript_8471C93_DeclinedText, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_CeladonCity_EventScript_8471C93_Taught:
+	msgbox Kanto_CeladonCity_EventScript_8471C93_TaughtText, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_CeladonCity_EventScript_8471C93_Teach:
+	.string "Hello, there!\p"
+	.string "I've seen you about, but I never\n"
+	.string "had a chance to chat.\p"
+	.string "It must be good luck that brought\n"
+	.string "us together finally.\p"
+	.string "I'd like to celebrate by teaching\n"
+	.string "you the move SOFTBOILED.$"
+
+Kanto_CeladonCity_EventScript_8471C93_DeclinedText:
+	.string "I'll always be keeping an eye out\n"
+	.string "for you.\p"
+	.string "I hope we can chat again.$"
+
+Kanto_CeladonCity_EventScript_8471C93_WhichMon:
+	.string "So, who's the MOéMON that gets\n"
+	.string "the chance to learn SOFTBOILED?$"
+
+Kanto_CeladonCity_EventScript_8471C93_TaughtText:
+	.string "I wish you the best of luck!$"
 
 Kanto_CeladonCity_Text_843009F::
 	.string "I got my KOFFING in CINNABAR.\p"

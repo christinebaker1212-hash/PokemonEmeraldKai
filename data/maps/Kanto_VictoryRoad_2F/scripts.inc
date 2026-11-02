@@ -114,8 +114,54 @@ Kanto_VictoryRoad_2F_EventScript_846BEF9::
 
 @ Kanto_VictoryRoad_2F object 13 (local id 13, gfx 0x3EFD) at 40,9
 Kanto_VictoryRoad_2F_EventScript_8471C54::
-	msgbox Quetzal_Text_8471CE4, MSGBOX_NPC
+	@ Moemon Kai: FireRed's DOUBLE EDGE tutor (tools/quetzal_port/fix_move_tutors.py), on Kai's move tutors
+	lock
+	faceplayer
+	goto_if_set 0x210D, Kanto_VictoryRoad_2F_EventScript_8471C54_Taught
+	msgbox Kanto_VictoryRoad_2F_EventScript_8471C54_Teach, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Kanto_VictoryRoad_2F_EventScript_8471C54_Declined
+	call MoveTutor_EventScript_CanOnlyBeLearnedOnce
+	goto_if_eq VAR_RESULT, NO, Kanto_VictoryRoad_2F_EventScript_8471C54_Declined
+	msgbox Kanto_VictoryRoad_2F_EventScript_8471C54_WhichMon, MSGBOX_DEFAULT
+	setvar VAR_0x8005, TUTOR_MOVE_DOUBLE_EDGE
+	call MoveTutor_EventScript_OpenPartyMenu
+	goto_if_eq VAR_RESULT, 0, Kanto_VictoryRoad_2F_EventScript_8471C54_Declined
+	setflag 0x210D
+	goto Kanto_VictoryRoad_2F_EventScript_8471C54_Taught
 	end
+
+Kanto_VictoryRoad_2F_EventScript_8471C54_Declined:
+	msgbox Kanto_VictoryRoad_2F_EventScript_8471C54_DeclinedText, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_VictoryRoad_2F_EventScript_8471C54_Taught:
+	msgbox Kanto_VictoryRoad_2F_EventScript_8471C54_TaughtText, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_VictoryRoad_2F_EventScript_8471C54_Teach:
+	.string "You should be proud of yourself,\n"
+	.string "having battled your way through\l"
+	.string "VICTORY ROAD so courageously.\p"
+	.string "In recognition of your feat,\n"
+	.string "I'll teach you DOUBLE-EDGE.\p"
+	.string "Would you like me to teach that\n"
+	.string "technique?$"
+
+Kanto_VictoryRoad_2F_EventScript_8471C54_DeclinedText:
+	.string "I'll teach you the technique\n"
+	.string "anytime.$"
+
+Kanto_VictoryRoad_2F_EventScript_8471C54_WhichMon:
+	.string "Which MOéMON should I teach\n"
+	.string "DOUBLE-EDGE?$"
+
+Kanto_VictoryRoad_2F_EventScript_8471C54_TaughtText:
+	.string "Keep that drive going for the\n"
+	.string "MOéMON LEAGUE!\p"
+	.string "Take a run at them and knock 'em\n"
+	.string "out!$"
 
 Kanto_VictoryRoad_2F_Text_8424EA5::
 	.string "If you can get through here,\n"

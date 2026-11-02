@@ -213,8 +213,53 @@ Kanto_ViridianCity_EventScript_846C072::
 	end
 
 Kanto_ViridianCity_EventScript_8471C8A::
-	msgbox Quetzal_Text_8471CE4, MSGBOX_NPC
+	@ Moemon Kai: FireRed's DREAM EATER tutor (tools/quetzal_port/fix_move_tutors.py), on Kai's move tutors
+	lock
+	faceplayer
+	goto_if_set 0x21F0, Kanto_ViridianCity_EventScript_8471C8A_Taught
+	msgbox Kanto_ViridianCity_EventScript_8471C8A_Teach, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Kanto_ViridianCity_EventScript_8471C8A_Declined
+	call MoveTutor_EventScript_CanOnlyBeLearnedOnce
+	goto_if_eq VAR_RESULT, NO, Kanto_ViridianCity_EventScript_8471C8A_Declined
+	msgbox Kanto_ViridianCity_EventScript_8471C8A_WhichMon, MSGBOX_DEFAULT
+	setvar VAR_0x8005, TUTOR_MOVE_DREAM_EATER
+	call MoveTutor_EventScript_OpenPartyMenu
+	goto_if_eq VAR_RESULT, 0, Kanto_ViridianCity_EventScript_8471C8A_Declined
+	setflag 0x21F0
+	goto Kanto_ViridianCity_EventScript_8471C8A_Taught
 	end
+
+Kanto_ViridianCity_EventScript_8471C8A_Declined:
+	msgbox Kanto_ViridianCity_EventScript_8471C8A_DeclinedText, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_ViridianCity_EventScript_8471C8A_Taught:
+	msgbox Kanto_ViridianCity_EventScript_8471C8A_TaughtText, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_ViridianCity_EventScript_8471C8A_Teach:
+	.string "Yawn!\n"
+	.string "I must have dozed off in the sun.\p"
+	.string "I had this weird dream about\n"
+	.string "a DROWZEE eating my dream.\p"
+	.string "And…\n"
+	.string "I learned how to eat dreams…\p"
+	.string "Oogh, this is too spooky!\p"
+	.string "Let me teach it to a MOéMON so\n"
+	.string "I can forget about it!$"
+
+Kanto_ViridianCity_EventScript_8471C8A_DeclinedText:
+	.string "…Snore…$"
+
+Kanto_ViridianCity_EventScript_8471C8A_WhichMon:
+	.string "Which MOéMON wants to learn\n"
+	.string "DREAM EATER?$"
+
+Kanto_ViridianCity_EventScript_8471C8A_TaughtText:
+	.string "…ZZZ…\n"
+	.string "I…can't eat…anymore…$"
 
 Kanto_ViridianCity_Movement_841581E:
 	jump_2_down

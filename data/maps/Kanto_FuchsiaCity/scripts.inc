@@ -158,8 +158,55 @@ Kanto_FuchsiaCity_EventScript_8416B7D::
 
 @ Kanto_FuchsiaCity object 15 (local id 15, gfx 0x3EF1) at 15,11
 Kanto_FuchsiaCity_EventScript_8471C9C::
-	msgbox Quetzal_Text_8471CE4, MSGBOX_NPC
+	@ Moemon Kai: FireRed's SUBSTITUTE tutor (tools/quetzal_port/fix_move_tutors.py), on Kai's move tutors
+	lock
+	faceplayer
+	goto_if_set 0x2212, Kanto_FuchsiaCity_EventScript_8471C9C_Taught
+	msgbox Kanto_FuchsiaCity_EventScript_8471C9C_Teach, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Kanto_FuchsiaCity_EventScript_8471C9C_Declined
+	call MoveTutor_EventScript_CanOnlyBeLearnedOnce
+	goto_if_eq VAR_RESULT, NO, Kanto_FuchsiaCity_EventScript_8471C9C_Declined
+	msgbox Kanto_FuchsiaCity_EventScript_8471C9C_WhichMon, MSGBOX_DEFAULT
+	setvar VAR_0x8005, TUTOR_MOVE_SUBSTITUTE
+	call MoveTutor_EventScript_OpenPartyMenu
+	goto_if_eq VAR_RESULT, 0, Kanto_FuchsiaCity_EventScript_8471C9C_Declined
+	setflag 0x2212
+	goto Kanto_FuchsiaCity_EventScript_8471C9C_Taught
 	end
+
+Kanto_FuchsiaCity_EventScript_8471C9C_Declined:
+	msgbox Kanto_FuchsiaCity_EventScript_8471C9C_DeclinedText, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_FuchsiaCity_EventScript_8471C9C_Taught:
+	msgbox Kanto_FuchsiaCity_EventScript_8471C9C_TaughtText, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_FuchsiaCity_EventScript_8471C9C_Teach:
+	.string "Aww, I wish I was a KANGASKHAN\n"
+	.string "baby.\p"
+	.string "I'd love to be a substitute for the\n"
+	.string "baby…\p"
+	.string "And snuggle in the mother\n"
+	.string "KANGASKHAN's belly pouch.\p"
+	.string "But only MOéMON can use the\n"
+	.string "technique SUBSTITUTE…\p"
+	.string "Want me to teach SUBSTITUTE to\n"
+	.string "one of your MOéMON?$"
+
+Kanto_FuchsiaCity_EventScript_8471C9C_DeclinedText:
+	.string "Oh, really?\n"
+	.string "SUBSTITUTE seems so fun…$"
+
+Kanto_FuchsiaCity_EventScript_8471C9C_WhichMon:
+	.string "Which MOéMON wants to learn\n"
+	.string "SUBSTITUTE?$"
+
+Kanto_FuchsiaCity_EventScript_8471C9C_TaughtText:
+	.string "Boy, what I'd give to crawl inside\n"
+	.string "a KANGASKHAN belly pouch…$"
 
 Kanto_FuchsiaCity_Text_843074A::
 	.string "Did you try the SAFARI GAME?\p"
