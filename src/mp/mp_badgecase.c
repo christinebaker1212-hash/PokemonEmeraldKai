@@ -1,10 +1,11 @@
 // Moemon Co-op: the BADGE CASE (SELECT on the TRAINER CARD): every region's eight badges in a case modeled on
 // Platinum's, drawn in a 480x320 picture of its own like a VS fight's (display.c), so the badges' artwork shows at
 // twice the GBA's detail (graphics/moemon/badges/badges.bin: tools/moemon_badges/build_badges.py). The game waits
-// while it's open (sdl2.c ScreenStep). L / R: the region; A: a badge up close, where it's polished as in Platinum
-// (each change of direction of the rub, LEFT / RIGHT or the mouse dragged over it, is a rub: mp_tcard.c
-// MP_TCard_Rub). Badges dull day by day (OPTIONS > GAME > BADGE FADING) and show it: dirty, filthy, or 2 / 4
-// sparkles when well polished. Each badge chimes its own note when picked, as Platinum's do.
+// while it's open (sdl2.c ScreenStep). L / R: the region; A: a badge chimes (higher the cleaner it is) and comes up
+// close, where A chimes it again and holding A while circling the stick polishes it (every 30 degrees of the turn a
+// rub, Platinum's rubs a point: mp_tcard.c MP_TCard_Rub; the D-pad's directions one after another or the mouse
+// circling the badge do too), the controller rumbling with it. Badges dull day by day (OPTIONS > GAME > BADGE
+// FADING) and show it: dirty, filthy, or 2 / 4 sparkles when well polished; a clean one spins up close.
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -14,6 +15,7 @@
 #include "sound.h"
 #include "constants/songs.h"
 #include "data.h"
+#include "m4a.h"
 #include "mp.h"
 #include "mp_region.h"
 #include "mp_tcard.h"
@@ -78,8 +80,8 @@ static const struct BadgeInfo sBadges[REGION_COUNT][TCARD_BADGES_PER_REGION] = {
     },
 };
 
-// Platinum's chimes: each badge its own note (a scale up the case)
-static const u16 sChimes[TCARD_BADGES_PER_REGION] = {SE_NOTE_C, SE_NOTE_D, SE_NOTE_E, SE_NOTE_F, SE_NOTE_G, SE_NOTE_A, SE_NOTE_B, SE_NOTE_C_HIGH};
+void Gamepad_Sticks(float *lx, float *ly, float *rx, float *ry);
+void Gamepad_Rumble(int strength, int ms);
 
 // the case's colors (Platinum's case_platinum palette)
 #define C_CASE      0xf0e8a8
@@ -106,14 +108,21 @@ static struct
     s8 mouseDirX, mouseDirY;
     bool8 mouseDown;
     u8 glint[NUM_BADGES_ALL];           // frames of the light passing over a badge that just shone up
+    float angle, turned;                // polishing: the stick's (or mouse's) last angle, how far it turned since a rub
+    bool8 angleOk;
+    s8 lastDpad;                        // the D-pad's last direction while polishing (0-3, -1 none)
+    u16 spin;                           // up close: frames of the badge's spin (0 none)
+    u16 idle;                           // up close: frames since it last spun
     SDL_Renderer *owner;
     SDL_Texture *canvas;
     SDL_Texture *small[NUM_BADGES_ALL], *big[NUM_BADGES_ALL];
     SDL_Texture *grimeSmall[NUM_BADGES_ALL], *grimeBig[NUM_BADGES_ALL];
+    SDL_Texture *shape[NUM_BADGES_ALL];   // a badge's shape in white (not won, on the TRAINER CARD's dark panels)
     SDL_Texture *slot, *well;           // the hollows the badges sit in (the tray's, the close-up's)
 } B;
 
-static const struct MpCardView *sView;   // whose case: NULL = the player's own (live records, polishing)
+static const struct MpCardView *sView;
+static void MP_BadgeCase_FrameDrawn(void);   // whose case: NULL = the player's own (live records, polishing)
 
 static u8 Region(void) { return sTabRegion[B.tab]; }
 static bool8 Has(u8 region, u8 badge)
@@ -137,7 +146,8 @@ static void DestroyTextures(void)
         if (B.big[i]) SDL_DestroyTexture(B.big[i]);
         if (B.grimeSmall[i]) SDL_DestroyTexture(B.grimeSmall[i]);
         if (B.grimeBig[i]) SDL_DestroyTexture(B.grimeBig[i]);
-        B.small[i] = B.big[i] = B.grimeSmall[i] = B.grimeBig[i] = NULL;
+        if (B.shape[i]) SDL_DestroyTexture(B.shape[i]);
+        B.small[i] = B.big[i] = B.grimeSmall[i] = B.grimeBig[i] = B.shape[i] = NULL;
     }
     if (B.slot) SDL_DestroyTexture(B.slot);
     if (B.well) SDL_DestroyTexture(B.well);
@@ -251,6 +261,14 @@ static void MakeTextures(SDL_Renderer *r)
     {
         const u32 *s = (const u32 *)p, *b = (const u32 *)(p + caseSize * caseSize * 4);
         B.small[i] = MakeTexture(r, s, caseSize);
+        if (caseSize <= 128)
+        {
+            static u32 white[128 * 128];
+            int k;
+            for (k = 0; k < caseSize * caseSize; k++)
+                white[k] = (s[k] & 0xFF000000) | 0xFFFFFF;
+            B.shape[i] = MakeTexture(r, white, caseSize);
+        }
         B.big[i] = MakeTexture(r, b, bigSize);
         if (caseSize <= 128 && bigSize <= 128)
         {
@@ -290,6 +308,9 @@ static void Sparkle(float cx, float cy, float size, unsigned alpha)
 
 // A badge in the case (hi-res pixels: x, y its top left, size its side): won and as clean as its polish says, or
 // the dark shape it leaves in the case when not won yet
+static u8 sHollowShade;   // a badge not won: drawn as its shape in black (the case), or in white (dark card panels)
+void MP_BadgeCase_HollowShade(u8 shade) { sHollowShade = shade; }
+
 static void DrawBadgeOf(const struct MpCardView *v, u8 region, u8 badge, int x, int y, int size, bool8 big)
 {
     SDL_Renderer *r = G_R();
@@ -300,8 +321,25 @@ static void DrawBadgeOf(const struct MpCardView *v, u8 region, u8 badge, int x, 
     u8 level;
     if (!t)
         return;
+    if (big && B.spin && B.closeup)
+    {
+        // spinning: turned edge-on and round again (the width as a cosine), the light catching it face-on
+        float a = (float)B.spin / 48.0f * 6.2831853f, k = cosf(a);
+        int w = (int)(size * (k < 0 ? -k : k));
+        if (w < 2)
+            w = 2;
+        dst.x = x + (size - w) / 2;
+        dst.w = w;
+    }
     if (v ? !MP_CardView_HasBadge(v, region, badge) : !MP_TCard_HasBadge(region, badge))
     {
+        if (sHollowShade && !big && B.shape[i])
+        {
+            SDL_SetTextureAlphaMod(B.shape[i], 40);
+            SDL_RenderCopy(r, B.shape[i], NULL, &dst);
+            SDL_SetTextureAlphaMod(B.shape[i], 255);
+            return;
+        }
         SDL_SetTextureColorMod(t, 0, 0, 0);
         SDL_SetTextureAlphaMod(t, 70);
         SDL_RenderCopy(r, t, NULL, &dst);
@@ -525,7 +563,7 @@ static void DrawCloseup(void)
     G_Fill(barX, 102, fill, 6, MP_TCard_PolishLevel(polish) >= TCARD_POLISH_LEVEL_2_SPARKLES ? 0xf0c030 : 0x90b8d8);
     for (k = 0; k < 4; k++)
         G_Fill(barX + barW * sMarks[k] / TCARD_POLISH_MAX, 101, 1, 8, C_CASE_EDGE);
-    G_TextAlign(120, 89, TA_CENTER, C_INK_SOFT, G_NO_SHADOW, sView ? "Shined by its owner" : "Rub it: LEFT / RIGHT, or drag the mouse", TF_SMALL);
+    G_TextAlign(120, 89, TA_CENTER, C_INK_SOFT, G_NO_SHADOW, sView ? "Shined by its owner" : "Hold A and circle the stick to polish", TF_SMALL);
     SDL_RenderSetScale(r, 1, 1);
     if (B.well)
     {
@@ -553,6 +591,7 @@ SDL_Texture *MP_BadgeCase_Canvas(SDL_Renderer *r)
         memset(B.big, 0, sizeof(B.big));
         memset(B.grimeSmall, 0, sizeof(B.grimeSmall));
         memset(B.grimeBig, 0, sizeof(B.grimeBig));
+        memset(B.shape, 0, sizeof(B.shape));
         B.slot = B.well = NULL;
         B.canvas = NULL;
         B.owner = r;
@@ -581,6 +620,7 @@ SDL_Texture *MP_BadgeCase_Canvas(SDL_Renderer *r)
     DrawCase();
     if (B.closeup)
         DrawCloseup();
+    MP_BadgeCase_FrameDrawn();
     SDL_SetRenderTarget(r, previous);
     SDL_RenderSetViewport(r, &oldViewport);
     SDL_RenderSetClipRect(r, clipped ? &oldClip : NULL);
@@ -630,27 +670,86 @@ static void Close(void)
 
 static void Pick(u8 badge)
 {
-    B.cursor = badge;
-    if (Has(Region(), badge))
-        PlaySE(sChimes[badge]);
+    B.cursor = badge;   // (no sound: a badge chimes only when its button is pressed)
 }
 
-static void Rub(s8 dir)
+// The badge's chime: higher the cleaner it is (an octave down filthy, an octave up shining: 1/256 semitones)
+static void Chime(void)
+{
+    s32 pitch = ((s32)PolishOf(sView, Region(), B.cursor) - 100) * 12 * 256 / 100;
+    if (pitch > 12 * 256)
+        pitch = 12 * 256;
+    PlaySE(SE_NOTE_G);
+    m4aMPlayPitchControl(&gMPlayInfo_SE1, TRACKS_ALL, (s16)pitch);
+    m4aMPlayPitchControl(&gMPlayInfo_SE2, TRACKS_ALL, (s16)pitch);
+}
+
+// One rub (a stretch of a polishing circle): a point of polish when enough have added up (Platinum's), the controller
+// rumbling (more on a dirtier badge) and a pulse, the light and a spin when it shines up
+static void Rub(void)
 {
     u8 region = Region(), badge = B.cursor;
+    u8 polish;
     if (sView || !MP_TCard_HasBadge(region, badge))
         return;
-    if (dir == B.rubDir)
-        return;   // (a rub is a change of direction)
-    B.rubDir = dir;
+    polish = MP_TCard_Badge(region, badge)->polish;
+    Gamepad_Rumble(polish < TCARD_POLISH_DIRTY ? 45 : polish < TCARD_POLISH_NORMAL ? 30 : 18, 70);
     if (MP_TCard_Rub(region, badge))
     {
         u8 level = MP_TCard_PolishLevel(MP_TCard_Badge(region, badge)->polish);
         B.glint[Index(region, badge)] = 40;
+        if (level >= TCARD_POLISH_LEVEL_NORMAL)
+            B.spin = 48;
+        Gamepad_Rumble(90, 220);
         PlaySE(level >= TCARD_POLISH_LEVEL_2_SPARKLES ? SE_SHINY : SE_SUCCESS);
+        MPNet_Log("card: badge %d of %s polished up to %d", badge, sRegionNames[region], MP_TCard_Badge(region, badge)->polish);
     }
-    else if ((B.age & 3) == 0)
+    else if ((B.age & 7) == 0)
         PlaySE(SE_BALL_TRAY_ENTER);
+}
+
+// A turn of the polishing circle (radians, either way): a rub every 30 degrees
+static void Turned(float d)
+{
+    if (d > 3.14159265f)
+        d -= 6.2831853f;
+    if (d < -3.14159265f)
+        d += 6.2831853f;
+    B.turned += d < 0 ? -d : d;
+    while (B.turned >= 0.5235988f)
+    {
+        B.turned -= 0.5235988f;
+        Rub();
+    }
+}
+
+// Holding A up close: the stick going round (or the D-pad's directions one after another) polishes
+static void Polish(u16 keys)
+{
+    float lx, ly, rx, ry;
+    s8 dir = -1;
+    Gamepad_Sticks(&lx, &ly, &rx, &ry);
+    if (rx * rx + ry * ry > lx * lx + ly * ly)
+        lx = rx, ly = ry;
+    if (lx * lx + ly * ly > 0.35f)
+    {
+        float a = atan2f(ly, lx);
+        if (B.angleOk)
+            Turned(a - B.angle);
+        B.angle = a;
+        B.angleOk = TRUE;
+        B.lastDpad = -1;
+        return;
+    }
+    B.angleOk = FALSE;
+    if (keys & DPAD_UP) dir = 0;
+    else if (keys & DPAD_RIGHT) dir = 1;
+    else if (keys & DPAD_DOWN) dir = 2;
+    else if (keys & DPAD_LEFT) dir = 3;
+    if (dir >= 0 && B.lastDpad >= 0 && dir != B.lastDpad && ((dir - B.lastDpad + 4) % 4 == 1 || (dir - B.lastDpad + 4) % 4 == 3))
+        Turned(1.5707964f);   // (a quarter turn)
+    if (dir >= 0)
+        B.lastDpad = dir;
 }
 
 static void Mouse(void)
@@ -662,26 +761,21 @@ static void Mouse(void)
         return;
     if (B.closeup)
     {
-        // dragged over the badge: each change of direction is a rub
-        if (down && B.mouseDown && x >= 82 && x < 158 && y >= 6 && y < 82)
+        // the button held, circling the badge: the angle around its center turning polishes
+        s32 dx = x - 120, dy = y - 44;
+        if (clicked && dx * dx + dy * dy <= 34 * 34)
+            Chime();
+        if (down && B.mouseDown && dx * dx + dy * dy >= 6 * 6 && dx * dx + dy * dy <= 46 * 46)
         {
-            s32 dx = x - B.mouseX, dy = y - B.mouseY;
-            if (dx > 1 || dx < -1)
-            {
-                s8 d = dx > 0 ? 1 : -1;
-                if (d != B.mouseDirX)
-                    Rub(d);
-                B.mouseDirX = d;
-            }
-            if (dy > 1 || dy < -1)
-            {
-                s8 d = dy > 0 ? 1 : -1;
-                if (d != B.mouseDirY)
-                    Rub(B.rubDir == 1 ? -1 : 1);
-                B.mouseDirY = d;
-            }
+            float a = atan2f((float)dy, (float)dx);
+            if (B.angleOk)
+                Turned(a - B.angle);
+            B.angle = a;
+            B.angleOk = TRUE;
         }
-        else if (clicked && (x < 46 || x >= 194 || y >= 112))
+        else if (!down)
+            B.angleOk = FALSE;
+        if (clicked && (x < 46 || x >= 194 || y >= 112))
             B.closeup = FALSE;
     }
     else if (clicked)
@@ -693,12 +787,13 @@ static void Mouse(void)
             SlotCenter(b, &cx, &cy);
             if ((x - cx) * (x - cx) + (y - cy) * (y - cy) <= 19 * 19)
             {
-                bool8 again = b == B.cursor;
                 Pick(b);
-                if (again && Has(Region(), b))
+                if (Has(Region(), b))
                 {
+                    Chime();
                     B.closeup = TRUE;
-                    B.rubDir = 0;
+                    B.angleOk = FALSE;
+                    B.idle = 0;
                 }
             }
         }
@@ -738,15 +833,21 @@ bool8 MP_BadgeCase_Step(u16 keys)
         return TRUE;
     if (B.closeup)
     {
-        if (pressed & (B_BUTTON | A_BUTTON))
+        if (B.spin)
+            B.spin--;
+        else if (++B.idle >= 300 && MP_TCard_PolishLevel(PolishOf(sView, Region(), B.cursor)) >= TCARD_POLISH_LEVEL_NORMAL)
+            B.spin = 48, B.idle = 0;   // (a clean badge turns now and then, catching the light)
+        if (pressed & B_BUTTON)
         {
             B.closeup = FALSE;
-            PlaySE(SE_SELECT);
+            B.angleOk = FALSE;
         }
-        else if (pressed & (DPAD_LEFT | DPAD_UP))
-            Rub(-1);
-        else if (pressed & (DPAD_RIGHT | DPAD_DOWN))
-            Rub(1);
+        else if (pressed & A_BUTTON)
+            Chime();
+        else if (keys & A_BUTTON)
+            Polish(keys);
+        else
+            B.angleOk = FALSE, B.lastDpad = -1;
         return TRUE;
     }
     if (pressed & B_BUTTON)
@@ -758,9 +859,11 @@ bool8 MP_BadgeCase_Step(u16 keys)
     {
         if (Has(Region(), B.cursor))
         {
+            Chime();
             B.closeup = TRUE;
-            B.rubDir = 0;
-            PlaySE(sChimes[B.cursor]);
+            B.angleOk = FALSE;
+            B.lastDpad = -1;
+            B.idle = 0;
         }
         else
             PlaySE(SE_FAILURE);
@@ -784,7 +887,14 @@ bool8 MP_BadgeCase_Step(u16 keys)
     return TRUE;
 }
 
-// For the JOHTO / SINNOH cards' backs: a badge as the case shows it (the textures made on first use)
+// For the TRAINER CARD's BADGES & STARS page (mp_cardscreen.c): a badge as the case shows it (the textures made on
+// first use; MP_BadgeCase_Tick once a frame moves its sparkles)
+void MP_BadgeCase_Tick(void)
+{
+    if (!B.active)
+        B.age++;
+}
+
 void MP_BadgeCase_DrawBadgeFor(SDL_Renderer *r, const struct MpCardView *v, u8 region, u8 badge, int x, int y, int size)
 {
     if (B.owner != r)
@@ -793,13 +903,13 @@ void MP_BadgeCase_DrawBadgeFor(SDL_Renderer *r, const struct MpCardView *v, u8 r
         memset(B.big, 0, sizeof(B.big));
         memset(B.grimeSmall, 0, sizeof(B.grimeSmall));
         memset(B.grimeBig, 0, sizeof(B.grimeBig));
+        memset(B.shape, 0, sizeof(B.shape));
         B.slot = B.well = NULL;
         B.canvas = NULL;
         B.owner = r;
     }
     if (!B.small[0])
         MakeTextures(r);
-    B.age++;
     DrawBadgeOf(v && v->own ? NULL : v, region, badge, x, y, size, size > 64);
 }
 
@@ -807,4 +917,49 @@ void MP_BadgeCase_DestroyTextures(void)
 {
     DestroyTextures();
     B.owner = NULL;
+}
+
+// ----------------------------------------------------------------------------------------------------- spectating
+// Friends spectating see these screens as the game's 240x160 picture (as the card games' Tcg_Frame): the 480x320
+// canvas read back and halved (each 2x2 pixels averaged)
+static u16 sBigFrame[BC_W * BC_H];
+static u16 sFrame[240 * 160];
+static bool8 sFrameRead;
+
+const u16 *MP_CardScreen_Halve(SDL_Renderer *r, SDL_Texture *canvas, u16 *out)
+{
+    SDL_Texture *previous = SDL_GetRenderTarget(r);
+    int x, y;
+    SDL_SetRenderTarget(r, canvas);
+    if (SDL_RenderReadPixels(r, NULL, SDL_PIXELFORMAT_ABGR1555, sBigFrame, BC_W * 2) != 0)
+    {
+        SDL_SetRenderTarget(r, previous);
+        return NULL;
+    }
+    SDL_SetRenderTarget(r, previous);
+    for (y = 0; y < 160; y++)
+        for (x = 0; x < 240; x++)
+        {
+            const u16 *p = &sBigFrame[(y * 2) * BC_W + x * 2];
+            u16 a = p[0], b = p[1], c = p[BC_W], d = p[BC_W + 1];
+            u16 rr = ((a & 31) + (b & 31) + (c & 31) + (d & 31) + 2) / 4;
+            u16 gg = (((a >> 5) & 31) + ((b >> 5) & 31) + ((c >> 5) & 31) + ((d >> 5) & 31) + 2) / 4;
+            u16 bb = (((a >> 10) & 31) + ((b >> 10) & 31) + ((c >> 10) & 31) + ((d >> 10) & 31) + 2) / 4;
+            out[y * 240 + x] = rr | (gg << 5) | (bb << 10);
+        }
+    return out;
+}
+
+const u16 *MP_BadgeCase_Frame(void)
+{
+    if (!B.active || !B.canvas || !B.owner)
+        return NULL;
+    if (!sFrameRead)
+        sFrameRead = MP_CardScreen_Halve(B.owner, B.canvas, sFrame) != NULL;
+    return sFrameRead ? sFrame : NULL;
+}
+
+static void MP_BadgeCase_FrameDrawn(void)
+{
+    sFrameRead = FALSE;   // (a new picture: read again when spectators need it)
 }

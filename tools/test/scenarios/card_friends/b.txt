@@ -10,5 +10,6 @@ mp setflag 0x11B3
 wait 90
 mp tcard rub 0 0 700
 mp tcard rub 1 1 300
+mp tcard style 16 9 3 1
 wait 4000
 quit

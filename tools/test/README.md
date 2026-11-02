@@ -57,9 +57,11 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `sim_nodata` | the BATTLE SIMULATOR on a save that never played online: no battle data, said politely |
 | `anim_classic` | every move animation on BATTLE ANIMS > CLASSIC, each one's length logged (`MOEMON_ANIM_FRAMES`), shots of a few |
 | `anim_modern` | the same on MODERN (run after anim_classic): `tools/test/check_anim_frames.sh` checks all 716 lengths match, no crash |
-| `badge_case` | the BADGE CASE (SELECT on the card): badges of three regions won now, six days of fading, rubbed to each look (4 / 2 sparkles, clean, dirty, filthy); shots of the trays and a badge up close; B leaves the card open |
-| `card_regions` | the card in every region: HOENN (Emerald's), KANTO (FireRed's, the team as icons), JOHTO (HeartGold's), SINNOH (Platinum's), backs, MY CARD (a title), back to HOENN, B from JOHTO back to the map |
-| `card_friends` | two clients: a friend's card with its add-on: their KANTO and JOHTO cards (what you did together on the back), their BADGE CASE, then the card in MY CARD > FRIENDS' CARDS |
+| `badge_case` | the BADGE CASE (SELECT on the card): badges of three regions won now, six days of fading, rubbed to each look (4 / 2 sparkles, clean, dirty, filthy); shots of the trays and a badge up close; B leaves the card open; a badge up close polished by A held and the stick going round (a virtual pad) |
+| `card_design` | the TRAINER CARD (one design for every region): PROFILE, BADGES & STARS, RECORDS, TEAM & SIGNATURE; MY CARD: a design, its hue, accent, frame, panels, the showcase; a signature drawn on the pad; the card as styled; B back to the map |
+| `card_designs` | the PROFILE on all 36 Battle Pass designs, the other pages, the four panels, the five frames: kept on the pass's grid (label, emblem, notch) |
+| `card_friends` | two clients: a friend's card with its add-on, as they styled it: their BADGES & STARS, their BADGE CASE on JOHTO, YOU AND BOB; then the album card on MY CARD > FRIENDS' CARDS |
+| `spec_card` | two clients: BOB's SPECTATE panel shows ALICE's TRAINER CARD and her BADGE CASE up close |
 | `hm_rescue` / `hm_rescue_carried` | HM04 STRENGTH's scene gone (RUSTURF TUNNEL open) without it: Wanda's boyfriend walks up and hands it over; nobody comes when it's already carried |
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped (and their MOéMON GARDEN records travel) |
 | `nurse_no_union` | CHERRYGROVE's nurse heals a game started in JOHTO: she never says "It appears as if <junk> is playing right now" (the wireless UNION ROOM check; flag 0x2A07 stays clear) |

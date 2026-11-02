@@ -715,9 +715,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_HmRescue_Debug(void);
         MP_HmRescue_Debug();
     }
+    else if (strcmp(cmd, "cardscreen") == 0)
+    {
+        // cardscreen [DESIGN [PAGE [PANEL [ACCENT [FRAME]]]]] - the TRAINER CARD's screen as it is (page, design,
+        // stars: mp_cardscreen.c), or shown so
+        void MP_CardScreen_Debug(void);
+        void MP_CardScreen_DebugSet(const char *arg);
+        if (arg[0])
+            MP_CardScreen_DebugSet(arg);
+        MP_CardScreen_Debug();
+    }
     else if (strcmp(cmd, "tcard") == 0)
     {
-        // tcard days N | tcard rub REGION BADGE COUNT | tcard info: the TRAINER CARD's badge records (mp_tcard.c)
+        // tcard days N | tcard rub REGION BADGE COUNT | tcard style D A F [P H] | tcard info: the TRAINER CARD's badge records (mp_tcard.c)
         char sub[16] = "";
         int a = 0, b = 0, c = 0;
         sscanf(arg, "%15s %d %d %d", sub, &a, &b, &c);
@@ -726,6 +736,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
         else if (strcmp(sub, "rub") == 0)
             while (c-- > 0)
                 MP_TCard_Rub(a, b);
+        else if (strcmp(sub, "style") == 0)
+        {
+            // tcard style DESIGN ACCENT FRAME [PANEL HUE]: the card's look (MY CARD)
+            struct MpCardStyle style = *MP_TCard_Style();
+            int panel = style.panel, hue = style.hue;
+            sscanf(arg, "%*s %*d %*d %*d %d %d", &panel, &hue);
+            style.design = a, style.accent = b, style.frame = c, style.panel = panel, style.hue = hue;
+            MP_TCard_SetStyle(&style);
+        }
         {
             int r, k;
             for (r = 0; r < REGION_COUNT; r++)

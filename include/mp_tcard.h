@@ -73,8 +73,41 @@ const struct MpTCardMon *MP_TCard_TeamMon(u8 i);
 void MP_TCard_SetTeamFromParty(const u8 *slots, u8 count);   // the card's team: these party slots, as they are now
 void MP_TCard_DebugDays(s32 days);              // tests: as if this many days had passed on the PC's clock
 
-// A card as the JOHTO / SINNOH cards and the BADGE CASE show it: the player's own (live records) or a friend's (from
-// their card and its co-op add-on, mp_linkx.c)
+// The card's look (MY CARD): one of Battle Revolution's Battle Pass designs (graphics/moemon/cards/passes.bin), a hue
+// for the recolorable ones, an accent color, a frame, the panels behind the text, the holo shine
+enum { TCARD_FRAME_NONE, TCARD_FRAME_THIN, TCARD_FRAME_THICK, TCARD_FRAME_GLOW, TCARD_FRAME_DOUBLE, TCARD_FRAME_COUNT };
+enum { TCARD_PANEL_LIGHT, TCARD_PANEL_DARK, TCARD_PANEL_GLASS, TCARD_PANEL_NONE, TCARD_PANEL_COUNT };
+#define TCARD_ACCENTS 12
+struct MpCardStyle
+{
+    u8 design, accent, frame, panel;
+    u16 hue;                                    // 0-359 (recolorable designs)
+    u8 holo, pad;
+};
+
+// The POKéMON shown big on the card
+struct MpCardShowcase
+{
+    u16 species;                                // 0: none
+    u8 shiny, pad;                              // pad (the card file's): chosen on MY CARD (else the party's first)
+    u32 personality, otId;
+    u8 nickname[POKEMON_NAME_LENGTH + 1];
+};
+
+// The card's signature, drawn as in the DS games: 192x64, a bit a pixel
+#define TCARD_SIG_W 192
+#define TCARD_SIG_H 64
+#define TCARD_SIG_BYTES (TCARD_SIG_W * TCARD_SIG_H / 8)
+
+// The card's records (its STATS page)
+enum {
+    TCARD_STAT_CATCHES, TCARD_STAT_HATCHED, TCARD_STAT_EVOLVED, TCARD_STAT_BATTLES, TCARD_STAT_TRAINERS,
+    TCARD_STAT_WILD, TCARD_STAT_STEPS, TCARD_STAT_FISHED, TCARD_STAT_HOF, TCARD_STAT_CONTESTS, TCARD_STAT_ACHIEVEMENTS,
+    TCARD_STAT_TOGETHER, TCARD_STAT_COUNT
+};
+
+// A card as the TRAINER CARD and the BADGE CASE show it: the player's own (live records) or a friend's (from their
+// card and its co-op add-on, mp_linkx.c)
 #define TCARD_TITLE_LEN 24
 struct MpCardView
 {
@@ -94,14 +127,22 @@ struct MpCardView
     u16 team[PARTY_SIZE];
     u8 teamShiny;                               // bit per place
     char title[TCARD_TITLE_LEN];                // "" = none (or not shown)
+    struct MpCardStyle style;
+    struct MpCardShowcase showcase;
+    u32 stats[TCARD_STAT_COUNT];
+    u32 regionSeconds[REGION_COUNT];            // play time in each region
+    u8 profile[4][16];                          // the card's catchphrase (the profile's words, ASCII)
+    bool8 hasSig;
+    u8 sig[TCARD_SIG_BYTES];
     bool8 hasPic;
     u32 pic[64 * 64];                           // the card's picture of them (0xAARRGGBB)
 };
 
 void MP_CardView_FillOwn(struct MpCardView *v); // (the picture is taken from the card on screen: trainer_card.c)
-u8 MP_CardView_Stars(const struct MpCardView *v, u8 region);   // 0-5 (the card's color)
+u8 MP_CardView_Stars(const struct MpCardView *v, u8 region);   // 0-3: the region's CHAMPION, all 8 badges, all 8 shining
 bool8 MP_CardView_HasBadge(const struct MpCardView *v, u8 region, u8 badge);
-const char *MP_TCard_TitleText(void);           // the chosen title as shown (NULL: none or not shown)
+const char *MP_TCard_TitleText(void);
+void MP_TCard_GameToText(char *dst, const u8 *src, int size);   // ASCII, é as UTF-8 (the card screens' font)           // the chosen title as shown (NULL: none or not shown)
 
 // Friends: what you did together (counted on your own game) and the last card you saw of each (the album)
 #define TCARD_FRIENDS 16
@@ -121,7 +162,13 @@ void MP_TCard_KeepFriendCard(const struct MpCardView *v);
 const struct MpTCardFriend *MP_TCard_FriendByName(const char *asciiName);
 u16 MP_TCard_PackAddon(u8 *out);               // the card's co-op add-on (mp_linkx.c), at most TCARD_ADDON_MAX bytes
 bool8 MP_TCard_UnpackAddon(const u8 *in, u16 len, struct MpCardView *v);
-#define TCARD_ADDON_MAX 80
+#define TCARD_ADDON_MAX 1800
+const struct MpCardStyle *MP_TCard_Style(void);
+void MP_TCard_SetStyle(const struct MpCardStyle *style);
+const struct MpCardShowcase *MP_TCard_Showcase(void);
+void MP_TCard_SetShowcaseFromParty(s8 slot);   // -1: none
+const u8 *MP_TCard_Signature(bool8 *has);
+void MP_TCard_SetSignature(const u8 *sig, bool8 has);
 u8 MP_TCard_AlbumCount(void);
 const struct MpTCardFriend *MP_TCard_AlbumFriend(u8 i);   // the friends with a card, the latest first
 

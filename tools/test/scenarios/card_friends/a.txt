@@ -9,20 +9,27 @@ watchlog TRAINER CARD
 press A 2
 waitlog 1500
 wait 150
-shot friend_hoenn
-press R 2
-wait 40
-rendershot friend_kanto
+rendershot friend_profile
+mp cardscreen
 press R 2
 wait 30
-press A 2
-wait 30
-rendershot friend_johto_back
+press DOWN 2
+wait 4
+press DOWN 2
+wait 10
+rendershot friend_badges
 press SELECT 2
 wait 40
 rendershot friend_case
 press B 2
 wait 30
+press R 2
+wait 24
+press R 2
+wait 24
+press R 2
+wait 30
+rendershot friend_together
 press B 2
 wait 150
 mp card
@@ -35,7 +42,7 @@ press A 2
 wait 10
 rendershot album
 press A 2
-wait 20
+wait 30
 rendershot album_card
 press B 2
 wait 10

@@ -1,0 +1,10 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp panel 1 1
+wait 480
+rendershot b_sees_card
+wait 180
+rendershot b_sees_case
+wait 400
+quit

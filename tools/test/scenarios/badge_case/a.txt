@@ -23,15 +23,132 @@ wait 120
 press SELECT 2
 wait 40
 rendershot case_hoenn
-press RIGHT 2
+press DOWN 2
 wait 20
 press A 2
 wait 40
 rendershot closeup
-press RIGHT 2
-wait 4
-press LEFT 2
-wait 4
+mp tcard
+vpad
+vbtn south 1
+wait 2
+vaxis lx 100
+vaxis ly 0
+wait 2
+vaxis lx 87
+vaxis ly 50
+wait 2
+vaxis lx 50
+vaxis ly 87
+wait 2
+vaxis lx 0
+vaxis ly 100
+wait 2
+vaxis lx -50
+vaxis ly 87
+wait 2
+vaxis lx -87
+vaxis ly 50
+wait 2
+vaxis lx -100
+vaxis ly 0
+wait 2
+vaxis lx -87
+vaxis ly -50
+wait 2
+vaxis lx -50
+vaxis ly -87
+wait 2
+vaxis lx 0
+vaxis ly -100
+wait 2
+vaxis lx 50
+vaxis ly -87
+wait 2
+vaxis lx 87
+vaxis ly -50
+wait 2
+vaxis lx 100
+vaxis ly 0
+wait 2
+vaxis lx 87
+vaxis ly 50
+wait 2
+vaxis lx 50
+vaxis ly 87
+wait 2
+vaxis lx 0
+vaxis ly 100
+wait 2
+vaxis lx -50
+vaxis ly 87
+wait 2
+vaxis lx -87
+vaxis ly 50
+wait 2
+vaxis lx -100
+vaxis ly 0
+wait 2
+vaxis lx -87
+vaxis ly -50
+wait 2
+vaxis lx -50
+vaxis ly -87
+wait 2
+vaxis lx 0
+vaxis ly -100
+wait 2
+vaxis lx 50
+vaxis ly -87
+wait 2
+vaxis lx 87
+vaxis ly -50
+wait 2
+vaxis lx 100
+vaxis ly 0
+wait 2
+vaxis lx 87
+vaxis ly 50
+wait 2
+vaxis lx 50
+vaxis ly 87
+wait 2
+vaxis lx 0
+vaxis ly 100
+wait 2
+vaxis lx -50
+vaxis ly 87
+wait 2
+vaxis lx -87
+vaxis ly 50
+wait 2
+vaxis lx -100
+vaxis ly 0
+wait 2
+vaxis lx -87
+vaxis ly -50
+wait 2
+vaxis lx -50
+vaxis ly -87
+wait 2
+vaxis lx 0
+vaxis ly -100
+wait 2
+vaxis lx 50
+vaxis ly -87
+wait 2
+vaxis lx 87
+vaxis ly -50
+wait 2
+vaxis lx 100
+vaxis ly 0
+wait 2
+vbtn south 0
+vaxis lx 0
+vaxis ly 0
+wait 20
+rendershot polished
+mp tcard
 press B 2
 wait 20
 press R 2

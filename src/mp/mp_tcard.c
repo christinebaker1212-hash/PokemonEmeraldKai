@@ -14,6 +14,7 @@
 #include "pokemon.h"
 #include "pokedex.h"
 #include "money.h"
+#include "easy_chat.h"
 #include "overworld.h"
 #include "constants/game_stat.h"
 #include "string_util.h"
@@ -25,7 +26,7 @@
 extern char gPlatformSavePath[512];
 
 #define TCARD_MAGIC 0x44524354   // "TCRD"
-#define TCARD_VERSION 2   // 2: friends (what was done together, the album)
+#define TCARD_VERSION 3   // 2: friends (what was done together, the album); 3: the card's look, showcase, signature, time per region
 #define NUM_TCARD_BADGES (REGION_COUNT * TCARD_BADGES_PER_REGION)
 // a badge counts the co-op battle that ended this many frames before it (time for the leader's words and the badge)
 #define PARTNER_FRAMES (60 * 60 * 10)
@@ -49,7 +50,13 @@ static struct
     struct MpTCardFriend friends[TCARD_FRIENDS];   // the most recently seen first
     u32 albumSeq[TCARD_FRIENDS];                    // when each card was seen (a counter: the album's order)
     u32 albumNext;
+    struct MpCardStyle style;
+    struct MpCardShowcase showcase;
+    bool8 hasSig;
+    u8 sig[TCARD_SIG_BYTES];
+    u32 regionSeconds[REGION_COUNT];
     // not kept
+    u16 secondFrames, saveSeconds;
     u8 metChecked;
     u8 progress[NUM_TCARD_BADGES];      // rubs towards the next point
     u8 lastPartnerCount;
@@ -60,6 +67,7 @@ static struct
 } sT;
 
 static void MeetFriends(void);
+static void DefaultStyle(void);
 static struct MpCardView sAddonView;   // (the card a friend asked for, as sent)
 
 static u32 Owner(void)
@@ -138,6 +146,11 @@ static void Save(void)
         Put(f, &sT.friends[i], sizeof(sT.friends[i]));
         Put(f, &sT.albumSeq[i], 4);
     }
+    Put(f, &sT.style, sizeof(sT.style));
+    Put(f, &sT.showcase, sizeof(sT.showcase));
+    Put(f, &sT.hasSig, 1);
+    Put(f, sT.sig, sizeof(sT.sig));
+    Put(f, sT.regionSeconds, sizeof(sT.regionSeconds));
     fclose(f);
 }
 
@@ -179,7 +192,7 @@ static bool8 Read(FILE *f)
             return FALSE;
         m->nickname[POKEMON_NAME_LENGTH] = EOS;
     }
-    if (head[1] >= 2)
+    if (head[1] >= 3)
     {
         if (!Get(f, &sT.friendCount, 1) || !Get(f, &sT.albumNext, 4))
             return FALSE;
@@ -191,10 +204,26 @@ static bool8 Read(FILE *f)
                 sT.friendCount = i;
                 break;
             }
+        if (!Get(f, &sT.style, sizeof(sT.style)) || !Get(f, &sT.showcase, sizeof(sT.showcase)) || !Get(f, &sT.hasSig, 1)
+         || !Get(f, sT.sig, sizeof(sT.sig)) || !Get(f, sT.regionSeconds, sizeof(sT.regionSeconds)))
+            DefaultStyle();
     }
+    else
+        DefaultStyle();   // (an older card file: friends' records were in the old form, kept from now on)
     if (sT.fade >= TCARD_FADE_COUNT)
         sT.fade = TCARD_FADE_PLATINUM;
     return TRUE;
+}
+
+// a new card's look: RENTAL PASS BLUE, a blue accent, a thin frame, light panels, the holo shine
+static void DefaultStyle(void)
+{
+    memset(&sT.style, 0, sizeof(sT.style));
+    sT.style.design = 0;
+    sT.style.accent = 6;
+    sT.style.frame = TCARD_FRAME_THIN;
+    sT.style.panel = TCARD_PANEL_LIGHT;
+    sT.style.holo = TRUE;
 }
 
 static void Load(void)
@@ -223,6 +252,7 @@ static void Load(void)
     }
     // the first time (or another game begun on this save): the badges had now are from before the records
     sT.showTitle = TRUE;
+    DefaultStyle();
     sT.fade = TCARD_FADE_PLATINUM;
     for (i = 0; i < NUM_TCARD_BADGES; i++)
     {
@@ -315,6 +345,15 @@ void MP_TCard_Update(void)
 {
     bool8 changed = FALSE;
     u8 i;
+    // play time in each region (a second every 60 frames)
+    if (sT.loaded && gSaveBlock2Ptr != NULL && ++sT.secondFrames >= 60)
+    {
+        u8 r = MP_Region_Current();
+        sT.secondFrames = 0;
+        if (r < REGION_COUNT)
+            sT.regionSeconds[r]++;
+        sT.saveSeconds++;
+    }
     if (gSaveBlock2Ptr == NULL || !MP_IsInOverworld())
     {
         // in a co-op battle: who's in it (a badge won right after it keeps their names)
@@ -351,8 +390,13 @@ void MP_TCard_Update(void)
     }
     if (FadeDays())
         changed = TRUE;
+    if (sT.saveSeconds >= 300)
+        changed = TRUE;
     if (changed)
+    {
+        sT.saveSeconds = 0;
         Save();
+    }
     // friends in the room: when we first met (every few seconds)
     if (++sT.metChecked >= 10)
     {
@@ -494,6 +538,29 @@ const char *MP_TCard_TitleText(void)
     return name;
 }
 
+// Game text as the card's own text (ASCII, é as UTF-8: the card screens' font has it), at most size - 1 bytes
+void MP_TCard_GameToText(char *dst, const u8 *src, int size)
+{
+    int n = 0;
+    for (; *src != EOS && n < size - 1; src++)
+    {
+        if (*src == CHAR_e_ACUTE || *src == CHAR_E_ACUTE)
+        {
+            if (n + 2 > size - 1)
+                break;
+            dst[n++] = (char)0xc3, dst[n++] = (char)0xa9;
+        }
+        else
+        {
+            u8 one[2] = {*src, EOS};
+            char c[4];
+            MP_GameToAscii(c, one, 1);
+            dst[n++] = c[0] ? c[0] : '?';
+        }
+    }
+    dst[n] = 0;
+}
+
 void MP_CardView_FillOwn(struct MpCardView *v)
 {
     u8 r, b, i;
@@ -549,6 +616,88 @@ void MP_CardView_FillOwn(struct MpCardView *v)
     title = MP_TCard_TitleText();
     if (title)
         snprintf(v->title, sizeof(v->title), "%s", title);
+    v->style = sT.style;
+    v->showcase = sT.showcase;
+    if (!sT.showcase.pad)
+    {
+        // never chosen on MY CARD: the party's first POKéMON
+        for (i = 0; i < PARTY_SIZE; i++)
+        {
+            struct Pokemon *mon = &gPlayerParty[i];
+            if (GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG))
+                continue;
+            v->showcase.species = GetMonData(mon, MON_DATA_SPECIES);
+            v->showcase.shiny = IsMonShiny(mon);
+            v->showcase.personality = GetMonData(mon, MON_DATA_PERSONALITY);
+            v->showcase.otId = GetMonData(mon, MON_DATA_OT_ID);
+            GetMonData(mon, MON_DATA_NICKNAME, v->showcase.nickname);
+            v->showcase.nickname[POKEMON_NAME_LENGTH] = EOS;
+            break;
+        }
+    }
+    memcpy(v->regionSeconds, sT.regionSeconds, sizeof(v->regionSeconds));
+    v->hasSig = sT.hasSig;
+    memcpy(v->sig, sT.sig, sizeof(v->sig));
+    {
+        static const u8 sStat[TCARD_STAT_COUNT] = {
+            [TCARD_STAT_CATCHES] = GAME_STAT_POKEMON_CAPTURES, [TCARD_STAT_HATCHED] = GAME_STAT_HATCHED_EGGS,
+            [TCARD_STAT_EVOLVED] = GAME_STAT_EVOLVED_POKEMON, [TCARD_STAT_BATTLES] = GAME_STAT_TOTAL_BATTLES,
+            [TCARD_STAT_TRAINERS] = GAME_STAT_TRAINER_BATTLES, [TCARD_STAT_WILD] = GAME_STAT_WILD_BATTLES,
+            [TCARD_STAT_STEPS] = GAME_STAT_STEPS, [TCARD_STAT_FISHED] = GAME_STAT_FISHING_ENCOUNTERS,
+            [TCARD_STAT_HOF] = GAME_STAT_ENTERED_HOF, [TCARD_STAT_CONTESTS] = GAME_STAT_WON_CONTEST,
+        };
+        u32 together = 0;
+        for (i = 0; i < TCARD_STAT_ACHIEVEMENTS; i++)
+            v->stats[i] = GetGameStat(sStat[i]);
+        v->stats[TCARD_STAT_ACHIEVEMENTS] = MP_Achieve_DoneCount();
+        for (i = 0; i < sT.friendCount; i++)
+            together += sT.friends[i].wonTogether;
+        v->stats[TCARD_STAT_TOGETHER] = together;
+    }
+    // the catchphrase: the profile's four words (Emerald's own card profile)
+    for (i = 0; i < 4; i++)
+    {
+        u8 word[64];
+        CopyEasyChatWord(word, gSaveBlock1Ptr->easyChatProfile[i]);
+        MP_TCard_GameToText((char *)v->profile[i], word, sizeof(v->profile[i]));
+    }
+}
+
+const struct MpCardStyle *MP_TCard_Style(void) { Check(); return &sT.style; }
+void MP_TCard_SetStyle(const struct MpCardStyle *style)
+{
+    Check();
+    sT.style = *style;
+    Save();
+}
+const struct MpCardShowcase *MP_TCard_Showcase(void) { Check(); return &sT.showcase; }
+void MP_TCard_SetShowcaseFromParty(s8 slot)
+{
+    Check();
+    memset(&sT.showcase, 0, sizeof(sT.showcase));
+    sT.showcase.pad = TRUE;   // (chosen: NONE stays none)
+    if (slot >= 0 && slot < PARTY_SIZE)
+    {
+        struct Pokemon *mon = &gPlayerParty[slot];
+        if (GetMonData(mon, MON_DATA_SPECIES) != SPECIES_NONE && !GetMonData(mon, MON_DATA_IS_EGG))
+        {
+            sT.showcase.species = GetMonData(mon, MON_DATA_SPECIES);
+            sT.showcase.shiny = IsMonShiny(mon);
+            sT.showcase.personality = GetMonData(mon, MON_DATA_PERSONALITY);
+            sT.showcase.otId = GetMonData(mon, MON_DATA_OT_ID);
+            GetMonData(mon, MON_DATA_NICKNAME, sT.showcase.nickname);
+            sT.showcase.nickname[POKEMON_NAME_LENGTH] = EOS;
+        }
+    }
+    Save();
+}
+const u8 *MP_TCard_Signature(bool8 *has) { Check(); *has = sT.hasSig; return sT.sig; }
+void MP_TCard_SetSignature(const u8 *sig, bool8 has)
+{
+    Check();
+    memcpy(sT.sig, sig, sizeof(sT.sig));
+    sT.hasSig = has;
+    Save();
 }
 
 bool8 MP_CardView_HasBadge(const struct MpCardView *v, u8 region, u8 badge)
@@ -558,8 +707,7 @@ bool8 MP_CardView_HasBadge(const struct MpCardView *v, u8 region, u8 badge)
     return (v->badges >> (region * TCARD_BADGES_PER_REGION + badge)) & 1;
 }
 
-// A card's color by its region's stars: its CHAMPION beaten, all 8 badges, all 8 with 4 sparkles, all 32 badges;
-// and a fifth (the black card) for every region's CHAMPION beaten
+// A region's stars on the card: its CHAMPION beaten, all 8 of its badges, all 8 shining (4 sparkles)
 u8 MP_CardView_Stars(const struct MpCardView *v, u8 region)
 {
     u8 stars = 0, b, all = TRUE;
@@ -577,11 +725,7 @@ u8 MP_CardView_Stars(const struct MpCardView *v, u8 region)
         if (all)
             stars++;
     }
-    if (v->badges == 0xFFFFFFFFu)
-        stars++;
-    if ((v->cleared & 0xF) == 0xF)
-        stars++;
-    return stars > 5 ? 5 : stars;
+    return stars;
 }
 
 // ----------------------------------------------------------------------------------------------------- friends
@@ -736,7 +880,7 @@ const struct MpTCardFriend *MP_TCard_AlbumFriend(u8 at)
 // ----------------------------------------------------------------------------------------------------- the co-op add-on
 // After the TRAINER CARD a friend asks for (mp_linkx.c LX_CARD): every region's badges and their shine, the CHAMPIONs
 // beaten, the card's team and its title. 1 + 4 + 32 + 1 + 1 + 12 + 1 + 24 + 1 bytes.
-#define ADDON_VERSION 1
+#define ADDON_VERSION 2   // 2: the card's look, showcase, records, time per region, catchphrase, signature
 
 u16 MP_TCard_PackAddon(u8 *out)
 {
@@ -756,6 +900,22 @@ u16 MP_TCard_PackAddon(u8 *out)
     p[TCARD_TITLE_LEN - 1] = 0;
     p += TCARD_TITLE_LEN;
     *p++ = v->gender;
+    memcpy(p, &v->style, sizeof(v->style));
+    p += sizeof(v->style);
+    memcpy(p, &v->showcase, sizeof(v->showcase));
+    p += sizeof(v->showcase);
+    memcpy(p, v->stats, sizeof(v->stats));
+    p += sizeof(v->stats);
+    memcpy(p, v->regionSeconds, sizeof(v->regionSeconds));
+    p += sizeof(v->regionSeconds);
+    memcpy(p, v->profile, sizeof(v->profile));
+    p += sizeof(v->profile);
+    *p++ = v->hasSig;
+    if (v->hasSig)
+    {
+        memcpy(p, v->sig, sizeof(v->sig));
+        p += sizeof(v->sig);
+    }
     return p - out;
 }
 
@@ -785,6 +945,28 @@ bool8 MP_TCard_UnpackAddon(const u8 *in, u16 len, struct MpCardView *v)
     v->title[TCARD_TITLE_LEN - 1] = 0;
     p += TCARD_TITLE_LEN;
     v->gender = *p++;
+    if (p + sizeof(v->style) + sizeof(v->showcase) + sizeof(v->stats) + sizeof(v->regionSeconds) + sizeof(v->profile) + 1 > in + len)
+        return FALSE;
+    memcpy(&v->style, p, sizeof(v->style));
+    p += sizeof(v->style);
+    memcpy(&v->showcase, p, sizeof(v->showcase));
+    p += sizeof(v->showcase);
+    memcpy(v->stats, p, sizeof(v->stats));
+    p += sizeof(v->stats);
+    memcpy(v->regionSeconds, p, sizeof(v->regionSeconds));
+    p += sizeof(v->regionSeconds);
+    memcpy(v->profile, p, sizeof(v->profile));
+    p += sizeof(v->profile);
+    for (i = 0; i < 4; i++)
+        v->profile[i][sizeof(v->profile[i]) - 1] = 0;
+    v->hasSig = *p++ != 0;
+    if (v->hasSig && p + sizeof(v->sig) <= in + len)
+        memcpy(v->sig, p, sizeof(v->sig));
+    else
+        v->hasSig = FALSE;
+    if (v->showcase.species >= NUM_SPECIES)
+        v->showcase.species = SPECIES_NONE;
+    v->showcase.nickname[POKEMON_NAME_LENGTH] = EOS;
     for (i = 0; i < sizeof(v->polish); i++)
         if (v->polish[i] > TCARD_POLISH_MAX)
             v->polish[i] = TCARD_POLISH_MAX;

@@ -57,3 +57,5 @@ Numbered in the order they were sent. Add new ones with the next number and a li
 | 60 | 60.png: KANTO, the VIRIDIAN POKé MART after OAK's PARCEL: "RE put away ????????." | the item's name and the right pocket in the put-away message |
 | 61 | 61.png: the same, next page: "????????. Pocket: ITEMS." | (as 60) |
 | 62 | (sent in chat, no file) JOHTO's CHERRYGROVE on a new game: a TEAM ROCKET grunt and a GROWLITHE on the road by the POKéMON CENTER, nothing to say | Quetzal's Giovanni-story Rockets only in the past (1.63.11) |
+| 63 | 63.zip: 36 Battle Pass designs from Pokemon Battle Revolution (the "recolorable" ones named so) | the TRAINER CARD's designs to pick from (graphics/moemon/cards/passes/, 1.66.0) |
+| 64 | 64.png (sent in chat; the same picture as graphics/moemon/cards/passes/rental_pass_blue.png): the RENTAL PASS BLUE Battle Pass as the reference | the TRAINER CARD laid out on the pass's own grid: its border, the BATTLE PASS label's line, the P emblem and the notch kept clear (1.66.0) |

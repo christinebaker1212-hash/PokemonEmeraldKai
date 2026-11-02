@@ -1,0 +1,123 @@
+pressuntil A field 5000
+wait 60
+mp setflag 0x867
+mp setflag 0x868
+mp setflag 0x2100
+mp setflag 0x2101
+mp setflag 0x2102
+mp setflag 0x11B2
+mp setflag 0x11B3
+mp setflag 0x11B4
+mp setflag 0x3320
+wait 90
+mp tcard rub 1 0 400
+mp tcard rub 1 1 150
+mp card
+wait 60
+rendershot profile
+mp cardscreen
+press R 2
+wait 6
+rendershot flipping
+wait 20
+rendershot badges
+press DOWN 2
+wait 4
+press R 2
+wait 30
+rendershot records
+press R 2
+wait 30
+rendershot team
+press R 2
+wait 30
+mp cardscreen
+press START 2
+wait 20
+rendershot mycard
+press RIGHT 2
+wait 6
+press RIGHT 2
+wait 6
+press RIGHT 2
+wait 6
+press RIGHT 2
+wait 6
+press RIGHT 2
+wait 10
+rendershot design6
+press DOWN 2
+wait 4
+press RIGHT 2
+wait 4
+press RIGHT 2
+wait 4
+press RIGHT 2
+wait 4
+press RIGHT 2
+wait 10
+rendershot hue
+press DOWN 2
+wait 4
+press LEFT 2
+wait 4
+press LEFT 2
+wait 4
+press DOWN 2
+wait 4
+press RIGHT 2
+wait 4
+press RIGHT 2
+wait 4
+press DOWN 2
+wait 4
+press RIGHT 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press RIGHT 2
+wait 10
+rendershot mycard_more
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press RIGHT 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press A 2
+wait 10
+press A+RIGHT 40
+press A+DOWN 15
+press A+LEFT 30
+press A+UP 8
+press NONE 4
+press R 2
+press A+RIGHT 12
+press NONE 2
+wait 10
+rendershot signing
+press B 2
+wait 10
+press B 2
+wait 30
+mp cardscreen
+rendershot styled_profile
+press R 2
+wait 30
+rendershot styled_badges
+press R 2
+wait 30
+press R 2
+wait 30
+rendershot styled_team
+press B 2
+wait 120
+waitfor field 600
+shot field_after
+quit

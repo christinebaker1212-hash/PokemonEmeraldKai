@@ -1,0 +1,9 @@
+# The TRAINER CARD, one design for every region: the PROFILE (every region's stars), R: BADGES & STARS (DOWN moves the
+# region), RECORDS, TEAM & SIGNATURE, back round to the PROFILE; START: MY CARD: the 6th design, a recolorable one
+# turned (HUE), a different accent, frame, panels and the showcase POKéMON, then a signature drawn on the pad (A held
+# while the D-Pad moves the pen). B twice: the card as styled; B closes it, back on the map. Shots looked at by hand.
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=280:30,283:25,286:12"
+EXPECT_A=("card: own card shown" "card: page BADGES & STARS" "card: page TEAM & SIGNATURE" "card: signature saved" "card: style design 5")
+UNEXPECT_A=("[crash]")

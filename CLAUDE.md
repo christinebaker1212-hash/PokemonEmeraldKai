@@ -304,11 +304,13 @@ the host's online; MEGA forms aren't species: src/data/mp_megas.h from tools/moe
 B_ANIM_MP_GIMMICK on every screen; items 553-617): COOP_NOTES "The battle GIMMICKS"; tests gimmick_*.
 Also TM51-TM92 (items 618-659, after the HMs; TMHM_INDEX / TMHM_ITEM, gTm2Learnsets; tools/moemon_tms/gen_tm2.py; COOP_NOTES
 "TM51-TM92"; test tm_new).
-Also the TRAINER CARD in every region and the BADGE CASE (1.65.0: src/mp/mp_tcard.c "<save>.card" records, Platinum's
-polish and fading; mp_badgecase.c, 480x320 like a VS fight, PokeAPI's badge art in graphics/moemon/badges/badges.bin;
-mp_regioncard.c: JOHTO / SINNOH cards from sinnoh/cards.pak (HeartGold's / Platinum's, built by make_pack.sh), KANTO's
-is FireRed's in trainer_card.c, HOENN's untouched; MY CARD, titles, friends' cards by LX_CARD's add-on, the album;
-COOP_NOTES "The TRAINER CARD in every region"; tests badge_case, card_regions, card_friends). Also HMs a friend's
+Also the TRAINER CARD and the BADGE CASE (1.65.0: src/mp/mp_tcard.c "<save>.card" records, Platinum's
+polish and fading; mp_badgecase.c, 480x320 like a VS fight, PokeAPI's badge art in graphics/moemon/badges/badges.bin,
+A chimes by polish, A held + the stick going round polishes; 1.66.0: mp_cardscreen.c, one card for every region over
+the game's card, Battle Revolution's Battle Pass designs from graphics/moemon/cards/passes.bin (tools/moemon_cards),
+laid out on the pass's own grid (label line, P emblem, notch: docs/user_images/64.png), MY CARD's look / showcase /
+signature, stars per region; friends' cards by LX_CARD's add-on, the album; spectated;
+COOP_NOTES "The TRAINER CARD, the BADGE CASE"; tests badge_case, card_design, card_designs, card_friends, spec_card). Also HMs a friend's
 progress made impossible to get (mp_hmrescue.c: the giver walks up; tests hm_rescue*).
 Saves never change layout: tools/test/save_layout.py (gcc + MinGW, run by regress.sh and the release) must pass; old
 formats are converted on load by src/mp/mp_savefix.c (MP_SAVE_FORMAT in the sidecar; COOP_NOTES "Save layout and

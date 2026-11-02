@@ -1,0 +1,24 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 200
+mp setflag 0x867
+mp setflag 0x868
+mp panel 1 1
+wait 60
+mp card
+wait 200
+press R 2
+wait 60
+rendershot a_card
+wait 120
+press SELECT 2
+wait 60
+press A 2
+wait 120
+rendershot a_case
+wait 240
+press B 2
+wait 30
+press B 2
+wait 300
+quit

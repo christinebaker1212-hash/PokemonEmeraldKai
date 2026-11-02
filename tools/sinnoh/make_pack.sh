@@ -11,7 +11,3 @@ DIR="${1:-${XDG_CACHE_HOME:-$HOME/.cache}/moemon/pokeplatinum}"
 mkdir -p "$REPO/sinnoh"
 python3 -I "$REPO/tools/sinnoh/build_pack.py" "$DIR" "$REPO/sinnoh/platinum3d.pak" | tail -1
 python3 -I "$REPO/tools/sinnoh/build_gfx.py" "$DIR" "$REPO/sinnoh/platinum_gfx.pak"   # (its people as Platinum draws them)
-# the TRAINER CARD's JOHTO card (HeartGold's) and SINNOH card (Platinum's): sinnoh/cards.pak (build_cards.py)
-HGSS="${XDG_CACHE_HOME:-$HOME/.cache}/moemon/pokeheartgold_card"
-"$REPO/tools/sinnoh/fetch_hgss_card.sh" "$HGSS"
-python3 -I "$REPO/tools/sinnoh/build_cards.py" "$DIR" "$HGSS" "$REPO/sinnoh/cards.pak"

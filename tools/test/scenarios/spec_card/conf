@@ -1,0 +1,10 @@
+# Spectating the TRAINER CARD and the BADGE CASE: ALICE opens her card (its BADGES & STARS page), then the BADGE CASE
+# and a badge up close; BOB's SPECTATE panel shows each of them (b_sees_card, b_sees_case), halved from their 480x320
+MODE=2
+WARP=0,10,10,10
+WARP_B=0,10,12,10
+TMO=150
+EXPECT_A=("card: own card shown" "card: BADGE CASE opened on HOENN")
+EXPECT_B=("spectate panel: player 1 frame (full)")
+UNEXPECT_A=("[crash]")
+UNEXPECT_B=("[crash]")

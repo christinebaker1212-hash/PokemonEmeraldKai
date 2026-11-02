@@ -492,6 +492,13 @@ static float Axis(SDL_GameController *pad, SDL_GameControllerAxis a)
 #define BTN(b) (1u << (b))
 
 // Reads every controller. Returns GBA keys (*fastForward is always 0 now).
+// Moemon Co-op: the sticks as last polled, -1..1 (the BADGE CASE's polishing circles, the TRAINER CARD's tilt)
+static float sSticks[4];
+void Gamepad_Sticks(float *lx, float *ly, float *rx, float *ry)
+{
+    *lx = sSticks[0], *ly = sSticks[1], *rx = sSticks[2], *ry = sSticks[3];
+}
+
 u16 Gamepad_Poll(int *fastForward)
 {
     u16 keys = 0;
@@ -535,6 +542,7 @@ u16 Gamepad_Poll(int *fastForward)
         v = Axis(pad, SDL_CONTROLLER_AXIS_TRIGGERLEFT);  if (v > lt) lt = v;
         v = Axis(pad, SDL_CONTROLLER_AXIS_TRIGGERRIGHT); if (v > rt) rt = v;
     }
+    sSticks[0] = lx, sSticks[1] = ly, sSticks[2] = rx, sSticks[3] = ry;   // (Gamepad_Sticks)
     if (!any)
     {
         sPrevButtons = 0;

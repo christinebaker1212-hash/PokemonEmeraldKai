@@ -4088,46 +4088,78 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   (item.c MP_ItemNumberOrder, also mp_bag.c's tie-break) and holds 128 kinds (MP_BAG_TMHM_COUNT; the slots past the
   save block's 64 are in "<save>.bag"). MP_Gen_OfItem: 4. Test tm_new.
 
-## The TRAINER CARD in every region, the BADGE CASE (1.65.0)
+## The TRAINER CARD, the BADGE CASE (1.65.0; one card for every region since 1.66.0)
 
-- **Records** (`src/mp/mp_tcard.c`, `include/mp_tcard.h`): "<save>.card" (format 2; MP_TCard_Forget on a save file
-  switch). The save never changes: a region's badges are its flags (mp_region.c MP_Region_BadgeFlag). A badge flag
-  seen set for the first time is a badge just won, whatever script set it (MP_TCard_Update, twice a second on the map):
-  its date (the PC's clock), the lead POKéMON, the friends of the co-op battle that ended within 10 minutes before
-  (captured while MP_Coop_SeatCount() > 1). Badges had when the file is first made are "before records".
+- **Records** (`src/mp/mp_tcard.c`, `include/mp_tcard.h`): "<save>.card" (format 3; MP_TCard_Forget on a save file
+  switch; format 2 files are read and get the default look). The save never changes: a region's badges are its flags
+  (mp_region.c MP_Region_BadgeFlag). A badge flag seen set for the first time is a badge just won, whatever script set
+  it (MP_TCard_Update, twice a second on the map): its date (the PC's clock), the lead POKéMON, the friends of the co-op
+  battle that ended within 10 minutes before (captured while MP_Coop_SeatCount() > 1). Badges had when the file is
+  first made are "before records". Format 3 adds the card's look (struct MpCardStyle), the showcase POKéMON
+  (MpCardShowcase; its pad byte = chosen on MY CARD, else the party's first is shown), the signature (192x64, a bit a
+  pixel, row by row, the lowest bit leftmost) and the play time in each region (counted once a second, saved every
+  5 minutes).
 - **Polish** is Platinum's (pret/pokeplatinum include/trainer_case.h, trainer_case_badge_dirt.c, applications/
   trainer_case/main.c): 140 when won, 10 less a day (the PC's own local date, never the room host's shared clock:
-  MP_ClockShift's rule), FILTHY < 100 <= DIRTY < 140 <= CLEAN < 170 <= 2 SPARKLES < 190 <= 4 SPARKLES <= 199; a rub is a
-  change of direction, Platinum's rubs per point by level {1, 3, 4, 15, 15}. OPTIONS > GAME > BADGE FADING PLATINUM /
-  SLOW (a third: 10 every 3 days) / OFF, per save (in the card file). Tests: `mp tcard days N`, `mp tcard rub R B N`.
+  MP_ClockShift's rule), FILTHY < 100 <= DIRTY < 140 <= CLEAN < 170 <= 2 SPARKLES < 190 <= 4 SPARKLES <= 199;
+  Platinum's rubs per point by level {1, 3, 4, 15, 15}. OPTIONS > GAME > BADGE FADING PLATINUM / SLOW (a third: 10 every
+  3 days) / OFF, per save (in the card file). Tests: `mp tcard days N`, `mp tcard rub R B N`, `mp tcard style D A F P H`.
 - **The BADGE CASE** (`src/mp/mp_badgecase.c`): SELECT on the card. A 480x320 picture of its own like a VS fight's
   (display.c: MP_BadgeCase_Canvas after Fight_Canvas; sdl2.c ScreenStep: MP_BadgeCase_Step, the game waits), drawn
   with tcg_gfx at scale 2 for the case and text and scale 1 for the badges. Badge art: PokeAPI's official artwork at a
   pinned commit, its white stroke taken off (`tools/moemon_badges/build_badges.py` -> graphics/moemon/badges/
   badges.bin, built in by mp_badge_data.c's .incbin), 64 px in a tray and 128 px up close; dirt is the badge's colors
   turned toward brown plus a grime texture made from its alpha (value noise and specks), sparkles are drawn stars.
-  Each badge chimes its note (SE_NOTE_C..C_HIGH). Closing waits for the buttons to be let go (B mustn't close the card).
-  A friend's case (MP_BadgeCase_OpenView) is looked at, not polished.
-- **Region cards**: L / R on the player's card (trainer_card.c sCardRegion; the card of the region we're in opens):
-  HOENN is Emerald's card, untouched; KANTO is FireRed's (CARD_TYPE_FRLG via version VERSION_FIRE_RED: KANTO's badge
-  flags, the card's team in monSpecies, stars from MP_CardView_Stars); the card screen is rebuilt for a switch
-  (STATE_SWITCH_REGION). JOHTO and SINNOH (`src/mp/mp_regioncard.c`) show over it at 480x320: HeartGold's card and
-  Platinum's own art, front and back, six colors by stars (`sinnoh/cards.pak`: tools/sinnoh/build_cards.py from
-  pret/pokeheartgold files/a/0/4/9, fetched by fetch_hgss_card.sh, and pokeplatinum's res/graphics/trainer_case,
-  fetch_decomp.sh parts 9; make_pack.sh builds it, the release ships it, nothing committed). Platinum's card is on an
-  affine layer: its screens are a byte a tile of 8-bit tiles. The picture is read from the game card's window
-  (WIN_TRAINER_PIC's pixels and BG palette 8): every LOOK as the game draws it. The card's color: its region's stars
-  (CHAMPION beaten, all 8 badges, all 8 at 4 sparkles, all 32 badges; a fifth for every CHAMPION).
-- **MY CARD** (START on the own card): CARD TEAM (the party as it is, or this team kept), TITLE (an unlocked
-  achievement's name), SHOW TITLE (also OPTIONS > GAME > CARD TITLE), FRIENDS' CARDS (the album). The title shows on
-  the JOHTO / SINNOH cards and to friends; Emerald's HOENN card stays as it was.
-- **Co-op** (protocol 71): LX_CARD ends with the card's add-on (MP_TCard_PackAddon: every region's badges and polish,
-  the CHAMPIONs beaten, the team, the title, the gender). On a friend's card (CO-OP > FRIENDS > TRAINER CARD) L / R show
-  their other regions' cards (KANTO's as HeartGold's), SELECT their BADGE CASE. The back of a friend's card says what
-  you did together, counted on your own game per friend (MP_TCard_NoteCoopWin from mp_coop.c's win, NotePvp from
-  mp_battle.c, NoteTrade from mp_trade.c, first met when first in a room together). Every friend's card seen is kept
-  with its picture (MP_TCard_KeepFriendCard, 16 friends): MY CARD > FRIENDS' CARDS.
-- Tests: badge_case, card_regions, card_friends (two clients).
+  Moving over the tray is silent; A on a badge chimes and opens it up close. Up close, A chimes (SE_NOTE_G turned by
+  m4aMPlayPitchControl: an octave down when filthy to an octave up at 199) and A held while either stick goes round
+  polishes: a rub every 30 degrees (Gamepad_Sticks, atan2 of the stick pushed further; the D-Pad's quarter turns and
+  the mouse circling the badge count too). Each rub rumbles by how dirty it is; a new level glints, rumbles harder and
+  spins the badge (its width as a cosine; an idle spin every 5 seconds from CLEAN up). Closing waits for the buttons to
+  be let go. A friend's case (MP_BadgeCase_OpenView) is looked at, not polished.
+- **The card** (`src/mp/mp_cardscreen.c`): one design for every region, shown over the game's card for the player's
+  own card and a friend's with the add-on (trainer_card.c OpenCardScreen in Task_TrainerCard's state 7, before the
+  fade: the game's card never shows; the Union Room's and the Cable Club's cards stay the game's). It closes by fading
+  to black (white back to the FRONTIER PASS) and stays so (MP_CardScreen_Hide from CloseTrainerCard) while the game's
+  card fades out behind it. A 480x320 picture like the BADGE CASE's: the card drawn flat into a 456x288 texture, then
+  tilted in perspective as a grid of triangles (SDL_RenderGeometry) by the right stick or the mouse (an idle sway
+  otherwise) and turned over between pages. The trainer picture is read from the game card's window (WIN_TRAINER_PIC's
+  pixels and BG palette 8): every LOOK as the game draws it.
+- **The designs**: Pokemon Battle Revolution's Battle Pass designs (the user's upload, docs/user_images/63.zip, as
+  graphics/moemon/cards/passes/*.png; `tools/moemon_cards/build_passes.py` -> passes.bin "MPAS", built in by
+  mp_pass_data.c's .incbin), decoded with stb_image and resampled to the card's size (premultiplied bilinear); a
+  design named "recolorable" turns to any hue (MY CARD > HUE, a rotation of each pixel's hue). The card's color never
+  follows achievements: it's the look chosen on MY CARD.
+- **The grid** (the user's rule: the RENTAL PASS BLUE pass is the reference, docs/user_images/64.png): every design
+  shares its elements in 340x214 pixels: a 3-pixel bevel, the BATTLE PASS label at (233..323, 9..20), the P emblem at
+  (8..72, 170..208), the notch in the right edge at y 45..62. On the 228x144 card (GBA pixels) the content runs from
+  x 10 to 218 (the label's right margin, both sides), the headings sit on the label's line in its lettering (LabelText:
+  the game's font drawn white into a texture, then 6/5 its size from its foot, a picture pixel bolder, a one-pixel dark
+  edge, light metal over darker metal, a soft shadow), the pages from y 19 to 111, and a row beside the emblem from
+  x 52 (y 116..137). Panels are rounded and bevelled like the pass (a light top edge, a dark bottom one). Nothing is
+  drawn over the label, the emblem or the notch; the frame follows the design's own edge (a chamfer distance from its
+  alpha, so it goes round the notch). Test card_designs: the PROFILE on all 36 designs, the other pages, panels and
+  frames (`mp cardscreen DESIGN PAGE PANEL ACCENT FRAME` shows the card so, held flat).
+- **Pages** (L / R, the D-Pad, A for the next): PROFILE (the name on the label's line, the picture with its IDNo.,
+  MONEY / MOéDEX / TIME / BADGES / STARS, the showcase POKéMON with its nickname, the title as an accent ribbon and the
+  catchphrase (the profile's four words), and each region's stars beside the emblem); BADGES & STARS (each region's
+  8 badges as the case shows them, its stars; UP / DOWN picks a region, SELECT opens its BADGE CASE; the region's
+  details beside the emblem); RECORDS (12 game stats and the time in each region; link battles and trades beside the
+  emblem); TEAM & SIGNATURE; on a friend's card YOU AND <NAME> (what you did together, counted on your own game).
+  **Stars**: 0-3 a region (MP_CardView_Stars: its CHAMPION beaten, all 8 badges, all 8 at 4 sparkles).
+- **MY CARD** (START on the own card): DESIGN, HUE (recolorable designs), ACCENT (12 colors: the frame, ribbons,
+  cursors), FRAME (NONE / THIN / THICK / GLOW / DOUBLE), PANELS (LIGHT / DARK / GLASS / NONE), HOLO (rainbow foil, a
+  streak of light and glints that follow the tilt, added light), SHOWCASE (a party POKéMON or none), TITLE, SHOW TITLE
+  (also OPTIONS > GAME > CARD TITLE), CARD TEAM (the party as it is, or this team kept), SIGNATURE (a pad: A draws while
+  the stick / D-Pad moves the pen or the mouse draws, L / R pen or eraser, SELECT clears) and FRIENDS' CARDS (the
+  album). The look is kept in MY CARD's own copy and saved when MY CARD closes; a preview of the card beside the list.
+- **Co-op** (protocol 72): LX_CARD ends with the card's add-on (MP_TCard_PackAddon, version 2: every region's badges and
+  polish, the CHAMPIONs beaten, the team, the title, the gender, the look, the showcase, the records, the time in each
+  region, the profile's words, the signature; at most TCARD_ADDON_MAX). A friend's card shows as they styled it. Every
+  friend's card seen is kept with its picture (MP_TCard_KeepFriendCard, 16 friends): MY CARD > FRIENDS' CARDS.
+- **Spectating**: friends see the card and the BADGE CASE (Platform_GetFrame: MP_BadgeCase_Frame, MP_CardScreen_Frame:
+  the 480x320 canvas read back and halved, each 2x2 averaged, once a drawn frame).
+- Tests: card_design (pages, MY CARD, the signature), card_designs, badge_case (the stick polishing with a virtual
+  pad), card_friends (two clients), spec_card (two clients: the SPECTATE panel shows both screens).
 
 ## HMs a friend's progress made impossible to get (1.65.0)
 

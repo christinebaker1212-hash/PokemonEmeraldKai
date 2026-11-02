@@ -1,16 +1,11 @@
 #include "global.h"
 #include "tcg/integration.h"
 #include "mp.h"
-#include "mp_region.h"
 #include "mp_tcard.h"
-void MP_BadgeCase_Open(u8 region);
-void MP_RegionCard_Open(u8 region, const struct MpCardView *friendView, const u32 *pic);
-u8 MP_RegionCard_TakeResult(void);
-bool8 MP_RegionCard_Available(void);
-void MP_RegionCard_OpenMyCard(void);
-bool8 MP_RegionCard_IsActive(void);
-bool8 MP_BadgeCase_IsActive(void);
-void MP_BadgeCase_OpenView(const struct MpCardView *view, u8 region);
+void MP_CardScreen_Open(const struct MpCardView *friendView, const u32 *pic, bool8 fadeWhite);
+bool8 MP_CardScreen_IsActive(void);
+void MP_CardScreen_Hide(void);
+u8 MP_CardScreen_TakeResult(void);
 const struct MpCardView *MP_Linkx_FriendCardView(void);
 #include "scanline_effect.h"
 #include "palette.h"
@@ -109,10 +104,8 @@ struct TrainerCardData
 
 // EWRAM
 EWRAM_DATA struct TrainerCard gTrainerCards[4] = {0};
-// Moemon Co-op: the region the player's own card shows (HOENN: Emerald's card; KANTO: FireRed's; JOHTO / SINNOH:
-// their own cards over it, src/mp/mp_regioncard.c), L / R between the regions shown
-static EWRAM_DATA u8 sCardRegion = 0;
-static EWRAM_DATA bool8 sCardRegionKeep = FALSE;
+// Moemon Co-op: the TRAINER CARD (src/mp/mp_cardscreen.c) is open over this one
+static EWRAM_DATA bool8 sCardScreen = FALSE;
 EWRAM_DATA static struct TrainerCardData *sData = NULL;
 
 //this file's functions
@@ -379,6 +372,8 @@ static void CB2_TrainerCard(void)
 
 static void CloseTrainerCard(u8 taskId)
 {
+    MP_CardScreen_Hide();   // Moemon Co-op: the TRAINER CARD's screen goes with it
+    sCardScreen = FALSE;
     SetMainCallback2(sData->callback2);
     FreeAllWindowBuffers();
     FREE_AND_SET_NULL(sData);
@@ -396,36 +391,9 @@ static void CloseTrainerCard(u8 taskId)
 #define STATE_CLOSE_CARD          14
 #define STATE_WAIT_LINK_PARTNER   15
 #define STATE_CLOSE_CARD_LINK     16
-#define STATE_SWITCH_REGION       17   // Moemon Co-op: fading out to show another region's card
+#define STATE_CARD_SCREEN_CLOSED  17   // Moemon Co-op: the TRAINER CARD closed: this card fades out behind it
 
-// Moemon Co-op: a region gets a card when it's the one we're in, we have a badge of it or beat its CHAMPION
-// (HOENN, Emerald's own card, always)
-bool8 MP_TrainerCard_RegionShown(u8 region, const struct MpCardView *friendView)
-{
-    if (region == REGION_HOENN)
-        return TRUE;
-    if (friendView)
-        return ((friendView->badges >> (region * 8)) & 0xFF) != 0 || ((friendView->cleared >> region) & 1);
-    return region == MP_Region_Current() || MP_Region_BadgeCount(region) != 0 || MP_Region_Cleared(region);
-}
-
-static u8 NextRegion(u8 from, s8 dir)
-{
-    static const u8 sOrder[REGION_COUNT] = {REGION_HOENN, REGION_KANTO, REGION_JOHTO, REGION_SINNOH};
-    u8 at = 0, k;
-    for (k = 0; k < REGION_COUNT; k++)
-        if (sOrder[k] == from)
-            at = k;
-    for (k = 1; k < REGION_COUNT; k++)
-    {
-        u8 next = sOrder[(at + (dir > 0 ? k : REGION_COUNT - k)) % REGION_COUNT];
-        if (MP_TrainerCard_RegionShown(next, NULL))
-            return next;
-    }
-    return from;
-}
-
-// The card's picture as it is in its window (every LOOK as the game draws it), for the JOHTO / SINNOH cards
+// Moemon Co-op: the card's picture as it is in its window (every LOOK as the game draws it)
 static bool8 ReadCardPic(u32 *out)
 {
     const u8 *tiles = gWindows[WIN_TRAINER_PIC].tileData;
@@ -447,122 +415,36 @@ static bool8 ReadCardPic(u32 *out)
     return TRUE;
 }
 
-static void ShowRegionCard(u8 region)
+// Moemon Co-op: the TRAINER CARD, one design for every region (src/mp/mp_cardscreen.c), shows over this one for the
+// player's own card and a friend's with the co-op add-on (CO-OP > FRIENDS > TRAINER CARD); the Union Room's and the
+// Cable Club's cards stay the game's own
+static void OpenCardScreen(void)
 {
     static u32 sPic[64 * 64];
-    MP_RegionCard_Open(region, NULL, ReadCardPic(sPic) ? sPic : NULL);
-}
-
-// L / R (and the JOHTO / SINNOH cards' answers): another region's card. HOENN and KANTO are the game's own cards
-// (drawn again from the start), JOHTO and SINNOH show over it.
-static void SwitchRegion(u8 taskId, u8 region)
-{
-    bool8 kanto = sData->cardType == CARD_TYPE_FRLG;
-    if (region == REGION_JOHTO || region == REGION_SINNOH)
-    {
-        if (MP_RegionCard_Available())
-        {
-            sCardRegion = region;
-            ShowRegionCard(region);
-        }
+    static struct MpCardView sKeep;
+    const struct MpCardView *friendView = NULL;
+    if (sData->isLink && (InUnionRoom() || (friendView = MP_Linkx_FriendCardView()) == NULL))
         return;
-    }
-    sCardRegion = region;
-    if ((region == REGION_KANTO) == kanto)
-        return;   // (this card already)
-    BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, sData->blendColor);
-    sData->mainState = STATE_SWITCH_REGION;
-}
-
-// what the JOHTO / SINNOH cards (and MY CARD) ask of this card
-static bool8 RegionCardAnswer(u8 taskId)
-{
-    u8 r = MP_RegionCard_TakeResult();
-    if (r == 0xFF)
-        return FALSE;
-    if (r == 0xFE)
+    if (friendView)
     {
-        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, sData->blendColor);
-        sData->mainState = STATE_CLOSE_CARD;
+        // a friend's card goes in the album (MY CARD > FRIENDS' CARDS) with their picture as it is here
+        sKeep = *friendView;
+        sKeep.hasPic = ReadCardPic(sKeep.pic);
+        MP_TCard_KeepFriendCard(&sKeep);
     }
-    else if (r == 0xFD)
-    {
-        // MY CARD changed the team or the title: the card drawn again
-        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, sData->blendColor);
-        sData->mainState = STATE_SWITCH_REGION;
-    }
-    else
-        SwitchRegion(taskId, r);
-    return TRUE;
-}
-
-// A friend's card (CO-OP > FRIENDS > TRAINER CARD, with the add-on): L / R their other regions' cards, SELECT their
-// BADGE CASE (looked at, not polished)
-static bool8 FriendCardButtons(u8 taskId)
-{
-    const struct MpCardView *v = MP_Linkx_FriendCardView();
-    static u32 sPic[64 * 64];
-    u8 r;
-    if (!sData->isLink || InUnionRoom() || v == NULL || MP_RegionCard_IsActive() || MP_BadgeCase_IsActive())
-        return FALSE;
-    r = MP_RegionCard_TakeResult();
-    if (r == 0xFE)
-    {
-        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, sData->blendColor);
-        sData->mainState = STATE_CLOSE_CARD;
-        return TRUE;
-    }
-    if (r != 0xFF)
-        return TRUE;   // (back to their HOENN card: this one)
-    if (JOY_NEW(SELECT_BUTTON))
-        MP_BadgeCase_OpenView(v, REGION_HOENN);
-    else if (JOY_NEW(L_BUTTON) || JOY_NEW(R_BUTTON))
-    {
-        static const u8 sOrder[REGION_COUNT] = {REGION_HOENN, REGION_KANTO, REGION_JOHTO, REGION_SINNOH};
-        u8 k, next = REGION_HOENN;
-        for (k = 1; k < REGION_COUNT; k++)
-        {
-            next = sOrder[JOY_NEW(R_BUTTON) ? k : REGION_COUNT - k];
-            if (MP_TrainerCard_RegionShown(next, v))
-                break;
-        }
-        if (next != REGION_HOENN && MP_RegionCard_Available())
-        {
-            PlaySE(SE_RG_CARD_OPEN);
-            MP_RegionCard_Open(next, v, ReadCardPic(sPic) ? sPic : NULL);
-        }
-    }
-    else
-        return FALSE;
-    return TRUE;
-}
-
-// the buttons that are the co-op card's (the player's own card only)
-static bool8 OwnCardButtons(u8 taskId)
-{
-    if (FriendCardButtons(taskId))
-        return TRUE;
-    if (sData->isLink || MP_RegionCard_IsActive() || MP_BadgeCase_IsActive())
-        return FALSE;
-    if (RegionCardAnswer(taskId))
-        return TRUE;
-    if (JOY_NEW(SELECT_BUTTON))
-        MP_BadgeCase_Open(sCardRegion == REGION_KANTO ? REGION_KANTO : sCardRegion);   // the BADGE CASE (mp_badgecase.c)
-    else if (JOY_NEW(START_BUTTON))
-        MP_RegionCard_OpenMyCard();
-    else if (JOY_NEW(L_BUTTON) || JOY_NEW(R_BUTTON))
-    {
-        u8 next = NextRegion(sData->cardType == CARD_TYPE_FRLG ? REGION_KANTO : REGION_HOENN, JOY_NEW(R_BUTTON) ? 1 : -1);
-        PlaySE(SE_RG_CARD_OPEN);
-        SwitchRegion(taskId, next);
-    }
-    else
-        return FALSE;
-    return TRUE;
+    MP_CardScreen_Open(friendView, ReadCardPic(sPic) ? sPic : NULL, sData->blendColor == RGB_WHITE);
+    sCardScreen = TRUE;
 }
 
 static void Task_TrainerCard(u8 taskId)
 {
+    // Moemon Co-op: the TRAINER CARD over this one has closed: so does this card
+    if (sCardScreen && !MP_CardScreen_IsActive())
+    {
+        sCardScreen = FALSE;
+        MP_CardScreen_TakeResult();
+        sData->mainState = STATE_CARD_SCREEN_CLOSED;
+    }
     switch (sData->mainState)
     {
     // Draw card initially
@@ -601,6 +483,7 @@ static void Task_TrainerCard(u8 taskId)
         break;
     // Fade in
     case 7:
+        OpenCardScreen();   // Moemon Co-op
         if (gWirelessCommType == 1 && gReceivedRemoteLinkPlayers == TRUE)
         {
             LoadWirelessStatusIndicatorSpriteGfx();
@@ -616,17 +499,6 @@ static void Task_TrainerCard(u8 taskId)
         {
             PlaySE(SE_RG_CARD_OPEN);
             sData->mainState = STATE_HANDLE_INPUT_FRONT;
-            // Moemon Co-op: JOHTO's and SINNOH's cards show over this one
-            if (!sData->isLink && (sCardRegion == REGION_JOHTO || sCardRegion == REGION_SINNOH) && MP_RegionCard_Available())
-                ShowRegionCard(sCardRegion);
-            // a friend's card goes in the album (MY CARD > FRIENDS' CARDS) with their picture as it is here
-            if (sData->isLink && !InUnionRoom() && MP_Linkx_FriendCardView() != NULL)
-            {
-                static struct MpCardView sKeep;
-                sKeep = *MP_Linkx_FriendCardView();
-                sKeep.hasPic = ReadCardPic(sKeep.pic);
-                MP_TCard_KeepFriendCard(&sKeep);
-            }
         }
         break;
     case 9:
@@ -646,9 +518,6 @@ static void Task_TrainerCard(u8 taskId)
             FlipTrainerCard();
             PlaySE(SE_RG_CARD_FLIP);
             sData->mainState = STATE_WAIT_FLIP_TO_BACK;
-        }
-        else if (OwnCardButtons(taskId))   // Moemon Co-op: L / R the regions, SELECT the BADGE CASE, START MY CARD
-        {
         }
         else if (JOY_NEW(B_BUTTON))
         {
@@ -671,10 +540,7 @@ static void Task_TrainerCard(u8 taskId)
         }
         break;
     case STATE_HANDLE_INPUT_BACK:
-        if (OwnCardButtons(taskId))   // Moemon Co-op
-        {
-        }
-        else if (JOY_NEW(B_BUTTON))
+        if (JOY_NEW(B_BUTTON))
         {
             if (gReceivedRemoteLinkPlayers && sData->isLink && InUnionRoom() == TRUE)
             {
@@ -723,17 +589,12 @@ static void Task_TrainerCard(u8 taskId)
         if (!UpdatePaletteFade())
             CloseTrainerCard(taskId);
         break;
-    case STATE_SWITCH_REGION:
-        // Moemon Co-op: the same screen again, for another region (or with a new team or title)
+    case STATE_CARD_SCREEN_CLOSED:
+        // Moemon Co-op: the TRAINER CARD closed (its screen stays black until this card has gone)
         if (!UpdatePaletteFade())
         {
-            void (*callback)(void) = sData->callback2;
-            FreeAllWindowBuffers();
-            FREE_AND_SET_NULL(sData);
-            DestroyTask(taskId);
-            SetVBlankHBlankCallbacksToNull();
-            sCardRegionKeep = TRUE;
-            ShowPlayerTrainerCard(callback);
+            BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, sData->blendColor);
+            sData->mainState = STATE_CLOSE_CARD;
         }
         break;
     case STATE_WAIT_FLIP_TO_FRONT:
@@ -986,22 +847,6 @@ static void TrainerCard_GenerateCardForPlayer(struct TrainerCard *trainerCard)
     // Moemon Kai: every card of the card game collected (src/tcg) is a star too
     if (Tcg_CardMasterStar() && trainerCard->stars < 4)
         trainerCard->stars++;
-    // Moemon Co-op: KANTO's card is FireRed's: its badges, its colors by KANTO's stars, the card's team as icons
-    if (sCardRegion == REGION_KANTO)
-    {
-        static struct MpCardView sView;
-        u8 i;
-        trainerCard->version = VERSION_FIRE_RED;
-        trainerCard->hasAllFrontierSymbols = FALSE;
-        MP_CardView_FillOwn(&sView);
-        trainerCard->stars = MP_CardView_Stars(&sView, REGION_KANTO);
-        if (trainerCard->stars > 4)
-            trainerCard->stars = 4;
-        for (i = 0; i < PARTY_SIZE; i++)
-            trainerCard->monSpecies[i] = i < sView.teamCount ? sView.team[i] : SPECIES_NONE;
-        trainerCard->monIconTint = MON_ICON_TINT_NORMAL;
-        trainerCard->shouldDrawStickers = FALSE;
-    }
 
     if (trainerCard->gender == FEMALE)
         trainerCard->unionRoomClass = gUnionRoomFacilityClasses[(trainerCard->trainerId % NUM_UNION_ROOM_CLASSES) + NUM_UNION_ROOM_CLASSES];
@@ -1079,8 +924,7 @@ static void SetDataFromTrainerCard(void)
 
     for (i = 0, badgeFlag = FLAG_BADGE01_GET; badgeFlag < FLAG_BADGE01_GET + NUM_BADGES; badgeFlag++, i++)
     {
-        // Moemon Co-op: KANTO's card shows KANTO's badges
-        if (FlagGet(sData->cardType == CARD_TYPE_FRLG && !sData->isLink ? MP_Region_BadgeFlag(REGION_KANTO, i) : badgeFlag))
+        if (FlagGet(badgeFlag))
             sData->badgeCount[i]++;
     }
 }
@@ -2061,10 +1905,6 @@ static bool8 Task_EndCardFlip(struct Task *task)
 
 void ShowPlayerTrainerCard(void (*callback)(void))
 {
-    // Moemon Co-op: the card of the region we're in (unless switching between them)
-    if (!sCardRegionKeep)
-        sCardRegion = MP_Region_Current() < REGION_COUNT ? MP_Region_Current() : REGION_HOENN;
-    sCardRegionKeep = FALSE;
     sData = AllocZeroed(sizeof(*sData));
     sData->callback2 = callback;
     if (callback == CB2_ReshowFrontierPass)
