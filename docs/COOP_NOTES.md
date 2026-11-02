@@ -3013,6 +3013,9 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   LANCE is shown from behind like STEVEN (MP_PartnerShowsBack / MP_PartnerBackPic in battle_tower.c: a partner
   listed in sQzPartnerLooks gets its LOOK's back picture, mp_avatar.c MP_Avatar_NamedBackPic, in the Triple Battle
   second ally's slot, free when no friend is in the battle); any other partner keeps the Frontier layout.
+- (1.68.1: it never begins any more, the user's "Quetzal's fan additions aren't wanted": QzGiovanniStoryCanStart is
+  always FALSE and GIOVANNI isn't at TOHJO FALLS; a save already in it, VAR 0x506C set and 0x1319 not, can still see
+  it through by TOHJO's radio: GiovanniStoryBegun; test story_giovanni. What follows is how it works.)
 - GIOVANNI's alternate past (JOHTO postgame; qz_specials.c, Quetzal's specials 693-703 and 792 read from its ROM -
   note Emerald's order FlagSet 0x80E4788, FlagToggle, FlagClear 0x80E47D8, FlagGet 0x80E4800; earlier notes had Set /
   Clear swapped): GIOVANNI at TOHJO FALLS asks a player in Team Rocket's colors (mp_avatar.c

@@ -100,8 +100,9 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       tools/quetzal_port/fix_kanto_gifts.py), FIVE ISLAND's MEMORIAL PILLAR FireRed's TM42 (Quetzal: REAPER CLOTH,
       fix_kanto_tms.py). FireRed's own key items the game hasn't got stay out: FAME CHECKER, TEACHY TV, POWDER JAR,
       the TOWN MAP (the POKéNAV / POKéGEAR maps). JOHTO against pret/pokecrystal, to do: BILL's family gives Crystal's
-      EEVEE (Quetzal: ROTOM), MT. MORTAR's KARATE KING his TYROGUE, ELM's lab has a Quetzal ARCEUS scene, the RADIO
-      TOWER's prizes and the DIRECTOR's gift, MR. POKéMON's EXP. SHARE for the RED SCALE)
+      EEVEE (Quetzal: ROTOM) [x], MT. MORTAR's KARATE KING his TYROGUE [x] (fix_johto_gifts.py, test johto_gifts);
+      GIOVANNI's quest (Quetzal's) never begins [x] (it was ELM's ARCEUS scene's way in; test story_giovanni); the
+      RADIO TOWER's prizes and the DIRECTOR's gift, MR. POKéMON's EXP. SHARE for the RED SCALE: to do)
 - [x] A non-HOENN gym leader beaten: the gym's unbattled trainers count as beaten (mp_coop.c MP_Coop_GymLeaderBeaten;
       test sinnoh_gym)
 - [x] BADGES count every region's badges (the continue screen and the SAVE window: MP_Region_TotalBadges)

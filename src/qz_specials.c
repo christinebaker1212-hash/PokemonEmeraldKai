@@ -1769,6 +1769,14 @@ u16 QzSSAnneExteriorEventStep(void)
 
 static bool8 InGiovanniPast(void) { return FlagGet(GIOVANNI_PAST); }
 
+// Moemon Kai: Quetzal's own addition, not Crystal's or HeartGold / SoulSilver's (the user, 2026-11-02: Quetzal's fan
+// additions, GIOVANNI's quest first, aren't wanted): it never begins any more; a save already in it (begun, not over)
+// can still see it through
+static bool8 GiovanniStoryBegun(void)
+{
+    return VarGet(VAR_QZ_0x506C) != 0 && !FlagGet(GIOVANNI_DONE);
+}
+
 static void QzGiovanniRockets(void)
 {
     if (InGiovanniPast())
@@ -1814,10 +1822,9 @@ static bool8 CelebiCanTravel(bool8 leadOnly)
 u16 QzGiovanniStoryUpdateFlags(void)
 {
     QzGiovanniRockets();
-    if (OnMap(35, 94))   // TOHJO FALLS: GIOVANNI waits once the League is beaten, before and after his story
+    if (OnMap(35, 94))   // TOHJO FALLS: GIOVANNI waits only for a save already in his story (GiovanniStoryBegun)
     {
-        if (!InGiovanniPast() && MP_Region_Cleared(MP_Region_Current())
-         && (FlagGet(GIOVANNI_DONE) || VarGet(VAR_QZ_0x506C) == 0))
+        if (!InGiovanniPast() && GiovanniStoryBegun())
             FlagClear(FLAG_QZ_0x10D4);
         else
             FlagSet(FLAG_QZ_0x10D4);
@@ -1871,14 +1878,14 @@ u16 QzGiovanniStoryNewBarkHouseFlags(void)
 // 694: GIOVANNI asks the player to come along
 u16 QzGiovanniStoryCanStart(void)
 {
-    gSpecialVar_Result = !FlagGet(GIOVANNI_DONE) && VarGet(VAR_QZ_0x506C) == 0 && CelebiCanTravel(TRUE) && RocketLook();
+    gSpecialVar_Result = FALSE;   // (never begins: GiovanniStoryBegun)
     return gSpecialVar_Result;
 }
 
 // 792: TOHJO FALLS' radio: CELEBI can go back to the past once the story has begun
 u16 QzGiovanniStoryTohjoSignCheck(void)
 {
-    gSpecialVar_Result = (FlagGet(GIOVANNI_DONE) || VarGet(VAR_QZ_0x506C) != 0) && CelebiCanTravel(FALSE);
+    gSpecialVar_Result = GiovanniStoryBegun() && CelebiCanTravel(FALSE);   // (a save already in the story finishes it)
     return gSpecialVar_Result;
 }
 
