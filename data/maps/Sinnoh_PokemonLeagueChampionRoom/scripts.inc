@@ -19,6 +19,7 @@ Sinnoh_PokemonLeagueChampionRoom_EventScript_Person1_Defeated::
 	msgbox Sinnoh_PokemonLeagueChampionRoom_Text_Person1After, MSGBOX_DEFAULT
 	closemessage
 	call Quetzal_EventScript_835F6E4
+	call EventScript_SinnohTicket
 	setrespawn HEAL_LOCATION_SINNOH_POKEMON_LEAGUE
 	fadescreenspeed 1, 24
 	special GameClear

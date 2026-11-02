@@ -353,6 +353,13 @@ u8 *StringExpandPlaceholders(u8 *dest, const u8 *src)
                 dest = StringExpandPlaceholders(dest, S3D_Text(bank, msg));
                 break;
             }
+            if (placeholderId >= PLACEHOLDER_ID_SINNOH_VAR4 && placeholderId <= PLACEHOLDER_ID_SINNOH_VAR6)
+            {
+                // Moemon Kai: SINNOH's text's string slots 3-5 (src/sinnoh/s3d_text.c)
+                extern u8 gSinnohStrVar[3][64];
+                dest = StringExpandPlaceholders(dest, gSinnohStrVar[placeholderId - PLACEHOLDER_ID_SINNOH_VAR4]);
+                break;
+            }
             expandedString = GetExpandedPlaceholder(placeholderId);
             dest = StringExpandPlaceholders(dest, expandedString);
             break;

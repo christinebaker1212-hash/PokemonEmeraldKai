@@ -172,7 +172,8 @@ def elite(name, key, n, widths):
 
 def champion(name, key, widths):
     """The CHAMPION: after all four, the battle; the win makes SINNOH cleared (Quetzal_EventScript_835F6E4: the
-    region's record, then a save) and plays the HALL OF FAME (special GameClear), back at the LEAGUE's CENTER after"""
+    region's record, then a save), gives SINNOH's S.S. TICKET (EventScript_SinnohTicket: the boat to the other regions)
+    and plays the HALL OF FAME (special GameClear), back at the LEAGUE's CENTER after"""
     trainer, intro, defeat, after = CHAMPION
     label, t = '%s_EventScript_%s' % (name, key), '%s_Text_%s' % (name, key)
     checks = ''.join('\tgoto_if_unset 0x%X, %s_NotYet\n' % (trainer_flag(e[0]), label) for e in ELITE)
@@ -182,7 +183,7 @@ def champion(name, key, widths):
             '\tmsgbox %sAgain, MSGBOX_NPC\n\tend\n\n'
             '%s_NotYet::\n\tmsgbox %sNotYet, MSGBOX_NPC\n\tend\n\n'
             '%s_Defeated::\n\tmsgbox %sAfter, MSGBOX_DEFAULT\n\tcloseMessage\n'
-            '\tcall Quetzal_EventScript_835F6E4\n\tsetrespawn %s\n'
+            '\tcall Quetzal_EventScript_835F6E4\n\tcall EventScript_SinnohTicket\n\tsetrespawn %s\n'
             '\tfadescreenspeed 1, 24\n\tspecial GameClear\n\twaitstate\n\treleaseall\n\tend\n\n'
             % (label, checks, trainer, t, t, label, t, label, t, label, t, heal)).replace('closeMessage', 'closemessage')
     texts = ''.join('%s%s:\n%s\n' % (t, sfx, wrap(w, widths, name)) for sfx, w in

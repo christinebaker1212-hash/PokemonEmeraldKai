@@ -296,7 +296,18 @@ EventScript_RegionPickAll_Pick::
 	specialvar VAR_RESULT, MP_RegionBoatPick   @ (the choice -> the region, 0x7F: EXIT)
 	return
 
-@ CANALAVE's harbor sailor: the boat to the other regions (SINNOH's port)
+@ SINNOH's S.S. TICKET, once its CHAMPION is beaten (the CHAMPION's win; Platinum has no ticket of its own, and a game
+@ begun in SINNOH has no other way to the boat): as HOENN's from Dad, JOHTO's from ELM, KANTO's from BILL
+EventScript_SinnohTicket::
+	checkitem ITEM_SS_TICKET, 1
+	goto_if_eq VAR_RESULT, TRUE, EventScript_SinnohTicket_Had
+	giveitem ITEM_SS_TICKET
+EventScript_SinnohTicket_Had::
+	return
+
+@ CANALAVE's harbor sailor: the boat to the other regions (SINNOH's port). Shown only while the boat can sail
+@ (FLAG_SINNOH_HIDE_REGION_BOAT: s3d_scrcmd.c, SINNOH's ELITE FOUR beaten and the S.S. TICKET, as JOHTO's and
+@ KANTO's ports) and for the first boat in
 EventScript_SinnohRegionBoat::
 	lock
 	faceplayer

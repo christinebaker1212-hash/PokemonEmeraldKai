@@ -1418,14 +1418,24 @@ static const struct { u16 trainer; const char *look; } sQzPartnerLooks[] = {
     {TRAINER_QZ_4992, "kai_silver"},
 };
 
+bool8 S3D_Gfx_PartnerBack(u16 trainerId, const u8 **tiles, const u16 **pal, const char **look);
+u16 MP_Avatar_TilesBackPic(const u8 *tiles, const u16 *pal);
+
 static void SetQzPartner(u16 trainer)
 {
     u32 i;
+    const u8 *tiles;
+    const u16 *pal;
+    const char *look;
     sQzPartnerTrainer = trainer;
     sQzPartnerBackPic = 0xFFFF;
     for (i = 0; i < ARRAY_COUNT(sQzPartnerLooks); i++)
         if (sQzPartnerLooks[i].trainer == trainer)
             sQzPartnerBackPic = MP_Avatar_NamedBackPic(sQzPartnerLooks[i].look);
+    // SINNOH's partners (DAWN, LUCAS, BARRY, CHERYL, MIRA, RILEY, BUCK, MARLEY): shown from behind too, with Platinum's
+    // back (sinnoh/platinum_gfx.pak) or, for DAWN and LUCAS, Kai's LOOK's
+    if (sQzPartnerBackPic == 0xFFFF && S3D_Gfx_PartnerBack(trainer, &tiles, &pal, &look))
+        sQzPartnerBackPic = look ? MP_Avatar_NamedBackPic(look) : MP_Avatar_TilesBackPic(tiles, pal);
 }
 
 // Is the in-game partner shown from behind (STEVEN, LANCE), the battle laid out as STEVEN's? Else as a Frontier

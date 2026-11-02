@@ -50,6 +50,11 @@ SINNOH_SET_BIKE, SINNOH_PARTY_SPECIES, SINNOH_HELD_ITEM, SINNOH_OBJECT_POS, SINN
 SINNOH_SET_BG, SINNOH_BUFFER_RIVAL_STARTER, SINNOH_MOVEMENT_TYPE, SINNOH_LOCAL_DEX, SINNOH_STOP_MUSIC = 33, 34, 35, 36, 37
 SINNOH_BATTLE_WON, SINNOH_ADD_VAR, SINNOH_BADGE_COUNT, SINNOH_PREVIOUS_MAP, SINNOH_DAYCARE_EGG = 38, 39, 40, 41, 42
 SINNOH_BUFFER_TEXT, SINNOH_QUERY, SINNOH_DEX_RATING, SINNOH_MESSAGE_VAR = 43, 44, 45, 46
+SINNOH_TV, SINNOH_MESSAGE_BANK_VAR = 47, 48   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
+(TVCALL_STATUS, TVCALL_FRAMING, TVCALL_FINISH, TVCALL_SEGMENT_ID, TVCALL_SEGMENT, TVCALL_COMMERCIAL, TVCALL_NEXT,
+ TVCALL_INTERVIEW_ID, TVCALL_INTERVIEW_MESSAGE, TVCALL_INTERVIEW_SAVE, TVCALL_INTERVIEW_OK, TVCALL_WORD,
+ TVCALL_HIDDEN_ITEM, TVCALL_NAME_RATED, TVCALL_STORAGE, TVCALL_VILLA, TVCALL_AMITY, TVCALL_QUESTION) = range(18)
+TV_FRAMING = {'LoadTVGreeting': 0, 'LoadTVSegmentIntro': 1, 'LoadTVFarewell': 2, 'LoadTVFarewellExtended': 3}
 # Platinum's POKéDEX ratings (its src/unk_0205DFC4.c Pokedex_GetRatingMessageID_*): (up to this many, message) in
 # pokedex_ratings' bank; the last rows are for a complete dex. National: (caught up to, message, female's message)
 DEX_RATING_LOCAL = [(15, 'RowanPokemonSeenUpTo15'), (30, 'RowanPokemonSeenOver15'), (45, 'RowanPokemonSeenOver30'),
@@ -66,6 +71,7 @@ DEX_RATING_NATIONAL = [(39, 'OakPokemonCaughtUnder40'), (59, 'OakPokemonCaught40
                        (481, 'OakPokemonCaught476'),
                        (0xFFFF, 'OakCompleteNationalDex_Male', 'OakCompleteNationalDex_Female')]
 VAR_SINNOH_STARTER = 0x52F8      # (include/mp_region.h: the starter picked from ROWAN's briefcase)
+FLAG_SINNOH_HIDE_REGION_BOAT = 0x3D3D   # (include/mp_region.h: CANALAVE's ferry sailor, shown when the boat can sail)
 FLAG_SINNOH_HAS_PARTNER = 0x3D3C   # (include/mp_region.h: Platinum's walking partner, SetHasPartner)
 
 # Platinum's comparisons (CompareVar / CheckFlag then GoToIf / CallIf): the same codes as this game's
@@ -551,7 +557,10 @@ class FileConverter:
             op = 'checkitem' if cmd == 'CheckItem' else 'checkitemspace'
             return ['%s %s, %s' % (op, self.arg(a[0]), self.arg(a[1])), 'copyvar %s, VAR_RESULT' % self.var(a[2])]
         if cmd in ('AddItem', 'RemoveItem'):
-            return ['%s %s, %s' % (cmd.lower(), self.arg(a[0]), self.arg(a[1])), 'copyvar %s, VAR_RESULT' % self.var(a[2])]
+            out = ['%s %s, %s' % (cmd.lower(), self.arg(a[0]), self.arg(a[1])), 'copyvar %s, VAR_RESULT' % self.var(a[2])]
+            if cmd == 'AddItem':
+                out.append('special MP_GatchaTicketToast')   # (Kai's MOEGATCHA TICKET for a story item, as Std_ObtainItem)
+            return out
         if cmd == 'GoToIfCannotFitItem':
             return ['checkitemspace %s, %s' % (self.arg(a[0]), self.arg(a[1])), 'copyvar %s, VAR_RESULT' % self.var(a[2]),
                     'goto_if_eq VAR_RESULT, 0, %s' % self.label(a[3])]
@@ -761,7 +770,7 @@ class FileConverter:
         if cmd == 'GiveRunningShoes':
             return ['setflag FLAG_SYS_B_DASH']
         if cmd == 'GiveJournal':
-            return ['additem ITEM_JOURNAL']
+            return ['additem ITEM_JOURNAL', 'special MP_GatchaTicketToast']
         if cmd in ('InitSizeContestRecord', 'RandomizeJubilifeLottery', 'InitDailyRandomLevel', 'SetStepFlag'):
             return []
         if cmd == 'SetObjectFlagIsPersistent':
@@ -777,7 +786,7 @@ class FileConverter:
             return ['givemon %s, %s, %s' % (self.arg(a[0]), self.arg(a[1]), item), 'setvar %s, 1' % self.var(a[3]),
                     'goto_if_ne VAR_RESULT, MON_CANT_GIVE, %s' % done, 'setvar %s, 0' % self.var(a[3]), '%s:' % done]
         if cmd == 'EnablePoketch':
-            return ['additem ITEM_POKETCH']   # (Kai's POKéTCH is the key item: src/sinnoh/poketch.c)
+            return ['additem ITEM_POKETCH', 'special MP_GatchaTicketToast']   # (Kai's POKéTCH is the key item: src/sinnoh/poketch.c)
         if cmd in ('AddContestBackdrop', 'SetPlayerState', 'ChangePlayerState', 'AddAccessory'):
             return []                       # (SUPER CONTESTS' accessories, not decided yet; the player's poses)
         if cmd == 'CanFitAccessory':
@@ -834,6 +843,48 @@ class FileConverter:
                 raise Unsupported('MessageVar without a bank')
             return [self.sinnoh(SINNOH_MESSAGE_VAR, self.dec.banks[self.bank], self.var(a[0])),
                     'message gSinnohMessage', 'waitmessage']
+        # SINNOH's TV (src/sinnoh/s3d_tv.c: Platinum's broadcast, its reporters' interviews and what they record)
+        if cmd == 'CheckBroadcastStatus':
+            return [self.sinnoh(SINNOH_TV, TVCALL_STATUS, self.var(a[0]))]
+        if cmd in TV_FRAMING:
+            return [self.sinnoh(SINNOH_TV, TVCALL_FRAMING | TV_FRAMING[cmd] << 8, self.var(a[0]), self.var(a[1]))]
+        if cmd == 'LoadTVCommercial':
+            return [self.sinnoh(SINNOH_TV, TVCALL_COMMERCIAL, self.var(a[0]), self.var(a[1]))]
+        if cmd == 'LoadTVSegment':
+            return [self.sinnoh(SINNOH_TV, TVCALL_SEGMENT_ID, self.var(a[0])),
+                    self.sinnoh(SINNOH_TV, TVCALL_SEGMENT, self.var(a[1]), self.var(a[2]))]
+        if cmd == 'GetNextTVSegmentID':
+            return [self.sinnoh(SINNOH_TV, TVCALL_NEXT, self.var(a[0]))]
+        if cmd == 'FinishTVProgram':
+            return [self.sinnoh(SINNOH_TV, TVCALL_FINISH)]
+        if cmd == 'TVBroadcastDummy':
+            return []
+        if cmd == 'MessageFromBank':
+            return [self.sinnoh(SINNOH_MESSAGE_BANK_VAR, self.var(a[0]), self.var(a[1])),
+                    'message gSinnohMessage', 'waitmessage']
+        if cmd == 'CheckTVInterviewEligible':
+            return [self.sinnoh(SINNOH_TV, TVCALL_INTERVIEW_OK, self.arg(a[0]), self.var(a[1]))]
+        if cmd == 'LoadTVInterviewMessage':
+            return [self.sinnoh(SINNOH_TV, TVCALL_INTERVIEW_ID, self.var(a[0])),
+                    self.sinnoh(SINNOH_TV, TVCALL_INTERVIEW_MESSAGE, self.var(a[1]), self.var(a[2]))]
+        if cmd == 'SaveTVInterviewResponse':
+            return [self.sinnoh(SINNOH_TV, TVCALL_INTERVIEW_SAVE, self.var(a[0]), self.var(a[1]))]
+        if cmd == 'ChooseCustomMessageWord':
+            # (one word on the game's own easy chat: GABBY and TY's "Interview" screen)
+            return ['special Sinnoh_TvChooseWord', 'waitstate',
+                    self.sinnoh(SINNOH_TV, TVCALL_WORD, self.var(a[0]), self.var(a[1]))]
+        if cmd == 'SaveTVSegmentHiddenItem':
+            return [self.sinnoh(SINNOH_TV, TVCALL_HIDDEN_ITEM, self.arg(a[0]))]
+        if cmd == 'ScrCmd_2B8':
+            return [self.sinnoh(SINNOH_TV, TVCALL_NAME_RATED, self.var(a[0]))]
+        if cmd == 'SaveTVSegmentPokemonStorageBulletin':
+            return [self.sinnoh(SINNOH_TV, TVCALL_STORAGE)]
+        if cmd == 'SaveTVSegmentHomeAndManorNoFurniture':
+            return ['setvar 0x400F, 0', self.sinnoh(SINNOH_TV, TVCALL_VILLA, '0x400F', 1)]
+        if cmd == 'SaveTVSegmentHomeAndManor':
+            return [self.sinnoh(SINNOH_TV, TVCALL_VILLA, self.arg(a[0]), 0)]
+        if cmd == 'ScrCmd_27C':
+            return [self.sinnoh(SINNOH_TV, TVCALL_AMITY, self.value(a[0]), self.var(a[1]))]
         if cmd == 'StartCatchingTutorial':
             # (Emerald's WALLY tutorial with the counterpart and a BIDOOF: battle_setup.c Sinnoh_CatchingTutorial)
             return ['special SavePlayerParty', 'special Sinnoh_CatchingTutorial', 'waitstate', 'special LoadPlayerParty']
@@ -1159,8 +1210,8 @@ def _stub_body(name, label):
 STAND_INS = re.compile(r'^Sinnoh_EventScript_(Briefcase|RowanLab|DistortionEnter|Legend\w+|Story\d+)$')
 
 
-# Kai's systems that are always there, whatever the story (the ferry between the regions: a person Platinum's story
-# shows only later keeps it shown)
+# Kai's systems shown by Kai's own rules, whatever Platinum's story does with the person (the ferry between the regions:
+# FLAG_SINNOH_HIDE_REGION_BOAT, shown while the boat can sail, as JOHTO's and KANTO's ports)
 KAI_ALWAYS = re.compile(r'^\tgoto (EventScript_SinnohRegionBoat)\n$')
 
 
@@ -1222,7 +1273,7 @@ def people(root, p, low, name, done):
         gfx = 'OBJ_EVENT_GFX_VAR_%s' % o['graphics_id'][-1] if re.match(r'^OBJ_EVENT_GFX_VAR_[0-9A-F]$', o['graphics_id']) \
             else '0'                       # (a look the script picks: the game's VAR_OBJ_GFX_ID_n)
         if new is None and person and script != '0x0' and KAI_ALWAYS.match(_stub_body(name, script) or ''):
-            objs.append((i + 1, 0, mine['x'], mine['y'], None, '0'))
+            objs.append((i + 1, FLAG_SINNOH_HIDE_REGION_BOAT, mine['x'], mine['y'], None, '0'))
             continue
         objs.append((i + 1, flag or 0, o['x'] - p['x0'] * 32, o['z'] - p['z0'] * 32, new, gfx))
     trig, covered = [], set()
@@ -1368,7 +1419,10 @@ def write(lines, out_path):
 
 
 def stub(out_path):
+    import tv_data
     lines = ['%s::\n\tend' % lab for lab in sorted(referenced())] + map_index([]) + ['gSinnohPlatinumNewGame::', '\tend'] + stub_dex_ratings()
+    lines += ['gSinnohTvBroadcast::', '\tend']
+    lines += tv_data.stub_lines()
     write(lines, out_path)
     print('%s: %d stubs (no decomp)' % (os.path.relpath(out_path, ROOT), len(referenced())))
 
@@ -1382,6 +1436,7 @@ def build(root, out_path):
             wanted[m.group(1)].add(int(m.group(2)))
     tables = map_tables(root, wanted)
     wanted['init_new_game'].add(1)        # (Platinum's new game: its flags, src/sinnoh/s3d_scrcmd.c Sinnoh_PlatinumStoryBegin)
+    wanted['tv_broadcast'].add(1)         # (SINNOH's TVs: field_control_avatar.c, src/sinnoh/s3d_tv.c)
     # the common scripts the converted ones call, and the ones those call
     queue = [(low, n) for low in wanted for n in wanted[low]]
     while queue:
@@ -1413,8 +1468,12 @@ def build(root, out_path):
     lines += mt
     lines += ['SinnohP_Movement_SmashRock:', '\trock_smash_break', '\tstep_end']
     lines += dex_rating_tables(root)
+    import tv_data
+    lines += tv_data.lines(converter(root, 'common').dec, root)   # (SINNOH's TV: src/sinnoh/s3d_tv.c)
     new_game = converter(root, 'init_new_game').entry_label(1)
     lines += ['gSinnohPlatinumNewGame::', '\tgoto %s' % new_game if new_game in done else '\tend']
+    tv = converter(root, 'tv_broadcast').entry_label(1)
+    lines += ['gSinnohTvBroadcast::', '\tgoto %s' % tv if tv in done else '\tend']
     if new_game not in done:
         print('gen_scripts: Platinum\'s new game script doesn\'t convert: %s' % converter(root, 'init_new_game').check(1),
               file=sys.stderr)

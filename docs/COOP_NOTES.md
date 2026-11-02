@@ -3655,10 +3655,38 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   of the area; the map's own where Platinum has none), as gSinnohPlatinumMapScripts. s3d_scrcmd.c
   Sinnoh_PlatinumMapScripts (called from overworld.c LoadCurrentMapData / LoadSaveblockMapHeader) swaps them into a
   RAM copy of gMapHeader's events (warps and bg events copied too: SetWarpEventPos / SetBgEventPos move them).
-  Sinnoh_PlatinumStoryBegin (`mp platinumstory`) sets the flag and runs Platinum's scripts_init_new_game: on for a new
-  game begun in SINNOH, a first boat in, and a save in SINNOH whose story hasn't begun (no SINNOH badge, no starter);
-  saves further along keep the written story they began (tests of Kai's systems play as those: `mp setflag 0x3D39`,
-  `mp clearflag 0x3D3B`). Kai's ferry sailor stays shown (gen_scripts.py KAI_ALWAYS).
+  Sinnoh_PlatinumStoryBegin (`mp platinumstory`) sets the flag and runs Platinum's scripts_init_new_game: SINNOH is
+  always Platinum's story (the user, 2026-11-02: no saves partway through the written one to keep, no migration), so
+  any SINNOH map load without the flag begins it. Platinum's "\r" is a new box (both lines scroll away): build_text.py
+  makes it this game's page break (its one-line scroll put a page's second line out of the box and stalled the text).
+  Platinum's messages have six string slots: 0-2 are STR_VAR_1-3, 3-5 PLACEHOLDER_ID_SINNOH_VAR4-6 (gSinnohStrVar).
+- CANALAVE's ferry sailor (2026-11-02, the user: parity with JOHTO's and KANTO's ports): shown only while the boat can
+  sail (SINNOH's ELITE FOUR beaten and the S.S. TICKET: qz_specials.c MP_Region_CanSail) and on the first boat in
+  (VAR_SINNOH_ARRIVAL 1, the sailor's greeting): FLAG_SINNOH_HIDE_REGION_BOAT 0x3D3D, set on each SINNOH map load
+  (s3d_scrcmd.c Sinnoh_PlatinumMapScripts) and given to the sailor by gen_scripts.py KAI_ALWAYS. SINNOH's S.S. TICKET
+  comes with the CHAMPION's win (data/scripts/mp_region.inc EventScript_SinnohTicket, the game's own "obtained"
+  message; Platinum has no ticket of its own and a game begun in SINNOH had no way to one). Customs and the GLOBAL PC
+  were already the shared ones (the CENTERs' PCs are MB_PC tiles: EventScript_PC). Test sinnoh_ferry (`mp sinnohticket`).
+- Partners shown from behind (2026-11-02): battle_tower.c SetQzPartner also asks s3d_gfx.c S3D_Gfx_PartnerBack for a
+  SINNOH partner: Platinum's own back for BARRY, CHERYL, MIRA, RILEY, BUCK and MARLEY (sinnoh/platinum_gfx.pak "BACK":
+  build_gfx.py backs(), each class's back.png drawn 0.8 times as big into four 64x64 frames, five-frame backs keeping
+  0, 1, 3, 4 and BARRY's eight 0, 1, 3, 5), Kai's LOOKs' for DAWN and LUCAS (kai_dawn / kai_lucas), into the second
+  partner slot (mp_avatar.c MP_Avatar_TilesBackPic). The catching tutorial's reshown screen (after the BAG) keeps its
+  trainer (reshow_battle_screen.c gWallyTutorialBackPic). Tests sinnoh_platinum_partner, sinnoh_platinum_tag.
+- SINNOH's TV (2026-11-02, the user: "Pokemon Platinum's TV system be built and function properly"): src/sinnoh/s3d_tv.c,
+  ported from Platinum's tv_segment.c, ov6_022465FC.c, tv_commercials.c and scrcmd_tv_broadcast.c. A SINNOH TV tile
+  (MB_TELEVISION: field_control_avatar.c) runs Platinum's own broadcast script (gSinnohTvBroadcast); the program on air
+  is Platinum's weekly schedule's for the quarter hour (tv.narc, emitted by tools/sinnoh/tv_data.py into
+  platinum_scripts.inc; MOEMON_TEST_TV_PROGRAM for tests): a greeting by the time of day, up to four segments, a
+  farewell, then commercials until the next quarter hour (the closed features' commercials never air). Messages by
+  Platinum's own names (S3D_TextNamed: tv_data.py's name-hash table; banks without names use "pl_msg_<bank>_<n>").
+  TRAINER SIGHTINGS / RECORDS / INTERVIEWS segments are kept four each (a new one replacing one aired three times) in
+  "<save>.region" chunk TVBC, recorded in SINNOH from the game's own events: wild battles (battle_setup.c), fishing
+  (field_player_avatar.c), shopping (shop.c), eggs (egg_hatch.c), the GREAT MARSH (safari_zone.c), hidden items, the name
+  rater, the PC bulletin, BERRY crops, POKé BALL effects (the SEAL CLUB SHOW, in the Seals' place). The reporters ask for
+  one word on the game's own easy chat (GABBY and TY's screen: special Sinnoh_TvChooseWord). Online-only and Underground
+  segments never air; those about systems SINNOH lacks yet (contests, photos, BERRY patches, roamers, the VILLA) wait
+  for them (docs/SINNOH_CHECKLIST.md). `mp tv`, `mp tvwatch`, `mp tvcatch SPECIES BALLS`. Test sinnoh_tv.
   The user's rules: Kai's systems stay and SINNOH uses them (tag battles = Kai's partner battle, battle_tower.c
   MP_StartPartnerBattle via DoSpecialTrainerBattle 15, with STEVEN's party pick; two trainers = battle_setup.c
   MP_StartTwoTrainerBattle; AddFreeCamera = SpawnCameraObject, which s3d.c SetupView follows; the briefcase =

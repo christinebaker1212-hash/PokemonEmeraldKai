@@ -1,0 +1,33 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp warp 40,3,10,21
+wait 120
+waitfor field 1000
+mp getflag 15677
+shot f_before
+mp regionclear 3
+mp warp 40,3,10,21
+wait 120
+waitfor field 1000
+mp getflag 15677
+mp sinnohticket
+wait 30
+pressuntil A field 2000
+mp bagqty 265
+mp warp 40,3,10,21
+wait 120
+waitfor field 1000
+mp getflag 15677
+shot f_after
+mp face right
+wait 10
+press A 3
+wait 20
+pressuntil A multichoice 2000
+wait 20
+shot f_regions
+press B 3
+wait 30
+pressuntil B field 2000
+quit

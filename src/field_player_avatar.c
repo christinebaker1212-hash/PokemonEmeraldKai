@@ -2029,6 +2029,15 @@ static bool8 Fishing_MonOnHook(struct Task *task)
     return FALSE;
 }
 
+// Moemon Kai: fishing in SINNOH on its TV's WHAT'S FISHING (src/sinnoh/s3d_tv.c)
+static void MpSinnohFishing(bool8 bite, u8 rod)
+{
+    static const u16 sRods[] = {ITEM_OLD_ROD, ITEM_GOOD_ROD, ITEM_SUPER_ROD};
+    void Sinnoh_TvFishing(struct Pokemon *mon, u16 rod);
+    if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+        Sinnoh_TvFishing(bite ? &gEnemyParty[0] : NULL, sRods[rod < 3 ? rod : 0]);
+}
+
 static bool8 Fishing_StartEncounter(struct Task *task)
 {
     if (task->tFrameCounter == 0)
@@ -2060,6 +2069,7 @@ static bool8 Fishing_StartEncounter(struct Task *task)
         UnlockPlayerFieldControls();
         FishingWildEncounter(task->tFishingRod);
         RecordFishingAttemptForTV(TRUE);
+        MpSinnohFishing(TRUE, task->tFishingRod);
         DestroyTask(FindTaskIdByFunc(Task_Fishing));
     }
     return FALSE;
@@ -2120,6 +2130,7 @@ static bool8 Fishing_EndNoMon(struct Task *task)
         UnfreezeObjectEvents();
         ClearDialogWindowAndFrame(0, TRUE);
         RecordFishingAttemptForTV(FALSE);
+        MpSinnohFishing(FALSE, task->tFishingRod);
         DestroyTask(FindTaskIdByFunc(Task_Fishing));
     }
     return FALSE;

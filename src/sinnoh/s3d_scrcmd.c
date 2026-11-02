@@ -86,6 +86,8 @@ enum {
                                     //  REGICE and REGISTEEL in the party, 3 free PC slots, 4 HALL OF FAME entries
     SINNOH_DEX_RATING,              // ARG: a variable <- Platinum's POKéDEX rating line (ARG2 1: the NATIONAL DEX's)
     SINNOH_MESSAGE_VAR,             // gSinnohMessage <- SINNOH's text, ARG's bank, message ARG2's value
+    SINNOH_TV,                      // ARG: the TV's call (s3d_tv.c TVCALL_*), ARG2, ARG3 its variables
+    SINNOH_MESSAGE_BANK_VAR,        // gSinnohMessage <- SINNOH's text, bank ARG's value, message ARG2's value
 };
 
 u8 gSinnohMessage[1000];   // (SINNOH_MESSAGE_VAR: `message gSinnohMessage`)
@@ -473,6 +475,18 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
         VarSet(arg, gSaveBlock2Ptr->playerGender == FEMALE ? row[2] : row[1]);
         break;
     }
+    case SINNOH_TV:
+    {
+        void Sinnoh_TvCall(u16 call, u16 a, u16 b);
+        Sinnoh_TvCall(arg, arg2, arg3);
+        break;
+    }
+    case SINNOH_MESSAGE_BANK_VAR:
+    {
+        const u8 *t = VarGet(arg) == 0xFFFF ? NULL : S3D_Text(VarGet(arg), VarGet(arg2));
+        StringCopy(gSinnohMessage, t ? t : gText_EmptyString2);
+        break;
+    }
     case SINNOH_MESSAGE_VAR:
     {
         const u8 *t = S3D_Text(arg, VarGet(arg2));
@@ -540,7 +554,18 @@ struct SinnohMapStory
 extern const struct SinnohMapStory gSinnohPlatinumMapScripts[];
 
 
+// Every SINNOH POKéDEX POKéMON seen (Platinum's Pokedex_LocalDexCompleted: the TV's commercials)
+bool8 Sinnoh_DexCompleted(void)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sSinnohDex); i++)
+        if (!GetSetPokedexFlag(SpeciesToNationalPokedexNum(sSinnohDex[i]), FLAG_GET_SEEN))
+            return FALSE;
+    return TRUE;
+}
+
 void Sinnoh_PlatinumStoryBegin(void);
+bool8 MP_Region_CanSail(void);   // (src/qz_specials.c)
 
 void Sinnoh_PlatinumMapScripts(void)
 {
@@ -549,10 +574,17 @@ void Sinnoh_PlatinumMapScripts(void)
     u32 i, j;
     if (!S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
         return;
-    // A save in SINNOH from before Platinum's story, whose story hasn't begun (no SINNOH badge, no starter from ROWAN's
-    // briefcase): Platinum's story from its start. Saves further along keep the story they began
-    if (!FlagGet(FLAG_SINNOH_PLATINUM_STORY) && !FlagGet(FLAG_SINNOH_STARTER) && MP_Region_BadgeCount(REGION_SINNOH) == 0
-     && !MP_Region_Cleared(REGION_SINNOH) && gSinnohPlatinumMapScripts[0].map != 0xFFFF)
+    // CANALAVE's ferry sailor: only while the boat can sail (as JOHTO's and KANTO's ports), and for the first boat in
+    if (MP_Region_CanSail() || VarGet(VAR_SINNOH_ARRIVAL) == 1)
+        FlagClear(FLAG_SINNOH_HIDE_REGION_BOAT);
+    else
+        FlagSet(FLAG_SINNOH_HIDE_REGION_BOAT);
+    {
+        void Sinnoh_TvMapLoad(void);
+        Sinnoh_TvMapLoad();   // (the TV's day: s3d_tv.c)
+    }
+    // SINNOH is always Platinum's story (the user, 2026-11-02: no saves from the written one to keep)
+    if (!FlagGet(FLAG_SINNOH_PLATINUM_STORY) && gSinnohPlatinumMapScripts[0].map != 0xFFFF)
         Sinnoh_PlatinumStoryBegin();
     if (!FlagGet(FLAG_SINNOH_PLATINUM_STORY))
         return;

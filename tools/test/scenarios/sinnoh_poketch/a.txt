@@ -1,9 +1,13 @@
 pressuntil A field 5000
-mp setflag 0x3D39
-mp clearflag 0x3D3B
 wait 30
-mp warp 43,4,18,6
-wait 60
+mp textspeed 2
+mp platinumstory
+mp setflag 0x36a0
+mp setflag 0x36a1
+mp setflag 0x36a2
+mp clearflag 0x3443
+mp warp 40,14,46,36
+wait 90
 waitfor field 1000
 mp face up
 press A 1

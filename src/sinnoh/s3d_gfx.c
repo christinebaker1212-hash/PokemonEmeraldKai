@@ -20,6 +20,7 @@
 
 const char *Updater_ExeFile(const char *name);
 
+#define SINNOH_BACK_SIZE (2 + 32 + 4 * 2048)
 struct SinnohSprite { u8 kind; const u16 *pal[2]; const u8 *frames[2]; };   // ([1]: MIXED's smaller copy)
 struct SinnohPic { const u16 *pal; struct MpBigSprite big; };
 
@@ -32,6 +33,8 @@ static struct
     const u16 *town[2];    // the TOWN MAP's pages (tools/sinnoh/gen_townmap.py picture), RGB555
     u16 townW, townH;
     struct S3dStarterGfx starter;   // the briefcase (tools/sinnoh/build_starter.py: "STRT"; frames NULL: none)
+    const u8 *backs;       // the partners' backs (build_gfx.py backs(): "BACK"), each u16 picture, palette, 4 frames
+    u16 backCount;
     const u8 *poketch;     // the POKéTCH's art (tools/sinnoh/build_poketch.py: "PKCH")
     const u8 *poketchEnd;
 } sGfx;
@@ -101,6 +104,17 @@ static void Load(void)
         sGfx.pics[i].big.bpp = 4;
         sGfx.pics[i].big.colorCount = 16;
         p += 24 + 32 + 8 + 80 * 40;
+    }
+    // the partners' backs: "BACK", count, each u16 picture, u16 palette[16], four 64x64 frames of tiles
+    if (p + 6 <= end && memcmp(p, "BACK", 4) == 0)
+    {
+        n = p[4] | p[5] << 8;
+        if (p + 6 + n * SINNOH_BACK_SIZE <= end)
+        {
+            sGfx.backs = p + 6;
+            sGfx.backCount = n;
+            p += 6 + n * SINNOH_BACK_SIZE;
+        }
     }
     // then the TOWN MAP: "TOWN", width, height, pages (u16 each), the pages' RGB555 pixels (a pack without it: none)
     if (p + 10 <= end && memcmp(p, "TOWN", 4) == 0)
@@ -222,6 +236,41 @@ bool8 S3D_Gfx_TrainerPicPixels(u16 trainerId, const u8 **pixels, const u16 **pal
     *pixels = sGfx.pics[pic].big.frame + 8;
     *pal = sGfx.pics[pic].pal;
     return TRUE;
+}
+
+// A SINNOH partner's back (a tag or partner battle beside them: battle_tower.c SetQzPartner): Platinum's, four 64x64
+// frames as the game's trainer back pictures are laid out, and its 16 colors; FALSE: none (no back of its own, or no
+// pack). DAWN's and LUCAS's are Kai's LOOKs' (*look: "kai_dawn" / "kai_lucas", tiles NULL)
+bool8 S3D_Gfx_PartnerBack(u16 trainerId, const u8 **tiles, const u16 **pal, const char **look)
+{
+    u8 pic;
+    u32 i;
+    *look = NULL;
+    *tiles = NULL;
+    if (trainerId < FIRST_SINNOH_TRAINER || trainerId >= FIRST_SINNOH_TRAINER + SINNOH_TRAINERS_COUNT)
+        return FALSE;
+    pic = sSinnohTrainerPics[trainerId - FIRST_SINNOH_TRAINER];
+    if (pic == SINNOH_PIC_PLAYER_FEMALE || pic == SINNOH_PIC_DP_PLAYER_FEMALE || pic == SINNOH_PIC_DP_PLAYER_FEMALE_2)
+        *look = "kai_dawn";
+    else if (pic == SINNOH_PIC_PLAYER_MALE || pic == SINNOH_PIC_DP_PLAYER_MALE || pic == SINNOH_PIC_DP_PLAYER_MALE_2)
+        *look = "kai_lucas";
+    if (*look)
+        return TRUE;
+    if (!sGfx.tried)
+        Load();
+    if (!sGfx.ok)
+        return FALSE;
+    for (i = 0; i < sGfx.backCount; i++)
+    {
+        const u8 *b = sGfx.backs + i * SINNOH_BACK_SIZE;
+        if ((b[0] | b[1] << 8) == pic)
+        {
+            *pal = (const u16 *)(b + 2);
+            *tiles = b + 2 + 32;
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 // The battle's opponent trainer picture for BATTLER (battle controllers): the trainer it belongs to

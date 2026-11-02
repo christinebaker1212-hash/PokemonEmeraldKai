@@ -1,0 +1,9 @@
+# CANALAVE's ferry sailor (the boat to the other regions) as JOHTO's and KANTO's ports: hidden until the boat can sail
+# (SINNOH's ELITE FOUR beaten and the S.S. TICKET: FLAG_SINNOH_HIDE_REGION_BOAT 0x3D3D = 15677, set on each SINNOH map
+# load by s3d_scrcmd.c); SINNOH's S.S. TICKET from the CHAMPION's win (EventScript_SinnohTicket, item 265), then the
+# sailor is there and lists the other regions. Needs the 3D pack. Shots f_*.png.
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("[test] flag 15677 = 1" "[test] bagqty 265: 1" "[test] flag 15677 = 0" "reached state")
+UNEXPECT_A=("[crash]" "TIMEOUT")

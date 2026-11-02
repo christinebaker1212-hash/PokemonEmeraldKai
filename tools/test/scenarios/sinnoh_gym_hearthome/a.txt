@@ -1,6 +1,4 @@
 pressuntil A field 5000
-mp setflag 0x3D39
-mp clearflag 0x3D3B
 wait 30
 mp warp 41,116,8,9
 wait 90
@@ -13,7 +11,7 @@ waitfor field 1000
 mp gym
 press UP 20
 wait 120
-waitfor field 1000
+pressuntil A field 3000
 mp gym
 mp pos
 shot t_dark1

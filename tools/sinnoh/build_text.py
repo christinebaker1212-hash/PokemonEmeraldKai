@@ -28,7 +28,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 VERSION = 1   # (a message's wait at its end since 2026-11-02: the pack is rebuilt with the game, no reader change)
 EOS, NEWLINE, SCROLL, PAGE = 0xFF, 0xFE, 0xFA, 0xFB
 PAUSE_UNTIL_PRESS = (0xFC, 0x09)   # (charmap.txt: the box waits for A, its arrow shown)
-PLACEHOLDER_BEGIN, STR_VAR = 0xFD, (0x02, 0x03, 0x04)
+PLACEHOLDER_BEGIN, STR_VAR = 0xFD, (0x02, 0x03, 0x04, 0x41, 0x42, 0x43)   # (slots 3-5: SINNOH's own, gSinnohStrVar4-6)
 PLACEHOLDER_ID_SINNOH_TEXT = 0x40   # include/constants/characters.h
 
 
@@ -99,14 +99,15 @@ def convert(text, cmap, wait_at_end=True):
             code = text[i + 1:end] if end > 0 else ''
             i = end + 1 if end > 0 else len(text)
             m = re.match(r'STRVAR_\d+ \d+, (\d+)', code)
-            if m and int(m.group(1)) < 3:
+            if m and int(m.group(1)) < len(STR_VAR):
                 out += [PLACEHOLDER_BEGIN, STR_VAR[int(m.group(1))]]
             continue                     # (colors, sizes and the rest: plain text)
         i += 1
         if ch == '\n':
             out.append(NEWLINE)
         elif ch == '\r':
-            out.append(SCROLL)
+            out.append(PAGE)             # (Platinum's "\r" scrolls both lines away: the next text starts a fresh box, as
+                                         # this game's page break; its one-line scroll put a page's second line out of the box)
         elif ch == '\f':
             out.append(PAGE)
         else:

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "s3d.h"
 #include "mp_region.h"
 #include "pokemon.h"
 #include "egg_hatch.h"
@@ -378,6 +379,11 @@ static void AddHatchedMonToParty(u8 id)
     GetSetPokedexFlag(species, FLAG_SET_CAUGHT);
 
     GetMonNickname2(mon, gStringVar1);
+    if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+    {
+        void Sinnoh_TvEggHatched(struct Pokemon *mon);
+        Sinnoh_TvEggHatched(mon);   // Moemon Kai: HAPPY HAPPY EGG CLUB on SINNOH's TV (src/sinnoh/s3d_tv.c)
+    }
 
     ball = ITEM_POKE_BALL;
     SetMonData(mon, MON_DATA_POKEBALL, &ball);

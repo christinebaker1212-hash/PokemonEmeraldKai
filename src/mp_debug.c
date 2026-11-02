@@ -3107,6 +3107,32 @@ void MP_TestCommand(const char *cmd, const char *arg)
         extern const u8 EventScript_PC[];
         ScriptContext_SetupScript(EventScript_PC);
     }
+    else if (strcmp(cmd, "tv") == 0)
+    {
+        // tv: SINNOH's TV (src/sinnoh/s3d_tv.c): the program on air, what's kept
+        void Sinnoh_TvDebug(void);
+        Sinnoh_TvDebug();
+    }
+    else if (strcmp(cmd, "tvwatch") == 0)
+    {
+        // tvwatch: watch SINNOH's TV (as its TV tiles do: field_control_avatar.c)
+        extern const u8 gSinnohTvBroadcast[];
+        ScriptContext_SetupScript(gSinnohTvBroadcast);
+    }
+    else if (strcmp(cmd, "tvcatch") == 0)
+    {
+        // tvcatch SPECIES BALLS: a catch of the party's first POKéMON as if in SINNOH's wild (its CATCH THAT POKéMON SHOW)
+        void Sinnoh_TvWildBattleEnd(struct Pokemon *mon, u8 result, u16 ballsThrown, u16 ball);
+        int balls = 1;
+        sscanf(arg, "%*d %d", &balls);
+        Sinnoh_TvWildBattleEnd(&gPlayerParty[0], B_OUTCOME_CAUGHT, balls, ITEM_POKE_BALL);
+    }
+    else if (strcmp(cmd, "sinnohticket") == 0)
+    {
+        // sinnohticket: SINNOH's S.S. TICKET as the CHAMPION's win gives it (data/scripts/mp_region.inc)
+        extern const u8 EventScript_SinnohTicket[];
+        ScriptContext_SetupScript(EventScript_SinnohTicket);
+    }
     else if (strcmp(cmd, "regionreload") == 0)
     {
         // regionreload: writes "<save>.region" and reads it back (chunks: other regions' PCs, the GLOBAL PC, levels)

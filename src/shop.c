@@ -1173,6 +1173,11 @@ static void BuyMenuTryMakePurchase(u8 taskId)
         {
             BuyMenuDisplayMessage(taskId, gText_HereYouGoThankYou, BuyMenuSubtractMoney);
             RecordItemPurchase(taskId);
+            if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+            {
+                void Sinnoh_TvShopping(u16 item, u16 amount);
+                Sinnoh_TvShopping(tItemId, tItemCount);   // Moemon Kai: SINNOH SHOPPING CHAMP CORNER (src/sinnoh/s3d_tv.c)
+            }
         }
         else
         {

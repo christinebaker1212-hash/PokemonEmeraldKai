@@ -926,6 +926,22 @@ void MP_GatchaTicketForItem(void)
     gSpecialVar_Result = TRUE;
 }
 
+// Special: the same ticket for an item SINNOH's converted Platinum scripts give (tools/sinnoh/gen_scripts.py, after
+// their additem): shown as a note at the top of the screen, so Platinum's own "obtained" message goes on as it is.
+// VAR_RESULT is kept (Platinum's scripts read the additem's)
+void MP_GatchaTicketToast(void)
+{
+    u16 result = gSpecialVar_Result;
+    MP_GatchaTicketForItem();
+    if (gSpecialVar_Result)
+    {
+        u8 text[64];
+        MP_AsciiToGame(text, "A MOEGATCHA TICKET came with it!", 40);
+        MP_Toast(text);
+    }
+    gSpecialVar_Result = result;
+}
+
 // MOEGATCHA TICKETS a save would have had if tickets had existed when it got its story
 // items (saves from before them): once per save (BACKFILL_KEY), one per important item it
 // shows it got and wasn't rewarded for yet ("ticketitem:ID", shared with the live hook).

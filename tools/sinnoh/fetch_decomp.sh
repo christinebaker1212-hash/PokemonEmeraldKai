@@ -7,12 +7,13 @@
 set -e
 DIR="${1:?usage: fetch_decomp.sh DIR}"
 COMMIT=6eeb1b04c6433761f3049811b7e1383619c59743   # (2026-10-24; change it only with a check that the pack still matches)
-PARTS=9   # what is fetched (2: + res/field/events, the warps; 3: + the sprites and trainer pictures, build_gfx.py;
+PARTS=10  # what is fetched (2: + res/field/events, the warps; 3: + the sprites and trainer pictures, build_gfx.py;
           # 4: + the TOWN MAP's art and grid, gen_townmap.py; 5: + the POKéTCH's art, build_poketch.py; 6: + the field effect
           # models, the gyms' bags, tire stacks and snowballs: gymprops.py; 7: + the briefcase's starter screen,
           # build_starter.py; 8: + the map textures' and props' animations, fldtanime and
           # bm_anime_list: build_pack.py; 9: + the words and the scripts: res/text (build_text.py), res/field/scripts
-          # and the trainers' data (gen_scripts.py)); a folder fetched with other parts is fetched again
+          # and the trainers' data (gen_scripts.py); 10: + the TV's schedule, res/prebuilt/arc/tv.narc (tv_data.py)); a
+          # folder fetched with other parts is fetched again
 MARK="$COMMIT parts $PARTS"
 if [ -f "$DIR/.s3d_commit" ] && [ "$(cat "$DIR/.s3d_commit")" = "$MARK" ]; then
     echo "pokeplatinum $COMMIT already in $DIR"
@@ -33,7 +34,8 @@ git sparse-checkout set --no-cone /generated/map_headers.txt /include/data/map_h
     '/res/trainers/classes/*/front.png' /res/graphics/town_map/ /res/town_map/ \
     /res/graphics/poketch/ /res/graphics/field_effects/ /res/prebuilt/graphic/ev_pokeselect.narc \
     /res/prebuilt/data/fldtanime.narc /res/prebuilt/arc/bm_anime_list.narc \
-    /res/text/ /res/field/scripts/ /res/trainers/ /include/constants/ /asm/macros/
+    /res/text/ /res/field/scripts/ /res/trainers/ /include/constants/ /asm/macros/ \
+    /res/prebuilt/arc/tv.narc
 for i in 1 2 3 4; do
     git fetch -q --depth 1 --filter=blob:none origin "$COMMIT" && break
     sleep $((2 ** i))

@@ -12,6 +12,8 @@
 const char *Updater_ExeFile(const char *name);
 int uncompress(unsigned char *dest, unsigned long *destLen, const unsigned char *source, unsigned long sourceLen);
 
+u8 gSinnohStrVar[3][64];   // SINNOH's text's string slots 3-5 (PLACEHOLDER_ID_SINNOH_VAR4-6; slots 0-2 are gStringVar1-3)
+
 static u8 *sText;
 static unsigned long sTextSize;
 static bool8 sTried;
@@ -73,4 +75,41 @@ const u8 *S3D_Text(u16 bank, u16 msg)
     if (msg >= count || (at = Get32(bankAt + 4 + 4 * msg)) == 0 || at >= sTextSize)
         return sMissing;
     return sText + at;
+}
+
+// A SINNOH message by Platinum's own name (its id in the decomp's message bank), for the code that names them (the TV:
+// s3d_tv.c): gSinnohTextNames from tools/sinnoh/tv_data.py, sorted by the name's FNV-1a hash. FALSE: no such message
+// (or a build without the decomp)
+extern const u32 gSinnohTextNames[];
+bool8 S3D_TextNamed(const char *name, u16 *bank, u16 *msg)
+{
+    u32 h = 0x811C9DC5, lo = 0, hi = gSinnohTextNames[0];
+    const u8 *p;
+    for (p = (const u8 *)name; *p; p++)
+        h = (h ^ *p) * 0x01000193;
+    while (lo < hi)
+    {
+        u32 mid = (lo + hi) / 2;
+        const u32 *row = &gSinnohTextNames[1 + mid * 2];
+        if (row[0] == h)
+        {
+            *bank = row[1] & 0xFFFF;
+            *msg = row[1] >> 16;
+            return TRUE;
+        }
+        if (row[0] < h)
+            lo = mid + 1;
+        else
+            hi = mid;
+    }
+    return FALSE;
+}
+
+// The message itself (Message missing when there's none)
+const u8 *S3D_TextByName(const char *name)
+{
+    u16 bank, msg;
+    if (!S3D_TextNamed(name, &bank, &msg))
+        return S3D_Text(0xFFFF, 0);
+    return S3D_Text(bank, msg);
 }

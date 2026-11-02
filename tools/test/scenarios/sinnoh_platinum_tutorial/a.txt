@@ -25,6 +25,10 @@ mash A 30 12
 shot t6
 mash A 30 12
 shot t7
+mash A 30 12
+shot t8
+pressuntil A field 4000
+shot t9
 wait 120
 mp getvar 0x522A
 mp party

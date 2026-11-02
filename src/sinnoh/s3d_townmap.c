@@ -76,6 +76,16 @@ struct QzFlyDest { mapsec_u16_t mapsec; u8 map; u8 heal; u16 flag; };
 #define sSinnohMapPlaces sUnusedPlaces
 #include "../data/region_map/sinnoh_region_map.h"
 
+// A SINNOH town visited (its FLY spot's flag: Platinum's first-arrival flags, for the TV: s3d_tv.c)
+bool8 Sinnoh_TownVisited(u16 mapsec)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sSinnohFlyDests); i++)
+        if (sSinnohFlyDests[i].mapsec == mapsec)
+            return FlagGet(sSinnohFlyDests[i].flag);
+    return FALSE;
+}
+
 void Sinnoh_TownMapArrive(void)
 {
     u32 i;

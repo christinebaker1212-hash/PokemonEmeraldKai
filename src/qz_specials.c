@@ -1079,6 +1079,9 @@ static u16 QzSaveLeagueVictoryRecord_(void)
 }
 
 u16 QzGetReachableRegionsMask(void) { return gSpecialVar_Result = QzGetReachableRegionsMask_(); }
+
+// The boat can sail from here (the region's ELITE FOUR beaten, the S.S. TICKET): CANALAVE's ferry sailor shows
+bool8 MP_Region_CanSail(void) { return QzGetReachableRegionsMask_() != 0; }
 u16 MP_RegionBoatAsk(void) { return gSpecialVar_Result = MP_RegionBoatAsk_(); }
 
 // EventScript_RegionPickAll: the menu's choice (RESULT) -> the region (src/data/script_menu.h MULTI_REGIONS_FROM_*)

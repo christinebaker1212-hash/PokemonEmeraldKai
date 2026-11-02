@@ -26,6 +26,8 @@ float S3D_TestGround(s32 mapX, s32 mapY, float near);   // tests: the ground's h
 u16 S3D_MapMusic(u16 song);                      // a SINNOH map's song by night (Platinum's own night versions)
 // SINNOH's text pack: a message of a bank (tools/sinnoh/build_text.py; "Message missing" without the pack)
 const u8 *S3D_Text(u16 bank, u16 msg);
+bool8 S3D_TextNamed(const char *name, u16 *bank, u16 *msg);   // a message by Platinum's own name (s3d_text.c)
+const u8 *S3D_TextByName(const char *name);
 // The blocks of a map's layout: a SINNOH map's come from the pack (Platinum's collision), others are the layout's
 const u16 *S3D_LayoutBlocks(const struct MapLayout *layout);
 // Props placed at run time (SINNOH's gyms that move, src/sinnoh/s3d_gyms.c): Platinum's model by its number, in the

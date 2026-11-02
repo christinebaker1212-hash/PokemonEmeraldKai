@@ -8,8 +8,9 @@ Rules behind it: CLAUDE.md's SINNOH paragraph and docs/SINNOH_HANDOFF.md.
 
 | What | How to see it | Now |
 |---|---|---|
-| Platinum's script entries that convert | `python3 -I tools/sinnoh/gen_scripts.py --report ~/.cache/moemon/pokeplatinum` (first line) | 2032 of 2511 |
+| Platinum's script entries that convert | `python3 -I tools/sinnoh/gen_scripts.py --report ~/.cache/moemon/pokeplatinum` (first line) | 2053 of 2511 |
 | Commands still missing | the same report, the list under it (most used first) | 60 kinds |
+| Platinum's text slots and page breaks | messages show whole (\\r is a new box, six string slots) | done |
 | Platinum songs the game lacks | the same report, "songs the game lacks" | 5 |
 | SINNOH tests passing | `tools/test/regress.sh` with the `sinnoh_*`, `region_*` scenarios | all pass |
 
@@ -24,7 +25,7 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [x] JUBILIFE: the POKéTCH, the tag battle with DAWN / LUCAS against GALACTIC (sinnoh_platinum_tag)
 - [x] OREBURGH: ROARK's gym in Platinum's words (sinnoh_platinum_gym)
 - [~] FLOAROMA, the VALLEY WINDWORKS (MARS), ROUTE 205
-- [x] ETERNA FOREST with CHERYL: partner wild battles, her back picture still a stand-in (sinnoh_platinum_partner)
+- [x] ETERNA FOREST with CHERYL: partner wild battles, her own back picture (sinnoh_platinum_partner)
 - [~] ETERNA: the GALACTIC building, GARDENIA (her gym's clock puzzle: section 3)
 - [~] CYCLING ROAD, HEARTHOME: FANTINA, AMITY SQUARE, the CONTEST HALL (section 5)
 - [~] SOLACEON, VEILSTONE: MAYLENE, the GALACTIC warehouse with DAWN / LUCAS
@@ -62,6 +63,8 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [ ] PASTORIA's and SUNYSHORE's gym buttons in Platinum's commands (PressPastoriaGymButton / PressSunyshoreGymButton)
 - [ ] HEARTHOME's and VEILSTONE's gyms in Platinum's commands
 - [ ] Platform lifts (TriggerPlatformLift), GetFloorsAbove
+- [ ] Berry soil patches (Platinum's own berry spots; the TV's BERRY LOOKOUT waits for them)
+- [ ] MESPRIT and CRESSELIA roaming (static now; the TV's ROAMER NEWS FLASH waits for them)
 - [ ] The GREAT MARSH tram (MoveGreatMarshTram, CheckGreatMarshTramLocation)
 - [ ] The REGI ruins' dots (ActivateRegiRuinsDot), REGIGIGAS's check
 - [ ] ROTOM's room (GetPartyRotomCountAndFirst)
@@ -81,12 +84,14 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 
 ## 4. Region travel at parity with JOHTO and KANTO
 
-- [ ] CANALAVE's ferry sailor shown only once SINNOH's ELITE FOUR is beaten and the S.S. TICKET is in the bag
-- [ ] SINNOH's S.S. TICKET after its HALL OF FAME (a game begun in SINNOH has no other way to get one)
+- [x] CANALAVE's ferry sailor shown only once SINNOH's ELITE FOUR is beaten and the S.S. TICKET is in the bag, and on the
+      first boat in (sinnoh_ferry)
+- [x] SINNOH's S.S. TICKET from the CHAMPION's win (a game begun in SINNOH has no other way to get one) (sinnoh_ferry)
 - [x] Customs before boarding: one Pokémon comes, the rest go to the GLOBAL PC (EventScript_RegionCustoms)
 - [x] The GLOBAL PC: open in SINNOH only once its ELITE FOUR is beaten (MP_GlobalPcLinked)
 - [x] A first boat in starts Platinum's story (region_trip_hoenn_sinnoh)
-- [ ] A test: SINNOH's sailor hidden before the LEAGUE, there after, the boat to HOENN and back
+- [x] A test: SINNOH's sailor hidden before the LEAGUE, there after, the boat's list (sinnoh_ferry); to HOENN and back
+      (region_trip_hoenn_sinnoh)
 
 ## 5. Super Contests
 
@@ -99,23 +104,30 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 
 ## 6. Platinum's TV
 
-- [ ] The TV in every house and CENTER plays Platinum's shows
-- [ ] The interviewers (CheckTVInterviewEligible) and the shows they make
+- [x] The TV in every house and CENTER plays Platinum's broadcast: its weekly schedule, greetings, segments, farewells,
+      commercials (sinnoh_tv)
+- [x] TRAINER SIGHTINGS from what the player does in SINNOH: catches, fishing, shopping, eggs, the GREAT MARSH, hidden
+      items, the name rater, the PC bulletin, BERRY crops, POKé BALL effects in the SEAL CLUB SHOW's place (sinnoh_tv: a catch)
+- [~] The reporters' interviews (one word on the game's own easy chat) and the INTERVIEWS program; RECORDS; SINNOH NOW;
+      the VARIETY HOUR: converted and written, not yet each played by a test
+- [ ] The interviews and records that need systems SINNOH lacks: contests, dress-up photos, poffins, the frontier's
+      records, BERRY patches, roamers, the VILLA
+- [ ] Friends' segments on each other's TV (Platinum's record mixing: co-op)
 - [ ] JUBILIFE TV's floors and their people
-- [ ] Tests
 
 ## 7. Battles look right
 
-- [ ] Partners' back pictures in tag, partner and double battles: Platinum's own backs for CHERYL, MIRA, RILEY,
-      BUCK, MARLEY, BARRY, DAWN and LUCAS, through Kai's partner back slot (96x64; five-frame backs keep frames
-      0, 1, 3, 4)
+- [x] Partners' back pictures in tag, partner and double battles: Platinum's own backs for CHERYL, MIRA, RILEY,
+      BUCK, MARLEY and BARRY (sinnoh/platinum_gfx.pak), Kai's LOOKs' for DAWN and LUCAS, in Kai's partner back slot
+      (sinnoh_platinum_partner, sinnoh_platinum_tag)
+- [x] The catching tutorial's DAWN / LUCAS stay themselves after the BAG (sinnoh_platinum_tutorial)
 - [x] Trainers' battle pictures and overworld sprites from Platinum (sinnoh_pics)
 
 ## 8. Clean-up
 
-- [ ] No written story left: every new game in SINNOH plays Platinum's (no old saves to keep, no migration)
+- [x] No written story left: every game in SINNOH plays Platinum's (no old saves to keep, no migration)
 - [ ] The written words go once nothing uses them (words*.py, story_people.py, trainer_words.py)
-- [ ] Tests that used the written story moved to Platinum's
+- [x] Tests that used the written story moved to Platinum's (or gone where a Platinum test covers them)
 
 ## Closed (not built)
 

@@ -653,3 +653,5 @@ gSpecials::
 	.include "data/qz_specials.inc"   @ Moemon Kai: Quetzal's specials (Johto / Kanto)
 	def_special MP_BufferItemPocket   @ Moemon Kai: JOHTO / KANTO "put away ... Pocket:" (the BAG's eight pockets)
 	def_special Sinnoh_CatchingTutorial, waitstate=1   @ Moemon Kai: Platinum's catching tutorial on ROUTE 202 (battle_setup.c)
+	def_special MP_GatchaTicketToast   @ Moemon Kai: a story item's MOEGATCHA TICKET in SINNOH's converted scripts (mp_gatcha.c)
+	def_special Sinnoh_TvChooseWord, waitstate=1   @ Moemon Kai: SINNOH's TV reporters' one word (src/sinnoh/s3d_tv.c)

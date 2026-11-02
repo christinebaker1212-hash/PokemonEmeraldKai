@@ -1694,3 +1694,16 @@ void MP_Poketch_DebugTap(s16 x, s16 y)
 {
     sP.sx = x, sP.sy = y, sP.testTap = 4;
 }
+
+// The app on the POKéTCH now, as Platinum numbers its apps (its poketch_app_names bank: the TV's POKéTCH WATCH)
+u8 Sinnoh_PoketchCurrentApp(void)
+{
+    static const u8 sPlatinum[APP_COUNT] = {
+        [APP_WATCH] = 0, [APP_CALC] = 1, [APP_MEMO] = 2, [APP_PEDOMETER] = 3, [APP_PARTY] = 4, [APP_FRIENDSHIP] = 5,
+        [APP_DOWSING] = 6, [APP_BERRIES] = 7, [APP_DAYCARE] = 8, [APP_HISTORY] = 9, [APP_COUNTER] = 10,
+        [APP_ANALOG] = 11, [APP_MAP] = 12, [APP_LINK] = 13, [APP_COIN] = 14, [APP_MOVES] = 15, [APP_CALENDAR] = 16,
+        [APP_DOTS] = 17, [APP_ROULETTE] = 18, [APP_RADAR] = 19, [APP_TIMER] = 20, [APP_COLOR] = 21,
+        [APP_MATCHUP] = 22, [APP_STOPWATCH] = 23, [APP_ALARM] = 24, [APP_BACKLIGHT] = 0,
+    };
+    return sP.app < APP_COUNT ? sPlatinum[sP.app] : 0;
+}

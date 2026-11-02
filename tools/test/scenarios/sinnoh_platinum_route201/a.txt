@@ -103,6 +103,9 @@ shot b08
 mash A 60 12
 wait 60
 shot b09
+mash B 40 12
+wait 60
+shot b10
 mp party
 mp getvar 0x52F8
 mp getvar 0x51C9

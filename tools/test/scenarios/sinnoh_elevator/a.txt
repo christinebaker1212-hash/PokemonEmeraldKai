@@ -1,6 +1,4 @@
 pressuntil A field 5000
-mp setflag 0x3D39
-mp clearflag 0x3D3B
 wait 30
 mp warp 44,54,15,3
 wait 60
@@ -30,6 +28,7 @@ wait 30
 mp where
 shot e_out
 wait 30
+mp setvar 0x5244 3
 mp warp 40,60,54,55
 wait 60
 waitfor field 1000

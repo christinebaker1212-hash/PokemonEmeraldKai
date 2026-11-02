@@ -128,6 +128,18 @@ u16 Sinnoh_SwarmNews(void)
     return gSpecialVar_Result = TRUE;
 }
 
+// Today's swarm, once the twin has told of them (Platinum's SpecialEncounter_IsSwarmEnabled): its place and POKéMON
+// (the TV's SWARM NEWS FLASH: s3d_tv.c); FALSE: none
+bool8 Sinnoh_SwarmToday(u16 *mapsec, u16 *species)
+{
+    u8 r;
+    if (!FlagGet(FLAG_SINNOH_SWARMS) || (r = SwarmToday()) == 0xFF)
+        return FALSE;
+    *mapsec = Overworld_GetMapHeaderByGroupAndId(sSwarmMaps[r] >> 8, sSwarmMaps[r] & 0xFF)->regionMapSectionId;
+    *species = Timed(sSwarmMaps[r])->swarm[0];
+    return TRUE;
+}
+
 // ---------------------------------------------------------------------------------------------- the grass's slots
 // Grass slot INDEX's POKéMON (SPECIES: the table's) where the player is: the GREAT MARSH's daily ones, the swarm, the
 // time of day. A slot already changed from Platinum's table (the GENERATION's own POKéMON) stays as it is.

@@ -94,13 +94,12 @@ Where it stands:
   places and converted scripts) and triggers are emitted per map as gSinnohPlatinumMapScripts and swapped into
   gMapHeader when FLAG_SINNOH_PLATINUM_STORY (0x3D3B) is set (s3d_scrcmd.c Sinnoh_PlatinumMapScripts; the committed
   maps are untouched; a person whose script is one of Kai's roles keeps it). Sinnoh_StoryRefresh stands aside.
-- Sinnoh_PlatinumStoryBegin (debug `mp platinumstory`) sets the flag and runs Platinum's own scripts_init_new_game. It is
-  ON (2026-11-02): a new game begun in SINNOH, a first boat in from HOENN (mp_region.c), and a save in SINNOH whose
-  story hasn't begun (no SINNOH badge, no starter from the briefcase: Sinnoh_PlatinumMapScripts) play Platinum's story.
-  Saves further along keep the story they began (the written one) until a migration exists (step 4 below); tests of
-  Kai's systems that teleport around SINNOH play as such saves (`mp setflag 0x3D39` + `mp clearflag 0x3D3B`).
-- Kai's ferry between the regions (CANALAVE's harbor sailor, EventScript_SinnohRegionBoat) stays shown in Platinum's
-  story too (gen_scripts.py KAI_ALWAYS).
+- Sinnoh_PlatinumStoryBegin (debug `mp platinumstory`) sets the flag and runs Platinum's own scripts_init_new_game.
+  SINNOH is always Platinum's story (the user, 2026-11-02: no saves partway through the written one, no migration):
+  any SINNOH map load without the flag begins it.
+- Kai's ferry between the regions (CANALAVE's harbor sailor, EventScript_SinnohRegionBoat) shows only while the boat
+  can sail (SINNOH's ELITE FOUR and the S.S. TICKET, from the CHAMPION's win) and on the first boat in, as JOHTO's and
+  KANTO's ports (COOP_NOTES "CANALAVE's ferry sailor").
 - Story coverage (map scripts, triggers, story people): 500 of 760 at the end of 2026-11-02; the rest are mostly Kai's
   place systems (REGI ruins, TURNBACK CAVE, platform lifts, gym puzzles, the frontier), which stay Kai's.
 - Platinum's key items are items 662-684 (GALACTIC KEY ... GOOEY MULCH; Platinum's descriptions from PokeAPI, stand-in
@@ -131,12 +130,12 @@ To build (not 1:1 yet):
    the Frontier Brains' and the HALL MATRON's teams, the PASTORIA size contest, JUBILIFE's TV lottery, the JOURNAL,
    ROTOM's room, Platinum's POKéDEX ratings (LoadPokedexRating), UNOWN messages, DAWN's / LUCAS's own overworld
    sprites (stand-ins now), Platinum's songs the game lacks (`gen_scripts.py --report` lists them: SEQ_OPENING...).
-4. Saves already partway through SINNOH's written story: Platinum's flags and variables from what this game recorded
-   (badges, story battles: story_people.DONE), once, on load (mp_savefix.c's way); a story test from TWINLEAF to the
-   HALL OF FAME; then the written words go (words*.py, STORY_WORDS, trainer_words.py).
-5. For the user to confirm as closed or to build: the Underground (single-player digging works without wireless),
-   Super Contests and their accessories / backdrops (Kai has the contests; AddAccessory is a no-op for now), Platinum's
-   TV (Kai has Emerald's).
+4. A story test from TWINLEAF to the HALL OF FAME; then the written words go (words*.py, STORY_WORDS, trainer_words.py)
+   once nothing uses them.
+5. Decided by the user (2026-11-02): SUPER CONTESTS and their own functions are built (POKé BALL effects in the
+   Seals' place, in the story, menus and shops); Platinum's TV is built (src/sinnoh/s3d_tv.c, done: COOP_NOTES
+   "SINNOH's TV"). Still to ask: the Underground (single-player digging works without wireless).
+The working checklist: docs/SINNOH_CHECKLIST.md.
 
 ## The goal
 Add SINNOH as a third region beside JOHTO / KANTO, built from Pokémon Platinum:
@@ -159,8 +158,8 @@ Sinnoh gets everything JOHTO and KANTO got:
 Removed, with the scripts behind them (they will never work here): PAL PARK, the GTS, Wi-Fi features (the Wi-Fi
 Club, the Plaza, the Battle Tower's Wi-Fi rooms, Mystery Gift by Wi-Fi...). Removed where a Kai feature replaces
 them: BALL SEALS (the POKé BALL page's styles and ball effects), and anything else the co-op features supersede.
-Features that Gen 3 also has use the Gen 3 versions: POKéMON CONTESTS (not Super Contests), and the like. The
-Underground and Super Contests in step 6 below are dropped unless the user asks again.
+Features that Gen 3 also has use the Gen 3 versions, but for SUPER CONTESTS, which the user asked for again
+(2026-11-02: built, with POKé BALL effects in the Seals' place). The Underground is still to be asked.
 A new TRAINER CARD for Sinnoh comes later (the user's own design).
 People look as in Platinum (the user, 2026-11-01): its overworld sprites and trainers' battle pictures from the decomp,
 in sinnoh/platinum_gfx.pak (tools/sinnoh/build_gfx.py; COOP_NOTES).

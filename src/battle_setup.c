@@ -766,6 +766,23 @@ static void CB2_EndWildBattle(void)
     ResetOamRange(0, OAM_ENTRY_COUNT);   // Moemon PC: all 256 (128 left the rest zeroed: an 8x8 tile at 0,0)
     MP_Events_OnWildEnd(gBattleOutcome, &gEnemyParty[0]); // Moemon Co-op: team goals
     MP_PokeRadar_BattleEnd(gBattleOutcome);               // Moemon Kai: the POKé RADAR's chain (mp_pokeradar.c)
+    {
+        // Moemon Kai: SINNOH's TV (src/sinnoh/s3d_tv.c): the CATCH THAT POKéMON SHOW, the GREAT MARSH's catches
+        void Sinnoh_TvWildBattleEnd(struct Pokemon *mon, u8 result, u16 ballsThrown, u16 ball);
+        void Sinnoh_TvSafariCatch(struct Pokemon *mon);
+        u32 i, balls = 0;
+        for (i = 0; i < ARRAY_COUNT(gBattleResults.catchAttempts); i++)
+            balls += gBattleResults.catchAttempts[i];
+        if (gBattleOutcome == B_OUTCOME_CAUGHT && gLastUsedItem == ITEM_MASTER_BALL)
+            balls++;
+        if (gBattleTypeFlags & BATTLE_TYPE_SAFARI)
+        {
+            if (gBattleOutcome == B_OUTCOME_CAUGHT)
+                Sinnoh_TvSafariCatch(&gEnemyParty[0]);
+        }
+        else if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+            Sinnoh_TvWildBattleEnd(&gEnemyParty[0], gBattleOutcome, balls, gLastUsedItem);
+    }
 
     if (IsPlayerDefeated(gBattleOutcome) == TRUE && CurrentBattlePyramidLocation() == PYRAMID_LOCATION_NONE && !InBattlePike())
     {

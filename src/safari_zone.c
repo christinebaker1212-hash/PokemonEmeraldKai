@@ -1,4 +1,5 @@
 #include "global.h"
+#include "s3d.h"
 #include "battle.h"
 #include "event_data.h"
 #include "field_player_avatar.h"
@@ -61,11 +62,22 @@ void EnterSafariMode(void)
     sSafariZoneStepCounter = 500;
     sSafariZoneCaughtMons = 0;
     sSafariZonePkblkUses = 0;
+    if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+    {
+        void Sinnoh_TvSafariStart(void);
+        Sinnoh_TvSafariStart();   // Moemon Kai: the GREAT MARSH on SINNOH's TV (src/sinnoh/s3d_tv.c)
+    }
 }
 
 void ExitSafariMode(void)
 {
-    TryPutSafariFanClubOnAir(sSafariZoneCaughtMons, sSafariZonePkblkUses);
+    if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+    {
+        void Sinnoh_TvSafariEnd(void);
+        Sinnoh_TvSafariEnd();   // Moemon Kai: the GREAT MARSH's SAFARI GAME SPECIAL NEWS BULLETIN (src/sinnoh/s3d_tv.c)
+    }
+    else
+        TryPutSafariFanClubOnAir(sSafariZoneCaughtMons, sSafariZonePkblkUses);
     ResetSafariZoneFlag();
     ClearAllPokeblockFeeders();
     gNumSafariBalls = 0;

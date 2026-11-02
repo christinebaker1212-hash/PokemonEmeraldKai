@@ -1,9 +1,7 @@
-# (A save whose SINNOH story began before Platinum's own: FLAG_SINNOH_STARTER 0x3D39 set, FLAG_SINNOH_PLATINUM_STORY 0x3D3B
-# off: it keeps the story it began.)
 # SINNOH's gym leaders (tools/sinnoh/words.py GYMS, gen_words.py gym()): OREBURGH's ROARK battles, then gives the
-# COAL BADGE (flag 0x3320 = 13088) and TM76 STEALTH ROCK (item 643; flag 0x3770 = 14192). Needs the 3D pack.
+# COAL BADGE (flag 0x3320 = 13088) and TM76 STEALTH ROCK (item 643, in Platinum's own script). Needs the 3D pack.
 MODE=1
 TMO=200
 ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=283:60"
-EXPECT_A=("[test] flag 13088 = 1" "[test] flag 14192 = 1" "[test] bagqty 643: 1")
+EXPECT_A=("[test] flag 13088 = 1" "[test] bagqty 643: 1")
 UNEXPECT_A=("[crash]" "TIMEOUT")

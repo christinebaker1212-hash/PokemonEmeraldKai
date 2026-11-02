@@ -2607,6 +2607,15 @@ u16 MP_Avatar_NamedBackPic(const char *name)
     return TRAINER_BACK_PIC_MP_PARTNER2;
 }
 
+// A back picture from four 64x64 frames of tiles and 16 colors (SINNOH's partners: s3d_gfx.c S3D_Gfx_PartnerBack),
+// into the second partner slot as MP_Avatar_NamedBackPic does
+u16 MP_Avatar_TilesBackPic(const u8 *tiles, const u16 *pal)
+{
+    BackFramesToWide(tiles, gMpPartner2BackTiles);
+    MP_Pack_WriteLz77Literal((u8 *)gMpPartner2BackPalLz, pal, 32);
+    return TRAINER_BACK_PIC_MP_PARTNER2;
+}
+
 u16 MP_Avatar_LocalBackPic(void)
 {
     struct MpAppearance app = GetLocalAppearance();

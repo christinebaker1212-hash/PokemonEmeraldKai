@@ -1,0 +1,43 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp platinumstory
+mp dexsee 393
+mp warp 40,14,46,8
+wait 90
+waitfor field 1000
+mp tvcatch 418 4
+mp tv
+mp tvwatch
+wait 40
+shot v_greet
+press A 1
+wait 40
+shot v_intro
+press A 1
+wait 60
+shot v_segment
+press A 1
+wait 60
+shot v_seg2
+press A 1
+wait 60
+shot v_seg3
+press A 1
+wait 60
+shot v_seg4
+press A 1
+wait 60
+shot v_seg5
+pressuntil A field 2000
+mp tv
+mp tvwatch
+wait 40
+shot v_second
+pressuntil A field 2000
+mp tvwatch
+wait 40
+shot v_third
+pressuntil A field 2000
+mp tv
+quit

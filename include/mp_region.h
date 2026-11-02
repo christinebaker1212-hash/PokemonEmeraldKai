@@ -27,6 +27,7 @@
 #define VAR_SINNOH_STARTER 0x52F8   // the starter picked from ROWAN's briefcase in Platinum's story (its SaveChosenStarter)
 #define VAR_SINNOH_PARTNER_GFX 0x52F9   // SINNOH's walking partner's graphics + 1 (0: none; s3d_scrcmd.c Sinnoh_PartnerUpdate)
 #define VAR_SINNOH_PARTNER_TRAINER 0x52FA   // ... its team in wild battles (Platinum's VAR_PARTNER_TRAINER_ID: battle_setup.c)
+#define FLAG_SINNOH_HIDE_REGION_BOAT 0x3D3D   // CANALAVE's ferry sailor hidden (set on each SINNOH map load: s3d_scrcmd.c; shown when the boat can sail)
 #define FLAG_SINNOH_HAS_PARTNER 0x3D3C   // Platinum's walking partner (SetHasPartner)
 #define FLAG_SINNOH_PLATINUM_STORY 0x3D3B   // this save plays Platinum's own story (its converted map scripts, triggers and story people: tools/sinnoh/gen_scripts.py)
 #define VAR_SINNOH_ARRIVAL  0x52F0   // 1: just off the first boat to SINNOH (the harbor sailor takes them to TWINLEAF), 2: in SINNOH, 3: BARRY's mom's visit played (TWINLEAF's house 1F)
@@ -77,6 +78,9 @@ const void *Sinnoh_HoneyData(u32 *size);
 void Sinnoh_HallReset(void);          // SINNOH's BATTLE HALL record (s3d_hall.c), chunk HALL
 const void *Sinnoh_HallData(u32 *size);
 void Sinnoh_HallLoad(const void *data, u32 size);
+const void *Sinnoh_TvData(u32 *size);   // SINNOH's TV (src/sinnoh/s3d_tv.c), chunk TVBC
+void Sinnoh_TvLoad(const void *data, u32 size);
+void Sinnoh_TvReset(void);
 void Sinnoh_FrontierReset(void);      // SINNOH's BATTLE CASTLE's / ARCADE's records (s3d_frontier.c), chunk FRNT
 const void *Sinnoh_FrontierData(u32 *size);
 void Sinnoh_FrontierLoad(const void *data, u32 size);

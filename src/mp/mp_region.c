@@ -254,6 +254,7 @@ void MP_Region_StartNewGame(void)
     Sinnoh_HoneyReset();
     Sinnoh_HallReset();
     Sinnoh_FrontierReset();
+    Sinnoh_TvReset();
     MP_Region_Arrive(sStartRegion);
     if (sStartRegion == REGION_SINNOH)
     {
@@ -371,6 +372,15 @@ void MP_Region_WriteSidecar(void)
             fwrite(hall, size, 1, f);
         }
         {
+            // SINNOH's TV: its kept segments and records (src/sinnoh/s3d_tv.c)
+            u32 size;
+            const void *tv = Sinnoh_TvData(&size);
+            c[0] = CHUNK('T', 'V', 'B', 'C');
+            c[1] = size;
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(tv, size, 1, f);
+        }
+        {
             u32 format = MP_SAVE_FORMAT;   // the save's own layout version (mp_savefix.h)
             c[0] = CHUNK('S', 'A', 'V', 'F');
             c[1] = sizeof(format);
@@ -459,6 +469,12 @@ static bool8 LoadFrom(const char *path)
                 if (fread(buf, c[1], 1, f) == 1)
                     Sinnoh_HallLoad(buf, c[1]);
             }
+            else if (c[0] == CHUNK('T', 'V', 'B', 'C') && c[1] <= 4096)
+            {
+                u8 buf[4096];
+                if (fread(buf, c[1], 1, f) == 1)
+                    Sinnoh_TvLoad(buf, c[1]);
+            }
             else if (c[0] == CHUNK('S', 'A', 'V', 'F') && c[1] == sizeof(u32))
             {
                 u32 format = 0;
@@ -544,6 +560,7 @@ void MP_Region_LoadFromSave(void)
     Sinnoh_HoneyReset();
     Sinnoh_HallReset();
     Sinnoh_FrontierReset();
+    Sinnoh_TvReset();
     for (i = 0; i <= 3; i++)
     {
         if (i == 0)
