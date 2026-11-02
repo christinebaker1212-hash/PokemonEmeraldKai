@@ -3584,6 +3584,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
         else
             printf("[test] objat %d,%d: none\n", x, y);
     }
+    else if (strcmp(cmd, "findbehavior") == 0)
+    {
+        // findbehavior N: up to 5 cells of this map with metatile behavior N (MB_*)
+        int x, y, n = 0, want = atoi(arg);
+        for (y = 0; y < gMapHeader.mapLayout->height && n < 5; y++)
+            for (x = 0; x < gMapHeader.mapLayout->width && n < 5; x++)
+                if ((int)MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET) == want)
+                    printf("[test] behavior %d at %d,%d\n", want, x, y), n++;
+    }
     else if (strcmp(cmd, "shorespots") == 0)
     {
         // shorespots: up to 5 cells on this map that stand two tiles north of reflecting water with dry, walkable

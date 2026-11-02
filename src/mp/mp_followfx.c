@@ -107,6 +107,21 @@ static void StopEffect(struct Sprite *sprite)
     FieldEffectFreeGraphicsResources(sprite);
 }
 
+void MP_SpriteFeet(const struct Sprite *o, s16 *x, s16 *y);   // (mp_shadow.c)
+
+// A ground effect at the follower's feet, as the game puts the player's: DY above the row under them (a splash 4, the
+// hot springs and short grass 8, a sand heap 2). 1.68.1: they went by the sprite's point and its frame's size, which a
+// PMD picture or a follower drawn with an offset doesn't stand on
+static void AtFeet(struct Sprite *sprite, const struct Sprite *fs, s16 dy)
+{
+    s16 x, y;
+    MP_SpriteFeet(fs, &x, &y);
+    sprite->x = x;
+    sprite->y = y - dy;
+    sprite->x2 = 0;
+    sprite->y2 = 0;
+}
+
 static u8 StartEffect(u8 slot, u8 kind)
 {
     static const u8 sTemplates[] = {
@@ -163,12 +178,12 @@ static u8 StartEffect(u8 slot, u8 kind)
         break;
     case FX_SPLASH:
         sprite->oam.priority = fs->oam.priority;
-        sprite->y2 = (f->size >> 1) - 4;
+        AtFeet(sprite, fs, 4);
         PlaySE(SE_PUDDLE);
         break;
     case FX_FLOW:
         sprite->oam.priority = fs->oam.priority;
-        sprite->y2 = (f->size >> 1) - 4;
+        AtFeet(sprite, fs, 4);
         sprite->sPrevX = -1;   // the tile it last splashed on
         sprite->sPrevY = -1;
         StartSpriteAnim(sprite, 1);
@@ -176,10 +191,11 @@ static u8 StartEffect(u8 slot, u8 kind)
     case FX_SPRINGS:
     case FX_SHORT_GRASS:
         sprite->oam.priority = fs->oam.priority;
+        AtFeet(sprite, fs, 8);
         break;
     case FX_PILE:
         sprite->oam.priority = fs->oam.priority;
-        sprite->y2 = (f->size >> 1) - 2;
+        AtFeet(sprite, fs, 2);
         SeekSpriteAnim(sprite, 2);
         break;
     }
@@ -227,8 +243,7 @@ static void SpriteCB_Effect(struct Sprite *sprite)
             StopEffect(sprite);
             return;
         }
-        sprite->x = fs->x;
-        sprite->y = fs->y;
+        AtFeet(sprite, fs, 4);
         UpdateObjectEventSpriteInvisibility(sprite, f->hidden || fs->invisible);
         break;
     case FX_FLOW:
@@ -237,8 +252,7 @@ static void SpriteCB_Effect(struct Sprite *sprite)
             StopEffect(sprite);
             return;
         }
-        sprite->x = fs->x;
-        sprite->y = fs->y;
+        AtFeet(sprite, fs, 4);
         sprite->subpriority = fs->subpriority;
         UpdateObjectEventSpriteInvisibility(sprite, f->hidden || fs->invisible);
         if (f->cur.x != sprite->sPrevX || f->cur.y != sprite->sPrevY)
@@ -255,8 +269,7 @@ static void SpriteCB_Effect(struct Sprite *sprite)
             StopEffect(sprite);
             return;
         }
-        sprite->x = fs->x;
-        sprite->y = fs->y + (f->size >> 1) - 8;
+        AtFeet(sprite, fs, 8);
         sprite->subpriority = fs->subpriority - 1;
         UpdateObjectEventSpriteInvisibility(sprite, f->hidden || fs->invisible);
         break;
@@ -275,11 +288,9 @@ static void SpriteCB_Effect(struct Sprite *sprite)
             if (sprite->animEnded)
                 StartSpriteAnim(sprite, 0);
         }
-        sprite->x = fs->x;
-        sprite->y = fs->y;
+        AtFeet(sprite, fs, sprite->sKind == FX_SHORT_GRASS ? 8 : 2);
         if (sprite->sKind == FX_SHORT_GRASS)
         {
-            sprite->y2 = (f->size >> 1) - 8;
             sprite->subpriority = fs->subpriority - 1;
             sprite->oam.priority = fs->oam.priority;
         }

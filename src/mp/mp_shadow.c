@@ -271,6 +271,16 @@ static void Feet(const struct Sprite *o, s32 *x, s32 *y, s32 *w)
         *w = *w * o->mpScale / 256;
 }
 
+// The row under a sprite's feet and the x they're at, as its shadow finds them (followers' ground effects:
+// mp_followfx.c)
+void MP_SpriteFeet(const struct Sprite *o, s16 *x, s16 *y)
+{
+    s32 fx, fy, w;
+    Feet(o, &fx, &fy, &w);
+    *x = fx;
+    *y = fy;
+}
+
 static void Cast(u8 owner, bool8 person)
 {
     struct Sprite *o = &gSprites[owner], *s;
