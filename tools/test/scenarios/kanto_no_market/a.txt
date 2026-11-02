@@ -1,0 +1,7 @@
+pressuntil A field 5000
+wait 30
+mp warp 37,62,38,12
+wait 200
+shot vermilion
+mp getflag 0x2225
+quit

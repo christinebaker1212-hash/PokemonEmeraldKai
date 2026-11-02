@@ -15,7 +15,8 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [x] MEGA PUNCH / MEGA KICK people outside MT. MOON: FireRed's two move tutors on Kai's tutor flow, FireRed's words
       (Quetzal's said "move training is handled from your team menu"; flags 0x21DF / 0x21DC; test kanto_tutors)
 - [ ] CERULEAN: TRIPLE TRIAD first; people who offer a Yu-Gi-Oh! / POKéMON starter deck get words by their personality
-- [ ] VIRIDIAN's shopping area (RARE CANDY, Z / MEGA items whatever GENERATION): remove (CELADON DEPT. covers it)
+- [x] The shopping area (RARE CANDY, Z / MEGA items whatever GENERATION): Quetzal's market stalls in VERMILION (not
+      VIRIDIAN: VIRIDIAN has only FireRed's mart), all nine hidden (flag 0x2225, set as VERMILION loads; their empty canopies are map tiles, left; test kanto_no_market)
 - [ ] S.S. ANNE: its sprite, FireRed's departure scene, can't be boarded once gone
 - [x] The CUT man gives HM01 (not Quetzal's flag): the S.S. ANNE CAPTAIN, FireRed's (test hm_once); KANTO's other HM
       givers too, FireRed's words (HM02 ROUTE 16, HM03 SAFARI ZONE, HM04 the WARDEN, HM05 OAK's AIDE, HM06 EMBER SPA,

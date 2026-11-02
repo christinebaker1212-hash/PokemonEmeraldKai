@@ -133,6 +133,7 @@ Kanto_VermilionCity_EventScript_841657A::
 	end
 
 Kanto_VermilionCity_EventScript_841658F::
+	setflag 0x2225   @ Moemon Kai: Quetzal's market stalls gone (CELADON DEPT. STORE sells their items: docs/REGIONS_TODO.md)
 	special QzKantoTravelingEventCheck
 	setflag FLAG_QZ_0x2262
 	call_if_set FLAG_QZ_0x2219, Kanto_VermilionCity_EventScript_84165A4

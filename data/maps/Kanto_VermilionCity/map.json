@@ -140,7 +140,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Kanto_VermilionCity_EventScript_841652D",
-      "flag": "0"
+      "flag": "0x2225"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_15",
@@ -153,7 +153,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Kanto_VermilionCity_EventScript_82C1103",
-      "flag": "0"
+      "flag": "0x2225"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_44",
@@ -166,7 +166,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Kanto_VermilionCity_EventScript_82C1119",
-      "flag": "0"
+      "flag": "0x2225"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_45",
@@ -179,7 +179,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Kanto_VermilionCity_EventScript_82C06B6",
-      "flag": "0"
+      "flag": "0x2225"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_46",
@@ -192,7 +192,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Kanto_VermilionCity_EventScript_82C0666",
-      "flag": "0"
+      "flag": "0x2225"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_32",
@@ -205,7 +205,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Kanto_VermilionCity_EventScript_8416544",
-      "flag": "0"
+      "flag": "0x2225"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_30",
@@ -218,7 +218,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Kanto_VermilionCity_EventScript_82C0B00",
-      "flag": "0"
+      "flag": "0x2225"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_48",
@@ -231,7 +231,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Kanto_VermilionCity_EventScript_82C112F",
-      "flag": "0"
+      "flag": "0x2225"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_7",
@@ -244,7 +244,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Kanto_VermilionCity_EventScript_82C0B82",
-      "flag": "0"
+      "flag": "0x2225"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_10576",

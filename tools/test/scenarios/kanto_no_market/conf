@@ -1,0 +1,6 @@
+# VERMILION without Quetzal's market stalls (flag 0x2225 set as the city loads). Shot vermilion.
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=25:40"
+EXPECT_A=("[test] flag 8741 = 1")
+UNEXPECT_A=("[crash]")
