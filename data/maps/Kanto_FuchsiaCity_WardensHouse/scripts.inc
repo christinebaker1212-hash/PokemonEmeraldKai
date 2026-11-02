@@ -24,12 +24,8 @@ Kanto_FuchsiaCity_WardensHouse_EventScript_841D91B::
 	checkplayergender
 	call_if_eq VAR_RESULT, 0, Kanto_FuchsiaCity_WardensHouse_EventScript_841D974
 	call_if_eq VAR_RESULT, 1, Kanto_FuchsiaCity_WardensHouse_EventScript_841D97D
-	additem ITEM_NUGGET, 1
-	loadword 0, Kanto_FuchsiaCity_WardensHouse_Text_8448FE3
-	setorcopyvar VAR_0x8000, ITEM_NUGGET
-	setorcopyvar VAR_0x8001, 1
-	setorcopyvar VAR_0x8002, 0x16F
-	call Quetzal_EventScript_845571E
+	setvar VAR_0x8004, ITEM_HM04   @ Moemon Kai: FireRed's HM (tools/quetzal_port/fix_hm_givers.py)
+	call EventScript_GiveHmOnce
 	setflag FLAG_QZ_0x2151
 	removeitem ITEM_GOLD_TEETH, 1
 	release
@@ -120,10 +116,12 @@ Kanto_FuchsiaCity_WardensHouse_Text_8448FE3::
 	.string "from the WARDEN.$"
 
 Kanto_FuchsiaCity_WardensHouse_Text_844900F::
-	.string "WARDEN: BLACK AUGURITE can make\n"
-	.string "a certain MOéMON evolve.\p"
-	.string "Thanks again for returning my\n"
-	.string "GOLD TEETH!$"
+	.string "WARDEN: Inside HM04 you'll find\n"
+	.string "STRENGTH.\p"
+	.string "It lets MOéMON move boulders when\n"
+	.string "you're outside of battle.\p"
+	.string "Oh yes, did you find the SECRET\n"
+	.string "HOUSE in the SAFARI ZONE?$"
 
 Kanto_FuchsiaCity_WardensHouse_Text_8449084::
 	.string "MOéMON photos and fossils are on\n"

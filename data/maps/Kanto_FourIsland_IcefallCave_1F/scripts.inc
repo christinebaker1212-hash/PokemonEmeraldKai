@@ -38,9 +38,8 @@ Kanto_FourIsland_IcefallCave_1F_EventScript_846C239::
 
 @ Kanto_FourIsland_IcefallCave_1F object 2 (local id 2, gfx 0x3F0E) at 12,16
 Kanto_FourIsland_IcefallCave_1F_EventScript_846C246::
-	setorcopyvar VAR_0x8000, ITEM_DRAGON_SCALE
-	setorcopyvar VAR_0x8001, 1
-	callstd STD_FIND_ITEM
+	setvar VAR_0x8004, ITEM_HM07   @ Moemon Kai: FireRed's HM07 (fix_hm_givers.py)
+	goto EventScript_FindHmOnce
 	end
 
 Kanto_FourIsland_IcefallCave_1F_Movement_8413B23:

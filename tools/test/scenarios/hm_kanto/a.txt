@@ -1,0 +1,36 @@
+pressuntil A field 5000
+wait 30
+mp warp 38,105,4,3
+wait 200
+mp face up
+press A 2
+wait 30
+mash A 30 20
+pressuntil B field 2000
+mp bagqty 340
+mp warp 36,71,6,6
+wait 200
+mp face up
+press A 2
+wait 30
+mash A 30 20
+pressuntil B field 2000
+mp bagqty 341
+mp warp 37,54,10,6
+wait 200
+mp face up
+press A 2
+wait 30
+mash A 30 20
+pressuntil B field 2000
+mp bagqty 344
+shot hm_spa
+mp warp 36,71,6,6
+wait 200
+mp face up
+press A 2
+wait 30
+mash A 30 20
+pressuntil B field 2000
+mp bagqty 341
+quit

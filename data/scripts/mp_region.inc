@@ -369,3 +369,25 @@ Text_GiveHmOnce_Had:
 	.string "{STR_VAR_1}.\p"
 	.string "Then there's nothing more I can give\n"
 	.string "you. Your MOéMON know the way!$"
+
+@ Moemon Kai: an HM lying on the ground (KANTO's ICEFALL CAVE HM07), unless the player has it already (then the ball
+@ is just gone). VAR_0x8004 the HM
+EventScript_FindHmOnce::
+	specialvar VAR_RESULT, MP_PlayerHasHmVar
+	goto_if_eq VAR_RESULT, TRUE, EventScript_FindHmOnce_Had
+	setorcopyvar VAR_0x8000, VAR_0x8004
+	setorcopyvar VAR_0x8001, 1
+	callstd STD_FIND_ITEM
+	end
+
+EventScript_FindHmOnce_Had:
+	lock
+	bufferitemname STR_VAR_1, VAR_0x8004
+	msgbox Text_FindHmOnce_Had, MSGBOX_DEFAULT
+	removeobject VAR_LAST_TALKED
+	release
+	end
+
+Text_FindHmOnce_Had:
+	.string "It's {STR_VAR_1}! But you're already\n"
+	.string "carrying one, so you leave it be.$"

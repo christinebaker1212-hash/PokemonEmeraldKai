@@ -39,9 +39,8 @@ Kanto_OneIsland_KindleRoad_EmberSpa_EventScript_84151F3::
 	faceplayer
 	goto_if_set FLAG_QZ_0x2153, Kanto_OneIsland_KindleRoad_EmberSpa_EventScript_841521F
 	msgbox Kanto_OneIsland_KindleRoad_EmberSpa_Text_842DD2B, MSGBOX_DEFAULT
-	setorcopyvar VAR_0x8000, ITEM_PROTECTOR
-	setorcopyvar VAR_0x8001, 1
-	callstd STD_OBTAIN_ITEM
+	setvar VAR_0x8004, ITEM_HM06   @ Moemon Kai: FireRed's HM06 (Quetzal's PROTECTOR)
+	call EventScript_GiveHmOnce
 	setflag FLAG_QZ_0x2153
 	msgbox Kanto_OneIsland_KindleRoad_EmberSpa_Text_842DD9B, MSGBOX_DEFAULT
 	release
@@ -106,9 +105,13 @@ Kanto_OneIsland_KindleRoad_EmberSpa_Text_842DC59::
 Kanto_OneIsland_KindleRoad_EmberSpa_Text_842DD2B::
 	.string "Hot springs go hand-in-hand with\n"
 	.string "volcanoes.\p"
-	.string "I found this PROTECTOR while I\n"
-	.string "carved the pool. You should have it.$"
+	.string "The EMBER SPA here, well,\n"
+	.string "I made it years ago.\p"
+	.string "I hewed the pool right out of a\n"
+	.string "gigantic boulder by hand.\p"
+	.string "I was using this at the time.\n"
+	.string "I suppose I can part with it.$"
 
 Kanto_OneIsland_KindleRoad_EmberSpa_Text_842DD9B::
-	.string "A PROTECTOR can help a certain\n"
-	.string "MOéMON evolve.$"
+	.string "That shatters boulders as if they\n"
+	.string "were made of crackers.$"

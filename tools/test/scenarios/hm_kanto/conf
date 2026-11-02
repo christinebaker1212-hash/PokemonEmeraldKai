@@ -1,0 +1,7 @@
+# KANTO's HM givers as FireRed's (tools/quetzal_port/fix_hm_givers.py): ROUTE 16's girl HM02, the SAFARI ZONE's SECRET
+# HOUSE HM03, the EMBER SPA's old man HM06; asked again, the SECRET HOUSE gives no second HM03.
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=25:40"
+EXPECT_A=("[test] bagqty 340: 1" "[test] bagqty 341: 1" "[test] bagqty 344: 1")
+UNEXPECT_A=("[crash]" "bagqty 341: 2" "TIMEOUT")
