@@ -37,8 +37,12 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [x] The CUT tree east of CERULEAN (to ROUTE 9 / ROCK TUNNEL) can be cut (test kanto_cut_tree)
 
 ## JOHTO
-- [ ] POKéGEAR back as Crystal / HGSS have it (display, functions, calls), no manual clock setting; START menu in
-      JOHTO, a registrable key item elsewhere once JOHTO's ELITE FOUR is beaten
+- [x] POKéGEAR back as Crystal / HGSS have it (display, functions, calls), no manual clock setting; START menu in
+      JOHTO, a registrable key item elsewhere once JOHTO's ELITE FOUR is beaten (src/mp/mp_pokegear.c: CLOCK, MAP (the
+      TOWN MAP), PHONE (MOM with her savings question, PROF. ELM; Crystal's words), RADIO (OAK's POKéMON TALK in
+      Crystal's words with the region's wild POKéMON and places, the POKé FLUTE); MOM gives it as in Crystal; item 693;
+      test johto_pokegear. Crystal's other stations (MARCH, LULLABY, LUCKY CHANNEL, BUENA) need music the game
+      hasn't got: open until there are rips of them)
 - [x] JOHTO's legendaries only in JOHTO (FireRed's and Emerald's NAVEL ROCK empty: LUGIA and HO-OH are JOHTO's)
 - [x] Quetzal's berry system out: 1x1 berry patches where berries were; APRICORN trees rewritten from Crystal
       (behavior, words), JOHTO's berries (src/mp/mp_apricorn.c, tools/quetzal_port/fix_fruit_trees.py: Crystal's

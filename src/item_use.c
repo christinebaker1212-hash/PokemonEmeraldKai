@@ -785,6 +785,40 @@ void ItemUseOutOfBattle_Moenav(u8 taskId)
     }
 }
 
+// Moemon Kai: JOHTO's POKéGEAR from the BAG or SELECT: in JOHTO, or anywhere once JOHTO's LEAGUE is beaten
+// (mp_pokegear.c; on START in JOHTO)
+void CB2_MP_OpenPokegearToField(void);
+
+static void Task_OpenRegisteredPokegear(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        CleanupOverworldWindowsAndTilemaps();
+        SetMainCallback2(CB2_MP_OpenPokegearToField);
+        DestroyTask(taskId);
+    }
+}
+
+void ItemUseOutOfBattle_Pokegear(u8 taskId)
+{
+    if (!MP_Region_DeviceHere(REGION_JOHTO))
+    {
+        DisplayDadsAdviceCannotUseItemMessage(taskId, gTasks[taskId].tUsingRegisteredKeyItem);
+        return;
+    }
+    if (gTasks[taskId].tUsingRegisteredKeyItem != TRUE)
+    {
+        gBagMenu->newScreenCallback = CB2_MP_OpenPokegearToField;
+        Task_FadeAndCloseBagMenu(taskId);
+    }
+    else
+    {
+        PlayRainStoppingSoundEffect();
+        FadeScreen(FADE_TO_BLACK, 0);
+        gTasks[taskId].func = Task_OpenRegisteredPokegear;
+    }
+}
+
 void ItemUseOutOfBattle_PokeRadar(u8 taskId)
 {
     const u8 *why = MP_PokeRadar_CantUse();

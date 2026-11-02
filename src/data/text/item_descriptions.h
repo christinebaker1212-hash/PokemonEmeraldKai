@@ -1072,6 +1072,9 @@ static const u8 sWhtApricornDesc[] = _("A white APRICORN.");
 static const u8 sBlkApricornDesc[] = _("A black APRICORN.");
 static const u8 sPnkApricornDesc[] = _("A pink APRICORN.");
 
+static const u8 sPokegearDesc[] = _(
+    "JOHTO's POKéGEAR: its clock, MAP, PHONE and RADIO, carried to other regions.");
+
 static const u8 sPokeRadarDesc[] = _(
     "Shakes the grass where MOéMON hide. Find the same one again and again.");
 

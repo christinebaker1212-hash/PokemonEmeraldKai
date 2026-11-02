@@ -846,6 +846,10 @@ void MP_Region_GiveDevices(void)
 {
     if (FlagGet(FLAG_SYS_POKENAV_GET) && MP_Region_Cleared(REGION_HOENN) && !CheckBagHasItem(ITEM_MOENAV, 1))
         AddBagItem(ITEM_MOENAV, 1);
+    // JOHTO's POKéGEAR: MOM gives it as the player sets out (Johto_PlayersHouse1F); a save from before has it in
+    // JOHTO once that scene is behind it (VAR_QZ_0x5003 2+)
+    if (MP_Region_Current() == REGION_JOHTO && VarGet(0x5003) >= 2 && !CheckBagHasItem(ITEM_POKEGEAR, 1))
+        AddBagItem(ITEM_POKEGEAR, 1);
 }
 
 void MP_Region_SetCleared(u8 region)

@@ -210,3 +210,24 @@ void MP_MomBank_Debug(const char *arg)
     printf("[test] mom bank: saved %u, state %u, held %u\n", (unsigned)MomMoney(), VarGet(VAR_MOM_STATE),
            (unsigned)GetMoney(&gSaveBlock1Ptr->money));
 }
+
+// The POKéGEAR's call to MOM (mp_pokegear.c): her savings and whether she saves
+bool8 MP_MomBank_Saving(void)
+{
+    return (VarGet(VAR_MOM_STATE) & MOM_SAVING) != 0;
+}
+
+bool8 MP_MomBank_Asked(void)
+{
+    return (VarGet(VAR_MOM_STATE) & MOM_ASKED) != 0;
+}
+
+void MP_MomBank_SetSaving(bool8 on)
+{
+    VarSet(VAR_MOM_STATE, MOM_ASKED | (on ? MOM_SAVING : 0));
+}
+
+u32 MP_MomBank_Money(void)
+{
+    return MomMoney();
+}

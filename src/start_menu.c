@@ -1,6 +1,7 @@
 #include "mp_version.h"
 #include "global.h"
 #include "mp_region.h"
+#include "item.h"
 #include "qz_specials.h"
 #include "mp.h"
 #include "mp_garden.h"   // Moemon Co-op: START > GARDEN
@@ -71,6 +72,7 @@ enum
     MENU_ACTION_PYRAMID_BAG,
     MENU_ACTION_COOP,
     MENU_ACTION_GARDEN,   // Moemon Co-op: quick travel to the MOéMON GARDEN
+    MENU_ACTION_POKEGEAR,   // Moemon Kai: JOHTO's POKéGEAR (mp_pokegear.c)
 };
 
 // Save status
@@ -103,6 +105,8 @@ static bool8 StartMenuPokedexCallback(void);
 static bool8 StartMenuPokemonCallback(void);
 static bool8 StartMenuBagCallback(void);
 static bool8 StartMenuPokeNavCallback(void);
+static bool8 StartMenuPokegearCallback(void);
+static const u8 sText_MenuPokegear[] = _("POKéGEAR");
 static bool8 StartMenuPlayerNameCallback(void);
 static bool8 StartMenuSaveCallback(void);
 static bool8 StartMenuOptionCallback(void);
@@ -197,6 +201,7 @@ static const struct MenuAction sStartMenuItems[] =
     [MENU_ACTION_POKEMON]         = {gText_MenuPokemon, {.u8_void = StartMenuPokemonCallback}},
     [MENU_ACTION_BAG]             = {gText_MenuBag,     {.u8_void = StartMenuBagCallback}},
     [MENU_ACTION_POKENAV]         = {gText_MenuPokenav, {.u8_void = StartMenuPokeNavCallback}},
+    [MENU_ACTION_POKEGEAR]        = {sText_MenuPokegear, {.u8_void = StartMenuPokegearCallback}},
     [MENU_ACTION_PLAYER]          = {gText_MenuPlayer,  {.u8_void = StartMenuPlayerNameCallback}},
     [MENU_ACTION_SAVE]            = {gText_MenuSave,    {.u8_void = StartMenuSaveCallback}},
     [MENU_ACTION_OPTION]          = {gText_MenuOption,  {.u8_void = StartMenuOptionCallback}},
@@ -365,6 +370,9 @@ static void BuildNormalStartMenu(void)
     {
         AddStartMenuAction(MENU_ACTION_POKENAV);
     }
+    // Moemon Kai: JOHTO's POKéGEAR, on START there (a key item elsewhere once JOHTO's LEAGUE is beaten)
+    if (MP_Region_Current() == REGION_JOHTO && CheckBagHasItem(ITEM_POKEGEAR, 1))
+        AddStartMenuAction(MENU_ACTION_POKEGEAR);
 
     AddStartMenuAction(MENU_ACTION_PLAYER);
     if (!QzBugContest_Active())   // Moemon Kai: no saving with the party kept aside for the Bug-Catching Contest
@@ -741,6 +749,20 @@ static bool8 StartMenuPokeNavCallback(void)
         return TRUE;
     }
 
+    return FALSE;
+}
+
+static bool8 StartMenuPokegearCallback(void)
+{
+    void CB2_MP_OpenPokegear(void);
+    if (!gPaletteFade.active)
+    {
+        PlayRainStoppingSoundEffect();
+        RemoveExtraStartMenuWindows();
+        CleanupOverworldWindowsAndTilemaps();
+        SetMainCallback2(CB2_MP_OpenPokegear);
+        return TRUE;
+    }
     return FALSE;
 }
 

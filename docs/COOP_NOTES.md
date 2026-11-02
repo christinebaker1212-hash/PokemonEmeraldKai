@@ -4419,3 +4419,15 @@ Crystal's fruit trees (pokecrystal engine/events/fruit_trees.asm) in Quetzal's b
   Before, ten of Quetzal's trees were 100-109, the GARDEN farm's plots too.
 - Vars (JOHTO's, the region sidecar): 0x52E0 picked today, 0x52E1 that day, 0x52E2-0x52E4 KURT's APRICORN, count and
   day, 0x52E5 the patches planted. Debug: mp apricorn. Test johto_apricorn.
+
+## JOHTO's POKéGEAR (1.68.0)
+src/mp/mp_pokegear.c: a screen of its own (BG0 windows on the device's frame color as the backdrop): tabs CLOCK /
+MAP / PHONE / RADIO (LEFT / RIGHT), B off. CLOCK: the day and time from the game's clock (no setting). MAP:
+FieldInitRegionMap, back to the POKéGEAR. PHONE: MOM (Crystal's mom.asm: where you are; her savings, YES / NO keeps,
+starts or stops her saving: mp_mombank.c MP_MomBank_*) and PROF. ELM (Crystal's elm.asm lines by JOHTO badges).
+RADIO: 4.5 OAK's POKéMON TALK (MUS_JOHTO_PROF_OAK; MARY and OAK in Crystal's _OPT_ words, a POKéMON of the region's
+grass tables as the GENERATION has them, a line every 2.5 s), 20.0 POKé FLUTE (MUS_RG_POKE_FLUTE); the map's music
+comes back when the card or screen closes. Item ITEM_POKEGEAR 693 (key, registrable): START > POKéGEAR in JOHTO
+(start_menu.c MENU_ACTION_POKEGEAR, last in the enum), ItemUseOutOfBattle_Pokegear anywhere once JOHTO's LEAGUE is
+beaten. MOM hands it over after her first talk (Johto_PlayersHouse1F, Crystal's words); a save past that scene gets it
+in JOHTO (mp_region.c MP_Region_GiveDevices). Harness condition "pokegear", debug mp pokegear; test johto_pokegear.

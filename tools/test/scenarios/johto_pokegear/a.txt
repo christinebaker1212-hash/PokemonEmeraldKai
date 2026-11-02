@@ -1,0 +1,59 @@
+pressuntil A field 5000
+wait 60
+mp setvar 0x5003 5
+mp setvar 0x52EA 1
+mp warp 35,1,5,5
+wait 120
+mp checkitem 693
+press START 2
+wait 30
+shot startmenu
+mp startmenu
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+pressuntil A pokegear 600
+wait 30
+shot clock
+press RIGHT 2
+wait 30
+shot map
+press A 2
+wait 150
+shot townmap
+press B 2
+wait 150
+mp pokegear
+press RIGHT 2
+wait 30
+press A 2
+wait 30
+mp pokegear
+shot call
+press A 2
+wait 20
+press A 2
+wait 20
+mp pokegear
+shot ask
+press A 2
+wait 20
+mp mombank
+shot answer
+press A 2
+wait 20
+press A 2
+wait 20
+press RIGHT 2
+wait 30
+press A 2
+wait 200
+shot radio
+mp pokegear
+press B 2
+wait 60
+mp pokegear
+quit

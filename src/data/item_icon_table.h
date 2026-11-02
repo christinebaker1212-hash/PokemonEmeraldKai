@@ -465,5 +465,6 @@ const u32 *const gItemIconTable[ITEMS_COUNT + 1][2] =
     [ITEM_WHT_APRICORN] = {gItemIcon_WhtApricorn, gItemIconPalette_WhtApricorn},
     [ITEM_BLK_APRICORN] = {gItemIcon_BlkApricorn, gItemIconPalette_BlkApricorn},
     [ITEM_PNK_APRICORN] = {gItemIcon_PnkApricorn, gItemIconPalette_PnkApricorn},
+    [ITEM_POKEGEAR] = {gItemIcon_Scanner, gItemIconPalette_Scanner},   // Moemon Kai: a stand-in
     [ITEMS_COUNT] = {gItemIcon_ReturnToFieldArrow, gItemIconPalette_ReturnToFieldArrow},
 };

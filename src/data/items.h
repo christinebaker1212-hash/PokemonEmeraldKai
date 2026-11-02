@@ -5247,4 +5247,17 @@ const struct Item gItems[] =
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
     },
+
+    [ITEM_POKEGEAR] =
+    {
+        .name = _("POKéGEAR"),
+        .itemId = ITEM_POKEGEAR,
+        .price = 0,
+        .description = sPokegearDesc,
+        .importance = 1,
+        .registrability = TRUE,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_FIELD,
+        .fieldUseFunc = ItemUseOutOfBattle_Pokegear,
+    },
 };

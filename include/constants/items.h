@@ -795,8 +795,9 @@
 #define ITEM_PNK_APRICORN 692
 #define FIRST_APRICORN ITEM_RED_APRICORN
 #define LAST_APRICORN ITEM_PNK_APRICORN
+#define ITEM_POKEGEAR 693   // Moemon Kai: JOHTO's POKéGEAR (src/mp/mp_pokegear.c): on START there, a key item elsewhere
 
-#define ITEMS_COUNT 693
+#define ITEMS_COUNT 694
 // end of Gen 5-9 items
 #define FIRST_PLATINUM_KEY_ITEM ITEM_GALACTIC_KEY
 #define LAST_PLATINUM_ITEM ITEM_GOOEY_MULCH

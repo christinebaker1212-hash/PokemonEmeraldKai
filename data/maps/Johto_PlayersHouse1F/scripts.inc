@@ -271,8 +271,23 @@ Johto_PlayersHouse1F_EventScript_83E3BC1::
 Johto_PlayersHouse1F_EventScript_83E3C01::
 	setflag FLAG_QZ_0xAD8
 	msgbox Johto_PlayersHouse1F_Text_83E3C8A, MSGBOX_DEFAULT
+	@ Moemon Kai: Crystal's MOM hands over the POKéGEAR here (pokecrystal maps/PlayersHouse1F.asm: no clock to set,
+	@ the game's own clock; src/mp/mp_pokegear.c)
+	msgbox Johto_PlayersHouse1F_Text_MomPokegear, MSGBOX_DEFAULT
+	giveitem ITEM_POKEGEAR
+	msgbox Johto_PlayersHouse1F_Text_MomPokegear2, MSGBOX_DEFAULT
 	closemessage
 	return
+
+Johto_PlayersHouse1F_Text_MomPokegear:
+	.string "Oh! I almost forgot! Your MOéMON\n"
+	.string "GEAR is back from the repair shop.\p"
+	.string "Here you go!$"
+
+Johto_PlayersHouse1F_Text_MomPokegear2:
+	.string "MOéMON GEAR, or just POKéGEAR.\p"
+	.string "It’s essential if you want to be a\n"
+	.string "good trainer.$"
 
 @ Johto_PlayersHouse1F object 3 (local id 3, gfx 0x3EB0) at 9,6
 Johto_PlayersHouse1F_EventScript_84019F4::

@@ -282,6 +282,11 @@ int MP_TestCondition(const char *name)
         bool8 MP_StarterTable_Active(void);
         return MP_StarterTable_Active();
     }
+    if (strcmp(name, "pokegear") == 0)   // JOHTO's POKéGEAR, up and settled (mp_pokegear.c)
+    {
+        bool8 MP_Pokegear_Active(void);
+        return MP_Pokegear_Active();
+    }
     if (strcmp(name, "introlook") == 0)
     {
         bool8 MP_IntroLook_Active(void);
@@ -3377,6 +3382,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // mombank [SAVINGS] - MOM's savings and state (mp_mombank.c); a number sets her savings
         void MP_MomBank_Debug(const char *arg);
         MP_MomBank_Debug(arg);
+    }
+    else if (strcmp(cmd, "pokegear") == 0)
+    {
+        // pokegear - JOHTO's POKéGEAR: its card, cursor, phone and radio (mp_pokegear.c)
+        void MP_Pokegear_Debug(void);
+        MP_Pokegear_Debug();
     }
     else if (strcmp(cmd, "apricorn") == 0)
     {
