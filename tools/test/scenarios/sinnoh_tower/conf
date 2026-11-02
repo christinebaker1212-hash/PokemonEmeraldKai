@@ -1,10 +1,11 @@
-# The SINNOH BATTLE TOWER (data/maps/Sinnoh_BattleTower, Sinnoh_BattleTowerBattleRoom: Emerald's tower battles in
-# Platinum's rooms): Platinum's words and menus, SINGLE at level 50, three POKéMON picked, the game saved, the battle room, seven opponents (at 1 HP: MOEMON_TEST_FOE_HP1,
-# the frontier too: A pressed until the run ends), then back at the counter with BATTLE POINTS, the streak 7. Shots t_room.png (the first opponent), t_tower_end.png.
+# SINNOH's BATTLE TOWER as Platinum's (docs/SINNOH_TOWER_PORT.md): the single counter's own script (SINGLE), three
+# POKéMON picked (any level: battled at 50), the game saved, the elevator, the corridor and the battle room (Platinum's
+# frontier scenes on their maps), seven of Platinum's frontier trainers (at 1 HP: MOEMON_TEST_FOE_HP1), healed between
+# battles, then back at the counter: the streak 7, a room cleared, 3 BATTLE POINTS. Shots t_room*.png, t_tower_end.png.
 # Needs the 3D pack.
 MODE=1
-TMO=600
+TMO=900
 GEN=4
 ENV_A="MOEMON_TEST_STRONG=1 MOEMON_TEST_FOE_HP1=1 MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=143:100,248:100,149:100"
-EXPECT_A=("where map 41.8 xy 15,6" "streak 7, bp 1")
+EXPECT_A=("where map 41.8 xy 15,6" "single record 7 latest 7 room 1 on 1" "bp 3 ")
 UNEXPECT_A=("[crash]" "TIMEOUT")

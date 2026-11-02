@@ -330,7 +330,7 @@ u16 Sinnoh_FrontierBattle(void)
     if (sRun.facility == FACILITY_ARCADE)
         ApplyEvent();
     VarSet(VAR_FRONTIER_FACILITY, FRONTIER_FACILITY_TOWER);
-    gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_FRONTIER;
+    gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_BATTLE_TOWER;   // (one frontier flag: all of them were the PALACE's and ARENA's rules too)
     MPNet_Log("frontier: facility %d battle %d (streak %d): trainer %d", sRun.facility, sRun.battle + 1, streak,
               gTrainerBattleOpponent_A);
     CreateTask(Task_StartFrontierBattle, 1);

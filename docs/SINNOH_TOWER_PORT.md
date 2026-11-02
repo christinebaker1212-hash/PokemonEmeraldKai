@@ -30,15 +30,36 @@ BP, the save's frontier records where they fit); everything Platinum does is Pla
   any level, battled at 50.
 - BP: BattleTower_GiveBattlePointsReward (unk_02049D08.c:750).
 
+## How it runs here
+- The lobby, the elevator and the BATTLE SALON are Platinum's field scripts (gen_scripts.py, as every SINNOH map's).
+- The corridor and the battle room are Platinum's frontier scenes (overlay104's own script language,
+  res/field/frontier_scripts): gen_scripts.py FrontierConverter turns them into the game's scripts on the maps of the
+  same rooms. Each scene's actors are the map's people (FRONTIER_ACTORS: the attendant, the opponent, the player who
+  walks in); its pixel positions their tiles (x / 16 - 1, y rounded up / 16 - 1, checked on both rooms); its variables
+  the map's VAR_TEMP_*. LaunchBattleFrontierScene and ChangeScript warp to the scene's map and go on in its script there
+  (SINNOH_WARP_CONTINUE); ExitFrontier goes back to the field script after the LaunchBattleFrontierScene that started
+  the scene (the elevator's: the warp to the lobby). Platinum's field versions of these rooms (left from Diamond and
+  Pearl, never run by Platinum) aren't used: FRONTIER_SCENE_MAPS take no field map scripts.
+- `sinnoh SINNOH_TOWER, FUNC, ARG, DESTVAR` (src/sinnoh/s3d_scrcmd.c) runs Platinum's BT_FUNC_* (src/sinnoh/s3d_tower.c
+  Sinnoh_TowerCall) and the script commands around them (InitBattleTower, the intro line, the battle, CheckWonBattle,
+  the party menu, the save: SINNOH_TOWER_* in include/sinnoh_tower.h).
+- The records (Platinum's frontier stats and WifiBattleTowerRecord: best and last streaks, rooms cleared, the streak
+  going on, the challenge REST saved, game records) are "<save>.region" chunk TOWR; the BATTLE POINTS the game's own.
+- The party menu (party_menu.c, Sinnoh_Tower_Choosing): Platinum's banned list, any level (battled as level 50
+  copies: the party is the player's again after each battle), the duplicate checks Platinum's script makes after.
+- Closed: the Wi-Fi rooms (online), Battle Videos (no recorder: the offers to record are left out, FRONTIER_REWRITES),
+  TEALA's trophies (the Underground's secret base goods). REST goes back to the title screen as Platinum's reset does
+  (the PC build's soft reset quits), the game continued in the lobby.
+
 ## Steps
-1. [x] Data: tools/sinnoh/gen_frontier.py -> src/data/sinnoh_frontier.h (sets, trainers: class, picture, set ids);
-       names and lines in the text pack (build_text.py: a bank after the trainers').
-2. [ ] Engine: src/sinnoh/s3d_tower.c (the rules above, Lv 50 copies of the party, records in "<save>.region").
-       Done: Sinnoh_Frontier_FillParty (Platinum's party building), the battle ids TRAINER_SINNOH_FRONTIER_A / _B
-       (include/sinnoh_tower.h) answered by battle_tower.c / frontier_util.c / s3d_gfx.c (name, class, picture,
-       Platinum's battle picture, the three lines); new classes TOWER TYCOON ... WAITER (gen_trainers.py NEW).
-3. [ ] gen_scripts.py: InitBattleTower, CallBattleTowerFunction (BT_FUNC_*), SetBattleTowerNull, the rest.
-4. [ ] The frontier scripts' converter (battle rooms, corridors, multi room).
-5. [ ] The BATTLE SALON's partners (multi battles), PALMER.
-6. [ ] The records machine (OpenBattleTowerRecordsApp).
-7. [ ] Tests; remove data/maps/Sinnoh_BattleTower*'s own scripts.
+1. [x] Data: tools/sinnoh/gen_frontier.py -> src/data/sinnoh_frontier.h (sets, trainers: class, picture, set ids, the
+       battle room sprite; the rooms' trainer ranges, PALMER's and the partners' numbers); names and lines in the text
+       pack (build_text.py: a bank after the trainers').
+2. [x] Engine: src/sinnoh/s3d_tower.c (the rules above, Lv 50 copies of the party, records in "<save>.region").
+3. [x] gen_scripts.py: InitBattleTower, CallBattleTowerFunction (BT_FUNC_*), the rest (tower_command).
+4. [x] The frontier scripts' converter (corridor, battle room; the multi ones with step 5).
+5. [ ] The BATTLE SALON's partners (multi battles: GetBattleTowerPartnerSpeciesAndMove, BT_FUNC_UNK_56, the multi
+       corridor and battle room scenes), the multi attendant.
+6. [ ] The records machine (OpenBattleTowerRecordsApp), the STATS JUDGE (JudgeStats).
+7. [x] Tests (sinnoh_tower, sinnoh_tower_palmer, sinnoh_tower_rest, sinnoh_tower_double); Kai's own tower scripts
+       removed.

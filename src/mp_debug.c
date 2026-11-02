@@ -2290,6 +2290,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         FlagClear(FLAG_SYS_POKEDEX_GET);
         printf("[test] emptyparty\n");
     }
+    else if (strcmp(cmd, "stower") == 0)
+    {
+        void Sinnoh_TowerDebug(const char *arg);
+        Sinnoh_TowerDebug(arg);   // SINNOH's BATTLE TOWER (src/sinnoh/s3d_tower.c)
+    }
     else if (strcmp(cmd, "hall") == 0)
     {
         void Sinnoh_HallDebug(void);

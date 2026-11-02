@@ -106,6 +106,8 @@ enum {
     SINNOH_TRAM,                    // ARG: the GREAT MARSH tram's call (s3d_tram.c Sinnoh_TramCall), ARG2, ARG3
     SINNOH_ROAMER,                  // ARG: a roaming POKéMON's slot set going (s3d_roamer.c Sinnoh_RoamerActivate)
     SINNOH_MISC,                    // ARG: small Platinum commands on Kai's systems (s3d_misc.c Sinnoh_MiscCall), ARG2, ARG3
+    SINNOH_TOWER,                   // ARG: the BATTLE TOWER's function (s3d_tower.c Sinnoh_TowerCall), ARG2 a value or
+                                    // variable, ARG3 the variable for the answer
 };
 
 u8 gSinnohMessage[1000];
@@ -578,6 +580,16 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
     {
         void Sinnoh_MiscCall(u16 op, u16 a, u16 b);
         Sinnoh_MiscCall(arg, arg2, arg3);
+        break;
+    }
+    case SINNOH_TOWER:
+    {
+        bool8 Sinnoh_TowerCall(u16 func, u16 arg, u16 destVar);
+        if (Sinnoh_TowerCall(arg, arg2, arg3))
+        {
+            ScriptContext_Stop();   // (the party menu, a battle: their end starts the script again)
+            return TRUE;
+        }
         break;
     }
     case SINNOH_ROAMER:

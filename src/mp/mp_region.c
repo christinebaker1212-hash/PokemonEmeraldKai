@@ -10,7 +10,8 @@
 #include "fieldmap.h"
 #include "metatile_behavior.h"
 #include "s3d.h"   // Moemon Kai: SINNOH's map groups
-#include "s3d_underground.h"   // (SINNOH's Underground: chunk UNDG)
+#include "s3d_underground.h"
+#include "sinnoh_tower.h"   // (SINNOH's BATTLE TOWER: chunk TOWR)   // (SINNOH's Underground: chunk UNDG)
 const void *Sinnoh_UnownData(u32 *size);   // (the UNOWN letters seen: chunk UNOF, s3d_legends.c)
 void Sinnoh_UnownLoad(const void *data, u32 size);
 void Sinnoh_UnownReset(void);
@@ -270,6 +271,7 @@ void MP_Region_StartNewGame(void)
     gRegionState.started = 1 << sStartRegion;
     Sinnoh_HoneyReset();
     Sinnoh_HallReset();
+    Sinnoh_TowerReset();
     Sinnoh_FrontierReset();
     Sinnoh_TvReset();
     Sinnoh_FashionReset();
@@ -393,6 +395,15 @@ void MP_Region_WriteSidecar(void)
             c[1] = size;
             fwrite(c, sizeof(c), 1, f);
             fwrite(hall, size, 1, f);
+        }
+        {
+            // SINNOH's BATTLE TOWER records and the challenge REST saved (src/sinnoh/s3d_tower.c)
+            u32 size;
+            const void *tower = Sinnoh_TowerData(&size);
+            c[0] = CHUNK('T', 'O', 'W', 'R');
+            c[1] = size;
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(tower, size, 1, f);
         }
         {
             // SINNOH's TV: its kept segments and records (src/sinnoh/s3d_tv.c)
@@ -551,6 +562,12 @@ static bool8 LoadFrom(const char *path)
                 if (fread(buf, c[1], 1, f) == 1)
                     Sinnoh_HallLoad(buf, c[1]);
             }
+            else if (c[0] == CHUNK('T', 'O', 'W', 'R') && c[1] <= 1024)
+            {
+                u8 buf[1024];
+                if (fread(buf, c[1], 1, f) == 1)
+                    Sinnoh_TowerLoad(buf, c[1]);
+            }
             else if (c[0] == CHUNK('F', 'A', 'S', 'H') && c[1] <= 1024)
             {
                 u8 buf[1024];
@@ -683,6 +700,7 @@ void MP_Region_LoadFromSave(void)
     int i;
     Sinnoh_HoneyReset();
     Sinnoh_HallReset();
+    Sinnoh_TowerReset();
     Sinnoh_FrontierReset();
     Sinnoh_TvReset();
     Sinnoh_FashionReset();

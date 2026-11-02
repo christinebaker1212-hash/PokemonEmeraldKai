@@ -1,0 +1,9 @@
+# SINNOH's BATTLE TOWER: the 21st battle is PALMER's (Platinum's battle_tower.c: room 2's seventh opponent, singles):
+# a streak of 14 set going (`mp stower 0 2`), seven more won, PALMER among them: 20 BATTLE POINTS (Platinum's for beating
+# him), the streak 21, the room count 3, his silver print kept (VAR_BATTLE_TOWER_PRINT_STATE 2). Needs the 3D pack.
+MODE=1
+TMO=900
+GEN=4
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_TEST_FOE_HP1=1 MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=143:100,248:100,149:100"
+EXPECT_A=("where map 41.8 xy 15,6" "palmer 1 | single record 21 latest 21 room 3 on 1" "bp 20 " "against trainer 305" "var 0x51A3 = 2")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -149,8 +149,8 @@ EXTRA_PEOPLE = {
 
 
 # Platinum's people changed for this game's scripts: {map: {Platinum's object number: fields}}. The SINNOH BATTLE
-# TOWER's room: the opponent is Emerald's tower opponent (VAR_OBJ_GFX_ID_0, its hide flag), the player's stand-in
-# hidden (the player walks in). (BARRY's mom stays on the player's house's door mat, where her visit starts:
+# TOWER's room: the opponent's look is VAR_OBJ_GFX_ID_0 (its hide flag), the player's stand-in hidden (the player walks
+# in). (BARRY's mom stays on the player's house's door mat, where her visit starts:
 # EXTRA_TRIGGERS)
 OVERRIDES = {
     # people Platinum stands on a door for a scene this game doesn't play (they shut players in or out):
@@ -161,9 +161,12 @@ OVERRIDES = {
     'Sinnoh_CanalaveCitySailorEldritchHouse': {3: {'x': 3, 'y': 7, 'movement_type': 'MOVEMENT_TYPE_FACE_DOWN'}},
     'Sinnoh_StarkMountainRoom3': {8: {'x': 6, 'y': 16, 'movement_type': 'MOVEMENT_TYPE_FACE_DOWN'},
                                   9: {'x': 8, 'y': 16, 'movement_type': 'MOVEMENT_TYPE_FACE_DOWN'}},
-    'Sinnoh_BattleTowerBattleRoom': {2: {'graphics_id': 'OBJ_EVENT_GFX_VAR_0', 'flag': 'FLAG_HIDE_BATTLE_TOWER_OPPONENT',
+    # (Platinum's frontier scenes on the BATTLE TOWER's rooms, gen_scripts.py FRONTIER_ACTORS: the scene's attendant)
+    'Sinnoh_BattleTowerBattleRoom': {1: {'graphics_id': 'OBJ_EVENT_GFX_SINNOH_FRONTIER_SINGLE_ATTENDANT'},
+                                     2: {'graphics_id': 'OBJ_EVENT_GFX_VAR_0', 'flag': 'FLAG_HIDE_BATTLE_TOWER_OPPONENT',
                                          'movement_type': 'MOVEMENT_TYPE_FACE_DOWN', 'script': '0x0'},
                                      3: {'flag': '0x3FFF'}},
+    'Sinnoh_BattleTowerCorridor': {1: {'graphics_id': 'OBJ_EVENT_GFX_SINNOH_FRONTIER_SINGLE_ATTENDANT'}},
 }
 
 

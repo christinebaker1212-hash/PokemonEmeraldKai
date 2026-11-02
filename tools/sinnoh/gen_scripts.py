@@ -36,7 +36,7 @@ from gen_trainers import RENAME  # noqa: E402
 
 OUT = os.path.join(ROOT, 'sinnoh', 'platinum_scripts.inc')
 PREFIX = 'SinnohP_'
-TERMINAL = {'End', 'Return', 'GoTo', 'EndMovement'}
+TERMINAL = {'End', 'Return', 'GoTo', 'EndMovement', 'ExitFrontier'}
 
 # this game's SINNOH script command (data/script_cmd_table.inc 0xF6 `sinnoh OP, ARG, ARG2`, src/sinnoh/s3d_scrcmd.c)
 SINNOH_BUFFER_PLAYER, SINNOH_BUFFER_RIVAL, SINNOH_BUFFER_COUNTERPART, SINNOH_YESNO = 1, 2, 3, 4
@@ -58,6 +58,9 @@ SINNOH_MESSAGE_UNOWN = 57   # (gSinnohMessage <- a message in Platinum's UNOWN l
 SINNOH_UNOWN_SEEN = 58   # (the UNOWN letters seen: s3d_legends.c)
 SINNOH_TRAM = 59   # (the GREAT MARSH's tram: s3d_tram.c)
 SINNOH_MISC = 61   # (small commands on Kai's systems: src/sinnoh/s3d_misc.c)
+SINNOH_TOWER = 62  # (Platinum's BATTLE TOWER: src/sinnoh/s3d_tower.c Sinnoh_TowerCall, include/sinnoh_tower.h)
+# (its own functions past Platinum's BT_FUNC_* numbers: include/sinnoh_tower.h SINNOH_TOWER_*)
+TOWER_INIT, TOWER_INIT_RESUME, TOWER_FREE, TOWER_INTRO, TOWER_BATTLE, TOWER_WON, TOWER_CHOOSE, TOWER_SAVE = range(200, 208)
 SINNOH_ROAMER = 60   # (a roaming POKéMON set going: src/sinnoh/s3d_roamer.c; the slot, Platinum's ROAMING_SLOT_*)   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
 (TVCALL_STATUS, TVCALL_FRAMING, TVCALL_FINISH, TVCALL_SEGMENT_ID, TVCALL_SEGMENT, TVCALL_COMMERCIAL, TVCALL_NEXT,
  TVCALL_INTERVIEW_ID, TVCALL_INTERVIEW_MESSAGE, TVCALL_INTERVIEW_SAVE, TVCALL_INTERVIEW_OK, TVCALL_WORD,
@@ -144,7 +147,10 @@ def _sprite(gfx):
     """this game's sprite for a Platinum one (tools/sinnoh/sprites.py); the player's looks of the other gender are the
     counterpart's (DAWN, LUCAS)"""
     import sprites
-    gfx = {'OBJ_EVENT_GFX_PLAYER_F': 'OBJ_EVENT_GFX_DAWN', 'OBJ_EVENT_GFX_PLAYER_M': 'OBJ_EVENT_GFX_LUCAS'}.get(gfx, gfx)
+    gfx = {'OBJ_EVENT_GFX_PLAYER_F': 'OBJ_EVENT_GFX_DAWN', 'OBJ_EVENT_GFX_PLAYER_M': 'OBJ_EVENT_GFX_LUCAS',
+           # (the Wi-Fi rooms' attendants: online, closed; their scripts' looks never shown)
+           'OBJ_EVENT_GFX_WIFI_PLAZA_ATTENDANT_F': 'OBJ_EVENT_GFX_FRONTIER_SINGLE_ATTENDANT',
+           'OBJ_EVENT_GFX_WIFI_PLAZA_ATTENDANT_M': 'OBJ_EVENT_GFX_FRONTIER_SINGLE_ATTENDANT'}.get(gfx, gfx)
     m = re.match(r'^OBJ_EVENT_GFX_VAR_([0-9A-F])$', gfx)
     if m:
         return 'OBJ_EVENT_GFX_VAR_%s' % m.group(1)
@@ -321,6 +327,17 @@ KAI_REWRITES = {
                                             ('End', [])],
         'AmitySquare_CoordEvent_ExitAmitySquare': [('KaiAmityLeave', []), ('SetVar', ['VAR_FOLLOWER_MON_ACTIVE', 'FALSE']),
                                                    ('End', [])],
+    },
+    # the BATTLE TOWER's lobby: the attendant who walks the player to the door is named, not Platinum's object number
+    # (its numbers start at 0, this game's local ids at 1)
+    'battle_tower': {
+        lab: [('SetVar', ['VAR_MAP_LOCAL_0x02', who]), ('SetVar', ['VAR_MAP_LOCAL_0x03', door]),
+              ('Call', ['BattleTower_EnterBattleRoomAnimation']), ('GoTo', [then])]
+        for lab, who, door, then in [
+            ('BattleTower_EnterSingleDoubleBattleRoom', 'LOCALID_SINGLE_ATTENDANT', '15', 'BattleTower_WarpToElevator'),
+            ('BattleTower_EnterWiFiBattleRoom', 'LOCALID_WIFI_ATTENDANT', '19', 'BattleTower_WarpToElevator'),
+            ('BattleTower_EnterMultiBattleRoom', 'LOCALID_MULTI_ATTENDANT', '11', 'BattleTower_GoToWarpToElevator'),
+            ('BattleTower_EnterLinkMultiBattleRoom', 'LOCALID_MULTI_ATTENDANT', '11', '_06A0')]
     },
 }
 
@@ -1415,7 +1432,85 @@ class FileConverter:
         if cmd in ('TurnOnTimeBasedEffects', 'CreateJournalEvent', 'TrySetUnusedCollectedOrbFlag', 'RecordHeapMemory',
                    'CheckHeapMemory', 'SetMenuXOriginToRight', 'SetMenuXOriginToLeft'):
             return []                       # (Platinum's journal, its memory checks: nothing here)
+        out = self.tower_command(cmd, a)
+        if out is not None:
+            return out
         raise Unsupported(cmd)
+
+    # ---- Platinum's BATTLE TOWER (src/sinnoh/s3d_tower.c; docs/SINNOH_TOWER_PORT.md)
+    def bt_func(self, name):
+        if getattr(self.dec, '_bt_funcs', None) is None:
+            text = open(os.path.join(self.root, 'include/constants/battle_tower_functions.h')).read()
+            self.dec._bt_funcs, n = {}, 0
+            for item in re.search(r'enum BattleTowerFunction \{(.*?)\}', text, re.S).group(1).split(','):
+                name_, _, val = item.strip().partition('=')
+                if not name_.strip():
+                    continue
+                n = int(val.strip(), 0) if val.strip() else n
+                self.dec._bt_funcs[name_.strip()] = n
+                n += 1
+        if name not in self.dec._bt_funcs:
+            raise Unsupported('battle tower function %s' % name)
+        return self.dec._bt_funcs[name]
+
+    def tower(self, func, arg=0, dest=0):
+        return self.sinnoh(SINNOH_TOWER, func, arg, dest)
+
+    def tower_command(self, cmd, a):
+        """the BATTLE TOWER's commands, None: not one"""
+        if cmd == 'InitBattleTower':
+            if self.value(a[0]) != '0':
+                return [self.tower(TOWER_INIT_RESUME)]
+            return [self.tower(TOWER_INIT, self.value(a[1]) if a[1] != '0xFFFF' else 0)]
+        if cmd == 'SetBattleTowerNull':
+            return []                       # (Platinum's check that no challenge was left: the game's own state)
+        if cmd in ('FreeBattleTower', 'FreeTowerStruct'):
+            return [self.tower(TOWER_FREE)]
+        if cmd == 'CallBattleTowerFunction':
+            f = self.bt_func(a[0])
+            dest = self.var(a[2]) if self.is_var(a[2]) or a[2].startswith('FR_VAR_') else 0
+            return [self.tower(f, self.arg(a[1]), dest)]
+        if cmd in ('PrintBattleTowerIntroMessage', 'FrontierScrCmd_85'):
+            return [self.tower(TOWER_INTRO, self.value(a[0])), 'message gStringVar4', 'waitmessage']
+        if cmd in ('BattleTower_StartBattle',):
+            return [self.tower(TOWER_BATTLE)]
+        if cmd == 'BattleTower_CheckWonBattle':
+            return [self.tower(TOWER_WON, 0, self.var(a[0]))]
+        if cmd == 'MessageSeenBanlistSpecies':
+            # (Platinum's English line names only the number needed)
+            return ['buffernumberstring STR_VAR_1, %s' % self.value(a[1]), 'message %s' % self.text_label(a[0]),
+                    'waitmessage']
+        if cmd == 'TryRevertPokemonForm':
+            return ['setvar %s, 0' % self.var(a[1])]   # (no GRISEOUS ORB form to change back here)
+        if cmd in ('ScrCmd_1DF', 'ScrCmd_1E0'):
+            # (TEALA's trophies are the Underground's goods for a secret base: closed, so she has none to give)
+            return ['setvar %s, 0' % self.var(a[0])]
+        if cmd == 'TrySaveGame':
+            return [self.tower(TOWER_SAVE), 'setvar %s, 1' % self.var(a[0])]
+        if cmd == 'ScrCmd_0B3':
+            return ['setvar %s, 0' % self.var(a[0])]   # (the Wi-Fi rooms' upload: online, closed)
+        if cmd == 'ScrCmd_18C':
+            # (a person turned to face a way: Platinum's DIR_NORTH, SOUTH, WEST, EAST as the game's)
+            d = int(self.value(a[1]))
+            return ['turnobject %s, %s' % (self.localid(a[0]), ['DIR_NORTH', 'DIR_SOUTH', 'DIR_WEST', 'DIR_EAST'][d])]
+        if cmd in ('ShowSavingIcon', 'HideSavingIcon'):
+            return []
+        if cmd == 'LaunchBattleFrontierScene':
+            # (Platinum's frontier scene: its map, the frontier script going on there; ExitFrontier comes back here)
+            low = FRONTIER_SCENES.get(a[0])
+            if low is None:
+                raise Unsupported('frontier scene %s' % a[0])
+            c = converter(self.root, low)
+            m, x, y = c.start()
+            self.calls.add((low, 1))
+            # (the scene's ExitFrontier comes back to the first script that starts it: the Wi-Fi rooms' are closed)
+            first = next(lab for lab in self.order for c2, a2 in self.labels[lab]
+                         if c2 == cmd and a2[:1] == a[:1])
+            here = getattr(self, 'cur_label', first)
+            back = '%s%s__frexit_%s%s' % (PREFIX, self.low, a[0], '' if here == first else '_' + here)
+            return [self.sinnoh(SINNOH_WARP_CONTINUE), 'goto %s' % c.entry_label(1), 'warp %s, %d, %d' % (m, x, y),
+                    'waitstate', '%s:' % back]
+        return None
 
     def our_warp(self, n):
         return self.our_event(n, 'warp_events')
@@ -1506,6 +1601,7 @@ class FileConverter:
             if lab not in labels:
                 continue
             out.append('%s:' % self.label(lab))
+            self.cur_label = lab
             for cmd, a in self.labels[lab]:
                 if cmd == 'ApplyMovement':
                     moves.add(a[1])
@@ -1526,6 +1622,228 @@ class FileConverter:
         return out, entries
 
 
+# ------------------------------------------------------------------------------------------- the frontier scripts
+# Platinum's BATTLE FRONTIER scenes (overlay104: a second script language, res/field/frontier_scripts) run here on the
+# maps of the same rooms: the scene's people are the map's (FRONTIER_ACTORS: actor -> this game's object, its look's
+# VAR_OBJ_GFX_ID_n, or the player), its positions the tiles under them (x / 16 - 1, the y rounded up / 16 - 1), its
+# variables the map's own VAR_TEMP_*; LaunchBattleFrontierScene / ChangeScript warp to a scene's map and go on in its
+# script there (SINNOH_WARP_CONTINUE), ExitFrontier goes back after the LaunchBattleFrontierScene that started it
+
+FRONTIER_SCENES = {'FRONTIER_SCENE_TOWER_CORRIDOR': 'fr_battle_tower_corridor',
+                   'FRONTIER_SCENE_TOWER_BATTLE_ROOM': 'fr_battle_tower_battle_room'}
+# each scene file: (the map's Platinum header, {actor: 'player' / (local id, its look's variable number or None) / None})
+FRONTIER_ACTORS = {
+    'fr_battle_tower_corridor': ('battle_tower_corridor', {0: 'player', 1: ('1', None)}),
+    # (actor 0 is Platinum's hidden camera holder; 3 the player who walks in)
+    'fr_battle_tower_battle_room': ('battle_tower_battle_room', {0: None, 1: ('1', None), 2: ('2', 0), 3: 'player'}),
+}
+FRONTIER_SCENE_MAPS = {v[0] for v in FRONTIER_ACTORS.values()}
+# the field script and scene a frontier scene's ExitFrontier goes back to
+FRONTIER_EXIT = {'fr_battle_tower_corridor': ('battle_tower_elevator', 'FRONTIER_SCENE_TOWER_CORRIDOR'),
+                 'fr_battle_tower_battle_room': ('battle_tower_elevator', 'FRONTIER_SCENE_TOWER_CORRIDOR')}
+# the variables holding a sprite's number (Platinum's OBJ_EVENT_GFX_* order: a number set into them is a look)
+FRONTIER_GFX_VARS = {'FR_VAR_0x800F', 'VAR_0x800B', 'VAR_0x8009'}
+# Battle Videos: the scene's offers to record one are left out (no video recorder here)
+FRONTIER_REWRITES = {
+    'fr_battle_tower_battle_room': {
+        '_0227': [('CallBattleTowerFunction', ['BT_FUNC_UPDATE_GAME_RECORDS_AND_JOURNAL', '0', 'VAR_0x8008']),
+                  ('Message', ['BattleTowerBattleRoom_Text_BPFromTycoon']), ('Call', ['_0330']), ('CloseMessage', []),
+                  ('GoTo', ['_03EF'])],
+        '_0273': [('CallBattleTowerFunction', ['BT_FUNC_UPDATE_GAME_RECORDS_AND_JOURNAL', '0', 'VAR_0x8008']),
+                  ('CallBattleTowerFunction', ['BT_FUNC_GET_CHALLENGE_MODE', '0', 'VAR_0x8008']),
+                  ('GoToIfEq', ['VAR_0x8008', 'BATTLE_TOWER_MODE_5', '_02D4']),
+                  ('Message', ['BattleTowerBattleRoom_Text_BPEarned']), ('Call', ['_0330']), ('CloseMessage', []),
+                  ('GoTo', ['_03EF'])],
+        '_02DE': [('CloseMessage', []), ('CallBattleTowerFunction', ['BT_FUNC_UPDATE_GAME_RECORDS', '0', 'VAR_0x8008']),
+                  ('GoTo', ['_03EF'])],
+    },
+}
+
+
+class FrontierConverter(FileConverter):
+    def __init__(self, dec, path):
+        self.dec, self.root, self.path = dec, dec.root, path
+        self.low = 'fr_' + os.path.basename(path)[len('frontier_scripts_'):-2]
+        text = open(path, encoding='utf-8', errors='replace').read()
+        m = re.search(r'#\s*include "res/text/bank/(\w+)\.h"', text)
+        self.bank = m.group(1) if m else None
+        self.events_low, self.actors = FRONTIER_ACTORS.get(self.low, (None, {}))
+        self.localids = {}
+        self.labels, self.entries, self.order = parse(path)
+        # (the data tables: the actors' lists, the sprites' resources)
+        self.data, cur = {}, None
+        for raw in text.splitlines():
+            line = raw.split('//')[0].rstrip()
+            mm = re.match(r'^(\w+):\s*$', line)
+            if mm:
+                cur = mm.group(1)
+                continue
+            mm = re.match(r'^\s+\.(short|byte)\s+(\S+)', line)
+            if mm and cur:
+                self.data.setdefault(cur, []).append((mm.group(1), int(mm.group(2), 0)))
+        for lab in self.data:
+            self.labels.pop(lab, None)
+            if lab in self.order:
+                self.order.remove(lab)
+        for lab, body in FRONTIER_REWRITES.get(self.low, {}).items():
+            self.labels[lab] = body
+        self.texts = {}
+        self._local = 0
+        self.calls = set()
+        self.moves = set()
+        self._ok = {}
+
+    def actor_table(self, label):
+        """[(actor, sprite, direction, x, y, visible)] of a FrontierScrCmd_24 list"""
+        d = self.data.get(label)
+        if d is None:
+            raise Unsupported('actor list %s' % label)
+        out, i = [], 0
+        while i < len(d) and not (d[i][0] == 'short' and d[i][1] == 0xFD13):
+            vals = [v for _, v in d[i:i + 7]]
+            if len(vals) < 7:
+                raise Unsupported('actor list %s' % label)
+            out.append(tuple(vals))
+            i += 7
+        return out
+
+    @staticmethod
+    def tile(px, py):
+        return px // 16 - 1, -(-py // 16) - 1
+
+    def start(self):
+        """(map, x, y) where the player stands as the scene starts: its first actor list's player"""
+        o = self.dec.origins().get(self.events_low)
+        if o is None:
+            raise Unsupported('frontier scene map %s' % self.events_low)
+        for lab in self.order:
+            for cmd, a in self.labels[lab]:
+                if cmd != 'FrontierScrCmd_24':
+                    continue
+                for actor, gfx, d, x, y, b1, vis in self.actor_table(a[0]):
+                    if self.actors.get(actor) == 'player':
+                        tx, ty = self.tile(x, y)
+                        return o[0], tx, ty
+        raise Unsupported('no player in %s' % self.low)
+
+    def var(self, x):
+        m = re.match(r'^(?:FR_)?VAR_0x80([0-9A-Fa-f]{2})$', x)
+        if m:
+            n = int(m.group(1), 16)
+            if n > 0x10 or n in (0xD, 0xE) and not x.startswith('FR_'):
+                raise Unsupported('frontier variable %s' % x)
+            return '0x%X' % (0x4000 + {0xF: 0xD, 0x10: 0xE}.get(n, n))   # (the map's VAR_TEMP_*)
+        return FileConverter.var(self, x)
+
+    def is_var(self, x):
+        return x.startswith(('VAR_', 'FR_VAR_'))
+
+    def localid(self, x):
+        a = self.actors.get(int(x, 0)) if re.match(r'^(0x[0-9A-Fa-f]+|\d+)$', x) else None
+        if a == 'player':
+            return 'OBJ_EVENT_ID_PLAYER'
+        if isinstance(a, tuple):
+            return a[0]
+        raise Unsupported('frontier actor %s' % x)
+
+    def movement(self, cmd, a):
+        if cmd == 'WarpIn':
+            return ['set_visible']
+        if cmd == 'WarpOut':
+            return ['set_invisible']
+        m = re.match(r'^Walk(North|South|West|East)$', cmd)
+        if m:
+            n = int(a[0], 0) if a else 1
+            return ['walk_' + DIRS[m.group(1)]] * n
+        return FileConverter.movement(self, cmd, a)
+
+    def gfx_value(self, n):
+        """this game's sprite for Platinum's sprite number N"""
+        path = os.path.join(self.root, 'generated/object_events_gfx.txt')
+        names = [x.strip() for x in open(path) if x.strip()]
+        if not 0 <= n < len(names):
+            raise Unsupported('sprite number %d' % n)
+        return _sprite(names[n])
+
+    def command(self, cmd, a):
+        if cmd == 'SetVar' and a[0] in FRONTIER_GFX_VARS and not self.is_var(a[1]):
+            return ['setvar %s, %s' % (self.var(a[0]), self.gfx_value(int(self.value(a[1]))))]
+        if cmd == 'InitGlobalTextListMenu':
+            return [self.sinnoh(SINNOH_MENU_INIT, self.var(a[4]), 0)]
+        if cmd == 'AddListMenuEntry':
+            if a[0] == 'MenuEntries_Text_Record':
+                return []                   # (Battle Videos: no video recorder here)
+            where = self.dec.message(self.bank, a[0])
+            if where is None:
+                raise Unsupported('menu entry %s' % a[0])
+            return [self.sinnoh(SINNOH_MENU_ADD, where[0], where[1], self.value(a[2]))]
+        if cmd in ('SetMenuXOriginSide', 'SetMenuYOriginSide', 'FrontierScrCmd_22', 'FrontierScrCmd_23',
+                   'FrontierScrCmd_2A', 'FrontierScrCmd_2B', 'FrontierScrCmd_2C', 'FrontierScrCmd_2D', 'FrontierScrCmd_31',
+                   'FrontierScrCmd_32', 'FrontierScrCmd_33', 'InitNewBattleRecording', 'FreeBattleRecording',
+                   'IncrementRecordValue', 'IncrementTrainerScore', 'SyncConnectedPlayers',
+                   'ClearReceivedTempDataAllPlayers', 'EndCommunication', 'FrontierScrCmd_3F',
+                   'PlayFrontierBrainEncounterEffect', 'FrontierScrCmd_C8'):
+            return []   # (the scene's sprite resources and door, the link's, the battle's lead-in: the game's own)
+        if cmd == 'GetSystemVar':
+            return ['copyvar %s, %s' % (self.var(a[1]), FileConverter.var(self, a[0]))]
+        if cmd == 'SetSystemVar':
+            return ['setvar %s, %s' % (FileConverter.var(self, a[0]), self.value(a[1]))]
+        if cmd == 'PlaySoundEffect':
+            se = SE.get(a[0])
+            return ['playse %s' % se] if se else []
+        if cmd == 'WaitSoundEffect':
+            return ['waitse']
+        if cmd == 'WaitTime':
+            return ['delay %d' % (2 * int(self.value(a[0])))]
+        if cmd in ('MessageNoSkip',):
+            return ['message %s' % self.text_label(a[0]), 'waitmessage']
+        if cmd == 'FrontierScrCmd_24':
+            out = []
+            for actor, gfx, d, x, y, b1, vis in self.actor_table(a[0]):
+                who = self.actors.get(actor)
+                tx, ty = self.tile(x, y)
+                if who == 'player':
+                    if not vis:
+                        out += ['applymovement OBJ_EVENT_ID_PLAYER, SinnohP_Movement_Invisible', 'waitmovement 0']
+                    continue
+                if not isinstance(who, tuple):
+                    continue
+                if who[1] is not None:
+                    v = '0x%X' % (0x4010 + who[1])
+                    if 0x8000 <= gfx < 0x8020:
+                        out.append('copyvar %s, %s' % (v, self.var('VAR_0x%04X' % gfx)))
+                    elif gfx != 0xEEEE:
+                        out.append('setvar %s, %s' % (v, self.gfx_value(gfx)))
+                out += ['setobjectxyperm %s, %d, %d' % (who[0], tx, ty), 'addobject %s' % who[0]]
+            return out
+        if cmd == 'FrontierScrCmd_25':
+            who = self.actors.get(int(self.value(a[0])))
+            return ['removeobject %s' % who[0]] if isinstance(who, tuple) else []
+        if cmd == 'FrontierScrCmd_70':
+            return ['setvar %s, 2' % self.var(a[0])]   # (no Battle Video kept)
+        if cmd in ('FrontierScrCmd_71', 'FrontierScrCmd_4B'):
+            return ['setvar %s, 0' % self.var(a[0])]
+        if cmd == 'FrontierScrCmd_6D':
+            return ['setvar %s, 0' % self.var(a[3])]   # (a Battle Video not saved: there's no recorder)
+        if cmd in ('FrontierScrCmd_72', 'FrontierScrCmd_73'):
+            return [self.tower(TOWER_SAVE)]
+        if cmd == 'ChangeScript':
+            low = FRONTIER_SCENES.get(a[0])
+            if low is None:
+                raise Unsupported('frontier scene %s' % a[0])
+            c = converter(self.root, low)
+            m, x, y = c.start()
+            self.calls.add((low, 1))
+            return [self.sinnoh(SINNOH_WARP_CONTINUE), 'goto %s' % c.entry_label(1), 'warp %s, %d, %d' % (m, x, y),
+                    'waitstate']
+        if cmd == 'ExitFrontier':
+            back = FRONTIER_EXIT.get(self.low)
+            if back is None:
+                raise Unsupported('frontier exit of %s' % self.low)
+            return ['goto %s%s__frexit_%s' % (PREFIX, back[0], back[1])]
+        return FileConverter.command(self, cmd, a)
+
+
 # ----------------------------------------------------------------------------------------------------- all files
 
 _converters = {}
@@ -1535,9 +1853,13 @@ def converter(root, low):
     """the FileConverter of Platinum's scripts_<low>.s (None: no such file)"""
     key = (root, low)
     if key not in _converters:
-        path = os.path.join(root, 'res/field/scripts', 'scripts_%s.s' % low)
         dec = _converters.setdefault((root, None), Decomp(root)) if (root, None) not in _converters else _converters[(root, None)]
-        _converters[key] = FileConverter(dec, path) if os.path.exists(path) else None
+        if low.startswith('fr_'):
+            path = os.path.join(root, 'res/field/frontier_scripts', 'frontier_scripts_%s.s' % low[3:])
+            _converters[key] = FrontierConverter(dec, path) if os.path.exists(path) else None
+        else:
+            path = os.path.join(root, 'res/field/scripts', 'scripts_%s.s' % low)
+            _converters[key] = FileConverter(dec, path) if os.path.exists(path) else None
     return _converters[key]
 
 
@@ -1636,6 +1958,8 @@ def map_tables(root, wanted):
             continue
         seen.add(p['id'])
         once, frame = init_scripts(root, low)
+        if low in FRONTIER_SCENE_MAPS:
+            once, frame = {}, []            # (the frontier scene's own script runs there: not Platinum's field one)
         for n in list(once.values()) + [f[2] for f in frame]:
             wanted[low].add(n)
         ev = events(root, p['place'])
@@ -1969,6 +2293,7 @@ def build(root, out_path):
     mt, maps, skipped = emit_map_tables(root, tables, done)
     lines += mt
     lines += ['SinnohP_Movement_SmashRock:', '\trock_smash_break', '\tstep_end']
+    lines += ['SinnohP_Movement_Invisible:', '\tset_invisible', '\tstep_end']
     lines += dex_rating_tables(root)
     import tv_data
     lines += tv_data.lines(converter(root, 'common').dec, root)   # (SINNOH's TV: src/sinnoh/s3d_tv.c)

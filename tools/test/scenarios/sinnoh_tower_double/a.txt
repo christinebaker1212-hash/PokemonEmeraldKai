@@ -1,0 +1,60 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp teach 0 242
+mp teach 1 242
+mp teach 2 242
+mp teach 3 242
+mp warp 41,8,15,6
+wait 60
+waitfor field 1000
+mp face up
+press A 1
+pressuntil A multichoice 2000
+wait 20
+shot t_menu1
+press A 1
+wait 40
+waitfor multichoice 2000
+wait 20
+shot t_menu2
+press DOWN 1
+wait 10
+press A 1
+wait 30
+pressuntil A partymenu 3000
+wait 40
+press A 1
+wait 20
+press A 1
+wait 20
+press DOWN 1
+wait 10
+press A 1
+wait 20
+press A 1
+wait 20
+press DOWN 1
+wait 10
+press A 1
+wait 20
+press A 1
+wait 20
+press DOWN 1
+wait 10
+press A 1
+wait 20
+press A 1
+wait 30
+press A 1
+shotburst t_droom 1500 300
+pressuntil A battle 8000
+mp stower
+pressuntil A field 90000
+wait 120
+mash B 60 10
+wait 60
+mp where
+mp stower
+shot t_double_end
+quit

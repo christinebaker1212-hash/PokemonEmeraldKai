@@ -1,4 +1,5 @@
 #include "global.h"
+#include "sinnoh_tower.h"
 #include "mp_region.h"
 #include "mp.h"
 #include "malloc.h"
@@ -6282,6 +6283,9 @@ static bool8 GetBattleEntryEligibility(struct Pokemon *mon)
     u16 i = 0;
     u16 species;
 
+    if (Sinnoh_Tower_Choosing())   // Moemon Kai: SINNOH's BATTLE TOWER: Platinum's banned list, any level
+        return !GetMonData(mon, MON_DATA_IS_EGG) && !Sinnoh_Tower_Banned(GetMonData(mon, MON_DATA_SPECIES));
+
     if (GetMonData(mon, MON_DATA_IS_EGG)
         || GetMonData(mon, MON_DATA_LEVEL) > GetBattleEntryLevelCap()
         || (gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_BATTLE_FRONTIER_BATTLE_PYRAMID_LOBBY)
@@ -6330,6 +6334,8 @@ static u8 CheckBattleEntriesAndGetMessage(void)
     facility = VarGet(VAR_FRONTIER_FACILITY);
     if (facility == FACILITY_UNION_ROOM || facility == FACILITY_MULTI_OR_EREADER)
         return 0xFF;
+    if (Sinnoh_Tower_Choosing())
+        return 0xFF;   // Moemon Kai: (SINNOH's BATTLE TOWER: Platinum's script says what's the same afterwards)
 
     maxBattlers = GetMaxBattleEntries();
     for (i = 0; i < maxBattlers - 1; i++)

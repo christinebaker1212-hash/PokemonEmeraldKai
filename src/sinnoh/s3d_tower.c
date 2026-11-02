@@ -2,10 +2,12 @@
 // (src/data/sinnoh_frontier.h, tools/sinnoh/gen_frontier.py), their names and lines from the text pack's frontier bank
 // (tools/sinnoh/build_text.py frontier_bank(): the pack's last), and Platinum's rules from its battle_tower.c /
 // unk_02049D08.c.
+#include <stdio.h>
 #include "global.h"
 #include "battle.h"
 #include "pokemon.h"
 #include "random.h"
+#include "save.h"
 #include "string_util.h"
 #include "constants/characters.h"
 #include "constants/items.h"
@@ -169,4 +171,652 @@ u8 Sinnoh_Frontier_FillParty(struct Pokemon *party, u16 frontierTrainer, u8 coun
         CalculateMonStats(&party[i]);
     }
     return n;
+}
+
+// ------------------------------------------------------------------------------------------- Platinum's BATTLE TOWER
+// Its BattleTower struct (the challenge under way: mode, the POKéMON chosen, the seven opponents, the wins) and its
+// save's tower records (struct TowerSave: Platinum's frontier stats and WifiBattleTowerRecord's room numbers and
+// streak bits, kept in "<save>.region" chunk TOWR); the BATTLE POINTS are the game's own. Functions by Platinum's
+// BT_FUNC_* numbers (its unk_020494DC.c and frscrcmd_battle_tower.c), the rules from unk_02049D08.c, battle_tower.c
+// and ov104_0223A0C4.c.
+
+#include "battle_main.h"
+#include "battle_setup.h"
+#include "battle_transition.h"
+#include "event_data.h"
+#include "load_save.h"
+#include "main.h"
+#include "overworld.h"
+#include "party_menu.h"
+#include "script.h"
+#include "sound.h"
+#include "task.h"
+#include "constants/battle.h"
+#include "constants/battle_frontier.h"
+#include "constants/songs.h"
+#include "constants/vars.h"
+
+void ChoosePartyForBattleFrontier(void);
+
+enum { BT_MODE_SINGLE, BT_MODE_DOUBLE, BT_MODE_MULTI, BT_MODE_LINK_MULTI, BT_MODE_WIFI, BT_MODE_5, BT_MODE_6,
+       BT_RECORD_MODES = 4 };   // (Platinum's BATTLE_TOWER_MODE_*; WIFI and up are online: closed)
+#define BT_OPPONENTS 7
+
+// Platinum's BT_FUNC_* (include/constants/battle_tower_functions.h)
+enum
+{
+    BT_FUNC_CHECK_ENOUGH_VALID_POKEMON = 1, BT_FUNC_RESET_SYSTEM, BT_FUNC_UNK_03, BT_FUNC_UNK_04,
+    BT_FUNC_SET_COMMUNICATION_CLUB_ACCESSIBLE, BT_FUNC_CLEAR_COMMUNICATION_CLUB_ACCESSIBLE,
+    BT_FUNC_UNK_08 = 8, BT_FUNC_UNK_09, BT_FUNC_UNK_10, BT_FUNC_UNK_11, BT_FUNC_UNK_12, BT_FUNC_UNK_14 = 14, BT_FUNC_UNK_15,
+    BT_FUNC_UNK_16, BT_FUNC_UNK_30 = 30, BT_FUNC_UNK_31, BT_FUNC_CHECK_DUPLICATE_SPECIES_AND_HELD_ITEMS,
+    BT_FUNC_GET_NEXT_OPPONENT_NUM, BT_FUNC_UNK_34, BT_FUNC_HAS_DEFEATED_SEVEN_TRAINERS, BT_FUNC_UNK_36,
+    BT_FUNC_UPDATE_GAME_RECORDS, BT_FUNC_UPDATE_GAME_RECORDS_AND_JOURNAL, BT_FUNC_UNK_39, BT_FUNC_SET_OPPONENT_TEAMS,
+    BT_FUNC_GET_OPPONENT_OBJECT_ID, BT_FUNC_UNK_42, BT_FUNC_GET_CHALLENGE_MODE, BT_FUNC_SET_BEAT_PALMER,
+    BT_FUNC_GET_BEAT_PALMER, BT_FUNC_UNK_46, BT_FUNC_UNK_47, BT_FUNC_UNK_48, BT_FUNC_UNK_49, BT_FUNC_SET_PARTNER_ID,
+    BT_FUNC_GET_PARTNER_ID, BT_FUNC_UNK_52, BT_FUNC_GET_SLOT_INDEX, BT_FUNC_UNK_54, BT_FUNC_GET_PARTNER_PARAM,
+    BT_FUNC_UNK_56, BT_FUNC_UNK_57, BT_FUNC_UNK_58, BT_FUNC_UNK_59, BT_FUNC_CHECK_IS_NULL = 100,
+};
+
+static struct TowerSave
+{
+    u16 record[BT_RECORD_MODES];    // the best streak (Platinum's frontier stat mode * 2)
+    u16 latest[BT_RECORD_MODES];    // the last challenge's streak (mode * 2 + 1)
+    u16 room[BT_RECORD_MODES];      // the rooms of seven cleared in a row (WifiBattleTowerRecord roomNums)
+    u8 streakOn[BT_RECORD_MODES];   // the last challenge was won and goes on (its flag bit 8 + mode)
+    u8 gotRibbons[2];               // the 50 and 100 streaks' gifts given (its flag bits 0, 1)
+    // the challenge REST saved (WifiBattleTowerSave: sub_0204A8C8)
+    u8 inProgress, mode, nextOpponentNum, partnerID;
+    u8 slots[4];
+    u16 trainerIDs[BT_OPPONENTS * 2];
+    // game records
+    u32 victories, challenges, pointsReceived;
+} sTS;
+
+static struct
+{
+    bool8 active;                   // InitBattleTower made it (Platinum's fieldSystem->battleTower != NULL)
+    u8 challengeMode, partySize, nextOpponentNum, wins;
+    u8 defeatedSeven, beatPalmer, partnerID, ribbons;
+    u8 slots[4];
+    u16 species[4], items[4];
+    u16 trainerIDs[BT_OPPONENTS * 2];
+    u16 streakBefore, roomNum;
+    bool8 wonBattle, choosing;
+    struct Pokemon opponents[2][4];
+    u8 opponentCount[2];
+    struct Pokemon saved[PARTY_SIZE];
+} sT;
+
+void Sinnoh_TowerReset(void)
+{
+    memset(&sTS, 0, sizeof(sTS));
+    sT.active = FALSE;
+}
+
+const void *Sinnoh_TowerData(u32 *size)
+{
+    *size = sizeof(sTS);
+    return &sTS;
+}
+
+void Sinnoh_TowerLoad(const void *data, u32 size)
+{
+    memset(&sTS, 0, sizeof(sTS));
+    memcpy(&sTS, data, size < sizeof(sTS) ? size : sizeof(sTS));
+}
+
+static const u16 sBanned[] = {SPECIES_MEWTWO, SPECIES_MEW, SPECIES_LUGIA, SPECIES_HO_OH, SPECIES_CELEBI, SPECIES_KYOGRE,
+                              SPECIES_GROUDON, SPECIES_RAYQUAZA, SPECIES_JIRACHI, SPECIES_DEOXYS, SPECIES_DIALGA,
+                              SPECIES_PALKIA, SPECIES_GIRATINA, SPECIES_PHIONE, SPECIES_MANAPHY, SPECIES_DARKRAI,
+                              SPECIES_SHAYMIN, SPECIES_ARCEUS};   // (Platinum's sBattleFrontierBanlist)
+
+bool8 Sinnoh_Tower_Banned(u16 species)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sBanned); i++)
+        if (sBanned[i] == species)
+            return TRUE;
+    return FALSE;
+}
+
+bool8 Sinnoh_Tower_Choosing(void)
+{
+    return sT.choosing;
+}
+
+static u8 PartySize(u8 mode)
+{
+    switch (mode)
+    {
+    case BT_MODE_DOUBLE: return 4;
+    case BT_MODE_MULTI: case BT_MODE_LINK_MULTI: case BT_MODE_6: return 2;
+    default: return 3;
+    }
+}
+
+// Platinum's sub_02049EC4: COUNT POKéMON of different kinds holding different items (none counts as different) that
+// may enter
+static bool8 EnoughValid(u8 count)
+{
+    u16 species[PARTY_SIZE], items[PARTY_SIZE];
+    u32 i, j, n = 0, a, b, c, d;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        struct Pokemon *mon = &gPlayerParty[i];
+        u16 s = GetMonData(mon, MON_DATA_SPECIES), it = GetMonData(mon, MON_DATA_HELD_ITEM);
+        if (s == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG) || Sinnoh_Tower_Banned(s))
+            continue;
+        for (j = 0; j < n; j++)
+            if (species[j] == s && (it == 0 || items[j] == it))
+                break;
+        if (j < n)
+            continue;
+        species[n] = s, items[n] = it, n++;
+    }
+    if (n < count)
+        return FALSE;
+#define DIFF(x, y) (species[x] != species[y] && (items[x] == 0 || items[x] != items[y]))
+    for (a = 0; a < n; a++)
+        for (b = a + 1; b < n; b++)
+        {
+            if (!DIFF(a, b))
+                continue;
+            if (count == 2)
+                return TRUE;
+            for (c = b + 1; c < n; c++)
+            {
+                if (!DIFF(a, c) || !DIFF(b, c))
+                    continue;
+                if (count == 3)
+                    return TRUE;
+                for (d = c + 1; d < n; d++)
+                    if (DIFF(a, d) && DIFF(b, d) && DIFF(c, d))
+                        return TRUE;
+            }
+        }
+#undef DIFF
+    return count <= 1 && n >= count;
+}
+
+static void Init(u16 mode, bool8 resume)
+{
+    u32 i;
+    memset(&sT, 0, sizeof(sT) - sizeof(sT.saved));
+    sT.active = TRUE;
+    if (!resume)
+    {
+        sT.challengeMode = mode;
+        sT.nextOpponentNum = 1;
+        memset(sT.slots, 0xFF, sizeof(sT.slots));
+        for (i = 0; i < ARRAY_COUNT(sT.trainerIDs); i++)
+            sT.trainerIDs[i] = 0xFFFF;
+        sTS.inProgress = FALSE;
+    }
+    else
+    {
+        sT.challengeMode = sTS.mode;
+        sT.nextOpponentNum = sTS.nextOpponentNum;
+        sT.wins = sT.nextOpponentNum - 1;
+        memcpy(sT.slots, sTS.slots, sizeof(sT.slots));
+        memcpy(sT.trainerIDs, sTS.trainerIDs, sizeof(sT.trainerIDs));
+        sT.partnerID = sTS.partnerID;
+        sTS.inProgress = FALSE;
+    }
+    sT.partySize = PartySize(sT.challengeMode);
+    for (i = 0; i < sT.partySize && i < 4; i++)
+        if (sT.slots[i] < PARTY_SIZE)
+        {
+            sT.species[i] = GetMonData(&gPlayerParty[sT.slots[i]], MON_DATA_SPECIES);
+            sT.items[i] = GetMonData(&gPlayerParty[sT.slots[i]], MON_DATA_HELD_ITEM);
+        }
+    if (sT.challengeMode < BT_RECORD_MODES && sTS.streakOn[sT.challengeMode])
+    {
+        sT.streakBefore = sTS.latest[sT.challengeMode];
+        sT.roomNum = sTS.room[sT.challengeMode];
+    }
+    MPNet_Log("tower: %s mode %d (streak %d, room %d)", resume ? "resumed" : "started", sT.challengeMode,
+              sT.streakBefore, sT.roomNum);
+}
+
+// Platinum's BattleTower_GetTrainerIDForRoomAndOpponentNum
+static u16 TrainerFor(u8 roomNum, u8 opponentNum)
+{
+    const u16 *range;
+    if (sT.challengeMode == BT_MODE_SINGLE && opponentNum == BT_OPPONENTS - 1)
+    {
+        if (roomNum == 2)
+            return SINNOH_FT_TOWER_TYCOON_PALMER_SILVER;   // (the 21st battle)
+        if (roomNum == 6)
+            return SINNOH_FT_TOWER_TYCOON_PALMER_GOLD;     // (the 49th)
+    }
+    if (roomNum < 7)
+        range = opponentNum == BT_OPPONENTS - 1 ? sSinnohTowerBosses[roomNum] : sSinnohTowerRooms[roomNum];
+    else
+        range = sSinnohTowerRooms[7];
+    return range[0] + Random() % (range[1] - range[0] + 1);
+}
+
+// Platinum's sub_0204A4C8: the seven opponents (two a battle in multi battles), none twice
+static void ChooseOpponents(void)
+{
+    bool8 multi = sT.challengeMode == BT_MODE_MULTI || sT.challengeMode == BT_MODE_LINK_MULTI;
+    u32 n = multi ? BT_OPPONENTS * 2 : BT_OPPONENTS, i, j;
+    for (i = 0; i < n; i++)
+    {
+        u16 t;
+        do
+        {
+            t = TrainerFor(sT.roomNum, multi ? i / 2 : i);
+            for (j = 0; j < i && sT.trainerIDs[j] != t; j++)
+                ;
+        } while (j < i);
+        sT.trainerIDs[i] = t;
+    }
+}
+
+// Platinum's BattleTower_CreateOpponentParties
+static void MakeOpponents(void)
+{
+    u8 n = sT.nextOpponentNum - 1;
+    memset(sT.opponents, 0, sizeof(sT.opponents));
+    if (sT.challengeMode == BT_MODE_MULTI || sT.challengeMode == BT_MODE_LINK_MULTI)
+    {
+        u16 species[4], items[4];
+        u32 i;
+        sT.opponentCount[0] = Sinnoh_Frontier_FillParty(sT.opponents[0], sT.trainerIDs[n * 2], sT.partySize, NULL, NULL,
+                                                        0, 50);
+        for (i = 0; i < sT.opponentCount[0]; i++)
+        {
+            species[i] = GetMonData(&sT.opponents[0][i], MON_DATA_SPECIES);
+            items[i] = GetMonData(&sT.opponents[0][i], MON_DATA_HELD_ITEM);
+        }
+        sT.opponentCount[1] = Sinnoh_Frontier_FillParty(sT.opponents[1], sT.trainerIDs[n * 2 + 1], sT.partySize,
+                                                        species, items, sT.opponentCount[0], 50);
+        Sinnoh_Frontier_SetOpponent(TRAINER_SINNOH_FRONTIER_A, sT.trainerIDs[n * 2]);
+        Sinnoh_Frontier_SetOpponent(TRAINER_SINNOH_FRONTIER_B, sT.trainerIDs[n * 2 + 1]);
+    }
+    else
+    {
+        sT.opponentCount[0] = Sinnoh_Frontier_FillParty(sT.opponents[0], sT.trainerIDs[n], sT.partySize, NULL, NULL, 0,
+                                                        50);
+        sT.opponentCount[1] = 0;
+        Sinnoh_Frontier_SetOpponent(TRAINER_SINNOH_FRONTIER_A, sT.trainerIDs[n]);
+    }
+    MPNet_Log("tower: battle %d against trainer %d", sT.nextOpponentNum, sT.trainerIDs[n]);
+}
+
+// The challenge's RNG seed (BT_FUNC_UNK_57) is the game's own: Random()
+
+static u16 Streak(void)
+{
+    u32 s = (u32)sT.streakBefore + sT.wins;
+    return s > 0xFFFF ? 0xFFFF : s;
+}
+
+// Platinum's sub_0204ACC8: 50 in a row outside single battles earns the challenge's POKéMON a ribbon
+static void CheckRibbonStreak(void)
+{
+    if (sT.challengeMode != BT_MODE_SINGLE && sT.challengeMode < BT_MODE_WIFI && Streak() >= 50)
+        sT.ribbons = TRUE;
+}
+
+static void EndRecords(bool8 wonRoom)
+{
+    u8 m = sT.challengeMode;
+    if (m >= BT_RECORD_MODES)
+        return;
+    sTS.latest[m] = Streak();
+    if (sTS.latest[m] > sTS.record[m])
+        sTS.record[m] = sTS.latest[m];
+    sTS.streakOn[m] = wonRoom;
+    sTS.victories += wonRoom ? BT_OPPONENTS : sT.wins;
+    if (wonRoom)
+    {
+        if (sTS.room[m] < 65534)
+            sTS.room[m]++;
+    }
+    else
+    {
+        sTS.room[m] = 0;
+    }
+    sTS.challenges++;
+    CheckRibbonStreak();
+    MPNet_Log("tower: challenge %s, streak %d (best %d), room %d", wonRoom ? "won" : "over", sTS.latest[m],
+              sTS.record[m], sTS.room[m]);
+}
+
+// Platinum's BattleTower_GiveBattlePointsReward
+static u16 GiveBattlePoints(void)
+{
+    static const u8 sSolo[] = {0, 3, 3, 4, 4, 5, 5, 7};
+    static const u8 sLinkMulti[] = {0, 8, 9, 11, 12, 14, 15, 18};
+    u16 room = sT.challengeMode < BT_RECORD_MODES ? sTS.room[sT.challengeMode] : 0, bp;
+    if (sT.challengeMode == BT_MODE_LINK_MULTI)
+        bp = room >= 7 ? 18 : sLinkMulti[room];
+    else if (sT.beatPalmer)
+        bp = 20;
+    else
+        bp = room >= 7 ? 7 : sSolo[room];
+    gSaveBlock2Ptr->frontier.battlePoints = min(gSaveBlock2Ptr->frontier.battlePoints + bp, MAX_BATTLE_FRONTIER_POINTS);
+    sTS.pointsReceived += bp;
+    MPNet_Log("tower: %d BP", bp);
+    return bp;
+}
+
+// Platinum's sub_0204AC54: the ribbon for the challenge's POKéMON (TRUE: one got it). Platinum's ABILITY / GREAT
+// ABILITY ribbons are the game's own tower ribbons, WINNING and VICTORY; the doubles' and multis' ABILITY ribbons
+// WINNING
+static bool8 GiveRibbon(bool8 great)
+{
+    u8 one = 1, n = 0;
+    u32 i, field = great ? MON_DATA_VICTORY_RIBBON : MON_DATA_WINNING_RIBBON;
+    for (i = 0; i < sT.partySize && i < 4; i++)
+    {
+        struct Pokemon *mon;
+        if (sT.slots[i] >= PARTY_SIZE)
+            continue;
+        mon = &gPlayerParty[sT.slots[i]];
+        if (GetMonData(mon, field))
+            continue;
+        SetMonData(mon, field, &one);
+        n++;
+    }
+    return n != 0;
+}
+
+static void CB2_EndTowerBattle(void)
+{
+    sT.wonBattle = gBattleOutcome == B_OUTCOME_WON;
+    memcpy(gPlayerParty, sT.saved, sizeof(gPlayerParty));   // (the battle had copies at level 50: the party as it was)
+    CalculatePlayerPartyCount();
+    VarSet(VAR_FRONTIER_FACILITY, 0);
+    MP_MUSIC_SCENE_RELEASE();
+    MPNet_Log("tower: battle %d %s", sT.nextOpponentNum, sT.wonBattle ? "won" : "lost");
+    SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+}
+
+static void Task_StartTowerBattle(u8 taskId)
+{
+    if (IsBattleTransitionDone() == TRUE)
+    {
+        gMain.savedCallback = CB2_EndTowerBattle;
+        SetMainCallback2(CB2_InitBattle);
+        DestroyTask(taskId);
+    }
+}
+
+// Platinum's FieldBattleDTO_NewBattleTower: the chosen POKéMON (above level 50 brought down to it), the opponents
+static void StartBattle(void)
+{
+    u32 i;
+    memcpy(sT.saved, gPlayerParty, sizeof(gPlayerParty));
+    ZeroPlayerPartyMons();
+    for (i = 0; i < sT.partySize && i < 4; i++)
+    {
+        struct Pokemon *mon = &gPlayerParty[i];
+        if (sT.slots[i] >= PARTY_SIZE)
+            continue;
+        *mon = sT.saved[sT.slots[i]];
+        if (GetMonData(mon, MON_DATA_LEVEL) > 50)
+        {
+            u32 exp = gExperienceTables[gSpeciesInfo[GetMonData(mon, MON_DATA_SPECIES)].growthRate][50];
+            SetMonData(mon, MON_DATA_EXP, &exp);
+            CalculateMonStats(mon);
+        }
+    }
+    CalculatePlayerPartyCount();
+    ZeroEnemyPartyMons();
+    for (i = 0; i < sT.opponentCount[0]; i++)
+        gEnemyParty[i] = sT.opponents[0][i];
+    for (i = 0; i < sT.opponentCount[1]; i++)
+        gEnemyParty[3 + i] = sT.opponents[1][i];
+    VarSet(VAR_FRONTIER_FACILITY, FRONTIER_FACILITY_TOWER);
+    gTrainerBattleOpponent_A = TRAINER_SINNOH_FRONTIER_A;
+    gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_BATTLE_TOWER;
+    if (sT.challengeMode == BT_MODE_DOUBLE)
+        gBattleTypeFlags |= BATTLE_TYPE_DOUBLE;
+    if (sT.opponentCount[1])
+    {
+        gTrainerBattleOpponent_B = TRAINER_SINNOH_FRONTIER_B;
+        gBattleTypeFlags |= BATTLE_TYPE_DOUBLE | BATTLE_TYPE_TWO_OPPONENTS;
+    }
+    CreateTask(Task_StartTowerBattle, 1);
+    MP_MUSIC_SCENE_HOLD(MUS_VS_TRAINER, MUS_VICTORY_TRAINER);
+    PlayMapChosenOrBattleBGM(0);
+    BattleTransition_StartOnField(GetSpecialBattleTransition(B_TRANSITION_GROUP_B_TOWER));
+}
+
+static u16 Choose(void)
+{
+    // Platinum's sub_0204A358: the party menu for PARTYSIZE POKéMON of any level
+    sT.choosing = TRUE;
+    gSpecialVar_0x8004 = FRONTIER_LVL_OPEN;
+    gSpecialVar_0x8005 = sT.partySize;
+    ChoosePartyForBattleFrontier();   // (its end starts the script again; BT_FUNC_UNK_31 reads the choice)
+    return 0;
+}
+
+// Platinum's sub_0204A378: the POKéMON chosen (FALSE: none)
+static bool8 Chosen(void)
+{
+    u32 i;
+    sT.choosing = FALSE;
+    if (gSelectedOrderFromParty[0] == 0)
+        return FALSE;
+    for (i = 0; i < sT.partySize && i < 4; i++)
+    {
+        sT.slots[i] = gSelectedOrderFromParty[i] - 1;
+        sT.species[i] = GetMonData(&gPlayerParty[sT.slots[i]], MON_DATA_SPECIES);
+        sT.items[i] = GetMonData(&gPlayerParty[sT.slots[i]], MON_DATA_HELD_ITEM);
+    }
+    return TRUE;
+}
+
+// Platinum's BattleTower_CheckDuplicateSpeciesAndHeldItems: 1 the same kind twice, 2 the same item
+static u16 Duplicates(void)
+{
+    u32 i, j;
+    for (i = 1; i < sT.partySize && i < 4; i++)
+        for (j = 0; j < i; j++)
+        {
+            if (sT.species[i] == sT.species[j])
+                return 1;
+            if (sT.items[i] != ITEM_NONE && sT.items[i] == sT.items[j])
+                return 2;
+        }
+    return 0;
+}
+
+bool8 Sinnoh_TowerCall(u16 func, u16 arg, u16 destVar)
+{
+    u16 value = VarGet(arg), out = 0;
+    bool8 set = TRUE;
+    switch (func)
+    {
+    case SINNOH_TOWER_INIT:
+        Init(value, FALSE);
+        return FALSE;
+    case SINNOH_TOWER_INIT_RESUME:
+        Init(0, TRUE);
+        return FALSE;
+    case SINNOH_TOWER_FREE:
+        sT.active = FALSE;
+        return FALSE;
+    case SINNOH_TOWER_INTRO:
+        Sinnoh_Frontier_Speech(value ? TRAINER_SINNOH_FRONTIER_B : TRAINER_SINNOH_FRONTIER_A, SINNOH_FRONTIER_SPEECH_INTRO);
+        return FALSE;
+    case SINNOH_TOWER_BATTLE:
+    case BT_FUNC_UNK_42:
+        StartBattle();
+        return TRUE;
+    case SINNOH_TOWER_WON:
+        out = sT.wonBattle;
+        break;
+    case SINNOH_TOWER_SAVE:
+        TrySavingData(SAVE_NORMAL);
+        return FALSE;
+    case SINNOH_TOWER_CHOOSE:
+    case BT_FUNC_UNK_30:
+        Choose();
+        return TRUE;
+    case BT_FUNC_CHECK_ENOUGH_VALID_POKEMON:
+        out = EnoughValid(value ? value : sT.partySize);
+        break;
+    case BT_FUNC_RESET_SYSTEM:
+    {
+        // (Platinum's reset after REST: the title screen, the save read again; the PC build's SoftReset quits)
+        void MP_ReturnToTitleNow(void);
+        MP_ReturnToTitleNow();
+        return TRUE;
+    }
+    case BT_FUNC_UNK_03:   // (the saved challenge cleared: WifiBattleTowerSave_Init)
+        sTS.inProgress = FALSE;
+        set = FALSE;
+        break;
+    case BT_FUNC_UNK_04:   // a challenge REST saved
+        out = sTS.inProgress;
+        break;
+    case BT_FUNC_SET_COMMUNICATION_CLUB_ACCESSIBLE:
+        // (Platinum's special location: a game continued from here starts where the player stands)
+        SetDynamicWarpWithCoords(0, gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, WARP_ID_NONE,
+                                 gSaveBlock1Ptr->pos.x, gSaveBlock1Ptr->pos.y);
+        SetContinueGameWarpStatusToDynamicWarp();
+        set = FALSE;
+        break;
+    case BT_FUNC_CLEAR_COMMUNICATION_CLUB_ACCESSIBLE:
+        ClearContinueGameWarpStatus();
+        set = FALSE;
+        break;
+    case BT_FUNC_UNK_14:   // (a REST quit without saving: the streak is lost; Platinum's sub_0204A064)
+        if (sTS.mode < BT_RECORD_MODES)
+        {
+            sTS.streakOn[sTS.mode] = FALSE;
+            sTS.room[sTS.mode] = 0;
+            sTS.latest[sTS.mode] = 0;
+        }
+        out = sTS.mode;
+        break;
+    case BT_FUNC_UNK_08:
+        out = value < BT_RECORD_MODES ? sTS.latest[value] : 0;
+        break;
+    case BT_FUNC_UNK_31:
+        out = Chosen();
+        break;
+    case BT_FUNC_CHECK_DUPLICATE_SPECIES_AND_HELD_ITEMS:
+        out = Duplicates();
+        break;
+    case BT_FUNC_GET_NEXT_OPPONENT_NUM:
+        out = sT.nextOpponentNum;
+        break;
+    case BT_FUNC_UNK_34:
+        sT.wins++;
+        out = ++sT.nextOpponentNum;
+        break;
+    case BT_FUNC_HAS_DEFEATED_SEVEN_TRAINERS:
+        if (sT.nextOpponentNum > BT_OPPONENTS)
+            sT.defeatedSeven = TRUE;
+        out = sT.defeatedSeven;
+        break;
+    case BT_FUNC_UNK_36:
+        out = Streak();
+        break;
+    case BT_FUNC_UPDATE_GAME_RECORDS:
+        EndRecords(FALSE);
+        set = FALSE;
+        break;
+    case BT_FUNC_UPDATE_GAME_RECORDS_AND_JOURNAL:
+        EndRecords(TRUE);
+        set = FALSE;
+        break;
+    case BT_FUNC_UNK_39:
+        // REST: the challenge kept (sub_0204A8C8)
+        sTS.inProgress = TRUE;
+        sTS.mode = sT.challengeMode;
+        sTS.nextOpponentNum = sT.nextOpponentNum;
+        sTS.partnerID = sT.partnerID;
+        memcpy(sTS.slots, sT.slots, sizeof(sTS.slots));
+        memcpy(sTS.trainerIDs, sT.trainerIDs, sizeof(sTS.trainerIDs));
+        set = FALSE;
+        break;
+    case BT_FUNC_SET_OPPONENT_TEAMS:
+        MakeOpponents();
+        set = FALSE;
+        break;
+    case BT_FUNC_GET_OPPONENT_OBJECT_ID:
+        out = sSinnohFrontierTrainers[Sinnoh_Frontier_OpponentOf(value ? TRAINER_SINNOH_FRONTIER_B
+                                                                       : TRAINER_SINNOH_FRONTIER_A)].objGfx;
+        break;
+    case BT_FUNC_GET_CHALLENGE_MODE:
+        out = sT.challengeMode;
+        break;
+    case BT_FUNC_SET_BEAT_PALMER:
+        sT.beatPalmer = value;
+        set = FALSE;
+        break;
+    case BT_FUNC_GET_BEAT_PALMER:
+        out = sT.beatPalmer;
+        break;
+    case BT_FUNC_UNK_46:
+        out = GiveBattlePoints();
+        break;
+    case BT_FUNC_UNK_47:   // (the 50 / 100 streak gifts given: sub_0204AA7C)
+    {
+        u16 s = sT.challengeMode < BT_RECORD_MODES ? sTS.latest[sT.challengeMode] : 0;
+        out = s >= 50 && !sTS.gotRibbons[s >= 100];
+        break;
+    }
+    case BT_FUNC_UNK_48:   // PALMER beaten: the ribbon (sub_0204AB68)
+        out = sT.challengeMode == BT_MODE_SINGLE && sT.beatPalmer ? GiveRibbon(sT.beatPalmer == 2) : 0;
+        break;
+    case BT_FUNC_UNK_49:   // 50 in a row outside single battles: the ribbon (sub_0204ABA0)
+        out = sT.ribbons && sT.challengeMode != BT_MODE_SINGLE && sT.challengeMode < BT_MODE_WIFI ? GiveRibbon(FALSE) : 0;
+        break;
+    case BT_FUNC_SET_PARTNER_ID:
+        sT.partnerID = value;
+        set = FALSE;
+        break;
+    case BT_FUNC_GET_PARTNER_ID:
+        out = sT.partnerID;
+        break;
+    case BT_FUNC_UNK_52:
+        ChooseOpponents();
+        set = FALSE;
+        break;
+    case BT_FUNC_GET_SLOT_INDEX:
+        out = value < 4 ? sT.slots[value] : 0xFF;
+        break;
+    case BT_FUNC_GET_PARTNER_PARAM:
+        out = value == 2 ? sT.partnerID : 0;
+        break;
+    case BT_FUNC_UNK_57:
+        out = Random() / 65535;
+        break;
+    case BT_FUNC_CHECK_IS_NULL:
+        out = !sT.active;
+        break;
+    case BT_FUNC_UNK_09: case BT_FUNC_UNK_10: case BT_FUNC_UNK_11: case BT_FUNC_UNK_12: case BT_FUNC_UNK_15:
+    case BT_FUNC_UNK_16: case BT_FUNC_UNK_54: case BT_FUNC_UNK_56: case BT_FUNC_UNK_58: case BT_FUNC_UNK_59:
+    default:
+        break;   // (the Wi-Fi rooms' and the link's: closed; the partners' parties: the BATTLE SALON's own call)
+    }
+    if (set && destVar >= VARS_START)
+        VarSet(destVar, out);
+    return FALSE;
+}
+
+// (tests: `mp stower [MODE ROOM]`: the records, the challenge; MODE's streak set going at ROOM rooms of seven)
+void Sinnoh_TowerDebug(const char *arg)
+{
+    int mode, room;
+    if (sscanf(arg, "%d %d", &mode, &room) == 2 && mode >= 0 && mode < BT_RECORD_MODES)
+    {
+        sTS.room[mode] = room;
+        sTS.latest[mode] = room * BT_OPPONENTS;
+        sTS.streakOn[mode] = room > 0;
+    }
+    printf("[test] stower: active %d mode %d next %d wins %d palmer %d | single record %d latest %d room %d on %d"
+           " | double record %d latest %d room %d | bp %d victories %u challenges %u inprogress %d\n",
+           sT.active, sT.challengeMode, sT.nextOpponentNum, sT.wins, sT.beatPalmer, sTS.record[0], sTS.latest[0],
+           sTS.room[0], sTS.streakOn[0], sTS.record[1], sTS.latest[1], sTS.room[1], gSaveBlock2Ptr->frontier.battlePoints,
+           sTS.victories, sTS.challenges, sTS.inProgress);
 }

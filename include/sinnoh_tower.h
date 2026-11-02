@@ -23,6 +23,7 @@ struct SinnohFrontierTrainer
     u8 female;
     u16 firstSet;      // in sSinnohFrontierSetLists
     u16 setCount;
+    u16 objGfx;        // its sprite in the battle room (Platinum's BattleTower_GetObjectIDFromTrainerClass)
 };
 
 // The battle's opponents as these trainers: gTrainerBattleOpponent_A / _B (battle_tower.c and frontier_util.c ask
@@ -42,5 +43,27 @@ void Sinnoh_Frontier_Name(u8 *dst, u16 battleTrainerId);
 void Sinnoh_Frontier_Speech(u16 battleTrainerId, u8 kind);   // into gStringVar4
 u8 Sinnoh_Frontier_FillParty(struct Pokemon *party, u16 frontierTrainer, u8 count, const u16 *avoidSpecies,
                              const u16 *avoidItems, u8 avoidCount, u8 level);
+
+
+// Platinum's BATTLE TOWER (its BattleTower struct and BT_FUNC_* functions): `sinnoh SINNOH_TOWER, FUNC, ARG, DESTVAR`
+// (FUNC Platinum's BT_FUNC_* number or SINNOH_TOWER_* below; ARG a value or a variable; DESTVAR a variable). TRUE: the
+// script waits (the party menu, a battle: their end starts it again)
+enum
+{
+    SINNOH_TOWER_INIT = 200,        // InitBattleTower 0, ARG (the challenge mode)
+    SINNOH_TOWER_INIT_RESUME,       // InitBattleTower 1: the challenge saved by REST
+    SINNOH_TOWER_FREE,              // FreeBattleTower / FreeTowerStruct
+    SINNOH_TOWER_INTRO,             // gStringVar4 <- opponent ARG's line before battle (PrintBattleTowerIntroMessage)
+    SINNOH_TOWER_BATTLE,            // the battle (BattleTower_StartBattle / BT_FUNC_UNK_42)
+    SINNOH_TOWER_WON,               // DESTVAR <- the battle was won (BattleTower_CheckWonBattle / CheckWonBattle)
+    SINNOH_TOWER_CHOOSE,            // the party menu for the challenge's POKéMON (BT_FUNC_UNK_30)
+    SINNOH_TOWER_SAVE,              // the game saved as it stands, no question asked (TrySaveGame, FrontierScrCmd_72)
+};
+bool8 Sinnoh_TowerCall(u16 func, u16 arg, u16 destVar);
+bool8 Sinnoh_Tower_Choosing(void);   // (party_menu.c: Platinum's banned list, any level, its own duplicate checks)
+bool8 Sinnoh_Tower_Banned(u16 species);
+const void *Sinnoh_TowerData(u32 *size);   // "<save>.region" chunk TOWR (mp_region.c)
+void Sinnoh_TowerLoad(const void *data, u32 size);
+void Sinnoh_TowerReset(void);
 
 #endif // GUARD_SINNOH_TOWER_H

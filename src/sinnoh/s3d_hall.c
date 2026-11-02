@@ -288,7 +288,7 @@ u16 Sinnoh_HallBattle(void)
     gFacilityTrainers = gBattleFrontierTrainers;
     VarSet(VAR_FRONTIER_FACILITY, FRONTIER_FACILITY_TOWER);
     gTrainerBattleOpponent_A = trainer;
-    gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_FRONTIER;
+    gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_BATTLE_TOWER;   // (one frontier flag: all of them were the PALACE's and ARENA's rules too)
     MPNet_Log("hall: type %d rank %d: species %d Lv%d (trainer %d)", sRun.type, rank + 1, species, level, trainer);
     CreateTask(Task_StartHallBattle, 1);
     MP_MUSIC_SCENE_HOLD(MUS_VS_TRAINER, MUS_VICTORY_TRAINER);

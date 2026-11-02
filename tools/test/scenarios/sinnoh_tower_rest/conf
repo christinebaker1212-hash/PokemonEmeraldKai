@@ -1,0 +1,9 @@
+# SINNOH's BATTLE TOWER: REST (Platinum's save and quit) after the first battle: the challenge kept, the title screen;
+# CONTINUE starts in the lobby, whose attendant takes the player back up (Platinum's OnFrame_ResumeChallenge), the next
+# opponent's menu again; RETIRE ends it: the streak 1. Needs the 3D pack.
+MODE=1
+TMO=900
+GEN=4
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_TEST_FOE_HP1=1 MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=143:100,248:100,149:100"
+EXPECT_A=("inprogress 1" "tower: resumed mode 0" "where map 41.8 xy 15,6" "single record 1 latest 1 room 0 on 0")
+UNEXPECT_A=("[crash]" "TIMEOUT" "Soft Reset called")
