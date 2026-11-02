@@ -91,6 +91,17 @@ GBA songs on MP2K need none of that: their own commands and samples come straigh
 The game's own MIDIs (`sound/songs/midi/mus_*.mid`) open with their real voicegroup, volume,
 reverb and priority from `midi.cfg`.
 
+## Releases
+
+The studio has releases of its own, apart from the game's (tagged `mms-v<version>`, on the game repository's
+Releases page). To publish one: raise `STUDIO_VERSION` in `src/project.h`, write `release_notes/<version>.md`
+(first line `Moemon Music Studio <version> "<Title!>": <one line>`) and push to the default branch.
+`.github/workflows/mms-release.yml` runs the tests, builds Linux and Windows, packages them (`package.sh`)
+and publishes. A studio release is never marked the repository's latest release: the game's updater
+downloads from the latest one, so the workflow publishes with `--latest=false` and then checks that a game
+release (`v<version>`) still has the mark, putting it back and failing loudly if not. Changing the studio
+never starts a game release (that only runs when the game's version changes).
+
 ## Building
 
 ```

@@ -23,7 +23,9 @@ in sinnoh/platinum_gfx.pak (tools/sinnoh/build_gfx.py, src/sinnoh/s3d_gfx.c; tes
 card duels).
 
 Moemon Music Studio work (`tools/moemon_music/`): don't use agents (subagents / the Agent tool): do the work yourself
-(the rule from the studio's own branch). The game plays its `.kaisong` exports: music/ (shipped; `<song>@<place>`),
+(the rule from the studio's own branch). Its own releases: raise STUDIO_VERSION (src/project.h) + release_notes/<ver>.md,
+push to the default branch: .github/workflows/mms-release.yml publishes `mms-v<ver>`, never as the latest release (the
+game's updater reads releases/latest; the workflow checks a `v<ver>` game release keeps the mark). The game plays its `.kaisong` exports: music/ (shipped; `<song>@<place>`),
 src/mp/mp_kaisong.c, tools/kaisong/gen.py (docs/SONG_TABLE.md, the studio's place picker data; the release runs it),
 scenes (`@tcg`, `@sim`...: a source file / src folder that names songs, found by gen.py; new music-playing code needs no
 list edit, a scene using the battle code holds the music: MP_MUSIC_SCENE_HOLD), the BGM player at 64 tracks / 64

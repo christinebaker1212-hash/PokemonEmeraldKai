@@ -1,0 +1,122 @@
+# Moemon Music Studio's own releases, apart from the game's: a new STUDIO_VERSION
+# (tools/moemon_music/src/project.h) pushed to the default branch tests and builds the studio for Linux and
+# Windows and publishes release mms-v<version>, notes from tools/moemon_music/release_notes/<version>.md.
+# Also runs by hand (Actions > Moemon Music Studio release > Run workflow). A version already released is skipped.
+#
+# The game's updater (src/platform/updater.c) reads the release GitHub marks "latest" (releases/latest/download/
+# update.txt), and so does release.yml for the last songs zip. A studio release must never take that mark: it's
+# published with --latest=false, and afterwards the latest release is checked to be the game's (a v<version> tag);
+# if it isn't, the game's newest release is marked latest again and the run fails, so it gets looked at.
+name: Moemon Music Studio release
+
+on:
+  push:
+    paths: ['tools/moemon_music/src/project.h']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mms-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Version
+        id: ver
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VER=$(sed -n 's/^#define STUDIO_VERSION "\(.*\)"/\1/p' tools/moemon_music/src/project.h)
+          [ -n "$VER" ]
+          echo "ver=$VER" >> "$GITHUB_OUTPUT"
+          echo "tag=mms-v$VER" >> "$GITHUB_OUTPUT"
+          if gh release view "mms-v$VER" > /dev/null 2>&1; then
+            echo "mms-v$VER is already released: nothing to do"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # the same tools as the game's release (its script copes with a stalled Ubuntu mirror)
+      - name: Package cache
+        if: steps.ver.outputs.skip != 'true'
+        uses: actions/cache/restore@v4
+        env:
+          SEGMENT_DOWNLOAD_TIMEOUT_MINS: 1
+        with:
+          path: ${{ runner.temp }}/debs
+          key: debs-${{ runner.os }}-${{ hashFiles('tools/release/ci_tools.sh') }}-${{ github.run_id }}
+          restore-keys: debs-${{ runner.os }}-${{ hashFiles('tools/release/ci_tools.sh') }}-
+
+      - name: Tools
+        if: steps.ver.outputs.skip != 'true'
+        run: |
+          tools/release/ci_tools.sh "$RUNNER_TEMP/debs"
+          python3 -c "import numpy" 2>/dev/null || sudo apt-get install -y --no-install-recommends python3-numpy
+
+      - name: SDL2 for Windows (2.30.9, checked)
+        if: steps.ver.outputs.skip != 'true'
+        run: |
+          curl -sSL -o "$RUNNER_TEMP/sdl2.tar.gz" https://github.com/libsdl-org/SDL/releases/download/release-2.30.9/SDL2-devel-2.30.9-mingw.tar.gz
+          echo "b188d165dc4a0372042bff3d0c18e9bb90772581e92a7b8b47b521b47714f75c  $RUNNER_TEMP/sdl2.tar.gz" | sha256sum -c
+          tar xzf "$RUNNER_TEMP/sdl2.tar.gz" -C "$RUNNER_TEMP"
+
+      - name: Linux build
+        if: steps.ver.outputs.skip != 'true'
+        run: make -C tools/moemon_music linux -j"$(nproc)"
+
+      - name: Tests
+        if: steps.ver.outputs.skip != 'true'
+        run: make -C tools/moemon_music test
+
+      - name: Windows build
+        if: steps.ver.outputs.skip != 'true'
+        run: make -C tools/moemon_music windows -j"$(nproc)" SDL2_DIR="$RUNNER_TEMP/SDL2-2.30.9"
+
+      - name: Packages
+        if: steps.ver.outputs.skip != 'true'
+        run: tools/moemon_music/package.sh "$RUNNER_TEMP/dist"
+
+      - name: Publish (never as the latest release)
+        if: steps.ver.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VER=${{ steps.ver.outputs.ver }}
+          TAG=${{ steps.ver.outputs.tag }}
+          NOTES="tools/moemon_music/release_notes/$VER.md"
+          [ -f "$NOTES" ] || { echo "Moemon Music Studio $VER" > "$RUNNER_TEMP/notes.md"; NOTES="$RUNNER_TEMP/notes.md"; }
+          # the title from the notes' first line: Moemon Music Studio <ver> "<Title!>": <summary>
+          NAME="Moemon Music Studio $VER"
+          TITLE=$(head -1 "$NOTES" | sed -n 's/^Moemon Music Studio [0-9.]* "\([^"]*\)":.*/\1/p')
+          if [ -n "$TITLE" ]; then NAME="$NAME: $TITLE"; fi
+          gh release create "$TAG" "$RUNNER_TEMP/dist/MoemonMusicStudio-windows.zip" "$RUNNER_TEMP/dist/MoemonMusicStudio-linux.tar.gz" \
+            --target "$GITHUB_SHA" --title "$NAME" --notes-file "$NOTES" --latest=false
+
+      - name: The game's release is still the latest
+        if: always() && steps.ver.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          LATEST=$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq .tag_name 2>/dev/null || true)
+          echo "latest release: ${LATEST:-none}"
+          case "$LATEST" in
+            v[0-9]*) exit 0 ;;
+          esac
+          # put the mark back on the game's newest release (the highest v<version>, not a pre-release)
+          GAME=$(gh release list --exclude-pre-releases --limit 200 --json tagName --jq '.[].tagName' \
+                 | grep -E '^v[0-9]+(\.[0-9]+)*$' | sort -V | tail -1)
+          if [ -z "$GAME" ]; then
+            [ -z "$LATEST" ] && exit 0   # no game release at all yet: nothing for the updater to read either way
+            echo "::error::$LATEST is the latest release and there is no game release to put back"; exit 1
+          fi
+          gh release edit "$GAME" --latest
+          echo "::error::$LATEST had become the latest release: $GAME is the latest again (the game's updater reads it)"
+          exit 1
