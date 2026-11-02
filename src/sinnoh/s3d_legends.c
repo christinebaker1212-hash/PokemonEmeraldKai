@@ -1,3 +1,4 @@
+#include <string.h>
 // Moemon Kai: SINNOH's legendaries standing on the map (tools/sinnoh/legends.py, src/data/sinnoh_legends.h): on entering
 // their map (special Sinnoh_LegendsRefresh) one is shown unless it was caught or beaten, or its time hasn't come:
 // UXIE, AZELF, MESPRIT and GIRATINA from the 7th BADGE (when Platinum's story gives them), the others once SINNOH's
@@ -14,6 +15,10 @@
 #include "../data/sinnoh_legends.h"
 #include "../data/sinnoh_story_people.h"
 #include "s3d.h"
+#include "pokemon_icon.h"
+#include "sound.h"
+#include "mp.h"
+#include "constants/songs.h"
 
 #define FRIDAYS 0xFE   // (tools/sinnoh/legends.py)
 
@@ -182,6 +187,75 @@ u16 Sinnoh_PartyHasRegigigas(void)
         if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES_OR_EGG) == SPECIES_REGIGIGAS)
             return TRUE;
     return FALSE;
+}
+
+// Platinum's ActivateRegiRuinsDot (overlay005): the dot under the player sets its bit of the ruins' state; all seven:
+// RUINS_STATE_ACTIVATED_ALL_DOTS (260). Its tables of the dots, Platinum's tiles of each room
+void Sinnoh_RegiDot(u16 var, u16 type)
+{
+    static const s8 sIron[7][2] = {{4, 7}, {5, 5}, {5, 9}, {7, 7}, {9, 5}, {9, 9}, {10, 7}};
+    static const s8 sIceberg[7][2] = {{3, 7}, {5, 7}, {7, 5}, {7, 7}, {7, 9}, {9, 7}, {11, 7}};
+    static const s8 sRockPeak[7][2] = {{5, 5}, {5, 7}, {5, 9}, {7, 7}, {9, 5}, {9, 7}, {9, 9}};
+    const s8 (*dots)[2] = type == 588 ? sIron : type == 590 ? sIceberg : sRockPeak;
+    s32 cx = 0, cz = 0, x, z, i;
+    u16 state = VarGet(var);
+    S3D_MapCells(&cx, &cz);
+    x = gSaveBlock1Ptr->pos.x + cx * 32;
+    z = gSaveBlock1Ptr->pos.y + cz * 32;
+    for (i = 0; i < 7; i++)
+        if (x == dots[i][0] && z == dots[i][1])
+        {
+            PlaySE(SE_M_CHARM);
+            state |= 1 << i;
+            break;
+        }
+    if (state == 0x7F)
+        state = 260;
+    VarSet(var, state);
+    MPNet_Log("sinnoh: regi dot %d,%d: state %u", (int)x, (int)z, state);
+}
+
+u16 Sinnoh_UnownFormsSeen(void);
+
+// The UNOWN letters seen (Platinum's POKéDEX keeps them: GetUnownFormsSeenCount, the RUIN MANIAC's cave on ROUTE
+// 214 grows with them); "<save>.region" chunk UNOF (mp_region.c)
+static u32 sUnownSeen;
+
+void Sinnoh_UnownSeen(u32 personality)
+{
+    u16 letter = GetUnownLetterByPersonality(personality);
+    if (letter < 28 && !((sUnownSeen >> letter) & 1))
+    {
+        sUnownSeen |= 1u << letter;
+        MPNet_Log("sinnoh: UNOWN %u seen (%u letters)", letter, Sinnoh_UnownFormsSeen());
+    }
+}
+
+u16 Sinnoh_UnownFormsSeen(void)
+{
+    u16 n = 0;
+    u32 m;
+    for (m = sUnownSeen; m; m &= m - 1)
+        n++;
+    return n;
+}
+
+const void *Sinnoh_UnownData(u32 *size)
+{
+    *size = sizeof(sUnownSeen);
+    return &sUnownSeen;
+}
+
+void Sinnoh_UnownLoad(const void *data, u32 size)
+{
+    sUnownSeen = 0;
+    if (size == sizeof(sUnownSeen))
+        memcpy(&sUnownSeen, data, size);
+}
+
+void Sinnoh_UnownReset(void)
+{
+    sUnownSeen = 0;
 }
 
 u16 Sinnoh_IsNight(void)   // (SINNOH's night: 20:00 to 4:00, as its night music)

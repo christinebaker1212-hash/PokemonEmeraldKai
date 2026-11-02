@@ -24,6 +24,9 @@ static u16 FontFunc_ShortCopy2(struct TextPrinter *);
 static u16 FontFunc_ShortCopy3(struct TextPrinter *);
 static u16 FontFunc_Narrow(struct TextPrinter *);
 static u16 FontFunc_SmallNarrow(struct TextPrinter *);
+static u16 FontFunc_Unown(struct TextPrinter *);
+static void DecompressGlyph_Unown(u16);
+static u32 GetGlyphWidth_Unown(u16, bool32);
 static void DecompressGlyph_Small(u16, bool32);
 static void DecompressGlyph_Normal(u16, bool32);
 static void DecompressGlyph_Short(u16, bool32);
@@ -90,7 +93,8 @@ static const struct GlyphWidthFunc sGlyphWidthFuncs[] =
     { FONT_SHORT_COPY_3, GetGlyphWidth_Short },
     { FONT_BRAILLE,      GetGlyphWidth_Braille },
     { FONT_NARROW,       GetGlyphWidth_Narrow },
-    { FONT_SMALL_NARROW, GetGlyphWidth_SmallNarrow }
+    { FONT_SMALL_NARROW, GetGlyphWidth_SmallNarrow },
+    { FONT_UNOWN,        GetGlyphWidth_Unown }
 };
 
 struct
@@ -219,7 +223,17 @@ static const struct FontInfo sFontInfos[] =
         .fgColor = 1,
         .bgColor = 2,
         .shadowColor = 15,
-    }
+    },
+    [FONT_UNOWN] = {
+        .fontFunction = FontFunc_Unown,
+        .maxLetterWidth = 12,
+        .maxLetterHeight = 16,
+        .letterSpacing = 0,
+        .lineSpacing = 0,
+        .fgColor = 2,
+        .bgColor = 1,
+        .shadowColor = 3,
+    },
 };
 
 static const u8 sMenuCursorDimensions[][2] =
@@ -233,7 +247,8 @@ static const u8 sMenuCursorDimensions[][2] =
     [FONT_BRAILLE]      = { 8,  16 },
     [FONT_NARROW]       = { 8,  15 },
     [FONT_SMALL_NARROW] = { 8,   8 },
-    [FONT_BOLD]         = {}
+    [FONT_BOLD]         = {},
+    [FONT_UNOWN]        = { 8,  15 },
 };
 
 static const u16 sFontBoldJapaneseGlyphs[] = INCGFX_U16("graphics/fonts/japanese_bold.png", ".hwjpnfont");
@@ -684,6 +699,19 @@ static u16 FontFunc_Small(struct TextPrinter *textPrinter)
     if (subStruct->hasFontIdBeenSet == FALSE)
     {
         subStruct->fontId = FONT_SMALL;
+        subStruct->hasFontIdBeenSet = TRUE;
+    }
+    return RenderText(textPrinter);
+}
+
+// Moemon Kai: Platinum's UNOWN font (SINNOH's ruins' inscriptions: MessageUnown)
+static u16 FontFunc_Unown(struct TextPrinter *textPrinter)
+{
+    struct TextPrinterSubStruct *subStruct = (struct TextPrinterSubStruct *)(&textPrinter->subStructFields);
+
+    if (subStruct->hasFontIdBeenSet == FALSE)
+    {
+        subStruct->fontId = FONT_UNOWN;
         subStruct->hasFontIdBeenSet = TRUE;
     }
     return RenderText(textPrinter);
@@ -1146,6 +1174,9 @@ static u16 RenderText(struct TextPrinter *textPrinter)
             DecompressGlyph_SmallNarrow(currChar, textPrinter->japanese);
             break;
         case FONT_BRAILLE:
+            break;
+        case FONT_UNOWN:
+            DecompressGlyph_Unown(currChar);
             break;
         }
 
@@ -1900,6 +1931,54 @@ static void DecompressGlyph_Normal(u16 glyphId, bool32 isJapanese)
 
         gCurGlyph.height = 15;
     }
+}
+
+// Moemon Kai: FONT_UNOWN, Platinum's glyphs (its character codes - 1) for this game's letters; the normal font's
+// without the pack
+bool8 S3D_Gfx_UnownFont(const u16 **glyphs, const u8 **widths, u16 *count);
+
+static s32 UnownGlyph(u16 c)
+{
+    if (c >= CHAR_A && c <= CHAR_Z)
+        return 0x12B - 1 + (c - CHAR_A);
+    if (c >= CHAR_a && c <= CHAR_z)
+        return 0x145 - 1 + (c - CHAR_a);
+    if (c == CHAR_EXCL_MARK)
+        return 0x1AB - 1;
+    if (c == CHAR_QUESTION_MARK)
+        return 0x1AC - 1;
+    return 0x1DE - 1;   // (a space)
+}
+
+static void DecompressGlyph_Unown(u16 c)
+{
+    const u16 *glyphs;
+    const u8 *widths;
+    u16 count;
+    s32 g = UnownGlyph(c);
+    if (!S3D_Gfx_UnownFont(&glyphs, &widths, &count) || g >= count)
+    {
+        DecompressGlyph_Normal(c, FALSE);
+        return;
+    }
+    glyphs += 0x20 * g;
+    gCurGlyph.width = widths[g];
+    DecompressGlyphTile(glyphs, gCurGlyph.gfxBufferTop);
+    DecompressGlyphTile(glyphs + 0x8, gCurGlyph.gfxBufferTop + 8);
+    DecompressGlyphTile(glyphs + 0x10, gCurGlyph.gfxBufferBottom);
+    DecompressGlyphTile(glyphs + 0x18, gCurGlyph.gfxBufferBottom + 8);
+    gCurGlyph.height = 16;
+}
+
+static u32 GetGlyphWidth_Unown(u16 c, bool32 isJapanese)
+{
+    const u16 *glyphs;
+    const u8 *widths;
+    u16 count;
+    s32 g = UnownGlyph(c);
+    if (!S3D_Gfx_UnownFont(&glyphs, &widths, &count) || g >= count)
+        return GetGlyphWidth_Normal(c, FALSE);
+    return widths[g];
 }
 
 static u32 GetGlyphWidth_Normal(u16 glyphId, bool32 isJapanese)

@@ -38,6 +38,9 @@ static struct
     const u8 *accessories[100];   // SUPER CONTESTS' art (tools/sinnoh/build_contest.py: "CNTS"): u16 w, h, RGB555
     const u8 *backdrops2[18];
     const u8 *mining[128];  // the Underground's digging (tools/sinnoh/build_mining.py: "MINE"): u16 w, h, RGB555
+    const u8 *unownWidths;  // Platinum's UNOWN font (tools/sinnoh/build_unown.py: "UNWN"): widths, glyphs
+    const u16 *unownGlyphs;
+    u16 unownCount;
     const u8 *poketch;     // the POKéTCH's art (tools/sinnoh/build_poketch.py: "PKCH")
     const u8 *poketchEnd;
 } sGfx;
@@ -214,6 +217,18 @@ static void Load(void)
             if (k < ARRAY_COUNT(sGfx.mining))
                 sGfx.mining[k] = p;
             p += 4 + w * h * 2;
+        }
+    }
+    // Platinum's UNOWN font: "UNWN", u16 count, u8 widths[count], count x 32 u16 glyphs
+    if (p + 6 <= end && memcmp(p, "UNWN", 4) == 0)
+    {
+        n = p[4] | p[5] << 8;
+        if (p + 6 + n + n * 64 <= end)
+        {
+            sGfx.unownCount = n;
+            sGfx.unownWidths = p + 6;
+            sGfx.unownGlyphs = (const u16 *)(p + 6 + n);
+            p += 6 + n + n * 64;
         }
     }
     if (p + 4 <= end && memcmp(p, "PKCH", 4) == 0)
@@ -464,6 +479,19 @@ const struct S3dStarterGfx *S3D_Gfx_Starter(void)
 }
 
 // SUPER CONTESTS' art (s3d_contest.c): accessory N's / backdrop N's picture, W x H RGB555 (bit 15: drawn); FALSE: none
+// Platinum's UNOWN font (src/text.c FONT_UNOWN): FALSE without the pack
+bool8 S3D_Gfx_UnownFont(const u16 **glyphs, const u8 **widths, u16 *count)
+{
+    if (!sGfx.tried)
+        Load();
+    if (!sGfx.ok || sGfx.unownGlyphs == NULL)
+        return FALSE;
+    *glyphs = sGfx.unownGlyphs;
+    *widths = sGfx.unownWidths;
+    *count = sGfx.unownCount;
+    return TRUE;
+}
+
 // the Underground's digging screen's picture N (s3d_mining.c; build_mining.py's order)
 bool8 S3D_Gfx_MiningPicture(u16 n, u16 *w, u16 *h, const u16 **px)
 {

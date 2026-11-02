@@ -306,6 +306,9 @@ def main():
     # the Underground's digging screen (tools/sinnoh/build_mining.py; before the POKéTCH's)
     import build_mining
     out += build_mining.section(root)
+    # Platinum's UNOWN font (tools/sinnoh/build_unown.py; before the POKéTCH's)
+    import build_unown
+    out += build_unown.section(root)
     # the POKéTCH's app screens and sprites (tools/sinnoh/build_poketch.py)
     import build_poketch
     out += build_poketch.section(root)

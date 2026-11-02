@@ -7370,6 +7370,11 @@ u16 PlayerGenderToFrontTrainerPicId(u8 playerGender)
 void HandleSetPokedexFlag(u16 nationalNum, u8 caseId, u32 personality)
 {
     u8 getFlagCaseId = (caseId == FLAG_SET_SEEN) ? FLAG_GET_SEEN : FLAG_GET_CAUGHT;
+    if (NationalPokedexNumToSpecies(nationalNum) == SPECIES_UNOWN)
+    {
+        void Sinnoh_UnownSeen(u32 personality);
+        Sinnoh_UnownSeen(personality);   // Moemon Kai: the UNOWN letters seen (Platinum's GetUnownFormsSeenCount)
+    }
     if (!GetSetPokedexFlag(nationalNum, getFlagCaseId)) // don't set if it's already set
     {
         GetSetPokedexFlag(nationalNum, caseId);

@@ -274,8 +274,11 @@ def mining_lines(root):
     import ids
     flags = [ids.flag(root, f) or 0 for f in ('FLAG_ENTERED_UNDERGROUND', 'FLAG_DIGGING_FOR_FOSSILS')]
     return (['\t.balign 2', 'gSinnohMiningObjects::', '\t.2byte %d' % (len(out) // 3)] + out
-            + ['\t.balign 2', 'gSinnohUndergroundFlags::', '\t.2byte %s' % ', '.join('0x%X' % f for f in flags)])
+            + ['\t.balign 2', 'gSinnohUndergroundFlags::', '\t.2byte %s' % ', '.join('0x%X' % f for f in flags)]
+            # (Platinum's FLAG_GAME_COMPLETED, kept set while SINNOH's LEAGUE is beaten: s3d_scrcmd.c)
+            + ['gSinnohGameCompletedFlag::', '\t.2byte 0x%X' % (ids.flag(root, 'FLAG_GAME_COMPLETED') or 0)])
 
 
 def mining_stub():
-    return ['\t.balign 2', 'gSinnohMiningObjects::', '\t.2byte 0', 'gSinnohUndergroundFlags::', '\t.2byte 0, 0']
+    return ['\t.balign 2', 'gSinnohMiningObjects::', '\t.2byte 0', 'gSinnohUndergroundFlags::', '\t.2byte 0, 0',
+            'gSinnohGameCompletedFlag::', '\t.2byte 0']

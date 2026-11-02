@@ -1,0 +1,17 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp warp 43,78,5,2
+wait 120
+waitfor field 1000
+mp face up
+wait 10
+press A 1
+wait 90
+shot u_inscription
+pressuntil A field 1500
+mp wild 201:10
+wait 30
+pressuntil A action 3000
+shot u_battle
+quit

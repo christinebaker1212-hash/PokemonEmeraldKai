@@ -54,8 +54,9 @@ wait 20
 waitfor field 300
 mp face up
 press UP 32
+wait 40
+pressuntil A field 600
 wait 20
-waitfor field 300
 mp face up
 press UP 80
 wait 20

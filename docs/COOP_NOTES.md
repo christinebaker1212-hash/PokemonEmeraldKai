@@ -4098,12 +4098,19 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   Voltorb (tap: start / stop; held: blinks, faster, blows up: 0), ANALOG WATCH hands (CellRot), ROULETTE arrow and
   PLAY / STOP / CLEAR, DAY-CARE digits and gender marks, MATCHUP CHECKER meter / LUVDISC / button, MOVE TESTER arrows
   and marks, LINK SEARCHER waves, PARTY item / MAIL marks, FRIENDSHIP hearts, MARKING MAP markers.
-- The REGIS and ROTOM (2026-11-01): ROCK PEAK, ICEBERG and IRON RUINS work as Platinum's (after SINNOH's LEAGUE, with
-  REGIGIGAS in the party, the room's seven dots walked over, then the statue: REGIROCK / REGICE / REGISTEEL Lv. 30;
-  the dots are Platinum's coord events on its VAR_MAP_LOCAL_0x01-07, reset on entering; done flags 0x3D0C-0x3D0E).
-  The OLD CHATEAU's TV gives ROTOM (Lv. 20) at night (20:00-4:00) until caught (0x3D0F). Their scripts sit above the
-  maps' generated words (gen_words.py skips a script already written there). Specials Sinnoh_LeagueDone,
-  Sinnoh_PartyHasRegigigas, Sinnoh_IsNight. Tests sinnoh_regi, sinnoh_rotom.
+- The REGIS and ROTOM (2026-11-01; Platinum's own scripts since 2026-11-02): ROCK PEAK, ICEBERG and IRON RUINS run
+  scripts_*_ruins.s: after SINNOH's LEAGUE (Platinum's FLAG_GAME_COMPLETED, set on every SINNOH map load while the region
+  is cleared: s3d_scrcmd.c gSinnohGameCompletedFlag), the seven dots (ActivateRegiRuinsDot = s3d_legends.c
+  Sinnoh_RegiDot, Platinum's tables of each room: a bit each, all seven = 260) wake the statue (ScrCmd_29F = SINNOH_QUAKE,
+  the game's ShakeCamera, VAR_0x8004-7 kept), and with REGIGIGAS in the party (CheckPartyHasFatefulEncounterRegigigas:
+  any REGIGIGAS, special Sinnoh_PartyHasRegigigas; Platinum's was a DS distribution's, SNOWPOINT TEMPLE's after the
+  LEAGUE stands in) the statue gives REGIROCK / REGICE / REGISTEEL Lv. 30. The OLD CHATEAU's TV is Platinum's script
+  (StartWildBattle = BattleSetup_StartScriptedWildBattle): ROTOM Lv. 20 at night. Tests sinnoh_regi, sinnoh_rotom.
+- UNOWN (2026-11-02): Platinum's MessageUnown prints in its UNOWN font (res/fonts/font_unown, fetch_decomp.sh parts 16,
+  tools/sinnoh/build_unown.py into platinum_gfx.pak "UNWN" in the game's own latin font layout; src/text.c FONT_UNOWN,
+  `sinnoh SINNOH_MESSAGE_UNOWN` puts the font's code before the text; the normal font without the pack). The UNOWN
+  letters seen (pokemon.c HandleSetPokedexFlag -> s3d_legends.c Sinnoh_UnownSeen, "<save>.region" chunk UNOF) answer
+  GetUnownFormsSeenCount (the RUIN MANIAC's cave off ROUTE 214 grows with them). Test sinnoh_unown.
 - The story's battles (2026-11-01; tools/sinnoh/legends.py STORY, gen_trainers.py STORY_TRAINERS): BARRY (8 of
   Platinum's battles, each in its three versions: Sinnoh_RivalVersion by the Trainer ID), MARS, JUPITER, SATURN and
   CYRUS stand where Platinum's story puts them (their objects' own hide flags, shown by Sinnoh_LegendsRefresh's

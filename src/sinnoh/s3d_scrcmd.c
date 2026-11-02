@@ -98,6 +98,10 @@ enum {
                                     // once the warp that follows has brought the player to the new map
     SINNOH_LIFT,                    // ARG: the platform lift's call (s3d_lift.c Sinnoh_LiftCall), ARG2 a variable
     SINNOH_ELEVATOR,                // ARG: the elevator's call (s3d_elevator.c Sinnoh_ElevatorCall), ARG2, ARG3
+    SINNOH_REGI_DOT,                // ARG: the ruins' state variable, ARG2 Platinum's DOT_TYPE_* (s3d_legends.c)
+    SINNOH_QUAKE,                   // the ground shakes (Platinum's ScrCmd_29F; ARG 1: hard): the game's ShakeCamera
+    SINNOH_MESSAGE_UNOWN,           // gSinnohMessage <- SINNOH's text ARG, ARG2 in Platinum's UNOWN letters (FONT_UNOWN)
+    SINNOH_UNOWN_SEEN,              // ARG: a variable <- the UNOWN letters seen (s3d_legends.c)
 };
 
 u8 gSinnohMessage[1000];
@@ -556,6 +560,41 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
             return TRUE;
         }
         break;
+    case SINNOH_UNOWN_SEEN:
+    {
+        u16 Sinnoh_UnownFormsSeen(void);
+        VarSet(arg, Sinnoh_UnownFormsSeen());
+        break;
+    }
+    case SINNOH_MESSAGE_UNOWN:
+    {
+        const u8 *t = S3D_Text(arg, arg2);
+        gSinnohMessage[0] = EXT_CTRL_CODE_BEGIN;
+        gSinnohMessage[1] = EXT_CTRL_CODE_FONT;
+        gSinnohMessage[2] = FONT_UNOWN;
+        StringCopy(gSinnohMessage + 3, t ? t : gText_EmptyString2);
+        break;
+    }
+    case SINNOH_REGI_DOT:
+    {
+        void Sinnoh_RegiDot(u16 var, u16 type);
+        Sinnoh_RegiDot(arg, arg2);
+        break;
+    }
+    case SINNOH_QUAKE:
+    {
+        // (ShakeCamera reads VAR_0x8004-0x8007 as it starts: Platinum's script keeps its own values there)
+        u16 keep[4] = {gSpecialVar_0x8004, gSpecialVar_0x8005, gSpecialVar_0x8006, gSpecialVar_0x8007};
+        void ShakeCamera(void);
+        gSpecialVar_0x8004 = arg ? 3 : 2;
+        gSpecialVar_0x8005 = arg ? 2 : 1;
+        gSpecialVar_0x8006 = arg ? 20 : 12;
+        gSpecialVar_0x8007 = 3;
+        ShakeCamera();
+        gSpecialVar_0x8004 = keep[0], gSpecialVar_0x8005 = keep[1], gSpecialVar_0x8006 = keep[2], gSpecialVar_0x8007 = keep[3];
+        ScriptContext_Stop();   // (the shake's end starts the script again)
+        return TRUE;
+    }
     case SINNOH_ELEVATOR:
     {
         void Sinnoh_ElevatorCall(u16 op, u16 a, u16 b);
@@ -685,6 +724,12 @@ void Sinnoh_PlatinumMapScripts(void)
     {
         void Sinnoh_TvMapLoad(void);
         Sinnoh_TvMapLoad();   // (the TV's day: s3d_tv.c)
+    }
+    {
+        // Platinum's FLAG_GAME_COMPLETED: SINNOH's HALL OF FAME (the REGI ruins, the postgame's people read it)
+        extern const u16 gSinnohGameCompletedFlag[];
+        if (gSinnohGameCompletedFlag[0] && MP_Region_Cleared(REGION_SINNOH))
+            FlagSet(gSinnohGameCompletedFlag[0]);
     }
     // SINNOH is always Platinum's story (the user, 2026-11-02: no saves from the written one to keep)
     if (!FlagGet(FLAG_SINNOH_PLATINUM_STORY) && gSinnohPlatinumMapScripts[0].map != 0xFFFF)

@@ -8,7 +8,7 @@ Rules behind it: CLAUDE.md's SINNOH paragraph and docs/SINNOH_HANDOFF.md.
 
 | What | How to see it | Now |
 |---|---|---|
-| Platinum's script entries that convert | `python3 -I tools/sinnoh/gen_scripts.py --report ~/.cache/moemon/pokeplatinum` (first line) | 2128 of 2511 |
+| Platinum's script entries that convert | `python3 -I tools/sinnoh/gen_scripts.py --report ~/.cache/moemon/pokeplatinum` (first line) | 2158 of 2511 |
 | Commands still missing | the same report, the list under it (most used first) | 60 kinds |
 | Platinum's text slots and page breaks | messages show whole (\\r is a new box, six string slots) | done |
 | Platinum songs the game lacks | the same report, "songs the game lacks" | 5 |
@@ -72,9 +72,10 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [ ] Berry soil patches (Platinum's own berry spots; the TV's BERRY LOOKOUT waits for them)
 - [ ] MESPRIT and CRESSELIA roaming (static now; the TV's ROAMER NEWS FLASH waits for them)
 - [ ] The GREAT MARSH tram (MoveGreatMarshTram, CheckGreatMarshTramLocation)
-- [ ] The REGI ruins' dots (ActivateRegiRuinsDot), REGIGIGAS's check
+- [x] The REGI ruins in Platinum's own scripts (ActivateRegiRuinsDot, the statue's quake ScrCmd_29F, FLAG_GAME_COMPLETED;
+      REGIGIGAS's check: any REGIGIGAS, Platinum's being a DS event's) (sinnoh_regi); the OLD CHATEAU's ROTOM (sinnoh_rotom)
 - [ ] ROTOM's room (GetPartyRotomCountAndFirst)
-- [ ] UNOWN messages (MessageUnown, GetUnownFormsSeenCount)
+- [x] UNOWN messages in Platinum's UNOWN font (MessageUnown), the letters seen (GetUnownFormsSeenCount) (sinnoh_unown)
 - [ ] The VILLA (Resort Area) and its furniture
 - [ ] The Frontier Brains' and the HALL MATRON's teams
 - [ ] The PASTORIA size contest

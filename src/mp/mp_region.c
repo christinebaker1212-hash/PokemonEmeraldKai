@@ -9,6 +9,9 @@
 #include "global.h"
 #include "s3d.h"   // Moemon Kai: SINNOH's map groups
 #include "s3d_underground.h"   // (SINNOH's Underground: chunk UNDG)
+const void *Sinnoh_UnownData(u32 *size);   // (the UNOWN letters seen: chunk UNOF, s3d_legends.c)
+void Sinnoh_UnownLoad(const void *data, u32 size);
+void Sinnoh_UnownReset(void);
 #include "battle_pyramid.h"
 #include "event_data.h"
 #include "mp.h"
@@ -258,6 +261,7 @@ void MP_Region_StartNewGame(void)
     Sinnoh_TvReset();
     Sinnoh_FashionReset();
     Sinnoh_UndergroundReset();
+    Sinnoh_UnownReset();
     MP_Region_Arrive(sStartRegion);
     if (sStartRegion == REGION_SINNOH)
     {
@@ -407,6 +411,15 @@ void MP_Region_WriteSidecar(void)
             fwrite(ug, size, 1, f);
         }
         {
+            // the UNOWN letters seen (src/sinnoh/s3d_legends.c)
+            u32 size;
+            const void *un = Sinnoh_UnownData(&size);
+            c[0] = CHUNK('U', 'N', 'O', 'F');
+            c[1] = size;
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(un, size, 1, f);
+        }
+        {
             u32 format = MP_SAVE_FORMAT;   // the save's own layout version (mp_savefix.h)
             c[0] = CHUNK('S', 'A', 'V', 'F');
             c[1] = sizeof(format);
@@ -513,6 +526,12 @@ static bool8 LoadFrom(const char *path)
                 if (fread(buf, c[1], 1, f) == 1)
                     Sinnoh_TvLoad(buf, c[1]);
             }
+            else if (c[0] == CHUNK('U', 'N', 'O', 'F') && c[1] <= 64)
+            {
+                u8 buf[64];
+                if (fread(buf, c[1], 1, f) == 1)
+                    Sinnoh_UnownLoad(buf, c[1]);
+            }
             else if (c[0] == CHUNK('U', 'N', 'D', 'G') && c[1] <= 1024)
             {
                 u8 buf[1024];
@@ -607,6 +626,7 @@ void MP_Region_LoadFromSave(void)
     Sinnoh_TvReset();
     Sinnoh_FashionReset();
     Sinnoh_UndergroundReset();
+    Sinnoh_UnownReset();
     for (i = 0; i <= 3; i++)
     {
         if (i == 0)

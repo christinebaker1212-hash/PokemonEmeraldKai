@@ -52,7 +52,10 @@ SINNOH_BATTLE_WON, SINNOH_ADD_VAR, SINNOH_BADGE_COUNT, SINNOH_PREVIOUS_MAP, SINN
 SINNOH_BUFFER_TEXT, SINNOH_QUERY, SINNOH_DEX_RATING, SINNOH_MESSAGE_VAR = 43, 44, 45, 46
 SINNOH_TV, SINNOH_MESSAGE_BANK_VAR, SINNOH_SEAL, SINNOH_FASHION, SINNOH_CONTEST, SINNOH_WARP_CONTINUE = 47, 48, 49, 50, 51, 52
 SINNOH_LIFT = 53   # (the platform lifts: src/sinnoh/s3d_lift.c)
-SINNOH_ELEVATOR = 54   # (the elevators: src/sinnoh/s3d_elevator.c Sinnoh_ElevatorCall)   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
+SINNOH_ELEVATOR = 54   # (the elevators: src/sinnoh/s3d_elevator.c Sinnoh_ElevatorCall)
+SINNOH_REGI_DOT, SINNOH_QUAKE = 55, 56   # (the REGI ruins' dots; Platinum's screen quake, ScrCmd_29F)
+SINNOH_MESSAGE_UNOWN = 57   # (gSinnohMessage <- a message in Platinum's UNOWN letters: src/text.c FONT_UNOWN)
+SINNOH_UNOWN_SEEN = 58   # (the UNOWN letters seen: s3d_legends.c)   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
 (TVCALL_STATUS, TVCALL_FRAMING, TVCALL_FINISH, TVCALL_SEGMENT_ID, TVCALL_SEGMENT, TVCALL_COMMERCIAL, TVCALL_NEXT,
  TVCALL_INTERVIEW_ID, TVCALL_INTERVIEW_MESSAGE, TVCALL_INTERVIEW_SAVE, TVCALL_INTERVIEW_OK, TVCALL_WORD,
  TVCALL_HIDDEN_ITEM, TVCALL_NAME_RATED, TVCALL_STORAGE, TVCALL_VILLA, TVCALL_AMITY, TVCALL_QUESTION) = range(18)
@@ -567,6 +570,13 @@ class FileConverter:
             return ['waitbuttonpress']
         if cmd in ('CloseMessage', 'CloseMessageWithoutErasing'):
             return ['closemessage']
+        if cmd == 'GetUnownFormsSeenCount':
+            return [self.sinnoh(SINNOH_UNOWN_SEEN, self.var(a[0]))]
+        if cmd == 'MessageUnown':
+            where = self.dec.message(self.bank, a[0])
+            if where is None:
+                raise Unsupported('message %s' % a[0])
+            return [self.sinnoh(SINNOH_MESSAGE_UNOWN, where[0], where[1]), 'message gSinnohMessage', 'waitmessage']
         if cmd == 'UndergroundNPCMessage':
             # (the Underground's own message box, which names the player itself: the game's)
             return [self.sinnoh(SINNOH_BUFFER_PLAYER, 0), 'message %s' % self.text_label(a[0]), 'waitmessage']
@@ -1190,7 +1200,17 @@ class FileConverter:
             return ['delay %d' % (2 * int(cmd[len('Delay'):]))]
         if cmd == 'WaitTime':
             return ['delay %d' % (2 * int(self.value(a[0])))]
-        if cmd in ('StopSE', 'WaitForTransition', 'SetInitialVolumeForSequence', 'SetBlackOutWarpId', 'ScrCmd_29F'):
+        if cmd == 'ScrCmd_29F':
+            # (the ground shakes: the REGI statue waking, LAKE VALOR's blast felt in CANALAVE and PASTORIA)
+            return [self.sinnoh(SINNOH_QUAKE, self.value(a[0]))]
+        if cmd == 'CheckPartyHasFatefulEncounterRegigigas':
+            # (Platinum's REGIGIGAS from its distribution, a DS event: here any REGIGIGAS, SNOWPOINT TEMPLE's after the
+            # LEAGUE, as the REGI ruins have always worked here: s3d_legends.c)
+            return ['specialvar %s, Sinnoh_PartyHasRegigigas' % self.var(a[0])]
+        if cmd == 'ActivateRegiRuinsDot':
+            # (the dot under the player: Platinum's ruins' tables, src/sinnoh/s3d_legends.c Sinnoh_RegiDot)
+            return [self.sinnoh(SINNOH_REGI_DOT, self.var(a[0]), self.value(a[1]))]
+        if cmd in ('StopSE', 'WaitForTransition', 'SetInitialVolumeForSequence', 'SetBlackOutWarpId'):
             return []                       # (sounds stop by themselves here; the game picks the heal spot itself)
         if cmd in ('TurnOnTimeBasedEffects', 'CreateJournalEvent', 'TrySetUnusedCollectedOrbFlag', 'RecordHeapMemory',
                    'CheckHeapMemory', 'SetMenuXOriginToRight', 'SetMenuXOriginToLeft'):
