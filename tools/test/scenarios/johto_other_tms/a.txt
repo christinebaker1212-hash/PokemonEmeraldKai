@@ -1,0 +1,12 @@
+pressuntil A field 5000
+wait 60
+mp checkitem 298
+mp warp 34,99,4,5
+wait 120
+mp face up
+press A 2
+mash A 30 20
+wait 60
+shot hiddenpower
+mp checkitem 298
+quit

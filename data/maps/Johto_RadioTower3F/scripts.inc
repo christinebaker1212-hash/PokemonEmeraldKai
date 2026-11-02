@@ -46,7 +46,8 @@ Johto_RadioTower3F_EventScript_83D8119::
 	faceplayer
 	msgbox Johto_RadioTower3F_Text_83D83FE, MSGBOX_DEFAULT
 	closemessage
-	setorcopyvar VAR_0x8000, ITEM_LIFE_ORB
+	@ Moemon Kai: Crystal's TM (tools/quetzal_port/fix_johto_tms.py) (Quetzal gave LIFE_ORB)
+	setorcopyvar VAR_0x8000, ITEM_TM11
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
@@ -151,13 +152,12 @@ Johto_RadioTower3F_Text_83D8371::
 
 Johto_RadioTower3F_Text_83D83FE::
 	.string "Thank you! You’re my hero!\p"
-	.string "This is a token of my appreciation.$"
+	.string "This is a token of my\n"
+	.string "appreciation.$"
 
 Johto_RadioTower3F_Text_83D843D::
-	.string "THROAT SPRAY is used up after\n"
-	.string "its holder uses a sound move.\p"
-	.string "In return, it boosts\n"
-	.string "the holder’s Sp. Atk!$"
+	.string "It’s SUNNY DAY. It powers up\n"
+	.string "fire-type moves for a while.$"
 
 Johto_RadioTower3F_Text_83D84A4::
 	.string "You were simply marvelous!$"

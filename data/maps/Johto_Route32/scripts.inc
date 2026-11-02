@@ -59,7 +59,8 @@ Johto_Route32_EventScript_83EEA8D::
 	faceplayer
 	goto_if_set FLAG_QZ_0x1499, Johto_Route32_EventScript_83EEAC5
 	msgbox Johto_Route32_Text_83EF5E2, MSGBOX_DEFAULT
-	setorcopyvar VAR_0x8000, ITEM_LEFTOVERS
+	@ Moemon Kai: Crystal's TM (tools/quetzal_port/fix_johto_tms.py) (Quetzal gave LEFTOVERS)
+	setorcopyvar VAR_0x8000, ITEM_TM05
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
@@ -534,15 +535,13 @@ Johto_Route32_Text_83EF5B2::
 	.string "GYM in VIOLET CITY.$"
 
 Johto_Route32_Text_83EF5E2::
-	.string "WROOOOAR! PEOPLE RUN WHEN I\n"
-	.string "ROAR! BUT YOU CAME LOOKING!\p"
+	.string "WROOOOAR! PEOPLE RUN WHEN I ROAR!\n"
+	.string "BUT YOU CAME LOOKING!\p"
 	.string "THAT PLEASES ME! NOW TAKE THIS!$"
 
 Johto_Route32_Text_83EF63A::
-	.string "WROOOOAR! A RED CARD can force\n"
-	.string "an attacker out of battle\l"
-	.string "after it hits the holder!\p"
-	.string "It is used up in the process!$"
+	.string "WROOOAR! IT’S ROAR!\p"
+	.string "EVEN MOéMON RUN FROM A GOOD ROAR!$"
 
 Johto_Route32_Text_83EF6AB::
 	.string "FRIEDA: Yahoo!\p"

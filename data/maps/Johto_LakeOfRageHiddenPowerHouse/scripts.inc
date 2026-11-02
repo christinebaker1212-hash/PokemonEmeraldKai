@@ -7,7 +7,8 @@ Johto_LakeOfRageHiddenPowerHouse_EventScript_83DDE89::
 	faceplayer
 	goto_if_set FLAG_QZ_0x1054, Johto_LakeOfRageHiddenPowerHouse_EventScript_83DDEC1
 	msgbox Johto_LakeOfRageHiddenPowerHouse_Text_83DDECC, MSGBOX_DEFAULT
-	setorcopyvar VAR_0x8000, ITEM_DAWN_STONE
+	@ Moemon Kai: Crystal's TM (tools/quetzal_port/fix_johto_tms.py) (Quetzal gave DAWN_STONE)
+	setorcopyvar VAR_0x8000, ITEM_TM10
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
@@ -31,10 +32,11 @@ Johto_LakeOfRageHiddenPowerHouse_Text_83DDECC::
 	.string "MOéMON. Take this, child.$"
 
 Johto_LakeOfRageHiddenPowerHouse_Text_83DDF5F::
-	.string "This DAWN STONE can make\n"
-	.string "certain MOéMON evolve.\p"
-	.string "Even a small stone can\n"
-	.string "awaken a hidden power.$"
+	.string "Do you see it? It is HIDDEN POWER!\p"
+	.string "It draws out the power of MOéMON\n"
+	.string "for attacking.\p"
+	.string "Remember this: its type and power\n"
+	.string "depend on the MOéMON using it.$"
 
 Johto_LakeOfRageHiddenPowerHouse_Text_83DDFBE::
 	.string "I am meditating…$"

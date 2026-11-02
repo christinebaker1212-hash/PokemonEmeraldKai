@@ -54,7 +54,8 @@ Johto_Route43Gate_EventScript_83D1FCB::
 	faceplayer
 	goto_if_set FLAG_QZ_0x1052, Johto_Route43Gate_EventScript_83D1FFB
 	msgbox Johto_Route43Gate_Text_83D214A, MSGBOX_DEFAULT
-	setorcopyvar VAR_0x8000, ITEM_BLACK_SLUDGE
+	@ Moemon Kai: Crystal's TM (tools/quetzal_port/fix_johto_tms.py) (Quetzal gave BLACK_SLUDGE)
+	setorcopyvar VAR_0x8000, ITEM_TM36
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA

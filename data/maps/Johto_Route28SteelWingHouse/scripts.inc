@@ -7,7 +7,8 @@ Johto_Route28SteelWingHouse_EventScript_83ECA7C::
 	faceplayer
 	goto_if_set FLAG_QZ_0x1062, Johto_Route28SteelWingHouse_EventScript_83ECAA9
 	msgbox Johto_Route28SteelWingHouse_Text_83ECAB3, MSGBOX_DEFAULT
-	setorcopyvar VAR_0x8000, ITEM_METAL_COAT
+	@ Moemon Kai: Crystal's TM (tools/quetzal_port/fix_johto_tms.py) (Quetzal gave METAL_COAT)
+	setorcopyvar VAR_0x8000, ITEM_TM47
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
