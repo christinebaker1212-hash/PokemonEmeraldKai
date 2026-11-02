@@ -105,7 +105,8 @@ Kanto_SilphCo_4F_EventScript_846BD53::
 
 @ Kanto_SilphCo_4F object 8 (local id 8, gfx 0x3F0E) at 30,18
 Kanto_SilphCo_4F_EventScript_846C2EF::
-	setorcopyvar VAR_0x8000, ITEM_MENTAL_HERB
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_MENTAL_HERB here)
+	setorcopyvar VAR_0x8000, ITEM_TM41
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

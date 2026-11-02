@@ -121,21 +121,22 @@ Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C191::
 
 Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C1D4::
 	setvar VAR_0x8008, ITEM_FRESH_WATER
-	setvar VAR_0x8009, ITEM_SWEET_APPLE
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal gave SWEET_APPLE, TART_APPLE, SYRUPY_APPLE)
+	setvar VAR_0x8009, ITEM_TM16
 	goto_if_set FLAG_QZ_0x2169, Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C2D6
 	msgbox Kanto_CeladonCity_DepartmentStore_Roof_Text_8445EBF, MSGBOX_DEFAULT
 	goto Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C237
 
 Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C1F5::
 	setvar VAR_0x8008, ITEM_SODA_POP
-	setvar VAR_0x8009, ITEM_TART_APPLE
+	setvar VAR_0x8009, ITEM_TM20
 	goto_if_set FLAG_QZ_0x216B, Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C2D6
 	msgbox Kanto_CeladonCity_DepartmentStore_Roof_Text_8445F4F, MSGBOX_DEFAULT
 	goto Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C237
 
 Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C216::
 	setvar VAR_0x8008, ITEM_LEMONADE
-	setvar VAR_0x8009, ITEM_SYRUPY_APPLE
+	setvar VAR_0x8009, ITEM_TM33
 	goto_if_set FLAG_QZ_0x2170, Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C2D6
 	msgbox Kanto_CeladonCity_DepartmentStore_Roof_Text_8445FB4, MSGBOX_DEFAULT
 	goto Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C237
@@ -305,8 +306,9 @@ Kanto_CeladonCity_DepartmentStore_Roof_Text_8445EF7::
 	.string "from the little girl.$"
 
 Kanto_CeladonCity_DepartmentStore_Roof_Text_8445F1E::
-	.string "A SWEET APPLE can make a certain\n"
-	.string "MOéMON evolve.$"
+	.string "TM16 contains LIGHT SCREEN.\p"
+	.string "It’s a move that weakens the power\n"
+	.string "of special attacks by your foe.$"
 
 Kanto_CeladonCity_DepartmentStore_Roof_Text_8445F4F::
 	.string "Yay!\p"
@@ -315,8 +317,9 @@ Kanto_CeladonCity_DepartmentStore_Roof_Text_8445F4F::
 	.string "You can have this from me!$"
 
 Kanto_CeladonCity_DepartmentStore_Roof_Text_8445F84::
-	.string "A TART APPLE can make a certain\n"
-	.string "MOéMON evolve.$"
+	.string "TM20 contains SAFEGUARD.\p"
+	.string "It’s a move that prevents status\n"
+	.string "problems among your MOéMON.$"
 
 Kanto_CeladonCity_DepartmentStore_Roof_Text_8445FB4::
 	.string "Yay!\p"
@@ -325,8 +328,9 @@ Kanto_CeladonCity_DepartmentStore_Roof_Text_8445FB4::
 	.string "You can have this from me!$"
 
 Kanto_CeladonCity_DepartmentStore_Roof_Text_8445FE9::
-	.string "A SYRUPY APPLE can make a certain\n"
-	.string "MOéMON evolve.$"
+	.string "TM33 contains REFLECT.\p"
+	.string "It’s a move that weakens the power\n"
+	.string "of physical attacks by your foe.$"
 
 Kanto_CeladonCity_DepartmentStore_Roof_Text_844601B::
 	.string "You don’t have space for this!$"

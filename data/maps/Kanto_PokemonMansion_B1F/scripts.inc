@@ -38,7 +38,8 @@ Kanto_PokemonMansion_B1F_EventScript_841208C::
 
 @ Kanto_PokemonMansion_B1F object 4 (local id 4, gfx 0x3F0E) at 23,4
 Kanto_PokemonMansion_B1F_EventScript_846BE74::
-	setorcopyvar VAR_0x8000, ITEM_NEVER_MELT_ICE
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_NEVER_MELT_ICE here)
+	setorcopyvar VAR_0x8000, ITEM_TM14
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
@@ -52,7 +53,8 @@ Kanto_PokemonMansion_B1F_EventScript_846BE81::
 
 @ Kanto_PokemonMansion_B1F object 1 (local id 1, gfx 0x3F0E) at 6,21
 Kanto_PokemonMansion_B1F_EventScript_846BE8E::
-	setorcopyvar VAR_0x8000, ITEM_SHINY_STONE
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_SHINY_STONE here)
+	setorcopyvar VAR_0x8000, ITEM_TM22
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

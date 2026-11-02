@@ -22,13 +22,8 @@ mp where
 mp ctx
 shot lab1
 mp getvar 0x5004
-pressuntil A field 9000
+pressuntil A startertable 9000
 mp getvar 0x5004
-mp warp 35,0,10,5
-wait 150
-press UP 3
-wait 10
-pressuntil A startertable 3000
 wait 20
 shot starters
 press A 2

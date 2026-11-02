@@ -149,14 +149,16 @@ Kanto_PowerPlant_EventScript_846BDF2::
 
 @ Kanto_PowerPlant object 2 (local id 2, gfx 0x3F0E) at 40,22
 Kanto_PowerPlant_EventScript_846BDFF::
-	setorcopyvar VAR_0x8000, ITEM_SILK_SCARF
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_SILK_SCARF here)
+	setorcopyvar VAR_0x8000, ITEM_TM17
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
 
 @ Kanto_PowerPlant object 3 (local id 3, gfx 0x3F0E) at 46,37
 Kanto_PowerPlant_EventScript_846BE0C::
-	setorcopyvar VAR_0x8000, ITEM_CHARCOAL
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_CHARCOAL here)
+	setorcopyvar VAR_0x8000, ITEM_TM25
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

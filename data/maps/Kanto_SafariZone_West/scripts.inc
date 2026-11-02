@@ -23,7 +23,8 @@ Kanto_SafariZone_West_EventScript_8412138::
 
 @ Kanto_SafariZone_West object 2 (local id 2, gfx 0x3F0E) at 17,13
 Kanto_SafariZone_West_EventScript_846BCE8::
-	setorcopyvar VAR_0x8000, ITEM_SHARP_BEAK
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_SHARP_BEAK here)
+	setorcopyvar VAR_0x8000, ITEM_TM32
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

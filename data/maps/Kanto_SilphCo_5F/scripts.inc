@@ -146,7 +146,8 @@ Kanto_SilphCo_5F_EventScript_846BD60::
 
 @ Kanto_SilphCo_5F object 7 (local id 7, gfx 0x3F0E) at 1,18
 Kanto_SilphCo_5F_EventScript_846BD6D::
-	setorcopyvar VAR_0x8000, ITEM_BLACK_BELT
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_BLACK_BELT here)
+	setorcopyvar VAR_0x8000, ITEM_TM01
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

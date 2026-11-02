@@ -36,7 +36,8 @@ Kanto_SafariZone_North_EventScript_846BCCE::
 
 @ Kanto_SafariZone_North object 2 (local id 2, gfx 0x3F0E) at 28,9
 Kanto_SafariZone_North_EventScript_846BCDB::
-	setorcopyvar VAR_0x8000, ITEM_METAL_COAT
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_METAL_COAT here)
+	setorcopyvar VAR_0x8000, ITEM_TM47
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

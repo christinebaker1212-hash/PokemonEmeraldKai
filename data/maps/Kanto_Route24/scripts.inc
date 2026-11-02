@@ -169,7 +169,8 @@ Kanto_Route24_EventScript_8459B25::
 
 @ Kanto_Route24 object 8 (local id 8, gfx 0x3F0E) at 11,4
 Kanto_Route24_EventScript_846BAFA::
-	setorcopyvar VAR_0x8000, ITEM_DESTINY_KNOT
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_DESTINY_KNOT here)
+	setorcopyvar VAR_0x8000, ITEM_TM45
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

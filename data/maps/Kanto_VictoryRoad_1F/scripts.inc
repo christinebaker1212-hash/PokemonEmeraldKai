@@ -55,7 +55,8 @@ Kanto_VictoryRoad_1F_EventScript_846BEB8::
 
 @ Kanto_VictoryRoad_1F object 4 (local id 4, gfx 0x3F0E) at 14,1
 Kanto_VictoryRoad_1F_EventScript_846BEC5::
-	setorcopyvar VAR_0x8000, ITEM_DRAGON_SCALE
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_DRAGON_SCALE here)
+	setorcopyvar VAR_0x8000, ITEM_TM02
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

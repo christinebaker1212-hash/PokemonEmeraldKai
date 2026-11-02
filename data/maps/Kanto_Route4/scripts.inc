@@ -43,7 +43,8 @@ Kanto_Route4_EventScript_845D1BB::
 
 @ Kanto_Route4 object 3 (local id 3, gfx 0x3F0E) at 67,5
 Kanto_Route4_EventScript_846BAED::
-	setorcopyvar VAR_0x8000, ITEM_LIFE_ORB
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_LIFE_ORB here)
+	setorcopyvar VAR_0x8000, ITEM_TM05
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

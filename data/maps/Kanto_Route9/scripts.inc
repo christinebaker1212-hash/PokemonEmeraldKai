@@ -126,7 +126,8 @@ Kanto_Route9_EventScript_845A361::
 
 @ Kanto_Route9 object 11 (local id 11, gfx 0x3F0E) at 12,17
 Kanto_Route9_EventScript_846BB6F::
-	setorcopyvar VAR_0x8000, ITEM_OVAL_STONE
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_OVAL_STONE here)
+	setorcopyvar VAR_0x8000, ITEM_TM40
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

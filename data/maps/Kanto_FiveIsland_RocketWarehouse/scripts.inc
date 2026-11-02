@@ -215,7 +215,8 @@ Kanto_FiveIsland_RocketWarehouse_EventScript_846C26D::
 
 @ Kanto_FiveIsland_RocketWarehouse object 8 (local id 8, gfx 0x3F0E) at 17,3
 Kanto_FiveIsland_RocketWarehouse_EventScript_846C27A::
-	setorcopyvar VAR_0x8000, ITEM_TOXIC_ORB
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_TOXIC_ORB here)
+	setorcopyvar VAR_0x8000, ITEM_TM36
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

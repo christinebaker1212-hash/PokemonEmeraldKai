@@ -93,7 +93,8 @@ Kanto_VictoryRoad_2F_EventScript_846BED2::
 
 @ Kanto_VictoryRoad_2F object 7 (local id 7, gfx 0x3F0E) at 40,7
 Kanto_VictoryRoad_2F_EventScript_846BEDF::
-	setorcopyvar VAR_0x8000, ITEM_NEVER_MELT_ICE
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_NEVER_MELT_ICE here)
+	setorcopyvar VAR_0x8000, ITEM_TM07
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
@@ -107,7 +108,8 @@ Kanto_VictoryRoad_2F_EventScript_846BEEC::
 
 @ Kanto_VictoryRoad_2F object 9 (local id 9, gfx 0x3F0E) at 14,13
 Kanto_VictoryRoad_2F_EventScript_846BEF9::
-	setorcopyvar VAR_0x8000, ITEM_SMOOTH_ROCK
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_SMOOTH_ROCK here)
+	setorcopyvar VAR_0x8000, ITEM_TM37
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

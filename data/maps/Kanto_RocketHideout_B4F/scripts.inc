@@ -164,7 +164,8 @@ Kanto_RocketHideout_B4F_EventScript_841119C::
 
 @ Kanto_RocketHideout_B4F object 7 (local id 7, gfx 0x3F0E) at 1,6
 Kanto_RocketHideout_B4F_EventScript_846BBE4::
-	setorcopyvar VAR_0x8000, ITEM_NUGGET
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_NUGGET here)
+	setorcopyvar VAR_0x8000, ITEM_TM49
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

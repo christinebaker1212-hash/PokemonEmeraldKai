@@ -1,0 +1,20 @@
+pressuntil A field 5000
+wait 60
+mp checkitem 317
+mp warp 38,83,7,5
+wait 120
+mp face up
+press A 2
+mash A 30 20
+wait 60
+shot psychic
+mp checkitem 317
+mp checkitem 297
+mp warp 36,1,11,36
+wait 120
+mp face up
+press A 2
+mash A 20 20
+wait 60
+mp checkitem 297
+quit

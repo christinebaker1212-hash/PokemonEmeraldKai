@@ -103,11 +103,12 @@ Kanto_CeruleanCity_EventScript_8416244::
 
 Kanto_CeruleanCity_EventScript_841626F::
 	msgbox Kanto_CeruleanCity_Text_842EF62, MSGBOX_DEFAULT
-	checkitemspace ITEM_SUN_STONE, 1
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal gave SUN_STONE)
+	checkitemspace ITEM_TM28, 1
 	goto_if_eq VAR_RESULT, 0, Kanto_CeruleanCity_EventScript_84162BB
-	additem ITEM_SUN_STONE, 1
+	additem ITEM_TM28, 1
 	loadword 0, Kanto_CeruleanCity_Text_842EF8C
-	setorcopyvar VAR_0x8000, ITEM_SUN_STONE
+	setorcopyvar VAR_0x8000, ITEM_TM28
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E
@@ -427,11 +428,11 @@ Kanto_CeruleanCity_Text_842EF36::
 
 Kanto_CeruleanCity_Text_842EF62::
 	.string "…Okay.\n"
-	.string "I’ll return the SUN STONE I stole.$"
+	.string "I’ll return the TM I stole.$"
 
 Kanto_CeruleanCity_Text_842EF8C::
-	.string "{PLAYER} recovered a SUN STONE\n"
-	.string "from the TEAM ROCKET GRUNT.$"
+	.string "{PLAYER} recovered TM28 from\n"
+	.string "the TEAM ROCKET GRUNT.$"
 
 Kanto_CeruleanCity_Text_842EFC1::
 	.string "I better get moving!\n"

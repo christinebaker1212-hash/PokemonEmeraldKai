@@ -76,7 +76,8 @@ Kanto_VictoryRoad_3F_EventScript_846BF06::
 
 @ Kanto_VictoryRoad_3F object 6 (local id 6, gfx 0x3F0E) at 12,9
 Kanto_VictoryRoad_3F_EventScript_846BF13::
-	setorcopyvar VAR_0x8000, ITEM_PP_UP
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_PP_UP here)
+	setorcopyvar VAR_0x8000, ITEM_TM50
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

@@ -19,11 +19,12 @@ Kanto_Route12_NorthEntrance_2F_EventScript_841FE10::
 	checkplayergender
 	call_if_eq VAR_RESULT, 0, Kanto_Route12_NorthEntrance_2F_EventScript_841FE6E
 	call_if_eq VAR_RESULT, 1, Kanto_Route12_NorthEntrance_2F_EventScript_841FE77
-	checkitemspace ITEM_SHINY_STONE, 1
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal gave SHINY_STONE)
+	checkitemspace ITEM_TM27, 1
 	goto_if_eq VAR_RESULT, 0, Kanto_Route12_NorthEntrance_2F_EventScript_841FE80
-	additem ITEM_SHINY_STONE, 1
+	additem ITEM_TM27, 1
 	loadword 0, Kanto_Route12_NorthEntrance_2F_Text_844F351
-	setorcopyvar VAR_0x8000, ITEM_SHINY_STONE
+	setorcopyvar VAR_0x8000, ITEM_TM27
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E
@@ -53,24 +54,24 @@ Kanto_Route12_NorthEntrance_2F_EventScript_841FE8A::
 Kanto_Route12_NorthEntrance_2F_Text_844F283::
 	.string "My MOéMON’s ashes are stored in\n"
 	.string "MOéMON TOWER.\p"
-	.string "Please take this SHINY STONE.\n"
+	.string "You can have this TM.\n"
 	.string "I don’t need it anymore…$"
 
 Kanto_Route12_NorthEntrance_2F_Text_844F2EA::
 	.string "My MOéMON’s ashes are stored in\n"
 	.string "MOéMON TOWER.\p"
-	.string "Please take this SHINY STONE.\n"
+	.string "You can have this TM.\n"
 	.string "I don’t need it anymore…$"
 
 Kanto_Route12_NorthEntrance_2F_Text_844F351::
-	.string "{PLAYER} received a SHINY STONE\n"
+	.string "{PLAYER} received TM27\n"
 	.string "from the little girl.$"
 
 Kanto_Route12_NorthEntrance_2F_Text_844F381::
-	.string "A SHINY STONE can make certain\n"
-	.string "MOéMON evolve.\p"
-	.string "Please treat your MOéMON with\n"
-	.string "kindness.$"
+	.string "TM27 is a move called RETURN…\p"
+	.string "If you treat your MOéMON good,\n"
+	.string "it will return your love by working\l"
+	.string "its hardest in battle.$"
 
 Kanto_Route12_NorthEntrance_2F_Text_844F3D9::
 	.string "You don’t have room for this.$"

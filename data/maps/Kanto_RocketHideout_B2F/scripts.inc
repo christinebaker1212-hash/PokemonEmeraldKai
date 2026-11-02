@@ -23,7 +23,8 @@ Kanto_RocketHideout_B2F_EventScript_846BBA3::
 
 @ Kanto_RocketHideout_B2F object 4 (local id 4, gfx 0x3F0E) at 5,13
 Kanto_RocketHideout_B2F_EventScript_846BBB0::
-	setorcopyvar VAR_0x8000, ITEM_MENTAL_HERB
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_MENTAL_HERB here)
+	setorcopyvar VAR_0x8000, ITEM_TM12
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

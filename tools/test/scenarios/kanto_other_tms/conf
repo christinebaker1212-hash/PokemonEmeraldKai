@@ -1,0 +1,7 @@
+# KANTO's other TMs where FireRed has them (tools/quetzal_port/fix_kanto_tms.py): MR. PSYCHIC gives TM29 (item 317)
+# and MT. MOON 1F's ball holds TM09 (item 297), where Quetzal had a MOON STONE and a MIRACLE SEED
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=25:20"
+EXPECT_A=("item 317: 0" "item 317: 1" "item 297: 0" "item 297: 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

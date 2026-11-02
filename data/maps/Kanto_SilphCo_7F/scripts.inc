@@ -272,7 +272,8 @@ Kanto_SilphCo_7F_EventScript_846BDB1::
 
 @ Kanto_SilphCo_7F object 11 (local id 11, gfx 0x3F0E) at 30,11
 Kanto_SilphCo_7F_EventScript_846BDBE::
-	setorcopyvar VAR_0x8000, ITEM_LIFE_ORB
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_LIFE_ORB here)
+	setorcopyvar VAR_0x8000, ITEM_TM08
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

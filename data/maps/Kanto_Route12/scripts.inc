@@ -186,7 +186,8 @@ Kanto_Route12_EventScript_845AA45::
 
 @ Kanto_Route12 object 10 (local id 10, gfx 0x3F0E) at 18,36
 Kanto_Route12_EventScript_846BC66::
-	setorcopyvar VAR_0x8000, ITEM_DAWN_STONE
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_DAWN_STONE here)
+	setorcopyvar VAR_0x8000, ITEM_TM48
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

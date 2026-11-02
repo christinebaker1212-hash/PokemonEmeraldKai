@@ -142,7 +142,8 @@ Kanto_Route25_EventScript_845D220::
 
 @ Kanto_Route25 object 10 (local id 10, gfx 0x3F0E) at 26,2
 Kanto_Route25_EventScript_846BB07::
-	setorcopyvar VAR_0x8000, ITEM_SILK_SCARF
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_SILK_SCARF here)
+	setorcopyvar VAR_0x8000, ITEM_TM43
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

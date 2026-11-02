@@ -74,7 +74,8 @@ Kanto_MtMoon_1F_EventScript_846BA85::
 
 @ Kanto_MtMoon_1F object 9 (local id 9, gfx 0x3F0E) at 11,35
 Kanto_MtMoon_1F_EventScript_846BA92::
-	setorcopyvar VAR_0x8000, ITEM_MIRACLE_SEED
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_MIRACLE_SEED here)
+	setorcopyvar VAR_0x8000, ITEM_TM09
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

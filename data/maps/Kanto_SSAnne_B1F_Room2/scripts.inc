@@ -9,7 +9,8 @@ Kanto_SSAnne_B1F_Room2_EventScript_84108F0::
 
 @ Kanto_SSAnne_B1F_Room2 object 2 (local id 2, gfx 0x3F0E) at 3,2
 Kanto_SSAnne_B1F_Room2_EventScript_846BB3B::
-	setorcopyvar VAR_0x8000, ITEM_DESTINY_KNOT
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_DESTINY_KNOT here)
+	setorcopyvar VAR_0x8000, ITEM_TM44
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

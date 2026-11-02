@@ -93,7 +93,10 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       ([x] KANTO's leaders: FireRed's TM39, 03, 34, 19, 06, 04, 38, 26 with FireRed's words, for Quetzal's held items
       (still obtainable elsewhere: item audit), tools/quetzal_port/fix_leader_tms.py, test kanto_leader_tm; [x] JOHTO's
       leaders: HeartGold / SoulSilver's TM51, 89, 45, 30, 01, 23, 07, 59 with HGSS's words (Crystal's TMs MUD-SLAP, FURY
-      CUTTER... aren't TMs in this game; HGSS's all are); [ ] other TM givers)
+      CUTTER... aren't TMs in this game; HGSS's all are); [x] KANTO's other TMs as FireRed's: its 28 TM balls (Quetzal's
+      balls in the same places), the CERULEAN grunt's TM28, ROUTE 12's TM27, MR. PSYCHIC's TM29 and the CELADON roof's
+      TM16 / 20 / 33 with FireRed's words: tools/quetzal_port/fix_kanto_tms.py, test kanto_other_tms; [ ] JOHTO's other
+      TM givers)
 - [x] SINNOH's time of day in KANTO, JOHTO and HOENN: MORNING / DAY / NIGHT encounters (grass slots 2-3 by Platinum's
       hours: mp_region.c MP_TimeLandSlot, src/data/wild_time.h from tools/quetzal_port/gen_wild_time.py; tests time_wild_*)
 - [x] Encounter audit: no strong Pokémon early, places keep their identity (DIGLETT'S CAVE), no DITTO-like utility early;
@@ -123,7 +126,9 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [x] Legendaries: FireRed's NAVEL ROCK and BIRTH ISLAND static encounters and Emerald's NAVEL ROCK and FARAWAY ISLAND
       ones stay, whatever region the legendary is from (they were in the original games); exclusivity is for the others
       (qz_specials.c OriginalGameEvent; test legend_exclusive)
-- [ ] Platinum's remaining songs: the user's Platinum.zip (SINNOH's missing songs, task list SINNOH "songs")
+- [x] Platinum's remaining songs: the user's Platinum.zip (the BATTLE FACTORY / HALL / CASTLE / ARCADE, the VILLA's
+      audio, the five SUPER CONTEST dances, the Frontier Brain's victory: tools/kaisong/sinnoh_songs.py; COOP_NOTES
+      "SINNOH's music"; the opening, the Underground's and KUSAGASA's aren't in the rips)
 - [x] Time of day looks like Platinum's in every region: its color tinting by the hour (Platinum's outdoor area light
       on flat ground, over noon's, per half hour: tools/sinnoh/build_daylight.py -> sinnoh/platinum_daylight.bin with the
       pack; src/mp/mp_daytint.c tints outdoor maps' layers and world sprites; test day_tint)

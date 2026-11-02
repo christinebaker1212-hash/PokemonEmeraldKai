@@ -33,7 +33,8 @@ Kanto_SafariZone_East_EventScript_846BCA7::
 
 @ Kanto_SafariZone_East object 3 (local id 3, gfx 0x3F0E) at 31,18
 Kanto_SafariZone_East_EventScript_846BCB4::
-	setorcopyvar VAR_0x8000, ITEM_SUN_STONE
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_SUN_STONE here)
+	setorcopyvar VAR_0x8000, ITEM_TM11
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

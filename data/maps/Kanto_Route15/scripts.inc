@@ -165,7 +165,8 @@ Kanto_Route15_EventScript_845B2A1::
 
 @ Kanto_Route15 object 11 (local id 11, gfx 0x3F0E) at 20,6
 Kanto_Route15_EventScript_846BC80::
-	setorcopyvar VAR_0x8000, ITEM_DAMP_ROCK
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_DAMP_ROCK here)
+	setorcopyvar VAR_0x8000, ITEM_TM18
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

@@ -20,7 +20,8 @@ Kanto_SSAnne_1F_Room2_EventScript_841077F::
 
 @ Kanto_SSAnne_1F_Room2 object 4 (local id 4, gfx 0x3F0E) at 2,7
 Kanto_SSAnne_1F_Room2_EventScript_846BB14::
-	setorcopyvar VAR_0x8000, ITEM_BLACK_BELT
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_BLACK_BELT here)
+	setorcopyvar VAR_0x8000, ITEM_TM31
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
