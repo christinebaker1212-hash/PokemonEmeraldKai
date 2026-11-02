@@ -375,7 +375,7 @@ Custom: `mus_poke_mart@rustboro_city_game_center_2f.kaisong`
 
 ### mus_victory_trainer (412)
 Custom: `mus_victory_trainer@tt.kaisong`
-- Scenes: BATTLE SIMULATOR (BATTLE TENTS) [sim], POKéMON TCG card duels [tcg], TRIPLE TRIAD [tt], YU-GI-OH! duels [ygo]
+- Scenes: BATTLE SIMULATOR (BATTLE TENTS) [sim], POKéMON TCG card duels [tcg], Sinnoh [sinnoh], TRIPLE TRIAD [tt], YU-GI-OH! duels [ygo]
 - Field and battle code (by map): Battles, Coop
 
 ### mus_title (413)
@@ -580,7 +580,7 @@ Custom: `mus_vs_aqua_magma@ygo.kaisong`
 
 ### mus_vs_trainer (476)
 Custom: `mus_vs_trainer@cable_club.kaisong`, `mus_vs_trainer@ygo.kaisong`
-- Scenes: BATTLE SIMULATOR (BATTLE TENTS) [sim], Link battles (CABLE CLUB) [cable_club], POKéMON TCG card duels [tcg], YU-GI-OH! duels [ygo]
+- Scenes: BATTLE SIMULATOR (BATTLE TENTS) [sim], Link battles (CABLE CLUB) [cable_club], POKéMON TCG card duels [tcg], Sinnoh [sinnoh], YU-GI-OH! duels [ygo]
 - Battles: 70 places<details><summary>show</summary>Abandoned Ship Corridors 1F [abandoned_ship_corridors_1f], Abandoned Ship Corridors B1F [abandoned_ship_corridors_b1f], Abandoned Ship Rooms 1F [abandoned_ship_rooms_1f], Abandoned Ship Rooms 2 1F [abandoned_ship_rooms2_1f], Battle Frontier Battle Pyramid Floor [battle_frontier_battle_pyramid_floor], Dewford Town Gym [dewford_town_gym], Fortree City Gym [fortree_city_gym], Jagged Pass [jagged_pass], Lavaridge Town Gym 1F [lavaridge_town_gym_1f], Mauville City (Wally) [mauville_city], Mauville City Gym [mauville_city_gym], Meteor Falls 1F 2R [meteor_falls_1f_2r], Mossdeep City Gym [mossdeep_city_gym], Mt Chimney [mt_chimney], Mt Pyre 2F [mt_pyre_2f], Mt Pyre 3F [mt_pyre_3f], Mt Pyre 4F [mt_pyre_4f], Mt Pyre 5F [mt_pyre_5f], Mt Pyre 6F [mt_pyre_6f], Petalburg City Gym [petalburg_city_gym], Petalburg Woods [petalburg_woods], Route 102 [route102], Route 103 [route103], Route 104 [route104], Route 105 [route105], Route 106 [route106], Route 107 [route107], Route 108 [route108], Route 109 [route109], Route 109 Seashore House [route109_seashore_house], Route 110 [route110], Route 110 Trick House Puzzle 1 [route110_trick_house_puzzle1], Route 110 Trick House Puzzle 2 [route110_trick_house_puzzle2], Route 110 Trick House Puzzle 3 [route110_trick_house_puzzle3], Route 110 Trick House Puzzle 4 [route110_trick_house_puzzle4], Route 110 Trick House Puzzle 6 [route110_trick_house_puzzle6], Route 110 Trick House Puzzle 7 [route110_trick_house_puzzle7], Route 110 Trick House Puzzle 8 [route110_trick_house_puzzle8], Route 111 [route111], Route 112 [route112], Route 113 [route113], Route 114 [route114], Route 115 [route115], Route 116 [route116], Route 117 [route117], Route 118 [route118], Route 119 [route119], Route 120 [route120], Route 121 [route121], Route 123 [route123], Route 124 [route124], Route 125 [route125], Route 126 [route126], Route 127 [route127], Route 128 [route128], Route 129 [route129], Route 130 [route130], Route 131 [route131], Route 132 [route132], Route 133 [route133], Route 134 [route134], Rustboro City Gym [rustboro_city_gym], Rusturf Tunnel [rusturf_tunnel], SS Tidal Lower Deck [ss_tidal_lower_deck], SS Tidal Rooms [ss_tidal_rooms], Sootopolis City Gym B1F [sootopolis_city_gym_b1f], Victory Road 1F [victory_road_1f], Victory Road 1F (Wally) [victory_road_1f], Victory Road B1F [victory_road_b1f], Victory Road B2F [victory_road_b2f]</details>
 - Field and battle code (by map): Battle
 
@@ -1085,7 +1085,7 @@ Custom: `mus_johto_victory_gym_leader.kaisong`
 
 ### mus_sinnoh_twinleaf (678)
 Custom: `mus_sinnoh_twinleaf.kaisong`
-- Map music: Sinnoh Twinleaf Town [sinnoh_twinleaf_town]
+- Map music: Sinnoh Pastoria City Dp Great Marsh [sinnoh_pastoria_city_dp_great_marsh], Sinnoh Twinleaf Town [sinnoh_twinleaf_town], Sinnoh Twinleaf Town Northeast House [sinnoh_twinleaf_town_northeast_house], Sinnoh Twinleaf Town Player House 1f [sinnoh_twinleaf_town_player_house1f], Sinnoh Twinleaf Town Player House 2f [sinnoh_twinleaf_town_player_house2f], Sinnoh Twinleaf Town Rival House 1f [sinnoh_twinleaf_town_rival_house1f], Sinnoh Twinleaf Town Rival House 2f [sinnoh_twinleaf_town_rival_house2f], Sinnoh Twinleaf Town Southwest House [sinnoh_twinleaf_town_southwest_house]
 
 ### mus_sinnoh_twinleaf_night (679)
 Custom: `mus_sinnoh_twinleaf_night.kaisong`
@@ -1093,7 +1093,7 @@ Custom: `mus_sinnoh_twinleaf_night.kaisong`
 
 ### mus_sinnoh_sandgem (680)
 Custom: `mus_sinnoh_sandgem.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Sandgem Town [sinnoh_sandgem_town], Sinnoh Sandgem Town Counterpart House 1f [sinnoh_sandgem_town_counterpart_house1f], Sinnoh Sandgem Town Counterpart House 2f [sinnoh_sandgem_town_counterpart_house2f], Sinnoh Sandgem Town House [sinnoh_sandgem_town_house]
 
 ### mus_sinnoh_sandgem_night (681)
 Custom: `mus_sinnoh_sandgem_night.kaisong`
@@ -1101,7 +1101,7 @@ Custom: `mus_sinnoh_sandgem_night.kaisong`
 
 ### mus_sinnoh_jubilife (682)
 Custom: `mus_sinnoh_jubilife.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: 19 places<details><summary>show</summary>Sinnoh Jubilife City [sinnoh_jubilife_city], Sinnoh Jubilife City Condominiums 1f [sinnoh_jubilife_city_condominiums1f], Sinnoh Jubilife City Condominiums 2f [sinnoh_jubilife_city_condominiums2f], Sinnoh Jubilife City South House 1f [sinnoh_jubilife_city_south_house1f], Sinnoh Jubilife City South House 2f [sinnoh_jubilife_city_south_house2f], Sinnoh Jubilife City Southwest House 1f [sinnoh_jubilife_city_southwest_house1f], Sinnoh Jubilife City Southwest House 2f [sinnoh_jubilife_city_southwest_house2f], Sinnoh Jubilife Tv 1f [sinnoh_jubilife_tv1f], Sinnoh Jubilife Tv 2f [sinnoh_jubilife_tv2f], Sinnoh Jubilife Tv 2f Gallery [sinnoh_jubilife_tv2f_gallery], Sinnoh Jubilife Tv 3f [sinnoh_jubilife_tv3f], Sinnoh Jubilife Tv 3f Global Ranking Room [sinnoh_jubilife_tv3f_global_ranking_room], Sinnoh Jubilife Tv 3f Group Ranking Room [sinnoh_jubilife_tv3f_group_ranking_room], Sinnoh Jubilife Tv 4f [sinnoh_jubilife_tv4f], Sinnoh Jubilife Tv Elevator [sinnoh_jubilife_tv_elevator], Sinnoh Poketch Co 1f [sinnoh_poketch_co1f], Sinnoh Poketch Co 2f [sinnoh_poketch_co2f], Sinnoh Poketch Co 3f [sinnoh_poketch_co3f], Sinnoh Trainers School [sinnoh_trainers_school]</details>
 
 ### mus_sinnoh_jubilife_night (683)
 Custom: `mus_sinnoh_jubilife_night.kaisong`
@@ -1109,7 +1109,7 @@ Custom: `mus_sinnoh_jubilife_night.kaisong`
 
 ### mus_sinnoh_oreburgh (684)
 Custom: `mus_sinnoh_oreburgh.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Mining Museum [sinnoh_mining_museum], Sinnoh Oreburgh City [sinnoh_oreburgh_city], Sinnoh Oreburgh City East House 1f [sinnoh_oreburgh_city_east_house1f], Sinnoh Oreburgh City East House 2f [sinnoh_oreburgh_city_east_house2f], Sinnoh Oreburgh City Middle House [sinnoh_oreburgh_city_middle_house], Sinnoh Oreburgh City North House 1f [sinnoh_oreburgh_city_north_house1f], Sinnoh Oreburgh City North House 2f [sinnoh_oreburgh_city_north_house2f], Sinnoh Oreburgh City Northwest House 1f [sinnoh_oreburgh_city_northwest_house1f], Sinnoh Oreburgh City Northwest House 2f [sinnoh_oreburgh_city_northwest_house2f], Sinnoh Oreburgh City South House [sinnoh_oreburgh_city_south_house], Sinnoh Oreburgh City West House [sinnoh_oreburgh_city_west_house]
 
 ### mus_sinnoh_oreburgh_night (685)
 Custom: `mus_sinnoh_oreburgh_night.kaisong`
@@ -1117,7 +1117,7 @@ Custom: `mus_sinnoh_oreburgh_night.kaisong`
 
 ### mus_sinnoh_floaroma (686)
 Custom: `mus_sinnoh_floaroma.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Floaroma Meadow [sinnoh_floaroma_meadow], Sinnoh Floaroma Meadow House [sinnoh_floaroma_meadow_house], Sinnoh Floaroma Town [sinnoh_floaroma_town], Sinnoh Floaroma Town Middle House [sinnoh_floaroma_town_middle_house], Sinnoh Floaroma Town Southeast House [sinnoh_floaroma_town_southeast_house], Sinnoh Flower Paradise [sinnoh_flower_paradise], Sinnoh Flower Shop [sinnoh_flower_shop], Sinnoh Seabreak Path [sinnoh_seabreak_path]
 
 ### mus_sinnoh_floaroma_night (687)
 Custom: `mus_sinnoh_floaroma_night.kaisong`
@@ -1125,7 +1125,7 @@ Custom: `mus_sinnoh_floaroma_night.kaisong`
 
 ### mus_sinnoh_eterna (688)
 Custom: `mus_sinnoh_eterna.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: 15 places<details><summary>show</summary>Sinnoh Celestic Town [sinnoh_celestic_town], Sinnoh Celestic Town Cave [sinnoh_celestic_town_cave], Sinnoh Celestic Town North House [sinnoh_celestic_town_north_house], Sinnoh Celestic Town Northeast House [sinnoh_celestic_town_northeast_house], Sinnoh Celestic Town Northwest House [sinnoh_celestic_town_northwest_house], Sinnoh Celestic Town Southwest House [sinnoh_celestic_town_southwest_house], Sinnoh Cycle Shop [sinnoh_cycle_shop], Sinnoh Eterna City [sinnoh_eterna_city], Sinnoh Eterna City Condominiums 1f [sinnoh_eterna_city_condominiums1f], Sinnoh Eterna City Condominiums 2f [sinnoh_eterna_city_condominiums2f], Sinnoh Eterna City Condominiums 3f [sinnoh_eterna_city_condominiums3f], Sinnoh Eterna City East House [sinnoh_eterna_city_east_house], Sinnoh Eterna City Herb Shop [sinnoh_eterna_city_herb_shop], Sinnoh Eterna City South House [sinnoh_eterna_city_south_house], Sinnoh Rotoms Room [sinnoh_rotoms_room]</details>
 
 ### mus_sinnoh_eterna_night (689)
 Custom: `mus_sinnoh_eterna_night.kaisong`
@@ -1133,7 +1133,7 @@ Custom: `mus_sinnoh_eterna_night.kaisong`
 
 ### mus_sinnoh_hearthome (690)
 Custom: `mus_sinnoh_hearthome.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Hearthome City [sinnoh_hearthome_city], Sinnoh Hearthome City East Gate To Amity Square [sinnoh_hearthome_city_east_gate_to_amity_square], Sinnoh Hearthome City Northeast House 1f [sinnoh_hearthome_city_northeast_house1f], Sinnoh Hearthome City Northeast House 2f [sinnoh_hearthome_city_northeast_house2f], Sinnoh Hearthome City Northeast House Elevator [sinnoh_hearthome_city_northeast_house_elevator], Sinnoh Hearthome City Northwest House [sinnoh_hearthome_city_northwest_house], Sinnoh Hearthome City Pokemon Fan Club [sinnoh_hearthome_city_pokemon_fan_club], Sinnoh Hearthome City Southeast House 1f [sinnoh_hearthome_city_southeast_house1f], Sinnoh Hearthome City Southeast House 2f [sinnoh_hearthome_city_southeast_house2f], Sinnoh Hearthome City Southeast House Elevator [sinnoh_hearthome_city_southeast_house_elevator], Sinnoh Hearthome City West Gate To Amity Square [sinnoh_hearthome_city_west_gate_to_amity_square]
 
 ### mus_sinnoh_hearthome_night (691)
 Custom: `mus_sinnoh_hearthome_night.kaisong`
@@ -1141,7 +1141,7 @@ Custom: `mus_sinnoh_hearthome_night.kaisong`
 
 ### mus_sinnoh_solaceon (692)
 Custom: `mus_sinnoh_solaceon.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: 14 places<details><summary>show</summary>Sinnoh Pastoria City [sinnoh_pastoria_city], Sinnoh Pastoria City East House [sinnoh_pastoria_city_east_house], Sinnoh Pastoria City Middle House [sinnoh_pastoria_city_middle_house], Sinnoh Pastoria City North House [sinnoh_pastoria_city_north_house], Sinnoh Pastoria City Northeast House [sinnoh_pastoria_city_northeast_house], Sinnoh Pastoria City Observatory Gate 1f [sinnoh_pastoria_city_observatory_gate1f], Sinnoh Pastoria City Observatory Gate 2f [sinnoh_pastoria_city_observatory_gate2f], Sinnoh Pastoria City Southwest House [sinnoh_pastoria_city_southwest_house], Sinnoh Pokemon Day Care [sinnoh_pokemon_day_care], Sinnoh Solaceon Town [sinnoh_solaceon_town], Sinnoh Solaceon Town East House [sinnoh_solaceon_town_east_house], Sinnoh Solaceon Town North House [sinnoh_solaceon_town_north_house], Sinnoh Solaceon Town Northeast House [sinnoh_solaceon_town_northeast_house], Sinnoh Solaceon Town Pokemon News Press [sinnoh_solaceon_town_pokemon_news_press]</details>
 
 ### mus_sinnoh_solaceon_night (693)
 Custom: `mus_sinnoh_solaceon_night.kaisong`
@@ -1149,7 +1149,7 @@ Custom: `mus_sinnoh_solaceon_night.kaisong`
 
 ### mus_sinnoh_veilstone (694)
 Custom: `mus_sinnoh_veilstone.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Veilstone City [sinnoh_veilstone_city], Sinnoh Veilstone City Galactic Warehouse [sinnoh_veilstone_city_galactic_warehouse], Sinnoh Veilstone City Northeast House [sinnoh_veilstone_city_northeast_house], Sinnoh Veilstone City Northwest House [sinnoh_veilstone_city_northwest_house], Sinnoh Veilstone City Prize Exchange [sinnoh_veilstone_city_prize_exchange], Sinnoh Veilstone City Southeast House [sinnoh_veilstone_city_southeast_house], Sinnoh Veilstone City Southwest House [sinnoh_veilstone_city_southwest_house]
 
 ### mus_sinnoh_veilstone_night (695)
 Custom: `mus_sinnoh_veilstone_night.kaisong`
@@ -1157,7 +1157,7 @@ Custom: `mus_sinnoh_veilstone_night.kaisong`
 
 ### mus_sinnoh_canalave (696)
 Custom: `mus_sinnoh_canalave.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Canalave City [sinnoh_canalave_city], Sinnoh Canalave City East House [sinnoh_canalave_city_east_house], Sinnoh Canalave City Sailor Eldritch House [sinnoh_canalave_city_sailor_eldritch_house], Sinnoh Canalave City Southeast House [sinnoh_canalave_city_southeast_house], Sinnoh Canalave City West House [sinnoh_canalave_city_west_house], Sinnoh Canalave Library 1f [sinnoh_canalave_library1f], Sinnoh Canalave Library 2f [sinnoh_canalave_library2f], Sinnoh Canalave Library 3f [sinnoh_canalave_library3f]
 
 ### mus_sinnoh_canalave_night (697)
 Custom: `mus_sinnoh_canalave_night.kaisong`
@@ -1165,7 +1165,7 @@ Custom: `mus_sinnoh_canalave_night.kaisong`
 
 ### mus_sinnoh_snowpoint (698)
 Custom: `mus_sinnoh_snowpoint.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Snowpoint City [sinnoh_snowpoint_city], Sinnoh Snowpoint City East House [sinnoh_snowpoint_city_east_house], Sinnoh Snowpoint City West House [sinnoh_snowpoint_city_west_house]
 
 ### mus_sinnoh_snowpoint_night (699)
 Custom: `mus_sinnoh_snowpoint_night.kaisong`
@@ -1173,7 +1173,7 @@ Custom: `mus_sinnoh_snowpoint_night.kaisong`
 
 ### mus_sinnoh_sunyshore (700)
 Custom: `mus_sinnoh_sunyshore.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Sunyshore City [sinnoh_sunyshore_city], Sinnoh Sunyshore City East House [sinnoh_sunyshore_city_east_house], Sinnoh Sunyshore City Northeast House [sinnoh_sunyshore_city_northeast_house], Sinnoh Sunyshore City Northwest House [sinnoh_sunyshore_city_northwest_house], Sinnoh Sunyshore City West House [sinnoh_sunyshore_city_west_house], Sinnoh Sunyshore Market [sinnoh_sunyshore_market], Sinnoh Vista Lighthouse [sinnoh_vista_lighthouse], Sinnoh Vista Lighthouse Elevator [sinnoh_vista_lighthouse_elevator]
 
 ### mus_sinnoh_sunyshore_night (701)
 Custom: `mus_sinnoh_sunyshore_night.kaisong`
@@ -1181,7 +1181,7 @@ Custom: `mus_sinnoh_sunyshore_night.kaisong`
 
 ### mus_sinnoh_league (702)
 Custom: `mus_sinnoh_league.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Pokemon League [sinnoh_pokemon_league]
 
 ### mus_sinnoh_league_night (703)
 Custom: `mus_sinnoh_league_night.kaisong`
@@ -1189,7 +1189,7 @@ Custom: `mus_sinnoh_league_night.kaisong`
 
 ### mus_sinnoh_fight_area (704)
 Custom: `mus_sinnoh_fight_area.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Battle Frontier [sinnoh_battle_frontier], Sinnoh Battle Frontier Gate To Fight Area [sinnoh_battle_frontier_gate_to_fight_area], Sinnoh Battleground [sinnoh_battleground], Sinnoh Fight Area [sinnoh_fight_area], Sinnoh Fight Area Middle House [sinnoh_fight_area_middle_house], Sinnoh Fight Area South House [sinnoh_fight_area_south_house], Sinnoh Survival Area [sinnoh_survival_area], Sinnoh Survival Area North House [sinnoh_survival_area_north_house], Sinnoh Survival Area South House [sinnoh_survival_area_south_house]
 
 ### mus_sinnoh_fight_area_night (705)
 Custom: `mus_sinnoh_fight_area_night.kaisong`
@@ -1197,7 +1197,7 @@ Custom: `mus_sinnoh_fight_area_night.kaisong`
 
 ### mus_sinnoh_valor_lakefront (706)
 Custom: `mus_sinnoh_valor_lakefront.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: 17 places<details><summary>show</summary>Sinnoh Footstep House [sinnoh_footstep_house], Sinnoh Grand Lake Route 213 East House [sinnoh_grand_lake_route213_east_house], Sinnoh Grand Lake Route 213 Lobby [sinnoh_grand_lake_route213_lobby], Sinnoh Grand Lake Route 213 Northeast House [sinnoh_grand_lake_route213_northeast_house], Sinnoh Grand Lake Route 213 Northwest House [sinnoh_grand_lake_route213_northwest_house], Sinnoh Grand Lake Valor Lakefront East House [sinnoh_grand_lake_valor_lakefront_east_house], Sinnoh Grand Lake Valor Lakefront West House [sinnoh_grand_lake_valor_lakefront_west_house], Sinnoh Resort Area [sinnoh_resort_area], Sinnoh Resort Area House [sinnoh_resort_area_house], Sinnoh Resort Area Ribbon Syndicate 1f [sinnoh_resort_area_ribbon_syndicate1f], Sinnoh Resort Area Ribbon Syndicate 2f [sinnoh_resort_area_ribbon_syndicate2f], Sinnoh Resort Area Ribbon Syndicate Elevator [sinnoh_resort_area_ribbon_syndicate_elevator], Sinnoh Restaurant [sinnoh_restaurant], Sinnoh Route 213 [sinnoh_route213], Sinnoh Route 213 Gate To Pastoria City [sinnoh_route213_gate_to_pastoria_city], Sinnoh Valor Lakefront [sinnoh_valor_lakefront], Sinnoh Villa [sinnoh_villa]</details>
 
 ### mus_sinnoh_valor_lakefront_night (707)
 Custom: `mus_sinnoh_valor_lakefront_night.kaisong`
@@ -1205,7 +1205,7 @@ Custom: `mus_sinnoh_valor_lakefront_night.kaisong`
 
 ### mus_sinnoh_route201 (708)
 Custom: `mus_sinnoh_route201.kaisong`
-- Map music: Sinnoh Route 201 [sinnoh_route201]
+- Map music: Sinnoh Route 201 [sinnoh_route201], Sinnoh Route 202 [sinnoh_route202], Sinnoh Route 219 [sinnoh_route219], Sinnoh Verity Lakefront [sinnoh_verity_lakefront]
 
 ### mus_sinnoh_route201_night (709)
 Custom: `mus_sinnoh_route201_night.kaisong`
@@ -1213,7 +1213,7 @@ Custom: `mus_sinnoh_route201_night.kaisong`
 
 ### mus_sinnoh_route203 (710)
 Custom: `mus_sinnoh_route203.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Iron Island [sinnoh_iron_island], Sinnoh Iron Island House [sinnoh_iron_island_house], Sinnoh Route 203 [sinnoh_route203], Sinnoh Route 204 North [sinnoh_route204_north], Sinnoh Route 204 South [sinnoh_route204_south], Sinnoh Route 218 [sinnoh_route218], Sinnoh Route 218 Gate To Canalave City [sinnoh_route218_gate_to_canalave_city], Sinnoh Route 218 Gate To Jubilife City [sinnoh_route218_gate_to_jubilife_city]
 
 ### mus_sinnoh_route203_night (711)
 Custom: `mus_sinnoh_route203_night.kaisong`
@@ -1221,7 +1221,7 @@ Custom: `mus_sinnoh_route203_night.kaisong`
 
 ### mus_sinnoh_route205 (712)
 Custom: `mus_sinnoh_route205.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Eterna Forest Outside [sinnoh_eterna_forest_outside], Sinnoh Fuego Ironworks Outside [sinnoh_fuego_ironworks_outside], Sinnoh Route 205 House [sinnoh_route205_house], Sinnoh Route 205 North [sinnoh_route205_north], Sinnoh Route 205 South [sinnoh_route205_south], Sinnoh Route 211 West [sinnoh_route211_west], Sinnoh Valley Windworks Outside [sinnoh_valley_windworks_outside]
 
 ### mus_sinnoh_route205_night (713)
 Custom: `mus_sinnoh_route205_night.kaisong`
@@ -1229,7 +1229,7 @@ Custom: `mus_sinnoh_route205_night.kaisong`
 
 ### mus_sinnoh_route206 (714)
 Custom: `mus_sinnoh_route206.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Route 206 [sinnoh_route206], Sinnoh Route 206 Cycling Road North Gate [sinnoh_route206_cycling_road_north_gate], Sinnoh Route 206 Cycling Road South Gate [sinnoh_route206_cycling_road_south_gate], Sinnoh Route 207 [sinnoh_route207], Sinnoh Route 208 [sinnoh_route208], Sinnoh Route 208 Gate To Hearthome City [sinnoh_route208_gate_to_hearthome_city], Sinnoh Route 208 House [sinnoh_route208_house], Sinnoh Route 220 [sinnoh_route220], Sinnoh Route 221 [sinnoh_route221], Sinnoh Route 221 House [sinnoh_route221_house]
 
 ### mus_sinnoh_route206_night (715)
 Custom: `mus_sinnoh_route206_night.kaisong`
@@ -1237,7 +1237,7 @@ Custom: `mus_sinnoh_route206_night.kaisong`
 
 ### mus_sinnoh_route209 (716)
 Custom: `mus_sinnoh_route209.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: 14 places<details><summary>show</summary>Sinnoh Pokemon Mansion [sinnoh_pokemon_mansion], Sinnoh Pokemon Mansion Maids Room [sinnoh_pokemon_mansion_maids_room], Sinnoh Pokemon Mansion Office [sinnoh_pokemon_mansion_office], Sinnoh Route 209 [sinnoh_route209], Sinnoh Route 209 Gate To Hearthome City [sinnoh_route209_gate_to_hearthome_city], Sinnoh Route 212 Gate To Hearthome City [sinnoh_route212_gate_to_hearthome_city], Sinnoh Route 212 House [sinnoh_route212_house], Sinnoh Route 212 North [sinnoh_route212_north], Sinnoh Route 212 South [sinnoh_route212_south], Sinnoh Route 222 [sinnoh_route222], Sinnoh Route 222 East House [sinnoh_route222_east_house], Sinnoh Route 222 Gate To Sunyshore City [sinnoh_route222_gate_to_sunyshore_city], Sinnoh Route 222 West House [sinnoh_route222_west_house], Sinnoh Trophy Garden [sinnoh_trophy_garden]</details>
 
 ### mus_sinnoh_route209_night (717)
 Custom: `mus_sinnoh_route209_night.kaisong`
@@ -1245,7 +1245,7 @@ Custom: `mus_sinnoh_route209_night.kaisong`
 
 ### mus_sinnoh_route210 (718)
 Custom: `mus_sinnoh_route210.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: 13 places<details><summary>show</summary>Sinnoh Cafe [sinnoh_cafe], Sinnoh Route 210 Grandma Wilma House [sinnoh_route210_grandma_wilma_house], Sinnoh Route 210 North [sinnoh_route210_north], Sinnoh Route 210 South [sinnoh_route210_south], Sinnoh Route 211 East [sinnoh_route211_east], Sinnoh Route 214 [sinnoh_route214], Sinnoh Route 214 Gate To Veilstone City [sinnoh_route214_gate_to_veilstone_city], Sinnoh Route 215 [sinnoh_route215], Sinnoh Route 215 Gate To Veilstone City [sinnoh_route215_gate_to_veilstone_city], Sinnoh Route 223 [sinnoh_route223], Sinnoh Route 224 [sinnoh_route224], Sinnoh Sendoff Spring [sinnoh_sendoff_spring], Sinnoh Spring Path [sinnoh_spring_path]</details>
 
 ### mus_sinnoh_route210_night (719)
 Custom: `mus_sinnoh_route210_night.kaisong`
@@ -1253,7 +1253,7 @@ Custom: `mus_sinnoh_route210_night.kaisong`
 
 ### mus_sinnoh_route216 (720)
 Custom: `mus_sinnoh_route216.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Acuity Lakefront [sinnoh_acuity_lakefront], Sinnoh Route 216 [sinnoh_route216], Sinnoh Route 216 House [sinnoh_route216_house], Sinnoh Route 217 [sinnoh_route217], Sinnoh Route 217 Northeast House [sinnoh_route217_northeast_house], Sinnoh Route 217 West House [sinnoh_route217_west_house]
 
 ### mus_sinnoh_route216_night (721)
 Custom: `mus_sinnoh_route216_night.kaisong`
@@ -1261,7 +1261,7 @@ Custom: `mus_sinnoh_route216_night.kaisong`
 
 ### mus_sinnoh_route225 (722)
 Custom: `mus_sinnoh_route225.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Route 225 [sinnoh_route225], Sinnoh Route 225 Gate To Fight Area [sinnoh_route225_gate_to_fight_area], Sinnoh Route 225 House [sinnoh_route225_house], Sinnoh Route 226 [sinnoh_route226], Sinnoh Route 226 House [sinnoh_route226_house], Sinnoh Route 227 [sinnoh_route227], Sinnoh Route 227 House [sinnoh_route227_house], Sinnoh Stark Mountain Outside [sinnoh_stark_mountain_outside]
 
 ### mus_sinnoh_route225_night (723)
 Custom: `mus_sinnoh_route225_night.kaisong`
@@ -1269,7 +1269,7 @@ Custom: `mus_sinnoh_route225_night.kaisong`
 
 ### mus_sinnoh_route228 (724)
 Custom: `mus_sinnoh_route228.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Route 228 [sinnoh_route228], Sinnoh Route 228 Gate To Route 226 [sinnoh_route228_gate_to_route226], Sinnoh Route 228 North House [sinnoh_route228_north_house], Sinnoh Route 228 Rock Peak Ruins [sinnoh_route228_rock_peak_ruins], Sinnoh Route 228 South House [sinnoh_route228_south_house], Sinnoh Route 229 [sinnoh_route229], Sinnoh Route 230 [sinnoh_route230]
 
 ### mus_sinnoh_route228_night (725)
 Custom: `mus_sinnoh_route228_night.kaisong`
@@ -1285,15 +1285,15 @@ Custom: `mus_sinnoh_bicycle.kaisong`
 
 ### mus_sinnoh_lake (728)
 Custom: `mus_sinnoh_lake.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Lake Acuity Low Water [sinnoh_lake_acuity_low_water], Sinnoh Lake Valor [sinnoh_lake_valor], Sinnoh Lake Verity Low Water [sinnoh_lake_verity_low_water]
 
 ### mus_sinnoh_research_lab (729)
 Custom: `mus_sinnoh_research_lab.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Sandgem Town Pokemon Research Lab [sinnoh_sandgem_town_pokemon_research_lab]
 
 ### mus_sinnoh_pokecenter (730)
 Custom: `mus_sinnoh_pokecenter.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: 55 places<details><summary>show</summary>Sinnoh Canalave City Pokecenter 1f [sinnoh_canalave_city_pokecenter1f], Sinnoh Canalave City Pokecenter 2f [sinnoh_canalave_city_pokecenter2f], Sinnoh Canalave City Pokecenter B1f [sinnoh_canalave_city_pokecenter_b1f], Sinnoh Celestic Town Pokecenter 1f [sinnoh_celestic_town_pokecenter1f], Sinnoh Celestic Town Pokecenter 2f [sinnoh_celestic_town_pokecenter2f], Sinnoh Celestic Town Pokecenter B1f [sinnoh_celestic_town_pokecenter_b1f], Sinnoh Eterna City Pokecenter 1f [sinnoh_eterna_city_pokecenter1f], Sinnoh Eterna City Pokecenter 2f [sinnoh_eterna_city_pokecenter2f], Sinnoh Eterna City Pokecenter B1f [sinnoh_eterna_city_pokecenter_b1f], Sinnoh Fight Area Pokecenter 1f [sinnoh_fight_area_pokecenter1f], Sinnoh Fight Area Pokecenter 2f [sinnoh_fight_area_pokecenter2f], Sinnoh Fight Area Pokecenter B1f [sinnoh_fight_area_pokecenter_b1f], Sinnoh Floaroma Town Pokecenter 1f [sinnoh_floaroma_town_pokecenter1f], Sinnoh Floaroma Town Pokecenter 2f [sinnoh_floaroma_town_pokecenter2f], Sinnoh Floaroma Town Pokecenter B1f [sinnoh_floaroma_town_pokecenter_b1f], Sinnoh Hearthome City Pokecenter 1f [sinnoh_hearthome_city_pokecenter1f], Sinnoh Hearthome City Pokecenter 2f [sinnoh_hearthome_city_pokecenter2f], Sinnoh Hearthome City Pokecenter B1f [sinnoh_hearthome_city_pokecenter_b1f], Sinnoh Jubilife City Pokecenter 1f [sinnoh_jubilife_city_pokecenter1f], Sinnoh Jubilife City Pokecenter 2f [sinnoh_jubilife_city_pokecenter2f], Sinnoh Jubilife City Pokecenter B1f [sinnoh_jubilife_city_pokecenter_b1f], Sinnoh Oreburgh City Pokecenter 1f [sinnoh_oreburgh_city_pokecenter1f], Sinnoh Oreburgh City Pokecenter 2f [sinnoh_oreburgh_city_pokecenter2f], Sinnoh Oreburgh City Pokecenter B1f [sinnoh_oreburgh_city_pokecenter_b1f], Sinnoh Pastoria City Pokecenter 1f [sinnoh_pastoria_city_pokecenter1f], Sinnoh Pastoria City Pokecenter 2f [sinnoh_pastoria_city_pokecenter2f], Sinnoh Pastoria City Pokecenter B1f [sinnoh_pastoria_city_pokecenter_b1f], Sinnoh Pokemon League North Pokecenter 1f [sinnoh_pokemon_league_north_pokecenter1f], Sinnoh Pokemon League North Pokecenter 2f [sinnoh_pokemon_league_north_pokecenter2f], Sinnoh Pokemon League North Pokecenter B1f [sinnoh_pokemon_league_north_pokecenter_b1f], Sinnoh Pokemon League South Pokecenter 1f [sinnoh_pokemon_league_south_pokecenter1f], Sinnoh Pokemon League South Pokecenter 2f [sinnoh_pokemon_league_south_pokecenter2f], Sinnoh Pokemon League South Pokecenter B1f [sinnoh_pokemon_league_south_pokecenter_b1f], Sinnoh Record Mixing Room [sinnoh_record_mixing_room], Sinnoh Resort Area Pokecenter 1f [sinnoh_resort_area_pokecenter1f], Sinnoh Resort Area Pokecenter 2f [sinnoh_resort_area_pokecenter2f], Sinnoh Resort Area Pokecenter B1f [sinnoh_resort_area_pokecenter_b1f], Sinnoh Sandgem Town Pokecenter 1f [sinnoh_sandgem_town_pokecenter1f], Sinnoh Sandgem Town Pokecenter 2f [sinnoh_sandgem_town_pokecenter2f], Sinnoh Sandgem Town Pokecenter B1f [sinnoh_sandgem_town_pokecenter_b1f], Sinnoh Snowpoint City Pokecenter 1f [sinnoh_snowpoint_city_pokecenter1f], Sinnoh Snowpoint City Pokecenter 2f [sinnoh_snowpoint_city_pokecenter2f], Sinnoh Snowpoint City Pokecenter B1f [sinnoh_snowpoint_city_pokecenter_b1f], Sinnoh Solaceon Town Pokecenter 1f [sinnoh_solaceon_town_pokecenter1f], Sinnoh Solaceon Town Pokecenter 2f [sinnoh_solaceon_town_pokecenter2f], Sinnoh Solaceon Town Pokecenter B1f [sinnoh_solaceon_town_pokecenter_b1f], Sinnoh Sunyshore City Pokecenter 1f [sinnoh_sunyshore_city_pokecenter1f], Sinnoh Sunyshore City Pokecenter 2f [sinnoh_sunyshore_city_pokecenter2f], Sinnoh Sunyshore City Pokecenter B1f [sinnoh_sunyshore_city_pokecenter_b1f], Sinnoh Survival Area Pokecenter 1f [sinnoh_survival_area_pokecenter1f], Sinnoh Survival Area Pokecenter 2f [sinnoh_survival_area_pokecenter2f], Sinnoh Survival Area Pokecenter B1f [sinnoh_survival_area_pokecenter_b1f], Sinnoh Veilstone City Pokecenter 1f [sinnoh_veilstone_city_pokecenter1f], Sinnoh Veilstone City Pokecenter 2f [sinnoh_veilstone_city_pokecenter2f], Sinnoh Veilstone City Pokecenter B1f [sinnoh_veilstone_city_pokecenter_b1f]</details>
 
 ### mus_sinnoh_pokecenter_night (731)
 Custom: `mus_sinnoh_pokecenter_night.kaisong`
@@ -1301,7 +1301,7 @@ Custom: `mus_sinnoh_pokecenter_night.kaisong`
 
 ### mus_sinnoh_pokemart (732)
 Custom: `mus_sinnoh_pokemart.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: 20 places<details><summary>show</summary>Sinnoh Canalave City Mart [sinnoh_canalave_city_mart], Sinnoh Eterna City Mart [sinnoh_eterna_city_mart], Sinnoh Fight Area Mart [sinnoh_fight_area_mart], Sinnoh Floaroma Town Mart [sinnoh_floaroma_town_mart], Sinnoh Hearthome City Mart [sinnoh_hearthome_city_mart], Sinnoh Jubilife City Mart [sinnoh_jubilife_city_mart], Sinnoh Oreburgh City Mart [sinnoh_oreburgh_city_mart], Sinnoh Pastoria City Mart [sinnoh_pastoria_city_mart], Sinnoh Sandgem Town Mart [sinnoh_sandgem_town_mart], Sinnoh Snowpoint City Mart [sinnoh_snowpoint_city_mart], Sinnoh Solaceon Town Mart [sinnoh_solaceon_town_mart], Sinnoh Sunyshore City Mart [sinnoh_sunyshore_city_mart], Sinnoh Survival Area Mart [sinnoh_survival_area_mart], Sinnoh Veilstone Store 1f [sinnoh_veilstone_store1f], Sinnoh Veilstone Store 2f [sinnoh_veilstone_store2f], Sinnoh Veilstone Store 3f [sinnoh_veilstone_store3f], Sinnoh Veilstone Store 4f [sinnoh_veilstone_store4f], Sinnoh Veilstone Store 5f [sinnoh_veilstone_store5f], Sinnoh Veilstone Store B1f [sinnoh_veilstone_store_b1f], Sinnoh Veilstone Store Elevator [sinnoh_veilstone_store_elevator]</details>
 
 ### mus_sinnoh_oreburgh_gate (733)
 Custom: `mus_sinnoh_oreburgh_gate.kaisong`
@@ -1309,39 +1309,39 @@ Custom: `mus_sinnoh_oreburgh_gate.kaisong`
 
 ### mus_sinnoh_oreburgh_mine (734)
 Custom: `mus_sinnoh_oreburgh_mine.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Fuego Ironworks Building [sinnoh_fuego_ironworks_building], Sinnoh Iron Island 1f [sinnoh_iron_island1f], Sinnoh Iron Island B1f Left Room [sinnoh_iron_island_b1f_left_room], Sinnoh Iron Island B1f Right Room [sinnoh_iron_island_b1f_right_room], Sinnoh Iron Island B2f Left Room [sinnoh_iron_island_b2f_left_room], Sinnoh Iron Island B2f Right Room [sinnoh_iron_island_b2f_right_room], Sinnoh Iron Island B3f [sinnoh_iron_island_b3f], Sinnoh Iron Island Iron Ruins [sinnoh_iron_island_iron_ruins], Sinnoh Oreburgh Mine B1f [sinnoh_oreburgh_mine_b1f], Sinnoh Oreburgh Mine B2f [sinnoh_oreburgh_mine_b2f], Sinnoh Ruin Maniac Cave Long [sinnoh_ruin_maniac_cave_long], Sinnoh Ruin Maniac Cave Short [sinnoh_ruin_maniac_cave_short]
 
 ### mus_sinnoh_gym (735)
 Custom: `mus_sinnoh_gym.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: 23 places<details><summary>show</summary>Sinnoh Canalave City Gym [sinnoh_canalave_city_gym], Sinnoh Eterna City Dp Gym [sinnoh_eterna_city_dp_gym], Sinnoh Eterna City Gym [sinnoh_eterna_city_gym], Sinnoh Hearthome City Dp Gym Elevator Room 1 [sinnoh_hearthome_city_dp_gym_elevator_room1], Sinnoh Hearthome City Dp Gym Elevator Room 2 [sinnoh_hearthome_city_dp_gym_elevator_room2], Sinnoh Hearthome City Dp Gym Leader Room [sinnoh_hearthome_city_dp_gym_leader_room], Sinnoh Hearthome City Dp Gym Trainer Room 1 [sinnoh_hearthome_city_dp_gym_trainer_room1], Sinnoh Hearthome City Dp Gym Trainer Room 2 [sinnoh_hearthome_city_dp_gym_trainer_room2], Sinnoh Hearthome City Dp Gym Trainer Room 3 [sinnoh_hearthome_city_dp_gym_trainer_room3], Sinnoh Hearthome City Dp Gym Trainer Room 4 [sinnoh_hearthome_city_dp_gym_trainer_room4], Sinnoh Hearthome City Dp Gym Trainer Room 5 [sinnoh_hearthome_city_dp_gym_trainer_room5], Sinnoh Hearthome City Dp Gym Trainer Room 6 [sinnoh_hearthome_city_dp_gym_trainer_room6], Sinnoh Hearthome City Gym Entrance Room [sinnoh_hearthome_city_gym_entrance_room], Sinnoh Hearthome City Gym Leader Room [sinnoh_hearthome_city_gym_leader_room], Sinnoh Hearthome City Gym Trainer Room 1 [sinnoh_hearthome_city_gym_trainer_room1], Sinnoh Hearthome City Gym Trainer Room 2 [sinnoh_hearthome_city_gym_trainer_room2], Sinnoh Oreburgh City Gym [sinnoh_oreburgh_city_gym], Sinnoh Pastoria City Gym [sinnoh_pastoria_city_gym], Sinnoh Snowpoint City Gym [sinnoh_snowpoint_city_gym], Sinnoh Sunyshore City Gym Room 1 [sinnoh_sunyshore_city_gym_room1], Sinnoh Sunyshore City Gym Room 2 [sinnoh_sunyshore_city_gym_room2], Sinnoh Sunyshore City Gym Room 3 [sinnoh_sunyshore_city_gym_room3], Sinnoh Veilstone City Gym [sinnoh_veilstone_city_gym]</details>
 
 ### mus_sinnoh_eterna_forest (736)
 Custom: `mus_sinnoh_eterna_forest.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: 37 places<details><summary>show</summary>Sinnoh Eterna Forest [sinnoh_eterna_forest], Sinnoh Fullmoon Island [sinnoh_fullmoon_island], Sinnoh Fullmoon Island Forest [sinnoh_fullmoon_island_forest], Sinnoh Iceberg Ruins [sinnoh_iceberg_ruins], Sinnoh Iron Ruins [sinnoh_iron_ruins], Sinnoh Maniac Tunnel [sinnoh_maniac_tunnel], Sinnoh Rock Peak Ruins [sinnoh_rock_peak_ruins], Sinnoh Route 209 Lost Tower 1f [sinnoh_route209_lost_tower1f], Sinnoh Route 209 Lost Tower 2f [sinnoh_route209_lost_tower2f], Sinnoh Route 209 Lost Tower 3f [sinnoh_route209_lost_tower3f], Sinnoh Route 209 Lost Tower 4f [sinnoh_route209_lost_tower4f], Sinnoh Route 209 Lost Tower 5f [sinnoh_route209_lost_tower5f], Sinnoh Snowpoint Temple 1f [sinnoh_snowpoint_temple1f], Sinnoh Snowpoint Temple B1f [sinnoh_snowpoint_temple_b1f], Sinnoh Snowpoint Temple B2f [sinnoh_snowpoint_temple_b2f], Sinnoh Snowpoint Temple B3f [sinnoh_snowpoint_temple_b3f], Sinnoh Snowpoint Temple B4f [sinnoh_snowpoint_temple_b4f], Sinnoh Snowpoint Temple B5f [sinnoh_snowpoint_temple_b5f], Sinnoh Solaceon Ruins Maniac Tunnel Room [sinnoh_solaceon_ruins_maniac_tunnel_room], Sinnoh Solaceon Ruins Room 1 [sinnoh_solaceon_ruins_room1], Sinnoh Solaceon Ruins Room 1 Northwest Dead End [sinnoh_solaceon_ruins_room1_northwest_dead_end], Sinnoh Solaceon Ruins Room 1 Southeast Dead End [sinnoh_solaceon_ruins_room1_southeast_dead_end], Sinnoh Solaceon Ruins Room 2 [sinnoh_solaceon_ruins_room2], Sinnoh Solaceon Ruins Room 2 Northeast Dead End [sinnoh_solaceon_ruins_room2_northeast_dead_end], Sinnoh Solaceon Ruins Room 2 Southeast Dead End [sinnoh_solaceon_ruins_room2_southeast_dead_end], Sinnoh Solaceon Ruins Room 3 [sinnoh_solaceon_ruins_room3], Sinnoh Solaceon Ruins Room 3 Northwest Dead End [sinnoh_solaceon_ruins_room3_northwest_dead_end], Sinnoh Solaceon Ruins Room 3 Southwest Dead End [sinnoh_solaceon_ruins_room3_southwest_dead_end], Sinnoh Solaceon Ruins Room 4 [sinnoh_solaceon_ruins_room4], Sinnoh Solaceon Ruins Room 4 Southeast Dead End [sinnoh_solaceon_ruins_room4_southeast_dead_end], Sinnoh Solaceon Ruins Room 5 [sinnoh_solaceon_ruins_room5], Sinnoh Solaceon Ruins Room 5 Southeast Deadend [sinnoh_solaceon_ruins_room5_southeast_deadend], Sinnoh Solaceon Ruins Room 5 Southwest Dead End [sinnoh_solaceon_ruins_room5_southwest_dead_end], Sinnoh Solaceon Ruins Room 6 [sinnoh_solaceon_ruins_room6], Sinnoh Solaceon Ruins Room 6 Northwest Dead End [sinnoh_solaceon_ruins_room6_northwest_dead_end], Sinnoh Solaceon Ruins Room 6 Southeast Dead End [sinnoh_solaceon_ruins_room6_southeast_dead_end], Sinnoh Solaceon Ruins Room 7 [sinnoh_solaceon_ruins_room7]</details>
 
 ### mus_sinnoh_galactic_building (737)
 Custom: `mus_sinnoh_galactic_building.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Galactic Hq 1f [sinnoh_galactic_hq1f], Sinnoh Lake Acuity [sinnoh_lake_acuity], Sinnoh Lake Valor Drained [sinnoh_lake_valor_drained], Sinnoh Lake Verity [sinnoh_lake_verity], Sinnoh Team Galactic Eterna Building 1f [sinnoh_team_galactic_eterna_building1f], Sinnoh Team Galactic Eterna Building 2f [sinnoh_team_galactic_eterna_building2f], Sinnoh Team Galactic Eterna Building 3f [sinnoh_team_galactic_eterna_building3f], Sinnoh Team Galactic Eterna Building 4f [sinnoh_team_galactic_eterna_building4f], Sinnoh Valley Windworks Building [sinnoh_valley_windworks_building], Sinnoh Valor Cavern [sinnoh_valor_cavern]
 
 ### mus_sinnoh_galactic_hideout (738)
 Custom: `mus_sinnoh_galactic_hideout.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Galactic Hq 2f [sinnoh_galactic_hq2f], Sinnoh Galactic Hq 3f [sinnoh_galactic_hq3f], Sinnoh Galactic Hq 4f [sinnoh_galactic_hq4f], Sinnoh Galactic Hq B1f [sinnoh_galactic_hq_b1f], Sinnoh Galactic Hq B2f [sinnoh_galactic_hq_b2f], Sinnoh Galactic Hq Hall [sinnoh_galactic_hq_hall]
 
 ### mus_sinnoh_galactic_hideout_deep (739)
 Custom: `mus_sinnoh_galactic_hideout_deep.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Galactic Hq Control Room [sinnoh_galactic_hq_control_room], Sinnoh Galactic Hq Laboratory [sinnoh_galactic_hq_laboratory]
 
 ### mus_sinnoh_mt_coronet (740)
 Custom: `mus_sinnoh_mt_coronet.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: 19 places<details><summary>show</summary>Sinnoh Mt Coronet 1f North Room 1 [sinnoh_mt_coronet1f_north_room1], Sinnoh Mt Coronet 1f North Room 2 [sinnoh_mt_coronet1f_north_room2], Sinnoh Mt Coronet 1f South [sinnoh_mt_coronet1f_south], Sinnoh Mt Coronet 1f Tunnel Room [sinnoh_mt_coronet1f_tunnel_room], Sinnoh Mt Coronet 2f [sinnoh_mt_coronet2f], Sinnoh Mt Coronet 3f [sinnoh_mt_coronet3f], Sinnoh Mt Coronet 4f Room 3 [sinnoh_mt_coronet4f_room3], Sinnoh Mt Coronet 4f Rooms 1 And 2 [sinnoh_mt_coronet4f_rooms1_and2], Sinnoh Mt Coronet 5f [sinnoh_mt_coronet5f], Sinnoh Mt Coronet 6f [sinnoh_mt_coronet6f], Sinnoh Mt Coronet B1f [sinnoh_mt_coronet_b1f], Sinnoh Mt Coronet Iceberg Ruins [sinnoh_mt_coronet_iceberg_ruins], Sinnoh Mt Coronet Outside North [sinnoh_mt_coronet_outside_north], Sinnoh Mt Coronet Outside South [sinnoh_mt_coronet_outside_south], Sinnoh Oreburgh Gate 1f [sinnoh_oreburgh_gate1f], Sinnoh Oreburgh Gate B1f [sinnoh_oreburgh_gate_b1f], Sinnoh Ravaged Path [sinnoh_ravaged_path], Sinnoh Wayward Cave 1f [sinnoh_wayward_cave1f], Sinnoh Wayward Cave B1f [sinnoh_wayward_cave_b1f]</details>
 
 ### mus_sinnoh_spear_pillar (741)
 Custom: `mus_sinnoh_spear_pillar.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Spear Pillar [sinnoh_spear_pillar], Sinnoh Spear Pillar Dialga [sinnoh_spear_pillar_dialga], Sinnoh Spear Pillar Distorted [sinnoh_spear_pillar_distorted], Sinnoh Spear Pillar Palkia [sinnoh_spear_pillar_palkia]
 
 ### mus_sinnoh_victory_road (742)
 Custom: `mus_sinnoh_victory_road.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Victory Road 1f [sinnoh_victory_road1f], Sinnoh Victory Road 1f Room 1 [sinnoh_victory_road1f_room1], Sinnoh Victory Road 1f Room 2 [sinnoh_victory_road1f_room2], Sinnoh Victory Road 1f Room 3 [sinnoh_victory_road1f_room3], Sinnoh Victory Road 2f [sinnoh_victory_road2f], Sinnoh Victory Road B1f [sinnoh_victory_road_b1f]
 
 ### mus_sinnoh_forest_house (743)
 Custom: `mus_sinnoh_forest_house.kaisong`
@@ -1349,39 +1349,39 @@ Custom: `mus_sinnoh_forest_house.kaisong`
 
 ### mus_sinnoh_great_marsh (744)
 Custom: `mus_sinnoh_great_marsh.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Great Marsh 1 [sinnoh_great_marsh1], Sinnoh Great Marsh 2 [sinnoh_great_marsh2], Sinnoh Great Marsh 3 [sinnoh_great_marsh3], Sinnoh Great Marsh 4 [sinnoh_great_marsh4], Sinnoh Great Marsh 5 [sinnoh_great_marsh5], Sinnoh Great Marsh 6 [sinnoh_great_marsh6]
 
 ### mus_sinnoh_game_corner (745)
 Custom: `mus_sinnoh_game_corner.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Game Corner [sinnoh_game_corner]
 
 ### mus_sinnoh_cavern_on_the_lake (746)
 Custom: `mus_sinnoh_cavern_on_the_lake.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: 35 places<details><summary>show</summary>Sinnoh Acuity Cavern [sinnoh_acuity_cavern], Sinnoh Canalave City Harbor Inn [sinnoh_canalave_city_harbor_inn], Sinnoh Newmoon Island [sinnoh_newmoon_island], Sinnoh Newmoon Island Forest [sinnoh_newmoon_island_forest], Sinnoh Old Chateau [sinnoh_old_chateau], Sinnoh Old Chateau Back East Room [sinnoh_old_chateau_back_east_room], Sinnoh Old Chateau Back Middle East Room [sinnoh_old_chateau_back_middle_east_room], Sinnoh Old Chateau Back Middle Room [sinnoh_old_chateau_back_middle_room], Sinnoh Old Chateau Back Middle West Room [sinnoh_old_chateau_back_middle_west_room], Sinnoh Old Chateau Back West Room [sinnoh_old_chateau_back_west_room], Sinnoh Old Chateau Corridor [sinnoh_old_chateau_corridor], Sinnoh Old Chateau Dining Area [sinnoh_old_chateau_dining_area], Sinnoh Old Chateau Side Rooms [sinnoh_old_chateau_side_rooms], Sinnoh Turnback Cave Entrance [sinnoh_turnback_cave_entrance], Sinnoh Turnback Cave Giratina Room [sinnoh_turnback_cave_giratina_room], Sinnoh Turnback Cave Pillar 1 Room 1 [sinnoh_turnback_cave_pillar1_room1], Sinnoh Turnback Cave Pillar 1 Room 2 [sinnoh_turnback_cave_pillar1_room2], Sinnoh Turnback Cave Pillar 1 Room 3 [sinnoh_turnback_cave_pillar1_room3], Sinnoh Turnback Cave Pillar 1 Room 4 [sinnoh_turnback_cave_pillar1_room4], Sinnoh Turnback Cave Pillar 1 Room 5 [sinnoh_turnback_cave_pillar1_room5], Sinnoh Turnback Cave Pillar 1 Room 6 [sinnoh_turnback_cave_pillar1_room6], Sinnoh Turnback Cave Pillar 2 Room 1 [sinnoh_turnback_cave_pillar2_room1], Sinnoh Turnback Cave Pillar 2 Room 2 [sinnoh_turnback_cave_pillar2_room2], Sinnoh Turnback Cave Pillar 2 Room 3 [sinnoh_turnback_cave_pillar2_room3], Sinnoh Turnback Cave Pillar 2 Room 4 [sinnoh_turnback_cave_pillar2_room4], Sinnoh Turnback Cave Pillar 2 Room 5 [sinnoh_turnback_cave_pillar2_room5], Sinnoh Turnback Cave Pillar 2 Room 6 [sinnoh_turnback_cave_pillar2_room6], Sinnoh Turnback Cave Pillar 3 Room 1 [sinnoh_turnback_cave_pillar3_room1], Sinnoh Turnback Cave Pillar 3 Room 2 [sinnoh_turnback_cave_pillar3_room2], Sinnoh Turnback Cave Pillar 3 Room 3 [sinnoh_turnback_cave_pillar3_room3], Sinnoh Turnback Cave Pillar 3 Room 4 [sinnoh_turnback_cave_pillar3_room4], Sinnoh Turnback Cave Pillar 3 Room 5 [sinnoh_turnback_cave_pillar3_room5], Sinnoh Turnback Cave Pillar 3 Room 6 [sinnoh_turnback_cave_pillar3_room6], Sinnoh Turnback Cave Pillar Room [sinnoh_turnback_cave_pillar_room], Sinnoh Verity Cavern [sinnoh_verity_cavern]</details>
 
 ### mus_sinnoh_amity_square (747)
 Custom: `mus_sinnoh_amity_square.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Amity Square [sinnoh_amity_square]
 
 ### mus_sinnoh_battle_tower (748)
 Custom: `mus_sinnoh_battle_tower.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Battle Arcade [sinnoh_battle_arcade], Sinnoh Battle Castle [sinnoh_battle_castle], Sinnoh Battle Factory [sinnoh_battle_factory], Sinnoh Battle Hall [sinnoh_battle_hall], Sinnoh Battle Tower [sinnoh_battle_tower], Sinnoh Battle Tower Battle Room [sinnoh_battle_tower_battle_room], Sinnoh Battle Tower Battle Salon [sinnoh_battle_tower_battle_salon], Sinnoh Battle Tower Corridor [sinnoh_battle_tower_corridor], Sinnoh Battle Tower Corridor Multi [sinnoh_battle_tower_corridor_multi], Sinnoh Battle Tower Elevator [sinnoh_battle_tower_elevator], Sinnoh Battle Tower Multi Battle Room [sinnoh_battle_tower_multi_battle_room]
 
 ### mus_sinnoh_iron_mountain (749)
 Custom: `mus_sinnoh_iron_mountain.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Stark Mountain Room 1 [sinnoh_stark_mountain_room1], Sinnoh Stark Mountain Room 2 [sinnoh_stark_mountain_room2], Sinnoh Stark Mountain Room 3 [sinnoh_stark_mountain_room3]
 
 ### mus_sinnoh_league_showdown (750)
 Custom: `mus_sinnoh_league_showdown.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Pokemon League Aaron Room [sinnoh_pokemon_league_aaron_room], Sinnoh Pokemon League Bertha Room [sinnoh_pokemon_league_bertha_room], Sinnoh Pokemon League Champion Room [sinnoh_pokemon_league_champion_room], Sinnoh Pokemon League Elevator To Aaron Room [sinnoh_pokemon_league_elevator_to_aaron_room], Sinnoh Pokemon League Elevator To Bertha Room [sinnoh_pokemon_league_elevator_to_bertha_room], Sinnoh Pokemon League Elevator To Champion Room [sinnoh_pokemon_league_elevator_to_champion_room], Sinnoh Pokemon League Elevator To Flint Room [sinnoh_pokemon_league_elevator_to_flint_room], Sinnoh Pokemon League Elevator To Lucian Room [sinnoh_pokemon_league_elevator_to_lucian_room], Sinnoh Pokemon League Flint Room [sinnoh_pokemon_league_flint_room], Sinnoh Pokemon League Lucian Room [sinnoh_pokemon_league_lucian_room]
 
 ### mus_sinnoh_distortion_world (751)
 Custom: `mus_sinnoh_distortion_world.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Distortion World 1f [sinnoh_distortion_world1f], Sinnoh Distortion World B1f [sinnoh_distortion_world_b1f], Sinnoh Distortion World B2f [sinnoh_distortion_world_b2f], Sinnoh Distortion World B3f [sinnoh_distortion_world_b3f], Sinnoh Distortion World B4f [sinnoh_distortion_world_b4f], Sinnoh Distortion World B5f [sinnoh_distortion_world_b5f], Sinnoh Distortion World B6f [sinnoh_distortion_world_b6f], Sinnoh Distortion World B7f [sinnoh_distortion_world_b7f], Sinnoh Distortion World Giratina Room [sinnoh_distortion_world_giratina_room], Sinnoh Distortion World Turnback Cave Room [sinnoh_distortion_world_turnback_cave_room]
 
 ### mus_sinnoh_villa (752)
 Custom: `mus_sinnoh_villa.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Foreign Building [sinnoh_foreign_building]
 
 ### mus_sinnoh_rival (753)
 Custom: `mus_sinnoh_rival.kaisong`
@@ -1429,7 +1429,7 @@ Custom: `mus_sinnoh_cynthia.kaisong`
 
 ### mus_sinnoh_hall_of_fame (764)
 Custom: `mus_sinnoh_hall_of_fame.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Pokemon League Hall Of Fame [sinnoh_pokemon_league_hall_of_fame], Sinnoh Pokemon League Hallway To Hall Of Fame [sinnoh_pokemon_league_hallway_to_hall_of_fame]
 
 ### mus_sinnoh_ending (765)
 Custom: `mus_sinnoh_ending.kaisong`
@@ -1453,7 +1453,7 @@ Custom: `mus_sinnoh_azure_flute.kaisong`
 
 ### mus_sinnoh_arceus (770)
 Custom: `mus_sinnoh_arceus.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Hall Of Origin [sinnoh_hall_of_origin]
 
 ### mus_sinnoh_encounter_kid (771)
 Custom: `mus_sinnoh_encounter_kid.kaisong`
@@ -1509,14 +1509,17 @@ Custom: `mus_sinnoh_vs_wild.kaisong`
 
 ### mus_sinnoh_vs_trainer (784)
 Custom: `mus_sinnoh_vs_trainer.kaisong`
+- Scenes: POKéMON TCG card duels [tcg]
 - Field and battle code (by map): Battles
 
 ### mus_sinnoh_vs_rival (785)
 Custom: `mus_sinnoh_vs_rival.kaisong`
+- Scenes: POKéMON TCG card duels [tcg]
 - Field and battle code (by map): Battles
 
 ### mus_sinnoh_vs_gym_leader (786)
 Custom: `mus_sinnoh_vs_gym_leader.kaisong`
+- Scenes: POKéMON TCG card duels [tcg]
 - Field and battle code (by map): Battles
 
 ### mus_sinnoh_vs_galactic (787)
@@ -1545,10 +1548,12 @@ Custom: `mus_sinnoh_vs_legendary.kaisong`
 
 ### mus_sinnoh_vs_elite_four (793)
 Custom: `mus_sinnoh_vs_elite_four.kaisong`
+- Scenes: POKéMON TCG card duels [tcg]
 - Field and battle code (by map): Battles
 
 ### mus_sinnoh_vs_champion (794)
 Custom: `mus_sinnoh_vs_champion.kaisong`
+- Scenes: POKéMON TCG card duels [tcg]
 - Field and battle code (by map): Battles
 
 ### mus_sinnoh_vs_arceus (795)
