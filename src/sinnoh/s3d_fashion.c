@@ -69,8 +69,8 @@ static struct
         u8 wornCount;
         s8 backdrop;
         u8 worn[CONTEST_MAX_WORN][3];
-        u8 pad[2];
-    } photo[5];
+        u16 title;           // (the studio's photo: its one-word title, an easy chat word)
+    } photo[6];              // (0-4: the contest hall's winners by type; 5: JUBILIFE TV's dress-up studio)
 } sPhotos;
 
 const void *Sinnoh_PhotoData(u32 *size)
@@ -89,7 +89,7 @@ void Sinnoh_PhotoLoad(const void *data, u32 size)
 
 void Sinnoh_ContestKeepPhoto(u8 type, const struct ContestEntrant *e)
 {
-    struct ContestPhoto *p = &sPhotos.photo[type % 5];
+    struct ContestPhoto *p = &sPhotos.photo[type % 6];
     u8 i;
     memset(p, 0, sizeof(*p));
     p->kept = TRUE;
@@ -110,10 +110,15 @@ void Sinnoh_ContestKeepPhoto(u8 type, const struct ContestEntrant *e)
 }
 
 // a kept photo as an entrant the contest's screens can draw (NULL: none kept)
+u16 *Sinnoh_PhotoTitle(u8 type)
+{
+    return &sPhotos.photo[type % 6].title;
+}
+
 const struct ContestEntrant *Sinnoh_ContestPhoto(u8 type)
 {
     static struct ContestEntrant e;
-    const struct ContestPhoto *p = &sPhotos.photo[type % 5];
+    const struct ContestPhoto *p = &sPhotos.photo[type % 6];
     u8 i;
     if (!p->kept)
         return NULL;
@@ -223,10 +228,12 @@ enum {
     FASHCALL_POFFIN_CAN_COOK,// A: variable <- 0 can cook, 1 no BERRY, 2 the case is full (CheckCanCookPoffin)
 };
 
-// The photos: the contest hall's winners (slot: the contest type); Platinum's dress-up photos taken outside a contest
-// are the same pictures here (the hall's)
+// The photos: the contest hall's winners (slot: the contest type); JUBILIFE TV's gallery: the player's own dress-up
+// photo in its first frame (the other frames held friends' photos by wireless in Platinum: empty here)
 bool8 Sinnoh_PhotoKept(bool8 contest, u16 slot)
 {
+    if (!contest)
+        return slot == 0 && sPhotos.photo[5].kept;
     return slot < 5 && sPhotos.photo[slot].kept;
 }
 

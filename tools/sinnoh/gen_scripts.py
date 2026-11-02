@@ -844,6 +844,24 @@ class FileConverter:
             if cmd == 'EndContest':
                 args = []
             return [self.sinnoh(SINNOH_CONTEST, spec[0], *args)]
+        if cmd == 'ScrCmd_0A6':
+            # (JUBILIFE TV's dress-up studio: the contest's dress-up screen without its timer)
+            return [self.sinnoh(SINNOH_CONTEST, 28, self.var(a[0]), self.var(a[1]))]
+        if cmd == 'ShowDressUpPhoto':
+            return [self.sinnoh(SINNOH_CONTEST, 29, self.value(a[0]), self.var(a[1]))]
+        if cmd == 'SetDressUpPhotoTitle':
+            return [self.sinnoh(SINNOH_CONTEST, 30, self.var(a[0]))]
+        if cmd == 'BufferCustomMessageWord':
+            return [self.sinnoh(SINNOH_CONTEST, 31, self.arg(a[0]), self.var(a[1]))]
+        if cmd == 'SelectMoveTutorPokemon':
+            # (Platinum's "choose a POKeMON": the game's party menu; VAR_0x8004 it answers in is kept)
+            return [self.sinnoh(SINNOH_CONTEST, 32), 'special ChoosePartyMon', 'waitstate', self.sinnoh(SINNOH_CONTEST, 33)]
+        if cmd == 'GetSelectedPartySlot':
+            return [self.sinnoh(SINNOH_CONTEST, 34, self.var(a[0]))]
+        if cmd == 'GetPartyMonFriendship':
+            return [self.sinnoh(SINNOH_CONTEST, 35, self.var(a[0]), self.arg(a[1]))]
+        if cmd == 'Dummy316':
+            return []
         if cmd == 'NewContest':
             return [self.sinnoh(SINNOH_CONTEST, 0, self.arg(a[0]), self.arg(a[1])),
                     self.sinnoh(SINNOH_CONTEST, 1, self.arg(a[2]), self.arg(a[3]))]

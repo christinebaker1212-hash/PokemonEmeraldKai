@@ -24,28 +24,7 @@ Sinnoh_CelesticTownPokecenter1f_EventScript_Person3::
 	end
 
 Sinnoh_CelesticTownPokecenter1f_EventScript_Person4::
-	lock
-	faceplayer
-	goto_if_set 0x3DA5, Sinnoh_CelesticTownPokecenter1f_EventScript_Person4_Given
-	msgbox Sinnoh_CelesticTownPokecenter1f_Text_Person4, MSGBOX_DEFAULT
-	msgbox Sinnoh_CelesticTownPokecenter1f_Text_Person4Gift, MSGBOX_DEFAULT
-	giveitem ITEM_GREAT_BALL, 1
-	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DA5
-	release
+	goto SinnohP_celestic_town_pokecenter_1f_4
 	end
-
-Sinnoh_CelesticTownPokecenter1f_EventScript_Person4_Given::
-	msgbox Sinnoh_CelesticTownPokecenter1f_Text_Person4, MSGBOX_DEFAULT
-	release
-	end
-
-Sinnoh_CelesticTownPokecenter1f_Text_Person4:
-	.string "The shrine in the cave is said to honor\n"
-	.string "a MOéMON of time and space.$"
-
-Sinnoh_CelesticTownPokecenter1f_Text_Person4Gift:
-	.string "Visitors to the shrine should have one\n"
-	.string "of these. Take it!$"
 
 @ --- end of SINNOH words ---

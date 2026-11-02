@@ -1,0 +1,9 @@
+# JUBILIFE TV's dress-up studio (2F gallery; src/sinnoh/s3d_contest_ui.c Contest_RunStudio): Platinum's hiker and
+# script (scripts_jubilife_tv_2f_gallery.s): YES, no explanation, the first POKéMON, the dressing room, the
+# dress-up screen without the contest's timer (START takes the photo), its one-word title on the game's easy chat;
+# then the gallery's first frame shows it. Needs the packs. Shots s_*.png.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("sinnoh contest: the dress-up studio opens" "reached state")
+UNEXPECT_A=("[crash]" "TIMEOUT")

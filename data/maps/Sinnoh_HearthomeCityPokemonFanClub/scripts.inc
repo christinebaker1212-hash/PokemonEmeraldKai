@@ -7,7 +7,7 @@ Sinnoh_HearthomeCityPokemonFanClub_EventScript_Person1::
 	end
 
 Sinnoh_HearthomeCityPokemonFanClub_EventScript_Person2::
-	msgbox Sinnoh_HearthomeCityPokemonFanClub_Text_Person2, MSGBOX_NPC
+	goto SinnohP_hearthome_city_pokemon_fan_club_2
 	end
 
 Sinnoh_HearthomeCityPokemonFanClub_EventScript_Person3::
@@ -25,11 +25,6 @@ Sinnoh_HearthomeCityPokemonFanClub_EventScript_Person5::
 Sinnoh_HearthomeCityPokemonFanClub_EventScript_Person6::
 	msgbox Sinnoh_HearthomeCityPokemonFanClub_Text_Person6, MSGBOX_NPC
 	end
-
-Sinnoh_HearthomeCityPokemonFanClub_Text_Person2:
-	.string "Every member here loves MOéMON more\n"
-	.string "than anything. We have weekly\l"
-	.string "meetings about it.$"
 
 Sinnoh_HearthomeCityPokemonFanClub_Text_Person6:
 	.string "The FAN CLUB is my favorite beat.\n"

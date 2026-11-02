@@ -20,12 +20,6 @@ pressuntil A field 12000
 shot lab
 mp getvar 0x511A
 mp where
-pressuntil A startertable 12000
-shot starters
-press A 2
-wait 70
-press A 2
-wait 60
 pressuntil A field 12000
 mash A 200 10
 pressuntil A field 12000

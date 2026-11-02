@@ -1,0 +1,82 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp platinumstory
+mp dexsee 393
+mp warp 40,14,46,8
+wait 90
+waitfor field 1000
+mp tvcatch 418 4
+mp tvprogram 1
+mp tv
+mp tvwatch
+wait 40
+shot p1
+mash A 30 12
+pressuntil A field 3000
+wait 20
+mp tvprogram 2
+mp tv
+mp tvwatch
+wait 40
+shot p2
+mash A 30 12
+pressuntil A field 3000
+wait 20
+mp tvprogram 3
+mp tv
+mp tvwatch
+wait 40
+shot p3
+mash A 30 12
+pressuntil A field 3000
+wait 20
+mp tvprogram 4
+mp tv
+mp tvwatch
+wait 40
+shot p4
+mash A 30 12
+pressuntil A field 3000
+wait 20
+mp tvprogram 5
+mp tv
+mp tvwatch
+wait 40
+shot p5
+mash A 30 12
+pressuntil A field 3000
+wait 20
+mp tvprogram 6
+mp tv
+mp tvwatch
+wait 40
+shot p6
+mash A 30 12
+pressuntil A field 3000
+wait 20
+mp tvprogram 7
+mp tv
+mp tvwatch
+wait 40
+shot p7
+mash A 30 12
+pressuntil A field 3000
+wait 20
+mp tvprogram 8
+mp tv
+mp tvwatch
+wait 40
+shot p8
+mash A 30 12
+pressuntil A field 3000
+wait 20
+mp tvprogram 9
+mp tv
+mp tvwatch
+wait 40
+shot p9
+mash A 30 12
+pressuntil A field 3000
+wait 20
+quit

@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "easy_chat.h"
 #include "event_data.h"
 #include "item.h"
 #include "main.h"
@@ -326,6 +327,14 @@ static void FillPlayer(struct ContestEntrant *e, u8 slot)
     e->gfx = 0;
     e->wornCount = 0;
     e->backdrop = 0;
+}
+
+// JUBILIFE TV's dress-up studio: the party POKéMON dressed with no contest around it (s3d_contest_ui.c)
+void Contest_StudioEntrant(u8 slot)
+{
+    memset(&C, 0, sizeof(C));
+    C.rng = Random();
+    FillPlayer(&C.e[0], slot);
 }
 
 // how famous a POKéMON is in this type: one and its ribbons of the type (CalcMonContestFame)
@@ -1208,6 +1217,14 @@ static void End(void)
 // ----------------------------------------------------------------------------------------------------- the party
 
 static u16 sPartyResult, sPartyVar, sPartyRank, sPartyType;
+static u16 sStudioResult;
+static u16 sPickKept, sPicked = 0xFF;   // (CC_PICK_*: Platinum's SelectMoveTutorPokemon on the game's party menu)   // (the studio's answer variable: Contest_StudioDone)
+
+void Contest_StudioDone(bool8 taken)
+{
+    if (sStudioResult >= VARS_START)
+        VarSet(sStudioResult, taken);
+}
 
 static bool8 CanEnter(struct Pokemon *mon, u8 rank, u8 type)
 {
@@ -1336,6 +1353,33 @@ void Sinnoh_ContestCall(u16 call, u16 a, u16 b)
         break;
     case CC_SHOW_PHOTO:
         VarSet(b, Contest_ShowPhoto(VarGet(a)));
+        break;
+    case CC_STUDIO:
+        sStudioResult = b;
+        VarSet(b, FALSE);
+        Contest_RunStudio(VarGet(a));
+        break;
+    case CC_STUDIO_PHOTO:
+        VarSet(b, VarGet(a) == 0 && Contest_ShowPhoto(PHOTO_STUDIO) ? 0 : 1);
+        break;
+    case CC_STUDIO_TITLE:
+        *Sinnoh_PhotoTitle(PHOTO_STUDIO) = VarGet(a);
+        break;
+    case CC_PICK_BEGIN:
+        sPickKept = gSpecialVar_0x8004;
+        break;
+    case CC_PICK_END:
+        sPicked = gSpecialVar_0x8004 < PARTY_SIZE ? gSpecialVar_0x8004 : 0xFF;
+        gSpecialVar_0x8004 = sPickKept;
+        break;
+    case CC_PICK_RESULT:
+        VarSet(a, sPicked);
+        break;
+    case CC_FRIENDSHIP:
+        VarSet(a, VarGet(b) < PARTY_SIZE ? GetMonData(&gPlayerParty[VarGet(b)], MON_DATA_FRIENDSHIP) : 0);
+        break;
+    case CC_BUFFER_WORD:
+        CopyEasyChatWord(Contest_Slot(VarGet(a)), VarGet(b));
         break;
     }
 }

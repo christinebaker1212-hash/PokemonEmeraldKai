@@ -3113,6 +3113,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void Sinnoh_TvDebug(void);
         Sinnoh_TvDebug();
     }
+    else if (strcmp(cmd, "tvprogram") == 0)
+    {
+        // tvprogram N: Platinum's program N (1-9) on air from now on, whatever the hour (0: the schedule's again)
+        void Sinnoh_TvForceProgram(u8 program);
+        Sinnoh_TvForceProgram(atoi(arg));
+        printf("[test] tv program %d\n", atoi(arg));
+    }
     else if (strcmp(cmd, "tvwatch") == 0)
     {
         // tvwatch: watch SINNOH's TV (as its TV tiles do: field_control_avatar.c)

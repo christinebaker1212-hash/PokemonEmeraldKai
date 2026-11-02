@@ -1,0 +1,59 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp platinumstory
+mp warp 42,33,3,6
+wait 90
+waitfor field 1000
+mp face up
+wait 10
+press A 1
+wait 60
+shot s_hello
+pressuntil A yesno 2000
+wait 20
+press A 1
+wait 40
+pressuntil A yesno 2000
+wait 20
+press DOWN 1
+wait 10
+press A 1
+wait 60
+shot s_which
+pressuntil A partymenu 3000
+wait 30
+press A 1
+wait 60
+mash A 20 20
+rendershot s_dress
+press START 1
+wait 60
+mash A 6 20
+pressuntil A easychat 3000
+wait 60
+shot s_words
+press A 1
+wait 40
+press A 1
+wait 40
+press A 1
+wait 40
+shot s_word
+press DOWN 1
+wait 20
+press RIGHT 1
+wait 20
+press RIGHT 1
+wait 20
+shot s_ok
+press A 1
+wait 60
+shot s_ok2
+press A 1
+wait 60
+mash B 20 20
+waitfor field 1000
+shot s_done
+quit
+quit

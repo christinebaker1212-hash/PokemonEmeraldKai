@@ -28,16 +28,11 @@ Sinnoh_EternaCityPokecenter1f_EventScript_Person4::
 	end
 
 Sinnoh_EternaCityPokecenter1f_EventScript_Person5::
-	msgbox Sinnoh_EternaCityPokecenter1f_Text_Person5, MSGBOX_NPC
+	goto SinnohP_eterna_city_pokecenter_1f_5
 	end
 
 Sinnoh_EternaCityPokecenter1f_Text_Person3:
 	.string "BUNEARY bounces on the spot, ears\n"
 	.string "flopping.$"
-
-Sinnoh_EternaCityPokecenter1f_Text_Person5:
-	.string "ETERNA's flowers are lovely, but the\n"
-	.string "MOéMON CENTER's flowers are my\l"
-	.string "favorite.$"
 
 @ --- end of SINNOH words ---

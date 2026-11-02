@@ -8,7 +8,7 @@ Rules behind it: CLAUDE.md's SINNOH paragraph and docs/SINNOH_HANDOFF.md.
 
 | What | How to see it | Now |
 |---|---|---|
-| Platinum's script entries that convert | `python3 -I tools/sinnoh/gen_scripts.py --report ~/.cache/moemon/pokeplatinum` (first line) | 2071 of 2511 |
+| Platinum's script entries that convert | `python3 -I tools/sinnoh/gen_scripts.py --report ~/.cache/moemon/pokeplatinum` (first line) | 2098 of 2511 |
 | Commands still missing | the same report, the list under it (most used first) | 60 kinds |
 | Platinum's text slots and page breaks | messages show whole (\\r is a new box, six string slots) | done |
 | Platinum songs the game lacks | the same report, "songs the game lacks" | 5 |
@@ -51,8 +51,10 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [x] The camera object (AddFreeCamera), the starter briefcase, the POKéTCH as Kai's item (sinnoh_poketch)
 - [x] Marts, nurses, gyms and their written puzzles, the frontier (sinnoh_marts, sinnoh_heal, sinnoh_gym_*,
       sinnoh_tower, sinnoh_factory, sinnoh_hall, sinnoh_castle, sinnoh_arcade)
+- [x] Platinum's "choose a POKéMON" (SelectMoveTutorPokemon / GetSelectedPartySlot) on the game's party menu; its save
+      prompt (Common_SaveGame) the game's; scripts go on after a warp (SINNOH_WARP_CONTINUE)
 - [ ] Platinum's commands still unmapped onto Kai's systems: PokeMart*WithGreeting, Common_CallPokecenterNurse,
-      SelectMoveTutorPokemon / ShowMoveTutorMoveSelectionMenu, PlayHMCutIn, SelectPokemonToTrade,
+      ShowMoveTutorMoveSelectionMenu, PlayHMCutIn, SelectPokemonToTrade,
       CallBattleTowerFunction / the frontier lobbies, EndSafariGame
 
 ## 3. Built for 1:1 (Platinum has it, Kai doesn't)
@@ -106,14 +108,14 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [x] The ACTING round (appeals to the three judges, voltage, the 23 effects, the computer's table) (sinnoh_contest)
 - [x] Results, ranks (NORMAL to MASTER), ribbons (the game's), the first-win accessories, the winners' photos
       (ContestPhotoHasData, the lobby's frames), the hall's receptionists, practice
-- [ ] JUBILIFE TV's dress-up and its photos (ScrCmd_0A6, ShowDressUpPhoto, DressUpPhotoHasData)
+- [x] JUBILIFE TV's dress-up and its photos (ScrCmd_0A6, ShowDressUpPhoto, DressUpPhotoHasData) (sinnoh_studio)
+- [x] The POFFIN HOUSE's cooking as the game's BERRY BLENDER (CheckCanCookPoffin, OpenPoffinCooking)
 - [ ] Platinum's stage art (contest_bg / contest_obj)
 - [ ] Contests with friends (co-op, as Kai's link contests)
 - [x] POKé BALL effects (Kai's mp_ballfx.c) wherever Platinum has Seals: each Seal stands for an earned ball effect
       piece; the SUNYSHORE MARKET's Seal shop sells the day's at Platinum's prices (sinnoh_seals), SOLACEON's gifts
       unlock them, the PC's BALL CAPSULES are the summary's POKé BALL page, the TV's SEAL CLUB SHOW tells of a POKéMON
       given an effect in SINNOH
-- [ ] The POFFIN HOUSE's cooking as the game's BERRY BLENDER (POFFINS are POKéBLOCKS: the notes' rule)
 - [ ] Tests for each
 
 ## 6. Platinum's TV
@@ -122,8 +124,8 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       commercials (sinnoh_tv)
 - [x] TRAINER SIGHTINGS from what the player does in SINNOH: catches, fishing, shopping, eggs, the GREAT MARSH, hidden
       items, the name rater, the PC bulletin, BERRY crops, POKé BALL effects in the SEAL CLUB SHOW's place (sinnoh_tv: a catch)
-- [~] The reporters' interviews (one word on the game's own easy chat) and the INTERVIEWS program; RECORDS; SINNOH NOW;
-      the VARIETY HOUR: converted and written, not yet each played by a test
+- [x] Each of the nine programs watched to its end (sinnoh_tv_programs: mp tvprogram N); SINNOH NOW, RECORDS and the
+      VARIETY HOUR play Platinum's segments; the reporters' interviews (one word on the game's own easy chat)
 - [ ] The interviews and records that need systems SINNOH lacks: contests, dress-up photos, poffins, the frontier's
       records, BERRY patches, roamers, the VILLA
 - [ ] Friends' segments on each other's TV (Platinum's record mixing: co-op)

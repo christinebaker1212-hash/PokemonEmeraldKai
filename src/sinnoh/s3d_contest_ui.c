@@ -12,6 +12,7 @@
 #include "global.h"
 #include "data.h"
 #include "decompress.h"
+#include "easy_chat.h"
 #include "event_data.h"
 #include "main.h"
 #include "m4a.h"
@@ -47,7 +48,7 @@ enum {
 
 static struct
 {
-    bool8 active, enableScript;
+    bool8 active, enableScript, studio;
     u8 scene;
     u16 prevKeys;
     u32 t;
@@ -80,6 +81,7 @@ static struct
     u16 monSpecies[CONTEST_ENTRANTS];
     u32 monKey[CONTEST_ENTRANTS];
     const struct ContestEntrant *photo;
+    u16 photoTitle;
     u16 bigFrame[CW * CH];
     bool8 frameOk;
 } U;
@@ -394,9 +396,12 @@ static void DrawDress(void)
     }
     if (U.listCount == 0)
         G_Text(158, 9, 0x605060, G_NO_SHADOW, "-", 60, TF_SMALL);
-    snprintf(s, sizeof(s), "%u", (unsigned)(U.left + 59) / 60);
-    G_RoundFill(4, 120, 60, 16, 0x504060, 255);
-    G_TextAlign(34, 122, TA_CENTER, G_WHITE, G_NO_SHADOW, s, TF_NORMAL);
+    if (!U.studio)
+    {
+        snprintf(s, sizeof(s), "%u", (unsigned)(U.left + 59) / 60);
+        G_RoundFill(4, 120, 60, 16, 0x504060, 255);
+        G_TextAlign(34, 122, TA_CENTER, G_WHITE, G_NO_SHADOW, s, TF_NORMAL);
+    }
     if (!Talking())
     {
         G_RoundFill(68, 120, 168, 36, 0x504060, 255);
@@ -604,7 +609,14 @@ static void Draw(void)
             SDL_RenderSetScale(r, 1, 1);
             DrawPhoto(0, U.photo, 48, 16, 384, FALSE);
             SDL_RenderSetScale(r, 2, 2);
-            WordGame(120, 140, TA_CENTER, G_WHITE, U.photo->nick);
+            if (U.photoTitle != 0xFFFF && U.photoTitle != 0)
+            {
+                u8 word[32];
+                CopyEasyChatWord(word, U.photoTitle);
+                WordGame(120, 140, TA_CENTER, G_WHITE, word);
+            }
+            else
+                WordGame(120, 140, TA_CENTER, G_WHITE, U.photo->nick);
         }
         break;
     }
@@ -702,7 +714,7 @@ static void StepDress(u16 keys, u16 pressed)
 {
     if (Read(pressed))
         return;
-    if (U.left)
+    if (U.left && !U.studio)
         U.left--;
     if (U.held != 0xFF)
     {
@@ -745,12 +757,29 @@ static void StepDress(u16 keys, u16 pressed)
         }
         if (pressed & (B_BUTTON | SELECT_BUTTON) && C.e[0].wornCount)
             C.e[0].wornCount--;
+        else if (pressed & B_BUTTON && U.studio)
+        {
+            // (the studio: out again without a photo)
+            Contest_StudioDone(FALSE);
+            U.scene = SC_DONE;
+            return;
+        }
         if (pressed & L_BUTTON)
             NextBackdrop(-1);
         if (pressed & R_BUTTON)
             NextBackdrop(1);
     }
-    if (U.left == 0 || pressed & START_BUTTON)
+    if (U.studio && pressed & START_BUTTON)
+    {
+        // (the studio's photo: kept for JUBILIFE TV's gallery, its title asked for next by Platinum's script)
+        U.held = 0xFF;
+        Sinnoh_ContestKeepPhoto(PHOTO_STUDIO, &C.e[0]);
+        Contest_StudioDone(TRUE);
+        PlaySE(SE_SUCCESS);
+        U.scene = SC_DONE;
+        return;
+    }
+    if (!U.studio && (U.left == 0 || pressed & START_BUTTON))
     {
         U.held = 0xFF;
         Contest_ScoreVisual();
@@ -1263,6 +1292,7 @@ void Contest_RunScenes(void)
     u8 i;
     if (!C.made)
         return;
+    U.studio = FALSE;
     memset(U.copyCount, 0, sizeof(U.copyCount));
     U.active = TRUE;
     U.enableScript = TRUE;
@@ -1288,8 +1318,29 @@ void Contest_RunScenes(void)
     MPNet_Log("sinnoh contest: the screens open (scene %d)", U.scene);
 }
 
+bool8 Contest_RunStudio(u8 partySlot)
+{
+    if (partySlot >= PARTY_SIZE)
+        return FALSE;
+    Contest_StudioEntrant(partySlot);
+    U.active = TRUE;
+    U.enableScript = TRUE;
+    U.studio = TRUE;
+    U.prevKeys = 0xFFFF;
+    U.t = 0;
+    U.pageCount = U.page = 0;
+    BuildList();
+    U.held = 0xFF;
+    U.left = 1;
+    U.scene = SC_DRESS;
+    MPNet_Log("sinnoh contest: the dress-up studio opens");
+    return TRUE;
+}
+
 bool8 Contest_ShowPhoto(u8 type)
 {
+    U.studio = type == PHOTO_STUDIO;
+    U.photoTitle = type == PHOTO_STUDIO ? *Sinnoh_PhotoTitle(PHOTO_STUDIO) : 0xFFFF;
     U.photo = Sinnoh_ContestPhoto(type);
     if (!U.photo)
         return FALSE;
@@ -1365,7 +1416,7 @@ bool8 Sinnoh_Contest_Step(u16 keys)
             Close();
         break;
     case SC_DONE:
-        if (!C.scored)
+        if (!C.scored && !U.studio)
             Contest_ScoreAll();
         Close();
         break;

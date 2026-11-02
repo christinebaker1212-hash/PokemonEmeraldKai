@@ -1,0 +1,8 @@
+# Each of Platinum's nine TV programs (src/sinnoh/s3d_tv.c; mp tvprogram N puts N on air) watched to its end: their
+# greetings, segments (TRAINER SIGHTINGS, the INTERVIEWS, RECORDS, SINNOH NOW, the VARIETY HOUR) or commercials, and
+# farewells play in Platinum's words. A catch is kept first so the sightings have one. Needs the packs.
+MODE=1
+TMO=400
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("tv program 1" "tv program 5" "tv program 9" "sinnoh tv: program 7 segment" "sinnoh tv: program 8 segment" "sinnoh tv: program 9 segment")
+UNEXPECT_A=("[crash]" "TIMEOUT")

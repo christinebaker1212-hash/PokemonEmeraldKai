@@ -3716,7 +3716,13 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   accessory, the winner's photo (chunk CPHO, the lobby's frames: ScrCmd_0A8 shows it), the TV's CONTEST HALL
   segment. Link contests (StartBattleClient / Server with COMM_TYPE_CONTEST) answer "cancelled" until co-op contests
   are built; Platinum's POKéTCH-campaign coupons aren't gifts here (the POKéTCH is the game's key item). Test
-  sinnoh_contest.
+  sinnoh_contest. JUBILIFE TV's dress-up studio (ScrCmd_0A6: CC_STUDIO) is the same dress-up screen without the
+  timer; START keeps the photo (CPHO's sixth place) and Platinum's script asks its one-word title on the game's easy
+  chat (SetDressUpPhotoTitle, BufferCustomMessageWord); the gallery's first frame shows it (ShowDressUpPhoto; the other
+  frames held friends' photos by wireless). Test sinnoh_studio. Platinum's "choose a POKeMON" (SelectMoveTutorPokemon /
+  GetSelectedPartySlot, 14 scripts) is the game's party menu (CC_PICK_*: VAR_0x8004 kept). Platinum's scripts go on
+  after a Warp, on the new map (gen_scripts.py emits `sinnoh SINNOH_WARP_CONTINUE` + `goto LABEL` before the warp;
+  script.c TryRunOnFrameMapScript starts LABEL there).
   The user's rules: Kai's systems stay and SINNOH uses them (tag battles = Kai's partner battle, battle_tower.c
   MP_StartPartnerBattle via DoSpecialTrainerBattle 15, with STEVEN's party pick; two trainers = battle_setup.c
   MP_StartTwoTrainerBattle; AddFreeCamera = SpawnCameraObject, which s3d.c SetupView follows; the briefcase =

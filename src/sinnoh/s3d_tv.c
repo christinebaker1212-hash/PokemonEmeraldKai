@@ -612,10 +612,22 @@ static void UpdateSlot(void)
     }
 }
 
+u8 gSinnohTvForcedProgram;   // (tests: mp tvprogram)
+
+// (tests: mp tvprogram N) program N on air from now on, its broadcast from its start
+void Sinnoh_TvForceProgram(u8 program)
+{
+    gSinnohTvForcedProgram = program;
+    sTv.finished = FALSE;
+    memset(sTv.played, 0, sizeof(sTv.played));
+}
+
 static u8 ProgramOnAir(void)
 {
     u8 d, h, m, id;
     QuarterHour(&d, &h, &m);
+    if (gSinnohTvForcedProgram >= 1 && gSinnohTvForcedProgram <= 9)   // (tests: mp tvprogram)
+        return gSinnohTvForcedProgram;
     if (getenv("MOEMON_TEST_TV_PROGRAM"))   // (tests)
         return atoi(getenv("MOEMON_TEST_TV_PROGRAM"));
     id = gSinnohTvSchedule[(((19 + h) % 24) * 4 + m / 15) * 7 + d];

@@ -1,0 +1,15 @@
+
+=== Moemon Emerald Kai Co-op crash, 2026-11-02 11:10:01 (build Nov  2 2026 11:09:14)
+signal 11
+callback1 exe+668070 callback2 exe+591850
+in battle 0
+map 42.33 at 3,6
+/tmp/claude-0/crun/crun64[0x905ef3]
+/lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x7fbb82e45330]
+/tmp/claude-0/crun/crun64[0x74a55b]
+/tmp/claude-0/crun/crun64[0x65412d]
+/tmp/claude-0/crun/crun64[0x91aab5]
+/tmp/claude-0/crun/crun64(main+0x301)[0x416491]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7fbb82e2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7fbb82e2a28b]
+/tmp/claude-0/crun/crun64[0x416ff5]

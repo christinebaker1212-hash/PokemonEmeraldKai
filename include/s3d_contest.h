@@ -107,7 +107,18 @@ enum {
     CC_PARTY_RESULT,      // A: variable <- the slot (0xFF none), B: variable <- FALSE
     CC_RUN,               // RunContestApplication: the contest's screens, the script waits
     CC_SHOW_PHOTO,        // A: the photo's place (a contest type), B: variable <- TRUE when one was shown
+    CC_STUDIO,            // A: the party slot's variable, B: variable <- TRUE when a photo was taken (ScrCmd_0A6)
+    CC_STUDIO_PHOTO,      // A: the gallery's frame, B: variable <- 1 when none was shown (ShowDressUpPhoto)
+    CC_STUDIO_TITLE,      // A: the word's variable (SetDressUpPhotoTitle)
+    CC_BUFFER_WORD,       // A: the string slot, B: the word's variable (BufferCustomMessageWord)
+    CC_PICK_BEGIN,        // before the game's party menu (special ChoosePartyMon) for Platinum's SelectMoveTutorPokemon:
+                          // VAR_0x8004 kept
+    CC_PICK_END,          // after it: the choice (0xFF none) kept for GetSelectedPartySlot, VAR_0x8004 put back
+    CC_PICK_RESULT,       // A: variable <- the choice (GetSelectedPartySlot)
+    CC_FRIENDSHIP,        // A: variable <- the friendship of B's party POKéMON (GetPartyMonFriendship)
 };
+
+#define PHOTO_STUDIO 5   // (the photos' sixth place: JUBILIFE TV's dress-up studio)
 
 enum { NOTE_PERFORMED, NOTE_SAME_JUDGE, NOTE_APPEAL, NOTE_EFFECT, NOTE_VOLTAGE_UP, NOTE_VOLTAGE_DOWN, NOTE_EXCITED,
        NOTE_WILD, NOTE_IMPRESSED };
@@ -184,6 +195,8 @@ extern struct SinnohContest gSinnohContest;
 void Sinnoh_ContestCall(u16 call, u16 a, u16 b);
 bool8 Contest_IsMade(void);
 void Contest_New(u8 rank, u8 type, u8 mode, u8 slot);
+void Contest_StudioEntrant(u8 slot);
+void Contest_StudioDone(bool8 taken);
 bool8 Contest_IsPractice(void);
 bool8 Contest_HasRound(u8 round);
 u16 Contest_Random(void);
@@ -214,6 +227,7 @@ void Contest_ScoreAll(void);
 
 // the screens (s3d_contest_ui.c)
 void Contest_RunScenes(void);
+bool8 Contest_RunStudio(u8 partySlot);
 bool8 Contest_ShowPhoto(u8 type);
 bool8 Sinnoh_Contest_IsActive(void);
 bool8 Sinnoh_Contest_Step(u16 keys);
@@ -224,6 +238,7 @@ u8 Sinnoh_AccessoryCount(u16 accessory);
 bool8 Sinnoh_HasBackdrop(u16 backdrop);
 void Sinnoh_ContestKeepPhoto(u8 type, const struct ContestEntrant *e);
 const struct ContestEntrant *Sinnoh_ContestPhoto(u8 type);
+u16 *Sinnoh_PhotoTitle(u8 type);
 
 // the TV (s3d_tv.c)
 void Sinnoh_TvContestResult(struct Pokemon *mon, u8 type, u8 rank, u8 place);
