@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_region.h"
 #include "malloc.h"
 #include "battle.h"
 #include "battle_setup.h"
@@ -563,8 +564,8 @@ void InitSecretBaseDecorationSprites(void)
     objectEventId = 0;
     if (!CurMapIsSecretBase())
     {
-        decorations = gSaveBlock1Ptr->playerRoomDecorations;
-        decorationPositions = gSaveBlock1Ptr->playerRoomDecorationPositions;
+        decorations = MP_RoomDecorations();   // Moemon Kai: JOHTO's room its own (mp_region.c)
+        decorationPositions = MP_RoomDecorationPositions();
         numDecorations = DECOR_MAX_PLAYERS_HOUSE;
     }
     else
@@ -597,7 +598,8 @@ void InitSecretBaseDecorationSprites(void)
             gSpecialVar_0x8007 = decorationPositions[i] & 0xF;
             metatileBehavior = MapGridGetMetatileBehaviorAt(gSpecialVar_0x8006 + MAP_OFFSET, gSpecialVar_0x8007 + MAP_OFFSET);
             if (MetatileBehavior_HoldsSmallDecoration(metatileBehavior) == TRUE
-             || MetatileBehavior_HoldsLargeDecoration(metatileBehavior) == TRUE)
+             || MetatileBehavior_HoldsLargeDecoration(metatileBehavior) == TRUE
+             || MP_RoomFloorHoldsDecor(gSpecialVar_0x8006 + MAP_OFFSET, gSpecialVar_0x8007 + MAP_OFFSET))   // Moemon Kai: JOHTO's room
             {
                 gSpecialVar_Result = VAR_OBJ_GFX_ID_0 + (TEMPLATE_GFX_ID(&gMapHeader.events->objectEvents[objectEventId]) - OBJ_EVENT_GFX_VAR_0);
                 VarSet(gSpecialVar_Result, gDecorations[decorations[i]].tiles[0]);

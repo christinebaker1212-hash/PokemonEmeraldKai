@@ -1,0 +1,7 @@
+# MY ROOM in JOHTO (mp_region.c MP_RoomDecorations): its own decorations in JOHTO's vars 0x52D0+ show on entering (a
+# PIKACHU DOLL at 5,4 on the plain floor: FLAG_DECORATION_1 (174) clear, the next (175) set), and the PC is the bedroom PC
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=25:20"
+EXPECT_A=("flag 174 = 0" "flag 175 = 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

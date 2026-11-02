@@ -62,9 +62,11 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       JOHTO's words and his battles' name; in a friend's room the host's name (MPR_RULES, protocol 73) and no naming
       screen; tests johto_rival_starter, johto_rival_name, johto_rival_name_online)
 - [x] No tree-cutting prompt in a new game without the HM and badge (Quetzal's check said yes to everything)
-- [~] MOM's money saving (Crystal) and MY ROOM decorating on the Secret Base logic ([x] the BANK OF MOM: her offer as the
+- [x] MOM's money saving (Crystal) and MY ROOM decorating on the Secret Base logic ([x] the BANK OF MOM: her offer as the
       player leaves, a quarter of JOHTO / KANTO winnings, GET / SAVE / CHANGE at home with Crystal's digit entry and words:
-      src/mp/mp_mombank.c, test johto_mom_bank; [ ] MY ROOM)
+      src/mp/mp_mombank.c, test johto_mom_bank; [x] MY ROOM: JOHTO's room decorated on the bedroom's logic (its PC is the
+      bedroom PC with DECORATION; dolls and cushions on its plain floor; its own list in JOHTO's vars 0x52D0-0x52DB, a
+      decoration in one room counting as in use in the other: mp_region.c MP_RoomDecorations; test johto_my_room))
 
 ## HOENN
 - [x] HOENN's legendaries only in HOENN (KANTO's BIRTH ISLAND and Quetzal's CINNABAR chamber empty)

@@ -1,5 +1,32 @@
 Johto_PlayersHouse2F_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, Johto_PlayersHouse2F_OnTransition
+	map_script MAP_SCRIPT_ON_WARP_INTO_MAP_TABLE, Johto_PlayersHouse2F_OnWarp
 	.byte 0
+
+@ Moemon Kai: MY ROOM as Crystal's, decorated on the bedroom's logic (decoration.c / secret_base.c; its own
+@ decorations in JOHTO's vars: mp_region.c MP_RoomDecorations): the dolls and cushions shown on entering, the PC's
+@ DECORATION to place them
+Johto_PlayersHouse2F_OnTransition:
+	call SecretBase_EventScript_SetDecorationFlags
+	setvar VAR_SECRET_BASE_INITIALIZED, 0
+	end
+
+Johto_PlayersHouse2F_OnWarp:
+	map_script_2 VAR_SECRET_BASE_INITIALIZED, 0, SecretBase_EventScript_InitDecorations
+	.2byte 0
+
+Johto_PlayersHouse2F_EventScript_PC::
+	lockall
+	playse SE_PC_ON
+	msgbox gText_PlayerHouseBootPC, MSGBOX_DEFAULT
+	special BedroomPC
+	releaseall
+	end
+
+Johto_PlayersHouse2F_EventScript_TurnOffPC::
+	playse SE_PC_OFF
+	releaseall
+	end
 
 @ Johto_PlayersHouse2F sign / bg event at 1,1
 Johto_PlayersHouse2F_EventScript_82DE10F::

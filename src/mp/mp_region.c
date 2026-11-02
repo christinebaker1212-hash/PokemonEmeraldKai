@@ -7,6 +7,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include "global.h"
+#include "fieldmap.h"
+#include "metatile_behavior.h"
 #include "s3d.h"   // Moemon Kai: SINNOH's map groups
 #include "s3d_underground.h"   // (SINNOH's Underground: chunk UNDG)
 const void *Sinnoh_UnownData(u32 *size);   // (the UNOWN letters seen: chunk UNOF, s3d_legends.c)
@@ -850,6 +852,38 @@ void MP_Region_GiveDevices(void)
     // JOHTO once that scene is behind it (VAR_QZ_0x5003 2+)
     if (MP_Region_Current() == REGION_JOHTO && VarGet(0x5003) >= 2 && !CheckBagHasItem(ITEM_POKEGEAR, 1))
         AddBagItem(ITEM_POKEGEAR, 1);
+}
+
+// Moemon Kai: MY ROOM in JOHTO has decorations of its own (Crystal's room; the Secret Base / bedroom logic of
+// decoration.c and secret_base.c): DECOR_MAX_PLAYERS_HOUSE items and positions as bytes in JOHTO's vars
+// 0x52D0-0x52DB, saved with the region. Elsewhere the save's bedroom (HOENN's).
+#define VAR_JOHTO_ROOM_DECOR 0x52D0
+static bool8 InJohtoRoom(void)
+{
+    return gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_JOHTO_PLAYERS_HOUSE2F)
+        && gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_JOHTO_PLAYERS_HOUSE2F);
+}
+
+u8 *MP_JohtoRoomDecor(void)
+{
+    return (u8 *)GetVarPointer(VAR_JOHTO_ROOM_DECOR);
+}
+
+u8 *MP_RoomDecorations(void)
+{
+    return InJohtoRoom() ? MP_JohtoRoomDecor() : gSaveBlock1Ptr->playerRoomDecorations;
+}
+
+// JOHTO's room: Quetzal's floor has no tiles marked for decorations, so its plain walkable floor holds dolls and
+// cushions (X / Y with MAP_OFFSET)
+bool8 MP_RoomFloorHoldsDecor(s16 x, s16 y)
+{
+    return InJohtoRoom() && MetatileBehavior_IsNormal(MapGridGetMetatileBehaviorAt(x, y)) && !MapGridGetCollisionAt(x, y);
+}
+
+u8 *MP_RoomDecorationPositions(void)
+{
+    return InJohtoRoom() ? MP_JohtoRoomDecor() + DECOR_MAX_PLAYERS_HOUSE : gSaveBlock1Ptr->playerRoomDecorationPositions;
 }
 
 void MP_Region_SetCleared(u8 region)

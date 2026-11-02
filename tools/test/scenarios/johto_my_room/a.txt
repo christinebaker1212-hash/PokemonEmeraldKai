@@ -1,0 +1,19 @@
+pressuntil A field 5000
+wait 60
+mp setvar 0x52D0 77
+mp setvar 0x52D6 0x54
+mp warp 35,2,3,5
+wait 150
+shot room
+mp getflag 0xAE
+mp getflag 0xAF
+mp objs
+mp warp 35,2,1,2
+wait 120
+mp face up
+press A 2
+wait 120
+press A 2
+wait 60
+shot pc
+quit

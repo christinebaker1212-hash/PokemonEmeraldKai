@@ -4435,3 +4435,12 @@ comes back when the card or screen closes. Item ITEM_POKEGEAR 693 (key, registra
 (start_menu.c MENU_ACTION_POKEGEAR, last in the enum), ItemUseOutOfBattle_Pokegear anywhere once JOHTO's LEAGUE is
 beaten. MOM hands it over after her first talk (Johto_PlayersHouse1F, Crystal's words); a save past that scene gets it
 in JOHTO (mp_region.c MP_Region_GiveDevices). Harness condition "pokegear", debug mp pokegear; test johto_pokegear.
+
+## MY ROOM in JOHTO (1.68.0)
+Johto_PlayersHouse2F decorated on the bedroom's logic: 12 decoration sprite slots (OBJ_EVENT_GFX_VAR_0..B,
+FLAG_DECORATION_1..12), SecretBase_EventScript_SetDecorationFlags / InitDecorations on entering, the PC at (1,1) the
+bedroom PC (player_pc.c turns it off with Johto_PlayersHouse2F_EventScript_TurnOffPC, not Littleroot's metatile swap).
+Its list is its own: mp_region.c MP_RoomDecorations / MP_RoomDecorationPositions give JOHTO's vars 0x52D0-0x52DB as
+bytes in that room (decoration.c, secret_base.c read through them); the in-use check counts both rooms
+(sPlayerRoomItemsIndicesBuffer, 24). Quetzal's floor has no decoration behaviors, so the room's plain walkable floor
+holds dolls and cushions (MP_RoomFloorHoldsDecor). Test johto_my_room.

@@ -517,7 +517,12 @@ static void PlayerPC_Decoration(u8 taskId)
 
 static void PlayerPC_TurnOff(u8 taskId)
 {
-    if (sMpBedroomPC) // Moemon Co-op: told, not guessed from the option count
+    if (sMpBedroomPC && gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_JOHTO_PLAYERS_HOUSE2F)
+     && gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_JOHTO_PLAYERS_HOUSE2F))
+    {
+        ScriptContext_SetupScript(Johto_PlayersHouse2F_EventScript_TurnOffPC);   // Moemon Kai: MY ROOM in JOHTO
+    }
+    else if (sMpBedroomPC) // Moemon Co-op: told, not guessed from the option count
     {
         if (gSaveBlock2Ptr->playerGender == MALE)
             ScriptContext_SetupScript(LittlerootTown_BrendansHouse_2F_EventScript_TurnOffPlayerPC);

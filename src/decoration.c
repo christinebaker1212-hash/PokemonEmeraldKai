@@ -2,6 +2,7 @@
 #include "mp.h"
 #include "mp_life.h"
 #include "mp_garden.h"
+#include "mp_region.h"
 #include "malloc.h"
 #include "decompress.h"
 #include "decoration.h"
@@ -112,7 +113,7 @@ EWRAM_DATA u8 *gCurDecorationItems = NULL;
 EWRAM_DATA static u8 sDecorationActionsCursorPos = 0;
 EWRAM_DATA static u8 sNumOwnedDecorationsInCurCategory = 0;
 EWRAM_DATA static u8 sSecretBaseItemsIndicesBuffer[DECOR_MAX_SECRET_BASE] = {};
-EWRAM_DATA static u8 sPlayerRoomItemsIndicesBuffer[DECOR_MAX_PLAYERS_HOUSE] = {};
+EWRAM_DATA static u8 sPlayerRoomItemsIndicesBuffer[2 * DECOR_MAX_PLAYERS_HOUSE] = {};   // Moemon Kai: both bedrooms, HOENN's and JOHTO's
 EWRAM_DATA static u8 sMpGardenItemsIndicesBuffer[GARDEN_DECOR_MAX] = {};   // Moemon Co-op: placed in the MOéMON GARDEN
 extern const u8 MoemonGarden_EventScript_DecorateDone[];
 EWRAM_DATA static u8 sMpGardenItems[GARDEN_DECOR_MAX] = {};   // Moemon Co-op: the Garden's decorations (the context's items)
@@ -548,8 +549,8 @@ void InitDecorationContextItems(void)
 
     if (sDecorationContext.isPlayerRoom == TRUE)
     {
-        sDecorationContext.items = gSaveBlock1Ptr->playerRoomDecorations;
-        sDecorationContext.pos = gSaveBlock1Ptr->playerRoomDecorationPositions;
+        sDecorationContext.items = MP_RoomDecorations();   // Moemon Kai: JOHTO's room its own (mp_region.c)
+        sDecorationContext.pos = MP_RoomDecorationPositions();
     }
 }
 
@@ -615,8 +616,8 @@ void DoSecretBaseDecorationMenu(u8 taskId)
 void DoPlayerRoomDecorationMenu(u8 taskId)
 {
     InitDecorationActionsWindow();
-    sDecorationContext.items = gSaveBlock1Ptr->playerRoomDecorations;
-    sDecorationContext.pos = gSaveBlock1Ptr->playerRoomDecorationPositions;
+    sDecorationContext.items = MP_RoomDecorations();   // Moemon Kai: JOHTO's room its own (mp_region.c)
+    sDecorationContext.pos = MP_RoomDecorationPositions();
     sDecorationContext.size = DECOR_MAX_PLAYERS_HOUSE;
     sDecorationContext.isPlayerRoom = TRUE;
     sDecorationContext.isMpGarden = FALSE;
@@ -1160,13 +1161,14 @@ static void IdentifyOwnedDecorationsCurrentlyInUseInternal(u8 taskId)
     }
 
     count = 0;
-    for (i = 0; i < ARRAY_COUNT(sPlayerRoomItemsIndicesBuffer); i++)
+    for (i = 0; i < 2 * DECOR_MAX_PLAYERS_HOUSE; i++)   // Moemon Kai: HOENN's bedroom, then JOHTO's room (mp_region.c)
     {
-        if (gSaveBlock1Ptr->playerRoomDecorations[i] != DECOR_NONE)
+        u8 d = i < DECOR_MAX_PLAYERS_HOUSE ? gSaveBlock1Ptr->playerRoomDecorations[i] : MP_JohtoRoomDecor()[i - DECOR_MAX_PLAYERS_HOUSE];
+        if (d != DECOR_NONE && count < ARRAY_COUNT(sPlayerRoomItemsIndicesBuffer))
         {
             for (j = 0; j < gDecorationInventories[sCurDecorationCategory].size; j++)
             {
-                if (gCurDecorationItems[j] == gSaveBlock1Ptr->playerRoomDecorations[i] && IsDecorationIndexInSecretBase(j + 1) != TRUE)
+                if (gCurDecorationItems[j] == d && IsDecorationIndexInSecretBase(j + 1) != TRUE)
                 {
                     for (k = 0; k < count && sPlayerRoomItemsIndicesBuffer[k] != j + 1; k++);
                     if (k == count)
@@ -1712,7 +1714,9 @@ static bool8 CanPlaceDecoration(u8 taskId, const struct Decoration *decoration)
         {
             curX = gTasks[taskId].tCursorX + j;
             behaviorAt = MapGridGetMetatileBehaviorAt(curX, curY);
-            if (decoration->shape == DECORSHAPE_1x2)
+            if (MP_RoomFloorHoldsDecor(curX, curY))   // Moemon Kai: JOHTO's room (mp_region.c)
+                ;
+            else if (decoration->shape == DECORSHAPE_1x2)
             {
                 if (!MetatileBehavior_HoldsLargeDecoration(behaviorAt))
                     return FALSE;

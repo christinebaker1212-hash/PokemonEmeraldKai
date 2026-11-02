@@ -53,6 +53,10 @@ struct RegionState
 extern struct RegionState gRegionState;
 
 u8 MP_Region_OfGroup(u8 group);
+u8 *MP_RoomDecorations(void);           // MY ROOM's decorations: JOHTO's room its own (JOHTO's vars), else the save's
+u8 *MP_RoomDecorationPositions(void);
+u8 *MP_JohtoRoomDecor(void);
+bool8 MP_RoomFloorHoldsDecor(s16 x, s16 y);   // JOHTO's room: its plain floor holds dolls and cushions            // (its DECOR_MAX_PLAYERS_HOUSE items, then as many positions)
 u16 MP_Region_BadgeFlag(u8 region, u8 badge);
 u8 MP_Region_BadgeCount(u8 region);
 u16 MP_Region_FieldMoveBadge(u8 hm);    // an HM's badge flag (0 cut .. 7 waterfall; Platinum's on a SINNOH map)
