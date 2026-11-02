@@ -1,0 +1,33 @@
+pressuntil A field 5000
+wait 30
+mp emptyparty
+mp sprite kai_dawn
+wait 60
+shot d_walk
+mp avatarstate 3
+wait 30
+shot d_surf
+mp face up
+wait 10
+shot d_surfn
+mp face left
+wait 10
+shot d_surfw
+mp face down
+mp avatarstate 5
+wait 30
+shot d_field
+mp avatarstate 6
+wait 30
+shot d_fish
+mp avatarstate 0
+mp sprite kai_lucas
+wait 60
+shot l_walk
+mp avatarstate 3
+wait 30
+shot l_surf
+mp avatarstate 5
+wait 30
+shot l_field
+quit

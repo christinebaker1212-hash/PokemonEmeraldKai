@@ -4462,3 +4462,31 @@ Its list is its own: mp_region.c MP_RoomDecorations / MP_RoomDecorationPositions
 bytes in that room (decoration.c, secret_base.c read through them); the in-use check counts both rooms
 (sPlayerRoomItemsIndicesBuffer, 24). Quetzal's floor has no decoration behaviors, so the room's plain walkable floor
 holds dolls and cushions (MP_RoomFloorHoldsDecor). Test johto_my_room.
+
+## Walking partners, story people, counterpart looks, reflections (after 1.68.0)
+- **Walking partners end.** Platinum's ClearHasPartner (gen_scripts.py) also runs SINNOH_MISC 24 (s3d_misc.c): it clears
+  VAR_SINNOH_PARTNER_GFX and stops the one following (a facing movement); Platinum's scripts then move or remove the
+  person by their own local id. A map that has its own visible copy of the partner (LAKE VERITY's BARRY, same graphics,
+  a map local id) uses it: Sinnoh_PartnerUpdate (s3d_scrcmd.c MapHasOwnPartner) neither spawns nor keeps the carried
+  0xF2 one. Test sinnoh_partner_ends.
+- **Story people show by Platinum's flags.** gen_maps.py hides with 0x3FFF people the old written story had no script
+  for; gen_scripts.py people() now gives every such person with a Platinum hide flag their flag, place and look in the
+  story table (CYRUS, BARRY and the STARLY at LAKE VERITY, ROWAN on ROUTE 201, the VILLA's visitors... 44 in all).
+  story_people.py's NEVER only mattered to the written story (Sinnoh_StoryRefresh is off under Platinum's).
+- **16-bit sprite ids.** SET_OBJ_GFX_ID / SET_TEMPLATE_GFX_ID (global.fieldmap.h) work the id out once (an argument that
+  read the object's own id came out half old, half new: DAWN's 0x4A4 became Hoenn's 164);
+  VarGetObjectEventGraphicsId returns u16; QzVarGraphicsId is JOHTO's / KANTO's only. SINNOH maps start
+  VAR_OBJ_GFX_ID_0 as the counterpart (Sinnoh_PlatinumMapScripts) and their VAR_0 people are VAR_0 (sprites.py; no MAY
+  stand-in). Test sinnoh_counterpart_look.
+- **Reflections in SINNOH** (s3d.c OverReflectiveCell): a reflection pixel shows only where its ray from the eye meets
+  the ground's level on a reflective / ice cell (no land tiles' top layer hides it in 3D); SINNOH checks only the next
+  tile south, as Platinum. `mp shorespots` finds test spots. Test sinnoh_reflection.
+- **JOHTO's gym leaders after the League** (MORTY, WHITNEY, PRYCE, JASMINE: flags 0x1017-0x101E): JOHTO's setup hides
+  them and Quetzal's code that shows them wasn't ported; QzGiovanniStoryUpdateFlags shows them once JOHTO is cleared.
+  An audit of people hidden at a region's start and never shown found only them (the others are addobject scenes or
+  Quetzal's leftovers). Test johto_leaders_after.
+- **DAWN / LUCAS looks' actions** (mp_avatar.c ACT_PLATINUM): surfing, field moves and fishing use Platinum's own
+  player_f / player_m sheets from the SINNOH graphics pack ("PACT", build_gfx.py player_actions(): one palette per player,
+  the sheets' differently ordered colors joined), mapped onto Brendan's / May's frame layout (PlatinumFrameOf); the
+  local player's palette tag is OBJ_EVENT_PAL_TAG_MP_PACK. Without the pack: the hybrid body as before. Platinum's
+  watering can only faces north, so watering stays hybrid. Test look_platinum_actions.

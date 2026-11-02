@@ -1,0 +1,6 @@
+# The DAWN and LUCAS looks surf, use field moves and fish in Platinum's own sprites and colors (mp_avatar.c ACT_PLATINUM,
+# from sinnoh/platinum_gfx.pak "PACT"), not Brendan's / May's body with their heads
+MODE=1
+TMO=90
+EXPECT_A=("avatar: kai_dawn's Platinum frames for state 3" "avatar: kai_dawn's Platinum frames for state 5" "avatar: kai_dawn's Platinum frames for state 6" "avatar: kai_lucas's Platinum frames for state 3" "avatar: kai_lucas's Platinum frames for state 5")
+UNEXPECT_A=("[crash]" "TIMEOUT" "avatar: no action frames")

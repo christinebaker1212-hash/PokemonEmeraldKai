@@ -41,6 +41,9 @@ static struct
     const u8 *unownWidths;  // Platinum's UNOWN font (tools/sinnoh/build_unown.py: "UNWN"): widths, glyphs
     const u16 *unownGlyphs;
     u16 unownCount;
+    const u8 *actions[2][3];   // DAWN's and LUCAS's action sheets (build_gfx.py player_actions(): "PACT"): u8 frames,
+                               // pad, 32x32 frames
+    const u8 *actionPal[2];    // ... and each one's palette
     const u8 *poketch;     // the POKéTCH's art (tools/sinnoh/build_poketch.py: "PKCH")
     const u8 *poketchEnd;
 } sGfx;
@@ -229,6 +232,28 @@ static void Load(void)
             sGfx.unownWidths = p + 6;
             sGfx.unownGlyphs = (const u16 *)(p + 6 + n);
             p += 6 + n + n * 64;
+        }
+    }
+    // DAWN's and LUCAS's action sheets: "PACT", u8 players, u8 sheets, per player u16 palette[16] then per sheet u8
+    // frames, u8 pad, the 32x32 frames
+    if (p + 6 <= end && memcmp(p, "PACT", 4) == 0)
+    {
+        u32 who, sheet, players = p[4], sheets = p[5];
+        p += 6;
+        for (who = 0; who < players && p + 32 <= end; who++)
+        {
+            if (who < 2)
+                sGfx.actionPal[who] = p;
+            p += 32;
+            for (sheet = 0; sheet < sheets && p + 2 <= end; sheet++)
+            {
+                u32 frames = p[0];
+                if (p + 2 + frames * 512 > end)
+                    break;
+                if (who < 2 && sheet < 3 && frames)
+                    sGfx.actions[who][sheet] = p;
+                p += 2 + frames * 512;
+            }
         }
     }
     if (p + 4 <= end && memcmp(p, "PKCH", 4) == 0)
@@ -520,5 +545,21 @@ bool8 S3D_Gfx_ContestPicture(bool8 backdrop, u16 n, u16 *w, u16 *h, const u16 **
     *w = p[0] | p[1] << 8;
     *h = p[2] | p[3] << 8;
     *px = (const u16 *)(p + 4);
+    return TRUE;
+}
+
+// DAWN's (WHO 0) or LUCAS's (1) Platinum action sheet (0 surfing, 1 a field move's POKé BALL, 2 fishing): frame FRAME's
+// 32x32 tiles and the sheet's palette (FALSE: the pack has none)
+bool8 S3D_Gfx_PlayerAction(u8 who, u8 sheet, u8 frame, const u8 **tiles, const u16 **pal)
+{
+    const u8 *a;
+    if (!sGfx.tried)
+        Load();
+    if (!sGfx.ok || who >= 2 || sheet >= 3 || (a = sGfx.actions[who][sheet]) == NULL || frame >= a[0])
+        return FALSE;
+    if (tiles)
+        *tiles = a + 2 + frame * 512;
+    if (pal)
+        *pal = (const u16 *)sGfx.actionPal[who];
     return TRUE;
 }

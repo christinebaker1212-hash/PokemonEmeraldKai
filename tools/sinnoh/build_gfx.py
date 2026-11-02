@@ -15,7 +15,8 @@ their first frame. Sheets of any other shape (the grunts in a row) aren't taken:
 Battle pictures: each trainer class's front picture, its first 80x80 frame, drawn whole by the big-sprite renderer
 (mp_bigsprite.c) over the stand-in's place.
 
-Format (little endian): "S3DG" u32 version 2 (then "TOWN", the TOWN MAP; "STRT", the briefcase: build_starter.py; "PKCH")
+Format (little endian): "S3DG" u32 version 2 (then "TOWN", the TOWN MAP; "STRT", the briefcase: build_starter.py; "PACT", DAWN's and
+  LUCAS's action sheets: player_actions(); "PKCH")
   u16 sprites: each char name[24] (Platinum's, lower case), u8 kind (0 walking: 9 frames 32x32, 1 still 32x32,
                2 still 16x16, 3 walking with a bow: 10 frames, the POKeMON CENTER nurse), u8 pad, u16 palette[16]
                (BGR555; 0 transparent), then the frames as GBA 4bpp tiles (4: still 64x64, the big legendaries); then the smaller copy (OPTIONS >
@@ -175,6 +176,49 @@ def sheets(root):
     return out
 
 
+# DAWN's and LUCAS's action sheets the game uses for the DAWN / LUCAS looks (surfing, a field move's POKé BALL, fishing)
+PLAYER_ACTIONS = ('surf', 'holding_pokeball', 'fishing')
+
+
+def player_actions(root):
+    """"PACT": u8 players (DAWN, LUCAS), u8 sheets (PLAYER_ACTIONS); per player u16 palette[16] (the sheets' colors
+    together: each sheet orders them its own way), then per sheet u8 frames, u8 pad, 32x32 GBA 4bpp frames"""
+    folder = os.path.join(root, 'res/graphics/field_sprites/player')
+    out = bytearray(b'PACT' + struct.pack('<BB', 2, len(PLAYER_ACTIONS)))
+    for who in ('f', 'm'):
+        ims = []
+        for sheet in PLAYER_ACTIONS:
+            path = os.path.join(folder, 'player_%s_%s.png' % (who, sheet))
+            im = Image(path) if os.path.exists(path) else None
+            ims.append(im if im is not None and im.mode == 'P' and im.size[0] == 32 else None)
+        colors = []
+        for im in ims:
+            if im is None:
+                continue
+            rgb = rgb_of(im)
+            used = {im.px(x, y) & 15 for x in range(32) for y in range(im.size[1])} - {0}
+            for i in sorted(used):
+                if bgr555(rgb[i]) not in [bgr555(c) for c in colors]:
+                    colors.append(rgb[i])
+        assert len(colors) <= 15, 'player_%s: %d colors' % (who, len(colors))
+        first = next((im for im in ims if im is not None), None)
+        pal = [rgb_of(first)[0] if first else (0, 0, 0)] + colors + [(0, 0, 0)] * (15 - len(colors))
+        out += struct.pack('<16H', *(bgr555(c) for c in pal))
+        index = [bgr555(c) for c in colors]
+        for im in ims:
+            if im is None:
+                out += struct.pack('<BB', 0, 0)
+                continue
+            rgb = rgb_of(im)
+            n = im.size[1] // 32
+            out += struct.pack('<BB', n, 0)
+            for f in range(n):
+                rows = [[0 if (im.px(x, f * 32 + y) & 15) == 0 else 1 + index.index(bgr555(rgb[im.px(x, f * 32 + y) & 15]))
+                         for x in range(32)] for y in range(32)]
+                out += tiles_of(rows, 32, 32)
+    return bytes(out)
+
+
 def pictures(root):
     folder = os.path.join(root, 'res/trainers/classes')
     out = []
@@ -309,6 +353,9 @@ def main():
     # Platinum's UNOWN font (tools/sinnoh/build_unown.py; before the POKéTCH's)
     import build_unown
     out += build_unown.section(root)
+    # DAWN's and LUCAS's own action sheets for the player's looks (src/mp/mp_avatar.c ACT_PLATINUM: player_actions(),
+    # before the POKéTCH's)
+    out += player_actions(root)
     # the POKéTCH's app screens and sprites (tools/sinnoh/build_poketch.py)
     import build_poketch
     out += build_poketch.section(root)

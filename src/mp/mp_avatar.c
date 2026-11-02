@@ -1152,7 +1152,49 @@ enum {
     ACT_OWN,       // a Pokemon's own standing / walking frames
     ACT_STANDIN,   // the look's standing frame (StandInInfo)
     ACT_CHAR,      // a character's own bike / diving frames (mp_chars_gfx.h)
+    ACT_PLATINUM,  // DAWN's / LUCAS's own Platinum frames for surfing, field moves and fishing (sinnoh/platinum_gfx.pak)
 };
+
+// The DAWN and LUCAS looks act as Platinum draws them: its surfing, POKé BALL (field move) and fishing sheets
+// (src/sinnoh/s3d_gfx.c S3D_Gfx_PlayerAction, from the SINNOH graphics pack; without it, Brendan's / May's body)
+bool8 S3D_Gfx_PlayerAction(u8 who, u8 sheet, u8 frame, const u8 **tiles, const u16 **pal);
+static s8 PlatinumPlayerOf(const struct MpCharDef *c)
+{
+    if (c == NULL)
+        return -1;
+    return strcmp(c->cfg, "kai_dawn") == 0 ? 0 : strcmp(c->cfg, "kai_lucas") == 0 ? 1 : -1;
+}
+
+static u8 PlatinumSheetOf(u8 state)
+{
+    return state == ST_SURF ? 0 : state == ST_FIELD_MOVE ? 1 : state == ST_FISHING ? 2 : 0xFF;
+}
+
+// Brendan's / May's frame SRC of STATE -> Platinum's frame. Surfing: S, S, N, N, W, W (Platinum: N, S, left, right);
+// the field move: three standing, raising the ball, throwing (Platinum: N, S, raising, throwing); fishing: W, N, S four
+// each (Platinum: N, S, left, right four each)
+static u8 PlatinumFrameOf(u8 state, u8 src)
+{
+    static const u8 sSurf[6] = {1, 1, 0, 0, 2, 2};
+    static const u8 sField[5] = {1, 1, 1, 2, 3};
+    switch (state)
+    {
+    case ST_SURF:
+        return src < 6 ? sSurf[src] : 1;
+    case ST_FIELD_MOVE:
+        return src < 5 ? sField[src] : 1;
+    case ST_FISHING:
+        return src < 4 ? 8 + src : src < 8 ? src - 4 : src < 12 ? 4 + src - 8 : 4;
+    }
+    return 0;
+}
+
+static bool8 HasPlatinumAction(const struct MpCharDef *c, u8 state)
+{
+    s8 who = PlatinumPlayerOf(c);
+    u8 sheet = PlatinumSheetOf(state);
+    return who >= 0 && sheet != 0xFF && S3D_Gfx_PlayerAction(who, sheet, 0, NULL, NULL);
+}
 
 // Whose body an action is drawn on: Brendan's or May's
 static u8 ActionGender(const struct MpAppearance *app)
@@ -1202,6 +1244,8 @@ static u8 ActionKind(const struct MpAppearance *app, const struct MpPack *pack, 
     if ((c = CharOf(app)) != NULL)
     {
         // Their own bikes and diving; the rest (surfing, field moves...) built on Brendan's / May's body
+        if (HasPlatinumAction(c, state))
+            return ACT_PLATINUM;
         if (state == ST_UNDERWATER)
             return ACT_CHAR;
         if (state == ST_MACH_BIKE || state == ST_ACRO_BIKE)
@@ -1441,6 +1485,30 @@ static void BuildCharInfo(int gfxSlot, const struct MpCharDef *c, u8 state, u8 g
     info->inanimate = FALSE;
 }
 
+// ACT_PLATINUM: DAWN's / LUCAS's Platinum frames, one per picture-table entry, laid out as Brendan's / May's
+static bool8 BuildPlatinumInfo(int gfxSlot, const struct MpAppearance *app, u8 state)
+{
+    struct ObjectEventGraphicsInfo *info = &sMpGfxInfo[gfxSlot];
+    const struct ObjectEventGraphicsInfo *def = DefaultInfo(state, ActionGender(app));
+    s8 who = PlatinumPlayerOf(CharOf(app));
+    u8 i;
+    if (who < 0 || def->size != 32 * 32 / 2)
+        return FALSE;
+    for (i = 0; i < sStatePicCount[state] && i < MAX_FRAMES; i++)
+    {
+        u32 off = (u32)((const u8 *)def->images[i].data - (const u8 *)def->images[0].data);
+        const u8 *tiles;
+        if (!S3D_Gfx_PlayerAction(who, PlatinumSheetOf(state), PlatinumFrameOf(state, off / def->size), &tiles, NULL))
+            return FALSE;
+        sMpFrames[gfxSlot][i].data = tiles;
+        sMpFrames[gfxSlot][i].size = 32 * 32 / 2;
+    }
+    *info = *def;
+    info->images = sMpFrames[gfxSlot];
+    info->inanimate = FALSE;
+    return TRUE;
+}
+
 // Fills an info for one state. Palette fields are set by the callers.
 static void BuildStateInfo(int gfxSlot, const struct MpAppearance *app, const struct MpPack *pack, u8 state)
 {
@@ -1516,6 +1584,13 @@ static void BuildStateInfo(int gfxSlot, const struct MpAppearance *app, const st
         case ACT_CHAR:
             BuildCharInfo(gfxSlot, CharOf(app), state, ActionGender(app));
             return;
+        case ACT_PLATINUM:
+            if (BuildPlatinumInfo(gfxSlot, app, state))
+            {
+                MPNet_Log("avatar: %s's Platinum frames for state %d", CharOf(app)->cfg, state);
+                return;
+            }
+            break;
         }
         *info = *DefaultInfo(state, ActionGender(app));
         return;
@@ -1591,6 +1666,13 @@ static void StatePalette(const struct MpAppearance *app, const struct MpPack *pa
     {
         // Actions drawn with the look's own colors use its walking palette (a character's diving: its own)
         u8 kind = ActionKind(app, pack, state);
+        const u16 *platPal;
+        if (kind == ACT_PLATINUM
+         && S3D_Gfx_PlayerAction(PlatinumPlayerOf(CharOf(app)), PlatinumSheetOf(state), 0, NULL, &platPal))
+        {
+            memcpy(dst, platPal, 32);   // (Platinum's own colors for its own frames)
+            return;
+        }
         if (kind == ACT_CHAR && state == ST_UNDERWATER)
         {
             const struct MpCharDef *c = CharOf(app);
@@ -1871,6 +1953,8 @@ const struct ObjectEventGraphicsInfo *MP_Avatar_LocalStateInfo(u16 graphicsId)
             info->paletteTag = OBJ_EVENT_PAL_TAG_MP_PACK;   // RebuildLocal: CREATE's palette
         else if (kind == ACT_CHAR && st == ST_UNDERWATER)
             info->paletteTag = OBJ_EVENT_PAL_TAG_MP_PACK_DIVE;   // RebuildLocal: the character's diving palette
+        else if (kind == ACT_PLATINUM && info->images == sMpFrames[LOCAL_STATE(st)])
+            info->paletteTag = OBJ_EVENT_PAL_TAG_MP_PACK;   // RebuildLocal: DAWN's / LUCAS's Platinum colors
         else if (info->images == sMpFrames[LOCAL_STATE(st)])
             info->paletteTag = OBJ_EVENT_PAL_TAG_MP_LOCAL;  // HYBRID / OWN: the look's walking palette
         else if (info->paletteTag == OBJ_EVENT_PAL_TAG_BRENDAN || info->paletteTag == OBJ_EVENT_PAL_TAG_MAY)
@@ -1916,7 +2000,12 @@ static void RebuildLocal(void)
         PackPalette(&app, pack, ST_UNDERWATER, sLocalPalPackDive);
     }
     else if (CharOf(&app))
+    {
+        const u16 *platPal;
         StatePalette(&app, NULL, MP_CR_CACHE_LOCAL, ST_UNDERWATER, sLocalPalPackDive);
+        if (PlatinumPlayerOf(CharOf(&app)) >= 0 && S3D_Gfx_PlayerAction(PlatinumPlayerOf(CharOf(&app)), 0, 0, NULL, &platPal))
+            memcpy(sLocalPalPack, platPal, 32);   // (DAWN's / LUCAS's Platinum actions: their own colors)
+    }
 
     BuildStateInfo(0, &app, pack, ST_FOOT);
     // The player's sprite keeps the tile block it was made with when it gets on a bike, goes
