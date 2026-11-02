@@ -1,0 +1,7 @@
+# KANTO's water animates (tileset_anims.c TilesetAnim_QzGeneral: FireRed's General animations). Shots w_a, w_b
+# (16 frames apart: the water differs).
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=25:40"
+EXPECT_A=("reached state")
+UNEXPECT_A=("[crash]")

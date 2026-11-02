@@ -1,0 +1,8 @@
+pressuntil A field 5000
+wait 30
+mp warp 37,57,12,16
+wait 240
+shot w_a
+wait 17
+shot w_b
+quit

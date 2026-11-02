@@ -597,13 +597,49 @@ void UpdateTilesetAnimations(void)
         sSecondaryTilesetAnimCallback(sSecondaryTilesetAnimCounter);
 }
 
+// Moemon Kai: KANTO's and JOHTO's primary tilesets animate as FireRed's General one (its water, the sand and land by
+// it, its flowers), each animation over the tiles that are still FireRed's (tools/quetzal_port/gen_tile_anims.py)
+struct QzAnimRun { u16 tile, count, frameTile; };
+struct QzAnimSet { const struct Tileset *tileset; const struct QzAnimRun *sand, *water, *flower; };
+extern const struct Tileset gTileset_Kanto_General, gTileset_Kanto_Primary7, gTileset_Johto_Primary1,
+    gTileset_Johto_Primary2, gTileset_Johto_Primary3, gTileset_Johto_Primary4, gTileset_Johto_Primary5,
+    gTileset_Johto_Primary6;
+#include "data/tilesets/qz_anims.h"
+static const struct QzAnimSet *sQzAnimSet;
+
+static void QueueQzAnim(const struct QzAnimRun *run, const u16 *frame)
+{
+    for (; run->count; run++)
+        AppendTilesetAnimToBuffer(frame + run->frameTile * TILE_SIZE_4BPP / 2, (u16 *)(BG_VRAM + TILE_OFFSET_4BPP(run->tile)),
+                                  run->count * TILE_SIZE_4BPP);
+}
+
+static void TilesetAnim_QzGeneral(u16 timer)
+{
+    // (FireRed's TilesetAnim_General)
+    if (timer % 8 == 0)
+        QueueQzAnim(sQzAnimSet->sand, sQzAnim_Sand[(timer / 8) % ARRAY_COUNT(sQzAnim_Sand)]);
+    if (timer % 16 == 1)
+        QueueQzAnim(sQzAnimSet->water, sQzAnim_Water[(timer / 16) % ARRAY_COUNT(sQzAnim_Water)]);
+    if (timer % 16 == 2)
+        QueueQzAnim(sQzAnimSet->flower, sQzAnim_Flower[(timer / 16) % ARRAY_COUNT(sQzAnim_Flower)]);
+}
+
 static void _InitPrimaryTilesetAnimation(void)
 {
+    u32 i;
     sPrimaryTilesetAnimCounter = 0;
     sPrimaryTilesetAnimCounterMax = 0;
     sPrimaryTilesetAnimCallback = NULL;
     if (gMapHeader.mapLayout->primaryTileset && gMapHeader.mapLayout->primaryTileset->callback)
         gMapHeader.mapLayout->primaryTileset->callback();
+    for (i = 0; i < ARRAY_COUNT(sQzAnimSets); i++)
+        if (gMapHeader.mapLayout->primaryTileset == sQzAnimSets[i].tileset)
+        {
+            sQzAnimSet = &sQzAnimSets[i];
+            sPrimaryTilesetAnimCounterMax = 640;
+            sPrimaryTilesetAnimCallback = TilesetAnim_QzGeneral;
+        }
 }
 
 static void _InitSecondaryTilesetAnimation(void)

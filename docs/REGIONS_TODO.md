@@ -24,7 +24,8 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       twice (item.c MP_PlayerHasHm; HOENN's and KANTO's givers say so: EventScript_GiveHmOnce / FindHmOnce)
 - [x] JOHTO's HM givers give the HM they talk about (Crystal's: HM01 ILEX's CHARCOAL master, HM02 CIANWOOD, HM03 the
       DANCE THEATER, HM04 OLIVINE CAFE, HM05 SPROUT TOWER, HM07 ICE PATH's ball; HGSS's HM06 ROCK SMASH on ROUTE 36)
-- [ ] Water animates
+- [x] Water animates (FireRed's General tileset animations: water, its edges, flowers; src/tileset_anims.c
+      TilesetAnim_QzGeneral, tools/quetzal_port/gen_tile_anims.py; test qz_water_anim)
 - [x] The CUT tree east of CERULEAN (to ROUTE 9 / ROCK TUNNEL) can be cut (test kanto_cut_tree)
 
 ## JOHTO
@@ -35,7 +36,8 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       (behavior, words), JOHTO's berries
 - [ ] WHITNEY's MILTANK: perfect IVs
 - [ ] Quetzal's auto walk / run: remove its words
-- [ ] Door animations; water animates
+- [ ] Door animations; [x] water animates (JOHTO's primaries 2-6 carry FireRed's water tiles: the same animation over
+      them; primary 1's water is drawn differently and stays still)
 - [ ] The rival named as in Crystal (online: the host names him, said plainly), his starter the one beating the player's
 - [x] No tree-cutting prompt in a new game without the HM and badge (Quetzal's check said yes to everything)
 - [ ] MOM's money saving (Crystal) and MY ROOM decorating on the Secret Base logic
