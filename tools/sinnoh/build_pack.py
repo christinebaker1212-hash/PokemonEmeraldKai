@@ -72,7 +72,8 @@ WATER = (0x10, 0x13, 0x15)     # surfable (0x13: a waterfall, climbed with WATER
 
 def heights(land, ox=0, oz=0):
     """The ground's heights at each tile's centre from the block's BDHC: every plate whose rectangle holds the point
-    gives the height of its plane there (x, z from the block's centre, 16 units a tile). Up to 3, lowest first. (OX,
+    gives the height of its plane there (x, z from the block's centre, 16 units a tile). Up to 3, lowest first: with more,
+    the lowest and the two highest (a tunnel's surfaces under a bridge never push the bridge out). (OX,
     OZ: at that offset from each centre instead)"""
     b = land.bdhc
     out = [[] for _ in range(1024)]
@@ -104,7 +105,10 @@ def heights(land, ox=0, oz=0):
                     h = round(-(nx * x + nz * z + k) / ny, 2)
                     if all(abs(h - o) > 2 for o in hs):
                         hs.append(h)
-            out[tz * 32 + tx] = sorted(hs)[:3]
+            hs = sorted(hs)
+            if len(hs) > 3:   # (the floor and the two highest: a bridge over a tunnel keeps its deck, CYCLING ROAD's)
+                hs = [hs[0]] + hs[-2:]
+            out[tz * 32 + tx] = hs
     return out
 
 
