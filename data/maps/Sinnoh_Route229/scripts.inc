@@ -20,7 +20,7 @@ Sinnoh_Route229_EventScript_Person3_Given::
 	end
 
 Sinnoh_Route229_EventScript_Sign2::
-	msgbox Sinnoh_Route229_Text_Sign2, MSGBOX_SIGN
+	goto SinnohP_route_229_2
 	end
 
 Sinnoh_Route229_Text_Person3:
@@ -30,9 +30,5 @@ Sinnoh_Route229_Text_Person3:
 Sinnoh_Route229_Text_Person3Gift:
 	.string "Here's something I found in the grass.\n"
 	.string "Shiny, isn't it?$"
-
-Sinnoh_Route229_Text_Sign2:
-	.string "ROUTE 229\p"
-	.string "To the RESORT AREA$"
 
 @ --- end of SINNOH words ---

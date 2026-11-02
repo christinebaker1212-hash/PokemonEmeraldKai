@@ -8,11 +8,11 @@ Sinnoh_FloaromaTownPokecenter1f_OnTransition:
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_FloaromaTownPokecenter1f_EventScript_Person1::
-	msgbox Sinnoh_FloaromaTownPokecenter1f_Text_Person1, MSGBOX_NPC
+	goto SinnohP_floaroma_town_pokecenter_1f_4
 	end
 
 Sinnoh_FloaromaTownPokecenter1f_EventScript_Person2::
-	msgbox Sinnoh_FloaromaTownPokecenter1f_Text_Person2, MSGBOX_NPC
+	goto SinnohP_floaroma_town_pokecenter_1f_3
 	end
 
 Sinnoh_FloaromaTownPokecenter1f_EventScript_Person3::
@@ -24,19 +24,7 @@ Sinnoh_FloaromaTownPokecenter1f_EventScript_Person3::
 	end
 
 Sinnoh_FloaromaTownPokecenter1f_EventScript_Person4::
-	msgbox Sinnoh_FloaromaTownPokecenter1f_Text_Person4, MSGBOX_NPC
+	goto SinnohP_floaroma_town_pokecenter_1f_2
 	end
-
-Sinnoh_FloaromaTownPokecenter1f_Text_Person1:
-	.string "The flowers outside smell so good! I\n"
-	.string "want to bring some to the nurse.$"
-
-Sinnoh_FloaromaTownPokecenter1f_Text_Person2:
-	.string "I trained in the meadow all day. My\n"
-	.string "MOéMON smells like flowers now!$"
-
-Sinnoh_FloaromaTownPokecenter1f_Text_Person4:
-	.string "There's a windmill plant south of the\n"
-	.string "meadow. It powers this whole town.$"
 
 @ --- end of SINNOH words ---

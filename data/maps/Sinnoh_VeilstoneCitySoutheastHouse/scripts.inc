@@ -22,7 +22,7 @@ Sinnoh_VeilstoneCitySoutheastHouse_EventScript_Person1_Given::
 	end
 
 Sinnoh_VeilstoneCitySoutheastHouse_EventScript_Person2::
-	msgbox Sinnoh_VeilstoneCitySoutheastHouse_Text_Person2, MSGBOX_NPC
+	goto SinnohP_veilstone_city_southeast_house_2
 	end
 
 Sinnoh_VeilstoneCitySoutheastHouse_Text_Person1:
@@ -32,9 +32,5 @@ Sinnoh_VeilstoneCitySoutheastHouse_Text_Person1:
 Sinnoh_VeilstoneCitySoutheastHouse_Text_Person1Gift:
 	.string "You'll need somewhere to keep your\n"
 	.string "COINS for the GAME CORNER. Take this!$"
-
-Sinnoh_VeilstoneCitySoutheastHouse_Text_Person2:
-	.string "I train in the GYM every day. MAYLENE\n"
-	.string "says I've got the right spirit!$"
 
 @ --- end of SINNOH words ---

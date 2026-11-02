@@ -19,7 +19,7 @@ Sinnoh_StarkMountainOutside_EventScript_Person8::
 	end
 
 Sinnoh_StarkMountainOutside_EventScript_Sign4::
-	msgbox Sinnoh_StarkMountainOutside_Text_Sign4, MSGBOX_SIGN
+	goto SinnohP_stark_mountain_outside_2
 	end
 
 Sinnoh_StarkMountainOutside_Text_Person5:
@@ -39,10 +39,5 @@ Sinnoh_StarkMountainOutside_Text_Person7:
 Sinnoh_StarkMountainOutside_Text_Person8:
 	.string "It's so hot in here. Space suits were a\n"
 	.string "terrible idea.$"
-
-Sinnoh_StarkMountainOutside_Text_Sign4:
-	.string "STARK MOUNTAIN\p"
-	.string "A volcano that still breathes. Enter\n"
-	.string "with care.$"
 
 @ --- end of SINNOH words ---

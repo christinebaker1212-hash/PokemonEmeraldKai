@@ -16,7 +16,7 @@ Sinnoh_SunyshoreCityPokecenter1f_EventScript_Person1::
 	end
 
 Sinnoh_SunyshoreCityPokecenter1f_EventScript_Person2::
-	msgbox Sinnoh_SunyshoreCityPokecenter1f_Text_Person2, MSGBOX_NPC
+	goto SinnohP_sunyshore_city_pokecenter_1f_2
 	end
 
 Sinnoh_SunyshoreCityPokecenter1f_EventScript_Person3::
@@ -24,21 +24,12 @@ Sinnoh_SunyshoreCityPokecenter1f_EventScript_Person3::
 	end
 
 Sinnoh_SunyshoreCityPokecenter1f_EventScript_Person4::
-	msgbox Sinnoh_SunyshoreCityPokecenter1f_Text_Person4, MSGBOX_NPC
+	goto SinnohP_sunyshore_city_pokecenter_1f_4
 	end
-
-Sinnoh_SunyshoreCityPokecenter1f_Text_Person2:
-	.string "I've lived by the sea all my life. The\n"
-	.string "waves here are the gentlest in\l"
-	.string "SINNOH.$"
 
 Sinnoh_SunyshoreCityPokecenter1f_Text_Person3:
 	.string "VOLKNER used to battle everyone who\n"
 	.string "came. Now he just looks bored. Maybe\l"
 	.string "you can help!$"
-
-Sinnoh_SunyshoreCityPokecenter1f_Text_Person4:
-	.string "The solar walkways power the whole\n"
-	.string "city. Even this MOéMON CENTER!$"
 
 @ --- end of SINNOH words ---

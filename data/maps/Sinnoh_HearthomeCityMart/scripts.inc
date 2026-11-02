@@ -13,11 +13,11 @@ Sinnoh_HearthomeCityMart_EventScript_Person1::
 	end
 
 Sinnoh_HearthomeCityMart_EventScript_Person2::
-	msgbox Sinnoh_HearthomeCityMart_Text_Person2, MSGBOX_NPC
+	goto SinnohP_hearthome_city_mart_3
 	end
 
 Sinnoh_HearthomeCityMart_EventScript_Person3::
-	msgbox Sinnoh_HearthomeCityMart_Text_Person3, MSGBOX_NPC
+	goto SinnohP_hearthome_city_mart_4
 	end
 
 Sinnoh_HearthomeCityMart_EventScript_Person4::
@@ -29,14 +29,5 @@ Sinnoh_HearthomeCityMart_EventScript_Person4::
 	msgbox gText_PleaseComeAgain, MSGBOX_DEFAULT
 	release
 	end
-
-Sinnoh_HearthomeCityMart_Text_Person2:
-	.string "I came down from the mountains to\n"
-	.string "shop. The city's prices make my head\l"
-	.string "spin!$"
-
-Sinnoh_HearthomeCityMart_Text_Person3:
-	.string "I'm buying gifts for my MOéMON. It's\n"
-	.string "our anniversary. One year together!$"
 
 @ --- end of SINNOH words ---

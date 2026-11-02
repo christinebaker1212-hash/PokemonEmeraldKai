@@ -7,36 +7,19 @@ Sinnoh_Route208_EventScript_Person23::
 	end
 
 Sinnoh_Route208_EventScript_Sign11::
-	msgbox Sinnoh_Route208_Text_Sign11, MSGBOX_SIGN
+	goto SinnohP_route_208_2
 	end
 
 Sinnoh_Route208_EventScript_Sign12::
-	msgbox Sinnoh_Route208_Text_Sign12, MSGBOX_SIGN
+	goto SinnohP_route_208_3
 	end
 
 Sinnoh_Route208_EventScript_Sign13::
-	msgbox Sinnoh_Route208_Text_Sign13, MSGBOX_SIGN
+	goto SinnohP_route_208_1
 	end
 
 Sinnoh_Route208_EventScript_Sign24::
-	msgbox Sinnoh_Route208_Text_Sign24, MSGBOX_SIGN
+	goto SinnohP_route_208_5
 	end
-
-Sinnoh_Route208_Text_Sign11:
-	.string "ROUTE 208\p"
-	.string "To HEARTHOME CITY$"
-
-Sinnoh_Route208_Text_Sign12:
-	.string "BERRY MASTER'S HOUSE\p"
-	.string "Every BERRY grows best with love.$"
-
-Sinnoh_Route208_Text_Sign13:
-	.string "ROUTE 208\p"
-	.string "To MT. CORONET$"
-
-Sinnoh_Route208_Text_Sign24:
-	.string "TRAINER TIPS\p"
-	.string "BERRIES grow faster in soft soil.\n"
-	.string "Water them, and they'll thank you.$"
 
 @ --- end of SINNOH words ---

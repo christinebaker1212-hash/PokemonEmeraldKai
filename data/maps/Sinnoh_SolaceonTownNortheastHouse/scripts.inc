@@ -7,15 +7,11 @@ Sinnoh_SolaceonTownNortheastHouse_EventScript_Person1::
 	end
 
 Sinnoh_SolaceonTownNortheastHouse_EventScript_Person2::
-	msgbox Sinnoh_SolaceonTownNortheastHouse_Text_Person2, MSGBOX_NPC
+	goto SinnohP_solaceon_town_northeast_house_2
 	end
 
 Sinnoh_SolaceonTownNortheastHouse_Text_Person1:
 	.string "We raise MOéMON for the ranch. They're\n"
 	.string "like family.$"
-
-Sinnoh_SolaceonTownNortheastHouse_Text_Person2:
-	.string "I ride out to the ruins every morning.\n"
-	.string "The UNOWN wave at me. I think.$"
 
 @ --- end of SINNOH words ---

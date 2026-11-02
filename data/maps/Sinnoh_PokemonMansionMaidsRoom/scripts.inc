@@ -44,7 +44,7 @@ Sinnoh_PokemonMansionMaidsRoom_EventScript_Person2_Given::
 	end
 
 Sinnoh_PokemonMansionMaidsRoom_EventScript_Person3::
-	msgbox Sinnoh_PokemonMansionMaidsRoom_Text_Person3, MSGBOX_NPC
+	goto SinnohP_pokemon_mansion_maids_room_2
 	end
 
 Sinnoh_PokemonMansionMaidsRoom_Text_Bg2:
@@ -78,10 +78,5 @@ Sinnoh_PokemonMansionMaidsRoom_Text_Person2:
 Sinnoh_PokemonMansionMaidsRoom_Text_Person2Gift:
 	.string "Here, this bell is too loud for the\n"
 	.string "maids' room. Your MOéMON will love it.$"
-
-Sinnoh_PokemonMansionMaidsRoom_Text_Person3:
-	.string "We work hard, but the master treats us\n"
-	.string "well. And the cook makes the best\l"
-	.string "POFFINS.$"
 
 @ --- end of SINNOH words ---

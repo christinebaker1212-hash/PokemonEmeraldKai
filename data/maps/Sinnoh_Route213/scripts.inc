@@ -3,7 +3,7 @@ Sinnoh_Route213_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Route213_EventScript_Person30::
-	msgbox Sinnoh_Route213_Text_Person30, MSGBOX_NPC
+	goto SinnohP_route_213_3
 	end
 
 Sinnoh_Route213_EventScript_Person31::
@@ -11,11 +11,11 @@ Sinnoh_Route213_EventScript_Person31::
 	end
 
 Sinnoh_Route213_EventScript_Person32::
-	msgbox Sinnoh_Route213_Text_Person32, MSGBOX_NPC
+	goto SinnohP_route_213_4
 	end
 
 Sinnoh_Route213_EventScript_Person33::
-	msgbox Sinnoh_Route213_Text_Person33, MSGBOX_NPC
+	goto SinnohP_route_213_5
 	end
 
 Sinnoh_Route213_EventScript_Person34::
@@ -23,48 +23,25 @@ Sinnoh_Route213_EventScript_Person34::
 	end
 
 Sinnoh_Route213_EventScript_Sign16::
-	msgbox Sinnoh_Route213_Text_Sign16, MSGBOX_SIGN
+	goto SinnohP_route_213_6
 	end
 
 Sinnoh_Route213_EventScript_Sign17::
-	msgbox Sinnoh_Route213_Text_Sign17, MSGBOX_SIGN
+	goto SinnohP_route_213_8
 	end
 
 Sinnoh_Route213_EventScript_Sign18::
-	msgbox Sinnoh_Route213_Text_Sign18, MSGBOX_SIGN
+	goto SinnohP_route_213_7
 	end
-
-Sinnoh_Route213_Text_Person30:
-	.string "The beach is great for fishing. The\n"
-	.string "waves bring everything right to you.$"
 
 Sinnoh_Route213_Text_Person31:
 	.string "LAKE VALOR's going to be big news\n"
 	.string "soon. Real big. Boom-big. Forget I said\l"
 	.string "that.$"
 
-Sinnoh_Route213_Text_Person32:
-	.string "I could lie on this sand all day. My\n"
-	.string "MOéMON already is.$"
-
-Sinnoh_Route213_Text_Person33:
-	.string "Someone left a shell collection by the\n"
-	.string "hotel. I'm adding to it!$"
-
 Sinnoh_Route213_Text_Person34:
 	.string "LOOKER: TEAM GALACTIC is planning\n"
 	.string "something at LAKE VALOR. I can feel it\l"
 	.string "in my mustache.$"
-
-Sinnoh_Route213_Text_Sign16:
-	.string "ROUTE 213\p"
-	.string "To PASTORIA CITY$"
-
-Sinnoh_Route213_Text_Sign17:
-	.string "DR. FOOTSTEP'S HOUSE$"
-
-Sinnoh_Route213_Text_Sign18:
-	.string "HOTEL GRAND LAKE\p"
-	.string "A beachside stay to remember.$"
 
 @ --- end of SINNOH words ---

@@ -31,7 +31,7 @@ Sinnoh_ValorLakefront_EventScript_Person11::
 	end
 
 Sinnoh_ValorLakefront_EventScript_Sign8::
-	msgbox Sinnoh_ValorLakefront_Text_Sign8, MSGBOX_SIGN
+	goto SinnohP_valor_lakefront_7
 	end
 
 Sinnoh_ValorLakefront_Text_Person1:
@@ -67,10 +67,5 @@ Sinnoh_ValorLakefront_Text_Person11:
 	.string "BARRY: What happened here?! A bomb?!\n"
 	.string "TEAM GALACTIC is going to pay! I'll\l"
 	.string "fine them a million!$"
-
-Sinnoh_ValorLakefront_Text_Sign8:
-	.string "SEVEN STARS RESTAURANT\p"
-	.string "Dinner and a double battle, every\n"
-	.string "night.$"
 
 @ --- end of SINNOH words ---

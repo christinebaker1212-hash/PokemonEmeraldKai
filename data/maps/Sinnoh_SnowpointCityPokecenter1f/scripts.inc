@@ -16,11 +16,11 @@ Sinnoh_SnowpointCityPokecenter1f_EventScript_Person1::
 	end
 
 Sinnoh_SnowpointCityPokecenter1f_EventScript_Person2::
-	msgbox Sinnoh_SnowpointCityPokecenter1f_Text_Person2, MSGBOX_NPC
+	goto SinnohP_snowpoint_city_pokecenter_1f_2
 	end
 
 Sinnoh_SnowpointCityPokecenter1f_EventScript_Person3::
-	msgbox Sinnoh_SnowpointCityPokecenter1f_Text_Person3, MSGBOX_NPC
+	goto SinnohP_snowpoint_city_pokecenter_1f_3
 	end
 
 Sinnoh_SnowpointCityPokecenter1f_EventScript_Person4::
@@ -30,14 +30,6 @@ Sinnoh_SnowpointCityPokecenter1f_EventScript_Person4::
 Sinnoh_SnowpointCityPokecenter1f_EventScript_Person5::
 	msgbox Sinnoh_SnowpointCityPokecenter1f_Text_Person5, MSGBOX_NPC
 	end
-
-Sinnoh_SnowpointCityPokecenter1f_Text_Person2:
-	.string "It's so warm in here! I could stay all\n"
-	.string "day.$"
-
-Sinnoh_SnowpointCityPokecenter1f_Text_Person3:
-	.string "CANDICE trains outside in the snow.\n"
-	.string "She says it builds focus.$"
 
 Sinnoh_SnowpointCityPokecenter1f_Text_Person4:
 	.string "PSYDUCK: Psy...\p"

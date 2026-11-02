@@ -3,7 +3,7 @@ Sinnoh_Route222_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Route222_EventScript_Person16::
-	msgbox Sinnoh_Route222_Text_Person16, MSGBOX_NPC
+	goto SinnohP_route_222_1
 	end
 
 Sinnoh_Route222_EventScript_Person26::
@@ -28,24 +28,20 @@ Sinnoh_Route222_EventScript_Person30::
 	end
 
 Sinnoh_Route222_EventScript_Sign12::
-	msgbox Sinnoh_Route222_Text_Sign12, MSGBOX_SIGN
+	goto SinnohP_route_222_4
 	end
 
 Sinnoh_Route222_EventScript_Sign13::
-	msgbox Sinnoh_Route222_Text_Sign13, MSGBOX_SIGN
+	goto SinnohP_route_222_3
 	end
 
 Sinnoh_Route222_EventScript_Sign14::
-	msgbox Sinnoh_Route222_Text_Sign14, MSGBOX_SIGN
+	goto SinnohP_route_222_5
 	end
 
 Sinnoh_Route222_EventScript_Sign15::
-	msgbox Sinnoh_Route222_Text_Sign15, MSGBOX_SIGN
+	goto SinnohP_route_222_6
 	end
-
-Sinnoh_Route222_Text_Person16:
-	.string "The fish are biting today! It must be\n"
-	.string "the sunshine.$"
 
 Sinnoh_Route222_Text_Person26:
 	.string "I bought this whole beach. Just\n"
@@ -58,21 +54,5 @@ Sinnoh_Route222_Text_Person26Gift:
 Sinnoh_Route222_Text_Person30:
 	.string "The beach is quiet by day. Night\n"
 	.string "patrol's where the action is.$"
-
-Sinnoh_Route222_Text_Sign12:
-	.string "ROUTE 222\p"
-	.string "To SUNYSHORE CITY$"
-
-Sinnoh_Route222_Text_Sign13:
-	.string "ROUTE 222\p"
-	.string "To HOTEL GRAND LAKE$"
-
-Sinnoh_Route222_Text_Sign14:
-	.string "PIKACHU FAN CLUB\p"
-	.string "PIKACHU lovers welcome!$"
-
-Sinnoh_Route222_Text_Sign15:
-	.string "MOéMON SIZE CONTEST\p"
-	.string "Bring your biggest MOéMON!$"
 
 @ --- end of SINNOH words ---

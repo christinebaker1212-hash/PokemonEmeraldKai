@@ -619,6 +619,13 @@ ifneq ($(NODEP),1)
 -include $(addprefix $(OBJ_DIR)/,$(C_ASM_SRCS:.s=.d))
 endif
 
+# Moemon Kai: SINNOH's scripts, Platinum's own converted when the game is built (tools/sinnoh/gen_scripts.py, from the
+# decomp tools/sinnoh/make_pack.sh fetched; stubs without it); never committed
+sinnoh/platinum_scripts.inc: $(wildcard data/maps/Sinnoh_*/scripts.inc) tools/sinnoh/gen_scripts.py
+	@mkdir -p sinnoh
+	python3 -I tools/sinnoh/gen_scripts.py --auto $@
+$(DATA_ASM_BUILDDIR)/event_scripts_sinnoh.o: sinnoh/platinum_scripts.inc
+
 $(DATA_ASM_BUILDDIR)/%.o: $(DATA_ASM_SUBDIR)/%.s
 	$(PREPROC) $< charmap.txt | $(CPP) $(INCLUDE_SCANINC_ARGS) - | $(PREPROC) -ie $< charmap.txt | $(ASM_PSEUDO_OP_CONV) | $(AS) $(ASFLAGS) -o $@
 	$(FIX_UNDERSCORE) $@

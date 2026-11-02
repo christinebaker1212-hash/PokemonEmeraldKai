@@ -3,15 +3,15 @@ Sinnoh_SnowpointCity_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_SnowpointCity_EventScript_Person1::
-	msgbox Sinnoh_SnowpointCity_Text_Person1, MSGBOX_NPC
+	goto SinnohP_snowpoint_city_5
 	end
 
 Sinnoh_SnowpointCity_EventScript_Person4::
-	msgbox Sinnoh_SnowpointCity_Text_Person4, MSGBOX_NPC
+	goto SinnohP_snowpoint_city_8
 	end
 
 Sinnoh_SnowpointCity_EventScript_Person5::
-	msgbox Sinnoh_SnowpointCity_Text_Person5, MSGBOX_NPC
+	goto SinnohP_snowpoint_city_6
 	end
 
 Sinnoh_SnowpointCity_EventScript_Person6::
@@ -40,29 +40,16 @@ Sinnoh_SnowpointCity_EventScript_Person8::
 	end
 
 Sinnoh_SnowpointCity_EventScript_Person10::
-	msgbox Sinnoh_SnowpointCity_Text_Person10, MSGBOX_NPC
+	goto SinnohP_snowpoint_city_7
 	end
 
 Sinnoh_SnowpointCity_EventScript_Sign2::
-	msgbox Sinnoh_SnowpointCity_Text_Sign2, MSGBOX_SIGN
+	goto SinnohP_snowpoint_city_10
 	end
 
 Sinnoh_SnowpointCity_EventScript_Sign3::
-	msgbox Sinnoh_SnowpointCity_Text_Sign3, MSGBOX_SIGN
+	goto SinnohP_snowpoint_city_11
 	end
-
-Sinnoh_SnowpointCity_Text_Person1:
-	.string "It snows almost every day in\n"
-	.string "SNOWPOINT. Bundle up!$"
-
-Sinnoh_SnowpointCity_Text_Person4:
-	.string "The boat from the harbor goes to the\n"
-	.string "BATTLE ZONE. Only strong TRAINERS go\l"
-	.string "there.$"
-
-Sinnoh_SnowpointCity_Text_Person5:
-	.string "My ears get so cold here! My MOéMON\n"
-	.string "keeps them warm, though.$"
 
 Sinnoh_SnowpointCity_Text_Person6Ask0:
 	.string "Shall I take you to the BATTLE ZONE?$"
@@ -84,19 +71,5 @@ Sinnoh_SnowpointCity_Text_Person8:
 	.string "CANDICE, the GYM LEADER here.\p"
 	.string "Snow's no reason to stay inside! Come\n"
 	.string "show me what you've got at the GYM!$"
-
-Sinnoh_SnowpointCity_Text_Person10:
-	.string "We make snow sculptures of MOéMON\n"
-	.string "every winter. Last year's SNORLAX\l"
-	.string "took three days!$"
-
-Sinnoh_SnowpointCity_Text_Sign2:
-	.string "SNOWPOINT CITY\p"
-	.string "The frozen town at the top of SINNOH.$"
-
-Sinnoh_SnowpointCity_Text_Sign3:
-	.string "SNOWPOINT CITY MOéMON GYM\p"
-	.string "LEADER: CANDICE\p"
-	.string "The diamond-hard focus!$"
 
 @ --- end of SINNOH words ---

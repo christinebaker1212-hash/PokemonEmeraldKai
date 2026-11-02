@@ -99,6 +99,9 @@ def script(name, key, value, widths):
         return champion(name, key, widths)
     if isinstance(value, tuple) and value[0] == 'script':
         return '%s::\n\tgoto %s\n\tend\n\n' % (label, value[1]), ''
+    if isinstance(value, tuple) and value[0] == 'platinum':
+        # Platinum's own script and words (tools/sinnoh/gen_scripts.py, made when the game is built): its number only
+        return '%s::\n\tgoto %s\n\tend\n\n' % (label, value[1]), ''
     if isinstance(value, tuple) and value[0] == 'boat':
         return boat(name, key, value[1], widths)
     text = '%s_Text_%s' % (name, key)
@@ -281,6 +284,47 @@ def roles(root):
     return out
 
 
+def platinum(root):
+    """{map: {Person<n> / Sign<n> / Bg<n>: SinnohP_ label}} for the people and signs whose own Platinum script converts
+    (tools/sinnoh/gen_scripts.py): their words are Platinum's. People the story shows or hides (a hide flag) keep the
+    game's words until the story's scripts are converted (docs/SINNOH_HANDOFF.md step 4)"""
+    from source import open_source
+    from gen_maps import places
+    from places import events
+    import sprites
+    import gen_scripts
+
+    def target(low, s):
+        if not isinstance(s, int):
+            return None
+        if 2500 <= s < 2800:
+            return gen_scripts.convertible(root, 'bg_events', s - 2500 + 1)
+        if 2000 <= s < 2500:
+            return gen_scripts.convertible(root, 'common', s - 2000 + 1)
+        return gen_scripts.convertible(root, low, s) if 1 <= s < 2000 else None
+    out = {}
+    for p in places(open_source(root), root):
+        ev = events(root, p['place'])
+        low = p['place']['header'][len('MAP_HEADER_'):].lower()
+        for i, o in enumerate(ev['object_events']):
+            hide = o.get('hidden_flag')
+            if isinstance(hide, str) and hide.startswith(('FLAG_', 'MAP_HEADER_')):
+                continue
+            if isinstance(o['script'], str):
+                continue          # (a trainer: tools/sinnoh/gen_trainers.py)
+            lab = target(low, o['script'])
+            if lab:
+                key = ('Sign%d' if sprites.sign(o['graphics_id']) else 'Person%d') % (i + 1)
+                out.setdefault(p['name'], {})[key] = lab
+        for i, b in enumerate(ev['bg_events']):
+            if b.get('type') != 0:
+                continue
+            lab = target(low, b['script'])
+            if lab:
+                out.setdefault(p['name'], {})['Bg%d' % (i + 1)] = lab
+    return out
+
+
 def no_twice():
     """A map written twice in WORDS would lose the first one's words (a dict keeps the last): refuse"""
     import ast
@@ -304,6 +348,11 @@ def main():
         for name, found in roles(sys.argv[1]).items():
             for key, role in found.items():
                 words.setdefault(name, {}).setdefault(key, role)
+    if len(sys.argv) > 1:
+        for name, found in platinum(sys.argv[1]).items():
+            for key, lab in found.items():
+                if not isinstance(words.get(name, {}).get(key), tuple):   # (the game's roles stay)
+                    words.setdefault(name, {})[key] = ('platinum', lab)
     for name, entries in words.items():
         path = 'data/maps/%s/scripts.inc' % name
         if not os.path.exists(path):

@@ -16,11 +16,11 @@ Sinnoh_CelesticTownPokecenter1f_EventScript_Person1::
 	end
 
 Sinnoh_CelesticTownPokecenter1f_EventScript_Person2::
-	msgbox Sinnoh_CelesticTownPokecenter1f_Text_Person2, MSGBOX_NPC
+	goto SinnohP_celestic_town_pokecenter_1f_2
 	end
 
 Sinnoh_CelesticTownPokecenter1f_EventScript_Person3::
-	msgbox Sinnoh_CelesticTownPokecenter1f_Text_Person3, MSGBOX_NPC
+	goto SinnohP_celestic_town_pokecenter_1f_3
 	end
 
 Sinnoh_CelesticTownPokecenter1f_EventScript_Person4::
@@ -39,15 +39,6 @@ Sinnoh_CelesticTownPokecenter1f_EventScript_Person4_Given::
 	msgbox Sinnoh_CelesticTownPokecenter1f_Text_Person4, MSGBOX_DEFAULT
 	release
 	end
-
-Sinnoh_CelesticTownPokecenter1f_Text_Person2:
-	.string "CELESTIC's elder knows every old\n"
-	.string "story about SINNOH. Visit her if you\l"
-	.string "can.$"
-
-Sinnoh_CelesticTownPokecenter1f_Text_Person3:
-	.string "Grandma says this town is older than\n"
-	.string "all the other towns put together!$"
 
 Sinnoh_CelesticTownPokecenter1f_Text_Person4:
 	.string "The shrine in the cave is said to honor\n"

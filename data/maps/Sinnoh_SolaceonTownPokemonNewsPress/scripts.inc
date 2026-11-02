@@ -24,7 +24,7 @@ Sinnoh_SolaceonTownPokemonNewsPress_EventScript_Person1_Given::
 	end
 
 Sinnoh_SolaceonTownPokemonNewsPress_EventScript_Person2::
-	msgbox Sinnoh_SolaceonTownPokemonNewsPress_Text_Person2, MSGBOX_NPC
+	goto SinnohP_solaceon_town_pokemon_news_press_2
 	end
 
 Sinnoh_SolaceonTownPokemonNewsPress_Text_Bg1:
@@ -37,10 +37,5 @@ Sinnoh_SolaceonTownPokemonNewsPress_Text_Person1:
 Sinnoh_SolaceonTownPokemonNewsPress_Text_Person1Gift:
 	.string "Thanks for listening! Here's a pretty\n"
 	.string "scale a reader sent us.$"
-
-Sinnoh_SolaceonTownPokemonNewsPress_Text_Person2:
-	.string "I write the column about raising\n"
-	.string "MOéMON. Readers send me so many\l"
-	.string "questions!$"
 
 @ --- end of SINNOH words ---

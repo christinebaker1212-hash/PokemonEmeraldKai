@@ -19,7 +19,7 @@ Sinnoh_PokemonMansion_EventScript_Person4::
 	end
 
 Sinnoh_PokemonMansion_EventScript_Person7::
-	msgbox Sinnoh_PokemonMansion_Text_Person7, MSGBOX_NPC
+	goto SinnohP_pokemon_mansion_6
 	end
 
 Sinnoh_PokemonMansion_Text_Person1:
@@ -37,9 +37,5 @@ Sinnoh_PokemonMansion_Text_Person3:
 Sinnoh_PokemonMansion_Text_Person4:
 	.string "I polish every vase in this house. It\n"
 	.string "takes all week, then I start again.$"
-
-Sinnoh_PokemonMansion_Text_Person7:
-	.string "The master collects MOéMON statues.\n"
-	.string "He has over a hundred!$"
 
 @ --- end of SINNOH words ---

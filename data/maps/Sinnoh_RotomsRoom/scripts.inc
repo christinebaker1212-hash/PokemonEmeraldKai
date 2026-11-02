@@ -23,11 +23,11 @@ Sinnoh_RotomsRoom_EventScript_Bg5::
 	end
 
 Sinnoh_RotomsRoom_EventScript_Sign6::
-	msgbox Sinnoh_RotomsRoom_Text_Sign6, MSGBOX_SIGN
+	goto SinnohP_rotoms_room_6
 	end
 
 Sinnoh_RotomsRoom_EventScript_Sign8::
-	msgbox Sinnoh_RotomsRoom_Text_Sign8, MSGBOX_SIGN
+	goto SinnohP_rotoms_room_10
 	end
 
 Sinnoh_RotomsRoom_Text_Bg1:
@@ -49,13 +49,5 @@ Sinnoh_RotomsRoom_Text_Bg4:
 Sinnoh_RotomsRoom_Text_Bg5:
 	.string "An empty spot by the wall. Something\n"
 	.string "used to be plugged in here.$"
-
-Sinnoh_RotomsRoom_Text_Sign6:
-	.string "It's full of handwriting. It doesn't\n"
-	.string "seem polite to read it.$"
-
-Sinnoh_RotomsRoom_Text_Sign8:
-	.string "It's full of handwriting. It doesn't\n"
-	.string "seem polite to read it.$"
 
 @ --- end of SINNOH words ---

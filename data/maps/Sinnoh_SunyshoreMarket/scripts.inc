@@ -11,7 +11,7 @@ Sinnoh_SunyshoreMarket_EventScript_Person2::
 	end
 
 Sinnoh_SunyshoreMarket_EventScript_Person3::
-	msgbox Sinnoh_SunyshoreMarket_Text_Person3, MSGBOX_NPC
+	goto SinnohP_sunyshore_market_2
 	end
 
 Sinnoh_SunyshoreMarket_EventScript_Person4::
@@ -19,7 +19,7 @@ Sinnoh_SunyshoreMarket_EventScript_Person4::
 	end
 
 Sinnoh_SunyshoreMarket_EventScript_Person5::
-	msgbox Sinnoh_SunyshoreMarket_Text_Person5, MSGBOX_NPC
+	goto SinnohP_sunyshore_market_6
 	end
 
 Sinnoh_SunyshoreMarket_Text_Person1:
@@ -30,16 +30,8 @@ Sinnoh_SunyshoreMarket_Text_Person2:
 	.string "I found a shell shaped like a STARMIE\n"
 	.string "here once. Best day of my life.$"
 
-Sinnoh_SunyshoreMarket_Text_Person3:
-	.string "Sailors from all over sell their things\n"
-	.string "here. You never know what you'll find.$"
-
 Sinnoh_SunyshoreMarket_Text_Person4:
 	.string "Welcome! These seals go on your POKé\n"
 	.string "BALLS. Pretty, aren't they?$"
-
-Sinnoh_SunyshoreMarket_Text_Person5:
-	.string "I came for the fish, but I'm staying\n"
-	.string "for the sunsets.$"
 
 @ --- end of SINNOH words ---

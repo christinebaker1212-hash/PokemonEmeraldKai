@@ -7,7 +7,11 @@ Sinnoh_EternaForest_EventScript_Person1::
 	end
 
 Sinnoh_EternaForest_EventScript_Person2::
-	msgbox Sinnoh_EternaForest_Text_Person2, MSGBOX_NPC
+	goto SinnohP_eterna_forest_6
+	end
+
+Sinnoh_EternaForest_EventScript_Person17::
+	goto SinnohP_eterna_forest_10
 	end
 
 Sinnoh_EternaForest_EventScript_Person25::
@@ -15,11 +19,11 @@ Sinnoh_EternaForest_EventScript_Person25::
 	end
 
 Sinnoh_EternaForest_EventScript_Sign13::
-	msgbox Sinnoh_EternaForest_Text_Sign13, MSGBOX_SIGN
+	goto SinnohP_eterna_forest_8
 	end
 
 Sinnoh_EternaForest_EventScript_Sign14::
-	msgbox Sinnoh_EternaForest_Text_Sign14, MSGBOX_SIGN
+	goto SinnohP_eterna_forest_9
 	end
 
 Sinnoh_EternaForest_Text_Person1:
@@ -29,22 +33,10 @@ Sinnoh_EternaForest_Text_Person1:
 	.string "I'll patch up your team whenever you\n"
 	.string "ask.$"
 
-Sinnoh_EternaForest_Text_Person2:
-	.string "The forest is so big! Follow the light.\n"
-	.string "That's how you find the way out.$"
-
 Sinnoh_EternaForest_Text_Person25:
 	.string "GARDENIA: You're in ETERNA FOREST! I'm\n"
 	.string "GARDENIA, ETERNA's GYM LEADER.\p"
 	.string "I come here to listen to the trees.\n"
 	.string "Visit my GYM soon!$"
-
-Sinnoh_EternaForest_Text_Sign13:
-	.string "A signboard. The paint has faded.$"
-
-Sinnoh_EternaForest_Text_Sign14:
-	.string "TRAINER TIPS\p"
-	.string "Heal your MOéMON before you head into\n"
-	.string "a cave. There's no CENTER inside!$"
 
 @ --- end of SINNOH words ---

@@ -592,6 +592,9 @@ def main():
         head += '\t.include "data/scripts/sinnoh_wild.inc"\n'
     if 'sinnoh_places.inc' not in head:
         head += '\t.include "data/scripts/sinnoh_places.inc"\n'
+    if 'platinum_scripts.inc' not in head:
+        # Platinum's own scripts, converted when the game is built (tools/sinnoh/gen_scripts.py; never committed)
+        head += '\t.include "sinnoh/platinum_scripts.inc"\n'
     open(path, 'w').write(head + ''.join('\t.include "data/maps/%s/scripts.inc"\n' % n for n in names))
     rows = ''.join('    {%s, %d, %d, %d, %d, %d},\n' % (p['id'], p['matrix'], p['x0'], p['z0'], p['x1'] - p['x0'] + 1,
                                                        p['z1'] - p['z0'] + 1) for p in outdoor + indoor)

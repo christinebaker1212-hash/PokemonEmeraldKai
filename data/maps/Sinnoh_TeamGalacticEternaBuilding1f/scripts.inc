@@ -3,7 +3,7 @@ Sinnoh_TeamGalacticEternaBuilding1f_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_TeamGalacticEternaBuilding1f_EventScript_Bg1::
-	msgbox Sinnoh_TeamGalacticEternaBuilding1f_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_team_galactic_eterna_building_1f_3
 	end
 
 Sinnoh_TeamGalacticEternaBuilding1f_EventScript_Person1::
@@ -21,9 +21,6 @@ Sinnoh_TeamGalacticEternaBuilding1f_EventScript_Person5::
 Sinnoh_TeamGalacticEternaBuilding1f_EventScript_Person6::
 	msgbox Sinnoh_TeamGalacticEternaBuilding1f_Text_Person6, MSGBOX_NPC
 	end
-
-Sinnoh_TeamGalacticEternaBuilding1f_Text_Bg1:
-	.string "A notice on the wall.$"
 
 Sinnoh_TeamGalacticEternaBuilding1f_Text_Person1:
 	.string "We're TEAM GALACTIC! We'll build a\n"

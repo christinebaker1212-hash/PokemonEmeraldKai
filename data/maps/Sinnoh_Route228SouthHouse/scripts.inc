@@ -3,47 +3,23 @@ Sinnoh_Route228SouthHouse_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Route228SouthHouse_EventScript_Bg1::
-	msgbox Sinnoh_Route228SouthHouse_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_route_228_south_house_4
 	end
 
 Sinnoh_Route228SouthHouse_EventScript_Bg2::
-	msgbox Sinnoh_Route228SouthHouse_Text_Bg2, MSGBOX_SIGN
+	goto SinnohP_route_228_south_house_5
 	end
 
 Sinnoh_Route228SouthHouse_EventScript_Bg3::
-	msgbox Sinnoh_Route228SouthHouse_Text_Bg3, MSGBOX_SIGN
+	goto SinnohP_route_228_south_house_3
 	end
 
 Sinnoh_Route228SouthHouse_EventScript_Bg4::
-	msgbox Sinnoh_Route228SouthHouse_Text_Bg4, MSGBOX_SIGN
+	goto SinnohP_route_228_south_house_2
 	end
 
 Sinnoh_Route228SouthHouse_EventScript_Person1::
-	msgbox Sinnoh_Route228SouthHouse_Text_Person1, MSGBOX_NPC
+	goto SinnohP_route_228_south_house_1
 	end
-
-Sinnoh_Route228SouthHouse_Text_Bg1:
-	.string "The shelves are packed with books\n"
-	.string "about MOéMON and the places they\l"
-	.string "live.$"
-
-Sinnoh_Route228SouthHouse_Text_Bg2:
-	.string "The shelves are packed with books\n"
-	.string "about MOéMON and the places they\l"
-	.string "live.$"
-
-Sinnoh_Route228SouthHouse_Text_Bg3:
-	.string "The shelves are packed with books\n"
-	.string "about MOéMON and the places they\l"
-	.string "live.$"
-
-Sinnoh_Route228SouthHouse_Text_Bg4:
-	.string "The shelves are packed with books\n"
-	.string "about MOéMON and the places they\l"
-	.string "live.$"
-
-Sinnoh_Route228SouthHouse_Text_Person1:
-	.string "Welcome, traveler. Have a seat out of\n"
-	.string "the sand.$"
 
 @ --- end of SINNOH words ---

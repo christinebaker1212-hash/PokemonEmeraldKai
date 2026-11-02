@@ -3,19 +3,19 @@ Sinnoh_EternaCity_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_EternaCity_EventScript_Bg3::
-	msgbox Sinnoh_EternaCity_Text_Bg3, MSGBOX_SIGN
+	goto SinnohP_eterna_city_18
 	end
 
 Sinnoh_EternaCity_EventScript_Person1::
-	msgbox Sinnoh_EternaCity_Text_Person1, MSGBOX_NPC
+	goto SinnohP_eterna_city_5
 	end
 
 Sinnoh_EternaCity_EventScript_Person2::
-	msgbox Sinnoh_EternaCity_Text_Person2, MSGBOX_NPC
+	goto SinnohP_eterna_city_10
 	end
 
 Sinnoh_EternaCity_EventScript_Person3::
-	msgbox Sinnoh_EternaCity_Text_Person3, MSGBOX_NPC
+	goto SinnohP_eterna_city_11
 	end
 
 Sinnoh_EternaCity_EventScript_Person4::
@@ -27,11 +27,11 @@ Sinnoh_EternaCity_EventScript_Person5::
 	end
 
 Sinnoh_EternaCity_EventScript_Person11::
-	msgbox Sinnoh_EternaCity_Text_Person11, MSGBOX_NPC
+	goto SinnohP_eterna_city_6
 	end
 
 Sinnoh_EternaCity_EventScript_Person12::
-	msgbox Sinnoh_EternaCity_Text_Person12, MSGBOX_NPC
+	goto SinnohP_eterna_city_9
 	end
 
 Sinnoh_EternaCity_EventScript_Person13::
@@ -43,11 +43,11 @@ Sinnoh_EternaCity_EventScript_Person24::
 	end
 
 Sinnoh_EternaCity_EventScript_Person25::
-	msgbox Sinnoh_EternaCity_Text_Person25, MSGBOX_NPC
+	goto SinnohP_eterna_city_8
 	end
 
 Sinnoh_EternaCity_EventScript_Person29::
-	msgbox Sinnoh_EternaCity_Text_Person29, MSGBOX_NPC
+	goto SinnohP_eterna_city_19
 	end
 
 Sinnoh_EternaCity_EventScript_Person31::
@@ -67,51 +67,32 @@ Sinnoh_EternaCity_EventScript_Person34::
 	end
 
 Sinnoh_EternaCity_EventScript_Sign6::
-	msgbox Sinnoh_EternaCity_Text_Sign6, MSGBOX_SIGN
+	goto SinnohP_eterna_city_13
 	end
 
 Sinnoh_EternaCity_EventScript_Sign7::
-	msgbox Sinnoh_EternaCity_Text_Sign7, MSGBOX_SIGN
+	goto SinnohP_eterna_city_14
 	end
 
 Sinnoh_EternaCity_EventScript_Sign8::
-	msgbox Sinnoh_EternaCity_Text_Sign8, MSGBOX_SIGN
+	goto SinnohP_eterna_city_12
 	end
 
 Sinnoh_EternaCity_EventScript_Sign9::
-	msgbox Sinnoh_EternaCity_Text_Sign9, MSGBOX_SIGN
+	goto SinnohP_eterna_city_15
 	end
 
 Sinnoh_EternaCity_EventScript_Sign10::
-	msgbox Sinnoh_EternaCity_Text_Sign10, MSGBOX_SIGN
+	goto SinnohP_eterna_city_12
 	end
 
 Sinnoh_EternaCity_EventScript_Sign27::
-	msgbox Sinnoh_EternaCity_Text_Sign27, MSGBOX_SIGN
+	goto SinnohP_eterna_city_16
 	end
 
 Sinnoh_EternaCity_EventScript_Sign28::
-	msgbox Sinnoh_EternaCity_Text_Sign28, MSGBOX_SIGN
+	goto SinnohP_eterna_city_17
 	end
-
-Sinnoh_EternaCity_Text_Bg3:
-	.string "An old stone statue of a MOéMON. Its\n"
-	.string "face is worn smooth by time and rain.$"
-
-Sinnoh_EternaCity_Text_Person1:
-	.string "ETERNA is an old city. People here\n"
-	.string "have been telling the same stories for\l"
-	.string "centuries.$"
-
-Sinnoh_EternaCity_Text_Person2:
-	.string "The statue in the square is of a\n"
-	.string "MOéMON from long ago. Nobody agrees\l"
-	.string "on which one.$"
-
-Sinnoh_EternaCity_Text_Person3:
-	.string "I rode my bike all the way from\n"
-	.string "OREBURGH! Okay, I walked the last\l"
-	.string "half.$"
 
 Sinnoh_EternaCity_Text_Person4:
 	.string "This is TEAM GALACTIC's building. No\n"
@@ -120,15 +101,6 @@ Sinnoh_EternaCity_Text_Person4:
 Sinnoh_EternaCity_Text_Person5:
 	.string "The BOSS is very busy. Very, very busy.\n"
 	.string "Go away!$"
-
-Sinnoh_EternaCity_Text_Person11:
-	.string "The flowers in ETERNA bloom all year.\n"
-	.string "GARDENIA helps keep them that way.$"
-
-Sinnoh_EternaCity_Text_Person12:
-	.string "ETERNA FOREST is to the west. It's\n"
-	.string "beautiful, but the trees are so thick\l"
-	.string "you can lose the path.$"
 
 Sinnoh_EternaCity_Text_Person13:
 	.string "CYNTHIA: That statue is said to show a\n"
@@ -140,16 +112,6 @@ Sinnoh_EternaCity_Text_Person13:
 Sinnoh_EternaCity_Text_Person24:
 	.string "Our ETERNA building is very important.\n"
 	.string "Like a moon base. On the ground.$"
-
-Sinnoh_EternaCity_Text_Person25:
-	.string "I caught three BURMY in the forest\n"
-	.string "today! They all look a little\l"
-	.string "different.$"
-
-Sinnoh_EternaCity_Text_Person29:
-	.string "My MOéMON loves the herb shop. It\n"
-	.string "doesn't like the herbs, though. It\l"
-	.string "just likes the smell.$"
 
 Sinnoh_EternaCity_Text_Person31:
 	.string "There's a big bug in the forest that\n"
@@ -173,32 +135,5 @@ Sinnoh_EternaCity_Text_Person34:
 	.string "like a million years old! I raced here\l"
 	.string "to see it. Now I'm racing to the GYM.\l"
 	.string "Bye!$"
-
-Sinnoh_EternaCity_Text_Sign6:
-	.string "ETERNA CITY MOéMON GYM\p"
-	.string "LEADER: GARDENIA\p"
-	.string "The gardener who loves GRASS!$"
-
-Sinnoh_EternaCity_Text_Sign7:
-	.string "RAD RICKSHAW'S CYCLE SHOP\p"
-	.string "Bikes for every TRAINER!$"
-
-Sinnoh_EternaCity_Text_Sign8:
-	.string "ETERNA CITY\p"
-	.string "A city that remembers the past.$"
-
-Sinnoh_EternaCity_Text_Sign9:
-	.string "A tall office building. The doors are\n"
-	.string "shut.$"
-
-Sinnoh_EternaCity_Text_Sign10:
-	.string "ETERNA CITY\p"
-	.string "A city that remembers the past.$"
-
-Sinnoh_EternaCity_Text_Sign27:
-	.string "THE UNDERGROUND MAN'S HOUSE$"
-
-Sinnoh_EternaCity_Text_Sign28:
-	.string "ETERNA CONDOMINIUMS$"
 
 @ --- end of SINNOH words ---

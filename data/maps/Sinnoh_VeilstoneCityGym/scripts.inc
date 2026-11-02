@@ -11,15 +11,15 @@ Sinnoh_VeilstoneCityGym_EventScript_Bg2::
 	end
 
 Sinnoh_VeilstoneCityGym_EventScript_Bg3::
-	msgbox Sinnoh_VeilstoneCityGym_Text_Bg3, MSGBOX_SIGN
+	goto SinnohP_veilstone_city_gym_7
 	end
 
 Sinnoh_VeilstoneCityGym_EventScript_Bg4::
-	msgbox Sinnoh_VeilstoneCityGym_Text_Bg4, MSGBOX_SIGN
+	goto SinnohP_veilstone_city_gym_5
 	end
 
 Sinnoh_VeilstoneCityGym_EventScript_Bg5::
-	msgbox Sinnoh_VeilstoneCityGym_Text_Bg5, MSGBOX_SIGN
+	goto SinnohP_veilstone_city_gym_6
 	end
 
 Sinnoh_VeilstoneCityGym_EventScript_Person1::
@@ -57,18 +57,6 @@ Sinnoh_VeilstoneCityGym_Text_Bg1:
 Sinnoh_VeilstoneCityGym_Text_Bg2:
 	.string "VEILSTONE CITY MOéMON GYM\p"
 	.string "LEADER: MAYLENE$"
-
-Sinnoh_VeilstoneCityGym_Text_Bg3:
-	.string "A poster of a TRAINER striking a pose.\n"
-	.string "It's signed!$"
-
-Sinnoh_VeilstoneCityGym_Text_Bg4:
-	.string "A poster of a TRAINER striking a pose.\n"
-	.string "It's signed!$"
-
-Sinnoh_VeilstoneCityGym_Text_Bg5:
-	.string "A poster of a TRAINER striking a pose.\n"
-	.string "It's signed!$"
 
 Sinnoh_VeilstoneCityGym_Text_Person1Intro:
 	.string "I'm MAYLENE. I've trained here since I\n"

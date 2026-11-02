@@ -20,7 +20,7 @@ Sinnoh_PastoriaCityNortheastHouse_EventScript_Person1_Given::
 	end
 
 Sinnoh_PastoriaCityNortheastHouse_EventScript_Person2::
-	msgbox Sinnoh_PastoriaCityNortheastHouse_Text_Person2, MSGBOX_NPC
+	goto SinnohP_pastoria_city_northeast_house_2
 	end
 
 Sinnoh_PastoriaCityNortheastHouse_EventScript_Person3::
@@ -35,10 +35,6 @@ Sinnoh_PastoriaCityNortheastHouse_Text_Person1:
 Sinnoh_PastoriaCityNortheastHouse_Text_Person1Gift:
 	.string "My sister made scarves for every\n"
 	.string "MOéMON we know. Here's a spare!$"
-
-Sinnoh_PastoriaCityNortheastHouse_Text_Person2:
-	.string "I'm going to win! My brother still can't\n"
-	.string "get past WAKE's GYARADOS.$"
 
 Sinnoh_PastoriaCityNortheastHouse_Text_Person3:
 	.string "PACHIRISU: Chi!\p"

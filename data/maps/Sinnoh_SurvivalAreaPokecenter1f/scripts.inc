@@ -16,28 +16,15 @@ Sinnoh_SurvivalAreaPokecenter1f_EventScript_Person1::
 	end
 
 Sinnoh_SurvivalAreaPokecenter1f_EventScript_Person2::
-	msgbox Sinnoh_SurvivalAreaPokecenter1f_Text_Person2, MSGBOX_NPC
+	goto SinnohP_survival_area_pokecenter_1f_2
 	end
 
 Sinnoh_SurvivalAreaPokecenter1f_EventScript_Person3::
-	msgbox Sinnoh_SurvivalAreaPokecenter1f_Text_Person3, MSGBOX_NPC
+	goto SinnohP_survival_area_pokecenter_1f_3
 	end
 
 Sinnoh_SurvivalAreaPokecenter1f_EventScript_Person4::
-	msgbox Sinnoh_SurvivalAreaPokecenter1f_Text_Person4, MSGBOX_NPC
+	goto SinnohP_survival_area_pokecenter_1f_4
 	end
-
-Sinnoh_SurvivalAreaPokecenter1f_Text_Person2:
-	.string "The SURVIVAL AREA is where you prove\n"
-	.string "you can keep going. Battle after\l"
-	.string "battle!$"
-
-Sinnoh_SurvivalAreaPokecenter1f_Text_Person3:
-	.string "I've been training here for months. My\n"
-	.string "MOéMON and I are tougher than ever.$"
-
-Sinnoh_SurvivalAreaPokecenter1f_Text_Person4:
-	.string "I can sense strong TRAINERS here.\n"
-	.string "You're one of them.$"
 
 @ --- end of SINNOH words ---

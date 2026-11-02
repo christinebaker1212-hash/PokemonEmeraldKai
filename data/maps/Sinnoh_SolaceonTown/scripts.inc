@@ -7,15 +7,15 @@ Sinnoh_SolaceonTown_EventScript_Person1::
 	end
 
 Sinnoh_SolaceonTown_EventScript_Person2::
-	msgbox Sinnoh_SolaceonTown_Text_Person2, MSGBOX_NPC
+	goto SinnohP_solaceon_town_3
 	end
 
 Sinnoh_SolaceonTown_EventScript_Person3::
-	msgbox Sinnoh_SolaceonTown_Text_Person3, MSGBOX_NPC
+	goto SinnohP_solaceon_town_1
 	end
 
 Sinnoh_SolaceonTown_EventScript_Person8::
-	msgbox Sinnoh_SolaceonTown_Text_Person8, MSGBOX_NPC
+	goto SinnohP_solaceon_town_4
 	end
 
 Sinnoh_SolaceonTown_EventScript_Person9::
@@ -23,7 +23,7 @@ Sinnoh_SolaceonTown_EventScript_Person9::
 	end
 
 Sinnoh_SolaceonTown_EventScript_Person15::
-	msgbox Sinnoh_SolaceonTown_Text_Person15, MSGBOX_NPC
+	goto SinnohP_solaceon_town_5
 	end
 
 Sinnoh_SolaceonTown_EventScript_Person19::
@@ -31,59 +31,29 @@ Sinnoh_SolaceonTown_EventScript_Person19::
 	end
 
 Sinnoh_SolaceonTown_EventScript_Sign5::
-	msgbox Sinnoh_SolaceonTown_Text_Sign5, MSGBOX_SIGN
+	goto SinnohP_solaceon_town_7
 	end
 
 Sinnoh_SolaceonTown_EventScript_Sign6::
-	msgbox Sinnoh_SolaceonTown_Text_Sign6, MSGBOX_SIGN
+	goto SinnohP_solaceon_town_8
 	end
 
 Sinnoh_SolaceonTown_EventScript_Sign7::
-	msgbox Sinnoh_SolaceonTown_Text_Sign7, MSGBOX_SIGN
+	goto SinnohP_solaceon_town_9
 	end
 
 Sinnoh_SolaceonTown_Text_Person1:
 	.string "SOLACEON is a quiet town. The MOéMON\n"
 	.string "DAY CARE keeps it lively, though.$"
 
-Sinnoh_SolaceonTown_Text_Person2:
-	.string "I visit the DAY CARE every day to see\n"
-	.string "the MOéMON play.$"
-
-Sinnoh_SolaceonTown_Text_Person3:
-	.string "The cows here make the best milk. I'm a\n"
-	.string "little biased.$"
-
-Sinnoh_SolaceonTown_Text_Person8:
-	.string "I ride out to the ruins every morning.\n"
-	.string "The UNOWN there are like little\l"
-	.string "letters.$"
-
 Sinnoh_SolaceonTown_Text_Person9:
 	.string "The ruins east of town are full of\n"
 	.string "strange symbols. I've been studying\l"
 	.string "them for years.$"
 
-Sinnoh_SolaceonTown_Text_Person15:
-	.string "My MOéMON pulls the cart, I steer. We\n"
-	.string "make a good team.$"
-
 Sinnoh_SolaceonTown_Text_Person19:
 	.string "BARRY: SOLACEON's ruins have UNOWN all\n"
 	.string "over the walls! I tried to read them.\l"
 	.string "They said 'GO AWAY'. Probably.$"
-
-Sinnoh_SolaceonTown_Text_Sign5:
-	.string "SOLACEON TOWN\p"
-	.string "The peaceful town where MOéMON are\n"
-	.string "raised with care.$"
-
-Sinnoh_SolaceonTown_Text_Sign6:
-	.string "MOéMON DAY CARE\p"
-	.string "We raise your MOéMON for you!$"
-
-Sinnoh_SolaceonTown_Text_Sign7:
-	.string "MOéMON NEWS PRESS\p"
-	.string "All the news about MOéMON, every day.$"
 
 @ --- end of SINNOH words ---

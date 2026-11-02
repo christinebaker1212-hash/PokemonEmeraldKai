@@ -3,17 +3,11 @@ Sinnoh_GreatMarsh5_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_GreatMarsh5_EventScript_Person3::
-	msgbox Sinnoh_GreatMarsh5_Text_Person3, MSGBOX_NPC
+	goto SinnohP_great_marsh_5_1
 	end
 
 Sinnoh_GreatMarsh5_EventScript_Sign2::
-	msgbox Sinnoh_GreatMarsh5_Text_Sign2, MSGBOX_SIGN
+	goto SinnohP_great_marsh_5_2
 	end
-
-Sinnoh_GreatMarsh5_Text_Person3:
-	.string "The mud here is so deep! I lost a shoe!$"
-
-Sinnoh_GreatMarsh5_Text_Sign2:
-	.string "A map of this area.$"
 
 @ --- end of SINNOH words ---

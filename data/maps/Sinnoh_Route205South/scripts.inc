@@ -3,7 +3,7 @@ Sinnoh_Route205South_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Route205South_EventScript_Person9::
-	msgbox Sinnoh_Route205South_Text_Person9, MSGBOX_NPC
+	goto SinnohP_route_205_south_2
 	end
 
 Sinnoh_Route205South_EventScript_Person13::
@@ -23,20 +23,16 @@ Sinnoh_Route205South_EventScript_Person32::
 	end
 
 Sinnoh_Route205South_EventScript_Sign7::
-	msgbox Sinnoh_Route205South_Text_Sign7, MSGBOX_SIGN
+	goto SinnohP_route_205_south_8
 	end
 
 Sinnoh_Route205South_EventScript_Sign8::
-	msgbox Sinnoh_Route205South_Text_Sign8, MSGBOX_SIGN
+	goto SinnohP_route_205_south_9
 	end
 
 Sinnoh_Route205South_EventScript_Sign10::
-	msgbox Sinnoh_Route205South_Text_Sign10, MSGBOX_SIGN
+	goto SinnohP_route_205_south_10
 	end
-
-Sinnoh_Route205South_Text_Person9:
-	.string "I caught a COMBEE in the honey trees!\n"
-	.string "Its friends were not happy about it.$"
 
 Sinnoh_Route205South_Text_Person13:
 	.string "TEAM GALACTIC is busy at the\n"
@@ -55,19 +51,5 @@ Sinnoh_Route205South_Text_Person32:
 	.string "The windmills here turn all day long. I\n"
 	.string "like to count them. I always lose\l"
 	.string "track at eleven.$"
-
-Sinnoh_Route205South_Text_Sign7:
-	.string "ROUTE 205\p"
-	.string "To FLOAROMA TOWN$"
-
-Sinnoh_Route205South_Text_Sign8:
-	.string "ROUTE 205\p"
-	.string "To ETERNA FOREST$"
-
-Sinnoh_Route205South_Text_Sign10:
-	.string "TRAINER TIPS\p"
-	.string "Slather HONEY on a sweet-smelling\n"
-	.string "tree and come back later. Something\l"
-	.string "might be waiting!$"
 
 @ --- end of SINNOH words ---

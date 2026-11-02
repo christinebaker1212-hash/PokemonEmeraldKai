@@ -7,7 +7,7 @@ Sinnoh_VeilstoneCitySouthwestHouse_EventScript_Person1::
 	end
 
 Sinnoh_VeilstoneCitySouthwestHouse_EventScript_Person2::
-	msgbox Sinnoh_VeilstoneCitySouthwestHouse_Text_Person2, MSGBOX_NPC
+	goto SinnohP_veilstone_city_southwest_house_2
 	end
 
 Sinnoh_VeilstoneCitySouthwestHouse_EventScript_Person3::
@@ -17,10 +17,6 @@ Sinnoh_VeilstoneCitySouthwestHouse_EventScript_Person3::
 Sinnoh_VeilstoneCitySouthwestHouse_Text_Person1:
 	.string "I love living by the cliffs. The wind\n"
 	.string "sounds like music at night.$"
-
-Sinnoh_VeilstoneCitySouthwestHouse_Text_Person2:
-	.string "My PACHIRISU sleeps in my hood. It's\n"
-	.string "warmer than a bed.$"
 
 Sinnoh_VeilstoneCitySouthwestHouse_Text_Person3:
 	.string "PACHIRISU: Chipa?\p"

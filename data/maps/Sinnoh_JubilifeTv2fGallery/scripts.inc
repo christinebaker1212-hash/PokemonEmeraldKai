@@ -51,11 +51,11 @@ Sinnoh_JubilifeTv2fGallery_EventScript_Person1::
 	end
 
 Sinnoh_JubilifeTv2fGallery_EventScript_Person2::
-	msgbox Sinnoh_JubilifeTv2fGallery_Text_Person2, MSGBOX_NPC
+	goto SinnohP_jubilife_tv_2f_gallery_13
 	end
 
 Sinnoh_JubilifeTv2fGallery_EventScript_Person3::
-	msgbox Sinnoh_JubilifeTv2fGallery_Text_Person3, MSGBOX_NPC
+	goto SinnohP_jubilife_tv_2f_gallery_14
 	end
 
 Sinnoh_JubilifeTv2fGallery_Text_Bg1:
@@ -106,14 +106,5 @@ Sinnoh_JubilifeTv2fGallery_Text_Person1:
 	.string "I sent in a photo of my MOéMON at the\n"
 	.string "top of MT. CORONET. I hope they hang\l"
 	.string "it up!$"
-
-Sinnoh_JubilifeTv2fGallery_Text_Person2:
-	.string "Every photo here tells a story. That\n"
-	.string "one with the sleeping SNORLAX is my\l"
-	.string "favorite.$"
-
-Sinnoh_JubilifeTv2fGallery_Text_Person3:
-	.string "Look! That's my picture! The one with\n"
-	.string "the flowers!$"
 
 @ --- end of SINNOH words ---

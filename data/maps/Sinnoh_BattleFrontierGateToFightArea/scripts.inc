@@ -3,23 +3,23 @@ Sinnoh_BattleFrontierGateToFightArea_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_BattleFrontierGateToFightArea_EventScript_Person1::
-	msgbox Sinnoh_BattleFrontierGateToFightArea_Text_Person1, MSGBOX_NPC
+	goto SinnohP_battle_frontier_gate_to_fight_area_10
 	end
 
 Sinnoh_BattleFrontierGateToFightArea_EventScript_Person2::
-	msgbox Sinnoh_BattleFrontierGateToFightArea_Text_Person2, MSGBOX_NPC
+	goto SinnohP_battle_frontier_gate_to_fight_area_9
 	end
 
 Sinnoh_BattleFrontierGateToFightArea_EventScript_Person3::
-	msgbox Sinnoh_BattleFrontierGateToFightArea_Text_Person3, MSGBOX_NPC
+	goto SinnohP_battle_frontier_gate_to_fight_area_8
 	end
 
 Sinnoh_BattleFrontierGateToFightArea_EventScript_Person4::
-	msgbox Sinnoh_BattleFrontierGateToFightArea_Text_Person4, MSGBOX_NPC
+	goto SinnohP_battle_frontier_gate_to_fight_area_6
 	end
 
 Sinnoh_BattleFrontierGateToFightArea_EventScript_Person5::
-	msgbox Sinnoh_BattleFrontierGateToFightArea_Text_Person5, MSGBOX_NPC
+	goto SinnohP_battle_frontier_gate_to_fight_area_4
 	end
 
 Sinnoh_BattleFrontierGateToFightArea_EventScript_Person6::
@@ -27,66 +27,24 @@ Sinnoh_BattleFrontierGateToFightArea_EventScript_Person6::
 	end
 
 Sinnoh_BattleFrontierGateToFightArea_EventScript_Person7::
-	msgbox Sinnoh_BattleFrontierGateToFightArea_Text_Person7, MSGBOX_NPC
+	goto SinnohP_battle_frontier_gate_to_fight_area_7
 	end
 
 Sinnoh_BattleFrontierGateToFightArea_EventScript_Person8::
-	msgbox Sinnoh_BattleFrontierGateToFightArea_Text_Person8, MSGBOX_NPC
+	goto SinnohP_battle_frontier_gate_to_fight_area_5
 	end
 
 Sinnoh_BattleFrontierGateToFightArea_EventScript_Person9::
-	msgbox Sinnoh_BattleFrontierGateToFightArea_Text_Person9, MSGBOX_NPC
+	goto SinnohP_battle_frontier_gate_to_fight_area_3
 	end
 
 Sinnoh_BattleFrontierGateToFightArea_EventScript_Person10::
-	msgbox Sinnoh_BattleFrontierGateToFightArea_Text_Person10, MSGBOX_NPC
+	goto SinnohP_battle_frontier_gate_to_fight_area_11
 	end
-
-Sinnoh_BattleFrontierGateToFightArea_Text_Person1:
-	.string "The BATTLE FRONTIER is just through\n"
-	.string "here. Good luck!$"
-
-Sinnoh_BattleFrontierGateToFightArea_Text_Person2:
-	.string "Every TRAINER who comes through this\n"
-	.string "gate dreams of beating a FRONTIER\l"
-	.string "BRAIN.$"
-
-Sinnoh_BattleFrontierGateToFightArea_Text_Person3:
-	.string "I've studied the FRONTIER's history.\n"
-	.string "It's as old as the BATTLE ZONE itself.$"
-
-Sinnoh_BattleFrontierGateToFightArea_Text_Person4:
-	.string "Welcome! This facility is getting\n"
-	.string "ready for challengers. Please come\l"
-	.string "back soon!$"
-
-Sinnoh_BattleFrontierGateToFightArea_Text_Person5:
-	.string "Welcome! This facility is getting\n"
-	.string "ready for challengers. Please come\l"
-	.string "back soon!$"
 
 Sinnoh_BattleFrontierGateToFightArea_Text_Person6:
 	.string "Welcome! This facility is getting\n"
 	.string "ready for challengers. Please come\l"
 	.string "back soon!$"
-
-Sinnoh_BattleFrontierGateToFightArea_Text_Person7:
-	.string "Welcome! This facility is getting\n"
-	.string "ready for challengers. Please come\l"
-	.string "back soon!$"
-
-Sinnoh_BattleFrontierGateToFightArea_Text_Person8:
-	.string "Welcome! This facility is getting\n"
-	.string "ready for challengers. Please come\l"
-	.string "back soon!$"
-
-Sinnoh_BattleFrontierGateToFightArea_Text_Person9:
-	.string "Welcome! This facility is getting\n"
-	.string "ready for challengers. Please come\l"
-	.string "back soon!$"
-
-Sinnoh_BattleFrontierGateToFightArea_Text_Person10:
-	.string "The FRONTIER is so exciting! I could\n"
-	.string "watch the battles forever.$"
 
 @ --- end of SINNOH words ---

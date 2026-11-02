@@ -15,7 +15,7 @@ Sinnoh_Route227_EventScript_Person12::
 	end
 
 Sinnoh_Route227_EventScript_Sign1::
-	msgbox Sinnoh_Route227_Text_Sign1, MSGBOX_SIGN
+	goto SinnohP_route_227_2
 	end
 
 Sinnoh_Route227_Text_Person4:
@@ -31,9 +31,5 @@ Sinnoh_Route227_Text_Person12:
 	.string "BUCK: Up the road is STARK MOUNTAIN.\n"
 	.string "TEAM GALACTIC's leftovers went in.\l"
 	.string "Let's go!$"
-
-Sinnoh_Route227_Text_Sign1:
-	.string "ROUTE 227\p"
-	.string "To STARK MOUNTAIN$"
 
 @ --- end of SINNOH words ---

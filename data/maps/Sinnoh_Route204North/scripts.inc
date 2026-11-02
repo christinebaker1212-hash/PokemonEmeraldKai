@@ -3,7 +3,7 @@ Sinnoh_Route204North_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Route204North_EventScript_Person5::
-	msgbox Sinnoh_Route204North_Text_Person5, MSGBOX_NPC
+	goto SinnohP_route_204_north_1
 	end
 
 Sinnoh_Route204North_EventScript_Person11::
@@ -24,12 +24,8 @@ Sinnoh_Route204North_EventScript_Person11_Given::
 	end
 
 Sinnoh_Route204North_EventScript_Sign6::
-	msgbox Sinnoh_Route204North_Text_Sign6, MSGBOX_SIGN
+	goto SinnohP_route_204_north_3
 	end
-
-Sinnoh_Route204North_Text_Person5:
-	.string "FLOAROMA TOWN is just ahead. You can\n"
-	.string "smell the flowers from here!$"
 
 Sinnoh_Route204North_Text_Person11:
 	.string "I love this road. The breeze from the\n"
@@ -38,9 +34,5 @@ Sinnoh_Route204North_Text_Person11:
 Sinnoh_Route204North_Text_Person11Gift:
 	.string "This TM blows like that breeze. Take\n"
 	.string "it!$"
-
-Sinnoh_Route204North_Text_Sign6:
-	.string "ROUTE 204\p"
-	.string "To FLOAROMA TOWN$"
 
 @ --- end of SINNOH words ---

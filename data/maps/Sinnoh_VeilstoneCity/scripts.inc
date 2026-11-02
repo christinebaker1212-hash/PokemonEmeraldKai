@@ -19,27 +19,27 @@ Sinnoh_VeilstoneCity_EventScript_Bg6::
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Person1::
-	msgbox Sinnoh_VeilstoneCity_Text_Person1, MSGBOX_NPC
+	goto SinnohP_veilstone_city_2
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Person2::
-	msgbox Sinnoh_VeilstoneCity_Text_Person2, MSGBOX_NPC
+	goto SinnohP_veilstone_city_4
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Person3::
-	msgbox Sinnoh_VeilstoneCity_Text_Person3, MSGBOX_NPC
+	goto SinnohP_veilstone_city_5
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Person4::
-	msgbox Sinnoh_VeilstoneCity_Text_Person4, MSGBOX_NPC
+	goto SinnohP_veilstone_city_8
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Person5::
-	msgbox Sinnoh_VeilstoneCity_Text_Person5, MSGBOX_NPC
+	goto SinnohP_veilstone_city_9
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Person6::
-	msgbox Sinnoh_VeilstoneCity_Text_Person6, MSGBOX_NPC
+	goto SinnohP_veilstone_city_6
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Person7::
@@ -55,7 +55,7 @@ Sinnoh_VeilstoneCity_EventScript_Person21::
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Person22::
-	msgbox Sinnoh_VeilstoneCity_Text_Person22, MSGBOX_NPC
+	goto SinnohP_veilstone_city_3
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Person23::
@@ -92,43 +92,43 @@ Sinnoh_VeilstoneCity_EventScript_Person27::
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Person29::
-	msgbox Sinnoh_VeilstoneCity_Text_Person29, MSGBOX_NPC
+	goto SinnohP_veilstone_city_32
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Person30::
-	msgbox Sinnoh_VeilstoneCity_Text_Person30, MSGBOX_NPC
+	goto SinnohP_veilstone_city_31
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Sign9::
-	msgbox Sinnoh_VeilstoneCity_Text_Sign9, MSGBOX_SIGN
+	goto SinnohP_veilstone_city_17
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Sign10::
-	msgbox Sinnoh_VeilstoneCity_Text_Sign10, MSGBOX_SIGN
+	goto SinnohP_veilstone_city_19
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Sign11::
-	msgbox Sinnoh_VeilstoneCity_Text_Sign11, MSGBOX_SIGN
+	goto SinnohP_veilstone_city_20
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Sign12::
-	msgbox Sinnoh_VeilstoneCity_Text_Sign12, MSGBOX_SIGN
+	goto SinnohP_veilstone_city_21
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Sign13::
-	msgbox Sinnoh_VeilstoneCity_Text_Sign13, MSGBOX_SIGN
+	goto SinnohP_veilstone_city_18
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Sign14::
-	msgbox Sinnoh_VeilstoneCity_Text_Sign14, MSGBOX_SIGN
+	goto SinnohP_veilstone_city_22
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Sign15::
-	msgbox Sinnoh_VeilstoneCity_Text_Sign15, MSGBOX_SIGN
+	goto SinnohP_veilstone_city_23
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Sign16::
-	msgbox Sinnoh_VeilstoneCity_Text_Sign16, MSGBOX_SIGN
+	goto SinnohP_veilstone_city_24
 	end
 
 Sinnoh_VeilstoneCity_Text_Bg3:
@@ -151,33 +151,6 @@ Sinnoh_VeilstoneCity_Text_Bg6:
 	.string "long ago. It seems to hum, very\l"
 	.string "faintly.$"
 
-Sinnoh_VeilstoneCity_Text_Person1:
-	.string "VEILSTONE is carved right out of the\n"
-	.string "mountains. The cliffs keep the wind\l"
-	.string "out.$"
-
-Sinnoh_VeilstoneCity_Text_Person2:
-	.string "The department store has everything.\n"
-	.string "I went in for one thing and came out\l"
-	.string "with ten.$"
-
-Sinnoh_VeilstoneCity_Text_Person3:
-	.string "MAYLENE trains from sunrise to\n"
-	.string "sunset. She's the hardest worker in\l"
-	.string "the city.$"
-
-Sinnoh_VeilstoneCity_Text_Person4:
-	.string "The GAME CORNER is just over there. I\n"
-	.string "only go to watch, of course.$"
-
-Sinnoh_VeilstoneCity_Text_Person5:
-	.string "Hi-yah! I'm going to challenge MAYLENE\n"
-	.string "again tomorrow. And the day after!$"
-
-Sinnoh_VeilstoneCity_Text_Person6:
-	.string "See those big rocks? People say they\n"
-	.string "fell from the sky a long time ago.$"
-
 Sinnoh_VeilstoneCity_Text_Person7:
 	.string "TEAM GALACTIC's headquarters are\n"
 	.string "somewhere in this city. Please be\l"
@@ -190,11 +163,6 @@ Sinnoh_VeilstoneCity_Text_Person8:
 Sinnoh_VeilstoneCity_Text_Person21:
 	.string "The warehouse is locked tight. Not\n"
 	.string "that I lost the key. Nope.$"
-
-Sinnoh_VeilstoneCity_Text_Person22:
-	.string "My guitar sounds great bouncing off\n"
-	.string "these cliffs. Listen! ...Okay, maybe\l"
-	.string "not that great.$"
 
 Sinnoh_VeilstoneCity_Text_Person23:
 	.string "I came to VEILSTONE to get tough. The\n"
@@ -226,48 +194,5 @@ Sinnoh_VeilstoneCity_Text_Person27:
 	.string "stands right here in VEILSTONE.\p"
 	.string "I am gathering clues. Clue number one:\n"
 	.string "they really like the color blue.$"
-
-Sinnoh_VeilstoneCity_Text_Person29:
-	.string "Training under the stars is the best.\n"
-	.string "You can hear your MOéMON breathe.$"
-
-Sinnoh_VeilstoneCity_Text_Person30:
-	.string "I play here every evening. The rocks\n"
-	.string "are my audience. They never boo.$"
-
-Sinnoh_VeilstoneCity_Text_Sign9:
-	.string "VEILSTONE CITY\p"
-	.string "The rugged town carved from stone.$"
-
-Sinnoh_VeilstoneCity_Text_Sign10:
-	.string "A large warehouse. The doors are\n"
-	.string "locked.$"
-
-Sinnoh_VeilstoneCity_Text_Sign11:
-	.string "A tall, strange building. Nobody seems\n"
-	.string "to come in or out.$"
-
-Sinnoh_VeilstoneCity_Text_Sign12:
-	.string "VEILSTONE DEPARTMENT STORE\p"
-	.string "Everything a TRAINER needs, all in one\n"
-	.string "place.$"
-
-Sinnoh_VeilstoneCity_Text_Sign13:
-	.string "VEILSTONE CITY MOéMON GYM\p"
-	.string "LEADER: MAYLENE\p"
-	.string "The fighter who trains with all her\n"
-	.string "heart!$"
-
-Sinnoh_VeilstoneCity_Text_Sign14:
-	.string "GAME CORNER\p"
-	.string "Try your luck!$"
-
-Sinnoh_VeilstoneCity_Text_Sign15:
-	.string "PRIZE EXCHANGE\p"
-	.string "Trade your coins for prizes.$"
-
-Sinnoh_VeilstoneCity_Text_Sign16:
-	.string "ROUTE 214\p"
-	.string "To LAKE VALOR$"
 
 @ --- end of SINNOH words ---

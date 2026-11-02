@@ -3,7 +3,7 @@ Sinnoh_Route221House_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Route221House_EventScript_Bg1::
-	msgbox Sinnoh_Route221House_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_route_221_house_2
 	end
 
 Sinnoh_Route221House_EventScript_Person1::
@@ -22,9 +22,6 @@ Sinnoh_Route221House_EventScript_Person1_Given::
 	msgbox Sinnoh_Route221House_Text_Person1, MSGBOX_DEFAULT
 	release
 	end
-
-Sinnoh_Route221House_Text_Bg1:
-	.string "A notice on the wall.$"
 
 Sinnoh_Route221House_Text_Person1:
 	.string "The park up the road is still being\n"

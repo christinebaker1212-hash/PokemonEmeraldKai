@@ -3,7 +3,7 @@ Sinnoh_PastoriaCityMiddleHouse_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_PastoriaCityMiddleHouse_EventScript_Person1::
-	msgbox Sinnoh_PastoriaCityMiddleHouse_Text_Person1, MSGBOX_NPC
+	goto SinnohP_pastoria_city_middle_house_1
 	end
 
 Sinnoh_PastoriaCityMiddleHouse_EventScript_Person2::
@@ -22,10 +22,6 @@ Sinnoh_PastoriaCityMiddleHouse_EventScript_Person2_Given::
 	msgbox Sinnoh_PastoriaCityMiddleHouse_Text_Person2, MSGBOX_DEFAULT
 	release
 	end
-
-Sinnoh_PastoriaCityMiddleHouse_Text_Person1:
-	.string "When I was a boy, the marsh came right\n"
-	.string "up to the door. The town's grown a lot.$"
 
 Sinnoh_PastoriaCityMiddleHouse_Text_Person2:
 	.string "I caught a SKORUPI in the marsh! Okay,\n"

@@ -15,7 +15,7 @@ Sinnoh_Route216House_EventScript_Person1::
 	end
 
 Sinnoh_Route216House_EventScript_Person2::
-	msgbox Sinnoh_Route216House_Text_Person2, MSGBOX_NPC
+	goto SinnohP_route_216_house_2
 	end
 
 Sinnoh_Route216House_Text_Bg1:
@@ -29,10 +29,5 @@ Sinnoh_Route216House_Text_Bg2:
 Sinnoh_Route216House_Text_Person1:
 	.string "Get warm by the fire. The snow outside\n"
 	.string "won't let up any time soon.$"
-
-Sinnoh_Route216House_Text_Person2:
-	.string "We keep this house open for travelers.\n"
-	.string "Nobody should be stuck out in the\l"
-	.string "cold.$"
 
 @ --- end of SINNOH words ---

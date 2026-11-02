@@ -3,11 +3,11 @@ Sinnoh_FloaromaTown_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_FloaromaTown_EventScript_Person1::
-	msgbox Sinnoh_FloaromaTown_Text_Person1, MSGBOX_NPC
+	goto SinnohP_floaroma_town_5
 	end
 
 Sinnoh_FloaromaTown_EventScript_Person2::
-	msgbox Sinnoh_FloaromaTown_Text_Person2, MSGBOX_NPC
+	goto SinnohP_floaroma_town_4
 	end
 
 Sinnoh_FloaromaTown_EventScript_Person3::
@@ -32,7 +32,7 @@ Sinnoh_FloaromaTown_EventScript_Person4_Given::
 	end
 
 Sinnoh_FloaromaTown_EventScript_Person5::
-	msgbox Sinnoh_FloaromaTown_Text_Person5, MSGBOX_NPC
+	goto SinnohP_floaroma_town_6
 	end
 
 Sinnoh_FloaromaTown_EventScript_Person8::
@@ -44,29 +44,20 @@ Sinnoh_FloaromaTown_EventScript_Person9::
 	end
 
 Sinnoh_FloaromaTown_EventScript_Person13::
-	msgbox Sinnoh_FloaromaTown_Text_Person13, MSGBOX_NPC
+	goto SinnohP_floaroma_town_7
 	end
 
 Sinnoh_FloaromaTown_EventScript_Sign10::
-	msgbox Sinnoh_FloaromaTown_Text_Sign10, MSGBOX_SIGN
+	goto SinnohP_floaroma_town_8
 	end
 
 Sinnoh_FloaromaTown_EventScript_Sign11::
-	msgbox Sinnoh_FloaromaTown_Text_Sign11, MSGBOX_SIGN
+	goto SinnohP_floaroma_town_9
 	end
 
 Sinnoh_FloaromaTown_EventScript_Sign12::
-	msgbox Sinnoh_FloaromaTown_Text_Sign12, MSGBOX_SIGN
+	goto SinnohP_floaroma_town_10
 	end
-
-Sinnoh_FloaromaTown_Text_Person1:
-	.string "The flowers in FLOAROMA grow all year\n"
-	.string "long. Nobody knows why, and nobody\l"
-	.string "minds.$"
-
-Sinnoh_FloaromaTown_Text_Person2:
-	.string "I make flower crowns for my MOéMON. It\n"
-	.string "wears one every day!$"
 
 Sinnoh_FloaromaTown_Text_Person3:
 	.string "The meadow is full of sweet-smelling\n"
@@ -83,10 +74,6 @@ Sinnoh_FloaromaTown_Text_Person4Gift:
 	.string "me. It's meant for a very special\l"
 	.string "MOéMON. Take it!$"
 
-Sinnoh_FloaromaTown_Text_Person5:
-	.string "I sneezed so many times walking\n"
-	.string "through the meadow. Worth it, though!$"
-
 Sinnoh_FloaromaTown_Text_Person8:
 	.string "TEAM GALACTIC's taking the sweet\n"
 	.string "HONEY from the MEADOW. It's for...\l"
@@ -95,21 +82,5 @@ Sinnoh_FloaromaTown_Text_Person8:
 Sinnoh_FloaromaTown_Text_Person9:
 	.string "Don't look at me like that. Honey is\n"
 	.string "very important to our plans. Very.$"
-
-Sinnoh_FloaromaTown_Text_Person13:
-	.string "I set up my tent in the meadow. Waking\n"
-	.string "up to flowers is the best.$"
-
-Sinnoh_FloaromaTown_Text_Sign10:
-	.string "FLOAROMA TOWN\p"
-	.string "The town that blooms all year.$"
-
-Sinnoh_FloaromaTown_Text_Sign11:
-	.string "PICK A PECK OF COLORS FLOWER SHOP\p"
-	.string "Flowers for every occasion.$"
-
-Sinnoh_FloaromaTown_Text_Sign12:
-	.string "FLOAROMA MEADOW\p"
-	.string "Please don't pick the flowers!$"
 
 @ --- end of SINNOH words ---

@@ -262,6 +262,7 @@ gScriptCmdTable::
 	script_cmd_table_entry SCR_OP_QZ_NOP_F3                     ScrCmd_qz_nop_f3                      @ 0xf3
 	script_cmd_table_entry SCR_OP_QZ_NOP_F4                     ScrCmd_qz_nop_f4                      @ 0xf4
 	script_cmd_table_entry SCR_OP_QZ_CHECKMULTIPLAYERORFLAG     ScrCmd_qz_checkmultiplayerorflag      @ 0xf5
+	script_cmd_table_entry SCR_OP_SINNOH                        ScrCmd_sinnoh                         @ 0xf6
 
 	.if ALLOCATE_SCRIPT_CMD_TABLE
 gScriptCmdTableEnd::

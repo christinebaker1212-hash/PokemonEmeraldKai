@@ -216,23 +216,23 @@ Sinnoh_BattleTower_EventScript_Person2::
 	end
 
 Sinnoh_BattleTower_EventScript_Person5::
-	msgbox Sinnoh_BattleTower_Text_Person5, MSGBOX_NPC
+	goto SinnohP_battle_tower_19
 	end
 
 Sinnoh_BattleTower_EventScript_Person6::
-	msgbox Sinnoh_BattleTower_Text_Person6, MSGBOX_NPC
+	goto SinnohP_battle_tower_15
 	end
 
 Sinnoh_BattleTower_EventScript_Person7::
-	msgbox Sinnoh_BattleTower_Text_Person7, MSGBOX_NPC
+	goto SinnohP_battle_tower_16
 	end
 
 Sinnoh_BattleTower_EventScript_Person8::
-	msgbox Sinnoh_BattleTower_Text_Person8, MSGBOX_NPC
+	goto SinnohP_battle_tower_17
 	end
 
 Sinnoh_BattleTower_EventScript_Person9::
-	msgbox Sinnoh_BattleTower_Text_Person9, MSGBOX_NPC
+	goto SinnohP_battle_tower_18
 	end
 
 Sinnoh_BattleTower_EventScript_Person10::
@@ -240,11 +240,11 @@ Sinnoh_BattleTower_EventScript_Person10::
 	end
 
 Sinnoh_BattleTower_EventScript_Person11::
-	msgbox Sinnoh_BattleTower_Text_Person11, MSGBOX_NPC
+	goto SinnohP_battle_tower_20
 	end
 
 Sinnoh_BattleTower_EventScript_Person12::
-	msgbox Sinnoh_BattleTower_Text_Person12, MSGBOX_NPC
+	goto SinnohP_battle_tower_14
 	end
 
 Sinnoh_BattleTower_EventScript_Person13::
@@ -268,38 +268,9 @@ Sinnoh_BattleTower_Text_Person2:
 	.string "with a partner aren't open yet. The\l"
 	.string "single battle counter is!$"
 
-Sinnoh_BattleTower_Text_Person5:
-	.string "I'm sketching the TRAINERS who come\n"
-	.string "here. The tower inspires them.$"
-
-Sinnoh_BattleTower_Text_Person6:
-	.string "I run here every morning to get ready\n"
-	.string "for my challenge!$"
-
-Sinnoh_BattleTower_Text_Person7:
-	.string "I'm here to cheer on my favorite\n"
-	.string "TRAINERS! Go go go!$"
-
-Sinnoh_BattleTower_Text_Person8:
-	.string "I'll be the TOWER's champion! As soon\n"
-	.string "as it opens!$"
-
-Sinnoh_BattleTower_Text_Person9:
-	.string "PIKACHU: Pika!\p"
-	.string "It's sitting on its TRAINER's\n"
-	.string "shoulder.$"
-
 Sinnoh_BattleTower_Text_Person10:
 	.string "PIKACHU: Chu!\p"
 	.string "It's looking around excitedly.$"
-
-Sinnoh_BattleTower_Text_Person11:
-	.string "I'm keeping notes on every battle. I'm\n"
-	.string "going to beat the tower someday!$"
-
-Sinnoh_BattleTower_Text_Person12:
-	.string "The tower is so tall. I wonder how far\n"
-	.string "you have to win to get to the top.$"
 
 Sinnoh_BattleTower_Text_Person13:
 	.string "I'm covering the BATTLE TOWER's\n"

@@ -15,6 +15,11 @@ pret/pokeplatinum at a pinned commit by tools/sinnoh/make_pack.sh (run it before
 runs it and ships the pack; never committed: sinnoh/ is ignored; no ROM needed); TWINLEAF TOWN and ROUTE 201 (group 40)
 walk; tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM]; COOP_NOTES "SINNOH's 3D engine"; its people's sprites and battle pictures
 in sinnoh/platinum_gfx.pak (tools/sinnoh/build_gfx.py, src/sinnoh/s3d_gfx.c; test sinnoh_pics).
+**SINNOH's words and scripts are Platinum's own** (the user, 2026-11-02): never write original dialogue or scripts
+for SINNOH. They're converted from the decomp when the game is built, never committed: sinnoh/platinum_text.pak
+(tools/sinnoh/build_text.py) and sinnoh/platinum_scripts.inc (tools/sinnoh/gen_scripts.py; maps hold only
+`goto SinnohP_<file>_<n>` stubs); COOP_NOTES "Platinum's own words and scripts". The written words in
+tools/sinnoh/words*.py / story_people.py only stand in until a script's commands are converted.
 
 **Done (2026-11-01): `docs/NEXT_TASKS.md`**, the user's list through 1.63.7 (40 PC boxes: COOP_NOTES "40 PC boxes"; the save holds
 14, "<save>.boxes" the rest, src/mp/mp_boxes.c; tools/test/pc_boxes.sh).

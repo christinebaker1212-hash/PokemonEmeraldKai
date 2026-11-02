@@ -3,19 +3,19 @@ Sinnoh_CycleShop_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_CycleShop_EventScript_Bg1::
-	msgbox Sinnoh_CycleShop_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_cycle_shop_4
 	end
 
 Sinnoh_CycleShop_EventScript_Bg2::
-	msgbox Sinnoh_CycleShop_Text_Bg2, MSGBOX_SIGN
+	goto SinnohP_cycle_shop_4
 	end
 
 Sinnoh_CycleShop_EventScript_Bg3::
-	msgbox Sinnoh_CycleShop_Text_Bg3, MSGBOX_SIGN
+	goto SinnohP_cycle_shop_5
 	end
 
 Sinnoh_CycleShop_EventScript_Bg4::
-	msgbox Sinnoh_CycleShop_Text_Bg4, MSGBOX_SIGN
+	goto SinnohP_cycle_shop_5
 	end
 
 Sinnoh_CycleShop_EventScript_Person1::
@@ -38,28 +38,12 @@ Sinnoh_CycleShop_EventScript_Person1_Given::
 	end
 
 Sinnoh_CycleShop_EventScript_Person2::
-	msgbox Sinnoh_CycleShop_Text_Person2, MSGBOX_NPC
+	goto SinnohP_cycle_shop_3
 	end
 
 Sinnoh_CycleShop_EventScript_Person3::
 	msgbox Sinnoh_CycleShop_Text_Person3, MSGBOX_NPC
 	end
-
-Sinnoh_CycleShop_Text_Bg1:
-	.string "It's full of handwriting. It doesn't\n"
-	.string "seem polite to read it.$"
-
-Sinnoh_CycleShop_Text_Bg2:
-	.string "It's full of handwriting. It doesn't\n"
-	.string "seem polite to read it.$"
-
-Sinnoh_CycleShop_Text_Bg3:
-	.string "It's full of handwriting. It doesn't\n"
-	.string "seem polite to read it.$"
-
-Sinnoh_CycleShop_Text_Bg4:
-	.string "It's full of handwriting. It doesn't\n"
-	.string "seem polite to read it.$"
 
 Sinnoh_CycleShop_Text_Person1:
 	.string "Thanks to you, my CLEFAIRY is home\n"
@@ -69,10 +53,6 @@ Sinnoh_CycleShop_Text_Person1:
 Sinnoh_CycleShop_Text_Person1Gift:
 	.string "As thanks for saving my CLEFAIRY,\n"
 	.string "take a BIKE! On the house!$"
-
-Sinnoh_CycleShop_Text_Person2:
-	.string "I want a bike so badly! I've been\n"
-	.string "saving up for... a while. A long while.$"
 
 Sinnoh_CycleShop_Text_Person3:
 	.string "Clefairy twirls around happily.$"

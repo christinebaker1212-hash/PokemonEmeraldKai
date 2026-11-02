@@ -11,7 +11,7 @@ Sinnoh_TrainersSchool_EventScript_Bg2::
 	end
 
 Sinnoh_TrainersSchool_EventScript_Person1::
-	msgbox Sinnoh_TrainersSchool_Text_Person1, MSGBOX_NPC
+	goto SinnohP_trainers_school_2
 	end
 
 Sinnoh_TrainersSchool_EventScript_Person2::
@@ -19,15 +19,15 @@ Sinnoh_TrainersSchool_EventScript_Person2::
 	end
 
 Sinnoh_TrainersSchool_EventScript_Person3::
-	msgbox Sinnoh_TrainersSchool_Text_Person3, MSGBOX_NPC
+	goto SinnohP_trainers_school_4
 	end
 
 Sinnoh_TrainersSchool_EventScript_Person4::
-	msgbox Sinnoh_TrainersSchool_Text_Person4, MSGBOX_NPC
+	goto SinnohP_trainers_school_6
 	end
 
 Sinnoh_TrainersSchool_EventScript_Person5::
-	msgbox Sinnoh_TrainersSchool_Text_Person5, MSGBOX_NPC
+	goto SinnohP_trainers_school_5
 	end
 
 Sinnoh_TrainersSchool_EventScript_Person7::
@@ -52,7 +52,7 @@ Sinnoh_TrainersSchool_EventScript_Person8::
 	end
 
 Sinnoh_TrainersSchool_EventScript_Sign6::
-	msgbox Sinnoh_TrainersSchool_Text_Sign6, MSGBOX_SIGN
+	goto SinnohP_trainers_school_12
 	end
 
 Sinnoh_TrainersSchool_Text_Bg1:
@@ -65,32 +65,12 @@ Sinnoh_TrainersSchool_Text_Bg2:
 	.string "you what it's strong and weak\l"
 	.string "against.”$"
 
-Sinnoh_TrainersSchool_Text_Person1:
-	.string "Welcome to the TRAINERS' SCHOOL! Feel\n"
-	.string "free to look around and read the\l"
-	.string "boards.$"
-
 Sinnoh_TrainersSchool_Text_Person2:
 	.string "BARRY: Oh! It's you! I was teaching\n"
 	.string "these kids how to battle.\p"
 	.string "Well, they were teaching me, kind of.\n"
 	.string "Anyway! I'm off to OREBURGH! Last one\l"
 	.string "there pays a fine!$"
-
-Sinnoh_TrainersSchool_Text_Person3:
-	.string "We learned about status today. A\n"
-	.string "sleeping MOéMON can't move! Unless it\l"
-	.string "snores, I think.$"
-
-Sinnoh_TrainersSchool_Text_Person4:
-	.string "The teacher says a good TRAINER\n"
-	.string "watches the battle, not just their\l"
-	.string "own MOéMON.$"
-
-Sinnoh_TrainersSchool_Text_Person5:
-	.string "I'm the best in my class at throwing\n"
-	.string "POKé BALLS. Well, the best at hitting\l"
-	.string "the wall.$"
 
 Sinnoh_TrainersSchool_Text_Person7:
 	.string "My notes are full of type charts. I\n"
@@ -103,9 +83,5 @@ Sinnoh_TrainersSchool_Text_Person7Gift:
 Sinnoh_TrainersSchool_Text_Person8:
 	.string "I want to be a gym leader when I grow\n"
 	.string "up! I just have to pick a type.$"
-
-Sinnoh_TrainersSchool_Text_Sign6:
-	.string "It's full of handwriting. It doesn't\n"
-	.string "seem polite to read it.$"
 
 @ --- end of SINNOH words ---

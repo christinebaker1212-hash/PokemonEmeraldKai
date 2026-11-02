@@ -1,0 +1,23 @@
+pressuntil A field 5000
+wait 30
+mp warp 40,0,12,6
+wait 200
+mp face up
+press A 4
+wait 90
+shot guitarist1
+press A 4
+wait 60
+shot guitarist2
+press A 4
+wait 40
+mp warp 40,0,16,15
+wait 120
+mp face up
+press A 4
+wait 90
+shot sign
+press A 4
+wait 40
+mp ctx
+quit

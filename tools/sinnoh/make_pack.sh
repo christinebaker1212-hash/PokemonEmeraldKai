@@ -12,3 +12,6 @@ mkdir -p "$REPO/sinnoh"
 python3 -I "$REPO/tools/sinnoh/build_pack.py" "$DIR" "$REPO/sinnoh/platinum3d.pak" | tail -1
 python3 -I "$REPO/tools/sinnoh/build_gfx.py" "$DIR" "$REPO/sinnoh/platinum_gfx.pak"   # (its people as Platinum draws them)
 python3 -I "$REPO/tools/sinnoh/build_text.py" "$DIR" "$REPO/sinnoh/platinum_text.pak"
+# Platinum's scripts, converted to this game's (the build includes them: sinnoh/platinum_scripts.inc)
+echo "$DIR" > "$REPO/sinnoh/decomp_dir"
+python3 -I "$REPO/tools/sinnoh/gen_scripts.py" "$DIR" "$REPO/sinnoh/platinum_scripts.inc"

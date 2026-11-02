@@ -3,23 +3,23 @@ Sinnoh_VeilstoneStore1f_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_VeilstoneStore1f_EventScript_Bg1::
-	msgbox Sinnoh_VeilstoneStore1f_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_veilstone_store_1f_6
 	end
 
 Sinnoh_VeilstoneStore1f_EventScript_Bg2::
-	msgbox Sinnoh_VeilstoneStore1f_Text_Bg2, MSGBOX_SIGN
+	goto SinnohP_veilstone_store_1f_7
 	end
 
 Sinnoh_VeilstoneStore1f_EventScript_Person1::
-	msgbox Sinnoh_VeilstoneStore1f_Text_Person1, MSGBOX_NPC
+	goto SinnohP_veilstone_store_1f_1
 	end
 
 Sinnoh_VeilstoneStore1f_EventScript_Person2::
-	msgbox Sinnoh_VeilstoneStore1f_Text_Person2, MSGBOX_NPC
+	goto SinnohP_veilstone_store_1f_2
 	end
 
 Sinnoh_VeilstoneStore1f_EventScript_Person3::
-	msgbox Sinnoh_VeilstoneStore1f_Text_Person3, MSGBOX_NPC
+	goto SinnohP_veilstone_store_1f_3
 	end
 
 Sinnoh_VeilstoneStore1f_EventScript_Person4::
@@ -45,27 +45,6 @@ Sinnoh_VeilstoneStore1f_EventScript_Person6::
 	msgbox gText_PleaseComeAgain, MSGBOX_DEFAULT
 	release
 	end
-
-Sinnoh_VeilstoneStore1f_Text_Bg1:
-	.string "A notice on the wall.$"
-
-Sinnoh_VeilstoneStore1f_Text_Bg2:
-	.string "A directory of the floors in this\n"
-	.string "building.$"
-
-Sinnoh_VeilstoneStore1f_Text_Person1:
-	.string "Welcome to the VEILSTONE DEPARTMENT\n"
-	.string "STORE! Every floor has something for\l"
-	.string "TRAINERS.$"
-
-Sinnoh_VeilstoneStore1f_Text_Person2:
-	.string "I'm here for a gift for my wife. Five\n"
-	.string "floors and I still don't know what to\l"
-	.string "get.$"
-
-Sinnoh_VeilstoneStore1f_Text_Person3:
-	.string "This store has everything. I came for\n"
-	.string "one thing and forgot what it was.$"
 
 Sinnoh_VeilstoneStore1f_Text_Person4:
 	.string "Shopping is a sport, darling. And I'm a\n"

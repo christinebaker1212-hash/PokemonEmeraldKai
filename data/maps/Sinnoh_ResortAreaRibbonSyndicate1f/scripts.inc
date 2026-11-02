@@ -3,11 +3,11 @@ Sinnoh_ResortAreaRibbonSyndicate1f_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_ResortAreaRibbonSyndicate1f_EventScript_Person1::
-	msgbox Sinnoh_ResortAreaRibbonSyndicate1f_Text_Person1, MSGBOX_NPC
+	goto SinnohP_resort_area_ribbon_syndicate_1f_1
 	end
 
 Sinnoh_ResortAreaRibbonSyndicate1f_EventScript_Person3::
-	msgbox Sinnoh_ResortAreaRibbonSyndicate1f_Text_Person3, MSGBOX_NPC
+	goto SinnohP_resort_area_ribbon_syndicate_1f_3
 	end
 
 Sinnoh_ResortAreaRibbonSyndicate1f_EventScript_Person4::
@@ -21,15 +21,6 @@ Sinnoh_ResortAreaRibbonSyndicate1f_EventScript_Person5::
 Sinnoh_ResortAreaRibbonSyndicate1f_EventScript_Person6::
 	msgbox Sinnoh_ResortAreaRibbonSyndicate1f_Text_Person6, MSGBOX_NPC
 	end
-
-Sinnoh_ResortAreaRibbonSyndicate1f_Text_Person1:
-	.string "The RIBBON SYNDICATE is for TRAINERS\n"
-	.string "whose MOéMON have earned many\l"
-	.string "ribbons.$"
-
-Sinnoh_ResortAreaRibbonSyndicate1f_Text_Person3:
-	.string "My MOéMON has ten ribbons! We come\n"
-	.string "here to celebrate.$"
 
 Sinnoh_ResortAreaRibbonSyndicate1f_Text_Person4:
 	.string "Isn't it lovely here? The service is\n"

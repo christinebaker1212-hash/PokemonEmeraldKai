@@ -7,7 +7,7 @@ Sinnoh_ResortAreaHouse_EventScript_Person1::
 	end
 
 Sinnoh_ResortAreaHouse_EventScript_Person2::
-	msgbox Sinnoh_ResortAreaHouse_Text_Person2, MSGBOX_NPC
+	goto SinnohP_resort_area_house_2
 	end
 
 Sinnoh_ResortAreaHouse_EventScript_Person3::
@@ -17,10 +17,6 @@ Sinnoh_ResortAreaHouse_EventScript_Person3::
 Sinnoh_ResortAreaHouse_Text_Person1:
 	.string "I collect seashells from the beach.\n"
 	.string "This one is my favorite.$"
-
-Sinnoh_ResortAreaHouse_Text_Person2:
-	.string "I retired here. Nothing but sunshine\n"
-	.string "and MOéMON all day.$"
 
 Sinnoh_ResortAreaHouse_Text_Person3:
 	.string "I'm going to swim all the way to\n"

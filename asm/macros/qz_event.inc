@@ -136,4 +136,3 @@
 	ptrvalue \intro
 	ptrvalue \defeat
 	.endm
-

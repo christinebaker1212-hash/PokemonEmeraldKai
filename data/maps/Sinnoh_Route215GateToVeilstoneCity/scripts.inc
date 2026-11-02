@@ -3,12 +3,7 @@ Sinnoh_Route215GateToVeilstoneCity_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Route215GateToVeilstoneCity_EventScript_Person1::
-	msgbox Sinnoh_Route215GateToVeilstoneCity_Text_Person1, MSGBOX_NPC
+	goto SinnohP_route_215_gate_to_veilstone_city_1
 	end
-
-Sinnoh_Route215GateToVeilstoneCity_Text_Person1:
-	.string "The old stones in VEILSTONE are\n"
-	.string "covered in markings. I'm trying to read\l"
-	.string "them.$"
 
 @ --- end of SINNOH words ---

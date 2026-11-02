@@ -3,15 +3,12 @@ Sinnoh_Route226House_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Route226House_EventScript_Bg1::
-	msgbox Sinnoh_Route226House_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_route_226_house_3
 	end
 
 Sinnoh_Route226House_EventScript_Person1::
 	msgbox Sinnoh_Route226House_Text_Person1, MSGBOX_NPC
 	end
-
-Sinnoh_Route226House_Text_Bg1:
-	.string "A notice on the wall.$"
 
 Sinnoh_Route226House_Text_Person1:
 	.string "I've lived out here for years. The sea,\n"

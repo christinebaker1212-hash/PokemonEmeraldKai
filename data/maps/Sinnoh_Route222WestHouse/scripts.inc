@@ -23,7 +23,7 @@ Sinnoh_Route222WestHouse_EventScript_Person5::
 	end
 
 Sinnoh_Route222WestHouse_EventScript_Person6::
-	msgbox Sinnoh_Route222WestHouse_Text_Person6, MSGBOX_NPC
+	goto SinnohP_route_222_west_house_7
 	end
 
 Sinnoh_Route222WestHouse_Text_Person1:
@@ -45,10 +45,5 @@ Sinnoh_Route222WestHouse_Text_Person4:
 Sinnoh_Route222WestHouse_Text_Person5:
 	.string "PIKACHU: Pi!\p"
 	.string "Its cheeks spark a little.$"
-
-Sinnoh_Route222WestHouse_Text_Person6:
-	.string "Welcome to the PIKACHU FAN CLUB! As\n"
-	.string "you can see, we take PIKACHU very\l"
-	.string "seriously.$"
 
 @ --- end of SINNOH words ---

@@ -8,11 +8,7 @@ Sinnoh_Route209GateToHearthomeCity_OnTransition:
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Route209GateToHearthomeCity_EventScript_Person1::
-	msgbox Sinnoh_Route209GateToHearthomeCity_Text_Person1, MSGBOX_NPC
+	goto SinnohP_route_209_gate_to_hearthome_city_1
 	end
-
-Sinnoh_Route209GateToHearthomeCity_Text_Person1:
-	.string "The road to SOLACEON is long but\n"
-	.string "pretty. Watch for the old tower!$"
 
 @ --- end of SINNOH words ---

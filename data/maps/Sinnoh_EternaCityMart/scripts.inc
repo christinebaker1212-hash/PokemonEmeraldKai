@@ -7,7 +7,7 @@ Sinnoh_EternaCityMart_EventScript_Person1::
 	end
 
 Sinnoh_EternaCityMart_EventScript_Person2::
-	msgbox Sinnoh_EternaCityMart_Text_Person2, MSGBOX_NPC
+	goto SinnohP_eterna_city_mart_4
 	end
 
 Sinnoh_EternaCityMart_EventScript_Person3::
@@ -34,10 +34,5 @@ Sinnoh_EternaCityMart_Text_Person1:
 	.string "I write songs about the forest. The\n"
 	.string "MART sells everything except\l"
 	.string "inspiration.$"
-
-Sinnoh_EternaCityMart_Text_Person2:
-	.string "Stock up on ANTIDOTES before ETERNA\n"
-	.string "FOREST. The BUG MOéMON there love\l"
-	.string "POISON.$"
 
 @ --- end of SINNOH words ---

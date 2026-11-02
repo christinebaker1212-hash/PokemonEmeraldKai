@@ -3,15 +3,15 @@ Sinnoh_GalacticHqControlRoom_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_GalacticHqControlRoom_EventScript_Bg1::
-	msgbox Sinnoh_GalacticHqControlRoom_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_galactic_hq_control_room_4
 	end
 
 Sinnoh_GalacticHqControlRoom_EventScript_Bg2::
-	msgbox Sinnoh_GalacticHqControlRoom_Text_Bg2, MSGBOX_SIGN
+	goto SinnohP_galactic_hq_control_room_5
 	end
 
 Sinnoh_GalacticHqControlRoom_EventScript_Bg3::
-	msgbox Sinnoh_GalacticHqControlRoom_Text_Bg3, MSGBOX_SIGN
+	goto SinnohP_galactic_hq_control_room_6
 	end
 
 Sinnoh_GalacticHqControlRoom_EventScript_Bg4::
@@ -37,18 +37,6 @@ Sinnoh_GalacticHqControlRoom_EventScript_Person4::
 Sinnoh_GalacticHqControlRoom_EventScript_Person5::
 	msgbox Sinnoh_GalacticHqControlRoom_Text_Person5, MSGBOX_NPC
 	end
-
-Sinnoh_GalacticHqControlRoom_Text_Bg1:
-	.string "A big machine with a glass tank. It's\n"
-	.string "empty, and switched off.$"
-
-Sinnoh_GalacticHqControlRoom_Text_Bg2:
-	.string "A big machine with a glass tank. It's\n"
-	.string "empty, and switched off.$"
-
-Sinnoh_GalacticHqControlRoom_Text_Bg3:
-	.string "A big machine with a glass tank. It's\n"
-	.string "empty, and switched off.$"
 
 Sinnoh_GalacticHqControlRoom_Text_Bg4:
 	.string "A big button. It doesn't seem to do\n"

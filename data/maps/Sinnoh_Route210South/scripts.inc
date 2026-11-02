@@ -24,11 +24,11 @@ Sinnoh_Route210South_EventScript_Person31::
 	end
 
 Sinnoh_Route210South_EventScript_Sign11::
-	msgbox Sinnoh_Route210South_Text_Sign11, MSGBOX_SIGN
+	goto SinnohP_route_210_south_5
 	end
 
 Sinnoh_Route210South_EventScript_Sign14::
-	msgbox Sinnoh_Route210South_Text_Sign14, MSGBOX_SIGN
+	goto SinnohP_route_210_south_4
 	end
 
 Sinnoh_Route210South_Text_Person22:
@@ -43,13 +43,5 @@ Sinnoh_Route210South_Text_Person22Gift:
 Sinnoh_Route210South_Text_Person31:
 	.string "I only battle in daylight. At night I\n"
 	.string "just run and think about soup.$"
-
-Sinnoh_Route210South_Text_Sign11:
-	.string "ROUTE 210\p"
-	.string "To SOLACEON TOWN$"
-
-Sinnoh_Route210South_Text_Sign14:
-	.string "CAFE CABIN\p"
-	.string "Fresh MOOMOO MILK, all day long.$"
 
 @ --- end of SINNOH words ---

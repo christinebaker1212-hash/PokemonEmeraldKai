@@ -1992,3 +1992,10 @@
 	setvar VAR_0x8006, \item
 	special CreateEnemyEventMon
 	.endm
+
+	@ Moemon Kai: SINNOH's command (src/sinnoh/s3d_scrcmd.c): what Platinum's converted scripts need (OP, ARG)
+	.macro sinnoh op:req, arg=0
+	.byte 0xF6
+	.byte \op
+	.2byte \arg
+	.endm

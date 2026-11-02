@@ -16,27 +16,15 @@ Sinnoh_SolaceonTownPokecenter1f_EventScript_Person1::
 	end
 
 Sinnoh_SolaceonTownPokecenter1f_EventScript_Person2::
-	msgbox Sinnoh_SolaceonTownPokecenter1f_Text_Person2, MSGBOX_NPC
+	goto SinnohP_solaceon_town_pokecenter_1f_2
 	end
 
 Sinnoh_SolaceonTownPokecenter1f_EventScript_Person3::
-	msgbox Sinnoh_SolaceonTownPokecenter1f_Text_Person3, MSGBOX_NPC
+	goto SinnohP_solaceon_town_pokecenter_1f_3
 	end
 
 Sinnoh_SolaceonTownPokecenter1f_EventScript_Person6::
-	msgbox Sinnoh_SolaceonTownPokecenter1f_Text_Person6, MSGBOX_NPC
+	goto SinnohP_solaceon_town_pokecenter_1f_4
 	end
-
-Sinnoh_SolaceonTownPokecenter1f_Text_Person2:
-	.string "SOLACEON is the quietest town in\n"
-	.string "SINNOH. That's why I retired here.$"
-
-Sinnoh_SolaceonTownPokecenter1f_Text_Person3:
-	.string "The DAY CARE is just east. They take\n"
-	.string "great care of MOéMON!$"
-
-Sinnoh_SolaceonTownPokecenter1f_Text_Person6:
-	.string "I've been studying the ruins for\n"
-	.string "years. Every room has new letters.$"
 
 @ --- end of SINNOH words ---

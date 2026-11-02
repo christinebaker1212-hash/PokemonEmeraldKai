@@ -3,16 +3,12 @@ Sinnoh_Route218GateToCanalaveCity_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Route218GateToCanalaveCity_EventScript_Person1::
-	msgbox Sinnoh_Route218GateToCanalaveCity_Text_Person1, MSGBOX_NPC
+	goto SinnohP_route_218_gate_to_canalave_city_1
 	end
 
 Sinnoh_Route218GateToCanalaveCity_EventScript_Person2::
 	msgbox Sinnoh_Route218GateToCanalaveCity_Text_Person2, MSGBOX_NPC
 	end
-
-Sinnoh_Route218GateToCanalaveCity_Text_Person1:
-	.string "CANALAVE's just through here. Mind\n"
-	.string "the drawbridge!$"
 
 Sinnoh_Route218GateToCanalaveCity_Text_Person2:
 	.string "I'm studying the sea breeze. It smells\n"

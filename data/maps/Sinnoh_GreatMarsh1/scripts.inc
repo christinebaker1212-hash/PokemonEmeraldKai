@@ -3,18 +3,11 @@ Sinnoh_GreatMarsh1_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_GreatMarsh1_EventScript_Person4::
-	msgbox Sinnoh_GreatMarsh1_Text_Person4, MSGBOX_NPC
+	goto SinnohP_great_marsh_1_2
 	end
 
 Sinnoh_GreatMarsh1_EventScript_Sign3::
-	msgbox Sinnoh_GreatMarsh1_Text_Sign3, MSGBOX_SIGN
+	goto SinnohP_great_marsh_1_1
 	end
-
-Sinnoh_GreatMarsh1_Text_Person4:
-	.string "I'm searching the marsh for old ruins.\n"
-	.string "So far I've found mud. Lots of mud.$"
-
-Sinnoh_GreatMarsh1_Text_Sign3:
-	.string "A map of this area.$"
 
 @ --- end of SINNOH words ---

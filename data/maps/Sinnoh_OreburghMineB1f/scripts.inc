@@ -3,11 +3,11 @@ Sinnoh_OreburghMineB1f_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_OreburghMineB1f_EventScript_Person1::
-	msgbox Sinnoh_OreburghMineB1f_Text_Person1, MSGBOX_NPC
+	goto SinnohP_oreburgh_mine_b1f_2
 	end
 
 Sinnoh_OreburghMineB1f_EventScript_Person3::
-	msgbox Sinnoh_OreburghMineB1f_Text_Person3, MSGBOX_NPC
+	goto SinnohP_oreburgh_mine_b1f_3
 	end
 
 Sinnoh_OreburghMineB1f_EventScript_Person4::
@@ -26,14 +26,6 @@ Sinnoh_OreburghMineB1f_EventScript_Person4_Given::
 	msgbox Sinnoh_OreburghMineB1f_Text_Person4, MSGBOX_DEFAULT
 	release
 	end
-
-Sinnoh_OreburghMineB1f_Text_Person1:
-	.string "Careful down here! The carts don't\n"
-	.string "stop for anyone.$"
-
-Sinnoh_OreburghMineB1f_Text_Person3:
-	.string "My dad works here! I'm bringing him his\n"
-	.string "lunch.$"
 
 Sinnoh_OreburghMineB1f_Text_Person4:
 	.string "The mine's tunnels go deeper every\n"

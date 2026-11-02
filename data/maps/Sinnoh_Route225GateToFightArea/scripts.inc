@@ -3,20 +3,11 @@ Sinnoh_Route225GateToFightArea_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Route225GateToFightArea_EventScript_Person1::
-	msgbox Sinnoh_Route225GateToFightArea_Text_Person1, MSGBOX_NPC
+	goto SinnohP_route_225_gate_to_fight_area_1
 	end
 
 Sinnoh_Route225GateToFightArea_EventScript_Person2::
-	msgbox Sinnoh_Route225GateToFightArea_Text_Person2, MSGBOX_NPC
+	goto SinnohP_route_225_gate_to_fight_area_2
 	end
-
-Sinnoh_Route225GateToFightArea_Text_Person1:
-	.string "The routes past here are wild. Only\n"
-	.string "strong TRAINERS should go.$"
-
-Sinnoh_Route225GateToFightArea_Text_Person2:
-	.string "My father bought me a ticket to the\n"
-	.string "BATTLE ZONE. I'm going to win\l"
-	.string "everything!$"
 
 @ --- end of SINNOH words ---

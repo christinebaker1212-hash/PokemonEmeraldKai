@@ -11,7 +11,7 @@ Sinnoh_AmitySquare_EventScript_Person2::
 	end
 
 Sinnoh_AmitySquare_EventScript_Person7::
-	msgbox Sinnoh_AmitySquare_Text_Person7, MSGBOX_NPC
+	goto SinnohP_amity_square_9
 	end
 
 Sinnoh_AmitySquare_EventScript_Person8::
@@ -19,15 +19,15 @@ Sinnoh_AmitySquare_EventScript_Person8::
 	end
 
 Sinnoh_AmitySquare_EventScript_Person9::
-	msgbox Sinnoh_AmitySquare_Text_Person9, MSGBOX_NPC
+	goto SinnohP_amity_square_12
 	end
 
 Sinnoh_AmitySquare_EventScript_Person10::
-	msgbox Sinnoh_AmitySquare_Text_Person10, MSGBOX_NPC
+	goto SinnohP_amity_square_11
 	end
 
 Sinnoh_AmitySquare_EventScript_Person11::
-	msgbox Sinnoh_AmitySquare_Text_Person11, MSGBOX_NPC
+	goto SinnohP_amity_square_13
 	end
 
 Sinnoh_AmitySquare_EventScript_Person12::
@@ -35,7 +35,7 @@ Sinnoh_AmitySquare_EventScript_Person12::
 	end
 
 Sinnoh_AmitySquare_EventScript_Person13::
-	msgbox Sinnoh_AmitySquare_Text_Person13, MSGBOX_NPC
+	goto SinnohP_amity_square_15
 	end
 
 Sinnoh_AmitySquare_EventScript_Person14::
@@ -54,34 +54,13 @@ Sinnoh_AmitySquare_Text_Person2:
 	.string "Welcome to AMITY SQUARE! Enjoy a walk\n"
 	.string "with your MOéMON.$"
 
-Sinnoh_AmitySquare_Text_Person7:
-	.string "My DRIFLOON follows me everywhere.\n"
-	.string "Even into the bath!$"
-
 Sinnoh_AmitySquare_Text_Person8:
 	.string "DRIFLOON: Fuwa...\p"
 	.string "It's floating gently in the breeze.$"
 
-Sinnoh_AmitySquare_Text_Person9:
-	.string "HAPPINY: Happi!\p"
-	.string "It's carrying a little round stone.$"
-
-Sinnoh_AmitySquare_Text_Person10:
-	.string "My HAPPINY loves to collect round\n"
-	.string "stones. It thinks they're eggs!$"
-
-Sinnoh_AmitySquare_Text_Person11:
-	.string "My PIKACHU and I come here every\n"
-	.string "Sunday. It knows the way better than\l"
-	.string "I do.$"
-
 Sinnoh_AmitySquare_Text_Person12:
 	.string "PIKACHU: Pika!\p"
 	.string "It's chasing a leaf.$"
-
-Sinnoh_AmitySquare_Text_Person13:
-	.string "My CLEFAIRY dances under the trees.\n"
-	.string "Isn't it cute?$"
 
 Sinnoh_AmitySquare_Text_Person14:
 	.string "CLEFAIRY: Pi pi!\p"

@@ -3,7 +3,7 @@ Sinnoh_JubilifeTv2f_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_JubilifeTv2f_EventScript_Person1::
-	msgbox Sinnoh_JubilifeTv2f_Text_Person1, MSGBOX_NPC
+	goto SinnohP_jubilife_tv_2f_1
 	end
 
 Sinnoh_JubilifeTv2f_EventScript_Person2::
@@ -15,13 +15,8 @@ Sinnoh_JubilifeTv2f_EventScript_Person3::
 	end
 
 Sinnoh_JubilifeTv2f_EventScript_Person4::
-	msgbox Sinnoh_JubilifeTv2f_Text_Person4, MSGBOX_NPC
+	goto SinnohP_jubilife_tv_2f_3
 	end
-
-Sinnoh_JubilifeTv2f_Text_Person1:
-	.string "I'm going to sing on TV with my MOéMON!\n"
-	.string "We've practiced our harmony for\l"
-	.string "weeks.$"
 
 Sinnoh_JubilifeTv2f_Text_Person2:
 	.string "This floor has our gallery. Viewers\n"
@@ -31,10 +26,5 @@ Sinnoh_JubilifeTv2f_Text_Person3:
 	.string "We're always looking for stories! A\n"
 	.string "TRAINER who sailed all the way to\l"
 	.string "SINNOH? That's a good one.$"
-
-Sinnoh_JubilifeTv2f_Text_Person4:
-	.string "I came to complain about a show. Then\n"
-	.string "I watched it again and liked it. Now I'm\l"
-	.string "just visiting.$"
 
 @ --- end of SINNOH words ---

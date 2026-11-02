@@ -3634,7 +3634,21 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   and so do a neighbor's people Platinum loads early (hidden_flag MAP_HEADER_*). Signs, mailboxes and books are
   Platinum objects: each becomes a sign event where it stands once it has words. `mp hideobjs` hides every object
   (test_poc's picture).
-- Words (1.62.x, sinnoh-work): every person / sign / bg / trigger runs <map>_EventScript_Person<n> / _Sign<n> / _Bg<n>
+- Platinum's own words and scripts (2026-11-02, the user's call: "we have all the original dialogue and scripts";
+  never write original words or scripts for SINNOH again). tools/sinnoh/build_text.py turns the decomp's message banks
+  into sinnoh/platinum_text.pak (src/sinnoh/s3d_text.c reads it; a script's text is a placeholder, PLACEHOLDER_ID_SINNOH_TEXT
+  0x40, naming a bank and a message). tools/sinnoh/gen_scripts.py converts Platinum's event scripts (res/field/scripts)
+  into this game's commands: sinnoh/platinum_scripts.inc, included by data/event_scripts_sinnoh.s; make_pack.sh makes
+  both (the release runs it before the builds) and writes sinnoh/decomp_dir, so the Makefile's rule (`gen_scripts.py
+  --auto`) can make them again, or stubs (every label an `end`) without the decomp. Nothing of either is committed: a
+  map's person / sign / bg runs `goto SinnohP_<script file>_<entry number>` (gen_words.py writes those stubs when given
+  POKEPLATINUM_DIR: numbers only). A script converts when every command it reaches is one gen_scripts.py knows
+  (`gen_scripts.py --report POKEPLATINUM_DIR`: 1208 of 2511 entries at first; the rest keep the written words below
+  until their commands are added); flags and variables get SINNOH's numbers (ids.py); what this game's commands lack
+  is the `sinnoh OP, ARG` command (0xF6, src/sinnoh/s3d_scrcmd.c: the player's / rival's / counterpart's names into
+  STR_VAR_1-3, Platinum's YES = 0). People the story shows or hides (hide flags) keep their written words until the
+  story's scripts are converted too. Test sinnoh_platinum_words (TWINLEAF's guitarist, the town sign).
+- Words (1.62.x, sinnoh-work; being replaced by Platinum's own, above): every person / sign / bg / trigger runs <map>_EventScript_Person<n> / _Sign<n> / _Bg<n>
   / _Trigger<n> when the map's scripts.inc has it (n: its place in Platinum's lists, from 1), else nothing (a trigger
   without a script isn't placed). tools/sinnoh/words.py holds the words (original writing; '|' a new page; ('nurse',)
   a healer, ('mart',) a clerk with pokemart 0, the region's badge list as JOHTO's); tools/sinnoh/gen_words.py writes

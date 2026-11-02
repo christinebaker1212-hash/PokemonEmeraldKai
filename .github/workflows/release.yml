@@ -69,6 +69,14 @@ jobs:
         if: steps.ver.outputs.skip != 'true'
         run: python3 tools/kaisong/gen.py
 
+      # SINNOH's packs (docs/SINNOH_HANDOFF.md): Platinum's map models, props, textures, lights and collision, its
+      # people's sprites, its words, and its scripts converted to this game's (sinnoh/platinum_scripts.inc, which the
+      # builds below include), all from pret/pokeplatinum at a pinned commit (nothing of it is in this repository);
+      # package.sh ships the packs in sinnoh/. Before the builds: they compile the converted scripts in.
+      - name: SINNOH packs and scripts
+        if: steps.ver.outputs.skip != 'true'
+        run: tools/sinnoh/make_pack.sh "$RUNNER_TEMP/pokeplatinum"
+
       - name: Linux build
         if: steps.ver.outputs.skip != 'true'
         run: make linux -j"$(nproc)"
@@ -114,12 +122,6 @@ jobs:
             echo "songs $TAG MoemonDanceSongs.zip $(stat -c %s dist/MoemonDanceSongs.zip) $(sha256sum dist/MoemonDanceSongs.zip | cut -d' ' -f1) $ID" > dist/songs.txt
           fi
           cat dist/songs.txt
-
-      # SINNOH's 3D pack (docs/SINNOH_HANDOFF.md): Platinum's map models, props, textures, lights and collision, built
-      # from pret/pokeplatinum at a pinned commit (nothing of it is in this repository); package.sh ships it in sinnoh/
-      - name: SINNOH 3D pack
-        if: steps.ver.outputs.skip != 'true'
-        run: tools/sinnoh/make_pack.sh "$RUNNER_TEMP/pokeplatinum"
 
       - name: Packages and update.txt
         if: steps.ver.outputs.skip != 'true'

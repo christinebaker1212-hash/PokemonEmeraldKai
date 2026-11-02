@@ -19,7 +19,7 @@ Sinnoh_Route209_EventScript_Bg6::
 	end
 
 Sinnoh_Route209_EventScript_Person22::
-	msgbox Sinnoh_Route209_Text_Person22, MSGBOX_NPC
+	goto SinnohP_route_209_1
 	end
 
 Sinnoh_Route209_EventScript_Person29::
@@ -50,21 +50,16 @@ Sinnoh_Route209_EventScript_Person31::
 	end
 
 Sinnoh_Route209_EventScript_Sign10::
-	msgbox Sinnoh_Route209_Text_Sign10, MSGBOX_SIGN
+	goto SinnohP_route_209_3
 	end
 
 Sinnoh_Route209_EventScript_Sign11::
-	msgbox Sinnoh_Route209_Text_Sign11, MSGBOX_SIGN
+	goto SinnohP_route_209_4
 	end
 
 Sinnoh_Route209_EventScript_Sign32::
-	msgbox Sinnoh_Route209_Text_Sign32, MSGBOX_SIGN
+	goto SinnohP_route_209_9
 	end
-
-Sinnoh_Route209_Text_Person22:
-	.string "There's an old tower on this route.\n"
-	.string "People come here to remember MOéMON\l"
-	.string "that have passed on.$"
 
 Sinnoh_Route209_Text_Person29:
 	.string "I fish here every morning. The mist on\n"
@@ -81,18 +76,5 @@ Sinnoh_Route209_Text_Person30:
 Sinnoh_Route209_Text_Person31:
 	.string "Running at night keeps me cool. I'm\n"
 	.string "too out of breath to battle anyway.$"
-
-Sinnoh_Route209_Text_Sign10:
-	.string "ROUTE 209\p"
-	.string "To HEARTHOME CITY$"
-
-Sinnoh_Route209_Text_Sign11:
-	.string "ROUTE 209\p"
-	.string "To SOLACEON TOWN$"
-
-Sinnoh_Route209_Text_Sign32:
-	.string "TRAINER TIPS\p"
-	.string "Talk to your MOéMON often. A happy\n"
-	.string "MOéMON battles better.$"
 
 @ --- end of SINNOH words ---

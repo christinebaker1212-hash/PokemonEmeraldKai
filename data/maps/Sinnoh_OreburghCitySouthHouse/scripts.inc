@@ -3,11 +3,7 @@ Sinnoh_OreburghCitySouthHouse_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_OreburghCitySouthHouse_EventScript_Person1::
-	msgbox Sinnoh_OreburghCitySouthHouse_Text_Person1, MSGBOX_NPC
+	goto SinnohP_oreburgh_city_south_house_1
 	end
-
-Sinnoh_OreburghCitySouthHouse_Text_Person1:
-	.string "My shift starts in an hour. I'm getting\n"
-	.string "a little nap in first. Shh.$"
 
 @ --- end of SINNOH words ---

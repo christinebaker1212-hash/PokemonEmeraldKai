@@ -7,15 +7,11 @@ Sinnoh_Route205House_EventScript_Person1::
 	end
 
 Sinnoh_Route205House_EventScript_Person2::
-	msgbox Sinnoh_Route205House_Text_Person2, MSGBOX_NPC
+	goto SinnohP_route_205_house_2
 	end
 
 Sinnoh_Route205House_Text_Person1:
 	.string "Welcome! Rest your feet. The forest\n"
 	.string "path is long.$"
-
-Sinnoh_Route205House_Text_Person2:
-	.string "I caught a WURMPLE today! It's\n"
-	.string "sleeping in my hat.$"
 
 @ --- end of SINNOH words ---

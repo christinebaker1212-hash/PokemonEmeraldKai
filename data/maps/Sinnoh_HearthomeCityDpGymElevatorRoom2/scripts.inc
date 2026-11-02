@@ -3,17 +3,11 @@ Sinnoh_HearthomeCityDpGymElevatorRoom2_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_HearthomeCityDpGymElevatorRoom2_EventScript_Bg1::
-	msgbox Sinnoh_HearthomeCityDpGymElevatorRoom2_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_hearthome_city_dp_gym_elevator_room_2_4
 	end
 
 Sinnoh_HearthomeCityDpGymElevatorRoom2_EventScript_Bg2::
-	msgbox Sinnoh_HearthomeCityDpGymElevatorRoom2_Text_Bg2, MSGBOX_SIGN
+	goto SinnohP_hearthome_city_dp_gym_elevator_room_2_3
 	end
-
-Sinnoh_HearthomeCityDpGymElevatorRoom2_Text_Bg1:
-	.string "A notice on the wall.$"
-
-Sinnoh_HearthomeCityDpGymElevatorRoom2_Text_Bg2:
-	.string "A notice on the wall.$"
 
 @ --- end of SINNOH words ---

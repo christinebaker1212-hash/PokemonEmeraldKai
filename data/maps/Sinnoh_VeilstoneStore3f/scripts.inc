@@ -3,7 +3,7 @@ Sinnoh_VeilstoneStore3f_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_VeilstoneStore3f_EventScript_Bg1::
-	msgbox Sinnoh_VeilstoneStore3f_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_veilstone_store_3f_7
 	end
 
 Sinnoh_VeilstoneStore3f_EventScript_Person1::
@@ -11,11 +11,11 @@ Sinnoh_VeilstoneStore3f_EventScript_Person1::
 	end
 
 Sinnoh_VeilstoneStore3f_EventScript_Person2::
-	msgbox Sinnoh_VeilstoneStore3f_Text_Person2, MSGBOX_NPC
+	goto SinnohP_veilstone_store_3f_2
 	end
 
 Sinnoh_VeilstoneStore3f_EventScript_Person3::
-	msgbox Sinnoh_VeilstoneStore3f_Text_Person3, MSGBOX_NPC
+	goto SinnohP_veilstone_store_3f_3
 	end
 
 Sinnoh_VeilstoneStore3f_EventScript_Person4::
@@ -39,27 +39,11 @@ Sinnoh_VeilstoneStore3f_EventScript_Person5::
 	end
 
 Sinnoh_VeilstoneStore3f_EventScript_Person6::
-	msgbox Sinnoh_VeilstoneStore3f_Text_Person6, MSGBOX_NPC
+	goto SinnohP_veilstone_store_3f_4
 	end
-
-Sinnoh_VeilstoneStore3f_Text_Bg1:
-	.string "A directory of the floors in this\n"
-	.string "building.$"
 
 Sinnoh_VeilstoneStore3f_Text_Person1:
 	.string "Welcome to the third floor! TMs to\n"
 	.string "teach your MOéMON new tricks.$"
-
-Sinnoh_VeilstoneStore3f_Text_Person2:
-	.string "I want every TM! My piggy bank says\n"
-	.string "otherwise.$"
-
-Sinnoh_VeilstoneStore3f_Text_Person3:
-	.string "I'm looking for a TM that teaches\n"
-	.string "SING. My MOéMON has the voice for it!$"
-
-Sinnoh_VeilstoneStore3f_Text_Person6:
-	.string "Teaching your MOéMON a new move is\n"
-	.string "like giving it a new toy. They love it!$"
 
 @ --- end of SINNOH words ---

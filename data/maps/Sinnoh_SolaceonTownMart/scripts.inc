@@ -13,11 +13,11 @@ Sinnoh_SolaceonTownMart_EventScript_Person1::
 	end
 
 Sinnoh_SolaceonTownMart_EventScript_Person2::
-	msgbox Sinnoh_SolaceonTownMart_Text_Person2, MSGBOX_NPC
+	goto SinnohP_solaceon_town_mart_3
 	end
 
 Sinnoh_SolaceonTownMart_EventScript_Person3::
-	msgbox Sinnoh_SolaceonTownMart_Text_Person3, MSGBOX_NPC
+	goto SinnohP_solaceon_town_mart_4
 	end
 
 Sinnoh_SolaceonTownMart_EventScript_Person4::
@@ -29,13 +29,5 @@ Sinnoh_SolaceonTownMart_EventScript_Person4::
 	msgbox gText_PleaseComeAgain, MSGBOX_DEFAULT
 	release
 	end
-
-Sinnoh_SolaceonTownMart_Text_Person2:
-	.string "I'm buying POKé BALLS to catch\n"
-	.string "something at the ruins!$"
-
-Sinnoh_SolaceonTownMart_Text_Person3:
-	.string "The DAY CARE couple buys their\n"
-	.string "supplies here. They always buy a lot!$"
 
 @ --- end of SINNOH words ---

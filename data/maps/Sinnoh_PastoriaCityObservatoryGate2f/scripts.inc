@@ -15,19 +15,19 @@ Sinnoh_PastoriaCityObservatoryGate2f_EventScript_Bg3::
 	end
 
 Sinnoh_PastoriaCityObservatoryGate2f_EventScript_Person1::
-	msgbox Sinnoh_PastoriaCityObservatoryGate2f_Text_Person1, MSGBOX_NPC
+	goto SinnohP_pastoria_city_observatory_gate_2f_2
 	end
 
 Sinnoh_PastoriaCityObservatoryGate2f_EventScript_Person2::
-	msgbox Sinnoh_PastoriaCityObservatoryGate2f_Text_Person2, MSGBOX_NPC
+	goto SinnohP_pastoria_city_observatory_gate_2f_3
 	end
 
 Sinnoh_PastoriaCityObservatoryGate2f_EventScript_Person3::
-	msgbox Sinnoh_PastoriaCityObservatoryGate2f_Text_Person3, MSGBOX_NPC
+	goto SinnohP_pastoria_city_observatory_gate_2f_4
 	end
 
 Sinnoh_PastoriaCityObservatoryGate2f_EventScript_Person4::
-	msgbox Sinnoh_PastoriaCityObservatoryGate2f_Text_Person4, MSGBOX_NPC
+	goto SinnohP_pastoria_city_observatory_gate_2f_5
 	end
 
 Sinnoh_PastoriaCityObservatoryGate2f_Text_Bg1:
@@ -41,22 +41,5 @@ Sinnoh_PastoriaCityObservatoryGate2f_Text_Bg2:
 Sinnoh_PastoriaCityObservatoryGate2f_Text_Bg3:
 	.string "A pair of binoculars on a stand. You\n"
 	.string "can see far across the water.$"
-
-Sinnoh_PastoriaCityObservatoryGate2f_Text_Person1:
-	.string "Look through the binoculars!\n"
-	.string "Sometimes you can spot rare MOéMON in\l"
-	.string "the reeds.$"
-
-Sinnoh_PastoriaCityObservatoryGate2f_Text_Person2:
-	.string "I saw a CROAGUNK sitting on a rock out\n"
-	.string "there. It was just... grinning.$"
-
-Sinnoh_PastoriaCityObservatoryGate2f_Text_Person3:
-	.string "I've been watching the marsh all\n"
-	.string "morning. It's better than TV.$"
-
-Sinnoh_PastoriaCityObservatoryGate2f_Text_Person4:
-	.string "The marsh looks so peaceful from up\n"
-	.string "here. It's a lot muddier down there!$"
 
 @ --- end of SINNOH words ---

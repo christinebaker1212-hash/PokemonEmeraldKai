@@ -15,15 +15,15 @@ Sinnoh_JubilifeTv3fGlobalRankingRoom_EventScript_Bg3::
 	end
 
 Sinnoh_JubilifeTv3fGlobalRankingRoom_EventScript_Person1::
-	msgbox Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Person1, MSGBOX_NPC
+	goto SinnohP_jubilife_tv_3f_global_ranking_room_6
 	end
 
 Sinnoh_JubilifeTv3fGlobalRankingRoom_EventScript_Person2::
-	msgbox Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Person2, MSGBOX_NPC
+	goto SinnohP_jubilife_tv_3f_global_ranking_room_4
 	end
 
 Sinnoh_JubilifeTv3fGlobalRankingRoom_EventScript_Person3::
-	msgbox Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Person3, MSGBOX_NPC
+	goto SinnohP_jubilife_tv_3f_global_ranking_room_5
 	end
 
 Sinnoh_JubilifeTv3fGlobalRankingRoom_EventScript_Person4::
@@ -41,19 +41,6 @@ Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Bg2:
 Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Bg3:
 	.string "A machine that keeps records. Its\n"
 	.string "screen is dark for now.$"
-
-Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Person1:
-	.string "I'm in the rankings for the biggest\n"
-	.string "MAGIKARP. It's not much, but it's mine.$"
-
-Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Person2:
-	.string "These machines show TRAINERS from all\n"
-	.string "over. One day they'll show the whole\l"
-	.string "world.$"
-
-Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Person3:
-	.string "I check the rankings every week. I\n"
-	.string "like to see who's catching up.$"
 
 Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Person4:
 	.string "This room keeps records from all over.\n"

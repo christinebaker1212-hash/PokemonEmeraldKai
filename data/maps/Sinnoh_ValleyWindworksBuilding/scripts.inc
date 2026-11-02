@@ -8,11 +8,11 @@ Sinnoh_ValleyWindworksBuilding_OnTransition:
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_ValleyWindworksBuilding_EventScript_Bg1::
-	msgbox Sinnoh_ValleyWindworksBuilding_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_valley_windworks_building_7
 	end
 
 Sinnoh_ValleyWindworksBuilding_EventScript_Bg2::
-	msgbox Sinnoh_ValleyWindworksBuilding_Text_Bg2, MSGBOX_SIGN
+	goto SinnohP_valley_windworks_building_8
 	end
 
 Sinnoh_ValleyWindworksBuilding_EventScript_Person1::
@@ -20,7 +20,7 @@ Sinnoh_ValleyWindworksBuilding_EventScript_Person1::
 	end
 
 Sinnoh_ValleyWindworksBuilding_EventScript_Person3::
-	msgbox Sinnoh_ValleyWindworksBuilding_Text_Person3, MSGBOX_NPC
+	goto SinnohP_valley_windworks_building_5
 	end
 
 Sinnoh_ValleyWindworksBuilding_EventScript_Person6::
@@ -35,19 +35,9 @@ Sinnoh_ValleyWindworksBuilding_EventScript_Person8::
 	msgbox Sinnoh_ValleyWindworksBuilding_Text_Person8, MSGBOX_NPC
 	end
 
-Sinnoh_ValleyWindworksBuilding_Text_Bg1:
-	.string "The PC is switched off.$"
-
-Sinnoh_ValleyWindworksBuilding_Text_Bg2:
-	.string "The PC is switched off.$"
-
 Sinnoh_ValleyWindworksBuilding_Text_Person1:
 	.string "Turn back! COMMANDER MARS is busy and\n"
 	.string "doesn't want visitors.$"
-
-Sinnoh_ValleyWindworksBuilding_Text_Person3:
-	.string "The windmills make power for the towns\n"
-	.string "nearby. The wind here never stops!$"
 
 Sinnoh_ValleyWindworksBuilding_Text_Person6:
 	.string "My daddy's back! Thank you for\n"

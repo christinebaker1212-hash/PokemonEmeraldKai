@@ -20,7 +20,7 @@ Sinnoh_ValleyWindworksOutside_EventScript_Person7::
 	end
 
 Sinnoh_ValleyWindworksOutside_EventScript_Sign2::
-	msgbox Sinnoh_ValleyWindworksOutside_Text_Sign2, MSGBOX_SIGN
+	goto SinnohP_valley_windworks_outside_5
 	end
 
 Sinnoh_ValleyWindworksOutside_Text_Bg2:
@@ -36,10 +36,5 @@ Sinnoh_ValleyWindworksOutside_Text_Person7:
 	.string "something very large.\p"
 	.string "Their leader inside is a woman called\n"
 	.string "MARS. Be careful.$"
-
-Sinnoh_ValleyWindworksOutside_Text_Sign2:
-	.string "VALLEY WINDWORKS\p"
-	.string "The wind turns the turbines, the\n"
-	.string "turbines light the towns.$"
 
 @ --- end of SINNOH words ---

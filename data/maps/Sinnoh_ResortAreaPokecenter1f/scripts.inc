@@ -16,20 +16,11 @@ Sinnoh_ResortAreaPokecenter1f_EventScript_Person1::
 	end
 
 Sinnoh_ResortAreaPokecenter1f_EventScript_Person2::
-	msgbox Sinnoh_ResortAreaPokecenter1f_Text_Person2, MSGBOX_NPC
+	goto SinnohP_resort_area_pokecenter_1f_2
 	end
 
 Sinnoh_ResortAreaPokecenter1f_EventScript_Person3::
-	msgbox Sinnoh_ResortAreaPokecenter1f_Text_Person3, MSGBOX_NPC
+	goto SinnohP_resort_area_pokecenter_1f_3
 	end
-
-Sinnoh_ResortAreaPokecenter1f_Text_Person2:
-	.string "I'm on vacation with my family. They're\n"
-	.string "at the beach. I'm at the MOéMON\l"
-	.string "CENTER.$"
-
-Sinnoh_ResortAreaPokecenter1f_Text_Person3:
-	.string "I'm here to relax! No singing, no\n"
-	.string "dancing, just sunshine.$"
 
 @ --- end of SINNOH words ---

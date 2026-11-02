@@ -16,28 +16,15 @@ Sinnoh_HearthomeCityPokecenter1f_EventScript_Person1::
 	end
 
 Sinnoh_HearthomeCityPokecenter1f_EventScript_Person2::
-	msgbox Sinnoh_HearthomeCityPokecenter1f_Text_Person2, MSGBOX_NPC
+	goto SinnohP_hearthome_city_pokecenter_1f_2
 	end
 
 Sinnoh_HearthomeCityPokecenter1f_EventScript_Person3::
-	msgbox Sinnoh_HearthomeCityPokecenter1f_Text_Person3, MSGBOX_NPC
+	goto SinnohP_hearthome_city_pokecenter_1f_3
 	end
 
 Sinnoh_HearthomeCityPokecenter1f_EventScript_Person4::
-	msgbox Sinnoh_HearthomeCityPokecenter1f_Text_Person4, MSGBOX_NPC
+	goto SinnohP_hearthome_city_pokecenter_1f_4
 	end
-
-Sinnoh_HearthomeCityPokecenter1f_Text_Person2:
-	.string "HEARTHOME is the friendliest city in\n"
-	.string "SINNOH. Even the nurse says so!$"
-
-Sinnoh_HearthomeCityPokecenter1f_Text_Person3:
-	.string "I'm here to show off my MOéMON at the\n"
-	.string "CONTEST HALL. Darling, isn't it\l"
-	.string "beautiful?$"
-
-Sinnoh_HearthomeCityPokecenter1f_Text_Person4:
-	.string "I'm going to play a song for the FAN\n"
-	.string "CLUB. They love it when I play!$"
 
 @ --- end of SINNOH words ---

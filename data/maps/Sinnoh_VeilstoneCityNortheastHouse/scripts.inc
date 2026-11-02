@@ -7,15 +7,11 @@ Sinnoh_VeilstoneCityNortheastHouse_EventScript_Person1::
 	end
 
 Sinnoh_VeilstoneCityNortheastHouse_EventScript_Person2::
-	msgbox Sinnoh_VeilstoneCityNortheastHouse_Text_Person2, MSGBOX_NPC
+	goto SinnohP_veilstone_city_northeast_house_2
 	end
 
 Sinnoh_VeilstoneCityNortheastHouse_Text_Person1:
 	.string "The rocks in the city fell from the sky\n"
 	.string "long ago. I wonder what's inside them.$"
-
-Sinnoh_VeilstoneCityNortheastHouse_Text_Person2:
-	.string "My husband talks about those rocks\n"
-	.string "every day. Every single day.$"
 
 @ --- end of SINNOH words ---

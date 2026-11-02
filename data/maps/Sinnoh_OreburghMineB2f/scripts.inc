@@ -7,7 +7,7 @@ Sinnoh_OreburghMineB2f_EventScript_Person1::
 	end
 
 Sinnoh_OreburghMineB2f_EventScript_Person8::
-	msgbox Sinnoh_OreburghMineB2f_Text_Person8, MSGBOX_NPC
+	goto SinnohP_oreburgh_mine_b2f_5
 	end
 
 Sinnoh_OreburghMineB2f_EventScript_Person9::
@@ -28,10 +28,6 @@ Sinnoh_OreburghMineB2f_Text_Person1:
 	.string "I dig here when I'm not battling. Meet\n"
 	.string "me at the GYM when you're ready. I'll\l"
 	.string "be waiting.$"
-
-Sinnoh_OreburghMineB2f_Text_Person8:
-	.string "My MACHOP do the heavy lifting. I just\n"
-	.string "tell them where to put it!$"
 
 Sinnoh_OreburghMineB2f_Text_Person9:
 	.string "MACHOP: Ma-chop!\p"

@@ -3,7 +3,7 @@ Sinnoh_JubilifeCityCondominiums1f_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_JubilifeCityCondominiums1f_EventScript_Person1::
-	msgbox Sinnoh_JubilifeCityCondominiums1f_Text_Person1, MSGBOX_NPC
+	goto SinnohP_jubilife_city_condominiums_1f_1
 	end
 
 Sinnoh_JubilifeCityCondominiums1f_EventScript_Person2::
@@ -30,11 +30,6 @@ Sinnoh_JubilifeCityCondominiums1f_EventScript_Person4_Given::
 	msgbox Sinnoh_JubilifeCityCondominiums1f_Text_Person4, MSGBOX_DEFAULT
 	release
 	end
-
-Sinnoh_JubilifeCityCondominiums1f_Text_Person1:
-	.string "Everyone here has a MOéMON. The\n"
-	.string "hallways are full of them in the\l"
-	.string "evening!$"
 
 Sinnoh_JubilifeCityCondominiums1f_Text_Person2:
 	.string "PACHIRISU: Chipa?\p"

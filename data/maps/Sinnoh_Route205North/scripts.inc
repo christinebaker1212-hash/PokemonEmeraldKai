@@ -3,27 +3,15 @@ Sinnoh_Route205North_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Route205North_EventScript_Person6::
-	msgbox Sinnoh_Route205North_Text_Person6, MSGBOX_NPC
+	goto SinnohP_route_205_north_1
 	end
 
 Sinnoh_Route205North_EventScript_Sign4::
-	msgbox Sinnoh_Route205North_Text_Sign4, MSGBOX_SIGN
+	goto SinnohP_route_205_north_2
 	end
 
 Sinnoh_Route205North_EventScript_Sign5::
-	msgbox Sinnoh_Route205North_Text_Sign5, MSGBOX_SIGN
+	goto SinnohP_route_205_north_3
 	end
-
-Sinnoh_Route205North_Text_Person6:
-	.string "The river here is calm. Perfect for a\n"
-	.string "lazy afternoon of fishing.$"
-
-Sinnoh_Route205North_Text_Sign4:
-	.string "ROUTE 205\p"
-	.string "To ETERNA FOREST$"
-
-Sinnoh_Route205North_Text_Sign5:
-	.string "ROUTE 205\p"
-	.string "To ETERNA CITY$"
 
 @ --- end of SINNOH words ---

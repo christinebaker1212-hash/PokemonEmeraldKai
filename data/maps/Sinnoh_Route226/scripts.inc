@@ -3,19 +3,11 @@ Sinnoh_Route226_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Route226_EventScript_Sign1::
-	msgbox Sinnoh_Route226_Text_Sign1, MSGBOX_SIGN
+	goto SinnohP_route_226_1
 	end
 
 Sinnoh_Route226_EventScript_Sign15::
-	msgbox Sinnoh_Route226_Text_Sign15, MSGBOX_SIGN
+	goto SinnohP_route_226_2
 	end
-
-Sinnoh_Route226_Text_Sign1:
-	.string "ROUTE 226\p"
-	.string "To the SURVIVAL AREA$"
-
-Sinnoh_Route226_Text_Sign15:
-	.string "ROUTE 226\p"
-	.string "To ROUTE 227 and ROUTE 228$"
 
 @ --- end of SINNOH words ---

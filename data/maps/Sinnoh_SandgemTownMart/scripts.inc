@@ -13,23 +13,11 @@ Sinnoh_SandgemTownMart_EventScript_Person1::
 	end
 
 Sinnoh_SandgemTownMart_EventScript_Person2::
-	msgbox Sinnoh_SandgemTownMart_Text_Person2, MSGBOX_NPC
+	goto SinnohP_sandgem_town_mart_4
 	end
 
 Sinnoh_SandgemTownMart_EventScript_Person3::
-	msgbox Sinnoh_SandgemTownMart_Text_Person3, MSGBOX_NPC
+	goto SinnohP_sandgem_town_mart_3
 	end
-
-Sinnoh_SandgemTownMart_Text_Person2:
-	.string "I spent all my allowance on POKé\n"
-	.string "BALLS.\p"
-	.string "Now I just need to get good at\n"
-	.string "throwing them.$"
-
-Sinnoh_SandgemTownMart_Text_Person3:
-	.string "A POTION for the trip, an ANTIDOTE for\n"
-	.string "the grass... and a snack for me.\p"
-	.string "Shopping for a journey is the best\n"
-	.string "part!$"
 
 @ --- end of SINNOH words ---

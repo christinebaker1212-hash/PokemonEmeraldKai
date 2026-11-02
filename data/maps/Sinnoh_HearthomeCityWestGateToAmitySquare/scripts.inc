@@ -3,11 +3,11 @@ Sinnoh_HearthomeCityWestGateToAmitySquare_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_HearthomeCityWestGateToAmitySquare_EventScript_Person1::
-	msgbox Sinnoh_HearthomeCityWestGateToAmitySquare_Text_Person1, MSGBOX_NPC
+	goto SinnohP_hearthome_city_west_gate_to_amity_square_1
 	end
 
 Sinnoh_HearthomeCityWestGateToAmitySquare_EventScript_Person2::
-	msgbox Sinnoh_HearthomeCityWestGateToAmitySquare_Text_Person2, MSGBOX_NPC
+	goto SinnohP_hearthome_city_west_gate_to_amity_square_2
 	end
 
 Sinnoh_HearthomeCityWestGateToAmitySquare_EventScript_Person3::
@@ -17,13 +17,6 @@ Sinnoh_HearthomeCityWestGateToAmitySquare_EventScript_Person3::
 Sinnoh_HearthomeCityWestGateToAmitySquare_EventScript_Person4::
 	msgbox Sinnoh_HearthomeCityWestGateToAmitySquare_Text_Person4, MSGBOX_NPC
 	end
-
-Sinnoh_HearthomeCityWestGateToAmitySquare_Text_Person1:
-	.string "Welcome! Please enjoy your visit.$"
-
-Sinnoh_HearthomeCityWestGateToAmitySquare_Text_Person2:
-	.string "AMITY SQUARE is lovely! Walk with your\n"
-	.string "MOéMON and see what it finds.$"
 
 Sinnoh_HearthomeCityWestGateToAmitySquare_Text_Person3:
 	.string "PIKACHU: Pika!\p"

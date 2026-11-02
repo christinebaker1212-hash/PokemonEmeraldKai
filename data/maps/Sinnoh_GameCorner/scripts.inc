@@ -59,7 +59,7 @@ Sinnoh_GameCorner_EventScript_Person1::
 	end
 
 Sinnoh_GameCorner_EventScript_Person2::
-	msgbox Sinnoh_GameCorner_Text_Person2, MSGBOX_NPC
+	goto SinnohP_game_corner_14
 	end
 
 Sinnoh_GameCorner_EventScript_Person3::
@@ -71,19 +71,19 @@ Sinnoh_GameCorner_EventScript_Person4::
 	end
 
 Sinnoh_GameCorner_EventScript_Person5::
-	msgbox Sinnoh_GameCorner_Text_Person5, MSGBOX_NPC
+	goto SinnohP_game_corner_19
 	end
 
 Sinnoh_GameCorner_EventScript_Person6::
-	msgbox Sinnoh_GameCorner_Text_Person6, MSGBOX_NPC
+	goto SinnohP_game_corner_17
 	end
 
 Sinnoh_GameCorner_EventScript_Person7::
-	msgbox Sinnoh_GameCorner_Text_Person7, MSGBOX_NPC
+	goto SinnohP_game_corner_18
 	end
 
 Sinnoh_GameCorner_EventScript_Person8::
-	msgbox Sinnoh_GameCorner_Text_Person8, MSGBOX_NPC
+	goto SinnohP_game_corner_20
 	end
 
 Sinnoh_GameCorner_EventScript_Person9::
@@ -93,10 +93,6 @@ Sinnoh_GameCorner_EventScript_Person9::
 Sinnoh_GameCorner_Text_Bg13:
 	.string "A notice on the wall.$"
 
-Sinnoh_GameCorner_Text_Person2:
-	.string "A slot machine. The reels are dark: it's\n"
-	.string "switched off for now.$"
-
 Sinnoh_GameCorner_Text_Person3:
 	.string "I used to play here every day. Now I\n"
 	.string "just come for the music.$"
@@ -104,25 +100,6 @@ Sinnoh_GameCorner_Text_Person3:
 Sinnoh_GameCorner_Text_Person4:
 	.string "I came to town to sell vegetables and\n"
 	.string "ended up here. Don't tell my wife.$"
-
-Sinnoh_GameCorner_Text_Person5:
-	.string "The flashing lights give me ideas for\n"
-	.string "songs. Ding ding ding! ...See?$"
-
-Sinnoh_GameCorner_Text_Person6:
-	.string "After a long shift, I come here to\n"
-	.string "relax. The machines don't mind if I\l"
-	.string "just watch.$"
-
-Sinnoh_GameCorner_Text_Person7:
-	.string "Someone dropped a POKé BALL near the\n"
-	.string "machines once. I've been looking for\l"
-	.string "more ever since.$"
-
-Sinnoh_GameCorner_Text_Person8:
-	.string "My daughter runs the GYM. She trains\n"
-	.string "so hard. I come here to... train too. My\l"
-	.string "luck, that is.$"
 
 Sinnoh_GameCorner_Text_Person9:
 	.string "LOOKER: Do not mind me. I am simply a\n"

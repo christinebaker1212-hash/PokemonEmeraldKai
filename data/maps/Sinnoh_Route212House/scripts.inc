@@ -3,11 +3,11 @@ Sinnoh_Route212House_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Route212House_EventScript_Bg1::
-	msgbox Sinnoh_Route212House_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_route_212_house_4
 	end
 
 Sinnoh_Route212House_EventScript_Person1::
-	msgbox Sinnoh_Route212House_Text_Person1, MSGBOX_NPC
+	goto SinnohP_route_212_house_3
 	end
 
 Sinnoh_Route212House_EventScript_Person2::
@@ -15,24 +15,12 @@ Sinnoh_Route212House_EventScript_Person2::
 	end
 
 Sinnoh_Route212House_EventScript_Person3::
-	msgbox Sinnoh_Route212House_Text_Person3, MSGBOX_NPC
+	goto SinnohP_route_212_house_2
 	end
-
-Sinnoh_Route212House_Text_Bg1:
-	.string "It's full of handwriting. It doesn't\n"
-	.string "seem polite to read it.$"
-
-Sinnoh_Route212House_Text_Person1:
-	.string "It never stops raining here. My MOéMON\n"
-	.string "loves it, though.$"
 
 Sinnoh_Route212House_Text_Person2:
 	.string "I came down from the mountains to\n"
 	.string "escape the snow. Now it's rain\l"
 	.string "instead!$"
-
-Sinnoh_Route212House_Text_Person3:
-	.string "I've got a rain coat and rain boots\n"
-	.string "and a rain hat! I'm ready!$"
 
 @ --- end of SINNOH words ---

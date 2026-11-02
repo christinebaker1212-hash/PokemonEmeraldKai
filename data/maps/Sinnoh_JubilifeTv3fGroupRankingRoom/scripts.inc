@@ -15,11 +15,11 @@ Sinnoh_JubilifeTv3fGroupRankingRoom_EventScript_Bg3::
 	end
 
 Sinnoh_JubilifeTv3fGroupRankingRoom_EventScript_Person1::
-	msgbox Sinnoh_JubilifeTv3fGroupRankingRoom_Text_Person1, MSGBOX_NPC
+	goto SinnohP_jubilife_tv_3f_group_ranking_room_4
 	end
 
 Sinnoh_JubilifeTv3fGroupRankingRoom_EventScript_Person2::
-	msgbox Sinnoh_JubilifeTv3fGroupRankingRoom_Text_Person2, MSGBOX_NPC
+	goto SinnohP_jubilife_tv_3f_group_ranking_room_5
 	end
 
 Sinnoh_JubilifeTv3fGroupRankingRoom_EventScript_Person3::
@@ -37,16 +37,6 @@ Sinnoh_JubilifeTv3fGroupRankingRoom_Text_Bg2:
 Sinnoh_JubilifeTv3fGroupRankingRoom_Text_Bg3:
 	.string "A machine that keeps records. Its\n"
 	.string "screen is dark for now.$"
-
-Sinnoh_JubilifeTv3fGroupRankingRoom_Text_Person1:
-	.string "My friends and I made a group. We're\n"
-	.string "going to beat everyone's records\l"
-	.string "together!$"
-
-Sinnoh_JubilifeTv3fGroupRankingRoom_Text_Person2:
-	.string "Groups train together and climb\n"
-	.string "together. That's how you get to the\l"
-	.string "top!$"
 
 Sinnoh_JubilifeTv3fGroupRankingRoom_Text_Person3:
 	.string "Groups of TRAINERS compete for the\n"

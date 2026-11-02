@@ -11,27 +11,27 @@ Sinnoh_TwinleafTownPlayerHouse1f_EventScript_Bg2::
 	end
 
 Sinnoh_TwinleafTownPlayerHouse1f_EventScript_Bg3::
-	msgbox Sinnoh_TwinleafTownPlayerHouse1f_Text_Bg3, MSGBOX_SIGN
+	goto SinnohP_twinleaf_town_player_house_1f_8
 	end
 
 Sinnoh_TwinleafTownPlayerHouse1f_EventScript_Bg4::
-	msgbox Sinnoh_TwinleafTownPlayerHouse1f_Text_Bg4, MSGBOX_SIGN
+	goto SinnohP_twinleaf_town_player_house_1f_9
 	end
 
 Sinnoh_TwinleafTownPlayerHouse1f_EventScript_Bg5::
-	msgbox Sinnoh_TwinleafTownPlayerHouse1f_Text_Bg5, MSGBOX_SIGN
+	goto SinnohP_twinleaf_town_player_house_1f_9
 	end
 
 Sinnoh_TwinleafTownPlayerHouse1f_EventScript_Bg6::
-	msgbox Sinnoh_TwinleafTownPlayerHouse1f_Text_Bg6, MSGBOX_SIGN
+	goto SinnohP_twinleaf_town_player_house_1f_10
 	end
 
 Sinnoh_TwinleafTownPlayerHouse1f_EventScript_Bg7::
-	msgbox Sinnoh_TwinleafTownPlayerHouse1f_Text_Bg7, MSGBOX_SIGN
+	goto SinnohP_twinleaf_town_player_house_1f_10
 	end
 
 Sinnoh_TwinleafTownPlayerHouse1f_EventScript_Bg8::
-	msgbox Sinnoh_TwinleafTownPlayerHouse1f_Text_Bg8, MSGBOX_SIGN
+	goto SinnohP_twinleaf_town_player_house_1f_10
 	end
 
 Sinnoh_TwinleafTownPlayerHouse1f_EventScript_Person1::
@@ -51,34 +51,6 @@ Sinnoh_TwinleafTownPlayerHouse1f_Text_Bg2:
 	.string "A cooking show is on.\p"
 	.string "“...and that's how you make a POFFIN\n"
 	.string "that even a MUNCHLAX would share!”$"
-
-Sinnoh_TwinleafTownPlayerHouse1f_Text_Bg3:
-	.string "The fridge is full of BERRY juice and\n"
-	.string "leftovers labeled “FOR WHEN YOU\l"
-	.string "VISIT.”$"
-
-Sinnoh_TwinleafTownPlayerHouse1f_Text_Bg4:
-	.string "The sink is spotless. Someone here\n"
-	.string "takes pride in it.$"
-
-Sinnoh_TwinleafTownPlayerHouse1f_Text_Bg5:
-	.string "The sink is spotless. Someone here\n"
-	.string "takes pride in it.$"
-
-Sinnoh_TwinleafTownPlayerHouse1f_Text_Bg6:
-	.string "There's a recipe card on the counter.\p"
-	.string "“ORAN soup: three ORAN BERRIES, a\n"
-	.string "pinch of salt, and a lot of patience.”$"
-
-Sinnoh_TwinleafTownPlayerHouse1f_Text_Bg7:
-	.string "There's a recipe card on the counter.\p"
-	.string "“ORAN soup: three ORAN BERRIES, a\n"
-	.string "pinch of salt, and a lot of patience.”$"
-
-Sinnoh_TwinleafTownPlayerHouse1f_Text_Bg8:
-	.string "There's a recipe card on the counter.\p"
-	.string "“ORAN soup: three ORAN BERRIES, a\n"
-	.string "pinch of salt, and a lot of patience.”$"
 
 Sinnoh_TwinleafTownPlayerHouse1f_Text_Person1:
 	.string "Oh! You're the TRAINER from overseas!\n"

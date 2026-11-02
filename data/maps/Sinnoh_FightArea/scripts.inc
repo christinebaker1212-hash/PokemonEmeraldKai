@@ -48,23 +48,23 @@ Sinnoh_FightArea_EventScript_Person9::
 	end
 
 Sinnoh_FightArea_EventScript_Person14::
-	msgbox Sinnoh_FightArea_Text_Person14, MSGBOX_NPC
+	goto SinnohP_fight_area_4
 	end
 
 Sinnoh_FightArea_EventScript_Person15::
-	msgbox Sinnoh_FightArea_Text_Person15, MSGBOX_NPC
+	goto SinnohP_fight_area_2
 	end
 
 Sinnoh_FightArea_EventScript_Person16::
-	msgbox Sinnoh_FightArea_Text_Person16, MSGBOX_NPC
+	goto SinnohP_fight_area_3
 	end
 
 Sinnoh_FightArea_EventScript_Person17::
-	msgbox Sinnoh_FightArea_Text_Person17, MSGBOX_NPC
+	goto SinnohP_fight_area_5
 	end
 
 Sinnoh_FightArea_EventScript_Person18::
-	msgbox Sinnoh_FightArea_Text_Person18, MSGBOX_NPC
+	goto SinnohP_fight_area_6
 	end
 
 Sinnoh_FightArea_EventScript_Person19::
@@ -85,7 +85,7 @@ Sinnoh_FightArea_EventScript_Person19_Sail0::
 	end
 
 Sinnoh_FightArea_EventScript_Person20::
-	msgbox Sinnoh_FightArea_Text_Person20, MSGBOX_NPC
+	goto SinnohP_fight_area_13
 	end
 
 Sinnoh_FightArea_EventScript_Person25::
@@ -121,15 +121,15 @@ Sinnoh_FightArea_EventScript_Person32::
 	end
 
 Sinnoh_FightArea_EventScript_Sign1::
-	msgbox Sinnoh_FightArea_Text_Sign1, MSGBOX_SIGN
+	goto SinnohP_fight_area_9
 	end
 
 Sinnoh_FightArea_EventScript_Sign2::
-	msgbox Sinnoh_FightArea_Text_Sign2, MSGBOX_SIGN
+	goto SinnohP_fight_area_11
 	end
 
 Sinnoh_FightArea_EventScript_Sign3::
-	msgbox Sinnoh_FightArea_Text_Sign3, MSGBOX_SIGN
+	goto SinnohP_fight_area_10
 	end
 
 Sinnoh_FightArea_Text_Person6Ask0:
@@ -156,29 +156,6 @@ Sinnoh_FightArea_Text_Person9:
 	.string "STARK MOUNTAIN's where I'm headed\n"
 	.string "next. Something's waking up inside it.$"
 
-Sinnoh_FightArea_Text_Person14:
-	.string "Everyone here came to battle. Even\n"
-	.string "the MOéMON look like they're warming\l"
-	.string "up.$"
-
-Sinnoh_FightArea_Text_Person15:
-	.string "The BATTLE FRONTIER is where the real\n"
-	.string "challenge is. Are you ready?$"
-
-Sinnoh_FightArea_Text_Person16:
-	.string "I've been training in the BATTLE ZONE\n"
-	.string "for a year. I'm almost ready for the\l"
-	.string "FRONTIER.$"
-
-Sinnoh_FightArea_Text_Person17:
-	.string "My big brother is going to win\n"
-	.string "everything at the FRONTIER!\l"
-	.string "...Someday!$"
-
-Sinnoh_FightArea_Text_Person18:
-	.string "Hah! Nobody comes here to rest. Even\n"
-	.string "the cafe has a battle menu!$"
-
 Sinnoh_FightArea_Text_Person19Ask0:
 	.string "Shall I take you to SNOWPOINT CITY?$"
 
@@ -188,10 +165,6 @@ Sinnoh_FightArea_Text_Person19Bye:
 
 Sinnoh_FightArea_Text_Person19Off:
 	.string "All aboard! Hold on tight!$"
-
-Sinnoh_FightArea_Text_Person20:
-	.string "Feel that? The air out here crackles\n"
-	.string "with fighting spirit!$"
 
 Sinnoh_FightArea_Text_Person25:
 	.string "VOLKNER: I came to see if the BATTLE\n"
@@ -229,17 +202,5 @@ Sinnoh_FightArea_Text_Person31:
 Sinnoh_FightArea_Text_Person32:
 	.string "I sailed in from SNOWPOINT. My boat's\n"
 	.string "still frozen, but my heart's warm!$"
-
-Sinnoh_FightArea_Text_Sign1:
-	.string "FIGHT AREA\p"
-	.string "The gateway to the BATTLE ZONE.$"
-
-Sinnoh_FightArea_Text_Sign2:
-	.string "ROUTE 225\p"
-	.string "To the SURVIVAL AREA$"
-
-Sinnoh_FightArea_Text_Sign3:
-	.string "BATTLE FRONTIER\p"
-	.string "For the strongest TRAINERS.$"
 
 @ --- end of SINNOH words ---

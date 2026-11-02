@@ -11,7 +11,7 @@ Sinnoh_Route221_EventScript_Person17::
 	end
 
 Sinnoh_Route221_EventScript_Sign7::
-	msgbox Sinnoh_Route221_Text_Sign7, MSGBOX_SIGN
+	goto SinnohP_route_221_3
 	end
 
 Sinnoh_Route221_Text_Person16:
@@ -22,9 +22,5 @@ Sinnoh_Route221_Text_Person16:
 Sinnoh_Route221_Text_Person17:
 	.string "Pass me that shovel! ...No, the other\n"
 	.string "shovel. The shiny one.$"
-
-Sinnoh_Route221_Text_Sign7:
-	.string "PAL PARK\p"
-	.string "Coming soon!$"
 
 @ --- end of SINNOH words ---

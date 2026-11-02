@@ -15,7 +15,7 @@ Sinnoh_SandgemTownPokecenter2f_EventScript_Person3::
 	end
 
 Sinnoh_SandgemTownPokecenter2f_EventScript_Person4::
-	msgbox Sinnoh_SandgemTownPokecenter2f_Text_Person4, MSGBOX_NPC
+	goto SinnohP_sandgem_town_pokecenter_2f_1
 	end
 
 Sinnoh_SandgemTownPokecenter2f_Text_Person1:
@@ -35,11 +35,5 @@ Sinnoh_SandgemTownPokecenter2f_Text_Person3:
 	.string "set up.\p"
 	.string "Your friends in CO-OP can find you\n"
 	.string "anywhere, though!$"
-
-Sinnoh_SandgemTownPokecenter2f_Text_Person4:
-	.string "I'm waiting for my friend so we can\n"
-	.string "trade.\p"
-	.string "They said they'd be here an hour ago...\n"
-	.string "They're probably catching something.$"
 
 @ --- end of SINNOH words ---

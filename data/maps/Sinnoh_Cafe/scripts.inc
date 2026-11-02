@@ -3,7 +3,7 @@ Sinnoh_Cafe_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Cafe_EventScript_Person1::
-	msgbox Sinnoh_Cafe_Text_Person1, MSGBOX_NPC
+	goto SinnohP_cafe_2
 	end
 
 Sinnoh_Cafe_EventScript_Person2::
@@ -24,13 +24,8 @@ Sinnoh_Cafe_EventScript_Person2_Given::
 	end
 
 Sinnoh_Cafe_EventScript_Person6::
-	msgbox Sinnoh_Cafe_Text_Person6, MSGBOX_NPC
+	goto SinnohP_cafe_4
 	end
-
-Sinnoh_Cafe_Text_Person1:
-	.string "The MOOMOO MILK here comes straight\n"
-	.string "from the ranch. It's the freshest\l"
-	.string "you'll ever taste.$"
 
 Sinnoh_Cafe_Text_Person2:
 	.string "Welcome to the CAFE CABIN! Today's\n"
@@ -40,9 +35,5 @@ Sinnoh_Cafe_Text_Person2:
 Sinnoh_Cafe_Text_Person2Gift:
 	.string "Here, have a few bottles on the house.\n"
 	.string "Fresh from the farm!$"
-
-Sinnoh_Cafe_Text_Person6:
-	.string "I come here every day for a glass of\n"
-	.string "milk. Keeps me young!$"
 
 @ --- end of SINNOH words ---

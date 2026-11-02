@@ -8,7 +8,7 @@ Sinnoh_TeamGalacticEternaBuilding4f_OnTransition:
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_TeamGalacticEternaBuilding4f_EventScript_Bg1::
-	msgbox Sinnoh_TeamGalacticEternaBuilding4f_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_team_galactic_eterna_building_4f_6
 	end
 
 Sinnoh_TeamGalacticEternaBuilding4f_EventScript_Person2::
@@ -22,9 +22,6 @@ Sinnoh_TeamGalacticEternaBuilding4f_EventScript_Person3::
 Sinnoh_TeamGalacticEternaBuilding4f_EventScript_Person4::
 	msgbox Sinnoh_TeamGalacticEternaBuilding4f_Text_Person4, MSGBOX_NPC
 	end
-
-Sinnoh_TeamGalacticEternaBuilding4f_Text_Bg1:
-	.string "A notice on the wall.$"
 
 Sinnoh_TeamGalacticEternaBuilding4f_Text_Person2:
 	.string "Clefairy looks frightened. It huddles\n"

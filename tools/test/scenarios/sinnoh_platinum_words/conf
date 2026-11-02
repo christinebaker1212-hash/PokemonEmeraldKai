@@ -1,0 +1,7 @@
+# SINNOH's people say Platinum's own words (tools/sinnoh/gen_scripts.py converts their scripts when the game is
+# built; the words come from sinnoh/platinum_text.pak): TWINLEAF TOWN's guitarist (his line with the player's and the
+# rival's names buffered) and the town's sign. Needs the packs and the converted scripts (tools/sinnoh/make_pack.sh).
+MODE=1
+TMO=90
+EXPECT_A=("ctx 1 free 1 overworld 1 locked 0 script 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

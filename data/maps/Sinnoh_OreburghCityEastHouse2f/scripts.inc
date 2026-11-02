@@ -20,11 +20,11 @@ Sinnoh_OreburghCityEastHouse2f_EventScript_Person1_Given::
 	end
 
 Sinnoh_OreburghCityEastHouse2f_EventScript_Person2::
-	msgbox Sinnoh_OreburghCityEastHouse2f_Text_Person2, MSGBOX_NPC
+	goto SinnohP_oreburgh_city_east_house_2f_1
 	end
 
 Sinnoh_OreburghCityEastHouse2f_EventScript_Person3::
-	msgbox Sinnoh_OreburghCityEastHouse2f_Text_Person3, MSGBOX_NPC
+	goto SinnohP_oreburgh_city_east_house_2f_4
 	end
 
 Sinnoh_OreburghCityEastHouse2f_Text_Person1:
@@ -34,14 +34,5 @@ Sinnoh_OreburghCityEastHouse2f_Text_Person1:
 Sinnoh_OreburghCityEastHouse2f_Text_Person1Gift:
 	.string "I traded a lump of coal for this BALL.\n"
 	.string "You can have it!$"
-
-Sinnoh_OreburghCityEastHouse2f_Text_Person2:
-	.string "I've traveled all over SINNOH.\n"
-	.string "OREBURGH's people are the hardest\l"
-	.string "working of all.$"
-
-Sinnoh_OreburghCityEastHouse2f_Text_Person3:
-	.string "I'm researching how to burn coal more\n"
-	.string "cleanly. It's slow work, but it matters.$"
 
 @ --- end of SINNOH words ---

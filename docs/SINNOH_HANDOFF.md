@@ -32,8 +32,11 @@ Queued after the 1.61.6 release and the KANTO / JOHTO sweep (the user's plan, 20
   41-44), with every place's warps: doors lead in, mats out. The pack ships compressed (7 MB). SINNOH is a region of its own
   (REGION_SINNOH: GENERATION cap 4+, badges from flag 0x3320, CANALAVE's dock for the boat, off the boat's list
   until its story is in), with Platinum's wild POKéMON (gen_wild.py). Next: data (step 3: trainers, items, marts),
-  scripts and text (step 4: original writing for this game, committed per map; DECIDED 2026-10-31: nothing of
-  Platinum's scripts or text is converted, committed or shipped; tools/sinnoh/words.py + gen_words.py, who.py to see
+  scripts and text (step 4: Platinum's OWN words and scripts, converted when the game is built and never committed
+  (DECIDED by the user, 2026-11-02, undoing a session's 2026-10-31 call to write original words instead: "we have
+  all the original dialogue and scripts"; tools/sinnoh/build_text.py -> sinnoh/platinum_text.pak, tools/sinnoh/
+  gen_scripts.py -> sinnoh/platinum_scripts.inc, both by make_pack.sh; COOP_NOTES "Platinum's own words and
+  scripts"); the words written for this game (below) stand in only where a script doesn't convert yet; tools/sinnoh/words.py + gen_words.py, who.py to see
   a map's people: TWINLEAF, ROUTE 201 and SANDGEM written, COOP_NOTES "Words"; done 2026-11-01: item balls, hidden
   items, the 403 route trainers with lines of their own, TM51-TM92, the gym leaders, the ELITE FOUR and the CHAMPION
   (the region cleared), boats inside SINNOH and the boat from the other regions: SINNOH is playable from start to
@@ -126,9 +129,10 @@ perspective camera. The engine draws those models as Platinum does instead of pi
    compared against reference pictures), then inside the game: one Sinnoh map drawn in 3D with billboarded sprites.
 2. Collision and height: Platinum's tile permissions -> Emerald behaviours; BDHC -> heights under objects, bridge
    layers.
-3. Data converters: trainers, wild, items, marts (no text: SINNOH's words are written for this game); small new systems for Honey Trees, Poké Radar,
+3. Data converters: trainers, wild, items, marts, text (Platinum's own: build_text.py); small new systems for Honey Trees, Poké Radar,
    swarms and the Great Marsh; Rock Climb and Defog as field moves.
-4. Scripts: written for this game, with its own words (nothing converted from Platinum's scripts). This is the bulk of the work
+4. Scripts: Platinum's own, converted (tools/sinnoh/gen_scripts.py; DECIDED by the user 2026-11-02: never rewrite
+   them or their words). This is the bulk of the work
    (Team Galactic, the lakes, Spear Pillar, the Distortion World; the Distortion World's own gravity and camera
    need the 3D engine's camera moves).
 5. PÓKETCH Key Item and its apps (touch apps use the D-pad cursor or mouse). Self-contained, can come early.

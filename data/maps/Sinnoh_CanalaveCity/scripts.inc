@@ -37,15 +37,15 @@ Sinnoh_CanalaveCity_Text_Arrival:
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_CanalaveCity_EventScript_Bg1::
-	msgbox Sinnoh_CanalaveCity_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_canalave_city_21
 	end
 
 Sinnoh_CanalaveCity_EventScript_Person1::
-	msgbox Sinnoh_CanalaveCity_Text_Person1, MSGBOX_NPC
+	goto SinnohP_canalave_city_8
 	end
 
 Sinnoh_CanalaveCity_EventScript_Person2::
-	msgbox Sinnoh_CanalaveCity_Text_Person2, MSGBOX_NPC
+	goto SinnohP_canalave_city_11
 	end
 
 Sinnoh_CanalaveCity_EventScript_Person3::
@@ -53,7 +53,7 @@ Sinnoh_CanalaveCity_EventScript_Person3::
 	end
 
 Sinnoh_CanalaveCity_EventScript_Person4::
-	msgbox Sinnoh_CanalaveCity_Text_Person4, MSGBOX_NPC
+	goto SinnohP_canalave_city_10
 	end
 
 Sinnoh_CanalaveCity_EventScript_Person10::
@@ -61,7 +61,7 @@ Sinnoh_CanalaveCity_EventScript_Person10::
 	end
 
 Sinnoh_CanalaveCity_EventScript_Person11::
-	msgbox Sinnoh_CanalaveCity_Text_Person11, MSGBOX_NPC
+	goto SinnohP_canalave_city_13
 	end
 
 Sinnoh_CanalaveCity_EventScript_Person13::
@@ -118,61 +118,37 @@ Sinnoh_CanalaveCity_EventScript_Person19::
 	end
 
 Sinnoh_CanalaveCity_EventScript_Sign5::
-	msgbox Sinnoh_CanalaveCity_Text_Sign5, MSGBOX_SIGN
+	goto SinnohP_canalave_city_16
 	end
 
 Sinnoh_CanalaveCity_EventScript_Sign6::
-	msgbox Sinnoh_CanalaveCity_Text_Sign6, MSGBOX_SIGN
+	goto SinnohP_canalave_city_15
 	end
 
 Sinnoh_CanalaveCity_EventScript_Sign7::
-	msgbox Sinnoh_CanalaveCity_Text_Sign7, MSGBOX_SIGN
+	goto SinnohP_canalave_city_18
 	end
 
 Sinnoh_CanalaveCity_EventScript_Sign8::
-	msgbox Sinnoh_CanalaveCity_Text_Sign8, MSGBOX_SIGN
+	goto SinnohP_canalave_city_14
 	end
 
 Sinnoh_CanalaveCity_EventScript_Sign9::
-	msgbox Sinnoh_CanalaveCity_Text_Sign9, MSGBOX_SIGN
+	goto SinnohP_canalave_city_17
 	end
 
 Sinnoh_CanalaveCity_EventScript_Sign18::
 	msgbox Sinnoh_CanalaveCity_Text_Sign18, MSGBOX_SIGN
 	end
 
-Sinnoh_CanalaveCity_Text_Bg1:
-	.string "The door is locked. A sign says “Back\n"
-	.string "soon.”$"
-
-Sinnoh_CanalaveCity_Text_Person1:
-	.string "Boats come and go from CANALAVE all\n"
-	.string "day. I like to guess where each one is\l"
-	.string "headed.$"
-
-Sinnoh_CanalaveCity_Text_Person2:
-	.string "The library here has books older than\n"
-	.string "my great-grandma! The third floor is\l"
-	.string "the best.$"
-
 Sinnoh_CanalaveCity_Text_Person3:
 	.string "The drawbridge goes up when big ships\n"
 	.string "pass. You get used to waiting.$"
-
-Sinnoh_CanalaveCity_Text_Person4:
-	.string "BYRON at the GYM is tough. His MOéMON\n"
-	.string "are as hard as the iron from the\l"
-	.string "island.$"
 
 Sinnoh_CanalaveCity_Text_Person10:
 	.string "PSYDUCK: Psy...? Psy-yi-yi...\p"
 	.string "It's holding its head. It looks like\n"
 	.string "it's thinking very hard.$"
-
-Sinnoh_CanalaveCity_Text_Person11:
-	.string "I've fished from this canal for fifty\n"
-	.string "years. The fish here are smarter than\l"
-	.string "they look.$"
 
 Sinnoh_CanalaveCity_Text_Person13:
 	.string "The PROFESSOR wants us all at the\n"
@@ -203,28 +179,6 @@ Sinnoh_CanalaveCity_Text_Person19:
 	.string "BARRY: The library! The PROFESSOR's\n"
 	.string "calling a meeting. Hurry up, I'll fine\l"
 	.string "you if you're late!$"
-
-Sinnoh_CanalaveCity_Text_Sign5:
-	.string "CANALAVE LIBRARY\p"
-	.string "Stories of SINNOH's past, open to\n"
-	.string "everyone.$"
-
-Sinnoh_CanalaveCity_Text_Sign6:
-	.string "CANALAVE CITY MOéMON GYM\p"
-	.string "LEADER: BYRON\p"
-	.string "A wall of solid steel!$"
-
-Sinnoh_CanalaveCity_Text_Sign7:
-	.string "CANALAVE DOCK\p"
-	.string "Boats to IRON ISLAND and beyond.$"
-
-Sinnoh_CanalaveCity_Text_Sign8:
-	.string "CANALAVE CITY\p"
-	.string "The port town where the sea and the\n"
-	.string "land shake hands.$"
-
-Sinnoh_CanalaveCity_Text_Sign9:
-	.string "SAILOR ELDRITCH'S HOUSE$"
 
 Sinnoh_CanalaveCity_Text_Sign18:
 	.string "HARBOR INN\p"

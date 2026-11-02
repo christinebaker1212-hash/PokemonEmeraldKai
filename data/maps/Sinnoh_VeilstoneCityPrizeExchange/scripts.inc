@@ -11,15 +11,11 @@ Sinnoh_VeilstoneCityPrizeExchange_EventScript_Person2::
 	end
 
 Sinnoh_VeilstoneCityPrizeExchange_EventScript_Person3::
-	msgbox Sinnoh_VeilstoneCityPrizeExchange_Text_Person3, MSGBOX_NPC
+	goto SinnohP_veilstone_city_prize_exchange_3
 	end
 
 Sinnoh_VeilstoneCityPrizeExchange_Text_Person2:
 	.string "I won a prize once. It was a POTION.\n"
 	.string "I'm still proud of it.$"
-
-Sinnoh_VeilstoneCityPrizeExchange_Text_Person3:
-	.string "In my day, prizes were fancier. But I\n"
-	.string "still come to look.$"
 
 @ --- end of SINNOH words ---
