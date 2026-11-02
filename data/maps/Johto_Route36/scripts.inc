@@ -18,6 +18,8 @@ Johto_Route36_EventScript_83F19E1::
 Johto_Route36_EventScript_83F19F7::
 	goto_if_set FLAG_QZ_0x1003, Johto_Route36_EventScript_83F1A0B
 	msgbox Johto_Route36_Text_83F1D0D, MSGBOX_DEFAULT
+	setvar VAR_0x8004, ITEM_HM06   @ Moemon Kai: Crystal's HM (Quetzal said it, never gave it)
+	call EventScript_GiveHmOnce
 	setflag FLAG_QZ_0x1003
 
 Johto_Route36_EventScript_83F1A0B::

@@ -52,6 +52,8 @@ Johto_SproutTower3F_EventScript_83FA7E7::
 	applymovement 5, Johto_SproutTower3F_Movement_83FA8F6
 	waitmovement 0
 	msgbox Johto_SproutTower3F_Text_83FA915, MSGBOX_DEFAULT
+	setvar VAR_0x8004, ITEM_HM05   @ Moemon Kai: Crystal's HM (Quetzal said it, never gave it)
+	call EventScript_GiveHmOnce
 	closemessage
 	playse SE_PIN
 	applymovement 5, Quetzal_Movement_83607F9
@@ -83,6 +85,8 @@ Johto_SproutTower3F_EventScript_83FA84F::
 	applymovement 5, Johto_SproutTower3F_Movement_83FA8F6
 	waitmovement 0
 	msgbox Johto_SproutTower3F_Text_83FA915, MSGBOX_DEFAULT
+	setvar VAR_0x8004, ITEM_HM05   @ Moemon Kai: Crystal's HM (Quetzal said it, never gave it)
+	call EventScript_GiveHmOnce
 	closemessage
 	playse SE_PIN
 	applymovement 5, Quetzal_Movement_83607F9

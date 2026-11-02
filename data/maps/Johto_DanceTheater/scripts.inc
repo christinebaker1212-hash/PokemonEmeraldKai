@@ -151,6 +151,8 @@ Johto_DanceTheater_EventScript_83CFAF5::
 
 Johto_DanceTheater_EventScript_83CFB16::
 	msgbox Johto_DanceTheater_Text_83CFC97, MSGBOX_DEFAULT
+	setvar VAR_0x8004, ITEM_HM03   @ Moemon Kai: Crystal's HM (Quetzal said it, never gave it)
+	call EventScript_GiveHmOnce
 	setflag FLAG_QZ_0x1006
 	msgbox Johto_DanceTheater_Text_83CFD13, MSGBOX_DEFAULT
 	closemessage
@@ -172,6 +174,8 @@ Johto_DanceTheater_EventScript_83CFB3F::
 	waitmovement 0
 	turnobject LOCALID_PLAYER, 2
 	msgbox Johto_DanceTheater_Text_83CFC97, MSGBOX_DEFAULT
+	setvar VAR_0x8004, ITEM_HM03   @ Moemon Kai: Crystal's HM (Quetzal said it, never gave it)
+	call EventScript_GiveHmOnce
 	setflag FLAG_QZ_0x1006
 	msgbox Johto_DanceTheater_Text_83CFD13, MSGBOX_DEFAULT
 	closemessage

@@ -16,6 +16,8 @@ Johto_OlivineCafe_EventScript_83E4802::
 	faceplayer
 	goto_if_set FLAG_QZ_0x1002, Johto_OlivineCafe_EventScript_83E4818
 	msgbox Johto_OlivineCafe_Text_83E483D, MSGBOX_DEFAULT
+	setvar VAR_0x8004, ITEM_HM04   @ Moemon Kai: Crystal's HM (Quetzal said it, never gave it)
+	call EventScript_GiveHmOnce
 	setflag FLAG_QZ_0x1002
 
 Johto_OlivineCafe_EventScript_83E4818::

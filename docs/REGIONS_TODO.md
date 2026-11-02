@@ -19,7 +19,8 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       givers too, FireRed's words (HM02 ROUTE 16, HM03 SAFARI ZONE, HM04 the WARDEN, HM05 OAK's AIDE, HM06 EMBER SPA,
       HM07 ICEFALL CAVE's ball: tools/quetzal_port/fix_hm_givers.py; test hm_kanto); every region: an HM never given
       twice (item.c MP_PlayerHasHm; HOENN's and KANTO's givers say so: EventScript_GiveHmOnce / FindHmOnce)
-- [ ] JOHTO's HM givers (Crystal's / HGSS's) still Quetzal's
+- [x] JOHTO's HM givers give the HM they talk about (Crystal's: HM01 ILEX's CHARCOAL master, HM02 CIANWOOD, HM03 the
+      DANCE THEATER, HM04 OLIVINE CAFE, HM05 SPROUT TOWER, HM07 ICE PATH's ball; HGSS's HM06 ROCK SMASH on ROUTE 36)
 - [ ] Water animates
 - [x] The CUT tree east of CERULEAN (to ROUTE 9 / ROCK TUNNEL) can be cut (test kanto_cut_tree)
 
@@ -83,3 +84,5 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - An HM a player already has (BAG, PC or held) is never added again (item.c AddBagItem). HOENN's and KANTO's givers
   run EventScript_GiveHmOnce, which says "Oh! You're already carrying <HM>..." instead; SINNOH's givers keep Platinum's
   words (no original lines there) and simply add nothing. The S.S. ANNE CAPTAIN's METAL COAT (Quetzal's) is gone.
+- JOHTO's whirlpools: Kai has no WHIRLPOOL HM (only level-up learners), so one opens for the GLACIERBADGE and a Pokémon
+  with WHIRLPOOL or SURF until A4 adds an HM for it (qz_specials.c).

@@ -7,9 +7,8 @@ Johto_IcePath1F_EventScript_83DB627::
 
 @ Johto_IcePath1F object 1 (local id 1, gfx 0x3B) at 48,14
 Johto_IcePath1F_EventScript_83DB628::
-	setorcopyvar VAR_0x8000, ITEM_NUGGET
-	setorcopyvar VAR_0x8001, 1
-	callstd STD_FIND_ITEM
+	setvar VAR_0x8004, ITEM_HM07   @ Moemon Kai: Crystal's HM07 (Quetzal's NUGGET)
+	goto EventScript_FindHmOnce
 	end
 
 @ Johto_IcePath1F object 2 (local id 2, gfx 0x3B) at 47,29

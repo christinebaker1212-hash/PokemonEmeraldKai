@@ -41,6 +41,8 @@ Johto_CianwoodCity_EventScript_83C9C28::
 	applymovement 6, Johto_CianwoodCity_Movement_83C9C58
 	waitmovement 0
 	msgbox Johto_CianwoodCity_Text_83C9DB3, MSGBOX_DEFAULT
+	setvar VAR_0x8004, ITEM_HM02   @ Moemon Kai: Crystal's HM (Quetzal said it, never gave it)
+	call EventScript_GiveHmOnce
 	msgbox Johto_CianwoodCity_Text_83C9DEE, MSGBOX_DEFAULT
 	closemessage
 	setvar VAR_QZ_0x501E, 2
@@ -61,6 +63,8 @@ Johto_CianwoodCity_EventScript_83C9C6F::
 
 Johto_CianwoodCity_EventScript_83C9C98::
 	msgbox Johto_CianwoodCity_Text_83C9DB3, MSGBOX_DEFAULT
+	setvar VAR_0x8004, ITEM_HM02   @ Moemon Kai: Crystal's HM (Quetzal said it, never gave it)
+	call EventScript_GiveHmOnce
 	setvar VAR_QZ_0x501E, 2
 	msgbox Johto_CianwoodCity_Text_83C9DEE, MSGBOX_DEFAULT
 	closemessage

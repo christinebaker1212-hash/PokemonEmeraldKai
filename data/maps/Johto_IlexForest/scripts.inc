@@ -212,10 +212,8 @@ Johto_IlexForest_EventScript_83DC1DA::
 
 Johto_IlexForest_EventScript_83DC20F::
 	goto_if_set FLAG_QZ_0x1030, Johto_IlexForest_EventScript_83DC232
-	setorcopyvar VAR_0x8000, ITEM_CHARCOAL
-	setorcopyvar VAR_0x8001, 1
-	callstd STD_OBTAIN_ITEM
-	goto_if_eq VAR_RESULT, 0, Johto_IlexForest_EventScript_83DC23D
+	setvar VAR_0x8004, ITEM_HM01   @ Moemon Kai: Crystal's HM (Quetzal said it, never gave it)
+	call EventScript_GiveHmOnce
 	setflag FLAG_QZ_0x1030
 
 Johto_IlexForest_EventScript_83DC232::
@@ -716,10 +714,11 @@ Johto_IlexForest_Text_83DC72C::
 	.string "I know! Here, take this.$"
 
 Johto_IlexForest_Text_83DC7D4::
-	.string "A MOéMON holding this CHARCOAL\n"
-	.string "gets stronger FIRE-type attacks.\p"
-	.string "With JOHTO’s second GYM BADGE,\n"
-	.string "you can already use CUT.$"
+	.string "That's the CUT HM.\n"
+	.string "Teach that to a MOéMON to clear\l"
+	.string "small trees.\p"
+	.string "Of course, you have to have the\n"
+	.string "GYM BADGE from AZALEA to use it.$"
 
 Johto_IlexForest_Text_83DC84D::
 	.string "There is no room in your BAG.\p"
