@@ -17,6 +17,9 @@ import os
 import re
 import shutil
 
+# (trainer id, species): IVs (0-255) this game sets (the user, 2026-11-02: WHITNEY's MILTANK, perfect)
+IV_OVERRIDES = {(4700, 'SPECIES_MILTANK'): 255}
+
 REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 RIP = os.path.join(REPO, 'quetzal_rip')
 FIRST_ID = 864           # MAX_TRAINERS_COUNT
@@ -124,6 +127,7 @@ def main():
             iv = m.get('iv', 0)
             if kind == 4:
                 iv = min(255, iv * 255 // 31) if iv <= 31 else iv
+            iv = IV_OVERRIDES.get((t['id'], m['species']), iv)
             line = '    {.iv = %d, .lvl = %d, .species = %s' % (iv, m['lvl'], check(m['species']))
             if held:
                 line += ', .heldItem = %s' % check(m.get('held_item') or m.get('item') or 'ITEM_NONE')

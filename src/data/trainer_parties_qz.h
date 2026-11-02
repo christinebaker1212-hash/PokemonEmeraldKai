@@ -1221,7 +1221,7 @@ static const struct TrainerMonItemCustomMoves sParty_Qz4692[] = {
 
 static const struct TrainerMonItemCustomMoves sParty_Qz4700[] = {
     {.iv = 164, .lvl = 20, .species = SPECIES_GIRAFARIG, .heldItem = ITEM_LIGHT_CLAY, .moves = {MOVE_PSYCHIC, MOVE_SHADOW_BALL, MOVE_REFLECT, MOVE_PSYBEAM}},
-    {.iv = 164, .lvl = 20, .species = SPECIES_MILTANK, .heldItem = ITEM_SITRUS_BERRY, .moves = {MOVE_BODY_SLAM, MOVE_EARTHQUAKE, MOVE_ICE_PUNCH, MOVE_MILK_DRINK}},
+    {.iv = 255, .lvl = 20, .species = SPECIES_MILTANK, .heldItem = ITEM_SITRUS_BERRY, .moves = {MOVE_BODY_SLAM, MOVE_EARTHQUAKE, MOVE_ICE_PUNCH, MOVE_MILK_DRINK}},
     {.iv = 164, .lvl = 21, .species = SPECIES_KANGASKHAN, .heldItem = ITEM_SITRUS_BERRY, .moves = {MOVE_BODY_SLAM, MOVE_DRAIN_PUNCH, MOVE_CRUNCH, MOVE_EARTHQUAKE}},
 };
 

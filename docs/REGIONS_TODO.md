@@ -35,8 +35,8 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [ ] JOHTO's legendaries only in JOHTO
 - [ ] Quetzal's berry system out: 1x1 berry patches where berries were; APRICORN trees rewritten from Crystal
       (behavior, words), JOHTO's berries
-- [ ] WHITNEY's MILTANK: perfect IVs
-- [ ] Quetzal's auto walk / run: remove its words
+- [x] WHITNEY's MILTANK: perfect IVs (her gym team; tools/quetzal_port/gen_trainers.py IV_OVERRIDES)
+- [x] Quetzal's auto walk / run: its words gone (MOM in NEW BARK TOWN)
 - [ ] Door animations; [x] water animates (JOHTO's primaries 2-6 carry FireRed's water tiles: the same animation over
       them; primary 1's water is drawn differently and stays still)
 - [ ] The rival named as in Crystal (online: the host names him, said plainly), his starter the one beating the player's

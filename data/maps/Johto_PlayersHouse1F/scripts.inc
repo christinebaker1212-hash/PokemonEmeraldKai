@@ -309,10 +309,7 @@ Johto_PlayersHouse1F_Text_83E3C25::
 
 Johto_PlayersHouse1F_Text_83E3C8A::
 	.string "MOM: With your RUNNING SHOES,\n"
-	.string "hold B to run.\p"
-	.string "While on foot, press L to turn\n"
-	.string "automatic running on or off.\p"
-	.string "When it is on, hold B to walk.$"
+	.string "hold B to run.$"
 
 Johto_PlayersHouse1F_Text_83E3D12::
 	.string "MOM: PROF.ELM is waiting for you.\p"
