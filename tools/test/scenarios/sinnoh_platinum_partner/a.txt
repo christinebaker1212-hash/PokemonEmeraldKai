@@ -10,7 +10,9 @@ mp landwild
 waitfor battle 3000
 wait 300
 shot battle
-mash A 300 8
+mash A 30 8
+shot battle2
+mash A 270 8
 pressuntil A field 6000
 wait 60
 mp party

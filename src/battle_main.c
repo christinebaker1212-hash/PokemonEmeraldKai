@@ -3863,7 +3863,8 @@ static void BattleIntroDrawTrainersOrMonsSprites(void)
             if (GetBattlerPosition(gActiveBattler) == B_POSITION_PLAYER_RIGHT
              || GetBattlerPosition(gActiveBattler) == B_POSITION_PLAYER_CENTER   // Moemon Co-op: a triple's third player
              || ((GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_RIGHT
-                  || GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_CENTER) && !gMpCoopWild))
+                  || GetBattlerPosition(gActiveBattler) == B_POSITION_OPPONENT_CENTER) && !gMpCoopWild
+                 && (gBattleTypeFlags & BATTLE_TYPE_TRAINER)))   // Moemon Kai: (SINNOH's partner wild battles: wild foes)
             {
                 BtlController_EmitDrawTrainerPic(B_COMM_TO_CONTROLLER);
                 MarkBattlerForControllerExec(gActiveBattler);

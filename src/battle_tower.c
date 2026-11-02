@@ -2246,7 +2246,12 @@ void MP_SetupPartnerWild(u16 partner)
     gPartnerTrainerId = TRAINER_QZ_PARTNER;
     for (i = MULTI_PARTY_SIZE; i < PARTY_SIZE; i++)
         ZeroMonData(&gPlayerParty[i]);
-    MP_CreateTrainerPartyAt(&gPlayerParty[MULTI_PARTY_SIZE], sQzPartnerTrainer);
+    {
+        u32 flags = gBattleTypeFlags;
+        gBattleTypeFlags |= BATTLE_TYPE_TRAINER;   // (a trainer's team is only made for a trainer battle)
+        MP_CreateTrainerPartyAt(&gPlayerParty[MULTI_PARTY_SIZE], sQzPartnerTrainer);
+        gBattleTypeFlags = flags;
+    }
 }
 
 static void SaveCurrentWinStreak(void)
