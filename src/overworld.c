@@ -598,10 +598,13 @@ struct MapHeader const *const GetDestinationWarpMapHeader(void)
     return Overworld_GetMapHeaderByGroupAndId(sWarpDestination.mapGroup, sWarpDestination.mapNum);
 }
 
+void Sinnoh_PlatinumMapScripts(void);
+
 static void LoadCurrentMapData(void)
 {
     sLastMapSectionId = gMapHeader.regionMapSectionId;
     gMapHeader = *Overworld_GetMapHeaderByGroupAndId(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
+    Sinnoh_PlatinumMapScripts();   // Moemon Kai: SINNOH's maps run Platinum's own map scripts in a save that plays its story
     gSaveBlock1Ptr->mapLayoutId = gMapHeader.mapLayoutId;
     gMapHeader.mapLayout = GetMapLayout();
 }
@@ -609,6 +612,7 @@ static void LoadCurrentMapData(void)
 static void LoadSaveblockMapHeader(void)
 {
     gMapHeader = *Overworld_GetMapHeaderByGroupAndId(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
+    Sinnoh_PlatinumMapScripts();   // Moemon Kai: SINNOH's maps run Platinum's own map scripts in a save that plays its story
     gMapHeader.mapLayout = GetMapLayout();
 }
 

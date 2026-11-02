@@ -71,6 +71,8 @@ void Sinnoh_StoryRefresh(void)
     bool8 night;
     if (!S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
         return;
+    if (FlagGet(FLAG_SINNOH_PLATINUM_STORY))
+        return;   // (Platinum's own scripts show and hide the story's people: tools/sinnoh/gen_scripts.py)
     badges = MP_Region_Cleared(REGION_SINNOH) ? 9 : MP_Region_BadgeCount(REGION_SINNOH);
     RtcCalcLocalTime();
     hour = gLocalTime.hours;

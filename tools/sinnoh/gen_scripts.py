@@ -169,10 +169,11 @@ class Decomp:
         if self._origins is None:
             from source import open_source
             from gen_maps import places
-            self._origins = {}
+            self._origins, self.names = {}, {}
             for p in places(open_source(self.root), self.root):
                 low = p['place']['header'][len('MAP_HEADER_'):].lower()
                 self._origins.setdefault(low, (p['id'], p['x0'] * 32, p['z0'] * 32))
+                self.names.setdefault(p['id'], p['name'])
         return self._origins
 
     def trainer(self, x):
@@ -744,6 +745,147 @@ def referenced():
     return out
 
 
+# ----------------------------------------------------------------------------------------------------- map scripts
+
+# Platinum's init script kinds -> this game's map script kinds (include/constants/map_scripts.h)
+INIT_KIND = {'OnTransition': 'MAP_SCRIPT_ON_TRANSITION', 'OnLoad': 'MAP_SCRIPT_ON_LOAD', 'OnResume': 'MAP_SCRIPT_ON_RESUME'}
+
+
+def init_scripts(root, low):
+    """Platinum's scripts_init_<low>.s: ({kind: entry}, [(variable, value, entry)] its frame table)"""
+    path = os.path.join(root, 'res/field/scripts', 'scripts_init_%s.s' % low)
+    once, frame = {}, []
+    if not os.path.exists(path):
+        return once, frame
+    for raw in open(path, encoding='utf-8', errors='replace'):
+        line = raw.split('//')[0].strip()
+        m = re.match(r'^InitScriptEntry_(OnTransition|OnLoad|OnResume)\s+(\d+)$', line)
+        if m:
+            once[m.group(1)] = int(m.group(2))
+        m = re.match(r'^InitScriptGoToIfEqual\s+(\w+),\s*(\w+),\s*(\d+)$', line)
+        if m:
+            frame.append((m.group(1), m.group(2), int(m.group(3))))
+    return once, frame
+
+
+def our_map_scripts(name):
+    """this game's own map script table of map NAME (data/maps/NAME/scripts.inc): [(kind, label)] and, for the frame
+    tables, {label: [(var, value, label)]}"""
+    path = os.path.join(ROOT, 'data/maps', name, 'scripts.inc')
+    if not os.path.exists(path):
+        return [], {}
+    lines = [ln.split('@')[0].strip() for ln in open(path, encoding='utf-8')]
+    out, tables = [], {}
+    try:
+        i = lines.index('%s_MapScripts::' % name) + 1
+    except ValueError:
+        return [], {}
+    while i < len(lines):
+        m = re.match(r'^map_script\s+(\w+),\s*(\w+)$', lines[i])
+        if not m:
+            break
+        out.append((m.group(1), m.group(2)))
+        i += 1
+    for kind, lab in out:
+        if kind not in ('MAP_SCRIPT_ON_FRAME_TABLE', 'MAP_SCRIPT_ON_WARP_INTO_MAP_TABLE'):
+            continue
+        rows = []
+        j = next((k for k, ln in enumerate(lines) if re.match(r'^%s::?$' % re.escape(lab), ln)), None)
+        while j is not None and j + 1 < len(lines):
+            j += 1
+            m = re.match(r'^map_script_2\s+(\w+),\s*(\w+),\s*(\w+)$', lines[j])
+            if not m:
+                break
+            rows.append(m.groups())
+        tables[lab] = rows
+    return out, tables
+
+
+def map_tables(root, wanted):
+    """[(map constant, map name, Platinum low, {kind: entry}, [(var, value, entry)])] of every SINNOH map Platinum gives
+    map scripts; adds the entries to WANTED (so they are converted)"""
+    out = []
+    for low, (mapid, x, z) in sorted(converter(root, 'common').dec.origins().items(), key=lambda kv: kv[1][0]):
+        once, frame = init_scripts(root, low)
+        if not once and not frame:
+            continue
+        c = converter(root, low)
+        if c is None:
+            continue
+        for n in list(once.values()) + [f[2] for f in frame]:
+            wanted[low].add(n)
+        out.append((mapid, low, once, frame))
+    return out
+
+
+def emit_map_tables(root, tables, done):
+    """gSinnohPlatinumMapScripts (src/sinnoh/s3d_scrcmd.c Sinnoh_PlatinumMapScripts): each map's own map scripts with
+    Platinum's added: its transition / load / resume scripts after the map's own, its frame table's rows after the
+    map's own rows (a row whose script doesn't convert is left out: a script that never changed its variable would run
+    every frame). Only while the story is Platinum's (FLAG_SINNOH_PLATINUM_STORY)"""
+    lines, index, skipped = [], [], 0
+    for mapid, low, once, frame in tables:
+        name = converter(root, 'common').dec.names[mapid]
+        ours, our_tables = our_map_scripts(name)
+        if not ours and not os.path.isdir(os.path.join(ROOT, 'data/maps', name)):
+            continue
+        c = converter(root, low)
+        ok = {k: n for k, n in once.items() if c.entry_label(n) in done}
+        rows = []
+        for var, val, n in frame:
+            if c.entry_label(n) not in done:
+                skipped += 1
+                continue
+            try:
+                rows.append((c.var(var), c.var(val) if c.is_var(val) else c.value(val), c.entry_label(n)))
+            except Unsupported:
+                skipped += 1
+        skipped += len(once) - len(ok)
+        if not ok and not rows:
+            continue
+        base = '%s%s_Map' % (PREFIX, low)
+        table = []
+        kinds_done = set()
+        for kind, lab in ours:
+            plat = next((k for k, v in INIT_KIND.items() if v == kind), None)
+            if plat in ok:
+                lines += ['%s_%s:' % (base, plat), '\tcall %s' % lab, '\tgoto %s' % c.entry_label(ok[plat])]
+                table.append((kind, '%s_%s' % (base, plat)))
+                kinds_done.add(plat)
+            elif kind == 'MAP_SCRIPT_ON_FRAME_TABLE' and rows:
+                lines.append('%s_Frame:' % base)
+                for r in our_tables.get(lab, []) + rows:
+                    lines.append('\tmap_script_2 %s, %s, %s' % r)
+                lines.append('\t.2byte 0')
+                table.append((kind, '%s_Frame' % base))
+                rows = []
+            else:
+                table.append((kind, lab))
+        for plat, n in ok.items():
+            if plat not in kinds_done:
+                table.append((INIT_KIND[plat], c.entry_label(n)))
+        if rows:
+            lines.append('%s_Frame:' % base)
+            for r in rows:
+                lines.append('\tmap_script_2 %s, %s, %s' % r)
+            lines.append('\t.2byte 0')
+            table.append(('MAP_SCRIPT_ON_FRAME_TABLE', '%s_Frame' % base))
+        lines.append('%s_Scripts:' % base)
+        lines += ['\tmap_script %s, %s' % t for t in table]
+        lines.append('\t.byte 0')
+        index.append((mapid, '%s_Scripts' % base))
+    lines += map_index(index)
+    return lines, len(index), skipped
+
+
+def map_index(index):
+    out = ['\t.balign 8', 'gSinnohPlatinumMapScripts::']
+    for mapid, lab in index:
+        out += ['\t.2byte %s, 0, 0, 0' % mapid, '\tptrvalue %s' % lab]
+    out += ['\t.2byte 0xFFFF, 0, 0, 0', '\tptrvalue 0']
+    return out
+
+
 def text_bytes(b, m):
     return ', '.join('0x%02X' % x for x in build_text.sinnoh_text_bytes(b, m))
 
@@ -761,7 +903,7 @@ def write(lines, out_path):
 
 
 def stub(out_path):
-    lines = ['%s::\n\tend' % lab for lab in sorted(referenced())]
+    lines = ['%s::\n\tend' % lab for lab in sorted(referenced())] + map_index([])
     write(lines, out_path)
     print('%s: %d stubs (no decomp)' % (os.path.relpath(out_path, ROOT), len(referenced())))
 
@@ -773,6 +915,7 @@ def build(root, out_path):
         m = re.match(r'^%s(\w+?)_(\d+)$' % PREFIX, lab)
         if m:
             wanted[m.group(1)].add(int(m.group(2)))
+    tables = map_tables(root, wanted)
     # the common scripts the converted ones call, and the ones those call
     queue = [(low, n) for low in wanted for n in wanted[low]]
     while queue:
@@ -800,10 +943,13 @@ def build(root, out_path):
     for lab in sorted(refs - done):
         print('gen_scripts: %s no longer converts: it ends' % lab, file=sys.stderr)
         lines.append('%s::\n\tend' % lab)
+    mt, maps, skipped = emit_map_tables(root, tables, done)
+    lines += mt
     for lab, (b, m) in sorted(texts.items()):
         lines.append('%s:\n\t.byte %s' % (lab, text_bytes(b, m)))
     write(lines, out_path)
-    print('%s: %d scripts, %d texts' % (os.path.relpath(out_path, ROOT), len(done), len(texts)))
+    print('%s: %d scripts, %d texts, map scripts for %d maps (%d of Platinum\'s left out)'
+          % (os.path.relpath(out_path, ROOT), len(done), len(texts), maps, skipped))
 
 
 def report(root):

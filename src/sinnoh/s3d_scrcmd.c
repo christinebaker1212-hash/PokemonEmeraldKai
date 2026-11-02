@@ -304,3 +304,27 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
     }
     return FALSE;
 }
+
+// SINNOH's maps in a save that plays Platinum's own story (FLAG_SINNOH_PLATINUM_STORY): the map's scripts are the
+// combined table tools/sinnoh/gen_scripts.py makes (this game's own entries and Platinum's: on load, on transition,
+// on resume, the frame table), looked up by map in gSinnohPlatinumMapScripts (its end: map 0xFFFF)
+struct SinnohMapScripts
+{
+    u16 map, pad[3];
+    const u8 *scripts;
+};
+extern const struct SinnohMapScripts gSinnohPlatinumMapScripts[];
+
+void Sinnoh_PlatinumMapScripts(void)
+{
+    u16 map = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
+    const struct SinnohMapScripts *m;
+    if (!S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup) || !FlagGet(FLAG_SINNOH_PLATINUM_STORY))
+        return;
+    for (m = gSinnohPlatinumMapScripts; m->map != 0xFFFF; m++)
+        if (m->map == map)
+        {
+            gMapHeader.mapScripts = m->scripts;
+            return;
+        }
+}

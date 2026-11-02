@@ -24,6 +24,7 @@
 #define VAR_SINNOH_SPIRITOMB  0x52F2   // the HALLOWED TOWER: the battle count +1 when the ODD KEYSTONE went in (0: not in)
 #define FLAG_SINNOH_NEW_GAME 0x3D38   // a new game begun in SINNOH (ROUTE 201's briefcase is there for it)
 #define FLAG_SINNOH_STARTER  0x3D39   // ... its first POKéMON picked from the briefcase
+#define FLAG_SINNOH_PLATINUM_STORY 0x3D3B   // this save plays Platinum's own story (its converted map scripts, triggers and story people: tools/sinnoh/gen_scripts.py)
 #define VAR_SINNOH_ARRIVAL  0x52F0   // 1: just off the first boat to SINNOH (the harbor sailor takes them to TWINLEAF), 2: in SINNOH, 3: BARRY's mom's visit played (TWINLEAF's house 1F)
 #define FLAG_SINNOH_HIDDEN  0x3FFF   // always set (s3d.c S3D_LayoutBlocks): Platinum's objects that aren't people here
 #define REGION_FLAG_BYTES  ((REGION_FLAGS_END - REGION_FLAGS_START) / 8)

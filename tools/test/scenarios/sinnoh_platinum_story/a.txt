@@ -1,0 +1,10 @@
+pressuntil A field 5000
+wait 30
+mp setflag 0x3D3B
+mp setvar 0x520A 4
+mp warp 40,0,12,6
+wait 200
+mp getvar 0x520A
+mp getvar 0x5237
+mp ctx
+quit
