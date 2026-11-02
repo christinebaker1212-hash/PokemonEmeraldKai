@@ -450,6 +450,41 @@ def hearthome(root):
     return out
 
 
+def villa(root):
+    """The VILLA's furniture (Platinum's src/overlay005/villa_furniture.c): each slot's furniture, where its model stands
+    (16 units a tile, from the map's corner), its collision box (tiles) and the script its tiles run; the furniture's
+    flags (FLAG_VILLA_FURNITURE_*, consecutive) start at the game's flag for the TABLE"""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import ids
+    path = os.path.join(root, 'src/overlay005/villa_furniture.c')
+    if not os.path.exists(path):
+        raise SystemExit('%s: fetch_decomp.sh PARTS 19' % path)
+    text = open(path).read()
+    types = [l.strip() for l in open(os.path.join(root, 'generated/villa_furniture_type.txt')) if l.strip()]
+    types = [t for t in types if t != 'VILLA_FURNITURE_MAX']
+    coord = lambda macro, n: int(n) * 16 + (8 if 'CENTER' in macro else 0)
+    slots = []
+    for b in re.findall(r'\{\s*\.furnitureType = (\w+),\s*\.isCollisionEnabled = (\w+),\s*\.position = \{\s*'
+                        r'\.x = (\w+)\((\d+)\),\s*\.y = 0,\s*\.z = (\w+)\((\d+)\),\s*\},\s*'
+                        r'\.collisionBounds = (COLLISION_BOUNDS_NONE|\{[^}]*\}),', text):
+        bounds = [0, 0, 0, 0] if b[6] == 'COLLISION_BOUNDS_NONE' else [int(v) for v in re.findall(r'= (\d+)', b[6])]
+        slots.append((types.index(b[0]), 1 if b[1] == 'TRUE' else 0, coord(b[2], b[3]), coord(b[4], b[5])) + tuple(bounds))
+    assert len(slots) == 23, len(slots)
+    scripts = dict(re.findall(r'\[(VILLA_FURNITURE_\w+)\] = (0x[0-9A-Fa-f]+|SCRIPT_ID_OFFSET_TV_BROADCAST)', text.split(
+        'sVillaFurnitureScriptIDs')[-1]))
+    entry = [0 if scripts[t] == 'SCRIPT_ID_OFFSET_TV_BROADCAST' else int(scripts[t], 16) for t in types]
+    models = ['S3D_MODEL_%s' % t.replace('VILLA_FURNITURE_', 'VILLA_FURNITURE_') for t in types]
+    out = ['', '// the VILLA (s3d_villa.c): its furniture flags from FLAG_VILLA_FURNITURE_TABLE on, each furniture\'s model and',
+           '// its tiles\' script (Platinum\'s scripts_villa entry; 0: the TV, SINNOH\'s TV broadcast); each slot: furniture,',
+           '// collision, x and z of its model (map units), its box left, top, right, bottom (tiles)']
+    out.append('#define SINNOH_VILLA_FLAG_FIRST 0x%X' % ids.flag(root, 'FLAG_VILLA_FURNITURE_TABLE'))
+    out.append('static const u16 sVillaModels[%d] = {%s};' % (len(types), ', '.join(models)))
+    out.append('static const u8 sVillaScripts[%d] = {%s};' % (len(types), ', '.join(str(e) for e in entry)))
+    out.append('static const u16 sVillaSlots[%d][8] = {%s};' % (len(slots), ', '.join(
+        '{%s}' % ', '.join(str(v) for v in sl) for sl in slots)))
+    return out
+
+
 def ident(name):
     return name.replace('fx:', '').replace('.nsbmd', '').upper()
 
@@ -478,6 +513,7 @@ def main():
     out += eterna(root)
     out += veilstone(root)
     out += snowpoint(root)
+    out += villa(root)
     out += hearthome(root)
     open('src/data/sinnoh_gyms.h', 'w').write('\n'.join(out) + '\n')
     print('%d models; PASTORIA: %d deep tiles, %d gates, %d buttons' % (len(gymprops.model_names()), len(deep), len(gates),

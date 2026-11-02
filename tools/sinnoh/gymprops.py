@@ -24,6 +24,11 @@ GYM_MODELS = {
     'MAP_HEADER_IRON_ISLAND_B2F_LEFT_ROOM': ['iron_island_platform_lift.nsbmd'],
     # not a gym's: the GREAT MARSH's tram (src/sinnoh/s3d_tram.c)
     'MAP_HEADER_GREAT_MARSH_1': ['great_marsh_train.nsbmd'],
+    # not a gym's: the VILLA's furniture, shown once bought (Platinum's villa_furniture.c; src/sinnoh/s3d_villa.c)
+    'MAP_HEADER_VILLA': ['villa_furniture_%s.nsbmd' % n for n in (
+        'table', 'big_sofa', 'small_sofa', 'bed', 'night_table', 'tv', 'audio_system', 'bookshelf', 'rack', 'houseplant',
+        'pc_desk', 'music_box', 'pokemon_bust', 'pokemon_bust_silver', 'piano', 'guest_set', 'wall_clock', 'masterpiece',
+        'tea_set', 'chandelier')],
     # not a gym's: the healing machine's balls in every POKeMON CENTER (src/sinnoh/s3d_heal.c; the CENTERs share textures)
     'MAP_HEADER_JUBILIFE_CITY_POKECENTER_1F': ['pokecenter_healing_machine_mini_pokeball.nsbmd'],
 }

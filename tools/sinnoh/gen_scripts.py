@@ -325,6 +325,11 @@ KAI_REWRITES = {
 }
 
 
+# Entries kept from converting until what goes with them is built (a map whose own setup converts takes Platinum's
+# people: SPEAR PILLAR's CYRUS waits on the DISTORTION WORLD's commands, so the map stays the stand-in's till then)
+HOLD = {('spear_pillar', 1): 'held: SPEAR PILLAR waits for the DISTORTION WORLD (CYRUS\'s scene)'}
+
+
 class FileConverter:
     def __init__(self, dec, path):
         self.dec, self.root, self.path = dec, dec.root, path
@@ -375,6 +380,12 @@ class FileConverter:
     def value(self, x):
         if re.match(r'^-?(0x[0-9A-Fa-f]+|\d+)$', x):
             return str(int(x, 0))
+        m = re.match(r'^(\w+)\s*([+-])\s*(\d+)$', x)
+        if m:   # (a constant and a number: VILLA_FURNITURE_PIANO + 1)
+            base = self.value(m.group(1))
+            if re.match(r'^-?\d+$', base):
+                return str(int(base) + (1 if m.group(2) == '+' else -1) * int(m.group(3)))
+            return '(%s %s %s)' % (base, m.group(2), m.group(3))
         if x in CONSTANTS:
             return str(CONSTANTS[x])
         if re.match(r'^(ITEM|SPECIES|MOVE)_', x):
@@ -608,6 +619,11 @@ class FileConverter:
             slot = int(self.strvar(a[0])[-1]) - 1
             return [self.sinnoh(SINNOH_MISC, 4, self.var(a[1]),
                                 (slot << 8) | (0x80 if a[2] == 'PADDING_MODE_ZEROES' else 0) | int(self.value(a[3])))]
+        if cmd == 'BufferValuePaddingDigits':
+            slot = int(self.strvar(a[0])[-1]) - 1
+            v = int(self.value(a[1]))
+            return ([self.sinnoh(SINNOH_MISC, 23, v >> 16)] if v > 0xFFFF else []) + [self.sinnoh(
+                SINNOH_MISC, 22, v & 0xFFFF, (slot << 8) | (0x80 if a[2] == 'PADDING_MODE_ZEROES' else 0) | int(self.value(a[3])))]
         if cmd == 'BufferMonNicknameFromPC':
             return [self.sinnoh(SINNOH_MISC, 5, self.var(a[1]), int(self.strvar(a[0])[-1]) - 1)]
         # ROUTE 222's size contest (REMORAID): s3d_misc.c 6-9 on Emerald's size code (pokemon_size_record.c); the
@@ -626,6 +642,27 @@ class FileConverter:
             return ['setvar VAR_0x800B, %s' % self.localid(a[0]), 'call Common_EventScript_PkmnCenterNurse', 'waitmessage',
                     'waitbuttonpress', 'release']
         # AMITY SQUARE (s3d_misc.c 10-15: Platinum's scrcmd_amity_square.c)
+        # the VILLA's music box (Platinum's scrcmd_sound.c: its song, then the one before back)
+        if cmd == 'CheckABPress':
+            return [self.sinnoh(SINNOH_MISC, 19, self.var(a[0]))]
+        if cmd == 'CheckMetFurnitureRequirements':
+            return [self.sinnoh(SINNOH_MISC, 20, self.var(a[0]) if self.is_var(a[0]) else self.value(a[0]), self.var(a[1]))]
+        if cmd in ('IncrementGameRecord', 'IncrementGameRecordTwice') and a and a[0] == 'RECORD_TIMES_BATTLED_AT_BATTLEGROUND':
+            return [self.sinnoh(SINNOH_MISC, 21)]   # (the VILLA's GUEST SET waits on 50)
+        if cmd in ('InitPersistedMapFeaturesForVilla', 'Dummy1F9'):
+            return []                       # (the VILLA's furniture stands as it's owned on each visit: s3d_gyms.c)
+        if cmd == 'GetCurrentBGM':
+            return [self.sinnoh(SINNOH_MISC, 17, self.var(a[0]))]
+        if cmd == 'SetScenePlayBGMMusicBox':
+            mus = MUSIC_OF.get('SEQ_PL_TOWN02_sseq')
+            if mus is None:
+                MISSING_MUSIC.add('SEQ_PL_TOWN02_sseq')
+                return []                   # (the music box's song: the game hasn't got it yet; the music plays on)
+            return ['playbgm %s, FALSE' % mus]
+        if cmd == 'SetFieldScene':
+            return [self.sinnoh(SINNOH_MISC, 18, self.var(a[0]) if self.is_var(a[0]) else self.value(a[0]))]
+        if cmd == 'CheckMoney':
+            return ['checkmoney %s' % self.value(a[1]), 'copyvar %s, VAR_RESULT' % self.var(a[0])]
         if cmd == 'KaiAmityEnter':
             return [self.sinnoh(SINNOH_MISC, 10, self.var('VAR_FOLLOWER_MON_PARTY_ID'), self.var('VAR_FOLLOWER_MON_SPECIES')),
                     'setvar %s, %d' % (self.var('VAR_FOLLOWER_MON_ACTIVE'), 1)]
@@ -786,8 +823,8 @@ class FileConverter:
                 raise Unsupported('menu entry %s' % a[0])
             value = a[1]          # (AddListMenuEntry's third is an alternative text)
             return [self.sinnoh(SINNOH_MENU_ADD, where[0], where[1], self.value(value))]
-        if cmd in ('ShowMenu', 'ShowListMenu', 'ShowMenuMultiColumn'):
-            return [self.sinnoh(SINNOH_MENU_SHOW)]
+        if cmd in ('ShowMenu', 'ShowListMenu', 'ShowMenuMultiColumn', 'ShowListMenuSetWidth'):
+            return [self.sinnoh(SINNOH_MENU_SHOW)]   # (the game's menu sizes itself)
         if cmd in ('ScrCmd_32D', 'ScrCmd_338', 'ScrCmd_32E', 'ScrCmd_339', 'ScrCmd_332', 'LockObject', 'UnlockObject',
                    'ReleaseObject', 'SetMenuXOriginToRight', 'IncrementTrainerScore', 'IncrementTrainerScore2', 'IncrementGameRecord',
                    'IncrementGameRecordTwice', 'LoadDoorAnimation', 'PlayDoorOpenAnimation', 'PlayDoorCloseAnimation',
@@ -1389,6 +1426,8 @@ class FileConverter:
         """None if entry n (from 1) converts (and every common script it calls), else why not"""
         if n in self._ok:
             return self._ok[n]
+        if (self.low, n) in HOLD:
+            return HOLD[(self.low, n)]
         busy = busy or set()
         if (self.low, n) in busy:
             return None                     # (a loop through the common scripts: judged by its first visit)

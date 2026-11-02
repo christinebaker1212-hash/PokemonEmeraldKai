@@ -54,7 +54,8 @@ u16 S3D_Gyms_HealBallModel(void)   // (the healing machine's balls: s3d_heal.c)
 #define VAR_SINNOH_CANALAVE_HI 0x52F6   // (bits 16-23)
 #define VAR_SINNOH_CANALAVE_FLOOR 0x52F7   // the floor the player is on
 
-enum { GYM_NONE, GYM_PASTORIA, GYM_SUNYSHORE, GYM_CANALAVE, GYM_ETERNA, GYM_VEILSTONE, GYM_SNOWPOINT, GYM_HEARTHOME, GYM_DISTORTION };
+enum { GYM_NONE, GYM_PASTORIA, GYM_SUNYSHORE, GYM_CANALAVE, GYM_ETERNA, GYM_VEILSTONE, GYM_SNOWPOINT, GYM_HEARTHOME, GYM_DISTORTION,
+       GYM_VILLA };
 
 static struct
 {
@@ -1166,6 +1167,62 @@ void S3D_Gyms_LiftProp(float x, float y, float z)
 }
 
 // ------------------------------------------------------------------------------------------------------ all gyms
+// ------------------------------------------------------------------------------------------------------ the VILLA
+// Not a gym's, but Platinum's furniture works the same way (its villa_furniture.c, the table in sinnoh_gyms.h): each piece
+// bought (its FLAG_VILLA_FURNITURE_*) stands as its model, blocks its box of tiles and, faced with A, runs its own script
+// of Platinum's (scripts_villa's; the TV: SINNOH's TV broadcast, from below only)
+static bool8 VillaOwns(u8 furniture)
+{
+    return FlagGet(SINNOH_VILLA_FLAG_FIRST + furniture);
+}
+
+static void VillaLoad(void)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sVillaSlots); i++)
+        if (VillaOwns(sVillaSlots[i][0]))
+            S3D_DynProp(i, sVillaModels[sVillaSlots[i][0]], sG.ox + sVillaSlots[i][2], 0, sG.oz + sVillaSlots[i][3], 0);
+}
+
+static s32 VillaSlotAt(s32 x, s32 y)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sVillaSlots); i++)
+    {
+        const u16 *v = sVillaSlots[i];
+        if (v[1] && VillaOwns(v[0]) && x >= v[4] && x <= v[6] && y >= v[5] && y <= v[7])
+            return i;
+    }
+    return -1;
+}
+
+#define VILLA_SCRIPT(n) extern const u8 SinnohP_villa_##n[] __attribute__((weak))
+VILLA_SCRIPT(21); VILLA_SCRIPT(22); VILLA_SCRIPT(23); VILLA_SCRIPT(24); VILLA_SCRIPT(25); VILLA_SCRIPT(27);
+VILLA_SCRIPT(28); VILLA_SCRIPT(29); VILLA_SCRIPT(30); VILLA_SCRIPT(31); VILLA_SCRIPT(32); VILLA_SCRIPT(33);
+VILLA_SCRIPT(34); VILLA_SCRIPT(35); VILLA_SCRIPT(36); VILLA_SCRIPT(37); VILLA_SCRIPT(38); VILLA_SCRIPT(39);
+VILLA_SCRIPT(40);
+
+// (field_control_avatar.c, A facing a tile) the furniture's own script there, NULL if none
+const u8 *S3D_Gyms_VillaScript(s16 x, s16 y, u8 direction)
+{
+    extern const u8 gSinnohTvBroadcast[];
+    static const u8 *const sScripts[41] = {
+        [21] = SinnohP_villa_21, [22] = SinnohP_villa_22, [23] = SinnohP_villa_23, [24] = SinnohP_villa_24,
+        [25] = SinnohP_villa_25, [27] = SinnohP_villa_27, [28] = SinnohP_villa_28, [29] = SinnohP_villa_29,
+        [30] = SinnohP_villa_30, [31] = SinnohP_villa_31, [32] = SinnohP_villa_32, [33] = SinnohP_villa_33,
+        [34] = SinnohP_villa_34, [35] = SinnohP_villa_35, [36] = SinnohP_villa_36, [37] = SinnohP_villa_37,
+        [38] = SinnohP_villa_38, [39] = SinnohP_villa_39, [40] = SinnohP_villa_40,
+    };
+    s32 slot;
+    u8 entry;
+    if (sG.gym != GYM_VILLA || (slot = VillaSlotAt(x - MAP_OFFSET, y - MAP_OFFSET)) < 0)
+        return NULL;
+    entry = sVillaScripts[sVillaSlots[slot][0]];
+    if (entry == 0)
+        return direction == DIR_NORTH ? gSinnohTvBroadcast : NULL;
+    return entry < ARRAY_COUNT(sScripts) ? sScripts[entry] : NULL;
+}
+
 void S3D_Gyms_MapLoaded(void)
 {
     u16 map = CurrentMap();
@@ -1218,6 +1275,11 @@ void S3D_Gyms_MapLoaded(void)
     }
     else if (map == MAP_SINNOH_DISTORTION_WORLD_GIRATINA_ROOM)
         sG.gym = GYM_DISTORTION;   // (GIRATINA's arena: only its rock is walked, rows 23-28; the floor data runs on)
+    else if (map == MAP_SINNOH_VILLA)
+    {
+        sG.gym = GYM_VILLA;
+        VillaLoad();
+    }
     if (sG.gym != GYM_VEILSTONE)
         sVeil.lastMap = map;
     if (sG.gym != GYM_HEARTHOME)
@@ -1314,6 +1376,9 @@ bool8 S3D_Gyms_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY)
         break;
     case GYM_SNOWPOINT:
         blocked = SnowBlocked(fromX - MAP_OFFSET, fromY - MAP_OFFSET, toX - MAP_OFFSET, toY - MAP_OFFSET);
+        break;
+    case GYM_VILLA:
+        blocked = VillaSlotAt(toX - MAP_OFFSET, toY - MAP_OFFSET) >= 0;
         break;
     }
     // Platinum's bridges (the pack's behavior 0x1D, tools/sinnoh/build_pack.py S3D_BRIDGE): up on the deck, a step

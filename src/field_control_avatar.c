@@ -428,6 +428,12 @@ static const u8 *GetInteractedMetatileScript(struct MapPosition *position, u8 me
 {
     s8 elevation;
 
+    {
+        const u8 *S3D_Gyms_VillaScript(s16 x, s16 y, u8 direction);
+        const u8 *villa = S3D_Gyms_VillaScript(position->x, position->y, direction);
+        if (villa)
+            return villa;   // Moemon Kai: the VILLA's furniture (src/sinnoh/s3d_gyms.c)
+    }
     if (MetatileBehavior_IsPlayerFacingTVScreen(metatileBehavior, direction) == TRUE)
     {
         extern const u8 gSinnohTvBroadcast[];

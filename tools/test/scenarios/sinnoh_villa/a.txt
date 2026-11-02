@@ -1,0 +1,20 @@
+pressuntil A field 5000
+wait 30
+mp setflag 0x3758
+mp setflag 0x3766
+mp setflag 0x376B
+mp setvar 0x5258 2
+mp warp 44,68,12,10
+wait 200
+shot villa
+press UP 16
+wait 40
+press UP 16
+wait 40
+mp where
+mp face up
+press A 2
+wait 90
+shot villa_table
+mash A 6 20
+quit

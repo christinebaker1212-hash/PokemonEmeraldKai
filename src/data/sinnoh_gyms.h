@@ -31,6 +31,26 @@
 #define S3D_MODEL_HEARTHOME_GYM_HINT_HEART 32778
 #define S3D_MODEL_IRON_ISLAND_PLATFORM_LIFT 258
 #define S3D_MODEL_GREAT_MARSH_TRAIN 475
+#define S3D_MODEL_VILLA_FURNITURE_TABLE 559
+#define S3D_MODEL_VILLA_FURNITURE_BIG_SOFA 560
+#define S3D_MODEL_VILLA_FURNITURE_SMALL_SOFA 561
+#define S3D_MODEL_VILLA_FURNITURE_BED 562
+#define S3D_MODEL_VILLA_FURNITURE_NIGHT_TABLE 563
+#define S3D_MODEL_VILLA_FURNITURE_TV 564
+#define S3D_MODEL_VILLA_FURNITURE_AUDIO_SYSTEM 565
+#define S3D_MODEL_VILLA_FURNITURE_BOOKSHELF 566
+#define S3D_MODEL_VILLA_FURNITURE_RACK 567
+#define S3D_MODEL_VILLA_FURNITURE_HOUSEPLANT 568
+#define S3D_MODEL_VILLA_FURNITURE_PC_DESK 569
+#define S3D_MODEL_VILLA_FURNITURE_MUSIC_BOX 570
+#define S3D_MODEL_VILLA_FURNITURE_POKEMON_BUST 571
+#define S3D_MODEL_VILLA_FURNITURE_POKEMON_BUST_SILVER 572
+#define S3D_MODEL_VILLA_FURNITURE_PIANO 573
+#define S3D_MODEL_VILLA_FURNITURE_GUEST_SET 574
+#define S3D_MODEL_VILLA_FURNITURE_WALL_CLOCK 575
+#define S3D_MODEL_VILLA_FURNITURE_MASTERPIECE 576
+#define S3D_MODEL_VILLA_FURNITURE_TEA_SET 577
+#define S3D_MODEL_VILLA_FURNITURE_CHANDELIER 578
 #define S3D_MODEL_POKECENTER_HEALING_MACHINE_MINI_POKEBALL 517
 
 // PASTORIA: the deep water's tiles, the gates (open at water level 0 low, 1 middle, 2 high), the buttons
@@ -141,6 +161,14 @@ static const char sSnowpointSlope[32][65] = {"0000000000000000000000000000000000
 // its snowballs {x, y}, its fences {x, y, 0 no step north-south / 1 no step west-east}
 static const u8 sSnowpointBalls[19][2] = {{12, 18}, {10, 21}, {17, 19}, {11, 16}, {11, 14}, {11, 11}, {11, 8}, {13, 8}, {10, 8}, {12, 8}, {9, 4}, {13, 4}, {10, 15}, {17, 17}, {17, 18}, {17, 20}, {12, 21}, {9, 8}, {20, 23}};
 static const u8 sSnowpointFences[13][3] = {{11, 5, 1}, {11, 7, 1}, {19, 8, 0}, {11, 10, 1}, {16, 11, 0}, {11, 13, 1}, {13, 14, 0}, {9, 16, 0}, {11, 17, 1}, {6, 19, 0}, {11, 20, 1}, {3, 22, 0}, {11, 23, 1}};
+
+// the VILLA (s3d_villa.c): its furniture flags from FLAG_VILLA_FURNITURE_TABLE on, each furniture's model and
+// its tiles' script (Platinum's scripts_villa entry; 0: the TV, SINNOH's TV broadcast); each slot: furniture,
+// collision, x and z of its model (map units), its box left, top, right, bottom (tiles)
+#define SINNOH_VILLA_FLAG_FIRST 0x3758
+static const u16 sVillaModels[20] = {S3D_MODEL_VILLA_FURNITURE_TABLE, S3D_MODEL_VILLA_FURNITURE_BIG_SOFA, S3D_MODEL_VILLA_FURNITURE_SMALL_SOFA, S3D_MODEL_VILLA_FURNITURE_BED, S3D_MODEL_VILLA_FURNITURE_NIGHT_TABLE, S3D_MODEL_VILLA_FURNITURE_TV, S3D_MODEL_VILLA_FURNITURE_AUDIO_SYSTEM, S3D_MODEL_VILLA_FURNITURE_BOOKSHELF, S3D_MODEL_VILLA_FURNITURE_RACK, S3D_MODEL_VILLA_FURNITURE_HOUSEPLANT, S3D_MODEL_VILLA_FURNITURE_PC_DESK, S3D_MODEL_VILLA_FURNITURE_MUSIC_BOX, S3D_MODEL_VILLA_FURNITURE_POKEMON_BUST, S3D_MODEL_VILLA_FURNITURE_POKEMON_BUST_SILVER, S3D_MODEL_VILLA_FURNITURE_PIANO, S3D_MODEL_VILLA_FURNITURE_GUEST_SET, S3D_MODEL_VILLA_FURNITURE_WALL_CLOCK, S3D_MODEL_VILLA_FURNITURE_MASTERPIECE, S3D_MODEL_VILLA_FURNITURE_TEA_SET, S3D_MODEL_VILLA_FURNITURE_CHANDELIER};
+static const u8 sVillaScripts[20] = {21, 22, 23, 24, 25, 0, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40};
+static const u16 sVillaSlots[23][8] = {{0, 1, 200, 112, 11, 5, 13, 8}, {1, 1, 240, 112, 14, 5, 15, 8}, {2, 1, 216, 168, 11, 9, 13, 10}, {3, 1, 296, 128, 18, 6, 20, 9}, {4, 1, 328, 120, 17, 6, 17, 7}, {5, 1, 192, 56, 11, 3, 12, 3}, {6, 1, 232, 56, 13, 3, 15, 3}, {7, 1, 272, 56, 16, 3, 17, 3}, {8, 1, 304, 56, 18, 3, 19, 3}, {9, 1, 24, 56, 1, 3, 1, 3}, {9, 1, 328, 56, 20, 3, 20, 3}, {9, 1, 24, 184, 1, 11, 1, 11}, {9, 1, 328, 184, 20, 11, 20, 11}, {10, 1, 32, 136, 1, 7, 2, 9}, {11, 0, 296, 56, 0, 0, 0, 0}, {12, 1, 40, 56, 2, 3, 2, 3}, {13, 1, 104, 56, 6, 3, 6, 3}, {14, 1, 40, 88, 1, 4, 2, 6}, {15, 1, 96, 160, 4, 9, 7, 10}, {16, 0, 184, 24, 0, 0, 0, 0}, {17, 0, 136, 24, 0, 0, 0, 0}, {18, 0, 104, 168, 0, 0, 0, 0}, {19, 0, 120, 104, 0, 0, 0, 0}};
 
 // HEARTHOME: its trainer rooms {area x, y, w, h where the clue may lie, first door's symbol, doors}, where in
 // each area the clue may lie ('0'), each room's doors {x, y, symbol: circle, square, triangle, sun, donut, moon,

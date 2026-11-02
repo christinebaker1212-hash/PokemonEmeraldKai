@@ -1,0 +1,10 @@
+# The VILLA's furniture (Platinum's villa_furniture.c: s3d_gyms.c, src/data/sinnoh_gyms.h): what's bought (here the
+# TABLE, the PIANO, the CHANDELIER: their FLAG_VILLA_FURNITURE_*) stands as its model, blocks its tiles (the TABLE's
+# 11-13, 5-8: a step north from 12,9 stays there) and, faced with A, runs its own script of Platinum's (VAR_VILLA_STATE
+# 0x5258 = 2: the first visit's scene seen). Needs both packs.
+# Shots villa*.png.
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_GYM_TRACE=1"
+EXPECT_A=("step 12,10 -> 12,9: free" "step 12,9 -> 12,8: blocked" "where map 44.68 xy 12,9")
+UNEXPECT_A=("[crash]" "TIMEOUT")

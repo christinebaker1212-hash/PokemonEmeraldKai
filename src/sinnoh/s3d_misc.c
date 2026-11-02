@@ -20,12 +20,20 @@
 //   11 ClearAmitySquareStepCount; 12 GetAmitySquareStepCount A (the steps in the square since, Sinnoh_MiscStep)
 //   13 CalcAmitySquareFoundAccessory: A the accessory found, B the species' variable (Platinum's pools and odds)
 //   16 out of the square (its walker no more)
+//   19 CheckABPress A; 20 CheckMetFurnitureRequirements: A the order form's choice (the furniture + 1), B the answer
+//      (Platinum's ov5_021F6454.c on the game's records: the frontier's best streaks, HALL OF FAME entries, BERRIES
+//      planted, eggs hatched, steps; the FIGHT AREA's battleground battles counted by 21)
+//   22 BufferValuePaddingDigits: A a number (its low 16 bits, after 23 A: its high ones, for this one number), B as 4's
+//   21 a battle in the FIGHT AREA's battleground (Platinum's RECORD_TIMES_BATTLED_AT_BATTLEGROUND)
+//   17 GetCurrentBGM A: the song playing (the VILLA's music box keeps it), 18 SetFieldScene A: that song again
 //   14 CheckAmitySquareManGiftIsAccessory: A the gift's number, B the answer; 15 GetAmitySquareBerryOrAccessoryIDFromMan:
 //      A the gift's number, B its item or accessory
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
 #include "event_data.h"
+#include "main.h"
+#include "overworld.h"
 #include "lottery_corner.h"
 #include "pokemon.h"
 #include "pokemon_storage_system.h"
@@ -36,6 +44,11 @@
 #include "constants/map_groups.h"
 #include "mp.h"
 #include "mp_life_field.h"
+#include "m4a.h"
+#include "mp_kaisong.h"
+#include "sound.h"
+#include "constants/game_stat.h"
+#include "constants/frontier_util.h"
 
 #define MAGIC 0x43534D53   // "SMSC"
 
@@ -46,7 +59,8 @@ static struct
     u16 remoraidRecord;   // (ROUTE 222's size contest: the record's size hash, 0 = none yet)
     u16 amitySteps;       // (AMITY SQUARE: steps since the follower's last find)
     u16 amityWalking;     // (AMITY SQUARE: the follower is the square's walker, from a gate in to a gate out)
-    u16 unused[12];
+    u16 battleground;     // (the FIGHT AREA's battleground: battles there, for the VILLA's GUEST SET)
+    u16 unused[11];
 } sM;
 
 const void *Sinnoh_MiscData(u32 *size)
@@ -181,10 +195,63 @@ void Sinnoh_MiscStep(void)
         sM.amitySteps++;
 }
 
+// Platinum's ScrCmd_CheckMetFurnitureRequirements: the furniture that waits on the player's records (the frontier's:
+// Platinum asks one win at each of the five facilities for the bust, a silver print at any for the silver one; the
+// game's facilities keep their best streaks, and a Brain stands at the 21st battle of a streak: Platinum's silver print)
+u16 Sinnoh_FrontierBest(u8 facility);
+u16 Sinnoh_HallBest(void);
+
+static u16 BestTower(void)
+{
+    u32 i, j, best = 0;
+    for (i = 0; i < 4; i++)
+        for (j = 0; j < FRONTIER_LVL_MODE_COUNT; j++)
+            if (gSaveBlock2Ptr->frontier.towerRecordWinStreaks[i][j] > best)
+                best = gSaveBlock2Ptr->frontier.towerRecordWinStreaks[i][j];
+    return best;
+}
+
+static u16 BestFactory(void)
+{
+    u32 i, j, best = 0;
+    for (i = 0; i < 2; i++)
+        for (j = 0; j < FRONTIER_LVL_MODE_COUNT; j++)
+            if (gSaveBlock2Ptr->frontier.factoryRecordWinStreaks[i][j] > best)
+                best = gSaveBlock2Ptr->frontier.factoryRecordWinStreaks[i][j];
+    return best;
+}
+
+static bool8 VillaFurnitureAllowed(u16 choice)
+{
+    u16 best[5] = {BestTower(), BestFactory(), Sinnoh_HallBest(), Sinnoh_FrontierBest(0), Sinnoh_FrontierBest(1)};
+    u32 i;
+    switch (choice)
+    {
+    case 12 + 1:   // the POKéMON BUST: a win at each facility
+        for (i = 0; i < ARRAY_COUNT(best); i++)
+            if (best[i] < 1)
+                return FALSE;
+        return TRUE;
+    case 13 + 1:   // the silver one: a Brain beaten at any (the 21st battle of a streak)
+        for (i = 0; i < ARRAY_COUNT(best); i++)
+            if (best[i] >= 21)
+                return TRUE;
+        return FALSE;
+    case 14 + 1: return GetGameStat(GAME_STAT_ENTERED_HOF) >= 10;      // the PIANO
+    case 15 + 1: return sM.battleground >= 50;                         // the GUEST SET
+    case 16 + 1: return GetGameStat(GAME_STAT_PLANTED_BERRIES) >= 50;  // the WALL CLOCK
+    case 17 + 1: return GetGameStat(GAME_STAT_HATCHED_EGGS) >= 30;     // the MASTERPIECE
+    case 19 + 1: return GetGameStat(GAME_STAT_STEPS) >= 300000;        // the CHANDELIER
+    }
+    return TRUE;
+}
+
 static struct Pokemon *PartySlotMon(u16 var)
 {
     return &gPlayerParty[VarGet(var) % PARTY_SIZE];
 }
+
+static u16 sHigh;   // (22's number's high half, from 23)
 
 void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
 {
@@ -277,6 +344,34 @@ void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
     }
     case 16:
         sM.amityWalking = FALSE;
+        break;
+    case 17:
+        VarSet(a, MP_Kaisong_SongOf(gMPlayInfo_BGM.songHeader));
+        break;
+    case 18:
+        if (VarGet(a) != 0)
+            PlayBGM(VarGet(a));
+        break;
+    case 19:
+        VarSet(a, JOY_NEW(A_BUTTON | B_BUTTON) ? TRUE : FALSE);
+        break;
+    case 20:
+        VarSet(b, VillaFurnitureAllowed(VarGet(a)));
+        break;
+    case 22:
+    {
+        static u8 *const sSlots[] = {gStringVar1, gStringVar2, gStringVar3};
+        ConvertIntToDecimalStringN(sSlots[(b >> 8) % 3], ((u32)sHigh << 16) | a,
+                                   (b & 0x80) ? STR_CONV_MODE_LEADING_ZEROS : STR_CONV_MODE_RIGHT_ALIGN, b & 0x7F);
+        sHigh = 0;
+        break;
+    }
+    case 23:
+        sHigh = a;
+        break;
+    case 21:
+        if (sM.battleground < 0xFFFF)
+            sM.battleground++;
         break;
     case 11:
         sM.amitySteps = 0;

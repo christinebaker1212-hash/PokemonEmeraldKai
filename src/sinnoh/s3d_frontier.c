@@ -394,3 +394,9 @@ u16 Sinnoh_FrontierEnd(void)
         sSave.cp = 0;
     return 0;
 }
+
+// (s3d_misc.c, the VILLA's order form) the CASTLE's (0) or the ARCADE's (1) best streak
+u16 Sinnoh_FrontierBest(u8 facility)
+{
+    return sSave.best[facility & 1];
+}

@@ -80,7 +80,11 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [x] ROTOM's room in Platinum's own scripts: as Platinum's without the ROTOM distribution (a DS event, closed): no
       appliances, the notebooks and PROF. ROWAN (sinnoh_rotom_room)
 - [x] UNOWN messages in Platinum's UNOWN font (MessageUnown), the letters seen (GetUnownFormsSeenCount) (sinnoh_unown)
-- [ ] The VILLA (Resort Area) and its furniture
+- [x] The VILLA (RESORT AREA) and its furniture: all 44 of Platinum's scripts (the order form, the visitors, each
+      piece's own); what's bought stands as Platinum's model (s3d_gyms.c VILLA, its table generated from Platinum's
+      villa_furniture.c into src/data/sinnoh_gyms.h, the models in the 3D pack: gymprops.py), blocks its tiles, runs
+      its script on A; the order form's requirements on the game's records (s3d_misc.c 20). The music box's song
+      (SEQ_PL_TOWN02) isn't in the game yet: the music plays on. Test sinnoh_villa
 - [ ] The Frontier Brains' and the HALL MATRON's teams
 - [x] The size contest (ROUTE 222's house, REMORAID; not PASTORIA's): Platinum's script, s3d_misc.c 6-9 on Emerald's size
       code with Platinum's rounding and starting record; test sinnoh_size_contest

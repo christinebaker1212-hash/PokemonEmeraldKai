@@ -344,3 +344,9 @@ void Sinnoh_HallDebug(void)
     }
     printf("\n");
 }
+
+// (s3d_misc.c, the VILLA's order form) the HALL's best streak
+u16 Sinnoh_HallBest(void)
+{
+    return sHall.best;
+}
