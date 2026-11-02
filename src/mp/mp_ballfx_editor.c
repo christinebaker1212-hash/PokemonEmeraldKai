@@ -681,8 +681,12 @@ static void Leave(bool8 save)
 {
     if (save)
     {
+        char name[24];
+        void Sinnoh_TvBallEffect(struct BoxPokemon *box, const char *effectName);
         MP_BallFx_SetBoxMon(sEd->target, &sEd->fx);
         PlaySE(SE_EXP_MAX);
+        MP_BallFx_EffectName(&sEd->fx, name, sizeof(name));
+        Sinnoh_TvBallEffect(sEd->target, name);   // Moemon Kai: SINNOH's TV's SEAL CLUB SHOW (src/sinnoh/s3d_tv.c)
     }
     else
     {

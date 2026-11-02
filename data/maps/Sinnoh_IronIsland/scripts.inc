@@ -22,12 +22,12 @@ Sinnoh_IronIsland_EventScript_Person1_Sail0::
 Sinnoh_IronIsland_EventScript_Person2::
 	lock
 	faceplayer
-	goto_if_set 0x3DB8, Sinnoh_IronIsland_EventScript_Person2_Given
+	goto_if_set 0x3DBB, Sinnoh_IronIsland_EventScript_Person2_Given
 	msgbox Sinnoh_IronIsland_Text_Person2, MSGBOX_DEFAULT
 	msgbox Sinnoh_IronIsland_Text_Person2Gift, MSGBOX_DEFAULT
 	giveitem ITEM_HM04, 1
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DB8
+	setflag 0x3DBB
 	release
 	end
 

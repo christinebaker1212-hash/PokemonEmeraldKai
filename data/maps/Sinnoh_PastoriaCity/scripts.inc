@@ -56,7 +56,7 @@ Sinnoh_PastoriaCity_EventScript_Person22::
 	end
 
 Sinnoh_PastoriaCity_EventScript_Person24::
-	msgbox Sinnoh_PastoriaCity_Text_Person24, MSGBOX_NPC
+	goto SinnohP_pastoria_city_10
 	end
 
 Sinnoh_PastoriaCity_EventScript_Person25::
@@ -95,10 +95,6 @@ Sinnoh_PastoriaCity_Text_Person22:
 	.string "I'm totally not hiding from TEAM\n"
 	.string "GALACTIC's bosses. I'm resting. In a\l"
 	.string "bush.$"
-
-Sinnoh_PastoriaCity_Text_Person24:
-	.string "My parasol keeps the marsh mist off.\n"
-	.string "My MOéMON hides under it too.$"
 
 Sinnoh_PastoriaCity_Text_Person28:
 	.string "WAKE: You're the TRAINER everyone's\n"

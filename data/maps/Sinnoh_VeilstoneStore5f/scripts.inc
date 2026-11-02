@@ -23,7 +23,7 @@ Sinnoh_VeilstoneStore5f_EventScript_Person2::
 	end
 
 Sinnoh_VeilstoneStore5f_EventScript_Person3::
-	msgbox Sinnoh_VeilstoneStore5f_Text_Person3, MSGBOX_NPC
+	goto SinnohP_veilstone_store_5f_3
 	end
 
 Sinnoh_VeilstoneStore5f_EventScript_Person4::
@@ -35,9 +35,5 @@ Sinnoh_VeilstoneStore5f_Text_Bg1:
 
 Sinnoh_VeilstoneStore5f_Text_Bg2:
 	.string "A vending machine. It's out of order.$"
-
-Sinnoh_VeilstoneStore5f_Text_Person3:
-	.string "I've been to every floor twice. This\n"
-	.string "store is a treasure hunt!$"
 
 @ --- end of SINNOH words ---

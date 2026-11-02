@@ -22,9 +22,6 @@ shot t_types
 press A 4
 pressuntil A action 4000
 mp foehp 1
-mash A 30 10
-mp foehp 1
-mash A 30 10
 pressuntil A multichoice 6000
 wait 20
 mp hall

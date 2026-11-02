@@ -11,11 +11,7 @@ Sinnoh_Route206CyclingRoadSouthGate_EventScript_Person2::
 	end
 
 Sinnoh_Route206CyclingRoadSouthGate_EventScript_Person3::
-	msgbox Sinnoh_Route206CyclingRoadSouthGate_Text_Person3, MSGBOX_NPC
+	goto SinnohP_route_206_cycling_road_south_gate_5
 	end
-
-Sinnoh_Route206CyclingRoadSouthGate_Text_Person3:
-	.string "The cycling road is downhill all the\n"
-	.string "way south! Wheee!$"
 
 @ --- end of SINNOH words ---

@@ -9,12 +9,12 @@ Sinnoh_PastoriaCityMiddleHouse_EventScript_Person1::
 Sinnoh_PastoriaCityMiddleHouse_EventScript_Person2::
 	lock
 	faceplayer
-	goto_if_set 0x3DC3, Sinnoh_PastoriaCityMiddleHouse_EventScript_Person2_Given
+	goto_if_set 0x3DC6, Sinnoh_PastoriaCityMiddleHouse_EventScript_Person2_Given
 	msgbox Sinnoh_PastoriaCityMiddleHouse_Text_Person2, MSGBOX_DEFAULT
 	msgbox Sinnoh_PastoriaCityMiddleHouse_Text_Person2Gift, MSGBOX_DEFAULT
 	giveitem ITEM_MACHO_BRACE, 1
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DC3
+	setflag 0x3DC6
 	release
 	end
 

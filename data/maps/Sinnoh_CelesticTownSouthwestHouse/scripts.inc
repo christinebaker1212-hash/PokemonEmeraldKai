@@ -7,11 +7,7 @@ Sinnoh_CelesticTownSouthwestHouse_EventScript_Person1::
 	end
 
 Sinnoh_CelesticTownSouthwestHouse_EventScript_Person2::
-	msgbox Sinnoh_CelesticTownSouthwestHouse_Text_Person2, MSGBOX_NPC
+	goto SinnohP_celestic_town_southwest_house_1
 	end
-
-Sinnoh_CelesticTownSouthwestHouse_Text_Person2:
-	.string "I train my body in the mountains. My\n"
-	.string "HAPPINY trains its heart.$"
 
 @ --- end of SINNOH words ---

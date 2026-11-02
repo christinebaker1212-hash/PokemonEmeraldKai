@@ -22,6 +22,8 @@
 #include "mp.h"
 bool8 MP_BadgeCase_IsActive(void);   // Moemon Co-op: the BADGE CASE (src/mp/mp_badgecase.c)
 bool8 MP_BadgeCase_Step(u16 keys);
+bool8 Sinnoh_Contest_IsActive(void);   // Moemon Kai: SINNOH's SUPER CONTESTS (src/sinnoh/s3d_contest_ui.c)
+bool8 Sinnoh_Contest_Step(u16 keys);
 bool8 MP_CardScreen_Step(u16 keys);   // the TRAINER CARD (src/mp/mp_cardscreen.c)
 bool8 MP_CardScreen_IsActive(void);
 u8 TrySavingData(u8 saveType);
@@ -379,7 +381,7 @@ int main(int argc, char **argv)
         // Present only when there is something new (a game frame, a resize or a
         // settings change). With vsync on, presenting waits for the monitor;
         // otherwise sleep briefly while the next game frame is still >2ms away.
-        if (Tcg_IsActive() || MP_Fight_IsActive() || Rhythm_IsActive() || MP_BadgeCase_IsActive() || MP_CardScreen_IsActive() || Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
+        if (Tcg_IsActive() || MP_Fight_IsActive() || Rhythm_IsActive() || MP_BadgeCase_IsActive() || MP_CardScreen_IsActive() || Sinnoh_Contest_IsActive() || Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
             Display_Present();
         else if (paused || (fixedTimestep - accumulator) / timeScale > 0.002)
             SDL_Delay(1);
@@ -1092,9 +1094,12 @@ const u16 *Platform_GetFrame(void)
     {
         const u16 *MP_BadgeCase_Frame(void);
         const u16 *MP_CardScreen_Frame(void);
+        const u16 *Sinnoh_Contest_Frame(void);
         const u16 *card = MP_BadgeCase_Frame();
         if (card == NULL)
             card = MP_CardScreen_Frame();
+        if (card == NULL)
+            card = Sinnoh_Contest_Frame();
         if (card)
             return card;
     }
@@ -1113,7 +1118,7 @@ const u16 *Platform_GetFrame(void)
 static bool ScreenStep(void)
 {
     if (Tcg_Step(Platform_GetKeyInput()) || MP_Fight_Step() || MP_BadgeCase_Step(Platform_GetKeyInput())
-     || MP_CardScreen_Step(Platform_GetKeyInput()))
+     || MP_CardScreen_Step(Platform_GetKeyInput()) || Sinnoh_Contest_Step(Platform_GetKeyInput()))
     {
         MP_Spectate_PanelSync();
         return true;

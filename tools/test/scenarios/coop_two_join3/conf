@@ -7,9 +7,9 @@ WARP=0,31,30,6
 WARP_B=0,31,30,7
 WARP_C=0,10,10,10
 TMO=500
-ENV_A="MOEMON_DEBUG_PARTY=283:46,286:40"
-ENV_B="MOEMON_DEBUG_PARTY=280:46"
-ENV_C="MOEMON_DEBUG_PARTY=283:46"
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_PARTY=283:46,286:40"
+ENV_B="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_PARTY=280:46"
+ENV_C="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_PARTY=283:46"
 EXPECT_A=("co-op: two trainers (" "join: our player said yes" "join: battle now 3 seats (was 2)" "join: everyone is in" "co-op: battle over, outcome 1" "trainerflag 273 = 1" "trainerflag 605 = 1")
 EXPECT_B=("join: the battle grows to 3 players" "co-op: battle over, outcome 1" "trainerflag 273 = 1" "trainerflag 605 = 1")
 EXPECT_C=("join: asking the battle's leader, player 1" "join: we're in the battle (seat 2 of 3)" "co-op: battle over, outcome 1" "trainerflag 273 = 1" "trainerflag 605 = 1")

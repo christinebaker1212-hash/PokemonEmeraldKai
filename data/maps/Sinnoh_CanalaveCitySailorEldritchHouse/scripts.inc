@@ -3,7 +3,7 @@ Sinnoh_CanalaveCitySailorEldritchHouse_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_CanalaveCitySailorEldritchHouse_EventScript_Person1::
-	msgbox Sinnoh_CanalaveCitySailorEldritchHouse_Text_Person1, MSGBOX_NPC
+	goto SinnohP_canalave_city_sailor_eldritch_house_2
 	end
 
 Sinnoh_CanalaveCitySailorEldritchHouse_EventScript_Person2::
@@ -13,10 +13,6 @@ Sinnoh_CanalaveCitySailorEldritchHouse_EventScript_Person2::
 Sinnoh_CanalaveCitySailorEldritchHouse_EventScript_Person3::
 	msgbox Sinnoh_CanalaveCitySailorEldritchHouse_Text_Person3, MSGBOX_NPC
 	end
-
-Sinnoh_CanalaveCitySailorEldritchHouse_Text_Person1:
-	.string "My dad's boat goes to IRON ISLAND!\n"
-	.string "And sometimes even farther.$"
 
 Sinnoh_CanalaveCitySailorEldritchHouse_Text_Person3:
 	.string "My son has nightmares every night.\n"

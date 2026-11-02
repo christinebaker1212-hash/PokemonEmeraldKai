@@ -5,12 +5,12 @@ Sinnoh_MtCoronet2f_MapScripts::
 Sinnoh_MtCoronet2f_EventScript_Person6::
 	lock
 	faceplayer
-	goto_if_set 0x3DBB, Sinnoh_MtCoronet2f_EventScript_Person6_Given
+	goto_if_set 0x3DBE, Sinnoh_MtCoronet2f_EventScript_Person6_Given
 	msgbox Sinnoh_MtCoronet2f_Text_Person6, MSGBOX_DEFAULT
 	msgbox Sinnoh_MtCoronet2f_Text_Person6Gift, MSGBOX_DEFAULT
 	giveitem ITEM_BLACK_FLUTE, 1
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DBB
+	setflag 0x3DBE
 	release
 	end
 

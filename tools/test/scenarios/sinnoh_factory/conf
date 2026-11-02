@@ -3,6 +3,6 @@
 # and its door leads back to SINNOH's FACTORY. Shots t_lobby, t_back.
 MODE=1
 TMO=120
-ENV_A="MOEMON_DEBUG_REGION=3"
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3"
 EXPECT_A=("where map 26.31" "region 3" "where map 41.4")
 UNEXPECT_A=("[crash]" "TIMEOUT" "region 0 ")

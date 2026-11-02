@@ -15,7 +15,7 @@ Sinnoh_SunyshoreMarket_EventScript_Person3::
 	end
 
 Sinnoh_SunyshoreMarket_EventScript_Person4::
-	msgbox Sinnoh_SunyshoreMarket_Text_Person4, MSGBOX_NPC
+	goto SinnohP_sunyshore_market_3
 	end
 
 Sinnoh_SunyshoreMarket_EventScript_Person5::
@@ -25,9 +25,5 @@ Sinnoh_SunyshoreMarket_EventScript_Person5::
 Sinnoh_SunyshoreMarket_Text_Person1:
 	.string "The market's stalls change every day.\n"
 	.string "Come back tomorrow for something new!$"
-
-Sinnoh_SunyshoreMarket_Text_Person4:
-	.string "Welcome! These seals go on your POKé\n"
-	.string "BALLS. Pretty, aren't they?$"
 
 @ --- end of SINNOH words ---

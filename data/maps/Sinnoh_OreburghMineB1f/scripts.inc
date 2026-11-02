@@ -13,12 +13,12 @@ Sinnoh_OreburghMineB1f_EventScript_Person3::
 Sinnoh_OreburghMineB1f_EventScript_Person4::
 	lock
 	faceplayer
-	goto_if_set 0x3DC1, Sinnoh_OreburghMineB1f_EventScript_Person4_Given
+	goto_if_set 0x3DC4, Sinnoh_OreburghMineB1f_EventScript_Person4_Given
 	msgbox Sinnoh_OreburghMineB1f_Text_Person4, MSGBOX_DEFAULT
 	msgbox Sinnoh_OreburghMineB1f_Text_Person4Gift, MSGBOX_DEFAULT
 	giveitem ITEM_FLAME_PLATE, 1
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DC1
+	setflag 0x3DC4
 	release
 	end
 

@@ -37,7 +37,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_HearthomeCityNortheastHouse1f_EventScript_Person2",
       "flag": "0x3FFF"
     },
     {
@@ -125,7 +125,7 @@
       "y": 12,
       "elevation": 0,
       "dest_map": "MAP_SINNOH_HEARTHOME_CITY",
-      "dest_warp_id": "11"
+      "dest_warp_id": "13"
     },
     {
       "x": 18,

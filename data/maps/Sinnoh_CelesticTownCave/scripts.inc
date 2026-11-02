@@ -8,11 +8,11 @@ Sinnoh_CelesticTownCave_OnTransition:
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_CelesticTownCave_EventScript_Bg1::
-	msgbox Sinnoh_CelesticTownCave_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_celestic_town_cave_1
 	end
 
 Sinnoh_CelesticTownCave_EventScript_Bg2::
-	msgbox Sinnoh_CelesticTownCave_Text_Bg2, MSGBOX_SIGN
+	goto SinnohP_celestic_town_cave_1
 	end
 
 Sinnoh_CelesticTownCave_EventScript_Person1::
@@ -22,14 +22,6 @@ Sinnoh_CelesticTownCave_EventScript_Person1::
 Sinnoh_CelesticTownCave_EventScript_Person3::
 	msgbox Sinnoh_CelesticTownCave_Text_Person3, MSGBOX_NPC
 	end
-
-Sinnoh_CelesticTownCave_Text_Bg1:
-	.string "A painting of a MOéMON in a field of\n"
-	.string "flowers.$"
-
-Sinnoh_CelesticTownCave_Text_Bg2:
-	.string "A painting of a MOéMON in a field of\n"
-	.string "flowers.$"
 
 Sinnoh_CelesticTownCave_Text_Person1:
 	.string "The painting in this cave shows the\n"

@@ -8,7 +8,7 @@ Rules behind it: CLAUDE.md's SINNOH paragraph and docs/SINNOH_HANDOFF.md.
 
 | What | How to see it | Now |
 |---|---|---|
-| Platinum's script entries that convert | `python3 -I tools/sinnoh/gen_scripts.py --report ~/.cache/moemon/pokeplatinum` (first line) | 2053 of 2511 |
+| Platinum's script entries that convert | `python3 -I tools/sinnoh/gen_scripts.py --report ~/.cache/moemon/pokeplatinum` (first line) | 2071 of 2511 |
 | Commands still missing | the same report, the list under it (most used first) | 60 kinds |
 | Platinum's text slots and page breaks | messages show whole (\\r is a new box, six string slots) | done |
 | Platinum songs the game lacks | the same report, "songs the game lacks" | 5 |
@@ -95,11 +95,25 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 
 ## 5. Super Contests
 
-- [ ] Platinum's Super Contests: the dress-up round, the dance round, the acting round, ranks and HALLs
-      (OpenPartyMenuForContest, the CONTEST HALL's scripts)
-- [ ] Accessories and backdrops (AddAccessory, BufferAccessoryName, BufferContestBackdropName), the photos
-      (ContestPhotoHasData, DressUpPhotoHasData)
-- [ ] POKé BALL effects (Kai's mp_ballfx.c) wherever Platinum has Seals: the story's gifts, the menus, the shops
+- [x] The FASHION CASE: Platinum's 100 accessories and 18 backdrops kept, given, checked, named in its words
+      (src/sinnoh/s3d_fashion.c; AMITY SQUARE's and the hall's gifts convert)
+- [x] POFFINS as POKéBLOCKS (the POFFIN case checks, GivePoffin)
+- [ ] The contest's art in the graphics pack: accessories, backdrops, the dress-up screen, contest_bg / contest_obj
+- [x] The CONTEST HALL's lobby and stages, the POFFIN HOUSE as maps again (numbers of every other map kept)
+- [x] The VISUAL round: dress-up (accessories placed on the POKéMON over a backdrop, Platinum's time and theme),
+      then its judging (sinnoh_contest)
+- [x] The DANCE round (following the lead dancer's steps to the music) (sinnoh_contest)
+- [x] The ACTING round (appeals to the three judges, voltage, the 23 effects, the computer's table) (sinnoh_contest)
+- [x] Results, ranks (NORMAL to MASTER), ribbons (the game's), the first-win accessories, the winners' photos
+      (ContestPhotoHasData, the lobby's frames), the hall's receptionists, practice
+- [ ] JUBILIFE TV's dress-up and its photos (ScrCmd_0A6, ShowDressUpPhoto, DressUpPhotoHasData)
+- [ ] Platinum's stage art (contest_bg / contest_obj)
+- [ ] Contests with friends (co-op, as Kai's link contests)
+- [x] POKé BALL effects (Kai's mp_ballfx.c) wherever Platinum has Seals: each Seal stands for an earned ball effect
+      piece; the SUNYSHORE MARKET's Seal shop sells the day's at Platinum's prices (sinnoh_seals), SOLACEON's gifts
+      unlock them, the PC's BALL CAPSULES are the summary's POKé BALL page, the TV's SEAL CLUB SHOW tells of a POKéMON
+      given an effect in SINNOH
+- [ ] The POFFIN HOUSE's cooking as the game's BERRY BLENDER (POFFINS are POKéBLOCKS: the notes' rule)
 - [ ] Tests for each
 
 ## 6. Platinum's TV

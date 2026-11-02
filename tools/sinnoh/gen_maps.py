@@ -506,8 +506,8 @@ def main():
     _places_by_header.update({p['header']: p for p in every})
     groups = json.load(open('data/maps/map_groups.json'))
     layouts = json.load(open('data/layouts/layouts.json'))
-    # the outdoor places in group 40 (numbers kept), the buildings after them in groups of PER_GROUP (by name, so a
-    # building's number only changes when places are added before it)
+    # the outdoor places in group 40 (numbers kept), the buildings after them in groups of PER_GROUP (their numbers
+    # kept too: new ones go after the last)
     outdoor = [p for p in every if p['outdoor']]
     indoor = sorted((p for p in every if not p['outdoor']), key=lambda p: p['name'])
     if GROUP not in groups:
@@ -519,6 +519,9 @@ def main():
         if p['name'] not in known:
             known.append(p['name'])
     order = list(groups['group_order'])
+    # (the buildings keep their numbers: those already in the groups first, in their order, new ones after the last)
+    before = [n for g in order if g.startswith('gMapGroup_SinnohIndoor') for n in groups[g]]
+    indoor.sort(key=lambda p: (p['name'] not in before, before.index(p['name']) if p['name'] in before else 0, p['name']))
     for g in [g for g in order if g.startswith('gMapGroup_SinnohIndoor')]:
         groups['group_order'].remove(g)
         del groups[g]

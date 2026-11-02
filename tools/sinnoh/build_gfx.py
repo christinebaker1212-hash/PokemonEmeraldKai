@@ -294,6 +294,9 @@ def main():
     import build_starter
     if os.path.exists(os.path.join(root, build_starter.NARC)):
         out += build_starter.section(root)
+    # SUPER CONTESTS' accessories and backdrops (tools/sinnoh/build_contest.py; before the POKéTCH's)
+    import build_contest
+    out += build_contest.section(root)
     # the POKéTCH's app screens and sprites (tools/sinnoh/build_poketch.py)
     import build_poketch
     out += build_poketch.section(root)

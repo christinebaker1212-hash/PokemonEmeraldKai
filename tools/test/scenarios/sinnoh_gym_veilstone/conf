@@ -3,6 +3,6 @@
 # south is the floor as before. Shots t_bag0-3.png. Needs the 3D pack (version 4, with the field effect models).
 MODE=1
 TMO=90
-ENV_A="MOEMON_DEBUG_REGION=3"
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3"
 EXPECT_A=("VEILSTONE bags 3,10 4,22 8,7 " "stacks 7FF" "VEILSTONE's stack 4 knocked over" "VEILSTONE's bag 2 at 11,7" "VEILSTONE bags 3,10 4,22 11,7 " "stacks 7EF")
 UNEXPECT_A=("[crash]" "TIMEOUT")

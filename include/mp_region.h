@@ -81,6 +81,11 @@ void Sinnoh_HallLoad(const void *data, u32 size);
 const void *Sinnoh_TvData(u32 *size);   // SINNOH's TV (src/sinnoh/s3d_tv.c), chunk TVBC
 void Sinnoh_TvLoad(const void *data, u32 size);
 void Sinnoh_TvReset(void);
+const void *Sinnoh_FashionData(u32 *size);   // Platinum's FASHION CASE (src/sinnoh/s3d_fashion.c), chunk FASH
+void Sinnoh_FashionLoad(const void *data, u32 size);
+void Sinnoh_FashionReset(void);
+const void *Sinnoh_PhotoData(u32 *size);   // the contest hall's photos, chunk CPHO
+void Sinnoh_PhotoLoad(const void *data, u32 size);
 void Sinnoh_FrontierReset(void);      // SINNOH's BATTLE CASTLE's / ARCADE's records (s3d_frontier.c), chunk FRNT
 const void *Sinnoh_FrontierData(u32 *size);
 void Sinnoh_FrontierLoad(const void *data, u32 size);

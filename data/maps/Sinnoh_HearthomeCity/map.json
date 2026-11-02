@@ -79,7 +79,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_HearthomeCity_EventScript_Person4",
       "flag": "0x3FFF"
     },
     {
@@ -404,7 +404,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "0x0",
+      "script": "Sinnoh_HearthomeCity_EventScript_Person29",
       "flag": "0x3FFF"
     },
     {
@@ -515,6 +515,13 @@
       "dest_warp_id": "0"
     },
     {
+      "x": 31,
+      "y": 19,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_CONTEST_HALL_LOBBY",
+      "dest_warp_id": "0"
+    },
+    {
       "x": 52,
       "y": 11,
       "elevation": 0,
@@ -561,6 +568,13 @@
       "y": 37,
       "elevation": 0,
       "dest_map": "MAP_SINNOH_FOREIGN_BUILDING",
+      "dest_warp_id": "0"
+    },
+    {
+      "x": 24,
+      "y": 38,
+      "elevation": 0,
+      "dest_map": "MAP_SINNOH_POFFIN_HOUSE",
       "dest_warp_id": "0"
     },
     {

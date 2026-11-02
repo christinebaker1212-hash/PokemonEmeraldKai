@@ -138,7 +138,7 @@ Sinnoh_CanalaveCity_EventScript_Sign9::
 	end
 
 Sinnoh_CanalaveCity_EventScript_Sign18::
-	msgbox Sinnoh_CanalaveCity_Text_Sign18, MSGBOX_SIGN
+	goto SinnohP_canalave_city_19
 	end
 
 Sinnoh_CanalaveCity_Text_Person13:
@@ -170,9 +170,5 @@ Sinnoh_CanalaveCity_Text_Person19:
 	.string "BARRY: The library! The PROFESSOR's\n"
 	.string "calling a meeting. Hurry up, I'll fine\l"
 	.string "you if you're late!$"
-
-Sinnoh_CanalaveCity_Text_Sign18:
-	.string "HARBOR INN\p"
-	.string "A warm bed for tired travelers.$"
 
 @ --- end of SINNOH words ---

@@ -4,6 +4,6 @@
 # Shots t_party, t_types, t_next.
 MODE=1
 TMO=300
-ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=6:60"
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=6:60"
 EXPECT_A=("hall: type 0 rank 1" "hall: battle won" "hall: streak 1, type 0 rank 1" "hall: the challenge ends at 1")
 UNEXPECT_A=("[crash]" "TIMEOUT")

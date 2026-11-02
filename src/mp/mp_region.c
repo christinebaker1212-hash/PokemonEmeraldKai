@@ -255,6 +255,7 @@ void MP_Region_StartNewGame(void)
     Sinnoh_HallReset();
     Sinnoh_FrontierReset();
     Sinnoh_TvReset();
+    Sinnoh_FashionReset();
     MP_Region_Arrive(sStartRegion);
     if (sStartRegion == REGION_SINNOH)
     {
@@ -381,6 +382,20 @@ void MP_Region_WriteSidecar(void)
             fwrite(tv, size, 1, f);
         }
         {
+            // Platinum's FASHION CASE: SUPER CONTESTS' accessories and backdrops (src/sinnoh/s3d_fashion.c)
+            u32 size;
+            const void *fashion = Sinnoh_FashionData(&size);
+            c[0] = CHUNK('F', 'A', 'S', 'H');
+            c[1] = size;
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(fashion, size, 1, f);
+            fashion = Sinnoh_PhotoData(&size);   // (and the contest hall's photos)
+            c[0] = CHUNK('C', 'P', 'H', 'O');
+            c[1] = size;
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(fashion, size, 1, f);
+        }
+        {
             u32 format = MP_SAVE_FORMAT;   // the save's own layout version (mp_savefix.h)
             c[0] = CHUNK('S', 'A', 'V', 'F');
             c[1] = sizeof(format);
@@ -468,6 +483,18 @@ static bool8 LoadFrom(const char *path)
                 u8 buf[1024];
                 if (fread(buf, c[1], 1, f) == 1)
                     Sinnoh_HallLoad(buf, c[1]);
+            }
+            else if (c[0] == CHUNK('F', 'A', 'S', 'H') && c[1] <= 1024)
+            {
+                u8 buf[1024];
+                if (fread(buf, c[1], 1, f) == 1)
+                    Sinnoh_FashionLoad(buf, c[1]);
+            }
+            else if (c[0] == CHUNK('C', 'P', 'H', 'O') && c[1] <= 2048)
+            {
+                u8 buf[2048];
+                if (fread(buf, c[1], 1, f) == 1)
+                    Sinnoh_PhotoLoad(buf, c[1]);
             }
             else if (c[0] == CHUNK('T', 'V', 'B', 'C') && c[1] <= 4096)
             {
@@ -561,6 +588,7 @@ void MP_Region_LoadFromSave(void)
     Sinnoh_HallReset();
     Sinnoh_FrontierReset();
     Sinnoh_TvReset();
+    Sinnoh_FashionReset();
     for (i = 0; i <= 3; i++)
     {
         if (i == 0)

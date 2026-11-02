@@ -3,6 +3,6 @@
 # reaches the next trainer and GARDENIA.) Shots t_clock0.png, t_clock1.png. Needs the 3D pack (version 4).
 MODE=1
 TMO=90
-ENV_A="MOEMON_DEBUG_REGION=3"
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3"
 EXPECT_A=("clock 0" "ETERNA's clock to state 1 (6:15)" "clock 1")
 UNEXPECT_A=("[crash]" "TIMEOUT")

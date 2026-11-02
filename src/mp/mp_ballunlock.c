@@ -146,7 +146,7 @@ void MP_BallUnlock_HowTo(u8 kind, u8 index, char *out, u32 size)
     if (ach)
         snprintf(out, size, "Achievement: %s", MP_Achieve_NameById(ach));
     else
-        snprintf(out, size, "a MOEGATCHA prize");
+        snprintf(out, size, "a MOEGATCHA prize, or SINNOH's Seals");
 }
 
 // "BALL COLOR: MINT", "SEND-OUT: SAKURA STORM", "PARTICLES: STARS", "RETURN: WARP OUT"

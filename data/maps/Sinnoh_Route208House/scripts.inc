@@ -7,7 +7,7 @@ Sinnoh_Route208House_EventScript_Person1::
 	end
 
 Sinnoh_Route208House_EventScript_Person2::
-	msgbox Sinnoh_Route208House_Text_Person2, MSGBOX_NPC
+	goto SinnohP_route_208_house_3
 	end
 
 Sinnoh_Route208House_EventScript_Person3::
@@ -22,10 +22,6 @@ Sinnoh_Route208House_Text_Person1:
 	.string "I've grown BERRIES my whole life. Each\n"
 	.string "one has its own taste, and its own\l"
 	.string "story.$"
-
-Sinnoh_Route208House_Text_Person2:
-	.string "Grandpa lets me pick one BERRY a day.\n"
-	.string "Today I picked the biggest one!$"
 
 Sinnoh_Route208House_Text_Person3:
 	.string "BERRIES make MOéMON happy. And\n"

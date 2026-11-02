@@ -8,7 +8,7 @@ Sinnoh_ValleyWindworksOutside_OnTransition:
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_ValleyWindworksOutside_EventScript_Bg2::
-	msgbox Sinnoh_ValleyWindworksOutside_Text_Bg2, MSGBOX_SIGN
+	goto SinnohP_valley_windworks_outside_4
 	end
 
 Sinnoh_ValleyWindworksOutside_EventScript_Person1::
@@ -22,9 +22,6 @@ Sinnoh_ValleyWindworksOutside_EventScript_Person7::
 Sinnoh_ValleyWindworksOutside_EventScript_Sign2::
 	goto SinnohP_valley_windworks_outside_5
 	end
-
-Sinnoh_ValleyWindworksOutside_Text_Bg2:
-	.string "The door is locked.$"
 
 Sinnoh_ValleyWindworksOutside_Text_Person1:
 	.string "The WINDWORKS is closed! TEAM\n"

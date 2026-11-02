@@ -266,7 +266,8 @@ def roles(root):
         vendors = vendor_kind(root, p['place']['header'][len('MAP_HEADER_'):].lower())
         for i, o in enumerate(ev['object_events']):
             gfx = o['graphics_id']
-            if gfx.endswith('POKECENTER_NURSE'):
+            if gfx.endswith('POKECENTER_NURSE') and not (isinstance(o['script'], int) and o['script'] >= 2800):
+                # (a nurse; the contest hall's receptionists wear the same clothes: their own scripts are Platinum's)
                 out.setdefault(p['name'], {})['Person%d' % (i + 1)] = ('nurse',)
             elif vendors.get(full(o['script'])):
                 # a clerk: the common list or a specialty list, as Platinum's own script says (gen_marts.py)
@@ -283,6 +284,9 @@ def roles(root):
             if words:
                 out.setdefault(p['name'], {})['Bg%d' % (i + 1)] = words
     return out
+
+
+CLOSED = ('SinnohP_pokemon_center_b1f_common',)   # (the Wi-Fi Club's and Plaza's attendants: online only, closed)
 
 
 def platinum(root):
@@ -302,6 +306,11 @@ def platinum(root):
             return gen_scripts.convertible(root, 'bg_events', s - 2500 + 1)
         if 2000 <= s < 2500:
             return gen_scripts.convertible(root, 'common', s - 2000 + 1)
+        if s >= 2800:
+            # (a shared file's: the contest hall's receptionists, the POFFIN HOUSE's cook; the others are the Wi-Fi Club's
+            # and Plaza's, closed: online only)
+            t = gen_scripts.common_target(s)
+            return gen_scripts.convertible(root, t[0], t[1]) if t and t[0] in ('contests', 'poffin_common') else None
         return gen_scripts.convertible(root, low, s) if 1 <= s < 2000 else None
     out = {}
     for p in places(open_source(root), root):
@@ -314,6 +323,8 @@ def platinum(root):
             if isinstance(o['script'], str):
                 continue          # (a trainer: tools/sinnoh/gen_trainers.py)
             lab = target(low, o['script'])
+            if lab and lab.startswith(CLOSED):
+                lab = None
             if lab:
                 key = ('Sign%d' if sprites.sign(o['graphics_id']) else 'Person%d') % (i + 1)
                 out.setdefault(p['name'], {})[key] = lab

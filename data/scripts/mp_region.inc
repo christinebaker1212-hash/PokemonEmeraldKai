@@ -326,3 +326,25 @@ gText_SinnohRegionBoatNotYet::
 	.string "This boat sails to faraway regions.\p"
 	.string "Come back with an S.S. TICKET once\n"
 	.string "you're the CHAMPION of SINNOH.$"
+
+@ SINNOH's Seal shop (the SUNYSHORE MARKET, Platinum's PokeMartSeal), POKé BALL effects in the Seals' place
+@ (src/sinnoh/s3d_seals.c): the day's pieces at Platinum's prices; VAR_0x8004 = the day's stock (0 Monday)
+EventScript_SinnohSealShop::
+	sinnoh 13, VAR_0x8005, 1
+	sinnoh 49, 4, VAR_0x8004
+	sinnoh 15
+	goto_if_eq VAR_0x8005, 0xFFFE, EventScript_SinnohSealShop_End
+	sinnoh 49, 5, VAR_0x8005, VAR_RESULT
+	goto_if_eq VAR_RESULT, 0, EventScript_SinnohSealShop_NoMoney
+	goto_if_eq VAR_RESULT, 2, EventScript_SinnohSealShop
+	playse SE_SHOP
+	msgbox gText_HereYouGoThankYou, MSGBOX_DEFAULT
+	goto EventScript_SinnohSealShop
+
+EventScript_SinnohSealShop_NoMoney::
+	msgbox gText_YouDontHaveMoney, MSGBOX_DEFAULT
+	goto EventScript_SinnohSealShop
+
+EventScript_SinnohSealShop_End::
+	closemessage
+	return

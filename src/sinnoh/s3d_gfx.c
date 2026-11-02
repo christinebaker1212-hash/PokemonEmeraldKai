@@ -35,6 +35,8 @@ static struct
     struct S3dStarterGfx starter;   // the briefcase (tools/sinnoh/build_starter.py: "STRT"; frames NULL: none)
     const u8 *backs;       // the partners' backs (build_gfx.py backs(): "BACK"), each u16 picture, palette, 4 frames
     u16 backCount;
+    const u8 *accessories[100];   // SUPER CONTESTS' art (tools/sinnoh/build_contest.py: "CNTS"): u16 w, h, RGB555
+    const u8 *backdrops2[18];
     const u8 *poketch;     // the POKéTCH's art (tools/sinnoh/build_poketch.py: "PKCH")
     const u8 *poketchEnd;
 } sGfx;
@@ -174,6 +176,28 @@ static void Load(void)
             }
         }
         p = qend <= end ? qend : end;
+    }
+    // SUPER CONTESTS' art: "CNTS", u16 accessories (u16 w, h, RGB555), u16 backdrops (the same)
+    if (p + 6 <= end && memcmp(p, "CNTS", 4) == 0)
+    {
+        u32 k, list;
+        p += 4;
+        for (list = 0; list < 2 && p + 2 <= end; list++)
+        {
+            n = p[0] | p[1] << 8;
+            p += 2;
+            for (k = 0; k < n && p + 4 <= end; k++)
+            {
+                u32 w = p[0] | p[1] << 8, h = p[2] | p[3] << 8;
+                if (p + 4 + w * h * 2 > end)
+                    break;
+                if (list == 0 && k < ARRAY_COUNT(sGfx.accessories))
+                    sGfx.accessories[k] = p;
+                if (list == 1 && k < ARRAY_COUNT(sGfx.backdrops2))
+                    sGfx.backdrops2[k] = p;
+                p += 4 + w * h * 2;
+            }
+        }
     }
     if (p + 4 <= end && memcmp(p, "PKCH", 4) == 0)
     {
@@ -420,4 +444,22 @@ const struct S3dStarterGfx *S3D_Gfx_Starter(void)
     if (!sGfx.tried)
         Load();
     return sGfx.ok && sGfx.starter.frames != NULL ? &sGfx.starter : NULL;
+}
+
+// SUPER CONTESTS' art (s3d_contest.c): accessory N's / backdrop N's picture, W x H RGB555 (bit 15: drawn); FALSE: none
+bool8 S3D_Gfx_ContestPicture(bool8 backdrop, u16 n, u16 *w, u16 *h, const u16 **px)
+{
+    const u8 *p;
+    if (!sGfx.tried)
+        Load();
+    if (!sGfx.ok)
+        return FALSE;
+    p = backdrop ? (n < ARRAY_COUNT(sGfx.backdrops2) ? sGfx.backdrops2[n] : NULL)
+                 : (n < ARRAY_COUNT(sGfx.accessories) ? sGfx.accessories[n] : NULL);
+    if (p == NULL || (p[0] | p[1] << 8) == 0)
+        return FALSE;
+    *w = p[0] | p[1] << 8;
+    *h = p[2] | p[3] << 8;
+    *px = (const u16 *)(p + 4);
+    return TRUE;
 }

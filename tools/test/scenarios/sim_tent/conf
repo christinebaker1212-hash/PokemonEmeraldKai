@@ -5,8 +5,8 @@ MODE=2
 WARP=9,2,11,5
 WARP_B=0,10,10,10
 TMO=300
-ENV_A="MOEMON_DEBUG_PARTY=283:46"
-ENV_B="MOEMON_DEBUG_PARTY=288:12"
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_PARTY=288:12"
 EXPECT_A=("sim: sent our record" "sim: a record arrived" "sim: 1 digital trainer(s) here" "sim: battle 1 against" "sim: battle 1 won (our lead back at Lv46)" "sim: streak 1 (best 1)" "sim: the challenge ends at 1")
 EXPECT_B=("sim: sent our record")
 UNEXPECT_A=("crash" "BAD EGG")

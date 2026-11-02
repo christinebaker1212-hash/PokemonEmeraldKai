@@ -5,12 +5,12 @@ Sinnoh_GrandLakeValorLakefrontEastHouse_MapScripts::
 Sinnoh_GrandLakeValorLakefrontEastHouse_EventScript_Person1::
 	lock
 	faceplayer
-	goto_if_set 0x3DB3, Sinnoh_GrandLakeValorLakefrontEastHouse_EventScript_Person1_Given
+	goto_if_set 0x3DB5, Sinnoh_GrandLakeValorLakefrontEastHouse_EventScript_Person1_Given
 	msgbox Sinnoh_GrandLakeValorLakefrontEastHouse_Text_Person1, MSGBOX_DEFAULT
 	msgbox Sinnoh_GrandLakeValorLakefrontEastHouse_Text_Person1Gift, MSGBOX_DEFAULT
 	giveitem ITEM_WHITE_FLUTE, 1
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DB3
+	setflag 0x3DB5
 	release
 	end
 

@@ -3,7 +3,7 @@ Sinnoh_HearthomeCityPokemonFanClub_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_HearthomeCityPokemonFanClub_EventScript_Person1::
-	msgbox Sinnoh_HearthomeCityPokemonFanClub_Text_Person1, MSGBOX_NPC
+	goto SinnohP_hearthome_city_pokemon_fan_club_1
 	end
 
 Sinnoh_HearthomeCityPokemonFanClub_EventScript_Person2::
@@ -25,11 +25,6 @@ Sinnoh_HearthomeCityPokemonFanClub_EventScript_Person5::
 Sinnoh_HearthomeCityPokemonFanClub_EventScript_Person6::
 	msgbox Sinnoh_HearthomeCityPokemonFanClub_Text_Person6, MSGBOX_NPC
 	end
-
-Sinnoh_HearthomeCityPokemonFanClub_Text_Person1:
-	.string "Welcome to the MOéMON FAN CLUB! Tell\n"
-	.string "me all about your MOéMON. I'll listen\l"
-	.string "all day!$"
 
 Sinnoh_HearthomeCityPokemonFanClub_Text_Person2:
 	.string "Every member here loves MOéMON more\n"

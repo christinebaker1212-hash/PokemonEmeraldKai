@@ -7,7 +7,7 @@ Sinnoh_FlowerShop_EventScript_Person1::
 	end
 
 Sinnoh_FlowerShop_EventScript_Person2::
-	msgbox Sinnoh_FlowerShop_Text_Person2, MSGBOX_NPC
+	goto SinnohP_flower_shop_2
 	end
 
 Sinnoh_FlowerShop_EventScript_Person3::
@@ -17,10 +17,6 @@ Sinnoh_FlowerShop_EventScript_Person3::
 Sinnoh_FlowerShop_Text_Person1:
 	.string "Welcome! Our flowers bring a smile to\n"
 	.string "every face.$"
-
-Sinnoh_FlowerShop_Text_Person2:
-	.string "I love the flower shop! I come every\n"
-	.string "day just to smell everything.$"
 
 Sinnoh_FlowerShop_Text_Person3:
 	.string "My MOéMON helps me water the flowers.\n"

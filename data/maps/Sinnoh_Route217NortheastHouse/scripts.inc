@@ -5,12 +5,12 @@ Sinnoh_Route217NortheastHouse_MapScripts::
 Sinnoh_Route217NortheastHouse_EventScript_Person1::
 	lock
 	faceplayer
-	goto_if_set 0x3DD0, Sinnoh_Route217NortheastHouse_EventScript_Person1_Given
+	goto_if_set 0x3DD7, Sinnoh_Route217NortheastHouse_EventScript_Person1_Given
 	msgbox Sinnoh_Route217NortheastHouse_Text_Person1, MSGBOX_DEFAULT
 	msgbox Sinnoh_Route217NortheastHouse_Text_Person1Gift, MSGBOX_DEFAULT
 	giveitem ITEM_SPELL_TAG, 1
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DD0
+	setflag 0x3DD7
 	release
 	end
 

@@ -14,6 +14,10 @@ Sinnoh_VeilstoneStore2f_EventScript_Person2::
 	goto SinnohP_veilstone_store_2f_3
 	end
 
+Sinnoh_VeilstoneStore2f_EventScript_Person3::
+	goto SinnohP_veilstone_store_2f_5
+	end
+
 Sinnoh_VeilstoneStore2f_EventScript_Person4::
 	msgbox Sinnoh_VeilstoneStore2f_Text_Person4, MSGBOX_NPC
 	end

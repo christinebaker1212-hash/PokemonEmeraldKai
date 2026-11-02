@@ -3,7 +3,7 @@ Sinnoh_HearthomeCity_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_HearthomeCity_EventScript_Person1::
-	msgbox Sinnoh_HearthomeCity_Text_Person1, MSGBOX_NPC
+	goto SinnohP_hearthome_city_11
 	end
 
 Sinnoh_HearthomeCity_EventScript_Person2::
@@ -117,10 +117,6 @@ Sinnoh_HearthomeCity_EventScript_Sign19::
 Sinnoh_HearthomeCity_EventScript_Sign31::
 	goto SinnohP_hearthome_city_30
 	end
-
-Sinnoh_HearthomeCity_Text_Person1:
-	.string "Even fishermen come to HEARTHOME.\n"
-	.string "It's the city of friendship, after all.$"
 
 Sinnoh_HearthomeCity_Text_Person7:
 	.string "I make little MOéMON statues out of\n"

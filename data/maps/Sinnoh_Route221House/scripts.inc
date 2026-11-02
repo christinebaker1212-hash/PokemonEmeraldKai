@@ -9,12 +9,12 @@ Sinnoh_Route221House_EventScript_Bg1::
 Sinnoh_Route221House_EventScript_Person1::
 	lock
 	faceplayer
-	goto_if_set 0x3DD3, Sinnoh_Route221House_EventScript_Person1_Given
+	goto_if_set 0x3DDA, Sinnoh_Route221House_EventScript_Person1_Given
 	msgbox Sinnoh_Route221House_Text_Person1, MSGBOX_DEFAULT
 	msgbox Sinnoh_Route221House_Text_Person1Gift, MSGBOX_DEFAULT
 	giveitem ITEM_BLACK_BELT, 1
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DD3
+	setflag 0x3DDA
 	release
 	end
 

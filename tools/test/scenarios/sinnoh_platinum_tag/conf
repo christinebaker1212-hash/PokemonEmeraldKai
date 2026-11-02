@@ -2,7 +2,7 @@
 # with STEVEN's pick of the party's half): DAWN beside the player against the two GALACTIC grunts
 # (VAR_JUBILIFE_CITY_STATE 0x51D9 from 3); the whole party is back after. Needs the packs.
 MODE=1
-ENV_A="MOEMON_DEBUG_PARTY=6:100,9:100 MOEMON_TEST_FOE_HP1=1"
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_PARTY=6:100,9:100 MOEMON_TEST_FOE_HP1=1"
 TMO=600
 EXPECT_A=("ctx 1 free 1 overworld 1 locked 0 script 0")
 UNEXPECT_A=("[crash]" "TIMEOUT" "var 0x51D9 = 3")

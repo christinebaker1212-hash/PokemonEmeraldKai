@@ -6,3 +6,4 @@ MODE=1
 TMO=900
 EXPECT_A=("var 0x524B = 1" "var 0x52F8 = 415" "var 0x51C9 = 2" "ctx 1 free 1 overworld 1 locked 0 script 0")
 UNEXPECT_A=("[crash]" "TIMEOUT")
+ENV_A="MOEMON_TEST_STRONG=1"

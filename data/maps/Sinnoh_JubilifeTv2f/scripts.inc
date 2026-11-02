@@ -7,7 +7,7 @@ Sinnoh_JubilifeTv2f_EventScript_Person1::
 	end
 
 Sinnoh_JubilifeTv2f_EventScript_Person2::
-	msgbox Sinnoh_JubilifeTv2f_Text_Person2, MSGBOX_NPC
+	goto SinnohP_jubilife_tv_2f_2
 	end
 
 Sinnoh_JubilifeTv2f_EventScript_Person3::
@@ -17,10 +17,6 @@ Sinnoh_JubilifeTv2f_EventScript_Person3::
 Sinnoh_JubilifeTv2f_EventScript_Person4::
 	goto SinnohP_jubilife_tv_2f_3
 	end
-
-Sinnoh_JubilifeTv2f_Text_Person2:
-	.string "This floor has our gallery. Viewers\n"
-	.string "send us photos of their MOéMON!$"
 
 Sinnoh_JubilifeTv2f_Text_Person3:
 	.string "We're always looking for stories! A\n"

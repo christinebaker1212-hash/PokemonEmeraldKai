@@ -3687,6 +3687,36 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   one word on the game's own easy chat (GABBY and TY's screen: special Sinnoh_TvChooseWord). Online-only and Underground
   segments never air; those about systems SINNOH lacks yet (contests, photos, BERRY patches, roamers, the VILLA) wait
   for them (docs/SINNOH_CHECKLIST.md). `mp tv`, `mp tvwatch`, `mp tvcatch SPECIES BALLS`. Test sinnoh_tv.
+- Seals as POKé BALL effects (2026-11-02, the user: "Poke Ball effects take the place of Seals wherever they would
+  appear in the story, or in menus or shops"): src/sinnoh/s3d_seals.c. Each of Platinum's Seals (generated/seals.txt's
+  ids) stands for an earned ball effect piece (mp_ballunlock.c's MOEGATCHA prizes in order, round again): a Seal given
+  unlocks it, a Seal counted is 99 (Platinum's full case) once unlocked, its name is the piece's; the SUNYSHORE MARKET's
+  Seal shop (PokeMartSeal: data/scripts/mp_region.inc EventScript_SinnohSealShop on the SINNOH menu) sells the day's
+  Seals' pieces at Platinum's prices (tv_data.py seal_lines: gSinnohSealPrices / gSinnohSealShops); Platinum's SEAL
+  CASE (item 679) still comes first from SOLACEON; the PC's BALL CAPSULES are the summary's POKé BALL page (its
+  editor), and an effect saved there in SINNOH is the TV's SEAL CLUB SHOW. Test sinnoh_seals.
+- The FASHION CASE (2026-11-02, SUPER CONTESTS' first piece): src/sinnoh/s3d_fashion.c keeps Platinum's 100
+  accessories (the first 61 up to 9 each, the rest one) and 18 backdrops in "<save>.region" chunk FASH; AddAccessory,
+  CanFitAccessory, BufferAccessoryName(WithArticle), AddContestBackdrop, CheckBackdrop, BufferContestBackdropName and the
+  massage girl's gift convert (gen_scripts.py: ACCESSORY_* / BACKDROP_* are Platinum's numbers, dec.fashion_ids).
+  POFFINS are this game's POKéBLOCKS (the notes' rule: what Kai has SINNOH uses): the POFFIN case checks and GivePoffin
+  give a POKéBLOCK of the same flavors (smoothness as its feel). Plan: docs/SINNOH_CHECKLIST.md section 5.
+- SUPER CONTESTS (2026-11-02, the user: "Super Contests should be added, as well as their unique functions"): the rules
+  in src/sinnoh/s3d_contest.c as Platinum's code has them (docs/SUPER_CONTEST.md says where each comes from), the
+  screens in s3d_contest_ui.c (480x320 like the BADGE CASE: IsActive / Step / Canvas / Frame in sdl2.c and display.c).
+  Tables from the decomp when the game is built (tools/sinnoh/contest_data.py into sinnoh/platinum_scripts.inc, never
+  committed): each move's contest type and effect (res/moves), the effects' appeal and messages, the computer's ACTING
+  table (165 rows), contest_data.narc's 96 opponents, 12 judges, 96 dress-ups and 12 themes. The hall's scripts are
+  Platinum's (scripts_contests.s: `sinnoh SINNOH_CONTEST` CC_*); the CONTEST HALL's lobby and stages and the POFFIN
+  HOUSE are maps again (places.py no longer drops them; gen_maps.py now keeps every building's number and appends new
+  ones). What Kai has, SINNOH uses: a win gives this game's contest ribbon of the type at the rank's level (NORMAL =
+  COOL RIBBON ... MASTER = COOL RIBBON MASTER, named by Platinum's own ribbon_names words for them), entering rank N
+  asks for that ribbon at level N, the party menu is the game's (special ChoosePartyMon; VAR_0x8004 kept), the save
+  prompt the game's (Common_SaveGame = special SaveGame), the music the game's contest songs. The first win's
+  accessory, the winner's photo (chunk CPHO, the lobby's frames: ScrCmd_0A8 shows it), the TV's CONTEST HALL
+  segment. Link contests (StartBattleClient / Server with COMM_TYPE_CONTEST) answer "cancelled" until co-op contests
+  are built; Platinum's POKéTCH-campaign coupons aren't gifts here (the POKéTCH is the game's key item). Test
+  sinnoh_contest.
   The user's rules: Kai's systems stay and SINNOH uses them (tag battles = Kai's partner battle, battle_tower.c
   MP_StartPartnerBattle via DoSpecialTrainerBattle 15, with STEVEN's party pick; two trainers = battle_setup.c
   MP_StartTwoTrainerBattle; AddFreeCamera = SpawnCameraObject, which s3d.c SetupView follows; the briefcase =

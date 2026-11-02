@@ -571,3 +571,7 @@
 	.include "data/maps/Sinnoh_VistaLighthouseElevator/scripts.inc"
 	.include "data/maps/Sinnoh_WaywardCave1f/scripts.inc"
 	.include "data/maps/Sinnoh_WaywardCaveB1f/scripts.inc"
+	.include "data/maps/Sinnoh_ContestHallLobby/scripts.inc"
+	.include "data/maps/Sinnoh_ContestHallStageNoContest/scripts.inc"
+	.include "data/maps/Sinnoh_ContestHallStageOngoingContest/scripts.inc"
+	.include "data/maps/Sinnoh_PoffinHouse/scripts.inc"

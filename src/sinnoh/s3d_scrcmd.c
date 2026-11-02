@@ -2,6 +2,8 @@
 // scripts do that this game's commands don't, for the scripts tools/sinnoh/gen_scripts.py converts from Platinum's own
 // (docs/SINNOH_HANDOFF.md step 4).
 #include "global.h"
+#include "money.h"
+#include "pokemon_icon.h"
 #include "event_data.h"
 #include "script.h"
 #include "string_util.h"
@@ -14,6 +16,7 @@
 #include "party_menu.h"
 #include "mp_region.h"
 #include "s3d.h"
+#include "s3d_contest.h"
 
 #include "data.h"
 #include "battle.h"
@@ -88,9 +91,15 @@ enum {
     SINNOH_MESSAGE_VAR,             // gSinnohMessage <- SINNOH's text, ARG's bank, message ARG2's value
     SINNOH_TV,                      // ARG: the TV's call (s3d_tv.c TVCALL_*), ARG2, ARG3 its variables
     SINNOH_MESSAGE_BANK_VAR,        // gSinnohMessage <- SINNOH's text, bank ARG's value, message ARG2's value
+    SINNOH_SEAL,                    // ARG: the Seals' call (s3d_seals.c SEALCALL_*: POKé BALL effects in their place), ARG2, ARG3
+    SINNOH_FASHION,                 // ARG: the FASHION CASE's call (s3d_fashion.c FASHCALL_*), ARG2, ARG3
+    SINNOH_CONTEST,                 // ARG: SUPER CONTESTS' call (s3d_contest.c CC_*), ARG2, ARG3
+    SINNOH_WARP_CONTINUE,           // (then a `goto LABEL`, read here, not taken): Platinum's script goes on at LABEL
+                                    // once the warp that follows has brought the player to the new map
 };
 
-u8 gSinnohMessage[1000];   // (SINNOH_MESSAGE_VAR: `message gSinnohMessage`)
+u8 gSinnohMessage[1000];
+const u8 *gSinnohWarpContinue;   // (SINNOH_WARP_CONTINUE: script.c TryRunOnFrameMapScript starts it on the new map)   // (SINNOH_MESSAGE_VAR: `message gSinnohMessage`)
 extern const u16 gSinnohDexRatings[];   // (sinnoh/platinum_scripts.inc: bank, then rows of up to, line, female's line)
 #include "../data/sinnoh_dex.h"
 
@@ -108,9 +117,23 @@ static struct
     u8 count;
     bool8 canExit;
     u16 values[MENU_MAX];
-    u8 texts[MENU_MAX][48];
+    u8 texts[MENU_MAX][64];
     struct MenuAction actions[MENU_MAX];
 } sMenu;
+
+// A line made by the game's code (the Seal shop: s3d_seals.c)
+void Sinnoh_MenuAddLine(const u8 *text, u16 value)
+{
+    if (sMenu.count < MENU_MAX)
+    {
+        u8 *t = sMenu.texts[sMenu.count];
+        StringCopyN(t, text, sizeof(sMenu.texts[0]) - 1);
+        t[sizeof(sMenu.texts[0]) - 1] = EOS;
+        sMenu.actions[sMenu.count].text = t;
+        sMenu.values[sMenu.count] = value;
+        sMenu.count++;
+    }
+}
 
 static void Task_SinnohMenu(u8 taskId)
 {
@@ -174,7 +197,7 @@ static u16 PlatinumPocket(u16 item)
     }
 }
 
-static u8 *StringVar(u16 n)
+u8 *StringVar(u16 n)
 {
     n = VarGet(n);   // (a buffer number, or a variable holding one)
     return n == 0 ? gStringVar1 : n == 1 ? gStringVar2 : gStringVar3;
@@ -452,6 +475,27 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
         case 4:
             n = GetGameStat(GAME_STAT_ENTERED_HOF);
             break;
+        case 5:   // the first party slot holding species ARG3 (a value or variable; PARTY_SIZE: none)
+            for (n = 0; n < PARTY_SIZE; n++)
+                if (GetMonData(&gPlayerParty[n], MON_DATA_SPECIES) == VarGet(arg3) && !GetMonData(&gPlayerParty[n], MON_DATA_IS_EGG))
+                    break;
+            break;
+        case 7:   // the player has ARG3 money (a value or variable: Platinum's CheckMoney2)
+            n = IsEnoughMoney(&gSaveBlock1Ptr->money, VarGet(arg3));
+            break;
+        case 8:   // a BAD EGG in the party (Platinum's CheckPartyHasBadEgg)
+            for (i = 0; i < PARTY_SIZE; i++)
+                n |= GetMonData(&gPlayerParty[i], MON_DATA_SANITY_IS_BAD_EGG) != 0;
+            break;
+        case 9:   // the map the player is on, as this game numbers maps (Platinum's GetCurrentMapID: gen_scripts.py
+                  // turns its MAP_HEADER_* into the same)
+            n = gSaveBlock1Ptr->location.mapNum | gSaveBlock1Ptr->location.mapGroup << 8;
+            break;
+        case 6:   // party slot ARG3's form (UNOWN's letter)
+            i = VarGet(arg3);
+            n = i < PARTY_SIZE && GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) == SPECIES_UNOWN
+              ? GetUnownLetterByPersonality(GetMonData(&gPlayerParty[i], MON_DATA_PERSONALITY)) : 0;
+            break;
         }
         VarSet(arg, n);
         break;
@@ -479,6 +523,30 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
     {
         void Sinnoh_TvCall(u16 call, u16 a, u16 b);
         Sinnoh_TvCall(arg, arg2, arg3);
+        break;
+    }
+    case SINNOH_FASHION:
+    {
+        void Sinnoh_FashionCall(u16 call, u16 a, u16 b);
+        Sinnoh_FashionCall(arg, arg2, arg3);
+        break;
+    }
+    case SINNOH_WARP_CONTINUE:
+        if (ScriptReadByte(ctx) == 0x05)   // (the goto's opcode: its target is where the script goes on)
+            gSinnohWarpContinue = (const u8 *)ScriptReadPointer(ctx);
+        break;
+    case SINNOH_CONTEST:
+        Sinnoh_ContestCall(arg, arg2, arg3);
+        if (Sinnoh_Contest_IsActive())
+        {
+            ScriptContext_Stop();   // (the contest's screens run; their end starts the script again)
+            return TRUE;
+        }
+        break;
+    case SINNOH_SEAL:
+    {
+        void Sinnoh_SealCall(u16 call, u16 a, u16 b);
+        Sinnoh_SealCall(arg, arg2, arg3);
         break;
     }
     case SINNOH_MESSAGE_BANK_VAR:

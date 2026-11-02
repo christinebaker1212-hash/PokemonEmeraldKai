@@ -35,24 +35,12 @@ Sinnoh_TwinleafTownPlayerHouse1f_EventScript_Bg8::
 	end
 
 Sinnoh_TwinleafTownPlayerHouse1f_EventScript_Person1::
-	msgbox Sinnoh_TwinleafTownPlayerHouse1f_Text_Person1, MSGBOX_NPC
+	goto SinnohP_twinleaf_town_player_house_1f_4
 	end
 
 Sinnoh_TwinleafTownPlayerHouse1f_EventScript_Person2::
 	msgbox Sinnoh_TwinleafTownPlayerHouse1f_Text_Person2, MSGBOX_NPC
 	end
-
-Sinnoh_TwinleafTownPlayerHouse1f_Text_Person1:
-	.string "Oh! You're the TRAINER from overseas!\n"
-	.string "PROF. ROWAN told me you were coming.\p"
-	.string "The room upstairs is yours while\n"
-	.string "you're in SINNOH. My kid left on a\l"
-	.string "MOéMON journey last spring, so the\l"
-	.string "house got so quiet...\p"
-	.string "PROF. ROWAN's lab is in SANDGEM TOWN,\n"
-	.string "past ROUTE 201. Come home whenever\l"
-	.string "you're tired. I always cook too much\l"
-	.string "anyway.$"
 
 Sinnoh_TwinleafTownPlayerHouse1f_Text_Person2:
 	.string "Oh, hello! I live next door. My son\n"

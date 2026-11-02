@@ -5,8 +5,8 @@ MODE=2
 WARP=38,5,6,6
 WARP_B=37,59,15,18
 TMO=500
-ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=283:46"
-ENV_B="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=283:46"
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=283:46"
 EXPECT_A=("join: our player said yes" "join: battle now 2 seats (was 1)" "join: everyone is in" "co-op: battle over, outcome 1" "flag 8448 = 1")
 EXPECT_B=("co-op: player 1 is battling trainer" "join: we're in the battle (seat 1 of 2)" "co-op: battle over, outcome 1" "flag 8448 = 1")
 UNEXPECT_A=("crash" "BAD EGG" "important one")

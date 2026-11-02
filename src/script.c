@@ -382,7 +382,20 @@ void RunOnDiveWarpMapScript(void)
 
 bool8 TryRunOnFrameMapScript(void)
 {
-    u8 *ptr = MapHeaderCheckScriptTable(MAP_SCRIPT_ON_FRAME_TABLE);
+    u8 *ptr;
+    // Moemon Kai: a SINNOH script that warped goes on here, on the new map, as Platinum's scripts do
+    // (src/sinnoh/s3d_scrcmd.c SINNOH_WARP_CONTINUE)
+    {
+        extern const u8 *gSinnohWarpContinue;
+        if (gSinnohWarpContinue)
+        {
+            ptr = (u8 *)gSinnohWarpContinue;
+            gSinnohWarpContinue = NULL;
+            ScriptContext_SetupScript(ptr);
+            return TRUE;
+        }
+    }
+    ptr = MapHeaderCheckScriptTable(MAP_SCRIPT_ON_FRAME_TABLE);
 
     if (!ptr)
         return FALSE;

@@ -4,8 +4,8 @@
 # Needs the 3D pack.
 MODE=2
 TMO=500
-ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=283:46"
-ENV_B="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=283:46"
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=283:46"
 EXPECT_A=("join: our player said yes" "join: battle now 2 seats (was 1)" "join: everyone is in" "co-op: battle over, outcome 1" "flag 13088 = 1")
 EXPECT_B=("co-op: player 1 is battling trainer 2067" "join: we're in the battle (seat 1 of 2)" "co-op: battle over, outcome 1" "flag 13088 = 1")
 UNEXPECT_A=("crash" "BAD EGG" "important one")

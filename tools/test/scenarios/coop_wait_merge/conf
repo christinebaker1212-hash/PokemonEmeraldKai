@@ -5,8 +5,8 @@ MODE=2
 WARP=0,31,29,4
 WARP_B=0,31,26,7
 TMO=300
-ENV_A="MOEMON_DEBUG_PARTY=283:46"
-ENV_B="MOEMON_DEBUG_PARTY=280:46"
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_PARTY=283:46"
+ENV_B="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_PARTY=280:46"
 EXPECT_A=("co-op: waiting for a partner (trainer 273)" "waits on our trainer too" "co-op: battle over, outcome 1" "trainerflag 273 = 1")
 EXPECT_B=("co-op: waiting for a partner (trainer 273)" "co-op: battle over, outcome 1" "trainerflag 273 = 1")
 UNEXPECT_A=("crash" "BAD EGG" "battling alone")

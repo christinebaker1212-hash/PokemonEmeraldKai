@@ -5,12 +5,12 @@ Sinnoh_FuegoIronworksBuilding_MapScripts::
 Sinnoh_FuegoIronworksBuilding_EventScript_Person5::
 	lock
 	faceplayer
-	goto_if_set 0x3DAF, Sinnoh_FuegoIronworksBuilding_EventScript_Person5_Given
+	goto_if_set 0x3DB1, Sinnoh_FuegoIronworksBuilding_EventScript_Person5_Given
 	msgbox Sinnoh_FuegoIronworksBuilding_Text_Person5, MSGBOX_DEFAULT
 	msgbox Sinnoh_FuegoIronworksBuilding_Text_Person5Gift, MSGBOX_DEFAULT
 	giveitem ITEM_STAR_PIECE, 1
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DAF
+	setflag 0x3DB1
 	release
 	end
 

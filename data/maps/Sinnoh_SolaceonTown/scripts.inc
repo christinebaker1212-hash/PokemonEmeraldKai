@@ -19,7 +19,7 @@ Sinnoh_SolaceonTown_EventScript_Person8::
 	end
 
 Sinnoh_SolaceonTown_EventScript_Person9::
-	msgbox Sinnoh_SolaceonTown_Text_Person9, MSGBOX_NPC
+	goto SinnohP_solaceon_town_6
 	end
 
 Sinnoh_SolaceonTown_EventScript_Person15::
@@ -41,11 +41,6 @@ Sinnoh_SolaceonTown_EventScript_Sign6::
 Sinnoh_SolaceonTown_EventScript_Sign7::
 	goto SinnohP_solaceon_town_9
 	end
-
-Sinnoh_SolaceonTown_Text_Person9:
-	.string "The ruins east of town are full of\n"
-	.string "strange symbols. I've been studying\l"
-	.string "them for years.$"
 
 Sinnoh_SolaceonTown_Text_Person19:
 	.string "BARRY: SOLACEON's ruins have UNOWN all\n"

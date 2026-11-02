@@ -3,6 +3,6 @@
 # from its middle: the room's own turn 2) turns the gears a quarter (2 -> 3). Shots t_gears.png, t_turned.png. Needs the 3D pack (version 4).
 MODE=1
 TMO=90
-ENV_A="MOEMON_DEBUG_REGION=3"
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3"
 EXPECT_A=("room 1 turn 0" "person 2 at 6,4 reached after 2 buttons" "door 1 at 8,2 reached" "room 2 turn 0" "door 1 at 9,2 reached" "room 3 turn 0" "person 1 at 11,3 reached after 3 buttons" "SUNYSHORE room 1 gears turn 1 (from 2)" "room 1 turn 3")
 UNEXPECT_A=("[crash]" "TIMEOUT" "NOT reached")

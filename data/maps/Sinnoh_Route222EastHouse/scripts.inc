@@ -5,12 +5,12 @@ Sinnoh_Route222EastHouse_MapScripts::
 Sinnoh_Route222EastHouse_EventScript_Person1::
 	lock
 	faceplayer
-	goto_if_set 0x3DD5, Sinnoh_Route222EastHouse_EventScript_Person1_Given
+	goto_if_set 0x3DDC, Sinnoh_Route222EastHouse_EventScript_Person1_Given
 	msgbox Sinnoh_Route222EastHouse_Text_Person1, MSGBOX_DEFAULT
 	msgbox Sinnoh_Route222EastHouse_Text_Person1Gift, MSGBOX_DEFAULT
 	giveitem ITEM_NET_BALL, 1
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DD5
+	setflag 0x3DDC
 	release
 	end
 

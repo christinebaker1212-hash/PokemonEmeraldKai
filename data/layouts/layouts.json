@@ -15467,6 +15467,46 @@
       "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
       "border_filepath": "data/layouts/Sinnoh_WaywardCaveB1f/border.bin",
       "blockdata_filepath": "data/layouts/Sinnoh_WaywardCaveB1f/map.bin"
+    },
+    {
+      "id": "LAYOUT_SINNOH_CONTEST_HALL_LOBBY",
+      "name": "Sinnoh_ContestHallLobby_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Sinnoh_ContestHallLobby/border.bin",
+      "blockdata_filepath": "data/layouts/Sinnoh_ContestHallLobby/map.bin"
+    },
+    {
+      "id": "LAYOUT_SINNOH_CONTEST_HALL_STAGE_NO_CONTEST",
+      "name": "Sinnoh_ContestHallStageNoContest_Layout",
+      "width": 64,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Sinnoh_ContestHallStageNoContest/border.bin",
+      "blockdata_filepath": "data/layouts/Sinnoh_ContestHallStageNoContest/map.bin"
+    },
+    {
+      "id": "LAYOUT_SINNOH_CONTEST_HALL_STAGE_ONGOING_CONTEST",
+      "name": "Sinnoh_ContestHallStageOngoingContest_Layout",
+      "width": 64,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Sinnoh_ContestHallStageOngoingContest/border.bin",
+      "blockdata_filepath": "data/layouts/Sinnoh_ContestHallStageOngoingContest/map.bin"
+    },
+    {
+      "id": "LAYOUT_SINNOH_POFFIN_HOUSE",
+      "name": "Sinnoh_PoffinHouse_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Sinnoh_PoffinHouse/border.bin",
+      "blockdata_filepath": "data/layouts/Sinnoh_PoffinHouse/map.bin"
     }
   ]
 }

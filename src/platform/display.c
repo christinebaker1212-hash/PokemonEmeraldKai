@@ -1408,6 +1408,11 @@ static void RenderToBackbuffer(void)
         // (and the TRAINER CARD: src/mp/mp_cardscreen.c)
         if (!fight && !badges)
             badges = MP_CardScreen_Canvas(sRenderer);
+        if (!fight && !badges)
+        {
+            SDL_Texture *Sinnoh_Contest_Canvas(SDL_Renderer *r);   // (SINNOH's SUPER CONTESTS: src/sinnoh/s3d_contest_ui.c)
+            badges = Sinnoh_Contest_Canvas(sRenderer);
+        }
         if (badges)
         {
             gameTex = badges;

@@ -1887,6 +1887,10 @@
     "Sinnoh_VistaLighthouse",
     "Sinnoh_VistaLighthouseElevator",
     "Sinnoh_WaywardCave1f",
-    "Sinnoh_WaywardCaveB1f"
+    "Sinnoh_WaywardCaveB1f",
+    "Sinnoh_ContestHallLobby",
+    "Sinnoh_ContestHallStageNoContest",
+    "Sinnoh_ContestHallStageOngoingContest",
+    "Sinnoh_PoffinHouse"
   ]
 }

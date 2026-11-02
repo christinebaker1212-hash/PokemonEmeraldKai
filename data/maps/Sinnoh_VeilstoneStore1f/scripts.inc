@@ -23,7 +23,7 @@ Sinnoh_VeilstoneStore1f_EventScript_Person3::
 	end
 
 Sinnoh_VeilstoneStore1f_EventScript_Person4::
-	msgbox Sinnoh_VeilstoneStore1f_Text_Person4, MSGBOX_NPC
+	goto SinnohP_veilstone_store_1f_8
 	end
 
 Sinnoh_VeilstoneStore1f_EventScript_Person5::
@@ -45,9 +45,5 @@ Sinnoh_VeilstoneStore1f_EventScript_Person6::
 	msgbox gText_PleaseComeAgain, MSGBOX_DEFAULT
 	release
 	end
-
-Sinnoh_VeilstoneStore1f_Text_Person4:
-	.string "Shopping is a sport, darling. And I'm a\n"
-	.string "champion.$"
 
 @ --- end of SINNOH words ---

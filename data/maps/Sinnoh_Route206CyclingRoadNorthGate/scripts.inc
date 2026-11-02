@@ -13,12 +13,12 @@ Sinnoh_Route206CyclingRoadNorthGate_EventScript_Person2::
 Sinnoh_Route206CyclingRoadNorthGate_EventScript_Person3::
 	lock
 	faceplayer
-	goto_if_set 0x3DC8, Sinnoh_Route206CyclingRoadNorthGate_EventScript_Person3_Given
+	goto_if_set 0x3DCB, Sinnoh_Route206CyclingRoadNorthGate_EventScript_Person3_Given
 	msgbox Sinnoh_Route206CyclingRoadNorthGate_Text_Person3, MSGBOX_DEFAULT
 	msgbox Sinnoh_Route206CyclingRoadNorthGate_Text_Person3Gift, MSGBOX_DEFAULT
 	giveitem ITEM_EXP_SHARE, 1
 	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DC8
+	setflag 0x3DCB
 	release
 	end
 

@@ -50,7 +50,7 @@ SINNOH_SET_BIKE, SINNOH_PARTY_SPECIES, SINNOH_HELD_ITEM, SINNOH_OBJECT_POS, SINN
 SINNOH_SET_BG, SINNOH_BUFFER_RIVAL_STARTER, SINNOH_MOVEMENT_TYPE, SINNOH_LOCAL_DEX, SINNOH_STOP_MUSIC = 33, 34, 35, 36, 37
 SINNOH_BATTLE_WON, SINNOH_ADD_VAR, SINNOH_BADGE_COUNT, SINNOH_PREVIOUS_MAP, SINNOH_DAYCARE_EGG = 38, 39, 40, 41, 42
 SINNOH_BUFFER_TEXT, SINNOH_QUERY, SINNOH_DEX_RATING, SINNOH_MESSAGE_VAR = 43, 44, 45, 46
-SINNOH_TV, SINNOH_MESSAGE_BANK_VAR = 47, 48   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
+SINNOH_TV, SINNOH_MESSAGE_BANK_VAR, SINNOH_SEAL, SINNOH_FASHION, SINNOH_CONTEST, SINNOH_WARP_CONTINUE = 47, 48, 49, 50, 51, 52   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
 (TVCALL_STATUS, TVCALL_FRAMING, TVCALL_FINISH, TVCALL_SEGMENT_ID, TVCALL_SEGMENT, TVCALL_COMMERCIAL, TVCALL_NEXT,
  TVCALL_INTERVIEW_ID, TVCALL_INTERVIEW_MESSAGE, TVCALL_INTERVIEW_SAVE, TVCALL_INTERVIEW_OK, TVCALL_WORD,
  TVCALL_HIDDEN_ITEM, TVCALL_NAME_RATED, TVCALL_STORAGE, TVCALL_VILLA, TVCALL_AMITY, TVCALL_QUESTION) = range(18)
@@ -229,6 +229,27 @@ class Decomp:
         ours = 'TRAINER_SINNOH_' + x[len('TRAINER_'):]
         return ours if ours in self.trainers else None
 
+    def fashion_ids(self):
+        """Platinum's ACCESSORY_* (include/constants/accessories.h) and BACKDROP_* (generated/backdrops.txt) numbers"""
+        if getattr(self, '_fashion', None) is None:
+            self._fashion = {}
+            t = open(os.path.join(self.root, 'include/constants/accessories.h')).read()
+            for enum in re.findall(r'enum\s*\w*\s*\{([^}]*)\}', t):
+                n = 0
+                for item in enum.split(','):
+                    item = re.sub(r'//.*', '', item).strip()
+                    if not item:
+                        continue
+                    name, _, val = item.partition('=')
+                    n = int(val.strip(), 0) if val.strip() else n
+                    self._fashion[name.strip()] = n
+                    n += 1
+            path = os.path.join(self.root, 'generated/backdrops.txt')
+            if os.path.exists(path):
+                for i, name in enumerate(x.strip() for x in open(path) if x.strip()):
+                    self._fashion[name] = i
+        return self._fashion
+
     def ids(self, bank):
         if bank not in self._ids:
             d = json.load(open(os.path.join(self.root, 'res/text', bank + '.json'), encoding='utf-8'))
@@ -270,6 +291,9 @@ def common_target(n):
     return None
 
 
+SHARED_EVENTS = {'contests': ['contest_hall_lobby', 'contest_hall_stage_ongoing_contest']}
+
+
 class FileConverter:
     def __init__(self, dec, path):
         self.dec, self.root, self.path = dec, dec.root, path
@@ -280,12 +304,13 @@ class FileConverter:
         m = re.search(r'#include "res/field/events/events_(\w+)\.h"', text)
         self.events_low = m.group(1) if m else self.low
         self.localids = {}
-        if m:
-            ev = os.path.join(self.root, 'res/field/events', 'events_%s.json' % m.group(1))
+        # (a file shared by maps names their people: the contest hall's scripts, its lobby's and stage's)
+        for low in ([m.group(1)] if m else []) + SHARED_EVENTS.get(self.low, []):
+            ev = os.path.join(self.root, 'res/field/events', 'events_%s.json' % low)
             if os.path.exists(ev):
                 for i, o in enumerate(json.load(open(ev)).get('object_events', [])):
                     if isinstance(o.get('id'), str):
-                        self.localids[o['id']] = i + 1
+                        self.localids.setdefault(o['id'], i + 1)
         self.labels, self.entries, self.order = parse(path)
         self.texts = {}            # label -> (bank number, message number)
         self._local = 0
@@ -328,7 +353,10 @@ class FileConverter:
                 return x
             raise Unsupported('value %s (not in this game)' % x)
         if x.startswith(('ACCESSORY_', 'BACKDROP_')):
-            return '0'                      # (Platinum's accessories / backdrops: SUPER CONTESTS, not decided yet)
+            n = self.dec.fashion_ids().get(x)   # (Platinum's own numbers: src/sinnoh/s3d_fashion.c)
+            if n is None:
+                raise Unsupported('value %s' % x)
+            return str(n)
         if x.startswith('OBJ_EVENT_GFX_'):
             return _sprite(x)
         if x.startswith('MAP_HEADER_'):
@@ -478,6 +506,9 @@ class FileConverter:
             return ['call %s' % self.label(a[0])]
         if cmd == 'CallCommonScript':
             return ['call %s' % self.common(int(a[0], 0))]
+        if cmd == 'Common_SaveGame':
+            # (the game's own save prompt; Platinum's answer is left in VAR_MAP_LOCAL_0x00: CommonScript_SaveGame)
+            return ['special SaveGame', 'waitstate', 'copyvar %s, VAR_RESULT' % self.var('VAR_MAP_LOCAL_0x00')]
         if cmd in self.dec.common_macro:
             return ['call %s' % self.common(self.dec.common_macro[cmd])]
         if cmd == 'CompareVar':
@@ -513,6 +544,8 @@ class FileConverter:
             return ['playfanfare %s' % FANFARE.get(a[0], 'MUS_OBTAIN_ITEM')]
         if cmd == 'WaitFanfare':
             return ['waitfanfare']
+        if cmd == 'MessageSynchronized':
+            cmd = 'Message'                 # (a link contest's message, said to each player at once: one player)
         if cmd == 'Message':
             return ['message %s' % self.text_label(a[0]), 'waitmessage']
         if cmd in ('WaitButton', 'WaitABXPadPress', 'WaitABPress', 'WaitABPressTime'):
@@ -719,7 +752,11 @@ class FileConverter:
             o = self.dec.origins().get(low)
             if o is None:
                 raise Unsupported('warp to %s' % a[0])
-            return ['warp %s, %d, %d' % (o[0], int(self.value(a[1])) - o[1], int(self.value(a[2])) - o[2])]
+            # (Platinum's script goes on on the new map: src/sinnoh/s3d_scrcmd.c SINNOH_WARP_CONTINUE)
+            go = '%s%s__warped%d' % (PREFIX, self.low, self.next_local())
+            return [self.sinnoh(SINNOH_WARP_CONTINUE), 'goto %s' % go,
+                    'warp %s, %d, %d' % (o[0], int(self.value(a[1])) - o[1], int(self.value(a[2])) - o[2]), 'waitstate',
+                    '%s:' % go]
         if cmd == 'SetObjectEventPos' and (self.is_var(a[1]) or self.is_var(a[2])):
             # (a place the script worked out: Platinum's map tiles, made this map's by the game)
             return [self.sinnoh(SINNOH_OBJECT_POS, self.localid(a[0]), self.arg(a[1]), self.arg(a[2]))]
@@ -787,10 +824,79 @@ class FileConverter:
                     'goto_if_ne VAR_RESULT, MON_CANT_GIVE, %s' % done, 'setvar %s, 0' % self.var(a[3]), '%s:' % done]
         if cmd == 'EnablePoketch':
             return ['additem ITEM_POKETCH', 'special MP_GatchaTicketToast']   # (Kai's POKéTCH is the key item: src/sinnoh/poketch.c)
-        if cmd in ('AddContestBackdrop', 'SetPlayerState', 'ChangePlayerState', 'AddAccessory'):
-            return []                       # (SUPER CONTESTS' accessories, not decided yet; the player's poses)
+        if cmd in ('SetPlayerState', 'ChangePlayerState'):
+            return []                       # (the player's poses)
+        # SUPER CONTESTS (src/sinnoh/s3d_contest.c CC_*; the screens s3d_contest_ui.c): the hall's own commands
+        contest = {'EndContest': (2,), 'BufferJudgeName': (3, 'a', 'a'), 'BufferContestantTrainerName': (4, 'a', 'a'),
+                   'BufferContestantMonName': (5, 'a', 'a'), 'BufferContestRegistrationEntryNumber': (6, 'a', 'a'),
+                   'BufferContestRank': (7, 'a'), 'BufferContestType': (8, 'a'),
+                   'BufferWinningContestantTrainerName': (9, 'a'), 'BufferWinningContestantMonName': (10, 'a'),
+                   'GetPlayerContestPlacement': (11, 'v'), 'GetWinningContestantEntryNum': (12, 'v'),
+                   'GetContestRegistrationEntryNum': (13, 'v'), 'GetContestantObjEventGFX': (14, 'a', 'v'),
+                   'GetContestantMonContestFame': (15, 'a', 'v'), 'GetContestMode': (16, 'v'),
+                   'CheckPlayerMonHasRibbon': (19, 'v'), 'SetRibbonName': (20, 'a'),
+                   'GetFirstTimeVictoryAccessory': (21, 'v'), 'GetShouldSkipAwardCeremony': (22, 'v'),
+                   'GetContestPartyMenuResult': (25, 'v', 'v'), 'RunContestApplication': (26,),
+                   'ScrCmd_0A8': (27, 'a', 'v')}
+        if cmd in contest:
+            spec = contest[cmd]
+            args = [self.arg(x) if k == 'a' else self.var(x) for k, x in zip(spec[1:], a)]
+            if cmd == 'EndContest':
+                args = []
+            return [self.sinnoh(SINNOH_CONTEST, spec[0], *args)]
+        if cmd == 'NewContest':
+            return [self.sinnoh(SINNOH_CONTEST, 0, self.arg(a[0]), self.arg(a[1])),
+                    self.sinnoh(SINNOH_CONTEST, 1, self.arg(a[2]), self.arg(a[3]))]
+        if cmd == 'GetContestInfo':
+            return [self.sinnoh(SINNOH_CONTEST, 17, self.var(a[0]), self.var(a[1])),
+                    self.sinnoh(SINNOH_CONTEST, 18, self.var(a[2]), self.var(a[3]))]
+        if cmd == 'OpenPartyMenuForContest':
+            # (the game's party menu: it answers in VAR_0x8004, where the hall keeps the rank: kept and put back)
+            return [self.sinnoh(SINNOH_CONTEST, 23, self.arg(a[1]), self.arg(a[2])), 'special ChoosePartyMon',
+                    'waitstate', self.sinnoh(SINNOH_CONTEST, 24)]
+        if cmd in ('StartBattleClient', 'StartBattleServer') and self.low in ('contests', 'poffin_common'):
+            # (COMM_CLUB_RET_CANCEL: link contests and group cooking come with co-op)
+            return ['setvar %s, 1' % self.var(a[-1])]
+        if cmd == 'WaitForLinkContestSetup':
+            return []
+        if cmd in ('SetMonSummary', 'GetMonPartySlot'):
+            return []                       # (after the party menu's summary: the game's menu shows it itself)
+        if cmd in ('StartContestCommSync', 'WaitForCommSyncState', 'LockAutoScrollForLinkContests', 'LockTextSpeed',
+                   'StopHBlank', 'StartHBlank', 'ChangeIntoContestAttire', 'StartContestCameraFlashTask',
+                   'WaitForContestCameraFlashTask', 'ScrCmd_2B0', 'ScrCmd_2BB', 'DestroyNetworkIcon', 'EndCommunication',
+                   'HidePoketch', 'ShowPoketch'):
+            return []                       # (wireless syncs, the stage's light and camera flashes, the costume)
+        # Platinum's FASHION CASE (src/sinnoh/s3d_fashion.c)
+        if cmd == 'AddAccessory':
+            return [self.sinnoh(SINNOH_FASHION, 0, self.arg(a[0]), self.arg(a[1]))]
+        if cmd == 'RemoveAccessory':
+            return [self.sinnoh(SINNOH_FASHION, 8, self.arg(a[0]), self.arg(a[1]))]
         if cmd == 'CanFitAccessory':
-            return ['setvar %s, 1' % self.var(a[2] if len(a) > 2 else a[-1])]
+            return ['setorcopyvar 0x400F, %s' % self.arg(a[1]), self.sinnoh(SINNOH_FASHION, 1, self.arg(a[0]), self.var(a[2]))]
+        if cmd in ('BufferAccessoryName', 'BufferAccessoryNameWithArticle'):
+            return [self.sinnoh(SINNOH_FASHION, 2 if cmd == 'BufferAccessoryName' else 3, self.value(a[0]), self.arg(a[1]))]
+        if cmd == 'AddContestBackdrop':
+            return [self.sinnoh(SINNOH_FASHION, 4, self.arg(a[0]))]
+        if cmd == 'CheckBackdrop':
+            return [self.sinnoh(SINNOH_FASHION, 5, self.arg(a[0]), self.var(a[1]))]
+        if cmd == 'BufferContestBackdropName':
+            return [self.sinnoh(SINNOH_FASHION, 6, self.value(a[0]), self.arg(a[1]))]
+        # Platinum's POFFINS: this game's POKéBLOCKS (src/sinnoh/s3d_fashion.c)
+        if cmd == 'CheckHasEmptyPoffinCaseSlot':
+            return [self.sinnoh(SINNOH_FASHION, 9, self.var(a[0]))]
+        if cmd == 'GetEmptyPoffinCaseSlotCount':
+            return [self.sinnoh(SINNOH_FASHION, 10, self.var(a[0]))]
+        if cmd == 'GivePoffin':
+            return [self.sinnoh(SINNOH_FASHION, 11, k, self.arg(a[1 + k])) for k in range(6)] + \
+                   [self.sinnoh(SINNOH_FASHION, 12, self.var(a[0]))]
+        if cmd == 'CheckCanCookPoffin':
+            return [self.sinnoh(SINNOH_FASHION, 15, self.var(a[0]))]
+        if cmd == 'OpenPoffinCooking':
+            # (the POFFIN HOUSE's cooking is the game's BERRY BLENDER: POFFINS are POKéBLOCKS; alone means with the
+            # blender's one computer partner, the fewest it takes; in a group comes with co-op)
+            return ['setvar VAR_0x8004, 1', 'special DoBerryBlending', 'waitstate']
+        if cmd == 'TryGetRandomMassageGirlAccessory':
+            return [self.sinnoh(SINNOH_FASHION, 7, self.var(a[0]))]
         if cmd == 'BufferPartyMonSpecies':
             return [self.sinnoh(SINNOH_PARTY_SPECIES, self.arg(a[1]), '0x400F'),
                     'bufferspeciesname %s, 0x400F' % self.strvar(a[0])]
@@ -826,6 +932,10 @@ class FileConverter:
             kind = ['CheckHasTwoAliveMons', 'GetNationalDexSeenCount', 'CheckHasAllLegendaryTitansInParty',
                     'GetPCBoxesFreeSlotCount', 'GetLeagueVictories'].index(cmd)
             return [self.sinnoh(SINNOH_QUERY, self.var(a[0]), kind)]
+        if cmd == 'FindPartySlotWithSpecies':
+            return [self.sinnoh(SINNOH_QUERY, self.var(a[0]), 5, self.arg(a[1]))]
+        if cmd in ('GetPartyMonForm', 'GetPartyMonForm2'):
+            return [self.sinnoh(SINNOH_QUERY, self.var(a[1]), 6, self.arg(a[0]))]
         if cmd == 'OpenPokemonNamingScreen':
             # (the game's own nickname screen)
             return ['setvar VAR_0x8004, %s' % self.value(a[0]) if not self.is_var(a[0]) else 'copyvar VAR_0x8004, %s' % self.var(a[0]),
@@ -885,6 +995,23 @@ class FileConverter:
             return [self.sinnoh(SINNOH_TV, TVCALL_VILLA, self.arg(a[0]), 0)]
         if cmd == 'ScrCmd_27C':
             return [self.sinnoh(SINNOH_TV, TVCALL_AMITY, self.value(a[0]), self.var(a[1]))]
+        # Seals: this game's POKé BALL effects in their place (src/sinnoh/s3d_seals.c; the user, 2026-11-02)
+        if cmd == 'GiveOrTakeSeal':
+            return [self.sinnoh(SINNOH_SEAL, 0, self.arg(a[0]), self.arg(a[1]))]
+        if cmd == 'CountSealOccurence':
+            return [self.sinnoh(SINNOH_SEAL, 1, self.arg(a[0]), self.var(a[1]))]
+        if cmd == 'CountUniqueSealsInSealCase':
+            return [self.sinnoh(SINNOH_SEAL, 2, self.var(a[0]))]
+        if cmd in ('BufferBallSealName', 'BufferBallSealNamePlural'):
+            return [self.sinnoh(SINNOH_SEAL, 3, self.value(a[0]), self.arg(a[1]))]
+        if cmd == 'PokeMartSeal':
+            day = re.match(r'^MART_SEAL_ID_SUNYSHORE_(\w+)$', a[0])
+            days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']
+            if not day or day.group(1) not in days:
+                raise Unsupported('Seal shop %s' % a[0])
+            return ['setvar VAR_0x8004, %d' % days.index(day.group(1)), 'call EventScript_SinnohSealShop']
+        if cmd == 'OpenSealCapsuleEditor':
+            return []                       # (the BALL CAPSULES: the summary's POKé BALL page, as in every region)
         if cmd == 'StartCatchingTutorial':
             # (Emerald's WALLY tutorial with the counterpart and a BIDOOF: battle_setup.c Sinnoh_CatchingTutorial)
             return ['special SavePlayerParty', 'special Sinnoh_CatchingTutorial', 'waitstate', 'special LoadPlayerParty']
@@ -894,6 +1021,18 @@ class FileConverter:
             if self.is_var(a[0]):
                 raise Unsupported('money by a variable')
             return ['checkmoney %s' % self.value(a[0]), 'goto_if_eq VAR_RESULT, FALSE, %s' % self.label(a[1])]
+        if cmd in ('DressUpPhotoHasData', 'ContestPhotoHasData'):
+            return [self.sinnoh(SINNOH_FASHION, 13 if cmd == 'DressUpPhotoHasData' else 14, self.arg(a[0]), self.var(a[1]))]
+        if cmd == 'CheckPartyHasBadEgg':
+            return [self.sinnoh(SINNOH_QUERY, self.var(a[0]), 8)]
+        if cmd == 'GetCurrentMapID':
+            return [self.sinnoh(SINNOH_QUERY, self.var(a[0]), 9)]
+        if cmd in ('ClearInCatchingShowFlag', 'SetClearInCatchingShowFlag'):
+            return []                       # (the PAL PARK's catching show: closed)
+        if cmd == 'CheckMoney2':
+            return [self.sinnoh(SINNOH_QUERY, self.var(a[0]), 7, self.arg(a[1]))]
+        if cmd == 'AddToGameRecord':
+            return []                       # (Platinum's game records: the game keeps its own)
         if cmd == 'FindPartySlotWithFatefulEncounterSpecies':
             return ['setvar %s, 6' % self.var(a[0])]   # (none: distribution events are closed)
         if cmd == 'GiveEgg':
@@ -936,6 +1075,12 @@ class FileConverter:
             return ['fadescreen FADE_FROM_BLACK']
         if cmd == 'WaitFadeScreen':
             return []                       # (fadescreen waits by itself)
+        if cmd == 'FadeScreen' and len(a) == 4 and a[2].startswith('FADE_TYPE_'):
+            # (Platinum's typed fades: even types fade out, odd ones in: generated/fade_types.txt)
+            kinds = [x.strip() for x in open(os.path.join(self.root, 'generated/fade_types.txt')) if x.strip()]
+            out = a[2] in kinds and kinds.index(a[2]) % 2 == 0
+            white = a[3] == 'COLOR_WHITE'
+            return ['fadescreen %s' % ('FADE_TO_' if out else 'FADE_FROM_') + ('WHITE' if white else 'BLACK')]
         if cmd == 'ShowMoney':
             return ['showmoneybox 0, 0']
         if cmd == 'HideMoney':
@@ -1423,6 +1568,8 @@ def stub(out_path):
     lines = ['%s::\n\tend' % lab for lab in sorted(referenced())] + map_index([]) + ['gSinnohPlatinumNewGame::', '\tend'] + stub_dex_ratings()
     lines += ['gSinnohTvBroadcast::', '\tend']
     lines += tv_data.stub_lines()
+    import contest_data
+    lines += contest_data.stub_lines()
     write(lines, out_path)
     print('%s: %d stubs (no decomp)' % (os.path.relpath(out_path, ROOT), len(referenced())))
 
@@ -1470,6 +1617,8 @@ def build(root, out_path):
     lines += dex_rating_tables(root)
     import tv_data
     lines += tv_data.lines(converter(root, 'common').dec, root)   # (SINNOH's TV: src/sinnoh/s3d_tv.c)
+    import contest_data
+    lines += contest_data.lines(converter(root, 'common').dec, root)   # (SUPER CONTESTS: src/sinnoh/s3d_contest.c)
     new_game = converter(root, 'init_new_game').entry_label(1)
     lines += ['gSinnohPlatinumNewGame::', '\tgoto %s' % new_game if new_game in done else '\tend']
     tv = converter(root, 'tv_broadcast').entry_label(1)

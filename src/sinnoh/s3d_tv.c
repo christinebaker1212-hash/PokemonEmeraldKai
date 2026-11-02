@@ -436,11 +436,15 @@ void Sinnoh_TvBerries(u16 item, u8 rating, u16 amount)
 }
 
 // A POKé BALL effect given to a POKéMON in SINNOH (mp_ballfx.c, in the Seals' place): the SEAL CLUB SHOW
-void Sinnoh_TvBallEffect(struct Pokemon *mon, const char *effectName)
+void Sinnoh_TvBallEffect(struct BoxPokemon *box, const char *effectName)
 {
     struct TvBallFx b;
+    struct Pokemon mon;
     memset(&b, 0, sizeof(b));
-    MonOf(mon, &b.mon);
+    if (!InSinnoh())
+        return;
+    BoxMonToMon(box, &mon);
+    MonOf(&mon, &b.mon);
     MP_AsciiToGame(b.effect, effectName, sizeof(b.effect) - 1);
     SaveSegment(TV_SIGHTINGS, 21, &b, sizeof(b));
 }

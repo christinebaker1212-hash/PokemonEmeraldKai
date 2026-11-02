@@ -751,6 +751,31 @@ static void CB2_InitBattleInternal(void)
             }
     }
 
+    if (getenv("MOEMON_TEST_STRONG"))
+    {
+        // Moemon Kai (tests only: battles a test means to win): the player's POKéMON with a powerful move that never
+        // misses first (AERIAL ACE unless the first already is one), 99 PP on every move, Attack and Sp. Atk 999, and
+        // Speed 999: it moves first, so foes left at 1 HP (MOEMON_TEST_FOE_HP1) never wear it down
+        u16 strong = 999, move;
+        u8 pp = 99, j;
+        for (i = 0; i < PARTY_SIZE; i++)
+        {
+            if (!GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) || GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG))
+                continue;
+            move = GetMonData(&gPlayerParty[i], MON_DATA_MOVE1);
+            if (move == MOVE_NONE || gBattleMoves[move].power == 0 || gBattleMoves[move].accuracy != 0)
+            {
+                move = MOVE_AERIAL_ACE;
+                SetMonData(&gPlayerParty[i], MON_DATA_MOVE1, &move);
+            }
+            for (j = 0; j < MAX_MON_MOVES; j++)
+                SetMonData(&gPlayerParty[i], MON_DATA_PP1 + j, &pp);
+            SetMonData(&gPlayerParty[i], MON_DATA_ATK, &strong);
+            SetMonData(&gPlayerParty[i], MON_DATA_SPATK, &strong);
+            SetMonData(&gPlayerParty[i], MON_DATA_SPEED, &strong);
+        }
+    }
+
     SetHBlankCallback(NULL);
     SetVBlankCallback(NULL);
 
