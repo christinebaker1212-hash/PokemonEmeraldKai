@@ -14,6 +14,7 @@
 #include "event_data.h"
 #include "field_camera.h"
 #include "fieldmap.h"
+#include "event_object_movement.h"
 #include "main.h"
 #include "overworld.h"
 #include "palette.h"
@@ -42,6 +43,11 @@ static const u16 sGameCenter1FOver[] = INCBIN_U16("graphics/moemon/gamecenter/1f
 static const u16 sGameCenter2FOver[] = INCBIN_U16("graphics/moemon/gamecenter/2f_over.bin");
 static const u16 sGameCenter3FOver[] = INCBIN_U16("graphics/moemon/gamecenter/3f_over.bin");
 static const u16 sGameCenterPassage[] = INCBIN_U16("graphics/moemon/gamecenter/passage.bin");
+// KANTO: FireRed's S.S. ANNE at VERMILION's dock (its object, 128 x 64, the game's sprites can't be: drawn here, its
+// object kept for its flag and hidden; tools/quetzal_port/gen_ss_anne.py)
+static const u16 sSSAnne[] = INCBIN_U16("graphics/moemon/kanto/ss_anne.bin");
+#define SS_ANNE_HIDE_FLAG 0x2313   // (Quetzal's FLAG_HIDE_SS_ANNE)
+s16 gMpSSAnneShift;   // (the departure: pixels left, qz_specials.c QzDoSSAnneDepartureCutscene)
 
 #define BLACK 0x8000
 #define SKY (0x8000 | RGB(19, 26, 31))
@@ -58,6 +64,8 @@ static const struct MapPic sPics[] = {
     // right of the poster at (11, 0), the attendant at its left door; he stands clear of the row to the basement stairs)
     {MAP_JOHTO_GOLDENROD_GAME_CORNER, 12 * 16 - 8, 6, 32, 26, sGameCenterPassage, 0, NULL},
     {MAP_KANTO_CELADON_CITY_GAME_CORNER, 12 * 16, 6, 32, 26, sGameCenterPassage, 0, NULL},
+    // (FireRed's object at (30, 16): 128 x 64 above its feet's cell)
+    {MAP_KANTO_SSANNE_EXTERIOR, 30 * 16 + 8 - 64, 16 * 16 + 16 - 64, 128, 64, sSSAnne, 0, NULL},
 };
 
 #define MAX_SHOWN 4
@@ -78,10 +86,12 @@ static void FindShown(void)
     sShownCount = 0;
     for (i = 0; i < ARRAY_COUNT(sPics) && sShownCount < MAX_SHOWN; i++)
     {
+        if (sPics[i].pixels == sSSAnne && FlagGet(SS_ANNE_HIDE_FLAG))
+            continue;   // (gone: it has sailed)
         if (sPics[i].map == here)
         {
             sShown[sShownCount].pic = &sPics[i];
-            sShown[sShownCount].x = sPics[i].x;
+            sShown[sShownCount].x = sPics[i].x - (sPics[i].pixels == sSSAnne ? gMpSSAnneShift : 0);
             sShown[sShownCount].y = sPics[i].y;
             sShownCount++;
             continue;
@@ -202,7 +212,13 @@ static void MapPicLine(int line, u16 layers[4][DISPLAY_WIDTH])
 // Every overworld frame: which pictures are in view (none: the renderer skips the hook)
 void MP_MapPic_Update(void)
 {
+    u8 objId;
     FindShown();
+    // (the S.S. ANNE's object, local id 1, only holds its flag: the picture is the ship)
+    if (gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_KANTO_SSANNE_EXTERIOR)
+     && gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_KANTO_SSANNE_EXTERIOR)
+     && !TryGetObjectEventIdByLocalIdAndMap(1, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, &objId))
+        gSprites[gObjectEvents[objId].spriteId].invisible = TRUE;
     gMpMapPicLine = sShownCount ? MapPicLine : NULL;
 }
 

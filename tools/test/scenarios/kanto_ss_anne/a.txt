@@ -1,0 +1,21 @@
+pressuntil A field 5000
+wait 30
+mp clearflag 0x2313
+mp setvar 0x5135 0
+mp warp 36,4,30,20
+wait 200
+shot ss_docked
+mp setvar 0x5135 1
+mp warp 36,4,30,19
+wait 300
+shot ss_leaving
+wait 900
+shot ss_far
+pressuntil A field 4000
+wait 60
+mp where
+mp getflag 0x2313
+mp warp 36,4,30,20
+wait 200
+shot ss_gone
+quit

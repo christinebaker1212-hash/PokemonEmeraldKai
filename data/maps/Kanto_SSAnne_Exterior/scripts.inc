@@ -11,9 +11,13 @@ Kanto_SSAnne_Exterior_OnFrame_84101CC:
 
 Kanto_SSAnne_Exterior_EventScript_84101BE::
 	setflag FLAG_QZ_0x225A
-	clearflag FLAG_QZ_0x2313
+	call_if_lt VAR_QZ_0x5135, 2, Kanto_SSAnne_Exterior_EventScript_ShipIn   @ Moemon Kai: gone once it sailed (FireRed)
 	special QzKantoStaticEncountersRefresh
 	end
+
+Kanto_SSAnne_Exterior_EventScript_ShipIn::
+	clearflag FLAG_QZ_0x2313
+	return
 
 Kanto_SSAnne_Exterior_EventScript_84101C8::
 	special QzSSAnneExteriorEventInit

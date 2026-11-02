@@ -18,7 +18,9 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [ ] CERULEAN: TRIPLE TRIAD first; people who offer a Yu-Gi-Oh! / POKéMON starter deck get words by their personality
 - [x] The shopping area (RARE CANDY, Z / MEGA items whatever GENERATION): Quetzal's market stalls in VERMILION (not
       VIRIDIAN: VIRIDIAN has only FireRed's mart), all nine hidden (flag 0x2225, set as VERMILION loads; their empty canopies are map tiles, left; test kanto_no_market)
-- [ ] S.S. ANNE: its sprite, FireRed's departure scene, can't be boarded once gone
+- [x] S.S. ANNE: FireRed's ship (its 128 x 64 picture as a map picture, mp_mappic.c), its departure (glides off, horns:
+      qz_specials.c QzDoSSAnneDepartureCutscene), gone for good once it sails (Quetzal's dock brought it back each
+      visit); FireRed's wake and smoke puffs not drawn; test kanto_ss_anne
 - [x] The CUT man gives HM01 (not Quetzal's flag): the S.S. ANNE CAPTAIN, FireRed's (test hm_once); KANTO's other HM
       givers too, FireRed's words (HM02 ROUTE 16, HM03 SAFARI ZONE, HM04 the WARDEN, HM05 OAK's AIDE, HM06 EMBER SPA,
       HM07 ICEFALL CAVE's ball: tools/quetzal_port/fix_hm_givers.py; test hm_kanto); every region: an HM never given

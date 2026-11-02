@@ -916,10 +916,45 @@ u16 QzDoSeagallopFerryScene(void)
     return 0;
 }
 
-// The S.S. ANNE leaves: FireRed's scene is its own art; the script goes on
+// The S.S. ANNE leaves, as FireRed's (pokefirered src/ss_anne.c): its horn, 50 frames, then the ship glides left a
+// pixel every 5 frames until it's out of view, its horn again, 40 frames (the picture: mp_mappic.c gMpSSAnneShift)
+extern s16 gMpSSAnneShift;
+static void Task_SSAnneDeparts(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    s32 screenX;
+    switch (data[0])
+    {
+    case 0:
+        if (++data[1] >= 50)
+            data[0] = 1, data[1] = 0;
+        break;
+    case 1:
+        data[1]++;
+        gMpSSAnneShift = data[1] / 5;
+        // (the ship's left edge on screen: FireRed stops when its sprite's middle is 120 px past the left edge)
+        screenX = 30 * 16 + 8 - gMpSSAnneShift - (gSaveBlock1Ptr->pos.x * 16 + 8 - DISPLAY_WIDTH / 2);
+        if (screenX < -120)
+        {
+            PlaySE(SE_RG_SS_ANNE_HORN);
+            data[0] = 2, data[1] = 0;
+        }
+        break;
+    case 2:
+        if (++data[1] == 40)
+        {
+            DestroyTask(taskId);
+            ScriptContext_Enable();
+        }
+        break;
+    }
+}
+
 u16 QzDoSSAnneDepartureCutscene(void)
 {
-    ScriptContext_Enable();
+    gMpSSAnneShift = 0;
+    PlaySE(SE_RG_SS_ANNE_HORN);
+    CreateTask(Task_SSAnneDeparts, 8);
     return 0;
 }
 
