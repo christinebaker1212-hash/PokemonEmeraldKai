@@ -9,7 +9,8 @@ committed: tools/sinnoh/make_pack.sh builds sinnoh/cards.pak and the release shi
 cards.pak: "MCRD", u8 version 1, u8 kinds 2 (0: HeartGold's, 1: Platinum's), then per kind: u16 w, h, u8 palettes;
 the front's w*h color indices, the back's, then each palette's 256 colors as u32 0xAARRGGBB (index 0 clear)."""
 import os, struct, sys
-from PIL import Image
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from png8 import Image  # noqa: E402   (no Pillow on the release's runner)
 
 
 # ---- the DS's own formats (NARC archives, NCLR palettes, NCGR tiles, NSCR screens)
@@ -107,8 +108,8 @@ def hgss(path):
 # ---- Platinum's card: 8-bit tiles on an affine layer (a byte a tile), its six colors' palettes
 def platinum(root):
     d = os.path.join(root, 'res', 'graphics', 'trainer_case')
-    t = Image.open(os.path.join(d, 'trainer_card_tiles.png'))
-    src, tw = t.load(), t.width // 8
+    t = Image(os.path.join(d, 'trainer_card_tiles.png'))
+    tw = t.w // 8
     maps = []
     for name in ('trainer_card_front', 'trainer_card_back'):
         w, h, ents = nscr(open(os.path.join(d, name + '.NSCR'), 'rb').read())
@@ -121,7 +122,7 @@ def platinum(root):
             sx, sy = (tn % tw) * 8, (tn // tw) * 8
             for y in range(8):
                 for x in range(8):
-                    m[(ty + y) * w + tx + x] = src[sx + x, sy + y] if sy + y < t.height else 0
+                    m[(ty + y) * w + tx + x] = t.px(sx + x, sy + y) if sy + y < t.h else 0
         maps.append((m, w, h))
     box = crop(maps)
     pals = []
