@@ -41,6 +41,8 @@ $(C_BUILDDIR)/mp/mp_patchnotes.o: c_dep += $(DATA_SRC_SUBDIR)/mp_patchnotes.h
 
 # Moemon Co-op: the PMD Collab sheets go in with .incbin (scaninc doesn't see it)
 $(C_BUILDDIR)/mp/mp_pmd_data.o: graphics/moemon/pmd/pmd.bin
+# Moemon Co-op: the BADGE CASE's badges, the same way
+$(C_BUILDDIR)/mp/mp_badge_data.o: graphics/moemon/badges/badges.bin
 # Moemon Kai: the card game's Game Boy illustrations, the same way
 $(C_BUILDDIR)/tcg/tcg_art_data.o: graphics/tcg/original.bin graphics/tcg/printed.bin
 $(C_BUILDDIR)/ygo/ygo_art_data.o: graphics/ygo/printed.bin graphics/ygo/sdd_art.bin

@@ -31,6 +31,8 @@ unsigned int SDL_GetTicks(void);
 #include "script.h"
 #include "pokedex.h"
 #include "mp.h"
+#include "mp_tcard.h"
+#include "mp_region.h"
 #include "tcg/integration.h"
 #include "ygo/integration.h"
 #include "tt/integration.h"
@@ -706,6 +708,31 @@ void MP_TestCommand(const char *cmd, const char *arg)
         gSpecialVar_0x8004 = n;
         StoreSelectedPokemonInDaycare();
         printf("[test] daycare: %d in it\n", CountPokemonInDaycare(&gSaveBlock1Ptr->daycare));
+    }
+    else if (strcmp(cmd, "tcard") == 0)
+    {
+        // tcard days N | tcard rub REGION BADGE COUNT | tcard info: the TRAINER CARD's badge records (mp_tcard.c)
+        char sub[16] = "";
+        int a = 0, b = 0, c = 0;
+        sscanf(arg, "%15s %d %d %d", sub, &a, &b, &c);
+        if (strcmp(sub, "days") == 0)
+            MP_TCard_DebugDays(a);
+        else if (strcmp(sub, "rub") == 0)
+            while (c-- > 0)
+                MP_TCard_Rub(a, b);
+        {
+            int r, k;
+            for (r = 0; r < REGION_COUNT; r++)
+            {
+                printf("[test] tcard region %d:", r);
+                for (k = 0; k < 8; k++)
+                {
+                    const struct MpTCardBadge *t = MP_TCard_Badge(r, k);
+                    printf(" %c%d/%d", MP_TCard_HasBadge(r, k) ? '+' : '-', t->polish, t->when != 0);
+                }
+                printf("\n");
+            }
+        }
     }
     else if (strcmp(cmd, "coopegg") == 0)
     {

@@ -14,6 +14,7 @@
 #include "save_slots.h"
 #include "mp_region.h"
 #include "mp.h"
+#include "mp_tcard.h"
 #include "mp_spritescale.h"
 #include "mp_fight.h"
 #include "mp_pmd.h"
@@ -2096,6 +2097,7 @@ void MP_SaveSlotChanged(void)
     Gamepad_ReloadSettings();
     Display_ReloadSettings();
     Tcg_ForgetSidecars();
+    MP_TCard_Forget();   // (the TRAINER CARD's "<save>.card")
     MPNet_Log("save file changed: settings from %s", ConfigPath());
 }
 
@@ -2125,6 +2127,7 @@ void MP_FrameEnd(void)
 
 void MP_FrameUpdate(void)
 {
+    MP_TCard_Update();   // the TRAINER CARD's badge records and the BADGE CASE's fading (mp_tcard.c)
     if (sFollowRegion && MP_IsInOverworld() && MP_IsLocalFree())
     {
         // Moemon Kai: the host's trip: everyone in the room follows (docs/REGIONS_PLAN.md "Co-op")

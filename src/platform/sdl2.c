@@ -20,6 +20,8 @@
 #include "global.h"
 #include "mp_region.h"
 #include "mp.h"
+bool8 MP_BadgeCase_IsActive(void);   // Moemon Co-op: the BADGE CASE (src/mp/mp_badgecase.c)
+bool8 MP_BadgeCase_Step(u16 keys);
 u8 TrySavingData(u8 saveType);
 #include "mp_life.h"
 #include "platform.h"
@@ -375,7 +377,7 @@ int main(int argc, char **argv)
         // Present only when there is something new (a game frame, a resize or a
         // settings change). With vsync on, presenting waits for the monitor;
         // otherwise sleep briefly while the next game frame is still >2ms away.
-        if (Tcg_IsActive() || MP_Fight_IsActive() || Rhythm_IsActive() || Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
+        if (Tcg_IsActive() || MP_Fight_IsActive() || Rhythm_IsActive() || MP_BadgeCase_IsActive() || Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
             Display_Present();
         else if (paused || (fixedTimestep - accumulator) / timeScale > 0.002)
             SDL_Delay(1);
@@ -1098,7 +1100,7 @@ const u16 *Platform_GetFrame(void)
 // SPECTATE panel's friends' screens are handed to the display here (they froze through a card duel)
 static bool ScreenStep(void)
 {
-    if (Tcg_Step(Platform_GetKeyInput()) || MP_Fight_Step())
+    if (Tcg_Step(Platform_GetKeyInput()) || MP_Fight_Step() || MP_BadgeCase_Step(Platform_GetKeyInput()))
     {
         MP_Spectate_PanelSync();
         return true;

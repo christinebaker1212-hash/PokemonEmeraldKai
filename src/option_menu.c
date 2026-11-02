@@ -13,6 +13,7 @@
 #include "international_string_util.h"
 #include "list_menu.h"
 #include "mp.h"
+#include "mp_tcard.h"
 #include "mp_spritescale.h"
 #include "main.h"
 #include "menu.h"
@@ -107,6 +108,8 @@ enum
     OPT_FB_DEFAULTS,
     OPT_FB_BACK,
     OPT_SHADOWS,      // Moemon Kai: DISPLAY > SHADOWS ON / OFF (mp_shadow.c)
+    OPT_BADGEFADE,    // Moemon Co-op: GAME > BADGE FADING (the BADGE CASE: mp_tcard.c, per save)
+    OPT_CARDTITLE,    // Moemon Co-op: GAME > CARD TITLE ON / OFF (the TRAINER CARD's title)
     OPT_SPRITESCALE,  // Moemon Co-op: DISPLAY > SPRITE SCALING (A: its page)
     OPT_SS_FOLLOW,    // the SPRITE SCALING page (mp_spritescale.c)
     OPT_SS_GARDEN,
@@ -187,6 +190,10 @@ static const u8 sText_NewFriends[] = _("NEW FRIENDS");
 static const u8 sText_Autosave[] = _("AUTOSAVE");
 static const u8 sText_FlagRange[] = _("FLAG RANGE");
 static const u8 sText_BikeMusic[] = _("BIKE MUSIC");
+static const u8 sText_BadgeFade[] = _("BADGE FADING");
+static const u8 sText_CardTitle[] = _("CARD TITLE");
+static const u8 sText_FadePlatinum[] = _("PLATINUM");
+static const u8 sText_FadeSlow[] = _("SLOW");
 static const u8 sText_Followers[] = _("FOLLOWERS");
 static const u8 sText_SinnohPeople[] = _("SINNOH PEOPLE");
 static const u8 sText_Mixed[] = _("MIXED");
@@ -410,6 +417,8 @@ static void BuildRows(void)
         AddRow(OPT_SOUND, 0);
         AddRow(OPT_BIKEMUSIC, 0);
         AddRow(OPT_SURFMUSIC, 0);
+        AddRow(OPT_BADGEFADE, 0);
+        AddRow(OPT_CARDTITLE, 0);
         AddRow(OPT_CARDSCALE, 0);
         AddRow(OPT_CARDART, 0);
         AddRow(OPT_CARDBACK, 0);
@@ -511,9 +520,12 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         names[0] = gText_ButtonTypeNormal, names[1] = gText_ButtonTypeLR, names[2] = gText_ButtonTypeLEqualsA;
         return 3;
     case OPT_TYPEICONS: case OPT_FULLSCREEN: case OPT_VSYNC: case OPT_ANALOGRUN: case OPT_RUMBLE: case OPT_SPECPANEL:
-    case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_CARDSCALE: case OPT_SHADOWS:
+    case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_CARDSCALE: case OPT_SHADOWS: case OPT_CARDTITLE:
         names[0] = sText_Off, names[1] = sText_On;
         return 2;
+    case OPT_BADGEFADE:
+        names[TCARD_FADE_PLATINUM] = sText_FadePlatinum, names[TCARD_FADE_SLOW] = sText_FadeSlow, names[TCARD_FADE_OFF] = sText_Off;
+        return 3;
     case OPT_NAMECASE:
         names[0] = sText_NameCaseAsTyped, names[1] = sText_NameCaseCaps, names[2] = sText_NameCaseMixed;
         return 3;
@@ -760,6 +772,8 @@ static u8 Current(u8 row)
     case OPT_FOLLOWSPRITES: return gMpConfig.followerSprites % MP_FOLLOW_SPRITES_COUNT;
     case OPT_SINNOHSPRITES: return 2 - gMpConfig.sinnohSprites % 3;
     case OPT_SHADOWS:     return !gMpConfig.noShadows;
+    case OPT_BADGEFADE:   return MP_TCard_Fade();
+    case OPT_CARDTITLE:   return MP_TCard_ShowTitle() != 0;
     }
     return 0;
 }
@@ -842,6 +856,14 @@ static void Change(u8 row, int dir)
     case OPT_SHADOWS:
         gMpConfig.noShadows = !gMpConfig.noShadows;
         MPNet_Log("shadows: %d", !gMpConfig.noShadows);
+        break;
+    case OPT_BADGEFADE:
+        MP_TCard_SetFade(Wrap(MP_TCard_Fade() + dir, TCARD_FADE_COUNT));
+        MPNet_Log("badge fading: %d", MP_TCard_Fade());
+        break;
+    case OPT_CARDTITLE:
+        MP_TCard_SetShowTitle(!MP_TCard_ShowTitle());
+        MPNet_Log("card title: %d", MP_TCard_ShowTitle());
         break;
     case OPT_SINNOHSPRITES:
         gMpConfig.sinnohSprites = 2 - Wrap(2 - gMpConfig.sinnohSprites % 3 + dir, 3);
@@ -953,6 +975,8 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_FOLLOWSPRITES: return sText_Followers;
     case OPT_SINNOHSPRITES: return sText_SinnohPeople;
     case OPT_SHADOWS: return sText_Shadows;
+    case OPT_BADGEFADE:   return sText_BadgeFade;
+    case OPT_CARDTITLE:   return sText_CardTitle;
     case OPT_SC_ON:       return sText_LevelScale;
     case OPT_SC_WILD:     return sText_ScWild;
     case OPT_SC_TRAINERS: return sText_ScTrainers;
@@ -1135,6 +1159,11 @@ static void DrawHint(void)
     }
     else if (opt == OPT_SURFMUSIC)
         snprintf(ascii, sizeof(ascii), "OFF: THE MAP'S SONG SURFING AND DIVING");
+    else if (opt == OPT_BADGEFADE)
+        snprintf(ascii, sizeof(ascii), "%s", MP_TCard_Fade() == TCARD_FADE_OFF ? "BADGES KEEP THEIR SHINE"
+                 : MP_TCard_Fade() == TCARD_FADE_SLOW ? "BADGES DULL A LITTLE EVERY 3 DAYS" : "BADGES DULL A LITTLE EACH DAY");
+    else if (opt == OPT_CARDTITLE)
+        snprintf(ascii, sizeof(ascii), "%s", MP_TCard_ShowTitle() ? "YOUR TITLE SHOWS ON YOUR CARD" : "NO TITLE ON YOUR CARD");
     else if (opt == OPT_LEVELSCALE)
         snprintf(ascii, sizeof(ascii), "%s", ScaleLocked() ? "ONLINE THE HOST DECIDES. A: SEE IT" : "A: HOW WILD AND TRAINERS KEEP UP");
     else if (opt >= OPT_SC_ON && opt <= OPT_SC_PAST8 && ScaleLocked())

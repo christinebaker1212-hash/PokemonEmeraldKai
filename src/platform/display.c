@@ -1400,7 +1400,16 @@ static void RenderToBackbuffer(void)
     // Moemon Fight: a fight is the game picture, at its own 480x320 (src/platform/fight_platform.c), scaled the same
     // way as the game's 240x160 in every mode (whole multiples, sharp-bilinear between them) with the same filters
     {
+        SDL_Texture *MP_BadgeCase_Canvas(SDL_Renderer *r);
         SDL_Texture *fight = Fight_Canvas(sRenderer);
+        // Moemon Co-op: the BADGE CASE draws at the same 480x320 (src/mp/mp_badgecase.c)
+        SDL_Texture *badges = fight ? NULL : MP_BadgeCase_Canvas(sRenderer);
+        if (badges)
+        {
+            gameTex = badges;
+            srcW = FIGHT_CANVAS_W;
+            srcH = FIGHT_CANVAS_H;
+        }
         if (fight)
         {
             gameTex = fight;

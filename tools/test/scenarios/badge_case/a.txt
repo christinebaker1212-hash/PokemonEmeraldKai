@@ -1,0 +1,48 @@
+pressuntil A field 5000
+wait 60
+mp setflag 0x867
+mp setflag 0x868
+mp setflag 0x869
+mp setflag 0x86A
+mp setflag 0x86B
+mp setflag 0x2100
+mp setflag 0x2101
+mp setflag 0x2102
+mp setflag 0x3320
+mp setflag 0x3321
+wait 90
+mp tcard days 6
+mp tcard rub 0 0 700
+mp tcard rub 0 1 270
+mp tcard rub 0 2 140
+mp tcard rub 0 3 30
+mp tcard rub 2 0 300
+mp tcard rub 3 1 700
+mp card
+wait 120
+press SELECT 2
+wait 40
+rendershot case_hoenn
+press RIGHT 2
+wait 20
+press A 2
+wait 40
+rendershot closeup
+press RIGHT 2
+wait 4
+press LEFT 2
+wait 4
+press B 2
+wait 20
+press R 2
+wait 30
+rendershot case_kanto
+press R 2
+wait 10
+press R 2
+wait 30
+rendershot case_sinnoh
+press B 2
+wait 60
+shot card_after
+quit

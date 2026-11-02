@@ -1,6 +1,8 @@
 #include "global.h"
 #include "tcg/integration.h"
 #include "mp.h"
+#include "mp_region.h"
+void MP_BadgeCase_Open(u8 region);
 #include "scanline_effect.h"
 #include "palette.h"
 #include "task.h"
@@ -457,6 +459,10 @@ static void Task_TrainerCard(u8 taskId)
             PlaySE(SE_RG_CARD_FLIP);
             sData->mainState = STATE_WAIT_FLIP_TO_BACK;
         }
+        else if (JOY_NEW(SELECT_BUTTON) && !sData->isLink)
+        {
+            MP_BadgeCase_Open(MP_Region_Current());   // Moemon Co-op: the BADGE CASE (src/mp/mp_badgecase.c)
+        }
         else if (JOY_NEW(B_BUTTON))
         {
             if (gReceivedRemoteLinkPlayers && sData->isLink && InUnionRoom() == TRUE)
@@ -478,7 +484,11 @@ static void Task_TrainerCard(u8 taskId)
         }
         break;
     case STATE_HANDLE_INPUT_BACK:
-        if (JOY_NEW(B_BUTTON))
+        if (JOY_NEW(SELECT_BUTTON) && !sData->isLink)
+        {
+            MP_BadgeCase_Open(MP_Region_Current());   // Moemon Co-op: the BADGE CASE
+        }
+        else if (JOY_NEW(B_BUTTON))
         {
             if (gReceivedRemoteLinkPlayers && sData->isLink && InUnionRoom() == TRUE)
             {
