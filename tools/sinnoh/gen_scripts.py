@@ -1651,11 +1651,34 @@ def _replaceable(body):
     return bool(re.match(r'^\tlock\n\tfaceplayer\n\tgoto_if_set 0x[0-9A-F]+, \w+_Given\n', body))   # (a written gift)
 
 
-def _story_shows(hide, name, o):
+# Platinum's people for events and online features this game closes (a distribution's SHAYMIN, the Mystery Gift
+# deliveryman, the S.S. SPIRAL's sailor): Platinum hides them by scripts that check for the event, which don't convert
+CLOSED_STORY_PEOPLE = {'FLAG_HIDE_MART_MYSTERY_GIFT_DELIVERYMAN', 'FLAG_HIDE_ROUTE_224_SHAYMIN',
+                       'FLAG_HIDE_SNOWPOINT_CITY_SAILOR_SS_SPIRAL'}
+_PLAT_SCRIPTS = {}
+
+
+def _platinum_sets(root, flag):
+    """does any of Platinum's scripts (the new game's too) set FLAG?"""
+    if 'text' not in _PLAT_SCRIPTS:
+        folder = os.path.join(root, 'res/field/scripts')
+        _PLAT_SCRIPTS['text'] = '\n'.join(open(os.path.join(folder, f), encoding='utf-8', errors='replace').read()
+                                         for f in sorted(os.listdir(folder)) if f.endswith('.s'))
+    return re.search(r'\bSetFlag %s\b' % re.escape(flag), _PLAT_SCRIPTS['text']) is not None
+
+
+def _story_shows(root, hide, name, o, c):
     """a person Platinum's story shows by its own hide flag (story_people.py's NEVER was the written story's: Platinum's
-    scripts now show and hide its whole cast), not one the game closes for good (tools/sinnoh/gen_maps.py)"""
+    scripts now show and hide its whole cast), not one the game closes (tools/sinnoh/gen_maps.py, CLOSED_STORY_PEOPLE).
+    A flag no script of Platinum's ever sets (its people hidden by the map changing, or by its code): shown only when a
+    scene of the map moves or removes them (LAKE VERITY's CYRUS)"""
     from gen_maps import CLOSED_PEOPLE
-    return o.get('script') not in CLOSED_PEOPLE.get(name, ())
+    if o.get('script') in CLOSED_PEOPLE.get(name, ()) or hide in CLOSED_STORY_PEOPLE:
+        return False
+    if _platinum_sets(root, hide):
+        return True
+    lid = o.get('id')
+    return bool(lid) and any(lid in a for lab in c.labels.values() for _, a in lab)
 
 
 def people(root, p, low, name, done):
@@ -1693,7 +1716,7 @@ def people(root, p, low, name, done):
         elif person and lab and _replaceable(_stub_body(name, script) if script != '0x0' else None):
             new = lab
         elif person and script == '0x0':
-            if mine['flag'] == '0x3FFF' and flag and _story_shows(hide, name, o):
+            if mine['flag'] == '0x3FFF' and flag and _story_shows(root, hide, name, o, c):
                 # (a story person with nothing to say: CYRUS and BARRY at LAKE VERITY, a STARLY... the map keeps
                 # them hidden for good, Platinum shows them by their own hide flag)
                 gfx = 'OBJ_EVENT_GFX_VAR_%s' % o['graphics_id'][-1] \
