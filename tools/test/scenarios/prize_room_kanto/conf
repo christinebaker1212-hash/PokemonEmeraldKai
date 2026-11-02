@@ -1,0 +1,7 @@
+# CELADON's GAME CORNER prize room is FireRed's (tools/quetzal_port/fix_prize_room.py; Quetzal's numbers gave other
+# POKeMON): the left clerk's first prize is ABRA (63) at level 9 for 180 COINS
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=25:20"
+EXPECT_A=("party: 25(" " 63(" "coins 9819")
+UNEXPECT_A=("[crash]" "TIMEOUT")

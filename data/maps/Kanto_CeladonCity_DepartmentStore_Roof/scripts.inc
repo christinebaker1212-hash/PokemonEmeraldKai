@@ -229,17 +229,20 @@ Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C303::
 	goto Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C40C
 
 Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C342::
-	setvar VAR_TEMP_0, 0x23
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_0, ITEM_FRESH_WATER
 	checkmoney 0xC8, 0
 	goto Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C38A
 
 Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C353::
-	setvar VAR_TEMP_0, 0x24
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_0, ITEM_SODA_POP
 	checkmoney 0x12C, 0
 	goto Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C38A
 
 Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C364::
-	setvar VAR_TEMP_0, 0x25
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_0, ITEM_LEMONADE
 	checkmoney 0x15E, 0
 	goto Kanto_CeladonCity_DepartmentStore_Roof_EventScript_841C38A
 

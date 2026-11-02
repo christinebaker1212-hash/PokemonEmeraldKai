@@ -50,7 +50,8 @@ Kanto_CinnabarIsland_PrimalChamber_EventScript_84221DE::
 Kanto_CinnabarIsland_PrimalChamber_EventScript_8422214::
 	goto_if_set FLAG_QZ_0x2EB5, Kanto_CinnabarIsland_PrimalChamber_EventScript_8422325
 	msgbox Kanto_CinnabarIsland_PrimalChamber_Text_84224C1, MSGBOX_DEFAULT
-	setvar VAR_0x8000, 0x122
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_0x8000, ITEM_RED_ORB
 	call Kanto_CinnabarIsland_PrimalChamber_EventScript_8422308
 	goto_if_eq VAR_RESULT, 0, Kanto_CinnabarIsland_PrimalChamber_EventScript_842231D
 	setflag FLAG_QZ_0x2EB5
@@ -101,7 +102,8 @@ Kanto_CinnabarIsland_PrimalChamber_EventScript_84222A4::
 Kanto_CinnabarIsland_PrimalChamber_EventScript_84222DA::
 	goto_if_set FLAG_QZ_0x2EB6, Kanto_CinnabarIsland_PrimalChamber_EventScript_8422325
 	msgbox Kanto_CinnabarIsland_PrimalChamber_Text_8422727, MSGBOX_DEFAULT
-	setvar VAR_0x8000, 0x123
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_0x8000, ITEM_BLUE_ORB
 	call Kanto_CinnabarIsland_PrimalChamber_EventScript_8422308
 	goto_if_eq VAR_RESULT, 0, Kanto_CinnabarIsland_PrimalChamber_EventScript_842231D
 	setflag FLAG_QZ_0x2EB6

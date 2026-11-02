@@ -97,6 +97,11 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       balls in the same places), the CERULEAN grunt's TM28, ROUTE 12's TM27, MR. PSYCHIC's TM29 and the CELADON roof's
       TM16 / 20 / 33 with FireRed's words: tools/quetzal_port/fix_kanto_tms.py, test kanto_other_tms; [ ] JOHTO's other
       TM givers)
+- [x] Prizes named by Quetzal's own numbers (a species / item put in a variable first kept Quetzal's number, another
+      POKéMON or item here): CELADON's GAME CORNER prize room is FireRed's (POKéMON at FireRed's levels, TM13 / 23 / 24 /
+      30 / 35, items, FireRed's prices and menus), GOLDENROD's prize clerk Crystal's (ABRA, CUBONE, WOBBUFFET); B leaves
+      the menus; the vending machines sell drinks again (they sold MAX ETHERs); CINNABAR's chamber gives the RED / BLUE
+      ORB (it gave TM02 / TM03): tools/quetzal_port/fix_prize_room.py, tests prize_room_kanto, prize_room_johto
 - [x] SINNOH's time of day in KANTO, JOHTO and HOENN: MORNING / DAY / NIGHT encounters (grass slots 2-3 by Platinum's
       hours: mp_region.c MP_TimeLandSlot, src/data/wild_time.h from tools/quetzal_port/gen_wild_time.py; tests time_wild_*)
 - [x] Encounter audit: no strong Pokémon early, places keep their identity (DIGLETT'S CAVE), no DITTO-like utility early;

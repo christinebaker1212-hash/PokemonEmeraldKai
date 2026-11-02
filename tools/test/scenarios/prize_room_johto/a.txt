@@ -1,0 +1,26 @@
+pressuntil A field 5000
+wait 60
+mp additem 260 1
+mp coins 9999
+mp warp 34,73,18,3
+wait 120
+mp face up
+press A 2
+wait 200
+press A 2
+wait 200
+press A 2
+wait 300
+shot menu
+press A 2
+wait 220
+shot yesno
+press A 2
+wait 250
+shot got
+mash B 20 20
+wait 60
+mp party
+mp coins
+shot after
+quit

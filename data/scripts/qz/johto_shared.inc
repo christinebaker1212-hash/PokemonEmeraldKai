@@ -55,15 +55,18 @@ Quetzal_EventScript_8306A6E::
 	goto Quetzal_EventScript_8306C27
 
 Quetzal_EventScript_8306AAD::
-	setvar VAR_TEMP_0, 0x23
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_0, ITEM_FRESH_WATER
 	goto Quetzal_EventScript_8306AF8
 
 Quetzal_EventScript_8306AB8::
-	setvar VAR_TEMP_0, 0x24
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_0, ITEM_SODA_POP
 	goto Quetzal_EventScript_8306AF8
 
 Quetzal_EventScript_8306AC3::
-	setvar VAR_TEMP_0, 0x25
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_0, ITEM_LEMONADE
 	goto Quetzal_EventScript_8306AF8
 
 Quetzal_EventScript_8306ACE::

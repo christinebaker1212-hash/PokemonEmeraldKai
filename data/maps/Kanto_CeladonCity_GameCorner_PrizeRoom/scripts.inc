@@ -25,7 +25,7 @@ Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CE9A::
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CECF::
 	call Quetzal_EventScript_841CE7A
-	multichoice 0xB, 0, MULTI_QZ_0x61, 1
+	multichoice 0xB, 0, MULTI_QZ_0x61, 0
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CF29
@@ -42,28 +42,33 @@ Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CF26::
 	end
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CF29::
-	setvar VAR_TEMP_1, 0x3BA
-	setvar VAR_TEMP_2, 0x7D0
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_1, SPECIES_ABRA
+	setvar VAR_TEMP_2, 180
 	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CF79
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CF39::
-	setvar VAR_TEMP_1, 0x27C
-	setvar VAR_TEMP_2, 0x9C4
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_1, SPECIES_CLEFAIRY
+	setvar VAR_TEMP_2, 500
 	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CF79
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CF49::
-	setvar VAR_TEMP_1, 0x93
-	setvar VAR_TEMP_2, 0xAF0
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_1, SPECIES_DRATINI
+	setvar VAR_TEMP_2, 2800
 	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CF79
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CF59::
-	setvar VAR_TEMP_1, 0x1DF
-	setvar VAR_TEMP_2, 0x1388
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_1, SPECIES_SCYTHER
+	setvar VAR_TEMP_2, 5500
 	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CF79
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CF69::
-	setvar VAR_TEMP_1, 0x89
-	setvar VAR_TEMP_2, 0x270F
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_1, SPECIES_PORYGON
+	setvar VAR_TEMP_2, 9999
 	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CF79
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CF79::
@@ -74,7 +79,13 @@ Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CF79::
 	compare_var_to_var VAR_RESULT, VAR_TEMP_2
 	goto_if_lt Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D00A
 	textcolor 3
-	givemon VAR_TEMP_1, 0x18, ITEM_NONE
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	goto_if_eq VAR_TEMP_1, SPECIES_ABRA, Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_Give_ABRA
+	goto_if_eq VAR_TEMP_1, SPECIES_CLEFAIRY, Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_Give_CLEFAIRY
+	goto_if_eq VAR_TEMP_1, SPECIES_DRATINI, Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_Give_DRATINI
+	goto_if_eq VAR_TEMP_1, SPECIES_SCYTHER, Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_Give_SCYTHER
+	goto_if_eq VAR_TEMP_1, SPECIES_PORYGON, Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_Give_PORYGON
+	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CF26
 	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CFB5
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CFB5::
@@ -147,7 +158,7 @@ Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D07C::
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D0AC::
 	call Quetzal_EventScript_841CE7A
-	multichoice 0xB, 0, MULTI_QZ_0x62, 1
+	multichoice 0xB, 0, MULTI_QZ_0x62, 0
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D103
@@ -159,28 +170,33 @@ Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D0AC::
 	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CF26
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D103::
-	setvar VAR_TEMP_1, 0x31D
-	setvar VAR_TEMP_2, 0xFA0
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_1, ITEM_TM13
+	setvar VAR_TEMP_2, 4000
 	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D16C
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D113::
-	setvar VAR_TEMP_1, 0xE8
-	setvar VAR_TEMP_2, 0xDAC
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_1, ITEM_TM23
+	setvar VAR_TEMP_2, 3500
 	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D16C
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D123::
-	setvar VAR_TEMP_1, 0xE6
-	setvar VAR_TEMP_2, 0xFA0
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_1, ITEM_TM24
+	setvar VAR_TEMP_2, 4000
 	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D16C
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D133::
-	setvar VAR_TEMP_1, 0xE7
-	setvar VAR_TEMP_2, 0x1194
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_1, ITEM_TM30
+	setvar VAR_TEMP_2, 4500
 	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D16C
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D143::
-	setvar VAR_TEMP_1, 0x326
-	setvar VAR_TEMP_2, 0xFA0
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_1, ITEM_TM35
+	setvar VAR_TEMP_2, 4000
 	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D16C
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D16C::
@@ -223,7 +239,7 @@ Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D1D8::
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D208::
 	call Quetzal_EventScript_841CE7A
-	multichoice 0xA, 0, MULTI_QZ_0x5F, 1
+	multichoice 0xA, 0, MULTI_QZ_0x5F, 0
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D25F
@@ -235,28 +251,33 @@ Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D208::
 	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CF26
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D25F::
-	setvar VAR_TEMP_1, 0x1DD
-	setvar VAR_TEMP_2, 0x3E8
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_1, ITEM_SMOKE_BALL
+	setvar VAR_TEMP_2, 800
 	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D16C
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D26F::
-	setvar VAR_TEMP_1, 0x1EE
-	setvar VAR_TEMP_2, 0x5DC
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_1, ITEM_MIRACLE_SEED
+	setvar VAR_TEMP_2, 1000
 	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D16C
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D27F::
-	setvar VAR_TEMP_1, 0x2FC
-	setvar VAR_TEMP_2, 0x7D0
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_1, ITEM_CHARCOAL
+	setvar VAR_TEMP_2, 1000
 	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D16C
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D28F::
-	setvar VAR_TEMP_1, 0x1BC
-	setvar VAR_TEMP_2, 0x9C4
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_1, ITEM_MYSTIC_WATER
+	setvar VAR_TEMP_2, 1000
 	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D16C
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D29F::
-	setvar VAR_TEMP_1, 0x1F7
-	setvar VAR_TEMP_2, 0x9C4
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_1, ITEM_YELLOW_FLUTE
+	setvar VAR_TEMP_2, 1600
 	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841D16C
 
 Kanto_CeladonCity_GameCorner_PrizeRoom_Text_8447161::
@@ -283,3 +304,23 @@ Kanto_CeladonCity_GameCorner_PrizeRoom_Text_8447267::
 Kanto_CeladonCity_GameCorner_PrizeRoom_Text_8455F86::
 	.string "{PLAYER} obtained\n"
 	.string "the {STR_VAR_1}!$"
+
+Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_Give_ABRA::
+	givemon VAR_TEMP_1, 9, ITEM_NONE
+	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CFB5
+
+Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_Give_CLEFAIRY::
+	givemon VAR_TEMP_1, 8, ITEM_NONE
+	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CFB5
+
+Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_Give_DRATINI::
+	givemon VAR_TEMP_1, 18, ITEM_NONE
+	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CFB5
+
+Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_Give_SCYTHER::
+	givemon VAR_TEMP_1, 25, ITEM_NONE
+	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CFB5
+
+Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_Give_PORYGON::
+	givemon VAR_TEMP_1, 26, ITEM_NONE
+	goto Kanto_CeladonCity_GameCorner_PrizeRoom_EventScript_841CFB5

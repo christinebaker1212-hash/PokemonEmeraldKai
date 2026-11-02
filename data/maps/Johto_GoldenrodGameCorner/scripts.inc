@@ -192,30 +192,33 @@ Johto_GoldenrodGameCorner_EventScript_83D518E::
 	goto_if_eq VAR_RESULT, 0, Johto_GoldenrodGameCorner_EventScript_83D530A
 	msgbox Johto_GoldenrodGameCorner_Text_83D54CF, MSGBOX_DEFAULT
 	call Quetzal_EventScript_841CE7A
-	multichoice 0xC, 0, MULTI_QZ_0x4C, 1
+	multichoice 0xC, 0, MULTI_QZ_0x4C, 0
 	nop
 	copyvar VAR_0x8000, VAR_RESULT
 	goto_if_eq VAR_0x8000, 0, Johto_GoldenrodGameCorner_EventScript_83D5204
 	goto_if_eq VAR_0x8000, 1, Johto_GoldenrodGameCorner_EventScript_83D5213
 	goto_if_eq VAR_0x8000, 2, Johto_GoldenrodGameCorner_EventScript_83D5222
-	goto_if_eq VAR_0x8000, 3, Johto_GoldenrodGameCorner_EventScript_83D5231
-	goto_if_eq VAR_0x8000, 4, Johto_GoldenrodGameCorner_EventScript_83D5240
-	goto_if_eq VAR_0x8000, 5, Johto_GoldenrodGameCorner_EventScript_83D524F
+	goto_if_eq VAR_0x8000, 3, Johto_GoldenrodGameCorner_EventScript_83D5297
+	goto_if_eq VAR_0x8000, 4, Johto_GoldenrodGameCorner_EventScript_83D5297
+	goto_if_eq VAR_0x8000, 5, Johto_GoldenrodGameCorner_EventScript_83D5297
 	goto Johto_GoldenrodGameCorner_EventScript_83D5297
 
 Johto_GoldenrodGameCorner_EventScript_83D5204::
-	setvar VAR_TEMP_1, 0x3BA
-	setvar VAR_TEMP_2, 0x9C4
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_1, SPECIES_ABRA
+	setvar VAR_TEMP_2, 100
 	goto Johto_GoldenrodGameCorner_EventScript_83D525E
 
 Johto_GoldenrodGameCorner_EventScript_83D5213::
-	setvar VAR_TEMP_1, 0x15D
-	setvar VAR_TEMP_2, 0x1388
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_1, SPECIES_CUBONE
+	setvar VAR_TEMP_2, 800
 	goto Johto_GoldenrodGameCorner_EventScript_83D525E
 
 Johto_GoldenrodGameCorner_EventScript_83D5222::
-	setvar VAR_TEMP_1, 0x93
-	setvar VAR_TEMP_2, 0x157C
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	setvar VAR_TEMP_1, SPECIES_WOBBUFFET
+	setvar VAR_TEMP_2, 1500
 	goto Johto_GoldenrodGameCorner_EventScript_83D525E
 
 Johto_GoldenrodGameCorner_EventScript_83D5231::
@@ -240,7 +243,11 @@ Johto_GoldenrodGameCorner_EventScript_83D525E::
 	checkcoins VAR_RESULT
 	compare_var_to_var VAR_RESULT, VAR_TEMP_2
 	goto_if_lt Johto_GoldenrodGameCorner_EventScript_83D5314
-	qz_givemon_ex VAR_TEMP_1, 0x14, ITEM_NONE, 2, 0, 0
+	@ Moemon Kai: the original game's prize (tools/quetzal_port/fix_prize_room.py)
+	goto_if_eq VAR_TEMP_1, SPECIES_ABRA, Johto_GoldenrodGameCorner_EventScript_Give_ABRA
+	goto_if_eq VAR_TEMP_1, SPECIES_CUBONE, Johto_GoldenrodGameCorner_EventScript_Give_CUBONE
+	goto_if_eq VAR_TEMP_1, SPECIES_WOBBUFFET, Johto_GoldenrodGameCorner_EventScript_Give_WOBBUFFET
+	goto Johto_GoldenrodGameCorner_EventScript_83D5297
 	goto Johto_GoldenrodGameCorner_EventScript_83D529A
 
 Johto_GoldenrodGameCorner_EventScript_83D5297::
@@ -482,3 +489,15 @@ Johto_GoldenrodGameCorner_Text_83D5782::
 
 Johto_GoldenrodGameCorner_Text_83D57FA::
 	.string "Wahahah! The coins keep rolling in!$"
+
+Johto_GoldenrodGameCorner_EventScript_Give_ABRA::
+	qz_givemon_ex VAR_TEMP_1, 5, ITEM_NONE, 2, 0, 0
+	goto Johto_GoldenrodGameCorner_EventScript_83D529A
+
+Johto_GoldenrodGameCorner_EventScript_Give_CUBONE::
+	qz_givemon_ex VAR_TEMP_1, 15, ITEM_NONE, 2, 0, 0
+	goto Johto_GoldenrodGameCorner_EventScript_83D529A
+
+Johto_GoldenrodGameCorner_EventScript_Give_WOBBUFFET::
+	qz_givemon_ex VAR_TEMP_1, 15, ITEM_NONE, 2, 0, 0
+	goto Johto_GoldenrodGameCorner_EventScript_83D529A

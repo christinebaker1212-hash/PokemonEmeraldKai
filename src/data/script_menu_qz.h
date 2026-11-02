@@ -178,12 +178,9 @@ static const struct MenuAction sQzMulti_4B[] = {
     {(const u8 []) _("EXIT")},
 };
 static const struct MenuAction sQzMulti_4C[] = {
-    {(const u8 []) _("VULPIX A.")},
-    {(const u8 []) _("FEEBAS")},
-    {(const u8 []) _("DRATINI")},
-    {(const u8 []) _("DITTO")},
-    {(const u8 []) _("DREEPY")},
-    {(const u8 []) _("MIMIKYU")},
+    {(const u8 []) _("ABRA{CLEAR_TO 0x4B}{FONT_SMALL}   100 COINS")},
+    {(const u8 []) _("CUBONE{CLEAR_TO 0x4B}{FONT_SMALL}   800 COINS")},
+    {(const u8 []) _("WOBBUFFET{CLEAR_TO 0x4B}{FONT_SMALL} 1,500 COINS")},
 };
 static const struct MenuAction sQzMulti_4D[] = {
     {(const u8 []) _("Floor 6")},
@@ -287,29 +284,29 @@ static const struct MenuAction sQzMulti_5E[] = {
     {(const u8 []) _("QUIT")},
 };
 static const struct MenuAction sQzMulti_5F[] = {
-    {(const u8 []) _("Expert Belt")},
-    {(const u8 []) _("Eviolite")},
-    {(const u8 []) _("Loaded Dice")},
-    {(const u8 []) _("Choice Scarf")},
-    {(const u8 []) _("Assault Vest")},
+    {(const u8 []) _("SMOKE BALL{CLEAR_TO 0x5A}{FONT_SMALL}800 COINS")},
+    {(const u8 []) _("MIRACLE SEED{CLEAR_TO 0x50}{FONT_SMALL}1,000 COINS")},
+    {(const u8 []) _("CHARCOAL{CLEAR_TO 0x50}{FONT_SMALL}1,000 COINS")},
+    {(const u8 []) _("MYSTIC WATER{CLEAR_TO 0x50}{FONT_SMALL}1,000 COINS")},
+    {(const u8 []) _("YELLOW FLUTE{CLEAR_TO 0x50}{FONT_SMALL}1,600 COINS")},
 };
 static const struct MenuAction sQzMulti_60[] = {
     {(const u8 []) _("50 COINS")},
     {(const u8 []) _("500 COINS")},
 };
 static const struct MenuAction sQzMulti_61[] = {
-    {(const u8 []) _("ALOLAN VULPIX")},
-    {(const u8 []) _("LARVESTA")},
-    {(const u8 []) _("DRATINI")},
-    {(const u8 []) _("ROTOM")},
-    {(const u8 []) _("PORYGON")},
+    {(const u8 []) _("ABRA{CLEAR_TO 0x55}{FONT_SMALL} 180 COINS")},
+    {(const u8 []) _("CLEFAIRY{CLEAR_TO 0x55}{FONT_SMALL} 500 COINS")},
+    {(const u8 []) _("DRATINI{CLEAR_TO 0x4B}{FONT_SMALL} 2,800 COINS")},
+    {(const u8 []) _("SCYTHER{CLEAR_TO 0x4B}{FONT_SMALL} 5,500 COINS")},
+    {(const u8 []) _("PORYGON{CLEAR_TO 0x4B}{FONT_SMALL} 9,999 COINS")},
 };
 static const struct MenuAction sQzMulti_62[] = {
-    {(const u8 []) _("Peat Block")},
-    {(const u8 []) _("Dubious Disc")},
-    {(const u8 []) _("Electirizer")},
-    {(const u8 []) _("Magmarizer")},
-    {(const u8 []) _("Metal Alloy")},
+    {(const u8 []) _("TM13{CLEAR_TO 0x48}{FONT_SMALL}4,000 COINS")},
+    {(const u8 []) _("TM23{CLEAR_TO 0x48}{FONT_SMALL}3,500 COINS")},
+    {(const u8 []) _("TM24{CLEAR_TO 0x48}{FONT_SMALL}4,000 COINS")},
+    {(const u8 []) _("TM30{CLEAR_TO 0x48}{FONT_SMALL}4,500 COINS")},
+    {(const u8 []) _("TM35{CLEAR_TO 0x48}{FONT_SMALL}4,000 COINS")},
 };
 static const struct MenuAction sQzMulti_63[] = {
     {(const u8 []) _("HELIX FOSSIL")},

@@ -13,6 +13,22 @@ import os
 REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 FIRST = 117   # after MULTI_DANCE_MACHINE
 
+# The GAME CORNER prize rooms (tools/quetzal_port/fix_prize_room.py): CELADON's in FireRed's words (src/strings.c),
+# GOLDENROD's with Crystal's prizes and prices in the same style
+PRIZE_MENUS = {
+    0x4C: ['ABRA{CLEAR_TO 0x4B}{FONT_SMALL}   100 COINS', 'CUBONE{CLEAR_TO 0x4B}{FONT_SMALL}   800 COINS',
+           'WOBBUFFET{CLEAR_TO 0x4B}{FONT_SMALL} 1,500 COINS'],
+    0x61: ['ABRA{CLEAR_TO 0x55}{FONT_SMALL} 180 COINS', 'CLEFAIRY{CLEAR_TO 0x55}{FONT_SMALL} 500 COINS',
+           'DRATINI{CLEAR_TO 0x4B}{FONT_SMALL} 2,800 COINS', 'SCYTHER{CLEAR_TO 0x4B}{FONT_SMALL} 5,500 COINS',
+           'PORYGON{CLEAR_TO 0x4B}{FONT_SMALL} 9,999 COINS'],
+    0x62: ['TM13{CLEAR_TO 0x48}{FONT_SMALL}4,000 COINS', 'TM23{CLEAR_TO 0x48}{FONT_SMALL}3,500 COINS',
+           'TM24{CLEAR_TO 0x48}{FONT_SMALL}4,000 COINS', 'TM30{CLEAR_TO 0x48}{FONT_SMALL}4,500 COINS',
+           'TM35{CLEAR_TO 0x48}{FONT_SMALL}4,000 COINS'],
+    0x5F: ['SMOKE BALL{CLEAR_TO 0x5A}{FONT_SMALL}800 COINS', 'MIRACLE SEED{CLEAR_TO 0x50}{FONT_SMALL}1,000 COINS',
+           'CHARCOAL{CLEAR_TO 0x50}{FONT_SMALL}1,000 COINS', 'MYSTIC WATER{CLEAR_TO 0x50}{FONT_SMALL}1,000 COINS',
+           'YELLOW FLUTE{CLEAR_TO 0x50}{FONT_SMALL}1,600 COINS'],
+}
+
 
 def main():
     d = json.load(open(os.path.join(REPO, 'quetzal_rip/data/multichoice.json')))
@@ -25,6 +41,7 @@ def main():
     # Kai's HOENN boat docks at SLATEPORT (docs/REGIONS_PLAN.md), Quetzal's at LILYCOVE
     for m in menus:
         m['items'] = [t.replace('LILYCOVE (HOENN)', 'SLATEPORT (HOENN)') for t in m['items']]
+        m['items'] = PRIZE_MENUS.get(m['id'], m['items'])
     for n, m in enumerate(menus):
         head.append('#define MULTI_QZ_0x%02X %d' % (m['id'], FIRST + n))
         lists.append('static const struct MenuAction sQzMulti_%02X[] = {\n%s};' % (
