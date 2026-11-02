@@ -1067,4 +1067,71 @@ static const u8 sPokeRadarDesc[] = _(
 static const u8 sCandyJarDesc[] = _(
     "Keeps the candies released MOéMON leave behind.");
 
+static const u8 sGalacticKeyDesc[] = _(
+    "A card key for disengaging security systems in the GALACTIC HQ. Losing it can result in punishment, apparently.");
 
+static const u8 sAzureFluteDesc[] = _(
+    "A flute that puts out echoing sounds that do not seem to be of this world. It is unknown who made it.");
+
+static const u8 sWorksKeyDesc[] = _(
+    "A large key for operating the doors of the VALLEY WINDWORKS in the canyon. It was held by a TEAM GALACTIC GRUNT.");
+
+static const u8 sSuiteKeyDesc[] = _(
+    "A key to one of the suites at the luxury hotel by a lake. For some odd reason, it often disappears.");
+
+static const u8 sOaksLetterDesc[] = _(
+    "A letter from PROF. OAK. Written in it is a request for you to go to RT. 224.");
+
+static const u8 sMemberCardDesc[] = _(
+    "A card needed for entering the inn in CANALAVE CITY. Oddly, the last date marked on it was 50 years ago.");
+
+static const u8 sOldCharmDesc[] = _(
+    "An ancient good-luck charm made of MOéMON bones to be taken to the elder of CELESTIC TOWN.");
+
+static const u8 sLunarWingDesc[] = _(
+    "A feather that glows like the moon. It is said to possess the power to dispel nightmares.");
+
+static const u8 sPoffinCaseDesc[] = _(
+    "A case for storing POFFIN cooked from BERRIES.");
+
+static const u8 sVsRecorderDesc[] = _(
+    "An amazing device that can record a battle either between friends or at a special battle facility.");
+
+static const u8 sExplorerKitDesc[] = _(
+    "A bag filled with convenient tools for exploring. It provides access to the UNDERGROUND.");
+
+static const u8 sCoupon1Desc[] = _(
+    "A coupon to be exchanged for a MOéMON WATCH (POKéTCH for short). Three coupons are needed.");
+
+static const u8 sCoupon2Desc[] = _(
+    "A coupon to be exchanged for a MOéMON WATCH (POKéTCH for short). Three coupons are needed.");
+
+static const u8 sCoupon3Desc[] = _(
+    "A coupon to be exchanged for a MOéMON WATCH (POKéTCH for short). Three coupons are needed.");
+
+static const u8 sSprayduckDesc[] = _(
+    "A watering can shaped like a PSYDUCK. It helps promote healthy growth of BERRIES planted in soft soil.");
+
+static const u8 sJournalDesc[] = _(
+    "A notebook that keeps a day-to-day record of your adventure so far.");
+
+static const u8 sPalPadDesc[] = _(
+    "A convenient notepad that is used for registering your friends, FRIEND CODES, and keeping a record of game play.");
+
+static const u8 sSealCaseDesc[] = _(
+    "A case for storing SEALS that can be applied to the CAPSULE cases of POKé BALLS.");
+
+static const u8 sFashionCaseDesc[] = _(
+    "A fancy case for the tidy arrangement and storage of whimsical MOéMON ACCESSORIES.");
+
+static const u8 sGrowthMulchDesc[] = _(
+    "A fertilizer to be spread on soft soil. It speeds up the growth of BERRIES. However, it also dries the soil faster.");
+
+static const u8 sDampMulchDesc[] = _(
+    "A fertilizer to be spread on soft soil. It slows the growth of BERRIES and causes the soil to dry slower.");
+
+static const u8 sStableMulchDesc[] = _(
+    "A fertilizer to be spread on soft soil. It extends the time ripened BERRIES remain on their plants before falling.");
+
+static const u8 sGooeyMulchDesc[] = _(
+    "A fertilizer to be spread on soft soil. It ups the number of times new plants grow where mature plants withered.");

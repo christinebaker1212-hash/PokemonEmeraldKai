@@ -5651,3 +5651,687 @@
         .party = ITEM_CUSTOM_MOVES(sParty_SinnohGalacticBossCyrusDistortionWorld),
     },
 
+    [TRAINER_SINNOH_AROMA_LADY_ALISON] =
+    {
+        .trainerClass = TRAINER_CLASS_AROMA_LADY,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_AROMA_LADY,
+        .trainerName = _("ALISON"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohAromaLadyAlison),
+    },
+
+    [TRAINER_SINNOH_BEAUTY_GABRIELLA] =
+    {
+        .trainerClass = TRAINER_CLASS_BEAUTY,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_BEAUTY,
+        .trainerName = _("GABRIELLA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBeautyGabriella),
+    },
+
+    [TRAINER_SINNOH_BEAUTY_HARLEY] =
+    {
+        .trainerClass = TRAINER_CLASS_BEAUTY,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_BEAUTY,
+        .trainerName = _("HARLEY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBeautyHarley),
+    },
+
+    [TRAINER_SINNOH_BEAUTY_LINDSAY] =
+    {
+        .trainerClass = TRAINER_CLASS_BEAUTY,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_BEAUTY,
+        .trainerName = _("LINDSAY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohBeautyLindsay),
+    },
+
+    [TRAINER_SINNOH_BREEDER_KAYLEE] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_BREEDER,
+        .encounterMusic_gender = 33 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_POKEMON_BREEDER_F,
+        .trainerName = _("KAYLEE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBreederKaylee),
+    },
+
+    [TRAINER_SINNOH_CAMERAMAN_TEVIN] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_CAMERAMAN,
+        .encounterMusic_gender = 33,
+        .trainerPic = TRAINER_PIC_QZ_220,
+        .trainerName = _("TEVIN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohCameramanTevin),
+    },
+
+    [TRAINER_SINNOH_CAMERAMAN_TEVIN_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_CAMERAMAN,
+        .encounterMusic_gender = 33,
+        .trainerPic = TRAINER_PIC_QZ_220,
+        .trainerName = _("TEVIN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohCameramanTevinRematch1),
+    },
+
+    [TRAINER_SINNOH_CAMERAMAN_TEVIN_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_CAMERAMAN,
+        .encounterMusic_gender = 33,
+        .trainerPic = TRAINER_PIC_QZ_220,
+        .trainerName = _("TEVIN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohCameramanTevinRematch2),
+    },
+
+    [TRAINER_SINNOH_CAMERAMAN_TEVIN_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_CAMERAMAN,
+        .encounterMusic_gender = 33,
+        .trainerPic = TRAINER_PIC_QZ_220,
+        .trainerName = _("TEVIN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohCameramanTevinRematch3),
+    },
+
+    [TRAINER_SINNOH_CAMERAMAN_TEVIN_REMATCH_4] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_CAMERAMAN,
+        .encounterMusic_gender = 33,
+        .trainerPic = TRAINER_PIC_QZ_220,
+        .trainerName = _("TEVIN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohCameramanTevinRematch4),
+    },
+
+    [TRAINER_SINNOH_CAMERAMAN_TEVIN_UNUSED] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_CAMERAMAN,
+        .encounterMusic_gender = 33,
+        .trainerPic = TRAINER_PIC_QZ_220,
+        .trainerName = _("TEVIN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohCameramanTevinUnused),
+    },
+
+    [TRAINER_SINNOH_DAWN_JUBILIFE_CITY_CHIMCHAR] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_TRAINER_2,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_MAY,
+        .trainerName = _("DAWN"),
+        .items = {ITEM_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohDawnJubilifeCityChimchar),
+    },
+
+    [TRAINER_SINNOH_DAWN_JUBILIFE_CITY_PIPLUP] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_TRAINER_2,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_MAY,
+        .trainerName = _("DAWN"),
+        .items = {ITEM_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohDawnJubilifeCityPiplup),
+    },
+
+    [TRAINER_SINNOH_DAWN_JUBILIFE_CITY_TURTWIG] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_TRAINER_2,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_MAY,
+        .trainerName = _("DAWN"),
+        .items = {ITEM_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohDawnJubilifeCityTurtwig),
+    },
+
+    [TRAINER_SINNOH_DAWN_VEILSTONE_CITY_CHIMCHAR] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_TRAINER_2,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_MAY,
+        .trainerName = _("DAWN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohDawnVeilstoneCityChimchar),
+    },
+
+    [TRAINER_SINNOH_DAWN_VEILSTONE_CITY_PIPLUP] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_TRAINER_2,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_MAY,
+        .trainerName = _("DAWN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohDawnVeilstoneCityPiplup),
+    },
+
+    [TRAINER_SINNOH_DAWN_VEILSTONE_CITY_TURTWIG] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_TRAINER_2,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_MAY,
+        .trainerName = _("DAWN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohDawnVeilstoneCityTurtwig),
+    },
+
+    [TRAINER_SINNOH_GALACTIC_GRUNT_CELESTIC_TOWN] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_GALACTIC,
+        .encounterMusic_gender = 36,
+        .trainerPic = TRAINER_PIC_QZ_270,
+        .trainerName = _("GRUNT"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGalacticGruntCelesticTown),
+    },
+
+    [TRAINER_SINNOH_GALACTIC_GRUNT_FLOAROMA_MEADOW_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_GALACTIC,
+        .encounterMusic_gender = 36,
+        .trainerPic = TRAINER_PIC_QZ_270,
+        .trainerName = _("GRUNT"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGalacticGruntFloaromaMeadow1),
+    },
+
+    [TRAINER_SINNOH_GALACTIC_GRUNT_FLOAROMA_MEADOW_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_GALACTIC,
+        .encounterMusic_gender = 36,
+        .trainerPic = TRAINER_PIC_QZ_270,
+        .trainerName = _("GRUNT"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGalacticGruntFloaromaMeadow2),
+    },
+
+    [TRAINER_SINNOH_GALACTIC_GRUNT_IRON_ISLAND_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_GALACTIC,
+        .encounterMusic_gender = 36,
+        .trainerPic = TRAINER_PIC_QZ_270,
+        .trainerName = _("GRUNT"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGalacticGruntIronIsland1),
+    },
+
+    [TRAINER_SINNOH_GALACTIC_GRUNT_IRON_ISLAND_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_GALACTIC,
+        .encounterMusic_gender = 36,
+        .trainerPic = TRAINER_PIC_QZ_270,
+        .trainerName = _("GRUNT"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGalacticGruntIronIsland2),
+    },
+
+    [TRAINER_SINNOH_GALACTIC_GRUNT_JUBILIFE_CITY_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_GALACTIC,
+        .encounterMusic_gender = 36,
+        .trainerPic = TRAINER_PIC_QZ_270,
+        .trainerName = _("GRUNT"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGalacticGruntJubilifeCity1),
+    },
+
+    [TRAINER_SINNOH_GALACTIC_GRUNT_JUBILIFE_CITY_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_GALACTIC,
+        .encounterMusic_gender = 36,
+        .trainerPic = TRAINER_PIC_QZ_270,
+        .trainerName = _("GRUNT"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGalacticGruntJubilifeCity2),
+    },
+
+    [TRAINER_SINNOH_GALACTIC_GRUNT_SPEAR_PILLAR_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_GALACTIC,
+        .encounterMusic_gender = 36,
+        .trainerPic = TRAINER_PIC_QZ_270,
+        .trainerName = _("GRUNT"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGalacticGruntSpearPillar1),
+    },
+
+    [TRAINER_SINNOH_GALACTIC_GRUNT_SPEAR_PILLAR_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_GALACTIC,
+        .encounterMusic_gender = 36 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_271,
+        .trainerName = _("GRUNT"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGalacticGruntSpearPillar2),
+    },
+
+    [TRAINER_SINNOH_GALACTIC_GRUNT_VALLEY_WINDWORKS_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_GALACTIC,
+        .encounterMusic_gender = 36,
+        .trainerPic = TRAINER_PIC_QZ_270,
+        .trainerName = _("GRUNT"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGalacticGruntValleyWindworks1),
+    },
+
+    [TRAINER_SINNOH_GALACTIC_GRUNT_VALOR_LAKEFRONT] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_GALACTIC,
+        .encounterMusic_gender = 36,
+        .trainerPic = TRAINER_PIC_QZ_270,
+        .trainerName = _("GRUNT"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGalacticGruntValorLakefront),
+    },
+
+    [TRAINER_SINNOH_GALACTIC_GRUNT_VEILSTONE_CITY_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_GALACTIC,
+        .encounterMusic_gender = 36,
+        .trainerPic = TRAINER_PIC_QZ_270,
+        .trainerName = _("GRUNT"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGalacticGruntVeilstoneCity1),
+    },
+
+    [TRAINER_SINNOH_GALACTIC_GRUNT_VEILSTONE_CITY_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_GALACTIC,
+        .encounterMusic_gender = 36,
+        .trainerPic = TRAINER_PIC_QZ_270,
+        .trainerName = _("GRUNT"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGalacticGruntVeilstoneCity2),
+    },
+
+    [TRAINER_SINNOH_GUITARIST_ARTURO] =
+    {
+        .trainerClass = TRAINER_CLASS_GUITARIST,
+        .encounterMusic_gender = 35,
+        .trainerPic = TRAINER_PIC_GUITARIST,
+        .trainerName = _("ARTURO"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGuitaristArturo),
+    },
+
+    [TRAINER_SINNOH_GUITARIST_ARTURO_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_GUITARIST,
+        .encounterMusic_gender = 35,
+        .trainerPic = TRAINER_PIC_GUITARIST,
+        .trainerName = _("ARTURO"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGuitaristArturoRematch1),
+    },
+
+    [TRAINER_SINNOH_GUITARIST_ARTURO_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_GUITARIST,
+        .encounterMusic_gender = 35,
+        .trainerPic = TRAINER_PIC_GUITARIST,
+        .trainerName = _("ARTURO"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGuitaristArturoRematch2),
+    },
+
+    [TRAINER_SINNOH_GUITARIST_ARTURO_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_GUITARIST,
+        .encounterMusic_gender = 35,
+        .trainerPic = TRAINER_PIC_GUITARIST,
+        .trainerName = _("ARTURO"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGuitaristArturoRematch3),
+    },
+
+    [TRAINER_SINNOH_GUITARIST_ARTURO_REMATCH_4] =
+    {
+        .trainerClass = TRAINER_CLASS_GUITARIST,
+        .encounterMusic_gender = 35,
+        .trainerPic = TRAINER_PIC_GUITARIST,
+        .trainerName = _("ARTURO"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGuitaristArturoRematch4),
+    },
+
+    [TRAINER_SINNOH_GUITARIST_ARTURO_UNUSED] =
+    {
+        .trainerClass = TRAINER_CLASS_GUITARIST,
+        .encounterMusic_gender = 35,
+        .trainerPic = TRAINER_PIC_GUITARIST,
+        .trainerName = _("ARTURO"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGuitaristArturoUnused),
+    },
+
+    [TRAINER_SINNOH_LADY_CELESTE] =
+    {
+        .trainerClass = TRAINER_CLASS_LADY,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_LADY,
+        .trainerName = _("CELESTE"),
+        .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohLadyCeleste),
+    },
+
+    [TRAINER_SINNOH_LADY_KYLIE] =
+    {
+        .trainerClass = TRAINER_CLASS_LADY,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_LADY,
+        .trainerName = _("KYLIE"),
+        .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohLadyKylie),
+    },
+
+    [TRAINER_SINNOH_LASS_BLYTHE] =
+    {
+        .trainerClass = TRAINER_CLASS_LASS,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_LASS,
+        .trainerName = _("BLYTHE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohLassBlythe),
+    },
+
+    [TRAINER_SINNOH_LUCAS_JUBILIFE_CITY_CHIMCHAR] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_TRAINER_1,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_BRENDAN,
+        .trainerName = _("LUCAS"),
+        .items = {ITEM_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohLucasJubilifeCityChimchar),
+    },
+
+    [TRAINER_SINNOH_LUCAS_JUBILIFE_CITY_PIPLUP] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_TRAINER_1,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_BRENDAN,
+        .trainerName = _("LUCAS"),
+        .items = {ITEM_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohLucasJubilifeCityPiplup),
+    },
+
+    [TRAINER_SINNOH_LUCAS_JUBILIFE_CITY_TURTWIG] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_TRAINER_1,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_BRENDAN,
+        .trainerName = _("LUCAS"),
+        .items = {ITEM_POTION, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohLucasJubilifeCityTurtwig),
+    },
+
+    [TRAINER_SINNOH_LUCAS_VEILSTONE_CITY_CHIMCHAR] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_TRAINER_1,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_BRENDAN,
+        .trainerName = _("LUCAS"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohLucasVeilstoneCityChimchar),
+    },
+
+    [TRAINER_SINNOH_LUCAS_VEILSTONE_CITY_PIPLUP] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_TRAINER_1,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_BRENDAN,
+        .trainerName = _("LUCAS"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohLucasVeilstoneCityPiplup),
+    },
+
+    [TRAINER_SINNOH_LUCAS_VEILSTONE_CITY_TURTWIG] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_TRAINER_1,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_BRENDAN,
+        .trainerName = _("LUCAS"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohLucasVeilstoneCityTurtwig),
+    },
+
+    [TRAINER_SINNOH_POKEFAN_MEREDITH] =
+    {
+        .trainerClass = TRAINER_CLASS_POKEFAN,
+        .encounterMusic_gender = 33 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_POKEFAN_F,
+        .trainerName = _("MEREDITH"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = ITEM_DEFAULT_MOVES(sParty_SinnohPokefanMeredith),
+    },
+
+    [TRAINER_SINNOH_POKE_KID_ARIEL] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_POKE_KID,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_262,
+        .trainerName = _("ARIEL"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohPokeKidAriel),
+    },
+
+    [TRAINER_SINNOH_POKE_KID_ARIEL_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_POKE_KID,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_262,
+        .trainerName = _("ARIEL"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohPokeKidArielRematch1),
+    },
+
+    [TRAINER_SINNOH_POKE_KID_ARIEL_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_POKE_KID,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_262,
+        .trainerName = _("ARIEL"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohPokeKidArielRematch2),
+    },
+
+    [TRAINER_SINNOH_POKE_KID_ARIEL_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_POKE_KID,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_262,
+        .trainerName = _("ARIEL"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohPokeKidArielRematch3),
+    },
+
+    [TRAINER_SINNOH_POKE_KID_ARIEL_REMATCH_4] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_POKE_KID,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_262,
+        .trainerName = _("ARIEL"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohPokeKidArielRematch4),
+    },
+
+    [TRAINER_SINNOH_POKE_KID_ARIEL_UNUSED] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_POKE_KID,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_262,
+        .trainerName = _("ARIEL"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohPokeKidArielUnused),
+    },
+
+    [TRAINER_SINNOH_RICH_BOY_LIAM] =
+    {
+        .trainerClass = TRAINER_CLASS_RICH_BOY,
+        .encounterMusic_gender = 34,
+        .trainerPic = TRAINER_PIC_RICH_BOY,
+        .trainerName = _("LIAM"),
+        .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = ITEM_DEFAULT_MOVES(sParty_SinnohRichBoyLiam),
+    },
+
+    [TRAINER_SINNOH_RIVAL_SPEAR_PILLAR_CHIMCHAR] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalSpearPillarChimchar),
+    },
+
+    [TRAINER_SINNOH_RIVAL_SPEAR_PILLAR_PIPLUP] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalSpearPillarPiplup),
+    },
+
+    [TRAINER_SINNOH_RIVAL_SPEAR_PILLAR_TURTWIG] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("CEDRIC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohRivalSpearPillarTurtwig),
+    },
+
+    [TRAINER_SINNOH_SOCIALITE_REBECCA] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_SOCIALITE,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_249,
+        .trainerName = _("REBECCA"),
+        .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSocialiteRebecca),
+    },
+

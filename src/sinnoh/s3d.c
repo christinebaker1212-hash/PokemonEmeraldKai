@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "constants/event_objects.h"
 #include "event_data.h"
 #include "mp_region.h"
 #include "gpu_regs.h"
@@ -500,8 +501,17 @@ static void FindCamera(void)
 static void SetupView(void)
 {
     const struct Sprite *s = &gSprites[gObjectEvents[gPlayerAvatar.objectEventId].spriteId];
+    u8 cam;
     float p = CAM_PITCH * 3.14159265f / 180.0f;
     float sp = sinf(p), cp = cosf(p);
+    // (a scene's camera, the game's own camera object (special SpawnCameraObject: Platinum's AddFreeCamera): the
+    // view follows it until RemoveCameraObject)
+    for (cam = 0; cam < OBJECT_EVENTS_COUNT; cam++)
+        if (gObjectEvents[cam].active && gObjectEvents[cam].localId == OBJ_EVENT_ID_CAMERA)
+        {
+            s = &gSprites[gObjectEvents[cam].spriteId];
+            break;
+        }
     // The player's tile centre: their sprite's middle, 8 pixels above its feet (the tile's bottom edge)
     sView.ax = s->x + s->x2 + gSpriteCoordOffsetX;
     sView.ay = s->y + s->y2 + gSpriteCoordOffsetY - s->centerToCornerVecY - 8;

@@ -117,6 +117,14 @@ for _t, _pic, _f in (('COMMANDER_MARS_VALLEY_WINDWORKS', 'AQUA_ADMIN_F', 1),
 # DISTORTION WORLD (tools/sinnoh/distortion.py)
 LATE_STORY = {'TRAINER_GALACTIC_BOSS_CYRUS_DISTORTION_WORLD': ('S:GALACTIC_BOSS', 'MAGMA_LEADER_MAXIE', 0, 'GALACTIC')}
 STORY_TRAINERS.update(LATE_STORY)
+# The partners of Platinum's tag battles (StartTagBattle: Kai's partner battle, battle_tower.c MP_StartPartnerBattle):
+# the counterpart in JUBILIFE and VEILSTONE, the rival at the SPEAR PILLAR, by the player's starter
+PARTNERS = {}
+for _starter in ('CHIMCHAR', 'PIPLUP', 'TURTWIG'):
+    for _place in ('JUBILIFE_CITY', 'VEILSTONE_CITY'):
+        PARTNERS['TRAINER_DAWN_%s_%s' % (_place, _starter)] = ('PKMN_TRAINER_2', 'MAY', 1, 'ACE_TRAINER')
+        PARTNERS['TRAINER_LUCAS_%s_%s' % (_place, _starter)] = ('PKMN_TRAINER_1', 'BRENDAN', 0, 'ACE_TRAINER')
+    PARTNERS['TRAINER_RIVAL_SPEAR_PILLAR_' + _starter] = ('RIVAL', 'YOUNGSTER', 0, 'ACE_TRAINER')
 RENAME = {'ITEM_X_DEFENSE': 'ITEM_X_DEFEND', 'MOVE_SMOKE_SCREEN': 'MOVE_SMOKESCREEN', 'MOVE_SOFTBOILED': 'MOVE_SOFT_BOILED', 'MOVE_HIGH_JUMP_KICK': 'MOVE_HI_JUMP_KICK',
           'ITEM_PARLYZ_HEAL': 'ITEM_PARALYZE_HEAL'}
 
@@ -142,6 +150,24 @@ def placed(root):
             for o in json.load(open(os.path.join(edir, f)))['object_events']:
                 if isinstance(o['script'], str) and o['script'].startswith('TRAINER_'):
                     out.setdefault(o['script'], f)
+    return out
+
+
+def scripted(root, have):
+    """Trainers Platinum's scripts battle that no map places (story scenes, the restaurant, rematches), in name order:
+    after all the others, so the ids before them stay"""
+    names = set()
+    sdir = os.path.join(root, 'res/field/scripts')
+    for f in os.listdir(sdir):
+        if f.endswith('.s'):
+            names |= set(re.findall(r'\b(TRAINER_[A-Z0-9_]+)\b', open(os.path.join(sdir, f), errors='replace').read()))
+    out = []
+    for t in sorted(names):
+        path = os.path.join(root, 'res/trainers/data', t[len('TRAINER_'):].lower() + '.json')
+        if t in have or t.startswith('TRAINER_CLASS_') or not os.path.exists(path):
+            continue
+        if t in PARTNERS or json.load(open(path))['class'][len('TRAINER_CLASS_'):] in CLASSES:   # (the BATTLEGROUND's partners: not yet)
+            out.append(t)
     return out
 
 
@@ -174,6 +200,8 @@ def main():
 
     trainers = sorted(placed(root)) + list(SPECIAL) + [t for t in STORY_TRAINERS if t not in LATE_STORY] \
         + [t for t in TALK if t not in placed(root)] + list(LATE_STORY)
+    only_scripts = scripted(root, set(trainers))   # (battled by Platinum's own scripts: no script of their own here)
+    trainers += only_scripts
     widths = letter_widths()
     consts, entries, parties, script = [], [], [], []
     pics = []   # Platinum's battle picture of each (its class's, include/constants/sinnoh_gfx.h)
@@ -186,8 +214,8 @@ def main():
         if t in SPECIAL:
             ours, pic, female = SPECIAL[t]
             music = 'ACE_TRAINER'      # (their scripts battle with NO_MUSIC)
-        elif t in STORY_TRAINERS:
-            ours, pic, female, music = STORY_TRAINERS[t]
+        elif t in STORY_TRAINERS or t in PARTNERS:
+            ours, pic, female, music = STORY_TRAINERS.get(t) or PARTNERS[t]
         else:
             ours, pic, music, female = CLASSES[pclass]
         cls = 'TRAINER_CLASS_SINNOH_' + ours[2:] if ours.startswith('S:') else c('TRAINER_CLASS_' + ours)
@@ -220,7 +248,7 @@ def main():
                        '        .party = %s(%s),\n    },\n\n'
                        % (const, cls, M[music], ' | F_TRAINER_FEMALE' if female else '', c('TRAINER_PIC_' + pic)[12:],
                           name, ', '.join(items), 'TRUE' if d['double_battle'] else 'FALSE', ai, macro, pname))
-        if t in SPECIAL or t in STORY_TRAINERS:
+        if t in SPECIAL or t in STORY_TRAINERS or t in PARTNERS or t in only_scripts:
             continue        # (their words are in tools/sinnoh/words.py / legends.py, with their scripts)
         intro, defeat, after = trainer_words.lines(pclass, t)
         lab = label(t)

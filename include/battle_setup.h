@@ -17,6 +17,8 @@ extern const struct RematchTrainer gRematchTable[REMATCH_TABLE_ENTRIES];
 extern u16 gTrainerBattleOpponent_A;
 extern u16 gTrainerBattleOpponent_B;
 extern u16 gPartnerTrainerId;
+void MP_StartTwoTrainerBattle(u16 a, u16 b, const u8 *defeatA, const u8 *defeatB);   // Moemon Kai: SINNOH's scripted two-trainer battles
+void MP_StartPartnerBattle(u16 partner);   // Moemon Kai: a multi battle beside a trainer (battle_tower.c)
 bool8 MP_PartnerShowsBack(void);   // Moemon Kai: STEVEN or a JOHTO / KANTO partner shown from behind (battle_tower.c)
 u16 MP_PartnerBackPic(void);
 

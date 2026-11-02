@@ -1508,6 +1508,26 @@ void MP_EndJoinedTrainerBattle(void)
     SetBattledTrainersFlags();
 }
 
+// Moemon Kai: SINNOH's battles against two trainers at once that a script starts (Platinum's StartTrainerBattle with
+// two: src/sinnoh/s3d_scrcmd.c), as two trainers who spotted the player together: the game's own double battle
+// against both, each with its defeat line; the script goes on after a win
+void MP_StartTwoTrainerBattle(u16 a, u16 b, const u8 *defeatA, const u8 *defeatB)
+{
+    gApproachingTrainerId = 0;
+    InitTrainerBattleVariables();
+    gApproachingTrainerId = 1;
+    InitTrainerBattleVariables();
+    gApproachingTrainerId = 0;
+    sTrainerBattleMode = TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT;
+    gTrainerBattleOpponent_A = a;
+    gTrainerBattleOpponent_B = b;
+    sTrainerADefeatSpeech = (u8 *)defeatA;
+    sTrainerBDefeatSpeech = (u8 *)defeatB;
+    sTrainerObjectEventLocalId = LOCALID_NONE;
+    gNoOfApproachingTrainers = 2;
+    BattleSetup_StartTrainerBattle();
+}
+
 // Moemon Kai (tests only: mp trainer, tools/test/trainer_sweep.sh): a battle against trainer ID right now, as its
 // script would start it
 void MP_Debug_TrainerBattle(u16 id)

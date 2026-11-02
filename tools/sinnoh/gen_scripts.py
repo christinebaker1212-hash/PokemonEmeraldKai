@@ -36,7 +36,7 @@ from gen_trainers import RENAME  # noqa: E402
 
 OUT = os.path.join(ROOT, 'sinnoh', 'platinum_scripts.inc')
 PREFIX = 'SinnohP_'
-TERMINAL = {'End', 'Return', 'GoTo', 'EndMovement', 'ReturnToField'}
+TERMINAL = {'End', 'Return', 'GoTo', 'EndMovement'}
 
 # this game's SINNOH script command (data/script_cmd_table.inc 0xF6 `sinnoh OP, ARG, ARG2`, src/sinnoh/s3d_scrcmd.c)
 SINNOH_BUFFER_PLAYER, SINNOH_BUFFER_RIVAL, SINNOH_BUFFER_COUNTERPART, SINNOH_YESNO = 1, 2, 3, 4
@@ -45,7 +45,11 @@ SINNOH_BUFFER_POCKET, SINNOH_BADGE_CHECK, SINNOH_NATIONAL_DEX = 10, 11, 12
 SINNOH_MENU_INIT, SINNOH_MENU_ADD, SINNOH_MENU_SHOW = 13, 14, 15
 SINNOH_FIRST_NON_EGG, SINNOH_COUNT_ALIVE_EXCEPT, SINNOH_HAS_SPECIES, SINNOH_DAY_OF_WEEK = 16, 17, 18, 19
 SINNOH_TIME_OF_DAY, SINNOH_ON_BIKE, SINNOH_STARTER, SINNOH_FACE = 20, 21, 22, 23
-SINNOH_GAME_COMPLETED, SINNOH_DID_NOT_CAPTURE = 24, 25
+SINNOH_GAME_COMPLETED, SINNOH_DID_NOT_CAPTURE, SINNOH_GET_HOUR, SINNOH_SET_WARP = 24, 25, 26, 27
+SINNOH_SET_BIKE, SINNOH_PARTY_SPECIES, SINNOH_HELD_ITEM, SINNOH_OBJECT_POS, SINNOH_TWO_TRAINERS = 28, 29, 30, 31, 32
+SINNOH_SET_BG, SINNOH_BUFFER_RIVAL_STARTER = 33, 34
+VAR_SINNOH_STARTER = 0x52F8      # (include/mp_region.h: the starter picked from ROWAN's briefcase)
+FLAG_SINNOH_HAS_PARTNER = 0x3D3C   # (include/mp_region.h: Platinum's walking partner, SetHasPartner)
 
 # Platinum's comparisons (CompareVar / CheckFlag then GoToIf / CallIf): the same codes as this game's
 COND = {'Lt': 0, 'Eq': 1, 'Gt': 2, 'Le': 3, 'Ge': 4, 'Ne': 5}
@@ -106,8 +110,13 @@ class Unsupported(Exception):
 def parse(path):
     """{label: [(command, [args])]}, the entries (ScriptEntry names in order), the labels in file order"""
     labels, entries, order, cur = {}, [], [], None
+    defines = {}
     for raw in open(path, encoding='utf-8', errors='replace'):
         line = raw.split('//')[0].split('@')[0].rstrip()   # (both kinds of comments)
+        m = re.match(r'^#define\s+(\w+)\s+(\S+)\s*$', line)
+        if m:
+            defines[m.group(1)] = m.group(2)                 # (a file's own names: LOCAL_VAR_X VAR_0x8004)
+            continue
         if not line.strip() or line.lstrip().startswith('#'):
             continue
         m = re.match(r'^(\w+):\s*$', line)
@@ -126,7 +135,7 @@ def parse(path):
         if cmd in ('ScriptEntryEnd', '.balign', '.align'):
             continue
         if cur:
-            labels[cur].append((cmd, [a.strip() for a in args.split(',')] if args else []))
+            labels[cur].append((cmd, [defines.get(a.strip(), a.strip()) for a in args.split(',')] if args else []))
     return labels, entries, order
 
 
@@ -170,7 +179,8 @@ class Decomp:
             from source import open_source
             from gen_maps import places
             self._origins, self.names = {}, {}
-            for p in places(open_source(self.root), self.root):
+            self.places = list(places(open_source(self.root), self.root))
+            for p in self.places:
                 low = p['place']['header'][len('MAP_HEADER_'):].lower()
                 self._origins.setdefault(low, (p['id'], p['x0'] * 32, p['z0'] * 32))
                 self.names.setdefault(p['id'], p['name'])
@@ -261,7 +271,9 @@ class FileConverter:
             return str(CONSTANTS[x])
         if re.match(r'^(ITEM|SPECIES|MOVE)_', x):
             x = RENAME.get(x, x)
-            x = {'ITEM_SECRETPOTION': 'ITEM_SECRET_POTION'}.get(x, x)
+            x = {'ITEM_SECRETPOTION': 'ITEM_SECRET_POTION', 'ITEM_BLACKGLASSES': 'ITEM_BLACK_GLASSES',
+                 'ITEM_SILVERPOWDER': 'ITEM_SILVER_POWDER', 'ITEM_NEVERMELTICE': 'ITEM_NEVER_MELT_ICE',
+                 'ITEM_THUNDERSTONE': 'ITEM_THUNDER_STONE'}.get(x, x)
             if x in self.dec.ours:
                 return x
             raise Unsupported('value %s (not in this game)' % x)
@@ -279,6 +291,11 @@ class FileConverter:
             return x                  # (this game's own special variables of the same meaning)
         if re.match(r'^(0x[0-9A-Fa-f]+|\d+)$', x) and int(x, 0) >= 0x4000:
             raise Unsupported('a raw variable number %s' % x)
+        m = re.match(r'^VAR_MAP_LOCAL_0x([0-9A-Fa-f]+)$', x)
+        if m and int(m.group(1), 16) <= 0xE:
+            return '0x%X' % (0x4000 + int(m.group(1), 16))   # (the map's own: VAR_TEMP_0-E, cleared as a map loads)
+        if re.match(r'^VAR_DUMMY_0x', x):
+            return '0x400F'           # (VAR_TEMP_F: Platinum's unused variables)
         v = ids.var(self.root, x) if x.startswith('VAR_') else None
         if v is None:
             raise Unsupported('variable %s' % x)
@@ -292,6 +309,14 @@ class FileConverter:
         return x.startswith('VAR_')
 
     def flag(self, x):
+        if re.match(r'^FLAG_(DUMMY|UNUSED)_0x', x):
+            return '0'                # (Platinum's unused flags: nothing reads them)
+        m = re.match(r'^FLAG_MAP_LOCAL_0x([0-9A-Fa-f]+)$', x)
+        if m:
+            n = int(m.group(1), 16)
+            if not 1 <= n <= 0x1F:
+                raise Unsupported('flag %s' % x)
+            return '0x%X' % n         # (the map's own flags: this game's FLAG_TEMP_1-1F, cleared as a map loads)
         f = ids.flag(self.root, x) if x.startswith('FLAG_') else None
         if f is None:
             raise Unsupported('flag %s' % x)
@@ -541,9 +566,34 @@ class FileConverter:
             return ['fadedefaultbgm']
         if cmd == 'WaitABPadPress':
             return ['waitbuttonpress']
+        if cmd == 'StartTrainerBattle' and len(a) > 1 and a[1] not in ('0',):
+            # two at once: the game's own battle against two trainers who spotted the player (battle_setup.c
+            # MP_StartTwoTrainerBattle), each with Platinum's defeat line
+            out = []
+            for k in (0, 1):
+                where = build_text.trainer_message(self.root, a[k], 'TRMSG_DEFEAT')
+                if where is None or self.is_var(a[k]):
+                    raise Unsupported('trainer %s has no defeat line' % a[k])
+                lab = '%sT_%d_%d' % (PREFIX, where[0], where[1])
+                self.texts[lab] = where
+                out.append('loadword %d, %s' % (k, lab))
+            return out + [self.sinnoh(SINNOH_TWO_TRAINERS, self.value(a[0]), self.value(a[1]))]
+        if cmd == 'StartTagBattle':
+            # beside a partner: the game's own multi battle (Kai's, as STEVEN's and LANCE's: battle_tower.c
+            # MP_StartPartnerBattle, DoSpecialTrainerBattle 15): the half of the party that battles picked first, the
+            # party back as it was after (with what the battle changed), a loss whites out
+            n = self.next_local()
+            pick, go, won = ['%s%s__tag%d_%s' % (PREFIX, self.low, n, x) for x in ('pick', 'go', 'won')]
+            return ['special SavePlayerParty', '%s:' % pick, 'fadescreen FADE_TO_BLACK',
+                    'special ChooseHalfPartyForBattle', 'waitstate', 'goto_if_ne VAR_RESULT, 0, %s' % go,
+                    'special LoadPlayerParty', 'special SavePlayerParty', 'goto %s' % pick, '%s:' % go,
+                    'special ReducePlayerPartyToSelectedMons', 'frontier_set FRONTIER_DATA_SELECTED_MON_ORDER',
+                    ('copyvar VAR_0x8005, %s' if self.is_var(a[0]) else 'setvar VAR_0x8005, %s') % self.arg(a[0]),
+                    'setvar VAR_0x8006, %s' % self.value(a[1]), 'setvar VAR_0x8007, %s' % self.value(a[2]),
+                    'setvar VAR_0x8004, 15', 'special DoSpecialTrainerBattle', 'waitstate', 'frontier_saveparty',
+                    'special LoadPlayerParty', 'goto_if_eq VAR_RESULT, B_OUTCOME_WON, %s' % won,
+                    'fadescreen FADE_TO_BLACK', 'special SetCB2WhiteOut', 'waitstate', '%s:' % won]
         if cmd == 'StartTrainerBattle':
-            if len(a) > 1 and a[1] not in ('0',):
-                raise Unsupported('StartTrainerBattle with two trainers')
             if self.is_var(a[0]):
                 raise Unsupported('StartTrainerBattle by a variable')
             t = self.value(a[0])
@@ -581,6 +631,9 @@ class FileConverter:
             if o is None:
                 raise Unsupported('warp to %s' % a[0])
             return ['warp %s, %d, %d' % (o[0], int(self.value(a[1])) - o[1], int(self.value(a[2])) - o[2])]
+        if cmd == 'SetObjectEventPos' and (self.is_var(a[1]) or self.is_var(a[2])):
+            # (a place the script worked out: Platinum's map tiles, made this map's by the game)
+            return [self.sinnoh(SINNOH_OBJECT_POS, self.localid(a[0]), self.arg(a[1]), self.arg(a[2]))]
         if cmd == 'SetObjectEventPos':
             o = self.dec.origins().get(self.events_low)
             if o is None:
@@ -588,6 +641,66 @@ class FileConverter:
             x, z = int(self.value(a[1])) - o[1], int(self.value(a[2])) - o[2]
             lid = self.localid(a[0])
             return ['setobjectxyperm %s, %d, %d' % (lid, x, z), 'setobjectxy %s, %d, %d' % (lid, x, z)]
+        if cmd == 'SetPosition':
+            o = self.dec.origins().get(self.events_low)
+            if o is None:
+                raise Unsupported('positions on %s' % self.events_low)
+            x, z = int(self.value(a[1])) - o[1], int(self.value(a[3])) - o[2]
+            lid = self.localid(a[0])
+            return ['setobjectxyperm %s, %d, %d' % (lid, x, z), 'setobjectxy %s, %d, %d' % (lid, x, z),
+                    self.sinnoh(SINNOH_FACE, lid, self.value(a[4]))]
+        if cmd == 'SetWarpEventPos':
+            n = self.our_warp(int(self.value(a[0])))
+            o = self.dec.origins()[self.events_low]
+            return [self.sinnoh(SINNOH_SET_WARP, n, int(self.value(a[1])) - o[1], int(self.value(a[2])) - o[2])]
+        if cmd == 'SetBgEventPos':
+            n = self.our_event(int(self.value(a[0])), 'bg_events')
+            o = self.dec.origins()[self.events_low]
+            return [self.sinnoh(SINNOH_SET_BG, n, int(self.value(a[1])) - o[1], int(self.value(a[2])) - o[2])]
+        if cmd in ('SetHasPartner', 'ClearHasPartner'):
+            return ['%sflag 0x%X' % ('set' if cmd == 'SetHasPartner' else 'clear', FLAG_SINNOH_HAS_PARTNER)]
+        if cmd == 'AddFreeCamera':
+            # the game's own camera object (the 3D view follows it: src/sinnoh/s3d.c SetupView), where Platinum's is
+            return ['special SpawnCameraObject',
+                    self.sinnoh(SINNOH_OBJECT_POS, 'OBJ_EVENT_ID_CAMERA', self.arg(a[0]), self.arg(a[1]))]
+        if cmd == 'ApplyFreeCameraMovement':
+            return ['applymovement OBJ_EVENT_ID_CAMERA, %s' % self.movement_label(a[0])]
+        if cmd == 'RestoreCamera':
+            return ['special RemoveCameraObject']
+        if cmd == 'StartChooseStarterScene':
+            # Kai's SINNOH briefcase (src/sinnoh/s3d_places.c Sinnoh_StarterMenu: Platinum's screen from the graphics
+            # pack); Platinum's can't be backed out of
+            again = '%s%s__starter%d' % (PREFIX, self.low, self.next_local())
+            return ['%s:' % again, 'special Sinnoh_StarterMenu', 'waitstate', 'goto_if_eq VAR_RESULT, 0, %s' % again]
+        if cmd == 'SaveChosenStarter':
+            return ['copyvar 0x%X, VAR_RESULT' % VAR_SINNOH_STARTER, 'setflag 0x3D39']   # (FLAG_SINNOH_STARTER)
+        if cmd == 'ReturnToField':
+            return []                       # (the briefcase went back to the field itself)
+        if cmd == 'BufferRivalStarterSpeciesName':
+            return [self.sinnoh(SINNOH_BUFFER_RIVAL_STARTER, self.value(a[0]))]
+        if cmd == 'GiveRunningShoes':
+            return ['setflag FLAG_SYS_B_DASH']
+        if cmd == 'GiveJournal':
+            return ['additem ITEM_JOURNAL']
+        if cmd in ('InitSizeContestRecord', 'RandomizeJubilifeLottery', 'InitDailyRandomLevel', 'SetStepFlag'):
+            return []
+        if cmd == 'SetObjectFlagIsPersistent':
+            return []                       # (this game's objects keep their flags anyway)
+        if cmd == 'GetPartyMonSpecies':
+            return [self.sinnoh(SINNOH_PARTY_SPECIES, self.arg(a[0]), self.var(a[1]))]
+        if cmd == 'CheckPartyHasHeldItem':
+            return [self.sinnoh(SINNOH_HELD_ITEM, self.arg(a[0]), self.var(a[1]))]
+        if cmd == 'SetPlayerBike':
+            return [self.sinnoh(SINNOH_SET_BIKE, self.value(a[0]))]
+        if cmd == 'SetMovementType':
+            import sprites
+            return ['setobjectmovementtype %s, %s' % (self.localid(a[0]), sprites.movement(a[1]))]
+        if cmd == 'CheckDistributionEvent':
+            return ['setvar %s, 0' % self.var(a[1])]   # (no distribution events: Platinum without them)
+        if cmd == 'MessageInstant':
+            return ['message %s' % self.text_label(a[0]), 'waitmessage']
+        if cmd == 'GetHour':
+            return [self.sinnoh(SINNOH_GET_HOUR, self.var(a[0]))]
         if cmd == 'GetPlayerGender':
             return ['checkplayergender', 'copyvar %s, VAR_RESULT' % self.var(a[0])]
         if cmd == 'GetPlayerDir':
@@ -625,10 +738,33 @@ class FileConverter:
             return ['delay %d' % (2 * int(cmd[len('Delay'):]))]
         if cmd == 'WaitTime':
             return ['delay %d' % (2 * int(self.value(a[0])))]
+        if cmd in ('StopSE', 'WaitForTransition', 'SetInitialVolumeForSequence', 'SetBlackOutWarpId', 'ScrCmd_29F'):
+            return []                       # (sounds stop by themselves here; the game picks the heal spot itself)
         if cmd in ('TurnOnTimeBasedEffects', 'CreateJournalEvent', 'TrySetUnusedCollectedOrbFlag', 'RecordHeapMemory',
                    'CheckHeapMemory', 'SetMenuXOriginToRight', 'SetMenuXOriginToLeft'):
             return []                       # (Platinum's journal, its memory checks: nothing here)
         raise Unsupported(cmd)
+
+    def our_warp(self, n):
+        return self.our_event(n, 'warp_events')
+
+    def our_event(self, n, kind):
+        """this game's number of Platinum's warp / bg event N on this file's map (the same tile: tools/sinnoh/gen_maps.py
+        keeps only some)"""
+        from places import events
+        o = self.dec.origins().get(self.events_low)
+        p = next((q for q in self.dec.places if q['id'] == (o or [None])[0]), None)
+        if p is None:
+            raise Unsupported('warps on %s' % self.events_low)
+        ws = events(self.root, p['place'])[kind]
+        ours = _our_map(p['name'])
+        if ours is None or not 0 <= n < len(ws):
+            raise Unsupported('%s %d' % (kind, n))
+        x, y = ws[n]['x'] - o[1], ws[n]['z'] - o[2]
+        for i, w in enumerate(ours.get(kind, [])):
+            if (w['x'], w['y']) == (x, y):
+                return i
+        raise Unsupported('%s %d (left out here)' % (kind, n))
 
     # ---- reach and convert
     def reach(self, start):
@@ -643,7 +779,7 @@ class FileConverter:
             seen.append(lab)
             body = self.labels[lab]
             for cmd, a in body:
-                if cmd == 'ApplyMovement':
+                if cmd in ('ApplyMovement', 'ApplyFreeCameraMovement'):
                     continue
                 for x in a:
                     if x in self.labels and x not in seen:
@@ -699,6 +835,8 @@ class FileConverter:
             for cmd, a in self.labels[lab]:
                 if cmd == 'ApplyMovement':
                     moves.add(a[1])
+                if cmd == 'ApplyFreeCameraMovement':
+                    moves.add(a[0])
                 out += ['\t' + line for line in self.command(cmd, a)]
             body = self.labels[lab]
             if not body or body[-1][0] not in TERMINAL:
@@ -801,21 +939,124 @@ def our_map_scripts(name):
     return out, tables
 
 
+def _target(root, low, s):
+    """(file, entry) Platinum's script number S of map file LOW runs, None for none / a trainer"""
+    if not isinstance(s, int) or isinstance(s, bool):
+        return None
+    t = common_target(s)
+    if t:
+        return t
+    return (low, s) if 1 <= s < 2000 else None
+
+
 def map_tables(root, wanted):
-    """[(map constant, map name, Platinum low, {kind: entry}, [(var, value, entry)])] of every SINNOH map Platinum gives
-    map scripts; adds the entries to WANTED (so they are converted)"""
-    out = []
-    for low, (mapid, x, z) in sorted(converter(root, 'common').dec.origins().items(), key=lambda kv: kv[1][0]):
+    """[(map constant, Platinum low, {kind: entry}, [(var, value, entry)], place)] of every SINNOH map; adds every entry
+    its map scripts, people and triggers run to WANTED (so they are converted)"""
+    from places import events
+    dec = converter(root, 'common').dec
+    dec.origins()
+    out, seen = [], set()
+    for p in dec.places:
+        low = p['place']['header'][len('MAP_HEADER_'):].lower()
+        if p['id'] in seen or converter(root, low) is None:
+            continue
+        seen.add(p['id'])
         once, frame = init_scripts(root, low)
-        if not once and not frame:
-            continue
-        c = converter(root, low)
-        if c is None:
-            continue
         for n in list(once.values()) + [f[2] for f in frame]:
             wanted[low].add(n)
-        out.append((mapid, low, once, frame))
+        ev = events(root, p['place'])
+        for o in ev['object_events'] + ev['coord_events']:
+            t = _target(root, low, o.get('script'))
+            if t:
+                wanted[t[0]].add(t[1])
+        out.append((p['id'], low, once, frame, p))
     return out
+
+
+def _our_map(name):
+    path = os.path.join(ROOT, 'data/maps', name, 'map.json')
+    return json.load(open(path, encoding='utf-8')) if os.path.exists(path) else None
+
+
+def _stub_body(name, label):
+    """the lines of a map's own script LABEL (data/maps/NAME/scripts.inc), up to its first `end`"""
+    path = os.path.join(ROOT, 'data/maps', name, 'scripts.inc')
+    text = open(path, encoding='utf-8').read() if os.path.exists(path) else ''
+    m = re.search(r'^%s::\n((?:\t.*\n)*?)\tend\n' % re.escape(label), text, re.M)
+    return m.group(1) if m else None
+
+
+# a person's script of this game's that Platinum's story replaces (its words, or Platinum's own script already); the
+# rest (MOéMON CENTER nurses, clerks, gym leaders, sailors, place systems) stay the game's
+def _replaceable(body):
+    if body is None:
+        return True
+    if re.match(r'^\tgoto SinnohP_\w+\n$', body):
+        return True
+    if re.match(r'^\tmsgbox \w+_Text_\w+, MSGBOX_(NPC|SIGN)\n$', body):
+        return True
+    return bool(re.match(r'^\tlock\n\tfaceplayer\n\tgoto_if_set 0x[0-9A-F]+, \w+_Given\n', body))   # (a written gift)
+
+
+def people(root, p, low, name, done):
+    """Platinum's story on map NAME: [(local id, hide flag, x, y, script label or None: the map's own)] for its people,
+    and its triggers as [(x, y, var, value, script)] (Platinum's whose script converts, each tile of their area, and the
+    map's own where Platinum has none)"""
+    from places import events
+    from gen_maps import inside
+    import sprites
+    c = converter(root, low)
+    ours = _our_map(name)
+    if ours is None:
+        return [], []
+    ev = events(root, p['place'])
+    objs = []
+    for i, o in enumerate(ev['object_events']):
+        if i >= len(ours['object_events']):
+            break
+        mine = ours['object_events'][i]
+        hide = o.get('hidden_flag')
+        flag = ids.flag(root, hide) if isinstance(hide, str) and hide.startswith('FLAG_') else None
+        t = _target(root, low, o.get('script'))
+        lab = converter(root, t[0]).entry_label(t[1]) if t and converter(root, t[0]) else None
+        if lab not in done:
+            lab = None
+        ghost = isinstance(hide, str) and hide.startswith('MAP_HEADER_')
+        if ghost or sprites.sprite(o['graphics_id']) is None or not inside(p, o['x'], o['z']) \
+                or o['graphics_id'].endswith('POKEBALL'):
+            continue
+        script = mine['script']
+        person = script == '%s_EventScript_Person%d' % (name, i + 1) or script == '0x0'
+        trainer = isinstance(o.get('script'), str)
+        if person and lab and _replaceable(_stub_body(name, script) if script != '0x0' else None):
+            new = lab
+        elif person and script == '0x0':
+            continue                       # (nothing to say: stays as it is)
+        elif trainer or person:
+            new = None                     # (the game's own script: a trainer's battle, a role)
+        else:
+            continue                       # (a legendary, an obstacle: the game's own systems)
+        objs.append((i + 1, flag or 0, o['x'] - p['x0'] * 32, o['z'] - p['z0'] * 32, new))
+    trig, covered = [], set()
+    for k, e in enumerate(ev['coord_events']):
+        t = _target(root, low, e.get('script'))
+        lab = converter(root, t[0]).entry_label(t[1]) if t and converter(root, t[0]) else None
+        if lab not in done or not isinstance(e.get('var'), str) or not inside(p, e['x'], e['z']):
+            continue
+        try:
+            var = c.var(e['var'])
+            val = c.value(str(int(e['value']))) if isinstance(e['value'], (bool, int)) else c.arg(str(e['value']))
+        except Unsupported:
+            continue
+        for dz in range(max(1, e.get('length', 1))):
+            for dx in range(max(1, e.get('width', 1))):
+                x, y = e['x'] - p['x0'] * 32 + dx, e['z'] - p['z0'] * 32 + dz
+                trig.append((x, y, var, val, lab))
+                covered.add((x, y))
+    for e in ours.get('coord_events', []):
+        if e.get('type') == 'trigger' and (e['x'], e['y']) not in covered and e['var'] != '0x52F0':
+            trig.append((e['x'], e['y'], e['var'], e['var_value'], e['script']))
+    return objs, trig
 
 
 def emit_map_tables(root, tables, done):
@@ -824,12 +1065,24 @@ def emit_map_tables(root, tables, done):
     map's own rows (a row whose script doesn't convert is left out: a script that never changed its variable would run
     every frame). Only while the story is Platinum's (FLAG_SINNOH_PLATINUM_STORY)"""
     lines, index, skipped = [], [], 0
-    for mapid, low, once, frame in tables:
-        name = converter(root, 'common').dec.names[mapid]
-        ours, our_tables = our_map_scripts(name)
-        if not ours and not os.path.isdir(os.path.join(ROOT, 'data/maps', name)):
+    for mapid, low, once, frame, p in tables:
+        name = p['name']
+        if not os.path.isdir(os.path.join(ROOT, 'data/maps', name)):
             continue
+        ours, our_tables = our_map_scripts(name)
         c = converter(root, low)
+        base = '%s%s_Map' % (PREFIX, low)
+        objs, trig = people(root, p, low, name, done)
+        if objs:
+            lines += ['\t.balign 8', '%s_People:' % base]
+            for lid, flag, x, y, lab in objs:
+                lines += ['\t.byte %d, 0' % lid, '\t.2byte 0x%X, %d, %d' % (flag, x, y), '\tptrvalue %s' % (lab or 0)]
+        if trig:
+            lines.append('\t.balign 8')
+            lines.append('%s_Triggers:' % base)
+            for x, y, var, val, lab in trig:
+                lines += ['\t.2byte %d, %d' % (x, y), '\t.byte 0, 0', '\t.2byte %s, %s, 0' % (var, val),
+                          '\tspace64 4', '\tptrvalue %s' % lab]
         ok = {k: n for k, n in once.items() if c.entry_label(n) in done}
         rows = []
         for var, val, n in frame:
@@ -841,9 +1094,12 @@ def emit_map_tables(root, tables, done):
             except Unsupported:
                 skipped += 1
         skipped += len(once) - len(ok)
+        if not ok and not rows and not objs and not trig:
+            continue
+        index.append((mapid, len(objs), len(trig), '%s_Scripts' % base if ok or rows else 0,
+                      '%s_People' % base if objs else 0, '%s_Triggers' % base if trig else 0))
         if not ok and not rows:
             continue
-        base = '%s%s_Map' % (PREFIX, low)
         table = []
         kinds_done = set()
         for kind, lab in ours:
@@ -873,16 +1129,18 @@ def emit_map_tables(root, tables, done):
         lines.append('%s_Scripts:' % base)
         lines += ['\tmap_script %s, %s' % t for t in table]
         lines.append('\t.byte 0')
-        index.append((mapid, '%s_Scripts' % base))
     lines += map_index(index)
     return lines, len(index), skipped
 
 
 def map_index(index):
+    """struct SinnohMapStory (src/sinnoh/s3d_scrcmd.c): map, people, triggers, then the map scripts, the people and
+    the triggers (0: the map's own)"""
     out = ['\t.balign 8', 'gSinnohPlatinumMapScripts::']
-    for mapid, lab in index:
-        out += ['\t.2byte %s, 0, 0, 0' % mapid, '\tptrvalue %s' % lab]
-    out += ['\t.2byte 0xFFFF, 0, 0, 0', '\tptrvalue 0']
+    for mapid, np, nt, scripts, ppl, trig in index:
+        out += ['\t.2byte %s, %d, %d, 0' % (mapid, np, nt), '\tptrvalue %s' % scripts, '\tptrvalue %s' % ppl,
+                '\tptrvalue %s' % trig]
+    out += ['\t.2byte 0xFFFF, 0, 0, 0', '\tptrvalue 0', '\tptrvalue 0', '\tptrvalue 0']
     return out
 
 
@@ -903,7 +1161,7 @@ def write(lines, out_path):
 
 
 def stub(out_path):
-    lines = ['%s::\n\tend' % lab for lab in sorted(referenced())] + map_index([])
+    lines = ['%s::\n\tend' % lab for lab in sorted(referenced())] + map_index([]) + ['gSinnohPlatinumNewGame::', '\tend']
     write(lines, out_path)
     print('%s: %d stubs (no decomp)' % (os.path.relpath(out_path, ROOT), len(referenced())))
 
@@ -916,6 +1174,7 @@ def build(root, out_path):
         if m:
             wanted[m.group(1)].add(int(m.group(2)))
     tables = map_tables(root, wanted)
+    wanted['init_new_game'].add(1)        # (Platinum's new game: its flags, src/sinnoh/s3d_scrcmd.c Sinnoh_PlatinumStoryBegin)
     # the common scripts the converted ones call, and the ones those call
     queue = [(low, n) for low in wanted for n in wanted[low]]
     while queue:
@@ -945,10 +1204,15 @@ def build(root, out_path):
         lines.append('%s::\n\tend' % lab)
     mt, maps, skipped = emit_map_tables(root, tables, done)
     lines += mt
+    new_game = converter(root, 'init_new_game').entry_label(1)
+    lines += ['gSinnohPlatinumNewGame::', '\tgoto %s' % new_game if new_game in done else '\tend']
+    if new_game not in done:
+        print('gen_scripts: Platinum\'s new game script doesn\'t convert: %s' % converter(root, 'init_new_game').check(1),
+              file=sys.stderr)
     for lab, (b, m) in sorted(texts.items()):
         lines.append('%s:\n\t.byte %s' % (lab, text_bytes(b, m)))
     write(lines, out_path)
-    print('%s: %d scripts, %d texts, map scripts for %d maps (%d of Platinum\'s left out)'
+    print('%s: %d scripts, %d texts, Platinum\'s story on %d maps (%d of its map scripts left out)'
           % (os.path.relpath(out_path, ROOT), len(done), len(texts), maps, skipped))
 
 

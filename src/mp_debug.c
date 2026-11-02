@@ -1083,6 +1083,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         gSaveBlock2Ptr->frontier.challengeStatus = atoi(arg);
         printf("[test] challenge status %d\n", gSaveBlock2Ptr->frontier.challengeStatus);
     }
+    else if (strcmp(cmd, "platinumstory") == 0)
+    {
+        // platinumstory - Platinum's own story begins in this save (src/sinnoh/s3d_scrcmd.c)
+        void Sinnoh_PlatinumStoryBegin(void);
+        Sinnoh_PlatinumStoryBegin();
+    }
     else if (strcmp(cmd, "setflag") == 0)
     {
         // setflag N - an event flag (include/constants/flags.h; 0x.. hex too)

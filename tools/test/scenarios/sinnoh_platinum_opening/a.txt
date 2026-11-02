@@ -1,0 +1,18 @@
+pressuntil A field 5000
+wait 30
+mp platinumstory
+mp getflag 0x3499
+mp warp 44,38,8,5
+wait 150
+shot tv1
+press A 4
+wait 60
+shot tv2
+mash A 8 20
+wait 200
+mash A 4 30
+wait 120
+shot after
+mp getvar 0x5209
+mp ctx
+quit

@@ -761,9 +761,34 @@
 #define ITEM_TM92 659
 #define ITEM_POKETCH 660   // Moemon Kai: SINNOH's watch of apps (src/sinnoh/poketch.c)
 #define ITEM_POKE_RADAR 661   // Moemon Kai: shakes the grass (src/mp/mp_pokeradar.c)
+#define ITEM_GALACTIC_KEY 662   // Moemon Kai: Platinum's (SINNOH's story: tools/sinnoh/gen_scripts.py)
+#define ITEM_AZURE_FLUTE 663
+#define ITEM_WORKS_KEY 664
+#define ITEM_SUITE_KEY 665
+#define ITEM_OAKS_LETTER 666
+#define ITEM_MEMBER_CARD 667
+#define ITEM_OLD_CHARM 668
+#define ITEM_LUNAR_WING 669
+#define ITEM_POFFIN_CASE 670
+#define ITEM_VS_RECORDER 671
+#define ITEM_EXPLORER_KIT 672
+#define ITEM_COUPON_1 673
+#define ITEM_COUPON_2 674
+#define ITEM_COUPON_3 675
+#define ITEM_SPRAYDUCK 676
+#define ITEM_JOURNAL 677
+#define ITEM_PAL_PAD 678
+#define ITEM_SEAL_CASE 679
+#define ITEM_FASHION_CASE 680
+#define ITEM_GROWTH_MULCH 681
+#define ITEM_DAMP_MULCH 682
+#define ITEM_STABLE_MULCH 683
+#define ITEM_GOOEY_MULCH 684
 
-#define ITEMS_COUNT 662
+#define ITEMS_COUNT 685
 // end of Gen 5-9 items
+#define FIRST_PLATINUM_KEY_ITEM ITEM_GALACTIC_KEY
+#define LAST_PLATINUM_ITEM ITEM_GOOEY_MULCH
 
 // A special item id associated with "Cancel"/"Exit" etc. in a list of items or decorations
 // Its icon is defined at ITEMS_COUNT as the "return to field" arrow

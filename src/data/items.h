@@ -4884,4 +4884,276 @@ const struct Item gItems[] =
         .type = ITEM_USE_FIELD,
         .fieldUseFunc = ItemUseOutOfBattle_PokeRadar,
     },
+
+    [ITEM_GALACTIC_KEY] =
+    {
+        .name = _("GALACTIC KEY"),
+        .itemId = ITEM_GALACTIC_KEY,
+        .price = 0,
+        .description = sGalacticKeyDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_AZURE_FLUTE] =
+    {
+        .name = _("AZURE FLUTE"),
+        .itemId = ITEM_AZURE_FLUTE,
+        .price = 0,
+        .description = sAzureFluteDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_WORKS_KEY] =
+    {
+        .name = _("WORKS KEY"),
+        .itemId = ITEM_WORKS_KEY,
+        .price = 0,
+        .description = sWorksKeyDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_SUITE_KEY] =
+    {
+        .name = _("SUITE KEY"),
+        .itemId = ITEM_SUITE_KEY,
+        .price = 0,
+        .description = sSuiteKeyDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_OAKS_LETTER] =
+    {
+        .name = _("OAK'S LETTER"),
+        .itemId = ITEM_OAKS_LETTER,
+        .price = 0,
+        .description = sOaksLetterDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_MEMBER_CARD] =
+    {
+        .name = _("MEMBER CARD"),
+        .itemId = ITEM_MEMBER_CARD,
+        .price = 0,
+        .description = sMemberCardDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_OLD_CHARM] =
+    {
+        .name = _("OLD CHARM"),
+        .itemId = ITEM_OLD_CHARM,
+        .price = 0,
+        .description = sOldCharmDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_LUNAR_WING] =
+    {
+        .name = _("LUNAR WING"),
+        .itemId = ITEM_LUNAR_WING,
+        .price = 0,
+        .description = sLunarWingDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_POFFIN_CASE] =
+    {
+        .name = _("POFFIN CASE"),
+        .itemId = ITEM_POFFIN_CASE,
+        .price = 0,
+        .description = sPoffinCaseDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_VS_RECORDER] =
+    {
+        .name = _("VS. RECORDER"),
+        .itemId = ITEM_VS_RECORDER,
+        .price = 0,
+        .description = sVsRecorderDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_EXPLORER_KIT] =
+    {
+        .name = _("EXPLORER KIT"),
+        .itemId = ITEM_EXPLORER_KIT,
+        .price = 0,
+        .description = sExplorerKitDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_COUPON_1] =
+    {
+        .name = _("COUPON 1"),
+        .itemId = ITEM_COUPON_1,
+        .price = 0,
+        .description = sCoupon1Desc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_COUPON_2] =
+    {
+        .name = _("COUPON 2"),
+        .itemId = ITEM_COUPON_2,
+        .price = 0,
+        .description = sCoupon2Desc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_COUPON_3] =
+    {
+        .name = _("COUPON 3"),
+        .itemId = ITEM_COUPON_3,
+        .price = 0,
+        .description = sCoupon3Desc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_SPRAYDUCK] =
+    {
+        .name = _("SPRAYDUCK"),
+        .itemId = ITEM_SPRAYDUCK,
+        .price = 0,
+        .description = sSprayduckDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_JOURNAL] =
+    {
+        .name = _("JOURNAL"),
+        .itemId = ITEM_JOURNAL,
+        .price = 0,
+        .description = sJournalDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_PAL_PAD] =
+    {
+        .name = _("PAL PAD"),
+        .itemId = ITEM_PAL_PAD,
+        .price = 0,
+        .description = sPalPadDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_SEAL_CASE] =
+    {
+        .name = _("SEAL CASE"),
+        .itemId = ITEM_SEAL_CASE,
+        .price = 0,
+        .description = sSealCaseDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_FASHION_CASE] =
+    {
+        .name = _("FASHION CASE"),
+        .itemId = ITEM_FASHION_CASE,
+        .price = 0,
+        .description = sFashionCaseDesc,
+        .importance = 1,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_GROWTH_MULCH] =
+    {
+        .name = _("GROWTH MULCH"),
+        .itemId = ITEM_GROWTH_MULCH,
+        .price = 200,
+        .description = sGrowthMulchDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_DAMP_MULCH] =
+    {
+        .name = _("DAMP MULCH"),
+        .itemId = ITEM_DAMP_MULCH,
+        .price = 200,
+        .description = sDampMulchDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_STABLE_MULCH] =
+    {
+        .name = _("STABLE MULCH"),
+        .itemId = ITEM_STABLE_MULCH,
+        .price = 200,
+        .description = sStableMulchDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_GOOEY_MULCH] =
+    {
+        .name = _("GOOEY MULCH"),
+        .itemId = ITEM_GOOEY_MULCH,
+        .price = 200,
+        .description = sGooeyMulchDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
 };

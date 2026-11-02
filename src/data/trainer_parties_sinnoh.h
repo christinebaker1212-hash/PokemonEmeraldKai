@@ -2439,3 +2439,297 @@ static const struct TrainerMonItemCustomMoves sParty_SinnohGalacticBossCyrusDist
     {.iv = 250, .lvl = 48, .species = SPECIES_WEAVILE, .heldItem = ITEM_SITRUS_BERRY, .moves = {MOVE_NIGHT_SLASH, MOVE_ICE_PUNCH, MOVE_FAKE_OUT, MOVE_X_SCISSOR}},
 };
 
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohAromaLadyAlison[] = {
+    {.iv = 0, .lvl = 28, .species = SPECIES_ROSELIA},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohBeautyGabriella[] = {
+    {.iv = 0, .lvl = 26, .species = SPECIES_FINNEON},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohBeautyHarley[] = {
+    {.iv = 0, .lvl = 26, .species = SPECIES_PSYDUCK},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohBeautyLindsay[] = {
+    {.iv = 20, .lvl = 19, .species = SPECIES_ROSELIA, .moves = {MOVE_MEGA_DRAIN, MOVE_POISON_STING, MOVE_STUN_SPORE, MOVE_NONE}},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohBreederKaylee[] = {
+    {.iv = 0, .lvl = 26, .species = SPECIES_AIPOM},
+    {.iv = 0, .lvl = 26, .species = SPECIES_MARILL},
+    {.iv = 0, .lvl = 26, .species = SPECIES_SWABLU},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohCameramanTevin[] = {
+    {.iv = 0, .lvl = 20, .species = SPECIES_MIME_JR},
+    {.iv = 0, .lvl = 22, .species = SPECIES_MACHOP},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohCameramanTevinRematch1[] = {
+    {.iv = 0, .lvl = 30, .species = SPECIES_MAGNEMITE},
+    {.iv = 0, .lvl = 32, .species = SPECIES_MR_MIME},
+    {.iv = 0, .lvl = 34, .species = SPECIES_MACHOKE},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohCameramanTevinRematch2[] = {
+    {.iv = 0, .lvl = 42, .species = SPECIES_MAGNEMITE},
+    {.iv = 0, .lvl = 42, .species = SPECIES_MAGNETON},
+    {.iv = 0, .lvl = 43, .species = SPECIES_MR_MIME},
+    {.iv = 0, .lvl = 45, .species = SPECIES_MACHOKE},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohCameramanTevinRematch3[] = {
+    {.iv = 0, .lvl = 48, .species = SPECIES_MAGNETON},
+    {.iv = 0, .lvl = 48, .species = SPECIES_MAGNETON},
+    {.iv = 0, .lvl = 49, .species = SPECIES_MR_MIME},
+    {.iv = 0, .lvl = 51, .species = SPECIES_MACHAMP},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohCameramanTevinRematch4[] = {
+    {.iv = 0, .lvl = 54, .species = SPECIES_MAGNETON},
+    {.iv = 0, .lvl = 54, .species = SPECIES_MAGNETON},
+    {.iv = 0, .lvl = 55, .species = SPECIES_MR_MIME},
+    {.iv = 0, .lvl = 57, .species = SPECIES_MACHAMP},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohCameramanTevinUnused[] = {
+    {.iv = 0, .lvl = 6, .species = SPECIES_MACHOP},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohDawnJubilifeCityChimchar[] = {
+    {.iv = 30, .lvl = 13, .species = SPECIES_TURTWIG, .moves = {MOVE_ABSORB, MOVE_TACKLE, MOVE_NONE, MOVE_NONE}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohDawnJubilifeCityPiplup[] = {
+    {.iv = 30, .lvl = 13, .species = SPECIES_CHIMCHAR, .moves = {MOVE_EMBER, MOVE_SCRATCH, MOVE_NONE, MOVE_NONE}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohDawnJubilifeCityTurtwig[] = {
+    {.iv = 30, .lvl = 13, .species = SPECIES_PIPLUP, .moves = {MOVE_BUBBLE, MOVE_POUND, MOVE_NONE, MOVE_NONE}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohDawnVeilstoneCityChimchar[] = {
+    {.iv = 60, .lvl = 25, .species = SPECIES_CLEFAIRY, .moves = {MOVE_METRONOME, MOVE_GRAVITY, MOVE_WAKE_UP_SLAP, MOVE_SING}},
+    {.iv = 60, .lvl = 25, .species = SPECIES_KADABRA, .moves = {MOVE_PSYBEAM, MOVE_PSYCHO_CUT, MOVE_REFLECT, MOVE_LIGHT_SCREEN}},
+    {.iv = 60, .lvl = 27, .species = SPECIES_GROTLE, .moves = {MOVE_RAZOR_LEAF, MOVE_MEGA_DRAIN, MOVE_BITE, MOVE_CURSE}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohDawnVeilstoneCityPiplup[] = {
+    {.iv = 60, .lvl = 25, .species = SPECIES_CLEFAIRY, .moves = {MOVE_METRONOME, MOVE_GRAVITY, MOVE_WAKE_UP_SLAP, MOVE_SING}},
+    {.iv = 60, .lvl = 25, .species = SPECIES_KADABRA, .moves = {MOVE_PSYBEAM, MOVE_PSYCHO_CUT, MOVE_REFLECT, MOVE_LIGHT_SCREEN}},
+    {.iv = 60, .lvl = 27, .species = SPECIES_MONFERNO, .moves = {MOVE_FLAME_WHEEL, MOVE_MACH_PUNCH, MOVE_FURY_SWIPES, MOVE_TORMENT}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohDawnVeilstoneCityTurtwig[] = {
+    {.iv = 60, .lvl = 25, .species = SPECIES_CLEFAIRY, .moves = {MOVE_METRONOME, MOVE_GRAVITY, MOVE_WAKE_UP_SLAP, MOVE_SING}},
+    {.iv = 60, .lvl = 25, .species = SPECIES_KADABRA, .moves = {MOVE_PSYBEAM, MOVE_PSYCHO_CUT, MOVE_REFLECT, MOVE_LIGHT_SCREEN}},
+    {.iv = 60, .lvl = 27, .species = SPECIES_PRINPLUP, .moves = {MOVE_BUBBLE_BEAM, MOVE_METAL_CLAW, MOVE_PECK, MOVE_GROWL}},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohGalacticGruntCelesticTown[] = {
+    {.iv = 30, .lvl = 32, .species = SPECIES_HOUNDOUR},
+    {.iv = 30, .lvl = 30, .species = SPECIES_GOLBAT},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohGalacticGruntFloaromaMeadow1[] = {
+    {.iv = 0, .lvl = 13, .species = SPECIES_STUNKY},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohGalacticGruntFloaromaMeadow2[] = {
+    {.iv = 0, .lvl = 11, .species = SPECIES_ZUBAT},
+    {.iv = 0, .lvl = 11, .species = SPECIES_ZUBAT},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohGalacticGruntIronIsland1[] = {
+    {.iv = 30, .lvl = 34, .species = SPECIES_ZUBAT},
+    {.iv = 30, .lvl = 34, .species = SPECIES_HOUNDOUR},
+    {.iv = 30, .lvl = 34, .species = SPECIES_GOLBAT},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohGalacticGruntIronIsland2[] = {
+    {.iv = 30, .lvl = 34, .species = SPECIES_GLAMEOW},
+    {.iv = 30, .lvl = 34, .species = SPECIES_STUNKY},
+    {.iv = 30, .lvl = 34, .species = SPECIES_CROAGUNK},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohGalacticGruntJubilifeCity1[] = {
+    {.iv = 0, .lvl = 11, .species = SPECIES_STUNKY},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohGalacticGruntJubilifeCity2[] = {
+    {.iv = 0, .lvl = 11, .species = SPECIES_GLAMEOW},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohGalacticGruntSpearPillar1[] = {
+    {.iv = 30, .lvl = 39, .species = SPECIES_CROAGUNK},
+    {.iv = 30, .lvl = 43, .species = SPECIES_CROAGUNK},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohGalacticGruntSpearPillar2[] = {
+    {.iv = 30, .lvl = 41, .species = SPECIES_STUNKY},
+    {.iv = 30, .lvl = 41, .species = SPECIES_GLAMEOW},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohGalacticGruntValleyWindworks1[] = {
+    {.iv = 30, .lvl = 13, .species = SPECIES_GLAMEOW},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohGalacticGruntValorLakefront[] = {
+    {.iv = 30, .lvl = 31, .species = SPECIES_CROAGUNK},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohGalacticGruntVeilstoneCity1[] = {
+    {.iv = 30, .lvl = 24, .species = SPECIES_ZUBAT},
+    {.iv = 30, .lvl = 26, .species = SPECIES_STUNKY},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohGalacticGruntVeilstoneCity2[] = {
+    {.iv = 30, .lvl = 24, .species = SPECIES_ZUBAT},
+    {.iv = 30, .lvl = 26, .species = SPECIES_CROAGUNK},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohGuitaristArturo[] = {
+    {.iv = 0, .lvl = 23, .species = SPECIES_KRICKETUNE},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohGuitaristArturoRematch1[] = {
+    {.iv = 0, .lvl = 35, .species = SPECIES_KRICKETUNE},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohGuitaristArturoRematch2[] = {
+    {.iv = 0, .lvl = 47, .species = SPECIES_KRICKETUNE},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohGuitaristArturoRematch3[] = {
+    {.iv = 0, .lvl = 53, .species = SPECIES_KRICKETUNE},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohGuitaristArturoRematch4[] = {
+    {.iv = 0, .lvl = 59, .species = SPECIES_KRICKETUNE},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohGuitaristArturoUnused[] = {
+    {.iv = 0, .lvl = 7, .species = SPECIES_KRICKETOT},
+};
+
+static const struct TrainerMonItemCustomMoves sParty_SinnohLadyCeleste[] = {
+    {.iv = 250, .lvl = 35, .species = SPECIES_BLISSEY, .heldItem = ITEM_RARE_CANDY, .moves = {MOVE_FLING, MOVE_SOFT_BOILED, MOVE_EGG_BOMB, MOVE_PSYCHIC}},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohLadyKylie[] = {
+    {.iv = 0, .lvl = 24, .species = SPECIES_CLEFFA},
+    {.iv = 0, .lvl = 26, .species = SPECIES_CLEFAIRY},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohLassBlythe[] = {
+    {.iv = 0, .lvl = 25, .species = SPECIES_CHINGLING},
+    {.iv = 0, .lvl = 25, .species = SPECIES_BUNEARY},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohLucasJubilifeCityChimchar[] = {
+    {.iv = 30, .lvl = 13, .species = SPECIES_TURTWIG, .moves = {MOVE_ABSORB, MOVE_TACKLE, MOVE_NONE, MOVE_NONE}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohLucasJubilifeCityPiplup[] = {
+    {.iv = 30, .lvl = 13, .species = SPECIES_CHIMCHAR, .moves = {MOVE_EMBER, MOVE_SCRATCH, MOVE_NONE, MOVE_NONE}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohLucasJubilifeCityTurtwig[] = {
+    {.iv = 30, .lvl = 13, .species = SPECIES_PIPLUP, .moves = {MOVE_BUBBLE, MOVE_POUND, MOVE_NONE, MOVE_NONE}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohLucasVeilstoneCityChimchar[] = {
+    {.iv = 60, .lvl = 25, .species = SPECIES_CLEFAIRY, .moves = {MOVE_METRONOME, MOVE_GRAVITY, MOVE_WAKE_UP_SLAP, MOVE_SING}},
+    {.iv = 60, .lvl = 25, .species = SPECIES_KADABRA, .moves = {MOVE_PSYBEAM, MOVE_PSYCHO_CUT, MOVE_REFLECT, MOVE_LIGHT_SCREEN}},
+    {.iv = 60, .lvl = 27, .species = SPECIES_GROTLE, .moves = {MOVE_RAZOR_LEAF, MOVE_MEGA_DRAIN, MOVE_BITE, MOVE_CURSE}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohLucasVeilstoneCityPiplup[] = {
+    {.iv = 60, .lvl = 25, .species = SPECIES_CLEFAIRY, .moves = {MOVE_METRONOME, MOVE_GRAVITY, MOVE_WAKE_UP_SLAP, MOVE_SING}},
+    {.iv = 60, .lvl = 25, .species = SPECIES_KADABRA, .moves = {MOVE_PSYBEAM, MOVE_PSYCHO_CUT, MOVE_REFLECT, MOVE_LIGHT_SCREEN}},
+    {.iv = 60, .lvl = 27, .species = SPECIES_MONFERNO, .moves = {MOVE_FLAME_WHEEL, MOVE_MACH_PUNCH, MOVE_FURY_SWIPES, MOVE_TORMENT}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohLucasVeilstoneCityTurtwig[] = {
+    {.iv = 60, .lvl = 25, .species = SPECIES_CLEFAIRY, .moves = {MOVE_METRONOME, MOVE_GRAVITY, MOVE_WAKE_UP_SLAP, MOVE_SING}},
+    {.iv = 60, .lvl = 25, .species = SPECIES_KADABRA, .moves = {MOVE_PSYBEAM, MOVE_PSYCHO_CUT, MOVE_REFLECT, MOVE_LIGHT_SCREEN}},
+    {.iv = 60, .lvl = 27, .species = SPECIES_PRINPLUP, .moves = {MOVE_BUBBLE_BEAM, MOVE_METAL_CLAW, MOVE_PECK, MOVE_GROWL}},
+};
+
+static const struct TrainerMonItemDefaultMoves sParty_SinnohPokefanMeredith[] = {
+    {.iv = 0, .lvl = 26, .species = SPECIES_PICHU, .heldItem = ITEM_SITRUS_BERRY},
+    {.iv = 0, .lvl = 26, .species = SPECIES_PACHIRISU, .heldItem = ITEM_SITRUS_BERRY},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohPokeKidAriel[] = {
+    {.iv = 0, .lvl = 19, .species = SPECIES_PICHU},
+    {.iv = 0, .lvl = 19, .species = SPECIES_PIKACHU},
+    {.iv = 0, .lvl = 19, .species = SPECIES_PIKACHU},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohPokeKidArielRematch1[] = {
+    {.iv = 0, .lvl = 31, .species = SPECIES_PICHU},
+    {.iv = 0, .lvl = 31, .species = SPECIES_PIKACHU},
+    {.iv = 0, .lvl = 31, .species = SPECIES_PIKACHU},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohPokeKidArielRematch2[] = {
+    {.iv = 0, .lvl = 43, .species = SPECIES_PICHU},
+    {.iv = 0, .lvl = 43, .species = SPECIES_PIKACHU},
+    {.iv = 0, .lvl = 43, .species = SPECIES_PIKACHU},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohPokeKidArielRematch3[] = {
+    {.iv = 0, .lvl = 49, .species = SPECIES_PICHU},
+    {.iv = 0, .lvl = 49, .species = SPECIES_PIKACHU},
+    {.iv = 0, .lvl = 49, .species = SPECIES_RAICHU},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohPokeKidArielRematch4[] = {
+    {.iv = 0, .lvl = 55, .species = SPECIES_PICHU},
+    {.iv = 0, .lvl = 55, .species = SPECIES_PIKACHU},
+    {.iv = 0, .lvl = 55, .species = SPECIES_RAICHU},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohPokeKidArielUnused[] = {
+    {.iv = 0, .lvl = 3, .species = SPECIES_PICHU},
+    {.iv = 0, .lvl = 3, .species = SPECIES_PICHU},
+    {.iv = 0, .lvl = 3, .species = SPECIES_PICHU},
+};
+
+static const struct TrainerMonItemDefaultMoves sParty_SinnohRichBoyLiam[] = {
+    {.iv = 250, .lvl = 35, .species = SPECIES_BLISSEY, .heldItem = ITEM_RARE_CANDY},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohRivalSpearPillarChimchar[] = {
+    {.iv = 200, .lvl = 40, .species = SPECIES_MUNCHLAX, .moves = {MOVE_BODY_SLAM, MOVE_STOCKPILE, MOVE_SWALLOW, MOVE_SCREECH}},
+    {.iv = 200, .lvl = 42, .species = SPECIES_STARAPTOR, .moves = {MOVE_CLOSE_COMBAT, MOVE_AERIAL_ACE, MOVE_TAKE_DOWN, MOVE_QUICK_ATTACK}},
+    {.iv = 200, .lvl = 40, .species = SPECIES_ROSERADE, .moves = {MOVE_GIGA_DRAIN, MOVE_TOXIC, MOVE_INGRAIN, MOVE_GRASS_WHISTLE}},
+    {.iv = 200, .lvl = 42, .species = SPECIES_HERACROSS, .moves = {MOVE_CLOSE_COMBAT, MOVE_BRICK_BREAK, MOVE_NIGHT_SLASH, MOVE_AERIAL_ACE}},
+    {.iv = 200, .lvl = 40, .species = SPECIES_RAPIDASH, .moves = {MOVE_FIRE_BLAST, MOVE_WILL_O_WISP, MOVE_STOMP, MOVE_TAKE_DOWN}},
+    {.iv = 200, .lvl = 44, .species = SPECIES_EMPOLEON, .moves = {MOVE_AQUA_JET, MOVE_AERIAL_ACE, MOVE_METAL_CLAW, MOVE_SWAGGER}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohRivalSpearPillarPiplup[] = {
+    {.iv = 200, .lvl = 40, .species = SPECIES_MUNCHLAX, .moves = {MOVE_BODY_SLAM, MOVE_STOCKPILE, MOVE_SWALLOW, MOVE_SCREECH}},
+    {.iv = 200, .lvl = 42, .species = SPECIES_STARAPTOR, .moves = {MOVE_CLOSE_COMBAT, MOVE_AERIAL_ACE, MOVE_TAKE_DOWN, MOVE_QUICK_ATTACK}},
+    {.iv = 200, .lvl = 40, .species = SPECIES_FLOATZEL, .moves = {MOVE_AQUA_JET, MOVE_PURSUIT, MOVE_BRICK_BREAK, MOVE_IRON_TAIL}},
+    {.iv = 200, .lvl = 42, .species = SPECIES_HERACROSS, .moves = {MOVE_CLOSE_COMBAT, MOVE_BRICK_BREAK, MOVE_NIGHT_SLASH, MOVE_AERIAL_ACE}},
+    {.iv = 200, .lvl = 40, .species = SPECIES_RAPIDASH, .moves = {MOVE_FIRE_BLAST, MOVE_WILL_O_WISP, MOVE_STOMP, MOVE_TAKE_DOWN}},
+    {.iv = 200, .lvl = 44, .species = SPECIES_TORTERRA, .moves = {MOVE_GIGA_DRAIN, MOVE_BITE, MOVE_LEECH_SEED, MOVE_SYNTHESIS}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohRivalSpearPillarTurtwig[] = {
+    {.iv = 200, .lvl = 40, .species = SPECIES_MUNCHLAX, .moves = {MOVE_BODY_SLAM, MOVE_STOCKPILE, MOVE_SWALLOW, MOVE_SCREECH}},
+    {.iv = 200, .lvl = 42, .species = SPECIES_STARAPTOR, .moves = {MOVE_CLOSE_COMBAT, MOVE_AERIAL_ACE, MOVE_TAKE_DOWN, MOVE_QUICK_ATTACK}},
+    {.iv = 200, .lvl = 40, .species = SPECIES_FLOATZEL, .moves = {MOVE_AQUA_JET, MOVE_PURSUIT, MOVE_BRICK_BREAK, MOVE_IRON_TAIL}},
+    {.iv = 200, .lvl = 42, .species = SPECIES_HERACROSS, .moves = {MOVE_CLOSE_COMBAT, MOVE_BRICK_BREAK, MOVE_NIGHT_SLASH, MOVE_AERIAL_ACE}},
+    {.iv = 200, .lvl = 40, .species = SPECIES_ROSERADE, .moves = {MOVE_GIGA_DRAIN, MOVE_TOXIC, MOVE_INGRAIN, MOVE_GRASS_WHISTLE}},
+    {.iv = 200, .lvl = 44, .species = SPECIES_INFERNAPE, .moves = {MOVE_CLOSE_COMBAT, MOVE_PUNISHMENT, MOVE_FLAME_WHEEL, MOVE_WILL_O_WISP}},
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_SinnohSocialiteRebecca[] = {
+    {.iv = 0, .lvl = 27, .species = SPECIES_PURUGLY},
+};
+

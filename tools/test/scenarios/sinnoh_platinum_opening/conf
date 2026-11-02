@@ -1,0 +1,7 @@
+# Platinum's own story from its start (src/sinnoh/s3d_scrcmd.c Sinnoh_PlatinumStoryBegin: its new-game script hides
+# ROUTE 201's PROF. ROWAN, flag 0x3499): the player's room plays Platinum's frame script, the TV program ending
+# (VAR_PLAYER_HOUSE_SPECIAL_PROGRAM_STATE 0x5209 0 -> 1), in Platinum's own words. Needs the packs (make_pack.sh).
+MODE=1
+TMO=120
+EXPECT_A=("flag 13465 = 1" "var 0x5209 = 1" "ctx 1 free 1 overworld 1 locked 0 script 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

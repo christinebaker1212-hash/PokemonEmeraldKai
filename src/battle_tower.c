@@ -2186,34 +2186,24 @@ void DoSpecialTrainerBattle(void)
     // Moemon Kai: Quetzal's multi battles (its special 249 has these three more): 12 the ROCKET HIDEOUT's two
     // executives beside LANCE; 13 / 14 GIOVANNI's past (not ported: a double battle against the one trainer)
     case 12:
-        gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE | BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_MULTI | BATTLE_TYPE_INGAME_PARTNER;
         gTrainerBattleOpponent_A = TRAINER_QZ_4223;
         gTrainerBattleOpponent_B = TRAINER_QZ_4219;
-        SetQzPartner(TRAINER_QZ_4959);
-        gPartnerTrainerId = TRAINER_QZ_PARTNER;
-        for (i = MULTI_PARTY_SIZE; i < PARTY_SIZE; i++)
-            ZeroMonData(&gPlayerParty[i]);
-        MP_CreateTrainerPartyAt(&gPlayerParty[MULTI_PARTY_SIZE], sQzPartnerTrainer);
-        CreateTask(Task_StartBattleAfterTransition, 1);
-        PlayMapChosenOrBattleBGM(0);
-        BattleTransition_StartOnField(B_TRANSITION_MAGMA);
+        MP_StartPartnerBattle(TRAINER_QZ_4959);
         break;
     case 13:
     case 14:
         // Quetzal's GIOVANNI story at the RADIO TOWER: beside GIOVANNI against ETHAN (13), beside SILVER against
         // GIOVANNI (14); one trainer with a full team on the other side
-        gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE | BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_MULTI
-                         | BATTLE_TYPE_INGAME_PARTNER;
         gTrainerBattleOpponent_A = gSpecialVar_0x8004 == 13 ? TRAINER_QZ_4989 : TRAINER_QZ_4962;
         gTrainerBattleOpponent_B = gTrainerBattleOpponent_A;   // (the same trainer in both slots: battle_main.c MP_QzSoloMulti)
-        SetQzPartner(gSpecialVar_0x8004 == 13 ? TRAINER_QZ_4990 : TRAINER_QZ_4992);
-        gPartnerTrainerId = TRAINER_QZ_PARTNER;
-        for (i = MULTI_PARTY_SIZE; i < PARTY_SIZE; i++)
-            ZeroMonData(&gPlayerParty[i]);
-        MP_CreateTrainerPartyAt(&gPlayerParty[MULTI_PARTY_SIZE], sQzPartnerTrainer);
-        CreateTask(Task_StartBattleAfterTransition, 1);
-        PlayMapChosenOrBattleBGM(0);
-        BattleTransition_StartOnField(B_TRANSITION_MAGMA);
+        MP_StartPartnerBattle(gSpecialVar_0x8004 == 13 ? TRAINER_QZ_4990 : TRAINER_QZ_4992);
+        break;
+    case 15:
+        // SINNOH's tag battles (Platinum's StartTagBattle, tools/sinnoh/gen_scripts.py): beside VAR_0x8005 against
+        // VAR_0x8006 and VAR_0x8007
+        gTrainerBattleOpponent_A = gSpecialVar_0x8006;
+        gTrainerBattleOpponent_B = gSpecialVar_0x8007;
+        MP_StartPartnerBattle(gSpecialVar_0x8005);
         break;
     case SPECIAL_BATTLE_STEVEN:
         gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE | BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_MULTI | BATTLE_TYPE_INGAME_PARTNER;
@@ -2228,6 +2218,23 @@ void DoSpecialTrainerBattle(void)
         BattleTransition_StartOnField(B_TRANSITION_MAGMA);
         break;
     }
+}
+
+// Moemon Kai: a multi battle beside one of the game's trainers (PARTNER: its own team in the party's second half),
+// against gTrainerBattleOpponent_A and _B: Quetzal's (DoSpecialTrainerBattle 12) and SINNOH's tag battles
+// (src/sinnoh/s3d_scrcmd.c SINNOH_TAG_BATTLE). The script saved the party and chose the half that battles, as for STEVEN
+void MP_StartPartnerBattle(u16 partner)
+{
+    u32 i;
+    gBattleTypeFlags = BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE | BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_MULTI | BATTLE_TYPE_INGAME_PARTNER;
+    SetQzPartner(partner);
+    gPartnerTrainerId = TRAINER_QZ_PARTNER;
+    for (i = MULTI_PARTY_SIZE; i < PARTY_SIZE; i++)
+        ZeroMonData(&gPlayerParty[i]);
+    MP_CreateTrainerPartyAt(&gPlayerParty[MULTI_PARTY_SIZE], sQzPartnerTrainer);
+    CreateTask(Task_StartBattleAfterTransition, 1);
+    PlayMapChosenOrBattleBGM(0);
+    BattleTransition_StartOnField(B_TRANSITION_MAGMA);
 }
 
 static void SaveCurrentWinStreak(void)

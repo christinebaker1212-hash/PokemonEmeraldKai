@@ -1004,6 +1004,8 @@ u8 MP_Gen_OfItem(u16 item)
         return 4;
     if (item >= ITEM_TM51 && item <= ITEM_TM92)
         return 4;   // (Diamond, Pearl and Platinum's TMs)
+    if (item >= FIRST_PLATINUM_KEY_ITEM && item <= LAST_PLATINUM_ITEM)
+        return 0;   // (SINNOH's story's own: the GALACTIC KEY, the AZURE FLUTE... at every GENERATION)
     if (item >= ITEM_ICE_STONE && item < ITEM_ICE_STONE + ARRAY_COUNT(sGen59))
         return sGen59[item - ITEM_ICE_STONE];
     return 0;

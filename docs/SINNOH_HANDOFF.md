@@ -76,27 +76,47 @@ Done:
   2026-11-02). gen_words.py (given the decomp) points every person / sign / bg whose script converts at it; the game's
   roles (nurses, clerks, gym leaders, ELITE FOUR, CHAMPION, boats, gifts that don't convert) keep this game's scripts.
 
-Next, in this order:
-1. Remaining commands (the --report list): Platinum's dynamic menus (InitGlobalTextMenu / InitLocalTextMenu /
-   AddMenuEntryImm / AddListMenuEntry / ShowMenu: a `sinnoh` op building a menu of pack texts), SetObjectEventMovementType,
-   GetFirstNonEggInParty, CountAliveMonsExcept, GetPlayerStarterSpecies, FindPartySlotWithMove, move tutors, two-trainer
-   battles, StartLegendaryBattle (legends.py has the battles), GiveBadge (gyms keep the game's role until the gyms'
-   scripts convert), PlayMusic / fades of music, the special places' commands (REGI ruins, TV, the GREAT MARSH tram,
-   the BATTLE TOWER: keep the game's systems where it has them).
-2. Map scripts: each map's scripts_init_<map>.s (InitScriptEntry_OnTransition / OnLoad / OnResume N, the
-   OnFrameTable rows VAR, VALUE, N) as the map's MAP_SCRIPT_ON_TRANSITION / ON_LOAD / ON_RESUME / ON_FRAME_TABLE (the
-   committed MapScripts point at SinnohP_ labels, numbers only), and the coord events (gen_maps.py triggers()).
-   Convert them, but don't switch them on piecemeal: Platinum's frame tables start cutscenes by the story's variables,
-   and SINNOH's are 0 in every save (Platinum's new-game state), so the opening would play again.
-3. The switch to Platinum's story, in one change: Platinum's new-game setup (scripts_init_new_game.s: the starting
-   flags and variables) run when a game first enters SINNOH; the story people (the 256 hide flags) shown and hidden by
-   Platinum's own scripts instead of tools/sinnoh/story_people.py / s3d_legends.c Sinnoh_StoryRefresh; the story
-   scenes (legends.py STORY battles) by Platinum's scripts. Saves already in SINNOH: set Platinum's flags and variables
-   from what this game recorded (badges, story battles beaten: story_people.DONE, legends.py) once, on load
-   (src/mp/mp_savefix.c's way), so nobody replays or skips the story. Test the story from TWINLEAF to the HALL OF FAME
-   (the existing sinnoh_* scenarios plus a story walk) before it ships.
-4. Then remove the written words (tools/sinnoh/words*.py, story_people.py's STORY_WORDS, trainer_words.py) once
-   nothing uses them.
+The user's rules for the rest (2026-11-02):
+- **Kai's systems stay.** Anything Kai already has (marts, nurses, gyms and their puzzles, the BATTLE TOWER and the
+  frontier, partner battles, two-trainer battles, the camera object, the bike, followers, the starter briefcase, the
+  heal spots...) is used by SINNOH as it is: a Platinum command maps onto Kai's system, never a second copy of it.
+  Examples so far: StartTagBattle = Kai's partner battle (battle_tower.c MP_StartPartnerBattle, the one Quetzal's LANCE
+  uses; DoSpecialTrainerBattle 15) with STEVEN's party pick; StartTrainerBattle with two = the game's own two-trainer
+  battle (battle_setup.c MP_StartTwoTrainerBattle); AddFreeCamera = special SpawnCameraObject (the 3D view follows it);
+  StartChooseStarterScene = Sinnoh_StarterMenu; GiveRunningShoes = FLAG_SYS_B_DASH.
+- **Everything else 1:1 with Platinum.** What isn't, gets built (the DISTORTION WORLD first: it isn't 1:1).
+- **Closed:** online-only features (GTS, Wi-Fi Club / Plaza, global rankings, distribution events: CheckDistributionEvent
+  is always 0), and features that Kai supersedes or that rely on the DS itself (the PAL PARK and its GBA slot, the
+  second screen's own uses: the POKéTCH is Kai's).
+
+Where it stands:
+- Map scripts (scripts_init_*.s: transition / load / resume and frame tables), Platinum's people (their hide flags,
+  places and converted scripts) and triggers are emitted per map as gSinnohPlatinumMapScripts and swapped into
+  gMapHeader when FLAG_SINNOH_PLATINUM_STORY (0x3D3B) is set (s3d_scrcmd.c Sinnoh_PlatinumMapScripts; the committed
+  maps are untouched; a person whose script is one of Kai's roles keeps it). Sinnoh_StoryRefresh stands aside.
+- Sinnoh_PlatinumStoryBegin (debug `mp platinumstory`) sets the flag and runs Platinum's own scripts_init_new_game.
+  Not yet called for real games: the switch waits until the story plays through (tests sinnoh_platinum_story,
+  sinnoh_platinum_opening).
+- Story coverage (map scripts, triggers, story people): 500 of 760 at the end of 2026-11-02; the rest are mostly Kai's
+  place systems (REGI ruins, TURNBACK CAVE, platform lifts, gym puzzles, the frontier), which stay Kai's.
+- Platinum's key items are items 662-684 (GALACTIC KEY ... GOOEY MULCH; Platinum's descriptions from PokeAPI, stand-in
+  icons); the trainers its scripts battle (story scenes, the restaurant, rematches, tag partners) are appended to
+  trainers_sinnoh.h (ids before them unchanged).
+
+To build (not 1:1 yet):
+1. Walking partners: MOVEMENT_TYPE_FOLLOW_PLAYER (BARRY on ROUTE 201, DAWN / LUCAS, CHERYL, MIRA, RILEY, BUCK, MARLEY),
+   Platinum's LOCALID_FOLLOWER that crosses maps with the player, and the partner's wild double battles
+   (FLAG_SINNOH_HAS_PARTNER 0x3D3C is already kept).
+2. The DISTORTION WORLD 1:1: walking on walls and ceilings, its rotating rooms, the boulders and the lift, CYRUS and
+   GIRATINA's scenes (now a scene in GIRATINA's arena: data/scripts/sinnoh_places.inc).
+3. The VILLA, the Frontier Brains' and the HALL MATRON's teams, the PASTORIA size contest, JUBILIFE's TV lottery, the
+   JOURNAL (ITEM_JOURNAL is given), ROTOM's room, the catching tutorial (map it onto Emerald's WALLY tutorial battle),
+   Platinum's songs the game lacks (SEQ_OPENING...).
+4. Saves already in SINNOH: Platinum's flags and variables from what this game recorded, once, on load
+   (mp_savefix.c's way); then the switch (new games in SINNOH and a first boat in begin Platinum's story) and a story
+   test from TWINLEAF to the HALL OF FAME; then the written words go (words*.py, STORY_WORDS, trainer_words.py).
+5. For the user to confirm as closed or to build: the Underground (single-player digging works without wireless) and
+   Super Contests (Kai has the contests).
 
 ## The goal
 Add SINNOH as a third region beside JOHTO / KANTO, built from Pokémon Platinum:

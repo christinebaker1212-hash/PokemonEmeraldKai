@@ -101,6 +101,16 @@ def sources():
         p = os.path.join(REPO, f)
         if os.path.exists(p):
             scan(open(p, encoding='utf-8', errors='replace').read(), f)
+    # SINNOH's story items (FIRST_PLATINUM_KEY_ITEM .. LAST_PLATINUM_ITEM): given by Platinum's own scripts, converted
+    # from the decomp when the game is built (tools/sinnoh/gen_scripts.py), so in no file here
+    t = oa.rd('include/constants/items.h')
+    ids = {m.group(1): int(m.group(2)) for m in re.finditer(r'#define (ITEM_\w+) (\d+)\b', t)}
+    first = re.search(r'#define FIRST_PLATINUM_KEY_ITEM (ITEM_\w+)', t)
+    last = re.search(r'#define LAST_PLATINUM_ITEM (ITEM_\w+)', t)
+    if first and last:
+        for n, i in ids.items():
+            if ids[first.group(1)] <= i <= ids[last.group(1)]:
+                found.setdefault(n, []).append('Platinum\'s scripts')
     return found
 
 

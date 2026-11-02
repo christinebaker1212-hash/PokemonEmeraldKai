@@ -3648,6 +3648,21 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   is the `sinnoh OP, ARG` command (0xF6, src/sinnoh/s3d_scrcmd.c: the player's / rival's / counterpart's names into
   STR_VAR_1-3, Platinum's YES = 0). People the story shows or hides (hide flags) keep their written words until the
   story's scripts are converted too. Test sinnoh_platinum_words (TWINLEAF's guitarist, the town sign).
+- Platinum's story (2026-11-02, behind FLAG_SINNOH_PLATINUM_STORY 0x3D3B until it plays through): gen_scripts.py also
+  emits, per map, Platinum's map scripts (scripts_init_*.s: on transition / load / resume after the map's own, frame
+  rows after its own; a row whose script doesn't convert is left out, it would run every frame), its people (hide
+  flag, Platinum's place, the converted script unless the person is one of Kai's roles) and its triggers (each tile
+  of the area; the map's own where Platinum has none), as gSinnohPlatinumMapScripts. s3d_scrcmd.c
+  Sinnoh_PlatinumMapScripts (called from overworld.c LoadCurrentMapData / LoadSaveblockMapHeader) swaps them into a
+  RAM copy of gMapHeader's events (warps and bg events copied too: SetWarpEventPos / SetBgEventPos move them).
+  Sinnoh_PlatinumStoryBegin (`mp platinumstory`) sets the flag and runs Platinum's scripts_init_new_game.
+  The user's rules: Kai's systems stay and SINNOH uses them (tag battles = Kai's partner battle, battle_tower.c
+  MP_StartPartnerBattle via DoSpecialTrainerBattle 15, with STEVEN's party pick; two trainers = battle_setup.c
+  MP_StartTwoTrainerBattle; AddFreeCamera = SpawnCameraObject, which s3d.c SetupView follows; the briefcase =
+  Sinnoh_StarterMenu, the pick kept in VAR_SINNOH_STARTER 0x52F8); everything else 1:1 (the build list:
+  docs/SINNOH_HANDOFF.md); online-only and DS-only features closed (CheckDistributionEvent is 0). Platinum's key items
+  are 662-684 (item_audit.py counts them as given by Platinum's scripts). Tests sinnoh_platinum_story,
+  sinnoh_platinum_opening.
 - Words (1.62.x, sinnoh-work; being replaced by Platinum's own, above): every person / sign / bg / trigger runs <map>_EventScript_Person<n> / _Sign<n> / _Bg<n>
   / _Trigger<n> when the map's scripts.inc has it (n: its place in Platinum's lists, from 1), else nothing (a trigger
   without a script isn't placed). tools/sinnoh/words.py holds the words (original writing; '|' a new page; ('nurse',)

@@ -8,8 +8,10 @@ from 1.63.1: COOP_NOTES "A new game in SINNOH"; its starter from Platinum's brie
 models: tools/sinnoh/build_starter.py, COOP_NOTES "SINNOH's briefcase"), `docs/SINNOH_HANDOFF.md`;
 everything per feature in COOP_NOTES (its SINNOH sections: story people tools/sinnoh/story_people.py, the gyms that move
 src/sinnoh/s3d_gyms.c, the DISTORTION WORLD scene, the BATTLE FRONTIER's five: TOWER, FACTORY (the game's own halls,
-shared maps), HALL s3d_hall.c, CASTLE / ARCADE s3d_frontier.c). Left out: the Underground, Super Contests, Wi-Fi, the
-VILLA, the Frontier Brains' and HALL MATRON's teams, the DISTORTION WORLD's walk on walls (a scene in GIRATINA's arena). The 3D
+shared maps), HALL s3d_hall.c, CASTLE / ARCADE s3d_frontier.c). **SINNOH is 1:1 with Platinum** (the user, 2026-11-02):
+what Kai already has, SINNOH uses (never a second copy); anything else not 1:1 is built (the DISTORTION WORLD first);
+only online-only features (GTS, Wi-Fi) and ones Kai supersedes or the DS itself needs (PAL PARK) are closed. The list:
+docs/SINNOH_HANDOFF.md "Platinum's own words and scripts". The 3D
 engine (src/sinnoh/s3d.c, include/s3d.h) draws Platinum's own map models from sinnoh/platinum3d.pak, built from
 pret/pokeplatinum at a pinned commit by tools/sinnoh/make_pack.sh (run it before playing SINNOH from a build; the release
 runs it and ships the pack; never committed: sinnoh/ is ignored; no ROM needed); TWINLEAF TOWN and ROUTE 201 (group 40)
@@ -18,7 +20,8 @@ in sinnoh/platinum_gfx.pak (tools/sinnoh/build_gfx.py, src/sinnoh/s3d_gfx.c; tes
 **SINNOH's words and scripts are Platinum's own** (the user, 2026-11-02): never write original dialogue or scripts
 for SINNOH. They're converted from the decomp when the game is built, never committed: sinnoh/platinum_text.pak
 (tools/sinnoh/build_text.py) and sinnoh/platinum_scripts.inc (tools/sinnoh/gen_scripts.py; maps hold only
-`goto SinnohP_<file>_<n>` stubs); COOP_NOTES "Platinum's own words and scripts". The written words in
+`goto SinnohP_<file>_<n>` stubs; Platinum's map scripts, people and triggers per map behind FLAG_SINNOH_PLATINUM_STORY,
+s3d_scrcmd.c Sinnoh_PlatinumMapScripts); COOP_NOTES "Platinum's own words and scripts". The written words in
 tools/sinnoh/words*.py / story_people.py only stand in until a script's commands are converted.
 
 **Done (2026-11-01): `docs/NEXT_TASKS.md`**, the user's list through 1.63.7 (40 PC boxes: COOP_NOTES "40 PC boxes"; the save holds
