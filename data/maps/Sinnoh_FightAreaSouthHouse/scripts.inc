@@ -15,11 +15,7 @@ Sinnoh_FightAreaSouthHouse_EventScript_Person3::
 	end
 
 Sinnoh_FightAreaSouthHouse_EventScript_Person4::
-	msgbox Sinnoh_FightAreaSouthHouse_Text_Person4, MSGBOX_NPC
+	goto SinnohP_fight_area_south_house_4
 	end
-
-Sinnoh_FightAreaSouthHouse_Text_Person4:
-	.string "Items can turn a battle around. A good\n"
-	.string "held item is half the battle!$"
 
 @ --- end of SINNOH words ---

@@ -51,7 +51,7 @@ Sinnoh_GameCorner_EventScript_Bg12::
 	end
 
 Sinnoh_GameCorner_EventScript_Bg13::
-	msgbox Sinnoh_GameCorner_Text_Bg13, MSGBOX_SIGN
+	goto SinnohP_game_corner_21
 	end
 
 Sinnoh_GameCorner_EventScript_Person1::
@@ -89,9 +89,6 @@ Sinnoh_GameCorner_EventScript_Person8::
 Sinnoh_GameCorner_EventScript_Person9::
 	msgbox Sinnoh_GameCorner_Text_Person9, MSGBOX_NPC
 	end
-
-Sinnoh_GameCorner_Text_Bg13:
-	.string "A notice on the wall.$"
 
 Sinnoh_GameCorner_Text_Person3:
 	.string "I used to play here every day. Now I\n"

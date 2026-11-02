@@ -42,6 +42,9 @@ TERMINAL = {'End', 'Return', 'GoTo', 'EndMovement', 'ReturnToField'}
 SINNOH_BUFFER_PLAYER, SINNOH_BUFFER_RIVAL, SINNOH_BUFFER_COUNTERPART, SINNOH_YESNO = 1, 2, 3, 4
 SINNOH_GET_DIR, SINNOH_GET_POS, SINNOH_GET_POCKET, SINNOH_IS_TMHM, SINNOH_BUFFER_TMHM_MOVE = 5, 6, 7, 8, 9
 SINNOH_BUFFER_POCKET, SINNOH_BADGE_CHECK, SINNOH_NATIONAL_DEX = 10, 11, 12
+SINNOH_MENU_INIT, SINNOH_MENU_ADD, SINNOH_MENU_SHOW = 13, 14, 15
+SINNOH_FIRST_NON_EGG, SINNOH_COUNT_ALIVE_EXCEPT, SINNOH_HAS_SPECIES, SINNOH_DAY_OF_WEEK = 16, 17, 18, 19
+SINNOH_TIME_OF_DAY, SINNOH_ON_BIKE, SINNOH_STARTER, SINNOH_FACE = 20, 21, 22, 23
 
 # Platinum's comparisons (CompareVar / CheckFlag then GoToIf / CallIf): the same codes as this game's
 COND = {'Lt': 0, 'Eq': 1, 'Gt': 2, 'Le': 3, 'Ge': 4, 'Ne': 5}
@@ -73,6 +76,18 @@ MOVE_ONE = {'EmoteExclamationMark': ['emote_exclamation_mark'], 'EmoteQuestionMa
             'FaceAwayFromPlayer': ['face_away_player']}
 DELAYS = {1: ['delay_2'], 2: ['delay_4'], 4: ['delay_8'], 8: ['delay_16'], 15: ['delay_16', 'delay_8', 'delay_4', 'delay_2'],
           16: ['delay_16', 'delay_16'], 32: ['delay_16'] * 4}
+
+
+def _music_of():
+    """Platinum's songs (SEQ_*) -> this game's SINNOH songs (gen_maps.py's MUSIC: the songs the maps play)"""
+    try:
+        from gen_maps import MUSIC
+    except Exception:
+        return {}
+    return {seq: 'MUS_SINNOH_' + name.upper() for seq, name in MUSIC.items()}
+
+
+MUSIC_OF = _music_of()
 
 
 class Unsupported(Exception):
@@ -290,8 +305,8 @@ class FileConverter:
             return ['compare_var_to_var %s, %s' % (self.var(a), self.var(b))]
         return ['compare_var_to_value %s, %s' % (self.var(a), self.value(b))]
 
-    def sinnoh(self, op, a=0, b=0):
-        return 'sinnoh %d, %s, %s' % (op, a, b)
+    def sinnoh(self, op, a=0, b=0, c=0):
+        return 'sinnoh %d, %s, %s, %s' % (op, a, b, c)
 
     def common(self, number):
         t = common_target(number)
@@ -440,6 +455,60 @@ class FileConverter:
         if cmd == 'ShowYesNoMenu':
             # (this game's YES is 1, Platinum's MENU_YES 0: the answer turned into Platinum's)
             return ['yesnobox 20, 8', self.sinnoh(SINNOH_YESNO, self.var(a[0]))]
+        if cmd in ('InitGlobalTextMenu', 'InitLocalTextMenu', 'InitGlobalTextListMenu', 'InitLocalTextListMenu'):
+            can_exit = self.value(a[4]) if len(a) > 4 else '1'
+            return [self.sinnoh(SINNOH_MENU_INIT, self.var(a[3]), can_exit)]
+        if cmd in ('AddMenuEntryImm', 'AddMenuEntry', 'AddListMenuEntry'):
+            where = self.dec.message(self.bank, a[0])
+            if where is None:
+                raise Unsupported('menu entry %s' % a[0])
+            value = a[1]          # (AddListMenuEntry's third is an alternative text)
+            return [self.sinnoh(SINNOH_MENU_ADD, where[0], where[1], self.value(value))]
+        if cmd in ('ShowMenu', 'ShowListMenu', 'ShowMenuMultiColumn'):
+            return [self.sinnoh(SINNOH_MENU_SHOW)]
+        if cmd in ('ScrCmd_32D', 'ScrCmd_338', 'LockObject', 'UnlockObject', 'SetMenuXOriginToRight'):
+            return []                       # (the walking partner paused / resumed, objects held: nothing to do here)
+        if cmd == 'SetObjectEventMovementType':
+            import sprites
+            return ['setobjectmovementtype %s, %s' % (self.localid(a[0]), sprites.movement(a[1]))]
+        if cmd == 'SetObjectEventDir':
+            return [self.sinnoh(SINNOH_FACE, self.localid(a[0]) if not a[0].startswith('VAR_') else self.var(a[0]),
+                                self.value(a[1]))]
+        if cmd == 'GetFirstNonEggInParty':
+            return [self.sinnoh(SINNOH_FIRST_NON_EGG, self.var(a[0]))]
+        if cmd == 'CountAliveMonsExcept':
+            return [self.sinnoh(SINNOH_COUNT_ALIVE_EXCEPT, self.var(a[0]), self.arg(a[1]))]
+        if cmd in ('CheckPartyHasSpecies', 'CheckPartyHasSpecies2'):
+            return [self.sinnoh(SINNOH_HAS_SPECIES, self.var(a[0]), self.arg(a[1]))]
+        if cmd == 'FindPartySlotWithMove':
+            return ['checkpartymove %s' % self.value(a[1]), 'copyvar %s, VAR_RESULT' % self.var(a[0])]
+        if cmd == 'GetDayOfWeek':
+            return [self.sinnoh(SINNOH_DAY_OF_WEEK, self.var(a[0]))]
+        if cmd == 'GetTimeOfDay':
+            return [self.sinnoh(SINNOH_TIME_OF_DAY, self.var(a[0]))]
+        if cmd == 'CheckPlayerOnBike':
+            return [self.sinnoh(SINNOH_ON_BIKE, self.var(a[0]))]
+        if cmd == 'GetPlayerStarterSpecies':
+            return [self.sinnoh(SINNOH_STARTER, self.var(a[0]))]
+        if cmd == 'BufferNumber':
+            return ['buffernumberstring %s, %s' % (self.strvar(a[0]), self.var(a[1]) if self.is_var(a[1]) else self.value(a[1]))]
+        if cmd == 'GiveBadge':
+            n = int(self.value(a[0]))
+            return ['setflag 0x%X' % (0x3320 + n)]   # (FLAG_SINNOH_BADGE01 + n, include/mp_region.h)
+        if cmd == 'StartLegendaryBattle':
+            return ['setwildbattle %s, %s' % (self.value(a[0]), self.value(a[1])),
+                    'special BattleSetup_StartLegendaryBattle', 'waitstate']
+        if cmd == 'PlayMusic':
+            mus = MUSIC_OF.get(a[0])
+            if mus is None:
+                raise Unsupported('music %s' % a[0])
+            return ['playbgm %s, FALSE' % mus]
+        if cmd in ('StopMusic', 'FadeOutBGM', 'FadeOutMusic'):
+            return ['fadeoutbgm 1']
+        if cmd in ('PlayDefaultMusic', 'RestoreDefaultBGM', 'FadeInBGM'):
+            return ['fadedefaultbgm']
+        if cmd == 'WaitABPadPress':
+            return ['waitbuttonpress']
         if cmd == 'StartTrainerBattle':
             if len(a) > 1 and a[1] not in ('0',):
                 raise Unsupported('StartTrainerBattle with two trainers')

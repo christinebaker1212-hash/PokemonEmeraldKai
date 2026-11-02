@@ -1994,9 +1994,10 @@
 	.endm
 
 	@ Moemon Kai: SINNOH's command (src/sinnoh/s3d_scrcmd.c): what Platinum's converted scripts need (OP, ARG)
-	.macro sinnoh op:req, arg=0, arg2=0
+	.macro sinnoh op:req, arg=0, arg2=0, arg3=0
 	.byte 0xF6
 	.byte \op
 	.2byte \arg
 	.2byte \arg2
+	.2byte \arg3
 	.endm

@@ -23,7 +23,7 @@ Sinnoh_BattleFrontierGateToFightArea_EventScript_Person5::
 	end
 
 Sinnoh_BattleFrontierGateToFightArea_EventScript_Person6::
-	msgbox Sinnoh_BattleFrontierGateToFightArea_Text_Person6, MSGBOX_NPC
+	goto SinnohP_battle_frontier_gate_to_fight_area_2
 	end
 
 Sinnoh_BattleFrontierGateToFightArea_EventScript_Person7::
@@ -41,10 +41,5 @@ Sinnoh_BattleFrontierGateToFightArea_EventScript_Person9::
 Sinnoh_BattleFrontierGateToFightArea_EventScript_Person10::
 	goto SinnohP_battle_frontier_gate_to_fight_area_11
 	end
-
-Sinnoh_BattleFrontierGateToFightArea_Text_Person6:
-	.string "Welcome! This facility is getting\n"
-	.string "ready for challengers. Please come\l"
-	.string "back soon!$"
 
 @ --- end of SINNOH words ---

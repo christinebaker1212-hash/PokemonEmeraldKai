@@ -51,11 +51,11 @@ Sinnoh_CanalaveLibrary3f_EventScript_Bg12::
 	end
 
 Sinnoh_CanalaveLibrary3f_EventScript_Bg13::
-	msgbox Sinnoh_CanalaveLibrary3f_Text_Bg13, MSGBOX_SIGN
+	goto SinnohP_canalave_library_3f_11
 	end
 
 Sinnoh_CanalaveLibrary3f_EventScript_Bg14::
-	msgbox Sinnoh_CanalaveLibrary3f_Text_Bg14, MSGBOX_SIGN
+	goto SinnohP_canalave_library_3f_11
 	end
 
 Sinnoh_CanalaveLibrary3f_EventScript_Bg15::
@@ -83,11 +83,11 @@ Sinnoh_CanalaveLibrary3f_EventScript_Bg20::
 	end
 
 Sinnoh_CanalaveLibrary3f_EventScript_Bg21::
-	msgbox Sinnoh_CanalaveLibrary3f_Text_Bg21, MSGBOX_SIGN
+	goto SinnohP_canalave_library_3f_11
 	end
 
 Sinnoh_CanalaveLibrary3f_EventScript_Bg22::
-	msgbox Sinnoh_CanalaveLibrary3f_Text_Bg22, MSGBOX_SIGN
+	goto SinnohP_canalave_library_3f_11
 	end
 
 Sinnoh_CanalaveLibrary3f_EventScript_Person1::
@@ -109,30 +109,6 @@ Sinnoh_CanalaveLibrary3f_EventScript_Person4::
 Sinnoh_CanalaveLibrary3f_EventScript_Person5::
 	msgbox Sinnoh_CanalaveLibrary3f_Text_Person5, MSGBOX_NPC
 	end
-
-Sinnoh_CanalaveLibrary3f_Text_Bg13:
-	.string "An old book of SINNOH's stories. It\n"
-	.string "tells of MOéMON that shaped the land,\l"
-	.string "the lakes and the sky, long before\l"
-	.string "people came.$"
-
-Sinnoh_CanalaveLibrary3f_Text_Bg14:
-	.string "An old book of SINNOH's stories. It\n"
-	.string "tells of MOéMON that shaped the land,\l"
-	.string "the lakes and the sky, long before\l"
-	.string "people came.$"
-
-Sinnoh_CanalaveLibrary3f_Text_Bg21:
-	.string "An old book of SINNOH's stories. It\n"
-	.string "tells of MOéMON that shaped the land,\l"
-	.string "the lakes and the sky, long before\l"
-	.string "people came.$"
-
-Sinnoh_CanalaveLibrary3f_Text_Bg22:
-	.string "An old book of SINNOH's stories. It\n"
-	.string "tells of MOéMON that shaped the land,\l"
-	.string "the lakes and the sky, long before\l"
-	.string "people came.$"
 
 Sinnoh_CanalaveLibrary3f_Text_Person3:
 	.string "PROF. ROWAN: The book is clear. The\n"

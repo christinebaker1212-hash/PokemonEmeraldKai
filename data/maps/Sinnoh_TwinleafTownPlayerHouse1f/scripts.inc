@@ -3,11 +3,11 @@ Sinnoh_TwinleafTownPlayerHouse1f_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_TwinleafTownPlayerHouse1f_EventScript_Bg1::
-	msgbox Sinnoh_TwinleafTownPlayerHouse1f_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_twinleaf_town_player_house_1f_7
 	end
 
 Sinnoh_TwinleafTownPlayerHouse1f_EventScript_Bg2::
-	msgbox Sinnoh_TwinleafTownPlayerHouse1f_Text_Bg2, MSGBOX_SIGN
+	goto SinnohP_twinleaf_town_player_house_1f_7
 	end
 
 Sinnoh_TwinleafTownPlayerHouse1f_EventScript_Bg3::
@@ -41,16 +41,6 @@ Sinnoh_TwinleafTownPlayerHouse1f_EventScript_Person1::
 Sinnoh_TwinleafTownPlayerHouse1f_EventScript_Person2::
 	msgbox Sinnoh_TwinleafTownPlayerHouse1f_Text_Person2, MSGBOX_NPC
 	end
-
-Sinnoh_TwinleafTownPlayerHouse1f_Text_Bg1:
-	.string "A cooking show is on.\p"
-	.string "“...and that's how you make a POFFIN\n"
-	.string "that even a MUNCHLAX would share!”$"
-
-Sinnoh_TwinleafTownPlayerHouse1f_Text_Bg2:
-	.string "A cooking show is on.\p"
-	.string "“...and that's how you make a POFFIN\n"
-	.string "that even a MUNCHLAX would share!”$"
 
 Sinnoh_TwinleafTownPlayerHouse1f_Text_Person1:
 	.string "Oh! You're the TRAINER from overseas!\n"

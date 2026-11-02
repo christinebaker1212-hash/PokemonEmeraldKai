@@ -15,7 +15,7 @@ Sinnoh_Route208House_EventScript_Person3::
 	end
 
 Sinnoh_Route208House_EventScript_Sign4::
-	msgbox Sinnoh_Route208House_Text_Sign4, MSGBOX_SIGN
+	goto SinnohP_route_208_house_5
 	end
 
 Sinnoh_Route208House_Text_Person1:
@@ -31,9 +31,5 @@ Sinnoh_Route208House_Text_Person3:
 	.string "BERRIES make MOéMON happy. And\n"
 	.string "people too, if you bake them into a\l"
 	.string "pie.$"
-
-Sinnoh_Route208House_Text_Sign4:
-	.string "It's full of handwriting. It doesn't\n"
-	.string "seem polite to read it.$"
 
 @ --- end of SINNOH words ---

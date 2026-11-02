@@ -3,7 +3,7 @@ Sinnoh_SolaceonTownPokemonNewsPress_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_SolaceonTownPokemonNewsPress_EventScript_Bg1::
-	msgbox Sinnoh_SolaceonTownPokemonNewsPress_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_solaceon_town_pokemon_news_press_3
 	end
 
 Sinnoh_SolaceonTownPokemonNewsPress_EventScript_Person1::
@@ -26,9 +26,6 @@ Sinnoh_SolaceonTownPokemonNewsPress_EventScript_Person1_Given::
 Sinnoh_SolaceonTownPokemonNewsPress_EventScript_Person2::
 	goto SinnohP_solaceon_town_pokemon_news_press_2
 	end
-
-Sinnoh_SolaceonTownPokemonNewsPress_Text_Bg1:
-	.string "The PC is switched off.$"
 
 Sinnoh_SolaceonTownPokemonNewsPress_Text_Person1:
 	.string "We report on MOéMON news from all over\n"

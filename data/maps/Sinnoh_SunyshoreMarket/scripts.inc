@@ -7,7 +7,7 @@ Sinnoh_SunyshoreMarket_EventScript_Person1::
 	end
 
 Sinnoh_SunyshoreMarket_EventScript_Person2::
-	msgbox Sinnoh_SunyshoreMarket_Text_Person2, MSGBOX_NPC
+	goto SinnohP_sunyshore_market_4
 	end
 
 Sinnoh_SunyshoreMarket_EventScript_Person3::
@@ -25,10 +25,6 @@ Sinnoh_SunyshoreMarket_EventScript_Person5::
 Sinnoh_SunyshoreMarket_Text_Person1:
 	.string "The market's stalls change every day.\n"
 	.string "Come back tomorrow for something new!$"
-
-Sinnoh_SunyshoreMarket_Text_Person2:
-	.string "I found a shell shaped like a STARMIE\n"
-	.string "here once. Best day of my life.$"
 
 Sinnoh_SunyshoreMarket_Text_Person4:
 	.string "Welcome! These seals go on your POKé\n"
