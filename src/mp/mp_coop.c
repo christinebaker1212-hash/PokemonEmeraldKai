@@ -1928,17 +1928,82 @@ static bool8 ShareType(u16 a, u16 b)
 // it shares a type with it, is about as strong (base stats within 15%), isn't
 // legendary or a baby (no-eggs group), and isn't in the party yet. Always the
 // same for the same trainer and slot. Falls back to src's own species.
+// Moemon Kai: TEAM PADDING's POKéMON come from the region the battle is in (the user, 2026-11-02: FILL never off
+// GENERATION, another region's very sparingly): a region's own are the ones its wild tables have, and what they evolve
+// into; one from elsewhere only when the region has none that fits, or one time in ten. Never newer than the
+// trainer's own team (a Gen 1 team gets no Gen 7 POKéMON), and never past the GENERATION setting.
+#include "wild_encounter.h"
+#include "constants/wild_encounter.h"
+extern const struct Evolution gEvolutionTable[][EVOS_PER_MON];
+static u8 sRegionNative[REGION_COUNT][(NUM_SPECIES + 7) / 8];
+static bool8 sRegionNativeBuilt;
+
+static void MarkNative(u8 region, u16 species, u8 depth)
+{
+    u8 k;
+    if (species == SPECIES_NONE || species >= NUM_SPECIES || depth > 3)
+        return;
+    sRegionNative[region][species / 8] |= 1 << (species % 8);
+    for (k = 0; k < EVOS_PER_MON; k++)
+        if (gEvolutionTable[species][k].method != 0)
+            MarkNative(region, gEvolutionTable[species][k].targetSpecies, depth + 1);
+}
+
+static void MarkInfo(u8 region, const struct WildPokemonInfo *info, u8 count)
+{
+    u8 i;
+    if (info == NULL || info->wildPokemon == NULL)
+        return;
+    for (i = 0; i < count; i++)
+        MarkNative(region, info->wildPokemon[i].species, 0);
+}
+
+static bool8 RegionNative(u16 species, u8 region)
+{
+    if (!sRegionNativeBuilt)
+    {
+        u32 i;
+        for (i = 0; gWildMonHeaders[i].mapGroup != MAP_GROUP(MAP_UNDEFINED); i++)
+        {
+            const struct WildPokemonHeader *h = &gWildMonHeaders[i];
+            u8 r = MP_Region_OfGroup(h->mapGroup);
+            if (r >= REGION_COUNT)
+                continue;
+            MarkInfo(r, h->landMonsInfo, NUM_LAND_MONS_ENCOUNTER_SLOTS);
+            MarkInfo(r, h->waterMonsInfo, NUM_WATER_MONS_ENCOUNTER_SLOTS);
+            MarkInfo(r, h->rockSmashMonsInfo, NUM_ROCK_SMASH_MONS_ENCOUNTER_SLOTS);
+            MarkInfo(r, h->fishingMonsInfo, NUM_FISHING_MONS_ENCOUNTER_SLOTS);
+        }
+        sRegionNativeBuilt = TRUE;
+    }
+    return region < REGION_COUNT && (sRegionNative[region][species / 8] & (1 << (species % 8)));
+}
+
+// The newest generation among the trainer's own POKéMON (gEnemyParty)
+static u8 TeamNewestGen(void)
+{
+    u8 k, g = 1;
+    for (k = 0; k < PARTY_SIZE; k++)
+    {
+        u16 sp = GetMonData(&gEnemyParty[k], MON_DATA_SPECIES);
+        if (sp != SPECIES_NONE && sp < NUM_SPECIES && MP_Gen_OfSpecies(sp) > g)
+            g = MP_Gen_OfSpecies(sp);
+    }
+    return g;
+}
+
 static u16 PickFillerSpecies(struct Pokemon *src, u8 slot, u16 trainerId)
 {
-    static u16 sCandidates[NUM_SPECIES];
-    u16 srcSpecies = GetMonData(src, MON_DATA_SPECIES), species, count = 0;
+    static u16 sCandidates[NUM_SPECIES], sElsewhere[NUM_SPECIES];
+    u16 srcSpecies = GetMonData(src, MON_DATA_SPECIES), species, count = 0, elsewhere = 0;
     u16 bst = BaseStatTotal(srcSpecies);
-    u8 tries;
+    u8 tries, region = MP_Region_Current(), newest = TeamNewestGen();
     u32 seed = trainerId * 2654435761u + slot * 40503u;
 
     for (tries = 0; tries < 2 && count == 0; tries++)
     {
         u16 lo = bst * (tries ? 75 : 85) / 100, hi = bst * (tries ? 125 : 115) / 100;
+        elsewhere = 0;
         for (species = 1; species < NUM_SPECIES; species++)
         {
             u8 k;
@@ -1949,6 +2014,8 @@ static u16 PickFillerSpecies(struct Pokemon *src, u8 slot, u16 trainerId)
                 continue;   // Moemon Kai: Gen 4 Moemon only where the game puts them (after the ELITE FOUR, other regions)
             if (MP_Gen_SealedSpecies(species) || !MP_Gen_Allowed(species))
                 continue;   // Moemon Kai: nothing past the GENERATION (or the region's own cap)
+            if (MP_Gen_OfSpecies(species) > newest)
+                continue;   // ... nor newer than the trainer's own team
             if (species == SPECIES_SHEDINJA || species == SPECIES_UNOWN || species == SPECIES_DITTO
              || gSpeciesInfo[species].eggGroups[0] == EGG_GROUP_NO_EGGS_DISCOVERED)
                 continue;
@@ -1957,15 +2024,21 @@ static u16 PickFillerSpecies(struct Pokemon *src, u8 slot, u16 trainerId)
             for (k = 0; k < PARTY_SIZE; k++)
                 if (GetMonData(&gEnemyParty[k], MON_DATA_SPECIES) == species)
                     used = TRUE;
-            if (!used)
+            if (used)
+                continue;
+            if (RegionNative(species, region))
                 sCandidates[count++] = species;
+            else
+                sElsewhere[elsewhere++] = species;
         }
     }
-    if (count == 0)
-        return srcSpecies;
     seed ^= seed >> 13;
     seed *= 0x5bd1e995u;
     seed ^= seed >> 15;
+    if (elsewhere != 0 && (count == 0 || seed % 10 == 0))
+        return sElsewhere[(seed / 10) % elsewhere];   // (another region's: only now and then)
+    if (count == 0)
+        return srcSpecies;
     return sCandidates[seed % count];
 }
 
