@@ -827,6 +827,9 @@ static void UpdateSlot(struct FollowerSlot *s, u8 ownerObj, bool8 hidden)
     }
     else
         SetObjectSubpriorityByElevation(owner->previousElevation, fs, 2);
+    // Raised above tall grass yet behind its Trainer (walking down, facing down): gives way to them where they meet
+    // (gba_easy_draw.c; the user, 2026-11-02: it was drawn over them)
+    fs->mpUnder = fs->oam.priority < os->oam.priority && fs->subpriority > os->subpriority ? owner->spriteId + 1 : 0;
     fs->invisible = hidden || os->invisible || s->fxHide
         || (!s->autoOn && s->cur.x == owner->currentCoords.x && s->cur.y == owner->currentCoords.y && s->moved >= 16);
     if (s->recalling && !MP_BallFx_BodyRunning(s->spriteId))
@@ -1787,7 +1790,8 @@ void MP_Follower_PmdDebug(u8 slot)
         struct Sprite *fs = &gSprites[s->spriteId], *os = &gSprites[me->spriteId];
         printf("[test] pmd depth: follower %d,%d trainer %d,%d front %d push %d,%d%s lift %d\n", s->cur.x - MAP_OFFSET,
                s->cur.y - MAP_OFFSET, me->currentCoords.x - MAP_OFFSET, me->currentCoords.y - MAP_OFFSET,
-               fs->oam.priority < os->oam.priority || (fs->oam.priority == os->oam.priority && fs->subpriority < os->subpriority),
+               fs->mpUnder != me->spriteId + 1
+               && (fs->oam.priority < os->oam.priority || (fs->oam.priority == os->oam.priority && fs->subpriority < os->subpriority)),
                s->pushX, s->pushY, s->pushX || s->pushY ? " (back)" : "", s->pmd.big.lift);
     }
 }

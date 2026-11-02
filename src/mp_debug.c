@@ -586,8 +586,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
         }
         for (i = 0; i < MAX_SPRITES; i++)
             if (gSprites[i].inUse && gSprites[i].mpShadow)
+            {
                 n++;
-        printf("[test] shadows %s: %u\n", gMpConfig.noShadows ? "off" : "on", (unsigned)n);
+            }
+        {
+            extern unsigned int MP_ShadowKeep(void);   // gba_easy_draw.c: how much of the darkening shows (48 full, 64 none)
+            void MP_Shadow_Debug(void);
+            MP_Shadow_Debug();
+            printf("[test] shadows %s: %u (keep %u)\n", gMpConfig.noShadows ? "off" : "on", (unsigned)n, MP_ShadowKeep());
+        }
     }
     else if (strcmp(cmd, "s3dtex") == 0)   // s3dtex - SINNOH's animated map textures: how many, the first's frame now
     {

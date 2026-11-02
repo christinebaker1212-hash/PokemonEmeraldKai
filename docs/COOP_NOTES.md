@@ -3369,6 +3369,16 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   a 64x64 POKeMON stands 16 higher in its frame and its reflection was drawn far below); a small follower (drawn
   rows < 22) in tall grass stands above the grass's top layer (priority 1: the top layer covered it whole).
 
+1.67.0: shadows fade with the screen (gba_easy_draw.c ShadowKeepForFrame fits BG palette 0's shown colors against
+its own, MP_FadeFit, and keeps that share of the darkening: a whole-screen fade to white or black takes them, a fade
+of other palettes doesn't). A shadow sprite knows its owner (data[6]): an owner whose shadow id was reused by another
+owner's shadow makes a new one (two owners used to move one shadow, the player's ending under an NPC off screen; `mp
+shadows` prints each shadow's owner and "shadow shared" if it ever happens). A follower's reflection (a struct copy of
+it) has no mpCastShadow. A small follower raised to priority 1 in tall grass behind its Trainer gives way to them:
+sprite->mpUnder = the Trainer's sprite id + 1, sprite.c marks its OAM entries (gMpOamUnder, the Trainer's first
+entry) and the renderer takes its pixels out of its layer where the Trainer's own pixels land (sUnderPix). Tests
+follow_behind, follow_ground.
+
 ## Settings per save file, and switching save files in place (1.63.5)
 - save_slots.c SaveSlots_File(name, shared): the save file in use's own moemon_coop.ini (mp_main.c ConfigPath),
   moemon_controls.ini (gamepad.c), moemon_display.ini (display.c Display_PreInit) and lobby.txt (mp_main.c

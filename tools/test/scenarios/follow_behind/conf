@@ -1,0 +1,8 @@
+# A follower (the original overworld sprites) walking behind its Trainer down through ROUTE 101's tall grass: raised
+# above the grass's top layer (priority 1), it still gives way to its Trainer where they meet (sprite->mpUnder,
+# gba_easy_draw.c); the player's own shadow is theirs alone (an NPC's stale shadow id once moved it off screen). Shot behind.
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_PARTY=280:15 MOEMON_FOLLOWER_SPRITES=2"
+EXPECT_A=("pmd depth: follower 16,11 trainer 16,12 front 0" "pmd depth: follower 16,12 trainer 16,13 front 0" "shadow of sprite 0 (object): owner at 120,72 pri 2 sub 136, shadow at 120,83")
+UNEXPECT_A=("[crash]" "TIMEOUT" "front 1" "shadow shared")

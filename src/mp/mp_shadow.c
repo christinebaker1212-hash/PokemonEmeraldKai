@@ -83,9 +83,17 @@ static bool8 IsOurs(u8 id)
         && gSprites[id].data[7] == SHADOW_MAGIC;
 }
 
+// ... and this owner's: a shadow knows its owner (data[6]), so an owner whose shadow went with the sprites (a sprite
+// reset) never takes over the shadow that sprite id became for someone else (two owners moved one shadow each frame,
+// the last one's place winning: the player's shadow under an NPC off screen)
+static bool8 IsOwnShadow(u8 id, u8 owner)
+{
+    return IsOurs(id) && gSprites[id].data[6] == owner;
+}
+
 static void Drop(u8 owner)
 {
-    if (IsOurs(sShadowOf[owner]))
+    if (IsOwnShadow(sShadowOf[owner], owner))
         DestroySprite(&gSprites[sShadowOf[owner]]);
     sShadowOf[owner] = MAX_SPRITES;
 }
@@ -268,12 +276,16 @@ static void Cast(u8 owner, bool8 person)
     struct Sprite *o = &gSprites[owner], *s;
     s32 x, y, w;
     u8 size, id = sShadowOf[owner];
-    if (!IsOurs(id))
+    if (!IsOwnShadow(id, owner))
     {
         id = CreateSprite(&sTemplate, 0, 0, 255);
         if (id == MAX_SPRITES)
+        {
+            sShadowOf[owner] = MAX_SPRITES;
             return;
+        }
         gSprites[id].data[7] = SHADOW_MAGIC;
+        gSprites[id].data[6] = owner;
         gSprites[id].mpShadow = TRUE;
         sShadowOf[owner] = id;
     }
@@ -295,6 +307,7 @@ static void Cast(u8 owner, bool8 person)
 }
 
 void MP_Shadow_Reset(void);
+bool8 MP_IsReflectionSprite(struct Sprite *sprite);   // field_effect_helpers.c
 
 static bool8 InWater(s16 x, s16 y)
 {
@@ -322,7 +335,7 @@ static void WatchOne(u32 k, u8 owner)
     if (owner >= MAX_SPRITES)
         return;
     id = sShadowOf[owner];
-    if (IsOurs(id) && !gSprites[id].invisible)
+    if (IsOwnShadow(id, owner) && !gSprites[id].invisible)
     {
         s16 gap = gSprites[id].y - gSprites[owner].y;
         if (getenv("MOEMON_SHADOW_TRACE"))
@@ -397,7 +410,7 @@ void MP_Shadow_Update(void)
         for (i = 0; i < MAX_SPRITES; i++)   // followers and Garden POKeMON (mp_follower.c marks them)
         {
             struct Sprite *o = &gSprites[i];
-            if (o->inUse && o->mpCastShadow && !o->invisible && !o->mpClipOn && !sSeen[i])
+            if (o->inUse && o->mpCastShadow && !o->invisible && !o->mpClipOn && !sSeen[i] && !MP_IsReflectionSprite(o))
                 Cast(i, FALSE);
         }
     }
@@ -411,4 +424,35 @@ void MP_Shadow_Reset(void)
 {
     memset(sShadowOf, MAX_SPRITES, sizeof(sShadowOf));
     memset(sFeetImages, 0, sizeof(sFeetImages));
+}
+
+// Tests (mp shadows): each shadow, its owner and where both are on screen
+void MP_Shadow_Debug(void)
+{
+    u32 i, j;
+    for (i = 0; i < MAX_SPRITES; i++)
+        for (j = i + 1; j < MAX_SPRITES; j++)
+            if (sShadowOf[i] != MAX_SPRITES && sShadowOf[i] == sShadowOf[j] && IsOurs(sShadowOf[i]))
+                printf("[test] shadow shared: sprites %u and %u both hold shadow %u\n", (unsigned)i, (unsigned)j, sShadowOf[i]);
+    {
+        struct ObjectEvent *e = &gObjectEvents[gPlayerAvatar.objectEventId];
+        struct Sprite *o = &gSprites[e->spriteId];
+        u32 used = 0;
+        for (j = 0; j < MAX_SPRITES; j++)
+            used += gSprites[j].inUse;
+        printf("[test] shadow player: %u sprites used, its shadow %u (ours %d); sprite %u inUse %d inv %d mpShadow %d clip %d evInv %d inanimate %d water %d under %u cast %d\n",
+               (unsigned)used, sShadowOf[e->spriteId], IsOurs(sShadowOf[e->spriteId]), e->spriteId, o->inUse, o->invisible, o->mpShadow, o->mpClipOn, e->invisible, e->inanimate,
+               InWater(e->currentCoords.x, e->currentCoords.y), o->mpUnder, o->mpCastShadow);
+    }
+    for (i = 0; i < MAX_SPRITES; i++)
+        if (sShadowOf[i] != MAX_SPRITES && IsOwnShadow(sShadowOf[i], i))
+        {
+            const struct Sprite *o = &gSprites[i], *s = &gSprites[sShadowOf[i]];
+            printf("[test] shadow of sprite %u (%s): owner at %d,%d pri %d sub %d, shadow at %d,%d pri %d inv %d\n",
+                   (unsigned)i, MP_IsReflectionSprite((struct Sprite *)o) ? "reflection" : o->mpCastShadow ? "follower" : "object",
+                   o->x + o->x2 + (o->coordOffsetEnabled ? gSpriteCoordOffsetX : 0),
+                   o->y + o->y2 + (o->coordOffsetEnabled ? gSpriteCoordOffsetY : 0), o->oam.priority, o->subpriority,
+                   s->x + s->x2 + (s->coordOffsetEnabled ? gSpriteCoordOffsetX : 0),
+                   s->y + s->y2 + (s->coordOffsetEnabled ? gSpriteCoordOffsetY : 0), s->oam.priority, s->invisible);
+        }
 }

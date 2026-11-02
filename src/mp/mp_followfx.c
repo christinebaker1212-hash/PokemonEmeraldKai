@@ -431,6 +431,8 @@ static void CreateReflection(struct FollowFx *f, bool8 still)
         return;
     r = &gSprites[id];
     r->callback = SpriteCB_Reflection;
+    r->mpUnder = 0;
+    r->mpCastShadow = FALSE;      // (a copy of the follower: no shadow of its own under the water, the user 2026-11-02)
     r->oam.priority = 3;          // under the land tiles, so it only shows on the water / ice
     r->usingSheet = TRUE;         // shares the follower's tiles
     r->anims = gDummySpriteAnimTable;

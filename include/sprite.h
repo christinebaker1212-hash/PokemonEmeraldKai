@@ -255,6 +255,8 @@ struct Sprite
     s16 mpClipY;
     u16 mpScale;            // Moemon Co-op: drawn this much smaller (Q8: 128 = half; 0 = as it is), smoothly (mp_spritescale.h)
     bool8 mpShadow;         // Moemon Kai: a shadow: its pixels darken what's under them instead (mp_shadow.c, gba_easy_draw.c)
+    u8 mpUnder;             // Moemon Kai: drawn at a higher OAM priority yet behind this sprite (its id + 1): its pixels
+                            // give way to that sprite's (a follower raised above tall grass behind its Trainer)
     bool8 mpCastShadow;     // ... a shadow goes under it (followers, Garden POKeMON; map objects get one anyway)
 };
 

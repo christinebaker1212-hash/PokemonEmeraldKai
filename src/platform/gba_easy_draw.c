@@ -488,12 +488,22 @@ extern u16 *gMpFxLayer;
 static bool sFxSprite;
 extern u8 gMpOamShadowLive[256];
 static bool sShadowSprite;
+// Moemon Kai: entries that give way to another (sprite->mpUnder, sprite.c gMpOamUnderLive): a follower raised to a
+// higher priority to stand above tall grass, walking behind its Trainer, never covers them. Its pixels on this line are
+// remembered (sUnderPix: its entry + 1) and the Trainer's pixels, drawn after it, take them out of its layer.
+extern u16 gMpOamUnderLive[256];
+static u16 sUnderPix[DISPLAY_WIDTH];
 
 // Moemon Kai: how much of a shadow's darkening is left this frame. A fade to white or black takes the shadows with
 // it, as it takes the sprites (the user, 2026-11-02: a white transition left them on screen): the backgrounds' first
 // palette is fitted against its own colors (palette.c MP_FadeFit), and the shadow keeps the share of it still shown.
 // A fade of other palettes only (a sprite's flash) leaves them alone.
 static unsigned int sShadowKeep = 48;
+unsigned int MP_ShadowKeep(void)
+{
+    return sShadowKeep;
+}
+
 static void ShadowKeepForFrame(void)
 {
     struct MpFadeFit fit;
@@ -591,6 +601,24 @@ static void PutObjPixel(struct scanlineData *scanline, uint16_t *pixels, struct 
             }
         }
         
+        // Moemon Kai: a follower behind its Trainer gives way to them (sUnderPix)
+        {
+            int e = (int)(oam - (struct OamData *)OAM);
+            if (gMpOamUnderLive[e])
+                sUnderPix[global_x] = e + 1;
+            else if (sUnderPix[global_x])
+            {
+                int f = sUnderPix[global_x] - 1;
+                struct OamData *fo = &((struct OamData *)OAM)[f];
+                if (fo->priority == oam->priority)
+                    sUnderPix[global_x] = 0;   // (covered in its own layer anyway)
+                else if (gMpOamUnderLive[f] == e + 1 && fo->priority < oam->priority)
+                {
+                    scanline->spriteLayers[fo->priority][global_x] = 0;
+                    sUnderPix[global_x] = 0;
+                }
+            }
+        }
         //write pixel to pixel framebuffer
         pixels[global_x] = color | (1 << 15);
         // Moemon Co-op: BATTLE ANIMS > MODERN marks the effect sprites' pixels (mp_modernanim.c)
@@ -829,6 +857,7 @@ static void DrawSprites(struct scanlineData* scanline, uint16_t vcount, bool win
     {
         puts("2-D OBJ Character mapping not supported.");
     }
+    memset(sUnderPix, 0, sizeof(sUnderPix));
 
     for (i = OAM_ENTRY_COUNT - 1; i >= 0; i--)
     {

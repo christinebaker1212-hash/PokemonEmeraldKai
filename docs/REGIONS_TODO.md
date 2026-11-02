@@ -76,8 +76,10 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 
 ## General
 - [x] Shadows fade with screen transitions (gba_easy_draw.c ShadowKeepForFrame: the share of the backgrounds still shown)
-- [ ] No extra shadow under a follower's reflection
-- [ ] A follower behind the player drawn over the player when facing / moving down
+- [x] No extra shadow under a follower's reflection (mp_followfx.c clears the copy's mpCastShadow; mp_shadow.c skips
+      reflections; a shadow knows its owner, so two owners never share one: test follow_ground)
+- [x] A follower behind the player drawn over the player when facing / moving down (raised above tall grass, it
+      gives way to its Trainer: sprite->mpUnder, gba_easy_draw.c; test follow_behind)
 - [x] OPTIONS: RETURN TO MAIN MENU (GAME tab, from the field: the save prompt, declined: sure?, then the save read again
       and the title screen; the PC build's soft reset quits, so it's main_menu.c MP_ReturnToTitleNow; test options_title)
 
