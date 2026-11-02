@@ -75,7 +75,7 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       found somewhere; FILL never sends OFF GENERATION, OFF REGION very sparingly
 
 ## General
-- [ ] Shadows fade with screen transitions
+- [x] Shadows fade with screen transitions (gba_easy_draw.c ShadowKeepForFrame: the share of the backgrounds still shown)
 - [ ] No extra shadow under a follower's reflection
 - [ ] A follower behind the player drawn over the player when facing / moving down
 - [x] OPTIONS: RETURN TO MAIN MENU (GAME tab, from the field: the save prompt, declined: sure?, then the save read again

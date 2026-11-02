@@ -1,6 +1,7 @@
 #ifdef RENDERER_EASY_DRAW
 #include "global.h"
 #include "mp.h"
+#include "palette.h"
 #include "mp_bigsprite.h"
 #include <stdbool.h>
 #include "platform/dma.h"
@@ -488,6 +489,24 @@ static bool sFxSprite;
 extern u8 gMpOamShadowLive[256];
 static bool sShadowSprite;
 
+// Moemon Kai: how much of a shadow's darkening is left this frame. A fade to white or black takes the shadows with
+// it, as it takes the sprites (the user, 2026-11-02: a white transition left them on screen): the backgrounds' first
+// palette is fitted against its own colors (palette.c MP_FadeFit), and the shadow keeps the share of it still shown.
+// A fade of other palettes only (a sprite's flash) leaves them alone.
+static unsigned int sShadowKeep = 48;
+static void ShadowKeepForFrame(void)
+{
+    struct MpFadeFit fit;
+    s32 s;
+    MP_FadeFit_FromPalette(&fit, BG_PLTT_ID(0));
+    s = fit.on ? fit.s256 : 256;
+    if (s < 0)
+        s = 0;
+    if (s > 256)
+        s = 256;
+    sShadowKeep = 64 - (16 * s >> 8);
+}
+
 // Moemon Kai: a shadow sprite's pixel (mp_shadow.c): what the backgrounds show there at the sprite's priority and below,
 // darkened (the backdrop if none); sprites drawn after it (everything: shadows come last in the OAM) cover it
 static uint16_t ShadowPixel(struct scanlineData *scanline, int prnum, int x)
@@ -505,10 +524,11 @@ static uint16_t ShadowPixel(struct scanlineData *scanline, int prnum, int x)
             }
         }
 found:
-    // a quarter darker (1.63.8: the user asked for half the 1.63.4 shadow's strength)
+    // a quarter darker (1.63.8: the user asked for half the 1.63.4 shadow's strength), fading out with the screen
+    // (sShadowKeep: 48 a quarter off, 64 none)
     {
         unsigned int r = c & 0x1F, g = (c >> 5) & 0x1F, b = (c >> 10) & 0x1F;
-        return (r * 3 >> 2) | ((g * 3 >> 2) << 5) | ((b * 3 >> 2) << 10);
+        return (r * sShadowKeep >> 6) | ((g * sShadowKeep >> 6) << 5) | ((b * sShadowKeep >> 6) << 10);
     }
 }
 
@@ -1238,6 +1258,8 @@ void DrawFrame(uint16_t *pixels)
 {
     int i;
     int j;
+
+    ShadowKeepForFrame();
 
     for (i = 0; i < DISPLAY_HEIGHT; i++)
     {
