@@ -1202,7 +1202,9 @@ static void BuyMenuTryMakePurchase(u8 taskId)
 
 static void BuyMenuSubtractMoney(u8 taskId)
 {
+    void Sinnoh_StoreBought(void);
     IncrementGameStat(GAME_STAT_SHOPPED);
+    Sinnoh_StoreBought();   // Moemon Kai: the VEILSTONE DEPARTMENT STORE's regulars (src/sinnoh/s3d_misc.c)
     RemoveMoney(&gSaveBlock1Ptr->money, sShopData->totalCost);
     PlaySE(SE_SHOP);
     PrintMoneyAmountInMoneyBox(WIN_MONEY, GetMoney(&gSaveBlock1Ptr->money), 0);

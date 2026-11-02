@@ -1,0 +1,15 @@
+pressuntil A field 5000
+wait 30
+mp warp 42,31,9,8
+wait 200
+mp face up
+press A 2
+wait 60
+pressuntil A yesno 900
+wait 10
+press A 2
+wait 200
+shot lot_number
+mash A 30 20
+pressuntil B field 2000
+quit

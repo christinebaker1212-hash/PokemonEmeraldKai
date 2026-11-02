@@ -83,11 +83,12 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [ ] The VILLA (Resort Area) and its furniture
 - [ ] The Frontier Brains' and the HALL MATRON's teams
 - [ ] The PASTORIA size contest
-- [ ] JUBILIFE's TV lottery
+- [x] JUBILIFE's TV lottery in Platinum's own script, on the game's own lottery number (s3d_misc.c) (sinnoh_lottery)
 - [ ] The JOURNAL
 - [ ] AMITY SQUARE's walk (ClearAmitySquareStepCount)
-- [ ] The VEILSTONE DEPARTMENT STORE's regular (CheckIsDepartmentStoreRegular)
-- [ ] Game records (AddToGameRecord), the rankings machines (StartRankingsMachine)
+- [x] The VEILSTONE DEPARTMENT STORE's regular (CheckIsDepartmentStoreRegular: 5 buys there, s3d_misc.c)
+- [x] Game records (AddToGameRecord: kept by nothing, Platinum showing them only in the rankings rooms); the rankings
+      machines (StartRankingsMachine) closed: group / Wi-Fi rankings
 - [x] DAWN's and LUCAS's own overworld sprites (Platinum's player_f / player_m sheets, appended to the pack after the
       others: OBJ_EVENT_GFX_SINNOH_PLAYER_F / _M)
 - [x] The Underground, for its digging and SPIRITOMB only (the user, 2026-11-02; its wireless sides are CO-OP's):

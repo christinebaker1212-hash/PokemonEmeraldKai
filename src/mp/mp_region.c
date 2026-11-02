@@ -18,6 +18,9 @@ void Sinnoh_RoamerReset(void);
 const void *MP_RegionBerryTrees_Data(u32 *size);   // (the BERRY trees past the save's 128: chunk BTRE, mp_berrytrees.c)
 void MP_RegionBerryTrees_Load(const void *data, u32 size);
 void MP_RegionBerryTrees_Reset(void);
+const void *Sinnoh_MiscData(u32 *size);   // (small Platinum counters: chunk SMSC, s3d_misc.c)
+void Sinnoh_MiscLoad(const void *data, u32 size);
+void Sinnoh_MiscReset(void);
 #include "battle_pyramid.h"
 #include "event_data.h"
 #include "mp.h"
@@ -270,6 +273,7 @@ void MP_Region_StartNewGame(void)
     Sinnoh_UnownReset();
     Sinnoh_RoamerReset();
     MP_RegionBerryTrees_Reset();
+    Sinnoh_MiscReset();
     MP_Region_Arrive(sStartRegion);
     if (sStartRegion == REGION_SINNOH)
     {
@@ -446,6 +450,15 @@ void MP_Region_WriteSidecar(void)
             fwrite(bt, size, 1, f);
         }
         {
+            // small Platinum counters (src/sinnoh/s3d_misc.c)
+            u32 size;
+            const void *sm = Sinnoh_MiscData(&size);
+            c[0] = CHUNK('S', 'M', 'S', 'C');
+            c[1] = size;
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(sm, size, 1, f);
+        }
+        {
             u32 format = MP_SAVE_FORMAT;   // the save's own layout version (mp_savefix.h)
             c[0] = CHUNK('S', 'A', 'V', 'F');
             c[1] = sizeof(format);
@@ -551,6 +564,12 @@ static bool8 LoadFrom(const char *path)
                 u8 buf[4096];
                 if (fread(buf, c[1], 1, f) == 1)
                     Sinnoh_TvLoad(buf, c[1]);
+            }
+            else if (c[0] == CHUNK('S', 'M', 'S', 'C') && c[1] <= 256)
+            {
+                u8 buf[256];
+                if (fread(buf, c[1], 1, f) == 1)
+                    Sinnoh_MiscLoad(buf, c[1]);
             }
             else if (c[0] == CHUNK('B', 'T', 'R', 'E') && c[1] <= 2048)
             {
@@ -667,6 +686,7 @@ void MP_Region_LoadFromSave(void)
     Sinnoh_UnownReset();
     Sinnoh_RoamerReset();
     MP_RegionBerryTrees_Reset();
+    Sinnoh_MiscReset();
     for (i = 0; i <= 3; i++)
     {
         if (i == 0)

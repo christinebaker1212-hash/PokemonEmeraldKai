@@ -3979,6 +3979,12 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   daily POKéMON: each area one of 32 picks a day (day + Trainer ID) in the 5% slots 6-7 while the SAFARI GAME is on,
   the second list after SINNOH's LEAGUE (Sinnoh_GreatMarshDaily; `mp marshdaily`). The marsh is 128x160 tiles:
   MAX_MAP_DATA_SIZE is 32768 (fieldmap.h; a map past it gets no grid at all: no walls, grass or warps). Test sinnoh_marsh.
+- Small Platinum commands on Kai's systems (2026-11-02, src/sinnoh/s3d_misc.c, `sinnoh SINNOH_MISC, op` 61, chunk SMSC
+  in "<save>.region"): JUBILIFE TV's lottery (GetJubilifeLotteryTrainerID is the game's own lottery number, the one
+  HOENN's LOTTERY CORNER draws; CheckForJubilifeLotteryWinner Platinum's digit match over the party and the save's
+  boxes; BufferVarPaddingDigits, BufferMonNicknameFromPC), the VEILSTONE DEPARTMENT STORE's regular (5 buys there:
+  shop.c Sinnoh_StoreBought). AddToGameRecord is dropped (Platinum shows its records only in the closed rankings
+  rooms). Test sinnoh_lottery.
 - BERRY patches (2026-11-02, src/mp/mp_berrytrees.c): Platinum's 118 soil patches (OBJ_EVENT_GFX_BERRY_SOIL, its
   patch number in data[0]) are the game's own BERRY trees (BerryTreeScript, MOVEMENT_TYPE_BERRY_TREE_GROWTH: what Kai
   has, SINNOH uses, so the WAILMER PAIL waters them), numbered 128 + Platinum's patch number (gen_maps.py

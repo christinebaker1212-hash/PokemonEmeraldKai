@@ -57,6 +57,7 @@ SINNOH_REGI_DOT, SINNOH_QUAKE = 55, 56   # (the REGI ruins' dots; Platinum's scr
 SINNOH_MESSAGE_UNOWN = 57   # (gSinnohMessage <- a message in Platinum's UNOWN letters: src/text.c FONT_UNOWN)
 SINNOH_UNOWN_SEEN = 58   # (the UNOWN letters seen: s3d_legends.c)
 SINNOH_TRAM = 59   # (the GREAT MARSH's tram: s3d_tram.c)
+SINNOH_MISC = 61   # (small commands on Kai's systems: src/sinnoh/s3d_misc.c)
 SINNOH_ROAMER = 60   # (a roaming POKéMON set going: src/sinnoh/s3d_roamer.c; the slot, Platinum's ROAMING_SLOT_*)   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
 (TVCALL_STATUS, TVCALL_FRAMING, TVCALL_FINISH, TVCALL_SEGMENT_ID, TVCALL_SEGMENT, TVCALL_COMMERCIAL, TVCALL_NEXT,
  TVCALL_INTERVIEW_ID, TVCALL_INTERVIEW_MESSAGE, TVCALL_INTERVIEW_SAVE, TVCALL_INTERVIEW_OK, TVCALL_WORD,
@@ -581,6 +582,25 @@ class FileConverter:
         if cmd == 'SetPlayerHeightCalculationEnabled':
             # (the GREAT MARSH's tram: the player rides at the platform's height, s3d_tram.c)
             return [self.sinnoh(SINNOH_TRAM, 3, 1 if a[0] == 'TRUE' else 0)]
+        if cmd == 'BufferVarPaddingDigits':
+            slot = int(self.strvar(a[0])[-1]) - 1
+            return [self.sinnoh(SINNOH_MISC, 4, self.var(a[1]),
+                                (slot << 8) | (0x80 if a[2] == 'PADDING_MODE_ZEROES' else 0) | int(self.value(a[3])))]
+        if cmd == 'BufferMonNicknameFromPC':
+            return [self.sinnoh(SINNOH_MISC, 5, self.var(a[1]), int(self.strvar(a[0])[-1]) - 1)]
+        if cmd == 'GetJubilifeLotteryTrainerID':
+            return [self.sinnoh(SINNOH_MISC, 0, self.var(a[0]))]
+        if cmd == 'CheckForJubilifeLotteryWinner':
+            v = [self.var(x) for x in a[:3]]
+            if v != ['VAR_0x8001', 'VAR_0x8002', 'VAR_0x8003']:
+                raise Unsupported('lottery variables %s' % v)
+            return [self.sinnoh(SINNOH_MISC, 1, 'VAR_0x8001', self.var(a[3]))]
+        if cmd == 'RandomizeJubilifeLottery':
+            return [self.sinnoh(SINNOH_MISC, 2)]
+        if cmd == 'CheckIsDepartmentStoreRegular':
+            return [self.sinnoh(SINNOH_MISC, 3, self.var(a[0]))]
+        if cmd in ('AddToGameRecord', 'AddToGameRecordBigValue'):
+            return []   # (Platinum's records shown only by its rankings rooms: group / Wi-Fi, closed)
         if cmd == 'GetPartyRotomCountAndFirst':
             # (ROTOM in another form than its own: none, the forms coming only from the ROTOM distribution, a DS event
             # closed here: ROTOM's room has no appliances, as Platinum's without it)
