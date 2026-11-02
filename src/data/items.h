@@ -5170,4 +5170,81 @@ const struct Item gItems[] =
         .type = ITEM_USE_FIELD,
         .fieldUseFunc = ItemUseOutOfBattle_Moenav,
     },
+
+    [ITEM_RED_APRICORN] =   // Moemon Kai: Crystal's (its name and words; KURT's POKé BALLS: mp_apricorn.c)
+    {
+        .name = _("RED APRICORN"),
+        .itemId = ITEM_RED_APRICORN,
+        .price = 20,
+        .description = sRedApricornDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_BLU_APRICORN] =   // Moemon Kai: Crystal's (its name and words; KURT's POKé BALLS: mp_apricorn.c)
+    {
+        .name = _("BLU APRICORN"),
+        .itemId = ITEM_BLU_APRICORN,
+        .price = 20,
+        .description = sBluApricornDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_YLW_APRICORN] =   // Moemon Kai: Crystal's (its name and words; KURT's POKé BALLS: mp_apricorn.c)
+    {
+        .name = _("YLW APRICORN"),
+        .itemId = ITEM_YLW_APRICORN,
+        .price = 20,
+        .description = sYlwApricornDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_GRN_APRICORN] =   // Moemon Kai: Crystal's (its name and words; KURT's POKé BALLS: mp_apricorn.c)
+    {
+        .name = _("GRN APRICORN"),
+        .itemId = ITEM_GRN_APRICORN,
+        .price = 20,
+        .description = sGrnApricornDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_WHT_APRICORN] =   // Moemon Kai: Crystal's (its name and words; KURT's POKé BALLS: mp_apricorn.c)
+    {
+        .name = _("WHT APRICORN"),
+        .itemId = ITEM_WHT_APRICORN,
+        .price = 20,
+        .description = sWhtApricornDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_BLK_APRICORN] =   // Moemon Kai: Crystal's (its name and words; KURT's POKé BALLS: mp_apricorn.c)
+    {
+        .name = _("BLK APRICORN"),
+        .itemId = ITEM_BLK_APRICORN,
+        .price = 20,
+        .description = sBlkApricornDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
+
+    [ITEM_PNK_APRICORN] =   // Moemon Kai: Crystal's (its name and words; KURT's POKé BALLS: mp_apricorn.c)
+    {
+        .name = _("PNK APRICORN"),
+        .itemId = ITEM_PNK_APRICORN,
+        .price = 20,
+        .description = sPnkApricornDesc,
+        .pocket = POCKET_ITEMS,
+        .type = ITEM_USE_BAG_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+    },
 };

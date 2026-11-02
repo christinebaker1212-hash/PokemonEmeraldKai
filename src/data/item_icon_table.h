@@ -458,5 +458,12 @@ const u32 *const gItemIconTable[ITEMS_COUNT + 1][2] =
     [ITEM_STABLE_MULCH] = {gItemIcon_SoftSand, gItemIconPalette_SoftSand},   // Moemon Kai: a stand-in
     [ITEM_GOOEY_MULCH] = {gItemIcon_SoftSand, gItemIconPalette_SoftSand},   // Moemon Kai: a stand-in
     [ITEM_MOENAV] = {gItemIcon_Scanner, gItemIconPalette_Scanner},   // Moemon Kai: a stand-in
+    [ITEM_RED_APRICORN] = {gItemIcon_RedApricorn, gItemIconPalette_RedApricorn},
+    [ITEM_BLU_APRICORN] = {gItemIcon_BluApricorn, gItemIconPalette_BluApricorn},
+    [ITEM_YLW_APRICORN] = {gItemIcon_YlwApricorn, gItemIconPalette_YlwApricorn},
+    [ITEM_GRN_APRICORN] = {gItemIcon_GrnApricorn, gItemIconPalette_GrnApricorn},
+    [ITEM_WHT_APRICORN] = {gItemIcon_WhtApricorn, gItemIconPalette_WhtApricorn},
+    [ITEM_BLK_APRICORN] = {gItemIcon_BlkApricorn, gItemIconPalette_BlkApricorn},
+    [ITEM_PNK_APRICORN] = {gItemIcon_PnkApricorn, gItemIconPalette_PnkApricorn},
     [ITEMS_COUNT] = {gItemIcon_ReturnToFieldArrow, gItemIconPalette_ReturnToFieldArrow},
 };

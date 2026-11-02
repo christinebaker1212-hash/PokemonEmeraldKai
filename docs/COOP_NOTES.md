@@ -4400,3 +4400,22 @@ have givers who stay. Debug `mp hmrescue`; tests hm_rescue, hm_rescue_carried.
 - On SINNOH's outdoor maps the same tint goes on the sprites only (the user: the light should tint the sprites as
   well; its 3D world is lit by s3d.c): gMpSceneLayers 0 there; MOEMON_S3D_HOUR (`mp s3dhour`) sets its hour in tests.
 
+
+
+## JOHTO's fruit trees and KURT's BALLS (1.68.0)
+Crystal's fruit trees (pokecrystal engine/events/fruit_trees.asm) in Quetzal's berry trees' places
+(tools/quetzal_port/fix_fruit_trees.py), src/mp/mp_apricorn.c:
+- APRICORN trees: AZALEA (WHT), ROUTE 37 (RED, BLU, BLK), ROUTE 42 (PNK, GRN, YLW; Crystal's three in a row, two
+  added beside Quetzal's one). One APRICORN each a day, Crystal's words (its PACK is the BAG), script
+  Johto_EventScript_FruitTree (data/scripts/mp_region.inc). Drawn as the game's grown BERRY tree on trees 246-252
+  (mp_berrytrees.c's range, past SINNOH's), a BERRY of the APRICORN's color, flowering once picked until the next
+  day (never growing on their own: PlantBerryTree allowGrowth FALSE). The day is gLocalTime.days.
+- KURT (JOHTO's KURTS_HOUSE, after the SLOWPOKE WELL): Crystal's flow in place of Quetzal's ball shop. QzKurtChooseApricorn:
+  the APRICORNs held and CANCEL, then how many (UP / DOWN one, LEFT / RIGHT ten); a day later the BALLS (RED: LEVEL,
+  BLU: LURE, YLW: MOON, GRN: FRIEND, WHT: FAST, BLK: HEAVY, PNK: LOVE). Every ball the shop sold is still obtainable
+  (item_audit.py).
+- The other 17 trees are BERRY patches (the game's own 1x1 soil, BerryTreeScript) on tree numbers 90-99 / 120-127,
+  planted once (MP_JohtoBerries_Init after a JOHTO map's transition scripts) with Crystal's BERRY in its Gen 3 name.
+  Before, ten of Quetzal's trees were 100-109, the GARDEN farm's plots too.
+- Vars (JOHTO's, the region sidecar): 0x52E0 picked today, 0x52E1 that day, 0x52E2-0x52E4 KURT's APRICORN, count and
+  day, 0x52E5 the patches planted. Debug: mp apricorn. Test johto_apricorn.

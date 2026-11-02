@@ -119,15 +119,92 @@ Johto_KurtsHouse_EventScript_83C5B77::
 	call_if_unset FLAG_QZ_0x1150, Johto_KurtsHouse_EventScript_83C5B66
 	goto Johto_KurtsHouse_EventScript_83C5BA8
 
+@ Moemon Kai: Crystal's KURT makes BALLS of APRICORNS (a day's wait; src/mp/mp_apricorn.c) where Quetzal's sold them
 Johto_KurtsHouse_EventScript_83C5BA8::
-	message Johto_KurtsHouse_Text_83C5BD4
-	waitmessage
-
-Johto_KurtsHouse_EventScript_83C5BAE::
-	pokemart Johto_KurtsHouse_Mart_83C5BC0
-	msgbox Quetzal_Text_8360D20, MSGBOX_DEFAULT
+	special QzKurtBallState
+	goto_if_eq VAR_RESULT, 1, Johto_KurtsHouse_EventScript_KurtWorking
+	goto_if_eq VAR_RESULT, 2, Johto_KurtsHouse_EventScript_KurtBallReady
+	special QzHasApricorn
+	goto_if_eq VAR_RESULT, TRUE, Johto_KurtsHouse_EventScript_KurtAskApricorn
+	msgbox Johto_KurtsHouse_Text_KurtBallsFromApricorns, MSGBOX_DEFAULT
 	release
 	end
+
+Johto_KurtsHouse_EventScript_KurtAskApricorn::
+	msgbox Johto_KurtsHouse_Text_KurtAskApricorn, MSGBOX_DEFAULT
+	message Johto_KurtsHouse_Text_KurtWhichApricorn
+	waitmessage
+	special QzKurtChooseApricorn
+	waitstate
+	goto_if_eq VAR_RESULT, FALSE, Johto_KurtsHouse_EventScript_KurtLetdown
+	msgbox Johto_KurtsHouse_Text_KurtTakeADay, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_KurtsHouse_EventScript_KurtLetdown::
+	msgbox Johto_KurtsHouse_Text_KurtLetdown, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_KurtsHouse_EventScript_KurtWorking::
+	msgbox Johto_KurtsHouse_Text_KurtWorking, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_KurtsHouse_EventScript_KurtBallReady::
+	msgbox Johto_KurtsHouse_Text_KurtFinished, MSGBOX_DEFAULT
+	checkitemspace VAR_0x8005, VAR_0x8006
+	goto_if_eq VAR_RESULT, FALSE, Johto_KurtsHouse_EventScript_KurtNoRoom
+	setorcopyvar VAR_0x8000, VAR_0x8005
+	setorcopyvar VAR_0x8001, VAR_0x8006
+	callstd STD_OBTAIN_ITEM
+	special QzKurtBallTaken
+	msgbox Johto_KurtsHouse_Text_KurtTurnedOutGreat, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_KurtsHouse_EventScript_KurtNoRoom::
+	msgbox Johto_KurtsHouse_Text_KurtNoRoom, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_KurtsHouse_Text_KurtBallsFromApricorns:
+	.string "KURT: I make BALLS from APRICORNS.\p"
+	.string "Collect them from trees and bring\n"
+	.string "’em to me.\p"
+	.string "I’ll make BALLS out of them.$"
+
+Johto_KurtsHouse_Text_KurtAskApricorn:
+	.string "KURT: You have an APRICORN for me?\p"
+	.string "Fine! I’ll turn it into a BALL.$"
+
+Johto_KurtsHouse_Text_KurtWhichApricorn:
+	.string "Which APRICORN should I use?\n"
+	.string "How many should I make?$"
+
+Johto_KurtsHouse_Text_KurtTakeADay:
+	.string "KURT: It’ll take a day to make you\n"
+	.string "a BALL. Come back for it later.$"
+
+Johto_KurtsHouse_Text_KurtLetdown:
+	.string "KURT: Oh…\n"
+	.string "That’s a letdown.$"
+
+Johto_KurtsHouse_Text_KurtWorking:
+	.string "KURT: I’m working!\n"
+	.string "Don’t bother me!$"
+
+Johto_KurtsHouse_Text_KurtFinished:
+	.string "KURT: Ah, {PLAYER}!\n"
+	.string "I just finished your BALL. Here!$"
+
+Johto_KurtsHouse_Text_KurtTurnedOutGreat:
+	.string "KURT: That turned out great.\p"
+	.string "Try catching MOéMON with it.$"
+
+Johto_KurtsHouse_Text_KurtNoRoom:
+	.string "KURT: Make room in your BAG and\n"
+	.string "come back for it!$"
 
 Johto_KurtsHouse_EventScript_83C5C0A::
 	msgbox Johto_KurtsHouse_Text_83C60AE, MSGBOX_DEFAULT
@@ -169,7 +246,7 @@ Johto_KurtsHouse_EventScript_83C5C7D::
 	delay 0x1E
 	msgbox Johto_KurtsHouse_Text_83C5C99, MSGBOX_DEFAULT
 	closemessage
-	goto Johto_KurtsHouse_EventScript_83C5BAE
+	goto Johto_KurtsHouse_EventScript_83C5BA8
 
 @ Johto_KurtsHouse sign / bg event at 10,1
 @ Johto_KurtsHouse sign / bg event at 9,1

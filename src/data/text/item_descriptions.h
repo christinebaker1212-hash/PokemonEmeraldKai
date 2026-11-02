@@ -1064,6 +1064,14 @@ static const u8 sPoketchDesc[] = _(
 static const u8 sMoenavDesc[] = _(
     "HOENN's MOéNAV, carried to other regions. Its map, MATCH CALL and ribbons on the go.");
 
+static const u8 sRedApricornDesc[] = _("A red APRICORN.");
+static const u8 sBluApricornDesc[] = _("A blue APRICORN.");
+static const u8 sYlwApricornDesc[] = _("A yellow APRICORN.");
+static const u8 sGrnApricornDesc[] = _("A green APRICORN.");
+static const u8 sWhtApricornDesc[] = _("A white APRICORN.");
+static const u8 sBlkApricornDesc[] = _("A black APRICORN.");
+static const u8 sPnkApricornDesc[] = _("A pink APRICORN.");
+
 static const u8 sPokeRadarDesc[] = _(
     "Shakes the grass where MOéMON hide. Find the same one again and again.");
 

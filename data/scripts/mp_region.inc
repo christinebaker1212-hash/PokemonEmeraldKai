@@ -424,3 +424,51 @@ EventScript_MpNameJohtoRival::
 EventScript_MpNameJohtoRivalWait:
 	waitstate
 	return
+
+@ Moemon Kai: JOHTO's APRICORN trees as Crystal's fruit trees, one APRICORN a day each, with Crystal's words
+@ (pokecrystal engine/events/fruit_trees.asm; its PACK is the BAG here): src/mp/mp_apricorn.c
+Johto_EventScript_FruitTree::
+	lockall
+	special QzFruitTreeCheck
+	msgbox Johto_Text_FruitBearingTree, MSGBOX_DEFAULT
+	goto_if_eq VAR_RESULT, FALSE, Johto_EventScript_FruitTreeBare
+	msgbox Johto_Text_HeyItsFruit, MSGBOX_DEFAULT
+	checkitemspace VAR_0x8005, 1
+	goto_if_eq VAR_RESULT, FALSE, Johto_EventScript_FruitTreeFull
+	additem VAR_0x8005, 1
+	special QzFruitTreePick
+	playfanfare MUS_OBTAIN_ITEM
+	message Johto_Text_ObtainedFruit
+	waitmessage
+	waitfanfare
+	waitbuttonpress
+	closemessage
+	releaseall
+	end
+
+Johto_EventScript_FruitTreeBare::
+	msgbox Johto_Text_NothingHere, MSGBOX_DEFAULT
+	closemessage
+	releaseall
+	end
+
+Johto_EventScript_FruitTreeFull::
+	msgbox Johto_Text_FruitBagFull, MSGBOX_DEFAULT
+	closemessage
+	releaseall
+	end
+
+Johto_Text_FruitBearingTree:
+	.string "It’s a fruit-bearing tree.$"
+
+Johto_Text_HeyItsFruit:
+	.string "Hey! It’s\n{STR_VAR_1}!$"
+
+Johto_Text_ObtainedFruit:
+	.string "Obtained\n{STR_VAR_1}!$"
+
+Johto_Text_FruitBagFull:
+	.string "But the BAG is full…$"
+
+Johto_Text_NothingHere:
+	.string "There’s nothing here…$"

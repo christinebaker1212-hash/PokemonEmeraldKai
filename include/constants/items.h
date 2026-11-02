@@ -785,8 +785,18 @@
 #define ITEM_STABLE_MULCH 683
 #define ITEM_GOOEY_MULCH 684
 #define ITEM_MOENAV 685   // Moemon Kai: the MOéNAV as a key item outside HOENN once HOENN's LEAGUE is beaten
+// Moemon Kai: JOHTO's APRICORNs (Crystal's fruit trees; KURT makes POKé BALLS of them: src/mp/mp_apricorn.c)
+#define ITEM_RED_APRICORN 686
+#define ITEM_BLU_APRICORN 687
+#define ITEM_YLW_APRICORN 688
+#define ITEM_GRN_APRICORN 689
+#define ITEM_WHT_APRICORN 690
+#define ITEM_BLK_APRICORN 691
+#define ITEM_PNK_APRICORN 692
+#define FIRST_APRICORN ITEM_RED_APRICORN
+#define LAST_APRICORN ITEM_PNK_APRICORN
 
-#define ITEMS_COUNT 686
+#define ITEMS_COUNT 693
 // end of Gen 5-9 items
 #define FIRST_PLATINUM_KEY_ITEM ITEM_GALACTIC_KEY
 #define LAST_PLATINUM_ITEM ITEM_GOOEY_MULCH

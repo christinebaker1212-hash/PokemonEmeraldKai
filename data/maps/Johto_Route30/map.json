@@ -143,7 +143,7 @@
       "flag": "FLAG_QZ_0x106D"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_QZ_60",
+      "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
       "x": 30,
       "y": 4,
       "elevation": 3,
@@ -151,12 +151,12 @@
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
-      "trainer_sight_or_berry_tree_id": "107",
-      "script": "Quetzal_EventScript_836266F",
+      "trainer_sight_or_berry_tree_id": "127",
+      "script": "BerryTreeScript",
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_QZ_60",
+      "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
       "x": 23,
       "y": 38,
       "elevation": 3,
@@ -164,8 +164,8 @@
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
-      "trainer_sight_or_berry_tree_id": "103",
-      "script": "Quetzal_EventScript_836266F",
+      "trainer_sight_or_berry_tree_id": "123",
+      "script": "BerryTreeScript",
       "flag": "0"
     }
   ],

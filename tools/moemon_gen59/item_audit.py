@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import obtain_audit as oa   # noqa: E402
 
 REPO = oa.REPO
-SOURCE_FILES = ['src/shop.c', 'src/mp/mp_region.c', 'src/data/qz_badge_marts.h', 'src/mp/mp_gatcha.c', 'src/battle_script_commands.c',
+SOURCE_FILES = ['src/shop.c', 'src/mp/mp_apricorn.c', 'src/mp/mp_region.c', 'src/data/qz_badge_marts.h', 'src/mp/mp_gatcha.c', 'src/battle_script_commands.c',
                 'src/mp/mp_candy.c', 'src/mp/mp_tmrefund.c', 'src/mp/mp_achieve.c', 'src/mp/mp_daily.c',
                 'src/qz_bugcontest.c', 'src/qz_specials.c', 'src/mp/mp_farm.c', 'src/data/battle_frontier/battle_frontier_exchange_corner.h',
                 'src/frontier_util.c', 'src/battle_pyramid.c', 'src/lottery_corner.c', 'src/mp/mp_life.c', 'src/mp/mp_life_field.c',

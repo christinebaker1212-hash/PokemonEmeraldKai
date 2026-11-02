@@ -1,0 +1,38 @@
+pressuntil A field 5000
+wait 60
+mp regionclear 1
+mp warp 35,45,33,25
+wait 120
+mp berryinfo 122
+mp face up
+press A 2
+mash A 10 25
+wait 60
+shot picked
+mp checkitem 687
+mp apricorn
+press A 2
+mash A 6 25
+wait 60
+mp checkitem 687
+mp checkitem 57
+mp getflag 0x1089
+mp clearflag 0x1089
+mp setvar 0x5009 7
+mp warp 34,3,15,4
+wait 120
+mp face up
+press A 2
+mash A 24 40
+wait 120
+shot kurt
+mp checkitem 687
+mp apricorn
+mp setvar 0x52E4 65000
+press A 2
+mash A 24 40
+wait 120
+shot ball
+mp checkitem 57
+mp apricorn
+quit

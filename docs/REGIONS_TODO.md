@@ -40,8 +40,12 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [ ] POKéGEAR back as Crystal / HGSS have it (display, functions, calls), no manual clock setting; START menu in
       JOHTO, a registrable key item elsewhere once JOHTO's ELITE FOUR is beaten
 - [x] JOHTO's legendaries only in JOHTO (FireRed's and Emerald's NAVEL ROCK empty: LUGIA and HO-OH are JOHTO's)
-- [ ] Quetzal's berry system out: 1x1 berry patches where berries were; APRICORN trees rewritten from Crystal
-      (behavior, words), JOHTO's berries
+- [x] Quetzal's berry system out: 1x1 berry patches where berries were; APRICORN trees rewritten from Crystal
+      (behavior, words), JOHTO's berries (src/mp/mp_apricorn.c, tools/quetzal_port/fix_fruit_trees.py: Crystal's
+      APRICORN trees (AZALEA, ROUTE 37's and 42's three each), one a day, its words; KURT makes the BALLS in a day
+      (choose the APRICORN and how many); items 686-692 with PokeAPI's icons (tools/moemon_items/gen_apricorns.py);
+      the other 17 trees are BERRY patches on JOHTO's own tree numbers (the GARDEN farm's 100-109 were shared),
+      starting with Crystal's BERRIES in their Gen 3 names; test johto_apricorn)
 - [x] WHITNEY's MILTANK: perfect IVs (her gym team; tools/quetzal_port/gen_trainers.py IV_OVERRIDES)
 - [x] Quetzal's auto walk / run: its words gone (MOM in NEW BARK TOWN)
 - [ ] Door animations (blocked: Quetzal's JOHTO door frames are only in its ROM, which the rip didn't read; Emerald's

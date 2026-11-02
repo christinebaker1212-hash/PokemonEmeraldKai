@@ -1,0 +1,8 @@
+# JOHTO's fruit trees as Crystal's (src/mp/mp_apricorn.c, tools/quetzal_port/fix_fruit_trees.py): ROUTE 37's middle
+# tree gives a BLU APRICORN (687) once a day; KURT takes it and, a day later, hands over a LURE BALL (57); ROUTE 29's
+# BERRY patch (tree 122) starts with ORAN BERRIES
+MODE=1
+TMO=180
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=25:20"
+EXPECT_A=("item 687: 1" "kurt item 687 count 1" "item 687: 0" "item 57: 1" "picked 4 ")
+UNEXPECT_A=("[crash]" "TIMEOUT")

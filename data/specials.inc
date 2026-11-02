@@ -665,3 +665,9 @@ gSpecials::
 	def_special QzMomBankState   @ Moemon Kai: Crystal's BANK OF MOM (src/mp/mp_mombank.c)
 	def_special QzMomBankSetSaving
 	def_special QzMomBankAmount
+	def_special QzFruitTreeCheck   @ Moemon Kai: JOHTO's APRICORN trees and KURT's BALLS (src/mp/mp_apricorn.c)
+	def_special QzFruitTreePick
+	def_special QzKurtBallState
+	def_special QzKurtBallTaken
+	def_special QzHasApricorn
+	def_special QzKurtChooseApricorn

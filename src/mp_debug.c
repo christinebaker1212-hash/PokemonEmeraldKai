@@ -3378,6 +3378,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_MomBank_Debug(const char *arg);
         MP_MomBank_Debug(arg);
     }
+    else if (strcmp(cmd, "apricorn") == 0)
+    {
+        // apricorn - JOHTO's fruit trees picked today, KURT's BALLS, the BERRY patches planted (mp_apricorn.c)
+        void MP_Apricorn_Debug(void);
+        MP_Apricorn_Debug();
+    }
     else if (strcmp(cmd, "rivalname") == 0)
     {
         // rivalname [open] - JOHTO's rival's name (qz_specials.c); open: the naming at ELM's and the officer's line

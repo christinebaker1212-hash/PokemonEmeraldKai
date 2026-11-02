@@ -104,7 +104,7 @@
       "flag": "FLAG_QZ_0x11A7"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_QZ_60",
+      "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
       "x": 12,
       "y": 27,
       "elevation": 3,
@@ -113,7 +113,7 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "97",
-      "script": "Quetzal_EventScript_836266F",
+      "script": "BerryTreeScript",
       "flag": "0"
     },
     {
