@@ -1336,7 +1336,16 @@ class FileConverter:
         if cmd == 'FadeScreenOut':
             return ['fadescreen FADE_TO_BLACK']
         if cmd == 'FadeScreenIn':
+            if getattr(self, 'faded_in', False):
+                self.faded_in = False
+                return []                   # (the slot machine came back to the field faded in)
             return ['fadescreen FADE_FROM_BLACK']
+        if cmd == 'ScrCmd_267':
+            # VEILSTONE GAME CORNER's slot machine (its number 0-11): Emerald's slots, the machine's own odds
+            # (GetSlotMachineId), coming back to the field faded in
+            self.faded_in = True
+            return ['copyvar VAR_0x8004, %s' % self.var(a[0]), 'specialvar VAR_RESULT, GetSlotMachineId',
+                    'playslotmachine VAR_RESULT']
         if cmd == 'WaitFadeScreen':
             return []                       # (fadescreen waits by itself)
         if cmd == 'FadeScreen' and len(a) == 4 and a[2].startswith('FADE_TYPE_'):

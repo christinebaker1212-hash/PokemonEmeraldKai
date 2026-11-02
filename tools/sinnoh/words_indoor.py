@@ -457,8 +457,8 @@ INDOOR = {
     },
     'Sinnoh_GameCorner': {
         'Person1': ('script', 'Sinnoh_EventScript_GameCornerClerk'),   # (the coins: data/scripts/sinnoh_places.inc)
-        # the 12 slot machines: Emerald's (data/scripts/sinnoh_places.inc)
-        **{'Bg%d' % (n + 1): ('script', 'Sinnoh_EventScript_SlotMachine%d' % n) for n in range(12)},
+        # the 12 slot machines: Platinum's scripts 1-12 (gen_scripts.py ScrCmd_267: Emerald's slots)
+        **{'Bg%d' % (n + 1): ('script', 'SinnohP_game_corner_%d' % (n + 1)) for n in range(12)},
         'Person3': "I used to play here every day. Now I just come for the music.",
         'Person4': "I came to town to sell vegetables and ended up here. Don't tell my wife.",
         'Person5': "The flashing lights give me ideas for songs. Ding ding ding! ...See?",

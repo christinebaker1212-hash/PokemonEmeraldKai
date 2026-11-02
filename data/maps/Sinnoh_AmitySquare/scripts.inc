@@ -43,11 +43,7 @@ Sinnoh_AmitySquare_EventScript_Person14::
 	end
 
 Sinnoh_AmitySquare_EventScript_Person16::
-	msgbox Sinnoh_AmitySquare_Text_Person16, MSGBOX_NPC
+	goto SinnohP_amity_square_17
 	end
-
-Sinnoh_AmitySquare_Text_Person16:
-	.string "Your MOéMON might find something on\n"
-	.string "the paths. It has a good nose!$"
 
 @ --- end of SINNOH words ---

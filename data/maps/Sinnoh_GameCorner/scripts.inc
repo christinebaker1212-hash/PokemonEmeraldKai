@@ -3,51 +3,51 @@ Sinnoh_GameCorner_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_GameCorner_EventScript_Bg1::
-	goto Sinnoh_EventScript_SlotMachine0
+	goto SinnohP_game_corner_1
 	end
 
 Sinnoh_GameCorner_EventScript_Bg2::
-	goto Sinnoh_EventScript_SlotMachine1
+	goto SinnohP_game_corner_2
 	end
 
 Sinnoh_GameCorner_EventScript_Bg3::
-	goto Sinnoh_EventScript_SlotMachine2
+	goto SinnohP_game_corner_3
 	end
 
 Sinnoh_GameCorner_EventScript_Bg4::
-	goto Sinnoh_EventScript_SlotMachine3
+	goto SinnohP_game_corner_4
 	end
 
 Sinnoh_GameCorner_EventScript_Bg5::
-	goto Sinnoh_EventScript_SlotMachine4
+	goto SinnohP_game_corner_5
 	end
 
 Sinnoh_GameCorner_EventScript_Bg6::
-	goto Sinnoh_EventScript_SlotMachine5
+	goto SinnohP_game_corner_6
 	end
 
 Sinnoh_GameCorner_EventScript_Bg7::
-	goto Sinnoh_EventScript_SlotMachine6
+	goto SinnohP_game_corner_7
 	end
 
 Sinnoh_GameCorner_EventScript_Bg8::
-	goto Sinnoh_EventScript_SlotMachine7
+	goto SinnohP_game_corner_8
 	end
 
 Sinnoh_GameCorner_EventScript_Bg9::
-	goto Sinnoh_EventScript_SlotMachine8
+	goto SinnohP_game_corner_9
 	end
 
 Sinnoh_GameCorner_EventScript_Bg10::
-	goto Sinnoh_EventScript_SlotMachine9
+	goto SinnohP_game_corner_10
 	end
 
 Sinnoh_GameCorner_EventScript_Bg11::
-	goto Sinnoh_EventScript_SlotMachine10
+	goto SinnohP_game_corner_11
 	end
 
 Sinnoh_GameCorner_EventScript_Bg12::
-	goto Sinnoh_EventScript_SlotMachine11
+	goto SinnohP_game_corner_12
 	end
 
 Sinnoh_GameCorner_EventScript_Bg13::
