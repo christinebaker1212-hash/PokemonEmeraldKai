@@ -64,6 +64,7 @@ TOWER_INIT, TOWER_INIT_RESUME, TOWER_FREE, TOWER_INTRO, TOWER_BATTLE, TOWER_WON,
 TOWER_PARTNER_SPECIES, TOWER_PARTNER_MOVE = 210, 212   # (+ the POKéMON's number, 0 or 1)
 TOWER_BUFFER_SPECIES, TOWER_BUFFER_MOVE = 214, 215     # (a kind's / a move's name into text slot DESTVAR, 0-5)
 TOWER_JUDGE_TOTAL, TOWER_JUDGE_STAT, TOWER_JUDGE_BEST = 216, 217, 218   # (the STATS JUDGE: JudgeStats)
+TOWER_RANKINGS = 220   # (JUBILIFE TV's rankings machines: src/sinnoh/s3d_rankings.c)
 SINNOH_ROAMER = 60   # (a roaming POKéMON set going: src/sinnoh/s3d_roamer.c; the slot, Platinum's ROAMING_SLOT_*)   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
 (TVCALL_STATUS, TVCALL_FRAMING, TVCALL_FINISH, TVCALL_SEGMENT_ID, TVCALL_SEGMENT, TVCALL_COMMERCIAL, TVCALL_NEXT,
  TVCALL_INTERVIEW_ID, TVCALL_INTERVIEW_MESSAGE, TVCALL_INTERVIEW_SAVE, TVCALL_INTERVIEW_OK, TVCALL_WORD,
@@ -1510,6 +1511,9 @@ class FileConverter:
             return ['setvar %s, 0' % self.var(a[2])]   # (the wireless partner's data: never asked here)
         if cmd in ('EndCommunication', 'ClearReceivedTempDataAllPlayers', 'ScrCmd_135'):
             return []   # (the BATTLE TOWER's wireless multi battles: never started here)
+        if cmd == 'StartRankingsMachine':
+            # (JUBILIFE TV's rankings machines: src/sinnoh/s3d_rankings.c; the script waits until it closes)
+            return [self.tower(TOWER_RANKINGS, self.value(a[0]))]
         if cmd == 'JudgeStats':
             # (the BATTLE TOWER's STATS JUDGE: party slot A0's IVs: their total, the best stat as the line that names
             # it, Platinum's message 122 + the stat, and its IV)

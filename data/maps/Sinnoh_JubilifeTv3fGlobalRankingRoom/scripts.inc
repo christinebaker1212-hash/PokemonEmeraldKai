@@ -3,15 +3,15 @@ Sinnoh_JubilifeTv3fGlobalRankingRoom_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_JubilifeTv3fGlobalRankingRoom_EventScript_Bg1::
-	msgbox Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_jubilife_tv_3f_global_ranking_room_1
 	end
 
 Sinnoh_JubilifeTv3fGlobalRankingRoom_EventScript_Bg2::
-	msgbox Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Bg2, MSGBOX_SIGN
+	goto SinnohP_jubilife_tv_3f_global_ranking_room_2
 	end
 
 Sinnoh_JubilifeTv3fGlobalRankingRoom_EventScript_Bg3::
-	msgbox Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Bg3, MSGBOX_SIGN
+	goto SinnohP_jubilife_tv_3f_global_ranking_room_3
 	end
 
 Sinnoh_JubilifeTv3fGlobalRankingRoom_EventScript_Person1::
@@ -29,18 +29,6 @@ Sinnoh_JubilifeTv3fGlobalRankingRoom_EventScript_Person3::
 Sinnoh_JubilifeTv3fGlobalRankingRoom_EventScript_Person4::
 	msgbox Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Person4, MSGBOX_NPC
 	end
-
-Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Bg1:
-	.string "A machine that keeps records. Its\n"
-	.string "screen is dark for now.$"
-
-Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Bg2:
-	.string "A machine that keeps records. Its\n"
-	.string "screen is dark for now.$"
-
-Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Bg3:
-	.string "A machine that keeps records. Its\n"
-	.string "screen is dark for now.$"
 
 Sinnoh_JubilifeTv3fGlobalRankingRoom_Text_Person4:
 	.string "This room keeps records from all over.\n"

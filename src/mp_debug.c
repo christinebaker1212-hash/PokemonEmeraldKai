@@ -2290,6 +2290,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         FlagClear(FLAG_SYS_POKEDEX_GET);
         printf("[test] emptyparty\n");
     }
+    else if (strcmp(cmd, "rankings") == 0)
+    {
+        void Sinnoh_RankingsDebug(const char *arg);
+        Sinnoh_RankingsDebug(arg);   // JUBILIFE TV's rankings (src/sinnoh/s3d_rankings.c)
+    }
     else if (strcmp(cmd, "stower") == 0)
     {
         void Sinnoh_TowerDebug(const char *arg);

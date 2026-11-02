@@ -3116,6 +3116,10 @@ static void Cmd_tryfaintmon(void)
             {
                 if (gBattleResults.opponentFaintCounter < 255)
                     gBattleResults.opponentFaintCounter++;
+                {
+                    void Sinnoh_RankingsDefeated(void);
+                    Sinnoh_RankingsDefeated();   // Moemon Kai: POKéMON defeated (JUBILIFE TV's rankings: s3d_rankings.c)
+                }
                 gBattleResults.lastOpponentSpecies = GetMonData(&gEnemyParty[gBattlerPartyIndexes[gActiveBattler]], MON_DATA_SPECIES, NULL);
             }
             if ((gHitMarker & HITMARKER_DESTINYBOND) && gBattleMons[gBattlerAttacker].hp != 0)

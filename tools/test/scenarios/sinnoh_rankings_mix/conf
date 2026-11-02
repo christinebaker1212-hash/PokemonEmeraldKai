@@ -1,0 +1,7 @@
+# JUBILIFE TV's rankings through CO-OP's record mixing: ALICE and BOB in a room mix records; each one's 13 rankings
+# entries go with the mix record (protocol 74), so each sees the other in the GLOBAL and GROUP rankings (the room is
+# the group). `mp rankings` prints the lists' first entries after the mix.
+MODE=2
+TMO=150
+EXPECT_A=("mix: applied" "rankings: 1 friends' records mixed in" "rankings: list 0 BOB" "rankings: list 13 BOB")
+EXPECT_B=("mix: applied" "rankings: 1 friends' records mixed in" "rankings: list 0 ALICE")

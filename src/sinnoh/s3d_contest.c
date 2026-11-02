@@ -18,6 +18,8 @@
 #include "global.h"
 #include "easy_chat.h"
 #include "event_data.h"
+#include "overworld.h"
+#include "constants/game_stat.h"
 #include "item.h"
 #include "main.h"
 #include "party_menu.h"
@@ -1200,13 +1202,16 @@ static void End(void)
         return;
     if (C.mode != CONTEST_OFFICIAL && C.mode != CONTEST_UNK0 && C.mode != CONTEST_UNK1)
         return;   // (practice and the single rounds give nothing)
+    IncrementGameStat(GAME_STAT_ENTERED_CONTEST);   // (the game's contest records: JUBILIFE TV's rankings read them)
     if (C.e[0].place == 0)
     {
         u8 level = GetMonData(mon, MON_DATA_COOL_RIBBON + C.type);
+        IncrementGameStat(GAME_STAT_WON_CONTEST);
         if (level < C.rank + 1)
         {
             level = C.rank + 1;
             SetMonData(mon, MON_DATA_COOL_RIBBON + C.type, &level);
+            IncrementGameStat(GAME_STAT_RECEIVED_RIBBONS);
         }
         AdjustFriendship(mon, FRIENDSHIP_EVENT_LEAGUE_BATTLE);   // (Platinum's FRIENDSHIP_EVENT_CONTEST_WIN: as much)
         Sinnoh_ContestKeepPhoto(C.type, &C.e[0]);

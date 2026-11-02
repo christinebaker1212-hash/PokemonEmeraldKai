@@ -1,0 +1,33 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp rankings add 0 30 MAYA
+mp rankings add 6 120 KENJI
+mp rankings add 7 45 MAYA
+mp rankings
+mp warp 42,35,8,6
+wait 60
+waitfor field 1000
+mp face up
+press A 1
+wait 40
+shot r_list
+press A 1
+wait 30
+shot r_ranking
+press SELECT 1
+wait 20
+press A 1
+wait 20
+shot r_ask
+press A 1
+wait 30
+shot r_deleted
+press B 1
+wait 20
+press B 1
+wait 20
+press B 1
+wait 40
+waitfor field 600
+quit

@@ -1,0 +1,9 @@
+# JUBILIFE TV's rankings machines (Platinum's): a friend's entries (as CO-OP's record mixing brings them: `mp rankings
+# add`), the GLOBAL room's machine at (8,5): its records listed, the first record's ranking (the friend above the
+# player), then SELECT, the friend's entry picked and deleted (YES). Needs the 3D pack.
+MODE=1
+TMO=300
+GEN=4
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("rankings: machine" "rankings: 1. MAYA 30" "rankings: 2. TEST 0" "entry 0 deleted" "rankings: 1. TEST 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

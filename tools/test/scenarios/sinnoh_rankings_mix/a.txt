@@ -1,0 +1,7 @@
+pressuntil A field 5000
+waitfor online 6000
+waitlog 3000 mix: applied
+wait 60
+mp rankings
+wait 30
+quit

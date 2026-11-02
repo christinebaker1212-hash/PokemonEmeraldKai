@@ -272,6 +272,10 @@ void MP_Region_StartNewGame(void)
     Sinnoh_HoneyReset();
     Sinnoh_HallReset();
     Sinnoh_TowerReset();
+    {
+        void Sinnoh_RankingsReset(void);
+        Sinnoh_RankingsReset();
+    }
     Sinnoh_FrontierReset();
     Sinnoh_TvReset();
     Sinnoh_FashionReset();
@@ -404,6 +408,16 @@ void MP_Region_WriteSidecar(void)
             c[1] = size;
             fwrite(c, sizeof(c), 1, f);
             fwrite(tower, size, 1, f);
+        }
+        {
+            // JUBILIFE TV's rankings (src/sinnoh/s3d_rankings.c)
+            u32 size;
+            const void *Sinnoh_RankingsData(u32 *size);
+            const void *rank = Sinnoh_RankingsData(&size);
+            c[0] = CHUNK('R', 'A', 'N', 'K');
+            c[1] = size;
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(rank, size, 1, f);
         }
         {
             // SINNOH's TV: its kept segments and records (src/sinnoh/s3d_tv.c)
@@ -568,6 +582,13 @@ static bool8 LoadFrom(const char *path)
                 if (fread(buf, c[1], 1, f) == 1)
                     Sinnoh_TowerLoad(buf, c[1]);
             }
+            else if (c[0] == CHUNK('R', 'A', 'N', 'K') && c[1] <= 4096)
+            {
+                static u8 buf[4096];
+                void Sinnoh_RankingsLoad(const void *data, u32 size);
+                if (fread(buf, c[1], 1, f) == 1)
+                    Sinnoh_RankingsLoad(buf, c[1]);
+            }
             else if (c[0] == CHUNK('F', 'A', 'S', 'H') && c[1] <= 1024)
             {
                 u8 buf[1024];
@@ -701,6 +722,10 @@ void MP_Region_LoadFromSave(void)
     Sinnoh_HoneyReset();
     Sinnoh_HallReset();
     Sinnoh_TowerReset();
+    {
+        void Sinnoh_RankingsReset(void);
+        Sinnoh_RankingsReset();
+    }
     Sinnoh_FrontierReset();
     Sinnoh_TvReset();
     Sinnoh_FashionReset();

@@ -4243,6 +4243,17 @@ follow_behind, follow_ground.
   sinnoh_tower_multi, sinnoh_stats_judge. The BATTLE FRONTIER's two booths trade
   BP (the frontier's, HOENN's too) for Platinum's lists: items left, TMs right (s3d_places.c Sinnoh_BpMenu /
   Sinnoh_BpBuy; the BP in the question, the scroll list covers Emerald's BP window). Test sinnoh_bp.
+- JUBILIFE TV's rankings machines (2026-11-02, src/sinnoh/s3d_rankings.c; Platinum's rankings.c / rankings_machine.c):
+  the GLOBAL and GROUP ranking rooms' six machines (StartRankingsMachine 0-5: the BATTLE TOWER's, POKéMON's and
+  CONTESTS' records, `sinnoh SINNOH_TOWER, 220, MACHINE`), Platinum's screen on the game's windows: the records and
+  EXIT, a record's ranking (the player among the six best others heard of, rank numbers shared by equal values), its
+  explanation, SELECT then A to delete someone else's entry (YES / NO; one's own can't be). Platinum's records arrive by
+  record mixing: here CO-OP's (mp_linkx.c sends the player's 13 entries after the mix record, protocol 74; the friends'
+  are sorted in by Platinum's SortRankings), the group being the CO-OP room (its name hashed: the group seed). The
+  player's own values: the BATTLE TOWER's best streaks and average (s3d_tower.c), the game's stats (catches, eggs,
+  fishing, contest wins and entries, ribbons: SINNOH's contests and tower ribbons now count them too) and the POKéMON
+  defeated, counted in battle_script_commands.c's faint handling. "<save>.region" chunk RANK. `mp rankings [add STAT
+  VALUE NAME [GROUP]]`; tests sinnoh_rankings, sinnoh_rankings_mix.
 - The POKé RADAR (2026-11-01, src/mp/mp_pokeradar.c; ITEM_POKE_RADAR 661, ITEMS_COUNT 662, the DEVON SCOPE's icon):
   SANDGEM LAB's aide gives it after the LEAGUE (flag 0x3D33). It works in any region's tall grass, not on a bike or in
   the water, with a 50-step battery: up to four patches, one at each distance 1-4, rustle (Emerald's tall grass field

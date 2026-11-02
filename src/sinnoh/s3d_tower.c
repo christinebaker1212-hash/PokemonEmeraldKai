@@ -195,6 +195,7 @@ u8 Sinnoh_Frontier_FillParty(struct Pokemon *party, u16 frontierTrainer, u8 coun
 #include "constants/battle_frontier.h"
 #include "constants/songs.h"
 #include "constants/vars.h"
+#include "constants/game_stat.h"
 #include "constants/trainers_sinnoh.h"
 #include "string_util.h"
 #include "strings.h"
@@ -540,6 +541,7 @@ static bool8 GiveRibbon(bool8 great)
         if (GetMonData(mon, field))
             continue;
         SetMonData(mon, field, &one);
+        IncrementGameStat(GAME_STAT_RECEIVED_RIBBONS);
         n++;
     }
     return n != 0;
@@ -859,6 +861,12 @@ bool8 Sinnoh_TowerCall(u16 func, u16 arg, u16 destVar)
             StringCopy(StringVar(destVar), gMoveNames[value]);
         return FALSE;
     }
+    case SINNOH_TOWER_RANKINGS:
+    {
+        void Sinnoh_RankingsStart(u16 machine);
+        Sinnoh_RankingsStart(value);
+        return TRUE;
+    }
     case SINNOH_TOWER_JUDGE_TOTAL:
     case SINNOH_TOWER_JUDGE_STAT:
     case SINNOH_TOWER_JUDGE_BEST:
@@ -902,6 +910,22 @@ bool8 Sinnoh_TowerCall(u16 func, u16 arg, u16 destVar)
     if (set && destVar >= VARS_START)
         VarSet(destVar, out);
     return FALSE;
+}
+
+// (s3d_rankings.c: JUBILIFE TV's rankings machines) the best streak in MODE, the victories, the challenges
+u16 Sinnoh_Tower_RecordStreak(u8 mode)
+{
+    return mode < BT_RECORD_MODES ? sTS.record[mode] : 0;
+}
+
+u32 Sinnoh_Tower_Victories(void)
+{
+    return sTS.victories;
+}
+
+u32 Sinnoh_Tower_Challenges(void)
+{
+    return sTS.challenges;
 }
 
 // (tests: `mp stower [MODE ROOM]`: the records, the challenge; MODE's streak set going at ROOM rooms of seven)

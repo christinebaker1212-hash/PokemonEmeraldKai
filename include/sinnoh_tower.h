@@ -65,6 +65,7 @@ enum
     SINNOH_TOWER_JUDGE_TOTAL,           // the STATS JUDGE: DESTVAR <- party slot ARG's IVs' total
     SINNOH_TOWER_JUDGE_STAT,            // ... its best stat's line (Platinum's battle tower message 122 + the stat)
     SINNOH_TOWER_JUDGE_BEST,            // ... that stat's IV
+    SINNOH_TOWER_RANKINGS = 220,        // JUBILIFE TV's rankings machine ARG (s3d_rankings.c; Platinum's StartRankingsMachine)
 };
 bool8 Sinnoh_TowerCall(u16 func, u16 arg, u16 destVar);
 bool8 Sinnoh_Tower_Choosing(void);   // (party_menu.c: Platinum's banned list, any level, its own duplicate checks)
