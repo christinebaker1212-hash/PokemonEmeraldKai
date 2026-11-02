@@ -18,10 +18,10 @@ MOéMON's words like HOENN's (MOéMON, MOéDEX, POKé BALL kept): OPTIONS > CREA
 WORDS = {
     'Sinnoh_FightArea': {'Person6': ('boat', ['Sinnoh_SnowpointCity']), 'Person19': ('boat', ['Sinnoh_SnowpointCity'])},
     'Sinnoh_SnowpointCity': {'Person6': ('boat', ['Sinnoh_FightArea'])},
-    'Sinnoh_NewmoonIsland': {'Person1': ('boat', ['Sinnoh_CanalaveCity'])},
-    'Sinnoh_FullmoonIsland': {'Person1': ('boat', ['Sinnoh_CanalaveCity'])},
-    'Sinnoh_IronIsland': {'Person1': ('boat', ['Sinnoh_CanalaveCity'])},
-    'Sinnoh_CanalaveCity': {'Person15': ('script', 'EventScript_SinnohRegionBoat'), 'Person17': ('boat', ['Sinnoh_IronIsland', 'Sinnoh_FullmoonIsland', 'Sinnoh_NewmoonIsland'])},
+    'Sinnoh_NewmoonIsland': {'Person1': ('platinum', 'SinnohP_newmoon_island_2')},   # (the sailor home: Platinum's)
+    'Sinnoh_FullmoonIsland': {'Person1': ('platinum', 'SinnohP_fullmoon_island_2')},
+    'Sinnoh_IronIsland': {'Person1': ('platinum', 'SinnohP_iron_island_2')},
+    'Sinnoh_CanalaveCity': {'Person15': ('script', 'EventScript_SinnohRegionBoat'), 'Person17': ('platinum', 'SinnohP_canalave_city_20')},   # (ELDRITCH's boat: Platinum's)
     'Sinnoh_PokemonLeagueChampionRoom': {'Person1': ('champion',)},
     'Sinnoh_PokemonLeagueLucianRoom': {'Person1': ('e4', 3)},
     'Sinnoh_PokemonLeagueFlintRoom': {'Person1': ('e4', 2)},

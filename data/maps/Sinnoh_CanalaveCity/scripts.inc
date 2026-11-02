@@ -77,40 +77,7 @@ Sinnoh_CanalaveCity_EventScript_Person15::
 	end
 
 Sinnoh_CanalaveCity_EventScript_Person17::
-	lock
-	faceplayer
-	msgbox Sinnoh_CanalaveCity_Text_Person17Ask0, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, YES, Sinnoh_CanalaveCity_EventScript_Person17_Sail0
-	msgbox Sinnoh_CanalaveCity_Text_Person17Ask1, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, YES, Sinnoh_CanalaveCity_EventScript_Person17_Sail1
-	msgbox Sinnoh_CanalaveCity_Text_Person17Ask2, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, YES, Sinnoh_CanalaveCity_EventScript_Person17_Sail2
-	msgbox Sinnoh_CanalaveCity_Text_Person17Bye, MSGBOX_DEFAULT
-	release
-	end
-
-Sinnoh_CanalaveCity_EventScript_Person17_Sail0::
-	msgbox Sinnoh_CanalaveCity_Text_Person17Off, MSGBOX_DEFAULT
-	closemessage
-	warp MAP_SINNOH_IRON_ISLAND, 4, 22
-	waitstate
-	releaseall
-	end
-
-Sinnoh_CanalaveCity_EventScript_Person17_Sail1::
-	msgbox Sinnoh_CanalaveCity_Text_Person17Off, MSGBOX_DEFAULT
-	closemessage
-	warp MAP_SINNOH_FULLMOON_ISLAND, 9, 21
-	waitstate
-	releaseall
-	end
-
-Sinnoh_CanalaveCity_EventScript_Person17_Sail2::
-	msgbox Sinnoh_CanalaveCity_Text_Person17Off, MSGBOX_DEFAULT
-	closemessage
-	warp MAP_SINNOH_NEWMOON_ISLAND, 24, 21
-	waitstate
-	releaseall
+	goto SinnohP_canalave_city_20
 	end
 
 Sinnoh_CanalaveCity_EventScript_Person19::
@@ -149,22 +116,6 @@ Sinnoh_CanalaveCity_Text_Person14:
 	.string "PROF. ROWAN: The library holds a book\n"
 	.string "about SINNOH's three lakes. I must\l"
 	.string "read it at once.$"
-
-Sinnoh_CanalaveCity_Text_Person17Ask0:
-	.string "Shall I take you to IRON ISLAND?$"
-
-Sinnoh_CanalaveCity_Text_Person17Ask1:
-	.string "Shall I take you to FULLMOON ISLAND?$"
-
-Sinnoh_CanalaveCity_Text_Person17Ask2:
-	.string "Shall I take you to NEWMOON ISLAND?$"
-
-Sinnoh_CanalaveCity_Text_Person17Bye:
-	.string "Come back any time. The sea's always\n"
-	.string "here.$"
-
-Sinnoh_CanalaveCity_Text_Person17Off:
-	.string "All aboard! Hold on tight!$"
 
 Sinnoh_CanalaveCity_Text_Person19:
 	.string "BARRY: The library! The PROFESSOR's\n"

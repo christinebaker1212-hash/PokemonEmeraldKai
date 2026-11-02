@@ -756,6 +756,10 @@ void Sinnoh_PlatinumMapScripts(void)
         extern const u16 gSinnohGameCompletedFlag[];
         if (gSinnohGameCompletedFlag[0] && MP_Region_Cleared(REGION_SINNOH))
             FlagSet(gSinnohGameCompletedFlag[0]);
+        // NEWMOON ISLAND on CANALAVE's boat (Platinum: after the MEMBER CARD's dream trip, an event this game has none
+        // of): once SINNOH's LEAGUE is beaten, when its DARKRAI waits there (tools/sinnoh/legends.py)
+        if (gSinnohGameCompletedFlag[1] && MP_Region_Cleared(REGION_SINNOH))
+            FlagSet(gSinnohGameCompletedFlag[1]);
     }
     // SINNOH is always Platinum's story (the user, 2026-11-02: no saves from the written one to keep)
     if (!FlagGet(FLAG_SINNOH_PLATINUM_STORY) && gSinnohPlatinumMapScripts[0].map != 0xFFFF)

@@ -1,6 +1,7 @@
-# SINNOH's boats (the ('boat', [maps]) kind, gen_words.py boat()): CANALAVE's sailor asks about IRON ISLAND first;
-# YES sails there, landing beside IRON ISLAND's own sailor (4, 22). Needs the 3D pack.
+# SINNOH's boats as Platinum's own scripts (gen_scripts.py TakeShipFromCanalave / TakeShipToCanalave): ELDRITCH in
+# CANALAVE sails to IRON ISLAND (beside its sailor, 4, 22) and IRON ISLAND's sailor back to CANALAVE's dock (11, 22).
+# Needs the 3D pack.
 MODE=1
 TMO=90
-EXPECT_A=("[test] where map 40.13 xy 4,22")
+EXPECT_A=("[test] where map 40.13 xy 4,22" "[test] where map 40.3 xy 11,22")
 UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -276,7 +276,8 @@ def mining_lines(root):
     return (['\t.balign 2', 'gSinnohMiningObjects::', '\t.2byte %d' % (len(out) // 3)] + out
             + ['\t.balign 2', 'gSinnohUndergroundFlags::', '\t.2byte %s' % ', '.join('0x%X' % f for f in flags)]
             # (Platinum's FLAG_GAME_COMPLETED, kept set while SINNOH's LEAGUE is beaten: s3d_scrcmd.c)
-            + ['gSinnohGameCompletedFlag::', '\t.2byte 0x%X' % (ids.flag(root, 'FLAG_GAME_COMPLETED') or 0)]
+            + ['gSinnohGameCompletedFlag::', '\t.2byte 0x%X' % (ids.flag(root, 'FLAG_GAME_COMPLETED') or 0),
+               '\t.2byte 0x%X' % (ids.flag(root, 'FLAG_TRAVELED_TO_NEWMOON_ISLAND') or 0)]   # ([1]: NEWMOON on the boat)
             # (the roamers' state variables, Platinum's ROAMING_SLOT_* order: s3d_roamer.c)
             + ['gSinnohRoamerStateVars::', '\t.2byte %s' % ', '.join(
                 '0x%X' % (ids.var(root, 'VAR_ROAMING_%s_STATE' % n) or 0)
@@ -295,5 +296,5 @@ def berry_lines(root):
 
 def mining_stub():
     return ['\t.balign 2', 'gSinnohMiningObjects::', '\t.2byte 0', 'gSinnohUndergroundFlags::', '\t.2byte 0, 0',
-            'gSinnohGameCompletedFlag::', '\t.2byte 0', 'gSinnohRoamerStateVars::', '\t.2byte 0, 0, 0, 0, 0, 0',
+            'gSinnohGameCompletedFlag::', '\t.2byte 0, 0', 'gSinnohRoamerStateVars::', '\t.2byte 0, 0, 0, 0, 0, 0',
             'gSinnohBerryInit::', '\t.2byte 0']

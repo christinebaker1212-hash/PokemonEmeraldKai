@@ -13,4 +13,14 @@ pressuntil A field 3000
 wait 120
 mp where
 shot iron
+mp face left
+press A 4
+wait 60
+press A 4
+wait 60
+press A 4
+pressuntil A field 3000
+wait 120
+mp where
+shot back
 quit

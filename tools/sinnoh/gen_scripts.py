@@ -965,6 +965,18 @@ class FileConverter:
             return ['getpartysize', 'copyvar %s, VAR_RESULT' % self.var(a[0])]
         if cmd == 'GetNationalDexEnabled':
             return [self.sinnoh(SINNOH_NATIONAL_DEX, self.var(a[0]))]
+        if cmd in ('TakeShipFromCanalave', 'TakeShipFromSnowpoint'):
+            # the boat out of CANALAVE / SNOWPOINT (Platinum's sailing scene: a fade and the warp, as the game's ferries)
+            return ['fadescreen FADE_TO_BLACK', 'playse SE_SHIP'] + self.command('Warp', a[1:4])
+        if cmd in ('TakeShipToCanalave', 'TakeShipToSnowpoint'):
+            # back to the harbor's dock (where the boats come in: the game's own island sailors' spot)
+            dock = {'TakeShipToCanalave': ('MAP_SINNOH_CANALAVE_CITY', 11, 22),
+                    'TakeShipToSnowpoint': ('MAP_SINNOH_SNOWPOINT_CITY', None, None)}[cmd]
+            if dock[1] is None:
+                raise Unsupported(cmd)
+            go = '%s%s__docked%d' % (PREFIX, self.low, self.next_local())
+            return ['fadescreen FADE_TO_BLACK', 'playse SE_SHIP', self.sinnoh(SINNOH_WARP_CONTINUE), 'goto %s' % go,
+                    'warp %s, %d, %d' % dock, 'waitstate', '%s:' % go]
         if cmd == 'Warp':
             low = a[0][len('MAP_HEADER_'):].lower() if a[0].startswith('MAP_HEADER_') else None
             o = self.dec.origins().get(low)
