@@ -79,12 +79,10 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [x] Palettes inverted when the time-of-day lighting changes on a running map (checked: on ROUTE 201 the light switched
       noon -> dusk -> night -> noon in place (`mp s3dhour`) gives Platinum's colors each time and noon's again, nothing
       inverted)
-- [~] Falling through CYCLING ROAD's tunnels (found, ROUTE 206 40.26: the road splits into two lanes (x 11-12, 17-18)
-      around its covered stretch from row 69 to 85; the middle (x 13-16) is blocked at rows 69-71 and 79-85 but open
-      at rows 72-78, where the only ground under it is the valley floor (16, the lanes ~90): a step off a lane there
-      drops through. Needs Platinum's per-tile bridge attributes (its terrain's bridge bits) for the lane edges, a 3D
-      engine job; `mp collisionmap 8 62 14 28` and `mp s3dground` show it. Also: tiles with more than three ground
-      surfaces now keep the floor and the two highest, so a bridge's deck is never dropped (build_pack.py heights))
+- [x] Falling through CYCLING ROAD's tunnels (ROUTE 206 40.26: the lanes are Platinum's bridge tiles, 0x71, over the
+      valley floor between them at rows 72-78; the pack keeps them as behavior 0x1D (build_pack.py S3D_BRIDGE) and, up on
+      the deck, a step off its side onto ground far below is blocked as in Platinum: s3d_gyms.c S3D_Gyms_StepBlocked;
+      test sinnoh_cycling_road. Tiles with more than three ground surfaces keep the floor and the two highest)
 - [x] BERRY patches can't be planted (fixed: test sinnoh_berry picks and plants FLOAROMA's patch)
 - [x] Followers cut in half in 3D (checked: a follower in ROUTE 201's tall grass and on its paths stands
       whole, every direction)

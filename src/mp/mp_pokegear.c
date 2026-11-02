@@ -218,10 +218,6 @@ static void DrawStatus(void)
 {
     u8 i, buf[8], *p;
     FillWindowPixelBuffer(WIN_STATUS, PIXEL_FILL(C_LCD));
-    Rect(WIN_STATUS, C_DARK, 0, 0, LCD_W, 2);
-    Rect(WIN_STATUS, C_GLOW, 2, 2, LCD_W - 4, 1);
-    Sides(WIN_STATUS, 16);
-    Corners(WIN_STATUS, TRUE, 16);
     for (i = 0; i < 4; i++)   // the signal: four bars
         Rect(WIN_STATUS, C_INK, 8 + i * 4, 13 - (i + 1) * 2 - 1, 2, (i + 1) * 2 + 1);
     for (i = 0; i < CARD_COUNT; i++)   // the cards, the open one inverted
@@ -241,28 +237,32 @@ static void DrawStatus(void)
     p = ConvertIntToDecimalStringN(buf, gLocalTime.hours, STR_CONV_MODE_LEADING_ZEROS, 2);
     *p++ = CHAR_COLON;
     ConvertIntToDecimalStringN(p, gLocalTime.minutes, STR_CONV_MODE_LEADING_ZEROS, 2);
-    PrintRight(WIN_STATUS, FONT_SMALL, buf, 190, 4, sColLcd);
+    PrintRight(WIN_STATUS, FONT_SMALL, buf, 190, 3, sColLcd);
     Rect(WIN_STATUS, C_INK, 196, 5, 18, 8);
     Rect(WIN_STATUS, C_LCD, 197, 6, 16, 6);
     Rect(WIN_STATUS, C_INK, 214, 7, 2, 4);
     for (i = 0; i < 3; i++)
         Rect(WIN_STATUS, C_INK, 198 + i * 5, 7, 4, 4);
+    Rect(WIN_STATUS, C_DARK, 0, 0, LCD_W, 2);   // (the frame last: over any text's box)
+    Rect(WIN_STATUS, C_GLOW, 2, 2, LCD_W - 4, 1);
+    Sides(WIN_STATUS, 16);
+    Corners(WIN_STATUS, TRUE, 16);
     CopyWindowToVram(WIN_STATUS, COPYWIN_FULL);
 }
 
 static void DrawKeys(const u8 *left, const u8 *right, const u8 *mid)
 {
     FillWindowPixelBuffer(WIN_KEYS, PIXEL_FILL(C_LCD));
+    if (left != NULL)   // (the labels first: a text's background is a box; the rules go over it)
+        Print(WIN_KEYS, FONT_NORMAL, left, 8, 1, sColLcd);
+    if (right != NULL)
+        PrintRight(WIN_KEYS, FONT_NORMAL, right, LCD_W - 8, 1, sColLcd);
+    if (mid != NULL)
+        PrintCentered(WIN_KEYS, FONT_NORMAL, mid, 1, sColLcd);
     Rect(WIN_KEYS, C_MID, 4, 0, LCD_W - 8, 1);
     Sides(WIN_KEYS, 16);
     Rect(WIN_KEYS, C_DARK, 0, 14, LCD_W, 2);
     Corners(WIN_KEYS, FALSE, 16);
-    if (left != NULL)
-        Print(WIN_KEYS, FONT_NORMAL, left, 8, 0, sColLcd);
-    if (right != NULL)
-        PrintRight(WIN_KEYS, FONT_NORMAL, right, LCD_W - 8, 0, sColLcd);
-    if (mid != NULL)
-        PrintCentered(WIN_KEYS, FONT_NORMAL, mid, 0, sColLcd);
     CopyWindowToVram(WIN_KEYS, COPYWIN_FULL);
 }
 
@@ -270,26 +270,33 @@ static void DrawKeys(const u8 *left, const u8 *right, const u8 *mid)
 static void DrawMsg(const u8 *a, const u8 *b)
 {
     FillWindowPixelBuffer(WIN_MSG, PIXEL_FILL(C_LCD));
+    if (a != NULL)   // (the text first, then the double rule round it)
+        Print(WIN_MSG, FONT_NORMAL, a, 14, 6, sColLcd);
+    if (b != NULL)
+        Print(WIN_MSG, FONT_NORMAL, b, 14, 20, sColLcd);
     Sides(WIN_MSG, 40);
-    Rect(WIN_MSG, C_INK, 6, 2, LCD_W - 12, 36);
-    Rect(WIN_MSG, C_LCD, 7, 3, LCD_W - 14, 34);
-    Rect(WIN_MSG, C_INK, 8, 4, LCD_W - 16, 32);
-    Rect(WIN_MSG, C_LCD, 10, 5, LCD_W - 20, 30);
+    Rect(WIN_MSG, C_INK, 6, 2, LCD_W - 12, 1);
+    Rect(WIN_MSG, C_INK, 6, 37, LCD_W - 12, 1);
+    Rect(WIN_MSG, C_INK, 6, 2, 1, 36);
+    Rect(WIN_MSG, C_INK, LCD_W - 7, 2, 1, 36);
+    Rect(WIN_MSG, C_INK, 8, 4, LCD_W - 16, 1);
+    Rect(WIN_MSG, C_INK, 8, 35, LCD_W - 16, 1);
+    Rect(WIN_MSG, C_INK, 8, 4, 1, 32);
+    Rect(WIN_MSG, C_INK, LCD_W - 9, 4, 1, 32);
     Rect(WIN_MSG, C_LCD, 6, 2, 2, 1);   // (the rounded corners)
     Rect(WIN_MSG, C_LCD, LCD_W - 8, 2, 2, 1);
     Rect(WIN_MSG, C_LCD, 6, 37, 2, 1);
     Rect(WIN_MSG, C_LCD, LCD_W - 8, 37, 2, 1);
-    if (a != NULL)
-        Print(WIN_MSG, FONT_NORMAL, a, 14, b == NULL ? 4 : 5, sColLcd);
-    if (b != NULL)
-        Print(WIN_MSG, FONT_NORMAL, b, 14, 19, sColLcd);
+    Rect(WIN_MSG, C_LCD, 6, 3, 1, 1);
+    Rect(WIN_MSG, C_LCD, LCD_W - 7, 3, 1, 1);
+    Rect(WIN_MSG, C_LCD, 6, 36, 1, 1);
+    Rect(WIN_MSG, C_LCD, LCD_W - 7, 36, 1, 1);
     CopyWindowToVram(WIN_MSG, COPYWIN_FULL);
 }
 
 static void MainBegin(void)
 {
     FillWindowPixelBuffer(WIN_MAIN, PIXEL_FILL(C_LCD));
-    Sides(WIN_MAIN, 72);
 }
 
 static void DrawClock(void)
@@ -359,7 +366,7 @@ static u16 FreqX(u8 freq)
 static void DrawRadio(void)
 {
     u8 f, buf[12], *p;
-    Rect(WIN_MAIN, C_DARK, 8, 2, LCD_W - 16, 38);   // the dial
+    Rect(WIN_MAIN, C_DARK, 8, 2, LCD_W - 16, 40);   // the dial
     for (f = 0; f < 5; f++)   // (the MHz, over their ticks)
         Print(WIN_MAIN, FONT_SMALL, sText_Dial[f], FreqX(f * 10) - GetStringWidth(FONT_SMALL, sText_Dial[f], 0) / 2, 2, sColDial);
     for (f = 0; f <= 40; f++)
@@ -370,8 +377,8 @@ static void DrawRadio(void)
     *p++ = CHAR_PERIOD;
     *p++ = CHAR_0 + (sG->freq % 2) * 5;
     *p = EOS;
-    Print(WIN_MAIN, FONT_SMALL, buf, 16, 28, sColDial);
-    PrintRight(WIN_MAIN, FONT_SMALL, sText_Tuning, LCD_W - 14, 28, sColDial);
+    Print(WIN_MAIN, FONT_SMALL, buf, 16, 24, sColDial);
+    PrintRight(WIN_MAIN, FONT_SMALL, sText_Tuning, LCD_W - 14, 24, sColDial);
     Rect(WIN_MAIN, C_INK, 40, 46, LCD_W - 80, 22);   // the station's box
     Rect(WIN_MAIN, C_LCD, 41, 47, LCD_W - 82, 20);
     PrintCentered(WIN_MAIN, FONT_NORMAL, sG->station == 1 ? sText_Talk : sG->station == 2 ? sText_Flute : sText_NoSignal,
@@ -417,6 +424,7 @@ static void DrawAll(void)
         DrawKeys(NULL, sKey_Exit, sKey_Tune);
         break;
     }
+    Sides(WIN_MAIN, 72);   // (last: over any text's box)
     CopyWindowToVram(WIN_MAIN, COPYWIN_FULL);
 }
 

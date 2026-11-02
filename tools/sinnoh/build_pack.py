@@ -66,6 +66,10 @@ SAME = {0x02, 0x03, 0x08, 0x0B, 0x0C, 0x10, 0x13, 0x15, 0x16, 0x17, 0x20, 0x21, 
 BEHAVIOR = {b: b for b in SAME}
 BEHAVIOR.update({0x5A: 0x3A, 0x5B: 0x3B, 0x5C: 0x39, 0x5D: 0x38,   # (ledges jumped twice: as ledges)
                  0xEB: 0xE5, 0xEC: 0xE5})                           # (other shop shelves)
+# Platinum's bridges (0x71-0x75: the deck; 0x70 where you get on, plain ground) as the game's unused 0x1D: Platinum keeps
+# a walker on the deck, and so does s3d_gyms.c S3D_Gyms_StepBlocked (CYCLING ROAD's lanes over ROUTE 206's valley)
+S3D_BRIDGE = 0x1D
+BEHAVIOR.update({b: S3D_BRIDGE for b in range(0x71, 0x76)})
 ROCK_CLIMB = (0x4B, 0x4C)      # walkable: this game has no HM restrictions (and no ROCK CLIMB of its own)
 WATER = (0x10, 0x13, 0x15)     # surfable (0x13: a waterfall, climbed with WATERFALL)
 

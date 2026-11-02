@@ -29,6 +29,7 @@ void Sinnoh_Tram_Update(void);
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
 #include "fieldmap.h"
+#include "constants/metatile_behaviors.h"
 #include "mp.h"
 #include "script.h"
 #include "overworld.h"
@@ -1314,6 +1315,15 @@ bool8 S3D_Gyms_StepBlocked(s16 fromX, s16 fromY, s16 toX, s16 toY)
     case GYM_SNOWPOINT:
         blocked = SnowBlocked(fromX - MAP_OFFSET, fromY - MAP_OFFSET, toX - MAP_OFFSET, toY - MAP_OFFSET);
         break;
+    }
+    // Platinum's bridges (the pack's behavior 0x1D, tools/sinnoh/build_pack.py S3D_BRIDGE): up on the deck, a step
+    // off its side onto ground far below is blocked (CYCLING ROAD's lanes over ROUTE 206's valley)
+    if (!blocked && MapGridGetMetatileBehaviorAt(fromX, fromY) == MB_UNUSED_1D
+     && MapGridGetMetatileBehaviorAt(toX, toY) != MB_UNUSED_1D)
+    {
+        float h = S3D_PlayerHeight(), f = S3D_TileFloor(toX - MAP_OFFSET, toY - MAP_OFFSET, h);
+        if (!isnan(h) && (isnan(f) || h - f > 12))
+            blocked = TRUE;
     }
     if (getenv("MOEMON_GYM_TRACE"))
         printf("[gym] step %d,%d -> %d,%d: %s (player at %.0f)\n", fromX - MAP_OFFSET, fromY - MAP_OFFSET, toX - MAP_OFFSET,

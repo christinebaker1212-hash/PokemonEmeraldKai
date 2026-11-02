@@ -1,0 +1,29 @@
+pressuntil A field 5000
+wait 60
+mp warp 40,26,12,66
+wait 150
+mp where
+shot deck
+press DOWN 8
+wait 20
+press DOWN 8
+wait 20
+press DOWN 8
+wait 20
+press DOWN 8
+wait 20
+press DOWN 8
+wait 20
+press DOWN 8
+wait 20
+press DOWN 8
+wait 20
+press DOWN 8
+wait 20
+mp where
+shot lane
+press RIGHT 30
+wait 40
+mp where
+shot after
+quit

@@ -1,0 +1,7 @@
+# SINNOH's CYCLING ROAD (ROUTE 206, 40.26): its lanes are Platinum's bridge tiles (the pack's behavior 0x1D, build_pack.py
+# S3D_BRIDGE); up on the deck, a step off its side into the valley gap (x 13-16, rows 72-78) is blocked
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_GYM_TRACE=1"
+EXPECT_A=("where map 40.26 xy 12,74" "step 12,74 -> 13,74: blocked")
+UNEXPECT_A=("[crash]" "TIMEOUT" "xy 13,74" "xy 14,74")
