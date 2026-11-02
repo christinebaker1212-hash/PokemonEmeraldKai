@@ -5,6 +5,7 @@ Kanto_PewterCity_MapScripts::
 	.byte 0
 
 Kanto_PewterCity_EventScript_841599D::
+	call Kanto_PewterCity_EventScript_AideShow   @ Moemon Kai: FireRed's RUNNING SHOES aide
 	special QzKantoTravelingEventCheck
 	setflag FLAG_QZ_0x2246
 	setvar VAR_QZ_0x511E, 0
@@ -1121,3 +1122,268 @@ Kanto_PewterCity_Text_842EAF6::
 Kanto_PewterCity_Text_842EB3C::
 	.string "PEWTER CITY\n"
 	.string "A Stone Gray City$"
+
+@ Moemon Kai: FireRed's RUNNING SHOES aide (pokefirered data/maps/PewterCity), removed by Quetzal
+Kanto_PewterCity_EventScript_RunningShoesAide::
+	lock
+	faceplayer
+	setvar VAR_TEMP_1, 0
+	call Kanto_PewterCity_EventScript_AideGiveRunningShoes
+	release
+	end
+
+Kanto_PewterCity_EventScript_RunningShoesAideTriggerTop::
+	lockall
+	setvar VAR_TEMP_1, 1
+	call Kanto_PewterCity_EventScript_AideGiveRunningShoes
+	releaseall
+	end
+
+Kanto_PewterCity_EventScript_RunningShoesAideTriggerMid::
+	lockall
+	setvar VAR_TEMP_1, 2
+	call Kanto_PewterCity_EventScript_AideGiveRunningShoes
+	releaseall
+	end
+
+Kanto_PewterCity_EventScript_RunningShoesAideTriggerBottom::
+	lockall
+	setvar VAR_TEMP_1, 3
+	call Kanto_PewterCity_EventScript_AideGiveRunningShoes
+	releaseall
+	end
+
+Kanto_PewterCity_EventScript_AideGiveRunningShoes::
+	textcolor 0
+	call_if_eq VAR_TEMP_1, 1, Kanto_PewterCity_EventScript_AideNoticePlayer
+	call_if_eq VAR_TEMP_1, 2, Kanto_PewterCity_EventScript_AideNoticePlayer
+	call_if_eq VAR_TEMP_1, 3, Kanto_PewterCity_EventScript_AideNoticePlayer
+	waitse
+	playse SE_PIN
+	applymovement 12, Kanto_PewterCity_Movement_AideExclamation
+	waitmovement 0
+	applymovement 12, Kanto_PewterCity_Movement_AideDelay48
+	waitmovement 0
+	msgbox Kanto_PewterCity_Text_OhPlayer, MSGBOX_DEFAULT
+	call_if_eq VAR_TEMP_1, 0, Kanto_PewterCity_EventScript_AideApproachPlayer0
+	call_if_eq VAR_TEMP_1, 1, Kanto_PewterCity_EventScript_AideApproachPlayer1
+	call_if_eq VAR_TEMP_1, 2, Kanto_PewterCity_EventScript_AideApproachPlayer2
+	call_if_eq VAR_TEMP_1, 3, Kanto_PewterCity_EventScript_AideApproachPlayer3
+	msgbox Kanto_PewterCity_Text_AskedToDeliverThis, MSGBOX_DEFAULT
+	goto_if_set FLAG_SYS_B_DASH, Kanto_PewterCity_EventScript_AideHadShoes
+	textcolor 3
+	playfanfare MUS_RG_OBTAIN_KEY_ITEM
+	message Kanto_PewterCity_Text_ReceivedRunningShoesFromAide
+	waitmessage
+	waitfanfare
+	msgbox Kanto_PewterCity_Text_SwitchedShoesWithRunningShoes, MSGBOX_DEFAULT
+	msgbox Kanto_PewterCity_Text_ExplainRunningShoes, MSGBOX_DEFAULT
+	call Quetzal_EventScript_8456AB7
+	msgbox Kanto_PewterCity_Text_MustBeGoingBackToLab, MSGBOX_DEFAULT
+	closemessage
+	call_if_eq VAR_TEMP_1, 0, Kanto_PewterCity_EventScript_AideExit0
+	call_if_eq VAR_TEMP_1, 1, Kanto_PewterCity_EventScript_AideExit1
+	call_if_eq VAR_TEMP_1, 2, Kanto_PewterCity_EventScript_AideExit2
+	call_if_eq VAR_TEMP_1, 3, Kanto_PewterCity_EventScript_AideExit3
+	delay 30
+	textcolor 3
+	msgbox Kanto_PewterCity_Text_RunningShoesLetterFromMom, MSGBOX_DEFAULT
+	closemessage
+Kanto_PewterCity_EventScript_AideGone:
+	removeobject 12
+	setflag FLAG_SYS_B_DASH
+	setflag 0x2223
+	setvar VAR_TEMP_2, 0
+	return
+
+Kanto_PewterCity_EventScript_AideNoticePlayer::
+	applymovement 12, Kanto_PewterCity_Movement_AideFaceDown
+	waitmovement 0
+	return
+
+@ Aide already at player
+Kanto_PewterCity_EventScript_AideApproachPlayer0::
+	closemessage
+	delay 20
+	return
+
+Kanto_PewterCity_EventScript_AideApproachPlayer1::
+	closemessage
+	applymovement LOCALID_PLAYER, Kanto_PewterCity_Movement_PlayerFaceUp
+	waitmovement 0
+	return
+
+Kanto_PewterCity_EventScript_AideApproachPlayer2::
+	closemessage
+	applymovement 12, Kanto_PewterCity_Movement_AideApproachPlayerMid
+	waitmovement 0
+	applymovement LOCALID_PLAYER, Kanto_PewterCity_Movement_PlayerFaceUp
+	waitmovement 0
+	return
+
+Kanto_PewterCity_EventScript_AideApproachPlayer3::
+	closemessage
+	applymovement 12, Kanto_PewterCity_Movement_AideApproachPlayerBottom
+	waitmovement 0
+	applymovement LOCALID_PLAYER, Kanto_PewterCity_Movement_PlayerFaceUp
+	waitmovement 0
+	return
+
+Kanto_PewterCity_EventScript_AideExit0::
+	applymovement 12, Kanto_PewterCity_Movement_AideExit0
+	waitmovement 0
+	return
+
+Kanto_PewterCity_EventScript_AideExit1::
+	applymovement 12, Kanto_PewterCity_Movement_AideExit1
+	waitmovement 0
+	return
+
+Kanto_PewterCity_EventScript_AideExit2::
+	applymovement 12, Kanto_PewterCity_Movement_AideExit2
+	waitmovement 0
+	return
+
+Kanto_PewterCity_EventScript_AideExit3::
+	applymovement 12, Kanto_PewterCity_Movement_AideExit3
+	waitmovement 0
+	return
+
+Kanto_PewterCity_Movement_AideApproachPlayerMid::
+	delay_4
+	walk_down
+	step_end
+
+Kanto_PewterCity_Movement_AideApproachPlayerBottom::
+	delay_4
+	walk_down
+	walk_down
+	step_end
+
+Kanto_PewterCity_Movement_AideExit0::
+	walk_down
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	step_end
+
+Kanto_PewterCity_Movement_AideExit1::
+	walk_left
+	walk_down
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	step_end
+
+Kanto_PewterCity_Movement_AideExit2::
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	step_end
+
+Kanto_PewterCity_Movement_AideExit3::
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	walk_left
+	step_end
+
+Kanto_PewterCity_EventScript_AideHadShoes:
+	msgbox Kanto_PewterCity_Text_AideHadShoes, MSGBOX_DEFAULT
+	closemessage
+	call_if_eq VAR_TEMP_1, 0, Kanto_PewterCity_EventScript_AideExit0
+	call_if_eq VAR_TEMP_1, 1, Kanto_PewterCity_EventScript_AideExit1
+	call_if_eq VAR_TEMP_1, 2, Kanto_PewterCity_EventScript_AideExit2
+	call_if_eq VAR_TEMP_1, 3, Kanto_PewterCity_EventScript_AideExit3
+	goto Kanto_PewterCity_EventScript_AideGone
+
+@ (shown from BROCK's BOULDERBADGE until the RUNNING SHOES are delivered: FireRed's VAR_MAP_SCENE_PEWTER_CITY 1)
+Kanto_PewterCity_EventScript_AideShow::
+	setflag 0x2224
+	goto_if_set 0x2223, Kanto_PewterCity_EventScript_AideShowEnd
+	goto_if_unset FLAG_QZ_0x2100, Kanto_PewterCity_EventScript_AideShowEnd
+	clearflag 0x2224
+	setvar VAR_TEMP_2, 1
+Kanto_PewterCity_EventScript_AideShowEnd:
+	return
+
+Kanto_PewterCity_Movement_AideExclamation:
+	emote_exclamation_mark
+	step_end
+
+Kanto_PewterCity_Movement_AideDelay48:
+	delay_16
+	delay_16
+	delay_16
+	step_end
+
+Kanto_PewterCity_Movement_AideFaceDown:
+	walk_in_place_faster_down
+	step_end
+
+Kanto_PewterCity_Movement_PlayerFaceUp:
+	walk_in_place_faster_up
+	step_end
+
+Kanto_PewterCity_Text_OhPlayer:
+	.string "Oh, {PLAYER}{KUN}!$"
+
+Kanto_PewterCity_Text_AskedToDeliverThis:
+	.string "I'm glad I caught up to you.\n"
+	.string "I'm PROF. OAK's AIDE.\p"
+	.string "I've been asked to deliver this,\n"
+	.string "so here you go.$"
+
+Kanto_PewterCity_Text_ReceivedRunningShoesFromAide:
+	.string "{PLAYER} received the\n"
+	.string "RUNNING SHOES from the AIDE.$"
+
+Kanto_PewterCity_Text_SwitchedShoesWithRunningShoes:
+	.string "{PLAYER} switched shoes with the\n"
+	.string "RUNNING SHOES.$"
+
+Kanto_PewterCity_Text_ExplainRunningShoes:
+	.string "Press the B Button to run.\n"
+	.string "But only where there's room to run!$"
+
+Kanto_PewterCity_Text_MustBeGoingBackToLab:
+	.string "Well, I must be going back to\n"
+	.string "the LAB.\p"
+	.string "Bye-bye!$"
+
+Kanto_PewterCity_Text_RunningShoesLetterFromMom:
+	.string "There's a letter attached…\p"
+	.string "Dear {PLAYER},\p"
+	.string "Here is a pair of RUNNING SHOES\n"
+	.string "for my beloved challenger.\p"
+	.string "Remember, I'll always cheer for\n"
+	.string "you! Don't ever give up!\p"
+	.string "From Mom$"
+
+Kanto_PewterCity_Text_AideHadShoes:
+	.string "…Oh! You're already wearing a pair\n"
+	.string "of RUNNING SHOES!\p"
+	.string "Then I've come all this way for\n"
+	.string "nothing. Well, keep up the running!$"

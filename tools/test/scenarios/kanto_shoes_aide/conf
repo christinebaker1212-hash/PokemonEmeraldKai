@@ -1,0 +1,7 @@
+# FireRed's RUNNING SHOES aide in PEWTER (Quetzal had removed him): with BROCK's BOULDERBADGE he stands by the gym, the
+# path's trigger brings him over, he hands over the RUNNING SHOES (FLAG_SYS_B_DASH) and goes (0x2223 set).
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=25:40"
+EXPECT_A=("[test] flag 8739 = 1" "[test] flag 2240 = 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

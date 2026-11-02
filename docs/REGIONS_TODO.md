@@ -7,7 +7,8 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 ## KANTO
 - [ ] FireRed's decomp settles any behavior question (Kai > FireRed > Quetzal)
 - [ ] KANTO's legendaries only in KANTO (exclusives)
-- [ ] FireRed's RUNNING SHOES aide after BROCK doesn't appear: remove him
+- [x] FireRed's RUNNING SHOES aide after BROCK: back (FireRed's scene and words; a line of his own if the player has
+      them already; hide flag 0x2224, done 0x2223; test kanto_shoes_aide)
 - [ ] Doorways too wide: one tile wide
 - [ ] Door opening / closing animations
 - [ ] Going down some ladders puts the player on top of the ladder, not in front of it

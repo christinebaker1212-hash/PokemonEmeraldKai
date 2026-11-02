@@ -730,9 +730,6 @@ u16 MP_Region_BadgeFlag(u8 region, u8 badge)
     return sBadgeFlags[region] + badge;
 }
 
-// The badge an HM's field move waits for (FIELD_MOVE_CUT .. FIELD_MOVE_WATERFALL: the game's badge order): HOENN's,
-// but on a SINNOH map Platinum's (CUT the FOREST BADGE, FLASH and ROCK SMASH the COAL BADGE, STRENGTH the MINE BADGE,
-// SURF and DIVE the FEN BADGE, FLY the COBBLE BADGE, WATERFALL the BEACON BADGE)
 // The badge a field move needs in the region the player is in (HM order: CUT, FLY, SURF, STRENGTH, FLASH, ROCK SMASH,
 // WATERFALL, DIVE, then 8 WHIRLPOOL): HOENN's are Emerald's; KANTO's FireRed's (CASCADE, THUNDER, SOUL, RAINBOW,
 // BOULDER, MARSH, VOLCANO; DIVE: EARTH); JOHTO's Crystal's (HIVE, STORM, FOG, PLAIN, ZEPHYR; ROCK SMASH, a TM there:

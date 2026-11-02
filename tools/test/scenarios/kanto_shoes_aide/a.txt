@@ -1,0 +1,21 @@
+pressuntil A field 5000
+wait 30
+mp setflag 0x2100
+mp clearflag 0x8C0
+mp warp 37,59,43,22
+wait 200
+wait 120
+press RIGHT 20
+wait 20
+press RIGHT 20
+wait 20
+press RIGHT 20
+wait 60
+shot aide_scene
+mash A 30 20
+pressuntil A field 3000
+wait 30
+mp getflag 0x2223
+mp getflag 0x8C0
+shot aide_gone
+quit
