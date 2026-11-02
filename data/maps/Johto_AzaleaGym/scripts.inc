@@ -566,7 +566,8 @@ Johto_AzaleaGym_EventScript_83C4C67::
 	end
 
 Johto_AzaleaGym_EventScript_83C4C6E::
-	setorcopyvar VAR_0x8000, ITEM_NUGGET
+	@ Moemon Kai: HeartGold / SoulSilver's TM from the leader (Quetzal gave ITEM_NUGGET)
+	setorcopyvar VAR_0x8000, ITEM_TM89
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602B4
@@ -746,11 +747,11 @@ Johto_AzaleaGym_Text_83C4EFC::
 	.string "have this.$"
 
 Johto_AzaleaGym_Text_83C4FCE::
-	.string "That’s BLACK AUGURITE.\p"
-	.string "It can awaken a rugged new form\n"
-	.string "in a certain Bug-type MOéMON.\p"
-	.string "Isn’t that great?\n"
-	.string "I discovered it!$"
+	.string "TM89 contains U-TURN.\p"
+	.string "It lets your MOéMON attack, then\n"
+	.string "switch with the next MOéMON in\l"
+	.string "your party.\p"
+	.string "Isn’t that great?$"
 
 Johto_AzaleaGym_Text_83C5047::
 	.string "Bug MOéMON are deep. There are\n"

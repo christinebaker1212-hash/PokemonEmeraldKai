@@ -84,8 +84,9 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [~] A4: TMs / HMs from leaders, trainers and events as the original games give them (new TMs / HMs where HOENN's
       list lacks them)
       ([x] KANTO's leaders: FireRed's TM39, 03, 34, 19, 06, 04, 38, 26 with FireRed's words, for Quetzal's held items
-      (still obtainable elsewhere: item audit), tools/quetzal_port/fix_leader_tms.py, test kanto_leader_tm; [ ] JOHTO's
-      leaders, other TM givers)
+      (still obtainable elsewhere: item audit), tools/quetzal_port/fix_leader_tms.py, test kanto_leader_tm; [x] JOHTO's
+      leaders: HeartGold / SoulSilver's TM51, 89, 45, 30, 01, 23, 07, 59 with HGSS's words (Crystal's TMs MUD-SLAP, FURY
+      CUTTER... aren't TMs in this game; HGSS's all are); [ ] other TM givers)
 - [x] SINNOH's time of day in KANTO, JOHTO and HOENN: MORNING / DAY / NIGHT encounters (grass slots 2-3 by Platinum's
       hours: mp_region.c MP_TimeLandSlot, src/data/wild_time.h from tools/quetzal_port/gen_wild_time.py; tests time_wild_*)
 - [ ] Encounter audit: no strong Pokémon early, places keep their identity (DIGLETT'S CAVE), no DITTO-like utility early;

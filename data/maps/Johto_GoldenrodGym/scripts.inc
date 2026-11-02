@@ -90,7 +90,8 @@ Johto_GoldenrodGym_EventScript_83D5936::
 	setvar VAR_QZ_0x500A, 5
 
 Johto_GoldenrodGym_EventScript_83D5977::
-	setorcopyvar VAR_0x8000, ITEM_CHOICE_SCARF
+	@ Moemon Kai: HeartGold / SoulSilver's TM from the leader (Quetzal gave ITEM_CHOICE_SCARF)
+	setorcopyvar VAR_0x8000, ITEM_TM45
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
@@ -190,10 +191,10 @@ Johto_GoldenrodGym_Text_83D5BEA::
 	.string "Oh, you can have this too!$"
 
 Johto_GoldenrodGym_Text_83D5C69::
-	.string "A CHOICE SCARF boosts Speed,\n"
-	.string "but only lets its holder\l"
-	.string "use one move.\p"
-	.string "My MILTANK would be so fast!$"
+	.string "It’s ATTRACT! It makes full use of\n"
+	.string "a MOéMON’s charm.\p"
+	.string "Isn’t it just perfect for a cutie\n"
+	.string "like me? That’s right!$"
 
 Johto_GoldenrodGym_Text_83D5CCA::
 	.string "Ah, that was a good cry!$"

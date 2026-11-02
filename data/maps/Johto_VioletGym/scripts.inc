@@ -57,7 +57,8 @@ Johto_VioletGym_EventScript_83FF117::
 	setrespawn 0x19
 
 Johto_VioletGym_EventScript_83FF150::
-	setorcopyvar VAR_0x8000, ITEM_LEFTOVERS
+	@ Moemon Kai: HeartGold / SoulSilver's TM from the leader (Quetzal gave ITEM_LEFTOVERS)
+	setorcopyvar VAR_0x8000, ITEM_TM51
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
@@ -129,10 +130,12 @@ Johto_VioletGym_Text_83FF32D::
 	.string "Here--take this too.$"
 
 Johto_VioletGym_Text_83FF3B7::
-	.string "HEAVY-DUTY BOOTS protect against\n"
-	.string "hazards when entering battle.\p"
-	.string "My flying MOéMON appreciate\n"
-	.string "being able to land safely!$"
+	.string "By using a TM, a MOéMON will\n"
+	.string "instantly learn a new move.\p"
+	.string "Think before you act--a TM can be\n"
+	.string "used only once.\p"
+	.string "TM51 contains ROOST. It restores\n"
+	.string "half the max HP.$"
 
 Johto_VioletGym_Text_83FF42E::
 	.string "There are MOéMON GYMS in cities\n"

@@ -68,7 +68,8 @@ Johto_EcruteakGym_EventScript_83CDCCB::
 	setvar VAR_QZ_0x500B, 4
 
 Johto_EcruteakGym_EventScript_83CDD01::
-	setorcopyvar VAR_0x8000, ITEM_LIFE_ORB
+	@ Moemon Kai: HeartGold / SoulSilver's TM from the leader (Quetzal gave ITEM_LIFE_ORB)
+	setorcopyvar VAR_0x8000, ITEM_TM30
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
@@ -152,9 +153,9 @@ Johto_EcruteakGym_Text_83CDFD7::
 	.string "I want you to have this too.$"
 
 Johto_EcruteakGym_Text_83CE06F::
-	.string "A LIFE ORB boosts attack damage,\n"
-	.string "but costs HP when damage is dealt.\p"
-	.string "Power always comes at a price.$"
+	.string "It’s SHADOW BALL. It causes damage\n"
+	.string "and may reduce SPECIAL DEFENSE.\l"
+	.string "Use it if it appeals to you.$"
 
 Johto_EcruteakGym_Text_83CE0D2::
 	.string "I see...\p"

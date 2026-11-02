@@ -199,7 +199,8 @@ Johto_OlivineGym_EventScript_83E5064::
 	setvar VAR_QZ_0x500D, 8
 
 Johto_OlivineGym_EventScript_83E509F::
-	setorcopyvar VAR_0x8000, ITEM_LEFTOVERS
+	@ Moemon Kai: HeartGold / SoulSilver's TM from the leader (Quetzal gave ITEM_LEFTOVERS)
+	setorcopyvar VAR_0x8000, ITEM_TM23
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
@@ -332,10 +333,10 @@ Johto_OlivineGym_Text_83E52D5::
 	.string "…Um… Please take this too…$"
 
 Johto_OlivineGym_Text_83E5320::
-	.string "A ROCKY HELMET hurts attackers\n"
-	.string "that make contact with its holder.\p"
-	.string "…Sometimes, taking a hit\n"
-	.string "can be a way to strike back.$"
+	.string "It is called IRON TAIL...\p"
+	.string "Your MOéMON will hit the target\n"
+	.string "with its hard tail, occasionally\l"
+	.string "lowering the target’s DEFENSE...$"
 
 Johto_OlivineGym_Text_83E5398::
 	.string "Um… I don’t know how to say this,\n"
