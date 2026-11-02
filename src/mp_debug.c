@@ -3350,6 +3350,22 @@ void MP_TestCommand(const char *cmd, const char *arg)
         bool8 MP_Region_FollowHost(u8 to);
         printf("[test] travel %d: %d\n", atoi(arg), MP_Region_FollowHost(atoi(arg)));
     }
+    else if (strcmp(cmd, "s3dhour") == 0)
+    {
+        // s3dhour H - SINNOH's lighting hour from now on (MOEMON_S3D_HOUR), on the map the player is on
+        char v[8];
+        snprintf(v, sizeof(v), "%d", atoi(arg));
+#ifdef _WIN32
+        {
+            char e[24];
+            snprintf(e, sizeof(e), "MOEMON_S3D_HOUR=%s", v);
+            _putenv(e);
+        }
+#else
+        setenv("MOEMON_S3D_HOUR", v, 1);
+#endif
+        printf("[test] s3d hour %s\n", v);
+    }
     else if (strcmp(cmd, "daytint") == 0)
     {
         // daytint - Platinum's time-of-day tint outside SINNOH (mp_daytint.c)

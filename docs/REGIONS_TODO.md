@@ -66,7 +66,9 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 ## SINNOH
 - [x] Plates and SINNOH's legendaries only in SINNOH (Quetzal's plate shops at CINNABAR's lab and the RUINS OF ALPH
       gone: FireRed's / Crystal's scientists back)
-- [ ] Palettes inverted when the time-of-day lighting changes on a running map (maybe fixed)
+- [x] Palettes inverted when the time-of-day lighting changes on a running map (checked: on ROUTE 201 the light switched
+      noon -> dusk -> night -> noon in place (`mp s3dhour`) gives Platinum's colors each time and noon's again, nothing
+      inverted)
 - [ ] Falling through CYCLING ROAD's tunnels (maybe fixed)
 - [x] BERRY patches can't be planted (fixed: test sinnoh_berry picks and plants FLOAROMA's patch)
 - [x] Followers cut in half in 3D (checked: a follower in ROUTE 201's tall grass and on its paths stands
