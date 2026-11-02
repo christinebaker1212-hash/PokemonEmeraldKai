@@ -3773,13 +3773,14 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
 - Platform lifts (2026-11-02, src/sinnoh/s3d_lift.c, Platinum's platform_lift.c): IRON ISLAND B1F's right room, B2F's
   left room, B3F, the five LEAGUE elevators up to the ELITE FOUR's rooms and the CHAMPION's, and the CHAMPION's room.
   Platinum's scripts drive them (InitPersistedMapFeaturesForPlatformLift / CheckPlatformLiftNotUsedWhenEnteredMap /
-  TriggerPlatformLift =  0 / 1 / 2, the script stopped while it rides); a 3 x 2 plate of tiles at the
+  TriggerPlatformLift = `sinnoh SINNOH_LIFT` 0 / 1 / 2, the script stopped while it rides); a 3 x 2 plate of tiles at the
   lift's height (gS3dHeightHook), its floor on arrival from where the player came in (the bottom floor's warp row), the
   same map's state kept through battles and menus. The lift's prop is the map's own, drawn at the lift's height (s3d.c
   S3D_SetLift: the props standing on the plate), or on IRON ISLAND B2F's left room Platinum's run-time one (gymprops.py:
   S3D_MODEL_IRON_ISLAND_PLATFORM_LIFT). IRON ISLAND's go 1 a frame both ways, the LEAGUE's 2 a frame and up only. After a
   ride the arrival step is over (gPlayerAvatar.runningState): the game asks a coord event again each frame while the
-  last step's animation stands, Platinum doesn't, and the plate's trigger would freeze the player. , , . Tests sinnoh_lift, sinnoh_lift_iron.
+  last step's animation stands, Platinum doesn't, and the plate's trigger would freeze the player. `mp lift`,
+  `mp collisionmap X Y W H`, `mp canstep`. Tests sinnoh_lift, sinnoh_lift_iron.
 - Words (1.62.x, sinnoh-work; being replaced by Platinum's own, above): every person / sign / bg / trigger runs <map>_EventScript_Person<n> / _Sign<n> / _Bg<n>
   / _Trigger<n> when the map's scripts.inc has it (n: its place in Platinum's lists, from 1), else nothing (a trigger
   without a script isn't placed). tools/sinnoh/words.py holds the words (original writing; '|' a new page; ('nurse',)
