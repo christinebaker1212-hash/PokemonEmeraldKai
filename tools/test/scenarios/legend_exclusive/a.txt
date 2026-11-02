@@ -1,0 +1,32 @@
+pressuntil A field 5000
+wait 30
+mp regionclear 1
+mp regionclear 2
+mp warp 36,1,5,7
+wait 120
+mp getflag 10517
+mp getflag 10520
+mp warp 36,74,5,5
+wait 120
+mp getflag 8605
+mp warp 37,35,10,16
+wait 120
+mp getflag 8604
+mp warp 37,34,9,14
+wait 120
+mp getflag 8589
+mp getvar 0x4001
+mp warp 26,57,10,10
+wait 120
+mp getflag 718
+mp warp 26,87,10,10
+wait 120
+mp getflag 800
+mp warp 34,92,5,5
+wait 120
+mp getflag 4562
+mp warp 34,94,5,5
+wait 120
+mp getflag 4583
+mp getflag 4601
+quit

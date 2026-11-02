@@ -6,7 +6,8 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 
 ## KANTO
 - [ ] FireRed's decomp settles any behavior question (Kai > FireRed > Quetzal)
-- [ ] KANTO's legendaries only in KANTO (exclusives)
+- [x] KANTO's legendaries only in KANTO (exclusives: qz_specials.c MP_LegendForeign / MP_HideForeignLegends; test
+      legend_exclusive)
 - [x] FireRed's RUNNING SHOES aide after BROCK: back (FireRed's scene and words; a line of his own if the player has
       them already; hide flag 0x2224, done 0x2223; test kanto_shoes_aide)
 - [x] Doorways too wide: one tile wide (Emerald's door table, with its two-tile-wide doors, was drawing over KANTO's
@@ -38,7 +39,7 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 ## JOHTO
 - [ ] POKéGEAR back as Crystal / HGSS have it (display, functions, calls), no manual clock setting; START menu in
       JOHTO, a registrable key item elsewhere once JOHTO's ELITE FOUR is beaten
-- [ ] JOHTO's legendaries only in JOHTO
+- [x] JOHTO's legendaries only in JOHTO (FireRed's and Emerald's NAVEL ROCK empty: LUGIA and HO-OH are JOHTO's)
 - [ ] Quetzal's berry system out: 1x1 berry patches where berries were; APRICORN trees rewritten from Crystal
       (behavior, words), JOHTO's berries
 - [x] WHITNEY's MILTANK: perfect IVs (her gym team; tools/quetzal_port/gen_trainers.py IV_OVERRIDES)
@@ -51,11 +52,12 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [ ] MOM's money saving (Crystal) and MY ROOM decorating on the Secret Base logic
 
 ## HOENN
-- [ ] HOENN's legendaries only in HOENN
+- [x] HOENN's legendaries only in HOENN (KANTO's BIRTH ISLAND and Quetzal's CINNABAR chamber empty)
 - [ ] MOENAV: START menu in HOENN (done), a registrable key item elsewhere once HOENN's ELITE FOUR is beaten
 
 ## SINNOH
-- [ ] Plates and SINNOH's legendaries only in SINNOH
+- [x] Plates and SINNOH's legendaries only in SINNOH (Quetzal's plate shops at CINNABAR's lab and the RUINS OF ALPH
+      gone: FireRed's / Crystal's scientists back)
 - [ ] Palettes inverted when the time-of-day lighting changes on a running map (maybe fixed)
 - [ ] Falling through CYCLING ROAD's tunnels (maybe fixed)
 - [ ] BERRY patches can't be planted (maybe fixed)
@@ -116,3 +118,9 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
   floor below) now steps the player off to the south. Ladders down (holes in the floor) stay as FireRed's.
 - JOHTO's door animations need Quetzal's door frames, which live only in its ROM (tools/quetzal_rip didn't read the
   door table); left open until the rip can read them from the user's ROM.
+- Legendaries: each one's home is the region whose games it belongs to (KANTO: the birds, MEWTWO, MEW; JOHTO: the
+  beasts, LUGIA, HO-OH, CELEBI; HOENN: the Regis, the Latis, the weather trio, DEOXYS; SINNOH: Platinum's). Outside
+  their home they're hidden: Quetzal's static encounters in JOHTO and KANTO, FireRed's NAVEL ROCK and BIRTH ISLAND, and
+  Emerald's NAVEL ROCK and FARAWAY ISLAND (MEW is KANTO's: under the truck by the S.S. ANNE). The tickets still sail
+  there; the islands are empty. JIRACHI, MANAPHY and PHIONE have no encounter in their home region, so they keep
+  their places (else they couldn't be caught at all). Gens 5-9 legendaries have no home region here and stay.

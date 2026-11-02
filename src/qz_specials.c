@@ -432,6 +432,60 @@ static bool8 PreLeagueLegend(const struct QzStatic *e)
     return FALSE;
 }
 
+// Moemon Kai: each region's legendaries only in their own region (the user, 2026-11-02: Quetzal put every
+// generation's in JOHTO and KANTO, FireRed's Sevii islands and Emerald's event islands borrow other regions' too).
+// A legendary that has no encounter in its home region (JIRACHI, MANAPHY, PHIONE) keeps the places it has.
+static const u16 sLegendHome[][2] = {
+    {SPECIES_ARTICUNO, REGION_KANTO}, {SPECIES_ZAPDOS, REGION_KANTO}, {SPECIES_MOLTRES, REGION_KANTO},
+    {SPECIES_MEWTWO, REGION_KANTO}, {SPECIES_MEW, REGION_KANTO},
+    {SPECIES_RAIKOU, REGION_JOHTO}, {SPECIES_ENTEI, REGION_JOHTO}, {SPECIES_SUICUNE, REGION_JOHTO},
+    {SPECIES_LUGIA, REGION_JOHTO}, {SPECIES_HO_OH, REGION_JOHTO}, {SPECIES_CELEBI, REGION_JOHTO},
+    {SPECIES_REGIROCK, REGION_HOENN}, {SPECIES_REGICE, REGION_HOENN}, {SPECIES_REGISTEEL, REGION_HOENN},
+    {SPECIES_LATIAS, REGION_HOENN}, {SPECIES_LATIOS, REGION_HOENN}, {SPECIES_KYOGRE, REGION_HOENN},
+    {SPECIES_GROUDON, REGION_HOENN}, {SPECIES_RAYQUAZA, REGION_HOENN}, {SPECIES_DEOXYS, REGION_HOENN},
+    {SPECIES_UXIE, REGION_SINNOH}, {SPECIES_MESPRIT, REGION_SINNOH}, {SPECIES_AZELF, REGION_SINNOH},
+    {SPECIES_DIALGA, REGION_SINNOH}, {SPECIES_PALKIA, REGION_SINNOH}, {SPECIES_HEATRAN, REGION_SINNOH},
+    {SPECIES_REGIGIGAS, REGION_SINNOH}, {SPECIES_GIRATINA, REGION_SINNOH}, {SPECIES_CRESSELIA, REGION_SINNOH},
+    {SPECIES_DARKRAI, REGION_SINNOH}, {SPECIES_SHAYMIN, REGION_SINNOH}, {SPECIES_ARCEUS, REGION_SINNOH},
+};
+
+bool8 MP_LegendForeign(u16 species, u8 region)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sLegendHome); i++)
+        if (sLegendHome[i][0] == species)
+            return sLegendHome[i][1] != region;
+    return FALSE;
+}
+
+// After a map's transition scripts (overworld.c): a legendary from another region stays hidden, also where the map's
+// own scripts show it (FireRed's NAVEL ROCK and BIRTH ISLAND, Emerald's NAVEL ROCK and FARAWAY ISLAND)
+void MP_HideForeignLegends(void)
+{
+    u32 i;
+    u16 map = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
+    for (i = 0; i < ARRAY_COUNT(sQzStatics); i++)
+        if (HereIs(&sQzStatics[i]) && MP_LegendForeign(sQzStatics[i].species, sQzStatics[i].region))
+            FlagSet(sQzStatics[i].objFlag);
+    switch (map)
+    {
+    case MAP_KANTO_NAVEL_ROCK_SUMMIT:   // HO-OH (its trigger runs while VAR_TEMP_1 is 0)
+    case MAP_NAVEL_ROCK_TOP:
+        FlagSet(FLAG_HIDE_HO_OH);
+        VarSet(VAR_TEMP_1, 1);
+        break;
+    case MAP_NAVEL_ROCK_BOTTOM:
+        FlagSet(FLAG_HIDE_LUGIA);
+        break;
+    case MAP_KANTO_BIRTH_ISLAND_EXTERIOR:   // DEOXYS's triangle too (DEOXYS: HOENN's BIRTH ISLAND)
+        FlagSet(FLAG_QZ_0x217B);
+        break;
+    case MAP_FARAWAY_ISLAND_INTERIOR:   // MEW: KANTO's (under the truck by the S.S. ANNE)
+        FlagSet(FLAG_HIDE_MEW);
+        break;
+    }
+}
+
 // On entering a map: a done Pokémon stays hidden; one of a later generation than the region shows waits (MP_Gen_Cap);
 // one its region's own games give only after the LEAGUE waits for it (PreLeagueLegend; none is part of the story
 // before it: only its own map's scripts and the postgame's read their flags)
@@ -444,6 +498,7 @@ static u16 RefreshStatics(void)
         if (!HereIs(e))
             continue;
         if (FlagGet(e->doneFlag) || !MP_Gen_Allowed(e->species) || MP_Gen_Cap(e->region) < e->gen   // (a form: GALARIAN ARTICUNO...)
+         || MP_LegendForeign(e->species, e->region)
          || (!MP_Region_Cleared(e->region) && !PreLeagueLegend(e))
          || (e->region == 2 && e->species == SPECIES_MELOETTA && !FlagGet(FLAG_QZ_0x2924))   // after the CHANSEY Dance
          || (e->species == SPECIES_DARKRAI && !FlagGet(e->region == 1 ? FLAG_QZ_0x1425 : FLAG_QZ_0x292B))   // in a dream

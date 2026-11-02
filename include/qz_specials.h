@@ -5,5 +5,7 @@
 u16 QzSpecialStub(const char *name);
 bool8 QzBugContest_Active(void);       // src/qz_bugcontest.c: the Bug-Catching Contest runs (no SAVE)
 bool8 QzBugContest_FieldCheck(void);   // its end by time / catches / balls, or leaving the park
+bool8 MP_LegendForeign(u16 species, u8 region);   // a legendary of another region (each region's only there)
+void MP_HideForeignLegends(void);                 // after a map's transition scripts (overworld.c)
 #define QZ_STUB(name) u16 name(void) { return QzSpecialStub(#name); }
 #endif

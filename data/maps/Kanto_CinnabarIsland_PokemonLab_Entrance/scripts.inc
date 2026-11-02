@@ -12,6 +12,18 @@ Kanto_CinnabarIsland_PokemonLab_Entrance_EventScript_841E4A4::
 
 @ Kanto_CinnabarIsland_PokemonLab_Entrance object 1 (local id 1, gfx 0x3F43) at 2,4
 Kanto_CinnabarIsland_PokemonLab_Entrance_EventScript_841E4AA::
+	@ Moemon Kai: FireRed's scientist (pokefirered CinnabarIsland_PokemonLab_Entrance_EventScript_Scientist);
+	@ Quetzal's plate shop is gone (the plates are SINNOH's)
+	msgbox Kanto_CinnabarIsland_PokemonLab_Entrance_Text_StudyMonsExtensively, MSGBOX_NPC
+	end
+
+Kanto_CinnabarIsland_PokemonLab_Entrance_Text_StudyMonsExtensively:
+	.string "We study MOéMON extensively\n"
+	.string "every day.\p"
+	.string "People often bring us rare MOéMON\n"
+	.string "for examination.$"
+
+Kanto_CinnabarIsland_PokemonLab_Entrance_EventScript_QzPlateShop:
 	lock
 	faceplayer
 	msgbox Kanto_CinnabarIsland_PokemonLab_Entrance_Text_8449E2F, MSGBOX_DEFAULT

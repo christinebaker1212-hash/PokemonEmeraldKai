@@ -6,11 +6,16 @@ Johto_RuinsOfAlphResearchCenter_MapScripts::
 Johto_RuinsOfAlphResearchCenter_EventScript_83F6E83::
 	lock
 	faceplayer
-	msgbox Johto_RuinsOfAlphResearchCenter_Text_83F6EB4, MSGBOX_DEFAULT
-	pokemart Johto_RuinsOfAlphResearchCenter_Mart_82F6F64
-	msgbox Quetzal_Text_8360D20, MSGBOX_DEFAULT
+	@ Moemon Kai: Crystal's scientist (pokecrystal RuinsOfAlphResearchCenterScientist1Text); Quetzal's plate shop
+	@ is gone (the plates are SINNOH's)
+	msgbox Johto_RuinsOfAlphResearchCenter_Text_CrystalRuinsAge, MSGBOX_DEFAULT
 	release
 	end
+
+Johto_RuinsOfAlphResearchCenter_Text_CrystalRuinsAge:
+	.string "The RUINS are about 1500 years old.\p"
+	.string "But it's not known why they were\n"
+	.string "built--or by whom.$"
 
 @ Johto_RuinsOfAlphResearchCenter object 1 (local id 1, gfx 0x3EB3) at 8,5
 Johto_RuinsOfAlphResearchCenter_EventScript_83F6E9C::
