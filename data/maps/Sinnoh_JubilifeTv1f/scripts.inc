@@ -15,16 +15,11 @@ Sinnoh_JubilifeTv1f_EventScript_Person3::
 	end
 
 Sinnoh_JubilifeTv1f_EventScript_Person4::
-	msgbox Sinnoh_JubilifeTv1f_Text_Person4, MSGBOX_NPC
+	goto SinnohP_jubilife_tv_1f_4
 	end
 
 Sinnoh_JubilifeTv1f_EventScript_Person5::
 	goto SinnohP_jubilife_tv_1f_9
 	end
-
-Sinnoh_JubilifeTv1f_Text_Person4:
-	.string "I came down from the north just to\n"
-	.string "see the station. It's so warm down\l"
-	.string "here!$"
 
 @ --- end of SINNOH words ---

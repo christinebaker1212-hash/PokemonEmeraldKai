@@ -1,0 +1,26 @@
+pressuntil A field 5000
+wait 30
+mp warp 37,60,49,18
+wait 200
+mp teach 0 15
+mp face right
+press A 2
+wait 90
+shot ct_nobadge
+mash B 6 20
+pressuntil B field 900
+mp getflag 0x12
+mp givebadges 2
+mp face right
+press A 2
+pressuntil A yesno 900
+wait 10
+press A 2
+wait 200
+pressuntil B field 900
+mp getflag 0x12
+press RIGHT 30
+wait 60
+mp where
+shot ct_cut
+quit

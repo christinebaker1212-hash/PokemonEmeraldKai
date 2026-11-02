@@ -3,6 +3,7 @@
 // every name this file defines).
 #include <stdio.h>
 #include "global.h"
+#include "constants/moves.h"
 #include "credits.h"
 #include "event_data.h"
 #include "load_save.h"
@@ -77,7 +78,28 @@ u16 QzSetEnemyMonOverrides(void) { return 0; }
 static u16 QzUseAltGymLeaderTeam_(void) { return FALSE; }
 
 // HMs work without badges in Kai (mp_heldhm.c)
-static u16 QzHasBadgeForFieldMove_(void) { return TRUE; }
+bool8 MP_PartyCanUseFieldMove(u16 move);   // (mp_region.c)
+bool8 MP_Region_HasFieldMoveBadge(u8 hm);
+
+// Moemon Kai: the field move in VAR_0x8004 (CUT, ROCK SMASH, STRENGTH, WHIRLPOOL): the region's badge for it
+// (mp_region.c MP_Region_FieldMoveBadge: FireRed's in KANTO, Crystal's in JOHTO) and someone to use it (a party
+// Pokémon that knows it or holds its HM, or a friend close by: the game's checkpartymove). Quetzal's said yes to all.
+static u16 QzHasBadgeForFieldMove_(void)
+{
+    u16 move = gSpecialVar_0x8004;
+    u8 hm;
+    switch (move)
+    {
+    case MOVE_CUT:        hm = 0; break;
+    case MOVE_STRENGTH:   hm = 3; break;
+    case MOVE_ROCK_SMASH: hm = 5; break;
+    case MOVE_WHIRLPOOL:  hm = 8; break;   // (JOHTO's GLACIERBADGE: MP_Region_FieldMoveBadge)
+    default:              return TRUE;
+    }
+    if (!MP_Region_HasFieldMoveBadge(hm))
+        return FALSE;
+    return MP_PartyCanUseFieldMove(move);
+}
 
 // ---------------------------------------------------------------------------------------------------- party, dex
 u16 QzHealPlayerPartyEx(void)

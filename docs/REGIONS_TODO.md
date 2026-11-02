@@ -17,7 +17,7 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [ ] S.S. ANNE: its sprite, FireRed's departure scene, can't be boarded once gone
 - [ ] The CUT man gives HM01 (not Quetzal's flag); every region: an HM never given twice, words for that case
 - [ ] Water animates
-- [ ] The CUT tree east of CERULEAN (to ROUTE 9 / ROCK TUNNEL) can be cut
+- [x] The CUT tree east of CERULEAN (to ROUTE 9 / ROCK TUNNEL) can be cut (test kanto_cut_tree)
 
 ## JOHTO
 - [ ] POKéGEAR back as Crystal / HGSS have it (display, functions, calls), no manual clock setting; START menu in
@@ -29,7 +29,7 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [ ] Quetzal's auto walk / run: remove its words
 - [ ] Door animations; water animates
 - [ ] The rival named as in Crystal (online: the host names him, said plainly), his starter the one beating the player's
-- [ ] No tree-cutting prompt in a new game without the HM and badge
+- [x] No tree-cutting prompt in a new game without the HM and badge (Quetzal's check said yes to everything)
 - [ ] MOM's money saving (Crystal) and MY ROOM decorating on the Secret Base logic
 
 ## HOENN
@@ -66,3 +66,13 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 
 ## Decisions
 (each assumption made while working through the list, with why)
+- FireRed "clone" objects (an object copying a neighbor map's one at the map's edge: trainer_type 65535, the target's
+  local id in elevation, its map in the range) aren't supported by Emerald's engine: the 9 in KANTO's maps now carry
+  their original's script, flag and elevation (cutting either side counts for both: the same flag).
+- Field moves check the region's own badge: FireRed's per HM in KANTO, Crystal's in JOHTO (ROCK SMASH, a TM in
+  Crystal: the ZEPHYRBADGE; DIVE, which neither has: the last badge), Platinum's in SINNOH (mp_region.c
+  MP_Region_FieldMoveBadge). Quetzal's tree / rock / boulder / whirlpool scripts now need that badge and a party Pokémon
+  that knows the move or holds its HM (or a friend's), as Kai's own scripts.
+- SINNOH released before it's 100%: the parts still open need art or songs that don't exist yet (contest stage art,
+  Platinum songs the game lacks) or are large (the DISTORTION WORLD, the full story test); a release with what's done and
+  the KANTO / JOHTO fixes is more use to players than waiting. SINNOH's remaining list stays in docs/SINNOH_CHECKLIST.md.

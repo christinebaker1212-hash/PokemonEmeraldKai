@@ -29,6 +29,7 @@ void Sinnoh_PlatinumStoryBegin(void);   // (src/sinnoh/s3d_scrcmd.c)
 #include "mp_savefix.h"
 #include "save.h"
 #include "pokemon.h"
+#include "party_menu.h"
 #include "pokemon_storage_system.h"
 #include "string_util.h"
 #include "strings.h"
@@ -732,14 +733,41 @@ u16 MP_Region_BadgeFlag(u8 region, u8 badge)
 // The badge an HM's field move waits for (FIELD_MOVE_CUT .. FIELD_MOVE_WATERFALL: the game's badge order): HOENN's,
 // but on a SINNOH map Platinum's (CUT the FOREST BADGE, FLASH and ROCK SMASH the COAL BADGE, STRENGTH the MINE BADGE,
 // SURF and DIVE the FEN BADGE, FLY the COBBLE BADGE, WATERFALL the BEACON BADGE)
+// The badge a field move needs in the region the player is in (HM order: CUT, FLY, SURF, STRENGTH, FLASH, ROCK SMASH,
+// WATERFALL, DIVE, then 8 WHIRLPOOL): HOENN's are Emerald's; KANTO's FireRed's (CASCADE, THUNDER, SOUL, RAINBOW,
+// BOULDER, MARSH, VOLCANO; DIVE: EARTH); JOHTO's Crystal's (HIVE, STORM, FOG, PLAIN, ZEPHYR; ROCK SMASH, a TM there:
+// ZEPHYR; WATERFALL and DIVE: RISING; WHIRLPOOL: GLACIER); SINNOH's Platinum's
 u16 MP_Region_FieldMoveBadge(u8 hm)
 {
-    static const u8 sSinnoh[8] = {1, 0, 0, 5, 3, 2, 3, 7};
-    if (hm >= 8)
+    static const u8 sSinnoh[9] = {1, 0, 0, 5, 3, 2, 3, 7, 7};
+    static const u8 sKanto[9] = {1, 2, 4, 3, 0, 5, 6, 7, 7};
+    static const u8 sJohto[9] = {1, 4, 3, 2, 0, 0, 7, 7, 6};
+    u8 region = MP_Region_OfGroup(gSaveBlock1Ptr->location.mapGroup);
+    if (hm >= 9)
         return 0;
-    if (MP_Region_OfGroup(gSaveBlock1Ptr->location.mapGroup) == REGION_SINNOH)
+    if (region == REGION_SINNOH)
         return MP_Region_BadgeFlag(REGION_SINNOH, sSinnoh[hm]);
-    return FLAG_BADGE01_GET + hm;
+    if (region == REGION_KANTO)
+        return MP_Region_BadgeFlag(REGION_KANTO, sKanto[hm]);
+    if (region == REGION_JOHTO)
+        return MP_Region_BadgeFlag(REGION_JOHTO, sJohto[hm]);
+    return FLAG_BADGE01_GET + (hm < 8 ? hm : 7);
+}
+
+// (Quetzal's field move scripts: qz_specials.c) a party Pokémon that knows MOVE or holds its HM, or a friend close by
+// who lends it: the game's checkpartymove
+bool8 MP_PartyCanUseFieldMove(u16 move)
+{
+    u8 i;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        struct Pokemon *mon = &gPlayerParty[i];
+        if (!GetMonData(mon, MON_DATA_SPECIES))
+            break;
+        if (!GetMonData(mon, MON_DATA_IS_EGG) && (MonKnowsMove(mon, move) || MP_HeldHmMove(mon) == move))
+            return TRUE;
+    }
+    return MP_Lend_Borrow(move) >= 0;
 }
 
 bool8 MP_Region_HasFieldMoveBadge(u8 hm)

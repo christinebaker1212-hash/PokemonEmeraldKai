@@ -19,7 +19,7 @@ Sinnoh_VeilstoneStore2f_EventScript_Person3::
 	end
 
 Sinnoh_VeilstoneStore2f_EventScript_Person4::
-	msgbox Sinnoh_VeilstoneStore2f_Text_Person4, MSGBOX_NPC
+	goto SinnohP_veilstone_store_2f_1
 	end
 
 Sinnoh_VeilstoneStore2f_EventScript_Person5::
@@ -45,9 +45,5 @@ Sinnoh_VeilstoneStore2f_EventScript_Person6::
 Sinnoh_VeilstoneStore2f_EventScript_Person7::
 	goto SinnohP_veilstone_store_2f_4
 	end
-
-Sinnoh_VeilstoneStore2f_Text_Person4:
-	.string "Welcome to the second floor! For\n"
-	.string "TRAINERS on the go.$"
 
 @ --- end of SINNOH words ---

@@ -15,15 +15,11 @@ Sinnoh_VeilstoneStore4f_EventScript_Person2::
 	end
 
 Sinnoh_VeilstoneStore4f_EventScript_Person3::
-	msgbox Sinnoh_VeilstoneStore4f_Text_Person3, MSGBOX_NPC
+	goto SinnohP_veilstone_store_4f_1
 	end
 
 Sinnoh_VeilstoneStore4f_EventScript_Person6::
 	goto SinnohP_veilstone_store_4f_4
 	end
-
-Sinnoh_VeilstoneStore4f_Text_Person3:
-	.string "Welcome to the fourth floor!\n"
-	.string "Decorations and dolls for your room.$"
 
 @ --- end of SINNOH words ---

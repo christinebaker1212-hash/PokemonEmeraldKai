@@ -1,0 +1,8 @@
+# KANTO's CUT trees (qz_specials.c QzHasBadgeForFieldMove: the region's badge for the move, FireRed's CASCADE BADGE,
+# and a party Pokémon with CUT; the clone of ROUTE 9's tree at CERULEAN's east edge now has the tree's script): no
+# badge, the tree stays (flag 0x12 clear); with KANTO's badges it's cut (set) and the player walks on to ROUTE 9.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=25:40"
+EXPECT_A=("[test] flag 18 = 0" "[test] flag 18 = 1" "where map 37.84")
+UNEXPECT_A=("[crash]")

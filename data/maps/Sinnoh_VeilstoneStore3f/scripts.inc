@@ -7,7 +7,7 @@ Sinnoh_VeilstoneStore3f_EventScript_Bg1::
 	end
 
 Sinnoh_VeilstoneStore3f_EventScript_Person1::
-	msgbox Sinnoh_VeilstoneStore3f_Text_Person1, MSGBOX_NPC
+	goto SinnohP_veilstone_store_3f_1
 	end
 
 Sinnoh_VeilstoneStore3f_EventScript_Person2::
@@ -41,9 +41,5 @@ Sinnoh_VeilstoneStore3f_EventScript_Person5::
 Sinnoh_VeilstoneStore3f_EventScript_Person6::
 	goto SinnohP_veilstone_store_3f_4
 	end
-
-Sinnoh_VeilstoneStore3f_Text_Person1:
-	.string "Welcome to the third floor! TMs to\n"
-	.string "teach your MOéMON new tricks.$"
 
 @ --- end of SINNOH words ---
