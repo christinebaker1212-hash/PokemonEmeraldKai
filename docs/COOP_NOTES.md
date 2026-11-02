@@ -4407,9 +4407,10 @@ Crystal's fruit trees (pokecrystal engine/events/fruit_trees.asm) in Quetzal's b
 (tools/quetzal_port/fix_fruit_trees.py), src/mp/mp_apricorn.c:
 - APRICORN trees: AZALEA (WHT), ROUTE 37 (RED, BLU, BLK), ROUTE 42 (PNK, GRN, YLW; Crystal's three in a row, two
   added beside Quetzal's one). One APRICORN each a day, Crystal's words (its PACK is the BAG), script
-  Johto_EventScript_FruitTree (data/scripts/mp_region.inc). Drawn as the game's grown BERRY tree on trees 246-252
-  (mp_berrytrees.c's range, past SINNOH's), a BERRY of the APRICORN's color, flowering once picked until the next
-  day (never growing on their own: PlantBerryTree allowGrowth FALSE). The day is gLocalTime.days.
+  Johto_EventScript_FruitTree (data/scripts/mp_region.inc). Drawn as Crystal's fruit tree, the same all day as in
+  Crystal (the user: no berries on them, no change when picked): OBJ_EVENT_GFX_FRUIT_TREE, the game's own sprite past
+  the port's (data/object_events/kai_objects.h, graphics/object_events/pics/kai/fruit_tree.png from pokecrystal's
+  gfx/sprites/fruit_tree.png). The day is gLocalTime.days.
 - KURT (JOHTO's KURTS_HOUSE, after the SLOWPOKE WELL): Crystal's flow in place of Quetzal's ball shop. QzKurtChooseApricorn:
   the APRICORNs held and CANCEL, then how many (UP / DOWN one, LEFT / RIGHT ten); a day later the BALLS (RED: LEVEL,
   BLU: LURE, YLW: MOON, GRN: FRIEND, WHT: FAST, BLK: HEAVY, PNK: LOVE). Every ball the shop sold is still obtainable

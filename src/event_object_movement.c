@@ -490,6 +490,7 @@ const u8 gInitialMovementTypeFacingDirections[] = {
 #include "data/object_events/object_event_subsprites.h"
 #include "data/object_events/object_event_graphics_info.h"
 #include "data/object_events/qz_object_events.h"   // Moemon Kai: Johto / Kanto sprites
+#include "data/object_events/kai_objects.h"   // Moemon Kai: the game's own past them
 
 // Moemon Co-op: not const so the player palettes can be recolored at runtime
 static struct SpritePalette sObjectEventSpritePalettes[] = {
@@ -1961,6 +1962,8 @@ static void SetBerryTreeGraphics(struct ObjectEvent *objectEvent, struct Sprite 
 const struct ObjectEventGraphicsInfo *QzObjectEventGraphicsInfo(u16 graphicsId)
 {
     u16 i = graphicsId - OBJ_EVENT_GFX_QZ_FIRST;
+    if (graphicsId == OBJ_EVENT_GFX_FRUIT_TREE)
+        return &sObjectEventGraphicsInfo_KaiFruitTree;
     if (i < ARRAY_COUNT(sQzObjectEventGraphicsInfoPointers))
         return sQzObjectEventGraphicsInfoPointers[i];
     return gObjectEventGraphicsInfoPointers[OBJ_EVENT_GFX_NINJA_BOY];
@@ -1981,6 +1984,14 @@ u8 QzLoadObjectPalette(u16 tag)
         return slot;
     if (tag >= SINNOH_PAL_TAG && (tag & 0xFF) < SINNOH_SPRITE_COUNT && tag < SINNOH_PAL_TAG_CHAR + 0x100)
         return SinnohLoadObjectPalette(tag);   // (Platinum's: from the pack)
+    for (i = 0; sKaiObjectEventPalettes[i].tag != TAG_NONE; i++)   // (the game's own: kai_objects.h)
+        if (sKaiObjectEventPalettes[i].tag == tag)
+        {
+            slot = LoadSpritePalette(&sKaiObjectEventPalettes[i]);
+            if (slot != 0xFF)
+                UpdateSpritePaletteWithWeather(slot);
+            return slot == 0xFF ? 0 : slot;
+        }
     for (i = 0; sQzObjectEventPalettes[i].tag != TAG_NONE; i++)
         if (sQzObjectEventPalettes[i].tag == tag)
         {

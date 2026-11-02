@@ -78,15 +78,15 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
+      "graphics_id": "OBJ_EVENT_GFX_FRUIT_TREE",
       "x": 33,
       "y": 24,
       "elevation": 3,
-      "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
+      "movement_type": "MOVEMENT_TYPE_NONE",
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
-      "trainer_sight_or_berry_tree_id": "248",
+      "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_EventScript_FruitTree",
       "flag": "0"
     },
@@ -143,28 +143,28 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
+      "graphics_id": "OBJ_EVENT_GFX_FRUIT_TREE",
       "x": 32,
       "y": 24,
       "elevation": 3,
-      "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
+      "movement_type": "MOVEMENT_TYPE_NONE",
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
-      "trainer_sight_or_berry_tree_id": "247",
+      "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_EventScript_FruitTree",
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_BERRY_TREE",
+      "graphics_id": "OBJ_EVENT_GFX_FRUIT_TREE",
       "x": 34,
       "y": 24,
       "elevation": 3,
-      "movement_type": "MOVEMENT_TYPE_BERRY_TREE_GROWTH",
+      "movement_type": "MOVEMENT_TYPE_NONE",
       "movement_range_x": 0,
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
-      "trainer_sight_or_berry_tree_id": "249",
+      "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_EventScript_FruitTree",
       "flag": "0"
     }

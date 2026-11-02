@@ -7,7 +7,7 @@ Quetzal put a BERRY tree of the game's own (Emerald's growing BERRIES) where Cry
 as a tree, on tree numbers 90-109, ten of them the GARDEN farm's too (100-119). Now:
 - where Crystal's tree bears APRICORNs (AZALEA TOWN, ROUTE 37, ROUTE 42) it is an APRICORN tree
   (Johto_EventScript_FruitTree, data/scripts/mp_region.inc); ROUTE 37 and ROUTE 42 have Crystal's three in a row
-  (the two more beside Quetzal's one); drawn as the game's grown BERRY tree on trees 246-252 (mp_apricorn.c)
+  (the two more beside Quetzal's one); drawn as Crystal's fruit tree, the same all day (OBJ_EVENT_GFX_FRUIT_TREE)
 - everywhere else it is a BERRY patch (the game's own soil, 1x1) on a tree number of JOHTO's own, starting with
   Crystal's BERRY there (mp_apricorn.c sBerryPatches)
 """
@@ -24,8 +24,6 @@ PATCHES = {   # (map, x, y): tree number (mp_apricorn.c sBerryPatches)
     ('Route30', 30, 4): 127,
 }
 APRICORNS = {('AzaleaTown', 12, 7): [], ('Route37', 33, 24): [32, 34], ('Route42', 40, 19): [39, 41]}
-APRICORN_TREES = {('AzaleaTown', 12): 246, ('Route37', 32): 247, ('Route37', 33): 248, ('Route37', 34): 249,
-                  ('Route42', 39): 250, ('Route42', 40): 251, ('Route42', 41): 252}   # (map, x): tree number (its look)
 
 
 def main():
@@ -40,12 +38,14 @@ def main():
                 o.update({'graphics_id': 'OBJ_EVENT_GFX_BERRY_TREE', 'movement_type': 'MOVEMENT_TYPE_BERRY_TREE_GROWTH',
                           'trainer_sight_or_berry_tree_id': str(PATCHES[key]), 'script': 'BerryTreeScript'})
             elif key in APRICORNS and o['script'] in (SCRIPT, 'Johto_EventScript_FruitTree'):
-                o.update({'graphics_id': 'OBJ_EVENT_GFX_BERRY_TREE', 'movement_type': 'MOVEMENT_TYPE_BERRY_TREE_GROWTH',
-                          'trainer_sight_or_berry_tree_id': str(APRICORN_TREES[(m, o['x'])]),
-                          'script': 'Johto_EventScript_FruitTree'})
+                o.update({'graphics_id': 'OBJ_EVENT_GFX_FRUIT_TREE', 'movement_type': 'MOVEMENT_TYPE_NONE',
+                          'trainer_sight_or_berry_tree_id': '0', 'script': 'Johto_EventScript_FruitTree'})
                 for x in APRICORNS[key]:
                     if not any(p['x'] == x and p['y'] == o['y'] for p in objs):
-                        objs.append(dict(o, x=x, trainer_sight_or_berry_tree_id=str(APRICORN_TREES[(m, x)])))
+                        objs.append(dict(o, x=x))
+            elif o['script'] == 'Johto_EventScript_FruitTree':   # (the two added beside it, from an earlier run)
+                o.update({'graphics_id': 'OBJ_EVENT_GFX_FRUIT_TREE', 'movement_type': 'MOVEMENT_TYPE_NONE',
+                          'trainer_sight_or_berry_tree_id': '0'})
         left = [o for o in objs if o['script'] == SCRIPT]
         if left:
             raise SystemExit('%s: a tree not placed: %s' % (m, [(o['x'], o['y']) for o in left]))

@@ -45,20 +45,18 @@ struct FruitTree
     u16 map;
     u8 x, y;
     u16 item;
-    u8 tree;     // its BERRY tree number (the sprite: the game's grown BERRY tree, kept at that stage)
-    u16 look;    // the BERRY whose tree looks like it (the APRICORN's color)
 };
 
-// the APRICORN trees (where they stand on JOHTO's maps). Drawn as the game's own BERRY trees in fruit (trees
-// 246-252: mp_berrytrees.c, past SINNOH's), bare once picked until the next day.
+// the APRICORN trees (where they stand on JOHTO's maps): Crystal's fruit tree, the same all day as in Crystal
+// (OBJ_EVENT_GFX_FRUIT_TREE, data/object_events/kai_objects.h); one APRICORN a day each
 static const struct FruitTree sApricornTrees[] = {
-    {MAP_JOHTO_AZALEA_TOWN, 12, 7, ITEM_WHT_APRICORN, 246, ITEM_WEPEAR_BERRY},
-    {MAP_JOHTO_ROUTE37, 32, 24, ITEM_RED_APRICORN, 247, ITEM_CHERI_BERRY},
-    {MAP_JOHTO_ROUTE37, 33, 24, ITEM_BLU_APRICORN, 248, ITEM_ORAN_BERRY},
-    {MAP_JOHTO_ROUTE37, 34, 24, ITEM_BLK_APRICORN, 249, ITEM_BELUE_BERRY},
-    {MAP_JOHTO_ROUTE42, 39, 19, ITEM_PNK_APRICORN, 250, ITEM_PECHA_BERRY},
-    {MAP_JOHTO_ROUTE42, 40, 19, ITEM_GRN_APRICORN, 251, ITEM_LUM_BERRY},
-    {MAP_JOHTO_ROUTE42, 41, 19, ITEM_YLW_APRICORN, 252, ITEM_ASPEAR_BERRY},
+    {MAP_JOHTO_AZALEA_TOWN, 12, 7, ITEM_WHT_APRICORN},
+    {MAP_JOHTO_ROUTE37, 32, 24, ITEM_RED_APRICORN},
+    {MAP_JOHTO_ROUTE37, 33, 24, ITEM_BLU_APRICORN},
+    {MAP_JOHTO_ROUTE37, 34, 24, ITEM_BLK_APRICORN},
+    {MAP_JOHTO_ROUTE42, 39, 19, ITEM_PNK_APRICORN},
+    {MAP_JOHTO_ROUTE42, 40, 19, ITEM_GRN_APRICORN},
+    {MAP_JOHTO_ROUTE42, 41, 19, ITEM_YLW_APRICORN},
 };
 
 // the BERRY patches: tree number, the BERRY a new patch starts with (ITEM_NONE: soil)
@@ -121,18 +119,6 @@ static void NewDay(void)
     }
 }
 
-// the trees' looks: in fruit, or bare (flowering) once picked today; never growing on their own
-static void ShowTrees(void)
-{
-    u32 i;
-    for (i = 0; i < ARRAY_COUNT(sApricornTrees); i++)
-    {
-        u8 stage = (VarGet(VAR_TREES_PICKED) & (1 << i)) ? BERRY_STAGE_FLOWERING : BERRY_STAGE_BERRIES;
-        struct BerryTree *tree = GetBerryTreeInfo(sApricornTrees[i].tree);
-        if (tree->stage != stage || tree->berry != ItemIdToBerryType(sApricornTrees[i].look))
-            PlantBerryTree(sApricornTrees[i].tree, ItemIdToBerryType(sApricornTrees[i].look), stage, FALSE);
-    }
-}
 
 // The tree: VAR_0x8005 its APRICORN (named in STR_VAR_1), VAR_RESULT 1 when one hangs there today
 u16 QzFruitTreeCheck(void)
@@ -153,19 +139,15 @@ u16 QzFruitTreePick(void)
     s32 t = TalkedTree();
     if (t >= 0)
         VarSet(VAR_TREES_PICKED, VarGet(VAR_TREES_PICKED) | (1 << t));
-    ShowTrees();
     return 0;
 }
 
-// After a JOHTO map's transition scripts (overworld.c): the APRICORN trees' looks for the day; the BERRY patches
-// start with Crystal's BERRIES, once
+// After a JOHTO map's transition scripts (overworld.c): the BERRY patches start with Crystal's BERRIES, once
 void MP_JohtoBerries_Init(void)
 {
     u32 i;
     if (MP_Region_Current() != REGION_JOHTO)
         return;
-    NewDay();
-    ShowTrees();   // (the APRICORN trees: in fruit again on a new day)
     if (VarGet(VAR_BERRIES_SET))
         return;
     for (i = 0; i < ARRAY_COUNT(sBerryPatches); i++)
