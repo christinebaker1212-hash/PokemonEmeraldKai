@@ -53,6 +53,27 @@ TRAINER_TYPES = ['TRMSG_PRE_BATTLE', 'TRMSG_DEFEAT', 'TRMSG_POST_BATTLE', 'TRMSG
                  'TRMSG_ACTIVE_BATTLER_HALF_HP']
 
 
+# Platinum's frontier trainers (res/trainers/frontier/data, in generated/frontier_trainers.txt's order): one more bank
+# after the trainers', FRONTIER_KINDS entries each: the name, then its lines (src/sinnoh/s3d_tower.c)
+FRONTIER_KINDS = ['name', 'TRMSG_PRE_BATTLE', 'TRMSG_WIN', 'TRMSG_DEFEAT']
+
+
+def frontier_trainers(root):
+    """the frontier trainers' file names (youngster_jim...) in Platinum's order, None where a file is missing"""
+    out = []
+    for line in open(os.path.join(root, 'generated/frontier_trainers.txt'), encoding='utf-8'):
+        n = line.strip()
+        if n.startswith('FRONTIER_TRAINER_'):
+            f = n[len('FRONTIER_TRAINER_'):].lower()
+            out.append(f if os.path.exists(os.path.join(root, 'res/trainers/frontier/data', f + '.json')) else None)
+    return out
+
+
+def frontier_bank(root):
+    """the frontier trainers' bank number (after the message banks and the trainers')"""
+    return len(bank_numbers(root)) + 1
+
+
 def trainer_files(root):
     d = os.path.join(root, 'res/trainers/data')
     return sorted(f[:-5] for f in os.listdir(d) if f.endswith('.json'))
@@ -147,6 +168,18 @@ def main():
             t = text(by.get(kind)) if kind in by else None
             tr.append(convert(moe(t), cmap, wait_at_end=False) if t is not None else None)
     banks.append(tr)
+    # the frontier trainers' names and lines (frontier_bank())
+    fr = []
+    if os.path.isdir(os.path.join(root, 'res/trainers/frontier/data')):
+        for name in frontier_trainers(root):
+            d = json.load(open(os.path.join(root, 'res/trainers/frontier/data', name + '.json'), encoding='utf-8')) \
+                if name else {}
+            by = {m.get('type'): m.get('en_US') for m in d.get('messages', [])}
+            fr.append(convert(moe(d['name'].upper()), cmap, wait_at_end=False) if d.get('name') else None)
+            for kind in FRONTIER_KINDS[1:]:
+                t = text(by.get(kind)) if kind in by else None
+                fr.append(convert(moe(t), cmap, wait_at_end=False) if t is not None else None)
+    banks.append(fr)
     head = bytearray(b'S3DT' + struct.pack('<II', VERSION, len(banks)))
     table_at = len(head)
     head += b'\0' * 4 * len(banks)

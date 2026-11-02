@@ -1,4 +1,5 @@
 #include "global.h"
+#include "sinnoh_tower.h"   // Moemon Kai: SINNOH's frontier trainers
 #include "constants/qz_port.h"
 #include "load_save.h"
 #include "battle_tower.h"
@@ -1455,6 +1456,8 @@ u8 GetFrontierTrainerFrontSpriteId(u16 trainerId)
 {
     SetFacilityPtrsGetLevel();
 
+    if (IS_SINNOH_FRONTIER_TRAINER(trainerId))   // Moemon Kai: SINNOH's frontier trainers (s3d_tower.c)
+        return Sinnoh_Frontier_Pic(trainerId);
     if (trainerId == TRAINER_QZ_PARTNER)
         return gTrainers[sQzPartnerTrainer].trainerPic;
     if (trainerId == TRAINER_EREADER)
@@ -1490,6 +1493,8 @@ u8 GetFrontierOpponentClass(u16 trainerId)
     u8 trainerClass = 0;
     SetFacilityPtrsGetLevel();
 
+    if (IS_SINNOH_FRONTIER_TRAINER(trainerId))
+        return Sinnoh_Frontier_Class(trainerId);
     if (trainerId == TRAINER_QZ_PARTNER)
         return gTrainers[sQzPartnerTrainer].trainerClass;
 
@@ -1571,6 +1576,11 @@ void GetFrontierTrainerName(u8 *dst, u16 trainerId)
     s32 i = 0;
     SetFacilityPtrsGetLevel();
 
+    if (IS_SINNOH_FRONTIER_TRAINER(trainerId))
+    {
+        Sinnoh_Frontier_Name(dst, trainerId);
+        return;
+    }
     if (trainerId == TRAINER_QZ_PARTNER)
     {
         StringCopy(dst, gTrainers[sQzPartnerTrainer].trainerName);
@@ -2004,7 +2014,9 @@ static void GetOpponentIntroSpeech(void)
     else
         trainerId = gTrainerBattleOpponent_A;
 
-    if (trainerId == TRAINER_EREADER)
+    if (IS_SINNOH_FRONTIER_TRAINER(trainerId))
+        Sinnoh_Frontier_Speech(trainerId, SINNOH_FRONTIER_SPEECH_INTRO);
+    else if (trainerId == TRAINER_EREADER)
         FrontierSpeechToString(gSaveBlock2Ptr->frontier.ereaderTrainer.greeting);
     else if (trainerId < FRONTIER_TRAINERS_COUNT)
         FrontierSpeechToString(gFacilityTrainers[trainerId].speechBefore);

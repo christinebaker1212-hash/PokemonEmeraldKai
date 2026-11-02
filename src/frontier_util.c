@@ -1,4 +1,5 @@
 #include "global.h"
+#include "sinnoh_tower.h"
 #include "frontier_util.h"
 #include "event_data.h"
 #include "battle_setup.h"
@@ -1697,7 +1698,9 @@ void CopyFrontierTrainerText(u8 whichText, u16 trainerId)
     switch (whichText)
     {
     case FRONTIER_BEFORE_TEXT:
-        if (trainerId == TRAINER_EREADER)
+        if (IS_SINNOH_FRONTIER_TRAINER(trainerId))   // Moemon Kai: SINNOH's frontier trainers
+            Sinnoh_Frontier_Speech(trainerId, SINNOH_FRONTIER_SPEECH_INTRO);
+        else if (trainerId == TRAINER_EREADER)
             FrontierSpeechToString(gSaveBlock2Ptr->frontier.ereaderTrainer.greeting);
         else if (trainerId == TRAINER_FRONTIER_BRAIN)
             CopyFrontierBrainText(FALSE);
@@ -1709,7 +1712,9 @@ void CopyFrontierTrainerText(u8 whichText, u16 trainerId)
             BufferApprenticeChallengeText(trainerId - TRAINER_RECORD_MIXING_APPRENTICE);
         break;
     case FRONTIER_PLAYER_LOST_TEXT:
-        if (trainerId == TRAINER_EREADER)
+        if (IS_SINNOH_FRONTIER_TRAINER(trainerId))   // Moemon Kai: SINNOH's frontier trainers
+            Sinnoh_Frontier_Speech(trainerId, SINNOH_FRONTIER_SPEECH_WIN);
+        else if (trainerId == TRAINER_EREADER)
         {
             FrontierSpeechToString(gSaveBlock2Ptr->frontier.ereaderTrainer.farewellPlayerLost);
         }
@@ -1737,7 +1742,9 @@ void CopyFrontierTrainerText(u8 whichText, u16 trainerId)
         }
         break;
     case FRONTIER_PLAYER_WON_TEXT:
-        if (trainerId == TRAINER_EREADER)
+        if (IS_SINNOH_FRONTIER_TRAINER(trainerId))   // Moemon Kai: SINNOH's frontier trainers
+            Sinnoh_Frontier_Speech(trainerId, SINNOH_FRONTIER_SPEECH_DEFEAT);
+        else if (trainerId == TRAINER_EREADER)
         {
             FrontierSpeechToString(gSaveBlock2Ptr->frontier.ereaderTrainer.farewellPlayerWon);
         }

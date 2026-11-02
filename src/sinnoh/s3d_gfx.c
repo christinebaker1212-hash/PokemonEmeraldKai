@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "sinnoh_tower.h"
 #include "palette.h"
 #include "sprite.h"
 #include "s3d.h"
@@ -288,10 +289,17 @@ bool8 S3D_Gfx_Sprite(u16 index, bool8 small, u8 *kind, const u16 **pal, const u8
 void S3D_Gfx_TrainerPic(struct Sprite *sprite, u16 trainerId, u16 standIn)
 {
     u8 pic;
-    if (trainerId < FIRST_SINNOH_TRAINER || trainerId >= FIRST_SINNOH_TRAINER + SINNOH_TRAINERS_COUNT
-     || gTrainers[trainerId].trainerPic != standIn)
+    if (IS_SINNOH_FRONTIER_TRAINER(trainerId))   // (Platinum's frontier trainers: s3d_tower.c)
+    {
+        if (Sinnoh_Frontier_Pic(trainerId) != standIn)
+            return;
+        pic = Sinnoh_Frontier_SinnohPic(trainerId);
+    }
+    else if (trainerId < FIRST_SINNOH_TRAINER || trainerId >= FIRST_SINNOH_TRAINER + SINNOH_TRAINERS_COUNT
+          || gTrainers[trainerId].trainerPic != standIn)
         return;
-    pic = sSinnohTrainerPics[trainerId - FIRST_SINNOH_TRAINER];
+    else
+        pic = sSinnohTrainerPics[trainerId - FIRST_SINNOH_TRAINER];
     if (!sGfx.tried)
         Load();
     if (!sGfx.ok || pic >= SINNOH_PIC_COUNT)

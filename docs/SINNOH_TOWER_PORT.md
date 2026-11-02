@@ -31,9 +31,12 @@ BP, the save's frontier records where they fit); everything Platinum does is Pla
 - BP: BattleTower_GiveBattlePointsReward (unk_02049D08.c:750).
 
 ## Steps
-1. [ ] Data: tools/sinnoh/gen_frontier.py -> src/data/sinnoh_frontier.h (sets, trainers: class, picture, set ids);
+1. [x] Data: tools/sinnoh/gen_frontier.py -> src/data/sinnoh_frontier.h (sets, trainers: class, picture, set ids);
        names and lines in the text pack (build_text.py: a bank after the trainers').
 2. [ ] Engine: src/sinnoh/s3d_tower.c (the rules above, Lv 50 copies of the party, records in "<save>.region").
+       Done: Sinnoh_Frontier_FillParty (Platinum's party building), the battle ids TRAINER_SINNOH_FRONTIER_A / _B
+       (include/sinnoh_tower.h) answered by battle_tower.c / frontier_util.c / s3d_gfx.c (name, class, picture,
+       Platinum's battle picture, the three lines); new classes TOWER TYCOON ... WAITER (gen_trainers.py NEW).
 3. [ ] gen_scripts.py: InitBattleTower, CallBattleTowerFunction (BT_FUNC_*), SetBattleTowerNull, the rest.
 4. [ ] The frontier scripts' converter (battle rooms, corridors, multi room).
 5. [ ] The BATTLE SALON's partners (multi battles), PALMER.

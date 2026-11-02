@@ -38,7 +38,11 @@ NEW = {'WORKER': ('WORKER', 10), 'VETERAN': ('VETERAN', 20), 'SCIENTIST': ('SCIE
        'WAITRESS': ('WAITRESS', 8), 'COWGIRL': ('COWGIRL', 8), 'SOCIALITE': ('SOCIALITE', 50), 'PI': ('P.I.', 20),
        'RANCHER': ('RANCHER', 10), 'ROUGHNECK': ('ROUGHNECK', 10), 'ARTIST': ('ARTIST', 12),
        'COMMANDER': ('COMMANDER', 40), 'GALACTIC_BOSS': ('GALACTIC BOSS', 60), 'MAID': ('MAID', 30),
-       'CAMERAMAN': ('CAMERAMAN', 16)}
+       'CAMERAMAN': ('CAMERAMAN', 16),
+       # (the BATTLE FRONTIER's: tools/sinnoh/gen_frontier.py)
+       'TOWER_TYCOON': ('TOWER TYCOON', 0), 'FACTORY_HEAD': ('FACTORY HEAD', 0), 'HALL_MATRON': ('HALL MATRON', 0),
+       'CASTLE_VALET': ('CASTLE VALET', 0), 'ARCADE_STAR': ('ARCADE STAR', 0), 'IDOL': ('IDOL', 8),
+       'CLOWN': ('CLOWN', 8), 'WAITER': ('WAITER', 8)}
 NEW_ID = {k: FIRST_CLASS + i for i, k in enumerate(NEW)}
 # Platinum class -> (the game's class, picture, encounter music, female)
 CLASSES = {

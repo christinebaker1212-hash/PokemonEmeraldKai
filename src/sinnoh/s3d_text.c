@@ -63,6 +63,14 @@ static void Load(void)
         printf("[s3d] %s: %u banks of SINNOH's text\n", path, Get32(8));
 }
 
+// How many banks the pack has (its last: Platinum's frontier trainers, build_text.py frontier_bank())
+u16 S3D_TextBanks(void)
+{
+    if (!sTried)
+        Load();
+    return sText ? Get32(8) : 0;
+}
+
 const u8 *S3D_Text(u16 bank, u16 msg)
 {
     u32 bankAt, count, at;
