@@ -81,7 +81,7 @@ enum
     VS_FRIEND
 };
 enum { RESOLVE_NONE, RESOLVE_GIFT, RESOLVE_LOAN };
-static void ResolveNoDeck(int trade);
+static void ResolveNoDeck(int trade, int npc);
 enum
 {
     ACT_NONE,
@@ -308,7 +308,7 @@ void YgoUi_OpenChallenge(const struct YgoOpponent *opponent)
                MyRating(C()->activeDeck));
     }
     printf("[ygo] challenge: %s, special %u\n", Y.opp.name, Y.opp.special);
-    ResolveNoDeck(0);
+    ResolveNoDeck(0, Y.vs == VS_NPC);
 }
 /* A friend said yes to a duel: both pick a deck (the asker's invite carries theirs, ygo_net.c) */
 void YgoUi_OpenOnlineDeck(void)
@@ -333,7 +333,7 @@ void YgoUi_OpenOnlineDeck(void)
     Y.onlineDeckChosen = 0;
     Y.cursor = C()->activeDeck;
     printf("[ygo] friend's duel: %s, seat %u\n", Y.opp.name, s->seat);
-    ResolveNoDeck(0);
+    ResolveNoDeck(0, 0);
 }
 void YgoUi_OpenOnlineTrade(void)
 {
@@ -345,7 +345,7 @@ void YgoUi_OpenOnlineTrade(void)
     Y.vs = VS_FRIEND;
     Y.filter = 0;
     printf("[ygo] trade with %s\n", Y.opp.name);
-    ResolveNoDeck(1);
+    ResolveNoDeck(1, 0);
 }
 void YgoUi_OpenStarter(void)
 {
@@ -424,7 +424,7 @@ static unsigned MatchFor(unsigned d, int *cards, unsigned *level)
 }
 /* Someone wants a Yu-Gi-Oh! duel (or trade) with a player who has no deck for it: no Yu-Gi-Oh! cards at all gets a
  * Starter Deck to keep (what the CARD CLUB's duelist would give), cards but no deck ready one to borrow for this duel */
-static void ResolveNoDeck(int trade)
+static void ResolveNoDeck(int trade, int npc)
 {
     unsigned d;
     struct YgoCollection *c = C();
@@ -436,10 +436,31 @@ static void ResolveNoDeck(int trade)
     Y.resolveBack = Y.screen;
     Y.resolve = c->optedIn ? RESOLVE_LOAN : RESOLVE_GIFT;
     Screen(Y_STARTER);
-    if (Y.resolve == RESOLVE_GIFT)
-        Say(ACT_NONE, "You don't have a Yu-Gi-Oh! deck yet! Pick a Starter Deck: it's yours to keep.");
-    else
-        Say(ACT_NONE, "None of your decks is ready to duel. Borrow a Starter Deck for this duel!");
+    {
+        /* (the user, 2026-11-02: the challenger offers it in their own way, by how they talk: QUOTE_VOICE_*) */
+        static const char *const sGift[] = {
+            /* KID */     "No Yu-Gi-Oh! deck? No way! Here, I've got a spare Starter Deck. Pick one, it's yours!",
+            /* STYLISH */ "No deck of your own? Oh, you poor thing! Take one of my Starter Decks. Choose the one you like!",
+            /* TOUGH */   "No deck?! Hah! Can't duel empty-handed! Grab a Starter Deck, it's yours. Now let's go!",
+            /* SEA */     "No deck aboard? Every sailor needs one! Here, pick a Starter Deck, it's yours to keep.",
+            /* REFINED */ "Ah, no deck of your own? Please, allow me: choose a Starter Deck. Consider it a gift.",
+            /* BRAINY */  "No deck? I came prepared: Starter Decks, in case of exactly this. Choose one, keep it.",
+            /* TEAM */    "No deck?! Ugh, fine! Take a Starter Deck and keep it, so I can beat you properly!",
+            /* STAFF */   "You don't have a Yu-Gi-Oh! deck yet? Please, pick a Starter Deck: it's yours to keep.",
+        };
+        static const char *const sLoan[] = {
+            /* KID */     "None of your decks is ready? Use one of my Starter Decks this time!",
+            /* STYLISH */ "Your decks aren't ready? Borrow one of mine, darling. Just for this duel!",
+            /* TOUGH */   "Not one deck ready to go? Hah! Borrow a Starter Deck and fight me anyway!",
+            /* SEA */     "Your decks aren't shipshape? Borrow a Starter Deck for this duel, matey!",
+            /* REFINED */ "None of your decks is ready? Then do borrow a Starter Deck for our duel.",
+            /* BRAINY */  "None of your decks is legal. Logically, you should borrow a Starter Deck. Here.",
+            /* TEAM */    "No deck ready? Pathetic! Borrow a Starter Deck so I can crush you anyway!",
+            /* STAFF */   "None of your decks is ready to duel. Borrow a Starter Deck for this duel!",
+        };
+        unsigned v = npc && Y.opp.voice < 8 ? Y.opp.voice : 7;   /* (a friend online: the plain line) */
+        Say(ACT_NONE, Y.resolve == RESOLVE_GIFT ? sGift[v] : sLoan[v]);
+    }
     printf("[ygo] no deck: %s\n", Y.resolve == RESOLVE_GIFT ? "a Starter Deck to keep" : "a Starter Deck to borrow");
 }
 /* A deck's face: its strongest monster */

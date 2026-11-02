@@ -15,7 +15,9 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [ ] Going down some ladders puts the player on top of the ladder, not in front of it
 - [x] MEGA PUNCH / MEGA KICK people outside MT. MOON: FireRed's two move tutors on Kai's tutor flow, FireRed's words
       (Quetzal's said "move training is handled from your team menu"; flags 0x21DF / 0x21DC; test kanto_tutors)
-- [ ] CERULEAN: TRIPLE TRIAD first; people who offer a Yu-Gi-Oh! / POKéMON starter deck get words by their personality
+- [x] CERULEAN: TRIPLE TRIAD first; people who offer a Yu-Gi-Oh! starter deck say so in their own way (the eight ways
+      card players talk: kid, stylish, tough, sea, refined, brainy, team, staff; a gift or a loan: ygo_ui.c
+      ResolveNoDeck). (Only Yu-Gi-Oh! duelists hand out a deck when challenging; POKéMON card players don't.)
 - [x] The shopping area (RARE CANDY, Z / MEGA items whatever GENERATION): Quetzal's market stalls in VERMILION (not
       VIRIDIAN: VIRIDIAN has only FireRed's mart), all nine hidden (flag 0x2225, set as VERMILION loads; their empty canopies are map tiles, left; test kanto_no_market)
 - [x] S.S. ANNE: FireRed's ship (its 128 x 64 picture as a map picture, mp_mappic.c), its departure (glides off, horns:
