@@ -44,10 +44,11 @@ mkdir -p "$P/mugen"
 mkdir -p "$P/music"
 cp music/*.kaisong "$P/music/" 2>/dev/null || true
 cp docs/SONG_TABLE.md "$P/music/SONG_TABLE.md"
-# SINNOH's 3D pack (tools/sinnoh/make_pack.sh builds them from pret/pokeplatinum; the release runs it first)
+# SINNOH's 3D pack and text pack (tools/sinnoh/make_pack.sh builds them from pret/pokeplatinum; the release runs it first)
 if [ -f sinnoh/platinum3d.pak ]; then
     mkdir -p "$P/sinnoh"
     cp sinnoh/platinum3d.pak "$P/sinnoh/"
+    if [ -f sinnoh/platinum_text.pak ]; then cp sinnoh/platinum_text.pak "$P/sinnoh/"; fi   # (its words)
 fi
 if [ -f sinnoh/platinum_gfx.pak ]; then   # (SINNOH's people as Platinum draws them, tools/sinnoh/build_gfx.py)
     mkdir -p "$P/sinnoh"
