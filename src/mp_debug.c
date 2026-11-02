@@ -2979,6 +2979,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // face up|down|left|right - turn the player in place
         static const char *const sDirs[] = {"down", "up", "left", "right"};
         int d;
+        if (!MP_IsInOverworld())
+        {
+            printf("[test] face: not on the field\n");   // (a battle or a menu: no player sprite to turn)
+            return;
+        }
         for (d = 0; d < 4; d++)
             if (strcmp(arg, sDirs[d]) == 0)
             {

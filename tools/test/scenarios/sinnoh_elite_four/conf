@@ -1,0 +1,8 @@
+# The ELITE FOUR as Platinum's own scripts (gen_scripts.py: the room's AARON with Platinum's words): his battle
+# (trainer 2075) sets his flag (0x3382) and the trainer's (14619); once CHARON is arrested at STARK MOUNTAIN (Platinum's
+# FLAG_ARRESTED_CHARON_STARK_MOUNTAIN, 0x3335) he battles with his rematch team (TRAINER_SINNOH_ELITE_FOUR_AARON_REMATCH, 2197)
+MODE=1
+TMO=300
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=150:100"
+EXPECT_A=("trainer 2075 " "flag 13186 = 1" "flag 14619 = 1" "trainer 2197 ")
+UNEXPECT_A=("[crash]" "TIMEOUT")

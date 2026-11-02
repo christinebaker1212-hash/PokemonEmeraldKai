@@ -1,6 +1,6 @@
-# SINNOH's CHAMPION (tools/sinnoh/words.py CHAMPION, gen_words.py champion()): she waits until the ELITE FOUR are
-# beaten (their trainer flags 0x391B-0x391E), then battles; the win makes SINNOH cleared (region 3, bit 8) and starts
-# the HALL OF FAME. Needs the 3D pack.
+# SINNOH's CHAMPION as Platinum's own scenes (the CHAMPION's room on entering: CYNTHIA battles; the hallway with her and
+# PROF. ROWAN; the HALL OF FAME): with the ELITE FOUR beaten (their trainer flags 0x391B-0x391E) the win makes SINNOH
+# cleared (region 3, bit 8). Needs the 3D pack.
 MODE=1
 TMO=600
 ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=150:100,150:100,150:100,150:100,150:100,150:100"

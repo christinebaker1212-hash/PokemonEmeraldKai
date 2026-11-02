@@ -140,6 +140,19 @@ RENAME = {'ITEM_X_DEFENSE': 'ITEM_X_DEFEND', 'MOVE_SMOKE_SCREEN': 'MOVE_SMOKESCR
 # events): ETERNA's gym (its clock moves as they're beaten), the TRAINERS' SCHOOL, the POKéMON MANSION's maids, the
 # restaurant's diners. Kept after the others (their ids and flags come last); gen_maps.py gives their objects the
 # battle (TALK_SCRIPTS: the Platinum script entry that battles each)
+# Trainers only Platinum's later scripts battle, imported after all the others (their ids come last): the ELITE FOUR's and
+# the CHAMPION's rematch teams, VOLKNER at the FIGHT AREA, BARRY's second SURVIVAL AREA team, the restaurant's reporter
+REMATCHES = {
+    'TRAINER_ELITE_FOUR_AARON_REMATCH': ('ELITE_FOUR', 'BUG_MANIAC', 0, 'ACE_TRAINER'),
+    'TRAINER_ELITE_FOUR_BERTHA_REMATCH': ('ELITE_FOUR', 'QZ_216', 1, 'ACE_TRAINER'),
+    'TRAINER_ELITE_FOUR_FLINT_REMATCH': ('ELITE_FOUR', 'QZ_116', 0, 'ACE_TRAINER'),
+    'TRAINER_ELITE_FOUR_LUCIAN_REMATCH': ('ELITE_FOUR', 'QZ_100', 0, 'ACE_TRAINER'),
+    'TRAINER_CHAMPION_CYNTHIA_REMATCH': ('CHAMPION', 'QZ_171', 1, 'ACE_TRAINER'),
+    'TRAINER_LEADER_VOLKNER_FIGHT_AREA': ('LEADER', 'QZ_256', 0, 'ACE_TRAINER'),
+    'TRAINER_REPORTER_VALERIE': ('INTERVIEWER', 'INTERVIEWER', 1, 'ACE_TRAINER'),
+}
+for _starter in ('CHIMCHAR', 'PIPLUP', 'TURTWIG'):
+    REMATCHES['TRAINER_RIVAL_SURVIVAL_AREA_2_' + _starter] = ('RIVAL', 'YOUNGSTER', 0, 'ACE_TRAINER')
 TALK = ['TRAINER_LASS_CAROLINE', 'TRAINER_AROMA_LADY_JENNA', 'TRAINER_AROMA_LADY_ANGELA',
         'TRAINER_SCHOOL_KID_CHRISTINE', 'TRAINER_SCHOOL_KID_HARRISON',
         'TRAINER_MAID_BELINDA', 'TRAINER_MAID_CLARE', 'TRAINER_MAID_ELENA', 'TRAINER_MAID_EMILY', 'TRAINER_MAID_SOPHIE',
@@ -173,6 +186,8 @@ def scripted(root, have):
         path = os.path.join(root, 'res/trainers/data', t[len('TRAINER_'):].lower() + '.json')
         if t in have or t.startswith('TRAINER_CLASS_') or not os.path.exists(path):
             continue
+        if t in REMATCHES:
+            continue        # (after everyone: main())
         if t in PARTNERS or json.load(open(path))['class'][len('TRAINER_CLASS_'):] in CLASSES:   # (the BATTLEGROUND's partners: not yet)
             out.append(t)
     return out
@@ -208,6 +223,7 @@ def main():
     trainers = sorted(placed(root)) + list(SPECIAL) + [t for t in STORY_TRAINERS if t not in LATE_STORY] \
         + [t for t in TALK if t not in placed(root)] + list(LATE_STORY)
     only_scripts = scripted(root, set(trainers))   # (battled by Platinum's own scripts: no script of their own here)
+    only_scripts += [t for t in REMATCHES if t not in trainers]   # (the last ids: the ones before keep theirs)
     trainers += only_scripts
     widths = letter_widths()
     consts, entries, parties, script = [], [], [], []
@@ -221,8 +237,8 @@ def main():
         if t in SPECIAL:
             ours, pic, female = SPECIAL[t]
             music = 'ACE_TRAINER'      # (their scripts battle with NO_MUSIC)
-        elif t in STORY_TRAINERS or t in PARTNERS:
-            ours, pic, female, music = STORY_TRAINERS.get(t) or PARTNERS[t]
+        elif t in STORY_TRAINERS or t in PARTNERS or t in REMATCHES:
+            ours, pic, female, music = STORY_TRAINERS.get(t) or PARTNERS.get(t) or REMATCHES[t]
         else:
             ours, pic, music, female = CLASSES[pclass]
         cls = 'TRAINER_CLASS_SINNOH_' + ours[2:] if ours.startswith('S:') else c('TRAINER_CLASS_' + ours)

@@ -1,0 +1,55 @@
+pressuntil A field 5000
+wait 30
+mp platinumstory
+mp battlestyle 1
+mp moves 0 58
+mp warp 42,103,8,6
+wait 200
+mp face down
+press A 4
+pressuntil A action 4000
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mp foehp 1
+mash A 30 10
+mash A 60 10
+mash A 60 10
+mash A 60 10
+mash A 60 10
+mp face up
+wait 120
+shot after_battle
+wait 60
+mp getflag 13186
+mp getflag 14619
+mp ctx
+mp setflag 0x3335
+mp clearflag 13186
+mp setvar 0x4003 0
+mp warp 42,103,8,6
+wait 200
+mp face down
+press A 4
+pressuntil A action 4000
+wait 30
+quit

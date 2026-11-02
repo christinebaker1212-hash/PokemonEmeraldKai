@@ -6395,3 +6395,123 @@
         .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSocialiteRebecca),
     },
 
+    [TRAINER_SINNOH_ELITE_FOUR_AARON_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_ELITE_FOUR,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_BUG_MANIAC,
+        .trainerName = _("AARON"),
+        .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohEliteFourAaronRematch),
+    },
+
+    [TRAINER_SINNOH_ELITE_FOUR_BERTHA_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_ELITE_FOUR,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_216,
+        .trainerName = _("BERTHA"),
+        .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohEliteFourBerthaRematch),
+    },
+
+    [TRAINER_SINNOH_ELITE_FOUR_FLINT_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_ELITE_FOUR,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_QZ_116,
+        .trainerName = _("FLINT"),
+        .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohEliteFourFlintRematch),
+    },
+
+    [TRAINER_SINNOH_ELITE_FOUR_LUCIAN_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_ELITE_FOUR,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_QZ_100,
+        .trainerName = _("LUCIAN"),
+        .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohEliteFourLucianRematch),
+    },
+
+    [TRAINER_SINNOH_CHAMPION_CYNTHIA_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_CHAMPION,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_171,
+        .trainerName = _("CYNTHIA"),
+        .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_FULL_RESTORE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohChampionCynthiaRematch),
+    },
+
+    [TRAINER_SINNOH_LEADER_VOLKNER_FIGHT_AREA] =
+    {
+        .trainerClass = TRAINER_CLASS_LEADER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_QZ_256,
+        .trainerName = _("VOLKNER"),
+        .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohLeaderVolknerFightArea),
+    },
+
+    [TRAINER_SINNOH_REPORTER_VALERIE] =
+    {
+        .trainerClass = TRAINER_CLASS_INTERVIEWER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_INTERVIEWER,
+        .trainerName = _("VALERIE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohReporterValerie),
+    },
+
+    [TRAINER_SINNOH_RIVAL_SURVIVAL_AREA_2_CHIMCHAR] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("BARRY"),
+        .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_FULL_RESTORE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohRivalSurvivalArea2Chimchar),
+    },
+
+    [TRAINER_SINNOH_RIVAL_SURVIVAL_AREA_2_PIPLUP] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("BARRY"),
+        .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_FULL_RESTORE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohRivalSurvivalArea2Piplup),
+    },
+
+    [TRAINER_SINNOH_RIVAL_SURVIVAL_AREA_2_TURTWIG] =
+    {
+        .trainerClass = TRAINER_CLASS_RIVAL,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("BARRY"),
+        .items = {ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_FULL_RESTORE, ITEM_FULL_RESTORE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = ITEM_CUSTOM_MOVES(sParty_SinnohRivalSurvivalArea2Turtwig),
+    },
+

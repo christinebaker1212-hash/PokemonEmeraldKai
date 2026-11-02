@@ -1016,6 +1016,16 @@ class FileConverter:
             if cmd == 'ClearHasPartner':   # (and the walk ends: the one who followed stops, as Platinum's)
                 lines.append(self.sinnoh(SINNOH_MISC, 24))
             return lines
+        if cmd == 'PlayHallOfFameHealingAnimation':
+            return ['playse SE_USE_ITEM', 'delay 60']   # (Platinum's machine heals and records the team; ClearGame next)
+        if cmd == 'ClearGame':
+            # SINNOH's HALL OF FAME: the league record, the boat ticket home, the LEAGUE as the place to wake up, then
+            # the game's own HALL OF FAME and credits (special GameClear: SINNOH cleared, src/mp/mp_region.c)
+            return ['call Quetzal_EventScript_835F6E4', 'call EventScript_SinnohTicket',
+                    'setrespawn HEAL_LOCATION_SINNOH_POKEMON_LEAGUE', 'fadescreenspeed 1, 24', 'special GameClear',
+                    'waitstate']
+        if cmd == 'EnableHiddenLocation':
+            return []                       # (FULLMOON / NEWMOON ISLAND, the SPRING and SEABREAK PATHS: open in this game)
         if cmd == 'CheckHasPartner':
             # (someone walks with the player: no SURF or ROCK CLIMB then, as Platinum's)
             done = '%s%s__partner%d' % (PREFIX, self.low, self.next_local())
