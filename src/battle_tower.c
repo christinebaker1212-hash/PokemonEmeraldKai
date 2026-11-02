@@ -2237,6 +2237,18 @@ void MP_StartPartnerBattle(u16 partner)
     BattleTransition_StartOnField(B_TRANSITION_MAGMA);
 }
 
+// Moemon Kai: SINNOH's walking partners in wild battles (Platinum's SetHasPartner: CHERYL, MIRA, RILEY, BUCK,
+// MARLEY): the partner's team in the party's second half, shown as Kai's partners are (battle_setup.c DoStandardWildBattle)
+void MP_SetupPartnerWild(u16 partner)
+{
+    u32 i;
+    SetQzPartner(partner);
+    gPartnerTrainerId = TRAINER_QZ_PARTNER;
+    for (i = MULTI_PARTY_SIZE; i < PARTY_SIZE; i++)
+        ZeroMonData(&gPlayerParty[i]);
+    MP_CreateTrainerPartyAt(&gPlayerParty[MULTI_PARTY_SIZE], sQzPartnerTrainer);
+}
+
 static void SaveCurrentWinStreak(void)
 {
     u8 lvlMode = gSaveBlock2Ptr->frontier.lvlMode;

@@ -3655,14 +3655,18 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   of the area; the map's own where Platinum has none), as gSinnohPlatinumMapScripts. s3d_scrcmd.c
   Sinnoh_PlatinumMapScripts (called from overworld.c LoadCurrentMapData / LoadSaveblockMapHeader) swaps them into a
   RAM copy of gMapHeader's events (warps and bg events copied too: SetWarpEventPos / SetBgEventPos move them).
-  Sinnoh_PlatinumStoryBegin (`mp platinumstory`) sets the flag and runs Platinum's scripts_init_new_game.
+  Sinnoh_PlatinumStoryBegin (`mp platinumstory`) sets the flag and runs Platinum's scripts_init_new_game: on for a new
+  game begun in SINNOH, a first boat in, and a save in SINNOH whose story hasn't begun (no SINNOH badge, no starter);
+  saves further along keep the written story they began (tests of Kai's systems play as those: `mp setflag 0x3D39`,
+  `mp clearflag 0x3D3B`). Kai's ferry sailor stays shown (gen_scripts.py KAI_ALWAYS).
   The user's rules: Kai's systems stay and SINNOH uses them (tag battles = Kai's partner battle, battle_tower.c
   MP_StartPartnerBattle via DoSpecialTrainerBattle 15, with STEVEN's party pick; two trainers = battle_setup.c
   MP_StartTwoTrainerBattle; AddFreeCamera = SpawnCameraObject, which s3d.c SetupView follows; the briefcase =
   Sinnoh_StarterMenu, the pick kept in VAR_SINNOH_STARTER 0x52F8); everything else 1:1 (the build list:
   docs/SINNOH_HANDOFF.md); online-only and DS-only features closed (CheckDistributionEvent is 0). Platinum's key items
   are 662-684 (item_audit.py counts them as given by Platinum's scripts). Tests sinnoh_platinum_story,
-  sinnoh_platinum_opening.
+  sinnoh_platinum_opening, sinnoh_platinum_walk, sinnoh_platinum_route201, sinnoh_platinum_tutorial,
+  sinnoh_platinum_tag, sinnoh_platinum_gym, sinnoh_newgame.
 - Words (1.62.x, sinnoh-work; being replaced by Platinum's own, above): every person / sign / bg / trigger runs <map>_EventScript_Person<n> / _Sign<n> / _Bg<n>
   / _Trigger<n> when the map's scripts.inc has it (n: its place in Platinum's lists, from 1), else nothing (a trigger
   without a script isn't placed). tools/sinnoh/words.py holds the words (original writing; '|' a new page; ('nurse',)

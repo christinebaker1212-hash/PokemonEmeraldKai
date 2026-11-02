@@ -1,3 +1,5 @@
+# (A save whose SINNOH story began before Platinum's own: FLAG_SINNOH_STARTER 0x3D39 set, FLAG_SINNOH_PLATINUM_STORY 0x3D3B
+# off: it keeps the story it began.)
 # BARRY's mom's visit in the player's house in TWINLEAF (data/scripts/sinnoh_places.inc Sinnoh_EventScript_RivalMomVisit,
 # tools/sinnoh/gen_maps.py EXTRA_TRIGGERS): stepping next to the door mat, she comes in, the player is pushed back a step
 # (to 6,8), she talks and leaves; VAR_SINNOH_ARRIVAL goes 2 -> 3 and the door lets the player out (TWINLEAF TOWN, 40.0).

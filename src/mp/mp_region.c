@@ -12,6 +12,7 @@
 #include "event_data.h"
 #include "mp.h"
 #include "mp_region.h"
+void Sinnoh_PlatinumStoryBegin(void);   // (src/sinnoh/s3d_scrcmd.c)
 #include "mp_savefix.h"
 #include "save.h"
 #include "pokemon.h"
@@ -211,6 +212,7 @@ void MP_Region_GoToStartHouse(u8 region)
         SetWarpDestination(MAP_GROUP(MAP_SINNOH_CANALAVE_CITY), MAP_NUM(MAP_SINNOH_CANALAVE_CITY), WARP_ID_NONE, 11, 22);
         SetLastHealLocationWarp(HEAL_LOCATION_SINNOH_TWINLEAF_TOWN);
         VarSet(VAR_SINNOH_ARRIVAL, 1);
+        Sinnoh_PlatinumStoryBegin();   // (Platinum's story begins at home in TWINLEAF, where the sailor takes them)
     }
 }
 
@@ -263,7 +265,7 @@ void MP_Region_StartNewGame(void)
         SetLastHealLocationWarp(HEAL_LOCATION_SINNOH_TWINLEAF_TOWN);
         VarSet(VAR_SINNOH_ARRIVAL, 2);
         FlagSet(FLAG_SINNOH_NEW_GAME);
-        FlagSet(FLAG_SYS_B_DASH);
+        Sinnoh_PlatinumStoryBegin();   // (Platinum's own story from its start: mom gives the Running Shoes later)
         WarpIntoMap();
     }
     else if (sStartRegion != REGION_HOENN)

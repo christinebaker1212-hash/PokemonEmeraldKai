@@ -540,12 +540,21 @@ struct SinnohMapStory
 extern const struct SinnohMapStory gSinnohPlatinumMapScripts[];
 
 
+void Sinnoh_PlatinumStoryBegin(void);
+
 void Sinnoh_PlatinumMapScripts(void)
 {
     u16 map = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
     const struct SinnohMapStory *m;
     u32 i, j;
-    if (!S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup) || !FlagGet(FLAG_SINNOH_PLATINUM_STORY))
+    if (!S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+        return;
+    // A save in SINNOH from before Platinum's story, whose story hasn't begun (no SINNOH badge, no starter from ROWAN's
+    // briefcase): Platinum's story from its start. Saves further along keep the story they began
+    if (!FlagGet(FLAG_SINNOH_PLATINUM_STORY) && !FlagGet(FLAG_SINNOH_STARTER) && MP_Region_BadgeCount(REGION_SINNOH) == 0
+     && !MP_Region_Cleared(REGION_SINNOH) && gSinnohPlatinumMapScripts[0].map != 0xFFFF)
+        Sinnoh_PlatinumStoryBegin();
+    if (!FlagGet(FLAG_SINNOH_PLATINUM_STORY))
         return;
     for (m = gSinnohPlatinumMapScripts; m->map != 0xFFFF; m++)
         if (m->map == map)

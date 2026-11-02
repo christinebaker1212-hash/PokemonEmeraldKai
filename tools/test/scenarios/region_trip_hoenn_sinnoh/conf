@@ -1,7 +1,8 @@
 # HOENN -> SINNOH and back by boat: SLATEPORT's ferry lists CANALAVE (SINNOH) third (after the other two ports, as
 # before); the first visit lands at CANALAVE's dock, where the harbor sailor meets the player and sails them to TWINLEAF
 # TOWN's house (8, 5 on its 2F), where SINNOH starts (CANALAVE's GYM is the sixth); CANALAVE's harbor sailor sails
-# back (SLATEPORT first on SINNOH's list). Customs and levels per region as the other trips. Needs the 3D pack.
+# back (SLATEPORT first on SINNOH's list). Platinum's story begins in that room (the TV program: B passes it). Customs
+# and levels per region as the other trips. Needs the 3D pack.
 MODE=1
 TMO=300
 ENV_A="MOEMON_DEBUG_REGION=0 MOEMON_DEBUG_PARTY=258:30,255:25"

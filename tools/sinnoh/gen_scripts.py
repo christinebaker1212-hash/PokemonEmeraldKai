@@ -346,6 +346,8 @@ class FileConverter:
             return x                  # (this game's own special variables of the same meaning)
         if re.match(r'^(0x[0-9A-Fa-f]+|\d+)$', x) and int(x, 0) >= 0x4000:
             raise Unsupported('a raw variable number %s' % x)
+        if x == 'VAR_PARTNER_TRAINER_ID':
+            return '0x52FA'           # (VAR_SINNOH_PARTNER_TRAINER: the walking partner's team, battle_setup.c)
         m = re.match(r'^VAR_OBJ_GFX_ID_([0-9A-F])$', x)
         if m:
             return '0x%X' % (0x4010 + int(m.group(1), 16))   # (the game's own VAR_OBJ_GFX_ID_0-F: a person's look)
@@ -1157,6 +1159,11 @@ def _stub_body(name, label):
 STAND_INS = re.compile(r'^Sinnoh_EventScript_(Briefcase|RowanLab|DistortionEnter|Legend\w+|Story\d+)$')
 
 
+# Kai's systems that are always there, whatever the story (the ferry between the regions: a person Platinum's story
+# shows only later keeps it shown)
+KAI_ALWAYS = re.compile(r'^\tgoto (EventScript_SinnohRegionBoat)\n$')
+
+
 def _replaceable(body):
     if body is None:
         return True
@@ -1214,6 +1221,9 @@ def people(root, p, low, name, done):
             continue                       # (an obstacle, an item: the game's own systems)
         gfx = 'OBJ_EVENT_GFX_VAR_%s' % o['graphics_id'][-1] if re.match(r'^OBJ_EVENT_GFX_VAR_[0-9A-F]$', o['graphics_id']) \
             else '0'                       # (a look the script picks: the game's VAR_OBJ_GFX_ID_n)
+        if new is None and person and script != '0x0' and KAI_ALWAYS.match(_stub_body(name, script) or ''):
+            objs.append((i + 1, 0, mine['x'], mine['y'], None, '0'))
+            continue
         objs.append((i + 1, flag or 0, o['x'] - p['x0'] * 32, o['z'] - p['z0'] * 32, new, gfx))
     trig, covered = [], set()
     for k, e in enumerate(ev['coord_events']):

@@ -1,4 +1,6 @@
 pressuntil A field 5000
+mp setflag 0x3D39
+mp clearflag 0x3D3B
 mp textspeed 2
 wait 60
 mp getvar 0x52F0

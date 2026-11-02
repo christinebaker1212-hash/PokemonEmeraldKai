@@ -1,3 +1,5 @@
+# (A save whose SINNOH story began before Platinum's own: FLAG_SINNOH_STARTER 0x3D39 set, FLAG_SINNOH_PLATINUM_STORY 0x3D3B
+# off: it keeps the story it began.)
 # SINNOH's elevators (src/sinnoh/s3d_elevator.c, tools/sinnoh/gen_maps.py elevators): VEILSTONE's store from 1F, the
 # attendant's floor menu, 5F, and its doors open on 5F; the VISTA LIGHTHOUSE's from SUNYSHORE by the panel this game
 # adds, to the top. Needs the 3D pack. Shots e_out.png, v_top.png.

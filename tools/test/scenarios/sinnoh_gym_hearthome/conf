@@ -1,3 +1,5 @@
+# (A save whose SINNOH story began before Platinum's own: FLAG_SINNOH_STARTER 0x3D39 set, FLAG_SINNOH_PLATINUM_STORY 0x3D3B
+# off: it keeps the story it began.)
 # HEARTHOME's gym (src/sinnoh/s3d_gyms.c): the first trainer room is dark but for the lamps; its right door and its
 # clue are drawn on coming in; the square door (8,2) leads on if it's the right one, else back to the entrance room.
 MODE=1

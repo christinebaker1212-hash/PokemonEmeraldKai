@@ -21,7 +21,8 @@ in sinnoh/platinum_gfx.pak (tools/sinnoh/build_gfx.py, src/sinnoh/s3d_gfx.c; tes
 for SINNOH. They're converted from the decomp when the game is built, never committed: sinnoh/platinum_text.pak
 (tools/sinnoh/build_text.py) and sinnoh/platinum_scripts.inc (tools/sinnoh/gen_scripts.py; maps hold only
 `goto SinnohP_<file>_<n>` stubs; Platinum's map scripts, people and triggers per map behind FLAG_SINNOH_PLATINUM_STORY,
-s3d_scrcmd.c Sinnoh_PlatinumMapScripts); COOP_NOTES "Platinum's own words and scripts". The written words in
+s3d_scrcmd.c Sinnoh_PlatinumMapScripts; on for new SINNOH games, a first boat in and saves whose SINNOH story hasn't
+begun; saves further along keep their written story); COOP_NOTES "Platinum's own words and scripts". The written words in
 tools/sinnoh/words*.py / story_people.py only stand in until a script's commands are converted.
 
 **Done (2026-11-01): `docs/NEXT_TASKS.md`**, the user's list through 1.63.7 (40 PC boxes: COOP_NOTES "40 PC boxes"; the save holds

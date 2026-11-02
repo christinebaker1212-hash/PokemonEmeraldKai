@@ -1,0 +1,18 @@
+pressuntil A field 5000
+wait 30
+mp platinumstory
+mp setflag 0x3D3C
+mp setvar 0x52FA 2147
+mp party
+mp warp 40,1,30,22
+wait 150
+mp landwild
+waitfor battle 3000
+wait 300
+shot battle
+mash A 300 8
+pressuntil A field 6000
+wait 60
+mp party
+mp ctx
+quit

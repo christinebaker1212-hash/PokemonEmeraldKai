@@ -1,0 +1,22 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp platinumstory
+mp warp 42,73,5,4
+wait 200
+mp face up
+press A 4
+wait 60
+shot roark1
+pressuntil A action 4000
+shot roark2
+mash A 200 8
+pressuntil A field 6000
+wait 60
+mash B 40 20
+wait 120
+shot after
+mp getflag 0x3320
+mp bagqty 643
+mp ctx
+quit

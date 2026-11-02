@@ -2,52 +2,12 @@ pressuntil A field 5000
 mp textspeed 2
 wait 60
 mp where
-mp emptyparty
-mp warp 40,1,16,24
-wait 90
-waitfor field 1000
-mp face up
-press A 4
-wait 40
-shot t_barry
-mash B 6 10
-waitfor field 1000
-mp warp 40,1,15,22
-wait 90
-waitfor field 1000
-mp face right
-press A 4
-pressuntil A yesno 3000
-wait 20
-press A 4
-shotburst t_case 180 30
-pressuntil A startertable 3000
-wait 20
-shot t_starters
-press LEFT 2
-wait 30
-shot t_left
-press A 2
-wait 100
-wait 10
-shot t_preview
-press A 2
-wait 30
-pressuntil A yesno 3000
-wait 20
-press B 4
-mash B 10 10
-waitfor field 2000
-mp getflag 0x3D39
+mp getflag 15675
 mp getflag 2144
-mp party
-mp warp 43,62,7,6
-wait 90
-waitfor field 1000
-mp face up
-press A 4
-pressuntil A field 4000
-wait 30
-mp getflag 2145
-mp bagqty 4
+mash A 12 20
+wait 200
+mash A 6 30
+wait 60
+mp getvar 0x5209
+mp ctx
 quit

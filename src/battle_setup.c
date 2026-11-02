@@ -1,5 +1,7 @@
 #include "global.h"
 #include "mp_region.h"
+#include "s3d.h"
+#include "pokemon_storage_system.h"
 #include "mp.h"
 #include "platform/gamepad.h"
 #include "battle.h"
@@ -437,6 +439,29 @@ void BattleSetup_StartBattlePikeWildBattle(void)
     DoBattlePikeWildBattle();
 }
 
+// Moemon Kai: a wild battle beside SINNOH's walking partner (Platinum's SetHasPartner, VAR_SINNOH_PARTNER_TRAINER):
+// two wild POKéMON (the second in the foe's slot 3, as Kai's co-op wild doubles), the player's first three and the
+// partner's team; the player's other three are kept and come back after (CB2_EndWildBattle)
+static EWRAM_DATA struct Pokemon sPartnerWildKept[PARTY_SIZE - MULTI_PARTY_SIZE] = {0};
+static EWRAM_DATA bool8 sPartnerWild = FALSE;
+void MP_SetupPartnerWild(u16 partner);   // (battle_tower.c)
+bool8 MP_RollExtraLandMon(struct Pokemon *out);   // (wild_encounter.c)
+
+static bool8 TryPartnerWildBattle(void)
+{
+    u32 i;
+    u16 partner = VarGet(VAR_SINNOH_PARTNER_TRAINER);
+    if (!FlagGet(FLAG_SINNOH_HAS_PARTNER) || partner == 0 || !S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup)
+     || CalculatePlayerPartyCount() == 0 || !MP_RollExtraLandMon(&gEnemyParty[3]))
+        return FALSE;
+    for (i = 0; i < ARRAY_COUNT(sPartnerWildKept); i++)
+        sPartnerWildKept[i] = gPlayerParty[MULTI_PARTY_SIZE + i];
+    MP_SetupPartnerWild(partner);
+    sPartnerWild = TRUE;
+    gBattleTypeFlags = BATTLE_TYPE_DOUBLE | BATTLE_TYPE_INGAME_PARTNER | BATTLE_TYPE_MULTI;
+    return TRUE;
+}
+
 static void DoStandardWildBattle(void)
 {
     LockPlayerFieldControls();
@@ -444,6 +469,7 @@ static void DoStandardWildBattle(void)
     StopPlayerAvatar();
     gMain.savedCallback = CB2_EndWildBattle;
     gBattleTypeFlags = 0;
+    TryPartnerWildBattle();
     if (CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE)
     {
         VarSet(VAR_TEMP_PLAYING_PYRAMID_MUSIC, 0);
@@ -725,6 +751,16 @@ void StartRegiBattle(void)
 
 static void CB2_EndWildBattle(void)
 {
+    if (sPartnerWild)
+    {
+        // (the player's other three back where the partner's team was)
+        u32 i;
+        for (i = 0; i < ARRAY_COUNT(sPartnerWildKept); i++)
+            gPlayerParty[MULTI_PARTY_SIZE + i] = sPartnerWildKept[i];
+        CompactPartySlots();
+        CalculatePlayerPartyCount();
+        sPartnerWild = FALSE;
+    }
     gMpFishingEncounter = FALSE;   // Moemon Co-op: LURE BALL
     CpuFill16(0, (void *)(BG_PLTT), BG_PLTT_SIZE);
     ResetOamRange(0, OAM_ENTRY_COUNT);   // Moemon PC: all 256 (128 left the rest zeroed: an 8x8 tile at 0,0)

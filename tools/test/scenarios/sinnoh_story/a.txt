@@ -1,4 +1,6 @@
 pressuntil A field 5000
+mp setflag 0x3D39
+mp clearflag 0x3D3B
 wait 30
 mp warp 40,1,16,24
 wait 60

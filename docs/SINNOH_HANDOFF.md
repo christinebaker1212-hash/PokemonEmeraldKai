@@ -94,9 +94,13 @@ Where it stands:
   places and converted scripts) and triggers are emitted per map as gSinnohPlatinumMapScripts and swapped into
   gMapHeader when FLAG_SINNOH_PLATINUM_STORY (0x3D3B) is set (s3d_scrcmd.c Sinnoh_PlatinumMapScripts; the committed
   maps are untouched; a person whose script is one of Kai's roles keeps it). Sinnoh_StoryRefresh stands aside.
-- Sinnoh_PlatinumStoryBegin (debug `mp platinumstory`) sets the flag and runs Platinum's own scripts_init_new_game.
-  Not yet called for real games: the switch waits until the story plays through (tests sinnoh_platinum_story,
-  sinnoh_platinum_opening).
+- Sinnoh_PlatinumStoryBegin (debug `mp platinumstory`) sets the flag and runs Platinum's own scripts_init_new_game. It is
+  ON (2026-11-02): a new game begun in SINNOH, a first boat in from HOENN (mp_region.c), and a save in SINNOH whose
+  story hasn't begun (no SINNOH badge, no starter from the briefcase: Sinnoh_PlatinumMapScripts) play Platinum's story.
+  Saves further along keep the story they began (the written one) until a migration exists (step 4 below); tests of
+  Kai's systems that teleport around SINNOH play as such saves (`mp setflag 0x3D39` + `mp clearflag 0x3D3B`).
+- Kai's ferry between the regions (CANALAVE's harbor sailor, EventScript_SinnohRegionBoat) stays shown in Platinum's
+  story too (gen_scripts.py KAI_ALWAYS).
 - Story coverage (map scripts, triggers, story people): 500 of 760 at the end of 2026-11-02; the rest are mostly Kai's
   place systems (REGI ruins, TURNBACK CAVE, platform lifts, gym puzzles, the frontier), which stay Kai's.
 - Platinum's key items are items 662-684 (GALACTIC KEY ... GOOEY MULCH; Platinum's descriptions from PokeAPI, stand-in
@@ -114,17 +118,22 @@ convert, every script-number range (SCRIPT_RANGES). The story plays from the TV 
 the briefcase and BARRY's battle to mom's Running Shoes (tests sinnoh_platinum_walk, sinnoh_platinum_route201).
 
 To build (not 1:1 yet):
-1. Partner wild battles (SetHasPartner, VAR_PARTNER_TRAINER_ID: CHERYL, MIRA, RILEY, BUCK, MARLEY beside the player:
-   Kai's partner battle for wild POKéMON).
+1. Partner wild battles: written (battle_setup.c TryPartnerWildBattle, test sinnoh_platinum_partner), being verified.
 2. The DISTORTION WORLD 1:1: walking on walls and ceilings, its rotating rooms, the boulders and the lift, CYRUS and
-   GIRATINA's scenes (now a scene in GIRATINA's arena: data/scripts/sinnoh_places.inc).
+   GIRATINA's scenes (now a scene in GIRATINA's arena: data/scripts/sinnoh_places.inc). Platinum's is
+   src/overlay009/ov9_02249960.c (14,000 lines: DistWorldSystem; per-floor map info files with camera angles, moving /
+   floating platforms and their jump points, ghost props, sky clouds, map objects that turn with the floor, event
+   commands; its tables sMapEvents, sMovingPlatformsMapTemplates, sDistWorldMapConnectionList...). Its scripts need
+   InitPersistedMapFeaturesForDistortionWorld, AddDistortionWorldMapObject, the DIST_WORLD_MAP_OBJECT_* ids,
+   DIST_WORLD_PROGRESS_*, GetPlayer3DPos, SetPartyGiratinaForm, StartGiratinaOriginBattle. The 3D engine (s3d.c) needs
+   a player that walks on any face (gravity per tile) and the camera Platinum's angle templates give.
 3. The gym puzzles Kai doesn't have yet (ETERNA's clock: AdvanceEternaGymClock; VEILSTONE's, HEARTHOME's), the VILLA,
    the Frontier Brains' and the HALL MATRON's teams, the PASTORIA size contest, JUBILIFE's TV lottery, the JOURNAL,
    ROTOM's room, Platinum's POKéDEX ratings (LoadPokedexRating), UNOWN messages, DAWN's / LUCAS's own overworld
    sprites (stand-ins now), Platinum's songs the game lacks (`gen_scripts.py --report` lists them: SEQ_OPENING...).
-4. Saves already in SINNOH: Platinum's flags and variables from what this game recorded, once, on load
-   (mp_savefix.c's way); then the switch (new games in SINNOH and a first boat in begin Platinum's story) and a story
-   test from TWINLEAF to the HALL OF FAME; then the written words go (words*.py, STORY_WORDS, trainer_words.py).
+4. Saves already partway through SINNOH's written story: Platinum's flags and variables from what this game recorded
+   (badges, story battles: story_people.DONE), once, on load (mp_savefix.c's way); a story test from TWINLEAF to the
+   HALL OF FAME; then the written words go (words*.py, STORY_WORDS, trainer_words.py).
 5. For the user to confirm as closed or to build: the Underground (single-player digging works without wireless),
    Super Contests and their accessories / backdrops (Kai has the contests; AddAccessory is a no-op for now), Platinum's
    TV (Kai has Emerald's).

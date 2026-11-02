@@ -1,3 +1,5 @@
+# (A save whose SINNOH story began before Platinum's own: FLAG_SINNOH_STARTER 0x3D39 set, FLAG_SINNOH_PLATINUM_STORY 0x3D3B
+# off: it keeps the story it began.)
 # SINNOH's gym leaders (tools/sinnoh/words.py GYMS, gen_words.py gym()): OREBURGH's ROARK battles, then gives the
 # COAL BADGE (flag 0x3320 = 13088) and TM76 STEALTH ROCK (item 643; flag 0x3770 = 14192). Needs the 3D pack.
 MODE=1
