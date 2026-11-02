@@ -6174,7 +6174,14 @@ static void Cmd_getmoneyreward(void)
         moneyReward += GetTrainerMoneyToGive(gTrainerBattleOpponent_B);
     moneyReward = moneyReward * (100 + MP_BuddyBonusPercent()) / 100; // Moemon Co-op: buddy bonus
 
-    AddMoney(&gSaveBlock1Ptr->money, moneyReward);
+    {
+        // Moemon Kai: MOM keeps a quarter while she saves (JOHTO / KANTO: mp_mombank.c); the message says so
+        u32 MP_MomShare(u32 reward);
+        extern bool8 gMpMomShared;
+        u32 share = MP_MomShare(moneyReward);
+        gMpMomShared = share != 0;
+        AddMoney(&gSaveBlock1Ptr->money, moneyReward - share);
+    }
     if (gMpCoopBattle)
         MP_Coop_RecordMoney(moneyReward); // the partner gets the same prize
     PREPARE_WORD_NUMBER_BUFFER(gBattleTextBuff1, 5, moneyReward);

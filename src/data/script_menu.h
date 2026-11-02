@@ -786,6 +786,13 @@ static const struct MenuAction MultichoiceList_RegionsFromKanto[] = {
 static const struct MenuAction MultichoiceList_RegionsFromSinnoh[] = {
     {sRegionPortSlateport}, {sRegionPortOlivine}, {sRegionPortVermilion}, {gText_Exit}};
 
+// Moemon Kai: Crystal's BANK OF MOM (pokecrystal engine/events/mom.asm BankOfMom_MenuHeader)
+static const u8 sMomBankGet[] = _("GET");
+static const u8 sMomBankSave[] = _("SAVE");
+static const u8 sMomBankChange[] = _("CHANGE");
+static const u8 sMomBankCancel[] = _("CANCEL");
+static const struct MenuAction MultichoiceList_MomBank[] = {{sMomBankGet}, {sMomBankSave}, {sMomBankChange}, {sMomBankCancel}};
+
 static const struct MenuAction MultichoiceList_ArcadeCabinet[] =
 {
     {gText_MpFightWait2P},
@@ -956,6 +963,7 @@ static const struct MultichoiceListStruct sMultichoiceLists[] =
     [MULTI_REGIONS_FROM_JOHTO]         = MULTICHOICE(MultichoiceList_RegionsFromJohto),
     [MULTI_REGIONS_FROM_KANTO]         = MULTICHOICE(MultichoiceList_RegionsFromKanto),
     [MULTI_REGIONS_FROM_SINNOH]        = MULTICHOICE(MultichoiceList_RegionsFromSinnoh),
+    [MULTI_MOM_BANK]                   = MULTICHOICE(MultichoiceList_MomBank),
 };
 
 static const u8 sText_QzStd_1E[] = _("MEDICINE");

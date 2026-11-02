@@ -662,3 +662,6 @@ gSpecials::
 	def_special MP_PlayerHasHmVar
 	def_special MP_ReturnToTitle   @ Moemon Kai: OPTIONS > RETURN TO MAIN MENU (src/option_menu.c)
 	def_special QzNameJohtoRival   @ Moemon Kai: Crystal names JOHTO's rival at ELM's (qz_specials.c)
+	def_special QzMomBankState   @ Moemon Kai: Crystal's BANK OF MOM (src/mp/mp_mombank.c)
+	def_special QzMomBankSetSaving
+	def_special QzMomBankAmount

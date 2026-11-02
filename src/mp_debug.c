@@ -3350,6 +3350,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         bool8 MP_Region_FollowHost(u8 to);
         printf("[test] travel %d: %d\n", atoi(arg), MP_Region_FollowHost(atoi(arg)));
     }
+    else if (strcmp(cmd, "mombank") == 0)
+    {
+        // mombank [SAVINGS] - MOM's savings and state (mp_mombank.c); a number sets her savings
+        void MP_MomBank_Debug(const char *arg);
+        MP_MomBank_Debug(arg);
+    }
     else if (strcmp(cmd, "rivalname") == 0)
     {
         // rivalname [open] - JOHTO's rival's name (qz_specials.c); open: the naming at ELM's and the officer's line

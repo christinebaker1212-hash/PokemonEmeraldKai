@@ -1,0 +1,43 @@
+pressuntil A field 5000
+wait 30
+mp setvar 0x52EA 3
+mp battlestyle 1
+mp mombank
+mp trainer 1079
+mash A 200 10
+pressuntil A field 6000
+wait 30
+mp mombank
+mp setflag 4205
+mp warp 35,1,2,3
+wait 120
+mp face up
+press A 2
+wait 90
+press A 2
+wait 90
+press A 2
+wait 90
+press A 2
+wait 120
+press A 2
+wait 120
+shot yesno
+press A 2
+wait 120
+shot menu
+press A 2
+wait 120
+press UP 2
+wait 6
+press LEFT 2
+wait 6
+press UP 2
+wait 10
+shot amount
+press A 2
+wait 60
+mp mombank
+mash A 8 20
+wait 60
+quit

@@ -65,7 +65,12 @@ Johto_PlayersHouse1F_EventScript_83E3B6D::
 	end
 
 Johto_PlayersHouse1F_EventScript_83E3B83::
-	msgbox Johto_PlayersHouse1F_Text_83E3DC0, MSGBOX_DEFAULT
+	@ Moemon Kai: Crystal's MOM offers to save money as the player leaves (pokecrystal BankOfMom .InitializeBank)
+	msgbox Johto_PlayersHouse1F_Text_MomLeaving1, MSGBOX_YESNO
+	setvar VAR_0x8004, 0
+	call_if_eq VAR_RESULT, YES, Johto_PlayersHouse1F_EventScript_MomStartsSaving
+	special QzMomBankSetSaving
+	msgbox Johto_PlayersHouse1F_Text_MomLeaving3, MSGBOX_DEFAULT
 	setflag FLAG_QZ_0x106D
 	clearflag FLAG_QZ_0x107D
 	setvar VAR_QZ_0x5003, 5
@@ -73,9 +78,164 @@ Johto_PlayersHouse1F_EventScript_83E3B83::
 	end
 
 Johto_PlayersHouse1F_EventScript_83E3B98::
+	@ Moemon Kai: Crystal's BANK OF MOM ("Or is this about your money?"); not that: her rest, as before
+	specialvar VAR_RESULT, QzMomBankState
+	goto_if_eq VAR_RESULT, 0, Johto_PlayersHouse1F_EventScript_83E3B83
+	msgbox Johto_PlayersHouse1F_Text_MomAboutMoney, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Johto_PlayersHouse1F_EventScript_MomRest
+	goto Johto_PlayersHouse1F_EventScript_MomBank
+
+Johto_PlayersHouse1F_EventScript_MomRest:
 	call Johto_PlayersHouse1F_EventScript_83813E8
 	release
 	end
+
+Johto_PlayersHouse1F_EventScript_MomStartsSaving:
+	msgbox Johto_PlayersHouse1F_Text_MomLeaving2, MSGBOX_DEFAULT
+	setvar VAR_0x8004, 1
+	return
+
+Johto_PlayersHouse1F_EventScript_MomBank:
+	message Johto_PlayersHouse1F_Text_MomWhatToDo
+	waitmessage
+	multichoice 0, 0, MULTI_MOM_BANK, FALSE
+	switch VAR_RESULT
+	case 0, Johto_PlayersHouse1F_EventScript_MomGet
+	case 1, Johto_PlayersHouse1F_EventScript_MomSave
+	case 2, Johto_PlayersHouse1F_EventScript_MomChange
+	goto Johto_PlayersHouse1F_EventScript_MomJustDoWhatYouCan
+
+Johto_PlayersHouse1F_EventScript_MomGet:
+	message Johto_PlayersHouse1F_Text_MomHowMuchTake
+	waitmessage
+	setvar VAR_0x8004, 1
+	special QzMomBankAmount
+	waitstate
+	call Johto_PlayersHouse1F_EventScript_MomAmountResult
+	goto_if_ne VAR_RESULT, 1, Johto_PlayersHouse1F_EventScript_MomBank
+	msgbox Johto_PlayersHouse1F_Text_MomTaken, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_PlayersHouse1F_EventScript_MomSave:
+	message Johto_PlayersHouse1F_Text_MomHowMuchSave
+	waitmessage
+	setvar VAR_0x8004, 0
+	special QzMomBankAmount
+	waitstate
+	call Johto_PlayersHouse1F_EventScript_MomAmountResult
+	goto_if_ne VAR_RESULT, 1, Johto_PlayersHouse1F_EventScript_MomBank
+	msgbox Johto_PlayersHouse1F_Text_MomStored, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_PlayersHouse1F_EventScript_MomAmountResult:
+	call_if_eq VAR_RESULT, 2, Johto_PlayersHouse1F_EventScript_MomHaventSaved
+	call_if_eq VAR_RESULT, 3, Johto_PlayersHouse1F_EventScript_MomWalletFull
+	call_if_eq VAR_RESULT, 4, Johto_PlayersHouse1F_EventScript_MomNotEnough
+	call_if_eq VAR_RESULT, 5, Johto_PlayersHouse1F_EventScript_MomBankFull
+	return
+
+Johto_PlayersHouse1F_EventScript_MomHaventSaved:
+	msgbox Johto_PlayersHouse1F_Text_MomHaventSaved, MSGBOX_DEFAULT
+	return
+
+Johto_PlayersHouse1F_EventScript_MomWalletFull:
+	msgbox Johto_PlayersHouse1F_Text_MomWalletFull, MSGBOX_DEFAULT
+	return
+
+Johto_PlayersHouse1F_EventScript_MomNotEnough:
+	msgbox Johto_PlayersHouse1F_Text_MomNotEnough, MSGBOX_DEFAULT
+	return
+
+Johto_PlayersHouse1F_EventScript_MomBankFull:
+	msgbox Johto_PlayersHouse1F_Text_MomBankFull, MSGBOX_DEFAULT
+	return
+
+Johto_PlayersHouse1F_EventScript_MomChange:
+	msgbox Johto_PlayersHouse1F_Text_MomSaveSome, MSGBOX_YESNO
+	setvar VAR_0x8004, 0
+	goto_if_eq VAR_RESULT, NO, Johto_PlayersHouse1F_EventScript_MomStopSaving
+	setvar VAR_0x8004, 1
+	special QzMomBankSetSaving
+	msgbox Johto_PlayersHouse1F_Text_MomStartSaving, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_PlayersHouse1F_EventScript_MomStopSaving:
+	special QzMomBankSetSaving
+Johto_PlayersHouse1F_EventScript_MomJustDoWhatYouCan:
+	msgbox Johto_PlayersHouse1F_Text_MomJustDoWhatYouCan, MSGBOX_DEFAULT
+	release
+	end
+
+@ Crystal's words (pokecrystal data/text/common_1.asm)
+Johto_PlayersHouse1F_Text_MomLeaving1:
+	.string "MOM: Wow, that's a cute MOéMON.\n"
+	.string "Where did you get it?\p"
+	.string "…\p"
+	.string "So, you're leaving on an adventure…\p"
+	.string "OK! I'll help too.\n"
+	.string "But what can I do for you?\p"
+	.string "I know! I'll save money for you.\p"
+	.string "On a long journey,\n"
+	.string "money's important.\p"
+	.string "Do you want me to save your money?$"
+
+Johto_PlayersHouse1F_Text_MomLeaving2:
+	.string "OK, I'll take care of your money.\p"
+	.string "…………$"
+
+Johto_PlayersHouse1F_Text_MomLeaving3:
+	.string "Be careful.\p"
+	.string "MOéMON are your friends.\n"
+	.string "You need to work as a team.\p"
+	.string "Now, go on!$"
+
+Johto_PlayersHouse1F_Text_MomAboutMoney:
+	.string "MOM: Hi! Welcome home!\n"
+	.string "You're trying very hard, I see.\p"
+	.string "I've kept your room tidy.\p"
+	.string "Or is this about your money?$"
+
+Johto_PlayersHouse1F_Text_MomWhatToDo:
+	.string "What do you want to do?$"
+
+Johto_PlayersHouse1F_Text_MomHowMuchSave:
+	.string "How much do you want to save?$"
+
+Johto_PlayersHouse1F_Text_MomHowMuchTake:
+	.string "How much do you want to take?$"
+
+Johto_PlayersHouse1F_Text_MomSaveSome:
+	.string "Do you want to save some money?$"
+
+Johto_PlayersHouse1F_Text_MomHaventSaved:
+	.string "You haven't saved that much.$"
+
+Johto_PlayersHouse1F_Text_MomWalletFull:
+	.string "You can't take that much.$"
+
+Johto_PlayersHouse1F_Text_MomNotEnough:
+	.string "You don't have that much.$"
+
+Johto_PlayersHouse1F_Text_MomBankFull:
+	.string "You can't save that much.$"
+
+Johto_PlayersHouse1F_Text_MomStartSaving:
+	.string "OK, I'll save your money.\n"
+	.string "Trust me!\p"
+	.string "{PLAYER}, stick with it!$"
+
+Johto_PlayersHouse1F_Text_MomStored:
+	.string "Your money's safe here!\n"
+	.string "Get going!$"
+
+Johto_PlayersHouse1F_Text_MomTaken:
+	.string "{PLAYER}, don't give up!$"
+
+Johto_PlayersHouse1F_Text_MomJustDoWhatYouCan:
+	.string "Just do what you can.$"
 
 @ Johto_PlayersHouse1F trigger at 9,2 (VAR_QZ_0x5003 == 1)
 Johto_PlayersHouse1F_EventScript_83E3B9F::

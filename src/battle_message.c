@@ -85,6 +85,8 @@ static const u8 sText_ItDoesntAffect[] = _("It doesn't affect\n{B_DEF_NAME_WITH_
 static const u8 sText_AttackerFainted[] = _("{B_ATK_NAME_WITH_PREFIX}\nfainted!\p");
 static const u8 sText_TargetFainted[] = _("{B_DEF_NAME_WITH_PREFIX}\nfainted!\p");
 static const u8 sText_PlayerGotMoney[] = _("{B_PLAYER_NAME} got ¥{B_BUFF1}\nfor winning!\p");
+static const u8 sText_PlayerGotMoneySentSomeToMom[] = _("{B_PLAYER_NAME} got ¥{B_BUFF1}\nfor winning!\lSent some to MOM!\p");   // Moemon Kai: Crystal's
+bool8 gMpMomShared;   // Moemon Kai: the last winnings went partly to MOM (battle_script_commands.c, mp_mombank.c)
 static const u8 sText_PlayerWhiteout[] = _("{B_PLAYER_NAME} is out of\nusable MOéMON!\p");
 static const u8 sText_PlayerWhiteout2[] = _("{B_PLAYER_NAME} whited out!{PAUSE_UNTIL_PRESS}");
 static const u8 sText_PreventsEscape[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX} prevents\nescape with {B_SCR_ACTIVE_ABILITY}!\p");
@@ -2600,6 +2602,9 @@ void BufferStringBattle(u16 stringID)
             stringPtr = MP_Coop_OtherWildOut(gBattlerTarget) ? sText_MpCoopGotchaGoOn : sText_MpCoopGotcha;
         else
             stringPtr = sText_GotchaPkmnCaughtPlayer;
+        break;
+    case STRINGID_PLAYERGOTMONEY:   // Moemon Kai: "Sent some to MOM!" when she kept a share (mp_mombank.c)
+        stringPtr = gMpMomShared ? sText_PlayerGotMoneySentSomeToMom : sText_PlayerGotMoney;
         break;
     case STRINGID_PKMNBROKEFREE:
     case STRINGID_ITAPPEAREDCAUGHT:

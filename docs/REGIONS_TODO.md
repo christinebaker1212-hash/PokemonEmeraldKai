@@ -54,7 +54,9 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       JOHTO's words and his battles' name; in a friend's room the host's name (MPR_RULES, protocol 73) and no naming
       screen; tests johto_rival_starter, johto_rival_name, johto_rival_name_online)
 - [x] No tree-cutting prompt in a new game without the HM and badge (Quetzal's check said yes to everything)
-- [ ] MOM's money saving (Crystal) and MY ROOM decorating on the Secret Base logic
+- [~] MOM's money saving (Crystal) and MY ROOM decorating on the Secret Base logic ([x] the BANK OF MOM: her offer as the
+      player leaves, a quarter of JOHTO / KANTO winnings, GET / SAVE / CHANGE at home with Crystal's digit entry and words:
+      src/mp/mp_mombank.c, test johto_mom_bank; [ ] MY ROOM)
 
 ## HOENN
 - [x] HOENN's legendaries only in HOENN (KANTO's BIRTH ISLAND and Quetzal's CINNABAR chamber empty)
@@ -94,6 +96,12 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       gives way to its Trainer: sprite->mpUnder, gba_easy_draw.c; test follow_behind)
 - [x] OPTIONS: RETURN TO MAIN MENU (GAME tab, from the field: the save prompt, declined: sure?, then the save read again
       and the title screen; the PC build's soft reset quits, so it's main_menu.c MP_ReturnToTitleNow; test options_title)
+
+## The user's additions (2026-11-02, later)
+- [ ] Legendaries: FireRed's NAVEL ROCK and BIRTH ISLAND static encounters and Emerald's NAVEL ROCK and FARAWAY ISLAND
+      ones stay, whatever region the legendary is from (they were in the original games); exclusivity is for the others
+- [ ] Platinum's remaining songs: the user's Platinum.zip (SINNOH's missing songs, task list SINNOH "songs")
+- [ ] Time of day looks like Platinum's in every region: its color tinting by the hour
 
 ## Decisions
 (each assumption made while working through the list, with why)

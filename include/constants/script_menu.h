@@ -132,6 +132,7 @@
 #define MULTI_REGIONS_FROM_JOHTO           226
 #define MULTI_REGIONS_FROM_KANTO           227
 #define MULTI_REGIONS_FROM_SINNOH          228
+#define MULTI_MOM_BANK                     229   // Moemon Kai: Crystal's BANK OF MOM (mp_mombank.c)
 
 // Lilycove SS Tidal Multichoice Selections
 #define SSTIDAL_SELECTION_SLATEPORT        0
