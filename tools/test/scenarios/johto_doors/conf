@@ -1,0 +1,7 @@
+# JOHTO's doors animate (src/mp/mp_frlgdoor.c JohtoDoor: frames made from the closed door, its panel rising and the
+# doorway going dark): the player's house in NEW BARK TOWN. Shots door_*.png.
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=25:40"
+EXPECT_A=("frlg door: metatile" "opens" "where map 35.1")
+UNEXPECT_A=("[crash]" "isn't FireRed's")
