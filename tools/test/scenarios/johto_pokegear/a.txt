@@ -18,6 +18,7 @@ wait 8
 pressuntil A pokegear 600
 wait 30
 shot clock
+mp pokegear
 press RIGHT 2
 wait 30
 shot map
@@ -33,6 +34,8 @@ press A 2
 wait 30
 mp pokegear
 shot call
+wait 90
+shot calltimer
 press A 2
 wait 20
 press A 2
@@ -49,7 +52,24 @@ press A 2
 wait 20
 press RIGHT 2
 wait 30
-press A 2
+press UP 2
+wait 6
+press UP 2
+wait 6
+press UP 2
+wait 6
+press UP 2
+wait 6
+press UP 2
+wait 6
+press UP 2
+wait 6
+press UP 2
+wait 6
+press UP 2
+wait 6
+press UP 2
+wait 6
 wait 200
 shot radio
 mp pokegear

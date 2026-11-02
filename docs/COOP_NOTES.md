@@ -4421,8 +4421,12 @@ Crystal's fruit trees (pokecrystal engine/events/fruit_trees.asm) in Quetzal's b
   day, 0x52E5 the patches planted. Debug: mp apricorn. Test johto_apricorn.
 
 ## JOHTO's POKéGEAR (1.68.0)
-src/mp/mp_pokegear.c: a screen of its own (BG0 windows on the device's frame color as the backdrop): tabs CLOCK /
-MAP / PHONE / RADIO (LEFT / RIGHT), B off. CLOCK: the day and time from the game's clock (no setting). MAP:
+src/mp/mp_pokegear.c: a screen of its own, drawn as a 2000s multifunction phone after the user's Crystal screens
+(docs/user_images 65): Crystal's orange body (BG1, one solid tile) round a green backlit LCD (BG0: four windows, each
+under 448 tiles: a bigger one didn't copy whole); the status bar (signal bars, the four card icons from ASCII bitmaps
+with the open one inverted, the time, the battery), Crystal's double-ruled message box, soft keys ({A_BUTTON}CALL /
+EXIT{B_BUTTON}); big seven-segment digits on the CLOCK (Digit()); a black FM dial with a red needle (UP / DOWN, 0.0-20.0
+in 0.5 steps, a station only on its frequency). LEFT / RIGHT change cards, B off (any button on the CLOCK). CLOCK: the day and time from the game's clock (no setting). MAP:
 FieldInitRegionMap, back to the POKéGEAR. PHONE: MOM (Crystal's mom.asm: where you are; her savings, YES / NO keeps,
 starts or stops her saving: mp_mombank.c MP_MomBank_*) and PROF. ELM (Crystal's elm.asm lines by JOHTO badges).
 RADIO: 4.5 OAK's POKéMON TALK (MUS_JOHTO_PROF_OAK; MARY and OAK in Crystal's _OPT_ words, a POKéMON of the region's
