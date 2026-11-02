@@ -1,0 +1,26 @@
+pressuntil A field 5000
+wait 30
+mp warp 37,79,47,4
+wait 200
+mp face up
+press A 2
+pressuntil A yesno 900
+wait 10
+press A 2
+pressuntil A yesno 900
+wait 10
+press A 2
+wait 120
+shot tu_party
+wait 60
+shot tu_party2
+press A 2
+wait 40
+press A 2
+wait 120
+shot tu_after
+mash A 40 20
+pressuntil A field 3000
+mp getflag 0x21DF
+mp moves 0
+quit

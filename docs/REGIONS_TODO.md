@@ -11,7 +11,8 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [ ] Doorways too wide: one tile wide
 - [ ] Door opening / closing animations
 - [ ] Going down some ladders puts the player on top of the ladder, not in front of it
-- [ ] MEGA PUNCH / MEGA KICK people outside MT. MOON give their TMs (A4)
+- [x] MEGA PUNCH / MEGA KICK people outside MT. MOON: FireRed's two move tutors on Kai's tutor flow, FireRed's words
+      (Quetzal's said "move training is handled from your team menu"; flags 0x21DF / 0x21DC; test kanto_tutors)
 - [ ] CERULEAN: TRIPLE TRIAD first; people who offer a Yu-Gi-Oh! / POKéMON starter deck get words by their personality
 - [ ] VIRIDIAN's shopping area (RARE CANDY, Z / MEGA items whatever GENERATION): remove (CELADON DEPT. covers it)
 - [ ] S.S. ANNE: its sprite, FireRed's departure scene, can't be boarded once gone
@@ -86,3 +87,5 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
   words (no original lines there) and simply add nothing. The S.S. ANNE CAPTAIN's METAL COAT (Quetzal's) is gone.
 - JOHTO's whirlpools: Kai has no WHIRLPOOL HM (only level-up learners), so one opens for the GLACIERBADGE and a Pokémon
   with WHIRLPOOL or SURF until A4 adds an HM for it (qz_specials.c).
+- ROUTE 4's MEGA PUNCH / MEGA KICK people are move tutors in FireRed (not TM givers), so they teach once, as FireRed's
+  and Kai's tutors do; Quetzal's other "move training from the team menu" stand-ins are untouched until each is checked.

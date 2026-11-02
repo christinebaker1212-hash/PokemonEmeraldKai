@@ -31,6 +31,8 @@
 #define FLAG_SINNOH_HAS_PARTNER 0x3D3C   // Platinum's walking partner (SetHasPartner)
 #define FLAG_SINNOH_PLATINUM_STORY 0x3D3B   // this save plays Platinum's own story (its converted map scripts, triggers and story people: tools/sinnoh/gen_scripts.py)
 #define VAR_SINNOH_ARRIVAL  0x52F0   // 1: just off the first boat to SINNOH (the harbor sailor takes them to TWINLEAF), 2: in SINNOH, 3: BARRY's mom's visit played (TWINLEAF's house 1F)
+#define FLAG_KANTO_TUTOR_MEGA_PUNCH 0x21DF   // FireRed's ROUTE 4 tutors (free in Quetzal's KANTO flags)
+#define FLAG_KANTO_TUTOR_MEGA_KICK  0x21DC
 #define FLAG_SINNOH_HIDDEN  0x3FFF   // always set (s3d.c S3D_LayoutBlocks): Platinum's objects that aren't people here
 #define REGION_FLAG_BYTES  ((REGION_FLAGS_END - REGION_FLAGS_START) / 8)
 #define REGION_VARS_START  0x5000
