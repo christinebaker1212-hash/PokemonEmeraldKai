@@ -3979,6 +3979,15 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   daily POKéMON: each area one of 32 picks a day (day + Trainer ID) in the 5% slots 6-7 while the SAFARI GAME is on,
   the second list after SINNOH's LEAGUE (Sinnoh_GreatMarshDaily; `mp marshdaily`). The marsh is 128x160 tiles:
   MAX_MAP_DATA_SIZE is 32768 (fieldmap.h; a map past it gets no grid at all: no walls, grass or warps). Test sinnoh_marsh.
+- BERRY patches (2026-11-02, src/mp/mp_berrytrees.c): Platinum's 118 soil patches (OBJ_EVENT_GFX_BERRY_SOIL, its
+  patch number in data[0]) are the game's own BERRY trees (BerryTreeScript, MOVEMENT_TYPE_BERRY_TREE_GROWTH: what Kai
+  has, SINNOH uses, so the WAILMER PAIL waters them), numbered 128 + Platinum's patch number (gen_maps.py
+  SINNOH_BERRY_TREES). The save's berryTrees[128] is full, so trees 128-255 live in "<save>.region" chunk BTRE
+  (berry.c GetBerryTreeInfo; BerryTreeTimeUpdate grows both sets on the player's own clock). A new game plants
+  Platinum's first BERRY in each, ripe, with Platinum's yield (include/data/berry_init.h, fetched since PARTS 17:
+  gSinnohBerryInit from contest_data.py berry_lines). An empty SINNOH patch shows the soil mound (3D maps have no soil
+  tile: event_object_movement.c). Test sinnoh_berry. Note: JOHTO's Quetzal trees (90-109) overlap the GARDEN farm's
+  100-119 (docs/REGIONS_TODO.md, JOHTO).
 - The roamers (2026-11-02, src/sinnoh/s3d_roamer.c from Platinum's roaming_pokemon.c, TryEncounterRoamer and
   roamer_after_battle.c): six slots in Platinum's ROAMING_SLOT_* order (MESPRIT 50, CRESSELIA 50, DARKRAI 40, unused as
   Platinum's, MOLTRES / ZAPDOS / ARTICUNO 60), set going by Platinum's own scripts (`sinnoh SINNOH_ROAMER, slot`, op 60):

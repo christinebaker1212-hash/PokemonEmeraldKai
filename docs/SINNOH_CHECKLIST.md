@@ -69,14 +69,16 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       sinnoh_lift_iron)
 - [x] The elevators in Platinum's own scripts: the attendants' words, GetFloorsAbove, the "Current Floor" window,
       SetSpecialLocation, PlayElevatorAnimation; the VISTA LIGHTHOUSE's ride by itself (sinnoh_elevator)
-- [ ] Berry soil patches (Platinum's own berry spots; the TV's BERRY LOOKOUT waits for them)
+- [x] BERRY soil patches: Platinum's 118, its first BERRIES ripe, the game's own BERRY trees (128+ in the region
+      sidecar: src/mp/mp_berrytrees.c) (sinnoh_berry); the TV's BERRY LOOKOUT still to come
 - [x] The roamers: MESPRIT, CRESSELIA and PROF. OAK's birds in Platinum's own scripts (ActivateRoamingPokemon,
       DrawPokemonPreview, FlickerObject), their moves, encounters, HP kept, the HALL OF FAME's reset, the TV's ROAMER
       NEWS FLASH (src/sinnoh/s3d_roamer.c) (sinnoh_roamer)
 - [x] The GREAT MARSH tram (MoveGreatMarshTram, CheckGreatMarshTramLocation: src/sinnoh/s3d_tram.c) (sinnoh_tram)
 - [x] The REGI ruins in Platinum's own scripts (ActivateRegiRuinsDot, the statue's quake ScrCmd_29F, FLAG_GAME_COMPLETED;
       REGIGIGAS's check: any REGIGIGAS, Platinum's being a DS event's) (sinnoh_regi); the OLD CHATEAU's ROTOM (sinnoh_rotom)
-- [ ] ROTOM's room (GetPartyRotomCountAndFirst)
+- [x] ROTOM's room in Platinum's own scripts: as Platinum's without the ROTOM distribution (a DS event, closed): no
+      appliances, the notebooks and PROF. ROWAN (sinnoh_rotom_room)
 - [x] UNOWN messages in Platinum's UNOWN font (MessageUnown), the letters seen (GetUnownFormsSeenCount) (sinnoh_unown)
 - [ ] The VILLA (Resort Area) and its furniture
 - [ ] The Frontier Brains' and the HALL MATRON's teams

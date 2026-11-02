@@ -3340,6 +3340,19 @@ bool8 MovementType_BerryTreeGrowth_Normal(struct ObjectEvent *objectEvent, struc
             FieldEffectStart(FLDEFF_BERRY_TREE_GROWTH_SPARKLE);
             sprite->animNum = berryStage;
         }
+        if (objectEvent->trainerRange_berryTreeId >= BERRY_TREES_COUNT)
+        {
+            // Moemon Kai: SINNOH's soil patches (mp_berrytrees.c) have no soil tile under them in 3D: their soil shows
+            objectEvent->invisible = FALSE;
+            sprite->invisible = FALSE;
+            if (OBJ_GFX_ID(objectEvent) != gBerryTreeObjectEventGraphicsIdTablePointers[0][0])
+            {
+                ObjectEventSetGraphicsId(objectEvent, gBerryTreeObjectEventGraphicsIdTablePointers[0][0]);
+                sprite->images = gBerryTreePicTablePointers[0];
+                sprite->oam.paletteNum = gBerryTreePaletteSlotTablePointers[0][0];
+                StartSpriteAnim(sprite, 0);
+            }
+        }
         return FALSE;
     }
     objectEvent->invisible = FALSE;

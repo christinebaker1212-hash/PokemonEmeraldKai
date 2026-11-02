@@ -194,6 +194,7 @@ CLOSED_PEOPLE = {'Sinnoh_Underground': (3, 4, 5)}
 # hide flag all the same (the Underground's ROARK: its OnFrame intro, gen_scripts.py's map scripts)
 SCENE_PEOPLE = {'Sinnoh_Underground': (17,)}
 
+SINNOH_BERRY_TREES = 128   # (the BERRY trees past the save's own 128: src/mp/mp_berrytrees.c)
 OBSTACLES = {'OBJ_EVENT_GFX_CUT_TREE': 'EventScript_CutTree', 'OBJ_EVENT_GFX_ROCK_SMASH': 'EventScript_RockSmash',
              'OBJ_EVENT_GFX_STRENGTH_BOULDER': 'EventScript_StrengthBoulder'}
 
@@ -221,6 +222,15 @@ def people(p, root, have):
             # (one who battles when talked to: gen_trainers.py TALK; no sight)
             script = gen_trainers.label(talk)
             hide = None if not isinstance(hide, str) or not hide.startswith('FLAG_') else hide
+        if o['graphics_id'] == 'OBJ_EVENT_GFX_BERRY_SOIL' and inside(p, o['x'], o['z']):
+            # Platinum's BERRY soil: the game's own BERRY tree, its number SINNOH_BERRY_TREES + Platinum's patch number
+            # (src/mp/mp_berrytrees.c keeps SINNOH's trees: no room in the save's 128)
+            out.append({'graphics_id': 'OBJ_EVENT_GFX_BERRY_TREE', 'x': o['x'] - p['x0'] * 32, 'y': o['z'] - p['z0'] * 32,
+                        'elevation': 3, 'movement_type': 'MOVEMENT_TYPE_BERRY_TREE_GROWTH', 'movement_range_x': 0,
+                        'movement_range_y': 0, 'trainer_type': 'TRAINER_TYPE_NONE',
+                        'trainer_sight_or_berry_tree_id': str(SINNOH_BERRY_TREES + (o.get('data') or [0])[0]),
+                        'script': 'BerryTreeScript', 'flag': '0'})
+            continue
         obstacle = OBSTACLES.get(o['graphics_id'])
         if obstacle and gfx and inside(p, o['x'], o['z']):
             # a CUT tree, a ROCK SMASH rock or a STRENGTH boulder: the game's own script; no flag, so it's back each

@@ -1707,8 +1707,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         // givebadges [REGION] - all 8 badges (HOENN's, or region 1 JOHTO / 2 KANTO's)
         int b, region = *arg ? atoi(arg) : 0;
+        void MP_HmRescue_GiveAll(void);
         for (b = 0; b < 8; b++)
             FlagSet(region ? MP_Region_BadgeFlag(region, b) : FLAG_BADGE01_GET + b);
+        if (!region)
+            MP_HmRescue_GiveAll();   // (the HMs a player with them has had: no HM rescue in tests that skip the story)
     }
     else if (strcmp(cmd, "photo") == 0)
     {

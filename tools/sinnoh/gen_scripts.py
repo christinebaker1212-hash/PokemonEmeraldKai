@@ -581,6 +581,14 @@ class FileConverter:
         if cmd == 'SetPlayerHeightCalculationEnabled':
             # (the GREAT MARSH's tram: the player rides at the platform's height, s3d_tram.c)
             return [self.sinnoh(SINNOH_TRAM, 3, 1 if a[0] == 'TRUE' else 0)]
+        if cmd == 'GetPartyRotomCountAndFirst':
+            # (ROTOM in another form than its own: none, the forms coming only from the ROTOM distribution, a DS event
+            # closed here: ROTOM's room has no appliances, as Platinum's without it)
+            return ['setvar %s, 0' % self.var(a[0]), 'setvar %s, 255' % self.var(a[1])]
+        if cmd == 'GetRotomFormsInSave':
+            return ['setvar %s, 1' % self.var(x) for x in a[:5]]
+        if cmd == 'SetRotomForm':
+            return []
         if cmd == 'ActivateRoamingPokemon':
             slots = [x.strip() for x in open(os.path.join(self.root, 'generated/roaming_slots.txt')) if x.strip()]
             return [self.sinnoh(SINNOH_ROAMER, slots.index(a[0]))]
@@ -841,6 +849,11 @@ class FileConverter:
                 raise Unsupported('warp to %s' % a[0])
             # (Platinum's script goes on on the new map: src/sinnoh/s3d_scrcmd.c SINNOH_WARP_CONTINUE)
             go = '%s%s__warped%d' % (PREFIX, self.low, self.next_local())
+            if self.is_var(a[1]) and self.is_var(a[2]):
+                # (a place the script worked out, Platinum's tiles: GetPlayerMapPos, the warp in place)
+                x, y = self.var(a[1]), self.var(a[2])
+                return ['subvar %s, %d' % (x, o[1]), 'subvar %s, %d' % (y, o[2]), self.sinnoh(SINNOH_WARP_CONTINUE),
+                        'goto %s' % go, 'warp %s, %s, %s' % (o[0], x, y), 'waitstate', '%s:' % go]
             return [self.sinnoh(SINNOH_WARP_CONTINUE), 'goto %s' % go,
                     'warp %s, %d, %d' % (o[0], int(self.value(a[1])) - o[1], int(self.value(a[2])) - o[2]), 'waitstate',
                     '%s:' % go]

@@ -1,0 +1,28 @@
+pressuntil A field 5000
+wait 30
+mp warp 40,8,18,44
+wait 200
+mp face up
+shot b_ripe
+press A 2
+pressuntil A yesno 900
+wait 10
+press A 2
+wait 60
+pressuntil B field 900
+wait 30
+mp checkitem 139
+shot b_picked
+press A 2
+pressuntil A yesno 900
+wait 10
+press A 2
+wait 150
+press A 2
+wait 120
+mash A 6 30
+pressuntil B field 900
+wait 30
+mp checkitem 139
+shot b_planted
+quit

@@ -1,0 +1,16 @@
+pressuntil A field 5000
+wait 30
+mp warp 43,18,13,6
+wait 200
+mp face up
+press A 2
+wait 60
+shot rr_notebook
+pressuntil A yesno 600
+wait 10
+press A 2
+wait 60
+shot rr_read
+mash B 20 10
+pressuntil B field 2000
+quit

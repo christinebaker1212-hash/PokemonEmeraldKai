@@ -287,6 +287,14 @@ void MP_HmRescue_Update(void)
     }
 }
 
+// The harness: "mp givebadges" (HOENN's eight) also counts every owed HM as given, as a player with the badges has them
+void MP_HmRescue_GiveAll(void)
+{
+    u8 i;
+    for (i = 0; i < OWED_COUNT; i++)
+        FlagSet(sOwed[i].flag);
+}
+
 // The harness: "mp hmrescue" lists what's owed
 void MP_HmRescue_Debug(void)
 {

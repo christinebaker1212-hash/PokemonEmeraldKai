@@ -15,6 +15,9 @@ void Sinnoh_UnownReset(void);
 const void *Sinnoh_RoamerData(u32 *size);   // (the roaming POKéMON: chunk ROAM, s3d_roamer.c)
 void Sinnoh_RoamerLoad(const void *data, u32 size);
 void Sinnoh_RoamerReset(void);
+const void *MP_RegionBerryTrees_Data(u32 *size);   // (the BERRY trees past the save's 128: chunk BTRE, mp_berrytrees.c)
+void MP_RegionBerryTrees_Load(const void *data, u32 size);
+void MP_RegionBerryTrees_Reset(void);
 #include "battle_pyramid.h"
 #include "event_data.h"
 #include "mp.h"
@@ -266,6 +269,7 @@ void MP_Region_StartNewGame(void)
     Sinnoh_UndergroundReset();
     Sinnoh_UnownReset();
     Sinnoh_RoamerReset();
+    MP_RegionBerryTrees_Reset();
     MP_Region_Arrive(sStartRegion);
     if (sStartRegion == REGION_SINNOH)
     {
@@ -433,6 +437,15 @@ void MP_Region_WriteSidecar(void)
             fwrite(ro, size, 1, f);
         }
         {
+            // the BERRY trees past the save's 128 (src/mp/mp_berrytrees.c)
+            u32 size;
+            const void *bt = MP_RegionBerryTrees_Data(&size);
+            c[0] = CHUNK('B', 'T', 'R', 'E');
+            c[1] = size;
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(bt, size, 1, f);
+        }
+        {
             u32 format = MP_SAVE_FORMAT;   // the save's own layout version (mp_savefix.h)
             c[0] = CHUNK('S', 'A', 'V', 'F');
             c[1] = sizeof(format);
@@ -538,6 +551,12 @@ static bool8 LoadFrom(const char *path)
                 u8 buf[4096];
                 if (fread(buf, c[1], 1, f) == 1)
                     Sinnoh_TvLoad(buf, c[1]);
+            }
+            else if (c[0] == CHUNK('B', 'T', 'R', 'E') && c[1] <= 2048)
+            {
+                u8 buf[2048];
+                if (fread(buf, c[1], 1, f) == 1)
+                    MP_RegionBerryTrees_Load(buf, c[1]);
             }
             else if (c[0] == CHUNK('R', 'O', 'A', 'M') && c[1] <= 512)
             {
@@ -647,6 +666,7 @@ void MP_Region_LoadFromSave(void)
     Sinnoh_UndergroundReset();
     Sinnoh_UnownReset();
     Sinnoh_RoamerReset();
+    MP_RegionBerryTrees_Reset();
     for (i = 0; i <= 3; i++)
     {
         if (i == 0)

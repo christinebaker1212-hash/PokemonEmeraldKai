@@ -280,9 +280,20 @@ def mining_lines(root):
             # (the roamers' state variables, Platinum's ROAMING_SLOT_* order: s3d_roamer.c)
             + ['gSinnohRoamerStateVars::', '\t.2byte %s' % ', '.join(
                 '0x%X' % (ids.var(root, 'VAR_ROAMING_%s_STATE' % n) or 0)
-                for n in ('MESPRIT', 'CRESSELIA', 'DARKRAI', 'MOLTRES', 'ZAPDOS', 'ARTICUNO'))])
+                for n in ('MESPRIT', 'CRESSELIA', 'DARKRAI', 'MOLTRES', 'ZAPDOS', 'ARTICUNO'))]
+            + berry_lines(root))
+
+
+def berry_lines(root):
+    """gSinnohBerryInit: the BERRY each of Platinum's 118 soil patches starts with and its yield (its
+    include/data/berry_init.h, by patch number: src/mp/mp_berrytrees.c)"""
+    path = os.path.join(root, 'include/data/berry_init.h')
+    rows = re.findall(r'berryItemID = (ITEM_\w+), \.yield = (\d+)', open(path).read()) if os.path.exists(path) else []
+    return (['\t.balign 2', 'gSinnohBerryInit::', '\t.2byte %d' % len(rows)]
+            + ['\t.2byte %s, %s' % r for r in rows])
 
 
 def mining_stub():
     return ['\t.balign 2', 'gSinnohMiningObjects::', '\t.2byte 0', 'gSinnohUndergroundFlags::', '\t.2byte 0, 0',
-            'gSinnohGameCompletedFlag::', '\t.2byte 0', 'gSinnohRoamerStateVars::', '\t.2byte 0, 0, 0, 0, 0, 0']
+            'gSinnohGameCompletedFlag::', '\t.2byte 0', 'gSinnohRoamerStateVars::', '\t.2byte 0, 0, 0, 0, 0, 0',
+            'gSinnohBerryInit::', '\t.2byte 0']

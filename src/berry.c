@@ -1261,8 +1261,11 @@ struct BerryTree *GetBerryTreeInfo(u8 id)
 {
     // Moemon Co-op: the MOéMON GARDEN's farm plots show the room host's farm online (mp_farm.c)
     struct BerryTree *farm = MP_Farm_Tree(id);
+    struct BerryTree *MP_RegionBerryTree(u8 id);
     if (farm != NULL)
         return farm;
+    if (id >= BERRY_TREES_COUNT)   // Moemon Kai: the trees past the save's 128 (SINNOH's: mp_berrytrees.c)
+        return MP_RegionBerryTree(id);
     return &gSaveBlock1Ptr->berryTrees[id];
 }
 
@@ -1347,14 +1350,25 @@ static bool32 BerryTreeGrow(struct BerryTree *tree)
     return TRUE;
 }
 
+static void GrowTrees(struct BerryTree *trees, u32 count, s32 minutes);
+
 void BerryTreeTimeUpdate(s32 minutes)
 {
-    int i;
+    struct BerryTree *MP_RegionBerryTrees(u32 *count);
+    u32 count;
+    struct BerryTree *more = MP_RegionBerryTrees(&count);
+    GrowTrees(gSaveBlock1Ptr->berryTrees, BERRY_TREES_COUNT, minutes);
+    GrowTrees(more, count, minutes);   // Moemon Kai: the trees past the save's 128 (mp_berrytrees.c)
+}
+
+static void GrowTrees(struct BerryTree *trees, u32 count, s32 minutes)
+{
+    u32 i;
     struct BerryTree *tree;
 
-    for (i = 0; i < BERRY_TREES_COUNT; i++)
+    for (i = 0; i < count; i++)
     {
-        tree = &gSaveBlock1Ptr->berryTrees[i];
+        tree = &trees[i];
 
         if (tree->berry && tree->stage && !tree->stopGrowth)
         {
