@@ -175,6 +175,15 @@ static int rip_load_inner(Rip *r, const char *path, const char *biosDir, int gbs
         return 0;
     }
     double secs = r->length > 0 ? r->length + r->fade : (seconds > 0 ? seconds : 180);
+    // MMS_RIP_SECONDS: record at least this long (a song whose tags give less than two of its loops: the loop is
+    // read from the sound repeating); the tags' fade then goes at the end of the longer recording
+    double fadeAt = r->length;
+    if (getenv("MMS_RIP_SECONDS") && atof(getenv("MMS_RIP_SECONDS")) > secs) {
+        secs = atof(getenv("MMS_RIP_SECONDS"));
+        fadeAt = secs - (r->fade > 0 ? r->fade : 0);
+        if (r->length > 0)
+            r->length = fadeAt;   // (the song as recorded, up to the fade: where its loop is looked for)
+    }
     if (secs > RIP_MAX_SECONDS) secs = RIP_MAX_SECONDS;
     if (secs < 1) secs = 1;
     // one row per game frame
@@ -225,7 +234,7 @@ static int rip_load_inner(Rip *r, const char *path, const char *biosDir, int gbs
     }
     // the tags' fade-out, for the original-instruments player
     if (r->length > 0 && r->fade > 0) {
-        long fs = (long)(r->length * e.rate), fe = (long)((r->length + r->fade) * e.rate);
+        long fs = (long)(fadeAt * e.rate), fe = (long)((fadeAt + r->fade) * e.rate);
         for (long i = fs; i < r->pcmFrames; i++) {
             float g = i >= fe ? 0.0f : 1.0f - (float)(i - fs) / (float)(fe - fs);
             r->pcm[i * 2] = (int16_t)(r->pcm[i * 2] * g);

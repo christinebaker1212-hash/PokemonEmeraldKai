@@ -168,6 +168,8 @@ moemon_music_studio [FILE]                          the window (FILE: .mid, .mms
 moemon_music_studio --original RIP OUT.wav           the rip's own sound (its emulator); MMS_BIOS = BIOS folder
 moemon_music_studio --render IN OUT.wav [SECONDS]   to the loop end, or SECONDS
 moemon_music_studio --export IN OUT.kaisong [SONG[@PLACE]]   OUT a folder: named for SONG@PLACE, and its SONG_TABLE.md
+                                                     (prints the window's warnings; MMS_RIP_SECONDS=N records a rip at
+                                                     least N s, for a song whose tags hold less than two of its loops)
 moemon_music_studio --song-table DIR                 DIR/SONG_TABLE.md for the .kaisong files in DIR
 moemon_music_studio --decomp IN DIR
 moemon_music_studio --save IN OUT.mmsproj [SONG]
