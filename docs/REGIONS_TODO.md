@@ -15,7 +15,9 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [ ] CERULEAN: TRIPLE TRIAD first; people who offer a Yu-Gi-Oh! / POKéMON starter deck get words by their personality
 - [ ] VIRIDIAN's shopping area (RARE CANDY, Z / MEGA items whatever GENERATION): remove (CELADON DEPT. covers it)
 - [ ] S.S. ANNE: its sprite, FireRed's departure scene, can't be boarded once gone
-- [ ] The CUT man gives HM01 (not Quetzal's flag); every region: an HM never given twice, words for that case
+- [~] The CUT man gives HM01 (not Quetzal's flag): the S.S. ANNE CAPTAIN, FireRed's (test hm_once); every region: an HM
+      never given twice (item.c MP_PlayerHasHm; HOENN's eight givers say so: EventScript_GiveHmOnce); KANTO's and
+      JOHTO's other HM givers still teach Quetzal's way
 - [ ] Water animates
 - [x] The CUT tree east of CERULEAN (to ROUTE 9 / ROCK TUNNEL) can be cut (test kanto_cut_tree)
 
@@ -76,3 +78,6 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - SINNOH released before it's 100%: the parts still open need art or songs that don't exist yet (contest stage art,
   Platinum songs the game lacks) or are large (the DISTORTION WORLD, the full story test); a release with what's done and
   the KANTO / JOHTO fixes is more use to players than waiting. SINNOH's remaining list stays in docs/SINNOH_CHECKLIST.md.
+- An HM a player already has (BAG, PC or held) is never added again (item.c AddBagItem). HOENN's and KANTO's givers
+  run EventScript_GiveHmOnce, which says "Oh! You're already carrying <HM>..." instead; SINNOH's givers keep Platinum's
+  words (no original lines there) and simply add nothing. The S.S. ANNE CAPTAIN's METAL COAT (Quetzal's) is gone.

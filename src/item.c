@@ -233,12 +233,35 @@ bool8 CheckBagHasSpace(u16 itemId, u16 count)
     return TRUE;
 }
 
+// Moemon Kai: the player has this HM already: in the BAG, the PC or held by a party Pokémon (a held HM never leaves
+// the player: mp_heldhm.c)
+bool8 MP_PlayerHasHm(u16 itemId)
+{
+    u8 i;
+    if (itemId < ITEM_HM01 || itemId > ITEM_HM08)
+        return FALSE;
+    if (CheckBagHasItem(itemId, 1) || CheckPCHasItem(itemId, 1))
+        return TRUE;
+    for (i = 0; i < PARTY_SIZE; i++)
+        if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) && GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM) == itemId)
+            return TRUE;
+    return FALSE;
+}
+
+// (scripts: VAR_0x8004 an HM -> VAR_RESULT)
+u16 MP_PlayerHasHmVar(void)
+{
+    return MP_PlayerHasHm(gSpecialVar_0x8004);
+}
+
 bool8 AddBagItem(u16 itemId, u16 count)
 {
     u8 i;
 
     if (GetItemPocket(itemId) == POCKET_NONE)
         return FALSE;
+    if (MP_PlayerHasHm(itemId))   // Moemon Kai: an HM is never had twice (each region gives its own: SINNOH's in
+        return TRUE;              // Platinum's words; the others say so: EventScript_GiveHmOnce)
 
     // check Battle Pyramid Bag
     if (CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE || FlagGet(FLAG_STORING_ITEMS_IN_PYRAMID_BAG) == TRUE)

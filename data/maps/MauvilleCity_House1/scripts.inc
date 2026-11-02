@@ -6,7 +6,8 @@ MauvilleCity_House1_EventScript_RockSmashDude::
 	faceplayer
 	goto_if_set FLAG_RECEIVED_HM_ROCK_SMASH, MauvilleCity_House1_EventScript_ReceivedRockSmash
 	msgbox MauvilleCity_House1_Text_ImRockSmashDudeTakeThis, MSGBOX_DEFAULT
-	giveitem ITEM_HM_ROCK_SMASH
+	setvar VAR_0x8004, ITEM_HM_ROCK_SMASH
+	call EventScript_GiveHmOnce   @ Moemon Kai: not if another region gave it
 	setflag FLAG_RECEIVED_HM_ROCK_SMASH
 	setflag FLAG_HIDE_ROUTE_111_ROCK_SMASH_TIP_GUY
 	msgbox MauvilleCity_House1_Text_ExplainRockSmash, MSGBOX_DEFAULT

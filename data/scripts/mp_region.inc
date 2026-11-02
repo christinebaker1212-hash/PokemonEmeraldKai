@@ -348,3 +348,24 @@ EventScript_SinnohSealShop_NoMoney::
 EventScript_SinnohSealShop_End::
 	closemessage
 	return
+
+@ Moemon Kai: an HM handed over unless the player has it already (from another region's giver: the BAG, the PC or a
+@ held one: item.c MP_PlayerHasHm). VAR_0x8004 the HM; VAR_RESULT TRUE if it was given
+EventScript_GiveHmOnce::
+	specialvar VAR_RESULT, MP_PlayerHasHmVar
+	goto_if_eq VAR_RESULT, TRUE, EventScript_GiveHmOnce_Had
+	giveitem VAR_0x8004
+	setvar VAR_RESULT, TRUE
+	return
+
+EventScript_GiveHmOnce_Had:
+	bufferitemname STR_VAR_1, VAR_0x8004
+	msgbox Text_GiveHmOnce_Had, MSGBOX_DEFAULT
+	setvar VAR_RESULT, FALSE
+	return
+
+Text_GiveHmOnce_Had:
+	.string "Oh! You're already carrying\n"
+	.string "{STR_VAR_1}.\p"
+	.string "Then there's nothing more I can give\n"
+	.string "you. Your MOéMON know the way!$"

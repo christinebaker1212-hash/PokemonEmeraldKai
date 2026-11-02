@@ -128,7 +128,8 @@ Route119_EventScript_DefeatedBrendan::
 	end
 
 Route119_EventScript_GiveFlyHM::
-	giveitem ITEM_HM_FLY
+	setvar VAR_0x8004, ITEM_HM_FLY
+	call EventScript_GiveHmOnce   @ Moemon Kai: not if another region gave it
 	setflag FLAG_RECEIVED_HM_FLY
 	return
 

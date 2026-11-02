@@ -19,7 +19,8 @@ PetalburgCity_WallysHouse_OnFrame:
 PetalburgCity_WallysHouse_EventScript_GiveHMSurf::
 	lockall
 	msgbox PetalburgCity_WallysHouse_Text_PleaseExcuseUs, MSGBOX_DEFAULT
-	giveitem ITEM_HM_SURF
+	setvar VAR_0x8004, ITEM_HM_SURF
+	call EventScript_GiveHmOnce   @ Moemon Kai: not if another region gave it
 	setflag FLAG_RECEIVED_HM_SURF
 	msgbox PetalburgCity_WallysHouse_Text_SurfGoAllSortsOfPlaces, MSGBOX_DEFAULT
 	setvar VAR_PETALBURG_CITY_STATE, 5

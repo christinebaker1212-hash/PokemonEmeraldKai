@@ -3,6 +3,7 @@ Kanto_SSAnne_CaptainsOffice_MapScripts::
 
 @ Kanto_SSAnne_CaptainsOffice object 1 (local id 1, gfx 0x3EF4) at 5,4
 Kanto_SSAnne_CaptainsOffice_EventScript_84106B0::
+	@ Moemon Kai: FireRed's CAPTAIN (pokefirered SSAnne_CaptainsOffice): HM01, not Quetzal's taught CUT and METAL COAT
 	lock
 	goto_if_set FLAG_QZ_0x214E, Kanto_SSAnne_CaptainsOffice_EventScript_841072E
 	msgbox Kanto_SSAnne_CaptainsOffice_Text_8423C31, MSGBOX_DEFAULT
@@ -12,21 +13,37 @@ Kanto_SSAnne_CaptainsOffice_EventScript_84106B0::
 	playfanfare MUS_HEAL
 	waitfanfare
 	call Quetzal_EventScript_8456AB7
-	delay 0x32
+	delay 50
 	applymovement 1, Quetzal_Movement_8457AA4
 	waitmovement 0
-	msgbox Kanto_SSAnne_CaptainsOffice_Text_8423C91, MSGBOX_DEFAULT
-	additem ITEM_METAL_COAT, 1
-	loadword 0, Kanto_SSAnne_CaptainsOffice_Text_8423D4F
-	setorcopyvar VAR_0x8000, ITEM_METAL_COAT
-	setorcopyvar VAR_0x8001, 1
-	setorcopyvar VAR_0x8002, 0x212
-	call Quetzal_EventScript_845571E
-	msgbox Kanto_SSAnne_CaptainsOffice_Text_8423D7A, MSGBOX_DEFAULT
+	msgbox Kanto_SSAnne_CaptainsOffice_Text_ThankYouHaveHMForCut, MSGBOX_DEFAULT
+	setvar VAR_0x8004, ITEM_HM01
+	call EventScript_GiveHmOnce
+	goto_if_eq VAR_RESULT, FALSE, Kanto_SSAnne_CaptainsOffice_EventScript_HadCut
+	msgbox Kanto_SSAnne_CaptainsOffice_Text_ExplainCut, MSGBOX_DEFAULT
+Kanto_SSAnne_CaptainsOffice_EventScript_HadCut:
 	setflag FLAG_QZ_0x214E
 	setvar VAR_QZ_0x5135, 1
 	release
 	end
+
+Kanto_SSAnne_CaptainsOffice_Text_ThankYouHaveHMForCut:
+	.string "CAPTAIN: Whew! Thank you!\n"
+	.string "I'm feeling much better now.\p"
+	.string "You want to see my hidden CUT\n"
+	.string "technique?\p"
+	.string "I could show you my prized CUT\n"
+	.string "technique if I weren't so ill…\p"
+	.string "I know! You can have this!\n"
+	.string "This HIDDEN MACHINE!\p"
+	.string "Teach CUT to your MOéMON, and\n"
+	.string "you can see it CUT anytime!$"
+
+Kanto_SSAnne_CaptainsOffice_Text_ExplainCut:
+	.string "Using CUT, you can chop down\n"
+	.string "small trees.\p"
+	.string "Why not try it with the trees\n"
+	.string "around VERMILION CITY?$"
 
 Kanto_SSAnne_CaptainsOffice_EventScript_841072E::
 	applymovement 1, Quetzal_Movement_8457AA4

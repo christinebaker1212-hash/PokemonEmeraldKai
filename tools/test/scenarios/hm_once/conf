@@ -1,0 +1,8 @@
+# HMs never twice: KANTO's S.S. ANNE CAPTAIN gives HM01 as FireRed's (not Quetzal's taught CUT); RUSTBORO's CUTTER then
+# says the player carries it already (EventScript_GiveHmOnce) and the BAG still holds one (item.c MP_PlayerHasHm).
+# Shots hm_captain, hm_had.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=25:40"
+EXPECT_A=("[test] bagqty 339: 1")
+UNEXPECT_A=("[crash]" "bagqty 339: 2" "bagqty 339: 0")

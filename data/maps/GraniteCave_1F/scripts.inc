@@ -6,7 +6,8 @@ GraniteCave_1F_EventScript_Hiker::
 	faceplayer
 	goto_if_set FLAG_RECEIVED_HM_FLASH, GraniteCave_1F_EventScript_ReceivedFlash
 	msgbox GraniteCave_1F_Text_GetsDarkAheadHereYouGo, MSGBOX_DEFAULT
-	giveitem ITEM_HM_FLASH
+	setvar VAR_0x8004, ITEM_HM_FLASH
+	call EventScript_GiveHmOnce   @ Moemon Kai: not if another region gave it
 	setflag FLAG_RECEIVED_HM_FLASH
 	msgbox GraniteCave_1F_Text_ExplainFlash, MSGBOX_DEFAULT
 	release

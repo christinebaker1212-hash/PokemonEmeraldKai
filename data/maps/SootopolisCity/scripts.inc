@@ -1284,7 +1284,8 @@ SootopolisCity_EventScript_Wallace::
 
 SootopolisCity_EventScript_GiveWaterfall::
 	msgbox SootopolisCity_Text_ThankYouForHelpAcceptThis, MSGBOX_DEFAULT
-	giveitem ITEM_HM_WATERFALL
+	setvar VAR_0x8004, ITEM_HM_WATERFALL
+	call EventScript_GiveHmOnce   @ Moemon Kai: not if another region gave it
 	setflag FLAG_RECEIVED_HM_WATERFALL
 	msgbox SootopolisCity_Text_ExplainWaterfallGoToGym, MSGBOX_DEFAULT
 	closemessage

@@ -1,0 +1,23 @@
+pressuntil A field 5000
+wait 30
+mp warp 36,11,5,5
+wait 200
+mp face up
+press A 2
+wait 30
+mash A 40 20
+pressuntil B field 2000
+mp bagqty 339
+shot hm_captain
+mp warp 11,11,7,6
+wait 200
+mp face up
+press A 2
+wait 30
+mash A 14 20
+wait 30
+shot hm_had
+mash A 20 20
+pressuntil B field 2000
+mp bagqty 339
+quit
