@@ -20,6 +20,7 @@ shot shown
 mp face up
 wait 10
 press A 4
-pressuntil A action 3000
-mp bgm
+wait 300
+mp where
+mp getflag 0x2E22
 quit

@@ -9,9 +9,9 @@ TMO=400
 ENV_A="MOEMON_DEBUG_PARTY=283:80,280:80 MOEMON_PARTYTRACE=1 MOEMON_DEBUG_FOE_HP=1 MOEMON_DEBUG_FOE_MOVE=2"
 ENV_B="MOEMON_DEBUG_PARTY=283:80,280:80 MOEMON_PARTYTRACE=1"
 ENV_C="MOEMON_DEBUG_PARTY=283:80,280:80 MOEMON_PARTYTRACE=1"
-EXPECT_A=("(and another: triple)" "partytrace: enemy 100/0 337/0 82/0 181/1 338/1 0/0" "absent 20")
-EXPECT_B=("co-op battle link: 3 games" "partytrace: enemy 100/0 337/0 82/0 181/1 338/1 0/0" "absent 20")
-EXPECT_C=("co-op battle link: 3 games" "partytrace: enemy 100/0 337/0 82/0 181/1 338/1 0/0" "absent 20")
+EXPECT_A=("(and another: triple)" "partytrace: enemy 100/0 337/0 82/0 125/1 338/1 0/0" "absent 20")
+EXPECT_B=("co-op battle link: 3 games" "partytrace: enemy 100/0 337/0 82/0 125/1 338/1 0/0" "absent 20")
+EXPECT_C=("co-op battle link: 3 games" "partytrace: enemy 100/0 337/0 82/0 125/1 338/1 0/0" "absent 20")
 UNEXPECT_A=("BADEGG" "no Pokemon left")
 UNEXPECT_B=("BADEGG" "no Pokemon left")
 UNEXPECT_C=("BADEGG" "no Pokemon left")

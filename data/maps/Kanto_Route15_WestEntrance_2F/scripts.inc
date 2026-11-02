@@ -42,7 +42,6 @@ Kanto_Route15_WestEntrance_2F_EventScript_842011D::
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E
-	goto_if_eq VAR_0x8007, 0, Quetzal_EventScript_8457F8A
 	setflag FLAG_QZ_0x2147
 	msgbox Kanto_Route15_WestEntrance_2F_Text_844FBB9, MSGBOX_DEFAULT
 	release

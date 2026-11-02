@@ -1,0 +1,7 @@
+# KANTO's gifts as FireRed's (tools/quetzal_port/fix_kanto_gifts.py): ROUTE 15's gate, 2F: PROF. OAK's AIDE gives the
+# EXP. SHARE (item 182) for 50 kinds of POKéMON (Quetzal: a LUCKY EGG, 197)
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=2"
+EXPECT_A=("item 182: 1" "item 197: 0")   # (once: talking again only explains it)
+UNEXPECT_A=("[crash]" "TIMEOUT")

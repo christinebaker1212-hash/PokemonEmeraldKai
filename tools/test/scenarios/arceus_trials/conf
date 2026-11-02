@@ -1,7 +1,8 @@
-# KANTO's ARCEUS trials wait for ARCEUS's visit to the player's bedroom (FLAG_QZ_0x2E13): ROUTE 2's ARCEUS is hidden
-# before (talking to the spot starts nothing), there after, and its battle is ARCEUS's, to FireRed's legendary theme.
+# KANTO's ARCEUS trials (Quetzal's) stay hidden: ARCEUS is SINNOH's, and each region's legendaries are only in their
+# own region (qz_specials.c MP_HideForeignLegends, 1.68.0), also after ARCEUS's visit to the player's bedroom
+# (FLAG_QZ_0x2E13): ROUTE 2's spot shows nothing and talking to it starts nothing.
 MODE=1
 TMO=120
 ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_BATTLETEXT=1"
-EXPECT_A=("flag 11810 = 1" "flag 11810 = 0" "Wild ARCEUS appeared" "bgm song 553 ")
-UNEXPECT_A=("[crash]" "TIMEOUT" "VICTINI")
+EXPECT_A=("flag 11810 = 1" "where map 37.77 xy 4,62")
+UNEXPECT_A=("[crash]" "TIMEOUT" "flag 11810 = 0" "Wild ARCEUS appeared" "VICTINI")

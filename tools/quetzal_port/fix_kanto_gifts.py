@@ -4,7 +4,9 @@
     python3 tools/quetzal_port/fix_kanto_gifts.py      (run from anywhere; safe to run again)
 
 - ROUTE 15's gate, 2F: PROF. OAK's AIDE gives the EXP. SHARE for 50 kinds of POKéMON, as in FireRed (Quetzal: a
-  LUCKY EGG, which stays obtainable: held by wild CHANSEY, the MoeGatcha), with FireRed's words about it.
+  LUCKY EGG, which stays obtainable: held by wild CHANSEY, the MoeGatcha), with FireRed's words about it. Quetzal's
+  script checked a variable nothing sets (VAR_0x8007) after the gift and so never set its flag: the AIDE gave it at
+  every talk; the check goes, as ROUTE 16's AIDE has it.
 """
 import os
 import re
@@ -21,6 +23,18 @@ GIFTS = {   # map: ([(Quetzal's item, FireRed's)], {text label: FireRed's words}
 
 def kai_words(s):
     return s.replace('POKéMON', 'MOéMON').replace("'", '’')
+
+
+STALE = {'Route15_WestEntrance_2F': '\tgoto_if_eq VAR_0x8007, 0, Quetzal_EventScript_8457F8A\n'}
+
+
+def stale_checks():
+    for name, line in STALE.items():
+        path = os.path.join(REPO, 'data/maps/Kanto_%s/scripts.inc' % name)
+        s = open(path).read()
+        if line in s:
+            open(path, 'w').write(s.replace(line, ''))
+            print(name, 'stale check removed')
 
 
 def main():
@@ -46,3 +60,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    stale_checks()

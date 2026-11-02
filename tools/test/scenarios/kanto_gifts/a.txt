@@ -1,0 +1,67 @@
+pressuntil A field 5000
+wait 60
+mp dexcatch 1
+mp dexcatch 2
+mp dexcatch 3
+mp dexcatch 4
+mp dexcatch 5
+mp dexcatch 6
+mp dexcatch 7
+mp dexcatch 8
+mp dexcatch 9
+mp dexcatch 10
+mp dexcatch 11
+mp dexcatch 12
+mp dexcatch 13
+mp dexcatch 14
+mp dexcatch 15
+mp dexcatch 16
+mp dexcatch 17
+mp dexcatch 18
+mp dexcatch 19
+mp dexcatch 20
+mp dexcatch 21
+mp dexcatch 22
+mp dexcatch 23
+mp dexcatch 24
+mp dexcatch 25
+mp dexcatch 26
+mp dexcatch 27
+mp dexcatch 28
+mp dexcatch 29
+mp dexcatch 30
+mp dexcatch 31
+mp dexcatch 32
+mp dexcatch 33
+mp dexcatch 34
+mp dexcatch 35
+mp dexcatch 36
+mp dexcatch 37
+mp dexcatch 38
+mp dexcatch 39
+mp dexcatch 40
+mp dexcatch 41
+mp dexcatch 42
+mp dexcatch 43
+mp dexcatch 44
+mp dexcatch 45
+mp dexcatch 46
+mp dexcatch 47
+mp dexcatch 48
+mp dexcatch 49
+mp dexcatch 50
+mp dexcatch 51
+mp dexcatch 52
+mp dexcatch 53
+mp dexcatch 54
+mp dexcatch 55
+mp warp 38,104,5,6
+wait 120
+mp face up
+press A 2
+mash A 120 20
+wait 60
+shot aide
+mp checkitem 182
+mp checkitem 197
+quit

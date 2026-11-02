@@ -1,10 +1,12 @@
 # ROUTE 116: JERRY spots ALICE and BOB (a co-op battle, as in coop_wait_merge). CARL comes along after it starts.
+# ALICE and BOB only know GROWL and so does JERRY's team: the battle lasts until CARL is in.
+GEN=3   # (the trainer's own team: GENERATION 9 pads it with a newer POKéMON that can end the battle first)
 MODE=3
 WARP=0,31,29,4
 WARP_B=0,31,26,7
 WARP_C=0,10,10,10
 TMO=400
-ENV_A="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_PARTY=283:46"
-ENV_B="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_PARTY=280:46"
+ENV_A="MOEMON_DEBUG_PARTY=283:46 MOEMON_DEBUG_FOE_MOVEID=45 MOEMON_DEBUG_FOE_MOVE=0"   # (no TEST_STRONG: it would give ALICE and BOB AERIAL ACE; the foe only GROWLs too)
+ENV_B="MOEMON_DEBUG_PARTY=280:46"
 ENV_C="MOEMON_TEST_STRONG=1 MOEMON_DEBUG_PARTY=280:46"
 EXPECT_A=()

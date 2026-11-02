@@ -1,5 +1,6 @@
 watchlog player 2 is
 pressuntil A field 5000
+mp moves 0 45
 waitfor online 6000
 waitlog 3000
 wait 120

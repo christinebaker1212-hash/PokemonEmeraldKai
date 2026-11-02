@@ -1,15 +1,5 @@
 pressuntil A field 5000
 wait 60
-mp clearflag 0x103A
-mp warp 34,61,5,5
-wait 120
-mp face up
-press A 2
-mash A 30 20
-wait 60
-shot bill
-mp party
-mp getflag 0x103B
 mp warp 34,109,16,5
 wait 120
 mp face up
@@ -21,4 +11,14 @@ wait 60
 shot kiyo
 mp party
 mp getflag 0x10BA
+mp clearflag 0x103A
+mp warp 34,61,5,5
+wait 120
+mp face up
+press A 2
+mash A 90 20
+wait 60
+shot bill
+mp party
+mp getflag 0x103B
 quit
