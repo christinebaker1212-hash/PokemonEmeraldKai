@@ -1,0 +1,7 @@
+pressuntil A field 5000
+wait 30
+mp additem 342 1
+mp setvar 0x409A 6
+wait 400
+mp hmrescue
+quit

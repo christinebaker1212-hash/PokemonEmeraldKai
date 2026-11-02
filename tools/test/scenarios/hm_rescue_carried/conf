@@ -1,0 +1,6 @@
+# The HM rescue only when it's needed: RUSTURF TUNNEL open without the flag, but HM04 STRENGTH already in the BAG (or
+# PC, or held): nobody comes
+MODE=1
+TMO=60
+EXPECT_A=("[test] hmrescue: HM04 STRENGTH=carried")
+UNEXPECT_A=("[crash]" "hms: HM04 STRENGTH comes")

@@ -1,0 +1,11 @@
+pressuntil A field 5000
+wait 30
+mp setvar 0x409A 6
+mp hmrescue
+wait 200
+shot courier
+mash A 50 30
+wait 120
+mp hmrescue
+shot after
+quit

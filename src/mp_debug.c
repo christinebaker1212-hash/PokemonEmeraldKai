@@ -709,6 +709,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         StoreSelectedPokemonInDaycare();
         printf("[test] daycare: %d in it\n", CountPokemonInDaycare(&gSaveBlock1Ptr->daycare));
     }
+    else if (strcmp(cmd, "hmrescue") == 0)
+    {
+        // hmrescue - the HMs a friend's progress made impossible to get, owed now (mp_hmrescue.c)
+        void MP_HmRescue_Debug(void);
+        MP_HmRescue_Debug();
+    }
     else if (strcmp(cmd, "tcard") == 0)
     {
         // tcard days N | tcard rub REGION BADGE COUNT | tcard info: the TRAINER CARD's badge records (mp_tcard.c)

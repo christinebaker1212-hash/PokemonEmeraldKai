@@ -1,0 +1,7 @@
+# HM04 STRENGTH missed (a friend smashed RUSTURF TUNNEL's last boulder while ALICE was away, so the scene that hands it
+# over is gone: the tunnel's state is 6, the HM never received): Wanda's boyfriend walks up on the map and hands it
+# over, the flag set; nothing else is owed (FLY, DIVE, WATERFALL: their scenes haven't happened yet)
+MODE=1
+TMO=150
+EXPECT_A=("[test] hmrescue: HM04 STRENGTH=owed HM02 FLY=not yet" "hms: HM04 STRENGTH comes" "hms: HM04 STRENGTH handed over" "[test] hmrescue: HM04 STRENGTH=got HM02 FLY=not yet")
+UNEXPECT_A=("[crash]")

@@ -2128,6 +2128,10 @@ void MP_FrameEnd(void)
 void MP_FrameUpdate(void)
 {
     MP_TCard_Update();   // the TRAINER CARD's badge records and the BADGE CASE's fading (mp_tcard.c)
+    {
+        void MP_HmRescue_Update(void);
+        MP_HmRescue_Update();   // HMs a friend's progress made impossible to get (mp_hmrescue.c)
+    }
     if (sFollowRegion && MP_IsInOverworld() && MP_IsLocalFree())
     {
         // Moemon Kai: the host's trip: everyone in the room follows (docs/REGIONS_PLAN.md "Co-op")
