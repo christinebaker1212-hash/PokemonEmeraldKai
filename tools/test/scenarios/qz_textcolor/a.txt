@@ -4,7 +4,7 @@ mp warp 36,11,5,5
 wait 120
 mp face up
 shot start
-mash A 120 20
+mash A 200 20
 wait 200
 shot end
 mp getflag 8526
