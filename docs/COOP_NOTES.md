@@ -4387,3 +4387,14 @@ rival beaten; DIVE: STEVEN's house empty and the 7th badge; WATERFALL: the 8th b
 HM is in neither the BAG, the PC nor held by a POKéMON in the party or the boxes, the giver walks up on the map (never on
 the scene's own map) and hands it over, setting the flag; the walk-up is mp_tmrefund.c's. CUT, ROCK SMASH, FLASH and SURF
 have givers who stay. Debug `mp hmrescue`; tests hm_rescue, hm_rescue_carried.
+
+## Platinum's time of day in the 2D regions (1.67.0)
+- src/mp/mp_daytint.c: on an outdoor map outside SINNOH (IsMapTypeOutdoors; SINNOH's 3D maps light themselves), the
+  map's layers (BG1-3) and the sprites at OAM priority 1-3 (their palettes: people, POKéMON, field effects) pass
+  through the renderer's scene hook (gMpScenePixel, which battle weather holds in battle) and are multiplied by a
+  color per half hour, eased between them. The colors: tools/sinnoh/build_daylight.py, run by make_pack.sh, from
+  Platinum's outdoor area light set (the one most of matrix 0 uses): flat ground lit by its light 0 (s3d.c Light's sum)
+  over noon's, so noon is the maps as drawn. Shipped as sinnoh/platinum_daylight.bin (package.sh), never committed.
+  Without it, no tint. Off under the test harness unless MOEMON_DAYTINT is set (pixel-compared pictures stay); `mp
+  daytint` prints it. Test day_tint.
+

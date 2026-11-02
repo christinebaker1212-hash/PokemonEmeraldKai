@@ -3350,6 +3350,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         bool8 MP_Region_FollowHost(u8 to);
         printf("[test] travel %d: %d\n", atoi(arg), MP_Region_FollowHost(atoi(arg)));
     }
+    else if (strcmp(cmd, "daytint") == 0)
+    {
+        // daytint - Platinum's time-of-day tint outside SINNOH (mp_daytint.c)
+        void MP_DayTint_Debug(void);
+        MP_DayTint_Debug();
+    }
     else if (strcmp(cmd, "mombank") == 0)
     {
         // mombank [SAVINGS] - MOM's savings and state (mp_mombank.c); a number sets her savings

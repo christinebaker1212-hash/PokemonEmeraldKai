@@ -892,6 +892,10 @@ void VDraw(void)
         MP_StarterTable_Composite(image);   // ... and the KANTO / JOHTO starter table's (starter_choose.c)
     }
     MP_BattleWeather_Composite(image);   // ... battle weather the whole battle long
+    {
+        void MP_DayTint_Update(void);
+        MP_DayTint_Update();             // Moemon Kai: Platinum's time-of-day tint outside SINNOH (mp_daytint.c)
+    }
     MP_ModernAnim_Composite(image);      // ... BATTLE ANIMS > MODERN: glows, trails and impacts over the animation
     MP_TriCards_Composite(image);   // Moemon Co-op: Triple Battle cards over the frame
     MP_TypeIcons_Composite(image);  // ... type icons by the healthboxes (OPTIONS > TYPE ICONS)

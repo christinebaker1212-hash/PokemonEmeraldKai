@@ -1,0 +1,9 @@
+# Platinum's time of day outside SINNOH (src/mp/mp_daytint.c, sinnoh/platinum_daylight.bin from
+# tools/sinnoh/build_daylight.py): ROUTE 101 at 22:00 is drawn in Platinum's night blue (red / green 132 of 256, blue
+# 196) on its map layers and sprites; the place sign and messages aren't. Needs the SINNOH pack built. Shot tint.
+MODE=1
+TMO=60
+HOUR=22
+ENV_A="MOEMON_DAYTINT=1 MOEMON_DEBUG_PARTY=280:10"
+EXPECT_A=("daytint: loaded, on 1, mul 132 132 196")
+UNEXPECT_A=("[crash]")

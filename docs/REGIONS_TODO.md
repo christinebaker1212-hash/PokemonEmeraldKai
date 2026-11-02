@@ -102,7 +102,9 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       ones stay, whatever region the legendary is from (they were in the original games); exclusivity is for the others
       (qz_specials.c OriginalGameEvent; test legend_exclusive)
 - [ ] Platinum's remaining songs: the user's Platinum.zip (SINNOH's missing songs, task list SINNOH "songs")
-- [ ] Time of day looks like Platinum's in every region: its color tinting by the hour
+- [x] Time of day looks like Platinum's in every region: its color tinting by the hour (Platinum's outdoor area light
+      on flat ground, over noon's, per half hour: tools/sinnoh/build_daylight.py -> sinnoh/platinum_daylight.bin with the
+      pack; src/mp/mp_daytint.c tints outdoor maps' layers and world sprites; test day_tint)
 
 ## Decisions
 (each assumption made while working through the list, with why)

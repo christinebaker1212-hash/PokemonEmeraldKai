@@ -1,0 +1,7 @@
+pressuntil A field 5000
+wait 30
+mp warp 0,16,10,10
+wait 120
+mp daytint
+shot tint
+quit
