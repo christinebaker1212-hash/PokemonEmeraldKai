@@ -25,7 +25,7 @@
 extern char gPlatformSavePath[512];
 
 #define TCARD_MAGIC 0x44524354   // "TCRD"
-#define TCARD_VERSION 1
+#define TCARD_VERSION 2   // 2: friends (what was done together, the album)
 #define NUM_TCARD_BADGES (REGION_COUNT * TCARD_BADGES_PER_REGION)
 // a badge counts the co-op battle that ended this many frames before it (time for the leader's words and the badge)
 #define PARTNER_FRAMES (60 * 60 * 10)
@@ -45,7 +45,12 @@ static struct
     struct MpTCardBadge badges[NUM_TCARD_BADGES];
     u8 teamCount;
     struct MpTCardMon team[PARTY_SIZE];
+    u8 friendCount;
+    struct MpTCardFriend friends[TCARD_FRIENDS];   // the most recently seen first
+    u32 albumSeq[TCARD_FRIENDS];                    // when each card was seen (a counter: the album's order)
+    u32 albumNext;
     // not kept
+    u8 metChecked;
     u8 progress[NUM_TCARD_BADGES];      // rubs towards the next point
     u8 lastPartnerCount;
     u8 lastPartners[TCARD_PARTNERS][MP_NAME_LEN + 1];
@@ -53,6 +58,9 @@ static struct
     s32 debugDays;
     u16 checkTimer;
 } sT;
+
+static void MeetFriends(void);
+static struct MpCardView sAddonView;   // (the card a friend asked for, as sent)
 
 static u32 Owner(void)
 {
@@ -123,6 +131,13 @@ static void Save(void)
         Put(f, &m->personality, 4);
         Put(f, m->nickname, sizeof(m->nickname));
     }
+    Put(f, &sT.friendCount, 1);
+    Put(f, &sT.albumNext, 4);
+    for (i = 0; i < sT.friendCount; i++)
+    {
+        Put(f, &sT.friends[i], sizeof(sT.friends[i]));
+        Put(f, &sT.albumSeq[i], 4);
+    }
     fclose(f);
 }
 
@@ -136,7 +151,7 @@ static bool8 Read(FILE *f)
 {
     u32 head[3];
     u8 i;
-    if (!Get(f, head, sizeof(head)) || head[0] != TCARD_MAGIC || head[1] != TCARD_VERSION || head[2] != sT.owner)
+    if (!Get(f, head, sizeof(head)) || head[0] != TCARD_MAGIC || head[1] < 1 || head[1] > TCARD_VERSION || head[2] != sT.owner)
         return FALSE;
     if (!Get(f, &sT.known, 4) || !Get(f, &sT.lastDay, 4) || !Get(f, &sT.slowCarry, 1) || !Get(f, &sT.fade, 1)
      || !Get(f, &sT.showTitle, 1) || !Get(f, &sT.title, 2))
@@ -163,6 +178,19 @@ static bool8 Read(FILE *f)
          || !Get(f, m->nickname, sizeof(m->nickname)))
             return FALSE;
         m->nickname[POKEMON_NAME_LENGTH] = EOS;
+    }
+    if (head[1] >= 2)
+    {
+        if (!Get(f, &sT.friendCount, 1) || !Get(f, &sT.albumNext, 4))
+            return FALSE;
+        if (sT.friendCount > TCARD_FRIENDS)
+            sT.friendCount = TCARD_FRIENDS;
+        for (i = 0; i < sT.friendCount; i++)
+            if (!Get(f, &sT.friends[i], sizeof(sT.friends[i])) || !Get(f, &sT.albumSeq[i], 4))
+            {
+                sT.friendCount = i;
+                break;
+            }
     }
     if (sT.fade >= TCARD_FADE_COUNT)
         sT.fade = TCARD_FADE_PLATINUM;
@@ -325,6 +353,12 @@ void MP_TCard_Update(void)
         changed = TRUE;
     if (changed)
         Save();
+    // friends in the room: when we first met (every few seconds)
+    if (++sT.metChecked >= 10)
+    {
+        sT.metChecked = 0;
+        MeetFriends();
+    }
 }
 
 bool8 MP_TCard_HasBadge(u8 region, u8 badge)
@@ -548,4 +582,211 @@ u8 MP_CardView_Stars(const struct MpCardView *v, u8 region)
     if ((v->cleared & 0xF) == 0xF)
         stars++;
     return stars > 5 ? 5 : stars;
+}
+
+// ----------------------------------------------------------------------------------------------------- friends
+
+static bool8 SameName(const u8 *a, const u8 *b)
+{
+    u8 k;
+    for (k = 0; k < MP_NAME_LEN; k++)
+    {
+        if (a[k] != b[k])
+            return FALSE;
+        if (a[k] == EOS)
+            return TRUE;
+    }
+    return TRUE;
+}
+
+// a friend's record, made when first met (the oldest dropped when there are too many)
+static struct MpTCardFriend *Friend(const u8 *name, u32 otId, bool8 make)
+{
+    u8 i;
+    struct MpTCardFriend *f;
+    Check();
+    for (i = 0; i < sT.friendCount; i++)
+        if (SameName(sT.friends[i].name, name) && (otId == 0 || sT.friends[i].otId == 0 || sT.friends[i].otId == otId))
+        {
+            if (otId)
+                sT.friends[i].otId = otId;
+            return &sT.friends[i];
+        }
+    if (!make)
+        return NULL;
+    if (sT.friendCount < TCARD_FRIENDS)
+        i = sT.friendCount++;
+    else
+    {
+        // (the one whose card was seen longest ago)
+        u8 k;
+        i = 0;
+        for (k = 1; k < TCARD_FRIENDS; k++)
+            if (sT.albumSeq[k] < sT.albumSeq[i])
+                i = k;
+    }
+    f = &sT.friends[i];
+    memset(f, 0, sizeof(*f));
+    sT.albumSeq[i] = 0;
+    StringCopyN(f->name, name, MP_NAME_LEN);
+    f->name[MP_NAME_LEN] = EOS;
+    f->otId = otId;
+    f->firstMet = (u32)time(NULL);
+    return f;
+}
+
+static void MeetFriends(void)
+{
+    u8 id;
+    bool8 changed = FALSE;
+    for (id = 0; id < MP_MAX_PLAYERS; id++)
+        if (gMpPlayers[id].present && gMpPlayers[id].hasInfo && gMpPlayers[id].name[0] != EOS
+         && Friend(gMpPlayers[id].name, gMpPlayers[id].otId, FALSE) == NULL)
+        {
+            Friend(gMpPlayers[id].name, gMpPlayers[id].otId, TRUE);
+            changed = TRUE;
+        }
+    if (changed)
+        Save();
+}
+
+void MP_TCard_NoteCoopWin(const u8 *seatPlayers, u8 count, u8 ownSeat)
+{
+    u8 seat;
+    for (seat = 0; seat < count && seat < 3; seat++)
+    {
+        u8 id = seatPlayers[seat];
+        struct MpTCardFriend *f;
+        if (seat == ownSeat || id >= MP_MAX_PLAYERS)
+            continue;
+        f = Friend(gMpPlayers[id].name, gMpPlayers[id].otId, TRUE);
+        if (f->wonTogether < 0xFFFF)
+            f->wonTogether++;
+    }
+    Save();
+}
+
+void MP_TCard_NotePvp(const u8 *oppName, u8 outcome)
+{
+    struct MpTCardFriend *f = Friend(oppName, 0, TRUE);
+    if (outcome == 1)   // (B_OUTCOME_WON)
+        f->vsWins += f->vsWins < 0xFFFF;
+    else if (outcome == 2)   // (B_OUTCOME_LOST)
+        f->vsLosses += f->vsLosses < 0xFFFF;
+    Save();
+}
+
+void MP_TCard_NoteTrade(u8 playerId)
+{
+    struct MpTCardFriend *f;
+    if (playerId >= MP_MAX_PLAYERS)
+        return;
+    f = Friend(gMpPlayers[playerId].name, gMpPlayers[playerId].otId, TRUE);
+    f->trades += f->trades < 0xFFFF;
+    Save();
+}
+
+void MP_TCard_KeepFriendCard(const struct MpCardView *v)
+{
+    u8 name[MP_NAME_LEN + 1];
+    struct MpTCardFriend *f;
+    MP_AsciiToGame(name, v->name, MP_NAME_LEN);
+    name[MP_NAME_LEN] = EOS;
+    f = Friend(name, 0, TRUE);
+    f->card = *v;
+    f->card.own = FALSE;
+    f->hasCard = TRUE;
+    sT.albumSeq[f - sT.friends] = ++sT.albumNext;
+    Save();
+}
+
+const struct MpTCardFriend *MP_TCard_FriendByName(const char *asciiName)
+{
+    u8 name[MP_NAME_LEN + 1];
+    MP_AsciiToGame(name, asciiName, MP_NAME_LEN);
+    name[MP_NAME_LEN] = EOS;
+    return Friend(name, 0, FALSE);
+}
+
+u8 MP_TCard_AlbumCount(void)
+{
+    u8 i, n = 0;
+    Check();
+    for (i = 0; i < sT.friendCount; i++)
+        n += sT.friends[i].hasCard;
+    return n;
+}
+
+const struct MpTCardFriend *MP_TCard_AlbumFriend(u8 at)
+{
+    // the friends with a card, the one seen latest first
+    u8 order[TCARD_FRIENDS], n = 0, i, k;
+    Check();
+    for (i = 0; i < sT.friendCount; i++)
+        if (sT.friends[i].hasCard)
+        {
+            for (k = n; k > 0 && sT.albumSeq[order[k - 1]] < sT.albumSeq[i]; k--)
+                order[k] = order[k - 1];
+            order[k] = i;
+            n++;
+        }
+    return at < n ? &sT.friends[order[at]] : NULL;
+}
+
+// ----------------------------------------------------------------------------------------------------- the co-op add-on
+// After the TRAINER CARD a friend asks for (mp_linkx.c LX_CARD): every region's badges and their shine, the CHAMPIONs
+// beaten, the card's team and its title. 1 + 4 + 32 + 1 + 1 + 12 + 1 + 24 + 1 bytes.
+#define ADDON_VERSION 1
+
+u16 MP_TCard_PackAddon(u8 *out)
+{
+    struct MpCardView *v = &sAddonView;
+    u8 *p = out, i;
+    MP_CardView_FillOwn(v);
+    *p++ = ADDON_VERSION;
+    *p++ = v->badges, *p++ = v->badges >> 8, *p++ = v->badges >> 16, *p++ = v->badges >> 24;
+    memcpy(p, v->polish, sizeof(v->polish));
+    p += sizeof(v->polish);
+    *p++ = v->cleared;
+    *p++ = v->teamCount;
+    for (i = 0; i < PARTY_SIZE; i++)
+        *p++ = v->team[i], *p++ = v->team[i] >> 8;
+    *p++ = v->teamShiny;
+    memcpy(p, v->title, TCARD_TITLE_LEN);
+    p[TCARD_TITLE_LEN - 1] = 0;
+    p += TCARD_TITLE_LEN;
+    *p++ = v->gender;
+    return p - out;
+}
+
+bool8 MP_TCard_UnpackAddon(const u8 *in, u16 len, struct MpCardView *v)
+{
+    const u8 *p = in;
+    u8 i;
+    if (len < 1 + 4 + REGION_COUNT * TCARD_BADGES_PER_REGION + 1 + 1 + 2 * PARTY_SIZE + 1 + TCARD_TITLE_LEN + 1 || in[0] != ADDON_VERSION)
+        return FALSE;
+    p++;
+    v->badges = p[0] | (p[1] << 8) | (p[2] << 16) | ((u32)p[3] << 24);
+    p += 4;
+    memcpy(v->polish, p, sizeof(v->polish));
+    p += sizeof(v->polish);
+    v->cleared = *p++;
+    v->teamCount = *p++;
+    if (v->teamCount > PARTY_SIZE)
+        v->teamCount = PARTY_SIZE;
+    for (i = 0; i < PARTY_SIZE; i++, p += 2)
+    {
+        v->team[i] = p[0] | (p[1] << 8);
+        if (v->team[i] >= NUM_SPECIES)
+            v->team[i] = SPECIES_NONE;
+    }
+    v->teamShiny = *p++;
+    memcpy(v->title, p, TCARD_TITLE_LEN);
+    v->title[TCARD_TITLE_LEN - 1] = 0;
+    p += TCARD_TITLE_LEN;
+    v->gender = *p++;
+    for (i = 0; i < sizeof(v->polish); i++)
+        if (v->polish[i] > TCARD_POLISH_MAX)
+            v->polish[i] = TCARD_POLISH_MAX;
+    return TRUE;
 }

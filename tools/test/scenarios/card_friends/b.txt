@@ -1,0 +1,14 @@
+pressuntil A field 5000
+waitfor online 6000
+mp setflag 0x867
+mp setflag 0x868
+mp setflag 0x869
+mp setflag 0x2100
+mp setflag 0x2101
+mp setflag 0x11B2
+mp setflag 0x11B3
+wait 90
+mp tcard rub 0 0 700
+mp tcard rub 1 1 300
+wait 4000
+quit

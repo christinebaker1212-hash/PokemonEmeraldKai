@@ -27,6 +27,7 @@
 #include "ygo/integration.h"
 #include "tt/integration.h"
 #include "mp.h"
+#include "mp_tcard.h"
 #include "mp_garden.h"
 #include "daycare.h"
 #include "event_data.h"
@@ -80,7 +81,7 @@ enum {
     LX_MIX_REC,                      // -> all: u8 round, u8 mask, LinkPlayer, record (or nothing: can't mix now)
     LX_MIX_ASK,                      // -> coordinator: please mix now
     LX_CARD_REQ,                     // -> friend: show me your card
-    LX_CARD,                         // -> asker: struct TrainerCard, u8 language
+    LX_CARD,                         // -> asker: struct TrainerCard, u8 language, the card's add-on (mp_tcard.c: badges, team, title)
     LX_BASE_REQ,                     // -> friend: your Secret Base please
     LX_BASE,                         // -> asker: u8 version, u8 language, struct SecretBase
     LX_WORLD,                        // -> all: weather stage, abnormal weather, roamer
@@ -354,6 +355,14 @@ static struct
 
 static struct TrainerCard sCard;
 static u8 sCardLanguage;
+static struct MpCardView sCardView;   // the friend's card with its add-on (every region's cards, their BADGE CASE)
+static bool8 sCardViewOk;
+
+// the friend's card being shown (NULL: none, or theirs came without an add-on)
+const struct MpCardView *MP_Linkx_FriendCardView(void)
+{
+    return sCardViewOk ? &sCardView : NULL;
+}
 static u16 sCardPicForCard = 0xFFFF;
 
 u16 MP_Linkx_CardPicOr(u16 defaultPic)
@@ -363,14 +372,16 @@ u16 MP_Linkx_CardPicOr(u16 defaultPic)
 
 static void OnCardReq(u8 from)
 {
-    u8 buf[1 + sizeof(struct TrainerCard) + 1];
+    u8 buf[1 + sizeof(struct TrainerCard) + 1 + TCARD_ADDON_MAX];
     char name[16], msg[64];
     struct TrainerCard card;
+    u16 n;
     TrainerCard_GenerateCardForLinkPlayer(&card);
     buf[0] = LX_CARD;
     memcpy(buf + 1, &card, sizeof(card));
     buf[1 + sizeof(card)] = gGameLanguage;
-    MP_SendRelay(from, buf, sizeof(buf));
+    n = MP_TCard_PackAddon(buf + 2 + sizeof(card));   // Moemon Co-op: every region's badges, the team, the title
+    MP_SendRelay(from, buf, 2 + sizeof(card) + n);
     Name(from, name);
     snprintf(msg, sizeof(msg), "%s is looking at your TRAINER CARD!", name);
     MP_Events_QueueToast(msg);
@@ -382,6 +393,21 @@ static void OnCard(u8 from, const u8 *data, u16 len)
         return;
     memcpy(&sCard, data + 1, sizeof(sCard));
     sCardLanguage = data[1 + sizeof(sCard)];
+    // the add-on: their card as every region's cards show it
+    memset(&sCardView, 0, sizeof(sCardView));
+    sCardViewOk = MP_TCard_UnpackAddon(data + 2 + sizeof(sCard), len - 2 - sizeof(sCard), &sCardView);
+    if (sCardViewOk)
+    {
+        MP_GameToAscii(sCardView.name, sCard.playerName, sizeof(sCardView.name));
+        sCardView.trainerId = sCard.trainerId;
+        sCardView.money = sCard.money;
+        sCardView.dex = sCard.caughtMonsCount;
+        sCardView.hours = sCard.playTimeHours;
+        sCardView.minutes = sCard.playTimeMinutes;
+        sCardView.linkWins = sCard.linkBattleWins;
+        sCardView.linkLosses = sCard.linkBattleLosses;
+        sCardView.trades = sCard.pokemonTrades;
+    }
     sAsk.cardReady = TRUE;
     MPNet_Log("linkx: got player %d's TRAINER CARD", from + 1);
     MP_Events_Did(MP_DID_CARD);

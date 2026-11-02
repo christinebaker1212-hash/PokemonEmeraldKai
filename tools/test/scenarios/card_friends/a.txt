@@ -1,0 +1,48 @@
+pressuntil A field 5000
+waitfor online 6000
+wait 700
+mp friend 2
+wait 40
+press DOWN 2
+wait 10
+watchlog TRAINER CARD
+press A 2
+waitlog 1500
+wait 150
+shot friend_hoenn
+press R 2
+wait 40
+rendershot friend_kanto
+press R 2
+wait 30
+press A 2
+wait 30
+rendershot friend_johto_back
+press SELECT 2
+wait 40
+rendershot friend_case
+press B 2
+wait 30
+press B 2
+wait 150
+mp card
+wait 120
+press START 2
+wait 20
+press UP 2
+wait 6
+press A 2
+wait 10
+rendershot album
+press A 2
+wait 20
+rendershot album_card
+press B 2
+wait 10
+press B 2
+wait 10
+press B 2
+wait 30
+press B 2
+wait 150
+quit

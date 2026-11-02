@@ -8,6 +8,7 @@
 // carry the data through the relay server to the opponent.
 #include "global.h"
 #include "mp.h"
+#include "mp_tcard.h"
 #include "mp_life_battle.h"
 #include "map_name_popup.h"
 #include "main.h"
@@ -549,6 +550,7 @@ static void CB2_MpReturnFromBattle(void)
         StringAppend(sResultText, sNet.oppName);
         AppendRaw(sResultText, CHAR_EXCL_MARK);
         MP_Tourney_OnBattleResult(outcome == B_OUTCOME_WON || outcome == B_OUTCOME_DREW ? outcome : B_OUTCOME_LOST);
+        MP_TCard_NotePvp(sNet.oppName, outcome);   // the TRAINER CARD's record against them
         MP_Events_Did(MP_DID_PVP);
         if (outcome == B_OUTCOME_WON)
             MP_Events_Did(MP_DID_PVPWIN);
@@ -557,6 +559,7 @@ static void CB2_MpReturnFromBattle(void)
         return;
     }
 
+    MP_TCard_NotePvp(sNet.oppName, outcome);   // the TRAINER CARD's record against them
     MP_Events_Did(MP_DID_PVP);
     if (outcome == B_OUTCOME_WON)
         MP_Events_Did(MP_DID_PVPWIN);

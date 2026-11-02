@@ -10,6 +10,8 @@ bool8 MP_RegionCard_Available(void);
 void MP_RegionCard_OpenMyCard(void);
 bool8 MP_RegionCard_IsActive(void);
 bool8 MP_BadgeCase_IsActive(void);
+void MP_BadgeCase_OpenView(const struct MpCardView *view, u8 region);
+const struct MpCardView *MP_Linkx_FriendCardView(void);
 #include "scanline_effect.h"
 #include "palette.h"
 #include "task.h"
@@ -494,9 +496,52 @@ static bool8 RegionCardAnswer(u8 taskId)
     return TRUE;
 }
 
+// A friend's card (CO-OP > FRIENDS > TRAINER CARD, with the add-on): L / R their other regions' cards, SELECT their
+// BADGE CASE (looked at, not polished)
+static bool8 FriendCardButtons(u8 taskId)
+{
+    const struct MpCardView *v = MP_Linkx_FriendCardView();
+    static u32 sPic[64 * 64];
+    u8 r;
+    if (!sData->isLink || InUnionRoom() || v == NULL || MP_RegionCard_IsActive() || MP_BadgeCase_IsActive())
+        return FALSE;
+    r = MP_RegionCard_TakeResult();
+    if (r == 0xFE)
+    {
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, sData->blendColor);
+        sData->mainState = STATE_CLOSE_CARD;
+        return TRUE;
+    }
+    if (r != 0xFF)
+        return TRUE;   // (back to their HOENN card: this one)
+    if (JOY_NEW(SELECT_BUTTON))
+        MP_BadgeCase_OpenView(v, REGION_HOENN);
+    else if (JOY_NEW(L_BUTTON) || JOY_NEW(R_BUTTON))
+    {
+        static const u8 sOrder[REGION_COUNT] = {REGION_HOENN, REGION_KANTO, REGION_JOHTO, REGION_SINNOH};
+        u8 k, next = REGION_HOENN;
+        for (k = 1; k < REGION_COUNT; k++)
+        {
+            next = sOrder[JOY_NEW(R_BUTTON) ? k : REGION_COUNT - k];
+            if (MP_TrainerCard_RegionShown(next, v))
+                break;
+        }
+        if (next != REGION_HOENN && MP_RegionCard_Available())
+        {
+            PlaySE(SE_RG_CARD_OPEN);
+            MP_RegionCard_Open(next, v, ReadCardPic(sPic) ? sPic : NULL);
+        }
+    }
+    else
+        return FALSE;
+    return TRUE;
+}
+
 // the buttons that are the co-op card's (the player's own card only)
 static bool8 OwnCardButtons(u8 taskId)
 {
+    if (FriendCardButtons(taskId))
+        return TRUE;
     if (sData->isLink || MP_RegionCard_IsActive() || MP_BadgeCase_IsActive())
         return FALSE;
     if (RegionCardAnswer(taskId))
@@ -574,6 +619,14 @@ static void Task_TrainerCard(u8 taskId)
             // Moemon Co-op: JOHTO's and SINNOH's cards show over this one
             if (!sData->isLink && (sCardRegion == REGION_JOHTO || sCardRegion == REGION_SINNOH) && MP_RegionCard_Available())
                 ShowRegionCard(sCardRegion);
+            // a friend's card goes in the album (MY CARD > FRIENDS' CARDS) with their picture as it is here
+            if (sData->isLink && !InUnionRoom() && MP_Linkx_FriendCardView() != NULL)
+            {
+                static struct MpCardView sKeep;
+                sKeep = *MP_Linkx_FriendCardView();
+                sKeep.hasPic = ReadCardPic(sKeep.pic);
+                MP_TCard_KeepFriendCard(&sKeep);
+            }
         }
         break;
     case 9:

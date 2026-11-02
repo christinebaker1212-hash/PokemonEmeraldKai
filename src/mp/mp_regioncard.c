@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 #include <SDL2/SDL.h>
 #include "global.h"
 #include "main.h"
@@ -75,6 +76,8 @@ static const char *const sRegionNames[REGION_COUNT] = {"HOENN", "JOHTO", "KANTO"
 static struct
 {
     bool8 active, back, myCard;
+    bool8 albumList, fromAlbum;  // MY CARD's FRIENDS' CARDS: the list, a card opened from it
+    u8 albumAt, panelRegion;
     bool8 draining;             // closed: the game waits until the buttons are let go (they were this card's)
     u8 region, result;
     u8 flip;                    // frames left of the flip (0: none)
@@ -82,7 +85,7 @@ static struct
     u32 age;
     u16 prevKeys;
     bool8 mouseDown;
-    struct MpCardView view;
+    struct MpCardView view, ownBackup;
     bool8 loaded, tried;
     u8 *pak;
     struct CardArt art[KIND_COUNT];
@@ -293,16 +296,42 @@ static void DrawBack(SDL_Renderer *r, const struct CardLayout *L)
     char buf[48];
     u8 b, shiny = 0, i;
     Row(L->backX, L->backY[0], L->backW, "HALL OF FAME", (v->cleared >> R.region) & 1 ? "CHAMPION!" : "-");
-    snprintf(buf, sizeof(buf), "%u WINS  %u LOSSES", v->linkWins, v->linkLosses);
-    Row(L->backX, L->backY[1], L->backW, "LINK BATTLES", buf);
-    snprintf(buf, sizeof(buf), "%u", v->trades);
-    Row(L->backX, L->backY[2], L->backW, "TRADES", buf);
-    for (b = 0; b < TCARD_BADGES_PER_REGION; b++)
-        if (MP_CardView_HasBadge(v, R.region, b) && v->polish[R.region * TCARD_BADGES_PER_REGION + b] >= TCARD_POLISH_2_SPARKLES)
-            shiny++;
-    snprintf(buf, sizeof(buf), "%u / 8", shiny);
-    Row(L->backX, L->backY[3], L->backW, "SHINING BADGES", buf);
-    Row(L->backX, L->backY[4], L->backW, v->own ? "MY CARD TEAM" : "CARD TEAM", NULL);
+    if (!v->own)
+    {
+        // a friend's card: what the two of you did (counted on this game)
+        const struct MpTCardFriend *f = MP_TCard_FriendByName(v->name);
+        snprintf(buf, sizeof(buf), "%u", f ? f->wonTogether : 0);
+        Row(L->backX, L->backY[1], L->backW, "WON TOGETHER", buf);
+        snprintf(buf, sizeof(buf), "%u - %u", f ? f->vsWins : 0, f ? f->vsLosses : 0);
+        Row(L->backX, L->backY[2], L->backW, "YOU VS THEM", buf);
+        snprintf(buf, sizeof(buf), "%u", f ? f->trades : 0);
+        Row(L->backX, L->backY[3], L->backW, "TRADED", buf);
+        if (f && f->firstMet)
+        {
+            time_t t = (time_t)f->firstMet;
+            struct tm *tm = localtime(&t);
+            if (tm)
+                snprintf(buf, sizeof(buf), "%04d/%02d/%02d", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday);
+            else
+                buf[0] = 0;
+        }
+        else
+            snprintf(buf, sizeof(buf), "-");
+        Row(L->backX, L->backY[4], L->backW, "FIRST MET", buf);
+    }
+    else
+    {
+        snprintf(buf, sizeof(buf), "%u WINS  %u LOSSES", v->linkWins, v->linkLosses);
+        Row(L->backX, L->backY[1], L->backW, "LINK BATTLES", buf);
+        snprintf(buf, sizeof(buf), "%u", v->trades);
+        Row(L->backX, L->backY[2], L->backW, "TRADES", buf);
+        for (b = 0; b < TCARD_BADGES_PER_REGION; b++)
+            if (MP_CardView_HasBadge(v, R.region, b) && v->polish[R.region * TCARD_BADGES_PER_REGION + b] >= TCARD_POLISH_2_SPARKLES)
+                shiny++;
+        snprintf(buf, sizeof(buf), "%u / 8", shiny);
+        Row(L->backX, L->backY[3], L->backW, "SHINING BADGES", buf);
+        Row(L->backX, L->backY[4], L->backW, "MY CARD TEAM", NULL);
+    }
     // the white panel: the region's badges, then the team
     SDL_RenderSetScale(r, 1, 1);
     {
@@ -350,19 +379,39 @@ static void DrawSide(SDL_Renderer *r, bool8 back)
 static void DrawMyCard(void)
 {
     // START on the player's own card: its team, its title, whether the title shows
-    static const char *const sRows[] = {"CARD TEAM", "TITLE", "SHOW TITLE"};
+    static const char *const sRows[] = {"CARD TEAM", "TITLE", "SHOW TITLE", "FRIENDS' CARDS"};
     char value[40];
     const char *name, *desc;
     char status[8], reward[8];
     u16 t = MP_TCard_Title();
     u8 i;
     G_FillA(0, 0, 240, 160, 0x101010, 150);
-    G_RoundFill(24, 36, 192, 88, 0x404048, 255);
-    G_RoundFill(25, 37, 190, 86, 0xf8f0d0, 255);
-    G_TextAlign(120, 40, TA_CENTER, G_INK, G_NO_SHADOW, "MY CARD", TF_NORMAL);
-    for (i = 0; i < 3; i++)
+    G_RoundFill(24, 28, 192, 104, 0x404048, 255);
+    G_RoundFill(25, 29, 190, 102, 0xf8f0d0, 255);
+    if (R.albumList)
     {
-        int y = 58 + i * 16;
+        // FRIENDS' CARDS: the last card seen of each friend, the latest first
+        u8 n = MP_TCard_AlbumCount(), k, first = R.albumAt > 4 ? R.albumAt - 4 : 0;
+        G_TextAlign(120, 32, TA_CENTER, G_INK, G_NO_SHADOW, "FRIENDS' CARDS", TF_NORMAL);
+        if (n == 0)
+            G_TextAlign(120, 70, TA_CENTER, 0x707060, G_NO_SHADOW, "Look at a friend's card to keep it here.", TF_SMALL);
+        for (k = first; k < n && k < first + 5; k++)
+        {
+            const struct MpTCardFriend *f = MP_TCard_AlbumFriend(k);
+            int y = 50 + (k - first) * 14;
+            char nm[24];
+            if (k == R.albumAt)
+                G_RoundFill(30, y - 1, 180, 14, 0xf0d870, 255);
+            MP_GameToAscii(nm, f->name, sizeof(nm));
+            G_Text(34, y, G_INK, G_NO_SHADOW, nm, 0, TF_SMALL);
+        }
+        G_Text(34, 118, 0x707060, G_NO_SHADOW, "A: their card  B: back", 180, TF_SMALL);
+        return;
+    }
+    G_TextAlign(120, 32, TA_CENTER, G_INK, G_NO_SHADOW, "MY CARD", TF_NORMAL);
+    for (i = 0; i < 4; i++)
+    {
+        int y = 48 + i * 16;
         if (i == R.myRow)
             G_RoundFill(30, y - 1, 180, 14, 0xf0d870, 255);
         G_Text(34, y, G_INK, G_NO_SHADOW, sRows[i], 0, TF_SMALL);
@@ -378,12 +427,15 @@ static void DrawMyCard(void)
                 snprintf(value, sizeof(value), "< %s >", name);
             }
         }
-        else
+        else if (i == 2)
             snprintf(value, sizeof(value), "< %s >", MP_TCard_ShowTitle() ? "ON" : "OFF");
+        else
+            snprintf(value, sizeof(value), "%u  A >", MP_TCard_AlbumCount());
         G_TextAlign(206, y, TA_RIGHT, G_INK, G_NO_SHADOW, value, TF_SMALL);
     }
-    G_Text(34, 108, 0x707060, G_NO_SHADOW, R.myRow == 0 ? "LEFT/RIGHT: the party now, or this team kept"
-                                         : R.myRow == 1 ? "LEFT/RIGHT: an achievement's name" : "LEFT/RIGHT: on or off", 180, TF_SMALL);
+    G_Text(34, 116, 0x707060, G_NO_SHADOW, R.myRow == 0 ? "LEFT/RIGHT: the party now, or this team kept"
+                                         : R.myRow == 1 ? "LEFT/RIGHT: an achievement's name"
+                                         : R.myRow == 2 ? "LEFT/RIGHT: on or off" : "A: the cards of friends you've seen", 180, TF_SMALL);
 }
 
 SDL_Texture *MP_RegionCard_Canvas(SDL_Renderer *r, SDL_Texture *game)
@@ -498,6 +550,28 @@ void MP_RegionCard_Open(u8 region, const struct MpCardView *friendView, const u3
     MPNet_Log("card: %s card shown%s", sRegionNames[region], friendView ? " (a friend's)" : "");
 }
 
+static bool8 Shown(u8 region)
+{
+    if (R.view.own)
+        return MP_TrainerCard_RegionShown(region, NULL);
+    return MP_TrainerCard_RegionShown(region, &R.view);
+}
+
+// an album card opens on the region they've done the most in
+static u8 FirstRegionOf(const struct MpCardView *v)
+{
+    u8 r, best = REGION_HOENN, most = 0;
+    for (r = 0; r < REGION_COUNT; r++)
+    {
+        u8 b, n = 0;
+        for (b = 0; b < TCARD_BADGES_PER_REGION; b++)
+            n += MP_CardView_HasBadge(v, r, b);
+        if (n > most)
+            most = n, best = r;
+    }
+    return best;
+}
+
 // what the game's card does next: 0xFF nothing, 0xFE close, a region (HOENN / KANTO: the game's own cards)
 u8 MP_RegionCard_TakeResult(void)
 {
@@ -506,8 +580,39 @@ u8 MP_RegionCard_TakeResult(void)
     return r;
 }
 
+static u8 FirstRegionOf(const struct MpCardView *v);
+
 static void MyCardStep(u16 pressed)
 {
+    if (R.albumList)
+    {
+        u8 n = MP_TCard_AlbumCount();
+        if (pressed & B_BUTTON)
+            R.albumList = FALSE;
+        else if ((pressed & DPAD_UP) && n)
+            R.albumAt = (R.albumAt + n - 1) % n;
+        else if ((pressed & DPAD_DOWN) && n)
+            R.albumAt = (R.albumAt + 1) % n;
+        else if ((pressed & A_BUTTON) && n)
+        {
+            // their card, as last seen
+            const struct MpTCardFriend *f = MP_TCard_AlbumFriend(R.albumAt);
+            R.ownBackup = R.view;
+            R.view = f->card;
+            if (R.pic)
+                SDL_DestroyTexture(R.pic);
+            R.pic = NULL;
+            R.region = FirstRegionOf(&R.view);
+            R.back = FALSE;
+            R.myCard = FALSE;
+            R.fromAlbum = TRUE;
+            MPNet_Log("card: a friend's card from the album");
+        }
+        else
+            return;
+        PlaySE(SE_SELECT);
+        return;
+    }
     if (pressed & (B_BUTTON | START_BUTTON))
     {
         R.myCard = FALSE;
@@ -517,9 +622,18 @@ static void MyCardStep(u16 pressed)
         return;
     }
     if (pressed & DPAD_UP)
-        R.myRow = (R.myRow + 2) % 3;
+        R.myRow = (R.myRow + 3) % 4;
     else if (pressed & DPAD_DOWN)
-        R.myRow = (R.myRow + 1) % 3;
+        R.myRow = (R.myRow + 1) % 4;
+    else if (R.myRow == 3)
+    {
+        if (pressed & A_BUTTON)
+        {
+            R.albumList = TRUE;
+            R.albumAt = 0;
+            PlaySE(SE_SELECT);
+        }
+    }
     else if (pressed & (DPAD_LEFT | DPAD_RIGHT | A_BUTTON))
     {
         s8 dir = (pressed & DPAD_LEFT) ? -1 : 1;
@@ -566,6 +680,8 @@ void MP_RegionCard_OpenMyCard(void)
     }
     R.myCard = TRUE;
     R.myRow = 0;
+    R.albumList = FALSE;
+    R.panelRegion = R.region;
     R.prevKeys = 0xFFFF;
     PlaySE(SE_WIN_OPEN);
 }
@@ -607,6 +723,19 @@ bool8 MP_RegionCard_Step(u16 keys)
         R.flip = 10;
         PlaySE(SE_RG_CARD_FLIP);
     }
+    else if ((pressed & B_BUTTON) && R.fromAlbum)
+    {
+        // back to the album
+        R.fromAlbum = FALSE;
+        R.view = R.ownBackup;
+        if (R.pic)
+            SDL_DestroyTexture(R.pic);
+        R.pic = NULL;
+        R.region = R.panelRegion;
+        R.myCard = TRUE;
+        R.albumList = TRUE;
+        PlaySE(SE_SELECT);
+    }
     else if (pressed & B_BUTTON)
     {
         R.active = FALSE;
@@ -617,6 +746,8 @@ bool8 MP_RegionCard_Step(u16 keys)
         MP_RegionCard_OpenMyCard();
     else if (pressed & SELECT_BUTTON)
         MP_BadgeCase_OpenView(R.view.own ? NULL : &R.view, R.region);
+    else if (pressed & START_BUTTON)
+        ;   // (a friend's card: no MY CARD)
     else if (pressed & (L_BUTTON | R_BUTTON))
     {
         // the next region's card: the game's own for HOENN and KANTO
@@ -625,17 +756,21 @@ bool8 MP_RegionCard_Step(u16 keys)
         for (k = 0; k < REGION_COUNT; k++)
             if (sOrder[k] == R.region)
                 at = k;
+        next = R.region;
         for (k = 1; k < REGION_COUNT; k++)
         {
             next = sOrder[(at + ((pressed & R_BUTTON) ? k : REGION_COUNT - k)) % REGION_COUNT];
-            if (MP_TrainerCard_RegionShown(next, R.view.own ? NULL : &R.view))
+            if (Shown(next))
                 break;
         }
         PlaySE(SE_RG_CARD_OPEN);
-        if (next == REGION_JOHTO || next == REGION_SINNOH)
+        // (the player's own HOENN and KANTO cards are the game's; a friend's KANTO card is here, HeartGold's, and an
+        // album card's HOENN too)
+        if (next == REGION_JOHTO || next == REGION_SINNOH || (!R.view.own && next == REGION_KANTO) || R.fromAlbum)
         {
             R.region = next;
             R.back = FALSE;
+            MPNet_Log("card: %s card shown%s", sRegionNames[next], R.view.own ? "" : " (a friend's)");
         }
         else
         {

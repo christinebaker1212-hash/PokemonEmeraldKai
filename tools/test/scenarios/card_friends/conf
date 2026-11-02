@@ -1,0 +1,9 @@
+# CO-OP > FRIENDS > BOB > TRAINER CARD with the card's add-on: BOB's HOENN card (Emerald's), R: his KANTO card
+# (HeartGold's: a friend's KANTO card is drawn here), R: his JOHTO card, flipped (what ALICE and BOB did together);
+# SELECT: his BADGE CASE (shine as he keeps it, no polishing); then ALICE's own card, START > MY CARD > FRIENDS'
+# CARDS: BOB's card kept in her album. Shots looked at by hand.
+MODE=2
+TMO=200
+EXPECT_A=("got player 2's TRAINER CARD" "card: KANTO card shown (a friend's)" "card: JOHTO card shown (a friend's)" "card: BADGE CASE opened on JOHTO (a friend's)" "card: a friend's card from the album")
+UNEXPECT_A=("[crash]")
+UNEXPECT_B=("[crash]")

@@ -10,6 +10,7 @@
 #include <string.h>
 #include "global.h"
 #include "mp.h"
+#include "mp_tcard.h"
 #include "mp_life.h"
 #include "mp_life_social.h"
 #include "pokedex.h"
@@ -535,7 +536,10 @@ static void ApplyTrade(void)
     PlaySE(SE_SUCCESS);
     MP_Events_OnTrade();
     if (sTrade.theirHasMon || sTrade.mine.monSlot != 0xFF)
+    {
         MP_Events_Did(MP_DID_TRADE);   // only trades with a POKeMON in them count
+        MP_TCard_NoteTrade(sTrade.partner);   // the TRAINER CARD's trades together
+    }
     MP_GameToAscii(them, sTrade.partnerName, PLAYER_NAME_LENGTH);
     snprintf(msg, sizeof(msg), "Trade with %s complete!", them);
     MPNet_Log("trade with player %d complete", sTrade.partner + 1);

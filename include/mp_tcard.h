@@ -103,4 +103,26 @@ u8 MP_CardView_Stars(const struct MpCardView *v, u8 region);   // 0-5 (the card'
 bool8 MP_CardView_HasBadge(const struct MpCardView *v, u8 region, u8 badge);
 const char *MP_TCard_TitleText(void);           // the chosen title as shown (NULL: none or not shown)
 
+// Friends: what you did together (counted on your own game) and the last card you saw of each (the album)
+#define TCARD_FRIENDS 16
+struct MpTCardFriend
+{
+    u8 name[MP_NAME_LEN + 1];                   // game text
+    u32 otId;
+    u32 firstMet;                               // the PC's clock (seconds since 1970)
+    u16 wonTogether, vsWins, vsLosses, trades;
+    bool8 hasCard;
+    struct MpCardView card;                     // the last one seen (the album)
+};
+void MP_TCard_NoteCoopWin(const u8 *seatPlayers, u8 count, u8 ownSeat);
+void MP_TCard_NotePvp(const u8 *oppName, u8 outcome);
+void MP_TCard_NoteTrade(u8 playerId);
+void MP_TCard_KeepFriendCard(const struct MpCardView *v);
+const struct MpTCardFriend *MP_TCard_FriendByName(const char *asciiName);
+u16 MP_TCard_PackAddon(u8 *out);               // the card's co-op add-on (mp_linkx.c), at most TCARD_ADDON_MAX bytes
+bool8 MP_TCard_UnpackAddon(const u8 *in, u16 len, struct MpCardView *v);
+#define TCARD_ADDON_MAX 80
+u8 MP_TCard_AlbumCount(void);
+const struct MpTCardFriend *MP_TCard_AlbumFriend(u8 i);   // the friends with a card, the latest first
+
 #endif // GUARD_MP_TCARD_H

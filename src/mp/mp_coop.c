@@ -27,6 +27,7 @@
 #include "global.h"
 #include "random.h"
 #include "mp.h"
+#include "mp_tcard.h"
 #include "mp_region.h"
 #include "mp_join.h"
 #include "item.h"
@@ -2450,6 +2451,7 @@ static void CB2_MpCoopFinish(void)
     gBattleOutcome = sCoop.outcome;
     if (sCoop.outcome == B_OUTCOME_WON)
     {
+        MP_TCard_NoteCoopWin(sCoop.seatPlayer, sCoop.count, MP_Coop_Seat());   // the TRAINER CARD's "won together"
         // Both players' achievements
         if (sCoop.count == 3)
             MP_Achieve_Count("triple", 1);   // a Triple Battle won with two friends (wild or trainer)
