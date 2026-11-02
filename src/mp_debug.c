@@ -3107,6 +3107,27 @@ void MP_TestCommand(const char *cmd, const char *arg)
         MP_Region_WriteSidecar();
         MP_Region_LoadFromSave();
     }
+    else if (strcmp(cmd, "s3dtext") == 0)
+    {
+        // s3dtext BANK MSG: a message of SINNOH's text pack through the placeholder scripts use, in a message box
+        // (the log has only its length)
+        static u8 sPlaceholder[7];
+        int bank = 0, msg = 0;
+        sscanf(arg, "%d %d", &bank, &msg);
+        sPlaceholder[0] = PLACEHOLDER_BEGIN;
+        sPlaceholder[1] = PLACEHOLDER_ID_SINNOH_TEXT;
+        sPlaceholder[2] = (bank >> 7) & 0x7F;
+        sPlaceholder[3] = bank & 0x7F;
+        sPlaceholder[4] = (msg >> 7) & 0x7F;
+        sPlaceholder[5] = msg & 0x7F;
+        sPlaceholder[6] = EOS;
+        StringCopy(gStringVar1, gSaveBlock2Ptr->playerName);   // (what a script would have put in the buffers)
+        StringCopy(gStringVar2, gSaveBlock2Ptr->playerName);
+        StringCopy(gStringVar3, gSaveBlock2Ptr->playerName);
+        StringExpandPlaceholders(gStringVar4, sPlaceholder);
+        printf("[test] s3dtext %d %d: %d characters\n", bank, msg, (int)StringLength(gStringVar4));
+        ShowFieldMessage(sPlaceholder);
+    }
     else if (strcmp(cmd, "s3dground") == 0)
     {
         // s3dground X Y [NEAR]: SINNOH's ground height (BDHC) at map pixel (X, Y) of this map, the layer nearest NEAR
