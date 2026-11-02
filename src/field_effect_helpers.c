@@ -54,6 +54,13 @@ static u8 ReflectionPaletteFor(u8 paletteNum)
     return gReflectionEffectPaletteMap[paletteNum];
 }
 
+// Moemon Kai: SINNOH's 3D view keeps a reflection's pixels to the water (src/sinnoh/s3d.c OamHidden): no land tiles'
+// top layer hides it there, as on the game's own maps
+bool8 FieldEffect_IsReflectionSprite(const struct Sprite *sprite)
+{
+    return sprite->callback == UpdateObjectReflectionSprite;
+}
+
 void SetUpReflection(struct ObjectEvent *objectEvent, struct Sprite *sprite, bool8 stillReflection)
 {
     struct Sprite *reflectionSprite;

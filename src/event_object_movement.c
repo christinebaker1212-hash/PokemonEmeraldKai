@@ -7957,6 +7957,11 @@ static u8 ObjectEventGetNearbyReflectionType(struct ObjectEvent *objEvent)
     u8 result, b; // used by RETURN_REFLECTION_TYPE_AT
     s16 one = 1;
 
+    // Moemon Kai: SINNOH reflects as Platinum does, with the water on the very next tile (its 3D view keeps the picture
+    // to the water: src/sinnoh/s3d.c OverReflectiveCell)
+    if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+        height = 1;
+
     for (i = 0; i < height; i++)
     {
         RETURN_REFLECTION_TYPE_AT(objEvent->currentCoords.x, objEvent->currentCoords.y + one + i)

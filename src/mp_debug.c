@@ -5,6 +5,7 @@
 #include <string.h>
 #include "platform/gamepad.h"
 #include "global.h"
+#include "metatile_behavior.h"
 #include "roamer.h"
 #include "s3d_underground.h"
 unsigned int SDL_GetTicks(void);
@@ -3578,6 +3579,22 @@ void MP_TestCommand(const char *cmd, const char *arg)
         else
             printf("[test] objat %d,%d: none\n", x, y);
     }
+    else if (strcmp(cmd, "shorespots") == 0)
+    {
+        // shorespots: up to 5 cells on this map that stand two tiles north of reflecting water with dry, walkable
+        // ground between (reflection tests: the reflection shows only over the water)
+        int x, y, n = 0;
+        for (y = 0; y < gMapHeader.mapLayout->height - 2 && n < 5; y++)
+            for (x = 0; x < gMapHeader.mapLayout->width && n < 5; x++)
+            {
+                u32 b0 = MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET);
+                u32 b1 = MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + 1 + MAP_OFFSET);
+                u32 b2 = MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + 2 + MAP_OFFSET);
+                if (!MetatileBehavior_IsReflective(b0) && !MetatileBehavior_IsReflective(b1) && MetatileBehavior_IsReflective(b2)
+                 && !MapGridGetCollisionAt(x + MAP_OFFSET, y + MAP_OFFSET) && !MapGridGetCollisionAt(x + MAP_OFFSET, y + 1 + MAP_OFFSET))
+                    printf("[test] shorespot %d,%d\n", x, y), n++;
+            }
+    }
     else if (strcmp(cmd, "objlist") == 0)
     {
         // objlist: every object on the field (local id, graphics, cell, hidden, its sprite's state and palette)
@@ -3589,10 +3606,10 @@ void MP_TestCommand(const char *cmd, const char *arg)
             if (!o->active)
                 continue;
             sp = o->spriteId < MAX_SPRITES ? &gSprites[o->spriteId] : NULL;
-            printf("[test] obj %d local %d gfx %d at %d,%d move %d inv %d offscreen %d sprite %d inUse %d sinv %d pal %d xy %d,%d\n",
+            printf("[test] obj %d local %d gfx %d at %d,%d move %d inv %d offscreen %d sprite %d inUse %d sinv %d pal %d xy %d,%d refl %d\n",
                    i, o->localId, OBJ_GFX_ID(o), o->currentCoords.x - MAP_OFFSET, o->currentCoords.y - MAP_OFFSET, o->movementType,
                    o->invisible, o->offScreen, o->spriteId, sp ? sp->inUse : 0, sp ? sp->invisible : 0, sp ? sp->oam.paletteNum : -1,
-                   sp ? sp->x : 0, sp ? sp->y : 0);
+                   sp ? sp->x : 0, sp ? sp->y : 0, o->hasReflection);
         }
     }
     else if (strcmp(cmd, "steptrigger") == 0)

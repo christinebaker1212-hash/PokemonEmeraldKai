@@ -31,14 +31,12 @@ mash A 60 10
 shot lake2
 mash A 60 10
 shot lake3
+mash A 60 10
 wait 200
+shot lake4
+wait 100
+mp ctx
 mp where
 mp getvar 0x52F9
 mp objlist
-press DOWN 16
-wait 30
-press DOWN 16
-wait 60
-shot after
-mp ctx
 quit

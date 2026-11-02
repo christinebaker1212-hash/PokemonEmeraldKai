@@ -27,6 +27,8 @@
 #include "event_object_movement.h"
 #include "field_camera.h"
 #include "fieldmap.h"
+#include "metatile_behavior.h"
+bool8 FieldEffect_IsReflectionSprite(const struct Sprite *sprite);   // (field_effect_helpers.c)
 #include "main.h"
 #include "overworld.h"
 #include "palette.h"
@@ -601,7 +603,8 @@ void S3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
 // so dy * tan(pitch) nearer the camera (about one unit a pixel at the target)
 float gS3dSpriteDepth[MAX_SPRITES];
 s16 gS3dSpriteFeet[MAX_SPRITES];
-typedef struct { float d0; s16 feet; u8 flat; } OamDepth;   // flat: a shadow lying on the ground (mp_shadow.c)
+typedef struct { float d0; s16 feet; u8 flat, refl; } OamDepth;   // flat: a shadow lying on the ground (mp_shadow.c);
+                                                                // refl: a reflection, seen only over water
 static OamDepth sPendingOam[OAM_ENTRY_COUNT], sLiveOam[OAM_ENTRY_COUNT];
 static bool8 sLiveAny;
 
@@ -614,6 +617,7 @@ void S3D_NoteOam(u16 spriteId, u16 first, u16 end)
         sPendingOam[i].d0 = on ? gS3dSpriteDepth[spriteId] : 0.0f;
         sPendingOam[i].feet = on ? gS3dSpriteFeet[spriteId] : 0;
         sPendingOam[i].flat = on && gSprites[spriteId].mpShadow;
+        sPendingOam[i].refl = on && FieldEffect_IsReflectionSprite(&gSprites[spriteId]);
     }
 }
 
@@ -625,6 +629,28 @@ void S3D_CommitOam(void)
         memset(sPendingOam, 0, sizeof(sPendingOam));
 }
 
+// A reflection pixel shows only where the ground under it is water (or ice): the pixel's ray from the eye meets the
+// ground's level (the player's) on a map cell whose behavior reflects. Emerald's land tiles hide the rest with their top
+// layer; here, without it, a reflection showed on the grass about a tile before the water
+static bool8 OverReflectiveCell(int x, int line)
+{
+    float rx = (x - sView.ax) / sView.focal, ry = (sView.ay - line) / sView.focal;
+    float d[3], t, wx, wz;
+    s32 cx, cy;
+    u32 i, b;
+    for (i = 0; i < 3; i++)
+        d[i] = sView.fwd[i] + sView.right[i] * rx + sView.up[i] * ry;
+    if (d[1] > -1e-4f)
+        return TRUE;
+    t = (sView.ty - sView.eye[1]) / d[1];
+    wx = sView.eye[0] + d[0] * t - sView.originX;
+    wz = sView.eye[2] + d[2] * t - sView.originZ;
+    cx = (s32)floorf(wx / 16.0f);
+    cy = (s32)floorf(wz / 16.0f);
+    b = MapGridGetMetatileBehaviorAt(cx + MAP_OFFSET, cy + MAP_OFFSET);
+    return MetatileBehavior_IsReflective(b) || MetatileBehavior_IsIce(b);
+}
+
 static bool OamHidden(int oamIndex, int x, int line)
 {
     const OamDepth *o;
@@ -634,6 +660,8 @@ static bool OamHidden(int oamIndex, int x, int line)
     o = &sLiveOam[oamIndex];
     if (o->d0 <= 0.0f)
         return FALSE;
+    if (o->refl && !OverReflectiveCell(x, line))
+        return TRUE;
     if (o->flat)   // (a shadow lies on the ground: all of it as far as its middle, and only a wall in front hides it;
         return sDepth[line][x] < o->d0 - 16.0f;   //  1.63.9: the ground around hid parts of it as an upright picture's)
     d = o->d0 - (o->feet - line) * 1.6652f;   // tan(59.05 degrees)

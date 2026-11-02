@@ -1,0 +1,7 @@
+# Reflections in SINNOH's 3D view show only over water (src/sinnoh/s3d.c OverReflectiveCell): ROUTE 205's river bank,
+# two tiles north of the water (none: Platinum's only reflect with water on the next tile) and right beside it
+# (on the water, none of it on the grass)
+MODE=1
+TMO=60
+EXPECT_A=("shorespot 56,23" "where map 40.5 xy 56,24" "local 255 gfx 0 at 56,23 move 11 inv 0 offscreen 0 sprite 0 inUse 1 sinv 0 pal 0 xy 120,112 refl 0" "at 56,24 move 11 inv 0 offscreen 0 sprite 0 inUse 1 sinv 0 pal 0 xy 120,128 refl 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

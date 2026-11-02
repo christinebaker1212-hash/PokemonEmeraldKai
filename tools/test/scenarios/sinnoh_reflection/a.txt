@@ -1,0 +1,18 @@
+pressuntil A field 5000
+wait 30
+mp emptyparty
+mp platinumstory
+mp setvar 0x5259 1
+mp warp 40,5,56,23
+wait 200
+mp shorespots
+mp face down
+wait 40
+shot two_away
+mp objlist
+press DOWN 16
+wait 40
+shot next_to
+mp objlist
+mp where
+quit
