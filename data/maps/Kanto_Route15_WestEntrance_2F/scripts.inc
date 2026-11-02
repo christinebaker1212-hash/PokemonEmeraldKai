@@ -33,11 +33,12 @@ Kanto_Route15_WestEntrance_2F_EventScript_842011D::
 	call Kanto_Route15_WestEntrance_2F_EventScript_84201B7
 	goto_if_lt VAR_0x8006, 50, Quetzal_EventScript_8457F80
 	msgbox Kanto_Route15_WestEntrance_2F_Text_844FB44, MSGBOX_DEFAULT
-	checkitemspace ITEM_LUCKY_EGG, 1
+	@ Moemon Kai: FireRed's gift (tools/quetzal_port/fix_kanto_gifts.py) (Quetzal gave LUCKY_EGG)
+	checkitemspace ITEM_EXP_SHARE, 1
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_8457F8A
-	additem ITEM_LUCKY_EGG, 1
+	additem ITEM_EXP_SHARE, 1
 	loadword 0, Kanto_Route15_WestEntrance_2F_Text_844FB97
-	setorcopyvar VAR_0x8000, ITEM_LUCKY_EGG
+	setorcopyvar VAR_0x8000, ITEM_EXP_SHARE
 	setorcopyvar VAR_0x8001, 1
 	setorcopyvar VAR_0x8002, 0x16F
 	call Quetzal_EventScript_845571E
@@ -54,7 +55,7 @@ Kanto_Route15_WestEntrance_2F_EventScript_84201AD::
 
 Kanto_Route15_WestEntrance_2F_EventScript_84201B7::
 	buffernumberstring 0, 0x32
-	bufferitemname 1, ITEM_LUCKY_EGG
+	bufferitemname 1, ITEM_EXP_SHARE
 	return
 
 Kanto_Route15_WestEntrance_2F_Text_844FA45::
@@ -80,8 +81,11 @@ Kanto_Route15_WestEntrance_2F_Text_844FB97::
 	.string "from the AIDE.$"
 
 Kanto_Route15_WestEntrance_2F_Text_844FBB9::
-	.string "A MOéMON holding this item gains\n"
-	.string "extra EXP. Points in battle.$"
+	.string "EXP. SHARE is an item to be held\n"
+	.string "by a MOéMON.\p"
+	.string "The MOéMON will receive a share\n"
+	.string "of the EXP. Points without having\l"
+	.string "to battle.$"
 
 Kanto_Route15_WestEntrance_2F_Text_844FBF8::
 	.string "Let’s see what the binoculars have\n"

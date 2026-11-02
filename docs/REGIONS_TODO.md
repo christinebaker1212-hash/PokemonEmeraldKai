@@ -94,7 +94,14 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       beaten (MP_Region_DeviceHere; tests poketch_locked, poketch_regions)
 
 ## All added regions
-- [ ] Events: FireRed for KANTO, then HGSS for gaps
+- [~] Events: FireRed for KANTO, then HGSS for gaps
+      (KANTO, map by map against pret/pokefirered: every POKéMON gift, static encounter and trainer matches; the
+      gifts that differed: ROUTE 15's AIDE gives FireRed's EXP. SHARE (Quetzal: LUCKY EGG,
+      tools/quetzal_port/fix_kanto_gifts.py), FIVE ISLAND's MEMORIAL PILLAR FireRed's TM42 (Quetzal: REAPER CLOTH,
+      fix_kanto_tms.py). FireRed's own key items the game hasn't got stay out: FAME CHECKER, TEACHY TV, POWDER JAR,
+      the TOWN MAP (the POKéNAV / POKéGEAR maps). JOHTO against pret/pokecrystal, to do: BILL's family gives Crystal's
+      EEVEE (Quetzal: ROTOM), MT. MORTAR's KARATE KING his TYROGUE, ELM's lab has a Quetzal ARCEUS scene, the RADIO
+      TOWER's prizes and the DIRECTOR's gift, MR. POKéMON's EXP. SHARE for the RED SCALE)
 - [x] A non-HOENN gym leader beaten: the gym's unbattled trainers count as beaten (mp_coop.c MP_Coop_GymLeaderBeaten;
       test sinnoh_gym)
 - [x] BADGES count every region's badges (the continue screen and the SAVE window: MP_Region_TotalBadges)

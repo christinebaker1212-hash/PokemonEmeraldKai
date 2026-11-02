@@ -40,13 +40,14 @@ Johto_BillsFamilysHouse_EventScript_83D3189::
 	end
 
 Johto_BillsFamilysHouse_EventScript_83D319D::
-	call Quetzal_EventScript_8361A4D
+	@ Moemon Kai: Crystal's gift (tools/quetzal_port/fix_johto_gifts.py) (Quetzal: ROTOM)
 	msgbox Johto_BillsFamilysHouse_Text_83D31E7, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, 0, Johto_BillsFamilysHouse_EventScript_83D31DC
 	msgbox Johto_BillsFamilysHouse_Text_83D3251, MSGBOX_DEFAULT
-	setvar VAR_TEMP_1, 0x1DF
-	bufferspeciesname 0, SPECIES_ROTOM
-	qz_givestorymon 3
+	setvar VAR_TEMP_1, SPECIES_EEVEE
+	call Quetzal_EventScript_8361A4D
+	bufferspeciesname 0, SPECIES_EEVEE
+	qz_givemon_ex SPECIES_EEVEE, 20, ITEM_NONE, 1, 2, 3
 	call Quetzal_EventScript_840181E
 	setflag FLAG_QZ_0x103B
 	msgbox Johto_BillsFamilysHouse_Text_83D32D5, MSGBOX_DEFAULT
@@ -61,10 +62,14 @@ Johto_BillsFamilysHouse_EventScript_83D31DC::
 	end
 
 Johto_BillsFamilysHouse_Text_83D31E7::
-	.string "BILL: Hi, {PLAYER}! This ROTOM\n"
-	.string "moved into my computer.\p"
-	.string "It’s curious about the world.\n"
-	.string "Will you take it with you?$"
+	.string "BILL: Hi, {PLAYER}! Do us a favor\n"
+	.string "and take this EEVEE.\p"
+	.string "It came over when I was adjusting\n"
+	.string "the TIME CAPSULE.\p"
+	.string "Someone has to take care of it,\n"
+	.string "but I don’t like being outside.\p"
+	.string "Can I count on you to play with\n"
+	.string "it, {PLAYER}?$"
 
 Johto_BillsFamilysHouse_Text_83D3251::
 	.string "BILL: I knew you’d come through!\p"
@@ -73,17 +78,17 @@ Johto_BillsFamilysHouse_Text_83D3251::
 	.string "Take good care of it!$"
 
 Johto_BillsFamilysHouse_Text_83D32D5::
-	.string "BILL: ROTOM can enter appliances\n"
-	.string "and change its form.\p"
-	.string "You’ll have lots of fun together!$"
+	.string "BILL: PROF.ELM claims EEVEE may\n"
+	.string "evolve in new and unknown ways.$"
 
 Johto_BillsFamilysHouse_Text_83D335B::
 	.string "Oh… Now what to do?$"
 
 Johto_BillsFamilysHouse_Text_83D336F::
-	.string "BILL: My pop, he won’t work. All he\n"
-	.string "does is goof off all day long.\p"
-	.string "He’s getting to be a real headache…$"
+	.string "BILL: My pop, he won’t work. All\n"
+	.string "he does is goof off all day long.\p"
+	.string "He’s getting to be a real\n"
+	.string "headache…$"
 
 Johto_BillsFamilysHouse_Text_83D33D6::
 	.string "Oh, you collect MOéMON? My son\n"

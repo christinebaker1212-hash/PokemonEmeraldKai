@@ -1,0 +1,7 @@
+# JOHTO's gift POKéMON as Crystal's (tools/quetzal_port/fix_johto_gifts.py): BILL gives an EEVEE (Lv. 20; Quetzal: a
+# ROTOM), the KARATE KING in MT. MORTAR, once beaten, a TYROGUE (Lv. 10; Quetzal: two scrolls), in Crystal's words
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=6:90"
+EXPECT_A=("party: 6(" " 133(" "flag 4155 = 1" " 236(" "flag 4282 = 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

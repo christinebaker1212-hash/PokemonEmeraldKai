@@ -26,7 +26,8 @@ Kanto_FiveIsland_MemorialPillar_EventScript_84187C8::
 
 Kanto_FiveIsland_MemorialPillar_EventScript_84187D2::
 	msgbox Kanto_FiveIsland_MemorialPillar_Text_843B56B, MSGBOX_DEFAULT
-	setorcopyvar VAR_0x8000, ITEM_REAPER_CLOTH
+	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal gave REAPER_CLOTH)
+	setorcopyvar VAR_0x8000, ITEM_TM42
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Kanto_FiveIsland_MemorialPillar_EventScript_84188B0
@@ -65,7 +66,7 @@ Kanto_FiveIsland_MemorialPillar_EventScript_841884D::
 	waitmovement 0
 	textcolor 0
 	msgbox Kanto_FiveIsland_MemorialPillar_Text_843B45A, MSGBOX_DEFAULT
-	setorcopyvar VAR_0x8000, ITEM_REAPER_CLOTH
+	setorcopyvar VAR_0x8000, ITEM_TM42
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Kanto_FiveIsland_MemorialPillar_EventScript_84188B0

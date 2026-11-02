@@ -7,7 +7,8 @@ fix_leader_tms.py). Quetzal put held items and stones in their places; FireRed c
 - Item balls: FireRed's TM balls (pokefirered data/scripts/item_ball_scripts.inc, their places from each map's
   map.json) are Quetzal's balls at the same places (two moved: ROCKET HIDEOUT B2F's, the S.S. ANNE's), whose
   STD_FIND_ITEM item becomes the TM.
-- People: the CERULEAN CITY grunt (TM28), ROUTE 12's little girl (TM27) and MR. PSYCHIC (TM29) give FireRed's TM
+- People: the CERULEAN CITY grunt (TM28), ROUTE 12's little girl (TM27), MR. PSYCHIC (TM29), the CELADON roof's girl
+  (TM16 / 20 / 33) and the man at FIVE ISLAND's MEMORIAL PILLAR (TM42) give FireRed's TM
   with FireRed's words (pokefirered data/maps/<map>/text.inc, POKéMON spelt MOéMON, ' as ’).
 What Quetzal gave there stays obtainable elsewhere (tools/moemon_gen59/item_audit.py).
 """
@@ -49,6 +50,8 @@ PEOPLE = {   # map: ([(Quetzal's item, TM)...], {text label: FireRed's words})
         '844C0F2': ["You already know, don't you?\\n", 'TM29 is PSYCHIC.\\p', "It's an attack that may also lower\\n",
                     "the target's special stats.$"],
     }),
+    # the man at TECTONIX's grave, for a LEMONADE left there (FireRed's words are Quetzal's)
+    'FiveIsland_MemorialPillar': ([('ITEM_REAPER_CLOTH', 'ITEM_TM42')], {}),
     # the thirsty girl on the roof: FRESH WATER, SODA POP, LEMONADE
     'CeladonCity_DepartmentStore_Roof': ([('ITEM_SWEET_APPLE', 'ITEM_TM16'), ('ITEM_TART_APPLE', 'ITEM_TM20'),
                                           ('ITEM_SYRUPY_APPLE', 'ITEM_TM33')], {
