@@ -3385,9 +3385,10 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "pokegear") == 0)
     {
-        // pokegear - JOHTO's POKéGEAR: its card, cursor, phone and radio (mp_pokegear.c)
-        void MP_Pokegear_Debug(void);
-        MP_Pokegear_Debug();
+        // pokegear [open | tune FREQ] - JOHTO's POKéGEAR: its card, cursor, phone and radio (mp_pokegear.c); open: from
+        // the field; tune: the RADIO card at FREQ (half MHz: 9 = 4.5)
+        void MP_Pokegear_Debug(const char *arg);
+        MP_Pokegear_Debug(arg);
     }
     else if (strcmp(cmd, "apricorn") == 0)
     {

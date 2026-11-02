@@ -38,6 +38,17 @@ Files in this repository's `music` folder ship with every update.
 | `mus_johto_pokecenter.kaisong` | mus_johto_pokecenter | everywhere | Pokemon Center |
 | `mus_johto_pokemart.kaisong` | mus_johto_pokemart | everywhere | Friendly Shop |
 | `mus_johto_prof_oak.kaisong` | mus_johto_prof_oak | everywhere | Professor Oak |
+| `mus_johto_radio_buenas_password.kaisong` | mus_johto_radio_buenas_password | everywhere | Buenas Password |
+| `mus_johto_radio_evolution.kaisong` | mus_johto_radio_evolution | everywhere | Evolution |
+| `mus_johto_radio_lucky_channel.kaisong` | mus_johto_radio_lucky_channel | everywhere | Lucky Channel |
+| `mus_johto_radio_places_and_people.kaisong` | mus_johto_radio_places_and_people | everywhere | Places And People |
+| `mus_johto_radio_poke_flute.kaisong` | mus_johto_radio_poke_flute | everywhere | Poke Flute |
+| `mus_johto_radio_pokedex_show.kaisong` | mus_johto_radio_pokedex_show | everywhere | Pokedex Show |
+| `mus_johto_radio_pokemon_lullaby.kaisong` | mus_johto_radio_pokemon_lullaby | everywhere | Pokemon Lullaby |
+| `mus_johto_radio_pokemon_march.kaisong` | mus_johto_radio_pokemon_march | everywhere | Pokemon March |
+| `mus_johto_radio_pokemon_talk.kaisong` | mus_johto_radio_pokemon_talk | everywhere | Pokemon Talk |
+| `mus_johto_radio_rocket.kaisong` | mus_johto_radio_rocket | everywhere | Rocket |
+| `mus_johto_radio_unown.kaisong` | mus_johto_radio_unown | everywhere | Unown |
 | `mus_johto_rival_appears.kaisong` | mus_johto_rival_appears | everywhere | Rival! |
 | `mus_johto_rocket_hideout.kaisong` | mus_johto_rocket_hideout | everywhere | Rocket Hideout |
 | `mus_johto_route26.kaisong` | mus_johto_route26 | everywhere | Route 26 |
@@ -1379,7 +1390,7 @@ Custom: `mus_sinnoh_amity_square.kaisong`
 
 ### mus_sinnoh_battle_tower (748)
 Custom: `mus_sinnoh_battle_tower.kaisong`
-- Map music: Sinnoh Battle Arcade [sinnoh_battle_arcade], Sinnoh Battle Castle [sinnoh_battle_castle], Sinnoh Battle Factory [sinnoh_battle_factory], Sinnoh Battle Hall [sinnoh_battle_hall], Sinnoh Battle Tower [sinnoh_battle_tower], Sinnoh Battle Tower Battle Room [sinnoh_battle_tower_battle_room], Sinnoh Battle Tower Battle Salon [sinnoh_battle_tower_battle_salon], Sinnoh Battle Tower Corridor [sinnoh_battle_tower_corridor], Sinnoh Battle Tower Corridor Multi [sinnoh_battle_tower_corridor_multi], Sinnoh Battle Tower Elevator [sinnoh_battle_tower_elevator], Sinnoh Battle Tower Multi Battle Room [sinnoh_battle_tower_multi_battle_room]
+- Map music: Sinnoh Battle Tower [sinnoh_battle_tower], Sinnoh Battle Tower Battle Room [sinnoh_battle_tower_battle_room], Sinnoh Battle Tower Battle Salon [sinnoh_battle_tower_battle_salon], Sinnoh Battle Tower Corridor [sinnoh_battle_tower_corridor], Sinnoh Battle Tower Corridor Multi [sinnoh_battle_tower_corridor_multi], Sinnoh Battle Tower Elevator [sinnoh_battle_tower_elevator], Sinnoh Battle Tower Multi Battle Room [sinnoh_battle_tower_multi_battle_room]
 
 ### mus_sinnoh_iron_mountain (749)
 Custom: `mus_sinnoh_iron_mountain.kaisong`
@@ -1612,19 +1623,19 @@ Custom: `mus_sinnoh_victory_champion.kaisong`
 
 ### mus_sinnoh_battle_factory (805)
 Custom: `mus_sinnoh_battle_factory.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Battle Factory [sinnoh_battle_factory]
 
 ### mus_sinnoh_battle_hall (806)
 Custom: `mus_sinnoh_battle_hall.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Battle Hall [sinnoh_battle_hall]
 
 ### mus_sinnoh_battle_castle (807)
 Custom: `mus_sinnoh_battle_castle.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Battle Castle [sinnoh_battle_castle]
 
 ### mus_sinnoh_battle_arcade (808)
 Custom: `mus_sinnoh_battle_arcade.kaisong`
-- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+- Map music: Sinnoh Battle Arcade [sinnoh_battle_arcade]
 
 ### mus_sinnoh_villa_audio (809)
 Custom: `mus_sinnoh_villa_audio.kaisong`
@@ -1653,3 +1664,47 @@ Custom: `mus_sinnoh_contest_tough.kaisong`
 ### mus_sinnoh_victory_frontier_brain (815)
 Custom: `mus_sinnoh_victory_frontier_brain.kaisong`
 - Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_johto_radio_pokemon_talk (816)
+Custom: `mus_johto_radio_pokemon_talk.kaisong`
+- Scenes: Pokegear [pokegear]
+
+### mus_johto_radio_pokedex_show (817)
+Custom: `mus_johto_radio_pokedex_show.kaisong`
+- Scenes: Pokegear [pokegear]
+
+### mus_johto_radio_pokemon_march (818)
+Custom: `mus_johto_radio_pokemon_march.kaisong`
+- Scenes: Pokegear [pokegear]
+
+### mus_johto_radio_pokemon_lullaby (819)
+Custom: `mus_johto_radio_pokemon_lullaby.kaisong`
+- Scenes: Pokegear [pokegear]
+
+### mus_johto_radio_lucky_channel (820)
+Custom: `mus_johto_radio_lucky_channel.kaisong`
+- Scenes: Pokegear [pokegear]
+
+### mus_johto_radio_buenas_password (821)
+Custom: `mus_johto_radio_buenas_password.kaisong`
+- Scenes: Pokegear [pokegear]
+
+### mus_johto_radio_unown (822)
+Custom: `mus_johto_radio_unown.kaisong`
+- Scenes: Pokegear [pokegear]
+
+### mus_johto_radio_places_and_people (823)
+Custom: `mus_johto_radio_places_and_people.kaisong`
+- Scenes: Pokegear [pokegear]
+
+### mus_johto_radio_poke_flute (824)
+Custom: `mus_johto_radio_poke_flute.kaisong`
+- Scenes: Pokegear [pokegear]
+
+### mus_johto_radio_evolution (825)
+Custom: `mus_johto_radio_evolution.kaisong`
+- Scenes: Pokegear [pokegear]
+
+### mus_johto_radio_rocket (826)
+Custom: `mus_johto_radio_rocket.kaisong`
+- Scenes: Pokegear [pokegear]

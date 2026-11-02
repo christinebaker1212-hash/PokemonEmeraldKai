@@ -1,0 +1,8 @@
+# Crystal's radio in the morning (7 AM): 4.5 is the POKéDEX SHOW (a caught POKéMON's name, then its POKéDEX entry
+# line by line), BUENA's PASSWORD is off the air until 6 PM
+MODE=1
+TMO=120
+HOUR=7
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=25:20"
+EXPECT_A=("freq 9 station 2 show 2 song 817 (kaisong) line \"" "freq 21 station 0 show 0")
+UNEXPECT_A=("[crash]" "TIMEOUT" "show 2 song 817 (kaisong) line \"\"")

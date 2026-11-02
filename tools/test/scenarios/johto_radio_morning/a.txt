@@ -1,0 +1,19 @@
+pressuntil A field 5000
+wait 60
+mp setvar 0x5003 5
+mp dexcatch 25
+mp warp 35,1,5,5
+wait 120
+mp pokegear open
+pressuntil B pokegear 600
+wait 30
+mp pokegear tune 9
+wait 130
+mp pokegear
+shot dexshow
+mp pokegear tune 21
+wait 30
+mp pokegear
+press B 2
+wait 90
+quit

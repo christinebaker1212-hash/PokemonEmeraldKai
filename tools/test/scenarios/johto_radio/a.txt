@@ -1,0 +1,91 @@
+pressuntil A field 5000
+wait 60
+mp setvar 0x5003 5
+mp warp 35,1,5,5
+wait 120
+mp pokegear open
+pressuntil B pokegear 600
+wait 30
+mp pokegear tune 9
+wait 260
+mp pokegear
+shot talk
+mp pokegear tune 15
+wait 500
+mp pokegear
+shot music
+mp pokegear tune 17
+wait 750
+mp pokegear
+shot lucky
+mp pokegear tune 21
+wait 400
+mp pokegear
+shot buena
+mp pokegear tune 27
+wait 30
+mp pokegear
+mp pokegear tune 41
+wait 30
+mp pokegear
+mp pokegear tune 12
+wait 30
+mp pokegear
+shot nostation
+press B 2
+wait 90
+mp setvar 0x500A 7
+mp pokegear open
+pressuntil B pokegear 600
+wait 30
+mp pokegear tune 17
+wait 300
+mp pokegear
+shot rocket
+press B 2
+wait 90
+mp setvar 0x500A 3
+mp setvar 0x500C 2
+mp warp 34,105,14,5
+wait 120
+mp pokegear open
+pressuntil B pokegear 600
+mp pokegear tune 41
+wait 30
+mp pokegear
+shot evolution
+press B 2
+wait 90
+mp warp 35,61,20,7
+wait 120
+mp pokegear open
+pressuntil B pokegear 600
+mp pokegear tune 27
+wait 30
+mp pokegear
+shot unown
+press B 2
+wait 90
+mp warp 37,57,6,8
+wait 120
+mp pokegear open
+pressuntil B pokegear 600
+mp pokegear tune 9
+wait 30
+mp pokegear
+mp pokegear tune 33
+wait 600
+mp pokegear
+shot places
+mp pokegear tune 37
+wait 400
+mp pokegear
+shot sing
+mp pokegear tune 40
+wait 30
+mp pokegear
+shot flute
+press B 2
+wait 90
+mp pokegear
+quit

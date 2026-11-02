@@ -296,6 +296,8 @@ Elite Four's and the Champion's can be joined (MP_Coop_JoinTrainerOk; test join_
 
 Also JOHTO and KANTO (1.60.0, Moemon Quetzal's regions capped to Gen 4: docs/REGIONS_PLAN.md, COOP_NOTES "JOHTO and
 KANTO"; src/mp/mp_region.c and "<save>.region", src/qz_specials.c, tools/quetzal_port/; tests region_*).
+JOHTO's POKéGEAR (src/mp/mp_pokegear.c) and its radio: Crystal's stations with Crystal's own songs, built from
+pret/pokecrystal with rgbds into a GBS by tools/kaisong/crystal_radio.py (no ROM; COOP_NOTES "JOHTO's POKéGEAR").
 Also NEW on cards in the three BINDERs and the centered BOOSTER PACKS row (1.63.6: src/tcg/tcg_new.c "<save>.cardnew";
 COOP_NOTES "NEW in the BINDER"; tests cards_new, cards_packs_center).
 Also settings per save file and SAVE FILE switching in place (1.63.5: save_slots.c SaveSlots_File / SaveSlots_Switch,

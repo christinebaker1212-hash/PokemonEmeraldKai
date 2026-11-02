@@ -1,0 +1,16 @@
+# Crystal's radio in the POKéGEAR (src/mp/mp_pokegear.c StationAt / ShowLine, songs tools/kaisong/crystal_radio.py), at
+# 8 PM: JOHTO's stations (OAK's talk, POKéMON MUSIC, the LUCKY CHANNEL, BUENA's PASSWORD; no UNOWN or EVOLUTION radio
+# at home), TEAM ROCKET's broadcast while they hold the RADIO TOWER, the EVOLUTION radio at MAHOGANY, the UNOWN at the
+# RUINS OF ALPH, and KANTO's (PLACES AND PEOPLE, LET'S ALL SING, the POKé FLUTE; nothing on 4.5 there); each station's
+# own .kaisong plays (music/mus_johto_radio_*); the log's line is ASCII (other letters as dots)
+MODE=1
+TMO=200
+HOUR=20
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=25:20"
+EXPECT_A=("freq 9 station 1 show 1 song 816 (kaisong) line \"OAK. " "freq 15 station 3 show 3 song 81" "line \"POK.MON "
+          "freq 17 station 4 show 4 song 820 (kaisong) line \"Number is " "freq 21 station 5 show 5 song 821 (kaisong) line \"Don.t forget it.\""
+          "freq 27 station 0 show 0" "freq 41 station 0" "freq 12 station 0"
+          "freq 17 station 4 show 11 song 826 (kaisong) line \"of preparation. we\"" "freq 41 station 10 show 10 song 825 (kaisong)"
+          "freq 27 station 6 show 6 song 822 (kaisong)" "freq 9 station 0" "freq 33 station 7 show 7 song 823 (kaisong)"
+          "freq 37 station 8 show 8 song 81" "freq 40 station 9 show 9 song 824 (kaisong)" "pokegear: closed")
+UNEXPECT_A=("[crash]" "TIMEOUT")

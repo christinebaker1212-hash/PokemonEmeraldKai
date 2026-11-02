@@ -41,8 +41,9 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       JOHTO, a registrable key item elsewhere once JOHTO's ELITE FOUR is beaten (src/mp/mp_pokegear.c: CLOCK, MAP (the
       TOWN MAP), PHONE (MOM with her savings question, PROF. ELM; Crystal's words), RADIO (OAK's POKéMON TALK in
       Crystal's words with the region's wild POKéMON and places, the POKé FLUTE); MOM gives it as in Crystal; item 693;
-      test johto_pokegear. Crystal's other stations (MARCH, LULLABY, LUCKY CHANNEL, BUENA) need music the game
-      hasn't got: open until there are rips of them)
+      test johto_pokegear. 1.68.0: every Crystal station with Crystal's own songs, built from pret/pokecrystal by
+      tools/kaisong/crystal_radio.py: POKéDEX SHOW, POKéMON MUSIC, LUCKY CHANNEL, BUENA's PASSWORD, UNOWN, EVOLUTION
+      radio, TEAM ROCKET's takeover, PLACES AND PEOPLE, LET'S ALL SING, POKé FLUTE; tests johto_radio*)
 - [x] JOHTO's legendaries only in JOHTO (FireRed's and Emerald's NAVEL ROCK empty: LUGIA and HO-OH are JOHTO's)
 - [x] Quetzal's berry system out: 1x1 berry patches where berries were; APRICORN trees rewritten from Crystal
       (behavior, words), JOHTO's berries (src/mp/mp_apricorn.c, tools/quetzal_port/fix_fruit_trees.py: Crystal's

@@ -9,10 +9,12 @@
 // - PHONE: the phone book (MOM, PROF. ELM, empty "----------:" rows), "Whom do you want to call?"; a call shows its
 //   timer, Crystal's words in the message box; MOM's savings question on the soft keys YES / NO (mp_mombank.c);
 //   Crystal's words (pokecrystal data/phone/text/mom.asm, elm.asm)
-// - RADIO: a black FM dial, UP / DOWN tune the red needle 0.0-20.0; a station plays only on its frequency: 4.5 OAK's
-//   POKéMON TALK (MARY and PROF. OAK on a POKéMON seen around a place of the region, from its wild tables, in Crystal's
-//   words: data/text/common_1.asm _OPT_*), 20.0 the POKé FLUTE. Crystal's other stations need music the game hasn't
-//   got (the MARCH, the LULLABY...).
+// - RADIO: a black FM dial, UP / DOWN tune the red needle 0.0-20.5; Crystal's stations on Crystal's frequencies, with
+//   Crystal's own songs (tools/kaisong/crystal_radio.py) and words: in JOHTO 4.5 OAK's POKéMON TALK (the POKéDEX SHOW in
+//   the morning), 7.5 POKéMON MUSIC (the MARCH or the LULLABY by the day), 8.5 the LUCKY CHANNEL, 10.5 BUENA's PASSWORD
+//   (6 PM to midnight), 13.5 the UNOWN's sounds at the RUINS OF ALPH, 20.5 the EVOLUTION radio around MAHOGANY while
+//   TEAM ROCKET is there (and TEAM ROCKET on every JOHTO station while they hold the RADIO TOWER); out of JOHTO 16.5
+//   PLACES AND PEOPLE, 18.5 LET'S ALL SING!, 20.0 the POKé FLUTE
 // On START in JOHTO once MOM has given it (Johto_PlayersHouse1F); elsewhere a key item (ITEM_POKEGEAR, registrable)
 // once JOHTO's LEAGUE is beaten (mp_region.c MP_Region_DeviceHere / MP_Region_GiveDevices).
 #include <stdio.h>
@@ -42,6 +44,16 @@
 #include "text.h"
 #include "window.h"
 #include "wild_encounter.h"
+#include "data.h"
+#include "gba/m4a_internal.h"
+#include "m4a.h"
+#include "mp_kaisong.h"
+#include "lottery_corner.h"
+#include "pokedex.h"
+#include "constants/pokedex.h"
+#include "constants/qz_port.h"
+#include "constants/region_map_sections.h"
+#include "constants/trainers.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
 #include "mp_region.h"
@@ -135,9 +147,10 @@ static const char *const sIcons[CARD_COUNT][14] = {
 
 static EWRAM_DATA struct
 {
-    u8 card, cursor, phone, page, pages, freq, station, talkStep;
+    u8 card, cursor, phone, page, pages, freq, station, show, talkStep, drag, midnight;
     u16 talkTimer, lastMinute, song, callFrames;
     u16 talkSpecies;
+    const u8 *dexText;   // (the POKéDEX SHOW's entry, where it has got to)
     u8 talkPlace[24];
     u8 lines[12][40];   // the call's lines (two to a page), or the radio's now
     bool8 leaving;
@@ -147,6 +160,37 @@ static EWRAM_DATA bool8 sToField = FALSE;   // (from the BAG or SELECT: back to 
 
 #define FREQ_TALK  9    // 4.5
 #define FREQ_FLUTE 40   // 20.0
+#define FREQ_MAX   41   // 20.5 (the dial's end, as Crystal's)
+
+// the radio's stations (StationAt, ShowLine below)
+enum
+{
+    ST_NONE, ST_TALK, ST_DEX, ST_MUSIC, ST_LUCKY, ST_BUENA, ST_UNOWN, ST_PLACES, ST_SING, ST_FLUTE, ST_EVOLUTION,
+    ST_ROCKET,
+};
+static const u8 sName_Dex[] = _("POKéDEX Show");
+static const u8 sName_Music[] = _("POKéMON Music");
+static const u8 sName_Lucky[] = _("Lucky Channel");
+static const u8 sName_Buena[] = _("BUENA’S PASSWORD");
+static const u8 sName_Unown[] = _("?????");
+static const u8 sName_Places[] = _("Places & People");
+static const u8 sName_Sing[] = _("Let’s All Sing!");
+static const struct { const u8 *name; u16 song; } sStations[] = {
+    [ST_NONE] = {sText_NoSignal, 0},
+    [ST_TALK] = {sText_Talk, MUS_JOHTO_RADIO_POKEMON_TALK},
+    [ST_DEX] = {sName_Dex, MUS_JOHTO_RADIO_POKEDEX_SHOW},
+    [ST_MUSIC] = {sName_Music, MUS_JOHTO_RADIO_POKEMON_MARCH},   // (the LULLABY on Mondays, Wednesdays, Fridays)
+    [ST_LUCKY] = {sName_Lucky, MUS_JOHTO_RADIO_LUCKY_CHANNEL},
+    [ST_BUENA] = {sName_Buena, MUS_JOHTO_RADIO_BUENAS_PASSWORD},
+    [ST_UNOWN] = {sName_Unown, MUS_JOHTO_RADIO_UNOWN},
+    [ST_PLACES] = {sName_Places, MUS_JOHTO_RADIO_PLACES_AND_PEOPLE},
+    [ST_SING] = {sName_Sing, MUS_JOHTO_RADIO_POKEMON_MARCH},
+    [ST_FLUTE] = {sText_Flute, MUS_JOHTO_RADIO_POKE_FLUTE},
+    [ST_EVOLUTION] = {sName_Unown, MUS_JOHTO_RADIO_EVOLUTION},
+    [ST_ROCKET] = {NULL, MUS_JOHTO_RADIO_ROCKET},   // (on the tuned station, under its own name)
+};
+
+extern const struct PokedexEntry gPokedexEntries[];
 
 // ---------------------------------------------------------------------------------------------------- drawing
 static void Print(u8 win, u8 font, const u8 *text, u8 x, u8 y, const u8 *colors)
@@ -369,9 +413,9 @@ static void DrawRadio(void)
     Rect(WIN_MAIN, C_DARK, 8, 2, LCD_W - 16, 40);   // the dial
     for (f = 0; f < 5; f++)   // (the MHz, over their ticks)
         Print(WIN_MAIN, FONT_SMALL, sText_Dial[f], FreqX(f * 10) - GetStringWidth(FONT_SMALL, sText_Dial[f], 0) / 2, 2, sColDial);
-    for (f = 0; f <= 40; f++)
+    for (f = 0; f <= FREQ_MAX; f++)
         Rect(WIN_MAIN, C_WHITE, FreqX(f), f % 10 == 0 ? 14 : 17, 1, f % 10 == 0 ? 6 : 3);
-    Rect(WIN_MAIN, C_WHITE, FreqX(0), 20, FreqX(40) - FreqX(0) + 1, 1);
+    Rect(WIN_MAIN, C_WHITE, FreqX(0), 20, FreqX(FREQ_MAX) - FreqX(0) + 1, 1);
     Rect(WIN_MAIN, C_RED, FreqX(sG->freq) - 1, 10, 3, 18);   // the needle
     p = ConvertIntToDecimalStringN(buf, sG->freq / 2, STR_CONV_MODE_LEFT_ALIGN, 2);
     *p++ = CHAR_PERIOD;
@@ -381,8 +425,7 @@ static void DrawRadio(void)
     PrintRight(WIN_MAIN, FONT_SMALL, sText_Tuning, LCD_W - 14, 24, sColDial);
     Rect(WIN_MAIN, C_INK, 40, 46, LCD_W - 80, 22);   // the station's box
     Rect(WIN_MAIN, C_LCD, 41, 47, LCD_W - 82, 20);
-    PrintCentered(WIN_MAIN, FONT_NORMAL, sG->station == 1 ? sText_Talk : sG->station == 2 ? sText_Flute : sText_NoSignal,
-                  49, sColLcd);
+    PrintCentered(WIN_MAIN, FONT_NORMAL, sStations[sG->station].name, 49, sColLcd);
 }
 
 static void DrawAll(void)
@@ -417,7 +460,7 @@ static void DrawAll(void)
         break;
     case CARD_RADIO:
         DrawRadio();
-        if (sG->station == 1)
+        if (sG->station != 0 && sG->lines[1][0] != EOS)
             DrawMsg(sG->lines[0], sG->lines[1]);
         else
             DrawMsg(sMsg_Tune, NULL);
@@ -542,6 +585,9 @@ static void CallElm(void)
 }
 
 // ---------------------------------------------------------------------------------------------------- radio
+// Crystal's stations (pokecrystal engine/pokegear/pokegear.asm RadioChannels, engine/pokegear/radio.asm), their songs
+// Crystal's own (tools/kaisong/crystal_radio.py) and their words Crystal's (data/text/common_1.asm), a line at a time
+// scrolling up the message box as Crystal's radio prints them
 static const u8 sOpt_Intro1[] = _("MARY: PROF. OAK’S MOéMON TALK!");
 static const u8 sOpt_Intro2[] = _("With me, MARY!");
 static const u8 sOpt_Oak1[] = _("OAK: {STR_VAR_1}");
@@ -583,6 +629,95 @@ static const u8 sOpt_Adjectives[][20] = {
     _("lovely."),
     _("speedy."),
 };
+static const u8 sBen1[] = _("BEN: POKéMON MUSIC");
+static const u8 sBen2[] = _("CHANNEL!");
+static const u8 sBen3[] = _("It’s me, DJ BEN!");
+static const u8 sFern1[] = _("FERN: POKéMUSIC!");
+static const u8 sFern2[] = _("With DJ FERN!");
+static const u8 sBenFern1[] = _("Today’s {STR_VAR_1},");
+static const u8 sBenFern2A[] = _("so let us jam to");
+static const u8 sBenFern2B[] = _("so chill out to");
+static const u8 sBenFern3A[] = _("POKéMON March!");
+static const u8 sBenFern3B[] = _("POKéMON Lullaby!");
+static const u8 sLucky[][24] = {
+    _("REED: Yeehaw! How"), _("y’all doin’ now?"),
+    _("Whether you’re up"), _("or way down low,"),
+    _("don’t you miss the"), _("LUCKY NUMBER SHOW!"),
+    _("This week’s Lucky"), _("Number is {STR_VAR_1}!"),
+    _("I’ll repeat that!"), _("This week’s Lucky"),
+    _("Number is {STR_VAR_1}!"), _("Match it and go to"),
+    _("the RADIO TOWER!"),
+};
+static const u8 sLuckyDrag[][24] = {_("…Repeating myself"), _("gets to be a drag…")};
+static const u8 sBuena[][24] = {
+    _("BUENA: BUENA here!"), _("Today’s password!"),
+    _("Let me think… It’s"), _("HELP!"),   // (the password BUENA asks for, RADIO TOWER 2F)
+    _("Don’t forget it!"), _("I’m in GOLDENROD’s"),
+    _("RADIO TOWER!"),
+};
+static const u8 sBuenaMidnight[][24] = {
+    _("BUENA: Oh my…"), _("It’s midnight! I"),
+    _("have to shut down!"), _("Thanks for tuning"),
+    _("in to the end! But"), _("don’t stay up too"),
+    _("late! Presented to"), _("you by DJ BUENA!"),
+    _("I’m outta here!"), _("…"),
+};
+static const u8 sRocket[][24] = {
+    _("… …Ahem, we are"), _("TEAM ROCKET!"),
+    _("After three years"), _("of preparation, we"),
+    _("have risen again"), _("from the ashes!"),
+    _("GIOVANNI! Can you"), _("hear? We did it!"),
+    _("Where is our boss?"), _("Is he listening?"),
+};
+static const u8 sPnP[][24] = {
+    _("PLACES AND PEOPLE!"), _("Brought to you by"), _("me, DJ LILY!"),
+};
+static const u8 sPnPAdjectives[][24] = {
+    _("is cute."), _("is sort of lazy."), _("is always happy."),
+    _("is quite noisy."), _("is precocious."), _("is somewhat bold."),
+    _("is too picky!"), _("is sort of OK."), _("is just so-so."),
+    _("is actually great."), _("is just my type."), _("is so cool, no?"),
+    _("is inspiring!"), _("is kind of weird."), _("is right for me?"),
+    _("is definitely odd!"),
+};
+
+static bool8 RocketsInRadioTower(void)   // (TEAM ROCKET's takeover: after MAHOGANY's hideout, until the last EXECUTIVE)
+{
+    return VarGet(VAR_QZ_0x500A) >= 6 && VarGet(VAR_QZ_0x500A) < 10;
+}
+
+// the station on the dial at FREQ here and now (Crystal: JOHTO's stations in JOHTO, KANTO's out of it)
+static u8 StationAt(u8 freq)
+{
+    bool8 johto = MP_Region_Current() == REGION_JOHTO;
+    u16 sec = gMapHeader.regionMapSectionId;
+    RtcCalcLocalTime();
+    switch (freq)
+    {
+    case FREQ_TALK:   // the POKéDEX SHOW in the morning
+        return !johto ? ST_NONE : gLocalTime.hours >= 4 && gLocalTime.hours < 10 ? ST_DEX : ST_TALK;
+    case 15:   // 7.5
+        return johto ? ST_MUSIC : ST_NONE;
+    case 17:   // 8.5
+        return johto ? ST_LUCKY : ST_NONE;
+    case 21:   // 10.5: from 6 PM to midnight
+        return johto && gLocalTime.hours >= 18 ? ST_BUENA : ST_NONE;
+    case 27:   // 13.5
+        return sec == MAPSEC_JOHTO_RUINS_OF_ALPH ? ST_UNOWN : ST_NONE;
+    case 33:   // 16.5
+        return johto ? ST_NONE : ST_PLACES;
+    case 37:   // 18.5
+        return johto ? ST_NONE : ST_SING;
+    case FREQ_FLUTE:
+        return johto ? ST_NONE : ST_FLUTE;
+    case FREQ_MAX:   // 20.5: around MAHOGANY while TEAM ROCKET is there (from the LAKE OF RAGE's red GYARADOS on)
+        if (VarGet(VAR_QZ_0x500C) >= 2 && VarGet(VAR_QZ_0x500A) < 6
+         && (sec == MAPSEC_JOHTO_MAHOGANY_TOWN || sec == MAPSEC_JOHTO_ROUTE43 || sec == MAPSEC_JOHTO_LAKE_OF_RAGE))
+            return ST_EVOLUTION;
+        return ST_NONE;
+    }
+    return ST_NONE;
+}
 
 // a POKéMON of the region’s grass and where (its wild tables, as Crystal’s show picks a route’s)
 static void PickTalkMon(void)
@@ -606,44 +741,194 @@ static void PickTalkMon(void)
     }
 }
 
-// the show’s lines now: the greeting, then OAK and MARY in turn, a new POKéMON each time round
-static void TalkLines(void)
+// a POKéMON the player has caught (Crystal's POKéDEX SHOW), its POKéDEX entry
+static bool8 PickDexMon(void)
 {
-    const u8 *a = sEmpty, *b = sEmpty;
-    switch (sG->talkStep % 4)
+    u32 tries;
+    for (tries = 0; tries < 4000; tries++)
     {
-    case 0: a = sOpt_Intro1; b = sOpt_Intro2; break;
-    case 1:
-        PickTalkMon();
-        GetSpeciesName(gStringVar1, sG->talkSpecies);
-        StringCopy(gStringVar2, sG->talkPlace);
-        a = sOpt_Oak1; b = sOpt_Oak2;
-        break;
-    case 2:
-        GetSpeciesName(gStringVar1, sG->talkSpecies);
-        a = sOpt_Mary1; b = sOpt_Adverbs[Random() % ARRAY_COUNT(sOpt_Adverbs)];
-        break;
-    case 3:
-        a = sOpt_Adjectives[Random() % ARRAY_COUNT(sOpt_Adjectives)];
-        break;
+        u16 num = 1 + Random() % NATIONAL_DEX_COUNT;
+        if (GetSetPokedexFlag(num, FLAG_GET_CAUGHT))
+        {
+            sG->talkSpecies = NationalPokedexNumToSpecies(num);
+            sG->dexText = gPokedexEntries[num].description;
+            return TRUE;
+        }
     }
-    StringExpandPlaceholders(sG->lines[0], a);
-    StringExpandPlaceholders(sG->lines[1], b);
+    return FALSE;
 }
 
-// the dial at FREQ: on a station, its music (and the talk); between them the map's music
+// the next line of the POKéDEX entry (it breaks at its own line ends)
+static void DexLine(u8 *dst)
+{
+    u32 n = 0;
+    while (*sG->dexText != EOS && *sG->dexText != CHAR_NEWLINE && n < 38)
+        dst[n++] = *sG->dexText++;
+    dst[n] = EOS;
+    if (*sG->dexText == CHAR_NEWLINE)
+        sG->dexText++;
+}
+
+// a JOHTO or KANTO trainer, "CLASS NAME" (Crystal's PLACES AND PEOPLE)
+static void PickPerson(u8 *dst)
+{
+    u32 tries;
+    for (tries = 0; tries < 200; tries++)
+    {
+        const struct Trainer *t = &gTrainers[FIRST_QZ_TRAINER + Random() % QZ_TRAINERS_COUNT];
+        if (t->trainerName[0] != EOS && gTrainerClassNames[t->trainerClass][0] != EOS)
+        {
+            u8 *p = StringCopy(dst, gTrainerClassNames[t->trainerClass]);
+            *p++ = CHAR_SPACE;
+            StringCopy(p, t->trainerName);
+            return;
+        }
+    }
+    StringCopy(dst, sText_Johto);
+}
+
+// a new line under the last: Crystal's radio scrolls a line at a time
+static void Say(const u8 *line)
+{
+    StringCopy(sG->lines[0], sG->lines[1]);
+    StringExpandPlaceholders(sG->lines[1], line);
+}
+
+// the show's next line (sG->talkStep counts them); FALSE: the show has nothing more to say for now
+static bool8 ShowLine(void)
+{
+    u16 step = sG->talkStep++;
+    bool8 lullaby = (gLocalTime.days % 7) & 1;   // (Mondays, Wednesdays, Fridays)
+    switch (sG->show)
+    {
+    case ST_TALK:   // the greeting, then OAK and MARY in turn, a new POKéMON each time round
+        if (step < 2)
+            Say(step == 0 ? sOpt_Intro1 : sOpt_Intro2);
+        else switch ((step - 2) % 5)
+        {
+        case 0:
+            PickTalkMon();
+            GetSpeciesName(gStringVar1, sG->talkSpecies);
+            Say(sOpt_Oak1);
+            break;
+        case 1:
+            StringCopy(gStringVar2, sG->talkPlace);
+            Say(sOpt_Oak2);
+            break;
+        case 2:
+            GetSpeciesName(gStringVar1, sG->talkSpecies);
+            Say(sOpt_Mary1);
+            break;
+        case 3: Say(sOpt_Adverbs[Random() % ARRAY_COUNT(sOpt_Adverbs)]); break;
+        case 4: Say(sOpt_Adjectives[Random() % ARRAY_COUNT(sOpt_Adjectives)]); break;
+        }
+        return TRUE;
+    case ST_DEX:   // a caught POKéMON's name, then its entry
+        if (step == 0 || *sG->dexText == EOS)
+        {
+            if (!PickDexMon())
+                return FALSE;
+            GetSpeciesName(gStringVar1, sG->talkSpecies);
+            Say(gStringVar1);
+        }
+        else
+        {
+            u8 line[40];
+            DexLine(line);
+            Say(line);
+        }
+        return TRUE;
+    case ST_MUSIC:   // BEN's greeting (FERN's on LET'S ALL SING), the day and its song; then the music
+    case ST_SING:
+        if (step >= 6 || (sG->show == ST_SING && step >= 5))
+            return FALSE;
+        if (sG->show == ST_SING && step >= 2)
+            step++;
+        switch (step)
+        {
+        case 0: Say(sG->show == ST_SING ? sFern1 : sBen1); break;
+        case 1: Say(sG->show == ST_SING ? sFern2 : sBen2); break;
+        case 2: Say(sBen3); break;
+        case 3:
+            StringCopy(gStringVar1, sText_Days[gLocalTime.days % 7]);
+            Say(sBenFern1);
+            break;
+        case 4: Say(lullaby ? sBenFern2B : sBenFern2A); break;
+        case 5: Say(lullaby ? sBenFern3B : sBenFern3A); break;
+        }
+        return TRUE;
+    case ST_LUCKY:   // REED and this week's number (the LOTTERY CORNER's), now and then a sigh
+        if (step == 0)
+            sG->drag = (Random() & 0xFF) == 0;
+        if (step >= ARRAY_COUNT(sLucky) + (sG->drag ? 2 : 0))
+        {
+            sG->talkStep = 0;
+            return ShowLine();
+        }
+        ConvertIntToDecimalStringN(gStringVar1, GetLotteryNumber() % 100000, STR_CONV_MODE_LEADING_ZEROS, 5);
+        Say(step < ARRAY_COUNT(sLucky) ? sLucky[step] : sLuckyDrag[step - ARRAY_COUNT(sLucky)]);
+        return TRUE;
+    case ST_BUENA:   // BUENA's password, over and over until midnight
+        RtcCalcLocalTime();
+        if (gLocalTime.hours < 18)
+        {
+            if (sG->midnight >= ARRAY_COUNT(sBuenaMidnight))
+                return FALSE;
+            Say(sBuenaMidnight[sG->midnight++]);
+            return TRUE;
+        }
+        Say(sBuena[step % ARRAY_COUNT(sBuena)]);
+        return TRUE;
+    case ST_PLACES:   // DJ LILY on a JOHTO or KANTO trainer or place
+        if (step < ARRAY_COUNT(sPnP))
+            Say(sPnP[step]);
+        else if ((step - ARRAY_COUNT(sPnP)) % 2 == 0)
+        {
+            if (Random() % 100 < 49)
+                PickPerson(gStringVar1);
+            else
+            {
+                PickTalkMon();
+                StringCopy(gStringVar1, sG->talkPlace);
+            }
+            Say(gStringVar1);
+        }
+        else
+        {
+            Say(sPnPAdjectives[Random() % ARRAY_COUNT(sPnPAdjectives)]);
+            if (Random() % 100 < 4)   // (and the show from the top)
+                sG->talkStep = 0;
+        }
+        return TRUE;
+    case ST_ROCKET:
+        Say(sRocket[step % ARRAY_COUNT(sRocket)]);
+        return TRUE;
+    }
+    return FALSE;   // (the UNOWN, the POKé FLUTE, the EVOLUTION radio: only sounds)
+}
+
+// the dial at FREQ: on a station, its music and its show; between them the map's music
 static void TuneTo(u8 freq)
 {
-    u8 station = freq == FREQ_TALK ? 1 : freq == FREQ_FLUTE ? 2 : 0;
+    u8 station = StationAt(freq), show = station;
+    u16 song;
     sG->freq = freq;
-    if (station == sG->station)
+    if (station != ST_NONE && freq <= 21 && MP_Region_Current() == REGION_JOHTO && RocketsInRadioTower())
+        show = ST_ROCKET;   // (TEAM ROCKET on every JOHTO station)
+    if (station == sG->station && show == sG->show)
         return;
     sG->station = station;
+    sG->show = show;
     sG->talkStep = 0;
     sG->talkTimer = 0;
-    PlayBGM(station == 1 ? MUS_JOHTO_PROF_OAK : station == 2 ? MUS_RG_POKE_FLUTE : sG->song);
-    if (station == 1)
-        TalkLines();
+    sG->midnight = 0;
+    sG->lines[0][0] = sG->lines[1][0] = EOS;
+    song = sStations[show].song;
+    if (show == ST_MUSIC || show == ST_SING)
+        song = (gLocalTime.days % 7) & 1 ? MUS_JOHTO_RADIO_POKEMON_LULLABY : MUS_JOHTO_RADIO_POKEMON_MARCH;
+    PlayBGM(station == ST_NONE ? sG->song : song);
+    if (station != ST_NONE)
+        ShowLine();
 }
 
 // ---------------------------------------------------------------------------------------------------- the screen
@@ -698,12 +983,16 @@ static void Task_Pokegear(u8 taskId)
         sG->lastMinute = gLocalTime.minutes;
         DrawAll();
     }
-    if (sG->card == CARD_RADIO && sG->station == 1 && ++sG->talkTimer >= 150)   // (a line every two and a half seconds)
+    if (sG->card == CARD_RADIO && sG->station != 0 && ++sG->talkTimer >= 100)   // (a line every second and a half)
     {
         sG->talkTimer = 0;
-        sG->talkStep++;
-        TalkLines();
-        DrawAll();
+        if (ShowLine())
+            DrawAll();
+        else if (sG->show == ST_BUENA)   // (BUENA's gone at midnight: off the air)
+        {
+            TuneTo(sG->freq);
+            DrawAll();
+        }
     }
 
     if (sG->card == CARD_PHONE && sG->phone != PHONE_LIST)   // a call: A turns the page; MOM's question A YES / B NO
@@ -742,7 +1031,7 @@ static void Task_Pokegear(u8 taskId)
         sG->phone = PHONE_LIST;
         if (sG->station != 0)   // (the radio plays while its card is open)
         {
-            sG->station = 0;
+            sG->station = sG->show = 0;
             PlayBGM(sG->song);
         }
         if (sG->card == CARD_RADIO)
@@ -751,7 +1040,7 @@ static void Task_Pokegear(u8 taskId)
     }
     else if (sG->card == CARD_RADIO && (JOY_REPEAT(DPAD_UP) || JOY_REPEAT(DPAD_DOWN)))
     {
-        if (JOY_REPEAT(DPAD_UP) && sG->freq < FREQ_FLUTE)
+        if (JOY_REPEAT(DPAD_UP) && sG->freq < FREQ_MAX)
             TuneTo(sG->freq + 1);
         else if (JOY_REPEAT(DPAD_DOWN) && sG->freq > 0)
             TuneTo(sG->freq - 1);
@@ -789,6 +1078,10 @@ static void OpenPokegear(u8 card)
     SetGpuReg(REG_OFFSET_DISPCNT, 0);
     ResetBgsAndClearDma3BusyFlags(0);
     InitBgsFromTemplates(0, sBgTemplates, ARRAY_COUNT(sBgTemplates));
+    ChangeBgX(0, 0, BG_COORD_SET);   // (the field's scroll would shift the screen)
+    ChangeBgY(0, 0, BG_COORD_SET);
+    ChangeBgX(1, 0, BG_COORD_SET);
+    ChangeBgY(1, 0, BG_COORD_SET);
     DmaFill16(3, 0, VRAM, VRAM_SIZE);
     DmaFill32(3, 0, OAM, OAM_SIZE);
     DmaFill16(3, 0, PLTT, PLTT_SIZE);
@@ -857,12 +1150,39 @@ bool8 MP_Pokegear_Active(void)
     return sG != NULL && !sG->leaving && !gPaletteFade.active;
 }
 
-// Tests (mp pokegear): the card, the cursor, the phone and the radio
-void MP_Pokegear_Debug(void)
+// Tests (mp pokegear [open | tune FREQ]): the card, the cursor, the phone and the radio
+void MP_Pokegear_Debug(const char *arg)
 {
+    if (arg != NULL && strncmp(arg, "open", 4) == 0 && sG == NULL)
+    {
+        sToField = TRUE;
+        SetMainCallback2(CB2_MP_OpenPokegearToField);
+        return;
+    }
+    if (arg != NULL && strncmp(arg, "tune ", 5) == 0 && sG != NULL)
+    {
+        if (sG->card != CARD_RADIO)
+            sG->card = CARD_RADIO;
+        TuneTo(atoi(arg + 5));
+        DrawAll();
+    }
     if (sG == NULL)
         printf("[test] pokegear: closed\n");
     else
-        printf("[test] pokegear: card %u cursor %u phone %u page %u/%u freq %u station %u\n", sG->card, sG->cursor,
-               sG->phone, sG->page, sG->pages, sG->freq, sG->station);
+    {
+        u8 line[48];
+        u32 i;
+        for (i = 0; i < sizeof(sG->lines[1]) && sG->lines[1][i] != EOS; i++)   // (the radio's last line, in ASCII)
+        {
+            u8 c = sG->lines[1][i];
+            line[i] = c == CHAR_SPACE ? ' ' : c >= CHAR_A && c <= CHAR_Z ? 'A' + c - CHAR_A
+                    : c >= CHAR_a && c <= CHAR_z ? 'a' + c - CHAR_a : c >= CHAR_0 && c <= CHAR_9 ? '0' + c - CHAR_0 : '.';
+        }
+        line[i] = 0;
+        u16 song = MP_Kaisong_SongOf(gMPlayInfo_BGM.songHeader);
+        printf("[test] pokegear: card %u cursor %u phone %u page %u/%u freq %u station %u show %u song %u%s line \"%s\"\n",
+               sG->card, sG->cursor, sG->phone, sG->page, sG->pages, sG->freq, sG->station, sG->show, song,
+               song != 0 && song <= MUS_JOHTO_RADIO_ROCKET && gMPlayInfo_BGM.songHeader != gSongTable[song].header
+               ? " (kaisong)" : "", line);
+    }
 }

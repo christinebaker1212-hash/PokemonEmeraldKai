@@ -4430,12 +4430,26 @@ EXIT{B_BUTTON}); big seven-segment digits on the CLOCK (Digit()); a black FM dia
 in 0.5 steps, a station only on its frequency). LEFT / RIGHT change cards, B off (any button on the CLOCK). CLOCK: the day and time from the game's clock (no setting). MAP:
 FieldInitRegionMap, back to the POKéGEAR. PHONE: MOM (Crystal's mom.asm: where you are; her savings, YES / NO keeps,
 starts or stops her saving: mp_mombank.c MP_MomBank_*) and PROF. ELM (Crystal's elm.asm lines by JOHTO badges).
-RADIO: 4.5 OAK's POKéMON TALK (MUS_JOHTO_PROF_OAK; MARY and OAK in Crystal's _OPT_ words, a POKéMON of the region's
-grass tables as the GENERATION has them, a line every 2.5 s), 20.0 POKé FLUTE (MUS_RG_POKE_FLUTE); the map's music
-comes back when the card or screen closes. Item ITEM_POKEGEAR 693 (key, registrable): START > POKéGEAR in JOHTO
+RADIO (0.0-20.5): Crystal's stations (pokecrystal pokegear.asm RadioChannels: StationAt) with Crystal's own songs
+and words, a line every 100 frames scrolling up the message box as Crystal's (ShowLine). In JOHTO: 4.5 OAK's POKéMON TALK
+(MARY and OAK, _OPT_ words, a POKéMON of the region's grass tables as the GENERATION has them; 4-10 AM the POKéDEX SHOW:
+a caught POKéMON's name, then its POKéDEX entry line by line), 7.5 POKéMON MUSIC (DJ BEN; the MARCH on Sundays,
+Tuesdays, Thursdays, Saturdays, the LULLABY on the other days: gLocalTime.days % 7), 8.5 the LUCKY CHANNEL (REED; the
+number is the LOTTERY CORNER's, GetLotteryNumber), 10.5 BUENA's PASSWORD (6 PM to midnight; the password is HELP, what
+BUENA asks for on RADIO TOWER 2F; at midnight her goodbye, then off the air), 13.5 the UNOWN at the RUINS OF ALPH, 20.5
+the EVOLUTION radio at MAHOGANY / ROUTE 43 / the LAKE OF RAGE from the red GYARADOS (VAR_QZ_0x500C >= 2) until TEAM
+ROCKET takes the RADIO TOWER (VAR_QZ_0x500A 6); while they hold it (0x500A 6-9) TEAM ROCKET's broadcast is on every
+JOHTO station (show ST_ROCKET under the station's name). Out of JOHTO: 16.5 PLACES AND PEOPLE (DJ LILY on a JOHTO /
+KANTO trainer of the QZ table or a place), 18.5 LET'S ALL SING! (DJ FERN, the MARCH / LULLABY: Crystal's song list names
+the BICYCLE song there, its show never plays it), 20.0 the POKé FLUTE (no EXPN CARD: Kai has none). The songs:
+MUS_JOHTO_RADIO_* 816-826 (tools/kaisong/crystal_radio.py: pokecrystal's audio.o + ram.o linked with a small GBS
+driver into banks 1-7, since a GBS player banks like MBC1 and the songs' banks are past 0x1F; built from the decomp
+with rgbds 1.0.4, no ROM; the studio converts each track through an .m3u to music/mus_johto_radio_*.kaisong).
+Between stations the map's music plays; it comes back when the card or screen closes. Item ITEM_POKEGEAR 693 (key, registrable): START > POKéGEAR in JOHTO
 (start_menu.c MENU_ACTION_POKEGEAR, last in the enum), ItemUseOutOfBattle_Pokegear anywhere once JOHTO's LEAGUE is
 beaten. MOM hands it over after her first talk (Johto_PlayersHouse1F, Crystal's words); a save past that scene gets it
-in JOHTO (mp_region.c MP_Region_GiveDevices). Harness condition "pokegear", debug mp pokegear; test johto_pokegear.
+in JOHTO (mp_region.c MP_Region_GiveDevices). Harness condition "pokegear", debug mp pokegear [open | tune FREQ] (FREQ in
+half MHz: 9 = 4.5); tests johto_pokegear, johto_radio (8 PM, every station and place), johto_radio_morning.
 
 ## MY ROOM in JOHTO (1.68.0)
 Johto_PlayersHouse2F decorated on the bedroom's logic: 12 decoration sprite slots (OBJ_EVENT_GFX_VAR_0..B,

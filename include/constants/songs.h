@@ -754,6 +754,19 @@
 #define MUS_SINNOH_CONTEST_TOUGH              814
 #define MUS_SINNOH_VICTORY_FRONTIER_BRAIN     815
 // end of SINNOH's songs
+// Moemon Kai: JOHTO's radio (tools/kaisong/crystal_radio.py)
+#define MUS_JOHTO_RADIO_POKEMON_TALK           816
+#define MUS_JOHTO_RADIO_POKEDEX_SHOW           817
+#define MUS_JOHTO_RADIO_POKEMON_MARCH          818
+#define MUS_JOHTO_RADIO_POKEMON_LULLABY        819
+#define MUS_JOHTO_RADIO_LUCKY_CHANNEL          820
+#define MUS_JOHTO_RADIO_BUENAS_PASSWORD        821
+#define MUS_JOHTO_RADIO_UNOWN                  822
+#define MUS_JOHTO_RADIO_PLACES_AND_PEOPLE      823
+#define MUS_JOHTO_RADIO_POKE_FLUTE             824
+#define MUS_JOHTO_RADIO_EVOLUTION              825
+#define MUS_JOHTO_RADIO_ROCKET                 826
+// end of JOHTO's radio
 
 #define MUS_ROUTE118                0x7FFF  // Map is split into 2 music sections. controlled by GetCurrLocationDefaultMusic().
 

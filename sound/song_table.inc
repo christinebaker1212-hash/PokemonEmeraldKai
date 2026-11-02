@@ -978,6 +978,30 @@ gSongTable::
 	song mus_sinnoh_contest_tough, MUSIC_PLAYER_BGM, 0
 	song mus_sinnoh_victory_frontier_brain, MUSIC_PLAYER_BGM, 0
 @ end of SINNOH's songs
+@ Moemon Kai: JOHTO's radio (tools/kaisong/crystal_radio.py)
+	.set mus_johto_radio_pokemon_talk, mus_johto_prof_oak
+	.set mus_johto_radio_pokedex_show, mus_johto_pokecenter
+	.set mus_johto_radio_pokemon_march, mus_johto_goldenrod
+	.set mus_johto_radio_pokemon_lullaby, mus_johto_azalea
+	.set mus_johto_radio_lucky_channel, mus_johto_game_corner
+	.set mus_johto_radio_buenas_password, mus_johto_goldenrod
+	.set mus_johto_radio_unown, mus_johto_ruins_of_alph
+	.set mus_johto_radio_places_and_people, mus_rg_vermillion
+	.set mus_johto_radio_poke_flute, mus_rg_poke_flute
+	.set mus_johto_radio_evolution, mus_johto_rocket_hideout
+	.set mus_johto_radio_rocket, mus_johto_rocket_hideout
+	song mus_johto_radio_pokemon_talk, MUSIC_PLAYER_BGM, 0
+	song mus_johto_radio_pokedex_show, MUSIC_PLAYER_BGM, 0
+	song mus_johto_radio_pokemon_march, MUSIC_PLAYER_BGM, 0
+	song mus_johto_radio_pokemon_lullaby, MUSIC_PLAYER_BGM, 0
+	song mus_johto_radio_lucky_channel, MUSIC_PLAYER_BGM, 0
+	song mus_johto_radio_buenas_password, MUSIC_PLAYER_BGM, 0
+	song mus_johto_radio_unown, MUSIC_PLAYER_BGM, 0
+	song mus_johto_radio_places_and_people, MUSIC_PLAYER_BGM, 0
+	song mus_johto_radio_poke_flute, MUSIC_PLAYER_BGM, 0
+	song mus_johto_radio_evolution, MUSIC_PLAYER_BGM, 0
+	song mus_johto_radio_rocket, MUSIC_PLAYER_BGM, 0
+@ end of JOHTO's radio
 
 	.align 2
 dummy_song_header:
