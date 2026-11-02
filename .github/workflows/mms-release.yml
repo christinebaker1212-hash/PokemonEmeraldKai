@@ -59,7 +59,9 @@ jobs:
         if: steps.ver.outputs.skip != 'true'
         run: |
           tools/release/ci_tools.sh "$RUNNER_TEMP/debs"
-          python3 -c "import numpy" 2>/dev/null || sudo apt-get install -y --no-install-recommends python3-numpy
+          # numpy for the tests' sound comparisons (ci_tools.sh reads its own package list, so from pip)
+          python3 -c "import numpy" 2>/dev/null || python3 -m pip install --user --break-system-packages numpy
+          python3 -c "import numpy; print('numpy', numpy.__version__)"
 
       - name: SDL2 for Windows (2.30.9, checked)
         if: steps.ver.outputs.skip != 'true'
