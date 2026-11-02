@@ -1,0 +1,110 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp emptyparty
+mp platinumstory
+mp setvar 0x5209 1
+mp setvar 0x5208 1
+mp setvar 0x520A 1
+mp warp 40,0,9,13
+wait 150
+press UP 16
+wait 30
+mash A 60 10
+wait 100
+mp getvar 0x524B
+mp warp 40,1,15,26
+wait 150
+press UP 16
+wait 60
+mash A 40 10
+shot s00
+mash A 40 10
+shot s01
+mash A 40 10
+shot s02
+mash A 40 10
+shot s03
+mash A 40 10
+shot s04
+mash A 40 10
+shot s05
+mash A 40 10
+shot s06
+mash A 40 10
+shot s07
+mash A 40 10
+shot s08
+mash A 40 10
+shot s09
+mash A 40 10
+shot s10
+mash A 40 10
+shot s11
+mash A 40 10
+shot s12
+mash A 40 10
+shot s13
+mash A 40 10
+shot s14
+mash A 40 10
+shot s15
+mp getvar 0x51C9
+mp where
+mp objs
+shot scene_end
+press LEFT 16
+wait 20
+mp face left
+press A 4
+wait 60
+shot case1
+mash A 6 20
+wait 120
+shot case2
+press A 4
+wait 60
+shot case3
+mash A 10 20
+wait 120
+shot case4
+mp party
+mash A 60 12
+wait 200
+shot after1
+mp party
+mash A 60 12
+wait 60
+shot b00
+mash A 60 12
+wait 60
+shot b01
+mash A 60 12
+wait 60
+shot b02
+mash A 60 12
+wait 60
+shot b03
+mash A 60 12
+wait 60
+shot b04
+mash A 60 12
+wait 60
+shot b05
+mash A 60 12
+wait 60
+shot b06
+mash A 60 12
+wait 60
+shot b07
+mash A 60 12
+wait 60
+shot b08
+mash A 60 12
+wait 60
+shot b09
+mp party
+mp getvar 0x52F8
+mp getvar 0x51C9
+mp ctx
+quit

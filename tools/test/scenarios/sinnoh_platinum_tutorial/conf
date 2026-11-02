@@ -1,0 +1,7 @@
+# Platinum's catching tutorial on ROUTE 202 (its StartCatchingTutorial on Emerald's WALLY tutorial battle:
+# battle_setup.c Sinnoh_CatchingTutorial): DAWN with the starter neither the player (CHIMCHAR here) nor BARRY took
+# catches a BIDOOF (once the PARCEL from mom is in hand: FLAG_RECEIVED_PARCEL); the player's party is back after (VAR_ROUTE_202_STATE 0x522A). Needs the packs.
+MODE=1
+TMO=300
+EXPECT_A=("var 0x522A = 1" "ctx 1 free 1 overworld 1 locked 0 script 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

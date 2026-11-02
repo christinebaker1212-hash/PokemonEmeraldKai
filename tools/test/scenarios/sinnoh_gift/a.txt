@@ -7,11 +7,15 @@ mp gencheck 262
 mp face up
 press A 1
 wait 60
-pressuntil A field 2000
-wait 20
+mash A 16 25
+mash B 20 25
+wait 120
+mp gencheck 262
 mp face up
 press A 1
-wait 60
-pressuntil A field 2000
+wait 300
+mash B 60 25
+wait 120
 mp gencheck 262
+mp ctx
 quit

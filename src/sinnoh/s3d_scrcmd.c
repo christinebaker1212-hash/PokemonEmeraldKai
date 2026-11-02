@@ -29,6 +29,11 @@
 #include "palette.h"
 #include "constants/songs.h"
 #include "pokedex.h"
+#include "pokemon_storage_system.h"
+#include "constants/game_stat.h"
+#include "daycare.h"
+#include "strings.h"
+#include "constants/daycare.h"
 #include "bike.h"
 #include "battle_setup.h"
 #include "overworld.h"
@@ -71,7 +76,20 @@ enum {
     SINNOH_MOVEMENT_TYPE,           // ARG: an object, ARG2: its movement type now (MOVEMENT_TYPE_FOLLOW_PLAYER: the partner)
     SINNOH_LOCAL_DEX,               // ARG: a variable <- of Platinum's SINNOH POKéDEX: ARG2 0 the seen, 1 the caught, 2 all seen
     SINNOH_STOP_MUSIC,              // ARG: Platinum's frames (0: at once): the song fades out and stops; the script waits
+    SINNOH_BATTLE_WON,              // ARG: a variable <- the last battle won (ARG2 1: lost)
+    SINNOH_ADD_VAR,                 // ARG += ARG2's value (ARG3 1: -=), both variables
+    SINNOH_BADGE_COUNT,             // ARG: a variable <- SINNOH's badges
+    SINNOH_PREVIOUS_MAP,            // ARG: a variable <- the map the player came from (MAP_GROUP << 8 | MAP_NUM)
+    SINNOH_DAYCARE_EGG,             // ARG: a variable <- the DAY CARE has an EGG
+    SINNOH_BUFFER_TEXT,             // ARG: a string buffer <- SINNOH's text, ARG2's bank, message ARG3 (or a variable)
+    SINNOH_QUERY,                   // ARG: a variable <- ARG2: 0 two able to battle, 1 the NATIONAL DEX's seen, 2 REGIROCK,
+                                    //  REGICE and REGISTEEL in the party, 3 free PC slots, 4 HALL OF FAME entries
+    SINNOH_DEX_RATING,              // ARG: a variable <- Platinum's POKéDEX rating line (ARG2 1: the NATIONAL DEX's)
+    SINNOH_MESSAGE_VAR,             // gSinnohMessage <- SINNOH's text, ARG's bank, message ARG2's value
 };
+
+u8 gSinnohMessage[1000];   // (SINNOH_MESSAGE_VAR: `message gSinnohMessage`)
+extern const u16 gSinnohDexRatings[];   // (sinnoh/platinum_scripts.inc: bank, then rows of up to, line, female's line)
 #include "../data/sinnoh_dex.h"
 
 static struct MapEvents sStoryEvents;                 // (Sinnoh_PlatinumMapScripts below)
@@ -374,6 +392,93 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
             FadeOutBGM(arg / 8 + 1);   // (m4a's fade: 16 steps of SPEED frames, at 60 frames a second)
         SetupNativeScript(ctx, IsBGMPausedOrStopped);
         return TRUE;
+    case SINNOH_BATTLE_WON:
+    {
+        bool8 lost = gBattleOutcome == B_OUTCOME_LOST || gBattleOutcome == B_OUTCOME_DREW;
+        VarSet(arg, arg2 ? lost : !lost);
+        break;
+    }
+    case SINNOH_ADD_VAR:
+        VarSet(arg, arg3 ? VarGet(arg) - VarGet(arg2) : VarGet(arg) + VarGet(arg2));
+        break;
+    case SINNOH_BADGE_COUNT:
+        VarSet(arg, MP_Region_BadgeCount(REGION_SINNOH));
+        break;
+    case SINNOH_PREVIOUS_MAP:
+        VarSet(arg, (gLastUsedWarp.mapGroup << 8) | (u8)gLastUsedWarp.mapNum);
+        break;
+    case SINNOH_DAYCARE_EGG:
+        VarSet(arg, GetDaycareState() == DAYCARE_EGG_WAITING);
+        break;
+    case SINNOH_BUFFER_TEXT:
+    {
+        const u8 *t = S3D_Text(arg2, VarGet(arg3));
+        StringCopy(StringVar(arg), t ? t : gText_EmptyString2);
+        break;
+    }
+    case SINNOH_QUERY:
+    {
+        u32 i, n = 0;
+        switch (arg2)
+        {
+        case 0:
+            for (i = 0; i < PARTY_SIZE; i++)
+                n += GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) != SPECIES_NONE && !GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG)
+                  && GetMonData(&gPlayerParty[i], MON_DATA_HP) != 0;
+            n = n >= 2;
+            break;
+        case 1:
+            n = GetNationalPokedexCount(FLAG_GET_SEEN);
+            break;
+        case 2:
+        {
+            static const u16 sTitans[] = {SPECIES_REGIROCK, SPECIES_REGICE, SPECIES_REGISTEEL};
+            u32 k, have = 0;
+            for (k = 0; k < ARRAY_COUNT(sTitans); k++)
+                for (i = 0; i < PARTY_SIZE; i++)
+                    if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) == sTitans[k])
+                    {
+                        have++;
+                        break;
+                    }
+            n = have == ARRAY_COUNT(sTitans);
+            break;
+        }
+        case 3:
+            n = TOTAL_BOXES_COUNT * IN_BOX_COUNT - CountAllStorageMons();
+            break;
+        case 4:
+            n = GetGameStat(GAME_STAT_ENTERED_HOF);
+            break;
+        }
+        VarSet(arg, n);
+        break;
+    }
+    case SINNOH_DEX_RATING:
+    {
+        const u16 *row = gSinnohDexRatings + 1;
+        u32 n = 0, i;
+        if (arg2)
+            n = GetNationalPokedexCount(FLAG_GET_CAUGHT);
+        else
+            for (i = 0; i < ARRAY_COUNT(sSinnohDex); i++)
+                n += GetSetPokedexFlag(SpeciesToNationalPokedexNum(sSinnohDex[i]), FLAG_GET_SEEN) != 0;
+        if (arg2)
+            while (row[0] != 0xFFFF)
+                row += 3;   // (past the local rows and their end)
+        if (arg2)
+            row += 3;
+        while (row[0] != 0xFFFF && n > row[0])
+            row += 3;
+        VarSet(arg, gSaveBlock2Ptr->playerGender == FEMALE ? row[2] : row[1]);
+        break;
+    }
+    case SINNOH_MESSAGE_VAR:
+    {
+        const u8 *t = S3D_Text(arg, VarGet(arg2));
+        StringCopy(gSinnohMessage, t ? t : gText_EmptyString2);
+        break;
+    }
     case SINNOH_SET_BIKE:
         if (!arg != !TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_MACH_BIKE | PLAYER_AVATAR_FLAG_ACRO_BIKE))
             GetOnOffBike(PLAYER_AVATAR_FLAG_MACH_BIKE);
@@ -424,7 +529,7 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
 // on transition, on resume, the frame table), its people as Platinum's (their hide flags, places and converted
 // scripts) and its step triggers, all from sinnoh/platinum_scripts.inc (tools/sinnoh/gen_scripts.py map_index, made
 // when the game is built; its end: map 0xFFFF). The map header keeps the map's own events: gMapHeader gets a copy
-struct SinnohStoryPerson { u8 localId, pad; u16 flag; s16 x, y; const u8 *script; };
+struct SinnohStoryPerson { u8 localId, pad; u16 flag; s16 x, y; u16 gfx, pad2[3]; const u8 *script; };   // (gfx 0: the map's)
 struct SinnohMapStory
 {
     u16 map, people, triggers, pad;
@@ -472,6 +577,11 @@ void Sinnoh_PlatinumMapScripts(void)
                 {
                     sStoryObjects[j].flagId = m->person[i].flag;
                     sStoryObjects[j].x = m->person[i].x;
+                    if (m->person[i].gfx)
+                    {
+                        sStoryObjects[j].graphicsIdLo = m->person[i].gfx & 0xFF;
+                        sStoryObjects[j].graphicsIdHi = m->person[i].gfx >> 8;
+                    }
                     sStoryObjects[j].y = m->person[i].y;
                     if (m->person[i].script)
                         sStoryObjects[j].script = m->person[i].script;

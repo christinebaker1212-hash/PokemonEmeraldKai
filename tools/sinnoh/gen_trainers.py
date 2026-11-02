@@ -125,6 +125,13 @@ for _starter in ('CHIMCHAR', 'PIPLUP', 'TURTWIG'):
         PARTNERS['TRAINER_DAWN_%s_%s' % (_place, _starter)] = ('PKMN_TRAINER_2', 'MAY', 1, 'ACE_TRAINER')
         PARTNERS['TRAINER_LUCAS_%s_%s' % (_place, _starter)] = ('PKMN_TRAINER_1', 'BRENDAN', 0, 'ACE_TRAINER')
     PARTNERS['TRAINER_RIVAL_SPEAR_PILLAR_' + _starter] = ('RIVAL', 'YOUNGSTER', 0, 'ACE_TRAINER')
+# ... and the walking partners (SetHasPartner: VAR_PARTNER_TRAINER_ID's team beside the player's in wild battles)
+for _t, _cls, _pic, _f in (('CHERYL_ETERNA_FOREST', 'COOLTRAINER', 'COOLTRAINER_F', 1),
+                           ('MIRA_WAYWARD_CAVE', 'PSYCHIC', 'PSYCHIC_F', 1),
+                           ('RILEY_IRON_ISLAND', 'BLACK_BELT', 'BLACK_BELT', 0),
+                           ('BUCK_STARK_MOUNTAIN', 'BLACK_BELT', 'BLACK_BELT', 0),
+                           ('MARLEY_VICTORY_ROAD', 'COOLTRAINER', 'COOLTRAINER_F', 1)):
+    PARTNERS['TRAINER_' + _t] = (_cls, _pic, _f, 'ACE_TRAINER')
 RENAME = {'ITEM_X_DEFENSE': 'ITEM_X_DEFEND', 'MOVE_SMOKE_SCREEN': 'MOVE_SMOKESCREEN', 'MOVE_SOFTBOILED': 'MOVE_SOFT_BOILED', 'MOVE_HIGH_JUMP_KICK': 'MOVE_HI_JUMP_KICK',
           'ITEM_PARLYZ_HEAL': 'ITEM_PARALYZE_HEAL'}
 
@@ -242,6 +249,8 @@ def main():
         items += ['ITEM_NONE'] * (4 - len(items))
         ai = '0x7' if any(f != 'AI_FLAG_BASIC' for f in d['ai_flags']) else '0x1'
         name = d['name'].upper().replace('&', '&')[:12]
+        if d['class'] == 'TRAINER_CLASS_RIVAL':
+            name = 'BARRY'          # (Platinum shows the rival's name, its decomp a stand-in: the game's rival is BARRY)
         entries.append('    [%s] =\n    {\n        .trainerClass = %s,\n        .encounterMusic_gender = %d%s,\n'
                        '        .trainerPic = TRAINER_PIC_%s,\n        .trainerName = _("%s"),\n'
                        '        .items = {%s},\n        .doubleBattle = %s,\n        .aiFlags = %s,\n'

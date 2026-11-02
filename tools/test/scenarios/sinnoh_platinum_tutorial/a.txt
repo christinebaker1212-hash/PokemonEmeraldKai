@@ -1,0 +1,32 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp platinumstory
+mp setvar 0x52F8 415
+mp setflag 0x36cf
+mp party
+mp warp 40,20,21,27
+wait 150
+press LEFT 16
+wait 60
+mash A 30 12
+shot t0
+mash A 30 12
+shot t1
+mash A 30 12
+shot t2
+mash A 30 12
+shot t3
+mash A 30 12
+shot t4
+mash A 30 12
+shot t5
+mash A 30 12
+shot t6
+mash A 30 12
+shot t7
+wait 120
+mp getvar 0x522A
+mp party
+mp ctx
+quit

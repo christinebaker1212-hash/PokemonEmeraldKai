@@ -103,20 +103,31 @@ Where it stands:
   icons); the trainers its scripts battle (story scenes, the restaurant, rematches, tag partners) are appended to
   trainers_sinnoh.h (ids before them unchanged).
 
+Done since (2026-11-02, later): walking partners (event_object_movement.c MOVEMENT_TYPE_FOLLOW_PLAYER; across maps as
+LOCALID_FOLLOWER 0xF2, s3d_scrcmd.c Sinnoh_PartnerUpdate; Kai's POKéMON follower walks behind them), Platinum's
+end-of-line waits (build_text.py: a message ending in "\r" waits for A), music that really stops (StopMapMusic, not
+the game's pausing fadeoutbgm), the SINNOH POKéDEX (src/data/sinnoh_dex.h, tools/sinnoh/gen_sinnoh_dex.py), BARRY's
+first battle on Kai's early-rival battle (Quetzal's trainerbattle 13), the catching tutorial on Emerald's WALLY
+tutorial (battle_setup.c Sinnoh_CatchingTutorial, DAWN / LUCAS from Kai's back pictures), the counterpart's look
+(VAR_OBJ_GFX_ID_n), Platinum's gym leaders / ELITE FOUR / CHAMPION scripts in place of the written ones where they
+convert, every script-number range (SCRIPT_RANGES). The story plays from the TV in the player's room through ROUTE 201,
+the briefcase and BARRY's battle to mom's Running Shoes (tests sinnoh_platinum_walk, sinnoh_platinum_route201).
+
 To build (not 1:1 yet):
-1. Walking partners: MOVEMENT_TYPE_FOLLOW_PLAYER (BARRY on ROUTE 201, DAWN / LUCAS, CHERYL, MIRA, RILEY, BUCK, MARLEY),
-   Platinum's LOCALID_FOLLOWER that crosses maps with the player, and the partner's wild double battles
-   (FLAG_SINNOH_HAS_PARTNER 0x3D3C is already kept).
+1. Partner wild battles (SetHasPartner, VAR_PARTNER_TRAINER_ID: CHERYL, MIRA, RILEY, BUCK, MARLEY beside the player:
+   Kai's partner battle for wild POKéMON).
 2. The DISTORTION WORLD 1:1: walking on walls and ceilings, its rotating rooms, the boulders and the lift, CYRUS and
    GIRATINA's scenes (now a scene in GIRATINA's arena: data/scripts/sinnoh_places.inc).
-3. The VILLA, the Frontier Brains' and the HALL MATRON's teams, the PASTORIA size contest, JUBILIFE's TV lottery, the
-   JOURNAL (ITEM_JOURNAL is given), ROTOM's room, the catching tutorial (map it onto Emerald's WALLY tutorial battle),
-   Platinum's songs the game lacks (SEQ_OPENING...).
+3. The gym puzzles Kai doesn't have yet (ETERNA's clock: AdvanceEternaGymClock; VEILSTONE's, HEARTHOME's), the VILLA,
+   the Frontier Brains' and the HALL MATRON's teams, the PASTORIA size contest, JUBILIFE's TV lottery, the JOURNAL,
+   ROTOM's room, Platinum's POKéDEX ratings (LoadPokedexRating), UNOWN messages, DAWN's / LUCAS's own overworld
+   sprites (stand-ins now), Platinum's songs the game lacks (`gen_scripts.py --report` lists them: SEQ_OPENING...).
 4. Saves already in SINNOH: Platinum's flags and variables from what this game recorded, once, on load
    (mp_savefix.c's way); then the switch (new games in SINNOH and a first boat in begin Platinum's story) and a story
    test from TWINLEAF to the HALL OF FAME; then the written words go (words*.py, STORY_WORDS, trainer_words.py).
-5. For the user to confirm as closed or to build: the Underground (single-player digging works without wireless) and
-   Super Contests (Kai has the contests).
+5. For the user to confirm as closed or to build: the Underground (single-player digging works without wireless),
+   Super Contests and their accessories / backdrops (Kai has the contests; AddAccessory is a no-op for now), Platinum's
+   TV (Kai has Emerald's).
 
 ## The goal
 Add SINNOH as a third region beside JOHTO / KANTO, built from Pokémon Platinum:

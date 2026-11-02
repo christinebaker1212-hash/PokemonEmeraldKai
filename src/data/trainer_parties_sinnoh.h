@@ -2461,6 +2461,10 @@ static const struct TrainerMonNoItemDefaultMoves sParty_SinnohBreederKaylee[] = 
     {.iv = 0, .lvl = 26, .species = SPECIES_SWABLU},
 };
 
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohBuckStarkMountain[] = {
+    {.iv = 30, .lvl = 63, .species = SPECIES_CLAYDOL, .moves = {MOVE_PSYCHIC, MOVE_ANCIENT_POWER, MOVE_LIGHT_SCREEN, MOVE_REFLECT}},
+};
+
 static const struct TrainerMonNoItemDefaultMoves sParty_SinnohCameramanTevin[] = {
     {.iv = 0, .lvl = 20, .species = SPECIES_MIME_JR},
     {.iv = 0, .lvl = 22, .species = SPECIES_MACHOP},
@@ -2495,6 +2499,10 @@ static const struct TrainerMonNoItemDefaultMoves sParty_SinnohCameramanTevinRema
 
 static const struct TrainerMonNoItemDefaultMoves sParty_SinnohCameramanTevinUnused[] = {
     {.iv = 0, .lvl = 6, .species = SPECIES_MACHOP},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohCherylEternaForest[] = {
+    {.iv = 30, .lvl = 20, .species = SPECIES_CHANSEY, .moves = {MOVE_EGG_BOMB, MOVE_SOFT_BOILED, MOVE_REFRESH, MOVE_NONE}},
 };
 
 static const struct TrainerMonNoItemCustomMoves sParty_SinnohDawnJubilifeCityChimchar[] = {
@@ -2657,6 +2665,14 @@ static const struct TrainerMonNoItemCustomMoves sParty_SinnohLucasVeilstoneCityT
     {.iv = 60, .lvl = 27, .species = SPECIES_PRINPLUP, .moves = {MOVE_BUBBLE_BEAM, MOVE_METAL_CLAW, MOVE_PECK, MOVE_GROWL}},
 };
 
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohMarleyVictoryRoad[] = {
+    {.iv = 30, .lvl = 59, .species = SPECIES_ARCANINE, .moves = {MOVE_EXTREME_SPEED, MOVE_FIRE_FANG, MOVE_HELPING_HAND, MOVE_AGILITY}},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohMiraWaywardCave[] = {
+    {.iv = 30, .lvl = 26, .species = SPECIES_KADABRA, .moves = {MOVE_CONFUSION, MOVE_SHOCK_WAVE, MOVE_FLASH, MOVE_KINESIS}},
+};
+
 static const struct TrainerMonItemDefaultMoves sParty_SinnohPokefanMeredith[] = {
     {.iv = 0, .lvl = 26, .species = SPECIES_PICHU, .heldItem = ITEM_SITRUS_BERRY},
     {.iv = 0, .lvl = 26, .species = SPECIES_PACHIRISU, .heldItem = ITEM_SITRUS_BERRY},
@@ -2700,6 +2716,10 @@ static const struct TrainerMonNoItemDefaultMoves sParty_SinnohPokeKidArielUnused
 
 static const struct TrainerMonItemDefaultMoves sParty_SinnohRichBoyLiam[] = {
     {.iv = 250, .lvl = 35, .species = SPECIES_BLISSEY, .heldItem = ITEM_RARE_CANDY},
+};
+
+static const struct TrainerMonNoItemCustomMoves sParty_SinnohRileyIronIsland[] = {
+    {.iv = 30, .lvl = 41, .species = SPECIES_LUCARIO, .moves = {MOVE_METAL_CLAW, MOVE_FORCE_PALM, MOVE_QUICK_ATTACK, MOVE_BONE_RUSH}},
 };
 
 static const struct TrainerMonNoItemCustomMoves sParty_SinnohRivalSpearPillarChimchar[] = {

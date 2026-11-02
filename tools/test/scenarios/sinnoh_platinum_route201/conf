@@ -1,0 +1,8 @@
+# Platinum's story on: TWINLEAF TOWN (BARRY bumps into the player at his door: VAR_TWINLEAF_TOWN_RIVAL_TRIGGER_STATE
+# 0x524B), then ROUTE 201: PROF. ROWAN's scene, the briefcase (Kai's: Sinnoh_StarterMenu), BARRY's battle
+# (VAR_FOLLOWER_RIVAL_STATE 0x51C9 2: then home, mom's Running Shoes). The A presses pick CHIMCHAR (415, VAR_SINNOH_STARTER).
+# Needs the packs and the converted scripts (tools/sinnoh/make_pack.sh).
+MODE=1
+TMO=900
+EXPECT_A=("var 0x524B = 1" "var 0x52F8 = 415" "var 0x51C9 = 2" "ctx 1 free 1 overworld 1 locked 0 script 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

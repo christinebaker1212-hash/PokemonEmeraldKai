@@ -48,6 +48,23 @@ SINNOH_TIME_OF_DAY, SINNOH_ON_BIKE, SINNOH_STARTER, SINNOH_FACE = 20, 21, 22, 23
 SINNOH_GAME_COMPLETED, SINNOH_DID_NOT_CAPTURE, SINNOH_GET_HOUR, SINNOH_SET_WARP = 24, 25, 26, 27
 SINNOH_SET_BIKE, SINNOH_PARTY_SPECIES, SINNOH_HELD_ITEM, SINNOH_OBJECT_POS, SINNOH_TWO_TRAINERS = 28, 29, 30, 31, 32
 SINNOH_SET_BG, SINNOH_BUFFER_RIVAL_STARTER, SINNOH_MOVEMENT_TYPE, SINNOH_LOCAL_DEX, SINNOH_STOP_MUSIC = 33, 34, 35, 36, 37
+SINNOH_BATTLE_WON, SINNOH_ADD_VAR, SINNOH_BADGE_COUNT, SINNOH_PREVIOUS_MAP, SINNOH_DAYCARE_EGG = 38, 39, 40, 41, 42
+SINNOH_BUFFER_TEXT, SINNOH_QUERY, SINNOH_DEX_RATING, SINNOH_MESSAGE_VAR = 43, 44, 45, 46
+# Platinum's POKéDEX ratings (its src/unk_0205DFC4.c Pokedex_GetRatingMessageID_*): (up to this many, message) in
+# pokedex_ratings' bank; the last rows are for a complete dex. National: (caught up to, message, female's message)
+DEX_RATING_LOCAL = [(15, 'RowanPokemonSeenUpTo15'), (30, 'RowanPokemonSeenOver15'), (45, 'RowanPokemonSeenOver30'),
+                    (60, 'RowanPokemonSeenOver45'), (80, 'RowanPokemonSeenOver60'), (100, 'RowanPokemonSeenOver80'),
+                    (120, 'RowanPokemonSeenOver100'), (140, 'RowanPokemonSeenOver120'), (160, 'RowanPokemonSeenOver140'),
+                    (180, 'RowanPokemonSeenOver160'), (200, 'RowanPokemonSeenOver180'), (209, 'RowanPokemonSeenOver200'),
+                    (0xFFFF, 'RowanCompleteLocalDex')]
+DEX_RATING_NATIONAL = [(39, 'OakPokemonCaughtUnder40'), (59, 'OakPokemonCaught40'), (89, 'OakPokemonCaught60'),
+                       (119, 'OakPokemonCaught90'), (149, 'OakPokemonCaught120'), (189, 'OakPokemonCaught150'),
+                       (229, 'OakPokemonCaught190'), (269, 'OakPokemonCaught230'), (309, 'OakPokemonCaught270'),
+                       (349, 'OakPokemonCaught310'), (379, 'OakPokemonCaught350'), (409, 'OakPokemonCaught380'),
+                       (429, 'OakPokemonCaught410_Male', 'OakPokemonCaught410_Female'), (449, 'OakPokemonCaught430'),
+                       (459, 'OakPokemonCaught450'), (469, 'OakPokemonCaught460'), (475, 'OakPokemonCaught470'),
+                       (481, 'OakPokemonCaught476'),
+                       (0xFFFF, 'OakCompleteNationalDex_Male', 'OakCompleteNationalDex_Female')]
 VAR_SINNOH_STARTER = 0x52F8      # (include/mp_region.h: the starter picked from ROWAN's briefcase)
 FLAG_SINNOH_HAS_PARTNER = 0x3D3C   # (include/mp_region.h: Platinum's walking partner, SetHasPartner)
 
@@ -104,6 +121,20 @@ MISSING_MUSIC = set()   # Platinum's songs its scripts play that the game lacks 
 
 class Unsupported(Exception):
     pass
+
+
+def _sprite(gfx):
+    """this game's sprite for a Platinum one (tools/sinnoh/sprites.py); the player's looks of the other gender are the
+    counterpart's (DAWN, LUCAS)"""
+    import sprites
+    gfx = {'OBJ_EVENT_GFX_PLAYER_F': 'OBJ_EVENT_GFX_DAWN', 'OBJ_EVENT_GFX_PLAYER_M': 'OBJ_EVENT_GFX_LUCAS'}.get(gfx, gfx)
+    m = re.match(r'^OBJ_EVENT_GFX_VAR_([0-9A-F])$', gfx)
+    if m:
+        return 'OBJ_EVENT_GFX_VAR_%s' % m.group(1)
+    ours = sprites.sprite(gfx)
+    if ours is None:
+        raise Unsupported('sprite %s' % gfx)
+    return ours
 
 
 # ----------------------------------------------------------------------------------------------------- the decomp
@@ -210,16 +241,28 @@ class Decomp:
         return self._global.get(msg_id)
 
 
+# Platinum's script numbers past a map's own (src/script_manager.c SCRIPT_RANGE_TABLE, include/constants/scrcmd.h):
+# (first number, file). Trainers' (3000 / 5000), items' (7000 / 8000) and BERRY trees' (2800) are the game's own
+SCRIPT_RANGES = [(2000, 'common'), (2500, 'bg_events'), (8800, 'safari_game'), (8900, 'record_chatot_cry'),
+                 (8950, 'vs_seeker'), (8970, 'poke_radar'), (9000, 'pokemon_center_2f_common'),
+                 (9100, 'communication_club'), (9200, 'pokemon_center_b1f_common'), (9300, 'group_connection'),
+                 (9400, 'poffin_common'), (9500, 'day_care_common'), (9600, 'init_new_game'),
+                 (9700, 'follower_partners'), (9800, 'contests'), (9900, 'unused_0397'), (9950, 'pokedex_ratings'),
+                 (10000, 'field_moves'), (10100, 'tv_broadcast'), (10150, 'tv_reporter_interviews'),
+                 (10200, 'mystery_gift_deliveryman'), (10300, 'counterpart_talk'),
+                 (10400, 'pokemon_center_daily_trainers'), (10450, 'battle_frontier_records'),
+                 (10490, 'scratch_off_cards')]
+SCRIPT_RANGES_END = {2000: 2500, 2500: 2800}
+
+
 def common_target(n):
-    """(file, entry from 1) of Platinum's script number N (2000-2499 the common scripts, 2500- the bg events')"""
-    if 2000 <= n < 2500:
-        return 'common', n - 2000 + 1
-    if 2500 <= n < 2800:
-        return 'bg_events', n - 2500 + 1
+    """(file, entry from 1) of Platinum's script number N past the map's own, None for the game's own kinds"""
+    for k, (first, low) in enumerate(SCRIPT_RANGES):
+        end = SCRIPT_RANGES_END.get(first, SCRIPT_RANGES[k + 1][0] if k + 1 < len(SCRIPT_RANGES) else 10600)
+        if first <= n < end:
+            return low, n - first + 1
     return None
 
-
-# ----------------------------------------------------------------------------------------------------- one file
 
 class FileConverter:
     def __init__(self, dec, path):
@@ -278,6 +321,17 @@ class FileConverter:
             if x in self.dec.ours:
                 return x
             raise Unsupported('value %s (not in this game)' % x)
+        if x.startswith(('ACCESSORY_', 'BACKDROP_')):
+            return '0'                      # (Platinum's accessories / backdrops: SUPER CONTESTS, not decided yet)
+        if x.startswith('OBJ_EVENT_GFX_'):
+            return _sprite(x)
+        if x.startswith('MAP_HEADER_'):
+            o = self.dec.origins().get(x[len('MAP_HEADER_'):].lower())
+            if o is None:
+                raise Unsupported('map %s (not in this game)' % x)
+            return o[0]
+        if x.startswith('LOCALID_') and x in self.localids:
+            return str(self.localids[x])
         if x.startswith('TRAINER_') and not x.startswith('TRAINER_CLASS_'):
             t = self.dec.trainer(x)
             if t:
@@ -292,6 +346,9 @@ class FileConverter:
             return x                  # (this game's own special variables of the same meaning)
         if re.match(r'^(0x[0-9A-Fa-f]+|\d+)$', x) and int(x, 0) >= 0x4000:
             raise Unsupported('a raw variable number %s' % x)
+        m = re.match(r'^VAR_OBJ_GFX_ID_([0-9A-F])$', x)
+        if m:
+            return '0x%X' % (0x4010 + int(m.group(1), 16))   # (the game's own VAR_OBJ_GFX_ID_0-F: a person's look)
         m = re.match(r'^VAR_MAP_LOCAL_0x([0-9A-Fa-f]+)$', x)
         if m and int(m.group(1), 16) <= 0xE:
             return '0x%X' % (0x4000 + int(m.group(1), 16))   # (the map's own: VAR_TEMP_0-E, cleared as a map loads)
@@ -370,6 +427,8 @@ class FileConverter:
             return DELAYS.get(int(m.group(2)), ['delay_16']) * n
         if cmd in MOVE_ONE:
             return MOVE_ONE[cmd] * n
+        if cmd in ('PlayerGive', 'PlayerReceive', 'PauseAnimation', 'ResumeAnimation', 'MoveAction_153'):
+            return []                       # (the player's give / receive poses, an object's paused frames)
         m = re.match(r'^(\w+?)(North|South|West|East)$', cmd)
         if m and m.group(1) in MOVE_KIND:
             return [MOVE_KIND[m.group(1)] + DIRS[m.group(2)]] * n
@@ -423,9 +482,9 @@ class FileConverter:
             if self.is_var(a[1]):
                 return ['copyvar %s, %s' % (self.var(a[0]), self.var(a[1]))]
             return ['setvar %s, %s' % (self.var(a[0]), self.value(a[1]))]
+        if cmd in ('AddVar', 'SubVar') and self.is_var(a[1]):
+            return [self.sinnoh(SINNOH_ADD_VAR, self.var(a[0]), self.var(a[1]), 1 if cmd == 'SubVar' else 0)]
         if cmd in ('AddVar', 'SubVar'):
-            if self.is_var(a[1]):
-                raise Unsupported('%s by a variable' % cmd)
             return ['%s %s, %s' % (cmd.lower(), self.var(a[0]), self.value(a[1]))]
         if cmd == 'CopyVar':
             return ['copyvar %s, %s' % (self.var(a[0]), self.var(a[1]))]
@@ -594,11 +653,12 @@ class FileConverter:
             # party back as it was after (with what the battle changed), a loss whites out
             n = self.next_local()
             pick, go, won = ['%s%s__tag%d_%s' % (PREFIX, self.low, n, x) for x in ('pick', 'go', 'won')]
-            return ['special SavePlayerParty', '%s:' % pick, 'fadescreen FADE_TO_BLACK',
+            keep = ('copyvar 0x400E, %s' if self.is_var(a[0]) else 'setvar 0x400E, %s') % self.arg(a[0])
+            return [keep, 'special SavePlayerParty', '%s:' % pick, 'fadescreen FADE_TO_BLACK',
                     'special ChooseHalfPartyForBattle', 'waitstate', 'goto_if_ne VAR_RESULT, 0, %s' % go,
                     'special LoadPlayerParty', 'special SavePlayerParty', 'goto %s' % pick, '%s:' % go,
                     'special ReducePlayerPartyToSelectedMons', 'frontier_set FRONTIER_DATA_SELECTED_MON_ORDER',
-                    ('copyvar VAR_0x8005, %s' if self.is_var(a[0]) else 'setvar VAR_0x8005, %s') % self.arg(a[0]),
+                    'copyvar VAR_0x8005, 0x400E',   # (the party pick and frontier_set use VAR_0x8004-5: kept in VAR_TEMP_E)
                     'setvar VAR_0x8006, %s' % self.value(a[1]), 'setvar VAR_0x8007, %s' % self.value(a[2]),
                     'setvar VAR_0x8004, 15', 'special DoSpecialTrainerBattle', 'waitstate', 'frontier_saveparty',
                     'special LoadPlayerParty', 'goto_if_eq VAR_RESULT, B_OUTCOME_WON, %s' % won,
@@ -613,12 +673,20 @@ class FileConverter:
             lab = '%sT_%d_%d' % (PREFIX, where[0], where[1])
             self.texts[lab] = where
             return ['trainerbattle_no_intro %s, %s' % (t, lab)]
-        if cmd == 'CheckWonBattle':
-            return ['setvar %s, 1' % self.var(a[0])]   # (a battle lost whites out here: the script goes on after a win)
-        if cmd == 'CheckLostBattle':
-            return ['setvar %s, 0' % self.var(a[0])]
+        if cmd in ('CheckWonBattle', 'CheckLostBattle'):
+            return [self.sinnoh(SINNOH_BATTLE_WON, self.var(a[0]), 1 if cmd == 'CheckLostBattle' else 0)]
+        if cmd == 'StartFirstBattle':
+            # BARRY's first battle: Kai's early rival battle (Quetzal's trainerbattle 13: a loss doesn't white out,
+            # the party is healed after), Platinum's defeat line
+            where = build_text.trainer_message(self.root, a[0], 'TRMSG_DEFEAT')
+            if where is None:
+                raise Unsupported('trainer %s has no defeat line' % a[0])
+            lab = '%sT_%d_%d' % (PREFIX, where[0], where[1])
+            self.texts[lab] = where
+            return ['.byte SCR_OP_TRAINERBATTLE, 13', '.2byte %s, 1' % self.value(a[0]), 'ptrvalue %s' % lab,
+                    'ptrvalue %s' % lab]
         if cmd == 'BlackOutFromBattle':
-            return ['end']
+            return ['special SetCB2WhiteOut', 'waitstate']   # (the game's own whiteout)
         if cmd in ('CheckTrainerFlag', 'SetTrainerFlag', 'ClearTrainerFlag'):
             return ['%s %s' % (cmd.lower(), self.value(a[0]))]
         m = re.match(r'^GoToIf(NotDefeated|Defeated)$', cmd)
@@ -708,8 +776,81 @@ class FileConverter:
                     'goto_if_ne VAR_RESULT, MON_CANT_GIVE, %s' % done, 'setvar %s, 0' % self.var(a[3]), '%s:' % done]
         if cmd == 'EnablePoketch':
             return ['additem ITEM_POKETCH']   # (Kai's POKéTCH is the key item: src/sinnoh/poketch.c)
-        if cmd in ('AddContestBackdrop', 'SetPlayerState', 'ChangePlayerState'):
-            return []
+        if cmd in ('AddContestBackdrop', 'SetPlayerState', 'ChangePlayerState', 'AddAccessory'):
+            return []                       # (SUPER CONTESTS' accessories, not decided yet; the player's poses)
+        if cmd == 'CanFitAccessory':
+            return ['setvar %s, 1' % self.var(a[2] if len(a) > 2 else a[-1])]
+        if cmd == 'BufferPartyMonSpecies':
+            return [self.sinnoh(SINNOH_PARTY_SPECIES, self.arg(a[1]), '0x400F'),
+                    'bufferspeciesname %s, 0x400F' % self.strvar(a[0])]
+        if cmd == 'SetNationalDexEnabled':
+            return ['special EnableNationalPokedex']
+        if cmd == 'RemoveMoney2' or cmd == 'RemoveMoney':
+            if self.is_var(a[0]):
+                raise Unsupported('money by a variable')
+            return ['removemoney %s' % self.value(a[0])]
+        if cmd in ('AddMoney',):
+            if self.is_var(a[0]):
+                raise Unsupported('money by a variable')
+            return ['addmoney %s' % self.value(a[0])]
+        if cmd == 'GetPreviousMapID':
+            return [self.sinnoh(SINNOH_PREVIOUS_MAP, self.var(a[0]))]
+        if cmd == 'CheckDaycareHasEgg':
+            return [self.sinnoh(SINNOH_DAYCARE_EGG, self.var(a[0]))]
+        if cmd == 'CapitalizeFirstLetter':
+            return []                       # (the game's names are in capitals already)
+        if cmd == 'BufferPoketchAppName':
+            # (Platinum's app names, from the text pack: Kai's POKéTCH has the same apps)
+            bank = self.dec.banks['poketch_app_names']
+            return [self.sinnoh(SINNOH_BUFFER_TEXT, self.value(a[0]), bank, self.arg(a[1]))]
+        if cmd == 'StartDestroyObstacleAnimation':
+            return ['applymovement %s, SinnohP_Movement_SmashRock' % self.localid(a[0])]   # (the game's ROCK SMASH)
+        if cmd == 'AddCameraOverrideObject':
+            return ['special SpawnCameraObject',
+                    self.sinnoh(SINNOH_OBJECT_POS, 'OBJ_EVENT_ID_CAMERA', self.arg(a[0]), self.arg(a[1]))]
+        if cmd == 'RemoveCameraOverrideObject':
+            return ['special RemoveCameraObject']
+        if cmd in ('CheckHasTwoAliveMons', 'GetNationalDexSeenCount', 'CheckHasAllLegendaryTitansInParty',
+                   'GetPCBoxesFreeSlotCount', 'GetLeagueVictories'):
+            kind = ['CheckHasTwoAliveMons', 'GetNationalDexSeenCount', 'CheckHasAllLegendaryTitansInParty',
+                    'GetPCBoxesFreeSlotCount', 'GetLeagueVictories'].index(cmd)
+            return [self.sinnoh(SINNOH_QUERY, self.var(a[0]), kind)]
+        if cmd == 'OpenPokemonNamingScreen':
+            # (the game's own nickname screen)
+            return ['setvar VAR_0x8004, %s' % self.value(a[0]) if not self.is_var(a[0]) else 'copyvar VAR_0x8004, %s' % self.var(a[0]),
+                    'special ChangePokemonNickname', 'waitstate', 'setvar %s, 1' % self.var(a[1])]
+        if cmd == 'CheckIsTodayPlayerBirthday':
+            return ['setvar %s, 0' % self.var(a[0])]   # (the game keeps no birthday)
+        if cmd == 'SetCyclingBGM':
+            return []                       # (Kai's OPTIONS > BIKE MUSIC)
+        if cmd == 'LoadPokedexRating' or cmd in ('LoadLocalDexRating', 'LoadNationalDexRating'):
+            national = cmd == 'LoadNationalDexRating' or (cmd == 'LoadPokedexRating' and int(self.value(a[0])) != 0)
+            return [self.sinnoh(SINNOH_DEX_RATING, self.var(a[-1]), 1 if national else 0)]
+        if cmd == 'MessageVar':
+            # (a line of this file's bank chosen by a variable)
+            if self.bank is None:
+                raise Unsupported('MessageVar without a bank')
+            return [self.sinnoh(SINNOH_MESSAGE_VAR, self.dec.banks[self.bank], self.var(a[0])),
+                    'message gSinnohMessage', 'waitmessage']
+        if cmd == 'StartCatchingTutorial':
+            # (Emerald's WALLY tutorial with the counterpart and a BIDOOF: battle_setup.c Sinnoh_CatchingTutorial)
+            return ['special SavePlayerParty', 'special Sinnoh_CatchingTutorial', 'waitstate', 'special LoadPlayerParty']
+        if cmd == 'CountBadgesAcquired':
+            return [self.sinnoh(SINNOH_BADGE_COUNT, self.var(a[0]))]
+        if cmd == 'GoToIfNotEnoughMoney':
+            if self.is_var(a[0]):
+                raise Unsupported('money by a variable')
+            return ['checkmoney %s' % self.value(a[0]), 'goto_if_eq VAR_RESULT, FALSE, %s' % self.label(a[1])]
+        if cmd == 'FindPartySlotWithFatefulEncounterSpecies':
+            return ['setvar %s, 6' % self.var(a[0])]   # (none: distribution events are closed)
+        if cmd == 'GiveEgg':
+            return ['giveegg %s' % self.arg(a[0])]
+        if cmd in ('RegisterPoketchApp', 'ScrCmd_2CD', 'ScrCmd_331'):
+            return []                       # (Kai's POKéTCH has its apps by badges: src/sinnoh/poketch.c)
+        if cmd == 'CheckPoketchEnabled':
+            return ['checkitem ITEM_POKETCH, 1', 'copyvar %s, VAR_RESULT' % self.var(a[0])]
+        if cmd == 'CheckPoketchAppRegistered':
+            return ['checkitem ITEM_POKETCH, 1', 'copyvar %s, VAR_RESULT' % self.var(a[1])]
         if cmd == 'GetPartyMonSpecies':
             return [self.sinnoh(SINNOH_PARTY_SPECIES, self.arg(a[0]), self.var(a[1]))]
         if cmd == 'CheckPartyHasHeldItem':
@@ -1010,11 +1151,22 @@ def _stub_body(name, label):
 
 # a person's script of this game's that Platinum's story replaces (its words, or Platinum's own script already); the
 # rest (MOéMON CENTER nurses, clerks, gym leaders, sailors, place systems) stay the game's
+# this game's written stand-ins for Platinum's story (tools/sinnoh/legends.py, story_people.py, sinnoh_places.inc):
+# Platinum's own scripts take their place where they convert. Kai's systems (frontier counters, prize exchanges, boats,
+# swarms, the move deleter...) stay
+STAND_INS = re.compile(r'^Sinnoh_EventScript_(Briefcase|RowanLab|DistortionEnter|Legend\w+|Story\d+)$')
+
+
 def _replaceable(body):
     if body is None:
         return True
     if re.match(r'^\tgoto SinnohP_\w+\n$', body):
         return True
+    m = re.match(r'^\tgoto (\w+)\n$', body)
+    if m and STAND_INS.match(m.group(1)):
+        return True
+    if re.match(r'^\ttrainerbattle_single TRAINER_SINNOH_\w+, \w+_Text_\w+', body):
+        return True                         # (a gym leader / the ELITE FOUR / the CHAMPION in written words)
     if re.match(r'^\tmsgbox \w+_Text_\w+, MSGBOX_(NPC|SIGN)\n$', body):
         return True
     return bool(re.match(r'^\tlock\n\tfaceplayer\n\tgoto_if_set 0x[0-9A-F]+, \w+_Given\n', body))   # (a written gift)
@@ -1050,15 +1202,19 @@ def people(root, p, low, name, done):
         script = mine['script']
         person = script == '%s_EventScript_Person%d' % (name, i + 1) or script == '0x0'
         trainer = isinstance(o.get('script'), str)
-        if person and lab and _replaceable(_stub_body(name, script) if script != '0x0' else None):
+        if lab and STAND_INS.match(script):
+            new = lab                      # (a legendary, a story battle: Platinum's scene)
+        elif person and lab and _replaceable(_stub_body(name, script) if script != '0x0' else None):
             new = lab
         elif person and script == '0x0':
             continue                       # (nothing to say: stays as it is)
-        elif trainer or person:
-            new = None                     # (the game's own script: a trainer's battle, a role)
+        elif trainer or person or STAND_INS.match(script):
+            new = None                     # (the game's own script: a trainer's battle, a role, a stand-in not yet replaced)
         else:
-            continue                       # (a legendary, an obstacle: the game's own systems)
-        objs.append((i + 1, flag or 0, o['x'] - p['x0'] * 32, o['z'] - p['z0'] * 32, new))
+            continue                       # (an obstacle, an item: the game's own systems)
+        gfx = 'OBJ_EVENT_GFX_VAR_%s' % o['graphics_id'][-1] if re.match(r'^OBJ_EVENT_GFX_VAR_[0-9A-F]$', o['graphics_id']) \
+            else '0'                       # (a look the script picks: the game's VAR_OBJ_GFX_ID_n)
+        objs.append((i + 1, flag or 0, o['x'] - p['x0'] * 32, o['z'] - p['z0'] * 32, new, gfx))
     trig, covered = [], set()
     for k, e in enumerate(ev['coord_events']):
         t = _target(root, low, e.get('script'))
@@ -1097,8 +1253,9 @@ def emit_map_tables(root, tables, done):
         objs, trig = people(root, p, low, name, done)
         if objs:
             lines += ['\t.balign 8', '%s_People:' % base]
-            for lid, flag, x, y, lab in objs:
-                lines += ['\t.byte %d, 0' % lid, '\t.2byte 0x%X, %d, %d' % (flag, x, y), '\tptrvalue %s' % (lab or 0)]
+            for lid, flag, x, y, lab, gfx in objs:
+                lines += ['\t.byte %d, 0' % lid, '\t.2byte 0x%X, %d, %d, %s, 0, 0, 0' % (flag, x, y, gfx),
+                          '\tptrvalue %s' % (lab or 0)]
         if trig:
             lines.append('\t.balign 8')
             lines.append('%s_Triggers:' % base)
@@ -1155,6 +1312,24 @@ def emit_map_tables(root, tables, done):
     return lines, len(index), skipped
 
 
+def dex_rating_tables(root):
+    """gSinnohDexRatings (src/sinnoh/s3d_scrcmd.c SINNOH_DEX_RATING): the pokedex_ratings bank, then rows of (up to,
+    message, female's message) local then national, each list ended by 0xFFFF"""
+    dec = converter(root, 'common').dec
+    ids = dec.ids('pokedex_ratings')
+    out = ['\t.balign 2', 'gSinnohDexRatings::', '\t.2byte %d' % dec.banks['pokedex_ratings']]
+    for table in (DEX_RATING_LOCAL, DEX_RATING_NATIONAL):
+        for row in table:
+            m = ids['PokedexRatings_Text_' + row[1]]
+            f = ids['PokedexRatings_Text_' + row[2]] if len(row) > 2 else m
+            out.append('\t.2byte %d, %d, %d' % (row[0], m, f))
+    return out
+
+
+def stub_dex_ratings():
+    return ['\t.balign 2', 'gSinnohDexRatings::', '\t.2byte 0, 0xFFFF, 0, 0, 0xFFFF, 0, 0']
+
+
 def map_index(index):
     """struct SinnohMapStory (src/sinnoh/s3d_scrcmd.c): map, people, triggers, then the map scripts, the people and
     the triggers (0: the map's own)"""
@@ -1183,7 +1358,7 @@ def write(lines, out_path):
 
 
 def stub(out_path):
-    lines = ['%s::\n\tend' % lab for lab in sorted(referenced())] + map_index([]) + ['gSinnohPlatinumNewGame::', '\tend']
+    lines = ['%s::\n\tend' % lab for lab in sorted(referenced())] + map_index([]) + ['gSinnohPlatinumNewGame::', '\tend'] + stub_dex_ratings()
     write(lines, out_path)
     print('%s: %d stubs (no decomp)' % (os.path.relpath(out_path, ROOT), len(referenced())))
 
@@ -1226,6 +1401,8 @@ def build(root, out_path):
         lines.append('%s::\n\tend' % lab)
     mt, maps, skipped = emit_map_tables(root, tables, done)
     lines += mt
+    lines += ['SinnohP_Movement_SmashRock:', '\trock_smash_break', '\tstep_end']
+    lines += dex_rating_tables(root)
     new_game = converter(root, 'init_new_game').entry_label(1)
     lines += ['gSinnohPlatinumNewGame::', '\tgoto %s' % new_game if new_game in done else '\tend']
     if new_game not in done:

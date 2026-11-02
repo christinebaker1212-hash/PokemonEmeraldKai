@@ -542,9 +542,42 @@ static void DoBattlePyramidTrainerHillBattle(void)
 }
 
 // Initiates battle where Wally catches Ralts
+// Moemon Kai: the catching tutorial's trainer, WALLY's unless SINNOH's (Sinnoh_CatchingTutorial below)
+u16 gWallyTutorialBackPic = TRAINER_BACK_PIC_WALLY;
+const u8 *gWallyTutorialName = NULL;
+void MP_WallyTutorialSetName(const u8 *name);   // (battle_message.c)
+
 void StartWallyTutorialBattle(void)
 {
+    gWallyTutorialBackPic = TRAINER_BACK_PIC_WALLY;
+    gWallyTutorialName = NULL;
+    MP_WallyTutorialSetName(NULL);
     CreateMaleMon(&gEnemyParty[0], SPECIES_RALTS, 5);
+    LockPlayerFieldControls();
+    gMain.savedCallback = CB2_ReturnToFieldContinueScriptPlayMapMusic;
+    gBattleTypeFlags = BATTLE_TYPE_WALLY_TUTORIAL;
+    CreateBattleStartTask(B_TRANSITION_SLICE, 0);
+}
+
+// Moemon Kai: Platinum's catching tutorial on ROUTE 202 (its StartCatchingTutorial), on Emerald's own: the counterpart
+// (DAWN for a boy, LUCAS for a girl; Kai's back pictures of them) with the starter neither the player nor BARRY took,
+// Lv. 5, catches a Lv. 2 BIDOOF. The script saves the party before and loads it after, as WALLY's does
+void Sinnoh_CatchingTutorial(void)
+{
+    static const u8 sDawn[] = _("DAWN"), sLucas[] = _("LUCAS");
+    u16 MP_Avatar_NamedBackPic(const char *name);
+    u16 mine = VarGet(VAR_SINNOH_STARTER), theirs, pic;
+    bool8 girl = gSaveBlock2Ptr->playerGender == MALE;
+    theirs = mine == SPECIES_TURTWIG ? SPECIES_PIPLUP : mine == SPECIES_CHIMCHAR ? SPECIES_TURTWIG : SPECIES_CHIMCHAR;
+    ZeroPlayerPartyMons();
+    CreateMon(&gPlayerParty[0], theirs, 5, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    CalculatePlayerPartyCount();
+    ZeroEnemyPartyMons();
+    CreateMon(&gEnemyParty[0], SPECIES_BIDOOF, 2, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    pic = MP_Avatar_NamedBackPic(girl ? "kai_dawn" : "kai_lucas");
+    gWallyTutorialBackPic = pic != 0xFFFF ? pic : TRAINER_BACK_PIC_WALLY;
+    gWallyTutorialName = girl ? sDawn : sLucas;
+    MP_WallyTutorialSetName(gWallyTutorialName);
     LockPlayerFieldControls();
     gMain.savedCallback = CB2_ReturnToFieldContinueScriptPlayMapMusic;
     gBattleTypeFlags = BATTLE_TYPE_WALLY_TUTORIAL;

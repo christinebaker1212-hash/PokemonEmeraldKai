@@ -1,0 +1,42 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp platinumstory
+mp setvar 0x52F8 415
+mp setvar 0x51D9 3
+mp clearflag 0x3445
+mp clearflag 0x3441
+mp clearflag 0x3444
+mp warp 40,14,46,8
+wait 150
+press UP 16
+wait 60
+pressuntil A partymenu 3000
+wait 30
+shot pick0
+press A 4
+wait 20
+press A 4
+wait 30
+shot pick1
+press DOWN 4
+wait 10
+press DOWN 4
+wait 10
+shot pick2
+press A 4
+wait 60
+shot pick3
+waitfor battle 3000
+wait 60
+shot pick4
+mash A 400 8
+pressuntil A field 6000
+wait 60
+mash A 30 15
+wait 120
+shot after
+mp getvar 0x51D9
+mp party
+mp ctx
+quit

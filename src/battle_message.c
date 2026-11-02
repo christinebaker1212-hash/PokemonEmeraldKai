@@ -647,7 +647,15 @@ const u8 *const gPokeblockWasTooXStringTable[FLAVOR_COUNT] =
 };
 
 static const u8 sText_PlayerUsedItem[] = _("{B_PLAYER_NAME} used\n{B_LAST_ITEM}!");
-static const u8 sText_WallyUsedItem[] = _("WALLY used\n{B_LAST_ITEM}!");
+static u8 sText_WallyUsedItem[40] = _("WALLY used\n{B_LAST_ITEM}!");   // Moemon Kai: SINNOH's tutorial: the counterpart's name
+
+// Moemon Kai: the catching tutorial's trainer (gWallyTutorialName: WALLY, or SINNOH's DAWN / LUCAS)
+void MP_WallyTutorialSetName(const u8 *name)
+{
+    static const u8 sWally[] = _("WALLY"), sUsed[] = _(" used\n{B_LAST_ITEM}!");
+    StringCopy(sText_WallyUsedItem, name ? name : sWally);
+    StringAppend(sText_WallyUsedItem, sUsed);
+}
 static const u8 sText_Trainer1UsedItem[] = _("{B_TRAINER1_CLASS} {B_TRAINER1_NAME}\nused {B_LAST_ITEM}!");
 static const u8 sText_TrainerBlockedBall[] = _("The TRAINER blocked the BALL!");
 static const u8 sText_DontBeAThief[] = _("Don't be a thief!");
