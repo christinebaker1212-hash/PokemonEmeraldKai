@@ -29,15 +29,10 @@ Kanto_CeruleanCity_Gym_EventScript_841AAD2::
 
 Kanto_CeruleanCity_Gym_EventScript_841AB0A::
 	msgbox Kanto_CeruleanCity_Gym_Text_84425F4, MSGBOX_DEFAULT
-	checkitemspace ITEM_LEFTOVERS, 1
+	@ Moemon Kai: FireRed's TM from the leader (Quetzal gave ITEM_LEFTOVERS: tools/quetzal_port/fix_leader_tms.py)
+	checkitemspace ITEM_TM03, 1
 	goto_if_eq VAR_RESULT, 0, Kanto_CeruleanCity_Gym_EventScript_841AB52
-	bufferitemname 0, ITEM_LEFTOVERS
-	additem ITEM_LEFTOVERS, 1
-	loadword 0, Kanto_CeruleanCity_Gym_Text_84426E8
-	setorcopyvar VAR_0x8000, ITEM_LEFTOVERS
-	setorcopyvar VAR_0x8001, 1
-	setorcopyvar VAR_0x8002, 0x16F
-	call Quetzal_EventScript_845571E
+	giveitem ITEM_TM03
 	setflag FLAG_QZ_0x2166
 	msgbox Kanto_CeruleanCity_Gym_Text_84425B1, MSGBOX_DEFAULT
 	release
@@ -101,8 +96,8 @@ Kanto_CeruleanCity_Gym_Text_84424E1::
 	.string "with WATER-type MOéMON!{PLAY_BGM 0x022A}$"
 
 Kanto_CeruleanCity_Gym_Text_84425B1::
-	.string "A MOéMON holding it restores\n"
-	.string "a little HP at the end of each turn.$"
+	.string "TM03 teaches WATER PULSE.\p"
+	.string "Use it on an aquatic MOéMON!$"
 
 Kanto_CeruleanCity_Gym_Text_84425F4::
 	.string "The CASCADEBADGE makes all\n"

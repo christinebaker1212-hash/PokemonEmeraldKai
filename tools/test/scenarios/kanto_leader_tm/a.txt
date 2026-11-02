@@ -1,0 +1,16 @@
+pressuntil A field 5000
+wait 60
+mp warp 38,5,6,6
+wait 120
+mp teach 0 61
+mp battlestyle 1
+mp checkitem 327
+mp face up
+press A 2
+pressuntil A battle 6000
+pressuntil A field 12000
+mash A 40 20
+wait 120
+mp checkitem 327
+mp getflag 0x2100
+quit

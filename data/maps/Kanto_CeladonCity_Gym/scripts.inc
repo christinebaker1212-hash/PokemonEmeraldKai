@@ -32,15 +32,10 @@ Kanto_CeladonCity_Gym_EventScript_841D2EF::
 
 Kanto_CeladonCity_Gym_EventScript_841D327::
 	msgbox Kanto_CeladonCity_Gym_Text_84474B9, MSGBOX_DEFAULT
-	checkitemspace ITEM_BIG_ROOT, 1
+	@ Moemon Kai: FireRed's TM from the leader (Quetzal gave ITEM_BIG_ROOT: tools/quetzal_port/fix_leader_tms.py)
+	checkitemspace ITEM_TM19, 1
 	goto_if_eq VAR_RESULT, 0, Kanto_CeladonCity_Gym_EventScript_841D36F
-	bufferitemname 0, ITEM_BIG_ROOT
-	additem ITEM_BIG_ROOT, 1
-	loadword 0, Kanto_CeladonCity_Gym_Text_844754C
-	setorcopyvar VAR_0x8000, ITEM_BIG_ROOT
-	setorcopyvar VAR_0x8001, 1
-	setorcopyvar VAR_0x8002, 0x16F
-	call Quetzal_EventScript_845571E
+	giveitem ITEM_TM19
 	setflag FLAG_QZ_0x216A
 	msgbox Kanto_CeladonCity_Gym_Text_844755C, MSGBOX_DEFAULT
 	release
@@ -154,8 +149,11 @@ Kanto_CeladonCity_Gym_Text_844754C::
 	.string "{STR_VAR_1}!$"
 
 Kanto_CeladonCity_Gym_Text_844755C::
-	.string "A MOéMON holding it restores more\n"
-	.string "HP with draining moves.$"
+	.string "TM19 contains GIGA DRAIN.\p"
+	.string "Half the damage it inflicts is\n"
+	.string "drained to heal your MOéMON.\p"
+	.string "Wouldn't you agree that it's a\n"
+	.string "wonderful move?$"
 
 Kanto_CeladonCity_Gym_Text_8447597::
 	.string "You should make room for this.$"

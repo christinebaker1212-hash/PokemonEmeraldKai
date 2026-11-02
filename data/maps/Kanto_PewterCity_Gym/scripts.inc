@@ -30,15 +30,10 @@ Kanto_PewterCity_Gym_EventScript_841A5B6::
 
 Kanto_PewterCity_Gym_EventScript_841A5F3::
 	msgbox Kanto_PewterCity_Gym_Text_8441392, MSGBOX_DEFAULT
-	checkitemspace ITEM_LEFTOVERS, 1
+	@ Moemon Kai: FireRed's TM from the leader (Quetzal gave ITEM_LEFTOVERS: tools/quetzal_port/fix_leader_tms.py)
+	checkitemspace ITEM_TM39, 1
 	goto_if_eq VAR_RESULT, 0, Kanto_PewterCity_Gym_EventScript_841A63B
-	bufferitemname 0, ITEM_LEFTOVERS
-	additem ITEM_LEFTOVERS, 1
-	loadword 0, Kanto_PewterCity_Gym_Text_84413AC
-	setorcopyvar VAR_0x8000, ITEM_ASSAULT_VEST
-	setorcopyvar VAR_0x8001, 1
-	setorcopyvar VAR_0x8002, 0x16F
-	call Quetzal_EventScript_845571E
+	giveitem ITEM_TM39
 	setflag FLAG_QZ_0x2173
 	msgbox Kanto_PewterCity_Gym_Text_84413BC, MSGBOX_DEFAULT
 	release
@@ -137,9 +132,17 @@ Kanto_PewterCity_Gym_Text_84413AC::
 	.string "{STR_VAR_1}!$"
 
 Kanto_PewterCity_Gym_Text_84413BC::
-	.string "A MOéMON holding it gains Special\n"
-	.string "Defense, but can only use moves\l"
-	.string "that deal damage.$"
+	.string "A TM, Technical Machine, contains a\n"
+	.string "technique for MOéMON.\p"
+	.string "Using a TM teaches the move it\n"
+	.string "contains to a MOéMON.\p"
+	.string "A TM is good for only one use.\p"
+	.string "So, when you use one, pick the\n"
+	.string "MOéMON carefully.\p"
+	.string "Anyways…\n"
+	.string "TM39 contains ROCK TOMB.\p"
+	.string "It hurls boulders at the foe and\n"
+	.string "lowers its SPEED.$"
 
 Kanto_PewterCity_Gym_Text_8441411::
 	.string "There are all kinds of TRAINERS in\n"

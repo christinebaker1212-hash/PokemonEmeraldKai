@@ -32,15 +32,10 @@ Kanto_SaffronCity_Gym_EventScript_841EE9D::
 
 Kanto_SaffronCity_Gym_EventScript_841EEE2::
 	msgbox Kanto_SaffronCity_Gym_Text_844B655, MSGBOX_DEFAULT
-	checkitemspace ITEM_CHOICE_SPECS, 1
+	@ Moemon Kai: FireRed's TM from the leader (Quetzal gave ITEM_CHOICE_SPECS: tools/quetzal_port/fix_leader_tms.py)
+	checkitemspace ITEM_TM04, 1
 	goto_if_eq VAR_RESULT, 0, Kanto_SaffronCity_Gym_EventScript_841EF2A
-	bufferitemname 0, ITEM_CHOICE_SPECS
-	additem ITEM_CHOICE_SPECS, 1
-	loadword 0, Kanto_SaffronCity_Gym_Text_844B726
-	setorcopyvar VAR_0x8000, ITEM_CHOICE_SPECS
-	setorcopyvar VAR_0x8001, 1
-	setorcopyvar VAR_0x8002, 0x16F
-	call Quetzal_EventScript_845571E
+	giveitem ITEM_TM04
 	setflag FLAG_QZ_0x2167
 	msgbox Kanto_SaffronCity_Gym_Text_844B5E0, MSGBOX_DEFAULT
 	release
@@ -142,10 +137,9 @@ Kanto_SaffronCity_Gym_Text_844B55D::
 	.string "MARSHBADGE.$"
 
 Kanto_SaffronCity_Gym_Text_844B5E0::
-	.string "Psychic power isn’t something that\n"
-	.string "only a few people have.\p"
-	.string "Everyone has psychic power.\n"
-	.string "People just don’t realize it.$"
+	.string "TM04 is CALM MIND.\p"
+	.string "It makes the MOéMON concentrate\n"
+	.string "to raise both SP. ATK and SP. DEF.$"
 
 Kanto_SaffronCity_Gym_Text_844B655::
 	.string "The MARSHBADGE makes MOéMON up\n"

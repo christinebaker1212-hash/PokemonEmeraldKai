@@ -31,15 +31,10 @@ Kanto_ViridianCity_Gym_EventScript_8419EEB::
 
 Kanto_ViridianCity_Gym_EventScript_8419F28::
 	msgbox Kanto_ViridianCity_Gym_Text_843F93A, MSGBOX_DEFAULT
-	checkitemspace ITEM_CHOICE_BAND, 1
+	@ Moemon Kai: FireRed's TM from the leader (Quetzal gave ITEM_CHOICE_BAND: tools/quetzal_port/fix_leader_tms.py)
+	checkitemspace ITEM_TM26, 1
 	goto_if_eq VAR_RESULT, 0, Kanto_ViridianCity_Gym_EventScript_8419F70
-	bufferitemname 0, ITEM_CHOICE_BAND
-	additem ITEM_CHOICE_BAND, 1
-	loadword 0, Kanto_ViridianCity_Gym_Text_843FA0F
-	setorcopyvar VAR_0x8000, ITEM_CHOICE_BAND
-	setorcopyvar VAR_0x8001, 1
-	setorcopyvar VAR_0x8002, 0x16F
-	call Quetzal_EventScript_845571E
+	giveitem ITEM_TM26
 	setflag FLAG_QZ_0x216C
 	msgbox Kanto_ViridianCity_Gym_Text_843FA1F, MSGBOX_DEFAULT
 	release
@@ -172,9 +167,11 @@ Kanto_ViridianCity_Gym_Text_843FA0F::
 	.string "{STR_VAR_1}!$"
 
 Kanto_ViridianCity_Gym_Text_843FA1F::
-	.string "It boosts the holder’s Attack,\n"
-	.string "but locks it into one move until\l"
-	.string "you switch MOéMON.$"
+	.string "TM26 contains EARTHQUAKE.\p"
+	.string "It is a powerful attack that causes\n"
+	.string "a massive tremor.\p"
+	.string "I made it when I ran the GYM here,\n"
+	.string "far too long ago… $"
 
 Kanto_ViridianCity_Gym_Text_843FA73::
 	.string "You do not have space for this!$"

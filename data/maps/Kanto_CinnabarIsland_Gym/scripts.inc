@@ -75,15 +75,10 @@ Kanto_CinnabarIsland_Gym_EventScript_841DC0C::
 
 Kanto_CinnabarIsland_Gym_EventScript_841DC4C::
 	msgbox Kanto_CinnabarIsland_Gym_Text_84495E9, MSGBOX_DEFAULT
-	checkitemspace ITEM_LIFE_ORB, 1
+	@ Moemon Kai: FireRed's TM from the leader (Quetzal gave ITEM_LIFE_ORB: tools/quetzal_port/fix_leader_tms.py)
+	checkitemspace ITEM_TM38, 1
 	goto_if_eq VAR_RESULT, 0, Kanto_CinnabarIsland_Gym_EventScript_841DC94
-	bufferitemname 0, ITEM_LIFE_ORB
-	additem ITEM_LIFE_ORB, 1
-	loadword 0, Kanto_CinnabarIsland_Gym_Text_844964A
-	setorcopyvar VAR_0x8000, ITEM_LIFE_ORB
-	setorcopyvar VAR_0x8001, 1
-	setorcopyvar VAR_0x8002, 0x16F
-	call Quetzal_EventScript_845571E
+	giveitem ITEM_TM38
 	setflag FLAG_QZ_0x2172
 	msgbox Kanto_CinnabarIsland_Gym_Text_844959A, MSGBOX_DEFAULT
 	release
@@ -771,9 +766,10 @@ Kanto_CinnabarIsland_Gym_Text_8449542::
 	.string "You have earned the VOLCANOBADGE.$"
 
 Kanto_CinnabarIsland_Gym_Text_844959A::
-	.string "It makes the holder’s attacks\n"
-	.string "stronger, but costs a little HP\l"
-	.string "when it attacks.$"
+	.string "TM38 contains FIRE BLAST.\n"
+	.string "Teach it to FIRE-type MOéMON.\p"
+	.string "VULPIX or CHARMELEON would be\n"
+	.string "ideal for that move.$"
 
 Kanto_CinnabarIsland_Gym_Text_84495E9::
 	.string "Hah!\p"

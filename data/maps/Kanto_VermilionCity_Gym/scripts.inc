@@ -234,15 +234,10 @@ Kanto_VermilionCity_Gym_EventScript_841B9B3::
 
 Kanto_VermilionCity_Gym_EventScript_841B9B7::
 	msgbox Kanto_VermilionCity_Gym_Text_8444D51, MSGBOX_DEFAULT
-	checkitemspace ITEM_CHOICE_SCARF, 1
+	@ Moemon Kai: FireRed's TM from the leader (Quetzal gave ITEM_CHOICE_SCARF: tools/quetzal_port/fix_leader_tms.py)
+	checkitemspace ITEM_TM34, 1
 	goto_if_eq VAR_RESULT, 0, Kanto_VermilionCity_Gym_EventScript_841B9FF
-	bufferitemname 0, ITEM_CHOICE_SCARF
-	additem ITEM_CHOICE_SCARF, 1
-	loadword 0, Kanto_VermilionCity_Gym_Text_8444DDE
-	setorcopyvar VAR_0x8000, ITEM_CHOICE_SCARF
-	setorcopyvar VAR_0x8001, 1
-	setorcopyvar VAR_0x8002, 0x16F
-	call Quetzal_EventScript_845571E
+	giveitem ITEM_TM34
 	setflag FLAG_QZ_0x2171
 	msgbox Kanto_VermilionCity_Gym_Text_8444DEE, MSGBOX_DEFAULT
 	release
@@ -342,9 +337,8 @@ Kanto_VermilionCity_Gym_Text_8444DDE::
 	.string "{STR_VAR_1}!$"
 
 Kanto_VermilionCity_Gym_Text_8444DEE::
-	.string "It boosts the holder’s Speed,\n"
-	.string "but locks it into one move until\l"
-	.string "you switch MOéMON.$"
+	.string "TM34 contains SHOCK WAVE!\p"
+	.string "Teach it to an ELECTRIC MOéMON!$"
 
 Kanto_VermilionCity_Gym_Text_8444E41::
 	.string "Yo, kid, make room in your BAG!$"

@@ -81,8 +81,11 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [x] A non-HOENN gym leader beaten: the gym's unbattled trainers count as beaten (mp_coop.c MP_Coop_GymLeaderBeaten;
       test sinnoh_gym)
 - [x] BADGES count every region's badges (the continue screen and the SAVE window: MP_Region_TotalBadges)
-- [ ] A4: TMs / HMs from leaders, trainers and events as the original games give them (new TMs / HMs where HOENN's
+- [~] A4: TMs / HMs from leaders, trainers and events as the original games give them (new TMs / HMs where HOENN's
       list lacks them)
+      ([x] KANTO's leaders: FireRed's TM39, 03, 34, 19, 06, 04, 38, 26 with FireRed's words, for Quetzal's held items
+      (still obtainable elsewhere: item audit), tools/quetzal_port/fix_leader_tms.py, test kanto_leader_tm; [ ] JOHTO's
+      leaders, other TM givers)
 - [x] SINNOH's time of day in KANTO, JOHTO and HOENN: MORNING / DAY / NIGHT encounters (grass slots 2-3 by Platinum's
       hours: mp_region.c MP_TimeLandSlot, src/data/wild_time.h from tools/quetzal_port/gen_wild_time.py; tests time_wild_*)
 - [ ] Encounter audit: no strong Pokémon early, places keep their identity (DIGLETT'S CAVE), no DITTO-like utility early;

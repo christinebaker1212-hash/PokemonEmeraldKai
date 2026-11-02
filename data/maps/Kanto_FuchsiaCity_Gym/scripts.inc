@@ -29,15 +29,10 @@ Kanto_FuchsiaCity_Gym_EventScript_841D70C::
 
 Kanto_FuchsiaCity_Gym_EventScript_841D744::
 	msgbox Kanto_FuchsiaCity_Gym_Text_844849E, MSGBOX_DEFAULT
-	checkitemspace ITEM_BLACK_SLUDGE, 1
+	@ Moemon Kai: FireRed's TM from the leader (Quetzal gave ITEM_BLACK_SLUDGE: tools/quetzal_port/fix_leader_tms.py)
+	checkitemspace ITEM_TM06, 1
 	goto_if_eq VAR_RESULT, 0, Kanto_FuchsiaCity_Gym_EventScript_841D78C
-	bufferitemname 0, ITEM_BLACK_SLUDGE
-	additem ITEM_BLACK_SLUDGE, 1
-	loadword 0, Kanto_FuchsiaCity_Gym_Text_844851F
-	setorcopyvar VAR_0x8000, ITEM_BLACK_SLUDGE
-	setorcopyvar VAR_0x8001, 1
-	setorcopyvar VAR_0x8002, 0x16F
-	call Quetzal_EventScript_845571E
+	giveitem ITEM_TM06
 	setflag FLAG_QZ_0x2168
 	msgbox Kanto_FuchsiaCity_Gym_Text_844852F, MSGBOX_DEFAULT
 	release
@@ -154,9 +149,10 @@ Kanto_FuchsiaCity_Gym_Text_844851F::
 	.string "{STR_VAR_1}!$"
 
 Kanto_FuchsiaCity_Gym_Text_844852F::
-	.string "It restores a Poison-type holder’s\n"
-	.string "HP each turn, but damages holders\l"
-	.string "of other types.$"
+	.string "Sealed within that TM06 lies\n"
+	.string "TOXIC!\p"
+	.string "It is a secret technique dating\n"
+	.string "back some four hundred years.$"
 
 Kanto_FuchsiaCity_Gym_Text_8448584::
 	.string "Make space for this, child!$"
