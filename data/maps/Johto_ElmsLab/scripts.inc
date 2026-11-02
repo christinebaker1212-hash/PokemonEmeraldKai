@@ -390,10 +390,18 @@ Johto_ElmsLab_EventScript_83E20AA::
 	waitmovement 0
 	setflag FLAG_QZ_0x1074
 	turnobject 7, 3
-	msgbox Johto_ElmsLab_Text_83E393B, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, 1, Johto_ElmsLab_EventScript_83E2124
-	goto_if_eq VAR_RESULT, 0, Johto_ElmsLab_EventScript_83E2105
+	@ Moemon Kai: Crystal's officer: the player names the thief (special NameRival); in a friend's room the host's
+	@ name stands (qz_specials.c QzNameJohtoRival)
+	msgbox Johto_ElmsLab_Text_83E393B, MSGBOX_DEFAULT
+	closemessage
+	specialvar VAR_RESULT, QzNameJohtoRival
+	call_if_eq VAR_RESULT, TRUE, Johto_ElmsLab_EventScript_WaitRivalName
+	goto Johto_ElmsLab_EventScript_83E2124
 	end
+
+Johto_ElmsLab_EventScript_WaitRivalName:
+	waitstate
+	return
 
 Johto_ElmsLab_EventScript_83E2105::
 	msgbox Johto_ElmsLab_Text_83E3A4E, MSGBOX_YESNO
@@ -1011,7 +1019,7 @@ Johto_ElmsLab_Text_83E393B::
 	.string "name?$"
 
 Johto_ElmsLab_Text_83E3A0D::
-	.string "Right! His name was SILVER.$"
+	.string "OK! So {RIVAL} was his name.$"
 
 Johto_ElmsLab_Text_83E3A29::
 	.string "Thanks for helping my\n"

@@ -3350,6 +3350,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
         bool8 MP_Region_FollowHost(u8 to);
         printf("[test] travel %d: %d\n", atoi(arg), MP_Region_FollowHost(atoi(arg)));
     }
+    else if (strcmp(cmd, "rivalname") == 0)
+    {
+        // rivalname [open] - JOHTO's rival's name (qz_specials.c); open: the naming at ELM's and the officer's line
+        extern const u8 EventScript_MpNameJohtoRival[];
+        const u8 *MP_JohtoRivalName(void);
+        char buf[16];
+        if (strcmp(arg, "open") == 0)
+            ScriptContext_SetupScript(EventScript_MpNameJohtoRival);
+        MP_GameToAscii(buf, MP_JohtoRivalName(), sizeof(buf) - 1);
+        printf("[test] rival name: %s\n", buf);
+    }
     else if (strcmp(cmd, "regionclear") == 0)
     {
         // regionclear R: as if that region's Elite Four were beaten (0 HOENN: FLAG_SYS_GAME_CLEAR too)

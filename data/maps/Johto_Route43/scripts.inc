@@ -87,7 +87,7 @@ Johto_Route43_Text_83F5218::
 
 Johto_Route43_Text_83F5248::
 	.string "Would you get this?\p"
-	.string "Some SILVER guy made fun of my\n"
+	.string "Some {RIVAL} guy made fun of my\n"
 	.string "MOéMON!\p"
 	.string "Darn it! My MOéMON’s great!$"
 

@@ -31,6 +31,10 @@
 #include "script_movement.h"
 #include "task.h"
 #include "palette.h"
+#include "naming_screen.h"
+#include "data.h"
+#include "constants/characters.h"
+#include "constants/trainers.h"
 #include "constants/event_object_movement.h"
 #include "constants/event_objects.h"
 #include "sound.h"
@@ -1390,6 +1394,91 @@ u16 QzGiveStarterJohto(void)
     if (gSpecialVar_Result != 2)
         VarSet(VAR_JOHTO_STARTER, VarGet(VAR_TEMP_2));   // (SILVER's line: MP_JohtoRivalSpecies)
     return gSpecialVar_Result;
+}
+
+// Moemon Kai: JOHTO's rival's name, as Crystal has the player give it (the officer at ELM's: QzNameJohtoRival); kept
+// in JOHTO's vars 0x52FC-0x52FF (8 bytes: 7 letters and EOS); none given: SILVER. {RIVAL} in JOHTO's words and his
+// battles' name read it.
+#define VAR_JOHTO_RIVAL_NAME 0x52FC
+static const u8 sSilverName[] = _("SILVER");
+
+static void RivalNameRead(u8 *out)
+{
+    u32 i;
+    for (i = 0; i < 4; i++)
+    {
+        u16 v = VarGet(VAR_JOHTO_RIVAL_NAME + i);
+        out[2 * i] = v & 0xFF;
+        out[2 * i + 1] = v >> 8;
+    }
+    out[PLAYER_NAME_LENGTH] = EOS;
+    if (out[0] == 0 || out[0] == EOS)
+        StringCopy(out, sSilverName);
+}
+
+static void RivalNameWrite(const u8 *name)
+{
+    u8 buf[8];
+    u32 i;
+    memset(buf, EOS, sizeof(buf));
+    for (i = 0; i < PLAYER_NAME_LENGTH && name[i] != EOS; i++)
+        buf[i] = name[i];
+    for (i = 0; i < 4; i++)
+        VarSet(VAR_JOHTO_RIVAL_NAME + i, buf[2 * i] | (buf[2 * i + 1] << 8));
+}
+
+// The name this player gave (sent to friends in a room this player hosts: mp_main.c MPR_RULES)
+const u8 *MP_JohtoRivalOwnName(void)
+{
+    static u8 sName[PLAYER_NAME_LENGTH + 1];
+    RivalNameRead(sName);
+    return sName;
+}
+
+// The name he goes by: online in a friend's room, the name the host gave (mp_main.c MP_RoomRivalName)
+const u8 *MP_JohtoRivalName(void)
+{
+    const u8 *MP_RoomRivalName(void);
+    const u8 *host = MP_RoomRivalName();
+    return host != NULL ? host : MP_JohtoRivalOwnName();
+}
+
+// {RIVAL} reads it in JOHTO (else NULL: HOENN's MAY / BRENDAN)
+const u8 *MP_JohtoRivalNameHere(void)
+{
+    return MP_Region_Current() == REGION_JOHTO ? MP_JohtoRivalName() : NULL;
+}
+
+// A battle's trainer name: SILVER's teams say his name
+const u8 *MP_JohtoRivalTrainerName(u16 trainerNum)
+{
+    if (trainerNum >= FIRST_QZ_TRAINER && trainerNum < FIRST_QZ_TRAINER + QZ_TRAINERS_COUNT
+     && StringCompare(gTrainers[trainerNum].trainerName, sSilverName) == 0)
+        return MP_JohtoRivalName();
+    return gTrainers[trainerNum].trainerName;
+}
+
+// The officer at ELM's asks the thief's name: Crystal's naming screen (special NameRival), SILVER to start
+static u8 sRivalNameBuf[PLAYER_NAME_LENGTH + 1];
+static void CB2_RivalNamed(void)
+{
+    void MP_SendRoomRules(void);
+    if (sRivalNameBuf[0] == EOS)
+        StringCopy(sRivalNameBuf, sSilverName);
+    RivalNameWrite(sRivalNameBuf);
+    MP_SendRoomRules();   // (hosting: friends hear it)
+    SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+}
+
+// In a friend's room the host names him: no naming screen here (the officer says the host's name)
+u16 QzNameJohtoRival(void)
+{
+    bool8 MP_IsRoomGuest(void);
+    if (MP_IsRoomGuest())
+        return gSpecialVar_Result = FALSE;   // (VAR_RESULT: no naming screen to wait for)
+    RivalNameRead(sRivalNameBuf);
+    DoNamingScreen(NAMING_SCREEN_RIVAL, sRivalNameBuf, 0, 0, 0, CB2_RivalNamed);
+    return gSpecialVar_Result = TRUE;
 }
 
 // Moemon Kai: SILVER's starter is the one strong against the player's, as Crystal's (Quetzal gave him TOTODILE's line

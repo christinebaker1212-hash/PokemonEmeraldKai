@@ -411,3 +411,16 @@ Text_MpReturnToTitle_Sure:
 	.string "Return to the main menu without\n"
 	.string "saving? Anything since your last\l"
 	.string "save will be lost.$"
+
+@ Moemon Kai (tests, mp rivalname): JOHTO's rival named as at ELM's (QzNameJohtoRival), then the officer's line
+EventScript_MpNameJohtoRival::
+	lockall
+	specialvar VAR_RESULT, QzNameJohtoRival
+	call_if_eq VAR_RESULT, TRUE, EventScript_MpNameJohtoRivalWait
+	msgbox Johto_ElmsLab_Text_83E3A0D, MSGBOX_DEFAULT
+	releaseall
+	end
+
+EventScript_MpNameJohtoRivalWait:
+	waitstate
+	return

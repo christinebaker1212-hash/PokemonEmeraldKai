@@ -195,7 +195,7 @@ Johto_SproutTower3F_Text_83FA9DD::
 	.string "about weak MOéMON.$"
 
 Johto_SproutTower3F_Text_83FAAC4::
-	.string "SILVER used an ESCAPE ROPE!$"
+	.string "{RIVAL} used an ESCAPE ROPE!$"
 
 Johto_SproutTower3F_Text_83FAAE0::
 	.string "So good of you to come here!\p"

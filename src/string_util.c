@@ -471,6 +471,9 @@ static const u8 *ExpandPlaceholder_KunChan(void)
 
 static const u8 *ExpandPlaceholder_RivalName(void)
 {
+    const u8 *MP_JohtoRivalNameHere(void);   // Moemon Kai: JOHTO's rival, as the player named him (qz_specials.c)
+    if (MP_JohtoRivalNameHere() != NULL)
+        return MP_JohtoRivalNameHere();
     if (gSaveBlock2Ptr->playerGender == MALE)
         return gText_ExpandedPlaceholder_May;
     else

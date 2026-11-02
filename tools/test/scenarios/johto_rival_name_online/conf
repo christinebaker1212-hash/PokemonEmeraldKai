@@ -1,0 +1,9 @@
+# JOHTO's rival is named by the room's host (MPR_RULES ends with the host's name, protocol 73): ALICE (hosting) names
+# him GARY; BOB in her room hears it (rival name: GARY) and at ELM's gets no naming screen, the officer saying GARY.
+MODE=2
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=1"
+ENV_B="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("rival name: GARY")
+EXPECT_B=("rival name: GARY")
+UNEXPECT_B=("rival name: SILVER" "[crash]")

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "constants/qz_port.h"
 #include "mp.h"
 #include "naming_screen.h"
 #include "malloc.h"
@@ -1386,6 +1387,8 @@ static void NamingScreen_CreatePCIcon(void);
 static void NamingScreen_CreateMonIcon(void);
 static void NamingScreen_CreateWaldaDadIcon(void);
 
+static void NamingScreen_CreateRivalIcon(void);
+
 static void (*const sIconFunctions[])(void) =
 {
     NamingScreen_NoIcon,
@@ -1393,6 +1396,7 @@ static void (*const sIconFunctions[])(void) =
     NamingScreen_CreatePCIcon,
     NamingScreen_CreateMonIcon,
     NamingScreen_CreateWaldaDadIcon,
+    NamingScreen_CreateRivalIcon,
 };
 
 static void CreateInputTargetIcon(void)
@@ -1418,6 +1422,17 @@ static void NamingScreen_CreatePlayerIcon(void)
         if (spriteId == MAX_SPRITES)
             spriteId = CreateObjectGraphicsSprite(rivalGfxId, SpriteCallbackDummy, 56, 37, 0);
     }
+    gSprites[spriteId].oam.priority = 3;
+    StartSpriteAnim(&gSprites[spriteId], ANIM_STD_GO_SOUTH);
+}
+
+// Moemon Kai: JOHTO's rival, as Crystal shows him while you name him (his JOHTO overworld picture)
+static void NamingScreen_CreateRivalIcon(void)
+{
+    const struct ObjectEventGraphicsInfo *info = GetObjectEventGraphicsInfo(OBJ_EVENT_GFX_QZ_16053);
+    u8 spriteId = CreateObjectGraphicsSprite(OBJ_EVENT_GFX_QZ_16053, SpriteCallbackDummy, 56, 37 + 16 - info->height / 2, 0);
+    if (spriteId == MAX_SPRITES)
+        return;
     gSprites[spriteId].oam.priority = 3;
     StartSpriteAnim(&gSprites[spriteId], ANIM_STD_GO_SOUTH);
 }
@@ -1823,6 +1838,7 @@ static void (*const sDrawTextEntryBoxFuncs[])(void) =
     [NAMING_SCREEN_COOP_CODE]     = DrawNormalTextEntryBox,
     [NAMING_SCREEN_COOP_NOTE1]    = DrawNormalTextEntryBox,
     [NAMING_SCREEN_COOP_NOTE2]    = DrawNormalTextEntryBox,
+    [NAMING_SCREEN_RIVAL]         = DrawNormalTextEntryBox,
 };
 
 static void DrawTextEntryBox(void)
@@ -2324,6 +2340,19 @@ static const struct NamingScreenTemplate sCoopCodeTemplate =
     .title = sText_CoopCode,
 };
 
+// Moemon Kai: JOHTO's rival (Crystal's naming at ELM's: "RIVAL'S NAME?"); left empty he's SILVER
+static const u8 sText_RivalsName[] = _("RIVAL'S NAME?");
+static const struct NamingScreenTemplate sRivalNamingTemplate =
+{
+    .copyExistingString = FALSE,
+    .maxChars = PLAYER_NAME_LENGTH,
+    .iconFunction = 5,
+    .addGenderIcon = FALSE,
+    .initialPage = KBPAGE_LETTERS_UPPER,
+    .unused = 35,
+    .title = sText_RivalsName,
+};
+
 static const struct NamingScreenTemplate sCoopRoomTemplate =
 {
     .copyExistingString = TRUE,
@@ -2383,6 +2412,7 @@ static const struct NamingScreenTemplate *const sNamingScreenTemplates[] =
     [NAMING_SCREEN_COOP_CODE]     = &sCoopCodeTemplate,
     [NAMING_SCREEN_COOP_NOTE1]    = &sCoopNote1Template,
     [NAMING_SCREEN_COOP_NOTE2]    = &sCoopNote2Template,
+    [NAMING_SCREEN_RIVAL]         = &sRivalNamingTemplate,
 };
 
 static const struct OamData sOam_8x8 =

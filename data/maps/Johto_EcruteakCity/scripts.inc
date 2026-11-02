@@ -214,12 +214,12 @@ Johto_EcruteakCity_Text_83CD26D::
 	.string "THUD!!$"
 
 Johto_EcruteakCity_Text_83CD274::
-	.string "SILVER: How...? How is this\n"
+	.string "{RIVAL}: How...? How is this\n"
 	.string "possible? How can I lose to mere\l"
 	.string "KIMONO GIRLS...?$"
 
 Johto_EcruteakCity_Text_83CD2C2::
-	.string "SILVER: You were watching me,\n"
+	.string "{RIVAL}: You were watching me,\n"
 	.string "{PLAYER}...\p"
 	.string "Yeah, that’s right!\p"
 	.string "I never thought defeating five\n"

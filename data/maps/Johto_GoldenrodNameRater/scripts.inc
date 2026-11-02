@@ -32,7 +32,7 @@ Johto_GoldenrodNameRater_Text_83D617A::
 
 Johto_GoldenrodNameRater_Text_83D62A9::
 	.string "The redheaded boy’s name\n"
-	.string "is SILVER.$"
+	.string "is {RIVAL}.$"
 
 Johto_GoldenrodNameRater_Text_83D62D9::
 	.string "You can change any nickname\n"

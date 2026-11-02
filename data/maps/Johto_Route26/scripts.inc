@@ -14,7 +14,7 @@ Johto_Route26_EventScript_83EC10D::
 	end
 
 Johto_Route26_Text_83EBF4B::
-	.string "I lost to a trainer named SILVER.\p"
+	.string "I lost to a trainer named {RIVAL}.\p"
 	.string "He was really strong, but…\p"
 	.string "It was as if he absolutely had to\n"
 	.string "win at any cost.\p"

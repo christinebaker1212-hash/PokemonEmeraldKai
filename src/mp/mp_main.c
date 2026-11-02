@@ -138,7 +138,20 @@ static void LevelRulesFromEnv(void);
 static bool8 sRoomLevelScaling;
 static bool8 sRoomMoveSplit = TRUE;   // Moemon Kai: MPR_RULES byte 4
 static u8 sRoomGeneration = 3;        // Moemon Kai: the room's GENERATION (MPR_RULES byte 5 + MP_SCALE_COUNT)
-static u8 sRoomGimmicks = 0;         // Moemon Kai: the room's GIMMICKS (MPR_RULES last byte)
+static u8 sRoomGimmicks = 0;         // Moemon Kai: the room's GIMMICKS (MPR_RULES byte 6 + MP_SCALE_COUNT)
+static u8 sRoomRivalName[8];         // Moemon Kai: the host's JOHTO rival's name (MPR_RULES bytes 7-14 + MP_SCALE_COUNT)
+// Moemon Kai: the JOHTO rival's name this player gave (7 letters, EOS-padded; qz_specials.c)
+static void OwnRivalName(u8 *out)
+{
+    const u8 *MP_JohtoRivalOwnName(void);
+    const u8 *n = MP_JohtoRivalOwnName();
+    u32 k;
+    for (k = 0; k < 8; k++)
+        out[k] = EOS;
+    for (k = 0; k < 7 && n[k] != EOS; k++)
+        out[k] = n[k];
+}
+
 static u8 OwnGimmicks(void);
 static u8 sLeaveForRegion;   // Moemon Kai: 1 + the host's region when it isn't ours (we leave the room)
 static u8 sFollowRegion;    // Moemon Kai: 1 + the region the host just travelled to (we follow when free)
@@ -1371,6 +1384,9 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
             sRoomGeneration = len >= 6 + MP_SCALE_COUNT && data[5 + MP_SCALE_COUNT] >= 3 && data[5 + MP_SCALE_COUNT] <= 9
                             ? data[5 + MP_SCALE_COUNT] : 3;   // Moemon Kai: GENERATION
             sRoomGimmicks = len >= 7 + MP_SCALE_COUNT ? data[6 + MP_SCALE_COUNT] : 0;   // Moemon Kai: GIMMICKS (AUTO before)
+            memset(sRoomRivalName, EOS, sizeof(sRoomRivalName));   // Moemon Kai: the JOHTO rival's name the host gave
+            if (len >= 15 + MP_SCALE_COUNT)
+                memcpy(sRoomRivalName, data + 7 + MP_SCALE_COUNT, 7);
             sRoomRulesHeard = TRUE;
             sRoomHostId = from;
             MPNet_Log("room rules from player %d: team padding %s, anim speed +%d%%, level scaling %s", from + 1,
@@ -1495,7 +1511,7 @@ static void SendWelcome(u8 id)
     if (sLobby.creator)
     {
         // the room's settings first (the host decides them for everyone)
-        u8 rules[7 + MP_SCALE_COUNT] = {MPR_RULES, OwnPadding(), OwnAnimSpeed(), OwnLevelScaling()};
+        u8 rules[15 + MP_SCALE_COUNT] = {MPR_RULES, OwnPadding(), OwnAnimSpeed(), OwnLevelScaling()};
         LevelRulesFromEnv();
         memcpy(rules + 4, gMpConfig.scale, MP_SCALE_COUNT - 1);
         rules[3 + MP_SCALE_COUNT] = OwnMoveSplit();
@@ -1503,6 +1519,7 @@ static void SendWelcome(u8 id)
         rules[4 + MP_SCALE_COUNT] = gRegionState.current < REGION_COUNT ? gRegionState.current : MP_Region_Current();
         rules[5 + MP_SCALE_COUNT] = OwnGeneration();
         rules[6 + MP_SCALE_COUNT] = OwnGimmicks();
+        OwnRivalName(rules + 7 + MP_SCALE_COUNT);
         MP_SendRelay(id, rules, sizeof(rules));
         SendClock(id);
     }
@@ -1546,6 +1563,21 @@ bool8 MP_PmdWanted(bool8 garden)
     return mode == MP_FOLLOW_SPRITES_PMD || (mode == MP_FOLLOW_SPRITES_DEFAULT && garden);
 }
 bool8 MP_Lobby_IsCreator(void) { return sLobby.creator && sLobby.state == MP_LOBBY_IN_ROOM; }
+
+// Moemon Kai: JOHTO's rival is named by the room's host (the user, 2026-11-02): a friend in someone's room reads the
+// host's name (NULL: ours, offline or hosting, or a host who never named him)
+const u8 *MP_RoomRivalName(void)
+{
+    if (sLobby.creator || sLobby.state != MP_LOBBY_IN_ROOM || !sRoomRulesHeard || sRoomRivalName[0] == EOS)
+        return NULL;
+    sRoomRivalName[7] = EOS;
+    return sRoomRivalName;
+}
+
+bool8 MP_IsRoomGuest(void)
+{
+    return !sLobby.creator && sLobby.state == MP_LOBBY_IN_ROOM;
+}
 
 // The room's host (who made it), heard with its rules when we joined: while they're still here
 s8 MP_RoomHostId(void)
@@ -1706,7 +1738,7 @@ bool8 MP_LevelScaling(void)
 // The host changed a room setting (OPTIONS): everyone hears it again
 void MP_SendRoomRules(void)
 {
-    u8 rules[7 + MP_SCALE_COUNT];
+    u8 rules[15 + MP_SCALE_COUNT];
     u8 i;
     if (!sLobby.creator || sLobby.state != MP_LOBBY_IN_ROOM)
         return;
@@ -1720,6 +1752,7 @@ void MP_SendRoomRules(void)
     rules[3 + MP_SCALE_COUNT] = OwnMoveSplit();
     rules[5 + MP_SCALE_COUNT] = OwnGeneration();
     rules[6 + MP_SCALE_COUNT] = OwnGimmicks();
+    OwnRivalName(rules + 7 + MP_SCALE_COUNT);
     for (i = 0; i < MP_MAX_PLAYERS; i++)
         if (i != gMpLocalId && gMpPlayers[i].present)
             MP_SendRelay(i, rules, sizeof(rules));

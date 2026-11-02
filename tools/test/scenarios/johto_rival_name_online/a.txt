@@ -1,0 +1,15 @@
+pressuntil A field 5000
+waitfor online 6000
+barrier joined 2
+mp rivalname open
+wait 120
+typetext GARY\n
+wait 30
+press START 2
+wait 60
+mash A 6 20
+wait 60
+mp rivalname
+barrier named 2
+wait 300
+quit

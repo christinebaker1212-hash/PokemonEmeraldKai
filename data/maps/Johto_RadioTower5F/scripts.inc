@@ -715,7 +715,7 @@ Johto_RadioTower5F_Text_8402A8F::
 Johto_RadioTower5F_Text_8402BB7::
 	.string "GIOVANNI: My ally... and my son.\n"
 	.string "Both against me.\p"
-	.string "SILVER, if you had understood\n"
+	.string "{RIVAL}, if you had understood\n"
 	.string "what I was trying to build...$"
 
 Johto_RadioTower5F_Text_8402C25::
@@ -764,16 +764,16 @@ Johto_RadioTower5F_Text_8403910::
 	.string "CELEBI surrounds you with its light.$"
 
 Johto_RadioTower5F_Text_840412D::
-	.string "SILVER: You never cared about your own.$"
+	.string "{RIVAL}: You never cared about your own.$"
 
 Johto_RadioTower5F_Text_8404155::
-	.string "GIOVANNI: SILVER...\n"
+	.string "GIOVANNI: {RIVAL}...\n"
 	.string "Another past, and you are just as weak.\p"
 	.string "Still waiting for your father\n"
 	.string "to come and look after you.$"
 
 Johto_RadioTower5F_Text_84041CB::
-	.string "SILVER: When you left, I thought it was\n"
+	.string "{RIVAL}: When you left, I thought it was\n"
 	.string "my fault. That I was not strong enough.\p"
 	.string "That is why I wanted to surpass you.\n"
 	.string "So you would look at me again.$"
@@ -783,7 +783,7 @@ Johto_RadioTower5F_Text_840425F::
 	.string "Beat me on your own.$"
 
 Johto_RadioTower5F_Text_840428D::
-	.string "SILVER: No. I will not let\n"
+	.string "{RIVAL}: No. I will not let\n"
 	.string "you keep hurting people\l"
 	.string "just to earn your respect.$"
 
@@ -791,15 +791,15 @@ Johto_RadioTower5F_Text_84042DB::
 	.string "GIOVANNI: And you need help to stop me?$"
 
 Johto_RadioTower5F_Text_8404303::
-	.string "SILVER: Stopping you matters\n"
+	.string "{RIVAL}: Stopping you matters\n"
 	.string "more than doing it alone.$"
 
 Johto_RadioTower5F_Text_840433A::
-	.string "SILVER: Choose up to three MOéMON.\n"
+	.string "{RIVAL}: Choose up to three MOéMON.\n"
 	.string "I will fight with three of mine.$"
 
 Johto_RadioTower5F_Text_840437F::
-	.string "SILVER: For a long time, I thought I had\n"
+	.string "{RIVAL}: For a long time, I thought I had\n"
 	.string "to be stronger for you to come back.\p"
 	.string "But leaving was your choice.\n"
 	.string "Not my fault.\p"
@@ -809,15 +809,15 @@ Johto_RadioTower5F_Text_840437F::
 	.string "That is something I can change.$"
 
 Johto_RadioTower5F_Text_8404460::
-	.string "SILVER: Here. Your MOéMON\n"
+	.string "{RIVAL}: Here. Your MOéMON\n"
 	.string "have earned these.$"
 
 Johto_RadioTower5F_Text_840448E::
-	.string "SILVER: I’ll hold on to them.\n"
+	.string "{RIVAL}: I’ll hold on to them.\n"
 	.string "Come back with room in your BAG.$"
 
 Johto_RadioTower5F_Text_84044CD::
-	.string "SILVER: Go back to your mother.\n"
+	.string "{RIVAL}: Go back to your mother.\n"
 	.string "I will stay and help here.\p"
 	.string "Then I will head to the shrine\n"
 	.string "in DRAGON’S DEN, in BLACKTHORN.\p"

@@ -14,6 +14,7 @@ enum {
     NAMING_SCREEN_COOP_CODE,      // Moemon Co-op: invite code from a friend
     NAMING_SCREEN_COOP_NOTE1,     // Moemon Co-op: the host's welcome note, line 1 (may be left empty)
     NAMING_SCREEN_COOP_NOTE2,     // Moemon Co-op: the host's welcome note, line 2
+    NAMING_SCREEN_RIVAL,          // Moemon Kai: JOHTO's rival, as Crystal names him (qz_specials.c MP_JohtoRivalName)
 };
 
 void DoNamingScreen(u8 templateNum, u8 *destBuffer, u16 monSpecies, u16 monGender, u32 monPersonality, MainCallback returnCallback);

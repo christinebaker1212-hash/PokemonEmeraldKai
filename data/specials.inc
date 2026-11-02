@@ -661,3 +661,4 @@ gSpecials::
 	def_special BattleSetup_StartScriptedWildBattle   @ Moemon Kai: SINNOH's converted StartWildBattle (ROUTE 209's SPIRITOMB, the OLD CHATEAU's ROTOM)
 	def_special MP_PlayerHasHmVar
 	def_special MP_ReturnToTitle   @ Moemon Kai: OPTIONS > RETURN TO MAIN MENU (src/option_menu.c)
+	def_special QzNameJohtoRival   @ Moemon Kai: Crystal names JOHTO's rival at ELM's (qz_specials.c)

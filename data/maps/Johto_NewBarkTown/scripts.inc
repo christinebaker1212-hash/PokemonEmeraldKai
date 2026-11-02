@@ -416,7 +416,7 @@ Johto_NewBarkTown_Text_83E1949::
 	.string "Good luck!$"
 
 Johto_NewBarkTown_Text_8403CE8::
-	.string "SILVER: I heard what\n"
+	.string "{RIVAL}: I heard what\n"
 	.string "was happening in there.\p"
 	.string "While it was other families,\n"
 	.string "you obeyed GIOVANNI.\p"
@@ -429,7 +429,7 @@ Johto_NewBarkTown_Text_8403DB2::
 	.string "...You have more than enough strength.$"
 
 Johto_NewBarkTown_Text_8403DD9::
-	.string "SILVER: ...You are strong. You could\n"
+	.string "{RIVAL}: ...You are strong. You could\n"
 	.string "have stood up to them long ago.\p"
 	.string "You say you are going back\n"
 	.string "to the RADIO TOWER... To stop\l"
@@ -450,10 +450,10 @@ Johto_NewBarkTown_Text_8403DD9::
 	.string "But right now, we have to stop him.$"
 
 Johto_NewBarkTown_Text_8404041::
-	.string "SILVER: I am going to the RADIO TOWER.\n"
+	.string "{RIVAL}: I am going to the RADIO TOWER.\n"
 	.string "CELEBI can take us.\p"
 	.string "Are you coming now?$"
 
 Johto_NewBarkTown_Text_8404090::
-	.string "SILVER: CELEBI, take me there first.\n"
+	.string "{RIVAL}: CELEBI, take me there first.\n"
 	.string "I will wait upstairs, by GIOVANNI.$"

@@ -1,0 +1,12 @@
+pressuntil A field 5000
+waitfor online 6000
+barrier joined 2
+barrier named 2
+wait 120
+mp rivalname
+mp rivalname open
+wait 60
+mash A 6 20
+wait 60
+mp rivalname
+quit

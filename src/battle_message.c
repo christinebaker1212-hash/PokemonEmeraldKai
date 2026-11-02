@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "global.h"
+const u8 *MP_JohtoRivalTrainerName(u16 trainerNum);   // Moemon Kai (qz_specials.c)
 #include "mp.h"
 #include "battle.h"
 #include "battle_anim.h"
@@ -2967,7 +2968,7 @@ u32 BattleStringExpandPlaceholders(const u8 *src, u8 *dst)
                 }
                 else
                 {
-                    toCpy = gTrainers[gTrainerBattleOpponent_A].trainerName;
+                    toCpy = MP_JohtoRivalTrainerName(gTrainerBattleOpponent_A);   // Moemon Kai: SILVER's own name
                 }
                 break;
             case B_TXT_LINK_PLAYER_NAME: // link player name
@@ -3095,7 +3096,7 @@ u32 BattleStringExpandPlaceholders(const u8 *src, u8 *dst)
                 }
                 else
                 {
-                    toCpy = gTrainers[gTrainerBattleOpponent_B].trainerName;
+                    toCpy = MP_JohtoRivalTrainerName(gTrainerBattleOpponent_B);   // Moemon Kai: SILVER's own name
                 }
                 break;
             case B_TXT_TRAINER2_LOSE_TEXT:
