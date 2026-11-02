@@ -403,6 +403,16 @@ def elevators(every, root):
     return out
 
 
+def platinum_elevator(root, p):
+    """Platinum's elevator script converts (its attendant and panel run it: GetFloorsAbove...)"""
+    import gen_scripts
+    low = p['place']['header'][len('MAP_HEADER_'):].lower()
+    try:
+        return gen_scripts.convertible(root, low, 1) is not None
+    except Exception:
+        return False
+
+
 def elevator_panel(m):
     """The elevator's panel and attendant open the floor menu (a panel where Platinum has none)"""
     for o in m['object_events']:
@@ -572,8 +582,8 @@ def main():
         m['bg_events'] = signs(p, root, have)
         if p['name'] == MARSH_MAP:
             marsh_merge(m, every, root)
-        if p['name'] in lifts:
-            elevator_panel(m)
+        if p['name'] in lifts and not platinum_elevator(root, p):
+            elevator_panel(m)   # (Platinum's own attendant and panel where its script converts: s3d_elevator.c)
         honey_tree(m, p, src)
         json.dump(m, open(path, 'w'), indent=2)
         open(path, 'a').write('\n')

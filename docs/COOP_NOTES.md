@@ -3770,6 +3770,15 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   are Sinnoh_SpecialRetired, keeping the numbers). The Underground's song isn't made yet (SEQ_TANKOU: OREBURGH MINE's
   plays). `mp explorerkit`, `mp underground`, `mp ugspot` / `ugface`, `mp mining`, `mp minecell`, `mp checkitem`.
   Tests sinnoh_underground, sinnoh_underground_man, sinnoh_spiritomb, sinnoh_spiritomb_talk.
+- Elevators in Platinum's own scripts (2026-11-02, src/sinnoh/s3d_elevator.c Sinnoh_ElevatorCall, `sinnoh
+  SINNOH_ELEVATOR`): VEILSTONE's store, JUBILIFE TV, HEARTHOME's two houses, the RIBBON SYNDICATE and the VISTA
+  LIGHTHOUSE run Platinum's attendants / panels / on-frame ride on Kai's elevator. Platinum's "special location" is the
+  dynamic warp the door set (the floor the player came from); GetFloorsAbove is that floor's place in the elevator's
+  table (top first, Platinum's FieldMenu_GetFloorsAbove counts); BufferFloorNumber Platinum's menu_entries words (0
+  B1F); ShowCurrentFloor its "Current Floor" window (its own tiles at 300, gone with the floor menu: s3d_scrcmd.c
+  Task_SinnohMenu); SetSpecialLocation sets the dynamic warp to that floor's door into the elevator;
+  PlayElevatorAnimation is Emerald's MoveElevator (two floors' shake, up or down). gen_maps.py adds the game's own
+  panel and floor menu (Sinnoh_EventScript_Elevator) only where Platinum's script doesn't convert. Test sinnoh_elevator.
 - Platform lifts (2026-11-02, src/sinnoh/s3d_lift.c, Platinum's platform_lift.c): IRON ISLAND B1F's right room, B2F's
   left room, B3F, the five LEAGUE elevators up to the ELITE FOUR's rooms and the CHAMPION's, and the CHAMPION's room.
   Platinum's scripts drive them (InitPersistedMapFeaturesForPlatformLift / CheckPlatformLiftNotUsedWhenEnteredMap /

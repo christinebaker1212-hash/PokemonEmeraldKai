@@ -1,9 +1,10 @@
-# SINNOH's elevators (src/sinnoh/s3d_elevator.c, tools/sinnoh/gen_maps.py elevators): VEILSTONE's store from 1F, the
-# attendant's floor menu, 5F, and its doors open on 5F; the VISTA LIGHTHOUSE's from SUNYSHORE by the panel this game
-# adds, to the top. Needs the 3D pack.
-# (SUNYSHORE's story state 3, VAR_SUNYSHORE_CITY_STATE 0x5244: past Platinum's scenes there.) Shots e_out.png, v_top.png.
+# SINNOH's elevators in Platinum's own scripts (src/sinnoh/s3d_elevator.c Sinnoh_ElevatorCall, gen_scripts.py
+# GetFloorsAbove...): VEILSTONE's store from 1F, the attendant's words, her floor menu with the "Current Floor" window,
+# 5F, the ride (Emerald's MoveElevator), and its doors open on 5F; the VISTA LIGHTHOUSE's from SUNYSHORE rides up by
+# itself (Platinum's on-frame script) to the top. Needs the packs.
+# (SUNYSHORE's story state 3, VAR_SUNYSHORE_CITY_STATE 0x5244: past Platinum's scenes there.) Shots e_*.png, v_top.png.
 MODE=1
 TMO=150
 ENV_A="MOEMON_DEBUG_REGION=3"
-EXPECT_A=("[test] elevator: floor 4 -> 0" "[test] where map 44.58 xy 15,3" "[test] elevator: floor 1 -> 0" "[test] where map 44.69 xy 6,10")
+EXPECT_A=("[test] elevator: doors open on 44.58" "[test] where map 44.58 xy 15,3" "[test] where map 44.69 xy 6,10")
 UNEXPECT_A=("[crash]")

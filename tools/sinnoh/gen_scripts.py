@@ -51,7 +51,8 @@ SINNOH_SET_BG, SINNOH_BUFFER_RIVAL_STARTER, SINNOH_MOVEMENT_TYPE, SINNOH_LOCAL_D
 SINNOH_BATTLE_WON, SINNOH_ADD_VAR, SINNOH_BADGE_COUNT, SINNOH_PREVIOUS_MAP, SINNOH_DAYCARE_EGG = 38, 39, 40, 41, 42
 SINNOH_BUFFER_TEXT, SINNOH_QUERY, SINNOH_DEX_RATING, SINNOH_MESSAGE_VAR = 43, 44, 45, 46
 SINNOH_TV, SINNOH_MESSAGE_BANK_VAR, SINNOH_SEAL, SINNOH_FASHION, SINNOH_CONTEST, SINNOH_WARP_CONTINUE = 47, 48, 49, 50, 51, 52
-SINNOH_LIFT = 53   # (the platform lifts: src/sinnoh/s3d_lift.c)   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
+SINNOH_LIFT = 53   # (the platform lifts: src/sinnoh/s3d_lift.c)
+SINNOH_ELEVATOR = 54   # (the elevators: src/sinnoh/s3d_elevator.c Sinnoh_ElevatorCall)   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
 (TVCALL_STATUS, TVCALL_FRAMING, TVCALL_FINISH, TVCALL_SEGMENT_ID, TVCALL_SEGMENT, TVCALL_COMMERCIAL, TVCALL_NEXT,
  TVCALL_INTERVIEW_ID, TVCALL_INTERVIEW_MESSAGE, TVCALL_INTERVIEW_SAVE, TVCALL_INTERVIEW_OK, TVCALL_WORD,
  TVCALL_HIDDEN_ITEM, TVCALL_NAME_RATED, TVCALL_STORAGE, TVCALL_VILLA, TVCALL_AMITY, TVCALL_QUESTION) = range(18)
@@ -574,6 +575,20 @@ class FileConverter:
         if cmd == 'SetCommPlayerDir':
             # (the player turned, Platinum's Underground player being a link one)
             return [self.sinnoh(SINNOH_FACE, 'LOCALID_PLAYER', self.value(a[0]))]
+        if cmd == 'GetFloorsAbove':
+            return [self.sinnoh(SINNOH_ELEVATOR, 0, self.var(a[0]))]
+        if cmd == 'BufferFloorNumber':
+            return [self.sinnoh(SINNOH_ELEVATOR, 1, self.value(a[0]), self.value(a[1]))]
+        if cmd == 'ShowCurrentFloor':
+            return [self.sinnoh(SINNOH_ELEVATOR, 2)]
+        if cmd == 'SetSpecialLocation':
+            o = self.dec.origins().get(a[0][len('MAP_HEADER_'):].lower())
+            if o is None:
+                raise Unsupported('special location %s' % a[0])
+            return [self.sinnoh(SINNOH_ELEVATOR, 3, o[0])]
+        if cmd == 'PlayElevatorAnimation':
+            return [self.sinnoh(SINNOH_ELEVATOR, 4, self.var(a[0]) if self.is_var(a[0]) else self.value(a[0]),
+                                self.value(a[1])), 'special MoveElevator']
         if cmd == 'InitPersistedMapFeaturesForPlatformLift':
             return [self.sinnoh(SINNOH_LIFT, 0)]
         if cmd == 'CheckPlatformLiftNotUsedWhenEnteredMap':

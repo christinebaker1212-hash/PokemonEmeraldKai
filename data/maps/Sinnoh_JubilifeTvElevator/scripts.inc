@@ -3,17 +3,11 @@ Sinnoh_JubilifeTvElevator_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_JubilifeTvElevator_EventScript_Bg1::
-	msgbox Sinnoh_JubilifeTvElevator_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_jubilife_tv_elevator_1
 	end
 
 Sinnoh_JubilifeTvElevator_EventScript_Person1::
-	msgbox Sinnoh_JubilifeTvElevator_Text_Person1, MSGBOX_NPC
+	goto SinnohP_jubilife_tv_elevator_1
 	end
-
-Sinnoh_JubilifeTvElevator_Text_Bg1:
-	.string "Welcome! Please enjoy your visit.$"
-
-Sinnoh_JubilifeTvElevator_Text_Person1:
-	.string "Welcome! Please enjoy your visit.$"
 
 @ --- end of SINNOH words ---

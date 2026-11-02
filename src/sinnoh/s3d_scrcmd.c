@@ -97,6 +97,7 @@ enum {
     SINNOH_WARP_CONTINUE,           // (then a `goto LABEL`, read here, not taken): Platinum's script goes on at LABEL
                                     // once the warp that follows has brought the player to the new map
     SINNOH_LIFT,                    // ARG: the platform lift's call (s3d_lift.c Sinnoh_LiftCall), ARG2 a variable
+    SINNOH_ELEVATOR,                // ARG: the elevator's call (s3d_elevator.c Sinnoh_ElevatorCall), ARG2, ARG3
 };
 
 u8 gSinnohMessage[1000];
@@ -160,6 +161,10 @@ static void Task_SinnohMenu(u8 taskId)
     else
         VarSet(sMenu.var, sMenu.values[selection]);
     ClearToTransparentAndRemoveWindow(data[0]);
+    {
+        void Sinnoh_ElevatorCloseFloor(void);
+        Sinnoh_ElevatorCloseFloor();   // (an elevator's "Current Floor" window goes with the floor menu: s3d_elevator.c)
+    }
     DestroyTask(taskId);
     ScriptContext_Enable();
 }
@@ -551,6 +556,12 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
             return TRUE;
         }
         break;
+    case SINNOH_ELEVATOR:
+    {
+        void Sinnoh_ElevatorCall(u16 op, u16 a, u16 b);
+        Sinnoh_ElevatorCall(arg, arg2, arg3);
+        break;
+    }
     case SINNOH_LIFT:
     {
         bool8 Sinnoh_LiftCall(u16 op, u16 var);
