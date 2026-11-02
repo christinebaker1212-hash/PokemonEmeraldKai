@@ -68,10 +68,11 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       gone: FireRed's / Crystal's scientists back)
 - [ ] Palettes inverted when the time-of-day lighting changes on a running map (maybe fixed)
 - [ ] Falling through CYCLING ROAD's tunnels (maybe fixed)
-- [ ] BERRY patches can't be planted (maybe fixed)
-- [ ] Followers cut in half in 3D (maybe fixed)
+- [x] BERRY patches can't be planted (fixed: test sinnoh_berry picks and plants FLOAROMA's patch)
+- [x] Followers cut in half in 3D (checked: a follower in ROUTE 201's tall grass and on its paths stands
+      whole, every direction)
 - [ ] Seams where the map ends and the out-of-bounds loop begins
-- [ ] Water animates
+- [x] Water animates (Platinum's animated map textures: test sinnoh_water)
 - [x] POKéTCH a registrable key item outside SINNOH (on / off, the right stick as usual) once SINNOH's ELITE FOUR is
       beaten (MP_Region_DeviceHere; tests poketch_locked, poketch_regions)
 
