@@ -5,6 +5,7 @@
 #include <string.h>
 #include "platform/gamepad.h"
 #include "global.h"
+#include "roamer.h"
 #include "s3d_underground.h"
 unsigned int SDL_GetTicks(void);
 #include "arcade.h"   // Moemon Kai: the GAME CENTER's arcade boards
@@ -3128,6 +3129,27 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void Sinnoh_TvForceProgram(u8 program);
         Sinnoh_TvForceProgram(atoi(arg));
         printf("[test] tv program %d\n", atoi(arg));
+    }
+    else if (strcmp(cmd, "roamers") == 0)
+    {
+        // roamers [SLOT]: SINNOH's roaming POKéMON (s3d_roamer.c: where each is, its HP); SLOT: that one to this map
+        void Sinnoh_RoamerDebug(void);
+        void Sinnoh_RoamerHere(u8 slot);
+        if (arg && strncmp(arg, "meet", 4) == 0)
+        {
+            // roamers meet: a wild encounter here until it's a roamer (roamer.c TryStartRoamerEncounter), its battle
+            int tries;
+            for (tries = 0; tries < 64; tries++)
+                if (TryStartRoamerEncounter())
+                {
+                    BattleSetup_StartRoamerBattle();
+                    break;
+                }
+            printf("[test] roamer met: %d\n", tries < 64);
+        }
+        else if (arg && *arg)
+            Sinnoh_RoamerHere(atoi(arg));
+        Sinnoh_RoamerDebug();
     }
     else if (strcmp(cmd, "tram") == 0)
     {

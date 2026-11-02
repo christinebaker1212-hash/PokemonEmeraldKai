@@ -70,7 +70,9 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [x] The elevators in Platinum's own scripts: the attendants' words, GetFloorsAbove, the "Current Floor" window,
       SetSpecialLocation, PlayElevatorAnimation; the VISTA LIGHTHOUSE's ride by itself (sinnoh_elevator)
 - [ ] Berry soil patches (Platinum's own berry spots; the TV's BERRY LOOKOUT waits for them)
-- [ ] MESPRIT and CRESSELIA roaming (static now; the TV's ROAMER NEWS FLASH waits for them)
+- [x] The roamers: MESPRIT, CRESSELIA and PROF. OAK's birds in Platinum's own scripts (ActivateRoamingPokemon,
+      DrawPokemonPreview, FlickerObject), their moves, encounters, HP kept, the HALL OF FAME's reset, the TV's ROAMER
+      NEWS FLASH (src/sinnoh/s3d_roamer.c) (sinnoh_roamer)
 - [x] The GREAT MARSH tram (MoveGreatMarshTram, CheckGreatMarshTramLocation: src/sinnoh/s3d_tram.c) (sinnoh_tram)
 - [x] The REGI ruins in Platinum's own scripts (ActivateRegiRuinsDot, the statue's quake ScrCmd_29F, FLAG_GAME_COMPLETED;
       REGIGIGAS's check: any REGIGIGAS, Platinum's being a DS event's) (sinnoh_regi); the OLD CHATEAU's ROTOM (sinnoh_rotom)
@@ -140,7 +142,7 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [x] Each of the nine programs watched to its end (sinnoh_tv_programs: mp tvprogram N); SINNOH NOW, RECORDS and the
       VARIETY HOUR play Platinum's segments; the reporters' interviews (one word on the game's own easy chat)
 - [ ] The interviews and records that need systems SINNOH lacks: contests, dress-up photos, poffins, the frontier's
-      records, BERRY patches, roamers, the VILLA
+      records, BERRY patches, the VILLA
 - [ ] Friends' segments on each other's TV (Platinum's record mixing: co-op)
 - [ ] JUBILIFE TV's floors and their people
 

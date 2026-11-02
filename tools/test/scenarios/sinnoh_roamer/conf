@@ -1,0 +1,9 @@
+# SINNOH's roamers (src/sinnoh/s3d_roamer.c): VERITY CAVERN's MESPRIT (7 BADGES: its object shown, flag 0x3510 clear)
+# runs Platinum's own script: its picture, its cry, it flickers and flies off (ActivateRoamingPokemon), PROF. ROWAN
+# comes in; it roams (mp roamers: species 506 somewhere) and its object stays gone. On ROUTE 201 with it there a wild
+# encounter is it (Lv. 50); it flees, keeping the HP it had (50). Needs both packs. Shots r_*.png.
+MODE=1
+TMO=400
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=150:100"
+EXPECT_A=("[test] flag 13584 = 0" "[test] flag 13584 = 1" "[test] roamers: 506@" "[test] roamer met: 1" "species 506 level 50" "(hp 50)")
+UNEXPECT_A=("[crash]" "[test] roamer met: 0")

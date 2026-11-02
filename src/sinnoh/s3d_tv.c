@@ -1126,6 +1126,21 @@ static bool8 Now_SwarmOk(struct TvInstance *k)
     u16 mapsec, species;
     return Sinnoh_SwarmToday(&mapsec, &species);
 }
+bool8 Sinnoh_RoamerNews(u16 *species, u16 *mapsec);   // (s3d_roamer.c)
+static const char *Now_Roamer(struct TvInstance *k)
+{
+    u16 mapsec, species;
+    if (!Sinnoh_RoamerNews(&species, &mapsec))
+        return NULL;
+    SetPlace(0, mapsec);
+    SetSpecies(1, species);
+    return "TVProgramSinnohNow_Text_RoamerNewsFlash";
+}
+static bool8 Now_RoamerOk(struct TvInstance *k)
+{
+    u16 mapsec, species;
+    return Sinnoh_RoamerNews(&species, &mapsec);
+}
 static const char *Now_Nature(struct TvInstance *k)
 {
     // (Platinum: a random personality's nature; half the time the flavor it likes, else the stat it raises: the same
@@ -1151,8 +1166,9 @@ static const struct TvSegment sSinnohNow[] = {
     [3] = {Now_BestThree, NULL},
     [5] = {Now_Swarm, Now_SwarmOk},
     [12] = {Now_Nature, NULL},
+    [15] = {Now_Roamer, Now_RoamerOk},
     [18] = {NULL, NULL},
-    // (1: groups, online; 9: the berry patches, 15: the roamers, 17: dress-up photos: until SINNOH has them)
+    // (1: groups, online; 9: the berry patches, 17: dress-up photos: until SINNOH has them)
 };
 
 // VARIETY HOUR (its messages by number: "#V" and the message's place in the bank)

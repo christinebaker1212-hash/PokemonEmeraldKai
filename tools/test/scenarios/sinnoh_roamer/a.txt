@@ -1,0 +1,40 @@
+pressuntil A field 5000
+wait 30
+mp setflag 0x3320
+mp setflag 0x3321
+mp setflag 0x3322
+mp setflag 0x3323
+mp setflag 0x3324
+mp setflag 0x3325
+mp setflag 0x3326
+mp warp 44,61,12,14
+wait 200
+mp getflag 0x3510
+shot r_mesprit
+mp face up
+press A 2
+wait 40
+shot r_preview
+mash A 80 10
+pressuntil A field 9000
+wait 30
+shot r_after
+mp roamers
+mp warp 44,61,12,16
+wait 200
+mp getflag 0x3510
+mp warp 40,1,10,10
+wait 200
+mp roamers 0
+mp roamers meet
+pressuntil A action 3000
+mp bhp
+mp foehp 50
+shot r_battle
+press A 2
+wait 20
+press A 2
+pressuntil A field 9000
+wait 30
+mp roamers
+quit

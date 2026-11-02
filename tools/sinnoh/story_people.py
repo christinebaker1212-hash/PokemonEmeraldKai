@@ -23,6 +23,10 @@ DONE = ['RIVAL_201', 'RIVAL_203', 'MARS_WINDWORKS', 'JUPITER_ETERNA', 'RIVAL_209
 EXTRA_DONE = {'DISTORTION': 0x3D35, 'NEW_GAME': 0x3D38, 'STARTER': 0x3D39}   # (a new game begun in SINNOH, its first POKéMON)
 
 LEAGUE = 9
+# Story people whose own Platinum script runs when talked to (tools/sinnoh/gen_words.py gives them their Platinum stub):
+# (map, Platinum's object number). PROF. OAK in ETERNA: the UPGRADE and the legendary birds set roaming
+# (src/sinnoh/s3d_roamer.c); his row in gifts.py keeps its flag number, unused
+PLATINUM = {('Sinnoh_EternaCitySouthHouse', 1)}
 NEVER = (99, 99, None, None, None)
 ALWAYS = (0, 99, None, None, None)
 

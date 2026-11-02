@@ -783,6 +783,11 @@ static void CB2_EndWildBattle(void)
         else if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
             Sinnoh_TvWildBattleEnd(&gEnemyParty[0], gBattleOutcome, balls, gLastUsedItem);
     }
+    if (!(gBattleTypeFlags & BATTLE_TYPE_ROAMER))
+    {
+        void Sinnoh_RoamerOtherBattle(void);
+        Sinnoh_RoamerOtherBattle();   // Moemon Kai: SINNOH's roamers on this route may leave it (s3d_roamer.c)
+    }
 
     if (IsPlayerDefeated(gBattleOutcome) == TRUE && CurrentBattlePyramidLocation() == PYRAMID_LOCATION_NONE && !InBattlePike())
     {

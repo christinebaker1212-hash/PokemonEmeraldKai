@@ -41,6 +41,9 @@ LEGENDS = [
     # not a legendary: Platinum's Friday DRIFLOON at the VALLEY WINDWORKS' door (s3d_legends.c FRIDAYS)
     ('Sinnoh_ValleyWindworksOutside', 5, 'DRIFLOON', 15, FRIDAYS),
 ]
+# The roamers: their objects run Platinum's own scripts (ActivateRoamingPokemon: src/sinnoh/s3d_roamer.c), shown by the
+# rows above all the same (the roamer sets the row's "done" flag; Platinum's HALL OF FAME clears it for a beaten one)
+ROAMERS = ('MESPRIT', 'CRESSELIA')
 EXTRA_FLAGS = 0x3D80  # the hide flags of the ones this game adds (('at', x, z)), one each
 
 # The story's battles (BARRY, TEAM GALACTIC), standing where Platinum's story puts them, each once, in Platinum's
@@ -132,6 +135,12 @@ def story_label(k):
 
 def label(species):
     return 'Sinnoh_EventScript_Legend%s' % species.capitalize()
+
+
+def platinum_people():
+    """{(map, object number)} of the legendaries whose own Platinum script runs (the roamers): gen_words.py gives them
+    their Platinum stubs, gen_maps.py places them with them"""
+    return {(m, n) for m, n, s, _, _ in LEGENDS if s in ROAMERS}
 
 
 def scripts():

@@ -12,6 +12,9 @@
 const void *Sinnoh_UnownData(u32 *size);   // (the UNOWN letters seen: chunk UNOF, s3d_legends.c)
 void Sinnoh_UnownLoad(const void *data, u32 size);
 void Sinnoh_UnownReset(void);
+const void *Sinnoh_RoamerData(u32 *size);   // (the roaming POKéMON: chunk ROAM, s3d_roamer.c)
+void Sinnoh_RoamerLoad(const void *data, u32 size);
+void Sinnoh_RoamerReset(void);
 #include "battle_pyramid.h"
 #include "event_data.h"
 #include "mp.h"
@@ -262,6 +265,7 @@ void MP_Region_StartNewGame(void)
     Sinnoh_FashionReset();
     Sinnoh_UndergroundReset();
     Sinnoh_UnownReset();
+    Sinnoh_RoamerReset();
     MP_Region_Arrive(sStartRegion);
     if (sStartRegion == REGION_SINNOH)
     {
@@ -420,6 +424,15 @@ void MP_Region_WriteSidecar(void)
             fwrite(un, size, 1, f);
         }
         {
+            // the roaming POKéMON (src/sinnoh/s3d_roamer.c)
+            u32 size;
+            const void *ro = Sinnoh_RoamerData(&size);
+            c[0] = CHUNK('R', 'O', 'A', 'M');
+            c[1] = size;
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(ro, size, 1, f);
+        }
+        {
             u32 format = MP_SAVE_FORMAT;   // the save's own layout version (mp_savefix.h)
             c[0] = CHUNK('S', 'A', 'V', 'F');
             c[1] = sizeof(format);
@@ -526,6 +539,12 @@ static bool8 LoadFrom(const char *path)
                 if (fread(buf, c[1], 1, f) == 1)
                     Sinnoh_TvLoad(buf, c[1]);
             }
+            else if (c[0] == CHUNK('R', 'O', 'A', 'M') && c[1] <= 512)
+            {
+                u8 buf[512];
+                if (fread(buf, c[1], 1, f) == 1)
+                    Sinnoh_RoamerLoad(buf, c[1]);
+            }
             else if (c[0] == CHUNK('U', 'N', 'O', 'F') && c[1] <= 64)
             {
                 u8 buf[64];
@@ -627,6 +646,7 @@ void MP_Region_LoadFromSave(void)
     Sinnoh_FashionReset();
     Sinnoh_UndergroundReset();
     Sinnoh_UnownReset();
+    Sinnoh_RoamerReset();
     for (i = 0; i <= 3; i++)
     {
         if (i == 0)

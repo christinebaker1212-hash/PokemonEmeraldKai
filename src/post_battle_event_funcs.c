@@ -21,6 +21,12 @@ int GameClear(void)
 
     HealPlayerParty();
     MP_Region_LeagueLevels(MP_Region_Current());   // Moemon Kai: the Pokémon that came here keep their best level
+    if (MP_Region_Current() == REGION_SINNOH)
+    {
+        // Moemon Kai: Platinum's HALL OF FAME brings the beaten roamers back (src/sinnoh/s3d_roamer.c)
+        void Sinnoh_RoamerHallOfFame(void);
+        Sinnoh_RoamerHallOfFame();
+    }
 
     if (MP_Region_Current() != REGION_HOENN)
     {

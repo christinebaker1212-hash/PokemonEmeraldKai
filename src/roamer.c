@@ -213,8 +213,21 @@ void CreateRoamerMonInstance(void)
     SetMonData(mon, MON_DATA_TOUGH, &ROAMER->tough);
 }
 
+// Moemon Kai: the level of the roamer just met (the repel's check: wild_encounter.c), HOENN's or SINNOH's
+static u8 sEncounterLevel;
+
+u8 RoamerEncounterLevel(void)
+{
+    return sEncounterLevel;
+}
+
 bool8 TryStartRoamerEncounter(void)
 {
+    bool8 Sinnoh_TryRoamerEncounter(u8 *level);
+    bool8 S3D_IsSinnohGroup(u8 mapGroup);
+    if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))   // Moemon Kai: SINNOH's own roamers (s3d_roamer.c)
+        return Sinnoh_TryRoamerEncounter(&sEncounterLevel);
+    sEncounterLevel = ROAMER->level;
     if (IsRoamerAt(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum) == TRUE && (Random() % 4) == 0)
     {
         CreateRoamerMonInstance();

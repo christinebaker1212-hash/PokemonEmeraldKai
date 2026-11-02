@@ -298,6 +298,8 @@ def platinum(root):
     from places import events
     import sprites
     import gen_scripts
+    import legends
+    import story_people
 
     def target(low, s):
         if not isinstance(s, int):
@@ -318,8 +320,9 @@ def platinum(root):
         low = p['place']['header'][len('MAP_HEADER_'):].lower()
         for i, o in enumerate(ev['object_events']):
             hide = o.get('hidden_flag')
-            if isinstance(hide, str) and hide.startswith(('FLAG_', 'MAP_HEADER_')):
-                continue
+            if isinstance(hide, str) and hide.startswith(('FLAG_', 'MAP_HEADER_')) \
+                    and (p['name'], i + 1) not in legends.platinum_people() | story_people.PLATINUM:
+                continue   # (but the roamers and a few story people: their own script)
             if isinstance(o['script'], str):
                 continue          # (a trainer: tools/sinnoh/gen_trainers.py)
             lab = target(low, o['script'])

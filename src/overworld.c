@@ -46,6 +46,8 @@
 #include "play_time.h"
 #include "random.h"
 #include "roamer.h"
+void Sinnoh_RoamerMapChanged(void);   // Moemon Kai: src/sinnoh/s3d_roamer.c
+void Sinnoh_RoamerFlew(void);
 #include "rotating_gate.h"
 #include "safari_zone.h"
 #include "save.h"
@@ -378,6 +380,7 @@ void Overworld_ResetStateAfterFly(void)
     FlagClear(FLAG_SYS_SAFARI_MODE);
     FlagClear(FLAG_SYS_USE_STRENGTH);
     FlagClear(FLAG_SYS_USE_FLASH);
+    Sinnoh_RoamerFlew();   // Moemon Kai: SINNOH's roamers anywhere after a flight (src/sinnoh/s3d_roamer.c)
 }
 
 void Overworld_ResetStateAfterTeleport(void)
@@ -838,6 +841,7 @@ void LoadMapFromCameraTransition(u8 mapGroup, u8 mapNum)
     InitSecondaryTilesetAnimation();
     UpdateLocationHistoryForRoamer();
     RoamerMove();
+    Sinnoh_RoamerMapChanged();   // Moemon Kai: SINNOH's roamers move on (src/sinnoh/s3d_roamer.c)
     DoCurrentWeather();
     ResetFieldTasksArgs();
     RunOnResumeMapScript();
@@ -885,6 +889,7 @@ static void LoadMapFromWarp(bool32 a1)
     RunOnTransitionMapScript();
     UpdateLocationHistoryForRoamer();
     RoamerMoveToOtherLocationSet();
+    Sinnoh_RoamerMapChanged();   // Moemon Kai: SINNOH's roamers move on (src/sinnoh/s3d_roamer.c)
     if (gMapHeader.mapLayoutId == LAYOUT_BATTLE_FRONTIER_BATTLE_PYRAMID_FLOOR)
         InitBattlePyramidMap(FALSE);
     else if (InTrainerHill())

@@ -67,6 +67,20 @@ u16 Sinnoh_LegendsRefresh(void)
     return 0;
 }
 
+// (s3d_roamer.c) MESPRIT's or CRESSELIA's object done with (roaming) or back (Platinum's HALL OF FAME)
+void Sinnoh_LegendDone(u16 species, bool8 done)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sSinnohLegends); i++)
+        if (sSinnohLegends[i].species == species)
+        {
+            if (done)
+                FlagSet(sSinnohLegends[i].doneFlag);
+            else
+                FlagClear(sSinnohLegends[i].doneFlag);
+        }
+}
+
 // SINNOH's story people (tools/sinnoh/story_people.py SHOW): each hide flag set or cleared by where the story is, as
 // a SINNOH map loads (overworld.c, before the map's own on-transition script and before its people are placed)
 void Sinnoh_StoryRefresh(void)

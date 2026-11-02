@@ -103,6 +103,7 @@ enum {
     SINNOH_MESSAGE_UNOWN,           // gSinnohMessage <- SINNOH's text ARG, ARG2 in Platinum's UNOWN letters (FONT_UNOWN)
     SINNOH_UNOWN_SEEN,              // ARG: a variable <- the UNOWN letters seen (s3d_legends.c)
     SINNOH_TRAM,                    // ARG: the GREAT MARSH tram's call (s3d_tram.c Sinnoh_TramCall), ARG2, ARG3
+    SINNOH_ROAMER,                  // ARG: a roaming POKéMON's slot set going (s3d_roamer.c Sinnoh_RoamerActivate)
 };
 
 u8 gSinnohMessage[1000];
@@ -569,6 +570,12 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
             ScriptContext_Stop();   // (the tram moves; its stop starts the script again: s3d_tram.c)
             return TRUE;
         }
+        break;
+    }
+    case SINNOH_ROAMER:
+    {
+        void Sinnoh_RoamerActivate(u8 slot);
+        Sinnoh_RoamerActivate(arg);
         break;
     }
     case SINNOH_UNOWN_SEEN:

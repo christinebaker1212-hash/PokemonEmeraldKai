@@ -10,6 +10,7 @@ void RoamerMove(void);
 bool8 IsRoamerAt(u8 mapGroup, u8 mapNum);
 void CreateRoamerMonInstance(void);
 bool8 TryStartRoamerEncounter(void);
+u8 RoamerEncounterLevel(void);   // Moemon Kai
 void UpdateRoamerHPStatus(struct Pokemon *mon);
 void SetRoamerInactive(void);
 void GetRoamerLocation(u8 *mapGroup, u8 *mapNum);

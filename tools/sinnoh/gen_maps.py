@@ -231,6 +231,8 @@ def people(p, root, have):
                         'script': obstacle, 'flag': '0'})
             continue
         legend = legends.scripts().get((p['name'], i + 1))
+        if legend and (p['name'], i + 1) in legends.platinum_people() and label in have:
+            legend = label   # (a roamer: Platinum's own script, shown by its row all the same)
         if legend:
             # a legendary: its battle (tools/sinnoh/legends.py), shown by its hide flag (Sinnoh_LegendsRefresh)
             out.append({'graphics_id': gfx, 'x': o['x'] - p['x0'] * 32, 'y': o['z'] - p['z0'] * 32, 'elevation': 3,

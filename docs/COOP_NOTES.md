@@ -3979,6 +3979,21 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   daily POKéMON: each area one of 32 picks a day (day + Trainer ID) in the 5% slots 6-7 while the SAFARI GAME is on,
   the second list after SINNOH's LEAGUE (Sinnoh_GreatMarshDaily; `mp marshdaily`). The marsh is 128x160 tiles:
   MAX_MAP_DATA_SIZE is 32768 (fieldmap.h; a map past it gets no grid at all: no walls, grass or warps). Test sinnoh_marsh.
+- The roamers (2026-11-02, src/sinnoh/s3d_roamer.c from Platinum's roaming_pokemon.c, TryEncounterRoamer and
+  roamer_after_battle.c): six slots in Platinum's ROAMING_SLOT_* order (MESPRIT 50, CRESSELIA 50, DARKRAI 40, unused as
+  Platinum's, MOLTRES / ZAPDOS / ARTICUNO 60), set going by Platinum's own scripts (`sinnoh SINNOH_ROAMER, slot`, op 60):
+  VERITY CAVERN's MESPRIT and FULLMOON ISLAND's CRESSELIA (their objects keep legends.py's rows and flags but run
+  Platinum's script: legends.ROAMERS / platinum_people(); DrawPokemonPreview is showmonpic, FlickerObject an unrolled
+  remove / add) and PROF. OAK in ETERNA (story_people.PLATINUM: his Platinum script, the UPGRADE and the birds; his
+  gifts.py row keeps its flag number, unused). Each map change in SINNOH moves them (one in 16 anywhere on Platinum's
+  29 routes, else to Platinum's nearby routes, never onto the map just left), FLY puts them anywhere; a wild encounter
+  on a roamer's route is it half the time (roamer.c TryStartRoamerEncounter, the repel by RoamerEncounterLevel()); the
+  game's roamer battle (it flees); after it battle_main.c Sinnoh_RoamerAfterBattle keeps its HP and status, or sets
+  Platinum's VAR_ROAMING_*_STATE CAPTURED / DEFEATED (gSinnohRoamerStateVars from contest_data.py) and every roamer on
+  that route moves; another wild battle there moves them 30% of the time. GameClear in SINNOH is Platinum's HALL OF
+  FAME reset (DEFEATED -> RESET, MESPRIT / CRESSELIA back: Sinnoh_LegendDone). SINNOH NOW's segment 15, the ROAMER NEWS
+  FLASH. Kept in "<save>.region" chunk ROAM. HOENN's LATIOS / LATIAS stay roamer.c's. `mp roamers [SLOT | meet]`.
+  Test sinnoh_roamer.
 - The GREAT MARSH's quick tram (2026-11-02, src/sinnoh/s3d_tram.c from Platinum's great_marsh_tram.c): the six
   stations (Platinum's safari_game.s entries 4-9 on the merged marsh's bg events: gen_words.py now converts that shared
   file's entries too) run Platinum's scripts; the car (great_marsh_train, a run-time model: gymprops.py,

@@ -591,7 +591,6 @@ static bool8 AreLegendariesInSootopolisPreventingEncounters(void)
 bool8 StandardWildEncounter(u16 curMetatileBehavior, u16 prevMetatileBehavior)
 {
     u16 headerId;
-    struct Roamer *roamer;
 
     if (sWildEncountersDisabled == TRUE)
         return FALSE;
@@ -644,8 +643,7 @@ bool8 StandardWildEncounter(u16 curMetatileBehavior, u16 prevMetatileBehavior)
 
             if (TryStartRoamerEncounter() == TRUE)
             {
-                roamer = &gSaveBlock1Ptr->roamer;
-                if (!IsWildLevelAllowedByRepel(roamer->level))
+                if (!IsWildLevelAllowedByRepel(RoamerEncounterLevel()))   // Moemon Kai: SINNOH's roamers too
                     return FALSE;
 
                 BattleSetup_StartRoamerBattle();
@@ -683,8 +681,7 @@ bool8 StandardWildEncounter(u16 curMetatileBehavior, u16 prevMetatileBehavior)
 
             if (TryStartRoamerEncounter() == TRUE)
             {
-                roamer = &gSaveBlock1Ptr->roamer;
-                if (!IsWildLevelAllowedByRepel(roamer->level))
+                if (!IsWildLevelAllowedByRepel(RoamerEncounterLevel()))   // Moemon Kai: SINNOH's roamers too
                     return FALSE;
 
                 BattleSetup_StartRoamerBattle();

@@ -56,7 +56,8 @@ SINNOH_ELEVATOR = 54   # (the elevators: src/sinnoh/s3d_elevator.c Sinnoh_Elevat
 SINNOH_REGI_DOT, SINNOH_QUAKE = 55, 56   # (the REGI ruins' dots; Platinum's screen quake, ScrCmd_29F)
 SINNOH_MESSAGE_UNOWN = 57   # (gSinnohMessage <- a message in Platinum's UNOWN letters: src/text.c FONT_UNOWN)
 SINNOH_UNOWN_SEEN = 58   # (the UNOWN letters seen: s3d_legends.c)
-SINNOH_TRAM = 59   # (the GREAT MARSH's tram: s3d_tram.c)   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
+SINNOH_TRAM = 59   # (the GREAT MARSH's tram: s3d_tram.c)
+SINNOH_ROAMER = 60   # (a roaming POKéMON set going: src/sinnoh/s3d_roamer.c; the slot, Platinum's ROAMING_SLOT_*)   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
 (TVCALL_STATUS, TVCALL_FRAMING, TVCALL_FINISH, TVCALL_SEGMENT_ID, TVCALL_SEGMENT, TVCALL_COMMERCIAL, TVCALL_NEXT,
  TVCALL_INTERVIEW_ID, TVCALL_INTERVIEW_MESSAGE, TVCALL_INTERVIEW_SAVE, TVCALL_INTERVIEW_OK, TVCALL_WORD,
  TVCALL_HIDDEN_ITEM, TVCALL_NAME_RATED, TVCALL_STORAGE, TVCALL_VILLA, TVCALL_AMITY, TVCALL_QUESTION) = range(18)
@@ -580,6 +581,17 @@ class FileConverter:
         if cmd == 'SetPlayerHeightCalculationEnabled':
             # (the GREAT MARSH's tram: the player rides at the platform's height, s3d_tram.c)
             return [self.sinnoh(SINNOH_TRAM, 3, 1 if a[0] == 'TRUE' else 0)]
+        if cmd == 'ActivateRoamingPokemon':
+            slots = [x.strip() for x in open(os.path.join(self.root, 'generated/roaming_slots.txt')) if x.strip()]
+            return [self.sinnoh(SINNOH_ROAMER, slots.index(a[0]))]
+        if cmd == 'DrawPokemonPreview':
+            return ['showmonpic %s, 10, 3' % self.arg(a[0])]   # (the POKéMON's picture in a window, as Platinum's)
+        if cmd == 'RemovePokemonPreview':
+            return ['hidemonpic']
+        if cmd == 'FlickerObject':
+            # (the object blinks TIMES times, DELAY frames each: Platinum's MapObject_Flicker)
+            obj, times, delay = self.localid(a[0]), int(self.value(a[1])), 2 * int(self.value(a[2]))
+            return ['removeobject %s' % obj, 'delay %d' % delay, 'addobject %s' % obj, 'delay %d' % delay] * times
         if cmd == 'EndSafariGame':
             return ['special ExitSafariMode']   # (the game's own SAFARI GAME: safari_zone.c)
         if cmd == 'GetUnownFormsSeenCount':
@@ -683,7 +695,7 @@ class FileConverter:
         if cmd in ('ShowMenu', 'ShowListMenu', 'ShowMenuMultiColumn'):
             return [self.sinnoh(SINNOH_MENU_SHOW)]
         if cmd in ('ScrCmd_32D', 'ScrCmd_338', 'ScrCmd_32E', 'ScrCmd_339', 'ScrCmd_332', 'LockObject', 'UnlockObject',
-                   'SetMenuXOriginToRight', 'IncrementTrainerScore', 'IncrementTrainerScore2', 'IncrementGameRecord',
+                   'ReleaseObject', 'SetMenuXOriginToRight', 'IncrementTrainerScore', 'IncrementTrainerScore2', 'IncrementGameRecord',
                    'IncrementGameRecordTwice', 'LoadDoorAnimation', 'PlayDoorOpenAnimation', 'PlayDoorCloseAnimation',
                    'WaitForAnimation', 'UnloadAnimation', 'UnloadDoorAnimation'):
             return []                       # (the walking partner paused / resumed, objects held: nothing to do here)
