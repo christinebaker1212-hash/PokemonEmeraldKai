@@ -52,7 +52,8 @@ static u16 DayTintPixel(u16 c, int x, int y, bool8 sprite)
 
 static bool8 Wanted(void)
 {
-    if (gMain.callback2 != CB2_Overworld || gMain.inBattle)
+    // (CB2_OverworldBasic: the field drawn under a battle's opening flash and transition, the tint stays on it)
+    if ((gMain.callback2 != CB2_Overworld && gMain.callback2 != CB2_OverworldBasic) || gMain.inBattle)
         return FALSE;
     return IsMapTypeOutdoors(gMapHeader.mapType);
 }
