@@ -47,7 +47,9 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [ ] Door animations (blocked: Quetzal's JOHTO door frames are only in its ROM, which the rip didn't read; Emerald's
       table matches none of them, so JOHTO's doors open without a picture); [x] water animates (JOHTO's primaries 2-6 carry FireRed's water tiles: the same animation over
       them; primary 1's water is drawn differently and stays still)
-- [ ] The rival named as in Crystal (online: the host names him, said plainly), his starter the one beating the player's
+- [~] The rival named as in Crystal (online: the host names him, said plainly), his starter the one beating the player's
+      ([x] his starter: ELM's ball he takes and every team's starter line, VAR_JOHTO_STARTER 0x52FB, qz_specials.c
+      MP_JohtoRivalSpecies, mp_region.c MP_Region_TrainerData; test johto_rival_starter. [ ] his name)
 - [x] No tree-cutting prompt in a new game without the HM and badge (Quetzal's check said yes to everything)
 - [ ] MOM's money saving (Crystal) and MY ROOM decorating on the Secret Base logic
 

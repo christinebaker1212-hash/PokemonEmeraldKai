@@ -1689,8 +1689,74 @@ static const struct Trainer *HoennModernTeam(u16 trainerNum, const struct HoennM
 }
 
 u16 QzKantoRivalTrainer(u16 trainerNum, bool8 *isBlue);   // qz_specials.c
+u16 MP_JohtoRivalSpecies(u16 species);                     // qz_specials.c
+static const struct Trainer *TrainerDataFor(u16 trainerNum);
 
+// The moves SPECIES knows at LEVEL by its level-up moves (for a swapped team member that had custom moves)
+static void LevelMoves(u16 species, u8 level, u16 *moves)
+{
+    static struct Pokemon sTmp;
+    u32 k;
+    CreateMon(&sTmp, species, level, 0, TRUE, 0, OT_ID_RANDOM_NO_SHINY, 0);
+    for (k = 0; k < MAX_MON_MOVES; k++)
+        moves[k] = GetMonData(&sTmp, MON_DATA_MOVE1 + k);
+}
+
+// SILVER's teams with his starter's line the one strong against the player's (qz_specials.c MP_JohtoRivalSpecies):
+// a copy of the team with the TOTODILE line swapped, whatever the team's format
 const struct Trainer *MP_Region_TrainerData(u16 trainerNum)
+{
+    static const u8 sSilver[] = _("SILVER");
+    static struct Trainer sRival;
+    static union {
+        struct TrainerMonNoItemDefaultMoves a[PARTY_SIZE];
+        struct TrainerMonNoItemCustomMoves b[PARTY_SIZE];
+        struct TrainerMonItemDefaultMoves c[PARTY_SIZE];
+        struct TrainerMonItemCustomMoves d[PARTY_SIZE];
+    } sParty;
+    const struct Trainer *t = TrainerDataFor(trainerNum);
+    u32 i, n;
+    if (trainerNum < FIRST_QZ_TRAINER || trainerNum >= FIRST_QZ_TRAINER + QZ_TRAINERS_COUNT || VarGet(VAR_JOHTO_STARTER) == 0
+     || StringCompare(gTrainers[trainerNum].trainerName, sSilver) != 0)
+        return t;
+    sRival = *t;
+    n = t->partySize < PARTY_SIZE ? t->partySize : PARTY_SIZE;
+    sRival.partySize = n;
+    for (i = 0; i < n; i++)
+    {
+        switch (t->partyFlags & (F_TRAINER_PARTY_CUSTOM_MOVESET | F_TRAINER_PARTY_HELD_ITEM))
+        {
+        case 0:
+            sParty.a[i] = t->party.NoItemDefaultMoves[i];
+            sParty.a[i].species = MP_JohtoRivalSpecies(sParty.a[i].species);
+            break;
+        case F_TRAINER_PARTY_CUSTOM_MOVESET:
+            sParty.b[i] = t->party.NoItemCustomMoves[i];
+            if (MP_JohtoRivalSpecies(sParty.b[i].species) != sParty.b[i].species)
+            {
+                sParty.b[i].species = MP_JohtoRivalSpecies(sParty.b[i].species);
+                LevelMoves(sParty.b[i].species, sParty.b[i].lvl, sParty.b[i].moves);
+            }
+            break;
+        case F_TRAINER_PARTY_HELD_ITEM:
+            sParty.c[i] = t->party.ItemDefaultMoves[i];
+            sParty.c[i].species = MP_JohtoRivalSpecies(sParty.c[i].species);
+            break;
+        default:
+            sParty.d[i] = t->party.ItemCustomMoves[i];
+            if (MP_JohtoRivalSpecies(sParty.d[i].species) != sParty.d[i].species)
+            {
+                sParty.d[i].species = MP_JohtoRivalSpecies(sParty.d[i].species);
+                LevelMoves(sParty.d[i].species, sParty.d[i].lvl, sParty.d[i].moves);
+            }
+            break;
+        }
+    }
+    sRival.party.ItemCustomMoves = sParty.d;   // (the union's one address; partyFlags says how to read it)
+    return &sRival;
+}
+
+static const struct Trainer *TrainerDataFor(u16 trainerNum)
 {
     static struct Trainer sCopy;
     u32 i;

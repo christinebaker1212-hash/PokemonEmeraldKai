@@ -1384,7 +1384,38 @@ static u16 QzGiveStarter_(void)
 
 u16 QzChooseStarterJohto(void) { return QzChooseStarter_(0); }
 u16 QzChooseStarterKanto(void) { return QzChooseStarter_(1); }
-u16 QzGiveStarterJohto(void) { return gSpecialVar_Result = QzGiveStarter_(); }
+u16 QzGiveStarterJohto(void)
+{
+    gSpecialVar_Result = QzGiveStarter_();
+    if (gSpecialVar_Result != 2)
+        VarSet(VAR_JOHTO_STARTER, VarGet(VAR_TEMP_2));   // (SILVER's line: MP_JohtoRivalSpecies)
+    return gSpecialVar_Result;
+}
+
+// Moemon Kai: SILVER's starter is the one strong against the player's, as Crystal's (Quetzal gave him TOTODILE's line
+// always): his teams' TOTODILE line becomes CHIKORITA's against CYNDAQUIL... (mp_region.c MP_Region_TrainerData).
+// A save from before (VAR_JOHTO_STARTER 0) keeps TOTODILE's.
+u16 MP_JohtoRivalSpecies(u16 species)
+{
+    static const u16 sLines[3][3] = {
+        {SPECIES_CHIKORITA, SPECIES_BAYLEEF, SPECIES_MEGANIUM},
+        {SPECIES_CYNDAQUIL, SPECIES_QUILAVA, SPECIES_TYPHLOSION},
+        {SPECIES_TOTODILE, SPECIES_CROCONAW, SPECIES_FERALIGATR},
+    };
+    u16 player = VarGet(VAR_JOHTO_STARTER);
+    u8 line, stage;
+    switch (player)
+    {
+    case SPECIES_CHIKORITA: line = 1; break;   // CYNDAQUIL's line against CHIKORITA
+    case SPECIES_CYNDAQUIL: line = 2; break;   // TOTODILE's against CYNDAQUIL
+    case SPECIES_TOTODILE:  line = 0; break;   // CHIKORITA's against TOTODILE
+    default: return species;
+    }
+    for (stage = 0; stage < 3; stage++)
+        if (species == sLines[2][stage])
+            return sLines[line][stage];
+    return species;
+}
 u16 QzGiveStarterKanto(void) { return gSpecialVar_Result = QzGiveStarter_(); }
 
 // ---------------------------------------------------------------------------------------------- credits

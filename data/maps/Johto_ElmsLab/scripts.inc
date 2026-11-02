@@ -348,6 +348,18 @@ Johto_ElmsLab_EventScript_83E204E::
 	release
 	end
 
+Johto_ElmsLab_EventScript_RivalTakesCyndaquil:
+	setvar VAR_QZ_0x5000, 2
+	return
+
+Johto_ElmsLab_EventScript_RivalTakesTotodile:
+	setvar VAR_QZ_0x5000, 0
+	return
+
+Johto_ElmsLab_EventScript_RivalTakesChikorita:
+	setvar VAR_QZ_0x5000, 1
+	return
+
 Johto_ElmsLab_EventScript_83E2095::
 	setflag FLAG_QZ_0x1070
 	removeobject 5
@@ -366,6 +378,11 @@ Johto_ElmsLab_EventScript_83E20A3::
 Johto_ElmsLab_EventScript_83E20AA::
 	lock
 	setmetatile 7, 1, 0x32B, 1
+	@ Moemon Kai: SILVER takes the ball strong against the player's, as Crystal (his teams: qz_specials.c
+	@ MP_JohtoRivalSpecies; 0x52FB = VAR_JOHTO_STARTER)
+	call_if_eq 0x52FB, SPECIES_CHIKORITA, Johto_ElmsLab_EventScript_RivalTakesCyndaquil
+	call_if_eq 0x52FB, SPECIES_CYNDAQUIL, Johto_ElmsLab_EventScript_RivalTakesTotodile
+	call_if_eq 0x52FB, SPECIES_TOTODILE, Johto_ElmsLab_EventScript_RivalTakesChikorita
 	call_if_eq VAR_QZ_0x5000, 0, Johto_ElmsLab_EventScript_83E2095
 	call_if_eq VAR_QZ_0x5000, 1, Johto_ElmsLab_EventScript_83E209C
 	call_if_eq VAR_QZ_0x5000, 2, Johto_ElmsLab_EventScript_83E20A3

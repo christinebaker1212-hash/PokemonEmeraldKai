@@ -24,6 +24,7 @@
 #define VAR_SINNOH_SPIRITOMB  0x52F2   // Platinum's SPIRITOMB counter: co-op friends talked to in the Underground (src/sinnoh/s3d_underground.c; ROUTE 209's HALLOWED TOWER reads it)
 #define FLAG_SINNOH_NEW_GAME 0x3D38   // a new game begun in SINNOH (ROUTE 201's briefcase is there for it)
 #define FLAG_SINNOH_STARTER  0x3D39   // ... its first POKéMON picked from the briefcase
+#define VAR_JOHTO_STARTER 0x52FB    // the starter the player took at ELM's (species; qz_specials.c: SILVER's is the one strong against it)
 #define VAR_SINNOH_STARTER 0x52F8   // the starter picked from ROWAN's briefcase in Platinum's story (its SaveChosenStarter)
 #define VAR_SINNOH_PARTNER_GFX 0x52F9   // SINNOH's walking partner's graphics + 1 (0: none; s3d_scrcmd.c Sinnoh_PartnerUpdate)
 #define VAR_SINNOH_PARTNER_TRAINER 0x52FA   // ... its team in wild battles (Platinum's VAR_PARTNER_TRAINER_ID: battle_setup.c)

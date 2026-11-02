@@ -1,0 +1,8 @@
+pressuntil A field 5000
+wait 30
+mp setvar 0x52FB 152
+mp getvar 0x52FB
+mp battlestyle 1
+mp trainer 1079
+mash A 200 10
+quit
