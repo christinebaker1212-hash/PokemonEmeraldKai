@@ -92,6 +92,15 @@ SONGS = [
     ('D', '110', 'victory_wild', 'mus_victory_wild'), ('D', '121', 'victory_trainer', 'mus_victory_trainer'),
     ('D', '133', 'victory_gym_leader', 'mus_victory_gym_leader'), ('D', '147', 'victory_galactic', 'mus_victory_aqua_magma'),
     ('D', '265', 'victory_elite_four', 'mus_victory_league'), ('D', '268', 'victory_champion', 'mus_victory_league'),
+    # (later, from the same Platinum rip: the BATTLE FRONTIER's halls, the VILLA's audio system, the SUPER CONTESTS'
+    # Master / Ultra rank dances by category, a Frontier Brain beaten)
+    ('P', '44', 'battle_factory', 'mus_b_factory'), ('P', '43', 'battle_hall', 'mus_b_dome'),
+    ('P', '45', 'battle_castle', 'mus_b_palace'), ('P', '41', 'battle_arcade', 'mus_b_arena'),
+    ('P', '39', 'villa_audio', 'mus_lilycove'),
+    ('P', '34', 'contest_cool', 'mus_contest'), ('P', '36', 'contest_beauty', 'mus_contest'),
+    ('P', '33', 'contest_cute', 'mus_contest'), ('P', '37', 'contest_smart', 'mus_contest'),
+    ('P', '35', 'contest_tough', 'mus_contest'),
+    ('P', '49', 'victory_frontier_brain', 'mus_victory_league'),
 ]
 
 H_BEGIN = '// Moemon Kai: SINNOH\'s songs (tools/kaisong/sinnoh_songs.py)'

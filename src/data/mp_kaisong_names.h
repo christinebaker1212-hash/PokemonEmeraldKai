@@ -807,6 +807,17 @@ static const char *const sKaisongSongNames[] = {
     "mus_sinnoh_victory_galactic",
     "mus_sinnoh_victory_elite_four",
     "mus_sinnoh_victory_champion",
+    "mus_sinnoh_battle_factory",
+    "mus_sinnoh_battle_hall",
+    "mus_sinnoh_battle_castle",
+    "mus_sinnoh_battle_arcade",
+    "mus_sinnoh_villa_audio",
+    "mus_sinnoh_contest_cool",
+    "mus_sinnoh_contest_beauty",
+    "mus_sinnoh_contest_cute",
+    "mus_sinnoh_contest_smart",
+    "mus_sinnoh_contest_tough",
+    "mus_sinnoh_victory_frontier_brain",
 };
 
 static const char *const sKaisongMaps0[] = {
@@ -2584,6 +2595,12 @@ static const char *const sKaisongMaps44[] = {
     "sinnoh_vista_lighthouse_elevator",
     "sinnoh_wayward_cave1f",
     "sinnoh_wayward_cave_b1f",
+    "sinnoh_contest_hall_lobby",
+    "sinnoh_contest_hall_stage_no_contest",
+    "sinnoh_contest_hall_stage_ongoing_contest",
+    "sinnoh_poffin_house",
+    "sinnoh_eterna_city_underground_man_house",
+    "sinnoh_underground",
 };
 
 static const struct { const char *const *keys; u16 count; } sKaisongMapGroups[] = {
@@ -2655,7 +2672,7 @@ static const u16 sKaisongScene16Songs[] = {403};
 static const u16 sKaisongScene17Songs[] = {464};
 static const u16 sKaisongScene18Songs[] = {539};
 static const u16 sKaisongScene19Songs[] = {412, 476};
-static const u16 sKaisongScene20Songs[] = {412, 476};
+static const u16 sKaisongScene20Songs[] = {412, 439, 440, 446, 452, 476, 810, 811, 812, 813, 814};
 static const u16 sKaisongScene21Songs[] = {392};
 static const u16 sKaisongScene22Songs[] = {412, 458, 471, 475, 476, 477, 478, 481, 482, 483, 539, 784, 785, 786, 793, 794};
 static const u16 sKaisongScene23Songs[] = {413};
@@ -2714,15 +2731,28 @@ static const struct { const char *path; u8 scene; } sKaisongSceneFiles[] = {
     {"mp/mp_sim.c", 19},
     {"sinnoh/poketch.c", 20},
     {"sinnoh/s3d.c", 20},
+    {"sinnoh/s3d_contest.c", 20},
+    {"sinnoh/s3d_contest_ui.c", 20},
     {"sinnoh/s3d_elevator.c", 20},
+    {"sinnoh/s3d_fashion.c", 20},
     {"sinnoh/s3d_frontier.c", 20},
     {"sinnoh/s3d_gfx.c", 20},
     {"sinnoh/s3d_gyms.c", 20},
     {"sinnoh/s3d_hall.c", 20},
     {"sinnoh/s3d_heal.c", 20},
     {"sinnoh/s3d_legends.c", 20},
+    {"sinnoh/s3d_lift.c", 20},
+    {"sinnoh/s3d_mining.c", 20},
+    {"sinnoh/s3d_misc.c", 20},
     {"sinnoh/s3d_places.c", 20},
+    {"sinnoh/s3d_roamer.c", 20},
+    {"sinnoh/s3d_scrcmd.c", 20},
+    {"sinnoh/s3d_seals.c", 20},
+    {"sinnoh/s3d_text.c", 20},
     {"sinnoh/s3d_townmap.c", 20},
+    {"sinnoh/s3d_tram.c", 20},
+    {"sinnoh/s3d_tv.c", 20},
+    {"sinnoh/s3d_underground.c", 20},
     {"sinnoh/s3d_wild.c", 20},
     {"slot_machine.c", 21},
     {"tcg/card_quotes.c", 22},

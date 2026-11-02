@@ -72,11 +72,20 @@ Files in this repository's `music` folder ship with every update.
 | `mus_sinnoh_amity_square.kaisong` | mus_sinnoh_amity_square | everywhere | Amity Square |
 | `mus_sinnoh_arceus.kaisong` | mus_sinnoh_arceus | everywhere | Beginning Dimension - Arceus |
 | `mus_sinnoh_azure_flute.kaisong` | mus_sinnoh_azure_flute | everywhere | Azure Flute |
+| `mus_sinnoh_battle_arcade.kaisong` | mus_sinnoh_battle_arcade | everywhere | Battle Arcade |
+| `mus_sinnoh_battle_castle.kaisong` | mus_sinnoh_battle_castle | everywhere | Battle Castle |
+| `mus_sinnoh_battle_factory.kaisong` | mus_sinnoh_battle_factory | everywhere | Battle Factory |
+| `mus_sinnoh_battle_hall.kaisong` | mus_sinnoh_battle_hall | everywhere | Battle Hall |
 | `mus_sinnoh_battle_tower.kaisong` | mus_sinnoh_battle_tower | everywhere | Battle Tower |
 | `mus_sinnoh_bicycle.kaisong` | mus_sinnoh_bicycle | everywhere | Bicycle |
 | `mus_sinnoh_canalave.kaisong` | mus_sinnoh_canalave | everywhere | Canalave City (Daytime) |
 | `mus_sinnoh_canalave_night.kaisong` | mus_sinnoh_canalave_night | everywhere | Canalave City (Nighttime) |
 | `mus_sinnoh_cavern_on_the_lake.kaisong` | mus_sinnoh_cavern_on_the_lake | everywhere | Cavern on the Lake |
+| `mus_sinnoh_contest_beauty.kaisong` | mus_sinnoh_contest_beauty | everywhere | Super Contest - Beauty Category |
+| `mus_sinnoh_contest_cool.kaisong` | mus_sinnoh_contest_cool | everywhere | Super Contest - Cool Category |
+| `mus_sinnoh_contest_cute.kaisong` | mus_sinnoh_contest_cute | everywhere | Super Contest - Cute Category |
+| `mus_sinnoh_contest_smart.kaisong` | mus_sinnoh_contest_smart | everywhere | Super Contest - Smart Category |
+| `mus_sinnoh_contest_tough.kaisong` | mus_sinnoh_contest_tough | everywhere | Super Contest - Tough Category |
 | `mus_sinnoh_cynthia.kaisong` | mus_sinnoh_cynthia | everywhere | Champion Cynthia |
 | `mus_sinnoh_dawn.kaisong` | mus_sinnoh_dawn | everywhere | Dawn |
 | `mus_sinnoh_distortion_world.kaisong` | mus_sinnoh_distortion_world | everywhere | Distortion World |
@@ -174,12 +183,14 @@ Files in this repository's `music` folder ship with every update.
 | `mus_sinnoh_veilstone_night.kaisong` | mus_sinnoh_veilstone_night | everywhere | Veilstone City (Nighttime) |
 | `mus_sinnoh_victory_champion.kaisong` | mus_sinnoh_victory_champion | everywhere | Champion Defeated! |
 | `mus_sinnoh_victory_elite_four.kaisong` | mus_sinnoh_victory_elite_four | everywhere | Elite Four Defeated! |
+| `mus_sinnoh_victory_frontier_brain.kaisong` | mus_sinnoh_victory_frontier_brain | everywhere | Defeated! Frontier Brain |
 | `mus_sinnoh_victory_galactic.kaisong` | mus_sinnoh_victory_galactic | everywhere | Team Galactic Defeated! |
 | `mus_sinnoh_victory_gym_leader.kaisong` | mus_sinnoh_victory_gym_leader | everywhere | Gym Leader Defeated! |
 | `mus_sinnoh_victory_road.kaisong` | mus_sinnoh_victory_road | everywhere | Victory Road |
 | `mus_sinnoh_victory_trainer.kaisong` | mus_sinnoh_victory_trainer | everywhere | Trainer Defeated! |
 | `mus_sinnoh_victory_wild.kaisong` | mus_sinnoh_victory_wild | everywhere | Wild Pokemon Defeated! |
 | `mus_sinnoh_villa.kaisong` | mus_sinnoh_villa | everywhere | Villa - Twinleaf Town Music Box |
+| `mus_sinnoh_villa_audio.kaisong` | mus_sinnoh_villa_audio | everywhere | Villa - Lilycove City Bossa Nova |
 | `mus_sinnoh_vs_arceus.kaisong` | mus_sinnoh_vs_arceus | everywhere | Battle! Arceus! |
 | `mus_sinnoh_vs_champion.kaisong` | mus_sinnoh_vs_champion | everywhere | Battle! Champion |
 | `mus_sinnoh_vs_dialga_palkia.kaisong` | mus_sinnoh_vs_dialga_palkia | everywhere | Battle! Dialga & Palkia |
@@ -464,10 +475,12 @@ Custom: `mus_game_corner@rustboro_city_game_center_1f.kaisong`, `mus_game_corner
 - Map music: Ancient Tomb [ancient_tomb], Desert Ruins [desert_ruins], Island Cave [island_cave], Sealed Chamber Inner Room [sealed_chamber_inner_room], Sealed Chamber Outer Room [sealed_chamber_outer_room]
 
 ### mus_contest_winner (439)
+- Scenes: Sinnoh [sinnoh]
 - Events: anywhere: Contest hall
 
 ### mus_contest (440)
 - Map music: Contest Hall [contest_hall], Contest Hall Beauty [contest_hall_beauty], Contest Hall Cool [contest_hall_cool], Contest Hall Cute [contest_hall_cute], Contest Hall Smart [contest_hall_smart], Contest Hall Tough [contest_hall_tough]
+- Scenes: Sinnoh [sinnoh]
 - Events: Contest Hall [contest_hall]
 
 ### mus_encounter_magma (441)
@@ -489,7 +502,7 @@ Custom: `mus_game_corner@rustboro_city_game_center_1f.kaisong`, `mus_game_corner
 - Events: Sootopolis City [sootopolis_city]
 
 ### mus_contest_results (446)
-- Scenes: Contests [contest_util]
+- Scenes: Contests [contest_util], Sinnoh [sinnoh]
 
 ### mus_hall_of_fame_room (447)
 - Map music: Ever Grande City Hall Of Fame [ever_grande_city_hall_of_fame]
@@ -509,6 +522,7 @@ Custom: `mus_game_corner@rustboro_city_game_center_1f.kaisong`, `mus_game_corner
 
 ### mus_contest_lobby (452)
 - Map music: Lilycove City Contest Hall [lilycove_city_contest_hall], Lilycove City Contest Lobby [lilycove_city_contest_lobby]
+- Scenes: Sinnoh [sinnoh]
 
 ### mus_encounter_interviewer (453)
 - Events: anywhere: Players house
@@ -1085,7 +1099,7 @@ Custom: `mus_johto_victory_gym_leader.kaisong`
 
 ### mus_sinnoh_twinleaf (678)
 Custom: `mus_sinnoh_twinleaf.kaisong`
-- Map music: Sinnoh Pastoria City Dp Great Marsh [sinnoh_pastoria_city_dp_great_marsh], Sinnoh Twinleaf Town [sinnoh_twinleaf_town], Sinnoh Twinleaf Town Northeast House [sinnoh_twinleaf_town_northeast_house], Sinnoh Twinleaf Town Player House 1f [sinnoh_twinleaf_town_player_house1f], Sinnoh Twinleaf Town Player House 2f [sinnoh_twinleaf_town_player_house2f], Sinnoh Twinleaf Town Rival House 1f [sinnoh_twinleaf_town_rival_house1f], Sinnoh Twinleaf Town Rival House 2f [sinnoh_twinleaf_town_rival_house2f], Sinnoh Twinleaf Town Southwest House [sinnoh_twinleaf_town_southwest_house]
+- Map music: Sinnoh Contest Hall Lobby [sinnoh_contest_hall_lobby], Sinnoh Contest Hall Stage No Contest [sinnoh_contest_hall_stage_no_contest], Sinnoh Contest Hall Stage Ongoing Contest [sinnoh_contest_hall_stage_ongoing_contest], Sinnoh Pastoria City Dp Great Marsh [sinnoh_pastoria_city_dp_great_marsh], Sinnoh Poffin House [sinnoh_poffin_house], Sinnoh Twinleaf Town [sinnoh_twinleaf_town], Sinnoh Twinleaf Town Northeast House [sinnoh_twinleaf_town_northeast_house], Sinnoh Twinleaf Town Player House 1f [sinnoh_twinleaf_town_player_house1f], Sinnoh Twinleaf Town Player House 2f [sinnoh_twinleaf_town_player_house2f], Sinnoh Twinleaf Town Rival House 1f [sinnoh_twinleaf_town_rival_house1f], Sinnoh Twinleaf Town Rival House 2f [sinnoh_twinleaf_town_rival_house2f], Sinnoh Twinleaf Town Southwest House [sinnoh_twinleaf_town_southwest_house]
 
 ### mus_sinnoh_twinleaf_night (679)
 Custom: `mus_sinnoh_twinleaf_night.kaisong`
@@ -1125,7 +1139,7 @@ Custom: `mus_sinnoh_floaroma_night.kaisong`
 
 ### mus_sinnoh_eterna (688)
 Custom: `mus_sinnoh_eterna.kaisong`
-- Map music: 15 places<details><summary>show</summary>Sinnoh Celestic Town [sinnoh_celestic_town], Sinnoh Celestic Town Cave [sinnoh_celestic_town_cave], Sinnoh Celestic Town North House [sinnoh_celestic_town_north_house], Sinnoh Celestic Town Northeast House [sinnoh_celestic_town_northeast_house], Sinnoh Celestic Town Northwest House [sinnoh_celestic_town_northwest_house], Sinnoh Celestic Town Southwest House [sinnoh_celestic_town_southwest_house], Sinnoh Cycle Shop [sinnoh_cycle_shop], Sinnoh Eterna City [sinnoh_eterna_city], Sinnoh Eterna City Condominiums 1f [sinnoh_eterna_city_condominiums1f], Sinnoh Eterna City Condominiums 2f [sinnoh_eterna_city_condominiums2f], Sinnoh Eterna City Condominiums 3f [sinnoh_eterna_city_condominiums3f], Sinnoh Eterna City East House [sinnoh_eterna_city_east_house], Sinnoh Eterna City Herb Shop [sinnoh_eterna_city_herb_shop], Sinnoh Eterna City South House [sinnoh_eterna_city_south_house], Sinnoh Rotoms Room [sinnoh_rotoms_room]</details>
+- Map music: 16 places<details><summary>show</summary>Sinnoh Celestic Town [sinnoh_celestic_town], Sinnoh Celestic Town Cave [sinnoh_celestic_town_cave], Sinnoh Celestic Town North House [sinnoh_celestic_town_north_house], Sinnoh Celestic Town Northeast House [sinnoh_celestic_town_northeast_house], Sinnoh Celestic Town Northwest House [sinnoh_celestic_town_northwest_house], Sinnoh Celestic Town Southwest House [sinnoh_celestic_town_southwest_house], Sinnoh Cycle Shop [sinnoh_cycle_shop], Sinnoh Eterna City [sinnoh_eterna_city], Sinnoh Eterna City Condominiums 1f [sinnoh_eterna_city_condominiums1f], Sinnoh Eterna City Condominiums 2f [sinnoh_eterna_city_condominiums2f], Sinnoh Eterna City Condominiums 3f [sinnoh_eterna_city_condominiums3f], Sinnoh Eterna City East House [sinnoh_eterna_city_east_house], Sinnoh Eterna City Herb Shop [sinnoh_eterna_city_herb_shop], Sinnoh Eterna City South House [sinnoh_eterna_city_south_house], Sinnoh Eterna City Underground Man House [sinnoh_eterna_city_underground_man_house], Sinnoh Rotoms Room [sinnoh_rotoms_room]</details>
 
 ### mus_sinnoh_eterna_night (689)
 Custom: `mus_sinnoh_eterna_night.kaisong`
@@ -1309,7 +1323,7 @@ Custom: `mus_sinnoh_oreburgh_gate.kaisong`
 
 ### mus_sinnoh_oreburgh_mine (734)
 Custom: `mus_sinnoh_oreburgh_mine.kaisong`
-- Map music: Sinnoh Fuego Ironworks Building [sinnoh_fuego_ironworks_building], Sinnoh Iron Island 1f [sinnoh_iron_island1f], Sinnoh Iron Island B1f Left Room [sinnoh_iron_island_b1f_left_room], Sinnoh Iron Island B1f Right Room [sinnoh_iron_island_b1f_right_room], Sinnoh Iron Island B2f Left Room [sinnoh_iron_island_b2f_left_room], Sinnoh Iron Island B2f Right Room [sinnoh_iron_island_b2f_right_room], Sinnoh Iron Island B3f [sinnoh_iron_island_b3f], Sinnoh Iron Island Iron Ruins [sinnoh_iron_island_iron_ruins], Sinnoh Oreburgh Mine B1f [sinnoh_oreburgh_mine_b1f], Sinnoh Oreburgh Mine B2f [sinnoh_oreburgh_mine_b2f], Sinnoh Ruin Maniac Cave Long [sinnoh_ruin_maniac_cave_long], Sinnoh Ruin Maniac Cave Short [sinnoh_ruin_maniac_cave_short]
+- Map music: 13 places<details><summary>show</summary>Sinnoh Fuego Ironworks Building [sinnoh_fuego_ironworks_building], Sinnoh Iron Island 1f [sinnoh_iron_island1f], Sinnoh Iron Island B1f Left Room [sinnoh_iron_island_b1f_left_room], Sinnoh Iron Island B1f Right Room [sinnoh_iron_island_b1f_right_room], Sinnoh Iron Island B2f Left Room [sinnoh_iron_island_b2f_left_room], Sinnoh Iron Island B2f Right Room [sinnoh_iron_island_b2f_right_room], Sinnoh Iron Island B3f [sinnoh_iron_island_b3f], Sinnoh Iron Island Iron Ruins [sinnoh_iron_island_iron_ruins], Sinnoh Oreburgh Mine B1f [sinnoh_oreburgh_mine_b1f], Sinnoh Oreburgh Mine B2f [sinnoh_oreburgh_mine_b2f], Sinnoh Ruin Maniac Cave Long [sinnoh_ruin_maniac_cave_long], Sinnoh Ruin Maniac Cave Short [sinnoh_ruin_maniac_cave_short], Sinnoh Underground [sinnoh_underground]</details>
 
 ### mus_sinnoh_gym (735)
 Custom: `mus_sinnoh_gym.kaisong`
@@ -1595,3 +1609,47 @@ Custom: `mus_sinnoh_victory_elite_four.kaisong`
 ### mus_sinnoh_victory_champion (804)
 Custom: `mus_sinnoh_victory_champion.kaisong`
 - Field and battle code (by map): Battles
+
+### mus_sinnoh_battle_factory (805)
+Custom: `mus_sinnoh_battle_factory.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_battle_hall (806)
+Custom: `mus_sinnoh_battle_hall.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_battle_castle (807)
+Custom: `mus_sinnoh_battle_castle.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_battle_arcade (808)
+Custom: `mus_sinnoh_battle_arcade.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_villa_audio (809)
+Custom: `mus_sinnoh_villa_audio.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).
+
+### mus_sinnoh_contest_cool (810)
+Custom: `mus_sinnoh_contest_cool.kaisong`
+- Scenes: Sinnoh [sinnoh]
+
+### mus_sinnoh_contest_beauty (811)
+Custom: `mus_sinnoh_contest_beauty.kaisong`
+- Scenes: Sinnoh [sinnoh]
+
+### mus_sinnoh_contest_cute (812)
+Custom: `mus_sinnoh_contest_cute.kaisong`
+- Scenes: Sinnoh [sinnoh]
+
+### mus_sinnoh_contest_smart (813)
+Custom: `mus_sinnoh_contest_smart.kaisong`
+- Scenes: Sinnoh [sinnoh]
+
+### mus_sinnoh_contest_tough (814)
+Custom: `mus_sinnoh_contest_tough.kaisong`
+- Scenes: Sinnoh [sinnoh]
+
+### mus_sinnoh_victory_frontier_brain (815)
+Custom: `mus_sinnoh_victory_frontier_brain.kaisong`
+- Not played anywhere the tables can find (unused, or chosen in a way they can't follow).

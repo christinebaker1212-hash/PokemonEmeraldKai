@@ -98,7 +98,11 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       the UNDERGROUND TREASURES CORNER on TV (sinnoh_underground, sinnoh_underground_man, sinnoh_spiritomb,
       sinnoh_spiritomb_talk)
 - [ ] The Underground's own song (SEQ_TANKOU; OREBURGH MINE's stands in)
-- [ ] Platinum's songs the game lacks: SEQ_OPENING, SEQ_KUSAGASA, SEQ_PL_AUDIO, SEQ_PL_PIANO, SEQ_SILENCE_FIELD
+- [~] Platinum's songs the game lacks: [x] SEQ_PL_AUDIO (the VILLA's audio system: its bossa nova, mus_sinnoh_villa_audio)
+      and SEQ_PL_PIANO (its piano: the music box, mus_sinnoh_villa) from the user's Platinum rip (2026-11-02, which also
+      gave the Frontier halls and the SUPER CONTEST category dances); [ ] SEQ_OPENING, SEQ_KUSAGASA (the POKé RADAR
+      demo), SEQ_TANKOU: not in the rips the user sent (tracks 1-19 of Platinum's and the Underground's); SEQ_SILENCE_FIELD
+      is PAL PARK's (closed)
 - [x] Platinum's POKéDEX ratings (Load*DexRating)
 - [x] Platinum's key items (items 662-684)
 

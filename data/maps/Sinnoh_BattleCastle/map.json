@@ -2,7 +2,7 @@
   "id": "MAP_SINNOH_BATTLE_CASTLE",
   "name": "Sinnoh_BattleCastle",
   "layout": "LAYOUT_SINNOH_BATTLE_CASTLE",
-  "music": "MUS_SINNOH_BATTLE_TOWER",
+  "music": "MUS_SINNOH_BATTLE_CASTLE",
   "region_map_section": "MAPSEC_SINNOH_BATTLE_CASTLE",
   "requires_flash": false,
   "weather": "WEATHER_SUNNY",

@@ -742,6 +742,17 @@
 #define MUS_SINNOH_VICTORY_GALACTIC           802
 #define MUS_SINNOH_VICTORY_ELITE_FOUR         803
 #define MUS_SINNOH_VICTORY_CHAMPION           804
+#define MUS_SINNOH_BATTLE_FACTORY             805
+#define MUS_SINNOH_BATTLE_HALL                806
+#define MUS_SINNOH_BATTLE_CASTLE              807
+#define MUS_SINNOH_BATTLE_ARCADE              808
+#define MUS_SINNOH_VILLA_AUDIO                809
+#define MUS_SINNOH_CONTEST_COOL               810
+#define MUS_SINNOH_CONTEST_BEAUTY             811
+#define MUS_SINNOH_CONTEST_CUTE               812
+#define MUS_SINNOH_CONTEST_SMART              813
+#define MUS_SINNOH_CONTEST_TOUGH              814
+#define MUS_SINNOH_VICTORY_FRONTIER_BRAIN     815
 // end of SINNOH's songs
 
 #define MUS_ROUTE118                0x7FFF  // Map is split into 2 music sections. controlled by GetCurrLocationDefaultMusic().

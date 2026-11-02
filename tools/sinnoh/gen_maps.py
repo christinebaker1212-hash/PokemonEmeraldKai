@@ -61,8 +61,9 @@ MUSIC = {
     'SEQ_D_AGITO_sseq': 'galactic_hideout', 'SEQ_THE_EVENT04_sseq': 'galactic_hideout_deep',
     'SEQ_D_LEAGUE_sseq': 'league_showdown', 'SEQ_BLD_DENDO_sseq': 'hall_of_fame', 'SEQ_D_SAFARI_sseq': 'great_marsh',
     'SEQ_D_KOUEN_sseq': 'amity_square', 'SEQ_BLD_GAME_sseq': 'game_corner', 'SEQ_BLD_TV_sseq': 'jubilife',
-    'SEQ_BF_TOWWER_sseq': 'battle_tower', 'SEQ_PL_BF_FACTORY_sseq': 'battle_tower', 'SEQ_PL_BF_STAGE_sseq': 'battle_tower',
-    'SEQ_PL_BF_CASTLE_sseq': 'battle_tower', 'SEQ_PL_BF_ROULETTE_sseq': 'battle_tower',
+    'SEQ_BF_TOWWER_sseq': 'battle_tower', 'SEQ_PL_BF_FACTORY_sseq': 'battle_factory', 'SEQ_PL_BF_STAGE_sseq': 'battle_hall',
+    'SEQ_PL_BF_CASTLE_sseq': 'battle_castle', 'SEQ_PL_BF_ROULETTE_sseq': 'battle_arcade',
+    'SEQ_PL_AUDIO_sseq': 'villa_audio', 'SEQ_PL_PIANO_sseq': 'villa',   # (the VILLA's audio system and piano)
     'SEQ_PL_D_GIRATINA_sseq': 'distortion_world', 'SEQ_AUS_sseq': 'arceus', 'SEQ_SILENCE_FIELD_sseq': 'villa',
 }
 # Platinum's overworld weather -> Emerald's

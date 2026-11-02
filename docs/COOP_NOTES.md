@@ -4280,6 +4280,11 @@ follow_behind, follow_ground.
   overworld.c GetLocationMusic asks S3D_MapMusic on a SINNOH map (S3D_IsSinnohGroup), night = 20:00-4:00
   (MOEMON_S3D_HOUR in tests). Battles on a SINNOH map: pokemon.c MpSinnohBattleBGM, victories MP_RegionVictorySong.
 - Tests sinnoh_music, sinnoh_music_night.
+- 2026-11-02, from the same Platinum rip (the user's Platinum.zip; never committed, converted with
+  `sinnoh_songs.py convert`'s steps): slots 805-815: the BATTLE FACTORY / HALL / CASTLE / ARCADE's own songs (were the
+  TOWER's: gen_maps.py MUSIC), the VILLA's audio system (SEQ_PL_AUDIO; its piano, SEQ_PL_PIANO, is the music box slot
+  `villa`), the SUPER CONTEST dances of the Master / Ultra ranks by category (s3d_contest_ui.c BeginDance) and a
+  Frontier Brain beaten (for the Brains' battles, not made yet).
 
 
 ## TM51-TM92 (sinnoh-work)

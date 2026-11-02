@@ -828,6 +828,17 @@ gSongTable::
 	.set mus_sinnoh_victory_galactic, mus_victory_aqua_magma
 	.set mus_sinnoh_victory_elite_four, mus_victory_league
 	.set mus_sinnoh_victory_champion, mus_victory_league
+	.set mus_sinnoh_battle_factory, mus_b_factory
+	.set mus_sinnoh_battle_hall, mus_b_dome
+	.set mus_sinnoh_battle_castle, mus_b_palace
+	.set mus_sinnoh_battle_arcade, mus_b_arena
+	.set mus_sinnoh_villa_audio, mus_lilycove
+	.set mus_sinnoh_contest_cool, mus_contest
+	.set mus_sinnoh_contest_beauty, mus_contest
+	.set mus_sinnoh_contest_cute, mus_contest
+	.set mus_sinnoh_contest_smart, mus_contest
+	.set mus_sinnoh_contest_tough, mus_contest
+	.set mus_sinnoh_victory_frontier_brain, mus_victory_league
 	song mus_sinnoh_twinleaf, MUSIC_PLAYER_BGM, 0
 	song mus_sinnoh_twinleaf_night, MUSIC_PLAYER_BGM, 0
 	song mus_sinnoh_sandgem, MUSIC_PLAYER_BGM, 0
@@ -955,6 +966,17 @@ gSongTable::
 	song mus_sinnoh_victory_galactic, MUSIC_PLAYER_BGM, 0
 	song mus_sinnoh_victory_elite_four, MUSIC_PLAYER_BGM, 0
 	song mus_sinnoh_victory_champion, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_battle_factory, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_battle_hall, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_battle_castle, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_battle_arcade, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_villa_audio, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_contest_cool, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_contest_beauty, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_contest_cute, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_contest_smart, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_contest_tough, MUSIC_PLAYER_BGM, 0
+	song mus_sinnoh_victory_frontier_brain, MUSIC_PLAYER_BGM, 0
 @ end of SINNOH's songs
 
 	.align 2

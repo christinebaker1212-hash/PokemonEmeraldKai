@@ -1014,7 +1014,13 @@ static void BeginDance(void)
     else
         U.leadCount = 0;
     StartPart();
-    PlayBGM(MUS_CONTEST);
+    // Platinum's dance songs: the Master and Ultra ranks' by category (the user's Platinum rip: COOL, BEAUTY, CUTE,
+    // SMART, TOUGH, the order of Contest_Song's songs 2-6); the lower ranks' aren't made yet (Gen 3's stands in)
+    {
+        static const u16 sCategorySongs[5] = {MUS_SINNOH_CONTEST_COOL, MUS_SINNOH_CONTEST_BEAUTY, MUS_SINNOH_CONTEST_CUTE,
+                                              MUS_SINNOH_CONTEST_SMART, MUS_SINNOH_CONTEST_TOUGH};
+        PlayBGM(C.rank >= 2 && C.type < 5 ? sCategorySongs[C.type] : MUS_CONTEST);
+    }
     U.scene = SC_DANCE;
 }
 
