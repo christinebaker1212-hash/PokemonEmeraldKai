@@ -1,0 +1,57 @@
+pressuntil A field 5000
+wait 60
+mp setflag 0x867
+mp setflag 0x868
+mp setflag 0x2100
+mp setflag 0x2101
+mp setflag 0x2102
+mp setflag 0x11B2
+mp setflag 0x11B3
+mp setflag 0x11B4
+mp setflag 0x3320
+wait 90
+mp tcard rub 1 0 400
+mp tcard rub 1 1 150
+mp card
+wait 120
+shot hoenn_front
+press R 2
+wait 120
+shot kanto_front
+press A 2
+wait 60
+shot kanto_back
+press R 2
+wait 60
+rendershot johto_front
+press A 2
+wait 30
+rendershot johto_back
+press R 2
+wait 30
+rendershot sinnoh_front
+press A 2
+wait 30
+rendershot sinnoh_back
+press START 2
+wait 20
+press DOWN 2
+wait 4
+press RIGHT 2
+wait 10
+rendershot mycard
+press B 2
+wait 20
+press R 2
+wait 120
+shot back_to_hoenn
+press L 2
+wait 30
+press L 2
+wait 30
+rendershot johto_again
+press B 2
+wait 120
+waitfor field 600
+shot field_after
+quit

@@ -1403,7 +1403,11 @@ static void RenderToBackbuffer(void)
         SDL_Texture *MP_BadgeCase_Canvas(SDL_Renderer *r);
         SDL_Texture *fight = Fight_Canvas(sRenderer);
         // Moemon Co-op: the BADGE CASE draws at the same 480x320 (src/mp/mp_badgecase.c)
+        SDL_Texture *MP_RegionCard_Canvas(SDL_Renderer *r, SDL_Texture *game);
         SDL_Texture *badges = fight ? NULL : MP_BadgeCase_Canvas(sRenderer);
+        // (and the TRAINER CARD's JOHTO / SINNOH cards: src/mp/mp_regioncard.c)
+        if (!fight && !badges)
+            badges = MP_RegionCard_Canvas(sRenderer, gameTex);
         if (badges)
         {
             gameTex = badges;

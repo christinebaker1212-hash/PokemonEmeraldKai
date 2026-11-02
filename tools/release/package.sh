@@ -49,6 +49,10 @@ if [ -f sinnoh/platinum3d.pak ]; then
     mkdir -p "$P/sinnoh"
     cp sinnoh/platinum3d.pak "$P/sinnoh/"
 fi
+if [ -f sinnoh/cards.pak ]; then   # (the TRAINER CARD's JOHTO and SINNOH cards, tools/sinnoh/build_cards.py)
+    mkdir -p "$P/sinnoh"
+    cp sinnoh/cards.pak "$P/sinnoh/"
+fi
 if [ -f sinnoh/platinum_gfx.pak ]; then   # (SINNOH's people as Platinum draws them, tools/sinnoh/build_gfx.py)
     mkdir -p "$P/sinnoh"
     cp sinnoh/platinum_gfx.pak "$P/sinnoh/"

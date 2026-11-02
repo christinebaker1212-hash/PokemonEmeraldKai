@@ -113,7 +113,17 @@ static struct
     SDL_Texture *slot, *well;           // the hollows the badges sit in (the tray's, the close-up's)
 } B;
 
+static const struct MpCardView *sView;   // whose case: NULL = the player's own (live records, polishing)
+
 static u8 Region(void) { return sTabRegion[B.tab]; }
+static bool8 Has(u8 region, u8 badge)
+{
+    return sView ? MP_CardView_HasBadge(sView, region, badge) : MP_TCard_HasBadge(region, badge);
+}
+static u8 PolishOf(const struct MpCardView *v, u8 region, u8 badge)
+{
+    return v ? v->polish[region * TCARD_BADGES_PER_REGION + badge] : MP_TCard_Badge(region, badge)->polish;
+}
 static u8 Index(u8 region, u8 badge) { return region * TCARD_BADGES_PER_REGION + badge; }
 
 // ----------------------------------------------------------------------------------------------------- textures
@@ -280,18 +290,17 @@ static void Sparkle(float cx, float cy, float size, unsigned alpha)
 
 // A badge in the case (hi-res pixels: x, y its top left, size its side): won and as clean as its polish says, or
 // the dark shape it leaves in the case when not won yet
-static void DrawBadge(u8 region, u8 badge, int x, int y, int size, bool8 big)
+static void DrawBadgeOf(const struct MpCardView *v, u8 region, u8 badge, int x, int y, int size, bool8 big)
 {
     SDL_Renderer *r = G_R();
     u8 i = Index(region, badge);
     SDL_Texture *t = big ? B.big[i] : B.small[i];
     SDL_Texture *grime = big ? B.grimeBig[i] : B.grimeSmall[i];
     SDL_Rect dst = {x, y, size, size};
-    const struct MpTCardBadge *rec;
     u8 level;
     if (!t)
         return;
-    if (!MP_TCard_HasBadge(region, badge))
+    if (v ? !MP_CardView_HasBadge(v, region, badge) : !MP_TCard_HasBadge(region, badge))
     {
         SDL_SetTextureColorMod(t, 0, 0, 0);
         SDL_SetTextureAlphaMod(t, 70);
@@ -300,8 +309,7 @@ static void DrawBadge(u8 region, u8 badge, int x, int y, int size, bool8 big)
         SDL_SetTextureAlphaMod(t, 255);
         return;
     }
-    rec = MP_TCard_Badge(region, badge);
-    level = MP_TCard_PolishLevel(rec->polish);
+    level = MP_TCard_PolishLevel(PolishOf(v, region, badge));
     SDL_RenderCopy(r, t, NULL, &dst);
     if (level <= TCARD_POLISH_LEVEL_DIRTY)
     {
@@ -348,6 +356,11 @@ static void DrawBadge(u8 region, u8 badge, int x, int y, int size, bool8 big)
     }
 }
 
+static void DrawBadge(u8 region, u8 badge, int x, int y, int size, bool8 big)
+{
+    DrawBadgeOf(sView, region, badge, x, y, size, big);
+}
+
 static void SlotCenter(u8 badge, int *cx, int *cy)
 {
     *cx = 36 + (badge % 4) * 56;
@@ -381,10 +394,20 @@ static void DrawPanel(void)
     G_Text(10, 117, C_INK, G_NO_SHADOW, info->name, 0, TF_NORMAL);
     snprintf(line, sizeof(line), "%s, %s", info->leader, info->town);
     G_Text(10, 130, C_INK_SOFT, G_NO_SHADOW, line, 0, TF_SMALL);
-    if (!MP_TCard_HasBadge(region, badge))
+    if (!Has(region, badge))
     {
         G_TextAlign(230, 117, TA_RIGHT, C_INK_SOFT, G_NO_SHADOW, "NOT WON YET", TF_SMALL);
-        G_Text(10, 141, C_INK_SOFT, G_NO_SHADOW, "Win it at the gym, and it takes its place in the case.", 220, TF_SMALL);
+        G_Text(10, 141, C_INK_SOFT, G_NO_SHADOW, sView ? "Not in their case yet." : "Win it at the gym, and it takes its place in the case.", 220, TF_SMALL);
+        return;
+    }
+    if (sView)
+    {
+        // a friend's case: how it shines (their records stay theirs)
+        u8 level = MP_TCard_PolishLevel(PolishOf(sView, region, badge));
+        G_TextAlign(230, 117, TA_RIGHT, level >= TCARD_POLISH_LEVEL_2_SPARKLES ? 0xc07818 : level <= TCARD_POLISH_LEVEL_DIRTY ? 0x806040 : C_INK_SOFT,
+                    G_NO_SHADOW, PolishWord(level), TF_SMALL);
+        snprintf(line, sizeof(line), "In %s's case.", sView->name);
+        G_Text(10, 140, C_INK, G_NO_SHADOW, line, 222, TF_SMALL);
         return;
     }
     {
@@ -437,7 +460,7 @@ static void DrawTabs(void)
         G_TextAlign(x + 23, y + 1, TA_CENTER, on ? C_INK : C_INK_SOFT, G_NO_SHADOW, sRegionNames[sTabRegion[k]], TF_SMALL);
         // a pip a badge, lit for those won
         for (b = 0; b < TCARD_BADGES_PER_REGION; b++)
-            G_Fill(x + 8 + b * 4, y + 12, 3, 2, MP_TCard_HasBadge(sTabRegion[k], b) ? 0xd09820 : on ? 0xc8bc90 : 0xa89c60);
+            G_Fill(x + 8 + b * 4, y + 12, 3, 2, Has(sTabRegion[k], b) ? 0xd09820 : on ? 0xc8bc90 : 0xa89c60);
     }
     // L / R
     G_RoundFill(4, 5, 13, 12, C_CASE_EDGE, 255);
@@ -485,7 +508,7 @@ static void DrawCloseup(void)
 {
     SDL_Renderer *r = G_R();
     u8 region = Region(), badge = B.cursor;
-    const struct MpTCardBadge *rec = MP_TCard_Badge(region, badge);
+    u8 polish = PolishOf(sView, region, badge);
     static const u8 sMarks[] = {TCARD_POLISH_DIRTY, TCARD_POLISH_NORMAL, TCARD_POLISH_2_SPARKLES, TCARD_POLISH_4_SPARKLES};
     int barX = 64, barW = 112, k, fill;
     SDL_RenderSetScale(r, 1, 1);
@@ -496,13 +519,13 @@ static void DrawCloseup(void)
     G_RoundFill(46, 3, 148, 109, C_CASE_EDGE, 255);
     G_RoundFill(47, 4, 146, 107, C_CASE, 255);
     // the polish so far, and where it shines up (Platinum's levels)
-    fill = barW * rec->polish / TCARD_POLISH_MAX;
+    fill = barW * polish / TCARD_POLISH_MAX;
     G_RoundFill(barX - 1, 101, barW + 2, 8, C_CASE_EDGE, 255);
     G_Fill(barX, 102, barW, 6, C_SLOT);
-    G_Fill(barX, 102, fill, 6, MP_TCard_PolishLevel(rec->polish) >= TCARD_POLISH_LEVEL_2_SPARKLES ? 0xf0c030 : 0x90b8d8);
+    G_Fill(barX, 102, fill, 6, MP_TCard_PolishLevel(polish) >= TCARD_POLISH_LEVEL_2_SPARKLES ? 0xf0c030 : 0x90b8d8);
     for (k = 0; k < 4; k++)
         G_Fill(barX + barW * sMarks[k] / TCARD_POLISH_MAX, 101, 1, 8, C_CASE_EDGE);
-    G_TextAlign(120, 89, TA_CENTER, C_INK_SOFT, G_NO_SHADOW, "Rub it: LEFT / RIGHT, or drag the mouse", TF_SMALL);
+    G_TextAlign(120, 89, TA_CENTER, C_INK_SOFT, G_NO_SHADOW, sView ? "Shined by its owner" : "Rub it: LEFT / RIGHT, or drag the mouse", TF_SMALL);
     SDL_RenderSetScale(r, 1, 1);
     if (B.well)
     {
@@ -530,6 +553,7 @@ SDL_Texture *MP_BadgeCase_Canvas(SDL_Renderer *r)
         memset(B.big, 0, sizeof(B.big));
         memset(B.grimeSmall, 0, sizeof(B.grimeSmall));
         memset(B.grimeBig, 0, sizeof(B.grimeBig));
+        B.slot = B.well = NULL;
         B.canvas = NULL;
         B.owner = r;
     }
@@ -540,7 +564,8 @@ SDL_Texture *MP_BadgeCase_Canvas(SDL_Renderer *r)
             return NULL;
         SDL_SetTextureBlendMode(B.canvas, SDL_BLENDMODE_NONE);
         SDL_SetTextureScaleMode(B.canvas, SDL_ScaleModeLinear);
-        MakeTextures(r);
+        if (!B.small[0])
+            MakeTextures(r);
     }
     previous = SDL_GetRenderTarget(r);
     SDL_RenderGetViewport(r, &oldViewport);
@@ -570,9 +595,10 @@ bool8 MP_BadgeCase_IsActive(void)
     return B.active;
 }
 
-void MP_BadgeCase_Open(u8 region)
+void MP_BadgeCase_OpenView(const struct MpCardView *view, u8 region)
 {
     u8 k;
+    sView = view;
     B.active = TRUE;
     B.closeup = FALSE;
     B.cursor = 0;
@@ -584,12 +610,18 @@ void MP_BadgeCase_Open(u8 region)
     B.rubDir = 0;
     memset(B.glint, 0, sizeof(B.glint));
     PlaySE(SE_PC_LOGIN);
-    MPNet_Log("card: BADGE CASE opened on %s", sRegionNames[region]);
+    MPNet_Log("card: BADGE CASE opened on %s%s", sRegionNames[region], view ? " (a friend's)" : "");
+}
+
+void MP_BadgeCase_Open(u8 region)
+{
+    MP_BadgeCase_OpenView(NULL, region);
 }
 
 static void Close(void)
 {
-    MP_TCard_SaveNow();
+    if (!sView)
+        MP_TCard_SaveNow();
     B.active = FALSE;
     B.draining = TRUE;
     B.closeup = FALSE;
@@ -599,14 +631,14 @@ static void Close(void)
 static void Pick(u8 badge)
 {
     B.cursor = badge;
-    if (MP_TCard_HasBadge(Region(), badge))
+    if (Has(Region(), badge))
         PlaySE(sChimes[badge]);
 }
 
 static void Rub(s8 dir)
 {
     u8 region = Region(), badge = B.cursor;
-    if (!MP_TCard_HasBadge(region, badge))
+    if (sView || !MP_TCard_HasBadge(region, badge))
         return;
     if (dir == B.rubDir)
         return;   // (a rub is a change of direction)
@@ -663,7 +695,7 @@ static void Mouse(void)
             {
                 bool8 again = b == B.cursor;
                 Pick(b);
-                if (again && MP_TCard_HasBadge(Region(), b))
+                if (again && Has(Region(), b))
                 {
                     B.closeup = TRUE;
                     B.rubDir = 0;
@@ -724,7 +756,7 @@ bool8 MP_BadgeCase_Step(u16 keys)
     }
     if (pressed & A_BUTTON)
     {
-        if (MP_TCard_HasBadge(Region(), B.cursor))
+        if (Has(Region(), B.cursor))
         {
             B.closeup = TRUE;
             B.rubDir = 0;
@@ -750,6 +782,25 @@ bool8 MP_BadgeCase_Step(u16 keys)
     else if (pressed & (DPAD_UP | DPAD_DOWN))
         Pick((B.cursor + 4) % 8);
     return TRUE;
+}
+
+// For the JOHTO / SINNOH cards' backs: a badge as the case shows it (the textures made on first use)
+void MP_BadgeCase_DrawBadgeFor(SDL_Renderer *r, const struct MpCardView *v, u8 region, u8 badge, int x, int y, int size)
+{
+    if (B.owner != r)
+    {
+        memset(B.small, 0, sizeof(B.small));
+        memset(B.big, 0, sizeof(B.big));
+        memset(B.grimeSmall, 0, sizeof(B.grimeSmall));
+        memset(B.grimeBig, 0, sizeof(B.grimeBig));
+        B.slot = B.well = NULL;
+        B.canvas = NULL;
+        B.owner = r;
+    }
+    if (!B.small[0])
+        MakeTextures(r);
+    B.age++;
+    DrawBadgeOf(v && v->own ? NULL : v, region, badge, x, y, size, size > 64);
 }
 
 void MP_BadgeCase_DestroyTextures(void)

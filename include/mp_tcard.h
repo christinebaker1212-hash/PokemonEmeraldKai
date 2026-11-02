@@ -7,6 +7,7 @@
 // (mp_region.c MP_Region_BadgeFlag).
 
 #include "mp.h"
+#include "mp_region.h"
 
 #define TCARD_BADGES_PER_REGION 8
 #define TCARD_PARTNERS 3
@@ -71,5 +72,35 @@ u8 MP_TCard_TeamCount(void);
 const struct MpTCardMon *MP_TCard_TeamMon(u8 i);
 void MP_TCard_SetTeamFromParty(const u8 *slots, u8 count);   // the card's team: these party slots, as they are now
 void MP_TCard_DebugDays(s32 days);              // tests: as if this many days had passed on the PC's clock
+
+// A card as the JOHTO / SINNOH cards and the BADGE CASE show it: the player's own (live records) or a friend's (from
+// their card and its co-op add-on, mp_linkx.c)
+#define TCARD_TITLE_LEN 24
+struct MpCardView
+{
+    bool8 own;
+    u8 gender;
+    char name[MP_NAME_LEN * 2 + 1];             // ASCII
+    u16 trainerId;
+    u32 money;
+    u16 dex;
+    u16 hours;
+    u8 minutes;
+    u32 badges;                                 // bit region * 8 + badge
+    u8 polish[REGION_COUNT * TCARD_BADGES_PER_REGION];
+    u8 cleared;                                 // bit region: its CHAMPION beaten
+    u16 linkWins, linkLosses, trades;
+    u8 teamCount;
+    u16 team[PARTY_SIZE];
+    u8 teamShiny;                               // bit per place
+    char title[TCARD_TITLE_LEN];                // "" = none (or not shown)
+    bool8 hasPic;
+    u32 pic[64 * 64];                           // the card's picture of them (0xAARRGGBB)
+};
+
+void MP_CardView_FillOwn(struct MpCardView *v); // (the picture is taken from the card on screen: trainer_card.c)
+u8 MP_CardView_Stars(const struct MpCardView *v, u8 region);   // 0-5 (the card's color)
+bool8 MP_CardView_HasBadge(const struct MpCardView *v, u8 region, u8 badge);
+const char *MP_TCard_TitleText(void);           // the chosen title as shown (NULL: none or not shown)
 
 #endif // GUARD_MP_TCARD_H

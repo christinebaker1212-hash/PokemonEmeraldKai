@@ -12,6 +12,10 @@
 #include "main.h"
 #include "event_data.h"
 #include "pokemon.h"
+#include "pokedex.h"
+#include "money.h"
+#include "overworld.h"
+#include "constants/game_stat.h"
 #include "string_util.h"
 #include "constants/characters.h"
 #include "mp.h"
@@ -439,4 +443,109 @@ void MP_TCard_DebugDays(s32 days)
     sT.debugDays += days;
     if (FadeDays())
         Save();
+}
+
+// ----------------------------------------------------------------------------------------------------- card views
+
+const char *MP_TCard_TitleText(void)
+{
+    const char *name, *desc;
+    char status[8], reward[8];
+    u16 t;
+    Check();
+    t = sT.title;
+    if (!sT.showTitle || t == 0 || t > MP_Achieve_Total() || !MP_Achieve_IsDone(t - 1))
+        return NULL;
+    MP_Achieve_Info(t - 1, &name, &desc, status, sizeof(status), reward, sizeof(reward));
+    return name;
+}
+
+void MP_CardView_FillOwn(struct MpCardView *v)
+{
+    u8 r, b, i;
+    const char *title;
+    Check();
+    memset(v, 0, sizeof(*v) - sizeof(v->pic));
+    v->own = TRUE;
+    v->gender = gSaveBlock2Ptr->playerGender;
+    MP_GameToAscii(v->name, gSaveBlock2Ptr->playerName, sizeof(v->name));
+    v->trainerId = gSaveBlock2Ptr->playerTrainerId[0] | (gSaveBlock2Ptr->playerTrainerId[1] << 8);
+    v->money = GetMoney(&gSaveBlock1Ptr->money);
+    v->dex = GetNationalPokedexCount(FLAG_GET_CAUGHT);
+    v->hours = gSaveBlock2Ptr->playTimeHours;
+    v->minutes = gSaveBlock2Ptr->playTimeMinutes;
+    for (r = 0; r < REGION_COUNT; r++)
+    {
+        for (b = 0; b < TCARD_BADGES_PER_REGION; b++)
+        {
+            i = r * TCARD_BADGES_PER_REGION + b;
+            if (MP_TCard_HasBadge(r, b))
+                v->badges |= 1u << i;
+            v->polish[i] = sT.badges[i].polish;
+        }
+        if (MP_Region_Cleared(r))
+            v->cleared |= 1 << r;
+    }
+    v->linkWins = GetGameStat(GAME_STAT_LINK_BATTLE_WINS) > 9999 ? 9999 : GetGameStat(GAME_STAT_LINK_BATTLE_WINS);
+    v->linkLosses = GetGameStat(GAME_STAT_LINK_BATTLE_LOSSES) > 9999 ? 9999 : GetGameStat(GAME_STAT_LINK_BATTLE_LOSSES);
+    v->trades = GetGameStat(GAME_STAT_POKEMON_TRADES) > 9999 ? 9999 : GetGameStat(GAME_STAT_POKEMON_TRADES);
+    // the card's team: the one chosen (MY CARD), else the party as it is
+    if (sT.teamCount)
+    {
+        for (i = 0; i < sT.teamCount; i++)
+        {
+            v->team[i] = sT.team[i].species;
+            if (sT.team[i].shiny)
+                v->teamShiny |= 1 << i;
+        }
+        v->teamCount = sT.teamCount;
+    }
+    else
+    {
+        for (i = 0; i < PARTY_SIZE; i++)
+        {
+            struct Pokemon *mon = &gPlayerParty[i];
+            if (GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG))
+                continue;
+            if (IsMonShiny(mon))
+                v->teamShiny |= 1 << v->teamCount;
+            v->team[v->teamCount++] = GetMonData(mon, MON_DATA_SPECIES);
+        }
+    }
+    title = MP_TCard_TitleText();
+    if (title)
+        snprintf(v->title, sizeof(v->title), "%s", title);
+}
+
+bool8 MP_CardView_HasBadge(const struct MpCardView *v, u8 region, u8 badge)
+{
+    if (region >= REGION_COUNT || badge >= TCARD_BADGES_PER_REGION)
+        return FALSE;
+    return (v->badges >> (region * TCARD_BADGES_PER_REGION + badge)) & 1;
+}
+
+// A card's color by its region's stars: its CHAMPION beaten, all 8 badges, all 8 with 4 sparkles, all 32 badges;
+// and a fifth (the black card) for every region's CHAMPION beaten
+u8 MP_CardView_Stars(const struct MpCardView *v, u8 region)
+{
+    u8 stars = 0, b, all = TRUE;
+    u32 mask = 0xFFu << (region * TCARD_BADGES_PER_REGION);
+    if (region >= REGION_COUNT)
+        return 0;
+    if (v->cleared & (1 << region))
+        stars++;
+    if ((v->badges & mask) == mask)
+    {
+        stars++;
+        for (b = 0; b < TCARD_BADGES_PER_REGION; b++)
+            if (v->polish[region * TCARD_BADGES_PER_REGION + b] < TCARD_POLISH_4_SPARKLES)
+                all = FALSE;
+        if (all)
+            stars++;
+    }
+    if (v->badges == 0xFFFFFFFFu)
+        stars++;
+    if ((v->cleared & 0xF) == 0xF)
+        stars++;
+    return stars > 5 ? 5 : stars;
 }
