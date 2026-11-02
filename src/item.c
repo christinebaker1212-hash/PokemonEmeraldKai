@@ -260,8 +260,6 @@ bool8 AddBagItem(u16 itemId, u16 count)
 
     if (GetItemPocket(itemId) == POCKET_NONE)
         return FALSE;
-    if (MP_PlayerHasHm(itemId))   // Moemon Kai: an HM is never had twice (each region gives its own: SINNOH's in
-        return TRUE;              // Platinum's words; the others say so: EventScript_GiveHmOnce)
 
     // check Battle Pyramid Bag
     if (CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE || FlagGet(FLAG_STORING_ITEMS_IN_PYRAMID_BAG) == TRUE)

@@ -36,6 +36,7 @@
 #include "constants/songs.h"
 #include "field_player_avatar.h"
 #include "overworld.h"
+#include "script.h"
 
 enum
 {
@@ -114,6 +115,7 @@ enum
     OPT_SS_FOLLOW,    // the SPRITE SCALING page (mp_spritescale.c)
     OPT_SS_GARDEN,
     OPT_SS_BACK,
+    OPT_TITLE,        // Moemon Kai: GAME > RETURN TO MAIN MENU (from the field: a save, then a soft reset)
     OPT_CLOSE,
 };
 #define SC_RULE(opt) ((opt) - OPT_SC_ON)
@@ -134,7 +136,8 @@ static EWRAM_DATA u8 sArrowTask = 0;
 static EWRAM_DATA u8 sStartCreatures = 0;
 static EWRAM_DATA u32 sShownKey = 0;       // what the screen shows (redrawn when something changes elsewhere)
 static EWRAM_DATA u8 sStartMusic = 0;      // BIKE MUSIC / SURF MUSIC when OPTIONS opened
-static EWRAM_DATA u8 sLabelEnd[MAX_ROWS] = {0};   // where each row's label ends (its choices start after it)
+static EWRAM_DATA u8 sLabelEnd[MAX_ROWS] = {0};
+static EWRAM_DATA bool8 sReturnToTitle = 0;   // GAME > RETURN TO MAIN MENU chosen   // where each row's label ends (its choices start after it)
 
 // Rows 14 pixels apart; seven show at a time (the list scrolls) and a hint line under them
 #define OPTION_ROW_H 14
@@ -162,6 +165,7 @@ static const u8 sText_TabCoop[] = _("CO-OP");
 static const u8 *const sTabNames[TAB_COUNT] = {sText_TabGame, sText_TabBattle, sText_TabDisplay, sText_TabControls, sText_TabCoop};
 
 static const u8 sText_TypeIcons[] = _("TYPE ICONS");
+static const u8 sText_ReturnToTitle[] = _("RETURN TO MAIN MENU");
 static const u8 sText_NameCase[] = _("NAME CASE");
 static const u8 sText_Creatures[] = _("CREATURES");
 static const u8 sText_Fullscreen[] = _("FULLSCREEN");
@@ -422,6 +426,8 @@ static void BuildRows(void)
         AddRow(OPT_CARDSCALE, 0);
         AddRow(OPT_CARDART, 0);
         AddRow(OPT_CARDBACK, 0);
+        if (gMain.savedCallback == CB2_ReturnToFieldWithOpenMenu)   // (from the field's START menu only)
+            AddRow(OPT_TITLE, 0);
         break;
     case TAB_BATTLE:   // how battles look, then their rules
         AddRow(OPT_BATTLESCENE, 0);
@@ -758,6 +764,7 @@ static u8 Current(u8 row)
     case OPT_SS_FOLLOW:   return 0;   // (one value shown: its percent)
     case OPT_SS_GARDEN:   return 0;
     case OPT_SPRITESCALE: return 0;   // (the page has the settings)
+    case OPT_TITLE:       return 0;
     case OPT_SURFMUSIC:   return gMpConfig.surfMusic != 0;
     case OPT_LEVELSCALE:  return 0;   // (the page has the settings)
     case OPT_SC_ON: case OPT_SC_WILD: case OPT_SC_TRAINERS: case OPT_SC_BOSS: case OPT_SC_CAPS: case OPT_SC_PAST8:
@@ -849,6 +856,7 @@ static void Change(u8 row, int dir)
         MPNet_Log("sprite scaling: garden %s %d%%", gMpConfig.scaleGarden ? "on" : "off", gMpConfig.scaleGardenPct);
         break;
     case OPT_SPRITESCALE: break;   // A opens its page
+    case OPT_TITLE:       break;   // A leaves for the main menu
     case OPT_FOLLOWSPRITES:
         gMpConfig.followerSprites = Wrap(gMpConfig.followerSprites + dir, MP_FOLLOW_SPRITES_COUNT);
         MPNet_Log("follower sprites: %d", gMpConfig.followerSprites);
@@ -998,6 +1006,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_FB_DEFAULTS: return sText_FbDefaults;
     case OPT_FB_BACK:     return sText_Back;
     case OPT_SPRITESCALE: return sText_SpriteScale;
+    case OPT_TITLE:       return sText_ReturnToTitle;
     case OPT_SS_FOLLOW:   return sText_SsFollowers;
     case OPT_SS_GARDEN:   return sText_SsGarden;
     case OPT_SS_BACK:     return sText_Back;
@@ -1594,6 +1603,14 @@ static void Task_OptionMenuProcessInput(u8 taskId)
         PlaySE(SE_SELECT);
         Fight_BindDefaults();
     }
+    else if (JOY_NEW(A_BUTTON) && opt == OPT_TITLE)
+    {
+        // back to the field, where the game asks to save, then (or if not, once sure) goes back to the main menu
+        PlaySE(SE_SELECT);
+        sReturnToTitle = TRUE;
+        gTasks[taskId].func = Task_OptionMenuSave;
+        return;
+    }
     else if (JOY_NEW(B_BUTTON | START_BUTTON) || (JOY_NEW(A_BUTTON) && (opt == OPT_CLOSE || opt == OPT_FR_BACK)))
     {
         if (sFriendPage)
@@ -1674,12 +1691,28 @@ static void Task_OptionMenuSave(u8 taskId)
     gTasks[taskId].func = Task_OptionMenuFadeOut;
 }
 
+// (special MP_ReturnToTitle) back to the title screen, the save read again (main_menu.c MP_ReturnToTitleNow)
+u16 MP_ReturnToTitle(void)
+{
+    void MP_ReturnToTitleNow(void);
+    MP_ReturnToTitleNow();
+    return 0;
+}
+
 static void Task_OptionMenuFadeOut(u8 taskId)
 {
     if (!gPaletteFade.active)
     {
         DestroyTask(taskId);
         FreeAllWindowBuffers();
+        if (sReturnToTitle)
+        {
+            // Moemon Kai: RETURN TO MAIN MENU: the field again, with the script that saves and resets
+            extern const u8 EventScript_MpReturnToTitle[];
+            sReturnToTitle = FALSE;
+            ScriptContext_SetupScript(EventScript_MpReturnToTitle);
+            gMain.savedCallback = CB2_ReturnToField;
+        }
         SetMainCallback2(gMain.savedCallback);
     }
 }

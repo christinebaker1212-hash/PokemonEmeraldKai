@@ -540,7 +540,13 @@ bool8 ScrCmd_additem(struct ScriptContext *ctx)
     u16 itemId = VarGet(ScriptReadHalfword(ctx));
     u32 quantity = VarGet(ScriptReadHalfword(ctx));
 
-    gSpecialVar_Result = AddBagItem(itemId, (u8)quantity);
+    bool8 MP_PlayerHasHm(u16 itemId);
+    // Moemon Kai: a script never hands over an HM the player has already (each region gives its own: SINNOH's in
+    // Platinum's words; the others say so: EventScript_GiveHmOnce); a held HM back to the BAG is C's own AddBagItem
+    if (MP_PlayerHasHm(itemId))
+        gSpecialVar_Result = TRUE;
+    else
+        gSpecialVar_Result = AddBagItem(itemId, (u8)quantity);
     gMpLastScriptItem = itemId;   // Moemon Co-op: MP_GatchaTicketForItem (VAR_0x8000 changes during the message)
     return FALSE;
 }

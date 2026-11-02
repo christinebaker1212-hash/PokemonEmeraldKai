@@ -10,7 +10,8 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [x] FireRed's RUNNING SHOES aide after BROCK: back (FireRed's scene and words; a line of his own if the player has
       them already; hide flag 0x2224, done 0x2223; test kanto_shoes_aide)
 - [ ] Doorways too wide: one tile wide
-- [ ] Door opening / closing animations
+- [x] Door opening / closing animations: FireRed's doors (its door table, pictures and drawing: src/mp/mp_frlgdoor.c,
+      tools/quetzal_port/gen_frlg_doors.py; test kanto_doors)
 - [ ] Going down some ladders puts the player on top of the ladder, not in front of it
 - [x] MEGA PUNCH / MEGA KICK people outside MT. MOON: FireRed's two move tutors on Kai's tutor flow, FireRed's words
       (Quetzal's said "move training is handled from your team menu"; flags 0x21DF / 0x21DC; test kanto_tutors)
@@ -59,8 +60,9 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 
 ## All added regions
 - [ ] Events: FireRed for KANTO, then HGSS for gaps
-- [ ] A non-HOENN gym leader beaten: the gym's unbattled trainers count as beaten
-- [ ] BADGES count every region's badges
+- [x] A non-HOENN gym leader beaten: the gym's unbattled trainers count as beaten (mp_coop.c MP_Coop_GymLeaderBeaten;
+      test sinnoh_gym)
+- [x] BADGES count every region's badges (the continue screen and the SAVE window: MP_Region_TotalBadges)
 - [ ] A4: TMs / HMs from leaders, trainers and events as the original games give them (new TMs / HMs where HOENN's
       list lacks them)
 - [ ] SINNOH's time of day in KANTO, JOHTO and HOENN: MORNING / DAY / NIGHT encounters
@@ -72,7 +74,8 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [ ] Shadows fade with screen transitions
 - [ ] No extra shadow under a follower's reflection
 - [ ] A follower behind the player drawn over the player when facing / moving down
-- [ ] OPTIONS: RETURN TO MAIN MENU (save? no: sure? then soft reset)
+- [x] OPTIONS: RETURN TO MAIN MENU (GAME tab, from the field: the save prompt, declined: sure?, then the save read again
+      and the title screen; the PC build's soft reset quits, so it's main_menu.c MP_ReturnToTitleNow; test options_title)
 
 ## Decisions
 (each assumption made while working through the list, with why)
@@ -86,7 +89,8 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - SINNOH released before it's 100%: the parts still open need art or songs that don't exist yet (contest stage art,
   Platinum songs the game lacks) or are large (the DISTORTION WORLD, the full story test); a release with what's done and
   the KANTO / JOHTO fixes is more use to players than waiting. SINNOH's remaining list stays in docs/SINNOH_CHECKLIST.md.
-- An HM a player already has (BAG, PC or held) is never added again (item.c AddBagItem). HOENN's and KANTO's givers
+- An HM a player already has (BAG, PC or held) is never handed over again by a script (scrcmd.c additem: a held HM
+  going back to the BAG is C's own AddBagItem, untouched). HOENN's and KANTO's givers
   run EventScript_GiveHmOnce, which says "Oh! You're already carrying <HM>..." instead; SINNOH's givers keep Platinum's
   words (no original lines there) and simply add nothing. The S.S. ANNE CAPTAIN's METAL COAT (Quetzal's) is gone.
 - JOHTO's whirlpools: Kai has no WHIRLPOOL HM (only level-up learners), so one opens for the GLACIERBADGE and a Pokémon
@@ -96,3 +100,4 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
   EXPLOSION, DREAM EATER, SOFTBOILED, SUBSTITUTE, SWORDS DANCE, SEISMIC TOSS, METRONOME, BODY SLAM:
   tools/quetzal_port/fix_move_tutors.py). Still Quetzal's stand-ins: CAPE BRINK's starter tutor and TWO ISLAND's move
   maniac (FireRed systems of their own) and SAFFRON's COPYCAT (MIMIC, needs her POKé DOLL trade).
+- JOHTO's doors keep still: its tilesets are Quetzal's own, their door metatiles aren't FireRed's numbers.

@@ -1659,6 +1659,10 @@ static void CB2_EndTrainerBattle(void)
         {
             RegisterTrainerInMatchCall();
             SetBattledTrainersFlags();
+            {
+                void MP_Coop_GymLeaderBeaten(u16 trainerId);
+                MP_Coop_GymLeaderBeaten(gTrainerBattleOpponent_A);   // Moemon Kai: the other regions' gyms' trainers
+            }
             MP_Events_OnTrainerWin(); // Moemon Co-op: team goals
         }
     }

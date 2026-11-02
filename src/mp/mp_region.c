@@ -786,6 +786,15 @@ u8 MP_Region_BadgeCount(u8 region)
     return n;
 }
 
+// Every region's badges (the continue screen's and the SAVE window's BADGES)
+u8 MP_Region_TotalBadges(void)
+{
+    u8 r, n = 0;
+    for (r = 0; r < REGION_COUNT; r++)
+        n += MP_Region_BadgeCount(r);
+    return n;
+}
+
 bool8 MP_Region_Cleared(u8 region)
 {
     if (region == REGION_HOENN && FlagGet(FLAG_SYS_GAME_CLEAR))

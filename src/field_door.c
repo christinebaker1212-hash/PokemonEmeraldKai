@@ -503,14 +503,35 @@ static void UNUSED Debug_FieldAnimateDoorOpen(u32 x, u32 y)
     StartDoorOpenAnimation(sDoorAnimGraphicsTable, x, y);
 }
 
+// Moemon Kai: KANTO's doors are FireRed's (src/mp/mp_frlgdoor.c)
+bool8 MP_FrlgDoor_Here(void);
+s8 MP_FrlgDoor_Open(u32 x, u32 y);
+s8 MP_FrlgDoor_Close(u32 x, u32 y);
+void MP_FrlgDoor_SetOpened(u32 x, u32 y);
+void MP_FrlgDoor_SetClosed(u32 x, u32 y);
+bool8 MP_FrlgDoor_Running(void);
+u32 MP_FrlgDoor_Sound(u32 x, u32 y);
+
 void FieldSetDoorOpened(u32 x, u32 y)
 {
+    if (MP_FrlgDoor_Here())
+    {
+        if (MetatileBehavior_IsDoor(MapGridGetMetatileBehaviorAt(x, y)))
+            MP_FrlgDoor_SetOpened(x, y);
+        return;
+    }
     if (MetatileBehavior_IsDoor(MapGridGetMetatileBehaviorAt(x, y)))
         DrawOpenedDoor(sDoorAnimGraphicsTable, x, y);
 }
 
 void FieldSetDoorClosed(u32 x, u32 y)
 {
+    if (MP_FrlgDoor_Here())
+    {
+        if (MetatileBehavior_IsDoor(MapGridGetMetatileBehaviorAt(x, y)))
+            MP_FrlgDoor_SetClosed(x, y);
+        return;
+    }
     if (MetatileBehavior_IsDoor(MapGridGetMetatileBehaviorAt(x, y)))
         DrawClosedDoor(sDoorAnimGraphicsTable, x, y);
 }
@@ -519,6 +540,8 @@ s8 FieldAnimateDoorClose(u32 x, u32 y)
 {
     if (!MetatileBehavior_IsDoor(MapGridGetMetatileBehaviorAt(x, y)))
         return -1;
+    if (MP_FrlgDoor_Here())
+        return MP_FrlgDoor_Close(x, y);
     else
         return StartDoorCloseAnimation(sDoorAnimGraphicsTable, x, y);
 }
@@ -527,18 +550,25 @@ s8 FieldAnimateDoorOpen(u32 x, u32 y)
 {
     if (!MetatileBehavior_IsDoor(MapGridGetMetatileBehaviorAt(x, y)))
         return -1;
+    if (MP_FrlgDoor_Here())
+        return MP_FrlgDoor_Open(x, y);
     else
         return StartDoorOpenAnimation(sDoorAnimGraphicsTable, x, y);
 }
 
 bool8 FieldIsDoorAnimationRunning(void)
 {
+    if (MP_FrlgDoor_Running())
+        return TRUE;
     return FuncIsActiveTask(Task_AnimateDoor);
 }
 
 u32 GetDoorSoundEffect(u32 x, u32 y)
 {
-    int sound = GetDoorSoundType(sDoorAnimGraphicsTable, x, y);
+    int sound;
+    if (MP_FrlgDoor_Here())
+        return MP_FrlgDoor_Sound(x, y);
+    sound = GetDoorSoundType(sDoorAnimGraphicsTable, x, y);
 
     if (sound == DOOR_SOUND_NORMAL)
         return SE_DOOR;

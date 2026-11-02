@@ -660,3 +660,4 @@ gSpecials::
 	def_special Sinnoh_ExplorerKitUse, waitstate=1   @ Moemon Kai: SINNOH's EXPLORER KIT, down into the Underground or up (src/sinnoh/s3d_underground.c)
 	def_special BattleSetup_StartScriptedWildBattle   @ Moemon Kai: SINNOH's converted StartWildBattle (ROUTE 209's SPIRITOMB, the OLD CHATEAU's ROTOM)
 	def_special MP_PlayerHasHmVar
+	def_special MP_ReturnToTitle   @ Moemon Kai: OPTIONS > RETURN TO MAIN MENU (src/option_menu.c)

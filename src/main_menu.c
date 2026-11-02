@@ -1,4 +1,6 @@
 #include "global.h"
+#include "m4a.h"
+#include "script.h"
 #include "mp_region.h"
 #include "trainer_pokemon_sprites.h"
 #include "bg.h"
@@ -580,6 +582,19 @@ static void MpReloadSave(void)
     if (gSaveFileStatus == SAVE_STATUS_EMPTY || gSaveFileStatus == SAVE_STATUS_CORRUPT)
         Sav2_ClearSetDefault();
     SetPokemonCryStereo(gSaveBlock2Ptr->optionsSound);
+}
+
+// Moemon Kai: OPTIONS > RETURN TO MAIN MENU (special MP_ReturnToTitle): the room left, the save and its side files read
+// again from disk as when the game starts (anything unsaved gone), then the title screen. The PC build's SoftReset quits
+void MP_ReturnToTitleNow(void)
+{
+    void MP_SaveSlotChanged(void);
+    MP_SaveSlotChanged();
+    MpReloadSave();
+    m4aMPlayAllStop();
+    gMain.callback1 = NULL;
+    ScriptContext_Init();
+    SetMainCallback2(CB2_InitTitleScreen);
 }
 
 void CB2_InitMainMenu(void)
@@ -2646,14 +2661,11 @@ static void MainMenu_FormatSavegameBadges(void)
     u8 badgeCount = 0;
     u32 i;
 
-    for (i = FLAG_BADGE01_GET; i < FLAG_BADGE01_GET + NUM_BADGES; i++)
-    {
-        if (FlagGet(i))
-            badgeCount++;
-    }
+    badgeCount = MP_Region_TotalBadges();   // Moemon Kai: every region's badges, not only HOENN's
+    (void)i;
     StringExpandPlaceholders(gStringVar4, gText_ContinueMenuBadges);
     AddTextPrinterParameterized3(2, FONT_NORMAL, 0x6C, 33, sTextColor_MenuInfo, TEXT_SKIP_DRAW, gStringVar4);
-    ConvertIntToDecimalStringN(str, badgeCount, STR_CONV_MODE_LEADING_ZEROS, 1);
+    ConvertIntToDecimalStringN(str, badgeCount, STR_CONV_MODE_LEFT_ALIGN, 2);
     AddTextPrinterParameterized3(2, FONT_NORMAL, GetStringRightAlignXOffset(FONT_NORMAL, str, 0xD0), 33, sTextColor_MenuInfo, TEXT_SKIP_DRAW, str);
 }
 

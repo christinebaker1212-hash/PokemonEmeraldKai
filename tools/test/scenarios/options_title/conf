@@ -1,0 +1,7 @@
+# OPTIONS > GAME > RETURN TO MAIN MENU: back on the field the game's save prompt shows; declined, the game asks to be
+# sure; yes: the save read again and the title screen; CONTINUE brings the field back. Shots t_*.
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_PARTY=25:40"
+EXPECT_A=("save file changed" "where map")
+UNEXPECT_A=("[crash]")

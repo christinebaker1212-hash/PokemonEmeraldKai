@@ -391,3 +391,23 @@ EventScript_FindHmOnce_Had:
 Text_FindHmOnce_Had:
 	.string "It's {STR_VAR_1}! But you're already\n"
 	.string "carrying one, so you leave it be.$"
+
+@ Moemon Kai: OPTIONS > GAME > RETURN TO MAIN MENU (src/option_menu.c): the game's save prompt; saved, or once the
+@ player is sure about leaving without saving, back to the main menu (a soft reset)
+EventScript_MpReturnToTitle::
+	lockall
+	call Common_EventScript_SaveGame
+	goto_if_ne VAR_RESULT, 0, EventScript_MpReturnToTitle_Go
+	msgbox Text_MpReturnToTitle_Sure, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, YES, EventScript_MpReturnToTitle_Go
+	releaseall
+	end
+
+EventScript_MpReturnToTitle_Go:
+	special MP_ReturnToTitle
+	end
+
+Text_MpReturnToTitle_Sure:
+	.string "Return to the main menu without\n"
+	.string "saving? Anything since your last\l"
+	.string "save will be lost.$"

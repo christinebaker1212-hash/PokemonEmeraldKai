@@ -1,0 +1,31 @@
+pressuntil A field 5000
+wait 60
+press START 2
+wait 30
+press UP 2
+wait 10
+press UP 2
+wait 10
+press A 2
+wait 120
+press UP 2
+wait 10
+press UP 2
+wait 10
+shot t_row
+press A 2
+wait 120
+shot t_prompt
+press B 2
+wait 30
+press B 2
+wait 60
+shot t_sure
+press A 2
+wait 240
+shot t_title
+pressuntil A field 6000
+wait 60
+shot t_back
+mp where
+quit

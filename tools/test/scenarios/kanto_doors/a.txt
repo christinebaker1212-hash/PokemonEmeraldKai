@@ -1,0 +1,9 @@
+pressuntil A field 5000
+wait 30
+mp warp 37,57,15,8
+wait 200
+press UP 4
+shotburst door 40 4
+wait 120
+mp where
+quit

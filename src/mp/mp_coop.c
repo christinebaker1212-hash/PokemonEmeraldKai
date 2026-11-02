@@ -232,6 +232,22 @@ static u8 QzGymLeader(u16 trainerId)
     return 0xFF;
 }
 
+// Moemon Kai: a KANTO, JOHTO or SINNOH gym leader beaten: every trainer on the gym's map counts as beaten (Emerald's
+// gyms do it by script: Common_EventScript_SetGymTrainers). A trainer is an object whose script starts with trainerbattle
+void MP_Coop_GymLeaderBeaten(u16 trainerId)
+{
+    u32 i;
+    if (QzGymLeader(trainerId) == 0xFF || gMapHeader.events == NULL)
+        return;
+    for (i = 0; i < gMapHeader.events->objectEventCount; i++)
+    {
+        const u8 *script = gMapHeader.events->objectEvents[i].script;
+        if (script != NULL && script[0] == 0x5C)   // (trainerbattle: its mode, then the trainer)
+            FlagSet(TRAINER_FLAG(script[2] | (script[3] << 8)));
+    }
+    MPNet_Log("gym: leader %u beaten, the gym's trainers too", trainerId);
+}
+
 // Any trainer of the three regions (HOENN's, then JOHTO's and KANTO's after FIRST_QZ_TRAINER)
 bool8 MP_IsRealTrainer(u16 trainerId)
 {
