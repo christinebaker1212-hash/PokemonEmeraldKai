@@ -360,6 +360,8 @@ void alist_envmix_exp(
         }
     }
 
+    if (alist_tap) alist_tap(hle, ALIST_TAP_ENVMIX, address, (int32_t)(ramps[0].value >> 16), (int32_t)(ramps[1].value >> 16),
+                             (int32_t)(((uint32_t)(uint16_t)dry << 16) | (uint16_t)wet));   /* Moemon Music Studio: ABI1 (Hudson...) */
     *(int16_t *)(save_buffer +  0) = wet;               /* 0-1 */
     *(int16_t *)(save_buffer +  2) = dry;               /* 2-3 */
     *(int32_t *)(save_buffer +  4) = (int32_t)ramps[0].target;   /* 4-5 */
@@ -439,6 +441,8 @@ void alist_envmix_ge(
         alist_envmix_mix(n, buffers, gains, in[k^S]);
     }
 
+    if (alist_tap) alist_tap(hle, ALIST_TAP_ENVMIX, address, (int32_t)(ramps[0].value >> 16), (int32_t)(ramps[1].value >> 16),
+                             (int32_t)(((uint32_t)(uint16_t)dry << 16) | (uint16_t)wet));   /* Moemon Music Studio: ABI1 (Hudson...) */
     *(int16_t *)(save_buffer +  0) = wet;               /* 0-1 */
     *(int16_t *)(save_buffer +  2) = dry;               /* 2-3 */
     *(int32_t *)(save_buffer +  4) = (int32_t)ramps[0].target;   /* 4-5 */

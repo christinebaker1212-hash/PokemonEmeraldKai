@@ -38,6 +38,7 @@ static uint16_t timer0Value = 0;
 bool timer0On = false;
 int timer0Ticks = 0;
 static int timer0Reload = 0;
+int gsfTimer0Reload() { return timer0Reload; }   // Moemon Music Studio: a driver's mixing rate
 int timer0ClockReload  = 0;
 static uint16_t timer1Value = 0;
 bool timer1On = false;

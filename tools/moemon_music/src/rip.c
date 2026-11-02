@@ -8,7 +8,7 @@
 #include "rip.h"
 #include "engine.h"
 
-static const char *const k_kindNames[RIP_NUM_KINDS] = {"PSF", "PSF2", "USF", "GBS", "2SF", "GSF", "GameCube stream", "SPC", "VGM"};
+static const char *const k_kindNames[RIP_NUM_KINDS] = {"PSF", "PSF2", "USF", "GBS", "2SF", "GSF", "GameCube stream", "SPC", "VGM", "GSF"};
 
 const char *rip_kind_name(int kind) { return kind >= 0 && kind < RIP_NUM_KINDS ? k_kindNames[kind] : "?"; }
 int rip_needs_bios(int kind) { return kind == RIP_PSF1 || kind == RIP_PSF2; }

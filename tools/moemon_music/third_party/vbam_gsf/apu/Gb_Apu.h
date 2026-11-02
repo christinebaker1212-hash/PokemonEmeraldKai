@@ -116,4 +116,13 @@ private:
 
 public:
 	int read_status();
+
+	// Moemon Music Studio: what the channels play (rip_gsf.cpp)
+	static void (*tap_trigger)(Gb_Apu *, int osc);
+	const Gb_Osc *tap_osc(int i) const { return oscs[i]; }
+	const uint8_t *tap_regs() const { return regs; }
+	// the 16 bytes (32 steps) playing: NR30 bit 6 picks the bank heard (the CPU reaches the other one)
+	const uint8_t *tap_wave() const { return &wave.wave_ram[(wave.regs[0] & 0x40) >> 2 & wave.agb_mask]; }
+	const uint8_t *tap_wave_other() const { return &wave.wave_ram[(~wave.regs[0] & 0x40) >> 2 & wave.agb_mask]; }
+	int tap_wave_64() const { return (wave.regs[0] & 0x20 & wave.agb_mask) != 0; }  // both banks as one 64-step wave
 };
