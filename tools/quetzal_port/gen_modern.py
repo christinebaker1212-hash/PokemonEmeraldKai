@@ -15,6 +15,10 @@ Gen 4 cap's.
 import json
 import os
 import re
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from gen_wild import apply_overrides   # noqa: E402  (the encounter audit's fixes, at every generation)
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 RIP = os.path.join(REPO, 'quetzal_rip')
@@ -52,6 +56,9 @@ def main():
     pairs = []
     for e in g4:
         f = mod.get(e['base_label'], {})
+        apply_overrides(e)
+        if f:
+            apply_overrides(dict(f, map=e['map']))
         for k, suffix in AREAS:
             if k not in e or k not in f:
                 continue

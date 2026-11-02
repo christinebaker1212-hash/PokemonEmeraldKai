@@ -1,0 +1,8 @@
+# The encounter audit (tools/quetzal_port/gen_wild.py OVERRIDES): KANTO's DIGLETT'S CAVE is FireRed's again, DIGLETT
+# (50) and DUGTRIO only; no DITTO (132) on ROUTE 1 (300 grass rolls).
+MODE=1
+TMO=60
+GEN=3
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=25:20"
+EXPECT_A=("land slots: 50 50 50 50")
+UNEXPECT_A=("[crash]" " 132 " " 132$")

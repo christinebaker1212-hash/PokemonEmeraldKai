@@ -1623,9 +1623,11 @@ static bool8 Caught(u16 species)
     return GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_GET_CAUGHT);
 }
 
+// (DARKRAI is SINNOH's: MP_LegendForeign, so neither dream starts in JOHTO or KANTO any more; one an older save is in
+// ends: sleeping again at home, or coming back into the cabin)
 static bool8 DreamAllowed(void)
 {
-    return MP_Gen_Allowed(SPECIES_DARKRAI) && Caught(SPECIES_CRESSELIA) && !Caught(SPECIES_DARKRAI)
+    return !MP_LegendForeign(SPECIES_DARKRAI, MP_Region_Current()) && MP_Gen_Allowed(SPECIES_DARKRAI) && Caught(SPECIES_CRESSELIA) && !Caught(SPECIES_DARKRAI)
         && !FlagGet(FLAG_QZ_0x1318)   // (not in GIOVANNI's past)
         && MP_Region_Cleared(MP_Region_Current());   // (DARKRAI waits for the LEAGUE: RefreshStatics)
 }
@@ -1690,7 +1692,7 @@ u16 QzSSAnneDreamEventEnd(void)
 // The cabin on entering: the woman is away during the dream; a dream whose DARKRAI is caught or beaten ends
 u16 QzSSAnneRoom6OnResume(void)
 {
-    if (FlagGet(FLAG_QZ_0x292B) && FlagGet(QZ_FLAG_KANTO_DARKRAI_DONE))
+    if (FlagGet(FLAG_QZ_0x292B) && (FlagGet(QZ_FLAG_KANTO_DARKRAI_DONE) || MP_LegendForeign(SPECIES_DARKRAI, REGION_KANTO)))
         SSAnneWake();
     if (FlagGet(FLAG_QZ_0x292B))
         FlagSet(FLAG_QZ_0x292D);

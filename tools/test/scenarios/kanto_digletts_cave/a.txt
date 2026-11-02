@@ -1,0 +1,9 @@
+pressuntil A field 5000
+wait 30
+mp warp 36,37,10,10
+wait 120
+mp landslots
+mp warp 37,76,10,10
+wait 120
+mp wildroll 300
+quit

@@ -1,8 +1,9 @@
-# JOHTO's DARKRAI dream: with CRESSELIA caught, the bed at home starts it (FLAG_QZ_0x1425 = 5157), DARKRAI waits in
-# DARK CAVE; beating it wakes you at home (5157 off, FLAG_QZ_0x1321 = 4897 on)
+# JOHTO's DARKRAI dream is no more (DARKRAI is SINNOH's: qz_specials.c DreamAllowed): with CRESSELIA caught the bed
+# at home doesn't start it (FLAG_QZ_0x1425 = 5157 stays off); a save already in the dream wakes there (5157 off,
+# FLAG_QZ_0x1321 = 4897 on)
 MODE=1
 GEN=9
-TMO=180
-ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=6:80,513:50 MOEMON_TEST_FOE_HP1=1"
-EXPECT_A=("flag 5157 = 1" "where map 35.2" "flag 4897 = 1")
-UNEXPECT_A=("[crash]" "not ported")
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=6:80,513:50"
+EXPECT_A=("flag 5157 = 0" "flag 4897 = 1")
+UNEXPECT_A=("[crash]" "not ported" "flag 5157 = 1")

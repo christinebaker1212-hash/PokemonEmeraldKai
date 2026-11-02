@@ -14,6 +14,31 @@ import re
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 
+# The encounter audit's fixes (docs/REGIONS_TODO.md): FireRed's DIGLETT'S CAVE (DIGLETT and DUGTRIO only: its identity;
+# Quetzal's others are all found elsewhere), no DITTO on KANTO's ROUTE 1 / ROUTE 5 (FireRed has it from ROUTE 13 on;
+# its slot takes a POKeMON the same table has). {map: {table: [(slot, species, min, max), ...]}}: slot a number, or
+# the species it replaces (in every generation's table, whatever slot it has there)
+FRLG_DIGLETTS = [('DIGLETT', 18, 18), ('DIGLETT', 19, 19), ('DIGLETT', 17, 17), ('DIGLETT', 15, 15), ('DIGLETT', 16, 16),
+                 ('DIGLETT', 20, 20), ('DIGLETT', 21, 21), ('DIGLETT', 22, 22), ('DIGLETT', 17, 17), ('DUGTRIO', 29, 29),
+                 ('DIGLETT', 17, 17), ('DUGTRIO', 31, 31)]
+OVERRIDES = {
+    'MAP_KANTO_DIGLETTS_CAVE_B1F': {'land_mons': [(i, 'SPECIES_' + sp, lo, hi) for i, (sp, lo, hi) in enumerate(FRLG_DIGLETTS)]},
+    'MAP_KANTO_ROUTE1': {'land_mons': [('SPECIES_DITTO', 'SPECIES_RATTATA', None, None)]},
+    'MAP_KANTO_ROUTE5': {'land_mons': [('SPECIES_DITTO', 'SPECIES_MEOWTH', None, None)]},
+}
+
+
+def apply_overrides(e):
+    for table, slots in OVERRIDES.get(e['map'], {}).items():
+        if table not in e:
+            continue
+        for slot, sp, lo, hi in slots:
+            mons = e[table]['mons']
+            for m in ([mons[slot]] if isinstance(slot, int) else [m for m in mons if m['species'] == slot]):
+                m['species'] = sp
+                if lo is not None:
+                    m['min_level'], m['max_level'] = lo, hi
+
 
 def main():
     rip = json.load(open(os.path.join(REPO, 'quetzal_rip/gen4/data/wild_encounters.json')))['wild_encounter_groups'][0]
@@ -39,6 +64,7 @@ def main():
                 for mon in v['mons']:
                     if mon['species'] not in species:
                         bad.add(mon['species'])
+        apply_overrides(out)
         if len(out) > 2:
             main_group['encounters'].append(out)
             n += 1

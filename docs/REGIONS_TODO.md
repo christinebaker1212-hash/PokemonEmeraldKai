@@ -101,7 +101,10 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       found somewhere; FILL never sends OFF GENERATION, OFF REGION very sparingly
       ([x] FILL: TEAM PADDING's POKéMON are the region's own (its wild tables and their evolutions), another region's only
       when none fits or one time in ten, never newer than the trainer's own team: mp_coop.c PickFillerSpecies; tests
-      coop_fill_gen3, tri_padded. [ ] the wild tables' audit)
+      coop_fill_gen3, tri_padded. [x] DIGLETT'S CAVE is FireRed's (DIGLETT, DUGTRIO) at every GENERATION, no DITTO on
+      KANTO's ROUTE 1 / 5: tools/quetzal_port/gen_wild.py OVERRIDES, applied by gen_gen2.py / gen_modern.py too; test
+      kanto_digletts_cave. [x] Quetzal's DARKRAI dreams (JOHTO's bed, the S.S. ANNE's cabin) don't start: DARKRAI is
+      SINNOH's; a save in one wakes; tests qz_dream*. [ ] the wild tables' audit for strong POKéMON early)
 
 ## General
 - [x] Shadows fade with screen transitions (gba_easy_draw.c ShadowKeepForFrame: the share of the backgrounds still shown)

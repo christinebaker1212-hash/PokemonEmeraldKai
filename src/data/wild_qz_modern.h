@@ -390,8 +390,6 @@ extern const struct WildPokemonInfo gQuetzal_36_4_WaterMonsInfo;
 static const u16 sQzM_gQuetzal_36_4_WaterMons[] = {SPECIES_TENTACOOL, SPECIES_FINNEON, SPECIES_STARYU, SPECIES_CLAUNCHER, SPECIES_DHELMISE};
 extern const struct WildPokemonInfo gQuetzal_36_4_FishingMonsInfo;
 static const u16 sQzM_gQuetzal_36_4_FishingMons[] = {SPECIES_MAGIKARP, SPECIES_WISHIWASHI, SPECIES_FINNEON, SPECIES_KRABBY, SPECIES_STARYU, SPECIES_FINNEON, SPECIES_STARYU, SPECIES_CLAUNCHER, SPECIES_TENTACOOL, SPECIES_GYARADOS};
-extern const struct WildPokemonInfo gQuetzal_36_37_LandMonsInfo;
-static const u16 sQzM_gQuetzal_36_37_LandMons[] = {SPECIES_DIGLETT, SPECIES_TIMBURR, SPECIES_DWEBBLE, SPECIES_GLIGAR, SPECIES_TRAPINCH, SPECIES_SANDILE, SPECIES_HIPPOPOTAS, SPECIES_SILICOBRA, SPECIES_DURANT, SPECIES_HEATMOR, SPECIES_ORTHWORM, SPECIES_BAGON};
 extern const struct WildPokemonInfo gQuetzal_36_39_LandMonsInfo;
 static const u16 sQzM_gQuetzal_36_39_LandMons[] = {SPECIES_GOLBAT, SPECIES_GRAVELER, SPECIES_MACHOKE, SPECIES_ONIX, SPECIES_BOLDORE, SPECIES_GURDURR, SPECIES_LAIRON, SPECIES_DUGTRIO, SPECIES_HARIYAMA, SPECIES_RHYDON, SPECIES_EXCADRILL, SPECIES_STEELIX};
 extern const struct WildPokemonInfo gQuetzal_36_40_LandMonsInfo;
@@ -637,7 +635,7 @@ static const u16 sQzM_gQuetzal_37_79_WaterMons[] = {SPECIES_GOLDEEN, SPECIES_BAR
 extern const struct WildPokemonInfo gQuetzal_37_79_FishingMonsInfo;
 static const u16 sQzM_gQuetzal_37_79_FishingMons[] = {SPECIES_MAGIKARP, SPECIES_WISHIWASHI, SPECIES_GOLDEEN, SPECIES_BARBOACH, SPECIES_CHEWTLE, SPECIES_GOLDEEN, SPECIES_BARBOACH, SPECIES_BASCULIN, SPECIES_REMORAID, SPECIES_GYARADOS};
 extern const struct WildPokemonInfo gQuetzal_37_80_LandMonsInfo;
-static const u16 sQzM_gQuetzal_37_80_LandMons[] = {SPECIES_MEOWTH, SPECIES_BUNEARY, SPECIES_FIDOUGH, SPECIES_SMOOCHUM, SPECIES_TOGEPI, SPECIES_HAPPINY, SPECIES_MUNCHLAX, SPECIES_TOXEL, SPECIES_DITTO, SPECIES_COMFEY, SPECIES_LITTEN, SPECIES_AUDINO};
+static const u16 sQzM_gQuetzal_37_80_LandMons[] = {SPECIES_MEOWTH, SPECIES_BUNEARY, SPECIES_FIDOUGH, SPECIES_SMOOCHUM, SPECIES_TOGEPI, SPECIES_HAPPINY, SPECIES_MUNCHLAX, SPECIES_TOXEL, SPECIES_MEOWTH, SPECIES_COMFEY, SPECIES_LITTEN, SPECIES_AUDINO};
 extern const struct WildPokemonInfo gQuetzal_37_81_LandMonsInfo;
 static const u16 sQzM_gQuetzal_37_81_LandMons[] = {SPECIES_PIDOVE, SPECIES_YUNGOOS, SPECIES_KRICKETOT, SPECIES_BLIPBUG, SPECIES_SEEDOT, SPECIES_HATENNA, SPECIES_DUCKLETT, SPECIES_BOUNSWEET, SPECIES_PACHIRISU, SPECIES_WOOPER, SPECIES_BULBASAUR, SPECIES_QUAXLY};
 extern const struct WildPokemonInfo gQuetzal_37_81_WaterMonsInfo;
@@ -973,7 +971,6 @@ static const struct {const struct WildPokemonInfo *gen4; const u16 *species; u8 
     {&gQuetzal_36_3_LandMonsInfo, sQzM_gQuetzal_36_3_LandMons, 12},
     {&gQuetzal_36_4_WaterMonsInfo, sQzM_gQuetzal_36_4_WaterMons, 5},
     {&gQuetzal_36_4_FishingMonsInfo, sQzM_gQuetzal_36_4_FishingMons, 10},
-    {&gQuetzal_36_37_LandMonsInfo, sQzM_gQuetzal_36_37_LandMons, 12},
     {&gQuetzal_36_39_LandMonsInfo, sQzM_gQuetzal_36_39_LandMons, 12},
     {&gQuetzal_36_40_LandMonsInfo, sQzM_gQuetzal_36_40_LandMons, 12},
     {&gQuetzal_36_41_LandMonsInfo, sQzM_gQuetzal_36_41_LandMons, 12},

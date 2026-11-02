@@ -507,9 +507,6 @@ static const struct WildPokemonInfo sQz2_gQuetzal_36_4_WaterMonsInfo = {1, sQz2_
 extern const struct WildPokemonInfo gQuetzal_36_4_FishingMonsInfo;
 static const struct WildPokemon sQz2_gQuetzal_36_4_FishingMons[] = {{10, 15, SPECIES_MAGIKARP}, {10, 15, SPECIES_HORSEA}, {20, 25, SPECIES_PSYDUCK}, {20, 25, SPECIES_KRABBY}, {20, 25, SPECIES_STARYU}, {25, 30, SPECIES_PSYDUCK}, {25, 30, SPECIES_STARYU}, {25, 30, SPECIES_SLOWPOKE}, {25, 30, SPECIES_TENTACOOL}, {25, 30, SPECIES_GYARADOS}};
 static const struct WildPokemonInfo sQz2_gQuetzal_36_4_FishingMonsInfo = {10, sQz2_gQuetzal_36_4_FishingMons};
-extern const struct WildPokemonInfo gQuetzal_36_37_LandMonsInfo;
-static const struct WildPokemon sQz2_gQuetzal_36_37_LandMons[] = {{15, 18, SPECIES_DIGLETT}, {15, 18, SPECIES_MACHOP}, {15, 18, SPECIES_SHUCKLE}, {15, 18, SPECIES_GLIGAR}, {15, 18, SPECIES_GEODUDE}, {15, 18, SPECIES_LARVITAR}, {15, 18, SPECIES_PHANPY}, {15, 18, SPECIES_CUBONE}, {15, 18, SPECIES_SCYTHER}, {15, 18, SPECIES_PONYTA}, {15, 18, SPECIES_SKARMORY}, {15, 18, SPECIES_DRATINI}};
-static const struct WildPokemonInfo sQz2_gQuetzal_36_37_LandMonsInfo = {5, sQz2_gQuetzal_36_37_LandMons};
 extern const struct WildPokemonInfo gQuetzal_36_39_LandMonsInfo;
 static const struct WildPokemon sQz2_gQuetzal_36_39_LandMons[] = {{40, 43, SPECIES_GOLBAT}, {40, 43, SPECIES_GRAVELER}, {40, 43, SPECIES_MACHOKE}, {40, 43, SPECIES_ONIX}, {40, 43, SPECIES_GEODUDE}, {40, 43, SPECIES_MACHOP}, {40, 43, SPECIES_MAROWAK}, {40, 43, SPECIES_DUGTRIO}, {42, 45, SPECIES_SANDSLASH}, {42, 45, SPECIES_RHYDON}, {42, 45, SPECIES_ARBOK}, {42, 45, SPECIES_STEELIX}};
 static const struct WildPokemonInfo sQz2_gQuetzal_36_39_LandMonsInfo = {7, sQz2_gQuetzal_36_39_LandMons};
@@ -796,7 +793,7 @@ extern const struct WildPokemonInfo gQuetzal_37_118_FishingMonsInfo;
 static const struct WildPokemon sQz2_gQuetzal_37_118_FishingMons[] = {{25, 30, SPECIES_MAGIKARP}, {25, 30, SPECIES_HORSEA}, {35, 40, SPECIES_QWILFISH}, {35, 40, SPECIES_PSYDUCK}, {35, 40, SPECIES_KRABBY}, {45, 50, SPECIES_QWILFISH}, {45, 50, SPECIES_PSYDUCK}, {45, 50, SPECIES_KINGLER}, {45, 50, SPECIES_SEADRA}, {45, 50, SPECIES_GYARADOS}};
 static const struct WildPokemonInfo sQz2_gQuetzal_37_118_FishingMonsInfo = {20, sQz2_gQuetzal_37_118_FishingMons};
 extern const struct WildPokemonInfo gQuetzal_37_76_LandMonsInfo;
-static const struct WildPokemon sQz2_gQuetzal_37_76_LandMons[] = {{2, 3, SPECIES_PIDGEY}, {2, 3, SPECIES_RATTATA}, {2, 3, SPECIES_HOOTHOOT}, {2, 3, SPECIES_SENTRET}, {2, 3, SPECIES_SPEAROW}, {2, 3, SPECIES_DITTO}, {2, 3, SPECIES_MAREEP}, {2, 3, SPECIES_SMEARGLE}, {2, 3, SPECIES_MAGNEMITE}, {2, 3, SPECIES_EEVEE}, {2, 3, SPECIES_VULPIX}, {2, 3, SPECIES_ODDISH}};
+static const struct WildPokemon sQz2_gQuetzal_37_76_LandMons[] = {{2, 3, SPECIES_PIDGEY}, {2, 3, SPECIES_RATTATA}, {2, 3, SPECIES_HOOTHOOT}, {2, 3, SPECIES_SENTRET}, {2, 3, SPECIES_SPEAROW}, {2, 3, SPECIES_RATTATA}, {2, 3, SPECIES_MAREEP}, {2, 3, SPECIES_SMEARGLE}, {2, 3, SPECIES_MAGNEMITE}, {2, 3, SPECIES_EEVEE}, {2, 3, SPECIES_VULPIX}, {2, 3, SPECIES_ODDISH}};
 static const struct WildPokemonInfo sQz2_gQuetzal_37_76_LandMonsInfo = {21, sQz2_gQuetzal_37_76_LandMons};
 extern const struct WildPokemonInfo gQuetzal_37_77_LandMonsInfo;
 static const struct WildPokemon sQz2_gQuetzal_37_77_LandMons[] = {{3, 5, SPECIES_PIDGEY}, {3, 5, SPECIES_SENTRET}, {3, 5, SPECIES_HOPPIP}, {3, 5, SPECIES_SUNKERN}, {3, 5, SPECIES_HOOTHOOT}, {3, 5, SPECIES_CATERPIE}, {3, 5, SPECIES_WEEDLE}, {3, 5, SPECIES_SPINARAK}, {3, 5, SPECIES_PICHU}, {3, 5, SPECIES_RATTATA}, {3, 5, SPECIES_BUTTERFREE}, {3, 5, SPECIES_LEDYBA}};
@@ -814,7 +811,7 @@ extern const struct WildPokemonInfo gQuetzal_37_79_FishingMonsInfo;
 static const struct WildPokemon sQz2_gQuetzal_37_79_FishingMons[] = {{30, 34, SPECIES_MAGIKARP}, {30, 34, SPECIES_HORSEA}, {30, 35, SPECIES_GOLDEEN}, {30, 35, SPECIES_POLIWAG}, {30, 35, SPECIES_SLOWPOKE}, {30, 36, SPECIES_GOLDEEN}, {30, 36, SPECIES_POLIWAG}, {30, 36, SPECIES_KRABBY}, {30, 36, SPECIES_REMORAID}, {30, 36, SPECIES_GYARADOS}};
 static const struct WildPokemonInfo sQz2_gQuetzal_37_79_FishingMonsInfo = {20, sQz2_gQuetzal_37_79_FishingMons};
 extern const struct WildPokemonInfo gQuetzal_37_80_LandMonsInfo;
-static const struct WildPokemon sQz2_gQuetzal_37_80_LandMons[] = {{12, 15, SPECIES_MEOWTH}, {12, 15, SPECIES_PIDGEOTTO}, {12, 15, SPECIES_ABRA}, {12, 15, SPECIES_SMOOCHUM}, {12, 15, SPECIES_TOGEPI}, {12, 15, SPECIES_PIDGEY}, {12, 15, SPECIES_NOCTOWL}, {12, 15, SPECIES_BELLSPROUT}, {12, 15, SPECIES_DITTO}, {12, 15, SPECIES_ODDISH}, {12, 15, SPECIES_MANKEY}, {12, 15, SPECIES_SNUBBULL}};
+static const struct WildPokemon sQz2_gQuetzal_37_80_LandMons[] = {{12, 15, SPECIES_MEOWTH}, {12, 15, SPECIES_PIDGEOTTO}, {12, 15, SPECIES_ABRA}, {12, 15, SPECIES_SMOOCHUM}, {12, 15, SPECIES_TOGEPI}, {12, 15, SPECIES_PIDGEY}, {12, 15, SPECIES_NOCTOWL}, {12, 15, SPECIES_BELLSPROUT}, {12, 15, SPECIES_MEOWTH}, {12, 15, SPECIES_ODDISH}, {12, 15, SPECIES_MANKEY}, {12, 15, SPECIES_SNUBBULL}};
 static const struct WildPokemonInfo sQz2_gQuetzal_37_80_LandMonsInfo = {21, sQz2_gQuetzal_37_80_LandMons};
 extern const struct WildPokemonInfo gQuetzal_37_81_LandMonsInfo;
 static const struct WildPokemon sQz2_gQuetzal_37_81_LandMons[] = {{13, 16, SPECIES_PIDGEY}, {13, 16, SPECIES_RATTATA}, {13, 16, SPECIES_JIGGLYPUFF}, {13, 16, SPECIES_MEOWTH}, {13, 16, SPECIES_BELLSPROUT}, {13, 16, SPECIES_DROWZEE}, {13, 16, SPECIES_PSYDUCK}, {13, 16, SPECIES_ODDISH}, {13, 16, SPECIES_MAGNEMITE}, {13, 16, SPECIES_WOOPER}, {13, 16, SPECIES_BULBASAUR}, {13, 16, SPECIES_MANKEY}};
@@ -1146,7 +1143,6 @@ static const struct {const struct WildPokemonInfo *gen4, *gen2;} sQzGen2Wild[] =
     {&gQuetzal_36_3_LandMonsInfo, &sQz2_gQuetzal_36_3_LandMonsInfo},
     {&gQuetzal_36_4_WaterMonsInfo, &sQz2_gQuetzal_36_4_WaterMonsInfo},
     {&gQuetzal_36_4_FishingMonsInfo, &sQz2_gQuetzal_36_4_FishingMonsInfo},
-    {&gQuetzal_36_37_LandMonsInfo, &sQz2_gQuetzal_36_37_LandMonsInfo},
     {&gQuetzal_36_39_LandMonsInfo, &sQz2_gQuetzal_36_39_LandMonsInfo},
     {&gQuetzal_36_40_LandMonsInfo, &sQz2_gQuetzal_36_40_LandMonsInfo},
     {&gQuetzal_36_41_LandMonsInfo, &sQz2_gQuetzal_36_41_LandMonsInfo},
