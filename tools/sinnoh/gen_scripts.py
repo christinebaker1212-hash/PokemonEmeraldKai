@@ -1013,9 +1013,15 @@ class FileConverter:
             return [self.sinnoh(SINNOH_SET_BG, n, int(self.value(a[1])) - o[1], int(self.value(a[2])) - o[2])]
         if cmd in ('SetHasPartner', 'ClearHasPartner'):
             lines = ['%sflag 0x%X' % ('set' if cmd == 'SetHasPartner' else 'clear', FLAG_SINNOH_HAS_PARTNER)]
-            if cmd == 'ClearHasPartner':   # (and the walk ends: the partner who followed is gone, as Platinum's)
+            if cmd == 'ClearHasPartner':   # (and the walk ends: the one who followed stops, as Platinum's)
                 lines.append(self.sinnoh(SINNOH_MISC, 24))
             return lines
+        if cmd == 'CheckHasPartner':
+            # (someone walks with the player: no SURF or ROCK CLIMB then, as Platinum's)
+            done = '%s%s__partner%d' % (PREFIX, self.low, self.next_local())
+            v = self.var(a[0])
+            return ['setvar %s, 0' % v, 'goto_if_unset 0x%X, %s' % (FLAG_SINNOH_HAS_PARTNER, done), 'setvar %s, 1' % v,
+                    '%s:' % done]
         if cmd == 'AddFreeCamera':
             # the game's own camera object (the 3D view follows it: src/sinnoh/s3d.c SetupView), where Platinum's is
             return ['special SpawnCameraObject',
