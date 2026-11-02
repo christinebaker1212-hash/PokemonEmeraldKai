@@ -1012,7 +1012,10 @@ class FileConverter:
             o = self.dec.origins()[self.events_low]
             return [self.sinnoh(SINNOH_SET_BG, n, int(self.value(a[1])) - o[1], int(self.value(a[2])) - o[2])]
         if cmd in ('SetHasPartner', 'ClearHasPartner'):
-            return ['%sflag 0x%X' % ('set' if cmd == 'SetHasPartner' else 'clear', FLAG_SINNOH_HAS_PARTNER)]
+            lines = ['%sflag 0x%X' % ('set' if cmd == 'SetHasPartner' else 'clear', FLAG_SINNOH_HAS_PARTNER)]
+            if cmd == 'ClearHasPartner':   # (and the walk ends: the partner who followed is gone, as Platinum's)
+                lines.append(self.sinnoh(SINNOH_MISC, 24))
+            return lines
         if cmd == 'AddFreeCamera':
             # the game's own camera object (the 3D view follows it: src/sinnoh/s3d.c SetupView), where Platinum's is
             return ['special SpawnCameraObject',
@@ -1648,6 +1651,13 @@ def _replaceable(body):
     return bool(re.match(r'^\tlock\n\tfaceplayer\n\tgoto_if_set 0x[0-9A-F]+, \w+_Given\n', body))   # (a written gift)
 
 
+def _story_shows(hide, name, o):
+    """a person Platinum's story shows by its own hide flag (story_people.py's NEVER was the written story's: Platinum's
+    scripts now show and hide its whole cast), not one the game closes for good (tools/sinnoh/gen_maps.py)"""
+    from gen_maps import CLOSED_PEOPLE
+    return o.get('script') not in CLOSED_PEOPLE.get(name, ())
+
+
 def people(root, p, low, name, done):
     """Platinum's story on map NAME: [(local id, hide flag, x, y, script label or None: the map's own)] for its people,
     and its triggers as [(x, y, var, value, script)] (Platinum's whose script converts, each tile of their area, and the
@@ -1683,6 +1693,12 @@ def people(root, p, low, name, done):
         elif person and lab and _replaceable(_stub_body(name, script) if script != '0x0' else None):
             new = lab
         elif person and script == '0x0':
+            if mine['flag'] == '0x3FFF' and flag and _story_shows(hide, name, o):
+                # (a story person with nothing to say: CYRUS and BARRY at LAKE VERITY, a STARLY... the map keeps
+                # them hidden for good, Platinum shows them by their own hide flag)
+                gfx = 'OBJ_EVENT_GFX_VAR_%s' % o['graphics_id'][-1] \
+                    if re.match(r'^OBJ_EVENT_GFX_VAR_[0-9A-F]$', o['graphics_id']) else '0'
+                objs.append((i + 1, flag, o['x'] - p['x0'] * 32, o['z'] - p['z0'] * 32, lab, gfx))
             continue                       # (nothing to say: stays as it is)
         elif trainer or person or STAND_INS.match(script):
             new = None                     # (the game's own script: a trainer's battle, a role, a stand-in not yet replaced)

@@ -1,0 +1,15 @@
+pressuntil A field 5000
+wait 30
+mp platinumstory
+mp setvar 0x5259 1
+mp clearflag 0x3451
+mp clearflag 0x344F
+mp setflag 0x3450
+mp warp 42,44,49,45
+wait 150
+mp face up
+wait 700
+shot look
+mp objlist
+mp getvar 0x4010
+quit

@@ -7,6 +7,7 @@
 #include "event_data.h"
 #include "script.h"
 #include "string_util.h"
+#include "constants/sinnoh_gfx.h"
 #include "constants/vars.h"
 #include "constants/item.h"
 #include "event_object_movement.h"
@@ -761,6 +762,9 @@ void Sinnoh_PlatinumMapScripts(void)
         Sinnoh_PlatinumStoryBegin();
     if (!FlagGet(FLAG_SINNOH_PLATINUM_STORY))
         return;
+    // (Platinum's VAR_OBJ_GFX_ID_0 is the counterpart, DAWN for a boy and LUCAS for a girl: each map's own transition
+    // script sets it again where it's someone else; left at another region's value, the counterpart wore that look)
+    VarSet(VAR_OBJ_GFX_ID_0, gSaveBlock2Ptr->playerGender == MALE ? OBJ_EVENT_GFX_SINNOH_PLAYER_F : OBJ_EVENT_GFX_SINNOH_PLAYER_M);
     for (m = gSinnohPlatinumMapScripts; m->map != 0xFFFF; m++)
         if (m->map == map)
             break;
@@ -824,6 +828,21 @@ void Sinnoh_PlatinumStoryBegin(void)
 // the field: the one following the player walks with them into the next map (it then answers to LOCALID_FOLLOWER,
 // 0xF2, there), and comes along through warps (put behind the player again)
 #define LOCALID_SINNOH_FOLLOWER 0xF2
+// (a map that has its own copy of the partner showing, like LAKE VERITY's BARRY, uses that one in its scripts: Platinum
+// never shows two of the same person)
+static bool8 MapHasOwnPartner(u16 gfx, u8 except)
+{
+    u32 i;
+    for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+    {
+        struct ObjectEvent *o = &gObjectEvents[i];
+        if (i != except && o->active && !o->isPlayer && !o->invisible && o->localId != LOCALID_SINNOH_FOLLOWER
+         && o->localId < 0xF0 && o->mapNum == gSaveBlock1Ptr->location.mapNum
+         && o->mapGroup == gSaveBlock1Ptr->location.mapGroup && OBJ_GFX_ID(o) == gfx)
+            return TRUE;
+    }
+    return FALSE;
+}
 void Sinnoh_PartnerUpdate(void)
 {
     u16 gfx = VarGet(VAR_SINNOH_PARTNER_GFX);
@@ -837,6 +856,11 @@ void Sinnoh_PartnerUpdate(void)
     {
         if (gObjectEvents[obj].mapNum != mapNum || gObjectEvents[obj].mapGroup != mapGroup)
         {
+            if (MapHasOwnPartner(gfx - 1, obj))   // (this map's own BARRY waits here: he takes over)
+            {
+                RemoveObjectEventByLocalIdAndMap(gObjectEvents[obj].localId, gObjectEvents[obj].mapNum, gObjectEvents[obj].mapGroup);
+                return;
+            }
             gObjectEvents[obj].localId = LOCALID_SINNOH_FOLLOWER;
             gObjectEvents[obj].mapNum = mapNum;
             gObjectEvents[obj].mapGroup = mapGroup;
@@ -844,6 +868,8 @@ void Sinnoh_PartnerUpdate(void)
         return;
     }
     if (ArePlayerFieldControlsLocked() || !TryGetObjectEventIdByLocalIdAndMap(LOCALID_SINNOH_FOLLOWER, mapNum, mapGroup, &obj))
+        return;
+    if (MapHasOwnPartner(gfx - 1, OBJECT_EVENTS_COUNT))   // (LAKE VERITY's own BARRY stands beside the player: no second one)
         return;
     {
         // (behind the player: the way they came, else any free side)

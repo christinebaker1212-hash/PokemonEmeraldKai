@@ -24,6 +24,8 @@
 //      (Platinum's ov5_021F6454.c on the game's records: the frontier's best streaks, HALL OF FAME entries, BERRIES
 //      planted, eggs hatched, steps; the FIGHT AREA's battleground battles counted by 21)
 //   22 BufferValuePaddingDigits: A a number (its low 16 bits, after 23 A: its high ones, for this one number), B as 4's
+//   24 ClearHasPartner: SINNOH's walking partner's walk ends (s3d_scrcmd.c Sinnoh_PartnerUpdate): its graphics var
+//      cleared, the one following the player removed (the map's own object of it, if any, takes over)
 //   21 a battle in the FIGHT AREA's battleground (Platinum's RECORD_TIMES_BATTLED_AT_BATTLEGROUND)
 //   17 GetCurrentBGM A: the song playing (the VILLA's music box keeps it), 18 SetFieldScene A: that song again
 //   14 CheckAmitySquareManGiftIsAccessory: A the gift's number, B the answer; 15 GetAmitySquareBerryOrAccessoryIDFromMan:
@@ -44,6 +46,9 @@
 #include "constants/map_groups.h"
 #include "mp.h"
 #include "mp_life_field.h"
+#include "event_object_movement.h"
+#include "mp_region.h"
+#include "constants/event_object_movement.h"
 #include "m4a.h"
 #include "mp_kaisong.h"
 #include "sound.h"
@@ -369,6 +374,22 @@ void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
     case 23:
         sHigh = a;
         break;
+    case 24:
+    {
+        // ClearHasPartner: the walk ends (Platinum's scripts then set the partner's own movement, walk them off or
+        // remove them by their own local id): the one following stops where they are, facing the way they face
+        u8 obj = GetFollowPlayerObjectId();
+        VarSet(VAR_SINNOH_PARTNER_GFX, 0);
+        if (obj < OBJECT_EVENTS_COUNT)
+        {
+            static const u8 sFace[] = {MOVEMENT_TYPE_FACE_DOWN, MOVEMENT_TYPE_FACE_DOWN, MOVEMENT_TYPE_FACE_UP,
+                                       MOVEMENT_TYPE_FACE_LEFT, MOVEMENT_TYPE_FACE_RIGHT};
+            u8 d = gObjectEvents[obj].facingDirection;
+            SetTrainerMovementType(&gObjectEvents[obj], sFace[d <= DIR_EAST ? d : 0]);
+        }
+        MPNet_Log("sinnoh partner: the walk ends");
+        break;
+    }
     case 21:
         if (sM.battleground < 0xFFFF)
             sM.battleground++;

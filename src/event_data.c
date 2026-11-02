@@ -205,7 +205,8 @@ u16 QzVarGraphicsId(u8 id)
 {
     u16 loc = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum, v;
     u32 i;
-    if (id != 0 || MP_Region_OfGroup(gSaveBlock1Ptr->location.mapGroup) == REGION_HOENN)
+    u8 region = MP_Region_OfGroup(gSaveBlock1Ptr->location.mapGroup);
+    if (id != 0 || (region != REGION_JOHTO && region != REGION_KANTO))   // (SINNOH's are Platinum's own: 16-bit ids)
         return 0xFFFF;
     v = VarGet(loc == ((37 << 8) | 58) || loc == ((37 << 8) | 53) || loc == ((37 << 8) | 64) ? VAR_QZ_0x513E : VAR_QZ_0x4010);
     for (i = 0; i < ARRAY_COUNT(sQzGfxIds); i++)
@@ -214,9 +215,10 @@ u16 QzVarGraphicsId(u8 id)
     return 0xFFFF;
 }
 
-u8 VarGetObjectEventGraphicsId(u8 id)
+u16 VarGetObjectEventGraphicsId(u8 id)
 {
-    u8 gfx = VarGet(VAR_OBJ_GFX_ID_0 + id);
+    // (16 bits: SINNOH's, JOHTO's and KANTO's sprites are past 255; a u8 here gave DAWN / LUCAS someone else's look)
+    u16 gfx = VarGet(VAR_OBJ_GFX_ID_0 + id);
     // Moemon Co-op: a map person (variables 0-B; C-F are link players and the Battle Tower's
     // stand-ins for you) never takes the player's own sprite, which wears your look and palette:
     // a variable left at 0 (= Brendan) made a copy of the player that broke the player's colors

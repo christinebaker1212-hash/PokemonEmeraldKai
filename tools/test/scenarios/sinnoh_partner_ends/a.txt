@@ -1,0 +1,44 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp platinumstory
+mp warp 40,65,48,47
+wait 150
+mp face up
+wait 10
+mp setvar 0x52F9 1033
+wait 30
+shot follow
+mp objlist
+press UP 16
+wait 20
+press UP 16
+wait 20
+press UP 16
+wait 60
+mp where
+shot verity
+mash A 20 10
+wait 100
+shot lake0
+mp objlist
+mash A 20 10
+mp objlist
+shot lake1a
+mash A 40 10
+shot lake1
+mash A 60 10
+shot lake2
+mash A 60 10
+shot lake3
+wait 200
+mp where
+mp getvar 0x52F9
+mp objlist
+press DOWN 16
+wait 30
+press DOWN 16
+wait 60
+shot after
+mp ctx
+quit

@@ -124,6 +124,10 @@ def sprite(platinum):
     name = platinum[len('OBJ_EVENT_GFX_'):] if platinum.startswith('OBJ_EVENT_GFX_') else platinum
     if HIDDEN.search(name):
         return None
+    if re.match(r'^VAR_[0-9A-F]$', name):
+        # (a look the scripts pick: VAR_OBJ_GFX_ID_n, the counterpart DAWN / LUCAS most of all; SINNOH's maps start it
+        # as the counterpart, s3d_scrcmd.c Sinnoh_PlatinumMapScripts. A stand-in here showed MAY)
+        return 'OBJ_EVENT_GFX_' + name
     # (DAWN and LUCAS, the player's counterpart: Platinum's own player sheets)
     own = {'DAWN': 'PLAYER_F', 'LUCAS': 'PLAYER_M'}.get(name)
     if own and own in platinum_sheets():

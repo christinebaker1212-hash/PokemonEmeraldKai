@@ -1,0 +1,7 @@
+# Platinum's walking partner (BARRY from ROUTE 201) walks with the player to LAKE VERITY, where the lake's own BARRY
+# takes over (never two of him) and ClearHasPartner ends the walk: the partner var is cleared, no one follows after
+MODE=1
+TMO=300
+ENV_A="MOEMON_TEST_STRONG=1"
+EXPECT_A=("sinnoh partner: the walk ends" "var 0x52F9 = 0" "ctx 1 free 1 overworld 1 locked 0 script 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

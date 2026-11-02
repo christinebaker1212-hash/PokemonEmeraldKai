@@ -1,0 +1,6 @@
+# DAWN / LUCAS, the player's counterpart, wear Platinum's own look through VAR_OBJ_GFX_ID_0 (a 16-bit sprite id: cut
+# to 8 bits it was someone else's, the player's colors broken): LAKE VERITY's PROF. ROWAN and DAWN for a boy
+MODE=1
+TMO=120
+EXPECT_A=("var 0x4010 = 1188" "local 2 gfx 1188 at 49,43")
+UNEXPECT_A=("[crash]" "TIMEOUT")

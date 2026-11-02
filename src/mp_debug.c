@@ -3578,6 +3578,23 @@ void MP_TestCommand(const char *cmd, const char *arg)
         else
             printf("[test] objat %d,%d: none\n", x, y);
     }
+    else if (strcmp(cmd, "objlist") == 0)
+    {
+        // objlist: every object on the field (local id, graphics, cell, hidden, its sprite's state and palette)
+        int i;
+        for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+        {
+            struct ObjectEvent *o = &gObjectEvents[i];
+            struct Sprite *sp;
+            if (!o->active)
+                continue;
+            sp = o->spriteId < MAX_SPRITES ? &gSprites[o->spriteId] : NULL;
+            printf("[test] obj %d local %d gfx %d at %d,%d move %d inv %d offscreen %d sprite %d inUse %d sinv %d pal %d xy %d,%d\n",
+                   i, o->localId, OBJ_GFX_ID(o), o->currentCoords.x - MAP_OFFSET, o->currentCoords.y - MAP_OFFSET, o->movementType,
+                   o->invisible, o->offScreen, o->spriteId, sp ? sp->inUse : 0, sp ? sp->invisible : 0, sp ? sp->oam.paletteNum : -1,
+                   sp ? sp->x : 0, sp ? sp->y : 0);
+        }
+    }
     else if (strcmp(cmd, "steptrigger") == 0)
     {
         // steptrigger X Y: as if the player stepped onto that cell: its step trigger runs if its variable holds the value

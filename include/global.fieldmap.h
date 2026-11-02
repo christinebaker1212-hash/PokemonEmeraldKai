@@ -258,10 +258,11 @@ struct ObjectEvent
 
 // Moemon Kai: an object's whole graphics id (the save format keeps its low byte at 0x05, the high one in old padding)
 #define OBJ_GFX_ID(obj) ((u16)((obj)->graphicsIdLo | ((obj)->graphicsIdHi << 8)))
-#define SET_OBJ_GFX_ID(obj, id) ((obj)->graphicsIdLo = (u8)(id), (obj)->graphicsIdHi = ((id) >> 8) & 0xF)
+// (the id is worked out once: one that reads the object's own id, a VAR_0 look, came out half the old and half the new)
+#define SET_OBJ_GFX_ID(obj, id) ({ u16 _gfx = (id); (obj)->graphicsIdLo = (u8)_gfx; (obj)->graphicsIdHi = (_gfx >> 8) & 0xF; })
 // ... and an object event template's (map data and SaveBlock1.objectEventTemplates)
 #define TEMPLATE_GFX_ID(t) ((u16)((t)->graphicsIdLo | ((t)->graphicsIdHi << 8)))
-#define SET_TEMPLATE_GFX_ID(t, id) ((t)->graphicsIdLo = (u8)(id), (t)->graphicsIdHi = (u8)((id) >> 8))
+#define SET_TEMPLATE_GFX_ID(t, id) ({ u16 _gfx = (id); (t)->graphicsIdLo = (u8)_gfx; (t)->graphicsIdHi = (u8)(_gfx >> 8); })
 
 struct ObjectEventGraphicsInfo
 {
