@@ -5157,4 +5157,17 @@ const struct Item gItems[] =
         .type = ITEM_USE_BAG_MENU,
         .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
     },
+
+    [ITEM_MOENAV] =
+    {
+        .name = _("MOéNAV"),
+        .itemId = ITEM_MOENAV,
+        .price = 0,
+        .description = sMoenavDesc,
+        .importance = 1,
+        .registrability = TRUE,
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_FIELD,
+        .fieldUseFunc = ItemUseOutOfBattle_Moenav,
+    },
 };

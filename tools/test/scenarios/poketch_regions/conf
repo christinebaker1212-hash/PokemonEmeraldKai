@@ -1,6 +1,6 @@
 # The POKéTCH outside SINNOH (src/sinnoh/poketch.c): in HOENN, registered to SELECT it opens from the field; HOENN's
 # badges unlock the apps (badges from any region count); the MARKING MAP shows HOENN's own town map; the KITCHEN
-# TIMER runs; B closes it and the player walks again. Needs the graphics pack. Shots r_*.png.
+# TIMER runs; B closes it and the player walks again. Needs the graphics pack. Shots r_*.png. (SINNOH's LEAGUE beaten: outside SINNOH it works only then.)
 MODE=1
 TMO=90
 ENV_A="MOEMON_DEBUG_PARTY=25:30,1:20"

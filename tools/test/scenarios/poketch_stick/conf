@@ -2,7 +2,7 @@
 # nothing without the item; up shows it small (the player still walks), right changes the app, up again makes it
 # large; the click starts the cursor (locked to the CALCULATOR's keys), again ends it; left goes back through the apps
 # (to the LINK SEARCHER, a free cursor); down twice hides it, and then the click is the FRIEND FINDER's again.
-# Shots s_*.png.
+# Shots s_*.png. (SINNOH's LEAGUE beaten: outside SINNOH it works only then.)
 MODE=1
 TMO=60
 ENV_A="MOEMON_DEBUG_PARTY=25:30"

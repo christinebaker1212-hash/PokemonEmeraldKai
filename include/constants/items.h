@@ -784,8 +784,9 @@
 #define ITEM_DAMP_MULCH 682
 #define ITEM_STABLE_MULCH 683
 #define ITEM_GOOEY_MULCH 684
+#define ITEM_MOENAV 685   // Moemon Kai: the MOéNAV as a key item outside HOENN once HOENN's LEAGUE is beaten
 
-#define ITEMS_COUNT 685
+#define ITEMS_COUNT 686
 // end of Gen 5-9 items
 #define FIRST_PLATINUM_KEY_ITEM ITEM_GALACTIC_KEY
 #define LAST_PLATINUM_ITEM ITEM_GOOEY_MULCH

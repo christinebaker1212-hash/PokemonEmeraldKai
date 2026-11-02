@@ -11,6 +11,7 @@ void ItemUseOutOfBattle_CandyJar(u8 taskId);
 void ItemUseOutOfBattle_Poketch(u8 taskId);   // Moemon Kai
 void ItemUseOutOfBattle_Honey(u8 taskId);     // Moemon Kai
 void ItemUseOutOfBattle_PokeRadar(u8 taskId); // Moemon Kai
+void ItemUseOutOfBattle_Moenav(u8 taskId);    // Moemon Kai
 void ItemUseOutOfBattle_CardCase(u8 taskId);
 void ItemUseOutOfBattle_CoinCase(u8 taskId);
 void ItemUseOutOfBattle_PowderJar(u8 taskId);

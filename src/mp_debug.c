@@ -3354,9 +3354,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         // regionclear R: as if that region's Elite Four were beaten (0 HOENN: FLAG_SYS_GAME_CLEAR too)
         int r = atoi(arg);
+        void MP_HmRescue_GiveAll(void);
         MP_Region_SetCleared(r);
         if (r == 0)
             FlagSet(FLAG_SYS_GAME_CLEAR);
+        MP_HmRescue_GiveAll();   // (a cleared region's player has had its HMs: no HM rescue in tests that skip the story)
     }
     else if (strcmp(cmd, "party") == 0)
     {

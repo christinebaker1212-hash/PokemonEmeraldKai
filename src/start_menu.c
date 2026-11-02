@@ -1,5 +1,6 @@
 #include "mp_version.h"
 #include "global.h"
+#include "mp_region.h"
 #include "qz_specials.h"
 #include "mp.h"
 #include "mp_garden.h"   // Moemon Co-op: START > GARDEN
@@ -359,7 +360,8 @@ static void BuildNormalStartMenu(void)
 
     AddStartMenuAction(MENU_ACTION_BAG);
 
-    if (FlagGet(FLAG_SYS_POKENAV_GET) == TRUE)
+    // Moemon Kai: the MOéNAV is HOENN's: on START there; elsewhere it's a key item once HOENN's LEAGUE is beaten
+    if (FlagGet(FLAG_SYS_POKENAV_GET) == TRUE && MP_Region_Current() == REGION_HOENN)
     {
         AddStartMenuAction(MENU_ACTION_POKENAV);
     }

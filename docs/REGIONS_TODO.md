@@ -53,7 +53,8 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 
 ## HOENN
 - [x] HOENN's legendaries only in HOENN (KANTO's BIRTH ISLAND and Quetzal's CINNABAR chamber empty)
-- [ ] MOENAV: START menu in HOENN (done), a registrable key item elsewhere once HOENN's ELITE FOUR is beaten
+- [x] MOENAV: START menu in HOENN (only there now), a registrable key item elsewhere once HOENN's ELITE FOUR is beaten
+      (ITEM_MOENAV 685, given on the next map load: mp_region.c MP_Region_GiveDevices; test moenav_key)
 
 ## SINNOH
 - [x] Plates and SINNOH's legendaries only in SINNOH (Quetzal's plate shops at CINNABAR's lab and the RUINS OF ALPH
@@ -64,8 +65,8 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [ ] Followers cut in half in 3D (maybe fixed)
 - [ ] Seams where the map ends and the out-of-bounds loop begins
 - [ ] Water animates
-- [ ] POKéTCH a registrable key item outside SINNOH (on / off, the right stick as usual) once SINNOH's ELITE FOUR is
-      beaten
+- [x] POKéTCH a registrable key item outside SINNOH (on / off, the right stick as usual) once SINNOH's ELITE FOUR is
+      beaten (MP_Region_DeviceHere; tests poketch_locked, poketch_regions)
 
 ## All added regions
 - [ ] Events: FireRed for KANTO, then HGSS for gaps

@@ -39,6 +39,7 @@ void Sinnoh_PlatinumStoryBegin(void);   // (src/sinnoh/s3d_scrcmd.c)
 #include "constants/flags.h"
 #include "constants/qz_port.h"
 #include "constants/items.h"
+#include "item.h"
 #include "constants/moves.h"
 #include "constants/species.h"
 #include "constants/trainers.h"
@@ -800,6 +801,21 @@ bool8 MP_Region_Cleared(u8 region)
     if (region == REGION_HOENN && FlagGet(FLAG_SYS_GAME_CLEAR))
         return TRUE;
     return region < REGION_COUNT && (gRegionState.cleared & (1 << region));
+}
+
+// A region's own device (HOENN's MOéNAV, SINNOH's POKéTCH, JOHTO's POKéGEAR) works in its region, and in the others
+// once that region's LEAGUE is beaten (the user, 2026-11-02)
+bool8 MP_Region_DeviceHere(u8 home)
+{
+    return MP_Region_Current() == home || MP_Region_Cleared(home);
+}
+
+// On every map load (overworld.c): HOENN's LEAGUE beaten with the MOéNAV in hand, its key item joins the BAG for the
+// other regions (on START in HOENN as ever)
+void MP_Region_GiveDevices(void)
+{
+    if (FlagGet(FLAG_SYS_POKENAV_GET) && MP_Region_Cleared(REGION_HOENN) && !CheckBagHasItem(ITEM_MOENAV, 1))
+        AddBagItem(ITEM_MOENAV, 1);
 }
 
 void MP_Region_SetCleared(u8 region)

@@ -1,0 +1,16 @@
+pressuntil A field 5000
+wait 30
+mp additem 660 1
+mp register 660
+mp poketchstick 0
+wait 10
+press SELECT 1
+wait 60
+shot locked
+mash A 20 10
+wait 60
+shot closed
+mp regionclear 3
+mp poketchstick 0
+wait 10
+quit

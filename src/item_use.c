@@ -1,4 +1,6 @@
 #include "global.h"
+#include "mp_region.h"
+#include "pokenav.h"
 #include "s3d_underground.h"   // Moemon Kai: the EXPLORER KIT
 #include "tcg/integration.h"
 #include "mp.h"
@@ -701,6 +703,11 @@ static void Task_OpenRegisteredCandyJar(u8 taskId)
 void ItemUseOutOfBattle_Poketch(u8 taskId)
 {
     void MP_Poketch_Open(void);
+    if (!MP_Region_DeviceHere(REGION_SINNOH))   // (outside SINNOH once SINNOH's LEAGUE is beaten)
+    {
+        DisplayDadsAdviceCannotUseItemMessage(taskId, gTasks[taskId].tUsingRegisteredKeyItem);
+        return;
+    }
     MP_Poketch_Open();
     if (gTasks[taskId].tUsingRegisteredKeyItem != TRUE)
     {
@@ -736,6 +743,46 @@ static void ItemUseOnFieldCB_PokeRadar(u8 taskId)
     ScriptUnfreezeObjectEvents();
     UnlockPlayerFieldControls();
     DestroyTask(taskId);
+}
+
+// Moemon Kai: the MOéNAV as a key item (outside HOENN, once HOENN's LEAGUE is beaten: mp_region.c
+// MP_Region_DeviceHere): the POKéNAV opens, and closing it goes back to the field (pokenav.c gMpPokenavToField)
+extern bool8 gMpPokenavToField;
+static void CB2_OpenMoenavFromBag(void)
+{
+    gMpPokenavToField = TRUE;
+    CB2_InitPokeNav();
+}
+
+static void Task_OpenRegisteredMoenav(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        CleanupOverworldWindowsAndTilemaps();
+        gMpPokenavToField = TRUE;
+        SetMainCallback2(CB2_InitPokeNav);
+        DestroyTask(taskId);
+    }
+}
+
+void ItemUseOutOfBattle_Moenav(u8 taskId)
+{
+    if (!MP_Region_DeviceHere(REGION_HOENN))
+    {
+        DisplayDadsAdviceCannotUseItemMessage(taskId, gTasks[taskId].tUsingRegisteredKeyItem);
+        return;
+    }
+    if (gTasks[taskId].tUsingRegisteredKeyItem != TRUE)
+    {
+        gBagMenu->newScreenCallback = CB2_OpenMoenavFromBag;
+        Task_FadeAndCloseBagMenu(taskId);
+    }
+    else
+    {
+        PlayRainStoppingSoundEffect();
+        FadeScreen(FADE_TO_BLACK, 0);
+        gTasks[taskId].func = Task_OpenRegisteredMoenav;
+    }
 }
 
 void ItemUseOutOfBattle_PokeRadar(u8 taskId)

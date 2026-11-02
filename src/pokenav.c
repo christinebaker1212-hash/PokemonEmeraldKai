@@ -312,6 +312,8 @@ static void Task_RunLoopedTask_LinkMode(u8 taskId)
     }
 }
 
+bool8 gMpPokenavToField;   // Moemon Kai: opened as the MOéNAV key item: closing it goes back to the field (item_use.c)
+
 void CB2_InitPokeNav(void)
 {
     gPokenavResources = Alloc(sizeof(*gPokenavResources));
@@ -494,8 +496,11 @@ static void Task_Pokenav(u8 taskId)
             FreePokenavResources();
             if (calledFromScript)
                 SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+            else if (gMpPokenavToField)
+                SetMainCallback2(CB2_ReturnToField);
             else
                 SetMainCallback2(CB2_ReturnToFieldWithOpenMenu);
+            gMpPokenavToField = FALSE;
         }
         break;
     }

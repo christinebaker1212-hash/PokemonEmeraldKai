@@ -1,0 +1,26 @@
+pressuntil A field 5000
+wait 30
+mp setflag 2146
+mp startmenu
+mp warp 36,1,5,7
+wait 120
+mp startmenu
+mp checkitem 685
+mp setflag 2148
+mp warp 36,1,5,8
+wait 120
+mp checkitem 685
+mp register 685
+wait 10
+press SELECT 2
+wait 150
+shot moenav
+press B 2
+wait 30
+press B 2
+wait 30
+press B 2
+wait 150
+mp where
+shot field
+quit

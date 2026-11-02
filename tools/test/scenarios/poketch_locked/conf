@@ -1,0 +1,7 @@
+# The POKéTCH outside SINNOH before SINNOH's LEAGUE: the right stick does nothing and SELECT says it can't be used
+# (mp_region.c MP_Region_DeviceHere); with the LEAGUE beaten the stick shows it. Shot locked.
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_PARTY=25:30"
+EXPECT_A=("[test] poketch: view 1")
+UNEXPECT_A=("[crash]" "[test] poketch: open")

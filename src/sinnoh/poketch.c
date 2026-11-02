@@ -1400,9 +1400,11 @@ static void MoveTarget(const struct Target *t, u8 n, s32 dx, s32 dy)
 }
 
 // Shown on the field while the player is free to move (a script, a menu or another screen hides it for the while)
+// (outside SINNOH only once SINNOH's LEAGUE is beaten: mp_region.c MP_Region_DeviceHere)
 static bool8 Available(void)
 {
-    return gMain.callback2 == CB2_Overworld && !gPaletteFade.active && MP_IsLocalFree();
+    return gMain.callback2 == CB2_Overworld && !gPaletteFade.active && MP_IsLocalFree()
+        && MP_Region_DeviceHere(REGION_SINNOH);
 }
 
 static bool8 Shown(void)

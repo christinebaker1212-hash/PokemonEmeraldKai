@@ -1,5 +1,6 @@
 pressuntil A field 5000
 wait 30
+mp regionclear 3
 mp poketchstick 0
 wait 10
 mp additem 660 1
