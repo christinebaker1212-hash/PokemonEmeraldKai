@@ -66,6 +66,8 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
   "PÓKETCH"; the game spells it POKéTCH): before pushing, run `python3 tools/release/gen_patchnotes.py
   src/data/mp_patchnotes.h tools/release/notes/*.md`. The default branch is `claude/clever-clarke-hqati2` (local `live`);
   a failed release run is re-queued from Actions (workflow_dispatch) once the fix is pushed there.
+- Publishing needs no permission (the user, 2026-11-02): once the tests pass, release; ask first only when the user
+  says to pause and check.
 - Dev updates (planned, HANDOFF.md): unless the user asks for a feature with "As a dev update..." or something like it,
   it is a main update: don't test it as a dev update and don't push a dev update.
 - `tools/moemon_import/`: scripts that imported the Kai IPS into the decomp (need the user's ROM; not in the repo)
