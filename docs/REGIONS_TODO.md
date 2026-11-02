@@ -102,7 +102,9 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       the TOWN MAP (the POKéNAV / POKéGEAR maps). JOHTO against pret/pokecrystal, to do: BILL's family gives Crystal's
       EEVEE (Quetzal: ROTOM) [x], MT. MORTAR's KARATE KING his TYROGUE [x] (fix_johto_gifts.py, test johto_gifts);
       GIOVANNI's quest (Quetzal's) never begins [x] (it was ELM's ARCEUS scene's way in; test story_giovanni); the
-      RADIO TOWER's prizes and the DIRECTOR's gift: to do; MR. POKéMON's EXP. SHARE for the RED SCALE [x] (Quetzal: DRAGON
+      RADIO TOWER kept as it is [x]: the DIRECTOR's RAINBOW WING is Gold's / HeartGold's (Crystal's CLEAR BELL would
+      undo the TIN TOWER's events, which wait on the WING), and the lucky number's prizes are Emerald's own LOTTERY
+      CORNER (Kai first); MR. POKéMON's EXP. SHARE for the RED SCALE [x] (Quetzal: DRAGON
       SCALE))
 - [x] A non-HOENN gym leader beaten: the gym's unbattled trainers count as beaten (mp_coop.c MP_Coop_GymLeaderBeaten;
       test sinnoh_gym)
