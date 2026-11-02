@@ -1914,7 +1914,8 @@ def write(lines, out_path):
 
 def stub(out_path):
     import tv_data
-    lines = ['%s::\n\tend' % lab for lab in sorted(referenced())] + map_index([]) + ['gSinnohPlatinumNewGame::', '\tend'] + stub_dex_ratings()
+    lines = [('%s:\n\t.byte 0xFF' if TEXT_REF.match(lab) else '%s::\n\tend') % lab for lab in sorted(referenced())] \
+        + map_index([]) + ['gSinnohPlatinumNewGame::', '\tend'] + stub_dex_ratings()
     lines += ['gSinnohTvBroadcast::', '\tend']
     lines += tv_data.stub_lines()
     import contest_data
@@ -1923,8 +1924,13 @@ def stub(out_path):
     print('%s: %d stubs (no decomp)' % (os.path.relpath(out_path, ROOT), len(referenced())))
 
 
+TEXT_REF = re.compile(r'^%sT_(\d+)_(\d+)$' % PREFIX)   # (one of Platinum's lines, by bank and number, from this game's scripts)
+
+
 def build(root, out_path):
     refs = referenced()
+    text_refs = {lab for lab in refs if TEXT_REF.match(lab)}
+    refs -= text_refs
     wanted = collections.defaultdict(set)
     for lab in refs:
         m = re.match(r'^%s(\w+?)_(\d+)$' % PREFIX, lab)
@@ -1975,6 +1981,9 @@ def build(root, out_path):
     if new_game not in done:
         print('gen_scripts: Platinum\'s new game script doesn\'t convert: %s' % converter(root, 'init_new_game').check(1),
               file=sys.stderr)
+    for lab in text_refs:   # (Platinum's own lines this game's scripts say: SinnohP_T_<bank>_<number>)
+        m = TEXT_REF.match(lab)
+        texts[lab] = (int(m.group(1)), int(m.group(2)))
     for lab, (b, m) in sorted(texts.items()):
         lines.append('%s:\n\t.byte %s' % (lab, text_bytes(b, m)))
     write(lines, out_path)

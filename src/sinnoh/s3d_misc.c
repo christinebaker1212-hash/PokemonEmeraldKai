@@ -390,6 +390,11 @@ void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
         MPNet_Log("sinnoh partner: the walk ends");
         break;
     }
+    case 25:
+        // (the BATTLE TOWER's BP, Platinum's line: the player's name, then the points frontier_givepoints wrote)
+        StringCopy(gStringVar2, gStringVar1);
+        StringCopy(gStringVar1, gSaveBlock2Ptr->playerName);
+        break;
     case 21:
         if (sM.battleground < 0xFFFF)
             sM.battleground++;

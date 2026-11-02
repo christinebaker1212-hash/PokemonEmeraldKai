@@ -1,5 +1,5 @@
 # The SINNOH BATTLE TOWER (data/maps/Sinnoh_BattleTower, Sinnoh_BattleTowerBattleRoom: Emerald's tower battles in
-# Platinum's rooms): OPEN LEVEL, three POKéMON picked, the game saved, the battle room, seven opponents (at 1 HP: MOEMON_TEST_FOE_HP1,
+# Platinum's rooms): Platinum's words and menus, SINGLE at level 50, three POKéMON picked, the game saved, the battle room, seven opponents (at 1 HP: MOEMON_TEST_FOE_HP1,
 # the frontier too: A pressed until the run ends), then back at the counter with BATTLE POINTS, the streak 7. Shots t_room.png (the first opponent), t_tower_end.png.
 # Needs the 3D pack.
 MODE=1

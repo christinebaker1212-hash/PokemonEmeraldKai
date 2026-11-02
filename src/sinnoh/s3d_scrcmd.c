@@ -886,3 +886,9 @@ void Sinnoh_PartnerUpdate(void)
             ObjectEventTurn(&gObjectEvents[obj], player->facingDirection);
     }
 }
+
+// Tests (the harness's "multichoice" state): one of Platinum's menus is up
+bool8 Sinnoh_MenuOpen(void)
+{
+    return FuncIsActiveTask(Task_SinnohMenu);
+}

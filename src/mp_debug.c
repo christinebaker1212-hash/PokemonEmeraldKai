@@ -325,7 +325,8 @@ int MP_TestCondition(const char *name)
     if (strcmp(name, "multichoice") == 0)   // a script's multichoice menu is up
     {
         bool8 MP_ScriptMultichoiceOpen(void);
-        return MP_ScriptMultichoiceOpen();
+        bool8 Sinnoh_MenuOpen(void);   // (SINNOH's Platinum menus: s3d_scrcmd.c)
+        return MP_ScriptMultichoiceOpen() || Sinnoh_MenuOpen();
     }
     if (strcmp(name, "partymenu") == 0)   // the party screen is up (e.g. picking the next Moemon in battle)
     {

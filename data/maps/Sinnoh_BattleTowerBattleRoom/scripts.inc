@@ -40,7 +40,7 @@ Sinnoh_BattleTowerBattleRoom_EventScript_Won::
 	waitmovement 0
 	applymovement 1, Sinnoh_BattleTowerBattleRoom_Movement_AttendantOut
 	waitmovement 0
-	msgbox Sinnoh_BattleTowerBattleRoom_Text_Heal, MSGBOX_DEFAULT
+	msgbox SinnohP_T_30_0, MSGBOX_DEFAULT
 	playfanfare MUS_HEAL
 	waitfanfare
 	special HealPlayerParty
@@ -48,9 +48,9 @@ Sinnoh_BattleTowerBattleRoom_EventScript_AskNext::
 	frontier_get FRONTIER_DATA_BATTLE_NUM
 	addvar VAR_RESULT, 1
 	buffernumberstring STR_VAR_1, VAR_RESULT
-	msgbox Sinnoh_BattleTowerBattleRoom_Text_Next, MSGBOX_YESNO
+	msgbox SinnohP_T_30_1, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, YES, Sinnoh_BattleTowerBattleRoom_EventScript_Continue
-	msgbox Sinnoh_BattleTowerBattleRoom_Text_Retire, MSGBOX_YESNO
+	msgbox SinnohP_T_30_3, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, YES, Sinnoh_BattleTowerBattleRoom_EventScript_Lost
 	goto Sinnoh_BattleTowerBattleRoom_EventScript_AskNext
 
@@ -133,14 +133,5 @@ Sinnoh_BattleTowerBattleRoom_Movement_AttendantBack:
 	face_right
 	step_end
 
-Sinnoh_BattleTowerBattleRoom_Text_Heal:
-	.string "Well done! Let me restore your\n"
-	.string "MOéMON.$"
 
-Sinnoh_BattleTowerBattleRoom_Text_Next:
-	.string "Your next opponent will be number\n"
-	.string "{STR_VAR_1}. Are you ready?$"
 
-Sinnoh_BattleTowerBattleRoom_Text_Retire:
-	.string "Would you like to end your\n"
-	.string "challenge here?$"

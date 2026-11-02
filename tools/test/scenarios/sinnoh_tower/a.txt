@@ -15,10 +15,9 @@ press A 1
 wait 40
 waitfor multichoice 2000
 wait 20
-press DOWN 1
-wait 10
 press A 1
 wait 30
+shot t_menu2
 pressuntil A partymenu 3000
 wait 40
 press A 1
@@ -37,9 +36,6 @@ press A 1
 wait 20
 press A 1
 wait 30
-press A 1
-pressuntil A yesno 3000
-wait 10
 press A 1
 shotburst t_room 900 60
 pressuntil A battle 6000
