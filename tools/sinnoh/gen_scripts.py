@@ -45,6 +45,7 @@ SINNOH_BUFFER_POCKET, SINNOH_BADGE_CHECK, SINNOH_NATIONAL_DEX = 10, 11, 12
 SINNOH_MENU_INIT, SINNOH_MENU_ADD, SINNOH_MENU_SHOW = 13, 14, 15
 SINNOH_FIRST_NON_EGG, SINNOH_COUNT_ALIVE_EXCEPT, SINNOH_HAS_SPECIES, SINNOH_DAY_OF_WEEK = 16, 17, 18, 19
 SINNOH_TIME_OF_DAY, SINNOH_ON_BIKE, SINNOH_STARTER, SINNOH_FACE = 20, 21, 22, 23
+SINNOH_GAME_COMPLETED, SINNOH_DID_NOT_CAPTURE = 24, 25
 
 # Platinum's comparisons (CompareVar / CheckFlag then GoToIf / CallIf): the same codes as this game's
 COND = {'Lt': 0, 'Eq': 1, 'Gt': 2, 'Le': 3, 'Ge': 4, 'Ne': 5}
@@ -84,7 +85,13 @@ def _music_of():
         from gen_maps import MUSIC
     except Exception:
         return {}
-    return {seq: 'MUS_SINNOH_' + name.upper() for seq, name in MUSIC.items()}
+    out = {seq: 'MUS_SINNOH_' + name.upper() for seq, name in MUSIC.items()}
+    # the story's own songs (not a map's)
+    out.update({'SEQ_THE_RIV_sseq': 'MUS_SINNOH_RIVAL', 'SEQ_THE_GIRL_sseq': 'MUS_SINNOH_DAWN',
+                'SEQ_THE_BOY_sseq': 'MUS_SINNOH_LUCAS', 'SEQ_TSURETEKE_sseq': 'MUS_SINNOH_FOLLOW_ME',
+                'SEQ_PL_HANDSOME_sseq': 'MUS_SINNOH_LOOKER', 'SEQ_FUE_sseq': 'MUS_SINNOH_AZURE_FLUTE',
+                'SEQ_D_SAFARI_sseq': 'MUS_SINNOH_GREAT_MARSH', 'SEQ_THE_EVENT02_sseq': 'MUS_SINNOH_GALACTIC_APPEARS'})
+    return out
 
 
 MUSIC_OF = _music_of()
@@ -220,9 +227,14 @@ class FileConverter:
                         self.localids[o['id']] = i + 1
         self.labels, self.entries, self.order = parse(path)
         self.texts = {}            # label -> (bank number, message number)
+        self._local = 0
         self.calls = set()         # (file, entry) of the common scripts it calls
         self.moves = set()         # movement labels
         self._ok = {}
+
+    def next_local(self):
+        self._local += 1
+        return self._local
 
     # ---- names
     def label(self, name):
@@ -248,6 +260,7 @@ class FileConverter:
             return str(CONSTANTS[x])
         if re.match(r'^(ITEM|SPECIES|MOVE)_', x):
             x = RENAME.get(x, x)
+            x = {'ITEM_SECRETPOTION': 'ITEM_SECRET_POTION'}.get(x, x)
             if x in self.dec.ours:
                 return x
             raise Unsupported('value %s (not in this game)' % x)
@@ -466,7 +479,10 @@ class FileConverter:
             return [self.sinnoh(SINNOH_MENU_ADD, where[0], where[1], self.value(value))]
         if cmd in ('ShowMenu', 'ShowListMenu', 'ShowMenuMultiColumn'):
             return [self.sinnoh(SINNOH_MENU_SHOW)]
-        if cmd in ('ScrCmd_32D', 'ScrCmd_338', 'LockObject', 'UnlockObject', 'SetMenuXOriginToRight'):
+        if cmd in ('ScrCmd_32D', 'ScrCmd_338', 'ScrCmd_32E', 'ScrCmd_339', 'ScrCmd_332', 'LockObject', 'UnlockObject',
+                   'SetMenuXOriginToRight', 'IncrementTrainerScore', 'IncrementTrainerScore2', 'IncrementGameRecord',
+                   'IncrementGameRecordTwice', 'LoadDoorAnimation', 'PlayDoorOpenAnimation', 'PlayDoorCloseAnimation',
+                   'WaitForAnimation', 'UnloadAnimation', 'UnloadDoorAnimation'):
             return []                       # (the walking partner paused / resumed, objects held: nothing to do here)
         if cmd == 'SetObjectEventMovementType':
             import sprites
@@ -498,7 +514,22 @@ class FileConverter:
         if cmd == 'StartLegendaryBattle':
             return ['setwildbattle %s, %s' % (self.value(a[0]), self.value(a[1])),
                     'special BattleSetup_StartLegendaryBattle', 'waitstate']
-        if cmd == 'PlayMusic':
+        if cmd == 'CheckGameCompleted':
+            return [self.sinnoh(SINNOH_GAME_COMPLETED, self.var(a[0]))]
+        if cmd == 'CheckDidNotCapture':
+            return [self.sinnoh(SINNOH_DID_NOT_CAPTURE, self.var(a[0]))]
+        if cmd == 'GoToIfInRange':
+            # (a .. b, both in): two comparisons, the first skipping past the second
+            skip = '%s%s__skip%d' % (PREFIX, self.low, self.next_local())
+            return ['compare_var_to_value %s, %s' % (self.var(a[0]), self.value(a[1])), 'goto_if 0, %s' % skip,
+                    'compare_var_to_value %s, %s' % (self.var(a[0]), self.value(a[2])), 'goto_if 3, %s' % self.label(a[3]),
+                    '%s:' % skip]
+        if cmd == 'HideObject':
+            o = self.dec.origins().get(self.events_low)
+            if o is None:
+                raise Unsupported('objects on %s' % self.events_low)
+            return ['hideobjectat %s, %s' % (self.localid(a[0]), o[0])]
+        if cmd in ('PlayMusic', 'SetBGM'):
             mus = MUSIC_OF.get(a[0])
             if mus is None:
                 raise Unsupported('music %s' % a[0])

@@ -7,15 +7,11 @@ Sinnoh_GrandLakeRoute213NorthwestHouse_EventScript_Person1::
 	end
 
 Sinnoh_GrandLakeRoute213NorthwestHouse_EventScript_Person2::
-	msgbox Sinnoh_GrandLakeRoute213NorthwestHouse_Text_Person2, MSGBOX_NPC
+	goto SinnohP_grand_lake_route_213_northwest_house_2
 	end
 
 Sinnoh_GrandLakeRoute213NorthwestHouse_EventScript_Person3::
 	goto SinnohP_grand_lake_route_213_northwest_house_3
 	end
-
-Sinnoh_GrandLakeRoute213NorthwestHouse_Text_Person2:
-	.string "The sea air clears my mind. I can\n"
-	.string "almost hear my MOéMON's thoughts.$"
 
 @ --- end of SINNOH words ---

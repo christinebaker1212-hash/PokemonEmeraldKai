@@ -3,7 +3,7 @@ Sinnoh_OreburghCity_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_OreburghCity_EventScript_Bg1::
-	msgbox Sinnoh_OreburghCity_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_oreburgh_city_3
 	end
 
 Sinnoh_OreburghCity_EventScript_Person1::
@@ -109,10 +109,6 @@ Sinnoh_OreburghCity_EventScript_Sign9::
 Sinnoh_OreburghCity_EventScript_Sign10::
 	goto SinnohP_oreburgh_city_15
 	end
-
-Sinnoh_OreburghCity_Text_Bg1:
-	.string "The road to the mine. The ground\n"
-	.string "rumbles faintly under your feet.$"
 
 Sinnoh_OreburghCity_Text_Person4:
 	.string "BARRY: The GYM LEADER's down in the\n"

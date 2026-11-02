@@ -16,6 +16,8 @@
 #include "s3d.h"
 
 #include "data.h"
+#include "battle.h"
+#include "constants/battle.h"
 #include "pokemon.h"
 #include "rtc.h"
 #include <time.h>
@@ -51,6 +53,8 @@ enum {
     SINNOH_ON_BIKE,                 // ARG: a variable <- the player rides a bike
     SINNOH_STARTER,                 // ARG: a variable <- the player's SINNOH starter (by the party's lines; TURTWIG else)
     SINNOH_FACE,                    // ARG: an object (or a variable holding it), ARG2: Platinum's way (N 0 S 1 W 2 E 3)
+    SINNOH_GAME_COMPLETED,          // ARG: a variable <- SINNOH's CHAMPION beaten (its HALL OF FAME)
+    SINNOH_DID_NOT_CAPTURE,         // ARG: a variable <- the last wild battle didn't end in a catch
 };
 
 // Platinum's menus are made as the script goes (InitGlobalTextMenu / AddMenuEntryImm / ShowMenu): here as a
@@ -284,6 +288,12 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
                                        sDirs[arg2 & 3]);
         break;
     }
+    case SINNOH_GAME_COMPLETED:
+        VarSet(arg, MP_Region_Cleared(REGION_SINNOH));
+        break;
+    case SINNOH_DID_NOT_CAPTURE:
+        VarSet(arg, gBattleOutcome != B_OUTCOME_CAUGHT);
+        break;
     case SINNOH_NATIONAL_DEX:
         VarSet(arg, IsNationalPokedexEnabled());
         break;

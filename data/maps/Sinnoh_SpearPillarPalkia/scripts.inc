@@ -3,19 +3,11 @@ Sinnoh_SpearPillarPalkia_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_SpearPillarPalkia_EventScript_Bg1::
-	msgbox Sinnoh_SpearPillarPalkia_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_spear_pillar_palkia_1
 	end
 
 Sinnoh_SpearPillarPalkia_EventScript_Bg2::
-	msgbox Sinnoh_SpearPillarPalkia_Text_Bg2, MSGBOX_SIGN
+	goto SinnohP_spear_pillar_palkia_1
 	end
-
-Sinnoh_SpearPillarPalkia_Text_Bg1:
-	.string "A strange crack in the wall. Cold air\n"
-	.string "seeps out of it.$"
-
-Sinnoh_SpearPillarPalkia_Text_Bg2:
-	.string "A strange crack in the wall. Cold air\n"
-	.string "seeps out of it.$"
 
 @ --- end of SINNOH words ---
