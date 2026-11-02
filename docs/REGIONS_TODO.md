@@ -1,0 +1,68 @@
+# The user's list for the regions (2026-11-02)
+
+To do once SINNOH is finished, pushed, built and released, without stopping to ask: decide and note the decision
+here ("Decisions" below). Priority when sources disagree: Kai > FireRed (KANTO) / Crystal + HGSS (JOHTO) > Quetzal.
+Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [ ] to do, [~] begun, [x] done.
+
+## KANTO
+- [ ] FireRed's decomp settles any behavior question (Kai > FireRed > Quetzal)
+- [ ] KANTO's legendaries only in KANTO (exclusives)
+- [ ] FireRed's RUNNING SHOES aide after BROCK doesn't appear: remove him
+- [ ] Doorways too wide: one tile wide
+- [ ] Door opening / closing animations
+- [ ] Going down some ladders puts the player on top of the ladder, not in front of it
+- [ ] MEGA PUNCH / MEGA KICK people outside MT. MOON give their TMs (A4)
+- [ ] CERULEAN: TRIPLE TRIAD first; people who offer a Yu-Gi-Oh! / POKéMON starter deck get words by their personality
+- [ ] VIRIDIAN's shopping area (RARE CANDY, Z / MEGA items whatever GENERATION): remove (CELADON DEPT. covers it)
+- [ ] S.S. ANNE: its sprite, FireRed's departure scene, can't be boarded once gone
+- [ ] The CUT man gives HM01 (not Quetzal's flag); every region: an HM never given twice, words for that case
+- [ ] Water animates
+- [ ] The CUT tree east of CERULEAN (to ROUTE 9 / ROCK TUNNEL) can be cut
+
+## JOHTO
+- [ ] POKéGEAR back as Crystal / HGSS have it (display, functions, calls), no manual clock setting; START menu in
+      JOHTO, a registrable key item elsewhere once JOHTO's ELITE FOUR is beaten
+- [ ] JOHTO's legendaries only in JOHTO
+- [ ] Quetzal's berry system out: 1x1 berry patches where berries were; APRICORN trees rewritten from Crystal
+      (behavior, words), JOHTO's berries
+- [ ] WHITNEY's MILTANK: perfect IVs
+- [ ] Quetzal's auto walk / run: remove its words
+- [ ] Door animations; water animates
+- [ ] The rival named as in Crystal (online: the host names him, said plainly), his starter the one beating the player's
+- [ ] No tree-cutting prompt in a new game without the HM and badge
+- [ ] MOM's money saving (Crystal) and MY ROOM decorating on the Secret Base logic
+
+## HOENN
+- [ ] HOENN's legendaries only in HOENN
+- [ ] MOENAV: START menu in HOENN (done), a registrable key item elsewhere once HOENN's ELITE FOUR is beaten
+
+## SINNOH
+- [ ] Plates and SINNOH's legendaries only in SINNOH
+- [ ] Palettes inverted when the time-of-day lighting changes on a running map (maybe fixed)
+- [ ] Falling through CYCLING ROAD's tunnels (maybe fixed)
+- [ ] BERRY patches can't be planted (maybe fixed)
+- [ ] Followers cut in half in 3D (maybe fixed)
+- [ ] Seams where the map ends and the out-of-bounds loop begins
+- [ ] Water animates
+- [ ] POKéTCH a registrable key item outside SINNOH (on / off, the right stick as usual) once SINNOH's ELITE FOUR is
+      beaten
+
+## All added regions
+- [ ] Events: FireRed for KANTO, then HGSS for gaps
+- [ ] A non-HOENN gym leader beaten: the gym's unbattled trainers count as beaten
+- [ ] BADGES count every region's badges
+- [ ] A4: TMs / HMs from leaders, trainers and events as the original games give them (new TMs / HMs where HOENN's
+      list lacks them)
+- [ ] SINNOH's time of day in KANTO, JOHTO and HOENN: MORNING / DAY / NIGHT encounters
+- [ ] Encounter audit: no strong Pokémon early, places keep their identity (DIGLETT'S CAVE), no DITTO-like utility early;
+      each region's own Pokémon mainly there, the other regions' Pokémon spread where they fit; never remove one already
+      found somewhere; FILL never sends OFF GENERATION, OFF REGION very sparingly
+
+## General
+- [ ] Shadows fade with screen transitions
+- [ ] No extra shadow under a follower's reflection
+- [ ] A follower behind the player drawn over the player when facing / moving down
+- [ ] OPTIONS: RETURN TO MAIN MENU (save? no: sure? then soft reset)
+
+## Decisions
+(each assumption made while working through the list, with why)
