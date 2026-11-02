@@ -39,15 +39,15 @@ Sinnoh_EternaCityGym_EventScript_Person2_GiveTm::
 	end
 
 Sinnoh_EternaCityGym_EventScript_Person3::
-	msgbox Sinnoh_EternaCityGym_Text_Person3, MSGBOX_NPC
+	goto SinnohP_eterna_city_gym_5
 	end
 
 Sinnoh_EternaCityGym_EventScript_Person4::
-	msgbox Sinnoh_EternaCityGym_Text_Person4, MSGBOX_NPC
+	goto SinnohP_eterna_city_gym_6
 	end
 
 Sinnoh_EternaCityGym_EventScript_Person5::
-	msgbox Sinnoh_EternaCityGym_Text_Person5, MSGBOX_NPC
+	goto SinnohP_eterna_city_gym_7
 	end
 
 Sinnoh_EternaCityGym_Text_Person2Intro:
@@ -77,18 +77,5 @@ Sinnoh_EternaCityGym_Text_Person2After:
 Sinnoh_EternaCityGym_Text_Person2Badge:
 	.string "{PLAYER} received the FOREST BADGE\n"
 	.string "from GARDENIA.$"
-
-Sinnoh_EternaCityGym_Text_Person3:
-	.string "GARDENIA's GYM is like a garden inside\n"
-	.string "a clock. Isn't that pretty?$"
-
-Sinnoh_EternaCityGym_Text_Person4:
-	.string "I tend the flowers in this GYM. They're\n"
-	.string "almost as strong as GARDENIA's\l"
-	.string "MOéMON.$"
-
-Sinnoh_EternaCityGym_Text_Person5:
-	.string "Breathe in! Smell that? GRASS MOéMON\n"
-	.string "give off the nicest scents.$"
 
 @ --- end of SINNOH words ---
