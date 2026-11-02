@@ -590,6 +590,19 @@ class FileConverter:
             return [self.sinnoh(SINNOH_MISC, 5, self.var(a[1]), int(self.strvar(a[0])[-1]) - 1)]
         # ROUTE 222's size contest (REMORAID): s3d_misc.c 6-9 on Emerald's size code (pokemon_size_record.c); the
         # number's two halves go to text slots 0-5 (SINNOH's text has six)
+        # the POKéMART clerks and the POKéMON CENTER's nurse on the game's own shop and nurse (as the written stand-ins
+        # had them: gen_words.py); the greeting is Platinum's own common script
+        if cmd in ('PokeMartCommonWithGreeting', 'PokeMartSpecialtiesWithGreeting'):
+            if cmd == 'PokeMartCommonWithGreeting':
+                shop = 'pokemart 0x0'   # (Platinum's list by the region's badges: shop.c in SINNOH)
+            else:
+                from gen_marts import label as mart_label
+                shop = 'pokemart %s' % mart_label(a[0])
+            return (['playse SE_SELECT', 'lockall', 'faceplayer', 'call %s' % self.common(self.dec.common_macro['Common_VendorGreeting']),
+                     shop, 'msgbox gText_PleaseComeAgain, MSGBOX_DEFAULT', 'releaseall'])
+        if cmd == 'Common_CallPokecenterNurse':
+            return ['setvar VAR_0x800B, %s' % self.localid(a[0]), 'call Common_EventScript_PkmnCenterNurse', 'waitmessage',
+                    'waitbuttonpress', 'release']
         if cmd == 'CalcSizeContestResult':
             return [self.sinnoh(SINNOH_MISC, 6, self.var(a[0]), self.var(a[1]))]
         if cmd == 'BufferPartyPokemonSize':

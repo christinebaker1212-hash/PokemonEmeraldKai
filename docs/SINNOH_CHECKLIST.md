@@ -53,8 +53,8 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       sinnoh_tower, sinnoh_factory, sinnoh_hall, sinnoh_castle, sinnoh_arcade)
 - [x] Platinum's "choose a POKéMON" (SelectMoveTutorPokemon / GetSelectedPartySlot) on the game's party menu; its save
       prompt (Common_SaveGame) the game's; scripts go on after a warp (SINNOH_WARP_CONTINUE)
-- [ ] Platinum's commands still unmapped onto Kai's systems: PokeMart*WithGreeting, Common_CallPokecenterNurse,
-      ShowMoveTutorMoveSelectionMenu, PlayHMCutIn, SelectPokemonToTrade,
+- [ ] Platinum's commands still unmapped onto Kai's systems ([x] PokeMart*WithGreeting and Common_CallPokecenterNurse:
+      the game's shop and nurse, Platinum's greeting; 2248 of 2511 entries convert), ShowMoveTutorMoveSelectionMenu, PlayHMCutIn, SelectPokemonToTrade,
       CallBattleTowerFunction / the frontier lobbies, EndSafariGame
 
 ## 3. Built for 1:1 (Platinum has it, Kai doesn't)
