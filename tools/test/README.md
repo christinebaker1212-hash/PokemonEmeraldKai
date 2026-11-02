@@ -57,6 +57,10 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `sim_nodata` | the BATTLE SIMULATOR on a save that never played online: no battle data, said politely |
 | `anim_classic` | every move animation on BATTLE ANIMS > CLASSIC, each one's length logged (`MOEMON_ANIM_FRAMES`), shots of a few |
 | `anim_modern` | the same on MODERN (run after anim_classic): `tools/test/check_anim_frames.sh` checks all 716 lengths match, no crash |
+| `badge_case` | the BADGE CASE (SELECT on the card): badges of three regions won now, six days of fading, rubbed to each look (4 / 2 sparkles, clean, dirty, filthy); shots of the trays and a badge up close; B leaves the card open |
+| `card_regions` | the card in every region: HOENN (Emerald's), KANTO (FireRed's, the team as icons), JOHTO (HeartGold's), SINNOH (Platinum's), backs, MY CARD (a title), back to HOENN, B from JOHTO back to the map |
+| `card_friends` | two clients: a friend's card with its add-on: their KANTO and JOHTO cards (what you did together on the back), their BADGE CASE, then the card in MY CARD > FRIENDS' CARDS |
+| `hm_rescue` / `hm_rescue_carried` | HM04 STRENGTH's scene gone (RUSTURF TUNNEL open) without it: Wanda's boyfriend walks up and hands it over; nobody comes when it's already carried |
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped (and their MOéMON GARDEN records travel) |
 | `nurse_no_union` | CHERRYGROVE's nurse heals a game started in JOHTO: she never says "It appears as if <junk> is playing right now" (the wireless UNION ROOM check; flag 0x2A07 stays clear) |
 | `pmd_scale_hop` | a scaled PMD follower (PIKACHU, FOLLOWERS: PMD everywhere) mid-hop is drawn whole: check.py counts its rows and pixels (its lower part was cut off) |

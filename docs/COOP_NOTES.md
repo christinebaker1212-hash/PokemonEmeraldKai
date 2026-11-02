@@ -4087,3 +4087,55 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   daycare's egg moves, BufferTMHMMoveName, ItemIdToBattleMoveId. The TM pocket sorts by number with the HMs last
   (item.c MP_ItemNumberOrder, also mp_bag.c's tie-break) and holds 128 kinds (MP_BAG_TMHM_COUNT; the slots past the
   save block's 64 are in "<save>.bag"). MP_Gen_OfItem: 4. Test tm_new.
+
+## The TRAINER CARD in every region, the BADGE CASE (1.65.0)
+
+- **Records** (`src/mp/mp_tcard.c`, `include/mp_tcard.h`): "<save>.card" (format 2; MP_TCard_Forget on a save file
+  switch). The save never changes: a region's badges are its flags (mp_region.c MP_Region_BadgeFlag). A badge flag
+  seen set for the first time is a badge just won, whatever script set it (MP_TCard_Update, twice a second on the map):
+  its date (the PC's clock), the lead POKéMON, the friends of the co-op battle that ended within 10 minutes before
+  (captured while MP_Coop_SeatCount() > 1). Badges had when the file is first made are "before records".
+- **Polish** is Platinum's (pret/pokeplatinum include/trainer_case.h, trainer_case_badge_dirt.c, applications/
+  trainer_case/main.c): 140 when won, 10 less a day (the PC's own local date, never the room host's shared clock:
+  MP_ClockShift's rule), FILTHY < 100 <= DIRTY < 140 <= CLEAN < 170 <= 2 SPARKLES < 190 <= 4 SPARKLES <= 199; a rub is a
+  change of direction, Platinum's rubs per point by level {1, 3, 4, 15, 15}. OPTIONS > GAME > BADGE FADING PLATINUM /
+  SLOW (a third: 10 every 3 days) / OFF, per save (in the card file). Tests: `mp tcard days N`, `mp tcard rub R B N`.
+- **The BADGE CASE** (`src/mp/mp_badgecase.c`): SELECT on the card. A 480x320 picture of its own like a VS fight's
+  (display.c: MP_BadgeCase_Canvas after Fight_Canvas; sdl2.c ScreenStep: MP_BadgeCase_Step, the game waits), drawn
+  with tcg_gfx at scale 2 for the case and text and scale 1 for the badges. Badge art: PokeAPI's official artwork at a
+  pinned commit, its white stroke taken off (`tools/moemon_badges/build_badges.py` -> graphics/moemon/badges/
+  badges.bin, built in by mp_badge_data.c's .incbin), 64 px in a tray and 128 px up close; dirt is the badge's colors
+  turned toward brown plus a grime texture made from its alpha (value noise and specks), sparkles are drawn stars.
+  Each badge chimes its note (SE_NOTE_C..C_HIGH). Closing waits for the buttons to be let go (B mustn't close the card).
+  A friend's case (MP_BadgeCase_OpenView) is looked at, not polished.
+- **Region cards**: L / R on the player's card (trainer_card.c sCardRegion; the card of the region we're in opens):
+  HOENN is Emerald's card, untouched; KANTO is FireRed's (CARD_TYPE_FRLG via version VERSION_FIRE_RED: KANTO's badge
+  flags, the card's team in monSpecies, stars from MP_CardView_Stars); the card screen is rebuilt for a switch
+  (STATE_SWITCH_REGION). JOHTO and SINNOH (`src/mp/mp_regioncard.c`) show over it at 480x320: HeartGold's card and
+  Platinum's own art, front and back, six colors by stars (`sinnoh/cards.pak`: tools/sinnoh/build_cards.py from
+  pret/pokeheartgold files/a/0/4/9, fetched by fetch_hgss_card.sh, and pokeplatinum's res/graphics/trainer_case,
+  fetch_decomp.sh parts 9; make_pack.sh builds it, the release ships it, nothing committed). Platinum's card is on an
+  affine layer: its screens are a byte a tile of 8-bit tiles. The picture is read from the game card's window
+  (WIN_TRAINER_PIC's pixels and BG palette 8): every LOOK as the game draws it. The card's color: its region's stars
+  (CHAMPION beaten, all 8 badges, all 8 at 4 sparkles, all 32 badges; a fifth for every CHAMPION).
+- **MY CARD** (START on the own card): CARD TEAM (the party as it is, or this team kept), TITLE (an unlocked
+  achievement's name), SHOW TITLE (also OPTIONS > GAME > CARD TITLE), FRIENDS' CARDS (the album). The title shows on
+  the JOHTO / SINNOH cards and to friends; Emerald's HOENN card stays as it was.
+- **Co-op** (protocol 71): LX_CARD ends with the card's add-on (MP_TCard_PackAddon: every region's badges and polish,
+  the CHAMPIONs beaten, the team, the title, the gender). On a friend's card (CO-OP > FRIENDS > TRAINER CARD) L / R show
+  their other regions' cards (KANTO's as HeartGold's), SELECT their BADGE CASE. The back of a friend's card says what
+  you did together, counted on your own game per friend (MP_TCard_NoteCoopWin from mp_coop.c's win, NotePvp from
+  mp_battle.c, NoteTrade from mp_trade.c, first met when first in a room together). Every friend's card seen is kept
+  with its picture (MP_TCard_KeepFriendCard, 16 friends): MY CARD > FRIENDS' CARDS.
+- Tests: badge_case, card_regions, card_friends (two clients).
+
+## HMs a friend's progress made impossible to get (1.65.0)
+
+`src/mp/mp_hmrescue.c`: four of HOENN's HMs come from a scene that happens once, by someone who then leaves: STRENGTH
+(RUSTURF TUNNEL, VAR_RUSTURF_TUNNEL_STATE 4/5 -> 6), FLY (ROUTE 119's rival battle), DIVE (STEVEN's house in MOSSDEEP),
+WATERFALL (WALLACE in SOOTOPOLIS). Online a friend can move the story past it (a smashed boulder is the room's), so a
+player can come back with the scene gone. Only when the scene is over for good (STRENGTH: the tunnel open; FLY: the
+rival beaten; DIVE: STEVEN's house empty and the 7th badge; WATERFALL: the 8th badge), the received flag is unset and the
+HM is in neither the BAG, the PC nor held by a POKéMON in the party or the boxes, the giver walks up on the map (never on
+the scene's own map) and hands it over, setting the flag; the walk-up is mp_tmrefund.c's. CUT, ROCK SMASH, FLASH and SURF
+have givers who stay. Debug `mp hmrescue`; tests hm_rescue, hm_rescue_carried.
