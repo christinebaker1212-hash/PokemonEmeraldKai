@@ -9,10 +9,12 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [ ] KANTO's legendaries only in KANTO (exclusives)
 - [x] FireRed's RUNNING SHOES aide after BROCK: back (FireRed's scene and words; a line of his own if the player has
       them already; hide flag 0x2224, done 0x2223; test kanto_shoes_aide)
-- [ ] Doorways too wide: one tile wide
+- [x] Doorways too wide: one tile wide (Emerald's door table, with its two-tile-wide doors, was drawing over KANTO's
+      door metatiles; FireRed's own doors now: mp_frlgdoor.c, test kanto_doors)
 - [x] Door opening / closing animations: FireRed's doors (its door table, pictures and drawing: src/mp/mp_frlgdoor.c,
       tools/quetzal_port/gen_frlg_doors.py; test kanto_doors)
-- [ ] Going down some ladders puts the player on top of the ladder, not in front of it
+- [x] Going down some ladders puts the player on top of the ladder, not in front of it (an up ladder in the wall
+      steps the player off, south: field_screen_effect.c MpLadderStepOff, KANTO and JOHTO; test kanto_ladder)
 - [x] MEGA PUNCH / MEGA KICK people outside MT. MOON: FireRed's two move tutors on Kai's tutor flow, FireRed's words
       (Quetzal's said "move training is handled from your team menu"; flags 0x21DF / 0x21DC; test kanto_tutors)
 - [x] CERULEAN: TRIPLE TRIAD first; people who offer a Yu-Gi-Oh! starter deck say so in their own way (the eight ways
@@ -41,7 +43,8 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       (behavior, words), JOHTO's berries
 - [x] WHITNEY's MILTANK: perfect IVs (her gym team; tools/quetzal_port/gen_trainers.py IV_OVERRIDES)
 - [x] Quetzal's auto walk / run: its words gone (MOM in NEW BARK TOWN)
-- [ ] Door animations; [x] water animates (JOHTO's primaries 2-6 carry FireRed's water tiles: the same animation over
+- [ ] Door animations (blocked: Quetzal's JOHTO door frames are only in its ROM, which the rip didn't read; Emerald's
+      table matches none of them, so JOHTO's doors open without a picture); [x] water animates (JOHTO's primaries 2-6 carry FireRed's water tiles: the same animation over
       them; primary 1's water is drawn differently and stays still)
 - [ ] The rival named as in Crystal (online: the host names him, said plainly), his starter the one beating the player's
 - [x] No tree-cutting prompt in a new game without the HM and badge (Quetzal's check said yes to everything)
@@ -107,3 +110,9 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
   tools/quetzal_port/fix_move_tutors.py). Still Quetzal's stand-ins: CAPE BRINK's starter tutor and TWO ISLAND's move
   maniac (FireRed systems of their own) and SAFFRON's COPYCAT (MIMIC, needs her POKé DOLL trade).
 - JOHTO's doors keep still: its tilesets are Quetzal's own, their door metatiles aren't FireRed's numbers.
+- KANTO's ladders already match FireRed's warps (every KANTO warp's place and destination checked against
+  pokefirered's maps: only the POKéMON CENTER 2Fs' link rooms, Quetzal's own additions and the elevators differ), and
+  FireRed itself leaves the player on the ladder; the user saw that as a bug, so an up ladder in a wall (a wall above,
+  floor below) now steps the player off to the south. Ladders down (holes in the floor) stay as FireRed's.
+- JOHTO's door animations need Quetzal's door frames, which live only in its ROM (tools/quetzal_rip didn't read the
+  door table); left open until the rip can read them from the user's ROM.

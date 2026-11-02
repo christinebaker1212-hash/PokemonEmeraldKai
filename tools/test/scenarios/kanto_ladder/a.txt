@@ -1,0 +1,13 @@
+pressuntil A field 5000
+wait 60
+mp warp 36,1,5,7
+waitfor field 600
+wait 60
+press UP 20
+wait 150
+mp where
+shot arrive
+press UP 20
+wait 150
+mp where
+quit

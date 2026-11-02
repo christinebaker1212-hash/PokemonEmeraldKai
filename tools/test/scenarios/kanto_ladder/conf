@@ -1,0 +1,7 @@
+# A ladder climbed down in MT. MOON (1F's hole at 5,6 -> B1F's ladder in the wall at 3,3): the player steps off it and
+# stands in front of it (field_screen_effect.c MpLadderStepOff); back up, 1F's hole keeps them on it, as FireRed. Shot arrive.
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=25:40"
+EXPECT_A=("where map 36.2 xy 3,4" "where map 36.1 xy 5,6")
+UNEXPECT_A=("[crash]" "TIMEOUT")

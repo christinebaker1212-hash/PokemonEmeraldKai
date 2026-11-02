@@ -33,6 +33,7 @@
 #include "constants/event_object_movement.h"
 #include "constants/event_objects.h"
 #include "mp.h"
+#include "mp_region.h"
 #include "constants/songs.h"
 #include "constants/rgb.h"
 #include "trainer_hill.h"
@@ -256,6 +257,20 @@ void FieldCB_ReturnToFieldWirelessLink(void)
     CreateTask(Task_ReturnToFieldWirelessLink, 10);
 }
 
+// Moemon Kai: a ladder climbed down to (an up ladder in the wall: a wall above it, floor below) steps the player off
+// it, so they stand in front of it (the user, 2026-11-02: KANTO's and JOHTO's put the player on top of the ladder).
+// Ladders down (holes in the floor) keep the player on them, as FireRed.
+static bool8 MpLadderStepOff(s16 x, s16 y)
+{
+    u8 region = MP_Region_OfGroup(gSaveBlock1Ptr->location.mapGroup);
+    if (region == REGION_HOENN || S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+        return FALSE;
+    if (!MetatileBehavior_IsLadder(MapGridGetMetatileBehaviorAt(x, y)))
+        return FALSE;
+    return MapGridGetCollisionAt(x, y - 1) && !MapGridGetCollisionAt(x, y + 1)
+        && !MetatileBehavior_IsLadder(MapGridGetMetatileBehaviorAt(x, y + 1));
+}
+
 static void SetUpWarpExitTask(void)
 {
     s16 x, y;
@@ -269,6 +284,8 @@ static void SetUpWarpExitTask(void)
     else if (MetatileBehavior_IsNonAnimDoor(behavior) == TRUE
           || (MetatileBehavior_IsEscalator(behavior) && S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup)))
         func = Task_ExitNonAnimDoor;   // (Moemon Kai: SINNOH's escalators step off as its other warps)
+    else if (MpLadderStepOff(x, y))
+        func = Task_ExitNonAnimDoor;
     else
         func = Task_ExitNonDoor;
     CreateTask(func, 10);
@@ -411,6 +428,8 @@ static void Task_ExitNonAnimDoor(u8 taskId)
             u8 dir = MP_MapPic_ArrivalDir(*x, *y);   // Moemon Co-op: the GAME CENTER's stairs step off sideways
             if (dir == DIR_NONE)
                 dir = SinnohArrivalDir(*x, *y);
+            if (dir == DIR_NONE && MpLadderStepOff(*x, *y))
+                dir = DIR_SOUTH;
             SetPlayerVisibility(TRUE);
             objEventId = GetObjectEventIdByLocalIdAndMap(LOCALID_PLAYER, 0, 0);
             if (dir == DIR_NONE + 0xFF)   // (SINNOH: nowhere to step)

@@ -1070,7 +1070,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // tileat X,Y - the metatile there (map coords without the offset)
         int x = 0, y = 0;
         sscanf(arg, "%d,%d", &x, &y);
-        printf("[test] tile %d,%d = %d\n", x, y, MapGridGetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET));
+        printf("[test] tile %d,%d = %d behavior 0x%X\n", x, y, MapGridGetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET),
+               MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET));
     }
     else if (strcmp(cmd, "lights") == 0)
     {
