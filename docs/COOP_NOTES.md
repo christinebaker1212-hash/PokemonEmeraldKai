@@ -3701,6 +3701,11 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   massage girl's gift convert (gen_scripts.py: ACCESSORY_* / BACKDROP_* are Platinum's numbers, dec.fashion_ids).
   POFFINS are this game's POKéBLOCKS (the notes' rule: what Kai has SINNOH uses): the POFFIN case checks and GivePoffin
   give a POKéBLOCK of the same flavors (smoothness as its feel). Plan: docs/SINNOH_CHECKLIST.md section 5.
+- DAWN and LUCAS (2026-11-02): the counterpart walks with Platinum's own player sheets (res/graphics/field_sprites/player
+  player_f / player_m only, fetch_decomp.sh parts 14; build_gfx.py appends them after every other sheet so no sprite's
+  number moves: OBJ_EVENT_GFX_SINNOH_PLAYER_F / _M; sprites.py maps DAWN / LUCAS there). Platinum's GetNationalDexCaughtCount /
+  CheckNationalDexCompleted count as its pokedex.c does (1-493 caught, its eleven mythicals left out, goal 482);
+  CountPartyNonEggs; AdvanceEternaGymClock, PressPastoriaGymButton, PressSunyshoreGymButton on s3d_gyms.c's own.
 - SUPER CONTESTS (2026-11-02, the user: "Super Contests should be added, as well as their unique functions"): the rules
   in src/sinnoh/s3d_contest.c as Platinum's code has them (docs/SUPER_CONTEST.md says where each comes from), the
   screens in s3d_contest_ui.c (480x320 like the BADGE CASE: IsActive / Step / Canvas / Frame in sdl2.c and display.c).

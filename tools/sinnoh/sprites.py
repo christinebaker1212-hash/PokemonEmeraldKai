@@ -124,6 +124,10 @@ def sprite(platinum):
     name = platinum[len('OBJ_EVENT_GFX_'):] if platinum.startswith('OBJ_EVENT_GFX_') else platinum
     if HIDDEN.search(name):
         return None
+    # (DAWN and LUCAS, the player's counterpart: Platinum's own player sheets)
+    own = {'DAWN': 'PLAYER_F', 'LUCAS': 'PLAYER_M'}.get(name)
+    if own and own in platinum_sheets():
+        return 'OBJ_EVENT_GFX_SINNOH_' + own
     if name in platinum_sheets():
         return 'OBJ_EVENT_GFX_SINNOH_' + name
     return standin(name)

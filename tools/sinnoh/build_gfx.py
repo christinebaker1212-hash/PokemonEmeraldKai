@@ -32,7 +32,9 @@ from png8 import Image  # noqa: E402   (no Pillow on the release's runner)
 
 VERSION = 2
 SMALL = 0.84   # MIXED's Platinum sprites: about Gen 3's size (Emerald's people are 0.80-0.88 of Platinum's same ones)
-SHEETS = ('npc', 'pokemon', 'objects')
+SHEETS = ('npc', 'pokemon', 'objects', 'player')   # (player: only DAWN's and LUCAS's own, PLAYER_ONLY; after the rest, so
+                                                    # the others keep their numbers)
+PLAYER_ONLY = ('player_f', 'player_m')
 # the game's own sprites stay for these (their breaking / cutting animations, the item ball's)
 KEEP_OWN = {'rock_smash', 'cut_tree', 'strength_boulder', 'pokeball', 'ice_rock', 'moss_rock', 'surf_wake'}
 # Platinum's frame for each of the game's nine: down, up, left standing; down x2, up x2, left x2 stepping
@@ -152,9 +154,13 @@ def sheets(root):
     out, seen = [], set()
     for d in SHEETS:
         folder = os.path.join(root, 'res/graphics/field_sprites', d)
+        if not os.path.isdir(folder):
+            continue
         for f in sorted(os.listdir(folder)):
             name = f[:-4]
             if not f.endswith('.png') or name in seen or name in KEEP_OWN or name.endswith('_unused'):
+                continue
+            if d == 'player' and name not in PLAYER_ONLY:
                 continue
             im = Image(os.path.join(folder, f))
             if im.mode != 'P':

@@ -166,4 +166,6 @@ static const u16 sSinnohGen3[SINNOH_SPRITE_COUNT] = {
     0,
     OBJ_EVENT_GFX_BIRCHS_BAG,
     0,
+    0,
+    0,
 };

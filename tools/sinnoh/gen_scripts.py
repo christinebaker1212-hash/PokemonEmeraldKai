@@ -869,6 +869,12 @@ class FileConverter:
             return ['special Sinnoh_PastoriaWater', 'waitstate']   # (src/sinnoh/s3d_gyms.c: the button under the player)
         if cmd == 'PressSunyshoreGymButton':
             return ['special Sinnoh_SunyshoreTurn', 'waitstate']
+        if cmd == 'GetNationalDexCaughtCount':
+            return [self.sinnoh(SINNOH_CONTEST, 36, self.var(a[0]))]
+        if cmd == 'CheckNationalDexCompleted':
+            return [self.sinnoh(SINNOH_CONTEST, 37, self.var(a[0]))]
+        if cmd == 'CountPartyNonEggs':
+            return [self.sinnoh(SINNOH_CONTEST, 38, self.var(a[0]))]
         if cmd == 'Dummy316':
             return []
         if cmd == 'NewContest':

@@ -116,6 +116,9 @@ enum {
     CC_PICK_END,          // after it: the choice (0xFF none) kept for GetSelectedPartySlot, VAR_0x8004 put back
     CC_PICK_RESULT,       // A: variable <- the choice (GetSelectedPartySlot)
     CC_FRIENDSHIP,        // A: variable <- the friendship of B's party POKéMON (GetPartyMonFriendship)
+    CC_DEX_CAUGHT,        // A: variable <- the national POKéDEX's caught count as Platinum counts it (1-493, no mythicals)
+    CC_DEX_DONE,          // A: variable <- that count reached Platinum's goal (482: CheckNationalDexCompleted)
+    CC_PARTY_NON_EGGS,    // A: variable <- the party's POKéMON that aren't EGGS (CountPartyNonEggs)
 };
 
 #define PHOTO_STUDIO 5   // (the photos' sixth place: JUBILIFE TV's dress-up studio)

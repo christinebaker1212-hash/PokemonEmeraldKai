@@ -8,7 +8,7 @@ Rules behind it: CLAUDE.md's SINNOH paragraph and docs/SINNOH_HANDOFF.md.
 
 | What | How to see it | Now |
 |---|---|---|
-| Platinum's script entries that convert | `python3 -I tools/sinnoh/gen_scripts.py --report ~/.cache/moemon/pokeplatinum` (first line) | 2110 of 2511 |
+| Platinum's script entries that convert | `python3 -I tools/sinnoh/gen_scripts.py --report ~/.cache/moemon/pokeplatinum` (first line) | 2114 of 2511 |
 | Commands still missing | the same report, the list under it (most used first) | 60 kinds |
 | Platinum's text slots and page breaks | messages show whole (\\r is a new box, six string slots) | done |
 | Platinum songs the game lacks | the same report, "songs the game lacks" | 5 |
@@ -80,7 +80,8 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [ ] AMITY SQUARE's walk (ClearAmitySquareStepCount)
 - [ ] The VEILSTONE DEPARTMENT STORE's regular (CheckIsDepartmentStoreRegular)
 - [ ] Game records (AddToGameRecord), the rankings machines (StartRankingsMachine)
-- [ ] DAWN's and LUCAS's own overworld sprites (stand-ins now)
+- [x] DAWN's and LUCAS's own overworld sprites (Platinum's player_f / player_m sheets, appended to the pack after the
+      others: OBJ_EVENT_GFX_SINNOH_PLAYER_F / _M)
 - [ ] Platinum's songs the game lacks: SEQ_OPENING, SEQ_KUSAGASA, SEQ_PL_AUDIO, SEQ_PL_PIANO, SEQ_SILENCE_FIELD
 - [x] Platinum's POKéDEX ratings (Load*DexRating)
 - [x] Platinum's key items (items 662-684)

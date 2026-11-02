@@ -21,6 +21,7 @@
 #include "item.h"
 #include "main.h"
 #include "party_menu.h"
+#include "pokedex.h"
 #include "pokemon.h"
 #include "random.h"
 #include "script.h"
@@ -1235,6 +1236,21 @@ static bool8 CanEnter(struct Pokemon *mon, u8 rank, u8 type)
 
 // ----------------------------------------------------------------------------------------------------- the commands
 
+// Platinum's national POKéDEX count (pokedex.c Pokedex_NumCaught_National): 1-493 caught, its eleven mythicals left out
+static u16 NationalCaught(void)
+{
+    static const u16 sLeftOut[] = {151, 249, 250, 251, 385, 386, 489, 490, 491, 492, 493};
+    u16 n = 0, i, k;
+    for (i = 1; i <= 493; i++)
+    {
+        for (k = 0; k < ARRAY_COUNT(sLeftOut) && sLeftOut[k] != i; k++)
+            ;
+        if (k == ARRAY_COUNT(sLeftOut) && GetSetPokedexFlag(i, FLAG_GET_CAUGHT))
+            n++;
+    }
+    return n;
+}
+
 void Sinnoh_ContestCall(u16 call, u16 a, u16 b)
 {
     struct ContestEntrant *e;
@@ -1378,6 +1394,20 @@ void Sinnoh_ContestCall(u16 call, u16 a, u16 b)
     case CC_FRIENDSHIP:
         VarSet(a, VarGet(b) < PARTY_SIZE ? GetMonData(&gPlayerParty[VarGet(b)], MON_DATA_FRIENDSHIP) : 0);
         break;
+    case CC_DEX_CAUGHT:
+        VarSet(a, NationalCaught());
+        break;
+    case CC_DEX_DONE:
+        VarSet(a, NationalCaught() >= 493 - 11);
+        break;
+    case CC_PARTY_NON_EGGS:
+    {
+        u8 i, n = 0;
+        for (i = 0; i < PARTY_SIZE; i++)
+            n += GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) != SPECIES_NONE && !GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG);
+        VarSet(a, n);
+        break;
+    }
     case CC_BUFFER_WORD:
         CopyEasyChatWord(Contest_Slot(VarGet(a)), VarGet(b));
         break;
