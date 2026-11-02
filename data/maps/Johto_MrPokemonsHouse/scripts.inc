@@ -84,7 +84,8 @@ Johto_MrPokemonsHouse_EventScript_83EDC4F::
 	end
 
 Johto_MrPokemonsHouse_EventScript_83EDC6C::
-	bufferitemname 0, ITEM_DRAGON_SCALE
+	@ Moemon Kai: Crystal's gift (tools/quetzal_port/fix_johto_gifts.py) (Quetzal: DRAGON SCALE)
+	bufferitemname 0, ITEM_EXP_SHARE
 	msgbox Johto_MrPokemonsHouse_Text_83EE301, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, 1, Johto_MrPokemonsHouse_EventScript_83EDC8E
 	msgbox Johto_MrPokemonsHouse_Text_83EE38E, MSGBOX_DEFAULT
@@ -93,7 +94,7 @@ Johto_MrPokemonsHouse_EventScript_83EDC6C::
 	end
 
 Johto_MrPokemonsHouse_EventScript_83EDC8E::
-	setorcopyvar VAR_0x8000, ITEM_DRAGON_SCALE
+	setorcopyvar VAR_0x8000, ITEM_EXP_SHARE
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_0x8007, 0, Quetzal_EventScript_83602AA
@@ -232,13 +233,13 @@ Johto_MrPokemonsHouse_Text_83EE261::
 	.string "{PLAYER}, I’m counting on you!$"
 
 Johto_MrPokemonsHouse_Text_83EE301::
-	.string "Hm? That SCALE! What’s that?\n"
-	.string "A red GYARADOS?\p"
+	.string "Hm? That SCALE! What’s that? A red\n"
+	.string "GYARADOS?\p"
 	.string "That’s rare! I, I want it…\p"
-	.string "{PLAYER}, would you care to\n"
-	.string "trade it?\p"
-	.string "I can offer this item in return:\n"
-	.string "{STR_VAR_1}.$"
+	.string "{PLAYER}, would you care to trade\n"
+	.string "it?\p"
+	.string "I can offer this EXP. SHARE I got\n"
+	.string "from PROF.OAK.$"
 
 Johto_MrPokemonsHouse_Text_83EE38E::
 	.string "That’s disappointing.\n"

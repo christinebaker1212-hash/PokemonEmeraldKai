@@ -21,4 +21,18 @@ wait 60
 shot bill
 mp party
 mp getflag 0x103B
+mp additem 500 1
+mp warp 35,36,7,6
+wait 120
+mp face up
+press A 2
+mash A 60 20
+wait 60
+shot mrpokemon
+mp checkitem 500
+mp checkitem 182
+press A 2
+mash A 30 20
+wait 30
+mp checkitem 182
 quit

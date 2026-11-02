@@ -8,7 +8,8 @@
   computer"), Crystal's words.
 - MT. MORTAR B1F: the KARATE KING, once beaten, gives Crystal's TYROGUE (Lv. 10; Quetzal: two "scrolls" for a KUBFU,
   NUGGETS in this game, behind a seven-badge gate), Crystal's words.
-Each gift goes through the game's own givemon (party, else the PC; a full PC says so and the gift waits) and the
+- MR. POKéMON's house: the RED SCALE trades for Crystal's EXP. SHARE (Quetzal: a DRAGON SCALE), Crystal's words.
+Each POKéMON gift goes through the game's own givemon (party, else the PC; a full PC says so and the gift waits) and the
 region's NUZLOCKE check (Quetzal_EventScript_8361A4D).
 """
 import os
@@ -99,7 +100,24 @@ def kiyo(crystal):
     print('MountMortarB1F: TYROGUE')
 
 
+def mr_pokemon(crystal):
+    path = os.path.join(REPO, 'data/maps/Johto_MrPokemonsHouse/scripts.inc')
+    s = open(path).read()
+    if MARK in s:
+        return
+    asm = asm_of('MrPokemonsHouse', crystal)
+    p = 'Johto_MrPokemonsHouse_'
+    a = s.index(p + 'EventScript_83EDC6C::\n') + len(p + 'EventScript_83EDC6C::\n')
+    s = s[:a] + '\t' + MARK + ' (Quetzal: DRAGON SCALE)\n' + s[a:]
+    s = s.replace('ITEM_DRAGON_SCALE', 'ITEM_EXP_SHARE')
+    s = set_text(s, p + 'Text_83EE301', gba_text([t.replace('<PLAY_G>', '{PLAYER}').replace('EXP.SHARE', 'EXP. SHARE')
+                                                  for t in crystal_text(asm, 'MrPokemonText_GimmeTheScale')]))   # (the item's name here)
+    open(path, 'w').write(s)
+    print('MrPokemonsHouse: EXP. SHARE')
+
+
 if __name__ == '__main__':
     crystal = sys.argv[1] if len(sys.argv) > 1 else None
     bill(crystal)
     kiyo(crystal)
+    mr_pokemon(crystal)
