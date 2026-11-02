@@ -103,6 +103,11 @@ int cli_main(int argc, char **argv)
             snprintf(dir, sizeof(dir), "%s", argv[3]);
             snprintf(path, sizeof(path), "%s/%s", argv[3], name);
         }
+        {
+            char warn[512];
+            export_warnings(&s.p, &s.c, warn, sizeof(warn));   // (what the window shows before an export)
+            if (warn[0]) fprintf(stderr, "%s: %s\n", path, warn);
+        }
         if (!export_kaisong(&s.p, &s.c, path, err, sizeof(err))) { fprintf(stderr, "%s\n", err); return 1; }
         if (folder && !export_song_table(dir, err, sizeof(err))) { fprintf(stderr, "%s\n", err); return 1; }
         return 0;

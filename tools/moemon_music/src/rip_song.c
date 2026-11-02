@@ -1230,20 +1230,36 @@ int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, const uint8_t
     }
     out->gbaDrums = gbaDrums && drumKey;
 
-    // tracks: each instrument gets lanes, a note going on the first of its instrument's lanes that's free
+    // tracks: each instrument gets lanes, a note going on the first of its instrument's lanes that's free. A song
+    // that needs more lanes than a song can have tracks (64: the game's BGM player, the converter's candidates)
+    // is laid out again with lanes that change instrument: a note goes on a free lane already playing its
+    // instrument, else on any free lane (a VOICE change before it). The chip never plays more notes at once
+    // than it has voices, so every note finds a lane (drum hits keep lanes of their own drum).
     int ntr = 0;
     {
+        enum { LANE_LIMIT = 64 };
         int *laneEnd = malloc(sizeof(int) * (size_t)nn), *laneSlot = malloc(sizeof(int) * (size_t)nn);
-        for (int i = 0; i < nn && laneEnd && laneSlot; i++) {
-            int slot = notes[i].sample < ns ? slotOf[notes[i].sample] : 127;
-            int f0 = notes[i].f0 + notes[i].shift, t = -1;
-            for (int k = 0; k < ntr; k++) if (laneSlot[k] == slot && laneEnd[k] <= f0) { t = k; break; }
-            if (t < 0) { t = ntr++; laneSlot[t] = slot; }
-            laneEnd[t] = notes[i].f1 + notes[i].shift;
-            notes[i].track = t;
+        uint8_t *laneDrum = malloc((size_t)nn + 1);
+        for (int pass = 0; pass < 2 && laneEnd && laneSlot && laneDrum; pass++) {
+            ntr = 0;
+            for (int i = 0; i < nn; i++) {
+                int slot = notes[i].sample < ns ? slotOf[notes[i].sample] : 127;
+                int drum = out->gbaDrums && drumKey[i] >= 0;
+                int f0 = notes[i].f0 + notes[i].shift, t = -1;
+                for (int k = 0; k < ntr; k++) if (laneSlot[k] == slot && laneEnd[k] <= f0) { t = k; break; }
+                if (t < 0 && pass && !drum)
+                    for (int k = 0; k < ntr; k++) if (!laneDrum[k] && laneEnd[k] <= f0) { t = k; break; }
+                if (t < 0) { t = ntr++; laneDrum[t] = (uint8_t)drum; }
+                laneSlot[t] = slot;
+                laneEnd[t] = notes[i].f1 + notes[i].shift;
+                notes[i].track = t;
+            }
+            if (ntr <= LANE_LIMIT || getenv("MMS_TEST_NO_PACK"))   // (tests: the old layout, to compare)
+                break;
         }
         free(laneEnd);
         free(laneSlot);
+        free(laneDrum);
     }
     if (ntr > nv) { MTrk *nt = realloc(tr, sizeof(MTrk) * (size_t)(ntr + 1)); if (nt) { tr = nt; memset(tr + 1, 0, sizeof(MTrk) * (size_t)ntr); } }
     int chanOf = 0;
@@ -1266,7 +1282,7 @@ int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, const uint8_t
         mmeta(t, 0, 0x03, name, (int)strlen(name));
         mev(t, 0, 0xB0 | ch, 7, 127);
         mev(t, 0, 0xC0 | ch, slot, 0);
-        int lastExpr = -1, lastPan = -1, lastBend = -1, lastTune = -1, range = -1;
+        int lastExpr = -1, lastPan = -1, lastBend = -1, lastTune = -1, range = -1, laneSlotNow = slot;
         int pOffKey[64], pOffT[64], npOff = 0;          // drum note-offs still to come
         for (int i = first; i <= nn; i++) {
             // the drum note-offs due by this note's start (or all of them after the last note)
@@ -1282,6 +1298,12 @@ int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, const uint8_t
             if (i == nn) break;
             Note *n = &notes[i];
             int v = n->voice, sh = n->shift;
+            {
+                // a lane shared by instruments (a song over 64 lanes): the instrument this note plays
+                int ns2 = n->sample < ns ? slotOf[n->sample] : 127;
+                if (ns2 < 0) ns2 = 127;
+                if (ns2 != laneSlotNow) { mev(t, (uint32_t)(n->f0 + sh), 0xC0 | ch, ns2, 0); laneSlotNow = ns2; }
+            }
             // the bend range this note needs (the game's bends go to 63/64 of it)
             float maxDev = 0;
             for (int f = n->f0; f < n->f1 && !n->flat; f++) {
