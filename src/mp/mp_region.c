@@ -803,6 +803,36 @@ bool8 MP_Region_Cleared(u8 region)
     return region < REGION_COUNT && (gRegionState.cleared & (1 << region));
 }
 
+// SINNOH's time of day in JOHTO, KANTO and HOENN (the user, 2026-11-02): grass slots 2 and 3 hold the morning's
+// POKéMON from 4:00 to 9:59 and the night's from 20:00 to 3:59, as Platinum's (src/sinnoh/s3d_wild.c); by day the
+// table's own. JOHTO's and KANTO's from Crystal's tables, HOENN's from its own nocturnal / diurnal POKéMON
+// (src/data/wild_time.h from tools/quetzal_port/gen_wild_time.py)
+#include "rtc.h"
+#include "../data/wild_time.h"
+u16 MP_TimeLandSlot(u16 species, u8 index)
+{
+    u32 i;
+    u8 group = gSaveBlock1Ptr->location.mapGroup, num = gSaveBlock1Ptr->location.mapNum;
+    if (index != 2 && index != 3)
+        return species;
+    for (i = 0; i < ARRAY_COUNT(sMpTimedSlots); i++)
+    {
+        const struct MpTimedSlots *t = &sMpTimedSlots[i];
+        u16 pick;
+        if (t->group != group || t->num != num)
+            continue;
+        // (HOENN's only over its own species; JOHTO's and KANTO's Crystal ones over whatever the GENERATION's pool has)
+        if (MP_Region_OfGroup(group) == REGION_HOENN && t->base[index - 2] != species)
+            continue;
+        RtcCalcLocalTime();
+        if (gLocalTime.hours >= 10 && gLocalTime.hours < 20)
+            return species;
+        pick = (gLocalTime.hours >= 4 && gLocalTime.hours < 10) ? t->morn[index - 2] : t->nite[index - 2];
+        return MP_Gen_Allowed(pick) ? pick : species;
+    }
+    return species;
+}
+
 // A region's own device (HOENN's MOéNAV, SINNOH's POKéTCH, JOHTO's POKéGEAR) works in its region, and in the others
 // once that region's LEAGUE is beaten (the user, 2026-11-02)
 bool8 MP_Region_DeviceHere(u8 home)

@@ -150,7 +150,7 @@ u16 Sinnoh_LandSlot(u16 species, u8 index)
     u16 map, pick = SPECIES_NONE;
     species = Sinnoh_GreatMarshDaily(species, index);
     if (MP_Region_Current() != REGION_SINNOH)
-        return species;
+        return MP_TimeLandSlot(species, index);   // (JOHTO, KANTO and HOENN: mp_region.c)
     if (index == 6 || index == 7)
     {
         u8 n = sHoney.trophy[index - 6];

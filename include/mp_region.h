@@ -58,6 +58,7 @@ u16 MP_Region_FieldMoveBadge(u8 hm);    // an HM's badge flag (0 cut .. 7 waterf
 bool8 MP_Region_HasFieldMoveBadge(u8 hm);
 u16 MP_FieldMoveHasBadge(void);          // special: VAR_0x8004 -> VAR_RESULT
 bool8 MP_Region_Cleared(u8 region);
+u16 MP_TimeLandSlot(u16 species, u8 index);   // grass slots 2-3 by the time of day outside SINNOH
 bool8 MP_Region_DeviceHere(u8 home);   // a region's device works here (its region, or anywhere once its LEAGUE is beaten)
 void MP_Region_GiveDevices(void);      // map load: the MOéNAV key item once HOENN's LEAGUE is beaten
 void MP_Region_SetCleared(u8 region);

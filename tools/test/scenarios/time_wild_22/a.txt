@@ -1,0 +1,9 @@
+pressuntil A field 5000
+wait 30
+mp warp 35,34,10,10
+wait 120
+mp landslots
+mp warp 0,25,10,10
+wait 120
+mp landslots
+quit

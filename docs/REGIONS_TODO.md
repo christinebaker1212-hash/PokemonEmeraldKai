@@ -75,7 +75,8 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
 - [x] BADGES count every region's badges (the continue screen and the SAVE window: MP_Region_TotalBadges)
 - [ ] A4: TMs / HMs from leaders, trainers and events as the original games give them (new TMs / HMs where HOENN's
       list lacks them)
-- [ ] SINNOH's time of day in KANTO, JOHTO and HOENN: MORNING / DAY / NIGHT encounters
+- [x] SINNOH's time of day in KANTO, JOHTO and HOENN: MORNING / DAY / NIGHT encounters (grass slots 2-3 by Platinum's
+      hours: mp_region.c MP_TimeLandSlot, src/data/wild_time.h from tools/quetzal_port/gen_wild_time.py; tests time_wild_*)
 - [ ] Encounter audit: no strong Pokémon early, places keep their identity (DIGLETT'S CAVE), no DITTO-like utility early;
       each region's own Pokémon mainly there, the other regions' Pokémon spread where they fit; never remove one already
       found somewhere; FILL never sends OFF GENERATION, OFF REGION very sparingly
@@ -125,3 +126,10 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
   Emerald's NAVEL ROCK and FARAWAY ISLAND (MEW is KANTO's: under the truck by the S.S. ANNE). The tickets still sail
   there; the islands are empty. JIRACHI, MANAPHY and PHIONE have no encounter in their home region, so they keep
   their places (else they couldn't be caught at all). Gens 5-9 legendaries have no home region here and stay.
+- Time of day outside SINNOH: Platinum's mechanism (grass slots 2 and 3; morning 4:00-9:59, night 20:00-3:59). JOHTO's
+  and KANTO's morning / night POKéMON are Crystal's (the ones its tables show then and not by day, heaviest slot first;
+  79 maps; Crystal's DIGLETT'S CAVE, ROUTE 10 NORTH, 21, 26, TIN TOWER 2F, SILVER CAVE's item rooms and the WHIRL
+  ISLANDS have no grass table here). At GENERATION 6+ JOHTO's and KANTO's modern pools take the same slots' morning /
+  night POKéMON. HOENN has no original times: its own tables' POKéMON that Crystal shows only at night (ODDISH, MARILL...)
+  fill slots 2-3 at night, only by day (SANDSHREW, SKARMORY...) in the morning: nothing added, nothing removed (22 maps).
+  By day every table is as it was, so no POKéMON found before is lost.
