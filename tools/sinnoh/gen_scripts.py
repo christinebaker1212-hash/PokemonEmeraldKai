@@ -61,6 +61,9 @@ SINNOH_MISC = 61   # (small commands on Kai's systems: src/sinnoh/s3d_misc.c)
 SINNOH_TOWER = 62  # (Platinum's BATTLE TOWER: src/sinnoh/s3d_tower.c Sinnoh_TowerCall, include/sinnoh_tower.h)
 # (its own functions past Platinum's BT_FUNC_* numbers: include/sinnoh_tower.h SINNOH_TOWER_*)
 TOWER_INIT, TOWER_INIT_RESUME, TOWER_FREE, TOWER_INTRO, TOWER_BATTLE, TOWER_WON, TOWER_CHOOSE, TOWER_SAVE = range(200, 208)
+TOWER_PARTNER_SPECIES, TOWER_PARTNER_MOVE = 210, 212   # (+ the POKéMON's number, 0 or 1)
+TOWER_BUFFER_SPECIES, TOWER_BUFFER_MOVE = 214, 215     # (a kind's / a move's name into text slot DESTVAR, 0-5)
+TOWER_JUDGE_TOTAL, TOWER_JUDGE_STAT, TOWER_JUDGE_BEST = 216, 217, 218   # (the STATS JUDGE: JudgeStats)
 SINNOH_ROAMER = 60   # (a roaming POKéMON set going: src/sinnoh/s3d_roamer.c; the slot, Platinum's ROAMING_SLOT_*)   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
 (TVCALL_STATUS, TVCALL_FRAMING, TVCALL_FINISH, TVCALL_SEGMENT_ID, TVCALL_SEGMENT, TVCALL_COMMERCIAL, TVCALL_NEXT,
  TVCALL_INTERVIEW_ID, TVCALL_INTERVIEW_MESSAGE, TVCALL_INTERVIEW_SAVE, TVCALL_INTERVIEW_OK, TVCALL_WORD,
@@ -338,6 +341,11 @@ KAI_REWRITES = {
             ('BattleTower_EnterWiFiBattleRoom', 'LOCALID_WIFI_ATTENDANT', '19', 'BattleTower_WarpToElevator'),
             ('BattleTower_EnterMultiBattleRoom', 'LOCALID_MULTI_ATTENDANT', '11', 'BattleTower_GoToWarpToElevator'),
             ('BattleTower_EnterLinkMultiBattleRoom', 'LOCALID_MULTI_ATTENDANT', '11', '_06A0')]
+    } | {
+        # (the multi counter's question about battling with a friend by wireless is left out: the game's wireless
+        # sides are CO-OP's; a BATTLE SALON partner it is)
+        'BattleTower_AskCommunicateWithFriend': [('GoTo', ['BattleTower_InitMultiChallengeMode'])],
+        'BattleTower_HealAndSaveBeforeCommunicating': [('GoTo', ['BattleTower_ClearCommunicationAndEnd'])],
     },
 }
 
@@ -801,10 +809,14 @@ class FileConverter:
             return [self.sinnoh(SINNOH_BUFFER_COUNTERPART, self.value(a[0]))]
         if cmd in ('BufferItemName', 'BufferItemNamePlural', 'BufferItemNameWithArticle'):
             return ['bufferitemname %s, %s' % (self.strvar(a[0]), self.arg(a[1]))]
-        if cmd == 'BufferSpeciesName':
-            return ['bufferspeciesname %s, %s' % (self.strvar(a[0]), self.arg(a[1]))]
-        if cmd == 'BufferMoveName':
-            return ['buffermovename %s, %s' % (self.strvar(a[0]), self.arg(a[1]))]
+        if cmd in ('BufferSpeciesName', 'BufferSpeciesNameFromVar', 'BufferSpeciesNameWithArticle', 'BufferMoveName'):
+            slot = int(self.value(a[0]))
+            if slot > 2:
+                # (SINNOH's text slots 4-6: src/sinnoh/s3d_tower.c's name buffering)
+                return [self.tower(TOWER_BUFFER_MOVE if cmd == 'BufferMoveName' else TOWER_BUFFER_SPECIES,
+                                   self.arg(a[1]), slot)]
+            return ['%s %s, %s' % ('buffermovename' if cmd == 'BufferMoveName' else 'bufferspeciesname',
+                                   self.strvar(a[0]), self.arg(a[1]))]
         if cmd == 'BufferPartyMonNickname':
             return ['bufferpartymonnick %s, %s' % (self.strvar(a[0]), self.arg(a[1]))]
         if cmd == 'BufferTMHMMoveName':
@@ -893,11 +905,11 @@ class FileConverter:
             return ['compare_var_to_value %s, %s' % (self.var(a[0]), self.value(a[1])), 'goto_if 0, %s' % skip,
                     'compare_var_to_value %s, %s' % (self.var(a[0]), self.value(a[2])), 'goto_if 3, %s' % self.label(a[3]),
                     '%s:' % skip]
-        if cmd == 'HideObject':
+        if cmd in ('HideObject', 'ShowObject'):
             o = self.dec.origins().get(self.events_low)
             if o is None:
                 raise Unsupported('objects on %s' % self.events_low)
-            return ['hideobjectat %s, %s' % (self.localid(a[0]), o[0])]
+            return ['%sobjectat %s, %s' % (cmd[:4].lower(), self.localid(a[0]), o[0])]
         if cmd in ('PlayMusic', 'SetBGM'):
             mus = MUSIC_OF.get(a[0])
             if mus is None:
@@ -1487,6 +1499,23 @@ class FileConverter:
             return ['setvar %s, 0' % self.var(a[0])]
         if cmd == 'TrySaveGame':
             return [self.tower(TOWER_SAVE), 'setvar %s, 1' % self.var(a[0])]
+        if cmd == 'GetBattleTowerPartnerSpeciesAndMove':
+            # (a BATTLE SALON partner's POKéMON n: its kind and first move, of the team made for this challenge)
+            n = int(self.value(a[1]))
+            return [self.tower(TOWER_PARTNER_SPECIES + n, self.arg(a[0]), self.var(a[2])),
+                    self.tower(TOWER_PARTNER_MOVE + n, self.arg(a[0]), self.var(a[3]))]
+        if cmd in ('StartBattleServer', 'StartBattleClient'):
+            return ['setvar %s, %d' % (self.var(a[3]), self.dec.consts.get('COMM_CLUB_RET_CANCEL', 1))]
+        if cmd == 'ScrCmd_1E1':
+            return ['setvar %s, 0' % self.var(a[2])]   # (the wireless partner's data: never asked here)
+        if cmd in ('EndCommunication', 'ClearReceivedTempDataAllPlayers', 'ScrCmd_135'):
+            return []   # (the BATTLE TOWER's wireless multi battles: never started here)
+        if cmd == 'JudgeStats':
+            # (the BATTLE TOWER's STATS JUDGE: party slot A0's IVs: their total, the best stat as the line that names
+            # it, Platinum's message 122 + the stat, and its IV)
+            return [self.tower(TOWER_JUDGE_TOTAL, self.arg(a[0]), self.var(a[1])),
+                    self.tower(TOWER_JUDGE_STAT, self.arg(a[0]), self.var(a[2])),
+                    self.tower(TOWER_JUDGE_BEST, self.arg(a[0]), self.var(a[3]))]
         if cmd == 'ScrCmd_0B3':
             return ['setvar %s, 0' % self.var(a[0])]   # (the Wi-Fi rooms' upload: online, closed)
         if cmd == 'ScrCmd_18C':
@@ -1498,6 +1527,8 @@ class FileConverter:
         if cmd == 'LaunchBattleFrontierScene':
             # (Platinum's frontier scene: its map, the frontier script going on there; ExitFrontier comes back here)
             low = FRONTIER_SCENES.get(a[0])
+            if a[0] in FRONTIER_CLOSED_SCENES:
+                return ['end']
             if low is None:
                 raise Unsupported('frontier scene %s' % a[0])
             c = converter(self.root, low)
@@ -1630,17 +1661,36 @@ class FileConverter:
 # script there (SINNOH_WARP_CONTINUE), ExitFrontier goes back after the LaunchBattleFrontierScene that started it
 
 FRONTIER_SCENES = {'FRONTIER_SCENE_TOWER_CORRIDOR': 'fr_battle_tower_corridor',
-                   'FRONTIER_SCENE_TOWER_BATTLE_ROOM': 'fr_battle_tower_battle_room'}
-# each scene file: (the map's Platinum header, {actor: 'player' / (local id, its look's variable number or None) / None})
+                   'FRONTIER_SCENE_TOWER_BATTLE_ROOM': 'fr_battle_tower_battle_room',
+                   'FRONTIER_SCENE_TOWER_MULTI_CORRIDOR': 'fr_battle_tower_corridor_multi',
+                   'FRONTIER_SCENE_TOWER_MULTI_BATTLE_ROOM': 'fr_battle_tower_multi_battle_room'}
+# each scene file: (the map's Platinum header, {actor: 'player' / (local id, its look's variable number or None) / None:
+# not shown (Platinum's hidden camera holder, a link partner)}, the tile under a scene position: the single rooms'
+# maps lie a tile apart from their scenes' pictures, the multi rooms' as they are)
+_SINGLE_TILE = lambda x, y: (x // 16 - 1, -(-y // 16) - 1)
+_MULTI_TILE = lambda x, y: (x // 16, y // 16 - 1)
 FRONTIER_ACTORS = {
-    'fr_battle_tower_corridor': ('battle_tower_corridor', {0: 'player', 1: ('1', None)}),
-    # (actor 0 is Platinum's hidden camera holder; 3 the player who walks in)
-    'fr_battle_tower_battle_room': ('battle_tower_battle_room', {0: None, 1: ('1', None), 2: ('2', 0), 3: 'player'}),
+    'fr_battle_tower_corridor': ('battle_tower_corridor', {0: 'player', 1: ('1', None)}, _SINGLE_TILE),
+    'fr_battle_tower_battle_room': ('battle_tower_battle_room', {0: None, 1: ('1', None), 2: ('2', 0), 3: 'player'},
+                                    _SINGLE_TILE),
+    'fr_battle_tower_corridor_multi': ('battle_tower_corridor_multi', {0: None, 1: ('1', None), 2: ('2', None),
+                                                                       3: 'player', 4: ('4', 1), 5: None, 6: None},
+                                       _MULTI_TILE),
+    'fr_battle_tower_multi_battle_room': ('battle_tower_multi_battle_room',
+                                          {0: None, 1: ('1', None), 2: ('2', None), 3: ('6', 2), 4: ('5', 3),
+                                           5: 'player', 6: ('4', 1), 7: None, 8: None}, _MULTI_TILE),
 }
 FRONTIER_SCENE_MAPS = {v[0] for v in FRONTIER_ACTORS.values()}
+# the scenes of the Wi-Fi rooms (online: closed; only their link's scripts go there)
+FRONTIER_CLOSED_SCENES = {'FRONTIER_SCENE_WFC_FACILITY_SELECTOR'}
+# the actors a scene picks by a variable (its own setting; the link's, closed, set others)
+FRONTIER_VAR_ACTORS = {'fr_battle_tower_corridor_multi': {'VAR_0x8002': 3, 'VAR_0x8003': 4},
+                       'fr_battle_tower_multi_battle_room': {'VAR_0x8001': 5, 'VAR_0x8002': 6}}
 # the field script and scene a frontier scene's ExitFrontier goes back to
 FRONTIER_EXIT = {'fr_battle_tower_corridor': ('battle_tower_elevator', 'FRONTIER_SCENE_TOWER_CORRIDOR'),
-                 'fr_battle_tower_battle_room': ('battle_tower_elevator', 'FRONTIER_SCENE_TOWER_CORRIDOR')}
+                 'fr_battle_tower_battle_room': ('battle_tower_elevator', 'FRONTIER_SCENE_TOWER_CORRIDOR'),
+                 'fr_battle_tower_corridor_multi': ('battle_tower_elevator', 'FRONTIER_SCENE_TOWER_MULTI_CORRIDOR'),
+                 'fr_battle_tower_multi_battle_room': ('battle_tower_elevator', 'FRONTIER_SCENE_TOWER_MULTI_CORRIDOR')}
 # the variables holding a sprite's number (Platinum's OBJ_EVENT_GFX_* order: a number set into them is a look)
 FRONTIER_GFX_VARS = {'FR_VAR_0x800F', 'VAR_0x800B', 'VAR_0x8009'}
 # Battle Videos: the scene's offers to record one are left out (no video recorder here)
@@ -1667,7 +1717,7 @@ class FrontierConverter(FileConverter):
         text = open(path, encoding='utf-8', errors='replace').read()
         m = re.search(r'#\s*include "res/text/bank/(\w+)\.h"', text)
         self.bank = m.group(1) if m else None
-        self.events_low, self.actors = FRONTIER_ACTORS.get(self.low, (None, {}))
+        self.events_low, self.actors, self.tile = FRONTIER_ACTORS.get(self.low, (None, {}, _SINGLE_TILE))
         self.localids = {}
         self.labels, self.entries, self.order = parse(path)
         # (the data tables: the actors' lists, the sprites' resources)
@@ -1704,12 +1754,8 @@ class FrontierConverter(FileConverter):
             if len(vals) < 7:
                 raise Unsupported('actor list %s' % label)
             out.append(tuple(vals))
-            i += 7
+            i += 8 if vals[1] == 0xEEEF else 7   # (a link partner's entry has one byte more)
         return out
-
-    @staticmethod
-    def tile(px, py):
-        return px // 16 - 1, -(-py // 16) - 1
 
     def start(self):
         """(map, x, y) where the player stands as the scene starts: its first actor list's player"""
@@ -1739,6 +1785,8 @@ class FrontierConverter(FileConverter):
         return x.startswith(('VAR_', 'FR_VAR_'))
 
     def localid(self, x):
+        if x in FRONTIER_VAR_ACTORS.get(self.low, {}):
+            x = str(FRONTIER_VAR_ACTORS[self.low][x])
         a = self.actors.get(int(x, 0)) if re.match(r'^(0x[0-9A-Fa-f]+|\d+)$', x) else None
         if a == 'player':
             return 'OBJ_EVENT_ID_PLAYER'
@@ -1779,7 +1827,7 @@ class FrontierConverter(FileConverter):
             return [self.sinnoh(SINNOH_MENU_ADD, where[0], where[1], self.value(a[2]))]
         if cmd in ('SetMenuXOriginSide', 'SetMenuYOriginSide', 'FrontierScrCmd_22', 'FrontierScrCmd_23',
                    'FrontierScrCmd_2A', 'FrontierScrCmd_2B', 'FrontierScrCmd_2C', 'FrontierScrCmd_2D', 'FrontierScrCmd_31',
-                   'FrontierScrCmd_32', 'FrontierScrCmd_33', 'InitNewBattleRecording', 'FreeBattleRecording',
+                   'FrontierScrCmd_32', 'FrontierScrCmd_33', 'FrontierScrCmd_2F', 'InitNewBattleRecording', 'FreeBattleRecording',
                    'IncrementRecordValue', 'IncrementTrainerScore', 'SyncConnectedPlayers',
                    'ClearReceivedTempDataAllPlayers', 'EndCommunication', 'FrontierScrCmd_3F',
                    'PlayFrontierBrainEncounterEffect', 'FrontierScrCmd_C8'):
@@ -1821,6 +1869,10 @@ class FrontierConverter(FileConverter):
             return ['removeobject %s' % who[0]] if isinstance(who, tuple) else []
         if cmd == 'FrontierScrCmd_70':
             return ['setvar %s, 2' % self.var(a[0])]   # (no Battle Video kept)
+        if cmd == 'FrontierScrCmd_89':
+            return ['setvar %s, 1' % self.var(a[2])]   # (a link partner's answer arrived: no link here)
+        if cmd == 'FrontierScrCmd_8A':
+            return ['setvar %s, 0' % self.var(a[1])]
         if cmd in ('FrontierScrCmd_71', 'FrontierScrCmd_4B'):
             return ['setvar %s, 0' % self.var(a[0])]
         if cmd == 'FrontierScrCmd_6D':
@@ -1829,6 +1881,8 @@ class FrontierConverter(FileConverter):
             return [self.tower(TOWER_SAVE)]
         if cmd == 'ChangeScript':
             low = FRONTIER_SCENES.get(a[0])
+            if a[0] in FRONTIER_CLOSED_SCENES:
+                return ['end']
             if low is None:
                 raise Unsupported('frontier scene %s' % a[0])
             c = converter(self.root, low)

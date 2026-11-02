@@ -1,0 +1,11 @@
+# SINNOH's BATTLE TOWER: the multi counter (Platinum's: two POKéMON picked, its question about a wireless friend left
+# out), the BATTLE SALON (Platinum's own: CHERYL there once she walked with the player, her team made for this challenge
+# and named in her line), CHERYL picked, the multi corridor and battle room scenes, seven multi battles beside her
+# against Platinum's frontier pairs, back at the counter: the multi streak 7, 3 BATTLE POINTS (with a SALON partner,
+# Platinum's single and double table). Needs the 3D pack.
+MODE=1
+TMO=1200
+GEN=4
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_TEST_FOE_HP1=1 MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=143:100,248:100,149:100"
+EXPECT_A=("tower: started mode 2" "multi record 7 latest 7 room 1 partner 0" "bp 3 " "where map 41.8 xy 11,6")
+UNEXPECT_A=("[crash]" "TIMEOUT")

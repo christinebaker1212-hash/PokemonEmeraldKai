@@ -1439,6 +1439,14 @@ static void SetQzPartner(u16 trainer)
         sQzPartnerBackPic = look ? MP_Avatar_NamedBackPic(look) : MP_Avatar_TilesBackPic(tiles, pal);
 }
 
+// Moemon Kai: SINNOH's BATTLE TOWER: a BATTLE SALON partner beside the player (src/sinnoh/s3d_tower.c: its team is
+// already in the party's second half), shown as SINNOH's partners are
+void MP_SetupTowerPartner(u16 trainer)
+{
+    SetQzPartner(trainer);
+    gPartnerTrainerId = TRAINER_QZ_PARTNER;
+}
+
 // Is the in-game partner shown from behind (STEVEN, LANCE), the battle laid out as STEVEN's? Else as a Frontier
 // partner's (front pictures for both)
 bool8 MP_PartnerShowsBack(void)

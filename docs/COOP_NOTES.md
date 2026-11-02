@@ -4227,14 +4227,20 @@ follow_behind, follow_ground.
   VEILSTONE's southeast house (a gift). The PRIZE EXCHANGE trades COINS for Platinum's 19 prizes at half its prices
   (the COIN CASE holds 9999: TM68 at that) in a scrolling list (src/sinnoh/s3d_places.c Sinnoh_PrizeMenu, the
   dynamic scroll multichoice). Tests sinnoh_slots, sinnoh_prizes.
-- The SINNOH BATTLE TOWER (2026-11-01): its single battle counter runs Emerald's tower (tower_init, tower_setopponent,
-  BattleFrontier_BattleTowerBattleRoom_EventScript_DoTowerBattle, frontier_givepoints...: the same records, streaks and
-  BATTLE POINTS as HOENN's tower) in Platinum's rooms: data/maps/Sinnoh_BattleTower (the counter, the ON_FRAME
-  won / lost / quit handling) and Sinnoh_BattleTowerBattleRoom (the player walks in, the opponent from the back door,
-  Platinum's paths; healed and asked between battles). gen_maps.py OVERRIDES makes the room's opponent Emerald's
-  (OBJ_EVENT_GFX_VAR_0, FLAG_HIDE_BATTLE_TOWER_OPPONENT) and hides Platinum's stand-in for the player. Not here: the
-  partner counter, PALMER (Emerald's brain logic isn't asked), the other four buildings (Platinum's own kinds of
-  battle). `mp tower [BP]`; test sinnoh_tower (7 wins with `mp battlerhp`). The BATTLE FRONTIER's two booths trade
+- The SINNOH BATTLE TOWER (2026-11-02, the full port: docs/SINNOH_TOWER_PORT.md): Platinum's own lobby, elevator and
+  BATTLE SALON scripts (gen_scripts.py, as every SINNOH map's) and its frontier scenes, the corridors and battle rooms
+  (overlay104's own script language: gen_scripts.py FrontierConverter onto the rooms' maps; the scene's actors the
+  map's people, FRONTIER_ACTORS; LaunchBattleFrontierScene / ChangeScript warp and go on there, ExitFrontier back after
+  the launch). Platinum's rules in src/sinnoh/s3d_tower.c (`sinnoh SINNOH_TOWER, FUNC, ARG, DESTVAR`: its BT_FUNC_*):
+  its 315 frontier trainers and 951 sets (src/data/sinnoh_frontier.h, tools/sinnoh/gen_frontier.py), seven a room by
+  its ranges, PALMER at battles 21 and 49 (silver / gold prints, 20 BP), level 50 copies of the chosen POKéMON (any
+  level may enter; Platinum's banned list in the party menu), single, double and multi beside a SALON partner (CHERYL,
+  MIRA, RILEY, MARLEY, BUCK once met on the way: their teams made for each challenge, named in their lines; the battle
+  is Kai's partner battle, MP_SetupTowerPartner, shown from behind), REST (the title screen, CONTINUE in the lobby,
+  the challenge resumed), the STATS JUDGE. Records in "<save>.region" chunk TOWR; the BATTLE POINTS the game's own.
+  Closed: the Wi-Fi rooms and machines, the wireless multi, Battle Videos, TEALA's trophies (secret base goods).
+  `mp stower [MODE ROOM]`; tests sinnoh_tower, sinnoh_tower_palmer, sinnoh_tower_rest, sinnoh_tower_double,
+  sinnoh_tower_multi, sinnoh_stats_judge. The BATTLE FRONTIER's two booths trade
   BP (the frontier's, HOENN's too) for Platinum's lists: items left, TMs right (s3d_places.c Sinnoh_BpMenu /
   Sinnoh_BpBuy; the BP in the question, the scroll list covers Emerald's BP window). Test sinnoh_bp.
 - The POKé RADAR (2026-11-01, src/mp/mp_pokeradar.c; ITEM_POKE_RADAR 661, ITEMS_COUNT 662, the DEVON SCOPE's icon):

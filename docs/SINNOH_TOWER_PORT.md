@@ -1,4 +1,4 @@
-# SINNOH's BATTLE TOWER: the full port (in progress)
+# SINNOH's BATTLE TOWER: the full port
 
 The user (2026-11-02): Platinum's BATTLE TOWER fully, not words on Emerald's tower. What Kai already has it uses (the
 BP, the save's frontier records where they fit); everything Platinum does is Platinum's. Wi-Fi rooms stay closed
@@ -58,8 +58,9 @@ BP, the save's frontier records where they fit); everything Platinum does is Pla
 2. [x] Engine: src/sinnoh/s3d_tower.c (the rules above, Lv 50 copies of the party, records in "<save>.region").
 3. [x] gen_scripts.py: InitBattleTower, CallBattleTowerFunction (BT_FUNC_*), the rest (tower_command).
 4. [x] The frontier scripts' converter (corridor, battle room; the multi ones with step 5).
-5. [ ] The BATTLE SALON's partners (multi battles: GetBattleTowerPartnerSpeciesAndMove, BT_FUNC_UNK_56, the multi
-       corridor and battle room scenes), the multi attendant.
-6. [ ] The records machine (OpenBattleTowerRecordsApp), the STATS JUDGE (JudgeStats).
-7. [x] Tests (sinnoh_tower, sinnoh_tower_palmer, sinnoh_tower_rest, sinnoh_tower_double); Kai's own tower scripts
-       removed.
+5. [x] The BATTLE SALON's partners (multi battles: GetBattleTowerPartnerSpeciesAndMove, BT_FUNC_UNK_56, the multi
+       corridor and battle room scenes), the multi attendant (its question about a wireless friend left out).
+6. [x] The STATS JUDGE (JudgeStats). The lobby's machines are the Wi-Fi rooms' results and leaders (online: closed;
+       the solo and multi results machines are Diamond and Pearl's, unused by Platinum).
+7. [x] Tests (sinnoh_tower, sinnoh_tower_palmer, sinnoh_tower_rest, sinnoh_tower_double, sinnoh_tower_multi,
+       sinnoh_stats_judge); Kai's own tower scripts removed.

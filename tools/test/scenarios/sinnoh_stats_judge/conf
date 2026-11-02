@@ -1,0 +1,8 @@
+# SINNOH's BATTLE TOWER: the STATS JUDGE (Platinum's own script): a POKéMON picked, its IVs judged, Platinum's lines on
+# its total and its best stat. Needs the 3D pack.
+MODE=1
+TMO=300
+GEN=4
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=143:50,248:50"
+EXPECT_A=("tower: the STATS JUDGE: slot 0, total" "where map 41.8 xy 24,8")
+UNEXPECT_A=("[crash]" "TIMEOUT")

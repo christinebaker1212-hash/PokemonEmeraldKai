@@ -682,7 +682,6 @@ INDOOR = {
         'Person3': "The cycling road is downhill all the way south! Wheee!",
     },
     'Sinnoh_BattleTower': {
-        'Person2': "Welcome to the BATTLE TOWER. Battles with a partner aren't open yet. The single battle counter is!",
         'Person5': "I'm sketching the TRAINERS who come here. The tower inspires them.",
         'Person6': "I run here every morning to get ready for my challenge!",
         'Person7': "I'm here to cheer on my favorite TRAINERS! Go go go!",
@@ -691,7 +690,6 @@ INDOOR = {
         'Person10': "PIKACHU: Chu!|It's looking around excitedly.",
         'Person11': "I'm keeping notes on every battle. I'm going to beat the tower someday!",
         'Person12': "The tower is so tall. I wonder how far you have to win to get to the top.",
-        'Person15': "I can tell how your MOéMON's stats grew. Come back once the tower is open!",
     },
     'Sinnoh_GalacticHq1f': {
         'Person1': "What are you doing here? Visitors aren't allowed! ...Well, look around, but don't touch.",
@@ -751,7 +749,6 @@ INDOOR = {
     'Sinnoh_OreburghCityPokecenterB1f': {'Person4': "I'm waiting for a friend to link up with. She's always late!"},
     'Sinnoh_VeilstoneCityPokecenterB1f': {'Person4': "This room's for linking up with friends. It's quiet today."},
     'Sinnoh_Cafe': {'Person1': "The MOOMOO MILK here comes straight from the ranch. It's the freshest you'll ever taste.", 'Person2': "Welcome to the CAFE CABIN! Today's special is MOOMOO MILK. It's always MOOMOO MILK.", 'Person6': 'I come here every day for a glass of milk. Keeps me young!'},
-    'Sinnoh_BattleTowerBattleSalon': {'Person1': 'Welcome! This facility is getting ready for challengers. Please come back soon!'},
     'Sinnoh_Route225House': {'Person1': "I'm building a road through here. It's slow going with all these TRAINERS around!"},
     'Sinnoh_Route226House': {'Person1': "I've lived out here for years. The sea, the mountains... and lots of battles!"},
     'Sinnoh_Route227House': {'Person1': "The volcano's ash makes the soil good for BERRIES. Every cloud has a silver lining."},

@@ -58,6 +58,13 @@ enum
     SINNOH_TOWER_WON,               // DESTVAR <- the battle was won (BattleTower_CheckWonBattle / CheckWonBattle)
     SINNOH_TOWER_CHOOSE,            // the party menu for the challenge's POKéMON (BT_FUNC_UNK_30)
     SINNOH_TOWER_SAVE,              // the game saved as it stands, no question asked (TrySaveGame, FrontierScrCmd_72)
+    SINNOH_TOWER_PARTNER_SPECIES = 210, // (+ n) DESTVAR <- BATTLE SALON partner ARG's POKéMON n's kind
+    SINNOH_TOWER_PARTNER_MOVE = 212,    // (+ n) ... its first move
+    SINNOH_TOWER_BUFFER_SPECIES = 214,  // the name of kind ARG into text slot DESTVAR (0-5)
+    SINNOH_TOWER_BUFFER_MOVE,           // the name of move ARG into text slot DESTVAR (0-5)
+    SINNOH_TOWER_JUDGE_TOTAL,           // the STATS JUDGE: DESTVAR <- party slot ARG's IVs' total
+    SINNOH_TOWER_JUDGE_STAT,            // ... its best stat's line (Platinum's battle tower message 122 + the stat)
+    SINNOH_TOWER_JUDGE_BEST,            // ... that stat's IV
 };
 bool8 Sinnoh_TowerCall(u16 func, u16 arg, u16 destVar);
 bool8 Sinnoh_Tower_Choosing(void);   // (party_menu.c: Platinum's banned list, any level, its own duplicate checks)

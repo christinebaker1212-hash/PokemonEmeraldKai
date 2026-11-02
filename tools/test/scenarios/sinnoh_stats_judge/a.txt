@@ -1,0 +1,19 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp warp 41,8,24,8
+wait 60
+waitfor field 1000
+mp face up
+press A 1
+pressuntil A partymenu 3000
+wait 40
+press A 1
+wait 30
+press A 1
+pressuntillog A 2000 STATS JUDGE
+wait 40
+shot j_judged
+pressuntil A field 3000
+mp where
+quit

@@ -195,12 +195,27 @@ u8 Sinnoh_Frontier_FillParty(struct Pokemon *party, u16 frontierTrainer, u8 coun
 #include "constants/battle_frontier.h"
 #include "constants/songs.h"
 #include "constants/vars.h"
+#include "constants/trainers_sinnoh.h"
+#include "string_util.h"
+#include "strings.h"
+#include "data.h"
 
 void ChoosePartyForBattleFrontier(void);
 
 enum { BT_MODE_SINGLE, BT_MODE_DOUBLE, BT_MODE_MULTI, BT_MODE_LINK_MULTI, BT_MODE_WIFI, BT_MODE_5, BT_MODE_6,
        BT_RECORD_MODES = 4 };   // (Platinum's BATTLE_TOWER_MODE_*; WIFI and up are online: closed)
 #define BT_OPPONENTS 7
+#define BT_PARTNERS 5   // CHERYL, MIRA, RILEY, MARLEY, BUCK (Platinum's BT_PARTNER_*)
+
+// the partners as the game's own trainers (their names, their pictures from behind: battle_tower.c SetQzPartner) and
+// their sprites
+static const u16 sPartnerTrainers[BT_PARTNERS] = {TRAINER_SINNOH_CHERYL_ETERNA_FOREST, TRAINER_SINNOH_MIRA_WAYWARD_CAVE,
+                                                  TRAINER_SINNOH_RILEY_IRON_ISLAND, TRAINER_SINNOH_MARLEY_VICTORY_ROAD,
+                                                  TRAINER_SINNOH_BUCK_STARK_MOUNTAIN};
+static const u16 sPartnerGfx[BT_PARTNERS] = {OBJ_EVENT_GFX_SINNOH_CHERYL, OBJ_EVENT_GFX_SINNOH_MIRA,
+                                             OBJ_EVENT_GFX_SINNOH_RILEY, OBJ_EVENT_GFX_SINNOH_MARLEY,
+                                             OBJ_EVENT_GFX_SINNOH_BUCK};
+void MP_SetupTowerPartner(u16 trainer);   // (battle_tower.c)
 
 // Platinum's BT_FUNC_* (include/constants/battle_tower_functions.h)
 enum
@@ -228,6 +243,7 @@ static struct TowerSave
     u8 inProgress, mode, nextOpponentNum, partnerID;
     u8 slots[4];
     u16 trainerIDs[BT_OPPONENTS * 2];
+    struct Pokemon partnerMons[2];  // the BATTLE SALON partner's team (Platinum keeps its sets and personalities)
     // game records
     u32 victories, challenges, pointsReceived;
 } sTS;
@@ -244,6 +260,8 @@ static struct
     bool8 wonBattle, choosing;
     struct Pokemon opponents[2][4];
     u8 opponentCount[2];
+    struct Pokemon partners[BT_PARTNERS][2];   // the BATTLE SALON's partners' teams (BT_FUNC_UNK_56)
+    u8 partnerCount[BT_PARTNERS];
     struct Pokemon saved[PARTY_SIZE];
 } sT;
 
@@ -359,7 +377,10 @@ static void Init(u16 mode, bool8 resume)
         sT.wins = sT.nextOpponentNum - 1;
         memcpy(sT.slots, sTS.slots, sizeof(sT.slots));
         memcpy(sT.trainerIDs, sTS.trainerIDs, sizeof(sT.trainerIDs));
-        sT.partnerID = sTS.partnerID;
+        sT.partnerID = sTS.partnerID % BT_PARTNERS;
+        sT.partners[sT.partnerID][0] = sTS.partnerMons[0];
+        sT.partners[sT.partnerID][1] = sTS.partnerMons[1];
+        sT.partnerCount[sT.partnerID] = 2;
         sTS.inProgress = FALSE;
     }
     sT.partySize = PartySize(sT.challengeMode);
@@ -580,6 +601,15 @@ static void StartBattle(void)
         gTrainerBattleOpponent_B = TRAINER_SINNOH_FRONTIER_B;
         gBattleTypeFlags |= BATTLE_TYPE_DOUBLE | BATTLE_TYPE_TWO_OPPONENTS;
     }
+    if (sT.challengeMode == BT_MODE_MULTI)
+    {
+        // beside the BATTLE SALON partner: its team in the party's second half (Platinum's BATTLE_TYPE_FRONTIER_WITH_AI_PARTNER)
+        u8 p = sT.partnerID % BT_PARTNERS;
+        for (i = 0; i < sT.partnerCount[p] && i < MULTI_PARTY_SIZE; i++)
+            gPlayerParty[MULTI_PARTY_SIZE + i] = sT.partners[p][i];
+        MP_SetupTowerPartner(sPartnerTrainers[p]);
+        gBattleTypeFlags |= BATTLE_TYPE_DOUBLE | BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_MULTI | BATTLE_TYPE_INGAME_PARTNER;
+    }
     CreateTask(Task_StartTowerBattle, 1);
     MP_MUSIC_SCENE_HOLD(MUS_VS_TRAINER, MUS_VICTORY_TRAINER);
     PlayMapChosenOrBattleBGM(0);
@@ -736,6 +766,8 @@ bool8 Sinnoh_TowerCall(u16 func, u16 arg, u16 destVar)
         sTS.partnerID = sT.partnerID;
         memcpy(sTS.slots, sT.slots, sizeof(sTS.slots));
         memcpy(sTS.trainerIDs, sT.trainerIDs, sizeof(sTS.trainerIDs));
+        sTS.partnerMons[0] = sT.partners[sT.partnerID % BT_PARTNERS][0];
+        sTS.partnerMons[1] = sT.partners[sT.partnerID % BT_PARTNERS][1];
         set = FALSE;
         break;
     case BT_FUNC_SET_OPPONENT_TEAMS:
@@ -772,7 +804,7 @@ bool8 Sinnoh_TowerCall(u16 func, u16 arg, u16 destVar)
         out = sT.ribbons && sT.challengeMode != BT_MODE_SINGLE && sT.challengeMode < BT_MODE_WIFI ? GiveRibbon(FALSE) : 0;
         break;
     case BT_FUNC_SET_PARTNER_ID:
-        sT.partnerID = value;
+        sT.partnerID = value % BT_PARTNERS;
         set = FALSE;
         break;
     case BT_FUNC_GET_PARTNER_ID:
@@ -786,7 +818,8 @@ bool8 Sinnoh_TowerCall(u16 func, u16 arg, u16 destVar)
         out = value < 4 ? sT.slots[value] : 0xFF;
         break;
     case BT_FUNC_GET_PARTNER_PARAM:
-        out = value == 2 ? sT.partnerID : 0;
+        // (2 the partner's number, 1 its sprite: the player's own is the player walking in)
+        out = value == 2 ? sT.partnerID : value == 1 ? sPartnerGfx[sT.partnerID % BT_PARTNERS] : 0;
         break;
     case BT_FUNC_UNK_57:
         out = Random() / 65535;
@@ -794,8 +827,75 @@ bool8 Sinnoh_TowerCall(u16 func, u16 arg, u16 destVar)
     case BT_FUNC_CHECK_IS_NULL:
         out = !sT.active;
         break;
+    case BT_FUNC_UNK_56:
+    {
+        // the BATTLE SALON's partners' teams (sub_0204A97C): two each, none of the player's kinds or items
+        u32 p;
+        for (p = 0; p < BT_PARTNERS; p++)
+            sT.partnerCount[p] = Sinnoh_Frontier_FillParty(sT.partners[p], SINNOH_FT_TRAINER_CHERYL_CHERYL + p,
+                                                           sT.partySize, sT.species, sT.items, sT.partySize, 50);
+        MPNet_Log("tower: the BATTLE SALON's partners' teams made");
+        set = FALSE;
+        break;
+    }
+    case SINNOH_TOWER_PARTNER_SPECIES:
+    case SINNOH_TOWER_PARTNER_SPECIES + 1:
+    case SINNOH_TOWER_PARTNER_MOVE:
+    case SINNOH_TOWER_PARTNER_MOVE + 1:
+    {
+        // (Platinum's GetBattleTowerPartnerSpeciesAndMove: partner VALUE's POKéMON n, its kind or its first move)
+        struct Pokemon *mon = &sT.partners[value % BT_PARTNERS][func & 1];
+        out = func < SINNOH_TOWER_PARTNER_MOVE ? GetMonData(mon, MON_DATA_SPECIES) : GetMonData(mon, MON_DATA_MOVE1);
+        break;
+    }
+    case SINNOH_TOWER_BUFFER_SPECIES:
+    case SINNOH_TOWER_BUFFER_MOVE:
+    {
+        // (a name into text slot DESTVAR: 0-2 the game's STR_VAR_*, 3-5 SINNOH's own)
+        u8 *StringVar(u16 n);
+        if (func == SINNOH_TOWER_BUFFER_SPECIES)
+            GetSpeciesName(StringVar(destVar), value);
+        else
+            StringCopy(StringVar(destVar), gMoveNames[value]);
+        return FALSE;
+    }
+    case SINNOH_TOWER_JUDGE_TOTAL:
+    case SINNOH_TOWER_JUDGE_STAT:
+    case SINNOH_TOWER_JUDGE_BEST:
+    {
+        // Platinum's ScrCmd_JudgeStats: in its stat order HP, ATTACK, DEFENSE, SP. ATK, SP. DEF, SPEED, the best IV
+        // (one of those tied, at random: picked with the total, kept for the next two)
+        static const u8 sIvField[NUM_STATS] = {MON_DATA_HP_IV, MON_DATA_ATK_IV, MON_DATA_DEF_IV, MON_DATA_SPATK_IV,
+                                               MON_DATA_SPDEF_IV, MON_DATA_SPEED_IV};
+        static u8 sBest;
+        struct Pokemon *mon = &gPlayerParty[value < PARTY_SIZE ? value : 0];
+        u8 ivs[NUM_STATS], top = 0, ties = 0;
+        u32 k, total = 0;
+        for (k = 0; k < NUM_STATS; k++)
+        {
+            ivs[k] = GetMonData(mon, sIvField[k]);
+            total += ivs[k];
+            if (ivs[k] > top)
+                top = ivs[k];
+        }
+        if (func == SINNOH_TOWER_JUDGE_TOTAL)
+        {
+            for (k = 0; k < NUM_STATS; k++)
+                ties += ivs[k] == top;
+            ties = Random() % ties;
+            for (k = 0; k < NUM_STATS; k++)
+                if (ivs[k] == top && ties-- == 0)
+                    break;
+            sBest = k < NUM_STATS ? k : 0;
+            out = total;
+            MPNet_Log("tower: the STATS JUDGE: slot %d, total %u, best stat %d (%d)", value, total, sBest, top);
+        }
+        else
+            out = func == SINNOH_TOWER_JUDGE_STAT ? 122 + sBest : ivs[sBest];
+        break;
+    }
     case BT_FUNC_UNK_09: case BT_FUNC_UNK_10: case BT_FUNC_UNK_11: case BT_FUNC_UNK_12: case BT_FUNC_UNK_15:
-    case BT_FUNC_UNK_16: case BT_FUNC_UNK_54: case BT_FUNC_UNK_56: case BT_FUNC_UNK_58: case BT_FUNC_UNK_59:
+    case BT_FUNC_UNK_16: case BT_FUNC_UNK_54: case BT_FUNC_UNK_58: case BT_FUNC_UNK_59:
     default:
         break;   // (the Wi-Fi rooms' and the link's: closed; the partners' parties: the BATTLE SALON's own call)
     }
@@ -815,8 +915,10 @@ void Sinnoh_TowerDebug(const char *arg)
         sTS.streakOn[mode] = room > 0;
     }
     printf("[test] stower: active %d mode %d next %d wins %d palmer %d | single record %d latest %d room %d on %d"
-           " | double record %d latest %d room %d | bp %d victories %u challenges %u inprogress %d\n",
+           " | double record %d latest %d room %d | multi record %d latest %d room %d partner %d"
+           " | bp %d victories %u challenges %u inprogress %d\n",
            sT.active, sT.challengeMode, sT.nextOpponentNum, sT.wins, sT.beatPalmer, sTS.record[0], sTS.latest[0],
-           sTS.room[0], sTS.streakOn[0], sTS.record[1], sTS.latest[1], sTS.room[1], gSaveBlock2Ptr->frontier.battlePoints,
+           sTS.room[0], sTS.streakOn[0], sTS.record[1], sTS.latest[1], sTS.room[1], sTS.record[2], sTS.latest[2],
+           sTS.room[2], sT.partnerID, gSaveBlock2Ptr->frontier.battlePoints,
            sTS.victories, sTS.challenges, sTS.inProgress);
 }

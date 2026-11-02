@@ -167,6 +167,17 @@ OVERRIDES = {
                                          'movement_type': 'MOVEMENT_TYPE_FACE_DOWN', 'script': '0x0'},
                                      3: {'flag': '0x3FFF'}},
     'Sinnoh_BattleTowerCorridor': {1: {'graphics_id': 'OBJ_EVENT_GFX_SINNOH_FRONTIER_SINGLE_ATTENDANT'}},
+    # (the multi battles' scenes: the attendants, the player walking in, the partner and the opponents by their looks)
+    'Sinnoh_BattleTowerMultiBattleRoom': {1: {'graphics_id': 'OBJ_EVENT_GFX_SINNOH_FRONTIER_MULTI_ATTENDANT'},
+                                          2: {'graphics_id': 'OBJ_EVENT_GFX_SINNOH_FRONTIER_MULTI_ATTENDANT'},
+                                          3: {'flag': '0x3FFF'},
+                                          4: {'graphics_id': 'OBJ_EVENT_GFX_VAR_1', 'flag': '0x3FFF'},
+                                          5: {'graphics_id': 'OBJ_EVENT_GFX_VAR_3', 'flag': '0x3FFF'},
+                                          6: {'graphics_id': 'OBJ_EVENT_GFX_VAR_2', 'flag': '0x3FFF'}},
+    'Sinnoh_BattleTowerCorridorMulti': {1: {'graphics_id': 'OBJ_EVENT_GFX_SINNOH_FRONTIER_MULTI_ATTENDANT'},
+                                        2: {'graphics_id': 'OBJ_EVENT_GFX_SINNOH_FRONTIER_MULTI_ATTENDANT'},
+                                        3: {'flag': '0x3FFF'},
+                                        4: {'graphics_id': 'OBJ_EVENT_GFX_VAR_1', 'flag': '0x3FFF'}},
 }
 
 

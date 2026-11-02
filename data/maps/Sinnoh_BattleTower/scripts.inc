@@ -15,7 +15,7 @@ Sinnoh_BattleTower_EventScript_Person1::
 	end
 
 Sinnoh_BattleTower_EventScript_Person2::
-	msgbox Sinnoh_BattleTower_Text_Person2, MSGBOX_NPC
+	goto SinnohP_battle_tower_2
 	end
 
 Sinnoh_BattleTower_EventScript_Person5::
@@ -55,7 +55,7 @@ Sinnoh_BattleTower_EventScript_Person13::
 	end
 
 Sinnoh_BattleTower_EventScript_Person15::
-	msgbox Sinnoh_BattleTower_Text_Person15, MSGBOX_NPC
+	goto SinnohP_battle_tower_24
 	end
 
 Sinnoh_BattleTower_Text_Bg2:
@@ -66,19 +66,9 @@ Sinnoh_BattleTower_Text_Bg3:
 	.string "A machine that keeps records. Its\n"
 	.string "screen is dark for now.$"
 
-Sinnoh_BattleTower_Text_Person2:
-	.string "Welcome to the BATTLE TOWER. Battles\n"
-	.string "with a partner aren't open yet. The\l"
-	.string "single battle counter is!$"
-
 Sinnoh_BattleTower_Text_Person13:
 	.string "I'm covering the BATTLE TOWER's\n"
 	.string "records. Some of these streaks are\l"
 	.string "legendary.$"
-
-Sinnoh_BattleTower_Text_Person15:
-	.string "I can tell how your MOéMON's stats\n"
-	.string "grew. Come back once the tower is\l"
-	.string "open!$"
 
 @ --- end of SINNOH words ---

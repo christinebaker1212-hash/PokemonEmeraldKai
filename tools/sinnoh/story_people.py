@@ -26,7 +26,8 @@ LEAGUE = 9
 # Story people whose own Platinum script runs when talked to (tools/sinnoh/gen_words.py gives them their Platinum stub):
 # (map, Platinum's object number). PROF. OAK in ETERNA: the UPGRADE and the legendary birds set roaming
 # (src/sinnoh/s3d_roamer.c); his row in gifts.py keeps its flag number, unused
-PLATINUM = {('Sinnoh_EternaCitySouthHouse', 1)}
+# The BATTLE SALON's partners (shown by the salon's own map script, Platinum's, by the partners met on the way)
+PLATINUM = {('Sinnoh_EternaCitySouthHouse', 1)} | {('Sinnoh_BattleTowerBattleSalon', n) for n in range(2, 7)}
 NEVER = (99, 99, None, None, None)
 ALWAYS = (0, 99, None, None, None)
 
@@ -554,12 +555,6 @@ STORY_WORDS = {
         'Person17': "BYRON: Gahaha! A fine place to rest these old bones.",
         'Person18': "ROARK: Dad's here too? Ugh. Can't even vacation in peace.",
         'Person19': "MAYLENE: Resting is training too! ...Is that true? I hope that's true."},
-    'Sinnoh_BattleTowerBattleSalon': {
-        'Person2': "CHERYL: The TOWER's TRAINERS are so strong. I'm here to heal everyone afterward!",
-        'Person3': "MIRA: Mira likes the TOWER. It's the only building Mira doesn't get lost in.",
-        'Person4': "RILEY: I come here to test my aura against the best. It's humbling.",
-        'Person5': "MARLEY: ...It's loud in here. But the battles are good.",
-        'Person6': "BUCK: Want a partner for the TOWER? Hah! I'd win every round!"},
     'Sinnoh_BattleTower': {
         'Person13': "I'm covering the BATTLE TOWER's records. Some of these streaks are legendary."},
     'Sinnoh_BattleHall': {'Person11': "The BATTLE HALL's crowd is the loudest in SINNOH!"},

@@ -1,0 +1,55 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp teach 0 242
+mp teach 1 242
+mp setflag 0x3739
+mp warp 41,8,11,6
+wait 60
+waitfor field 1000
+mp face up
+press A 1
+pressuntil A multichoice 2000
+wait 20
+shot m_menu1
+press A 1
+wait 30
+pressuntil A partymenu 3000
+wait 40
+press A 1
+wait 20
+press A 1
+wait 20
+press DOWN 1
+wait 10
+press A 1
+wait 20
+press A 1
+wait 30
+press A 1
+pressuntillog A 8000 partners' teams made
+pressuntil A free 3000
+wait 30
+mp where
+shot m_salon
+mp warp 41,10,13,11
+wait 60
+waitfor free 2000
+mp objlist
+mp face up
+press A 1
+pressuntil A yesno 3000
+wait 20
+shot m_cheryl
+press A 1
+shotburst m_walk 1500 150
+pressuntil A battle 8000
+mp stower
+pressuntil A field 120000
+wait 120
+mash B 60 10
+wait 60
+mp where
+mp stower
+shot m_end
+quit

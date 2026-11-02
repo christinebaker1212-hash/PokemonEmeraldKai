@@ -215,8 +215,9 @@ static u16 PlatinumPocket(u16 item)
 
 u8 *StringVar(u16 n)
 {
-    n = VarGet(n);   // (a buffer number, or a variable holding one)
-    return n == 0 ? gStringVar1 : n == 1 ? gStringVar2 : gStringVar3;
+    extern u8 gSinnohStrVar[3][64];
+    n = VarGet(n);   // (a buffer number, or a variable holding one; 3-5 SINNOH's own slots, s3d_text.c)
+    return n == 0 ? gStringVar1 : n == 1 ? gStringVar2 : n == 2 ? gStringVar3 : gSinnohStrVar[(n - 3) % 3];
 }
 
 static const u8 sPocket0[] = _("ITEMS"), sPocket1[] = _("MEDICINE"), sPocket2[] = _("POKé BALLS"),
