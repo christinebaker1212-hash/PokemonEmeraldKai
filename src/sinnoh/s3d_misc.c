@@ -14,6 +14,15 @@
 //   7 BufferPartyPokemonSize: A the party slot's variable, B the text slots (whole inches << 8 | tenths)
 //   8 UpdateSizeContestRecord: A the party slot's variable: its POKéMON is the new record
 //   9 BufferSizeContestRecord: B the text slots (as 7) for the record (A: the species, REMORAID)
+//   AMITY SQUARE (Platinum's scrcmd_amity_square.c; every POKéMON follows in this game, so the square's walker is the
+//   player's own follower: tools/sinnoh/gen_scripts.py KAI_REWRITES):
+//   10 the follower's party slot into A, its species into B (none: slot 0, SPECIES_NONE)
+//   11 ClearAmitySquareStepCount; 12 GetAmitySquareStepCount A (the steps in the square since, Sinnoh_MiscStep)
+//   13 CalcAmitySquareFoundAccessory: A the accessory found, B the species' variable (Platinum's pools and odds)
+//   16 out of the square (its walker no more)
+//   14 CheckAmitySquareManGiftIsAccessory: A the gift's number, B the answer; 15 GetAmitySquareBerryOrAccessoryIDFromMan:
+//      A the gift's number, B its item or accessory
+#include <stdlib.h>
 #include <string.h>
 #include "global.h"
 #include "event_data.h"
@@ -22,9 +31,11 @@
 #include "pokemon_storage_system.h"
 #include "random.h"
 #include "string_util.h"
+#include "constants/items.h"
 #include "constants/species.h"
 #include "constants/map_groups.h"
 #include "mp.h"
+#include "mp_life_field.h"
 
 #define MAGIC 0x43534D53   // "SMSC"
 
@@ -33,7 +44,9 @@ static struct
     u32 magic;
     u16 storeBuys;
     u16 remoraidRecord;   // (ROUTE 222's size contest: the record's size hash, 0 = none yet)
-    u16 unused[14];
+    u16 amitySteps;       // (AMITY SQUARE: steps since the follower's last find)
+    u16 amityWalking;     // (AMITY SQUARE: the follower is the square's walker, from a gate in to a gate out)
+    u16 unused[12];
 } sM;
 
 const void *Sinnoh_MiscData(u32 *size)
@@ -96,6 +109,76 @@ static void BufferSize(u32 tenths, u16 slots)
 {
     ConvertIntToDecimalStringN(TextSlot(slots >> 8), tenths / 10, STR_CONV_MODE_LEFT_ALIGN, 4);
     ConvertIntToDecimalStringN(TextSlot(slots & 0xFF), tenths % 10, STR_CONV_MODE_LEFT_ALIGN, 1);
+}
+
+// Platinum's ACCESSORY_* (include/constants/accessories.h), the ones AMITY SQUARE gives
+enum
+{
+    A_WHITE_FLUFF, A_YELLOW_FLUFF, A_PINK_FLUFF, A_BROWN_FLUFF, A_BLACK_FLUFF, A_ORANGE_FLUFF, A_ROUND_PEBBLE,
+    A_GLITTER_BOULDER, A_SNAGGY_PEBBLE, A_JAGGED_BOULDER, A_BLACK_PEBBLE, A_MINI_PEBBLE, A_PINK_SCALE, A_BLUE_SCALE,
+    A_GREEN_SCALE, A_PURPLE_SCALE, A_BIG_SCALE, A_NARROW_SCALE, A_BLUE_FEATHER, A_RED_FEATHER, A_YELLOW_FEATHER,
+    A_WHITE_FEATHER, A_BLACK_MOUSTACHE, A_WHITE_MOUSTACHE, A_BLACK_BEARD, A_WHITE_BEARD, A_SMALL_LEAF, A_BIG_LEAF,
+    A_NARROW_LEAF, A_SHED_CLAW, A_SHED_HORN, A_THIN_MUSHROOM, A_THICK_MUSHROOM, A_STUMP,
+};
+
+// (Platinum's sMonFindableAccessories: by the follower's kind, ten finds from common to rare)
+static const u8 sAmityFinds[6][10] = {
+    {A_WHITE_FLUFF, A_ORANGE_FLUFF, A_WHITE_FEATHER, A_ROUND_PEBBLE, A_SMALL_LEAF, A_BLUE_SCALE, A_WHITE_BEARD,
+     A_THIN_MUSHROOM, A_BIG_SCALE, A_STUMP},
+    {A_PINK_FLUFF, A_RED_FEATHER, A_YELLOW_FEATHER, A_BLACK_BEARD, A_NARROW_SCALE, A_WHITE_FLUFF, A_WHITE_MOUSTACHE,
+     A_SHED_CLAW, A_NARROW_LEAF, A_PURPLE_SCALE},
+    {A_JAGGED_BOULDER, A_SNAGGY_PEBBLE, A_BROWN_FLUFF, A_ROUND_PEBBLE, A_BLACK_MOUSTACHE, A_SHED_HORN, A_NARROW_SCALE,
+     A_GLITTER_BOULDER, A_GREEN_SCALE, A_THICK_MUSHROOM},
+    {A_PINK_SCALE, A_BLUE_FEATHER, A_WHITE_FEATHER, A_BLUE_SCALE, A_THIN_MUSHROOM, A_SNAGGY_PEBBLE, A_WHITE_BEARD,
+     A_BLACK_BEARD, A_BIG_LEAF, A_GLITTER_BOULDER},
+    {A_ORANGE_FLUFF, A_BROWN_FLUFF, A_SMALL_LEAF, A_RED_FEATHER, A_YELLOW_FEATHER, A_YELLOW_FLUFF, A_MINI_PEBBLE,
+     A_BIG_SCALE, A_BLACK_MOUSTACHE, A_PURPLE_SCALE},
+    {A_PINK_SCALE, A_SHED_HORN, A_PINK_FLUFF, A_YELLOW_FEATHER, A_SHED_CLAW, A_BLACK_FLUFF, A_JAGGED_BOULDER,
+     A_BIG_LEAF, A_GREEN_SCALE, A_BLACK_PEBBLE},
+};
+
+static u8 AmityPool(u16 species)
+{
+    switch (species)
+    {
+    case SPECIES_PIPLUP: case SPECIES_PRINPLUP: case SPECIES_EMPOLEON: return 1;
+    case SPECIES_TURTWIG: case SPECIES_GROTLE: case SPECIES_TORTERRA: return 2;
+    case SPECIES_PSYDUCK: case SPECIES_BUNEARY: case SPECIES_DRIFLOON: return 3;
+    case SPECIES_PIKACHU: case SPECIES_CLEFAIRY: case SPECIES_PACHIRISU: case SPECIES_HAPPINY: return 4;
+    case SPECIES_JIGGLYPUFF: case SPECIES_TORCHIC: case SPECIES_SKITTY: case SPECIES_SHROOMISH: return 5;
+    }
+    return 0;   // (CHIMCHAR's line, and any other POKéMON: Platinum's default)
+}
+
+// (Platinum's sBerryAndAccessoryManOptions: 0-8 BERRIES, 9-15 accessories)
+static const u16 sAmityGifts[16] = {
+    ITEM_MAGOST_BERRY, ITEM_CORNN_BERRY, ITEM_RABUTA_BERRY, ITEM_NOMEL_BERRY, ITEM_SPELON_BERRY, ITEM_PAMTRE_BERRY,
+    ITEM_WATMEL_BERRY, ITEM_DURIN_BERRY, ITEM_BELUE_BERRY,
+    A_MINI_PEBBLE, A_GLITTER_BOULDER, A_BLACK_PEBBLE, A_BIG_SCALE, A_BIG_LEAF, A_THICK_MUSHROOM, A_STUMP,
+};
+
+static bool8 InAmitySquare(void)
+{
+    return gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_SINNOH_AMITY_SQUARE)
+        && gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_SINNOH_AMITY_SQUARE);
+}
+
+// (mp_life_interact.c, A in front of the follower) in AMITY SQUARE, the walker's own script: Platinum's AmitySquare_FollowerMon
+// (its find every 200 steps, or a line); NULL elsewhere (the follower's usual words)
+extern const u8 SinnohP_amity_square_6[] __attribute__((weak));
+const u8 *Sinnoh_FollowerTalkScript(void)
+{
+    if (!InAmitySquare() || !sM.amityWalking)
+        return NULL;
+    MPNet_Log("amity: the walker's script (%u steps)", sM.amitySteps);
+    return SinnohP_amity_square_6;
+}
+
+// (field_control_avatar.c, each step) AMITY SQUARE counts its walker's steps
+void Sinnoh_MiscStep(void)
+{
+    if (InAmitySquare() && sM.amityWalking && sM.amitySteps < 0xFFFF)
+        sM.amitySteps++;
 }
 
 static struct Pokemon *PartySlotMon(u16 var)
@@ -184,5 +267,46 @@ void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
     case 9:
         BufferSize(MP_MonSizeTenthsInch(SPECIES_REMORAID, RemoraidRecord()), b);
         break;
+    case 10:
+    {
+        u8 slot = MP_Follower_LocalPartySlot();
+        VarSet(a, slot < PARTY_SIZE ? slot : 0);
+        VarSet(b, slot < PARTY_SIZE ? GetMonData(&gPlayerParty[slot], MON_DATA_SPECIES) : SPECIES_NONE);
+        sM.amityWalking = slot < PARTY_SIZE;
+        break;
     }
+    case 16:
+        sM.amityWalking = FALSE;
+        break;
+    case 11:
+        sM.amitySteps = 0;
+        break;
+    case 12:
+        VarSet(a, sM.amitySteps);
+        break;
+    case 13:
+    {
+        static const u8 sOdds[10] = {15, 30, 45, 60, 70, 80, 88, 93, 98, 100};   // (Platinum's: 15% .. 2%)
+        u16 r = Random() % 100;
+        u8 i = 0;
+        while (r >= sOdds[i])
+            i++;
+        VarSet(a, sAmityFinds[AmityPool(VarGet(b))][i]);
+        break;
+    }
+    case 14:
+        VarSet(b, VarGet(a) >= 9);
+        break;
+    case 15:
+        VarSet(b, sAmityGifts[VarGet(a) % ARRAY_COUNT(sAmityGifts)]);
+        break;
+    }
+}
+
+// Tests (mp amity [STEPS]): AMITY SQUARE's walker and its steps (STEPS: set them)
+void Sinnoh_AmityDebug(const char *arg)
+{
+    if (arg != NULL && *arg >= '0' && *arg <= '9')
+        sM.amitySteps = atoi(arg);
+    MPNet_Log("amity: walking %u steps %u slot %u", sM.amityWalking, sM.amitySteps, MP_Follower_LocalPartySlot());
 }

@@ -3383,6 +3383,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_MomBank_Debug(const char *arg);
         MP_MomBank_Debug(arg);
     }
+    else if (strcmp(cmd, "amity") == 0)
+    {
+        // amity [STEPS] - SINNOH's AMITY SQUARE: is the follower its walker, its steps (s3d_misc.c); STEPS sets them
+        void Sinnoh_AmityDebug(const char *arg);
+        Sinnoh_AmityDebug(arg);
+    }
     else if (strcmp(cmd, "pokegear") == 0)
     {
         // pokegear [open | tune FREQ] - JOHTO's POKéGEAR: its card, cursor, phone and radio (mp_pokegear.c); open: from

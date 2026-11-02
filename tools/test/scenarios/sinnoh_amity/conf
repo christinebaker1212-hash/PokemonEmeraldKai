@@ -1,0 +1,9 @@
+# AMITY SQUARE (Platinum's own scripts, Kai's follower as its walker: gen_scripts.py KAI_REWRITES, s3d_misc.c 10-16):
+# stepping in at the west gate makes the follower (PIKACHU) the walker; past 200 steps, talking to it gives its find
+# (a BERRY or an accessory, Platinum's odds) and the count starts again; then one of its lines; stepping out ends the
+# walk. Needs both packs. Shots amity_*.png.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=25:30"
+EXPECT_A=("amity: walking 1 steps 1 slot 0" "amity: the walker's script (250 steps)" "amity: walking 1 steps 0 slot 0" "amity: walking 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -54,7 +54,7 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [x] Platinum's "choose a POKéMON" (SelectMoveTutorPokemon / GetSelectedPartySlot) on the game's party menu; its save
       prompt (Common_SaveGame) the game's; scripts go on after a warp (SINNOH_WARP_CONTINUE)
 - [ ] Platinum's commands still unmapped onto Kai's systems ([x] PokeMart*WithGreeting and Common_CallPokecenterNurse:
-      the game's shop and nurse, Platinum's greeting; 2248 of 2511 entries convert), ShowMoveTutorMoveSelectionMenu, PlayHMCutIn, SelectPokemonToTrade,
+      the game's shop and nurse, Platinum's greeting; 2255 of 2511 entries convert), ShowMoveTutorMoveSelectionMenu, PlayHMCutIn, SelectPokemonToTrade,
       CallBattleTowerFunction / the frontier lobbies, EndSafariGame
 
 ## 3. Built for 1:1 (Platinum has it, Kai doesn't)
@@ -86,7 +86,10 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       code with Platinum's rounding and starting record; test sinnoh_size_contest
 - [x] JUBILIFE's TV lottery in Platinum's own script, on the game's own lottery number (s3d_misc.c) (sinnoh_lottery)
 - [ ] The JOURNAL
-- [ ] AMITY SQUARE's walk (ClearAmitySquareStepCount)
+- [x] AMITY SQUARE: Platinum's own scripts with the player's follower as the square's walker (every POKéMON follows in
+      this game, so the gates no longer check the party or hand one over: gen_scripts.py KAI_REWRITES); its finds every
+      200 steps by Platinum's pools and odds (BERRIES, accessories), its lines, the gift man's BERRY or accessory a
+      day (s3d_misc.c 10-16, mp_life_interact.c); test sinnoh_amity
 - [x] The VEILSTONE DEPARTMENT STORE's regular (CheckIsDepartmentStoreRegular: 5 buys there, s3d_misc.c)
 - [x] Game records (AddToGameRecord: kept by nothing, Platinum showing them only in the rankings rooms); the rankings
       machines (StartRankingsMachine) closed: group / Wi-Fi rankings

@@ -879,6 +879,13 @@ static struct Pokemon *FindLocalFollower(void)
     return FindPartyMon(sLocalPersonality);
 }
 
+// The local follower's party slot (PARTY_SIZE: none)
+u8 MP_Follower_LocalPartySlot(void)
+{
+    struct Pokemon *mon = FindLocalFollower();
+    return mon ? (u8)(mon - gPlayerParty) : PARTY_SIZE;
+}
+
 u32 MP_Follower_LocalFx(u8 *sound)
 {
     struct Pokemon *mon = FindLocalFollower();

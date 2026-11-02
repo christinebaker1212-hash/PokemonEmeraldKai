@@ -584,6 +584,16 @@ bool8 MP_LifeInteract_TryFollower(void)
     MoveCoords(me->facingDirection, &x, &y);
     if (x != fx || y != fy || GetObjectEventIdByXY(x, y) != OBJECT_EVENTS_COUNT)
         return FALSE;
+    {
+        // Moemon Kai: SINNOH's AMITY SQUARE: the follower is the square's walker, Platinum's own script (s3d_misc.c)
+        const u8 *Sinnoh_FollowerTalkScript(void);
+        const u8 *script = Sinnoh_FollowerTalkScript();
+        if (script)
+        {
+            ScriptContext_SetupScript(script);
+            return TRUE;
+        }
+    }
     LockPlayerFieldControls();
     CreateTask(Task_Interact, 80);
     return TRUE;

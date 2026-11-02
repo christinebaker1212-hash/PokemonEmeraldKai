@@ -70,6 +70,7 @@ bool8 MP_Follower_LocalPos(s16 *x, s16 *y, u8 *dir);
 bool8 MP_Follower_SlotScreenTop(u8 slot, s16 *x, s16 *top, u8 *subpriority);
 bool8 MP_Follower_CanStandAt(s16 x, s16 y);
 u16 MP_Follower_SlotDex(u8 slot);
+u8 MP_Follower_LocalPartySlot(void);   // the local follower's party slot (PARTY_SIZE: none)
 bool8 MP_Follower_SlotTile(u8 slot, s16 *x, s16 *y);
 bool8 MP_Follower_AutoTargetTile(s16 *x, s16 *y);
 bool8 MP_Follower_AutoState(s16 *x, s16 *y, s16 *px, s16 *py, u8 *dir, u8 *speed);   // the local follower on its own

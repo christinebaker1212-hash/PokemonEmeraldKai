@@ -667,6 +667,10 @@ static bool8 TryStartStepCountScript(u16 metatileBehavior)
         }
     }
 
+    {
+        void Sinnoh_MiscStep(void);
+        Sinnoh_MiscStep();   // Moemon Kai: AMITY SQUARE's walker counts its steps (src/sinnoh/s3d_misc.c)
+    }
     if (SafariZoneTakeStep() == TRUE)
         return TRUE;
     if (CountSSTidalStep(1) == TRUE)

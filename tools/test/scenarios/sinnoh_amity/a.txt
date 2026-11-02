@@ -1,0 +1,31 @@
+pressuntil A field 5000
+wait 30
+mp follow 0
+wait 60
+mp warp 41,1,12,47
+wait 200
+press UP 16
+wait 90
+mp amity
+mp amity 250
+mp face down
+wait 10
+press A 2
+mash A 20 20
+wait 60
+shot amity_find
+mash A 10 20
+wait 60
+mp amity
+mp face down
+press A 2
+wait 60
+shot amity_line
+mash A 6 20
+wait 60
+mp warp 41,1,12,48
+wait 200
+press UP 16
+wait 90
+mp amity
+quit

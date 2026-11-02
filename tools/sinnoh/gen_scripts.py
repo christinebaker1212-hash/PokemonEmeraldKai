@@ -161,7 +161,7 @@ def parse(path):
     labels, entries, order, cur = {}, [], [], None
     defines = {}
     for raw in open(path, encoding='utf-8', errors='replace'):
-        line = raw.split('//')[0].split('@')[0].rstrip()   # (both kinds of comments)
+        line = re.sub(r'/\*.*?\*/', '', raw).split('//')[0].split('@')[0].rstrip()   # (every kind of comment)
         m = re.match(r'^#define\s+(\w+)\s+(\S+)\s*$', line)
         if m:
             defines[m.group(1)] = m.group(2)                 # (a file's own names: LOCAL_VAR_X VAR_0x8004)
@@ -305,6 +305,26 @@ def common_target(n):
 SHARED_EVENTS = {'contests': ['contest_hall_lobby', 'contest_hall_stage_ongoing_contest']}
 
 
+# Platinum's scripts that Kai's own systems supersede in part (CLAUDE.md: what Kai already has, SINNOH uses): a
+# label's commands replaced, the rest of the file as Platinum's. Command names starting with Kai are the converter's own.
+KAI_REWRITES = {
+    # AMITY SQUARE: every POKéMON follows anywhere in this game (Kai's followers), so the gates don't check the party
+    # or hand a POKéMON over: stepping in at a gate makes the follower the square's walker as it is (KaiAmityEnter: its
+    # party slot and species into Platinum's follower variables, the step count from zero, its first find drawn by
+    # Platinum's own SetNextPickUpType), stepping out ends it, without a word. Talking to the follower in the square
+    # runs Platinum's own AmitySquare_FollowerMon (mp_follower.c MP_Follower_TryInteract): its finds every 200 steps,
+    # its lines; the gift man is Platinum's.
+    'amity_square': {
+        'AmitySquare_CoordEvent_WestGate': [('KaiAmityEnter', []), ('Call', ['AmitySquare_FollowerMon_SetNextPickUpType']),
+                                            ('End', [])],
+        'AmitySquare_CoordEvent_EastGate': [('KaiAmityEnter', []), ('Call', ['AmitySquare_FollowerMon_SetNextPickUpType']),
+                                            ('End', [])],
+        'AmitySquare_CoordEvent_ExitAmitySquare': [('KaiAmityLeave', []), ('SetVar', ['VAR_FOLLOWER_MON_ACTIVE', 'FALSE']),
+                                                   ('End', [])],
+    },
+}
+
+
 class FileConverter:
     def __init__(self, dec, path):
         self.dec, self.root, self.path = dec, dec.root, path
@@ -323,6 +343,8 @@ class FileConverter:
                     if isinstance(o.get('id'), str):
                         self.localids.setdefault(o['id'], i + 1)
         self.labels, self.entries, self.order = parse(path)
+        for lab, body in KAI_REWRITES.get(self.low, {}).items():
+            self.labels[lab] = body
         self.texts = {}            # label -> (bank number, message number)
         self._local = 0
         self.calls = set()         # (file, entry) of the common scripts it calls
@@ -603,6 +625,27 @@ class FileConverter:
         if cmd == 'Common_CallPokecenterNurse':
             return ['setvar VAR_0x800B, %s' % self.localid(a[0]), 'call Common_EventScript_PkmnCenterNurse', 'waitmessage',
                     'waitbuttonpress', 'release']
+        # AMITY SQUARE (s3d_misc.c 10-15: Platinum's scrcmd_amity_square.c)
+        if cmd == 'KaiAmityEnter':
+            return [self.sinnoh(SINNOH_MISC, 10, self.var('VAR_FOLLOWER_MON_PARTY_ID'), self.var('VAR_FOLLOWER_MON_SPECIES')),
+                    'setvar %s, %d' % (self.var('VAR_FOLLOWER_MON_ACTIVE'), 1)]
+        if cmd == 'KaiAmityLeave':
+            return [self.sinnoh(SINNOH_MISC, 16)]
+        if cmd == 'ClearAmitySquareStepCount':
+            return [self.sinnoh(SINNOH_MISC, 11)]
+        if cmd == 'GetAmitySquareStepCount':
+            return [self.sinnoh(SINNOH_MISC, 12, self.var(a[0]))]
+        if cmd == 'CalcAmitySquareFoundAccessory':
+            return [self.sinnoh(SINNOH_MISC, 13, self.var(a[0]), self.var(a[1]))]
+        if cmd == 'CalcAmitySquareBerryAndAccessoryManOptionID':
+            return ['random 16', 'copyvar %s, VAR_RESULT' % self.var(a[0])]
+        if cmd == 'CheckAmitySquareManGiftIsAccessory':
+            return [self.sinnoh(SINNOH_MISC, 14, self.var(a[0]), self.var(a[1]))]
+        if cmd == 'GoToIfAmitySquareManGiftIsNotAccessory':   # (Platinum's macro)
+            return (self.command('CheckAmitySquareManGiftIsAccessory', [a[0], 'VAR_RESULT'])
+                    + self.command('GoToIfEq', ['VAR_RESULT', 'FALSE', a[1]]))
+        if cmd == 'GetAmitySquareBerryOrAccessoryIDFromMan':
+            return [self.sinnoh(SINNOH_MISC, 15, self.var(a[0]), self.var(a[1]))]
         if cmd == 'CalcSizeContestResult':
             return [self.sinnoh(SINNOH_MISC, 6, self.var(a[0]), self.var(a[1]))]
         if cmd == 'BufferPartyPokemonSize':
