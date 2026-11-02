@@ -37,6 +37,7 @@ static struct
     u16 backCount;
     const u8 *accessories[100];   // SUPER CONTESTS' art (tools/sinnoh/build_contest.py: "CNTS"): u16 w, h, RGB555
     const u8 *backdrops2[18];
+    const u8 *mining[128];  // the Underground's digging (tools/sinnoh/build_mining.py: "MINE"): u16 w, h, RGB555
     const u8 *poketch;     // the POKéTCH's art (tools/sinnoh/build_poketch.py: "PKCH")
     const u8 *poketchEnd;
 } sGfx;
@@ -197,6 +198,22 @@ static void Load(void)
                     sGfx.backdrops2[k] = p;
                 p += 4 + w * h * 2;
             }
+        }
+    }
+    // the Underground's digging screen: "MINE", u16 count, pictures (u16 w, h, RGB555)
+    if (p + 6 <= end && memcmp(p, "MINE", 4) == 0)
+    {
+        u32 k;
+        n = p[4] | p[5] << 8;
+        p += 6;
+        for (k = 0; k < n && p + 4 <= end; k++)
+        {
+            u32 w = p[0] | p[1] << 8, h = p[2] | p[3] << 8;
+            if (p + 4 + w * h * 2 > end)
+                break;
+            if (k < ARRAY_COUNT(sGfx.mining))
+                sGfx.mining[k] = p;
+            p += 4 + w * h * 2;
         }
     }
     if (p + 4 <= end && memcmp(p, "PKCH", 4) == 0)
@@ -447,6 +464,20 @@ const struct S3dStarterGfx *S3D_Gfx_Starter(void)
 }
 
 // SUPER CONTESTS' art (s3d_contest.c): accessory N's / backdrop N's picture, W x H RGB555 (bit 15: drawn); FALSE: none
+// the Underground's digging screen's picture N (s3d_mining.c; build_mining.py's order)
+bool8 S3D_Gfx_MiningPicture(u16 n, u16 *w, u16 *h, const u16 **px)
+{
+    const u8 *p;
+    if (!sGfx.tried)
+        Load();
+    if (!sGfx.ok || n >= ARRAY_COUNT(sGfx.mining) || (p = sGfx.mining[n]) == NULL || (p[0] | p[1] << 8) == 0)
+        return FALSE;
+    *w = p[0] | p[1] << 8;
+    *h = p[2] | p[3] << 8;
+    *px = (const u16 *)(p + 4);
+    return TRUE;
+}
+
 bool8 S3D_Gfx_ContestPicture(bool8 backdrop, u16 n, u16 *w, u16 *h, const u16 **px)
 {
     const u8 *p;

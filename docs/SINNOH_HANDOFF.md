@@ -134,7 +134,9 @@ To build (not 1:1 yet):
    once nothing uses them.
 5. Decided by the user (2026-11-02): SUPER CONTESTS and their own functions are built (POKé BALL effects in the
    Seals' place, in the story, menus and shops); Platinum's TV is built (src/sinnoh/s3d_tv.c, done: COOP_NOTES
-   "SINNOH's TV"). Still to ask: the Underground (single-player digging works without wireless).
+   "SINNOH's TV"). The Underground (the user, 2026-11-02): ONLY its fossil digging and SPIRITOMB's prerequisites;
+   its wireless sides (secret bases, spheres, traps, flags) are superseded by CO-OP (done: COOP_NOTES "The
+   Underground").
 The working checklist: docs/SINNOH_CHECKLIST.md.
 
 ## The goal
@@ -159,7 +161,8 @@ Removed, with the scripts behind them (they will never work here): PAL PARK, the
 Club, the Plaza, the Battle Tower's Wi-Fi rooms, Mystery Gift by Wi-Fi...). Removed where a Kai feature replaces
 them: BALL SEALS (the POKé BALL page's styles and ball effects), and anything else the co-op features supersede.
 Features that Gen 3 also has use the Gen 3 versions, but for SUPER CONTESTS, which the user asked for again
-(2026-11-02: built, with POKé BALL effects in the Seals' place). The Underground is still to be asked.
+(2026-11-02: built, with POKé BALL effects in the Seals' place). The Underground is built for its digging and
+SPIRITOMB only (the user, 2026-11-02).
 A new TRAINER CARD for Sinnoh comes later (the user's own design).
 People look as in Platinum (the user, 2026-11-01): its overworld sprites and trainers' battle pictures from the decomp,
 in sinnoh/platinum_gfx.pak (tools/sinnoh/build_gfx.py; COOP_NOTES).
@@ -218,7 +221,7 @@ perspective camera. The engine draws those models as Platinum does instead of pi
    (Team Galactic, the lakes, Spear Pillar, the Distortion World; the Distortion World's own gravity and camera
    need the 3D engine's camera moves).
 5. PÓKETCH Key Item and its apps (touch apps use the D-pad cursor or mouse). Self-contained, can come early.
-6. Not planned: Super Contests (Gen 3 contests instead); the Underground only if the user asks.
+6. (Superseded: SUPER CONTESTS and the Underground's digging were built after all, the user's later calls.)
 
 ## Decided (the user, 2026-10-31)
 - The map screen is Emerald's: Sinnoh is drawn at 240x160 (Platinum's camera fitted to it: its field of view

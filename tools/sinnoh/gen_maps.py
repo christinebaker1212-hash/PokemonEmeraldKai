@@ -55,6 +55,7 @@ MUSIC = {
     # buildings, caves and the rest
     'SEQ_PC_01_sseq': 'pokecenter', 'SEQ_FS_sseq': 'pokemart', 'SEQ_GYM_sseq': 'gym', 'SEQ_KENKYUJO_sseq': 'research_lab',
     'SEQ_D_01_sseq': 'victory_road', 'SEQ_D_02_sseq': 'eterna_forest', 'SEQ_D_03_sseq': 'cavern_on_the_lake',
+    'SEQ_TANKOU_sseq': 'oreburgh_mine',   # (the Underground's own song isn't made yet: OREBURGH MINE's stands in)
     'SEQ_D_04_sseq': 'oreburgh_mine', 'SEQ_D_05_sseq': 'mt_coronet', 'SEQ_D_06_sseq': 'iron_mountain',
     'SEQ_D_MOUNT1_sseq': 'mt_coronet', 'SEQ_D_MOUNT2_sseq': 'spear_pillar', 'SEQ_D_GINLOBBY_sseq': 'galactic_building',
     'SEQ_D_AGITO_sseq': 'galactic_hideout', 'SEQ_THE_EVENT04_sseq': 'galactic_hideout_deep',
@@ -186,6 +187,13 @@ def talk_trainer(root, p, o):
     return None
 
 
+# Platinum's people for sides of the game this one closes: never shown (the Underground's traps, goods and treasures
+# vendors: its secret bases, spheres and trades, which CO-OP supersedes; the user, 2026-11-02)
+CLOSED_PEOPLE = {'Sinnoh_Underground': (3, 4, 5)}
+# Story people only Platinum's own map scripts move and talk for (no script of their own when talked to): shown by their
+# hide flag all the same (the Underground's ROARK: its OnFrame intro, gen_scripts.py's map scripts)
+SCENE_PEOPLE = {'Sinnoh_Underground': (17,)}
+
 OBSTACLES = {'OBJ_EVENT_GFX_CUT_TREE': 'EventScript_CutTree', 'OBJ_EVENT_GFX_ROCK_SMASH': 'EventScript_RockSmash',
              'OBJ_EVENT_GFX_STRENGTH_BOULDER': 'EventScript_StrengthBoulder'}
 
@@ -243,7 +251,9 @@ def people(p, root, have):
             used_items.add(ball)
             flag_s = '0x%X' % flag
         elif gfx is None or ghost or story == story_people.NEVER or o['graphics_id'].endswith('POKEBALL') \
-                or (flag and not (story and (trainer or talk)) and label not in have) or not inside(p, o['x'], o['z']):
+                or o['script'] in CLOSED_PEOPLE.get(p['name'], ()) \
+                or (flag and not (story and (trainer or talk)) and label not in have
+                    and i + 1 not in SCENE_PEOPLE.get(p['name'], ())) or not inside(p, o['x'], o['z']):
             flag_s = '0x3FFF'
         else:
             flag_s = ('0x%X' % flag) if flag else '0'

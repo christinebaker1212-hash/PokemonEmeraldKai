@@ -71,6 +71,7 @@ DEX_RATING_NATIONAL = [(39, 'OakPokemonCaughtUnder40'), (59, 'OakPokemonCaught40
                        (481, 'OakPokemonCaught476'),
                        (0xFFFF, 'OakCompleteNationalDex_Male', 'OakCompleteNationalDex_Female')]
 VAR_SINNOH_STARTER = 0x52F8      # (include/mp_region.h: the starter picked from ROWAN's briefcase)
+VAR_SINNOH_SPIRITOMB = 0x52F2    # (include/mp_region.h: Platinum's SPIRITOMB counter, friends talked to in the Underground)
 FLAG_SINNOH_HIDE_REGION_BOAT = 0x3D3D   # (include/mp_region.h: CANALAVE's ferry sailor, shown when the boat can sail)
 FLAG_SINNOH_HAS_PARTNER = 0x3D3C   # (include/mp_region.h: Platinum's walking partner, SetHasPartner)
 
@@ -101,7 +102,9 @@ MOVE_KIND = {'WalkNormal': 'walk_', 'WalkFast': 'walk_fast_', 'WalkFaster': 'wal
 MOVE_ONE = {'EmoteExclamationMark': ['emote_exclamation_mark'], 'EmoteQuestionMark': ['emote_question_mark'],
             'SetInvisible': ['set_invisible'], 'SetVisible': ['set_visible'], 'LockDir': ['lock_facing_direction'],
             'UnlockDir': ['unlock_facing_direction'], 'FacePlayer': ['face_player'],
-            'FaceAwayFromPlayer': ['face_away_player']}
+            'FaceAwayFromPlayer': ['face_away_player'],
+            'WarpOut': ['fly_up', 'set_invisible'], 'WarpIn': ['set_visible', 'fly_down']}   # (Platinum's spin up and out of
+            # sight, as the Underground's ROARK leaves: the game's own rising)
 DELAYS = {1: ['delay_2'], 2: ['delay_4'], 4: ['delay_8'], 8: ['delay_16'], 15: ['delay_16', 'delay_8', 'delay_4', 'delay_2'],
           16: ['delay_16', 'delay_16'], 32: ['delay_16'] * 4}
 
@@ -504,6 +507,11 @@ class FileConverter:
             return ['goto %s' % self.label(a[0])]
         if cmd == 'Call':
             return ['call %s' % self.label(a[0])]
+        if cmd in ('Common_ObtainUndergroundTrap', 'Common_ObtainUndergroundSphere', 'Common_SendToUndergroundPCWithLinefeed',
+                   'Common_SendToUndergroundPC'):
+            # (traps, spheres and secret base goods: the Underground's sides CO-OP supersedes, closed; the user,
+            # 2026-11-02: the Underground is here for its digging and SPIRITOMB only)
+            return []
         if cmd == 'CallCommonScript':
             return ['call %s' % self.common(int(a[0], 0))]
         if cmd == 'Common_SaveGame':
@@ -527,6 +535,11 @@ class FileConverter:
             return ['%s %s, %s' % (cmd.lower(), self.var(a[0]), self.value(a[1]))]
         if cmd == 'CopyVar':
             return ['copyvar %s, %s' % (self.var(a[0]), self.var(a[1]))]
+        if cmd == 'GetSpiritombCounter':
+            # (the Underground's talks: src/sinnoh/s3d_underground.c counts them, co-op friends being Platinum's people)
+            return ['copyvar %s, 0x%X' % (self.var(a[0]), VAR_SINNOH_SPIRITOMB)]
+        if cmd == 'ClearSpiritombCounter':
+            return ['setvar 0x%X, 0' % VAR_SINNOH_SPIRITOMB]
         if cmd in ('SetFlag', 'ClearFlag'):
             return ['%s %s' % (cmd.lower(), self.flag(a[0]))]
         if cmd == 'LockAll':
@@ -552,6 +565,20 @@ class FileConverter:
             return ['waitbuttonpress']
         if cmd in ('CloseMessage', 'CloseMessageWithoutErasing'):
             return ['closemessage']
+        if cmd == 'UndergroundNPCMessage':
+            # (the Underground's own message box, which names the player itself: the game's)
+            return [self.sinnoh(SINNOH_BUFFER_PLAYER, 0), 'message %s' % self.text_label(a[0]), 'waitmessage']
+        if cmd == 'CloseUndergroundNPCMessage':
+            return ['closemessage']
+        if cmd == 'SetCommPlayerDir':
+            # (the player turned, Platinum's Underground player being a link one)
+            return [self.sinnoh(SINNOH_FACE, 'LOCALID_PLAYER', self.value(a[0]))]
+        if cmd == 'Dummy14F':
+            return []
+        if cmd == 'CheckHasRoomForGoodsInPC':
+            return ['setvar %s, 1' % self.var(a[2])]
+        if cmd == 'GetCapturedFlagCount':
+            return ['setvar %s, 0' % self.var(a[0])]   # (Capture the Flag: online, closed)
         if cmd == 'NPCMessage':
             return ['playse SE_SELECT', 'lockall', 'faceplayer', 'message %s' % self.text_label(a[0]), 'waitmessage',
                     'waitbuttonpress', 'closemessage', 'releaseall']
@@ -648,6 +675,10 @@ class FileConverter:
         if cmd == 'StartLegendaryBattle':
             return ['setwildbattle %s, %s' % (self.value(a[0]), self.value(a[1])),
                     'special BattleSetup_StartLegendaryBattle', 'waitstate']
+        if cmd == 'StartWildBattle':
+            # (a POKéMON met in a script, as any wild one: ROUTE 209's SPIRITOMB, the OLD CHATEAU's ROTOM)
+            return ['setwildbattle %s, %s' % (self.value(a[0]), self.value(a[1])),
+                    'special BattleSetup_StartScriptedWildBattle', 'waitstate']
         if cmd == 'CheckGameCompleted':
             return [self.sinnoh(SINNOH_GAME_COMPLETED, self.var(a[0]))]
         if cmd == 'CheckDidNotCapture':
@@ -767,6 +798,11 @@ class FileConverter:
             x, z = int(self.value(a[1])) - o[1], int(self.value(a[2])) - o[2]
             lid = self.localid(a[0])
             return ['setobjectxyperm %s, %d, %d' % (lid, x, z), 'setobjectxy %s, %d, %d' % (lid, x, z)]
+        if cmd == 'SetPosition' and (self.is_var(a[1]) or self.is_var(a[3])):
+            # (a place the script worked out, as SetObjectEventPos's: the Underground's ROARK beside the player)
+            lid = self.localid(a[0])
+            return [self.sinnoh(SINNOH_OBJECT_POS, lid, self.arg(a[1]), self.arg(a[3])),
+                    self.sinnoh(SINNOH_FACE, lid, self.value(a[4]))]
         if cmd == 'SetPosition':
             o = self.dec.origins().get(self.events_low)
             if o is None:

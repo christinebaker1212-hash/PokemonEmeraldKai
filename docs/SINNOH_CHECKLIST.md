@@ -8,7 +8,7 @@ Rules behind it: CLAUDE.md's SINNOH paragraph and docs/SINNOH_HANDOFF.md.
 
 | What | How to see it | Now |
 |---|---|---|
-| Platinum's script entries that convert | `python3 -I tools/sinnoh/gen_scripts.py --report ~/.cache/moemon/pokeplatinum` (first line) | 2114 of 2511 |
+| Platinum's script entries that convert | `python3 -I tools/sinnoh/gen_scripts.py --report ~/.cache/moemon/pokeplatinum` (first line) | 2117 of 2511 |
 | Commands still missing | the same report, the list under it (most used first) | 60 kinds |
 | Platinum's text slots and page breaks | messages show whole (\\r is a new box, six string slots) | done |
 | Platinum songs the game lacks | the same report, "songs the game lacks" | 5 |
@@ -82,6 +82,13 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [ ] Game records (AddToGameRecord), the rankings machines (StartRankingsMachine)
 - [x] DAWN's and LUCAS's own overworld sprites (Platinum's player_f / player_m sheets, appended to the pack after the
       others: OBJ_EVENT_GFX_SINNOH_PLAYER_F / _M)
+- [x] The Underground, for its digging and SPIRITOMB only (the user, 2026-11-02; its wireless sides are CO-OP's):
+      the EXPLORER KIT down and up (Platinum's cell mapping), the day's dig spots, Platinum's digging screen and rules
+      (s3d_mining.c, art "MINE"), treasures to the BAG, the UNDERGROUND MAN's and ROARK's own scripts, SPIRITOMB's
+      counter from co-op friends talked to there, ROUTE 208's ODD KEYSTONE and ROUTE 209's tower in Platinum's scripts,
+      the UNDERGROUND TREASURES CORNER on TV (sinnoh_underground, sinnoh_underground_man, sinnoh_spiritomb,
+      sinnoh_spiritomb_talk)
+- [ ] The Underground's own song (SEQ_TANKOU; OREBURGH MINE's stands in)
 - [ ] Platinum's songs the game lacks: SEQ_OPENING, SEQ_KUSAGASA, SEQ_PL_AUDIO, SEQ_PL_PIANO, SEQ_SILENCE_FIELD
 - [x] Platinum's POKéDEX ratings (Load*DexRating)
 - [x] Platinum's key items (items 662-684)
@@ -152,4 +159,6 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - Online-only: the GTS, the Wi-Fi Club and Plaza, global rankings, distribution events
 - The DS's own: the PAL PARK and its GBA slot, the second screen (the POKéTCH is Kai's)
 - Superseded by Kai: Ball Seals (POKé BALL effects take their place), Kai's TRAINER CARD
-- Still undecided by the user: the Underground
+- The Underground's wireless sides (the user, 2026-11-02: CO-OP supersedes them): secret bases, spheres and their
+  trades, traps, goods, Capture the Flag; its vendors aren't there, the UNDERGROUND MAN's missions past digging can't
+  be finished

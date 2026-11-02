@@ -1122,3 +1122,26 @@ Sinnoh_EventScript_StoryNoTeam::
 Sinnoh_Text_StoryNoTeam:
 	.string "You don't have a MOéMON yet!\n"
 	.string "Come back once you do.$"
+
+@ Moemon Kai: a dig spot in the Underground: Platinum's "The wall is bulging slightly. Try digging into it?", then the
+@ digging screen (src/sinnoh/s3d_mining.c; field_control_avatar.c finds the spot)
+Sinnoh_EventScript_UndergroundDig::
+	lockall
+	special Sinnoh_UndergroundBulging
+	message gSinnohMessage
+	waitmessage
+	yesnobox 20, 8
+	goto_if_eq VAR_RESULT, NO, Sinnoh_EventScript_UndergroundDigEnd
+	closemessage
+	special Sinnoh_UndergroundDig
+Sinnoh_EventScript_UndergroundDigEnd:
+	closemessage
+	releaseall
+	end
+
+@ Moemon Kai: the EXPLORER KIT used (item_use.c): down into the Underground, or back up (src/sinnoh/s3d_underground.c)
+Sinnoh_EventScript_ExplorerKit::
+	lockall
+	playse SE_M_DIG
+	special Sinnoh_ExplorerKitUse
+	end

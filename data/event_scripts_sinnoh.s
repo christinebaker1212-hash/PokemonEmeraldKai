@@ -575,3 +575,5 @@
 	.include "data/maps/Sinnoh_ContestHallStageNoContest/scripts.inc"
 	.include "data/maps/Sinnoh_ContestHallStageOngoingContest/scripts.inc"
 	.include "data/maps/Sinnoh_PoffinHouse/scripts.inc"
+	.include "data/maps/Sinnoh_EternaCityUndergroundManHouse/scripts.inc"
+	.include "data/maps/Sinnoh_Underground/scripts.inc"

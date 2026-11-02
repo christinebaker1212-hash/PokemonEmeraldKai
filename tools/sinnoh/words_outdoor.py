@@ -301,7 +301,6 @@ OUTDOOR = {
         'Sign11': "ROUTE 208|To HEARTHOME CITY",
         'Sign12': "BERRY MASTER'S HOUSE|Every BERRY grows best with love.",
         'Sign13': "ROUTE 208|To MT. CORONET",
-        'Person23': ('script', 'Sinnoh_EventScript_OddKeystoneGiver'),   # (data/scripts/sinnoh_wild.inc)
         'Sign24': "TRAINER TIPS|BERRIES grow faster in soft soil. Water them, and they'll thank you.",
     },
     'Sinnoh_Route209': {
@@ -310,10 +309,6 @@ OUTDOOR = {
         'Person22': "There's an old tower on this route. People come here to remember MOéMON that have passed on.",
         'Person29': "I fish here every morning. The mist on the water makes everything quiet.",
         'Sign32': "TRAINER TIPS|Talk to your MOéMON often. A happy MOéMON battles better.",
-        'Bg3': ('script', 'Sinnoh_EventScript_HallowedTower'),
-        'Bg4': ('script', 'Sinnoh_EventScript_HallowedTower'),
-        'Bg5': ('script', 'Sinnoh_EventScript_HallowedTower'),
-        'Bg6': ('script', 'Sinnoh_EventScript_HallowedTower'),
     },
     'Sinnoh_Route210South': {
         'Sign11': "ROUTE 210|To SOLACEON TOWN",

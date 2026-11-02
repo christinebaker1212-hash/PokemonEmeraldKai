@@ -303,6 +303,9 @@ def main():
     # SUPER CONTESTS' accessories and backdrops (tools/sinnoh/build_contest.py; before the POKéTCH's)
     import build_contest
     out += build_contest.section(root)
+    # the Underground's digging screen (tools/sinnoh/build_mining.py; before the POKéTCH's)
+    import build_mining
+    out += build_mining.section(root)
     # the POKéTCH's app screens and sprites (tools/sinnoh/build_poketch.py)
     import build_poketch
     out += build_poketch.section(root)

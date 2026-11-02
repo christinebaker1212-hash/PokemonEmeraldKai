@@ -1,0 +1,8 @@
+# ETERNA CITY's UNDERGROUND MAN (Platinum's own script, scripts_eterna_city_underground_man_house.s): the EXPLORER
+# KIT, then "Let me mentor you" (YES) and his first mission, to go down; the kit can't be used indoors. Needs the
+# packs. Shots m_*.png.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("item 672: 1" "explorer kit: can't be used here")
+UNEXPECT_A=("[crash]" "TIMEOUT")

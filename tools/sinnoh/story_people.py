@@ -47,6 +47,7 @@ SHOW = {
     'JUBILIFE_TV_3F_GROUP_RANKING_ROOM_WORKER': ALWAYS, 'POKETCH_CO_1F_REPORTER': ALWAYS,
     'TRAINERS_SCHOOL_RIVAL': _r(0, 1), 'OREBURGH_CITY_RIVAL': _r(0, 1),
     'OREBURGH_MINE_B1F_HIKER': ALWAYS, 'OREBURGH_MINE_B2F_ROARK': _r(0, 1),
+    'ROARK_UNDERGROUND': ALWAYS,   # (Platinum's never hides him: his intro brings him beside the player, then he leaves)
     'MT_CORONET_1F_SOUTH_CYRUS': _r(1, 2),
     # ------------------------------------------------------------------ the VALLEY WINDWORKS (1 BADGE: until MARS)
     'FLOAROMA_TOWN_GRUNTS': _r(1, unless='MARS_WINDWORKS'),

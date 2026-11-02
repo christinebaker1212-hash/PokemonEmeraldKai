@@ -1,0 +1,10 @@
+# SPIRITOMB's counter (src/sinnoh/s3d_underground.c MP_Underground_TryTalk): in SINNOH's Underground, A facing a
+# co-op friend counts once a visit (Platinum's first talk with each person there); each player keeps their own.
+MODE=2
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=3"
+ENV_B="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("SPIRITOMB's counter 1" "spiritomb 1")
+EXPECT_B=("SPIRITOMB's counter 1" "spiritomb 1")
+UNEXPECT_A=("crash" "SPIRITOMB's counter 2")
+UNEXPECT_B=("crash" "SPIRITOMB's counter 2")

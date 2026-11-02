@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include "global.h"
 #include "s3d.h"
+#include "s3d_underground.h"
 #include "m4a.h"
 #include "event_data.h"
 #include "battle_setup.h"
@@ -1151,6 +1152,7 @@ void S3D_Gyms_RedirectWarp(s16 x, s16 y)
 void S3D_Gyms_MapLoaded(void)
 {
     u16 map = CurrentMap();
+    Sinnoh_Underground_MapLoaded();   // (the Underground's dig spots: s3d_underground.c)
     S3D_DynPropsClear();
     S3D_SetDarkness(0, NULL, 0);
     gS3dHeightHook = NULL;
@@ -1210,6 +1212,7 @@ void S3D_Gyms_MapLoaded(void)
 void S3D_Gyms_Update(void)
 {
     s16 x, y;
+    Sinnoh_Underground_Update();
     if (sG.gym == GYM_NONE)
         return;
     if (sG.gym == GYM_CANALAVE)

@@ -200,6 +200,10 @@ def lines(dec, root):
         out += narc_lines(root)
     except (OSError, ValueError):
         out += stub_narc()
+    try:
+        out += mining_lines(root)
+    except (OSError, ValueError, KeyError, AttributeError):
+        out += mining_stub()
     return out
 
 
@@ -212,4 +216,66 @@ def stub_lines():
     return (['\t.balign 2'] + _words('gSinnohContestBanks', [0xFFFF] * len(BANKS))
             + _words('gSinnohContestMoves', [0xFF] * MOVES, 'byte') + ['\t.balign 2']
             + _words('gSinnohContestEffects', [0] * (24 * 26), 'byte') + ['\t.balign 2', 'gSinnohContestAi::', '\t.2byte 0']
-            + stub_narc())
+            + stub_narc() + mining_stub())
+
+
+# ---------------------------------------------------------------------------------------------- the Underground's digging
+# gSinnohMiningObjects (src/sinnoh/s3d_mining.c): u16 count, then count x {u16 item (this game's; 0xFFFF a rock),
+# u8 width, u8 height (cells), u8 weights[4] (odd Trainer ID, even, odd with the NATIONAL DEX, even with it),
+# u8 shape[36] (6 x 6, 1 where it is)} from src/underground/mining.c's sMiningObjects. Spheres are left out (the
+# Underground here digs for treasure and fossils only: the user, 2026-11-02).
+def mining_objects(root):
+    """sMiningObjects as dicts (item: this game's ITEM_ name or None for a rock; w, h in cells; weights; grid: 6 x 6;
+    sprite, palette: the NCGR / NCLR names), spheres and items this game lacks left out (build_mining.py: the art in the
+    same order)."""
+    text = open(os.path.join(root, 'src/underground/mining.c')).read()
+    shapes = {}
+    for name, body in re.findall(r'static u8 (s\w+Shape\w*)\[\d+\]\[\d+\] = \{(.*?)\};', text, re.S):
+        shapes[name] = [x for x in re.findall(r"'(.)'", body)]
+    m = re.search(r'sMiningObjects\[\] = \{(.*?)\n\};', text, re.S)
+    rows = re.findall(r'\{ (\.itemID = .*?) \}', m.group(1))
+    ours = set(re.findall(r'^#define\s+(ITEM_\w+)\b', open(os.path.join(os.path.dirname(__file__), '../../include/constants/items.h'), errors='replace').read(), re.M))
+    out = []
+    for r in rows:
+        f = dict(re.findall(r'\.(\w+) = ([^,]+)', r))
+        item = f['itemID'].strip()
+        if 'SPHERE' in item:
+            continue
+        if item.startswith('MINING_ROCK'):
+            name = None
+        else:
+            name = 'ITEM_' + item[len('MINING_TREASURE_'):]
+            if name not in ours:
+                continue
+        w = int(eval(f['width'])) // 2
+        h = int(eval(f['height'])) // 2
+        shape = [1] * (w * h)
+        if f['shape'].strip() != 'NULL':
+            s = shapes[f['shape'].strip()]
+            shape = [0 if c == 'o' else 1 for c in s[:w * h]]
+        grid = [0] * 36
+        for y in range(h):
+            for x in range(w):
+                grid[y * 6 + x] = shape[y * w + x]
+        weights = [int(f[k]) for k in ('oddTIDWeight', 'evenTIDWeight', 'oddTIDNatDexWeight', 'evenTIDNatDexWeight')]
+        out.append({'item': name, 'w': w, 'h': h, 'weights': weights, 'grid': grid,
+                    'sprite': f.get('spriteNARCIndex', '').strip(), 'palette': f.get('paletteNARCIndex', '').strip()})
+    return out
+
+
+def mining_lines(root):
+    out = []
+    for o in mining_objects(root):
+        out.append('\t.2byte %s' % (o['item'] or '0xFFFF'))
+        out.append('\t.byte %d, %d, %s' % (o['w'], o['h'], ', '.join(str(x) for x in o['weights'])))
+        out.append('\t.byte ' + ', '.join(str(x) for x in o['grid']))
+    # the flags Platinum's Underground sets and the UNDERGROUND MAN's script reads (s3d_underground.c): gone down there,
+    # a treasure dug up
+    import ids
+    flags = [ids.flag(root, f) or 0 for f in ('FLAG_ENTERED_UNDERGROUND', 'FLAG_DIGGING_FOR_FOSSILS')]
+    return (['\t.balign 2', 'gSinnohMiningObjects::', '\t.2byte %d' % (len(out) // 3)] + out
+            + ['\t.balign 2', 'gSinnohUndergroundFlags::', '\t.2byte %s' % ', '.join('0x%X' % f for f in flags)])
+
+
+def mining_stub():
+    return ['\t.balign 2', 'gSinnohMiningObjects::', '\t.2byte 0', 'gSinnohUndergroundFlags::', '\t.2byte 0, 0']

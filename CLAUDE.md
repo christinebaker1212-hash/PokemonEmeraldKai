@@ -25,7 +25,9 @@ s3d_scrcmd.c Sinnoh_PlatinumMapScripts; always on in SINNOH: no old saves to kee
 COOP_NOTES "Platinum's own words and scripts". Progress: docs/SINNOH_CHECKLIST.md. Platinum's TV: src/sinnoh/s3d_tv.c
 (COOP_NOTES "SINNOH's TV"); SUPER CONTESTS: src/sinnoh/s3d_contest.c (rules) + s3d_contest_ui.c (screens), tables by
 tools/sinnoh/contest_data.py, docs/SUPER_CONTEST.md (COOP_NOTES "SUPER CONTESTS"; POKé BALL effects in the Seals'
-place: s3d_seals.c; test sinnoh_contest). The written words in
+place: s3d_seals.c; test sinnoh_contest). The Underground, for its digging and SPIRITOMB only (wireless sides are CO-OP's):
+src/sinnoh/s3d_underground.c + s3d_mining.c (art tools/sinnoh/build_mining.py; COOP_NOTES "The Underground"; tests
+sinnoh_underground*, sinnoh_spiritomb*). The written words in
 tools/sinnoh/words*.py / story_people.py only stand in until a script's commands are converted.
 
 **Done (2026-11-01): `docs/NEXT_TASKS.md`**, the user's list through 1.63.7 (40 PC boxes: COOP_NOTES "40 PC boxes"; the save holds

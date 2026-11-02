@@ -21,7 +21,7 @@
 #define REGION_SINNOH_FLAGS 0x3320
 #define FLAG_SINNOH_BADGE01 (REGION_SINNOH_FLAGS + 0)   // .. + 7
 #define VAR_SINNOH_FRIDAY_DAY 0x52F1   // the day (+1) DRIFLOON was met on, its Friday (src/sinnoh/s3d_legends.c)
-#define VAR_SINNOH_SPIRITOMB  0x52F2   // the HALLOWED TOWER: the battle count +1 when the ODD KEYSTONE went in (0: not in)
+#define VAR_SINNOH_SPIRITOMB  0x52F2   // Platinum's SPIRITOMB counter: co-op friends talked to in the Underground (src/sinnoh/s3d_underground.c; ROUTE 209's HALLOWED TOWER reads it)
 #define FLAG_SINNOH_NEW_GAME 0x3D38   // a new game begun in SINNOH (ROUTE 201's briefcase is there for it)
 #define FLAG_SINNOH_STARTER  0x3D39   // ... its first POKéMON picked from the briefcase
 #define VAR_SINNOH_STARTER 0x52F8   // the starter picked from ROWAN's briefcase in Platinum's story (its SaveChosenStarter)

@@ -1,0 +1,20 @@
+pressuntil A field 5000
+wait 100
+mp setvar 0x51D3 1
+mp warp 44,78,41,72
+wait 120
+waitfor online 6000
+wait 200
+barrier talk 2
+mp face left
+wait 10
+press A 1
+wait 60
+pressuntil B field 600
+press A 1
+wait 60
+pressuntil B field 600
+mp underground
+barrier done 2
+wait 60
+quit

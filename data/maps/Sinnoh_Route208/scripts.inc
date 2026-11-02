@@ -3,7 +3,7 @@ Sinnoh_Route208_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Route208_EventScript_Person23::
-	goto Sinnoh_EventScript_OddKeystoneGiver
+	goto SinnohP_route_208_4
 	end
 
 Sinnoh_Route208_EventScript_Sign11::

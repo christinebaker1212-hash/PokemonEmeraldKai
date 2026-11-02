@@ -1413,6 +1413,11 @@ static void RenderToBackbuffer(void)
             SDL_Texture *Sinnoh_Contest_Canvas(SDL_Renderer *r);   // (SINNOH's SUPER CONTESTS: src/sinnoh/s3d_contest_ui.c)
             badges = Sinnoh_Contest_Canvas(sRenderer);
         }
+        if (!fight && !badges)
+        {
+            SDL_Texture *Sinnoh_Mining_Canvas(SDL_Renderer *r);   // (SINNOH's Underground digging: src/sinnoh/s3d_mining.c)
+            badges = Sinnoh_Mining_Canvas(sRenderer);
+        }
         if (badges)
         {
             gameTex = badges;

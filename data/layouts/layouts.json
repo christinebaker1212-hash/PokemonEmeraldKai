@@ -15507,6 +15507,26 @@
       "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
       "border_filepath": "data/layouts/Sinnoh_PoffinHouse/border.bin",
       "blockdata_filepath": "data/layouts/Sinnoh_PoffinHouse/map.bin"
+    },
+    {
+      "id": "LAYOUT_SINNOH_ETERNA_CITY_UNDERGROUND_MAN_HOUSE",
+      "name": "Sinnoh_EternaCityUndergroundManHouse_Layout",
+      "width": 32,
+      "height": 32,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Sinnoh_EternaCityUndergroundManHouse/border.bin",
+      "blockdata_filepath": "data/layouts/Sinnoh_EternaCityUndergroundManHouse/map.bin"
+    },
+    {
+      "id": "LAYOUT_SINNOH_UNDERGROUND",
+      "name": "Sinnoh_Underground_Layout",
+      "width": 480,
+      "height": 480,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Sinnoh_Underground/border.bin",
+      "blockdata_filepath": "data/layouts/Sinnoh_Underground/map.bin"
     }
   ]
 }

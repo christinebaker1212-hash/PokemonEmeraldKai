@@ -1,4 +1,5 @@
 #include "global.h"
+#include "s3d_underground.h"
 #include "s3d.h"   // Moemon Kai
 #include "mp_region.h"
 #include "mp.h"
@@ -206,6 +207,8 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
 
     GetInFrontOfPlayerPosition(&position);
     metatileBehavior = MapGridGetMetatileBehaviorAt(position.x, position.y);
+    if (input->pressedAButton)
+        MP_Underground_TryTalk();   // Moemon Kai: SPIRITOMB's counter, a friend talked to in SINNOH's Underground
     if (input->pressedAButton && TryStartInteractionScript(&position, metatileBehavior, playerDirection) == TRUE)
         return TRUE;
 
@@ -434,6 +437,12 @@ static const u8 *GetInteractedMetatileScript(struct MapPosition *position, u8 me
     }
     if (MP_Headbutt_IsTree(position->x, position->y))   // Moemon Kai: JOHTO / KANTO's trees
         return EventScript_QzHeadbuttTree;
+    {
+        // Moemon Kai: a dig spot in SINNOH's Underground (src/sinnoh/s3d_underground.c)
+        const u8 *dig = Sinnoh_UndergroundDigScript(position->x - MAP_OFFSET, position->y - MAP_OFFSET);
+        if (dig != NULL)
+            return dig;
+    }
     if (MetatileBehavior_IsPC(metatileBehavior) == TRUE)
         return EventScript_PC;
     if (MetatileBehavior_IsClosedSootopolisDoor(metatileBehavior) == TRUE)

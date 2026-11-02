@@ -505,4 +505,6 @@ static const struct { u16 map, mat; u8 cx, cz, bw, bh; } sMaps[] = {
     {MAP_SINNOH_CONTEST_HALL_STAGE_NO_CONTEST, 166, 0, 0, 2, 1},
     {MAP_SINNOH_CONTEST_HALL_STAGE_ONGOING_CONTEST, 166, 0, 0, 2, 1},
     {MAP_SINNOH_POFFIN_HOUSE, 237, 0, 0, 1, 1},
+    {MAP_SINNOH_ETERNA_CITY_UNDERGROUND_MAN_HOUSE, 248, 0, 0, 1, 1},
+    {MAP_SINNOH_UNDERGROUND, 2, 0, 0, 15, 15},
 };

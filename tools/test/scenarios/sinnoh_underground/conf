@@ -1,0 +1,9 @@
+# SINNOH's Underground (src/sinnoh/s3d_underground.c, s3d_mining.c): the EXPLORER KIT down from TWINLEAF TOWN,
+# Platinum's ROARK intro, a dig spot's "The wall is bulging slightly." YES, the digging screen (Platinum's art, its
+# pinged count and first-time tutorial, HAMMER blows on the buried treasures until they lie bare or the wall falls),
+# the treasures in the BAG, then the kit takes the player back up. Needs the packs. Shots u_*.png.
+MODE=1
+TMO=240
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("sinnoh underground: down from" "sinnoh mining: spot" "sinnoh mining: \"Something pinged" "in the bag" "sinnoh underground: up to" "underground: inside 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

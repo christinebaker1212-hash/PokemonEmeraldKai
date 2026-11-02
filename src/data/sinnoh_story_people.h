@@ -131,6 +131,7 @@ static const struct SinnohStoryPerson sSinnohStoryPeople[] = {
     {0x348D, 0x0, 0x0, 99, 0, 0},  // RESTAURANT_KENDRICK_GABRIELLA
     {0x348E, 0x0, 0x0, 99, 0, 0},  // RESTAURANT_LEONARDO_REBECCA
     {0x348F, 0x0, 0x0, 99, 0, 0},  // RESTAURANT_ROMAN_KYLIE
+    {0x3490, 0x0, 0x0, 0, 99, 0},  // ROARK_UNDERGROUND
     {0x3494, 0x0, 0x0, 99, 0, 0},  // ROTOMS_ROOM_PROF_ROWAN
     {0x3497, 0x3D38, 0x3D39, 0, 99, 0},  // ROUTE_201_BRIEFCASE
     {0x3498, 0x0, 0x0, 99, 0, 0},  // ROUTE_201_COUNTERPART

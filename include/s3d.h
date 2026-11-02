@@ -40,6 +40,7 @@ void S3D_DynPropsClear(void);
 #define S3D_DARK_LIGHTS 40
 void S3D_SetDarkness(float level, const s16 (*lights)[3], u8 n);   // a dark room (0: none) lit around {x, y, radius}
 bool8 S3D_MapOrigin(float *x, float *z);
+bool8 S3D_MapCell(u16 *mat, u16 *cx, u16 *cz);   // the map's matrix and its top-left cell there
 bool8 S3D_MapCells(s32 *cx, s32 *cz);   // the current map's top-left block in Platinum's matrix
 // A gym's own ground heights (map tiles; NaN: the block's), asked with the height the object is nearest
 extern float (*gS3dHeightHook)(s32 mapX, s32 mapY, float h);

@@ -3,19 +3,19 @@ Sinnoh_Route209_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Route209_EventScript_Bg3::
-	goto Sinnoh_EventScript_HallowedTower
+	goto SinnohP_route_209_2
 	end
 
 Sinnoh_Route209_EventScript_Bg4::
-	goto Sinnoh_EventScript_HallowedTower
+	goto SinnohP_route_209_2
 	end
 
 Sinnoh_Route209_EventScript_Bg5::
-	goto Sinnoh_EventScript_HallowedTower
+	goto SinnohP_route_209_2
 	end
 
 Sinnoh_Route209_EventScript_Bg6::
-	goto Sinnoh_EventScript_HallowedTower
+	goto SinnohP_route_209_2
 	end
 
 Sinnoh_Route209_EventScript_Person22::

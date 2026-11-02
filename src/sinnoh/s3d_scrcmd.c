@@ -242,9 +242,16 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
     {
         s32 cx = 0, cz = 0;
         struct ObjectEvent *player = &gObjectEvents[gPlayerAvatar.objectEventId];
+        s16 x = player->currentCoords.x - MAP_OFFSET, y = player->currentCoords.y - MAP_OFFSET;
+        if (gMain.callback2 != CB2_Overworld)
+        {
+            // (a map loading: its resume script runs before the player stands there; where the warp put them)
+            x = gSaveBlock1Ptr->pos.x;
+            y = gSaveBlock1Ptr->pos.y;
+        }
         S3D_MapCells(&cx, &cz);
-        VarSet(arg, player->currentCoords.x - MAP_OFFSET + cx * 32);
-        VarSet(arg2, player->currentCoords.y - MAP_OFFSET + cz * 32);
+        VarSet(arg, x + cx * 32);
+        VarSet(arg2, y + cz * 32);
         break;
     }
     case SINNOH_GET_POCKET:
@@ -591,6 +598,12 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
         y = VarGet(arg3) - cz * 32;
         SetObjEventTemplateCoords(id, x, y);
         TryMoveObjectEventToMapCoords(id, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, x, y);
+        {
+            // (one far off until now, never spawned, comes out where it was put: the Underground's ROARK beside the player)
+            u8 objId;
+            if (TryGetObjectEventIdByLocalIdAndMap(id, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup, &objId))
+                TrySpawnObjectEvent(id, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+        }
         break;
     }
     case SINNOH_TWO_TRAINERS:

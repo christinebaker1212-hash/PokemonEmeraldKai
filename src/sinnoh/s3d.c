@@ -1020,6 +1020,18 @@ bool8 S3D_MapCells(s32 *cx, s32 *cz)
     return TRUE;
 }
 
+// the current SINNOH map's matrix (0: the region) and the cell of its top-left block there (s3d_underground.c)
+bool8 S3D_MapCell(u16 *mat, u16 *cx, u16 *cz)
+{
+    s32 map = MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
+    if (map < 0)
+        return FALSE;
+    *mat = sMaps[map].mat;
+    *cx = sMaps[map].cx;
+    *cz = sMaps[map].cz;
+    return TRUE;
+}
+
 bool8 S3D_MapOrigin(float *x, float *z)
 {
     s32 map = MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);

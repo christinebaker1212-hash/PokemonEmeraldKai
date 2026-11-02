@@ -623,9 +623,9 @@ gSpecials::
 	def_special Sinnoh_TrophyGardenToday
 	def_special Sinnoh_TrophyGardenAdd
 	def_special Sinnoh_FridayMet
-	def_special Sinnoh_SpiritombTower
-	def_special Sinnoh_SpiritombPlace
-	def_special Sinnoh_SpiritombAfter
+	def_special Sinnoh_SpecialRetired   @ (was Sinnoh_SpiritombTower: the HALLOWED TOWER runs Platinum's own script now; kept so the numbers after it stay)
+	def_special Sinnoh_SpecialRetired   @ (was Sinnoh_SpiritombPlace: the HALLOWED TOWER runs Platinum's own script now; kept so the numbers after it stay)
+	def_special Sinnoh_SpecialRetired   @ (was Sinnoh_SpiritombAfter: the HALLOWED TOWER runs Platinum's own script now; kept so the numbers after it stay)
 	def_special Sinnoh_PrizeMenu
 	def_special Sinnoh_BpMenu
 	def_special Sinnoh_BpBuy
@@ -655,3 +655,7 @@ gSpecials::
 	def_special Sinnoh_CatchingTutorial, waitstate=1   @ Moemon Kai: Platinum's catching tutorial on ROUTE 202 (battle_setup.c)
 	def_special MP_GatchaTicketToast   @ Moemon Kai: a story item's MOEGATCHA TICKET in SINNOH's converted scripts (mp_gatcha.c)
 	def_special Sinnoh_TvChooseWord, waitstate=1   @ Moemon Kai: SINNOH's TV reporters' one word (src/sinnoh/s3d_tv.c)
+	def_special Sinnoh_UndergroundBulging   @ Moemon Kai: SINNOH's Underground, a dig spot's question (src/sinnoh/s3d_mining.c)
+	def_special Sinnoh_UndergroundDig, waitstate=1   @ Moemon Kai: SINNOH's Underground, the digging screen (src/sinnoh/s3d_mining.c)
+	def_special Sinnoh_ExplorerKitUse, waitstate=1   @ Moemon Kai: SINNOH's EXPLORER KIT, down into the Underground or up (src/sinnoh/s3d_underground.c)
+	def_special BattleSetup_StartScriptedWildBattle   @ Moemon Kai: SINNOH's converted StartWildBattle (ROUTE 209's SPIRITOMB, the OLD CHATEAU's ROTOM)

@@ -7,7 +7,7 @@
 #define NUM_METATILES_TOTAL 1024
 #define NUM_PALS_IN_PRIMARY 6
 #define NUM_PALS_TOTAL 13
-#define MAX_MAP_DATA_SIZE 32768   // Moemon Kai: 10240 on the GBA; SINNOH's GREAT MARSH is 128x160 (not in the save)
+#define MAX_MAP_DATA_SIZE 262144  // Moemon Kai: 10240 on the GBA; SINNOH's UNDERGROUND is 480x480 (not in the save)
 
 // Moemon Kai: FRLG-style tilesets (Johto / Kanto, struct Tileset isFrlg on the primary): 640 tiles, 640 metatiles
 // and 7 palettes in the primary, the rest (384 / 384 / 6) in the secondary. The split follows the layout's primary.

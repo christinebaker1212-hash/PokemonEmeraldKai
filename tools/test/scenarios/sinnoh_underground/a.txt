@@ -1,0 +1,141 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp platinumstory
+mp additem 672 1
+mp warp 40,0,8,10
+wait 90
+waitfor field 1000
+mp explorerkit
+wait 200
+pressuntil A field 3000
+wait 30
+mp underground
+shot u_down
+mp ugspot
+wait 90
+waitfor field 1000
+mp ugface
+wait 10
+shot u_spot
+press A 1
+pressuntil A yesno 600
+wait 20
+shot u_bulging
+press A 1
+wait 60
+rendershot u_wall
+wait 120
+mash A 16 30
+wait 30
+mp mining
+press R 1
+wait 10
+mp mining
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+rendershot u_dig
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp minecell
+press A 1
+wait 22
+mp mining
+rendershot u_end
+wait 120
+rendershot u_msg
+wait 900
+mp mining
+mp underground
+mp bag
+waitfor field 2000
+mp explorerkit
+wait 200
+waitfor field 2000
+mp where
+mp underground
+shot u_up
+quit

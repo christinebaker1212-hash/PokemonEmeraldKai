@@ -1,4 +1,5 @@
 #include "global.h"
+#include "s3d_underground.h"   // Moemon Kai: the EXPLORER KIT
 #include "tcg/integration.h"
 #include "mp.h"
 #include "item_use.h"
@@ -1081,6 +1082,29 @@ void ItemUseOutOfBattle_EscapeRope(u8 taskId)
     if (CanUseDigOrEscapeRopeOnCurMap() == TRUE)
     {
         sItemUseOnFieldCB = ItemUseOnFieldCB_EscapeRope;
+        SetUpItemUseOnFieldCallback(taskId);
+    }
+    else
+    {
+        DisplayDadsAdviceCannotUseItemMessage(taskId, gTasks[taskId].tUsingRegisteredKeyItem);
+    }
+}
+
+// Moemon Kai: SINNOH's EXPLORER KIT: down into the Underground from the region's outdoors, and back up from there to
+// where the player went down (src/sinnoh/s3d_underground.c)
+static void ItemUseOnFieldCB_ExplorerKit(u8 taskId)
+{
+    extern const u8 Sinnoh_EventScript_ExplorerKit[];
+    LockPlayerFieldControls();
+    ScriptContext_SetupScript(Sinnoh_EventScript_ExplorerKit);
+    DestroyTask(taskId);
+}
+
+void ItemUseOutOfBattle_ExplorerKit(u8 taskId)
+{
+    if (Sinnoh_ExplorerKitCantUse() == NULL && !TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING | PLAYER_AVATAR_FLAG_UNDERWATER))
+    {
+        sItemUseOnFieldCB = ItemUseOnFieldCB_ExplorerKit;
         SetUpItemUseOnFieldCallback(taskId);
     }
     else

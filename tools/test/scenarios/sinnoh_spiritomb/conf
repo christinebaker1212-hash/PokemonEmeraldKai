@@ -1,9 +1,10 @@
-# The HALLOWED TOWER (data/scripts/sinnoh_wild.inc, src/sinnoh/s3d_wild.c): ROUTE 208's BLACK BELT gives the ODD
-# KEYSTONE, it goes on ROUTE 209's tower, and after 32 battles (mp gamestat) SPIRITOMB (467) comes out at Lv. 25.
-# Needs the 3D pack. Shot t_spiritomb.png.
+# The HALLOWED TOWER, Platinum's own scripts (scripts_route_208.s / scripts_route_209.s, tools/sinnoh/gen_scripts.py):
+# ROUTE 208's BLACK BELT gives the ODD KEYSTONE, it goes on ROUTE 209's tower, and once SPIRITOMB's counter (Platinum's:
+# friends talked to in the Underground, VAR_SINNOH_SPIRITOMB, src/sinnoh/s3d_underground.c) reaches 32 (mp setvar)
+# SPIRITOMB (467) comes out at Lv. 25. Needs the packs. Shot t_spiritomb.png.
 MODE=1
 TMO=120
 GEN=4
 ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=25:40"
-EXPECT_A=("hallowed tower: 40 battles" "species 467 level 25")
+EXPECT_A=("var 0x52F2 = 0" "species 467 level 25")
 UNEXPECT_A=("[crash]" "TIMEOUT")

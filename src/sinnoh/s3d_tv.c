@@ -9,7 +9,8 @@
 // - the reporters' interviews (one word from the game's own easy chat, GABBY and TY's screen)
 // Its words are Platinum's (the TV banks of sinnoh/platinum_text.pak, by Platinum's message names: S3D_TextNamed). The
 // records are kept in "<save>.region" (chunk TVBC, mp_region.c), saved with the game.
-// Kept to what this game has: online-only segments (groups, Capture the Flag, the GTS) and the Underground's never air;
+// Kept to what this game has: online-only segments (groups, Capture the Flag, the GTS) and the Underground's traps and
+// flags never air (its treasures do: the digging is here, s3d_mining.c);
 // the ones about systems SINNOH doesn't have yet (the dress-up photos, the berry patches, the roamers, the VILLA) wait
 // for them (docs/SINNOH_CHECKLIST.md). The SEAL CLUB SHOW is about POKé BALL effects (they take the Seals' place).
 #include <string.h>
@@ -339,6 +340,13 @@ void Sinnoh_TvHiddenItem(u16 item)
 {
     struct TvHidden h = {item, gMapHeader.regionMapSectionId};
     SaveSegment(TV_SIGHTINGS, 6, &h, sizeof(h));
+}
+
+// A treasure dug up in the Underground (s3d_mining.c): UNDERGROUND TREASURES CORNER
+void Sinnoh_TvUndergroundTreasure(u16 item)
+{
+    struct TvHidden h = {item, 0};
+    SaveSegment(TV_SIGHTINGS, 13, &h, sizeof(h));
 }
 
 // Shopping in SINNOH (shop.c): SINNOH SHOPPING CHAMP CORNER, ten or more at once
@@ -716,6 +724,13 @@ static const char *Hidden(struct TvInstance *k)
     SetItem(2, h->item);
     return "TVProgramTrainerSightings_Text_HiddenItemBreakingNews";
 }
+static const char *Treasure(struct TvInstance *k)
+{
+    struct TvHidden *h = (void *)k->data;
+    SetPlayer(0);
+    SetItem(1, h->item);
+    return "TVProgramTrainerSightings_Text_UndergroundTreasuresCorner";
+}
 static const char *Shopping(struct TvInstance *k)
 {
     struct TvShopping *s = (void *)k->data;
@@ -816,6 +831,7 @@ static const struct TvSegment sSightings[] = {
     [7] = {Shopping, NULL},
     [8] = {Egg, EggOk},
     [10] = {NameRater, NameRaterOk},
+    [13] = {Treasure, NULL},
     [15] = {Safari, SafariOk},
     [16] = {Storage, StorageOk},
     [18] = {Berries, NULL},
@@ -824,7 +840,7 @@ static const struct TvSegment sSightings[] = {
     [25] = {VillaNone, VillaOk},
     [26] = {Villa, VillaOk},
     [27] = {NULL, NULL},
-    // (4, 20: groups, 22, 23: Capture the Flag, 13: the Underground's treasures: online / the Underground, never on air)
+    // (4, 20: groups, 22, 23: Capture the Flag: online, never on air)
 };
 
 // RECORDS (Platinum's records bank: its messages in order, so the names are its message numbers)

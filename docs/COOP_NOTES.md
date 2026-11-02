@@ -3736,6 +3736,40 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   are 662-684 (item_audit.py counts them as given by Platinum's scripts). Tests sinnoh_platinum_story,
   sinnoh_platinum_opening, sinnoh_platinum_walk, sinnoh_platinum_route201, sinnoh_platinum_tutorial,
   sinnoh_platinum_tag, sinnoh_platinum_gym, sinnoh_newgame.
+- The Underground (2026-11-02, the user: "The Underground will ONLY be implemented for its Fossil-hunting features and
+  Spiritomb prerequisites only - the Wireless feature is superceded by CO-OP"). src/sinnoh/s3d_underground.c: the map
+  MAP_SINNOH_UNDERGROUND (Platinum's matrix 2, 480x480 tiles: places.py keeps it, MAX_MAP_DATA_SIZE 262144; the ETERNA
+  CITY UNDERGROUND MAN's house too, both appended); the EXPLORER KIT (item_use.c ItemUseOutOfBattle_ExplorerKit,
+  registrable) works on the region's matrix and goes down by Platinum's cell mapping (region cell -> Underground cell,
+  two to one, tile 8 or 23 by parity), and from the Underground back up where the player went down (the last POKéMON
+  CENTER if they never went down with it). SetWarpDestination and its kin take 16-bit x / y now (8 bits wrapped past
+  127: the Underground is the first map that wide). The day's dig spots: 24 clusters of 6-11 on walls beside open
+  floor (Platinum's Mining_SpawnMiningSpotsAndTraps, its sphere-dependent count left out), gone once dug that day; the
+  DS's radar is a sparkle (FLDEFF_SPARKLE) on the near ones. A facing one: Platinum's "The wall is bulging slightly."
+  YES/NO (data/scripts/sinnoh_places.inc Sinnoh_EventScript_UndergroundDig, field_control_avatar.c), then the digging
+  screen, src/sinnoh/s3d_mining.c, 480x320 like the BADGE CASE (sdl2.c / display.c): Platinum's own art (graphics
+  pack section "MINE", tools/sinnoh/build_mining.py from res/graphics/mining: the screen, the crack, the buttons, seven
+  dirt layers, the tools' swing and spark, every buried object, the rotated ones turned the way their shapes say),
+  Platinum's rules (mining.c: 13 x 10 cells, dirt 2 with patches of 4 and 6, 2-4 treasures, 3 the first time, by the
+  Trainer ID's oddness and the NATIONAL DEX, each Plate once ever and never twice in a wall, up to 100 rock tries;
+  PICKAXE -2 / -1 around and 4 off the wall, HAMMER -2 / -2 / -1 corners and 8 off, a bared rock stops the spread;
+  196 to start; the shake), its words (underground_common: pinged, the first-time tutorial, everything dug up, the
+  wall collapsed, "... was obtained.", "Too bad! Your Bag is full!"). The touch screen is a cursor: + Control Pad, A
+  strikes, L / R / SELECT / B change tools. Treasures go straight in the BAG (Platinum's treasure case and its PC are
+  the wireless side's); spheres aren't buried (their weights left out: the other treasures keep Platinum's odds among
+  themselves). Each one airs the TV's UNDERGROUND TREASURES CORNER (s3d_tv.c segment 13). Kept in "<save>.region"
+  chunk UNDG (the way back up, the day's dug spots, the Plates had, dug before). Platinum's scripts convert:
+  the UNDERGROUND MAN gives the kit and his missions (going down and digging finish: FLAG_ENTERED_UNDERGROUND /
+  FLAG_DIGGING_FOR_FOSSILS set from C through gSinnohUndergroundFlags; traps, spheres and goods he hands over are
+  nothing, so his later missions can't be finished); ROARK's first-visit intro (UndergroundNPCMessage names the
+  player, SetCommPlayerDir turns them, WarpOut is the game's fly_up; gen_maps.py SCENE_PEOPLE shows him by his flag);
+  the vendors are never shown (gen_maps.py CLOSED_PEOPLE). SPIRITOMB: Platinum's counter (GetSpiritombCounter /
+  ClearSpiritombCounter on VAR_SINNOH_SPIRITOMB 0x52F2) counts co-op friends talked to there, each once a visit
+  (MP_Underground_TryTalk: A facing one); ROUTE 208's BLACK BELT and ROUTE 209's HALLOWED TOWER run Platinum's own
+  scripts (StartWildBattle = BattleSetup_StartScriptedWildBattle), the written stand-in is gone (its three specials
+  are Sinnoh_SpecialRetired, keeping the numbers). The Underground's song isn't made yet (SEQ_TANKOU: OREBURGH MINE's
+  plays). `mp explorerkit`, `mp underground`, `mp ugspot` / `ugface`, `mp mining`, `mp minecell`, `mp checkitem`.
+  Tests sinnoh_underground, sinnoh_underground_man, sinnoh_spiritomb, sinnoh_spiritomb_talk.
 - Words (1.62.x, sinnoh-work; being replaced by Platinum's own, above): every person / sign / bg / trigger runs <map>_EventScript_Person<n> / _Sign<n> / _Bg<n>
   / _Trigger<n> when the map's scripts.inc has it (n: its place in Platinum's lists, from 1), else nothing (a trigger
   without a script isn't placed). tools/sinnoh/words.py holds the words (original writing; '|' a new page; ('nurse',)
@@ -4100,10 +4134,9 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
 - DRIFLOON and SPIRITOMB (2026-11-01): DRIFLOON floats by the VALLEY WINDWORKS' door on Fridays from the 1st BADGE
   (legends.py row FRIDAYS 0xFE, done flag 0x3D32; its battle sets VAR_SINNOH_FRIDAY_DAY 0x52F1 through special
   Sinnoh_FridayMet and a later day clears the flag; the weekday from the day count, day 1 = 1 Jan 2000, a Saturday;
-  MOEMON_TEST_FRIDAY). ROUTE 208's BLACK BELT gives the ODD KEYSTONE (flag 0x3D31); on ROUTE 209's HALLOWED TOWER it
-  starts the count Platinum keeps of Underground talks, here 32 battles of any kind (VAR_SINNOH_SPIRITOMB 0x52F2 = the
-  battle stat + 1 then; the tower's words change at 8 / 15 / 22 / 29), then SPIRITOMB Lv. 25; not caught, the count
-  starts again. Tests sinnoh_drifloon, sinnoh_spiritomb.
+  MOEMON_TEST_FRIDAY). ROUTE 208's BLACK BELT and ROUTE 209's HALLOWED TOWER are
+  Platinum's own scripts now, the count Platinum's Underground talks (see "The Underground" below; the written
+  stand-in of 32 battles is gone). Tests sinnoh_drifloon, sinnoh_spiritomb.
 - Gifts (2026-11-01, tools/sinnoh/gifts.py): the people who hand over an item in Platinum (its scripts'
   Common_GiveItemQuantity, followed through their GoTos) and have words of their own here give it once: their words,
   then a line of this game's (gifts.py LINES; gen_words.py stops if one is missing), the item, flag 0x3DA0 + the

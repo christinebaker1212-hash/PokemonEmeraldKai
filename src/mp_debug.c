@@ -5,6 +5,7 @@
 #include <string.h>
 #include "platform/gamepad.h"
 #include "global.h"
+#include "s3d_underground.h"
 unsigned int SDL_GetTicks(void);
 #include "arcade.h"   // Moemon Kai: the GAME CENTER's arcade boards
 #include "s3d.h"   // Moemon Kai: SINNOH's 3D engine (tests)
@@ -78,6 +79,8 @@ bool8 MP_DebugQuickStartEnabled(void)
 // at the action menu); with MOEMON_ANIMCHECK the log lists every sprite animation started (tools/test/check_anims.py)
 #include "task.h"
 extern const u8 *const gBattleAnims_Moves[];
+static u8 sUgFace = DIR_NORTH;   // (mp ugspot / ugface: the way to a dig spot)
+
 static void Task_MpAnimAll(u8 taskId)
 {
     static struct DisableStruct sDisable;
@@ -994,6 +997,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         int id = 0, n = 1;
         sscanf(arg, "%d %d", &id, &n);
         AddBagItem(id, n);
+    }
+    else if (strcmp(cmd, "checkitem") == 0)
+    {
+        // checkitem ID - how many the bag holds
+        int id = atoi(arg);
+        printf("[test] item %d: %d\n", id, CountTotalItemQuantityInBag(id));
     }
     else if (strcmp(cmd, "coins") == 0)
     {
@@ -3119,6 +3128,52 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void Sinnoh_TvForceProgram(u8 program);
         Sinnoh_TvForceProgram(atoi(arg));
         printf("[test] tv program %d\n", atoi(arg));
+    }
+    else if (strcmp(cmd, "underground") == 0)
+    {
+        // underground: SINNOH's Underground (where the player went down, the dig spots, SPIRITOMB's counter)
+        Sinnoh_UndergroundDebug();
+    }
+    else if (strcmp(cmd, "explorerkit") == 0)
+    {
+        // explorerkit: the EXPLORER KIT used (down into the Underground, or back up), as from the BAG
+        extern const u8 Sinnoh_EventScript_ExplorerKit[];
+        const u8 *why = Sinnoh_ExplorerKitCantUse();
+        printf("[test] explorer kit: %s\n", why ? "can't be used here" : "used");
+        if (why == NULL)
+            ScriptContext_SetupScript(Sinnoh_EventScript_ExplorerKit);
+    }
+    else if (strcmp(cmd, "ugspot") == 0)
+    {
+        // ugspot: to the tile beside the nearest dig spot (then ugface turns the player to it)
+        s16 x, y;
+        if (Sinnoh_UndergroundNearestSpot(&x, &y, &sUgFace))
+        {
+            SetWarpDestination(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, WARP_ID_NONE, x, y);
+            DoWarp();
+            printf("[test] ugspot: %d,%d dir %d\n", x, y, sUgFace);
+        }
+        else
+            printf("[test] ugspot: none\n");
+    }
+    else if (strcmp(cmd, "ugface") == 0)
+    {
+        ObjectEventTurn(&gObjectEvents[gPlayerAvatar.objectEventId], sUgFace);
+        printf("[test] ugface: %d\n", sUgFace);
+    }
+    else if (strcmp(cmd, "mining") == 0)
+    {
+        // mining: the digging screen's wall (what is buried, what lies bare)
+        Sinnoh_MiningDebug();
+    }
+    else if (strcmp(cmd, "minecell") == 0)
+    {
+        // minecell: the digging screen's cursor to a cell over a treasure still under dirt
+        u8 x, y;
+        if (Sinnoh_MiningTestCell(&x, &y))
+            printf("[test] minecell: %d,%d\n", x, y);
+        else
+            printf("[test] minecell: none\n");
     }
     else if (strcmp(cmd, "tvwatch") == 0)
     {
