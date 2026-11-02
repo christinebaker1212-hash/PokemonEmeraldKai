@@ -1,0 +1,7 @@
+# JOHTO's gym leaders out and about once its League is beaten (qz_specials.c QzGiovanniStoryUpdateFlags: JOHTO's setup
+# hides them and no script shows them): JASMINE at OLIVINE's cafe (flag 0x101C), hidden before, there after
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_WARP=35,4,5,7"
+EXPECT_A=("flag 4124 = 1" "objat 5,4: none" "flag 4124 = 0" "objat 5,4: local 4")
+UNEXPECT_A=("[crash]" "TIMEOUT")

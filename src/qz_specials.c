@@ -1853,6 +1853,21 @@ u16 QzGiovanniStoryUpdateFlags(void)
     else
         FlagSet(FLAG_QZ_0x1321);
     FlagSet(FLAG_QZ_0x131F);   // ELM's lab's ARCEUS: its own scene shows it
+    {
+        // The gym leaders out and about once JOHTO's League is beaten: MORTY in ECRUTEAK, WHITNEY at the DEPT. STORE's
+        // roof, PRYCE at the LAKE OF RAGE, JASMINE at OLIVINE's cafe. JOHTO's setup hides them and Quetzal's code that
+        // shows them wasn't carried over: no script clears these flags
+        static const u16 sLeaders[] = {FLAG_QZ_0x1017, FLAG_QZ_0x1019, FLAG_QZ_0x101C, FLAG_QZ_0x101E};
+        u32 i;
+        bool8 shown = MP_Region_Cleared(REGION_JOHTO) && !InGiovanniPast();
+        for (i = 0; i < ARRAY_COUNT(sLeaders); i++)
+        {
+            if (shown)
+                FlagClear(sLeaders[i]);
+            else
+                FlagSet(sLeaders[i]);
+        }
+    }
     return 0;
 }
 

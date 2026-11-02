@@ -1,0 +1,14 @@
+pressuntil A field 5000
+wait 200
+mp warp 35,4,5,7
+wait 150
+mp getflag 4124
+mp objat 5 4
+mp regionclear 1
+mp warp 35,4,5,7
+wait 150
+mp getflag 4124
+mp objat 5 4
+mp face up
+shot cafe
+quit
