@@ -8,7 +8,7 @@ Rules behind it: CLAUDE.md's SINNOH paragraph and docs/SINNOH_HANDOFF.md.
 
 | What | How to see it | Now |
 |---|---|---|
-| Platinum's script entries that convert | `python3 -I tools/sinnoh/gen_scripts.py --report ~/.cache/moemon/pokeplatinum` (first line) | 2098 of 2511 |
+| Platinum's script entries that convert | `python3 -I tools/sinnoh/gen_scripts.py --report ~/.cache/moemon/pokeplatinum` (first line) | 2106 of 2511 |
 | Commands still missing | the same report, the list under it (most used first) | 60 kinds |
 | Platinum's text slots and page breaks | messages show whole (\\r is a new box, six string slots) | done |
 | Platinum songs the game lacks | the same report, "songs the game lacks" | 5 |
@@ -62,7 +62,8 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [ ] The DISTORTION WORLD: walking on walls and ceilings, the turning rooms, boulders, the lift, CYRUS and
       GIRATINA (overlay009, SetPartyGiratinaForm, StartGiratinaOriginBattle)
 - [ ] ETERNA's gym clock (AdvanceEternaGymClock)
-- [ ] PASTORIA's and SUNYSHORE's gym buttons in Platinum's commands (PressPastoriaGymButton / PressSunyshoreGymButton)
+- [x] PASTORIA's and SUNYSHORE's gym buttons in Platinum's commands (PressPastoriaGymButton / PressSunyshoreGymButton on
+      s3d_gyms.c's Sinnoh_PastoriaWater / Sinnoh_SunyshoreTurn) (sinnoh_gym_pastoria, sinnoh_gym_sunyshore)
 - [ ] HEARTHOME's and VEILSTONE's gyms in Platinum's commands
 - [ ] Platform lifts (TriggerPlatformLift), GetFloorsAbove
 - [ ] Berry soil patches (Platinum's own berry spots; the TV's BERRY LOOKOUT waits for them)

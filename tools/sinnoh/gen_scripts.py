@@ -860,6 +860,13 @@ class FileConverter:
             return [self.sinnoh(SINNOH_CONTEST, 34, self.var(a[0]))]
         if cmd == 'GetPartyMonFriendship':
             return [self.sinnoh(SINNOH_CONTEST, 35, self.var(a[0]), self.arg(a[1]))]
+        if cmd in ('InitPersistedMapFeaturesForPastoriaGym', 'InitPersistedMapFeaturesForSunyshoreGym',
+                   'InitPersistedMapFeaturesForCanalaveGym'):
+            return []                       # (src/sinnoh/s3d_gyms.c sets its gyms up as their maps load)
+        if cmd == 'PressPastoriaGymButton':
+            return ['special Sinnoh_PastoriaWater', 'waitstate']   # (src/sinnoh/s3d_gyms.c: the button under the player)
+        if cmd == 'PressSunyshoreGymButton':
+            return ['special Sinnoh_SunyshoreTurn', 'waitstate']
         if cmd == 'Dummy316':
             return []
         if cmd == 'NewContest':
