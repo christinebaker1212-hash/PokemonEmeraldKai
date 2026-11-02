@@ -8,6 +8,12 @@
 //   3 CheckIsDepartmentStoreRegular A: 5 buys or more in the VEILSTONE DEPARTMENT STORE (Sinnoh_StoreBought, shop.c)
 //   4 BufferVarPaddingDigits: A a variable, B the text slot << 8 | 0x80 for zeroes | the digits
 //   5 BufferMonNicknameFromPC: A a variable (box * 30 + place), B the text slot
+//   6 CalcSizeContestResult: A the result's variable (Platinum's SIZE_CONTEST_SMALLER / SAME_SIZE / LARGER, 0-2), B the
+//     party slot's: the POKéMON against ROUTE 222's REMORAID record, measured as Emerald's SEEDOT / LOTAD
+//     (pokemon_size_record.c, its hash in remoraidRecord; 0: none yet, Platinum's starting record 33280)
+//   7 BufferPartyPokemonSize: A the party slot's variable, B the text slots (whole inches << 8 | tenths)
+//   8 UpdateSizeContestRecord: A the party slot's variable: its POKéMON is the new record
+//   9 BufferSizeContestRecord: B the text slots (as 7) for the record (A: the species, REMORAID)
 #include <string.h>
 #include "global.h"
 #include "event_data.h"
@@ -16,6 +22,7 @@
 #include "pokemon_storage_system.h"
 #include "random.h"
 #include "string_util.h"
+#include "constants/species.h"
 #include "constants/map_groups.h"
 #include "mp.h"
 
@@ -25,7 +32,8 @@ static struct
 {
     u32 magic;
     u16 storeBuys;
-    u16 unused[15];
+    u16 remoraidRecord;   // (ROUTE 222's size contest: the record's size hash, 0 = none yet)
+    u16 unused[14];
 } sM;
 
 const void *Sinnoh_MiscData(u32 *size)
@@ -68,6 +76,31 @@ static u8 Matching(u16 drawn, u16 otId)
         n++;
     }
     return n;
+}
+
+u16 MP_MonSizeHash(struct Pokemon *mon);
+u32 MP_MonSizeTenthsInch(u16 species, u16 hash);
+extern u8 gSinnohStrVar[3][64];
+
+static u8 *TextSlot(u8 i)
+{
+    return i == 0 ? gStringVar1 : i == 1 ? gStringVar2 : i == 2 ? gStringVar3 : gSinnohStrVar[(i - 3) % 3];
+}
+
+static u16 RemoraidRecord(void)
+{
+    return sM.remoraidRecord != 0 ? sM.remoraidRecord : 33280;   // (Platinum's InitSizeContestRecord)
+}
+
+static void BufferSize(u32 tenths, u16 slots)
+{
+    ConvertIntToDecimalStringN(TextSlot(slots >> 8), tenths / 10, STR_CONV_MODE_LEFT_ALIGN, 4);
+    ConvertIntToDecimalStringN(TextSlot(slots & 0xFF), tenths % 10, STR_CONV_MODE_LEFT_ALIGN, 1);
+}
+
+static struct Pokemon *PartySlotMon(u16 var)
+{
+    return &gPlayerParty[VarGet(var) % PARTY_SIZE];
 }
 
 void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
@@ -132,5 +165,24 @@ void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
         StringGet_Nickname(sSlots[b % 3]);
         break;
     }
+    case 6:
+    {
+        u32 mine = MP_MonSizeTenthsInch(SPECIES_REMORAID, MP_MonSizeHash(PartySlotMon(b)));
+        u32 record = MP_MonSizeTenthsInch(SPECIES_REMORAID, RemoraidRecord());
+        VarSet(a, mine < record ? 0 : mine == record ? 1 : 2);
+        MPNet_Log("sinnoh size contest: %u.%u in against the record %u.%u", mine / 10, mine % 10, record / 10, record % 10);
+        break;
+    }
+    case 7:
+        BufferSize(MP_MonSizeTenthsInch(SPECIES_REMORAID, MP_MonSizeHash(PartySlotMon(a))), b);
+        break;
+    case 8:
+        sM.remoraidRecord = MP_MonSizeHash(PartySlotMon(a));
+        if (sM.remoraidRecord == 0)
+            sM.remoraidRecord = 1;   // (0 stands for none)
+        break;
+    case 9:
+        BufferSize(MP_MonSizeTenthsInch(SPECIES_REMORAID, RemoraidRecord()), b);
+        break;
     }
 }

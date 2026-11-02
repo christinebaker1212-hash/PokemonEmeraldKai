@@ -29,7 +29,7 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [~] ETERNA: the GALACTIC building, GARDENIA (her gym's clock puzzle: section 3)
 - [~] CYCLING ROAD, HEARTHOME: FANTINA, AMITY SQUARE, the CONTEST HALL (section 5)
 - [~] SOLACEON, VEILSTONE: MAYLENE, the GALACTIC warehouse with DAWN / LUCAS
-- [~] PASTORIA: CRASHER WAKE, the GREAT MARSH tram (MoveGreatMarshTram), the size contest
+- [~] PASTORIA: CRASHER WAKE, the GREAT MARSH tram (MoveGreatMarshTram)
 - [~] CELESTIC, CANALAVE: BYRON, IRON ISLAND with RILEY (partner)
 - [~] The three lakes, SNOWPOINT: CANDICE, LAKE ACUITY
 - [~] GALACTIC HQ, MT. CORONET, SPEAR PILLAR (the tag battle with BARRY)
@@ -82,7 +82,8 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [x] UNOWN messages in Platinum's UNOWN font (MessageUnown), the letters seen (GetUnownFormsSeenCount) (sinnoh_unown)
 - [ ] The VILLA (Resort Area) and its furniture
 - [ ] The Frontier Brains' and the HALL MATRON's teams
-- [ ] The PASTORIA size contest
+- [x] The size contest (ROUTE 222's house, REMORAID; not PASTORIA's): Platinum's script, s3d_misc.c 6-9 on Emerald's size
+      code with Platinum's rounding and starting record; test sinnoh_size_contest
 - [x] JUBILIFE's TV lottery in Platinum's own script, on the game's own lottery number (s3d_misc.c) (sinnoh_lottery)
 - [ ] The JOURNAL
 - [ ] AMITY SQUARE's walk (ClearAmitySquareStepCount)

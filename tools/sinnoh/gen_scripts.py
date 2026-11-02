@@ -588,6 +588,16 @@ class FileConverter:
                                 (slot << 8) | (0x80 if a[2] == 'PADDING_MODE_ZEROES' else 0) | int(self.value(a[3])))]
         if cmd == 'BufferMonNicknameFromPC':
             return [self.sinnoh(SINNOH_MISC, 5, self.var(a[1]), int(self.strvar(a[0])[-1]) - 1)]
+        # ROUTE 222's size contest (REMORAID): s3d_misc.c 6-9 on Emerald's size code (pokemon_size_record.c); the
+        # number's two halves go to text slots 0-5 (SINNOH's text has six)
+        if cmd == 'CalcSizeContestResult':
+            return [self.sinnoh(SINNOH_MISC, 6, self.var(a[0]), self.var(a[1]))]
+        if cmd == 'BufferPartyPokemonSize':
+            return [self.sinnoh(SINNOH_MISC, 7, self.var(a[2]), (int(self.value(a[0])) << 8) | int(self.value(a[1])))]
+        if cmd == 'UpdateSizeContestRecord':
+            return [self.sinnoh(SINNOH_MISC, 8, self.var(a[0]))]
+        if cmd == 'BufferSizeContestRecord':
+            return [self.sinnoh(SINNOH_MISC, 9, self.value(a[2]), (int(self.value(a[0])) << 8) | int(self.value(a[1])))]
         if cmd == 'GetJubilifeLotteryTrainerID':
             return [self.sinnoh(SINNOH_MISC, 0, self.var(a[0]))]
         if cmd == 'CheckForJubilifeLotteryWinner':

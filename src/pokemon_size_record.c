@@ -192,3 +192,16 @@ void CompareLotadSize(void)
 
     gSpecialVar_Result = CompareMonSize(SPECIES_LOTAD, sizeRecord);
 }
+
+// Moemon Kai: SINNOH's size contest (ROUTE 222's REMORAID, src/sinnoh/s3d_misc.c) on the same measure: a POKéMON's size
+// hash, and a hash's size in tenths of an inch (Platinum's English text gives inches, rounded as Platinum's)
+u16 MP_MonSizeHash(struct Pokemon *mon)
+{
+    return GetMonSizeHash(mon);
+}
+
+u32 MP_MonSizeTenthsInch(u16 species, u16 hash)
+{
+    u32 mm = GetMonSize(species, hash);   // (Platinum's measure is the same: overlay005/size_contest.c)
+    return ((mm * 1000) / 254 + 5) / 10;   // (Platinum's MM_TO_TENTH_OF_INCH)
+}
