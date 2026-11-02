@@ -462,32 +462,28 @@ bool8 MP_LegendForeign(u16 species, u8 region)
     return FALSE;
 }
 
-// After a map's transition scripts (overworld.c): a legendary from another region stays hidden, also where the map's
-// own scripts show it (FireRed's NAVEL ROCK and BIRTH ISLAND, Emerald's NAVEL ROCK and FARAWAY ISLAND)
+// FireRed's own island events keep their legendaries whatever region they're from (the user, 2026-11-02: they were
+// in the original game): NAVEL ROCK's LUGIA and HO-OH, BIRTH ISLAND's DEOXYS. (Emerald's NAVEL ROCK and FARAWAY
+// ISLAND aren't in this table: their own scripts, untouched.)
+static bool8 OriginalGameEvent(const struct QzStatic *e)
+{
+    u16 map = (e->group << 8) | e->num;
+    return map == MAP_KANTO_NAVEL_ROCK_BASE || map == MAP_KANTO_NAVEL_ROCK_SUMMIT || map == MAP_KANTO_BIRTH_ISLAND_EXTERIOR;
+}
+
+static bool8 HiddenForeignLegend(const struct QzStatic *e)
+{
+    return MP_LegendForeign(e->species, e->region) && !OriginalGameEvent(e);
+}
+
+// After a map's transition scripts (overworld.c): a legendary from another region that Quetzal placed stays hidden,
+// also where the map's own scripts would show it
 void MP_HideForeignLegends(void)
 {
     u32 i;
-    u16 map = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
     for (i = 0; i < ARRAY_COUNT(sQzStatics); i++)
-        if (HereIs(&sQzStatics[i]) && MP_LegendForeign(sQzStatics[i].species, sQzStatics[i].region))
+        if (HereIs(&sQzStatics[i]) && HiddenForeignLegend(&sQzStatics[i]))
             FlagSet(sQzStatics[i].objFlag);
-    switch (map)
-    {
-    case MAP_KANTO_NAVEL_ROCK_SUMMIT:   // HO-OH (its trigger runs while VAR_TEMP_1 is 0)
-    case MAP_NAVEL_ROCK_TOP:
-        FlagSet(FLAG_HIDE_HO_OH);
-        VarSet(VAR_TEMP_1, 1);
-        break;
-    case MAP_NAVEL_ROCK_BOTTOM:
-        FlagSet(FLAG_HIDE_LUGIA);
-        break;
-    case MAP_KANTO_BIRTH_ISLAND_EXTERIOR:   // DEOXYS's triangle too (DEOXYS: HOENN's BIRTH ISLAND)
-        FlagSet(FLAG_QZ_0x217B);
-        break;
-    case MAP_FARAWAY_ISLAND_INTERIOR:   // MEW: KANTO's (under the truck by the S.S. ANNE)
-        FlagSet(FLAG_HIDE_MEW);
-        break;
-    }
 }
 
 // On entering a map: a done Pokémon stays hidden; one of a later generation than the region shows waits (MP_Gen_Cap);
@@ -502,7 +498,7 @@ static u16 RefreshStatics(void)
         if (!HereIs(e))
             continue;
         if (FlagGet(e->doneFlag) || !MP_Gen_Allowed(e->species) || MP_Gen_Cap(e->region) < e->gen   // (a form: GALARIAN ARTICUNO...)
-         || MP_LegendForeign(e->species, e->region)
+         || HiddenForeignLegend(e)
          || (!MP_Region_Cleared(e->region) && !PreLeagueLegend(e))
          || (e->region == 2 && e->species == SPECIES_MELOETTA && !FlagGet(FLAG_QZ_0x2924))   // after the CHANSEY Dance
          || (e->species == SPECIES_DARKRAI && !FlagGet(e->region == 1 ? FLAG_QZ_0x1425 : FLAG_QZ_0x292B))   // in a dream

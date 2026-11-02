@@ -98,8 +98,9 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       and the title screen; the PC build's soft reset quits, so it's main_menu.c MP_ReturnToTitleNow; test options_title)
 
 ## The user's additions (2026-11-02, later)
-- [ ] Legendaries: FireRed's NAVEL ROCK and BIRTH ISLAND static encounters and Emerald's NAVEL ROCK and FARAWAY ISLAND
+- [x] Legendaries: FireRed's NAVEL ROCK and BIRTH ISLAND static encounters and Emerald's NAVEL ROCK and FARAWAY ISLAND
       ones stay, whatever region the legendary is from (they were in the original games); exclusivity is for the others
+      (qz_specials.c OriginalGameEvent; test legend_exclusive)
 - [ ] Platinum's remaining songs: the user's Platinum.zip (SINNOH's missing songs, task list SINNOH "songs")
 - [ ] Time of day looks like Platinum's in every region: its color tinting by the hour
 
@@ -135,9 +136,8 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
   door table); left open until the rip can read them from the user's ROM.
 - Legendaries: each one's home is the region whose games it belongs to (KANTO: the birds, MEWTWO, MEW; JOHTO: the
   beasts, LUGIA, HO-OH, CELEBI; HOENN: the Regis, the Latis, the weather trio, DEOXYS; SINNOH: Platinum's). Outside
-  their home they're hidden: Quetzal's static encounters in JOHTO and KANTO, FireRed's NAVEL ROCK and BIRTH ISLAND, and
-  Emerald's NAVEL ROCK and FARAWAY ISLAND (MEW is KANTO's: under the truck by the S.S. ANNE). The tickets still sail
-  there; the islands are empty. JIRACHI, MANAPHY and PHIONE have no encounter in their home region, so they keep
+  their home Quetzal's static encounters of them are hidden. The original games' own island events stay (the user,
+  later the same day): FireRed's NAVEL ROCK and BIRTH ISLAND, Emerald's NAVEL ROCK and FARAWAY ISLAND. JIRACHI, MANAPHY and PHIONE have no encounter in their home region, so they keep
   their places (else they couldn't be caught at all). Gens 5-9 legendaries have no home region here and stay.
 - Time of day outside SINNOH: Platinum's mechanism (grass slots 2 and 3; morning 4:00-9:59, night 20:00-3:59). JOHTO's
   and KANTO's morning / night POKéMON are Crystal's (the ones its tables show then and not by day, heaviest slot first;

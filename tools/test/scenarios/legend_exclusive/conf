@@ -1,11 +1,11 @@
 # Each region's legendaries only in their own region (qz_specials.c MP_LegendForeign / MP_HideForeignLegends), with
 # JOHTO's and KANTO's LEAGUEs beaten: KANTO's MT. MOON DIALGA (10517) and PALKIA (10520) hidden, CERULEAN CAVE's
-# MEWTWO (8605) shown; FireRed's NAVEL ROCK LUGIA (8604) and HO-OH (8589, its trigger off: VAR_TEMP_1 = 1) hidden;
-# Emerald's FARAWAY ISLAND MEW (718) and NAVEL ROCK LUGIA (800) hidden; JOHTO's ICE PATH ARTICUNO (4562) and ILEX
-# FOREST MEW (4583) hidden, ILEX's CELEBI (4601) shown.
+# MEWTWO (8605) shown; the original games' island events stay (the user: they were in the games): FireRed's NAVEL
+# ROCK LUGIA (8604) and Emerald's FARAWAY ISLAND MEW (718) and NAVEL ROCK LUGIA (800) shown; JOHTO's ICE PATH ARTICUNO
+# (4562) and ILEX FOREST MEW (4583) hidden, ILEX's CELEBI (4601) shown.
 MODE=1
 GEN=9
 TMO=120
 ENV_A="MOEMON_DEBUG_REGION=2"
-EXPECT_A=("flag 10517 = 1" "flag 10520 = 1" "flag 8605 = 0" "flag 8604 = 1" "flag 8589 = 1" "var 0x4001 = 1" "flag 718 = 1" "flag 800 = 1" "flag 4562 = 1" "flag 4583 = 1" "flag 4601 = 0")
+EXPECT_A=("flag 10517 = 1" "flag 10520 = 1" "flag 8605 = 0" "flag 8604 = 0" "flag 718 = 0" "flag 800 = 0" "flag 4562 = 1" "flag 4583 = 1" "flag 4601 = 0")
 UNEXPECT_A=("[crash]" "TIMEOUT")

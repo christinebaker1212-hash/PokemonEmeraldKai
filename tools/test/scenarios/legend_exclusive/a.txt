@@ -12,10 +12,6 @@ mp getflag 8605
 mp warp 37,35,10,16
 wait 120
 mp getflag 8604
-mp warp 37,34,9,14
-wait 120
-mp getflag 8589
-mp getvar 0x4001
 mp warp 26,57,10,10
 wait 120
 mp getflag 718
