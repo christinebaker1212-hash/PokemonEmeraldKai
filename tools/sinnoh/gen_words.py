@@ -310,7 +310,7 @@ def platinum(root):
             # (a shared file's: the contest hall's receptionists, the POFFIN HOUSE's cook; the others are the Wi-Fi Club's
             # and Plaza's, closed: online only)
             t = gen_scripts.common_target(s)
-            return gen_scripts.convertible(root, t[0], t[1]) if t and t[0] in ('contests', 'poffin_common') else None
+            return gen_scripts.convertible(root, t[0], t[1]) if t and t[0] in ('contests', 'poffin_common', 'safari_game') else None
         return gen_scripts.convertible(root, low, s) if 1 <= s < 2000 else None
     out = {}
     for p in places(open_source(root), root):

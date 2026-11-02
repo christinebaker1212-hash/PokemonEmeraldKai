@@ -1,0 +1,8 @@
+# The GREAT MARSH's quick tram in Platinum's own scripts (scripts_safari_game.s; src/sinnoh/s3d_tram.c): AREA 1's
+# station, AREA 3 picked, the player boards and rides the car down the track to the 3 / 4 stop and steps off west.
+# Needs the packs. Shots t_*.png.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=280:100"
+EXPECT_A=("sinnoh tram: ridden to stop 1" "sinnoh tram: at stop 1" "tram: stop 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

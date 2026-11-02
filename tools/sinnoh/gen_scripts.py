@@ -55,7 +55,8 @@ SINNOH_LIFT = 53   # (the platform lifts: src/sinnoh/s3d_lift.c)
 SINNOH_ELEVATOR = 54   # (the elevators: src/sinnoh/s3d_elevator.c Sinnoh_ElevatorCall)
 SINNOH_REGI_DOT, SINNOH_QUAKE = 55, 56   # (the REGI ruins' dots; Platinum's screen quake, ScrCmd_29F)
 SINNOH_MESSAGE_UNOWN = 57   # (gSinnohMessage <- a message in Platinum's UNOWN letters: src/text.c FONT_UNOWN)
-SINNOH_UNOWN_SEEN = 58   # (the UNOWN letters seen: s3d_legends.c)   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
+SINNOH_UNOWN_SEEN = 58   # (the UNOWN letters seen: s3d_legends.c)
+SINNOH_TRAM = 59   # (the GREAT MARSH's tram: s3d_tram.c)   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
 (TVCALL_STATUS, TVCALL_FRAMING, TVCALL_FINISH, TVCALL_SEGMENT_ID, TVCALL_SEGMENT, TVCALL_COMMERCIAL, TVCALL_NEXT,
  TVCALL_INTERVIEW_ID, TVCALL_INTERVIEW_MESSAGE, TVCALL_INTERVIEW_SAVE, TVCALL_INTERVIEW_OK, TVCALL_WORD,
  TVCALL_HIDDEN_ITEM, TVCALL_NAME_RATED, TVCALL_STORAGE, TVCALL_VILLA, TVCALL_AMITY, TVCALL_QUESTION) = range(18)
@@ -570,6 +571,17 @@ class FileConverter:
             return ['waitbuttonpress']
         if cmd in ('CloseMessage', 'CloseMessageWithoutErasing'):
             return ['closemessage']
+        if cmd == 'InitGreatMarshTram':
+            return [self.sinnoh(SINNOH_TRAM, 0)]
+        if cmd == 'MoveGreatMarshTram':
+            return [self.sinnoh(SINNOH_TRAM, 1, self.var(a[0]), self.value(a[1]))]
+        if cmd == 'CheckGreatMarshTramLocation':
+            return [self.sinnoh(SINNOH_TRAM, 2, self.value(a[0]), self.var(a[1]))]
+        if cmd == 'SetPlayerHeightCalculationEnabled':
+            # (the GREAT MARSH's tram: the player rides at the platform's height, s3d_tram.c)
+            return [self.sinnoh(SINNOH_TRAM, 3, 1 if a[0] == 'TRUE' else 0)]
+        if cmd == 'EndSafariGame':
+            return ['special ExitSafariMode']   # (the game's own SAFARI GAME: safari_zone.c)
         if cmd == 'GetUnownFormsSeenCount':
             return [self.sinnoh(SINNOH_UNOWN_SEEN, self.var(a[0]))]
         if cmd == 'MessageUnown':

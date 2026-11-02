@@ -102,6 +102,7 @@ enum {
     SINNOH_QUAKE,                   // the ground shakes (Platinum's ScrCmd_29F; ARG 1: hard): the game's ShakeCamera
     SINNOH_MESSAGE_UNOWN,           // gSinnohMessage <- SINNOH's text ARG, ARG2 in Platinum's UNOWN letters (FONT_UNOWN)
     SINNOH_UNOWN_SEEN,              // ARG: a variable <- the UNOWN letters seen (s3d_legends.c)
+    SINNOH_TRAM,                    // ARG: the GREAT MARSH tram's call (s3d_tram.c Sinnoh_TramCall), ARG2, ARG3
 };
 
 u8 gSinnohMessage[1000];
@@ -560,6 +561,16 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
             return TRUE;
         }
         break;
+    case SINNOH_TRAM:
+    {
+        bool8 Sinnoh_TramCall(u16 op, u16 a, u16 b);
+        if (Sinnoh_TramCall(arg, arg2, arg3))
+        {
+            ScriptContext_Stop();   // (the tram moves; its stop starts the script again: s3d_tram.c)
+            return TRUE;
+        }
+        break;
+    }
     case SINNOH_UNOWN_SEEN:
     {
         u16 Sinnoh_UnownFormsSeen(void);

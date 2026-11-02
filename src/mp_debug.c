@@ -3129,6 +3129,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         Sinnoh_TvForceProgram(atoi(arg));
         printf("[test] tv program %d\n", atoi(arg));
     }
+    else if (strcmp(cmd, "tram") == 0)
+    {
+        // tram: the GREAT MARSH's tram (s3d_tram.c: its stop, where the car is, moving)
+        void Sinnoh_TramDebug(void);
+        Sinnoh_TramDebug();
+    }
     else if (strcmp(cmd, "lift") == 0)
     {
         // lift: SINNOH's platform lift on this map (s3d_lift.c: which, its floor, height, riding)

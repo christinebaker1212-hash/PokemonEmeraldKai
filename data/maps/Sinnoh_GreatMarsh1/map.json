@@ -92,6 +92,14 @@
       "script": "Sinnoh_GreatMarsh1_EventScript_Sign3"
     },
     {
+      "type": "sign",
+      "x": 62,
+      "y": 38,
+      "elevation": 0,
+      "player_facing_dir": "BG_EVENT_PLAYER_FACING_NORTH",
+      "script": "Sinnoh_GreatMarsh1_EventScript_Bg1"
+    },
+    {
       "type": "hidden_item",
       "x": 33,
       "y": 37,

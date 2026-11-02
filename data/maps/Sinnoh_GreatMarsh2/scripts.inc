@@ -2,6 +2,10 @@ Sinnoh_GreatMarsh2_MapScripts::
 	.byte 0
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
+Sinnoh_GreatMarsh2_EventScript_Bg1::
+	goto SinnohP_safari_game_5
+	end
+
 Sinnoh_GreatMarsh2_EventScript_Person3::
 	goto SinnohP_great_marsh_2_1
 	end

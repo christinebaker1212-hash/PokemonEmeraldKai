@@ -18,6 +18,8 @@
 #include "s3d_underground.h"
 void Sinnoh_Lift_MapLoaded(void);   // (s3d_lift.c)
 void Sinnoh_Lift_Update(void);
+void Sinnoh_Tram_MapLoaded(void);   // (s3d_tram.c)
+void Sinnoh_Tram_Update(void);
 #include "m4a.h"
 #include "event_data.h"
 #include "battle_setup.h"
@@ -1150,6 +1152,12 @@ void S3D_Gyms_RedirectWarp(s16 x, s16 y)
         }
 }
 
+// The GREAT MARSH's tram, Platinum's run-time prop (s3d_tram.c)
+void S3D_Gyms_TramProp(float x, float y, float z)
+{
+    S3D_DynProp(1, S3D_MODEL_GREAT_MARSH_TRAIN, x, y, z, 0);
+}
+
 // IRON ISLAND B2F's platform lift, Platinum's run-time prop (s3d_lift.c)
 void S3D_Gyms_LiftProp(float x, float y, float z)
 {
@@ -1168,6 +1176,7 @@ void S3D_Gyms_MapLoaded(void)
     sG.gym = GYM_NONE;
     sG.lastX = sG.lastY = -1;
     Sinnoh_Lift_MapLoaded();   // (the platform lifts: s3d_lift.c)
+    Sinnoh_Tram_MapLoaded();   // (the GREAT MARSH's tram: s3d_tram.c)
     if (!S3D_MapOrigin(&sG.ox, &sG.oz))
         return;
     if (map == MAP_SINNOH_PASTORIA_CITY_GYM)
@@ -1223,6 +1232,7 @@ void S3D_Gyms_Update(void)
     s16 x, y;
     Sinnoh_Underground_Update();
     Sinnoh_Lift_Update();
+    Sinnoh_Tram_Update();
     if (sG.gym == GYM_NONE)
         return;
     if (sG.gym == GYM_CANALAVE)

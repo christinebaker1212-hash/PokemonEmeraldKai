@@ -1,0 +1,23 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp setvar 0x4021 250
+mp warp 41,102,62,39
+wait 120
+waitfor field 1000
+mp tram
+shot t_station
+mp face up
+wait 10
+press A 1
+wait 90
+shot t_menu
+press A 1
+wait 100
+shot t_ride
+wait 500
+waitfor field 2000
+mp tram
+mp where
+shot t_area3
+quit

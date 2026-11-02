@@ -3979,6 +3979,14 @@ POKEPLATINUM_DIR` (tools/sinnoh/fetch_decomp.sh DIR gets one), then `make`.
   daily POKéMON: each area one of 32 picks a day (day + Trainer ID) in the 5% slots 6-7 while the SAFARI GAME is on,
   the second list after SINNOH's LEAGUE (Sinnoh_GreatMarshDaily; `mp marshdaily`). The marsh is 128x160 tiles:
   MAX_MAP_DATA_SIZE is 32768 (fieldmap.h; a map past it gets no grid at all: no walls, grass or warps). Test sinnoh_marsh.
+- The GREAT MARSH's quick tram (2026-11-02, src/sinnoh/s3d_tram.c from Platinum's great_marsh_tram.c): the six
+  stations (Platinum's safari_game.s entries 4-9 on the merged marsh's bg events: gen_words.py now converts that shared
+  file's entries too) run Platinum's scripts; the car (great_marsh_train, a run-time model: gymprops.py,
+  S3D_MODEL_GREAT_MARSH_TRAIN, DynProp slot 1) waits at x 66 by z 40 / 82 / 108; called it glides in with Platinum's
+  speeds and slow-down points; ridden, the player (invisible in it, as Platinum's SetInvisible) walks the track faster
+  then slower and the car follows (z + 8), the player kept at the platform's height (SetPlayerHeightCalculationEnabled
+  FALSE: s3d_tram.c Height over the track's tiles). InitGreatMarshTram puts it back by AREAS 1 / 2; EndSafariGame is the
+  game's ExitSafariMode. `mp tram`. Test sinnoh_tram.
 - Elevators (2026-11-01): Platinum's run by script; here gen_maps.py elevators() finds them (a place with a warp to
   MAP_HEADER_DYNAMIC) and their floors (the places with a door into one; sorted by their names' B1F / nF, a place outside
   as 1F, anything else TOP: VISTA LIGHTHOUSE), keeps their doors as Emerald's MAP_DYNAMIC warp (SetupWarp sets it to
