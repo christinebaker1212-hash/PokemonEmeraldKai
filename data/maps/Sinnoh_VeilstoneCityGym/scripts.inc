@@ -3,11 +3,11 @@ Sinnoh_VeilstoneCityGym_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_VeilstoneCityGym_EventScript_Bg1::
-	msgbox Sinnoh_VeilstoneCityGym_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_veilstone_city_gym_4
 	end
 
 Sinnoh_VeilstoneCityGym_EventScript_Bg2::
-	msgbox Sinnoh_VeilstoneCityGym_Text_Bg2, MSGBOX_SIGN
+	goto SinnohP_veilstone_city_gym_4
 	end
 
 Sinnoh_VeilstoneCityGym_EventScript_Bg3::
@@ -47,16 +47,8 @@ Sinnoh_VeilstoneCityGym_EventScript_Person1_GiveTm::
 	end
 
 Sinnoh_VeilstoneCityGym_EventScript_Person2::
-	msgbox Sinnoh_VeilstoneCityGym_Text_Person2, MSGBOX_NPC
+	goto SinnohP_veilstone_city_gym_3
 	end
-
-Sinnoh_VeilstoneCityGym_Text_Bg1:
-	.string "VEILSTONE CITY MOéMON GYM\p"
-	.string "LEADER: MAYLENE$"
-
-Sinnoh_VeilstoneCityGym_Text_Bg2:
-	.string "VEILSTONE CITY MOéMON GYM\p"
-	.string "LEADER: MAYLENE$"
 
 Sinnoh_VeilstoneCityGym_Text_Person1Intro:
 	.string "I'm MAYLENE. I've trained here since I\n"
@@ -84,10 +76,5 @@ Sinnoh_VeilstoneCityGym_Text_Person1After:
 Sinnoh_VeilstoneCityGym_Text_Person1Badge:
 	.string "{PLAYER} received the COBBLE BADGE\n"
 	.string "from MAYLENE.$"
-
-Sinnoh_VeilstoneCityGym_Text_Person2:
-	.string "MAYLENE's FIGHTING MOéMON hit hard.\n"
-	.string "FLYING and PSYCHIC moves will keep\l"
-	.string "you on your feet!$"
 
 @ --- end of SINNOH words ---

@@ -23,7 +23,27 @@ Sinnoh_OreburghCity_EventScript_Person4::
 	end
 
 Sinnoh_OreburghCity_EventScript_Person5::
-	msgbox Sinnoh_OreburghCity_Text_Person5, MSGBOX_NPC
+	goto SinnohP_oreburgh_city_2
+	end
+
+Sinnoh_OreburghCity_EventScript_Person11::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_OreburghCity_EventScript_Person12::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_OreburghCity_EventScript_Person13::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_OreburghCity_EventScript_Person14::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_OreburghCity_EventScript_Person15::
+	goto SinnohP_common_28
 	end
 
 Sinnoh_OreburghCity_EventScript_Person16::
@@ -31,20 +51,7 @@ Sinnoh_OreburghCity_EventScript_Person16::
 	end
 
 Sinnoh_OreburghCity_EventScript_Person17::
-	lock
-	faceplayer
-	goto_if_set 0x3DBC, Sinnoh_OreburghCity_EventScript_Person17_Given
-	msgbox Sinnoh_OreburghCity_Text_Person17, MSGBOX_DEFAULT
-	msgbox Sinnoh_OreburghCity_Text_Person17Gift, MSGBOX_DEFAULT
-	giveitem ITEM_SUPER_POTION, 1
-	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DBC
-	release
-	end
-
-Sinnoh_OreburghCity_EventScript_Person17_Given::
-	msgbox Sinnoh_OreburghCity_Text_Person17, MSGBOX_DEFAULT
-	release
+	goto SinnohP_oreburgh_city_7
 	end
 
 Sinnoh_OreburghCity_EventScript_Person18::
@@ -68,15 +75,15 @@ Sinnoh_OreburghCity_EventScript_Person22::
 	end
 
 Sinnoh_OreburghCity_EventScript_Person23::
-	msgbox Sinnoh_OreburghCity_Text_Person23, MSGBOX_NPC
+	goto SinnohP_oreburgh_city_19
 	end
 
 Sinnoh_OreburghCity_EventScript_Person26::
-	msgbox Sinnoh_OreburghCity_Text_Person26, MSGBOX_NPC
+	goto SinnohP_oreburgh_city_21
 	end
 
 Sinnoh_OreburghCity_EventScript_Person27::
-	msgbox Sinnoh_OreburghCity_Text_Person27, MSGBOX_NPC
+	goto SinnohP_oreburgh_city_22
 	end
 
 Sinnoh_OreburghCity_EventScript_Person28::
@@ -113,31 +120,5 @@ Sinnoh_OreburghCity_Text_Person4:
 	.string "he's back!\p"
 	.string "...After I stock up on POTIONS. And\n"
 	.string "maybe a snack.$"
-
-Sinnoh_OreburghCity_Text_Person5:
-	.string "Have you been to the GYM yet? ROARK\n"
-	.string "uses ROCK MOéMON. Bring something\l"
-	.string "with water!$"
-
-Sinnoh_OreburghCity_Text_Person17:
-	.string "Break time! Ten minutes, then back to\n"
-	.string "the mine.$"
-
-Sinnoh_OreburghCity_Text_Person17Gift:
-	.string "Here, a little something from the\n"
-	.string "first-aid box. Miners share!$"
-
-Sinnoh_OreburghCity_Text_Person23:
-	.string "MACHOP: Machop! Ma-chop!\p"
-	.string "It's flexing proudly.$"
-
-Sinnoh_OreburghCity_Text_Person26:
-	.string "MACHOP: Ma! Machop!\p"
-	.string "It's carrying a lump of coal bigger\n"
-	.string "than its head.$"
-
-Sinnoh_OreburghCity_Text_Person27:
-	.string "MACHOP: Chop chop!\p"
-	.string "It's taking a short break.$"
 
 @ --- end of SINNOH words ---

@@ -12,11 +12,11 @@ Sinnoh_OreburghCityPokecenter1f_EventScript_Person1::
 	end
 
 Sinnoh_OreburghCityPokecenter1f_EventScript_Person2::
-	msgbox Sinnoh_OreburghCityPokecenter1f_Text_Person2, MSGBOX_NPC
+	goto SinnohP_oreburgh_city_pokecenter_1f_3
 	end
 
 Sinnoh_OreburghCityPokecenter1f_EventScript_Person3::
-	msgbox Sinnoh_OreburghCityPokecenter1f_Text_Person3, MSGBOX_NPC
+	goto SinnohP_oreburgh_city_pokecenter_1f_2
 	end
 
 Sinnoh_OreburghCityPokecenter1f_EventScript_Person4::
@@ -28,41 +28,19 @@ Sinnoh_OreburghCityPokecenter1f_EventScript_Person4::
 	end
 
 Sinnoh_OreburghCityPokecenter1f_EventScript_Person5::
-	msgbox Sinnoh_OreburghCityPokecenter1f_Text_Person5, MSGBOX_NPC
+	goto SinnohP_oreburgh_city_pokecenter_1f_5
 	end
 
 Sinnoh_OreburghCityPokecenter1f_EventScript_Person8::
-	msgbox Sinnoh_OreburghCityPokecenter1f_Text_Person8, MSGBOX_NPC
+	goto SinnohP_oreburgh_city_pokecenter_1f_6
 	end
 
 Sinnoh_OreburghCityPokecenter1f_EventScript_Person9::
-	msgbox Sinnoh_OreburghCityPokecenter1f_Text_Person9, MSGBOX_NPC
+	goto SinnohP_oreburgh_city_pokecenter_1f_7
 	end
 
 Sinnoh_OreburghCityPokecenter1f_Text_Person1:
 	.string "I can sense... that your MOéMON are\n"
 	.string "tired. That's why you're here, right?$"
-
-Sinnoh_OreburghCityPokecenter1f_Text_Person2:
-	.string "ROARK uses ROCK MOéMON. My GRASS\n"
-	.string "MOéMON had a great time in that\l"
-	.string "battle!$"
-
-Sinnoh_OreburghCityPokecenter1f_Text_Person3:
-	.string "I'm waiting for my friend to finish in\n"
-	.string "the mine. He's been down there all day.$"
-
-Sinnoh_OreburghCityPokecenter1f_Text_Person5:
-	.string "I've visited this MOéMON CENTER for\n"
-	.string "forty years. The chairs have never\l"
-	.string "been comfier.$"
-
-Sinnoh_OreburghCityPokecenter1f_Text_Person8:
-	.string "Are you here to trade? I've got a\n"
-	.string "GEODUDE, and I'm not afraid to use it!$"
-
-Sinnoh_OreburghCityPokecenter1f_Text_Person9:
-	.string "We're linking up to battle! Our MOéMON\n"
-	.string "are fighting in a tiny screen world.$"
 
 @ --- end of SINNOH words ---

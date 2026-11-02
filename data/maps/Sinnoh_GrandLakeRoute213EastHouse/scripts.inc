@@ -3,11 +3,7 @@ Sinnoh_GrandLakeRoute213EastHouse_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_GrandLakeRoute213EastHouse_EventScript_Person1::
-	msgbox Sinnoh_GrandLakeRoute213EastHouse_Text_Person1, MSGBOX_NPC
+	goto SinnohP_grand_lake_route_213_east_house_1
 	end
-
-Sinnoh_GrandLakeRoute213EastHouse_Text_Person1:
-	.string "I rent this cottage every summer. The\n"
-	.string "sound of the waves helps me sleep.$"
 
 @ --- end of SINNOH words ---

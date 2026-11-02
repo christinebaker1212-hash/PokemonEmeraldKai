@@ -7,20 +7,19 @@ Sinnoh_Route222_EventScript_Person16::
 	end
 
 Sinnoh_Route222_EventScript_Person26::
-	lock
-	faceplayer
-	goto_if_set 0x3DD4, Sinnoh_Route222_EventScript_Person26_Given
-	msgbox Sinnoh_Route222_Text_Person26, MSGBOX_DEFAULT
-	msgbox Sinnoh_Route222_Text_Person26Gift, MSGBOX_DEFAULT
-	giveitem ITEM_TM56, 1
-	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DD4
-	release
+	goto SinnohP_route_222_2
 	end
 
-Sinnoh_Route222_EventScript_Person26_Given::
-	msgbox Sinnoh_Route222_Text_Person26, MSGBOX_DEFAULT
-	release
+Sinnoh_Route222_EventScript_Person27::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_Route222_EventScript_Person28::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_Route222_EventScript_Person29::
+	goto SinnohP_common_28
 	end
 
 Sinnoh_Route222_EventScript_Person30::
@@ -42,14 +41,6 @@ Sinnoh_Route222_EventScript_Sign14::
 Sinnoh_Route222_EventScript_Sign15::
 	goto SinnohP_route_222_6
 	end
-
-Sinnoh_Route222_Text_Person26:
-	.string "I bought this whole beach. Just\n"
-	.string "kidding! ...Or am I?$"
-
-Sinnoh_Route222_Text_Person26Gift:
-	.string "Since you're my guest on my beach,\n"
-	.string "here's a TM. Money is no object!$"
 
 Sinnoh_Route222_Text_Person30:
 	.string "The beach is quiet by day. Night\n"

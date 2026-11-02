@@ -3,11 +3,11 @@ Sinnoh_SnowpointCityGym_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_SnowpointCityGym_EventScript_Bg1::
-	msgbox Sinnoh_SnowpointCityGym_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_snowpoint_city_gym_4
 	end
 
 Sinnoh_SnowpointCityGym_EventScript_Bg2::
-	msgbox Sinnoh_SnowpointCityGym_Text_Bg2, MSGBOX_SIGN
+	goto SinnohP_snowpoint_city_gym_4
 	end
 
 Sinnoh_SnowpointCityGym_EventScript_Person1::
@@ -35,16 +35,84 @@ Sinnoh_SnowpointCityGym_EventScript_Person1_GiveTm::
 	end
 
 Sinnoh_SnowpointCityGym_EventScript_Person2::
-	msgbox Sinnoh_SnowpointCityGym_Text_Person2, MSGBOX_NPC
+	goto SinnohP_snowpoint_city_gym_3
 	end
 
-Sinnoh_SnowpointCityGym_Text_Bg1:
-	.string "SNOWPOINT CITY MOéMON GYM\p"
-	.string "LEADER: CANDICE$"
+Sinnoh_SnowpointCityGym_EventScript_Person9::
+	goto SinnohP_common_38
+	end
 
-Sinnoh_SnowpointCityGym_Text_Bg2:
-	.string "SNOWPOINT CITY MOéMON GYM\p"
-	.string "LEADER: CANDICE$"
+Sinnoh_SnowpointCityGym_EventScript_Person10::
+	goto SinnohP_common_38
+	end
+
+Sinnoh_SnowpointCityGym_EventScript_Person11::
+	goto SinnohP_common_38
+	end
+
+Sinnoh_SnowpointCityGym_EventScript_Person12::
+	goto SinnohP_common_38
+	end
+
+Sinnoh_SnowpointCityGym_EventScript_Person13::
+	goto SinnohP_common_38
+	end
+
+Sinnoh_SnowpointCityGym_EventScript_Person14::
+	goto SinnohP_common_38
+	end
+
+Sinnoh_SnowpointCityGym_EventScript_Person15::
+	goto SinnohP_common_38
+	end
+
+Sinnoh_SnowpointCityGym_EventScript_Person16::
+	goto SinnohP_common_38
+	end
+
+Sinnoh_SnowpointCityGym_EventScript_Person17::
+	goto SinnohP_common_38
+	end
+
+Sinnoh_SnowpointCityGym_EventScript_Person18::
+	goto SinnohP_common_38
+	end
+
+Sinnoh_SnowpointCityGym_EventScript_Person19::
+	goto SinnohP_common_38
+	end
+
+Sinnoh_SnowpointCityGym_EventScript_Person20::
+	goto SinnohP_common_38
+	end
+
+Sinnoh_SnowpointCityGym_EventScript_Person21::
+	goto SinnohP_common_38
+	end
+
+Sinnoh_SnowpointCityGym_EventScript_Person22::
+	goto SinnohP_common_38
+	end
+
+Sinnoh_SnowpointCityGym_EventScript_Person23::
+	goto SinnohP_common_38
+	end
+
+Sinnoh_SnowpointCityGym_EventScript_Person24::
+	goto SinnohP_common_38
+	end
+
+Sinnoh_SnowpointCityGym_EventScript_Person25::
+	goto SinnohP_common_38
+	end
+
+Sinnoh_SnowpointCityGym_EventScript_Person26::
+	goto SinnohP_common_38
+	end
+
+Sinnoh_SnowpointCityGym_EventScript_Person27::
+	goto SinnohP_common_38
+	end
 
 Sinnoh_SnowpointCityGym_Text_Person1Intro:
 	.string "I'm CANDICE! In SNOWPOINT we say it's\n"
@@ -72,10 +140,5 @@ Sinnoh_SnowpointCityGym_Text_Person1After:
 Sinnoh_SnowpointCityGym_Text_Person1Badge:
 	.string "{PLAYER} received the ICICLE BADGE\n"
 	.string "from CANDICE.$"
-
-Sinnoh_SnowpointCityGym_Text_Person2:
-	.string "CANDICE's ICE MOéMON are tough in the\n"
-	.string "cold. FIRE, FIGHTING, ROCK and STEEL\l"
-	.string "moves will thaw them out!$"
 
 @ --- end of SINNOH words ---

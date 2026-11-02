@@ -7,16 +7,32 @@ Sinnoh_PastoriaCity_OnTransition:
 	end
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
+Sinnoh_PastoriaCity_EventScript_Person1::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_PastoriaCity_EventScript_Person2::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_PastoriaCity_EventScript_Person3::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_PastoriaCity_EventScript_Person4::
+	goto SinnohP_common_28
+	end
+
 Sinnoh_PastoriaCity_EventScript_Person10::
 	goto SinnohP_pastoria_city_4
 	end
 
 Sinnoh_PastoriaCity_EventScript_Person11::
-	msgbox Sinnoh_PastoriaCity_Text_Person11, MSGBOX_NPC
+	goto SinnohP_pastoria_city_6
 	end
 
 Sinnoh_PastoriaCity_EventScript_Person12::
-	msgbox Sinnoh_PastoriaCity_Text_Person12, MSGBOX_NPC
+	goto SinnohP_pastoria_city_8
 	end
 
 Sinnoh_PastoriaCity_EventScript_Person13::
@@ -74,14 +90,6 @@ Sinnoh_PastoriaCity_EventScript_Sign7::
 Sinnoh_PastoriaCity_EventScript_Sign9::
 	goto SinnohP_pastoria_city_16
 	end
-
-Sinnoh_PastoriaCity_Text_Person11:
-	.string "Hyah! I train by walking through the\n"
-	.string "marsh. The mud makes your legs strong!$"
-
-Sinnoh_PastoriaCity_Text_Person12:
-	.string "CLEFAIRY: Pippi!\p"
-	.string "It's waving its little arms.$"
 
 Sinnoh_PastoriaCity_Text_Person22:
 	.string "I'm totally not hiding from TEAM\n"

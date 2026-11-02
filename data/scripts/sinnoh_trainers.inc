@@ -5,15 +5,13 @@ Sinnoh_EventScript_TrAceTrainerAbel::
 	end
 
 Sinnoh_Text_TrAceTrainerAbelIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x00, 0xFF
 
 Sinnoh_Text_TrAceTrainerAbelDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x01, 0xFF
 
 Sinnoh_Text_TrAceTrainerAbelAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x02, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerAlicia::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_ALICIA, Sinnoh_Text_TrAceTrainerAliciaIntro, Sinnoh_Text_TrAceTrainerAliciaDefeat
@@ -21,15 +19,13 @@ Sinnoh_EventScript_TrAceTrainerAlicia::
 	end
 
 Sinnoh_Text_TrAceTrainerAliciaIntro:
-	.string "A battle tells you everything about a\n"
-	.string "TRAINER. Let's talk.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x12, 0xFF
 
 Sinnoh_Text_TrAceTrainerAliciaDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x13, 0xFF
 
 Sinnoh_Text_TrAceTrainerAliciaAfter:
-	.string "Your team works together like it's one\n"
-	.string "MOéMON. That's rare.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x14, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerAllen::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_ALLEN, Sinnoh_Text_TrAceTrainerAllenIntro, Sinnoh_Text_TrAceTrainerAllenDefeat
@@ -37,15 +33,13 @@ Sinnoh_EventScript_TrAceTrainerAllen::
 	end
 
 Sinnoh_Text_TrAceTrainerAllenIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x24, 0xFF
 
 Sinnoh_Text_TrAceTrainerAllenDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x25, 0xFF
 
 Sinnoh_Text_TrAceTrainerAllenAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x26, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerAlyssa::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_ALYSSA, Sinnoh_Text_TrAceTrainerAlyssaIntro, Sinnoh_Text_TrAceTrainerAlyssaDefeat
@@ -53,15 +47,13 @@ Sinnoh_EventScript_TrAceTrainerAlyssa::
 	end
 
 Sinnoh_Text_TrAceTrainerAlyssaIntro:
-	.string "The view from here is great, but a good\n"
-	.string "battle is better!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x36, 0xFF
 
 Sinnoh_Text_TrAceTrainerAlyssaDefeat:
-	.string "Great view, great loss.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x37, 0xFF
 
 Sinnoh_Text_TrAceTrainerAlyssaAfter:
-	.string "I come up here to think. Today I'll\n"
-	.string "think about that battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x38, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerAnton::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_ANTON, Sinnoh_Text_TrAceTrainerAntonIntro, Sinnoh_Text_TrAceTrainerAntonDefeat
@@ -69,15 +61,13 @@ Sinnoh_EventScript_TrAceTrainerAnton::
 	end
 
 Sinnoh_Text_TrAceTrainerAntonIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x48, 0xFF
 
 Sinnoh_Text_TrAceTrainerAntonDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x49, 0xFF
 
 Sinnoh_Text_TrAceTrainerAntonAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x4A, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerArthur::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_ARTHUR, Sinnoh_Text_TrAceTrainerArthurIntro, Sinnoh_Text_TrAceTrainerArthurDefeat
@@ -85,15 +75,13 @@ Sinnoh_EventScript_TrAceTrainerArthur::
 	end
 
 Sinnoh_Text_TrAceTrainerArthurIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x5A, 0xFF
 
 Sinnoh_Text_TrAceTrainerArthurDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x5B, 0xFF
 
 Sinnoh_Text_TrAceTrainerArthurAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x5C, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerBlake::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_BLAKE, Sinnoh_Text_TrAceTrainerBlakeIntro, Sinnoh_Text_TrAceTrainerBlakeDefeat
@@ -101,15 +89,13 @@ Sinnoh_EventScript_TrAceTrainerBlake::
 	end
 
 Sinnoh_Text_TrAceTrainerBlakeIntro:
-	.string "A battle tells you everything about a\n"
-	.string "TRAINER. Let's talk.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x6C, 0xFF
 
 Sinnoh_Text_TrAceTrainerBlakeDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x6D, 0xFF
 
 Sinnoh_Text_TrAceTrainerBlakeAfter:
-	.string "Your team works together like it's one\n"
-	.string "MOéMON. That's rare.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x6E, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerBrandi::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_BRANDI, Sinnoh_Text_TrAceTrainerBrandiIntro, Sinnoh_Text_TrAceTrainerBrandiDefeat
@@ -117,15 +103,13 @@ Sinnoh_EventScript_TrAceTrainerBrandi::
 	end
 
 Sinnoh_Text_TrAceTrainerBrandiIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x7E, 0xFF
 
 Sinnoh_Text_TrAceTrainerBrandiDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x7F, 0xFF
 
 Sinnoh_Text_TrAceTrainerBrandiAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x00, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerBreanna::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_BREANNA, Sinnoh_Text_TrAceTrainerBreannaIntro, Sinnoh_Text_TrAceTrainerBreannaDefeat
@@ -133,15 +117,13 @@ Sinnoh_EventScript_TrAceTrainerBreanna::
 	end
 
 Sinnoh_Text_TrAceTrainerBreannaIntro:
-	.string "A battle tells you everything about a\n"
-	.string "TRAINER. Let's talk.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x10, 0xFF
 
 Sinnoh_Text_TrAceTrainerBreannaDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x11, 0xFF
 
 Sinnoh_Text_TrAceTrainerBreannaAfter:
-	.string "Your team works together like it's one\n"
-	.string "MOéMON. That's rare.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x12, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerBrenda::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_BRENDA, Sinnoh_Text_TrAceTrainerBrendaIntro, Sinnoh_Text_TrAceTrainerBrendaDefeat
@@ -149,15 +131,13 @@ Sinnoh_EventScript_TrAceTrainerBrenda::
 	end
 
 Sinnoh_Text_TrAceTrainerBrendaIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x22, 0xFF
 
 Sinnoh_Text_TrAceTrainerBrendaDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x23, 0xFF
 
 Sinnoh_Text_TrAceTrainerBrendaAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x24, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerBrenna::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_BRENNA, Sinnoh_Text_TrAceTrainerBrennaIntro, Sinnoh_Text_TrAceTrainerBrennaDefeat
@@ -165,15 +145,13 @@ Sinnoh_EventScript_TrAceTrainerBrenna::
 	end
 
 Sinnoh_Text_TrAceTrainerBrennaIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x34, 0xFF
 
 Sinnoh_Text_TrAceTrainerBrennaDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x35, 0xFF
 
 Sinnoh_Text_TrAceTrainerBrennaAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x36, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerCatherine::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_CATHERINE, Sinnoh_Text_TrAceTrainerCatherineIntro, Sinnoh_Text_TrAceTrainerCatherineDefeat
@@ -181,15 +159,13 @@ Sinnoh_EventScript_TrAceTrainerCatherine::
 	end
 
 Sinnoh_Text_TrAceTrainerCatherineIntro:
-	.string "A battle tells you everything about a\n"
-	.string "TRAINER. Let's talk.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x46, 0xFF
 
 Sinnoh_Text_TrAceTrainerCatherineDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x47, 0xFF
 
 Sinnoh_Text_TrAceTrainerCatherineAfter:
-	.string "Your team works together like it's one\n"
-	.string "MOéMON. That's rare.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x48, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerCesar::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_CESAR, Sinnoh_Text_TrAceTrainerCesarIntro, Sinnoh_Text_TrAceTrainerCesarDefeat
@@ -197,15 +173,13 @@ Sinnoh_EventScript_TrAceTrainerCesar::
 	end
 
 Sinnoh_Text_TrAceTrainerCesarIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x58, 0xFF
 
 Sinnoh_Text_TrAceTrainerCesarDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x59, 0xFF
 
 Sinnoh_Text_TrAceTrainerCesarAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x5A, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerClarice::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_CLARICE, Sinnoh_Text_TrAceTrainerClariceIntro, Sinnoh_Text_TrAceTrainerClariceDefeat
@@ -213,15 +187,13 @@ Sinnoh_EventScript_TrAceTrainerClarice::
 	end
 
 Sinnoh_Text_TrAceTrainerClariceIntro:
-	.string "A battle tells you everything about a\n"
-	.string "TRAINER. Let's talk.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x6A, 0xFF
 
 Sinnoh_Text_TrAceTrainerClariceDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x6B, 0xFF
 
 Sinnoh_Text_TrAceTrainerClariceAfter:
-	.string "Your team works together like it's one\n"
-	.string "MOéMON. That's rare.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x6C, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerDalton::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_DALTON, Sinnoh_Text_TrAceTrainerDaltonIntro, Sinnoh_Text_TrAceTrainerDaltonDefeat
@@ -229,15 +201,13 @@ Sinnoh_EventScript_TrAceTrainerDalton::
 	end
 
 Sinnoh_Text_TrAceTrainerDaltonIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x7C, 0xFF
 
 Sinnoh_Text_TrAceTrainerDaltonDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x7D, 0xFF
 
 Sinnoh_Text_TrAceTrainerDaltonAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x7E, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerDana::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_DANA, Sinnoh_Text_TrAceTrainerDanaIntro, Sinnoh_Text_TrAceTrainerDanaDefeat
@@ -245,15 +215,13 @@ Sinnoh_EventScript_TrAceTrainerDana::
 	end
 
 Sinnoh_Text_TrAceTrainerDanaIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x20, 0xFF
 
 Sinnoh_Text_TrAceTrainerDanaDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x21, 0xFF
 
 Sinnoh_Text_TrAceTrainerDanaAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x22, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerDeanna::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_DEANNA, Sinnoh_Text_TrAceTrainerDeannaIntro, Sinnoh_Text_TrAceTrainerDeannaDefeat
@@ -261,15 +229,13 @@ Sinnoh_EventScript_TrAceTrainerDeanna::
 	end
 
 Sinnoh_Text_TrAceTrainerDeannaIntro:
-	.string "A battle tells you everything about a\n"
-	.string "TRAINER. Let's talk.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x32, 0xFF
 
 Sinnoh_Text_TrAceTrainerDeannaDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x33, 0xFF
 
 Sinnoh_Text_TrAceTrainerDeannaAfter:
-	.string "Your team works together like it's one\n"
-	.string "MOéMON. That's rare.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x34, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerDennis::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_DENNIS, Sinnoh_Text_TrAceTrainerDennisIntro, Sinnoh_Text_TrAceTrainerDennisDefeat
@@ -277,15 +243,13 @@ Sinnoh_EventScript_TrAceTrainerDennis::
 	end
 
 Sinnoh_Text_TrAceTrainerDennisIntro:
-	.string "The view from here is great, but a good\n"
-	.string "battle is better!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x56, 0xFF
 
 Sinnoh_Text_TrAceTrainerDennisDefeat:
-	.string "Great view, great loss.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x57, 0xFF
 
 Sinnoh_Text_TrAceTrainerDennisAfter:
-	.string "I come up here to think. Today I'll\n"
-	.string "think about that battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x58, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerDestiny::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_DESTINY, Sinnoh_Text_TrAceTrainerDestinyIntro, Sinnoh_Text_TrAceTrainerDestinyDefeat
@@ -293,15 +257,13 @@ Sinnoh_EventScript_TrAceTrainerDestiny::
 	end
 
 Sinnoh_Text_TrAceTrainerDestinyIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x0C, 0xFF
 
 Sinnoh_Text_TrAceTrainerDestinyDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x0D, 0xFF
 
 Sinnoh_Text_TrAceTrainerDestinyAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x0E, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerErnest::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_ERNEST, Sinnoh_Text_TrAceTrainerErnestIntro, Sinnoh_Text_TrAceTrainerErnestDefeat
@@ -309,15 +271,13 @@ Sinnoh_EventScript_TrAceTrainerErnest::
 	end
 
 Sinnoh_Text_TrAceTrainerErnestIntro:
-	.string "A battle tells you everything about a\n"
-	.string "TRAINER. Let's talk.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x1E, 0xFF
 
 Sinnoh_Text_TrAceTrainerErnestDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x1F, 0xFF
 
 Sinnoh_Text_TrAceTrainerErnestAfter:
-	.string "Your team works together like it's one\n"
-	.string "MOéMON. That's rare.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x20, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerFelix::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_FELIX, Sinnoh_Text_TrAceTrainerFelixIntro, Sinnoh_Text_TrAceTrainerFelixDefeat
@@ -325,15 +285,13 @@ Sinnoh_EventScript_TrAceTrainerFelix::
 	end
 
 Sinnoh_Text_TrAceTrainerFelixIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x30, 0xFF
 
 Sinnoh_Text_TrAceTrainerFelixDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x31, 0xFF
 
 Sinnoh_Text_TrAceTrainerFelixAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x32, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerGarrett::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_GARRETT, Sinnoh_Text_TrAceTrainerGarrettIntro, Sinnoh_Text_TrAceTrainerGarrettDefeat
@@ -341,15 +299,13 @@ Sinnoh_EventScript_TrAceTrainerGarrett::
 	end
 
 Sinnoh_Text_TrAceTrainerGarrettIntro:
-	.string "The view from here is great, but a good\n"
-	.string "battle is better!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x42, 0xFF
 
 Sinnoh_Text_TrAceTrainerGarrettDefeat:
-	.string "Great view, great loss.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x43, 0xFF
 
 Sinnoh_Text_TrAceTrainerGarrettAfter:
-	.string "I come up here to think. Today I'll\n"
-	.string "think about that battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x44, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerGraham::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_GRAHAM, Sinnoh_Text_TrAceTrainerGrahamIntro, Sinnoh_Text_TrAceTrainerGrahamDefeat
@@ -357,15 +313,13 @@ Sinnoh_EventScript_TrAceTrainerGraham::
 	end
 
 Sinnoh_Text_TrAceTrainerGrahamIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x54, 0xFF
 
 Sinnoh_Text_TrAceTrainerGrahamDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x55, 0xFF
 
 Sinnoh_Text_TrAceTrainerGrahamAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x56, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerHenry::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_HENRY, Sinnoh_Text_TrAceTrainerHenryIntro, Sinnoh_Text_TrAceTrainerHenryDefeat
@@ -373,15 +327,13 @@ Sinnoh_EventScript_TrAceTrainerHenry::
 	end
 
 Sinnoh_Text_TrAceTrainerHenryIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x66, 0xFF
 
 Sinnoh_Text_TrAceTrainerHenryDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x67, 0xFF
 
 Sinnoh_Text_TrAceTrainerHenryAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x68, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerIsaiah::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_ISAIAH, Sinnoh_Text_TrAceTrainerIsaiahIntro, Sinnoh_Text_TrAceTrainerIsaiahDefeat
@@ -389,15 +341,13 @@ Sinnoh_EventScript_TrAceTrainerIsaiah::
 	end
 
 Sinnoh_Text_TrAceTrainerIsaiahIntro:
-	.string "A battle tells you everything about a\n"
-	.string "TRAINER. Let's talk.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x78, 0xFF
 
 Sinnoh_Text_TrAceTrainerIsaiahDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x79, 0xFF
 
 Sinnoh_Text_TrAceTrainerIsaiahAfter:
-	.string "Your team works together like it's one\n"
-	.string "MOéMON. That's rare.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x7A, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerJake::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_JAKE, Sinnoh_Text_TrAceTrainerJakeIntro, Sinnoh_Text_TrAceTrainerJakeDefeat
@@ -405,15 +355,13 @@ Sinnoh_EventScript_TrAceTrainerJake::
 	end
 
 Sinnoh_Text_TrAceTrainerJakeIntro:
-	.string "A battle tells you everything about a\n"
-	.string "TRAINER. Let's talk.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x0A, 0xFF
 
 Sinnoh_Text_TrAceTrainerJakeDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x0B, 0xFF
 
 Sinnoh_Text_TrAceTrainerJakeAfter:
-	.string "Your team works together like it's one\n"
-	.string "MOéMON. That's rare.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x0C, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerJamie::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_JAMIE, Sinnoh_Text_TrAceTrainerJamieIntro, Sinnoh_Text_TrAceTrainerJamieDefeat
@@ -421,15 +369,13 @@ Sinnoh_EventScript_TrAceTrainerJamie::
 	end
 
 Sinnoh_Text_TrAceTrainerJamieIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x2E, 0xFF
 
 Sinnoh_Text_TrAceTrainerJamieDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x2F, 0xFF
 
 Sinnoh_Text_TrAceTrainerJamieAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x30, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerJasmin::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_JASMIN, Sinnoh_Text_TrAceTrainerJasminIntro, Sinnoh_Text_TrAceTrainerJasminDefeat
@@ -437,15 +383,13 @@ Sinnoh_EventScript_TrAceTrainerJasmin::
 	end
 
 Sinnoh_Text_TrAceTrainerJasminIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x40, 0xFF
 
 Sinnoh_Text_TrAceTrainerJasminDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x41, 0xFF
 
 Sinnoh_Text_TrAceTrainerJasminAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x42, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerJonah::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_JONAH, Sinnoh_Text_TrAceTrainerJonahIntro, Sinnoh_Text_TrAceTrainerJonahDefeat
@@ -453,15 +397,13 @@ Sinnoh_EventScript_TrAceTrainerJonah::
 	end
 
 Sinnoh_Text_TrAceTrainerJonahIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x52, 0xFF
 
 Sinnoh_Text_TrAceTrainerJonahDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x53, 0xFF
 
 Sinnoh_Text_TrAceTrainerJonahAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x54, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerJose::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_JOSE, Sinnoh_Text_TrAceTrainerJoseIntro, Sinnoh_Text_TrAceTrainerJoseDefeat
@@ -469,15 +411,13 @@ Sinnoh_EventScript_TrAceTrainerJose::
 	end
 
 Sinnoh_Text_TrAceTrainerJoseIntro:
-	.string "The view from here is great, but a good\n"
-	.string "battle is better!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x64, 0xFF
 
 Sinnoh_Text_TrAceTrainerJoseDefeat:
-	.string "Great view, great loss.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x65, 0xFF
 
 Sinnoh_Text_TrAceTrainerJoseAfter:
-	.string "I come up here to think. Today I'll\n"
-	.string "think about that battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x66, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerKassandra::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_KASSANDRA, Sinnoh_Text_TrAceTrainerKassandraIntro, Sinnoh_Text_TrAceTrainerKassandraDefeat
@@ -485,15 +425,13 @@ Sinnoh_EventScript_TrAceTrainerKassandra::
 	end
 
 Sinnoh_Text_TrAceTrainerKassandraIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x76, 0xFF
 
 Sinnoh_Text_TrAceTrainerKassandraDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x77, 0xFF
 
 Sinnoh_Text_TrAceTrainerKassandraAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x78, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerKeenan::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_KEENAN, Sinnoh_Text_TrAceTrainerKeenanIntro, Sinnoh_Text_TrAceTrainerKeenanDefeat
@@ -501,15 +439,13 @@ Sinnoh_EventScript_TrAceTrainerKeenan::
 	end
 
 Sinnoh_Text_TrAceTrainerKeenanIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x08, 0xFF
 
 Sinnoh_Text_TrAceTrainerKeenanDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x09, 0xFF
 
 Sinnoh_Text_TrAceTrainerKeenanAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x0A, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerLaura::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_LAURA, Sinnoh_Text_TrAceTrainerLauraIntro, Sinnoh_Text_TrAceTrainerLauraDefeat
@@ -517,15 +453,13 @@ Sinnoh_EventScript_TrAceTrainerLaura::
 	end
 
 Sinnoh_Text_TrAceTrainerLauraIntro:
-	.string "The view from here is great, but a good\n"
-	.string "battle is better!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x1A, 0xFF
 
 Sinnoh_Text_TrAceTrainerLauraDefeat:
-	.string "Great view, great loss.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x1B, 0xFF
 
 Sinnoh_Text_TrAceTrainerLauraAfter:
-	.string "I come up here to think. Today I'll\n"
-	.string "think about that battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x1C, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerMaria::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_MARIA, Sinnoh_Text_TrAceTrainerMariaIntro, Sinnoh_Text_TrAceTrainerMariaDefeat
@@ -533,15 +467,13 @@ Sinnoh_EventScript_TrAceTrainerMaria::
 	end
 
 Sinnoh_Text_TrAceTrainerMariaIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x2C, 0xFF
 
 Sinnoh_Text_TrAceTrainerMariaDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x2D, 0xFF
 
 Sinnoh_Text_TrAceTrainerMariaAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x2E, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerMariah::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_MARIAH, Sinnoh_Text_TrAceTrainerMariahIntro, Sinnoh_Text_TrAceTrainerMariahDefeat
@@ -549,15 +481,13 @@ Sinnoh_EventScript_TrAceTrainerMariah::
 	end
 
 Sinnoh_Text_TrAceTrainerMariahIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x3E, 0xFF
 
 Sinnoh_Text_TrAceTrainerMariahDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x3F, 0xFF
 
 Sinnoh_Text_TrAceTrainerMariahAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x40, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerMaya::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_MAYA, Sinnoh_Text_TrAceTrainerMayaIntro, Sinnoh_Text_TrAceTrainerMayaDefeat
@@ -565,15 +495,13 @@ Sinnoh_EventScript_TrAceTrainerMaya::
 	end
 
 Sinnoh_Text_TrAceTrainerMayaIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x50, 0xFF
 
 Sinnoh_Text_TrAceTrainerMayaDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x51, 0xFF
 
 Sinnoh_Text_TrAceTrainerMayaAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x52, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerMeagan::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_MEAGAN, Sinnoh_Text_TrAceTrainerMeaganIntro, Sinnoh_Text_TrAceTrainerMeaganDefeat
@@ -581,15 +509,13 @@ Sinnoh_EventScript_TrAceTrainerMeagan::
 	end
 
 Sinnoh_Text_TrAceTrainerMeaganIntro:
-	.string "The view from here is great, but a good\n"
-	.string "battle is better!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x06, 0xFF
 
 Sinnoh_Text_TrAceTrainerMeaganDefeat:
-	.string "Great view, great loss.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x07, 0xFF
 
 Sinnoh_Text_TrAceTrainerMeaganAfter:
-	.string "I come up here to think. Today I'll\n"
-	.string "think about that battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x08, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerMicah::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_MICAH, Sinnoh_Text_TrAceTrainerMicahIntro, Sinnoh_Text_TrAceTrainerMicahDefeat
@@ -597,15 +523,13 @@ Sinnoh_EventScript_TrAceTrainerMicah::
 	end
 
 Sinnoh_Text_TrAceTrainerMicahIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x18, 0xFF
 
 Sinnoh_Text_TrAceTrainerMicahDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x19, 0xFF
 
 Sinnoh_Text_TrAceTrainerMicahAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x1A, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerMikayla::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_MIKAYLA, Sinnoh_Text_TrAceTrainerMikaylaIntro, Sinnoh_Text_TrAceTrainerMikaylaDefeat
@@ -613,15 +537,13 @@ Sinnoh_EventScript_TrAceTrainerMikayla::
 	end
 
 Sinnoh_Text_TrAceTrainerMikaylaIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x2A, 0xFF
 
 Sinnoh_Text_TrAceTrainerMikaylaDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x2B, 0xFF
 
 Sinnoh_Text_TrAceTrainerMikaylaAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x2C, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerMoira::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_MOIRA, Sinnoh_Text_TrAceTrainerMoiraIntro, Sinnoh_Text_TrAceTrainerMoiraDefeat
@@ -629,15 +551,13 @@ Sinnoh_EventScript_TrAceTrainerMoira::
 	end
 
 Sinnoh_Text_TrAceTrainerMoiraIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x3C, 0xFF
 
 Sinnoh_Text_TrAceTrainerMoiraDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x3D, 0xFF
 
 Sinnoh_Text_TrAceTrainerMoiraAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x3E, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerMonique::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_MONIQUE, Sinnoh_Text_TrAceTrainerMoniqueIntro, Sinnoh_Text_TrAceTrainerMoniqueDefeat
@@ -645,15 +565,13 @@ Sinnoh_EventScript_TrAceTrainerMonique::
 	end
 
 Sinnoh_Text_TrAceTrainerMoniqueIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x60, 0xFF
 
 Sinnoh_Text_TrAceTrainerMoniqueDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x61, 0xFF
 
 Sinnoh_Text_TrAceTrainerMoniqueAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x62, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerNatasha::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_NATASHA, Sinnoh_Text_TrAceTrainerNatashaIntro, Sinnoh_Text_TrAceTrainerNatashaDefeat
@@ -661,15 +579,13 @@ Sinnoh_EventScript_TrAceTrainerNatasha::
 	end
 
 Sinnoh_Text_TrAceTrainerNatashaIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x72, 0xFF
 
 Sinnoh_Text_TrAceTrainerNatashaDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x73, 0xFF
 
 Sinnoh_Text_TrAceTrainerNatashaAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x74, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerOlivia::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_OLIVIA, Sinnoh_Text_TrAceTrainerOliviaIntro, Sinnoh_Text_TrAceTrainerOliviaDefeat
@@ -677,15 +593,13 @@ Sinnoh_EventScript_TrAceTrainerOlivia::
 	end
 
 Sinnoh_Text_TrAceTrainerOliviaIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x04, 0xFF
 
 Sinnoh_Text_TrAceTrainerOliviaDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x05, 0xFF
 
 Sinnoh_Text_TrAceTrainerOliviaAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x06, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerOmar::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_OMAR, Sinnoh_Text_TrAceTrainerOmarIntro, Sinnoh_Text_TrAceTrainerOmarDefeat
@@ -693,15 +607,13 @@ Sinnoh_EventScript_TrAceTrainerOmar::
 	end
 
 Sinnoh_Text_TrAceTrainerOmarIntro:
-	.string "The view from here is great, but a good\n"
-	.string "battle is better!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x28, 0xFF
 
 Sinnoh_Text_TrAceTrainerOmarDefeat:
-	.string "Great view, great loss.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x29, 0xFF
 
 Sinnoh_Text_TrAceTrainerOmarAfter:
-	.string "I come up here to think. Today I'll\n"
-	.string "think about that battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x2A, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerQuinn::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_QUINN, Sinnoh_Text_TrAceTrainerQuinnIntro, Sinnoh_Text_TrAceTrainerQuinnDefeat
@@ -709,15 +621,13 @@ Sinnoh_EventScript_TrAceTrainerQuinn::
 	end
 
 Sinnoh_Text_TrAceTrainerQuinnIntro:
-	.string "A battle tells you everything about a\n"
-	.string "TRAINER. Let's talk.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x3A, 0xFF
 
 Sinnoh_Text_TrAceTrainerQuinnDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x3B, 0xFF
 
 Sinnoh_Text_TrAceTrainerQuinnAfter:
-	.string "Your team works together like it's one\n"
-	.string "MOéMON. That's rare.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x3C, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerRodolfo::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_RODOLFO, Sinnoh_Text_TrAceTrainerRodolfoIntro, Sinnoh_Text_TrAceTrainerRodolfoDefeat
@@ -725,15 +635,13 @@ Sinnoh_EventScript_TrAceTrainerRodolfo::
 	end
 
 Sinnoh_Text_TrAceTrainerRodolfoIntro:
-	.string "A battle tells you everything about a\n"
-	.string "TRAINER. Let's talk.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x4C, 0xFF
 
 Sinnoh_Text_TrAceTrainerRodolfoDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x4D, 0xFF
 
 Sinnoh_Text_TrAceTrainerRodolfoAfter:
-	.string "Your team works together like it's one\n"
-	.string "MOéMON. That's rare.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x4E, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerRuben::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_RUBEN, Sinnoh_Text_TrAceTrainerRubenIntro, Sinnoh_Text_TrAceTrainerRubenDefeat
@@ -741,15 +649,13 @@ Sinnoh_EventScript_TrAceTrainerRuben::
 	end
 
 Sinnoh_Text_TrAceTrainerRubenIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x70, 0xFF
 
 Sinnoh_Text_TrAceTrainerRubenDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x71, 0xFF
 
 Sinnoh_Text_TrAceTrainerRubenAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x72, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerSandra::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_SANDRA, Sinnoh_Text_TrAceTrainerSandraIntro, Sinnoh_Text_TrAceTrainerSandraDefeat
@@ -757,15 +663,13 @@ Sinnoh_EventScript_TrAceTrainerSandra::
 	end
 
 Sinnoh_Text_TrAceTrainerSandraIntro:
-	.string "The view from here is great, but a good\n"
-	.string "battle is better!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x02, 0xFF
 
 Sinnoh_Text_TrAceTrainerSandraDefeat:
-	.string "Great view, great loss.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x03, 0xFF
 
 Sinnoh_Text_TrAceTrainerSandraAfter:
-	.string "I come up here to think. Today I'll\n"
-	.string "think about that battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x04, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerSaul::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_SAUL, Sinnoh_Text_TrAceTrainerSaulIntro, Sinnoh_Text_TrAceTrainerSaulDefeat
@@ -773,15 +677,13 @@ Sinnoh_EventScript_TrAceTrainerSaul::
 	end
 
 Sinnoh_Text_TrAceTrainerSaulIntro:
-	.string "A battle tells you everything about a\n"
-	.string "TRAINER. Let's talk.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x14, 0xFF
 
 Sinnoh_Text_TrAceTrainerSaulDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x15, 0xFF
 
 Sinnoh_Text_TrAceTrainerSaulAfter:
-	.string "Your team works together like it's one\n"
-	.string "MOéMON. That's rare.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x16, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerSavannah::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_SAVANNAH, Sinnoh_Text_TrAceTrainerSavannahIntro, Sinnoh_Text_TrAceTrainerSavannahDefeat
@@ -789,15 +691,13 @@ Sinnoh_EventScript_TrAceTrainerSavannah::
 	end
 
 Sinnoh_Text_TrAceTrainerSavannahIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x38, 0xFF
 
 Sinnoh_Text_TrAceTrainerSavannahDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x39, 0xFF
 
 Sinnoh_Text_TrAceTrainerSavannahAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x3A, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerSergio::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_SERGIO, Sinnoh_Text_TrAceTrainerSergioIntro, Sinnoh_Text_TrAceTrainerSergioDefeat
@@ -805,15 +705,13 @@ Sinnoh_EventScript_TrAceTrainerSergio::
 	end
 
 Sinnoh_Text_TrAceTrainerSergioIntro:
-	.string "A battle tells you everything about a\n"
-	.string "TRAINER. Let's talk.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x4A, 0xFF
 
 Sinnoh_Text_TrAceTrainerSergioDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x4B, 0xFF
 
 Sinnoh_Text_TrAceTrainerSergioAfter:
-	.string "Your team works together like it's one\n"
-	.string "MOéMON. That's rare.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x4C, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerShannon::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_SHANNON, Sinnoh_Text_TrAceTrainerShannonIntro, Sinnoh_Text_TrAceTrainerShannonDefeat
@@ -821,15 +719,13 @@ Sinnoh_EventScript_TrAceTrainerShannon::
 	end
 
 Sinnoh_Text_TrAceTrainerShannonIntro:
-	.string "The view from here is great, but a good\n"
-	.string "battle is better!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x5C, 0xFF
 
 Sinnoh_Text_TrAceTrainerShannonDefeat:
-	.string "Great view, great loss.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x5D, 0xFF
 
 Sinnoh_Text_TrAceTrainerShannonAfter:
-	.string "I come up here to think. Today I'll\n"
-	.string "think about that battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x5E, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerSkylar::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_SKYLAR, Sinnoh_Text_TrAceTrainerSkylarIntro, Sinnoh_Text_TrAceTrainerSkylarDefeat
@@ -837,15 +733,13 @@ Sinnoh_EventScript_TrAceTrainerSkylar::
 	end
 
 Sinnoh_Text_TrAceTrainerSkylarIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x09, 0x00, 0xFF
 
 Sinnoh_Text_TrAceTrainerSkylarDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x09, 0x01, 0xFF
 
 Sinnoh_Text_TrAceTrainerSkylarAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x09, 0x02, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerStefan::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_STEFAN, Sinnoh_Text_TrAceTrainerStefanIntro, Sinnoh_Text_TrAceTrainerStefanDefeat
@@ -853,15 +747,13 @@ Sinnoh_EventScript_TrAceTrainerStefan::
 	end
 
 Sinnoh_Text_TrAceTrainerStefanIntro:
-	.string "The view from here is great, but a good\n"
-	.string "battle is better!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x09, 0x12, 0xFF
 
 Sinnoh_Text_TrAceTrainerStefanDefeat:
-	.string "Great view, great loss.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x09, 0x13, 0xFF
 
 Sinnoh_Text_TrAceTrainerStefanAfter:
-	.string "I come up here to think. Today I'll\n"
-	.string "think about that battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x09, 0x14, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerSydney::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_SYDNEY, Sinnoh_Text_TrAceTrainerSydneyIntro, Sinnoh_Text_TrAceTrainerSydneyDefeat
@@ -869,15 +761,13 @@ Sinnoh_EventScript_TrAceTrainerSydney::
 	end
 
 Sinnoh_Text_TrAceTrainerSydneyIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x09, 0x24, 0xFF
 
 Sinnoh_Text_TrAceTrainerSydneyDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x09, 0x25, 0xFF
 
 Sinnoh_Text_TrAceTrainerSydneyAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x09, 0x26, 0xFF
 
 Sinnoh_EventScript_TrAceTrainerZachery::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_ZACHERY, Sinnoh_Text_TrAceTrainerZacheryIntro, Sinnoh_Text_TrAceTrainerZacheryDefeat
@@ -885,15 +775,13 @@ Sinnoh_EventScript_TrAceTrainerZachery::
 	end
 
 Sinnoh_Text_TrAceTrainerZacheryIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x09, 0x36, 0xFF
 
 Sinnoh_Text_TrAceTrainerZacheryDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x09, 0x37, 0xFF
 
 Sinnoh_Text_TrAceTrainerZacheryAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x09, 0x38, 0xFF
 
 Sinnoh_EventScript_TrAromaLadyElizabeth::
 	trainerbattle_single TRAINER_SINNOH_AROMA_LADY_ELIZABETH, Sinnoh_Text_TrAromaLadyElizabethIntro, Sinnoh_Text_TrAromaLadyElizabethDefeat
@@ -901,15 +789,13 @@ Sinnoh_EventScript_TrAromaLadyElizabeth::
 	end
 
 Sinnoh_Text_TrAromaLadyElizabethIntro:
-	.string "A battle with a traveler! I'll tell\n"
-	.string "everyone about this.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x09, 0x7E, 0xFF
 
 Sinnoh_Text_TrAromaLadyElizabethDefeat:
-	.string "I'll leave out the part where I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x09, 0x7F, 0xFF
 
 Sinnoh_Text_TrAromaLadyElizabethAfter:
-	.string "Was that your best? It was lovely.\n"
-	.string "Truly.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0A, 0x00, 0xFF
 
 Sinnoh_EventScript_TrAromaLadyHannah::
 	trainerbattle_single TRAINER_SINNOH_AROMA_LADY_HANNAH, Sinnoh_Text_TrAromaLadyHannahIntro, Sinnoh_Text_TrAromaLadyHannahDefeat
@@ -917,15 +803,13 @@ Sinnoh_EventScript_TrAromaLadyHannah::
 	end
 
 Sinnoh_Text_TrAromaLadyHannahIntro:
-	.string "A battle with a traveler! I'll tell\n"
-	.string "everyone about this.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0A, 0x46, 0xFF
 
 Sinnoh_Text_TrAromaLadyHannahDefeat:
-	.string "I'll leave out the part where I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0A, 0x47, 0xFF
 
 Sinnoh_Text_TrAromaLadyHannahAfter:
-	.string "Was that your best? It was lovely.\n"
-	.string "Truly.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0A, 0x48, 0xFF
 
 Sinnoh_EventScript_TrAromaLadyTaylor::
 	trainerbattle_single TRAINER_SINNOH_AROMA_LADY_TAYLOR, Sinnoh_Text_TrAromaLadyTaylorIntro, Sinnoh_Text_TrAromaLadyTaylorDefeat
@@ -933,15 +817,13 @@ Sinnoh_EventScript_TrAromaLadyTaylor::
 	end
 
 Sinnoh_Text_TrAromaLadyTaylorIntro:
-	.string "A battle with a traveler! I'll tell\n"
-	.string "everyone about this.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0A, 0x6A, 0xFF
 
 Sinnoh_Text_TrAromaLadyTaylorDefeat:
-	.string "I'll leave out the part where I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0A, 0x6B, 0xFF
 
 Sinnoh_Text_TrAromaLadyTaylorAfter:
-	.string "Was that your best? It was lovely.\n"
-	.string "Truly.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0A, 0x6C, 0xFF
 
 Sinnoh_EventScript_TrArtistWilliam::
 	trainerbattle_single TRAINER_SINNOH_ARTIST_WILLIAM, Sinnoh_Text_TrArtistWilliamIntro, Sinnoh_Text_TrArtistWilliamDefeat
@@ -949,15 +831,13 @@ Sinnoh_EventScript_TrArtistWilliam::
 	end
 
 Sinnoh_Text_TrArtistWilliamIntro:
-	.string "A battle with a traveler! I'll tell\n"
-	.string "everyone about this.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0B, 0x0E, 0xFF
 
 Sinnoh_Text_TrArtistWilliamDefeat:
-	.string "I'll leave out the part where I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0B, 0x0F, 0xFF
 
 Sinnoh_Text_TrArtistWilliamAfter:
-	.string "Was that your best? It was lovely.\n"
-	.string "Truly.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0B, 0x10, 0xFF
 
 Sinnoh_EventScript_TrBattleGirlHelen::
 	trainerbattle_single TRAINER_SINNOH_BATTLE_GIRL_HELEN, Sinnoh_Text_TrBattleGirlHelenIntro, Sinnoh_Text_TrBattleGirlHelenDefeat
@@ -965,15 +845,13 @@ Sinnoh_EventScript_TrBattleGirlHelen::
 	end
 
 Sinnoh_Text_TrBattleGirlHelenIntro:
-	.string "I can hear your MOéMON's fighting\n"
-	.string "spirit. Mine is louder!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0B, 0x56, 0xFF
 
 Sinnoh_Text_TrBattleGirlHelenDefeat:
-	.string "Your spirit was louder!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0B, 0x57, 0xFF
 
 Sinnoh_Text_TrBattleGirlHelenAfter:
-	.string "Keep that spirit. It's the best thing a\n"
-	.string "TRAINER can have.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0B, 0x58, 0xFF
 
 Sinnoh_EventScript_TrBattleGirlKelsey::
 	trainerbattle_single TRAINER_SINNOH_BATTLE_GIRL_KELSEY, Sinnoh_Text_TrBattleGirlKelseyIntro, Sinnoh_Text_TrBattleGirlKelseyDefeat
@@ -981,15 +859,13 @@ Sinnoh_EventScript_TrBattleGirlKelsey::
 	end
 
 Sinnoh_Text_TrBattleGirlKelseyIntro:
-	.string "Bow, then battle! That's the way of\n"
-	.string "the dojo!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0C, 0x1E, 0xFF
 
 Sinnoh_Text_TrBattleGirlKelseyDefeat:
-	.string "I bow to your strength.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0C, 0x1F, 0xFF
 
 Sinnoh_Text_TrBattleGirlKelseyAfter:
-	.string "Losing is part of training. Thank you\n"
-	.string "for the lesson.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0C, 0x20, 0xFF
 
 Sinnoh_EventScript_TrBattleGirlTyler::
 	trainerbattle_single TRAINER_SINNOH_BATTLE_GIRL_TYLER, Sinnoh_Text_TrBattleGirlTylerIntro, Sinnoh_Text_TrBattleGirlTylerDefeat
@@ -997,15 +873,13 @@ Sinnoh_EventScript_TrBattleGirlTyler::
 	end
 
 Sinnoh_Text_TrBattleGirlTylerIntro:
-	.string "I can hear your MOéMON's fighting\n"
-	.string "spirit. Mine is louder!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0C, 0x30, 0xFF
 
 Sinnoh_Text_TrBattleGirlTylerDefeat:
-	.string "Your spirit was louder!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0C, 0x31, 0xFF
 
 Sinnoh_Text_TrBattleGirlTylerAfter:
-	.string "Keep that spirit. It's the best thing a\n"
-	.string "TRAINER can have.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0C, 0x32, 0xFF
 
 Sinnoh_EventScript_TrBeautyCyndy::
 	trainerbattle_single TRAINER_SINNOH_BEAUTY_CYNDY, Sinnoh_Text_TrBeautyCyndyIntro, Sinnoh_Text_TrBeautyCyndyDefeat
@@ -1013,15 +887,13 @@ Sinnoh_EventScript_TrBeautyCyndy::
 	end
 
 Sinnoh_Text_TrBeautyCyndyIntro:
-	.string "Elegance and strength! My team has\n"
-	.string "both. Let me show you!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0C, 0x42, 0xFF
 
 Sinnoh_Text_TrBeautyCyndyDefeat:
-	.string "Strength was missing today, it seems.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0C, 0x43, 0xFF
 
 Sinnoh_Text_TrBeautyCyndyAfter:
-	.string "Elegance never loses, even when you\n"
-	.string "lose. Remember that.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0C, 0x44, 0xFF
 
 Sinnoh_EventScript_TrBeautyDevon::
 	trainerbattle_single TRAINER_SINNOH_BEAUTY_DEVON, Sinnoh_Text_TrBeautyDevonIntro, Sinnoh_Text_TrBeautyDevonDefeat
@@ -1029,15 +901,13 @@ Sinnoh_EventScript_TrBeautyDevon::
 	end
 
 Sinnoh_Text_TrBeautyDevonIntro:
-	.string "Oh my, a challenger! How delightful.\n"
-	.string "Shall we?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0C, 0x78, 0xFF
 
 Sinnoh_Text_TrBeautyDevonDefeat:
-	.string "How very rude of my team to lose.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0C, 0x79, 0xFF
 
 Sinnoh_Text_TrBeautyDevonAfter:
-	.string "Do come by for tea some time. My\n"
-	.string "MOéMON adore guests.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0C, 0x7A, 0xFF
 
 Sinnoh_EventScript_TrBeautyNicola::
 	trainerbattle_single TRAINER_SINNOH_BEAUTY_NICOLA, Sinnoh_Text_TrBeautyNicolaIntro, Sinnoh_Text_TrBeautyNicolaDefeat
@@ -1045,15 +915,13 @@ Sinnoh_EventScript_TrBeautyNicola::
 	end
 
 Sinnoh_Text_TrBeautyNicolaIntro:
-	.string "Elegance and strength! My team has\n"
-	.string "both. Let me show you!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0D, 0x40, 0xFF
 
 Sinnoh_Text_TrBeautyNicolaDefeat:
-	.string "Strength was missing today, it seems.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0D, 0x41, 0xFF
 
 Sinnoh_Text_TrBeautyNicolaAfter:
-	.string "Elegance never loses, even when you\n"
-	.string "lose. Remember that.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0D, 0x42, 0xFF
 
 Sinnoh_EventScript_TrBelleAndPaAvaAndMatt::
 	trainerbattle_double TRAINER_SINNOH_BELLE_AND_PA_AVA_AND_MATT, Sinnoh_Text_TrBelleAndPaAvaAndMattIntro, Sinnoh_Text_TrBelleAndPaAvaAndMattDefeat, Sinnoh_Text_TrBelleAndPaAvaAndMattNotEnough
@@ -1061,19 +929,16 @@ Sinnoh_EventScript_TrBelleAndPaAvaAndMatt::
 	end
 
 Sinnoh_Text_TrBelleAndPaAvaAndMattIntro:
-	.string "Two of us, two MOéMON! Can you handle\n"
-	.string "a double battle?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0D, 0x56, 0xFF
 
 Sinnoh_Text_TrBelleAndPaAvaAndMattDefeat:
-	.string "Two of us, and we still lost!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0D, 0x57, 0xFF
 
 Sinnoh_Text_TrBelleAndPaAvaAndMattAfter:
-	.string "We'll practice our teamwork. You\n"
-	.string "clearly have yours down.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0D, 0x58, 0xFF
 
 Sinnoh_Text_TrBelleAndPaAvaAndMattNotEnough:
-	.string "There are two of us! Come back when\n"
-	.string "you have two MOéMON that can battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0D, 0x59, 0xFF
 
 Sinnoh_EventScript_TrBelleAndPaBethAndBob::
 	trainerbattle_double TRAINER_SINNOH_BELLE_AND_PA_BETH_AND_BOB, Sinnoh_Text_TrBelleAndPaBethAndBobIntro, Sinnoh_Text_TrBelleAndPaBethAndBobDefeat, Sinnoh_Text_TrBelleAndPaBethAndBobNotEnough
@@ -1081,19 +946,16 @@ Sinnoh_EventScript_TrBelleAndPaBethAndBob::
 	end
 
 Sinnoh_Text_TrBelleAndPaBethAndBobIntro:
-	.string "Two of us, two MOéMON! Can you handle\n"
-	.string "a double battle?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0D, 0x68, 0xFF
 
 Sinnoh_Text_TrBelleAndPaBethAndBobDefeat:
-	.string "Two of us, and we still lost!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0D, 0x69, 0xFF
 
 Sinnoh_Text_TrBelleAndPaBethAndBobAfter:
-	.string "We'll practice our teamwork. You\n"
-	.string "clearly have yours down.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0D, 0x6A, 0xFF
 
 Sinnoh_Text_TrBelleAndPaBethAndBobNotEnough:
-	.string "There are two of us! Come back when\n"
-	.string "you have two MOéMON that can battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0D, 0x6B, 0xFF
 
 Sinnoh_EventScript_TrBirdKeeperAlexandra::
 	trainerbattle_single TRAINER_SINNOH_BIRD_KEEPER_ALEXANDRA, Sinnoh_Text_TrBirdKeeperAlexandraIntro, Sinnoh_Text_TrBirdKeeperAlexandraDefeat
@@ -1101,15 +963,13 @@ Sinnoh_EventScript_TrBirdKeeperAlexandra::
 	end
 
 Sinnoh_Text_TrBirdKeeperAlexandraIntro:
-	.string "Listen to my MOéMON's cry! Isn't it\n"
-	.string "music? Let's battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0D, 0x76, 0xFF
 
 Sinnoh_Text_TrBirdKeeperAlexandraDefeat:
-	.string "That was a sad song.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0D, 0x77, 0xFF
 
 Sinnoh_Text_TrBirdKeeperAlexandraAfter:
-	.string "I'll write a song about this. It'll be a\n"
-	.string "slow one.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0D, 0x78, 0xFF
 
 Sinnoh_EventScript_TrBirdKeeperAudrey::
 	trainerbattle_single TRAINER_SINNOH_BIRD_KEEPER_AUDREY, Sinnoh_Text_TrBirdKeeperAudreyIntro, Sinnoh_Text_TrBirdKeeperAudreyDefeat
@@ -1117,15 +977,13 @@ Sinnoh_EventScript_TrBirdKeeperAudrey::
 	end
 
 Sinnoh_Text_TrBirdKeeperAudreyIntro:
-	.string "Listen to my MOéMON's cry! Isn't it\n"
-	.string "music? Let's battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0E, 0x08, 0xFF
 
 Sinnoh_Text_TrBirdKeeperAudreyDefeat:
-	.string "That was a sad song.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0E, 0x09, 0xFF
 
 Sinnoh_Text_TrBirdKeeperAudreyAfter:
-	.string "I'll write a song about this. It'll be a\n"
-	.string "slow one.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0E, 0x0A, 0xFF
 
 Sinnoh_EventScript_TrBirdKeeperAutumn::
 	trainerbattle_single TRAINER_SINNOH_BIRD_KEEPER_AUTUMN, Sinnoh_Text_TrBirdKeeperAutumnIntro, Sinnoh_Text_TrBirdKeeperAutumnDefeat
@@ -1133,15 +991,13 @@ Sinnoh_EventScript_TrBirdKeeperAutumn::
 	end
 
 Sinnoh_Text_TrBirdKeeperAutumnIntro:
-	.string "Listen to my MOéMON's cry! Isn't it\n"
-	.string "music? Let's battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0E, 0x2C, 0xFF
 
 Sinnoh_Text_TrBirdKeeperAutumnDefeat:
-	.string "That was a sad song.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0E, 0x2D, 0xFF
 
 Sinnoh_Text_TrBirdKeeperAutumnAfter:
-	.string "I'll write a song about this. It'll be a\n"
-	.string "slow one.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0E, 0x2E, 0xFF
 
 Sinnoh_EventScript_TrBirdKeeperBrianna::
 	trainerbattle_single TRAINER_SINNOH_BIRD_KEEPER_BRIANNA, Sinnoh_Text_TrBirdKeeperBriannaIntro, Sinnoh_Text_TrBirdKeeperBriannaDefeat
@@ -1149,15 +1005,13 @@ Sinnoh_EventScript_TrBirdKeeperBrianna::
 	end
 
 Sinnoh_Text_TrBirdKeeperBriannaIntro:
-	.string "You there! You look like you'd\n"
-	.string "appreciate my team!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0E, 0x3E, 0xFF
 
 Sinnoh_Text_TrBirdKeeperBriannaDefeat:
-	.string "My poor darlings!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0E, 0x3F, 0xFF
 
 Sinnoh_Text_TrBirdKeeperBriannaAfter:
-	.string "Every MOéMON is special. Even when\n"
-	.string "they lose.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0E, 0x40, 0xFF
 
 Sinnoh_EventScript_TrBirdKeeperGeneva::
 	trainerbattle_single TRAINER_SINNOH_BIRD_KEEPER_GENEVA, Sinnoh_Text_TrBirdKeeperGenevaIntro, Sinnoh_Text_TrBirdKeeperGenevaDefeat
@@ -1165,15 +1019,13 @@ Sinnoh_EventScript_TrBirdKeeperGeneva::
 	end
 
 Sinnoh_Text_TrBirdKeeperGenevaIntro:
-	.string "I've studied MOéMON for years. Time\n"
-	.string "for a field test!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0E, 0x74, 0xFF
 
 Sinnoh_Text_TrBirdKeeperGenevaDefeat:
-	.string "Hmm. The data says I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0E, 0x75, 0xFF
 
 Sinnoh_Text_TrBirdKeeperGenevaAfter:
-	.string "I'll write that battle down in my\n"
-	.string "notebook. Under “lessons.”$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0E, 0x76, 0xFF
 
 Sinnoh_EventScript_TrBirdKeeperHana::
 	trainerbattle_single TRAINER_SINNOH_BIRD_KEEPER_HANA, Sinnoh_Text_TrBirdKeeperHanaIntro, Sinnoh_Text_TrBirdKeeperHanaDefeat
@@ -1181,15 +1033,13 @@ Sinnoh_EventScript_TrBirdKeeperHana::
 	end
 
 Sinnoh_Text_TrBirdKeeperHanaIntro:
-	.string "I've studied MOéMON for years. Time\n"
-	.string "for a field test!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x06, 0xFF
 
 Sinnoh_Text_TrBirdKeeperHanaDefeat:
-	.string "Hmm. The data says I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x07, 0xFF
 
 Sinnoh_Text_TrBirdKeeperHanaAfter:
-	.string "I'll write that battle down in my\n"
-	.string "notebook. Under “lessons.”$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x08, 0xFF
 
 Sinnoh_EventScript_TrBirdKeeperKatherine::
 	trainerbattle_single TRAINER_SINNOH_BIRD_KEEPER_KATHERINE, Sinnoh_Text_TrBirdKeeperKatherineIntro, Sinnoh_Text_TrBirdKeeperKatherineDefeat
@@ -1197,15 +1047,13 @@ Sinnoh_EventScript_TrBirdKeeperKatherine::
 	end
 
 Sinnoh_Text_TrBirdKeeperKatherineIntro:
-	.string "You there! You look like you'd\n"
-	.string "appreciate my team!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x18, 0xFF
 
 Sinnoh_Text_TrBirdKeeperKatherineDefeat:
-	.string "My poor darlings!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x19, 0xFF
 
 Sinnoh_Text_TrBirdKeeperKatherineAfter:
-	.string "Every MOéMON is special. Even when\n"
-	.string "they lose.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x1A, 0xFF
 
 Sinnoh_EventScript_TrBirdKeeperKrystal::
 	trainerbattle_single TRAINER_SINNOH_BIRD_KEEPER_KRYSTAL, Sinnoh_Text_TrBirdKeeperKrystalIntro, Sinnoh_Text_TrBirdKeeperKrystalDefeat
@@ -1213,15 +1061,13 @@ Sinnoh_EventScript_TrBirdKeeperKrystal::
 	end
 
 Sinnoh_Text_TrBirdKeeperKrystalIntro:
-	.string "I've studied MOéMON for years. Time\n"
-	.string "for a field test!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x2A, 0xFF
 
 Sinnoh_Text_TrBirdKeeperKrystalDefeat:
-	.string "Hmm. The data says I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x2B, 0xFF
 
 Sinnoh_Text_TrBirdKeeperKrystalAfter:
-	.string "I'll write that battle down in my\n"
-	.string "notebook. Under “lessons.”$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x2C, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltAdam::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_ADAM, Sinnoh_Text_TrBlackBeltAdamIntro, Sinnoh_Text_TrBlackBeltAdamDefeat
@@ -1229,15 +1075,13 @@ Sinnoh_EventScript_TrBlackBeltAdam::
 	end
 
 Sinnoh_Text_TrBlackBeltAdamIntro:
-	.string "Bow, then battle! That's the way of\n"
-	.string "the dojo!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x3C, 0xFF
 
 Sinnoh_Text_TrBlackBeltAdamDefeat:
-	.string "I bow to your strength.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x3D, 0xFF
 
 Sinnoh_Text_TrBlackBeltAdamAfter:
-	.string "Losing is part of training. Thank you\n"
-	.string "for the lesson.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x3E, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltCarl::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_CARL, Sinnoh_Text_TrBlackBeltCarlIntro, Sinnoh_Text_TrBlackBeltCarlDefeat
@@ -1245,15 +1089,13 @@ Sinnoh_EventScript_TrBlackBeltCarl::
 	end
 
 Sinnoh_Text_TrBlackBeltCarlIntro:
-	.string "Bow, then battle! That's the way of\n"
-	.string "the dojo!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x4E, 0xFF
 
 Sinnoh_Text_TrBlackBeltCarlDefeat:
-	.string "I bow to your strength.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x4F, 0xFF
 
 Sinnoh_Text_TrBlackBeltCarlAfter:
-	.string "Losing is part of training. Thank you\n"
-	.string "for the lesson.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x50, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltColby::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_COLBY, Sinnoh_Text_TrBlackBeltColbyIntro, Sinnoh_Text_TrBlackBeltColbyDefeat
@@ -1261,15 +1103,13 @@ Sinnoh_EventScript_TrBlackBeltColby::
 	end
 
 Sinnoh_Text_TrBlackBeltColbyIntro:
-	.string "I can hear your MOéMON's fighting\n"
-	.string "spirit. Mine is louder!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x60, 0xFF
 
 Sinnoh_Text_TrBlackBeltColbyDefeat:
-	.string "Your spirit was louder!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x61, 0xFF
 
 Sinnoh_Text_TrBlackBeltColbyAfter:
-	.string "Keep that spirit. It's the best thing a\n"
-	.string "TRAINER can have.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x62, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltDarren::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_DARREN, Sinnoh_Text_TrBlackBeltDarrenIntro, Sinnoh_Text_TrBlackBeltDarrenDefeat
@@ -1277,15 +1117,13 @@ Sinnoh_EventScript_TrBlackBeltDarren::
 	end
 
 Sinnoh_Text_TrBlackBeltDarrenIntro:
-	.string "Hyaah! My training has been for this\n"
-	.string "moment!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x72, 0xFF
 
 Sinnoh_Text_TrBlackBeltDarrenDefeat:
-	.string "My training wasn't enough!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x73, 0xFF
 
 Sinnoh_Text_TrBlackBeltDarrenAfter:
-	.string "One thousand more punches before\n"
-	.string "dinner. Then I'll be ready.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x74, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltDavid::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_DAVID, Sinnoh_Text_TrBlackBeltDavidIntro, Sinnoh_Text_TrBlackBeltDavidDefeat
@@ -1293,15 +1131,13 @@ Sinnoh_EventScript_TrBlackBeltDavid::
 	end
 
 Sinnoh_Text_TrBlackBeltDavidIntro:
-	.string "Hyaah! My training has been for this\n"
-	.string "moment!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x04, 0xFF
 
 Sinnoh_Text_TrBlackBeltDavidDefeat:
-	.string "My training wasn't enough!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x05, 0xFF
 
 Sinnoh_Text_TrBlackBeltDavidAfter:
-	.string "One thousand more punches before\n"
-	.string "dinner. Then I'll be ready.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x06, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltDavon::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_DAVON, Sinnoh_Text_TrBlackBeltDavonIntro, Sinnoh_Text_TrBlackBeltDavonDefeat
@@ -1309,15 +1145,13 @@ Sinnoh_EventScript_TrBlackBeltDavon::
 	end
 
 Sinnoh_Text_TrBlackBeltDavonIntro:
-	.string "Bow, then battle! That's the way of\n"
-	.string "the dojo!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x16, 0xFF
 
 Sinnoh_Text_TrBlackBeltDavonDefeat:
-	.string "I bow to your strength.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x17, 0xFF
 
 Sinnoh_Text_TrBlackBeltDavonAfter:
-	.string "Losing is part of training. Thank you\n"
-	.string "for the lesson.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x18, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltDerek::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_DEREK, Sinnoh_Text_TrBlackBeltDerekIntro, Sinnoh_Text_TrBlackBeltDerekDefeat
@@ -1325,15 +1159,13 @@ Sinnoh_EventScript_TrBlackBeltDerek::
 	end
 
 Sinnoh_Text_TrBlackBeltDerekIntro:
-	.string "Hyaah! My training has been for this\n"
-	.string "moment!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x3A, 0xFF
 
 Sinnoh_Text_TrBlackBeltDerekDefeat:
-	.string "My training wasn't enough!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x3B, 0xFF
 
 Sinnoh_Text_TrBlackBeltDerekAfter:
-	.string "One thousand more punches before\n"
-	.string "dinner. Then I'll be ready.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x3C, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltEddie::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_EDDIE, Sinnoh_Text_TrBlackBeltEddieIntro, Sinnoh_Text_TrBlackBeltEddieDefeat
@@ -1341,15 +1173,13 @@ Sinnoh_EventScript_TrBlackBeltEddie::
 	end
 
 Sinnoh_Text_TrBlackBeltEddieIntro:
-	.string "I can hear your MOéMON's fighting\n"
-	.string "spirit. Mine is louder!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x4C, 0xFF
 
 Sinnoh_Text_TrBlackBeltEddieDefeat:
-	.string "Your spirit was louder!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x4D, 0xFF
 
 Sinnoh_Text_TrBlackBeltEddieAfter:
-	.string "Keep that spirit. It's the best thing a\n"
-	.string "TRAINER can have.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x4E, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltGregory::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_GREGORY, Sinnoh_Text_TrBlackBeltGregoryIntro, Sinnoh_Text_TrBlackBeltGregoryDefeat
@@ -1357,15 +1187,13 @@ Sinnoh_EventScript_TrBlackBeltGregory::
 	end
 
 Sinnoh_Text_TrBlackBeltGregoryIntro:
-	.string "Bow, then battle! That's the way of\n"
-	.string "the dojo!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x5E, 0xFF
 
 Sinnoh_Text_TrBlackBeltGregoryDefeat:
-	.string "I bow to your strength.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x5F, 0xFF
 
 Sinnoh_Text_TrBlackBeltGregoryAfter:
-	.string "Losing is part of training. Thank you\n"
-	.string "for the lesson.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x60, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltGriffin::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_GRIFFIN, Sinnoh_Text_TrBlackBeltGriffinIntro, Sinnoh_Text_TrBlackBeltGriffinDefeat
@@ -1373,15 +1201,13 @@ Sinnoh_EventScript_TrBlackBeltGriffin::
 	end
 
 Sinnoh_Text_TrBlackBeltGriffinIntro:
-	.string "I can hear your MOéMON's fighting\n"
-	.string "spirit. Mine is louder!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x70, 0xFF
 
 Sinnoh_Text_TrBlackBeltGriffinDefeat:
-	.string "Your spirit was louder!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x71, 0xFF
 
 Sinnoh_Text_TrBlackBeltGriffinAfter:
-	.string "Keep that spirit. It's the best thing a\n"
-	.string "TRAINER can have.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x72, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltJarrett::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_JARRETT, Sinnoh_Text_TrBlackBeltJarrettIntro, Sinnoh_Text_TrBlackBeltJarrettDefeat
@@ -1389,15 +1215,13 @@ Sinnoh_EventScript_TrBlackBeltJarrett::
 	end
 
 Sinnoh_Text_TrBlackBeltJarrettIntro:
-	.string "Bow, then battle! That's the way of\n"
-	.string "the dojo!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x02, 0xFF
 
 Sinnoh_Text_TrBlackBeltJarrettDefeat:
-	.string "I bow to your strength.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x03, 0xFF
 
 Sinnoh_Text_TrBlackBeltJarrettAfter:
-	.string "Losing is part of training. Thank you\n"
-	.string "for the lesson.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x04, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltJeffery::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_JEFFERY, Sinnoh_Text_TrBlackBeltJefferyIntro, Sinnoh_Text_TrBlackBeltJefferyDefeat
@@ -1405,15 +1229,13 @@ Sinnoh_EventScript_TrBlackBeltJeffery::
 	end
 
 Sinnoh_Text_TrBlackBeltJefferyIntro:
-	.string "I can hear your MOéMON's fighting\n"
-	.string "spirit. Mine is louder!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x14, 0xFF
 
 Sinnoh_Text_TrBlackBeltJefferyDefeat:
-	.string "Your spirit was louder!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x15, 0xFF
 
 Sinnoh_Text_TrBlackBeltJefferyAfter:
-	.string "Keep that spirit. It's the best thing a\n"
-	.string "TRAINER can have.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x16, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltKendal::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_KENDAL, Sinnoh_Text_TrBlackBeltKendalIntro, Sinnoh_Text_TrBlackBeltKendalDefeat
@@ -1421,15 +1243,13 @@ Sinnoh_EventScript_TrBlackBeltKendal::
 	end
 
 Sinnoh_Text_TrBlackBeltKendalIntro:
-	.string "I can hear your MOéMON's fighting\n"
-	.string "spirit. Mine is louder!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x26, 0xFF
 
 Sinnoh_Text_TrBlackBeltKendalDefeat:
-	.string "Your spirit was louder!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x27, 0xFF
 
 Sinnoh_Text_TrBlackBeltKendalAfter:
-	.string "Keep that spirit. It's the best thing a\n"
-	.string "TRAINER can have.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x28, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltKyle::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_KYLE, Sinnoh_Text_TrBlackBeltKyleIntro, Sinnoh_Text_TrBlackBeltKyleDefeat
@@ -1437,15 +1257,13 @@ Sinnoh_EventScript_TrBlackBeltKyle::
 	end
 
 Sinnoh_Text_TrBlackBeltKyleIntro:
-	.string "I can hear your MOéMON's fighting\n"
-	.string "spirit. Mine is louder!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x38, 0xFF
 
 Sinnoh_Text_TrBlackBeltKyleDefeat:
-	.string "Your spirit was louder!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x39, 0xFF
 
 Sinnoh_Text_TrBlackBeltKyleAfter:
-	.string "Keep that spirit. It's the best thing a\n"
-	.string "TRAINER can have.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x3A, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltLuke::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_LUKE, Sinnoh_Text_TrBlackBeltLukeIntro, Sinnoh_Text_TrBlackBeltLukeDefeat
@@ -1453,15 +1271,13 @@ Sinnoh_EventScript_TrBlackBeltLuke::
 	end
 
 Sinnoh_Text_TrBlackBeltLukeIntro:
-	.string "Bow, then battle! That's the way of\n"
-	.string "the dojo!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x4A, 0xFF
 
 Sinnoh_Text_TrBlackBeltLukeDefeat:
-	.string "I bow to your strength.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x4B, 0xFF
 
 Sinnoh_Text_TrBlackBeltLukeAfter:
-	.string "Losing is part of training. Thank you\n"
-	.string "for the lesson.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x4C, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltMiles::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_MILES, Sinnoh_Text_TrBlackBeltMilesIntro, Sinnoh_Text_TrBlackBeltMilesDefeat
@@ -1469,15 +1285,13 @@ Sinnoh_EventScript_TrBlackBeltMiles::
 	end
 
 Sinnoh_Text_TrBlackBeltMilesIntro:
-	.string "Hyaah! My training has been for this\n"
-	.string "moment!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x5C, 0xFF
 
 Sinnoh_Text_TrBlackBeltMilesDefeat:
-	.string "My training wasn't enough!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x5D, 0xFF
 
 Sinnoh_Text_TrBlackBeltMilesAfter:
-	.string "One thousand more punches before\n"
-	.string "dinner. Then I'll be ready.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x5E, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltNathaniel::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_NATHANIEL, Sinnoh_Text_TrBlackBeltNathanielIntro, Sinnoh_Text_TrBlackBeltNathanielDefeat
@@ -1485,15 +1299,13 @@ Sinnoh_EventScript_TrBlackBeltNathaniel::
 	end
 
 Sinnoh_Text_TrBlackBeltNathanielIntro:
-	.string "I can hear your MOéMON's fighting\n"
-	.string "spirit. Mine is louder!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x6E, 0xFF
 
 Sinnoh_Text_TrBlackBeltNathanielDefeat:
-	.string "Your spirit was louder!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x6F, 0xFF
 
 Sinnoh_Text_TrBlackBeltNathanielAfter:
-	.string "Keep that spirit. It's the best thing a\n"
-	.string "TRAINER can have.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x70, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltPhilip::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_PHILIP, Sinnoh_Text_TrBlackBeltPhilipIntro, Sinnoh_Text_TrBlackBeltPhilipDefeat
@@ -1501,15 +1313,13 @@ Sinnoh_EventScript_TrBlackBeltPhilip::
 	end
 
 Sinnoh_Text_TrBlackBeltPhilipIntro:
-	.string "Bow, then battle! That's the way of\n"
-	.string "the dojo!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x00, 0xFF
 
 Sinnoh_Text_TrBlackBeltPhilipDefeat:
-	.string "I bow to your strength.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x01, 0xFF
 
 Sinnoh_Text_TrBlackBeltPhilipAfter:
-	.string "Losing is part of training. Thank you\n"
-	.string "for the lesson.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x02, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltRafael::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_RAFAEL, Sinnoh_Text_TrBlackBeltRafaelIntro, Sinnoh_Text_TrBlackBeltRafaelDefeat
@@ -1517,15 +1327,13 @@ Sinnoh_EventScript_TrBlackBeltRafael::
 	end
 
 Sinnoh_Text_TrBlackBeltRafaelIntro:
-	.string "Bow, then battle! That's the way of\n"
-	.string "the dojo!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x24, 0xFF
 
 Sinnoh_Text_TrBlackBeltRafaelDefeat:
-	.string "I bow to your strength.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x25, 0xFF
 
 Sinnoh_Text_TrBlackBeltRafaelAfter:
-	.string "Losing is part of training. Thank you\n"
-	.string "for the lesson.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x26, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltRay::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_RAY, Sinnoh_Text_TrBlackBeltRayIntro, Sinnoh_Text_TrBlackBeltRayDefeat
@@ -1533,15 +1341,13 @@ Sinnoh_EventScript_TrBlackBeltRay::
 	end
 
 Sinnoh_Text_TrBlackBeltRayIntro:
-	.string "Bow, then battle! That's the way of\n"
-	.string "the dojo!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x36, 0xFF
 
 Sinnoh_Text_TrBlackBeltRayDefeat:
-	.string "I bow to your strength.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x37, 0xFF
 
 Sinnoh_Text_TrBlackBeltRayAfter:
-	.string "Losing is part of training. Thank you\n"
-	.string "for the lesson.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x38, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltRicky::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_RICKY, Sinnoh_Text_TrBlackBeltRickyIntro, Sinnoh_Text_TrBlackBeltRickyDefeat
@@ -1549,15 +1355,13 @@ Sinnoh_EventScript_TrBlackBeltRicky::
 	end
 
 Sinnoh_Text_TrBlackBeltRickyIntro:
-	.string "I can hear your MOéMON's fighting\n"
-	.string "spirit. Mine is louder!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x48, 0xFF
 
 Sinnoh_Text_TrBlackBeltRickyDefeat:
-	.string "Your spirit was louder!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x49, 0xFF
 
 Sinnoh_Text_TrBlackBeltRickyAfter:
-	.string "Keep that spirit. It's the best thing a\n"
-	.string "TRAINER can have.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x4A, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltSean::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_SEAN, Sinnoh_Text_TrBlackBeltSeanIntro, Sinnoh_Text_TrBlackBeltSeanDefeat
@@ -1565,15 +1369,13 @@ Sinnoh_EventScript_TrBlackBeltSean::
 	end
 
 Sinnoh_Text_TrBlackBeltSeanIntro:
-	.string "Hyaah! My training has been for this\n"
-	.string "moment!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x5A, 0xFF
 
 Sinnoh_Text_TrBlackBeltSeanDefeat:
-	.string "My training wasn't enough!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x5B, 0xFF
 
 Sinnoh_Text_TrBlackBeltSeanAfter:
-	.string "One thousand more punches before\n"
-	.string "dinner. Then I'll be ready.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x5C, 0xFF
 
 Sinnoh_EventScript_TrBlackBeltWillie::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_WILLIE, Sinnoh_Text_TrBlackBeltWillieIntro, Sinnoh_Text_TrBlackBeltWillieDefeat
@@ -1581,15 +1383,13 @@ Sinnoh_EventScript_TrBlackBeltWillie::
 	end
 
 Sinnoh_Text_TrBlackBeltWillieIntro:
-	.string "Bow, then battle! That's the way of\n"
-	.string "the dojo!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x6C, 0xFF
 
 Sinnoh_Text_TrBlackBeltWillieDefeat:
-	.string "I bow to your strength.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x6D, 0xFF
 
 Sinnoh_Text_TrBlackBeltWillieAfter:
-	.string "Losing is part of training. Thank you\n"
-	.string "for the lesson.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x6E, 0xFF
 
 Sinnoh_EventScript_TrBreederAlbert::
 	trainerbattle_single TRAINER_SINNOH_BREEDER_ALBERT, Sinnoh_Text_TrBreederAlbertIntro, Sinnoh_Text_TrBreederAlbertDefeat
@@ -1597,15 +1397,13 @@ Sinnoh_EventScript_TrBreederAlbert::
 	end
 
 Sinnoh_Text_TrBreederAlbertIntro:
-	.string "You there! You look like you'd\n"
-	.string "appreciate my team!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x7E, 0xFF
 
 Sinnoh_Text_TrBreederAlbertDefeat:
-	.string "My poor darlings!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x7F, 0xFF
 
 Sinnoh_Text_TrBreederAlbertAfter:
-	.string "Every MOéMON is special. Even when\n"
-	.string "they lose.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x13, 0x00, 0xFF
 
 Sinnoh_EventScript_TrBreederAmber::
 	trainerbattle_single TRAINER_SINNOH_BREEDER_AMBER, Sinnoh_Text_TrBreederAmberIntro, Sinnoh_Text_TrBreederAmberDefeat
@@ -1613,15 +1411,13 @@ Sinnoh_EventScript_TrBreederAmber::
 	end
 
 Sinnoh_Text_TrBreederAmberIntro:
-	.string "Listen to my MOéMON's cry! Isn't it\n"
-	.string "music? Let's battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x13, 0x46, 0xFF
 
 Sinnoh_Text_TrBreederAmberDefeat:
-	.string "That was a sad song.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x13, 0x47, 0xFF
 
 Sinnoh_Text_TrBreederAmberAfter:
-	.string "I'll write a song about this. It'll be a\n"
-	.string "slow one.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x13, 0x48, 0xFF
 
 Sinnoh_EventScript_TrBreederJennifer::
 	trainerbattle_single TRAINER_SINNOH_BREEDER_JENNIFER, Sinnoh_Text_TrBreederJenniferIntro, Sinnoh_Text_TrBreederJenniferDefeat
@@ -1629,15 +1425,13 @@ Sinnoh_EventScript_TrBreederJennifer::
 	end
 
 Sinnoh_Text_TrBreederJenniferIntro:
-	.string "I've studied MOéMON for years. Time\n"
-	.string "for a field test!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x13, 0x58, 0xFF
 
 Sinnoh_Text_TrBreederJenniferDefeat:
-	.string "Hmm. The data says I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x13, 0x59, 0xFF
 
 Sinnoh_Text_TrBreederJenniferAfter:
-	.string "I'll write that battle down in my\n"
-	.string "notebook. Under “lessons.”$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x13, 0x5A, 0xFF
 
 Sinnoh_EventScript_TrBreederKahlil::
 	trainerbattle_single TRAINER_SINNOH_BREEDER_KAHLIL, Sinnoh_Text_TrBreederKahlilIntro, Sinnoh_Text_TrBreederKahlilDefeat
@@ -1645,15 +1439,13 @@ Sinnoh_EventScript_TrBreederKahlil::
 	end
 
 Sinnoh_Text_TrBreederKahlilIntro:
-	.string "I've studied MOéMON for years. Time\n"
-	.string "for a field test!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x14, 0x20, 0xFF
 
 Sinnoh_Text_TrBreederKahlilDefeat:
-	.string "Hmm. The data says I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x14, 0x21, 0xFF
 
 Sinnoh_Text_TrBreederKahlilAfter:
-	.string "I'll write that battle down in my\n"
-	.string "notebook. Under “lessons.”$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x14, 0x22, 0xFF
 
 Sinnoh_EventScript_TrBugCatcherBrandon::
 	trainerbattle_single TRAINER_SINNOH_BUG_CATCHER_BRANDON, Sinnoh_Text_TrBugCatcherBrandonIntro, Sinnoh_Text_TrBugCatcherBrandonDefeat
@@ -1661,15 +1453,13 @@ Sinnoh_EventScript_TrBugCatcherBrandon::
 	end
 
 Sinnoh_Text_TrBugCatcherBrandonIntro:
-	.string "Stop right there! Nobody walks past\n"
-	.string "me without a battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x14, 0x68, 0xFF
 
 Sinnoh_Text_TrBugCatcherBrandonDefeat:
-	.string "Okay, okay, you can walk past!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x14, 0x69, 0xFF
 
 Sinnoh_Text_TrBugCatcherBrandonAfter:
-	.string "Being a road guard is harder than it\n"
-	.string "looks.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x14, 0x6A, 0xFF
 
 Sinnoh_EventScript_TrBugCatcherDonald::
 	trainerbattle_single TRAINER_SINNOH_BUG_CATCHER_DONALD, Sinnoh_Text_TrBugCatcherDonaldIntro, Sinnoh_Text_TrBugCatcherDonaldDefeat
@@ -1677,15 +1467,13 @@ Sinnoh_EventScript_TrBugCatcherDonald::
 	end
 
 Sinnoh_Text_TrBugCatcherDonaldIntro:
-	.string "Stop right there! Nobody walks past\n"
-	.string "me without a battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x15, 0x30, 0xFF
 
 Sinnoh_Text_TrBugCatcherDonaldDefeat:
-	.string "Okay, okay, you can walk past!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x15, 0x31, 0xFF
 
 Sinnoh_Text_TrBugCatcherDonaldAfter:
-	.string "Being a road guard is harder than it\n"
-	.string "looks.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x15, 0x32, 0xFF
 
 Sinnoh_EventScript_TrBugCatcherJack::
 	trainerbattle_single TRAINER_SINNOH_BUG_CATCHER_JACK, Sinnoh_Text_TrBugCatcherJackIntro, Sinnoh_Text_TrBugCatcherJackDefeat
@@ -1693,16 +1481,13 @@ Sinnoh_EventScript_TrBugCatcherJack::
 	end
 
 Sinnoh_Text_TrBugCatcherJackIntro:
-	.string "I caught my partner all by myself!\n"
-	.string "Want to see how strong it is?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x15, 0x42, 0xFF
 
 Sinnoh_Text_TrBugCatcherJackDefeat:
-	.string "It's strong... just not stronger than\n"
-	.string "yours.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x15, 0x43, 0xFF
 
 Sinnoh_Text_TrBugCatcherJackAfter:
-	.string "Your MOéMON look really happy. How do\n"
-	.string "you do that?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x15, 0x44, 0xFF
 
 Sinnoh_EventScript_TrBugCatcherPhillip::
 	trainerbattle_single TRAINER_SINNOH_BUG_CATCHER_PHILLIP, Sinnoh_Text_TrBugCatcherPhillipIntro, Sinnoh_Text_TrBugCatcherPhillipDefeat
@@ -1710,15 +1495,13 @@ Sinnoh_EventScript_TrBugCatcherPhillip::
 	end
 
 Sinnoh_Text_TrBugCatcherPhillipIntro:
-	.string "Hey! You look like you know what\n"
-	.string "you're doing. Show me!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x15, 0x54, 0xFF
 
 Sinnoh_Text_TrBugCatcherPhillipDefeat:
-	.string "Aww, no fair!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x15, 0x55, 0xFF
 
 Sinnoh_Text_TrBugCatcherPhillipAfter:
-	.string "I'm gonna train every day after\n"
-	.string "school. Next time I'll win for sure!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x15, 0x56, 0xFF
 
 Sinnoh_EventScript_TrCamperAnthony::
 	trainerbattle_single TRAINER_SINNOH_CAMPER_ANTHONY, Sinnoh_Text_TrCamperAnthonyIntro, Sinnoh_Text_TrCamperAnthonyDefeat
@@ -1726,15 +1509,13 @@ Sinnoh_EventScript_TrCamperAnthony::
 	end
 
 Sinnoh_Text_TrCamperAnthonyIntro:
-	.string "Stop right there! Nobody walks past\n"
-	.string "me without a battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x16, 0x64, 0xFF
 
 Sinnoh_Text_TrCamperAnthonyDefeat:
-	.string "Okay, okay, you can walk past!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x16, 0x65, 0xFF
 
 Sinnoh_Text_TrCamperAnthonyAfter:
-	.string "Being a road guard is harder than it\n"
-	.string "looks.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x16, 0x66, 0xFF
 
 Sinnoh_EventScript_TrCamperCurtis::
 	trainerbattle_single TRAINER_SINNOH_CAMPER_CURTIS, Sinnoh_Text_TrCamperCurtisIntro, Sinnoh_Text_TrCamperCurtisDefeat
@@ -1742,15 +1523,13 @@ Sinnoh_EventScript_TrCamperCurtis::
 	end
 
 Sinnoh_Text_TrCamperCurtisIntro:
-	.string "My MOéMON and I practiced all morning!\n"
-	.string "Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x16, 0x76, 0xFF
 
 Sinnoh_Text_TrCamperCurtisDefeat:
-	.string "We practiced the wrong things...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x16, 0x77, 0xFF
 
 Sinnoh_Text_TrCamperCurtisAfter:
-	.string "I'll practice the right things this\n"
-	.string "afternoon. Probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x16, 0x78, 0xFF
 
 Sinnoh_EventScript_TrCamperDiego::
 	trainerbattle_single TRAINER_SINNOH_CAMPER_DIEGO, Sinnoh_Text_TrCamperDiegoIntro, Sinnoh_Text_TrCamperDiegoDefeat
@@ -1758,15 +1537,13 @@ Sinnoh_EventScript_TrCamperDiego::
 	end
 
 Sinnoh_Text_TrCamperDiegoIntro:
-	.string "My MOéMON and I practiced all morning!\n"
-	.string "Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x08, 0xFF
 
 Sinnoh_Text_TrCamperDiegoDefeat:
-	.string "We practiced the wrong things...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x09, 0xFF
 
 Sinnoh_Text_TrCamperDiegoAfter:
-	.string "I'll practice the right things this\n"
-	.string "afternoon. Probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x0A, 0xFF
 
 Sinnoh_EventScript_TrCamperDrew::
 	trainerbattle_single TRAINER_SINNOH_CAMPER_DREW, Sinnoh_Text_TrCamperDrewIntro, Sinnoh_Text_TrCamperDrewDefeat
@@ -1774,16 +1551,13 @@ Sinnoh_EventScript_TrCamperDrew::
 	end
 
 Sinnoh_Text_TrCamperDrewIntro:
-	.string "I caught my partner all by myself!\n"
-	.string "Want to see how strong it is?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x1A, 0xFF
 
 Sinnoh_Text_TrCamperDrewDefeat:
-	.string "It's strong... just not stronger than\n"
-	.string "yours.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x1B, 0xFF
 
 Sinnoh_Text_TrCamperDrewAfter:
-	.string "Your MOéMON look really happy. How do\n"
-	.string "you do that?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x1C, 0xFF
 
 Sinnoh_EventScript_TrCamperJacob::
 	trainerbattle_single TRAINER_SINNOH_CAMPER_JACOB, Sinnoh_Text_TrCamperJacobIntro, Sinnoh_Text_TrCamperJacobDefeat
@@ -1791,15 +1565,13 @@ Sinnoh_EventScript_TrCamperJacob::
 	end
 
 Sinnoh_Text_TrCamperJacobIntro:
-	.string "Hey! You look like you know what\n"
-	.string "you're doing. Show me!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x2C, 0xFF
 
 Sinnoh_Text_TrCamperJacobDefeat:
-	.string "Aww, no fair!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x2D, 0xFF
 
 Sinnoh_Text_TrCamperJacobAfter:
-	.string "I'm gonna train every day after\n"
-	.string "school. Next time I'll win for sure!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x2E, 0xFF
 
 Sinnoh_EventScript_TrCamperLawrence::
 	trainerbattle_single TRAINER_SINNOH_CAMPER_LAWRENCE, Sinnoh_Text_TrCamperLawrenceIntro, Sinnoh_Text_TrCamperLawrenceDefeat
@@ -1807,15 +1579,13 @@ Sinnoh_EventScript_TrCamperLawrence::
 	end
 
 Sinnoh_Text_TrCamperLawrenceIntro:
-	.string "Stop right there! Nobody walks past\n"
-	.string "me without a battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x3E, 0xFF
 
 Sinnoh_Text_TrCamperLawrenceDefeat:
-	.string "Okay, okay, you can walk past!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x3F, 0xFF
 
 Sinnoh_Text_TrCamperLawrenceAfter:
-	.string "Being a road guard is harder than it\n"
-	.string "looks.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x40, 0xFF
 
 Sinnoh_EventScript_TrCamperParker::
 	trainerbattle_single TRAINER_SINNOH_CAMPER_PARKER, Sinnoh_Text_TrCamperParkerIntro, Sinnoh_Text_TrCamperParkerDefeat
@@ -1823,15 +1593,13 @@ Sinnoh_EventScript_TrCamperParker::
 	end
 
 Sinnoh_Text_TrCamperParkerIntro:
-	.string "Stop right there! Nobody walks past\n"
-	.string "me without a battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x50, 0xFF
 
 Sinnoh_Text_TrCamperParkerDefeat:
-	.string "Okay, okay, you can walk past!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x51, 0xFF
 
 Sinnoh_Text_TrCamperParkerAfter:
-	.string "Being a road guard is harder than it\n"
-	.string "looks.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x52, 0xFF
 
 Sinnoh_EventScript_TrCamperZackary::
 	trainerbattle_single TRAINER_SINNOH_CAMPER_ZACKARY, Sinnoh_Text_TrCamperZackaryIntro, Sinnoh_Text_TrCamperZackaryDefeat
@@ -1839,15 +1607,13 @@ Sinnoh_EventScript_TrCamperZackary::
 	end
 
 Sinnoh_Text_TrCamperZackaryIntro:
-	.string "Stop right there! Nobody walks past\n"
-	.string "me without a battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x62, 0xFF
 
 Sinnoh_Text_TrCamperZackaryDefeat:
-	.string "Okay, okay, you can walk past!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x63, 0xFF
 
 Sinnoh_Text_TrCamperZackaryAfter:
-	.string "Being a road guard is harder than it\n"
-	.string "looks.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x64, 0xFF
 
 Sinnoh_EventScript_TrCollectorBrady::
 	trainerbattle_single TRAINER_SINNOH_COLLECTOR_BRADY, Sinnoh_Text_TrCollectorBradyIntro, Sinnoh_Text_TrCollectorBradyDefeat
@@ -1855,15 +1621,13 @@ Sinnoh_EventScript_TrCollectorBrady::
 	end
 
 Sinnoh_Text_TrCollectorBradyIntro:
-	.string "Halt! I need to check your TRAINER\n"
-	.string "skills!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x19, 0x70, 0xFF
 
 Sinnoh_Text_TrCollectorBradyDefeat:
-	.string "Your skills check out!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x19, 0x71, 0xFF
 
 Sinnoh_Text_TrCollectorBradyAfter:
-	.string "Carry on, TRAINER. Stay safe out\n"
-	.string "there.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x19, 0x72, 0xFF
 
 Sinnoh_EventScript_TrCollectorDean::
 	trainerbattle_single TRAINER_SINNOH_COLLECTOR_DEAN, Sinnoh_Text_TrCollectorDeanIntro, Sinnoh_Text_TrCollectorDeanDefeat
@@ -1871,15 +1635,13 @@ Sinnoh_EventScript_TrCollectorDean::
 	end
 
 Sinnoh_Text_TrCollectorDeanIntro:
-	.string "Halt! I need to check your TRAINER\n"
-	.string "skills!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x02, 0xFF
 
 Sinnoh_Text_TrCollectorDeanDefeat:
-	.string "Your skills check out!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x03, 0xFF
 
 Sinnoh_Text_TrCollectorDeanAfter:
-	.string "Carry on, TRAINER. Stay safe out\n"
-	.string "there.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x04, 0xFF
 
 Sinnoh_EventScript_TrCollectorDouglas::
 	trainerbattle_single TRAINER_SINNOH_COLLECTOR_DOUGLAS, Sinnoh_Text_TrCollectorDouglasIntro, Sinnoh_Text_TrCollectorDouglasDefeat
@@ -1887,15 +1649,13 @@ Sinnoh_EventScript_TrCollectorDouglas::
 	end
 
 Sinnoh_Text_TrCollectorDouglasIntro:
-	.string "I've studied MOéMON for years. Time\n"
-	.string "for a field test!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x14, 0xFF
 
 Sinnoh_Text_TrCollectorDouglasDefeat:
-	.string "Hmm. The data says I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x15, 0xFF
 
 Sinnoh_Text_TrCollectorDouglasAfter:
-	.string "I'll write that battle down in my\n"
-	.string "notebook. Under “lessons.”$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x16, 0xFF
 
 Sinnoh_EventScript_TrCollectorEdwin::
 	trainerbattle_single TRAINER_SINNOH_COLLECTOR_EDWIN, Sinnoh_Text_TrCollectorEdwinIntro, Sinnoh_Text_TrCollectorEdwinDefeat
@@ -1903,15 +1663,13 @@ Sinnoh_EventScript_TrCollectorEdwin::
 	end
 
 Sinnoh_Text_TrCollectorEdwinIntro:
-	.string "I've studied MOéMON for years. Time\n"
-	.string "for a field test!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x26, 0xFF
 
 Sinnoh_Text_TrCollectorEdwinDefeat:
-	.string "Hmm. The data says I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x27, 0xFF
 
 Sinnoh_Text_TrCollectorEdwinAfter:
-	.string "I'll write that battle down in my\n"
-	.string "notebook. Under “lessons.”$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x28, 0xFF
 
 Sinnoh_EventScript_TrCollectorFernando::
 	trainerbattle_single TRAINER_SINNOH_COLLECTOR_FERNANDO, Sinnoh_Text_TrCollectorFernandoIntro, Sinnoh_Text_TrCollectorFernandoDefeat
@@ -1919,15 +1677,13 @@ Sinnoh_EventScript_TrCollectorFernando::
 	end
 
 Sinnoh_Text_TrCollectorFernandoIntro:
-	.string "Listen to my MOéMON's cry! Isn't it\n"
-	.string "music? Let's battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x4A, 0xFF
 
 Sinnoh_Text_TrCollectorFernandoDefeat:
-	.string "That was a sad song.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x4B, 0xFF
 
 Sinnoh_Text_TrCollectorFernandoAfter:
-	.string "I'll write a song about this. It'll be a\n"
-	.string "slow one.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x4C, 0xFF
 
 Sinnoh_EventScript_TrCollectorIvan::
 	trainerbattle_single TRAINER_SINNOH_COLLECTOR_IVAN, Sinnoh_Text_TrCollectorIvanIntro, Sinnoh_Text_TrCollectorIvanDefeat
@@ -1935,15 +1691,13 @@ Sinnoh_EventScript_TrCollectorIvan::
 	end
 
 Sinnoh_Text_TrCollectorIvanIntro:
-	.string "Halt! I need to check your TRAINER\n"
-	.string "skills!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x5C, 0xFF
 
 Sinnoh_Text_TrCollectorIvanDefeat:
-	.string "Your skills check out!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x5D, 0xFF
 
 Sinnoh_Text_TrCollectorIvanAfter:
-	.string "Carry on, TRAINER. Stay safe out\n"
-	.string "there.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x5E, 0xFF
 
 Sinnoh_EventScript_TrCollectorJamal::
 	trainerbattle_single TRAINER_SINNOH_COLLECTOR_JAMAL, Sinnoh_Text_TrCollectorJamalIntro, Sinnoh_Text_TrCollectorJamalDefeat
@@ -1951,15 +1705,13 @@ Sinnoh_EventScript_TrCollectorJamal::
 	end
 
 Sinnoh_Text_TrCollectorJamalIntro:
-	.string "I've studied MOéMON for years. Time\n"
-	.string "for a field test!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1B, 0x00, 0xFF
 
 Sinnoh_Text_TrCollectorJamalDefeat:
-	.string "Hmm. The data says I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1B, 0x01, 0xFF
 
 Sinnoh_Text_TrCollectorJamalAfter:
-	.string "I'll write that battle down in my\n"
-	.string "notebook. Under “lessons.”$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1B, 0x02, 0xFF
 
 Sinnoh_EventScript_TrCollectorTerry::
 	trainerbattle_single TRAINER_SINNOH_COLLECTOR_TERRY, Sinnoh_Text_TrCollectorTerryIntro, Sinnoh_Text_TrCollectorTerryDefeat
@@ -1967,15 +1719,13 @@ Sinnoh_EventScript_TrCollectorTerry::
 	end
 
 Sinnoh_Text_TrCollectorTerryIntro:
-	.string "You there! You look like you'd\n"
-	.string "appreciate my team!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1B, 0x12, 0xFF
 
 Sinnoh_Text_TrCollectorTerryDefeat:
-	.string "My poor darlings!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1B, 0x13, 0xFF
 
 Sinnoh_Text_TrCollectorTerryAfter:
-	.string "Every MOéMON is special. Even when\n"
-	.string "they lose.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1B, 0x14, 0xFF
 
 Sinnoh_EventScript_TrCowgirlShelley::
 	trainerbattle_single TRAINER_SINNOH_COWGIRL_SHELLEY, Sinnoh_Text_TrCowgirlShelleyIntro, Sinnoh_Text_TrCowgirlShelleyDefeat
@@ -1983,15 +1733,13 @@ Sinnoh_EventScript_TrCowgirlShelley::
 	end
 
 Sinnoh_Text_TrCowgirlShelleyIntro:
-	.string "Hard work makes strong MOéMON. Mine\n"
-	.string "dig all day!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1C, 0x46, 0xFF
 
 Sinnoh_Text_TrCowgirlShelleyDefeat:
-	.string "Back to digging, I guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1C, 0x47, 0xFF
 
 Sinnoh_Text_TrCowgirlShelleyAfter:
-	.string "My MOéMON and I are taking a lunch\n"
-	.string "break. We earned it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1C, 0x48, 0xFF
 
 Sinnoh_EventScript_TrCyclistAxel::
 	trainerbattle_single TRAINER_SINNOH_CYCLIST_AXEL, Sinnoh_Text_TrCyclistAxelIntro, Sinnoh_Text_TrCyclistAxelDefeat
@@ -1999,14 +1747,13 @@ Sinnoh_EventScript_TrCyclistAxel::
 	end
 
 Sinnoh_Text_TrCyclistAxelIntro:
-	.string "Speed is everything! Can you keep up?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1C, 0x58, 0xFF
 
 Sinnoh_Text_TrCyclistAxelDefeat:
-	.string "You kept up AND passed me!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1C, 0x59, 0xFF
 
 Sinnoh_Text_TrCyclistAxelAfter:
-	.string "Slow and steady wins sometimes, I\n"
-	.string "guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1C, 0x5A, 0xFF
 
 Sinnoh_EventScript_TrCyclistJames::
 	trainerbattle_single TRAINER_SINNOH_CYCLIST_JAMES, Sinnoh_Text_TrCyclistJamesIntro, Sinnoh_Text_TrCyclistJamesDefeat
@@ -2014,15 +1761,13 @@ Sinnoh_EventScript_TrCyclistJames::
 	end
 
 Sinnoh_Text_TrCyclistJamesIntro:
-	.string "Out of the way! Oh, a TRAINER! Let's\n"
-	.string "make it quick!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1C, 0x6A, 0xFF
 
 Sinnoh_Text_TrCyclistJamesDefeat:
-	.string "That was quick, all right.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1C, 0x6B, 0xFF
 
 Sinnoh_Text_TrCyclistJamesAfter:
-	.string "I'm off on another lap. See you at the\n"
-	.string "finish line!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1C, 0x6C, 0xFF
 
 Sinnoh_EventScript_TrCyclistJohn::
 	trainerbattle_single TRAINER_SINNOH_CYCLIST_JOHN, Sinnoh_Text_TrCyclistJohnIntro, Sinnoh_Text_TrCyclistJohnDefeat
@@ -2030,13 +1775,13 @@ Sinnoh_EventScript_TrCyclistJohn::
 	end
 
 Sinnoh_Text_TrCyclistJohnIntro:
-	.string "A battle is a great warm-up. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1C, 0x7C, 0xFF
 
 Sinnoh_Text_TrCyclistJohnDefeat:
-	.string "That warmed me up too much!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1C, 0x7D, 0xFF
 
 Sinnoh_Text_TrCyclistJohnAfter:
-	.string "Stretch before battles. Trust me.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1C, 0x7E, 0xFF
 
 Sinnoh_EventScript_TrCyclistKayla::
 	trainerbattle_single TRAINER_SINNOH_CYCLIST_KAYLA, Sinnoh_Text_TrCyclistKaylaIntro, Sinnoh_Text_TrCyclistKaylaDefeat
@@ -2044,14 +1789,13 @@ Sinnoh_EventScript_TrCyclistKayla::
 	end
 
 Sinnoh_Text_TrCyclistKaylaIntro:
-	.string "Speed is everything! Can you keep up?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1D, 0x44, 0xFF
 
 Sinnoh_Text_TrCyclistKaylaDefeat:
-	.string "You kept up AND passed me!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1D, 0x45, 0xFF
 
 Sinnoh_Text_TrCyclistKaylaAfter:
-	.string "Slow and steady wins sometimes, I\n"
-	.string "guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1D, 0x46, 0xFF
 
 Sinnoh_EventScript_TrCyclistMegan::
 	trainerbattle_single TRAINER_SINNOH_CYCLIST_MEGAN, Sinnoh_Text_TrCyclistMeganIntro, Sinnoh_Text_TrCyclistMeganDefeat
@@ -2059,13 +1803,13 @@ Sinnoh_EventScript_TrCyclistMegan::
 	end
 
 Sinnoh_Text_TrCyclistMeganIntro:
-	.string "A battle is a great warm-up. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1E, 0x0C, 0xFF
 
 Sinnoh_Text_TrCyclistMeganDefeat:
-	.string "That warmed me up too much!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1E, 0x0D, 0xFF
 
 Sinnoh_Text_TrCyclistMeganAfter:
-	.string "Stretch before battles. Trust me.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1E, 0x0E, 0xFF
 
 Sinnoh_EventScript_TrCyclistNicole::
 	trainerbattle_single TRAINER_SINNOH_CYCLIST_NICOLE, Sinnoh_Text_TrCyclistNicoleIntro, Sinnoh_Text_TrCyclistNicoleDefeat
@@ -2073,13 +1817,13 @@ Sinnoh_EventScript_TrCyclistNicole::
 	end
 
 Sinnoh_Text_TrCyclistNicoleIntro:
-	.string "A battle is a great warm-up. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1E, 0x1E, 0xFF
 
 Sinnoh_Text_TrCyclistNicoleDefeat:
-	.string "That warmed me up too much!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1E, 0x1F, 0xFF
 
 Sinnoh_Text_TrCyclistNicoleAfter:
-	.string "Stretch before battles. Trust me.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1E, 0x20, 0xFF
 
 Sinnoh_EventScript_TrCyclistRachel::
 	trainerbattle_single TRAINER_SINNOH_CYCLIST_RACHEL, Sinnoh_Text_TrCyclistRachelIntro, Sinnoh_Text_TrCyclistRachelDefeat
@@ -2087,14 +1831,13 @@ Sinnoh_EventScript_TrCyclistRachel::
 	end
 
 Sinnoh_Text_TrCyclistRachelIntro:
-	.string "Speed is everything! Can you keep up?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1E, 0x30, 0xFF
 
 Sinnoh_Text_TrCyclistRachelDefeat:
-	.string "You kept up AND passed me!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1E, 0x31, 0xFF
 
 Sinnoh_Text_TrCyclistRachelAfter:
-	.string "Slow and steady wins sometimes, I\n"
-	.string "guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1E, 0x32, 0xFF
 
 Sinnoh_EventScript_TrCyclistRyan::
 	trainerbattle_single TRAINER_SINNOH_CYCLIST_RYAN, Sinnoh_Text_TrCyclistRyanIntro, Sinnoh_Text_TrCyclistRyanDefeat
@@ -2102,15 +1845,13 @@ Sinnoh_EventScript_TrCyclistRyan::
 	end
 
 Sinnoh_Text_TrCyclistRyanIntro:
-	.string "Out of the way! Oh, a TRAINER! Let's\n"
-	.string "make it quick!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1E, 0x42, 0xFF
 
 Sinnoh_Text_TrCyclistRyanDefeat:
-	.string "That was quick, all right.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1E, 0x43, 0xFF
 
 Sinnoh_Text_TrCyclistRyanAfter:
-	.string "I'm off on another lap. See you at the\n"
-	.string "finish line!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1E, 0x44, 0xFF
 
 Sinnoh_EventScript_TrDoubleTeamAlAndKay::
 	trainerbattle_double TRAINER_SINNOH_DOUBLE_TEAM_AL_AND_KAY, Sinnoh_Text_TrDoubleTeamAlAndKayIntro, Sinnoh_Text_TrDoubleTeamAlAndKayDefeat, Sinnoh_Text_TrDoubleTeamAlAndKayNotEnough
@@ -2118,19 +1859,16 @@ Sinnoh_EventScript_TrDoubleTeamAlAndKay::
 	end
 
 Sinnoh_Text_TrDoubleTeamAlAndKayIntro:
-	.string "We do everything together. Even lose?\n"
-	.string "Let's find out!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1F, 0x44, 0xFF
 
 Sinnoh_Text_TrDoubleTeamAlAndKayDefeat:
-	.string "We found out.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1F, 0x45, 0xFF
 
 Sinnoh_Text_TrDoubleTeamAlAndKayAfter:
-	.string "At least we lost together. That's\n"
-	.string "something!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1F, 0x46, 0xFF
 
 Sinnoh_Text_TrDoubleTeamAlAndKayNotEnough:
-	.string "There are two of us! Come back when\n"
-	.string "you have two MOéMON that can battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1F, 0x47, 0xFF
 
 Sinnoh_EventScript_TrDoubleTeamJoAndPat::
 	trainerbattle_double TRAINER_SINNOH_DOUBLE_TEAM_JO_AND_PAT, Sinnoh_Text_TrDoubleTeamJoAndPatIntro, Sinnoh_Text_TrDoubleTeamJoAndPatDefeat, Sinnoh_Text_TrDoubleTeamJoAndPatNotEnough
@@ -2138,19 +1876,16 @@ Sinnoh_EventScript_TrDoubleTeamJoAndPat::
 	end
 
 Sinnoh_Text_TrDoubleTeamJoAndPatIntro:
-	.string "We do everything together. Even lose?\n"
-	.string "Let's find out!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1F, 0x56, 0xFF
 
 Sinnoh_Text_TrDoubleTeamJoAndPatDefeat:
-	.string "We found out.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1F, 0x57, 0xFF
 
 Sinnoh_Text_TrDoubleTeamJoAndPatAfter:
-	.string "At least we lost together. That's\n"
-	.string "something!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1F, 0x58, 0xFF
 
 Sinnoh_Text_TrDoubleTeamJoAndPatNotEnough:
-	.string "There are two of us! Come back when\n"
-	.string "you have two MOéMON that can battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1F, 0x59, 0xFF
 
 Sinnoh_EventScript_TrDoubleTeamZacAndJen::
 	trainerbattle_double TRAINER_SINNOH_DOUBLE_TEAM_ZAC_AND_JEN, Sinnoh_Text_TrDoubleTeamZacAndJenIntro, Sinnoh_Text_TrDoubleTeamZacAndJenDefeat, Sinnoh_Text_TrDoubleTeamZacAndJenNotEnough
@@ -2158,19 +1893,16 @@ Sinnoh_EventScript_TrDoubleTeamZacAndJen::
 	end
 
 Sinnoh_Text_TrDoubleTeamZacAndJenIntro:
-	.string "Two of us, two MOéMON! Can you handle\n"
-	.string "a double battle?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1F, 0x68, 0xFF
 
 Sinnoh_Text_TrDoubleTeamZacAndJenDefeat:
-	.string "Two of us, and we still lost!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1F, 0x69, 0xFF
 
 Sinnoh_Text_TrDoubleTeamZacAndJenAfter:
-	.string "We'll practice our teamwork. You\n"
-	.string "clearly have yours down.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1F, 0x6A, 0xFF
 
 Sinnoh_Text_TrDoubleTeamZacAndJenNotEnough:
-	.string "There are two of us! Come back when\n"
-	.string "you have two MOéMON that can battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1F, 0x6B, 0xFF
 
 Sinnoh_EventScript_TrDragonTamerClinton::
 	trainerbattle_single TRAINER_SINNOH_DRAGON_TAMER_CLINTON, Sinnoh_Text_TrDragonTamerClintonIntro, Sinnoh_Text_TrDragonTamerClintonDefeat
@@ -2178,15 +1910,13 @@ Sinnoh_EventScript_TrDragonTamerClinton::
 	end
 
 Sinnoh_Text_TrDragonTamerClintonIntro:
-	.string "A battle tells you everything about a\n"
-	.string "TRAINER. Let's talk.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1F, 0x76, 0xFF
 
 Sinnoh_Text_TrDragonTamerClintonDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1F, 0x77, 0xFF
 
 Sinnoh_Text_TrDragonTamerClintonAfter:
-	.string "Your team works together like it's one\n"
-	.string "MOéMON. That's rare.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1F, 0x78, 0xFF
 
 Sinnoh_EventScript_TrDragonTamerDarien::
 	trainerbattle_single TRAINER_SINNOH_DRAGON_TAMER_DARIEN, Sinnoh_Text_TrDragonTamerDarienIntro, Sinnoh_Text_TrDragonTamerDarienDefeat
@@ -2194,15 +1924,13 @@ Sinnoh_EventScript_TrDragonTamerDarien::
 	end
 
 Sinnoh_Text_TrDragonTamerDarienIntro:
-	.string "A battle tells you everything about a\n"
-	.string "TRAINER. Let's talk.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x08, 0xFF
 
 Sinnoh_Text_TrDragonTamerDarienDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x09, 0xFF
 
 Sinnoh_Text_TrDragonTamerDarienAfter:
-	.string "Your team works together like it's one\n"
-	.string "MOéMON. That's rare.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x0A, 0xFF
 
 Sinnoh_EventScript_TrDragonTamerDrake::
 	trainerbattle_single TRAINER_SINNOH_DRAGON_TAMER_DRAKE, Sinnoh_Text_TrDragonTamerDrakeIntro, Sinnoh_Text_TrDragonTamerDrakeDefeat
@@ -2210,15 +1938,13 @@ Sinnoh_EventScript_TrDragonTamerDrake::
 	end
 
 Sinnoh_Text_TrDragonTamerDrakeIntro:
-	.string "A battle tells you everything about a\n"
-	.string "TRAINER. Let's talk.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x1A, 0xFF
 
 Sinnoh_Text_TrDragonTamerDrakeDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x1B, 0xFF
 
 Sinnoh_Text_TrDragonTamerDrakeAfter:
-	.string "Your team works together like it's one\n"
-	.string "MOéMON. That's rare.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x1C, 0xFF
 
 Sinnoh_EventScript_TrDragonTamerGeoffrey::
 	trainerbattle_single TRAINER_SINNOH_DRAGON_TAMER_GEOFFREY, Sinnoh_Text_TrDragonTamerGeoffreyIntro, Sinnoh_Text_TrDragonTamerGeoffreyDefeat
@@ -2226,15 +1952,13 @@ Sinnoh_EventScript_TrDragonTamerGeoffrey::
 	end
 
 Sinnoh_Text_TrDragonTamerGeoffreyIntro:
-	.string "A battle tells you everything about a\n"
-	.string "TRAINER. Let's talk.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x2C, 0xFF
 
 Sinnoh_Text_TrDragonTamerGeoffreyDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x2D, 0xFF
 
 Sinnoh_Text_TrDragonTamerGeoffreyAfter:
-	.string "Your team works together like it's one\n"
-	.string "MOéMON. That's rare.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x2E, 0xFF
 
 Sinnoh_EventScript_TrDragonTamerHayden::
 	trainerbattle_single TRAINER_SINNOH_DRAGON_TAMER_HAYDEN, Sinnoh_Text_TrDragonTamerHaydenIntro, Sinnoh_Text_TrDragonTamerHaydenDefeat
@@ -2242,15 +1966,13 @@ Sinnoh_EventScript_TrDragonTamerHayden::
 	end
 
 Sinnoh_Text_TrDragonTamerHaydenIntro:
-	.string "A battle tells you everything about a\n"
-	.string "TRAINER. Let's talk.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x50, 0xFF
 
 Sinnoh_Text_TrDragonTamerHaydenDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x51, 0xFF
 
 Sinnoh_Text_TrDragonTamerHaydenAfter:
-	.string "Your team works together like it's one\n"
-	.string "MOéMON. That's rare.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x52, 0xFF
 
 Sinnoh_EventScript_TrDragonTamerJoe::
 	trainerbattle_single TRAINER_SINNOH_DRAGON_TAMER_JOE, Sinnoh_Text_TrDragonTamerJoeIntro, Sinnoh_Text_TrDragonTamerJoeDefeat
@@ -2258,15 +1980,13 @@ Sinnoh_EventScript_TrDragonTamerJoe::
 	end
 
 Sinnoh_Text_TrDragonTamerJoeIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x74, 0xFF
 
 Sinnoh_Text_TrDragonTamerJoeDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x75, 0xFF
 
 Sinnoh_Text_TrDragonTamerJoeAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x76, 0xFF
 
 Sinnoh_EventScript_TrDragonTamerKeegan::
 	trainerbattle_single TRAINER_SINNOH_DRAGON_TAMER_KEEGAN, Sinnoh_Text_TrDragonTamerKeeganIntro, Sinnoh_Text_TrDragonTamerKeeganDefeat
@@ -2274,15 +1994,13 @@ Sinnoh_EventScript_TrDragonTamerKeegan::
 	end
 
 Sinnoh_Text_TrDragonTamerKeeganIntro:
-	.string "A battle tells you everything about a\n"
-	.string "TRAINER. Let's talk.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x06, 0xFF
 
 Sinnoh_Text_TrDragonTamerKeeganDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x07, 0xFF
 
 Sinnoh_Text_TrDragonTamerKeeganAfter:
-	.string "Your team works together like it's one\n"
-	.string "MOéMON. That's rare.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x08, 0xFF
 
 Sinnoh_EventScript_TrDragonTamerKenny::
 	trainerbattle_single TRAINER_SINNOH_DRAGON_TAMER_KENNY, Sinnoh_Text_TrDragonTamerKennyIntro, Sinnoh_Text_TrDragonTamerKennyDefeat
@@ -2290,15 +2008,13 @@ Sinnoh_EventScript_TrDragonTamerKenny::
 	end
 
 Sinnoh_Text_TrDragonTamerKennyIntro:
-	.string "The view from here is great, but a good\n"
-	.string "battle is better!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x18, 0xFF
 
 Sinnoh_Text_TrDragonTamerKennyDefeat:
-	.string "Great view, great loss.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x19, 0xFF
 
 Sinnoh_Text_TrDragonTamerKennyAfter:
-	.string "I come up here to think. Today I'll\n"
-	.string "think about that battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x1A, 0xFF
 
 Sinnoh_EventScript_TrDragonTamerOndrej::
 	trainerbattle_single TRAINER_SINNOH_DRAGON_TAMER_ONDREJ, Sinnoh_Text_TrDragonTamerOndrejIntro, Sinnoh_Text_TrDragonTamerOndrejDefeat
@@ -2306,15 +2022,13 @@ Sinnoh_EventScript_TrDragonTamerOndrej::
 	end
 
 Sinnoh_Text_TrDragonTamerOndrejIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x2A, 0xFF
 
 Sinnoh_Text_TrDragonTamerOndrejDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x2B, 0xFF
 
 Sinnoh_Text_TrDragonTamerOndrejAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x2C, 0xFF
 
 Sinnoh_EventScript_TrDragonTamerPatrick::
 	trainerbattle_single TRAINER_SINNOH_DRAGON_TAMER_PATRICK, Sinnoh_Text_TrDragonTamerPatrickIntro, Sinnoh_Text_TrDragonTamerPatrickDefeat
@@ -2322,15 +2036,13 @@ Sinnoh_EventScript_TrDragonTamerPatrick::
 	end
 
 Sinnoh_Text_TrDragonTamerPatrickIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x3C, 0xFF
 
 Sinnoh_Text_TrDragonTamerPatrickDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x3D, 0xFF
 
 Sinnoh_Text_TrDragonTamerPatrickAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x3E, 0xFF
 
 Sinnoh_EventScript_TrDragonTamerStanley::
 	trainerbattle_single TRAINER_SINNOH_DRAGON_TAMER_STANLEY, Sinnoh_Text_TrDragonTamerStanleyIntro, Sinnoh_Text_TrDragonTamerStanleyDefeat
@@ -2338,15 +2050,13 @@ Sinnoh_EventScript_TrDragonTamerStanley::
 	end
 
 Sinnoh_Text_TrDragonTamerStanleyIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x72, 0xFF
 
 Sinnoh_Text_TrDragonTamerStanleyDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x73, 0xFF
 
 Sinnoh_Text_TrDragonTamerStanleyAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x74, 0xFF
 
 Sinnoh_EventScript_TrFishermanAlec::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_ALEC, Sinnoh_Text_TrFishermanAlecIntro, Sinnoh_Text_TrFishermanAlecDefeat
@@ -2354,15 +2064,13 @@ Sinnoh_EventScript_TrFishermanAlec::
 	end
 
 Sinnoh_Text_TrFishermanAlecIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3C, 0x60, 0xFF
 
 Sinnoh_Text_TrFishermanAlecDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3C, 0x61, 0xFF
 
 Sinnoh_Text_TrFishermanAlecAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3C, 0x62, 0xFF
 
 Sinnoh_EventScript_TrFishermanAndrew::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_ANDREW, Sinnoh_Text_TrFishermanAndrewIntro, Sinnoh_Text_TrFishermanAndrewDefeat
@@ -2370,15 +2078,13 @@ Sinnoh_EventScript_TrFishermanAndrew::
 	end
 
 Sinnoh_Text_TrFishermanAndrewIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x04, 0xFF
 
 Sinnoh_Text_TrFishermanAndrewDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x05, 0xFF
 
 Sinnoh_Text_TrFishermanAndrewAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x06, 0xFF
 
 Sinnoh_EventScript_TrFishermanBrett::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_BRETT, Sinnoh_Text_TrFishermanBrettIntro, Sinnoh_Text_TrFishermanBrettDefeat
@@ -2386,15 +2092,13 @@ Sinnoh_EventScript_TrFishermanBrett::
 	end
 
 Sinnoh_Text_TrFishermanBrettIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x16, 0xFF
 
 Sinnoh_Text_TrFishermanBrettDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x17, 0xFF
 
 Sinnoh_Text_TrFishermanBrettAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x18, 0xFF
 
 Sinnoh_EventScript_TrFishermanCody::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_CODY, Sinnoh_Text_TrFishermanCodyIntro, Sinnoh_Text_TrFishermanCodyDefeat
@@ -2402,15 +2106,13 @@ Sinnoh_EventScript_TrFishermanCody::
 	end
 
 Sinnoh_Text_TrFishermanCodyIntro:
-	.string "Ahoy! A sailor never turns down a\n"
-	.string "fight!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x28, 0xFF
 
 Sinnoh_Text_TrFishermanCodyDefeat:
-	.string "Blown off course!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x29, 0xFF
 
 Sinnoh_Text_TrFishermanCodyAfter:
-	.string "The sea teaches you to lose well. I've\n"
-	.string "had a lot of lessons.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x2A, 0xFF
 
 Sinnoh_EventScript_TrFishermanCole::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_COLE, Sinnoh_Text_TrFishermanColeIntro, Sinnoh_Text_TrFishermanColeDefeat
@@ -2418,15 +2120,13 @@ Sinnoh_EventScript_TrFishermanCole::
 	end
 
 Sinnoh_Text_TrFishermanColeIntro:
-	.string "Ahoy! A sailor never turns down a\n"
-	.string "fight!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x3A, 0xFF
 
 Sinnoh_Text_TrFishermanColeDefeat:
-	.string "Blown off course!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x3B, 0xFF
 
 Sinnoh_Text_TrFishermanColeAfter:
-	.string "The sea teaches you to lose well. I've\n"
-	.string "had a lot of lessons.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x3C, 0xFF
 
 Sinnoh_EventScript_TrFishermanCory::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_CORY, Sinnoh_Text_TrFishermanCoryIntro, Sinnoh_Text_TrFishermanCoryDefeat
@@ -2434,15 +2134,13 @@ Sinnoh_EventScript_TrFishermanCory::
 	end
 
 Sinnoh_Text_TrFishermanCoryIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x4C, 0xFF
 
 Sinnoh_Text_TrFishermanCoryDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x4D, 0xFF
 
 Sinnoh_Text_TrFishermanCoryAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x4E, 0xFF
 
 Sinnoh_EventScript_TrFishermanErick::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_ERICK, Sinnoh_Text_TrFishermanErickIntro, Sinnoh_Text_TrFishermanErickDefeat
@@ -2450,15 +2148,13 @@ Sinnoh_EventScript_TrFishermanErick::
 	end
 
 Sinnoh_Text_TrFishermanErickIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x5E, 0xFF
 
 Sinnoh_Text_TrFishermanErickDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x5F, 0xFF
 
 Sinnoh_Text_TrFishermanErickAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x60, 0xFF
 
 Sinnoh_EventScript_TrFishermanGeorge::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_GEORGE, Sinnoh_Text_TrFishermanGeorgeIntro, Sinnoh_Text_TrFishermanGeorgeDefeat
@@ -2466,15 +2162,13 @@ Sinnoh_EventScript_TrFishermanGeorge::
 	end
 
 Sinnoh_Text_TrFishermanGeorgeIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x70, 0xFF
 
 Sinnoh_Text_TrFishermanGeorgeDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x71, 0xFF
 
 Sinnoh_Text_TrFishermanGeorgeAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x72, 0xFF
 
 Sinnoh_EventScript_TrFishermanJoseph::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_JOSEPH, Sinnoh_Text_TrFishermanJosephIntro, Sinnoh_Text_TrFishermanJosephDefeat
@@ -2482,15 +2176,13 @@ Sinnoh_EventScript_TrFishermanJoseph::
 	end
 
 Sinnoh_Text_TrFishermanJosephIntro:
-	.string "Ahoy! A sailor never turns down a\n"
-	.string "fight!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x02, 0xFF
 
 Sinnoh_Text_TrFishermanJosephDefeat:
-	.string "Blown off course!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x03, 0xFF
 
 Sinnoh_Text_TrFishermanJosephAfter:
-	.string "The sea teaches you to lose well. I've\n"
-	.string "had a lot of lessons.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x04, 0xFF
 
 Sinnoh_EventScript_TrFishermanJosh::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_JOSH, Sinnoh_Text_TrFishermanJoshIntro, Sinnoh_Text_TrFishermanJoshDefeat
@@ -2498,15 +2190,13 @@ Sinnoh_EventScript_TrFishermanJosh::
 	end
 
 Sinnoh_Text_TrFishermanJoshIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x38, 0xFF
 
 Sinnoh_Text_TrFishermanJoshDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x39, 0xFF
 
 Sinnoh_Text_TrFishermanJoshAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x3A, 0xFF
 
 Sinnoh_EventScript_TrFishermanJuan::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_JUAN, Sinnoh_Text_TrFishermanJuanIntro, Sinnoh_Text_TrFishermanJuanDefeat
@@ -2514,15 +2204,13 @@ Sinnoh_EventScript_TrFishermanJuan::
 	end
 
 Sinnoh_Text_TrFishermanJuanIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x4A, 0xFF
 
 Sinnoh_Text_TrFishermanJuanDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x4B, 0xFF
 
 Sinnoh_Text_TrFishermanJuanAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x4C, 0xFF
 
 Sinnoh_EventScript_TrFishermanKenneth::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_KENNETH, Sinnoh_Text_TrFishermanKennethIntro, Sinnoh_Text_TrFishermanKennethDefeat
@@ -2530,15 +2218,13 @@ Sinnoh_EventScript_TrFishermanKenneth::
 	end
 
 Sinnoh_Text_TrFishermanKennethIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x5C, 0xFF
 
 Sinnoh_Text_TrFishermanKennethDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x5D, 0xFF
 
 Sinnoh_Text_TrFishermanKennethAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x5E, 0xFF
 
 Sinnoh_EventScript_TrFishermanLuc::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_LUC, Sinnoh_Text_TrFishermanLucIntro, Sinnoh_Text_TrFishermanLucDefeat
@@ -2546,15 +2232,13 @@ Sinnoh_EventScript_TrFishermanLuc::
 	end
 
 Sinnoh_Text_TrFishermanLucIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x6E, 0xFF
 
 Sinnoh_Text_TrFishermanLucDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x6F, 0xFF
 
 Sinnoh_Text_TrFishermanLucAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x70, 0xFF
 
 Sinnoh_EventScript_TrFishermanMiguel::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_MIGUEL, Sinnoh_Text_TrFishermanMiguelIntro, Sinnoh_Text_TrFishermanMiguelDefeat
@@ -2562,15 +2246,13 @@ Sinnoh_EventScript_TrFishermanMiguel::
 	end
 
 Sinnoh_Text_TrFishermanMiguelIntro:
-	.string "Ahoy! A sailor never turns down a\n"
-	.string "fight!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3F, 0x00, 0xFF
 
 Sinnoh_Text_TrFishermanMiguelDefeat:
-	.string "Blown off course!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3F, 0x01, 0xFF
 
 Sinnoh_Text_TrFishermanMiguelAfter:
-	.string "The sea teaches you to lose well. I've\n"
-	.string "had a lot of lessons.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3F, 0x02, 0xFF
 
 Sinnoh_EventScript_TrFishermanTravis::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_TRAVIS, Sinnoh_Text_TrFishermanTravisIntro, Sinnoh_Text_TrFishermanTravisDefeat
@@ -2578,15 +2260,13 @@ Sinnoh_EventScript_TrFishermanTravis::
 	end
 
 Sinnoh_Text_TrFishermanTravisIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3F, 0x24, 0xFF
 
 Sinnoh_Text_TrFishermanTravisDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3F, 0x25, 0xFF
 
 Sinnoh_Text_TrFishermanTravisAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3F, 0x26, 0xFF
 
 Sinnoh_EventScript_TrFishermanWalter::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_WALTER, Sinnoh_Text_TrFishermanWalterIntro, Sinnoh_Text_TrFishermanWalterDefeat
@@ -2594,15 +2274,13 @@ Sinnoh_EventScript_TrFishermanWalter::
 	end
 
 Sinnoh_Text_TrFishermanWalterIntro:
-	.string "Ahoy! A sailor never turns down a\n"
-	.string "fight!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3F, 0x36, 0xFF
 
 Sinnoh_Text_TrFishermanWalterDefeat:
-	.string "Blown off course!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3F, 0x37, 0xFF
 
 Sinnoh_Text_TrFishermanWalterAfter:
-	.string "The sea teaches you to lose well. I've\n"
-	.string "had a lot of lessons.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3F, 0x38, 0xFF
 
 Sinnoh_EventScript_TrFishermanZachary::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_ZACHARY, Sinnoh_Text_TrFishermanZacharyIntro, Sinnoh_Text_TrFishermanZacharyDefeat
@@ -2610,15 +2288,13 @@ Sinnoh_EventScript_TrFishermanZachary::
 	end
 
 Sinnoh_Text_TrFishermanZacharyIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3F, 0x48, 0xFF
 
 Sinnoh_Text_TrFishermanZacharyDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3F, 0x49, 0xFF
 
 Sinnoh_Text_TrFishermanZacharyAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3F, 0x4A, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntGalacticHq1f::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_GALACTIC_HQ_1F, Sinnoh_Text_TrGalacticGruntGalacticHq1fIntro, Sinnoh_Text_TrGalacticGruntGalacticHq1fDefeat
@@ -2626,15 +2302,13 @@ Sinnoh_EventScript_TrGalacticGruntGalacticHq1f::
 	end
 
 Sinnoh_Text_TrGalacticGruntGalacticHq1fIntro:
-	.string "TEAM GALACTIC is busy here. Move\n"
-	.string "along, or move us!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x40, 0x46, 0xFF
 
 Sinnoh_Text_TrGalacticGruntGalacticHq1fDefeat:
-	.string "Hey, that's not in the plan!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x40, 0x47, 0xFF
 
 Sinnoh_Text_TrGalacticGruntGalacticHq1fAfter:
-	.string "You haven't seen the last of TEAM\n"
-	.string "GALACTIC... probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x40, 0x48, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntGalacticHq2f1::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_GALACTIC_HQ_2F_1, Sinnoh_Text_TrGalacticGruntGalacticHq2f1Intro, Sinnoh_Text_TrGalacticGruntGalacticHq2f1Defeat
@@ -2642,15 +2316,13 @@ Sinnoh_EventScript_TrGalacticGruntGalacticHq2f1::
 	end
 
 Sinnoh_Text_TrGalacticGruntGalacticHq2f1Intro:
-	.string "TEAM GALACTIC is busy here. Move\n"
-	.string "along, or move us!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x40, 0x58, 0xFF
 
 Sinnoh_Text_TrGalacticGruntGalacticHq2f1Defeat:
-	.string "Hey, that's not in the plan!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x40, 0x59, 0xFF
 
 Sinnoh_Text_TrGalacticGruntGalacticHq2f1After:
-	.string "You haven't seen the last of TEAM\n"
-	.string "GALACTIC... probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x40, 0x5A, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntGalacticHq2f2::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_GALACTIC_HQ_2F_2, Sinnoh_Text_TrGalacticGruntGalacticHq2f2Intro, Sinnoh_Text_TrGalacticGruntGalacticHq2f2Defeat
@@ -2658,15 +2330,13 @@ Sinnoh_EventScript_TrGalacticGruntGalacticHq2f2::
 	end
 
 Sinnoh_Text_TrGalacticGruntGalacticHq2f2Intro:
-	.string "Halt! This area is closed by order of\n"
-	.string "TEAM GALACTIC!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x40, 0x6A, 0xFF
 
 Sinnoh_Text_TrGalacticGruntGalacticHq2f2Defeat:
-	.string "I'll have to report this...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x40, 0x6B, 0xFF
 
 Sinnoh_Text_TrGalacticGruntGalacticHq2f2After:
-	.string "My boss is going to make me fill out so\n"
-	.string "many forms.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x40, 0x6C, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntGalacticHq2f3::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_GALACTIC_HQ_2F_3, Sinnoh_Text_TrGalacticGruntGalacticHq2f3Intro, Sinnoh_Text_TrGalacticGruntGalacticHq2f3Defeat
@@ -2674,15 +2344,13 @@ Sinnoh_EventScript_TrGalacticGruntGalacticHq2f3::
 	end
 
 Sinnoh_Text_TrGalacticGruntGalacticHq2f3Intro:
-	.string "A kid wandering around here? I'll send\n"
-	.string "you home!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x40, 0x7C, 0xFF
 
 Sinnoh_Text_TrGalacticGruntGalacticHq2f3Defeat:
-	.string "I'm the one who should go home...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x40, 0x7D, 0xFF
 
 Sinnoh_Text_TrGalacticGruntGalacticHq2f3After:
-	.string "Fine, fine. Just don't tell anyone you\n"
-	.string "beat me.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x40, 0x7E, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntGalacticHq3f1::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_GALACTIC_HQ_3F_1, Sinnoh_Text_TrGalacticGruntGalacticHq3f1Intro, Sinnoh_Text_TrGalacticGruntGalacticHq3f1Defeat
@@ -2690,15 +2358,13 @@ Sinnoh_EventScript_TrGalacticGruntGalacticHq3f1::
 	end
 
 Sinnoh_Text_TrGalacticGruntGalacticHq3f1Intro:
-	.string "Halt! This area is closed by order of\n"
-	.string "TEAM GALACTIC!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x41, 0x0E, 0xFF
 
 Sinnoh_Text_TrGalacticGruntGalacticHq3f1Defeat:
-	.string "I'll have to report this...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x41, 0x0F, 0xFF
 
 Sinnoh_Text_TrGalacticGruntGalacticHq3f1After:
-	.string "My boss is going to make me fill out so\n"
-	.string "many forms.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x41, 0x10, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntGalacticHq3f2::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_GALACTIC_HQ_3F_2, Sinnoh_Text_TrGalacticGruntGalacticHq3f2Intro, Sinnoh_Text_TrGalacticGruntGalacticHq3f2Defeat
@@ -2706,15 +2372,13 @@ Sinnoh_EventScript_TrGalacticGruntGalacticHq3f2::
 	end
 
 Sinnoh_Text_TrGalacticGruntGalacticHq3f2Intro:
-	.string "A kid wandering around here? I'll send\n"
-	.string "you home!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x41, 0x20, 0xFF
 
 Sinnoh_Text_TrGalacticGruntGalacticHq3f2Defeat:
-	.string "I'm the one who should go home...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x41, 0x21, 0xFF
 
 Sinnoh_Text_TrGalacticGruntGalacticHq3f2After:
-	.string "Fine, fine. Just don't tell anyone you\n"
-	.string "beat me.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x41, 0x22, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntGalacticHq3f3::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_GALACTIC_HQ_3F_3, Sinnoh_Text_TrGalacticGruntGalacticHq3f3Intro, Sinnoh_Text_TrGalacticGruntGalacticHq3f3Defeat
@@ -2722,15 +2386,13 @@ Sinnoh_EventScript_TrGalacticGruntGalacticHq3f3::
 	end
 
 Sinnoh_Text_TrGalacticGruntGalacticHq3f3Intro:
-	.string "TEAM GALACTIC is busy here. Move\n"
-	.string "along, or move us!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x41, 0x32, 0xFF
 
 Sinnoh_Text_TrGalacticGruntGalacticHq3f3Defeat:
-	.string "Hey, that's not in the plan!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x41, 0x33, 0xFF
 
 Sinnoh_Text_TrGalacticGruntGalacticHq3f3After:
-	.string "You haven't seen the last of TEAM\n"
-	.string "GALACTIC... probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x41, 0x34, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntGalacticHq3f4::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_GALACTIC_HQ_3F_4, Sinnoh_Text_TrGalacticGruntGalacticHq3f4Intro, Sinnoh_Text_TrGalacticGruntGalacticHq3f4Defeat
@@ -2738,15 +2400,13 @@ Sinnoh_EventScript_TrGalacticGruntGalacticHq3f4::
 	end
 
 Sinnoh_Text_TrGalacticGruntGalacticHq3f4Intro:
-	.string "Halt! This area is closed by order of\n"
-	.string "TEAM GALACTIC!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x41, 0x44, 0xFF
 
 Sinnoh_Text_TrGalacticGruntGalacticHq3f4Defeat:
-	.string "I'll have to report this...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x41, 0x45, 0xFF
 
 Sinnoh_Text_TrGalacticGruntGalacticHq3f4After:
-	.string "My boss is going to make me fill out so\n"
-	.string "many forms.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x41, 0x46, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntGalacticHqB2f1::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_GALACTIC_HQ_B2F_1, Sinnoh_Text_TrGalacticGruntGalacticHqB2f1Intro, Sinnoh_Text_TrGalacticGruntGalacticHqB2f1Defeat
@@ -2754,15 +2414,13 @@ Sinnoh_EventScript_TrGalacticGruntGalacticHqB2f1::
 	end
 
 Sinnoh_Text_TrGalacticGruntGalacticHqB2f1Intro:
-	.string "Halt! This area is closed by order of\n"
-	.string "TEAM GALACTIC!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x41, 0x56, 0xFF
 
 Sinnoh_Text_TrGalacticGruntGalacticHqB2f1Defeat:
-	.string "I'll have to report this...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x41, 0x57, 0xFF
 
 Sinnoh_Text_TrGalacticGruntGalacticHqB2f1After:
-	.string "My boss is going to make me fill out so\n"
-	.string "many forms.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x41, 0x58, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntGalacticHqB2f2::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_GALACTIC_HQ_B2F_2, Sinnoh_Text_TrGalacticGruntGalacticHqB2f2Intro, Sinnoh_Text_TrGalacticGruntGalacticHqB2f2Defeat
@@ -2770,15 +2428,13 @@ Sinnoh_EventScript_TrGalacticGruntGalacticHqB2f2::
 	end
 
 Sinnoh_Text_TrGalacticGruntGalacticHqB2f2Intro:
-	.string "A kid wandering around here? I'll send\n"
-	.string "you home!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x41, 0x68, 0xFF
 
 Sinnoh_Text_TrGalacticGruntGalacticHqB2f2Defeat:
-	.string "I'm the one who should go home...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x41, 0x69, 0xFF
 
 Sinnoh_Text_TrGalacticGruntGalacticHqB2f2After:
-	.string "Fine, fine. Just don't tell anyone you\n"
-	.string "beat me.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x41, 0x6A, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntLakeValor1::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_LAKE_VALOR_1, Sinnoh_Text_TrGalacticGruntLakeValor1Intro, Sinnoh_Text_TrGalacticGruntLakeValor1Defeat
@@ -2786,15 +2442,13 @@ Sinnoh_EventScript_TrGalacticGruntLakeValor1::
 	end
 
 Sinnoh_Text_TrGalacticGruntLakeValor1Intro:
-	.string "TEAM GALACTIC is busy here. Move\n"
-	.string "along, or move us!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x42, 0x42, 0xFF
 
 Sinnoh_Text_TrGalacticGruntLakeValor1Defeat:
-	.string "Hey, that's not in the plan!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x42, 0x43, 0xFF
 
 Sinnoh_Text_TrGalacticGruntLakeValor1After:
-	.string "You haven't seen the last of TEAM\n"
-	.string "GALACTIC... probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x42, 0x44, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntLakeValor2::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_LAKE_VALOR_2, Sinnoh_Text_TrGalacticGruntLakeValor2Intro, Sinnoh_Text_TrGalacticGruntLakeValor2Defeat
@@ -2802,15 +2456,13 @@ Sinnoh_EventScript_TrGalacticGruntLakeValor2::
 	end
 
 Sinnoh_Text_TrGalacticGruntLakeValor2Intro:
-	.string "Halt! This area is closed by order of\n"
-	.string "TEAM GALACTIC!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x42, 0x54, 0xFF
 
 Sinnoh_Text_TrGalacticGruntLakeValor2Defeat:
-	.string "I'll have to report this...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x42, 0x55, 0xFF
 
 Sinnoh_Text_TrGalacticGruntLakeValor2After:
-	.string "My boss is going to make me fill out so\n"
-	.string "many forms.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x42, 0x56, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntLakeValor3::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_LAKE_VALOR_3, Sinnoh_Text_TrGalacticGruntLakeValor3Intro, Sinnoh_Text_TrGalacticGruntLakeValor3Defeat
@@ -2818,15 +2470,13 @@ Sinnoh_EventScript_TrGalacticGruntLakeValor3::
 	end
 
 Sinnoh_Text_TrGalacticGruntLakeValor3Intro:
-	.string "A kid wandering around here? I'll send\n"
-	.string "you home!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x42, 0x66, 0xFF
 
 Sinnoh_Text_TrGalacticGruntLakeValor3Defeat:
-	.string "I'm the one who should go home...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x42, 0x67, 0xFF
 
 Sinnoh_Text_TrGalacticGruntLakeValor3After:
-	.string "Fine, fine. Just don't tell anyone you\n"
-	.string "beat me.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x42, 0x68, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntLakeVerity1::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_LAKE_VERITY_1, Sinnoh_Text_TrGalacticGruntLakeVerity1Intro, Sinnoh_Text_TrGalacticGruntLakeVerity1Defeat
@@ -2834,15 +2484,13 @@ Sinnoh_EventScript_TrGalacticGruntLakeVerity1::
 	end
 
 Sinnoh_Text_TrGalacticGruntLakeVerity1Intro:
-	.string "Halt! This area is closed by order of\n"
-	.string "TEAM GALACTIC!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x42, 0x78, 0xFF
 
 Sinnoh_Text_TrGalacticGruntLakeVerity1Defeat:
-	.string "I'll have to report this...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x42, 0x79, 0xFF
 
 Sinnoh_Text_TrGalacticGruntLakeVerity1After:
-	.string "My boss is going to make me fill out so\n"
-	.string "many forms.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x42, 0x7A, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntLakeVerity2::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_LAKE_VERITY_2, Sinnoh_Text_TrGalacticGruntLakeVerity2Intro, Sinnoh_Text_TrGalacticGruntLakeVerity2Defeat
@@ -2850,15 +2498,13 @@ Sinnoh_EventScript_TrGalacticGruntLakeVerity2::
 	end
 
 Sinnoh_Text_TrGalacticGruntLakeVerity2Intro:
-	.string "A kid wandering around here? I'll send\n"
-	.string "you home!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x0A, 0xFF
 
 Sinnoh_Text_TrGalacticGruntLakeVerity2Defeat:
-	.string "I'm the one who should go home...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x0B, 0xFF
 
 Sinnoh_Text_TrGalacticGruntLakeVerity2After:
-	.string "Fine, fine. Just don't tell anyone you\n"
-	.string "beat me.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x0C, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntLakeVerity3::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_LAKE_VERITY_3, Sinnoh_Text_TrGalacticGruntLakeVerity3Intro, Sinnoh_Text_TrGalacticGruntLakeVerity3Defeat
@@ -2866,15 +2512,13 @@ Sinnoh_EventScript_TrGalacticGruntLakeVerity3::
 	end
 
 Sinnoh_Text_TrGalacticGruntLakeVerity3Intro:
-	.string "TEAM GALACTIC is busy here. Move\n"
-	.string "along, or move us!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x1C, 0xFF
 
 Sinnoh_Text_TrGalacticGruntLakeVerity3Defeat:
-	.string "Hey, that's not in the plan!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x1D, 0xFF
 
 Sinnoh_Text_TrGalacticGruntLakeVerity3After:
-	.string "You haven't seen the last of TEAM\n"
-	.string "GALACTIC... probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x1E, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntLakeVerity4::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_LAKE_VERITY_4, Sinnoh_Text_TrGalacticGruntLakeVerity4Intro, Sinnoh_Text_TrGalacticGruntLakeVerity4Defeat
@@ -2882,15 +2526,13 @@ Sinnoh_EventScript_TrGalacticGruntLakeVerity4::
 	end
 
 Sinnoh_Text_TrGalacticGruntLakeVerity4Intro:
-	.string "Halt! This area is closed by order of\n"
-	.string "TEAM GALACTIC!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x2E, 0xFF
 
 Sinnoh_Text_TrGalacticGruntLakeVerity4Defeat:
-	.string "I'll have to report this...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x2F, 0xFF
 
 Sinnoh_Text_TrGalacticGruntLakeVerity4After:
-	.string "My boss is going to make me fill out so\n"
-	.string "many forms.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x30, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntMtCoronet3f1::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_MT_CORONET_3F_1, Sinnoh_Text_TrGalacticGruntMtCoronet3f1Intro, Sinnoh_Text_TrGalacticGruntMtCoronet3f1Defeat
@@ -2898,15 +2540,13 @@ Sinnoh_EventScript_TrGalacticGruntMtCoronet3f1::
 	end
 
 Sinnoh_Text_TrGalacticGruntMtCoronet3f1Intro:
-	.string "A kid wandering around here? I'll send\n"
-	.string "you home!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x40, 0xFF
 
 Sinnoh_Text_TrGalacticGruntMtCoronet3f1Defeat:
-	.string "I'm the one who should go home...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x41, 0xFF
 
 Sinnoh_Text_TrGalacticGruntMtCoronet3f1After:
-	.string "Fine, fine. Just don't tell anyone you\n"
-	.string "beat me.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x42, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntMtCoronet3f2::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_MT_CORONET_3F_2, Sinnoh_Text_TrGalacticGruntMtCoronet3f2Intro, Sinnoh_Text_TrGalacticGruntMtCoronet3f2Defeat
@@ -2914,15 +2554,13 @@ Sinnoh_EventScript_TrGalacticGruntMtCoronet3f2::
 	end
 
 Sinnoh_Text_TrGalacticGruntMtCoronet3f2Intro:
-	.string "TEAM GALACTIC is busy here. Move\n"
-	.string "along, or move us!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x52, 0xFF
 
 Sinnoh_Text_TrGalacticGruntMtCoronet3f2Defeat:
-	.string "Hey, that's not in the plan!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x53, 0xFF
 
 Sinnoh_Text_TrGalacticGruntMtCoronet3f2After:
-	.string "You haven't seen the last of TEAM\n"
-	.string "GALACTIC... probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x54, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntMtCoronet4f1::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_MT_CORONET_4F_1, Sinnoh_Text_TrGalacticGruntMtCoronet4f1Intro, Sinnoh_Text_TrGalacticGruntMtCoronet4f1Defeat
@@ -2930,15 +2568,13 @@ Sinnoh_EventScript_TrGalacticGruntMtCoronet4f1::
 	end
 
 Sinnoh_Text_TrGalacticGruntMtCoronet4f1Intro:
-	.string "TEAM GALACTIC is busy here. Move\n"
-	.string "along, or move us!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x64, 0xFF
 
 Sinnoh_Text_TrGalacticGruntMtCoronet4f1Defeat:
-	.string "Hey, that's not in the plan!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x65, 0xFF
 
 Sinnoh_Text_TrGalacticGruntMtCoronet4f1After:
-	.string "You haven't seen the last of TEAM\n"
-	.string "GALACTIC... probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x66, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntMtCoronet4f2::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_MT_CORONET_4F_2, Sinnoh_Text_TrGalacticGruntMtCoronet4f2Intro, Sinnoh_Text_TrGalacticGruntMtCoronet4f2Defeat
@@ -2946,15 +2582,13 @@ Sinnoh_EventScript_TrGalacticGruntMtCoronet4f2::
 	end
 
 Sinnoh_Text_TrGalacticGruntMtCoronet4f2Intro:
-	.string "Halt! This area is closed by order of\n"
-	.string "TEAM GALACTIC!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x76, 0xFF
 
 Sinnoh_Text_TrGalacticGruntMtCoronet4f2Defeat:
-	.string "I'll have to report this...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x77, 0xFF
 
 Sinnoh_Text_TrGalacticGruntMtCoronet4f2After:
-	.string "My boss is going to make me fill out so\n"
-	.string "many forms.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x43, 0x78, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntMtCoronet5f1::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_MT_CORONET_5F_1, Sinnoh_Text_TrGalacticGruntMtCoronet5f1Intro, Sinnoh_Text_TrGalacticGruntMtCoronet5f1Defeat
@@ -2962,15 +2596,13 @@ Sinnoh_EventScript_TrGalacticGruntMtCoronet5f1::
 	end
 
 Sinnoh_Text_TrGalacticGruntMtCoronet5f1Intro:
-	.string "Halt! This area is closed by order of\n"
-	.string "TEAM GALACTIC!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x44, 0x08, 0xFF
 
 Sinnoh_Text_TrGalacticGruntMtCoronet5f1Defeat:
-	.string "I'll have to report this...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x44, 0x09, 0xFF
 
 Sinnoh_Text_TrGalacticGruntMtCoronet5f1After:
-	.string "My boss is going to make me fill out so\n"
-	.string "many forms.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x44, 0x0A, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntMtCoronet5f2::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_MT_CORONET_5F_2, Sinnoh_Text_TrGalacticGruntMtCoronet5f2Intro, Sinnoh_Text_TrGalacticGruntMtCoronet5f2Defeat
@@ -2978,15 +2610,13 @@ Sinnoh_EventScript_TrGalacticGruntMtCoronet5f2::
 	end
 
 Sinnoh_Text_TrGalacticGruntMtCoronet5f2Intro:
-	.string "A kid wandering around here? I'll send\n"
-	.string "you home!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x44, 0x1A, 0xFF
 
 Sinnoh_Text_TrGalacticGruntMtCoronet5f2Defeat:
-	.string "I'm the one who should go home...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x44, 0x1B, 0xFF
 
 Sinnoh_Text_TrGalacticGruntMtCoronet5f2After:
-	.string "Fine, fine. Just don't tell anyone you\n"
-	.string "beat me.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x44, 0x1C, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntMtCoronet6f::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_MT_CORONET_6F, Sinnoh_Text_TrGalacticGruntMtCoronet6fIntro, Sinnoh_Text_TrGalacticGruntMtCoronet6fDefeat
@@ -2994,15 +2624,13 @@ Sinnoh_EventScript_TrGalacticGruntMtCoronet6f::
 	end
 
 Sinnoh_Text_TrGalacticGruntMtCoronet6fIntro:
-	.string "A kid wandering around here? I'll send\n"
-	.string "you home!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x44, 0x2C, 0xFF
 
 Sinnoh_Text_TrGalacticGruntMtCoronet6fDefeat:
-	.string "I'm the one who should go home...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x44, 0x2D, 0xFF
 
 Sinnoh_Text_TrGalacticGruntMtCoronet6fAfter:
-	.string "Fine, fine. Just don't tell anyone you\n"
-	.string "beat me.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x44, 0x2E, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntMtCoronetTunnelRoom1::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_MT_CORONET_TUNNEL_ROOM_1, Sinnoh_Text_TrGalacticGruntMtCoronetTunnelRoom1Intro, Sinnoh_Text_TrGalacticGruntMtCoronetTunnelRoom1Defeat
@@ -3010,15 +2638,13 @@ Sinnoh_EventScript_TrGalacticGruntMtCoronetTunnelRoom1::
 	end
 
 Sinnoh_Text_TrGalacticGruntMtCoronetTunnelRoom1Intro:
-	.string "A kid wandering around here? I'll send\n"
-	.string "you home!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x44, 0x3E, 0xFF
 
 Sinnoh_Text_TrGalacticGruntMtCoronetTunnelRoom1Defeat:
-	.string "I'm the one who should go home...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x44, 0x3F, 0xFF
 
 Sinnoh_Text_TrGalacticGruntMtCoronetTunnelRoom1After:
-	.string "Fine, fine. Just don't tell anyone you\n"
-	.string "beat me.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x44, 0x40, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntMtCoronetTunnelRoom2::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_MT_CORONET_TUNNEL_ROOM_2, Sinnoh_Text_TrGalacticGruntMtCoronetTunnelRoom2Intro, Sinnoh_Text_TrGalacticGruntMtCoronetTunnelRoom2Defeat
@@ -3026,15 +2652,13 @@ Sinnoh_EventScript_TrGalacticGruntMtCoronetTunnelRoom2::
 	end
 
 Sinnoh_Text_TrGalacticGruntMtCoronetTunnelRoom2Intro:
-	.string "TEAM GALACTIC is busy here. Move\n"
-	.string "along, or move us!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x44, 0x50, 0xFF
 
 Sinnoh_Text_TrGalacticGruntMtCoronetTunnelRoom2Defeat:
-	.string "Hey, that's not in the plan!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x44, 0x51, 0xFF
 
 Sinnoh_Text_TrGalacticGruntMtCoronetTunnelRoom2After:
-	.string "You haven't seen the last of TEAM\n"
-	.string "GALACTIC... probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x44, 0x52, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntMtCoronetTunnelRoom3::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_MT_CORONET_TUNNEL_ROOM_3, Sinnoh_Text_TrGalacticGruntMtCoronetTunnelRoom3Intro, Sinnoh_Text_TrGalacticGruntMtCoronetTunnelRoom3Defeat
@@ -3042,15 +2666,13 @@ Sinnoh_EventScript_TrGalacticGruntMtCoronetTunnelRoom3::
 	end
 
 Sinnoh_Text_TrGalacticGruntMtCoronetTunnelRoom3Intro:
-	.string "Halt! This area is closed by order of\n"
-	.string "TEAM GALACTIC!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x44, 0x62, 0xFF
 
 Sinnoh_Text_TrGalacticGruntMtCoronetTunnelRoom3Defeat:
-	.string "I'll have to report this...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x44, 0x63, 0xFF
 
 Sinnoh_Text_TrGalacticGruntMtCoronetTunnelRoom3After:
-	.string "My boss is going to make me fill out so\n"
-	.string "many forms.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x44, 0x64, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntTeamGalacticEternaBuilding1f1::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_TEAM_GALACTIC_ETERNA_BUILDING_1F_1, Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding1f1Intro, Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding1f1Defeat
@@ -3058,15 +2680,13 @@ Sinnoh_EventScript_TrGalacticGruntTeamGalacticEternaBuilding1f1::
 	end
 
 Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding1f1Intro:
-	.string "Halt! This area is closed by order of\n"
-	.string "TEAM GALACTIC!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x45, 0x18, 0xFF
 
 Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding1f1Defeat:
-	.string "I'll have to report this...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x45, 0x19, 0xFF
 
 Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding1f1After:
-	.string "My boss is going to make me fill out so\n"
-	.string "many forms.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x45, 0x1A, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntTeamGalacticEternaBuilding1f2::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_TEAM_GALACTIC_ETERNA_BUILDING_1F_2, Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding1f2Intro, Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding1f2Defeat
@@ -3074,15 +2694,13 @@ Sinnoh_EventScript_TrGalacticGruntTeamGalacticEternaBuilding1f2::
 	end
 
 Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding1f2Intro:
-	.string "A kid wandering around here? I'll send\n"
-	.string "you home!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x45, 0x2A, 0xFF
 
 Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding1f2Defeat:
-	.string "I'm the one who should go home...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x45, 0x2B, 0xFF
 
 Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding1f2After:
-	.string "Fine, fine. Just don't tell anyone you\n"
-	.string "beat me.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x45, 0x2C, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntTeamGalacticEternaBuilding2f1::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_TEAM_GALACTIC_ETERNA_BUILDING_2F_1, Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding2f1Intro, Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding2f1Defeat
@@ -3090,15 +2708,13 @@ Sinnoh_EventScript_TrGalacticGruntTeamGalacticEternaBuilding2f1::
 	end
 
 Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding2f1Intro:
-	.string "A kid wandering around here? I'll send\n"
-	.string "you home!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x45, 0x3C, 0xFF
 
 Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding2f1Defeat:
-	.string "I'm the one who should go home...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x45, 0x3D, 0xFF
 
 Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding2f1After:
-	.string "Fine, fine. Just don't tell anyone you\n"
-	.string "beat me.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x45, 0x3E, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntTeamGalacticEternaBuilding2f2::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_TEAM_GALACTIC_ETERNA_BUILDING_2F_2, Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding2f2Intro, Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding2f2Defeat
@@ -3106,15 +2722,13 @@ Sinnoh_EventScript_TrGalacticGruntTeamGalacticEternaBuilding2f2::
 	end
 
 Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding2f2Intro:
-	.string "TEAM GALACTIC is busy here. Move\n"
-	.string "along, or move us!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x45, 0x4E, 0xFF
 
 Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding2f2Defeat:
-	.string "Hey, that's not in the plan!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x45, 0x4F, 0xFF
 
 Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding2f2After:
-	.string "You haven't seen the last of TEAM\n"
-	.string "GALACTIC... probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x45, 0x50, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntTeamGalacticEternaBuilding3f::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_TEAM_GALACTIC_ETERNA_BUILDING_3F, Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding3fIntro, Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding3fDefeat
@@ -3122,15 +2736,13 @@ Sinnoh_EventScript_TrGalacticGruntTeamGalacticEternaBuilding3f::
 	end
 
 Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding3fIntro:
-	.string "Halt! This area is closed by order of\n"
-	.string "TEAM GALACTIC!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x45, 0x60, 0xFF
 
 Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding3fDefeat:
-	.string "I'll have to report this...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x45, 0x61, 0xFF
 
 Sinnoh_Text_TrGalacticGruntTeamGalacticEternaBuilding3fAfter:
-	.string "My boss is going to make me fill out so\n"
-	.string "many forms.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x45, 0x62, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntValleyWindworks2::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_VALLEY_WINDWORKS_2, Sinnoh_Text_TrGalacticGruntValleyWindworks2Intro, Sinnoh_Text_TrGalacticGruntValleyWindworks2Defeat
@@ -3138,15 +2750,13 @@ Sinnoh_EventScript_TrGalacticGruntValleyWindworks2::
 	end
 
 Sinnoh_Text_TrGalacticGruntValleyWindworks2Intro:
-	.string "Halt! This area is closed by order of\n"
-	.string "TEAM GALACTIC!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x46, 0x04, 0xFF
 
 Sinnoh_Text_TrGalacticGruntValleyWindworks2Defeat:
-	.string "I'll have to report this...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x46, 0x05, 0xFF
 
 Sinnoh_Text_TrGalacticGruntValleyWindworks2After:
-	.string "My boss is going to make me fill out so\n"
-	.string "many forms.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x46, 0x06, 0xFF
 
 Sinnoh_EventScript_TrGalacticGruntValleyWindworks3::
 	trainerbattle_single TRAINER_SINNOH_GALACTIC_GRUNT_VALLEY_WINDWORKS_3, Sinnoh_Text_TrGalacticGruntValleyWindworks3Intro, Sinnoh_Text_TrGalacticGruntValleyWindworks3Defeat
@@ -3154,15 +2764,13 @@ Sinnoh_EventScript_TrGalacticGruntValleyWindworks3::
 	end
 
 Sinnoh_Text_TrGalacticGruntValleyWindworks3Intro:
-	.string "A kid wandering around here? I'll send\n"
-	.string "you home!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x46, 0x16, 0xFF
 
 Sinnoh_Text_TrGalacticGruntValleyWindworks3Defeat:
-	.string "I'm the one who should go home...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x46, 0x17, 0xFF
 
 Sinnoh_Text_TrGalacticGruntValleyWindworks3After:
-	.string "Fine, fine. Just don't tell anyone you\n"
-	.string "beat me.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x46, 0x18, 0xFF
 
 Sinnoh_EventScript_TrGentlemanJeremy::
 	trainerbattle_single TRAINER_SINNOH_GENTLEMAN_JEREMY, Sinnoh_Text_TrGentlemanJeremyIntro, Sinnoh_Text_TrGentlemanJeremyDefeat
@@ -3170,15 +2778,13 @@ Sinnoh_EventScript_TrGentlemanJeremy::
 	end
 
 Sinnoh_Text_TrGentlemanJeremyIntro:
-	.string "A battle with a traveler! I'll tell\n"
-	.string "everyone about this.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x46, 0x5E, 0xFF
 
 Sinnoh_Text_TrGentlemanJeremyDefeat:
-	.string "I'll leave out the part where I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x46, 0x5F, 0xFF
 
 Sinnoh_Text_TrGentlemanJeremyAfter:
-	.string "Was that your best? It was lovely.\n"
-	.string "Truly.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x46, 0x60, 0xFF
 
 Sinnoh_EventScript_TrGuitaristJerry::
 	trainerbattle_single TRAINER_SINNOH_GUITARIST_JERRY, Sinnoh_Text_TrGuitaristJerryIntro, Sinnoh_Text_TrGuitaristJerryDefeat
@@ -3186,15 +2792,13 @@ Sinnoh_EventScript_TrGuitaristJerry::
 	end
 
 Sinnoh_Text_TrGuitaristJerryIntro:
-	.string "I've studied MOéMON for years. Time\n"
-	.string "for a field test!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x48, 0x24, 0xFF
 
 Sinnoh_Text_TrGuitaristJerryDefeat:
-	.string "Hmm. The data says I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x48, 0x25, 0xFF
 
 Sinnoh_Text_TrGuitaristJerryAfter:
-	.string "I'll write that battle down in my\n"
-	.string "notebook. Under “lessons.”$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x48, 0x26, 0xFF
 
 Sinnoh_EventScript_TrGuitaristLonnie::
 	trainerbattle_single TRAINER_SINNOH_GUITARIST_LONNIE, Sinnoh_Text_TrGuitaristLonnieIntro, Sinnoh_Text_TrGuitaristLonnieDefeat
@@ -3202,15 +2806,13 @@ Sinnoh_EventScript_TrGuitaristLonnie::
 	end
 
 Sinnoh_Text_TrGuitaristLonnieIntro:
-	.string "You there! You look like you'd\n"
-	.string "appreciate my team!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x48, 0x36, 0xFF
 
 Sinnoh_Text_TrGuitaristLonnieDefeat:
-	.string "My poor darlings!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x48, 0x37, 0xFF
 
 Sinnoh_Text_TrGuitaristLonnieAfter:
-	.string "Every MOéMON is special. Even when\n"
-	.string "they lose.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x48, 0x38, 0xFF
 
 Sinnoh_EventScript_TrGuitaristPreston::
 	trainerbattle_single TRAINER_SINNOH_GUITARIST_PRESTON, Sinnoh_Text_TrGuitaristPrestonIntro, Sinnoh_Text_TrGuitaristPrestonDefeat
@@ -3218,15 +2820,13 @@ Sinnoh_EventScript_TrGuitaristPreston::
 	end
 
 Sinnoh_Text_TrGuitaristPrestonIntro:
-	.string "Halt! I need to check your TRAINER\n"
-	.string "skills!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x48, 0x48, 0xFF
 
 Sinnoh_Text_TrGuitaristPrestonDefeat:
-	.string "Your skills check out!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x48, 0x49, 0xFF
 
 Sinnoh_Text_TrGuitaristPrestonAfter:
-	.string "Carry on, TRAINER. Stay safe out\n"
-	.string "there.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x48, 0x4A, 0xFF
 
 Sinnoh_EventScript_TrGuitaristTony::
 	trainerbattle_single TRAINER_SINNOH_GUITARIST_TONY, Sinnoh_Text_TrGuitaristTonyIntro, Sinnoh_Text_TrGuitaristTonyDefeat
@@ -3234,15 +2834,13 @@ Sinnoh_EventScript_TrGuitaristTony::
 	end
 
 Sinnoh_Text_TrGuitaristTonyIntro:
-	.string "Listen to my MOéMON's cry! Isn't it\n"
-	.string "music? Let's battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x48, 0x5A, 0xFF
 
 Sinnoh_Text_TrGuitaristTonyDefeat:
-	.string "That was a sad song.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x48, 0x5B, 0xFF
 
 Sinnoh_Text_TrGuitaristTonyAfter:
-	.string "I'll write a song about this. It'll be a\n"
-	.string "slow one.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x48, 0x5C, 0xFF
 
 Sinnoh_EventScript_TrHikerAlexander::
 	trainerbattle_single TRAINER_SINNOH_HIKER_ALEXANDER, Sinnoh_Text_TrHikerAlexanderIntro, Sinnoh_Text_TrHikerAlexanderDefeat
@@ -3250,15 +2848,13 @@ Sinnoh_EventScript_TrHikerAlexander::
 	end
 
 Sinnoh_Text_TrHikerAlexanderIntro:
-	.string "Ha! Up here you have to be tough.\n"
-	.string "Let's see if you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x10, 0xFF
 
 Sinnoh_Text_TrHikerAlexanderDefeat:
-	.string "Tough as a mountain, you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x11, 0xFF
 
 Sinnoh_Text_TrHikerAlexanderAfter:
-	.string "Rest a bit before you go on. The trail\n"
-	.string "doesn't get any flatter.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x12, 0xFF
 
 Sinnoh_EventScript_TrHikerDamon::
 	trainerbattle_single TRAINER_SINNOH_HIKER_DAMON, Sinnoh_Text_TrHikerDamonIntro, Sinnoh_Text_TrHikerDamonDefeat
@@ -3266,15 +2862,13 @@ Sinnoh_EventScript_TrHikerDamon::
 	end
 
 Sinnoh_Text_TrHikerDamonIntro:
-	.string "Ha! Up here you have to be tough.\n"
-	.string "Let's see if you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x22, 0xFF
 
 Sinnoh_Text_TrHikerDamonDefeat:
-	.string "Tough as a mountain, you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x23, 0xFF
 
 Sinnoh_Text_TrHikerDamonAfter:
-	.string "Rest a bit before you go on. The trail\n"
-	.string "doesn't get any flatter.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x24, 0xFF
 
 Sinnoh_EventScript_TrHikerDaniel::
 	trainerbattle_single TRAINER_SINNOH_HIKER_DANIEL, Sinnoh_Text_TrHikerDanielIntro, Sinnoh_Text_TrHikerDanielDefeat
@@ -3282,15 +2876,13 @@ Sinnoh_EventScript_TrHikerDaniel::
 	end
 
 Sinnoh_Text_TrHikerDanielIntro:
-	.string "Hard work makes strong MOéMON. Mine\n"
-	.string "dig all day!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x34, 0xFF
 
 Sinnoh_Text_TrHikerDanielDefeat:
-	.string "Back to digging, I guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x35, 0xFF
 
 Sinnoh_Text_TrHikerDanielAfter:
-	.string "My MOéMON and I are taking a lunch\n"
-	.string "break. We earned it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x36, 0xFF
 
 Sinnoh_EventScript_TrHikerJonathan::
 	trainerbattle_single TRAINER_SINNOH_HIKER_JONATHAN, Sinnoh_Text_TrHikerJonathanIntro, Sinnoh_Text_TrHikerJonathanDefeat
@@ -3298,15 +2890,13 @@ Sinnoh_EventScript_TrHikerJonathan::
 	end
 
 Sinnoh_Text_TrHikerJonathanIntro:
-	.string "Hard work makes strong MOéMON. Mine\n"
-	.string "dig all day!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x46, 0xFF
 
 Sinnoh_Text_TrHikerJonathanDefeat:
-	.string "Back to digging, I guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x47, 0xFF
 
 Sinnoh_Text_TrHikerJonathanAfter:
-	.string "My MOéMON and I are taking a lunch\n"
-	.string "break. We earned it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x48, 0xFF
 
 Sinnoh_EventScript_TrHikerJustin::
 	trainerbattle_single TRAINER_SINNOH_HIKER_JUSTIN, Sinnoh_Text_TrHikerJustinIntro, Sinnoh_Text_TrHikerJustinDefeat
@@ -3314,15 +2904,13 @@ Sinnoh_EventScript_TrHikerJustin::
 	end
 
 Sinnoh_Text_TrHikerJustinIntro:
-	.string "Hard work makes strong MOéMON. Mine\n"
-	.string "dig all day!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x58, 0xFF
 
 Sinnoh_Text_TrHikerJustinDefeat:
-	.string "Back to digging, I guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x59, 0xFF
 
 Sinnoh_Text_TrHikerJustinAfter:
-	.string "My MOéMON and I are taking a lunch\n"
-	.string "break. We earned it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x5A, 0xFF
 
 Sinnoh_EventScript_TrHikerKevin::
 	trainerbattle_single TRAINER_SINNOH_HIKER_KEVIN, Sinnoh_Text_TrHikerKevinIntro, Sinnoh_Text_TrHikerKevinDefeat
@@ -3330,15 +2918,13 @@ Sinnoh_EventScript_TrHikerKevin::
 	end
 
 Sinnoh_Text_TrHikerKevinIntro:
-	.string "I've been out here since sunrise. A\n"
-	.string "battle's just what I need!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x6A, 0xFF
 
 Sinnoh_Text_TrHikerKevinDefeat:
-	.string "Whew! That woke me up.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x6B, 0xFF
 
 Sinnoh_Text_TrHikerKevinAfter:
-	.string "If you see a nice flat rock, that's my\n"
-	.string "nap spot. Don't take it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x6C, 0xFF
 
 Sinnoh_EventScript_TrHikerLorenzo::
 	trainerbattle_single TRAINER_SINNOH_HIKER_LORENZO, Sinnoh_Text_TrHikerLorenzoIntro, Sinnoh_Text_TrHikerLorenzoDefeat
@@ -3346,15 +2932,13 @@ Sinnoh_EventScript_TrHikerLorenzo::
 	end
 
 Sinnoh_Text_TrHikerLorenzoIntro:
-	.string "Ha! Up here you have to be tough.\n"
-	.string "Let's see if you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x7C, 0xFF
 
 Sinnoh_Text_TrHikerLorenzoDefeat:
-	.string "Tough as a mountain, you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x7D, 0xFF
 
 Sinnoh_Text_TrHikerLorenzoAfter:
-	.string "Rest a bit before you go on. The trail\n"
-	.string "doesn't get any flatter.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x7E, 0xFF
 
 Sinnoh_EventScript_TrHikerLouis::
 	trainerbattle_single TRAINER_SINNOH_HIKER_LOUIS, Sinnoh_Text_TrHikerLouisIntro, Sinnoh_Text_TrHikerLouisDefeat
@@ -3362,15 +2946,13 @@ Sinnoh_EventScript_TrHikerLouis::
 	end
 
 Sinnoh_Text_TrHikerLouisIntro:
-	.string "I've been out here since sunrise. A\n"
-	.string "battle's just what I need!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x0E, 0xFF
 
 Sinnoh_Text_TrHikerLouisDefeat:
-	.string "Whew! That woke me up.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x0F, 0xFF
 
 Sinnoh_Text_TrHikerLouisAfter:
-	.string "If you see a nice flat rock, that's my\n"
-	.string "nap spot. Don't take it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x10, 0xFF
 
 Sinnoh_EventScript_TrHikerMaurice::
 	trainerbattle_single TRAINER_SINNOH_HIKER_MAURICE, Sinnoh_Text_TrHikerMauriceIntro, Sinnoh_Text_TrHikerMauriceDefeat
@@ -3378,15 +2960,13 @@ Sinnoh_EventScript_TrHikerMaurice::
 	end
 
 Sinnoh_Text_TrHikerMauriceIntro:
-	.string "Hard work makes strong MOéMON. Mine\n"
-	.string "dig all day!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x20, 0xFF
 
 Sinnoh_Text_TrHikerMauriceDefeat:
-	.string "Back to digging, I guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x21, 0xFF
 
 Sinnoh_Text_TrHikerMauriceAfter:
-	.string "My MOéMON and I are taking a lunch\n"
-	.string "break. We earned it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x22, 0xFF
 
 Sinnoh_EventScript_TrHikerNicholas::
 	trainerbattle_single TRAINER_SINNOH_HIKER_NICHOLAS, Sinnoh_Text_TrHikerNicholasIntro, Sinnoh_Text_TrHikerNicholasDefeat
@@ -3394,15 +2974,13 @@ Sinnoh_EventScript_TrHikerNicholas::
 	end
 
 Sinnoh_Text_TrHikerNicholasIntro:
-	.string "Hard work makes strong MOéMON. Mine\n"
-	.string "dig all day!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x32, 0xFF
 
 Sinnoh_Text_TrHikerNicholasDefeat:
-	.string "Back to digging, I guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x33, 0xFF
 
 Sinnoh_Text_TrHikerNicholasAfter:
-	.string "My MOéMON and I are taking a lunch\n"
-	.string "break. We earned it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x34, 0xFF
 
 Sinnoh_EventScript_TrHikerReginald::
 	trainerbattle_single TRAINER_SINNOH_HIKER_REGINALD, Sinnoh_Text_TrHikerReginaldIntro, Sinnoh_Text_TrHikerReginaldDefeat
@@ -3410,15 +2988,13 @@ Sinnoh_EventScript_TrHikerReginald::
 	end
 
 Sinnoh_Text_TrHikerReginaldIntro:
-	.string "Hard work makes strong MOéMON. Mine\n"
-	.string "dig all day!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x44, 0xFF
 
 Sinnoh_Text_TrHikerReginaldDefeat:
-	.string "Back to digging, I guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x45, 0xFF
 
 Sinnoh_Text_TrHikerReginaldAfter:
-	.string "My MOéMON and I are taking a lunch\n"
-	.string "break. We earned it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x46, 0xFF
 
 Sinnoh_EventScript_TrHikerRobert::
 	trainerbattle_single TRAINER_SINNOH_HIKER_ROBERT, Sinnoh_Text_TrHikerRobertIntro, Sinnoh_Text_TrHikerRobertDefeat
@@ -3426,15 +3002,13 @@ Sinnoh_EventScript_TrHikerRobert::
 	end
 
 Sinnoh_Text_TrHikerRobertIntro:
-	.string "Hard work makes strong MOéMON. Mine\n"
-	.string "dig all day!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x56, 0xFF
 
 Sinnoh_Text_TrHikerRobertDefeat:
-	.string "Back to digging, I guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x57, 0xFF
 
 Sinnoh_Text_TrHikerRobertAfter:
-	.string "My MOéMON and I are taking a lunch\n"
-	.string "break. We earned it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x58, 0xFF
 
 Sinnoh_EventScript_TrHikerTheodore::
 	trainerbattle_single TRAINER_SINNOH_HIKER_THEODORE, Sinnoh_Text_TrHikerTheodoreIntro, Sinnoh_Text_TrHikerTheodoreDefeat
@@ -3442,15 +3016,13 @@ Sinnoh_EventScript_TrHikerTheodore::
 	end
 
 Sinnoh_Text_TrHikerTheodoreIntro:
-	.string "I've been out here since sunrise. A\n"
-	.string "battle's just what I need!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x68, 0xFF
 
 Sinnoh_Text_TrHikerTheodoreDefeat:
-	.string "Whew! That woke me up.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x69, 0xFF
 
 Sinnoh_Text_TrHikerTheodoreAfter:
-	.string "If you see a nice flat rock, that's my\n"
-	.string "nap spot. Don't take it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x6A, 0xFF
 
 Sinnoh_EventScript_TrJoggerCraig::
 	trainerbattle_single TRAINER_SINNOH_JOGGER_CRAIG, Sinnoh_Text_TrJoggerCraigIntro, Sinnoh_Text_TrJoggerCraigDefeat
@@ -3458,15 +3030,13 @@ Sinnoh_EventScript_TrJoggerCraig::
 	end
 
 Sinnoh_Text_TrJoggerCraigIntro:
-	.string "Out of the way! Oh, a TRAINER! Let's\n"
-	.string "make it quick!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x08, 0xFF
 
 Sinnoh_Text_TrJoggerCraigDefeat:
-	.string "That was quick, all right.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x09, 0xFF
 
 Sinnoh_Text_TrJoggerCraigAfter:
-	.string "I'm off on another lap. See you at the\n"
-	.string "finish line!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x0A, 0xFF
 
 Sinnoh_EventScript_TrJoggerRaul::
 	trainerbattle_single TRAINER_SINNOH_JOGGER_RAUL, Sinnoh_Text_TrJoggerRaulIntro, Sinnoh_Text_TrJoggerRaulDefeat
@@ -3474,15 +3044,13 @@ Sinnoh_EventScript_TrJoggerRaul::
 	end
 
 Sinnoh_Text_TrJoggerRaulIntro:
-	.string "Out of the way! Oh, a TRAINER! Let's\n"
-	.string "make it quick!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x3E, 0xFF
 
 Sinnoh_Text_TrJoggerRaulDefeat:
-	.string "That was quick, all right.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x3F, 0xFF
 
 Sinnoh_Text_TrJoggerRaulAfter:
-	.string "I'm off on another lap. See you at the\n"
-	.string "finish line!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x40, 0xFF
 
 Sinnoh_EventScript_TrJoggerRichard::
 	trainerbattle_single TRAINER_SINNOH_JOGGER_RICHARD, Sinnoh_Text_TrJoggerRichardIntro, Sinnoh_Text_TrJoggerRichardDefeat
@@ -3490,13 +3058,13 @@ Sinnoh_EventScript_TrJoggerRichard::
 	end
 
 Sinnoh_Text_TrJoggerRichardIntro:
-	.string "A battle is a great warm-up. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x50, 0xFF
 
 Sinnoh_Text_TrJoggerRichardDefeat:
-	.string "That warmed me up too much!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x51, 0xFF
 
 Sinnoh_Text_TrJoggerRichardAfter:
-	.string "Stretch before battles. Trust me.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x52, 0xFF
 
 Sinnoh_EventScript_TrJoggerScott::
 	trainerbattle_single TRAINER_SINNOH_JOGGER_SCOTT, Sinnoh_Text_TrJoggerScottIntro, Sinnoh_Text_TrJoggerScottDefeat
@@ -3504,15 +3072,13 @@ Sinnoh_EventScript_TrJoggerScott::
 	end
 
 Sinnoh_Text_TrJoggerScottIntro:
-	.string "Out of the way! Oh, a TRAINER! Let's\n"
-	.string "make it quick!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x62, 0xFF
 
 Sinnoh_Text_TrJoggerScottDefeat:
-	.string "That was quick, all right.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x63, 0xFF
 
 Sinnoh_Text_TrJoggerScottAfter:
-	.string "I'm off on another lap. See you at the\n"
-	.string "finish line!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x64, 0xFF
 
 Sinnoh_EventScript_TrJoggerWyatt::
 	trainerbattle_single TRAINER_SINNOH_JOGGER_WYATT, Sinnoh_Text_TrJoggerWyattIntro, Sinnoh_Text_TrJoggerWyattDefeat
@@ -3520,15 +3086,13 @@ Sinnoh_EventScript_TrJoggerWyatt::
 	end
 
 Sinnoh_Text_TrJoggerWyattIntro:
-	.string "Out of the way! Oh, a TRAINER! Let's\n"
-	.string "make it quick!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x74, 0xFF
 
 Sinnoh_Text_TrJoggerWyattDefeat:
-	.string "That was quick, all right.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x75, 0xFF
 
 Sinnoh_Text_TrJoggerWyattAfter:
-	.string "I'm off on another lap. See you at the\n"
-	.string "finish line!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x76, 0xFF
 
 Sinnoh_EventScript_TrLadyMelissa::
 	trainerbattle_single TRAINER_SINNOH_LADY_MELISSA, Sinnoh_Text_TrLadyMelissaIntro, Sinnoh_Text_TrLadyMelissaDefeat
@@ -3536,15 +3100,13 @@ Sinnoh_EventScript_TrLadyMelissa::
 	end
 
 Sinnoh_Text_TrLadyMelissaIntro:
-	.string "Elegance and strength! My team has\n"
-	.string "both. Let me show you!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4E, 0x2A, 0xFF
 
 Sinnoh_Text_TrLadyMelissaDefeat:
-	.string "Strength was missing today, it seems.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4E, 0x2B, 0xFF
 
 Sinnoh_Text_TrLadyMelissaAfter:
-	.string "Elegance never loses, even when you\n"
-	.string "lose. Remember that.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4E, 0x2C, 0xFF
 
 Sinnoh_EventScript_TrLassBriana::
 	trainerbattle_single TRAINER_SINNOH_LASS_BRIANA, Sinnoh_Text_TrLassBrianaIntro, Sinnoh_Text_TrLassBrianaDefeat
@@ -3552,16 +3114,13 @@ Sinnoh_EventScript_TrLassBriana::
 	end
 
 Sinnoh_Text_TrLassBrianaIntro:
-	.string "I caught my partner all by myself!\n"
-	.string "Want to see how strong it is?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4F, 0x04, 0xFF
 
 Sinnoh_Text_TrLassBrianaDefeat:
-	.string "It's strong... just not stronger than\n"
-	.string "yours.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4F, 0x05, 0xFF
 
 Sinnoh_Text_TrLassBrianaAfter:
-	.string "Your MOéMON look really happy. How do\n"
-	.string "you do that?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4F, 0x06, 0xFF
 
 Sinnoh_EventScript_TrLassCassidy::
 	trainerbattle_single TRAINER_SINNOH_LASS_CASSIDY, Sinnoh_Text_TrLassCassidyIntro, Sinnoh_Text_TrLassCassidyDefeat
@@ -3569,15 +3128,13 @@ Sinnoh_EventScript_TrLassCassidy::
 	end
 
 Sinnoh_Text_TrLassCassidyIntro:
-	.string "Hey! You look like you know what\n"
-	.string "you're doing. Show me!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4F, 0x5E, 0xFF
 
 Sinnoh_Text_TrLassCassidyDefeat:
-	.string "Aww, no fair!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4F, 0x5F, 0xFF
 
 Sinnoh_Text_TrLassCassidyAfter:
-	.string "I'm gonna train every day after\n"
-	.string "school. Next time I'll win for sure!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4F, 0x60, 0xFF
 
 Sinnoh_EventScript_TrLassKaitlin::
 	trainerbattle_single TRAINER_SINNOH_LASS_KAITLIN, Sinnoh_Text_TrLassKaitlinIntro, Sinnoh_Text_TrLassKaitlinDefeat
@@ -3585,15 +3142,13 @@ Sinnoh_EventScript_TrLassKaitlin::
 	end
 
 Sinnoh_Text_TrLassKaitlinIntro:
-	.string "Hey! You look like you know what\n"
-	.string "you're doing. Show me!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4F, 0x70, 0xFF
 
 Sinnoh_Text_TrLassKaitlinDefeat:
-	.string "Aww, no fair!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4F, 0x71, 0xFF
 
 Sinnoh_Text_TrLassKaitlinAfter:
-	.string "I'm gonna train every day after\n"
-	.string "school. Next time I'll win for sure!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4F, 0x72, 0xFF
 
 Sinnoh_EventScript_TrLassMadeline::
 	trainerbattle_single TRAINER_SINNOH_LASS_MADELINE, Sinnoh_Text_TrLassMadelineIntro, Sinnoh_Text_TrLassMadelineDefeat
@@ -3601,15 +3156,13 @@ Sinnoh_EventScript_TrLassMadeline::
 	end
 
 Sinnoh_Text_TrLassMadelineIntro:
-	.string "My MOéMON and I practiced all morning!\n"
-	.string "Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x50, 0x02, 0xFF
 
 Sinnoh_Text_TrLassMadelineDefeat:
-	.string "We practiced the wrong things...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x50, 0x03, 0xFF
 
 Sinnoh_Text_TrLassMadelineAfter:
-	.string "I'll practice the right things this\n"
-	.string "afternoon. Probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x50, 0x04, 0xFF
 
 Sinnoh_EventScript_TrLassMolly::
 	trainerbattle_single TRAINER_SINNOH_LASS_MOLLY, Sinnoh_Text_TrLassMollyIntro, Sinnoh_Text_TrLassMollyDefeat
@@ -3617,16 +3170,13 @@ Sinnoh_EventScript_TrLassMolly::
 	end
 
 Sinnoh_Text_TrLassMollyIntro:
-	.string "I caught my partner all by myself!\n"
-	.string "Want to see how strong it is?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x50, 0x4A, 0xFF
 
 Sinnoh_Text_TrLassMollyDefeat:
-	.string "It's strong... just not stronger than\n"
-	.string "yours.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x50, 0x4B, 0xFF
 
 Sinnoh_Text_TrLassMollyAfter:
-	.string "Your MOéMON look really happy. How do\n"
-	.string "you do that?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x50, 0x4C, 0xFF
 
 Sinnoh_EventScript_TrLassNatalie::
 	trainerbattle_single TRAINER_SINNOH_LASS_NATALIE, Sinnoh_Text_TrLassNatalieIntro, Sinnoh_Text_TrLassNatalieDefeat
@@ -3634,15 +3184,13 @@ Sinnoh_EventScript_TrLassNatalie::
 	end
 
 Sinnoh_Text_TrLassNatalieIntro:
-	.string "Hey! You look like you know what\n"
-	.string "you're doing. Show me!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x50, 0x5C, 0xFF
 
 Sinnoh_Text_TrLassNatalieDefeat:
-	.string "Aww, no fair!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x50, 0x5D, 0xFF
 
 Sinnoh_Text_TrLassNatalieAfter:
-	.string "I'm gonna train every day after\n"
-	.string "school. Next time I'll win for sure!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x50, 0x5E, 0xFF
 
 Sinnoh_EventScript_TrLassSamantha::
 	trainerbattle_single TRAINER_SINNOH_LASS_SAMANTHA, Sinnoh_Text_TrLassSamanthaIntro, Sinnoh_Text_TrLassSamanthaDefeat
@@ -3650,15 +3198,13 @@ Sinnoh_EventScript_TrLassSamantha::
 	end
 
 Sinnoh_Text_TrLassSamanthaIntro:
-	.string "My MOéMON and I practiced all morning!\n"
-	.string "Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x50, 0x6E, 0xFF
 
 Sinnoh_Text_TrLassSamanthaDefeat:
-	.string "We practiced the wrong things...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x50, 0x6F, 0xFF
 
 Sinnoh_Text_TrLassSamanthaAfter:
-	.string "I'll practice the right things this\n"
-	.string "afternoon. Probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x50, 0x70, 0xFF
 
 Sinnoh_EventScript_TrLassSarah::
 	trainerbattle_single TRAINER_SINNOH_LASS_SARAH, Sinnoh_Text_TrLassSarahIntro, Sinnoh_Text_TrLassSarahDefeat
@@ -3666,16 +3212,13 @@ Sinnoh_EventScript_TrLassSarah::
 	end
 
 Sinnoh_Text_TrLassSarahIntro:
-	.string "I caught my partner all by myself!\n"
-	.string "Want to see how strong it is?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x51, 0x36, 0xFF
 
 Sinnoh_Text_TrLassSarahDefeat:
-	.string "It's strong... just not stronger than\n"
-	.string "yours.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x51, 0x37, 0xFF
 
 Sinnoh_Text_TrLassSarahAfter:
-	.string "Your MOéMON look really happy. How do\n"
-	.string "you do that?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x51, 0x38, 0xFF
 
 Sinnoh_EventScript_TrNinjaBoyBrennan::
 	trainerbattle_single TRAINER_SINNOH_NINJA_BOY_BRENNAN, Sinnoh_Text_TrNinjaBoyBrennanIntro, Sinnoh_Text_TrNinjaBoyBrennanDefeat
@@ -3683,15 +3226,13 @@ Sinnoh_EventScript_TrNinjaBoyBrennan::
 	end
 
 Sinnoh_Text_TrNinjaBoyBrennanIntro:
-	.string "Hey! You look like you know what\n"
-	.string "you're doing. Show me!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x08, 0xFF
 
 Sinnoh_Text_TrNinjaBoyBrennanDefeat:
-	.string "Aww, no fair!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x09, 0xFF
 
 Sinnoh_Text_TrNinjaBoyBrennanAfter:
-	.string "I'm gonna train every day after\n"
-	.string "school. Next time I'll win for sure!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x0A, 0xFF
 
 Sinnoh_EventScript_TrNinjaBoyBruce::
 	trainerbattle_single TRAINER_SINNOH_NINJA_BOY_BRUCE, Sinnoh_Text_TrNinjaBoyBruceIntro, Sinnoh_Text_TrNinjaBoyBruceDefeat
@@ -3699,15 +3240,13 @@ Sinnoh_EventScript_TrNinjaBoyBruce::
 	end
 
 Sinnoh_Text_TrNinjaBoyBruceIntro:
-	.string "My MOéMON and I practiced all morning!\n"
-	.string "Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x1A, 0xFF
 
 Sinnoh_Text_TrNinjaBoyBruceDefeat:
-	.string "We practiced the wrong things...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x1B, 0xFF
 
 Sinnoh_Text_TrNinjaBoyBruceAfter:
-	.string "I'll practice the right things this\n"
-	.string "afternoon. Probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x1C, 0xFF
 
 Sinnoh_EventScript_TrNinjaBoyDavido::
 	trainerbattle_single TRAINER_SINNOH_NINJA_BOY_DAVIDO, Sinnoh_Text_TrNinjaBoyDavidoIntro, Sinnoh_Text_TrNinjaBoyDavidoDefeat
@@ -3715,15 +3254,13 @@ Sinnoh_EventScript_TrNinjaBoyDavido::
 	end
 
 Sinnoh_Text_TrNinjaBoyDavidoIntro:
-	.string "My MOéMON and I practiced all morning!\n"
-	.string "Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x2C, 0xFF
 
 Sinnoh_Text_TrNinjaBoyDavidoDefeat:
-	.string "We practiced the wrong things...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x2D, 0xFF
 
 Sinnoh_Text_TrNinjaBoyDavidoAfter:
-	.string "I'll practice the right things this\n"
-	.string "afternoon. Probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x2E, 0xFF
 
 Sinnoh_EventScript_TrNinjaBoyEthan::
 	trainerbattle_single TRAINER_SINNOH_NINJA_BOY_ETHAN, Sinnoh_Text_TrNinjaBoyEthanIntro, Sinnoh_Text_TrNinjaBoyEthanDefeat
@@ -3731,15 +3268,13 @@ Sinnoh_EventScript_TrNinjaBoyEthan::
 	end
 
 Sinnoh_Text_TrNinjaBoyEthanIntro:
-	.string "Hey! You look like you know what\n"
-	.string "you're doing. Show me!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x3E, 0xFF
 
 Sinnoh_Text_TrNinjaBoyEthanDefeat:
-	.string "Aww, no fair!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x3F, 0xFF
 
 Sinnoh_Text_TrNinjaBoyEthanAfter:
-	.string "I'm gonna train every day after\n"
-	.string "school. Next time I'll win for sure!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x40, 0xFF
 
 Sinnoh_EventScript_TrNinjaBoyFabian::
 	trainerbattle_single TRAINER_SINNOH_NINJA_BOY_FABIAN, Sinnoh_Text_TrNinjaBoyFabianIntro, Sinnoh_Text_TrNinjaBoyFabianDefeat
@@ -3747,15 +3282,13 @@ Sinnoh_EventScript_TrNinjaBoyFabian::
 	end
 
 Sinnoh_Text_TrNinjaBoyFabianIntro:
-	.string "My MOéMON and I practiced all morning!\n"
-	.string "Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x50, 0xFF
 
 Sinnoh_Text_TrNinjaBoyFabianDefeat:
-	.string "We practiced the wrong things...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x51, 0xFF
 
 Sinnoh_Text_TrNinjaBoyFabianAfter:
-	.string "I'll practice the right things this\n"
-	.string "afternoon. Probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x52, 0xFF
 
 Sinnoh_EventScript_TrNinjaBoyJoel::
 	trainerbattle_single TRAINER_SINNOH_NINJA_BOY_JOEL, Sinnoh_Text_TrNinjaBoyJoelIntro, Sinnoh_Text_TrNinjaBoyJoelDefeat
@@ -3763,15 +3296,13 @@ Sinnoh_EventScript_TrNinjaBoyJoel::
 	end
 
 Sinnoh_Text_TrNinjaBoyJoelIntro:
-	.string "Stop right there! Nobody walks past\n"
-	.string "me without a battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x62, 0xFF
 
 Sinnoh_Text_TrNinjaBoyJoelDefeat:
-	.string "Okay, okay, you can walk past!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x63, 0xFF
 
 Sinnoh_Text_TrNinjaBoyJoelAfter:
-	.string "Being a road guard is harder than it\n"
-	.string "looks.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x64, 0xFF
 
 Sinnoh_EventScript_TrNinjaBoyMatthew::
 	trainerbattle_single TRAINER_SINNOH_NINJA_BOY_MATTHEW, Sinnoh_Text_TrNinjaBoyMatthewIntro, Sinnoh_Text_TrNinjaBoyMatthewDefeat
@@ -3779,15 +3310,13 @@ Sinnoh_EventScript_TrNinjaBoyMatthew::
 	end
 
 Sinnoh_Text_TrNinjaBoyMatthewIntro:
-	.string "Hey! You look like you know what\n"
-	.string "you're doing. Show me!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x74, 0xFF
 
 Sinnoh_Text_TrNinjaBoyMatthewDefeat:
-	.string "Aww, no fair!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x75, 0xFF
 
 Sinnoh_Text_TrNinjaBoyMatthewAfter:
-	.string "I'm gonna train every day after\n"
-	.string "school. Next time I'll win for sure!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x76, 0xFF
 
 Sinnoh_EventScript_TrNinjaBoyNathan::
 	trainerbattle_single TRAINER_SINNOH_NINJA_BOY_NATHAN, Sinnoh_Text_TrNinjaBoyNathanIntro, Sinnoh_Text_TrNinjaBoyNathanDefeat
@@ -3795,15 +3324,13 @@ Sinnoh_EventScript_TrNinjaBoyNathan::
 	end
 
 Sinnoh_Text_TrNinjaBoyNathanIntro:
-	.string "Stop right there! Nobody walks past\n"
-	.string "me without a battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x57, 0x06, 0xFF
 
 Sinnoh_Text_TrNinjaBoyNathanDefeat:
-	.string "Okay, okay, you can walk past!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x57, 0x07, 0xFF
 
 Sinnoh_Text_TrNinjaBoyNathanAfter:
-	.string "Being a road guard is harder than it\n"
-	.string "looks.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x57, 0x08, 0xFF
 
 Sinnoh_EventScript_TrNinjaBoyNick::
 	trainerbattle_single TRAINER_SINNOH_NINJA_BOY_NICK, Sinnoh_Text_TrNinjaBoyNickIntro, Sinnoh_Text_TrNinjaBoyNickDefeat
@@ -3811,15 +3338,13 @@ Sinnoh_EventScript_TrNinjaBoyNick::
 	end
 
 Sinnoh_Text_TrNinjaBoyNickIntro:
-	.string "My MOéMON and I practiced all morning!\n"
-	.string "Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x57, 0x18, 0xFF
 
 Sinnoh_Text_TrNinjaBoyNickDefeat:
-	.string "We practiced the wrong things...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x57, 0x19, 0xFF
 
 Sinnoh_Text_TrNinjaBoyNickAfter:
-	.string "I'll practice the right things this\n"
-	.string "afternoon. Probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x57, 0x1A, 0xFF
 
 Sinnoh_EventScript_TrNinjaBoyZach::
 	trainerbattle_single TRAINER_SINNOH_NINJA_BOY_ZACH, Sinnoh_Text_TrNinjaBoyZachIntro, Sinnoh_Text_TrNinjaBoyZachDefeat
@@ -3827,15 +3352,13 @@ Sinnoh_EventScript_TrNinjaBoyZach::
 	end
 
 Sinnoh_Text_TrNinjaBoyZachIntro:
-	.string "Stop right there! Nobody walks past\n"
-	.string "me without a battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x57, 0x2A, 0xFF
 
 Sinnoh_Text_TrNinjaBoyZachDefeat:
-	.string "Okay, okay, you can walk past!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x57, 0x2B, 0xFF
 
 Sinnoh_Text_TrNinjaBoyZachAfter:
-	.string "Being a road guard is harder than it\n"
-	.string "looks.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x57, 0x2C, 0xFF
 
 Sinnoh_EventScript_TrParasolLadyAlexa::
 	trainerbattle_single TRAINER_SINNOH_PARASOL_LADY_ALEXA, Sinnoh_Text_TrParasolLadyAlexaIntro, Sinnoh_Text_TrParasolLadyAlexaDefeat
@@ -3843,15 +3366,13 @@ Sinnoh_EventScript_TrParasolLadyAlexa::
 	end
 
 Sinnoh_Text_TrParasolLadyAlexaIntro:
-	.string "A battle with a traveler! I'll tell\n"
-	.string "everyone about this.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x58, 0x04, 0xFF
 
 Sinnoh_Text_TrParasolLadyAlexaDefeat:
-	.string "I'll leave out the part where I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x58, 0x05, 0xFF
 
 Sinnoh_Text_TrParasolLadyAlexaAfter:
-	.string "Was that your best? It was lovely.\n"
-	.string "Truly.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x58, 0x06, 0xFF
 
 Sinnoh_EventScript_TrParasolLadySabrina::
 	trainerbattle_single TRAINER_SINNOH_PARASOL_LADY_SABRINA, Sinnoh_Text_TrParasolLadySabrinaIntro, Sinnoh_Text_TrParasolLadySabrinaDefeat
@@ -3859,15 +3380,13 @@ Sinnoh_EventScript_TrParasolLadySabrina::
 	end
 
 Sinnoh_Text_TrParasolLadySabrinaIntro:
-	.string "Elegance and strength! My team has\n"
-	.string "both. Let me show you!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x58, 0x4C, 0xFF
 
 Sinnoh_Text_TrParasolLadySabrinaDefeat:
-	.string "Strength was missing today, it seems.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x58, 0x4D, 0xFF
 
 Sinnoh_Text_TrParasolLadySabrinaAfter:
-	.string "Elegance never loses, even when you\n"
-	.string "lose. Remember that.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x58, 0x4E, 0xFF
 
 Sinnoh_EventScript_TrPicnickerAna::
 	trainerbattle_single TRAINER_SINNOH_PICNICKER_ANA, Sinnoh_Text_TrPicnickerAnaIntro, Sinnoh_Text_TrPicnickerAnaDefeat
@@ -3875,15 +3394,13 @@ Sinnoh_EventScript_TrPicnickerAna::
 	end
 
 Sinnoh_Text_TrPicnickerAnaIntro:
-	.string "My MOéMON and I practiced all morning!\n"
-	.string "Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x59, 0x26, 0xFF
 
 Sinnoh_Text_TrPicnickerAnaDefeat:
-	.string "We practiced the wrong things...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x59, 0x27, 0xFF
 
 Sinnoh_Text_TrPicnickerAnaAfter:
-	.string "I'll practice the right things this\n"
-	.string "afternoon. Probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x59, 0x28, 0xFF
 
 Sinnoh_EventScript_TrPicnickerCheyenne::
 	trainerbattle_single TRAINER_SINNOH_PICNICKER_CHEYENNE, Sinnoh_Text_TrPicnickerCheyenneIntro, Sinnoh_Text_TrPicnickerCheyenneDefeat
@@ -3891,15 +3408,13 @@ Sinnoh_EventScript_TrPicnickerCheyenne::
 	end
 
 Sinnoh_Text_TrPicnickerCheyenneIntro:
-	.string "Hey! You look like you know what\n"
-	.string "you're doing. Show me!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x59, 0x38, 0xFF
 
 Sinnoh_Text_TrPicnickerCheyenneDefeat:
-	.string "Aww, no fair!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x59, 0x39, 0xFF
 
 Sinnoh_Text_TrPicnickerCheyenneAfter:
-	.string "I'm gonna train every day after\n"
-	.string "school. Next time I'll win for sure!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x59, 0x3A, 0xFF
 
 Sinnoh_EventScript_TrPicnickerDiana::
 	trainerbattle_single TRAINER_SINNOH_PICNICKER_DIANA, Sinnoh_Text_TrPicnickerDianaIntro, Sinnoh_Text_TrPicnickerDianaDefeat
@@ -3907,15 +3422,13 @@ Sinnoh_EventScript_TrPicnickerDiana::
 	end
 
 Sinnoh_Text_TrPicnickerDianaIntro:
-	.string "Hey! You look like you know what\n"
-	.string "you're doing. Show me!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x59, 0x4A, 0xFF
 
 Sinnoh_Text_TrPicnickerDianaDefeat:
-	.string "Aww, no fair!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x59, 0x4B, 0xFF
 
 Sinnoh_Text_TrPicnickerDianaAfter:
-	.string "I'm gonna train every day after\n"
-	.string "school. Next time I'll win for sure!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x59, 0x4C, 0xFF
 
 Sinnoh_EventScript_TrPicnickerKarina::
 	trainerbattle_single TRAINER_SINNOH_PICNICKER_KARINA, Sinnoh_Text_TrPicnickerKarinaIntro, Sinnoh_Text_TrPicnickerKarinaDefeat
@@ -3923,16 +3436,13 @@ Sinnoh_EventScript_TrPicnickerKarina::
 	end
 
 Sinnoh_Text_TrPicnickerKarinaIntro:
-	.string "I caught my partner all by myself!\n"
-	.string "Want to see how strong it is?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x59, 0x5C, 0xFF
 
 Sinnoh_Text_TrPicnickerKarinaDefeat:
-	.string "It's strong... just not stronger than\n"
-	.string "yours.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x59, 0x5D, 0xFF
 
 Sinnoh_Text_TrPicnickerKarinaAfter:
-	.string "Your MOéMON look really happy. How do\n"
-	.string "you do that?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x59, 0x5E, 0xFF
 
 Sinnoh_EventScript_TrPicnickerLauren::
 	trainerbattle_single TRAINER_SINNOH_PICNICKER_LAUREN, Sinnoh_Text_TrPicnickerLaurenIntro, Sinnoh_Text_TrPicnickerLaurenDefeat
@@ -3940,15 +3450,13 @@ Sinnoh_EventScript_TrPicnickerLauren::
 	end
 
 Sinnoh_Text_TrPicnickerLaurenIntro:
-	.string "Stop right there! Nobody walks past\n"
-	.string "me without a battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5A, 0x24, 0xFF
 
 Sinnoh_Text_TrPicnickerLaurenDefeat:
-	.string "Okay, okay, you can walk past!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5A, 0x25, 0xFF
 
 Sinnoh_Text_TrPicnickerLaurenAfter:
-	.string "Being a road guard is harder than it\n"
-	.string "looks.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5A, 0x26, 0xFF
 
 Sinnoh_EventScript_TrPicnickerSiena::
 	trainerbattle_single TRAINER_SINNOH_PICNICKER_SIENA, Sinnoh_Text_TrPicnickerSienaIntro, Sinnoh_Text_TrPicnickerSienaDefeat
@@ -3956,16 +3464,13 @@ Sinnoh_EventScript_TrPicnickerSiena::
 	end
 
 Sinnoh_Text_TrPicnickerSienaIntro:
-	.string "I caught my partner all by myself!\n"
-	.string "Want to see how strong it is?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5A, 0x36, 0xFF
 
 Sinnoh_Text_TrPicnickerSienaDefeat:
-	.string "It's strong... just not stronger than\n"
-	.string "yours.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5A, 0x37, 0xFF
 
 Sinnoh_Text_TrPicnickerSienaAfter:
-	.string "Your MOéMON look really happy. How do\n"
-	.string "you do that?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5A, 0x38, 0xFF
 
 Sinnoh_EventScript_TrPicnickerSummer::
 	trainerbattle_single TRAINER_SINNOH_PICNICKER_SUMMER, Sinnoh_Text_TrPicnickerSummerIntro, Sinnoh_Text_TrPicnickerSummerDefeat
@@ -3973,15 +3478,13 @@ Sinnoh_EventScript_TrPicnickerSummer::
 	end
 
 Sinnoh_Text_TrPicnickerSummerIntro:
-	.string "Stop right there! Nobody walks past\n"
-	.string "me without a battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5A, 0x48, 0xFF
 
 Sinnoh_Text_TrPicnickerSummerDefeat:
-	.string "Okay, okay, you can walk past!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5A, 0x49, 0xFF
 
 Sinnoh_Text_TrPicnickerSummerAfter:
-	.string "Being a road guard is harder than it\n"
-	.string "looks.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5A, 0x4A, 0xFF
 
 Sinnoh_EventScript_TrPicnickerTori::
 	trainerbattle_single TRAINER_SINNOH_PICNICKER_TORI, Sinnoh_Text_TrPicnickerToriIntro, Sinnoh_Text_TrPicnickerToriDefeat
@@ -3989,15 +3492,13 @@ Sinnoh_EventScript_TrPicnickerTori::
 	end
 
 Sinnoh_Text_TrPicnickerToriIntro:
-	.string "My MOéMON and I practiced all morning!\n"
-	.string "Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5A, 0x5A, 0xFF
 
 Sinnoh_Text_TrPicnickerToriDefeat:
-	.string "We practiced the wrong things...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5A, 0x5B, 0xFF
 
 Sinnoh_Text_TrPicnickerToriAfter:
-	.string "I'll practice the right things this\n"
-	.string "afternoon. Probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5A, 0x5C, 0xFF
 
 Sinnoh_EventScript_TrPiCarlos::
 	trainerbattle_single TRAINER_SINNOH_PI_CARLOS, Sinnoh_Text_TrPiCarlosIntro, Sinnoh_Text_TrPiCarlosDefeat
@@ -4005,15 +3506,13 @@ Sinnoh_EventScript_TrPiCarlos::
 	end
 
 Sinnoh_Text_TrPiCarlosIntro:
-	.string "You there! You look like you'd\n"
-	.string "appreciate my team!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x58, 0x5E, 0xFF
 
 Sinnoh_Text_TrPiCarlosDefeat:
-	.string "My poor darlings!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x58, 0x5F, 0xFF
 
 Sinnoh_Text_TrPiCarlosAfter:
-	.string "Every MOéMON is special. Even when\n"
-	.string "they lose.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x58, 0x60, 0xFF
 
 Sinnoh_EventScript_TrPokefanLeonard::
 	trainerbattle_single TRAINER_SINNOH_POKEFAN_LEONARD, Sinnoh_Text_TrPokefanLeonardIntro, Sinnoh_Text_TrPokefanLeonardDefeat
@@ -4021,15 +3520,13 @@ Sinnoh_EventScript_TrPokefanLeonard::
 	end
 
 Sinnoh_Text_TrPokefanLeonardIntro:
-	.string "You there! You look like you'd\n"
-	.string "appreciate my team!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5C, 0x44, 0xFF
 
 Sinnoh_Text_TrPokefanLeonardDefeat:
-	.string "My poor darlings!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5C, 0x45, 0xFF
 
 Sinnoh_Text_TrPokefanLeonardAfter:
-	.string "Every MOéMON is special. Even when\n"
-	.string "they lose.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5C, 0x46, 0xFF
 
 Sinnoh_EventScript_TrPokefanRebekah::
 	trainerbattle_single TRAINER_SINNOH_POKEFAN_REBEKAH, Sinnoh_Text_TrPokefanRebekahIntro, Sinnoh_Text_TrPokefanRebekahDefeat
@@ -4037,15 +3534,13 @@ Sinnoh_EventScript_TrPokefanRebekah::
 	end
 
 Sinnoh_Text_TrPokefanRebekahIntro:
-	.string "I've studied MOéMON for years. Time\n"
-	.string "for a field test!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5C, 0x68, 0xFF
 
 Sinnoh_Text_TrPokefanRebekahDefeat:
-	.string "Hmm. The data says I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5C, 0x69, 0xFF
 
 Sinnoh_Text_TrPokefanRebekahAfter:
-	.string "I'll write that battle down in my\n"
-	.string "notebook. Under “lessons.”$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5C, 0x6A, 0xFF
 
 Sinnoh_EventScript_TrPokeKidDanielle::
 	trainerbattle_single TRAINER_SINNOH_POKE_KID_DANIELLE, Sinnoh_Text_TrPokeKidDanielleIntro, Sinnoh_Text_TrPokeKidDanielleDefeat
@@ -4053,15 +3548,13 @@ Sinnoh_EventScript_TrPokeKidDanielle::
 	end
 
 Sinnoh_Text_TrPokeKidDanielleIntro:
-	.string "My MOéMON and I practiced all morning!\n"
-	.string "Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5B, 0x58, 0xFF
 
 Sinnoh_Text_TrPokeKidDanielleDefeat:
-	.string "We practiced the wrong things...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5B, 0x59, 0xFF
 
 Sinnoh_Text_TrPokeKidDanielleAfter:
-	.string "I'll practice the right things this\n"
-	.string "afternoon. Probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5B, 0x5A, 0xFF
 
 Sinnoh_EventScript_TrPokeKidJanet::
 	trainerbattle_single TRAINER_SINNOH_POKE_KID_JANET, Sinnoh_Text_TrPokeKidJanetIntro, Sinnoh_Text_TrPokeKidJanetDefeat
@@ -4069,15 +3562,13 @@ Sinnoh_EventScript_TrPokeKidJanet::
 	end
 
 Sinnoh_Text_TrPokeKidJanetIntro:
-	.string "My MOéMON and I practiced all morning!\n"
-	.string "Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5C, 0x20, 0xFF
 
 Sinnoh_Text_TrPokeKidJanetDefeat:
-	.string "We practiced the wrong things...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5C, 0x21, 0xFF
 
 Sinnoh_Text_TrPokeKidJanetAfter:
-	.string "I'll practice the right things this\n"
-	.string "afternoon. Probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5C, 0x22, 0xFF
 
 Sinnoh_EventScript_TrPokeKidMeghan::
 	trainerbattle_single TRAINER_SINNOH_POKE_KID_MEGHAN, Sinnoh_Text_TrPokeKidMeghanIntro, Sinnoh_Text_TrPokeKidMeghanDefeat
@@ -4085,16 +3576,13 @@ Sinnoh_EventScript_TrPokeKidMeghan::
 	end
 
 Sinnoh_Text_TrPokeKidMeghanIntro:
-	.string "I caught my partner all by myself!\n"
-	.string "Want to see how strong it is?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5C, 0x32, 0xFF
 
 Sinnoh_Text_TrPokeKidMeghanDefeat:
-	.string "It's strong... just not stronger than\n"
-	.string "yours.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5C, 0x33, 0xFF
 
 Sinnoh_Text_TrPokeKidMeghanAfter:
-	.string "Your MOéMON look really happy. How do\n"
-	.string "you do that?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5C, 0x34, 0xFF
 
 Sinnoh_EventScript_TrPolicemanAlex::
 	trainerbattle_single TRAINER_SINNOH_POLICEMAN_ALEX, Sinnoh_Text_TrPolicemanAlexIntro, Sinnoh_Text_TrPolicemanAlexDefeat
@@ -4102,15 +3590,13 @@ Sinnoh_EventScript_TrPolicemanAlex::
 	end
 
 Sinnoh_Text_TrPolicemanAlexIntro:
-	.string "Listen to my MOéMON's cry! Isn't it\n"
-	.string "music? Let's battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5C, 0x7A, 0xFF
 
 Sinnoh_Text_TrPolicemanAlexDefeat:
-	.string "That was a sad song.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5C, 0x7B, 0xFF
 
 Sinnoh_Text_TrPolicemanAlexAfter:
-	.string "I'll write a song about this. It'll be a\n"
-	.string "slow one.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5C, 0x7C, 0xFF
 
 Sinnoh_EventScript_TrPolicemanBobby::
 	trainerbattle_single TRAINER_SINNOH_POLICEMAN_BOBBY, Sinnoh_Text_TrPolicemanBobbyIntro, Sinnoh_Text_TrPolicemanBobbyDefeat
@@ -4118,15 +3604,13 @@ Sinnoh_EventScript_TrPolicemanBobby::
 	end
 
 Sinnoh_Text_TrPolicemanBobbyIntro:
-	.string "Listen to my MOéMON's cry! Isn't it\n"
-	.string "music? Let's battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5D, 0x0C, 0xFF
 
 Sinnoh_Text_TrPolicemanBobbyDefeat:
-	.string "That was a sad song.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5D, 0x0D, 0xFF
 
 Sinnoh_Text_TrPolicemanBobbyAfter:
-	.string "I'll write a song about this. It'll be a\n"
-	.string "slow one.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5D, 0x0E, 0xFF
 
 Sinnoh_EventScript_TrPolicemanCaleb::
 	trainerbattle_single TRAINER_SINNOH_POLICEMAN_CALEB, Sinnoh_Text_TrPolicemanCalebIntro, Sinnoh_Text_TrPolicemanCalebDefeat
@@ -4134,15 +3618,13 @@ Sinnoh_EventScript_TrPolicemanCaleb::
 	end
 
 Sinnoh_Text_TrPolicemanCalebIntro:
-	.string "Halt! I need to check your TRAINER\n"
-	.string "skills!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5D, 0x1E, 0xFF
 
 Sinnoh_Text_TrPolicemanCalebDefeat:
-	.string "Your skills check out!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5D, 0x1F, 0xFF
 
 Sinnoh_Text_TrPolicemanCalebAfter:
-	.string "Carry on, TRAINER. Stay safe out\n"
-	.string "there.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5D, 0x20, 0xFF
 
 Sinnoh_EventScript_TrPolicemanDanny::
 	trainerbattle_single TRAINER_SINNOH_POLICEMAN_DANNY, Sinnoh_Text_TrPolicemanDannyIntro, Sinnoh_Text_TrPolicemanDannyDefeat
@@ -4150,15 +3632,13 @@ Sinnoh_EventScript_TrPolicemanDanny::
 	end
 
 Sinnoh_Text_TrPolicemanDannyIntro:
-	.string "Listen to my MOéMON's cry! Isn't it\n"
-	.string "music? Let's battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5D, 0x30, 0xFF
 
 Sinnoh_Text_TrPolicemanDannyDefeat:
-	.string "That was a sad song.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5D, 0x31, 0xFF
 
 Sinnoh_Text_TrPolicemanDannyAfter:
-	.string "I'll write a song about this. It'll be a\n"
-	.string "slow one.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5D, 0x32, 0xFF
 
 Sinnoh_EventScript_TrPolicemanDylan::
 	trainerbattle_single TRAINER_SINNOH_POLICEMAN_DYLAN, Sinnoh_Text_TrPolicemanDylanIntro, Sinnoh_Text_TrPolicemanDylanDefeat
@@ -4166,15 +3646,13 @@ Sinnoh_EventScript_TrPolicemanDylan::
 	end
 
 Sinnoh_Text_TrPolicemanDylanIntro:
-	.string "Listen to my MOéMON's cry! Isn't it\n"
-	.string "music? Let's battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5D, 0x78, 0xFF
 
 Sinnoh_Text_TrPolicemanDylanDefeat:
-	.string "That was a sad song.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5D, 0x79, 0xFF
 
 Sinnoh_Text_TrPolicemanDylanAfter:
-	.string "I'll write a song about this. It'll be a\n"
-	.string "slow one.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5D, 0x7A, 0xFF
 
 Sinnoh_EventScript_TrPolicemanThomas::
 	trainerbattle_single TRAINER_SINNOH_POLICEMAN_THOMAS, Sinnoh_Text_TrPolicemanThomasIntro, Sinnoh_Text_TrPolicemanThomasDefeat
@@ -4182,15 +3660,13 @@ Sinnoh_EventScript_TrPolicemanThomas::
 	end
 
 Sinnoh_Text_TrPolicemanThomasIntro:
-	.string "I've studied MOéMON for years. Time\n"
-	.string "for a field test!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5E, 0x0A, 0xFF
 
 Sinnoh_Text_TrPolicemanThomasDefeat:
-	.string "Hmm. The data says I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5E, 0x0B, 0xFF
 
 Sinnoh_Text_TrPolicemanThomasAfter:
-	.string "I'll write that battle down in my\n"
-	.string "notebook. Under “lessons.”$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5E, 0x0C, 0xFF
 
 Sinnoh_EventScript_TrPsychicAbigail::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_ABIGAIL, Sinnoh_Text_TrPsychicAbigailIntro, Sinnoh_Text_TrPsychicAbigailDefeat
@@ -4198,15 +3674,13 @@ Sinnoh_EventScript_TrPsychicAbigail::
 	end
 
 Sinnoh_Text_TrPsychicAbigailIntro:
-	.string "Shh... I'm focusing. Okay. Now we\n"
-	.string "battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5E, 0x1C, 0xFF
 
 Sinnoh_Text_TrPsychicAbigailDefeat:
-	.string "I lost my focus...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5E, 0x1D, 0xFF
 
 Sinnoh_Text_TrPsychicAbigailAfter:
-	.string "Focus is like a muscle. Mine needs more\n"
-	.string "training.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5E, 0x1E, 0xFF
 
 Sinnoh_EventScript_TrPsychicBrittney::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_BRITTNEY, Sinnoh_Text_TrPsychicBrittneyIntro, Sinnoh_Text_TrPsychicBrittneyDefeat
@@ -4214,15 +3688,13 @@ Sinnoh_EventScript_TrPsychicBrittney::
 	end
 
 Sinnoh_Text_TrPsychicBrittneyIntro:
-	.string "Shh... I'm focusing. Okay. Now we\n"
-	.string "battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5E, 0x52, 0xFF
 
 Sinnoh_Text_TrPsychicBrittneyDefeat:
-	.string "I lost my focus...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5E, 0x53, 0xFF
 
 Sinnoh_Text_TrPsychicBrittneyAfter:
-	.string "Focus is like a muscle. Mine needs more\n"
-	.string "training.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5E, 0x54, 0xFF
 
 Sinnoh_EventScript_TrPsychicBryce::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_BRYCE, Sinnoh_Text_TrPsychicBryceIntro, Sinnoh_Text_TrPsychicBryceDefeat
@@ -4230,15 +3702,13 @@ Sinnoh_EventScript_TrPsychicBryce::
 	end
 
 Sinnoh_Text_TrPsychicBryceIntro:
-	.string "Shh... I'm focusing. Okay. Now we\n"
-	.string "battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5E, 0x76, 0xFF
 
 Sinnoh_Text_TrPsychicBryceDefeat:
-	.string "I lost my focus...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5E, 0x77, 0xFF
 
 Sinnoh_Text_TrPsychicBryceAfter:
-	.string "Focus is like a muscle. Mine needs more\n"
-	.string "training.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5E, 0x78, 0xFF
 
 Sinnoh_EventScript_TrPsychicChelsey::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_CHELSEY, Sinnoh_Text_TrPsychicChelseyIntro, Sinnoh_Text_TrPsychicChelseyDefeat
@@ -4246,15 +3716,13 @@ Sinnoh_EventScript_TrPsychicChelsey::
 	end
 
 Sinnoh_Text_TrPsychicChelseyIntro:
-	.string "My MOéMON read your next move. Can\n"
-	.string "yours read mine?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5F, 0x08, 0xFF
 
 Sinnoh_Text_TrPsychicChelseyDefeat:
-	.string "They read it, but couldn't stop it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5F, 0x09, 0xFF
 
 Sinnoh_Text_TrPsychicChelseyAfter:
-	.string "Your thoughts are very loud. That's a\n"
-	.string "compliment.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5F, 0x0A, 0xFF
 
 Sinnoh_EventScript_TrPsychicCorbin::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_CORBIN, Sinnoh_Text_TrPsychicCorbinIntro, Sinnoh_Text_TrPsychicCorbinDefeat
@@ -4262,15 +3730,13 @@ Sinnoh_EventScript_TrPsychicCorbin::
 	end
 
 Sinnoh_Text_TrPsychicCorbinIntro:
-	.string "Shh... I'm focusing. Okay. Now we\n"
-	.string "battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5F, 0x1A, 0xFF
 
 Sinnoh_Text_TrPsychicCorbinDefeat:
-	.string "I lost my focus...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5F, 0x1B, 0xFF
 
 Sinnoh_Text_TrPsychicCorbinAfter:
-	.string "Focus is like a muscle. Mine needs more\n"
-	.string "training.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5F, 0x1C, 0xFF
 
 Sinnoh_EventScript_TrPsychicDaisy::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_DAISY, Sinnoh_Text_TrPsychicDaisyIntro, Sinnoh_Text_TrPsychicDaisyDefeat
@@ -4278,15 +3744,13 @@ Sinnoh_EventScript_TrPsychicDaisy::
 	end
 
 Sinnoh_Text_TrPsychicDaisyIntro:
-	.string "My MOéMON read your next move. Can\n"
-	.string "yours read mine?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5F, 0x3E, 0xFF
 
 Sinnoh_Text_TrPsychicDaisyDefeat:
-	.string "They read it, but couldn't stop it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5F, 0x3F, 0xFF
 
 Sinnoh_Text_TrPsychicDaisyAfter:
-	.string "Your thoughts are very loud. That's a\n"
-	.string "compliment.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5F, 0x40, 0xFF
 
 Sinnoh_EventScript_TrPsychicDeandre::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_DEANDRE, Sinnoh_Text_TrPsychicDeandreIntro, Sinnoh_Text_TrPsychicDeandreDefeat
@@ -4294,15 +3758,13 @@ Sinnoh_EventScript_TrPsychicDeandre::
 	end
 
 Sinnoh_Text_TrPsychicDeandreIntro:
-	.string "Shh... I'm focusing. Okay. Now we\n"
-	.string "battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5F, 0x62, 0xFF
 
 Sinnoh_Text_TrPsychicDeandreDefeat:
-	.string "I lost my focus...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5F, 0x63, 0xFF
 
 Sinnoh_Text_TrPsychicDeandreAfter:
-	.string "Focus is like a muscle. Mine needs more\n"
-	.string "training.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5F, 0x64, 0xFF
 
 Sinnoh_EventScript_TrPsychicDesiree::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_DESIREE, Sinnoh_Text_TrPsychicDesireeIntro, Sinnoh_Text_TrPsychicDesireeDefeat
@@ -4310,15 +3772,13 @@ Sinnoh_EventScript_TrPsychicDesiree::
 	end
 
 Sinnoh_Text_TrPsychicDesireeIntro:
-	.string "My MOéMON read your next move. Can\n"
-	.string "yours read mine?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5F, 0x74, 0xFF
 
 Sinnoh_Text_TrPsychicDesireeDefeat:
-	.string "They read it, but couldn't stop it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5F, 0x75, 0xFF
 
 Sinnoh_Text_TrPsychicDesireeAfter:
-	.string "Your thoughts are very loud. That's a\n"
-	.string "compliment.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5F, 0x76, 0xFF
 
 Sinnoh_EventScript_TrPsychicElijah::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_ELIJAH, Sinnoh_Text_TrPsychicElijahIntro, Sinnoh_Text_TrPsychicElijahDefeat
@@ -4326,15 +3786,13 @@ Sinnoh_EventScript_TrPsychicElijah::
 	end
 
 Sinnoh_Text_TrPsychicElijahIntro:
-	.string "My MOéMON read your next move. Can\n"
-	.string "yours read mine?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x60, 0x06, 0xFF
 
 Sinnoh_Text_TrPsychicElijahDefeat:
-	.string "They read it, but couldn't stop it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x60, 0x07, 0xFF
 
 Sinnoh_Text_TrPsychicElijahAfter:
-	.string "Your thoughts are very loud. That's a\n"
-	.string "compliment.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x60, 0x08, 0xFF
 
 Sinnoh_EventScript_TrPsychicKendra::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_KENDRA, Sinnoh_Text_TrPsychicKendraIntro, Sinnoh_Text_TrPsychicKendraDefeat
@@ -4342,15 +3800,13 @@ Sinnoh_EventScript_TrPsychicKendra::
 	end
 
 Sinnoh_Text_TrPsychicKendraIntro:
-	.string "I saw this battle in a dream last\n"
-	.string "night... I won in the dream.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x60, 0x18, 0xFF
 
 Sinnoh_Text_TrPsychicKendraDefeat:
-	.string "Dreams aren't always true...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x60, 0x19, 0xFF
 
 Sinnoh_Text_TrPsychicKendraAfter:
-	.string "Tonight I'll dream about a rematch.\n"
-	.string "Maybe that one comes true.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x60, 0x1A, 0xFF
 
 Sinnoh_EventScript_TrPsychicKody::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_KODY, Sinnoh_Text_TrPsychicKodyIntro, Sinnoh_Text_TrPsychicKodyDefeat
@@ -4358,15 +3814,13 @@ Sinnoh_EventScript_TrPsychicKody::
 	end
 
 Sinnoh_Text_TrPsychicKodyIntro:
-	.string "I saw this battle in a dream last\n"
-	.string "night... I won in the dream.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x60, 0x2A, 0xFF
 
 Sinnoh_Text_TrPsychicKodyDefeat:
-	.string "Dreams aren't always true...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x60, 0x2B, 0xFF
 
 Sinnoh_Text_TrPsychicKodyAfter:
-	.string "Tonight I'll dream about a rematch.\n"
-	.string "Maybe that one comes true.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x60, 0x2C, 0xFF
 
 Sinnoh_EventScript_TrPsychicLandon::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_LANDON, Sinnoh_Text_TrPsychicLandonIntro, Sinnoh_Text_TrPsychicLandonDefeat
@@ -4374,15 +3828,13 @@ Sinnoh_EventScript_TrPsychicLandon::
 	end
 
 Sinnoh_Text_TrPsychicLandonIntro:
-	.string "My MOéMON read your next move. Can\n"
-	.string "yours read mine?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x60, 0x3C, 0xFF
 
 Sinnoh_Text_TrPsychicLandonDefeat:
-	.string "They read it, but couldn't stop it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x60, 0x3D, 0xFF
 
 Sinnoh_Text_TrPsychicLandonAfter:
-	.string "Your thoughts are very loud. That's a\n"
-	.string "compliment.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x60, 0x3E, 0xFF
 
 Sinnoh_EventScript_TrPsychicLindsey::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_LINDSEY, Sinnoh_Text_TrPsychicLindseyIntro, Sinnoh_Text_TrPsychicLindseyDefeat
@@ -4390,15 +3842,13 @@ Sinnoh_EventScript_TrPsychicLindsey::
 	end
 
 Sinnoh_Text_TrPsychicLindseyIntro:
-	.string "My MOéMON read your next move. Can\n"
-	.string "yours read mine?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x60, 0x4E, 0xFF
 
 Sinnoh_Text_TrPsychicLindseyDefeat:
-	.string "They read it, but couldn't stop it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x60, 0x4F, 0xFF
 
 Sinnoh_Text_TrPsychicLindseyAfter:
-	.string "Your thoughts are very loud. That's a\n"
-	.string "compliment.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x60, 0x50, 0xFF
 
 Sinnoh_EventScript_TrPsychicMaxwell::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_MAXWELL, Sinnoh_Text_TrPsychicMaxwellIntro, Sinnoh_Text_TrPsychicMaxwellDefeat
@@ -4406,15 +3856,13 @@ Sinnoh_EventScript_TrPsychicMaxwell::
 	end
 
 Sinnoh_Text_TrPsychicMaxwellIntro:
-	.string "I saw this battle in a dream last\n"
-	.string "night... I won in the dream.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x60, 0x60, 0xFF
 
 Sinnoh_Text_TrPsychicMaxwellDefeat:
-	.string "Dreams aren't always true...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x60, 0x61, 0xFF
 
 Sinnoh_Text_TrPsychicMaxwellAfter:
-	.string "Tonight I'll dream about a rematch.\n"
-	.string "Maybe that one comes true.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x60, 0x62, 0xFF
 
 Sinnoh_EventScript_TrPsychicMitchell::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_MITCHELL, Sinnoh_Text_TrPsychicMitchellIntro, Sinnoh_Text_TrPsychicMitchellDefeat
@@ -4422,15 +3870,13 @@ Sinnoh_EventScript_TrPsychicMitchell::
 	end
 
 Sinnoh_Text_TrPsychicMitchellIntro:
-	.string "My MOéMON read your next move. Can\n"
-	.string "yours read mine?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x61, 0x04, 0xFF
 
 Sinnoh_Text_TrPsychicMitchellDefeat:
-	.string "They read it, but couldn't stop it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x61, 0x05, 0xFF
 
 Sinnoh_Text_TrPsychicMitchellAfter:
-	.string "Your thoughts are very loud. That's a\n"
-	.string "compliment.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x61, 0x06, 0xFF
 
 Sinnoh_EventScript_TrPsychicRachael::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_RACHAEL, Sinnoh_Text_TrPsychicRachaelIntro, Sinnoh_Text_TrPsychicRachaelDefeat
@@ -4438,15 +3884,13 @@ Sinnoh_EventScript_TrPsychicRachael::
 	end
 
 Sinnoh_Text_TrPsychicRachaelIntro:
-	.string "Shh... I'm focusing. Okay. Now we\n"
-	.string "battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x61, 0x3A, 0xFF
 
 Sinnoh_Text_TrPsychicRachaelDefeat:
-	.string "I lost my focus...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x61, 0x3B, 0xFF
 
 Sinnoh_Text_TrPsychicRachaelAfter:
-	.string "Focus is like a muscle. Mine needs more\n"
-	.string "training.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x61, 0x3C, 0xFF
 
 Sinnoh_EventScript_TrPsychicSterling::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_STERLING, Sinnoh_Text_TrPsychicSterlingIntro, Sinnoh_Text_TrPsychicSterlingDefeat
@@ -4454,15 +3898,13 @@ Sinnoh_EventScript_TrPsychicSterling::
 	end
 
 Sinnoh_Text_TrPsychicSterlingIntro:
-	.string "My MOéMON read your next move. Can\n"
-	.string "yours read mine?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x61, 0x4C, 0xFF
 
 Sinnoh_Text_TrPsychicSterlingDefeat:
-	.string "They read it, but couldn't stop it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x61, 0x4D, 0xFF
 
 Sinnoh_Text_TrPsychicSterlingAfter:
-	.string "Your thoughts are very loud. That's a\n"
-	.string "compliment.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x61, 0x4E, 0xFF
 
 Sinnoh_EventScript_TrPsychicValencia::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_VALENCIA, Sinnoh_Text_TrPsychicValenciaIntro, Sinnoh_Text_TrPsychicValenciaDefeat
@@ -4470,15 +3912,13 @@ Sinnoh_EventScript_TrPsychicValencia::
 	end
 
 Sinnoh_Text_TrPsychicValenciaIntro:
-	.string "Shh... I'm focusing. Okay. Now we\n"
-	.string "battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x61, 0x5E, 0xFF
 
 Sinnoh_Text_TrPsychicValenciaDefeat:
-	.string "I lost my focus...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x61, 0x5F, 0xFF
 
 Sinnoh_Text_TrPsychicValenciaAfter:
-	.string "Focus is like a muscle. Mine needs more\n"
-	.string "training.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x61, 0x60, 0xFF
 
 Sinnoh_EventScript_TrRancherMarco::
 	trainerbattle_single TRAINER_SINNOH_RANCHER_MARCO, Sinnoh_Text_TrRancherMarcoIntro, Sinnoh_Text_TrRancherMarcoDefeat
@@ -4486,15 +3926,13 @@ Sinnoh_EventScript_TrRancherMarco::
 	end
 
 Sinnoh_Text_TrRancherMarcoIntro:
-	.string "I've been out here since sunrise. A\n"
-	.string "battle's just what I need!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x61, 0x70, 0xFF
 
 Sinnoh_Text_TrRancherMarcoDefeat:
-	.string "Whew! That woke me up.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x61, 0x71, 0xFF
 
 Sinnoh_Text_TrRancherMarcoAfter:
-	.string "If you see a nice flat rock, that's my\n"
-	.string "nap spot. Don't take it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x61, 0x72, 0xFF
 
 Sinnoh_EventScript_TrRangerAllison::
 	trainerbattle_single TRAINER_SINNOH_RANGER_ALLISON, Sinnoh_Text_TrRangerAllisonIntro, Sinnoh_Text_TrRangerAllisonDefeat
@@ -4502,15 +3940,13 @@ Sinnoh_EventScript_TrRangerAllison::
 	end
 
 Sinnoh_Text_TrRangerAllisonIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x62, 0x26, 0xFF
 
 Sinnoh_Text_TrRangerAllisonDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x62, 0x27, 0xFF
 
 Sinnoh_Text_TrRangerAllisonAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x62, 0x28, 0xFF
 
 Sinnoh_EventScript_TrRangerAshlee::
 	trainerbattle_single TRAINER_SINNOH_RANGER_ASHLEE, Sinnoh_Text_TrRangerAshleeIntro, Sinnoh_Text_TrRangerAshleeDefeat
@@ -4518,15 +3954,13 @@ Sinnoh_EventScript_TrRangerAshlee::
 	end
 
 Sinnoh_Text_TrRangerAshleeIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x62, 0x6E, 0xFF
 
 Sinnoh_Text_TrRangerAshleeDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x62, 0x6F, 0xFF
 
 Sinnoh_Text_TrRangerAshleeAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x62, 0x70, 0xFF
 
 Sinnoh_EventScript_TrRangerDeshawn::
 	trainerbattle_single TRAINER_SINNOH_RANGER_DESHAWN, Sinnoh_Text_TrRangerDeshawnIntro, Sinnoh_Text_TrRangerDeshawnDefeat
@@ -4534,15 +3968,13 @@ Sinnoh_EventScript_TrRangerDeshawn::
 	end
 
 Sinnoh_Text_TrRangerDeshawnIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x12, 0xFF
 
 Sinnoh_Text_TrRangerDeshawnDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x13, 0xFF
 
 Sinnoh_Text_TrRangerDeshawnAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x14, 0xFF
 
 Sinnoh_EventScript_TrRangerDwayne::
 	trainerbattle_single TRAINER_SINNOH_RANGER_DWAYNE, Sinnoh_Text_TrRangerDwayneIntro, Sinnoh_Text_TrRangerDwayneDefeat
@@ -4550,15 +3982,13 @@ Sinnoh_EventScript_TrRangerDwayne::
 	end
 
 Sinnoh_Text_TrRangerDwayneIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x24, 0xFF
 
 Sinnoh_Text_TrRangerDwayneDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x25, 0xFF
 
 Sinnoh_Text_TrRangerDwayneAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x26, 0xFF
 
 Sinnoh_EventScript_TrRangerFelicia::
 	trainerbattle_single TRAINER_SINNOH_RANGER_FELICIA, Sinnoh_Text_TrRangerFeliciaIntro, Sinnoh_Text_TrRangerFeliciaDefeat
@@ -4566,15 +3996,13 @@ Sinnoh_EventScript_TrRangerFelicia::
 	end
 
 Sinnoh_Text_TrRangerFeliciaIntro:
-	.string "The view from here is great, but a good\n"
-	.string "battle is better!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x36, 0xFF
 
 Sinnoh_Text_TrRangerFeliciaDefeat:
-	.string "Great view, great loss.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x37, 0xFF
 
 Sinnoh_Text_TrRangerFeliciaAfter:
-	.string "I come up here to think. Today I'll\n"
-	.string "think about that battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x38, 0xFF
 
 Sinnoh_EventScript_TrRangerJeffrey::
 	trainerbattle_single TRAINER_SINNOH_RANGER_JEFFREY, Sinnoh_Text_TrRangerJeffreyIntro, Sinnoh_Text_TrRangerJeffreyDefeat
@@ -4582,15 +4010,13 @@ Sinnoh_EventScript_TrRangerJeffrey::
 	end
 
 Sinnoh_Text_TrRangerJeffreyIntro:
-	.string "The view from here is great, but a good\n"
-	.string "battle is better!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x48, 0xFF
 
 Sinnoh_Text_TrRangerJeffreyDefeat:
-	.string "Great view, great loss.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x49, 0xFF
 
 Sinnoh_Text_TrRangerJeffreyAfter:
-	.string "I come up here to think. Today I'll\n"
-	.string "think about that battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x4A, 0xFF
 
 Sinnoh_EventScript_TrRangerKrista::
 	trainerbattle_single TRAINER_SINNOH_RANGER_KRISTA, Sinnoh_Text_TrRangerKristaIntro, Sinnoh_Text_TrRangerKristaDefeat
@@ -4598,15 +4024,13 @@ Sinnoh_EventScript_TrRangerKrista::
 	end
 
 Sinnoh_Text_TrRangerKristaIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x5A, 0xFF
 
 Sinnoh_Text_TrRangerKristaDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x5B, 0xFF
 
 Sinnoh_Text_TrRangerKristaAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x5C, 0xFF
 
 Sinnoh_EventScript_TrRangerKyler::
 	trainerbattle_single TRAINER_SINNOH_RANGER_KYLER, Sinnoh_Text_TrRangerKylerIntro, Sinnoh_Text_TrRangerKylerDefeat
@@ -4614,15 +4038,13 @@ Sinnoh_EventScript_TrRangerKyler::
 	end
 
 Sinnoh_Text_TrRangerKylerIntro:
-	.string "The view from here is great, but a good\n"
-	.string "battle is better!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x6C, 0xFF
 
 Sinnoh_Text_TrRangerKylerDefeat:
-	.string "Great view, great loss.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x6D, 0xFF
 
 Sinnoh_Text_TrRangerKylerAfter:
-	.string "I come up here to think. Today I'll\n"
-	.string "think about that battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x6E, 0xFF
 
 Sinnoh_EventScript_TrRangerTaylor::
 	trainerbattle_single TRAINER_SINNOH_RANGER_TAYLOR, Sinnoh_Text_TrRangerTaylorIntro, Sinnoh_Text_TrRangerTaylorDefeat
@@ -4630,15 +4052,13 @@ Sinnoh_EventScript_TrRangerTaylor::
 	end
 
 Sinnoh_Text_TrRangerTaylorIntro:
-	.string "The view from here is great, but a good\n"
-	.string "battle is better!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x64, 0x10, 0xFF
 
 Sinnoh_Text_TrRangerTaylorDefeat:
-	.string "Great view, great loss.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x64, 0x11, 0xFF
 
 Sinnoh_Text_TrRangerTaylorAfter:
-	.string "I come up here to think. Today I'll\n"
-	.string "think about that battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x64, 0x12, 0xFF
 
 Sinnoh_EventScript_TrRichBoyJason::
 	trainerbattle_single TRAINER_SINNOH_RICH_BOY_JASON, Sinnoh_Text_TrRichBoyJasonIntro, Sinnoh_Text_TrRichBoyJasonDefeat
@@ -4646,15 +4066,13 @@ Sinnoh_EventScript_TrRichBoyJason::
 	end
 
 Sinnoh_Text_TrRichBoyJasonIntro:
-	.string "Oh my, a challenger! How delightful.\n"
-	.string "Shall we?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x65, 0x56, 0xFF
 
 Sinnoh_Text_TrRichBoyJasonDefeat:
-	.string "How very rude of my team to lose.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x65, 0x57, 0xFF
 
 Sinnoh_Text_TrRichBoyJasonAfter:
-	.string "Do come by for tea some time. My\n"
-	.string "MOéMON adore guests.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x65, 0x58, 0xFF
 
 Sinnoh_EventScript_TrRichBoyTrey::
 	trainerbattle_single TRAINER_SINNOH_RICH_BOY_TREY, Sinnoh_Text_TrRichBoyTreyIntro, Sinnoh_Text_TrRichBoyTreyDefeat
@@ -4662,15 +4080,13 @@ Sinnoh_EventScript_TrRichBoyTrey::
 	end
 
 Sinnoh_Text_TrRichBoyTreyIntro:
-	.string "Elegance and strength! My team has\n"
-	.string "both. Let me show you!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x66, 0x0C, 0xFF
 
 Sinnoh_Text_TrRichBoyTreyDefeat:
-	.string "Strength was missing today, it seems.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x66, 0x0D, 0xFF
 
 Sinnoh_Text_TrRichBoyTreyAfter:
-	.string "Elegance never loses, even when you\n"
-	.string "lose. Remember that.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x66, 0x0E, 0xFF
 
 Sinnoh_EventScript_TrRoughneckKirby::
 	trainerbattle_single TRAINER_SINNOH_ROUGHNECK_KIRBY, Sinnoh_Text_TrRoughneckKirbyIntro, Sinnoh_Text_TrRoughneckKirbyDefeat
@@ -4678,15 +4094,13 @@ Sinnoh_EventScript_TrRoughneckKirby::
 	end
 
 Sinnoh_Text_TrRoughneckKirbyIntro:
-	.string "Ha! Up here you have to be tough.\n"
-	.string "Let's see if you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6B, 0x38, 0xFF
 
 Sinnoh_Text_TrRoughneckKirbyDefeat:
-	.string "Tough as a mountain, you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6B, 0x39, 0xFF
 
 Sinnoh_Text_TrRoughneckKirbyAfter:
-	.string "Rest a bit before you go on. The trail\n"
-	.string "doesn't get any flatter.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6B, 0x3A, 0xFF
 
 Sinnoh_EventScript_TrRuinManiacBryan::
 	trainerbattle_single TRAINER_SINNOH_RUIN_MANIAC_BRYAN, Sinnoh_Text_TrRuinManiacBryanIntro, Sinnoh_Text_TrRuinManiacBryanDefeat
@@ -4694,15 +4108,13 @@ Sinnoh_EventScript_TrRuinManiacBryan::
 	end
 
 Sinnoh_Text_TrRuinManiacBryanIntro:
-	.string "I've been out here since sunrise. A\n"
-	.string "battle's just what I need!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6B, 0x4A, 0xFF
 
 Sinnoh_Text_TrRuinManiacBryanDefeat:
-	.string "Whew! That woke me up.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6B, 0x4B, 0xFF
 
 Sinnoh_Text_TrRuinManiacBryanAfter:
-	.string "If you see a nice flat rock, that's my\n"
-	.string "nap spot. Don't take it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6B, 0x4C, 0xFF
 
 Sinnoh_EventScript_TrRuinManiacCalvin::
 	trainerbattle_single TRAINER_SINNOH_RUIN_MANIAC_CALVIN, Sinnoh_Text_TrRuinManiacCalvinIntro, Sinnoh_Text_TrRuinManiacCalvinDefeat
@@ -4710,15 +4122,13 @@ Sinnoh_EventScript_TrRuinManiacCalvin::
 	end
 
 Sinnoh_Text_TrRuinManiacCalvinIntro:
-	.string "I've been out here since sunrise. A\n"
-	.string "battle's just what I need!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6B, 0x5C, 0xFF
 
 Sinnoh_Text_TrRuinManiacCalvinDefeat:
-	.string "Whew! That woke me up.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6B, 0x5D, 0xFF
 
 Sinnoh_Text_TrRuinManiacCalvinAfter:
-	.string "If you see a nice flat rock, that's my\n"
-	.string "nap spot. Don't take it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6B, 0x5E, 0xFF
 
 Sinnoh_EventScript_TrRuinManiacGerald::
 	trainerbattle_single TRAINER_SINNOH_RUIN_MANIAC_GERALD, Sinnoh_Text_TrRuinManiacGeraldIntro, Sinnoh_Text_TrRuinManiacGeraldDefeat
@@ -4726,15 +4136,13 @@ Sinnoh_EventScript_TrRuinManiacGerald::
 	end
 
 Sinnoh_Text_TrRuinManiacGeraldIntro:
-	.string "Ha! Up here you have to be tough.\n"
-	.string "Let's see if you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6B, 0x6E, 0xFF
 
 Sinnoh_Text_TrRuinManiacGeraldDefeat:
-	.string "Tough as a mountain, you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6B, 0x6F, 0xFF
 
 Sinnoh_Text_TrRuinManiacGeraldAfter:
-	.string "Rest a bit before you go on. The trail\n"
-	.string "doesn't get any flatter.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6B, 0x70, 0xFF
 
 Sinnoh_EventScript_TrRuinManiacHarry::
 	trainerbattle_single TRAINER_SINNOH_RUIN_MANIAC_HARRY, Sinnoh_Text_TrRuinManiacHarryIntro, Sinnoh_Text_TrRuinManiacHarryDefeat
@@ -4742,15 +4150,13 @@ Sinnoh_EventScript_TrRuinManiacHarry::
 	end
 
 Sinnoh_Text_TrRuinManiacHarryIntro:
-	.string "Ha! Up here you have to be tough.\n"
-	.string "Let's see if you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x00, 0xFF
 
 Sinnoh_Text_TrRuinManiacHarryDefeat:
-	.string "Tough as a mountain, you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x01, 0xFF
 
 Sinnoh_Text_TrRuinManiacHarryAfter:
-	.string "Rest a bit before you go on. The trail\n"
-	.string "doesn't get any flatter.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x02, 0xFF
 
 Sinnoh_EventScript_TrRuinManiacKarl::
 	trainerbattle_single TRAINER_SINNOH_RUIN_MANIAC_KARL, Sinnoh_Text_TrRuinManiacKarlIntro, Sinnoh_Text_TrRuinManiacKarlDefeat
@@ -4758,15 +4164,13 @@ Sinnoh_EventScript_TrRuinManiacKarl::
 	end
 
 Sinnoh_Text_TrRuinManiacKarlIntro:
-	.string "I've been out here since sunrise. A\n"
-	.string "battle's just what I need!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x36, 0xFF
 
 Sinnoh_Text_TrRuinManiacKarlDefeat:
-	.string "Whew! That woke me up.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x37, 0xFF
 
 Sinnoh_Text_TrRuinManiacKarlAfter:
-	.string "If you see a nice flat rock, that's my\n"
-	.string "nap spot. Don't take it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x38, 0xFF
 
 Sinnoh_EventScript_TrRuinManiacLarry::
 	trainerbattle_single TRAINER_SINNOH_RUIN_MANIAC_LARRY, Sinnoh_Text_TrRuinManiacLarryIntro, Sinnoh_Text_TrRuinManiacLarryDefeat
@@ -4774,15 +4178,13 @@ Sinnoh_EventScript_TrRuinManiacLarry::
 	end
 
 Sinnoh_Text_TrRuinManiacLarryIntro:
-	.string "Hard work makes strong MOéMON. Mine\n"
-	.string "dig all day!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x48, 0xFF
 
 Sinnoh_Text_TrRuinManiacLarryDefeat:
-	.string "Back to digging, I guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x49, 0xFF
 
 Sinnoh_Text_TrRuinManiacLarryAfter:
-	.string "My MOéMON and I are taking a lunch\n"
-	.string "break. We earned it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x4A, 0xFF
 
 Sinnoh_EventScript_TrRuinManiacRonald::
 	trainerbattle_single TRAINER_SINNOH_RUIN_MANIAC_RONALD, Sinnoh_Text_TrRuinManiacRonaldIntro, Sinnoh_Text_TrRuinManiacRonaldDefeat
@@ -4790,15 +4192,13 @@ Sinnoh_EventScript_TrRuinManiacRonald::
 	end
 
 Sinnoh_Text_TrRuinManiacRonaldIntro:
-	.string "Hard work makes strong MOéMON. Mine\n"
-	.string "dig all day!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x5A, 0xFF
 
 Sinnoh_Text_TrRuinManiacRonaldDefeat:
-	.string "Back to digging, I guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x5B, 0xFF
 
 Sinnoh_Text_TrRuinManiacRonaldAfter:
-	.string "My MOéMON and I are taking a lunch\n"
-	.string "break. We earned it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x5C, 0xFF
 
 Sinnoh_EventScript_TrSailorDamian::
 	trainerbattle_single TRAINER_SINNOH_SAILOR_DAMIAN, Sinnoh_Text_TrSailorDamianIntro, Sinnoh_Text_TrSailorDamianDefeat
@@ -4806,15 +4206,13 @@ Sinnoh_EventScript_TrSailorDamian::
 	end
 
 Sinnoh_Text_TrSailorDamianIntro:
-	.string "Ahoy! A sailor never turns down a\n"
-	.string "fight!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x6C, 0xFF
 
 Sinnoh_Text_TrSailorDamianDefeat:
-	.string "Blown off course!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x6D, 0xFF
 
 Sinnoh_Text_TrSailorDamianAfter:
-	.string "The sea teaches you to lose well. I've\n"
-	.string "had a lot of lessons.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x6E, 0xFF
 
 Sinnoh_EventScript_TrSailorLuther::
 	trainerbattle_single TRAINER_SINNOH_SAILOR_LUTHER, Sinnoh_Text_TrSailorLutherIntro, Sinnoh_Text_TrSailorLutherDefeat
@@ -4822,15 +4220,13 @@ Sinnoh_EventScript_TrSailorLuther::
 	end
 
 Sinnoh_Text_TrSailorLutherIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x7E, 0xFF
 
 Sinnoh_Text_TrSailorLutherDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x7F, 0xFF
 
 Sinnoh_Text_TrSailorLutherAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x00, 0xFF
 
 Sinnoh_EventScript_TrSailorMarc::
 	trainerbattle_single TRAINER_SINNOH_SAILOR_MARC, Sinnoh_Text_TrSailorMarcIntro, Sinnoh_Text_TrSailorMarcDefeat
@@ -4838,15 +4234,13 @@ Sinnoh_EventScript_TrSailorMarc::
 	end
 
 Sinnoh_Text_TrSailorMarcIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x10, 0xFF
 
 Sinnoh_Text_TrSailorMarcDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x11, 0xFF
 
 Sinnoh_Text_TrSailorMarcAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x12, 0xFF
 
 Sinnoh_EventScript_TrSailorPaul::
 	trainerbattle_single TRAINER_SINNOH_SAILOR_PAUL, Sinnoh_Text_TrSailorPaulIntro, Sinnoh_Text_TrSailorPaulDefeat
@@ -4854,15 +4248,13 @@ Sinnoh_EventScript_TrSailorPaul::
 	end
 
 Sinnoh_Text_TrSailorPaulIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x46, 0xFF
 
 Sinnoh_Text_TrSailorPaulDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x47, 0xFF
 
 Sinnoh_Text_TrSailorPaulAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x48, 0xFF
 
 Sinnoh_EventScript_TrSailorSamson::
 	trainerbattle_single TRAINER_SINNOH_SAILOR_SAMSON, Sinnoh_Text_TrSailorSamsonIntro, Sinnoh_Text_TrSailorSamsonDefeat
@@ -4870,15 +4262,13 @@ Sinnoh_EventScript_TrSailorSamson::
 	end
 
 Sinnoh_Text_TrSailorSamsonIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x58, 0xFF
 
 Sinnoh_Text_TrSailorSamsonDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x59, 0xFF
 
 Sinnoh_Text_TrSailorSamsonAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x5A, 0xFF
 
 Sinnoh_EventScript_TrSailorSkyler::
 	trainerbattle_single TRAINER_SINNOH_SAILOR_SKYLER, Sinnoh_Text_TrSailorSkylerIntro, Sinnoh_Text_TrSailorSkylerDefeat
@@ -4886,15 +4276,13 @@ Sinnoh_EventScript_TrSailorSkyler::
 	end
 
 Sinnoh_Text_TrSailorSkylerIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x6A, 0xFF
 
 Sinnoh_Text_TrSailorSkylerDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x6B, 0xFF
 
 Sinnoh_Text_TrSailorSkylerAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x6C, 0xFF
 
 Sinnoh_EventScript_TrSailorZachariah::
 	trainerbattle_single TRAINER_SINNOH_SAILOR_ZACHARIAH, Sinnoh_Text_TrSailorZachariahIntro, Sinnoh_Text_TrSailorZachariahDefeat
@@ -4902,15 +4290,13 @@ Sinnoh_EventScript_TrSailorZachariah::
 	end
 
 Sinnoh_Text_TrSailorZachariahIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x7C, 0xFF
 
 Sinnoh_Text_TrSailorZachariahDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x7D, 0xFF
 
 Sinnoh_Text_TrSailorZachariahAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x7E, 0xFF
 
 Sinnoh_EventScript_TrSchoolKidChance::
 	trainerbattle_single TRAINER_SINNOH_SCHOOL_KID_CHANCE, Sinnoh_Text_TrSchoolKidChanceIntro, Sinnoh_Text_TrSchoolKidChanceDefeat
@@ -4918,15 +4304,13 @@ Sinnoh_EventScript_TrSchoolKidChance::
 	end
 
 Sinnoh_Text_TrSchoolKidChanceIntro:
-	.string "Stop right there! Nobody walks past\n"
-	.string "me without a battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6E, 0x20, 0xFF
 
 Sinnoh_Text_TrSchoolKidChanceDefeat:
-	.string "Okay, okay, you can walk past!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6E, 0x21, 0xFF
 
 Sinnoh_Text_TrSchoolKidChanceAfter:
-	.string "Being a road guard is harder than it\n"
-	.string "looks.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6E, 0x22, 0xFF
 
 Sinnoh_EventScript_TrSchoolKidForrest::
 	trainerbattle_single TRAINER_SINNOH_SCHOOL_KID_FORREST, Sinnoh_Text_TrSchoolKidForrestIntro, Sinnoh_Text_TrSchoolKidForrestDefeat
@@ -4934,16 +4318,13 @@ Sinnoh_EventScript_TrSchoolKidForrest::
 	end
 
 Sinnoh_Text_TrSchoolKidForrestIntro:
-	.string "I caught my partner all by myself!\n"
-	.string "Want to see how strong it is?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6E, 0x56, 0xFF
 
 Sinnoh_Text_TrSchoolKidForrestDefeat:
-	.string "It's strong... just not stronger than\n"
-	.string "yours.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6E, 0x57, 0xFF
 
 Sinnoh_Text_TrSchoolKidForrestAfter:
-	.string "Your MOéMON look really happy. How do\n"
-	.string "you do that?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6E, 0x58, 0xFF
 
 Sinnoh_EventScript_TrSchoolKidMackenzie::
 	trainerbattle_single TRAINER_SINNOH_SCHOOL_KID_MACKENZIE, Sinnoh_Text_TrSchoolKidMackenzieIntro, Sinnoh_Text_TrSchoolKidMackenzieDefeat
@@ -4951,16 +4332,13 @@ Sinnoh_EventScript_TrSchoolKidMackenzie::
 	end
 
 Sinnoh_Text_TrSchoolKidMackenzieIntro:
-	.string "I caught my partner all by myself!\n"
-	.string "Want to see how strong it is?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6E, 0x7A, 0xFF
 
 Sinnoh_Text_TrSchoolKidMackenzieDefeat:
-	.string "It's strong... just not stronger than\n"
-	.string "yours.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6E, 0x7B, 0xFF
 
 Sinnoh_Text_TrSchoolKidMackenzieAfter:
-	.string "Your MOéMON look really happy. How do\n"
-	.string "you do that?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6E, 0x7C, 0xFF
 
 Sinnoh_EventScript_TrSchoolKidTiera::
 	trainerbattle_single TRAINER_SINNOH_SCHOOL_KID_TIERA, Sinnoh_Text_TrSchoolKidTieraIntro, Sinnoh_Text_TrSchoolKidTieraDefeat
@@ -4968,15 +4346,13 @@ Sinnoh_EventScript_TrSchoolKidTiera::
 	end
 
 Sinnoh_Text_TrSchoolKidTieraIntro:
-	.string "My MOéMON and I practiced all morning!\n"
-	.string "Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6F, 0x0C, 0xFF
 
 Sinnoh_Text_TrSchoolKidTieraDefeat:
-	.string "We practiced the wrong things...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6F, 0x0D, 0xFF
 
 Sinnoh_Text_TrSchoolKidTieraAfter:
-	.string "I'll practice the right things this\n"
-	.string "afternoon. Probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6F, 0x0E, 0xFF
 
 Sinnoh_EventScript_TrScientistDarrius::
 	trainerbattle_single TRAINER_SINNOH_SCIENTIST_DARRIUS, Sinnoh_Text_TrScientistDarriusIntro, Sinnoh_Text_TrScientistDarriusDefeat
@@ -4984,15 +4360,13 @@ Sinnoh_EventScript_TrScientistDarrius::
 	end
 
 Sinnoh_Text_TrScientistDarriusIntro:
-	.string "I've studied MOéMON for years. Time\n"
-	.string "for a field test!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6F, 0x1E, 0xFF
 
 Sinnoh_Text_TrScientistDarriusDefeat:
-	.string "Hmm. The data says I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6F, 0x1F, 0xFF
 
 Sinnoh_Text_TrScientistDarriusAfter:
-	.string "I'll write that battle down in my\n"
-	.string "notebook. Under “lessons.”$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6F, 0x20, 0xFF
 
 Sinnoh_EventScript_TrScientistFredrick::
 	trainerbattle_single TRAINER_SINNOH_SCIENTIST_FREDRICK, Sinnoh_Text_TrScientistFredrickIntro, Sinnoh_Text_TrScientistFredrickDefeat
@@ -5000,15 +4374,13 @@ Sinnoh_EventScript_TrScientistFredrick::
 	end
 
 Sinnoh_Text_TrScientistFredrickIntro:
-	.string "Listen to my MOéMON's cry! Isn't it\n"
-	.string "music? Let's battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6F, 0x42, 0xFF
 
 Sinnoh_Text_TrScientistFredrickDefeat:
-	.string "That was a sad song.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6F, 0x43, 0xFF
 
 Sinnoh_Text_TrScientistFredrickAfter:
-	.string "I'll write a song about this. It'll be a\n"
-	.string "slow one.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6F, 0x44, 0xFF
 
 Sinnoh_EventScript_TrScientistShaun::
 	trainerbattle_single TRAINER_SINNOH_SCIENTIST_SHAUN, Sinnoh_Text_TrScientistShaunIntro, Sinnoh_Text_TrScientistShaunDefeat
@@ -5016,15 +4388,13 @@ Sinnoh_EventScript_TrScientistShaun::
 	end
 
 Sinnoh_Text_TrScientistShaunIntro:
-	.string "You there! You look like you'd\n"
-	.string "appreciate my team!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6F, 0x54, 0xFF
 
 Sinnoh_Text_TrScientistShaunDefeat:
-	.string "My poor darlings!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6F, 0x55, 0xFF
 
 Sinnoh_Text_TrScientistShaunAfter:
-	.string "Every MOéMON is special. Even when\n"
-	.string "they lose.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6F, 0x56, 0xFF
 
 Sinnoh_EventScript_TrScientistStefano::
 	trainerbattle_single TRAINER_SINNOH_SCIENTIST_STEFANO, Sinnoh_Text_TrScientistStefanoIntro, Sinnoh_Text_TrScientistStefanoDefeat
@@ -5032,15 +4402,13 @@ Sinnoh_EventScript_TrScientistStefano::
 	end
 
 Sinnoh_Text_TrScientistStefanoIntro:
-	.string "Listen to my MOéMON's cry! Isn't it\n"
-	.string "music? Let's battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x70, 0x1C, 0xFF
 
 Sinnoh_Text_TrScientistStefanoDefeat:
-	.string "That was a sad song.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x70, 0x1D, 0xFF
 
 Sinnoh_Text_TrScientistStefanoAfter:
-	.string "I'll write a song about this. It'll be a\n"
-	.string "slow one.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x70, 0x1E, 0xFF
 
 Sinnoh_EventScript_TrScientistTravon::
 	trainerbattle_single TRAINER_SINNOH_SCIENTIST_TRAVON, Sinnoh_Text_TrScientistTravonIntro, Sinnoh_Text_TrScientistTravonDefeat
@@ -5048,15 +4416,13 @@ Sinnoh_EventScript_TrScientistTravon::
 	end
 
 Sinnoh_Text_TrScientistTravonIntro:
-	.string "Listen to my MOéMON's cry! Isn't it\n"
-	.string "music? Let's battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x70, 0x2E, 0xFF
 
 Sinnoh_Text_TrScientistTravonDefeat:
-	.string "That was a sad song.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x70, 0x2F, 0xFF
 
 Sinnoh_Text_TrScientistTravonAfter:
-	.string "I'll write a song about this. It'll be a\n"
-	.string "slow one.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x70, 0x30, 0xFF
 
 Sinnoh_EventScript_TrSkierAndrea::
 	trainerbattle_single TRAINER_SINNOH_SKIER_ANDREA, Sinnoh_Text_TrSkierAndreaIntro, Sinnoh_Text_TrSkierAndreaDefeat
@@ -5064,14 +4430,13 @@ Sinnoh_EventScript_TrSkierAndrea::
 	end
 
 Sinnoh_Text_TrSkierAndreaIntro:
-	.string "Speed is everything! Can you keep up?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x70, 0x40, 0xFF
 
 Sinnoh_Text_TrSkierAndreaDefeat:
-	.string "You kept up AND passed me!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x70, 0x41, 0xFF
 
 Sinnoh_Text_TrSkierAndreaAfter:
-	.string "Slow and steady wins sometimes, I\n"
-	.string "guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x70, 0x42, 0xFF
 
 Sinnoh_EventScript_TrSkierBjorn::
 	trainerbattle_single TRAINER_SINNOH_SKIER_BJORN, Sinnoh_Text_TrSkierBjornIntro, Sinnoh_Text_TrSkierBjornDefeat
@@ -5079,13 +4444,13 @@ Sinnoh_EventScript_TrSkierBjorn::
 	end
 
 Sinnoh_Text_TrSkierBjornIntro:
-	.string "A battle is a great warm-up. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x70, 0x76, 0xFF
 
 Sinnoh_Text_TrSkierBjornDefeat:
-	.string "That warmed me up too much!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x70, 0x77, 0xFF
 
 Sinnoh_Text_TrSkierBjornAfter:
-	.string "Stretch before battles. Trust me.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x70, 0x78, 0xFF
 
 Sinnoh_EventScript_TrSkierBradley::
 	trainerbattle_single TRAINER_SINNOH_SKIER_BRADLEY, Sinnoh_Text_TrSkierBradleyIntro, Sinnoh_Text_TrSkierBradleyDefeat
@@ -5093,15 +4458,13 @@ Sinnoh_EventScript_TrSkierBradley::
 	end
 
 Sinnoh_Text_TrSkierBradleyIntro:
-	.string "Out of the way! Oh, a TRAINER! Let's\n"
-	.string "make it quick!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x71, 0x2C, 0xFF
 
 Sinnoh_Text_TrSkierBradleyDefeat:
-	.string "That was quick, all right.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x71, 0x2D, 0xFF
 
 Sinnoh_Text_TrSkierBradleyAfter:
-	.string "I'm off on another lap. See you at the\n"
-	.string "finish line!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x71, 0x2E, 0xFF
 
 Sinnoh_EventScript_TrSkierEdward::
 	trainerbattle_single TRAINER_SINNOH_SKIER_EDWARD, Sinnoh_Text_TrSkierEdwardIntro, Sinnoh_Text_TrSkierEdwardDefeat
@@ -5109,14 +4472,13 @@ Sinnoh_EventScript_TrSkierEdward::
 	end
 
 Sinnoh_Text_TrSkierEdwardIntro:
-	.string "Speed is everything! Can you keep up?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x71, 0x3E, 0xFF
 
 Sinnoh_Text_TrSkierEdwardDefeat:
-	.string "You kept up AND passed me!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x71, 0x3F, 0xFF
 
 Sinnoh_Text_TrSkierEdwardAfter:
-	.string "Slow and steady wins sometimes, I\n"
-	.string "guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x71, 0x40, 0xFF
 
 Sinnoh_EventScript_TrSkierKaitlyn::
 	trainerbattle_single TRAINER_SINNOH_SKIER_KAITLYN, Sinnoh_Text_TrSkierKaitlynIntro, Sinnoh_Text_TrSkierKaitlynDefeat
@@ -5124,14 +4486,13 @@ Sinnoh_EventScript_TrSkierKaitlyn::
 	end
 
 Sinnoh_Text_TrSkierKaitlynIntro:
-	.string "Speed is everything! Can you keep up?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x71, 0x74, 0xFF
 
 Sinnoh_Text_TrSkierKaitlynDefeat:
-	.string "You kept up AND passed me!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x71, 0x75, 0xFF
 
 Sinnoh_Text_TrSkierKaitlynAfter:
-	.string "Slow and steady wins sometimes, I\n"
-	.string "guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x71, 0x76, 0xFF
 
 Sinnoh_EventScript_TrSkierLexie::
 	trainerbattle_single TRAINER_SINNOH_SKIER_LEXIE, Sinnoh_Text_TrSkierLexieIntro, Sinnoh_Text_TrSkierLexieDefeat
@@ -5139,15 +4500,13 @@ Sinnoh_EventScript_TrSkierLexie::
 	end
 
 Sinnoh_Text_TrSkierLexieIntro:
-	.string "Out of the way! Oh, a TRAINER! Let's\n"
-	.string "make it quick!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x72, 0x06, 0xFF
 
 Sinnoh_Text_TrSkierLexieDefeat:
-	.string "That was quick, all right.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x72, 0x07, 0xFF
 
 Sinnoh_Text_TrSkierLexieAfter:
-	.string "I'm off on another lap. See you at the\n"
-	.string "finish line!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x72, 0x08, 0xFF
 
 Sinnoh_EventScript_TrSkierMadison::
 	trainerbattle_single TRAINER_SINNOH_SKIER_MADISON, Sinnoh_Text_TrSkierMadisonIntro, Sinnoh_Text_TrSkierMadisonDefeat
@@ -5155,15 +4514,13 @@ Sinnoh_EventScript_TrSkierMadison::
 	end
 
 Sinnoh_Text_TrSkierMadisonIntro:
-	.string "Out of the way! Oh, a TRAINER! Let's\n"
-	.string "make it quick!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x72, 0x18, 0xFF
 
 Sinnoh_Text_TrSkierMadisonDefeat:
-	.string "That was quick, all right.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x72, 0x19, 0xFF
 
 Sinnoh_Text_TrSkierMadisonAfter:
-	.string "I'm off on another lap. See you at the\n"
-	.string "finish line!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x72, 0x1A, 0xFF
 
 Sinnoh_EventScript_TrSkierShawn::
 	trainerbattle_single TRAINER_SINNOH_SKIER_SHAWN, Sinnoh_Text_TrSkierShawnIntro, Sinnoh_Text_TrSkierShawnDefeat
@@ -5171,13 +4528,13 @@ Sinnoh_EventScript_TrSkierShawn::
 	end
 
 Sinnoh_Text_TrSkierShawnIntro:
-	.string "A battle is a great warm-up. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x72, 0x4E, 0xFF
 
 Sinnoh_Text_TrSkierShawnDefeat:
-	.string "That warmed me up too much!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x72, 0x4F, 0xFF
 
 Sinnoh_Text_TrSkierShawnAfter:
-	.string "Stretch before battles. Trust me.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x72, 0x50, 0xFF
 
 Sinnoh_EventScript_TrSocialiteReina::
 	trainerbattle_single TRAINER_SINNOH_SOCIALITE_REINA, Sinnoh_Text_TrSocialiteReinaIntro, Sinnoh_Text_TrSocialiteReinaDefeat
@@ -5185,15 +4542,13 @@ Sinnoh_EventScript_TrSocialiteReina::
 	end
 
 Sinnoh_Text_TrSocialiteReinaIntro:
-	.string "A battle with a traveler! I'll tell\n"
-	.string "everyone about this.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x72, 0x72, 0xFF
 
 Sinnoh_Text_TrSocialiteReinaDefeat:
-	.string "I'll leave out the part where I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x72, 0x73, 0xFF
 
 Sinnoh_Text_TrSocialiteReinaAfter:
-	.string "Was that your best? It was lovely.\n"
-	.string "Truly.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x72, 0x74, 0xFF
 
 Sinnoh_EventScript_TrSwimmerAdrian::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_ADRIAN, Sinnoh_Text_TrSwimmerAdrianIntro, Sinnoh_Text_TrSwimmerAdrianDefeat
@@ -5201,15 +4556,13 @@ Sinnoh_EventScript_TrSwimmerAdrian::
 	end
 
 Sinnoh_Text_TrSwimmerAdrianIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x28, 0xFF
 
 Sinnoh_Text_TrSwimmerAdrianDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x29, 0xFF
 
 Sinnoh_Text_TrSwimmerAdrianAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x2A, 0xFF
 
 Sinnoh_EventScript_TrSwimmerAubree::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_AUBREE, Sinnoh_Text_TrSwimmerAubreeIntro, Sinnoh_Text_TrSwimmerAubreeDefeat
@@ -5217,15 +4570,13 @@ Sinnoh_EventScript_TrSwimmerAubree::
 	end
 
 Sinnoh_Text_TrSwimmerAubreeIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x3A, 0xFF
 
 Sinnoh_Text_TrSwimmerAubreeDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x3B, 0xFF
 
 Sinnoh_Text_TrSwimmerAubreeAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x3C, 0xFF
 
 Sinnoh_EventScript_TrSwimmerCassandra::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_CASSANDRA, Sinnoh_Text_TrSwimmerCassandraIntro, Sinnoh_Text_TrSwimmerCassandraDefeat
@@ -5233,15 +4584,13 @@ Sinnoh_EventScript_TrSwimmerCassandra::
 	end
 
 Sinnoh_Text_TrSwimmerCassandraIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x4C, 0xFF
 
 Sinnoh_Text_TrSwimmerCassandraDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x4D, 0xFF
 
 Sinnoh_Text_TrSwimmerCassandraAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x4E, 0xFF
 
 Sinnoh_EventScript_TrSwimmerClaire::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_CLAIRE, Sinnoh_Text_TrSwimmerClaireIntro, Sinnoh_Text_TrSwimmerClaireDefeat
@@ -5249,15 +4598,13 @@ Sinnoh_EventScript_TrSwimmerClaire::
 	end
 
 Sinnoh_Text_TrSwimmerClaireIntro:
-	.string "Ahoy! A sailor never turns down a\n"
-	.string "fight!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x5E, 0xFF
 
 Sinnoh_Text_TrSwimmerClaireDefeat:
-	.string "Blown off course!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x5F, 0xFF
 
 Sinnoh_Text_TrSwimmerClaireAfter:
-	.string "The sea teaches you to lose well. I've\n"
-	.string "had a lot of lessons.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x60, 0xFF
 
 Sinnoh_EventScript_TrSwimmerColton::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_COLTON, Sinnoh_Text_TrSwimmerColtonIntro, Sinnoh_Text_TrSwimmerColtonDefeat
@@ -5265,15 +4612,13 @@ Sinnoh_EventScript_TrSwimmerColton::
 	end
 
 Sinnoh_Text_TrSwimmerColtonIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x70, 0xFF
 
 Sinnoh_Text_TrSwimmerColtonDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x71, 0xFF
 
 Sinnoh_Text_TrSwimmerColtonAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x72, 0xFF
 
 Sinnoh_EventScript_TrSwimmerCrystal::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_CRYSTAL, Sinnoh_Text_TrSwimmerCrystalIntro, Sinnoh_Text_TrSwimmerCrystalDefeat
@@ -5281,15 +4626,13 @@ Sinnoh_EventScript_TrSwimmerCrystal::
 	end
 
 Sinnoh_Text_TrSwimmerCrystalIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x02, 0xFF
 
 Sinnoh_Text_TrSwimmerCrystalDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x03, 0xFF
 
 Sinnoh_Text_TrSwimmerCrystalAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x04, 0xFF
 
 Sinnoh_EventScript_TrSwimmerDillon::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_DILLON, Sinnoh_Text_TrSwimmerDillonIntro, Sinnoh_Text_TrSwimmerDillonDefeat
@@ -5297,15 +4640,13 @@ Sinnoh_EventScript_TrSwimmerDillon::
 	end
 
 Sinnoh_Text_TrSwimmerDillonIntro:
-	.string "Ahoy! A sailor never turns down a\n"
-	.string "fight!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x26, 0xFF
 
 Sinnoh_Text_TrSwimmerDillonDefeat:
-	.string "Blown off course!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x27, 0xFF
 
 Sinnoh_Text_TrSwimmerDillonAfter:
-	.string "The sea teaches you to lose well. I've\n"
-	.string "had a lot of lessons.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x28, 0xFF
 
 Sinnoh_EventScript_TrSwimmerErica::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_ERICA, Sinnoh_Text_TrSwimmerEricaIntro, Sinnoh_Text_TrSwimmerEricaDefeat
@@ -5313,15 +4654,13 @@ Sinnoh_EventScript_TrSwimmerErica::
 	end
 
 Sinnoh_Text_TrSwimmerEricaIntro:
-	.string "Ahoy! A sailor never turns down a\n"
-	.string "fight!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x38, 0xFF
 
 Sinnoh_Text_TrSwimmerEricaDefeat:
-	.string "Blown off course!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x39, 0xFF
 
 Sinnoh_Text_TrSwimmerEricaAfter:
-	.string "The sea teaches you to lose well. I've\n"
-	.string "had a lot of lessons.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x3A, 0xFF
 
 Sinnoh_EventScript_TrSwimmerErik::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_ERIK, Sinnoh_Text_TrSwimmerErikIntro, Sinnoh_Text_TrSwimmerErikDefeat
@@ -5329,15 +4668,13 @@ Sinnoh_EventScript_TrSwimmerErik::
 	end
 
 Sinnoh_Text_TrSwimmerErikIntro:
-	.string "Ahoy! A sailor never turns down a\n"
-	.string "fight!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x4A, 0xFF
 
 Sinnoh_Text_TrSwimmerErikDefeat:
-	.string "Blown off course!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x4B, 0xFF
 
 Sinnoh_Text_TrSwimmerErikAfter:
-	.string "The sea teaches you to lose well. I've\n"
-	.string "had a lot of lessons.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x4C, 0xFF
 
 Sinnoh_EventScript_TrSwimmerEvan::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_EVAN, Sinnoh_Text_TrSwimmerEvanIntro, Sinnoh_Text_TrSwimmerEvanDefeat
@@ -5345,15 +4682,13 @@ Sinnoh_EventScript_TrSwimmerEvan::
 	end
 
 Sinnoh_Text_TrSwimmerEvanIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x5C, 0xFF
 
 Sinnoh_Text_TrSwimmerEvanDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x5D, 0xFF
 
 Sinnoh_Text_TrSwimmerEvanAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x5E, 0xFF
 
 Sinnoh_EventScript_TrSwimmerFrancisco::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_FRANCISCO, Sinnoh_Text_TrSwimmerFranciscoIntro, Sinnoh_Text_TrSwimmerFranciscoDefeat
@@ -5361,15 +4696,13 @@ Sinnoh_EventScript_TrSwimmerFrancisco::
 	end
 
 Sinnoh_Text_TrSwimmerFranciscoIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x6E, 0xFF
 
 Sinnoh_Text_TrSwimmerFranciscoDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x6F, 0xFF
 
 Sinnoh_Text_TrSwimmerFranciscoAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x70, 0xFF
 
 Sinnoh_EventScript_TrSwimmerGabrielle::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_GABRIELLE, Sinnoh_Text_TrSwimmerGabrielleIntro, Sinnoh_Text_TrSwimmerGabrielleDefeat
@@ -5377,15 +4710,13 @@ Sinnoh_EventScript_TrSwimmerGabrielle::
 	end
 
 Sinnoh_Text_TrSwimmerGabrielleIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x12, 0xFF
 
 Sinnoh_Text_TrSwimmerGabrielleDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x13, 0xFF
 
 Sinnoh_Text_TrSwimmerGabrielleAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x14, 0xFF
 
 Sinnoh_EventScript_TrSwimmerGlenn::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_GLENN, Sinnoh_Text_TrSwimmerGlennIntro, Sinnoh_Text_TrSwimmerGlennDefeat
@@ -5393,15 +4724,13 @@ Sinnoh_EventScript_TrSwimmerGlenn::
 	end
 
 Sinnoh_Text_TrSwimmerGlennIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x24, 0xFF
 
 Sinnoh_Text_TrSwimmerGlennDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x25, 0xFF
 
 Sinnoh_Text_TrSwimmerGlennAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x26, 0xFF
 
 Sinnoh_EventScript_TrSwimmerHaley::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_HALEY, Sinnoh_Text_TrSwimmerHaleyIntro, Sinnoh_Text_TrSwimmerHaleyDefeat
@@ -5409,15 +4738,13 @@ Sinnoh_EventScript_TrSwimmerHaley::
 	end
 
 Sinnoh_Text_TrSwimmerHaleyIntro:
-	.string "Ahoy! A sailor never turns down a\n"
-	.string "fight!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x48, 0xFF
 
 Sinnoh_Text_TrSwimmerHaleyDefeat:
-	.string "Blown off course!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x49, 0xFF
 
 Sinnoh_Text_TrSwimmerHaleyAfter:
-	.string "The sea teaches you to lose well. I've\n"
-	.string "had a lot of lessons.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x4A, 0xFF
 
 Sinnoh_EventScript_TrSwimmerJessica::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_JESSICA, Sinnoh_Text_TrSwimmerJessicaIntro, Sinnoh_Text_TrSwimmerJessicaDefeat
@@ -5425,15 +4752,13 @@ Sinnoh_EventScript_TrSwimmerJessica::
 	end
 
 Sinnoh_Text_TrSwimmerJessicaIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x5A, 0xFF
 
 Sinnoh_Text_TrSwimmerJessicaDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x5B, 0xFF
 
 Sinnoh_Text_TrSwimmerJessicaAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x5C, 0xFF
 
 Sinnoh_EventScript_TrSwimmerJoanna::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_JOANNA, Sinnoh_Text_TrSwimmerJoannaIntro, Sinnoh_Text_TrSwimmerJoannaDefeat
@@ -5441,15 +4766,13 @@ Sinnoh_EventScript_TrSwimmerJoanna::
 	end
 
 Sinnoh_Text_TrSwimmerJoannaIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x6C, 0xFF
 
 Sinnoh_Text_TrSwimmerJoannaDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x6D, 0xFF
 
 Sinnoh_Text_TrSwimmerJoannaAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x6E, 0xFF
 
 Sinnoh_EventScript_TrSwimmerKatelyn::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_KATELYN, Sinnoh_Text_TrSwimmerKatelynIntro, Sinnoh_Text_TrSwimmerKatelynDefeat
@@ -5457,15 +4780,13 @@ Sinnoh_EventScript_TrSwimmerKatelyn::
 	end
 
 Sinnoh_Text_TrSwimmerKatelynIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x10, 0xFF
 
 Sinnoh_Text_TrSwimmerKatelynDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x11, 0xFF
 
 Sinnoh_Text_TrSwimmerKatelynAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x12, 0xFF
 
 Sinnoh_EventScript_TrSwimmerKurt::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_KURT, Sinnoh_Text_TrSwimmerKurtIntro, Sinnoh_Text_TrSwimmerKurtDefeat
@@ -5473,15 +4794,13 @@ Sinnoh_EventScript_TrSwimmerKurt::
 	end
 
 Sinnoh_Text_TrSwimmerKurtIntro:
-	.string "Ahoy! A sailor never turns down a\n"
-	.string "fight!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x22, 0xFF
 
 Sinnoh_Text_TrSwimmerKurtDefeat:
-	.string "Blown off course!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x23, 0xFF
 
 Sinnoh_Text_TrSwimmerKurtAfter:
-	.string "The sea teaches you to lose well. I've\n"
-	.string "had a lot of lessons.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x24, 0xFF
 
 Sinnoh_EventScript_TrSwimmerLydia::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_LYDIA, Sinnoh_Text_TrSwimmerLydiaIntro, Sinnoh_Text_TrSwimmerLydiaDefeat
@@ -5489,15 +4808,13 @@ Sinnoh_EventScript_TrSwimmerLydia::
 	end
 
 Sinnoh_Text_TrSwimmerLydiaIntro:
-	.string "Ahoy! A sailor never turns down a\n"
-	.string "fight!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x34, 0xFF
 
 Sinnoh_Text_TrSwimmerLydiaDefeat:
-	.string "Blown off course!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x35, 0xFF
 
 Sinnoh_Text_TrSwimmerLydiaAfter:
-	.string "The sea teaches you to lose well. I've\n"
-	.string "had a lot of lessons.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x36, 0xFF
 
 Sinnoh_EventScript_TrSwimmerMallory::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_MALLORY, Sinnoh_Text_TrSwimmerMalloryIntro, Sinnoh_Text_TrSwimmerMalloryDefeat
@@ -5505,15 +4822,13 @@ Sinnoh_EventScript_TrSwimmerMallory::
 	end
 
 Sinnoh_Text_TrSwimmerMalloryIntro:
-	.string "Ahoy! A sailor never turns down a\n"
-	.string "fight!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x46, 0xFF
 
 Sinnoh_Text_TrSwimmerMalloryDefeat:
-	.string "Blown off course!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x47, 0xFF
 
 Sinnoh_Text_TrSwimmerMalloryAfter:
-	.string "The sea teaches you to lose well. I've\n"
-	.string "had a lot of lessons.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x48, 0xFF
 
 Sinnoh_EventScript_TrSwimmerMary::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_MARY, Sinnoh_Text_TrSwimmerMaryIntro, Sinnoh_Text_TrSwimmerMaryDefeat
@@ -5521,15 +4836,13 @@ Sinnoh_EventScript_TrSwimmerMary::
 	end
 
 Sinnoh_Text_TrSwimmerMaryIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x58, 0xFF
 
 Sinnoh_Text_TrSwimmerMaryDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x59, 0xFF
 
 Sinnoh_Text_TrSwimmerMaryAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x5A, 0xFF
 
 Sinnoh_EventScript_TrSwimmerMiranda::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_MIRANDA, Sinnoh_Text_TrSwimmerMirandaIntro, Sinnoh_Text_TrSwimmerMirandaDefeat
@@ -5537,15 +4850,13 @@ Sinnoh_EventScript_TrSwimmerMiranda::
 	end
 
 Sinnoh_Text_TrSwimmerMirandaIntro:
-	.string "Ahoy! A sailor never turns down a\n"
-	.string "fight!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x6A, 0xFF
 
 Sinnoh_Text_TrSwimmerMirandaDefeat:
-	.string "Blown off course!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x6B, 0xFF
 
 Sinnoh_Text_TrSwimmerMirandaAfter:
-	.string "The sea teaches you to lose well. I've\n"
-	.string "had a lot of lessons.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x6C, 0xFF
 
 Sinnoh_EventScript_TrSwimmerOscar::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_OSCAR, Sinnoh_Text_TrSwimmerOscarIntro, Sinnoh_Text_TrSwimmerOscarDefeat
@@ -5553,15 +4864,13 @@ Sinnoh_EventScript_TrSwimmerOscar::
 	end
 
 Sinnoh_Text_TrSwimmerOscarIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x0E, 0xFF
 
 Sinnoh_Text_TrSwimmerOscarDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x0F, 0xFF
 
 Sinnoh_Text_TrSwimmerOscarAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x10, 0xFF
 
 Sinnoh_EventScript_TrSwimmerPaige::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_PAIGE, Sinnoh_Text_TrSwimmerPaigeIntro, Sinnoh_Text_TrSwimmerPaigeDefeat
@@ -5569,15 +4878,13 @@ Sinnoh_EventScript_TrSwimmerPaige::
 	end
 
 Sinnoh_Text_TrSwimmerPaigeIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x20, 0xFF
 
 Sinnoh_Text_TrSwimmerPaigeDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x21, 0xFF
 
 Sinnoh_Text_TrSwimmerPaigeAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x22, 0xFF
 
 Sinnoh_EventScript_TrSwimmerRicardo::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_RICARDO, Sinnoh_Text_TrSwimmerRicardoIntro, Sinnoh_Text_TrSwimmerRicardoDefeat
@@ -5585,15 +4892,13 @@ Sinnoh_EventScript_TrSwimmerRicardo::
 	end
 
 Sinnoh_Text_TrSwimmerRicardoIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x32, 0xFF
 
 Sinnoh_Text_TrSwimmerRicardoDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x33, 0xFF
 
 Sinnoh_Text_TrSwimmerRicardoAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x34, 0xFF
 
 Sinnoh_EventScript_TrSwimmerSam::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_SAM, Sinnoh_Text_TrSwimmerSamIntro, Sinnoh_Text_TrSwimmerSamDefeat
@@ -5601,15 +4906,13 @@ Sinnoh_EventScript_TrSwimmerSam::
 	end
 
 Sinnoh_Text_TrSwimmerSamIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x44, 0xFF
 
 Sinnoh_Text_TrSwimmerSamDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x45, 0xFF
 
 Sinnoh_Text_TrSwimmerSamAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x46, 0xFF
 
 Sinnoh_EventScript_TrSwimmerSheltin::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_SHELTIN, Sinnoh_Text_TrSwimmerSheltinIntro, Sinnoh_Text_TrSwimmerSheltinDefeat
@@ -5617,15 +4920,13 @@ Sinnoh_EventScript_TrSwimmerSheltin::
 	end
 
 Sinnoh_Text_TrSwimmerSheltinIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x56, 0xFF
 
 Sinnoh_Text_TrSwimmerSheltinDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x57, 0xFF
 
 Sinnoh_Text_TrSwimmerSheltinAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x58, 0xFF
 
 Sinnoh_EventScript_TrSwimmerSophia::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_SOPHIA, Sinnoh_Text_TrSwimmerSophiaIntro, Sinnoh_Text_TrSwimmerSophiaDefeat
@@ -5633,15 +4934,13 @@ Sinnoh_EventScript_TrSwimmerSophia::
 	end
 
 Sinnoh_Text_TrSwimmerSophiaIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x68, 0xFF
 
 Sinnoh_Text_TrSwimmerSophiaDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x69, 0xFF
 
 Sinnoh_Text_TrSwimmerSophiaAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x6A, 0xFF
 
 Sinnoh_EventScript_TrSwimmerTroy::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_TROY, Sinnoh_Text_TrSwimmerTroyIntro, Sinnoh_Text_TrSwimmerTroyDefeat
@@ -5649,15 +4948,13 @@ Sinnoh_EventScript_TrSwimmerTroy::
 	end
 
 Sinnoh_Text_TrSwimmerTroyIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x7A, 0xFF
 
 Sinnoh_Text_TrSwimmerTroyDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x7B, 0xFF
 
 Sinnoh_Text_TrSwimmerTroyAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x7C, 0xFF
 
 Sinnoh_EventScript_TrSwimmerVanessa::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_VANESSA, Sinnoh_Text_TrSwimmerVanessaIntro, Sinnoh_Text_TrSwimmerVanessaDefeat
@@ -5665,15 +4962,13 @@ Sinnoh_EventScript_TrSwimmerVanessa::
 	end
 
 Sinnoh_Text_TrSwimmerVanessaIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x0C, 0xFF
 
 Sinnoh_Text_TrSwimmerVanessaDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x0D, 0xFF
 
 Sinnoh_Text_TrSwimmerVanessaAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x0E, 0xFF
 
 Sinnoh_EventScript_TrSwimmerVincent::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_VINCENT, Sinnoh_Text_TrSwimmerVincentIntro, Sinnoh_Text_TrSwimmerVincentDefeat
@@ -5681,15 +4976,13 @@ Sinnoh_EventScript_TrSwimmerVincent::
 	end
 
 Sinnoh_Text_TrSwimmerVincentIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x1E, 0xFF
 
 Sinnoh_Text_TrSwimmerVincentDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x1F, 0xFF
 
 Sinnoh_Text_TrSwimmerVincentAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x20, 0xFF
 
 Sinnoh_EventScript_TrSwimmerWade::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_WADE, Sinnoh_Text_TrSwimmerWadeIntro, Sinnoh_Text_TrSwimmerWadeDefeat
@@ -5697,15 +4990,13 @@ Sinnoh_EventScript_TrSwimmerWade::
 	end
 
 Sinnoh_Text_TrSwimmerWadeIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x30, 0xFF
 
 Sinnoh_Text_TrSwimmerWadeDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x31, 0xFF
 
 Sinnoh_Text_TrSwimmerWadeAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x32, 0xFF
 
 Sinnoh_EventScript_TrSwimmerWesley::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_WESLEY, Sinnoh_Text_TrSwimmerWesleyIntro, Sinnoh_Text_TrSwimmerWesleyDefeat
@@ -5713,15 +5004,13 @@ Sinnoh_EventScript_TrSwimmerWesley::
 	end
 
 Sinnoh_Text_TrSwimmerWesleyIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x42, 0xFF
 
 Sinnoh_Text_TrSwimmerWesleyDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x43, 0xFF
 
 Sinnoh_Text_TrSwimmerWesleyAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x44, 0xFF
 
 Sinnoh_EventScript_TrTuberCaitlyn::
 	trainerbattle_single TRAINER_SINNOH_TUBER_CAITLYN, Sinnoh_Text_TrTuberCaitlynIntro, Sinnoh_Text_TrTuberCaitlynDefeat
@@ -5729,15 +5018,13 @@ Sinnoh_EventScript_TrTuberCaitlyn::
 	end
 
 Sinnoh_Text_TrTuberCaitlynIntro:
-	.string "Ahoy! A sailor never turns down a\n"
-	.string "fight!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x78, 0xFF
 
 Sinnoh_Text_TrTuberCaitlynDefeat:
-	.string "Blown off course!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x79, 0xFF
 
 Sinnoh_Text_TrTuberCaitlynAfter:
-	.string "The sea teaches you to lose well. I've\n"
-	.string "had a lot of lessons.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x7A, 0xFF
 
 Sinnoh_EventScript_TrTuberChelsea::
 	trainerbattle_single TRAINER_SINNOH_TUBER_CHELSEA, Sinnoh_Text_TrTuberChelseaIntro, Sinnoh_Text_TrTuberChelseaDefeat
@@ -5745,15 +5032,13 @@ Sinnoh_EventScript_TrTuberChelsea::
 	end
 
 Sinnoh_Text_TrTuberChelseaIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x0A, 0xFF
 
 Sinnoh_Text_TrTuberChelseaDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x0B, 0xFF
 
 Sinnoh_Text_TrTuberChelseaAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x0C, 0xFF
 
 Sinnoh_EventScript_TrTuberConner::
 	trainerbattle_single TRAINER_SINNOH_TUBER_CONNER, Sinnoh_Text_TrTuberConnerIntro, Sinnoh_Text_TrTuberConnerDefeat
@@ -5761,15 +5046,13 @@ Sinnoh_EventScript_TrTuberConner::
 	end
 
 Sinnoh_Text_TrTuberConnerIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x40, 0xFF
 
 Sinnoh_Text_TrTuberConnerDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x41, 0xFF
 
 Sinnoh_Text_TrTuberConnerAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x42, 0xFF
 
 Sinnoh_EventScript_TrTuberHolly::
 	trainerbattle_single TRAINER_SINNOH_TUBER_HOLLY, Sinnoh_Text_TrTuberHollyIntro, Sinnoh_Text_TrTuberHollyDefeat
@@ -5777,15 +5060,13 @@ Sinnoh_EventScript_TrTuberHolly::
 	end
 
 Sinnoh_Text_TrTuberHollyIntro:
-	.string "The water's great today! So is my\n"
-	.string "team. Let's go!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x52, 0xFF
 
 Sinnoh_Text_TrTuberHollyDefeat:
-	.string "Glub! I sank!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x53, 0xFF
 
 Sinnoh_Text_TrTuberHollyAfter:
-	.string "I'm going to swim a few more laps to\n"
-	.string "cool off.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x54, 0xFF
 
 Sinnoh_EventScript_TrTuberJacky::
 	trainerbattle_single TRAINER_SINNOH_TUBER_JACKY, Sinnoh_Text_TrTuberJackyIntro, Sinnoh_Text_TrTuberJackyDefeat
@@ -5793,15 +5074,13 @@ Sinnoh_EventScript_TrTuberJacky::
 	end
 
 Sinnoh_Text_TrTuberJackyIntro:
-	.string "Ahoy! A sailor never turns down a\n"
-	.string "fight!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x64, 0xFF
 
 Sinnoh_Text_TrTuberJackyDefeat:
-	.string "Blown off course!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x65, 0xFF
 
 Sinnoh_Text_TrTuberJackyAfter:
-	.string "The sea teaches you to lose well. I've\n"
-	.string "had a lot of lessons.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x66, 0xFF
 
 Sinnoh_EventScript_TrTuberJared::
 	trainerbattle_single TRAINER_SINNOH_TUBER_JARED, Sinnoh_Text_TrTuberJaredIntro, Sinnoh_Text_TrTuberJaredDefeat
@@ -5809,15 +5088,13 @@ Sinnoh_EventScript_TrTuberJared::
 	end
 
 Sinnoh_Text_TrTuberJaredIntro:
-	.string "Ahoy! A sailor never turns down a\n"
-	.string "fight!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x76, 0xFF
 
 Sinnoh_Text_TrTuberJaredDefeat:
-	.string "Blown off course!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x77, 0xFF
 
 Sinnoh_Text_TrTuberJaredAfter:
-	.string "The sea teaches you to lose well. I've\n"
-	.string "had a lot of lessons.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x78, 0xFF
 
 Sinnoh_EventScript_TrTuberMariel::
 	trainerbattle_single TRAINER_SINNOH_TUBER_MARIEL, Sinnoh_Text_TrTuberMarielIntro, Sinnoh_Text_TrTuberMarielDefeat
@@ -5825,15 +5102,13 @@ Sinnoh_EventScript_TrTuberMariel::
 	end
 
 Sinnoh_Text_TrTuberMarielIntro:
-	.string "You can't fish and battle at the same\n"
-	.string "time... or can you?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x2C, 0xFF
 
 Sinnoh_Text_TrTuberMarielDefeat:
-	.string "Lost the battle and the fish.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x2D, 0xFF
 
 Sinnoh_Text_TrTuberMarielAfter:
-	.string "Nothing's biting today. Maybe they\n"
-	.string "saw our battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x2E, 0xFF
 
 Sinnoh_EventScript_TrTuberTrenton::
 	trainerbattle_single TRAINER_SINNOH_TUBER_TRENTON, Sinnoh_Text_TrTuberTrentonIntro, Sinnoh_Text_TrTuberTrentonDefeat
@@ -5841,15 +5116,13 @@ Sinnoh_EventScript_TrTuberTrenton::
 	end
 
 Sinnoh_Text_TrTuberTrentonIntro:
-	.string "Ahoy! A sailor never turns down a\n"
-	.string "fight!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x3E, 0xFF
 
 Sinnoh_Text_TrTuberTrentonDefeat:
-	.string "Blown off course!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x3F, 0xFF
 
 Sinnoh_Text_TrTuberTrentonAfter:
-	.string "The sea teaches you to lose well. I've\n"
-	.string "had a lot of lessons.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x40, 0xFF
 
 Sinnoh_EventScript_TrTwinsEmmaAndLil::
 	trainerbattle_double TRAINER_SINNOH_TWINS_EMMA_AND_LIL, Sinnoh_Text_TrTwinsEmmaAndLilIntro, Sinnoh_Text_TrTwinsEmmaAndLilDefeat, Sinnoh_Text_TrTwinsEmmaAndLilNotEnough
@@ -5857,19 +5130,16 @@ Sinnoh_EventScript_TrTwinsEmmaAndLil::
 	end
 
 Sinnoh_Text_TrTwinsEmmaAndLilIntro:
-	.string "Two of us, two MOéMON! Can you handle\n"
-	.string "a double battle?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x54, 0xFF
 
 Sinnoh_Text_TrTwinsEmmaAndLilDefeat:
-	.string "Two of us, and we still lost!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x55, 0xFF
 
 Sinnoh_Text_TrTwinsEmmaAndLilAfter:
-	.string "We'll practice our teamwork. You\n"
-	.string "clearly have yours down.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x56, 0xFF
 
 Sinnoh_Text_TrTwinsEmmaAndLilNotEnough:
-	.string "There are two of us! Come back when\n"
-	.string "you have two MOéMON that can battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x57, 0xFF
 
 Sinnoh_EventScript_TrTwinsLivAndLiz::
 	trainerbattle_double TRAINER_SINNOH_TWINS_LIV_AND_LIZ, Sinnoh_Text_TrTwinsLivAndLizIntro, Sinnoh_Text_TrTwinsLivAndLizDefeat, Sinnoh_Text_TrTwinsLivAndLizNotEnough
@@ -5877,19 +5147,16 @@ Sinnoh_EventScript_TrTwinsLivAndLiz::
 	end
 
 Sinnoh_Text_TrTwinsLivAndLizIntro:
-	.string "We do everything together. Even lose?\n"
-	.string "Let's find out!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x66, 0xFF
 
 Sinnoh_Text_TrTwinsLivAndLizDefeat:
-	.string "We found out.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x67, 0xFF
 
 Sinnoh_Text_TrTwinsLivAndLizAfter:
-	.string "At least we lost together. That's\n"
-	.string "something!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x68, 0xFF
 
 Sinnoh_Text_TrTwinsLivAndLizNotEnough:
-	.string "There are two of us! Come back when\n"
-	.string "you have two MOéMON that can battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x69, 0xFF
 
 Sinnoh_EventScript_TrTwinsTeriAndTia::
 	trainerbattle_double TRAINER_SINNOH_TWINS_TERI_AND_TIA, Sinnoh_Text_TrTwinsTeriAndTiaIntro, Sinnoh_Text_TrTwinsTeriAndTiaDefeat, Sinnoh_Text_TrTwinsTeriAndTiaNotEnough
@@ -5897,19 +5164,16 @@ Sinnoh_EventScript_TrTwinsTeriAndTia::
 	end
 
 Sinnoh_Text_TrTwinsTeriAndTiaIntro:
-	.string "We do everything together. Even lose?\n"
-	.string "Let's find out!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x78, 0xFF
 
 Sinnoh_Text_TrTwinsTeriAndTiaDefeat:
-	.string "We found out.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x79, 0xFF
 
 Sinnoh_Text_TrTwinsTeriAndTiaAfter:
-	.string "At least we lost together. That's\n"
-	.string "something!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x7A, 0xFF
 
 Sinnoh_Text_TrTwinsTeriAndTiaNotEnough:
-	.string "There are two of us! Come back when\n"
-	.string "you have two MOéMON that can battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x7B, 0xFF
 
 Sinnoh_EventScript_TrVeteranArmando::
 	trainerbattle_single TRAINER_SINNOH_VETERAN_ARMANDO, Sinnoh_Text_TrVeteranArmandoIntro, Sinnoh_Text_TrVeteranArmandoDefeat
@@ -5917,15 +5181,13 @@ Sinnoh_EventScript_TrVeteranArmando::
 	end
 
 Sinnoh_Text_TrVeteranArmandoIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7B, 0x2A, 0xFF
 
 Sinnoh_Text_TrVeteranArmandoDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7B, 0x2B, 0xFF
 
 Sinnoh_Text_TrVeteranArmandoAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7B, 0x2C, 0xFF
 
 Sinnoh_EventScript_TrVeteranBrenden::
 	trainerbattle_single TRAINER_SINNOH_VETERAN_BRENDEN, Sinnoh_Text_TrVeteranBrendenIntro, Sinnoh_Text_TrVeteranBrendenDefeat
@@ -5933,15 +5195,13 @@ Sinnoh_EventScript_TrVeteranBrenden::
 	end
 
 Sinnoh_Text_TrVeteranBrendenIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7B, 0x4E, 0xFF
 
 Sinnoh_Text_TrVeteranBrendenDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7B, 0x4F, 0xFF
 
 Sinnoh_Text_TrVeteranBrendenAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7B, 0x50, 0xFF
 
 Sinnoh_EventScript_TrVeteranBrian::
 	trainerbattle_single TRAINER_SINNOH_VETERAN_BRIAN, Sinnoh_Text_TrVeteranBrianIntro, Sinnoh_Text_TrVeteranBrianDefeat
@@ -5949,15 +5209,13 @@ Sinnoh_EventScript_TrVeteranBrian::
 	end
 
 Sinnoh_Text_TrVeteranBrianIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7B, 0x60, 0xFF
 
 Sinnoh_Text_TrVeteranBrianDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7B, 0x61, 0xFF
 
 Sinnoh_Text_TrVeteranBrianAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7B, 0x62, 0xFF
 
 Sinnoh_EventScript_TrVeteranClayton::
 	trainerbattle_single TRAINER_SINNOH_VETERAN_CLAYTON, Sinnoh_Text_TrVeteranClaytonIntro, Sinnoh_Text_TrVeteranClaytonDefeat
@@ -5965,15 +5223,13 @@ Sinnoh_EventScript_TrVeteranClayton::
 	end
 
 Sinnoh_Text_TrVeteranClaytonIntro:
-	.string "I've beaten every TRAINER on this\n"
-	.string "road. You're next.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7C, 0x16, 0xFF
 
 Sinnoh_Text_TrVeteranClaytonDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7C, 0x17, 0xFF
 
 Sinnoh_Text_TrVeteranClaytonAfter:
-	.string "I'll be waiting at the MOéMON LEAGUE.\n"
-	.string "Don't keep me waiting.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7C, 0x18, 0xFF
 
 Sinnoh_EventScript_TrVeteranEdgar::
 	trainerbattle_single TRAINER_SINNOH_VETERAN_EDGAR, Sinnoh_Text_TrVeteranEdgarIntro, Sinnoh_Text_TrVeteranEdgarDefeat
@@ -5981,15 +5237,13 @@ Sinnoh_EventScript_TrVeteranEdgar::
 	end
 
 Sinnoh_Text_TrVeteranEdgarIntro:
-	.string "The view from here is great, but a good\n"
-	.string "battle is better!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7C, 0x28, 0xFF
 
 Sinnoh_Text_TrVeteranEdgarDefeat:
-	.string "Great view, great loss.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7C, 0x29, 0xFF
 
 Sinnoh_Text_TrVeteranEdgarAfter:
-	.string "I come up here to think. Today I'll\n"
-	.string "think about that battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7C, 0x2A, 0xFF
 
 Sinnoh_EventScript_TrVeteranGrant::
 	trainerbattle_single TRAINER_SINNOH_VETERAN_GRANT, Sinnoh_Text_TrVeteranGrantIntro, Sinnoh_Text_TrVeteranGrantDefeat
@@ -5997,15 +5251,13 @@ Sinnoh_EventScript_TrVeteranGrant::
 	end
 
 Sinnoh_Text_TrVeteranGrantIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7C, 0x4C, 0xFF
 
 Sinnoh_Text_TrVeteranGrantDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7C, 0x4D, 0xFF
 
 Sinnoh_Text_TrVeteranGrantAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7C, 0x4E, 0xFF
 
 Sinnoh_EventScript_TrVeteranHarlan::
 	trainerbattle_single TRAINER_SINNOH_VETERAN_HARLAN, Sinnoh_Text_TrVeteranHarlanIntro, Sinnoh_Text_TrVeteranHarlanDefeat
@@ -6013,15 +5265,13 @@ Sinnoh_EventScript_TrVeteranHarlan::
 	end
 
 Sinnoh_Text_TrVeteranHarlanIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7C, 0x5E, 0xFF
 
 Sinnoh_Text_TrVeteranHarlanDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7C, 0x5F, 0xFF
 
 Sinnoh_Text_TrVeteranHarlanAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7C, 0x60, 0xFF
 
 Sinnoh_EventScript_TrVeteranTerrell::
 	trainerbattle_single TRAINER_SINNOH_VETERAN_TERRELL, Sinnoh_Text_TrVeteranTerrellIntro, Sinnoh_Text_TrVeteranTerrellDefeat
@@ -6029,15 +5279,13 @@ Sinnoh_EventScript_TrVeteranTerrell::
 	end
 
 Sinnoh_Text_TrVeteranTerrellIntro:
-	.string "I don't hold back, even against\n"
-	.string "newcomers. Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7C, 0x70, 0xFF
 
 Sinnoh_Text_TrVeteranTerrellDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7C, 0x71, 0xFF
 
 Sinnoh_Text_TrVeteranTerrellAfter:
-	.string "Next time I'll bring my best team.\n"
-	.string "You'll need yours too.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7C, 0x72, 0xFF
 
 Sinnoh_EventScript_TrWaitressKati::
 	trainerbattle_single TRAINER_SINNOH_WAITRESS_KATI, Sinnoh_Text_TrWaitressKatiIntro, Sinnoh_Text_TrWaitressKatiDefeat
@@ -6045,15 +5293,13 @@ Sinnoh_EventScript_TrWaitressKati::
 	end
 
 Sinnoh_Text_TrWaitressKatiIntro:
-	.string "Oh my, a challenger! How delightful.\n"
-	.string "Shall we?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x02, 0xFF
 
 Sinnoh_Text_TrWaitressKatiDefeat:
-	.string "How very rude of my team to lose.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x03, 0xFF
 
 Sinnoh_Text_TrWaitressKatiAfter:
-	.string "Do come by for tea some time. My\n"
-	.string "MOéMON adore guests.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x04, 0xFF
 
 Sinnoh_EventScript_TrWorkerBraden::
 	trainerbattle_single TRAINER_SINNOH_WORKER_BRADEN, Sinnoh_Text_TrWorkerBradenIntro, Sinnoh_Text_TrWorkerBradenDefeat
@@ -6061,15 +5307,13 @@ Sinnoh_EventScript_TrWorkerBraden::
 	end
 
 Sinnoh_Text_TrWorkerBradenIntro:
-	.string "Hard work makes strong MOéMON. Mine\n"
-	.string "dig all day!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x14, 0xFF
 
 Sinnoh_Text_TrWorkerBradenDefeat:
-	.string "Back to digging, I guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x15, 0xFF
 
 Sinnoh_Text_TrWorkerBradenAfter:
-	.string "My MOéMON and I are taking a lunch\n"
-	.string "break. We earned it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x16, 0xFF
 
 Sinnoh_EventScript_TrWorkerBrendon::
 	trainerbattle_single TRAINER_SINNOH_WORKER_BRENDON, Sinnoh_Text_TrWorkerBrendonIntro, Sinnoh_Text_TrWorkerBrendonDefeat
@@ -6077,15 +5321,13 @@ Sinnoh_EventScript_TrWorkerBrendon::
 	end
 
 Sinnoh_Text_TrWorkerBrendonIntro:
-	.string "Ha! Up here you have to be tough.\n"
-	.string "Let's see if you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x26, 0xFF
 
 Sinnoh_Text_TrWorkerBrendonDefeat:
-	.string "Tough as a mountain, you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x27, 0xFF
 
 Sinnoh_Text_TrWorkerBrendonAfter:
-	.string "Rest a bit before you go on. The trail\n"
-	.string "doesn't get any flatter.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x28, 0xFF
 
 Sinnoh_EventScript_TrWorkerColin::
 	trainerbattle_single TRAINER_SINNOH_WORKER_COLIN, Sinnoh_Text_TrWorkerColinIntro, Sinnoh_Text_TrWorkerColinDefeat
@@ -6093,15 +5335,13 @@ Sinnoh_EventScript_TrWorkerColin::
 	end
 
 Sinnoh_Text_TrWorkerColinIntro:
-	.string "Hard work makes strong MOéMON. Mine\n"
-	.string "dig all day!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x38, 0xFF
 
 Sinnoh_Text_TrWorkerColinDefeat:
-	.string "Back to digging, I guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x39, 0xFF
 
 Sinnoh_Text_TrWorkerColinAfter:
-	.string "My MOéMON and I are taking a lunch\n"
-	.string "break. We earned it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x3A, 0xFF
 
 Sinnoh_EventScript_TrWorkerConrad::
 	trainerbattle_single TRAINER_SINNOH_WORKER_CONRAD, Sinnoh_Text_TrWorkerConradIntro, Sinnoh_Text_TrWorkerConradDefeat
@@ -6109,15 +5349,13 @@ Sinnoh_EventScript_TrWorkerConrad::
 	end
 
 Sinnoh_Text_TrWorkerConradIntro:
-	.string "Ha! Up here you have to be tough.\n"
-	.string "Let's see if you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x4A, 0xFF
 
 Sinnoh_Text_TrWorkerConradDefeat:
-	.string "Tough as a mountain, you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x4B, 0xFF
 
 Sinnoh_Text_TrWorkerConradAfter:
-	.string "Rest a bit before you go on. The trail\n"
-	.string "doesn't get any flatter.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x4C, 0xFF
 
 Sinnoh_EventScript_TrWorkerDillan::
 	trainerbattle_single TRAINER_SINNOH_WORKER_DILLAN, Sinnoh_Text_TrWorkerDillanIntro, Sinnoh_Text_TrWorkerDillanDefeat
@@ -6125,15 +5363,13 @@ Sinnoh_EventScript_TrWorkerDillan::
 	end
 
 Sinnoh_Text_TrWorkerDillanIntro:
-	.string "Ha! Up here you have to be tough.\n"
-	.string "Let's see if you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x5C, 0xFF
 
 Sinnoh_Text_TrWorkerDillanDefeat:
-	.string "Tough as a mountain, you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x5D, 0xFF
 
 Sinnoh_Text_TrWorkerDillanAfter:
-	.string "Rest a bit before you go on. The trail\n"
-	.string "doesn't get any flatter.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x5E, 0xFF
 
 Sinnoh_EventScript_TrWorkerGary::
 	trainerbattle_single TRAINER_SINNOH_WORKER_GARY, Sinnoh_Text_TrWorkerGaryIntro, Sinnoh_Text_TrWorkerGaryDefeat
@@ -6141,15 +5377,13 @@ Sinnoh_EventScript_TrWorkerGary::
 	end
 
 Sinnoh_Text_TrWorkerGaryIntro:
-	.string "Hard work makes strong MOéMON. Mine\n"
-	.string "dig all day!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x6E, 0xFF
 
 Sinnoh_Text_TrWorkerGaryDefeat:
-	.string "Back to digging, I guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x6F, 0xFF
 
 Sinnoh_Text_TrWorkerGaryAfter:
-	.string "My MOéMON and I are taking a lunch\n"
-	.string "break. We earned it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7D, 0x70, 0xFF
 
 Sinnoh_EventScript_TrWorkerGerardo::
 	trainerbattle_single TRAINER_SINNOH_WORKER_GERARDO, Sinnoh_Text_TrWorkerGerardoIntro, Sinnoh_Text_TrWorkerGerardoDefeat
@@ -6157,15 +5391,13 @@ Sinnoh_EventScript_TrWorkerGerardo::
 	end
 
 Sinnoh_Text_TrWorkerGerardoIntro:
-	.string "Hard work makes strong MOéMON. Mine\n"
-	.string "dig all day!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x00, 0xFF
 
 Sinnoh_Text_TrWorkerGerardoDefeat:
-	.string "Back to digging, I guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x01, 0xFF
 
 Sinnoh_Text_TrWorkerGerardoAfter:
-	.string "My MOéMON and I are taking a lunch\n"
-	.string "break. We earned it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x02, 0xFF
 
 Sinnoh_EventScript_TrWorkerHolden::
 	trainerbattle_single TRAINER_SINNOH_WORKER_HOLDEN, Sinnoh_Text_TrWorkerHoldenIntro, Sinnoh_Text_TrWorkerHoldenDefeat
@@ -6173,15 +5405,13 @@ Sinnoh_EventScript_TrWorkerHolden::
 	end
 
 Sinnoh_Text_TrWorkerHoldenIntro:
-	.string "Ha! Up here you have to be tough.\n"
-	.string "Let's see if you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x12, 0xFF
 
 Sinnoh_Text_TrWorkerHoldenDefeat:
-	.string "Tough as a mountain, you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x13, 0xFF
 
 Sinnoh_Text_TrWorkerHoldenAfter:
-	.string "Rest a bit before you go on. The trail\n"
-	.string "doesn't get any flatter.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x14, 0xFF
 
 Sinnoh_EventScript_TrWorkerJackson::
 	trainerbattle_single TRAINER_SINNOH_WORKER_JACKSON, Sinnoh_Text_TrWorkerJacksonIntro, Sinnoh_Text_TrWorkerJacksonDefeat
@@ -6189,15 +5419,13 @@ Sinnoh_EventScript_TrWorkerJackson::
 	end
 
 Sinnoh_Text_TrWorkerJacksonIntro:
-	.string "Ha! Up here you have to be tough.\n"
-	.string "Let's see if you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x24, 0xFF
 
 Sinnoh_Text_TrWorkerJacksonDefeat:
-	.string "Tough as a mountain, you are!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x25, 0xFF
 
 Sinnoh_Text_TrWorkerJacksonAfter:
-	.string "Rest a bit before you go on. The trail\n"
-	.string "doesn't get any flatter.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x26, 0xFF
 
 Sinnoh_EventScript_TrWorkerMason::
 	trainerbattle_single TRAINER_SINNOH_WORKER_MASON, Sinnoh_Text_TrWorkerMasonIntro, Sinnoh_Text_TrWorkerMasonDefeat
@@ -6205,15 +5433,13 @@ Sinnoh_EventScript_TrWorkerMason::
 	end
 
 Sinnoh_Text_TrWorkerMasonIntro:
-	.string "Hard work makes strong MOéMON. Mine\n"
-	.string "dig all day!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x36, 0xFF
 
 Sinnoh_Text_TrWorkerMasonDefeat:
-	.string "Back to digging, I guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x37, 0xFF
 
 Sinnoh_Text_TrWorkerMasonAfter:
-	.string "My MOéMON and I are taking a lunch\n"
-	.string "break. We earned it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x38, 0xFF
 
 Sinnoh_EventScript_TrWorkerNoel::
 	trainerbattle_single TRAINER_SINNOH_WORKER_NOEL, Sinnoh_Text_TrWorkerNoelIntro, Sinnoh_Text_TrWorkerNoelDefeat
@@ -6221,15 +5447,13 @@ Sinnoh_EventScript_TrWorkerNoel::
 	end
 
 Sinnoh_Text_TrWorkerNoelIntro:
-	.string "I've been out here since sunrise. A\n"
-	.string "battle's just what I need!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x48, 0xFF
 
 Sinnoh_Text_TrWorkerNoelDefeat:
-	.string "Whew! That woke me up.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x49, 0xFF
 
 Sinnoh_Text_TrWorkerNoelAfter:
-	.string "If you see a nice flat rock, that's my\n"
-	.string "nap spot. Don't take it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x4A, 0xFF
 
 Sinnoh_EventScript_TrWorkerQuentin::
 	trainerbattle_single TRAINER_SINNOH_WORKER_QUENTIN, Sinnoh_Text_TrWorkerQuentinIntro, Sinnoh_Text_TrWorkerQuentinDefeat
@@ -6237,15 +5461,13 @@ Sinnoh_EventScript_TrWorkerQuentin::
 	end
 
 Sinnoh_Text_TrWorkerQuentinIntro:
-	.string "Hard work makes strong MOéMON. Mine\n"
-	.string "dig all day!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x5A, 0xFF
 
 Sinnoh_Text_TrWorkerQuentinDefeat:
-	.string "Back to digging, I guess.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x5B, 0xFF
 
 Sinnoh_Text_TrWorkerQuentinAfter:
-	.string "My MOéMON and I are taking a lunch\n"
-	.string "break. We earned it.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x5C, 0xFF
 
 Sinnoh_EventScript_TrYoungsterAustin::
 	trainerbattle_single TRAINER_SINNOH_YOUNGSTER_AUSTIN, Sinnoh_Text_TrYoungsterAustinIntro, Sinnoh_Text_TrYoungsterAustinDefeat
@@ -6253,15 +5475,13 @@ Sinnoh_EventScript_TrYoungsterAustin::
 	end
 
 Sinnoh_Text_TrYoungsterAustinIntro:
-	.string "My MOéMON and I practiced all morning!\n"
-	.string "Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7F, 0x10, 0xFF
 
 Sinnoh_Text_TrYoungsterAustinDefeat:
-	.string "We practiced the wrong things...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7F, 0x11, 0xFF
 
 Sinnoh_Text_TrYoungsterAustinAfter:
-	.string "I'll practice the right things this\n"
-	.string "afternoon. Probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7F, 0x12, 0xFF
 
 Sinnoh_EventScript_TrYoungsterDallas::
 	trainerbattle_single TRAINER_SINNOH_YOUNGSTER_DALLAS, Sinnoh_Text_TrYoungsterDallasIntro, Sinnoh_Text_TrYoungsterDallasDefeat
@@ -6269,15 +5489,13 @@ Sinnoh_EventScript_TrYoungsterDallas::
 	end
 
 Sinnoh_Text_TrYoungsterDallasIntro:
-	.string "Stop right there! Nobody walks past\n"
-	.string "me without a battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7F, 0x22, 0xFF
 
 Sinnoh_Text_TrYoungsterDallasDefeat:
-	.string "Okay, okay, you can walk past!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7F, 0x23, 0xFF
 
 Sinnoh_Text_TrYoungsterDallasAfter:
-	.string "Being a road guard is harder than it\n"
-	.string "looks.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7F, 0x24, 0xFF
 
 Sinnoh_EventScript_TrYoungsterDarius::
 	trainerbattle_single TRAINER_SINNOH_YOUNGSTER_DARIUS, Sinnoh_Text_TrYoungsterDariusIntro, Sinnoh_Text_TrYoungsterDariusDefeat
@@ -6285,15 +5503,13 @@ Sinnoh_EventScript_TrYoungsterDarius::
 	end
 
 Sinnoh_Text_TrYoungsterDariusIntro:
-	.string "My MOéMON and I practiced all morning!\n"
-	.string "Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7F, 0x6A, 0xFF
 
 Sinnoh_Text_TrYoungsterDariusDefeat:
-	.string "We practiced the wrong things...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7F, 0x6B, 0xFF
 
 Sinnoh_Text_TrYoungsterDariusAfter:
-	.string "I'll practice the right things this\n"
-	.string "afternoon. Probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7F, 0x6C, 0xFF
 
 Sinnoh_EventScript_TrYoungsterDonny::
 	trainerbattle_single TRAINER_SINNOH_YOUNGSTER_DONNY, Sinnoh_Text_TrYoungsterDonnyIntro, Sinnoh_Text_TrYoungsterDonnyDefeat
@@ -6301,16 +5517,13 @@ Sinnoh_EventScript_TrYoungsterDonny::
 	end
 
 Sinnoh_Text_TrYoungsterDonnyIntro:
-	.string "I caught my partner all by myself!\n"
-	.string "Want to see how strong it is?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7F, 0x7C, 0xFF
 
 Sinnoh_Text_TrYoungsterDonnyDefeat:
-	.string "It's strong... just not stronger than\n"
-	.string "yours.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7F, 0x7D, 0xFF
 
 Sinnoh_Text_TrYoungsterDonnyAfter:
-	.string "Your MOéMON look really happy. How do\n"
-	.string "you do that?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7F, 0x7E, 0xFF
 
 Sinnoh_EventScript_TrYoungsterJonathon::
 	trainerbattle_single TRAINER_SINNOH_YOUNGSTER_JONATHON, Sinnoh_Text_TrYoungsterJonathonIntro, Sinnoh_Text_TrYoungsterJonathonDefeat
@@ -6318,15 +5531,13 @@ Sinnoh_EventScript_TrYoungsterJonathon::
 	end
 
 Sinnoh_Text_TrYoungsterJonathonIntro:
-	.string "Stop right there! Nobody walks past\n"
-	.string "me without a battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x0E, 0xFF
 
 Sinnoh_Text_TrYoungsterJonathonDefeat:
-	.string "Okay, okay, you can walk past!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x0F, 0xFF
 
 Sinnoh_Text_TrYoungsterJonathonAfter:
-	.string "Being a road guard is harder than it\n"
-	.string "looks.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x10, 0xFF
 
 Sinnoh_EventScript_TrYoungsterLogan::
 	trainerbattle_single TRAINER_SINNOH_YOUNGSTER_LOGAN, Sinnoh_Text_TrYoungsterLoganIntro, Sinnoh_Text_TrYoungsterLoganDefeat
@@ -6334,15 +5545,13 @@ Sinnoh_EventScript_TrYoungsterLogan::
 	end
 
 Sinnoh_Text_TrYoungsterLoganIntro:
-	.string "Stop right there! Nobody walks past\n"
-	.string "me without a battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x20, 0xFF
 
 Sinnoh_Text_TrYoungsterLoganDefeat:
-	.string "Okay, okay, you can walk past!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x21, 0xFF
 
 Sinnoh_Text_TrYoungsterLoganAfter:
-	.string "Being a road guard is harder than it\n"
-	.string "looks.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x22, 0xFF
 
 Sinnoh_EventScript_TrYoungsterMichael::
 	trainerbattle_single TRAINER_SINNOH_YOUNGSTER_MICHAEL, Sinnoh_Text_TrYoungsterMichaelIntro, Sinnoh_Text_TrYoungsterMichaelDefeat
@@ -6350,15 +5559,13 @@ Sinnoh_EventScript_TrYoungsterMichael::
 	end
 
 Sinnoh_Text_TrYoungsterMichaelIntro:
-	.string "Hey! You look like you know what\n"
-	.string "you're doing. Show me!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x32, 0xFF
 
 Sinnoh_Text_TrYoungsterMichaelDefeat:
-	.string "Aww, no fair!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x33, 0xFF
 
 Sinnoh_Text_TrYoungsterMichaelAfter:
-	.string "I'm gonna train every day after\n"
-	.string "school. Next time I'll win for sure!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x34, 0xFF
 
 Sinnoh_EventScript_TrYoungsterOliver::
 	trainerbattle_single TRAINER_SINNOH_YOUNGSTER_OLIVER, Sinnoh_Text_TrYoungsterOliverIntro, Sinnoh_Text_TrYoungsterOliverDefeat
@@ -6366,15 +5573,13 @@ Sinnoh_EventScript_TrYoungsterOliver::
 	end
 
 Sinnoh_Text_TrYoungsterOliverIntro:
-	.string "Stop right there! Nobody walks past\n"
-	.string "me without a battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x7A, 0xFF
 
 Sinnoh_Text_TrYoungsterOliverDefeat:
-	.string "Okay, okay, you can walk past!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x7B, 0xFF
 
 Sinnoh_Text_TrYoungsterOliverAfter:
-	.string "Being a road guard is harder than it\n"
-	.string "looks.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x7C, 0xFF
 
 Sinnoh_EventScript_TrYoungsterSebastian::
 	trainerbattle_single TRAINER_SINNOH_YOUNGSTER_SEBASTIAN, Sinnoh_Text_TrYoungsterSebastianIntro, Sinnoh_Text_TrYoungsterSebastianDefeat
@@ -6382,15 +5587,13 @@ Sinnoh_EventScript_TrYoungsterSebastian::
 	end
 
 Sinnoh_Text_TrYoungsterSebastianIntro:
-	.string "My MOéMON and I practiced all morning!\n"
-	.string "Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x42, 0xFF
 
 Sinnoh_Text_TrYoungsterSebastianDefeat:
-	.string "We practiced the wrong things...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x43, 0xFF
 
 Sinnoh_Text_TrYoungsterSebastianAfter:
-	.string "I'll practice the right things this\n"
-	.string "afternoon. Probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x44, 0xFF
 
 Sinnoh_EventScript_TrYoungsterTristan::
 	trainerbattle_single TRAINER_SINNOH_YOUNGSTER_TRISTAN, Sinnoh_Text_TrYoungsterTristanIntro, Sinnoh_Text_TrYoungsterTristanDefeat
@@ -6398,15 +5601,13 @@ Sinnoh_EventScript_TrYoungsterTristan::
 	end
 
 Sinnoh_Text_TrYoungsterTristanIntro:
-	.string "Stop right there! Nobody walks past\n"
-	.string "me without a battle!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x54, 0xFF
 
 Sinnoh_Text_TrYoungsterTristanDefeat:
-	.string "Okay, okay, you can walk past!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x55, 0xFF
 
 Sinnoh_Text_TrYoungsterTristanAfter:
-	.string "Being a road guard is harder than it\n"
-	.string "looks.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x56, 0xFF
 
 Sinnoh_EventScript_TrYoungsterTyler::
 	trainerbattle_single TRAINER_SINNOH_YOUNGSTER_TYLER, Sinnoh_Text_TrYoungsterTylerIntro, Sinnoh_Text_TrYoungsterTylerDefeat
@@ -6414,15 +5615,13 @@ Sinnoh_EventScript_TrYoungsterTyler::
 	end
 
 Sinnoh_Text_TrYoungsterTylerIntro:
-	.string "My MOéMON and I practiced all morning!\n"
-	.string "Ready?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x1C, 0xFF
 
 Sinnoh_Text_TrYoungsterTylerDefeat:
-	.string "We practiced the wrong things...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x1D, 0xFF
 
 Sinnoh_Text_TrYoungsterTylerAfter:
-	.string "I'll practice the right things this\n"
-	.string "afternoon. Probably.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x1E, 0xFF
 
 Sinnoh_EventScript_TrYoungsterWayne::
 	trainerbattle_single TRAINER_SINNOH_YOUNGSTER_WAYNE, Sinnoh_Text_TrYoungsterWayneIntro, Sinnoh_Text_TrYoungsterWayneDefeat
@@ -6430,16 +5629,13 @@ Sinnoh_EventScript_TrYoungsterWayne::
 	end
 
 Sinnoh_Text_TrYoungsterWayneIntro:
-	.string "I caught my partner all by myself!\n"
-	.string "Want to see how strong it is?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x2E, 0xFF
 
 Sinnoh_Text_TrYoungsterWayneDefeat:
-	.string "It's strong... just not stronger than\n"
-	.string "yours.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x2F, 0xFF
 
 Sinnoh_Text_TrYoungsterWayneAfter:
-	.string "Your MOéMON look really happy. How do\n"
-	.string "you do that?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x30, 0xFF
 
 Sinnoh_EventScript_TrYoungCoupleMikeAndNat::
 	trainerbattle_double TRAINER_SINNOH_YOUNG_COUPLE_MIKE_AND_NAT, Sinnoh_Text_TrYoungCoupleMikeAndNatIntro, Sinnoh_Text_TrYoungCoupleMikeAndNatDefeat, Sinnoh_Text_TrYoungCoupleMikeAndNatNotEnough
@@ -6447,19 +5643,16 @@ Sinnoh_EventScript_TrYoungCoupleMikeAndNat::
 	end
 
 Sinnoh_Text_TrYoungCoupleMikeAndNatIntro:
-	.string "Two of us, two MOéMON! Can you handle\n"
-	.string "a double battle?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x70, 0xFF
 
 Sinnoh_Text_TrYoungCoupleMikeAndNatDefeat:
-	.string "Two of us, and we still lost!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x71, 0xFF
 
 Sinnoh_Text_TrYoungCoupleMikeAndNatAfter:
-	.string "We'll practice our teamwork. You\n"
-	.string "clearly have yours down.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x72, 0xFF
 
 Sinnoh_Text_TrYoungCoupleMikeAndNatNotEnough:
-	.string "There are two of us! Come back when\n"
-	.string "you have two MOéMON that can battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7E, 0x73, 0xFF
 
 Sinnoh_EventScript_TrYoungCoupleTyAndSue::
 	trainerbattle_double TRAINER_SINNOH_YOUNG_COUPLE_TY_AND_SUE, Sinnoh_Text_TrYoungCoupleTyAndSueIntro, Sinnoh_Text_TrYoungCoupleTyAndSueDefeat, Sinnoh_Text_TrYoungCoupleTyAndSueNotEnough
@@ -6467,19 +5660,16 @@ Sinnoh_EventScript_TrYoungCoupleTyAndSue::
 	end
 
 Sinnoh_Text_TrYoungCoupleTyAndSueIntro:
-	.string "We do everything together. Even lose?\n"
-	.string "Let's find out!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7F, 0x02, 0xFF
 
 Sinnoh_Text_TrYoungCoupleTyAndSueDefeat:
-	.string "We found out.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7F, 0x03, 0xFF
 
 Sinnoh_Text_TrYoungCoupleTyAndSueAfter:
-	.string "At least we lost together. That's\n"
-	.string "something!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7F, 0x04, 0xFF
 
 Sinnoh_Text_TrYoungCoupleTyAndSueNotEnough:
-	.string "There are two of us! Come back when\n"
-	.string "you have two MOéMON that can battle.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7F, 0x05, 0xFF
 
 Sinnoh_EventScript_TrLassCaroline::
 	trainerbattle_single TRAINER_SINNOH_LASS_CAROLINE, Sinnoh_Text_TrLassCarolineIntro, Sinnoh_Text_TrLassCarolineDefeat
@@ -6487,16 +5677,13 @@ Sinnoh_EventScript_TrLassCaroline::
 	end
 
 Sinnoh_Text_TrLassCarolineIntro:
-	.string "I caught my partner all by myself!\n"
-	.string "Want to see how strong it is?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4F, 0x16, 0xFF
 
 Sinnoh_Text_TrLassCarolineDefeat:
-	.string "It's strong... just not stronger than\n"
-	.string "yours.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4F, 0x17, 0xFF
 
 Sinnoh_Text_TrLassCarolineAfter:
-	.string "Your MOéMON look really happy. How do\n"
-	.string "you do that?$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4F, 0x18, 0xFF
 
 Sinnoh_EventScript_TrAromaLadyJenna::
 	trainerbattle_single TRAINER_SINNOH_AROMA_LADY_JENNA, Sinnoh_Text_TrAromaLadyJennaIntro, Sinnoh_Text_TrAromaLadyJennaDefeat
@@ -6504,15 +5691,13 @@ Sinnoh_EventScript_TrAromaLadyJenna::
 	end
 
 Sinnoh_Text_TrAromaLadyJennaIntro:
-	.string "Elegance and strength! My team has\n"
-	.string "both. Let me show you!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0A, 0x58, 0xFF
 
 Sinnoh_Text_TrAromaLadyJennaDefeat:
-	.string "Strength was missing today, it seems.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0A, 0x59, 0xFF
 
 Sinnoh_Text_TrAromaLadyJennaAfter:
-	.string "Elegance never loses, even when you\n"
-	.string "lose. Remember that.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0A, 0x5A, 0xFF
 
 Sinnoh_EventScript_TrAromaLadyAngela::
 	trainerbattle_single TRAINER_SINNOH_AROMA_LADY_ANGELA, Sinnoh_Text_TrAromaLadyAngelaIntro, Sinnoh_Text_TrAromaLadyAngelaDefeat
@@ -6520,15 +5705,13 @@ Sinnoh_EventScript_TrAromaLadyAngela::
 	end
 
 Sinnoh_Text_TrAromaLadyAngelaIntro:
-	.string "A battle with a traveler! I'll tell\n"
-	.string "everyone about this.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x09, 0x6C, 0xFF
 
 Sinnoh_Text_TrAromaLadyAngelaDefeat:
-	.string "I'll leave out the part where I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x09, 0x6D, 0xFF
 
 Sinnoh_Text_TrAromaLadyAngelaAfter:
-	.string "Was that your best? It was lovely.\n"
-	.string "Truly.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x09, 0x6E, 0xFF
 
 Sinnoh_EventScript_TrSchoolKidChristine::
 	trainerbattle_single TRAINER_SINNOH_SCHOOL_KID_CHRISTINE, Sinnoh_Text_TrSchoolKidChristineIntro, Sinnoh_Text_TrSchoolKidChristineDefeat
@@ -6540,7 +5723,7 @@ Sinnoh_Text_TrSchoolKidChristineIntro:
 	.string "Ready?$"
 
 Sinnoh_Text_TrSchoolKidChristineDefeat:
-	.string "We practiced the wrong things...$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6E, 0x33, 0xFF
 
 Sinnoh_Text_TrSchoolKidChristineAfter:
 	.string "I'll practice the right things this\n"
@@ -6556,7 +5739,7 @@ Sinnoh_Text_TrSchoolKidHarrisonIntro:
 	.string "you're doing. Show me!$"
 
 Sinnoh_Text_TrSchoolKidHarrisonDefeat:
-	.string "Aww, no fair!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6E, 0x69, 0xFF
 
 Sinnoh_Text_TrSchoolKidHarrisonAfter:
 	.string "I'm gonna train every day after\n"
@@ -6572,7 +5755,7 @@ Sinnoh_Text_TrMaidBelindaIntro:
 	.string "TRAINER. Let's talk.$"
 
 Sinnoh_Text_TrMaidBelindaDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x54, 0x67, 0xFF
 
 Sinnoh_Text_TrMaidBelindaAfter:
 	.string "Your team works together like it's one\n"
@@ -6588,7 +5771,7 @@ Sinnoh_Text_TrMaidClareIntro:
 	.string "TRAINER. Let's talk.$"
 
 Sinnoh_Text_TrMaidClareDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x54, 0x79, 0xFF
 
 Sinnoh_Text_TrMaidClareAfter:
 	.string "Your team works together like it's one\n"
@@ -6604,7 +5787,7 @@ Sinnoh_Text_TrMaidElenaIntro:
 	.string "battle is better!$"
 
 Sinnoh_Text_TrMaidElenaDefeat:
-	.string "Great view, great loss.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x55, 0x0B, 0xFF
 
 Sinnoh_Text_TrMaidElenaAfter:
 	.string "I come up here to think. Today I'll\n"
@@ -6620,7 +5803,7 @@ Sinnoh_Text_TrMaidEmilyIntro:
 	.string "road. You're next.$"
 
 Sinnoh_Text_TrMaidEmilyDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x55, 0x1D, 0xFF
 
 Sinnoh_Text_TrMaidEmilyAfter:
 	.string "I'll be waiting at the MOéMON LEAGUE.\n"
@@ -6636,7 +5819,7 @@ Sinnoh_Text_TrMaidSophieIntro:
 	.string "newcomers. Ready?$"
 
 Sinnoh_Text_TrMaidSophieDefeat:
-	.string "I should've held back less.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x55, 0x2F, 0xFF
 
 Sinnoh_Text_TrMaidSophieAfter:
 	.string "Next time I'll bring my best team.\n"
@@ -6652,7 +5835,7 @@ Sinnoh_Text_TrArtistIsmaelIntro:
 	.string "everyone about this.$"
 
 Sinnoh_Text_TrArtistIsmaelDefeat:
-	.string "I'll leave out the part where I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0A, 0x7D, 0xFF
 
 Sinnoh_Text_TrArtistIsmaelAfter:
 	.string "Was that your best? It was lovely.\n"
@@ -6668,7 +5851,7 @@ Sinnoh_Text_TrCameramanDarrylIntro:
 	.string "road. You're next.$"
 
 Sinnoh_Text_TrCameramanDarrylDefeat:
-	.string "You're the first to beat me in a while.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x15, 0x67, 0xFF
 
 Sinnoh_Text_TrCameramanDarrylAfter:
 	.string "I'll be waiting at the MOéMON LEAGUE.\n"
@@ -6684,7 +5867,7 @@ Sinnoh_Text_TrCollectorEugeneIntro:
 	.string "for a field test!$"
 
 Sinnoh_Text_TrCollectorEugeneDefeat:
-	.string "Hmm. The data says I lost.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x39, 0xFF
 
 Sinnoh_Text_TrCollectorEugeneAfter:
 	.string "I'll write that battle down in my\n"
@@ -6700,7 +5883,7 @@ Sinnoh_Text_TrGentlemanLeonardoIntro:
 	.string "Shall we?$"
 
 Sinnoh_Text_TrGentlemanLeonardoDefeat:
-	.string "How very rude of my team to lose.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x47, 0x27, 0xFF
 
 Sinnoh_Text_TrGentlemanLeonardoAfter:
 	.string "Do come by for tea some time. My\n"
@@ -6716,7 +5899,7 @@ Sinnoh_Text_TrPiKendrickIntro:
 	.string "music? Let's battle!$"
 
 Sinnoh_Text_TrPiKendrickDefeat:
-	.string "That was a sad song.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x59, 0x15, 0xFF
 
 Sinnoh_Text_TrPiKendrickAfter:
 	.string "I'll write a song about this. It'll be a\n"
@@ -6732,7 +5915,7 @@ Sinnoh_Text_TrRichBoyRomanIntro:
 	.string "both. Let me show you!$"
 
 Sinnoh_Text_TrRichBoyRomanDefeat:
-	.string "Strength was missing today, it seems.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x65, 0x7B, 0xFF
 
 Sinnoh_Text_TrRichBoyRomanAfter:
 	.string "Elegance never loses, even when you\n"
@@ -6748,7 +5931,7 @@ Sinnoh_Text_TrSchoolKidEstebanIntro:
 	.string "me without a battle!$"
 
 Sinnoh_Text_TrSchoolKidEstebanDefeat:
-	.string "Okay, okay, you can walk past!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6E, 0x45, 0xFF
 
 Sinnoh_Text_TrSchoolKidEstebanAfter:
 	.string "Being a road guard is harder than it\n"
@@ -6764,7 +5947,7 @@ Sinnoh_Text_TrScientistEmilioIntro:
 	.string "skills!$"
 
 Sinnoh_Text_TrScientistEmilioDefeat:
-	.string "Your skills check out!$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6F, 0x31, 0xFF
 
 Sinnoh_Text_TrScientistEmilioAfter:
 	.string "Carry on, TRAINER. Stay safe out\n"
@@ -6780,7 +5963,7 @@ Sinnoh_Text_TrVeteranEmanuelIntro:
 	.string "TRAINER. Let's talk.$"
 
 Sinnoh_Text_TrVeteranEmanuelDefeat:
-	.string "That said plenty.$"
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7C, 0x3B, 0xFF
 
 Sinnoh_Text_TrVeteranEmanuelAfter:
 	.string "Your team works together like it's one\n"

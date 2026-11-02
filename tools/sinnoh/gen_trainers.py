@@ -21,6 +21,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import trainer_words  # noqa: E402
+import build_text  # noqa: E402
 from gen_words import letter_widths, wrap  # noqa: E402
 
 FIRST_ID = 1664
@@ -230,9 +231,21 @@ def main():
         else:
             script.append('%s::\n\ttrainerbattle_single %s, %sIntro, %sDefeat\n\tmsgbox %sAfter, MSGBOX_AUTOCLOSE\n'
                           '\tend\n\n' % (lab, const, base, base, base))
+        # their words are Platinum's own (the text pack's trainers' bank, tools/sinnoh/build_text.py: only its numbers
+        # here); the written ones only where Platinum has no such line
+        kinds = {'Intro': ('TRMSG_PRE_DOUBLE_BATTLE_1', 'TRMSG_PRE_BATTLE'), 'Defeat': ('TRMSG_DOUBLE_BATTLE_DEFEAT_1', 'TRMSG_DEFEAT'),
+                 'After': ('TRMSG_POST_DOUBLE_BATTLE_1', 'TRMSG_POST_BATTLE'),
+                 'NotEnough': ('TRMSG_DOUBLE_BATTLE_NOT_ENOUGH_POKEMON_1',)}
         for suffix, text in (('Intro', intro), ('Defeat', defeat), ('After', after)) + \
                 ((('NotEnough', trainer_words.NOT_ENOUGH),) if d['double_battle'] else ()):
-            script.append('%s%s:\n%s\n' % (base, suffix, wrap(text, widths, t)))
+            where = None
+            for kind in kinds[suffix][0 if d['double_battle'] else -1:] if suffix != 'NotEnough' else kinds[suffix]:
+                where = where or build_text.trainer_message(root, t, kind)
+            if where:
+                script.append('%s%s:\n\t.byte %s\n\n' % (base, suffix,
+                              ', '.join('0x%02X' % x for x in build_text.sinnoh_text_bytes(*where))))
+            else:
+                script.append('%s%s:\n%s\n' % (base, suffix, wrap(text, widths, t)))
     if bad:
         sys.exit('not in the game: %s' % ' '.join(sorted(bad)))
     assert FLAGS_START + len(trainers) <= FLAGS_END, 'too many SINNOH trainers for their flags'

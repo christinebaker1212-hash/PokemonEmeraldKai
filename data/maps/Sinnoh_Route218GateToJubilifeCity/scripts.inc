@@ -7,30 +7,7 @@ Sinnoh_Route218GateToJubilifeCity_EventScript_Person1::
 	end
 
 Sinnoh_Route218GateToJubilifeCity_EventScript_Person2::
-	lock
-	faceplayer
-	goto_if_set 0x3DD2, Sinnoh_Route218GateToJubilifeCity_EventScript_Person2_Given
-	checkitem ITEM_OLD_ROD
-	goto_if_eq VAR_RESULT, TRUE, Sinnoh_Route218GateToJubilifeCity_EventScript_Person2_Given
-	msgbox Sinnoh_Route218GateToJubilifeCity_Text_Person2, MSGBOX_DEFAULT
-	msgbox Sinnoh_Route218GateToJubilifeCity_Text_Person2Gift, MSGBOX_DEFAULT
-	giveitem ITEM_OLD_ROD, 1
-	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DD2
-	release
+	goto SinnohP_route_218_gate_to_jubilife_city_2
 	end
-
-Sinnoh_Route218GateToJubilifeCity_EventScript_Person2_Given::
-	msgbox Sinnoh_Route218GateToJubilifeCity_Text_Person2, MSGBOX_DEFAULT
-	release
-	end
-
-Sinnoh_Route218GateToJubilifeCity_Text_Person2:
-	.string "The fishing on ROUTE 218 is great.\n"
-	.string "Every TRAINER should try it once!$"
-
-Sinnoh_Route218GateToJubilifeCity_Text_Person2Gift:
-	.string "Never fished before? Then start with\n"
-	.string "this rod!$"
 
 @ --- end of SINNOH words ---

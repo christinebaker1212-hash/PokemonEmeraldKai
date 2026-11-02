@@ -31,7 +31,7 @@ Sinnoh_SandgemTownPokemonResearchLab_EventScript_Person1::
 	end
 
 Sinnoh_SandgemTownPokemonResearchLab_EventScript_Person2::
-	msgbox Sinnoh_SandgemTownPokemonResearchLab_Text_Person2, MSGBOX_NPC
+	goto SinnohP_sandgem_town_pokemon_research_lab_5
 	end
 
 Sinnoh_SandgemTownPokemonResearchLab_EventScript_Person3::
@@ -45,12 +45,6 @@ Sinnoh_SandgemTownPokemonResearchLab_EventScript_Person4::
 Sinnoh_SandgemTownPokemonResearchLab_EventScript_Person5::
 	msgbox Sinnoh_SandgemTownPokemonResearchLab_Text_Person5, MSGBOX_NPC
 	end
-
-Sinnoh_SandgemTownPokemonResearchLab_Text_Person2:
-	.string "We study how MOéMON evolve.\p"
-	.string "Some evolve with a stone, some with a\n"
-	.string "friend, and some just when they're\l"
-	.string "good and ready.$"
 
 Sinnoh_SandgemTownPokemonResearchLab_Text_Person4:
 	.string "We've been following TEAM GALACTIC's\n"

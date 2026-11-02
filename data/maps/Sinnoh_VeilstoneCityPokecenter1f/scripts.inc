@@ -16,16 +16,11 @@ Sinnoh_VeilstoneCityPokecenter1f_EventScript_Person1::
 	end
 
 Sinnoh_VeilstoneCityPokecenter1f_EventScript_Person2::
-	msgbox Sinnoh_VeilstoneCityPokecenter1f_Text_Person2, MSGBOX_NPC
+	goto SinnohP_veilstone_city_pokecenter_1f_2
 	end
 
 Sinnoh_VeilstoneCityPokecenter1f_EventScript_Person3::
 	goto SinnohP_veilstone_city_pokecenter_1f_3
 	end
-
-Sinnoh_VeilstoneCityPokecenter1f_Text_Person2:
-	.string "The department store is the best\n"
-	.string "thing in VEILSTONE. Well, after the\l"
-	.string "MOéMON CENTER, darling.$"
 
 @ --- end of SINNOH words ---

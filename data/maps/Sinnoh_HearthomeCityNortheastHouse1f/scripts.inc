@@ -11,7 +11,7 @@ Sinnoh_HearthomeCityNortheastHouse1f_EventScript_Person2::
 	end
 
 Sinnoh_HearthomeCityNortheastHouse1f_EventScript_Person3::
-	msgbox Sinnoh_HearthomeCityNortheastHouse1f_Text_Person3, MSGBOX_NPC
+	goto SinnohP_hearthome_city_northeast_house_1f_9
 	end
 
 Sinnoh_HearthomeCityNortheastHouse1f_EventScript_Person4::
@@ -33,9 +33,5 @@ Sinnoh_HearthomeCityNortheastHouse1f_EventScript_Person7::
 Sinnoh_HearthomeCityNortheastHouse1f_EventScript_Person8::
 	goto SinnohP_hearthome_city_northeast_house_1f_6
 	end
-
-Sinnoh_HearthomeCityNortheastHouse1f_Text_Person3:
-	.string "PIKACHU: Pika chu!\p"
-	.string "It's playing tag with the children.$"
 
 @ --- end of SINNOH words ---

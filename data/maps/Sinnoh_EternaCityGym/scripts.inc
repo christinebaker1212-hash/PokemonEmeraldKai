@@ -3,15 +3,15 @@ Sinnoh_EternaCityGym_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_EternaCityGym_EventScript_Bg1::
-	msgbox Sinnoh_EternaCityGym_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_eterna_city_gym_3
 	end
 
 Sinnoh_EternaCityGym_EventScript_Bg2::
-	msgbox Sinnoh_EternaCityGym_Text_Bg2, MSGBOX_SIGN
+	goto SinnohP_eterna_city_gym_3
 	end
 
 Sinnoh_EternaCityGym_EventScript_Person1::
-	msgbox Sinnoh_EternaCityGym_Text_Person1, MSGBOX_NPC
+	goto SinnohP_eterna_city_gym_2
 	end
 
 Sinnoh_EternaCityGym_EventScript_Person2::
@@ -49,19 +49,6 @@ Sinnoh_EternaCityGym_EventScript_Person4::
 Sinnoh_EternaCityGym_EventScript_Person5::
 	msgbox Sinnoh_EternaCityGym_Text_Person5, MSGBOX_NPC
 	end
-
-Sinnoh_EternaCityGym_Text_Bg1:
-	.string "ETERNA CITY MOéMON GYM\p"
-	.string "LEADER: GARDENIA$"
-
-Sinnoh_EternaCityGym_Text_Bg2:
-	.string "ETERNA CITY MOéMON GYM\p"
-	.string "LEADER: GARDENIA$"
-
-Sinnoh_EternaCityGym_Text_Person1:
-	.string "GARDENIA's MOéMON love the sun. FIRE,\n"
-	.string "FLYING, ICE and BUG moves will help\l"
-	.string "you thin out her garden!$"
 
 Sinnoh_EternaCityGym_Text_Person2Intro:
 	.string "Hi there! I'm GARDENIA. I grow MOéMON\n"

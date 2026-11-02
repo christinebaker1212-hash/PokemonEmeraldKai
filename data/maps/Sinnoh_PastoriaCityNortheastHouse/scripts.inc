@@ -24,7 +24,7 @@ Sinnoh_PastoriaCityNortheastHouse_EventScript_Person2::
 	end
 
 Sinnoh_PastoriaCityNortheastHouse_EventScript_Person3::
-	msgbox Sinnoh_PastoriaCityNortheastHouse_Text_Person3, MSGBOX_NPC
+	goto SinnohP_pastoria_city_northeast_house_3
 	end
 
 Sinnoh_PastoriaCityNortheastHouse_Text_Person1:
@@ -35,9 +35,5 @@ Sinnoh_PastoriaCityNortheastHouse_Text_Person1:
 Sinnoh_PastoriaCityNortheastHouse_Text_Person1Gift:
 	.string "My sister made scarves for every\n"
 	.string "MOéMON we know. Here's a spare!$"
-
-Sinnoh_PastoriaCityNortheastHouse_Text_Person3:
-	.string "PACHIRISU: Chi!\p"
-	.string "It's cheering for someone.$"
 
 @ --- end of SINNOH words ---

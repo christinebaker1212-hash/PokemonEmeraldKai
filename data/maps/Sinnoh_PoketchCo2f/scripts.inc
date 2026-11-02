@@ -11,20 +11,11 @@ Sinnoh_PoketchCo2f_EventScript_Person2::
 	end
 
 Sinnoh_PoketchCo2f_EventScript_Person3::
-	msgbox Sinnoh_PoketchCo2f_Text_Person3, MSGBOX_NPC
+	goto SinnohP_poketch_co_2f_3
 	end
 
 Sinnoh_PoketchCo2f_EventScript_Person4::
-	msgbox Sinnoh_PoketchCo2f_Text_Person4, MSGBOX_NPC
+	goto SinnohP_poketch_co_2f_4
 	end
-
-Sinnoh_PoketchCo2f_Text_Person3:
-	.string "CLEFAIRY: Pippi pi!\p"
-	.string "It's tapping on a watch face,\n"
-	.string "fascinated.$"
-
-Sinnoh_PoketchCo2f_Text_Person4:
-	.string "PACHIRISU: Chipa!\p"
-	.string "It's chewing on a watch strap.$"
 
 @ --- end of SINNOH words ---

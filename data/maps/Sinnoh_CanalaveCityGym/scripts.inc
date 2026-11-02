@@ -3,15 +3,15 @@ Sinnoh_CanalaveCityGym_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_CanalaveCityGym_EventScript_Bg1::
-	msgbox Sinnoh_CanalaveCityGym_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_canalave_city_gym_4
 	end
 
 Sinnoh_CanalaveCityGym_EventScript_Bg2::
-	msgbox Sinnoh_CanalaveCityGym_Text_Bg2, MSGBOX_SIGN
+	goto SinnohP_canalave_city_gym_4
 	end
 
 Sinnoh_CanalaveCityGym_EventScript_Person2::
-	msgbox Sinnoh_CanalaveCityGym_Text_Person2, MSGBOX_NPC
+	goto SinnohP_canalave_city_gym_3
 	end
 
 Sinnoh_CanalaveCityGym_EventScript_Person5::
@@ -37,19 +37,6 @@ Sinnoh_CanalaveCityGym_EventScript_Person5_GiveTm::
 	msgbox Sinnoh_CanalaveCityGym_Text_Person5Tm, MSGBOX_DEFAULT
 	release
 	end
-
-Sinnoh_CanalaveCityGym_Text_Bg1:
-	.string "CANALAVE CITY MOéMON GYM\p"
-	.string "LEADER: BYRON$"
-
-Sinnoh_CanalaveCityGym_Text_Bg2:
-	.string "CANALAVE CITY MOéMON GYM\p"
-	.string "LEADER: BYRON$"
-
-Sinnoh_CanalaveCityGym_Text_Person2:
-	.string "BYRON's STEEL MOéMON shrug off lots\n"
-	.string "of moves. FIRE, FIGHTING and GROUND\l"
-	.string "moves get through!$"
 
 Sinnoh_CanalaveCityGym_Text_Person5Intro:
 	.string "So you're the one who's been climbing\n"

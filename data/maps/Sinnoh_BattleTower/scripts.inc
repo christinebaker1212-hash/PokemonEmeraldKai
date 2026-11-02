@@ -236,7 +236,7 @@ Sinnoh_BattleTower_EventScript_Person9::
 	end
 
 Sinnoh_BattleTower_EventScript_Person10::
-	msgbox Sinnoh_BattleTower_Text_Person10, MSGBOX_NPC
+	goto SinnohP_battle_tower_21
 	end
 
 Sinnoh_BattleTower_EventScript_Person11::
@@ -267,10 +267,6 @@ Sinnoh_BattleTower_Text_Person2:
 	.string "Welcome to the BATTLE TOWER. Battles\n"
 	.string "with a partner aren't open yet. The\l"
 	.string "single battle counter is!$"
-
-Sinnoh_BattleTower_Text_Person10:
-	.string "PIKACHU: Chu!\p"
-	.string "It's looking around excitedly.$"
 
 Sinnoh_BattleTower_Text_Person13:
 	.string "I'm covering the BATTLE TOWER's\n"

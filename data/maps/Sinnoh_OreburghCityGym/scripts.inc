@@ -3,11 +3,11 @@ Sinnoh_OreburghCityGym_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_OreburghCityGym_EventScript_Bg1::
-	msgbox Sinnoh_OreburghCityGym_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_oreburgh_city_gym_3
 	end
 
 Sinnoh_OreburghCityGym_EventScript_Bg2::
-	msgbox Sinnoh_OreburghCityGym_Text_Bg2, MSGBOX_SIGN
+	goto SinnohP_oreburgh_city_gym_3
 	end
 
 Sinnoh_OreburghCityGym_EventScript_Person1::
@@ -35,16 +35,8 @@ Sinnoh_OreburghCityGym_EventScript_Person1_GiveTm::
 	end
 
 Sinnoh_OreburghCityGym_EventScript_Person2::
-	msgbox Sinnoh_OreburghCityGym_Text_Person2, MSGBOX_NPC
+	goto SinnohP_oreburgh_city_gym_2
 	end
-
-Sinnoh_OreburghCityGym_Text_Bg1:
-	.string "OREBURGH CITY MOéMON GYM\p"
-	.string "LEADER: ROARK$"
-
-Sinnoh_OreburghCityGym_Text_Bg2:
-	.string "OREBURGH CITY MOéMON GYM\p"
-	.string "LEADER: ROARK$"
 
 Sinnoh_OreburghCityGym_Text_Person1Intro:
 	.string "Welcome to the OREBURGH GYM! I'm\n"
@@ -74,11 +66,5 @@ Sinnoh_OreburghCityGym_Text_Person1After:
 Sinnoh_OreburghCityGym_Text_Person1Badge:
 	.string "{PLAYER} received the COAL BADGE\n"
 	.string "from ROARK.$"
-
-Sinnoh_OreburghCityGym_Text_Person2:
-	.string "Hey, champ in the making! ROARK uses\n"
-	.string "ROCK MOéMON. WATER and GRASS moves\l"
-	.string "hit them hard, and NORMAL moves\l"
-	.string "barely scratch them.$"
 
 @ --- end of SINNOH words ---

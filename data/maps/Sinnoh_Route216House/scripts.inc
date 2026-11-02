@@ -3,31 +3,19 @@ Sinnoh_Route216House_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_Route216House_EventScript_Bg1::
-	msgbox Sinnoh_Route216House_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_route_216_house_3
 	end
 
 Sinnoh_Route216House_EventScript_Bg2::
-	msgbox Sinnoh_Route216House_Text_Bg2, MSGBOX_SIGN
+	goto SinnohP_route_216_house_3
 	end
 
 Sinnoh_Route216House_EventScript_Person1::
-	msgbox Sinnoh_Route216House_Text_Person1, MSGBOX_NPC
+	goto SinnohP_route_216_house_1
 	end
 
 Sinnoh_Route216House_EventScript_Person2::
 	goto SinnohP_route_216_house_2
 	end
-
-Sinnoh_Route216House_Text_Bg1:
-	.string "A soft, tidy bed. It looks very\n"
-	.string "comfortable.$"
-
-Sinnoh_Route216House_Text_Bg2:
-	.string "A soft, tidy bed. It looks very\n"
-	.string "comfortable.$"
-
-Sinnoh_Route216House_Text_Person1:
-	.string "Get warm by the fire. The snow outside\n"
-	.string "won't let up any time soon.$"
 
 @ --- end of SINNOH words ---

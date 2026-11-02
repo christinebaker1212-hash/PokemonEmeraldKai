@@ -3,7 +3,7 @@ Sinnoh_SolaceonTown_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_SolaceonTown_EventScript_Person1::
-	msgbox Sinnoh_SolaceonTown_Text_Person1, MSGBOX_NPC
+	goto SinnohP_solaceon_town_2
 	end
 
 Sinnoh_SolaceonTown_EventScript_Person2::
@@ -41,10 +41,6 @@ Sinnoh_SolaceonTown_EventScript_Sign6::
 Sinnoh_SolaceonTown_EventScript_Sign7::
 	goto SinnohP_solaceon_town_9
 	end
-
-Sinnoh_SolaceonTown_Text_Person1:
-	.string "SOLACEON is a quiet town. The MOéMON\n"
-	.string "DAY CARE keeps it lively, though.$"
 
 Sinnoh_SolaceonTown_Text_Person9:
 	.string "The ruins east of town are full of\n"

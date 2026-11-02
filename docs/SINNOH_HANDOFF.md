@@ -55,6 +55,49 @@ Queued after the 1.61.6 release and the KANTO / JOHTO sweep (the user's plan, 20
   Google Drive file 13njqEG8nKIltrVkMAgXtM5E6X3dV33as, "Pokemon - Platinum Version (USA) (Rev 1).zip" (about 51 MB;
   the .nds inside), downloaded into its own folder outside the repo. Nothing from either is committed.
 
+## Platinum's own words and scripts: where it stands (2026-11-02) and what's next
+
+The user's call (2026-11-02): SINNOH's dialogue and scripts are Platinum's own, converted from the decomp at build
+time and never committed. Never write original words or scripts for SINNOH again.
+
+Done:
+- Words: tools/sinnoh/build_text.py -> sinnoh/platinum_text.pak (the 685 message banks, plus one bank of every trainer's
+  own lines: build_text.trainer_message()). Trainers' intro / defeat / after-battle lines are Platinum's
+  (gen_trainers.py writes only their pack numbers into data/scripts/sinnoh_trainers.inc).
+- Scripts: tools/sinnoh/gen_scripts.py converts Platinum's event scripts to this game's commands
+  (sinnoh/platinum_scripts.inc, made by make_pack.sh before the builds; the Makefile's `--auto` rule; stubs without
+  the decomp). It follows calls into scripts_common.s, translates movements (30 fps -> 60: delays doubled), maps
+  items / species / moves / trainers by name to this game's (gen_trainers.RENAME), Platinum-only constants from the
+  decomp's generated/*.txt and include/constants, flags / variables through ids.py (never change ids.py's numbering:
+  saves hold them). The `sinnoh OP, ARG, ARG2` command (0xF6, src/sinnoh/s3d_scrcmd.c) covers what this game's
+  commands lack (names into buffers, YES = 0, Platinum's facing / position / pockets / badges / TM move names /
+  NATIONAL DEX).
+- Coverage: `python3 -I tools/sinnoh/gen_scripts.py --report POKEPLATINUM_DIR` (1804 of 2511 entries at the end of
+  2026-11-02). gen_words.py (given the decomp) points every person / sign / bg whose script converts at it; the game's
+  roles (nurses, clerks, gym leaders, ELITE FOUR, CHAMPION, boats, gifts that don't convert) keep this game's scripts.
+
+Next, in this order:
+1. Remaining commands (the --report list): Platinum's dynamic menus (InitGlobalTextMenu / InitLocalTextMenu /
+   AddMenuEntryImm / AddListMenuEntry / ShowMenu: a `sinnoh` op building a menu of pack texts), SetObjectEventMovementType,
+   GetFirstNonEggInParty, CountAliveMonsExcept, GetPlayerStarterSpecies, FindPartySlotWithMove, move tutors, two-trainer
+   battles, StartLegendaryBattle (legends.py has the battles), GiveBadge (gyms keep the game's role until the gyms'
+   scripts convert), PlayMusic / fades of music, the special places' commands (REGI ruins, TV, the GREAT MARSH tram,
+   the BATTLE TOWER: keep the game's systems where it has them).
+2. Map scripts: each map's scripts_init_<map>.s (InitScriptEntry_OnTransition / OnLoad / OnResume N, the
+   OnFrameTable rows VAR, VALUE, N) as the map's MAP_SCRIPT_ON_TRANSITION / ON_LOAD / ON_RESUME / ON_FRAME_TABLE (the
+   committed MapScripts point at SinnohP_ labels, numbers only), and the coord events (gen_maps.py triggers()).
+   Convert them, but don't switch them on piecemeal: Platinum's frame tables start cutscenes by the story's variables,
+   and SINNOH's are 0 in every save (Platinum's new-game state), so the opening would play again.
+3. The switch to Platinum's story, in one change: Platinum's new-game setup (scripts_init_new_game.s: the starting
+   flags and variables) run when a game first enters SINNOH; the story people (the 256 hide flags) shown and hidden by
+   Platinum's own scripts instead of tools/sinnoh/story_people.py / s3d_legends.c Sinnoh_StoryRefresh; the story
+   scenes (legends.py STORY battles) by Platinum's scripts. Saves already in SINNOH: set Platinum's flags and variables
+   from what this game recorded (badges, story battles beaten: story_people.DONE, legends.py) once, on load
+   (src/mp/mp_savefix.c's way), so nobody replays or skips the story. Test the story from TWINLEAF to the HALL OF FAME
+   (the existing sinnoh_* scenarios plus a story walk) before it ships.
+4. Then remove the written words (tools/sinnoh/words*.py, story_people.py's STORY_WORDS, trainer_words.py) once
+   nothing uses them.
+
 ## The goal
 Add SINNOH as a third region beside JOHTO / KANTO, built from Pokémon Platinum:
 - Shown in its ORIGINAL Platinum look, in 3D: a new 3D engine draws Platinum's own map models (scope change,

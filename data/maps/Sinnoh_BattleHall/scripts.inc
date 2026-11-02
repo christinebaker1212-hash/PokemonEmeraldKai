@@ -23,7 +23,7 @@ Sinnoh_BattleHall_EventScript_Person5::
 	end
 
 Sinnoh_BattleHall_EventScript_Person6::
-	msgbox Sinnoh_BattleHall_Text_Person6, MSGBOX_NPC
+	goto SinnohP_battle_hall_10
 	end
 
 Sinnoh_BattleHall_EventScript_Person7::
@@ -53,10 +53,6 @@ Sinnoh_BattleHall_EventScript_Person12::
 Sinnoh_BattleHall_EventScript_Person15::
 	msgbox Sinnoh_BattleHall_Text_Person15, MSGBOX_NPC
 	end
-
-Sinnoh_BattleHall_Text_Person6:
-	.string "PACHIRISU: Chipa chipa!\p"
-	.string "It looks ready for a challenge.$"
 
 Sinnoh_BattleHall_Text_Person11:
 	.string "The BATTLE HALL's crowd is the\n"

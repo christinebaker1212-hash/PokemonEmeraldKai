@@ -32,21 +32,47 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, HERE)
 import ids  # noqa: E402
 import build_text  # noqa: E402
+from gen_trainers import RENAME  # noqa: E402
 
 OUT = os.path.join(ROOT, 'sinnoh', 'platinum_scripts.inc')
 PREFIX = 'SinnohP_'
 TERMINAL = {'End', 'Return', 'GoTo', 'EndMovement', 'ReturnToField'}
 
-# this game's SINNOH script command (data/script_cmd_table.inc 0xF6, src/sinnoh/s3d_scrcmd.c)
+# this game's SINNOH script command (data/script_cmd_table.inc 0xF6 `sinnoh OP, ARG, ARG2`, src/sinnoh/s3d_scrcmd.c)
 SINNOH_BUFFER_PLAYER, SINNOH_BUFFER_RIVAL, SINNOH_BUFFER_COUNTERPART, SINNOH_YESNO = 1, 2, 3, 4
+SINNOH_GET_DIR, SINNOH_GET_POS, SINNOH_GET_POCKET, SINNOH_IS_TMHM, SINNOH_BUFFER_TMHM_MOVE = 5, 6, 7, 8, 9
+SINNOH_BUFFER_POCKET, SINNOH_BADGE_CHECK, SINNOH_NATIONAL_DEX = 10, 11, 12
 
 # Platinum's comparisons (CompareVar / CheckFlag then GoToIf / CallIf): the same codes as this game's
 COND = {'Lt': 0, 'Eq': 1, 'Gt': 2, 'Le': 3, 'Ge': 4, 'Ne': 5}
 
 # Platinum's sound effects that have a match here (others are left out: a script never waits on a missing one)
-SE = {'SE_CONFIRM_sseq_3': 'SE_SELECT', 'SE_CONFIRM': 'SE_SELECT', 'SEQ_SE_CONFIRM': 'SE_SELECT'}
+SE = {'SE_CONFIRM_sseq_3': 'SE_SELECT', 'SE_CONFIRM': 'SE_SELECT', 'SEQ_SE_CONFIRM': 'SE_SELECT',
+      'SEQ_SE_DP_SELECT': 'SE_SELECT', 'SEQ_SE_DP_WIN_OPEN': 'SE_WIN_OPEN', 'SEQ_SE_DP_KAIDAN2': 'SE_EXIT',
+      'SEQ_SE_DP_DOOR_OPEN': 'SE_DOOR', 'SEQ_SE_DP_DOOR_CLOSE': 'SE_DOOR'}
+# Platinum's fanfares (the obtained-item jingles and the rest): this game's closest
+FANFARE = {'SEQ_FANFA4': 'MUS_OBTAIN_ITEM', 'SEQ_FANFA3': 'MUS_OBTAIN_TMHM', 'SEQ_FANFA1': 'MUS_HEAL',
+           'SEQ_FANFA5': 'MUS_OBTAIN_BADGE', 'SEQ_FANFA2': 'MUS_LEVEL_UP', 'SEQ_KINOMI': 'MUS_OBTAIN_BERRY',
+           'SEQ_ACCE': 'MUS_OBTAIN_ITEM', 'SEQ_POKEWALKER': 'MUS_OBTAIN_ITEM', 'SEQ_BADGE': 'MUS_OBTAIN_BADGE',
+           'SEQ_ASA': 'MUS_HEAL', 'SEQ_KEYITEM': 'MUS_OBTAIN_ITEM', 'SEQ_WAZA': 'MUS_OBTAIN_TMHM'}
 
 CONSTANTS = {'TRUE': 1, 'FALSE': 0, 'MENU_YES': 0, 'MENU_NO': 1, 'GENDER_MALE': 0, 'GENDER_FEMALE': 1}
+
+# Platinum's movement actions -> this game's (Platinum's field runs at 30 frames a second, this one at 60: a delay
+# is twice as many frames here)
+DIRS = {'North': 'up', 'South': 'down', 'West': 'left', 'East': 'right'}
+MOVE_KIND = {'WalkNormal': 'walk_', 'WalkFast': 'walk_fast_', 'WalkFaster': 'walk_faster_', 'WalkSlow': 'walk_slow_',
+             'WalkSlower': 'walk_slow_', 'WalkFastest': 'walk_faster_',
+             'WalkOnSpotNormal': 'walk_in_place_', 'WalkOnSpotFast': 'walk_in_place_fast_',
+             'WalkOnSpotFaster': 'walk_in_place_faster_', 'WalkOnSpotSlow': 'walk_in_place_slow_', 'Face': 'face_',
+             'JumpOnSpotFast': 'jump_in_place_', 'JumpOnSpotSlow': 'jump_in_place_', 'JumpNear': 'jump_',
+             'JumpFar': 'jump_2_'}
+MOVE_ONE = {'EmoteExclamationMark': ['emote_exclamation_mark'], 'EmoteQuestionMark': ['emote_question_mark'],
+            'SetInvisible': ['set_invisible'], 'SetVisible': ['set_visible'], 'LockDir': ['lock_facing_direction'],
+            'UnlockDir': ['unlock_facing_direction'], 'FacePlayer': ['face_player'],
+            'FaceAwayFromPlayer': ['face_away_player']}
+DELAYS = {1: ['delay_2'], 2: ['delay_4'], 4: ['delay_8'], 8: ['delay_16'], 15: ['delay_16', 'delay_8', 'delay_4', 'delay_2'],
+          16: ['delay_16', 'delay_16'], 32: ['delay_16'] * 4}
 
 
 class Unsupported(Exception):
@@ -59,7 +85,7 @@ def parse(path):
     """{label: [(command, [args])]}, the entries (ScriptEntry names in order), the labels in file order"""
     labels, entries, order, cur = {}, [], [], None
     for raw in open(path, encoding='utf-8', errors='replace'):
-        line = raw.split('//')[0].rstrip()
+        line = raw.split('//')[0].split('@')[0].rstrip()   # (both kinds of comments)
         if not line.strip() or line.lstrip().startswith('#'):
             continue
         m = re.match(r'^(\w+):\s*$', line)
@@ -82,17 +108,55 @@ def parse(path):
     return labels, entries, order
 
 
-class Messages:
-    """The banks' numbers (build_text.py's) and each message's number in its bank"""
+class Decomp:
+    """What every file's conversion shares: the banks' numbers and messages, the constants, the common macros"""
 
     def __init__(self, root):
         self.root = root
         self.banks = build_text.bank_numbers(root)
         self._ids = {}
+        self._global = None
+        self.consts = {}
+        gdir = os.path.join(root, 'generated')
+        for f in sorted(os.listdir(gdir)) if os.path.isdir(gdir) else []:
+            if f.endswith('.txt'):
+                for i, line in enumerate(open(os.path.join(gdir, f), encoding='utf-8', errors='replace')):
+                    name = line.strip().split()[0] if line.strip() else ''
+                    if re.match(r'^[A-Z][A-Z0-9_]+$', name):
+                        self.consts.setdefault(name, i)
+        for path in glob.glob(os.path.join(root, 'include/constants/**/*.h'), recursive=True):
+            for m in re.finditer(r'^#define\s+([A-Z][A-Z0-9_]+)\s+(-?(?:0x[0-9A-Fa-f]+|\d+))\b', open(path, errors='replace').read(),
+                                 re.M):
+                self.consts.setdefault(m.group(1), int(m.group(2), 0))
+        self.trainers = set(re.findall(r'^#define\s+(TRAINER_SINNOH_\w+)\b',
+                                       open(os.path.join(ROOT, 'include/constants/trainers_sinnoh.h')).read(), re.M))
+        self._origins = None
+        self.ours = set()
+        for h in ('items.h', 'species.h', 'moves.h'):
+            self.ours |= set(re.findall(r'^#define\s+((?:ITEM|SPECIES|MOVE)_\w+)\b',
+                                        open(os.path.join(ROOT, 'include/constants', h), errors='replace').read(), re.M))
+        # Common_X macros -> the common script they call (CallCommonScript N)
+        self.common_macro = {}
+        text = open(os.path.join(root, 'asm/macros/scrcmd.inc'), errors='replace').read()
+        for m in re.finditer(r'\.macro (Common_\w+)\s*\n\s*CallCommonScript (0x[0-9A-Fa-f]+|\d+)\s*\n\s*\.endm', text):
+            self.common_macro[m.group(1)] = int(m.group(2), 0)
 
-    def bank_of_file(self, script_text):
-        m = re.search(r'#include "res/text/bank/(\w+)\.h"', script_text)
-        return m.group(1) if m else None
+    def origins(self):
+        """{Platinum header in lower case (twinleaf_town): (this game's map constant, its x and z in Platinum's
+        coordinates)}"""
+        if self._origins is None:
+            from source import open_source
+            from gen_maps import places
+            self._origins = {}
+            for p in places(open_source(self.root), self.root):
+                low = p['place']['header'][len('MAP_HEADER_'):].lower()
+                self._origins.setdefault(low, (p['id'], p['x0'] * 32, p['z0'] * 32))
+        return self._origins
+
+    def trainer(self, x):
+        """this game's constant for a Platinum trainer (gen_trainers.py's)"""
+        ours = 'TRAINER_SINNOH_' + x[len('TRAINER_'):]
+        return ours if ours in self.trainers else None
 
     def ids(self, bank):
         if bank not in self._ids:
@@ -100,17 +164,49 @@ class Messages:
             self._ids[bank] = {m['id']: i for i, m in enumerate(d.get('messages', []))}
         return self._ids[bank]
 
+    def message(self, bank, msg_id):
+        """(bank number, message number) of a message: its file's bank, else wherever it is"""
+        if bank and msg_id in self.ids(bank):
+            return self.banks[bank], self.ids(bank)[msg_id]
+        if self._global is None:
+            self._global = {}
+            for b in self.banks:
+                for k, i in self.ids(b).items():
+                    self._global.setdefault(k, (self.banks[b], i))
+        return self._global.get(msg_id)
+
+
+def common_target(n):
+    """(file, entry from 1) of Platinum's script number N (2000-2499 the common scripts, 2500- the bg events')"""
+    if 2000 <= n < 2500:
+        return 'common', n - 2000 + 1
+    if 2500 <= n < 2800:
+        return 'bg_events', n - 2500 + 1
+    return None
+
 
 # ----------------------------------------------------------------------------------------------------- one file
 
 class FileConverter:
-    def __init__(self, root, msgs, path):
-        self.root, self.msgs, self.path = root, msgs, path
+    def __init__(self, dec, path):
+        self.dec, self.root, self.path = dec, dec.root, path
         self.low = os.path.basename(path)[len('scripts_'):-2]
         text = open(path, encoding='utf-8', errors='replace').read()
-        self.bank = msgs.bank_of_file(text)
+        m = re.search(r'#include "res/text/bank/(\w+)\.h"', text)
+        self.bank = m.group(1) if m else None
+        m = re.search(r'#include "res/field/events/events_(\w+)\.h"', text)
+        self.events_low = m.group(1) if m else self.low
+        self.localids = {}
+        if m:
+            ev = os.path.join(self.root, 'res/field/events', 'events_%s.json' % m.group(1))
+            if os.path.exists(ev):
+                for i, o in enumerate(json.load(open(ev)).get('object_events', [])):
+                    if isinstance(o.get('id'), str):
+                        self.localids[o['id']] = i + 1
         self.labels, self.entries, self.order = parse(path)
         self.texts = {}            # label -> (bank number, message number)
+        self.calls = set()         # (file, entry) of the common scripts it calls
+        self.moves = set()         # movement labels
         self._ok = {}
 
     # ---- names
@@ -123,14 +219,11 @@ class FileConverter:
         return '%s%s_%d' % (PREFIX, self.low, n)
 
     def text_label(self, msg_id):
-        if self.bank is None:
-            raise Unsupported('no text bank')
-        ids_ = self.msgs.ids(self.bank)
-        if msg_id not in ids_:
-            raise Unsupported('message %s not in its bank' % msg_id)
-        b, m = self.msgs.banks[self.bank], ids_[msg_id]
-        lab = '%sT_%d_%d' % (PREFIX, b, m)
-        self.texts[lab] = (b, m)
+        where = self.dec.message(self.bank, msg_id)
+        if where is None:
+            raise Unsupported('message %s' % msg_id)
+        lab = '%sT_%d_%d' % (PREFIX, where[0], where[1])
+        self.texts[lab] = where
         return lab
 
     def value(self, x):
@@ -138,15 +231,33 @@ class FileConverter:
             return str(int(x, 0))
         if x in CONSTANTS:
             return str(CONSTANTS[x])
+        if re.match(r'^(ITEM|SPECIES|MOVE)_', x):
+            x = RENAME.get(x, x)
+            if x in self.dec.ours:
+                return x
+            raise Unsupported('value %s (not in this game)' % x)
+        if x.startswith('TRAINER_') and not x.startswith('TRAINER_CLASS_'):
+            t = self.dec.trainer(x)
+            if t:
+                return t
+            raise Unsupported('trainer %s (not in this game)' % x)
+        if x in self.dec.consts:
+            return str(self.dec.consts[x])
         raise Unsupported('value %s' % x)
 
     def var(self, x):
+        if x in ('VAR_LAST_TALKED', 'VAR_FACING'):
+            return x                  # (this game's own special variables of the same meaning)
         if re.match(r'^(0x[0-9A-Fa-f]+|\d+)$', x) and int(x, 0) >= 0x4000:
             raise Unsupported('a raw variable number %s' % x)
         v = ids.var(self.root, x) if x.startswith('VAR_') else None
         if v is None:
             raise Unsupported('variable %s' % x)
         return v if isinstance(v, str) else '0x%X' % v
+
+    def arg(self, x):
+        """a value or a variable (the commands that take either)"""
+        return self.var(x) if self.is_var(x) else self.value(x)
 
     def is_var(self, x):
         return x.startswith('VAR_')
@@ -157,10 +268,63 @@ class FileConverter:
             raise Unsupported('flag %s' % x)
         return '0x%X' % f
 
+    def localid(self, x):
+        if x in ('LOCALID_PLAYER', 'OBJ_EVENT_ID_PLAYER'):
+            return 'OBJ_EVENT_ID_PLAYER'
+        if x in self.localids:
+            return str(self.localids[x])
+        if re.match(r'^\d+$', x):
+            return x
+        if x.startswith('VAR_'):
+            return self.var(x)        # (this game's commands take a variable for the object too)
+        raise Unsupported('object %s' % x)
+
+    def strvar(self, x):
+        n = int(self.value(x))
+        if not 0 <= n <= 2:
+            raise Unsupported('string buffer %d' % n)
+        return 'STR_VAR_%d' % (n + 1)
+
     def compare(self, a, b):
         if self.is_var(b):
             return ['compare_var_to_var %s, %s' % (self.var(a), self.var(b))]
         return ['compare_var_to_value %s, %s' % (self.var(a), self.value(b))]
+
+    def sinnoh(self, op, a=0, b=0):
+        return 'sinnoh %d, %s, %s' % (op, a, b)
+
+    def common(self, number):
+        t = common_target(number)
+        if t is None:
+            raise Unsupported('common script %d' % number)
+        c = converter(self.root, t[0])
+        if c is None:
+            raise Unsupported('no file %s' % t[0])
+        self.calls.add(t)
+        return c.entry_label(t[1])
+
+    # ---- one movement
+    def movement(self, cmd, a):
+        n = int(a[0], 0) if a and re.match(r'^(0x[0-9A-Fa-f]+|\d+)$', a[0]) else 1
+        if cmd == 'EndMovement':
+            return ['step_end']
+        m = re.match(r'^(Delay)(\d+)$', cmd)
+        if m:
+            return DELAYS.get(int(m.group(2)), ['delay_16']) * n
+        if cmd in MOVE_ONE:
+            return MOVE_ONE[cmd] * n
+        m = re.match(r'^(\w+?)(North|South|West|East)$', cmd)
+        if m and m.group(1) in MOVE_KIND:
+            return [MOVE_KIND[m.group(1)] + DIRS[m.group(2)]] * n
+        raise Unsupported('movement %s' % cmd)
+
+    def movement_label(self, name):
+        if name not in self.labels:
+            raise Unsupported('movement %s elsewhere' % name)
+        for cmd, a in self.labels[name]:
+            self.movement(cmd, a)
+        self.moves.add(name)
+        return '%s%s__%s' % (PREFIX, self.low, name)
 
     # ---- one command
     def command(self, cmd, a):
@@ -173,14 +337,25 @@ class FileConverter:
         m = re.match(r'^(GoTo|Call)If(Set|Unset)$', cmd)
         if m:
             return ['%s_if_%s %s, %s' % (m.group(1).lower(), m.group(2).lower(), self.flag(a[0]), self.label(a[1]))]
+        m = re.match(r'^(GoTo|Call)IfBadge(Acquired|NotAcquired)$', cmd)
+        if m:
+            return [self.sinnoh(SINNOH_BADGE_CHECK, self.value(a[0])),
+                    '%s_if %d, %s' % ('goto' if m.group(1) == 'GoTo' else 'call', 1 if m.group(2) == 'Acquired' else 0,
+                                      self.label(a[1]))]
+        if cmd == 'CheckBadgeAcquired':
+            return [self.sinnoh(SINNOH_BADGE_CHECK, self.value(a[0])), 'copyvar %s, VAR_RESULT' % self.var(a[1])]
         if cmd in ('End',):
             return ['end']
-        if cmd == 'Return':
+        if cmd in ('Return', 'ReturnCommonScript'):
             return ['return']
         if cmd == 'GoTo':
             return ['goto %s' % self.label(a[0])]
         if cmd == 'Call':
             return ['call %s' % self.label(a[0])]
+        if cmd == 'CallCommonScript':
+            return ['call %s' % self.common(int(a[0], 0))]
+        if cmd in self.dec.common_macro:
+            return ['call %s' % self.common(self.dec.common_macro[cmd])]
         if cmd == 'CompareVar':
             return self.compare(a[0], a[1])
         if cmd == 'CheckFlag':
@@ -210,11 +385,15 @@ class FileConverter:
             return ['playse %s' % se] if se else []
         if cmd == 'WaitSE':
             return ['waitse']
+        if cmd == 'PlayFanfare':
+            return ['playfanfare %s' % FANFARE.get(a[0], 'MUS_OBTAIN_ITEM')]
+        if cmd == 'WaitFanfare':
+            return ['waitfanfare']
         if cmd == 'Message':
             return ['message %s' % self.text_label(a[0]), 'waitmessage']
-        if cmd in ('WaitButton', 'WaitABXPadPress', 'WaitABPress'):
+        if cmd in ('WaitButton', 'WaitABXPadPress', 'WaitABPress', 'WaitABPressTime'):
             return ['waitbuttonpress']
-        if cmd == 'CloseMessage':
+        if cmd in ('CloseMessage', 'CloseMessageWithoutErasing'):
             return ['closemessage']
         if cmd == 'NPCMessage':
             return ['playse SE_SELECT', 'lockall', 'faceplayer', 'message %s' % self.text_label(a[0]), 'waitmessage',
@@ -227,20 +406,127 @@ class FileConverter:
             return ['lockall', 'message %s' % self.text_label(a[0]), 'waitmessage', 'waitbuttonpress', 'closemessage',
                     'releaseall']
         if cmd == 'BufferPlayerName':
-            return ['sinnoh %d, %s' % (SINNOH_BUFFER_PLAYER, self.value(a[0]))]
+            return [self.sinnoh(SINNOH_BUFFER_PLAYER, self.value(a[0]))]
         if cmd == 'BufferRivalName':
-            return ['sinnoh %d, %s' % (SINNOH_BUFFER_RIVAL, self.value(a[0]))]
+            return [self.sinnoh(SINNOH_BUFFER_RIVAL, self.value(a[0]))]
         if cmd == 'BufferCounterpartName':
-            return ['sinnoh %d, %s' % (SINNOH_BUFFER_COUNTERPART, self.value(a[0]))]
+            return [self.sinnoh(SINNOH_BUFFER_COUNTERPART, self.value(a[0]))]
+        if cmd in ('BufferItemName', 'BufferItemNamePlural', 'BufferItemNameWithArticle'):
+            return ['bufferitemname %s, %s' % (self.strvar(a[0]), self.arg(a[1]))]
+        if cmd == 'BufferSpeciesName':
+            return ['bufferspeciesname %s, %s' % (self.strvar(a[0]), self.arg(a[1]))]
+        if cmd == 'BufferMoveName':
+            return ['buffermovename %s, %s' % (self.strvar(a[0]), self.arg(a[1]))]
+        if cmd == 'BufferPartyMonNickname':
+            return ['bufferpartymonnick %s, %s' % (self.strvar(a[0]), self.arg(a[1]))]
+        if cmd == 'BufferTMHMMoveName':
+            return [self.sinnoh(SINNOH_BUFFER_TMHM_MOVE, self.value(a[0]), self.arg(a[1]))]
+        if cmd == 'BufferPocketName':
+            return [self.sinnoh(SINNOH_BUFFER_POCKET, self.value(a[0]), self.arg(a[1]))]
+        if cmd == 'GetItemPocket':
+            return [self.sinnoh(SINNOH_GET_POCKET, self.arg(a[0]), self.var(a[1]))]
+        if cmd == 'IsItemTMHM':
+            return [self.sinnoh(SINNOH_IS_TMHM, self.arg(a[0]), self.var(a[1]))]
+        if cmd == 'CheckItemIsPlate':
+            return ['setvar %s, 0' % self.var(a[1])]     # (this game has no ARCEUS plates to engrave)
+        if cmd in ('CheckItem', 'CanFitItem'):
+            op = 'checkitem' if cmd == 'CheckItem' else 'checkitemspace'
+            return ['%s %s, %s' % (op, self.arg(a[0]), self.arg(a[1])), 'copyvar %s, VAR_RESULT' % self.var(a[2])]
+        if cmd in ('AddItem', 'RemoveItem'):
+            return ['%s %s, %s' % (cmd.lower(), self.arg(a[0]), self.arg(a[1])), 'copyvar %s, VAR_RESULT' % self.var(a[2])]
+        if cmd == 'GoToIfCannotFitItem':
+            return ['checkitemspace %s, %s' % (self.arg(a[0]), self.arg(a[1])), 'copyvar %s, VAR_RESULT' % self.var(a[2]),
+                    'goto_if_eq VAR_RESULT, 0, %s' % self.label(a[3])]
         if cmd == 'ShowYesNoMenu':
             # (this game's YES is 1, Platinum's MENU_YES 0: the answer turned into Platinum's)
-            return ['yesnobox 20, 8', 'sinnoh %d, %s' % (SINNOH_YESNO, self.var(a[0]))]
+            return ['yesnobox 20, 8', self.sinnoh(SINNOH_YESNO, self.var(a[0]))]
+        if cmd == 'StartTrainerBattle':
+            if len(a) > 1 and a[1] not in ('0',):
+                raise Unsupported('StartTrainerBattle with two trainers')
+            if self.is_var(a[0]):
+                raise Unsupported('StartTrainerBattle by a variable')
+            t = self.value(a[0])
+            where = build_text.trainer_message(self.root, a[0], 'TRMSG_DEFEAT')
+            if where is None:
+                raise Unsupported('trainer %s has no defeat line' % a[0])
+            lab = '%sT_%d_%d' % (PREFIX, where[0], where[1])
+            self.texts[lab] = where
+            return ['trainerbattle_no_intro %s, %s' % (t, lab)]
+        if cmd == 'CheckWonBattle':
+            return ['setvar %s, 1' % self.var(a[0])]   # (a battle lost whites out here: the script goes on after a win)
+        if cmd == 'CheckLostBattle':
+            return ['setvar %s, 0' % self.var(a[0])]
+        if cmd == 'BlackOutFromBattle':
+            return ['end']
+        if cmd in ('CheckTrainerFlag', 'SetTrainerFlag', 'ClearTrainerFlag'):
+            return ['%s %s' % (cmd.lower(), self.value(a[0]))]
+        m = re.match(r'^GoToIf(NotDefeated|Defeated)$', cmd)
+        if m:
+            return ['checktrainerflag %s' % self.value(a[0]),
+                    'goto_if %d, %s' % (0 if m.group(1) == 'NotDefeated' else 1, self.label(a[1]))]
+        if cmd == 'PlayTrainerEncounterBGM':
+            return []                       # (the battle plays its own)
+        if cmd == 'GetRandom' or cmd == 'GetRandom2':
+            return ['random %s' % self.value(a[1]), 'copyvar %s, VAR_RESULT' % self.var(a[0])]
+        if cmd == 'HealParty':
+            return ['special HealPlayerParty']
+        if cmd == 'GetPartyCount':
+            return ['getpartysize', 'copyvar %s, VAR_RESULT' % self.var(a[0])]
+        if cmd == 'GetNationalDexEnabled':
+            return [self.sinnoh(SINNOH_NATIONAL_DEX, self.var(a[0]))]
+        if cmd == 'Warp':
+            low = a[0][len('MAP_HEADER_'):].lower() if a[0].startswith('MAP_HEADER_') else None
+            o = self.dec.origins().get(low)
+            if o is None:
+                raise Unsupported('warp to %s' % a[0])
+            return ['warp %s, %d, %d' % (o[0], int(self.value(a[1])) - o[1], int(self.value(a[2])) - o[2])]
+        if cmd == 'SetObjectEventPos':
+            o = self.dec.origins().get(self.events_low)
+            if o is None:
+                raise Unsupported('positions on %s' % self.events_low)
+            x, z = int(self.value(a[1])) - o[1], int(self.value(a[2])) - o[2]
+            lid = self.localid(a[0])
+            return ['setobjectxyperm %s, %d, %d' % (lid, x, z), 'setobjectxy %s, %d, %d' % (lid, x, z)]
+        if cmd == 'GetPlayerGender':
+            return ['checkplayergender', 'copyvar %s, VAR_RESULT' % self.var(a[0])]
+        if cmd == 'GetPlayerDir':
+            return [self.sinnoh(SINNOH_GET_DIR, self.var(a[0]))]
+        if cmd == 'GetPlayerMapPos':
+            return [self.sinnoh(SINNOH_GET_POS, self.var(a[0]), self.var(a[1]))]
+        if cmd in ('PlayCry', 'PlayPokemonCry'):
+            return ['playmoncry %s, CRY_MODE_NORMAL' % self.arg(a[0])]
+        if cmd == 'WaitCry':
+            return ['waitmoncry']
+        if cmd == 'PokemonCryAndMessage':
+            return ['playmoncry %s, CRY_MODE_NORMAL' % self.arg(a[0]), 'message %s' % self.text_label(a[1]),
+                    'waitmessage', 'waitmoncry']
+        if cmd == 'FadeScreenOut':
+            return ['fadescreen FADE_TO_BLACK']
+        if cmd == 'FadeScreenIn':
+            return ['fadescreen FADE_FROM_BLACK']
+        if cmd == 'WaitFadeScreen':
+            return []                       # (fadescreen waits by itself)
+        if cmd == 'ShowMoney':
+            return ['showmoneybox 0, 0']
+        if cmd == 'HideMoney':
+            return ['hidemoneybox']
+        if cmd == 'UpdateMoneyDisplay':
+            return ['updatemoneybox']
+        if cmd == 'ApplyMovement':
+            return ['applymovement %s, %s' % (self.localid(a[0]), self.movement_label(a[1]))]
+        if cmd == 'WaitMovement':
+            return ['waitmovement 0']
+        if cmd == 'RemoveObject':
+            return ['removeobject %s' % self.localid(a[0])]
+        if cmd == 'AddObject':
+            return ['addobject %s' % self.localid(a[0])]
         if cmd in ('Delay8', 'Delay4', 'Delay2', 'Delay1', 'Delay16', 'Delay15', 'Delay32'):
-            return ['delay %d' % int(cmd[len('Delay'):])]
+            return ['delay %d' % (2 * int(cmd[len('Delay'):]))]
         if cmd == 'WaitTime':
-            return ['delay %s' % self.value(a[0])]
-        if cmd in ('TurnOnTimeBasedEffects',):
-            return []
+            return ['delay %d' % (2 * int(self.value(a[0])))]
+        if cmd in ('TurnOnTimeBasedEffects', 'CreateJournalEvent', 'TrySetUnusedCollectedOrbFlag', 'RecordHeapMemory',
+                   'CheckHeapMemory', 'SetMenuXOriginToRight', 'SetMenuXOriginToLeft'):
+            return []                       # (Platinum's journal, its memory checks: nothing here)
         raise Unsupported(cmd)
 
     # ---- reach and convert
@@ -256,8 +542,10 @@ class FileConverter:
             seen.append(lab)
             body = self.labels[lab]
             for cmd, a in body:
+                if cmd == 'ApplyMovement':
+                    continue
                 for x in a:
-                    if x in self.labels and x not in seen and cmd != 'ApplyMovement':
+                    if x in self.labels and x not in seen:
                         stack.append(x)
             if not body or body[-1][0] not in TERMINAL:
                 i = self.order.index(lab)
@@ -265,17 +553,26 @@ class FileConverter:
                     stack.append(self.order[i + 1])
         return seen
 
-    def check(self, n):
-        """None if entry n (from 1) converts, else why not"""
+    def check(self, n, busy=None):
+        """None if entry n (from 1) converts (and every common script it calls), else why not"""
         if n in self._ok:
             return self._ok[n]
+        busy = busy or set()
+        if (self.low, n) in busy:
+            return None                     # (a loop through the common scripts: judged by its first visit)
+        busy = busy | {(self.low, n)}
         why = None
+        before = set(self.calls)
         try:
             if not 1 <= n <= len(self.entries):
                 raise Unsupported('no entry %d' % n)
             for lab in self.reach(self.entries[n - 1]):
                 for cmd, a in self.labels[lab]:
                     self.command(cmd, a)
+            for low, m in sorted(self.calls - before):
+                w = converter(self.root, low).check(m, busy)
+                if w is not None:
+                    raise Unsupported('common %s %d: %s' % (low, m, w))
         except Unsupported as e:
             why = str(e)
         except (IndexError, ValueError) as e:
@@ -285,8 +582,7 @@ class FileConverter:
 
     def emit(self, wanted):
         """this file's converted labels (the entries in WANTED that convert), in file order"""
-        labels = set()
-        entries = []
+        labels, entries, moves = set(), [], set()
         for n in sorted(wanted):
             if self.check(n) is None:
                 labels |= set(self.reach(self.entries[n - 1]))
@@ -300,12 +596,20 @@ class FileConverter:
                 continue
             out.append('%s:' % self.label(lab))
             for cmd, a in self.labels[lab]:
+                if cmd == 'ApplyMovement':
+                    moves.add(a[1])
                 out += ['\t' + line for line in self.command(cmd, a)]
             body = self.labels[lab]
             if not body or body[-1][0] not in TERMINAL:
                 i = self.order.index(lab)
                 nxt = self.order[i + 1] if i + 1 < len(self.order) else None
                 out.append('\tgoto %s' % self.label(nxt) if nxt in labels else '\tend')
+        for lab in sorted(moves):
+            out.append('%s%s__%s:' % (PREFIX, self.low, lab))
+            for cmd, a in self.labels[lab]:
+                out += ['\t' + line for line in self.movement(cmd, a)]
+            if not self.labels[lab] or self.labels[lab][-1][0] != 'EndMovement':
+                out.append('\tstep_end')
         return out, entries
 
 
@@ -319,8 +623,8 @@ def converter(root, low):
     key = (root, low)
     if key not in _converters:
         path = os.path.join(root, 'res/field/scripts', 'scripts_%s.s' % low)
-        msgs = _converters.setdefault((root, None), Messages(root))
-        _converters[key] = FileConverter(root, msgs, path) if os.path.exists(path) else None
+        dec = _converters.setdefault((root, None), Decomp(root)) if (root, None) not in _converters else _converters[(root, None)]
+        _converters[key] = FileConverter(dec, path) if os.path.exists(path) else None
     return _converters[key]
 
 
@@ -369,6 +673,21 @@ def build(root, out_path):
         m = re.match(r'^%s(\w+?)_(\d+)$' % PREFIX, lab)
         if m:
             wanted[m.group(1)].add(int(m.group(2)))
+    # the common scripts the converted ones call, and the ones those call
+    queue = [(low, n) for low in wanted for n in wanted[low]]
+    while queue:
+        low, n = queue.pop()
+        c = converter(root, low)
+        if c is None or c.check(n) is not None:
+            continue
+        before = set(c.calls)
+        for lab in c.reach(c.entries[n - 1]):
+            for cmd, a in c.labels[lab]:
+                c.command(cmd, a)
+        for t in c.calls:
+            if t[1] not in wanted[t[0]]:
+                wanted[t[0]].add(t[1])
+                queue.append(t)
     lines, texts, done = [], {}, set()
     for low in sorted(wanted):
         c = converter(root, low)

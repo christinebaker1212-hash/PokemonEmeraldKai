@@ -43,7 +43,7 @@ Sinnoh_HearthomeCity_EventScript_Person10::
 	end
 
 Sinnoh_HearthomeCity_EventScript_Person11::
-	msgbox Sinnoh_HearthomeCity_Text_Person11, MSGBOX_NPC
+	goto SinnohP_hearthome_city_10
 	end
 
 Sinnoh_HearthomeCity_EventScript_Person22::
@@ -126,11 +126,6 @@ Sinnoh_HearthomeCity_Text_Person7:
 	.string "I make little MOéMON statues out of\n"
 	.string "clay. Want to see? ...Well, they're still\l"
 	.string "drying.$"
-
-Sinnoh_HearthomeCity_Text_Person11:
-	.string "PACHIRISU: Chipa! Chipaaa!\p"
-	.string "It's stuffing its cheeks with\n"
-	.string "something.$"
 
 Sinnoh_HearthomeCity_Text_Person22:
 	.string "HEARTHOME is the friendliest city\n"

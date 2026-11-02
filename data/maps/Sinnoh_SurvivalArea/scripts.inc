@@ -11,6 +11,14 @@ Sinnoh_SurvivalArea_EventScript_Bg2::
 	goto SinnohP_survival_area_7
 	end
 
+Sinnoh_SurvivalArea_EventScript_Person2::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_SurvivalArea_EventScript_Person3::
+	goto SinnohP_common_28
+	end
+
 Sinnoh_SurvivalArea_EventScript_Person4::
 	goto SinnohP_survival_area_3
 	end

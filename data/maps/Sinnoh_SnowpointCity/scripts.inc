@@ -32,7 +32,7 @@ Sinnoh_SnowpointCity_EventScript_Person6_Sail0::
 	end
 
 Sinnoh_SnowpointCity_EventScript_Person7::
-	msgbox Sinnoh_SnowpointCity_Text_Person7, MSGBOX_NPC
+	goto SinnohP_snowpoint_city_2
 	end
 
 Sinnoh_SnowpointCity_EventScript_Person8::
@@ -60,11 +60,6 @@ Sinnoh_SnowpointCity_Text_Person6Bye:
 
 Sinnoh_SnowpointCity_Text_Person6Off:
 	.string "All aboard! Hold on tight!$"
-
-Sinnoh_SnowpointCity_Text_Person7:
-	.string "The temple north of the city is very\n"
-	.string "old. Only people who have the LEAGUE's\l"
-	.string "blessing may go inside.$"
 
 Sinnoh_SnowpointCity_Text_Person8:
 	.string "CANDICE: A visitor in SNOWPOINT! I'm\n"

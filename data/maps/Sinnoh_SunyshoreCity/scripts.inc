@@ -23,11 +23,31 @@ Sinnoh_SunyshoreCity_EventScript_Person8::
 	end
 
 Sinnoh_SunyshoreCity_EventScript_Person10::
-	msgbox Sinnoh_SunyshoreCity_Text_Person10, MSGBOX_NPC
+	goto SinnohP_sunyshore_city_9
+	end
+
+Sinnoh_SunyshoreCity_EventScript_Person11::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_SunyshoreCity_EventScript_Person12::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_SunyshoreCity_EventScript_Person13::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_SunyshoreCity_EventScript_Person17::
+	goto SinnohP_common_28
 	end
 
 Sinnoh_SunyshoreCity_EventScript_Person19::
 	msgbox Sinnoh_SunyshoreCity_Text_Person19, MSGBOX_NPC
+	end
+
+Sinnoh_SunyshoreCity_EventScript_Person20::
+	goto SinnohP_common_28
 	end
 
 Sinnoh_SunyshoreCity_EventScript_Person21::
@@ -61,12 +81,6 @@ Sinnoh_SunyshoreCity_EventScript_Sign15::
 Sinnoh_SunyshoreCity_EventScript_Sign16::
 	goto SinnohP_sunyshore_city_15
 	end
-
-Sinnoh_SunyshoreCity_Text_Person10:
-	.string "I'm visiting from OLIVINE, in JOHTO. I\n"
-	.string "came to see this city's lighthouse.\p"
-	.string "It's beautiful. I'll tell everyone back\n"
-	.string "home about it.$"
 
 Sinnoh_SunyshoreCity_Text_Person19:
 	.string "FLINT: Hey! I'm FLINT, of the ELITE\n"

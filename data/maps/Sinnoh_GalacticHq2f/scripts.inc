@@ -3,7 +3,7 @@ Sinnoh_GalacticHq2f_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_GalacticHq2f_EventScript_Bg1::
-	msgbox Sinnoh_GalacticHq2f_Text_Bg1, MSGBOX_SIGN
+	goto SinnohP_galactic_hq_2f_1
 	end
 
 Sinnoh_GalacticHq2f_EventScript_Bg4::
@@ -31,35 +31,19 @@ Sinnoh_GalacticHq2f_EventScript_Bg9::
 	end
 
 Sinnoh_GalacticHq2f_EventScript_Bg10::
-	msgbox Sinnoh_GalacticHq2f_Text_Bg10, MSGBOX_SIGN
+	goto SinnohP_galactic_hq_2f_1
 	end
 
 Sinnoh_GalacticHq2f_EventScript_Bg11::
-	msgbox Sinnoh_GalacticHq2f_Text_Bg11, MSGBOX_SIGN
+	goto SinnohP_galactic_hq_2f_1
 	end
 
 Sinnoh_GalacticHq2f_EventScript_Bg12::
-	msgbox Sinnoh_GalacticHq2f_Text_Bg12, MSGBOX_SIGN
+	goto SinnohP_galactic_hq_2f_1
 	end
 
 Sinnoh_GalacticHq2f_EventScript_Sign7::
 	goto SinnohP_galactic_hq_2f_6
 	end
-
-Sinnoh_GalacticHq2f_Text_Bg1:
-	.string "A soft, tidy bed. It looks very\n"
-	.string "comfortable.$"
-
-Sinnoh_GalacticHq2f_Text_Bg10:
-	.string "A soft, tidy bed. It looks very\n"
-	.string "comfortable.$"
-
-Sinnoh_GalacticHq2f_Text_Bg11:
-	.string "A soft, tidy bed. It looks very\n"
-	.string "comfortable.$"
-
-Sinnoh_GalacticHq2f_Text_Bg12:
-	.string "A soft, tidy bed. It looks very\n"
-	.string "comfortable.$"
 
 @ --- end of SINNOH words ---

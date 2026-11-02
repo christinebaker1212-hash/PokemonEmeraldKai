@@ -3,7 +3,7 @@ Sinnoh_BattleTowerBattleSalon_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_BattleTowerBattleSalon_EventScript_Person1::
-	msgbox Sinnoh_BattleTowerBattleSalon_Text_Person1, MSGBOX_NPC
+	goto SinnohP_battle_tower_battle_salon_1
 	end
 
 Sinnoh_BattleTowerBattleSalon_EventScript_Person2::
@@ -25,11 +25,6 @@ Sinnoh_BattleTowerBattleSalon_EventScript_Person5::
 Sinnoh_BattleTowerBattleSalon_EventScript_Person6::
 	msgbox Sinnoh_BattleTowerBattleSalon_Text_Person6, MSGBOX_NPC
 	end
-
-Sinnoh_BattleTowerBattleSalon_Text_Person1:
-	.string "Welcome! This facility is getting\n"
-	.string "ready for challengers. Please come\l"
-	.string "back soon!$"
 
 Sinnoh_BattleTowerBattleSalon_Text_Person2:
 	.string "CHERYL: The TOWER's TRAINERS are so\n"

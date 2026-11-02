@@ -3,11 +3,11 @@ Sinnoh_PokemonMansion_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_PokemonMansion_EventScript_Person1::
-	msgbox Sinnoh_PokemonMansion_Text_Person1, MSGBOX_NPC
+	goto SinnohP_pokemon_mansion_2
 	end
 
 Sinnoh_PokemonMansion_EventScript_Person2::
-	msgbox Sinnoh_PokemonMansion_Text_Person2, MSGBOX_NPC
+	goto SinnohP_pokemon_mansion_3
 	end
 
 Sinnoh_PokemonMansion_EventScript_Person3::
@@ -15,27 +15,15 @@ Sinnoh_PokemonMansion_EventScript_Person3::
 	end
 
 Sinnoh_PokemonMansion_EventScript_Person4::
-	msgbox Sinnoh_PokemonMansion_Text_Person4, MSGBOX_NPC
+	goto SinnohP_pokemon_mansion_5
 	end
 
 Sinnoh_PokemonMansion_EventScript_Person7::
 	goto SinnohP_pokemon_mansion_6
 	end
 
-Sinnoh_PokemonMansion_Text_Person1:
-	.string "Welcome to the MOéMON MANSION. The\n"
-	.string "master's office is straight ahead.$"
-
-Sinnoh_PokemonMansion_Text_Person2:
-	.string "The garden out back is the master's\n"
-	.string "pride. MOéMON from all over live there.$"
-
 Sinnoh_PokemonMansion_Text_Person3:
 	.string "Please enjoy the mansion. Don't touch\n"
 	.string "the statues, though!$"
-
-Sinnoh_PokemonMansion_Text_Person4:
-	.string "I polish every vase in this house. It\n"
-	.string "takes all week, then I start again.$"
 
 @ --- end of SINNOH words ---

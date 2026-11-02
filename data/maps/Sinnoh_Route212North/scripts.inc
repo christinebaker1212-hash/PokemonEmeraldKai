@@ -2,6 +2,18 @@ Sinnoh_Route212North_MapScripts::
 	.byte 0
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
+Sinnoh_Route212North_EventScript_Person20::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_Route212North_EventScript_Person21::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_Route212North_EventScript_Person22::
+	goto SinnohP_common_28
+	end
+
 Sinnoh_Route212North_EventScript_Person23::
 	goto SinnohP_route_212_north_1
 	end

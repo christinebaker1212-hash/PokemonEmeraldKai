@@ -18,6 +18,34 @@ Sinnoh_Route205South_EventScript_Person19::
 	msgbox Sinnoh_Route205South_Text_Person19, MSGBOX_NPC
 	end
 
+Sinnoh_Route205South_EventScript_Person23::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_Route205South_EventScript_Person24::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_Route205South_EventScript_Person25::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_Route205South_EventScript_Person26::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_Route205South_EventScript_Person27::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_Route205South_EventScript_Person28::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_Route205South_EventScript_Person29::
+	goto SinnohP_common_28
+	end
+
 Sinnoh_Route205South_EventScript_Person32::
 	msgbox Sinnoh_Route205South_Text_Person32, MSGBOX_NPC
 	end

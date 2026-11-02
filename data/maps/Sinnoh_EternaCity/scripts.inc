@@ -38,6 +38,18 @@ Sinnoh_EternaCity_EventScript_Person13::
 	msgbox Sinnoh_EternaCity_Text_Person13, MSGBOX_NPC
 	end
 
+Sinnoh_EternaCity_EventScript_Person19::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_EternaCity_EventScript_Person20::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_EternaCity_EventScript_Person21::
+	goto SinnohP_common_28
+	end
+
 Sinnoh_EternaCity_EventScript_Person24::
 	msgbox Sinnoh_EternaCity_Text_Person24, MSGBOX_NPC
 	end
@@ -50,8 +62,12 @@ Sinnoh_EternaCity_EventScript_Person29::
 	goto SinnohP_eterna_city_19
 	end
 
+Sinnoh_EternaCity_EventScript_Person30::
+	goto SinnohP_common_28
+	end
+
 Sinnoh_EternaCity_EventScript_Person31::
-	msgbox Sinnoh_EternaCity_Text_Person31, MSGBOX_NPC
+	goto SinnohP_eterna_city_22
 	end
 
 Sinnoh_EternaCity_EventScript_Person32::
@@ -112,11 +128,6 @@ Sinnoh_EternaCity_Text_Person13:
 Sinnoh_EternaCity_Text_Person24:
 	.string "Our ETERNA building is very important.\n"
 	.string "Like a moon base. On the ground.$"
-
-Sinnoh_EternaCity_Text_Person31:
-	.string "There's a big bug in the forest that\n"
-	.string "only comes out at night. I'm going to\l"
-	.string "find it!$"
 
 Sinnoh_EternaCity_Text_Person32:
 	.string "GARDENIA: The GYM's waiting for you!\n"

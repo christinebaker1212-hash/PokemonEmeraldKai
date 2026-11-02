@@ -7,16 +7,11 @@ Sinnoh_JubilifeCitySouthwestHouse1f_EventScript_Person1::
 	end
 
 Sinnoh_JubilifeCitySouthwestHouse1f_EventScript_Person2::
-	msgbox Sinnoh_JubilifeCitySouthwestHouse1f_Text_Person2, MSGBOX_NPC
+	goto SinnohP_jubilife_city_southwest_house_1f_2
 	end
 
 Sinnoh_JubilifeCitySouthwestHouse1f_EventScript_Person3::
 	goto SinnohP_jubilife_city_southwest_house_1f_3
 	end
-
-Sinnoh_JubilifeCitySouthwestHouse1f_Text_Person2:
-	.string "PIKACHU: Pika!\p"
-	.string "It's wagging its tail to music only it\n"
-	.string "can hear.$"
 
 @ --- end of SINNOH words ---

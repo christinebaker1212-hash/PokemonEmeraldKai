@@ -27,7 +27,7 @@ Sinnoh_JubilifeCity_EventScript_Person6::
 	end
 
 Sinnoh_JubilifeCity_EventScript_Person7::
-	msgbox Sinnoh_JubilifeCity_Text_Person7, MSGBOX_NPC
+	goto SinnohP_jubilife_city_12
 	end
 
 Sinnoh_JubilifeCity_EventScript_Person8::
@@ -114,11 +114,6 @@ Sinnoh_JubilifeCity_Text_Person3:
 	.string "The TRAINERS' SCHOOL is right over\n"
 	.string "there. The teacher is nice, but the\l"
 	.string "tests are tough!$"
-
-Sinnoh_JubilifeCity_Text_Person7:
-	.string "Every morning I walk my MOéMON around\n"
-	.string "the plaza. It knows the way better\l"
-	.string "than I do.$"
 
 Sinnoh_JubilifeCity_Text_Person8:
 	.string "PROF. ROWAN sent me to JUBILIFE for\n"

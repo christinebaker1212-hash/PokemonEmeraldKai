@@ -11,11 +11,7 @@ Sinnoh_JubilifeCitySouthHouse1f_EventScript_Person2::
 	end
 
 Sinnoh_JubilifeCitySouthHouse1f_EventScript_Person3::
-	msgbox Sinnoh_JubilifeCitySouthHouse1f_Text_Person3, MSGBOX_NPC
+	goto SinnohP_jubilife_city_south_house_1f_3
 	end
-
-Sinnoh_JubilifeCitySouthHouse1f_Text_Person3:
-	.string "PACHIRISU: Chipa chipa!\p"
-	.string "It's running in circles.$"
 
 @ --- end of SINNOH words ---

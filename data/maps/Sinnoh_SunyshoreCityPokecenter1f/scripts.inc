@@ -20,16 +20,11 @@ Sinnoh_SunyshoreCityPokecenter1f_EventScript_Person2::
 	end
 
 Sinnoh_SunyshoreCityPokecenter1f_EventScript_Person3::
-	msgbox Sinnoh_SunyshoreCityPokecenter1f_Text_Person3, MSGBOX_NPC
+	goto SinnohP_sunyshore_city_pokecenter_1f_3
 	end
 
 Sinnoh_SunyshoreCityPokecenter1f_EventScript_Person4::
 	goto SinnohP_sunyshore_city_pokecenter_1f_4
 	end
-
-Sinnoh_SunyshoreCityPokecenter1f_Text_Person3:
-	.string "VOLKNER used to battle everyone who\n"
-	.string "came. Now he just looks bored. Maybe\l"
-	.string "you can help!$"
 
 @ --- end of SINNOH words ---

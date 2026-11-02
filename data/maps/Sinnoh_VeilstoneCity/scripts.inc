@@ -50,6 +50,14 @@ Sinnoh_VeilstoneCity_EventScript_Person8::
 	msgbox Sinnoh_VeilstoneCity_Text_Person8, MSGBOX_NPC
 	end
 
+Sinnoh_VeilstoneCity_EventScript_Person17::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_VeilstoneCity_EventScript_Person18::
+	goto SinnohP_common_28
+	end
+
 Sinnoh_VeilstoneCity_EventScript_Person21::
 	msgbox Sinnoh_VeilstoneCity_Text_Person21, MSGBOX_NPC
 	end
@@ -59,20 +67,7 @@ Sinnoh_VeilstoneCity_EventScript_Person22::
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Person23::
-	lock
-	faceplayer
-	goto_if_set 0x3DE0, Sinnoh_VeilstoneCity_EventScript_Person23_Given
-	msgbox Sinnoh_VeilstoneCity_Text_Person23, MSGBOX_DEFAULT
-	msgbox Sinnoh_VeilstoneCity_Text_Person23Gift, MSGBOX_DEFAULT
-	giveitem ITEM_TM63, 1
-	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DE0
-	release
-	end
-
-Sinnoh_VeilstoneCity_EventScript_Person23_Given::
-	msgbox Sinnoh_VeilstoneCity_Text_Person23, MSGBOX_DEFAULT
-	release
+	goto SinnohP_veilstone_city_7
 	end
 
 Sinnoh_VeilstoneCity_EventScript_Person24::
@@ -163,14 +158,6 @@ Sinnoh_VeilstoneCity_Text_Person8:
 Sinnoh_VeilstoneCity_Text_Person21:
 	.string "The warehouse is locked tight. Not\n"
 	.string "that I lost the key. Nope.$"
-
-Sinnoh_VeilstoneCity_Text_Person23:
-	.string "I came to VEILSTONE to get tough. The\n"
-	.string "stairs alone are a workout!$"
-
-Sinnoh_VeilstoneCity_Text_Person23Gift:
-	.string "A TOUGH TRAINER deserves a TOUGH TM.\n"
-	.string "Here!$"
 
 Sinnoh_VeilstoneCity_Text_Person24:
 	.string "I'm supposed to be guarding the\n"

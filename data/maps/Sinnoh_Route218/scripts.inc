@@ -2,6 +2,14 @@ Sinnoh_Route218_MapScripts::
 	.byte 0
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
+Sinnoh_Route218_EventScript_Person13::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_Route218_EventScript_Person14::
+	goto SinnohP_common_28
+	end
+
 Sinnoh_Route218_EventScript_Sign5::
 	goto SinnohP_route_218_2
 	end

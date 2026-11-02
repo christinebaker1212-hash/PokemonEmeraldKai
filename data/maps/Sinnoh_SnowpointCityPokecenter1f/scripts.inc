@@ -24,17 +24,12 @@ Sinnoh_SnowpointCityPokecenter1f_EventScript_Person3::
 	end
 
 Sinnoh_SnowpointCityPokecenter1f_EventScript_Person4::
-	msgbox Sinnoh_SnowpointCityPokecenter1f_Text_Person4, MSGBOX_NPC
+	goto SinnohP_snowpoint_city_pokecenter_1f_4
 	end
 
 Sinnoh_SnowpointCityPokecenter1f_EventScript_Person5::
 	msgbox Sinnoh_SnowpointCityPokecenter1f_Text_Person5, MSGBOX_NPC
 	end
-
-Sinnoh_SnowpointCityPokecenter1f_Text_Person4:
-	.string "PSYDUCK: Psy...\p"
-	.string "It's shivering a little, but happy to\n"
-	.string "be inside.$"
 
 Sinnoh_SnowpointCityPokecenter1f_Text_Person5:
 	.string "MAYLENE: I came north to train in the\n"

@@ -11,15 +11,15 @@ Sinnoh_OreburghMineB2f_EventScript_Person8::
 	end
 
 Sinnoh_OreburghMineB2f_EventScript_Person9::
-	msgbox Sinnoh_OreburghMineB2f_Text_Person9, MSGBOX_NPC
+	goto SinnohP_oreburgh_mine_b2f_2
 	end
 
 Sinnoh_OreburghMineB2f_EventScript_Person10::
-	msgbox Sinnoh_OreburghMineB2f_Text_Person10, MSGBOX_NPC
+	goto SinnohP_oreburgh_mine_b2f_4
 	end
 
 Sinnoh_OreburghMineB2f_EventScript_Person11::
-	msgbox Sinnoh_OreburghMineB2f_Text_Person11, MSGBOX_NPC
+	goto SinnohP_oreburgh_mine_b2f_3
 	end
 
 Sinnoh_OreburghMineB2f_Text_Person1:
@@ -28,17 +28,5 @@ Sinnoh_OreburghMineB2f_Text_Person1:
 	.string "I dig here when I'm not battling. Meet\n"
 	.string "me at the GYM when you're ready. I'll\l"
 	.string "be waiting.$"
-
-Sinnoh_OreburghMineB2f_Text_Person9:
-	.string "MACHOP: Ma-chop!\p"
-	.string "It's carrying a big rock.$"
-
-Sinnoh_OreburghMineB2f_Text_Person10:
-	.string "MACHOP: Chop!\p"
-	.string "It's taking a break, sitting on a cart.$"
-
-Sinnoh_OreburghMineB2f_Text_Person11:
-	.string "MACHOP: Machop!\p"
-	.string "It flexes proudly.$"
 
 @ --- end of SINNOH words ---

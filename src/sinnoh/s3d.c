@@ -1000,6 +1000,16 @@ float S3D_TileFloor(s32 mapX, s32 mapY, float near)
 }
 
 // The current map's block (0, 0) corner in its matrix's world (for a gym's run-time props); FALSE: not a SINNOH map
+// the current map's top-left block in Platinum's matrix (SINNOH's converted scripts: Platinum's map coordinates)
+bool8 S3D_MapCells(s32 *cx, s32 *cz)
+{
+    s32 map = MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
+    if (map < 0)
+        return FALSE;
+    *cx = sMaps[map].cx, *cz = sMaps[map].cz;
+    return TRUE;
+}
+
 bool8 S3D_MapOrigin(float *x, float *z)
 {
     s32 map = MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);

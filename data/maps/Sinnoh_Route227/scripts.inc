@@ -10,6 +10,14 @@ Sinnoh_Route227_EventScript_Person5::
 	msgbox Sinnoh_Route227_Text_Person5, MSGBOX_NPC
 	end
 
+Sinnoh_Route227_EventScript_Person10::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_Route227_EventScript_Person11::
+	goto SinnohP_common_28
+	end
+
 Sinnoh_Route227_EventScript_Person12::
 	msgbox Sinnoh_Route227_Text_Person12, MSGBOX_NPC
 	end

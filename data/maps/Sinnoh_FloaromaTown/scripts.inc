@@ -11,7 +11,7 @@ Sinnoh_FloaromaTown_EventScript_Person2::
 	end
 
 Sinnoh_FloaromaTown_EventScript_Person3::
-	msgbox Sinnoh_FloaromaTown_Text_Person3, MSGBOX_NPC
+	goto SinnohP_floaroma_town_3
 	end
 
 Sinnoh_FloaromaTown_EventScript_Person4::
@@ -58,11 +58,6 @@ Sinnoh_FloaromaTown_EventScript_Sign11::
 Sinnoh_FloaromaTown_EventScript_Sign12::
 	goto SinnohP_floaroma_town_10
 	end
-
-Sinnoh_FloaromaTown_Text_Person3:
-	.string "The meadow is full of sweet-smelling\n"
-	.string "honey trees. Bring HONEY if you have\l"
-	.string "some!$"
 
 Sinnoh_FloaromaTown_Text_Person4:
 	.string "The flower shop sells little gifts you\n"

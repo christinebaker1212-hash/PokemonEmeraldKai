@@ -91,17 +91,12 @@ Sinnoh_CanalaveLibrary1f_EventScript_Person1::
 	end
 
 Sinnoh_CanalaveLibrary1f_EventScript_Person2::
-	msgbox Sinnoh_CanalaveLibrary1f_Text_Person2, MSGBOX_NPC
+	goto SinnohP_canalave_library_1f_2
 	end
 
 Sinnoh_CanalaveLibrary1f_EventScript_Person3::
 	msgbox Sinnoh_CanalaveLibrary1f_Text_Person3, MSGBOX_NPC
 	end
-
-Sinnoh_CanalaveLibrary1f_Text_Person2:
-	.string "I come here every day after school.\n"
-	.string "It's so quiet... you can hear the pages\l"
-	.string "turn.$"
 
 Sinnoh_CanalaveLibrary1f_Text_Person3:
 	.string "LUCIAN: Hm? Oh, I'm off duty. Even the\n"

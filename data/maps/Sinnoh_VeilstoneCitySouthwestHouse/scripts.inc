@@ -11,15 +11,11 @@ Sinnoh_VeilstoneCitySouthwestHouse_EventScript_Person2::
 	end
 
 Sinnoh_VeilstoneCitySouthwestHouse_EventScript_Person3::
-	msgbox Sinnoh_VeilstoneCitySouthwestHouse_Text_Person3, MSGBOX_NPC
+	goto SinnohP_veilstone_city_southwest_house_3
 	end
 
 Sinnoh_VeilstoneCitySouthwestHouse_Text_Person1:
 	.string "I love living by the cliffs. The wind\n"
 	.string "sounds like music at night.$"
-
-Sinnoh_VeilstoneCitySouthwestHouse_Text_Person3:
-	.string "PACHIRISU: Chipa?\p"
-	.string "It peeks out from behind the chair.$"
 
 @ --- end of SINNOH words ---

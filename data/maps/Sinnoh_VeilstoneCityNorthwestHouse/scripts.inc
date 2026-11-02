@@ -11,11 +11,7 @@ Sinnoh_VeilstoneCityNorthwestHouse_EventScript_Person2::
 	end
 
 Sinnoh_VeilstoneCityNorthwestHouse_EventScript_Person3::
-	msgbox Sinnoh_VeilstoneCityNorthwestHouse_Text_Person3, MSGBOX_NPC
+	goto SinnohP_veilstone_city_northwest_house_3
 	end
-
-Sinnoh_VeilstoneCityNorthwestHouse_Text_Person3:
-	.string "BUNEARY: Bun!\p"
-	.string "It's hopping in place.$"
 
 @ --- end of SINNOH words ---

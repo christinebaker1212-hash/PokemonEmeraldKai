@@ -49,7 +49,7 @@ Sinnoh_CanalaveCity_EventScript_Person2::
 	end
 
 Sinnoh_CanalaveCity_EventScript_Person3::
-	msgbox Sinnoh_CanalaveCity_Text_Person3, MSGBOX_NPC
+	goto SinnohP_canalave_city_9
 	end
 
 Sinnoh_CanalaveCity_EventScript_Person4::
@@ -57,7 +57,7 @@ Sinnoh_CanalaveCity_EventScript_Person4::
 	end
 
 Sinnoh_CanalaveCity_EventScript_Person10::
-	msgbox Sinnoh_CanalaveCity_Text_Person10, MSGBOX_NPC
+	goto SinnohP_canalave_city_12
 	end
 
 Sinnoh_CanalaveCity_EventScript_Person11::
@@ -140,15 +140,6 @@ Sinnoh_CanalaveCity_EventScript_Sign9::
 Sinnoh_CanalaveCity_EventScript_Sign18::
 	msgbox Sinnoh_CanalaveCity_Text_Sign18, MSGBOX_SIGN
 	end
-
-Sinnoh_CanalaveCity_Text_Person3:
-	.string "The drawbridge goes up when big ships\n"
-	.string "pass. You get used to waiting.$"
-
-Sinnoh_CanalaveCity_Text_Person10:
-	.string "PSYDUCK: Psy...? Psy-yi-yi...\p"
-	.string "It's holding its head. It looks like\n"
-	.string "it's thinking very hard.$"
 
 Sinnoh_CanalaveCity_Text_Person13:
 	.string "The PROFESSOR wants us all at the\n"

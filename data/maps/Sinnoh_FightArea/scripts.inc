@@ -7,6 +7,14 @@ Sinnoh_FightArea_OnTransition:
 	end
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
+Sinnoh_FightArea_EventScript_Person4::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_FightArea_EventScript_Person5::
+	goto SinnohP_common_28
+	end
+
 Sinnoh_FightArea_EventScript_Person6::
 	lock
 	faceplayer
@@ -25,22 +33,7 @@ Sinnoh_FightArea_EventScript_Person6_Sail0::
 	end
 
 Sinnoh_FightArea_EventScript_Person7::
-	lock
-	faceplayer
-	goto_if_set 0x3DAA, Sinnoh_FightArea_EventScript_Person7_Given
-	checkitem ITEM_SUPER_ROD
-	goto_if_eq VAR_RESULT, TRUE, Sinnoh_FightArea_EventScript_Person7_Given
-	msgbox Sinnoh_FightArea_Text_Person7, MSGBOX_DEFAULT
-	msgbox Sinnoh_FightArea_Text_Person7Gift, MSGBOX_DEFAULT
-	giveitem ITEM_SUPER_ROD, 1
-	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DAA
-	release
-	end
-
-Sinnoh_FightArea_EventScript_Person7_Given::
-	msgbox Sinnoh_FightArea_Text_Person7, MSGBOX_DEFAULT
-	release
+	goto SinnohP_fight_area_8
 	end
 
 Sinnoh_FightArea_EventScript_Person9::
@@ -141,14 +134,6 @@ Sinnoh_FightArea_Text_Person6Bye:
 
 Sinnoh_FightArea_Text_Person6Off:
 	.string "All aboard! Hold on tight!$"
-
-Sinnoh_FightArea_Text_Person7:
-	.string "The fish out here are as tough as the\n"
-	.string "TRAINERS. I've lost three rods today!$"
-
-Sinnoh_FightArea_Text_Person7Gift:
-	.string "Here, take my spare rod. A good one!\n"
-	.string "You'll hook the big ones with it.$"
 
 Sinnoh_FightArea_Text_Person9:
 	.string "BUCK: Yo! I'm BUCK. I love tough\n"

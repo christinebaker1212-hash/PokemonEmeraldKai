@@ -42,6 +42,34 @@ def bank_of_header_field(field):
     return field[len('TEXT_BANK_'):].lower() if field.startswith('TEXT_BANK_') else None
 
 
+# Platinum's trainers' own lines (res/trainers/data/<trainer>.json "messages"): one more bank after the message banks,
+# every trainer's file in name order, TRAINER_TYPES messages each (a message the trainer doesn't have is left empty)
+TRAINER_TYPES = ['TRMSG_PRE_BATTLE', 'TRMSG_DEFEAT', 'TRMSG_POST_BATTLE', 'TRMSG_REMATCH',
+                 'TRMSG_PRE_DOUBLE_BATTLE_1', 'TRMSG_DOUBLE_BATTLE_DEFEAT_1', 'TRMSG_POST_DOUBLE_BATTLE_1',
+                 'TRMSG_DOUBLE_BATTLE_NOT_ENOUGH_POKEMON_1', 'TRMSG_PRE_DOUBLE_BATTLE_2', 'TRMSG_DOUBLE_BATTLE_DEFEAT_2',
+                 'TRMSG_POST_DOUBLE_BATTLE_2', 'TRMSG_DOUBLE_BATTLE_NOT_ENOUGH_POKEMON_2', 'TRMSG_DOUBLE_BATTLE_REMATCH_1',
+                 'TRMSG_DOUBLE_BATTLE_REMATCH_2', 'TRMSG_LAST_BATTLER_HALF_HP', 'TRMSG_LAST_BATTLER', 'TRMSG_FIRST_DAMAGE',
+                 'TRMSG_ACTIVE_BATTLER_HALF_HP']
+
+
+def trainer_files(root):
+    d = os.path.join(root, 'res/trainers/data')
+    return sorted(f[:-5] for f in os.listdir(d) if f.endswith('.json'))
+
+
+def trainer_message(root, const, kind):
+    """(bank, message) of a Platinum trainer's line (TRAINER_ACE_TRAINER_ABEL, 'TRMSG_DEFEAT'), None if it has none"""
+    import json
+    files = trainer_files(root)
+    name = const[len('TRAINER_'):].lower()
+    if name not in files or kind not in TRAINER_TYPES:
+        return None
+    d = json.load(open(os.path.join(root, 'res/trainers/data', name + '.json'), encoding='utf-8'))
+    if not any(m.get('type') == kind for m in d.get('messages', [])):
+        return None
+    return len(bank_numbers(root)), files.index(name) * len(TRAINER_TYPES) + TRAINER_TYPES.index(kind)
+
+
 def sinnoh_text_bytes(bank, msg):
     """The placeholder a script's text is: bank and message as two 7-bit bytes each (never EOS), then EOS"""
     return [PLACEHOLDER_BEGIN, PLACEHOLDER_ID_SINNOH_TEXT, (bank >> 7) & 0x7F, bank & 0x7F, (msg >> 7) & 0x7F,
@@ -103,6 +131,15 @@ def main():
         msgs = data.get('messages', []) if isinstance(data, dict) else []
         banks[n] = [convert(moe(text(m.get('en_US'))), cmap) if text(m.get('en_US')) is not None else None
                     for m in msgs]
+    # the trainers' own lines (trainer_message())
+    tr = []
+    for name in trainer_files(root):
+        d = json.load(open(os.path.join(root, 'res/trainers/data', name + '.json'), encoding='utf-8'))
+        by = {m.get('type'): m.get('en_US') for m in d.get('messages', [])}
+        for kind in TRAINER_TYPES:
+            t = text(by.get(kind)) if kind in by else None
+            tr.append(convert(moe(t), cmap) if t is not None else None)
+    banks.append(tr)
     head = bytearray(b'S3DT' + struct.pack('<II', VERSION, len(banks)))
     table_at = len(head)
     head += b'\0' * 4 * len(banks)

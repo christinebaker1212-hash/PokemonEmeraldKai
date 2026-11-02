@@ -22,6 +22,22 @@ Sinnoh_Route209_EventScript_Person22::
 	goto SinnohP_route_209_1
 	end
 
+Sinnoh_Route209_EventScript_Person25::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_Route209_EventScript_Person26::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_Route209_EventScript_Person27::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_Route209_EventScript_Person28::
+	goto SinnohP_common_28
+	end
+
 Sinnoh_Route209_EventScript_Person29::
 	lock
 	faceplayer

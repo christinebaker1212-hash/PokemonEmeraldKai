@@ -7,16 +7,11 @@ Sinnoh_PastoriaCityNorthHouse_EventScript_Person1::
 	end
 
 Sinnoh_PastoriaCityNorthHouse_EventScript_Person2::
-	msgbox Sinnoh_PastoriaCityNorthHouse_Text_Person2, MSGBOX_NPC
+	goto SinnohP_pastoria_city_north_house_2
 	end
 
 Sinnoh_PastoriaCityNorthHouse_EventScript_Person3::
 	goto SinnohP_pastoria_city_north_house_3
 	end
-
-Sinnoh_PastoriaCityNorthHouse_Text_Person2:
-	.string "PSYDUCK: Psy psy...\p"
-	.string "It's sitting in a puddle, perfectly\n"
-	.string "content.$"
 
 @ --- end of SINNOH words ---

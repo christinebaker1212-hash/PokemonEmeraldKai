@@ -11,11 +11,7 @@ Sinnoh_OreburghCityWestHouse_EventScript_Person2::
 	end
 
 Sinnoh_OreburghCityWestHouse_EventScript_Person3::
-	msgbox Sinnoh_OreburghCityWestHouse_Text_Person3, MSGBOX_NPC
+	goto SinnohP_oreburgh_city_west_house_3
 	end
-
-Sinnoh_OreburghCityWestHouse_Text_Person3:
-	.string "PIKACHU: Pika pi!\p"
-	.string "It seems very determined.$"
 
 @ --- end of SINNOH words ---

@@ -12,20 +12,7 @@ Sinnoh_Route201_EventScript_Person1::
 	end
 
 Sinnoh_Route201_EventScript_Person2::
-	lock
-	faceplayer
-	goto_if_set 0x3DC6, Sinnoh_Route201_EventScript_Person2_Given
-	msgbox Sinnoh_Route201_Text_Person2, MSGBOX_DEFAULT
-	msgbox Sinnoh_Route201_Text_Person2Gift, MSGBOX_DEFAULT
-	giveitem ITEM_POTION, 1
-	goto_if_eq VAR_RESULT, FALSE, Common_EventScript_ShowBagIsFull
-	setflag 0x3DC6
-	release
-	end
-
-Sinnoh_Route201_EventScript_Person2_Given::
-	msgbox Sinnoh_Route201_Text_Person2, MSGBOX_DEFAULT
-	release
+	goto SinnohP_route_201_10
 	end
 
 Sinnoh_Route201_EventScript_Person10::
@@ -51,13 +38,5 @@ Sinnoh_Route201_EventScript_Sign5::
 Sinnoh_Route201_EventScript_Sign11::
 	goto SinnohP_route_201_8
 	end
-
-Sinnoh_Route201_Text_Person2:
-	.string "I'm handing out samples from the POKé\n"
-	.string "MART in SANDGEM! It's just east of\l"
-	.string "here.$"
-
-Sinnoh_Route201_Text_Person2Gift:
-	.string "Here, have a free POTION!$"
 
 @ --- end of SINNOH words ---

@@ -50,6 +50,14 @@ Sinnoh_CelesticTown_EventScript_Person9::
 	goto SinnohP_celestic_town_8
 	end
 
+Sinnoh_CelesticTown_EventScript_Person10::
+	goto SinnohP_common_28
+	end
+
+Sinnoh_CelesticTown_EventScript_Person11::
+	goto SinnohP_common_28
+	end
+
 Sinnoh_CelesticTown_EventScript_Sign6::
 	goto SinnohP_celestic_town_10
 	end

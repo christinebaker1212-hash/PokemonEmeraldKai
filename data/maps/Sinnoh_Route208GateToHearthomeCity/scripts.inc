@@ -11,11 +11,7 @@ Sinnoh_Route208GateToHearthomeCity_EventScript_Person2::
 	end
 
 Sinnoh_Route208GateToHearthomeCity_EventScript_Person3::
-	msgbox Sinnoh_Route208GateToHearthomeCity_Text_Person3, MSGBOX_NPC
+	goto SinnohP_route_208_gate_to_hearthome_city_3
 	end
-
-Sinnoh_Route208GateToHearthomeCity_Text_Person3:
-	.string "CLEFAIRY: Pi!\p"
-	.string "It's bouncing up and down.$"
 
 @ --- end of SINNOH words ---

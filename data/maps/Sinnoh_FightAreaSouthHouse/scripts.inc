@@ -7,7 +7,7 @@ Sinnoh_FightAreaSouthHouse_EventScript_Person1::
 	end
 
 Sinnoh_FightAreaSouthHouse_EventScript_Person2::
-	msgbox Sinnoh_FightAreaSouthHouse_Text_Person2, MSGBOX_NPC
+	goto SinnohP_fight_area_south_house_3
 	end
 
 Sinnoh_FightAreaSouthHouse_EventScript_Person3::
@@ -17,10 +17,6 @@ Sinnoh_FightAreaSouthHouse_EventScript_Person3::
 Sinnoh_FightAreaSouthHouse_EventScript_Person4::
 	msgbox Sinnoh_FightAreaSouthHouse_Text_Person4, MSGBOX_NPC
 	end
-
-Sinnoh_FightAreaSouthHouse_Text_Person2:
-	.string "TORCHIC: Torchic!\p"
-	.string "It's flapping its little wings.$"
 
 Sinnoh_FightAreaSouthHouse_Text_Person4:
 	.string "Items can turn a battle around. A good\n"
