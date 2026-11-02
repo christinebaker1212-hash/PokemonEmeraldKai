@@ -7,7 +7,9 @@
 
 #include <stdint.h>
 
-enum { RIP_PSF1, RIP_PSF2, RIP_USF, RIP_GBS, RIP_2SF, RIP_GSF, RIP_GCN, RIP_SPC, RIP_VGM, RIP_NUM_KINDS };
+// RIP_GBA: a GSF whose game has its own sound driver (not MP2K), its voices read from the driver as it plays
+// (rip_gsf.cpp: Konami's); RIP_GSF is always a song on MP2K, read from the ROM.
+enum { RIP_PSF1, RIP_PSF2, RIP_USF, RIP_GBS, RIP_2SF, RIP_GSF, RIP_GCN, RIP_SPC, RIP_VGM, RIP_GBA, RIP_NUM_KINDS };
 
 #define RIP_MAX_VOICES 64
 #define RIP_MAX_SECONDS 900          // longest a rip plays (15 minutes)

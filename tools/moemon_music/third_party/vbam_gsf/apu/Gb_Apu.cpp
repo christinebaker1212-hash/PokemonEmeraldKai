@@ -277,6 +277,8 @@ void Gb_Apu::apply_stereo()
 	}
 }
 
+void (*Gb_Apu::tap_trigger)(Gb_Apu *, int) = nullptr;   // Moemon Music Studio
+
 void Gb_Apu::write_register(blip_time_t time, unsigned addr, int data)
 {
 	assert(static_cast<unsigned>(data) < 0x100);
@@ -308,6 +310,9 @@ void Gb_Apu::write_register(blip_time_t time, unsigned addr, int data)
 	{
 		int old_data = this->regs[reg];
 		this->regs[reg] = data;
+
+		if (addr < vol_reg && reg % 5 == 4 && (data & 0x80) && tap_trigger)
+			tap_trigger(this, reg / 5);   // Moemon Music Studio
 
 		if (addr < vol_reg)
 			// Oscillator
