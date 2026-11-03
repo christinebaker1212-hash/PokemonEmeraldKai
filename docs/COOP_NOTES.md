@@ -4686,5 +4686,6 @@ or the README. The updater no longer has a dev channel: AllowSmallTweaks only un
 ## 1.82.1: no shadow behind a tile drawn over the feet
 - mp_shadow.c FeetCovered: a NORMAL / SPLIT metatile's top layer (BG1, over sprites at priority 2) with 8 or more of the
   32 pixels of its bottom two rows drawn hides the owner's feet: no shadow (it peeked out under a 2x1 tree's leaves,
-  the user's picture). Followers and Garden POKeMON by their feet against the player's (SpriteFeetCovered). Tests
-  shadow_covered, shadow_covered_tree (check_shadow_covered.py).
+  the user's picture). Followers and Garden POKeMON by their feet against the player's (SpriteFeetCovered). The GAME
+  CENTER's counters are its pictures' "over" layer, not tiles: mp_mappic.c MP_MapPic_CoversFeet (the same 8 of the
+  bottom rows' 32 pixels). Tests shadow_covered, shadow_covered_tree, shadow_covered_gamecenter (check_shadow_covered.py).

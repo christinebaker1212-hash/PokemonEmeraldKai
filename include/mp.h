@@ -800,6 +800,7 @@ bool8 MP_Compass_AnyShown(void);
 void MP_Compass_Toggle(void);     // the right stick click / G: show or hide the FRIEND FINDER
 void MP_MapPic_Update(void);      // mp_mappic.c: full-color pictures pinned to maps (the GAME CENTER)
 bool8 MP_MapPic_IsPictureMap(u8 group, u8 num);
+bool8 MP_MapPic_CoversFeet(s16 x, s16 y);   // a picture's over layer hides cell (x, y)'s bottom rows (mp_shadow.c)
 u8 MP_MapPic_ArrivalDir(s16 x, s16 y);   // the way to step off an arrival door (DIR_NONE: down)
 bool8 MP_Emote_LoadUiPalette(void);   // the sprite palette shared by bubbles, toasts and compass arrows
 // mp_piggy.c

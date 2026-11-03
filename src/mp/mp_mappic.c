@@ -216,6 +216,29 @@ static void MapPicLine(int line, u16 layers[4][DISPLAY_WIDTH])
     }
 }
 
+// Whether a picture's "over" layer (drawn over the sprites: counter and furniture tops) covers the bottom two pixel
+// rows of map cell (x, y) (map coordinates, MAP_OFFSET included): mostly drawn there hides a person's feet, and so
+// their shadow (mp_shadow.c)
+bool8 MP_MapPic_CoversFeet(s16 x, s16 y)
+{
+    u32 i, n = 0;
+    s32 px, py, cx = (x - MAP_OFFSET) * 16, cy = (y - MAP_OFFSET) * 16 + 14;
+    for (i = 0; i < sShownCount; i++)
+    {
+        const struct MapPic *p = sShown[i].pic;
+        if (p->over == NULL)
+            continue;
+        for (py = cy; py < cy + 2; py++)
+            for (px = cx; px < cx + 16; px++)
+            {
+                s32 lx = px - sShown[i].x, ly = py - sShown[i].y;
+                if (lx >= 0 && lx < p->w && ly >= 0 && ly < p->h && (p->over[ly * p->w + lx] & 0x8000))
+                    n++;
+            }
+    }
+    return n >= 8;
+}
+
 // Every overworld frame: which pictures are in view (none: the renderer skips the hook)
 void MP_MapPic_Update(void)
 {

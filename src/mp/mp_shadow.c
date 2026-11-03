@@ -337,6 +337,8 @@ static bool8 FeetCovered(s16 x, s16 y, const struct Sprite *o)
     u32 id, k, row, opaque = 0;
     if (o->oam.priority <= 1 || layout == NULL || S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
         return FALSE;
+    if (MP_MapPic_CoversFeet(x, y))   // (the GAME CENTER's counters: its pictures' over layer, not tiles)
+        return TRUE;
     if (MapGridGetMetatileLayerTypeAt(x, y) == METATILE_LAYER_TYPE_COVERED)
         return FALSE;
     id = MapGridGetMetatileIdAt(x, y);
