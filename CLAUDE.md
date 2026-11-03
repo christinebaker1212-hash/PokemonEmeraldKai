@@ -46,7 +46,11 @@ through the co-op server's MAIL and PIPE): src/mp/mp_phone_friends.c ("<save>.pa
 android core/Server.java, Friends.java, FriendsPage; PHONE_LINK.md "Phase 4"; test coretest FriendsTest.
 Trades by mail (1.75.0): the server's ESCROW, pair keys (X25519), src/mp/mp_phone_trade.c ("<save>.trades"), trade.c
 MP_MailTrade_Scene, android core/Trades.java; PHONE_LINK.md "Trades by mail"; tests coretest TradeTest (two games at lag;
-ONLY=trade android/coretest/run.sh), tools/phone/escrow_test.py. The user asked (2026-11-03) for all four
+ONLY=trade android/coretest/run.sh), tools/phone/escrow_test.py.
+TRIPLE TRIAD on the phone (1.76.0): the game's src/tt through android cpp/tt_jni.c (Tt.java), art from build_assets.py,
+src/mp/mp_phone_cards.c (snapshot "tt", orders ttdeck / ttwin / ttopen, "<save>.phonecards"), CardsPage / TtDuelPage,
+friend duels core/TtFriends.java; PHONE_LINK.md "TRIPLE TRIAD on the phone"; tests tools/phone/cards_test.py, coretest
+TtCoreTest, TtFriendsTest (ONLY=tt). The user asked (2026-11-03) for all four
 phases in order, then a UI/UX pass: "polished Nintendo quality, mid 2000s to 2007 era graphics, 2026 usability".
 
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!

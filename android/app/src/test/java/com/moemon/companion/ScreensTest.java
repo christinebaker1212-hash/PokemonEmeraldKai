@@ -199,6 +199,39 @@ public class ScreensTest {
         v.select(7);
         shot(v, "friends");
         v.showOver(null);
+        // CARDS: TRIPLE TRIAD with the game's engine: the hub, a duel under way, a deck, a pack opened
+        StringBuilder owned = new StringBuilder();
+        for (int card = 1; card <= 60; card++) {
+            owned.append(card > 1 ? "," : "").append("[").append(card).append(",").append(card % 7 == 0 ? 2 : 1).append("]");
+        }
+        app.model().snap.put("tt", new JSONObject("{\"on\":1,\"day\":20395,\"region\":1,\"tier\":1,\"rules\":"
+                + (Tt.bit(Tt.RULE_OPEN) | Tt.bit(Tt.RULE_SAME)) + ",\"trade\":0,\"skill\":0,\"active\":0,\"rec\":[12,5,1],"
+                + "\"today\":{\"packs\":1,\"packsMax\":3,\"puzzles\":0,\"puzzlesMax\":1},\"packs\":[2,1,0,0,0],"
+                + "\"decks\":[{\"n\":\"CHOCOBO RUN\",\"c\":[1,2,3,4,5]},{\"n\":\"DECK 2\",\"c\":[0,0,0,0,0]},"
+                + "{\"n\":\"DECK 3\",\"c\":[0,0,0,0,0]},{\"n\":\"DECK 4\",\"c\":[0,0,0,0,0]},{\"n\":\"DECK 5\",\"c\":[0,0,0,0,0]},"
+                + "{\"n\":\"DECK 6\",\"c\":[0,0,0,0,0]}],\"owned\":[" + owned + "],\"seen\":[70,71,72]}"));
+        v.select(8);
+        shot(v, "cards");
+        TtDuelPage.Setup ds = new TtDuelPage.Setup();
+        ds.rules = Tt.bit(Tt.RULE_OPEN) | Tt.bit(Tt.RULE_SAME);
+        ds.seed = 12345;
+        ds.first = 0;
+        ds.level = 2;
+        ds.mine = new int[]{1, 2, 3, 4, 5};
+        ds.theirs = new int[]{6, 7, 8, 9, 10};
+        ds.who = "LASS  ***";
+        ds.moves = new org.json.JSONArray("[[0,4],[0,0],[1,8]]");
+        TtDuelPage duelPage = new TtDuelPage(v, ds);
+        v.showOver(duelPage);
+        duelPage.tap(0, 0);
+        shot(v, "cards_duel");
+        v.showOver(new TtDeckPage(v, 0));
+        shot(v, "cards_deck");
+        TtPackPage pack = new TtPackPage(v, 1, new int[]{11, 61, 25});
+        v.showOver(pack);
+        Thread.sleep(3200);
+        shot(v, "cards_pack");
+        v.showOver(null);
         try (FileOutputStream o = new FileOutputStream(new File(new File(System.getProperty("screens.out", "build/screens")),
                 "widget.png"))) {
             WalkWidget.picture(app).compress(Bitmap.CompressFormat.PNG, 100, o);

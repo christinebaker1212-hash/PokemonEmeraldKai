@@ -10,11 +10,20 @@ mkdir -p "$OUT/classes" "$CACHE"
 [ -f "$JSON" ] || curl -sSfL -o "$JSON" \
     https://maven-central.storage-download.googleapis.com/maven2/org/json/json/20240303/json-20240303.jar
 JH=${JAVA_HOME:-$(dirname "$(dirname "$(readlink -f "$(command -v javac)")")")}
-cc -shared -fPIC -O2 -I"$JH/include" -I"$JH/include/linux" -I"$ROOT/src/mp" -o "$OUT/libmoemonlink.so" \
-    "$APP/cpp/link_jni.c" "$ROOT/src/mp/phone_proto.c" "$ROOT/src/mp/monocypher/monocypher.c"
+mkdir -p "$OUT/ttinc" && ln -sfn "$ROOT/include/tt" "$OUT/ttinc/tt"   # (the game's include/ has its own strings.h)
+TT="$ROOT/src/tt"
+cc -shared -fPIC -O2 -I"$JH/include" -I"$JH/include/linux" -I"$ROOT/src/mp" -I"$OUT/ttinc" -o "$OUT/libmoemonlink.so" \
+    "$APP/cpp/link_jni.c" "$APP/cpp/tt_jni.c" "$ROOT/src/mp/phone_proto.c" "$ROOT/src/mp/monocypher/monocypher.c" \
+    "$TT/tt_duel.c" "$TT/tt_ai.c" "$TT/tt_catalog.c" "$TT/tt_common.c" "$TT/tt_hands.c" "$TT/tt_pools.c" \
+    "$TT/tt_rating.c" "$TT/tt_ratings.c" "$TT/tt_collection.c"
 javac -nowarn -d "$OUT/classes" -cp "$JSON" "$APP"/java/com/moemon/companion/core/*.java \
     "$APP/java/com/moemon/companion/Native.java" "$APP/java/com/moemon/companion/NativeCrypto.java" \
-    "$ROOT/android/coretest/CoreTest.java" "$ROOT/android/coretest/WalkCoreTest.java" "$ROOT/android/coretest/FriendsTest.java" "$ROOT/android/coretest/TradeTest.java"
+    "$APP/java/com/moemon/companion/Tt.java" "$APP/java/com/moemon/companion/TtFriendGame.java" \
+    "$ROOT/android/coretest/CoreTest.java" "$ROOT/android/coretest/WalkCoreTest.java" "$ROOT/android/coretest/FriendsTest.java" "$ROOT/android/coretest/TradeTest.java" "$ROOT/android/coretest/TtCoreTest.java" "$ROOT/android/coretest/TtFriendsTest.java"
+java -Djava.library.path="$OUT" -cp "$OUT/classes:$JSON" TtCoreTest
+bash -c "source '$ROOT/tools/test/common.sh' && build_server"
+java -Djava.library.path="$OUT" -cp "$OUT/classes:$JSON" TtFriendsTest "$ROOT/tools/test/.bin/moemon_server"
+[ "$ONLY" = tt ] && exit 0
 if [ "$ONLY" != trade ]; then
 java -cp "$OUT/classes:$JSON" WalkCoreTest
 java -Djava.library.path="$OUT" -cp "$OUT/classes:$JSON" CoreTest "$ROOT"

@@ -99,6 +99,7 @@ static unsigned TierOfBadges(void)
     u8 b = Badges();
     return b >= 7 ? 3 : b >= 4 ? 2 : b >= 2 ? 1 : 0;
 }
+unsigned Tt_Tier(void) { return TierOfBadges(); }   // Moemon Co-op: the phone's duelists (mp_phone_cards.c)
 
 // ---------------------------------------------------------------------------
 // How they talk: the kinds of Triple Triad player

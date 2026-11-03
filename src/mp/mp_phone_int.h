@@ -43,7 +43,14 @@ void PhoneTrade_Update(void);                                    // every frame
 void PhoneTrade_OnServer(const u8 *data, u16 len);               // MPMSG_S_MAIL answers (the escrow's, the inbox's)
 void PhoneTrade_Snapshot(struct Buf *b);                         // the snapshot's "trades"
 const char *PhoneTrade_Apply(const char *op, const char *json);  // "offer", "accept", "untrade"
-bool8 MP_Phone_OnOffer(u32 pid, u32 ot);                         // (the PC: ON OFFER; no release, walk or training)
+bool8 MP_Phone_OnOffer(u32 pid, u32 ot);
+u32 PhoneTrade_Hash(void);                                       // (the snapshot's rev: the trades' states)
+
+// mp_phone_cards.c: the card games on the phone (TRIPLE TRIAD's collection, decks, prizes, packs)
+void PhoneCards_Load(void);
+void PhoneCards_Snapshot(struct Buf *b);                         // the snapshot's "tt"
+u32 PhoneCards_Hash(void);                                       // (the snapshot's rev: what "tt" shows)
+const char *PhoneCards_Apply(const char *op, const char *json);  // "ttdeck", "ttwin", "ttopen"                         // (the PC: ON OFFER; no release, walk or training)
 
 // mp_phone_dev.c: the device's apps: the live map, MOENAV calls, the battle feed, the POKéGEAR)
 #ifndef GUARD_MP_PHONE_INT_H

@@ -32,6 +32,9 @@ public final class Companion implements LinkClient.Listener {
 
     public final Context context;
     public final GameArt art;
+    public final TtArt ttArt;                                     // TRIPLE TRIAD's cards (the game's engine and art)
+    public volatile int[] lastPack;                               // the cards of the last pack opened (ttopen's answer)
+    public volatile int lastPackType = -1;
     public final Store store;
     public final NativeCrypto crypto = new NativeCrypto();
     public final List<SavedLink> saves = new ArrayList<>();
@@ -96,6 +99,7 @@ public final class Companion implements LinkClient.Listener {
             }
         });
         this.art = new GameArt(context.getAssets());
+        this.ttArt = new TtArt(context.getAssets());
         final File dir = context.getFilesDir();
         this.store = new Store() {
             public String read(String name) {
@@ -317,6 +321,240 @@ public final class Companion implements LinkClient.Listener {
         });
     }
 
+    // ---------------------------------------------------------------------- TRIPLE TRIAD with friends, by turns
+
+    private java.util.List<JSONObject> ttGames;   // this save's friend duels (the phone's own record)
+    private String ttGamesSave = "";
+    public volatile java.util.List<JSONObject> ttInvites = new java.util.ArrayList<>();
+
+    /** This save's friend duels, newest first */
+    public synchronized java.util.List<JSONObject> ttGames() {
+        String save = client == null ? "" : client.saved().id();
+        if (ttGames == null || !save.equals(ttGamesSave)) {
+            ttGamesSave = save;
+            ttGames = new java.util.ArrayList<>();
+            JSONObject o = readJson("ttgames_" + save + ".json");
+            JSONArray a = o == null ? null : o.optJSONArray("games");
+            for (int i = 0; a != null && i < a.length(); i++) {
+                ttGames.add(a.optJSONObject(i));
+            }
+        }
+        return ttGames;
+    }
+
+    public synchronized void saveTtGames() {
+        if (ttGamesSave.isEmpty() || ttGames == null) {
+            return;
+        }
+        JSONArray a = new JSONArray();
+        long now = System.currentTimeMillis() / 1000;
+        for (JSONObject g : ttGames) {
+            if (now - g.optLong("last") < 30L * 86400) {   // (finished ones fade out after a month)
+                a.put(g);
+            }
+        }
+        try {
+            store.write("ttgames_" + ttGamesSave + ".json", new JSONObject().put("games", a).toString());
+        } catch (org.json.JSONException ignored) {
+        }
+    }
+
+    private JSONObject friendsSnap() {
+        Model m = model();
+        return m == null ? null : m.snap.optJSONObject("friends");
+    }
+
+    private JSONObject friendEntry(String id) {
+        JSONObject f = friendsSnap();
+        JSONArray list = f == null ? null : f.optJSONArray("list");
+        for (int i = 0; list != null && i < list.length(); i++) {
+            if (id.equals(list.optJSONObject(i).optString("id"))) {
+                return list.optJSONObject(i);
+            }
+        }
+        return null;
+    }
+
+    /** Friends' invites and the moves in each game going on, from the server (in the background) */
+    public void refreshTtGames() {
+        background.execute(this::syncTtGames);
+    }
+
+    /** The same, here and now (StepJob: off the screen's thread) */
+    public void syncTtGames() {
+        final JSONObject f = friendsSnap();
+        if (f == null) {
+            return;
+        }
+        final java.util.List<JSONObject> games;
+        synchronized (this) {
+            games = new java.util.ArrayList<>(ttGames());
+        }
+        {
+            boolean changed = false;
+            try {
+                java.util.List<JSONObject> inv = com.moemon.companion.core.TtFriends.invites(crypto, f.optString("srv"), f);
+                java.util.List<JSONObject> fresh = new java.util.ArrayList<>();
+                for (JSONObject i : inv) {
+                    boolean known = false;
+                    for (JSONObject g : games) {
+                        known |= g.optString("g").equals(i.optString("g"));
+                    }
+                    if (!known && System.currentTimeMillis() / 1000 - i.optLong("at") < com.moemon.companion.core.TtFriends.DAYS * 86400L) {
+                        fresh.add(i);
+                    }
+                }
+                ttInvites = fresh;
+                for (JSONObject g : games) {
+                    String st = TtFriendGame.status(g);
+                    if (st.equals("won") || st.equals("lost") || st.equals("draw") || st.equals("declined")) {
+                        continue;
+                    }
+                    JSONObject friend = friendEntry(g.optString("peer"));
+                    if (friend == null) {
+                        continue;
+                    }
+                    if (g.has("unsent")) {
+                        // (our last move didn't get there: again)
+                        int seq = g.optInt("unsent");
+                        JSONArray mv = g.getJSONArray("moves").optJSONArray(seq - 1);
+                        if (mv != null && com.moemon.companion.core.TtFriends.move(crypto, g.optString("srv", f.optString("srv")),
+                                friend, g.optString("g"), seq, mv.optInt(0), mv.optInt(1))) {
+                            synchronized (this) {
+                                g.remove("unsent");
+                            }
+                            changed = true;
+                        }
+                    }
+                    JSONObject r = com.moemon.companion.core.TtFriends.read(crypto, g.optString("srv", f.optString("srv")), friend,
+                            g.optString("g"));
+                    synchronized (this) {
+                        int other = 1 - g.optInt("seat");
+                        if (r.optInt("declined") == 1 && g.optInt("seat") == 0) {
+                            g.put("declined", 1);
+                            changed = true;
+                        }
+                        if (r.opt("hand") instanceof JSONArray && g.getJSONArray("hands").isNull(other)) {
+                            g.getJSONArray("hands").put(other, r.getJSONArray("hand"));
+                            changed = true;
+                        }
+                        if (r.getJSONArray("moves").length() > g.getJSONArray("moves").length()) {
+                            g.put("moves", r.getJSONArray("moves"));
+                            g.put("last", System.currentTimeMillis() / 1000);
+                            changed = true;
+                        }
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+            if (changed) {
+                saveTtGames();
+            }
+            main.post(this::changed);
+        }
+    }
+
+    /** Invites FRIEND to a duel with HAND (the result: null, else why not) */
+    public void inviteTt(JSONObject friend, int[] hand, int rules, java.util.function.Consumer<String> done) {
+        final JSONObject f = friendsSnap();
+        Model m = model();
+        if (f == null || m == null) {
+            done.accept("Link with your game first.");
+            return;
+        }
+        final String name = m.snap.optJSONObject("save").optString("name");
+        background.execute(() -> {
+            String why = null;
+            try {
+                JSONObject g = com.moemon.companion.core.TtFriends.invite(crypto, f.optString("srv"), f, friend, name, hand, rules);
+                synchronized (this) {
+                    ttGames().add(0, g);
+                }
+                saveTtGames();
+            } catch (IllegalStateException e) {
+                why = "Play together in a room once more first: then you can duel by turns.";
+            } catch (Exception e) {
+                why = "The co-op server didn't answer. Try again in a moment.";
+            }
+            final String w = why;
+            main.post(() -> {
+                done.accept(w);
+                changed();
+            });
+        });
+    }
+
+    public void acceptTt(JSONObject invite, int[] hand, java.util.function.Consumer<JSONObject> done) {
+        final JSONObject f = friendsSnap();
+        if (f == null) {
+            return;
+        }
+        background.execute(() -> {
+            JSONObject g = null;
+            try {
+                g = com.moemon.companion.core.TtFriends.accept(crypto, f.optString("srv"), invite, hand);
+                synchronized (this) {
+                    ttGames().add(0, g);
+                    ttInvites.remove(invite);
+                }
+                saveTtGames();
+            } catch (Exception ignored) {
+            }
+            final JSONObject game = g;
+            main.post(() -> {
+                done.accept(game);
+                changed();
+            });
+        });
+    }
+
+    public void declineTt(JSONObject invite) {
+        final JSONObject f = friendsSnap();
+        if (f == null) {
+            return;
+        }
+        ttInvites.remove(invite);
+        background.execute(() -> {
+            try {
+                com.moemon.companion.core.TtFriends.decline(crypto, f.optString("srv"), invite);
+            } catch (Exception ignored) {
+            }
+            main.post(this::changed);
+        });
+    }
+
+    /** Our move SEQ in GAME (already played on the phone): to the server; kept to send again if it doesn't get there */
+    public void postTtMove(JSONObject game, int slot, int cell) {
+        final JSONObject f = friendsSnap();
+        final JSONObject friend = friendEntry(game.optString("peer"));
+        final int seq;
+        synchronized (this) {
+            JSONArray moves = game.optJSONArray("moves");
+            moves.put(new JSONArray().put(slot).put(cell));
+            seq = moves.length();
+            try {
+                game.put("last", System.currentTimeMillis() / 1000).put("unsent", seq);
+            } catch (org.json.JSONException ignored) {
+            }
+        }
+        saveTtGames();
+        if (f == null || friend == null) {
+            return;
+        }
+        background.execute(() -> {
+            try {
+                if (com.moemon.companion.core.TtFriends.move(crypto, game.optString("srv", f.optString("srv")), friend,
+                        game.optString("g"), seq, slot, cell)) {
+                    synchronized (this) {
+                        game.remove("unsent");
+                    }
+                    saveTtGames();
+                }
+            } catch (Exception ignored) {
+            }
+        });
+    }
+
     // ------------------------------------------------------------------------------------------------- the walk
 
     private String walkFile(String save) {
@@ -484,6 +722,11 @@ public final class Companion implements LinkClient.Listener {
             case "busy": return "The game is busy. Try again.";
             case "crashed": return "The game closed while doing this, so it was stopped.";
             case "walking": return "Another POKéMON is already out on a walk.";
+            case "today": return "That's today's prizes from the phone. More tomorrow, or win cards in the game!";
+            case "nocards": return "Start TRIPLE TRIAD in your game first: a card seller in a POKéMON CENTER deals your first hand.";
+            case "notowned": return "That deck uses cards your game doesn't have (any more).";
+            case "deckrules": return "That deck breaks the deck rules: check its stars.";
+            case "nopack": return "That pack isn't in your game any more.";
             case "cantsave": return "The game couldn't save just now. Try again.";
             case "nowalk": return "That walk already ended.";
             case "otherphone": return "That POKéMON is on a walk with another phone.";
@@ -599,6 +842,19 @@ public final class Companion implements LinkClient.Listener {
             toastAt = System.currentTimeMillis();
         } else if (order != null && ("collect".equals(order.optString("op")) || "untrain".equals(order.optString("op")))) {
             toast = TrainText.gains(art, done.optJSONArray("gains"));
+            toastGood = true;
+            toastAt = System.currentTimeMillis();
+        } else if (order != null && "ttopen".equals(order.optString("op")) && done.has("cards")) {
+            org.json.JSONArray a = done.optJSONArray("cards");
+            int[] ids = new int[a.length()];
+            for (int i = 0; i < ids.length; i++) {
+                ids[i] = a.optInt(i);
+            }
+            lastPackType = order.optInt("pack");
+            lastPack = ids;
+        } else if (order != null && "ttwin".equals(order.optString("op")) && done.has("prize")) {
+            org.json.JSONArray packs = ttArt.words == null ? null : ttArt.words.optJSONArray("packs");
+            toast = "Won a " + (packs == null ? "" : packs.optString(done.optInt("prize")) + " ") + "pack! Open it in CARDS.";
             toastGood = true;
             toastAt = System.currentTimeMillis();
         } else if (order != null && "use".equals(order.optString("op"))) {

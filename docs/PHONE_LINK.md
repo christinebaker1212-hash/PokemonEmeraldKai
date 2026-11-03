@@ -329,4 +329,36 @@ The gate (trades pass two-client tests at lag): android/coretest TradeTest: two 
 through tools/mp_server/lagproxy.py at 120 ms + up to 60 ms each way: a trade (each POKéMON exactly once, the scene in
 both), a turned-down offer (nothing moves), an offer answered while the offering game is closed (it completes after).
 
-Next: the card games on the phone (turn-by-turn duels, daily puzzles, packs), then the UI / UX pass.
+### TRIPLE TRIAD on the phone (1.76.0)
+
+The game's own engine in the app: android/app/src/main/cpp/tt_jni.c over src/tt (tt_duel, tt_ai, tt_catalog,
+tt_common, tt_hands, tt_pools, tt_rating(s), tt_collection; the build includes a folder holding only include/tt, as
+the game's include/ has its own strings.h), Java Tt.java: the catalog and the rules' words, duels by handle (start,
+play: the events as JSON, state, the AI that sees only what its side may), opponents as the game makes them
+(tt_field.c Fill) with their hands fitted by CARD SCALING (Tt_FitOpponentHand), and the daily puzzle (a position three
+cards from the end where one or two plays win against the best defense; the same for a day; Best() is a full search).
+The card faces: the game's art pack (graphics/tt/cards.bin) cut to the large faces and the extras by
+android/build_assets.py (assets game/tt_cards.bin, ~10 MB); TtArt composes them as tt_gfx.c Tt_DrawCard does.
+
+The game's side, src/mp/mp_phone_cards.c: the snapshot's `tt` {on, day (Tcg_Today), region, tier (badges), rules and
+trade of the region, skill, active, rec, today {packs, packsMax 3, puzzles, puzzlesMax 1}, packs[5], decks[6] {n, c},
+owned [[id, count]], seen [ids]}; orders `ttdeck` {deck, cards, name, active} (Tt_DeckValid and owned copies:
+`deckrules`, `notowned`), `ttwin` {kind: duel | puzzle, harder, perfect} (a BRONZE pack, SILVER for a tough or perfect
+win, SILVER for the puzzle; per calendar day in "<save>.phonecards": `today`), `ttopen` {pack} (Tt_OpenPack: the cards
+in the answer's `cards`). Rev() takes in the cards and the trades (PhoneCards_Hash, PhoneTrade_Hash), so the app sees
+them change. Tests: tools/phone/cards_test.py, coretest TtCoreTest.
+
+The app: CARDS (CardsPage: PLAY a FREE DUEL against a duelist of where you are under the region's rules without
+RANDOM, cards never change hands; the DAILY PUZZLE; VS FRIENDS; PACKS to open; DECKS; the BINDER), TtDuelPage (upright
+table, tap or drag, captures turning in waves, SAME / PLUS / COMBO, the AI, the prize order), TtDeckPage (the game's deck
+rules), TtPackPage, TtCardPage.
+
+Turn by turn with friends (core/TtFriends.java): the invite into the friend's inbox {kind "tt", g, from, n, hand, rules,
+seed, first, at}; the game's record under Derive(pair key, "ttgame" + g), entries sealed with the pair key: the
+friend's hand (seq 0, or declined), then each move {seq, slot, cell}. OPEN always; the rules offered replay the same with
+either side as the engine's seat 0 (no SWAP, CHAOS, SUDDEN DEATH), so each phone plays as seat 0 (TtFriendGame). Moves
+not taken by the server are sent again; 3 days without a move: CLAIM WIN. Notifier TURN: a challenge, your turn.
+Test: coretest TtFriendsTest (12 games through a real server, both sides agreeing on every board).
+
+Next: the POKéMON card game and YU-GI-OH! on the phone (the same pattern: the game's engines through JNI), then the
+UI / UX pass.

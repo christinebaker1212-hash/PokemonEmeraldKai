@@ -100,6 +100,29 @@ def charmap():
     return out
 
 
+def tt_art():
+    """TRIPLE TRIAD's card faces for the phone: the game's own pack (graphics/tt/cards.bin, "TTCA") with only the large
+    faces (104x128) and the extras (backs, plates, stars, types, digits): the phone draws every size from those"""
+    src = open(os.path.join(ROOT, 'graphics/tt/cards.bin'), 'rb').read()
+    top, extras = struct.unpack('<II', src[4:12])
+    head = 12 + top * 24 + extras * 8
+    out = bytearray(head)
+    out[0:12] = src[0:12]
+    def put(at, off, size):
+        nonlocal out
+        if size:
+            out[at:at + 8] = struct.pack('<II', len(out), size)
+            out += src[off:off + size]
+    for i in range(top):
+        off, size = struct.unpack('<II', src[12 + i * 24:12 + i * 24 + 8])
+        put(12 + i * 24, off, size)
+    for k in range(extras):
+        at = 12 + top * 24 + k * 8
+        off, size = struct.unpack('<II', src[at:at + 8])
+        put(at, off, size)
+    open(os.path.join(OUT, 'tt_cards.bin'), 'wb').write(bytes(out))
+
+
 def main():
     exp = sys.argv[1] if len(sys.argv) > 1 else None
     if exp is None:
@@ -127,6 +150,7 @@ def main():
     write_png(os.path.join(OUT, 'types.png'), *read_png(os.path.join(exp, 'types.png')))
     for name in ('dex_info.png', 'dex_list.png', 'footprints.png', 'ribbons.png', 'trainers.png'):
         write_png(os.path.join(OUT, name), *read_png(os.path.join(exp, name)))
+    tt_art()
     # the town maps (the live map): KANTO's and the Sevii Islands' pages are narrower than the full view, and black
     # past their right edge: see-through there, so the device's own background shows
     page = 0

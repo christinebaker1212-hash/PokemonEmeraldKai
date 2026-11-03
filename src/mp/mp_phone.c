@@ -153,6 +153,7 @@ void MP_Phone_OnSaveLoaded(void)
     PhoneWalk_Load();
     PhoneFriends_Load();
     PhoneTrade_Load();
+    PhoneCards_Load();
 }
 
 const u8 *MP_Phone_SaveId(void)
@@ -503,6 +504,10 @@ u32 Rev(void)
         v = GetSetPokedexFlag(i, FLAG_GET_SEEN) | (GetSetPokedexFlag(i, FLAG_GET_CAUGHT) << 1);
         h = Fnv(h, &v, 1);
     }
+    v = PhoneTrade_Hash();   // (trades by mail move along on their own: the app sees each step)
+    h = Fnv(h, &v, 4);
+    v = PhoneCards_Hash();   // (the card collection, decks, packs, today's prizes)
+    h = Fnv(h, &v, 4);
     return h;
 }
 
@@ -577,6 +582,7 @@ static void BufSnapshot(struct Buf *b)
     PhoneWalk_Snapshot(b, sSnapPhone);
     PhoneFriends_Snapshot(b);
     PhoneTrade_Snapshot(b);
+    PhoneCards_Snapshot(b);
     // The POKeDEX: a bit per national number (1 first), as hex: seen, then caught
     {
         static const char *const sWhat[] = {"seen", "caught"};

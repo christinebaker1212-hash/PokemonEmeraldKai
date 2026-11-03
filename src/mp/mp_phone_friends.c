@@ -573,5 +573,7 @@ const char *PhoneFriends_Apply(const char *op, const char *json)
         MP_Events_QueueToast("Joining your friend's room...");
         return NULL;
     }
+    if (strncmp(op, "tt", 2) == 0)
+        return PhoneCards_Apply(op, json);   // (the card games: mp_phone_cards.c)
     return PhoneTrade_Apply(op, json);
 }

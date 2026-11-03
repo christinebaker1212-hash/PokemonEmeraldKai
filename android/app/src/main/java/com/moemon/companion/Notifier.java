@@ -165,6 +165,38 @@ public final class Notifier {
         }
     }
 
+    /** TRIPLE TRIAD with friends: a new challenge, or a friend has played and it's your turn (TURN: each once) */
+    public static void cardTurns(Context c, Companion app) {
+        if (!on(c, 5) || quiet(c, LocalTime.now())) {
+            return;
+        }
+        app.syncTtGames();
+        String told = prefs(c).getString("ttTold", "");
+        for (JSONObject inv : app.ttInvites) {
+            String key = "i" + inv.optString("g");
+            if (!told.contains(key)) {
+                remember(c, key);
+                post(c, 5, LocalDate.now(), app.art.plain(GameArt.hexText(inv.optString("n"))) + " challenges you!",
+                        "A game of TRIPLE TRIAD, a turn at a time. Answer in CARDS.");
+                return;
+            }
+        }
+        for (JSONObject g : app.ttGames()) {
+            String key = "t" + g.optString("g") + ":" + g.optJSONArray("moves").length();
+            if ("yourturn".equals(TtFriendGame.status(g)) && !told.contains(key)) {
+                remember(c, key);
+                post(c, 5, LocalDate.now(), "Your turn!", app.art.plain(GameArt.hexText(g.optString("pn")))
+                        + " has played. Your move in CARDS.");
+                return;
+            }
+        }
+    }
+
+    private static void remember(Context c, String key) {
+        String told = key + "," + prefs(c).getString("ttTold", "");
+        prefs(c).edit().putString("ttTold", told.substring(0, Math.min(told.length(), 4000))).remove("notif_last_TURN").apply();
+    }
+
     // a notification of KIND, once a day, while today's budget lasts
     private static void post(Context c, int kind, LocalDate today, String title, String text) {
         SharedPreferences p = prefs(c);

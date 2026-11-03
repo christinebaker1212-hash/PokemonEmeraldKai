@@ -714,6 +714,23 @@ void PhoneTrade_Load(void)
 
 // --------------------------------------------------------------------------------------------- the snapshot
 
+u32 PhoneTrade_Hash(void)
+{
+    u32 h = 2166136261u, i, k;
+    for (i = 0; sLoaded && i < sTr.count; i++)
+    {
+        const u8 *bits[] = {sTr.r[i].t, &sTr.r[i].state, &sTr.r[i].shown, &sTr.r[i].why, &sTr.r[i].cancel};
+        const u32 sizes[] = {16, 1, 1, 1, 1};
+        for (k = 0; k < 5; k++)
+        {
+            u32 n;
+            for (n = 0; n < sizes[k]; n++)
+                h = (h ^ bits[k][n]) * 16777619u;
+        }
+    }
+    return h ^ (sLoaded ? sTr.count : 0);
+}
+
 void PhoneTrade_Snapshot(struct Buf *b)
 {
     char hex[2 * PHONE_KEY_SIZE + 1];

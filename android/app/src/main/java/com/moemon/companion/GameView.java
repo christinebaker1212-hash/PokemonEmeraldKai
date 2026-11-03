@@ -55,6 +55,7 @@ public final class GameView extends View {
         pages.add(new DevicePage(this));
         pages.add(new WalkPage(this));
         pages.add(new FriendsPage(this));
+        pages.add(new CardsPage(this));
     }
 
     @Override
@@ -337,9 +338,9 @@ public final class GameView extends View {
     }
 
     // the tabs and the pages they open (SPAWNS, page 4, opens from the POKéDEX: its tab is DEX's)
-    private static final String[] TAB_NAMES = {"BOXES", "PARTY", "BAG", "DEX", "DEVICE", "WALK", "FRIENDS"};
-    private static final String[] TAB_SHORT = {"BOX", "PARTY", "BAG", "DEX", "DEVICE", "WALK", "PALS"};
-    private static final int[] TAB_PAGES = {0, 1, 2, 3, 5, 6, 7};
+    private static final String[] TAB_NAMES = {"BOXES", "PARTY", "BAG", "DEX", "DEVICE", "WALK", "CARDS", "FRIENDS"};
+    private static final String[] TAB_SHORT = {"BOX", "TEAM", "BAG", "DEX", "DEV", "WALK", "CARD", "PALS"};
+    private static final int[] TAB_PAGES = {0, 1, 2, 3, 5, 6, 8, 7};
 
     private int tabOf(int p) {
         for (int i = 0; i < TAB_PAGES.length; i++) {

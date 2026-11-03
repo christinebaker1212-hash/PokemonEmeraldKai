@@ -106,8 +106,8 @@ public final class Trades {
                 }
                 try {
                     JSONObject o = new JSONObject(new String(opened, 4, opened.length - 4, StandardCharsets.UTF_8));
-                    if (!from.equals(o.optString("from"))) {
-                        continue;   // (sealed by that friend, from that friend)
+                    if (!from.equals(o.optString("from")) || o.has("kind")) {
+                        continue;   // (sealed by that friend, from that friend; a card duel's invite isn't a trade)
                     }
                     byte[] t = Hex.bytes(o.optString("t"));
                     if (t == null || t.length != 16) {
