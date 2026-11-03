@@ -47,8 +47,8 @@ there do nothing.
 
 ### 1. The Maker is part of the game
 
-Moemon Maker is built from the game's own source and ships in the same exe (`Moemon --maker`, a "Moemon Maker"
-shortcut beside the game, and an entry on the title screen). That is the best answer to "it has to keep up":
+Moemon Maker is built from the game's own source and ships in the same exe, hidden behind a code. That is the best
+answer to "it has to keep up":
 
 - **It can't fall behind.** Every release of the game is a release of the Maker. Its lists of maps, flags, items,
   species, moves, songs and script commands are the game's own tables, not a copy that someone has to update.
@@ -57,6 +57,14 @@ shortcut beside the game, and an entry on the title screen). That is the best an
   only approximate its runtime. The Maker shows the real thing.
 - **Play is one key away.** F5 starts the game from the cursor and F12 comes back to the editor. There's no export
   and no second program.
+
+**The code** (the user, 2026-11-03): the main menu's MOEMON MAKER entry is hidden until **DOWN + L + R + START**
+is entered on the title screen: hold DOWN, L and R, then press START. Pressing START alone opens the main menu as
+always. The game plays a chime, opens the main menu with MOEMON MAKER in it, and remembers that on this PC (the
+settings file, not the save), so the code is needed once. Entering it again hides the entry. Gamepads and the
+keyboard both work, through the game's button mapping. title_screen.c must check the code before its plain
+START / A check, and it doesn't clash with the B + SELECT codes already there. No shortcut ships beside the game.
+`--maker` (start straight in the Maker) only works on a PC where the code was entered.
 
 **"In the game" means the same program, not inside the game's screen.** The Maker never edits in the 240x160
 picture. It opens its own desktop window at any size, with menus, toolbars, panels and the mouse, like RPG Maker. The
@@ -109,7 +117,7 @@ The game already does each risky part somewhere:
 MoemonMaker/ (JSON, one file per map / event / entry)
         |
         v
-  Moemon --maker  (edit, F5 play, compile)        moemake (the same compiler, command line, for CI)
+  Moemon (the Maker: edit, F5 play, compile)    moemake (the same compiler, command line, for CI)
         |                                                 |
         v                                                 v
   MoemonMaker.pak (local, hot reload)             MoemonMaker.pak (release asset) --> updater --> players
