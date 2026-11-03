@@ -4571,3 +4571,10 @@ holds dolls and cushions (MP_RoomFloorHoldsDecor). Test johto_my_room.
   the Bench with nothing Active could leave a player with no way on); an evolution card targets only Pokemon that can
   evolve this turn (not one put down this turn when another of the name can); Scoop Up / Super Scoop Up don't count as
   playable on your only Pokemon in play.
+
+## YU-GI-OH! shared with the phone (1.79.0)
+
+- The GBA games' duelists' decks as cards that can be played: src/ygo/ygo_rating.c Ygo_NpcDeckCards (it was
+  ygo_field.c's GameDeckAt), used by the game's duelists and the phone's FREE DUEL.
+- ygo_edo_data.c built with YGO_EDO_PAK_EXTERNAL takes EDOPro's pack from YgoEdo_SetPak (the phone app reads it from its
+  files); the game keeps it built in (ygo_edo_pak.c).

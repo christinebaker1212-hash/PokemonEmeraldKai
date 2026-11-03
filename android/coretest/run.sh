@@ -33,8 +33,12 @@ javac -nowarn -d "$OUT/classes" -cp "$JSON" "$APP"/java/com/moemon/companion/cor
     "$APP/java/com/moemon/companion/Tcg.java" "$APP/java/com/moemon/companion/TcgFriendGame.java" \
     "$ROOT/android/coretest/TcgCoreTest.java" "$ROOT/android/coretest/TcgFriendsTest.java" \
     "$APP/java/com/moemon/companion/Ygo.java" "$ROOT/android/coretest/YgoCoreTest.java" \
+    "$APP/java/com/moemon/companion/YgoFriendGame.java" \
+    "$ROOT/android/coretest/YgoFriendsTest.java" \
     "$ROOT/android/coretest/CoreTest.java" "$ROOT/android/coretest/WalkCoreTest.java" "$ROOT/android/coretest/FriendsTest.java" "$ROOT/android/coretest/TradeTest.java" "$ROOT/android/coretest/TtCoreTest.java" "$ROOT/android/coretest/TtFriendsTest.java"
 java -Djava.library.path="$OUT" -cp "$OUT/classes:$JSON" YgoCoreTest "$ROOT"
+bash -c "source '$ROOT/tools/test/common.sh' && build_server"
+java -Djava.library.path="$OUT" -cp "$OUT/classes:$JSON" YgoFriendsTest "$ROOT/tools/test/.bin/moemon_server" "$ROOT"
 [ "$ONLY" = ygo ] && exit 0
 java -Djava.library.path="$OUT" -cp "$OUT/classes:$JSON" TcgCoreTest
 bash -c "source '$ROOT/tools/test/common.sh' && build_server"

@@ -57,5 +57,14 @@ public final class Ygo {
             EV_TARGET = 26, EV_CONTROL = 27, EV_LOOK = 28, EV_WIN = 29, EV_MOVE = 30, EV_DECLARE = 31, EV_COUNTER = 32;
     public static final int DECK_MIN = 40, DECK_MAX = 60, EXTRA_MAX = 15;
 
+    /** A JSON list of numbers as an int[] (null: none) */
+    public static int[] ints(org.json.JSONArray a) {
+        int[] out = new int[a == null ? 0 : a.length()];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = a.optInt(i);
+        }
+        return out;
+    }
+
     private Ygo() {}
 }

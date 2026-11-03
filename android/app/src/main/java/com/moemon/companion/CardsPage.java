@@ -104,7 +104,7 @@ public final class CardsPage extends Page {
         actions.clear();
         if (game < 0) {
             String saved = v.app.store.read("cardsgame.txt");
-            game = "1".equals(saved == null ? "" : saved.trim()) ? 1 : 0;
+            game = "1".equals(saved == null ? "" : saved.trim()) ? 1 : "2".equals(saved == null ? "" : saved.trim()) ? 2 : 0;
         }
         if (v.app.lastTcgPack != null) {
             int[] cards = v.app.lastTcgPack;
@@ -114,9 +114,18 @@ public final class CardsPage extends Page {
         }
         int y = 24 - scroll;
         // the switch between the games, DS-style tabs
-        String[] names = {"TRIPLE TRIAD", "POKéMON CARDS"};
-        int tw = (w - 16) / 2;
-        for (int i = 0; i < 2; i++) {
+        String[] names = {"TRIPLE TRIAD", "POKéMON", "YU-GI-OH!"};
+        int tw = (w - 16) / 3;
+        if (art.width(names[0]) > tw - 4) {
+            names[0] = "TRIAD";
+        }
+        if (v.app.lastYgoPack != null) {
+            int[] cards = v.app.lastYgoPack;
+            int set = v.app.lastYgoPackSet, fresh = v.app.lastYgoPackNew;
+            v.app.lastYgoPack = null;
+            v.showOver(new YgoPackPage(v, set, cards, fresh));
+        }
+        for (int i = 0; i < 3; i++) {
             boolean on = game == i;
             fill.setColor(on ? 0xFF3868A8 : 0xFFD8E0E8);
             c.drawRoundRect(new android.graphics.RectF(8 + i * tw + 1, y, 8 + (i + 1) * tw - 1, y + 18), 5, 5, fill);
@@ -133,6 +142,10 @@ public final class CardsPage extends Page {
         y += 22;
         if (game == 1) {
             drawTcg(c, w, h, y);
+            return;
+        }
+        if (game == 2) {
+            drawYgo(c, w, h, y);
             return;
         }
         drawTt(c, w, h, y);
@@ -278,6 +291,8 @@ public final class CardsPage extends Page {
     public void shown() {
         if (game == 1) {
             v.app.refreshTcgGames();
+        } else if (game == 2) {
+            v.app.refreshYgoGames();
         } else {
             v.app.refreshTtGames();
         }
@@ -745,7 +760,7 @@ public final class CardsPage extends Page {
     }
 
     private int drawTcgFriends(Canvas c, int w, int y, JSONObject tcg) {
-        java.util.List<JSONObject> invites = v.app.tcgInvites, games = v.app.tcgGames();
+        java.util.List<JSONObject> invites = v.app.tcgInvites(), games = v.app.tcgGames();
         int yourTurn = 0;
         for (JSONObject g : games) {
             yourTurn += "yourturn".equals(TcgFriendGame.status(g)) ? 1 : 0;
@@ -845,6 +860,319 @@ public final class CardsPage extends Page {
         s.seat = g.optInt("seat");
         s.who = "VS " + nameOf(g.optString("pn"));
         v.showOver(new TcgDuelPage(v, s));
+    }
+
+    // ------------------------------------------------------------------------------------------------ YU-GI-OH!
+
+    static JSONObject ygo(GameView v) {
+        Model m = v.app.model();
+        return m == null ? null : m.snap.optJSONObject("ygo");
+    }
+
+    static int[] ygoOwned(JSONObject ygo) {
+        int[] out = new int[3000];
+        JSONArray o = ygo == null ? null : ygo.optJSONArray("owned");
+        for (int i = 0; o != null && i < o.length(); i++) {
+            int id = o.optJSONArray(i).optInt(0);
+            if (id > 0 && id < out.length) {
+                out[id] = o.optJSONArray(i).optInt(1);
+            }
+        }
+        return out;
+    }
+
+    /** The deck dueled with: [main, extra], or null and a word to the player if it can't be played */
+    private int[][] ygoPlayable(JSONObject ygo) {
+        JSONArray decks = ygo.optJSONArray("decks");
+        JSONObject d = decks == null ? null : decks.optJSONObject(ygo.optInt("active"));
+        if (d == null || d.optJSONArray("m") == null || d.optJSONArray("m").length() == 0) {
+            v.message("Build a deck first: tap a deck below.");
+            return null;
+        }
+        v.app.ygoArt.engine();
+        Ygo.useBanlist(ygo.optString("list"));
+        int[] main = YgoDuelPage.ints(d.optJSONArray("m")), extra = YgoDuelPage.ints(d.optJSONArray("x"));
+        String why = Ygo.validate(main, extra, ygoOwned(ygo));
+        if (why != null) {
+            v.message("Your deck can't be played: " + why);
+            return null;
+        }
+        return new int[][]{main, extra};
+    }
+
+    private void ygoFreeDuel() {
+        JSONObject ygo = ygo(v);
+        final int[][] deck = ygo == null ? null : ygoPlayable(ygo);
+        if (deck == null) {
+            return;
+        }
+        int badges = ygo.optInt("badges"), seed = (int) (System.nanoTime() & 0x7FFFFFFF);
+        int quarter = badges >= 7 ? 3 : badges >= 4 ? 2 : badges >= 2 ? 1 : 0;
+        int level = badges >= 4 ? 2 : 1;
+        if ((seed >> 17) % 4 == 0) {
+            level--;
+        }
+        // CARD SCALING as the game does (ygo_field.c Ygo_FitOpponent): a touch weaker than the player; when the decks
+        // they may bring this early fall well short, they play more carefully instead
+        int mine = Ygo.deckRating(deck[0]) + ygo.optInt("skill");
+        JSONObject o = null;
+        for (int tries = 0; tries < 3; tries++) {
+            int target = mine + Ygo.levelRating(2) - 35 - Ygo.levelRating(level);
+            try {
+                o = new JSONObject(Ygo.opponent(target, quarter, seed >> 3));
+            } catch (Exception e) {
+                o = null;
+                break;
+            }
+            if (level >= 2 || target - o.optInt("rating") <= 50) {
+                break;
+            }
+            level++;
+        }
+        if (o == null) {
+            v.message("The cards couldn't be dealt. Try again.");
+            return;
+        }
+        YgoDuelPage.Setup s = new YgoDuelPage.Setup();
+        s.mode = YgoDuelPage.MODE_DUEL;
+        s.main0 = deck[0];
+        s.extra0 = deck[1];
+        s.main1 = YgoDuelPage.ints(o.optJSONArray("main"));
+        s.extra1 = YgoDuelPage.ints(o.optJSONArray("extra"));
+        s.seed = seed;
+        s.first = seed >> 9 & 1;
+        s.level = level;
+        s.myRating = mine - ygo.optInt("skill");
+        s.oppRating = o.optInt("rating");
+        s.deckName = o.optString("name");
+        s.who = TRAINERS[(seed >> 5) % TRAINERS.length] + "  " + LEVELS[Math.max(0, Math.min(3, level))];
+        v.showOver(new YgoDuelPage(v, s));
+    }
+
+    private void drawYgo(Canvas c, int w, int h, int y) {
+        JSONObject ygo = ygo(v);
+        YgoArt ya = v.app.ygoArt;
+        if (ygo == null || ygo.optInt("on") == 0) {
+            art.window(c, 0, 12, y + 4, w - 24, 72);
+            int ty = y + 6;
+            for (String l : wrap(v.app.model() == null ? "Link with your game to play YU-GI-OH! here."
+                    : "Get your first YU-GI-OH! deck in your game: the CARD CLUB duelist in a POKéMON MART gives one. "
+                    + "Then your cards, decks and boosters show here.", w - 32)) {
+                art.text(c, l, 16, ty);
+                ty += 14;
+            }
+            bottom = ty + scroll + 16;
+            banner(c, w, "CARDS", null);
+            return;
+        }
+        JSONObject today = ygo.optJSONObject("today");
+        int left = today == null ? 0 : today.optInt("packsMax") - today.optInt("packs");
+        y = heading(c, w, y, "PLAY", null);
+        y = playCard(c, w, y, "FREE DUEL", "A duelist with a deck from the Game Boy Advance games, about as strong as yours.",
+                left > 0 ? "Win: a booster (" + left + " left today)" : "Boosters done for today: play for fun!", "DUEL",
+                this::ygoFreeDuel);
+        y = drawYgoFriends(c, w, y);
+        // BOOSTERS
+        JSONArray packs = ygo.optJSONArray("packs");
+        int unopened = 0;
+        for (int i = 0; packs != null && i < packs.length(); i++) {
+            unopened += packs.optJSONArray(i).optInt(1);
+        }
+        if (unopened > 0) {
+            y = heading(c, w, y, "BOOSTERS", unopened + " TO OPEN");
+            for (int i = 0; i < packs.length(); i++) {
+                int set = packs.optJSONArray(i).optInt(0), n = packs.optJSONArray(i).optInt(1);
+                JSONObject sj = ya.sets().optJSONObject(set);
+                String name = sj == null ? "" : sj.optString("short");
+                List<String> nl = wrap(name, w - 120);
+                int rows = Math.min(2, nl.size()), bh = 18 + 13 * rows;
+                art.window(c, 0, 12, y + 4, w - 24, bh);
+                for (int r = 0; r < rows; r++) {
+                    art.text(c, nl.get(r), 18, y + 6 + 13 * r);
+                }
+                art.text(c, "x" + n, 18, y + 6 + 13 * rows, GameArt.GRAY_TEXT, GameArt.SHADOW);
+                final int which = set;
+                button(c, "OPEN", w - 76, y + 4 + (bh - 24) / 2, 60, v.app.client != null);
+                tapArea(w - 76, y + 4 + (bh - 24) / 2, 60, 24, () -> openYgoPack(which));
+                y += bh + 6;
+            }
+        }
+        // DECKS
+        y = heading(c, w, y, "DECKS", null);
+        JSONArray decks = ygo.optJSONArray("decks");
+        for (int i = 0; decks != null && i < decks.length(); i++) {
+            JSONObject d = decks.optJSONObject(i);
+            int main = d.optJSONArray("m") == null ? 0 : d.optJSONArray("m").length();
+            int extra = d.optJSONArray("x") == null ? 0 : d.optJSONArray("x").length();
+            boolean active = i == ygo.optInt("active"), empty = main == 0;
+            int rh = 34;
+            art.window(c, 0, 12, y + 4, w - 24, rh);
+            if (!empty && d.optInt("ace") > 0) {
+                ya.drawArt(c, d.optInt("ace"), 16, y + 7, 36, 26, v.pixelScale(), 255);
+            }
+            art.text(c, empty ? "EMPTY" : d.optString("n"), 58, y + 6, active ? GameArt.BLUE_TEXT : empty ? GameArt.GRAY_TEXT
+                    : GameArt.TEXT, GameArt.SHADOW);
+            art.text(c, active ? "IN USE" : empty ? "Tap to build a deck." : main + " cards + " + extra + " Fusion", 58, y + 20,
+                    GameArt.GRAY_TEXT, GameArt.SHADOW);
+            final int deckNo = i;
+            tapArea(12, y + 4, w - 24, rh, () -> v.showOver(new YgoDeckPage(v, deckNo)));
+            y += rh + 6;
+        }
+        // BINDER: a row per set
+        int[] owned = ygoOwned(ygo);
+        JSONArray sets = ya.sets();
+        int have = 0, total = 0;
+        for (int id = 1; id <= ya.maxId(); id++) {
+            total++;
+            have += id < owned.length && owned[id] > 0 ? 1 : 0;
+        }
+        y = heading(c, w, y, "BINDER", have + "/" + total);
+        for (int si = 0; si < sets.length(); si++) {
+            JSONObject sj = sets.optJSONObject(si);
+            JSONArray cards = sj.optJSONArray("cards");
+            int n = 0, got = 0;
+            java.util.Set<Integer> seenIds = new java.util.HashSet<>();
+            for (int i = 0; cards != null && i < cards.length(); i++) {
+                int id = cards.optJSONArray(i).optInt(0);
+                if (seenIds.add(id)) {
+                    n++;
+                    got += id < owned.length && owned[id] > 0 ? 1 : 0;
+                }
+            }
+            if (n == 0) {
+                continue;
+            }
+            art.window(c, 0, 12, y + 4, w - 24, 20);
+            String nm = sj.optString("short");
+            List<String> nl = wrap(nm, w - 90);
+            art.text(c, nl.get(0), 18, y + 4);
+            String count = got + "/" + n;
+            art.text(c, count, w - 20 - art.width(count), y + 4, got == n ? 0xFF308030 : GameArt.GRAY_TEXT, GameArt.SHADOW);
+            fill.setColor(0xFFD0D8E0);
+            c.drawRect(18, y + 19, w - 20, y + 21, fill);
+            fill.setColor(got == n ? 0xFF48B048 : 0xFF6848A8);
+            c.drawRect(18, y + 19, 18 + (w - 38) * (got / (float) n), y + 21, fill);
+            final int setNo = si;
+            tapArea(12, y + 4, w - 24, 20, () -> v.showOver(new YgoBinderPage(v, setNo)));
+            y += 26;
+        }
+        bottom = y + scroll + 12;
+        banner(c, w, "CARDS", null);
+    }
+
+    private void openYgoPack(int set) {
+        if (v.app.client == null) {
+            v.message("Link with your game to open boosters: the game deals the cards.");
+            return;
+        }
+        try {
+            v.app.client.order(new JSONObject().put("op", "ygoopen").put("set", set));
+            v.buzz(true);
+        } catch (org.json.JSONException ignored) {
+        }
+    }
+
+    private int drawYgoFriends(Canvas c, int w, int y) {
+        java.util.List<JSONObject> invites = v.app.ygoInvites(), games = v.app.ygoGames();
+        int yourTurn = 0;
+        for (JSONObject g : games) {
+            yourTurn += "yourturn".equals(YgoFriendGame.status(g)) ? 1 : 0;
+        }
+        y = heading(c, w, y, "VS FRIENDS", invites.size() + yourTurn > 0 ? (invites.size() + yourTurn) + " WAITING" : null);
+        for (JSONObject inv : invites) {
+            String peer = nameOf(inv.optString("n"));
+            art.window(c, 0, 12, y + 4, w - 24, 50);
+            art.text(c, peer + " challenges you!", 18, y + 6, GameArt.BLUE_TEXT, GameArt.SHADOW);
+            art.text(c, "A YU-GI-OH! duel, a move at a time.", 18, y + 20, GameArt.GRAY_TEXT, GameArt.SHADOW);
+            final JSONObject invite = inv;
+            button(c, "ACCEPT", w - 148, y + 30, 64, true);
+            tapArea(w - 148, y + 30, 64, 24, () -> acceptYgo(invite));
+            button(c, "DECLINE", w - 80, y + 30, 64, true);
+            tapArea(w - 80, y + 30, 64, 24, () -> v.app.declineDuel("ygo", invite));
+            y += 56;
+        }
+        for (JSONObject g : games) {
+            String st = YgoFriendGame.status(g), peer = nameOf(g.optString("pn"));
+            boolean claim = YgoFriendGame.canClaim(g);
+            art.window(c, 0, 12, y + 4, w - 24, 38);
+            art.text(c, "VS " + peer, 18, y + 6, GameArt.TEXT, GameArt.SHADOW);
+            art.text(c, claim ? peer + " hasn't played in 3 days." : statusLine(st, peer).replace("turn", "move"), 18, y + 20,
+                    "yourturn".equals(st) ? 0xFFC07818 : GameArt.GRAY_TEXT, GameArt.SHADOW);
+            final JSONObject game = g;
+            if (claim) {
+                button(c, "CLAIM WIN", w - 96, y + 10, 80, true);
+                tapArea(w - 96, y + 10, 80, 24, () -> {
+                    try {
+                        game.put("forfeit", 1);
+                    } catch (org.json.JSONException ignored) {
+                    }
+                    v.app.saveDuelGames("ygo");
+                });
+            } else if (!"invited".equals(st) && !"declined".equals(st)) {
+                button(c, "yourturn".equals(st) ? "PLAY" : "SEE", w - 76, y + 10, 60, true);
+                tapArea(w - 76, y + 10, 60, 24, () -> openYgoGame(game));
+            }
+            y += 44;
+        }
+        button(c, "CHALLENGE A FRIEND", 12, y + 2, w - 24, true);
+        tapArea(12, y + 2, w - 24, 24, this::challengeYgo);
+        if (System.currentTimeMillis() - polledAt > 15000) {
+            polledAt = System.currentTimeMillis();
+            v.app.refreshYgoGames();
+        }
+        return y + 30;
+    }
+
+    private void challengeYgo() {
+        JSONObject ygo = ygo(v);
+        int[][] deck = ygo == null ? null : ygoPlayable(ygo);
+        if (deck == null) {
+            return;
+        }
+        Model m = v.app.model();
+        JSONObject fs = m == null ? null : m.snap.optJSONObject("friends");
+        JSONArray list = fs == null ? null : fs.optJSONArray("list");
+        Menu menu = Menu.make(v, "CHALLENGE WHO?");
+        int n = 0;
+        for (int i = 0; list != null && i < list.length(); i++) {
+            JSONObject f = list.optJSONObject(i);
+            if (!f.has("pk")) {
+                continue;
+            }
+            n++;
+            menu.add(nameOf(f.optString("n")), () -> v.app.inviteDuel("ygo", f, Companion.ygoDeck(deck[0], deck[1]),
+                    why -> v.message(why != null ? why : "Challenge sent! " + nameOf(f.optString("n")) + " answers from their phone.")));
+        }
+        if (n == 0) {
+            v.message("Friends are the players you've been in a co-op room with. Play together once, and you can duel them here by turns.");
+            return;
+        }
+        menu.add("CANCEL", null);
+        v.showMenu(menu);
+    }
+
+    private void acceptYgo(JSONObject invite) {
+        JSONObject ygo = ygo(v);
+        int[][] deck = ygo == null ? null : ygoPlayable(ygo);
+        if (deck == null) {
+            return;
+        }
+        v.app.acceptDuel("ygo", invite, Companion.ygoDeck(deck[0], deck[1]), game -> {
+            if (game == null) {
+                v.message("The co-op server didn't answer. Try again in a moment.");
+            } else {
+                openYgoGame(game);
+            }
+        });
+    }
+
+    private void openYgoGame(JSONObject g) {
+        YgoDuelPage.Setup s = new YgoDuelPage.Setup();
+        s.mode = YgoDuelPage.MODE_FRIEND;
+        s.game = g;
+        s.seat = g.optInt("seat");
+        s.who = "VS " + nameOf(g.optString("pn"));
+        v.showOver(new YgoDuelPage(v, s));
     }
 
     @Override

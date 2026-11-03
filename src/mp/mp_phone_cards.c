@@ -8,6 +8,7 @@
 //             a booster (3 a day),
 //             the prizes counted per calendar day in "<save>.phonecards" so the phone never outdoes the GAME CENTER,
 //   "ttopen" / "tcgopen"  a pack opened with the game's own pack math (the cards come back in the answer).
+// YU-GI-OH! the same way: "ygo" in the snapshot, orders "ygodeck", "ygoduel", "ygoopen".
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,6 +19,9 @@
 #include "tt/integration.h"
 #include "tcg/integration.h"
 #include "tcg/scale.h"
+#include "ygo/collection.h"
+#include "ygo/integration.h"
+#include "../ygo/ygo_internal.h"   // (the power ratings: Ygo_SkillResult, the levels' ratings)
 #include "mp_phone_int.h"
 #include "event_data.h"
 #include "constants/flags.h"
@@ -117,6 +121,19 @@ u32 PhoneCards_Hash(void)
         h = Fnv(h, p->ace, sizeof(p->ace));
         h = Fnv(h, &p->skill, sizeof(p->skill));
     }
+    {
+        struct YgoCollection *y = Ygo_GetCollection();
+        if (y != NULL)
+        {
+            h = Fnv(h, &y->optedIn, 1);
+            h = Fnv(h, &y->activeDeck, 1);
+            h = Fnv(h, y->owned, sizeof(y->owned));
+            h = Fnv(h, y->decks, sizeof(y->decks));
+            h = Fnv(h, y->packs, sizeof(y->packs));
+            h = Fnv(h, y->ace, sizeof(y->ace));
+            h = Fnv(h, &y->skill, sizeof(y->skill));
+        }
+    }
     h = Fnv(h, &c->optedIn, 1);
     h = Fnv(h, &c->activeDeck, 1);
     h = Fnv(h, c->owned, sizeof(c->owned));
@@ -166,6 +183,44 @@ static void TcgSnapshot(struct Buf *b)
     BufAdd(b, "]}");
 }
 
+// YU-GI-OH!'s collection: "ygo" {on, active, skill, rated, badges, wins, losses, list (its Forbidden & Limited list),
+// today, packs [[set, count]...], decks[8] {n, ace, m[], x[]}, owned [[id, count]...]}
+static void YgoSnapshot(struct Buf *b)
+{
+    struct YgoCollection *c = Ygo_GetCollection();
+    unsigned i, k, n;
+    if (c == NULL)
+        return;
+    BufAdd(b, ",\"ygo\":{\"on\":%u,\"active\":%u,\"skill\":%d,\"rated\":%u,\"badges\":%u,\"wins\":%u,\"losses\":%u,"
+              "\"list\":\"",
+           c->optedIn, c->activeDeck, c->skill, c->rated, Badges(), (unsigned)c->wins, (unsigned)c->losses);
+    for (k = 0; k < sizeof(c->banlist) && c->banlist[k]; k++)
+        BufAdd(b, "%c", c->banlist[k] == '"' || c->banlist[k] == '\\' ? '_' : c->banlist[k]);
+    BufAdd(b, "\",\"today\":{\"packs\":%u,\"packsMax\":%u},\"packs\":[", sDaily.packs[2], DUEL_PACKS_A_DAY);
+    for (i = 0, n = 0; i < YGO_SET_COUNT; i++)
+        if (c->packs[i])
+            BufAdd(b, "%s[%u,%u]", n++ ? "," : "", i, c->packs[i]);
+    BufAdd(b, "],\"decks\":[");
+    for (i = 0; i < YGO_SAVED_DECKS; i++)
+    {
+        BufAdd(b, "%s{\"n\":\"", i ? "," : "");
+        for (k = 0; k < YGO_NAME_LEN && c->decks[i].name[k]; k++)
+            BufAdd(b, "%c", c->decks[i].name[k] == '"' || c->decks[i].name[k] == '\\' ? '_' : c->decks[i].name[k]);
+        BufAdd(b, "\",\"ace\":%u,\"m\":[", c->decks[i].main[0] ? Ygo_DeckAce(c, i) : 0);
+        for (k = 0, n = 0; k < YGO_DECK_MAX && c->decks[i].main[k]; k++)
+            BufAdd(b, "%s%u", n++ ? "," : "", c->decks[i].main[k]);
+        BufAdd(b, "],\"x\":[");
+        for (k = 0, n = 0; k < YGO_FUSION_MAX && c->decks[i].extra[k]; k++)
+            BufAdd(b, "%s%u", n++ ? "," : "", c->decks[i].extra[k]);
+        BufAdd(b, "]}");
+    }
+    BufAdd(b, "],\"owned\":[");
+    for (i = 1, n = 0; i <= YGO_CARD_COUNT; i++)
+        if (c->owned[i])
+            BufAdd(b, "%s[%u,%u]", n++ ? "," : "", i, c->owned[i]);
+    BufAdd(b, "]}");
+}
+
 void PhoneCards_Snapshot(struct Buf *b)
 {
     struct TtCollection *c = Tt_GetCollection();
@@ -203,6 +258,7 @@ void PhoneCards_Snapshot(struct Buf *b)
             BufAdd(b, "%s%u", n++ ? "," : "", i);
     BufAdd(b, "]}");
     TcgSnapshot(b);
+    YgoSnapshot(b);
 }
 
 // ------------------------------------------------------------------------------------------------------ orders
@@ -465,9 +521,166 @@ static const char *TcgOpen(const char *json)
     return NULL;
 }
 
+// ------------------------------------------------------------------------------------------------ YU-GI-OH!
+
+static const char *YgoDeck(const char *json)
+{
+    struct YgoCollection *c = Ygo_GetCollection();
+    long long deck = -1, active = 0;
+    long main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];
+    uint16_t m[YGO_DECK_MAX], x[YGO_FUSION_MAX];
+    char name[YGO_NAME_LEN + 1], reason[128];
+    int nm, nx;
+    unsigned i;
+    if (!JsonNum(json, "deck", &deck) || deck < 0 || deck >= YGO_SAVED_DECKS)
+        return "bad";
+    JsonNum(json, "active", &active);
+    nm = JsonInts(json, "main", main, YGO_DECK_MAX);
+    nx = JsonInts(json, "extra", extra, YGO_FUSION_MAX);
+    if (nm == 0)
+    {
+        // an emptied deck slot (never the one dueled with)
+        if (c->activeDeck == deck)
+            return "activedeck";
+        memset(&c->decks[deck], 0, sizeof(c->decks[deck]));
+        c->ace[deck] = 0;
+        Ygo_WriteSidecar();
+        return NULL;
+    }
+    if (nm > 0)
+    {
+        memset(m, 0, sizeof(m));
+        memset(x, 0, sizeof(x));
+        for (i = 0; i < (unsigned)nm; i++)
+            m[i] = (uint16_t)(main[i] < 0 || main[i] > YGO_CARD_COUNT ? 0 : main[i]);
+        for (i = 0; nx > 0 && i < (unsigned)nx; i++)
+            x[i] = (uint16_t)(extra[i] < 0 || extra[i] > YGO_CARD_COUNT ? 0 : extra[i]);
+        if (!Ygo_DeckValidate(m, x, NULL, reason, sizeof(reason)))
+            return "deckrules";
+        if (!Ygo_DeckValidate(m, x, c->owned, reason, sizeof(reason)))
+            return "notowned";
+        memcpy(c->decks[deck].main, m, sizeof(m));
+        memcpy(c->decks[deck].extra, x, sizeof(x));
+        if (c->ace[deck])
+        {
+            bool8 kept = FALSE;
+            for (i = 0; i < YGO_DECK_MAX; i++)
+                kept |= m[i] == c->ace[deck];
+            for (i = 0; i < YGO_FUSION_MAX; i++)
+                kept |= x[i] == c->ace[deck];
+            if (!kept)
+                c->ace[deck] = 0;
+        }
+    }
+    else if (!c->decks[deck].main[0])
+        return "empty";
+    if (JsonStr(json, "name", name, sizeof(name)) && name[0])
+    {
+        for (i = 0; name[i]; i++)
+            if (name[i] >= 'a' && name[i] <= 'z')
+                name[i] -= 32;
+        snprintf(c->decks[deck].name, sizeof(c->decks[deck].name), "%s", name);
+    }
+    else if (!c->decks[deck].name[0])
+        snprintf(c->decks[deck].name, sizeof(c->decks[deck].name), "DECK %u", (unsigned)deck + 1);
+    if (active == 1)
+        c->activeDeck = (uint8_t)deck;
+    Ygo_WriteSidecar();
+    return NULL;
+}
+
+static const char *YgoDuelResult(const char *json)
+{
+    struct YgoCollection *c = Ygo_GetCollection();
+    long long won = 0, deck = 0, opp = 0, level = 2;
+    char kind[16] = "duel";
+    unsigned set;
+    if (!JsonNum(json, "won", &won))
+        return "bad";
+    JsonStr(json, "kind", kind, sizeof(kind));
+    JsonNum(json, "deck", &deck);
+    JsonNum(json, "opp", &opp);
+    JsonNum(json, "level", &level);
+    DailyToday();
+    // CARD SCALING learns from every duel against a duelist, won or lost (ygo_ui.c)
+    if (strcmp(kind, "duel") == 0 && deck > 0 && opp > 0 && level >= 0 && level <= 3)
+        Ygo_SkillResult(c, (int)deck + Ygo_PlayerRating(), (int)opp + Ygo_LevelRating((unsigned)level), won != 0);
+    if (!won)
+    {
+        if (strcmp(kind, "duel") == 0)
+            c->losses++;
+        Ygo_WriteSidecar();
+        BufAdd(&sDoneExtra, "\"prize\":-1,\"left\":%u", DUEL_PACKS_A_DAY - sDaily.packs[2]);
+        return NULL;
+    }
+    c->wins++;
+    MP_Achieve_Count("ygowin", 1);
+    if (strcmp(kind, "friend") == 0)
+    {
+        c->onlineWins++;
+        MP_Achieve_Count("cardfriend", 1);
+    }
+    if (sDaily.packs[2] >= DUEL_PACKS_A_DAY)
+    {
+        Ygo_WriteSidecar();
+        BufAdd(&sDoneExtra, "\"prize\":-1,\"left\":0");
+        return NULL;
+    }
+    sDaily.packs[2]++;
+    set = Ygo_RandomSet(&c->rng);
+    Ygo_AwardPack(c, set);
+    DailyWrite();
+    Ygo_WriteSidecar();
+    BufAdd(&sDoneExtra, "\"prize\":%u,\"left\":%u", set, DUEL_PACKS_A_DAY - sDaily.packs[2]);
+    MPNet_Log("phone cards: a Yu-Gi-Oh! duel won a booster (%u)", set);
+    return NULL;
+}
+
+static const char *YgoOpen(const char *json)
+{
+    struct YgoCollection *c = Ygo_GetCollection();
+    long long set = -1;
+    uint16_t out[YGO_PACK_SIZE];
+    unsigned i;
+    if (!JsonNum(json, "set", &set) || set < 0 || set >= YGO_SET_COUNT)
+        return "bad";
+    if (!c->packs[set] || !Ygo_OpenPack(c, (unsigned)set, out))
+        return "nopack";
+    MP_Achieve_Count("ygopack", 1);
+    Ygo_WriteSidecar();
+    BufAdd(&sDoneExtra, "\"cards\":[");
+    for (i = 0; i < YGO_PACK_SIZE; i++)
+        BufAdd(&sDoneExtra, "%s%u", i ? "," : "", out[i]);
+    BufAdd(&sDoneExtra, "],\"new\":[");
+    for (i = 0; i < YGO_PACK_SIZE; i++)
+    {
+        unsigned j, copies = 0, earlier = 0;
+        for (j = 0; j < YGO_PACK_SIZE; j++)
+            copies += out[j] == out[i];
+        for (j = 0; j < i; j++)
+            earlier |= out[j] == out[i];
+        BufAdd(&sDoneExtra, "%s%u", i ? "," : "", out[i] && !earlier && c->owned[out[i]] == copies);
+    }
+    BufAdd(&sDoneExtra, "]");
+    return NULL;
+}
+
 const char *PhoneCards_Apply(const char *op, const char *json)
 {
     struct TtCollection *c = Tt_GetCollection();
+    if (strncmp(op, "ygo", 3) == 0)
+    {
+        struct YgoCollection *y = Ygo_GetCollection();
+        if (y == NULL || !y->optedIn)
+            return "nocards";
+        if (strcmp(op, "ygodeck") == 0)
+            return YgoDeck(json);
+        if (strcmp(op, "ygoduel") == 0)
+            return YgoDuelResult(json);
+        if (strcmp(op, "ygoopen") == 0)
+            return YgoOpen(json);
+        return "unknown";
+    }
     if (strncmp(op, "tcg", 3) == 0)
     {
         struct TcgCollection *p = Tcg_GetCollection();
