@@ -39,10 +39,16 @@
 #include "window.h"
 #include "mp_version.h"
 #include "constants/items.h"
+#include "constants/moves.h"
 #include "constants/map_types.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
 #include "mp_phone_net.h"
+#include "evolution_scene.h"
+#include "party_menu.h"
+u8 MP_PhoneItemUse(u16 item);   // party_menu.c
+bool8 MP_PhoneItemConsumed(u16 item);
+u16 MP_PhoneTmMove(struct Pokemon *mon, u16 item, bool8 *knows);
 bool8 MP_Poketch_PhoneAvailable(void);   // sinnoh/poketch.c
 void MP_Poketch_PhoneTouch(s16 x, s16 y, bool8 down);
 void MP_Poketch_PhoneApp(s8 dir);
@@ -1029,6 +1035,13 @@ static struct Done *FindDone(s8 phone, u32 id)
 }
 
 // The answer to an order: done (with the places it changed, as they are now) or why not
+static u16 sUseLearned[4], sUseWants[4];
+static u8 sUseLearnedN, sUseWantsN;
+static bool8 sUseEvolve;
+static u16 sEvoSpecies;
+static s8 sEvoSlot = -1;
+static bool8 sEvoCanStop;
+
 // (fresh: "rev" after it, so the app knows its model, with the changes applied, is the game's; a repeated answer or
 // a refusal has none)
 static void SendDone(int c, u32 id, const char *why, bool8 fresh)
@@ -1067,10 +1080,143 @@ static void SendDone(int c, u32 id, const char *why, bool8 fresh)
         BufAdd(&sOut, ",");
         BufBag(&sOut);
     }
+    if (fresh && why == NULL && (sUseLearnedN || sUseWantsN || sUseEvolve))
+    {
+        // (a USE: the moves it learned, the ones it wants to (four known), whether it's evolving in the game)
+        BufAdd(&sOut, ",\"learned\":[");
+        for (i = 0; i < sUseLearnedN; i++)
+            BufAdd(&sOut, "%s%u", i ? "," : "", sUseLearned[i]);
+        BufAdd(&sOut, "],\"wants\":[");
+        for (i = 0; i < sUseWantsN; i++)
+            BufAdd(&sOut, "%s%u", i ? "," : "", sUseWants[i]);
+        BufAdd(&sOut, "],\"evolve\":%u", sUseEvolve);
+        sUseLearnedN = sUseWantsN = 0;
+        sUseEvolve = FALSE;
+    }
     if (fresh && why == NULL)
         BufAdd(&sOut, ",\"rev\":%u", (unsigned)Rev());
     BufAdd(&sOut, "}");
     SendBuf(c, &sOut);
+}
+
+// USE: an item on a party POKeMON (the BAG's USE, as the party menu carries it out: its own effects and rules), what
+// came of it for the answer, and an evolution to play in the game once it's free
+
+static const char *DoUse(const char *json)
+{
+    struct Loc at;
+    long long pid, ot, item = 0, move = -1;
+    struct Pokemon *mon;
+    u8 kind, slot;
+    sUseLearnedN = sUseWantsN = 0;
+    sUseEvolve = FALSE;
+    if (!ParseLoc(json, "at", &at) || !JsonNum(json, "p", &pid) || !JsonNum(json, "o", &ot))
+        return "bad";
+    if (at.kind != LOC_PARTY)
+        return "notparty";   // (as in the game: items are used on the party)
+    if (Empty(&at))
+        return "bad";
+    if (!Is(&at, (u32)pid, (u32)ot))
+        return "gone";
+    if (!JsonNum(json, "item", &item) || item <= 0 || item >= ITEMS_COUNT)
+        return "bad";
+    JsonNum(json, "move", &move);
+    if (!CheckBagHasItem(item, 1))
+        return "noitem";
+    slot = at.slot;
+    mon = &gPlayerParty[slot];
+    if (GetMonData(mon, MON_DATA_IS_EGG))
+        return "egg";
+    if (sEvoSlot >= 0)
+        return "busy";
+    kind = MP_PhoneItemUse(item);
+    switch (kind)
+    {
+    case 0:
+        return "cantuse";
+    case 3:   // SACRED ASH: every fainted one
+    {
+        bool8 any = FALSE;
+        u32 i;
+        for (i = 0; i < gPlayerPartyCount; i++)
+            if (!ExecuteTableBasedItemEffect(&gPlayerParty[i], item, i, 0))
+                any = TRUE;
+        if (!any)
+            return "noeffect";
+        break;
+    }
+    case 5:
+    case 6:   // one move's PP
+        if (move < 0 || move > 3 || GetMonData(mon, MON_DATA_MOVE1 + move) == MOVE_NONE)
+            return "bad";
+        if (ExecuteTableBasedItemEffect(mon, item, slot, move))
+            return "noeffect";
+        break;
+    case 7:   // RARE CANDY: the level (up to the cap), its new moves, then maybe an evolution
+    {
+        u16 learned, evo;
+        if (GetMonData(mon, MON_DATA_LEVEL) >= MP_RareCandyCap())
+            return "cap";
+        if (GetMonData(mon, MON_DATA_LEVEL) == MAX_LEVEL || ExecuteTableBasedItemEffect(mon, item, slot, 0))
+            return "noeffect";
+        learned = MonTryLearningNewMove(mon, TRUE);
+        while (learned != MOVE_NONE)
+        {
+            if (learned == MON_HAS_MAX_MOVES)
+            {
+                if (sUseWantsN < 4)
+                    sUseWants[sUseWantsN++] = gMoveToLearn;   // (full: it wants to; taught in the game, as ever)
+            }
+            else if (learned != MON_ALREADY_KNOWS_MOVE && sUseLearnedN < 4)
+                sUseLearned[sUseLearnedN++] = learned;
+            learned = MonTryLearningNewMove(mon, FALSE);
+        }
+        evo = GetEvolutionTargetSpecies(mon, EVO_MODE_NORMAL, ITEM_NONE);
+        if (evo != SPECIES_NONE)
+        {
+            sEvoSpecies = evo, sEvoSlot = slot, sEvoCanStop = TRUE;
+            sUseEvolve = TRUE;
+        }
+        break;
+    }
+    case 8:   // TM / HM: taught, in place of the move chosen when it knows four
+    {
+        bool8 knows;
+        u16 mv = MP_PhoneTmMove(mon, item, &knows);
+        if (knows)
+            return "knows";
+        if (mv == MOVE_NONE)
+            return "cantlearn";
+        if (GiveMoveToMon(mon, mv) == MON_HAS_MAX_MOVES)
+        {
+            if (move < 0 || move > 3)
+                return "full";
+            RemoveMonPPBonus(mon, move);
+            SetMonMoveSlot(mon, mv, move);
+        }
+        sUseLearned[sUseLearnedN++] = mv;
+        break;
+    }
+    case 9:   // an evolution stone: the evolution plays in the game
+    {
+        u16 evo = GetEvolutionTargetSpecies(mon, EVO_MODE_ITEM_USE, item);
+        if (evo == SPECIES_NONE)
+            return "noeffect";
+        sEvoSpecies = evo, sEvoSlot = slot, sEvoCanStop = FALSE;
+        sUseEvolve = TRUE;
+        break;
+    }
+    default:
+        if (ExecuteTableBasedItemEffect(mon, item, slot, 0))
+            return "noeffect";
+        break;
+    }
+    if (kind != 8 && MP_PhoneItemConsumed(item))   // (TMs and HMs stay: Kai's TMs are reusable)
+        RemoveBagItem(item, 1);
+    PlaySE(SE_USE_ITEM);
+    PartyChanged();
+    sBagChanged = TRUE;
+    return NULL;
 }
 
 static const char *Apply(const char *json)
@@ -1086,6 +1232,8 @@ static const char *Apply(const char *json)
         return DoItem(json, TRUE);
     if (strcmp(op, "take") == 0)
         return DoItem(json, FALSE);
+    if (strcmp(op, "use") == 0)
+        return DoUse(json);
     return "unknown";
 }
 
@@ -1490,6 +1638,15 @@ void MP_Phone_Update(void)
         sOrderCount--;
         if (sSess[o.conn].state == SESS_LIVE)
             Finish(o.conn, o.id, o.json);
+    }
+    // An evolution a USE started (an evolution stone, a RARE CANDY's level): the game's own scene, as from the BAG
+    if (sEvoSlot >= 0 && Safe())
+    {
+        s8 slot = sEvoSlot;
+        sEvoSlot = -1;
+        MPNet_Log("phone: evolution of party slot %d", slot);
+        gCB2_AfterEvolution = CB2_ReturnToField;
+        BeginEvolutionScene(&gPlayerParty[slot], sEvoSpecies, sEvoCanStop, slot);
     }
     PhoneNet_Poll(udp);   // (send what was just answered)
 }

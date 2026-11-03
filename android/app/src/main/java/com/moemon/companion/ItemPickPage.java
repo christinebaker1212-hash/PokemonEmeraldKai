@@ -15,6 +15,13 @@ public final class ItemPickPage extends Page {
     private static final int ROW = 26;
     private final JSONObject place, mon;
     private final Page back;   // where GIVE came from (shown again after), or null for the tabs
+    private boolean use;       // USE (items used on a POKéMON) rather than GIVE (items it can hold)
+
+    public static ItemPickPage forUse(GameView v, JSONObject place, JSONObject mon, Page back) {
+        ItemPickPage p = new ItemPickPage(v, place, mon, back);
+        p.use = true;
+        return p;
+    }
 
     public ItemPickPage(GameView v, JSONObject place, JSONObject mon) {
         this(v, place, mon, null);
@@ -41,7 +48,7 @@ public final class ItemPickPage extends Page {
             JSONArray pocket = bag.optJSONArray(p);
             for (int i = 0; pocket != null && i < pocket.length(); i++) {
                 JSONArray it = pocket.optJSONArray(i);
-                if (it != null && art.item(it.optInt(0)).optInt("hold") == 1) {
+                if (it != null && (use ? UseFlow.kind(art, it.optInt(0)) != UseFlow.NONE : art.item(it.optInt(0)).optInt("hold") == 1)) {
                     out.add(new int[]{it.optInt(0), it.optInt(1)});
                 }
             }
@@ -59,7 +66,7 @@ public final class ItemPickPage extends Page {
         List<int[]> l = items();
         if (l.isEmpty()) {
             art.window(c, 0, 12, 30, w - 24, 16);
-            art.text(c, "Nothing in the BAG can be held.", 14, 30);
+            art.text(c, use ? "Nothing in the BAG can be used on it." : "Nothing in the BAG can be held.", 14, 30);
         }
         for (int i = 0; i < l.size(); i++) {
             int y = 26 + i * ROW - scroll;
@@ -72,7 +79,7 @@ public final class ItemPickPage extends Page {
             String n = "x" + l.get(i)[1];
             art.text(c, n, w - 16 - art.width(n), y + 4);
         }
-        banner(c, w, "GIVE TO " + art.plain(GameArt.hexText(mon.optString("n"))), "BACK");
+        banner(c, w, (use ? "USE ON " : "GIVE TO ") + art.plain(GameArt.hexText(mon.optString("n"))), "BACK");
     }
 
     @Override
@@ -88,6 +95,10 @@ public final class ItemPickPage extends Page {
         if (y + scroll >= 26 && i >= 0 && i < l.size() && v.app.locked()) {
             v.message(Companion.LOCKED);
             v.showOver(null);
+            return;
+        }
+        if (use && y + scroll >= 26 && i >= 0 && i < l.size()) {
+            UseFlow.use(v, place, mon, l.get(i)[0], back);
             return;
         }
         if (y + scroll >= 26 && i >= 0 && i < l.size() && v.app.client != null) {

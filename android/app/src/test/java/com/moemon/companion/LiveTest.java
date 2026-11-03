@@ -95,8 +95,9 @@ public class LiveTest {
         Files.write(script.toPath(), String.join("\n",
                 "pressuntil A field 5000", "wait 30",
                 "mp boxput 1 0 25 5", "mp boxput 1 1 1 5", "mp boxput 1 2 4 5",
-                "mp additem 139 20", "mp shinymon 4 25 20", "mp additem 660 1", "mp regionclear 3", "mp dexcatch 263", "mp phone pair",
-                "wait 4200", "mp wild 263:3", "wait 2000000", "quit").getBytes());
+                "mp additem 139 20", "mp shinymon 4 25 20", "mp additem 660 1", "mp regionclear 3", "mp dexcatch 263",
+                "mp additem 13 3", "mp additem 68 2", "mp additem 96 1", "mp hp 1 5", "mp shinymon 5 16 5", "mp phone pair",
+                "wait 300", "mash B 200 15", "wait 900", "mp wild 263:3", "wait 2000000", "quit").getBytes());
         ProcessBuilder pb = new ProcessBuilder(game.getPath()).directory(root).redirectErrorStream(true);
         java.util.Map<String, String> env = pb.environment();
         env.put("SDL_VIDEODRIVER", "dummy");
@@ -152,9 +153,27 @@ public class LiveTest {
                     && app.model().saveId().equals(saveId), 30, "linked with a snapshot");
             draw(v);
 
+            // USE, as the BAG's USE in the game: a POTION on the hurt BULBASAUR, a RARE CANDY on the PIDGEY, a THUNDER
+            // STONE on PIKACHU (its evolution plays in the game: B through its messages)
+            JSONObject bulba = app.model().party().getJSONObject(1);
+            UseFlow.use(v, Model.partyPlace(1), bulba, 13, null);
+            idleUntil(() -> app.client.orders.pending().isEmpty()
+                    && app.model().party().optJSONObject(1).optInt("hp") > 5, 20, "the POTION healed it");
+            JSONObject pidgey = app.model().party().getJSONObject(4);
+            int lv = pidgey.optInt("l");
+            UseFlow.use(v, Model.partyPlace(4), pidgey, 68, null);
+            idleUntil(() -> app.client.orders.pending().isEmpty()
+                    && app.model().party().optJSONObject(4).optInt("l") == lv + 1, 20, "the RARE CANDY raised it a level");
+            assertTrue("nothing refused", app.client.orders.failed().isEmpty());
+            JSONObject pika = app.model().party().getJSONObject(0);
+            UseFlow.use(v, Model.partyPlace(0), pika, 96, null);
+            idleUntil(() -> app.model().party().optJSONObject(0).optInt("s") == 26, 90, "PIKACHU evolved in the game");
+            draw(v);
+            ScreensTest.shot(v, "live_evolved");
+
             // the shiny one in the party comes with its own colors (not its species')
             JSONObject shiny = app.model().party().getJSONObject(3);
-            assertEquals(25, shiny.optInt("s"));
+            assertEquals(25, shiny.optInt("s"));   // (the shiny one in slot 4; slot 1's PIKACHU evolved)
             assertEquals(1, shiny.optInt("sh"));
             String pal = shiny.optString("pal");
             assertEquals(64, pal.length());

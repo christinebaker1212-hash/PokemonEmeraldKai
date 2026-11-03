@@ -248,10 +248,24 @@ public final class GameView extends View {
             menu.draw(c, w, h);
         }
         // the last answer the game couldn't carry out, for 4 seconds
-        if (!app.toast.isEmpty() && System.currentTimeMillis() - app.toastAt < 4000) {
-            int tw = Math.min(w - 24, art.width(app.toast) + 8);
-            art.window(c, 0, (w - tw) / 2, h - TABS - 34, tw, 16);
-            art.text(c, app.toast, (w - tw) / 2 + 4, h - TABS - 34, GameArt.RED_TEXT, GameArt.SHADOW);
+        if (!app.toast.isEmpty() && System.currentTimeMillis() - app.toastAt < 5000) {
+            java.util.List<String> lines = new java.util.ArrayList<>();
+            StringBuilder line = new StringBuilder();
+            for (String word : app.toast.split(" ")) {
+                String next = line.length() == 0 ? word : line + " " + word;
+                if (art.width(next) > w - 40 && line.length() > 0) {
+                    lines.add(line.toString());
+                    line = new StringBuilder(word);
+                } else {
+                    line = new StringBuilder(next);
+                }
+            }
+            lines.add(line.toString());
+            int th = lines.size() * 16, ty = h - TABS - 18 - th;
+            art.window(c, 0, 16, ty, w - 32, th);
+            for (int i = 0; i < lines.size(); i++) {
+                art.text(c, lines.get(i), 20, ty + i * 16, app.toastGood ? GameArt.TEXT : GameArt.RED_TEXT, GameArt.SHADOW);
+            }
             postInvalidateDelayed(500);
         }
         c.restore();

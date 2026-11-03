@@ -87,9 +87,12 @@ public final class BagPage extends Page {
         int item = l.optJSONArray(chosen).optInt(0);
         art.itemIcon(c, item, 12, py + 2);
         art.text(c, art.name("items", item), 40, py + 4, GameArt.BLUE_TEXT, GameArt.SHADOW);
-        boolean hold = art.item(item).optInt("hold") == 1;
+        boolean hold = art.item(item).optInt("hold") == 1, usable = UseFlow.kind(art, item) != UseFlow.NONE;
         if (hold) {
             button(c, "GIVE", w - 74, py, 64, !v.app.locked());
+        }
+        if (usable) {
+            button(c, "USE", w - (hold ? 138 : 74), py, 64, !v.app.locked());
         }
         art.paragraph(c, art.item(item).optString("d"), 16, py + 24, w - 36, GameArt.TEXT, GameArt.SHADOW);
     }
@@ -118,10 +121,34 @@ public final class BagPage extends Page {
             return;
         }
         int py = TABS + listH() + 4;
-        if (chosen < 0 || chosen >= l.length() || x < w - 74 || y > py + 26) {
+        if (chosen < 0 || chosen >= l.length() || x < w - 138 || y > py + 26) {
             return;
         }
         final int item = l.optJSONArray(chosen).optInt(0);
+        boolean holdable = art.item(item).optInt("hold") == 1;
+        boolean onUse = UseFlow.kind(art, item) != UseFlow.NONE && (holdable ? x < w - 74 : x >= w - 74);
+        if (onUse && v.app.model() != null && v.app.client != null) {
+            if (v.app.locked()) {
+                v.message(Companion.LOCKED);
+                return;
+            }
+            Menu menu = Menu.make(v, "USE ON...");
+            JSONArray party = v.app.model().party();
+            for (int k = 0; party != null && k < party.length(); k++) {
+                final JSONObject mon = party.optJSONObject(k);
+                if (mon == null || mon.optInt("e") == 1) {
+                    continue;
+                }
+                final int slot = k;
+                menu.add(art.plain(GameArt.hexText(mon.optString("n"))), () -> UseFlow.use(v, Model.partyPlace(slot), mon, item, null));
+            }
+            menu.add("CANCEL", null);
+            v.showMenu(menu);
+            return;
+        }
+        if (x < w - 74) {
+            return;
+        }
         Model m = v.app.model();
         if (art.item(item).optInt("hold") != 1 || m == null || v.app.client == null) {
             return;

@@ -149,5 +149,15 @@ slot that makes it (the GENERATION's pools); the app groups them by place and me
 or less) are counted, not named, until met there. In BOXES, a POKéMON carried to a box's arrow turns the box
 (BoxesPage.dragMove); MOVE stays on through swipes and the box list.
 
+### USE (1.71.1)
+
+`{"op":"use","at":{"party":P},"item":I,"p","o"[,"move":M]}`: an item on a party POKéMON as the BAG's USE does it
+(mp_phone.c DoUse; party_menu.c MP_PhoneItemUse classifies by the item's field use: 1 medicine, 2 EV BERRY, 3 SACRED
+ASH, 4 PP all, 5 PP one, 6 PP UP, 7 RARE CANDY, 8 TM / HM, 9 evolution stone; data.json's items carry it as "use").
+The game's own effects (ExecuteTableBasedItemEffect), rules (MP_RareCandyCap, the TM checks, flutes and TMs kept) and,
+for an evolution, its own scene (BeginEvolutionScene back to the field, started once it's free). A fresh answer adds
+`learned`, `wants` (four moves known: taught in the game) and `evolve`. Refusals: notparty, noeffect, cap, knows,
+cantlearn, full, cantuse, egg, noitem. LiveTest: a POTION, a RARE CANDY, a THUNDER STONE evolving PIKACHU in the game.
+
 Next: the POKéNAV's apps (live region map, MOENAV calls, CONDITION, RIBBONS), the POKéGEAR's, and battle mode (the
 MOVE TESTER and the party's HP).

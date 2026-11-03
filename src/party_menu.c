@@ -7146,3 +7146,50 @@ void IsLastMonThatKnowsSurf(void)
             gSpecialVar_Result = TRUE;
     }
 }
+
+// Moemon Co-op: how an item is used on a party POKéMON (its field use, as the BAG's USE starts it), for the phone app
+// (mp_phone.c DoUse, mp_export.c's items): 0 not on a POKéMON, 1 medicine, 2 EV-lowering BERRY, 3 SACRED ASH,
+// 4 PP for every move, 5 PP for one move, 6 PP UP / PP MAX, 7 RARE CANDY, 8 TM / HM, 9 evolution stone
+u8 MP_PhoneItemUse(u16 item)
+{
+    ItemUseFunc f = GetItemFieldFunc(item);
+    if (f == ItemUseOutOfBattle_Medicine)
+        return 1;
+    if (f == ItemUseOutOfBattle_ReduceEV)
+        return 2;
+    if (f == ItemUseOutOfBattle_SacredAsh)
+        return 3;
+    if (f == ItemUseOutOfBattle_PPRecovery)
+    {
+        const u8 *effect = item >= ITEM_POTION && item != ITEM_ENIGMA_BERRY ? gItemEffectTable[item - ITEM_POTION] : NULL;
+        return effect != NULL && (effect[4] & ITEM4_HEAL_PP_ONE) ? 5 : 4;
+    }
+    if (f == ItemUseOutOfBattle_PPUp)
+        return 6;
+    if (f == ItemUseOutOfBattle_RareCandy)
+        return 7;
+    if (f == ItemUseOutOfBattle_TMHM)
+        return 8;
+    if (f == ItemUseOutOfBattle_EvolutionStone)
+        return 9;
+    return 0;
+}
+
+// Whether using it leaves the BAG one fewer (the flutes are kept, as the party menu keeps them)
+bool8 MP_PhoneItemConsumed(u16 item)
+{
+    return !IsItemFlute(item);
+}
+
+// A TM / HM's move for a POKéMON: 0 if it can't learn it (the party menu's rules: compatible, within the GENERATION),
+// with *knows set when it already knows it
+u16 MP_PhoneTmMove(struct Pokemon *mon, u16 item, bool8 *knows)
+{
+    *knows = FALSE;
+    if (CanMonLearnTMTutor(mon, item, 0) == ALREADY_KNOWS_MOVE)
+    {
+        *knows = TRUE;
+        return 0;
+    }
+    return CanMonLearnTMTutor(mon, item, 0) == CAN_LEARN_MOVE ? ItemIdToBattleMoveId(item) : 0;
+}

@@ -51,7 +51,7 @@ public final class SummaryPage extends Page {
     @Override
     public void draw(Canvas c, int w, int h) {
         JSONObject mon = mon();
-        banner(c, w, "SUMMARY", places.size() > 1 ? (index + 1) + "/" + places.size() : "");
+        banner(c, w, "SUMMARY" + (places.size() > 1 ? "  " + (index + 1) + "/" + places.size() : ""), "");
         if (mon == null) {
             art.window(c, 0, 12, 30, w - 24, 16);
             art.text(c, "It isn't there any more.", 14, 30);
@@ -87,11 +87,14 @@ public final class SummaryPage extends Page {
         // the actions and the arrows
         int by = h - 30, bw = (w - 16) / 4;
         boolean locked = v.app.locked();
-        button(c, "<", 8, by, bw / 2, places.size() > 1);
-        button(c, ">", 8 + bw / 2, by, bw / 2, places.size() > 1);
+        button(c, "USE", 8, by, bw, !locked && !egg && place().has("party"));
         button(c, "GIVE", 8 + bw, by, bw, !locked && !egg);
         button(c, "TAKE", 8 + 2 * bw, by, bw, !locked && mon.optInt("i") != 0);
         button(c, boxes != null ? "MOVE" : "BACK", 8 + 3 * bw, by, bw, boxes == null || !locked);
+        if (places.size() > 1) {
+            DexPage.chip(c, art, fill, ">", w - 26, 2, true);
+            DexPage.chip(c, art, fill, "<", w - 50, 2, true);
+        }
     }
 
     private void drawTop(Canvas c, int w, JSONObject mon) {
@@ -325,10 +328,27 @@ public final class SummaryPage extends Page {
     public void tap(int x, int y) {
         int w = v.width(), h = v.contentHeight();
         JSONObject mon = mon();
+        if (y < 20) {
+            if (x >= w - 26) {
+                swipe(1);
+            } else if (x >= w - 50) {
+                swipe(-1);
+            }
+            return;
+        }
         if (y >= h - 30) {
-            int bw = (w - 16) / 4, k = x < 8 + bw / 2 ? 0 : x < 8 + bw ? 1 : (x - 8) / bw + 1;
-            if (k == 0 || k == 1) {
-                swipe(k == 0 ? -1 : 1);
+            int bw = (w - 16) / 4, k = Math.min(3, Math.max(0, (x - 8) / bw)) + 1;
+            if (k == 1) {
+                if (mon == null || v.app.client == null || mon.optInt("e") == 1) {
+                    return;
+                }
+                if (v.app.locked()) {
+                    v.message(Companion.LOCKED);
+                } else if (!place().has("party")) {
+                    v.message("Items are used on the POKéMON in your party, as in the game.");
+                } else {
+                    v.showOver(ItemPickPage.forUse(v, place(), mon, this));
+                }
                 return;
             }
             if (mon == null || v.app.client == null) {

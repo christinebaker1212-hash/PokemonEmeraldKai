@@ -44,6 +44,7 @@ public final class Companion implements LinkClient.Listener {
     public volatile JSONObject watchFrame;                        // the POKéTCH's last LCD from the game
     public volatile boolean watching;                             // the DEVICE page shows it
     public long toastAt;
+    public boolean toastGood;                                     // (a USE's result, not a refusal)
     private final Handler main = new Handler(Looper.getMainLooper());
     private final List<Runnable> watchers = new ArrayList<>();
     private boolean resumed;
@@ -320,6 +321,12 @@ public final class Companion implements LinkClient.Listener {
             case "bagfull": return "The BAG is full.";
             case "nothing": return "It isn't holding anything.";
             case "busy": return "The game is busy. Try again.";
+            case "notparty": return "Items are used on the POKéMON in your party.";
+            case "noeffect": return "It won't have any effect.";
+            case "cap": return "RARE CANDIES won't raise it past the next BADGE's level.";
+            case "knows": return "It already knows that move.";
+            case "cantlearn": return "It can't learn that move.";
+            case "cantuse": return "That can't be used on a POKéMON.";
             default: return why == null || why.isEmpty() ? "It couldn't be done." : why;
         }
     }
@@ -377,6 +384,11 @@ public final class Companion implements LinkClient.Listener {
     public void onAnswer(JSONObject order, JSONObject done) {
         if (done.optInt("ok") == 0) {
             toast = why(done.optString("why"));
+            toastGood = false;
+            toastAt = System.currentTimeMillis();
+        } else if (order != null && "use".equals(order.optString("op"))) {
+            toast = UseFlow.result(art, order, done, model());
+            toastGood = true;
             toastAt = System.currentTimeMillis();
         }
         changed();

@@ -47,6 +47,7 @@
 
 void MP_ExportGlyph(u16 glyphId, u8 out[16][16], u8 *width);   // text.c
 const u32 *MP_SpeciesFrontPal(u16 species);   // pokemon.c
+u8 MP_PhoneItemUse(u16 item);                  // party_menu.c
 u8 MP_TypeIconPal(u8 type);                    // pokemon_summary_screen.c
 void MP_DexTexts(u32 num, const u8 *out[4]);   // pokedex.c
 void MP_DexInfoScreen(u16 *out);
@@ -481,7 +482,8 @@ static void ExportData(const char *dir)
         CopyItemName(i, name);
         fprintf(f, "%s{\"n\":", i ? "," : "");
         Json(f, name, sizeof(name));
-        fprintf(f, ",\"pocket\":%u,\"hold\":%u,\"d\":", GetItemPocket(i), MP_ItemCanBeHeld(i));
+        fprintf(f, ",\"pocket\":%u,\"hold\":%u,\"use\":%u,\"d\":", GetItemPocket(i), MP_ItemCanBeHeld(i),
+                MP_PhoneItemUse(i));
         Json(f, GetItemDescription(i), 300);
         fprintf(f, "}");
     }
