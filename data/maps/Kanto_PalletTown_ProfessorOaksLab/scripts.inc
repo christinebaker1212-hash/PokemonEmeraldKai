@@ -417,7 +417,7 @@ Kanto_PalletTown_ProfessorOaksLab_EventScript_84194AF::
 Kanto_PalletTown_ProfessorOaksLab_EventScript_84194B9::
 	lock
 	faceplayer
-	call_if_ge VAR_QZ_0x511A, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C3F
+	call_if_ge VAR_QZ_0x511A, 6, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C3F   @ Moemon Kai: (after the POKéDEX scene, not the starter)
 	goto_if_set FLAG_TEMP_2, Kanto_PalletTown_ProfessorOaksLab_EventScript_841952F
 	goto_if_eq VAR_QZ_0x511A, 9, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419819
 	goto_if_eq VAR_QZ_0x511A, 8, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419999
@@ -801,9 +801,8 @@ Kanto_PalletTown_ProfessorOaksLab_EventScript_8419BB9::
 	playfanfare MUS_RG_OBTAIN_KEY_ITEM
 	waitfanfare
 	call Quetzal_EventScript_8361ADB
-	call Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C51
-	call Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C6E
-	setflag FLAG_QZ_0xA79
+	@ Moemon Kai: no POKéDEX or POKé BALLS with the starter: OAK gives the POKéDEX (the NATIONAL DEX) and the POKé
+	@ BALLS when the PARCEL comes back, as in FireRed
 	setflag FLAG_QZ_0xA78
 	setflag FLAG_QZ_0x2EAF
 	specialvar VAR_RESULT, QzBufferLastReceivedMonForNickname
@@ -1728,9 +1727,8 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843F51D::
 	.string "Anyways, I’m outta here!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843F5D6::
-	.string "OAK: Take this NATIONAL MOéDEX\n"
-	.string "with you, too.\p"
-	.string "It records the MOéMON you meet.\n"
+	.string "OAK: It’s the NATIONAL MOéDEX:\n"
+	.string "it records MOéMON of every region.\p"
 	.string "Go and catch some new partners!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_845710D::

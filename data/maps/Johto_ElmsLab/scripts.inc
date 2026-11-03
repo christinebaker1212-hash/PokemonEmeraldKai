@@ -99,7 +99,7 @@ Johto_ElmsLab_EventScript_83E1C6E::
 	faceplayer
 	special QzGiovanniStoryElmCheck
 	goto_if_eq VAR_RESULT, 1, Johto_ElmsLab_EventScript_8401D20
-	call_if_set FLAG_QZ_0x11D1, Johto_ElmsLab_EventScript_83E1F8C
+	call_if_set FLAG_QZ_0xA79, Johto_ElmsLab_EventScript_83E1F8C   @ Moemon Kai: (the POKé BALLS once the POKéDEX is had, not with the starter)
 	goto_if_set FLAG_QZ_0x106A, Johto_ElmsLab_EventScript_83E1D23
 	goto_if_eq VAR_QZ_0x5004, 7, Johto_ElmsLab_EventScript_83E21B8
 	goto_if_eq VAR_QZ_0x5004, 8, Johto_ElmsLab_EventScript_83E2210
@@ -250,9 +250,8 @@ Johto_ElmsLab_EventScript_83E1EFC::
 	message Johto_ElmsLab_Text_83E2881
 	waitfanfare
 	call Quetzal_EventScript_8361ADB
-	call Johto_ElmsLab_EventScript_83E1F77
-	call Johto_ElmsLab_EventScript_83E1F8C
-	setflag FLAG_QZ_0xA79
+	@ Moemon Kai: no POKéDEX or POKé BALLS with the starter: OAK gives the POKéDEX (the NATIONAL DEX) at MR.
+	@ MOéMON's house and ELM's aide the POKé BALLS, as in Crystal
 	setflag FLAG_QZ_0xA78
 	setflag FLAG_QZ_0x149B
 	specialvar VAR_RESULT, QzBufferLastReceivedMonForNickname

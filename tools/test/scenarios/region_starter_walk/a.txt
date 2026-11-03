@@ -1,5 +1,6 @@
 pressuntil A field 5000
 wait 60
+mp clearflag 2145
 mp warp 35,0,6,4
 wait 120
 mp setvar 0x5004 1
@@ -23,4 +24,5 @@ pressuntil B field 4000
 wait 30
 mp party
 mp where
+mp getflag 2145
 quit
