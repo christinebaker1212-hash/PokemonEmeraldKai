@@ -1,0 +1,33 @@
+pressuntil A field 5000
+wait 60
+mp dexcatch 201
+mp dexorder 1 0
+mp unownsee 0 2 25 27
+mp formviewer
+press START 2
+wait 30
+press A 2
+wait 150
+press A 2
+wait 150
+shot f_info
+press SELECT 2
+wait 20
+shot f_form_a
+press RIGHT 2
+wait 20
+press RIGHT 2
+wait 20
+shot f_form_z
+press RIGHT 2
+wait 20
+press RIGHT 2
+wait 20
+shot f_form_a2
+press LEFT 2
+wait 20
+shot f_form_q
+press B 2
+wait 20
+shot f_back
+quit

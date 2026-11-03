@@ -1,4 +1,7 @@
 #include "global.h"
+#include "mp.h"
+#include "event_data.h"
+#include "mp_region.h"
 #include "overworld.h"
 #include "field_effect.h"
 #include "random.h"
@@ -380,6 +383,7 @@ struct SlotMachine
     /*0x0C*/ s32 coins;   // Moemon Kai: s32, MAX_COINS 50,000
     /*0x0E*/ s16 payout;
     /*0x10*/ s32 netCoinLoss; // never negative (Moemon Kai: s32)
+    u16 bonusesThisSitting;   // Moemon Kai: BONUS hits (7s) since sitting down: SINNOH's GAME CORNER record
     /*0x12*/ s16 bet;
     /*0x14*/ s16 reeltimePixelOffset;
     /*0x16*/ s16 reeltimePosition;
@@ -1540,6 +1544,8 @@ static bool8 SlotTask_CheckMatches(struct Task *task)
 
         if (sSlotMachine->matches & ((1 << MATCH_MIXED_7) | (1 << MATCH_BLUE_7) | (1 << MATCH_RED_7)))
         {
+            if (sSlotMachine->bonusesThisSitting < 999)
+                sSlotMachine->bonusesThisSitting++;
             sSlotMachine->machineBias &= ~(BIAS_STRAIGHT_7 | BIAS_MIXED_7);
             if (sSlotMachine->matches & ((1 << MATCH_BLUE_7) | (1 << MATCH_RED_7)))
             {
@@ -1734,6 +1740,11 @@ static bool8 SlotTask_WaitMsg_NoMoreCoins(struct Task *task)
 // SLOTTASK_END
 static bool8 SlotTask_EndGame(struct Task *task)
 {
+    // Moemon Kai: SINNOH keeps the most BONUS rounds of one sitting, as Platinum's slots keep their straight bonus
+    // rounds (VAR_CONSECUTIVE_BONUS_ROUND_WINS, SINNOH's 0x51AA; ten earn the clerk's TM64: CheckBonusRoundStreak)
+    if (MP_Region_Current() == REGION_SINNOH && sSlotMachine->bonusesThisSitting > VarGet(0x51AA))
+        VarSet(0x51AA, sSlotMachine->bonusesThisSitting);
+    MPNet_Log("slots: %d BONUS this sitting", sSlotMachine->bonusesThisSitting);
     SetCoins(sSlotMachine->coins);
     TryPutFindThatGamerOnAir(GetCoins());
     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);

@@ -1,0 +1,6 @@
+# SINNOH: SNOWPOINT's man teaches a trendy saying a day (Platinum's own script; its words are the game's EASY CHAT
+# TRENDY SAYINGS, unlocked as MAUVILLE's old man does). Shot s_word. Needs the 3D pack.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=3"
+UNEXPECT_A=("[crash]" "TIMEOUT" "a trendy saying unlocked: -1")

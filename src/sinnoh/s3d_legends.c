@@ -245,13 +245,33 @@ void Sinnoh_UnownSeen(u32 personality)
     }
 }
 
+// (bit 31: the POKeDEX's form viewer, ROUTE 218's gate scientist's upgrade: Platinum's TurnOnPokedexFormDetection)
+#define FORM_VIEWER_ON (1u << 31)
+#define UNOWN_LETTERS  ((1u << 28) - 1)
+
 u16 Sinnoh_UnownFormsSeen(void)
 {
     u16 n = 0;
     u32 m;
-    for (m = sUnownSeen; m; m &= m - 1)
+    for (m = sUnownSeen & UNOWN_LETTERS; m; m &= m - 1)
         n++;
     return n;
+}
+
+u32 Sinnoh_UnownLetters(void)
+{
+    return sUnownSeen & UNOWN_LETTERS;
+}
+
+bool8 Sinnoh_FormViewerOn(void)
+{
+    return (sUnownSeen & FORM_VIEWER_ON) != 0;
+}
+
+void Sinnoh_FormViewerEnable(void)
+{
+    sUnownSeen |= FORM_VIEWER_ON;
+    MPNet_Log("sinnoh: the POKeDEX's form viewer is on");
 }
 
 const void *Sinnoh_UnownData(u32 *size)

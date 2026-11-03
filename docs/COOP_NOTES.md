@@ -4276,8 +4276,7 @@ follow_behind, follow_ground.
   a u16 (TASK_COINS) with a fifth credit digit (SPR_CREDIT_DIG_10000). Tests sinnoh_prize_exchange, sinnoh_slots.
 - Platinum's own scripts now for CANALAVE's move deleter, the trade people, the MINING MUSEUM's researcher, the GAME
   CORNER's clerk and FLOAROMA MEADOW's HONEY seller (the stand-ins in data/scripts/sinnoh_places.inc / sinnoh_wild.inc
-  are gone). Not yet: the GAME CORNER's TM64 for four bonus rounds in a row (CheckBonusRoundStreak FALSE: Emerald's
-  slots have no bonus streak). Tests sinnoh_move_deleter, sinnoh_npc_trade, sinnoh_fossil, sinnoh_coins_honey.
+  are gone; the GAME CORNER's TM64: below). Tests sinnoh_move_deleter, sinnoh_npc_trade, sinnoh_fossil, sinnoh_coins_honey.
 - Platinum's SHARD move tutors (ROUTE 212, the SURVIVAL AREA, SNOWPOINT): src/data/sinnoh_tutors.h from
   tools/sinnoh/gen_tutors.py (res/pokemon/move_tutors.json: 38 moves, their RED / BLUE / YELLOW / GREEN SHARD costs and
   tutor; each species' learnset "by_tutor" as a bit mask, Platinum's 493 only). CheckHasLearnableTutorMoves,
@@ -4288,7 +4287,18 @@ follow_behind, follow_ground.
   METEOR and ROUTE 228's three (1.69.3): OpenMoveTutorMenu is Platinum's move-learning screen for one move, here the
   game's move relearner offering only it (move_relearner.c gMoveRelearnerOnlyMove; VAR_0x8004 kept and put back),
   CheckLearnedTutorMove the slot it went in or 0xFF. Tests sinnoh_draco_meteor, relearner (FALLARBOR's, unchanged).
-  Not yet: the SNOWPOINT man's "tough words" (CheckAllToughWordsUnlocked).
+  SNOWPOINT's man (1.69.4): Platinum's "tough words" a day are the game's EASY CHAT TRENDY SAYINGS
+  (TryBufferAndUnlockRandomToughWord: easy_chat.c UnlockRandomTrendySaying, as MAUVILLE's old man; -1 when all are
+  known; CheckAllToughWordsUnlocked: all 33 known). Test sinnoh_tough_word.
+- The GAME CORNER's TM64 (1.69.4): Platinum's clerk gives it for ten straight bonus rounds
+  (VAR_CONSECUTIVE_BONUS_ROUND_WINS, SINNOH's 0x51AA: the best of a sitting). The game's slots have no bonus game to
+  chain, so the record is the BONUS hits (any 7s: BIG / REG) of one sitting at a machine (slot_machine.c
+  bonusesThisSitting, kept in SlotTask_EndGame while in SINNOH); CheckBonusRoundStreak: 10 or more. Test sinnoh_tm64.
+- The POKéDEX's FORMS (1.69.4, Platinum's form viewer after ROUTE 218's gate scientist: TurnOnPokedexFormDetection ->
+  s3d_legends.c Sinnoh_FormViewerEnable, bit 31 of the UNOWN letters' "<save>.region" chunk UNOF): on UNOWN's page
+  SELECT shows the letters seen one at a time (pokedex.c MpDexFormsInput: LEFT / RIGHT, SELECT or B back). The game's
+  art has no other forms Platinum's viewer shows. The POKéDEX's foreign-language pages: left out (the user,
+  2026-11-03). `mp unownsee L...`, `mp formviewer`; test dex_forms.
 - The START menu's POKéMON (1.69.3): Platinum shows it once the starter is saved, so SaveChosenStarter sets
   FLAG_SYS_POKEMON_GET too (before, only a reload's SinnohStarterMenuFlag did); and in every region but HOENN it's
   shown whenever the party has someone (start_menu.c BuildNormalStartMenu). Test sinnoh_platinum_route201 (mp startmenu).

@@ -73,7 +73,8 @@ SINNOH_PARTY = 63   # (party and BAG queries, Platinum's ribbons: src/sinnoh/s3d
  PARTY_EV_TOTAL, PARTY_BUFFER_NATURE, PARTY_TEACH_MOVE, PARTY_TEACH_SLOT, PARTY_BUFFER_TYPE, PARTY_GET_MOVE,
  PARTY_TRADE_INIT, PARTY_TRADE_REQUESTED, PARTY_TRADE_START, PARTY_TRADE_END, PARTY_FOSSIL_FIND,
  PARTY_FOSSIL_SPECIES, PARTY_PRIZE, PARTY_HAS_COINS, PARTY_TUTOR_CAN, PARTY_TUTOR_MENU, PARTY_TUTOR_AFFORD,
- PARTY_TUTOR_PAY, PARTY_RESET_MOVE, PARTY_SHARD_COST, PARTY_SHARD_CLOSE, PARTY_LEARN_OPEN, PARTY_LEARN_RESULT) = range(49)
+ PARTY_TUTOR_PAY, PARTY_RESET_MOVE, PARTY_SHARD_COST, PARTY_SHARD_CLOSE, PARTY_LEARN_OPEN, PARTY_LEARN_RESULT,
+ PARTY_TOUGH_WORD, PARTY_TOUGH_ALL, PARTY_FORMS_ON) = range(52)
 SINNOH_ROAMER = 60   # (a roaming POKéMON set going: src/sinnoh/s3d_roamer.c; the slot, Platinum's ROAMING_SLOT_*)   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
 (TVCALL_STATUS, TVCALL_FRAMING, TVCALL_FINISH, TVCALL_SEGMENT_ID, TVCALL_SEGMENT, TVCALL_COMMERCIAL, TVCALL_NEXT,
  TVCALL_INTERVIEW_ID, TVCALL_INTERVIEW_MESSAGE, TVCALL_INTERVIEW_SAVE, TVCALL_INTERVIEW_OK, TVCALL_WORD,
@@ -1584,8 +1585,12 @@ class FileConverter:
         if cmd == 'UpdateCoinDisplay':
             return ['updatecoinsbox 1, 1']
         if cmd == 'CheckBonusRoundStreak':
-            # (the GAME CORNER's slots are the game's, which keep no bonus round streak)
-            return ['setvar %s, FALSE' % self.var(a[0])]
+            # (the GAME CORNER's slots are the game's: they keep the most BONUS hits of one sitting in Platinum's
+            # VAR_CONSECUTIVE_BONUS_ROUND_WINS, src/slot_machine.c SlotTask_EndGame; ten or more: TRUE)
+            skip = '%s%s__bonus%d' % (PREFIX, self.low, self.next_local())
+            return ['setvar %s, FALSE' % self.var(a[0]),
+                    'compare_var_to_value %s, 10' % self.var('VAR_CONSECUTIVE_BONUS_ROUND_WINS'), 'goto_if 0, %s' % skip,
+                    'setvar %s, TRUE' % self.var(a[0]), '%s:' % skip]
         if cmd == 'GetOverworldWeather':
             return [self.party(PARTY_WEATHER, 0, self.var(a[0]))]
         if cmd in ('AddMoney', 'RemoveMoney', 'RemoveMoney2') and self.is_var(a[0]):
@@ -1637,9 +1642,12 @@ class FileConverter:
                     'special DoInGameTradeScene', 'waitstate', self.party(PARTY_TRADE_END, 1)]
         if cmd == 'FinishNPCTrade':
             return [self.party(PARTY_TRADE_END)]
-        if cmd in ('TurnOnPokedexLanguageDetection', 'TurnOnPokedexFormDetection'):
-            # (the POKeDEX is the game's own, which has no foreign-language or form pages: the scripts go on as
-            # Platinum's, the MEISTER's flag set beside it)
+        if cmd == 'TurnOnPokedexFormDetection':
+            # (the POKeDEX's FORMS: SELECT on UNOWN's page, the letters seen; src/pokedex.c MpDexFormsInput)
+            return [self.party(PARTY_FORMS_ON)]
+        if cmd == 'TurnOnPokedexLanguageDetection':
+            # (the game's POKeDEX has no foreign-language pages, left out by the user's choice: the MEISTER's flag
+            # is still set beside it)
             return []
         if cmd == 'BufferTypeName':
             return [self.party(PARTY_ARG, self.value(a[0])), self.party(PARTY_BUFFER_TYPE, self.arg(a[1]))]
@@ -1674,6 +1682,11 @@ class FileConverter:
             # (Platinum's move-learning screen for one move: the game's move relearner offering only it)
             return [self.party(PARTY_ARG, self.arg(a[1])), self.party(PARTY_LEARN_OPEN, self.arg(a[0])),
                     'special TeachMoveRelearnerMove', 'waitstate']
+        if cmd == 'TryBufferAndUnlockRandomToughWord':
+            # (-1: none left, as Platinum's)
+            return [self.party(PARTY_TOUGH_WORD, self.value(a[1]), self.var(a[0]))]
+        if cmd == 'CheckAllToughWordsUnlocked':
+            return [self.party(PARTY_TOUGH_ALL, 0, self.var(a[0]))]
         if cmd == 'CheckLearnedTutorMove':
             return [self.party(PARTY_LEARN_RESULT, 0, self.var(a[0]))]
         if cmd == 'CloseShardCostWindow':

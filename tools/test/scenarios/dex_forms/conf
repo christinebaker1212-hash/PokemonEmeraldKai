@@ -1,0 +1,7 @@
+# The POKéDEX's FORMS (Platinum's form viewer, after ROUTE 218's gate scientist): UNOWN caught, letters A, C, Z and ?
+# seen; SELECT on its page shows A, RIGHT goes C then Z then ? and round to A, LEFT back to ?, B back to the page.
+# Shots f_*.png.
+MODE=1
+TMO=120
+EXPECT_A=("dex forms: UNOWN 0 (1 of 4)" "dex forms: UNOWN 2 (2 of 4)" "dex forms: UNOWN 25 (3 of 4)" "dex forms: UNOWN 27 (4 of 4)")
+UNEXPECT_A=("[crash]" "TIMEOUT")

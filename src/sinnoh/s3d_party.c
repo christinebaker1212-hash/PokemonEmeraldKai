@@ -16,6 +16,8 @@
 #include "pokedex.h"
 #include "pokemon.h"
 #include "mp.h"
+#include "constants/easy_chat.h"
+#include "easy_chat.h"
 #include "s3d.h"
 #include "strings.h"
 #include "text.h"
@@ -218,6 +220,9 @@ enum
     PARTY_LEARN_OPEN,        // A slot, ARG move: the game's move relearner offering only it (OpenMoveTutorMenu; the
                              // script runs special TeachMoveRelearnerMove after)
     PARTY_LEARN_RESULT,      // B <- the move slot it went in, 0xFF: not learnt (CheckLearnedTutorMove)
+    PARTY_TOUGH_WORD,        // A text slot <- a new word for the EASY CHAT, B <- its number (0xFFFF: none left)
+    PARTY_TOUGH_ALL,         // B <- every such word is known
+    PARTY_FORMS_ON,          // the POKeDEX's form viewer turned on (TurnOnPokedexFormDetection: pokedex.c MpDexForms*)
 };
 
 extern u16 gMoveRelearnerOnlyMove;
@@ -650,6 +655,36 @@ void Sinnoh_PartyCall(u16 op, u16 a, u16 b)
         gMoveRelearnerOnlyMove = MOVE_NONE;
         gSpecialVar_0x8004 = sLearnKept;
         Out(b, slot);
+        break;
+    }
+    case PARTY_TOUGH_WORD:
+    {
+        // (Platinum's "tough words" a day from SNOWPOINT's man: the game's EASY CHAT's TRENDY SAYINGS, unlocked one at
+        // a time as MAUVILLE's old man does: easy_chat.c UnlockRandomTrendySaying)
+        u8 *StringVar(u16 n);
+        u16 word = UnlockRandomTrendySaying();
+        if (word == EC_EMPTY_WORD)
+            Out(b, 0xFFFF);
+        else
+        {
+            CopyEasyChatWord(StringVar(value), word);
+            Out(b, word & EC_MASK_INDEX);
+        }
+        MPNet_Log("party: a trendy saying unlocked: %d", word == EC_EMPTY_WORD ? -1 : (int)(word & EC_MASK_INDEX));
+        break;
+    }
+    case PARTY_TOUGH_ALL:
+    {
+        u16 n = 0;
+        for (i = 0; i < NUM_TRENDY_SAYINGS; i++)
+            n += (gSaveBlock1Ptr->unlockedTrendySayings[i / 8] >> (i % 8)) & 1;
+        Out(b, n == NUM_TRENDY_SAYINGS);
+        break;
+    }
+    case PARTY_FORMS_ON:
+    {
+        void Sinnoh_FormViewerEnable(void);
+        Sinnoh_FormViewerEnable();
         break;
     }
     case PARTY_TRADE_INIT:

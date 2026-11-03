@@ -3594,6 +3594,94 @@ static void FreeInfoScreenWindowAndBgBuffers(void)
         Free(tilemapBuffer);
 }
 
+// Moemon Kai: Platinum's POKeDEX FORMS (after ROUTE 218's gate scientist: s3d_legends.c Sinnoh_FormViewerOn): on
+// UNOWN's page SELECT shows the letters seen, one at a time (LEFT / RIGHT), SELECT or B goes back. The game's art has
+// no other forms Platinum's viewer shows (BURMY's cloaks, ROTOM, male / female...)
+static bool8 sMpForms;
+static u8 sMpFormLetter;
+
+static u32 MpUnownPersonality(u8 letter)
+{
+    return (letter & 3) | (((letter >> 2) & 3) << 8) | (((letter >> 4) & 3) << 16) | (((letter >> 6) & 3) << 24);
+}
+
+static void MpDexFormShow(u8 taskId)
+{
+    static const u8 sLetters[] = _("ABCDEFGHIJKLMNOPQRSTUVWXYZ!?");
+    static const u8 sFmt[] = _("FORMS  {LEFT_ARROW} UNOWN  {STR_VAR_1} {RIGHT_ARROW}   {STR_VAR_2}/{STR_VAR_3}");
+    u32 Sinnoh_UnownLetters(void);
+    u32 seen = Sinnoh_UnownLetters(), i, n = 0, at = 0;
+    u8 buf[64];
+    for (i = 0; i < 28; i++)
+        if ((seen >> i) & 1)
+        {
+            n++;
+            if (i <= sMpFormLetter)
+                at = n;
+        }
+    FreeAndDestroyMonPicSprite(gTasks[taskId].data[4]);
+    gTasks[taskId].data[4] = CreateMonPicSprite_HandleDeoxys(SPECIES_UNOWN, SHINY_ODDS, MpUnownPersonality(sMpFormLetter),
+                                                             TRUE, MON_PAGE_X, MON_PAGE_Y, 0, TAG_NONE);
+    gSprites[gTasks[taskId].data[4]].oam.priority = 0;
+    gStringVar1[0] = sLetters[sMpFormLetter];
+    gStringVar1[1] = EOS;
+    ConvertIntToDecimalStringN(gStringVar2, at, STR_CONV_MODE_LEFT_ALIGN, 2);
+    ConvertIntToDecimalStringN(gStringVar3, n, STR_CONV_MODE_LEFT_ALIGN, 2);
+    StringExpandPlaceholders(buf, sFmt);
+    FillWindowPixelRect(WIN_INFO, PIXEL_FILL(0), 0, MP_DEX_TEXT_TOP, DISPLAY_WIDTH, DISPLAY_HEIGHT - MP_DEX_TEXT_TOP);
+    PrintInfoScreenText(buf, 16, MP_DEX_TEXT_TOP);
+    CopyWindowToVram(WIN_INFO, COPYWIN_GFX);
+    MPNet_Log("dex forms: UNOWN %u (%u of %u)", sMpFormLetter, at, n);
+}
+
+static bool8 MpDexFormsInput(u8 taskId)
+{
+    bool8 Sinnoh_FormViewerOn(void);
+    u32 Sinnoh_UnownLetters(void);
+    u32 seen = Sinnoh_UnownLetters(), i;
+    if (!sMpForms)
+    {
+        if (!JOY_NEW(SELECT_BUTTON) || NationalPokedexNumToSpecies(sPokedexListItem->dexNum) != SPECIES_UNOWN
+         || !Sinnoh_FormViewerOn() || seen == 0)
+            return FALSE;
+        sMpForms = TRUE;
+        for (sMpFormLetter = 0; !((seen >> sMpFormLetter) & 1); sMpFormLetter++)
+            ;
+        PlaySE(SE_SELECT);
+        MpDexFormShow(taskId);
+        return TRUE;
+    }
+    if (JOY_NEW(B_BUTTON | SELECT_BUTTON))
+    {
+        sMpForms = FALSE;
+        FreeAndDestroyMonPicSprite(gTasks[taskId].data[4]);
+        gTasks[taskId].data[4] = CreateMonSpriteFromNationalDexNumber(sPokedexListItem->dexNum, MON_PAGE_X, MON_PAGE_Y, 0);
+        gSprites[gTasks[taskId].data[4]].oam.priority = 0;
+        MpDexDraw();
+        CopyWindowToVram(WIN_INFO, COPYWIN_GFX);
+        PlaySE(SE_SELECT);
+        return TRUE;
+    }
+    if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
+    {
+        s32 step = JOY_NEW(DPAD_RIGHT) ? 1 : 27;
+        u8 letter = sMpFormLetter;
+        for (i = 0; i < 28; i++)
+        {
+            letter = (letter + step) % 28;
+            if ((seen >> letter) & 1)
+                break;
+        }
+        if (letter != sMpFormLetter)
+        {
+            sMpFormLetter = letter;
+            PlaySE(SE_DEX_PAGE);
+            MpDexFormShow(taskId);
+        }
+    }
+    return TRUE;   // (the rest of the page waits while the forms are shown)
+}
+
 static void Task_HandleInfoScreenInput(u8 taskId)
 {
     MpUpdateCategoryLine();
@@ -3607,6 +3695,8 @@ static void Task_HandleInfoScreenInput(u8 taskId)
         return;
     }
     if (MpDexReadInput()) // Moemon Co-op: TEXT is open
+        return;
+    if (MpDexFormsInput(taskId)) // Moemon Kai: Platinum's FORMS
         return;
     if (JOY_NEW(B_BUTTON))
     {

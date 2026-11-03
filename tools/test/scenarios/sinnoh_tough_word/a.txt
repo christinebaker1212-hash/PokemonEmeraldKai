@@ -1,0 +1,13 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp warp 43,64,5,6
+wait 60
+waitfor field 1000
+mp face up
+press A 1
+pressuntillog A 2000 party: a trendy saying unlocked
+wait 30
+shot s_word
+pressuntil A field 2000
+quit

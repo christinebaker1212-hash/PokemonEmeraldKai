@@ -672,6 +672,23 @@ void MP_TestCommand(const char *cmd, const char *arg)
             gMpConfig.scaleGardenPct = g > 100 ? 100 : g;
         printf("[test] sprite scaling: followers %d garden %d\n", MP_SCALE_FOLLOWERS_NOW(), MP_SCALE_GARDEN_NOW());
     }
+    else if (strcmp(cmd, "unownsee") == 0)
+    {
+        // unownsee LETTER [LETTER...]: UNOWN letters 0-27 seen; formviewer: ROUTE 218's POKeDEX upgrade (s3d_legends.c)
+        void Sinnoh_UnownSeen(u32 personality);
+        const char *p = arg;
+        int l, used;
+        while (sscanf(p, "%d%n", &l, &used) == 1)
+        {
+            Sinnoh_UnownSeen((l & 3) | (((l >> 2) & 3) << 8) | (((l >> 4) & 3) << 16) | (((l >> 6) & 3) << 24));
+            p += used;
+        }
+    }
+    else if (strcmp(cmd, "formviewer") == 0)
+    {
+        void Sinnoh_FormViewerEnable(void);
+        Sinnoh_FormViewerEnable();
+    }
     else if (strcmp(cmd, "dexorder") == 0)
     {
         // dexorder MODE ORDER: the POKéDEX list's mode (0 HOENN, 1 NATIONAL) and order (1 A-Z: only seen ones)
