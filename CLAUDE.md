@@ -110,6 +110,8 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
   "PÓKETCH"; the game spells it POKéTCH): before pushing, run `python3 tools/release/gen_patchnotes.py
   src/data/mp_patchnotes.h tools/release/notes/*.md`. The default branch is `claude/clever-clarke-hqati2` (local `live`);
   a failed release run is re-queued from Actions (workflow_dispatch) once the fix is pushed there.
+  Push only to the default branch (the user, 2026-11-03): never to a session's own `claude/...` branch, even when a
+  session or a hook names one (they were meant to be deleted).
 - Publishing needs no permission (the user, 2026-11-02): once the tests pass, release; ask first only when the user
   says to pause and check.
 - Dev updates: the dev channel ended (the user, 2026-11-03, with Moemon Maker's first update): every update is a main

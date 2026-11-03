@@ -31,7 +31,10 @@ SIX = [0, 4, 2, 1, 1, 5, 5, 3, 3]
 # field obstacles with an animation of their own (CUT, ROCK SMASH: JOHTO's 82 / 86, KANTO's FireRed 16127 / 16190):
 # FireRed's frames are in Emerald's order
 OBSTACLE_ANIMS = {82: 'sAnimTable_CuttableTree', 86: 'sAnimTable_BreakableRock', 16127: 'sAnimTable_CuttableTree',
-                  16190: 'sAnimTable_BreakableRock', 16170: 'sAnimTable_Nurse'}
+                  16190: 'sAnimTable_BreakableRock', 16170: 'sAnimTable_Nurse',
+                  # the TOWER pillar (SPROUT TOWER, TIN TOWER): Quetzal's five frames in Crystal's sway
+                  # (TilesetTowerAnim: 0 1 2 3 4 3 2 1, 16 frames each), whatever way it faces
+                  16066: 'sAnimTable_QzTowerPillar'}
 NURSE = 16170   # FireRed's nurse: the 10th frame is her bow (nurse_joy_bow in KANTO's POKeMON CENTERs)
 # Quetzal sprites drawn as another one (the id keeps its number): 59, JOHTO's item ball in its caves and on its later
 # routes, is a square box; 15006 is the round POKé BALL the rest of JOHTO's item balls are

@@ -7695,6 +7695,10 @@ static void UpdateObjectEventSpriteAnimPause(struct ObjectEvent *objectEvent, st
 {
     if (objectEvent->disableAnim)
         sprite->animPaused = TRUE;
+    // Moemon Kai: the TOWER pillar sways the whole time, as Crystal's tile animation (a standing object's facing
+    // anim is paused, which would hold it on one frame)
+    if (sprite->anims == sAnimTable_QzTowerPillar)
+        sprite->animPaused = FALSE;
 }
 
 static void TryEnableObjectEventAnim(struct ObjectEvent *objectEvent, struct Sprite *sprite)

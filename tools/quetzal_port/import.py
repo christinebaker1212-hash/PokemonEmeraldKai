@@ -18,6 +18,7 @@ unless --force. What it writes:
 - data/qz_specials.inc + src/qz_specials_stub.c: Quetzal's specials as Kai specials (QzName), stubbed until ported
 """
 import glob
+import frlg_blocks
 import json
 import os
 import re
@@ -141,6 +142,7 @@ def import_layouts(rename):
         os.makedirs(dst, exist_ok=True)
         for f in ('map.bin', 'border.bin'):
             shutil.copy(os.path.join(REPO, l['%s_filepath' % ('blockdata' if f == 'map.bin' else 'border')]), os.path.join(dst, f))
+        frlg_blocks.apply(name, os.path.join(dst, 'map.bin'))   # (FireRed's blocks where Quetzal changed them)
         kai['layouts'].append({
             'id': l['id'], 'name': l['name'], 'width': l['width'], 'height': l['height'],
             'primary_tileset': rename.get(l['primary_tileset'], l['primary_tileset']),

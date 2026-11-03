@@ -14,6 +14,9 @@ import os
 import struct
 import sys
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'quetzal_port'))
+import frlg_blocks   # (FireRed's blocks where Quetzal changed them: the game's copy only)
+
 REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 TABLE = 0x930A8C
 # Quetzal's id: (name, the layout it stands in for: same size and tilesets)
@@ -52,6 +55,7 @@ def main():
             open(os.path.join(d, 'map.bin'), 'wb').write(rom[blocks - 0x08000000:blocks - 0x08000000 + w * h * 2])
             open(os.path.join(d, 'border.bin'), 'wb').write(rom[border - 0x08000000:border - 0x08000000 + bw * bh * 2])
             table['layouts'] = [l for l in table['layouts'] if l['id'] != lid_const]
+        frlg_blocks.apply(name, os.path.join(REPO, 'data/layouts', name, 'map.bin'))
         rip['layouts'].append({
             'id': lid_const, 'name': name + '_Layout', 'width': w, 'height': h, 'border_width': bw, 'border_height': bh,
             'primary_tileset': base['primary_tileset'], 'secondary_tileset': base['secondary_tileset'],

@@ -8771,7 +8771,7 @@ static const struct ObjectEventGraphicsInfo sObjectEventGraphicsInfo_Qz16066 = {
     .tracks = TRACKS_FOOT,
     .oam = &gObjectEventBaseOam_64x64,
     .subspriteTables = sOamTables_64x64,
-    .anims = sAnimTable_Standard,
+    .anims = sAnimTable_QzTowerPillar,
     .images = sPicTable_Qz16066,
     .affineAnims = gDummySpriteAffineAnimTable,
 };

@@ -4665,8 +4665,13 @@ or the README. The updater no longer has a dev channel: AllowSmallTweaks only un
   CleanArtCorners cleans what's left in a rounded corner.
 - JOHTO's item ball sprite 59 is drawn as 15006 (gen_objects.py DRAWN_AS); ETHAN's back picture frames reordered
   (moemon_chars/import.py BACK_ORDER).
-- SPROUT TOWER's pillar: tools/quetzal_port/gen_sprout_pillar.py (Crystal's TilesetTowerAnim timing on Quetzal's
-  column), tileset_anims.c TilesetAnim_QzSproutPillar.
+- The TOWER pillar (SPROUT TOWER, TIN TOWER) is Quetzal's object 16066 (five frames), not map tiles: gen_objects.py
+  OBSTACLE_ANIMS gives it object_event_anims.h sAnimTable_QzTowerPillar (Crystal's TilesetTowerAnim: 0 1 2 3 4 3 2 1,
+  16 frames a step, for every anim index) and event_object_movement.c UpdateObjectEventSpriteAnimPause keeps it
+  running (a standing object's facing anim is paused). Test johto_sprout_pillar (check_pillar_sway.py).
+- Where Quetzal's KANTO layouts differ from FireRed's, FireRed's win (the user, 2026-11-03): tools/quetzal_port/
+  frlg_blocks.py puts FireRed's blocks back in data/layouts at import (the rip keeps Quetzal's bytes); so far SEAFOAM
+  B3F's two ledge-side tiles. The three alternate layouts are FireRed's own byte for byte.
 - The MAGNET TRAIN (data/scripts/mp_region.inc, MP_MagnetTrainOpen: either LEAGUE + the S.S. TICKET) rides Crystal's
   scene (engine/events/magnet_train.asm) in src/mp/mp_magnettrain.c with art from tools/quetzal_port/gen_magnet_train.py
   POKECRYSTAL_DIR: BG1 the scenery (Crystal's 18 rows a row lower; the GBA's extra top and bottom rows carry on the

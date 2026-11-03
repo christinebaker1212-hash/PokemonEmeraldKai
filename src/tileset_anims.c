@@ -652,23 +652,6 @@ static void _InitPrimaryTilesetAnimation(void)
         }
 }
 
-// Moemon Kai: SPROUT TOWER's pillar sways as Crystal's (TilesetTowerAnim: one step every 16 frames, 0 1 2 3 4 3 2 1;
-// tools/quetzal_port/gen_sprout_pillar.py)
-extern const struct Tileset gTileset_Johto_SproutTower1F;
-#include "data/tilesets/qz_sprout_pillar.h"
-static void TilesetAnim_QzSproutPillar(u16 timer)
-{
-    static const u8 sCycle[8] = {0, 1, 2, 3, 4, 3, 2, 1};
-    u32 i;
-    const u16 *frame;
-    if (timer % 16 != 0)
-        return;
-    frame = sQzSproutPillarFrames[sCycle[(timer / 16) % 8]];
-    for (i = 0; i < ARRAY_COUNT(sQzSproutPillarTiles); i++)
-        AppendTilesetAnimToBuffer(frame + i * TILE_SIZE_4BPP / 2, (u16 *)(BG_VRAM + TILE_OFFSET_4BPP(sQzSproutPillarTiles[i])),
-                                  TILE_SIZE_4BPP);
-}
-
 static void _InitSecondaryTilesetAnimation(void)
 {
     const struct MapLayout *layout = sAnimLayout ? sAnimLayout : gMapHeader.mapLayout;
@@ -677,11 +660,6 @@ static void _InitSecondaryTilesetAnimation(void)
     sSecondaryTilesetAnimCallback = NULL;
     if (layout->secondaryTileset && layout->secondaryTileset->callback)
         layout->secondaryTileset->callback();
-    if (layout->secondaryTileset == &gTileset_Johto_SproutTower1F)
-    {
-        sSecondaryTilesetAnimCounterMax = 128;
-        sSecondaryTilesetAnimCallback = TilesetAnim_QzSproutPillar;
-    }
 }
 
 // Moemon Maker: a layout's tile animations without making it the current map (src/maker/maker_tiles.c): the same
