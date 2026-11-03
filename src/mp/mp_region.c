@@ -4,6 +4,7 @@
 //   (tools/quetzal_port/import.py). They are kept in "<save>.region", written with the save and only read back
 //   when it was written with this very save (like the bag's extra slots, mp_bag.c).
 #include <stdio.h>
+#include "mp_version.h"
 #include <string.h>
 #include <stdlib.h>
 #include "global.h"
@@ -336,7 +337,7 @@ void MP_Region_WriteSidecar(void)
     char path[600], tmp[610];
     FILE *f;
     u32 header[4];
-    if (gSaveBlock2Ptr == NULL)
+    if (gSaveBlock2Ptr == NULL || MOEMON_DEV_BUILD)   // (a dev build never writes a save or its side files)
         return;
     snprintf(path, sizeof(path), "%s.region", gPlatformSavePath);
     snprintf(tmp, sizeof(tmp), "%s.tmp", path);

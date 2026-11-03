@@ -10,6 +10,7 @@
 //   the phone can link through the server when it's away from home: the same sealed link, frames in chunks.
 // - An invite: the phone's JOIN asks the game to join a friend's room ("join" order).
 #include <stdio.h>
+#include "mp_version.h"
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -92,6 +93,8 @@ static void PalsWrite(void)
 {
     char path[600];
     FILE *f;
+    if (MOEMON_DEV_BUILD)   // (a dev build never writes a save or its side files)
+        return;
     PalsPath(path, sizeof(path));
     f = fopen(path, "wb");
     if (f != NULL)
