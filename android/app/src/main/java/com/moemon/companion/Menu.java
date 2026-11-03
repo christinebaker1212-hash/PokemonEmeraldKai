@@ -34,6 +34,13 @@ public final class Menu {
         dim.setColor(0x80000000);
     }
 
+    /** No rows yet (a message's OK taken away, to give it its own) */
+    public Menu setRows() {
+        rows.clear();
+        actions.clear();
+        return this;
+    }
+
     public Menu add(String row, Action a) {
         rows.add(row);
         actions.add(a);

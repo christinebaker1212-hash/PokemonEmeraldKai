@@ -41,6 +41,16 @@ public final class LinkClient {
     });
     private Thread thread;
     private volatile boolean snapAsked;
+    /** The last message the link couldn't take (its stack), for the "Couldn't do" report; null if none */
+    public volatile String lastError;
+
+    private static JSONObject errorMessage() {
+        try {
+            return new JSONObject().put("t", "linkerror");
+        } catch (JSONException e) {
+            return new JSONObject();
+        }
+    }
 
     public LinkClient(Crypto crypto, Store store, SavedLink saved, Listener listener) {
         this.crypto = crypto;
@@ -236,6 +246,12 @@ public final class LinkClient {
             } catch (Link.Refused r) {
                 setStatus(Status.REFUSED, r.why);
             } catch (IOException | JSONException ignored) {
+            } catch (RuntimeException e) {
+                // (a message the app couldn't take: the link starts over, the app stays open, and it says what)
+                java.io.StringWriter sw = new java.io.StringWriter();
+                e.printStackTrace(new java.io.PrintWriter(sw));
+                lastError = sw.toString();
+                listener.onMessage(errorMessage());
             } finally {
                 link = null;
                 l.close();

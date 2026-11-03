@@ -72,6 +72,9 @@ android {
                 systemProperty 'robolectric.dependency.repo.url', 'https://maven-central.storage-download.googleapis.com/maven2'
                 systemProperty 'robolectric.graphicsMode', 'NATIVE'
                 systemProperty 'screens.out', file("$buildDir/screens").absolutePath
+                // LiveTest: the app against a headless game (the host build of the link library from coretest/run.sh)
+                systemProperty 'java.library.path', file('../../build/coretest').absolutePath
+                systemProperty 'moemon.root', file('../..').absolutePath
                 maxHeapSize = '2g'
             }
         }

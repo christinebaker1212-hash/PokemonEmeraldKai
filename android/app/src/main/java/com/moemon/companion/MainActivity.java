@@ -26,16 +26,38 @@ public class MainActivity extends Activity {
             return;
         }
         view = new GameView(this, app);
-        setContentView(view);
+        android.widget.FrameLayout root = new android.widget.FrameLayout(this);
+        root.setBackgroundColor(0xFF283848);
+        root.addView(view);
+        root.setOnApplyWindowInsetsListener((v, insets) -> {
+            int il, it, ir, ib;
+            if (android.os.Build.VERSION.SDK_INT >= 30) {
+                android.graphics.Insets i = insets.getInsets(android.view.WindowInsets.Type.systemBars()
+                        | android.view.WindowInsets.Type.displayCutout());
+                il = i.left; it = i.top; ir = i.right; ib = i.bottom;
+            } else {
+                il = insets.getSystemWindowInsetLeft(); it = insets.getSystemWindowInsetTop();
+                ir = insets.getSystemWindowInsetRight(); ib = insets.getSystemWindowInsetBottom();
+            }
+            v.setPadding(il, it, ir, ib);
+            return insets;
+        });
+        setContentView(root);
         if (app.saves.isEmpty()) {
             view.showOver(new PairPage(view));
         }
-        String crash = app.lastCrash();
+        CrashReport crash = CrashReport.take(this, app);
         if (crash != null) {
-            String[] lines = crash.split("\n");
-            String first = lines.length > 1 ? lines[1].trim() : crash.trim();
-            view.message("The app closed last time. Please tell the game's team: " + first.replaceAll("[^A-Za-z0-9 .:_()]", " "));
-            android.util.Log.e("Moemon", crash);
+            android.util.Log.e("Moemon", crash.full);
+            Menu m = Menu.message(view, "The app closed last time: " + crash.summary
+                    + "\nCOPY puts the whole report in the clipboard, to send to the game's team.");
+            m.setRows();
+            m.add("COPY", () -> {
+                crash.copy(this);
+                view.message("Copied. Paste it in your message.");
+            });
+            m.add("OK", null);
+            view.showMenu(m);
         } else {
             Updater.check(view, false);
         }

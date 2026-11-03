@@ -363,7 +363,12 @@ public final class Companion implements LinkClient.Listener {
         if (client == null) {
             return;
         }
-        if (t.equals("spawnmaps")) {
+        if (t.equals("linkerror")) {
+            String e = client.lastError == null ? "" : client.lastError;
+            store.write("linkerror.txt", e);
+            toast = "LINK ERROR: " + firstLine(e);
+            toastAt = System.currentTimeMillis();
+        } else if (t.equals("spawnmaps")) {
             spawnMaps = m;
             store.write("spawnmaps_" + client.saved().id() + ".json", m.toString());
         } else if (t.equals("spawns")) {
@@ -375,6 +380,11 @@ public final class Companion implements LinkClient.Listener {
             return;
         }
         changed();
+    }
+
+    static String firstLine(String s) {
+        String l = s.split("\n")[0].trim();
+        return l.replaceAll("[^A-Za-z0-9 .:_()]", " ");
     }
 
     public static String hex(byte[] b) {

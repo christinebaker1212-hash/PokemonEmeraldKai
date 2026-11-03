@@ -101,8 +101,11 @@ A plain Android app (no AndroidX; minSdk 26), its screens drawn in the game's pi
 - Build: `cd android && ./gradlew assembleDebug` (ANDROID_HOME set; NDK 27.2). Tests: `android/coretest/run.sh` (the
   core against a headless game: pairing, a move with the rev agreeing, a stale order refused, an order made away done
   on the next link, a change made in the game bringing a new snapshot, the spawn maps; `SNAP_OUT=DIR` saves a real
-  snapshot) and `./gradlew testDebugUnitTest` (Robolectric's real graphics: every page from that snapshot, pictures in
-  app/build/screens).
+  snapshot) and `./gradlew testDebugUnitTest` (Robolectric's real graphics: ScreensTest draws every page from that snapshot,
+  pictures in app/build/screens; LiveTest runs the whole app against a headless game: pairing, GIVE, MOVE, SPAWNS, by
+  taps, after `make linux` and coretest/run.sh).
+- Android draws the app under its bars (edge to edge, Android 15): MainActivity pads the view by the system bars'
+  insets. Why the app last closed: CrashReport (its own Java crash note and Android's ApplicationExitInfo), COPY.
 - Release: the release workflow builds and signs `MoemonCompanion.apk` with the repository secrets
   `MOEMON_APK_KEYSTORE_B64` (the keystore, base64) and `MOEMON_APK_PASSWORD` (alias `moemon`); without them the release
   has no app. The key must never change: an APK signed with another key can't update the installed one.
