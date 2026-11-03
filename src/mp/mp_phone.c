@@ -296,7 +296,8 @@ static void BufBoxMon(struct Buf *b, struct BoxPokemon *box)
     BufAdd(b, "{\"s\":%u,\"e\":%u,\"p\":%u,\"o\":%u,\"l\":%u,\"i\":%u,\"g\":%u,\"sh\":%u,\"nat\":%u,\"ab\":%u,\"ball\":%u,"
            "\"f\":%u,\"n\":", species, (unsigned)GetBoxMonData(box, MON_DATA_IS_EGG), (unsigned)pid, (unsigned)ot,
            GetLevelFromBoxMonExp(box), (unsigned)GetBoxMonData(box, MON_DATA_HELD_ITEM), GetBoxMonGender(box),
-           IsShinyOtIdPersonality(ot, pid), GetNatureFromPersonality(pid), (unsigned)GetBoxMonData(box, MON_DATA_ABILITY_NUM),
+           IsShinyOtIdPersonality(ot, pid), GetNatureFromPersonality(pid),
+           (unsigned)GetAbilityBySpecies(species, GetBoxMonData(box, MON_DATA_ABILITY_NUM)),
            (unsigned)GetBoxMonData(box, MON_DATA_POKEBALL), (unsigned)GetBoxMonData(box, MON_DATA_FRIENDSHIP));
     BufText(b, nick, POKEMON_NAME_LENGTH);
     BufAdd(b, ",\"m\":[");
@@ -345,6 +346,39 @@ static void BufPlace(struct Buf *b)
            gSaveBlock1Ptr->location.mapNum, gMapHeader.mapType, PcReachable(), Safe());
 }
 
+// A hash of everything the snapshot shows that can change (party, boxes, BAG, money, POKeDEX): "rev" in "snap" and
+// "state", so the app asks for a new snapshot only when the save changed (by hand in the game, too)
+static u32 Fnv(u32 h, const void *data, u32 n)
+{
+    const u8 *p = data;
+    while (n--)
+        h = (h ^ *p++) * 16777619u;
+    return h;
+}
+
+static u32 Rev(void)
+{
+    u32 h = 2166136261u, p, i, v;
+    h = Fnv(h, gPlayerParty, sizeof(gPlayerParty));
+    h = Fnv(h, Storage(), sizeof(struct PokemonStorage));
+    for (p = 0; p < POCKETS_COUNT; p++)
+        for (i = 0; i < gBagPockets[p].capacity; i++)
+        {
+            v = (gBagPockets[p].itemSlots[i].itemId << 16) | Quantity(&gBagPockets[p].itemSlots[i]);
+            h = Fnv(h, &v, 4);
+        }
+    v = GetMoney(&gSaveBlock1Ptr->money);
+    h = Fnv(h, &v, 4);
+    v = GetCoins();
+    h = Fnv(h, &v, 4);
+    for (i = 1; i <= NATIONAL_DEX_COUNT; i++)
+    {
+        v = GetSetPokedexFlag(i, FLAG_GET_SEEN) | (GetSetPokedexFlag(i, FLAG_GET_CAUGHT) << 1);
+        h = Fnv(h, &v, 1);
+    }
+    return h;
+}
+
 static void BufBag(struct Buf *b)
 {
     u32 p, i;
@@ -372,7 +406,7 @@ static void BufSnapshot(struct Buf *b)
     u32 i, j, n;
     char id[2 * PHONE_SAVEID_SIZE + 1];
     PhoneProto_ToHex(sFile.saveId, PHONE_SAVEID_SIZE, id);
-    BufAdd(b, "{\"t\":\"snap\",\"save\":{\"id\":\"%s\",\"name\":", id);
+    BufAdd(b, "{\"t\":\"snap\",\"rev\":%u,\"save\":{\"id\":\"%s\",\"name\":", (unsigned)Rev(), id);
     BufText(b, gSaveBlock2Ptr->playerName, PLAYER_NAME_LENGTH);
     BufAdd(b, ",\"tid\":%u,\"gender\":%u,\"region\":%u,\"gen\":%u,\"badges\":%u,\"money\":%u,\"coins\":%u,\"game\":\"%s\"},",
            (unsigned)(gSaveBlock2Ptr->playerTrainerId[0] | (gSaveBlock2Ptr->playerTrainerId[1] << 8)),
@@ -910,7 +944,8 @@ static void SendSnapshot(int c)
 static void SendState(int c)
 {
     BufReset(&sOut);
-    BufAdd(&sOut, "{\"t\":\"state\",\"queued\":%u,\"applied\":%u,", sOrderCount, (unsigned)sApplied);
+    BufAdd(&sOut, "{\"t\":\"state\",\"rev\":%u,\"queued\":%u,\"applied\":%u,", (unsigned)Rev(), sOrderCount,
+           (unsigned)sApplied);
     BufPlace(&sOut);
     BufAdd(&sOut, "}");
     SendBuf(c, &sOut);
@@ -926,7 +961,9 @@ static struct Done *FindDone(s8 phone, u32 id)
 }
 
 // The answer to an order: done (with the places it changed, as they are now) or why not
-static void SendDone(int c, u32 id, const char *why)
+// (fresh: "rev" after it, so the app knows its model, with the changes applied, is the game's; a repeated answer or
+// a refusal has none)
+static void SendDone(int c, u32 id, const char *why, bool8 fresh)
 {
     u32 i;
     BufReset(&sOut);
@@ -962,6 +999,8 @@ static void SendDone(int c, u32 id, const char *why)
         BufAdd(&sOut, ",");
         BufBag(&sOut);
     }
+    if (fresh && why == NULL)
+        BufAdd(&sOut, ",\"rev\":%u", (unsigned)Rev());
     BufAdd(&sOut, "}");
     SendBuf(c, &sOut);
 }
@@ -993,7 +1032,7 @@ static void Finish(int c, u32 id, const char *json)
     if (why == NULL)
         sApplied++;
     MPNet_Log("phone: order %u %s%s", (unsigned)id, why ? "not done: " : "done", why ? why : "");
-    SendDone(c, id, why);
+    SendDone(c, id, why, TRUE);
 }
 
 static void OnOrder(int c, const char *json)
@@ -1008,7 +1047,7 @@ static void OnOrder(int c, const char *json)
         // (sent again after a lost answer: the same answer, never done twice)
         sChangedCount = 0;
         sBagChanged = FALSE;
-        SendDone(c, (u32)id, d->why[0] ? d->why : NULL);
+        SendDone(c, (u32)id, d->why[0] ? d->why : NULL, FALSE);
         return;
     }
     for (i = 0; i < sOrderCount; i++)
@@ -1021,7 +1060,7 @@ static void OnOrder(int c, const char *json)
     }
     if (sOrderCount >= ORDERS_MAX || strlen(json) >= ORDER_LEN)
     {
-        SendDone(c, (u32)id, "busy");
+        SendDone(c, (u32)id, "busy", FALSE);
         return;
     }
     sOrders[sOrderCount].conn = c;

@@ -2,6 +2,8 @@
 // the game does (docs/PHONE_LINK.md "The app's art"). MOEMON_EXPORT_APP=DIR runs it at the first frame and quits:
 //   DIR/icons/SPECIES.png   the party icon's two frames (32x64), DIR/front/SPECIES.png the front picture (64x64),
 //   DIR/items/ITEM.png      the BAG icon (24x24), DIR/font.png the normal font (16 glyphs a row, 16x16 cells),
+//   DIR/wallpapers/N.png    a PC box's wallpaper as the PC draws it (160x144: 20x18 tiles, the name's frame on top),
+//   DIR/frames/N.png        the window frames of OPTIONS > FRAME (24x24: 3x3 tiles, corners, sides and middle),
 //   DIR/data.json           species, moves, items, abilities, natures, types (names as the game's text bytes in hex),
 //                           the font's widths.
 // android/build_assets.sh runs it before building the APK.
@@ -16,10 +18,13 @@
 #include "decompress.h"
 #include "item.h"
 #include "item_icon.h"
+#include "malloc.h"
+#include "menu.h"
 #include "pokemon.h"
 #include "pokemon_icon.h"
 #include "pokemon_summary_screen.h"
 #include "strings.h"
+#include "text_window.h"
 #include "constants/characters.h"
 #include "constants/abilities.h"
 #include "constants/items.h"
@@ -34,6 +39,7 @@
 #endif
 
 void MP_ExportGlyph(u16 glyphId, u8 out[16][16], u8 *width);   // text.c
+bool8 MP_WallpaperArt(u8 id, const u32 **tiles, const u32 **tilemap, const u16 **palettes);   // pokemon_storage_system.c
 
 // ------------------------------------------------------------------------------------------- a tiny PNG writer
 
@@ -229,6 +235,71 @@ static void ExportItems(const char *dir)
     }
 }
 
+static void ExportWallpapers(const char *dir)
+{
+    static u8 sRgba[160 * 144 * 4];
+    const u32 *tiles, *tilemap;
+    const u16 *pals;
+    char path[600];
+    u8 id;
+    snprintf(path, sizeof(path), "%s/wallpapers", dir);
+    MakeDir(path);
+    for (id = 0; MP_WallpaperArt(id, &tiles, &tilemap, &pals); id++)
+    {
+        u32 gfxSize, mapSize, x, y;
+        // (the game heap's: Free, never free)
+        u8 *gfx = malloc_and_decompress(tiles, &gfxSize);
+        u16 *map = malloc_and_decompress(tilemap, &mapSize);
+        if (gfx == NULL || map == NULL || mapSize < 20 * 18 * 2)
+        {
+            if (gfx) Free(gfx);
+            if (map) Free(map);
+            continue;
+        }
+        // (pokemon_storage_system.c DrawWallpaper: the map's palettes 1-2 are the wallpaper's two, frame then
+        // background; color 0 is clear: the PC's backdrop shows there)
+        for (y = 0; y < 144; y++)
+            for (x = 0; x < 160; x++)
+            {
+                u16 e = map[(y / 8) * 20 + x / 8];
+                u32 t = e & 0x3FF, px = x & 7, py = y & 7, pal = (e >> 12) & 0xF, idx;
+                u16 c;
+                u8 *o = sRgba + (y * 160 + x) * 4;
+                if (e & 0x400)
+                    px = 7 - px;
+                if (e & 0x800)
+                    py = 7 - py;
+                idx = t * 32 + py * 4 + px / 2 < gfxSize ? (gfx[t * 32 + py * 4 + px / 2] >> ((px & 1) * 4)) & 0xF : 0;
+                pal = pal >= 1 && pal <= 2 ? pal - 1 : 0;
+                c = pals[pal * 16 + idx];
+                o[0] = (c & 31) * 255 / 31;
+                o[1] = ((c >> 5) & 31) * 255 / 31;
+                o[2] = ((c >> 10) & 31) * 255 / 31;
+                o[3] = idx ? 255 : 0;   // (the PC's own backdrop shows there)
+            }
+        snprintf(path, sizeof(path), "%s/wallpapers/%u.png", dir, id);
+        WritePng(path, sRgba, 160, 144);
+        if (gfx) Free(gfx);
+        if (map) Free(map);
+    }
+}
+
+static void ExportFrames(const char *dir)
+{
+    static u8 sRgba[24 * 24 * 4];
+    char path[600];
+    u8 id;
+    snprintf(path, sizeof(path), "%s/frames", dir);
+    MakeDir(path);
+    for (id = 0; id < WINDOW_FRAMES_COUNT; id++)
+    {
+        const struct TilesPal *f = GetWindowFrameTilesPal(id);
+        Tiles((const u8 *)f->tiles, 3, 3, f->pal, sRgba);
+        snprintf(path, sizeof(path), "%s/frames/%u.png", dir, id);
+        WritePng(path, sRgba, 24, 24);
+    }
+}
+
 static void ExportFont(const char *dir, FILE *json)
 {
     static u8 sRgba[256 * 256 * 4];
@@ -259,7 +330,7 @@ static void ExportData(const char *dir)
     f = fopen(path, "w");
     if (f == NULL)
         return;
-    fprintf(f, "{\"version\":1,\"species\":[");
+    fprintf(f, "{\"version\":1,\"egg\":%u,\"species\":[", SPECIES_EGG);
     for (i = 0; i < AllSpecies(); i++)
     {
         u16 base = i > SPECIES_EGG ? SPECIES_UNOWN : i;
@@ -326,6 +397,8 @@ void MP_Export_IfAsked(void)
     MakeDir(dir);
     ExportMons(dir);
     ExportItems(dir);
+    ExportWallpapers(dir);
+    ExportFrames(dir);
     ExportData(dir);
     printf("[export] the app's art and tables are in %s\n", dir);
     fflush(stdout);

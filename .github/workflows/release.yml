@@ -25,13 +25,20 @@ jobs:
         id: ver
         env:
           GH_TOKEN: ${{ github.token }}
+          HAS_APP_KEY: ${{ secrets.MOEMON_APK_KEYSTORE_B64 }}
         run: |
           VER=$(sed -n 's/^#define MOEMON_VERSION "\(.*\)"/\1/p' include/mp_version.h)
           [ -n "$VER" ]
           echo "tag=v$VER" >> "$GITHUB_OUTPUT"
           if gh release view "v$VER" > /dev/null 2>&1; then
-            echo "v$VER is already released: nothing to do"
-            echo "skip=true" >> "$GITHUB_OUTPUT"
+            # (run by hand once the app's signing secrets are in: a release without the app gets it added)
+            if [ -n "$HAS_APP_KEY" ] && ! gh release view "v$VER" --json assets -q '.assets[].name' | grep -qx MoemonCompanion.apk; then
+              echo "v$VER has no app yet: only the app is built and added to it"
+              echo "apponly=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "v$VER is already released: nothing to do"
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+            fi
           fi
 
       # The runner's Ubuntu mirror sometimes stalls in the middle of a download (normally this takes under a
@@ -59,7 +66,7 @@ jobs:
           key: debs-${{ runner.os }}-${{ hashFiles('tools/release/ci_tools.sh') }}-${{ github.run_id }}
 
       - name: SDL2 for Windows (2.30.9, checked)
-        if: steps.ver.outputs.skip != 'true'
+        if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
         run: |
           curl -sSL -o "$RUNNER_TEMP/sdl2.tar.gz" https://github.com/libsdl-org/SDL/releases/download/release-2.30.9/SDL2-devel-2.30.9-mingw.tar.gz
           echo "b188d165dc4a0372042bff3d0c18e9bb90772581e92a7b8b47b521b47714f75c  $RUNNER_TEMP/sdl2.tar.gz" | sha256sum -c
@@ -85,14 +92,14 @@ jobs:
       # built, the difference written into the copies this release ships (INFO gain=; nothing is committed). Files
       # holding the same music share one gain. If it can't run, the gains in the repository ship as they are.
       - name: Windows build
-        if: steps.ver.outputs.skip != 'true'
+        if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
         run: tools/release/build_windows.sh "$RUNNER_TEMP/SDL2-2.30.9"
 
       # Saves must load on every platform: the save's structures compiled for Linux and for Windows (whose bitfield
       # layout differs) must match tools/test/save_layout.txt, and scripts' table lookups must be in range.
       # A failure stops the release (1.60.0 broke Windows saves this way).
       - name: Save layout and script checks
-        if: steps.ver.outputs.skip != 'true'
+        if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
         run: |
           REQUIRE_WINDOWS=1 python3 tools/test/save_layout.py
           python3 tools/test/check_scripts.py
@@ -101,7 +108,7 @@ jobs:
       # machine is first used. When the songs are the same as the last release's, its line is kept and nothing is
       # uploaded again (the zip stays on the release that has it).
       - name: The DANCE machine's songs
-        if: steps.ver.outputs.skip != 'true'
+        if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -123,19 +130,49 @@ jobs:
           fi
           cat dist/songs.txt
 
-      - name: Packages and update.txt
+      # The Moemon Companion app (android/, docs/PHONE_LINK.md): the game's art exported by the Linux build, then the
+      # APK signed with the release key from the repository's secrets (MOEMON_APK_KEYSTORE_B64: the keystore in base64,
+      # MOEMON_APK_PASSWORD). Without them the release goes out without the app. A failed app build never holds the
+      # game back: it says so as a warning.
+      - name: Java for the app
         if: steps.ver.outputs.skip != 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Companion app (APK)
+        if: steps.ver.outputs.skip != 'true'
+        continue-on-error: true
+        env:
+          KEYSTORE_B64: ${{ secrets.MOEMON_APK_KEYSTORE_B64 }}
+          MOEMON_APK_STORE_PASSWORD: ${{ secrets.MOEMON_APK_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "::warning::no MOEMON_APK_KEYSTORE_B64 secret: the release has no app"
+            exit 0
+          fi
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          export MOEMON_APK_KEYSTORE="$RUNNER_TEMP/release.jks"
+          python3 android/build_assets.py
+          (cd android && ./gradlew --no-daemon -q assembleRelease) || { echo "::warning::the app didn't build"; exit 0; }
+          mkdir -p dist
+          cp android/app/build/outputs/apk/release/app-release.apk dist/MoemonCompanion.apk
+          ls -la dist/MoemonCompanion.apk
+
+      - name: Packages and update.txt
+        if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
         run: |
           tools/release/package.sh linux dist
           SDL2_DLL="$RUNNER_TEMP/SDL2-2.30.9/x86_64-w64-mingw32/bin/SDL2.dll" tools/release/package.sh windows dist
           tools/release/manifest.sh dist
 
       - name: Updater test (Linux)
-        if: steps.ver.outputs.skip != 'true'
+        if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
         run: NOBUILD=1 OUT="$RUNNER_TEMP/update_test" tools/test/update_test.sh
 
       - name: Publish
-        if: steps.ver.outputs.skip != 'true'
+        if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -148,5 +185,14 @@ jobs:
           if [ -n "$TITLE" ]; then NAME="$NAME: $TITLE"; fi
           SONGS=""
           [ -f dist/MoemonDanceSongs.zip ] && SONGS=dist/MoemonDanceSongs.zip
+          [ -f dist/MoemonCompanion.apk ] && SONGS="$SONGS dist/MoemonCompanion.apk"
           gh release create "$TAG" dist/MoemonEmeraldKaiCoop-windows.zip dist/MoemonEmeraldKaiCoop-linux.zip dist/update.txt $SONGS \
             --target "$GITHUB_SHA" --title "$NAME" --notes-file "$NOTES" --latest
+
+      - name: Add the app to the release
+        if: steps.ver.outputs.apponly == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -f dist/MoemonCompanion.apk ] || { echo "the app didn't build"; exit 1; }
+          gh release upload "${{ steps.ver.outputs.tag }}" dist/MoemonCompanion.apk

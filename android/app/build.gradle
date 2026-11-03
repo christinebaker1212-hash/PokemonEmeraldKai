@@ -1,0 +1,85 @@
+plugins {
+    id 'com.android.application'
+}
+
+// The game's version and the link's protocol number (include/mp_version.h, src/mp/phone_proto.h)
+def gameVersion = (file('../../include/mp_version.h').text =~ /#define MOEMON_VERSION "([^"]+)"/)[0][1]
+def parts = gameVersion.tokenize('.').collect { it as int } + [0, 0, 0]
+
+android {
+    namespace 'com.moemon.companion'
+    compileSdk 35
+    ndkVersion '27.2.12479018'
+
+    defaultConfig {
+        applicationId 'com.moemon.companion'
+        minSdk 26
+        targetSdk 35
+        versionCode parts[0] * 1000000 + parts[1] * 1000 + parts[2]
+        versionName gameVersion
+        externalNativeBuild {
+            cmake {
+                cppFlags ''
+            }
+        }
+        ndk {
+            abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64'
+        }
+    }
+
+    signingConfigs {
+        release {
+            // The release key (docs/PHONE_LINK.md "Signing"): from the repository's secrets in the release workflow
+            def ks = System.getenv('MOEMON_APK_KEYSTORE')
+            if (ks != null && file(ks).exists()) {
+                storeFile file(ks)
+                storePassword System.getenv('MOEMON_APK_STORE_PASSWORD')
+                keyAlias System.getenv('MOEMON_APK_KEY_ALIAS') ?: 'moemon'
+                keyPassword System.getenv('MOEMON_APK_KEY_PASSWORD') ?: System.getenv('MOEMON_APK_STORE_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            def ks = System.getenv('MOEMON_APK_KEYSTORE')
+            signingConfig = (ks != null && file(ks).exists()) ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path 'src/main/cpp/CMakeLists.txt'
+            version '3.22.1'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    packagingOptions {
+        jniLibs { useLegacyPackaging false }
+    }
+
+    // The screens drawn on a desktop JVM (Robolectric's real graphics): app/src/test, pictures in app/build/screens
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            all {
+                systemProperty 'robolectric.dependency.repo.url', 'https://maven-central.storage-download.googleapis.com/maven2'
+                systemProperty 'robolectric.graphicsMode', 'NATIVE'
+                systemProperty 'screens.out', file("$buildDir/screens").absolutePath
+                maxHeapSize = '2g'
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation 'com.google.zxing:core:3.5.3'   // reading the PHONE LINK screen's QR code
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.robolectric:robolectric:4.14.1'
+}

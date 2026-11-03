@@ -33,8 +33,11 @@ tools/sinnoh/words*.py / story_people.py only stand in until a script's commands
 **Done (2026-11-01): `docs/NEXT_TASKS.md`**, the user's list through 1.63.7 (40 PC boxes: COOP_NOTES "40 PC boxes"; the save holds
 14, "<save>.boxes" the rest, src/mp/mp_boxes.c; tools/test/pc_boxes.sh).
 
-**Trigger words: "Let's do the app"** -> the Moemon Companion App (Android), the user's design in `docs/COMPANION_APP.md`.
-On hold until the user says so: no app work before (finish the region work and SINNOH first).
+**The Moemon Companion App (Android)**: the user's design in `docs/COMPANION_APP.md`, started 2026-11-03 ("let's build
+the app"). Phase 1 (1.70.0): the game's PHONE LINK (src/mp/mp_phone.c, phone_proto.c, mp_export.c) and the app in
+android/ (core/ is Android-free), all in `docs/PHONE_LINK.md`; tests tools/phone/gate.py, android/coretest/run.sh,
+`./gradlew testDebugUnitTest` (pictures of every page). Assets from `python3 android/build_assets.py`. The APK is signed
+by repository secrets in the release workflow; its key must never change.
 
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
 card duels).

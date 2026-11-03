@@ -12055,3 +12055,15 @@ static void MpResetSprites(void)
         memset(sMpPc.rLabelName[p], 0, sizeof(sMpPc.rLabelName[p]));
     }
 }
+
+// Moemon Co-op: a wallpaper's art for the phone app's export (mp_export.c ExportWallpapers); FALSE past the last
+// (WALLPAPER_FRIENDS is drawn from Walda's pattern: the app shows PLAIN for it)
+bool8 MP_WallpaperArt(u8 id, const u32 **tiles, const u32 **tilemap, const u16 **palettes)
+{
+    if (id >= WALLPAPER_COUNT - 1)
+        return FALSE;
+    *tiles = sWallpapers[id].tiles;
+    *tilemap = sWallpapers[id].tilemap;
+    *palettes = sWallpapers[id].palettes;
+    return TRUE;
+}

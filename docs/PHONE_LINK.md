@@ -49,7 +49,7 @@ number, PHONE_LINK_VERSION, not the game's), `othersave`, `unknown`, `notpairing
 coins, the game's version), the place (map, map type, `pc`: the party may trade places with the PC here, `safe`: the
 game is free on the overworld), the party, the box in use, all 40 boxes (name, wallpaper, 30 places), the BAG's 5
 pockets, the POKéDEX (seen and caught as hex bit strings by national number). A POKéMON: species, egg, personality
-`p`, Trainer ID `o`, level, held item, gender, shiny, nature, ability, ball, friendship, nickname (hex), moves; in the
+`p`, Trainer ID `o`, level, held item, gender, shiny, nature, ability (its number in the ability table), ball, friendship, nickname (hex), moves; in the
 party also HP, max HP and status.
 
 Orders: `{"t":"order","id":N,"op":"move","from":PLACE,"to":PLACE,"p":..,"o":..,"tp":..,"to2":..}` (PLACE `{"box":B,
@@ -62,7 +62,9 @@ order when it is. The answer: `{"t":"done","id":N,"ok":1,"why":"","changed":[...
 PC here: towns, cities, routes and buildings only, not caves, the Underground, the BATTLE FRONTIERs or the Elite
 Four), `last` (the party's last POKéMON that isn't an egg), `full`, `egg`, `mail`, `noitem`, `cantheld`, `bagfull`,
 `nothing`, `busy`, `bad`. An order's ID is answered once: sent again, it gets the same answer and is never done twice.
-`{"t":"ping"}` -> `{"t":"state","queued":N,"applied":N,"place":...}`.
+`{"t":"ping"}` -> `{"t":"state","rev":R,"queued":N,"applied":N,"place":...}`. `rev` (in "snap" too, and in a fresh
+"done" that was carried out) is a hash of the party, the boxes, the BAG, money, coins and the POKéDEX: the app asks for
+a new snapshot when the game's `rev` isn't its own (the player changed something in the game by hand).
 
 Moves use the game's own functions (BoxMonToMon heals a POKéMON coming out of a box, as the PC does), the party closes
 up (CompactPartySlots), the PC's rule about the last POKéMON holds, and held HMs stay as the PC keeps them.
@@ -76,3 +78,32 @@ snapshot must equal the model, and the set of POKéMON (personality, Trainer ID,
 start: none lost, none copied. Passed: 1,000 edits with seeds 1, 2 and 3.
 
 Test `phone_screen` (the screen, its QR code and letters). `mp phone [pair|forget]` prints the link's state.
+
+## The app (android/)
+
+A plain Android app (no AndroidX; minSdk 26), its screens drawn in the game's pixels by one custom view.
+
+- `app/src/main/cpp/link_jni.c`: phone_proto.c and Monocypher through JNI (`Native`, `NativeCrypto`).
+- `core/` (no Android code, run on a desktop JVM by `android/coretest/run.sh`): `Link` (frames, pairing, hello,
+  discovery), `LinkClient` (a thread: the last address, else discovery; a snapshot, the waiting orders sent again,
+  pings; a new snapshot when the game's `rev` isn't the model's), `Orders` (on disk until answered; "Couldn't do"),
+  `Model` (the snapshot with each answer's places applied, on disk: the app opens on it, "AWAY 5 MIN AGO"), `Planned`
+  (the waiting orders played on the model the way DoMove plays them, for the dashed outlines).
+- The screens: `GameView` (a whole-number scale, at least 240 pixels across; the link on top, BOXES / PARTY / BAG /
+  DEX / SPAWNS at the bottom), `GameArt` (the game's font with its widths and two colors, icons, front pictures, BAG
+  icons, PC wallpapers, window frames), the pages, `Menu` (the game's windows), `PairPage`, `ScanActivity` (camera2 and
+  ZXing), `Updater` (the latest release's `.apk`, installed through PackageInstaller's "Install?").
+- The art and tables come from the game: `MOEMON_EXPORT_APP=DIR ./pokeemerald64` (src/mp/mp_export.c: icons, front
+  pictures, BAG icons, wallpapers as the PC draws them, window frames, the font, data.json) packed into sheets by
+  `python3 android/build_assets.py` (assets/game, never committed). Run it before building the app.
+- Build: `cd android && ./gradlew assembleDebug` (ANDROID_HOME set; NDK 27.2). Tests: `android/coretest/run.sh` (the
+  core against a headless game: pairing, a move with the rev agreeing, a stale order refused, an order made away done
+  on the next link, a change made in the game bringing a new snapshot, the spawn maps; `SNAP_OUT=DIR` saves a real
+  snapshot) and `./gradlew testDebugUnitTest` (Robolectric's real graphics: every page from that snapshot, pictures in
+  app/build/screens).
+- Release: the release workflow builds and signs `MoemonCompanion.apk` with the repository secrets
+  `MOEMON_APK_KEYSTORE_B64` (the keystore, base64) and `MOEMON_APK_PASSWORD` (alias `moemon`); without them the release
+  has no app. The key must never change: an APK signed with another key can't update the installed one.
+
+Not yet: the relay route away from home (the app is AWAY off the home network), the link moment's ceremony, sounds,
+search and sort, RELEASE, TMs and medicine, the Global / shared PC.

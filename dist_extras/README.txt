@@ -1857,6 +1857,30 @@ Everyone should run the same version. A different version is refused
 with a message saying so.
 
 
+THE PHONE APP (MOEMON COMPANION, ANDROID)
+-----------------------------------------
+Your PC boxes, party, BAG, POKéDEX and where POKéMON live, on your phone.
+1. Download MoemonCompanion.apk from the same release page as the game,
+   on the phone, and open it. Android asks once to allow "Install unknown
+   apps" for your browser: allow it, then INSTALL.
+2. In the game: OPTIONS > CO-OP > PHONE LINK shows a code.
+3. In the app: SCAN THE CODE (or TYPE THE LETTERS under it). The phone
+   and the PC must be on the same Wi-Fi.
+After that the app links by itself whenever the game runs with that save.
+  BOXES   drag a POKéMON (or hold it, then drag) to move it; swipe for the
+          next box, tap the box's name for all 40. Party <-> PC only where
+          a PC could be reached (towns, routes, buildings).
+  PARTY   details, GIVE and TAKE items. BAG: give an item to the party.
+  DEX     seen and owned, by number or name.
+  SPAWNS  every map's POKéMON by GRASS, SURF, ROCK SMASH and each ROD. Rare
+          ones stay a shadow and a hint until you meet them there.
+The game carries out every change itself, when it's free on the map. A
+change made while the game is busy or away waits (dashed outline) and is
+done on the next link; one that no longer makes sense goes to MENU >
+COULDN'T DO. The app updates itself from the game's releases (MENU >
+UPDATE). In the game, SELECT on the PHONE LINK screen forgets every phone.
+
+
 KNOWN LIMITATIONS
 -----------------
 * You see other players on your map and directly connected maps (e.g.
