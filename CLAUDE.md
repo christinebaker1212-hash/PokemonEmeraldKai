@@ -48,6 +48,8 @@ phases in order, then a UI/UX pass: "polished Nintendo quality, mid 2000s to 200
 regeneration or conversion script would alter or overwrite it, check `git log` / `git blame` and ask the user; never
 "fix" a user edit on assumption. `MoemonMaker/` takes precedence over the conversion scripts (tools/quetzal_port,
 tools/sinnoh...): they leave what `MoemonMaker/base/` overrides alone.
+The dev update channel ends with the Maker's first update (the user, 2026-11-03): AllowSmallTweaks stops selecting
+it, and no dev updates are pushed (docs/MOEMON_MAKER.md "The dev channel ends").
 
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
 card duels).

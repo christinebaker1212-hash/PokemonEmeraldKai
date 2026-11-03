@@ -70,6 +70,19 @@ Typing it plays a chime. On the title screen or main menu, the entry appears at 
 closes. It isn't remembered, so it's typed again after each start. No shortcut ships beside the game, and there's no
 `--maker` start option. Nothing about the Maker is in the player README.
 
+**The dev channel ends with this update** (the user, 2026-11-03: the DEV branch of Moemon Kai is erased). Today
+`AllowSmallTweaks = 1` also makes the updater pick the dev channel (updater.c `sWantDev = MP_ConfigAllowsTweaks()`;
+BUILDING_COOP.md "Dev update channel"), and dev builds can't save. That would make the Maker unusable, since its
+switch is the same setting. From the Maker's first update:
+
+- the updater always follows main, whatever `AllowSmallTweaks` says; the setting only unlocks the small tweaks
+  ("speed", "gimme", "maker"...);
+- dev-release.yml, the `dev-latest` prerelease and the dev parts of BUILDING_COOP.md / HANDOFF.md go;
+- **installs already on a dev build**: their updater only reads `dev-latest` and refuses a "main" manifest, so they'd
+  be stranded (and unable to save) if it vanished first. One last dev release is built from the new code: those
+  installs take it, and its updater moves them to main on the next start (a channel change installs even an equal
+  or lower version). Only then is `dev-latest` deleted.
+
 **"In the game" means the same program, not inside the game's screen.** The Maker never edits in the 240x160
 picture. It opens its own desktop window at any size, with menus, toolbars, panels and the mouse, like RPG Maker. The
 game's code just draws into it:
