@@ -481,7 +481,7 @@ Johto_EventScript_FruitTreeFull::
 	releaseall
 	end
 
-Johto_Text_FruitBearingTree:
+Johto_Text_FruitBearingTree::
 	.string "It’s a fruit-bearing tree.$"
 
 Johto_Text_HeyItsFruit:
@@ -493,5 +493,5 @@ Johto_Text_ObtainedFruit:
 Johto_Text_FruitBagFull:
 	.string "But the BAG is full…$"
 
-Johto_Text_NothingHere:
+Johto_Text_NothingHere::
 	.string "There’s nothing here…$"

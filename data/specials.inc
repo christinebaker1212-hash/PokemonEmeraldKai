@@ -674,3 +674,4 @@ gSpecials::
 	def_special MP_Region_BufferName   @ Moemon Kai: the region's name into STR_VAR_1 (src/mp/mp_region.c)
 	def_special MP_Region_GameCenterLooks   @ Moemon Kai: the GAME CENTER's 3F patrons by region (src/mp/mp_region.c)
 	def_special MP_Region_BufferGameCorner
+	def_special MP_JohtoBerries_NotRipe   @ Moemon Kai: JOHTO's BERRY patches (src/mp/mp_apricorn.c)

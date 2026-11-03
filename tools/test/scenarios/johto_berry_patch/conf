@@ -1,0 +1,8 @@
+# JOHTO's BERRY patches on Crystal's fruit trees (src/mp/mp_apricorn.c): ROUTE 29's (tree 122) starts ripe with ORAN
+# BERRIES (berry 7, item 139) and its sprite shows; picked, it is planted again with the same BERRY (stage 1) and its
+# sprite hides until they're ripe; talking to it then plants nothing (Crystal's "There's nothing here…")
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("berryinfo 122: berry 7 stage 5" "berryinfo 122: berry 7 stage 1" "item 139: " "ctx 1 free 1 overworld 1 locked 0 script 0")
+UNEXPECT_A=("berryinfo 122: berry 0" "[crash]" "TIMEOUT")

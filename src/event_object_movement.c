@@ -1934,6 +1934,7 @@ void PlayerObjectTurn(struct PlayerAvatar *playerAvatar, u8 direction)
     ObjectEventTurn(&gObjectEvents[playerAvatar->objectEventId], direction);
 }
 
+bool8 MP_JohtoBerries_IsPatch(u8 tree);   // (mp_apricorn.c)
 static void SetBerryTreeGraphics(struct ObjectEvent *objectEvent, struct Sprite *sprite)
 {
     u8 berryStage;
@@ -1942,6 +1943,9 @@ static void SetBerryTreeGraphics(struct ObjectEvent *objectEvent, struct Sprite 
     objectEvent->invisible = TRUE;
     sprite->invisible = TRUE;
     berryStage = GetStageByBerryTreeId(objectEvent->trainerRange_berryTreeId);
+    if (berryStage != BERRY_STAGE_NO_BERRY && berryStage != BERRY_STAGE_BERRIES
+     && MP_JohtoBerries_IsPatch(objectEvent->trainerRange_berryTreeId))
+        berryStage = BERRY_STAGE_NO_BERRY;   // (Moemon Kai: JOHTO's BERRY patches show only ripe: mp_apricorn.c)
     if (berryStage != BERRY_STAGE_NO_BERRY)
     {
         objectEvent->invisible = FALSE;
@@ -3371,6 +3375,12 @@ bool8 MovementType_BerryTreeGrowth_Normal(struct ObjectEvent *objectEvent, struc
     objectEvent->invisible = TRUE;
     sprite->invisible = TRUE;
     berryStage = GetStageByBerryTreeId(objectEvent->trainerRange_berryTreeId);
+    if (berryStage != BERRY_STAGE_NO_BERRY && berryStage != BERRY_STAGE_BERRIES
+     && MP_JohtoBerries_IsPatch(objectEvent->trainerRange_berryTreeId))
+    {
+        sprite->animNum = BERRY_STAGE_NO_BERRY;   // (Moemon Kai: JOHTO's BERRY patches show only ripe: mp_apricorn.c)
+        return FALSE;
+    }
     if (berryStage == BERRY_STAGE_NO_BERRY)
     {
         if (!(sprite->sBerryTreeFlags & BERRY_FLAG_JUST_PICKED) && sprite->animNum == BERRY_STAGE_FLOWERING)
