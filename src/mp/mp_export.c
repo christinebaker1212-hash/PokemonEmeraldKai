@@ -4,6 +4,7 @@
 //                           palette indexes: gray = index x 17; data.json's species "pal" colors it),
 //   DIR/items/ITEM.png      the BAG icon (24x24), DIR/font.png the normal font (16 glyphs a row, 16x16 cells),
 //   DIR/wallpapers/N.png    a PC box's wallpaper as the PC draws it (160x144: 20x18 tiles, the name's frame on top),
+//   DIR/types.png           the type icons (32x16 each, by type, then the contest categories),
 //   DIR/frames/N.png        the window frames of OPTIONS > FRAME (24x24: 3x3 tiles, corners, sides and middle),
 //   DIR/data.json           species, moves, items, abilities, natures, types (names as the game's text bytes in hex),
 //                           the font's widths.
@@ -25,6 +26,11 @@
 #include "pokemon_icon.h"
 #include "pokemon_summary_screen.h"
 #include "strings.h"
+#include "constants/region_map_sections.h"
+#include "battle_anim.h"
+#include "graphics.h"
+#include "region_map.h"
+#include "pokedex.h"
 #include "text_window.h"
 #include "constants/characters.h"
 #include "constants/abilities.h"
@@ -41,6 +47,9 @@
 
 void MP_ExportGlyph(u16 glyphId, u8 out[16][16], u8 *width);   // text.c
 const u32 *MP_SpeciesFrontPal(u16 species);   // pokemon.c
+u8 MP_TypeIconPal(u8 type);                    // pokemon_summary_screen.c
+void MP_DexTexts(u32 num, const u8 *out[4]);   // pokedex.c
+const struct PokedexEntry *MP_DexEntry(u32 num);
 bool8 MP_WallpaperArt(u8 id, const u32 **tiles, const u32 **tilemap, const u16 **palettes);   // pokemon_storage_system.c
 
 // ------------------------------------------------------------------------------------------- a tiny PNG writer
@@ -322,6 +331,26 @@ static void ExportFrames(const char *dir)
     }
 }
 
+// The type icons as the summary draws them (32x16 each, in type order, then the contest categories)
+static void ExportTypeIcons(const char *dir)
+{
+    static u8 sTiles[(NUMBER_OF_MON_TYPES + CONTEST_CATEGORIES_COUNT) * 0x100], sRgba[32 * 16 * 4];
+    static u8 sSheet[32 * 16 * (NUMBER_OF_MON_TYPES + CONTEST_CATEGORIES_COUNT) * 4];
+    u16 pals[16 * 3];
+    char path[600];
+    u32 t, y;
+    LZDecompressWram(gMoveTypes_Gfx, sTiles);
+    LZDecompressWram(gMoveTypes_Pal, pals);
+    for (t = 0; t < NUMBER_OF_MON_TYPES + CONTEST_CATEGORIES_COUNT; t++)
+    {
+        Tiles(sTiles + t * 0x100, 4, 2, pals + 16 * (t < NUMBER_OF_MON_TYPES ? MP_TypeIconPal(t) : 0), sRgba);
+        for (y = 0; y < 16; y++)
+            memcpy(sSheet + ((t * 16 + y) * 32) * 4, sRgba + y * 32 * 4, 32 * 4);
+    }
+    snprintf(path, sizeof(path), "%s/types.png", dir);
+    WritePng(path, sSheet, 32, 16 * (NUMBER_OF_MON_TYPES + CONTEST_CATEGORIES_COUNT));
+}
+
 static void ExportFont(const char *dir, FILE *json)
 {
     static u8 sRgba[256 * 256 * 4];
@@ -366,8 +395,10 @@ static void ExportData(const char *dir)
         {
             u16 pal[16];
             u32 k;
-            fprintf(f, ",\"t\":[%u,%u],\"g\":%u", gSpeciesInfo[base].types[0], gSpeciesInfo[base].types[1],
-                    gSpeciesInfo[base].genderRatio);
+            fprintf(f, ",\"t\":[%u,%u],\"g\":%u,\"bs\":[%u,%u,%u,%u,%u,%u]", gSpeciesInfo[base].types[0],
+                    gSpeciesInfo[base].types[1], gSpeciesInfo[base].genderRatio, gSpeciesInfo[base].baseHP,
+                    gSpeciesInfo[base].baseAttack, gSpeciesInfo[base].baseDefense, gSpeciesInfo[base].baseSpAttack,
+                    gSpeciesInfo[base].baseSpDefense, gSpeciesInfo[base].baseSpeed);
             LZDecompressWram(MP_SpeciesFrontPal(base), pal);
             fprintf(f, ",\"pal\":\"");
             for (k = 0; k < 16; k++)
@@ -381,8 +412,14 @@ static void ExportData(const char *dir)
     {
         fprintf(f, "%s{\"n\":", i ? "," : "");
         Json(f, gMoveNames[i], MOVE_NAME_LENGTH);
-        fprintf(f, ",\"t\":%u,\"p\":%u,\"a\":%u,\"pp\":%u}", gBattleMoves[i].type, gBattleMoves[i].power,
+        fprintf(f, ",\"t\":%u,\"p\":%u,\"a\":%u,\"pp\":%u", gBattleMoves[i].type, gBattleMoves[i].power,
                 gBattleMoves[i].accuracy, gBattleMoves[i].pp);
+        if (i > 0)
+        {
+            fprintf(f, ",\"d\":");
+            Json(f, gMoveDescriptionPointers[i - 1], 200);
+        }
+        fprintf(f, "}");
     }
     fprintf(f, "],\"items\":[");
     for (i = 0; i < ITEMS_COUNT; i++)
@@ -391,13 +428,67 @@ static void ExportData(const char *dir)
         CopyItemName(i, name);
         fprintf(f, "%s{\"n\":", i ? "," : "");
         Json(f, name, sizeof(name));
-        fprintf(f, ",\"pocket\":%u,\"hold\":%u}", GetItemPocket(i), MP_ItemCanBeHeld(i));
+        fprintf(f, ",\"pocket\":%u,\"hold\":%u,\"d\":", GetItemPocket(i), MP_ItemCanBeHeld(i));
+        Json(f, GetItemDescription(i), 300);
+        fprintf(f, "}");
     }
     fprintf(f, "],\"abilities\":[");
     for (i = 0; i < ABILITIES_COUNT; i++)
     {
         fprintf(f, "%s", i ? "," : "");
         Json(f, gAbilityNames[i], ABILITY_NAME_LENGTH);
+    }
+    fprintf(f, "],\"abilityDesc\":[");
+    for (i = 0; i < ABILITIES_COUNT; i++)
+    {
+        fprintf(f, "%s", i ? "," : "");
+        Json(f, gAbilityDescriptionPointers[i], 200);
+    }
+    // a nature's stat changes: ATTACK, DEFENSE, SPEED, SP. ATK, SP. DEF (+1 / -1)
+    fprintf(f, "],\"natureStats\":[");
+    for (i = 0; i < NUM_NATURES; i++)
+        fprintf(f, "%s[%d,%d,%d,%d,%d]", i ? "," : "", gNatureStatTable[i][0], gNatureStatTable[i][1],
+                gNatureStatTable[i][2], gNatureStatTable[i][3], gNatureStatTable[i][4]);
+    // the places a POKeMON was met (MON_DATA_MET_LOCATION: a map section)
+    fprintf(f, "],\"mapsecs\":[");
+    for (i = 0; i < 256; i++)
+    {
+        u8 name[40];
+        name[0] = EOS;
+        if (i < MAPSEC_NONE)
+            GetMapNameGeneric(name, i);
+        fprintf(f, "%s", i ? "," : "");
+        Json(f, name, sizeof(name) - 1);
+    }
+    // POKe BALL numbers (MON_DATA_POKEBALL) to their items, for the ball's icon
+    fprintf(f, "],\"ballItems\":{");
+    {
+        u32 n = 0;
+        for (i = 1; i < ITEMS_COUNT; i++)
+            if (GetItemPocket(i) == POCKET_POKE_BALLS && ItemIdToBallId(i) != 0)
+                fprintf(f, "%s\"%u\":%u", n++ ? "," : "", ItemIdToBallId(i), i);
+            else if (i == ITEM_POKE_BALL)
+                fprintf(f, "%s\"%u\":%u", n++ ? "," : "", ItemIdToBallId(i), i);
+    }
+    // the POKeDEX's entries by national number: category, height (dm), weight (hg), the four games' texts
+    fprintf(f, "},\"dex\":[0");
+    for (i = 1; i <= NATIONAL_DEX_COUNT; i++)
+    {
+        const u8 *texts[4];
+        u32 k;
+        MP_DexTexts(i, texts);
+        fprintf(f, ",{\"cat\":");
+        Json(f, MP_DexEntry(i)->categoryName, sizeof(MP_DexEntry(i)->categoryName));
+        fprintf(f, ",\"h\":%u,\"w\":%u,\"tx\":[", MP_DexEntry(i)->height, MP_DexEntry(i)->weight);
+        for (k = 0; k < 4; k++)
+        {
+            fprintf(f, "%s", k ? "," : "");
+            if (texts[k] != NULL)
+                Json(f, texts[k], 400);
+            else
+                fprintf(f, "null");
+        }
+        fprintf(f, "]}");
     }
     fprintf(f, "],\"natures\":[");
     for (i = 0; i < NUM_NATURES; i++)
@@ -430,6 +521,7 @@ void MP_Export_IfAsked(void)
     ExportItems(dir);
     ExportWallpapers(dir);
     ExportFrames(dir);
+    ExportTypeIcons(dir);
     ExportData(dir);
     printf("[export] the app's art and tables are in %s\n", dir);
     fflush(stdout);

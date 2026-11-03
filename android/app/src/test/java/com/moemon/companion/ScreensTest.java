@@ -70,6 +70,7 @@ public class ScreensTest {
     @Test
     public void screens() throws Exception {
         Context ctx = RuntimeEnvironment.getApplication();
+        Companion.resetForTests();
         JSONObject file = new JSONObject(res("snap.json"));
         String id = file.getJSONObject("snap").getJSONObject("save").getString("id");
         file.put("asOf", System.currentTimeMillis() - 5 * 60000);
@@ -101,19 +102,47 @@ public class ScreensTest {
             v.select(i);
             shot(v, names[i]);
         }
-        // the PARTY's first, the BAG's BALLS, the POKéDEX's first entry, a map's POKéMON
+        // the summary's three pages, from the box's card
+        v.select(0);
+        tap(v, x0 + 24 + 12, y0 + 12);
+        tap(v, 60, GameView.TOP + 4 + 144 + 6 + 36 + 22 + 20);
+        shot(v, "summary_info");
+        tap(v, v.width() / 2, GameView.TOP + 112 + 8);
+        shot(v, "summary_skills");
+        tap(v, v.width() - 30, GameView.TOP + 112 + 8);
+        tap(v, 60, GameView.TOP + 136 + 4 + 12);
+        shot(v, "summary_moves");
+        v.showOver(null);
+        // the shiny in the party, its summary
         v.select(1);
-        tap(v, 60, GameView.TOP + 20);
-        shot(v, "party_one");
+        tap(v, 60, GameView.TOP + 24 + 3 * 50 + 20);
+        shot(v, "party_summary");
+        v.showOver(null);
+        // the BAG with an item chosen, the BALLS
         v.select(2);
-        tap(v, v.width() / 5 + 10, GameView.TOP + 6);
+        tap(v, 60, GameView.TOP + 40 + 2 + 12);
+        shot(v, "bag_item");
+        tap(v, v.width() / 5 + 10, GameView.TOP + 28);
+        tap(v, 60, GameView.TOP + 40 + 2 + 12);
         shot(v, "bag_balls");
+        // the POKéDEX and an entry (PIKACHU, caught)
         v.select(3);
-        tap(v, 20, GameView.TOP + 50);
+        shot(v, "dex");
+        tap(v, v.width() - 20, GameView.TOP + 28);
+        tap(v, 30, GameView.TOP + 30);
+        tap(v, 2 * (v.width() - 40) / 4 + 10, GameView.TOP + 28);
+        shot(v, "dex_caught");
+        tap(v, 20, GameView.TOP + 44 + 10);
         shot(v, "dex_entry");
+        v.showOver(null);
+        // a map's POKéMON, and the box list
         v.select(4);
-        tap(v, 40, GameView.TOP + 10);
+        tap(v, 40, GameView.TOP + 22 + 2 + 22 + 10);
         shot(v, "spawns_map");
+        v.select(0);
+        tap(v, v.width() / 2, GameView.TOP + 6);
+        shot(v, "box_list");
+        v.showOver(null);
         // the menu, and pairing
         tap(v, v.width() - 10, 8);
         shot(v, "menu");

@@ -144,9 +144,8 @@ public final class GameView extends View {
         }
         c.save();
         c.scale(scale, scale);
-        fill.setColor(0xFF70B8C8);
-        c.drawRect(0, 0, w, h, fill);
         Page p = active();
+        Page.background(c, w, h, p.scrollPos());
         c.save();
         c.translate(0, TOP);
         c.clipRect(0, 0, w, h - TOP - (over != null && over.fullScreen() ? 0 : TABS));

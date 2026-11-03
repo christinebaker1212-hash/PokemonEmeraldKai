@@ -96,14 +96,53 @@ public final class SpawnsPage extends Page {
         if (open >= 0) {
             JSONObject sp = spawnsOf(open);
             int n = sp == null ? 0 : rows(sp).size() + 4;
-            return Math.max(0, n * 30 + 40 - v.contentHeight());
+            return Math.max(0, n * 30 + 70 - v.contentHeight());
         }
-        return Math.max(0, maps().length() * ROW + 30 - v.contentHeight());
+        return Math.max(0, rowsOfList().size() * ROW + HEAD + 8 - v.contentHeight());
     }
 
     private JSONObject spawnsOf(int i) {
         JSONObject m = maps().optJSONObject(i);
         return m == null ? null : v.app.spawns.get(key(m.optJSONArray("map")));
+    }
+
+    private static final String[] REGIONS = {"HOENN", "JOHTO", "KANTO", "SINNOH"};
+    private static final int HEAD = 22;
+
+    /** The list's rows: a region's name (-1 - region) before its maps, then each map's index in spawnmaps */
+    private java.util.List<Integer> rowsOfList() {
+        java.util.List<Integer> out = new java.util.ArrayList<>();
+        JSONArray l = maps();
+        for (int r = 0; r < 4; r++) {
+            boolean any = false;
+            for (int i = 0; i < l.length(); i++) {
+                if (l.optJSONObject(i).optInt("region") == r) {
+                    if (!any) {
+                        out.add(-1 - r);
+                        any = true;
+                    }
+                    out.add(i);
+                }
+            }
+        }
+        return out;
+    }
+
+    /** A place's name, numbered when the game has several areas by that name (a cave's floors) */
+    private String label(int i) {
+        JSONArray l = maps();
+        String name = l.optJSONObject(i).optString("name");
+        int n = 0, k = 0;
+        for (int j = 0; j < l.length(); j++) {
+            if (l.optJSONObject(j).optString("name").equals(name)) {
+                n++;
+                if (j <= i) {
+                    k = n;
+                }
+            }
+        }
+        String plain = art.plain(GameArt.hexText(name));
+        return n > 1 && k > 1 ? plain + " " + k : plain;
     }
 
     @Override
@@ -114,94 +153,116 @@ public final class SpawnsPage extends Page {
         }
         JSONArray l = maps();
         if (l.length() == 0) {
-            art.window(c, 0, 12, 20, w - 24, 32);
-            art.text(c, "Link with the game to see", 16, 20);
-            art.text(c, "where POKéMON live.", 16, 36);
+            art.window(c, 0, 12, HEAD + 8, w - 24, 32);
+            art.text(c, "Link with the game to see", 16, HEAD + 8);
+            art.text(c, "where POKéMON live.", 16, HEAD + 24);
+            banner(c, w, "SPAWNS", "");
             return;
         }
-        for (int i = 0; i < l.length(); i++) {
-            int y = 4 + i * ROW - scroll;
-            if (y < -ROW || y > h) {
+        java.util.List<Integer> rows = rowsOfList();
+        for (int k = 0; k < rows.size(); k++) {
+            int y = HEAD + 2 + k * ROW - scroll, i = rows.get(k);
+            if (y < HEAD - ROW || y > h) {
+                continue;
+            }
+            if (i < 0) {
+                art.text(c, REGIONS[-1 - i], 8, y + 2, GOLD, 0xFF305060);
                 continue;
             }
             JSONObject m = l.optJSONObject(i);
             art.window(c, 0, 12, y + 4, w - 24, ROW - 8);
-            art.textHex(c, m.optString("name"), 14, y + 3, GameArt.TEXT, GameArt.SHADOW);
+            art.text(c, label(i), 14, y + 3);
             JSONArray has = m.optJSONArray("has");
-            String ways = (has != null && has.optInt(0) == 1 ? "G" : "") + (has != null && has.optInt(1) == 1 ? "S" : "")
-                    + (has != null && has.optInt(2) == 1 ? "R" : "") + (has != null && has.optInt(3) == 1 ? "F" : "");
-            art.text(c, ways, w - 18 - art.width(ways), y + 3, GameArt.GRAY_TEXT, GameArt.SHADOW);
+            int cx = w - 16;
+            String[] names = {"GRASS", "SURF", "ROCK", "ROD"};
+            int[] colors = {0xFF48A848, 0xFF4878D8, 0xFFA08048, 0xFF3898B8};
+            for (int t = 3; t >= 0; t--) {
+                if (has != null && has.optInt(t) == 1) {
+                    cx -= art.width(names[t]) + 8;
+                    chip(c, names[t], cx, y + 7, colors[t]);
+                }
+            }
         }
+        banner(c, w, "SPAWNS", l.length() + " PLACES");
     }
 
     private void drawMap(Canvas c, int w, int h) {
         JSONObject m = maps().optJSONObject(open);
-        int y = 4 - scroll;
-        art.textHex(c, m.optString("name"), 8, y, GameArt.WHITE_TEXT, GameArt.WHITE_SHADOW);
-        button(c, "BACK", w - 70, y - 4, 66, true);
-        y += 24;
+        int y = HEAD + 2 - scroll;
         JSONObject sp = spawnsOf(open);
         if (sp == null) {
-            art.window(c, 0, 12, y + 4, w - 24, 16);
+            art.window(c, 0, 12, y + 8, w - 24, 16);
             art.text(c, v.app.client != null && v.app.client.status() == com.moemon.companion.core.LinkClient.Status.LINKED
-                    ? "Asking the game..." : "Link with the game to see this.", 14, y + 4);
-            return;
-        }
-        String method = "";
-        for (Row r : rows(sp)) {
-            if (!r.method.equals(method)) {
-                method = r.method;
-                art.text(c, method, 8, y + 4, 0xFFF8E070, GameArt.WHITE_SHADOW);
-                y += 22;
+                    ? "Asking the game..." : "Link with the game to see this.", 14, y + 8);
+        } else {
+            String method = "";
+            int rare = 0, found = 0;
+            for (Row r : rows(sp)) {
+                if (r.rare) {
+                    rare++;
+                    found += r.metCount > 0 ? 1 : 0;
+                }
             }
-            art.window(c, 0, 12, y + 4, w - 24, 22);
-            boolean hidden = r.rare && r.metCount == 0;
-            art.icon(c, r.species, 8, y, hidden ? GameArt.ICON_SILHOUETTE : GameArt.ICON_PLAIN);
-            if (hidden) {
-                art.text(c, r.hint, 40, y + 6, GameArt.GRAY_TEXT, GameArt.SHADOW);
-            } else {
-                art.text(c, art.speciesName(r.species), 40, y, GameArt.TEXT, GameArt.SHADOW);
-                String lv = r.min == r.max ? "Lv" + r.min : "Lv" + r.min + "-" + r.max;
-                art.text(c, lv, 40, y + 13, GameArt.GRAY_TEXT, GameArt.SHADOW);
-                String pct = r.rate + "%";
-                art.text(c, pct, w - 18 - art.width(pct), y + 6);
+            if (rare > 0) {
+                art.text(c, "RARE ONES FOUND: " + found + "/" + rare, 8, y + 2, GameArt.WHITE_TEXT, 0xFF305060);
+                y += 18;
             }
-            y += 30;
-        }
-        // how many of its rare ones were found
-        int rare = 0, found = 0;
-        for (Row r : rows(sp)) {
-            if (r.rare) {
-                rare++;
-                found += r.metCount > 0 ? 1 : 0;
+            for (Row r : rows(sp)) {
+                if (!r.method.equals(method)) {
+                    method = r.method;
+                    y += 4;
+                    art.text(c, method, 8, y, GOLD, 0xFF305060);
+                    y += 18;
+                }
+                art.window(c, 0, 12, y + 4, w - 24, 22);
+                boolean hidden = r.rare && r.metCount == 0;
+                art.icon(c, r.species, 8, y, hidden ? GameArt.ICON_SILHOUETTE : GameArt.ICON_PLAIN);
+                if (hidden) {
+                    art.text(c, r.hint, 40, y + 6, GameArt.GRAY_TEXT, GameArt.SHADOW);
+                } else {
+                    art.text(c, art.speciesName(r.species), 40, y, GameArt.TEXT, GameArt.SHADOW);
+                    String lv = r.min == r.max ? "Lv" + r.min : "Lv" + r.min + "-" + r.max;
+                    art.text(c, lv, 40, y + 13, GameArt.GRAY_TEXT, GameArt.SHADOW);
+                    String pct = r.rate + "%";
+                    art.text(c, pct, w - 18 - art.width(pct), y + 2);
+                    android.graphics.Paint f = new android.graphics.Paint();
+                    f.setColor(0xFFD0D8E0);
+                    c.drawRect(w - 70, y + 20, w - 18, y + 23, f);
+                    f.setColor(r.rare ? 0xFFD89010 : 0xFF48A848);
+                    c.drawRect(w - 70, y + 20, w - 70 + Math.max(1, r.rate * 52 / 100), y + 23, f);
+                }
+                y += 30;
             }
         }
-        if (rare > 0) {
-            art.text(c, "RARE ONES FOUND: " + found + "/" + rare, 8, y + 4, GameArt.WHITE_TEXT, GameArt.WHITE_SHADOW);
-        }
+        banner(c, w, label(open), "BACK");
     }
 
     @Override
     public void tap(int x, int y) {
         if (open >= 0) {
-            if (y + scroll < 24 && x > v.width() - 70) {
+            if (y < 20 && x > v.width() - 60) {
                 open = -1;
                 scroll = openScroll;
             }
             return;
         }
-        int i = (y + scroll - 4) / ROW;
-        JSONArray l = maps();
-        if (i >= 0 && i < l.length()) {
-            open = i;
-            openScroll = scroll;
-            scroll = 0;
-            JSONObject m = l.optJSONObject(i);
-            if (v.app.client != null) {
-                try {
-                    v.app.client.send(new JSONObject().put("t", "spawns").put("map", m.optJSONArray("map")));
-                } catch (org.json.JSONException ignored) {
-                }
+        if (y < HEAD) {
+            return;
+        }
+        java.util.List<Integer> rows = rowsOfList();
+        int k = (y + scroll - HEAD - 2) / ROW;
+        if (k < 0 || k >= rows.size() || rows.get(k) < 0) {
+            return;
+        }
+        int i = rows.get(k);
+        open = i;
+        openScroll = scroll;
+        scroll = 0;
+        JSONObject m = maps().optJSONObject(i);
+        if (v.app.client != null) {
+            try {
+                v.app.client.send(new JSONObject().put("t", "spawns").put("map", m.optJSONArray("map")));
+            } catch (org.json.JSONException ignored) {
             }
         }
     }

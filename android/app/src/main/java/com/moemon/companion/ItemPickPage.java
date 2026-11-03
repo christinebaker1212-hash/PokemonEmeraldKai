@@ -14,11 +14,22 @@ import java.util.List;
 public final class ItemPickPage extends Page {
     private static final int ROW = 26;
     private final JSONObject place, mon;
+    private final Page back;   // where GIVE came from (shown again after), or null for the tabs
 
     public ItemPickPage(GameView v, JSONObject place, JSONObject mon) {
+        this(v, place, mon, null);
+    }
+
+    public ItemPickPage(GameView v, JSONObject place, JSONObject mon, Page back) {
         super(v);
         this.place = place;
         this.mon = mon;
+        this.back = back;
+    }
+
+    @Override
+    public void back() {
+        v.showOver(back);
     }
 
     /** [item, count] for every holdable item in the BAG, pocket by pocket */
@@ -45,8 +56,6 @@ public final class ItemPickPage extends Page {
 
     @Override
     public void draw(Canvas c, int w, int h) {
-        art.text(c, "GIVE AN ITEM TO", 8, 4 - scroll, GameArt.WHITE_TEXT, GameArt.WHITE_SHADOW);
-        art.textHex(c, mon.optString("n"), 8 + art.width("GIVE AN ITEM TO ") , 4 - scroll, 0xFFF8E070, GameArt.WHITE_SHADOW);
         List<int[]> l = items();
         if (l.isEmpty()) {
             art.window(c, 0, 12, 30, w - 24, 16);
@@ -54,7 +63,7 @@ public final class ItemPickPage extends Page {
         }
         for (int i = 0; i < l.size(); i++) {
             int y = 26 + i * ROW - scroll;
-            if (y < -ROW || y > h) {
+            if (y < 20 - ROW || y > h) {
                 continue;
             }
             art.window(c, 0, 12, y + 4, w - 24, ROW - 8);
@@ -63,10 +72,17 @@ public final class ItemPickPage extends Page {
             String n = "x" + l.get(i)[1];
             art.text(c, n, w - 16 - art.width(n), y + 4);
         }
+        banner(c, w, "GIVE TO " + art.plain(GameArt.hexText(mon.optString("n"))), "BACK");
     }
 
     @Override
     public void tap(int x, int y) {
+        if (y < 20) {
+            if (x > v.width() - 60) {
+                back();
+            }
+            return;
+        }
         List<int[]> l = items();
         int i = (y + scroll - 26) / ROW;
         if (y + scroll >= 26 && i >= 0 && i < l.size() && v.app.locked()) {
@@ -77,7 +93,7 @@ public final class ItemPickPage extends Page {
         if (y + scroll >= 26 && i >= 0 && i < l.size() && v.app.client != null) {
             v.app.client.order(Model.item(true, place, mon, l.get(i)[0]));
             v.buzz(false);
-            v.showOver(null);
+            v.showOver(back);
             v.app.changed();
         }
     }

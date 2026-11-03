@@ -321,7 +321,35 @@ static void BufBoxMon(struct Buf *b, struct BoxPokemon *box)
     BufAdd(b, ",\"m\":[");
     for (i = 0; i < MAX_MON_MOVES; i++)
         BufAdd(b, "%s%u", i ? "," : "", (unsigned)GetBoxMonData(box, MON_DATA_MOVE1 + i));
-    BufAdd(b, "]}");
+    BufAdd(b, "]");
+    if (!GetBoxMonData(box, MON_DATA_IS_EGG))
+    {
+        // the summary's pages: stats (HP, ATTACK, DEFENSE, SP. ATK, SP. DEF, SPEED, as the game works them out), EXP
+        // (now, this level's start, the next's), PP, where and at what level it was met, its Trainer
+        static struct Pokemon sTmp;
+        u8 ot[PLAYER_NAME_LENGTH + 1];
+        u32 lvl = GetLevelFromBoxMonExp(box), exp = GetBoxMonData(box, MON_DATA_EXP);
+        u8 growth = gSpeciesInfo[species].growthRate;
+        BoxMonToMon(box, &sTmp);
+        BufAdd(b, ",\"stats\":[%u,%u,%u,%u,%u,%u]", (unsigned)GetMonData(&sTmp, MON_DATA_MAX_HP),
+               (unsigned)GetMonData(&sTmp, MON_DATA_ATK), (unsigned)GetMonData(&sTmp, MON_DATA_DEF),
+               (unsigned)GetMonData(&sTmp, MON_DATA_SPATK), (unsigned)GetMonData(&sTmp, MON_DATA_SPDEF),
+               (unsigned)GetMonData(&sTmp, MON_DATA_SPEED));
+        BufAdd(b, ",\"xp\":[%u,%u,%u]", (unsigned)exp, (unsigned)gExperienceTables[growth][lvl],
+               (unsigned)gExperienceTables[growth][lvl < MAX_LEVEL ? lvl + 1 : lvl]);
+        BufAdd(b, ",\"pp\":[%u,%u,%u,%u]", (unsigned)GetBoxMonData(box, MON_DATA_PP1),
+               (unsigned)GetBoxMonData(box, MON_DATA_PP2), (unsigned)GetBoxMonData(box, MON_DATA_PP3),
+               (unsigned)GetBoxMonData(box, MON_DATA_PP4));
+        BufAdd(b, ",\"ppb\":%u", (unsigned)GetBoxMonData(box, MON_DATA_PP_BONUSES));
+        BufAdd(b, ",\"met\":[%u,%u]", (unsigned)GetBoxMonData(box, MON_DATA_MET_LOCATION),
+               (unsigned)GetBoxMonData(box, MON_DATA_MET_LEVEL));
+        GetBoxMonData(box, MON_DATA_OT_NAME, ot);
+        ot[PLAYER_NAME_LENGTH] = EOS;
+        BufAdd(b, ",\"otn\":");
+        BufText(b, ot, PLAYER_NAME_LENGTH);
+        BufAdd(b, ",\"otg\":%u", (unsigned)GetBoxMonData(box, MON_DATA_OT_GENDER));
+    }
+    BufAdd(b, "}");
 }
 
 static void BufPartyMon(struct Buf *b, struct Pokemon *mon)
@@ -826,8 +854,9 @@ static void SendSpawnMaps(int c)
         u16 map = (h->mapGroup << 8) | h->mapNum;
         BufAdd(&sOut, "%s{\"map\":[%u,%u],\"name\":", n++ ? "," : "", h->mapGroup, h->mapNum);
         BufMapName(&sOut, h->mapGroup, h->mapNum);
-        BufAdd(&sOut, ",\"has\":[%u,%u,%u,%u],\"met\":%u}", h->landMonsInfo != NULL, h->waterMonsInfo != NULL,
-               h->rockSmashMonsInfo != NULL, h->fishingMonsInfo != NULL, (unsigned)MetBits(map));
+        BufAdd(&sOut, ",\"has\":[%u,%u,%u,%u],\"met\":%u,\"region\":%u}", h->landMonsInfo != NULL,
+               h->waterMonsInfo != NULL, h->rockSmashMonsInfo != NULL, h->fishingMonsInfo != NULL, (unsigned)MetBits(map),
+               MP_Region_OfGroup(h->mapGroup));
     }
     BufAdd(&sOut, "]}");
     SendBuf(c, &sOut);

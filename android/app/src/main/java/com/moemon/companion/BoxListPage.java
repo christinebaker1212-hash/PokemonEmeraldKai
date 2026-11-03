@@ -1,20 +1,23 @@
 package com.moemon.companion;
 
 import android.graphics.Canvas;
+import android.graphics.Paint;
 
 import com.moemon.companion.core.Model;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-/** All 40 boxes: name and how full, tap one to open it */
+/** All 40 boxes on their wallpapers, with their names and how full they are; tap one to open it */
 public final class BoxListPage extends Page {
     private final BoxesPage boxes;
-    private static final int ROW = 22;
+    private static final int CW = 86, CH = 84, TOP = 24;
+    private final Paint shade = new Paint();
 
     public BoxListPage(GameView v, BoxesPage boxes) {
         super(v);
         this.boxes = boxes;
+        shade.setColor(0xA0283848);
     }
 
     private JSONArray list() {
@@ -22,39 +25,53 @@ public final class BoxListPage extends Page {
         return m == null ? new JSONArray() : m.boxes();
     }
 
+    private int cols() {
+        return Math.max(1, (v.width() - 8) / CW);
+    }
+
     @Override
     public int scrollMax() {
-        return Math.max(0, (list().length() + 1) / 2 * ROW + 30 - v.contentHeight());
+        return Math.max(0, (list().length() + cols() - 1) / cols() * CH + TOP + 8 - v.contentHeight());
     }
 
     @Override
     public void draw(Canvas c, int w, int h) {
         JSONArray l = list();
-        art.text(c, "BOXES", 8, 4 - scroll, GameArt.WHITE_TEXT, GameArt.WHITE_SHADOW);
-        int cw = (w - 12) / 2;
+        int cols = cols(), left = (w - cols * CW) / 2;
         for (int i = 0; i < l.length(); i++) {
             JSONObject b = l.optJSONObject(i);
-            int x = 6 + (i % 2) * cw, y = 24 + (i / 2) * ROW - scroll;
-            if (y < -ROW || y > h) {
+            int x = left + (i % cols) * CW + 3, y = TOP + (i / cols) * CH - scroll;
+            if (y < TOP - CH || y > h) {
                 continue;
             }
-            art.window(c, 0, x + 6, y + 4, cw - 12, 14);
-            art.textHex(c, b.optString("n"), x + 8, y + 3, GameArt.TEXT, GameArt.SHADOW);
+            art.wallpaperHalf(c, b.optInt("w"), x, y);
             int n = 0;
             JSONArray s = b.optJSONArray("m");
             for (int k = 0; s != null && k < s.length(); k++) {
                 n += s.optJSONObject(k) != null ? 1 : 0;
             }
+            byte[] name = GameArt.hexText(b.optString("n"));
+            int nw = art.width(name);
+            art.text(c, name, x + (80 - nw) / 2, y - 2, GameArt.WHITE_TEXT, 0xFF383838);
+            c.drawRect(x + 22, y + 56, x + 58, y + 69, shade);
             String count = n + "/30";
-            art.text(c, count, x + cw - 8 - art.width(count), y + 3, GameArt.GRAY_TEXT, GameArt.SHADOW);
+            art.text(c, count, x + (80 - art.width(count)) / 2, y + 54, n == 30 ? GOLD : GameArt.WHITE_TEXT, 0);
         }
+        banner(c, w, "BOXES", "BACK");
     }
 
     @Override
     public void tap(int x, int y) {
-        int cw = (v.width() - 12) / 2;
-        int i = (y + scroll - 24) / ROW * 2 + Math.min(1, Math.max(0, (x - 6) / cw));
-        if (y + scroll >= 24 && i >= 0 && i < list().length()) {
+        if (y < 20) {
+            if (x > v.width() - 60) {
+                back();
+            }
+            return;
+        }
+        int cols = cols(), left = (v.width() - cols * CW) / 2;
+        int col = (x - left) / CW, row = (y + scroll - TOP) / CH;
+        int i = row * cols + col;
+        if (col >= 0 && col < cols && y + scroll >= TOP && i < list().length()) {
             boxes.showBox(i);
             v.showOver(null);
         }

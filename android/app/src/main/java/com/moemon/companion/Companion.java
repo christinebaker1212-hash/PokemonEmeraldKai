@@ -52,6 +52,14 @@ public final class Companion implements LinkClient.Listener {
         return sInstance;
     }
 
+    /** Tests only: a fresh app next time (its link stopped) */
+    static synchronized void resetForTests() {
+        if (sInstance != null && sInstance.client != null) {
+            sInstance.client.stop();
+        }
+        sInstance = null;
+    }
+
     private Companion(Context context) throws Exception {
         this.context = context;
         // (if the app ever closes on its own, why: shown the next time it opens)

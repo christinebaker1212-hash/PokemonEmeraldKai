@@ -108,6 +108,11 @@ public class CoreTest {
         lines.add("mp additem 139 20");
         lines.add("mp additem 200 3");
         lines.add("mp additem 4 30");
+        lines.add("mp shinymon 4 25 20");   // (the screen tests' pictures: a shiny, a POKeDEX with entries)
+        for (int n : new int[]{1, 4, 7, 25, 26, 133, 252, 255, 258}) {
+            lines.add("mp dexcatch " + n);
+        }
+        lines.add("mp dexsee 150");
         lines.add("mp phone pair");
         lines.add("wait 2400");   // (40 s at MOEMON_TEST_FPS=60: after steps 1-3)
         lines.add("mp boxput 7 4 133 30");   // (a change "by hand": the app must notice it by itself)
@@ -228,12 +233,27 @@ public class CoreTest {
             if (after.at(from) != null || after.at(to) == null || after.at(to).optLong("p") != mon.optLong("p")) {
                 fail("the model didn't follow the move");
             }
-            JSONObject st = (JSONObject) ev.next("msg", 10)[1];
-            while (!"state".equals(st.optString("t"))) {
-                st = (JSONObject) ev.next("msg", 10)[1];
+            // (the game may change the save itself after: then one new snapshot catches the model up, and it stays)
+            int snaps = 0, same = 0;
+            long last = -1, end0 = System.currentTimeMillis() + 15000;
+            while (same < 3 && System.currentTimeMillis() < end0) {
+                Object[] q = ev.q.poll(200, TimeUnit.MILLISECONDS);
+                if (q == null) {
+                    continue;
+                }
+                if (q[0].equals("model")) {
+                    snaps++;
+                } else if (q[0].equals("msg") && "state".equals(((JSONObject) q[1]).optString("t"))) {
+                    long r = ((JSONObject) q[1]).optLong("rev");
+                    same = r == c.model().rev && r == last ? same + 1 : 0;
+                    last = r;
+                }
             }
-            if (st.optLong("rev") != after.rev) {
-                fail("the model's rev " + after.rev + " isn't the game's " + st.optLong("rev"));
+            if (same < 3) {
+                fail("the model never settled on the game's rev");
+            }
+            if (snaps > 2) {
+                fail("the model kept asking for snapshots (" + snaps + ")");
             }
             System.out.println("move: done, rev agrees");
 
@@ -246,9 +266,10 @@ public class CoreTest {
             System.out.println("stale: refused (" + done.optString("why") + ")");
 
             // 3. Away: an order made with no link waits on disk, then goes on the next link
+            long revNow = c.model().rev;
             c.stop();
             LinkClient c2 = new LinkClient(crypto, store, saved, ev);
-            if (c2.model() == null || c2.model().rev != after.rev) {
+            if (c2.model() == null || c2.model().rev != revNow) {
                 fail("the model didn't come back from the disk");
             }
             JSONObject back = c2.order(Model.move(to, mon, from, null));

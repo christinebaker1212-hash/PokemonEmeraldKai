@@ -6136,3 +6136,19 @@ static void ClearSearchParameterBoxText(void)
 {
     ClearSearchMenuRect(144, 8, 96, 96);
 }
+
+// Moemon Co-op: an entry's texts from Ruby, Sapphire, Emerald and FireRed (NULL where a game has none), as the
+// TEXT tab joins them (MpDexBuild), for the phone app's export (mp_export.c)
+void MP_DexTexts(u32 num, const u8 *out[4])
+{
+    const struct MpDexMore *more = &sMpDexMore[num];
+    out[0] = more->ruby;
+    out[1] = more->sapphire;
+    out[2] = (more->emerald || (!more->ruby && !more->sapphire && !more->fireRed)) ? gPokedexEntries[num].description : NULL;
+    out[3] = more->fireRed;
+}
+
+const struct PokedexEntry *MP_DexEntry(u32 num)
+{
+    return &gPokedexEntries[num];
+}

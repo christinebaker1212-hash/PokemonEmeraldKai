@@ -111,7 +111,7 @@ public final class BoxesPage extends Page {
                 c.drawRect(cx + 2, cy + 2, cx + PARTY_CELL - 2, cy + PARTY_CELL - 2, shade);
             }
         }
-        // the chosen POKeMON
+        // the chosen POKeMON: a short card, its SUMMARY a tap away
         int cy = cardY();
         JSONObject mon = selected == null ? null : p.at(selected);
         if (mon == null) {
@@ -122,35 +122,97 @@ public final class BoxesPage extends Page {
                 art.text(c, line, 14, ty, GameArt.GRAY_TEXT, GameArt.SHADOW);
                 ty += 16;
             }
-            return;
-        }
-        MonCard.draw(c, art, mon, 10, cy, w - 20);
-        if (mon != null) {
-            int by = cy + MonCard.HEIGHT + 10, bw = (w - 20) / 3;
-            boolean locked = v.app.locked();
-            if (locked) {
-                moveMode = false;
-                held = null;
-            }
-            button(c, moveMode ? "CANCEL" : "MOVE", 10, by, bw, !locked);
-            button(c, "GIVE", 10 + bw, by, bw, !locked && mon.optInt("e") == 0);
-            button(c, "TAKE", 10 + 2 * bw, by, bw, !locked && mon.optInt("i") != 0);
-            if (locked) {
-                int ty = by + 26;
-                for (String line : wrap(Companion.LOCKED, w - 24)) {
-                    art.text(c, line, 12, ty, 0xFFF8A050, GameArt.WHITE_SHADOW);
-                    ty += 16;
-                }
-            }
-            if (moveMode) {
-                art.text(c, "Tap where it should go.", 12, by + 26, GameArt.WHITE_TEXT, GameArt.WHITE_SHADOW);
-            }
+        } else {
+            drawCard(c, w, cy, mon);
         }
         // the one being dragged, under the finger
         if (held != null && heldMon != null && !moveMode) {
             art.icon(c, heldMon.optInt("e") == 1 ? MonCard.eggSpecies(art) : heldMon.optInt("s"), dragX - 16, dragY - 26,
                     GameArt.ICON_PLAIN);
         }
+    }
+
+    private static final int CARD_H = 52;
+
+    private void drawCard(Canvas c, int w, int cy, JSONObject mon) {
+        art.window(c, 0, 12, cy + 4, w - 24, CARD_H);
+        boolean egg = mon.optInt("e") == 1;
+        int species = mon.optInt("s");
+        art.icon(c, egg ? MonCard.eggSpecies(art) : species, 12, cy + 6, GameArt.ICON_PLAIN);
+        int nw = art.textHex(c, mon.optString("n"), 46, cy + 2, GameArt.TEXT, GameArt.SHADOW);
+        if (!egg) {
+            int g = mon.optInt("g");
+            if (g == 0) {
+                art.text(c, "♂", 46 + nw + 3, cy + 2, GameArt.BLUE_TEXT, GameArt.SHADOW);
+            } else if (g == 254) {
+                art.text(c, "♀", 46 + nw + 3, cy + 2, GameArt.RED_TEXT, GameArt.SHADOW);
+            }
+            String lv = "Lv" + mon.optInt("l");
+            art.text(c, lv, w - 18 - art.width(lv), cy + 2);
+            org.json.JSONArray t = art.species(species).optJSONArray("t");
+            if (t != null) {
+                art.typeIcon(c, t.optInt(0), 46, cy + 22);
+                if (t.optInt(1) != t.optInt(0)) {
+                    art.typeIcon(c, t.optInt(1), 82, cy + 22);
+                }
+            }
+            if (mon.optInt("sh") == 1) {
+                chip(c, "SHINY", 120, cy + 24, 0xFFD89010);
+            }
+            int item = mon.optInt("i");
+            if (item != 0) {
+                art.itemIcon(c, item, w - 40, cy + 22);
+            }
+        }
+        boolean locked = v.app.locked();
+        if (locked) {
+            moveMode = false;
+            held = null;
+        }
+        int by = cy + CARD_H + 10, bw = (w - 20) / 4;
+        button(c, "SUMMARY", 10, by, bw, true);
+        button(c, moveMode ? "CANCEL" : "MOVE", 10 + bw, by, bw, !locked);
+        button(c, "GIVE", 10 + 2 * bw, by, bw, !locked && !egg);
+        button(c, "TAKE", 10 + 3 * bw, by, bw, !locked && mon.optInt("i") != 0);
+        int ty = by + 26;
+        if (locked) {
+            for (String line : wrap(Companion.LOCKED, w - 24)) {
+                art.text(c, line, 12, ty, 0xFFF8A050, GameArt.WHITE_SHADOW);
+                ty += 16;
+            }
+        } else if (moveMode) {
+            art.text(c, "Tap where it should go.", 12, ty, GameArt.WHITE_TEXT, GameArt.WHITE_SHADOW);
+        }
+    }
+
+    /** MOVE from the summary: the next tap on a place moves it there */
+    public void startMove(JSONObject place) {
+        Planned p = planned();
+        if (p.at(place) != null) {
+            selected = place;
+            held = place;
+            heldMon = p.at(place);
+            moveMode = true;
+        }
+    }
+
+    /** The places the summary pages through: this box's POKéMON, or the party */
+    private java.util.List<JSONObject> around(JSONObject place) {
+        java.util.List<JSONObject> l = new java.util.ArrayList<>();
+        Planned p = planned();
+        if (place.has("party")) {
+            for (int i = 0; i < p.party.size(); i++) {
+                l.add(Model.partyPlace(i));
+            }
+        } else {
+            for (int s = 0; s < 30; s++) {
+                JSONObject q = Model.boxPlace(place.optInt("box"), s);
+                if (p.at(q) != null) {
+                    l.add(q);
+                }
+            }
+        }
+        return l;
     }
 
     private void drawSlot(Canvas c, Planned p, JSONObject place, int x, int y, int size) {
@@ -226,22 +288,43 @@ public final class BoxesPage extends Page {
             return;
         }
         JSONObject mon = selected == null ? null : p.at(selected);
-        int by = cardY() + MonCard.HEIGHT + 10, bw = (w - 20) / 3;
-        if (mon != null && y >= by && y < by + 24 && v.app.locked()) {
-            v.message(Companion.LOCKED);
+        int by = cardY() + CARD_H + 10, bw = (w - 20) / 4;
+        if (mon != null && y >= cardY() && y < by) {
+            openSummary(selected);
             return;
         }
         if (mon != null && y >= by && y < by + 24) {
-            int k = (x - 10) / bw;
+            int k = Math.min(3, Math.max(0, (x - 10) / bw));
             if (k == 0) {
+                openSummary(selected);
+                return;
+            }
+            if (v.app.locked()) {
+                v.message(Companion.LOCKED);
+                return;
+            }
+            if (k == 1) {
                 moveMode = !moveMode;
                 held = moveMode ? selected : null;
                 heldMon = moveMode ? mon : null;
-            } else if (k == 1 && mon.optInt("e") == 0) {
+            } else if (k == 2 && mon.optInt("e") == 0) {
                 v.showOver(new ItemPickPage(v, selected, mon));
-            } else if (k == 2 && mon.optInt("i") != 0) {
+            } else if (k == 3 && mon.optInt("i") != 0) {
                 order(Model.item(false, selected, mon, 0));
             }
+        }
+    }
+
+    private void openSummary(JSONObject place) {
+        java.util.List<JSONObject> l = around(place);
+        int i = 0;
+        for (int k = 0; k < l.size(); k++) {
+            if (Planned.key(l.get(k)).equals(Planned.key(place))) {
+                i = k;
+            }
+        }
+        if (!l.isEmpty()) {
+            v.showOver(new SummaryPage(v, l, i, this));
         }
     }
 

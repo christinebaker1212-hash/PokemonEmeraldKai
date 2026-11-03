@@ -136,6 +136,8 @@ public class LiveTest {
             final String saveId = field(line, "save");
 
             Context ctx = RuntimeEnvironment.getApplication();
+            Companion.resetForTests();
+        Companion.resetForTests();
             Companion app = Companion.get(ctx);
             GameView v = new GameView(ctx, app);
             draw(v);
@@ -159,20 +161,20 @@ public class LiveTest {
             assertTrue("a shiny's palette isn't its species'", !pal.equals(app.art.species(25).optString("pal")));
             assertTrue("a plain one has no palette of its own", !app.model().party().getJSONObject(0).has("pal"));
             v.select(1);
-            tap(v, 60, GameView.TOP + 6 + 3 * 46 + 20);
+            tap(v, 60, GameView.TOP + 24 + 3 * 50 + 20);
             ScreensTest.shot(v, "live_shiny");
-            tap(v, 60, GameView.TOP + 6 + 0 * 46 + 20);
-            v.select(1);
-            tap(v, 60, GameView.TOP + 6 + 0 * 46 + 20);
+            v.showOver(null);
+            tap(v, 60, GameView.TOP + 24 + 0 * 50 + 20);
             ScreensTest.shot(v, "live_plain");
+            v.showOver(null);
 
             // GIVE: the box's first POKéMON, its card's GIVE, the BAG's first holdable item
             v.select(0);
             int x0 = (v.width() - 160) / 2 + 8, y0 = GameView.TOP + 4 + 16;
             tap(v, x0 + 12, y0 + 12);
-            int cardY = GameView.TOP + 4 + 144 + 6 + 36 + 22, by = cardY + MonCard.HEIGHT + 10 + 12;
-            int bw = (v.width() - 20) / 3;
-            tap(v, 10 + bw + bw / 2, by);
+            int cardY = GameView.TOP + 4 + 144 + 6 + 36 + 22, by = cardY + 52 + 10 + 12;
+            int bw = (v.width() - 20) / 4;
+            tap(v, 10 + 2 * bw + bw / 2, by);
             assertTrue("GIVE opens the BAG's items", v.overPage() instanceof ItemPickPage);
             tap(v, 40, GameView.TOP + 26 + 13);
             idleUntil(() -> app.client.orders.pending().isEmpty() && !app.client.orders.failed().isEmpty()
@@ -185,7 +187,7 @@ public class LiveTest {
             // MOVE: the second POKéMON to the box's last place
             tap(v, x0 + 24 + 12, y0 + 12);
             long p2 = app.model().at(Model.boxPlace(0, 1)).optLong("p");
-            tap(v, 10 + bw / 2, by);
+            tap(v, 10 + bw + bw / 2, by);
             tap(v, x0 + 5 * 24 + 12, y0 + 4 * 24 + 12);
             idleUntil(() -> {
                 JSONObject m = app.model().at(Model.boxPlace(0, 29));
@@ -197,7 +199,7 @@ public class LiveTest {
             // SPAWNS: the list, then a map's POKéMON from the game
             tap(v, v.width() - 20, v.height() - 10);
             idleUntil(() -> app.spawnMaps != null, 20, "the spawn maps");
-            tap(v, 40, GameView.TOP + 10);
+            tap(v, 40, GameView.TOP + 22 + 2 + 22 + 10);
             idleUntil(() -> !app.spawns.isEmpty(), 20, "a map's spawns");
             draw(v);
 
@@ -207,7 +209,7 @@ public class LiveTest {
             draw(v);
             int pending = app.client.orders.pending().size();
             tap(v, x0 + 12, y0 + 12);
-            tap(v, 10 + bw + bw / 2, by);
+            tap(v, 10 + 2 * bw + bw / 2, by);
             assertTrue("GIVE is closed in a battle", !(v.overPage() instanceof ItemPickPage));
             assertEquals("no order in a battle", pending, app.client.orders.pending().size());
             app.pause();

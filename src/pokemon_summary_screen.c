@@ -5362,3 +5362,9 @@ bool8 MP_SummaryScreen_IsOpen(void)
 {
     return gMain.callback2 == MainCB2 && sMonSummaryScreen != NULL && !gPaletteFade.active;
 }
+
+// Moemon Co-op: a type icon's palette (0-2 of gMoveTypes_Pal), for the phone app's export (mp_export.c)
+u8 MP_TypeIconPal(u8 type)
+{
+    return sMoveTypeToOamPaletteNum[type] - 13;
+}

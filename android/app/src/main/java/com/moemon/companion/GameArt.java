@@ -35,7 +35,7 @@ public final class GameArt {
     private final Map<Character, Integer> charmap = new HashMap<>();
     private final char[] letters = new char[256];
     private final Bitmap fontMain, fontShadow;
-    private Bitmap icons, items, wallpapers, frames;
+    private Bitmap icons, items, wallpapers, frames, types;
     private final Bitmap[] fronts = new Bitmap[8];
     private final Map<Integer, Integer> dexToSpecies = new HashMap<>();
     private final Paint pix = new Paint(), tint = new Paint(), silhouette = new Paint(), gray = new Paint();
@@ -317,6 +317,11 @@ public final class GameArt {
 
     /** A front picture colored by pal (a POKeMON's own palette, the snapshot's "pal"), or its species' when null */
     public void front(Canvas c, int species, String pal, int x, int y, boolean silhouetted) {
+        front(c, species, pal, x, y, 64, silhouetted);
+    }
+
+    /** The same at size x size (a whole multiple of 64 keeps the pixels sharp) */
+    public void front(Canvas c, int species, String pal, int x, int y, int size, boolean silhouetted) {
         int k = species / 256;
         if (k >= fronts.length) {
             return;
@@ -349,8 +354,86 @@ public final class GameArt {
             colored.put(key, b);
         }
         src.set(0, 0, 64, 64);
-        dst.set(x, y, x + 64, y + 64);
+        dst.set(x, y, x + size, y + size);
         c.drawBitmap(b, src, dst, silhouetted ? silhouette : pix);
+    }
+
+    /** The game's type icon (32x16) for a type (18 = FAIRY's place in Kai: by number), as the summary shows it */
+    public void typeIcon(Canvas c, int type, int x, int y) {
+        if (types == null) {
+            types = bitmap("game/types.png");
+        }
+        cell(c, types, type, 32, 16, 1, x, y, pix);
+    }
+
+    /** A POKé BALL's icon (MON_DATA_POKEBALL), the ball's BAG icon */
+    public void ballIcon(Canvas c, int ball, int x, int y) {
+        JSONObject b = data.optJSONObject("ballItems");
+        int item = b == null ? 4 : b.optInt(String.valueOf(ball), 4);
+        itemIcon(c, item, x, y);
+    }
+
+    /**
+     * Game text made plain for wrapping: its line and page breaks (the GBA's windows' own) become spaces, control codes
+     * go (descriptions are written for a 240-pixel screen; here they're wrapped to the window)
+     */
+    public static byte[] clean(byte[] t) {
+        java.io.ByteArrayOutputStream o = new java.io.ByteArrayOutputStream();
+        for (int i = 0; i < t.length; i++) {
+            int g = t[i] & 255;
+            if (g == 0xFF) {
+                break;
+            } else if (g == 0xFE || g == 0xFA || g == 0xFB) {
+                o.write(0);
+            } else if (g == 0xFC || g == 0xFD) {
+                i++;   // (a control code and its argument)
+            } else {
+                o.write(g);
+            }
+        }
+        return o.toByteArray();
+    }
+
+    /** Game text in lines no wider than max pixels */
+    public java.util.List<byte[]> wrap(byte[] text, int max) {
+        byte[] t = clean(text);
+        java.util.List<byte[]> lines = new java.util.ArrayList<>();
+        int start = 0;
+        while (start < t.length) {
+            while (start < t.length && t[start] == 0) {
+                start++;
+            }
+            int end = start, fit = -1, w = 0;
+            while (end < t.length) {
+                w += widths[t[end] & 255];
+                if (w > max) {
+                    break;
+                }
+                if (end + 1 == t.length || t[end + 1] == 0) {
+                    fit = end + 1;
+                }
+                end++;
+            }
+            if (end == t.length) {
+                fit = end;
+            }
+            if (fit <= start) {
+                fit = Math.max(start + 1, end);   // (a word wider than the line: cut)
+            }
+            lines.add(java.util.Arrays.copyOfRange(t, start, fit));
+            start = fit;
+        }
+        return lines;
+    }
+
+    /** Game text by its hex (the tables' and the snapshot's), wrapped and drawn; returns the height used */
+    public int paragraph(Canvas c, String hex, int x, int y, int max, int color, int shadow) {
+        int yy = y;
+        for (byte[] line : wrap(hexText(hex), max)) {
+            text(c, line, x, yy, color, shadow);
+            yy += 14;
+        }
+        return yy - y;
     }
 
     /** A BAG icon (24x24) */
@@ -367,6 +450,17 @@ public final class GameArt {
             wallpapers = bitmap("game/wallpapers.png");
         }
         cell(c, wallpapers, id >= 16 ? 15 : id, 160, 144, 4, x, y, pix);
+    }
+
+    /** A wallpaper at half size (80x72), for the box list */
+    public void wallpaperHalf(Canvas c, int id, int x, int y) {
+        if (wallpapers == null) {
+            wallpapers = bitmap("game/wallpapers.png");
+        }
+        int i = id >= 16 ? 15 : id;
+        src.set((i % 4) * 160, (i / 4) * 144, (i % 4) * 160 + 160, (i / 4) * 144 + 144);
+        dst.set(x, y, x + 80, y + 72);
+        c.drawBitmap(wallpapers, src, dst, pix);
     }
 
     /** A window: OPTIONS > FRAME's frame (its 8-pixel tiles) around x, y, w, h, filled with the window's white */

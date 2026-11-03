@@ -124,6 +124,7 @@ def main():
     write_png(os.path.join(OUT, 'wallpapers.png'), *sheet(load_dir(os.path.join(exp, 'wallpapers')), 160, 144, 4))
     write_png(os.path.join(OUT, 'frames.png'), *sheet(load_dir(os.path.join(exp, 'frames')), 24, 24, 32))
     write_png(os.path.join(OUT, 'font.png'), *read_png(os.path.join(exp, 'font.png')))
+    write_png(os.path.join(OUT, 'types.png'), *read_png(os.path.join(exp, 'types.png')))
     total = sum(os.path.getsize(os.path.join(OUT, f)) for f in os.listdir(OUT))
     print('app assets: %s (%d KB)' % (OUT, total // 1024))
 
