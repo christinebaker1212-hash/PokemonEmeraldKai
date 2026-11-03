@@ -575,6 +575,7 @@ static void BuildLayout(ImGuiID dock)
     ImGui::DockBuilderDockWindow("MAP", center);
     ImGui::DockBuilderDockWindow("INSPECTOR", right);
     ImGui::DockBuilderDockWindow("PROBLEMS", bottom);
+    ImGui::DockBuilderDockWindow("ENCOUNTERS", bottom);
     ImGui::DockBuilderFinish(dock);
 }
 
@@ -755,6 +756,7 @@ static void ClosePrompt()
 
 static void Frame()
 {
+    static int sLastMode = -1;
     ImGui::SetCurrentContext(gEd.ctx);
     ImGui_ImplSDLRenderer2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
@@ -764,11 +766,18 @@ static void Frame()
     MenuBar();
     Toolbar();
     DockSpace();
+    if (gEd.mode != sLastMode)
+    {
+        // (Encounters mode brings its panel to the front; the others, PROBLEMS)
+        ImGui::SetWindowFocus(gEd.mode == MODE_ENCOUNTERS ? "ENCOUNTERS" : NULL);
+        sLastMode = gEd.mode;
+    }
     TilesPanel();
     MapsPanel();
     MapView_Panel();
     InspectorPanel();
     ProblemsPanel();
+    WildPanel();
     StatusBar();
     ClosePrompt();
     // (a slider let go or a stroke ended: that's one undo step, sent to the game)
@@ -922,6 +931,8 @@ extern "C" void MakerUi_TestCommand(const char *line)
         if (m >= 0)
             printf("[maker] edits of %s:\n%s[maker] end\n", gEd.maps[m].name, EditsText(m).c_str());
     }
+    else if (c == "wild" || c == "wildchance")
+        Wild_TestCommand(c.c_str(), arg);
     else
         MapView_TestCommand(c.c_str(), arg);
 }

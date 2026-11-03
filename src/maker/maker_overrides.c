@@ -11,6 +11,7 @@
 //   add person N x=.. y=.. elevation=.. look=.. movement=.. range_x=.. range_y=.. script=.. item=.. flag=..
 //   add hidden N x=.. y=.. elevation=.. item=..    a hidden item
 //   add sign N x=.. y=.. elevation=.. script=..    a sign reading one of the map's own signs' scripts
+//   wild AREA SLOT PROP WAS NOW                    AREA land / water / rock / fish, PROP species / min / max
 //
 // Person PROPs: x y elevation look movement range_x range_y trainer sight flag (values by name where they have one);
 // "removed" 0 1 takes a person, sign or trigger away. An added person's script is one the map's own people, signs or
@@ -36,6 +37,7 @@
 #include "constants/event_bg.h"
 #include "constants/flags.h"
 #include "constants/items.h"
+#include "wild_encounter.h"
 #include "maker.h"
 #include "maker_api.h"
 
@@ -51,6 +53,7 @@ static const char *const sPropNames[PROP_COUNT] = {"x", "y", "elevation", "look"
                                                    "trainer", "sight", "flag", "dest", "removed", "item"};
 
 struct BlockEdit { u16 x, y, was, now; };
+struct WildEdit { u8 area, slot, prop; s32 was, now; };   // prop: 0 species, 1 min, 2 max
 enum { ADD_PERSON, ADD_HIDDEN, ADD_SIGN };
 struct AddEdit { u8 kind; u16 n; s32 v[PROP_COUNT]; bool8 has[PROP_COUNT]; char script[80]; };
 struct PropEdit { u8 kind, prop; char key[80]; s32 was, now; };
@@ -65,6 +68,8 @@ struct MapEdits
     u32 propCount, propCap;
     struct AddEdit *adds;
     u32 addCount, addCap;
+    struct WildEdit *wild;
+    u32 wildCount, wildCap;
     // built from the edits: the patched header (NULL until asked for) and blocks
     struct MapHeader *header;
     struct MapEvents *events;
@@ -157,6 +162,7 @@ static void FreeEdits(int map)
     free(e->blocks);
     free(e->props);
     free(e->adds);
+    free(e->wild);
     free(e);
     sEdits[map] = NULL;
 }
@@ -278,6 +284,50 @@ static int ParseEdits(const char *text, const char *from)
             continue;
         if (strcmp(word[0], "block") == 0 && n == 5)
             AddBlock(e, atoi(word[1]), atoi(word[2]), strtol(word[3], NULL, 0), strtol(word[4], NULL, 0));
+        else if (strcmp(word[0], "wild") == 0 && n == 5)
+        {
+            // wild AREA SLOT PROP WAS NOW (5 words read: the line's last two again)
+            static const char *const sAreas[] = {"land", "water", "rock", "fish"};
+            static const char *const sProps[] = {"species", "min", "max"};
+            char wasW[96], nowW[96];
+            int area, prop;
+            unsigned v;
+            struct WildEdit w;
+            if (sscanf(line, "wild %*s %*s %*s %95s %95s", wasW, nowW) != 2)
+                continue;
+            for (area = 0; area < 4 && strcmp(word[1], sAreas[area]) != 0; area++)
+                ;
+            for (prop = 0; prop < 3 && strcmp(word[3], sProps[prop]) != 0; prop++)
+                ;
+            if (area == 4 || prop == 3)
+            {
+                printf("[maker] %s line %d: not understood (left out): %s\n", from, lineNo, line);
+                continue;
+            }
+            w.area = area;
+            w.slot = atoi(word[2]);
+            w.prop = prop;
+            if (prop == 0)
+            {
+                if (!MakerApi_ValueOf(MAKER_NAMES_SPECIES, wasW, &v))
+                    continue;
+                w.was = v;
+                if (!MakerApi_ValueOf(MAKER_NAMES_SPECIES, nowW, &v))
+                    continue;
+                w.now = v;
+            }
+            else
+            {
+                w.was = atoi(wasW);
+                w.now = atoi(nowW);
+            }
+            if (e->wildCount == e->wildCap)
+            {
+                e->wildCap = e->wildCap ? e->wildCap * 2 : 16;
+                e->wild = realloc(e->wild, e->wildCap * sizeof(*e->wild));
+            }
+            e->wild[e->wildCount++] = w;
+        }
         else if (strcmp(word[0], "add") == 0)
         {
             if (!ParseAdd(e, line))
@@ -779,4 +829,49 @@ void Maker_ItemBallItem(void)
             gSpecialVar_0x8000 = gSaveBlock1Ptr->objectEventTemplates[i].trainerRange_berryTreeId;
             break;
         }
+}
+
+// mp_region.c MP_Region_WildInfo: a table with the user's slot edits, on top of what the game picked (`now`: the
+// GENERATION's pools from the table as built, `base`); an edit applies only while `base` still has its WAS
+const struct WildPokemonInfo *Maker_WildInfo(const struct WildPokemonInfo *base, const struct WildPokemonInfo *now)
+{
+    bool8 Maker_WildInfoOwner(const struct WildPokemonInfo *info, int *map, int *area);
+    static struct WildPokemon sMons[12];
+    static struct WildPokemonInfo sInfo;
+    struct MapEdits *e;
+    int map, area, count;
+    u32 i;
+    bool8 any = FALSE;
+    if (!sAny || base == NULL || now == NULL || !Maker_WildInfoOwner(base, &map, &area))
+        return now;
+    e = EditsFor(map);
+    if (e == NULL || e->wildCount == 0)
+        return now;
+    count = MakerApi_WildSlotCount(area);
+    for (i = 0; i < e->wildCount; i++)
+    {
+        const struct WildEdit *w = &e->wild[i];
+        const struct WildPokemon *b;
+        s32 v;
+        if (w->area != area || w->slot >= count)
+            continue;
+        if (!any)
+        {
+            memcpy(sMons, now->wildPokemon, sizeof(struct WildPokemon) * count);
+            sInfo = *now;
+            sInfo.wildPokemon = sMons;
+            any = TRUE;
+        }
+        b = &base->wildPokemon[w->slot];
+        v = w->prop == 0 ? b->species : w->prop == 1 ? b->minLevel : b->maxLevel;
+        if (v != w->was)
+            continue;
+        if (w->prop == 0)
+            sMons[w->slot].species = w->now;
+        else if (w->prop == 1)
+            sMons[w->slot].minLevel = w->now;
+        else
+            sMons[w->slot].maxLevel = w->now;
+    }
+    return any ? &sInfo : now;
 }

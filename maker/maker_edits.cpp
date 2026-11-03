@@ -130,6 +130,8 @@ static int PropTable(const std::string &prop)
     if (prop == "movement") return MAKER_NAMES_MOVEMENT;
     if (prop == "trainer") return MAKER_NAMES_TRAINERTYPE;
     if (prop == "flag") return MAKER_NAMES_FLAG;
+    if (prop == "species") return MAKER_NAMES_SPECIES;
+    if (prop == "item") return MAKER_NAMES_ITEM;
     return -1;
 }
 
@@ -231,6 +233,14 @@ static bool ParseText(const std::string &text, int *mapOut, MapEdits *out)
                 return false;
             e.w = n >= 4 ? atoi(w[2]) : gEd.maps[map].width;
             e.h = n >= 4 ? atoi(w[3]) : gEd.maps[map].height;
+        }
+        else if (n == 5 && !strcmp(w[0], "wild"))
+        {
+            // wild AREA SLOT PROP WAS NOW
+            char was[96], now[96];
+            long a, b;
+            if (sscanf(line.c_str(), "wild %*s %*s %*s %95s %95s", was, now) == 2 && TextValue(w[3], was, &a) && TextValue(w[3], now, &b))
+                e.props[std::string("wild ") + w[1] + " " + w[2] + " " + w[3]] = PropEdit{a, b};
         }
         else if (n >= 3 && !strcmp(w[0], "add"))
         {

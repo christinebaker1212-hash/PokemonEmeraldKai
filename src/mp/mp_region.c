@@ -1536,7 +1536,15 @@ u16 MP_WildSlotSpecies(const struct WildPokemonInfo *info, u8 index)
     return species;   // (a table of nothing else)
 }
 
+// Moemon Maker: the user's slot edits on top of what's chosen here (src/maker/maker_overrides.c Maker_WildInfo)
+static const struct WildPokemonInfo *RegionWildInfo(const struct WildPokemonInfo *info);
 const struct WildPokemonInfo *MP_Region_WildInfo(const struct WildPokemonInfo *info)
+{
+    const struct WildPokemonInfo *Maker_WildInfo(const struct WildPokemonInfo *base, const struct WildPokemonInfo *now);
+    return Maker_WildInfo(info, RegionWildInfo(info));
+}
+
+static const struct WildPokemonInfo *RegionWildInfo(const struct WildPokemonInfo *info)
 {
     u32 i;
     if (info != NULL && MP_Region_Current() == REGION_HOENN && MP_Gen_Cap(REGION_HOENN) >= 4)

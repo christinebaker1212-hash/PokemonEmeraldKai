@@ -95,6 +95,12 @@ const char *MakerApi_NameAt(int table, int i, unsigned int *value);
 const char *MakerApi_NameOf(int table, unsigned int value);       // "" if it has none
 int MakerApi_ValueOf(int table, const char *name, unsigned int *value);   // 0 if no such name
 
+// A map's wild Pokémon as built (src/maker/maker_wild.c)
+enum { MAKER_WILD_LAND, MAKER_WILD_WATER, MAKER_WILD_ROCK, MAKER_WILD_FISH, MAKER_WILD_AREAS };
+struct MakerWildSlot { int species, minLevel, maxLevel; };
+int MakerApi_WildSlotCount(int area);   // 12, 5, 5, 10 (fishing: OLD ROD 0-1, GOOD ROD 2-4, SUPER ROD 5-9)
+int MakerApi_WildArea(int map, int area, struct MakerWildSlot *slots, int *rate);   // its slot count, 0 if none
+
 // The editor's edits of one map, as the text of its MoemonMaker/base/MAP_X.txt (src/maker/maker_overrides.c)
 void MakerApi_SetMapEdits(const char *mapName, const char *text);
 const char *MakerApi_EditsDir(void);   // MoemonMaker/ beside the game

@@ -124,6 +124,10 @@ void RecoveryTick();
 void DiscardUnsaved();
 void Message(const char *fmt, ...);
 
+// maker_wild.cpp
+void WildPanel();
+void Wild_TestCommand(const char *cmd, const char *arg);
+
 // maker_icons.cpp
 bool IconButton(const char *id, int icon, const char *tooltip, bool selected, bool enabled);
 void ToolbarSeparator();
