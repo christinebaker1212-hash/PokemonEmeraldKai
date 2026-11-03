@@ -1,0 +1,6 @@
+# Moemon Maker: edits to MAP_ROUTE115 (written by the editor; each line has the value it replaced, then the new one)
+map MAP_ROUTE115 40 80
+block 24 78 0x31CE 0x3001
+block 25 78 0x31CF 0x3001
+block 24 79 0x05D6 0x0001
+block 25 79 0x05D5 0x0001
