@@ -366,6 +366,17 @@ public final class GameArt {
         cell(c, types, type, 32, 16, 1, x, y, pix);
     }
 
+    /** A type's own color (from its icon's fill), for the POKéDEX's cards */
+    public int typeColor(int type) {
+        if (types == null) {
+            types = bitmap("game/types.png");
+        }
+        if (types == null || type * 16 + 8 >= types.getHeight()) {
+            return 0xFFA8A8A8;
+        }
+        return types.getPixel(30, type * 16 + 8) | 0xFF000000;
+    }
+
     /** A POKé BALL's icon (MON_DATA_POKEBALL), the ball's BAG icon */
     public void ballIcon(Canvas c, int ball, int x, int y) {
         JSONObject b = data.optJSONObject("ballItems");

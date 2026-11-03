@@ -18,9 +18,53 @@ import java.util.Map;
 public final class SpawnsPage extends Page {
     private static final int ROW = 22;
     // the game's slot rates (wild_encounter.c): grass 12, water 5, ROCK SMASH 5, fishing 10 (OLD 0-1, GOOD 2-4, SUPER 5-9)
-    private static final int[] LAND = {20, 20, 10, 10, 10, 10, 5, 5, 4, 4, 1, 1};
-    private static final int[] WATER = {60, 30, 5, 4, 1};
-    private static final int[] FISH = {70, 30, 60, 20, 20, 40, 40, 15, 4, 1};
+    static final int[] LAND = {20, 20, 10, 10, 10, 10, 5, 5, 4, 4, 1, 1};
+    static final int[] WATER = {60, 30, 5, 4, 1};
+    static final int[] FISH = {70, 30, 60, 20, 20, 40, 40, 15, 4, 1};
+
+    /** A slot's chance (method 0 grass, 1 surf, 2 rock smash, 3 rods) and its method's name (the rod for fishing) */
+    static int rate(int method, int slot) {
+        int[] r = method == 0 ? LAND : method == 3 ? FISH : WATER;
+        return slot < r.length ? r[slot] : 0;
+    }
+
+    static String method(int method, int slot) {
+        switch (method) {
+            case 0: return "GRASS";
+            case 1: return "SURF";
+            case 2: return "ROCK SMASH";
+            default: return slot < 2 ? "OLD ROD" : slot < 5 ? "GOOD ROD" : "SUPER ROD";
+        }
+    }
+
+    /** The map's index in the spawn maps, or -1 */
+    int indexOf(int group, int num) {
+        JSONArray l = maps();
+        for (int i = 0; i < l.length(); i++) {
+            JSONArray m = l.optJSONObject(i).optJSONArray("map");
+            if (m != null && m.optInt(0) == group && m.optInt(1) == num) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /** Open a map's POKéMON (from the POKéDEX's WHERE TO FIND) */
+    void openMap(int index) {
+        if (index < 0) {
+            return;
+        }
+        open = index;
+        openScroll = 0;
+        scroll = 0;
+        JSONObject m = maps().optJSONObject(index);
+        if (v.app.client != null) {
+            try {
+                v.app.client.send(new JSONObject().put("t", "spawns").put("map", m.optJSONArray("map")));
+            } catch (org.json.JSONException ignored) {
+            }
+        }
+    }
     private int open = -1;            // the map open (its index in spawnmaps)
     private int openScroll;
 
@@ -129,7 +173,7 @@ public final class SpawnsPage extends Page {
     }
 
     /** A place's name, numbered when the game has several areas by that name (a cave's floors) */
-    private String label(int i) {
+    String label(int i) {
         JSONArray l = maps();
         String name = l.optJSONObject(i).optString("name");
         int n = 0, k = 0;

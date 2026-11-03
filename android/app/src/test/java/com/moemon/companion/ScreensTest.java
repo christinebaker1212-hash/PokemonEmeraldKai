@@ -125,16 +125,23 @@ public class ScreensTest {
         tap(v, v.width() / 5 + 10, GameView.TOP + 28);
         tap(v, 60, GameView.TOP + 40 + 2 + 12);
         shot(v, "bag_balls");
-        // the POKéDEX and an entry (PIKACHU, caught)
+        // the POKéDEX: the cards, BULBASAUR's entry (and its lower part), a search for PIKA
         v.select(3);
         shot(v, "dex");
-        tap(v, v.width() - 20, GameView.TOP + 28);
-        tap(v, 30, GameView.TOP + 30);
-        tap(v, 2 * (v.width() - 40) / 4 + 10, GameView.TOP + 28);
-        shot(v, "dex_caught");
-        tap(v, 20, GameView.TOP + 44 + 10);
+        tap(v, 6 + 41, GameView.TOP + 96 + 49);
         shot(v, "dex_entry");
+        v.overPage().scrollTo(320);
+        shot(v, "dex_entry_lower");
         v.showOver(null);
+        tap(v, 60, GameView.TOP + 30);
+        v.overPage();
+        v.page(3).typed("PIKA");
+        v.page(3).typingDone();
+        shot(v, "dex_search");
+        v.page(3).backspace();
+        v.page(3).backspace();
+        v.page(3).backspace();
+        v.page(3).backspace();
         // a map's POKéMON, and the box list
         v.select(4);
         tap(v, 40, GameView.TOP + 22 + 2 + 22 + 10);

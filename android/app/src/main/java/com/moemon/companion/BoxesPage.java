@@ -57,7 +57,9 @@ public final class BoxesPage extends Page {
 
     public void showBox(int b) {
         box = b;
-        selected = null;
+        if (!moveMode) {
+            selected = null;   // (moving one: it stays in hand for the box chosen)
+        }
         v.invalidate();
     }
 
@@ -181,7 +183,11 @@ public final class BoxesPage extends Page {
                 ty += 16;
             }
         } else if (moveMode) {
-            art.text(c, "Tap where it should go.", 12, ty, GameArt.WHITE_TEXT, GameArt.WHITE_SHADOW);
+            for (String line : wrap("Tap where it should go. Swipe, or tap the arrows or the BOX's name, for another BOX.",
+                    w - 24)) {
+                art.text(c, line, 12, ty, GameArt.WHITE_TEXT, GameArt.WHITE_SHADOW);
+                ty += 16;
+            }
         }
     }
 
@@ -380,14 +386,30 @@ public final class BoxesPage extends Page {
         return longPress(x, y);
     }
 
+    private boolean inArrow;   // (a drag over a box's arrow turns the box once until it leaves)
+
     @Override
     public void dragMove(int x, int y) {
         dragX = x;
         dragY = y;
+        // like the game's PC: a POKéMON carried to the box's edge turns to the next box
+        int x0 = wx(v.width());
+        boolean arrow = held != null && y >= WY && y < WY + WP_H && (x < x0 + 4 || x >= x0 + WP_W - 4);
+        if (arrow && !inArrow) {
+            int dir = x < x0 + 4 ? -1 : 1;
+            Model m = v.app.model();
+            int n = boxCount(m);
+            if (n > 0) {
+                box = (box(m) + dir + n) % n;
+                v.buzz(false);
+            }
+        }
+        inArrow = arrow;
     }
 
     @Override
     public void dragEnd(int x, int y) {
+        inArrow = false;
         if (held != null) {
             JSONObject to = placeAt(x, y);
             if (to != null) {
@@ -405,7 +427,9 @@ public final class BoxesPage extends Page {
         int n = boxCount(m);
         if (n > 0) {
             box = (box(m) + dir + n) % n;
-            selected = null;
+            if (!moveMode) {
+                selected = null;   // (moving one: it stays in hand)
+            }
         }
     }
 

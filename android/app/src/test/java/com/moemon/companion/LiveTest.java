@@ -95,7 +95,7 @@ public class LiveTest {
         Files.write(script.toPath(), String.join("\n",
                 "pressuntil A field 5000", "wait 30",
                 "mp boxput 1 0 25 5", "mp boxput 1 1 1 5", "mp boxput 1 2 4 5",
-                "mp additem 139 20", "mp shinymon 4 25 20", "mp phone pair",
+                "mp additem 139 20", "mp shinymon 4 25 20", "mp additem 660 1", "mp regionclear 3", "mp dexcatch 263", "mp phone pair",
                 "wait 4200", "mp wild 263:3", "wait 2000000", "quit").getBytes());
         ProcessBuilder pb = new ProcessBuilder(game.getPath()).directory(root).redirectErrorStream(true);
         java.util.Map<String, String> env = pb.environment();
@@ -196,12 +196,49 @@ public class LiveTest {
             draw(v);
             assertTrue("nothing refused", app.client.orders.failed().isEmpty());
 
+            // MOVE to another box: the third POKéMON, MOVE, the next box (its arrow), its first place
+            tap(v, x0 + 2 * 24 + 12, y0 + 12);
+            long p3 = app.model().at(Model.boxPlace(0, 2)).optLong("p");
+            tap(v, 10 + bw + bw / 2, by);
+            tap(v, x0 - 8 + 160 + 8, GameView.TOP + 4 + 6);
+            tap(v, x0 + 12, y0 + 12);
+            idleUntil(() -> {
+                JSONObject m = app.model().at(Model.boxPlace(1, 0));
+                return app.client.orders.pending().isEmpty() && m != null && m.optLong("p") == p3;
+            }, 30, "the POKéMON moved to the next box");
+            assertTrue("nothing refused", app.client.orders.failed().isEmpty());
+
+            // the POKéDEX: where ZIGZAGOON lives, from the game; its first place opens SPAWNS
+            int zig = app.art.speciesOfDex(263);
+            java.util.List<Integer> nums = new java.util.ArrayList<>();
+            nums.add(263);
+            v.select(3);
+            v.showOver(new DexEntryPage(v, nums, 0));
+            draw(v);   // (the entry asks the game when it's drawn)
+            idleUntil(() -> app.where.containsKey(zig), 20, "where it lives");
+            assertTrue("ZIGZAGOON lives somewhere", app.where.get(zig).optJSONArray("slots").length() > 0);
+            draw(v);
+            ScreensTest.shot(v, "live_where");
+
             // SPAWNS: the list, then a map's POKéMON from the game
-            tap(v, v.width() - 20, v.height() - 10);
+            v.select(4);
             idleUntil(() -> app.spawnMaps != null, 20, "the spawn maps");
             tap(v, 40, GameView.TOP + 22 + 2 + 22 + 10);
             idleUntil(() -> !app.spawns.isEmpty(), 20, "a map's spawns");
             draw(v);
+
+            // the POKéTCH on the DEVICE page: the game's own LCD, a touch, the side button
+            v.select(5);
+            idleUntil(() -> app.watchFrame != null, 20, "the POKéTCH's LCD");
+            draw(v);
+            ScreensTest.shot(v, "live_poketch");
+            int app0 = app.watchFrame.optInt("app");
+            int s3 = Math.max(1, (v.width() - 40) / 192), lx = (v.width() - 192 * s3 - 16) / 2;
+            tap(v, lx + 192 * s3 + 16, GameView.TOP + 40 + 80 * s3);   // (the side button)
+            idleUntil(() -> app.watchFrame.optInt("app") != app0, 20, "the next app");
+            draw(v);
+            ScreensTest.shot(v, "live_poketch2");
+            v.select(0);
 
             // a battle in the game: the app offers nothing until it's over
             v.select(0);

@@ -52,6 +52,7 @@ public final class GameView extends View {
         pages.add(new BagPage(this));
         pages.add(new DexPage(this));
         pages.add(new SpawnsPage(this));
+        pages.add(new DevicePage(this));
     }
 
     @Override
@@ -100,11 +101,26 @@ public final class GameView extends View {
     }
 
     public void showOver(Page p) {
+        if (over == null && p != null) {
+            pages.get(page).hidden();
+        } else if (over != null && over != p) {
+            over.hidden();
+        }
+        if (p == null && over != null) {
+            over = null;
+            pages.get(page).shown();
+            invalidate();
+            return;
+        }
         over = p;
         if (p != null) {
             p.shown();
         }
         invalidate();
+    }
+
+    public Page page(int i) {
+        return pages.get(i);
     }
 
     public Page overPage() {
@@ -121,9 +137,82 @@ public final class GameView extends View {
     }
 
     public void select(int i) {
+        if (over != null) {
+            over.hidden();
+            over = null;
+        }
+        if (i != page) {
+            pages.get(page).hidden();
+        }
         page = i;
         pages.get(i).shown();
         invalidate();
+    }
+
+    // ----------------------------------------------------------------------------------- the phone's keyboard
+    /** Show (or hide) the phone's keyboard; what's typed goes to the page in front (Page.typed) */
+    public void keyboard(boolean show) {
+        android.view.inputmethod.InputMethodManager im =
+                (android.view.inputmethod.InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (show) {
+            setFocusableInTouchMode(true);
+            requestFocus();
+            im.showSoftInput(this, 0);
+        } else {
+            im.hideSoftInputFromWindow(getWindowToken(), 0);
+        }
+    }
+
+    @Override
+    public boolean onCheckIsTextEditor() {
+        return true;
+    }
+
+    @Override
+    public android.view.inputmethod.InputConnection onCreateInputConnection(android.view.inputmethod.EditorInfo info) {
+        info.inputType = android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
+        info.imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH;
+        return new android.view.inputmethod.BaseInputConnection(this, false) {
+            @Override
+            public boolean commitText(CharSequence text, int newCursorPosition) {
+                active().typed(text.toString());
+                invalidate();
+                return true;
+            }
+
+            @Override
+            public boolean deleteSurroundingText(int before, int after) {
+                for (int i = 0; i < Math.max(1, before); i++) {
+                    active().backspace();
+                }
+                invalidate();
+                return true;
+            }
+
+            @Override
+            public boolean performEditorAction(int action) {
+                active().typingDone();
+                keyboard(false);
+                invalidate();
+                return true;
+            }
+
+            @Override
+            public boolean sendKeyEvent(android.view.KeyEvent e) {
+                if (e.getAction() == android.view.KeyEvent.ACTION_DOWN) {
+                    if (e.getKeyCode() == android.view.KeyEvent.KEYCODE_DEL) {
+                        active().backspace();
+                    } else if (e.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER) {
+                        active().typingDone();
+                        keyboard(false);
+                    } else if (e.getUnicodeChar() != 0) {
+                        active().typed(String.valueOf((char) e.getUnicodeChar()));
+                    }
+                    invalidate();
+                }
+                return true;
+            }
+        };
     }
 
     public void buzz(boolean strong) {
@@ -231,7 +320,7 @@ public final class GameView extends View {
         return (s / 86400) + " DAYS AGO";
     }
 
-    private static final String[] TAB_NAMES = {"BOXES", "PARTY", "BAG", "DEX", "SPAWNS"};
+    private static final String[] TAB_NAMES = {"BOXES", "PARTY", "BAG", "DEX", "SPAWNS", "DEVICE"};
 
     private void drawTabs(Canvas c) {
         int y = h - TABS, tw = w / TAB_NAMES.length;
@@ -343,7 +432,6 @@ public final class GameView extends View {
         }
         if (y >= h - TABS && (over == null || !over.fullScreen())) {
             int i = Math.min(TAB_NAMES.length - 1, x / (w / TAB_NAMES.length));
-            over = null;
             select(i);
             return;
         }

@@ -6152,3 +6152,75 @@ const struct PokedexEntry *MP_DexEntry(u32 num)
 {
     return &gPokedexEntries[num];
 }
+
+// Moemon Co-op: the POKéDEX's entry screen as the game draws it (BG3: its frame, the picture's stage and the text
+// box), 240x160 in BGR555 with bit 15 set, and a footprint as 16x16 pixels (1 = ink), for the phone app's export
+// (mp_export.c)
+void MP_DexInfoScreen(u16 *out)
+{
+    u32 size, x, y;
+    u8 *gfx = malloc_and_decompress(gPokedexMenu_Gfx, &size);
+    u16 *map = malloc_and_decompress(gPokedexInfoScreen_Tilemap, &size);
+    for (y = 0; y < DISPLAY_HEIGHT; y++)
+        for (x = 0; x < DISPLAY_WIDTH; x++)
+        {
+            u16 e = map ? map[(y / 8) * 32 + x / 8] : 0;
+            u32 t = e & 0x3FF, px = x & 7, py = y & 7, pal = e >> 12, idx;
+            if (e & 0x400)
+                px = 7 - px;
+            if (e & 0x800)
+                py = 7 - py;
+            idx = gfx ? (gfx[t * 32 + py * 4 + px / 2] >> ((px & 1) * 4)) & 0xF : 0;
+            out[y * DISPLAY_WIDTH + x] = (idx ? gPokedexBgHoenn_Pal[pal * 16 + idx] : gPokedexBgHoenn_Pal[0]) | 0x8000;
+        }
+    if (gfx)
+        Free(gfx);
+    if (map)
+        Free(map);
+}
+
+void MP_DexFootprint(u16 species, u8 out[16][16])
+{
+    const u8 *fp = gMonFootprintTable[species];
+    u32 t, r, b;
+    memset(out, 0, 16 * 16);
+    for (t = 0; t < 4; t++)
+        for (r = 0; r < 8; r++)
+            for (b = 0; b < 8; b++)
+                if (fp[t * 8 + r] & (1 << b))
+                    out[(t / 2) * 8 + r][(t % 2) * 8 + b] = 1;
+}
+
+// Moemon Co-op: the POKéDEX's list screen as the game draws it (its BG layers: the list's frame over its underlay),
+// 240x160, for the phone app's export
+void MP_DexListScreen(u16 *out)
+{
+    u32 size, x, y, l;
+    u8 *gfx = malloc_and_decompress(gPokedexMenu_Gfx, &size);
+    u16 *maps[2];
+    maps[0] = malloc_and_decompress(gPokedexListUnderlay_Tilemap, &size);
+    maps[1] = malloc_and_decompress(gPokedexList_Tilemap, &size);
+    for (y = 0; y < DISPLAY_HEIGHT; y++)
+        for (x = 0; x < DISPLAY_WIDTH; x++)
+        {
+            u16 c = gPokedexBgHoenn_Pal[0];
+            for (l = 0; l < 2; l++)
+            {
+                u16 e = maps[l] ? maps[l][(y / 8) * 32 + x / 8] : 0;
+                u32 t = e & 0x3FF, px = x & 7, py = y & 7, pal = e >> 12, idx;
+                if (e & 0x400)
+                    px = 7 - px;
+                if (e & 0x800)
+                    py = 7 - py;
+                idx = gfx ? (gfx[t * 32 + py * 4 + px / 2] >> ((px & 1) * 4)) & 0xF : 0;
+                if (idx)
+                    c = gPokedexBgHoenn_Pal[pal * 16 + idx];
+            }
+            out[y * DISPLAY_WIDTH + x] = c | 0x8000;
+        }
+    if (gfx)
+        Free(gfx);
+    for (l = 0; l < 2; l++)
+        if (maps[l])
+            Free(maps[l]);
+}

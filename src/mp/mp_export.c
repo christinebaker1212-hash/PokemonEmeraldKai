@@ -49,6 +49,9 @@ void MP_ExportGlyph(u16 glyphId, u8 out[16][16], u8 *width);   // text.c
 const u32 *MP_SpeciesFrontPal(u16 species);   // pokemon.c
 u8 MP_TypeIconPal(u8 type);                    // pokemon_summary_screen.c
 void MP_DexTexts(u32 num, const u8 *out[4]);   // pokedex.c
+void MP_DexInfoScreen(u16 *out);
+void MP_DexListScreen(u16 *out);
+void MP_DexFootprint(u16 species, u8 out[16][16]);
 const struct PokedexEntry *MP_DexEntry(u32 num);
 bool8 MP_WallpaperArt(u8 id, const u32 **tiles, const u32 **tilemap, const u16 **palettes);   // pokemon_storage_system.c
 
@@ -351,6 +354,56 @@ static void ExportTypeIcons(const char *dir)
     WritePng(path, sSheet, 32, 16 * (NUMBER_OF_MON_TYPES + CONTEST_CATEGORIES_COUNT));
 }
 
+// The POKéDEX's entry screen (240x160) and every footprint (16x16 each, in species order, 32 a row)
+static void ExportDexArt(const char *dir)
+{
+    static u16 sScreen[DISPLAY_WIDTH * DISPLAY_HEIGHT];
+    static u8 sRgba[DISPLAY_WIDTH * DISPLAY_HEIGHT * 4];
+    u32 i, s, n = AllSpecies(), rows = (n + 31) / 32;
+    u8 *sheet = calloc(32 * 16 * rows * 16 * 4, 1);
+    char path[600];
+    MP_DexInfoScreen(sScreen);
+    for (i = 0; i < DISPLAY_WIDTH * DISPLAY_HEIGHT; i++)
+    {
+        u16 c = sScreen[i];
+        sRgba[i * 4] = (c & 31) * 255 / 31;
+        sRgba[i * 4 + 1] = ((c >> 5) & 31) * 255 / 31;
+        sRgba[i * 4 + 2] = ((c >> 10) & 31) * 255 / 31;
+        sRgba[i * 4 + 3] = 255;
+    }
+    snprintf(path, sizeof(path), "%s/dex_info.png", dir);
+    WritePng(path, sRgba, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+    MP_DexListScreen(sScreen);
+    for (i = 0; i < DISPLAY_WIDTH * DISPLAY_HEIGHT; i++)
+    {
+        u16 c = sScreen[i];
+        sRgba[i * 4] = (c & 31) * 255 / 31;
+        sRgba[i * 4 + 1] = ((c >> 5) & 31) * 255 / 31;
+        sRgba[i * 4 + 2] = ((c >> 10) & 31) * 255 / 31;
+        sRgba[i * 4 + 3] = 255;
+    }
+    snprintf(path, sizeof(path), "%s/dex_list.png", dir);
+    WritePng(path, sRgba, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+    if (sheet == NULL)
+        return;
+    for (s = 1; s < n && s < NUM_SPECIES; s++)
+    {
+        u8 fp[16][16];
+        u32 x, y;
+        MP_DexFootprint(s, fp);
+        for (y = 0; y < 16; y++)
+            for (x = 0; x < 16; x++)
+            {
+                u8 *o = sheet + ((((s / 32) * 16 + y) * 32 * 16) + (s % 32) * 16 + x) * 4;
+                if (fp[y][x])
+                    o[0] = 49, o[1] = 41, o[2] = 41, o[3] = 255;
+            }
+    }
+    snprintf(path, sizeof(path), "%s/footprints.png", dir);
+    WritePng(path, sheet, 32 * 16, rows * 16);
+    free(sheet);
+}
+
 static void ExportFont(const char *dir, FILE *json)
 {
     static u8 sRgba[256 * 256 * 4];
@@ -522,6 +575,7 @@ void MP_Export_IfAsked(void)
     ExportWallpapers(dir);
     ExportFrames(dir);
     ExportTypeIcons(dir);
+    ExportDexArt(dir);
     ExportData(dir);
     printf("[export] the app's art and tables are in %s\n", dir);
     fflush(stdout);

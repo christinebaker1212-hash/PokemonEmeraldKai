@@ -1305,6 +1305,82 @@ static void DrawApp(void)
     }
 }
 
+// ------------------------------------------------------------------------------------------------- on the phone
+// Moemon Co-op: the POKéTCH on the phone (mp_phone.c, docs/PHONE_LINK.md "The POKéTCH on the phone"): while the phone
+// shows it, the app is drawn into the LCD every frame the phone asks (here when the game's own isn't out, which draws
+// it itself), and the phone's finger is the stylus. The same apps, state and "<save>.poketch" as the game's.
+static struct { bool8 touch; s16 x, y; s8 change; bool8 drawn; } sPhone;
+static bool8 Shown(void);
+static void ChangeApp(s8 dir);
+
+static void MergePhoneTouch(void)
+{
+    if (sPhone.touch)
+    {
+        sP.sx = sPhone.x, sP.sy = sPhone.y;
+        sP.touch = TRUE;
+    }
+}
+
+bool8 MP_Poketch_PhoneAvailable(void)
+{
+    return CheckBagHasItem(ITEM_POKETCH, 1) && MP_Region_DeviceHere(REGION_SINNOH);
+}
+
+void MP_Poketch_PhoneTouch(s16 x, s16 y, bool8 down)
+{
+    sPhone.x = x < 0 ? 0 : x >= PW ? PW - 1 : x;
+    sPhone.y = y < 0 ? 0 : y >= PH ? PH - 1 : y;
+    sPhone.touch = down;
+}
+
+void MP_Poketch_PhoneApp(s8 dir)
+{
+    sPhone.change = dir;
+}
+
+// The LCD (PW x PH, shades 0-3) as the phone should show it now; also its app, color (COLOR CHANGER, BACKLIGHT, a
+// ringing flash) and which apps are unlocked (a bit each)
+const u8 *MP_Poketch_PhoneFrame(u8 *app, u8 *color, u8 *flags, u32 *unlocked)
+{
+    u32 i;
+    LoadState();
+    if (!AppUnlocked(sP.app))
+        sP.app = APP_WATCH;
+    if (sPhone.change)
+    {
+        ChangeApp(sPhone.change);
+        sPhone.change = 0;
+    }
+    if (!Shown())
+    {
+        // (the game's own isn't drawing it: here, with the phone's finger as the only stylus)
+        bool8 was = sP.touch;
+        sP.frame++;
+        sP.touch = FALSE;
+        sP.newKeys = sP.heldKeys = sP.repKeys = 0;
+        MergePhoneTouch();
+        sP.touchNew = sP.touch && !was;
+        DrawApp();
+        sP.touchNew = FALSE;
+    }
+    *app = sP.app;
+    *color = sP.color;
+    *flags = (sP.backlight ? 1 : 0) | (sP.ringing && (sP.ringing / 10) & 1 ? 2 : 0);
+    *unlocked = 0;
+    for (i = 0; i < APP_COUNT; i++)
+        if (AppUnlocked(i))
+            *unlocked |= 1u << i;
+    return &sCanvas[0][0];
+}
+
+void MP_Poketch_PhoneDone(void)
+{
+    sPhone.touch = FALSE;
+    if (sP.loaded)
+        SaveState();
+}
+
 // ------------------------------------------------------------------------------------------------- open / input
 // The UI elements an app's cursor goes between (no list: a free cursor, the MEMO PAD's kind)
 struct Target { u8 x, y, w, h; };
@@ -1586,6 +1662,7 @@ void MP_Poketch_FilterKeys(void)
              && my >= ly + 30 && my < ly + 110)
         ChangeApp(1);   // (the side button)
     sP.mouseWas = down;
+    MergePhoneTouch();
     sP.touchNew = sP.touch && !wasTouch;
 }
 

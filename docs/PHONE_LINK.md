@@ -117,3 +117,37 @@ A plain Android app (no AndroidX; minSdk 26), its screens drawn in the game's pi
 
 Not yet: the relay route away from home (the app is AWAY off the home network), the link moment's ceremony, sounds,
 search and sort, RELEASE, TMs and medicine, the Global / shared PC.
+
+## Phase 2: the device (docs/COMPANION_APP.md "Pillar 1: the second screen")
+
+The roadmap's Phase 2 is the device: second-screen mode, the POKéTCH's and the POKéNAV's apps, the live map. Its
+gate: touch feels instant on home Wi-Fi.
+
+### The POKéTCH on the phone (1.71.0)
+
+The app's DEVICE tab shows the game's own POKéTCH, live: no second copy of any app. `{"t":"watch","on":1}` starts it:
+while on, the game draws the app into the LCD (sinnoh/poketch.c MP_Poketch_PhoneFrame: itself when the game's own
+POKéTCH isn't out, which draws it anyway) up to 20 times a second and sends
+`{"t":"watch","app":A,"color":C,"flags":F,"apps":BITS,"rle":HEX}` only when it changed: 192x160 shades 0-3,
+run-length coded (a byte a run: the shade in the low 2 bits, the length less one above); `flags` 1 = BACKLIGHT,
+2 = ringing (the colors inverted); `apps` the unlocked apps, a bit each. The phone colors it with the COLOR CHANGER's
+table. `{"t":"touch","x":X,"y":Y,"d":0|1}` is the stylus (the LCD's pixels; merged with the game's own stylus while
+its POKéTCH is out), `{"t":"watchapp","dir":±1}` the side button. `{"t":"watch","on":0}` (or the link closing) stops
+it and saves "<save>.poketch". `{"t":"watch","none":1}`: the save has no POKéTCH where it is (MP_Region_DeviceHere).
+The snapshot's `save.devices` is [POKéTCH, POKéNAV, POKéGEAR] (1 = has it). LiveTest opens it, presses the side
+button and sees the next app.
+
+### The POKéDEX, WHERE TO FIND and moves across boxes (1.71.0)
+
+The POKéDEX page is made for a phone in the game's colors: the game's own list and entry screens are exported
+(pokedex.c MP_DexListScreen / MP_DexInfoScreen: dex_list.png, dex_info.png; its title is taken from the list's) with
+every footprint (footprints.png); the page has a search bar (GameView's keyboard: Page.typed / backspace /
+typingDone), filters and cards with the types' colors (GameArt.typeColor, from the type icons). An entry: the picture
+at twice its size on its type's color, the four games' texts, the size and footprint, WHERE TO FIND, base stats.
+`{"t":"where","s":SPECIES}` -> `{"t":"where","s":..,"slots":[[group,map,method,slot,min,max,met],...]}`: every wild
+slot that makes it (the GENERATION's pools); the app groups them by place and method, and rare ones (only slots of 1%
+or less) are counted, not named, until met there. In BOXES, a POKéMON carried to a box's arrow turns the box
+(BoxesPage.dragMove); MOVE stays on through swipes and the box list.
+
+Next: the POKéNAV's apps (live region map, MOENAV calls, CONDITION, RIBBONS), the POKéGEAR's, and battle mode (the
+MOVE TESTER and the party's HP).

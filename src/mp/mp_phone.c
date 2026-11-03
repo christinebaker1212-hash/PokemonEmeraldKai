@@ -43,6 +43,11 @@
 #include "constants/rgb.h"
 #include "constants/songs.h"
 #include "mp_phone_net.h"
+bool8 MP_Poketch_PhoneAvailable(void);   // sinnoh/poketch.c
+void MP_Poketch_PhoneTouch(s16 x, s16 y, bool8 down);
+void MP_Poketch_PhoneApp(s8 dir);
+const u8 *MP_Poketch_PhoneFrame(u8 *app, u8 *color, u8 *flags, u32 *unlocked);
+void MP_Poketch_PhoneDone(void);
 const u32 *MP_BoxMonFrontPal(struct BoxPokemon *box);   // pokemon.c
 const u32 *MP_SpeciesFrontPal(u16 species);
 #include "phone_proto.h"
@@ -464,6 +469,9 @@ static void BufSnapshot(struct Buf *b)
     PhoneProto_ToHex(sFile.saveId, PHONE_SAVEID_SIZE, id);
     BufAdd(b, "{\"t\":\"snap\",\"rev\":%u,\"save\":{\"id\":\"%s\",\"name\":", (unsigned)Rev(), id);
     BufText(b, gSaveBlock2Ptr->playerName, PLAYER_NAME_LENGTH);
+    // (the devices the save has, for the phone's DEVICE page: POKéTCH, POKéNAV, POKéGEAR)
+    BufAdd(b, ",\"devices\":[%u,%u,%u]", MP_Poketch_PhoneAvailable(), FlagGet(FLAG_SYS_POKENAV_GET) != 0,
+           CheckBagHasItem(ITEM_POKEGEAR, 1) != 0);
     BufAdd(b, ",\"tid\":%u,\"gender\":%u,\"region\":%u,\"gen\":%u,\"badges\":%u,\"money\":%u,\"coins\":%u,\"game\":\"%s\"},",
            (unsigned)(gSaveBlock2Ptr->playerTrainerId[0] | (gSaveBlock2Ptr->playerTrainerId[1] << 8)),
            gSaveBlock2Ptr->playerGender, MP_Region_Current(), MP_Generation(), MP_Region_TotalBadges(),
@@ -909,6 +917,9 @@ struct Session
     s8 phone;                       // its record in sFile
     u8 key[PHONE_KEY_SIZE];         // the session's key
     u32 seqIn, seqOut;
+    bool8 watch;                    // the phone shows the POKéTCH: its LCD is sent when it changes
+    u32 watchHash;
+    u8 watchTimer;
 };
 
 #define ORDERS_MAX 64
@@ -1129,6 +1140,36 @@ static void OnOrder(int c, const char *json)
     SendBuf(c, &sOut);
 }
 
+// Where a species lives, for the POKéDEX (the app's WHERE TO FIND): every wild slot that makes it, as the game would
+// now (the GENERATION's pools), each [group, map, method (0 grass, 1 surf, 2 rock smash, 3 rods), slot, min level,
+// max level, met there]; the app applies the spawn viewer's rules (rare ones unnamed until met)
+static void SendWhere(int c, const char *json)
+{
+    long long sp = 0;
+    u32 i, k, j, n = 0;
+    JsonNum(json, "s", &sp);
+    BufReset(&sOut);
+    BufAdd(&sOut, "{\"t\":\"where\",\"s\":%lld,\"slots\":[", sp);
+    for (i = 0; sp > 0 && gWildMonHeaders[i].mapGroup != MAP_GROUP(MAP_UNDEFINED); i++)
+    {
+        const struct WildPokemonHeader *h = &gWildMonHeaders[i];
+        const struct WildPokemonInfo *infos[4] = {h->landMonsInfo, h->waterMonsInfo, h->rockSmashMonsInfo, h->fishingMonsInfo};
+        u32 met = MetBits((h->mapGroup << 8) | h->mapNum);
+        for (k = 0; k < 4; k++)
+        {
+            const struct WildPokemonInfo *info = infos[k] ? MP_Region_WildInfo(infos[k]) : NULL;
+            if (info == NULL)
+                continue;
+            for (j = 0; j < sAreaSlots[k]; j++)
+                if (MP_WildSlotSpecies(info, j) == sp)
+                    BufAdd(&sOut, "%s[%u,%u,%u,%u,%u,%u,%u]", n++ ? "," : "", h->mapGroup, h->mapNum, k, j,
+                           info->wildPokemon[j].minLevel, info->wildPokemon[j].maxLevel, (met >> (sAreaBit[k] + j)) & 1);
+        }
+    }
+    BufAdd(&sOut, "]}");
+    SendBuf(c, &sOut);
+}
+
 static void OnSealed(int c, const char *json)
 {
     char t[16];
@@ -1144,6 +1185,67 @@ static void OnSealed(int c, const char *json)
         OnOrder(c, json);
     else if (strcmp(t, "ping") == 0)
         SendState(c);
+    else if (strcmp(t, "where") == 0)
+        SendWhere(c, json);
+    else if (strcmp(t, "watch") == 0)
+    {
+        // the phone shows the POKéTCH (on: 1) or stopped (on: 0)
+        long long on = 0;
+        JsonNum(json, "on", &on);
+        if (sSess[c].watch && !on)
+            MP_Poketch_PhoneDone();
+        sSess[c].watch = on != 0;
+        sSess[c].watchHash = 0;
+        if (on && !MP_Poketch_PhoneAvailable())
+        {
+            BufReset(&sOut);
+            BufAdd(&sOut, "{\"t\":\"watch\",\"none\":1}");
+            SendBuf(c, &sOut);
+            sSess[c].watch = FALSE;
+        }
+    }
+    else if (strcmp(t, "touch") == 0 && sSess[c].watch)
+    {
+        long long x = 0, y = 0, d = 0;
+        JsonNum(json, "x", &x);
+        JsonNum(json, "y", &y);
+        JsonNum(json, "d", &d);
+        MP_Poketch_PhoneTouch((s16)x, (s16)y, d != 0);
+    }
+    else if (strcmp(t, "watchapp") == 0 && sSess[c].watch)
+    {
+        long long dir = 1;
+        JsonNum(json, "dir", &dir);
+        MP_Poketch_PhoneApp(dir < 0 ? -1 : 1);
+    }
+}
+
+// The POKéTCH's LCD for a phone showing it, when it changed: 192x160 shades 0-3, run-length coded (a byte a run: the
+// shade in the low 2 bits, the run's length less one above), as hex
+static void SendWatch(int c)
+{
+    u8 app, color, flags;
+    u32 unlocked, i, h = 2166136261u, n = 192 * 160;
+    const u8 *lcd = MP_Poketch_PhoneFrame(&app, &color, &flags, &unlocked);
+    for (i = 0; i < n; i++)
+        h = (h ^ lcd[i]) * 16777619u;
+    h ^= app | (color << 8) | (flags << 16);
+    if (h == sSess[c].watchHash)
+        return;
+    sSess[c].watchHash = h;
+    BufReset(&sOut);
+    BufAdd(&sOut, "{\"t\":\"watch\",\"app\":%u,\"color\":%u,\"flags\":%u,\"apps\":%u,\"rle\":\"", app, color, flags,
+           (unsigned)unlocked);
+    for (i = 0; i < n;)
+    {
+        u32 run = 1;
+        while (i + run < n && run < 64 && lcd[i + run] == lcd[i])
+            run++;
+        BufAdd(&sOut, "%02X", (unsigned)(((run - 1) << 2) | (lcd[i] & 3)));
+        i += run;
+    }
+    BufAdd(&sOut, "\"}");
+    SendBuf(c, &sOut);
 }
 
 static int FindPhone(const u8 id[PHONE_ID_SIZE])
@@ -1360,6 +1462,9 @@ void MP_Phone_Update(void)
             {
                 u32 i, k = 0;
                 sSess[c].state = SESS_NONE;
+                if (sSess[c].watch)
+                    MP_Poketch_PhoneDone();
+                sSess[c].watch = FALSE;
                 for (i = 0; i < sOrderCount; i++)   // (its waiting orders go: the phone sends them again)
                     if (sOrders[i].conn != c)
                         sOrders[k++] = sOrders[i];
@@ -1370,6 +1475,13 @@ void MP_Phone_Update(void)
         while (budget-- > 0 && (got = PhoneNet_Recv(c, &frame, &len)) == 1)
             OnFrame(c, frame, len);
     }
+    // The POKéTCH for phones showing it (20 times a second at most; only what changed is sent)
+    for (c = 0; c < PHONE_NET_CONNS; c++)
+        if (sSess[c].state == SESS_LIVE && sSess[c].watch && ++sSess[c].watchTimer >= 3)
+        {
+            sSess[c].watchTimer = 0;
+            SendWatch(c);
+        }
     // Waiting orders, in order, once the game is free
     while (sOrderCount > 0 && Safe())
     {

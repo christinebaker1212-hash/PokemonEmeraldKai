@@ -40,6 +40,9 @@ public final class Companion implements LinkClient.Listener {
     public JSONObject spawnMaps;                                  // "spawnmaps"
     public final java.util.Map<String, JSONObject> spawns = new java.util.HashMap<>();   // "g,m" -> "spawns"
     public String toast = "";                                     // the last answer worth a word
+    public final java.util.Map<Integer, JSONObject> where = new java.util.HashMap<>();   // species -> "where"
+    public volatile JSONObject watchFrame;                        // the POKéTCH's last LCD from the game
+    public volatile boolean watching;                             // the DEVICE page shows it
     public long toastAt;
     private final Handler main = new Handler(Looper.getMainLooper());
     private final List<Runnable> watchers = new ArrayList<>();
@@ -356,6 +359,12 @@ public final class Companion implements LinkClient.Listener {
         if (status == LinkClient.Status.LINKED && client != null && spawnMaps == null) {
             client.ask("spawnmaps");
         }
+        if (status == LinkClient.Status.LINKED && client != null && watching) {
+            try {
+                client.send(new JSONObject().put("t", "watch").put("on", 1));   // (linked again: the POKéTCH again)
+            } catch (org.json.JSONException ignored) {
+            }
+        }
         changed();
     }
 
@@ -379,7 +388,11 @@ public final class Companion implements LinkClient.Listener {
         if (client == null) {
             return;
         }
-        if (t.equals("linkerror")) {
+        if (t.equals("where")) {
+            where.put(m.optInt("s"), m);
+        } else if (t.equals("watch")) {
+            watchFrame = m.optInt("none") == 1 ? null : m;
+        } else if (t.equals("linkerror")) {
             String e = client.lastError == null ? "" : client.lastError;
             store.write("linkerror.txt", e);
             toast = "LINK ERROR: " + firstLine(e);

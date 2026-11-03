@@ -16,6 +16,11 @@ public abstract class Page {
     public abstract void draw(Canvas c, int w, int h);
 
     public void shown() {}
+    /** Typed letters (the phone's keyboard, GameView.keyboard), a backspace, the keyboard's done */
+    public void typed(String text) {}
+    public void backspace() {}
+    public void typingDone() {}
+    public void hidden() {}
     public void press(int x, int y) {}
     public void tap(int x, int y) {}
     public boolean longPress(int x, int y) { return false; }
