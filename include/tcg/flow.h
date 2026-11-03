@@ -153,4 +153,7 @@ unsigned TcgFlow_Pick(struct TcgFlow *f, const struct TcgDuel *g, const uint8_t 
 unsigned TcgFlow_Menu(struct TcgFlow *f, const struct TcgDuel *g, unsigned value);
 /* Whose move it is now (the one promoting, or the one whose turn it is), TCG_NONE when it's over */
 unsigned TcgFlow_Actor(const struct TcgDuel *g);
+/* An attack's sound (an SE_ number, constants/songs.h) and its sparks' color (0: the type's) by its animation */
+unsigned TcgFlow_AttackSound(const char *anim, unsigned *color);
+
 #endif

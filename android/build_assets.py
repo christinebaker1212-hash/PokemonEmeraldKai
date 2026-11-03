@@ -2,7 +2,7 @@
 """The app's art and tables from the game itself (src/mp/mp_export.c, MOEMON_EXPORT_APP), packed for the APK into
 android/app/src/main/assets/game/: sheets of the POKeMON's icons (first frame) and front pictures, the BAG's icons,
 the PC wallpapers, the window frames and the font, compressed; data.json; charmap.json (the game's letters, for the
-app's own words, from charmap.txt).
+app's own words, from charmap.txt); sounds.bin (the game's sound effects, cries and songs, played by its own engine).
 
     python3 android/build_assets.py [EXPORT_DIR]   (no EXPORT_DIR: runs ./pokeemerald64 to make one; make linux first)
 """
@@ -190,6 +190,9 @@ def main():
     write_png(os.path.join(OUT, 'types.png'), *read_png(os.path.join(exp, 'types.png')))
     for name in ('dex_info.png', 'dex_list.png', 'footprints.png', 'ribbons.png', 'trainers.png'):
         write_png(os.path.join(OUT, name), *read_png(os.path.join(exp, name)))
+    # the game's sounds, recorded from its own sound engine (src/mp/mp_export_sound.c; Sound.java plays them)
+    if os.path.exists(os.path.join(exp, 'sounds.bin')):
+        shutil.copyfile(os.path.join(exp, 'sounds.bin'), os.path.join(OUT, 'sounds.bin'))
     tt_art()
     tcg_art()
     ygo_art()

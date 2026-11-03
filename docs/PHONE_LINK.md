@@ -457,4 +457,44 @@ hidden cards hidden), YgoFriendsTest (3 duels through a real server, a concessio
 - ON OFFER (a trade by mail) as a small orange tag on box places, and on the PC card and the PARTY's cards.
 - The tab bar: a 12x12 pixel icon for each page above its name, the chosen one on a raised plate (GameView TAB_ICONS).
 
-Next: the app's sounds and music (the game's own), and the rest of the pass.
+### The app's sounds (1.81.0)
+
+The game's own sounds, played by the game's own sound engine and recorded when the APK is built; nothing is written
+for the app and nothing is committed.
+
+- **The export** (src/mp/mp_export_sound.c, part of MOEMON_EXPORT_APP; MOEMON_EXPORT_NO_SOUND=1 skips it): each sound
+  is played on the game's players and mixed by its mixer, frame by frame, with the output taken from
+  Platform_QueueAudio (gMpAudioCapture: nothing reaches the sound device). Sound effects (the list in sEffects: the
+  card tables', the PC's, the POKéNAV's, the BAG's...), a cry for every species (PlayCry_NormalNoDucking; a cry that
+  doesn't start, a cry player still taken, is tried again after a longer quiet), fanfares, and the card games' duel
+  songs as each scene plays them: MP_Kaisong_Request with a file of the scene (tt_board.c, tcg_board.c, ygo_board.c),
+  so a scene's own .kaisong plays, with no map (a borrowed save block: the export runs at the first frame) so no
+  place's music does. A song's loop is found by its first track's GOTO (music_player.c gMpGotoWatch, at pattern level 0):
+  the loop's end is that frame, its start the first frame the track was past the GOTO's place; 50 ms more is rendered
+  past the end for the app's crossfade. Two scenes with the same music (no file of their own) share one copy.
+- **sounds.bin** ("MSND", the format at the top of mp_export_sound.c): IMA ADPCM, mono at 21024 Hz for sound effects,
+  10512 Hz for cries (their own rate), stereo 21024 Hz for fanfares and songs (the mixer's 42048 Hz taken down through
+  a windowed-sinc filter). About 16 MB: 1,050 cries 7 MB, six songs 7 MB. tools/phone/sounds_pack.py lists it or
+  writes WAVs (songs twice round, crossfaded as the app plays them).
+- **Sound.java**: an AudioTrack at the phone's own rate, low latency, opened while something plays (let go after 1.5 s
+  of quiet). Sound effects on three voices (the same one again starts over; else the oldest gives way), one cry (the
+  music at 85/256 under it, PlayCry_Normal's ducking), a fanfare (the music waits, then goes on), one song (decoded off
+  the main thread, a quarter-second fade in, a crossfade over the loop's seam). The music needs audio focus, never
+  starts while another app's media is playing (USAGE_MEDIA in the active playback configurations), and stops when the
+  app goes behind something (MainActivity onPause: Sound.front(false)); it comes back with the page that asked for it.
+  MENU > SOUND: SOUND EFFECTS (cries too) and MUSIC, each on its own switch.
+- **Where**: pages opening and closing SE_SELECT (GameView.showOver), the tabs SE_RG_BAG_POCKET, the MENU SE_WIN_OPEN
+  and its rows SE_SELECT, a refusal SE_FAILURE and a done SE_SUCCESS (the toast); the SUMMARY plays the POKéMON's cry
+  as it comes up and on the picture (not an EGG's), the POKéDEX entry its cry once seen and SE_DEX_PAGE turning; a
+  MATCH CALL rings SE_POKENAV_CALL. The card tables play what the game's boards play for every event (tcg_board.c
+  BoardEvent, ygo_board.c Present, tt_board.c Play: each page's sound(); a TCG attack's sound by its animation through
+  tcg_flow.c TcgFlow_AttackSound, the board's table moved there and shared, Tcg.attackSound), SE_SELECT on a choice and
+  SE_FAILURE on a refusal, the scene's duel song (TCG / YU-GI-OH!: VS TRAINER against a card player, the UNION ROOM's
+  against a friend; TRIPLE TRIAD: FireRed's VS TRAINER), the scene's victory song on a win, the music stopping on a
+  loss, SE_FAILURE on a TRIPLE TRIAD draw. Pack openings: SE_RG_CARD_OPEN, each card SE_RG_CARD_FLIP as it turns
+  (SE_SHINY for a rare one), MUS_OBTAIN_ITEM at the end, as the game's pack screens.
+- Tests: tools/phone/sounds_test.py (every sound the app names and the attack table's are in the pack, a cry for every
+  species, loops inside their songs with a crossfade tail, nothing silent or clipped), SoundTest (`./gradlew
+  testDebugUnitTest`: the ADPCM decodes, songs go round their loops with no jump at the seam).
+
+Next: the rest of the pass.

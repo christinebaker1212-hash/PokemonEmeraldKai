@@ -40,10 +40,15 @@ public final class GameView extends View {
     private final Runnable longPress = this::onLongPress;
     private android.view.VelocityTracker velocity;
 
+    /** The game's own sounds (Sound.java) */
+    public final Sound sound;
+    private long toastHeard;
+
     public GameView(Context c, Companion app) {
         super(c);
         this.app = app;
         this.art = app.art;
+        this.sound = Sound.get(c);
         scroller = new OverScroller(c);
         setFocusable(true);
         setContentDescription("Moemon Companion");
@@ -109,6 +114,9 @@ public final class GameView extends View {
     }
 
     public void showOver(Page p) {
+        if (p != over) {
+            sound.play("se_select");   // (a page opened or closed: the game's A and B)
+        }
         if (over == null && p != null) {
             pages.get(page).hidden();
         } else if (over != null && over != p) {
@@ -256,6 +264,10 @@ public final class GameView extends View {
             menu.draw(c, w, h);
         }
         // the last answer the game couldn't carry out, for 4 seconds
+        if (!app.toast.isEmpty() && app.toastAt != toastHeard && System.currentTimeMillis() - app.toastAt < 1000) {
+            toastHeard = app.toastAt;
+            sound.play(app.toastGood ? "se_success" : "se_failure");
+        }
         if (!app.toast.isEmpty() && System.currentTimeMillis() - app.toastAt < 5000) {
             java.util.List<String> lines = new java.util.ArrayList<>();
             StringBuilder line = new StringBuilder();
@@ -511,6 +523,7 @@ public final class GameView extends View {
     private void tap(int x, int y) {
         if (y < TOP) {
             if (x >= w - 60) {
+                sound.play("se_win_open");   // (the game's START menu)
                 showMenu(Menu.main(this));
             } else if (over != null) {
                 over.back();
@@ -519,6 +532,9 @@ public final class GameView extends View {
         }
         if (y >= h - TABS && (over == null || !over.fullScreen())) {
             int i = Math.min(TAB_NAMES.length - 1, x / (w / TAB_NAMES.length));
+            if (TAB_PAGES[i] != page || over != null) {
+                sound.play("se_rg_bag_pocket");   // (as the BAG's pockets)
+            }
             select(TAB_PAGES[i]);
             return;
         }
@@ -529,6 +545,7 @@ public final class GameView extends View {
     public boolean back() {
         if (menu != null) {
             menu = menu.parent;
+            sound.play("se_select");
             invalidate();
             return true;
         }

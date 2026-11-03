@@ -112,6 +112,7 @@ public final class Menu {
         }
         int i = (ty - rowY) / 20;
         if (ty >= rowY && i >= 0 && i < rows.size()) {
+            v.sound.play("se_select");
             v.showMenu(parent);
             if (actions.get(i) != null) {
                 actions.get(i).run();
@@ -147,6 +148,22 @@ public final class Menu {
             }
             Notifier.prefs(c).edit().putInt("quietFrom", choices[next][0]).putInt("quietTo", choices[next][1]).apply();
             v.showMenu(notifications(v));
+        });
+        m.add("CANCEL", null);
+        return m;
+    }
+
+    /** The game's sounds and its music (the card duels' songs) on their own switches */
+    static Menu sound(GameView v) {
+        Sound s = v.sound;
+        Menu m = make(v, "SOUND");
+        m.add((s.effectsOn() ? "ON  " : "OFF ") + "SOUND EFFECTS", () -> {
+            s.setEffects(!s.effectsOn());
+            v.showMenu(sound(v));
+        });
+        m.add((s.musicOn() ? "ON  " : "OFF ") + "MUSIC", () -> {
+            s.setMusic(!s.musicOn());
+            v.showMenu(sound(v));
         });
         m.add("CANCEL", null);
         return m;
@@ -196,6 +213,7 @@ public final class Menu {
             v.showMenu(t);
         });
         m.add("NOTIFICATIONS", () -> v.showMenu(notifications(v)));
+        m.add("SOUND", () -> v.showMenu(sound(v)));
         m.add("UPDATE", () -> Updater.check(v, true));
         m.add("ABOUT", () -> v.message("MOEMON COMPANION " + Updater.version(v.getContext())
                 + "\nThe game's own POKéMON, words and art. Pair it from OPTIONS > CO-OP > PHONE LINK in the game."));

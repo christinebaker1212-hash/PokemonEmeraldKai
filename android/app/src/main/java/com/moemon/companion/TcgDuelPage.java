@@ -79,12 +79,21 @@ public final class TcgDuelPage extends Page {
     }
 
     @Override
+    public void shown() {
+        // the duel's song as the game's table plays it (in shown: a rematch's page comes before the last one's hidden)
+        if (!ended) {
+            v.sound.music(s.mode == MODE_FRIEND ? "tcg:mus_rg_union_room" : "tcg:mus_vs_trainer");
+        }
+    }
+
+    @Override
     public boolean fullScreen() {
         return true;
     }
 
     @Override
     public void hidden() {
+        v.sound.music(null);
         if (duel != 0) {
             Tcg.end(duel);
             duel = 0;
@@ -160,6 +169,7 @@ public final class TcgDuelPage extends Page {
                 act(a);
                 break;
             case "fail":
+                v.sound.play("se_failure");
                 v.message(q.optString("error"));
                 v.buzz(false);
                 q = null;
@@ -210,6 +220,7 @@ public final class TcgDuelPage extends Page {
             JSONObject r = new JSONObject(Tcg.apply(duel, action.toString()));
             if (r.optInt("ok") != 1) {
                 if (actor == seat) {
+                    v.sound.play("se_failure");
                     v.message(r.optString("error"));
                     v.buzz(false);
                 }
@@ -244,6 +255,7 @@ public final class TcgDuelPage extends Page {
                     card = e.optInt(6);
             boolean mine = who == seat;
             String name = card != 0 ? a.name(card) : nameAt(who, slot);
+            se(t, sound(type, mine, flags, value, card, slot));
             switch (type) {
                 case Tcg.EV_TURN:
                     t = beat(t, "say", mine ? "YOUR TURN" : theirName() + "'S TURN", who, 0, 0, 0, 800);
@@ -338,6 +350,68 @@ public final class TcgDuelPage extends Page {
         beats.add(new Object[]{t, "end", "", 0, 0, 0, 0});
     }
 
+    /** The sound the game's duel board plays for an event (tcg_board.c BoardEvent), null for none */
+    private String sound(int type, boolean mine, int flags, int value, int card, int slot) {
+        switch (type) {
+            case Tcg.EV_TURN:
+                return mine ? "se_ball_tray_enter" : "se_ball_tray_exit";
+            case Tcg.EV_ATTACK:
+                return "#" + Tcg.attackSound(card, slot);
+            case Tcg.EV_COIN:
+                return "se_m_pay_day";
+            case Tcg.EV_DAMAGE:
+                return (flags & Tcg.DMG_POISON) != 0 ? "se_field_poison" : (flags & Tcg.DMG_WEAK) != 0 ? "se_super_effective"
+                        : (flags & Tcg.DMG_RESIST) != 0 ? "se_not_effective" : "se_effective";
+            case Tcg.EV_HEAL:
+                return "se_use_item";
+            case Tcg.EV_STATUS:
+                if (flags > 0 && value == 0) {
+                    return "se_m_toxic";
+                }
+                return value < 4 ? new String[]{"se_use_item", "se_m_sing", "se_m_thunder_wave", "se_m_confuse_ray"}[value] : null;
+            case Tcg.EV_NO_DAMAGE:
+                return "se_m_barrier";
+            case Tcg.EV_KO:
+                return "se_faint";
+            case Tcg.EV_TRAINER:
+            case Tcg.EV_PEEK:
+            case Tcg.EV_PLAY:
+            case Tcg.EV_PROMOTE:
+            case Tcg.EV_RETREAT:
+            case Tcg.EV_SWITCH:
+                return "se_rg_card_flip";
+            case Tcg.EV_POWER:
+                return "se_m_detect";
+            case Tcg.EV_RETREAT_FAIL:
+                return "se_failure";
+            case Tcg.EV_EVOLVE:
+            case Tcg.EV_MORPH:
+                return "se_shiny";
+            case Tcg.EV_ATTACH:
+                return "se_ball_tray_ball";
+            case Tcg.EV_PRIZE:
+                return mine ? "se_rg_card_flip" : "se_rg_card_flipping";
+            case Tcg.EV_SUDDEN_DEATH:
+                return "se_bang";
+            case Tcg.EV_WIN:
+                return mine ? "!tcg:mus_victory_trainer" : "!";   // (the win's song; a loss: the music stops)
+            case Tcg.EV_DEVOLVE:
+                return "se_m_teleport";
+            case Tcg.EV_TO_HAND:
+                return "se_m_gust";
+            case Tcg.EV_DECK_CHANGED:
+                return value != 0 ? "se_m_flame_wheel" : "se_rg_card_flipping";
+            default:
+                return null;
+        }
+    }
+
+    private void se(long at, String sound) {
+        if (sound != null) {
+            beats.add(new Object[]{at, "se", sound, 0, 0, 0, 0});
+        }
+    }
+
     private long lastDue() {
         return beats.isEmpty() ? 0 : (long) beats.get(beats.size() - 1)[0];
     }
@@ -370,6 +444,9 @@ public final class TcgDuelPage extends Page {
             Object[] b = beats.remove(0);
             String kind = (String) b[1];
             switch (kind) {
+                case "se":
+                    v.sound.cue((String) b[2]);
+                    break;
                 case "say":
                     say((String) b[2], (int) b[6], 1100);
                     break;
@@ -1238,6 +1315,7 @@ public final class TcgDuelPage extends Page {
         for (int i = hits.size() - 1; i >= 0; i--) {
             int[] r = hits.get(i);
             if (in(x, y, r[0], r[1], r[2], r[3])) {
+                v.sound.play("se_select");
                 actions.get(i).run();
                 v.invalidate();
                 return;

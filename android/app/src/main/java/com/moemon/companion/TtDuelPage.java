@@ -81,12 +81,21 @@ public final class TtDuelPage extends Page {
     }
 
     @Override
+    public void shown() {
+        // the duel's song as the game's table plays it (in shown: a rematch's page comes before the last one's hidden)
+        if (!ended) {
+            v.sound.music("tt:mus_rg_vs_trainer");
+        }
+    }
+
+    @Override
     public boolean fullScreen() {
         return true;
     }
 
     @Override
     public void hidden() {
+        v.sound.music(null);
         if (duel != 0) {
             Tt.end(duel);
             duel = 0;
@@ -140,11 +149,14 @@ public final class TtDuelPage extends Page {
                 JSONObject e = ev.getJSONObject(i);
                 switch (e.optInt("k")) {
                     case Tt.EV_PLACE:
+                        queue.add(new Object[]{t, "se", "se_rg_card_flipping"});
                         queue.add(new Object[]{t, "place", e.optInt("cell"), e.optInt("card"), e.optInt("seat")});
+                        queue.add(new Object[]{t + 200, "se", "se_rg_card_open"});   // (it lands)
                         t += 260;
                         break;
                     case Tt.EV_RULE:
                         int by = e.optInt("by");
+                        queue.add(new Object[]{t, "se", by == 1 || by == 2 ? "se_m_swords_dance" : "se_m_cosmic_power"});
                         queue.add(new Object[]{t, "banner", by == 1 ? "SAME!" : by == 2 ? "PLUS!" : by == 3 ? "COMBO!" : "SAME WALL!"});
                         t += 650;
                         break;
@@ -153,10 +165,15 @@ public final class TtDuelPage extends Page {
                             wave = e.optInt("wave");
                             t += 120;
                         }
+                        queue.add(new Object[]{t, "se", "se_rg_card_flip"});
                         queue.add(new Object[]{t, "flip", e.optInt("cell"), e.optInt("seat")});
+                        break;
+                    case Tt.EV_SHIFT:
+                        queue.add(new Object[]{t, "se", e.optInt("n") > 0 ? "se_m_stat_increase" : "se_m_stat_decrease"});
                         break;
                     case Tt.EV_ROUND:
                         t += 500;
+                        queue.add(new Object[]{t, "se", "se_bang"});
                         queue.add(new Object[]{t, "banner", "SUDDEN DEATH!"});
                         t += 900;
                         queue.add(new Object[]{t, "sync"});
@@ -195,6 +212,9 @@ public final class TtDuelPage extends Page {
         while (!queue.isEmpty() && (long) queue.get(0)[0] <= now) {
             Object[] q = queue.remove(0);
             switch ((String) q[1]) {
+                case "se":
+                    v.sound.play((String) q[2]);
+                    break;
                 case "place":
                     showCard[(int) q[2]] = (int) q[3];
                     showSeat[(int) q[2]] = (int) q[4];
@@ -256,6 +276,15 @@ public final class TtDuelPage extends Page {
         JSONArray score = st.optJSONArray("score");
         boolean perfect = score != null && score.optInt(0) >= 9;
         v.buzz(true);
+        // (as the game's table: the win's song, a draw's sound, a loss in quiet)
+        if (winner == 0) {
+            v.sound.music("tt:mus_victory_trainer");
+        } else {
+            v.sound.music(null);
+            if (winner == 2) {
+                v.sound.play("se_failure");
+            }
+        }
         if (winner == 0) {
             banner = s.mode == MODE_PUZZLE ? "SOLVED!" : "YOU WIN!";
         } else if (winner == 2) {
@@ -512,6 +541,7 @@ public final class TtDuelPage extends Page {
         for (int i = hits.size() - 1; i >= 0; i--) {
             int[] r = hits.get(i);
             if (in(x, y, r[0], r[1], r[2], r[3])) {
+                v.sound.play("se_select");
                 actions.get(i).run();
                 v.invalidate();
                 return;

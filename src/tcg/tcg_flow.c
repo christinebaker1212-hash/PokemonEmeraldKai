@@ -5,6 +5,7 @@
 #include <string.h>
 #include "tcg/card_ids.h"
 #include "tcg/flow.h"
+#include "constants/songs.h"
 
 static const struct TcgStep sNoSteps[1] = {{0, 0, 0, 0, 0, NULL}};
 static unsigned CardOf(const struct TcgDuel *g, unsigned who, unsigned physical) { return g->players[who].cards[physical]; }
@@ -1081,4 +1082,51 @@ unsigned TcgFlow_Menu(struct TcgFlow *f, const struct TcgDuel *g, unsigned value
         return Next(f, g);
     }
     return Fail(f, "That can't be done.");
+}
+
+/* An attack's sound and its sparks' color by its animation's name (the game's duel board plays it as the attack is
+   called; the phone's duels too). No match: SE_M_COMET_PUNCH and color 0 (the board's type color). */
+unsigned TcgFlow_AttackSound(const char *anim, unsigned *color)
+{
+    static const struct
+    {
+        const char *key;
+        unsigned se, color;
+    } map[] = {
+        {"FLAME", SE_M_FLAMETHROWER, 0xf86828}, {"FIRE", SE_M_FIRE_PUNCH, 0xf86828},
+        {"WATER", SE_M_WATERFALL, 0x48a0f8},    {"HYDRO", SE_M_HYDRO_PUMP, 0x48a0f8},
+        {"BUBBLE", SE_M_BUBBLE_BEAM, 0x78c0f8}, {"WHIRLPOOL", SE_M_WHIRLPOOL, 0x48a0f8},
+        {"THUNDER", SE_M_THUNDERBOLT, 0xf8e040}, {"LIGHTNING", SE_M_THUNDERBOLT, 0xf8e040},
+        {"MAGNETIC", SE_M_THUNDER_WAVE, 0xf8e040}, {"PSYCHIC", SE_M_PSYBEAM, 0xc070f0},
+        {"DARK", SE_M_NIGHTMARE, 0x9058c0},     {"CONFUSE", SE_M_CONFUSE_RAY, 0xd080f0},
+        {"HYPNOSIS", SE_M_PSYBEAM2, 0xc070f0},  {"SUPERSONIC", SE_M_SUPERSONIC, 0xd0d0f8},
+        {"SING", SE_M_SING, 0xf8a0d0},          {"LULLABY", SE_M_SING, 0xf8a0d0},
+        {"POWDER", SE_M_POISON_POWDER, 0xc070e0}, {"SPORE", SE_M_POISON_POWDER, 0xa0d050},
+        {"POISON", SE_M_TOXIC, 0xb048d0},       {"TOXIC", SE_M_TOXIC, 0xb048d0},
+        {"GAS", SE_M_HAZE, 0xa070c0},           {"SMOG", SE_M_HAZE, 0xa070c0},
+        {"GOO", SE_M_ACID_ARMOR, 0x90c050},     {"BLIZZARD", SE_M_BLIZZARD, 0xc8f0ff},
+        {"FREEZE", SE_M_ICY_WIND, 0xc8f0ff},    {"ROCK", SE_M_ROCK_THROW, 0xc09060},
+        {"STONE", SE_M_ROCK_THROW, 0xc09060},   {"BONE", SE_M_BONEMERANG, 0xe8e0c8},
+        {"SEISMIC", SE_M_STRENGTH, 0xc09060},   {"BEAM", SE_M_HYPER_BEAM, 0xf8f8a0},
+        {"SELFDESTRUCT", SE_M_EXPLOSION, 0xf8a040}, {"DRAIN", SE_M_GIGA_DRAIN, 0x80e070},
+        {"WHIRLWIND", SE_M_GUST, 0xe0f0f0},     {"SONICBOOM", SE_M_RAZOR_WIND, 0xe0f0f0},
+        {"SLASH", SE_M_CUT, 0xf8f8f8},          {"NEEDLE", SE_M_HORN_ATTACK, 0xf8f8f8},
+        {"DRILL", SE_M_HORN_ATTACK, 0xf8f8f8},  {"WHIP", SE_M_VITAL_THROW, 0x80d050},
+        {"STRING", SE_M_STRING_SHOT, 0xf8f8f8}, {"PETAL", SE_M_PETAL_DANCE, 0xf8a0c0},
+        {"PUNCH", SE_M_MEGA_KICK, 0xf8f8f8},    {"KICK", SE_M_MEGA_KICK2, 0xf8f8f8},
+        {"BIG_HIT", SE_M_MEGA_KICK, 0xf8f8f8},  {"RAMPAGE", SE_M_TAKE_DOWN, 0xf8f8f8},
+        {"QUICK", SE_M_COMET_PUNCH, 0xf8f8f8},  {"BARRIER", SE_M_BARRIER, 0x98e0f8},
+        {"PROTECT", SE_M_BARRIER, 0x98e0f8},    {"GLOW", SE_M_MORNING_SUN, 0xf8f0a0},
+        {"RECOVER", SE_M_MORNING_SUN, 0x80e070}, {"HEAL", SE_M_MORNING_SUN, 0x80e070},
+        {"CRY", SE_M_UPROAR, 0xf8f8f8},         {"DRAGON", SE_M_DRAGON_RAGE, 0xf86828},
+    };
+    unsigned i;
+    for (i = 0; i < sizeof(map) / sizeof(map[0]); i++)
+        if (anim && strstr(anim, map[i].key))
+        {
+            *color = map[i].color;
+            return map[i].se;
+        }
+    *color = 0;
+    return SE_M_COMET_PUNCH;
 }

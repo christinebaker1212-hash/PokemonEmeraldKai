@@ -33,6 +33,24 @@ public final class SummaryPage extends Page {
         this.boxes = boxes;
     }
 
+    /** Its cry, as the game's summary plays it when a POKéMON comes up (not an EGG's) */
+    private void cry() {
+        JSONObject mon = mon();
+        if (mon != null && mon.optInt("e") != 1) {
+            v.sound.cry(mon.optInt("s"));
+        }
+    }
+
+    private int criedFor = -1;
+
+    @Override
+    public void shown() {
+        if (criedFor != index) {
+            criedFor = index;   // (back from a page over it: no cry again)
+            cry();
+        }
+    }
+
     private Planned planned() {
         return new Planned(v.app.model(), v.app.client != null ? v.app.client.orders.pending()
                 : java.util.Collections.<JSONObject>emptyList());
@@ -383,8 +401,16 @@ public final class SummaryPage extends Page {
             return;
         }
         if (y >= TAB_Y && y < TAB_Y + 22 && mon.optInt("e") == 0) {
-            tab = Math.min(2, Math.max(0, (x - 8) / ((w - 16) / 3)));
+            int t = Math.min(2, Math.max(0, (x - 8) / ((w - 16) / 3)));
+            if (t != tab) {
+                v.sound.play("se_select");
+            }
+            tab = t;
             move = -1;
+            return;
+        }
+        if (y < TOP_H + 4 && x < 84) {
+            cry();   // (the picture: its cry again)
             return;
         }
         if (tab == 2 && y >= BODY_Y + 4 && y < BODY_Y + 4 + 4 * 32) {
@@ -397,6 +423,7 @@ public final class SummaryPage extends Page {
         if (places.size() > 1) {
             index = (index + dir + places.size()) % places.size();
             move = -1;
+            cry();
         }
     }
 }

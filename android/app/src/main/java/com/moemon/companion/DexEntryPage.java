@@ -36,6 +36,24 @@ public final class DexEntryPage extends Page {
         pix.setFilterBitmap(false);
     }
 
+    /** Its cry, once seen (as the game's POKéDEX plays it on its page) */
+    private void cry() {
+        int n = nums.get(index);
+        if (DexPage.bit(dex().optString("seen"), n)) {
+            v.sound.cry(art.speciesOfDex(n));
+        }
+    }
+
+    private int criedFor = -1;
+
+    @Override
+    public void shown() {
+        if (criedFor != index) {
+            criedFor = index;   // (back from a page over it: no cry again)
+            cry();
+        }
+    }
+
     private Bitmap asset(String name) {
         try (InputStream in = v.getContext().getAssets().open("game/" + name)) {
             BitmapFactory.Options o = new BitmapFactory.Options();
@@ -369,6 +387,8 @@ public final class DexEntryPage extends Page {
             scroll = 0;
             game = -1;
             v.buzz(false);
+            v.sound.play("se_dex_page");
+            cry();
         }
     }
 }

@@ -608,6 +608,15 @@ void Platform_QueueAudio(float *audioBuffer, s32 samplesPerFrame)
     Fight_MixAudio(audioBuffer, samplesPerFrame / (int)(2 * sizeof(float)), 42048);
     // Moemon Rhythm: the DANCE machine's songs and voices instead of the game's sound
     Rhythm_MixAudio(audioBuffer, samplesPerFrame / (int)(2 * sizeof(float)));
+    {
+        // Moemon Co-op: the phone app's sounds, recorded by the game itself (mp_export_sound.c), never sent to the device
+        extern void (*gMpAudioCapture)(const float *buffer, s32 bytes);
+        if (gMpAudioCapture != NULL)
+        {
+            gMpAudioCapture(audioBuffer, samplesPerFrame);
+            return;
+        }
+    }
     SDL_QueueAudio(1, audioBuffer, samplesPerFrame);
     {
         // Tests (MOEMON_AUDIO_DUMP=file): everything sent to the sound device, raw stereo float32 at 42048 Hz

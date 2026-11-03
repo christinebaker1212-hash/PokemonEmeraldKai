@@ -37,8 +37,19 @@ public final class TcgPackPage extends Page {
         return System.currentTimeMillis() - start > FIRST + cards.length * (long) STEP + 600;
     }
 
+    private int heard = -2;   // (the last card heard turning; -2: the pack not opened yet)
+    private boolean fanfare;
+
     @Override
     public void draw(Canvas c, int w, int h) {
+        if (heard == -2) {
+            heard = -1;
+            v.sound.play("se_rg_card_open");
+        }
+        if (!fanfare && done()) {
+            fanfare = true;
+            v.sound.fanfare("mus_obtain_item");
+        }
         TcgArt ta = v.app.tcgArt;
         long t = System.currentTimeMillis() - start;
         fill.setShader(new LinearGradient(0, 0, 0, h, 0xFF203868, 0xFF0A1428, Shader.TileMode.CLAMP));
@@ -56,6 +67,10 @@ public final class TcgPackPage extends Page {
             long at = FIRST + i * (long) STEP;
             float flip = 1;
             boolean front = t > at + 120;
+            if (front && i > heard) {
+                heard = i;   // (as the game's pack screen: each card as it turns, a rare one shining)
+                v.sound.play(ta.card(cards[i]) != null && ta.card(cards[i]).optInt("ra") >= 2 ? "se_shiny" : "se_rg_card_flip");
+            }
             if (t > at && t < at + 240) {
                 flip = Math.max(0.04f, (float) Math.abs(Math.cos((t - at) / 240.0 * Math.PI)));
             }

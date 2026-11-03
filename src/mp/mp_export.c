@@ -713,6 +713,11 @@ void MP_Export_IfAsked(void)
     ExportRibbons(dir);
     ExportTrainerPics(dir);
     ExportData(dir);
+    {
+        void MP_Export_Sounds(const char *dir);   // mp_export_sound.c: the sounds, played by the game's own engine
+        if (getenv("MOEMON_EXPORT_NO_SOUND") == NULL)
+            MP_Export_Sounds(dir);
+    }
     printf("[export] the app's art and tables are in %s\n", dir);
     fflush(stdout);
     exit(0);
