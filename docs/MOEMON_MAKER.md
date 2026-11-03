@@ -326,51 +326,150 @@ that isn't installed"). It is never deleted. Trades with a player who lacks the 
 ```
 MoemonMaker/
   base/                    edits to the base game: overrides by name (tiles, collision, NPCs, warps, wild...)
-  packs/<name>/
-    pack.json              name, version, author, which game versions
-    maps/<MAP>/map.json    layout, events (one file per event: events/<name>.json), encounters
-    overlays/              patches on the base game, by name
-    db/                    one file per Pokémon / move / item / trainer
-    tilesets/ graphics/ music/ lua/
+  maps/<MAP>/map.json      new maps: layout, events (one file per event: events/<name>.json), encounters
+  db/                      one file per Pokémon / move / item / trainer
+  tilesets/ graphics/ music/ lua/
 tools/maker/               moemake (the command-line compiler and checks), the decompiler for the base regions
 ```
 
-One file per thing, with stable key order, keeps git diffs small and merges rare. The Maker's **Changes** panel shows
-what you've edited since the last commit. A **Publish** button commits and pushes through git when it's installed.
+One pack: everything in `MoemonMaker/` is one pack, always on for every player (decision 21). One file per thing,
+with stable key order, keeps git diffs small. The Maker's **Changes** panel shows what's changed since the last
+publish.
 
 Generated, never committed: the base regions as events and the built `.pak`.
 
-**Distribution**: a push that changes `MoemonMaker/` makes the release workflow build `MoemonMaker.pak` and attach
-it as a release asset. The updater downloads it the way it downloads songs, and in-game OPTIONS lists packs with an
-on / off switch each.
+**Distribution** (decisions 7, 8): Publish commits the changed files to the default branch through GitHub's API. A
+new workflow (`maker-pack.yml`, on pushes that change `MoemonMaker/`) runs the checks, builds `MoemonMaker.pak` and
+puts it on a rolling prerelease (`maker-pack`, never marked latest: the updater reads releases/latest for the game).
+The pack records the game version it was built against. Players' updaters fetch it at start the way the DANCE songs
+are fetched, and only use a pack built for their game version or older. release.yml only runs when
+include/mp_version.h changes, so a publish never makes a game release by itself. Each game release also builds the
+pack into its zip, so a fresh install has it without a download.
 
 ## Watch out for
 
-- **SINNOH stays 1:1 with Platinum**: the base is always regenerated from the decomp, and packs are overlays on it,
-  so a pack never rewrites the converted originals in the repository.
+- **SINNOH**: the user may edit SINNOH's Platinum scripts and words like any region (decision 20). Claude sessions
+  still never write SINNOH dialogue (CLAUDE.md). SINNOH's scripts are converted at build time and never committed,
+  so the user's edits live in `MoemonMaker/base/` and replace the converted ones when the game is built and loaded.
+  The Maker shows no "Platinum's version" beside them.
 - **Saves**: nothing a pack does changes the save's layout. Pack state lives in `<save>.maker` by pack name and
   symbol name, and removing a pack leaves everything else working.
 - **"Like MZ" means its workflow**: no RPG Maker code, art, sounds or icons in the Maker.
 
+## When a Claude session changes the base game
+
+The user hands bug fixes to other sessions while editing in the Maker. Their fixes must reach the Maker by themselves,
+and neither side may silently undo the other. The design guarantees this:
+
+- **The Maker never keeps its own copy of the base game.** It's inside the exe and reads the build's own maps, tiles,
+  wild tables and (once converted, M4) scripts each time it opens. A session's fix released in an update is in the
+  Maker as soon as the update is installed. There's nothing to sync or regenerate by hand.
+- **Only what the user changed is stored**, as overrides in `MoemonMaker/base/`. Everything else is the base game,
+  so a fix anywhere the user hasn't touched simply appears.
+- **Every override records what it replaced** ("tile 12,7 was metatile 0x1A, now 0x2B"; "NPC LOCALID_MOM was at
+  5,9, now 6,9"; "grass slot 3 was WURMPLE Lv 2-3, now SEEDOT Lv 3"). When the game or the Maker applies it, it first
+  checks the base still says the "was" value:
+  - same: the override applies as normal;
+  - different: the base changed under the user's edit. The override is **not** applied blindly. The Maker lists it
+    under Problems as "The game changed here since your edit" with three views (before, the game's new version, the
+    user's edit) and buttons: keep mine / take the game's / edit. The game uses the base's new version until the user
+    picks, so a session's fix wins by default and nothing breaks.
+- **Overrides point at stable names, not positions in a list**: maps by MAP_ name, NPCs by their LOCALID_ constant
+  (or, without one, their script + look + spot, with a warning if that's ambiguous), warps by destination, wild slots
+  by table and slot, scripts by label. If a session adds an NPC in front of one the user moved, nothing shifts. If a
+  session removes or renames something an override points at, the checker reports "This edit points at something
+  that no longer exists" and drops nothing on its own.
+- **Tile overrides survive a resize**: a map that grew or shrank is detected by its size. Overrides are checked
+  against their "was" tiles and flagged if the layout moved under them.
+- **The pack follows game releases**: `maker-pack.yml` also runs after every game release, rebuilding and re-checking
+  the pack against the new game. A conflict it finds is reported in the run, and the pack keeps the base's version at
+  that spot until the user decides (as above).
+- **Sessions check first** (CLAUDE.md): before changing something that `MoemonMaker/base/` overrides, a session
+  reads the override and asks the user. It never edits `MoemonMaker/` to "fix" the user's work.
+
+The one case that needs the user is a fix that lands **on the very thing the user edited**: the Maker shows both,
+and nothing is lost or silently overwritten. Everywhere else, fixes flow in on their own.
+
+## Decisions (the user, 2026-11-03)
+
+Asked as choices, round by round. Later sections follow these, and these win where earlier text differs.
+
+**The program**
+1. The Maker lives **inside the game exe** (the main menu's MOEMON MAKER, after "maker" is typed with
+   AllowSmallTweaks = 1).
+2. UI: **Dear ImGui** (SDL2 back end, docking).
+3. Look: **RPG Maker's classic light layout by default, with a dark theme** in the Maker's settings.
+
+**M1's scope**
+4. M1 has **tiles + collision, NPCs / signs / items, wild encounters, warps + connections, and custom music**.
+5. M1's music: **pick a map's music** (every song and .kaisong, played in the editor through the game's own player),
+   **add new tracks** (import a .kaisong as a named track with a runtime song number) and **replace a song somewhere**
+   (the `<song>@<place>` rule, by picking). No "Open Music Studio" button.
+
+**Storage and delivery**
+6. Edits to existing maps are **overrides by name in `MoemonMaker/base/`**, read at runtime and applied by the
+   build. The conversion scripts skip what they list.
+7. Edits reach players **between releases**: the `maker-pack` download (Files and git).
+8. Publish uses a **GitHub token** pasted into the Maker once, kept on the PC only (in a Maker settings file beside
+   the game, never in the save, the repo or a log). It commits through GitHub's API with a `Moemon-Maker:` trailer;
+   no git needed.
+
+**Map editing**
+9. Collision: **Walkable / Blocked painting** that keeps each tile's elevation (new tiles take their neighbours'),
+   with a toggle for Porymap's full collision + elevation grid.
+10. Wild tables: **a simple list by default and the exact slots in a tab**, both editable and always in step.
+    Day / night and GENERATION pools are tabs too.
+11. The map view shows by default: **animated tiles, NPCs as real sprites** (range box when selected), **a 15x10
+    screen frame** under the mouse, **grid lines and behavior icons**. All toggle in View.
+12. SINNOH in M1: **edit on a top-down view, with a 3D preview panel** through the game's camera. Full 3D editing
+    comes later.
+
+**Playing and saving**
+13. F5 asks **who to play as each time, remembering the last pick**: a copy of a save file, a story-point preset or
+    a quick test party. A test never writes to a real save.
+14. The game opens **in its own window** beside the editor. F12 or closing it returns to editing.
+15. Saving: **autosave to a recovery file within seconds, Ctrl+S writes `MoemonMaker/`**, and Publish sends what
+    was saved.
+16. Hot reload: **instantly**. The map you're on updates within a moment of each change, and a running script
+    finishes first.
+
+**Events and scripts (M2, M4)**
+17. Events: **MZ's indented command list, with Ctrl+T for a text view**, both editable.
+18. The text view is a **readable script language in Poryscript's style** (`if / else`, `msgbox(...)`), using the
+    command list's names.
+19. The existing scripts of **all four regions are converted together**. Each must round-trip byte for byte before
+    the conversion is used.
+20. SINNOH's scripts and words are **fully editable** by the user (see Watch out for).
+
+**Content (M3 and later)**
+21. **One pack, always on** for every player. No OPTIONS pack list, no missing-pack cases.
+22. Art: **full colour wherever the game can draw it** (big sprites, the effects layer, pictures pinned to maps),
+    reduced to GBA palettes only where it must be, with a before / after preview.
+23. Lua hooks come **later, as planned (M5)**. Until then, custom moves and abilities use the game's existing effects.
+24. **Only the user** makes content. Publish goes straight to the default branch.
+
+**Safety and shipping**
+25. The checker **blocks Publish on errors** (a warp to a missing map, a map you can't leave, a trainer who battles
+    forever) and **lists warnings** without blocking.
+26. **Publish history in the Maker**: every publish with its date and changes. "Roll back to this" publishes that
+    state again as a new publish.
+27. PATCH NOTES **never mention the Maker**. They only describe what players notice.
+28. Progress: **screenshots of the editor for each feature as it lands**, and each milestone is **released without
+    asking**.
+
 ## Build order
 
-1. **M1, quick edits on the base game**: drawing any map into any buffer (the refactor above), the editor shell (map
-   tree, map view, inspector), painting tiles, collision / elevation, moving and setting up NPCs (position, look,
-   movement, range), warps, signs, item balls, wild tables, `MoemonMaker/base/` overrides read at runtime and applied
-   at build, F5 play from here, hot reload, Publish. Done when the user can move an NPC and fix a collision on ROUTE
-   101 and in TWINLEAF TOWN, see it in the game at once and publish it, all without a session.
-2. **M2, events and new GEN 3 maps**: event pages and the command list, compiling text and scripts, the pack loader,
-   new maps, connections and the World view, trainers, quick events, the checker.
-3. **M3, the database**: Pokémon, moves, items, art, IDs that never move, new Kaisong tracks, the battle bench.
-4. **M4, the four regions as events**: decompiler, byte-for-byte round trip, three-way merge, the debugger.
-5. **M5, 3D mode, the animation timeline, Lua hooks, tileset editor.**
-6. **M6, distribution**: moemake in the release workflow, the updater, the OPTIONS pack list, the lobby pack check,
-   Publish.
-
-## Questions for the user
-
-- One pack everyone gets (everything in `MoemonMaker/` together), or many packs players switch on and off?
-- Should packs ship with game releases (versioned together), or update between them like the songs zip?
-- Only you, or friends too (by pull request)? That decides how strict the checks have to be before a merge.
-- Should packs be able to change the base story by default, or should each player opt in?
-- The Maker inside the game exe (recommended above), or its own exe like Music Studio?
+1. **M1, quick edits on the base game**: drawing any map into any buffer (the refactor above), the editor shell
+   (ImGui, classic look + dark theme, map tree, map view, inspector), the way in (AllowSmallTweaks + "maker"), the
+   dev channel's end, tiles, collision / elevation, NPCs / signs / item balls / hidden items, warps and connections,
+   wild tables (list + slots), music (map music, new tracks, replacements), SINNOH top-down with a 3D preview,
+   `MoemonMaker/base/` overrides read at runtime and applied at build, F5 in its own window, instant hot reload,
+   autosave + Ctrl+S, Publish by token, the `maker-pack` download, the checker's M1 checks, publish history. Done
+   when the user can move an NPC, fix a collision and change a wild slot on ROUTE 101 and in TWINLEAF TOWN, hear a
+   new track on a map, see it all in the game at once and publish it, without a session.
+2. **M2, events and new GEN 3 maps**: event pages, the command list + text view, compiling text and scripts, new
+   maps, the World view, trainers, quick events, the rest of the checker.
+3. **M3, the database**: Pokémon, moves, items, art, IDs that never move, the battle bench.
+4. **M4, the four regions as events**: the decompiler for all four, byte-for-byte round trip, three-way merge, the
+   debugger.
+5. **M5, full 3D mode, the animation timeline, Lua hooks, tileset editor.**
