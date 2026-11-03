@@ -1,0 +1,4 @@
+# Moemon Maker: edits to MAP_RUSTBORO_CITY_GAME_CENTER_3F (written by the editor; each line has the value it replaced, then the new one)
+map MAP_RUSTBORO_CITY_GAME_CENTER_3F 13 17
+block 3 13 0x3001 0x3401
+block 4 13 0x3001 0x3401
