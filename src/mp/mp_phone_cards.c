@@ -1,10 +1,13 @@
 // Moemon Co-op: the card games on the phone, the game's side (docs/COMPANION_APP.md "Card games", docs/PHONE_LINK.md
-// "TRIPLE TRIAD on the phone"). The phone plays with the game's own engine (built into the app); the collection stays
-// the game's: the snapshot's "tt" shows it (cards, decks, unopened packs, today's prizes), and orders change it:
-//   "ttdeck"  a deck rebuilt on the phone (the game checks it as its own deck builder does),
+// "TRIPLE TRIAD on the phone", "The POKéMON card game on the phone"). The phone plays with the game's own engines
+// (built into the app); the collections stay the game's: the snapshot's "tt" and "tcg" show them (cards, decks,
+// unopened packs, today's prizes), and orders change them:
+//   "ttdeck" / "tcgdeck"  a deck rebuilt on the phone (the game checks it as its own deck builder does),
 //   "ttwin"   a prize: a pack for a duel won on the phone (3 a day) or the daily puzzle solved (1 a day),
-//             counted per calendar day in "<save>.phonecards" so the phone never outdoes the GAME CENTER,
-//   "ttopen"  a pack opened with the game's own pack math (the cards come back in the answer).
+//   "tcgduel" a POKéMON card duel finished on the phone: CARD SCALING learns from it (won or lost), and a win brings
+//             a booster (3 a day),
+//             the prizes counted per calendar day in "<save>.phonecards" so the phone never outdoes the GAME CENTER,
+//   "ttopen" / "tcgopen"  a pack opened with the game's own pack math (the cards come back in the answer).
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +17,10 @@
 #include "tt/collection.h"
 #include "tt/integration.h"
 #include "tcg/integration.h"
+#include "tcg/scale.h"
 #include "mp_phone_int.h"
+#include "event_data.h"
+#include "constants/flags.h"
 
 extern char gPlatformSavePath[512];
 unsigned Tt_Tier(void);             // tt_field.c
@@ -96,10 +102,21 @@ static u32 Fnv(u32 h, const void *data, u32 n)
 u32 PhoneCards_Hash(void)
 {
     struct TtCollection *c = Tt_GetCollection();
+    struct TcgCollection *p = Tcg_GetCollection();
     u32 h = 2166136261u;
     if (c == NULL)
         return 0;
     DailyToday();
+    if (p != NULL)
+    {
+        h = Fnv(h, &p->optedIn, 1);
+        h = Fnv(h, &p->activeDeck, 1);
+        h = Fnv(h, p->owned, sizeof(p->owned));
+        h = Fnv(h, p->decks, sizeof(p->decks));
+        h = Fnv(h, p->packs, sizeof(p->packs));
+        h = Fnv(h, p->ace, sizeof(p->ace));
+        h = Fnv(h, &p->skill, sizeof(p->skill));
+    }
     h = Fnv(h, &c->optedIn, 1);
     h = Fnv(h, &c->activeDeck, 1);
     h = Fnv(h, c->owned, sizeof(c->owned));
@@ -107,6 +124,46 @@ u32 PhoneCards_Hash(void)
     h = Fnv(h, c->packs, sizeof(c->packs));
     h = Fnv(h, &sDaily, sizeof(sDaily));
     return h;
+}
+
+static u8 Badges(void)
+{
+    u8 i, n = 0;
+    for (i = 0; i < NUM_BADGES; i++)
+        n += FlagGet(FLAG_BADGE01_GET + i) != 0;
+    return n;
+}
+
+// The POKéMON card game's collection: "tcg" {on, day, active, skill, rated, badges, wins, today, packs[11],
+// decks[8] {n, c[60], ace}, owned [[id, count]...]}
+static void TcgSnapshot(struct Buf *b)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    unsigned i, k, n;
+    if (c == NULL)
+        return;
+    BufAdd(b, ",\"tcg\":{\"on\":%u,\"day\":%u,\"active\":%u,\"skill\":%d,\"rated\":%u,\"badges\":%u,\"wins\":%u,"
+              "\"today\":{\"packs\":%u,\"packsMax\":%u},\"packs\":[",
+           c->optedIn, Tcg_Today(), c->activeDeck, c->skill, c->rated, Badges(), (unsigned)c->wins, sDaily.packs[1],
+           DUEL_PACKS_A_DAY);
+    for (i = 0; i < TCG_PACK_TYPES; i++)
+        BufAdd(b, "%s%u", i ? "," : "", c->packs[i]);
+    BufAdd(b, "],\"decks\":[");
+    for (i = 0; i < TCG_SAVED_DECKS; i++)
+    {
+        BufAdd(b, "%s{\"n\":\"", i ? "," : "");
+        for (k = 0; k < TCG_NAME_LEN && c->decks[i].name[k]; k++)
+            BufAdd(b, "%c", c->decks[i].name[k] == '"' || c->decks[i].name[k] == '\\' ? '_' : c->decks[i].name[k]);
+        BufAdd(b, "\",\"ace\":%u,\"c\":[", Tcg_DeckAce(c, i));
+        for (k = 0; k < TCG_DECK_SIZE; k++)
+            BufAdd(b, "%s%u", k ? "," : "", c->decks[i].cards[k]);
+        BufAdd(b, "]}");
+    }
+    BufAdd(b, "],\"owned\":[");
+    for (i = 1, n = 0; i <= TCG_CARD_COUNT; i++)
+        if (c->owned[i])
+            BufAdd(b, "%s[%u,%u]", n++ ? "," : "", i, c->owned[i]);
+    BufAdd(b, "]}");
 }
 
 void PhoneCards_Snapshot(struct Buf *b)
@@ -145,6 +202,7 @@ void PhoneCards_Snapshot(struct Buf *b)
         if (!c->owned[i] && Tt_Seen(c, i))
             BufAdd(b, "%s%u", n++ ? "," : "", i);
     BufAdd(b, "]}");
+    TcgSnapshot(b);
 }
 
 // ------------------------------------------------------------------------------------------------------ orders
@@ -269,9 +327,160 @@ static const char *Open(const char *json)
     return NULL;
 }
 
+// ------------------------------------------------------------------------------------- the POKéMON card game
+
+static const char *TcgDeck(const char *json)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    long long deck = -1, active = 0;
+    long cards[TCG_DECK_SIZE];
+    uint16_t list[TCG_DECK_SIZE];
+    char name[TCG_NAME_LEN + 1], reason[96];
+    int n;
+    unsigned i;
+    if (!JsonNum(json, "deck", &deck) || deck < 0 || deck >= TCG_SAVED_DECKS)
+        return "bad";
+    JsonNum(json, "active", &active);
+    n = JsonInts(json, "cards", cards, TCG_DECK_SIZE);
+    if (n == 0)
+    {
+        // an emptied deck slot (never the one dueled with)
+        if (c->activeDeck == deck)
+            return "activedeck";
+        memset(&c->decks[deck], 0, sizeof(c->decks[deck]));
+        c->ace[deck] = 0;
+        Tcg_WriteSidecar();
+        return NULL;
+    }
+    if (n > 0 && n != TCG_DECK_SIZE)
+        return "deckrules";
+    if (n == TCG_DECK_SIZE)
+    {
+        for (i = 0; i < TCG_DECK_SIZE; i++)
+            list[i] = (uint16_t)(cards[i] < 0 || cards[i] > TCG_CARD_COUNT ? 0 : cards[i]);
+        if (!Tcg_DeckValidate(list, NULL, reason, sizeof(reason)))
+            return "deckrules";
+        if (!Tcg_DeckValidate(list, c->owned, reason, sizeof(reason)))
+            return "notowned";
+        memcpy(c->decks[deck].cards, list, sizeof(list));
+        if (c->ace[deck])
+        {
+            // (an ACE CARD no longer in the deck: one is picked for it)
+            bool8 kept = FALSE;
+            for (i = 0; i < TCG_DECK_SIZE; i++)
+                kept |= list[i] == c->ace[deck];
+            if (!kept)
+                c->ace[deck] = 0;
+        }
+    }
+    else if (!c->decks[deck].cards[0])
+        return "empty";   // (only a deck with cards can be the one dueled with)
+    if (JsonStr(json, "name", name, sizeof(name)) && name[0])
+    {
+        for (i = 0; name[i]; i++)
+            if (name[i] >= 'a' && name[i] <= 'z')
+                name[i] -= 32;   // (the game's deck names are capitals)
+        snprintf(c->decks[deck].name, sizeof(c->decks[deck].name), "%s", name);
+    }
+    else if (!c->decks[deck].name[0])
+        snprintf(c->decks[deck].name, sizeof(c->decks[deck].name), "DECK %u", (unsigned)deck + 1);
+    if (active == 1)
+        c->activeDeck = (uint8_t)deck;
+    Tcg_WriteSidecar();
+    return NULL;
+}
+
+static const char *TcgDuel(const char *json)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    long long won = 0, deck = 0, opp = 0, level = 2;
+    char kind[16] = "duel";
+    unsigned pack;
+    if (!JsonNum(json, "won", &won))
+        return "bad";
+    JsonStr(json, "kind", kind, sizeof(kind));
+    JsonNum(json, "deck", &deck);
+    JsonNum(json, "opp", &opp);
+    JsonNum(json, "level", &level);
+    DailyToday();
+    // CARD SCALING learns from every duel against a card player, won or lost (tcg_ui.c DuelStep)
+    if (strcmp(kind, "duel") == 0 && deck > 0 && opp > 0 && level >= 0 && level <= 3)
+        TcgScale_Result(c, (int)deck + TcgScale_LevelRating(2), (int)opp + TcgScale_LevelRating((unsigned)level), won != 0);
+    if (!won)
+    {
+        Tcg_WriteSidecar();
+        BufAdd(&sDoneExtra, "\"prize\":-1,\"left\":%u", DUEL_PACKS_A_DAY - sDaily.packs[1]);
+        return NULL;
+    }
+    c->wins++;
+    MP_Achieve_Count("cardwin", 1);
+    if (strcmp(kind, "friend") == 0)
+    {
+        c->onlineWins++;
+        MP_Achieve_Count("cardfriend", 1);
+    }
+    if (sDaily.packs[1] >= DUEL_PACKS_A_DAY)
+    {
+        Tcg_WriteSidecar();
+        BufAdd(&sDoneExtra, "\"prize\":-1,\"left\":0");
+        return NULL;
+    }
+    sDaily.packs[1]++;
+    pack = Tcg_RandomBelow(&c->rng, TCG_PACK_TYPES);
+    Tcg_AwardPack(c, pack);
+    DailyWrite();
+    Tcg_WriteSidecar();
+    BufAdd(&sDoneExtra, "\"prize\":%u,\"left\":%u", pack, DUEL_PACKS_A_DAY - sDaily.packs[1]);
+    MPNet_Log("phone cards: a card duel won a booster (%u)", pack);
+    return NULL;
+}
+
+static const char *TcgOpen(const char *json)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    long long pack = -1;
+    uint16_t out[10];
+    unsigned i;
+    if (!JsonNum(json, "pack", &pack) || pack < 0 || pack >= TCG_PACK_TYPES)
+        return "bad";
+    if (!c->packs[pack] || !Tcg_OpenPack(c, (unsigned)pack, out))
+        return "nopack";
+    MP_Achieve_Count("cardpack", 1);
+    Tcg_WriteSidecar();
+    BufAdd(&sDoneExtra, "\"cards\":[");
+    for (i = 0; i < 10; i++)
+        BufAdd(&sDoneExtra, "%s%u", i ? "," : "", out[i]);
+    // NEW: the first copy of a card the collection didn't have (tcg_ui.c's reveal)
+    BufAdd(&sDoneExtra, "],\"new\":[");
+    for (i = 0; i < 10; i++)
+    {
+        unsigned j, copies = 0, earlier = 0;
+        for (j = 0; j < 10; j++)
+            copies += out[j] == out[i];
+        for (j = 0; j < i; j++)
+            earlier |= out[j] == out[i];
+        BufAdd(&sDoneExtra, "%s%u", i ? "," : "", out[i] > 6 && !earlier && c->owned[out[i]] == copies);
+    }
+    BufAdd(&sDoneExtra, "]");
+    return NULL;
+}
+
 const char *PhoneCards_Apply(const char *op, const char *json)
 {
     struct TtCollection *c = Tt_GetCollection();
+    if (strncmp(op, "tcg", 3) == 0)
+    {
+        struct TcgCollection *p = Tcg_GetCollection();
+        if (p == NULL || !p->optedIn)
+            return "nocards";
+        if (strcmp(op, "tcgdeck") == 0)
+            return TcgDeck(json);
+        if (strcmp(op, "tcgduel") == 0)
+            return TcgDuel(json);
+        if (strcmp(op, "tcgopen") == 0)
+            return TcgOpen(json);
+        return "unknown";
+    }
     if (c == NULL || !c->optedIn)
         return "nocards";
     if (strcmp(op, "ttdeck") == 0)

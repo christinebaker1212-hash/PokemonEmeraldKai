@@ -243,6 +243,7 @@ public class ScreensTest {
         Thread.sleep(3200);
         shot(v, "cards_pack");
         v.showOver(null);
+        tcgScreens(v, app);
         try (FileOutputStream o = new FileOutputStream(new File(new File(System.getProperty("screens.out", "build/screens")),
                 "widget.png"))) {
             WalkWidget.picture(app).compress(Bitmap.CompressFormat.PNG, 100, o);
@@ -253,6 +254,71 @@ public class ScreensTest {
         v.back();
         v.showOver(new PairPage(v));
         shot(v, "pair");
+    }
+
+    /** CARDS, the POKéMON card game: the hub, a duel under way (a card up close, a target to choose), a deck, a booster */
+    static void tcgScreens(GameView v, Companion app) throws Exception {
+        int[] charmander = Tcg.namedDeck("CharmanderAndFriends"), squirtle = Tcg.namedDeck("SquirtleAndFriends");
+        java.util.Map<Integer, Integer> have = new java.util.TreeMap<>();
+        for (int id : charmander) {
+            have.merge(id, 1, Integer::sum);
+        }
+        for (int id = 8; id < 120; id += 3) {
+            have.merge(id, 1, Integer::sum);
+        }
+        StringBuilder owned = new StringBuilder(), deck = new StringBuilder();
+        for (java.util.Map.Entry<Integer, Integer> e : have.entrySet()) {
+            owned.append(owned.length() == 0 ? "" : ",").append("[").append(e.getKey()).append(",").append(e.getValue()).append("]");
+        }
+        for (int id : charmander) {
+            deck.append(deck.length() == 0 ? "" : ",").append(id);
+        }
+        StringBuilder empty = new StringBuilder();
+        for (int i = 0; i < 60; i++) {
+            empty.append(i == 0 ? "0" : ",0");
+        }
+        StringBuilder decks = new StringBuilder("{\"n\":\"EMBER FRIENDS\",\"ace\":" + charmander[59] + ",\"c\":[" + deck + "]}");
+        for (int i = 1; i < 8; i++) {
+            decks.append(",{\"n\":\"\",\"ace\":0,\"c\":[").append(empty).append("]}");
+        }
+        app.model().snap.put("tcg", new JSONObject("{\"on\":1,\"day\":20395,\"active\":0,\"skill\":12,\"rated\":4,\"badges\":3,"
+                + "\"wins\":7,\"today\":{\"packs\":1,\"packsMax\":3},\"packs\":[1,0,2,0,0,0,0,1,0,0,0],\"decks\":[" + decks
+                + "],\"owned\":[" + owned + "]}"));
+        CardsPage.showGame(1);
+        v.select(8);
+        shot(v, "cards_tcg");
+        v.page(8).scrollTo(420);
+        shot(v, "cards_tcg_more");
+        v.page(8).scrollTo(0);
+        TcgDuelPage.Setup s = new TcgDuelPage.Setup();
+        s.mine = charmander;
+        s.theirs = squirtle;
+        s.seed = 4242;
+        s.level = 2;
+        s.who = "BUG CATCHER  SKILLED";
+        TcgDuelPage duel = new TcgDuelPage(v, s);
+        v.showOver(duel);
+        duel.autoPlay(60);
+        shot(v, "tcg_duel");
+        duel.inspect(0, 0);
+        shot(v, "tcg_duel_card");
+        duel.inspect(0, -1);
+        duel.back();
+        if (duel.beginHand("ATTACH") || duel.beginHand("PLAY")) {
+            shot(v, "tcg_duel_target");
+        }
+        v.showOver(new TcgDeckPage(v, 0));
+        shot(v, "tcg_deck");
+        TcgPackPage pack = new TcgPackPage(v, 2, new int[]{8, 20, 33, 41, 50, 60, 77, 90, 3, 37}, 1 << 9 | 1 << 2);
+        v.showOver(pack);
+        Thread.sleep(4200);
+        shot(v, "tcg_pack");
+        v.showOver(new TcgBinderPage(v, 0, CardsPage.setName(0)));
+        shot(v, "tcg_binder");
+        v.showOver(new TcgCardPage(v, 37, 1, null));
+        shot(v, "tcg_card");
+        v.showOver(null);
+        CardsPage.showGame(0);
     }
 
     /** The DEVICE page's devices and apps, with the snapshot given all three devices, conditions and ribbons */

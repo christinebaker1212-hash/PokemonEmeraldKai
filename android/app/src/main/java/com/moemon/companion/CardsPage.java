@@ -91,13 +91,56 @@ public final class CardsPage extends Page {
         return y + 22;
     }
 
+    // which game the page shows: 0 TRIPLE TRIAD, 1 the POKéMON card game (remembered)
+    private static int game = -1;
+
+    static void showGame(int g) {
+        game = g;
+    }
+
     @Override
     public void draw(Canvas c, int w, int h) {
         hits.clear();
         actions.clear();
+        if (game < 0) {
+            String saved = v.app.store.read("cardsgame.txt");
+            game = "1".equals(saved == null ? "" : saved.trim()) ? 1 : 0;
+        }
+        if (v.app.lastTcgPack != null) {
+            int[] cards = v.app.lastTcgPack;
+            int type = v.app.lastTcgPackType, fresh = v.app.lastTcgPackNew;
+            v.app.lastTcgPack = null;
+            v.showOver(new TcgPackPage(v, type, cards, fresh));
+        }
+        int y = 24 - scroll;
+        // the switch between the games, DS-style tabs
+        String[] names = {"TRIPLE TRIAD", "POKéMON CARDS"};
+        int tw = (w - 16) / 2;
+        for (int i = 0; i < 2; i++) {
+            boolean on = game == i;
+            fill.setColor(on ? 0xFF3868A8 : 0xFFD8E0E8);
+            c.drawRoundRect(new android.graphics.RectF(8 + i * tw + 1, y, 8 + (i + 1) * tw - 1, y + 18), 5, 5, fill);
+            art.text(c, names[i], 8 + i * tw + (tw - art.width(names[i])) / 2, y + 1, on ? GameArt.WHITE_TEXT : GameArt.TEXT,
+                    on ? 0xFF102040 : GameArt.SHADOW);
+            final int g = i;
+            tapArea(8 + i * tw, y, tw, 18, () -> {
+                game = g;
+                scroll = 0;
+                v.app.store.write("cardsgame.txt", String.valueOf(g));
+                shown();
+            });
+        }
+        y += 22;
+        if (game == 1) {
+            drawTcg(c, w, h, y);
+            return;
+        }
+        drawTt(c, w, h, y);
+    }
+
+    private void drawTt(Canvas c, int w, int h, int y) {
         JSONObject tt = tt();
         TtArt ta = v.app.ttArt;
-        int y = 24 - scroll;
         if (v.app.lastPack != null) {
             int[] cards = v.app.lastPack;
             int type = v.app.lastPackType;
@@ -114,7 +157,7 @@ public final class CardsPage extends Page {
                 ty += 14;
             }
             bottom = ty + scroll + 16;
-            banner(c, w, "CARDS", "TRIPLE TRIAD");
+            banner(c, w, "CARDS", null);
             return;
         }
         int total = ta.maxId(), have = tt.optJSONArray("owned") == null ? 0 : tt.optJSONArray("owned").length();
@@ -228,12 +271,16 @@ public final class CardsPage extends Page {
         }
         y += 4 + ((n + cols - 1) / cols) * (bh + 3);
         bottom = y + scroll + 12;
-        banner(c, w, "CARDS", "TRIPLE TRIAD");
+        banner(c, w, "CARDS", null);
     }
 
     @Override
     public void shown() {
-        v.app.refreshTtGames();
+        if (game == 1) {
+            v.app.refreshTcgGames();
+        } else {
+            v.app.refreshTtGames();
+        }
         polledAt = System.currentTimeMillis();
     }
 
@@ -487,6 +534,317 @@ public final class CardsPage extends Page {
             v.buzz(true);
         } catch (org.json.JSONException ignored) {
         }
+    }
+
+    // ------------------------------------------------------------------------------- the POKéMON card game
+
+    static JSONObject tcg(GameView v) {
+        Model m = v.app.model();
+        return m == null ? null : m.snap.optJSONObject("tcg");
+    }
+
+    /** The collection as counts by card id (Tcg.validate's) */
+    static int[] ownedArray(JSONObject tcg) {
+        int[] out = new int[443];
+        JSONArray o = tcg == null ? null : tcg.optJSONArray("owned");
+        for (int i = 0; o != null && i < o.length(); i++) {
+            int id = o.optJSONArray(i).optInt(0);
+            if (id > 0 && id < out.length) {
+                out[id] = o.optJSONArray(i).optInt(1);
+            }
+        }
+        return out;
+    }
+
+    static int[] tcgDeck(JSONObject tcg, int i) {
+        JSONArray d = tcg == null ? null : tcg.optJSONArray("decks");
+        JSONArray c = d == null || i < 0 || i >= d.length() ? null : d.optJSONObject(i).optJSONArray("c");
+        if (c == null || c.length() != Tcg.DECK || c.optInt(0) == 0) {
+            return null;
+        }
+        int[] out = new int[Tcg.DECK];
+        for (int k = 0; k < Tcg.DECK; k++) {
+            out[k] = c.optInt(k);
+        }
+        return out;
+    }
+
+    /** The deck dueled with, if it can be played (null and a word to the player if not) */
+    private int[] playableDeck(JSONObject tcg) {
+        int[] deck = tcgDeck(tcg, tcg.optInt("active"));
+        String why = deck == null ? "Build a deck of 60 first: tap a deck below." : Tcg.validate(deck, ownedArray(tcg));
+        if (why != null) {
+            v.message(why.startsWith("Build") ? why : "Your deck can't be played: " + why);
+            return null;
+        }
+        return deck;
+    }
+
+    private static String prettyDeck(String name) {
+        String n = name.startsWith("GB2 ") ? name.substring(4) : name;
+        return n.replaceAll("([a-z])([A-Z])", "$1 $2").replaceAll("([A-Za-z])([0-9])", "$1 $2").toUpperCase(java.util.Locale.ROOT);
+    }
+
+    private volatile boolean tcgBusy;
+
+    private void tcgFreeDuel() {
+        JSONObject tcg = tcg(v);
+        final int[] deck = tcg == null ? null : playableDeck(tcg);
+        if (deck == null || tcgBusy) {
+            return;
+        }
+        tcgBusy = true;
+        final int skill = tcg.optInt("skill"), badges = tcg.optInt("badges");
+        final int seed = (int) (System.nanoTime() & 0x7FFFFFFF);
+        new Thread(() -> {
+            // CARD SCALING, as the game does: the deck's strength, then a card player a touch weaker
+            int rating = Tcg.rateDeck(deck);
+            String opp = Tcg.opponent(rating + skill, badges, seed >> 3);
+            v.post(() -> {
+                tcgBusy = false;
+                try {
+                    JSONObject o = new JSONObject(opp);
+                    TcgDuelPage.Setup s = new TcgDuelPage.Setup();
+                    s.mode = TcgDuelPage.MODE_DUEL;
+                    s.mine = deck;
+                    JSONArray d = o.getJSONArray("deck");
+                    s.theirs = new int[Tcg.DECK];
+                    for (int i = 0; i < Tcg.DECK; i++) {
+                        s.theirs[i] = d.getInt(i);
+                    }
+                    s.seed = seed;
+                    s.level = o.optInt("level");
+                    s.myRating = rating;
+                    s.oppRating = o.optInt("rating");
+                    s.deckName = prettyDeck(o.optString("name"));
+                    s.who = TRAINERS[(seed >> 5) % TRAINERS.length] + "  " + LEVELS[Math.max(0, Math.min(3, s.level))];
+                    v.showOver(new TcgDuelPage(v, s));
+                } catch (Exception e) {
+                    v.message("The cards couldn't be dealt. Try again.");
+                }
+            });
+        }, "tcg-opponent").start();
+        v.invalidate();
+    }
+
+    private void drawTcg(Canvas c, int w, int h, int y) {
+        JSONObject tcg = tcg(v);
+        TcgArt ta = v.app.tcgArt;
+        if (tcg == null || tcg.optInt("on") == 0) {
+            art.window(c, 0, 12, y + 4, w - 24, 72);
+            int ty = y + 6;
+            for (String l : wrap(v.app.model() == null ? "Link with your game to play POKéMON cards here."
+                    : "Get your first POKéMON card deck in your game: the CARD CLUB member in a POKéMON MART gives one. "
+                    + "Then your cards, decks and boosters show here.", w - 32)) {
+                art.text(c, l, 16, ty);
+                ty += 14;
+            }
+            bottom = ty + scroll + 16;
+            banner(c, w, "CARDS", null);
+            return;
+        }
+        JSONObject today = tcg.optJSONObject("today");
+        int left = today == null ? 0 : today.optInt("packsMax") - today.optInt("packs");
+        // PLAY
+        y = heading(c, w, y, "PLAY", null);
+        y = playCard(c, w, y, "FREE DUEL", "A card player with a deck about as strong as yours, as in the game.",
+                left > 0 ? "Win: a booster (" + left + " left today)" : "Boosters done for today: play for fun!",
+                tcgBusy ? "..." : "DUEL", this::tcgFreeDuel);
+        // VS FRIENDS
+        y = drawTcgFriends(c, w, y, tcg);
+        // BOOSTERS
+        JSONArray packs = tcg.optJSONArray("packs");
+        int unopened = 0;
+        for (int i = 0; packs != null && i < packs.length(); i++) {
+            unopened += packs.optInt(i);
+        }
+        if (unopened > 0) {
+            y = heading(c, w, y, "BOOSTERS", unopened + " TO OPEN");
+            for (int i = 0; packs != null && i < packs.length(); i++) {
+                if (packs.optInt(i) == 0) {
+                    continue;
+                }
+                art.window(c, 0, 12, y + 4, w - 24, 30);
+                ta.draw(c, ta.packMascot(i), 16, y + 6, 20, 27.5f, v.pixelScale(), 255);
+                art.text(c, Tcg.PACK_NAMES[i], 42, y + 6);
+                art.text(c, "x" + packs.optInt(i), 42, y + 19, GameArt.GRAY_TEXT, GameArt.SHADOW);
+                final int pack = i;
+                button(c, "OPEN", w - 76, y + 7, 60, v.app.client != null);
+                tapArea(w - 76, y + 7, 60, 24, () -> openTcgPack(pack));
+                y += 36;
+            }
+        }
+        // DECKS
+        y = heading(c, w, y, "DECKS", null);
+        JSONArray decks = tcg.optJSONArray("decks");
+        for (int i = 0; decks != null && i < decks.length(); i++) {
+            JSONObject d = decks.optJSONObject(i);
+            boolean active = i == tcg.optInt("active"), empty = tcgDeck(tcg, i) == null;
+            int rh = 34;
+            art.window(c, 0, 12, y + 4, w - 24, rh);
+            if (!empty && d.optInt("ace") > 0) {
+                ta.drawArt(c, d.optInt("ace"), 16, y + 7, 36, 26, v.pixelScale(), 255);
+            }
+            art.text(c, empty ? "EMPTY" : d.optString("n"), 58, y + 6, active ? GameArt.BLUE_TEXT : empty ? GameArt.GRAY_TEXT
+                    : GameArt.TEXT, GameArt.SHADOW);
+            art.text(c, active ? "IN USE" : empty ? "Tap to build a deck." : "60 cards", 58, y + 20, GameArt.GRAY_TEXT, GameArt.SHADOW);
+            final int deckNo = i;
+            tapArea(12, y + 4, w - 24, rh, () -> v.showOver(new TcgDeckPage(v, deckNo)));
+            y += rh + 6;
+        }
+        // BINDER: a row per set
+        int[] owned = ownedArray(tcg);
+        int have = 0, total = ta.maxId();
+        for (int id = 1; id <= total; id++) {
+            have += owned[id] > 0 ? 1 : 0;
+        }
+        y = heading(c, w, y, "BINDER", have + "/" + total);
+        for (int set = 0; set < SET_ORDER.length; set++) {
+            int s0 = SET_ORDER[set], n = 0, got = 0;
+            for (int id = 1; id <= total; id++) {
+                JSONObject k = ta.card(id);
+                if (k != null && k.optInt("set") == s0) {
+                    n++;
+                    got += owned[id] > 0 ? 1 : 0;
+                }
+            }
+            art.window(c, 0, 12, y + 4, w - 24, 20);
+            art.text(c, setName(s0), 18, y + 4);
+            String count = got + "/" + n;
+            art.text(c, count, w - 20 - art.width(count), y + 4, got == n ? 0xFF308030 : GameArt.GRAY_TEXT, GameArt.SHADOW);
+            // the share collected, a bar under the name
+            fill.setColor(0xFFD0D8E0);
+            c.drawRect(18, y + 19, w - 20, y + 21, fill);
+            fill.setColor(got == n ? 0xFF48B048 : 0xFF3868A8);
+            c.drawRect(18, y + 19, 18 + (w - 38) * (n == 0 ? 0 : got / (float) n), y + 21, fill);
+            final int setNo = s0;
+            tapArea(12, y + 4, w - 24, 20, () -> v.showOver(new TcgBinderPage(v, setNo, setName(setNo))));
+            y += 26;
+        }
+        bottom = y + scroll + 12;
+        banner(c, w, "CARDS", null);
+    }
+
+    // the binder's sets as the game orders them: the first game's boosters, GB2's, then promos and Energy
+    private static final int[] SET_ORDER = {0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 4, 5};
+
+    static String setName(int set) {
+        return set < 4 ? Tcg.PACK_NAMES[set] : set == 4 ? "PROMOS" : set == 5 ? "ENERGY" : Tcg.PACK_NAMES[set - 2];
+    }
+
+    private void openTcgPack(int pack) {
+        if (v.app.client == null) {
+            v.message("Link with your game to open boosters: the game deals the cards.");
+            return;
+        }
+        try {
+            v.app.client.order(new JSONObject().put("op", "tcgopen").put("pack", pack));
+            v.buzz(true);
+        } catch (org.json.JSONException ignored) {
+        }
+    }
+
+    private int drawTcgFriends(Canvas c, int w, int y, JSONObject tcg) {
+        java.util.List<JSONObject> invites = v.app.tcgInvites, games = v.app.tcgGames();
+        int yourTurn = 0;
+        for (JSONObject g : games) {
+            yourTurn += "yourturn".equals(TcgFriendGame.status(g)) ? 1 : 0;
+        }
+        y = heading(c, w, y, "VS FRIENDS", invites.size() + yourTurn > 0 ? (invites.size() + yourTurn) + " WAITING" : null);
+        for (JSONObject inv : invites) {
+            String peer = nameOf(inv.optString("n"));
+            art.window(c, 0, 12, y + 4, w - 24, 50);
+            art.text(c, peer + " challenges you!", 18, y + 6, GameArt.BLUE_TEXT, GameArt.SHADOW);
+            art.text(c, "A POKéMON card duel, 6 Prize cards.", 18, y + 20, GameArt.GRAY_TEXT, GameArt.SHADOW);
+            final JSONObject invite = inv;
+            button(c, "ACCEPT", w - 148, y + 30, 64, true);
+            tapArea(w - 148, y + 30, 64, 24, () -> acceptTcg(invite));
+            button(c, "DECLINE", w - 80, y + 30, 64, true);
+            tapArea(w - 80, y + 30, 64, 24, () -> v.app.declineTcg(invite));
+            y += 56;
+        }
+        for (JSONObject g : games) {
+            String st = TcgFriendGame.status(g), peer = nameOf(g.optString("pn"));
+            boolean claim = TcgFriendGame.canClaim(g);
+            art.window(c, 0, 12, y + 4, w - 24, 38);
+            art.text(c, "VS " + peer, 18, y + 6, GameArt.TEXT, GameArt.SHADOW);
+            art.text(c, claim ? peer + " hasn't played in 3 days." : statusLine(st, peer), 18, y + 20,
+                    "yourturn".equals(st) ? 0xFFC07818 : GameArt.GRAY_TEXT, GameArt.SHADOW);
+            final JSONObject game = g;
+            if (claim) {
+                button(c, "CLAIM WIN", w - 96, y + 10, 80, true);
+                tapArea(w - 96, y + 10, 80, 24, () -> {
+                    try {
+                        game.put("forfeit", 1);
+                    } catch (org.json.JSONException ignored) {
+                    }
+                    v.app.saveTcgGames();
+                });
+            } else if (!"invited".equals(st) && !"declined".equals(st)) {
+                button(c, "yourturn".equals(st) ? "PLAY" : "SEE", w - 76, y + 10, 60, true);
+                tapArea(w - 76, y + 10, 60, 24, () -> openTcgGame(game));
+            }
+            y += 44;
+        }
+        button(c, "CHALLENGE A FRIEND", 12, y + 2, w - 24, true);
+        tapArea(12, y + 2, w - 24, 24, this::challengeTcg);
+        if (System.currentTimeMillis() - polledAt > 15000) {
+            polledAt = System.currentTimeMillis();
+            v.app.refreshTcgGames();
+        }
+        return y + 30;
+    }
+
+    private void challengeTcg() {
+        JSONObject tcg = tcg(v);
+        int[] deck = tcg == null ? null : playableDeck(tcg);
+        if (deck == null) {
+            return;
+        }
+        Model m = v.app.model();
+        JSONObject fs = m == null ? null : m.snap.optJSONObject("friends");
+        JSONArray list = fs == null ? null : fs.optJSONArray("list");
+        Menu menu = Menu.make(v, "CHALLENGE WHO?");
+        int n = 0;
+        for (int i = 0; list != null && i < list.length(); i++) {
+            JSONObject f = list.optJSONObject(i);
+            if (!f.has("pk")) {
+                continue;
+            }
+            n++;
+            menu.add(nameOf(f.optString("n")), () -> v.app.inviteTcg(f, deck, why -> v.message(why != null ? why
+                    : "Challenge sent! " + nameOf(f.optString("n")) + " answers from their phone.")));
+        }
+        if (n == 0) {
+            v.message("Friends are the players you've been in a co-op room with. Play together once, and you can duel them here by turns.");
+            return;
+        }
+        menu.add("CANCEL", null);
+        v.showMenu(menu);
+    }
+
+    private void acceptTcg(JSONObject invite) {
+        JSONObject tcg = tcg(v);
+        int[] deck = tcg == null ? null : playableDeck(tcg);
+        if (deck == null) {
+            return;
+        }
+        v.app.acceptTcg(invite, deck, game -> {
+            if (game == null) {
+                v.message("The co-op server didn't answer. Try again in a moment.");
+            } else {
+                openTcgGame(game);
+            }
+        });
+    }
+
+    private void openTcgGame(JSONObject g) {
+        TcgDuelPage.Setup s = new TcgDuelPage.Setup();
+        s.mode = TcgDuelPage.MODE_FRIEND;
+        s.game = g;
+        s.seat = g.optInt("seat");
+        s.who = "VS " + nameOf(g.optString("pn"));
+        v.showOver(new TcgDuelPage(v, s));
     }
 
     @Override

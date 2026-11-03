@@ -48,9 +48,9 @@ u32 PhoneTrade_Hash(void);                                       // (the snapsho
 
 // mp_phone_cards.c: the card games on the phone (TRIPLE TRIAD's collection, decks, prizes, packs)
 void PhoneCards_Load(void);
-void PhoneCards_Snapshot(struct Buf *b);                         // the snapshot's "tt"
+void PhoneCards_Snapshot(struct Buf *b);                         // the snapshot's "tt" and "tcg"
 u32 PhoneCards_Hash(void);                                       // (the snapshot's rev: what "tt" shows)
-const char *PhoneCards_Apply(const char *op, const char *json);  // "ttdeck", "ttwin", "ttopen"                         // (the PC: ON OFFER; no release, walk or training)
+const char *PhoneCards_Apply(const char *op, const char *json);  // "ttdeck", "ttwin", "ttopen", "tcgdeck", "tcgduel", "tcgopen"                         // (the PC: ON OFFER; no release, walk or training)
 
 // mp_phone_dev.c: the device's apps: the live map, MOENAV calls, the battle feed, the POKéGEAR)
 #ifndef GUARD_MP_PHONE_INT_H
