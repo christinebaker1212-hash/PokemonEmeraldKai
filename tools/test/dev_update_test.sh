@@ -13,9 +13,11 @@ if [ -z "${NOBUILD:-}" ]; then
     make linux DEV_BUILD=1 DEV_REVISION="${DEV_REVISION:-1}" -j"$(nproc)"
 fi
 D=$(mktemp -d "$OUT/case.XXXXXX")
-CHANNEL=main tools/release/package.sh linux "$D/main" >/dev/null
+# a failing check says where, with the end of the newest game log
+trap 'echo "FAIL at line $LINENO" >&2; L=$(ls -t "$D"/*.log 2>/dev/null | head -1); [ -z "$L" ] || { echo "== $L" >&2; tail -25 "$L" >&2; }' ERR
+CHANNEL=main tools/release/package.sh linux "$D/main" > "$D/package-main.txt" || { cat "$D/package-main.txt"; exit 1; }
 CHANNEL=main tools/release/manifest.sh "$D/main" >/dev/null
-CHANNEL=dev DEV_REVISION=${DEV_REVISION:-1} tools/release/package.sh linux "$D/dev" >/dev/null
+CHANNEL=dev DEV_REVISION=${DEV_REVISION:-1} tools/release/package.sh linux "$D/dev" > "$D/package-dev.txt" || { cat "$D/package-dev.txt"; exit 1; }
 CHANNEL=dev DEV_REVISION=${DEV_REVISION:-1} tools/release/manifest.sh "$D/dev" >/dev/null
 # Actual server binds an ephemeral loopback port; no fixed-port conflicts.
 python3 - "$D" > "$D/port" 2> "$D/http.log" <<'PY' &
