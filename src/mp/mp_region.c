@@ -163,6 +163,32 @@ void MP_Region_BufferName(void)
     StringCopy(gStringVar1, sNames[region < REGION_COUNT ? region : REGION_HOENN]);
 }
 
+// The GAME CENTER's 3F patrons (OBJ_EVENT_GFX_VAR_0-3: data/maps/RustboroCity_GameCenter_3F): HOENN's own, or the
+// regulars of the region's GAME CORNER (GOLDENROD's / CELADON's people)
+void MP_Region_GameCenterLooks(void)
+{
+    static const u16 sLooks[REGION_COUNT][4] = {
+        [REGION_HOENN]  = {OBJ_EVENT_GFX_GAMEBOY_KID, OBJ_EVENT_GFX_NINJA_BOY, OBJ_EVENT_GFX_MAN_3, OBJ_EVENT_GFX_GIRL_3},
+        [REGION_JOHTO]  = {OBJ_EVENT_GFX_QZ_16002, OBJ_EVENT_GFX_QZ_16004, OBJ_EVENT_GFX_QZ_16003, OBJ_EVENT_GFX_QZ_47},
+        [REGION_KANTO]  = {OBJ_EVENT_GFX_QZ_16134, OBJ_EVENT_GFX_QZ_16137, OBJ_EVENT_GFX_QZ_16102, OBJ_EVENT_GFX_QZ_16173},
+        [REGION_SINNOH] = {OBJ_EVENT_GFX_GAMEBOY_KID, OBJ_EVENT_GFX_NINJA_BOY, OBJ_EVENT_GFX_MAN_3, OBJ_EVENT_GFX_GIRL_3},
+    };
+    u8 region = MP_Region_Current() < REGION_COUNT ? MP_Region_Current() : REGION_HOENN;
+    u32 i;
+    for (i = 0; i < 4; i++)
+        VarSet(VAR_OBJ_GFX_ID_0 + i, sLooks[region][i]);
+}
+
+// The region's GAME CORNER's city into STR_VAR_1 (where a COIN CASE might be found: the GAME CENTER's coin counter)
+void MP_Region_BufferGameCorner(void)
+{
+    static const u8 sHoenn[] = _("MAUVILLE CITY"), sJohto[] = _("GOLDENROD CITY"), sKanto[] = _("CELADON CITY"),
+                    sSinnoh[] = _("VEILSTONE CITY");
+    static const u8 *const sNames[REGION_COUNT] = {sHoenn, sJohto, sKanto, sSinnoh};
+    u8 region = MP_Region_Current();
+    StringCopy(gStringVar1, sNames[region < REGION_COUNT ? region : REGION_HOENN]);
+}
+
 // A warp that doesn't lead anywhere in JOHTO's / KANTO's GAME CENTER: 3F's stairs up to the ROOFTOP
 bool8 MP_Region_WarpClosed(u8 destGroup, u8 destNum)
 {

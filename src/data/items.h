@@ -4353,7 +4353,8 @@ const struct Item gItems[] =
         .registrability = TRUE,
         .pocket = POCKET_KEY_ITEMS,
         .type = ITEM_USE_FIELD,
-        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .fieldUseFunc = ItemUseOutOfBattle_Bike,   // Moemon Kai: JOHTO's / KANTO's BICYCLE rides as FireRed's, one speed
+        .secondaryId = MACH_BIKE,
     },
 
     [ITEM_TOWN_MAP] =

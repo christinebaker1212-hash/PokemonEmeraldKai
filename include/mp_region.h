@@ -76,6 +76,8 @@ void MP_Region_NoteWarp(u8 destGroup, u8 destNum);   // overworld.c ApplyCurrent
 void MP_Region_SharedExit(u8 destGroup, u8 destNum);
 u16 MP_Region_GameCenterOtherFloor(void);   // special: the elevator's other floor in JOHTO / KANTO (2F / 3F only)
 void MP_Region_BufferName(void);
+void MP_Region_GameCenterLooks(void);
+void MP_Region_BufferGameCorner(void);
 bool8 MP_Region_WarpClosed(u8 destGroup, u8 destNum);   // field_control_avatar.c: JOHTO's / KANTO's GAME CENTER has no ROOFTOP    // field_control_avatar.c SetupWarp: leaving one goes back where the player came from
 u8 *MP_Region_FlagPointer(u16 id);   // NULL outside REGION_FLAGS_START..END
 u16 *MP_Region_VarPointer(u16 id);

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_region.h"   // Moemon Kai: the PC's tiles by region
 #include "malloc.h"
 #include "battle.h"
 #include "battle_tower.h"
@@ -987,9 +988,45 @@ void FieldShowRegionMap(void)
 #define tTimer        data[3]
 #define tIsScreenOn   data[4]
 
+// Moemon Kai: the PC's own tiles. HOENN's buildings have Emerald's pair (METATILE_Building_PC_Off / _On, 4 / 5);
+// JOHTO's and KANTO's (Quetzal's FireRed tilesets) have FireRed's, 0x62 / 0x63 (METATILE_Building_PCOff / PCOn
+// there); writing Emerald's numbers there drew another tile with no PC on it. A PC with no "on" tile keeps its own.
+static u16 sPcTile = 0xFFFF;   // (the PC's tile when the effect began)
+static void PcTilePair(s8 dx, s8 dy, u16 *off, u16 *on)
+{
+    u16 t = sPcTile != 0xFFFF ? sPcTile
+          : MapGridGetMetatileIdAt(gSaveBlock1Ptr->pos.x + dx + MAP_OFFSET, gSaveBlock1Ptr->pos.y + dy + MAP_OFFSET);
+    if (MP_Region_Current() == REGION_HOENN && (t == METATILE_Building_PC_Off || t == METATILE_Building_PC_On))
+        *off = METATILE_Building_PC_Off, *on = METATILE_Building_PC_On;
+    else if (MP_Region_Current() != REGION_HOENN && (t == 0x62 || t == 0x63))
+        *off = 0x62, *on = 0x63;
+    else if (MP_Region_Current() == REGION_HOENN)
+        *off = METATILE_Building_PC_Off, *on = METATILE_Building_PC_On;   // (Emerald's own, as before)
+    else
+        *off = *on = t;
+}
+
+static void PcFacingOffset(s8 *dx, s8 *dy)
+{
+    switch (GetPlayerFacingDirection())
+    {
+    case DIR_NORTH: *dx = 0;  *dy = -1; break;
+    case DIR_WEST:  *dx = -1; *dy = -1; break;
+    case DIR_EAST:  *dx = 1;  *dy = -1; break;
+    default:        *dx = 0;  *dy = 0;  break;
+    }
+}
+
 // For this special, gSpecialVar_0x8004 is expected to be some PC_LOCATION_* value.
 void DoPCTurnOnEffect(void)
 {
+    if (FuncIsActiveTask(Task_PCTurnOnEffect) != TRUE)
+    {
+        s8 dx, dy;
+        PcFacingOffset(&dx, &dy);
+        sPcTile = 0xFFFF;
+        sPcTile = MapGridGetMetatileIdAt(gSaveBlock1Ptr->pos.x + dx + MAP_OFFSET, gSaveBlock1Ptr->pos.y + dy + MAP_OFFSET);
+    }
     if (FuncIsActiveTask(Task_PCTurnOnEffect) != TRUE)
     {
         u8 taskId = CreateTask(Task_PCTurnOnEffect, 8);
@@ -1050,12 +1087,13 @@ static void PCTurnOnEffect(struct Task *task)
 
 static void PCTurnOnEffect_SetMetatile(s16 isScreenOn, s8 dx, s8 dy)
 {
-    u16 metatileId = 0;
+    u16 metatileId = 0, pcOff, pcOn;
+    PcTilePair(dx, dy, &pcOff, &pcOn);
     if (isScreenOn)
     {
         // Screen is on, set it off
         if (gSpecialVar_0x8004 == PC_LOCATION_OTHER)
-            metatileId = METATILE_Building_PC_Off;
+            metatileId = pcOff;
         else if (gSpecialVar_0x8004 == PC_LOCATION_BRENDANS_HOUSE)
             metatileId = METATILE_BrendansMaysHouse_BrendanPC_Off;
         else if (gSpecialVar_0x8004 == PC_LOCATION_MAYS_HOUSE)
@@ -1065,7 +1103,7 @@ static void PCTurnOnEffect_SetMetatile(s16 isScreenOn, s8 dx, s8 dy)
     {
         // Screen is off, set it on
         if (gSpecialVar_0x8004 == PC_LOCATION_OTHER)
-            metatileId = METATILE_Building_PC_On;
+            metatileId = pcOn;
         else if (gSpecialVar_0x8004 == PC_LOCATION_BRENDANS_HOUSE)
             metatileId = METATILE_BrendansMaysHouse_BrendanPC_On;
         else if (gSpecialVar_0x8004 == PC_LOCATION_MAYS_HOUSE)
@@ -1105,11 +1143,16 @@ static void PCTurnOffEffect(void)
     }
 
     if (gSpecialVar_0x8004 == PC_LOCATION_OTHER)
-        metatileId = METATILE_Building_PC_Off;
+    {
+        u16 pcOff, pcOn;
+        PcTilePair(dx, dy, &pcOff, &pcOn);
+        metatileId = pcOff;
+    }
     else if (gSpecialVar_0x8004 == PC_LOCATION_BRENDANS_HOUSE)
         metatileId = METATILE_BrendansMaysHouse_BrendanPC_Off;
     else if (gSpecialVar_0x8004 == PC_LOCATION_MAYS_HOUSE)
         metatileId = METATILE_BrendansMaysHouse_MayPC_Off;
+    sPcTile = 0xFFFF;
 
     MapGridSetMetatileIdAt(gSaveBlock1Ptr->pos.x + dx + MAP_OFFSET, gSaveBlock1Ptr->pos.y + dy + MAP_OFFSET, metatileId | MAPGRID_IMPASSABLE);
     DrawWholeMapView();

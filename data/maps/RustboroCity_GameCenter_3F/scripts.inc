@@ -1,7 +1,13 @@
 @ Moemon Co-op: the GAME CENTER's games. Played with COINS from the COIN CASE; for now the machines are only
 @ looked at (the coin counter sells COINS).
 RustboroCity_GameCenter_3F_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, RustboroCity_GameCenter_3F_OnTransition
 	.byte 0
+
+@ Its four patrons look like the region's own GAME CORNER regulars (src/mp/mp_region.c MP_Region_GameCenterLooks)
+RustboroCity_GameCenter_3F_OnTransition:
+	special MP_Region_GameCenterLooks
+	end
 
 RustboroCity_GameCenter_3F_EventScript_CoinCounter::
 	lock
@@ -41,6 +47,7 @@ RustboroCity_GameCenter_3F_EventScript_NoMoneyForCoins::
 	goto RustboroCity_GameCenter_3F_EventScript_CoinsDone
 
 RustboroCity_GameCenter_3F_EventScript_NoCoinCase::
+	special MP_Region_BufferGameCorner
 	msgbox RustboroCity_GameCenter_3F_Text_NoCoinCase, MSGBOX_DEFAULT
 	release
 	end
@@ -99,7 +106,7 @@ RustboroCity_GameCenter_3F_Text_NoMoneyForCoins:
 RustboroCity_GameCenter_3F_Text_NoCoinCase:
 	.string "You'll need a COIN CASE to keep\n"
 	.string "your COINS in, I'm afraid.\p"
-	.string "MAUVILLE CITY's GAME CORNER might\n"
+	.string "{STR_VAR_1}'s GAME CORNER might\n"
 	.string "know where to find one.$"
 
 RustboroCity_GameCenter_3F_Text_Console:

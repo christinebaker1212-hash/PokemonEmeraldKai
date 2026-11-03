@@ -203,14 +203,31 @@ gText_QzHeadbuttNothing::
 EventScript_GameCenterGuide::
 	lock
 	faceplayer
+	showmoneybox 0, 0
 	msgbox gText_GameCenterGuide, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, NO, EventScript_GameCenterGuide_No
+	goto_if_eq VAR_RESULT, NO, EventScript_GameCenterGuide_NoBox
+	checkmoney 500   @ (admission as HOENN's GAME CENTER charges: RustboroCity_GameCenter_1F)
+	goto_if_eq VAR_RESULT, FALSE, EventScript_GameCenterGuide_NoMoney
+	removemoney 500
+	updatemoneybox
+	playse SE_SHOP
 	msgbox gText_GameCenterGuideGo, MSGBOX_DEFAULT
+	hidemoneybox
 	closemessage
 	setvar VAR_GAME_CENTER_PAID, 1
 	warp MAP_RUSTBORO_CITY_GAME_CENTER_2F, 0
 	waitstate
 	end
+
+EventScript_GameCenterGuide_NoMoney::
+	msgbox gText_GameCenterGuideNoMoney, MSGBOX_DEFAULT
+	hidemoneybox
+	release
+	end
+
+EventScript_GameCenterGuide_NoBox::
+	hidemoneybox
+	goto EventScript_GameCenterGuide_No
 
 EventScript_GameCenterRoofClosed::
 	lockall
@@ -237,7 +254,13 @@ EventScript_GameCenterGuide_No::
 gText_GameCenterGuide::
 	.string "Upstairs is the GAME CENTER! The\n"
 	.string "CARD SHOP on 2F, games and the DANCE\p"
-	.string "machine on 3F. Shall I take you up?$"
+	.string "machine on 3F.\p"
+	.string "Admission is ¥500, and it's good for\n"
+	.string "every floor until you leave.\p"
+	.string "Shall I take you up?$"
+
+gText_GameCenterGuideNoMoney::
+	.string "Oh, I'm sorry. Admission is ¥500...$"
 
 gText_GameCenterGuideGo::
 	.string "Right this way! Have fun!$"

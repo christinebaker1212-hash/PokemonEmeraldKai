@@ -2017,6 +2017,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
         SetPlayerAvatarTransitionFlags(arg[0] && atoi(arg) == 0 ? PLAYER_AVATAR_FLAG_ON_FOOT
                                      : atoi(arg) == 2 ? PLAYER_AVATAR_FLAG_ACRO_BIKE : PLAYER_AVATAR_FLAG_MACH_BIKE);
     }
+    else if (strcmp(cmd, "metatileat") == 0)
+    {
+        // metatileat X,Y - the map's metatile id there (map coordinates)
+        int x = 0, y = 0;
+        sscanf(arg, "%d,%d", &x, &y);
+        printf("[test] metatile %d,%d = 0x%X\n", x, y, MapGridGetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET));
+    }
+    else if (strcmp(cmd, "riding") == 0)
+    {
+        // riding - the player's bike state (0 on foot, 1 MACH BIKE / BICYCLE, 2 ACRO BIKE)
+        printf("[test] riding %d\n", TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_MACH_BIKE) ? 1
+                                    : TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_ACRO_BIKE) ? 2 : 0);
+    }
     else if (strcmp(cmd, "mountbike") == 0)
     {
         // mountbike N - on (1 Mach, 2 Acro) or off (0) a bike the game's own way (GetOnOffBike: the bike song too)

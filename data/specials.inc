@@ -672,3 +672,5 @@ gSpecials::
 	def_special QzKurtChooseApricorn
 	def_special Maker_ItemBallItem   @ Moemon Maker: an item ball the user put down (src/maker/maker_overrides.c)
 	def_special MP_Region_BufferName   @ Moemon Kai: the region's name into STR_VAR_1 (src/mp/mp_region.c)
+	def_special MP_Region_GameCenterLooks   @ Moemon Kai: the GAME CENTER's 3F patrons by region (src/mp/mp_region.c)
+	def_special MP_Region_BufferGameCorner

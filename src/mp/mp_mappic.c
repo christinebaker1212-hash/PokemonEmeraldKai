@@ -201,10 +201,17 @@ static void MapPicLine(int line, u16 layers[4][DISPLAY_WIDTH])
                 c = fill;
             else
                 continue;
+            // (the time of day's tint on the field's layers, as the map's own tiles get it: mp_daytint.c; the
+            // renderer tints the layers before this hook lays the picture in)
+            if (gMpScenePixel && (gMpSceneLayers & (1 << 3)))
+                c = gMpScenePixel(c, x, line, FALSE);
             layers[3][x] = c;
             layers[2][x] = 0;
             // (BG1, the field's top layer, is drawn over the sprites)
-            layers[1][x] = o & 0x8000 ? Faded(o) : 0;
+            o = o & 0x8000 ? Faded(o) : 0;
+            if (o && gMpScenePixel && (gMpSceneLayers & (1 << 1)))
+                o = gMpScenePixel(o, x, line, FALSE);
+            layers[1][x] = o;
         }
     }
 }
