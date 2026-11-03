@@ -1,0 +1,13 @@
+pressuntil A field 5000
+wait 30
+mp warp 37,120,6,6
+waitfor field 600
+wait 30
+mp tvscreens
+wait 10
+shot kanto_room
+mp warp 1,0,8,6
+waitfor field 600
+wait 30
+mp tvscreens off
+quit

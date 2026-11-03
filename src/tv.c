@@ -1,4 +1,5 @@
 #include "global.h"
+#include <stdio.h>
 #include "rtc.h"
 #include "overworld.h"
 #include "random.h"
@@ -856,6 +857,11 @@ static void SetTVMetatilesOnMap(int width, int height, u16 metatileId)
     int x;
     int y;
 
+    // Moemon Kai: KANTO's / JOHTO's maps are FireRed's tilesets: METATILE_Building_TV_On / Off are Emerald's numbers,
+    // which drew another tile over their TV (a HOENN show on the air lit every TV the player's house had)
+    if (gMapHeader.mapLayout != NULL && gMapHeader.mapLayout->primaryTileset != NULL
+     && gMapHeader.mapLayout->primaryTileset->isFrlg)
+        return;
     for (y = 0; y < height; y++)
     {
         for (x = 0; x < width; x++)
@@ -864,6 +870,28 @@ static void SetTVMetatilesOnMap(int width, int height, u16 metatileId)
                 MapGridSetMetatileIdAt(x, y, metatileId | MAPGRID_COLLISION_MASK);
         }
     }
+}
+
+// Moemon Kai test hook (mp_debug.c "tvscreens"): the TVs lit as when a show is on the air (or turned off); each TV tile's metatile
+// before and after
+void MP_Tv_DebugScreens(bool8 on)
+{
+    int x, y, n = 0, k;
+    s16 at[8][2];
+    u16 before[8];
+    for (y = 0; y < gBackupMapLayout.height; y++)
+        for (x = 0; x < gBackupMapLayout.width; x++)
+            if (n < 8 && MapGridGetMetatileBehaviorAt(x, y) == MB_TELEVISION)
+            {
+                at[n][0] = x, at[n][1] = y, before[n] = MapGridGetMetatileIdAt(x, y);
+                n++;
+            }
+    SetTVMetatilesOnMap(gBackupMapLayout.width, gBackupMapLayout.height, on ? METATILE_Building_TV_On : METATILE_Building_TV_Off);
+    for (k = 0; k < n; k++)
+        printf("[test] tv tile %d,%d: 0x%X -> 0x%X\n", at[k][0] - MAP_OFFSET, at[k][1] - MAP_OFFSET, before[k],
+               MapGridGetMetatileIdAt(at[k][0], at[k][1]));
+    printf("[test] tv tiles %d\n", n);
+    DrawWholeMapView();
 }
 
 void TurnOffTVScreen(void)

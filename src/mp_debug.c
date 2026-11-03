@@ -3231,6 +3231,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void Sinnoh_TvDebug(void);
         Sinnoh_TvDebug();
     }
+    else if (strcmp(cmd, "tvscreens") == 0)
+    {
+        // tvscreens [off]: the map's TVs lit as when a show is on the air, or turned off (tv.c MP_Tv_DebugScreens)
+        void MP_Tv_DebugScreens(bool8 on);
+        MP_Tv_DebugScreens(strcmp(arg, "off") != 0);
+    }
     else if (strcmp(cmd, "tvprogram") == 0)
     {
         // tvprogram N: Platinum's program N (1-9) on air from now on, whatever the hour (0: the schedule's again)
