@@ -81,7 +81,7 @@ game's code just draws into it:
 - **Previews** (the message box, a sprite, a battle animation) are small game pictures inside the panels.
 
 ```
-   Moemon.exe --maker
+   Moemon.exe (AllowSmallTweaks = 1, "maker" typed, MOEMON MAKER picked)
    +-- Maker window (1920x1080, resizable): menus, map tree, tile palette, map view, event editor, database
    |       the map view and previews are drawn by the game's own renderers
    +-- Game window (F5): the real game at that spot, 240x160 scaled up, F12 back to editing
