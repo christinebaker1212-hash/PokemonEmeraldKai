@@ -89,7 +89,7 @@ search and undo. Panels can be moved anywhere, and every panel remembers its pla
 
 ### Modes (as in MZ)
 
-- **Map**: paint metatiles on the bottom / top layers, with pencil, rectangle, fill, shadow-free stamping of
+- **Map**: paint metatiles on the bottom / top layers, with pencil, rectangle, fill, stamps of
   multi-tile pieces, and a picker (right-click takes a tile from the map).
 - **Collision / elevation**: a paint mode with colors and numbers over the map, as in Porymap.
 - **Behaviors**: icons for grass, water, ledges, doors and warps, so nothing hidden surprises you.
