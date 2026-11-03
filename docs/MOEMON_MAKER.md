@@ -10,6 +10,35 @@ indented command list, and a database with tabs. It supports Kaisongs, including
 content goes in a `MoemonMaker/` folder in git and downloads to players' games automatically. It has to keep up with
 Moemon's own data.
 
+## Why first: hands-on fixes without a Claude session
+
+Most changes the user wants day to day are small and visual: a tile, a collision, where an NPC stands or walks, a
+warp, an item ball, a wild table. Today each one costs a session, tokens and a wait for a release. The Maker makes
+them a few clicks: see the problem, fix it, press F5 to check, Publish. So **the first milestone is these quick edits
+on the base game**, before packs, new Pokémon or anything else (see Build order).
+
+What that needs to get right:
+
+- **Edits to the base game go in one place.** All four regions' maps are in the repo (`data/maps`, `data/layouts`,
+  `src/data/wild_encounters.json`), but some were written by generators (tools/quetzal_port, tools/sinnoh). A later
+  session re-running one would quietly wipe a hand edit. So the Maker keeps base-game edits as **overrides by name** in
+  `MoemonMaker/base/` (a tile at x,y of `MAP_ROUTE101`, `TRAINER_ROB` moved to 12,7, a slot of a wild table). The
+  build applies them on top of the generated data, and the generators leave that folder alone. CLAUDE.md gets a rule
+  when this is built: never overwrite `MoemonMaker/base/`, and say so if a change of yours collides with one of the
+  user's edits.
+- **SINNOH**: the walkable grid comes from the 3D pack's blocks (s3d.c S3D_LayoutBlocks), not the map's layout, so
+  the same override file holds SINNOH's collision and behavior edits. The Maker draws them over the 3D picture.
+- **No rebuild to see it**: the game reads `MoemonMaker/base/` at runtime too, so F5 and hot reload show the fix
+  right away. A release bakes it in for everyone.
+- **Publishing without a session**: Publish commits and pushes the changed override files (git, or GitHub Desktop).
+  Base edits can ride the next game release, or go out as the downloadable pack between releases without a version
+  bump (see "Files and git").
+
+Until the Maker exists, Porymap (the community map editor for the pokeemerald decomp) can probably open HOENN's,
+JOHTO's and KANTO's maps in this repo for tiles, collision, events and wild tables. That's untested against Kai's
+changes. Seeing a result needs a local build, and SINNOH's walkable grid isn't in its layouts, so Porymap's edits
+there do nothing.
+
 ## Two decisions everything else depends on
 
 ### 1. The Maker is part of the game
@@ -276,11 +305,13 @@ on / off switch each.
 
 ## Build order
 
-1. **M1, the spine**: drawing any map into any buffer (the refactor above), the editor shell (map tree, map view,
-   event pages and command list), the pack loader, compiling text and scripts, overlays, F5 play from here and hot
-   reload. Done when editing one of Littleroot's NPCs in the Maker shows up in the game without a rebuild.
-2. **M2, new GEN 3 maps**: painting, collision / elevation, warps, connections and the World view, encounters,
-   trainers, quick events, the checker.
+1. **M1, quick edits on the base game**: drawing any map into any buffer (the refactor above), the editor shell (map
+   tree, map view, inspector), painting tiles, collision / elevation, moving and setting up NPCs (position, look,
+   movement, range), warps, signs, item balls, wild tables, `MoemonMaker/base/` overrides read at runtime and applied
+   at build, F5 play from here, hot reload, Publish. Done when the user can move an NPC and fix a collision on ROUTE
+   101 and in TWINLEAF TOWN, see it in the game at once and publish it, all without a session.
+2. **M2, events and new GEN 3 maps**: event pages and the command list, compiling text and scripts, the pack loader,
+   new maps, connections and the World view, trainers, quick events, the checker.
 3. **M3, the database**: Pokémon, moves, items, art, IDs that never move, new Kaisong tracks, the battle bench.
 4. **M4, the four regions as events**: decompiler, byte-for-byte round trip, three-way merge, the debugger.
 5. **M5, 3D mode, the animation timeline, Lua hooks, tileset editor.**
