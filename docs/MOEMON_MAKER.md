@@ -55,8 +55,29 @@ shortcut beside the game, and an entry on the title screen). That is the best an
 - **What you see is the game.** Maps are drawn by the game's renderer, SINNOH by the game's 3D engine, text by its
   font in its message box, battle animations by its battle engine, and songs played by its Kaisong player. MZ can
   only approximate its runtime. The Maker shows the real thing.
-- **Play is one key away.** F5 starts the game from the cursor in the same window, and F12 comes back to the editor.
-  There's no export and no second program.
+- **Play is one key away.** F5 starts the game from the cursor and F12 comes back to the editor. There's no export
+  and no second program.
+
+**"In the game" means the same program, not inside the game's screen.** The Maker never edits in the 240x160
+picture. It opens its own desktop window at any size, with menus, toolbars, panels and the mouse, like RPG Maker. The
+game's code just draws into it:
+
+- **The map view** is the whole map drawn by the game's own tile renderer at any zoom, not the 15x10 tiles the
+  camera shows while playing.
+- **The game picture** (F5) is one panel of the editor or its own window, the way display.c already opens extra
+  windows for the SPECTATE pop-outs and draws the VS fights' 480x320 picture.
+- **Previews** (the message box, a sprite, a battle animation) are small game pictures inside the panels.
+
+```
+   Moemon.exe --maker
+   +-- Maker window (1920x1080, resizable): menus, map tree, tile palette, map view, event editor, database
+   |       the map view and previews are drawn by the game's own renderers
+   +-- Game window (F5): the real game at that spot, 240x160 scaled up, F12 back to editing
+```
+
+**Later, from the phone:** the Companion App could get a small Maker page over its existing link for quick fixes on
+the go (move an NPC, change a wild slot), saved as the same `MoemonMaker/base/` overrides. The user liked the idea
+(2026-11-03). It comes after the PC Maker exists.
 
 Moemon Music Studio is the opposite example: a separate program with a port of the game's sound engine. It has to be
 "checked against" the game whenever the engine changes. The Maker shouldn't have that problem.
