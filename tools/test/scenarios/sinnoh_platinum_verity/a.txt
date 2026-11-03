@@ -1,0 +1,40 @@
+pressuntil A field 5000
+mp textspeed 2
+wait 60
+mash A 12 20
+wait 200
+mash A 6 30
+mp setvar 0x52F8 415
+mp setvar 0x51C9 2
+mp setvar 0x520A 5
+mp setvar 0x524A 2
+mp setvar 0x524B 1
+mp setvar 0x5222 1
+mp setflag 0x36FB
+mp warp 40,1,15,27
+wait 120
+press UP 16
+wait 30
+press UP 16
+wait 60
+mash A 60 20
+wait 60
+mp getvar 0x51C9
+press LEFT 16
+wait 30
+press LEFT 16
+wait 30
+mp where
+mp npcs
+mp warp 42,44,46,53
+wait 200
+mash A 60 20
+wait 100
+mash A 60 20
+wait 100
+mp getvar 0x51C9
+mp warp 40,1,15,27
+wait 150
+mp getflag 0x349A
+mp ctx
+quit

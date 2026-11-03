@@ -44,6 +44,10 @@ u16 Sinnoh_LegendsRefresh(void)
         bool8 shown;
         if (sSinnohLegends[i].group != gSaveBlock1Ptr->location.mapGroup || sSinnohLegends[i].num != gSaveBlock1Ptr->location.mapNum)
             continue;
+        // (the story's battles, BARRY's and TEAM GALACTIC's: Platinum's own scripts show and hide them, as
+        // Sinnoh_StoryRefresh; clearing their flags here brought ROUTE 201's BARRY back after LAKE VERITY)
+        if (sSinnohLegends[i].species == SPECIES_NONE && FlagGet(FLAG_SINNOH_PLATINUM_STORY))
+            continue;
         if (sSinnohLegends[i].badges == FRIDAYS)
         {
             // (DRIFLOON: met once a Friday. Its battle sets its "done" flag and the day (Sinnoh_FridayMet); a later
