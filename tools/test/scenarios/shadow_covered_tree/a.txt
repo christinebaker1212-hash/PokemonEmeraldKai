@@ -1,0 +1,22 @@
+pressuntil A field 5000
+wait 30
+mp shadows 1
+mp warp 0,57,6,8
+waitfor field 600
+wait 60
+mp where
+mp shadows
+rendershot open
+mp warp 0,57,6,9
+waitfor field 600
+wait 60
+mp where
+mp shadows
+rendershot behind
+mp warp 0,57,7,9
+waitfor field 600
+wait 60
+mp where
+mp shadows
+rendershot behind2
+quit

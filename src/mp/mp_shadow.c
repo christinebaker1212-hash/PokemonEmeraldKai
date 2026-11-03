@@ -370,6 +370,22 @@ static bool8 FeetCovered(s16 x, s16 y, const struct Sprite *o)
     return opaque >= 8;   // (of the 32 pixels under the feet: leaves have gaps)
 }
 
+// A follower or Garden POKeMON has no object event: its tile from where its feet stand against the player's (both
+// sprites in the same screen space; a tile is 16 pixels)
+static bool8 SpriteFeetCovered(const struct Sprite *o)
+{
+    struct ObjectEvent *pe = &gObjectEvents[gPlayerAvatar.objectEventId];
+    const struct Sprite *p;
+    s32 fx, fy, px, py, w;
+    if (pe->spriteId >= MAX_SPRITES || o->coordOffsetEnabled != gSprites[pe->spriteId].coordOffsetEnabled)
+        return FALSE;
+    p = &gSprites[pe->spriteId];
+    Feet(o, &fx, &fy, &w);
+    Feet(p, &px, &py, &w);
+    return FeetCovered(pe->currentCoords.x + (fx - px + 8 + 1600) / 16 - 100,
+                       pe->currentCoords.y + (fy - py + 8 + 1600) / 16 - 100, o);
+}
+
 static bool8 InWater(s16 x, s16 y)
 {
     u8 b = MapGridGetMetatileBehaviorAt(x, y);
@@ -475,7 +491,8 @@ void MP_Shadow_Update(void)
         for (i = 0; i < MAX_SPRITES; i++)   // followers and Garden POKeMON (mp_follower.c marks them)
         {
             struct Sprite *o = &gSprites[i];
-            if (o->inUse && o->mpCastShadow && !o->invisible && !o->mpClipOn && !sSeen[i] && !MP_IsReflectionSprite(o))
+            if (o->inUse && o->mpCastShadow && !o->invisible && !o->mpClipOn && !sSeen[i] && !MP_IsReflectionSprite(o)
+             && !SpriteFeetCovered(o))
                 Cast(i, FALSE);
         }
     }
