@@ -891,6 +891,7 @@ static bool8 IsMomentKind(u8 kind)
     case MEM_EVOLVED: case MEM_BADGE: case MEM_STORY: case MEM_NEAR_FAINT: case MEM_CLUTCH: case MEM_COMEBACK:
     case MEM_COMFORTED: case MEM_FED: case MEM_PLAYED: case MEM_PRAISED: case MEM_REUNION: case MEM_KEEPSAKE:
     case MEM_OVERCAME: case MEM_PURSUIT: case MEM_GARDEN: case MEM_NEW_PLACE: case MEM_WEATHER: case MEM_LEGEND:
+    case MEM_WALK:
         return TRUE;
     }
     return FALSE;
@@ -903,7 +904,7 @@ static const u8 sMemFeeling[MEM_KINDS] = {
     [MEM_COMEBACK] = EMO_JOY, [MEM_PARTNER] = EMO_AFFECTION, [MEM_RIVAL] = EMO_PRIDE, [MEM_COMFORTED] = EMO_AFFECTION,
     [MEM_FED] = EMO_JOY, [MEM_PLAYED] = EMO_JOY, [MEM_PRAISED] = EMO_PRIDE, [MEM_REUNION] = EMO_JOY,
     [MEM_KEEPSAKE] = EMO_AFFECTION, [MEM_HEARD] = EMO_SURPRISE, [MEM_RARE] = EMO_JOY, [MEM_PURSUIT] = EMO_PRIDE,
-    [MEM_FRIEND] = EMO_AFFECTION, [MEM_FAMILY] = EMO_AFFECTION, [MEM_GARDEN] = EMO_JOY,
+    [MEM_FRIEND] = EMO_AFFECTION, [MEM_FAMILY] = EMO_AFFECTION, [MEM_GARDEN] = EMO_JOY, [MEM_WALK] = EMO_JOY,
 };
 
 // How the temperament drifts after a strong memory (docs 4.4: slowly, within a range of its innate self)
@@ -2259,4 +2260,22 @@ bool8 MP_Life_WantsOut(struct BoxPokemon *box)
         return TRUE;
     spell = MP_Life_PlayMinutes() / 10;
     return ((rec->personality ^ (spell * 2654435761u)) >> 7) % 3 == 0;
+}
+
+// Moemon Co-op: a POKéMON back from a walk with the phone (mp_phone_walk.c): the walk as a memory (its JOURNAL line) and
+// a Friendship step for each of the walk's MOMENTS (a few thousand steps each), by the Garden's own steps: only ever up
+void MP_Life_WalkHome(struct BoxPokemon *box, u32 steps, u8 moments)
+{
+    struct MpLifeRec *rec = MP_Life_Get(box, TRUE);
+    u8 f = GetBoxMonData(box, MON_DATA_FRIENDSHIP);
+    if (rec != NULL)
+        MP_Life_Remember(rec, MEM_WALK, 150 + (steps >= 5000 ? 60 : steps / 100), TIER_PART, MP_Life_LocalTrainerKey(),
+                         steps / 100 > 0xFFFF ? 0xFFFF : steps / 100);
+    while (moments--)
+    {
+        u8 step = FriendshipStep(f);
+        f = f + step > MAX_FRIENDSHIP ? MAX_FRIENDSHIP : f + step;
+    }
+    SetBoxMonData(box, MON_DATA_FRIENDSHIP, &f);
+    MPNet_Log("life: walk home, %u steps, friendship %u", (unsigned)steps, f);
 }

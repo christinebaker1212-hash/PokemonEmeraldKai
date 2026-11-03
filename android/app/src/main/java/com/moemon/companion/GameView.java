@@ -53,6 +53,9 @@ public final class GameView extends View {
         pages.add(new DexPage(this));
         pages.add(new SpawnsPage(this));
         pages.add(new DevicePage(this));
+        pages.add(new WalkPage(this));
+        pages.add(new FriendsPage(this));
+        pages.add(new CardsPage(this));
     }
 
     @Override
@@ -90,6 +93,11 @@ public final class GameView extends View {
 
     public int width() {
         return w;
+    }
+
+    /** Screen pixels per page pixel (a page drawing at a factor of k keeps whole pixels when k x this is whole) */
+    public int pixelScale() {
+        return scale;
     }
 
     public int height() {
@@ -290,7 +298,7 @@ public final class GameView extends View {
         } else {
             switch (cl.status()) {
                 case LINKED:
-                    s = app.locked() ? "IN BATTLE" : "LINKED";
+                    s = app.locked() ? "IN BATTLE" : cl.viaServer() ? "LINKED (AWAY)" : "LINKED";
                     color = app.locked() ? 0xFFF8A050 : 0xFF88F888;
                     break;
                 case LINKING:
@@ -334,22 +342,87 @@ public final class GameView extends View {
         return (s / 86400) + " DAYS AGO";
     }
 
-    private static final String[] TAB_NAMES = {"BOXES", "PARTY", "BAG", "DEX", "SPAWNS", "DEVICE"};
+    // the tabs and the pages they open (SPAWNS, page 4, opens from the POKéDEX: its tab is DEX's)
+    private static final String[] TAB_NAMES = {"BOXES", "PARTY", "BAG", "DEX", "DEVICE", "WALK", "CARDS", "FRIENDS"};
+    private static final String[] TAB_SHORT = {"BOX", "TEAM", "BAG", "DEX", "DEV", "WALK", "CARD", "PALS"};
+    private static final int[] TAB_PAGES = {0, 1, 2, 3, 5, 6, 8, 7};
+
+    private int tabOf(int p) {
+        for (int i = 0; i < TAB_PAGES.length; i++) {
+            if (TAB_PAGES[i] == p) {
+                return i;
+            }
+        }
+        return 3;   // (SPAWNS: under DEX)
+    }
 
     private void drawTabs(Canvas c) {
         int y = h - TABS, tw = w / TAB_NAMES.length;
         fill.setColor(0xFF283848);
         c.drawRect(0, y, w, h, fill);
+        fill.setColor(0xFF3A5068);
+        c.drawRect(0, y, w, y + 1, fill);
         for (int i = 0; i < TAB_NAMES.length; i++) {
             int x = i * tw;
-            if (i == page && over == null) {
+            boolean on = i == tabOf(page) && over == null;
+            if (on) {
+                // the chosen one: a raised white plate, as the DS's touch menus
+                fill.setColor(0xFF98A8B8);
+                c.drawRoundRect(new android.graphics.RectF(x + 1, y + 2, x + tw - 1, h - 1), 3, 3, fill);
                 fill.setColor(0xFFF8F8F8);
-                c.drawRect(x + 2, y + 3, x + tw - 2, h - 3, fill);
+                c.drawRoundRect(new android.graphics.RectF(x + 1, y + 2, x + tw - 1, h - 3), 3, 3, fill);
             }
-            int nw = art.width(TAB_NAMES[i]);
-            boolean on = i == page && over == null;
-            art.text(c, TAB_NAMES[i], x + (tw - nw) / 2, y + 7, on ? GameArt.TEXT : GameArt.WHITE_TEXT,
-                    on ? GameArt.SHADOW : GameArt.WHITE_SHADOW);
+            drawTabIcon(c, i, x + (tw - 12) / 2, y + 3, !on);
+            String name = TAB_SHORT[i];
+            int nw = art.width(name);
+            c.save();
+            c.scale(0.75f, 0.75f, x + tw / 2f, y + 16);
+            art.text(c, name, x + (tw - nw) / 2, y + 12, on ? GameArt.TEXT : 0xFFC8D8E8,
+                    on ? GameArt.SHADOW : 0xFF101820);
+            c.restore();
+        }
+    }
+
+    // The tabs' icons: 12x12 pixel art in the game's way (. clear, k outline, w white, r red, y yellow, o orange,
+    // n brown, b blue, l light blue, g green, s grey, p pink, d dark red)
+    private static final String[][] TAB_ICONS = {
+        {"............", ".kkkkkkkkkk.", ".knnnnnnnnk.", ".kkkkkkkkkk.", ".knnnnnnnnk.", ".knnkkkknnk.",
+         ".knnkookknk.", ".knnkkkknnk.", ".knnnnnnnnk.", ".knnnnnnnnk.", ".kkkkkkkkkk.", "............"},
+        {"....kkkk....", "..kkrrrrkk..", ".krrrwrrrrk.", ".krrwrrrrrk.", "krrrrkkrrrrk", "kkkkkwwkkkkk",
+         "kwwwkwwkwwwk", ".kwwwkkwwwk.", ".kwwwwwwwwk.", "..kkwwwwkk..", "....kkkk....", "............"},
+        {"....kkkk....", "...kyyyyk...", "..kkkkkkkk..", ".kooooooook.", ".koyyyyyyok.", ".kooookoook.",
+         ".koooykyook.", ".kooookoook.", ".kooooooook.", ".koooooooook", ".kkkkkkkkkk.", "............"},
+        {".kkkkkkkkk..", ".krrrrrrrrk.", ".krwwwwwwrk.", ".krwlllwwrk.", ".krwlllwwrk.", ".krwwwwwwrk.",
+         ".krrrrrrrrk.", ".krrdrrrrrk.", ".krrrrrkrrk.", ".krrrrkkkrk.", ".kkkkkkkkkk.", "............"},
+        {"............", "..kkkkkkkk..", ".kyyyyyyyyk.", ".kykkkkkkyk.", ".kyklllllkyk", ".kyklllllkyk",
+         ".kykkkkkkyk.", ".kyyyyyyyyk.", ".kyykyykyyk.", ".kyyyyyyyyk.", "..kkkkkkkk..", "............"},
+        {"............", "............", "..kkkk......", ".kbbbbk.....", ".kbwbbk.....", ".kbbwbbkk...",
+         ".kbbbbbbbkk.", ".kbbbbbbbbbk", ".kwwwwwwwwwk", "..kkkkkkkkk.", "............", "............"},
+        {"..kkkkkkk...", "..kbbbbbk...", "..kblllbkkk.", "..kblwlbkrk.", "..kblllbkrk.", "..kbbbbbkrk.",
+         "..kbbbbbkrk.", "..kkkkkkkrk.", "....krrrrrk.", "....krrrrrk.", "....kkkkkkk.", "............"},
+        {"..kkk.......", ".kpppk..kkk.", ".kpppk.kbbbk", ".kpppk.kbbbk", "..kkk...kkk.", ".kkkkk.kkkkk",
+         "kpppppkbbbbb", "kpppppkbbbbb", "kpppppkbbbbb", "kkkkkkkkkkkk", "............", "............"},
+    };
+    private static final int[] ICON_COLORS = new int[128];
+    static {
+        ICON_COLORS['k'] = 0xFF202830; ICON_COLORS['w'] = 0xFFF8F8F8; ICON_COLORS['r'] = 0xFFE83838;
+        ICON_COLORS['y'] = 0xFFF8D038; ICON_COLORS['o'] = 0xFFF09030; ICON_COLORS['n'] = 0xFFB07038;
+        ICON_COLORS['b'] = 0xFF3868D8; ICON_COLORS['l'] = 0xFF98D0F8; ICON_COLORS['g'] = 0xFF48B048;
+        ICON_COLORS['s'] = 0xFFA0A8B0; ICON_COLORS['p'] = 0xFFF8A0A8; ICON_COLORS['d'] = 0xFF901818;
+    }
+
+    private void drawTabIcon(Canvas c, int i, int x, int y, boolean dim) {
+        String[] rows = TAB_ICONS[i];
+        for (int r = 0; r < rows.length; r++) {
+            for (int k = 0; k < rows[r].length(); k++) {
+                char ch = rows[r].charAt(k);
+                if (ch == '.') {
+                    continue;
+                }
+                int col = ICON_COLORS[ch];
+                fill.setColor(dim ? (col & 0x00FFFFFF) | 0xB0000000 : col);
+                c.drawRect(x + k, y + r, x + k + 1, y + r + 1, fill);
+            }
         }
     }
 
@@ -446,7 +519,7 @@ public final class GameView extends View {
         }
         if (y >= h - TABS && (over == null || !over.fullScreen())) {
             int i = Math.min(TAB_NAMES.length - 1, x / (w / TAB_NAMES.length));
-            select(i);
+            select(TAB_PAGES[i]);
             return;
         }
         active().tap(x, y - TOP);

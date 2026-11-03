@@ -11,6 +11,7 @@ public final class NativeCrypto implements Crypto {
     @Override public byte[] sessionKey(byte[] key, byte[] pn, byte[] gn) { return Native.sessionKey(key, pn, gn); }
     @Override public byte[] seal(byte[] key, int seq, byte[] msg) { return Native.seal(key, seq, msg); }
     @Override public byte[] open(byte[] key, byte[] sealed) { return Native.open(key, sealed); }
+    @Override public byte[] derive(byte[] key32, String word) { return Native.derive(key32, word); }
 
     public static int linkVersion() { return Native.linkVersion(); }
 }

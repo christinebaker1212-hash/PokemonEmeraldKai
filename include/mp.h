@@ -419,6 +419,7 @@ s16 MP_Hue_Find(u32 otId, u32 personality);
 s16 MP_Hue_FindByPersonality(u32 personality);
 void MP_Hue_ShiftPalette(u16 *pal, u16 keepMask, s16 hue);
 const u32 *MP_Hue_Lz(const u32 *lz, u16 species, s16 hue);
+const u32 *MP_Hue_LzMoe(const u32 *lz, u16 species, s16 hue);   // (a MOéMON palette, whatever CREATURES says)
 const struct CompressedSpritePalette *MP_Hue_LzStruct(const struct CompressedSpritePalette *pal, u16 species, s16 hue);
 u16 MP_Hue_Tag(u16 orig, s16 hue);
 u16 MP_Hue_IconPaletteTag(u16 baseTag, const u16 *colors, s16 hue);

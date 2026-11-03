@@ -39,8 +39,25 @@ android/ (core/ is Android-free), all in `docs/PHONE_LINK.md`; tests tools/phone
 `./gradlew testDebugUnitTest` (pictures of every page). Assets from `python3 android/build_assets.py`. The APK is signed
 by repository secrets in the release workflow; its key must never change. Phase 2 (1.72.0, the device: POKéNAV /
 POKéTCH / POKéGEAR on the DEVICE page, the live map, MATCH CALL, CONDITION, RIBBONS, battle mode): src/mp/mp_phone_dev.c
-(+ mp_phone_int.h), PHONE_LINK.md "The devices, the live map, battle mode". The user asked (2026-11-03) for all four
-phases in order, then a UI/UX pass: "polished Nintendo quality, mid 2000s to 2007 era graphics, 2026 usability".
+(+ mp_phone_int.h), PHONE_LINK.md "The devices, the live map, battle mode". Phase 3 (1.73.0, the walk, training, the
+Garden in your pocket): src/mp/mp_phone_walk.c, android core/Walk.java, PHONE_LINK.md "Phase 3"; tests
+tools/phone/walk_test.py, coretest WalkCoreTest. Phase 4 (1.74.0, friends: presence, JOIN, linking away from home
+through the co-op server's MAIL and PIPE): src/mp/mp_phone_friends.c ("<save>.pals"), mp_server.c MAIL / PIPE,
+android core/Server.java, Friends.java, FriendsPage; PHONE_LINK.md "Phase 4"; test coretest FriendsTest.
+Trades by mail (1.75.0): the server's ESCROW, pair keys (X25519), src/mp/mp_phone_trade.c ("<save>.trades"), trade.c
+MP_MailTrade_Scene, android core/Trades.java; PHONE_LINK.md "Trades by mail"; tests coretest TradeTest (two games at lag;
+ONLY=trade android/coretest/run.sh), tools/phone/escrow_test.py.
+TRIPLE TRIAD on the phone (1.76.0): the game's src/tt through android cpp/tt_jni.c (Tt.java), art from build_assets.py,
+src/mp/mp_phone_cards.c (snapshot "tt", orders ttdeck / ttwin / ttopen, "<save>.phonecards"), CardsPage / TtDuelPage,
+friend duels core/TtFriends.java; PHONE_LINK.md "TRIPLE TRIAD on the phone"; tests tools/phone/cards_test.py, coretest
+TtCoreTest, TtFriendsTest (ONLY=tt). The POKéMON card game on the phone (1.78.0): src/tcg through cpp/tcg_jni.c
+(Tcg.java); what a move asks for is src/tcg/tcg_flow.c (include/tcg/flow.h), shared with the game's tcg_board.c (never
+a second copy); snapshot "tcg", orders tcgdeck / tcgduel / tcgopen; TcgDuelPage etc.; friends by turns core/CardDuels.java
+(both games; records in pages of 12: the server keeps 16 entries a key); PHONE_LINK.md "The POKéMON card game on the
+phone"; tests coretest TcgCoreTest, TcgFriendsTest (ONLY=tcg), cards_test.py. The POKéMON and YU-GI-OH! tables turn the
+opponent's cards to face them; TRIPLE TRIAD stays as it is (never turn its cards: the user, 2026-11-03). The user asked
+(2026-11-03) for all four phases in order, then a UI/UX pass: "polished Nintendo quality, mid 2000s to 2007 era
+graphics, 2026 usability".
 
 **Moemon Maker** (concept, not built yet): the user's own MZ-like editor for maps, events and data, `docs/MOEMON_MAKER.md`.
 **The user's own changes come first** (the user, 2026-11-03): anything in `MoemonMaker/` and any commit without a

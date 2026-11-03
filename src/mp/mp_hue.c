@@ -327,9 +327,11 @@ void MP_Hue_ShiftPalette(u16 *pal, u16 keepMask, s16 hue)
 }
 
 // The skin slots a species' picture keeps (none for the original POKéMON pictures)
+static bool8 sForceMoe;   // (MP_Hue_LzMoe: the MOéMON pictures' skin slots whatever the option says)
+
 static u16 SkinMask(u16 species)
 {
-    if (MP_MonArtPokemon() || species >= NUM_SPECIES)
+    if ((MP_MonArtPokemon() && !sForceMoe) || species >= NUM_SPECIES)
         return 0;
     return sMpHueSkin[species];
 }
@@ -391,6 +393,16 @@ const u32 *MP_Hue_Lz(const u32 *lz, u16 species, s16 hue)
     if (hue == 0 || lz == NULL)
         return lz;
     return MakeLz(lz, species, hue, NULL);
+}
+
+// The same for a MOéMON picture's palette whatever OPTIONS > CREATURES says (the phone link: the app draws MOéMON)
+const u32 *MP_Hue_LzMoe(const u32 *lz, u16 species, s16 hue)
+{
+    const u32 *out;
+    sForceMoe = TRUE;
+    out = MP_Hue_Lz(lz, species, hue);
+    sForceMoe = FALSE;
+    return out;
 }
 
 // Sprite palette tags for turned icon palettes: one per (icon palette, hue); a new pair takes the next tag that isn't

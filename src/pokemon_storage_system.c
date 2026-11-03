@@ -96,6 +96,7 @@ enum {
     MSG_ITEM_IS_HELD,
     MSG_CHANGED_TO_ITEM,
     MSG_CANT_STORE_MAIL,
+    MSG_MP_ON_OFFER,   // Moemon Co-op: ON OFFER for a trade by mail
 };
 
 // IDs for how to resolve variables in the above messages
@@ -1138,6 +1139,7 @@ static const struct SpriteTemplate sSpriteTemplate_DisplayMon =
     .callback = SpriteCallbackDummy,
 };
 
+static const u8 sText_MpOnOffer[] = _("It's ON OFFER for a trade by mail.");
 static const struct StorageMessage sMessages[] =
 {
     [MSG_EXIT_BOX]             = {gText_ExitFromBox,             MSG_VAR_NONE},
@@ -1171,6 +1173,7 @@ static const struct StorageMessage sMessages[] =
     [MSG_ITEM_IS_HELD]         = {gText_ItemIsNowHeld,           MSG_VAR_ITEM_NAME},
     [MSG_CHANGED_TO_ITEM]      = {gText_ChangedToNewItem,        MSG_VAR_ITEM_NAME},
     [MSG_CANT_STORE_MAIL]      = {gText_MailCantBeStored,        MSG_VAR_NONE},
+    [MSG_MP_ON_OFFER]          = {sText_MpOnOffer,               MSG_VAR_NONE},
 };
 
 static const struct WindowTemplate sYesNoWindowTemplate =
@@ -2729,6 +2732,9 @@ static void Task_HidePartyPokemon(u8 taskId)
     }
 }
 
+static u32 sMpDisplayOt;   // (below)
+bool8 MP_Phone_OnOffer(u32 pid, u32 ot);   // mp_phone_trade.c
+
 static void Task_OnSelectedMon(u8 taskId)
 {
     switch (sStorage->state)
@@ -2823,6 +2829,10 @@ static void Task_OnSelectedMon(u8 taskId)
             {
                 sStorage->state = 4;
             }
+            else if (MP_Phone_OnOffer(sStorage->displayMonPersonality, sMpDisplayOt))
+            {
+                sStorage->state = 7;   // Moemon Co-op: ON OFFER for a trade by mail
+            }
             else
             {
                 PlaySE(SE_SELECT);
@@ -2885,6 +2895,11 @@ static void Task_OnSelectedMon(u8 taskId)
     case 4:
         PlaySE(SE_FAILURE);
         PrintMessage(MSG_PLEASE_REMOVE_MAIL);
+        sStorage->state = 6;
+        break;
+    case 7:
+        PlaySE(SE_FAILURE);
+        PrintMessage(MSG_MP_ON_OFFER);
         sStorage->state = 6;
         break;
     case 6:
@@ -7088,6 +7103,10 @@ static void ReshowDisplayMon(void)
         TryRefreshDisplayMon();
 }
 
+static u32 sMpDisplayOt;   // Moemon Co-op: the shown POKéMON's Trainer ID
+bool8 MP_Phone_InTraining(u32 pid, u32 ot);   // mp_phone_walk.c
+bool8 MP_Phone_OnOffer(u32 pid, u32 ot);      // mp_phone_trade.c
+
 static void SetDisplayMonData(void *pokemon, u8 mode)
 {
     u8 *txtPtr;
@@ -7115,6 +7134,7 @@ static void SetDisplayMonData(void *pokemon, u8 mode)
             sStorage->displayMonLevel = GetMonData(mon, MON_DATA_LEVEL);
             sStorage->displayMonMarkings = GetMonData(mon, MON_DATA_MARKINGS);
             sStorage->displayMonPersonality = GetMonData(mon, MON_DATA_PERSONALITY);
+            sMpDisplayOt = GetMonData(mon, MON_DATA_OT_ID);   // Moemon Co-op: (TRAINING, below)
             sStorage->displayMonPalette = GetMonFrontSpritePal(mon);
             gender = GetMonGender(mon);
             sStorage->displayMonItemId = GetMonData(mon, MON_DATA_HELD_ITEM);
@@ -7140,6 +7160,7 @@ static void SetDisplayMonData(void *pokemon, u8 mode)
             sStorage->displayMonLevel = GetLevelFromBoxMonExp(boxMon);
             sStorage->displayMonMarkings = GetBoxMonData(boxMon, MON_DATA_MARKINGS);
             sStorage->displayMonPersonality = GetBoxMonData(boxMon, MON_DATA_PERSONALITY);
+            sMpDisplayOt = GetBoxMonData(boxMon, MON_DATA_OT_ID);   // Moemon Co-op: (TRAINING, below)
             sStorage->displayMonPalette = GetMonSpritePalFromSpeciesAndPersonality(sStorage->displayMonSpecies, otId, sStorage->displayMonPersonality);
             gender = GetGenderFromSpeciesAndPersonality(sStorage->displayMonSpecies, sStorage->displayMonPersonality);
             sStorage->displayMonItemId = GetBoxMonData(boxMon, MON_DATA_HELD_ITEM);
@@ -7223,6 +7244,18 @@ static void SetDisplayMonData(void *pokemon, u8 mode)
             StringCopyPadded(sStorage->displayMonItemName, GetItemName(sStorage->displayMonItemId), CHAR_SPACE, 8);
         else
             StringFill(sStorage->displayMonItemName, CHAR_SPACE, 8);
+        // Moemon Co-op: a POKéMON in training on the phone (mp_phone_walk.c) says so where its item would be
+        if (MP_Phone_InTraining(sStorage->displayMonPersonality, sMpDisplayOt))
+        {
+            static const u8 sTraining[] = _("TRAINING");
+            StringCopyPadded(sStorage->displayMonItemName, sTraining, CHAR_SPACE, 8);
+        }
+        // ... and one a friend may get in a trade by mail (mp_phone_trade.c)
+        if (MP_Phone_OnOffer(sStorage->displayMonPersonality, sMpDisplayOt))
+        {
+            static const u8 sOnOffer[] = _("ON OFFER");
+            StringCopyPadded(sStorage->displayMonItemName, sOnOffer, CHAR_SPACE, 8);
+        }
     }
 }
 

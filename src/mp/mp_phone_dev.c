@@ -70,7 +70,7 @@ void PhoneDev_Place(struct Buf *b)
 {
     u8 page, x, y;
     u32 p, n = 0;
-    if (MP_TownMap_Player(&page, &x, &y))
+    if (gMain.callback2 != NULL && MP_TownMap_Player(&page, &x, &y))
         BufAdd(b, ",\"tm\":[%u,%u,%u]", page, x, y);
     BufAdd(b, ",\"sec\":%u", gMapHeader.regionMapSectionId);
     RtcCalcLocalTime();

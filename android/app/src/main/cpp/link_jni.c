@@ -100,6 +100,24 @@ JNIEXPORT jbyteArray JNICALL FN(open)(JNIEnv *env, jclass c, jbyteArray key, jby
     return a;
 }
 
+// A 16-byte key from a 32-byte one and a word (PhoneProto_Derive: a pipe's ID, a friend's records)
+JNIEXPORT jbyteArray JNICALL FN(derive)(JNIEnv *env, jclass c, jbyteArray key, jstring word)
+{
+    uint8_t k[PHONE_KEY_SIZE], out[16];
+    const char *w;
+    jbyteArray r;
+    (void)c;
+    if ((*env)->GetArrayLength(env, key) != PHONE_KEY_SIZE)
+        return NULL;
+    (*env)->GetByteArrayRegion(env, key, 0, PHONE_KEY_SIZE, (jbyte *)k);
+    w = (*env)->GetStringUTFChars(env, word, NULL);
+    PhoneProto_Derive(k, w, out);
+    (*env)->ReleaseStringUTFChars(env, word, w);
+    r = (*env)->NewByteArray(env, 16);
+    (*env)->SetByteArrayRegion(env, r, 0, 16, (const jbyte *)out);
+    return r;
+}
+
 JNIEXPORT jint JNICALL FN(linkVersion)(JNIEnv *env, jclass c)
 {
     return PHONE_LINK_VERSION;

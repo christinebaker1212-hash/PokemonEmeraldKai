@@ -70,6 +70,52 @@ static uint8_t sIn[MP_MAX_MSG + 16];
 
 static void Drop(int c);
 
+// ---------------------------------------------------------------------------
+// The mailbox (MPMSG_C_MAIL) and pipes (MPMSG_C_PIPE): outside rooms, for friends and phones (docs/PHONE_LINK.md
+// "Phase 4"). The server never reads what's in them: friends seal their records with keys only they share.
+
+#define MAIL_KEYS   4096
+#define MAIL_FILE   "moemon_mail.dat"
+#define MAIL_MAGIC  "MOEMAIL1\n"
+struct MailRec
+{
+    uint8_t key[16];
+    uint8_t owner[16];        // SHA-256 of the owner's secret (all 0: no owner yet)
+    uint32_t expires;
+    uint8_t count;
+    uint16_t len[MAIL_ENTRIES];
+    uint8_t *data[MAIL_ENTRIES];
+};
+static struct MailRec *sMail[MAIL_KEYS];
+static int sMailDirty;
+static time_t sMailSaved;
+
+// Mail trades' escrow (ESC_*): two deposits per trade, kept until each side has taken what it's owed
+#define ESC_RECS   2048
+#define ESC_FILE   "moemon_escrow.dat"
+#define ESC_MAGIC  "MOEESC1\n"
+#define ESC_KEEP_DAYS 365   // (a deposit nobody came back for stays this long: a POKéMON is never dropped soon)
+struct EscRec
+{
+    uint8_t key[16];
+    uint8_t lock[2][16];      // SHA-256 of each side's secret (all 0: not set yet)
+    uint8_t state;            // ESC_HAVE0 | ESC_HAVE1 | ESC_TAKEN0 | ESC_TAKEN1 | ESC_CLOSED
+    uint32_t expires;
+    uint16_t len[2];
+    uint8_t *data[2];
+};
+static struct EscRec *sEsc[ESC_RECS];
+static int sEscDirty;
+
+#define PIPE_HOSTS 512
+#define PIPE_CHANS 512
+static struct { uint8_t id[16]; int conn; } sPipeHost[PIPE_HOSTS];   // conn -1: free
+static struct { uint16_t ch; int host, phone; } sPipeChan[PIPE_CHANS];   // ch 0: free
+static uint16_t sNextChan = 1;
+static int sPipeInit;
+static void PipeDropConn(int c);
+static int UsesPipes(int c);
+
 int MPServer_IsRunning(void)
 {
     return sListen != MP_BADSOCK;
@@ -465,6 +511,625 @@ static void HandleBlob(int c, const uint8_t *data, uint16_t len)
     BroadcastWithId(sc->room, c, MPMSG_S_BLOB, (uint8_t)sc->slot, data, len);
 }
 
+// --------------------------------------------------------------------------------------------------- the mailbox
+
+static void MailFree(int i)
+{
+    int k;
+    if (!sMail[i])
+        return;
+    for (k = 0; k < sMail[i]->count; k++)
+        free(sMail[i]->data[k]);
+    free(sMail[i]);
+    sMail[i] = NULL;
+    sMailDirty = 1;
+}
+
+static int MailFind(const uint8_t *key, int create)
+{
+    int i, freeSlot = -1;
+    time_t now = time(NULL);
+    for (i = 0; i < MAIL_KEYS; i++)
+    {
+        if (sMail[i] && (time_t)sMail[i]->expires < now)
+            MailFree(i);
+        if (sMail[i] && memcmp(sMail[i]->key, key, 16) == 0)
+            return i;
+        if (!sMail[i] && freeSlot < 0)
+            freeSlot = i;
+    }
+    if (!create || freeSlot < 0)
+        return -1;
+    sMail[freeSlot] = (struct MailRec *)calloc(1, sizeof(struct MailRec));
+    if (!sMail[freeSlot])
+        return -1;
+    memcpy(sMail[freeSlot]->key, key, 16);
+    return freeSlot;
+}
+
+static void MailSave(void)
+{
+    FILE *f = fopen(MAIL_FILE ".tmp", "wb");
+    int i, k;
+    if (!f)
+        return;
+    fputs(MAIL_MAGIC, f);
+    for (i = 0; i < MAIL_KEYS; i++)
+    {
+        struct MailRec *m = sMail[i];
+        if (!m)
+            continue;
+        fwrite(m->key, 1, 16, f);
+        fwrite(m->owner, 1, 16, f);
+        fwrite(&m->expires, 4, 1, f);
+        fputc(m->count, f);
+        for (k = 0; k < m->count; k++)
+        {
+            fwrite(&m->len[k], 2, 1, f);
+            fwrite(m->data[k], 1, m->len[k], f);
+        }
+    }
+    fclose(f);
+    remove(MAIL_FILE);
+    rename(MAIL_FILE ".tmp", MAIL_FILE);
+    sMailDirty = 0;
+}
+
+static void MailLoad(void)
+{
+    FILE *f = fopen(MAIL_FILE, "rb");
+    char magic[16] = {0};
+    int i = 0;
+    if (!f)
+        return;
+    if (fread(magic, 1, strlen(MAIL_MAGIC), f) == strlen(MAIL_MAGIC) && memcmp(magic, MAIL_MAGIC, strlen(MAIL_MAGIC)) == 0)
+    {
+        while (i < MAIL_KEYS)
+        {
+            struct MailRec *m = (struct MailRec *)calloc(1, sizeof(*m));
+            int k, ok = 1, c;
+            if (!m || fread(m->key, 1, 16, f) != 16 || fread(m->owner, 1, 16, f) != 16 || fread(&m->expires, 4, 1, f) != 1
+             || (c = fgetc(f)) == EOF || c > MAIL_ENTRIES)
+            {
+                free(m);
+                break;
+            }
+            m->count = (uint8_t)c;
+            for (k = 0; k < m->count && ok; k++)
+            {
+                ok = fread(&m->len[k], 2, 1, f) == 1 && m->len[k] <= MAIL_ENTRY_MAX
+                  && (m->data[k] = (uint8_t *)malloc(m->len[k] ? m->len[k] : 1)) != NULL
+                  && fread(m->data[k], 1, m->len[k], f) == m->len[k];
+            }
+            if (!ok)
+            {
+                for (c = 0; c < k; c++)
+                    free(m->data[c]);
+                free(m);
+                break;
+            }
+            sMail[i++] = m;
+        }
+    }
+    fclose(f);
+}
+
+static void EscSave(void);
+static void EscHandle(int c, const uint8_t *data, uint16_t len);
+
+static void MailSaveSoon(time_t now)
+{
+    if (sMailDirty && now - sMailSaved >= 5)
+    {
+        sMailSaved = now;
+        MailSave();
+    }
+    if (sEscDirty)
+        EscSave();   // (at once: a deposit is a POKéMON)
+}
+
+static void MailAnswer(int c, uint8_t op, const uint8_t *key, int i)
+{
+    int n = 0, k;
+    sOut[n++] = op;
+    memcpy(sOut + n, key, 16);
+    n += 16;
+    if (op == MAIL_GET)
+    {
+        struct MailRec *m = i >= 0 ? sMail[i] : NULL;
+        int count = 0, at = n++;
+        for (k = 0; m && k < m->count; k++)
+        {
+            if (n + 2 + m->len[k] > MP_MAX_MSG - 8)
+                break;   // (what fits: newest entries are last, the oldest go first in ADD)
+            sOut[n++] = m->len[k] & 0xFF;
+            sOut[n++] = m->len[k] >> 8;
+            memcpy(sOut + n, m->data[k], m->len[k]);
+            n += m->len[k];
+            count++;
+        }
+        sOut[at] = (uint8_t)count;
+    }
+    SendTo(c, MPMSG_S_MAIL, sOut, (uint16_t)n);
+}
+
+// Does SECRET open the record's owner lock (or has it none yet)?
+static int MailOwner(struct MailRec *m, const uint8_t *secret)
+{
+    static const uint8_t zero[16];
+    uint8_t h[32];
+    MPNet_Sha256(secret, 16, h);
+    if (memcmp(m->owner, zero, 16) == 0)
+    {
+        memcpy(m->owner, h, 16);
+        return 1;
+    }
+    return memcmp(m->owner, h, 16) == 0;
+}
+
+// PUT: key, secret, u32 ttl, u16 len, data; ADD: key, u32 ttl, u16 len, data; GET: key; DEL: key, secret;
+// TAKE: key, secret, u8 index
+static void MailHandle(int c, const uint8_t *data, uint16_t len)
+{
+    uint8_t op;
+    const uint8_t *key;
+    int i, k;
+    if (len < 17)
+        return;
+    op = data[0];
+    key = data + 1;
+    if (op >= ESC_PUT && op <= ESC_LOOK)
+    {
+        EscHandle(c, data, len);
+        return;
+    }
+    switch (op)
+    {
+    case MAIL_PUT:
+    case MAIL_ADD:
+    {
+        int at = op == MAIL_PUT ? 33 : 17;
+        uint32_t ttl;
+        uint16_t n;
+        uint8_t *copy;
+        if (len < at + 6)
+            return;
+        ttl = data[at] | (data[at + 1] << 8) | (data[at + 2] << 16) | ((uint32_t)data[at + 3] << 24);
+        n = data[at + 4] | (data[at + 5] << 8);
+        if (n > MAIL_ENTRY_MAX || len < at + 6 + n)
+            return;
+        i = MailFind(key, 1);
+        if (i < 0)
+            return;
+        if (op == MAIL_PUT && !MailOwner(sMail[i], data + 17))
+        {
+            MailAnswer(c, MAIL_DENIED, key, i);
+            return;
+        }
+        if (op == MAIL_PUT)
+        {
+            for (k = 0; k < sMail[i]->count; k++)
+                free(sMail[i]->data[k]);
+            sMail[i]->count = 0;
+        }
+        else if (sMail[i]->count == MAIL_ENTRIES)
+        {
+            free(sMail[i]->data[0]);
+            memmove(&sMail[i]->data[0], &sMail[i]->data[1], (MAIL_ENTRIES - 1) * sizeof(sMail[i]->data[0]));
+            memmove(&sMail[i]->len[0], &sMail[i]->len[1], (MAIL_ENTRIES - 1) * sizeof(sMail[i]->len[0]));
+            sMail[i]->count--;
+        }
+        copy = (uint8_t *)malloc(n ? n : 1);
+        if (!copy)
+            return;
+        memcpy(copy, data + at + 6, n);
+        sMail[i]->data[sMail[i]->count] = copy;
+        sMail[i]->len[sMail[i]->count++] = n;
+        ttl = ttl > 30 * 86400 ? 30 * 86400 : ttl;
+        if ((uint32_t)(time(NULL) + ttl) > sMail[i]->expires || op == MAIL_PUT)
+            sMail[i]->expires = (uint32_t)(time(NULL) + ttl);
+        sMailDirty = 1;
+        MailAnswer(c, op, key, i);
+        break;
+    }
+    case MAIL_GET:
+        MailAnswer(c, MAIL_GET, key, MailFind(key, 0));
+        break;
+    case MAIL_DEL:
+    case MAIL_TAKE:
+        if (len < 33)
+            return;
+        i = MailFind(key, 0);
+        if (i < 0)
+        {
+            MailAnswer(c, op, key, -1);
+            return;
+        }
+        if (!MailOwner(sMail[i], data + 17))
+        {
+            MailAnswer(c, MAIL_DENIED, key, i);
+            return;
+        }
+        if (op == MAIL_DEL)
+            MailFree(i);
+        else if (len >= 34 && data[33] < sMail[i]->count)
+        {
+            k = data[33];
+            free(sMail[i]->data[k]);
+            memmove(&sMail[i]->data[k], &sMail[i]->data[k + 1], (sMail[i]->count - k - 1) * sizeof(sMail[i]->data[0]));
+            memmove(&sMail[i]->len[k], &sMail[i]->len[k + 1], (sMail[i]->count - k - 1) * sizeof(sMail[i]->len[0]));
+            sMail[i]->count--;
+            sMailDirty = 1;
+        }
+        MailAnswer(c, op, key, i);
+        break;
+    }
+}
+
+
+// ---------------------------------------------------------------------------------------------------- the escrow
+
+static void EscFree(int i)
+{
+    if (!sEsc[i])
+        return;
+    free(sEsc[i]->data[0]);
+    free(sEsc[i]->data[1]);
+    free(sEsc[i]);
+    sEsc[i] = NULL;
+    sEscDirty = 1;
+}
+
+static int EscFind(const uint8_t *key, int create)
+{
+    int i, freeSlot = -1;
+    time_t now = time(NULL);
+    for (i = 0; i < ESC_RECS; i++)
+    {
+        if (sEsc[i] && (time_t)sEsc[i]->expires < now)
+            EscFree(i);
+        if (sEsc[i] && memcmp(sEsc[i]->key, key, 16) == 0)
+            return i;
+        if (!sEsc[i] && freeSlot < 0)
+            freeSlot = i;
+    }
+    if (!create || freeSlot < 0)
+        return -1;
+    sEsc[freeSlot] = (struct EscRec *)calloc(1, sizeof(struct EscRec));
+    if (!sEsc[freeSlot])
+        return -1;
+    memcpy(sEsc[freeSlot]->key, key, 16);
+    sEsc[freeSlot]->expires = (uint32_t)(now + ESC_KEEP_DAYS * 86400);
+    sEscDirty = 1;
+    return freeSlot;
+}
+
+static void EscSave(void)
+{
+    FILE *f = fopen(ESC_FILE ".tmp", "wb");
+    int i, k;
+    if (!f)
+        return;
+    fputs(ESC_MAGIC, f);
+    for (i = 0; i < ESC_RECS; i++)
+    {
+        struct EscRec *e = sEsc[i];
+        if (!e)
+            continue;
+        fwrite(e->key, 1, 16, f);
+        fwrite(e->lock, 1, 32, f);
+        fputc(e->state, f);
+        fwrite(&e->expires, 4, 1, f);
+        for (k = 0; k < 2; k++)
+        {
+            fwrite(&e->len[k], 2, 1, f);
+            if (e->len[k])
+                fwrite(e->data[k], 1, e->len[k], f);
+        }
+    }
+    fflush(f);
+    fclose(f);
+    remove(ESC_FILE);
+    rename(ESC_FILE ".tmp", ESC_FILE);
+    sEscDirty = 0;
+}
+
+static void EscLoad(void)
+{
+    FILE *f = fopen(ESC_FILE, "rb");
+    char magic[16] = {0};
+    int i = 0, k, c;
+    if (!f)
+        return;
+    if (fread(magic, 1, strlen(ESC_MAGIC), f) == strlen(ESC_MAGIC) && memcmp(magic, ESC_MAGIC, strlen(ESC_MAGIC)) == 0)
+    {
+        while (i < ESC_RECS)
+        {
+            struct EscRec *e = (struct EscRec *)calloc(1, sizeof(*e));
+            int ok = e && fread(e->key, 1, 16, f) == 16 && fread(e->lock, 1, 32, f) == 32 && (c = fgetc(f)) != EOF
+                  && fread(&e->expires, 4, 1, f) == 1;
+            if (ok)
+                e->state = (uint8_t)c;
+            for (k = 0; k < 2 && ok; k++)
+            {
+                ok = fread(&e->len[k], 2, 1, f) == 1 && e->len[k] <= ESC_DATA_MAX;
+                if (ok && e->len[k])
+                    ok = (e->data[k] = (uint8_t *)malloc(e->len[k])) != NULL && fread(e->data[k], 1, e->len[k], f) == e->len[k];
+            }
+            if (!ok)
+            {
+                if (e)
+                {
+                    free(e->data[0]);
+                    free(e->data[1]);
+                }
+                free(e);
+                break;
+            }
+            sEsc[i++] = e;
+        }
+    }
+    fclose(f);
+}
+
+// Does SECRET open SIDE's lock (setting it when there's none yet)?
+static int EscLock(struct EscRec *e, int side, const uint8_t *secret)
+{
+    static const uint8_t zero[16];
+    uint8_t h[32];
+    MPNet_Sha256(secret, 16, h);
+    if (memcmp(e->lock[side], zero, 16) == 0)
+    {
+        memcpy(e->lock[side], h, 16);
+        sEscDirty = 1;
+        return 1;
+    }
+    return memcmp(e->lock[side], h, 16) == 0;
+}
+
+static void EscAnswer(int c, uint8_t op, const uint8_t *key, uint8_t state, const uint8_t *data, uint16_t len)
+{
+    int n = 0;
+    if (sEscDirty)
+        EscSave();   // (on disk before anyone hears of it: a deposit is a POKéMON)
+    sOut[n++] = op;
+    memcpy(sOut + n, key, 16);
+    n += 16;
+    sOut[n++] = state;
+    sOut[n++] = len & 0xFF;
+    sOut[n++] = len >> 8;
+    if (len)
+        memcpy(sOut + n, data, len);
+    n += len;
+    SendTo(c, MPMSG_S_MAIL, sOut, (uint16_t)n);
+}
+
+// The two-sided escrow (mp_net.h ESC_*). Each answer says the record's state, so a side that asks again (a game that
+// stopped between sending and hearing back) learns where it stands: every op can be repeated safely.
+static void EscHandle(int c, const uint8_t *data, uint16_t len)
+{
+    uint8_t op = data[0], side;
+    const uint8_t *key = data + 1, *secret;
+    struct EscRec *e;
+    int i, both;
+    if (op == ESC_LOOK)
+    {
+        i = EscFind(key, 0);
+        EscAnswer(c, op, key, i < 0 ? 0 : sEsc[i]->state, NULL, 0);
+        return;
+    }
+    if (len < 34 || data[17] > 1)
+        return;
+    side = data[17];
+    secret = data + 18;
+    i = EscFind(key, op == ESC_PUT || op == ESC_CANCEL);
+    if (i < 0)
+    {
+        EscAnswer(c, op, key, 0, NULL, 0);
+        return;
+    }
+    e = sEsc[i];
+    if (!EscLock(e, side, secret))
+    {
+        EscAnswer(c, MAIL_DENIED, key, e->state, NULL, 0);
+        return;
+    }
+    both = (e->state & (ESC_HAVE0 | ESC_HAVE1)) == (ESC_HAVE0 | ESC_HAVE1);
+    switch (op)
+    {
+    case ESC_PUT:
+    {
+        uint16_t n;
+        if (len < 36)
+            return;
+        n = data[34] | (data[35] << 8);
+        if (n == 0 || n > ESC_DATA_MAX || len < 36 + n)
+            return;
+        if (!(e->state & ESC_CLOSED) && !(e->state & (ESC_HAVE0 << side)))
+        {
+            e->data[side] = (uint8_t *)malloc(n);
+            if (!e->data[side])
+                return;
+            memcpy(e->data[side], data + 36, n);
+            e->len[side] = n;
+            e->state |= ESC_HAVE0 << side;
+            sEscDirty = 1;
+        }
+        EscAnswer(c, op, key, e->state, NULL, 0);   // (closed: nothing kept, the depositor keeps its own)
+        break;
+    }
+    case ESC_TAKE:
+        if (both && !(e->state & ESC_CLOSED))
+        {
+            if (!(e->state & (ESC_TAKEN0 << side)))
+            {
+                e->state |= ESC_TAKEN0 << side;
+                if ((e->state & (ESC_TAKEN0 | ESC_TAKEN1)) == (ESC_TAKEN0 | ESC_TAKEN1))
+                    e->expires = (uint32_t)(time(NULL) + 30 * 86400);   // (both done: kept a while for late repeats)
+                sEscDirty = 1;
+            }
+            EscAnswer(c, op, key, e->state, e->data[side ^ 1], e->len[side ^ 1]);
+        }
+        else
+            EscAnswer(c, op, key, e->state, NULL, 0);
+        break;
+    case ESC_CANCEL:
+        if (!both || (e->state & ESC_CLOSED))
+        {
+            if (!(e->state & ESC_CLOSED))
+            {
+                e->state |= ESC_CLOSED;
+                if (!(e->state & (ESC_HAVE0 | ESC_HAVE1)))
+                    e->expires = (uint32_t)(time(NULL) + 30 * 86400);   // (a tombstone: only that it's off)
+                sEscDirty = 1;
+            }
+            EscAnswer(c, op, key, e->state, e->data[side], e->len[side]);
+        }
+        else
+            EscAnswer(c, op, key, e->state, NULL, 0);   // (both are in: the trade stands)
+        break;
+    }
+}
+
+// ------------------------------------------------------------------------------------------------------ pipes
+
+static void PipeInit(void)
+{
+    int i;
+    if (sPipeInit)
+        return;
+    sPipeInit = 1;
+    for (i = 0; i < PIPE_HOSTS; i++)
+        sPipeHost[i].conn = -1;
+}
+
+static int UsesPipes(int c)
+{
+    int i;
+    PipeInit();
+    for (i = 0; i < PIPE_HOSTS; i++)
+        if (sPipeHost[i].conn == c)
+            return 1;
+    for (i = 0; i < PIPE_CHANS; i++)
+        if (sPipeChan[i].ch && (sPipeChan[i].host == c || sPipeChan[i].phone == c))
+            return 1;
+    return 0;
+}
+
+static void PipeSendOp(int c, uint8_t op, uint16_t ch, const uint8_t *extra, uint16_t n)
+{
+    sOut[0] = op;
+    sOut[1] = ch & 0xFF;
+    sOut[2] = ch >> 8;
+    if (n)
+        memcpy(sOut + 3, extra, n);
+    SendTo(c, MPMSG_S_PIPE, sOut, (uint16_t)(3 + n));
+}
+
+static void PipeClose(int i, int except)
+{
+    if (sPipeChan[i].host != except && sPipeChan[i].host >= 0 && sConns[sPipeChan[i].host])
+        PipeSendOp(sPipeChan[i].host, PIPE_CLOSED, sPipeChan[i].ch, NULL, 0);
+    if (sPipeChan[i].phone != except && sPipeChan[i].phone >= 0 && sConns[sPipeChan[i].phone])
+        PipeSendOp(sPipeChan[i].phone, PIPE_CLOSED, sPipeChan[i].ch, NULL, 0);
+    sPipeChan[i].ch = 0;
+}
+
+static void PipeDropConn(int c)
+{
+    int i;
+    PipeInit();
+    for (i = 0; i < PIPE_HOSTS; i++)
+        if (sPipeHost[i].conn == c)
+            sPipeHost[i].conn = -1;
+    for (i = 0; i < PIPE_CHANS; i++)
+        if (sPipeChan[i].ch && (sPipeChan[i].host == c || sPipeChan[i].phone == c))
+            PipeClose(i, c);
+}
+
+static void PipeHandle(int c, const uint8_t *data, uint16_t len)
+{
+    int i, free1 = -1;
+    PipeInit();
+    if (len < 1)
+        return;
+    switch (data[0])
+    {
+    case PIPE_HOST:
+        if (len < 17)
+            return;
+        for (i = 0; i < PIPE_HOSTS; i++)
+        {
+            if (sPipeHost[i].conn >= 0 && memcmp(sPipeHost[i].id, data + 1, 16) == 0)
+            {
+                sPipeHost[i].conn = c;   // (the game again, on a new connection)
+                return;
+            }
+            if (sPipeHost[i].conn < 0 && free1 < 0)
+                free1 = i;
+        }
+        if (free1 >= 0)
+        {
+            memcpy(sPipeHost[free1].id, data + 1, 16);
+            sPipeHost[free1].conn = c;
+        }
+        break;
+    case PIPE_UNHOST:
+        if (len < 17)
+            return;
+        for (i = 0; i < PIPE_HOSTS; i++)
+            if (sPipeHost[i].conn == c && memcmp(sPipeHost[i].id, data + 1, 16) == 0)
+                sPipeHost[i].conn = -1;
+        break;
+    case PIPE_JOIN:
+    {
+        int host = -1;
+        if (len < 17)
+            return;
+        for (i = 0; i < PIPE_HOSTS; i++)
+            if (sPipeHost[i].conn >= 0 && sConns[sPipeHost[i].conn] && memcmp(sPipeHost[i].id, data + 1, 16) == 0)
+                host = sPipeHost[i].conn;
+        for (i = 0; i < PIPE_CHANS && free1 < 0; i++)
+            if (!sPipeChan[i].ch)
+                free1 = i;
+        if (host < 0 || free1 < 0)
+        {
+            sOut[0] = PIPE_NOHOST;
+            memcpy(sOut + 1, data + 1, 16);
+            SendTo(c, MPMSG_S_PIPE, sOut, 17);
+            return;
+        }
+        if (++sNextChan == 0)
+            sNextChan = 1;
+        sPipeChan[free1].ch = sNextChan;
+        sPipeChan[free1].host = host;
+        sPipeChan[free1].phone = c;
+        PipeSendOp(host, PIPE_JOINED, sNextChan, data + 1, 16);
+        PipeSendOp(c, PIPE_OPENED, sNextChan, NULL, 0);
+        break;
+    }
+    case PIPE_DATA:
+    case PIPE_CLOSE:
+    {
+        uint16_t ch;
+        if (len < 3)
+            return;
+        ch = data[1] | (data[2] << 8);
+        for (i = 0; i < PIPE_CHANS; i++)
+            if (sPipeChan[i].ch == ch && (sPipeChan[i].host == c || sPipeChan[i].phone == c))
+            {
+                if (data[0] == PIPE_CLOSE)
+                    PipeClose(i, c);
+                else
+                    PipeSendOp(sPipeChan[i].host == c ? sPipeChan[i].phone : sPipeChan[i].host, PIPE_DATA, ch, data + 3,
+                               (uint16_t)(len - 3));
+                break;
+            }
+        break;
+    }
+    }
+}
+
 static void HandleMessage(int c, uint8_t type, uint8_t *data, uint16_t len)
 {
     struct SrvConn *sc = sConns[c];
@@ -580,6 +1245,12 @@ static void HandleMessage(int c, uint8_t type, uint8_t *data, uint16_t len)
     case MPMSG_C_PING:
         SendTo(c, MPMSG_S_PONG, data, len);
         break;
+    case MPMSG_C_MAIL:
+        MailHandle(c, data, len);
+        break;
+    case MPMSG_C_PIPE:
+        PipeHandle(c, data, len);
+        break;
     case MPMSG_C_STORE:
         if (r && sc->helloDone)
         {
@@ -601,6 +1272,7 @@ static void Drop(int c)
     struct SrvConn *sc = sConns[c];
     if (!sc)
         return;
+    PipeDropConn(c);
     LeaveRoom(c);
     MPConn_Reset(&sc->conn);
     free(sc->conn.send);
@@ -755,6 +1427,8 @@ static mp_sock OpenListen(int port)
 
 int MPServer_Start(int port, int lanDiscovery)
 {
+    MailLoad();
+    EscLoad();
     int i;
 
     MPNet_Init();
@@ -878,7 +1552,7 @@ void MPServer_Poll(void)
             continue;
         }
         if (now - sc->lastMsg > IDLE_TIMEOUT_S
-         || (sc->room < 0 && now - sc->connectedAt > LOBBY_TIMEOUT_S))
+         || (sc->room < 0 && now - sc->connectedAt > LOBBY_TIMEOUT_S && !UsesPipes(i)))
         {
             MPNet_Log("%s timed out", sc->addr);
             Drop(i);
@@ -888,6 +1562,7 @@ void MPServer_Poll(void)
     for (i = 0; i < MAX_CONNS; i++)
         if (sConns[i] && MPConn_Flush(&sConns[i]->conn) < 0)
             Drop(i);
+    MailSaveSoon(now);
 }
 
 void MPServer_Wait(int ms)

@@ -63,11 +63,27 @@ public class MainActivity extends Activity {
         }
     }
 
+    private StepCounter steps;
+
     @Override
     protected void onResume() {
         super.onResume();
         if (view != null) {
             view.app.resume();
+            // the walk's steps while the app is open; StepJob reads them when it's closed
+            steps = new StepCounter(this, view.app);
+            steps.start(null);
+            StepJob.schedule(this);
+            if (android.os.Build.VERSION.SDK_INT >= 33 && view.app.walk() != null
+                    && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                    != android.content.pm.PackageManager.PERMISSION_GRANTED
+                    && !getSharedPreferences("moemon", 0).getBoolean("askedNotif", false)) {
+                getSharedPreferences("moemon", 0).edit().putBoolean("askedNotif", true).apply();
+                requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 8);
+            }
+            if (view.overPage() == null && TodayPage.due(view)) {
+                view.showOver(new TodayPage(view));
+            }
         }
     }
 
@@ -75,8 +91,22 @@ public class MainActivity extends Activity {
     protected void onPause() {
         if (view != null) {
             view.app.pause();
+            WalkWidget.updateAll(this, view.app);
+        }
+        if (steps != null) {
+            steps.stop();
+            steps = null;
         }
         super.onPause();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int request, String[] permissions, int[] results) {
+        super.onRequestPermissionsResult(request, permissions, results);
+        if (request == 7 && view != null && steps != null) {
+            steps.start(null);   // (allowed now: count from here)
+            view.invalidate();
+        }
     }
 
     @Override

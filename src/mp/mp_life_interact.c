@@ -634,3 +634,66 @@ void MP_LifeInteract_Debug(s8 verb)
     gTasks[taskId].data[2] = verb;
     gTasks[taskId].data[0] = 2;
 }
+
+// ------------------------------------------------------------------------------------- Moemon Co-op: the phone
+// A kind act from the phone (docs/COMPANION_APP.md "Pillar 3"): a pet or a BERRY, carried out when the game is free
+// with the Garden's own rules (its feelings and bond with its Trainer, its tastes, its hunger: a real moment, with the
+// Friendship that brings, only when it was actually looking for food). OUT gets the line that says what happened (game
+// text). VERB: 0 pet, 1 a BERRY (ITEM, from the BAG). FALSE: no BERRY like that in the BAG.
+bool8 MP_Life_PhoneVerb(struct BoxPokemon *box, u8 verb, u16 item, u8 *out)
+{
+    static const u8 sPetPhone[] = _("{STR_VAR_1} was happy to be thought of.");
+    struct MpLifeRec *rec = MP_Life_Get(box, TRUE);
+    u32 owner = MP_Life_LocalTrainerKey();
+    const u8 *line;
+    GetBoxMonData(box, MON_DATA_NICKNAME, gStringVar1);
+    gStringVar1[POKEMON_NAME_LENGTH] = EOS;
+    if (rec == NULL)
+        return FALSE;
+    if (verb == 0)
+    {
+        MP_Life_Feel(rec, rec->cur[LIFE_WARM] >= 100 ? EMO_AFFECTION : EMO_CALM, 15);
+        OwnerBond(rec, 1, rec->cur[LIFE_WARM] >= 100 ? 1 : 0, FALSE);
+        line = rec->cur[LIFE_WARM] < 80 ? sText_Pet_Aloof : sPetPhone;
+    }
+    else
+    {
+        s8 taste;
+        const struct Berry *b;
+        s32 score;
+        u8 type = ItemIdToBerryType(item);
+        if (!CheckBagHasItem(item, 1) || type == 0 || GetItemPocket(item) != POCKET_BERRIES)
+            return FALSE;
+        b = GetBerryInfo(type);
+        score = b->spicy * rec->taste[FLAVOR_SPICY] + b->dry * rec->taste[FLAVOR_DRY] + b->sweet * rec->taste[FLAVOR_SWEET]
+              + b->bitter * rec->taste[FLAVOR_BITTER] + b->sour * rec->taste[FLAVOR_SOUR];
+        taste = score > 300 ? 1 : score < -300 ? -1 : 0;
+        CopyItemName(item, gStringVar2);
+        if (rec->need[NEED_HUNGER] < 60)
+            line = sText_Feed_Full;   // (it stays in the BAG)
+        else
+        {
+            RemoveBagItem(item, 1);
+            MP_Life_Reveal(rec, taste > 0 ? LIFE_FACT_LIKES : taste < 0 ? LIFE_FACT_DISLIKES : 0xFF);
+            if (rec->need[NEED_HUNGER] >= 180)
+            {
+                u8 strength = 100 + (rec->need[NEED_HUNGER] - 150) / 2 + (taste > 0 ? 30 : 0);
+                MP_Life_Satisfy(rec, NEED_HUNGER, 200);
+                MP_Life_Feel(rec, EMO_JOY, taste < 0 ? 10 : 30);
+                if (taste >= 0)
+                    MP_Life_Remember(rec, MEM_FED, strength, TIER_PART, owner, item);
+                OwnerBond(rec, 2, 2, TRUE);
+                line = taste > 0 ? sText_Feed_Favorite : taste < 0 ? sText_Feed_Disliked : sText_Feed_Hungry;
+            }
+            else
+            {
+                MP_Life_Satisfy(rec, NEED_HUNGER, 80);
+                MP_Life_Feel(rec, EMO_JOY, taste < 0 ? 0 : 10);
+                OwnerBond(rec, 0, 0, FALSE);
+                line = taste < 0 ? sText_Feed_Disliked : sText_Feed_Snack;
+            }
+        }
+    }
+    StringExpandPlaceholders(out, line);
+    return TRUE;
+}

@@ -81,6 +81,17 @@ public class ScreensTest {
                 + "\",\"phone\":\"00112233445566778899AABBCCDDEEFF\",\"key\":\"" + "00".repeat(32)
                 + "\",\"name\":\"\",\"host\":\"\",\"port\":47610}]}");
 
+        // a POKéMON out walking (for WALK's pictures): the snapshot's first box POKéMON
+        JSONObject walkMon = file.getJSONObject("snap").getJSONArray("boxes").getJSONObject(0).getJSONArray("m").getJSONObject(0);
+        java.time.LocalDate today = java.time.LocalDate.now();
+        write(new File(dir, "walk_" + id + ".json"), new JSONObject().put("game", new JSONObject().put("id", 5)
+                .put("sent", System.currentTimeMillis() / 1000 - 86400).put("cap", 20).put("mon", walkMon)
+                .put("wild", new org.json.JSONArray("[[286,2,4]]")).put("finds", new org.json.JSONArray("[13]"))
+                .put("rules", new org.json.JSONArray("[10000,2000,3000,2500,3]")))
+                .put("days", new JSONObject().put(today.minusDays(1).toString(), 8200).put(today.toString(), 4321))
+                .put("finds", new org.json.JSONArray("[13,13]")).put("met", new org.json.JSONArray().put(
+                        new org.json.JSONArray().put(286).put(3).put(1).put(today.toString())))
+                .put("caught", new org.json.JSONArray("[[286,3,4]]")).put("lastCounter", 100).toString());
         Companion app = Companion.get(ctx);
         JSONObject spawns = new JSONObject(res("spawns.json"));
         app.spawns.put("0,16", spawns);
@@ -89,13 +100,24 @@ public class ScreensTest {
         assertTrue(v.width() >= 240);
 
         // a POKéMON chosen, then a move waiting for the game (dashed)
-        int x0 = (v.width() - 160) / 2 + 8, y0 = GameView.TOP + 4 + 16;
-        tap(v, x0 + 12, y0 + 12);
+        // (the box at its scale: as large as the screen allows in whole screen pixels, BoxesPage.bk)
+        float bk = Math.max(1, Math.min(2, (float) Math.floor((v.width() - 28) * v.pixelScale() / 160f) / v.pixelScale()));
+        int wpW = Math.round(160 * bk), wpH = Math.round(144 * bk), cl = (int) (24 * bk);
+        int x0 = (v.width() - wpW) / 2 + (int) (8 * bk), y0 = GameView.TOP + 4 + (int) (16 * bk);
+        tap(v, x0 + cl / 2, y0 + cl / 2);
         shot(v, "boxes_chosen");
         Model m = app.model();
         JSONObject from = Model.boxPlace(0, 0), to = Model.boxPlace(0, 29);
         app.client.orders.add(Model.move(from, m.at(from), to, null));
         shot(v, "boxes_waiting");
+        // ALL BOXES: every box at once, the party pinned on top; SELECT two and they're outlined
+        tap(v, v.width() - 20, GameView.TOP + 4 + wpH + 6 + 2);
+        shot(v, "boxes_all");
+        tap(v, v.width() - 15, GameView.TOP + 8);
+        tap(v, 6 + 7 + 19 + 9, GameView.TOP + 62 + 14 + 9);
+        tap(v, 6 + 7 + 38 + 9, GameView.TOP + 62 + 14 + 9);
+        shot(v, "boxes_select");
+        tap(v, 12, GameView.TOP + 8);
 
         String[] names = {"boxes", "party", "bag", "dex", "spawns"};
         for (int i = 1; i < names.length; i++) {
@@ -104,8 +126,8 @@ public class ScreensTest {
         }
         // the summary's three pages, from the box's card
         v.select(0);
-        tap(v, x0 + 24 + 12, y0 + 12);
-        tap(v, 60, GameView.TOP + 4 + 144 + 6 + 36 + 22 + 20);
+        tap(v, x0 + cl + cl / 2, y0 + cl / 2);
+        tap(v, 60, GameView.TOP + 4 + wpH + 6 + 36 + 22 + 20);
         shot(v, "summary_info");
         tap(v, v.width() / 2, GameView.TOP + 112 + 8);
         shot(v, "summary_skills");
@@ -151,12 +173,152 @@ public class ScreensTest {
         shot(v, "box_list");
         v.showOver(null);
         devices(v, app);
+        // WALK: the walker, training and the Garden; a meeting; the day's report; the widget
+        v.select(6);
+        shot(v, "walk");
+        v.page(6).scrollTo(400);
+        shot(v, "walk_lower");
+        v.page(6).scrollTo(0);
+        v.showOver(new CatchPage(v, app.walk(), 286, 3));
+        shot(v, "walk_meet");
+        v.showOver(new TodayPage(v));
+        shot(v, "today");
+        v.showOver(null);
+        // FRIENDS: two friends, one online in a room with their party
+        String may = app.art.toHex("MAY"), wally = app.art.toHex("WALLY");
+        app.model().snap.put("friends", new JSONObject("{\"share\":0,\"srv\":\"127.0.0.1:1\",\"list\":[{\"id\":\"0102030405060708\","
+                + "\"key\":\"" + "11".repeat(32) + "\",\"pk\":\"" + "33".repeat(32) + "\",\"n\":\"" + may + "\",\"seen\":1},{\"id\":\"0807060504030201\",\"key\":\""
+                + "22".repeat(32) + "\",\"n\":\"" + wally + "\",\"seen\":1}]}"));
+        app.friends.put("0102030405060708", new JSONObject().put("n", may).put("t", System.currentTimeMillis() / 1000)
+                .put("sec", 3).put("do", "field").put("room", "MAYS ROOM").put("rkey", "00").put("srv", "")
+                .put("party", new org.json.JSONArray("[[25,20,0],[280,15,0],[0,0,1]]")));
+        app.friends.put("0807060504030201", new JSONObject().put("n", wally).put("t", System.currentTimeMillis() / 1000 - 7200));
+        app.friendsAt = System.currentTimeMillis();
+        // trades by mail: WALLY's offer, ours on offer to MAY, one done
+        long now = System.currentTimeMillis() / 1000;
+        java.util.List<JSONObject> offers = new java.util.ArrayList<>();
+        offers.add(new JSONObject().put("t", "AA".repeat(16)).put("from", "0807060504030201").put("n", wally)
+                .put("mon", new JSONObject().put("s", 283).put("l", 12).put("n", app.art.toHex("MUDKIP"))).put("want", 0)
+                .put("exp", now + 5 * 86400).put("esc", 0));
+        app.offers = offers;
+        app.model().snap.put("trades", new org.json.JSONArray()
+                .put(new JSONObject().put("t", "BB".repeat(16)).put("role", 0).put("st", "offered").put("want", 280).put("pn", may)
+                        .put("changed", now).put("mine", new JSONObject().put("s", 133).put("l", 18).put("n", app.art.toHex("EEVEE"))))
+                .put(new JSONObject().put("t", "CC".repeat(16)).put("role", 1).put("st", "done").put("shown", 0).put("pn", wally)
+                        .put("changed", now).put("mine", new JSONObject().put("s", 1).put("l", 20).put("n", app.art.toHex("BULBASAUR")))
+                        .put("theirs", new JSONObject().put("s", 4).put("l", 16).put("n", app.art.toHex("CHARMANDER")))));
+        v.select(7);
+        shot(v, "friends");
+        v.showOver(null);
+        // CARDS: TRIPLE TRIAD with the game's engine: the hub, a duel under way, a deck, a pack opened
+        StringBuilder owned = new StringBuilder();
+        for (int card = 1; card <= 60; card++) {
+            owned.append(card > 1 ? "," : "").append("[").append(card).append(",").append(card % 7 == 0 ? 2 : 1).append("]");
+        }
+        app.model().snap.put("tt", new JSONObject("{\"on\":1,\"day\":20395,\"region\":1,\"tier\":1,\"rules\":"
+                + (Tt.bit(Tt.RULE_OPEN) | Tt.bit(Tt.RULE_SAME)) + ",\"trade\":0,\"skill\":0,\"active\":0,\"rec\":[12,5,1],"
+                + "\"today\":{\"packs\":1,\"packsMax\":3,\"puzzles\":0,\"puzzlesMax\":1},\"packs\":[2,1,0,0,0],"
+                + "\"decks\":[{\"n\":\"CHOCOBO RUN\",\"c\":[1,2,3,4,5]},{\"n\":\"DECK 2\",\"c\":[0,0,0,0,0]},"
+                + "{\"n\":\"DECK 3\",\"c\":[0,0,0,0,0]},{\"n\":\"DECK 4\",\"c\":[0,0,0,0,0]},{\"n\":\"DECK 5\",\"c\":[0,0,0,0,0]},"
+                + "{\"n\":\"DECK 6\",\"c\":[0,0,0,0,0]}],\"owned\":[" + owned + "],\"seen\":[70,71,72]}"));
+        v.select(8);
+        shot(v, "cards");
+        TtDuelPage.Setup ds = new TtDuelPage.Setup();
+        ds.rules = Tt.bit(Tt.RULE_OPEN) | Tt.bit(Tt.RULE_SAME);
+        ds.seed = 12345;
+        ds.first = 0;
+        ds.level = 2;
+        ds.mine = new int[]{1, 2, 3, 4, 5};
+        ds.theirs = new int[]{6, 7, 8, 9, 10};
+        ds.who = "LASS  ***";
+        ds.moves = new org.json.JSONArray("[[0,4],[0,0],[1,8]]");
+        TtDuelPage duelPage = new TtDuelPage(v, ds);
+        v.showOver(duelPage);
+        duelPage.tap(0, 0);
+        shot(v, "cards_duel");
+        v.showOver(new TtDeckPage(v, 0));
+        shot(v, "cards_deck");
+        TtPackPage pack = new TtPackPage(v, 1, new int[]{11, 61, 25});
+        v.showOver(pack);
+        Thread.sleep(3200);
+        shot(v, "cards_pack");
+        v.showOver(null);
+        tcgScreens(v, app);
+        try (FileOutputStream o = new FileOutputStream(new File(new File(System.getProperty("screens.out", "build/screens")),
+                "widget.png"))) {
+            WalkWidget.picture(app).compress(Bitmap.CompressFormat.PNG, 100, o);
+        }
         // the menu, and pairing
         tap(v, v.width() - 10, 8);
         shot(v, "menu");
         v.back();
         v.showOver(new PairPage(v));
         shot(v, "pair");
+    }
+
+    /** CARDS, the POKéMON card game: the hub, a duel under way (a card up close, a target to choose), a deck, a booster */
+    static void tcgScreens(GameView v, Companion app) throws Exception {
+        int[] charmander = Tcg.namedDeck("CharmanderAndFriends"), squirtle = Tcg.namedDeck("SquirtleAndFriends");
+        java.util.Map<Integer, Integer> have = new java.util.TreeMap<>();
+        for (int id : charmander) {
+            have.merge(id, 1, Integer::sum);
+        }
+        for (int id = 8; id < 120; id += 3) {
+            have.merge(id, 1, Integer::sum);
+        }
+        StringBuilder owned = new StringBuilder(), deck = new StringBuilder();
+        for (java.util.Map.Entry<Integer, Integer> e : have.entrySet()) {
+            owned.append(owned.length() == 0 ? "" : ",").append("[").append(e.getKey()).append(",").append(e.getValue()).append("]");
+        }
+        for (int id : charmander) {
+            deck.append(deck.length() == 0 ? "" : ",").append(id);
+        }
+        StringBuilder empty = new StringBuilder();
+        for (int i = 0; i < 60; i++) {
+            empty.append(i == 0 ? "0" : ",0");
+        }
+        StringBuilder decks = new StringBuilder("{\"n\":\"EMBER FRIENDS\",\"ace\":" + charmander[59] + ",\"c\":[" + deck + "]}");
+        for (int i = 1; i < 8; i++) {
+            decks.append(",{\"n\":\"\",\"ace\":0,\"c\":[").append(empty).append("]}");
+        }
+        app.model().snap.put("tcg", new JSONObject("{\"on\":1,\"day\":20395,\"active\":0,\"skill\":12,\"rated\":4,\"badges\":3,"
+                + "\"wins\":7,\"today\":{\"packs\":1,\"packsMax\":3},\"packs\":[1,0,2,0,0,0,0,1,0,0,0],\"decks\":[" + decks
+                + "],\"owned\":[" + owned + "]}"));
+        CardsPage.showGame(1);
+        v.select(8);
+        shot(v, "cards_tcg");
+        v.page(8).scrollTo(420);
+        shot(v, "cards_tcg_more");
+        v.page(8).scrollTo(0);
+        TcgDuelPage.Setup s = new TcgDuelPage.Setup();
+        s.mine = charmander;
+        s.theirs = squirtle;
+        s.seed = 4242;
+        s.level = 2;
+        s.who = "BUG CATCHER  SKILLED";
+        TcgDuelPage duel = new TcgDuelPage(v, s);
+        v.showOver(duel);
+        duel.autoPlay(60);
+        shot(v, "tcg_duel");
+        duel.inspect(0, 0);
+        shot(v, "tcg_duel_card");
+        duel.inspect(0, -1);
+        duel.back();
+        if (duel.beginHand("ATTACH") || duel.beginHand("PLAY")) {
+            shot(v, "tcg_duel_target");
+        }
+        v.showOver(new TcgDeckPage(v, 0));
+        shot(v, "tcg_deck");
+        TcgPackPage pack = new TcgPackPage(v, 2, new int[]{8, 20, 33, 41, 50, 60, 77, 90, 3, 37}, 1 << 9 | 1 << 2);
+        v.showOver(pack);
+        Thread.sleep(4200);
+        shot(v, "tcg_pack");
+        v.showOver(new TcgBinderPage(v, 0, CardsPage.setName(0)));
+        shot(v, "tcg_binder");
+        v.showOver(new TcgCardPage(v, 37, 1, null));
+        shot(v, "tcg_card");
+        v.showOver(null);
+        CardsPage.showGame(0);
     }
 
     /** The DEVICE page's devices and apps, with the snapshot given all three devices, conditions and ribbons */

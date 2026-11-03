@@ -44,6 +44,10 @@ public final class MonCard {
         if (mon.optInt("sh") == 1) {
             art.text(c, "SHINY", tx + lw + 18, y + 16, 0xFFD89010, GameArt.SHADOW);
         }
+        if (mon.optInt("off") == 1) {
+            String o = "ON OFFER";
+            art.text(c, o, tx + lw + 18 + (mon.optInt("sh") == 1 ? art.width("SHINY") + 6 : 0), y + 16, 0xFFE07820, GameArt.SHADOW);
+        }
         art.text(c, art.speciesName(species), tx, y + 32, GameArt.GRAY_TEXT, GameArt.SHADOW);
         if (mon.has("hp")) {
             hp(c, art, tx, y + 50, mon.optInt("hp"), mon.optInt("mhp"));

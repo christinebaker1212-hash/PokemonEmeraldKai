@@ -4685,6 +4685,13 @@ static u8 CopyMonToPC(struct Pokemon *mon)
     return MON_CANT_GIVE;
 }
 
+// Moemon Co-op: into the PC's first free place from the box in use (what the phone's walk caught: MON_CANT_GIVE when
+// every box is full)
+u8 MP_CopyMonToPC(struct Pokemon *mon)
+{
+    return CopyMonToPC(mon);
+}
+
 u8 CalculatePlayerPartyCount(void)
 {
     gPlayerPartyCount = 0;
@@ -6958,19 +6965,27 @@ static const struct CompressedSpritePalette *MonSpritePalStruct(u16 species, u32
         return &gMonPaletteTable[species];
 }
 
-// Moemon Co-op: a box Pokémon's front palette as the game shows it (shiny, its Stadium hue), for the phone link
-// (mp_phone.c), and the species' own palette to compare with
+// Moemon Co-op: a box Pokémon's front palette (shiny, its Stadium hue), for the phone link (mp_phone.c), and the
+// species' own palette to compare with: always the MOéMON pictures' (the app draws those), whatever OPTIONS >
+// CREATURES says (the original POKéMON's palette on a MOéMON picture scrambled its colors)
 const u32 *MP_BoxMonFrontPal(struct BoxPokemon *box)
 {
     u16 species = GetBoxMonData(box, MON_DATA_SPECIES, 0);
     u32 otId = GetBoxMonData(box, MON_DATA_OT_ID, 0);
     u32 personality = GetBoxMonData(box, MON_DATA_PERSONALITY, 0);
-    return MP_Hue_Lz(MonSpritePal(species, otId, personality), species, MP_Hue_OfBoxMon(box));
+    const u32 *pal;
+    if (species > NUM_SPECIES)
+        pal = gMonPaletteTable_Moe[SPECIES_NONE].data;
+    else if (GET_SHINY_VALUE(otId, personality) < SHINY_ODDS)
+        pal = gMonShinyPaletteTable_Moe[species].data;
+    else
+        pal = gMonPaletteTable_Moe[species].data;
+    return MP_Hue_LzMoe(pal, species, MP_Hue_OfBoxMon(box));
 }
 
 const u32 *MP_SpeciesFrontPal(u16 species)
 {
-    return gMonPaletteTable[species > NUM_SPECIES ? SPECIES_NONE : species].data;
+    return gMonPaletteTable_Moe[species > NUM_SPECIES ? SPECIES_NONE : species].data;
 }
 
 // Moemon Co-op: a nicknamed Pokémon's palette is turned to its Stadium hue (mp_hue.c)

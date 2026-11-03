@@ -1682,3 +1682,18 @@ void MP_Events_DebugGoals(void)
         }
     }
 }
+
+// Moemon Co-op: today's goals for the phone's daily report (mp_phone_walk.c): up to MAX lines of text (ASCII) with
+// their progress and targets; how many there are
+u8 MP_Events_PhoneGoals(char out[][64], s32 *progress, s32 *target, u8 max)
+{
+    s32 date = TodayUTC();
+    u8 s, n = 0;
+    for (s = 0; s < 3 && n < max; s++)
+    {
+        GoalText(date, s, out[n], 64);
+        GoalNumbers(date, s, &progress[n], &target[n]);
+        n++;
+    }
+    return n;
+}

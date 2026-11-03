@@ -208,4 +208,217 @@ The gate (touch feels instant on home Wi-Fi): LiveTest presses the POKéTCH's si
 app coming back (72 ms over the test's loopback, under the 250 it allows), and checks the live map's finds, MATCH CALL,
 the radio, MOM's call and the battle feed against the game.
 
-Next: Phase 3, the walk (docs/COMPANION_APP.md "Pillar 2"), training facilities and the Garden in your pocket.
+## Phase 3: the walk, training, the Garden in your pocket (1.73.0)
+
+Game side: src/mp/mp_phone_walk.c (orders through mp_phone.c's Apply; the snapshot's `walk`, `train`, `today`, `now`).
+
+- The walk (custody). `{"op":"walk","at":PLACE,"p","o"}`: one at a time (`walking`), never the party's last (`last`), no
+  MAIL; a held HM back to the BAG. "<save>.walk" is written first (the POKéMON as it left, the phone, where it began,
+  the badge cap), then the POKéMON leaves the save and the game saves at once (`cantsave` if it can't: it stays). A
+  save that still holds the POKéMON the file names (closed between the two) drops the file. The answer and the
+  snapshot (for that phone; `walkOther` for another) carry `walk`: id, sent, mapsec, region, cap, mon, wild [species,
+  min, max] (its map's wild table, else its map section's, the GENERATION's), finds (the place's item balls and hidden
+  items, then PICKUP's first finds), rules [10,000 steps a day, 2,000 a find, 3,000 a meeting, 2,500 a moment, 3
+  meetings a day].
+- Coming home. `{"op":"home","walk":ID,"steps":N,"finds":[...],"caught":[[species,level,ball],...]}` from the phone
+  that holds it (`otherphone`, `nowalk` else): steps capped at 10,000 for each calendar day it was out (the PC's clock;
+  DayNumber), finds only from the pool and no more than the steps earn, catches only from the wild table at its
+  levels, 3 a day, to the PC (CreateMon, met there, the POKéDEX); EXP a step to the badge cap's level with the day
+  care's level-ups (daycare.c MP_ApplyDaycareExperience), an EGG's cycles (256 steps each), Friendship moments
+  (mp_life.c MP_Life_WalkHome: a MEM_WALK memory and its JOURNAL line, a Friendship step each 2,500 steps). Back in
+  the party (else the PC), the file erased, saved at once; the answer's `home` says what came of it. A toast on the
+  field (send-off and homecoming, with its cry). FORGET PHONES brings it home as it left.
+- Training: `{"op":"train","at":BOX PLACE,"p","o","k":0 STAT|1 LEVEL|2 REST,"s":stat}` (`trainbox`, `slots`: 2 + one
+  per 2 BADGES, up to 6), `{"op":"untrain","p","o"}`, `{"op":"collect"}` -> `gains` [p, o, kind, amount]. "<save>.train";
+  gains from at most 24 hours since the last collection on the PC's clock: STAT an EV every 5 minutes (252, 510),
+  LEVEL 10 EXP a minute to the badge cap, REST Friendship every 30 minutes and PP. Leaving the boxes ends it (the
+  party: collected first; TrainTick every 2 seconds), so it never battles. The PC shows TRAINING where its item would
+  be (pokemon_storage_system.c SetDisplayMonData).
+- The Garden's kind acts: `{"op":"kind","at","p","o","verb":0 pet|1 BERRY,"item"}` by the Garden's own rules
+  (mp_life_interact.c MP_Life_PhoneVerb: feelings, the bond with its Trainer, tastes, hunger; a real moment only when
+  it was looking for food); `line` says what happened. `{"t":"journal","at","p","o"}` -> its JOURNAL's lines.
+- The daily report's `today`: goals [text, progress, target] (mp_events.c MP_Events_PhoneGoals), berries [ready,
+  growing], gatcha [free pulls, tickets].
+
+App side: core/Walk.java (Android-free: readings spread over the days between them and capped at 10,000 each, a
+restart's counter, finds and meetings by steps, the homecoming order); StepCounter (TYPE_STEP_COUNTER,
+ACTIVITY_RECOGNITION), StepJob (JobScheduler every ~15 minutes: a reading, notifications, the widget), WalkPage (the
+walker, FIND / MEET / HOME, TRAINING, GARDEN), CatchPage (MEET: a ring to time, the species' catch rate), JournalPage,
+TodayPage (once a day), Notifier (kinds on their own switches in MENU > NOTIFICATIONS, 3 a day, quiet hours 21:00 to
+08:00, each kind once a day), WalkWidget. Forgetting a save is refused while one of its POKéMON is out walking.
+
+The gate ("a week of real walks: steps, caps and homecomings right"): tools/phone/walk_test.py (the game: custody
+across a restart; a week's caps with the walk's start moved back 7 days; home once; training an hour back; kindness;
+FORGET PHONES), android/coretest WalkCoreTest (a simulated week on the phone's side), LiveTest (send-off, steps, a
+find, homecoming through the app).
+
+## Phase 4: friends (docs/COMPANION_APP.md "Pillar 4")
+
+### Presence, invites, linking away from home (1.74.0)
+
+The co-op server (mp_server.c, protocol 75) gained two services anyone connected may use without a room:
+- MAIL (MPMSG_C_MAIL / S_MAIL): records under 16-byte keys. MAIL_PUT (one record, the owner's 16-byte secret: its
+  SHA-256 locks the key to whoever put it first), MAIL_ADD (up to MAIL_ENTRIES entries of MAIL_ENTRY_MAX bytes, anyone
+  who knows the key), MAIL_GET, MAIL_DEL / MAIL_TAKE (the owner's). Each has a TTL; kept in moemon_mail.dat next to the
+  server (saved a few seconds after a change). The server never reads them: keys are derived from friend keys
+  (PhoneProto_Derive: BLAKE2b keyed by the key, over a word) and the contents are sealed with them.
+- PIPE (MPMSG_C_PIPE / S_PIPE): a game hosts pipe ids (PIPE_HOST), a phone joins one (PIPE_JOIN), and the server passes
+  DATA between them in chunks of up to 7,900 bytes; PIPE_CLOSE / CLOSED either way. A connection that uses pipes is
+  never timed out as an idle lobby visitor.
+
+Game side: src/mp/mp_phone_friends.c, "<save>.pals" (magic PALS: this save's friend key and owner secret, the sharing
+level, up to 64 friends {save id, friend key, name, last seen}).
+- Friends: in a co-op room, each game sends its save id, name and friend key on relay type 19 (MPR_FRIEND) every 10
+  seconds; everyone met is kept.
+- Presence: while connected to a server and playing (in the overworld once since loading), every 60 seconds a MAIL_PUT
+  under Derive(friend key, "presence"), TTL 10 minutes, sealed JSON {n (name hex), t, and with EVERYTHING: sec, reg,
+  do (field / battle / coop / cards), srv ("" = the online lobby), room, rkey, code (a game hosted on that PC), party
+  [[species, level, egg]...]}. ONLINE ONLY sends n and t; HIDDEN deletes the record.
+- Snapshot `friends`: {share, srv, online, list [{id, key, n, seen}]}. Orders: `{"op":"share","level"}` and
+  `{"op":"join","srv","room","rkey"}` (connects and joins the room; `inroom` if the game is already in one).
+- The phone through the server: the game hosts a pipe for each paired phone, id Derive(phone key, "pipe"), and runs
+  the same sealed link over it (mp_phone_net.c conns with `pipe`, PhoneNet_PipeOpen / PipeIn / PipeClosed).
+
+App side: core/Server.java (MAIL from the phone), core/Friends.java (presence for the friend list: online when its
+`t` is under 5 minutes old), core/Link.viaServer (the pipe: when the game isn't found at home, LinkClient tries the
+snapshot's `friends.srv`; status LINKED (AWAY)), FriendsPage (the share level, friends online with where, what and
+their party, JOIN: an order to the linked game, else the invite code copied), Notifier kind FRIEND (off by default;
+once a friend a day, from StepJob), DexPage's SPAWNS button.
+
+The gate: android/coretest FriendsTest (a server, ALICE hosting a room, BOB joining: friend keys swapped, BOB's
+presence read from the server, ALICE's phone linked through the server with a snapshot of more than one chunk);
+ScreensTest "friends".
+
+### Trades by mail (1.75.0)
+
+The server's ESCROW (MAIL ops 7-10, protocol 76; mp_net.h ESC_*; "moemon_escrow.dat", written before each answer):
+a record per trade (its 16-byte ID) with two sides, each a deposit (up to ESC_DATA_MAX) and a lock (the SHA-256 of
+the side's secret, set by its first use). PUT deposits (refused once CLOSED), TAKE gives the other side's deposit
+only when both are in, CANCEL closes it while both aren't in (and gives back the caller's own), LOOK tells the state.
+Every op can be repeated and answers the state. Deposits nobody came back for stay 365 days; tools/phone/escrow_test.py.
+
+Keys: each save has an X25519 pair ("<save>.pals" version 2; 1.74.0's file is converted, its friends kept); MPR_FRIEND
+ends with the public key. Two saves' pair key (PhoneProto_PairKey: BLAKE2b over the X25519 secret) seals offers and
+deposits, so only those two can read them (friend keys are seen by everyone in a room). The snapshot's friends carry
+`pk` (the pair key, once met since 1.74.1), `me`, `tk` (the trade key: a side's secret is Derive(tk, hex(trade))),
+`inbox` and `inown` (Derive(friend key / secret, "inbox")).
+
+The flow:
+- OFFER (the phone, core/Trades.offer): a random trade ID; {t, from, n, mon (the snapshot's keys), want (species, 0
+  anything), at, exp (7 days), srv} sealed with the pair key into the friend's inbox (MAIL_ADD, [from id][sealed]);
+  then the order `{"op":"offer","trade","to","at","p","o","want","exp","srv"}` to this save's game (queued when away):
+  the POKéMON stays where it is, ON OFFER (the PC's label, no release in the PC, no walk or training; `off` in the
+  snapshot).
+- The friend's phone reads its inbox (Trades.incoming: each offer with the escrow's state); ACCEPT is the order
+  `{"op":"accept",...}` to its game (the species must be the one wanted: `notwanted`); DECLINE is an escrow CANCEL
+  from side 1, straight from the phone. CANCEL of one's own offer: CANCEL from side 0 plus `{"op":"untrade"}`.
+- The games (src/mp/mp_phone_trade.c, "<save>.trades"), whenever on the trade's server: the accepting game deposits
+  (side 1); the offering game, seeing it (LOOK), deposits too (side 0) and takes; the other takes on its next look.
+  Custody as the walk's: written down, out of the save, saved at once, then the server; received: written down, in
+  (party, else PC), saved at once; a game closed at any step works out on loading where it stands (the save holds it
+  or not). A deposit called off comes home the same way. Offers run out after 7 days (the accepting side waits a day
+  more before taking its deposit back).
+- Then the game's own in-game trade scene (trade.c MP_MailTrade_Scene: the friend's name, ours going, theirs coming,
+  any trade evolution) the next time the player is free on the field.
+
+App: core/Server.java (look / cancel), core/Trades.java, FriendsPage (TRADES BY MAIL: offers with ACCEPT / DECLINE,
+our trades and how each is getting on, CALL OFF; TRADE on each friend: ours, then "for what": anything or one of the
+species in their party), Notifier kind TURN (a new offer; from StepJob).
+
+The gate (trades pass two-client tests at lag): android/coretest TradeTest: two games and their phones, everything
+through tools/mp_server/lagproxy.py at 120 ms + up to 60 ms each way: a trade (each POKéMON exactly once, the scene in
+both), a turned-down offer (nothing moves), an offer answered while the offering game is closed (it completes after).
+
+### TRIPLE TRIAD on the phone (1.76.0)
+
+The game's own engine in the app: android/app/src/main/cpp/tt_jni.c over src/tt (tt_duel, tt_ai, tt_catalog,
+tt_common, tt_hands, tt_pools, tt_rating(s), tt_collection; the build includes a folder holding only include/tt, as
+the game's include/ has its own strings.h), Java Tt.java: the catalog and the rules' words, duels by handle (start,
+play: the events as JSON, state, the AI that sees only what its side may), opponents as the game makes them
+(tt_field.c Fill) with their hands fitted by CARD SCALING (Tt_FitOpponentHand), and the daily puzzle (a position three
+cards from the end where one or two plays win against the best defense; the same for a day; Best() is a full search).
+The card faces: the game's art pack (graphics/tt/cards.bin) cut to the large faces and the extras by
+android/build_assets.py (assets game/tt_cards.bin, ~10 MB); TtArt composes them as tt_gfx.c Tt_DrawCard does.
+
+The game's side, src/mp/mp_phone_cards.c: the snapshot's `tt` {on, day (Tcg_Today), region, tier (badges), rules and
+trade of the region, skill, active, rec, today {packs, packsMax 3, puzzles, puzzlesMax 1}, packs[5], decks[6] {n, c},
+owned [[id, count]], seen [ids]}; orders `ttdeck` {deck, cards, name, active} (Tt_DeckValid and owned copies:
+`deckrules`, `notowned`), `ttwin` {kind: duel | puzzle, harder, perfect} (a BRONZE pack, SILVER for a tough or perfect
+win, SILVER for the puzzle; per calendar day in "<save>.phonecards": `today`), `ttopen` {pack} (Tt_OpenPack: the cards
+in the answer's `cards`). Rev() takes in the cards and the trades (PhoneCards_Hash, PhoneTrade_Hash), so the app sees
+them change. Tests: tools/phone/cards_test.py, coretest TtCoreTest.
+
+The app: CARDS (CardsPage: PLAY a FREE DUEL against a duelist of where you are under the region's rules without
+RANDOM, cards never change hands; the DAILY PUZZLE; VS FRIENDS; PACKS to open; DECKS; the BINDER), TtDuelPage (upright
+table, tap or drag, captures turning in waves, SAME / PLUS / COMBO, the AI, the prize order), TtDeckPage (the game's deck
+rules), TtPackPage, TtCardPage.
+
+Turn by turn with friends (core/TtFriends.java over core/CardDuels.java, shared with the POKéMON card game): the invite
+into the friend's inbox {kind "tt", g, from, n, hand, rules, seed, first, at}; the game's record under Derive(pair key,
+"ttgame" + g), entries sealed with the pair key: the friend's hand (seq 0, or declined), then each move {seq, slot,
+cell}. OPEN always; the rules offered replay the same with
+either side as the engine's seat 0 (no SWAP, CHAOS, SUDDEN DEATH), so each phone plays as seat 0 (TtFriendGame). Moves
+not taken by the server are sent again; 3 days without a move: CLAIM WIN. Notifier TURN: a challenge, your turn.
+Test: coretest TtFriendsTest (12 games through a real server, both sides agreeing on every board).
+
+### The POKéMON card game on the phone (1.78.0)
+
+The game's own engine in the app: android/app/src/main/cpp/tcg_jni.c over src/tcg (tcg_duel, tcg_effects, tcg_trainers,
+tcg_powers, tcg_ai, tcg_catalog, tcg_collection, tcg_decks, tcg_scale, tcg_ratings, tcg_levels, tcg_link, and
+tcg_flow; the build's include folder holds include/tcg and mp_version.h), Java Tcg.java: the catalog, deck checks
+(Tcg_DeckValidate with the owned counts), CARD SCALING (TcgScale_RateDeck in a thread: about 0.1 s; an opponent fitted
+as tcg_field.c Tcg_FitOpponent does for an ordinary card player, from any of the game's decks), duels by handle (state
+as a seat may see it: the other hand, both decks and the other side's set-up Pokemon hidden; events after a sequence
+number; options: what each card in the hand, each attack, retreat, each Pokemon Power can do now and why not), the AI
+(TcgDuel_AiActionLevel) and the rules state's hash (TcgLink_Hash).
+
+What a move asks for is the game's own duel board's: src/tcg/tcg_flow.c (include/tcg/flow.h) holds the Trainers' and
+Pokemon Powers' steps, the attacks' menus and targets, the filters for spaces and cards, whether a hand card / attack /
+retreat can be used and why not, the retreat's Energy when there's nothing to choose; tcg_board.c uses them (its
+screen and cursor stay its own), and TcgFlow is the same as a machine without a screen (begin a move, answer SLOT /
+PICK / MENU questions, take the action) that the phone drives. Moves are small JSON actions {t, h, s, a, g, o, c, x}.
+Tests: coretest TcgCoreTest (150 whole duels with one or both sides moving only through flows with random legal
+answers against the AI: every action a flow builds is taken by the rules, every duel ends, a replay from the actions
+ends the same, the other side's hand stays hidden). It found three of the board's own: a Basic put on the Bench while
+setting up with the Active spot empty (no way on with no other Basic: now the Active spot first), evolving a Pokemon
+put down this turn when another of the name could evolve (now only those that can), Scoop Up on the last Pokemon in play.
+
+The cards' pictures: graphics/tcg/printed.bin (the scans, "TCGP") re-encoded as WebP by build_assets.py (assets
+game/tcg_cards.bin, ~13 MB, kept uncompressed in the APK so TcgArt reads a picture at a time); decoded at the size shown.
+
+The game's side, src/mp/mp_phone_cards.c: the snapshot's `tcg` {on, day, active, skill, rated, badges, wins, today
+{packs, packsMax 3}, packs[11], decks[8] {n, ace, c[60]}, owned [[id, count]]}; orders `tcgdeck` {deck, cards (60, or
+[] to empty a slot), name, active} (`deckrules`, `notowned`, `empty`, `activedeck`), `tcgduel` {won, kind duel | friend,
+deck and opp ratings, level} (CARD SCALING learns from every FREE DUEL, won or lost; a win: a random booster, 3 a day
+counted in "<save>.phonecards" packs[1]), `tcgopen` {pack} (Tcg_OpenPack: `cards` and `new`, the first copies). Test:
+tools/phone/cards_test.py.
+
+The app: CARDS has a switch between the two games (remembered). POKéMON CARDS: a FREE DUEL, VS FRIENDS, BOOSTERS, DECKS,
+the BINDER by set (TcgBinderPage). TcgDuelPage: upright, their side at the top turned to face them (their Bench, Active
+Pokemon, Prize cards, deck and discard pile, mirrored as across a table, as the game's own table turns them; the user
+2026-11-03: TRIPLE TRIAD stays as it is), yours below, the hand along the bottom. A tap on a card shows it up close with what it
+can do (and why not); a move's questions glow on the table (SLOT), open a card picker (PICK, in order where the order
+matters, Energy by value for a retreat), or a list (MENU). What happens is called out from the events (attacks, coins,
+damage numbers over the Pokemon, conditions, Knock Outs, Prize cards, the AI's Trainers shown). TcgDeckPage (stacks to
+take out, the collection by kind and type to put in, the game's rules as you go), TcgPackPage (ten cards turning over,
+the holo shining, NEW!), TcgCardPage (the scan, then the catalog's words).
+
+With friends by turns: core/CardDuels.java kind "tcg" (the invite {deck, prizes 6}; the friend's deck at seq 0; each
+action {seq, + the action} numbered in the order made, whoever acts posts the next). The inviter is the engine's
+player 0 on both phones (TcgFriendGame). The server keeps 16 entries a record, so a record is in pages of 12 numbers
+(page n > 0 under Derive(pair key, kind + "game" + g + "#" + n)); a TRIPLE TRIAD game stays in the first. Concede on your
+own turn (the rules take it from the player to move). Test: coretest TcgFriendsTest (3 duels, ~250 moves, through a real
+server, the two phones' rules hash equal after every move). `ONLY=tcg android/coretest/run.sh`.
+
+## The UI / UX pass (1.77.0 on)
+
+- BOXES: the box drawn as large as the screen allows in whole screen pixels (BoxesPage.bk: 1.5x on a 1080-wide phone),
+  and ALL BOXES (the user's ask, 2026-11-03): every box at once (each wallpaper's framed inside under a name strip, the
+  PC's places scaled), the party pinned on top; hold a POKéMON and drag it to any place of any box (the list scrolls
+  near the edges); SELECT several, then tap a box's name to send them there (each a move order, to the box's empty
+  places in the order picked; the party only near a PC). A box's name opens it in ONE BOX.
+- ON OFFER (a trade by mail) as a small orange tag on box places, and on the PC card and the PARTY's cards.
+- The tab bar: a 12x12 pixel icon for each page above its name, the chosen one on a raised plate (GameView TAB_ICONS).
+
+Next: YU-GI-OH! on the phone (the same pattern: EDOPro's ocgcore with Lua through JNI), the app's sounds and music (the
+game's own), and the rest of the pass.

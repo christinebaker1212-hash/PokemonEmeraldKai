@@ -196,9 +196,15 @@ public final class DexPage extends Page {
         art.text(c, counts, w - 6 - art.width(counts), 0, 0xFFFFFFFF, 0xFF000000);
         // the search bar
         fill.setColor(BORDER);
-        c.drawRect(6, 22, w - 6, 42, fill);
+        c.drawRect(6, 22, w - 70, 42, fill);
         fill.setColor(typing ? 0xFFFFFFFF : 0xFFF0F0E8);
-        c.drawRect(7, 23, w - 7, 41, fill);
+        c.drawRect(7, 23, w - 71, 41, fill);
+        // SPAWNS: where they live, map by map
+        fill.setColor(BORDER);
+        c.drawRect(w - 66, 22, w - 6, 42, fill);
+        fill.setColor(0xFF58A848);
+        c.drawRect(w - 65, 23, w - 7, 41, fill);
+        art.text(c, "SPAWNS", w - 36 - art.width("SPAWNS") / 2, 24, GameArt.WHITE_TEXT, 0xFF285820);
         if (search.isEmpty() && !typing) {
             art.text(c, "Search: a name or a number", 12, 24, GameArt.GRAY_TEXT, GameArt.SHADOW);
         } else {
@@ -212,7 +218,7 @@ public final class DexPage extends Page {
             }
         }
         if (!search.isEmpty()) {
-            art.text(c, "x", w - 18, 24, GameArt.RED_TEXT, GameArt.SHADOW);
+            art.text(c, "x", w - 82, 24, GameArt.RED_TEXT, GameArt.SHADOW);
         }
         // the filters and the order
         int fx = 6;
@@ -273,7 +279,13 @@ public final class DexPage extends Page {
         int w = v.width();
         if (y < HEAD) {
             if (y >= 20 && y < 44) {
-                if (!search.isEmpty() && x > w - 24) {
+                if (x > w - 68) {
+                    typing = false;
+                    v.keyboard(false);
+                    v.select(4);   // (SPAWNS)
+                    return;
+                }
+                if (!search.isEmpty() && x > w - 88) {
                     search = "";
                     scroll = 0;
                     return;

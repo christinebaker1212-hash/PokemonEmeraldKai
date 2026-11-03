@@ -4559,3 +4559,15 @@ holds dolls and cushions (MP_RoomFloorHoldsDecor). Test johto_my_room.
   the sheets' differently ordered colors joined), mapped onto Brendan's / May's frame layout (PlatinumFrameOf); the
   local player's palette tag is OBJ_EVENT_PAL_TAG_MP_PACK. Without the pack: the hybrid body as before. Platinum's
   watering can only faces north, so watering stays hybrid. Test look_platinum_actions.
+
+## The card tables' choices shared with the phone (1.78.0)
+
+- src/tcg/tcg_flow.c (include/tcg/flow.h): what a POKéMON card move asks for (the Trainers' and Pokemon Powers' steps,
+  the attacks' menus and targets, the filters for spaces and cards, whether a hand card / attack / retreat can be used
+  and why not, the retreat's Energy when there's nothing to choose) moved out of tcg_board.c, which keeps its screen and
+  cursor and calls these; the phone drives the same steps through TcgFlow (docs/PHONE_LINK.md "The POKéMON card game on
+  the phone"). Never copy them back into the board.
+- Fixes the phone's test turned up, in the game too: while setting up, the Active spot is chosen first (a Basic put on
+  the Bench with nothing Active could leave a player with no way on); an evolution card targets only Pokemon that can
+  evolve this turn (not one put down this turn when another of the name can); Scoop Up / Super Scoop Up don't count as
+  playable on your only Pokemon in play.

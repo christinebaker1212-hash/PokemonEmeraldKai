@@ -97,7 +97,7 @@ public class LiveTest {
                 "mp boxput 1 0 25 5", "mp boxput 1 1 1 5", "mp boxput 1 2 4 5",
                 "mp additem 139 20", "mp shinymon 4 25 20", "mp additem 660 1", "mp regionclear 3", "mp dexcatch 263",
                 "mp additem 13 3", "mp additem 68 2", "mp additem 96 1", "mp additem 693 1", "mp hp 1 5", "mp shinymon 5 16 5", "mp phone pair",
-                "wait 300", "mash B 200 15", "wait 900", "mp wild 263:3", "wait 2000000", "quit").getBytes());
+                "wait 300", "mash B 200 15", "wait 2700", "mp wild 263:3", "wait 2000000", "quit").getBytes());
         ProcessBuilder pb = new ProcessBuilder(game.getPath()).directory(root).redirectErrorStream(true);
         java.util.Map<String, String> env = pb.environment();
         env.put("SDL_VIDEODRIVER", "dummy");
@@ -189,9 +189,12 @@ public class LiveTest {
 
             // GIVE: the box's first POKéMON, its card's GIVE, the BAG's first holdable item
             v.select(0);
-            int x0 = (v.width() - 160) / 2 + 8, y0 = GameView.TOP + 4 + 16;
-            tap(v, x0 + 12, y0 + 12);
-            int cardY = GameView.TOP + 4 + 144 + 6 + 36 + 22, by = cardY + 52 + 10 + 12;
+            // (the box at its scale, as BoxesPage.bk works it out)
+            float bk = Math.max(1, Math.min(2, (float) Math.floor((v.width() - 28) * v.pixelScale() / 160f) / v.pixelScale()));
+            int wpW = Math.round(160 * bk), wpH = Math.round(144 * bk), cl = (int) (24 * bk);
+            int bx0 = (v.width() - wpW) / 2, x0 = bx0 + (int) (8 * bk), y0 = GameView.TOP + 4 + (int) (16 * bk);
+            tap(v, x0 + cl / 2, y0 + cl / 2);
+            int cardY = GameView.TOP + 4 + wpH + 6 + 36 + 22, by = cardY + 52 + 10 + 12;
             int bw = (v.width() - 20) / 4;
             tap(v, 10 + 2 * bw + bw / 2, by);
             assertTrue("GIVE opens the BAG's items", v.overPage() instanceof ItemPickPage);
@@ -204,10 +207,10 @@ public class LiveTest {
             draw(v);
 
             // MOVE: the second POKéMON to the box's last place
-            tap(v, x0 + 24 + 12, y0 + 12);
+            tap(v, x0 + cl + cl / 2, y0 + cl / 2);
             long p2 = app.model().at(Model.boxPlace(0, 1)).optLong("p");
             tap(v, 10 + bw + bw / 2, by);
-            tap(v, x0 + 5 * 24 + 12, y0 + 4 * 24 + 12);
+            tap(v, x0 + 5 * cl + cl / 2, y0 + 4 * cl + cl / 2);
             idleUntil(() -> {
                 JSONObject m = app.model().at(Model.boxPlace(0, 29));
                 return app.client.orders.pending().isEmpty() && m != null && m.optLong("p") == p2;
@@ -216,11 +219,11 @@ public class LiveTest {
             assertTrue("nothing refused", app.client.orders.failed().isEmpty());
 
             // MOVE to another box: the third POKéMON, MOVE, the next box (its arrow), its first place
-            tap(v, x0 + 2 * 24 + 12, y0 + 12);
+            tap(v, x0 + 2 * cl + cl / 2, y0 + cl / 2);
             long p3 = app.model().at(Model.boxPlace(0, 2)).optLong("p");
             tap(v, 10 + bw + bw / 2, by);
-            tap(v, x0 - 8 + 160 + 8, GameView.TOP + 4 + 6);
-            tap(v, x0 + 12, y0 + 12);
+            tap(v, bx0 + wpW - 4, GameView.TOP + 4 + 6);
+            tap(v, x0 + cl / 2, y0 + cl / 2);
             idleUntil(() -> {
                 JSONObject m = app.model().at(Model.boxPlace(1, 0));
                 return app.client.orders.pending().isEmpty() && m != null && m.optLong("p") == p3;
@@ -245,6 +248,44 @@ public class LiveTest {
             tap(v, 40, GameView.TOP + 44 + 2 + 10);
             idleUntil(() -> !app.spawns.isEmpty(), 20, "a map's spawns");
             draw(v);
+
+            // the walk: a box POKéMON goes off with the phone, walks, finds something, comes home with it all
+            {
+                Model wm = app.model();
+                org.json.JSONArray b0 = wm.box(0).getJSONArray("m");
+                int ws = 0;
+                while (b0.optJSONObject(ws) == null) {
+                    ws++;
+                }
+                JSONObject walker = b0.getJSONObject(ws);
+                app.client.order(new JSONObject().put("op", "walk").put("at", Model.boxPlace(0, ws))
+                        .put("p", walker.getLong("p")).put("o", walker.getLong("o")));
+                idleUntil(() -> app.walk() != null, 20, "the walk to begin");
+                long now = System.currentTimeMillis(), boot = now - 3600000;
+                app.walkReading(1000, boot, now);
+                app.walkReading(5600, boot, now + 1000);
+                assertEquals("steps counted", 4600, app.walk().steps());
+                int item = app.walk().find(new java.util.Random(3));
+                assertTrue("a find from the place", item > 0);
+                v.select(6);
+                draw(v);
+                ScreensTest.shot(v, "live_walk");
+                app.client.order(app.walk().homeOrder());
+                idleUntil(() -> app.lastHome != null, 20, "the homecoming");
+                assertEquals("home with its steps", 4600, app.lastHome.getInt("steps"));
+                assertEquals("home with its find", item, app.lastHome.getJSONArray("finds").getInt(0));
+                idleUntil(() -> {
+                    Model m2 = app.model();
+                    for (int i = 0; i < m2.party().length(); i++) {
+                        if (m2.party().optJSONObject(i).optLong("p") == walker.optLong("p")) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }, 20, "the walker back in the party");
+                assertTrue("no walk left", app.walk() == null);
+                v.select(0);
+            }
 
             // the live map: where the player is, and what they've found at the place tapped (the game's own answer)
             org.json.JSONArray tm = app.model().snap.getJSONObject("place").optJSONArray("tm");

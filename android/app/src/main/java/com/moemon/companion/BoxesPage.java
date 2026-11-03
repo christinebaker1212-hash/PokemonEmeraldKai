@@ -24,6 +24,13 @@ public final class BoxesPage extends Page {
     private boolean moveMode;
     private int dragX, dragY;
     private final Paint dash = new Paint(), cursor = new Paint(), shade = new Paint();
+    // ALL BOXES: every box at once, the party pinned on top; drag across boxes, or SELECT several and send them
+    private boolean grid, picking;
+    private final java.util.LinkedHashSet<String> picks = new java.util.LinkedHashSet<>();
+    private final java.util.Map<String, JSONObject> pickPlaces = new java.util.HashMap<>();
+    private int gridBottom;
+    private final Paint fill = new Paint(), pickPaint = new Paint();
+    private static final int GRID_TOP = 60, GRID_GAP = 6;
 
     public BoxesPage(GameView v) {
         super(v);
@@ -35,10 +42,32 @@ public final class BoxesPage extends Page {
         cursor.setStrokeWidth(2);
         cursor.setColor(0xFFF85838);
         shade.setColor(0x90303030);
+        pickPaint.setStyle(Paint.Style.STROKE);
+        pickPaint.setStrokeWidth(2);
+        pickPaint.setColor(0xFF40C8F8);
+    }
+
+    // the box as large as the screen allows in whole screen pixels (1.5x on a 1080-wide phone)
+    private float bk() {
+        int sc = v.pixelScale();
+        float k = (float) Math.floor((v.width() - 28) * sc / (float) WP_W) / sc;
+        return Math.max(1, Math.min(k, 2));
+    }
+
+    private int wpW() {
+        return Math.round(WP_W * bk());
+    }
+
+    private int wpH() {
+        return Math.round(WP_H * bk());
+    }
+
+    private float cell() {
+        return CELL * bk();
     }
 
     private int wx(int w) {
-        return (w - WP_W) / 2;
+        return (w - wpW()) / 2;
     }
 
     private static final int WY = 4;
@@ -69,7 +98,7 @@ public final class BoxesPage extends Page {
     }
 
     private int partyY() {
-        return WY + WP_H + 6;
+        return WY + wpH() + 6;
     }
 
     private int cardY() {
@@ -86,25 +115,35 @@ public final class BoxesPage extends Page {
             return;
         }
         Planned p = planned();
+        if (grid) {
+            drawGrid(c, w, h, m, p);
+            return;
+        }
         int b = box(m), x0 = wx(w);
         JSONObject bx = m.box(b);
-        art.wallpaper(c, bx.optInt("w"), x0, WY);
+        c.save();
+        c.translate(x0, WY);
+        c.scale(bk(), bk());
+        art.wallpaper(c, bx.optInt("w"), 0, 0);
+        c.restore();
         // the box's name on the wallpaper's banner, the arrows beside it
         byte[] name = GameArt.hexText(bx.optString("n"));
         int nw = art.width(name);
-        art.text(c, name, x0 + (WP_W - nw) / 2, WY + 2, GameArt.WHITE_TEXT, 0xFF383838);
-        art.text(c, "<", x0 - 14, WY + 2, GameArt.WHITE_TEXT, GameArt.WHITE_SHADOW);
-        art.text(c, ">", x0 + WP_W + 6, WY + 2, GameArt.WHITE_TEXT, GameArt.WHITE_SHADOW);
+        int bannerY = WY + (int) (8 * bk()) - 6;
+        art.text(c, name, x0 + (wpW() - nw) / 2, bannerY, GameArt.WHITE_TEXT, 0xFF383838);
+        art.text(c, "<", x0 - 12, bannerY, GameArt.WHITE_TEXT, GameArt.WHITE_SHADOW);
+        art.text(c, ">", x0 + wpW() + 4, bannerY, GameArt.WHITE_TEXT, GameArt.WHITE_SHADOW);
         for (int s = 0; s < 30; s++) {
             JSONObject place = Model.boxPlace(b, s);
-            // (the PC's own places: icons centered at 20 + 24 x column, 28 + 24 x row on the wallpaper)
-            int cx = x0 + 8 + (s % 6) * CELL, cy = WY + 16 + (s / 6) * CELL;
-            drawSlot(c, p, place, cx, cy, CELL);
+            // (the PC's own places: icons centered at 20 + 24 x column, 28 + 24 x row on the wallpaper, scaled)
+            float cx = x0 + 8 * bk() + (s % 6) * cell(), cy = WY + 16 * bk() + (s / 6) * cell();
+            drawSlotF(c, p, place, cx, cy, cell());
         }
         // the party
         boolean pc = m.pcReachable();
         int py = partyY(), px0 = (w - 6 * PARTY_CELL) / 2;
         art.text(c, pc ? "PARTY" : "PARTY: no PC here", px0, py - 2, GameArt.WHITE_TEXT, GameArt.WHITE_SHADOW);
+        chipButton(c, "ALL BOXES", w - 8 - art.width("ALL BOXES") - 10, py - 7);
         for (int i = 0; i < 6; i++) {
             int cx = px0 + i * PARTY_CELL, cy = py + 16;
             art.window(c, 0, cx + 2, cy + 2, PARTY_CELL - 4, PARTY_CELL - 4);
@@ -160,6 +199,9 @@ public final class BoxesPage extends Page {
             }
             if (mon.optInt("sh") == 1) {
                 chip(c, "SHINY", 120, cy + 24, 0xFFD89010);
+            }
+            if (mon.optInt("off") == 1) {
+                chip(c, "ON OFFER", mon.optInt("sh") == 1 ? 160 : 120, cy + 24, 0xFFE07820);
             }
             int item = mon.optInt("i");
             if (item != 0) {
@@ -221,6 +263,20 @@ public final class BoxesPage extends Page {
         return l;
     }
 
+    // a box slot at the box's scale: the icon scaled with it (the PC's 32-pixel icon in a 24-pixel place)
+    private void drawSlotF(Canvas c, Planned p, JSONObject place, float x, float y, float size) {
+        float k = size / CELL;
+        if (k == 1) {
+            drawSlot(c, p, place, (int) x, (int) y, (int) size);
+            return;
+        }
+        c.save();
+        c.translate(x, y);
+        c.scale(k, k);
+        drawSlot(c, p, place, 0, 0, CELL);
+        c.restore();
+    }
+
     private void drawSlot(Canvas c, Planned p, JSONObject place, int x, int y, int size) {
         JSONObject mon = p.at(place);
         boolean isHeld = held != null && Planned.key(held).equals(Planned.key(place)) && !moveMode;
@@ -234,6 +290,9 @@ public final class BoxesPage extends Page {
                 c.drawRect(x + size - 7, y + size - 7, x + size - 3, y + size - 3, dot);
                 dot.setStyle(Paint.Style.STROKE);
                 dot.setColor(0xFFF85838);
+            }
+            if (mon.optInt("off") == 1) {
+                offerMark(c, x + 1, y + 1);
             }
         }
         if (p.isDashed(place) || p.itemPending(place)) {
@@ -251,9 +310,13 @@ public final class BoxesPage extends Page {
         if (m == null) {
             return null;
         }
-        int w = v.width(), x0 = wx(w) + 8, y0 = WY + 16;
-        if (x >= x0 && x < x0 + 6 * CELL && y >= y0 && y < y0 + 5 * CELL) {
-            return Model.boxPlace(box(m), (y - y0) / CELL * 6 + (x - x0) / CELL);
+        if (grid) {
+            return gridPlaceAt(x, y, m);
+        }
+        int w = v.width();
+        float x0 = wx(w) + 8 * bk(), y0 = WY + 16 * bk(), cl = cell();
+        if (x >= x0 && x < x0 + 6 * cl && y >= y0 && y < y0 + 5 * cl) {
+            return Model.boxPlace(box(m), (int) ((y - y0) / cl) * 6 + (int) ((x - x0) / cl));
         }
         int px0 = (w - 6 * PARTY_CELL) / 2, py = partyY() + 16;
         if (x >= px0 && x < px0 + 6 * PARTY_CELL && y >= py && y < py + PARTY_CELL) {
@@ -269,10 +332,18 @@ public final class BoxesPage extends Page {
             return;
         }
         int w = v.width(), x0 = wx(w);
-        if (y >= WY && y < WY + 20) {
-            if (x < x0) {
+        if (grid) {
+            tapGrid(x, y, m);
+            return;
+        }
+        if (y >= partyY() - 7 && y < partyY() + 10 && x >= w - 8 - art.width("ALL BOXES") - 10) {
+            setGrid(true);
+            return;
+        }
+        if (y >= WY && y < WY + 16 * bk() + 4) {
+            if (x < x0 + 10) {
                 swipe(-1);
-            } else if (x >= x0 + WP_W) {
+            } else if (x >= x0 + wpW() - 10) {
                 swipe(1);
             } else {
                 v.showOver(new BoxListPage(v, this));
@@ -383,7 +454,7 @@ public final class BoxesPage extends Page {
 
     @Override
     public boolean dragStart(int x, int y) {
-        return longPress(x, y);
+        return !grid && longPress(x, y);   // (ALL BOXES: a swipe scrolls; hold to pick one up)
     }
 
     private boolean inArrow;   // (a drag over a box's arrow turns the box once until it leaves)
@@ -392,9 +463,13 @@ public final class BoxesPage extends Page {
     public void dragMove(int x, int y) {
         dragX = x;
         dragY = y;
+        if (grid) {
+            v.invalidate();   // (near the top or bottom: the boxes scroll under it, drawGrid)
+            return;
+        }
         // like the game's PC: a POKéMON carried to the box's edge turns to the next box
         int x0 = wx(v.width());
-        boolean arrow = held != null && y >= WY && y < WY + WP_H && (x < x0 + 4 || x >= x0 + WP_W - 4);
+        boolean arrow = held != null && y >= WY && y < WY + wpH() && (x < x0 + 4 || x >= x0 + wpW() - 4);
         if (arrow && !inArrow) {
             int dir = x < x0 + 4 ? -1 : 1;
             Model m = v.app.model();
@@ -423,6 +498,9 @@ public final class BoxesPage extends Page {
 
     @Override
     public void swipe(int dir) {
+        if (grid) {
+            return;
+        }
         Model m = v.app.model();
         int n = boxCount(m);
         if (n > 0) {
@@ -437,5 +515,304 @@ public final class BoxesPage extends Page {
     public void shown() {
         moveMode = false;
         held = null;
+    }
+
+    @Override
+    public int scrollMax() {
+        return grid ? Math.max(0, gridBottom - v.contentHeight()) : 0;
+    }
+
+    // ------------------------------------------------------------------------------------------- ALL BOXES
+
+    private void chipButton(Canvas c, String label, int x, int y) {
+        int tw = art.width(label);
+        art.window(c, 0, x, y + 2, tw + 10, 12);
+        art.text(c, label, x + 5, y, GameArt.TEXT, GameArt.SHADOW);
+    }
+
+    private void setGrid(boolean on) {
+        grid = on;
+        picking = false;
+        picks.clear();
+        pickPlaces.clear();
+        selected = null;
+        moveMode = false;
+        scroll = 0;
+        if (on) {
+            // (the box that was open, near the top)
+            Model m = v.app.model();
+            scroll = Math.max(0, gridBoxY(box(m), v.width()) - GRID_TOP - 6);
+        }
+        v.invalidate();
+    }
+
+    private int gridCols(int w) {
+        return Math.max(2, Math.min(4, w / 132));
+    }
+
+    private float gridBoxW(int w) {
+        int cols = gridCols(w);
+        return (w - 12 - (cols - 1) * GRID_GAP) / (float) cols;
+    }
+
+    // (the PC's own places scaled: 24-pixel cells from 8 in on a 160-wide wallpaper, under its 16-pixel banner)
+    private float gridK(int w) {
+        return gridBoxW(w) / 160f;
+    }
+
+    private float gridCell(int w) {
+        return 24 * gridK(w);
+    }
+
+    private float gridRow(int w) {
+        return 122 * gridK(w) / 5f;   // (five rows spread evenly in the framed inside)
+    }
+
+    private int gridBoxH(int w) {
+        return (int) (14 + 122 * gridK(w) + 3);
+    }
+
+    // where box B starts, in the scrolled list (before the scroll)
+    private int gridBoxY(int b, int w) {
+        return GRID_TOP + 4 + (b / gridCols(w)) * (gridBoxH(w) + GRID_GAP);
+    }
+
+    private float gridBoxX(int b, int w) {
+        return 6 + (b % gridCols(w)) * (gridBoxW(w) + GRID_GAP);
+    }
+
+    private void drawGrid(Canvas c, int w, int h, Model m, Planned p) {
+        int n = boxCount(m);
+        float bw = gridBoxW(w), cell = gridCell(w);
+        int bh = gridBoxH(w), icon = cell >= 16 ? 16 : (int) cell;
+        // (dragging near the top or bottom: the list scrolls)
+        if (held != null && !moveMode) {
+            if (dragY > h - 28) {
+                scrollTo(scroll + 6);
+                v.postInvalidateOnAnimation();
+            } else if (dragY < GRID_TOP + 18 && dragY > GRID_TOP - 30 && scroll > 0) {
+                scrollTo(scroll - 6);
+                v.postInvalidateOnAnimation();
+            }
+        }
+        c.save();
+        c.clipRect(0, GRID_TOP, w, h);
+        for (int b = 0; b < n; b++) {
+            float x = gridBoxX(b, w);
+            int y = gridBoxY(b, w) - scroll;
+            if (y + bh < GRID_TOP || y > h) {
+                continue;
+            }
+            JSONObject bx = m.box(b);
+            art.wallpaperAt(c, bx.optInt("w"), x, y + 14, bw, 122 * gridK(w));
+            fill.setColor(b == box(m) ? 0xF0284878 : 0xE0182838);
+            c.drawRect(x, y, x + bw, y + 14, fill);
+            art.textHex(c, bx.optString("n"), (int) x + 3, y, GameArt.WHITE_TEXT, 0xFF101010);
+            if (picking && !picks.isEmpty()) {
+                art.text(c, "+", (int) (x + bw - 9), y, 0xFF80E0FF, 0xFF101010);
+            }
+            for (int s = 0; s < 30; s++) {
+                JSONObject place = Model.boxPlace(b, s);
+                float cx = x + 8 * gridK(w) + (s % 6) * cell, cy = y + 14 + (s / 6) * gridRow(w) + (gridRow(w) - cell) / 2;
+                drawMini(c, p, place, cx, cy, cell, icon);
+            }
+        }
+        gridBottom = n == 0 ? GRID_TOP : gridBoxY(n - 1, w) + bh + 10;
+        c.restore();
+        // pinned on top: the views, SELECT, the party
+        fill.setColor(Page.BANNER_DARK);
+        c.drawRect(0, 0, w, GRID_TOP, fill);
+        chipButton(c, "ONE BOX", 6, 2);
+        String sel = picking ? (picks.isEmpty() ? "PICK SOME" : "SEND " + picks.size() + ": TAP A BOX") : "SELECT";
+        chipButton(c, picking ? "DONE" : "SELECT", w - 6 - art.width(picking ? "DONE" : "SELECT") - 10, 2);
+        if (picking) {
+            art.text(c, sel, 6 + art.width("ONE BOX") + 18, 2, 0xFF80E0FF, 0xFF101010);
+        }
+        boolean pc = m.pcReachable();
+        int pcell = Math.min(34, (w - 12) / 6), px0 = (w - 6 * pcell) / 2;
+        for (int i = 0; i < 6; i++) {
+            int cx = px0 + i * pcell, cy = 21;
+            art.window(c, 0, cx + 1, cy + 1, pcell - 2, pcell - 2);
+            drawMini(c, p, Model.partyPlace(i), cx + 1, cy + 1, pcell - 2, 32);
+            if (!pc) {
+                c.drawRect(cx + 1, cy + 1, cx + pcell - 1, cy + pcell - 1, shade);
+            }
+        }
+        // the one carried, under the finger
+        if (held != null && heldMon != null && !moveMode) {
+            art.icon(c, heldMon.optInt("e") == 1 ? MonCard.eggSpecies(art) : heldMon.optInt("s"), dragX - 16, dragY - 26,
+                    GameArt.ICON_PLAIN);
+        }
+        // the one chosen: name, level and SUMMARY at the bottom
+        JSONObject mon = selected == null || picking ? null : p.at(selected);
+        if (mon != null && held == null) {
+            int by = h - 30;
+            art.window(c, 0, 6, by, w - 12, 24);
+            art.iconAt(c, mon.optInt("e") == 1 ? MonCard.eggSpecies(art) : mon.optInt("s"), 8, by + 2, 20, GameArt.ICON_PLAIN);
+            art.textHex(c, mon.optString("n"), 32, by + 4, GameArt.TEXT, GameArt.SHADOW);
+            String lv = mon.optInt("e") == 1 ? "EGG" : "Lv" + mon.optInt("l");
+            art.text(c, lv, w - 92 - art.width(lv), by + 4, GameArt.GRAY_TEXT, GameArt.SHADOW);
+            chipButton(c, "SUMMARY", w - 78, by + 4);
+        }
+    }
+
+    private void drawMini(Canvas c, Planned p, JSONObject place, float x, float y, float size, int icon) {
+        JSONObject mon = p.at(place);
+        String k = Planned.key(place);
+        boolean isHeld = held != null && Planned.key(held).equals(k) && !moveMode;
+        if (mon != null && !isHeld) {
+            int sp = mon.optInt("e") == 1 ? MonCard.eggSpecies(art) : mon.optInt("s");
+            art.iconAt(c, sp, x + (size - icon) / 2f, y + (size - icon) / 2f - (icon >= 32 ? 2 : 1), icon, GameArt.ICON_PLAIN);
+            if (mon.optInt("off") == 1) {
+                offerMark(c, x + 1, y + 1);
+            }
+        }
+        if (p.isDashed(place) || p.itemPending(place)) {
+            c.drawRect(x + 1, y + 1, x + size - 1, y + size - 1, dash);
+        }
+        if (picks.contains(k)) {
+            c.drawRect(x + 1, y + 1, x + size - 1, y + size - 1, pickPaint);
+        } else if (selected != null && Planned.key(selected).equals(k) && !picking) {
+            c.drawRect(x + 1, y + 1, x + size - 1, y + size - 1, cursor);
+        }
+    }
+
+    /** ON OFFER for a trade by mail: a small orange tag in the slot's corner */
+    void offerMark(Canvas c, float x, float y) {
+        fill.setColor(0xFF803010);
+        c.drawRect(x, y, x + 7, y + 6, fill);
+        fill.setColor(0xFFF89838);
+        c.drawRect(x + 1, y + 1, x + 6, y + 5, fill);
+        fill.setColor(0xFFFFFFFF);
+        c.drawRect(x + 2, y + 2, x + 5, y + 3, fill);
+    }
+
+    private JSONObject gridPlaceAt(int x, int y, Model m) {
+        int w = v.width();
+        int pcell = Math.min(34, (w - 12) / 6), px0 = (w - 6 * pcell) / 2;
+        if (y >= 21 && y < 21 + pcell && x >= px0 && x < px0 + 6 * pcell) {
+            return Model.partyPlace((x - px0) / pcell);
+        }
+        if (y < GRID_TOP) {
+            return null;
+        }
+        float bw = gridBoxW(w), cell = gridCell(w);
+        int bh = gridBoxH(w);
+        for (int b = 0; b < boxCount(m); b++) {
+            float bx = gridBoxX(b, w);
+            int by = gridBoxY(b, w) - scroll;
+            float gx = bx + 8 * gridK(w);
+            if (x >= gx && x < gx + 6 * cell && y >= by + 14 && y < by + 14 + 5 * gridRow(w)) {
+                int col = (int) ((x - gx) / cell), row = (int) ((y - by - 14) / gridRow(w));
+                if (col < 6 && row < 5) {
+                    return Model.boxPlace(b, row * 6 + col);
+                }
+            }
+        }
+        return null;
+    }
+
+    // the box whose name strip is at (x, y), or -1
+    private int gridHeaderAt(int x, int y, Model m) {
+        int w = v.width();
+        float bw = gridBoxW(w);
+        for (int b = 0; b < boxCount(m); b++) {
+            float bx = gridBoxX(b, w);
+            int by = gridBoxY(b, w) - scroll;
+            if (y >= GRID_TOP && x >= bx && x < bx + bw && y >= by && y < by + 14) {
+                return b;
+            }
+        }
+        return -1;
+    }
+
+    private void tapGrid(int x, int y, Model m) {
+        int w = v.width();
+        if (y < 18) {
+            if (x < 6 + art.width("ONE BOX") + 12) {
+                setGrid(false);
+            } else if (x > w - 6 - art.width(picking ? "DONE" : "SELECT") - 12) {
+                picking = !picking;
+                picks.clear();
+                pickPlaces.clear();
+            }
+            v.invalidate();
+            return;
+        }
+        Planned p = planned();
+        JSONObject mon = selected == null || picking ? null : p.at(selected);
+        if (mon != null && y >= v.contentHeight() - 30) {
+            openSummary(selected);
+            return;
+        }
+        int header = gridHeaderAt(x, y, m);
+        if (header >= 0) {
+            if (picking && !picks.isEmpty()) {
+                sendPicks(header, p);
+            } else {
+                setGrid(false);
+                showBox(header);
+            }
+            return;
+        }
+        JSONObject place = placeAt(x, y);
+        if (place == null) {
+            return;
+        }
+        if (picking) {
+            String k = Planned.key(place);
+            if (p.at(place) == null) {
+                return;
+            }
+            if (!picks.remove(k)) {
+                picks.add(k);
+                pickPlaces.put(k, place);
+            }
+            v.buzz(false);
+        } else {
+            selected = p.at(place) != null ? place : null;
+        }
+        v.invalidate();
+    }
+
+    // the POKéMON picked, each to the next empty place in box B, in the order picked
+    private void sendPicks(int b, Planned p) {
+        if (v.app.locked()) {
+            v.message(Companion.LOCKED);
+            return;
+        }
+        java.util.List<JSONObject> empty = new java.util.ArrayList<>();
+        for (int s = 0; s < 30; s++) {
+            JSONObject q = Model.boxPlace(b, s);
+            if (p.at(q) == null) {
+                empty.add(q);
+            }
+        }
+        int moved = 0, skipped = 0;
+        Model m = v.app.model();
+        for (String k : picks) {
+            JSONObject from = pickPlaces.get(k), mon = from == null ? null : p.at(from);
+            if (mon == null || (from.has("box") && from.optInt("box") == b)) {
+                continue;
+            }
+            if (empty.isEmpty()) {
+                skipped++;
+                continue;
+            }
+            if (from.has("party") && (m == null || !m.pcReachable())) {
+                skipped++;
+                continue;
+            }
+            JSONObject to = empty.remove(0);
+            order(Model.move(from, mon, to, null));
+            moved++;
+        }
+        picks.clear();
+        pickPlaces.clear();
+        picking = false;
+        if (skipped > 0) {
+            v.message(moved + " moved. " + skipped + (empty.isEmpty() ? " didn't fit: that box is full." : " stay: the party moves only near a PC."));
+        }
+        v.invalidate();
     }
 }

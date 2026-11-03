@@ -9,4 +9,5 @@ public interface Crypto {
     byte[] sessionKey(byte[] key, byte[] phoneNonce, byte[] gameNonce);
     byte[] seal(byte[] key, int seq, byte[] msg);
     byte[] open(byte[] key, byte[] sealed);
+    byte[] derive(byte[] key32, String word);   // 16 bytes: a pipe's ID, a friend's records (PhoneProto_Derive)
 }

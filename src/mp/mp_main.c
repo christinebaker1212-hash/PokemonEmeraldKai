@@ -1329,6 +1329,13 @@ static void HandleMessage(u8 type, u8 *data, u16 len)
     case MPMSG_S_STORE:
         MP_Store_OnMessage(data, len);
         break;
+    case MPMSG_S_PIPE:
+    case MPMSG_S_MAIL:
+    {
+        void PhoneFriends_OnServer(u8 type, const u8 *data, u16 len);   // mp_phone_friends.c
+        PhoneFriends_OnServer(type, data, len);
+        break;
+    }
     case MPMSG_S_RELAY:
         if (len < 2 || data[0] >= MP_MAX_PLAYERS)
             return;
@@ -1445,6 +1452,11 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
         MP_GardenNet_OnRelay(from, data, len);
     else if (data[0] >= MPR_FARM_FIRST && data[0] < MPR_FARM_FIRST + 3)
         MP_Farm_OnRelay(from, data, len);
+    else if (data[0] == 19)   // MPR_FRIEND: a save's ID and friend key (mp_phone_friends.c)
+    {
+        void PhoneFriends_OnRelay(u8 from, const u8 *data, u16 len);
+        PhoneFriends_OnRelay(from, data, len);
+    }
     else if (data[0] < MPR_LINK_PLAYER)
         MP_Trainer_OnRelay(from, data, len);
 }

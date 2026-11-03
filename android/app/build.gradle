@@ -55,6 +55,11 @@ android {
         }
     }
 
+    // (the card packs are read a picture at a time: kept uncompressed, so the reader can skip to one)
+    androidResources {
+        noCompress 'bin'
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17

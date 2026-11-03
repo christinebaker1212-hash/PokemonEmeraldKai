@@ -150,6 +150,20 @@ void MP_Phone_OnSaveLoaded(void)
     if (!sHaveFile)
         NewSaveId();
     SpawnsLoad();
+    PhoneWalk_Load();
+    PhoneFriends_Load();
+    PhoneTrade_Load();
+    PhoneCards_Load();
+}
+
+const u8 *MP_Phone_SaveId(void)
+{
+    return sFile.saveId;
+}
+
+const u8 *MP_Phone_KeyOf(u32 i)
+{
+    return i < sFile.count ? sFile.phones[i].key : sFile.phones[0].key;
 }
 
 // new_game.c: a new game is a different save, even in the same slot: its own ID and no phones
@@ -175,7 +189,7 @@ static void EnsureFile(void)
 
 // ------------------------------------------------------------------------------------------------ JSON, in and out
 
-struct Buf sOut;
+struct Buf sOut, sDoneExtra;
 
 void BufReset(struct Buf *b)
 {
@@ -281,7 +295,7 @@ static bool8 JsonObj(const char *json, const char *key, char *out, size_t size)
 
 // ------------------------------------------------------------------------------------------ what the phone sees
 
-static struct PokemonStorage *Storage(void)
+struct PokemonStorage *Storage(void)
 {
     return MP_PersonalStorage();
 }
@@ -352,6 +366,8 @@ void BufBoxMon(struct Buf *b, struct BoxPokemon *box)
             BufAdd(b, "\"");
         }
     }
+    if (MP_Phone_OnOffer(pid, ot))
+        BufAdd(b, ",\"off\":1");   // (ON OFFER for a trade by mail: mp_phone_trade.c)
     BufAdd(b, ",\"m\":[");
     for (i = 0; i < MAX_MON_MOVES; i++)
         BufAdd(b, "%s%u", i ? "," : "", (unsigned)GetBoxMonData(box, MON_DATA_MOVE1 + i));
@@ -468,7 +484,7 @@ static u32 Fnv(u32 h, const void *data, u32 n)
     return h;
 }
 
-static u32 Rev(void)
+u32 Rev(void)
 {
     u32 h = 2166136261u, p, i, v;
     h = Fnv(h, OwnParty(), sizeof(gPlayerParty));
@@ -488,6 +504,10 @@ static u32 Rev(void)
         v = GetSetPokedexFlag(i, FLAG_GET_SEEN) | (GetSetPokedexFlag(i, FLAG_GET_CAUGHT) << 1);
         h = Fnv(h, &v, 1);
     }
+    v = PhoneTrade_Hash();   // (trades by mail move along on their own: the app sees each step)
+    h = Fnv(h, &v, 4);
+    v = PhoneCards_Hash();   // (the card collection, decks, packs, today's prizes)
+    h = Fnv(h, &v, 4);
     return h;
 }
 
@@ -511,6 +531,8 @@ static void BufBag(struct Buf *b)
     }
     BufAdd(b, "]");
 }
+
+static const u8 *sSnapPhone;   // (the phone the snapshot is for: its walk)
 
 static void BufSnapshot(struct Buf *b)
 {
@@ -557,6 +579,10 @@ static void BufSnapshot(struct Buf *b)
     }
     BufAdd(b, "],");
     BufBag(b);
+    PhoneWalk_Snapshot(b, sSnapPhone);
+    PhoneFriends_Snapshot(b);
+    PhoneTrade_Snapshot(b);
+    PhoneCards_Snapshot(b);
     // The POKeDEX: a bit per national number (1 first), as hex: seen, then caught
     {
         static const char *const sWhat[] = {"seen", "caught"};
@@ -582,10 +608,8 @@ static void BufSnapshot(struct Buf *b)
 
 // ------------------------------------------------------------------------------------------------------- orders
 
-enum { LOC_NONE, LOC_PARTY, LOC_BOX };
-struct Loc { u8 kind, box, slot; };
 
-static bool8 ParseLoc(const char *json, const char *key, struct Loc *loc)
+bool8 ParseLoc(const char *json, const char *key, struct Loc *loc)
 {
     char obj[96];
     long long v;
@@ -612,14 +636,14 @@ static bool8 ParseLoc(const char *json, const char *key, struct Loc *loc)
     return FALSE;
 }
 
-static struct BoxPokemon *BoxAt(const struct Loc *loc)
+struct BoxPokemon *BoxAt(const struct Loc *loc)
 {
     if (loc->kind == LOC_PARTY)
         return &gPlayerParty[loc->slot].box;
     return &Storage()->boxes[loc->box][loc->slot];
 }
 
-static bool8 Empty(const struct Loc *loc)
+bool8 Empty(const struct Loc *loc)
 {
     if (loc->kind == LOC_PARTY && loc->slot >= gPlayerPartyCount)
         return TRUE;
@@ -627,14 +651,14 @@ static bool8 Empty(const struct Loc *loc)
 }
 
 // The POKeMON there is the one the phone means: same personality and Trainer ID (0, 0: the place is empty)
-static bool8 Is(const struct Loc *loc, u32 pid, u32 ot)
+bool8 Is(const struct Loc *loc, u32 pid, u32 ot)
 {
     if (Empty(loc))
         return pid == 0 && ot == 0;
     return GetBoxMonData(BoxAt(loc), MON_DATA_PERSONALITY) == pid && GetBoxMonData(BoxAt(loc), MON_DATA_OT_ID) == ot;
 }
 
-static u32 NonEggsInParty(void)
+u32 NonEggsInParty(void)
 {
     u32 i, n = 0;
     for (i = 0; i < gPlayerPartyCount; i++)
@@ -646,16 +670,16 @@ static u32 NonEggsInParty(void)
 #define CHANGED_MAX 4
 static struct Loc sChanged[CHANGED_MAX];
 static u8 sChangedCount;
-static bool8 sBagChanged;
+bool8 sBagChanged;
 
-static void Changed(const struct Loc *loc)
+void Changed(const struct Loc *loc)
 {
     if (sChangedCount < CHANGED_MAX)
         sChanged[sChangedCount++] = *loc;
 }
 
 // Party slots shift when one empties: the whole party is sent again
-static void PartyChanged(void)
+void PartyChanged(void)
 {
     struct Loc l = {LOC_PARTY, 0, 0xFF};
     Changed(&l);
@@ -1061,6 +1085,7 @@ static void Bye(int c, const char *why)
 
 static void SendSnapshot(int c)
 {
+    sSnapPhone = sSess[c].phone >= 0 ? sFile.phones[sSess[c].phone].id : NULL;
     BufReset(&sOut);
     BufSnapshot(&sOut);
     SendBuf(c, &sOut);
@@ -1144,6 +1169,9 @@ static void SendDone(int c, u32 id, const char *why, bool8 fresh)
         sUseLearnedN = sUseWantsN = 0;
         sUseEvolve = FALSE;
     }
+    if (fresh && why == NULL && sDoneExtra.len > 0)
+        BufAdd(&sOut, ",%s", sDoneExtra.p);   // (a walk, a homecoming, training's gains)
+    BufReset(&sDoneExtra);
     if (fresh && why == NULL)
         BufAdd(&sOut, ",\"rev\":%u", (unsigned)Rev());
     BufAdd(&sOut, "}");
@@ -1299,7 +1327,7 @@ static const char *Apply(const char *json)
         return DoItem(json, FALSE);
     if (strcmp(op, "use") == 0)
         return DoUse(json);
-    return "unknown";
+    return PhoneWalk_Apply(op, json);
 }
 
 // An order the game is carrying out, written down first ("<save>.phone.busy": the phone's record and the order's ID)
@@ -1356,11 +1384,21 @@ static void BusyRecover(void)
     remove(path);
 }
 
+static s8 sOrderPhone = -1;
+
+const u8 *PhoneOrderPhone(void)
+{
+    static const u8 sNone[PHONE_ID_SIZE];
+    return sOrderPhone >= 0 && sOrderPhone < (s8)sFile.count ? sFile.phones[sOrderPhone].id : sNone;
+}
+
 static void Finish(int c, u32 id, const char *json)
 {
     const char *why;
     struct Done *d;
     BusyMark(sSess[c].phone, id);
+    sOrderPhone = sSess[c].phone;
+    BufReset(&sDoneExtra);
     why = Apply(json);
     BusyClear();
     d = &sDone[sDoneNext];
@@ -1446,7 +1484,7 @@ static void OnSealed(int c, const char *json)
     char t[16];
     if (!JsonStr(json, "t", t, sizeof(t)))
         return;
-    if (PhoneDev_OnSealed(c, t, json))
+    if (PhoneDev_OnSealed(c, t, json) || PhoneWalk_OnSealed(c, t, json))
         return;
     if (strcmp(t, "snap") == 0)
         SendSnapshot(c);
@@ -1655,7 +1693,7 @@ static void OnHello(int c, const char *json)
     }
     sSess[c].state = SESS_LIVE;
     MPNet_Log("phone: \"%s\" linked (conn %d)", sFile.phones[i].name, c);
-    PlaySE(SE_POKENAV_CALL);
+    // (silently: the phone links again and again as it comes and goes, and a sound each time grated)
 }
 
 static void OnFrame(int c, const u8 *body, size_t len)
@@ -1713,6 +1751,8 @@ void MP_Phone_Update(void)
     const u8 *frame;
     size_t len;
     char udp[96], idHex[2 * PHONE_SAVEID_SIZE + 1];
+    PhoneFriends_Update();   // (presence and the pipes: whenever the game is on a co-op server)
+    PhoneTrade_Update();     // (trades by mail: deposits, pickups, the trade scene)
     if (!sStarted)
     {
         if (!sHaveFile || !Wanted())
@@ -1762,6 +1802,7 @@ void MP_Phone_Update(void)
             sSess[c].watchTimer = 0;
             SendWatch(c);
         }
+    PhoneWalk_Update();
     // The device's live feeds (the battle)
     for (c = 0; c < PHONE_NET_CONNS; c++)
         PhoneDev_Update(c, sSess[c].state == SESS_LIVE);
@@ -1833,6 +1874,7 @@ void MP_Phone_ForgetAll(void)
         PhoneNet_Close(c);
         sSess[c].state = SESS_NONE;
     }
+    PhoneWalk_ForgetAll();   // (a walking POKéMON comes home as it left: never lost with the phone)
     memset(sFile.phones, 0, sizeof(sFile.phones));
     sFile.count = 0;
     WriteNow();

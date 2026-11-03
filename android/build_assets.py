@@ -100,6 +100,55 @@ def charmap():
     return out
 
 
+def tt_art():
+    """TRIPLE TRIAD's card faces for the phone: the game's own pack (graphics/tt/cards.bin, "TTCA") with only the large
+    faces (104x128) and the extras (backs, plates, stars, types, digits): the phone draws every size from those"""
+    src = open(os.path.join(ROOT, 'graphics/tt/cards.bin'), 'rb').read()
+    top, extras = struct.unpack('<II', src[4:12])
+    head = 12 + top * 24 + extras * 8
+    out = bytearray(head)
+    out[0:12] = src[0:12]
+    def put(at, off, size):
+        nonlocal out
+        if size:
+            out[at:at + 8] = struct.pack('<II', len(out), size)
+            out += src[off:off + size]
+    for i in range(top):
+        off, size = struct.unpack('<II', src[12 + i * 24:12 + i * 24 + 8])
+        put(12 + i * 24, off, size)
+    for k in range(extras):
+        at = 12 + top * 24 + k * 8
+        off, size = struct.unpack('<II', src[at:at + 8])
+        put(at, off, size)
+    open(os.path.join(OUT, 'tt_cards.bin'), 'wb').write(bytes(out))
+
+
+def tcg_art():
+    """The POKéMON cards for the phone: the game's printed cards (graphics/tcg/printed.bin, "TCGP": each card's
+    picture and where its illustration sits, then the card back) as WebP at the same size, the same layout: 443
+    pictures in about 11 MB instead of 19 (the phone shows them at most a little larger than they are)"""
+    import io
+    from PIL import Image
+    out_path = os.path.join(OUT, 'tcg_cards.bin')
+    src_path = os.path.join(ROOT, 'graphics/tcg/printed.bin')
+    if os.path.exists(out_path) and os.path.getmtime(out_path) >= os.path.getmtime(src_path):
+        return   # (made already: the WebP encoding takes a while)
+    src = open(src_path, 'rb').read()
+    count = struct.unpack('<I', src[4:8])[0]
+    head = 8 + 16 * (count + 1)
+    out = bytearray(src[0:head])
+    for i in range(count + 1):
+        off, size, x, y, w, h = struct.unpack('<IIHHHH', src[8 + 16 * i:8 + 16 * i + 16])
+        if size:
+            im = Image.open(io.BytesIO(src[off:off + size])).convert('RGB')
+            b = io.BytesIO()
+            im.save(b, 'WEBP', quality=78, method=4)
+            data = b.getvalue()
+            out[8 + 16 * i:8 + 16 * i + 16] = struct.pack('<IIHHHH', len(out), len(data), x, y, w, h)
+            out += data
+    open(out_path, 'wb').write(bytes(out))
+
+
 def main():
     exp = sys.argv[1] if len(sys.argv) > 1 else None
     if exp is None:
@@ -127,6 +176,8 @@ def main():
     write_png(os.path.join(OUT, 'types.png'), *read_png(os.path.join(exp, 'types.png')))
     for name in ('dex_info.png', 'dex_list.png', 'footprints.png', 'ribbons.png', 'trainers.png'):
         write_png(os.path.join(OUT, name), *read_png(os.path.join(exp, name)))
+    tt_art()
+    tcg_art()
     # the town maps (the live map): KANTO's and the Sevii Islands' pages are narrower than the full view, and black
     # past their right edge: see-through there, so the device's own background shows
     page = 0
