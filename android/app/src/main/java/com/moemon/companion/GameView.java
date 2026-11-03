@@ -188,8 +188,8 @@ public final class GameView extends View {
         } else {
             switch (cl.status()) {
                 case LINKED:
-                    s = "LINKED";
-                    color = 0xFF88F888;
+                    s = app.locked() ? "IN BATTLE" : "LINKED";
+                    color = app.locked() ? 0xFFF8A050 : 0xFF88F888;
                     break;
                 case LINKING:
                     s = m == null ? "LINKING..." : "AWAY " + ago(m.asOf);

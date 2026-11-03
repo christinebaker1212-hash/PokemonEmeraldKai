@@ -2742,6 +2742,20 @@ void MP_TestCommand(const char *cmd, const char *arg)
             SetMonData(&gPlayerParty[slot], MON_DATA_NICKNAME, name);
         }
     }
+    else if (strcmp(cmd, "shinymon") == 0)
+    {
+        // shinymon SLOT SPECIES LEVEL - a shiny Pokémon in a party slot (SLOT from 1; its Trainer ID is its
+        // personality, which makes it shiny; the phone link test checks its colors)
+        int slot = 1, species = 25, level = 5;
+        sscanf(arg, "%d %d %d", &slot, &species, &level);
+        if (slot >= 1 && slot <= PARTY_SIZE)
+        {
+            u32 pid = 0x1234ABCD;
+            CreateMon(&gPlayerParty[slot - 1], species, level, 32, TRUE, pid, OT_ID_PRESET, pid);
+            CalculatePlayerPartyCount();
+            printf("[test] shinymon %d: %d shiny %d\n", slot, species, IsMonShiny(&gPlayerParty[slot - 1]));
+        }
+    }
     else if (strcmp(cmd, "huemon") == 0)
     {
         // huemon SLOT - a party Pokémon's Stadium hue

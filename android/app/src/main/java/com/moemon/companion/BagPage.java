@@ -83,6 +83,10 @@ public final class BagPage extends Page {
         if (art.item(item).optInt("hold") != 1 || m == null || v.app.client == null) {
             return;
         }
+        if (v.app.locked()) {
+            v.message(Companion.LOCKED);
+            return;
+        }
         Menu menu = Menu.make(v, "GIVE TO...");
         JSONArray party = m.party();
         for (int k = 0; party != null && k < party.length(); k++) {

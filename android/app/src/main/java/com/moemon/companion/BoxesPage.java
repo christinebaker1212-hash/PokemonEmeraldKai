@@ -127,9 +127,21 @@ public final class BoxesPage extends Page {
         MonCard.draw(c, art, mon, 10, cy, w - 20);
         if (mon != null) {
             int by = cy + MonCard.HEIGHT + 10, bw = (w - 20) / 3;
-            button(c, moveMode ? "CANCEL" : "MOVE", 10, by, bw, true);
-            button(c, "GIVE", 10 + bw, by, bw, mon.optInt("e") == 0);
-            button(c, "TAKE", 10 + 2 * bw, by, bw, mon.optInt("i") != 0);
+            boolean locked = v.app.locked();
+            if (locked) {
+                moveMode = false;
+                held = null;
+            }
+            button(c, moveMode ? "CANCEL" : "MOVE", 10, by, bw, !locked);
+            button(c, "GIVE", 10 + bw, by, bw, !locked && mon.optInt("e") == 0);
+            button(c, "TAKE", 10 + 2 * bw, by, bw, !locked && mon.optInt("i") != 0);
+            if (locked) {
+                int ty = by + 26;
+                for (String line : wrap(Companion.LOCKED, w - 24)) {
+                    art.text(c, line, 12, ty, 0xFFF8A050, GameArt.WHITE_SHADOW);
+                    ty += 16;
+                }
+            }
             if (moveMode) {
                 art.text(c, "Tap where it should go.", 12, by + 26, GameArt.WHITE_TEXT, GameArt.WHITE_SHADOW);
             }
@@ -215,6 +227,10 @@ public final class BoxesPage extends Page {
         }
         JSONObject mon = selected == null ? null : p.at(selected);
         int by = cardY() + MonCard.HEIGHT + 10, bw = (w - 20) / 3;
+        if (mon != null && y >= by && y < by + 24 && v.app.locked()) {
+            v.message(Companion.LOCKED);
+            return;
+        }
         if (mon != null && y >= by && y < by + 24) {
             int k = (x - 10) / bw;
             if (k == 0) {
@@ -239,6 +255,10 @@ public final class BoxesPage extends Page {
 
     /** A move from one place to another as the game will check it: the POKeMON expected at both */
     private void drop(JSONObject from, JSONObject to, Planned p) {
+        if (v.app.locked()) {
+            v.message(Companion.LOCKED);
+            return;
+        }
         JSONObject a = p.at(from), b = p.at(to);
         if (a == null || Planned.key(from).equals(Planned.key(to))) {
             return;
@@ -254,6 +274,9 @@ public final class BoxesPage extends Page {
 
     @Override
     public boolean longPress(int x, int y) {
+        if (v.app.locked()) {
+            return false;   // (in a battle: nothing moves)
+        }
         JSONObject place = placeAt(x, y);
         Planned p = planned();
         if (place == null || p.at(place) == null) {

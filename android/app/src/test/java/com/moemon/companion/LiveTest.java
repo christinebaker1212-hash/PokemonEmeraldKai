@@ -95,7 +95,8 @@ public class LiveTest {
         Files.write(script.toPath(), String.join("\n",
                 "pressuntil A field 5000", "wait 30",
                 "mp boxput 1 0 25 5", "mp boxput 1 1 1 5", "mp boxput 1 2 4 5",
-                "mp additem 139 20", "mp phone pair", "wait 2000000", "quit").getBytes());
+                "mp additem 139 20", "mp shinymon 4 25 20", "mp phone pair",
+                "wait 4200", "mp wild 263:3", "wait 2000000", "quit").getBytes());
         ProcessBuilder pb = new ProcessBuilder(game.getPath()).directory(root).redirectErrorStream(true);
         java.util.Map<String, String> env = pb.environment();
         env.put("SDL_VIDEODRIVER", "dummy");
@@ -149,6 +150,22 @@ public class LiveTest {
                     && app.model().saveId().equals(saveId), 30, "linked with a snapshot");
             draw(v);
 
+            // the shiny one in the party comes with its own colors (not its species')
+            JSONObject shiny = app.model().party().getJSONObject(3);
+            assertEquals(25, shiny.optInt("s"));
+            assertEquals(1, shiny.optInt("sh"));
+            String pal = shiny.optString("pal");
+            assertEquals(64, pal.length());
+            assertTrue("a shiny's palette isn't its species'", !pal.equals(app.art.species(25).optString("pal")));
+            assertTrue("a plain one has no palette of its own", !app.model().party().getJSONObject(0).has("pal"));
+            v.select(1);
+            tap(v, 60, GameView.TOP + 6 + 3 * 46 + 20);
+            ScreensTest.shot(v, "live_shiny");
+            tap(v, 60, GameView.TOP + 6 + 0 * 46 + 20);
+            v.select(1);
+            tap(v, 60, GameView.TOP + 6 + 0 * 46 + 20);
+            ScreensTest.shot(v, "live_plain");
+
             // GIVE: the box's first POKéMON, its card's GIVE, the BAG's first holdable item
             v.select(0);
             int x0 = (v.width() - 160) / 2 + 8, y0 = GameView.TOP + 4 + 16;
@@ -183,6 +200,16 @@ public class LiveTest {
             tap(v, 40, GameView.TOP + 10);
             idleUntil(() -> !app.spawns.isEmpty(), 20, "a map's spawns");
             draw(v);
+
+            // a battle in the game: the app offers nothing until it's over
+            v.select(0);
+            idleUntil(app::locked, 150, "the battle seen by the app");
+            draw(v);
+            int pending = app.client.orders.pending().size();
+            tap(v, x0 + 12, y0 + 12);
+            tap(v, 10 + bw + bw / 2, by);
+            assertTrue("GIVE is closed in a battle", !(v.overPage() instanceof ItemPickPage));
+            assertEquals("no order in a battle", pending, app.client.orders.pending().size());
             app.pause();
         } finally {
             p.destroy();

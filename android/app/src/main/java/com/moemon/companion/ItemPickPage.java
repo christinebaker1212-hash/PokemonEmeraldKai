@@ -69,6 +69,11 @@ public final class ItemPickPage extends Page {
     public void tap(int x, int y) {
         List<int[]> l = items();
         int i = (y + scroll - 26) / ROW;
+        if (y + scroll >= 26 && i >= 0 && i < l.size() && v.app.locked()) {
+            v.message(Companion.LOCKED);
+            v.showOver(null);
+            return;
+        }
         if (y + scroll >= 26 && i >= 0 && i < l.size() && v.app.client != null) {
             v.app.client.order(Model.item(true, place, mon, l.get(i)[0]));
             v.buzz(false);

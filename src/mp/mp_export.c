@@ -1,6 +1,7 @@
 // Moemon Co-op: the phone app's art and tables, exported by the game itself so the app always shows exactly what
 // the game does (docs/PHONE_LINK.md "The app's art"). MOEMON_EXPORT_APP=DIR runs it at the first frame and quits:
-//   DIR/icons/SPECIES.png   the party icon's two frames (32x64), DIR/front/SPECIES.png the front picture (64x64),
+//   DIR/icons/SPECIES.png   the party icon's two frames (32x64), DIR/front/SPECIES.png the front picture (64x64, as
+//                           palette indexes: gray = index x 17; data.json's species "pal" colors it),
 //   DIR/items/ITEM.png      the BAG icon (24x24), DIR/font.png the normal font (16 glyphs a row, 16x16 cells),
 //   DIR/wallpapers/N.png    a PC box's wallpaper as the PC draws it (160x144: 20x18 tiles, the name's frame on top),
 //   DIR/frames/N.png        the window frames of OPTIONS > FRAME (24x24: 3x3 tiles, corners, sides and middle),
@@ -39,6 +40,7 @@
 #endif
 
 void MP_ExportGlyph(u16 glyphId, u8 out[16][16], u8 *width);   // text.c
+const u32 *MP_SpeciesFrontPal(u16 species);   // pokemon.c
 bool8 MP_WallpaperArt(u8 id, const u32 **tiles, const u32 **tilemap, const u16 **palettes);   // pokemon_storage_system.c
 
 // ------------------------------------------------------------------------------------------- a tiny PNG writer
@@ -160,6 +162,25 @@ static void Tiles(const u8 *tiles, u32 tilesW, u32 tilesH, const u16 *pal, u8 *r
         }
 }
 
+// The same, as indexes: gray (index x 17) and clear for index 0
+static void TilesIndex(const u8 *tiles, u32 tilesW, u32 tilesH, u8 *rgba)
+{
+    u32 tx, ty, y, x, w = tilesW * 8;
+    for (ty = 0; ty < tilesH; ty++)
+        for (tx = 0; tx < tilesW; tx++)
+        {
+            const u8 *t = tiles + (ty * tilesW + tx) * 32;
+            for (y = 0; y < 8; y++)
+                for (x = 0; x < 8; x++)
+                {
+                    u8 idx = (t[y * 4 + x / 2] >> ((x & 1) * 4)) & 0xF;
+                    u8 *o = rgba + ((ty * 8 + y) * w + tx * 8 + x) * 4;
+                    o[0] = o[1] = o[2] = idx * 17;
+                    o[3] = idx ? 255 : 0;
+                }
+        }
+}
+
 static void Json(FILE *f, const u8 *text, size_t max)
 {
     size_t i;
@@ -204,8 +225,9 @@ static void ExportMons(const char *dir)
             memset(sPic, 0, sizeof(sPic));
             LoadSpecialPokePic(&gMonFrontPicTable[s > SPECIES_EGG ? SPECIES_UNOWN : s], sPic,
                                s > SPECIES_EGG ? SPECIES_UNOWN : s, pid, TRUE);
-            LZDecompressWram(GetMonSpritePalFromSpeciesAndPersonality(s > SPECIES_EGG ? SPECIES_UNOWN : s, 0, pid), colors);
-            Tiles(sPic, 8, 8, colors, sRgba);
+            // (as palette indexes: the app colors it with the species' palette, or a POKeMON's own: shiny, hue)
+            (void)colors;
+            TilesIndex(sPic, 8, 8, sRgba);
             snprintf(path, sizeof(path), "%s/front/%u.png", dir, s);
             WritePng(path, sRgba, 64, 64);
         }
@@ -341,8 +363,17 @@ static void ExportData(const char *dir)
             Json(f, gSpeciesNames[base], POKEMON_NAME_LENGTH);
         fprintf(f, ",\"dex\":%u", i < NUM_SPECIES ? SpeciesToNationalPokedexNum(i) : base == SPECIES_UNOWN ? 201 : 0);
         if (base < NUM_SPECIES)
+        {
+            u16 pal[16];
+            u32 k;
             fprintf(f, ",\"t\":[%u,%u],\"g\":%u", gSpeciesInfo[base].types[0], gSpeciesInfo[base].types[1],
                     gSpeciesInfo[base].genderRatio);
+            LZDecompressWram(MP_SpeciesFrontPal(base), pal);
+            fprintf(f, ",\"pal\":\"");
+            for (k = 0; k < 16; k++)
+                fprintf(f, "%04X", pal[k]);
+            fprintf(f, "\"");
+        }
         fprintf(f, "}");
     }
     fprintf(f, "],\"moves\":[");

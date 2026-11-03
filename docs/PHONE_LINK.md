@@ -62,6 +62,11 @@ order when it is. The answer: `{"t":"done","id":N,"ok":1,"why":"","changed":[...
 PC here: towns, cities, routes and buildings only, not caves, the Underground, the BATTLE FRONTIERs or the Elite
 Four), `last` (the party's last POKéMON that isn't an egg), `full`, `egg`, `mail`, `noitem`, `cantheld`, `bagfull`,
 `nothing`, `busy`, `bad`. An order's ID is answered once: sent again, it gets the same answer and is never done twice.
+The place's `battle` is 1 in any battle: the app offers no orders then (Companion.locked). In a co-op or multi
+battle the party is the player's own, set aside in the save block (mp_coop.c SavePlayerParty), never the battle's
+mix with friends' POKéMON (mp_phone.c OwnParty). A POKéMON whose front picture's colors aren't its species' (shiny,
+a Stadium hue) carries `pal`: its 16 colors (BGR555, 4 hex digits each); the export's front pictures are palette
+indexes and data.json's species carry their own `pal`, so the app colors them exactly as the game does.
 `{"t":"ping"}` -> `{"t":"state","rev":R,"queued":N,"applied":N,"place":...}`. `rev` (in "snap" too, and in a fresh
 "done" that was carried out) is a hash of the party, the boxes, the BAG, money, coins and the POKéDEX: the app asks for
 a new snapshot when the game's `rev` isn't its own (the player changed something in the game by hand).

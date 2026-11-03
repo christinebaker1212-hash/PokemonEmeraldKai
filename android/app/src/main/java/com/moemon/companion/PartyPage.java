@@ -40,8 +40,16 @@ public final class PartyPage extends Page {
             JSONObject mon = p.party.get(open);
             MonCard.draw(c, art, mon, 10, 10, w - 20);
             int by = 10 + MonCard.HEIGHT + 10, bw = (w - 20) / 3;
-            button(c, "GIVE", 10, by, bw, mon.optInt("e") == 0);
-            button(c, "TAKE", 10 + bw, by, bw, mon.optInt("i") != 0);
+            boolean locked = v.app.locked();
+            button(c, "GIVE", 10, by, bw, !locked && mon.optInt("e") == 0);
+            button(c, "TAKE", 10 + bw, by, bw, !locked && mon.optInt("i") != 0);
+            if (locked) {
+                int ty = by + 26;
+                for (String line : wrap(Companion.LOCKED, w - 24)) {
+                    art.text(c, line, 12, ty, 0xFFF8A050, GameArt.WHITE_SHADOW);
+                    ty += 16;
+                }
+            }
             button(c, "BACK", 10 + 2 * bw, by, bw, true);
             return;
         }
@@ -81,6 +89,10 @@ public final class PartyPage extends Page {
             if (y >= by && y < by + 24) {
                 int k = (x - 10) / bw;
                 JSONObject place = Model.partyPlace(open);
+                if (k < 2 && v.app.locked()) {
+                    v.message(Companion.LOCKED);
+                    return;
+                }
                 if (k == 0 && mon.optInt("e") == 0) {
                     v.showOver(new ItemPickPage(v, place, mon));
                 } else if (k == 1 && mon.optInt("i") != 0 && v.app.client != null) {

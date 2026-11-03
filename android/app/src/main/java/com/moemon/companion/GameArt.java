@@ -292,16 +292,65 @@ public final class GameArt {
         cell(c, icons, species, 32, 32, 32, x, y, how == ICON_SILHOUETTE ? silhouette : how == ICON_GRAY ? gray : pix);
     }
 
-    /** A POKeMON's front picture (64x64) */
+    /** A POKeMON's front picture (64x64) in its species' colors */
     public void front(Canvas c, int species, int x, int y, boolean silhouetted) {
+        front(c, species, null, x, y, silhouetted);
+    }
+
+    // the pictures are palette indexes (gray = index x 17): colored here by the species' palette or a POKeMON's own
+    private final java.util.LinkedHashMap<String, Bitmap> colored = new java.util.LinkedHashMap<String, Bitmap>(64, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<String, Bitmap> e) {
+            return size() > 64;
+        }
+    };
+
+    /** The 16 colors of a palette written as the game's BGR555 in hex (4 digits each), as ARGB */
+    static int[] palette(String hex) {
+        int[] p = new int[16];
+        for (int i = 0; i < 16 && hex != null && hex.length() >= (i + 1) * 4; i++) {
+            int v = Integer.parseInt(hex.substring(i * 4, i * 4 + 4), 16);
+            p[i] = 0xFF000000 | (((v & 31) * 255 / 31) << 16) | ((((v >> 5) & 31) * 255 / 31) << 8) | (((v >> 10) & 31) * 255 / 31);
+        }
+        return p;
+    }
+
+    /** A front picture colored by pal (a POKeMON's own palette, the snapshot's "pal"), or its species' when null */
+    public void front(Canvas c, int species, String pal, int x, int y, boolean silhouetted) {
         int k = species / 256;
         if (k >= fronts.length) {
             return;
         }
-        if (fronts[k] == null) {
-            fronts[k] = bitmap("game/front_" + k + ".png");
+        if (pal == null || pal.isEmpty()) {
+            pal = species(species).optString("pal", null);
+            if (pal == null) {
+                // (UNOWN's letters past the EGG: UNOWN's colors)
+                pal = species(201).optString("pal", "");
+            }
         }
-        cell(c, fronts[k], species % 256, 64, 64, 16, x, y, silhouetted ? silhouette : pix);
+        String key = species + ":" + pal;
+        Bitmap b = colored.get(key);
+        if (b == null) {
+            if (fronts[k] == null) {
+                fronts[k] = bitmap("game/front_" + k + ".png");
+            }
+            Bitmap sheet = fronts[k];
+            int i = species % 256, sx = (i % 16) * 64, sy = (i / 16) * 64;
+            if (sheet == null || sy + 64 > sheet.getHeight()) {
+                return;
+            }
+            int[] px = new int[64 * 64], colors = palette(pal);
+            sheet.getPixels(px, 0, 64, sx, sy, 64, 64);
+            for (int p = 0; p < px.length; p++) {
+                int idx = Color.alpha(px[p]) == 0 ? 0 : Math.round(Color.red(px[p]) / 17f) & 15;
+                px[p] = idx == 0 ? 0 : colors[idx];
+            }
+            b = Bitmap.createBitmap(px, 64, 64, Bitmap.Config.ARGB_8888);
+            colored.put(key, b);
+        }
+        src.set(0, 0, 64, 64);
+        dst.set(x, y, x + 64, y + 64);
+        c.drawBitmap(b, src, dst, silhouetted ? silhouette : pix);
     }
 
     /** A BAG icon (24x24) */

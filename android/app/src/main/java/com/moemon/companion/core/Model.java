@@ -69,6 +69,11 @@ public final class Model {
         return snap.optJSONObject("place");
     }
 
+    /** The game is in a battle: the PC, moves and items wait (the app doesn't offer them) */
+    public boolean inBattle() {
+        return place() != null && place().optInt("battle") == 1;
+    }
+
     public boolean pcReachable() {
         return place() != null && place().optInt("pc") == 1;
     }

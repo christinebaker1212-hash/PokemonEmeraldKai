@@ -191,6 +191,14 @@ public final class Companion implements LinkClient.Listener {
         return t;
     }
 
+    /** Linked to a game in a battle: nothing in the boxes, party or BAG can change from the app */
+    public boolean locked() {
+        Model m = model();
+        return client != null && client.status() == LinkClient.Status.LINKED && m != null && m.inBattle();
+    }
+
+    public static final String LOCKED = "In a battle! The PC, the party and the BAG wait until it's over.";
+
     public Model model() {
         return client != null ? client.model() : null;
     }

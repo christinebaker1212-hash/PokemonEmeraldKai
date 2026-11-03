@@ -12,8 +12,10 @@
 #include "global.h"
 #include "mp.h"
 #include "mp_region.h"
+#include "battle.h"
 #include "bg.h"
 #include "coins.h"
+#include "decompress.h"
 #include "event_data.h"
 #include "gpu_regs.h"
 #include "item.h"
@@ -41,6 +43,8 @@
 #include "constants/rgb.h"
 #include "constants/songs.h"
 #include "mp_phone_net.h"
+const u32 *MP_BoxMonFrontPal(struct BoxPokemon *box);   // pokemon.c
+const u32 *MP_SpeciesFrontPal(u16 species);
 #include "phone_proto.h"
 #include "monocypher/monocypher.h"
 #include "region_map.h"
@@ -300,6 +304,20 @@ static void BufBoxMon(struct Buf *b, struct BoxPokemon *box)
            (unsigned)GetAbilityBySpecies(species, GetBoxMonData(box, MON_DATA_ABILITY_NUM)),
            (unsigned)GetBoxMonData(box, MON_DATA_POKEBALL), (unsigned)GetBoxMonData(box, MON_DATA_FRIENDSHIP));
     BufText(b, nick, POKEMON_NAME_LENGTH);
+    if (!GetBoxMonData(box, MON_DATA_IS_EGG))
+    {
+        // (shiny, or its Stadium hue: the front picture's 16 colors as the game shows them, when not the species')
+        u16 pal[16], own[16];
+        LZDecompressWram(MP_BoxMonFrontPal(box), pal);
+        LZDecompressWram(MP_SpeciesFrontPal(species), own);
+        if (memcmp(pal, own, sizeof(pal)) != 0)
+        {
+            BufAdd(b, ",\"pal\":\"");
+            for (i = 0; i < 16; i++)
+                BufAdd(b, "%04X", pal[i]);
+            BufAdd(b, "\"");
+        }
+    }
     BufAdd(b, ",\"m\":[");
     for (i = 0; i < MAX_MON_MOVES; i++)
         BufAdd(b, "%s%u", i ? "," : "", (unsigned)GetBoxMonData(box, MON_DATA_MOVE1 + i));
@@ -335,6 +353,15 @@ static bool8 PcReachable(void)
     return TRUE;
 }
 
+// The player's own party: in a co-op or multi battle gPlayerParty holds friends' POKeMON too, and the real party is
+// set aside in the save block (mp_coop.c SavePlayerParty) until the battle ends
+static struct Pokemon *OwnParty(void)
+{
+    if (gMain.inBattle && (gMpCoopBattle || (gBattleTypeFlags & BATTLE_TYPE_MULTI)))
+        return gSaveBlock1Ptr->playerParty;
+    return gPlayerParty;
+}
+
 static bool8 Safe(void)
 {
     return MP_IsLocalFree() && !gMain.inBattle;
@@ -342,8 +369,9 @@ static bool8 Safe(void)
 
 static void BufPlace(struct Buf *b)
 {
-    BufAdd(b, "\"place\":{\"map\":[%u,%u],\"type\":%u,\"pc\":%u,\"safe\":%u}", gSaveBlock1Ptr->location.mapGroup,
-           gSaveBlock1Ptr->location.mapNum, gMapHeader.mapType, PcReachable(), Safe());
+    BufAdd(b, "\"place\":{\"map\":[%u,%u],\"type\":%u,\"pc\":%u,\"safe\":%u,\"battle\":%u}",
+           gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, gMapHeader.mapType, PcReachable(), Safe(),
+           gMain.inBattle != 0);
 }
 
 // A hash of everything the snapshot shows that can change (party, boxes, BAG, money, POKeDEX): "rev" in "snap" and
@@ -359,7 +387,7 @@ static u32 Fnv(u32 h, const void *data, u32 n)
 static u32 Rev(void)
 {
     u32 h = 2166136261u, p, i, v;
-    h = Fnv(h, gPlayerParty, sizeof(gPlayerParty));
+    h = Fnv(h, OwnParty(), sizeof(gPlayerParty));
     h = Fnv(h, Storage(), sizeof(struct PokemonStorage));
     for (p = 0; p < POCKETS_COUNT; p++)
         for (i = 0; i < gBagPockets[p].capacity; i++)
@@ -416,10 +444,10 @@ static void BufSnapshot(struct Buf *b)
     BufAdd(b, ",\"party\":[");
     for (i = 0, n = 0; i < PARTY_SIZE; i++)
     {
-        if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) == SPECIES_NONE)
+        if (GetMonData(&OwnParty()[i], MON_DATA_SPECIES) == SPECIES_NONE)
             continue;
         BufAdd(b, "%s", n++ ? "," : "");
-        BufPartyMon(b, &gPlayerParty[i]);
+        BufPartyMon(b, &OwnParty()[i]);
     }
     BufAdd(b, "],\"box\":%u,\"boxes\":[", st->currentBox);
     for (i = 0; i < TOTAL_BOXES_COUNT; i++)
@@ -979,10 +1007,10 @@ static void SendDone(int c, u32 id, const char *why, bool8 fresh)
             BufAdd(&sOut, "{\"party\":[");
             for (k = 0; k < PARTY_SIZE; k++)
             {
-                if (GetMonData(&gPlayerParty[k], MON_DATA_SPECIES) == SPECIES_NONE)
+                if (GetMonData(&OwnParty()[k], MON_DATA_SPECIES) == SPECIES_NONE)
                     continue;
                 BufAdd(&sOut, "%s", n++ ? "," : "");
-                BufPartyMon(&sOut, &gPlayerParty[k]);
+                BufPartyMon(&sOut, &OwnParty()[k]);
             }
             BufAdd(&sOut, "]}");
         }

@@ -6958,6 +6958,21 @@ static const struct CompressedSpritePalette *MonSpritePalStruct(u16 species, u32
         return &gMonPaletteTable[species];
 }
 
+// Moemon Co-op: a box Pokémon's front palette as the game shows it (shiny, its Stadium hue), for the phone link
+// (mp_phone.c), and the species' own palette to compare with
+const u32 *MP_BoxMonFrontPal(struct BoxPokemon *box)
+{
+    u16 species = GetBoxMonData(box, MON_DATA_SPECIES, 0);
+    u32 otId = GetBoxMonData(box, MON_DATA_OT_ID, 0);
+    u32 personality = GetBoxMonData(box, MON_DATA_PERSONALITY, 0);
+    return MP_Hue_Lz(MonSpritePal(species, otId, personality), species, MP_Hue_OfBoxMon(box));
+}
+
+const u32 *MP_SpeciesFrontPal(u16 species)
+{
+    return gMonPaletteTable[species > NUM_SPECIES ? SPECIES_NONE : species].data;
+}
+
 // Moemon Co-op: a nicknamed Pokémon's palette is turned to its Stadium hue (mp_hue.c)
 const u32 *GetMonFrontSpritePal(struct Pokemon *mon)
 {
