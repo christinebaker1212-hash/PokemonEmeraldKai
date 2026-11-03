@@ -10,6 +10,7 @@
 // fades with the screen (MP_FadeFit), and it uses its own random numbers so it never touches the battle's.
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "global.h"
 #include "battle.h"
 #include "battle_anim.h"
@@ -176,6 +177,33 @@ static u16 Mix(u16 under, u16 over, u8 alpha)   // alpha in sixteenths of `over`
 
 // One frame of a 1D-mapped 4bpp sprite (w, h in pixels; firstTile its first tile), top-left at x, y; half size
 // draws every other pixel (Hail's smaller stones)
+// What the weather may cover (the user: never the health boxes; half the rain and hail in front of the Pokémon, half
+// behind): a pixel of a battler's sprite only for the drops in front, no other sprite's (health boxes, their bars,
+// the party balls) at all. gMpPixelObjPal (gba_easy_draw.c): each pixel's sprite palette, + 1
+extern u8 gMpPixelObjPal[DISPLAY_HEIGHT * DISPLAY_WIDTH];
+static u8 sBattlerPal[64];   // (palette + 1 -> a battler's: this frame)
+static bool8 sInFront;       // (the drop being drawn)
+
+static void FindBattlerPalettes(void)
+{
+    u32 i;
+    memset(sBattlerPal, 0, sizeof(sBattlerPal));
+    for (i = 0; i < gBattlersCount && i < MAX_BATTLERS_COUNT; i++)
+    {
+        u8 id = gBattlerSpriteIds[i];
+        if (id < MAX_SPRITES && gSprites[id].inUse)
+            sBattlerPal[gSprites[id].oam.paletteNum & 63] = TRUE;
+    }
+}
+
+static bool8 MayCover(int x, int y)
+{
+    u8 owner = gMpPixelObjPal[y * DISPLAY_WIDTH + x];
+    if (owner == 0)
+        return TRUE;
+    return sBattlerPal[(owner - 1) & 63] && sInFront;
+}
+
 static void Blit(u16 *frame, const struct Art *a, u16 firstTile, int w, int h, int x, int y, bool8 half, u8 alpha)
 {
     int px, py, tw = w / 8, step = half ? 2 : 1;
@@ -192,7 +220,7 @@ static void Blit(u16 *frame, const struct Art *a, u16 firstTile, int w, int h, i
                 continue;
             b = a->tiles[(firstTile + (py / 8) * tw + px / 8) * 32 + (py % 8) * 4 + (px % 8) / 2];
             c = (px & 1) ? (b >> 4) : (b & 0xF);
-            if (c == 0)
+            if (c == 0 || !MayCover(sx, sy))
                 continue;
             if (alpha >= 16)
                 frame[sy * DISPLAY_WIDTH + sx] = Shade(a->pal[c]);
@@ -230,6 +258,7 @@ static void UpdateRain(u16 *frame, bool8 heavy)
             d->x += 1;
             d->y += 4;
         }
+        sInFront = (i & 1) == 0;   // (half the drops in front of the Pokémon, half behind)
         Blit(frame, &sW.rain, sDropFrameAt[d->t] * 8, 16, 32, d->x - 8, d->y - 16, FALSE, 16);
         if (++d->t >= ARRAY_COUNT(sDropFrameAt))
             d->on = FALSE;
@@ -262,6 +291,7 @@ static void UpdateHail(u16 *frame)
         struct Stone *s = &sW.stones[i];
         if (!s->on)
             continue;
+        sInFront = (i & 1) == 0;   // (half the hail in front of the Pokémon, half behind)
         if (!s->hit)
         {
             s->x += 4;
@@ -508,6 +538,8 @@ void MP_BattleWeather_Composite(u16 *frame)
         sW.lastWeather = w;
     }
     sW.frame++;
+    FindBattlerPalettes();
+    sInFront = TRUE;   // (the sandstorm's crescents: in front of the Pokémon, never the health boxes)
     MP_FadeFit_FromPalette(&sFit, 0);   // fade as the battle scene does
     if (w & B_WEATHER_SANDSTORM)
         LoadSandBackground();
