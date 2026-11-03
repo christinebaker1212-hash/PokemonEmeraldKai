@@ -88,6 +88,7 @@ struct Editor
     int recovered = 0;                // maps whose unsaved edits came back from the recovery files
     std::string message;              // the status bar's last message ("Saved 3 maps")
     std::string title;
+    bool musicOpen = false;           // Tools > Music
     unsigned int messageUntil = 0;
 };
 
@@ -106,6 +107,8 @@ void SetBlock(int map, int x, int y, int base, int now);
 long CurrentProp(int map, const char *kind, const std::string &key, const char *prop, long base);
 void SetProp(int map, const char *kind, const std::string &key, const char *prop, long base, long now);
 std::string EditsText(int map);
+long CurrentMusic(int map, long base);
+void SetMusic(int map, long base, long now);
 void LoadAllEdits();
 void SendToGame(int map);
 void SendAllToGame();
@@ -128,6 +131,12 @@ void Message(const char *fmt, ...);
 void WildPanel();
 void Wild_TestCommand(const char *cmd, const char *arg);
 
+// maker_music.cpp
+void MusicWindow();
+bool SongPicker(const char *id, int *song);
+void Music_TestCommand(const char *cmd, const char *arg);
+void Music_Dropped(const std::string &path);
+
 // maker_icons.cpp
 bool IconButton(const char *id, int icon, const char *tooltip, bool selected, bool enabled);
 void ToolbarSeparator();
@@ -142,6 +151,7 @@ int MapView_SelectedMetatile();
 void MapView_Inspector();   // the selected event's details (the INSPECTOR panel)
 void MapView_EditsChanged(int map);
 void MapView_Problems();     // the PROBLEMS panel's entries
+void MapView_MapInspector(); // the map's own: its music, its connections
 int MapView_ProblemCount();
 
 } // namespace maker

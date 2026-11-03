@@ -344,6 +344,7 @@ static void InspectorPanel()
         row("Size", size);
         ImGui::EndTable();
     }
+    MapView_MapInspector();
     MapView_Inspector();
     ImGui::End();
 }
@@ -454,6 +455,11 @@ static void MenuBar()
         }
         if (ImGui::MenuItem("Reset panels"))
             gEd.layoutBuilt = false;
+        ImGui::EndMenu();
+    }
+    if (ImGui::BeginMenu("Tools"))
+    {
+        ImGui::MenuItem("Music...", NULL, &gEd.musicOpen);
         ImGui::EndMenu();
     }
     if (ImGui::BeginMenu("Help"))
@@ -778,6 +784,7 @@ static void Frame()
     InspectorPanel();
     ProblemsPanel();
     WildPanel();
+    MusicWindow();
     StatusBar();
     ClosePrompt();
     // (a slider let go or a stroke ended: that's one undo step, sent to the game)
@@ -856,6 +863,7 @@ extern "C" int MakerUi_HandleEvent(const void *ev)
     case SDL_MOUSEMOTION: id = e->motion.windowID; break;
     case SDL_MOUSEBUTTONDOWN: case SDL_MOUSEBUTTONUP: id = e->button.windowID; break;
     case SDL_MOUSEWHEEL: id = e->wheel.windowID; break;
+    case SDL_DROPFILE: id = e->drop.windowID; break;
     default: return 0;
     }
     if (id != SDL_GetWindowID(gEd.win))
@@ -864,6 +872,16 @@ extern "C" int MakerUi_HandleEvent(const void *ev)
     ImGui_ImplSDL2_ProcessEvent(e);
     if (e->type == SDL_WINDOWEVENT && e->window.event == SDL_WINDOWEVENT_CLOSE)
         gEd.wantClose = true;
+    if (e->type == SDL_DROPFILE && e->drop.file)
+    {
+        // a file dropped on the editor: a .kaisong for the MUSIC window
+        std::string path = e->drop.file;
+        SDL_free(e->drop.file);
+        if (path.size() > 8 && path.compare(path.size() - 8, 8, ".kaisong") == 0)
+            Music_Dropped(path);
+        else
+            Message("Only .kaisong files can be dropped here (for now)");
+    }
     return 1;
 }
 
@@ -930,6 +948,19 @@ extern "C" void MakerUi_TestCommand(const char *line)
         int m = arg[0] ? MakerApi_FindMap(arg) : gEd.map;
         if (m >= 0)
             printf("[maker] edits of %s:\n%s[maker] end\n", gEd.maps[m].name, EditsText(m).c_str());
+    }
+    else if (c == "track" || c == "replace")
+        Music_TestCommand(c.c_str(), arg);
+    else if (c == "music")
+    {
+        // music SONGNAME: the open map's music
+        int song = MakerApi_SongId(arg);
+        if (song >= 0 && gEd.map >= 0)
+        {
+            BeginChange(gEd.map);
+            SetMusic(gEd.map, gEd.maps[gEd.map].music, song);
+            EndChange();
+        }
     }
     else if (c == "wild" || c == "wildchance")
         Wild_TestCommand(c.c_str(), arg);

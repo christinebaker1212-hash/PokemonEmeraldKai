@@ -93,6 +93,24 @@ static std::string PropKey(const char *kind, const std::string &key, const char 
     return std::string(kind) + " " + key + " " + prop;
 }
 
+long CurrentMusic(int map, long base)
+{
+    const MapEdits *e = FindEdits(map);
+    if (!e)
+        return base;
+    auto it = e->props.find("music");
+    return it == e->props.end() || it->second.was != base ? base : it->second.now;
+}
+
+void SetMusic(int map, long base, long now)
+{
+    MapEdits &e = Edits(map);
+    if (now == base)
+        e.props.erase("music");
+    else
+        e.props["music"] = PropEdit{base, now};
+}
+
 long CurrentProp(int map, const char *kind, const std::string &key, const char *prop, long base)
 {
     const MapEdits *e = FindEdits(map);
@@ -135,10 +153,18 @@ static int PropTable(const std::string &prop)
     return -1;
 }
 
+static const char *const kDirections[] = {"", "down", "up", "left", "right", "dive", "emerge"};
+
 static std::string ValueText(const std::string &prop, long v)
 {
     char buf[96];
     int table = PropTable(prop);
+    if (prop == "music")
+        return MakerApi_SongName((int)v);
+    if (prop == "direction")
+        return v >= 1 && v <= 6 ? kDirections[v] : "down";
+    if (prop == "map")
+        return v >= 0 && v < (long)gEd.maps.size() ? gEd.maps[v].name : "MAP_UNDEFINED";
     if (prop == "dest")
     {
         int m = (int)(v >> 8);
@@ -158,6 +184,25 @@ static std::string ValueText(const std::string &prop, long v)
 static bool TextValue(const std::string &prop, const char *s, long *v)
 {
     int table = PropTable(prop);
+    if (prop == "music")
+    {
+        int id = MakerApi_SongId(s);
+        *v = id;
+        return id >= 0;
+    }
+    if (prop == "direction")
+    {
+        for (int i = 1; i <= 6; i++)
+            if (!strcmp(s, kDirections[i]))
+                return *v = i, true;
+        return false;
+    }
+    if (prop == "map")
+    {
+        int m = MakerApi_FindMap(s);
+        *v = m;
+        return m >= 0;
+    }
     if (prop == "dest")
     {
         const char *colon = strchr(s, ':');
@@ -233,6 +278,12 @@ static bool ParseText(const std::string &text, int *mapOut, MapEdits *out)
                 return false;
             e.w = n >= 4 ? atoi(w[2]) : gEd.maps[map].width;
             e.h = n >= 4 ? atoi(w[3]) : gEd.maps[map].height;
+        }
+        else if (n == 3 && !strcmp(w[0], "music"))
+        {
+            long a, b;
+            if (TextValue("music", w[1], &a) && TextValue("music", w[2], &b))
+                e.props["music"] = PropEdit{a, b};
         }
         else if (n == 5 && !strcmp(w[0], "wild"))
         {

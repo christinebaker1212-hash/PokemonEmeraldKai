@@ -12,6 +12,11 @@
 //   add hidden N x=.. y=.. elevation=.. item=..    a hidden item
 //   add sign N x=.. y=.. elevation=.. script=..    a sign reading one of the map's own signs' scripts
 //   wild AREA SLOT PROP WAS NOW                    AREA land / water / rock / fish, PROP species / min / max
+//   music WAS NOW                                  the map's music: MUS_X, or a new track's name (MoemonMaker/music/)
+//   connection INDEX PROP WAS NOW                  PROP direction (up / down / left / right / dive / emerge), map,
+//                                                  offset; or removed 0 1
+//   add connection N direction=.. map=MAP_X offset=..
+//   add warp N x=.. y=.. elevation=.. dest=MAP_X:N a new warp (after the map's own: theirs keep their numbers)
 //
 // Person PROPs: x y elevation look movement range_x range_y trainer sight flag (values by name where they have one);
 // "removed" 0 1 takes a person, sign or trigger away. An added person's script is one the map's own people, signs or
@@ -46,15 +51,17 @@ extern const u8 Maker_EventScript_Nothing[];
 
 const char *Updater_ExeFile(const char *name);
 
-enum { KIND_PERSON, KIND_WARP, KIND_SIGN, KIND_TRIGGER };
+enum { KIND_PERSON, KIND_WARP, KIND_SIGN, KIND_TRIGGER, KIND_CONNECTION };
 enum { PROP_X, PROP_Y, PROP_ELEVATION, PROP_LOOK, PROP_MOVEMENT, PROP_RANGE_X, PROP_RANGE_Y, PROP_TRAINER, PROP_SIGHT,
-       PROP_FLAG, PROP_DEST, PROP_REMOVED, PROP_ITEM, PROP_COUNT };
+       PROP_FLAG, PROP_DEST, PROP_REMOVED, PROP_ITEM, PROP_DIRECTION, PROP_MAP, PROP_OFFSET, PROP_COUNT };
 static const char *const sPropNames[PROP_COUNT] = {"x", "y", "elevation", "look", "movement", "range_x", "range_y",
-                                                   "trainer", "sight", "flag", "dest", "removed", "item"};
+                                                   "trainer", "sight", "flag", "dest", "removed", "item", "direction",
+                                                   "map", "offset"};
+static const char *const sDirections[] = {"", "down", "up", "left", "right", "dive", "emerge"};   // CONNECTION_*
 
 struct BlockEdit { u16 x, y, was, now; };
 struct WildEdit { u8 area, slot, prop; s32 was, now; };   // prop: 0 species, 1 min, 2 max
-enum { ADD_PERSON, ADD_HIDDEN, ADD_SIGN };
+enum { ADD_PERSON, ADD_HIDDEN, ADD_SIGN, ADD_CONNECTION, ADD_WARP };
 struct AddEdit { u8 kind; u16 n; s32 v[PROP_COUNT]; bool8 has[PROP_COUNT]; char script[80]; };
 struct PropEdit { u8 kind, prop; char key[80]; s32 was, now; };
 
@@ -70,6 +77,8 @@ struct MapEdits
     u32 addCount, addCap;
     struct WildEdit *wild;
     u32 wildCount, wildCap;
+    bool8 hasMusic;
+    s32 musicWas, musicNow;
     // built from the edits: the patched header (NULL until asked for) and blocks
     struct MapHeader *header;
     struct MapEvents *events;
@@ -103,6 +112,25 @@ static bool8 ParseValue(u8 prop, const char *s, s32 *out)
     case PROP_TRAINER: table = MAKER_NAMES_TRAINERTYPE; break;
     case PROP_FLAG: table = MAKER_NAMES_FLAG; break;
     case PROP_ITEM: table = MAKER_NAMES_ITEM; break;
+    case PROP_DIRECTION:
+    {
+        u32 i;
+        for (i = 1; i < ARRAY_COUNT(sDirections); i++)
+            if (strcmp(s, sDirections[i]) == 0)
+            {
+                *out = i;
+                return TRUE;
+            }
+        return FALSE;
+    }
+    case PROP_MAP:
+    {
+        int i = MakerApi_FindMap(s);
+        if (i < 0)
+            return FALSE;
+        *out = i;
+        return TRUE;
+    }
     case PROP_DEST:
     {
         // MAP_X:N -> map index << 8 | warp id
@@ -144,7 +172,7 @@ static void FreeBuilt(struct MapEdits *e)
         free(e->events ? (void *)e->events->coordEvents : NULL);
         free(e->events ? (void *)e->events->bgEvents : NULL);
         free(e->events);
-        free(e->header);
+        free(e->header);   // (an edited connections copy is small and kept: the field may still read it)
     }
     e->header = NULL;
     e->events = NULL;
@@ -196,16 +224,16 @@ static void AddProp(struct MapEdits *e, u8 kind, const char *key, u8 prop, s32 w
 // "add KIND N k=v k=v..."
 static bool8 ParseAdd(struct MapEdits *e, const char *line)
 {
-    static const char *const sKinds[] = {"person", "hidden", "sign"};
+    static const char *const sKinds[] = {"person", "hidden", "sign", "connection", "warp"};
     char kind[16], word[128];
     const char *p;
     int n, used, k, prop;
     struct AddEdit a;
     if (sscanf(line, "add %15s %d %n", kind, &n, &used) < 2)
         return FALSE;
-    for (k = 0; k < 3 && strcmp(kind, sKinds[k]) != 0; k++)
+    for (k = 0; k < 5 && strcmp(kind, sKinds[k]) != 0; k++)
         ;
-    if (k == 3)
+    if (k == 5)
         return FALSE;
     memset(&a, 0, sizeof(a));
     a.kind = k;
@@ -227,7 +255,7 @@ static bool8 ParseAdd(struct MapEdits *e, const char *line)
             return FALSE;
         a.has[prop] = TRUE;
     }
-    if (!a.has[PROP_X] || !a.has[PROP_Y])
+    if (k == ADD_CONNECTION ? !a.has[PROP_DIRECTION] || !a.has[PROP_MAP] : !a.has[PROP_X] || !a.has[PROP_Y])
         return FALSE;
     if (e->addCount == e->addCap)
     {
@@ -284,6 +312,18 @@ static int ParseEdits(const char *text, const char *from)
             continue;
         if (strcmp(word[0], "block") == 0 && n == 5)
             AddBlock(e, atoi(word[1]), atoi(word[2]), strtol(word[3], NULL, 0), strtol(word[4], NULL, 0));
+        else if (strcmp(word[0], "music") == 0 && n == 3)
+        {
+            int was = MakerApi_SongId(word[1]), now = MakerApi_SongId(word[2]);
+            if (was < 0 || now < 0)
+            {
+                printf("[maker] %s line %d: no such song (left out): %s\n", from, lineNo, line);
+                continue;
+            }
+            e->hasMusic = TRUE;
+            e->musicWas = was;
+            e->musicNow = now;
+        }
         else if (strcmp(word[0], "wild") == 0 && n == 5)
         {
             // wild AREA SLOT PROP WAS NOW (5 words read: the line's last two again)
@@ -335,14 +375,14 @@ static int ParseEdits(const char *text, const char *from)
         }
         else if (n == 5)
         {
-            static const char *const sKinds[] = {"person", "warp", "sign", "trigger"};
+            static const char *const sKinds[] = {"person", "warp", "sign", "trigger", "connection"};
             int k, prop;
             s32 was, now;
-            for (k = 0; k < 4 && strcmp(word[0], sKinds[k]) != 0; k++)
+            for (k = 0; k < 5 && strcmp(word[0], sKinds[k]) != 0; k++)
                 ;
             for (prop = 0; prop < PROP_COUNT && strcmp(word[2], sPropNames[prop]) != 0; prop++)
                 ;
-            if (k == 4 || prop == PROP_COUNT || !ParseValue(prop, word[3], &was) || !ParseValue(prop, word[4], &now))
+            if (k == 5 || prop == PROP_COUNT || !ParseValue(prop, word[3], &was) || !ParseValue(prop, word[4], &now))
             {
                 printf("[maker] %s line %d: not understood (left out): %s\n", from, lineNo, line);
                 continue;
@@ -501,6 +541,68 @@ static void SetPerson(struct ObjectEventTemplate *t, u8 prop, s32 v)
     }
 }
 
+// The edited connections: the map's own with their edits (some taken away), then the added ones
+static void BuildConnections(struct MapEdits *e, const struct MapHeader *base)
+{
+    const struct MapConnections *bc = base->connections;
+    struct MapConnections *mc;
+    struct MapConnection *c;
+    u32 i, j, n = 0, baseCount = bc ? bc->count : 0;
+    bool8 any = FALSE;
+    for (j = 0; j < e->propCount; j++)
+        any |= e->props[j].kind == KIND_CONNECTION;
+    for (j = 0; j < e->addCount; j++)
+        any |= e->adds[j].kind == ADD_CONNECTION;
+    if (!any)
+        return;
+    mc = malloc(sizeof(*mc));
+    c = malloc(sizeof(*c) * (baseCount + e->addCount + 1));
+    for (i = 0; i < baseCount; i++)
+    {
+        struct MapConnection v = bc->connections[i];
+        const struct MapConnection *b = &bc->connections[i];
+        bool8 gone = FALSE;
+        int bm = Maker_MapIndex(b->mapGroup, b->mapNum);
+        for (j = 0; j < e->propCount; j++)
+        {
+            const struct PropEdit *p = &e->props[j];
+            const struct MakerMapName *dn;
+            if (p->kind != KIND_CONNECTION || atoi(p->key) != (int)i)
+                continue;
+            switch (p->prop)
+            {
+            case PROP_REMOVED: gone = p->now != 0; break;
+            case PROP_DIRECTION: if (b->direction == p->was) v.direction = p->now; else e->skipped++; break;
+            case PROP_OFFSET: if ((s32)b->offset == p->was) v.offset = p->now; else e->skipped++; break;
+            case PROP_MAP:
+                dn = Maker_Map(p->now);
+                if (bm == p->was && dn)
+                    v.mapGroup = dn->mapGroup, v.mapNum = dn->mapNum;
+                else
+                    e->skipped++;
+                break;
+            }
+        }
+        if (!gone)
+            c[n++] = v;
+    }
+    for (j = 0; j < e->addCount; j++)
+    {
+        const struct AddEdit *a = &e->adds[j];
+        const struct MakerMapName *dn = Maker_Map(a->v[PROP_MAP]);
+        if (a->kind != ADD_CONNECTION || dn == NULL)
+            continue;
+        c[n].direction = a->v[PROP_DIRECTION];
+        c[n].offset = a->v[PROP_OFFSET];
+        c[n].mapGroup = dn->mapGroup;
+        c[n].mapNum = dn->mapNum;
+        n++;
+    }
+    mc->count = n;
+    mc->connections = c;
+    e->header->connections = mc;
+}
+
 // The edited header (people, warps, signs, triggers), made once per change of the edits
 static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
 {
@@ -519,12 +621,19 @@ static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
     e->header = malloc(sizeof(*e->header));
     *e->header = *base;
     e->skipped = 0;
+    if (e->hasMusic)
+    {
+        if (base->music == e->musicWas)
+            e->header->music = e->musicNow;
+        else
+            e->skipped++;
+    }
     if (be == NULL)
         return e->header;
     e->events = malloc(sizeof(*e->events));
     *e->events = *be;
     objs = malloc(sizeof(*objs) * (be->objectEventCount + e->addCount + 1));
-    warps = malloc(sizeof(*warps) * (be->warpCount + 1));
+    warps = malloc(sizeof(*warps) * (be->warpCount + e->addCount + 1));
     bgs = malloc(sizeof(*bgs) * (be->bgEventCount + e->addCount + 1));
     coords = malloc(sizeof(*coords) * (be->coordEventCount + 1));
     memcpy(objs, be->objectEvents, sizeof(*objs) * be->objectEventCount);
@@ -625,6 +734,9 @@ static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
                 }
             }
             break;
+        case KIND_CONNECTION:
+            applied = TRUE;   // (with the connections: BuildConnections)
+            break;
         case KIND_SIGN:
             for (i = 0; i < be->bgEventCount && !applied; i++)
             {
@@ -711,7 +823,7 @@ static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
             const struct AddEdit *a = &e->adds[j];
             struct BgEvent *b;
             char flagName[96];
-            if (a->kind == ADD_PERSON)
+            if (a->kind != ADD_HIDDEN && a->kind != ADD_SIGN)
                 continue;
             b = &bgs[n++];
             memset(b, 0, sizeof(*b));
@@ -738,6 +850,27 @@ static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
                 coords[n++] = coords[i];
         e->events->coordEventCount = n;
     }
+    // added warps after the map's own (theirs keep their numbers: other maps' doors lead to them by number)
+    {
+        u32 n = be->warpCount;
+        for (j = 0; j < e->addCount; j++)
+        {
+            const struct AddEdit *a = &e->adds[j];
+            const struct MakerMapName *dn;
+            if (a->kind != ADD_WARP)
+                continue;
+            memset(&warps[n], 0, sizeof(warps[n]));
+            warps[n].x = a->v[PROP_X];
+            warps[n].y = a->v[PROP_Y];
+            warps[n].elevation = a->has[PROP_ELEVATION] ? a->v[PROP_ELEVATION] : 0;
+            dn = a->has[PROP_DEST] ? Maker_Map(a->v[PROP_DEST] >> 8) : mn;
+            warps[n].mapGroup = dn->mapGroup;
+            warps[n].mapNum = dn->mapNum;
+            warps[n].warpId = a->has[PROP_DEST] ? a->v[PROP_DEST] & 0xFF : 0;
+            n++;
+        }
+        e->events->warpCount = n;
+    }
     free(objGone);
     free(bgGone);
     free(coordGone);
@@ -746,6 +879,7 @@ static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
     e->events->bgEvents = bgs;
     e->events->coordEvents = coords;
     e->header->events = e->events;
+    BuildConnections(e, base);
     if (e->skipped)
         printf("[maker] %s: %u edits left out (the game changed there since)\n", mn->name, e->skipped);
     return e->header;
@@ -760,7 +894,7 @@ const struct MapHeader *Maker_EditedHeader(u16 mapGroup, u16 mapNum)
         return NULL;
     map = Maker_MapIndex(mapGroup, mapNum);
     e = EditsFor(map);
-    if (e == NULL || (e->propCount == 0 && e->addCount == 0))
+    if (e == NULL || (e->propCount == 0 && e->addCount == 0 && !e->hasMusic))
         return NULL;
     return BuildHeader(map, e);
 }

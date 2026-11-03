@@ -207,3 +207,23 @@ int MakerApi_MovementFacing(int movementType)
     d = gInitialMovementTypeFacingDirections[movementType];
     return d >= 1 && d <= 4 ? d - 1 : 0;
 }
+
+// A map's connections as built: direction (CONNECTION_*), offset and the map joined (its index)
+int MakerApi_ConnectionCount(int map)
+{
+    const struct MapHeader *h = Header(map);
+    return h && h->connections ? h->connections->count : 0;
+}
+
+int MakerApi_ConnectionInfo(int map, int i, int *direction, int *offset, int *destMap)
+{
+    const struct MapHeader *h = Header(map);
+    const struct MapConnection *c;
+    if (!h || !h->connections || i < 0 || i >= h->connections->count)
+        return 0;
+    c = &h->connections->connections[i];
+    *direction = c->direction;
+    *offset = (int)(s32)c->offset;
+    *destMap = Maker_MapIndex(c->mapGroup, c->mapNum);
+    return 1;
+}

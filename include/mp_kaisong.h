@@ -26,4 +26,13 @@ bool8 MP_Kaisong_SameMusic(u16 song, const struct WarpData *warp);   // the musi
 u16 MP_Kaisong_Gain(const struct SongHeader *header);   // 256 = as made (INFO gain=)
 bool8 MP_Kaisong_PlayFile(const char *file);   // tests: one file's song (mp playkai)
 
+// Moemon Maker: the user's music (MoemonMaker/music/): new tracks have song numbers MAKER_SONG_FIRST...
+#define MAKER_SONG_FIRST 0x4000
+#define MAKER_SONG_COUNT 256
+u16 MP_Kaisong_TableIndex(u16 song);
+int MP_Kaisong_TrackCount(void);
+const char *MP_Kaisong_TrackName(int i);
+int MP_Kaisong_TrackId(const char *name);
+void MP_Kaisong_Rescan(void);
+
 #endif

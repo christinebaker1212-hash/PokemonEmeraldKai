@@ -617,6 +617,10 @@ static void DrawEvents(ImDrawList *dl, ImVec2 origin, float s)
                 continue;
             DrawPerson(dl, AddedPerson(a), p, s, sel, events, IM_COL32_WHITE);
         }
+        else if (key.rfind("connection", 0) == 0)
+            continue;   // (connections are the map's edges: the INSPECTOR's MAP section)
+        else if (events && key.rfind("warp", 0) == 0)
+            Marker(dl, p, s, IM_COL32(230, 120, 20, 255), "W", sel);
         else if (events)
             Marker(dl, p, s, key.rfind("hidden", 0) == 0 ? IM_COL32(40, 160, 90, 255) : IM_COL32(200, 40, 120, 255),
                    key.rfind("hidden", 0) == 0 ? "H" : "S", sel);
@@ -653,6 +657,8 @@ static bool PickEvent(int tx, int ty, int *kind, int *index)
     for (const std::string &key : AddedKeys())
     {
         const std::map<std::string, std::string> &a = *Added(key);
+        if (key.rfind("connection", 0) == 0)
+            continue;
         if (AddedInt(a, "x", -1) == tx && AddedInt(a, "y", -1) == ty)
         {
             gEd.selAdded = key;
@@ -862,6 +868,12 @@ static void AddEvent(const char *what, int x, int y)
         kind = "hidden";
         a["item"] = "ITEM_POTION";
     }
+    else if (w == "warp")
+    {
+        // (leads to this map's first warp until another is picked)
+        kind = "warp";
+        a["dest"] = std::string(gEd.maps[gEd.map].name) + ":0";
+    }
     else
     {
         kind = "sign";
@@ -891,6 +903,8 @@ static void AddMenu()
         AddEvent("hidden", sAddX, sAddY);
     if (ImGui::MenuItem("Add a sign here", NULL, false, !MapScripts(true).empty()))
         AddEvent("sign", sAddX, sAddY);
+    if (ImGui::MenuItem("Add a warp here"))
+        AddEvent("warp", sAddX, sAddY);
     ImGui::EndPopup();
 }
 
@@ -1342,11 +1356,12 @@ static void AddedInspector()
         return;
     }
     std::string key = gEd.selAdded;
-    bool person = key.rfind("person", 0) == 0, hidden = key.rfind("hidden", 0) == 0;
+    bool person = key.rfind("person", 0) == 0, hidden = key.rfind("hidden", 0) == 0, warp = key.rfind("warp", 0) == 0;
     bool itemball = person && (*ap)["script"] == "itemball";
     ImGui::Spacing();
     ImGui::PushFont(gEd.fontBold);
-    ImGui::SeparatorText(itemball ? "ITEM BALL (ADDED)" : person ? "PERSON (ADDED)" : hidden ? "HIDDEN ITEM (ADDED)" : "SIGN (ADDED)");
+    ImGui::SeparatorText(itemball ? "ITEM BALL (ADDED)" : person ? "PERSON (ADDED)" : hidden ? "HIDDEN ITEM (ADDED)"
+                         : warp ? "WARP (ADDED)" : "SIGN (ADDED)");
     ImGui::PopFont();
     if (!ImGui::BeginTable("added", 2, ImGuiTableFlags_SizingStretchProp))
         return;
@@ -1386,7 +1401,21 @@ static void AddedInspector()
     }
     if (itemball || hidden)
         named("Item", "##aitem", "item", MAKER_NAMES_ITEM);
-    if (!hidden && !itemball)
+    if (warp)
+    {
+        // dest = MAP_X:N
+        std::string dest = (*ap)["dest"];
+        size_t colon = dest.find(':');
+        int dm = MakerApi_FindMap(dest.substr(0, colon).c_str()), dw = colon == std::string::npos ? 0 : atoi(dest.c_str() + colon + 1);
+        Label("To map");
+        if (MapPicker("##adest", &dm) && dm >= 0)
+            setv("dest", std::string(gEd.maps[dm].name) + ":" + std::to_string(dw));
+        Label("Its warp");
+        ImGui::SetNextItemWidth(-FLT_MIN);
+        if (ImGui::InputInt("##adw", &dw) && dw >= 0 && dw < 256 && dm >= 0)
+            setv("dest", std::string(gEd.maps[dm].name) + ":" + std::to_string(dw));
+    }
+    if (!hidden && !itemball && !warp)
     {
         Label("Does");
         std::string cur = (*ap)["script"];
@@ -1406,6 +1435,158 @@ static void AddedInspector()
     if (ImGui::Button("Remove it (Delete)"))
         DeleteSelected();
     ImGui::TextDisabled("Drag it on the map to move it.");
+}
+
+static const char *const kDirNames[] = {"", "down", "up", "left", "right", "dive", "emerge"};
+
+static bool DirPicker(const char *id, int *dir)
+{
+    bool picked = false;
+    ImGui::SetNextItemWidth(-FLT_MIN);
+    if (ImGui::BeginCombo(id, *dir >= 1 && *dir <= 6 ? kDirNames[*dir] : "?"))
+    {
+        for (int d = 1; d <= 6; d++)
+            if (ImGui::Selectable(kDirNames[d], d == *dir))
+                *dir = d, picked = true;
+        ImGui::EndCombo();
+    }
+    return picked;
+}
+
+// The map's own: its music (with a play button) and the maps joined at its edges
+void MapView_MapInspector()
+{
+    if (gEd.map < 0)
+        return;
+    int m = gEd.map;
+    const MakerMapInfo &info = gEd.maps[m];
+    ImGui::Spacing();
+    ImGui::SeparatorText("MUSIC");
+    int song = (int)CurrentMusic(m, info.music);
+    ImGui::SetNextItemWidth(-90 * gEd.uiScale);
+    if (SongPicker("##music", &song))
+    {
+        BeginChange(m);
+        SetMusic(m, info.music, song);
+        EndChange();
+    }
+    ImGui::SameLine();
+    if (ImGui::SmallButton("Play"))
+        MakerApi_PlaySong(song);
+    ImGui::SameLine();
+    if (ImGui::SmallButton("Stop"))
+        MakerApi_StopSong();
+    ImGui::SeparatorText("CONNECTIONS");
+    int n = MakerApi_ConnectionCount(m);
+    if (ImGui::BeginTable("conn", 4, ImGuiTableFlags_SizingStretchProp))
+    {
+        ImGui::TableSetupColumn("side", ImGuiTableColumnFlags_WidthStretch, 1.2f);
+        ImGui::TableSetupColumn("map", ImGuiTableColumnFlags_WidthStretch, 2.4f);
+        ImGui::TableSetupColumn("offset", ImGuiTableColumnFlags_WidthStretch, 1.2f);
+        ImGui::TableSetupColumn("x", ImGuiTableColumnFlags_WidthFixed, 20);
+        for (int i = 0; i < n; i++)
+        {
+            int bd, bo, bm;
+            MakerApi_ConnectionInfo(m, i, &bd, &bo, &bm);
+            std::string key = std::to_string(i);
+            if (CurrentProp(m, "connection", key, "removed", 0))
+                continue;
+            int d = (int)CurrentProp(m, "connection", key, "direction", bd);
+            int o = (int)CurrentProp(m, "connection", key, "offset", bo);
+            int cm = (int)CurrentProp(m, "connection", key, "map", bm);
+            ImGui::PushID(i);
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            if (DirPicker("##d", &d))
+            {
+                BeginChange(m);
+                SetProp(m, "connection", key, "direction", bd, d);
+                EndChange();
+            }
+            ImGui::TableNextColumn();
+            if (MapPicker("##m", &cm))
+            {
+                BeginChange(m);
+                SetProp(m, "connection", key, "map", bm, cm);
+                EndChange();
+            }
+            ImGui::TableNextColumn();
+            ImGui::SetNextItemWidth(-FLT_MIN);
+            if (ImGui::InputInt("##o", &o, 0, 0))
+            {
+                BeginChange(m);
+                SetProp(m, "connection", key, "offset", bo, o);
+                EndChange();
+            }
+            ImGui::TableNextColumn();
+            if (ImGui::SmallButton("x"))
+            {
+                BeginChange(m);
+                SetProp(m, "connection", key, "removed", 0, 1);
+                EndChange();
+            }
+            ImGui::PopID();
+        }
+        for (const std::string &key : AddedKeys())
+        {
+            if (key.rfind("connection", 0) != 0)
+                continue;
+            std::map<std::string, std::string> &a = *Added(key);
+            long d = 1, cm = -1;
+            for (int k = 1; k <= 6; k++)
+                if (a["direction"] == kDirNames[k])
+                    d = k;
+            cm = MakerApi_FindMap(a["map"].c_str());
+            int di = (int)d, mi = (int)cm, o = atoi(a["offset"].c_str());
+            ImGui::PushID(key.c_str());
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            if (DirPicker("##d", &di))
+            {
+                BeginChange(m);
+                (*Added(key))["direction"] = kDirNames[di];
+                EndChange();
+            }
+            ImGui::TableNextColumn();
+            if (MapPicker("##m", &mi) && mi >= 0)
+            {
+                BeginChange(m);
+                (*Added(key))["map"] = gEd.maps[mi].name;
+                EndChange();
+            }
+            ImGui::TableNextColumn();
+            ImGui::SetNextItemWidth(-FLT_MIN);
+            if (ImGui::InputInt("##o", &o, 0, 0))
+            {
+                BeginChange(m);
+                (*Added(key))["offset"] = std::to_string(o);
+                EndChange();
+            }
+            ImGui::TableNextColumn();
+            if (ImGui::SmallButton("x"))
+            {
+                BeginChange(m);
+                Edits(m).adds.erase(key);
+                EndChange();
+                ImGui::PopID();
+                break;
+            }
+            ImGui::PopID();
+        }
+        ImGui::EndTable();
+    }
+    if (ImGui::SmallButton("+ Join a map"))
+    {
+        MapEdits &e = Edits(m);
+        int k = 1;
+        for (auto &a : e.adds)
+            k = std::max(k, atoi(a.first.substr(a.first.find(' ') + 1).c_str()) + 1);
+        BeginChange(m);
+        Edits(m).adds["connection " + std::to_string(k)] = {{"direction", "up"}, {"map", info.name}, {"offset", "0"}};
+        EndChange();
+    }
+    ImGui::SameLine();
+    ImGui::TextDisabled("offset: tiles along the edge");
 }
 
 void MapView_Inspector()

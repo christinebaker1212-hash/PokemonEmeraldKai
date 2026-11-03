@@ -189,6 +189,7 @@ void m4aSoundMain(void)
 #define SONG_HEADER(n, song) MP_Kaisong_Header((n), (song)->header)
 #else
 #define SONG_HEADER(n, song) ((song)->header)
+#define MP_Kaisong_TableIndex(n) (n)
 #endif
 
 // Moemon Kai tests (mp musiclock 1): the song playing keeps the music player; the game's own music changes, stops
@@ -200,7 +201,7 @@ void m4aSongNumStart(u16 n)
 {
     const struct MusicPlayer *mplayTable = gMPlayTable;
     const struct Song *songTable = gSongTable;
-    const struct Song *song = &songTable[n];
+    const struct Song *song = &songTable[MP_Kaisong_TableIndex(n)];   // Moemon Maker: a new track plays on a BGM entry
     const struct MusicPlayer *mplay = &mplayTable[song->ms];
     struct SongHeader *header = SONG_HEADER(n, song);
 
@@ -213,7 +214,7 @@ void m4aSongNumStartOrChange(u16 n)
 {
     const struct MusicPlayer *mplayTable = gMPlayTable;
     const struct Song *songTable = gSongTable;
-    const struct Song *song = &songTable[n];
+    const struct Song *song = &songTable[MP_Kaisong_TableIndex(n)];   // Moemon Maker: a new track plays on a BGM entry
     const struct MusicPlayer *mplay = &mplayTable[song->ms];
     struct SongHeader *header = SONG_HEADER(n, song);
 
@@ -237,7 +238,7 @@ static void UNUSED m4aSongNumStartOrContinue(u16 n)
 {
     const struct MusicPlayer *mplayTable = gMPlayTable;
     const struct Song *songTable = gSongTable;
-    const struct Song *song = &songTable[n];
+    const struct Song *song = &songTable[MP_Kaisong_TableIndex(n)];   // Moemon Maker: a new track plays on a BGM entry
     const struct MusicPlayer *mplay = &mplayTable[song->ms];
     struct SongHeader *header = SONG_HEADER(n, song);
 
@@ -253,7 +254,7 @@ void m4aSongNumStop(u16 n)
 {
     const struct MusicPlayer *mplayTable = gMPlayTable;
     const struct Song *songTable = gSongTable;
-    const struct Song *song = &songTable[n];
+    const struct Song *song = &songTable[MP_Kaisong_TableIndex(n)];   // Moemon Maker: a new track plays on a BGM entry
     const struct MusicPlayer *mplay = &mplayTable[song->ms];
     struct SongHeader *header = SONG_HEADER(n, song);
 
@@ -265,7 +266,7 @@ static void UNUSED m4aSongNumContinue(u16 n)
 {
     const struct MusicPlayer *mplayTable = gMPlayTable;
     const struct Song *songTable = gSongTable;
-    const struct Song *song = &songTable[n];
+    const struct Song *song = &songTable[MP_Kaisong_TableIndex(n)];   // Moemon Maker: a new track plays on a BGM entry
     const struct MusicPlayer *mplay = &mplayTable[song->ms];
     struct SongHeader *header = SONG_HEADER(n, song);
 

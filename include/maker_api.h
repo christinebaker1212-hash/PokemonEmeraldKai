@@ -86,6 +86,8 @@ int MakerApi_CoordInfo(int map, int i, struct MakerCoordInfo *c);
 // A look's standing picture (facing 0 south, 1 north, 2 west, 3 east) as RGBA (0 = clear); 0 if none fits maxW x maxH
 int MakerApi_RenderObject(int graphicsId, int facing, unsigned int *rgba, int maxW, int maxH, int *w, int *h);
 int MakerApi_MovementFacing(int movementType);
+int MakerApi_ConnectionCount(int map);
+int MakerApi_ConnectionInfo(int map, int i, int *direction, int *offset, int *destMap);   // direction 1 down 2 up 3 left 4 right 5 dive 6 emerge
 
 // Named values (songs, looks, movement types, trainer types, items, species, flags): MAKER_NAMES_*
 enum { MAKER_NAMES_SONG, MAKER_NAMES_GFX, MAKER_NAMES_MOVEMENT, MAKER_NAMES_TRAINERTYPE, MAKER_NAMES_ITEM,
@@ -100,6 +102,19 @@ enum { MAKER_WILD_LAND, MAKER_WILD_WATER, MAKER_WILD_ROCK, MAKER_WILD_FISH, MAKE
 struct MakerWildSlot { int species, minLevel, maxLevel; };
 int MakerApi_WildSlotCount(int area);   // 12, 5, 5, 10 (fishing: OLD ROD 0-1, GOOD ROD 2-4, SUPER ROD 5-9)
 int MakerApi_WildArea(int map, int area, struct MakerWildSlot *slots, int *rate);   // its slot count, 0 if none
+
+// Music (src/maker/maker_music.c): the game's songs and the user's new tracks (MoemonMaker/music/), played through
+// the game's own player
+int MakerApi_TrackCount(void);
+const char *MakerApi_TrackName(int i);
+int MakerApi_SongId(const char *name);         // MUS_X or a new track's name; -1 if none
+const char *MakerApi_SongName(int song);
+const char *MakerApi_SongFileName(int song);   // the lowercase name its files use (mus_route101)
+int MakerApi_SceneCount(void);
+const char *MakerApi_SceneKey(int i);         // the scenes a song can be replaced in (tcg, sim...)
+void MakerApi_PlaySong(int song);
+void MakerApi_StopSong(void);
+void MakerApi_MusicChanged(void);
 
 // The editor's edits of one map, as the text of its MoemonMaker/base/MAP_X.txt (src/maker/maker_overrides.c)
 void MakerApi_SetMapEdits(const char *mapName, const char *text);
