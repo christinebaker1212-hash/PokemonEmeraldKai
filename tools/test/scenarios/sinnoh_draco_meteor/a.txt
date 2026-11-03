@@ -1,0 +1,15 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp friendship 0 255
+mp warp 43,30,5,6
+wait 60
+waitfor field 1000
+mp face up
+press A 1
+pressuntillog A 3000 party: slot 0 may learn move 434
+wait 60
+shot w_learn
+pressuntillog A 3000 party: move 434 learnt
+pressuntil A field 3000
+quit

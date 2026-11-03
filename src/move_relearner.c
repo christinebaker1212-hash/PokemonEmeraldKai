@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "main.h"
 #include "battle.h"
 #include "bg.h"
@@ -368,6 +369,8 @@ static void VBlankCB_MoveRelearner(void)
     ProcessSpriteCopyRequests();
     TransferPlttBuffer();
 }
+
+u16 gMoveRelearnerOnlyMove;   // Moemon Kai: MOVE_NONE, or the one move the relearner offers (CreateLearnableMovesList)
 
 // Script arguments: The Pokémon to teach is in VAR_0x8004
 void TeachMoveRelearnerMove(void)
@@ -901,6 +904,19 @@ static void CreateLearnableMovesList(void)
     u8 nickname[POKEMON_NAME_LENGTH + 1];
 
     sMoveRelearnerStruct->numMenuChoices = GetMoveRelearnerMoves(&gPlayerParty[sMoveRelearnerStruct->partyMon], sMoveRelearnerStruct->movesToLearn);
+    if (gMoveRelearnerOnlyMove != MOVE_NONE)
+    {
+        // Moemon Kai: one move to learn (Platinum's OpenMoveTutorMenu: GRANDMA WILMA's DRACO METEOR, ROUTE 228's
+        // three; src/sinnoh/s3d_party.c), unless it's known already
+        u32 k;
+        struct Pokemon *mon = &gPlayerParty[sMoveRelearnerStruct->partyMon];
+        sMoveRelearnerStruct->numMenuChoices = 1;
+        sMoveRelearnerStruct->movesToLearn[0] = gMoveRelearnerOnlyMove;
+        for (k = 0; k < MAX_MON_MOVES; k++)
+            if (GetMonData(mon, MON_DATA_MOVE1 + k) == gMoveRelearnerOnlyMove)
+                sMoveRelearnerStruct->numMenuChoices = 0;
+    }
+    MPNet_Log("relearner: %d moves to learn", sMoveRelearnerStruct->numMenuChoices);
 
     for (i = 0; i < sMoveRelearnerStruct->numMenuChoices; i++)
     {

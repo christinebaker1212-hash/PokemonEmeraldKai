@@ -1,0 +1,16 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp additem 111 1
+mp warp 5,7,4,5
+wait 60
+waitfor field 1000
+mp face up
+press A 1
+pressuntil A partymenu 3000
+wait 30
+press A 1
+pressuntillog A 3000 relearner: 
+wait 60
+shot r_list
+quit

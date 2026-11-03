@@ -1,0 +1,7 @@
+# SINNOH: GRANDMA WILMA (ROUTE 210) teaches DRACO METEOR to a DRAGON-type at full friendship: Platinum's own script,
+# its learning screen the game's move relearner offering only that move (a fourth move forgotten). Needs the 3D pack.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=149:50"
+EXPECT_A=("party: move 434 learnt in move slot 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

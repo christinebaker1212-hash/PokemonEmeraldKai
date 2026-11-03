@@ -1,0 +1,7 @@
+# FALLARBOR's Move Relearner (Emerald's): a HEART SCALE, DRAGONITE picked, its forgotten level-up moves listed (the
+# relearner is also SINNOH's one-move learning screen: sinnoh_draco_meteor). Shot r_list.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=149:50"
+EXPECT_A=("relearner: 7 moves to learn")
+UNEXPECT_A=("[crash]" "TIMEOUT" "relearner: 1 moves")

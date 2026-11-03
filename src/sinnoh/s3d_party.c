@@ -215,7 +215,13 @@ enum
     PARTY_RESET_MOVE,        // A slot, ARG move slot, B move (a value or variable): learnt there, its PP full
     PARTY_SHARD_COST,        // A move, ARG SINNOH's menu text bank, B its first SHARDS line: the cost window
     PARTY_SHARD_CLOSE,       // the cost window closed
+    PARTY_LEARN_OPEN,        // A slot, ARG move: the game's move relearner offering only it (OpenMoveTutorMenu; the
+                             // script runs special TeachMoveRelearnerMove after)
+    PARTY_LEARN_RESULT,      // B <- the move slot it went in, 0xFF: not learnt (CheckLearnedTutorMove)
 };
+
+extern u16 gMoveRelearnerOnlyMove;
+static u16 sLearnSlot, sLearnKept;
 
 // (Platinum's move tutors: ROUTE 212's, the SURVIVAL AREA's and SNOWPOINT's, src/data/sinnoh_tutors.h from
 // tools/sinnoh/gen_tutors.py; Platinum's src/overlay005/scrcmd_move_tutor.c)
@@ -626,6 +632,26 @@ void Sinnoh_PartyCall(u16 op, u16 a, u16 b)
             sShardWindow = WINDOW_NONE;
         }
         break;
+    case PARTY_LEARN_OPEN:
+        sLearnKept = gSpecialVar_0x8004;
+        sLearnSlot = value;
+        gSpecialVar_0x8004 = value;
+        gMoveRelearnerOnlyMove = sArg;
+        MPNet_Log("party: slot %d may learn move %d", value, sArg);
+        break;
+    case PARTY_LEARN_RESULT:
+    {
+        u16 slot = 0xFF;
+        if (gSpecialVar_0x8004 == TRUE && gMoveRelearnerOnlyMove != MOVE_NONE)
+            for (i = 0; i < MAX_MON_MOVES; i++)
+                if (GetMonData(Slot(sLearnSlot), MON_DATA_MOVE1 + i) == gMoveRelearnerOnlyMove)
+                    slot = i;
+        MPNet_Log("party: move %d learnt in move slot %d", gMoveRelearnerOnlyMove, slot);
+        gMoveRelearnerOnlyMove = MOVE_NONE;
+        gSpecialVar_0x8004 = sLearnKept;
+        Out(b, slot);
+        break;
+    }
     case PARTY_TRADE_INIT:
         sTrade = value;
         break;

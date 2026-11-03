@@ -73,7 +73,7 @@ SINNOH_PARTY = 63   # (party and BAG queries, Platinum's ribbons: src/sinnoh/s3d
  PARTY_EV_TOTAL, PARTY_BUFFER_NATURE, PARTY_TEACH_MOVE, PARTY_TEACH_SLOT, PARTY_BUFFER_TYPE, PARTY_GET_MOVE,
  PARTY_TRADE_INIT, PARTY_TRADE_REQUESTED, PARTY_TRADE_START, PARTY_TRADE_END, PARTY_FOSSIL_FIND,
  PARTY_FOSSIL_SPECIES, PARTY_PRIZE, PARTY_HAS_COINS, PARTY_TUTOR_CAN, PARTY_TUTOR_MENU, PARTY_TUTOR_AFFORD,
- PARTY_TUTOR_PAY, PARTY_RESET_MOVE, PARTY_SHARD_COST, PARTY_SHARD_CLOSE) = range(47)
+ PARTY_TUTOR_PAY, PARTY_RESET_MOVE, PARTY_SHARD_COST, PARTY_SHARD_CLOSE, PARTY_LEARN_OPEN, PARTY_LEARN_RESULT) = range(49)
 SINNOH_ROAMER = 60   # (a roaming POKéMON set going: src/sinnoh/s3d_roamer.c; the slot, Platinum's ROAMING_SLOT_*)   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
 (TVCALL_STATUS, TVCALL_FRAMING, TVCALL_FINISH, TVCALL_SEGMENT_ID, TVCALL_SEGMENT, TVCALL_COMMERCIAL, TVCALL_NEXT,
  TVCALL_INTERVIEW_ID, TVCALL_INTERVIEW_MESSAGE, TVCALL_INTERVIEW_SAVE, TVCALL_INTERVIEW_OK, TVCALL_WORD,
@@ -1670,6 +1670,12 @@ class FileConverter:
             if first is None:
                 raise Unsupported('the SHARDS lines')
             return [self.party(PARTY_ARG, self.dec.banks['menu_entries']), self.party(PARTY_SHARD_COST, self.arg(a[2]), first)]
+        if cmd == 'OpenMoveTutorMenu':
+            # (Platinum's move-learning screen for one move: the game's move relearner offering only it)
+            return [self.party(PARTY_ARG, self.arg(a[1])), self.party(PARTY_LEARN_OPEN, self.arg(a[0])),
+                    'special TeachMoveRelearnerMove', 'waitstate']
+        if cmd == 'CheckLearnedTutorMove':
+            return [self.party(PARTY_LEARN_RESULT, 0, self.var(a[0]))]
         if cmd == 'CloseShardCostWindow':
             return [self.party(PARTY_SHARD_CLOSE)]
         if cmd == 'GetGameCornerPrizeData':

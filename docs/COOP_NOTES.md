@@ -4284,9 +4284,11 @@ follow_behind, follow_ground.
   ShowMoveTutorMoveSelectionMenu (the moves it can learn and doesn't know, then EXIT, on the converted menu: s3d_scrcmd.c
   Sinnoh_MenuBegin), CheckCanAffordMove / PayShardCost (the game's SHARDS, items 48-51), ResetMoveSlot (the scripts
   give party slot, move slot, move: SetMonMoveSlot + RemoveMonPPBonus), ShowShardCost / CloseShardCostWindow (the
-  costs, Platinum's "RED SHARDS  X 2" lines, menu_entries 273-277). Test sinnoh_move_tutor. Not yet: GRANDMA WILMA's
-  DRACO METEOR and ROUTE 228's three (OpenMoveTutorMenu: Platinum's move-learning screen), the SNOWPOINT man's
-  "tough words" (CheckAllToughWordsUnlocked).
+  costs, Platinum's "RED SHARDS  X 2" lines, menu_entries 273-277). Test sinnoh_move_tutor. GRANDMA WILMA's DRACO
+  METEOR and ROUTE 228's three (1.69.3): OpenMoveTutorMenu is Platinum's move-learning screen for one move, here the
+  game's move relearner offering only it (move_relearner.c gMoveRelearnerOnlyMove; VAR_0x8004 kept and put back),
+  CheckLearnedTutorMove the slot it went in or 0xFF. Tests sinnoh_draco_meteor, relearner (FALLARBOR's, unchanged).
+  Not yet: the SNOWPOINT man's "tough words" (CheckAllToughWordsUnlocked).
 - The START menu's POKéMON (1.69.3): Platinum shows it once the starter is saved, so SaveChosenStarter sets
   FLAG_SYS_POKEMON_GET too (before, only a reload's SinnohStarterMenuFlag did); and in every region but HOENN it's
   shown whenever the party has someone (start_menu.c BuildNormalStartMenu). Test sinnoh_platinum_route201 (mp startmenu).
