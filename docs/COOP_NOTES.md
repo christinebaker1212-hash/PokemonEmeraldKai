@@ -2975,8 +2975,11 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   and METEORITE 1000).
 - Borders: KANTO's seven FireRed layouts with 3x2 borders (VIRIDIAN FOREST, the SAFARI ZONE, BERRY FOREST, PATTERN
   BUSH) repeat them 3 wide (fieldmap.c GetBorderBlockAt); every other map's border is 2x2.
-- Doors: Quetzal has no door animations for JOHTO / KANTO's tiles either (its door table is Emerald's; a second
-  8-entry one is never used), so their doors open without one.
+- Doors: KANTO's are FireRed's (src/data/frlg_doors.h). JOHTO's are Quetzal's own (1.83.0): its door table at ROM
+  0x952148 (FireRed's format, 19 one-metatile doors, read next to Emerald's at 0x951EC0) plus FireRed's tall doors at
+  0x952358, ripped by tools/quetzal_rip/rip_doors.py QUETZAL_ROM into quetzal_rip/doors/ and src/data/qz_doors.h;
+  mp_frlgdoor.c Find looks a JOHTO door up there by metatile, and a door tile it doesn't list opens without an
+  animation, as in Quetzal (the frames once made from the closed door, all rising, are gone). Test johto_doors.
 - Triple Triad sellers in JOHTO / KANTO stock what MAUVILLE's / LILYCOVE's do (Tt_PoolOf, as their players' hands):
   gTtSellerStock has HOENN's eight shelves only, and the seller crashed on the missing ones.
 - Quetzal's system flags (FireRed's, from 0xA50) that the engine reads are Emerald's own (constants/qz_port.h, from

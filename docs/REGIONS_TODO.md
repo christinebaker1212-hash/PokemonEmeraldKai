@@ -53,9 +53,8 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
       starting with Crystal's BERRIES in their Gen 3 names; test johto_apricorn)
 - [x] WHITNEY's MILTANK: perfect IVs (her gym team; tools/quetzal_port/gen_trainers.py IV_OVERRIDES)
 - [x] Quetzal's auto walk / run: its words gone (MOM in NEW BARK TOWN)
-- [x] Door animations (Quetzal's JOHTO door pictures are only in its ROM: its door table wasn't ripped; so a JOHTO
-      door's frames are made from the closed door itself, as a GBA door opens: the panel rises in three steps and the
-      doorway goes dark, its frame kept: mp_frlgdoor.c JohtoDoor; test johto_doors); [x] water animates (JOHTO's primaries 2-6 carry FireRed's water tiles: the same animation over
+- [x] Door animations (Quetzal's own door table and frames from its ROM: tools/quetzal_rip/rip_doors.py,
+      src/data/qz_doors.h; sliding doors slide, swinging ones swing; test johto_doors); [x] water animates (JOHTO's primaries 2-6 carry FireRed's water tiles: the same animation over
       them; primary 1's water is drawn differently and stays still)
 - [x] The rival named as in Crystal (online: the host names him, said plainly), his starter the one beating the player's
       (his starter: ELM's ball he takes and every team's starter line, VAR_JOHTO_STARTER 0x52FB, qz_specials.c
@@ -184,7 +183,6 @@ Quetzal's fan additions (GIOVANNI's quest and the like) aren't wanted. Status: [
   EXPLOSION, DREAM EATER, SOFTBOILED, SUBSTITUTE, SWORDS DANCE, SEISMIC TOSS, METRONOME, BODY SLAM:
   tools/quetzal_port/fix_move_tutors.py). Still Quetzal's stand-ins: CAPE BRINK's starter tutor and TWO ISLAND's move
   maniac (FireRed systems of their own) and SAFFRON's COPYCAT (MIMIC, needs her POKé DOLL trade).
-- JOHTO's doors keep still: its tilesets are Quetzal's own, their door metatiles aren't FireRed's numbers.
 - KANTO's ladders already match FireRed's warps (every KANTO warp's place and destination checked against
   pokefirered's maps: only the POKéMON CENTER 2Fs' link rooms, Quetzal's own additions and the elevators differ), and
   FireRed itself leaves the player on the ladder; the user saw that as a bug, so an up ladder in a wall (a wall above,

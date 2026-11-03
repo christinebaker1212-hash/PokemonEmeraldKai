@@ -1,7 +1,8 @@
-# JOHTO's doors animate (src/mp/mp_frlgdoor.c JohtoDoor: frames made from the closed door, its panel rising and the
-# doorway going dark): the player's house in NEW BARK TOWN. Shots door_*.png.
+# JOHTO's doors animate as Quetzal's (src/mp/mp_frlgdoor.c with src/data/qz_doors.h from tools/quetzal_rip/rip_doors.py:
+# Quetzal's own door table and frames): the player's house in NEW BARK TOWN, ECRUTEAK's DANCE THEATER and OLIVINE's
+# CAFE. Shots door_*.png, theater_*.png, cafe_*.png.
 MODE=1
-TMO=60
+TMO=90
 ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=25:40"
-EXPECT_A=("frlg door: metatile" "opens" "where map 35.1")
+EXPECT_A=("frlg door: metatile 0x2CB opens" "frlg door: metatile 0x333 opens" "frlg door: metatile 0x312 opens" "where map 35.1" "where map 34.")
 UNEXPECT_A=("[crash]" "isn't FireRed's")

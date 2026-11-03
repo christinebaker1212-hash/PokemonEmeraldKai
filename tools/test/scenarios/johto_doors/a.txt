@@ -7,4 +7,16 @@ press UP 4
 shotburst door 40 4
 wait 120
 mp where
+mp warp 34,36,39,41
+wait 200
+press UP 4
+shotburst theater 40 4
+wait 120
+mp where
+mp warp 35,3,8,44
+wait 200
+press UP 4
+shotburst cafe 40 4
+wait 120
+mp where
 quit
