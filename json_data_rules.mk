@@ -51,3 +51,9 @@ $(C_BUILDDIR)/ygo/ygo_edo_pak.o: graphics/ygo/edo.pak
 $(C_BUILDDIR)/tt/tt_art_data.o: graphics/tt/cards.bin
 # Moemon Rhythm: the DANCE machine's art and sounds
 $(C_BUILDDIR)/rhythm/rh_assets.o: graphics/rhythm/rhythm.bin
+
+# Moemon Co-op: how many maps each map group holds, for the phone's live map (src/mp/mp_phone_dev.c)
+AUTO_GEN_TARGETS += $(DATA_SRC_SUBDIR)/mp_map_group_sizes.h
+$(DATA_SRC_SUBDIR)/mp_map_group_sizes.h: tools/phone/gen_map_sizes.py data/maps/map_groups.json
+	python3 tools/phone/gen_map_sizes.py $@ data/maps/map_groups.json
+$(C_BUILDDIR)/mp/mp_phone_dev.o: c_dep += $(DATA_SRC_SUBDIR)/mp_map_group_sizes.h

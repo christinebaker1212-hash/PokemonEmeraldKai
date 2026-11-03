@@ -96,7 +96,7 @@ public class LiveTest {
                 "pressuntil A field 5000", "wait 30",
                 "mp boxput 1 0 25 5", "mp boxput 1 1 1 5", "mp boxput 1 2 4 5",
                 "mp additem 139 20", "mp shinymon 4 25 20", "mp additem 660 1", "mp regionclear 3", "mp dexcatch 263",
-                "mp additem 13 3", "mp additem 68 2", "mp additem 96 1", "mp hp 1 5", "mp shinymon 5 16 5", "mp phone pair",
+                "mp additem 13 3", "mp additem 68 2", "mp additem 96 1", "mp additem 693 1", "mp hp 1 5", "mp shinymon 5 16 5", "mp phone pair",
                 "wait 300", "mash B 200 15", "wait 900", "mp wild 263:3", "wait 2000000", "quit").getBytes());
         ProcessBuilder pb = new ProcessBuilder(game.getPath()).directory(root).redirectErrorStream(true);
         java.util.Map<String, String> env = pb.environment();
@@ -246,15 +246,46 @@ public class LiveTest {
             idleUntil(() -> !app.spawns.isEmpty(), 20, "a map's spawns");
             draw(v);
 
+            // the live map: where the player is, and what they've found at the place tapped (the game's own answer)
+            org.json.JSONArray tm = app.model().snap.getJSONObject("place").optJSONArray("tm");
+            assertTrue("the town map knows where the player is", tm != null);
+            v.showOver(new MapPage(v, "HOENN MAP"));
+            draw(v);
+            int ms = Math.max(1, (v.width() - 8) / 240), mx = (v.width() - 240 * ms) / 2;
+            tap(v, mx + (8 + tm.getInt(1) * 8) * ms + 4, GameView.TOP + 46 + (16 + tm.getInt(2) * 8) * ms + 4);
+            int sec = app.model().snap.getJSONObject("place").getInt("sec");
+            idleUntil(() -> app.places.containsKey(sec), 20, "the place's finds");
+            assertTrue("the place lists its wild POKéMON", app.places.get(sec).has("wild"));
+            draw(v);
+            ScreensTest.shot(v, "live_map");
+            v.showOver(null);
+            // MATCH CALL's list and the POKéGEAR's radio and a call, from the game
+            app.client.ask("calls");
+            idleUntil(() -> app.calls != null, 20, "MATCH CALL's list");
+            app.client.send(new JSONObject().put("t", "gear").put("radio", 33));
+            idleUntil(() -> app.gear != null && app.gear.has("radio"), 20, "the radio");
+            assertTrue("16.5 plays PLACES AND PEOPLE out of JOHTO", !app.gear.optString("name").equals("FF"));
+            app.gear = null;
+            app.client.send(new JSONObject().put("t", "gear").put("call", 0));
+            idleUntil(() -> app.gear != null && app.gear.has("call"), 20, "MOM's call");
+            assertTrue("MOM says something", app.gear.optJSONArray("lines").length() > 0);
+
             // the POKéTCH on the DEVICE page: the game's own LCD, a touch, the side button
             v.select(5);
+            ((DevicePage) v.page(5)).show(DevicePage.POKETCH);
+            draw(v);
             idleUntil(() -> app.watchFrame != null, 20, "the POKéTCH's LCD");
             draw(v);
             ScreensTest.shot(v, "live_poketch");
             int app0 = app.watchFrame.optInt("app");
             int s3 = Math.max(1, (v.width() - 40) / 192), lx = (v.width() - 192 * s3 - 16) / 2;
-            tap(v, lx + 192 * s3 + 16, GameView.TOP + 40 + 80 * s3);   // (the side button)
+            long pressed = System.currentTimeMillis();
+            tap(v, lx + 192 * s3 + 16, GameView.TOP + 56 + 80 * s3);   // (the side button)
             idleUntil(() -> app.watchFrame.optInt("app") != app0, 20, "the next app");
+            // Phase 2's gate: a touch feels instant (the game's new screen back within a few frames)
+            long took = System.currentTimeMillis() - pressed;
+            System.out.println("LIVE: the POKéTCH's next app came back in " + took + " ms");
+            assertTrue("a touch answered in " + took + " ms", took < 250);
             draw(v);
             ScreensTest.shot(v, "live_poketch2");
             v.select(0);
@@ -262,6 +293,22 @@ public class LiveTest {
             // a battle in the game: the app offers nothing until it's over
             v.select(0);
             idleUntil(app::locked, 150, "the battle seen by the app");
+            // battle mode: the battle as the player sees it, live
+            idleUntil(() -> app.battle != null && app.battle.optJSONArray("mons") != null
+                    && app.battle.optJSONArray("mons").length() >= 2, 20, "the battle's feed with the POKéMON out");
+            org.json.JSONArray mons = app.battle.getJSONArray("mons");
+            boolean foe = false, mine = false;
+            for (int i = 0; i < mons.length(); i++) {
+                JSONObject b = mons.getJSONObject(i);
+                foe |= b.getInt("side") == 1 && b.getInt("s") > 0 && b.has("pct") && !b.has("hp") && !b.has("m");
+                mine |= b.getInt("me") == 1 && b.has("m");
+            }
+            assertTrue("the wild POKéMON, its HP as a share only", foe);
+            assertTrue("your POKéMON with its moves", mine);
+            v.select(5);
+            draw(v);
+            ScreensTest.shot(v, "live_battle");
+            v.select(0);
             draw(v);
             int pending = app.client.orders.pending().size();
             tap(v, x0 + 12, y0 + 12);

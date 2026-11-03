@@ -169,5 +169,43 @@ through FirstColors (room for 64 colors: JIRACHI's has 64), never into 16. The P
 only. The snapshot's `ball` is the item the summary shows (a special ball by its style). The app asks again for spawn
 maps cached by an older game (no `region`), and says when the game is older than it.
 
-Next: the POKéNAV's apps (live region map, MOENAV calls, CONDITION, RIBBONS), the POKéGEAR's, and battle mode (the
-MOVE TESTER and the party's HP).
+### The devices, the live map, battle mode (1.72.0)
+
+The DEVICE page takes on the region's device (HOENN the POKéNAV, SINNOH the POKéTCH, JOHTO and KANTO the POKéGEAR),
+with chips to switch to any other the save has (DevicePage.device / show). Game side: src/mp/mp_phone_dev.c, through
+mp_phone_int.h (the link's Buf / JSON helpers and OwnParty shared with mp_phone.c).
+
+- The live map (MapPage): the town map pages as their full views show them (region_map.c MP_TownMap_Picture, exported
+  as townmap_N.png; SINNOH's is Platinum's picture at twice the size; KANTO's black past its right edge made see-through
+  by build_assets.py) and their cells' map sections in data.json `townmaps` (a cell (x, y) at ((x + 1) * 8,
+  (y + 2) * 8)). The place adds `tm` [page, x, y] (MP_TownMap_Player: the cell the town map's own icon is on), `sec`,
+  `time` [day of the week, hour, minute] and `friends` [[name, page, x, y, battling]] (the room's players;
+  MP_TownMap_SecSpot). `{"t":"place","sec":N}` -> trainers [trainer, beaten, class, name] (people whose script starts
+  with a trainer battle), items [item, picked up, hidden] (item balls' finditem, hidden items), berries [tree, item,
+  stage], wild [species, seen, caught], over all the section's maps (tools/phone/gen_map_sizes.py makes the map groups'
+  sizes). The regions shown: the one you're in and any with a BADGE (save `rbadges`). Markers: press and hold a cell
+  (Platinum's six shapes), kept on the phone per save.
+- MATCH CALL (CallsPage): `{"t":"calls"}` -> the list as pokenav_match_call_list.c builds it (special people, then
+  registered trainers: class, name, place, rematch ready, trainer picture from trainers.png, the check page's four
+  texts); `{"t":"call","k":0|1,"i":N}` -> the call's words from MatchCall_GetMessage / SelectMatchCallMessage, made only
+  while the game is free (`busy` else; `r`: the call asked for a rematch).
+- CONDITION (ConditionPage) and RIBBONS (RibbonsPage): a POKéMON's `cond` [COOL, BEAUTY, CUTE, SMART, TOUGH, sheen] and
+  `rib` (pokenav_ribbons_summary.c MP_Ribbons_Of: its order) in the snapshot; ribbons.png and data.json `ribbons` /
+  `giftRibbons` (a gift ribbon's words are the save's `gifts` kind).
+- The POKéGEAR: CLOCK (the place's time), MAP, PHONE (`{"t":"gear","call":0|1}` MOM / PROF. ELM,
+  `{"t":"gear","answer":0|1}` MOM's savings question) and RADIO (`{"t":"gear","radio":FREQ}`: the station's name, song
+  and the show's next line, asked each second and a half), all mp_pokegear.c's own (MP_Pokegear_Phone*: their own
+  state; `busy` while the game's POKéGEAR is open).
+- Battle mode: in any battle the game sends `{"t":"battle","on":1,"mons":[...],"party":[...]}` when it changes (a look
+  every 6 frames): each battler's side, species, level, status and types now; the player's own with HP, moves and PP,
+  the others' HP only as a share; `{"t":"battle","on":0}` at the end. The phone shows the MOVE TESTER (each move against
+  each foe by data.json's `typeChart`, the game's gTypeEffectiveness; STAB) and the party's HP.
+- HIDE ON PC: `{"t":"watch","on":1,"hide":1}` puts the game's own POKéTCH away while the phone shows it
+  (poketch.c MP_Poketch_PhoneHide).
+- A sealed message the app can't read is passed over (Link.recv: `unreadable`), never a reason to link again.
+
+The gate (touch feels instant on home Wi-Fi): LiveTest presses the POKéTCH's side button and times the game's next
+app coming back (72 ms over the test's loopback, under the 250 it allows), and checks the live map's finds, MATCH CALL,
+the radio, MOM's call and the battle feed against the game.
+
+Next: Phase 3, the walk (docs/COMPANION_APP.md "Pillar 2"), training facilities and the Garden in your pocket.

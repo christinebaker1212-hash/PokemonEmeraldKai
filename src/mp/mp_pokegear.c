@@ -931,6 +931,90 @@ static void TuneTo(u8 freq)
         ShowLine();
 }
 
+// ------------------------------------------------------------------------------------------------- on the phone
+// Moemon Co-op: the phone's POKéGEAR (mp_phone_dev.c, docs/PHONE_LINK.md): the same calls and radio shows, with a state
+// of their own (never while the game's own POKéGEAR is open: its state is in use then)
+static void *sPhoneState;
+
+static bool8 PhoneBegin(void)
+{
+    if (sG != NULL)
+        return FALSE;
+    if (sPhoneState == NULL)
+        sPhoneState = calloc(1, sizeof(*sG));
+    if (sPhoneState == NULL)
+        return FALSE;
+    sG = sPhoneState;
+    return TRUE;
+}
+
+static u8 PhoneLines(u8 out[][40], u8 max)
+{
+    u8 i, n = 0;
+    for (i = 0; i < ARRAY_COUNT(sG->lines) && i < sG->pages * 2 && n < max; i++)
+        memcpy(out[n++], sG->lines[i], 40);
+    sG = NULL;
+    return n;
+}
+
+// A call (0 MOM, 1 PROF. ELM): its lines (two to a page); *ask: MOM's savings question follows (answer below). 0: busy
+u8 MP_Pokegear_PhoneCall(u8 who, u8 out[][40], u8 max, bool8 *ask)
+{
+    if (!PhoneBegin())
+        return 0;
+    if (who == 0)
+        CallMom();
+    else
+        CallElm();
+    *ask = sG->phone == PHONE_ASK;
+    return PhoneLines(out, max);
+}
+
+u8 MP_Pokegear_PhoneAnswer(bool8 yes, u8 out[][40], u8 max)
+{
+    if (!PhoneBegin())
+        return 0;
+    MomAnswer(yes);
+    return PhoneLines(out, max);
+}
+
+// The radio at FREQ (0-41, half a step each: 9 is 4.5): the station's name (NULL: no signal), its song, and the show's
+// next line (asked again each second and a half, as the game's radio prints them; "" when the show is quiet)
+bool8 MP_Pokegear_PhoneRadio(u8 freq, const u8 **name, u16 *song, u8 line[40])
+{
+    u8 station, show;
+    if (!PhoneBegin())
+        return FALSE;
+    RtcCalcLocalTime();
+    freq = freq > FREQ_MAX ? FREQ_MAX : freq;
+    station = StationAt(freq);
+    show = station;
+    if (station != ST_NONE && freq <= 21 && MP_Region_Current() == REGION_JOHTO && RocketsInRadioTower())
+        show = ST_ROCKET;
+    line[0] = EOS;
+    if (station != sG->station || show != sG->show || freq != sG->freq)
+    {
+        sG->freq = freq;
+        sG->station = station;
+        sG->show = show;
+        sG->talkStep = 0;
+        sG->midnight = 0;
+        sG->lines[0][0] = sG->lines[1][0] = EOS;
+    }
+    *song = station == ST_NONE ? 0 : sStations[show].song;
+    if (show == ST_MUSIC || show == ST_SING)
+        *song = (gLocalTime.days % 7) & 1 ? MUS_JOHTO_RADIO_POKEMON_LULLABY : MUS_JOHTO_RADIO_POKEMON_MARCH;
+    *name = station == ST_NONE ? NULL : sStations[station].name;
+    if (station != ST_NONE)
+    {
+        sG->lines[1][0] = EOS;
+        if (ShowLine())
+            memcpy(line, sG->lines[1], 40);
+    }
+    sG = NULL;
+    return TRUE;
+}
+
 // ---------------------------------------------------------------------------------------------------- the screen
 static void VBlankCB_Pokegear(void)
 {

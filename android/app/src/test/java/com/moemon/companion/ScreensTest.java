@@ -150,11 +150,67 @@ public class ScreensTest {
         tap(v, v.width() / 2, GameView.TOP + 6);
         shot(v, "box_list");
         v.showOver(null);
+        devices(v, app);
         // the menu, and pairing
         tap(v, v.width() - 10, 8);
         shot(v, "menu");
         v.back();
         v.showOver(new PairPage(v));
         shot(v, "pair");
+    }
+
+    /** The DEVICE page's devices and apps, with the snapshot given all three devices, conditions and ribbons */
+    static void devices(GameView v, Companion app) throws Exception {
+        Model m = app.model();
+        JSONObject save = m.save();
+        save.put("devices", new org.json.JSONArray("[1,1,1]"));
+        save.put("rbadges", new org.json.JSONArray("[3,1,0,0]"));
+        JSONObject first = m.party().getJSONObject(0);
+        first.put("cond", new org.json.JSONArray("[120,40,200,80,30,140]"));
+        first.put("rib", new org.json.JSONArray("[0,1,2,5,21,24,25]"));
+        JSONObject place = m.snap.getJSONObject("place");
+        place.put("friends", new org.json.JSONArray("[[\"" + app.art.toHex("MAY") + "\",0,14,6,0]]"));
+        v.select(5);
+        shot(v, "device_pokenav");
+        // the live map with a place's finds
+        app.places.put(1, new JSONObject("{\"t\":\"place\",\"sec\":1,\"trainers\":[[1,1,\"" + app.art.toHex("YOUNGSTER")
+                + "\",\"" + app.art.toHex("CALVIN") + "\"],[2,0,\"" + app.art.toHex("BUG CATCHER") + "\",\""
+                + app.art.toHex("RICK") + "\"]],\"items\":[[13,1,0],[17,0,1],[22,0,0]],\"berries\":[[1,133,5],[2,0,0]],"
+                + "\"wild\":[[261,1,1],[263,1,0],[265,0,0],[270,1,0]]}"));
+        v.showOver(new MapPage(v, "HOENN MAP"));
+        shot(v, "device_map");
+        v.showOver(new ConditionPage(v));
+        shot(v, "device_condition");
+        app.calls = new JSONObject("{\"t\":\"calls\",\"has\":1,\"list\":[{\"k\":0,\"i\":0,\"c\":\"" + app.art.toHex("LEADER")
+                + "\",\"n\":\"" + app.art.toHex("ROXANNE") + "\",\"sec\":11,\"r\":0,\"pic\":65},{\"k\":1,\"i\":3,\"c\":\""
+                + app.art.toHex("YOUNGSTER") + "\",\"n\":\"" + app.art.toHex("CALVIN") + "\",\"sec\":17,\"r\":1,\"pic\":38}]}");
+        v.showOver(new CallsPage(v));
+        shot(v, "device_calls");
+        RibbonsPage rp = new RibbonsPage(v);
+        v.showOver(rp);
+        shot(v, "device_ribbons");
+        tap(v, 60, GameView.TOP + 24 + 10);
+        shot(v, "device_ribbons_mon");
+        v.showOver(null);
+        // the POKéGEAR's cards
+        tap(v, 130, GameView.TOP + 28);
+        shot(v, "device_pokegear");
+        v.page(5).swipe(1);
+        v.page(5).swipe(1);
+        shot(v, "device_pokegear_phone");
+        v.page(5).swipe(1);
+        app.gear = new JSONObject("{\"t\":\"gear\",\"radio\":9,\"song\":1,\"name\":\"" + app.art.toHex("OAK'S POKéMON TALK")
+                + "\",\"line\":\"" + app.art.toHex("With me, MARY!") + "\"}");
+        v.page(5).press(60, GameView.TOP + 70);
+        v.page(5).dragEnd(60, GameView.TOP + 70);
+        shot(v, "device_pokegear_radio");
+        // battle mode: the MOVE TESTER and the party's HP
+        int sp = m.party().getJSONObject(0).getInt("s");
+        app.battle = new JSONObject("{\"t\":\"battle\",\"on\":1,\"wild\":1,\"mons\":[{\"b\":0,\"side\":0,\"me\":1,\"s\":" + sp
+                + ",\"l\":12,\"st\":0,\"ty\":[11,11],\"hp\":30,\"mhp\":38,\"m\":[33,55,39,145],\"pp\":[35,25,30,30]},"
+                + "{\"b\":1,\"side\":1,\"me\":0,\"s\":261,\"l\":4,\"st\":0,\"ty\":[17,17],\"pct\":64}],"
+                + "\"party\":[[" + sp + ",30,38,0,0],[252,0,20,0,0],[280,15,15,0,0]]}");
+        shot(v, "device_battle");
+        app.battle = null;
     }
 }

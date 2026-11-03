@@ -43,6 +43,13 @@ public final class Companion implements LinkClient.Listener {
     public final java.util.Map<Integer, JSONObject> where = new java.util.HashMap<>();   // species -> "where"
     public volatile JSONObject watchFrame;                        // the POKéTCH's last LCD from the game
     public volatile boolean watching;                             // the DEVICE page shows it
+    public final java.util.Map<Integer, JSONObject> places = new java.util.HashMap<>();  // map section -> "place"
+    public JSONObject calls;                                      // MATCH CALL's list ("calls")
+    public JSONObject call;                                       // the last call's words ("call")
+    public long callAt;                                           // (when it came)
+    public JSONObject gear;                                       // the POKéGEAR's last answer ("gear")
+    public long gearAt;                                           // (when it came)
+    public volatile JSONObject battle;                            // the battle as the player sees it ("battle")
     public long toastAt;
     public boolean toastGood;                                     // (a USE's result, not a refusal)
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -365,15 +372,27 @@ public final class Companion implements LinkClient.Listener {
         }
     }
 
+    /** DEVICE > HIDE ON PC: the game's own POKéTCH is put away while the phone shows it */
+    public boolean hideOnPc() {
+        return context.getSharedPreferences("moemon", 0).getBoolean("hideOnPc", false);
+    }
+
+    public JSONObject watchOn() throws org.json.JSONException {
+        return new JSONObject().put("t", "watch").put("on", 1).put("hide", hideOnPc() ? 1 : 0);
+    }
+
     @Override
     public void onStatus(LinkClient.Status status, String why) {
         statusWhy = why;
+        if (status != LinkClient.Status.LINKED) {
+            battle = null;   // (only while linked: it's live)
+        }
         if (status == LinkClient.Status.LINKED && client != null && spawnMaps == null) {
             client.ask("spawnmaps");
         }
         if (status == LinkClient.Status.LINKED && client != null && watching) {
             try {
-                client.send(new JSONObject().put("t", "watch").put("on", 1));   // (linked again: the POKéTCH again)
+                client.send(watchOn());   // (linked again: the POKéTCH again)
             } catch (org.json.JSONException ignored) {
             }
         }
@@ -429,6 +448,18 @@ public final class Companion implements LinkClient.Listener {
         } else if (t.equals("spawnmaps")) {
             spawnMaps = m;
             store.write("spawnmaps_" + client.saved().id() + ".json", m.toString());
+        } else if (t.equals("place")) {
+            places.put(m.optInt("sec"), m);
+        } else if (t.equals("calls")) {
+            calls = m;
+        } else if (t.equals("call")) {
+            call = m;
+            callAt = System.currentTimeMillis();
+        } else if (t.equals("gear")) {
+            gear = m;
+            gearAt = System.currentTimeMillis();
+        } else if (t.equals("battle")) {
+            battle = m.optInt("on") == 1 ? m : null;
         } else if (t.equals("spawns")) {
             JSONArray map = m.optJSONArray("map");
             if (map != null) {

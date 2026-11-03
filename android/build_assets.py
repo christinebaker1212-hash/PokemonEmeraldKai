@@ -125,8 +125,20 @@ def main():
     write_png(os.path.join(OUT, 'frames.png'), *sheet(load_dir(os.path.join(exp, 'frames')), 24, 24, 32))
     write_png(os.path.join(OUT, 'font.png'), *read_png(os.path.join(exp, 'font.png')))
     write_png(os.path.join(OUT, 'types.png'), *read_png(os.path.join(exp, 'types.png')))
-    for name in ('dex_info.png', 'dex_list.png', 'footprints.png'):
+    for name in ('dex_info.png', 'dex_list.png', 'footprints.png', 'ribbons.png', 'trainers.png'):
         write_png(os.path.join(OUT, name), *read_png(os.path.join(exp, name)))
+    # the town maps (the live map): KANTO's and the Sevii Islands' pages are narrower than the full view, and black
+    # past their right edge: see-through there, so the device's own background shows
+    page = 0
+    while os.path.exists(os.path.join(exp, 'townmap_%d.png' % page)):
+        w, h, px = read_png(os.path.join(exp, 'townmap_%d.png' % page))
+        if 2 <= page <= 5:
+            px = bytearray(px)
+            for i in range(0, len(px), 4):
+                if px[i] == 0 and px[i + 1] == 0 and px[i + 2] == 0:
+                    px[i + 3] = 0
+        write_png(os.path.join(OUT, 'townmap_%d.png' % page), w, h, bytes(px))
+        page += 1
     total = sum(os.path.getsize(os.path.join(OUT, f)) for f in os.listdir(OUT))
     print('app assets: %s (%d KB)' % (OUT, total // 1024))
 

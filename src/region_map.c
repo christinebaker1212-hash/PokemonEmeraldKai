@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <string.h>
 #include "global.h"
 #include "mp.h"
 #include "main.h"
@@ -154,6 +156,7 @@ void S3D_TownMapShowOn(u8 page, int bg, s32 offX, s32 offY);   // (src/sinnoh/s3
 #define TOWNMAP_OFF_X 0   // (the full view's BG2 texture point at the screen's top-left)
 #define TOWNMAP_OFF_Y 0
 extern const u16 gS3dTownMapPal[];
+bool8 S3D_Gfx_TownMap(u8 page, const u16 **pixels, u16 *w, u16 *h);   // (src/sinnoh/s3d_gfx.c)
 static u8 sShownMap;    // QZMAP_*
 static u8 sPlayerMap;   // the map the player is on
 static struct RegionMapLocation sQzBox;
@@ -683,6 +686,126 @@ void MP_RegionMap_AreaBox(mapsec_u16_t mapsec, u16 *x, u16 *y, u16 *w, u16 *h)
 {
     const struct RegionMapLocation *b = MapSecBox(mapsec);
     *x = b->x, *y = b->y, *w = b->width, *h = b->height;
+}
+
+// ------------------------------------------------------------------------------------- Moemon Co-op: the phone app
+// The town maps for the phone's live map (mp_export.c, mp_phone_dev.c): every page as its full view shows it (the BG's
+// texture point (0, 0) at the screen's top-left: a cell (x, y) of the grid, x from 0 to MAP_WIDTH - 1, is drawn at
+// ((x + MAPCURSOR_X_MIN) * 8, (y + MAPCURSOR_Y_MIN) * 8)), its cells' map sections, and where the player is.
+u32 MP_TownMap_Pages(void)
+{
+    return QZMAP_COUNT;
+}
+
+// The page's name: HOENN, JOHTO, KANTO (and its Sevii Island pages), SINNOH (north, south)
+const u8 *MP_TownMap_Title(u8 page)
+{
+    u8 shown = sShownMap;
+    const u8 *t;
+    sShownMap = page;
+    t = MP_RegionMap_Title();
+    sShownMap = shown;
+    return t;
+}
+
+// The page's picture: 240x160 BGR555 (SINNOH's pages: Platinum's picture at its own size, twice the full view's);
+// OUT has room for 480x320
+bool8 MP_TownMap_Picture(u8 page, u16 *out, u32 *w, u32 *h)
+{
+    const u32 *gfxLz, *mapLz;
+    const u16 *pal;
+    u8 *gfx, *map;
+    u32 x, y;
+    if (page >= QZMAP_COUNT)
+        return FALSE;
+    if (IS_SINNOH_PAGE(page))
+    {
+        const u16 *px;
+        u16 pw, ph;
+        if (!S3D_Gfx_TownMap(page - QZMAP_SINNOH_NORTH, &px, &pw, &ph) || pw > 480 || ph > 320)
+            return FALSE;
+        for (y = 0; y < ph; y++)
+            for (x = 0; x < pw; x++)
+                out[y * pw + x] = px[y * pw + x] | 0x8000;
+        *w = pw, *h = ph;
+        return TRUE;
+    }
+    gfxLz = page == QZMAP_HOENN ? sRegionMapBg_GfxLZ : sQzMapGfx[page - 1].gfx;
+    mapLz = page == QZMAP_HOENN ? sRegionMapBg_TilemapLZ : sQzMapGfx[page - 1].tilemap;
+    pal = page == QZMAP_HOENN ? sRegionMapBg_Pal : sQzMapGfx[page - 1].pal;
+    gfx = malloc(64 * 1024);
+    map = malloc(64 * 64);
+    if (gfx == NULL || map == NULL)
+    {
+        free(gfx);
+        free(map);
+        return FALSE;
+    }
+    memset(map, 0, 64 * 64);
+    LZ77UnCompWram(gfxLz, gfx);
+    LZ77UnCompWram(mapLz, map);
+    for (y = 0; y < DISPLAY_HEIGHT; y++)
+        for (x = 0; x < DISPLAY_WIDTH; x++)
+        {
+            // (an affine BG, 512 pixels square: a byte a tile, 8 bits a pixel; its palette is loaded at BG palette 7)
+            u8 idx = gfx[map[(y / 8) * 64 + x / 8] * 64 + (y & 7) * 8 + (x & 7)];
+            out[y * DISPLAY_WIDTH + x] = (idx >= 112 && idx < 160 ? pal[idx - 112] : pal[0]) | 0x8000;
+        }
+    free(gfx);
+    free(map);
+    *w = DISPLAY_WIDTH, *h = DISPLAY_HEIGHT;
+    return TRUE;
+}
+
+// The map section at grid cell (X, Y) of PAGE (MAPSEC_NONE: the sea, nothing)
+mapsec_u16_t MP_TownMap_Cell(u8 page, u8 x, u8 y)
+{
+    u8 shown = sShownMap;
+    mapsec_u16_t sec;
+    sShownMap = page;
+    sec = GetMapSecIdAt(x + MAPCURSOR_X_MIN, y + MAPCURSOR_Y_MIN);
+    sShownMap = shown;
+    return sec;
+}
+
+// Where the player is: the page of the region they're in and the cell the town map's own icon is on (by their place
+// on the map, as the game works it out); FALSE when nowhere on it
+bool8 MP_TownMap_Player(u8 *page, u8 *x, u8 *y)
+{
+    static struct RegionMap sTmp;
+    struct RegionMap *was = sRegionMap;
+    u8 shown = sShownMap;
+    bool8 ok;
+    sRegionMap = &sTmp;
+    ChooseShownMap();
+    *page = sShownMap;
+    ok = MapSecShown(PlayerMapSecForMap());
+    if (ok)
+    {
+        InitMapBasedOnPlayerLocation();
+        ok = sTmp.cursorPosX >= MAPCURSOR_X_MIN && sTmp.cursorPosY >= MAPCURSOR_Y_MIN;
+        *x = sTmp.cursorPosX - MAPCURSOR_X_MIN;
+        *y = sTmp.cursorPosY - MAPCURSOR_Y_MIN;
+    }
+    sRegionMap = was;
+    sShownMap = shown;
+    return ok;
+}
+
+// A map section's page and middle cell (a friend's place); FALSE when on no page
+bool8 MP_TownMap_SecSpot(mapsec_u16_t sec, u8 *page, u8 *x, u8 *y)
+{
+    u8 shown = sShownMap, map = MapOfMapSec(sec);
+    const struct RegionMapLocation *b;
+    if (map >= QZMAP_COUNT)
+        return FALSE;
+    sShownMap = map;
+    b = MapSecBox(sec);
+    *page = map;
+    *x = b->x + b->width / 2;
+    *y = b->y + b->height / 2;
+    sShownMap = shown;
+    return TRUE;
 }
 
 // The POKéTCH's MARKING MAP outside SINNOH (src/sinnoh/poketch.c): the player's region's town map as its grid of

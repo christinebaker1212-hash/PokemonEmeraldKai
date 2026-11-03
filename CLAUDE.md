@@ -37,7 +37,10 @@ tools/sinnoh/words*.py / story_people.py only stand in until a script's commands
 the app"). Phase 1 (1.70.0): the game's PHONE LINK (src/mp/mp_phone.c, phone_proto.c, mp_export.c) and the app in
 android/ (core/ is Android-free), all in `docs/PHONE_LINK.md`; tests tools/phone/gate.py, android/coretest/run.sh,
 `./gradlew testDebugUnitTest` (pictures of every page). Assets from `python3 android/build_assets.py`. The APK is signed
-by repository secrets in the release workflow; its key must never change.
+by repository secrets in the release workflow; its key must never change. Phase 2 (1.72.0, the device: POKéNAV /
+POKéTCH / POKéGEAR on the DEVICE page, the live map, MATCH CALL, CONDITION, RIBBONS, battle mode): src/mp/mp_phone_dev.c
+(+ mp_phone_int.h), PHONE_LINK.md "The devices, the live map, battle mode". The user asked (2026-11-03) for all four
+phases in order, then a UI/UX pass: "polished Nintendo quality, mid 2000s to 2007 era graphics, 2026 usability".
 
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
 card duels).

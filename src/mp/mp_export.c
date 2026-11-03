@@ -37,6 +37,8 @@
 #include "constants/items.h"
 #include "constants/moves.h"
 #include "constants/species.h"
+#include "constants/trainers.h"
+#include "constants/pokemon.h"
 
 #ifdef _WIN32
 #include <direct.h>
@@ -54,6 +56,14 @@ void MP_DexInfoScreen(u16 *out);
 void MP_DexListScreen(u16 *out);
 void MP_DexFootprint(u16 species, u8 out[16][16]);
 const struct PokedexEntry *MP_DexEntry(u32 num);
+u32 MP_TownMap_Pages(void);   // region_map.c
+const u8 *MP_TownMap_Title(u8 page);
+bool8 MP_TownMap_Picture(u8 page, u16 *out, u32 *w, u32 *h);
+mapsec_u16_t MP_TownMap_Cell(u8 page, u8 x, u8 y);
+u32 MP_Ribbons_Count(void);   // pokenav_ribbons_summary.c
+void MP_Ribbons_Icon(u32 id, u16 *out);
+const u8 *MP_Ribbons_Desc(u32 id, u32 line);
+extern const u8 *const gGiftRibbonDescriptionPointers[][2];
 bool8 MP_WallpaperArt(u8 id, const u32 **tiles, const u32 **tilemap, const u16 **palettes);   // pokemon_storage_system.c
 
 // ------------------------------------------------------------------------------------------- a tiny PNG writer
@@ -405,6 +415,77 @@ static void ExportDexArt(const char *dir)
     free(sheet);
 }
 
+// BGR555 (bit 15 = shown) to RGBA
+static void Rgba(const u16 *px, u32 n, u8 *rgba)
+{
+    u32 i;
+    for (i = 0; i < n; i++)
+    {
+        u16 c = px[i];
+        rgba[i * 4] = (c & 31) * 255 / 31;
+        rgba[i * 4 + 1] = ((c >> 5) & 31) * 255 / 31;
+        rgba[i * 4 + 2] = ((c >> 10) & 31) * 255 / 31;
+        rgba[i * 4 + 3] = (c & 0x8000) ? 255 : 0;
+    }
+}
+
+// The town maps for the live map: every page as its full view shows it (townmap_N.png; SINNOH's at Platinum's own
+// size, twice the others'), their cells in data.json (ExportData)
+static void ExportTownMaps(const char *dir)
+{
+    static u16 sPx[480 * 320];
+    static u8 sRgba[480 * 320 * 4];
+    char path[600];
+    u32 page, w, h;
+    for (page = 0; page < MP_TownMap_Pages(); page++)
+        if (MP_TownMap_Picture(page, sPx, &w, &h))
+        {
+            Rgba(sPx, w * h, sRgba);
+            snprintf(path, sizeof(path), "%s/townmap_%u.png", dir, page);
+            WritePng(path, sRgba, w, h);
+        }
+}
+
+// The POKéNAV's RIBBONS: every ribbon's big icon (32x32 each, one column, in ribbon order)
+static void ExportRibbons(const char *dir)
+{
+    static u16 sPx[32 * 32];
+    u32 n = MP_Ribbons_Count(), i;
+    u8 *sheet = calloc(32 * 32 * 4 * n, 1);
+    char path[600];
+    if (sheet == NULL)
+        return;
+    for (i = 0; i < n; i++)
+    {
+        MP_Ribbons_Icon(i, sPx);
+        Rgba(sPx, 32 * 32, sheet + i * 32 * 32 * 4);
+    }
+    snprintf(path, sizeof(path), "%s/ribbons.png", dir);
+    WritePng(path, sheet, 32, 32 * n);
+    free(sheet);
+}
+
+// The trainers' pictures (64x64 each, one column, by TRAINER_PIC_): MATCH CALL's people
+static void ExportTrainerPics(const char *dir)
+{
+    static u8 sTiles[64 * 64 / 2 + 64];
+    static u16 sPal[16 * 16];
+    u32 n = TRAINER_PIC_MP_LOCAL, i;
+    u8 *sheet = calloc(64 * 64 * 4 * n, 1);
+    char path[600];
+    if (sheet == NULL)
+        return;
+    for (i = 0; i < n; i++)
+    {
+        LZDecompressWram(gTrainerFrontPicTable[i].data, sTiles);
+        LZDecompressWram(gTrainerFrontPicPaletteTable[i].data, sPal);
+        Tiles(sTiles, 8, 8, sPal, sheet + i * 64 * 64 * 4);
+    }
+    snprintf(path, sizeof(path), "%s/trainers.png", dir);
+    WritePng(path, sheet, 64, 64 * n);
+    free(sheet);
+}
+
 static void ExportFont(const char *dir, FILE *json)
 {
     static u8 sRgba[256 * 256 * 4];
@@ -466,8 +547,8 @@ static void ExportData(const char *dir)
     {
         fprintf(f, "%s{\"n\":", i ? "," : "");
         Json(f, gMoveNames[i], MOVE_NAME_LENGTH);
-        fprintf(f, ",\"t\":%u,\"p\":%u,\"a\":%u,\"pp\":%u", gBattleMoves[i].type, gBattleMoves[i].power,
-                gBattleMoves[i].accuracy, gBattleMoves[i].pp);
+        fprintf(f, ",\"t\":%u,\"p\":%u,\"a\":%u,\"pp\":%u,\"c\":%u", gBattleMoves[i].type, gBattleMoves[i].power,
+                gBattleMoves[i].accuracy, gBattleMoves[i].pp, gMoveCategories[i]);
         if (i > 0)
         {
             fprintf(f, ",\"d\":");
@@ -506,11 +587,11 @@ static void ExportData(const char *dir)
                 gNatureStatTable[i][2], gNatureStatTable[i][3], gNatureStatTable[i][4]);
     // the places a POKeMON was met (MON_DATA_MET_LOCATION: a map section)
     fprintf(f, "],\"mapsecs\":[");
-    for (i = 0; i < 256; i++)
+    for (i = 0; i < MAPSEC_SINNOH_END; i++)
     {
         u8 name[40];
         name[0] = EOS;
-        if (i < MAPSEC_NONE)
+        if (i < MAPSEC_NONE || (i >= MAPSEC_JOHTO_FIRST && i < MAPSEC_JOHTO_END) || i >= MAPSEC_SINNOH_FIRST)
             GetMapNameGeneric(name, i);
         fprintf(f, "%s", i ? "," : "");
         Json(f, name, sizeof(name) - 1);
@@ -557,6 +638,45 @@ static void ExportData(const char *dir)
         fprintf(f, "%s", i ? "," : "");
         Json(f, gTypeNames[i], TYPE_NAME_LENGTH);
     }
+    // the type chart as the battles read it: [attacking, defending, x10 (20 super effective, 5 not very, 0 none)];
+    // the entries after the FORESIGHT mark (0xFE) are the ones FORESIGHT and ODOR SLEUTH lift
+    fprintf(f, "],\"typeChart\":[");
+    for (i = 0; TYPE_EFFECT_ATK_TYPE(i) != TYPE_ENDTABLE; i += 3)
+        fprintf(f, "%s[%u,%u,%u]", i ? "," : "", TYPE_EFFECT_ATK_TYPE(i), TYPE_EFFECT_DEF_TYPE(i),
+                TYPE_EFFECT_MULTIPLIER(i));
+    // the town maps' pages: name, picture size, and the map section of each grid cell (MP_TownMap_Cell; a cell (x, y)
+    // is drawn at ((x + 1) * 8, (y + 2) * 8) of the full view's 240x160)
+    fprintf(f, "],\"townmaps\":[");
+    for (i = 0; i < MP_TownMap_Pages(); i++)
+    {
+        u32 x, y;
+        fprintf(f, "%s{\"n\":", i ? "," : "");
+        Json(f, MP_TownMap_Title(i), 20);
+        fprintf(f, ",\"x0\":1,\"y0\":2,\"cells\":[");
+        for (y = 0; y < 15; y++)
+            for (x = 0; x < 28; x++)
+                fprintf(f, "%s%u", x || y ? "," : "", MP_TownMap_Cell(i, x, y));
+        fprintf(f, "]}");
+    }
+    // the ribbons' words (two lines each; a gift ribbon's are the save's: "giftRibbons" by its kind, 1 first)
+    fprintf(f, "],\"ribbons\":[");
+    for (i = 0; i < MP_Ribbons_Count(); i++)
+    {
+        fprintf(f, "%s[", i ? "," : "");
+        Json(f, i < FIRST_GIFT_RIBBON ? MP_Ribbons_Desc(i, 0) : (const u8 *)"\xFF", 60);
+        fprintf(f, ",");
+        Json(f, i < FIRST_GIFT_RIBBON ? MP_Ribbons_Desc(i, 1) : (const u8 *)"\xFF", 60);
+        fprintf(f, "]");
+    }
+    fprintf(f, "],\"giftRibbons\":[");
+    for (i = 0; i < MAX_GIFT_RIBBON; i++)
+    {
+        fprintf(f, "%s[", i ? "," : "");
+        Json(f, gGiftRibbonDescriptionPointers[i][0] ? gGiftRibbonDescriptionPointers[i][0] : (const u8 *)"\xFF", 60);
+        fprintf(f, ",");
+        Json(f, gGiftRibbonDescriptionPointers[i][1] ? gGiftRibbonDescriptionPointers[i][1] : (const u8 *)"\xFF", 60);
+        fprintf(f, "]");
+    }
     fprintf(f, "],");
     ExportFont(dir, f);
     fprintf(f, "}\n");
@@ -578,6 +698,9 @@ void MP_Export_IfAsked(void)
     ExportFrames(dir);
     ExportTypeIcons(dir);
     ExportDexArt(dir);
+    ExportTownMaps(dir);
+    ExportRibbons(dir);
+    ExportTrainerPics(dir);
     ExportData(dir);
     printf("[export] the app's art and tables are in %s\n", dir);
     fflush(stdout);

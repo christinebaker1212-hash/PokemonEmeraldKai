@@ -1,5 +1,7 @@
 package com.moemon.companion;
 
+import com.moemon.companion.core.Hex;
+
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -142,6 +144,11 @@ public final class GameArt {
             b[i] = (byte) (c != null ? c : 0);
         }
         return b;
+    }
+
+    /** The app's own words as the game's text in hex (where a page draws game text by its hex) */
+    public String toHex(String s) {
+        return Hex.of(encode(s));
     }
 
     /** A game letter as plain text (for sorting and menu rows) */
@@ -444,6 +451,74 @@ public final class GameArt {
             yy += 14;
         }
         return yy - y;
+    }
+
+    // ------------------------------------------------------------------------------------------- the device's art
+    private final Map<Integer, Bitmap> townMaps = new HashMap<>();
+    private Bitmap ribbons, trainers;
+
+    /** A town map page as its full view shows it (240x160; SINNOH's at twice that); null when it isn't there */
+    public Bitmap townMap(int page) {
+        if (!townMaps.containsKey(page)) {
+            townMaps.put(page, bitmap("game/townmap_" + page + ".png"));
+        }
+        return townMaps.get(page);
+    }
+
+    /** A ribbon's big icon (32x32), drawn at a whole SIZE multiple of 32 */
+    public void ribbon(Canvas c, int id, int x, int y, int size) {
+        if (ribbons == null) {
+            ribbons = bitmap("game/ribbons.png");
+        }
+        if (ribbons == null || id < 0 || (id + 1) * 32 > ribbons.getHeight()) {
+            return;
+        }
+        src.set(0, id * 32, 32, id * 32 + 32);
+        dst.set(x, y, x + size, y + size);
+        c.drawBitmap(ribbons, src, dst, pix);
+    }
+
+    /** A trainer's picture (64x64), as MATCH CALL shows them */
+    public void trainerPic(Canvas c, int pic, int x, int y, int size) {
+        if (trainers == null) {
+            trainers = bitmap("game/trainers.png");
+        }
+        if (trainers == null || pic < 0 || (pic + 1) * 64 > trainers.getHeight()) {
+            return;
+        }
+        src.set(0, pic * 64, 64, pic * 64 + 64);
+        dst.set(x, y, x + size, y + size);
+        c.drawBitmap(trainers, src, dst, pix);
+    }
+
+    /** Any bitmap at a size, its pixels kept sharp */
+    public void sharp(Canvas c, Bitmap b, int x, int y, int w, int h) {
+        if (b == null) {
+            return;
+        }
+        src.set(0, 0, b.getWidth(), b.getHeight());
+        dst.set(x, y, x + w, y + h);
+        c.drawBitmap(b, src, dst, pix);
+    }
+
+    /** How ATK hits a POKéMON of types T0 / T1, in tenths (the game's type chart: 0, 5, 10, 20, 40...) */
+    public int effectiveness(int atk, int t0, int t1) {
+        JSONArray chart = data.optJSONArray("typeChart");
+        int m = 10;
+        for (int i = 0; chart != null && i < chart.length(); i++) {
+            JSONArray e = chart.optJSONArray(i);
+            if (e.optInt(0) != atk) {
+                continue;
+            }
+            int def = e.optInt(1), mul = e.optInt(2);
+            if (def == t0) {
+                m = m * mul / 10;
+            }
+            if (def == t1 && t1 != t0) {
+                m = m * mul / 10;
+            }
+        }
+        return m;
     }
 
     /** A BAG icon (24x24) */

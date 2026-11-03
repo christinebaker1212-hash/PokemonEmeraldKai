@@ -1269,3 +1269,59 @@ static void SpriteCB_WaitForRibbonAnimation(struct Sprite *sprite)
         sprite->callback = SpriteCallbackDummy;
     }
 }
+
+// ------------------------------------------------------------------------------------- Moemon Co-op: the phone app
+// The POKéNAV's RIBBONS on the phone (mp_phone.c, mp_export.c): a POKéMON's ribbons in the order this screen lists
+// them (normal ones, then gift ones), each ribbon's big icon in its own colors and its two lines of words
+u32 MP_Ribbons_Of(u32 ribbonFlags, u8 *ids, u32 max)
+{
+    u32 i, n = 0;
+    s32 j;
+    for (i = 0; i < ARRAY_COUNT(sRibbonData); i++)
+    {
+        s32 numRibbons = ((1 << sRibbonData[i].numBits) - 1) & ribbonFlags;
+        for (j = 0; j < numRibbons && n < max; j++)
+            ids[n++] = sRibbonData[i].ribbonId + j;
+        ribbonFlags >>= sRibbonData[i].numBits;
+    }
+    return n;
+}
+
+u32 MP_Ribbons_Count(void)
+{
+    return ARRAY_COUNT(sRibbonGfxData);
+}
+
+// Ribbon ID's big icon: 32x32 BGR555, 0 where see-through
+void MP_Ribbons_Icon(u32 id, u16 *out)
+{
+    static const u16 *const pals[] = {sRibbonIcons1_Pal, sRibbonIcons2_Pal, sRibbonIcons3_Pal, sRibbonIcons4_Pal,
+                                      sRibbonIcons5_Pal};
+    static u8 sGfx[0x1800];
+    static bool8 sLoaded;
+    const u16 *pal;
+    u32 x, y;
+    if (!sLoaded)
+    {
+        LZ77UnCompWram(sRibbonIconsBig_Gfx, sGfx);
+        sLoaded = TRUE;
+    }
+    pal = pals[sRibbonGfxData[id].palNumOffset % ARRAY_COUNT(pals)];
+    for (y = 0; y < 32; y++)
+        for (x = 0; x < 32; x++)
+        {
+            // (a 32x32 sprite: 16 tiles in rows of 4, 32 bytes a tile)
+            const u8 *tile = sGfx + sRibbonGfxData[id].tileNumOffset * 512 + ((y / 8) * 4 + x / 8) * 32;
+            u8 idx = (tile[(y & 7) * 4 + (x & 7) / 2] >> ((x & 1) * 4)) & 0xF;
+            out[y * 32 + x] = idx ? pal[idx] | 0x8000 : 0;
+        }
+}
+
+// Ribbon ID's words (LINE 0 or 1); a gift ribbon's are the save's own (its gift ribbons' slots); NULL: none
+const u8 *MP_Ribbons_Desc(u32 id, u32 line)
+{
+    if (id < FIRST_GIFT_RIBBON)
+        return gRibbonDescriptionPointers[id][line & 1];
+    id = gSaveBlock1Ptr->giftRibbons[id - FIRST_GIFT_RIBBON];
+    return id == 0 || id > MAX_GIFT_RIBBON ? NULL : gGiftRibbonDescriptionPointers[id - 1][line & 1];
+}

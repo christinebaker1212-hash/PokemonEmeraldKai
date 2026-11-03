@@ -18,7 +18,7 @@
 
 static u32 GetEnigmaBerryChecksum(struct EnigmaBerry *enigmaBerry);
 static bool32 BerryTreeGrow(struct BerryTree *tree);
-static u16 BerryTypeToItemId(u16 berry);
+u16 BerryTypeToItemId(u16 berry);
 static u8 BerryTreeGetNumStagesWatered(struct BerryTree *tree);
 static u8 GetNumStagesWateredByBerryTreeId(u8 id);
 static u8 CalcBerryYieldInternal(u16 max, u16 min, u8 water);
@@ -1442,7 +1442,7 @@ u8 ItemIdToBerryType(u16 item)
         return ITEM_TO_BERRY(item);
 }
 
-static u16 BerryTypeToItemId(u16 berry)
+u16 BerryTypeToItemId(u16 berry)   // (Moemon Co-op: the phone's live map uses it too)
 {
     if (berry > 0xFF || !IsValidBerryType(berry))
         return FIRST_BERRY_INDEX;

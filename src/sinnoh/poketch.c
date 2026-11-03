@@ -1309,7 +1309,7 @@ static void DrawApp(void)
 // Moemon Co-op: the POKéTCH on the phone (mp_phone.c, docs/PHONE_LINK.md "The POKéTCH on the phone"): while the phone
 // shows it, the app is drawn into the LCD every frame the phone asks (here when the game's own isn't out, which draws
 // it itself), and the phone's finger is the stylus. The same apps, state and "<save>.poketch" as the game's.
-static struct { bool8 touch; s16 x, y; s8 change; bool8 drawn; } sPhone;
+static struct { bool8 touch; s16 x, y; s8 change; bool8 drawn; bool8 hide; } sPhone;
 static bool8 Shown(void);
 static void ChangeApp(s8 dir);
 
@@ -1375,9 +1375,16 @@ const u8 *MP_Poketch_PhoneFrame(u8 *app, u8 *color, u8 *flags, u32 *unlocked)
     return &sCanvas[0][0];
 }
 
+// The phone shows it and asks the game's own to stay away while it does (DEVICE > HIDE ON PC)
+void MP_Poketch_PhoneHide(bool8 hide)
+{
+    sPhone.hide = hide;
+}
+
 void MP_Poketch_PhoneDone(void)
 {
     sPhone.touch = FALSE;
+    sPhone.hide = FALSE;
     if (sP.loaded)
         SaveState();
 }
@@ -1486,7 +1493,8 @@ static bool8 Available(void)
 
 static bool8 Shown(void)
 {
-    return sP.loaded && sP.view != VIEW_HIDDEN && Available();
+    // (the phone showing it with "hide on the PC": the game's own is put away, so the PC's picture stays clear)
+    return sP.loaded && sP.view != VIEW_HIDDEN && Available() && !sPhone.hide;
 }
 
 bool8 MP_Poketch_IsOpen(void)

@@ -86,6 +86,9 @@ public final class Link implements AutoCloseable {
     }
 
     /** The next message from the game (sealed ones opened); blocks */
+    public int badMessages;
+    public String lastBad = "";
+
     public JSONObject recv() throws IOException {
         int n = in.readInt();
         if (n <= 0 || n > FRAME_MAX) {
@@ -113,7 +116,16 @@ public final class Link implements AutoCloseable {
                     throw new IOException("a replayed message");
                 }
                 seqIn = seq;
-                return new JSONObject(new String(opened, 4, opened.length - 4, StandardCharsets.UTF_8));
+                String text = new String(opened, 4, opened.length - 4, StandardCharsets.UTF_8);
+                try {
+                    return new JSONObject(text);
+                } catch (JSONException e) {
+                    // (a sealed message the app can't read: passed over, the link stays up; a game newer or older
+                    // than the app must never make it link again and again)
+                    badMessages++;
+                    lastBad = text.length() > 200 ? text.substring(0, 200) : text;
+                    return new JSONObject().put("t", "unreadable");
+                }
             }
         } catch (JSONException e) {
             throw new IOException("bad JSON", e);

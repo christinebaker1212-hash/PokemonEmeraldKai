@@ -54,8 +54,10 @@ void MP_Poketch_PhoneTouch(s16 x, s16 y, bool8 down);
 void MP_Poketch_PhoneApp(s8 dir);
 const u8 *MP_Poketch_PhoneFrame(u8 *app, u8 *color, u8 *flags, u32 *unlocked);
 void MP_Poketch_PhoneDone(void);
+void MP_Poketch_PhoneHide(bool8 hide);
 const u32 *MP_BoxMonFrontPal(struct BoxPokemon *box);   // pokemon.c
 const u32 *MP_SpeciesFrontPal(u16 species);
+u32 MP_Ribbons_Of(u32 ribbonFlags, u8 *ids, u32 max);   // pokenav_ribbons_summary.c
 #include "phone_proto.h"
 #include "monocypher/monocypher.h"
 #include "region_map.h"
@@ -92,8 +94,7 @@ static bool8 sDirty;             // write it with the next save
 static void SpawnsLoad(void);
 static void SpawnsWrite(void);
 static void SpawnsReset(void);
-struct Buf;
-static void SendBuf(int c, struct Buf *b);
+#include "mp_phone_int.h"
 
 // --------------------------------------------------------------------------------------------------- the sidecar
 
@@ -174,23 +175,16 @@ static void EnsureFile(void)
 
 // ------------------------------------------------------------------------------------------------ JSON, in and out
 
-struct Buf
-{
-    char *p;
-    size_t len, cap;
-};
+struct Buf sOut;
 
-static struct Buf sOut;
-
-static void BufReset(struct Buf *b)
+void BufReset(struct Buf *b)
 {
     b->len = 0;
     if (b->p)
         b->p[0] = '\0';
 }
 
-static void BufAdd(struct Buf *b, const char *fmt, ...) __attribute__((format(printf, 2, 3)));
-static void BufAdd(struct Buf *b, const char *fmt, ...)
+void BufAdd(struct Buf *b, const char *fmt, ...)
 {
     va_list ap;
     int n;
@@ -220,7 +214,7 @@ static void BufAdd(struct Buf *b, const char *fmt, ...)
 }
 
 // The game's text bytes as hex (names: the app draws them in the game's font)
-static void BufText(struct Buf *b, const u8 *s, size_t max)
+void BufText(struct Buf *b, const u8 *s, size_t max)
 {
     size_t i;
     BufAdd(b, "\"");
@@ -244,7 +238,7 @@ static const char *JsonKey(const char *json, const char *key)
     return p;
 }
 
-static bool8 JsonNum(const char *json, const char *key, long long *out)
+bool8 JsonNum(const char *json, const char *key, long long *out)
 {
     const char *p = JsonKey(json, key);
     char *end;
@@ -258,7 +252,7 @@ static bool8 JsonNum(const char *json, const char *key, long long *out)
     return TRUE;
 }
 
-static bool8 JsonStr(const char *json, const char *key, char *out, size_t size)
+bool8 JsonStr(const char *json, const char *key, char *out, size_t size)
 {
     const char *p = JsonKey(json, key);
     size_t n = 0;
@@ -324,7 +318,7 @@ static bool8 FirstColors(const u32 *lz, u16 out[16])
     return TRUE;
 }
 
-static void BufBoxMon(struct Buf *b, struct BoxPokemon *box)
+void BufBoxMon(struct Buf *b, struct BoxPokemon *box)
 {
     u16 species = GetBoxMonData(box, MON_DATA_SPECIES);
     u32 pid, ot, i;
@@ -388,11 +382,31 @@ static void BufBoxMon(struct Buf *b, struct BoxPokemon *box)
         BufAdd(b, ",\"otn\":");
         BufText(b, ot, PLAYER_NAME_LENGTH);
         BufAdd(b, ",\"otg\":%u", (unsigned)GetBoxMonData(box, MON_DATA_OT_GENDER));
+        // the POKéNAV's CONDITION (COOL, BEAUTY, CUTE, SMART, TOUGH, then the sheen) and RIBBONS (in its order)
+        {
+            static const u8 sCond[6] = {MON_DATA_COOL, MON_DATA_BEAUTY, MON_DATA_CUTE, MON_DATA_SMART, MON_DATA_TOUGH,
+                                        MON_DATA_SHEEN};
+            u32 cond[6], any = 0, n;
+            u8 ribbons[32];
+            for (i = 0; i < 6; i++)
+                any |= cond[i] = GetBoxMonData(box, sCond[i]);
+            if (any)
+                BufAdd(b, ",\"cond\":[%u,%u,%u,%u,%u,%u]", (unsigned)cond[0], (unsigned)cond[1], (unsigned)cond[2],
+                       (unsigned)cond[3], (unsigned)cond[4], (unsigned)cond[5]);
+            n = MP_Ribbons_Of(GetBoxMonData(box, MON_DATA_RIBBONS), ribbons, sizeof(ribbons));
+            if (n)
+            {
+                BufAdd(b, ",\"rib\":[");
+                for (i = 0; i < n; i++)
+                    BufAdd(b, "%s%u", i ? "," : "", ribbons[i]);
+                BufAdd(b, "]");
+            }
+        }
     }
     BufAdd(b, "}");
 }
 
-static void BufPartyMon(struct Buf *b, struct Pokemon *mon)
+void BufPartyMon(struct Buf *b, struct Pokemon *mon)
 {
     size_t at = b->len;
     BufBoxMon(b, &mon->box);
@@ -423,23 +437,25 @@ static bool8 PcReachable(void)
 
 // The player's own party: in a co-op or multi battle gPlayerParty holds friends' POKeMON too, and the real party is
 // set aside in the save block (mp_coop.c SavePlayerParty) until the battle ends
-static struct Pokemon *OwnParty(void)
+struct Pokemon *OwnParty(void)
 {
     if (gMain.inBattle && (gMpCoopBattle || (gBattleTypeFlags & BATTLE_TYPE_MULTI)))
         return gSaveBlock1Ptr->playerParty;
     return gPlayerParty;
 }
 
-static bool8 Safe(void)
+bool8 Safe(void)
 {
     return MP_IsLocalFree() && !gMain.inBattle;
 }
 
 static void BufPlace(struct Buf *b)
 {
-    BufAdd(b, "\"place\":{\"map\":[%u,%u],\"type\":%u,\"pc\":%u,\"safe\":%u,\"battle\":%u}",
+    BufAdd(b, "\"place\":{\"map\":[%u,%u],\"type\":%u,\"pc\":%u,\"safe\":%u,\"battle\":%u",
            gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, gMapHeader.mapType, PcReachable(), Safe(),
            gMain.inBattle != 0);
+    PhoneDev_Place(b);
+    BufAdd(b, "}");
 }
 
 // A hash of everything the snapshot shows that can change (party, boxes, BAG, money, POKeDEX): "rev" in "snap" and
@@ -507,6 +523,12 @@ static void BufSnapshot(struct Buf *b)
     // (the devices the save has, for the phone's DEVICE page: POKéTCH, POKéNAV, POKéGEAR)
     BufAdd(b, ",\"devices\":[%u,%u,%u]", MP_Poketch_PhoneAvailable(), FlagGet(FLAG_SYS_POKENAV_GET) != 0,
            CheckBagHasItem(ITEM_POKEGEAR, 1) != 0);
+    // (each region's BADGES: the live map shows the regions the player has been to; the save's gift ribbons' kinds)
+    BufAdd(b, ",\"rbadges\":[%u,%u,%u,%u],\"gifts\":[", MP_Region_BadgeCount(REGION_HOENN),
+           MP_Region_BadgeCount(REGION_JOHTO), MP_Region_BadgeCount(REGION_KANTO), MP_Region_BadgeCount(REGION_SINNOH));
+    for (i = 0; i < ARRAY_COUNT(gSaveBlock1Ptr->giftRibbons); i++)
+        BufAdd(b, "%s%u", i ? "," : "", gSaveBlock1Ptr->giftRibbons[i]);
+    BufAdd(b, "]");
     BufAdd(b, ",\"tid\":%u,\"gender\":%u,\"region\":%u,\"gen\":%u,\"badges\":%u,\"money\":%u,\"coins\":%u,\"game\":\"%s\"},",
            (unsigned)(gSaveBlock2Ptr->playerTrainerId[0] | (gSaveBlock2Ptr->playerTrainerId[1] << 8)),
            gSaveBlock2Ptr->playerGender, MP_Region_Current(), MP_Generation(), MP_Region_TotalBadges(),
@@ -1023,7 +1045,7 @@ static void SendSealed(int c, const char *json, size_t n)
     PhoneNet_Send(c, sSealBuf, need);
 }
 
-static void SendBuf(int c, struct Buf *b)
+void SendBuf(int c, struct Buf *b)
 {
     SendSealed(c, b->p, b->len);
 }
@@ -1424,6 +1446,8 @@ static void OnSealed(int c, const char *json)
     char t[16];
     if (!JsonStr(json, "t", t, sizeof(t)))
         return;
+    if (PhoneDev_OnSealed(c, t, json))
+        return;
     if (strcmp(t, "snap") == 0)
         SendSnapshot(c);
     else if (strcmp(t, "spawnmaps") == 0)
@@ -1445,6 +1469,12 @@ static void OnSealed(int c, const char *json)
             MP_Poketch_PhoneDone();
         sSess[c].watch = on != 0;
         sSess[c].watchHash = 0;
+        if (on)
+        {
+            long long hide = 0;
+            JsonNum(json, "hide", &hide);
+            MP_Poketch_PhoneHide(hide != 0);
+        }
         if (on && !MP_Poketch_PhoneAvailable())
         {
             BufReset(&sOut);
@@ -1714,6 +1744,7 @@ void MP_Phone_Update(void)
                 if (sSess[c].watch)
                     MP_Poketch_PhoneDone();
                 sSess[c].watch = FALSE;
+                PhoneDev_Closed(c);
                 for (i = 0; i < sOrderCount; i++)   // (its waiting orders go: the phone sends them again)
                     if (sOrders[i].conn != c)
                         sOrders[k++] = sOrders[i];
@@ -1731,6 +1762,9 @@ void MP_Phone_Update(void)
             sSess[c].watchTimer = 0;
             SendWatch(c);
         }
+    // The device's live feeds (the battle)
+    for (c = 0; c < PHONE_NET_CONNS; c++)
+        PhoneDev_Update(c, sSess[c].state == SESS_LIVE);
     // Waiting orders, in order, once the game is free
     while (sOrderCount > 0 && Safe())
     {
