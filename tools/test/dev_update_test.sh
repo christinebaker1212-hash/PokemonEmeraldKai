@@ -1,5 +1,7 @@
 #!/bin/bash
-# Channel changes with actual main/dev packages, verified installs and relaunches.
+# The dev channel ended in 1.80.0 (BUILDING_COOP.md "Dev update channel (ended)"): every build follows main whatever
+# AllowSmallTweaks says. A dev install moves itself to main (the last dev release carries this code), keeps the save and
+# the setting; main never takes a dev manifest. Real packages, verified installs and relaunches.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 REPO=$PWD
@@ -28,7 +30,7 @@ trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
 for _ in {1..50}; do [ ! -s "$D/port" ] || break; sleep .1; done
 PORT=$(cat "$D/port")
 printf 'wait 30\nlog channel test reached game\nquit\n' > "$D/script.txt"
-unzip -q "$D/main/MoemonEmeraldKaiCoop-linux.zip" -d "$D/player"
+unzip -q "$D/dev/MoemonEmeraldKaiCoop-linux.zip" -d "$D/player"
 G="$D/player/MoemonEmeraldKaiCoop"
 # An opaque player save must survive updater transitions byte for byte.
 head -c 131072 /dev/urandom > "$G/pokeemerald.sav"
@@ -43,28 +45,19 @@ run() {
     sha256sum -c --quiet "$D/save.sha"
     grep -q "AllowSmallTweaks = $on" "$G/moemon_coop.ini"
 }
-run dev 1 enter-dev
-grep -q 'installed version' "$D/enter-dev.log"
-grep -q '(dev)' "$D/enter-dev.log"
-echo 'ok main switches to dev and restarts; save and opt-in preserved'
-run dev 1 stay-dev
-grep -q 'up to date' "$D/stay-dev.log"
-! grep -q 'installed version' "$D/stay-dev.log"
-echo 'ok current dev does not download repeatedly'
-run main 0 return-main
-grep -q 'installed version' "$D/return-main.log"
-grep -q '(main)' "$D/return-main.log"
-echo 'ok dev returns to main despite its lower version'
+run main 1 dev-to-main
+grep -q 'installed version' "$D/dev-to-main.log"
+grep -q '(main)' "$D/dev-to-main.log"
+echo 'ok a dev install moves to main despite AllowSmallTweaks = 1; save and setting preserved'
+run main 1 stay-main-tweaks
+grep -q 'up to date' "$D/stay-main-tweaks.log"
+! grep -q 'installed version' "$D/stay-main-tweaks.log"
+echo 'ok AllowSmallTweaks = 1 stays on main'
 run main 0 stay-main
 grep -q 'up to date' "$D/stay-main.log"
 ! grep -q 'installed version' "$D/stay-main.log"
 echo 'ok current main does not download repeatedly'
-run main 1 wrong-channel
-grep -q 'refusing manifest for wrong channel' "$D/wrong-channel.log"
-! grep -q 'installed version' "$D/wrong-channel.log"
-echo 'ok wrong-channel manifest rejected'
-sed -i 's/^version .*/version 1.0.0.1/' "$D/dev/update.txt"
-run dev 1 stale-dev
-grep -q 'dev update is based on an older main version' "$D/stale-dev.log"
-! grep -q 'installed version' "$D/stale-dev.log"
-echo "ok stale dev content rejected; results in $D"
+run dev 1 refuse-dev
+grep -q 'refusing manifest for wrong channel' "$D/refuse-dev.log"
+! grep -q 'installed version' "$D/refuse-dev.log"
+echo "ok a dev manifest is refused; results in $D"
