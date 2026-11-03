@@ -34,7 +34,7 @@ unzip -q "$D/dev/MoemonEmeraldKaiCoop-linux.zip" -d "$D/player"
 G="$D/player/MoemonEmeraldKaiCoop"
 # An opaque player save must survive updater transitions byte for byte.
 head -c 131072 /dev/urandom > "$G/pokeemerald.sav"
-sha256sum "$G/pokeemerald.sav" > "$D/save.sha"
+SAVE_SHA=$(sha256sum < "$G/pokeemerald.sav")
 run() {
     local channel=$1 on=$2 name=$3
     printf 'AllowSmallTweaks = %s\nAutoUpdate = 1\n' "$on" > "$G/moemon_coop.ini"
@@ -42,7 +42,10 @@ run() {
         MOEMON_UPDATE_URL="http://127.0.0.1:$PORT/$channel/" \
         timeout -k 5 60 ./MoemonEmeraldKaiCoop > "$D/$name.log" 2>&1)
     grep -q 'channel test reached game' "$D/$name.log"
-    sha256sum -c --quiet "$D/save.sha"
+    # the game moves a loose save into saves/slot1 (save slots, 1.63.5): the bytes must arrive unchanged
+    local sav=$G/saves/slot1/pokeemerald.sav
+    [ -f "$sav" ] || sav=$G/pokeemerald.sav
+    [ "$(sha256sum < "$sav")" = "$SAVE_SHA" ]
     grep -q "AllowSmallTweaks = $on" "$G/moemon_coop.ini"
 }
 run main 1 dev-to-main
