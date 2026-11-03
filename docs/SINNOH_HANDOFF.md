@@ -157,7 +157,8 @@ Sinnoh gets everything JOHTO and KANTO got:
 - Every existing item by GENERATION: shops, pickups, held items, hidden items, trainers' items.
 - Co-op, achievements, MoeGatcha, level scaling, followers, the Garden and the rest work there as in the other regions.
 
-Removed, with the scripts behind them (they will never work here): PAL PARK, the GTS, Wi-Fi features (the Wi-Fi
+Removed, with the scripts behind them (they will never work here): PAL PARK (its catching show; the building is to
+reopen as a card hall for all four card games, the user 2026-11-03: docs/MTG_DECISIONS.md), the GTS, Wi-Fi features (the Wi-Fi
 Club, the Plaza, the Battle Tower's Wi-Fi rooms, Mystery Gift by Wi-Fi...). Removed where a Kai feature replaces
 them: BALL SEALS (the POKé BALL page's styles and ball effects), and anything else the co-op features supersede.
 Features that Gen 3 also has use the Gen 3 versions, but for SUPER CONTESTS, which the user asked for again

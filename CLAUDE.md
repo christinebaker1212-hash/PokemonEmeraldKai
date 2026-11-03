@@ -10,7 +10,8 @@ everything per feature in COOP_NOTES (its SINNOH sections: story people tools/si
 src/sinnoh/s3d_gyms.c, the DISTORTION WORLD scene, the BATTLE FRONTIER's five: TOWER, FACTORY (the game's own halls,
 shared maps), HALL s3d_hall.c, CASTLE / ARCADE s3d_frontier.c). **SINNOH is 1:1 with Platinum** (the user, 2026-11-02):
 what Kai already has, SINNOH uses (never a second copy); anything else not 1:1 is built (the DISTORTION WORLD first);
-only online-only features (GTS, Wi-Fi) and ones Kai supersedes or the DS itself needs (PAL PARK) are closed. The list:
+only online-only features (GTS, Wi-Fi) and ones Kai supersedes or the DS itself needs (PAL PARK's catching show; its building is to reopen as a hall for all four
+card games, original words allowed there: docs/MTG_DECISIONS.md) are closed. The list:
 docs/SINNOH_HANDOFF.md "Platinum's own words and scripts". The 3D
 engine (src/sinnoh/s3d.c, include/s3d.h) draws Platinum's own map models from sinnoh/platinum3d.pak, built from
 pret/pokeplatinum at a pinned commit by tools/sinnoh/make_pack.sh (run it before playing SINNOH from a build; the release
@@ -81,6 +82,8 @@ tools/sinnoh...): its edits sit on top of their output at run time and are never
 regenerated map keeps them (where the same thing changed, the editor asks the user which wins).
 The dev update channel ended with the Maker's first update (the user, 2026-11-03): every build follows main,
 AllowSmallTweaks only unlocks the small tweaks, and no dev updates are pushed.
+
+**Magic: The Gathering** (a fourth card game, planned, not started): the user's decisions in `docs/MTG_DECISIONS.md`.
 
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
 card duels).
