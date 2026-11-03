@@ -110,4 +110,5 @@ mp party
 mp getvar 0x52F8
 mp getvar 0x51C9
 mp ctx
+mp startmenu
 quit

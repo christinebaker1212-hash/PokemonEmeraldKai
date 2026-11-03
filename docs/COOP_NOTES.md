@@ -4287,6 +4287,9 @@ follow_behind, follow_ground.
   costs, Platinum's "RED SHARDS  X 2" lines, menu_entries 273-277). Test sinnoh_move_tutor. Not yet: GRANDMA WILMA's
   DRACO METEOR and ROUTE 228's three (OpenMoveTutorMenu: Platinum's move-learning screen), the SNOWPOINT man's
   "tough words" (CheckAllToughWordsUnlocked).
+- The START menu's POKéMON (1.69.3): Platinum shows it once the starter is saved, so SaveChosenStarter sets
+  FLAG_SYS_POKEMON_GET too (before, only a reload's SinnohStarterMenuFlag did); and in every region but HOENN it's
+  shown whenever the party has someone (start_menu.c BuildNormalStartMenu). Test sinnoh_platinum_route201 (mp startmenu).
 - StartTrainerBattle by a variable: each trainer the file puts in that variable (SetVar VAR, TRAINER_*; a #define
   of it too) compared in turn, each with its own defeat line (the mansion's maids; BufferTrainerName is the game's
   buffertrainername). The BATTLEGROUND's and the POKéMON CENTERs' daily trainers aren't imported yet

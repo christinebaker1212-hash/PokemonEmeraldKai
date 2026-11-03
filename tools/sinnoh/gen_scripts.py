@@ -1146,7 +1146,8 @@ class FileConverter:
             again = '%s%s__starter%d' % (PREFIX, self.low, self.next_local())
             return ['%s:' % again, 'special Sinnoh_StarterMenu', 'waitstate', 'goto_if_eq VAR_RESULT, 0, %s' % again]
         if cmd == 'SaveChosenStarter':
-            return ['copyvar 0x%X, VAR_RESULT' % VAR_SINNOH_STARTER, 'setflag 0x3D39']   # (FLAG_SINNOH_STARTER)
+            # (FLAG_SINNOH_STARTER; Platinum's START menu shows POKeMON once the starter is saved: the game's flag)
+            return ['copyvar 0x%X, VAR_RESULT' % VAR_SINNOH_STARTER, 'setflag 0x3D39', 'setflag FLAG_SYS_POKEMON_GET']
         if cmd == 'ReturnToField':
             return []                       # (the briefcase went back to the field itself)
         if cmd == 'BufferRivalStarterSpeciesName':
