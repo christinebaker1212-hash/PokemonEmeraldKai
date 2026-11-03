@@ -14,5 +14,6 @@ cc -shared -fPIC -O2 -I"$JH/include" -I"$JH/include/linux" -I"$ROOT/src/mp" -o "
     "$APP/cpp/link_jni.c" "$ROOT/src/mp/phone_proto.c" "$ROOT/src/mp/monocypher/monocypher.c"
 javac -nowarn -d "$OUT/classes" -cp "$JSON" "$APP"/java/com/moemon/companion/core/*.java \
     "$APP/java/com/moemon/companion/Native.java" "$APP/java/com/moemon/companion/NativeCrypto.java" \
-    "$ROOT/android/coretest/CoreTest.java"
+    "$ROOT/android/coretest/CoreTest.java" "$ROOT/android/coretest/WalkCoreTest.java"
+java -cp "$OUT/classes:$JSON" WalkCoreTest
 exec java -Djava.library.path="$OUT" -cp "$OUT/classes:$JSON" CoreTest "$ROOT"

@@ -120,6 +120,38 @@ public final class Menu {
     }
 
     /** The app's menu (the dots on top): saves, pairing, what couldn't be done, updates, text size */
+    /** Each kind of notification on its own switch, how many a day, the quiet hours */
+    static Menu notifications(GameView v) {
+        android.content.Context c = v.getContext();
+        Menu m = make(v, "NOTIFICATIONS");
+        for (int i = 0; i < Notifier.KINDS.length; i++) {
+            final int k = i;
+            m.add((Notifier.on(c, k) ? "ON  " : "OFF ") + Notifier.NAMES[k], () -> {
+                Notifier.set(c, k, !Notifier.on(c, k));
+                v.showMenu(notifications(v));
+            });
+        }
+        m.add("A DAY: " + Notifier.perDay(c), () -> {
+            int n = Notifier.perDay(c) % 5 + 1;
+            Notifier.prefs(c).edit().putInt("notif_perDay", n).apply();
+            v.showMenu(notifications(v));
+        });
+        int from = Notifier.prefs(c).getInt("quietFrom", 21), to = Notifier.prefs(c).getInt("quietTo", 8);
+        m.add("QUIET " + from + ":00 TO " + to + ":00", () -> {
+            int[][] choices = {{21, 8}, {22, 7}, {20, 9}, {23, 6}, {0, 0}};
+            int next = 0;
+            for (int i = 0; i < choices.length; i++) {
+                if (choices[i][0] == from && choices[i][1] == to) {
+                    next = (i + 1) % choices.length;
+                }
+            }
+            Notifier.prefs(c).edit().putInt("quietFrom", choices[next][0]).putInt("quietTo", choices[next][1]).apply();
+            v.showMenu(notifications(v));
+        });
+        m.add("CANCEL", null);
+        return m;
+    }
+
     public static Menu main(GameView v) {
         Companion app = v.app;
         Menu m = make(v, "MENU");
@@ -131,8 +163,15 @@ public final class Menu {
                 s.add((on ? "> " : "") + name, () -> {
                     Menu one = make(v, name);
                     one.add("USE", () -> app.use(l));
-                    one.add("FORGET", () -> v.showMenu(confirm(v, "Forget this save? Pair again to link it.",
-                            () -> app.forget(l))));
+                    one.add("FORGET", () -> {
+                        // (a POKéMON out walking with this phone comes home first: a lost link must never mean a
+                        // lost POKéMON; FORGET PHONES in the game brings it home as it left)
+                        if (app.client != null && app.client.saved() == l && app.walk() != null) {
+                            v.message("A POKéMON is out on a walk with this phone. Bring it home first (WALK > HOME).");
+                            return;
+                        }
+                        v.showMenu(confirm(v, "Forget this save? Pair again to link it.", () -> app.forget(l)));
+                    });
                     v.showMenu(one);
                 });
             }
@@ -156,6 +195,7 @@ public final class Menu {
             }
             v.showMenu(t);
         });
+        m.add("NOTIFICATIONS", () -> v.showMenu(notifications(v)));
         m.add("UPDATE", () -> Updater.check(v, true));
         m.add("ABOUT", () -> v.message("MOEMON COMPANION " + Updater.version(v.getContext())
                 + "\nThe game's own POKéMON, words and art. Pair it from OPTIONS > CO-OP > PHONE LINK in the game."));

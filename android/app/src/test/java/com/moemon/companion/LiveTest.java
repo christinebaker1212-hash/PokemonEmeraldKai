@@ -97,7 +97,7 @@ public class LiveTest {
                 "mp boxput 1 0 25 5", "mp boxput 1 1 1 5", "mp boxput 1 2 4 5",
                 "mp additem 139 20", "mp shinymon 4 25 20", "mp additem 660 1", "mp regionclear 3", "mp dexcatch 263",
                 "mp additem 13 3", "mp additem 68 2", "mp additem 96 1", "mp additem 693 1", "mp hp 1 5", "mp shinymon 5 16 5", "mp phone pair",
-                "wait 300", "mash B 200 15", "wait 900", "mp wild 263:3", "wait 2000000", "quit").getBytes());
+                "wait 300", "mash B 200 15", "wait 2700", "mp wild 263:3", "wait 2000000", "quit").getBytes());
         ProcessBuilder pb = new ProcessBuilder(game.getPath()).directory(root).redirectErrorStream(true);
         java.util.Map<String, String> env = pb.environment();
         env.put("SDL_VIDEODRIVER", "dummy");
@@ -245,6 +245,44 @@ public class LiveTest {
             tap(v, 40, GameView.TOP + 44 + 2 + 10);
             idleUntil(() -> !app.spawns.isEmpty(), 20, "a map's spawns");
             draw(v);
+
+            // the walk: a box POKéMON goes off with the phone, walks, finds something, comes home with it all
+            {
+                Model wm = app.model();
+                org.json.JSONArray b0 = wm.box(0).getJSONArray("m");
+                int ws = 0;
+                while (b0.optJSONObject(ws) == null) {
+                    ws++;
+                }
+                JSONObject walker = b0.getJSONObject(ws);
+                app.client.order(new JSONObject().put("op", "walk").put("at", Model.boxPlace(0, ws))
+                        .put("p", walker.getLong("p")).put("o", walker.getLong("o")));
+                idleUntil(() -> app.walk() != null, 20, "the walk to begin");
+                long now = System.currentTimeMillis(), boot = now - 3600000;
+                app.walkReading(1000, boot, now);
+                app.walkReading(5600, boot, now + 1000);
+                assertEquals("steps counted", 4600, app.walk().steps());
+                int item = app.walk().find(new java.util.Random(3));
+                assertTrue("a find from the place", item > 0);
+                v.select(6);
+                draw(v);
+                ScreensTest.shot(v, "live_walk");
+                app.client.order(app.walk().homeOrder());
+                idleUntil(() -> app.lastHome != null, 20, "the homecoming");
+                assertEquals("home with its steps", 4600, app.lastHome.getInt("steps"));
+                assertEquals("home with its find", item, app.lastHome.getJSONArray("finds").getInt(0));
+                idleUntil(() -> {
+                    Model m2 = app.model();
+                    for (int i = 0; i < m2.party().length(); i++) {
+                        if (m2.party().optJSONObject(i).optLong("p") == walker.optLong("p")) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }, 20, "the walker back in the party");
+                assertTrue("no walk left", app.walk() == null);
+                v.select(0);
+            }
 
             // the live map: where the player is, and what they've found at the place tapped (the game's own answer)
             org.json.JSONArray tm = app.model().snap.getJSONObject("place").optJSONArray("tm");

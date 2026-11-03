@@ -53,6 +53,7 @@ public final class GameView extends View {
         pages.add(new DexPage(this));
         pages.add(new SpawnsPage(this));
         pages.add(new DevicePage(this));
+        pages.add(new WalkPage(this));
     }
 
     @Override
@@ -334,7 +335,7 @@ public final class GameView extends View {
         return (s / 86400) + " DAYS AGO";
     }
 
-    private static final String[] TAB_NAMES = {"BOXES", "PARTY", "BAG", "DEX", "SPAWNS", "DEVICE"};
+    private static final String[] TAB_NAMES = {"BOXES", "PARTY", "BAG", "DEX", "SPAWNS", "DEVICE", "WALK"};
 
     private void drawTabs(Canvas c) {
         int y = h - TABS, tw = w / TAB_NAMES.length;

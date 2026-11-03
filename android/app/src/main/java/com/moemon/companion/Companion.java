@@ -50,6 +50,10 @@ public final class Companion implements LinkClient.Listener {
     public JSONObject gear;                                       // the POKéGEAR's last answer ("gear")
     public long gearAt;                                           // (when it came)
     public volatile JSONObject battle;                            // the battle as the player sees it ("battle")
+    public final java.util.Map<Long, JSONObject> journals = new java.util.HashMap<>();   // personality -> "journal"
+    private com.moemon.companion.core.Walk walk;                 // the POKéMON on a walk with this phone (this save's)
+    private String walkSave = "";                                 // (the save it's for)
+    public JSONObject lastHome;                                   // the last homecoming ("home" of a done answer)
     public long toastAt;
     public boolean toastGood;                                     // (a USE's result, not a refusal)
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -226,6 +230,65 @@ public final class Companion implements LinkClient.Listener {
         return client != null ? client.model() : null;
     }
 
+    // ------------------------------------------------------------------------------------------------- the walk
+
+    private String walkFile(String save) {
+        return "walk_" + save + ".json";
+    }
+
+    /** The POKéMON on a walk with this phone for the save in use, or null */
+    public synchronized com.moemon.companion.core.Walk walk() {
+        String save = client == null ? "" : client.saved().id();
+        if (!save.equals(walkSave)) {
+            walkSave = save;
+            JSONObject o = readJson(walkFile(save));
+            walk = o == null ? null : com.moemon.companion.core.Walk.fromJson(o, java.time.ZoneId.systemDefault());
+        }
+        return walk;
+    }
+
+    public synchronized void saveWalk() {
+        if (walkSave.isEmpty()) {
+            return;
+        }
+        if (walk == null) {
+            new File(context.getFilesDir(), walkFile(walkSave)).delete();
+            return;
+        }
+        try {
+            store.write(walkFile(walkSave), walk.toJson().toString());
+        } catch (org.json.JSONException ignored) {
+        }
+    }
+
+    /** A step counter reading (StepCounter, StepJob) */
+    public synchronized void walkReading(long counter, long boot, long now) {
+        com.moemon.companion.core.Walk w = walk();
+        if (w != null) {
+            w.reading(counter, boot, now);
+            saveWalk();
+            main.post(this::changed);
+        }
+    }
+
+    // The game's walk, from a snapshot or a "walk" answer: a new walk adopted, the one going on refreshed; a snapshot
+    // from a game that knows walks ("now") without one: it came home some other way (FORGET PHONES in the game)
+    private synchronized void walkFromGame(JSONObject snap, JSONObject fromAnswer) {
+        com.moemon.companion.core.Walk w = walk();
+        JSONObject g = fromAnswer != null ? fromAnswer : snap == null ? null : snap.optJSONObject("walk");
+        if (g != null) {
+            if (w == null || w.id() != g.optLong("id")) {
+                walk = new com.moemon.companion.core.Walk(g, java.time.ZoneId.systemDefault());
+            } else {
+                walk.game = g;
+            }
+            saveWalk();
+        } else if (snap != null && snap.has("now") && w != null) {
+            walk = null;
+            saveWalk();
+        }
+    }
+
     public void resume() {
         resumed = true;
         if (client != null) {
@@ -333,6 +396,12 @@ public final class Companion implements LinkClient.Listener {
             case "nothing": return "It isn't holding anything.";
             case "busy": return "The game is busy. Try again.";
             case "crashed": return "The game closed while doing this, so it was stopped.";
+            case "walking": return "Another POKéMON is already out on a walk.";
+            case "cantsave": return "The game couldn't save just now. Try again.";
+            case "nowalk": return "That walk already ended.";
+            case "otherphone": return "That POKéMON is on a walk with another phone.";
+            case "trainbox": return "Only POKéMON in the boxes can train.";
+            case "slots": return "Every training spot is taken. Earn BADGES for more.";
             case "notparty": return "Items are used on the POKéMON in your party.";
             case "noeffect": return "It won't have any effect.";
             case "cap": return "RARE CANDIES won't raise it past the next BADGE's level.";
@@ -401,6 +470,7 @@ public final class Companion implements LinkClient.Listener {
 
     @Override
     public void onModel(Model model) {
+        walkFromGame(model.snap, null);
         // a game older than the app sends less (stats, places): say so once, the game updates itself on its start
         String game = model.save().optString("game"), app = Updater.version(context);
         if (!game.isEmpty() && Updater.older(game, app) && !game.equals(warnedGame)) {
@@ -421,6 +491,28 @@ public final class Companion implements LinkClient.Listener {
             toast = done.optString("why").equals("unknown")
                     ? "The game doesn't know how to do that yet. Restart it to update it." : why(done.optString("why"));
             toastGood = false;
+            toastAt = System.currentTimeMillis();
+        } else if (order != null && "walk".equals(order.optString("op")) && done.has("walk")) {
+            walkFromGame(null, done.optJSONObject("walk"));
+            toast = "Off on a walk! Your steps count from now.";
+            toastGood = true;
+            toastAt = System.currentTimeMillis();
+        } else if (order != null && "home".equals(order.optString("op"))) {
+            synchronized (this) {
+                lastHome = done.optJSONObject("home");
+                walk = null;
+                saveWalk();
+            }
+            toast = "Home again! The game has it now.";
+            toastGood = true;
+            toastAt = System.currentTimeMillis();
+        } else if (order != null && "kind".equals(order.optString("op")) && done.has("line")) {
+            toast = art.plain(GameArt.hexText(done.optString("line")));
+            toastGood = true;
+            toastAt = System.currentTimeMillis();
+        } else if (order != null && ("collect".equals(order.optString("op")) || "untrain".equals(order.optString("op")))) {
+            toast = TrainText.gains(art, done.optJSONArray("gains"));
+            toastGood = true;
             toastAt = System.currentTimeMillis();
         } else if (order != null && "use".equals(order.optString("op"))) {
             toast = UseFlow.result(art, order, done, model());
@@ -448,6 +540,8 @@ public final class Companion implements LinkClient.Listener {
         } else if (t.equals("spawnmaps")) {
             spawnMaps = m;
             store.write("spawnmaps_" + client.saved().id() + ".json", m.toString());
+        } else if (t.equals("journal")) {
+            journals.put(m.optLong("p"), m);
         } else if (t.equals("place")) {
             places.put(m.optInt("sec"), m);
         } else if (t.equals("calls")) {

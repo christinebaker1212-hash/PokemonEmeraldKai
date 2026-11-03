@@ -208,4 +208,48 @@ The gate (touch feels instant on home Wi-Fi): LiveTest presses the POKéTCH's si
 app coming back (72 ms over the test's loopback, under the 250 it allows), and checks the live map's finds, MATCH CALL,
 the radio, MOM's call and the battle feed against the game.
 
-Next: Phase 3, the walk (docs/COMPANION_APP.md "Pillar 2"), training facilities and the Garden in your pocket.
+## Phase 3: the walk, training, the Garden in your pocket (1.73.0)
+
+Game side: src/mp/mp_phone_walk.c (orders through mp_phone.c's Apply; the snapshot's `walk`, `train`, `today`, `now`).
+
+- The walk (custody). `{"op":"walk","at":PLACE,"p","o"}`: one at a time (`walking`), never the party's last (`last`), no
+  MAIL; a held HM back to the BAG. "<save>.walk" is written first (the POKéMON as it left, the phone, where it began,
+  the badge cap), then the POKéMON leaves the save and the game saves at once (`cantsave` if it can't: it stays). A
+  save that still holds the POKéMON the file names (closed between the two) drops the file. The answer and the
+  snapshot (for that phone; `walkOther` for another) carry `walk`: id, sent, mapsec, region, cap, mon, wild [species,
+  min, max] (its map's wild table, else its map section's, the GENERATION's), finds (the place's item balls and hidden
+  items, then PICKUP's first finds), rules [10,000 steps a day, 2,000 a find, 3,000 a meeting, 2,500 a moment, 3
+  meetings a day].
+- Coming home. `{"op":"home","walk":ID,"steps":N,"finds":[...],"caught":[[species,level,ball],...]}` from the phone
+  that holds it (`otherphone`, `nowalk` else): steps capped at 10,000 for each calendar day it was out (the PC's clock;
+  DayNumber), finds only from the pool and no more than the steps earn, catches only from the wild table at its
+  levels, 3 a day, to the PC (CreateMon, met there, the POKéDEX); EXP a step to the badge cap's level with the day
+  care's level-ups (daycare.c MP_ApplyDaycareExperience), an EGG's cycles (256 steps each), Friendship moments
+  (mp_life.c MP_Life_WalkHome: a MEM_WALK memory and its JOURNAL line, a Friendship step each 2,500 steps). Back in
+  the party (else the PC), the file erased, saved at once; the answer's `home` says what came of it. A toast on the
+  field (send-off and homecoming, with its cry). FORGET PHONES brings it home as it left.
+- Training: `{"op":"train","at":BOX PLACE,"p","o","k":0 STAT|1 LEVEL|2 REST,"s":stat}` (`trainbox`, `slots`: 2 + one
+  per 2 BADGES, up to 6), `{"op":"untrain","p","o"}`, `{"op":"collect"}` -> `gains` [p, o, kind, amount]. "<save>.train";
+  gains from at most 24 hours since the last collection on the PC's clock: STAT an EV every 5 minutes (252, 510),
+  LEVEL 10 EXP a minute to the badge cap, REST Friendship every 30 minutes and PP. Leaving the boxes ends it (the
+  party: collected first; TrainTick every 2 seconds), so it never battles. The PC shows TRAINING where its item would
+  be (pokemon_storage_system.c SetDisplayMonData).
+- The Garden's kind acts: `{"op":"kind","at","p","o","verb":0 pet|1 BERRY,"item"}` by the Garden's own rules
+  (mp_life_interact.c MP_Life_PhoneVerb: feelings, the bond with its Trainer, tastes, hunger; a real moment only when
+  it was looking for food); `line` says what happened. `{"t":"journal","at","p","o"}` -> its JOURNAL's lines.
+- The daily report's `today`: goals [text, progress, target] (mp_events.c MP_Events_PhoneGoals), berries [ready,
+  growing], gatcha [free pulls, tickets].
+
+App side: core/Walk.java (Android-free: readings spread over the days between them and capped at 10,000 each, a
+restart's counter, finds and meetings by steps, the homecoming order); StepCounter (TYPE_STEP_COUNTER,
+ACTIVITY_RECOGNITION), StepJob (JobScheduler every ~15 minutes: a reading, notifications, the widget), WalkPage (the
+walker, FIND / MEET / HOME, TRAINING, GARDEN), CatchPage (MEET: a ring to time, the species' catch rate), JournalPage,
+TodayPage (once a day), Notifier (kinds on their own switches in MENU > NOTIFICATIONS, 3 a day, quiet hours 21:00 to
+08:00, each kind once a day), WalkWidget. Forgetting a save is refused while one of its POKéMON is out walking.
+
+The gate ("a week of real walks: steps, caps and homecomings right"): tools/phone/walk_test.py (the game: custody
+across a restart; a week's caps with the walk's start moved back 7 days; home once; training an hour back; kindness;
+FORGET PHONES), android/coretest WalkCoreTest (a simulated week on the phone's side), LiveTest (send-off, steps, a
+find, homecoming through the app).
+
+Next: Phase 4, friends (docs/COMPANION_APP.md "Pillar 4").

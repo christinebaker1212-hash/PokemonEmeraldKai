@@ -165,6 +165,7 @@ static const u8 sPursuitMilestone[LIFE_PURSUIT_COUNT][LIFE_PURSUIT_MILESTONES][4
 static const u8 sTxt_FamilySong[] = _("Hums a song its family sings.");
 static const u8 sTxt_FamilyGreeting[] = _("Greets you the way its family does.");
 static const u8 sTxt_GardenMem[] = _("Saw the GARDEN for the first time.");
+static const u8 sTxt_WalkMem[] = _("Went on a walk with {STR_VAR_1}: {STR_VAR_3} steps.");
 static const u8 sTxt_FavDecor[] = _("Loves the {STR_VAR_3} in the GARDEN.");
 
 static const u8 sTxt_Likes[] = _("Loves {STR_VAR_3} food.");
@@ -336,6 +337,10 @@ static void AddMemory(struct Builder *bd, u8 slot)
         tmpl = m->who == 0 ? sTxt_Family : m->param == 0 ? sTxt_FamilyChild : m->param == 1 ? sTxt_FamilyParent : sTxt_FamilySibling;
         break;
     case MEM_GARDEN: tmpl = sTxt_GardenMem; break;
+    case MEM_WALK:
+        ConvertIntToDecimalStringN(extra, (u32)m->param * 100, STR_CONV_MODE_LEFT_ALIGN, 7);
+        tmpl = sTxt_WalkMem;
+        break;
     }
     if (tmpl)
         Add(bd, fact, tmpl, m->place, extra);

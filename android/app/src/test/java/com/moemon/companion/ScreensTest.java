@@ -81,6 +81,17 @@ public class ScreensTest {
                 + "\",\"phone\":\"00112233445566778899AABBCCDDEEFF\",\"key\":\"" + "00".repeat(32)
                 + "\",\"name\":\"\",\"host\":\"\",\"port\":47610}]}");
 
+        // a POKéMON out walking (for WALK's pictures): the snapshot's first box POKéMON
+        JSONObject walkMon = file.getJSONObject("snap").getJSONArray("boxes").getJSONObject(0).getJSONArray("m").getJSONObject(0);
+        java.time.LocalDate today = java.time.LocalDate.now();
+        write(new File(dir, "walk_" + id + ".json"), new JSONObject().put("game", new JSONObject().put("id", 5)
+                .put("sent", System.currentTimeMillis() / 1000 - 86400).put("cap", 20).put("mon", walkMon)
+                .put("wild", new org.json.JSONArray("[[286,2,4]]")).put("finds", new org.json.JSONArray("[13]"))
+                .put("rules", new org.json.JSONArray("[10000,2000,3000,2500,3]")))
+                .put("days", new JSONObject().put(today.minusDays(1).toString(), 8200).put(today.toString(), 4321))
+                .put("finds", new org.json.JSONArray("[13,13]")).put("met", new org.json.JSONArray().put(
+                        new org.json.JSONArray().put(286).put(3).put(1).put(today.toString())))
+                .put("caught", new org.json.JSONArray("[[286,3,4]]")).put("lastCounter", 100).toString());
         Companion app = Companion.get(ctx);
         JSONObject spawns = new JSONObject(res("spawns.json"));
         app.spawns.put("0,16", spawns);
@@ -151,6 +162,21 @@ public class ScreensTest {
         shot(v, "box_list");
         v.showOver(null);
         devices(v, app);
+        // WALK: the walker, training and the Garden; a meeting; the day's report; the widget
+        v.select(6);
+        shot(v, "walk");
+        v.page(6).scrollTo(400);
+        shot(v, "walk_lower");
+        v.page(6).scrollTo(0);
+        v.showOver(new CatchPage(v, app.walk(), 286, 3));
+        shot(v, "walk_meet");
+        v.showOver(new TodayPage(v));
+        shot(v, "today");
+        v.showOver(null);
+        try (FileOutputStream o = new FileOutputStream(new File(new File(System.getProperty("screens.out", "build/screens")),
+                "widget.png"))) {
+            WalkWidget.picture(app).compress(Bitmap.CompressFormat.PNG, 100, o);
+        }
         // the menu, and pairing
         tap(v, v.width() - 10, 8);
         shot(v, "menu");

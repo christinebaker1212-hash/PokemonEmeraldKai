@@ -28,6 +28,7 @@
 #include "constants/field_specials.h"
 #include "constants/heal_locations.h"
 #include "constants/map_types.h"
+#include "constants/map_groups.h"
 #include "constants/rgb.h"
 #include "constants/weather.h"
 
@@ -776,6 +777,20 @@ bool8 MP_TownMap_Player(u8 *page, u8 *x, u8 *y)
     struct RegionMap *was = sRegionMap;
     u8 shown = sShownMap;
     bool8 ok;
+    const struct WarpData *warps[2] = {&gSaveBlock1Ptr->escapeWarp, &gSaveBlock1Ptr->dynamicWarp};
+    u32 i;
+    // (only with a map loaded, and warps that lead somewhere: the title screen and a fresh save have neither)
+    if (gMapHeader.mapLayout == NULL || gSaveBlock1Ptr->location.mapGroup >= MAP_GROUPS_COUNT)
+        return FALSE;
+    for (i = 0; i < 2; i++)
+    {
+        const struct MapHeader *h;
+        if (warps[i]->mapGroup >= MAP_GROUPS_COUNT || warps[i]->mapGroup < 0)
+            return FALSE;
+        h = Overworld_GetMapHeaderByGroupAndId(warps[i]->mapGroup, warps[i]->mapNum);
+        if (h == NULL || h->mapLayout == NULL)
+            return FALSE;
+    }
     sRegionMap = &sTmp;
     ChooseShownMap();
     *page = sShownMap;

@@ -7088,6 +7088,9 @@ static void ReshowDisplayMon(void)
         TryRefreshDisplayMon();
 }
 
+static u32 sMpDisplayOt;   // Moemon Co-op: the shown POKéMON's Trainer ID
+bool8 MP_Phone_InTraining(u32 pid, u32 ot);   // mp_phone_walk.c
+
 static void SetDisplayMonData(void *pokemon, u8 mode)
 {
     u8 *txtPtr;
@@ -7115,6 +7118,7 @@ static void SetDisplayMonData(void *pokemon, u8 mode)
             sStorage->displayMonLevel = GetMonData(mon, MON_DATA_LEVEL);
             sStorage->displayMonMarkings = GetMonData(mon, MON_DATA_MARKINGS);
             sStorage->displayMonPersonality = GetMonData(mon, MON_DATA_PERSONALITY);
+            sMpDisplayOt = GetMonData(mon, MON_DATA_OT_ID);   // Moemon Co-op: (TRAINING, below)
             sStorage->displayMonPalette = GetMonFrontSpritePal(mon);
             gender = GetMonGender(mon);
             sStorage->displayMonItemId = GetMonData(mon, MON_DATA_HELD_ITEM);
@@ -7140,6 +7144,7 @@ static void SetDisplayMonData(void *pokemon, u8 mode)
             sStorage->displayMonLevel = GetLevelFromBoxMonExp(boxMon);
             sStorage->displayMonMarkings = GetBoxMonData(boxMon, MON_DATA_MARKINGS);
             sStorage->displayMonPersonality = GetBoxMonData(boxMon, MON_DATA_PERSONALITY);
+            sMpDisplayOt = GetBoxMonData(boxMon, MON_DATA_OT_ID);   // Moemon Co-op: (TRAINING, below)
             sStorage->displayMonPalette = GetMonSpritePalFromSpeciesAndPersonality(sStorage->displayMonSpecies, otId, sStorage->displayMonPersonality);
             gender = GetGenderFromSpeciesAndPersonality(sStorage->displayMonSpecies, sStorage->displayMonPersonality);
             sStorage->displayMonItemId = GetBoxMonData(boxMon, MON_DATA_HELD_ITEM);
@@ -7223,6 +7228,12 @@ static void SetDisplayMonData(void *pokemon, u8 mode)
             StringCopyPadded(sStorage->displayMonItemName, GetItemName(sStorage->displayMonItemId), CHAR_SPACE, 8);
         else
             StringFill(sStorage->displayMonItemName, CHAR_SPACE, 8);
+        // Moemon Co-op: a POKéMON in training on the phone (mp_phone_walk.c) says so where its item would be
+        if (MP_Phone_InTraining(sStorage->displayMonPersonality, sMpDisplayOt))
+        {
+            static const u8 sTraining[] = _("TRAINING");
+            StringCopyPadded(sStorage->displayMonItemName, sTraining, CHAR_SPACE, 8);
+        }
     }
 }
 

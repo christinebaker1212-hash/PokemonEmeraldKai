@@ -530,6 +530,7 @@ static void ExportData(const char *dir)
         {
             static u16 pal[512];   // (room for any palette: Kai's hold up to 64 colors)
             u32 k;
+            fprintf(f, ",\"cr\":%u,\"gr\":%u", gSpeciesInfo[base].catchRate, gSpeciesInfo[base].growthRate);
             fprintf(f, ",\"t\":[%u,%u],\"g\":%u,\"bs\":[%u,%u,%u,%u,%u,%u]", gSpeciesInfo[base].types[0],
                     gSpeciesInfo[base].types[1], gSpeciesInfo[base].genderRatio, gSpeciesInfo[base].baseHP,
                     gSpeciesInfo[base].baseAttack, gSpeciesInfo[base].baseDefense, gSpeciesInfo[base].baseSpAttack,
@@ -646,6 +647,16 @@ static void ExportData(const char *dir)
                 TYPE_EFFECT_MULTIPLIER(i));
     // the town maps' pages: name, picture size, and the map section of each grid cell (MP_TownMap_Cell; a cell (x, y)
     // is drawn at ((x + 1) * 8, (y + 2) * 8) of the full view's 240x160)
+    // the EXP each level starts at, per growth rate (the walk's level progress on the phone)
+    fprintf(f, "],\"expTables\":[");
+    for (i = 0; i < 6; i++)
+    {
+        u32 l;
+        fprintf(f, "%s[", i ? "," : "");
+        for (l = 0; l <= MAX_LEVEL; l++)
+            fprintf(f, "%s%u", l ? "," : "", (unsigned)gExperienceTables[i][l]);
+        fprintf(f, "]");
+    }
     fprintf(f, "],\"townmaps\":[");
     for (i = 0; i < MP_TownMap_Pages(); i++)
     {

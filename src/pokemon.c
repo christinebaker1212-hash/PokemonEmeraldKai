@@ -4685,6 +4685,13 @@ static u8 CopyMonToPC(struct Pokemon *mon)
     return MON_CANT_GIVE;
 }
 
+// Moemon Co-op: into the PC's first free place from the box in use (what the phone's walk caught: MON_CANT_GIVE when
+// every box is full)
+u8 MP_CopyMonToPC(struct Pokemon *mon)
+{
+    return CopyMonToPC(mon);
+}
+
 u8 CalculatePlayerPartyCount(void)
 {
     gPlayerPartyCount = 0;

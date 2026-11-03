@@ -113,6 +113,7 @@ enum
     MEM_FRIEND,         // a friend was made (who)
     MEM_FAMILY,         // met its family (who: parent / hatchling)
     MEM_GARDEN,         // first time in the Garden
+    MEM_WALK,           // came home from a walk with the phone (param: steps / 100)
     MEM_KINDS
 };
 
@@ -414,7 +415,8 @@ u8 MP_Life_JournalKnownCount(void);   // known lines in the last journal built (
 
 bool8 MP_Life_WantsOut(struct BoxPokemon *box);
 void MP_Life_NoteEgg(struct BoxPokemon *egg, struct BoxPokemon *parentA, struct BoxPokemon *parentB);   // daycare.c
-u8 MP_Life_PursuitFor(struct MpLifeRec *rec);   // the pursuit that fits its instincts and temperament (LIFE_PURSUIT_*)
+u8 MP_Life_PursuitFor(struct MpLifeRec *rec);
+void MP_Life_WalkHome(struct BoxPokemon *box, u32 steps, u8 moments);   // the phone's walk: a memory, MOMENTS Friendship steps   // the pursuit that fits its instincts and temperament (LIFE_PURSUIT_*)
 bool8 MP_Life_NewBody(struct MpLifeRec *rec);   // evolved within the last quarter hour: still getting used to it
 // A teammate's evolution (docs 12: friends react): how this one takes it, once per evolution (the first
 // time it sees the new body: the follower, or in the Garden). Applies the feelings and bond changes.

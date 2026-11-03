@@ -1,4 +1,28 @@
 // Moemon Co-op: the phone link's insides shared by its files (mp_phone.c: the link, the snapshot and orders;
+// orders' places
+enum { LOC_NONE, LOC_PARTY, LOC_BOX };
+struct Loc { u8 kind, box, slot; };
+bool8 ParseLoc(const char *json, const char *key, struct Loc *loc);
+struct BoxPokemon *BoxAt(const struct Loc *loc);
+bool8 Empty(const struct Loc *loc);
+bool8 Is(const struct Loc *loc, u32 pid, u32 ot);
+u32 NonEggsInParty(void);
+void Changed(const struct Loc *loc);
+void PartyChanged(void);
+extern bool8 sBagChanged;
+struct PokemonStorage *Storage(void);
+u32 Rev(void);
+extern struct Buf sDoneExtra;                 // more for the next fresh "done" (a walk, a homecoming, gains)
+const u8 *PhoneOrderPhone(void);              // the phone whose order is being carried out (its 16-byte ID)
+
+// mp_phone_walk.c: the walk, training, the Garden's kind acts
+const char *PhoneWalk_Apply(const char *op, const char *json);   // "walk", "home", "train", "untrain", "collect", "kind"
+void PhoneWalk_Snapshot(struct Buf *b, const u8 *phone);         // the snapshot's "walk", "train" (for that phone)
+void PhoneWalk_Load(void);                                       // a save loaded
+void PhoneWalk_Update(void);                                     // every frame
+void PhoneWalk_ForgetAll(void);                                  // FORGET PHONES: a walking POKéMON comes home as it left
+bool8 PhoneWalk_OnSealed(int c, const char *t, const char *json);
+
 // mp_phone_dev.c: the device's apps: the live map, MOENAV calls, the battle feed, the POKéGEAR)
 #ifndef GUARD_MP_PHONE_INT_H
 #define GUARD_MP_PHONE_INT_H

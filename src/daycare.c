@@ -1402,3 +1402,10 @@ void MP_Daycare_TryCoopEgg(struct DayCare *daycare)
     daycare->offspringPersonality = tmp.offspringPersonality;
     MP_Linkx_SetPendingEgg(&egg, best);
 }
+
+// Moemon Co-op: the phone's walk and LEVEL training gain EXP as the day care does: levels one by one, new moves as the
+// day care teaches them (the oldest forgotten when four are known), stats worked out again
+void MP_ApplyDaycareExperience(struct Pokemon *mon)
+{
+    ApplyDaycareExperience(mon);
+}
