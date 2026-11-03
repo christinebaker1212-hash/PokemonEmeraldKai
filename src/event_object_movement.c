@@ -2288,22 +2288,35 @@ void MP_SetObjectEventPaletteData(u16 tag, const u16 *data)
         sObjectEventSpritePalettes[i].data = data;
 }
 
-// Moemon Maker: a look's palette as the field would load it for that person (the same slot rules as
-// TrySpawnObjectEventTemplate), read back from the palette buffer. Only while the editor is open (nothing else on screen)
+// Moemon Maker: a look's palette, found as the field finds it for that person (the same tags as
+// TrySpawnObjectEventTemplate and QzLoadObjectPalette) but only read: nothing is loaded, so the editor can draw people
+// while the game plays (src/maker/maker_objects.c)
 const u16 *ObjectEvent_MakerPalette(u16 graphicsId)
 {
     const struct ObjectEventGraphicsInfo *info = GetObjectEventGraphicsInfo(graphicsId);
-    u8 slot = info->paletteSlot;
-    FreeAllSpritePalettes();
-    if (slot == PALSLOT_QZ)
-        slot = QzLoadObjectPalette(info->paletteTag);
-    else
+    u16 tag = info->paletteTag;
+    u8 i;
+    if (info->paletteSlot == PALSLOT_QZ)
     {
-        if (slot >= 16)
-            slot -= 16;
-        PatchObjectPalette(info->paletteTag, slot);
+        if (tag >= SINNOH_PAL_TAG && (tag & 0xFF) < SINNOH_SPRITE_COUNT && tag < SINNOH_PAL_TAG_CHAR + 0x100)
+        {
+            u8 kind;
+            const u16 *pal = NULL;
+            const u8 *tiles;
+            if (tag >= SINNOH_PAL_TAG_CHAR)
+                return MP_Avatar_NpcPalette(sSinnohGen3[tag - SINNOH_PAL_TAG_CHAR]);
+            return S3D_Gfx_Sprite(tag & 0xFF, tag >= SINNOH_PAL_TAG_SMALL, &kind, &pal, &tiles) ? pal : NULL;
+        }
+        for (i = 0; sKaiObjectEventPalettes[i].tag != TAG_NONE; i++)
+            if (sKaiObjectEventPalettes[i].tag == tag)
+                return sKaiObjectEventPalettes[i].data;
+        for (i = 0; sQzObjectEventPalettes[i].tag != TAG_NONE; i++)
+            if (sQzObjectEventPalettes[i].tag == tag)
+                return sQzObjectEventPalettes[i].data;
+        return NULL;
     }
-    return &gPlttBufferUnfaded[OBJ_PLTT_ID(slot & 15)];
+    i = FindObjectEventPaletteIndexByTag(tag);
+    return i == 0xFF ? NULL : sObjectEventSpritePalettes[i].data;
 }
 
 static u8 FindObjectEventPaletteIndexByTag(u16 tag)

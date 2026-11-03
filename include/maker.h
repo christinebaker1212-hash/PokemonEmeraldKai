@@ -37,6 +37,15 @@ void Maker_Flags_NewGame(void);
 void Maker_Flags_LoadFromSave(void);
 void Maker_Flags_WriteSidecar(void);
 
+// Playing from the editor, F5 (src/maker/maker_play.c)
+bool8 Maker_IsPlaying(void);
+bool8 Maker_PlayNewGamePending(void);
+bool8 Maker_PlayNewGame(void);
+void Maker_StopPlay(void);
+void Maker_PlayFrame(void);
+void Maker_EditsChangedWhilePlaying(int map, bool8 blocksOnly);
+void Maker_BackToWaiting(void);
+
 // The editor (src/maker/maker_main.c)
 void Maker_Open(void);          // from the main menu: the editor window opens, the game waits on a black screen
 bool8 Maker_IsOpen(void);

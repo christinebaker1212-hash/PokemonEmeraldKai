@@ -1848,6 +1848,15 @@ void MapView_Problems()
     }
 }
 
+bool MapView_SelectedSpot(int *x, int *y)
+{
+    int bx, by;
+    if (gEd.selKind == SEL_NONE || gEd.map != sLoadedMap)
+        return false;
+    EventPos(gEd.selKind, gEd.selIndex, x, y, &bx, &by);
+    return true;
+}
+
 int MapView_SelectedMetatile()
 {
     return sStamp.empty() ? 0 : sStamp[0];

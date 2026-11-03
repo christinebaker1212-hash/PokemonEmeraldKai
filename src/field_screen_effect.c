@@ -589,6 +589,17 @@ void DoWarp(void)
     CreateTask(Task_WarpAndLoadMap, 10);
 }
 
+// Moemon Maker: the map loaded again where the player stands, quietly (its edits changed while playing from the editor:
+// src/maker/maker_play.c)
+void DoMakerReloadWarp(void)
+{
+    LockPlayerFieldControls();
+    TryFadeOutOldMapMusic();
+    WarpFadeOutScreen();
+    gFieldCallback = FieldCB_DefaultWarpExit;
+    CreateTask(Task_WarpAndLoadMap, 10);
+}
+
 void DoDiveWarp(void)
 {
     LockPlayerFieldControls();

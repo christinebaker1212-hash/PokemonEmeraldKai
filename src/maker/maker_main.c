@@ -35,11 +35,20 @@ void Maker_Open(void)
     Display_SetMainWindowShown(FALSE);
 }
 
+// After playing from the editor (maker_play.c): the game waits again
+void Maker_BackToWaiting(void)
+{
+    m4aMPlayAllStop();
+    SetGpuReg(REG_OFFSET_DISPCNT, 0);
+    SetMainCallback2(CB2_MakerWaiting);
+}
+
 // The editor's window closed (maker_ui.cpp)
 void MakerApi_Close(void)
 {
     if (!sOpen)
         return;
+    Maker_StopPlay();
     sOpen = FALSE;
     Display_SetMainWindowShown(TRUE);
     SetMainCallback2(CB2_InitMainMenu);

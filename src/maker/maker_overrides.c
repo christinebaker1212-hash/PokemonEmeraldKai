@@ -462,15 +462,37 @@ void MakerApi_ReloadEdits(void)
 }
 
 // The editor's edits of one map (its whole text; "" when it has none left)
+// (everything but the tiles, to tell a tile edit from one that needs the map loaded again: maker_play.c)
+static u32 NonBlockHash(const char *text)
+{
+    u32 h = 0;   // (no lines: 0, as a map with no edits yet has)
+    const char *p = text;
+    while (p && *p)
+    {
+        const char *nl = strchr(p, '\n');
+        size_t len = nl ? (size_t)(nl - p) : strlen(p);
+        if (strncmp(p, "block ", 6) != 0 && strncmp(p, "map ", 4) != 0 && p[0] != '#')
+            for (size_t i = 0; i < len; i++)
+                h = (h ^ (u8)p[i]) * 16777619u;
+        p = nl ? nl + 1 : p + len;
+    }
+    return h;
+}
+
 void MakerApi_SetMapEdits(const char *mapName, const char *text)
 {
+    static u32 sHash[1700];
     int map = MakerApi_FindMap(mapName);
+    u32 h;
     Maker_LoadEdits();
-    if (map < 0)
+    if (map < 0 || map >= (int)ARRAY_COUNT(sHash))
         return;
     FreeEdits(map);
     if (text && text[0] && ParseEdits(text, mapName) == map)
         sAny = TRUE;
+    h = NonBlockHash(text);
+    Maker_EditsChangedWhilePlaying(map, h == sHash[map]);
+    sHash[map] = h;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

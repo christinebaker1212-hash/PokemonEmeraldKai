@@ -79,6 +79,9 @@ static void DrawIcon(ImDrawList *dl, int icon, ImVec2 p, float s, ImU32 col, ImU
     case ICON_PLAY:
         dl->AddTriangleFilled(P(4, 2), P(4, 16), P(16, 9), IM_COL32(40, 170, 70, 255));
         break;
+    case ICON_STOP:
+        dl->AddRectFilled(P(3, 3), P(15, 15), IM_COL32(210, 50, 40, 255), 1);
+        break;
     }
 }
 

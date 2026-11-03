@@ -30,7 +30,7 @@ enum Icon
     ICON_SAVE, ICON_UNDO, ICON_REDO,
     ICON_MODE_MAP, ICON_MODE_COLLISION, ICON_MODE_EVENTS, ICON_MODE_ENCOUNTERS,
     ICON_PENCIL, ICON_RECT, ICON_FILL, ICON_PICKER,
-    ICON_ZOOM_OUT, ICON_ZOOM_IN, ICON_PLAY,
+    ICON_ZOOM_OUT, ICON_ZOOM_IN, ICON_PLAY, ICON_STOP,
 };
 
 struct PropEdit
@@ -89,6 +89,9 @@ struct Editor
     std::string message;              // the status bar's last message ("Saved 3 maps")
     std::string title;
     bool musicOpen = false;           // Tools > Music
+    int playKind = 0, playSlot = 1;   // F5's last pick (moemon_maker.ini)
+    bool wantPlay = false;            // F5 / the Play button: the "Play as" question
+    int playX = -1, playY = -1;       // where F5 starts
     unsigned int messageUntil = 0;
 };
 
@@ -153,6 +156,7 @@ void MapView_EditsChanged(int map);
 void MapView_Problems();     // the PROBLEMS panel's entries
 void MapView_MapInspector(); // the map's own: its music, its connections
 int MapView_ProblemCount();
+bool MapView_SelectedSpot(int *x, int *y);   // the picked event's tile
 
 } // namespace maker
 

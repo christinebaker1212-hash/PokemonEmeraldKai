@@ -41,6 +41,7 @@ bool8 Maker_TakeMenuRefresh(void)
 // Every game frame (mp_main.c MP_FrameUpdate)
 void Maker_FrameUpdate(void)
 {
+    Maker_PlayFrame();   // F5: edits shown at once (maker_play.c)
     if (sChime)
     {
         sChime = FALSE;

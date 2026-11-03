@@ -586,6 +586,12 @@ static void MpReloadSave(void)
     SetPokemonCryStereo(gSaveBlock2Ptr->optionsSound);
 }
 
+// Moemon Maker: the save read again (after playing from the editor on a copy: src/maker/maker_play.c)
+void MainMenu_ReloadSave(void)
+{
+    MpReloadSave();
+}
+
 // Moemon Kai: OPTIONS > RETURN TO MAIN MENU (special MP_ReturnToTitle): the room left, the save and its side files read
 // again from disk as when the game starts (anything unsaved gone), then the title screen. The PC build's SoftReset quits
 void MP_ReturnToTitleNow(void)

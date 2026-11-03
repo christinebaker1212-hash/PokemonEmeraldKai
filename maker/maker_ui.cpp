@@ -58,6 +58,7 @@ static void LoadSettings()
         else if (k == "view_frame") gEd.viewFrame = atoi(val) != 0;
         else if (k == "view_grid") gEd.viewGrid = atoi(val) != 0;
         else if (k == "view_icons") gEd.viewIcons = atoi(val) != 0;
+        else if (k == "play") sscanf(val, "%d %d", &gEd.playKind, &gEd.playSlot);
     }
     fclose(f);
     if (gEd.zoom < 1 || gEd.zoom > 8)
@@ -77,6 +78,7 @@ void SaveSettings()
     fprintf(f, "window = %d %d %d\n", gEd.winW, gEd.winH, gEd.winMax);
     fprintf(f, "view_anim = %d\nview_npcs = %d\nview_frame = %d\nview_grid = %d\nview_icons = %d\n",
             gEd.viewAnim, gEd.viewNpcs, gEd.viewFrame, gEd.viewGrid, gEd.viewIcons);
+    fprintf(f, "play = %d %d\n", gEd.playKind, gEd.playSlot);
     fclose(f);
 }
 
@@ -470,6 +472,8 @@ static void MenuBar()
     ImGui::EndMainMenuBar();
 }
 
+static void AskPlay();
+
 static float ToolbarHeight()
 {
     return 30.0f * gEd.uiScale + 2 * ImGui::GetStyle().WindowPadding.y;
@@ -519,7 +523,13 @@ static void Toolbar()
     if (IconButton("zoomin", ICON_ZOOM_IN, "Zoom in", false, gEd.zoom < 8) && gEd.zoom < 8)
         gEd.zoom++;
     ToolbarSeparator();
-    if (IconButton("play", ICON_PLAY, "Play from here (F5)", false, gEd.map >= 0)) {}
+    if (MakerApi_IsPlaying())
+    {
+        if (IconButton("stop", ICON_STOP, "Stop playing (F12)", false, true))
+            MakerApi_StopPlay();
+    }
+    else if (IconButton("play", ICON_PLAY, "Play from here (F5)", false, gEd.map >= 0))
+        AskPlay();
     ImGui::End();
 }
 
@@ -610,8 +620,66 @@ static void DockSpace()
     ImGui::End();
 }
 
+// F5 / Play: where from (the picked event, the tile under the mouse, the map's middle), then "Play as"
+static void AskPlay()
+{
+    if (gEd.map < 0 || MakerApi_IsPlaying())
+        return;
+    int x = gEd.maps[gEd.map].width / 2, y = gEd.maps[gEd.map].height / 2, ex, ey;
+    if (MapView_SelectedSpot(&ex, &ey))
+        x = ex, y = ey + 1;   // (in front of it, facing it)
+    else if (gEd.hoverX >= 0)
+        x = gEd.hoverX, y = gEd.hoverY;
+    gEd.playX = x;
+    gEd.playY = y;
+    gEd.wantPlay = true;
+}
+
+static void StartPlay()
+{
+    SaveSettings();
+    if (MakerApi_Play(gEd.map, gEd.playX, gEd.playY, gEd.playKind, gEd.playSlot))
+        Message("Playing %s from %d, %d. F12 or closing the game's window comes back.", gEd.maps[gEd.map].title, gEd.playX, gEd.playY);
+}
+
+static void PlayPrompt()
+{
+    if (gEd.wantPlay)
+    {
+        gEd.wantPlay = false;
+        ImGui::OpenPopup("Play as");
+    }
+    if (!ImGui::BeginPopupModal("Play as", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+        return;
+    ImGui::Text("%s, from %d, %d", gEd.maps[gEd.map].title, gEd.playX, gEd.playY);
+    ImGui::TextDisabled("A test never writes to your real save.");
+    ImGui::Spacing();
+    ImGui::RadioButton("A copy of save file", &gEd.playKind, MAKER_PLAY_SAVE);
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(70);
+    ImGui::SliderInt("##slot", &gEd.playSlot, 1, 3);
+    ImGui::RadioButton("The start of the game", &gEd.playKind, MAKER_PLAY_START);
+    ImGui::RadioButton("With four badges", &gEd.playKind, MAKER_PLAY_BADGES4);
+    ImGui::RadioButton("As Champion", &gEd.playKind, MAKER_PLAY_CHAMPION);
+    ImGui::RadioButton("A quick test party (strong, every badge and HM)", &gEd.playKind, MAKER_PLAY_TEST);
+    ImGui::Spacing();
+    if (ImGui::Button("Play", ImVec2(110, 0)) || ImGui::IsKeyPressed(ImGuiKey_Enter, false) || ImGui::IsKeyPressed(ImGuiKey_F5, false))
+    {
+        ImGui::CloseCurrentPopup();
+        StartPlay();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Cancel", ImVec2(110, 0)) || ImGui::IsKeyPressed(ImGuiKey_Escape, false))
+        ImGui::CloseCurrentPopup();
+    ImGui::EndPopup();
+}
+
 static void Shortcuts()
 {
+    if (ImGui::IsKeyPressed(ImGuiKey_F5, false) && !ImGui::IsPopupOpen("Play as"))
+        AskPlay();
+    if (ImGui::IsKeyPressed(ImGuiKey_F12, false) && MakerApi_IsPlaying())
+        MakerApi_StopPlay();
     ImGuiIO &io = ImGui::GetIO();
     if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_S, false))
         Save();
@@ -787,6 +855,7 @@ static void Frame()
     MusicWindow();
     StatusBar();
     ClosePrompt();
+    PlayPrompt();
     // (a slider let go or a stroke ended: that's one undo step, sent to the game)
     if (InChange() && !ImGui::IsAnyItemActive() && !ImGui::IsMouseDown(ImGuiMouseButton_Left))
         EndChange();
@@ -848,12 +917,34 @@ extern "C" int MakerUi_IsOpen(void)
     return gEd.win != NULL;
 }
 
+extern "C" void MakerUi_PlayStopped(void)
+{
+    MapView_Opened();   // (the map's tiles back in VRAM, animated)
+}
+
 extern "C" int MakerUi_HandleEvent(const void *ev)
 {
     const SDL_Event *e = (const SDL_Event *)ev;
     Uint32 id;
     if (!gEd.win)
         return 0;
+    if (MakerApi_IsPlaying())
+    {
+        // the game's window while testing: F12 or closing it comes back to editing
+        Uint32 game = MakerApi_GameWindowId();
+        if (e->type == SDL_KEYDOWN && e->key.keysym.sym == SDLK_F12 && e->key.windowID == game)
+        {
+            MakerApi_StopPlay();
+            return 1;
+        }
+        if (e->type == SDL_WINDOWEVENT && e->window.event == SDL_WINDOWEVENT_CLOSE && e->window.windowID == game)
+        {
+            MakerApi_StopPlay();
+            return 1;
+        }
+        if (e->type == SDL_QUIT)
+            return 1;   // (the last window shown closing: the editor's is still open)
+    }
     switch (e->type)
     {
     case SDL_WINDOWEVENT: id = e->window.windowID; break;
@@ -949,6 +1040,21 @@ extern "C" void MakerUi_TestCommand(const char *line)
         if (m >= 0)
             printf("[maker] edits of %s:\n%s[maker] end\n", gEd.maps[m].name, EditsText(m).c_str());
     }
+    else if (c == "play")
+    {
+        // play KIND [SLOT] [X Y]: F5 as KIND (0 a copy of a save, 1 start, 2 four badges, 3 Champion, 4 test party)
+        int kind = 1, slot = 1, x = -1, y = -1;
+        sscanf(arg, "%d %d %d %d", &kind, &slot, &x, &y);
+        AskPlay();
+        gEd.wantPlay = false;
+        gEd.playKind = kind;
+        gEd.playSlot = slot;
+        if (x >= 0)
+            gEd.playX = x, gEd.playY = y;
+        StartPlay();
+    }
+    else if (c == "stop")
+        MakerApi_StopPlay();
     else if (c == "track" || c == "replace")
         Music_TestCommand(c.c_str(), arg);
     else if (c == "music")

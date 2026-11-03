@@ -74,7 +74,8 @@ unsigned int SDL_GetTicks(void);
 
 bool8 MP_DebugQuickStartEnabled(void)
 {
-    return getenv("MOEMON_DEBUG_QUICKSTART") != NULL;
+    bool8 Maker_PlayNewGamePending(void);
+    return getenv("MOEMON_DEBUG_QUICKSTART") != NULL || Maker_PlayNewGamePending();   // Moemon Maker: F5's story points
 }
 
 // animall FIRST LAST ATK TGT [TURN]: every move animation from FIRST to LAST in a row, ATK attacking TGT (in a battle,
@@ -166,6 +167,11 @@ void MP_DebugQuickStartNewGame(void)
         gSaveBlock2Ptr->playerTrainerId[1] = tid >> 8;
         gSaveBlock2Ptr->playerTrainerId[2] = tid >> 16;
         gSaveBlock2Ptr->playerTrainerId[3] = tid >> 24;
+    }
+    {
+        bool8 Maker_PlayNewGame(void);
+        if (Maker_PlayNewGame())
+            return;   // Moemon Maker: F5's story point, set up by the editor (src/maker/maker_play.c)
     }
     FlagSet(FLAG_SYS_POKEMON_GET);
     FlagSet(FLAG_SYS_POKEDEX_GET);

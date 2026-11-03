@@ -121,6 +121,13 @@ void MakerApi_SetMapEdits(const char *mapName, const char *text);
 const char *MakerApi_EditsDir(void);   // MoemonMaker/ beside the game
 void MakerApi_ReloadEdits(void);       // the saved edits again (the editor's unsaved ones dropped)
 
+// Playing from the editor, F5 (src/maker/maker_play.c)
+enum { MAKER_PLAY_SAVE, MAKER_PLAY_START, MAKER_PLAY_BADGES4, MAKER_PLAY_CHAMPION, MAKER_PLAY_TEST, MAKER_PLAY_KINDS };
+int MakerApi_Play(int map, int x, int y, int kind, int slot);   // slot: the save file copied (1-3; 0 = the one in use)
+void MakerApi_StopPlay(void);
+int MakerApi_IsPlaying(void);
+unsigned int MakerApi_GameWindowId(void);   // the game's own window (F12 / closing it ends the test)
+
 // The game side of the editor (src/maker/maker_main.c)
 void MakerApi_Close(void);            // the editor closed: back to the main menu
 const char *MakerApi_GameVersion(void);
@@ -133,6 +140,7 @@ int MakerUi_HandleEvent(const void *sdlEvent);   // 1 if the event was the edito
 void MakerUi_Frame(void);             // draws the editor (at most 60 times a second)
 void MakerUi_TestCommand(const char *line);      // tests: "maker ..." in a MOEMON_TEST script
 int MakerUi_SaveShot(const char *path);          // tests: the editor's window as a BMP
+void MakerUi_PlayStopped(void);                  // back from F5: the map's tiles loaded again
 
 #ifdef __cplusplus
 }

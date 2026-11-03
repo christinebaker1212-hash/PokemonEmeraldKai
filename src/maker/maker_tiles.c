@@ -16,12 +16,15 @@
 #include "metatile_behavior.h"
 #include "maker.h"
 #include "maker_api.h"
+#include "maker.h"
 
 int Tilesets_MakerMetatileCount(const struct Tileset *tileset, const char **name);   // tilesets.c
 void TilesetAnims_InitForLayout(const struct MapLayout *layout);                    // tileset_anims.c
 u8 TilesetAnims_Queued(void);
 
 static const struct MapLayout *sLayout;   // the editor's map's layout (its tiles are in BG VRAM)
+static u8 *sTileBase;                     // where its tiles are: BG VRAM, or while the game plays (F5) a copy of our own
+static u8 *sOwnTiles;
 static u16 sPalettes[16][16];
 static bool8 sSinnoh;
 static bool8 sAnimating = TRUE;
@@ -37,7 +40,7 @@ static const struct MapHeader *Header(int index)
 // A tileset's tiles into BG VRAM at tile `offset` (as fieldmap.c CopyTilesetToVram), never past `numTiles`
 static void LoadTiles(const struct Tileset *t, u16 numTiles, u16 offset)
 {
-    u8 *dst = (u8 *)(BG_VRAM + offset * TILE_SIZE_4BPP);
+    u8 *dst = sTileBase + offset * TILE_SIZE_4BPP;
     u32 max = numTiles * TILE_SIZE_4BPP;
     if (t == NULL || t->tiles == NULL)
         return;
@@ -78,10 +81,20 @@ int MakerApi_LoadMapTiles(int index, struct MakerTilesInfo *info)
         return 0;
     sLayout = l;
     sSinnoh = S3D_IsSinnohGroup(Maker_Map(index)->mapGroup);
+    // (while the game plays, its VRAM is its own: the tiles go into a copy, and don't animate)
+    if (Maker_IsPlaying())
+    {
+        if (!sOwnTiles)
+            sOwnTiles = malloc(NUM_TILES_TOTAL * TILE_SIZE_4BPP);
+        sTileBase = sOwnTiles;
+    }
+    else
+        sTileBase = (u8 *)BG_VRAM;
     LoadTiles(l->primaryTileset, Fieldmap_PrimaryTiles(l), 0);
     LoadTiles(l->secondaryTileset, NUM_TILES_TOTAL - Fieldmap_PrimaryTiles(l), Fieldmap_PrimaryTiles(l));
     LoadPalettes(l);
-    TilesetAnims_InitForLayout(l);
+    if (!Maker_IsPlaying())
+        TilesetAnims_InitForLayout(l);
     info->primaryMetatiles = Tilesets_MakerMetatileCount(l->primaryTileset, &name);
     snprintf(info->primaryName, sizeof(info->primaryName), "%s", name);
     info->secondaryMetatiles = Tilesets_MakerMetatileCount(l->secondaryTileset, &name);
@@ -120,7 +133,7 @@ static u32 Rgba(u16 c)
 // One 8x8 tile entry (tile | hflip | vflip | palette) at (ox, oy) of a 16x16 picture; color 0 left as it was
 static void DrawTile(u32 *out, u16 entry, int ox, int oy, bool8 opaque)
 {
-    const u8 *tile = (const u8 *)(BG_VRAM + (entry & 0x3FF) * TILE_SIZE_4BPP);
+    const u8 *tile = sTileBase + (entry & 0x3FF) * TILE_SIZE_4BPP;
     const u16 *pal = sPalettes[(entry >> 12) & 15];
     int x, y;
     for (y = 0; y < 8; y++)
@@ -197,7 +210,7 @@ int MakerApi_MapBlock(int index, int x, int y)
 // The game's tile animations, one step a game frame while the editor is open (maker_main.c CB2_MakerWaiting)
 void Maker_TilesFrame(void)
 {
-    if (sLayout == NULL || !sAnimating)
+    if (sLayout == NULL || !sAnimating || sTileBase != (u8 *)BG_VRAM)
         return;
     UpdateTilesetAnimations();
     if (TilesetAnims_Queued())

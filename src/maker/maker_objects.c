@@ -181,6 +181,8 @@ int MakerApi_RenderObject(int graphicsId, int facing, unsigned int *rgba, int ma
     if (data == NULL)
         return 0;
     pal = ObjectEvent_MakerPalette(graphicsId);
+    if (pal == NULL)
+        return 0;
     tilesW = w / 8;
     for (y = 0; y < h; y++)
         for (x = 0; x < w; x++)

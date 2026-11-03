@@ -1642,6 +1642,12 @@ void Display_Shutdown(void)
 #endif
 }
 
+// Moemon Maker: the game's own window (the editor ends a test when it's closed: maker_ui.cpp)
+unsigned int MakerApi_GameWindowId(void)
+{
+    return sWindow ? SDL_GetWindowID(sWindow) : 0;
+}
+
 // Moemon Maker: the game's window hidden while the editor is open, shown again for F5 and when it closes
 void Display_SetMainWindowShown(int shown)
 {
