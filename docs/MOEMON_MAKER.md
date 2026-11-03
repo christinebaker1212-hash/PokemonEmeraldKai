@@ -58,13 +58,17 @@ answer to "it has to keep up":
 - **Play is one key away.** F5 starts the game from the cursor and F12 comes back to the editor. There's no export
   and no second program.
 
-**The code** (the user, 2026-11-03): the main menu's MOEMON MAKER entry is hidden until **DOWN + L + R + START**
-is entered on the title screen: hold DOWN, L and R, then press START. Pressing START alone opens the main menu as
-always. The game plays a chime, opens the main menu with MOEMON MAKER in it, and remembers that on this PC (the
-settings file, not the save), so the code is needed once. Entering it again hides the entry. Gamepads and the
-keyboard both work, through the game's button mapping. title_screen.c must check the code before its plain
-START / A check, and it doesn't clash with the B + SELECT codes already there. No shortcut ships beside the game.
-`--maker` (start straight in the Maker) only works on a PC where the code was entered.
+**The way in** (the user, 2026-11-03; it replaces the DOWN + L + R + START code): the main menu's MOEMON MAKER entry
+appears only when both are true:
+
+1. `AllowSmallTweaks = 1` in moemon_coop.ini (the existing small-tweaks switch, gMpConfig.smallTweaks /
+   MP_SmallTweaksAllowed; the file is per save file since 1.63.5).
+2. **"maker"** has been typed on the keyboard since the game started. It's one more typed word beside "speed" /
+   "slow" (text_input.c CheckTypedWords: typed anywhere outside text entry, ignored when AllowSmallTweaks isn't 1).
+
+Typing it plays a chime. On the title screen or main menu, the entry appears at once, and it stays until the game
+closes. It isn't remembered, so it's typed again after each start. No shortcut ships beside the game, and there's no
+`--maker` start option. Nothing about the Maker is in the player README.
 
 **"In the game" means the same program, not inside the game's screen.** The Maker never edits in the 240x160
 picture. It opens its own desktop window at any size, with menus, toolbars, panels and the mouse, like RPG Maker. The
