@@ -22,10 +22,14 @@ What that needs to get right:
 - **Edits to the base game go in one place.** All four regions' maps are in the repo (`data/maps`, `data/layouts`,
   `src/data/wild_encounters.json`), but some were written by generators (tools/quetzal_port, tools/sinnoh). A later
   session re-running one would quietly wipe a hand edit. So the Maker keeps base-game edits as **overrides by name** in
-  `MoemonMaker/base/` (a tile at x,y of `MAP_ROUTE101`, `TRAINER_ROB` moved to 12,7, a slot of a wild table). The
-  build applies them on top of the generated data, and the generators leave that folder alone. CLAUDE.md gets a rule
-  when this is built: never overwrite `MoemonMaker/base/`, and say so if a change of yours collides with one of the
-  user's edits.
+  `MoemonMaker/base/` (a tile at x,y of `MAP_ROUTE101`, `TRAINER_ROB` moved to 12,7, a slot of a wild table).
+  **`MoemonMaker/` takes precedence over the conversion scripts** (the user, 2026-11-03): the build applies the
+  overrides on top of the generated data, and each converter reads `MoemonMaker/base/` and leaves what it lists
+  untouched, so a re-run can't wipe them.
+- **New maps can't collide.** A map made in the Maker exists only in `MoemonMaker/`, so no converter writes it.
+- **Claude sessions check before touching the user's work.** The rule is in CLAUDE.md (the user, 2026-11-03).
+  Publish commits from the Maker carry a `Moemon-Maker:` trailer and no `Claude-Session:`, so the user's edits are
+  easy to tell apart in `git log`.
 - **SINNOH**: the walkable grid comes from the 3D pack's blocks (s3d.c S3D_LayoutBlocks), not the map's layout, so
   the same override file holds SINNOH's collision and behavior edits. The Maker draws them over the 3D picture.
 - **No rebuild to see it**: the game reads `MoemonMaker/base/` at runtime too, so F5 and hot reload show the fix

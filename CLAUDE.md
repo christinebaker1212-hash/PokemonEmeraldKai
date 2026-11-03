@@ -42,6 +42,13 @@ POKéTCH / POKéGEAR on the DEVICE page, the live map, MATCH CALL, CONDITION, RI
 (+ mp_phone_int.h), PHONE_LINK.md "The devices, the live map, battle mode". The user asked (2026-11-03) for all four
 phases in order, then a UI/UX pass: "polished Nintendo quality, mid 2000s to 2007 era graphics, 2026 usability".
 
+**Moemon Maker** (concept, not built yet): the user's own MZ-like editor for maps, events and data, `docs/MOEMON_MAKER.md`.
+**The user's own changes come first** (the user, 2026-11-03): anything in `MoemonMaker/` and any commit without a
+`Claude-Session:` trailer (the Maker's Publish commits carry `Moemon-Maker:`) is the user's work. Before a change,
+regeneration or conversion script would alter or overwrite it, check `git log` / `git blame` and ask the user; never
+"fix" a user edit on assumption. `MoemonMaker/` takes precedence over the conversion scripts (tools/quetzal_port,
+tools/sinnoh...): they leave what `MoemonMaker/base/` overrides alone.
+
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
 card duels).
 
