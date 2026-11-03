@@ -99,6 +99,38 @@ public final class Notifier {
         }
     }
 
+    /** Friends who've started playing since the last look (FRIEND: off unless turned on; once a friend a day) */
+    public static void friends(Context c, Companion app) {
+        if (!on(c, 4) || quiet(c, LocalTime.now())) {
+            return;
+        }
+        Model m = app.model();
+        JSONObject f = m == null ? null : m.snap.optJSONObject("friends");
+        JSONArray list = f == null ? null : f.optJSONArray("list");
+        if (list == null || list.length() == 0) {
+            return;
+        }
+        java.util.Map<String, JSONObject> p;
+        try {
+            p = com.moemon.companion.core.Friends.fetch(app.crypto, f.optString("srv"), list);
+        } catch (Exception e) {
+            return;
+        }
+        long now = System.currentTimeMillis() / 1000;
+        LocalDate today = LocalDate.now();
+        for (int i = 0; i < list.length(); i++) {
+            JSONObject friend = list.optJSONObject(i);
+            String id = friend.optString("id");
+            boolean was = prefs(c).getBoolean("online_" + id, false), is = com.moemon.companion.core.Friends.online(p.get(id), now);
+            prefs(c).edit().putBoolean("online_" + id, is).apply();
+            if (is && !was && !today.toString().equals(prefs(c).getString("friendDay_" + id, ""))) {
+                String name = app.art.plain(GameArt.hexText(friend.optString("n")));
+                prefs(c).edit().putString("friendDay_" + id, today.toString()).remove("notif_last_FRIEND").apply();
+                post(c, 4, today, name + " is playing!", "Say hi, or join their room from FRIENDS.");
+            }
+        }
+    }
+
     // a notification of KIND, once a day, while today's budget lasts
     private static void post(Context c, int kind, LocalDate today, String title, String text) {
         SharedPreferences p = prefs(c);

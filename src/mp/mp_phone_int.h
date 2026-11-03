@@ -23,6 +23,13 @@ void PhoneWalk_Update(void);                                     // every frame
 void PhoneWalk_ForgetAll(void);                                  // FORGET PHONES: a walking POKéMON comes home as it left
 bool8 PhoneWalk_OnSealed(int c, const char *t, const char *json);
 
+// mp_phone_friends.c: friends' keys, presence, the phones' pipes through the co-op server, invites
+void PhoneFriends_Load(void);
+void PhoneFriends_Update(void);
+void PhoneFriends_Snapshot(struct Buf *b);
+const char *PhoneFriends_Apply(const char *op, const char *json);   // "share", "join"
+const u8 *MP_Phone_SaveId(void);
+
 // mp_phone_dev.c: the device's apps: the live map, MOENAV calls, the battle feed, the POKéGEAR)
 #ifndef GUARD_MP_PHONE_INT_H
 #define GUARD_MP_PHONE_INT_H

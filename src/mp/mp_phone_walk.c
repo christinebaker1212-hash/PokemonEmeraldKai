@@ -843,7 +843,7 @@ const char *PhoneWalk_Apply(const char *op, const char *json)
         return DoCollect(json, FALSE);
     if (strcmp(op, "kind") == 0)
         return DoKind(json);
-    return "unknown";
+    return PhoneFriends_Apply(op, json);
 }
 
 void PhoneWalk_Snapshot(struct Buf *b, const u8 *phone)

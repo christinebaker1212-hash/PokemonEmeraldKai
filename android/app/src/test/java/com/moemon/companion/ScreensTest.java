@@ -173,6 +173,19 @@ public class ScreensTest {
         v.showOver(new TodayPage(v));
         shot(v, "today");
         v.showOver(null);
+        // FRIENDS: two friends, one online in a room with their party
+        String may = app.art.toHex("MAY"), wally = app.art.toHex("WALLY");
+        app.model().snap.put("friends", new JSONObject("{\"share\":0,\"srv\":\"127.0.0.1:1\",\"list\":[{\"id\":\"0102030405060708\","
+                + "\"key\":\"" + "11".repeat(32) + "\",\"n\":\"" + may + "\",\"seen\":1},{\"id\":\"0807060504030201\",\"key\":\""
+                + "22".repeat(32) + "\",\"n\":\"" + wally + "\",\"seen\":1}]}"));
+        app.friends.put("0102030405060708", new JSONObject().put("n", may).put("t", System.currentTimeMillis() / 1000)
+                .put("sec", 3).put("do", "field").put("room", "MAYS ROOM").put("rkey", "00").put("srv", "")
+                .put("party", new org.json.JSONArray("[[25,20,0],[280,15,0],[0,0,1]]")));
+        app.friends.put("0807060504030201", new JSONObject().put("n", wally).put("t", System.currentTimeMillis() / 1000 - 7200));
+        app.friendsAt = System.currentTimeMillis();
+        v.select(7);
+        shot(v, "friends");
+        v.showOver(null);
         try (FileOutputStream o = new FileOutputStream(new File(new File(System.getProperty("screens.out", "build/screens")),
                 "widget.png"))) {
             WalkWidget.picture(app).compress(Bitmap.CompressFormat.PNG, 100, o);

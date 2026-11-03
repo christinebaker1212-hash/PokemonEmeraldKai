@@ -95,6 +95,11 @@ void PhoneProto_PairProof(const uint8_t secret[PHONE_KEY_SIZE], const uint8_t ph
     crypto_blake2b_keyed(out, PHONE_KEY_SIZE, secret, PHONE_KEY_SIZE, msg, sizeof(msg));
 }
 
+void PhoneProto_Derive(const uint8_t key[PHONE_KEY_SIZE], const char *word, uint8_t out[16])
+{
+    crypto_blake2b_keyed(out, 16, key, PHONE_KEY_SIZE, (const uint8_t *)word, strlen(word));
+}
+
 void PhoneProto_SessionKey(const uint8_t key[PHONE_KEY_SIZE], const uint8_t phoneNonce[PHONE_NONCE_SIZE],
                            const uint8_t gameNonce[PHONE_NONCE_SIZE], uint8_t out[PHONE_KEY_SIZE])
 {

@@ -54,6 +54,7 @@ public final class GameView extends View {
         pages.add(new SpawnsPage(this));
         pages.add(new DevicePage(this));
         pages.add(new WalkPage(this));
+        pages.add(new FriendsPage(this));
     }
 
     @Override
@@ -291,7 +292,7 @@ public final class GameView extends View {
         } else {
             switch (cl.status()) {
                 case LINKED:
-                    s = app.locked() ? "IN BATTLE" : "LINKED";
+                    s = app.locked() ? "IN BATTLE" : cl.viaServer() ? "LINKED (AWAY)" : "LINKED";
                     color = app.locked() ? 0xFFF8A050 : 0xFF88F888;
                     break;
                 case LINKING:
@@ -335,7 +336,19 @@ public final class GameView extends View {
         return (s / 86400) + " DAYS AGO";
     }
 
-    private static final String[] TAB_NAMES = {"BOXES", "PARTY", "BAG", "DEX", "SPAWNS", "DEVICE", "WALK"};
+    // the tabs and the pages they open (SPAWNS, page 4, opens from the POKéDEX: its tab is DEX's)
+    private static final String[] TAB_NAMES = {"BOXES", "PARTY", "BAG", "DEX", "DEVICE", "WALK", "FRIENDS"};
+    private static final String[] TAB_SHORT = {"BOX", "PARTY", "BAG", "DEX", "DEVICE", "WALK", "PALS"};
+    private static final int[] TAB_PAGES = {0, 1, 2, 3, 5, 6, 7};
+
+    private int tabOf(int p) {
+        for (int i = 0; i < TAB_PAGES.length; i++) {
+            if (TAB_PAGES[i] == p) {
+                return i;
+            }
+        }
+        return 3;   // (SPAWNS: under DEX)
+    }
 
     private void drawTabs(Canvas c) {
         int y = h - TABS, tw = w / TAB_NAMES.length;
@@ -343,13 +356,14 @@ public final class GameView extends View {
         c.drawRect(0, y, w, h, fill);
         for (int i = 0; i < TAB_NAMES.length; i++) {
             int x = i * tw;
-            if (i == page && over == null) {
+            boolean on = i == tabOf(page) && over == null;
+            if (on) {
                 fill.setColor(0xFFF8F8F8);
                 c.drawRect(x + 2, y + 3, x + tw - 2, h - 3, fill);
             }
-            int nw = art.width(TAB_NAMES[i]);
-            boolean on = i == page && over == null;
-            art.text(c, TAB_NAMES[i], x + (tw - nw) / 2, y + 7, on ? GameArt.TEXT : GameArt.WHITE_TEXT,
+            String name = art.width(TAB_NAMES[i]) <= tw - 4 ? TAB_NAMES[i] : TAB_SHORT[i];
+            int nw = art.width(name);
+            art.text(c, name, x + (tw - nw) / 2, y + 7, on ? GameArt.TEXT : GameArt.WHITE_TEXT,
                     on ? GameArt.SHADOW : GameArt.WHITE_SHADOW);
         }
     }
@@ -447,7 +461,7 @@ public final class GameView extends View {
         }
         if (y >= h - TABS && (over == null || !over.fullScreen())) {
             int i = Math.min(TAB_NAMES.length - 1, x / (w / TAB_NAMES.length));
-            select(i);
+            select(TAB_PAGES[i]);
             return;
         }
         active().tap(x, y - TOP);

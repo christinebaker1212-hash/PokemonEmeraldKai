@@ -192,7 +192,30 @@ public final class LinkClient {
                 }
             }
         }
+        // away from home: through the co-op server the game is on (the snapshot's friends.srv), when it's online
+        String server = serverAddress();
+        if (!server.isEmpty()) {
+            try {
+                return Link.viaServer(crypto, saved, server);
+            } catch (Link.Refused r) {
+                throw new RefusedError(r.why);
+            } catch (IOException ignored) {
+            }
+        }
         return null;
+    }
+
+    /** The co-op server the game was last on ("host:port"; "" none known) */
+    public String serverAddress() {
+        Model m = model;
+        JSONObject f = m == null ? null : m.snap.optJSONObject("friends");
+        return f == null ? "" : f.optString("srv");
+    }
+
+    /** Linked through the co-op server (away from home) */
+    public boolean viaServer() {
+        Link l = link;
+        return l != null && l.viaServer();
     }
 
     private static final class RefusedError extends RuntimeException {

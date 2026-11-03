@@ -47,6 +47,9 @@ size_t PhoneProto_Seal(const uint8_t key[PHONE_KEY_SIZE], uint32_t seq, const vo
 // Open: the message's size (out gets len - PHONE_SEAL_EXTRA bytes), -1 if it was forged or damaged
 int PhoneProto_Open(const uint8_t key[PHONE_KEY_SIZE], const uint8_t *in, size_t len, uint32_t *seq, uint8_t *out);
 
+// 16 bytes from a 32-byte key and a word (BLAKE2b keyed): a pipe's ID ("pipe"), a friend's presence record ("presence"),
+// their inbox ("inbox")... secret to everyone without the key, the same on the game, the app and the test client
+void PhoneProto_Derive(const uint8_t key[PHONE_KEY_SIZE], const char *word, uint8_t out[16]);
 void PhoneProto_ToHex(const uint8_t *in, size_t n, char *out);   // out: 2n + 1 chars, upper case
 int PhoneProto_FromHex(const char *in, uint8_t *out, size_t n);  // 0 if in isn't 2n hex digits
 

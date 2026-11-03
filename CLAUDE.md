@@ -41,7 +41,9 @@ by repository secrets in the release workflow; its key must never change. Phase 
 POKéTCH / POKéGEAR on the DEVICE page, the live map, MATCH CALL, CONDITION, RIBBONS, battle mode): src/mp/mp_phone_dev.c
 (+ mp_phone_int.h), PHONE_LINK.md "The devices, the live map, battle mode". Phase 3 (1.73.0, the walk, training, the
 Garden in your pocket): src/mp/mp_phone_walk.c, android core/Walk.java, PHONE_LINK.md "Phase 3"; tests
-tools/phone/walk_test.py, coretest WalkCoreTest. The user asked (2026-11-03) for all four
+tools/phone/walk_test.py, coretest WalkCoreTest. Phase 4 (1.74.0, friends: presence, JOIN, linking away from home
+through the co-op server's MAIL and PIPE): src/mp/mp_phone_friends.c ("<save>.pals"), mp_server.c MAIL / PIPE,
+android core/Server.java, Friends.java, FriendsPage; PHONE_LINK.md "Phase 4"; test coretest FriendsTest. The user asked (2026-11-03) for all four
 phases in order, then a UI/UX pass: "polished Nintendo quality, mid 2000s to 2007 era graphics, 2026 usability".
 
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!

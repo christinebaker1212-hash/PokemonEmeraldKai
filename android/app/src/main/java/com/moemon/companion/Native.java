@@ -11,6 +11,7 @@ final class Native {
     static native byte[] sessionKey(byte[] key, byte[] phoneNonce, byte[] gameNonce);
     static native byte[] seal(byte[] key, int seq, byte[] msg);
     static native byte[] open(byte[] key, byte[] sealed);   // null if forged; else seq (4 bytes) + message
+    static native byte[] derive(byte[] key32, String word);
     static native int linkVersion();
 
     private Native() {}

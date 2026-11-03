@@ -32,6 +32,13 @@ public final class Link implements AutoCloseable {
     private final OutputStream out;
     private byte[] sessionKey;
     private int seqOut, seqIn;
+    // through the co-op server (docs/PHONE_LINK.md "Phase 4"): a pipe's channel, frames in chunks inside its messages
+    private int channel = -1;
+    public boolean viaServer() {
+        return channel >= 0;
+    }
+    static final int MP_C_PIPE = 13, MP_S_PIPE = 33, PIPE_JOIN = 2, PIPE_DATA = 3, PIPE_OPENED = 1, PIPE_CLOSED = 4,
+            PIPE_NOHOST = 5, PIPE_CHUNK = 7900;
 
     /** Refused by the game ({"t":"bye","why":...}): version, othersave, unknown, notpairing, wrongcode... */
     public static final class Refused extends IOException {
@@ -62,6 +69,24 @@ public final class Link implements AutoCloseable {
         if (Thread.currentThread() == screenThread) {
             throw new IllegalStateException("the network on the screen's thread");
         }
+        if (channel >= 0) {
+            byte[] whole = new byte[1 + body.length];
+            whole[0] = kind;
+            System.arraycopy(body, 0, whole, 1, body.length);
+            int at = 0;
+            do {
+                int n = Math.min(PIPE_CHUNK, whole.length - at);
+                byte[] m = new byte[4 + n];
+                m[0] = PIPE_DATA;
+                m[1] = (byte) channel;
+                m[2] = (byte) (channel >> 8);
+                m[3] = (byte) (at + n < whole.length ? 1 : 0);
+                System.arraycopy(whole, at, m, 4, n);
+                mpSend(MP_C_PIPE, m);
+                at += n;
+            } while (at < whole.length);
+            return;
+        }
         byte[] f = new byte[5 + body.length];
         int n = body.length + 1;
         f[0] = (byte) (n >>> 24);
@@ -89,13 +114,71 @@ public final class Link implements AutoCloseable {
     public int badMessages;
     public String lastBad = "";
 
+    // The co-op server's own framing: u16 length (the type and the data), u8 type, data
+    private void mpSend(int type, byte[] data) throws IOException {
+        byte[] f = new byte[3 + data.length];
+        int n = data.length + 1;
+        f[0] = (byte) n;
+        f[1] = (byte) (n >> 8);
+        f[2] = (byte) type;
+        System.arraycopy(data, 0, f, 3, data.length);
+        synchronized (out) {
+            out.write(f);
+            out.flush();
+        }
+    }
+
+    private byte[] mpRecv(int[] type) throws IOException {
+        int n = in.readUnsignedByte() | (in.readUnsignedByte() << 8);
+        if (n <= 0) {
+            throw new IOException("bad server frame");
+        }
+        type[0] = in.readUnsignedByte();
+        byte[] d = new byte[n - 1];
+        in.readFully(d);
+        return d;
+    }
+
+    // One frame from the game: straight, or gathered from the pipe's chunks
+    private byte[] readFrame() throws IOException {
+        if (channel < 0) {
+            int n = in.readInt();
+            if (n <= 0 || n > FRAME_MAX) {
+                throw new IOException("bad frame");
+            }
+            byte[] body = new byte[n];
+            in.readFully(body);
+            return body;
+        }
+        java.io.ByteArrayOutputStream whole = new java.io.ByteArrayOutputStream();
+        int[] type = new int[1];
+        for (;;) {
+            byte[] d = mpRecv(type);
+            if (type[0] != MP_S_PIPE || d.length < 3) {
+                continue;   // (the server's pings and the like)
+            }
+            if (d[0] == PIPE_CLOSED) {
+                throw new IOException("the pipe closed");
+            }
+            if (d[0] != PIPE_DATA || d.length < 4) {
+                continue;
+            }
+            whole.write(d, 4, d.length - 4);
+            if (whole.size() > FRAME_MAX) {
+                throw new IOException("bad frame");
+            }
+            if (d[3] == 0) {
+                return whole.toByteArray();
+            }
+        }
+    }
+
     public JSONObject recv() throws IOException {
-        int n = in.readInt();
-        if (n <= 0 || n > FRAME_MAX) {
+        byte[] body = readFrame();
+        int n = body.length;
+        if (n == 0) {
             throw new IOException("bad frame");
         }
-        byte[] body = new byte[n];
-        in.readFully(body);
         try {
             if (body[0] == 'P') {
                 JSONObject o = new JSONObject(new String(body, 1, n - 1, StandardCharsets.UTF_8));
@@ -176,7 +259,53 @@ public final class Link implements AutoCloseable {
 
     /** A session with a paired save's game; the welcome message is read */
     public static Link connect(Crypto crypto, SavedLink s, String host, int port) throws IOException {
-        Link l = new Link(crypto, host, port, 3000);
+        return hello(new Link(crypto, host, port, 3000), crypto, s);
+    }
+
+    /**
+     * The same session through the co-op server the game is on (ADDRESS "host:port"): the game hosts a pipe whose ID
+     * comes from this phone's key, so only this phone can reach it; the server only passes the sealed frames along
+     */
+    public static Link viaServer(Crypto crypto, SavedLink s, String address) throws IOException {
+        String host = address;
+        int port = 27015;
+        int colon = address.lastIndexOf(':');
+        if (colon > 0) {
+            host = address.substring(0, colon);
+            try {
+                port = Integer.parseInt(address.substring(colon + 1));
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        Link l = new Link(crypto, host, port, 5000);
+        try {
+            l.setTimeout(8000);
+            byte[] join = new byte[17];
+            join[0] = PIPE_JOIN;
+            System.arraycopy(crypto.derive(s.key, "pipe"), 0, join, 1, 16);
+            l.mpSend(MP_C_PIPE, join);
+            int[] type = new int[1];
+            for (;;) {
+                byte[] d = l.mpRecv(type);
+                if (type[0] != MP_S_PIPE || d.length < 1) {
+                    continue;
+                }
+                if (d[0] == PIPE_NOHOST) {
+                    throw new IOException("the game isn't on the server");
+                }
+                if (d[0] == PIPE_OPENED && d.length >= 3) {
+                    l.channel = (d[1] & 255) | ((d[2] & 255) << 8);
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            l.close();
+            throw e;
+        }
+        return hello(l, crypto, s);
+    }
+
+    private static Link hello(Link l, Crypto crypto, SavedLink s) throws IOException {
         try {
             l.setTimeout(8000);
             byte[] nonce = crypto.random(24);

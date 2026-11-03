@@ -54,6 +54,10 @@ public final class Companion implements LinkClient.Listener {
     private com.moemon.companion.core.Walk walk;                 // the POKéMON on a walk with this phone (this save's)
     private String walkSave = "";                                 // (the save it's for)
     public JSONObject lastHome;                                   // the last homecoming ("home" of a done answer)
+    public volatile java.util.Map<String, JSONObject> friends = new java.util.HashMap<>();   // save ID -> presence
+    public volatile long friendsAt;                               // (when they were read; 0: never)
+    public volatile String friendsError = "";
+    private final java.util.concurrent.ExecutorService background = java.util.concurrent.Executors.newSingleThreadExecutor();
     public long toastAt;
     public boolean toastGood;                                     // (a USE's result, not a refusal)
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -228,6 +232,29 @@ public final class Companion implements LinkClient.Listener {
 
     public Model model() {
         return client != null ? client.model() : null;
+    }
+
+    // ---------------------------------------------------------------------------------------------- friends
+
+    /** Friends' presence again from the co-op server (in the background; FriendsPage, StepJob) */
+    public void refreshFriends() {
+        Model m = model();
+        JSONObject f = m == null ? null : m.snap.optJSONObject("friends");
+        if (f == null) {
+            return;
+        }
+        final String server = f.optString("srv");
+        final JSONArray list = f.optJSONArray("list");
+        background.execute(() -> {
+            try {
+                friends = com.moemon.companion.core.Friends.fetch(crypto, server, list);
+                friendsError = "";
+            } catch (Exception e) {
+                friendsError = "The co-op server didn't answer.";
+            }
+            friendsAt = System.currentTimeMillis();
+            main.post(this::changed);
+        });
     }
 
     // ------------------------------------------------------------------------------------------------- the walk

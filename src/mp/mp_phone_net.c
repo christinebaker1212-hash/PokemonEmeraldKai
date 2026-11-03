@@ -16,7 +16,11 @@ struct PhoneConn
     size_t outLen, outCap;
     size_t frameDone;      // bytes of the frame handed out last, dropped at the next Recv
     int fresh;
+    uint16_t pipe;         // a pipe through the co-op server (its channel; 0: a socket)
 };
+
+void (*gPhonePipeOut)(uint16_t channel, const uint8_t *body, size_t len);
+void (*gPhonePipeClose)(uint16_t channel);
 
 static mp_sock sListen = MP_BADSOCK, sUdp = MP_BADSOCK;
 static int sPort;
@@ -24,6 +28,9 @@ static struct PhoneConn sConns[PHONE_NET_CONNS];
 
 static void Drop(struct PhoneConn *c)
 {
+    if (c->pipe && gPhonePipeClose)
+        gPhonePipeClose(c->pipe);
+    c->pipe = 0;
     if (c->sock != MP_BADSOCK)
         mp_closesock(c->sock);
     c->sock = MP_BADSOCK;
@@ -125,9 +132,9 @@ void PhoneNet_Poll(const char *udpAnswer)
         mp_sock s = accept(sListen, NULL, NULL);
         if (s == MP_BADSOCK)
             break;
-        for (i = 0; i < PHONE_NET_CONNS && sConns[i].sock != MP_BADSOCK; i++)
+        for (i = 0; i < PHONE_NET_TCP && sConns[i].sock != MP_BADSOCK; i++)
             ;
-        if (i == PHONE_NET_CONNS)
+        if (i == PHONE_NET_TCP)
         {
             mp_closesock(s);   // (two phones at most)
             continue;
@@ -200,7 +207,7 @@ int PhoneNet_NewConn(void)
 {
     int i;
     for (i = 0; i < PHONE_NET_CONNS; i++)
-        if (sConns[i].sock != MP_BADSOCK && sConns[i].fresh)
+        if ((sConns[i].sock != MP_BADSOCK || sConns[i].pipe) && sConns[i].fresh)
         {
             sConns[i].fresh = 0;
             return i;
@@ -210,7 +217,7 @@ int PhoneNet_NewConn(void)
 
 int PhoneNet_IsOpen(int c)
 {
-    return c >= 0 && c < PHONE_NET_CONNS && sConns[c].sock != MP_BADSOCK;
+    return c >= 0 && c < PHONE_NET_CONNS && (sConns[c].sock != MP_BADSOCK || sConns[c].pipe != 0);
 }
 
 int PhoneNet_Recv(int ci, const uint8_t **frame, size_t *len)
@@ -244,6 +251,12 @@ int PhoneNet_Recv(int ci, const uint8_t **frame, size_t *len)
 void PhoneNet_Send(int ci, const uint8_t *body, size_t len)
 {
     struct PhoneConn *c = &sConns[ci];
+    if (PhoneNet_IsOpen(ci) && c->pipe)
+    {
+        if (gPhonePipeOut)
+            gPhonePipeOut(c->pipe, body, len);
+        return;
+    }
     if (!PhoneNet_IsOpen(ci) || !Grow(&c->out, &c->outCap, c->outLen + 4 + len))
         return;
     c->out[c->outLen++] = (uint8_t)(len >> 24);
@@ -289,4 +302,50 @@ void PhoneNet_LocalAddress(char *out, size_t size)
             snprintf(out, size, "%u.%u.%u.%u", (ip >> 24) & 255, (ip >> 16) & 255, (ip >> 8) & 255, ip & 255);
     }
     mp_closesock(s);
+}
+
+// ------------------------------------------------------------------------------------------------------- pipes
+
+int PhoneNet_PipeOpen(uint16_t channel)
+{
+    int i;
+    for (i = PHONE_NET_TCP; i < PHONE_NET_CONNS; i++)
+        if (sConns[i].sock == MP_BADSOCK && !sConns[i].pipe)
+        {
+            sConns[i].sock = MP_BADSOCK;
+            sConns[i].pipe = channel;
+            sConns[i].inLen = sConns[i].outLen = sConns[i].frameDone = 0;
+            sConns[i].fresh = 1;
+            return i;
+        }
+    return -1;
+}
+
+void PhoneNet_PipeIn(uint16_t channel, const uint8_t *body, size_t len)
+{
+    int i;
+    for (i = PHONE_NET_TCP; i < PHONE_NET_CONNS; i++)
+    {
+        struct PhoneConn *c = &sConns[i];
+        if (c->pipe != channel || len == 0 || len > PHONE_FRAME_MAX || !Grow(&c->in, &c->inCap, c->inLen + 4 + len))
+            continue;
+        // (as a socket's: the 4-byte length, then the frame, so PhoneNet_Recv takes it the same way)
+        c->in[c->inLen++] = (uint8_t)(len >> 24);
+        c->in[c->inLen++] = (uint8_t)(len >> 16);
+        c->in[c->inLen++] = (uint8_t)(len >> 8);
+        c->in[c->inLen++] = (uint8_t)len;
+        memcpy(c->in + c->inLen, body, len);
+        c->inLen += len;
+    }
+}
+
+void PhoneNet_PipeClosed(uint16_t channel)
+{
+    int i;
+    for (i = PHONE_NET_TCP; i < PHONE_NET_CONNS; i++)
+        if (sConns[i].pipe == channel)
+        {
+            sConns[i].pipe = 0;   // (closed by the server: nothing to tell it)
+            Drop(&sConns[i]);
+        }
 }

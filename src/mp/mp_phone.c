@@ -151,6 +151,17 @@ void MP_Phone_OnSaveLoaded(void)
         NewSaveId();
     SpawnsLoad();
     PhoneWalk_Load();
+    PhoneFriends_Load();
+}
+
+const u8 *MP_Phone_SaveId(void)
+{
+    return sFile.saveId;
+}
+
+const u8 *MP_Phone_KeyOf(u32 i)
+{
+    return i < sFile.count ? sFile.phones[i].key : sFile.phones[0].key;
 }
 
 // new_game.c: a new game is a different save, even in the same slot: its own ID and no phones
@@ -561,6 +572,7 @@ static void BufSnapshot(struct Buf *b)
     BufAdd(b, "],");
     BufBag(b);
     PhoneWalk_Snapshot(b, sSnapPhone);
+    PhoneFriends_Snapshot(b);
     // The POKeDEX: a bit per national number (1 first), as hex: seen, then caught
     {
         static const char *const sWhat[] = {"seen", "caught"};
@@ -1729,6 +1741,7 @@ void MP_Phone_Update(void)
     const u8 *frame;
     size_t len;
     char udp[96], idHex[2 * PHONE_SAVEID_SIZE + 1];
+    PhoneFriends_Update();   // (presence and the pipes: whenever the game is on a co-op server)
     if (!sStarted)
     {
         if (!sHaveFile || !Wanted())

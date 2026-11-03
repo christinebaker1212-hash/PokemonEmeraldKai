@@ -51,6 +51,7 @@ public final class StepJob extends JobService {
                     sc.stop();
                 }
                 Notifier.check(this, app);
+                Notifier.friends(this, app);
                 WalkWidget.updateAll(this, app);
             } catch (Exception ignored) {
             }

@@ -252,4 +252,41 @@ across a restart; a week's caps with the walk's start moved back 7 days; home on
 FORGET PHONES), android/coretest WalkCoreTest (a simulated week on the phone's side), LiveTest (send-off, steps, a
 find, homecoming through the app).
 
-Next: Phase 4, friends (docs/COMPANION_APP.md "Pillar 4").
+## Phase 4: friends (docs/COMPANION_APP.md "Pillar 4")
+
+### Presence, invites, linking away from home (1.74.0)
+
+The co-op server (mp_server.c, protocol 75) gained two services anyone connected may use without a room:
+- MAIL (MPMSG_C_MAIL / S_MAIL): records under 16-byte keys. MAIL_PUT (one record, the owner's 16-byte secret: its
+  SHA-256 locks the key to whoever put it first), MAIL_ADD (up to MAIL_ENTRIES entries of MAIL_ENTRY_MAX bytes, anyone
+  who knows the key), MAIL_GET, MAIL_DEL / MAIL_TAKE (the owner's). Each has a TTL; kept in moemon_mail.dat next to the
+  server (saved a few seconds after a change). The server never reads them: keys are derived from friend keys
+  (PhoneProto_Derive: BLAKE2b keyed by the key, over a word) and the contents are sealed with them.
+- PIPE (MPMSG_C_PIPE / S_PIPE): a game hosts pipe ids (PIPE_HOST), a phone joins one (PIPE_JOIN), and the server passes
+  DATA between them in chunks of up to 7,900 bytes; PIPE_CLOSE / CLOSED either way. A connection that uses pipes is
+  never timed out as an idle lobby visitor.
+
+Game side: src/mp/mp_phone_friends.c, "<save>.pals" (magic PALS: this save's friend key and owner secret, the sharing
+level, up to 64 friends {save id, friend key, name, last seen}).
+- Friends: in a co-op room, each game sends its save id, name and friend key on relay type 19 (MPR_FRIEND) every 10
+  seconds; everyone met is kept.
+- Presence: while connected to a server and playing (in the overworld once since loading), every 60 seconds a MAIL_PUT
+  under Derive(friend key, "presence"), TTL 10 minutes, sealed JSON {n (name hex), t, and with EVERYTHING: sec, reg,
+  do (field / battle / coop / cards), srv ("" = the online lobby), room, rkey, code (a game hosted on that PC), party
+  [[species, level, egg]...]}. ONLINE ONLY sends n and t; HIDDEN deletes the record.
+- Snapshot `friends`: {share, srv, online, list [{id, key, n, seen}]}. Orders: `{"op":"share","level"}` and
+  `{"op":"join","srv","room","rkey"}` (connects and joins the room; `inroom` if the game is already in one).
+- The phone through the server: the game hosts a pipe for each paired phone, id Derive(phone key, "pipe"), and runs
+  the same sealed link over it (mp_phone_net.c conns with `pipe`, PhoneNet_PipeOpen / PipeIn / PipeClosed).
+
+App side: core/Server.java (MAIL from the phone), core/Friends.java (presence for the friend list: online when its
+`t` is under 5 minutes old), core/Link.viaServer (the pipe: when the game isn't found at home, LinkClient tries the
+snapshot's `friends.srv`; status LINKED (AWAY)), FriendsPage (the share level, friends online with where, what and
+their party, JOIN: an order to the linked game, else the invite code copied), Notifier kind FRIEND (off by default;
+once a friend a day, from StepJob), DexPage's SPAWNS button.
+
+The gate: android/coretest FriendsTest (a server, ALICE hosting a room, BOB joining: friend keys swapped, BOB's
+presence read from the server, ALICE's phone linked through the server with a snapshot of more than one chunk);
+ScreensTest "friends".
+
+Next: trades by mail, then the card games on the phone.
