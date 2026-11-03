@@ -1,0 +1,333 @@
+// Moemon Co-op: the phone app's art and tables, exported by the game itself so the app always shows exactly what
+// the game does (docs/PHONE_LINK.md "The app's art"). MOEMON_EXPORT_APP=DIR runs it at the first frame and quits:
+//   DIR/icons/SPECIES.png   the party icon's two frames (32x64), DIR/front/SPECIES.png the front picture (64x64),
+//   DIR/items/ITEM.png      the BAG icon (24x24), DIR/font.png the normal font (16 glyphs a row, 16x16 cells),
+//   DIR/data.json           species, moves, items, abilities, natures, types (names as the game's text bytes in hex),
+//                           the font's widths.
+// android/build_assets.sh runs it before building the APK.
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include "global.h"
+#include "mp.h"
+#include "battle_main.h"
+#include "data.h"
+#include "decompress.h"
+#include "item.h"
+#include "item_icon.h"
+#include "pokemon.h"
+#include "pokemon_icon.h"
+#include "pokemon_summary_screen.h"
+#include "strings.h"
+#include "constants/characters.h"
+#include "constants/abilities.h"
+#include "constants/items.h"
+#include "constants/moves.h"
+#include "constants/species.h"
+
+#ifdef _WIN32
+#include <direct.h>
+#define MakeDir(p) _mkdir(p)
+#else
+#define MakeDir(p) mkdir(p, 0755)
+#endif
+
+void MP_ExportGlyph(u16 glyphId, u8 out[16][16], u8 *width);   // text.c
+
+// ------------------------------------------------------------------------------------------- a tiny PNG writer
+
+static u32 sCrcTable[256];
+
+static u32 Crc(u32 crc, const u8 *p, size_t n)
+{
+    size_t i;
+    if (sCrcTable[1] == 0)
+    {
+        u32 k, c;
+        for (k = 0; k < 256; k++)
+        {
+            c = k;
+            for (i = 0; i < 8; i++)
+                c = c & 1 ? 0xEDB88320 ^ (c >> 1) : c >> 1;
+            sCrcTable[k] = c;
+        }
+    }
+    crc = ~crc;
+    for (i = 0; i < n; i++)
+        crc = sCrcTable[(crc ^ p[i]) & 0xFF] ^ (crc >> 8);
+    return ~crc;
+}
+
+static void Be32(u8 *p, u32 v)
+{
+    p[0] = v >> 24, p[1] = v >> 16, p[2] = v >> 8, p[3] = v;
+}
+
+static void Chunk(FILE *f, const char *type, const u8 *data, u32 len)
+{
+    u8 head[8], tail[4];
+    u32 crc;
+    Be32(head, len);
+    memcpy(head + 4, type, 4);
+    fwrite(head, 1, 8, f);
+    fwrite(data, 1, len, f);
+    crc = Crc(0, (const u8 *)type, 4);
+    crc = Crc(crc, data, len);
+    Be32(tail, crc);
+    fwrite(tail, 1, 4, f);
+}
+
+// RGBA pixels, w x h, as a PNG (zlib "stored" blocks: no compression; the APK zips them anyway)
+static bool8 WritePng(const char *path, const u8 *rgba, u32 w, u32 h)
+{
+    static const u8 sSig[8] = {0x89, 'P', 'N', 'G', 13, 10, 26, 10};
+    u32 raw = (w * 4 + 1) * h, blocks = (raw + 65534) / 65535, zlen = 2 + raw + blocks * 5 + 4, i, a = 1, b = 0;
+    u8 ihdr[13], *z, *q;
+    FILE *f = fopen(path, "wb");
+    if (f == NULL)
+        return FALSE;
+    z = malloc(zlen + raw);
+    if (z == NULL)
+    {
+        fclose(f);
+        return FALSE;
+    }
+    // the filtered scanlines first (filter 0), then into stored blocks
+    {
+        u8 *lines = z + zlen, *p = lines;
+        for (i = 0; i < h; i++)
+        {
+            *p++ = 0;
+            memcpy(p, rgba + i * w * 4, w * 4);
+            p += w * 4;
+        }
+        q = z;
+        *q++ = 0x78, *q++ = 0x01;
+        for (i = 0; i < raw; i += 65535)
+        {
+            u32 n = raw - i < 65535 ? raw - i : 65535;
+            *q++ = i + n >= raw;
+            *q++ = n & 0xFF, *q++ = n >> 8, *q++ = ~n & 0xFF, *q++ = (~n >> 8) & 0xFF;
+            memcpy(q, lines + i, n);
+            q += n;
+        }
+        for (i = 0; i < raw; i++)
+        {
+            a = (a + lines[i]) % 65521;
+            b = (b + a) % 65521;
+        }
+        Be32(q, (b << 16) | a);
+        q += 4;
+    }
+    Be32(ihdr, w);
+    Be32(ihdr + 4, h);
+    ihdr[8] = 8, ihdr[9] = 6, ihdr[10] = 0, ihdr[11] = 0, ihdr[12] = 0;
+    fwrite(sSig, 1, 8, f);
+    Chunk(f, "IHDR", ihdr, 13);
+    Chunk(f, "IDAT", z, q - z);
+    Chunk(f, "IEND", NULL, 0);
+    fclose(f);
+    free(z);
+    return TRUE;
+}
+
+// 4bpp GBA tiles (tilesW x tilesH tiles, in rows) with a 16-color palette (index 0 clear) as RGBA
+static void Tiles(const u8 *tiles, u32 tilesW, u32 tilesH, const u16 *pal, u8 *rgba)
+{
+    u32 tx, ty, y, x, w = tilesW * 8;
+    for (ty = 0; ty < tilesH; ty++)
+        for (tx = 0; tx < tilesW; tx++)
+        {
+            const u8 *t = tiles + (ty * tilesW + tx) * 32;
+            for (y = 0; y < 8; y++)
+                for (x = 0; x < 8; x++)
+                {
+                    u8 idx = (t[y * 4 + x / 2] >> ((x & 1) * 4)) & 0xF;
+                    u16 c = pal[idx];
+                    u8 *o = rgba + ((ty * 8 + y) * w + tx * 8 + x) * 4;
+                    o[0] = (c & 31) * 255 / 31;
+                    o[1] = ((c >> 5) & 31) * 255 / 31;
+                    o[2] = ((c >> 10) & 31) * 255 / 31;
+                    o[3] = idx ? 255 : 0;
+                }
+        }
+}
+
+static void Json(FILE *f, const u8 *text, size_t max)
+{
+    size_t i;
+    fputc('"', f);
+    for (i = 0; i < max && text[i] != EOS; i++)
+        fprintf(f, "%02X", text[i]);
+    fputc('"', f);
+}
+
+// ------------------------------------------------------------------------------------------------------ export
+
+static u32 AllSpecies(void)
+{
+    return SPECIES_UNOWN_QMARK + 1;   // (the EGG and UNOWN's letters after the 1,050)
+}
+
+static void ExportMons(const char *dir)
+{
+    static u8 sPic[64 * 64 / 2 * 4], sRgba[64 * 64 * 4];
+    char path[600];
+    u32 s, n = 0;
+    snprintf(path, sizeof(path), "%s/icons", dir);
+    MakeDir(path);
+    snprintf(path, sizeof(path), "%s/front", dir);
+    MakeDir(path);
+    for (s = 1; s < AllSpecies(); s++)
+    {
+        // (UNOWN's letters: UNOWN with a personality that makes the letter, as the game draws them)
+        u32 letter = s > SPECIES_EGG ? s - SPECIES_UNOWN_B + 1 : 0;
+        u32 pid = (letter & 3) | (((letter >> 2) & 3) << 8) | (((letter >> 4) & 3) << 16) | (((letter >> 6) & 3) << 24);
+        const u8 *icon = GetMonIconPtr(s > SPECIES_EGG ? SPECIES_UNOWN : s, pid, TRUE);
+        u8 pal = GetValidMonIconPalIndex(s > SPECIES_EGG ? SPECIES_UNOWN : s);
+        if (icon != NULL)
+        {
+            Tiles(icon, 4, 8, (const u16 *)gMonIconPaletteTable[pal].data, sRgba);
+            snprintf(path, sizeof(path), "%s/icons/%u.png", dir, s);
+            WritePng(path, sRgba, 32, 64);
+        }
+        if (s < NUM_SPECIES || s > SPECIES_EGG)
+        {
+            u16 colors[16];
+            memset(sPic, 0, sizeof(sPic));
+            LoadSpecialPokePic(&gMonFrontPicTable[s > SPECIES_EGG ? SPECIES_UNOWN : s], sPic,
+                               s > SPECIES_EGG ? SPECIES_UNOWN : s, pid, TRUE);
+            LZDecompressWram(GetMonSpritePalFromSpeciesAndPersonality(s > SPECIES_EGG ? SPECIES_UNOWN : s, 0, pid), colors);
+            Tiles(sPic, 8, 8, colors, sRgba);
+            snprintf(path, sizeof(path), "%s/front/%u.png", dir, s);
+            WritePng(path, sRgba, 64, 64);
+        }
+        n++;
+    }
+    MPNet_Log("export: %u POKeMON's icons and pictures", n);
+}
+
+static void ExportItems(const char *dir)
+{
+    static u8 sTiles[0x200], sRgba[24 * 24 * 4];
+    u16 colors[16];
+    char path[600];
+    u32 i;
+    snprintf(path, sizeof(path), "%s/items", dir);
+    MakeDir(path);
+    for (i = 1; i < ITEMS_COUNT; i++)
+    {
+        const void *pic = GetItemIconPicOrPalette(i, 0), *pal = GetItemIconPicOrPalette(i, 1);
+        if (pic == NULL || pal == NULL)
+            continue;
+        LZDecompressWram(pic, sTiles);
+        LZDecompressWram(pal, colors);
+        Tiles(sTiles, 3, 3, colors, sRgba);
+        snprintf(path, sizeof(path), "%s/items/%u.png", dir, i);
+        WritePng(path, sRgba, 24, 24);
+    }
+}
+
+static void ExportFont(const char *dir, FILE *json)
+{
+    static u8 sRgba[256 * 256 * 4];
+    static const u8 sColors[4][4] = {{0, 0, 0, 0}, {0, 0, 0, 0}, {64, 64, 64, 255}, {216, 216, 216, 255}};
+    char path[600];
+    u32 g, r, c;
+    fprintf(json, "\"fontWidths\":[");
+    for (g = 0; g < 256; g++)
+    {
+        u8 cell[16][16], width;
+        MP_ExportGlyph(g, cell, &width);
+        fprintf(json, "%s%u", g ? "," : "", width);
+        for (r = 0; r < 16; r++)
+            for (c = 0; c < 16; c++)
+                memcpy(sRgba + (((g / 16) * 16 + r) * 256 + (g % 16) * 16 + c) * 4, sColors[cell[r][c] & 3], 4);
+    }
+    fprintf(json, "]");
+    snprintf(path, sizeof(path), "%s/font.png", dir);
+    WritePng(path, sRgba, 256, 256);
+}
+
+static void ExportData(const char *dir)
+{
+    char path[600];
+    u32 i;
+    FILE *f;
+    snprintf(path, sizeof(path), "%s/data.json", dir);
+    f = fopen(path, "w");
+    if (f == NULL)
+        return;
+    fprintf(f, "{\"version\":1,\"species\":[");
+    for (i = 0; i < AllSpecies(); i++)
+    {
+        u16 base = i > SPECIES_EGG ? SPECIES_UNOWN : i;
+        fprintf(f, "%s{\"n\":", i ? "," : "");
+        if (i == SPECIES_EGG)
+            Json(f, gText_EggNickname, POKEMON_NAME_LENGTH);
+        else
+            Json(f, gSpeciesNames[base], POKEMON_NAME_LENGTH);
+        fprintf(f, ",\"dex\":%u", i < NUM_SPECIES ? SpeciesToNationalPokedexNum(i) : base == SPECIES_UNOWN ? 201 : 0);
+        if (base < NUM_SPECIES)
+            fprintf(f, ",\"t\":[%u,%u],\"g\":%u", gSpeciesInfo[base].types[0], gSpeciesInfo[base].types[1],
+                    gSpeciesInfo[base].genderRatio);
+        fprintf(f, "}");
+    }
+    fprintf(f, "],\"moves\":[");
+    for (i = 0; i < MOVES_COUNT; i++)
+    {
+        fprintf(f, "%s{\"n\":", i ? "," : "");
+        Json(f, gMoveNames[i], MOVE_NAME_LENGTH);
+        fprintf(f, ",\"t\":%u,\"p\":%u,\"a\":%u,\"pp\":%u}", gBattleMoves[i].type, gBattleMoves[i].power,
+                gBattleMoves[i].accuracy, gBattleMoves[i].pp);
+    }
+    fprintf(f, "],\"items\":[");
+    for (i = 0; i < ITEMS_COUNT; i++)
+    {
+        u8 name[32];
+        CopyItemName(i, name);
+        fprintf(f, "%s{\"n\":", i ? "," : "");
+        Json(f, name, sizeof(name));
+        fprintf(f, ",\"pocket\":%u,\"hold\":%u}", GetItemPocket(i), MP_ItemCanBeHeld(i));
+    }
+    fprintf(f, "],\"abilities\":[");
+    for (i = 0; i < ABILITIES_COUNT; i++)
+    {
+        fprintf(f, "%s", i ? "," : "");
+        Json(f, gAbilityNames[i], ABILITY_NAME_LENGTH);
+    }
+    fprintf(f, "],\"natures\":[");
+    for (i = 0; i < NUM_NATURES; i++)
+    {
+        fprintf(f, "%s", i ? "," : "");
+        Json(f, gNatureNamePointers[i], 16);
+    }
+    fprintf(f, "],\"types\":[");
+    for (i = 0; i < NUMBER_OF_MON_TYPES; i++)
+    {
+        fprintf(f, "%s", i ? "," : "");
+        Json(f, gTypeNames[i], TYPE_NAME_LENGTH);
+    }
+    fprintf(f, "],");
+    ExportFont(dir, f);
+    fprintf(f, "}\n");
+    fclose(f);
+}
+
+// mp_main.c MP_FrameUpdate, at the first frame when MOEMON_EXPORT_APP is set: everything, then the game quits
+void MP_Export_IfAsked(void)
+{
+    static bool8 sDone;
+    const char *dir = getenv("MOEMON_EXPORT_APP");
+    if (sDone || dir == NULL || dir[0] == '\0')
+        return;
+    sDone = TRUE;
+    MakeDir(dir);
+    ExportMons(dir);
+    ExportItems(dir);
+    ExportData(dir);
+    printf("[export] the app's art and tables are in %s\n", dir);
+    fflush(stdout);
+    exit(0);
+}

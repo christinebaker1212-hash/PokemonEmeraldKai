@@ -43,6 +43,8 @@
 #include "mp_phone_net.h"
 #include "phone_proto.h"
 #include "monocypher/monocypher.h"
+#include "region_map.h"
+#include "wild_encounter.h"
 #include "qrcodegen/qrcodegen.h"
 #include "../data/mp_phone_nopc.h"
 
@@ -71,6 +73,12 @@ struct PhoneFile
 static struct PhoneFile sFile;
 static bool8 sHaveFile;          // sFile is this save's
 static bool8 sDirty;             // write it with the next save
+
+static void SpawnsLoad(void);
+static void SpawnsWrite(void);
+static void SpawnsReset(void);
+struct Buf;
+static void SendBuf(int c, struct Buf *b);
 
 // --------------------------------------------------------------------------------------------------- the sidecar
 
@@ -122,12 +130,14 @@ void MP_Phone_OnSaveLoaded(void)
     }
     if (!sHaveFile)
         NewSaveId();
+    SpawnsLoad();
 }
 
 // new_game.c: a new game is a different save, even in the same slot: its own ID and no phones
 void MP_Phone_NewGame(void)
 {
     NewSaveId();
+    SpawnsReset();
 }
 
 // sdl2.c StoreSaveFile
@@ -135,6 +145,7 @@ void MP_Phone_WriteSidecar(void)
 {
     if (sHaveFile && sDirty)
         WriteNow();
+    SpawnsWrite();
 }
 
 static void EnsureFile(void)
@@ -634,6 +645,169 @@ static const char *DoItem(const char *json, bool8 give)
     return NULL;
 }
 
+// ------------------------------------------------------------------------------------------------ the spawn viewer
+
+// Which wild slots the player has met, per map: "<save>.spawns" (a map's 32 bits: land 0-11, water 12-16, ROCK SMASH
+// 17-21, the rods 22-31; the app hides a rare one until it's met there that way: docs/COMPANION_APP.md)
+#define SPAWN_MAPS_MAX 1200
+#define SPAWN_MAGIC 0x4E57504D   // "MPWN"
+struct SpawnMet
+{
+    u16 map;
+    u16 pad;
+    u32 bits;
+};
+static struct SpawnMet sMet[SPAWN_MAPS_MAX];
+static u32 sMetCount;
+static bool8 sMetDirty;
+static const u8 sAreaBit[4] = {0, 12, 17, 22};
+static const u8 sAreaSlots[4] = {12, 5, 5, 10};
+
+static void SpawnPath(char *out, size_t size)
+{
+    snprintf(out, size, "%s.spawns", gPlatformSavePath);
+}
+
+static void SpawnsLoad(void)
+{
+    char path[600];
+    FILE *f;
+    u32 magic = 0, n = 0;
+    sMetCount = 0;
+    sMetDirty = FALSE;
+    SpawnPath(path, sizeof(path));
+    f = fopen(path, "rb");
+    if (f == NULL)
+        return;
+    if (fread(&magic, 4, 1, f) == 1 && magic == SPAWN_MAGIC && fread(&n, 4, 1, f) == 1 && n <= SPAWN_MAPS_MAX)
+        sMetCount = fread(sMet, sizeof(sMet[0]), n, f);
+    fclose(f);
+}
+
+static void SpawnsReset(void)
+{
+    sMetCount = 0;
+    sMetDirty = TRUE;
+}
+
+static void SpawnsWrite(void)
+{
+    char path[600];
+    FILE *f;
+    u32 magic = SPAWN_MAGIC;
+    if (!sMetDirty)
+        return;
+    SpawnPath(path, sizeof(path));
+    f = fopen(path, "wb");
+    if (f == NULL)
+        return;
+    fwrite(&magic, 4, 1, f);
+    fwrite(&sMetCount, 4, 1, f);
+    fwrite(sMet, sizeof(sMet[0]), sMetCount, f);
+    fclose(f);
+    sMetDirty = FALSE;
+}
+
+static u32 MetBits(u16 map)
+{
+    u32 i;
+    for (i = 0; i < sMetCount; i++)
+        if (sMet[i].map == map)
+            return sMet[i].bits;
+    return 0;
+}
+
+// wild_encounter.c: a wild POKeMON from this map's AREA (land, water, ROCK SMASH, the rods) in SLOT
+void MP_Phone_SpawnMet(u8 area, u8 slot)
+{
+    u16 map = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
+    u32 i, bit;
+    if (area > 3 || slot >= sAreaSlots[area])
+        return;
+    bit = 1u << (sAreaBit[area] + slot);
+    for (i = 0; i < sMetCount && sMet[i].map != map; i++)
+        ;
+    if (i == sMetCount)
+    {
+        if (sMetCount >= SPAWN_MAPS_MAX)
+            return;
+        sMet[sMetCount].map = map;
+        sMet[sMetCount].bits = 0;
+        sMetCount++;
+    }
+    if (!(sMet[i].bits & bit))
+    {
+        sMet[i].bits |= bit;
+        sMetDirty = TRUE;
+    }
+}
+
+static void BufMapName(struct Buf *b, u8 group, u8 num)
+{
+    u8 name[40];
+    const struct MapHeader *h = Overworld_GetMapHeaderByGroupAndId(group, num);
+    name[0] = EOS;
+    if (h != NULL)
+        GetMapNameGeneric(name, h->regionMapSectionId);
+    BufText(b, name, sizeof(name) - 1);
+}
+
+// Every map with wild POKeMON: which ways they're found and how many of its slots were met
+static void SendSpawnMaps(int c)
+{
+    u32 i, n = 0;
+    BufReset(&sOut);
+    BufAdd(&sOut, "{\"t\":\"spawnmaps\",\"maps\":[");
+    for (i = 0; gWildMonHeaders[i].mapGroup != MAP_GROUP(MAP_UNDEFINED); i++)
+    {
+        const struct WildPokemonHeader *h = &gWildMonHeaders[i];
+        u16 map = (h->mapGroup << 8) | h->mapNum;
+        BufAdd(&sOut, "%s{\"map\":[%u,%u],\"name\":", n++ ? "," : "", h->mapGroup, h->mapNum);
+        BufMapName(&sOut, h->mapGroup, h->mapNum);
+        BufAdd(&sOut, ",\"has\":[%u,%u,%u,%u],\"met\":%u}", h->landMonsInfo != NULL, h->waterMonsInfo != NULL,
+               h->rockSmashMonsInfo != NULL, h->fishingMonsInfo != NULL, (unsigned)MetBits(map));
+    }
+    BufAdd(&sOut, "]}");
+    SendBuf(c, &sOut);
+}
+
+// One map's slots as the game would make them now (the GENERATION's pools: MP_Region_WildInfo, MP_WildSlotSpecies)
+static void SendSpawns(int c, const char *json)
+{
+    long long g = -1, m = -1;
+    const char *p = JsonKey(json, "map");
+    u32 i, k, met;
+    const struct WildPokemonHeader *h = NULL;
+    if (p != NULL && *p == '[')
+        sscanf(p, "[%lld,%lld]", &g, &m);
+    for (i = 0; gWildMonHeaders[i].mapGroup != MAP_GROUP(MAP_UNDEFINED); i++)
+        if (gWildMonHeaders[i].mapGroup == g && gWildMonHeaders[i].mapNum == m)
+            h = &gWildMonHeaders[i];
+    BufReset(&sOut);
+    BufAdd(&sOut, "{\"t\":\"spawns\",\"map\":[%lld,%lld]", g, m);
+    if (h != NULL)
+    {
+        const struct WildPokemonInfo *infos[4] = {h->landMonsInfo, h->waterMonsInfo, h->rockSmashMonsInfo, h->fishingMonsInfo};
+        static const char *const sNames[4] = {"land", "water", "rock", "fish"};
+        met = MetBits((g << 8) | m);
+        BufAdd(&sOut, ",\"name\":");
+        BufMapName(&sOut, g, m);
+        for (k = 0; k < 4; k++)
+        {
+            const struct WildPokemonInfo *info = infos[k] ? MP_Region_WildInfo(infos[k]) : NULL;
+            if (info == NULL)
+                continue;
+            BufAdd(&sOut, ",\"%s\":{\"rate\":%u,\"slots\":[", sNames[k], info->encounterRate);
+            for (i = 0; i < sAreaSlots[k]; i++)
+                BufAdd(&sOut, "%s[%u,%u,%u,%u]", i ? "," : "", MP_WildSlotSpecies(info, i), info->wildPokemon[i].minLevel,
+                       info->wildPokemon[i].maxLevel, (met >> (sAreaBit[k] + i)) & 1);
+            BufAdd(&sOut, "]}");
+        }
+    }
+    BufAdd(&sOut, "}");
+    SendBuf(c, &sOut);
+}
+
 // --------------------------------------------------------------------------------------------------- sessions
 
 enum { SESS_NONE, SESS_NEW, SESS_LIVE };
@@ -866,6 +1040,10 @@ static void OnSealed(int c, const char *json)
         return;
     if (strcmp(t, "snap") == 0)
         SendSnapshot(c);
+    else if (strcmp(t, "spawnmaps") == 0)
+        SendSpawnMaps(c);
+    else if (strcmp(t, "spawns") == 0)
+        SendSpawns(c, json);
     else if (strcmp(t, "order") == 0)
         OnOrder(c, json);
     else if (strcmp(t, "ping") == 0)

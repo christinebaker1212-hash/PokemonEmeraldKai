@@ -194,6 +194,17 @@ def main():
         print('gate: the game carried out %d orders' % st['applied'])
         if st['applied'] != done:
             fail('the game counts %d orders done, the client %d' % (st['applied'], done))
+        # The spawn viewer's two messages: the maps, then one map's slots
+        link.send({'t': 'spawnmaps'})
+        maps = link.recv(['spawnmaps'])['maps']
+        land = [m for m in maps if m['has'][0]]
+        if len(maps) < 100 or not land:
+            fail('only %d maps with wild POKeMON' % len(maps))
+        link.send({'t': 'spawns', 'map': land[0]['map']})
+        sp = link.recv(['spawns'])
+        if len(sp.get('land', {}).get('slots', [])) != 12 or not all(x[0] for x in sp['land']['slots']):
+            fail('spawns: %s' % sp)
+        print('gate: %d maps with wild POKeMON; %s: %s' % (len(maps), land[0]['map'], [x[0] for x in sp['land']['slots']]))
         print('GATE PASSED: %d edits, no POKeMON lost or copied' % EDITS)
     finally:
         game.kill()

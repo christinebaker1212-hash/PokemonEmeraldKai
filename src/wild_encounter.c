@@ -482,6 +482,10 @@ static bool8 TryGenerateWildMon(const struct WildPokemonInfo *wildMonInfo, u8 ar
     if (gMapHeader.mapLayoutId != LAYOUT_BATTLE_FRONTIER_BATTLE_PIKE_ROOM_WILD_MONS && flags & WILD_CHECK_KEEN_EYE && !IsAbilityAllowingEncounter(level))
         return FALSE;
 
+    {
+        void MP_Phone_SpawnMet(u8 area, u8 slot);
+        MP_Phone_SpawnMet(area, wildMonIndex);   // Moemon Co-op: the phone's spawn viewer: met here (mp_phone.c)
+    }
     // Moemon Co-op: today's outbreak species shows up often on its route
     if (area == WILD_AREA_LAND)   // (Moemon Kai: the GREAT MARSH's daily Pokemon in its SAFARI GAME, s3d_legends.c)
         CreateWildMon(MP_Events_MaybeOutbreak(Sinnoh_LandSlot(MP_WildSlotSpecies(wildMonInfo, wildMonIndex), wildMonIndex)), level);
@@ -497,6 +501,10 @@ static u16 GenerateFishingWildMon(const struct WildPokemonInfo *wildMonInfo, u8 
 
     wildMonInfo = MP_Region_WildInfo(wildMonInfo);   // Moemon Kai: JOHTO / KANTO before Gen 4 (mp_region.c)
     level = ChooseWildMonLevel(&wildMonInfo->wildPokemon[wildMonIndex]);
+    {
+        void MP_Phone_SpawnMet(u8 area, u8 slot);
+        MP_Phone_SpawnMet(WILD_AREA_FISHING, wildMonIndex);   // Moemon Co-op: the phone's spawn viewer (mp_phone.c)
+    }
 
     CreateWildMon(MP_WildSlotSpecies(wildMonInfo, wildMonIndex), level);   // Moemon Kai: no starters in the wild
     return MP_WildSlotSpecies(wildMonInfo, wildMonIndex);
