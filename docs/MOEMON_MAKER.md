@@ -75,9 +75,7 @@ game's code just draws into it:
    +-- Game window (F5): the real game at that spot, 240x160 scaled up, F12 back to editing
 ```
 
-**Later, from the phone:** the Companion App could get a small Maker page over its existing link for quick fixes on
-the go (move an NPC, change a wild slot), saved as the same `MoemonMaker/base/` overrides. The user liked the idea
-(2026-11-03). It comes after the PC Maker exists.
+The Maker is PC only: no Maker page in the Companion App (the user, 2026-11-03).
 
 Moemon Music Studio is the opposite example: a separate program with a port of the game's sound engine. It has to be
 "checked against" the game whenever the engine changes. The Maker shouldn't have that problem.
