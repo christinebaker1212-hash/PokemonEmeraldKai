@@ -457,9 +457,27 @@ Asked as choices, round by round. Later sections follow these, and these win whe
 28. Progress: **screenshots of the editor for each feature as it lands**, and each milestone is **released without
     asking**.
 
+## M1, as built (2026-11-03)
+
+M1 is done. The details for each piece are in COOP_NOTES "Moemon Maker, M1". Where the build differs from the plan
+above, or leaves something for later:
+
+- **The edit files are text, one edit a line** (MoemonMaker/base/MAP_X.txt), not JSON. Each line keeps the value it
+  replaced, git diffs show one line per edit, and merges are easy.
+- **The published pack is `MoemonMakerPack/`** beside the game. `MoemonMaker/` beside the game is the editor's working
+  copy (only on the user's PC). The game reads the working copy where there is one, else the pack. An update never
+  touches the working copy.
+- **Wild tables**: slots (species, levels) are editable. Encounter rates, and tables for maps that have none, come later.
+- **Adding**: people, item balls, hidden items, signs (reading one of the map's own signs' scripts), warps (after the
+  map's own) and connections. A new person's script is one of the map's own, or "nothing" until M2's events.
+- **The checker's "a map you can't leave"** compares the walkable tiles before and after the edits (side to side,
+  elevations set aside), so it only flags a spot an edit closed in, never one the game already had.
+- **SINNOH** is edited top-down by what each tile does, with the 3D PREVIEW; a full 3D mode comes in M5.
+- **No "Open Music Studio" button**, as decided. Tracks are imported by path or by dropping the file on the editor.
+
 ## Build order
 
-1. **M1, quick edits on the base game**: drawing any map into any buffer (the refactor above), the editor shell
+1. **M1, quick edits on the base game** (done 2026-11-03): drawing any map into any buffer (the refactor above), the editor shell
    (ImGui, classic look + dark theme, map tree, map view, inspector), the way in (AllowSmallTweaks + "maker"), the
    dev channel's end, tiles, collision / elevation, NPCs / signs / item balls / hidden items, warps and connections,
    wild tables (list + slots), music (map music, new tracks, replacements), SINNOH top-down with a 3D preview,

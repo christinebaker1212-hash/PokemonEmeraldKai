@@ -62,14 +62,21 @@ opponent's cards to face them; TRIPLE TRIAD stays as it is (never turn its cards
 (2026-11-03) for all four phases in order, then a UI/UX pass: "polished Nintendo quality, mid 2000s to 2007 era
 graphics, 2026 usability".
 
-**Moemon Maker** (concept, not built yet): the user's own MZ-like editor for maps, events and data, `docs/MOEMON_MAKER.md`.
+**Moemon Maker** (the user's own MZ-like editor, built into the game; design and every decision in `docs/MOEMON_MAKER.md`;
+M1 built 2026-11-03: COOP_NOTES "Moemon Maker, M1"): C++ in maker/ (Dear ImGui) reaching the game only through
+include/maker_api.h (src/maker/*.c); hidden until `AllowSmallTweaks = 1` and "maker" typed (never in PATCH NOTES or the
+README). The user's edits are MoemonMaker/base/MAP_X.txt (each line keeps the value it replaced; format at the top of
+src/maker/maker_overrides.c), applied at run time through Overworld_GetMapHeaderByGroupAndId / Maker_MapBlocks; music in
+MoemonMaker/music/; published from the editor straight to the default branch (a `Moemon-Maker:` trailer), then the
+maker-pack workflow ships MoemonMakerPack/. Tests tools/test/maker_*.sh.
 **The user's own changes come first** (the user, 2026-11-03): anything in `MoemonMaker/` and any commit without a
 `Claude-Session:` trailer (the Maker's Publish commits carry `Moemon-Maker:`) is the user's work. Before a change,
 regeneration or conversion script would alter or overwrite it, check `git log` / `git blame` and ask the user; never
 "fix" a user edit on assumption. `MoemonMaker/` takes precedence over the conversion scripts (tools/quetzal_port,
-tools/sinnoh...): they leave what `MoemonMaker/base/` overrides alone.
-The dev update channel ends with the Maker's first update (the user, 2026-11-03): AllowSmallTweaks stops selecting
-it, and no dev updates are pushed (docs/MOEMON_MAKER.md "The dev channel ends").
+tools/sinnoh...): its edits sit on top of their output at run time and are never written into their files, so a
+regenerated map keeps them (where the same thing changed, the editor asks the user which wins).
+The dev update channel ended with the Maker's first update (the user, 2026-11-03): every build follows main,
+AllowSmallTweaks only unlocks the small tweaks, and no dev updates are pushed.
 
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
 card duels).
@@ -103,8 +110,8 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
   a failed release run is re-queued from Actions (workflow_dispatch) once the fix is pushed there.
 - Publishing needs no permission (the user, 2026-11-02): once the tests pass, release; ask first only when the user
   says to pause and check.
-- Dev updates (planned, HANDOFF.md): unless the user asks for a feature with "As a dev update..." or something like it,
-  it is a main update: don't test it as a dev update and don't push a dev update.
+- Dev updates: the dev channel ended (the user, 2026-11-03, with Moemon Maker's first update): every update is a main
+  update; don't push dev updates.
 - `tools/moemon_import/`: scripts that imported the Kai IPS into the decomp (need the user's ROM; not in the repo)
 - `tools/moemon_music/`: Moemon Music Studio, a separate SDL2 program: plays MIDIs (and PSF/PSF2/USF/GBS/2SF/GSF rips and GameCube streams,
   through vendored emulators in its third_party/ with capture hooks: README there) with the game's own instruments

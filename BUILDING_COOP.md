@@ -81,9 +81,13 @@ and publishes the release. Locally the same steps are `tools/release/build_windo
 Bump `MP_PROTOCOL_VERSION` in `src/mp/mp_net.h` whenever the network
 protocol or anything that affects link battles changes.
 
-## Dev update channel
+## Dev update channel (ended)
 
-The dev channel is opt-in. In `moemon_coop.ini`, set `AllowSmallTweaks = 1`
+The dev channel ended with Moemon Maker's first update (the user, 2026-11-03): every build follows main and
+`AllowSmallTweaks = 1` only unlocks the small tweaks (src/platform/updater.c). A dev build running that code moves
+itself back to main at its next start. What follows describes how it worked, for the record.
+
+The dev channel was opt-in. In `moemon_coop.ini`, set `AllowSmallTweaks = 1`
 and restart a packaged game. It fetches the discovery manifest from the
 `dev-latest` GitHub prerelease, then downloads the platform zip from the
 immutable `dev-<main-version>.<revision>` prerelease named in that manifest.
