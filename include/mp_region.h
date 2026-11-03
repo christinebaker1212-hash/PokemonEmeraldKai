@@ -31,6 +31,7 @@
 #define FLAG_SINNOH_HIDE_REGION_BOAT 0x3D3D   // CANALAVE's ferry sailor hidden (set on each SINNOH map load: s3d_scrcmd.c; shown when the boat can sail)
 #define FLAG_SINNOH_HAS_PARTNER 0x3D3C   // Platinum's walking partner (SetHasPartner)
 #define FLAG_SINNOH_PLATINUM_STORY 0x3D3B   // this save plays Platinum's own story (its converted map scripts, triggers and story people: tools/sinnoh/gen_scripts.py)
+#define VAR_REGION_ARRIVAL  0x52FD   // the region (JOHTO 1, KANTO 2) of a first boat just in: its port's sailor takes the player to the first town (MP_Region_FirstBoatIn)
 #define VAR_SINNOH_ARRIVAL  0x52F0   // 1: just off the first boat to SINNOH (the harbor sailor takes them to TWINLEAF), 2: in SINNOH, 3: BARRY's mom's visit played (TWINLEAF's house 1F)
 u8 MP_Region_TotalBadges(void);   // every region's badges (BADGES on the continue screen and in SAVE)
 #define FLAG_KANTO_TUTOR_MEGA_PUNCH 0x21DF   // FireRed's ROUTE 4 tutors (free in Quetzal's KANTO flags)
@@ -85,6 +86,7 @@ u16 *MP_Region_VarPointer(u16 id);
 void MP_Region_NewGame(void);
 void MP_Region_SetStartRegion(u8 region);   // a new game's region (PROF. BIRCH's question)
 void MP_Region_StartNewGame(void);
+void MP_Region_FirstBoatIn(u8 region);    // the first boat to a region: in at its port, where a guide meets the player
 void MP_Region_GoToStartHouse(u8 region);  // the warp to JOHTO's / KANTO's first house (NEW BARK, PALLET)          // end of NewGameInitData: JOHTO / KANTO start at home there
 void MP_Region_WriteSidecar(void);   // "<save>.region", after the save file is written
 void MP_Boxes_WriteSidecar(void);   // Moemon Kai: "<save>.boxes", PC boxes 15-40 (mp_boxes.c)

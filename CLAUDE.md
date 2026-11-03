@@ -15,7 +15,8 @@ docs/SINNOH_HANDOFF.md "Platinum's own words and scripts". The 3D
 engine (src/sinnoh/s3d.c, include/s3d.h) draws Platinum's own map models from sinnoh/platinum3d.pak, built from
 pret/pokeplatinum at a pinned commit by tools/sinnoh/make_pack.sh (run it before playing SINNOH from a build; the release
 runs it and ships the pack; never committed: sinnoh/ is ignored; no ROM needed); TWINLEAF TOWN and ROUTE 201 (group 40)
-walk; tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM]; COOP_NOTES "SINNOH's 3D engine"; its people's sprites and battle pictures
+walk; tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM]; COOP_NOTES "SINNOH's 3D engine" (doors, moving lakes, buildings drawn by
+Platinum's material / shape lists: COOP_NOTES "SINNOH's doors, moving lakes and the feet row"); its people's sprites and battle pictures
 in sinnoh/platinum_gfx.pak (tools/sinnoh/build_gfx.py, src/sinnoh/s3d_gfx.c; test sinnoh_pics).
 **SINNOH's words and scripts are Platinum's own** (the user, 2026-11-02): never write original dialogue or scripts
 for SINNOH. They're converted from the decomp when the game is built, never committed: sinnoh/platinum_text.pak
@@ -352,6 +353,8 @@ Also JOHTO and KANTO (1.60.0, Moemon Quetzal's regions capped to Gen 4: docs/REG
 KANTO"; src/mp/mp_region.c and "<save>.region", src/qz_specials.c, tools/quetzal_port/; tests region_*).
 JOHTO's phone, Crystal's 28 trainer contacts (numbers, calls, rematches, gifts: tools/quetzal_port/gen_phone.py ->
 src/data/qz_phone.h, src/mp/mp_qzphone.c, data/scripts/qz_phone.inc; COOP_NOTES "JOHTO's phone, Crystal's").
+The voyage between regions and the SEAGALLOP ferries: FireRed's ferry scene, src/mp/mp_voyage.c; the first boat to
+JOHTO / KANTO lands at the port, where a sailor takes the player home (COOP_NOTES "Voyages between regions").
 JOHTO's POKéGEAR (src/mp/mp_pokegear.c) and its radio: Crystal's stations with Crystal's own songs, built from
 pret/pokecrystal with rgbds into a GBS by tools/kaisong/crystal_radio.py (no ROM; COOP_NOTES "JOHTO's POKéGEAR").
 Also NEW on cards in the three BINDERs and the centered BOOSTER PACKS row (1.63.6: src/tcg/tcg_new.c "<save>.cardnew";

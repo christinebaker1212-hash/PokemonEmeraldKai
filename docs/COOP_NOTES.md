@@ -4714,3 +4714,45 @@ or the README. The updater no longer has a dev channel: AllowSmallTweaks only un
   but no swarm appears yet.
 - State: region vars 0x5240-0x5258 (numbers, Crystal's phone flags, fight counts, the step count). Debug `mp qzphone
   register|ready|fights|steps|moenav|call N [V]`. Tests johto_phone, johto_pokegear_contacts, johto_phone_battles.
+
+## Voyages between regions, the first arrival's guide, KANTO's TVs (1.83.0)
+- src/mp/mp_voyage.c MP_Voyage_Begin(eastbound, faded): FireRed's ferry scene (pokefirered src/seagallop.c, its art in
+  graphics/moemon/voyage): the sea on BG3 scrolling 0x600 a frame, the ferry crossing with its wake every 5 frames,
+  FireRed's letterbox (WIN0, rows 24-136; the backdrop black), 140 frames, then the fade and WarpIntoMap to the warp set
+  before it (in DoWarp's place). The port's music plays on through it, as FireRed's. Logs `voyage: east|west|arrived`.
+- qz_specials.c TravelNow: every boat trip between regions (and a friend following the host's trip) sails it, east when
+  the destination comes later in HOENN, JOHTO, KANTO, SINNOH; the MAGNET TRAIN keeps its own ride.
+  QzDoSeagallopFerryScene: the SEVII ferries, east / west by FireRed's sTravelDirectionMatrix (the script has faded the
+  screen: faded TRUE).
+- The first boat to JOHTO / KANTO (mp_region.c MP_Region_FirstBoatIn) comes in at OLIVINE's port (8,16) / VERMILION's
+  dock (24,32) with VAR_REGION_ARRIVAL 0x52FD = the region; the ports' frame scripts (Moemon Kai lines in
+  Johto_OlivinePort / Kanto_VermilionCity scripts.inc) run data/scripts/mp_region.inc EventScript_RegionArrival*: the
+  port's sailor (local id 1 / 4) says the professor asked him to meet the player and warps them to NEW BARK's / PALLET's
+  room. A new game started there and the MAGNET TRAIN still go straight to the house (MP_Region_GoToStartHouse).
+  SINNOH's CANALAVE sailor was already that. tools/quetzal_port/story_vars.py reads include/mp_region.h's var names.
+- tv.c SetTVMetatilesOnMap does nothing on a FireRed-tileset map (isFrlg): METATILE_Building_TV_On / Off are Emerald's
+  numbers, which drew another tile over KANTO's / JOHTO's TVs when a HOENN show was on the air.
+- Tests region_voyage (HOENN -> KANTO first trip, the guide, back west), kanto_seagallop (`mp seagallop FROM TO`),
+  kanto_tv (`mp tvscreens [off]`).
+
+## SINNOH's doors, moving lakes and the feet row (1.83.0)
+- Doors: Platinum's door props (ov5_021D431C.c's list: door01, the wooden, iron, POKéMON CENTER, gym, DEPT. STORE...
+  doors; the elevator's, a texture pattern, isn't played) carry 2 or 4 joint animations (open, close; four: walking
+  in, then walking out). tools/sinnoh/build_pack.py (pack version 7) bakes each one's frames as meshes (door_frames)
+  and turns a step warp with a door prop on it or beside it (door_at, Platinum's three-tile box) into MB_ANIMATED_DOOR,
+  so the game's own door warp runs (field_screen_effect.c Task_DoDoorWarp / Task_ExitDoor); field_door.c hands its
+  calls to src/sinnoh/s3d.c on SINNOH's maps: S3D_DoorAnimate (0 / 1 walking in, 2 / 3 walking out; a task the field
+  waits on), S3D_DoorClose, S3D_DoorSound (sliding / the DEPT. STORE's chime: SE_SLIDING_DOOR, hinged: SE_DOOR). The
+  door left open keeps its last frame until it shuts. Logs `[s3d] door N at X,Y: animation K`; `mp s3ddoor K` plays one
+  in front of the player.
+- Buildings drawn as Platinum draws them: build_model_matshp.dat (fetch_decomp.sh PARTS 22) lists the (material,
+  shape) pairs of 478 building models; map_prop.c draws them one by one with the prop's transform and the position
+  scale only, their nodes left out (nitro.py Model.draw_matshp). A house's own copy of its door hangs off a node at the
+  doorway, and Platinum's way leaves it inside the house, so the door prop is what's seen (14 towns' pictures are
+  otherwise the same pixel for pixel).
+- Moving textures on props: an NSBTA (texture SRT: nitro.py Bta0 / SrtAnim, translation in texture sizes, rotation
+  left out) on a looping prop is baked frame by frame like the joint animations (build_pack.py prop_frames): LAKE
+  VERITY's water (prop 311, 61 frames a loop) and the other lakes and pools.
+- The feet row: Platinum's sheets stand on row 29 of their frames, Emerald's on 30; build_gfx.py feet_shift now takes
+  the standing frames only (112 sheets step down to row 30, and judged by those weren't moved).
+- Tests sinnoh_doors, sinnoh_lake_water (tools/test/check_lake_water.py), sinnoh_feet_row (tools/test/check_feet_row.py).

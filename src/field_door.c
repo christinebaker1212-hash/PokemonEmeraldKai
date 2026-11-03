@@ -1,4 +1,5 @@
 #include "global.h"
+#include "s3d.h"
 #include "event_data.h"
 #include "field_door.h"
 #include "field_camera.h"
@@ -511,9 +512,20 @@ void MP_FrlgDoor_SetOpened(u32 x, u32 y);
 void MP_FrlgDoor_SetClosed(u32 x, u32 y);
 bool8 MP_FrlgDoor_Running(void);
 u32 MP_FrlgDoor_Sound(u32 x, u32 y);
+// ... and SINNOH's are Platinum's door props (src/sinnoh/s3d.c S3D_DoorAnimate: built by tools/sinnoh/build_pack.py)
+static bool8 SinnohHere(void)
+{
+    return S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup);
+}
 
 void FieldSetDoorOpened(u32 x, u32 y)
 {
+    if (SinnohHere())   // (walking out: Platinum's door opens as the screen fades in)
+    {
+        if (MetatileBehavior_IsDoor(MapGridGetMetatileBehaviorAt(x, y)))
+            S3D_DoorAnimate(x, y, 2);
+        return;
+    }
     if (MP_FrlgDoor_Here())
     {
         if (MetatileBehavior_IsDoor(MapGridGetMetatileBehaviorAt(x, y)))
@@ -526,6 +538,8 @@ void FieldSetDoorOpened(u32 x, u32 y)
 
 void FieldSetDoorClosed(u32 x, u32 y)
 {
+    if (SinnohHere())
+        return;
     if (MP_FrlgDoor_Here())
     {
         if (MetatileBehavior_IsDoor(MapGridGetMetatileBehaviorAt(x, y)))
@@ -540,6 +554,8 @@ s8 FieldAnimateDoorClose(u32 x, u32 y)
 {
     if (!MetatileBehavior_IsDoor(MapGridGetMetatileBehaviorAt(x, y)))
         return -1;
+    if (SinnohHere())
+        return S3D_DoorClose(x, y);
     if (MP_FrlgDoor_Here())
         return MP_FrlgDoor_Close(x, y);
     else
@@ -550,6 +566,8 @@ s8 FieldAnimateDoorOpen(u32 x, u32 y)
 {
     if (!MetatileBehavior_IsDoor(MapGridGetMetatileBehaviorAt(x, y)))
         return -1;
+    if (SinnohHere())
+        return S3D_DoorAnimate(x, y, 0);
     if (MP_FrlgDoor_Here())
         return MP_FrlgDoor_Open(x, y);
     else
@@ -558,7 +576,7 @@ s8 FieldAnimateDoorOpen(u32 x, u32 y)
 
 bool8 FieldIsDoorAnimationRunning(void)
 {
-    if (MP_FrlgDoor_Running())
+    if (MP_FrlgDoor_Running() || S3D_DoorRunning())
         return TRUE;
     return FuncIsActiveTask(Task_AnimateDoor);
 }
@@ -566,6 +584,8 @@ bool8 FieldIsDoorAnimationRunning(void)
 u32 GetDoorSoundEffect(u32 x, u32 y)
 {
     int sound;
+    if (SinnohHere())
+        return S3D_DoorSound(x, y) >= 1 ? SE_SLIDING_DOOR : SE_DOOR;
     if (MP_FrlgDoor_Here())
         return MP_FrlgDoor_Sound(x, y);
     sound = GetDoorSoundType(sDoorAnimGraphicsTable, x, y);

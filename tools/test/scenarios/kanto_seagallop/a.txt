@@ -1,0 +1,28 @@
+pressuntil A field 5000
+wait 30
+mp warp 37,62,23,30
+waitfor field 600
+wait 30
+watchlog voyage: east
+mp seagallop 0 1
+waitlog 600 voyage: east
+wait 70
+shot to_one_island
+watchlog voyage: arrived
+waitlog 600 voyage: arrived
+waitfor field 600
+wait 60
+mp where
+shot one_island
+watchlog voyage: west
+mp seagallop 1 0
+waitlog 600 voyage: west
+wait 70
+shot to_vermilion
+watchlog voyage: arrived
+waitlog 600 voyage: arrived
+waitfor field 600
+wait 60
+mp where
+shot vermilion
+quit

@@ -495,3 +495,48 @@ Johto_Text_FruitBagFull:
 
 Johto_Text_NothingHere::
 	.string "There’s nothing here…$"
+
+@ The first boat to KANTO / JOHTO (MP_Region_FirstBoatIn, VAR_REGION_ARRIVAL 0x52FD = the region): off the boat at
+@ VERMILION / OLIVINE, the port's sailor meets the player and takes them to the region's first town, where a room
+@ waits (PALLET TOWN, NEW BARK TOWN). The ports' frame scripts run these.
+EventScript_RegionArrivalKanto::
+	lockall
+	turnobject OBJ_EVENT_ID_PLAYER, DIR_SOUTH
+	turnobject 4, DIR_NORTH
+	msgbox gText_RegionArrivalKanto, MSGBOX_DEFAULT
+	closemessage
+	setvar 0x52FD, 0
+	warp MAP_KANTO_PALLET_TOWN_PLAYERS_HOUSE_2F, 6, 6
+	waitstate
+	releaseall
+	end
+
+EventScript_RegionArrivalJohto::
+	lockall
+	turnobject OBJ_EVENT_ID_PLAYER, DIR_SOUTH
+	turnobject 1, DIR_NORTH
+	msgbox gText_RegionArrivalJohto, MSGBOX_DEFAULT
+	closemessage
+	setvar 0x52FD, 0
+	warp MAP_JOHTO_PLAYERS_HOUSE2F, 4, 4
+	waitstate
+	releaseall
+	end
+
+gText_RegionArrivalKanto::
+	.string "Ahoy! You're the TRAINER from\n"
+	.string "overseas, aren't you?\p"
+	.string "Welcome to KANTO! PROF. OAK asked\n"
+	.string "me to watch for your boat.\p"
+	.string "A room's ready for you in PALLET\n"
+	.string "TOWN, where his POKéMON LAB is.\p"
+	.string "Follow me, I'll take you there!$"
+
+gText_RegionArrivalJohto::
+	.string "Ahoy! You're the TRAINER from\n"
+	.string "overseas, aren't you?\p"
+	.string "Welcome to JOHTO! PROF. ELM asked\n"
+	.string "me to watch for your boat.\p"
+	.string "A room's ready for you in NEW BARK\n"
+	.string "TOWN, where his POKéMON LAB is.\p"
+	.string "Follow me, I'll take you there!$"

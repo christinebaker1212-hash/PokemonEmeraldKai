@@ -62,9 +62,15 @@ def main():
     for v, val in re.findall(r'^\s*copyvar (VAR_\w+), (VAR_\w+)', alltext, re.M):
         sets.setdefault(v, set()).add('copy')
     code = rd('src/qz_specials.c') + rd('src/mp/mp_region.c') + rd('src/data/qz_region_init.h')
+    # (Kai's own vars by name, include/mp_region.h, as the maps' scripts write them: 0x52FD; values REGION_*)
+    alias = {n: '0x%X' % int(h, 16) for n, h in re.findall(r'#define (VAR_\w+)\s+(0x[0-9A-Fa-f]+)', rd('include/mp_region.h'))}
+    regions = {'REGION_HOENN': 0, 'REGION_JOHTO': 1, 'REGION_KANTO': 2, 'REGION_SINNOH': 3}
     for v, val in re.findall(r'VarSet\((VAR_\w+),\s*(\w+)\)', code):
-        if num(val) is not None:
-            sets.setdefault(v, set()).add(num(val))
+        val = regions[val] if val in regions else num(val)
+        if val is not None:
+            sets.setdefault(v, set()).add(val)
+            if v in alias:
+                sets.setdefault(alias[v], set()).add(val)
     for v, val in re.findall(r'\{(VAR_\w+|0x[0-9A-Fa-f]+),\s*(\d+)\}', rd('src/data/qz_region_init.h')):
         vv = v if v.startswith('VAR_') else 'VAR_QZ_0x%X' % int(v, 16)
         sets.setdefault(vv, set()).add(int(val))

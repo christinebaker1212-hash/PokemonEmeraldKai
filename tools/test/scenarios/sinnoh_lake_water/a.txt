@@ -1,0 +1,11 @@
+pressuntil A field 5000
+wait 30
+mp warp 42,43,32,30
+waitfor field 600
+wait 60
+mp s3dtex
+mp where
+shot lake_a
+wait 15
+shot lake_b
+quit

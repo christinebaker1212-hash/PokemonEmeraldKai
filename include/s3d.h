@@ -19,6 +19,10 @@ extern s16 gS3dSpriteFeet[];
 void S3D_NoteOam(u16 spriteId, u16 first, u16 end);
 void S3D_CommitOam(void);
 bool8 S3D_IsSinnohGroup(u8 mapGroup);
+s8 S3D_DoorAnimate(s32 x, s32 y, u8 kind);   // Platinum's door prop at a warp tile: 0 / 1 open / close walking in, 2 / 3 walking out; a task or -1
+s8 S3D_DoorClose(s32 x, s32 y);              // its closing (after walking in or out)
+s8 S3D_DoorSound(s32 x, s32 y);              // 0 hinged, 1 sliding, 2 the DEPT. STORE's chime; -1 no door prop there
+bool8 S3D_DoorRunning(void);
 // SINNOH's layout blocks: metatile ids from here carry a behavior (id - S3D_METATILE_BEHAVIOR; fieldmap.c
 // GetMetatileAttributesById), tools/sinnoh/build_pack.py
 #define S3D_METATILE_BEHAVIOR 0x300

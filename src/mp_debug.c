@@ -609,6 +609,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
             printf("[test] shadows %s: %u (keep %u)\n", gMpConfig.noShadows ? "off" : "on", (unsigned)n, MP_ShadowKeep());
         }
     }
+    else if (strcmp(cmd, "s3ddoor") == 0)   // s3ddoor KIND - SINNOH's door prop in front of the player: its animation KIND
+    {
+        s16 x, y;
+        PlayerGetDestCoords(&x, &y);
+        printf("[test] s3ddoor %d\n", S3D_DoorAnimate(x, y - 1, atoi(arg)));
+    }
     else if (strcmp(cmd, "s3dtex") == 0)   // s3dtex - SINNOH's animated map textures: how many, the first's frame now
     {
         void S3D_TexAnimInfo(u32 *count, u32 *firstShown);
@@ -3231,6 +3237,16 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void Sinnoh_TvDebug(void);
         Sinnoh_TvDebug();
     }
+    else if (strcmp(cmd, "seagallop") == 0)
+    {
+        // seagallop FROM TO: the SEAGALLOP's trip as its script sails it (fadescreen, QzDoSeagallopFerryScene)
+        u16 QzDoSeagallopFerryScene(void);
+        unsigned from = 0, to = 1;
+        sscanf(arg, "%u %u", &from, &to);
+        gSpecialVar_0x8004 = from, gSpecialVar_0x8006 = to;
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, 0);   // (to black)
+        QzDoSeagallopFerryScene();
+    }
     else if (strcmp(cmd, "tvscreens") == 0)
     {
         // tvscreens [off]: the map's TVs lit as when a show is on the air, or turned off (tv.c MP_Tv_DebugScreens)
@@ -3777,10 +3793,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
         for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
         {
             struct ObjectEvent *o = &gObjectEvents[i];
-            if (!o->active || o->isPlayer)
+            extern s16 gS3dSpriteFeet[MAX_SPRITES];
+            if (!o->active)
                 continue;
-            printf("[test] npc local %d gfx %d xy %d,%d invisible %d offscreen %d\n", o->localId, OBJ_GFX_ID(o),
-                   o->currentCoords.x - MAP_OFFSET, o->currentCoords.y - MAP_OFFSET, o->invisible, o->offScreen);
+            // (and where its sprite is drawn: OAM x, y and, on a SINNOH map, its feet's screen row)
+            printf("[test] npc local %d gfx %d xy %d,%d invisible %d offscreen %d oam %d,%d feet %d%s\n", o->localId,
+                   OBJ_GFX_ID(o), o->currentCoords.x - MAP_OFFSET, o->currentCoords.y - MAP_OFFSET, o->invisible,
+                   o->offScreen, gSprites[o->spriteId].oam.x, gSprites[o->spriteId].oam.y, gS3dSpriteFeet[o->spriteId],
+                   o->isPlayer ? " player" : "");
         }
     }
     else if (strcmp(cmd, "objs") == 0)

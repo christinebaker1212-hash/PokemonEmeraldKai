@@ -36,6 +36,10 @@ Format (little endian), version 3:
           a texture's frames drawn with its own palette, swapped in turn)
   (version 6) u32 moving props: each u16 the prop's mesh, u16 frames, u16 Platinum frames each, then the frames' meshes
           (Platinum's looping joint animations, bm_anime: windmills, the steamship's screw...)
+  (version 7) u32 doors: each u16 the door prop's mesh, u8 its sound (0 hinged, 1 sliding, 2 the DEPT. STORE's chime),
+          u8 animations (2: open, close; 4: open, close walking in, then open, close walking out), each u16 frames,
+          u16 Platinum frames each, then the frames' meshes (Platinum's door props, ov5_021D431C.c: played as the
+          player walks through; their warp tiles are animated doors, MB_ANIMATED_DOOR)
 """
 import hashlib
 import math
@@ -52,7 +56,7 @@ from platinum import Land  # noqa: E402
 from source import open_source, NONE  # noqa: E402
 from places import places, events  # noqa: E402
 
-VERSION = 6
+VERSION = 7
 
 # A block's metatile id carries the tile's behavior: S3D_METATILE_BEHAVIOR (0x300, include/s3d.h) + the game's behavior
 # (fieldmap.c GetMetatileAttributesById), so any of the game's behaviors can be used without a tileset that has it.
@@ -122,6 +126,15 @@ def heights(land, ox=0, oz=0):
 # they were going (field_screen_effect.c SinnohArrivalDir)
 ARROW_MATS = (0x62, 0x63, 0x65)   # MB_EAST / WEST / SOUTH_ARROW_WARP (Platinum's WARP_ENTRANCE_EAST / WEST / SOUTH)
 STEP_WARP = 0x60       # MB_NON_ANIMATED_DOOR
+ANIMATED_DOOR = 0x69   # MB_ANIMATED_DOOR: a warp with one of Platinum's door props on it (walked into northward)
+# Platinum's door props (ov5_021D431C.c ov5_021D433C's list) and their sounds (DoorAnimation_GetSoundEffectType: 1
+# sliding, 2 the VEILSTONE DEPT. STORE's chime, 0 hinged)
+DOOR_MODELS = {'door01': 0, 'brown_wooden_door': 0, 'green_wooden_door': 0, 'iron_door': 0,
+               'jubilife_city_building_door': 0, 'pokecenter_door': 1, 'pokecenter_inside_door': 1,
+               'gts_inside_door': 1, 'hearthome_gym_inside_door': 0, 'blue_door': 0, 'iron_door_2': 0,
+               'yellow_wooden_door': 0, 'blue_wooden_door': 0, 'mansion_door': 0, 'veilstone_dpt_store_door': 2,
+               'gym_door': 1, 'card_door': 1, 'pokecenter_inside_counter_door': 0, 'hotel_grand_lake_door': 0,
+               'elevator_door': 1}
 # Platinum's stairs (0x5E WARP_STAIRS_EAST / 0x5F WARP_STAIRS_WEST: the tile beside the stairs, walked off east or west
 # into them, as an arrow warp) and escalators (0x6A / 0x6B) by where they lead: up or down a floor (the maps' floor
 # names). Stairs: Emerald's unused 0x5C / 0x5D (up, east / west) and 0x5E / 0x5F (down, east / west), arrow warps
@@ -178,6 +191,7 @@ class Pack:
         self.anims = []                    # (texture, [(frame texture, duration)...])
         self.anim_skipped = set()          # (a map texture of that name another size than the frames: not Platinum's)
         self.mesh_anims = {}               # a looping prop's mesh: [its frames' meshes] (Platinum's bm_anime, NSBCA)
+        self.doors = {}                    # a door prop's mesh: (sound, [([its frames' meshes], step) per animation])
 
     def texture(self, tex0, mat):
         if tex0 is None or not mat.texture or mat.texture not in tex0.textures:
@@ -222,15 +236,24 @@ class Pack:
         if out:
             self.anims.append((base, out))
 
-    def mesh(self, key, bmd, tex0, anim=None, frame=0):
+    def mesh(self, key, bmd, tex0, anim=None, frame=0, srt=None, matshp=None):
+        """srt: a texture SRT animation (nitro.SrtAnim) whose FRAME moves the materials' texture coordinates;
+        matshp: the (material, shape) pairs Platinum draws the model by (a building: nitro.Model.draw_matshp)"""
         if key in self.mesh_ids:
             return self.mesh_ids[key]
         groups = []
         pts = []
         for model in bmd.models:
             mats = anim.node_matrices(model, frame) if anim is not None else None
-            for mi, tris in sorted(model.draw(mats).items()):
+            drawn = model.draw_matshp(matshp) if matshp and anim is None else model.draw(mats)
+            for mi, tris in sorted(drawn.items()):
                 mat = model.materials[mi]
+                moved = srt.value(mat.name, frame) if srt is not None else None
+                if moved is not None:   # (Platinum's Maya mode: scaled, then shifted by texture sizes)
+                    ss, st, ts, tt = moved
+                    w, h = mat.width or 1, mat.height or 1
+                    tris = [tuple((pos, (uv[0] * ss - ts * w, uv[1] * st - tt * h), col, nrm)
+                                  for pos, uv, col, nrm in tri) for tri in tris]
                 cull = {'none': 0, 'back': 1, 'front': 2, 'all': 3}[mat.cull]
                 rs, rt, fs, ft = mat.repeat
                 groups.append((self.texture(tex0, mat), rs, rt, fs, ft, mat.alpha, (mat.poly_attr >> 24) & 63, cull,
@@ -257,6 +280,19 @@ def prop_frames(src, pack, model, prop_set, bmd, ptex):
     if not got or not got[0]:
         return ([], 0)
     for data in got[1]:
+        if data[:4] == b'BTA0':   # (its textures scroll: LAKE VERITY's water, ...)
+            srts = nitro.Bta0(data).anims
+            if not srts or srts[0].frames < 2:
+                continue
+            a = srts[0]
+            step = max(PROP_FRAME_STEP, (a.frames + PROP_MAX_FRAMES - 1) // PROP_MAX_FRAMES)
+            try:
+                return ([pack.mesh(('prop', model, prop_set, 'srt', f), bmd, ptex, None, f, srt=a,
+                                   matshp=src.matshp(model) if hasattr(src, 'matshp') else None)
+                         for f in range(0, a.frames, step)], step)
+            except Exception as e:
+                print('prop %d: its texture animation left out (%s)' % (model, e))
+                return ([], 0)
         if data[:4] != b'BCA0':
             continue
         anims = nitro.Bca0(data).anims
@@ -271,6 +307,48 @@ def prop_frames(src, pack, model, prop_set, bmd, ptex):
             print('prop %d: its animation left out (%s)' % (model, e))
             return ([], 0)
     return ([], 0)
+
+
+def door_frames(src, pack, model, prop_set, bmd, ptex):
+    """A door prop's animations (bm_anime_list, NSBCA: open and close, then for four the same walking out): [(its
+    meshes frame by frame, Platinum's frames each)...]; [] for one this reader can't play (the elevator's, NSBTP)"""
+    got = src.prop_anims(model) if hasattr(src, 'prop_anims') else None
+    if not got or got[0] or len(got[1]) not in (2, 4):
+        return []
+    out = []
+    for k, data in enumerate(got[1]):
+        if data[:4] != b'BCA0':
+            return []
+        anims = nitro.Bca0(data).anims
+        if not anims or anims[0].frames < 1:
+            return []
+        a = anims[0]
+        step = max(1, (a.frames + PROP_MAX_FRAMES - 1) // PROP_MAX_FRAMES)
+        frames = list(range(0, a.frames, step))
+        if frames[-1] != a.frames - 1:
+            frames.append(a.frames - 1)   # (the last pose: the door left open, or shut)
+        try:
+            out.append(([pack.mesh(('prop', model, prop_set, 'door', k, f), bmd, ptex, a, f) for f in frames], step))
+        except Exception as e:
+            print('door prop %d: its animation left out (%s)' % (model, e))
+            return []
+    return out
+
+
+def door_at(src, land, tx, tz, door_ids):
+    """The door prop of LAND standing on tile (TX, TZ) of its block, or one beside it (Platinum's door search: a
+    three-tile box, ov5_021D433C), or None"""
+    best = None
+    for pr in land.props:
+        if pr.model not in door_ids:
+            continue
+        px, pz = pr.pos[0] / 16 + 16, pr.pos[2] / 16 + 16
+        if int(math.floor(pz)) != tz or abs(int(math.floor(px)) - tx) > 1:
+            continue
+        d = abs(px - (tx + 0.5))
+        if best is None or d < best[0]:
+            best = (d, pr)
+    return best[1] if best else None
 
 
 def tex_bytes(t):
@@ -351,6 +429,12 @@ def write(path, pack, light_sets, matrices, named=()):
     for mesh, frames, st in moving:
         out += struct.pack('<HHH', mesh, len(frames), st)
         out += struct.pack('<%dH' % len(frames), *frames)
+    out += struct.pack('<I', len(pack.doors))
+    for mesh, (sound, anims) in sorted(pack.doors.items()):
+        out += struct.pack('<HBB', mesh, sound, len(anims))
+        for frames, st in anims:
+            out += struct.pack('<HH', len(frames), st)
+            out += struct.pack('<%dH' % len(frames), *frames)
     # stored compressed: "S3DZ", u32 the size of the pack, then the pack deflated (zlib): 88 MB -> about 6
     packed = b'S3DZ' + struct.pack('<I', len(out)) + zlib.compress(bytes(out), 6)
     open(path, 'wb').write(packed)
@@ -373,9 +457,13 @@ def main():
     light_sets = []
     tex_cache = {}
 
+    # Platinum's door props by model number: their sounds
+    order = getattr(src, '_props', None) or getattr(getattr(src, 'decomp', None), '_props', None) or []
+    door_ids = {order.index(n + '.nsbmd'): snd for n, snd in DOOR_MODELS.items() if n + '.nsbmd' in order}
     # every kept place's warp tiles: {(matrix, cell x, cell z): {tile index: behavior}}
     kept = places(src, decomp)
     warp_tiles = {}
+    door_warps = 0
     for p in kept:
         for w in events(decomp, p)['warp_events']:
             x, z = w['x'], w['z']
@@ -383,8 +471,11 @@ def main():
             if x // 32 >= mt.width or z // 32 >= mt.height or mt.cell(x // 32, z // 32)[0] == NONE:
                 continue
             land = Land(src.land(mt.cell(x // 32, z // 32)[0]))
-            warp_tiles.setdefault((p['matrix'], x // 32, z // 32), {})[(z % 32) * 32 + x % 32] = \
-                warp_behavior(land.attrs[(z % 32) * 32 + x % 32] & 0xFF, p['header'], w['dest_header_id'])
+            b = warp_behavior(land.attrs[(z % 32) * 32 + x % 32] & 0xFF, p['header'], w['dest_header_id'])
+            if b == STEP_WARP and door_at(src, land, x % 32, z % 32, door_ids) is not None:
+                b = ANIMATED_DOOR
+                door_warps += 1
+            warp_tiles.setdefault((p['matrix'], x // 32, z // 32), {})[(z % 32) * 32 + x % 32] = b
 
     def cell(lid, header, alt, where=None):
         if lid == NONE or header is None:
@@ -405,7 +496,7 @@ def main():
                 continue
             bmd = nitro.Bmd0(src.prop_model(pr.model))
             ptex = bmd.tex or tex_cache[('bm', prop_set)]
-            pm = pack.mesh(('prop', pr.model, prop_set), bmd, ptex)
+            pm = pack.mesh(('prop', pr.model, prop_set), bmd, ptex, matshp=src.matshp(pr.model))
             if pm not in pack.mesh_anims:
                 pack.mesh_anims[pm] = prop_frames(src, pack, pr.model, prop_set, bmd, ptex)
             ry = math.radians(pr.rot[1])
@@ -415,6 +506,10 @@ def main():
                  0.0, sy_, 0.0, pr.pos[1],
                  -sy * sx, 0.0, cy * sz, pr.pos[2]]
             props.append((pm, m))
+            if pr.model in door_ids and pm not in pack.doors:
+                frames = door_frames(src, pack, pr.model, prop_set, bmd, ptex)
+                if frames:
+                    pack.doors[pm] = (door_ids[pr.model], frames)
         return (mesh, alt, light_index[light_set], props, blocks(land, warp_tiles.get(where)), heights(land))
 
     matrices = []
@@ -450,10 +545,12 @@ def main():
                 bmd = nitro.Bmd0(data)
             else:
                 bmd = nitro.Bmd0(src.prop_model(model))
-            named.append((model, pack.mesh(('prop', model, prop_set), bmd, bmd.tex or tex_cache[('bm', prop_set)])))
+            named.append((model, pack.mesh(('prop', model, prop_set), bmd, bmd.tex or tex_cache[('bm', prop_set)],
+                                           matshp=src.matshp(model))))
     size = write(out_path, pack, light_sets, matrices, named)
     if pack.anim_skipped:
         print('left still (another size than their frames): %s' % ', '.join(sorted(pack.anim_skipped)))
+    print('doors: %d warp tiles, %d door props animated' % (door_warps, len(pack.doors)))
     print('%s: %d textures (%d animated), %d meshes, %d light sets, %d matrices, %d bytes' % (
         out_path, len(pack.textures), len(pack.anims), len(pack.meshes), len(light_sets), len(matrices), size))
 

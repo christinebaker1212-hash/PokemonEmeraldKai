@@ -270,6 +270,27 @@ void MP_Region_GoToStartHouse(u8 region)
     }
 }
 
+// The first boat to JOHTO / KANTO comes in at the region's port like every other (OLIVINE, VERMILION): its sailor meets
+// the player off the boat and takes them to the first town, where their room is (VAR_REGION_ARRIVAL: the ports' frame
+// scripts, data/scripts/mp_region.inc EventScript_RegionArrival*). SINNOH's own sailor does the same at CANALAVE.
+void MP_Region_FirstBoatIn(u8 region)
+{
+    if (region == REGION_JOHTO)
+    {
+        SetWarpDestination(MAP_GROUP(MAP_JOHTO_OLIVINE_PORT), MAP_NUM(MAP_JOHTO_OLIVINE_PORT), WARP_ID_NONE, 8, 16);
+        SetLastHealLocationWarp(HEAL_LOCATION_JOHTO_NEW_BARK_TOWN);
+        VarSet(VAR_REGION_ARRIVAL, REGION_JOHTO);
+    }
+    else if (region == REGION_KANTO)
+    {
+        SetWarpDestination(MAP_GROUP(MAP_KANTO_VERMILION_CITY), MAP_NUM(MAP_KANTO_VERMILION_CITY), WARP_ID_NONE, 24, 32);
+        SetLastHealLocationWarp(HEAL_LOCATION_KANTO_PALLET_TOWN);
+        VarSet(VAR_REGION_ARRIVAL, REGION_KANTO);
+    }
+    else
+        MP_Region_GoToStartHouse(region);
+}
+
 // The region picked on PROF. BIRCH's question (before the new game starts)
 u8 MP_Region_StartChoice(void)
 {

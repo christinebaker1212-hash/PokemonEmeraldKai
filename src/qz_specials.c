@@ -960,14 +960,18 @@ static u16 QzGetSeagallopNumber_(void)
     return 6;
 }
 
-// Sail to VAR_0x8006 (FireRed's ferry scene is its own art: the trip is the screen's fade)
+void MP_Voyage_Begin(bool8 eastbound, bool8 faded);   // src/mp/mp_voyage.c
+// Sail from VAR_0x8004 to VAR_0x8006: FireRed's ferry scene (mp_voyage.c), the way FireRed's direction matrix says
+// (pokefirered src/seagallop.c sTravelDirectionMatrix: bit DEST of ORIGIN's entry set = eastbound)
 u16 QzDoSeagallopFerryScene(void)
 {
+    static const u16 sTravelDirectionMatrix[] = {0x6fe, 0x6fc, 0x6f8, 0x6f0, 0x6e0, 0x4c0, 0x400, 0x440, 0x7ff, 0x6e0, 0x000};
     u16 dest = gSpecialVar_0x8006 < ARRAY_COUNT(sSeagallopSpots) ? gSpecialVar_0x8006 : 0;
+    bool8 east = gSpecialVar_0x8004 >= ARRAY_COUNT(sTravelDirectionMatrix) ? TRUE
+               : (sTravelDirectionMatrix[gSpecialVar_0x8004] >> dest) & 1;
     SetWarpDestination(sSeagallopSpots[dest].map >> 8, sSeagallopSpots[dest].map & 0xFF, WARP_ID_NONE,
                        sSeagallopSpots[dest].x, sSeagallopSpots[dest].y);
-    DoWarp();
-    ResetInitialPlayerAvatarState();
+    MP_Voyage_Begin(east, TRUE);   // (the script faded the screen already)
     return 0;
 }
 
@@ -1173,8 +1177,10 @@ static u16 TravelNow(u8 to, u8 keep, bool8 train)
     first = !(gRegionState.started & (1 << to)) && to != REGION_HOENN;
     MP_Region_Travel(from, to);
     HealPlayerParty();
-    if (first)
-        MP_Region_GoToStartHouse(to);   // the first visit: a guide takes the player to the region's first town
+    if (first && !train)
+        MP_Region_FirstBoatIn(to);   // the first visit: in at the port, where a guide takes the player to the first town
+    else if (first)
+        MP_Region_GoToStartHouse(to);
     else if (train)   // GOLDENROD <-> SAFFRON
     {
         bool8 MP_MagnetTrain_Ride(bool8 toSaffron);
@@ -1187,6 +1193,12 @@ static u16 TravelNow(u8 to, u8 keep, bool8 train)
     }
     else
         SetWarpDestination(sRegionPorts[to].map >> 8, sRegionPorts[to].map & 0xFF, WARP_ID_NONE, sRegionPorts[to].x, sRegionPorts[to].y);
+    if (!train)
+    {
+        // the voyage (FireRed's ferry scene, mp_voyage.c), east for the regions in order HOENN, JOHTO, KANTO, SINNOH
+        MP_Voyage_Begin(to > from, FALSE);
+        return 1;
+    }
     DoWarp();
     ResetInitialPlayerAvatarState();
     return 1;

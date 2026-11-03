@@ -145,9 +145,11 @@ def shrink(im, frames, w, h, src=None, scale=None):
 FEET_ROW = 30
 
 
-def feet_shift(rows_of_frames):
-    """how far down a sheet's frames (lists of index rows) go so its lowest pixel sits on FEET_ROW (0: already)"""
-    low = max((y for rows in rows_of_frames for y, r in enumerate(rows) if any(r)), default=FEET_ROW)
+def feet_shift(rows_of_frames, standing=3):
+    """how far down a sheet's frames (lists of index rows; the first STANDING ones the person standing) go so its
+    standing feet sit on FEET_ROW (0: already). The standing frames decide: some sheets' stepping feet reach a row
+    lower than their standing ones, and judged by those the person stood a pixel high"""
+    low = max((y for rows in rows_of_frames[:standing] for y, r in enumerate(rows) if any(r)), default=FEET_ROW)
     return max(0, FEET_ROW - low)
 
 

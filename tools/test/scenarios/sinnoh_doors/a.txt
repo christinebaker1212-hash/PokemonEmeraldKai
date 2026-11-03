@@ -1,0 +1,32 @@
+pressuntil A field 5000
+wait 30
+mp warp 40,0,10,22
+waitfor field 600
+wait 60
+mp face up
+wait 10
+shot before
+press UP 4
+shotburst enter 30 3
+wait 40
+waitfor field 600
+wait 30
+mp where
+press DOWN 20
+shotburst leave 40 4
+wait 60
+waitfor field 600
+wait 30
+mp where
+shot outside
+mp warp 40,54,17,11
+waitfor field 600
+wait 60
+mp face up
+wait 10
+press UP 4
+wait 40
+waitfor field 600
+wait 30
+mp where
+quit
