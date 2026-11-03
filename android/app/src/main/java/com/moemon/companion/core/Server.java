@@ -16,6 +16,9 @@ import java.util.List;
 public final class Server implements AutoCloseable {
     static final int MP_C_MAIL = 12, MP_S_MAIL = 32, MAIL_PUT = 1, MAIL_ADD = 2, MAIL_GET = 3, MAIL_DEL = 4, MAIL_TAKE = 5,
             MAIL_DENIED = 6;
+    /** The mail trades' escrow (mp_net.h ESC_*): ops and the state's bits */
+    public static final int ESC_PUT = 7, ESC_TAKE = 8, ESC_CANCEL = 9, ESC_LOOK = 10;
+    public static final int HAVE0 = 1, HAVE1 = 2, TAKEN0 = 4, TAKEN1 = 8, CLOSED = 16;
     private final Socket sock;
     private final DataInputStream in;
     private final OutputStream out;
@@ -116,6 +119,28 @@ public final class Server implements AutoCloseable {
         q[33] = (byte) i;
         send(q);
         return answer()[0] == MAIL_TAKE;
+    }
+
+    /** An escrow record's state (ESC_LOOK), or -1 when the server refused */
+    public int look(byte[] key) throws IOException {
+        byte[] q = new byte[17];
+        q[0] = (byte) ESC_LOOK;
+        System.arraycopy(key, 0, q, 1, 16);
+        send(q);
+        byte[] d = answer();
+        return d.length >= 18 && d[0] == ESC_LOOK ? d[17] & 255 : -1;
+    }
+
+    /** Calls a trade off from SIDE (0 offered, 1 accepted) while both deposits aren't in: the state after, -1 refused */
+    public int cancel(byte[] key, int side, byte[] secret) throws IOException {
+        byte[] q = new byte[34];
+        q[0] = (byte) ESC_CANCEL;
+        System.arraycopy(key, 0, q, 1, 16);
+        q[17] = (byte) side;
+        System.arraycopy(secret, 0, q, 18, 16);
+        send(q);
+        byte[] d = answer();
+        return d.length >= 18 && d[0] == ESC_CANCEL ? d[17] & 255 : -1;
     }
 
     @Override

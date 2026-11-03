@@ -118,6 +118,8 @@ address in, so even `lobby.txt` isn't needed.
 - Each server's SHARED PC, team goals and achievements are saved as
   `coop_store_<id>.dat` in the folder the server runs in (or `MOEMON_STORE_DIR`).
   Keep those files to keep everyone's shared PC.
+- `moemon_mail.dat` (friends' status for the phone app) and `moemon_escrow.dat` (POKéMON on their way in trades by
+  mail) are kept in the folder the server runs in. Keep `moemon_escrow.dat` above all: a trade in progress lives there.
 - Limits: 512 connections and 256 servers at once, 4 players per server.
 - `--lan` also makes the server answer local network searches (UDP 27016),
   useful when it runs on a PC on the same network as the players.

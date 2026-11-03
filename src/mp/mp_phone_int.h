@@ -1,5 +1,6 @@
 // Moemon Co-op: the phone link's insides shared by its files (mp_phone.c: the link, the snapshot and orders;
 // orders' places
+struct Buf;
 enum { LOC_NONE, LOC_PARTY, LOC_BOX };
 struct Loc { u8 kind, box, slot; };
 bool8 ParseLoc(const char *json, const char *key, struct Loc *loc);
@@ -29,6 +30,20 @@ void PhoneFriends_Update(void);
 void PhoneFriends_Snapshot(struct Buf *b);
 const char *PhoneFriends_Apply(const char *op, const char *json);   // "share", "join"
 const u8 *MP_Phone_SaveId(void);
+void PhoneFriends_Mail(u8 op, const u8 key[16], const u8 *secret16, u32 ttl, const u8 *data, u16 n);
+bool8 PhoneFriends_PairKey(const u8 id[8], u8 out[32]);
+const u8 *PhoneFriends_Name(const u8 id[8]);
+void PhoneFriends_Inbox(u8 key[16], u8 owner[16]);
+void PhoneFriends_TradeKey(u8 out[32]);
+bool8 PhoneFriends_Loaded(void);
+
+// mp_phone_trade.c: trades by mail (offers, deposits in the server's escrow, the trade scene)
+void PhoneTrade_Load(void);                                      // a save loaded
+void PhoneTrade_Update(void);                                    // every frame
+void PhoneTrade_OnServer(const u8 *data, u16 len);               // MPMSG_S_MAIL answers (the escrow's, the inbox's)
+void PhoneTrade_Snapshot(struct Buf *b);                         // the snapshot's "trades"
+const char *PhoneTrade_Apply(const char *op, const char *json);  // "offer", "accept", "untrade"
+bool8 MP_Phone_OnOffer(u32 pid, u32 ot);                         // (the PC: ON OFFER; no release, walk or training)
 
 // mp_phone_dev.c: the device's apps: the live map, MOENAV calls, the battle feed, the POKéGEAR)
 #ifndef GUARD_MP_PHONE_INT_H

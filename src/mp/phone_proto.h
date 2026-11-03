@@ -50,6 +50,11 @@ int PhoneProto_Open(const uint8_t key[PHONE_KEY_SIZE], const uint8_t *in, size_t
 // 16 bytes from a 32-byte key and a word (BLAKE2b keyed): a pipe's ID ("pipe"), a friend's presence record ("presence"),
 // their inbox ("inbox")... secret to everyone without the key, the same on the game, the app and the test client
 void PhoneProto_Derive(const uint8_t key[PHONE_KEY_SIZE], const char *word, uint8_t out[16]);
+void PhoneProto_Derive32(const uint8_t key[PHONE_KEY_SIZE], const char *word, uint8_t out[PHONE_KEY_SIZE]);
+// Two saves' shared key (X25519): only those two can work it out, each from its own secret and the other's public key
+void PhoneProto_PublicKey(const uint8_t secret[PHONE_KEY_SIZE], uint8_t pub[PHONE_KEY_SIZE]);
+void PhoneProto_PairKey(const uint8_t mySecret[PHONE_KEY_SIZE], const uint8_t theirPublic[PHONE_KEY_SIZE],
+                        uint8_t out[PHONE_KEY_SIZE]);
 void PhoneProto_ToHex(const uint8_t *in, size_t n, char *out);   // out: 2n + 1 chars, upper case
 int PhoneProto_FromHex(const char *in, uint8_t *out, size_t n);  // 0 if in isn't 2n hex digits
 

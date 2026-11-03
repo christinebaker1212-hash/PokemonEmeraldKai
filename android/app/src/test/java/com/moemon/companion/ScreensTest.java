@@ -176,13 +176,26 @@ public class ScreensTest {
         // FRIENDS: two friends, one online in a room with their party
         String may = app.art.toHex("MAY"), wally = app.art.toHex("WALLY");
         app.model().snap.put("friends", new JSONObject("{\"share\":0,\"srv\":\"127.0.0.1:1\",\"list\":[{\"id\":\"0102030405060708\","
-                + "\"key\":\"" + "11".repeat(32) + "\",\"n\":\"" + may + "\",\"seen\":1},{\"id\":\"0807060504030201\",\"key\":\""
+                + "\"key\":\"" + "11".repeat(32) + "\",\"pk\":\"" + "33".repeat(32) + "\",\"n\":\"" + may + "\",\"seen\":1},{\"id\":\"0807060504030201\",\"key\":\""
                 + "22".repeat(32) + "\",\"n\":\"" + wally + "\",\"seen\":1}]}"));
         app.friends.put("0102030405060708", new JSONObject().put("n", may).put("t", System.currentTimeMillis() / 1000)
                 .put("sec", 3).put("do", "field").put("room", "MAYS ROOM").put("rkey", "00").put("srv", "")
                 .put("party", new org.json.JSONArray("[[25,20,0],[280,15,0],[0,0,1]]")));
         app.friends.put("0807060504030201", new JSONObject().put("n", wally).put("t", System.currentTimeMillis() / 1000 - 7200));
         app.friendsAt = System.currentTimeMillis();
+        // trades by mail: WALLY's offer, ours on offer to MAY, one done
+        long now = System.currentTimeMillis() / 1000;
+        java.util.List<JSONObject> offers = new java.util.ArrayList<>();
+        offers.add(new JSONObject().put("t", "AA".repeat(16)).put("from", "0807060504030201").put("n", wally)
+                .put("mon", new JSONObject().put("s", 283).put("l", 12).put("n", app.art.toHex("MUDKIP"))).put("want", 0)
+                .put("exp", now + 5 * 86400).put("esc", 0));
+        app.offers = offers;
+        app.model().snap.put("trades", new org.json.JSONArray()
+                .put(new JSONObject().put("t", "BB".repeat(16)).put("role", 0).put("st", "offered").put("want", 280).put("pn", may)
+                        .put("changed", now).put("mine", new JSONObject().put("s", 133).put("l", 18).put("n", app.art.toHex("EEVEE"))))
+                .put(new JSONObject().put("t", "CC".repeat(16)).put("role", 1).put("st", "done").put("shown", 0).put("pn", wally)
+                        .put("changed", now).put("mine", new JSONObject().put("s", 1).put("l", 20).put("n", app.art.toHex("BULBASAUR")))
+                        .put("theirs", new JSONObject().put("s", 4).put("l", 16).put("n", app.art.toHex("CHARMANDER")))));
         v.select(7);
         shot(v, "friends");
         v.showOver(null);

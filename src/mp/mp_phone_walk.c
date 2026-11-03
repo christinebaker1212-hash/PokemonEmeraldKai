@@ -307,6 +307,8 @@ static const char *DoWalk(const char *json)
         return "gone";
     if (!Is(&at, (u32)p, (u32)o))
         return "changed";
+    if (MP_Phone_OnOffer((u32)p, (u32)o))
+        return "onoffer";
     box = BoxAt(&at);
     if (at.kind == LOC_PARTY && !GetBoxMonData(box, MON_DATA_IS_EGG) && NonEggsInParty() <= 1)
         return "last";
@@ -703,6 +705,8 @@ static const char *DoTrain(const char *json)
         return "changed";
     if (GetBoxMonData(BoxAt(&at), MON_DATA_IS_EGG))
         return "egg";
+    if (MP_Phone_OnOffer((u32)p, (u32)o))
+        return "onoffer";
     if (kind < TRAIN_STAT || kind > TRAIN_REST || stat < 0 || stat > 5)
         return "bad";
     r = TrainFind((u32)p, (u32)o);

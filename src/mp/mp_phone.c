@@ -152,6 +152,7 @@ void MP_Phone_OnSaveLoaded(void)
     SpawnsLoad();
     PhoneWalk_Load();
     PhoneFriends_Load();
+    PhoneTrade_Load();
 }
 
 const u8 *MP_Phone_SaveId(void)
@@ -364,6 +365,8 @@ void BufBoxMon(struct Buf *b, struct BoxPokemon *box)
             BufAdd(b, "\"");
         }
     }
+    if (MP_Phone_OnOffer(pid, ot))
+        BufAdd(b, ",\"off\":1");   // (ON OFFER for a trade by mail: mp_phone_trade.c)
     BufAdd(b, ",\"m\":[");
     for (i = 0; i < MAX_MON_MOVES; i++)
         BufAdd(b, "%s%u", i ? "," : "", (unsigned)GetBoxMonData(box, MON_DATA_MOVE1 + i));
@@ -573,6 +576,7 @@ static void BufSnapshot(struct Buf *b)
     BufBag(b);
     PhoneWalk_Snapshot(b, sSnapPhone);
     PhoneFriends_Snapshot(b);
+    PhoneTrade_Snapshot(b);
     // The POKeDEX: a bit per national number (1 first), as hex: seen, then caught
     {
         static const char *const sWhat[] = {"seen", "caught"};
@@ -1742,6 +1746,7 @@ void MP_Phone_Update(void)
     size_t len;
     char udp[96], idHex[2 * PHONE_SAVEID_SIZE + 1];
     PhoneFriends_Update();   // (presence and the pipes: whenever the game is on a co-op server)
+    PhoneTrade_Update();     // (trades by mail: deposits, pickups, the trade scene)
     if (!sStarted)
     {
         if (!sHaveFile || !Wanted())

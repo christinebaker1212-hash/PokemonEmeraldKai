@@ -289,4 +289,44 @@ The gate: android/coretest FriendsTest (a server, ALICE hosting a room, BOB join
 presence read from the server, ALICE's phone linked through the server with a snapshot of more than one chunk);
 ScreensTest "friends".
 
-Next: trades by mail, then the card games on the phone.
+### Trades by mail (1.75.0)
+
+The server's ESCROW (MAIL ops 7-10, protocol 76; mp_net.h ESC_*; "moemon_escrow.dat", written before each answer):
+a record per trade (its 16-byte ID) with two sides, each a deposit (up to ESC_DATA_MAX) and a lock (the SHA-256 of
+the side's secret, set by its first use). PUT deposits (refused once CLOSED), TAKE gives the other side's deposit
+only when both are in, CANCEL closes it while both aren't in (and gives back the caller's own), LOOK tells the state.
+Every op can be repeated and answers the state. Deposits nobody came back for stay 365 days; tools/phone/escrow_test.py.
+
+Keys: each save has an X25519 pair ("<save>.pals" version 2; 1.74.0's file is converted, its friends kept); MPR_FRIEND
+ends with the public key. Two saves' pair key (PhoneProto_PairKey: BLAKE2b over the X25519 secret) seals offers and
+deposits, so only those two can read them (friend keys are seen by everyone in a room). The snapshot's friends carry
+`pk` (the pair key, once met since 1.74.1), `me`, `tk` (the trade key: a side's secret is Derive(tk, hex(trade))),
+`inbox` and `inown` (Derive(friend key / secret, "inbox")).
+
+The flow:
+- OFFER (the phone, core/Trades.offer): a random trade ID; {t, from, n, mon (the snapshot's keys), want (species, 0
+  anything), at, exp (7 days), srv} sealed with the pair key into the friend's inbox (MAIL_ADD, [from id][sealed]);
+  then the order `{"op":"offer","trade","to","at","p","o","want","exp","srv"}` to this save's game (queued when away):
+  the POKéMON stays where it is, ON OFFER (the PC's label, no release in the PC, no walk or training; `off` in the
+  snapshot).
+- The friend's phone reads its inbox (Trades.incoming: each offer with the escrow's state); ACCEPT is the order
+  `{"op":"accept",...}` to its game (the species must be the one wanted: `notwanted`); DECLINE is an escrow CANCEL
+  from side 1, straight from the phone. CANCEL of one's own offer: CANCEL from side 0 plus `{"op":"untrade"}`.
+- The games (src/mp/mp_phone_trade.c, "<save>.trades"), whenever on the trade's server: the accepting game deposits
+  (side 1); the offering game, seeing it (LOOK), deposits too (side 0) and takes; the other takes on its next look.
+  Custody as the walk's: written down, out of the save, saved at once, then the server; received: written down, in
+  (party, else PC), saved at once; a game closed at any step works out on loading where it stands (the save holds it
+  or not). A deposit called off comes home the same way. Offers run out after 7 days (the accepting side waits a day
+  more before taking its deposit back).
+- Then the game's own in-game trade scene (trade.c MP_MailTrade_Scene: the friend's name, ours going, theirs coming,
+  any trade evolution) the next time the player is free on the field.
+
+App: core/Server.java (look / cancel), core/Trades.java, FriendsPage (TRADES BY MAIL: offers with ACCEPT / DECLINE,
+our trades and how each is getting on, CALL OFF; TRADE on each friend: ours, then "for what": anything or one of the
+species in their party), Notifier kind TURN (a new offer; from StepJob).
+
+The gate (trades pass two-client tests at lag): android/coretest TradeTest: two games and their phones, everything
+through tools/mp_server/lagproxy.py at 120 ms + up to 60 ms each way: a trade (each POKéMON exactly once, the scene in
+both), a turned-down offer (nothing moves), an offer answered while the offering game is closed (it completes after).
+
+Next: the card games on the phone (turn-by-turn duels, daily puzzles, packs), then the UI / UX pass.

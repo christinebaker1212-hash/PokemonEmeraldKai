@@ -39,6 +39,24 @@ const u8 *MP_Phone_KeyOf(u32 i);   // mp_phone.c
 #define PALS_MAX   64
 #define MPR_FRIEND 19
 
+struct PalV1   // (1.74.0's file)
+{
+    u8 id[PHONE_SAVEID_SIZE];
+    u8 key[PHONE_KEY_SIZE];
+    u8 name[PLAYER_NAME_LENGTH + 1];
+    u8 pad[3];
+    u32 seen;
+};
+
+struct PalsV1
+{
+    u32 magic, version;
+    u8 key[PHONE_KEY_SIZE], secret[PHONE_KEY_SIZE];
+    u8 share, pad[3];
+    u32 count;
+    struct PalV1 pals[PALS_MAX];
+};
+
 struct Pal
 {
     u8 id[PHONE_SAVEID_SIZE];
@@ -46,6 +64,7 @@ struct Pal
     u8 name[PLAYER_NAME_LENGTH + 1];
     u8 pad[3];
     u32 seen;
+    u8 pub[PHONE_KEY_SIZE];       // its X25519 public key (all 0: not met since 1.74.0: can't trade by mail yet)
 };
 
 static struct
@@ -57,6 +76,8 @@ static struct
     u8 pad[3];
     u32 count;
     struct Pal pals[PALS_MAX];
+    u8 xsecret[PHONE_KEY_SIZE];   // this save's X25519 secret (pair keys with each friend: mail trades): never shared
+    u8 xpublic[PHONE_KEY_SIZE];
 } sPals;
 static bool8 sPalsLoaded;
 static bool8 sPlaying;   // (on the field since this save loaded)
@@ -90,16 +111,47 @@ void PhoneFriends_Load(void)
     f = fopen(path, "rb");
     if (f != NULL)
     {
-        if (fread(&sPals, sizeof(sPals), 1, f) != 1 || sPals.magic != PALS_MAGIC || sPals.count > PALS_MAX)
-            memset(&sPals, 0, sizeof(sPals));
+        static struct PalsV1 sOld;
+        long size;
+        fseek(f, 0, SEEK_END);
+        size = ftell(f);
+        fseek(f, 0, SEEK_SET);
+        if (size == (long)sizeof(sPals))
+        {
+            if (fread(&sPals, sizeof(sPals), 1, f) != 1 || sPals.magic != PALS_MAGIC || sPals.count > PALS_MAX)
+                memset(&sPals, 0, sizeof(sPals));
+        }
+        else if (size == (long)sizeof(sOld) && fread(&sOld, sizeof(sOld), 1, f) == 1 && sOld.magic == PALS_MAGIC
+              && sOld.count <= PALS_MAX)
+        {
+            // 1.74.0's: the same friends and keys, an X25519 pair of keys added (below)
+            u32 i;
+            sPals.magic = PALS_MAGIC;
+            memcpy(sPals.key, sOld.key, sizeof(sPals.key));
+            memcpy(sPals.secret, sOld.secret, sizeof(sPals.secret));
+            sPals.share = sOld.share;
+            sPals.count = sOld.count;
+            for (i = 0; i < sOld.count; i++)
+            {
+                memcpy(sPals.pals[i].id, sOld.pals[i].id, sizeof(sPals.pals[i].id));
+                memcpy(sPals.pals[i].key, sOld.pals[i].key, sizeof(sPals.pals[i].key));
+                memcpy(sPals.pals[i].name, sOld.pals[i].name, sizeof(sPals.pals[i].name));
+                sPals.pals[i].seen = sOld.pals[i].seen;
+            }
+        }
         fclose(f);
     }
     if (sPals.magic != PALS_MAGIC)
     {
         sPals.magic = PALS_MAGIC;
-        sPals.version = 1;
         PhoneProto_Random(sPals.key, sizeof(sPals.key));
         PhoneProto_Random(sPals.secret, sizeof(sPals.secret));
+    }
+    if (sPals.version != 2)
+    {
+        sPals.version = 2;
+        PhoneProto_Random(sPals.xsecret, sizeof(sPals.xsecret));
+        PhoneProto_PublicKey(sPals.xsecret, sPals.xpublic);
         PalsWrite();
     }
     sPalsLoaded = TRUE;
@@ -109,12 +161,13 @@ void PhoneFriends_Load(void)
 
 static void SendMine(void)
 {
-    u8 msg[1 + PHONE_SAVEID_SIZE + PHONE_KEY_SIZE + PLAYER_NAME_LENGTH + 1];
+    u8 msg[1 + PHONE_SAVEID_SIZE + PHONE_KEY_SIZE + PLAYER_NAME_LENGTH + 1 + PHONE_KEY_SIZE];
     msg[0] = MPR_FRIEND;
     memcpy(msg + 1, MP_Phone_SaveId(), PHONE_SAVEID_SIZE);
     memcpy(msg + 1 + PHONE_SAVEID_SIZE, sPals.key, PHONE_KEY_SIZE);
     memcpy(msg + 1 + PHONE_SAVEID_SIZE + PHONE_KEY_SIZE, gSaveBlock2Ptr->playerName, PLAYER_NAME_LENGTH);
-    msg[sizeof(msg) - 1] = EOS;
+    msg[1 + PHONE_SAVEID_SIZE + PHONE_KEY_SIZE + PLAYER_NAME_LENGTH] = EOS;
+    memcpy(msg + 1 + PHONE_SAVEID_SIZE + PHONE_KEY_SIZE + PLAYER_NAME_LENGTH + 1, sPals.xpublic, PHONE_KEY_SIZE);
     MP_SendRelay(0xFF, msg, sizeof(msg));
 }
 
@@ -146,13 +199,62 @@ void PhoneFriends_OnRelay(u8 from, const u8 *data, u16 len)
     memcpy(sPals.pals[i].name, name, len - 1 - PHONE_SAVEID_SIZE - PHONE_KEY_SIZE > PLAYER_NAME_LENGTH
                                          ? PLAYER_NAME_LENGTH : len - 1 - PHONE_SAVEID_SIZE - PHONE_KEY_SIZE);
     sPals.pals[i].name[PLAYER_NAME_LENGTH] = EOS;
+    if (len >= 1 + PHONE_SAVEID_SIZE + PHONE_KEY_SIZE + PLAYER_NAME_LENGTH + 1 + PHONE_KEY_SIZE)   // (1.74.1 on)
+        memcpy(sPals.pals[i].pub, name + PLAYER_NAME_LENGTH + 1, PHONE_KEY_SIZE);
     sPals.pals[i].seen = (u32)time(NULL);
     PalsWrite();
 }
 
+
+// ------------------------------------------------------------------------------------- keys for mail trades
+
+static struct Pal *FindPal(const u8 id[PHONE_SAVEID_SIZE])
+{
+    u32 i;
+    for (i = 0; i < sPals.count; i++)
+        if (memcmp(sPals.pals[i].id, id, PHONE_SAVEID_SIZE) == 0)
+            return &sPals.pals[i];
+    return NULL;
+}
+
+// The key only this save and that friend share (FALSE: not a friend, or not met since 1.74.1)
+bool8 PhoneFriends_PairKey(const u8 id[PHONE_SAVEID_SIZE], u8 out[PHONE_KEY_SIZE])
+{
+    static const u8 zero[PHONE_KEY_SIZE];
+    struct Pal *p = FindPal(id);
+    if (!sPalsLoaded || p == NULL || memcmp(p->pub, zero, PHONE_KEY_SIZE) == 0)
+        return FALSE;
+    PhoneProto_PairKey(sPals.xsecret, p->pub, out);
+    return TRUE;
+}
+
+const u8 *PhoneFriends_Name(const u8 id[PHONE_SAVEID_SIZE])
+{
+    struct Pal *p = FindPal(id);
+    return p ? p->name : NULL;
+}
+
+// This save's inbox (offers from friends: anyone with its friend key may add; only it takes) and the key its trades'
+// side secrets come from (the phone has both)
+void PhoneFriends_Inbox(u8 key[16], u8 owner[16])
+{
+    PhoneProto_Derive(sPals.key, "inbox", key);
+    PhoneProto_Derive(sPals.secret, "inbox", owner);
+}
+
+void PhoneFriends_TradeKey(u8 out[PHONE_KEY_SIZE])
+{
+    PhoneProto_Derive32(sPals.secret, "trade", out);
+}
+
+bool8 PhoneFriends_Loaded(void)
+{
+    return sPalsLoaded;
+}
+
 // ------------------------------------------------------------------------------------------------- presence
 
-static void Mail(u8 op, const u8 key[16], const u8 *secret16, u32 ttl, const u8 *data, u16 n)
+void PhoneFriends_Mail(u8 op, const u8 key[16], const u8 *secret16, u32 ttl, const u8 *data, u16 n)
 {
     static u8 msg[MP_MAX_MSG];
     u32 at = 0;
@@ -197,7 +299,7 @@ static void Publish(void)
     PhoneProto_Derive(sPals.secret, "owner", owner);
     if (sPals.share == 2)
     {
-        Mail(MAIL_DEL, key, owner, 0, NULL, 0);
+        PhoneFriends_Mail(MAIL_DEL, key, owner, 0, NULL, 0);
         return;
     }
     for (k = 0; k < PLAYER_NAME_LENGTH && gSaveBlock2Ptr->playerName[k] != EOS; k++)
@@ -236,7 +338,7 @@ static void Publish(void)
     if (n >= sizeof(json))
         return;
     PhoneProto_Seal(sPals.key, 0, json, n, sealed);
-    Mail(MAIL_PUT, key, owner, 600, sealed, (u16)(n + PHONE_SEAL_EXTRA));
+    PhoneFriends_Mail(MAIL_PUT, key, owner, 600, sealed, (u16)(n + PHONE_SEAL_EXTRA));
 }
 
 // ------------------------------------------------------------------------------------------------- the pipes
@@ -285,6 +387,11 @@ void PhoneFriends_OnServer(u8 type, const u8 *data, u16 len)
 {
     u16 ch;
     u32 i;
+    if (type == MPMSG_S_MAIL)
+    {
+        PhoneTrade_OnServer(data, len);
+        return;
+    }
     if (type != MPMSG_S_PIPE || len < 3)
         return;
     ch = data[1] | (data[2] << 8);
@@ -407,9 +514,31 @@ void PhoneFriends_Snapshot(struct Buf *b)
         PhoneProto_ToHex(sPals.pals[i].key, PHONE_KEY_SIZE, hex);
         BufAdd(b, ",\"key\":\"%s\",\"n\":", hex);
         BufText(b, sPals.pals[i].name, PLAYER_NAME_LENGTH);
-        BufAdd(b, ",\"seen\":%u}", (unsigned)sPals.pals[i].seen);
+        BufAdd(b, ",\"seen\":%u", (unsigned)sPals.pals[i].seen);
+        {
+            u8 pk[PHONE_KEY_SIZE];
+            if (PhoneFriends_PairKey(sPals.pals[i].id, pk))
+            {
+                PhoneProto_ToHex(pk, PHONE_KEY_SIZE, hex);
+                BufAdd(b, ",\"pk\":\"%s\"", hex);   // (mail trades: the phone seals offers with it)
+            }
+        }
+        BufAdd(b, "}");
     }
-    BufAdd(b, "]}");
+    {
+        u8 tk[PHONE_KEY_SIZE], inbox[16], owner[16];
+        PhoneProto_ToHex(MP_Phone_SaveId(), PHONE_SAVEID_SIZE, hex);
+        BufAdd(b, "],\"me\":\"%s\"", hex);
+        PhoneFriends_TradeKey(tk);
+        PhoneProto_ToHex(tk, PHONE_KEY_SIZE, hex);
+        BufAdd(b, ",\"tk\":\"%s\"", hex);
+        PhoneFriends_Inbox(inbox, owner);
+        PhoneProto_ToHex(inbox, 16, hex);
+        BufAdd(b, ",\"inbox\":\"%s\"", hex);
+        PhoneProto_ToHex(owner, 16, hex);
+        BufAdd(b, ",\"inown\":\"%s\"", hex);
+    }
+    BufAdd(b, "}");
 }
 
 // ------------------------------------------------------------------------------------------------------ orders
@@ -444,5 +573,5 @@ const char *PhoneFriends_Apply(const char *op, const char *json)
         MP_Events_QueueToast("Joining your friend's room...");
         return NULL;
     }
-    return "unknown";
+    return PhoneTrade_Apply(op, json);
 }

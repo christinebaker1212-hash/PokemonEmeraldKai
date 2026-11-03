@@ -57,6 +57,7 @@ public final class Companion implements LinkClient.Listener {
     public volatile java.util.Map<String, JSONObject> friends = new java.util.HashMap<>();   // save ID -> presence
     public volatile long friendsAt;                               // (when they were read; 0: never)
     public volatile String friendsError = "";
+    public volatile java.util.List<JSONObject> offers = new java.util.ArrayList<>();   // friends' offers to this save
     private final java.util.concurrent.ExecutorService background = java.util.concurrent.Executors.newSingleThreadExecutor();
     public long toastAt;
     public boolean toastGood;                                     // (a USE's result, not a refusal)
@@ -248,12 +249,71 @@ public final class Companion implements LinkClient.Listener {
         background.execute(() -> {
             try {
                 friends = com.moemon.companion.core.Friends.fetch(crypto, server, list);
+                offers = com.moemon.companion.core.Trades.incoming(crypto, server, f);
                 friendsError = "";
             } catch (Exception e) {
                 friendsError = "The co-op server didn't answer.";
             }
             friendsAt = System.currentTimeMillis();
             main.post(this::changed);
+        });
+    }
+
+    /** A trade by mail: the offer into FRIEND's inbox (in the background), then the order to this save's game */
+    public void offerTrade(JSONObject friend, JSONObject mon, JSONObject place, int want, java.util.function.Consumer<String> done) {
+        Model m = model();
+        JSONObject f = m == null ? null : m.snap.optJSONObject("friends");
+        if (f == null || client == null) {
+            done.accept("Link with your game first.");
+            return;
+        }
+        final String name = m.snap.optJSONObject("save").optString("name");
+        background.execute(() -> {
+            String why = null;
+            try {
+                JSONObject order = com.moemon.companion.core.Trades.offer(crypto, f.optString("srv"), f, friend, name, mon, place, want);
+                main.post(() -> client.order(order));
+            } catch (IllegalStateException e) {
+                why = "Play together in a room once more first: then you can trade by mail.";
+            } catch (Exception e) {
+                why = "The co-op server didn't answer. Try again in a moment.";
+            }
+            final String w = why;
+            main.post(() -> {
+                done.accept(w);
+                changed();
+            });
+        });
+    }
+
+    /** DECLINE (SIDE 1: a friend's offer) or CANCEL (SIDE 0: ours) straight at the server's escrow */
+    public void callOffTrade(String tHex, int side, java.util.function.Consumer<String> done) {
+        Model m = model();
+        JSONObject f = m == null ? null : m.snap.optJSONObject("friends");
+        if (f == null) {
+            done.accept("Link with your game first.");
+            return;
+        }
+        background.execute(() -> {
+            String why;
+            try {
+                why = com.moemon.companion.core.Trades.callOff(crypto, f.optString("srv"), f, tHex, side) ? null
+                        : "Too late: both POKéMON are already on their way.";
+            } catch (Exception e) {
+                why = "The co-op server didn't answer. Try again in a moment.";
+            }
+            if (why == null && side == 0 && client != null) {
+                try {
+                    final JSONObject o = new JSONObject().put("op", "untrade").put("trade", tHex);
+                    main.post(() -> client.order(o));
+                } catch (org.json.JSONException ignored) {
+                }
+            }
+            final String w = why;
+            main.post(() -> {
+                done.accept(w);
+                refreshFriends();
+            });
         });
     }
 

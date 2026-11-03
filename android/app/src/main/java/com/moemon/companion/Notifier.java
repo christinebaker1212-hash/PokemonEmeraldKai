@@ -131,6 +131,40 @@ public final class Notifier {
         }
     }
 
+    /** A friend's new offer of a trade by mail (TURN: each offer once; not held to once a day) */
+    public static void trades(Context c, Companion app) {
+        if (!on(c, 5) || quiet(c, LocalTime.now())) {
+            return;
+        }
+        Model m = app.model();
+        JSONObject f = m == null ? null : m.snap.optJSONObject("friends");
+        if (f == null) {
+            return;
+        }
+        java.util.List<JSONObject> offers;
+        try {
+            offers = com.moemon.companion.core.Trades.incoming(app.crypto, f.optString("srv"), f);
+        } catch (Exception e) {
+            return;
+        }
+        app.offers = offers;
+        String told = prefs(c).getString("offersTold", "");
+        for (JSONObject o : offers) {
+            if ((o.optInt("esc") & (com.moemon.companion.core.Server.CLOSED | com.moemon.companion.core.Server.HAVE1)) != 0
+                    || told.contains(o.optString("t"))) {
+                continue;
+            }
+            told = (o.optString("t") + "," + told);
+            told = told.substring(0, Math.min(told.length(), 33 * 32));
+            prefs(c).edit().putString("offersTold", told).remove("notif_last_TURN").apply();
+            String peer = app.art.plain(GameArt.hexText(o.optString("n")));
+            JSONObject mon = o.optJSONObject("mon");
+            String name = mon == null ? "a POKéMON" : app.art.plain(GameArt.hexText(mon.optString("n")));
+            post(c, 5, LocalDate.now(), peer + " wants to trade!", peer + " offers " + name + ". See it in FRIENDS.");
+            break;
+        }
+    }
+
     // a notification of KIND, once a day, while today's budget lasts
     private static void post(Context c, int kind, LocalDate today, String title, String text) {
         SharedPreferences p = prefs(c);
