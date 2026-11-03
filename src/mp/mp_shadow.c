@@ -367,7 +367,7 @@ static bool8 FeetCovered(s16 x, s16 y, const struct Sprite *o)
                 opaque += ((px[r * 4 + b] & 0xF) != 0) + ((px[r * 4 + b] >> 4) != 0);
         }
     }
-    return opaque >= 16;   // (of the 32 pixels under the feet)
+    return opaque >= 8;   // (of the 32 pixels under the feet: leaves have gaps)
 }
 
 static bool8 InWater(s16 x, s16 y)

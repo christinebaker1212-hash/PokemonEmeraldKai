@@ -1,0 +1,8 @@
+# Drop shadows behind a tile drawn over the player (the POKéMON CENTER's potted plant, a 2x1 tree's top: the user's
+# picture, a line under the pot): standing at (2,5) the shadow is up, at (1,5) / (0,5) behind the plant's top it is
+# not (mp_shadow.c FeetCovered), so nothing shows under the pot
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_PARTY=280:30"
+EXPECT_A=("where map 2.2 xy 2,5" "where map 2.2 xy 1,5" "where map 2.2 xy 0,5")
+UNEXPECT_A=("[crash]" "TIMEOUT")
