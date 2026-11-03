@@ -277,6 +277,7 @@ that isn't installed"). It is never deleted. Trades with a player who lacks the 
 
 ```
 MoemonMaker/
+  base/                    edits to the base game: overrides by name (tiles, collision, NPCs, warps, wild...)
   packs/<name>/
     pack.json              name, version, author, which game versions
     maps/<MAP>/map.json    layout, events (one file per event: events/<name>.json), encounters
