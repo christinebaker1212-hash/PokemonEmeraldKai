@@ -183,7 +183,7 @@ static bool TextValue(const std::string &prop, const char *s, long *v)
 std::string EditsText(int map)
 {
     const MapEdits *e = FindEdits(map);
-    if (!e || (e->blocks.empty() && e->props.empty()))
+    if (!e || e->Empty())
         return "";
     std::string out = "# Moemon Maker: edits to " + std::string(gEd.maps[map].name) + " (written by the editor; each line"
                       " has the value it replaced, then the new one)\n";
@@ -199,6 +199,13 @@ std::string EditsText(int map)
     {
         std::string prop = p.first.substr(p.first.rfind(' ') + 1);
         out += p.first + " " + ValueText(prop, p.second.was) + " " + ValueText(prop, p.second.now) + "\n";
+    }
+    for (auto &a : e->adds)
+    {
+        out += "add " + a.first;
+        for (auto &kv : a.second)
+            out += " " + kv.first + "=" + kv.second;
+        out += "\n";
     }
     return out;
 }
@@ -224,6 +231,25 @@ static bool ParseText(const std::string &text, int *mapOut, MapEdits *out)
                 return false;
             e.w = n >= 4 ? atoi(w[2]) : gEd.maps[map].width;
             e.h = n >= 4 ? atoi(w[3]) : gEd.maps[map].height;
+        }
+        else if (n >= 3 && !strcmp(w[0], "add"))
+        {
+            // add KIND N k=v k=v...
+            std::map<std::string, std::string> kv;
+            size_t at = line.find(' ', line.find(' ', 4) + 1);
+            while (at != std::string::npos && at < line.size())
+            {
+                size_t start = line.find_first_not_of(' ', at);
+                if (start == std::string::npos)
+                    break;
+                size_t end = line.find(' ', start);
+                std::string word = line.substr(start, end == std::string::npos ? std::string::npos : end - start);
+                size_t eq = word.find('=');
+                if (eq != std::string::npos)
+                    kv[word.substr(0, eq)] = word.substr(eq + 1);
+                at = end;
+            }
+            e.adds[std::string(w[1]) + " " + w[2]] = kv;
         }
         else if (n == 5 && !strcmp(w[0], "block") && e.w)
             e.blocks[atoi(w[2]) * e.w + atoi(w[1])] = std::make_pair((int)strtol(w[3], NULL, 0), (int)strtol(w[4], NULL, 0));
@@ -329,7 +355,7 @@ void EndChange()
     int map = sChangeMap;
     auto it = sEdits.find(map);
     MapEdits after = it == sEdits.end() ? MapEdits() : it->second;
-    if (after.blocks == sChangeBefore.blocks && after.props == sChangeBefore.props)
+    if (after.blocks == sChangeBefore.blocks && after.props == sChangeBefore.props && after.adds == sChangeBefore.adds)
         return;   // (nothing changed: no undo step)
     sUndo.push_back(UndoStep{map, sChangeBefore, after});
     if (sUndo.size() > 500)
@@ -348,7 +374,7 @@ bool InChange()
 
 static void Restore(int map, const MapEdits &e)
 {
-    if (e.blocks.empty() && e.props.empty())
+    if (e.Empty())
         sEdits.erase(map);
     else
         sEdits[map] = e;
@@ -401,7 +427,7 @@ int EditedMapCount()
 {
     int n = 0;
     for (auto &e : sEdits)
-        if (!e.second.blocks.empty() || !e.second.props.empty())
+        if (!e.second.Empty())
             n++;
     return n;
 }

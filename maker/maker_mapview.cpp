@@ -47,6 +47,7 @@ static int sRectX0, sRectY0, sLastX = -1, sLastY = -1;
 // dragging an event
 static int sDragKind, sDragIndex = -1, sDragDX, sDragDY;
 static bool sDragMoved;
+static int sAddX, sAddY;   // where Events mode's right-click menu adds
 
 // the open map's own people, warps, signs, triggers (as built)
 static std::vector<MakerObjectInfo> sObjs;
@@ -264,6 +265,61 @@ static MakerCoordInfo CurCoord(int i)
     return c;
 }
 
+// What the user added ("add person 1 x=.. ..."): its properties, by key
+static std::map<std::string, std::string> *Added(const std::string &key)
+{
+    const MapEdits *e = FindEdits(gEd.map);
+    if (!e || !e->adds.count(key))
+        return nullptr;
+    return &Edits(gEd.map).adds[key];
+}
+
+static int AddedInt(const std::map<std::string, std::string> &a, const char *k, int def)
+{
+    auto it = a.find(k);
+    return it == a.end() ? def : atoi(it->second.c_str());
+}
+
+static long AddedNamed(const std::map<std::string, std::string> &a, const char *k, int table, long def)
+{
+    auto it = a.find(k);
+    unsigned v;
+    if (it == a.end() || !MakerApi_ValueOf(table, it->second.c_str(), &v))
+        return def;
+    return v;
+}
+
+static std::vector<std::string> AddedKeys()
+{
+    std::vector<std::string> keys;
+    if (const MapEdits *e = FindEdits(gEd.map))
+        for (auto &a : e->adds)
+            keys.push_back(a.first);
+    return keys;
+}
+
+// An added person as the game will have it
+static MakerObjectInfo AddedPerson(const std::map<std::string, std::string> &a)
+{
+    MakerObjectInfo o;
+    memset(&o, 0, sizeof(o));
+    o.x = AddedInt(a, "x", 0);
+    o.y = AddedInt(a, "y", 0);
+    o.elevation = AddedInt(a, "elevation", 3);
+    o.graphicsId = (int)AddedNamed(a, "look", MAKER_NAMES_GFX, 0);
+    o.movementType = (int)AddedNamed(a, "movement", MAKER_NAMES_MOVEMENT, 0);
+    o.rangeX = AddedInt(a, "range_x", 0);
+    o.rangeY = AddedInt(a, "range_y", 0);
+    o.facing = MakerApi_MovementFacing(o.movementType);
+    o.localIdName = o.gfxName = o.scriptName = "";
+    return o;
+}
+
+static bool Removed(const char *kind, const std::string &key)
+{
+    return CurrentProp(gEd.map, kind, key, "removed", 0) != 0;
+}
+
 // An event's kind and key for edits
 static void EventKey(int kind, int i, const char **k, std::string *key)
 {
@@ -280,6 +336,13 @@ static void EventPos(int kind, int i, int *x, int *y, int *bx, int *by)
 {
     switch (kind)
     {
+    case SEL_ADDED:
+    {
+        auto *a = Added(gEd.selAdded);
+        *x = *bx = a ? AddedInt(*a, "x", 0) : 0;
+        *y = *by = a ? AddedInt(*a, "y", 0) : 0;
+        break;
+    }
     case SEL_OBJECT: { MakerObjectInfo c = CurPerson(i); *x = c.x; *y = c.y; *bx = sObjs[i].x; *by = sObjs[i].y; break; }
     case SEL_WARP: { MakerWarpInfo c = CurWarp(i); *x = c.x; *y = c.y; *bx = sWarps[i].x; *by = sWarps[i].y; break; }
     case SEL_BG: { MakerBgInfo c = CurBg(i); *x = c.x; *y = c.y; *bx = sBgs[i].x; *by = sBgs[i].y; break; }
@@ -294,6 +357,17 @@ static void MoveEvent(int kind, int i, int x, int y)
     int cx, cy, bx, by;
     if (x < 0 || y < 0 || x >= sW || y >= sH)
         return;
+    if (kind == SEL_ADDED)
+    {
+        BeginChange(gEd.map);
+        if (auto *a = Added(gEd.selAdded))
+        {
+            (*a)["x"] = std::to_string(x);
+            (*a)["y"] = std::to_string(y);
+        }
+        EndChange();
+        return;
+    }
     EventKey(kind, i, &k, &key);
     EventPos(kind, i, &cx, &cy, &bx, &by);
     if (x == cx && y == cy)
@@ -531,19 +605,60 @@ static void DrawEvents(ImDrawList *dl, ImVec2 origin, float s)
             Marker(dl, at(c.x, c.y), s, IM_COL32(230, 120, 20, 255), "W", gEd.selKind == SEL_WARP && gEd.selIndex == (int)i);
         }
     }
+    // what the user added (a green + in its corner)
+    for (const std::string &key : AddedKeys())
+    {
+        const std::map<std::string, std::string> &a = *Added(key);
+        bool sel = gEd.selKind == SEL_ADDED && gEd.selAdded == key;
+        ImVec2 p = at(AddedInt(a, "x", 0), AddedInt(a, "y", 0));
+        if (key.rfind("person", 0) == 0)
+        {
+            if (!gEd.viewNpcs && !events)
+                continue;
+            DrawPerson(dl, AddedPerson(a), p, s, sel, events, IM_COL32_WHITE);
+        }
+        else if (events)
+            Marker(dl, p, s, key.rfind("hidden", 0) == 0 ? IM_COL32(40, 160, 90, 255) : IM_COL32(200, 40, 120, 255),
+                   key.rfind("hidden", 0) == 0 ? "H" : "S", sel);
+        else
+            continue;
+        if (events)
+        {
+            dl->AddRectFilled(ImVec2(p.x + s * 0.62f, p.y), ImVec2(p.x + s, p.y + s * 0.38f), IM_COL32(30, 160, 60, 255));
+            dl->AddText(gEd.fontBold, s * 0.36f, ImVec2(p.x + s * 0.7f, p.y - s * 0.02f), IM_COL32(255, 255, 255, 255), "+");
+        }
+    }
     if (!gEd.viewNpcs && !events)
         return;
     for (size_t i = 0; i < sObjs.size(); i++)
     {
         MakerObjectInfo o = CurPerson((int)i);
         bool sel = gEd.selKind == SEL_OBJECT && gEd.selIndex == (int)i;
-        DrawPerson(dl, o, at(o.x, o.y), s, sel, events, IM_COL32_WHITE);
+        bool gone = Removed("person", PersonKey((int)i));
+        if (gone && !events)
+            continue;
+        DrawPerson(dl, o, at(o.x, o.y), s, sel, events, gone ? IM_COL32(255, 255, 255, 70) : IM_COL32_WHITE);
+        if (gone)
+        {
+            ImVec2 p = at(o.x, o.y);
+            dl->AddLine(ImVec2(p.x + 3, p.y + 3), ImVec2(p.x + s - 3, p.y + s - 3), IM_COL32(220, 30, 30, 230), 3);
+            dl->AddLine(ImVec2(p.x + s - 3, p.y + 3), ImVec2(p.x + 3, p.y + s - 3), IM_COL32(220, 30, 30, 230), 3);
+        }
     }
 }
 
-// What's at a tile (Events mode): people first, then warps, signs, triggers
+// What's at a tile (Events mode): what the user added first, then people, warps, signs, triggers
 static bool PickEvent(int tx, int ty, int *kind, int *index)
 {
+    for (const std::string &key : AddedKeys())
+    {
+        const std::map<std::string, std::string> &a = *Added(key);
+        if (AddedInt(a, "x", -1) == tx && AddedInt(a, "y", -1) == ty)
+        {
+            gEd.selAdded = key;
+            return *kind = SEL_ADDED, *index = 0, true;
+        }
+    }
     for (size_t i = 0; i < sObjs.size(); i++)
     {
         MakerObjectInfo o = CurPerson((int)i);
@@ -580,6 +695,17 @@ static void MouseOnMap(int tx, int ty, bool inside)
     int cx = tx < 0 ? 0 : (tx >= sW ? sW - 1 : tx), cy = ty < 0 ? 0 : (ty >= sH ? sH - 1 : ty);
     if (gEd.mode == MODE_EVENTS)
     {
+        if (r && inside)
+        {
+            int k, i;
+            if (PickEvent(tx, ty, &k, &i))
+                gEd.selKind = k, gEd.selIndex = i;
+            else
+            {
+                sAddX = tx, sAddY = ty;
+                ImGui::OpenPopup("add");
+            }
+        }
         if (l && inside)
         {
             int k, i;
@@ -685,6 +811,109 @@ static void MouseOnMap(int tx, int ty, bool inside)
     }
 }
 
+// The map's own scripts by label (its people's, signs', triggers'): what an added person or sign can use
+static std::vector<std::string> MapScripts(bool signsOnly)
+{
+    std::vector<std::string> out;
+    auto add = [&](const char *s) {
+        if (s && s[0] && std::find(out.begin(), out.end(), s) == out.end())
+            out.push_back(s);
+    };
+    for (auto &b : sBgs)
+        if (!strstr(b.typeName, "hidden"))
+            add(b.scriptName);
+    if (!signsOnly)
+    {
+        for (auto &o : sObjs)
+            add(o.scriptName);
+        for (auto &c : sCoords)
+            add(c.scriptName);
+    }
+    return out;
+}
+
+// Adds a person, item ball, hidden item or sign at x, y (Events mode's right-click; tests)
+static void AddEvent(const char *what, int x, int y)
+{
+    MapEdits &e = Edits(gEd.map);
+    int n = 1;
+    for (auto &a : e.adds)
+        n = std::max(n, atoi(a.first.substr(a.first.find(' ') + 1).c_str()) + 1);
+    std::map<std::string, std::string> a;
+    std::string w = what, kind = "person";
+    a["x"] = std::to_string(x);
+    a["y"] = std::to_string(y);
+    a["elevation"] = std::to_string((Cur(x, y) >> 12) & 15);
+    if (w == "person")
+    {
+        a["look"] = "OBJ_EVENT_GFX_BOY_1";
+        a["movement"] = "MOVEMENT_TYPE_FACE_DOWN";
+        a["script"] = "nothing";
+    }
+    else if (w == "itemball")
+    {
+        a["look"] = "OBJ_EVENT_GFX_ITEM_BALL";
+        a["movement"] = "MOVEMENT_TYPE_LOOK_AROUND";
+        a["script"] = "itemball";
+        a["item"] = "ITEM_POTION";
+    }
+    else if (w == "hidden")
+    {
+        kind = "hidden";
+        a["item"] = "ITEM_POTION";
+    }
+    else
+    {
+        kind = "sign";
+        std::vector<std::string> signs = MapScripts(true);
+        if (signs.empty())
+            return;
+        a["script"] = signs[0];
+    }
+    std::string key = kind + " " + std::to_string(n);
+    BeginChange(gEd.map);
+    Edits(gEd.map).adds[key] = a;
+    EndChange();
+    gEd.selKind = SEL_ADDED;
+    gEd.selAdded = key;
+}
+
+static void AddMenu()
+{
+    if (!ImGui::BeginPopup("add"))
+        return;
+    ImGui::TextDisabled("At %d, %d", sAddX, sAddY);
+    if (ImGui::MenuItem("Add a person here"))
+        AddEvent("person", sAddX, sAddY);
+    if (ImGui::MenuItem("Add an item ball here"))
+        AddEvent("itemball", sAddX, sAddY);
+    if (ImGui::MenuItem("Add a hidden item here"))
+        AddEvent("hidden", sAddX, sAddY);
+    if (ImGui::MenuItem("Add a sign here", NULL, false, !MapScripts(true).empty()))
+        AddEvent("sign", sAddX, sAddY);
+    ImGui::EndPopup();
+}
+
+static void DeleteSelected()
+{
+    const char *k;
+    std::string key;
+    if (gEd.selKind == SEL_ADDED)
+    {
+        BeginChange(gEd.map);
+        Edits(gEd.map).adds.erase(gEd.selAdded);
+        EndChange();
+        gEd.selKind = SEL_NONE;
+        return;
+    }
+    if (gEd.selKind == SEL_NONE || gEd.selKind == SEL_WARP)
+        return;   // (warps stay: other maps' doors lead to them by number)
+    EventKey(gEd.selKind, gEd.selIndex, &k, &key);
+    BeginChange(gEd.map);
+    SetProp(gEd.map, k, key, "removed", 0, Removed(k, key) ? 0 : 1);
+    EndChange();
+}
+
 void MapView_Panel()
 {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -705,6 +934,9 @@ void MapView_Panel()
     LoadMap();
     if (MakerApi_TakeTilesChanged() || !sAtlas)
         RenderAtlas();
+    if (gEd.mode == MODE_EVENTS && ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows) && !ImGui::GetIO().WantTextInput
+     && ImGui::IsKeyPressed(ImGuiKey_Delete, false))
+        DeleteSelected();
     float s = 16.0f * gEd.zoom;
     ImGui::SetNextWindowContentSize(ImVec2(sW * s + 64, sH * s + 64));
     ImGui::BeginChild("canvas", ImVec2(0, 0), ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoMove);
@@ -830,6 +1062,7 @@ void MapView_Panel()
         else
             dl->AddRect(p, ImVec2(p.x + s, p.y + s), IM_COL32(255, 220, 0, 255), 0, 0, 3);
     }
+    AddMenu();
     // Ctrl + wheel: zoom round the mouse
     ImGuiIO &io = ImGui::GetIO();
     if (hovered && io.KeyCtrl && io.MouseWheel != 0)
@@ -1099,10 +1332,91 @@ static void IntField(const char *label, const char *id, const char *kind, const 
     }
 }
 
+// The details of something the user added
+static void AddedInspector()
+{
+    auto *ap = Added(gEd.selAdded);
+    if (!ap)
+    {
+        gEd.selKind = SEL_NONE;
+        return;
+    }
+    std::string key = gEd.selAdded;
+    bool person = key.rfind("person", 0) == 0, hidden = key.rfind("hidden", 0) == 0;
+    bool itemball = person && (*ap)["script"] == "itemball";
+    ImGui::Spacing();
+    ImGui::PushFont(gEd.fontBold);
+    ImGui::SeparatorText(itemball ? "ITEM BALL (ADDED)" : person ? "PERSON (ADDED)" : hidden ? "HIDDEN ITEM (ADDED)" : "SIGN (ADDED)");
+    ImGui::PopFont();
+    if (!ImGui::BeginTable("added", 2, ImGuiTableFlags_SizingStretchProp))
+        return;
+    ImGui::TableSetupColumn("k", ImGuiTableColumnFlags_WidthFixed, 80 * gEd.uiScale);
+    ImGui::TableSetupColumn("v", ImGuiTableColumnFlags_WidthStretch);
+    auto setv = [&](const char *k, const std::string &v) {
+        BeginChange(gEd.map);
+        if (auto *a = Added(key))
+            (*a)[k] = v;
+        EndChange();
+    };
+    auto named = [&](const char *label, const char *id, const char *k, int table) {
+        Label(label);
+        long v = AddedNamed(*Added(key), k, table, 0);
+        if (NamePicker(id, table, &v))
+            setv(k, MakerApi_NameOf(table, (unsigned)v));
+    };
+    auto slider = [&](const char *label, const char *id, const char *k, int def, int hi) {
+        Label(label);
+        int v = AddedInt(*Added(key), k, def);
+        ImGui::SetNextItemWidth(-FLT_MIN);
+        if (ImGui::SliderInt(id, &v, 0, hi))
+        {
+            BeginChange(gEd.map);
+            (*Added(key))[k] = std::to_string(v);
+        }
+    };
+    Label("At");
+    ImGui::Text("%d, %d", AddedInt(*ap, "x", 0), AddedInt(*ap, "y", 0));
+    slider("Elevation", "##ael", "elevation", 3, 15);
+    if (person && !itemball)
+    {
+        named("Look", "##alook", "look", MAKER_NAMES_GFX);
+        named("Moves", "##amove", "movement", MAKER_NAMES_MOVEMENT);
+        slider("Range X", "##arx", "range_x", 0, 15);
+        slider("Range Y", "##ary", "range_y", 0, 15);
+    }
+    if (itemball || hidden)
+        named("Item", "##aitem", "item", MAKER_NAMES_ITEM);
+    if (!hidden && !itemball)
+    {
+        Label("Does");
+        std::string cur = (*ap)["script"];
+        ImGui::SetNextItemWidth(-FLT_MIN);
+        if (ImGui::BeginCombo("##ascript", cur == "nothing" ? "Nothing yet" : cur.c_str(), ImGuiComboFlags_HeightLarge))
+        {
+            if (person && ImGui::Selectable("Nothing yet", cur == "nothing"))
+                setv("script", "nothing");
+            ImGui::TextDisabled(person ? "...or what one of this map's own does:" : "Reads one of this map's own signs:");
+            for (const std::string &sc : MapScripts(!person))
+                if (ImGui::Selectable(sc.c_str(), sc == cur))
+                    setv("script", sc);
+            ImGui::EndCombo();
+        }
+    }
+    ImGui::EndTable();
+    if (ImGui::Button("Remove it (Delete)"))
+        DeleteSelected();
+    ImGui::TextDisabled("Drag it on the map to move it.");
+}
+
 void MapView_Inspector()
 {
     if (gEd.selKind == SEL_NONE || gEd.map != sLoadedMap)
         return;
+    if (gEd.selKind == SEL_ADDED)
+    {
+        AddedInspector();
+        return;
+    }
     ImGui::Spacing();
     ImGui::PushFont(gEd.fontBold);
     static const char *const kKinds[] = {"", "PERSON", "WARP", "SIGN", "TRIGGER"};
@@ -1215,6 +1529,14 @@ void MapView_Inspector()
         ImGui::TextWrapped("%s", c.scriptName);
     }
     ImGui::EndTable();
+    if (gEd.selKind != SEL_WARP)
+    {
+        const char *k;
+        std::string key;
+        EventKey(gEd.selKind, gEd.selIndex, &k, &key);
+        if (ImGui::Button(Removed(k, key) ? "Bring it back" : "Remove it from the map (Delete)"))
+            DeleteSelected();
+    }
     ImGui::TextDisabled("Drag it on the map to move it.");
 }
 
@@ -1264,7 +1586,7 @@ static std::vector<Problem> Problems()
         {
             for (size_t i = 0; i < sObjs.size(); i++)
                 if (PersonKey((int)i) == key)
-                    base = BasePersonProp(sObjs[i], pr);
+                    base = pr == "removed" ? 0 : BasePersonProp(sObjs[i], pr);
         }
         else if (k == "warp" && atoi(key) < (int)sWarps.size())
         {
@@ -1279,7 +1601,7 @@ static std::vector<Problem> Problems()
             {
                 int bx = sign ? sBgs[i].x : sCoords[i].x, by = sign ? sBgs[i].y : sCoords[i].y;
                 if (SpotKey(sign ? sBgs[i].scriptName : sCoords[i].scriptName, bx, by) == key)
-                    base = pr == "x" ? bx : pr == "y" ? by : LONG_MIN;
+                    base = pr == "x" ? bx : pr == "y" ? by : pr == "removed" ? 0 : LONG_MIN;
             }
         }
         if (base == LONG_MIN)
@@ -1459,6 +1781,25 @@ void MapView_TestCommand(const char *cmd, const char *arg)
         for (auto &kv : behaviors)
             printf(" %02X=%d", kv.first, kv.second);
         printf("\n");
+    }
+    else if (c == "add")
+    {
+        char what[16];
+        int x = 0, y = 0;
+        if (sscanf(arg, "%15s %d %d", what, &x, &y) == 3)
+            AddEvent(what, x, y);
+    }
+    else if (c == "delete")
+        DeleteSelected();
+    else if (c == "set" && gEd.selKind == SEL_ADDED)
+    {
+        char k[32], v[96];
+        if (sscanf(arg, "%31s %95s", k, v) == 2)
+        {
+            BeginChange(gEd.map);
+            (*Added(gEd.selAdded))[k] = v;
+            EndChange();
+        }
     }
     else if (c == "problems")
         printf("[maker] problems %s: %d\n", gEd.map >= 0 ? gEd.maps[gEd.map].name : "-", MapView_ProblemCount());

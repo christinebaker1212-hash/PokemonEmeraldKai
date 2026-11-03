@@ -23,7 +23,7 @@ static const char *const kModeKeys[MODE_COUNT] = {"F1", "F2", "F3", "F4"};
 static const char *const kToolNames[TOOL_COUNT] = {"Pencil", "Rectangle", "Fill", "Picker"};
 static const char *const kToolKeys[TOOL_COUNT] = {"P", "R", "F", "I"};
 
-enum { SEL_NONE, SEL_OBJECT, SEL_WARP, SEL_BG, SEL_COORD };
+enum { SEL_NONE, SEL_OBJECT, SEL_WARP, SEL_BG, SEL_COORD, SEL_ADDED };
 
 enum Icon
 {
@@ -45,6 +45,8 @@ struct MapEdits
     int w = 0, h = 0;
     std::map<int, std::pair<int, int>> blocks;   // was, now
     std::map<std::string, PropEdit> props;
+    std::map<std::string, std::map<std::string, std::string>> adds;   // "person 1" -> {"x": "10", "look": "OBJ_..."}
+    bool Empty() const { return blocks.empty() && props.empty() && adds.empty(); }
 };
 
 struct Place
@@ -82,6 +84,7 @@ struct Editor
     int hoverX = -1, hoverY = -1;   // the tile under the mouse in the MAP panel
     int hoverBlock = -1;
     int selKind = 0, selIndex = -1;   // the selected event in the MAP panel: SEL_*
+    std::string selAdded;             // SEL_ADDED: its key in the map's adds ("person 1")
     int recovered = 0;                // maps whose unsaved edits came back from the recovery files
     std::string message;              // the status bar's last message ("Saved 3 maps")
     std::string title;

@@ -539,6 +539,10 @@ static void StoreSaveFile()
     MP_Life_WriteSidecar();  // Moemon Co-op: MOéMON GARDEN, the A-Life (mp_life.c)
     Tcg_WriteSidecar();      // Moemon Kai: the card game's collection (src/tcg/tcg_integration.c)
     MP_Region_WriteSidecar();   // Moemon Kai: Johto / Kanto progress (src/mp/mp_region.c)
+    {
+        void Maker_Flags_WriteSidecar(void);
+        Maker_Flags_WriteSidecar();   // Moemon Maker: flags of what the edits add (src/maker/maker_flags.c)
+    }
     MP_Boxes_WriteSidecar();    // Moemon Kai: PC boxes 15-40 (src/mp/mp_boxes.c)
     {
         void MP_Phone_WriteSidecar(void);

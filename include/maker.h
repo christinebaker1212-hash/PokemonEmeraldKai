@@ -28,6 +28,15 @@ const struct MakerBgName *Maker_BgName(int i);
 const struct MakerCoordName *Maker_CoordName(int i);
 const struct MapHeader *Maker_BaseMapHeader(u16 mapGroup, u16 mapNum);   // the map as built (never the edited one)
 
+// Flags for what the edits add (src/maker/maker_flags.c): ids past the save's, kept by name in "<save>.maker"
+#define MAKER_FLAGS_START 0x8000
+#define MAKER_FLAGS_COUNT 0x2000
+u16 Maker_FlagId(const char *name);
+u8 *Maker_FlagPointer(u16 id);
+void Maker_Flags_NewGame(void);
+void Maker_Flags_LoadFromSave(void);
+void Maker_Flags_WriteSidecar(void);
+
 // The editor (src/maker/maker_main.c)
 void Maker_Open(void);          // from the main menu: the editor window opens, the game waits on a black screen
 bool8 Maker_IsOpen(void);

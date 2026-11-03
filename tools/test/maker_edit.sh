@@ -46,6 +46,12 @@ maker pick 16 10
 maker move 12 10
 maker prop look OBJ_EVENT_GFX_BOY_1
 maker prop movement MOVEMENT_TYPE_FACE_DOWN
+maker add itemball 10 12
+maker set item ITEM_SUPER_POTION
+maker add hidden 11 13
+maker add person 14 14
+maker pick 14 17
+maker delete
 wait 4
 maker problems
 makershot edited
@@ -70,13 +76,18 @@ want "$F" "^block 2 15 "                                # (the rectangle)
 want "$F" "^person LOCALID_LITTLEROOT_TWIN x 16 12"
 want "$F" "^person LOCALID_LITTLEROOT_TWIN look OBJ_EVENT_GFX_TWIN OBJ_EVENT_GFX_BOY_1"
 want "$F" "^person LOCALID_LITTLEROOT_TWIN movement MOVEMENT_TYPE_WANDER_AROUND MOVEMENT_TYPE_FACE_DOWN"
+want "$F" "^add person 1 .*item=ITEM_SUPER_POTION .*script=itemball .*x=10 y=12"
+want "$F" "^add hidden 2 .*item=ITEM_POTION .*x=11 y=13"
+want "$F" "^add person 3 .*look=OBJ_EVENT_GFX_BOY_1"
+want "$F" "^person LittlerootTown_EventScript_[A-Za-z0-9_]*@14,17 removed 0 1"   # (no LOCALID: known by its script and spot)
 [ -e "$T/mm/.recovery/MAP_LITTLEROOT_TOWN.txt" ] && { echo "FAIL: the recovery file stayed after saving"; fail=1; }
 # the game reads them: a quick start in LITTLEROOT TOWN, the edits used (nothing left out)
-printf 'pressuntil A field 5000\nwait 60\nshot field\nquit\n' > "$T/play.txt"
+printf 'pressuntil A field 5000\nwait 60\nshot field\nmp checkitem 22\npress UP 2\nwait 20\npress A 2\nwait 40\nmash A 12 20\nwait 40\nmp checkitem 22\nquit\n' > "$T/play.txt"
 (cd "$T" && env SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy MOEMON_NO_UPDATE=1 MOEMON_TEST="$T/play.txt" \
     MOEMON_SHOTDIR="$T/shots" MOEMON_SKIP_COOP_SETUP=1 MOEMON_COOP_CONFIG="$T/play.ini" MOEMON_DEBUG_QUICKSTART=1 \
     MOEMON_DEBUG_WARP=0,9,10,13 MOEMON_MAKER_DIR="$T/mm" MOEMON_SAVE="$T/play.sav" timeout 150 "$BIN" > "$T/play.log" 2>&1)
 want "$T/play.log" "\[maker\] 1 edited maps"
 grep -q "left out" "$T/play.log" && { echo "FAIL: the game left edits out"; fail=1; }
+grep -q "\[test\] item 22: 1" "$T/play.log" || { echo "FAIL: the added item ball's SUPER POTION wasn't picked up"; fail=1; }
 [ $fail = 0 ] && echo "maker_edit: OK"
 exit $fail

@@ -8,8 +8,14 @@
 //   warp INDEX PROP WAS NOW                        PROP: x y elevation dest (MAP_X:N)
 //   sign KEY PROP WAS NOW                          KEY: SCRIPT@X,Y
 //   trigger KEY PROP WAS NOW                       KEY: SCRIPT@X,Y
+//   add person N x=.. y=.. elevation=.. look=.. movement=.. range_x=.. range_y=.. script=.. item=.. flag=..
+//   add hidden N x=.. y=.. elevation=.. item=..    a hidden item
+//   add sign N x=.. y=.. elevation=.. script=..    a sign reading one of the map's own signs' scripts
 //
-// Person PROPs: x y elevation look movement range_x range_y trainer sight flag (values by name where they have one).
+// Person PROPs: x y elevation look movement range_x range_y trainer sight flag (values by name where they have one);
+// "removed" 0 1 takes a person, sign or trigger away. An added person's script is one the map's own people, signs or
+// triggers use (by its label), "itemball" (an item ball holding item=, taken once: a Maker flag of its own) or
+// "nothing".
 //
 // An edit applies only while the game still has its WAS there: where a later update changed the same thing, the
 // game's new version wins and the editor shows the clash (nothing is ever applied blindly). The edits reach the map
@@ -26,18 +32,27 @@
 #include "global.fieldmap.h"
 #include "overworld.h"
 #include "s3d.h"
+#include "event_data.h"
+#include "constants/event_bg.h"
+#include "constants/flags.h"
+#include "constants/items.h"
 #include "maker.h"
 #include "maker_api.h"
+
+extern const u8 Maker_EventScript_ItemBall[];
+extern const u8 Maker_EventScript_Nothing[];
 
 const char *Updater_ExeFile(const char *name);
 
 enum { KIND_PERSON, KIND_WARP, KIND_SIGN, KIND_TRIGGER };
 enum { PROP_X, PROP_Y, PROP_ELEVATION, PROP_LOOK, PROP_MOVEMENT, PROP_RANGE_X, PROP_RANGE_Y, PROP_TRAINER, PROP_SIGHT,
-       PROP_FLAG, PROP_DEST, PROP_COUNT };
+       PROP_FLAG, PROP_DEST, PROP_REMOVED, PROP_ITEM, PROP_COUNT };
 static const char *const sPropNames[PROP_COUNT] = {"x", "y", "elevation", "look", "movement", "range_x", "range_y",
-                                                   "trainer", "sight", "flag", "dest"};
+                                                   "trainer", "sight", "flag", "dest", "removed", "item"};
 
 struct BlockEdit { u16 x, y, was, now; };
+enum { ADD_PERSON, ADD_HIDDEN, ADD_SIGN };
+struct AddEdit { u8 kind; u16 n; s32 v[PROP_COUNT]; bool8 has[PROP_COUNT]; char script[80]; };
 struct PropEdit { u8 kind, prop; char key[80]; s32 was, now; };
 
 struct MapEdits
@@ -48,6 +63,8 @@ struct MapEdits
     u32 blockCount, blockCap;
     struct PropEdit *props;
     u32 propCount, propCap;
+    struct AddEdit *adds;
+    u32 addCount, addCap;
     // built from the edits: the patched header (NULL until asked for) and blocks
     struct MapHeader *header;
     struct MapEvents *events;
@@ -80,6 +97,7 @@ static bool8 ParseValue(u8 prop, const char *s, s32 *out)
     case PROP_MOVEMENT: table = MAKER_NAMES_MOVEMENT; break;
     case PROP_TRAINER: table = MAKER_NAMES_TRAINERTYPE; break;
     case PROP_FLAG: table = MAKER_NAMES_FLAG; break;
+    case PROP_ITEM: table = MAKER_NAMES_ITEM; break;
     case PROP_DEST:
     {
         // MAP_X:N -> map index << 8 | warp id
@@ -138,6 +156,7 @@ static void FreeEdits(int map)
     FreeBuilt(e);
     free(e->blocks);
     free(e->props);
+    free(e->adds);
     free(e);
     sEdits[map] = NULL;
 }
@@ -166,6 +185,51 @@ static void AddProp(struct MapEdits *e, u8 kind, const char *key, u8 prop, s32 w
     snprintf(p->key, sizeof(p->key), "%s", key);
     p->was = was;
     p->now = now;
+}
+
+// "add KIND N k=v k=v..."
+static bool8 ParseAdd(struct MapEdits *e, const char *line)
+{
+    static const char *const sKinds[] = {"person", "hidden", "sign"};
+    char kind[16], word[128];
+    const char *p;
+    int n, used, k, prop;
+    struct AddEdit a;
+    if (sscanf(line, "add %15s %d %n", kind, &n, &used) < 2)
+        return FALSE;
+    for (k = 0; k < 3 && strcmp(kind, sKinds[k]) != 0; k++)
+        ;
+    if (k == 3)
+        return FALSE;
+    memset(&a, 0, sizeof(a));
+    a.kind = k;
+    a.n = n;
+    for (p = line + used; sscanf(p, "%127s%n", word, &used) == 1; p += used)
+    {
+        char *eq = strchr(word, '=');
+        if (!eq)
+            return FALSE;
+        *eq = 0;
+        if (strcmp(word, "script") == 0)
+        {
+            snprintf(a.script, sizeof(a.script), "%s", eq + 1);
+            continue;
+        }
+        for (prop = 0; prop < PROP_COUNT && strcmp(word, sPropNames[prop]) != 0; prop++)
+            ;
+        if (prop == PROP_COUNT || !ParseValue(prop, eq + 1, &a.v[prop]))
+            return FALSE;
+        a.has[prop] = TRUE;
+    }
+    if (!a.has[PROP_X] || !a.has[PROP_Y])
+        return FALSE;
+    if (e->addCount == e->addCap)
+    {
+        e->addCap = e->addCap ? e->addCap * 2 : 8;
+        e->adds = realloc(e->adds, e->addCap * sizeof(*e->adds));
+    }
+    e->adds[e->addCount++] = a;
+    return TRUE;
 }
 
 // One map's edits from their text (the file's, or the editor's); returns the map, or -1
@@ -214,6 +278,11 @@ static int ParseEdits(const char *text, const char *from)
             continue;
         if (strcmp(word[0], "block") == 0 && n == 5)
             AddBlock(e, atoi(word[1]), atoi(word[2]), strtol(word[3], NULL, 0), strtol(word[4], NULL, 0));
+        else if (strcmp(word[0], "add") == 0)
+        {
+            if (!ParseAdd(e, line))
+                printf("[maker] %s line %d: not understood (left out): %s\n", from, lineNo, line);
+        }
         else if (n == 5)
         {
             static const char *const sKinds[] = {"person", "warp", "sign", "trigger"};
@@ -344,6 +413,27 @@ static s32 *PersonField(struct ObjectEventTemplate *t, u8 prop, s32 *tmp)
     return NULL;
 }
 
+// A script by its label among the map's own (its people's, signs', triggers'), or the Maker's own
+static const u8 *ScriptOnMap(int map, const struct MapEvents *be, const char *label)
+{
+    const struct MakerMapEventNames *names = Maker_MapEventNames(map);
+    u32 i;
+    if (strcmp(label, "itemball") == 0)
+        return Maker_EventScript_ItemBall;
+    if (strcmp(label, "nothing") == 0 || label[0] == 0 || names == NULL)
+        return Maker_EventScript_Nothing;
+    for (i = 0; i < be->objectEventCount && i < names->objCount; i++)
+        if (strcmp(Maker_ObjName(names->obj + i)->script, label) == 0)
+            return be->objectEvents[i].script;
+    for (i = 0; i < be->bgEventCount && i < names->bgCount; i++)
+        if (be->bgEvents[i].kind != BG_EVENT_HIDDEN_ITEM && strcmp(Maker_BgName(names->bg + i)->script, label) == 0)
+            return be->bgEvents[i].bgUnion.script;
+    for (i = 0; i < be->coordEventCount && i < names->coordCount; i++)
+        if (strcmp(Maker_CoordName(names->coord + i)->script, label) == 0)
+            return be->coordEvents[i].script;
+    return Maker_EventScript_Nothing;
+}
+
 static void SetPerson(struct ObjectEventTemplate *t, u8 prop, s32 v)
 {
     switch (prop)
@@ -383,19 +473,47 @@ static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
         return e->header;
     e->events = malloc(sizeof(*e->events));
     *e->events = *be;
-    objs = malloc(sizeof(*objs) * (be->objectEventCount + 1));
+    objs = malloc(sizeof(*objs) * (be->objectEventCount + e->addCount + 1));
     warps = malloc(sizeof(*warps) * (be->warpCount + 1));
-    bgs = malloc(sizeof(*bgs) * (be->bgEventCount + 1));
+    bgs = malloc(sizeof(*bgs) * (be->bgEventCount + e->addCount + 1));
     coords = malloc(sizeof(*coords) * (be->coordEventCount + 1));
     memcpy(objs, be->objectEvents, sizeof(*objs) * be->objectEventCount);
     memcpy(warps, be->warps, sizeof(*warps) * be->warpCount);
     memcpy(bgs, be->bgEvents, sizeof(*bgs) * be->bgEventCount);
     memcpy(coords, be->coordEvents, sizeof(*coords) * be->coordEventCount);
+    // (taken away: marked, then left out below)
+    u8 *objGone = calloc(be->objectEventCount + 1, 1), *bgGone = calloc(be->bgEventCount + 1, 1);
+    u8 *coordGone = calloc(be->coordEventCount + 1, 1);
     for (j = 0; j < e->propCount; j++)
     {
         const struct PropEdit *p = &e->props[j];
         bool8 applied = FALSE;
         s32 tmp, *cur;
+        if (p->prop == PROP_REMOVED)
+        {
+            u32 count = p->kind == KIND_PERSON ? be->objectEventCount : p->kind == KIND_SIGN ? be->bgEventCount : be->coordEventCount;
+            for (i = 0; i < count && p->kind != KIND_WARP; i++)
+            {
+                if (p->kind == KIND_PERSON)
+                {
+                    const struct MakerObjName *on = names && i < names->objCount ? Maker_ObjName(names->obj + i) : NULL;
+                    KeyOf(key, sizeof(key), on ? on->localId : "", on ? on->script : "", be->objectEvents[i].x, be->objectEvents[i].y);
+                }
+                else if (p->kind == KIND_SIGN)
+                    KeyOf(key, sizeof(key), "", names && i < names->bgCount ? Maker_BgName(names->bg + i)->script : "", be->bgEvents[i].x, be->bgEvents[i].y);
+                else
+                    KeyOf(key, sizeof(key), "", names && i < names->coordCount ? Maker_CoordName(names->coord + i)->script : "", be->coordEvents[i].x, be->coordEvents[i].y);
+                if (strcmp(key, p->key) == 0 && p->now)
+                {
+                    (p->kind == KIND_PERSON ? objGone : p->kind == KIND_SIGN ? bgGone : coordGone)[i] = TRUE;
+                    applied = TRUE;
+                    break;
+                }
+            }
+            if (!applied)
+                e->skipped++;
+            continue;
+        }
         switch (p->kind)
         {
         case KIND_PERSON:
@@ -491,6 +609,88 @@ static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
         if (!applied)
             e->skipped++;
     }
+    // what was taken away left out, what was added put in
+    {
+        u32 n = 0, maxLocal = 0;
+        for (i = 0; i < be->objectEventCount; i++)
+        {
+            if (be->objectEvents[i].localId > maxLocal)
+                maxLocal = be->objectEvents[i].localId;
+            if (!objGone[i])
+                objs[n++] = objs[i];
+        }
+        for (j = 0; j < e->addCount && n < OBJECT_EVENT_TEMPLATES_COUNT; j++)
+        {
+            const struct AddEdit *a = &e->adds[j];
+            struct ObjectEventTemplate *t;
+            char flagName[96];
+            if (a->kind != ADD_PERSON)
+                continue;
+            t = &objs[n++];
+            memset(t, 0, sizeof(*t));
+            t->localId = maxLocal + 1 + a->n < 255 ? maxLocal + 1 + a->n : 254;
+            SetPerson(t, PROP_LOOK, a->has[PROP_LOOK] ? a->v[PROP_LOOK] : 0);
+            t->x = a->v[PROP_X];
+            t->y = a->v[PROP_Y];
+            t->elevation = a->has[PROP_ELEVATION] ? a->v[PROP_ELEVATION] : 3;
+            t->movementType = a->has[PROP_MOVEMENT] ? a->v[PROP_MOVEMENT] : 0;
+            t->movementRangeX = a->v[PROP_RANGE_X];
+            t->movementRangeY = a->v[PROP_RANGE_Y];
+            t->trainerType = a->v[PROP_TRAINER];
+            t->script = ScriptOnMap(map, be, a->script);
+            if (strcmp(a->script, "itemball") == 0)
+            {
+                // (the item rides in the berry tree / sight field, read by Maker_ItemBallItem; taken once)
+                t->trainerRange_berryTreeId = a->v[PROP_ITEM];
+                snprintf(flagName, sizeof(flagName), "MAKER_ITEM_%s_%u", mn->name, a->n);
+                t->flagId = Maker_FlagId(flagName);
+            }
+            else
+            {
+                t->trainerRange_berryTreeId = a->v[PROP_SIGHT];
+                t->flagId = a->v[PROP_FLAG];
+            }
+        }
+        e->events->objectEventCount = n;
+        n = 0;
+        for (i = 0; i < be->bgEventCount; i++)
+            if (!bgGone[i])
+                bgs[n++] = bgs[i];
+        for (j = 0; j < e->addCount; j++)
+        {
+            const struct AddEdit *a = &e->adds[j];
+            struct BgEvent *b;
+            char flagName[96];
+            if (a->kind == ADD_PERSON)
+                continue;
+            b = &bgs[n++];
+            memset(b, 0, sizeof(*b));
+            b->x = a->v[PROP_X];
+            b->y = a->v[PROP_Y];
+            b->elevation = a->has[PROP_ELEVATION] ? a->v[PROP_ELEVATION] : 0;
+            if (a->kind == ADD_HIDDEN)
+            {
+                snprintf(flagName, sizeof(flagName), "MAKER_HIDDEN_%s_%u", mn->name, a->n);
+                b->kind = BG_EVENT_HIDDEN_ITEM;
+                b->bgUnion.hiddenItem.item = a->v[PROP_ITEM];
+                b->bgUnion.hiddenItem.hiddenItemId = Maker_FlagId(flagName) - FLAG_HIDDEN_ITEMS_START;
+            }
+            else
+            {
+                b->kind = BG_EVENT_PLAYER_FACING_ANY;
+                b->bgUnion.script = ScriptOnMap(map, be, a->script);
+            }
+        }
+        e->events->bgEventCount = n;
+        n = 0;
+        for (i = 0; i < be->coordEventCount; i++)
+            if (!coordGone[i])
+                coords[n++] = coords[i];
+        e->events->coordEventCount = n;
+    }
+    free(objGone);
+    free(bgGone);
+    free(coordGone);
     e->events->objectEvents = objs;
     e->events->warps = warps;
     e->events->bgEvents = bgs;
@@ -510,7 +710,7 @@ const struct MapHeader *Maker_EditedHeader(u16 mapGroup, u16 mapNum)
         return NULL;
     map = Maker_MapIndex(mapGroup, mapNum);
     e = EditsFor(map);
-    if (e == NULL || e->propCount == 0)
+    if (e == NULL || (e->propCount == 0 && e->addCount == 0))
         return NULL;
     return BuildHeader(map, e);
 }
@@ -565,4 +765,18 @@ const u16 *Maker_MapBlocks(const struct MapHeader *h)
     if (skipped)
         printf("[maker] %s: %u tiles left out (the game changed there since)\n", Maker_Map(map)->name, skipped);
     return e->patchedBlocks;
+}
+
+// special Maker_ItemBallItem (data/scripts/maker.inc): the item ball talked to's item, for STD_FIND_ITEM
+void Maker_ItemBallItem(void)
+{
+    u32 i;
+    gSpecialVar_0x8000 = ITEM_NONE;
+    gSpecialVar_0x8001 = 1;
+    for (i = 0; i < OBJECT_EVENT_TEMPLATES_COUNT; i++)
+        if (gSaveBlock1Ptr->objectEventTemplates[i].localId == gSpecialVar_LastTalked)
+        {
+            gSpecialVar_0x8000 = gSaveBlock1Ptr->objectEventTemplates[i].trainerRange_berryTreeId;
+            break;
+        }
 }

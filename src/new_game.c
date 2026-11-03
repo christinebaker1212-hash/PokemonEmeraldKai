@@ -173,6 +173,10 @@ void NewGameInitData(void)
     ZeroPlayerPartyMons();
     MP_Region_NewGame();   // Moemon Kai: Johto / Kanto flags and vars (mp_region.c)
     {
+        void Maker_Flags_NewGame(void);
+        Maker_Flags_NewGame();   // Moemon Maker: flags of what the edits add (src/maker/maker_flags.c)
+    }
+    {
         void MP_Phone_NewGame(void);
         MP_Phone_NewGame();   // Moemon Co-op: a new game is a new save for the phone link (mp_phone.c)
     }

@@ -1071,6 +1071,7 @@ Common_EventScript_LegendaryFlewAway::
 	.include "data/scripts/vs_cabinet.inc"
 	.include "data/scripts/dance_machine.inc"
 	.include "data/scripts/battle_sim.inc"
+	.include "data/scripts/maker.inc"
 	.include "data/text/frontier_brain.inc"
 	.include "data/text/save.inc"
 	.include "data/text/birch_speech.inc"

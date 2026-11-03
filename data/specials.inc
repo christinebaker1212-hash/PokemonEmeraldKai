@@ -670,3 +670,4 @@ gSpecials::
 	def_special QzKurtBallTaken
 	def_special QzHasApricorn
 	def_special QzKurtChooseApricorn
+	def_special Maker_ItemBallItem   @ Moemon Maker: an item ball the user put down (src/maker/maker_overrides.c)
