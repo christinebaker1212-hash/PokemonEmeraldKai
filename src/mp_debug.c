@@ -3544,6 +3544,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // the script's place as an offset from gStdScripts (nm the game for the label: tools/test/script_at.sh)
         if (ScriptContext_IsEnabled() && MP_ScriptCurrentPtr())
             printf("[test] ctx script at gStdScripts%+ld\n", (long)((const u8 *)MP_ScriptCurrentPtr() - (const u8 *)gStdScripts));
+        {
+            // (what a script waits on: the text printers going, the native wait)
+            extern void *MP_ScriptNativePtr(void);
+            extern bool16 IsTextPrinterActive(u8 id);
+            int w;
+            printf("[test] ctx printers:");
+            for (w = 0; w < 32; w++)
+                if (IsTextPrinterActive(w))
+                    printf(" %d", w);
+            printf(" native %p\n", MP_ScriptNativePtr());
+        }
     }
     else if (strcmp(cmd, "event") == 0)
     {
@@ -3724,6 +3735,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
         int x = 0, y = 0;
         sscanf(arg, "%d %d", &x, &y);
         TryRunBoulderSwitchScript(x, y);
+    }
+    else if (strcmp(cmd, "npcs") == 0)
+    {
+        // npcs: the map's people as they are now: local id, look, place, hidden by the game, off-screen hidden
+        int i;
+        for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+        {
+            struct ObjectEvent *o = &gObjectEvents[i];
+            if (!o->active || o->isPlayer)
+                continue;
+            printf("[test] npc local %d gfx %d xy %d,%d invisible %d offscreen %d\n", o->localId, OBJ_GFX_ID(o),
+                   o->currentCoords.x - MAP_OFFSET, o->currentCoords.y - MAP_OFFSET, o->invisible, o->offScreen);
+        }
     }
     else if (strcmp(cmd, "objs") == 0)
     {

@@ -293,8 +293,9 @@ void MP_Region_StartNewGame(void)
         // SINNOH: at home in TWINLEAF TOWN (no boat, no sailor), with running shoes; the first POKéMON is in PROF.
         // ROWAN's briefcase on ROUTE 201 (story_people.py: shown for a new game begun here, flag 0x3D38, until one is
         // picked, 0x3D39), the POKéDEX from him at SANDGEM's lab
+        // (in front of the TV, facing it, as Platinum's start: overworld.c CB2_NewGame; BARRY's four triggers round it)
         SetWarpDestination(MAP_GROUP(MAP_SINNOH_TWINLEAF_TOWN_PLAYER_HOUSE2F), MAP_NUM(MAP_SINNOH_TWINLEAF_TOWN_PLAYER_HOUSE2F),
-                           WARP_ID_NONE, 8, 5);
+                           WARP_ID_NONE, 4, 6);
         SetLastHealLocationWarp(HEAL_LOCATION_SINNOH_TWINLEAF_TOWN);
         VarSet(VAR_SINNOH_ARRIVAL, 2);
         FlagSet(FLAG_SINNOH_NEW_GAME);

@@ -1,0 +1,9 @@
+# Platinum's SANDGEM TOWN with the starter (SINNOH's story): stepping in from ROUTE 201, LUCAS (a girl's counterpart)
+# leads the player into PROF. ROWAN's lab, whose first visit (VAR_SANDGEM_TOWN_LAB_STATE 0x5236 0: a frame table row the
+# converter used to leave out, its GivePokedex and BufferPlayerCounterpartStarterSpeciesName unconverted) gives the
+# POKéDEX (FLAG_SYS_POKEDEX_GET 2145) and sets the lab's state 1; then out of the lab, LUCAS shows the town (local 5).
+MODE=1
+TMO=600
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=415:7 MOEMON_DEBUG_GENDER=F"
+EXPECT_A=("var 0x5236 = 1" "flag 2145 = 1" "where map 43.62" "npc local 5 gfx 1189")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -1649,6 +1649,8 @@ void CB2_NewGame(void)
     ResetSafariZoneFlag_();
     NewGameInitData();
     ResetInitialPlayerAvatarState();
+    if (MP_Region_Current() == REGION_SINNOH)
+        sInitialPlayerAvatarState.direction = DIR_NORTH;   // Moemon Kai: SINNOH's start: watching the TV, as Platinum's
     PlayTimeCounter_Start();
     ScriptContext_Init();
     UnlockPlayerFieldControls();
