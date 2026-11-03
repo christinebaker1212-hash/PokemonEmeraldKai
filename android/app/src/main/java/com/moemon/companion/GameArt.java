@@ -537,6 +537,25 @@ public final class GameArt {
         cell(c, wallpapers, id >= 16 ? 15 : id, 160, 144, 4, x, y, pix);
     }
 
+    /** A wallpaper's framed inside (below its name banner: 160x122) at any size (the multi-box view's boxes) */
+    public void wallpaperAt(Canvas c, int id, float x, float y, float w, float h) {
+        if (wallpapers == null) {
+            wallpapers = bitmap("game/wallpapers.png");
+        }
+        int i = id >= 16 ? 15 : id;
+        src.set((i % 4) * 160, (i / 4) * 144 + 22, (i % 4) * 160 + 160, (i / 4) * 144 + 144);
+        c.drawBitmap(wallpapers, src, new android.graphics.RectF(x, y, x + w, y + h), pix);
+    }
+
+    /** A POKéMON's icon at SIZE (16: half size, still whole pixels) */
+    public void iconAt(Canvas c, int species, float x, float y, float size, int how) {
+        c.save();
+        c.translate(x, y);
+        c.scale(size / 32f, size / 32f);
+        icon(c, species, 0, 0, how);
+        c.restore();
+    }
+
     /** A wallpaper at half size (80x72), for the box list */
     public void wallpaperHalf(Canvas c, int id, int x, int y) {
         if (wallpapers == null) {

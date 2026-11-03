@@ -100,13 +100,24 @@ public class ScreensTest {
         assertTrue(v.width() >= 240);
 
         // a POKéMON chosen, then a move waiting for the game (dashed)
-        int x0 = (v.width() - 160) / 2 + 8, y0 = GameView.TOP + 4 + 16;
-        tap(v, x0 + 12, y0 + 12);
+        // (the box at its scale: as large as the screen allows in whole screen pixels, BoxesPage.bk)
+        float bk = Math.max(1, Math.min(2, (float) Math.floor((v.width() - 28) * v.pixelScale() / 160f) / v.pixelScale()));
+        int wpW = Math.round(160 * bk), wpH = Math.round(144 * bk), cl = (int) (24 * bk);
+        int x0 = (v.width() - wpW) / 2 + (int) (8 * bk), y0 = GameView.TOP + 4 + (int) (16 * bk);
+        tap(v, x0 + cl / 2, y0 + cl / 2);
         shot(v, "boxes_chosen");
         Model m = app.model();
         JSONObject from = Model.boxPlace(0, 0), to = Model.boxPlace(0, 29);
         app.client.orders.add(Model.move(from, m.at(from), to, null));
         shot(v, "boxes_waiting");
+        // ALL BOXES: every box at once, the party pinned on top; SELECT two and they're outlined
+        tap(v, v.width() - 20, GameView.TOP + 4 + wpH + 6 + 2);
+        shot(v, "boxes_all");
+        tap(v, v.width() - 15, GameView.TOP + 8);
+        tap(v, 6 + 7 + 19 + 9, GameView.TOP + 62 + 14 + 9);
+        tap(v, 6 + 7 + 38 + 9, GameView.TOP + 62 + 14 + 9);
+        shot(v, "boxes_select");
+        tap(v, 12, GameView.TOP + 8);
 
         String[] names = {"boxes", "party", "bag", "dex", "spawns"};
         for (int i = 1; i < names.length; i++) {
@@ -115,8 +126,8 @@ public class ScreensTest {
         }
         // the summary's three pages, from the box's card
         v.select(0);
-        tap(v, x0 + 24 + 12, y0 + 12);
-        tap(v, 60, GameView.TOP + 4 + 144 + 6 + 36 + 22 + 20);
+        tap(v, x0 + cl + cl / 2, y0 + cl / 2);
+        tap(v, 60, GameView.TOP + 4 + wpH + 6 + 36 + 22 + 20);
         shot(v, "summary_info");
         tap(v, v.width() / 2, GameView.TOP + 112 + 8);
         shot(v, "summary_skills");

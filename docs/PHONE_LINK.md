@@ -360,5 +360,15 @@ either side as the engine's seat 0 (no SWAP, CHAOS, SUDDEN DEATH), so each phone
 not taken by the server are sent again; 3 days without a move: CLAIM WIN. Notifier TURN: a challenge, your turn.
 Test: coretest TtFriendsTest (12 games through a real server, both sides agreeing on every board).
 
-Next: the POKéMON card game and YU-GI-OH! on the phone (the same pattern: the game's engines through JNI), then the
-UI / UX pass.
+## The UI / UX pass (1.77.0 on)
+
+- BOXES: the box drawn as large as the screen allows in whole screen pixels (BoxesPage.bk: 1.5x on a 1080-wide phone),
+  and ALL BOXES (the user's ask, 2026-11-03): every box at once (each wallpaper's framed inside under a name strip, the
+  PC's places scaled), the party pinned on top; hold a POKéMON and drag it to any place of any box (the list scrolls
+  near the edges); SELECT several, then tap a box's name to send them there (each a move order, to the box's empty
+  places in the order picked; the party only near a PC). A box's name opens it in ONE BOX.
+- ON OFFER (a trade by mail) as a small orange tag on box places, and on the PC card and the PARTY's cards.
+- The tab bar: a 12x12 pixel icon for each page above its name, the chosen one on a raised plate (GameView TAB_ICONS).
+
+Next: the POKéMON card game and YU-GI-OH! on the phone (the same pattern: the game's engines through JNI), the app's
+sounds and music (the game's own), and the rest of the pass.
