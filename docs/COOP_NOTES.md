@@ -4679,3 +4679,9 @@ or the README. The updater no longer has a dev channel: AllowSmallTweaks only un
   field's camera leaves BG1's scrolled). Test region_train_ride: tools/test/check_train_scroll.py checks two frames in a
   row differ in every 8-pixel row outside the train's band and that trees fill the top and bottom rows.
 - No drop shadow in tall grass (mp_shadow.c InGrass), as the game's own grass covers the feet.
+
+## 1.82.1: no shadow behind a tile drawn over the feet
+- mp_shadow.c FeetCovered: a NORMAL / SPLIT metatile's top layer (BG1, over sprites at priority 2) with 8 or more of the
+  32 pixels of its bottom two rows drawn hides the owner's feet: no shadow (it peeked out under a 2x1 tree's leaves,
+  the user's picture). Followers and Garden POKeMON by their feet against the player's (SpriteFeetCovered). Tests
+  shadow_covered, shadow_covered_tree (check_shadow_covered.py).
