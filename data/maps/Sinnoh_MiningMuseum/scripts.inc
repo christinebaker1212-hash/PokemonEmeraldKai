@@ -143,7 +143,7 @@ Sinnoh_MiningMuseum_EventScript_Person3::
 	end
 
 Sinnoh_MiningMuseum_EventScript_Person4::
-	goto Sinnoh_EventScript_FossilScientist
+	goto SinnohP_mining_museum_2
 	end
 
 Sinnoh_MiningMuseum_EventScript_Person5::

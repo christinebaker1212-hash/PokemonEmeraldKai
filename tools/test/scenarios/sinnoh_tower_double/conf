@@ -1,8 +1,9 @@
 # SINNOH's BATTLE TOWER: DOUBLE (four POKéMON picked: Platinum's double battles): seven double battles against
 # Platinum's frontier trainers, back at the counter with the double streak 7 and 3 BATTLE POINTS. Needs the 3D pack.
+# (fast POKéMON: they knock the 1-HP foes out before a foe can make one faint, which the A presses can't handle)
 MODE=1
 TMO=900
 GEN=4
-ENV_A="MOEMON_TEST_STRONG=1 MOEMON_TEST_FOE_HP1=1 MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=143:100,248:100,149:100,6:100"
+ENV_A="MOEMON_TEST_STRONG=1 MOEMON_TEST_FOE_HP1=1 MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=135:100,142:100,169:100,291:100"
 EXPECT_A=("where map 41.8 xy 15,6" "double record 7 latest 7 room 1" "bp 3 " "tower: started mode 1")
 UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -1,0 +1,60 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp coins 25000
+mp warp 44,51,4,5
+wait 60
+waitfor field 1000
+mp face up
+press A 1
+pressuntillog A 2000 sinnoh: a list of 20 lines
+wait 20
+shot p_list
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+shot p_scrolled
+press A 1
+wait 60
+shot p_confirm
+pressuntillog A 2000 sinnoh: a list of 20 lines (scroll 14, row 4)
+wait 20
+shot p_again
+press B 1
+pressuntil A field 2000
+mp checkitem 635
+mp coins
+quit

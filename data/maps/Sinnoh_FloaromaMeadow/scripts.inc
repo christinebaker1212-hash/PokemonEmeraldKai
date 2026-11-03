@@ -11,7 +11,7 @@ Sinnoh_FloaromaMeadow_EventScript_Person2::
 	end
 
 Sinnoh_FloaromaMeadow_EventScript_Person3::
-	goto Sinnoh_EventScript_HoneySeller
+	goto SinnohP_floaroma_meadow_5
 	end
 
 Sinnoh_FloaromaMeadow_Text_Person1:

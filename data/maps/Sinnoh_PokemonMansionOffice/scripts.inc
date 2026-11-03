@@ -7,7 +7,7 @@ Sinnoh_PokemonMansionOffice_EventScript_Bg1::
 	end
 
 Sinnoh_PokemonMansionOffice_EventScript_Bg2::
-	msgbox Sinnoh_PokemonMansionOffice_Text_Bg2, MSGBOX_SIGN
+	goto SinnohP_pokemon_mansion_office_7
 	end
 
 Sinnoh_PokemonMansionOffice_EventScript_Person2::
@@ -21,10 +21,6 @@ Sinnoh_PokemonMansionOffice_EventScript_Person3::
 Sinnoh_PokemonMansionOffice_EventScript_Person4::
 	msgbox Sinnoh_PokemonMansionOffice_Text_Person4, MSGBOX_NPC
 	end
-
-Sinnoh_PokemonMansionOffice_Text_Bg2:
-	.string "It's full of handwriting. It doesn't\n"
-	.string "seem polite to read it.$"
 
 Sinnoh_PokemonMansionOffice_Text_Person3:
 	.string "I've been the master's butler for\n"

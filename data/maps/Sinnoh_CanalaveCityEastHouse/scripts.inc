@@ -3,7 +3,7 @@ Sinnoh_CanalaveCityEastHouse_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_CanalaveCityEastHouse_EventScript_Person1::
-	goto LilycoveCity_MoveDeletersHouse_EventScript_MoveDeleter
+	goto SinnohP_canalave_city_east_house_1
 	end
 
 @ --- end of SINNOH words ---

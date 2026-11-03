@@ -109,31 +109,6 @@ Sinnoh_Text_HoneyTreeMon:
 	.string "Something is clinging to the tree,\n"
 	.string "licking the HONEY!$"
 
-@ FLOAROMA MEADOW's HONEY seller
-Sinnoh_EventScript_HoneySeller::
-	lock
-	faceplayer
-	message Sinnoh_Text_HoneySeller
-	waitmessage
-	pokemart Sinnoh_Mart_Honey
-	msgbox Sinnoh_Text_HoneySellerBye, MSGBOX_DEFAULT
-	release
-	end
-
-	.align 2
-Sinnoh_Mart_Honey:
-	.short ITEM_HONEY
-	pokemartlistend
-
-Sinnoh_Text_HoneySeller:
-	.string "The trees here love HONEY, and so do\n"
-	.string "the MOéMON that come to lick it off.\p"
-	.string "Fresh from the meadow! Want some?$"
-
-Sinnoh_Text_HoneySellerBye:
-	.string "Spread it on a sweet tree and come\n"
-	.string "back later. You'll see!$"
-
 @ MR. BACKLOT, the POKéMON MANSION's owner: after SINNOH's LEAGUE a daily POKéMON for his TROPHY GARDEN
 Sinnoh_EventScript_MrBacklot::
 	lock

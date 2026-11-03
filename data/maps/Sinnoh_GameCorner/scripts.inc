@@ -55,7 +55,7 @@ Sinnoh_GameCorner_EventScript_Bg13::
 	end
 
 Sinnoh_GameCorner_EventScript_Person1::
-	goto Sinnoh_EventScript_GameCornerClerk
+	goto SinnohP_game_corner_13
 	end
 
 Sinnoh_GameCorner_EventScript_Person2::
@@ -63,11 +63,11 @@ Sinnoh_GameCorner_EventScript_Person2::
 	end
 
 Sinnoh_GameCorner_EventScript_Person3::
-	msgbox Sinnoh_GameCorner_Text_Person3, MSGBOX_NPC
+	goto SinnohP_game_corner_15
 	end
 
 Sinnoh_GameCorner_EventScript_Person4::
-	msgbox Sinnoh_GameCorner_Text_Person4, MSGBOX_NPC
+	goto SinnohP_game_corner_16
 	end
 
 Sinnoh_GameCorner_EventScript_Person5::
@@ -89,14 +89,6 @@ Sinnoh_GameCorner_EventScript_Person8::
 Sinnoh_GameCorner_EventScript_Person9::
 	msgbox Sinnoh_GameCorner_Text_Person9, MSGBOX_NPC
 	end
-
-Sinnoh_GameCorner_Text_Person3:
-	.string "I used to play here every day. Now I\n"
-	.string "just come for the music.$"
-
-Sinnoh_GameCorner_Text_Person4:
-	.string "I came to town to sell vegetables and\n"
-	.string "ended up here. Don't tell my wife.$"
 
 Sinnoh_GameCorner_Text_Person9:
 	.string "LOOKER: Do not mind me. I am simply a\n"

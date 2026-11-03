@@ -377,9 +377,9 @@ struct SlotMachine
     /*0x08*/ u16 matches;
     /*0x0A*/ u8 reelTimeSpinsLeft;
     /*0x0B*/ u8 reelTimeSpinsUsed;
-    /*0x0C*/ s16 coins;
+    /*0x0C*/ s32 coins;   // Moemon Kai: s32, MAX_COINS 50,000
     /*0x0E*/ s16 payout;
-    /*0x10*/ s16 netCoinLoss; // never negative
+    /*0x10*/ s32 netCoinLoss; // never negative (Moemon Kai: s32)
     /*0x12*/ s16 bet;
     /*0x14*/ s16 reeltimePixelOffset;
     /*0x16*/ s16 reeltimePosition;
@@ -4107,15 +4107,16 @@ static void SpriteCB_ReelSymbol(struct Sprite *sprite)
 
 static void CreateCreditPayoutNumberSprites(void)
 {
-    s16 i;
+    s32 i;   // (Moemon Kai: 10,000 * 10 is past an s16, MAX_COINS 50,000)
     s16 x;
 
     // Credit number sprite
+    // (Moemon Kai: five digits for MAX_COINS 50,000, the 10,000s left of the panel, shown only past 9,999)
     for (x = 203, i = 1; i <= MAX_COINS; i *= 10, x -= 7)
         CreateCoinNumberSprite(x, 23, FALSE, i);
 
     // Payout number sprite
-    for (x = 235, i = 1; i <= MAX_COINS; i *= 10, x -= 7)
+    for (x = 235, i = 1; i <= 9999; i *= 10, x -= 7)   // (Moemon Kai: a payout stays under 10,000; the credit has 5 digits)
         CreateCoinNumberSprite(x, 23, TRUE, i);
 }
 
@@ -4143,8 +4144,13 @@ static void SpriteCB_CoinNumber(struct Sprite *sprite)
     {
         // Convert total to current digit
         sprite->sCurNum = tag;
-        tag %= (u16)sprite->sDigitMax;
+        if ((u16)sprite->sDigitMin >= 10000)
+            sprite->invisible = tag < 10000;
+        if ((u16)sprite->sDigitMin < 10000)   // (Moemon Kai: the 10,000s digit's x10 is past 16 bits: no modulo there)
+            tag %= (u16)sprite->sDigitMax;
         tag /= (u16)sprite->sDigitMin;
+        if (tag > 9)
+            tag = 9;
 
         tag += GFXTAG_NUM_0;
         sprite->sheetTileStart = GetSpriteTileStartByTag(tag);

@@ -162,6 +162,7 @@ struct InGameTrade {
     u8 otGender;
     u8 sheen;
     u16 requestedSpecies;
+    u8 language;   // Moemon Kai: SINNOH's trades keep Platinum's (0: the game's own)
 };
 
 static EWRAM_DATA u8 *sMenuTextTileBuffer = NULL;
@@ -4539,8 +4540,11 @@ static void SpriteCB_BouncingPokeballArrive(struct Sprite *sprite)
 // Moemon Kai: JOHTO / KANTO's scripts number Quetzal's trades (src/data/qz_ingame_trades.h); HOENN's are Emerald's
 #include "mp_region.h"
 #include "data/qz_ingame_trades.h"
+#include "data/sinnoh_ingame_trades.h"   // (SINNOH: Platinum's, tools/sinnoh/gen_trades.py)
 static const struct InGameTrade *InGameTrade(u16 which)
 {
+    if (MP_Region_Current() == REGION_SINNOH)
+        return &sSinnohIngameTrades[which < ARRAY_COUNT(sSinnohIngameTrades) ? which : 0];
     if (MP_Region_Current() != REGION_HOENN)
         return &sQzIngameTrades[which < ARRAY_COUNT(sQzIngameTrades) ? which : 0];
     return &sIngameTrades[which < ARRAY_COUNT(sIngameTrades) ? which : 0];
@@ -4592,6 +4596,8 @@ static void CreateInGameTradePokemonInternal(u8 whichPlayerMon, u8 whichInGameTr
     SetMonData(pokemon, MON_DATA_TOUGH, &inGameTrade->conditions[4]);
     SetMonData(pokemon, MON_DATA_SHEEN, &inGameTrade->sheen);
     SetMonData(pokemon, MON_DATA_MET_LOCATION, &metLocation);
+    if (inGameTrade->language)
+        SetMonData(pokemon, MON_DATA_LANGUAGE, &inGameTrade->language);
 
     mailNum = 0;
     if (inGameTrade->heldItem != ITEM_NONE)

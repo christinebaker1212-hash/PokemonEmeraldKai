@@ -1,0 +1,8 @@
+# SINNOH: CANALAVE's move deleter runs Platinum's own script: a POKéMON picked, a move picked on the game's own
+# move screen, forgotten. Needs the 3D pack.
+MODE=1
+TMO=200
+GEN=4
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=143:50"
+EXPECT_A=("party: slot 0 forgets move" "party: slot 0 knows 3 moves")
+UNEXPECT_A=("[crash]" "TIMEOUT")

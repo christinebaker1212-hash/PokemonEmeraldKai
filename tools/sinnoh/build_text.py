@@ -122,6 +122,9 @@ def convert(text, cmap, wait_at_end=True):
             m = re.match(r'STRVAR_\d+ \d+, (\d+)', code)
             if m and int(m.group(1)) < len(STR_VAR):
                 out += [PLACEHOLDER_BEGIN, STR_VAR[int(m.group(1))]]
+            m = re.match(r'CURSOR_X (\d+)$', code)
+            if m and int(m.group(1)) < 0xF0:
+                out += [0xFC, 0x13, int(m.group(1))]   # (the text goes on from that x: this game's CLEAR_TO)
             continue                     # (colors, sizes and the rest: plain text)
         i += 1
         if ch == '\n':

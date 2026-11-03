@@ -1,0 +1,18 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp additem 48 3
+mp additem 49 7
+mp warp 43,32,5,7
+wait 60
+waitfor field 1000
+mp face up
+press A 1
+pressuntillog A 2000 party: tutor 0 teaches
+wait 20
+shot m_menu
+pressuntillog A 2000 party: slot 0 learns move
+pressuntil A field 3000
+mp checkitem 48
+mp checkitem 49
+quit

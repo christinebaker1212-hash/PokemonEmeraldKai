@@ -11,15 +11,11 @@ Sinnoh_ResortAreaRibbonSyndicate2f_EventScript_Person2::
 	end
 
 Sinnoh_ResortAreaRibbonSyndicate2f_EventScript_Person3::
-	msgbox Sinnoh_ResortAreaRibbonSyndicate2f_Text_Person3, MSGBOX_NPC
+	goto SinnohP_resort_area_ribbon_syndicate_2f_1
 	end
 
 Sinnoh_ResortAreaRibbonSyndicate2f_EventScript_Person4::
 	goto SinnohP_resort_area_ribbon_syndicate_2f_4
 	end
-
-Sinnoh_ResortAreaRibbonSyndicate2f_Text_Person3:
-	.string "Welcome! Please relax and enjoy\n"
-	.string "yourself.$"
 
 @ --- end of SINNOH words ---

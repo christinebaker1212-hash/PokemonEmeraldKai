@@ -7,11 +7,7 @@ Sinnoh_Route226House_EventScript_Bg1::
 	end
 
 Sinnoh_Route226House_EventScript_Person1::
-	msgbox Sinnoh_Route226House_Text_Person1, MSGBOX_NPC
+	goto SinnohP_route_226_house_2
 	end
-
-Sinnoh_Route226House_Text_Person1:
-	.string "I've lived out here for years. The sea,\n"
-	.string "the mountains... and lots of battles!$"
 
 @ --- end of SINNOH words ---

@@ -1,0 +1,13 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp warp 41,17,2,7
+wait 60
+waitfor field 1000
+mp face up
+press A 1
+pressuntillog A 3000 party: slot 0 knows 3 moves
+wait 30
+shot d_forgot
+pressuntil A field 3000
+quit

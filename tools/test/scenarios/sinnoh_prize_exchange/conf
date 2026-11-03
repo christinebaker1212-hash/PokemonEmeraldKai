@@ -1,0 +1,7 @@
+# VEILSTONE's PRIZE EXCHANGE: Platinum's own script, its 19 prizes in a list that scrolls and remembers its place, the
+# TM68 for 20,000 COINS (the COIN CASE holds 50,000 as Platinum's). Needs the 3D pack.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("sinnoh: a list of 20 lines (scroll 0, row 0)" "sinnoh: a list of 20 lines (scroll 14, row 4)" "[test] coins 5000" "[test] item 635: 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

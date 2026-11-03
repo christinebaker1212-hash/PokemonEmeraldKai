@@ -11,7 +11,7 @@ Sinnoh_PokemonMansion_EventScript_Person2::
 	end
 
 Sinnoh_PokemonMansion_EventScript_Person3::
-	msgbox Sinnoh_PokemonMansion_Text_Person3, MSGBOX_NPC
+	goto SinnohP_pokemon_mansion_4
 	end
 
 Sinnoh_PokemonMansion_EventScript_Person4::
@@ -21,9 +21,5 @@ Sinnoh_PokemonMansion_EventScript_Person4::
 Sinnoh_PokemonMansion_EventScript_Person7::
 	goto SinnohP_pokemon_mansion_6
 	end
-
-Sinnoh_PokemonMansion_Text_Person3:
-	.string "Please enjoy the mansion. Don't touch\n"
-	.string "the statues, though!$"
 
 @ --- end of SINNOH words ---

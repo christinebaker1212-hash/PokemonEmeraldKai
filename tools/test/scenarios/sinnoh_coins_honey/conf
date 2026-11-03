@@ -1,0 +1,7 @@
+# SINNOH: VEILSTONE's GAME CORNER clerk sells 50 COINS for 1,000, FLOAROMA MEADOW's man sells HONEY x10 for 1,000:
+# Platinum's own scripts. Needs the 3D pack.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("[test] coins 50" "[test] item 401: 10" "money 18000")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -626,7 +626,6 @@ gSpecials::
 	def_special Sinnoh_SpecialRetired   @ (was Sinnoh_SpiritombTower: the HALLOWED TOWER runs Platinum's own script now; kept so the numbers after it stay)
 	def_special Sinnoh_SpecialRetired   @ (was Sinnoh_SpiritombPlace: the HALLOWED TOWER runs Platinum's own script now; kept so the numbers after it stay)
 	def_special Sinnoh_SpecialRetired   @ (was Sinnoh_SpiritombAfter: the HALLOWED TOWER runs Platinum's own script now; kept so the numbers after it stay)
-	def_special Sinnoh_PrizeMenu
 	def_special Sinnoh_BpMenu
 	def_special Sinnoh_BpBuy
 	def_special Sinnoh_PastoriaWater

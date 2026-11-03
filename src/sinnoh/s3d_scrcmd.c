@@ -41,6 +41,10 @@
 #include "bike.h"
 #include "battle_setup.h"
 #include "overworld.h"
+#include "list_menu.h"
+#include "mp.h"
+#include "window.h"
+#include "text.h"
 
 enum {
     SINNOH_BUFFER_PLAYER = 1,       // ARG: Platinum's string buffer 0-2 (STR_VAR_1-3) <- the player's name
@@ -108,6 +112,7 @@ enum {
     SINNOH_MISC,                    // ARG: small Platinum commands on Kai's systems (s3d_misc.c Sinnoh_MiscCall), ARG2, ARG3
     SINNOH_TOWER,                   // ARG: the BATTLE TOWER's function (s3d_tower.c Sinnoh_TowerCall), ARG2 a value or
                                     // variable, ARG3 the variable for the answer
+    SINNOH_PARTY,                   // ARG: a party / BAG query or change (s3d_party.c Sinnoh_PartyCall), ARG2, ARG3
 };
 
 u8 gSinnohMessage[1000];
@@ -122,16 +127,27 @@ static struct BgEvent sStoryBgs[64];
 
 // Platinum's menus are made as the script goes (InitGlobalTextMenu / AddMenuEntryImm / ShowMenu): here as a
 // multichoice window of the same look as this game's, at the right of the screen
-#define MENU_MAX 16
+#define MENU_MAX 24
+#define MENU_ROWS 6   // (more lines than this: a list that scrolls, as Platinum's list menus; the message box stays clear)
 static struct
 {
     u16 var;
     u8 count;
     bool8 canExit;
+    u16 posVar[2];   // (ShowListMenuRememberCursor: the list's scroll and cursor row kept in these, 0: none)
     u16 values[MENU_MAX];
     u8 texts[MENU_MAX][64];
     struct MenuAction actions[MENU_MAX];
 } sMenu;
+
+// A menu begun by the game's code (Platinum's move tutors: s3d_party.c), shown by the script's SINNOH_MENU_SHOW
+void Sinnoh_MenuBegin(u16 var, bool8 canExit)
+{
+    sMenu.var = var;
+    sMenu.canExit = canExit;
+    sMenu.count = 0;
+    sMenu.posVar[0] = sMenu.posVar[1] = 0;
+}
 
 // A line made by the game's code (the Seal shop: s3d_seals.c)
 void Sinnoh_MenuAddLine(const u8 *text, u16 value)
@@ -179,6 +195,114 @@ static void Task_SinnohMenu(u8 taskId)
     ScriptContext_Enable();
 }
 
+// (its tiles from 0x64 stay below the COINS box's, 0x141: ShowCoins beside a prize list)
+#define LIST_MAX_WIDTH ((0x141 - 0x64) / (MENU_ROWS * 2))
+static struct ListMenuItem sListItems[MENU_MAX];
+static u16 sListScroll;
+
+static void Task_SinnohList(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    s32 input;
+    u16 scroll, row;
+    if (gPaletteFade.active)
+        return;
+    if (data[1])
+    {
+        data[1]--;
+        return;
+    }
+    input = ListMenu_ProcessInput(data[2]);
+    if (input == LIST_NOTHING_CHOSEN)
+        return;
+    if (input == LIST_CANCEL)
+    {
+        if (!sMenu.canExit)
+            return;
+        VarSet(sMenu.var, 0xFFFE);   // (Platinum's MENU_CANCEL, -2)
+    }
+    else
+        VarSet(sMenu.var, sMenu.values[input]);
+    PlaySE(SE_SELECT);
+    DestroyListMenuTask(data[2], &scroll, &row);
+    if (sMenu.posVar[0])
+        VarSet(sMenu.posVar[0], scroll), VarSet(sMenu.posVar[1], row);
+    if (data[3] != TASK_NONE)
+        RemoveScrollIndicatorArrowPair(data[3]);
+    ClearToTransparentAndRemoveWindow(data[0]);
+    DestroyTask(taskId);
+    ScriptContext_Enable();
+}
+
+static void ShowSinnohList(void)
+{
+    static const struct ScrollArrowsTemplate sArrows = {
+        .firstArrowType = SCROLL_ARROW_UP, .secondArrowType = SCROLL_ARROW_DOWN,
+        .tileTag = 2000, .palTag = 100, .palNum = 0,
+    };
+    struct ListMenuTemplate list = {0};
+    struct ScrollArrowsTemplate arrows = sArrows;
+    struct WindowTemplate win;
+    int i, width = 0, left;
+    u16 scroll = 0, row = 0;
+    u8 windowId, taskId;
+    for (i = 0; i < sMenu.count; i++)
+    {
+        int w = GetStringWidth(FONT_NORMAL, sMenu.texts[i], 0);
+        // (a line that goes on from an x of its own, CLEAR_TO: the prize list's prices)
+        const u8 *c;
+        for (c = sMenu.texts[i]; *c != EOS; c++)
+            if (c[0] == EXT_CTRL_CODE_BEGIN && c[1] == EXT_CTRL_CODE_CLEAR_TO
+             && w < c[2] + GetStringWidth(FONT_NORMAL, c + 3, 0))
+                w = c[2] + GetStringWidth(FONT_NORMAL, c + 3, 0);
+        if (w > width)
+            width = w;
+        sListItems[i].name = sMenu.texts[i];
+        sListItems[i].id = i;
+    }
+    width = ConvertPixelWidthToTileWidth(width + 8 + 4);
+    if (width > LIST_MAX_WIDTH)
+        width = LIST_MAX_WIDTH;
+    left = 29 - width;
+    win = CreateWindowTemplate(0, left, 1, width, MENU_ROWS * 2, 15, 0x64);
+    windowId = AddWindow(&win);
+    SetStandardWindowBorderStyle(windowId, FALSE);
+    list.items = sListItems;
+    list.totalItems = sMenu.count;
+    list.maxShowed = MENU_ROWS;
+    list.windowId = windowId;
+    list.item_X = 8;
+    list.upText_Y = 1;
+    list.cursorPal = 2;
+    list.fillValue = 1;
+    list.cursorShadowPal = 3;
+    list.scrollMultiple = LIST_NO_MULTIPLE_SCROLL;
+    list.fontId = FONT_NORMAL;
+    list.cursorKind = CURSOR_BLACK_ARROW;
+    if (sMenu.posVar[0])
+    {
+        scroll = VarGet(sMenu.posVar[0]);
+        row = VarGet(sMenu.posVar[1]);
+        if (scroll > sMenu.count - MENU_ROWS)
+            scroll = 0, row = 0;
+        if (row >= MENU_ROWS)
+            row = 0;
+    }
+    taskId = CreateTask(Task_SinnohList, 80);
+    gTasks[taskId].data[0] = windowId;
+    gTasks[taskId].data[1] = 2;
+    gTasks[taskId].data[2] = ListMenuInit(&list, scroll, row);
+    sListScroll = scroll;
+    arrows.firstX = arrows.secondX = left * 8 + width * 4;
+    arrows.firstY = 8;
+    arrows.secondY = (1 + MENU_ROWS * 2) * 8 + 2;
+    arrows.fullyDownThreshold = sMenu.count - MENU_ROWS;
+    gTasks[taskId].data[3] = AddScrollIndicatorArrowPair(&arrows, &sListScroll);
+    MPNet_Log("sinnoh: a list of %d lines (scroll %d, row %d)", sMenu.count, scroll, row);
+    CopyWindowToVram(windowId, COPYWIN_FULL);
+    ScheduleBgCopyTilemapToVram(0);
+}
+
 static void ShowSinnohMenu(void)
 {
     int i, width = 0, left;
@@ -197,6 +321,7 @@ static void ShowSinnohMenu(void)
     taskId = CreateTask(Task_SinnohMenu, 80);
     gTasks[taskId].data[0] = windowId;
     gTasks[taskId].data[1] = 2;
+    MPNet_Log("sinnoh: a menu of %d lines", sMenu.count);
 }
 
 // Platinum's pockets (include/constants/items.h there): ITEMS 0, MEDICINE 1, BALLS 2, TMHMS 3, BERRIES 4, MAIL 5,
@@ -290,22 +415,31 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
         sMenu.var = arg;
         sMenu.canExit = arg2;
         sMenu.count = 0;
+        sMenu.posVar[0] = sMenu.posVar[1] = 0;
         break;
     case SINNOH_MENU_ADD:
         if (sMenu.count < MENU_MAX)
         {
             u8 *t = sMenu.texts[sMenu.count];
-            StringCopyN(t, S3D_Text(arg, arg2), sizeof(sMenu.texts[0]) - 1);
+            // (a variable: its text by number; the buffers in it filled now, as Platinum's AddMenuEntry does)
+            u8 line[256];
+            StringExpandPlaceholders(line, S3D_Text(arg, VarGet(arg2)));
+            StringCopyN(t, line, sizeof(sMenu.texts[0]) - 1);
             t[sizeof(sMenu.texts[0]) - 1] = EOS;
             sMenu.actions[sMenu.count].text = t;
-            sMenu.values[sMenu.count] = arg3;
+            sMenu.values[sMenu.count] = VarGet(arg3);
             sMenu.count++;
         }
         break;
     case SINNOH_MENU_SHOW:
         if (sMenu.count == 0)
             break;
-        ShowSinnohMenu();
+        if (arg >= VARS_START)   // (ShowListMenuRememberCursor's two variables)
+            sMenu.posVar[0] = arg, sMenu.posVar[1] = arg2;
+        if (sMenu.count > MENU_ROWS + 1)
+            ShowSinnohList();
+        else
+            ShowSinnohMenu();
         ScriptContext_Stop();
         return TRUE;
     case SINNOH_FIRST_NON_EGG:
@@ -581,6 +715,12 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
     {
         void Sinnoh_MiscCall(u16 op, u16 a, u16 b);
         Sinnoh_MiscCall(arg, arg2, arg3);
+        break;
+    }
+    case SINNOH_PARTY:
+    {
+        void Sinnoh_PartyCall(u16 op, u16 a, u16 b);
+        Sinnoh_PartyCall(arg, arg2, arg3);
         break;
     }
     case SINNOH_TOWER:

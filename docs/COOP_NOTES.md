@@ -4254,6 +4254,43 @@ follow_behind, follow_ground.
   fishing, contest wins and entries, ribbons: SINNOH's contests and tower ribbons now count them too) and the POKéMON
   defeated, counted in battle_script_commands.c's faint handling. "<save>.region" chunk RANK. `mp rankings [add STAT
   VALUE NAME [GROUP]]`; tests sinnoh_rankings, sinnoh_rankings_mix.
+- Platinum's party, BAG and trade commands (1.69.2, src/sinnoh/s3d_party.c Sinnoh_PartyCall, `sinnoh SINNOH_PARTY
+  (63), OP, A, B`; PARTY_ARG gives the next op an extra value, and its variable for an op that answers in it): ribbons
+  (Platinum's ribbon ids; the Gen 3 ones on the POKéMON, the Gen 4 ones in "<save>.region" chunk RIBN), nature, types,
+  HIDDEN POWER, contest stats, moves (CANALAVE's move deleter: Emerald's move screen and MoveDeleterForgetMove), EVs,
+  footprints (DR. FOOTSTEP: src/data/sinnoh_footprints.h, tools/sinnoh/gen_footprints.py), money and COINS, the
+  weather. In-game trades: Platinum's four (KAZZA's ABRA, CHARAP's CHATOT, GASPAR's HAUNTER, FOPPA's MAGIKARP) as
+  src/data/sinnoh_ingame_trades.h (tools/sinnoh/gen_trades.py from res/npc_trades; trade.c InGameTrade picks them in
+  SINNOH; struct InGameTrade has a language now, FOPPA's German); InitNPCTrade / StartNPCTrade run the game's own trade
+  scene (VAR_0x8004 / 8005 set for it and put back). The MINING MUSEUM's fossils (FindFossilAtThreshold,
+  GetSpeciesFromFossil: Platinum's fossil table; the menu adds its lines by a text number in a variable:
+  AddMenuEntry VAR, SINNOH_MENU_ADD reads both by VarGet). The POKéDEX's language and form detection have no pages in
+  the game's POKéDEX: the commands do nothing, the MEISTER's flag still set.
+- Converted menus (s3d_scrcmd.c): a line's buffers are filled when it's added (Platinum's AddMenuEntry formats then);
+  more than 7 lines make a list that scrolls (Emerald's ListMenu, 6 rows, arrows; its tiles from 0x64 kept below the
+  COINS box's 0x141), ShowListMenuRememberCursor keeps the scroll and row in its two variables. Platinum's CURSOR_X in
+  a text is the game's CLEAR_TO (build_text.py: the PRIZE EXCHANGE's prices line up).
+- The COIN CASE holds 50,000 (Platinum's; MAX_COINS / MAX_COIN_DIGITS 5 in include/constants/coins.h, every region):
+  VEILSTONE's PRIZE EXCHANGE (Platinum's script and prices, GetGameCornerPrizeData) sells up to 20,000. The slot
+  machine keeps its coins in an s32, its 10,000s digit shown left of the CREDIT panel only past 9,999; roulette's in
+  a u16 (TASK_COINS) with a fifth credit digit (SPR_CREDIT_DIG_10000). Tests sinnoh_prize_exchange, sinnoh_slots.
+- Platinum's own scripts now for CANALAVE's move deleter, the trade people, the MINING MUSEUM's researcher, the GAME
+  CORNER's clerk and FLOAROMA MEADOW's HONEY seller (the stand-ins in data/scripts/sinnoh_places.inc / sinnoh_wild.inc
+  are gone). Not yet: the GAME CORNER's TM64 for four bonus rounds in a row (CheckBonusRoundStreak FALSE: Emerald's
+  slots have no bonus streak). Tests sinnoh_move_deleter, sinnoh_npc_trade, sinnoh_fossil, sinnoh_coins_honey.
+- Platinum's SHARD move tutors (ROUTE 212, the SURVIVAL AREA, SNOWPOINT): src/data/sinnoh_tutors.h from
+  tools/sinnoh/gen_tutors.py (res/pokemon/move_tutors.json: 38 moves, their RED / BLUE / YELLOW / GREEN SHARD costs and
+  tutor; each species' learnset "by_tutor" as a bit mask, Platinum's 493 only). CheckHasLearnableTutorMoves,
+  ShowMoveTutorMoveSelectionMenu (the moves it can learn and doesn't know, then EXIT, on the converted menu: s3d_scrcmd.c
+  Sinnoh_MenuBegin), CheckCanAffordMove / PayShardCost (the game's SHARDS, items 48-51), ResetMoveSlot (the scripts
+  give party slot, move slot, move: SetMonMoveSlot + RemoveMonPPBonus), ShowShardCost / CloseShardCostWindow (the
+  costs, Platinum's "RED SHARDS  X 2" lines, menu_entries 273-277). Test sinnoh_move_tutor. Not yet: GRANDMA WILMA's
+  DRACO METEOR and ROUTE 228's three (OpenMoveTutorMenu: Platinum's move-learning screen), the SNOWPOINT man's
+  "tough words" (CheckAllToughWordsUnlocked).
+- StartTrainerBattle by a variable: each trainer the file puts in that variable (SetVar VAR, TRAINER_*; a #define
+  of it too) compared in turn, each with its own defeat line (the mansion's maids; BufferTrainerName is the game's
+  buffertrainername). The BATTLEGROUND's and the POKéMON CENTERs' daily trainers aren't imported yet
+  (tools/sinnoh/gen_trainers.py would need them appended after every other id: beaten flags are by id).
 - The POKé RADAR (2026-11-01, src/mp/mp_pokeradar.c; ITEM_POKE_RADAR 661, ITEMS_COUNT 662, the DEVON SCOPE's icon):
   SANDGEM LAB's aide gives it after the LEAGUE (flag 0x3D33). It works in any region's tall grass, not on a bike or in
   the water, with a 50-step battery: up to four patches, one at each distance 1-4, rustle (Emerald's tall grass field

@@ -5,6 +5,7 @@
 #include "tcg/integration.h"
 #include "mp.h"
 #include "item_use.h"
+#include "constants/coins.h"
 #include "battle.h"
 #include "battle_pyramid.h"
 #include "battle_pyramid_bag.h"
@@ -883,7 +884,7 @@ void ItemUseOutOfBattle_CardCase(u8 taskId)
 
 void ItemUseOutOfBattle_CoinCase(u8 taskId)
 {
-    ConvertIntToDecimalStringN(gStringVar1, GetCoins(), STR_CONV_MODE_LEFT_ALIGN, 4);
+    ConvertIntToDecimalStringN(gStringVar1, GetCoins(), STR_CONV_MODE_LEFT_ALIGN, MAX_COIN_DIGITS);
     StringExpandPlaceholders(gStringVar4, gText_CoinCase);
 
     if (!gTasks[taskId].tUsingRegisteredKeyItem)

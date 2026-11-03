@@ -3,7 +3,7 @@ Sinnoh_SunyshoreMarket_MapScripts::
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
 Sinnoh_SunyshoreMarket_EventScript_Person1::
-	msgbox Sinnoh_SunyshoreMarket_Text_Person1, MSGBOX_NPC
+	goto SinnohP_sunyshore_market_1
 	end
 
 Sinnoh_SunyshoreMarket_EventScript_Person2::
@@ -21,9 +21,5 @@ Sinnoh_SunyshoreMarket_EventScript_Person4::
 Sinnoh_SunyshoreMarket_EventScript_Person5::
 	goto SinnohP_sunyshore_market_6
 	end
-
-Sinnoh_SunyshoreMarket_Text_Person1:
-	.string "The market's stalls change every day.\n"
-	.string "Come back tomorrow for something new!$"
 
 @ --- end of SINNOH words ---

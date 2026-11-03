@@ -54,8 +54,9 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [x] Platinum's "choose a POKéMON" (SelectMoveTutorPokemon / GetSelectedPartySlot) on the game's party menu; its save
       prompt (Common_SaveGame) the game's; scripts go on after a warp (SINNOH_WARP_CONTINUE)
 - [ ] Platinum's commands still unmapped onto Kai's systems ([x] PokeMart*WithGreeting and Common_CallPokecenterNurse:
-      the game's shop and nurse, Platinum's greeting; 2255 of 2511 entries convert), ShowMoveTutorMoveSelectionMenu, PlayHMCutIn, SelectPokemonToTrade,
-      EndSafariGame ([x] StartRankingsMachine: JUBILIFE TV's rankings, s3d_rankings.c; [x] the BATTLE TOWER: CallBattleTowerFunction, its frontier scenes, the BATTLE SALON, the STATS
+      the game's shop and nurse, Platinum's greeting; 2343 of 2511 entries convert), PlayHMCutIn,
+      EndSafariGame ([x] the party, BAG, ribbon and trade commands, the move deleter, fossils, the PRIZE EXCHANGE, the
+      coin clerk, the HONEY seller, the SHARD tutors: s3d_party.c, COOP_NOTES "Platinum's party, BAG and trade commands"; [x] StartRankingsMachine: JUBILIFE TV's rankings, s3d_rankings.c; [x] the BATTLE TOWER: CallBattleTowerFunction, its frontier scenes, the BATTLE SALON, the STATS
       JUDGE: docs/SINNOH_TOWER_PORT.md)
 
 ## 3. Built for 1:1 (Platinum has it, Kai doesn't)

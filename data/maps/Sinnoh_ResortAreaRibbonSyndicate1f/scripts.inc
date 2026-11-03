@@ -6,6 +6,10 @@ Sinnoh_ResortAreaRibbonSyndicate1f_EventScript_Person1::
 	goto SinnohP_resort_area_ribbon_syndicate_1f_1
 	end
 
+Sinnoh_ResortAreaRibbonSyndicate1f_EventScript_Person2::
+	goto SinnohP_resort_area_ribbon_syndicate_1f_2
+	end
+
 Sinnoh_ResortAreaRibbonSyndicate1f_EventScript_Person3::
 	goto SinnohP_resort_area_ribbon_syndicate_1f_3
 	end

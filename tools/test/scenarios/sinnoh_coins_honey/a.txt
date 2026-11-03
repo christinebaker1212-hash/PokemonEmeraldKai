@@ -1,0 +1,33 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp additem 260 1
+mp money 20000
+mp warp 41,90,2,6
+wait 60
+waitfor field 1000
+mp face up
+press A 1
+pressuntillog A 2000 sinnoh: a menu of 3 lines
+wait 20
+shot c_menu
+press A 1
+pressuntillog A 2000 sinnoh: a menu of 3 lines
+wait 10
+press B 1
+pressuntil A field 2000
+mp coins
+mp warp 41,68,12,45
+wait 60
+waitfor field 1000
+mp face down
+press A 1
+pressuntillog A 2000 sinnoh: a menu of 3 lines
+wait 10
+press DOWN 1
+wait 6
+press A 1
+pressuntil A field 2000
+mp checkitem 401
+mp badges
+quit

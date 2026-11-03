@@ -223,9 +223,6 @@ INDOOR = {
         'Person1': "My dad's a sailor. He brings me a shell from every place he goes.",
         'Person2': "I train on the docks at sunrise. The ships' horns are my alarm clock.",
     },
-    'Sinnoh_CanalaveCityEastHouse': {
-        'Person1': ('script', 'LilycoveCity_MoveDeletersHouse_EventScript_MoveDeleter'),
-    },
     'Sinnoh_CanalaveCitySailorEldritchHouse': {
         'Person1': "My dad's boat goes to IRON ISLAND! And sometimes even farther.",
         'Person2': "My husband loves the sea more than land. He'd sleep on his boat if I let him.",
@@ -272,7 +269,6 @@ INDOOR = {
         'Person1': "Before machines, MOéMON helped carry the coal. MACHOP were the best workers.",
         'Person2': "Look at the old helmets! They had little candles on them!",
         'Person3': "I'm doing a school report on the mine. I've written three pages about rocks!",
-        'Person4': ('script', 'Sinnoh_EventScript_FossilScientist'),
         'Person5': "The museum tells OREBURGH's story so well. I learned so much!",
         'Person6': "My MOéMON loves the coal display. It keeps sniffing it.",
         'Person7': "I came for the fossil corner. It's smaller than I hoped, but it's very good.",
@@ -456,7 +452,6 @@ INDOOR = {
         'Person3': "MAYLENE trains every day at the GYM. I watch through the window sometimes!",
     },
     'Sinnoh_GameCorner': {
-        'Person1': ('script', 'Sinnoh_EventScript_GameCornerClerk'),   # (the coins: data/scripts/sinnoh_places.inc)
         # the 12 slot machines: Platinum's scripts 1-12 (gen_scripts.py ScrCmd_267: Emerald's slots)
         **{'Bg%d' % (n + 1): ('script', 'SinnohP_game_corner_%d' % (n + 1)) for n in range(12)},
         'Person3': "I used to play here every day. Now I just come for the music.",
@@ -497,7 +492,6 @@ INDOOR = {
         'Person4': "I collect the store's shopping bags. They change the design every season!",
     },
     'Sinnoh_VeilstoneCityPrizeExchange': {
-        'Person1': ('script', 'Sinnoh_EventScript_PrizeExchange'),   # (data/scripts/sinnoh_places.inc)
         'Person2': "I won a prize once. It was a POTION. I'm still proud of it.",
         'Person3': "In my day, prizes were fancier. But I still come to look.",
     },
@@ -651,9 +645,6 @@ INDOOR = {
         'Person13': "My CLEFAIRY dances under the trees. Isn't it cute?",
         'Person14': "CLEFAIRY: Pi pi!|It's spinning in a circle.",
         'Person16': "Your MOéMON might find something on the paths. It has a good nose!",
-    },
-    'Sinnoh_FloaromaMeadow': {
-        'Person3': ('script', 'Sinnoh_EventScript_HoneySeller'),   # (data/scripts/sinnoh_wild.inc)
     },
     'Sinnoh_FloaromaMeadowHouse': {
         'Person1': "We sell honey from the meadow! It's the sweetest in SINNOH.",

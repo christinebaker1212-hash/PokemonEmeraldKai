@@ -199,6 +199,7 @@ enum {
     SPR_CREDIT_DIG_10,
     SPR_CREDIT_DIG_100,
     SPR_CREDIT_DIG_1000,
+    SPR_CREDIT_DIG_10000,   // Moemon Kai: MAX_COIN_DIGITS 5 (SPR_63 gave its place)
     SPR_MULTIPLIER,
     SPR_BALL_COUNTER_1,
     SPR_BALL_COUNTER_2,
@@ -237,7 +238,6 @@ enum {
     SPR_60,
     SPR_61,
     SPR_62,
-    SPR_63,
 };
 
 // Start points for sprite IDs that are looped over
@@ -1173,6 +1173,8 @@ static void InitRouletteTableData(void)
 #define tConsecutiveWins data[11]
 #define tWinningSquare   data[12]
 #define tCoins           data[13]
+// Moemon Kai: the COINS read as u16 (MAX_COINS 50,000 is past an s16)
+#define TASK_COINS(id)   (*(u16 *)&gTasks[id].data[13])
 
 static void CB2_LoadRoulette(void)
 {
@@ -1251,7 +1253,7 @@ static void CB2_LoadRoulette(void)
         BeginHardwarePaletteFade(0xFF, 0, 16, 0, 1);
         taskId = sRoulette->playTaskId = CreateTask(Task_StartPlaying, 0);
         gTasks[taskId].tBallNum = BALLS_PER_ROUND;
-        gTasks[taskId].tCoins = GetCoins();
+        TASK_COINS(taskId) = GetCoins();
         AlertTVThatPlayerPlayedRoulette(GetCoins());
         sRoulette->spinTaskId = CreateTask(Task_SpinWheel, 1);
         SetMainCallback2(CB2_Roulette);
@@ -1492,9 +1494,11 @@ static void Task_PlaceBet(u8 taskId)
     sRoulette->betSelection[sRoulette->curBallNum] = gTasks[taskId].tSelectionId;
     gTasks[taskId].tMultiplier = GetMultiplier(sRoulette->betSelection[sRoulette->curBallNum]);
     SetMultiplierSprite(sRoulette->betSelection[sRoulette->curBallNum]);
-    if ((gTasks[taskId].tCoins -= sRoulette->minBet) < 0)
-        gTasks[taskId].tCoins = 0;
-    SetCreditDigits(gTasks[taskId].tCoins);
+    if (TASK_COINS(taskId) < sRoulette->minBet)
+        TASK_COINS(taskId) = 0;
+    else
+        TASK_COINS(taskId) -= sRoulette->minBet;
+    SetCreditDigits(TASK_COINS(taskId));
     gTasks[taskId].func = Task_StartSpin;
 }
 
@@ -1843,10 +1847,10 @@ static void Task_GivePayout(u8 taskId)
     switch (gTasks[taskId].data[7])
     {
     case 0:
-        gTasks[taskId].tCoins++;
+        TASK_COINS(taskId)++;
         m4aSongNumStart(SE_PIN);
-        SetCreditDigits(gTasks[taskId].tCoins);
-        if (gTasks[taskId].tCoins >= MAX_COINS)
+        SetCreditDigits(TASK_COINS(taskId));
+        if (TASK_COINS(taskId) >= MAX_COINS)
         {
             gTasks[taskId].tPayout = 0;
         }
@@ -1903,7 +1907,7 @@ static void Task_TryPrintEndTurnMsg(u8 taskId)
             gSprites[sRoulette->spriteIds[i + SPR_POKE_HEADERS]].sheetTileStart
             + (*gSprites[sRoulette->spriteIds[i + SPR_POKE_HEADERS]].anims)->type;
     }
-    if (gTasks[taskId].tCoins >= sRoulette->minBet)
+    if (TASK_COINS(taskId) >= sRoulette->minBet)
     {
         if (gTasks[taskId].tBallNum == BALLS_PER_ROUND)
         {
@@ -1913,7 +1917,7 @@ static void Task_TryPrintEndTurnMsg(u8 taskId)
             CopyWindowToVram(sTextWindowId, COPYWIN_FULL);
             StartTaskAfterDelayOrInput(taskId, Task_ClearBoard, NO_DELAY, A_BUTTON | B_BUTTON);
         }
-        else if (gTasks[taskId].tCoins == MAX_COINS)
+        else if (TASK_COINS(taskId) == MAX_COINS)
         {
             // Player maxed out coins
             DrawStdWindowFrame(sTextWindowId, FALSE);
@@ -1953,7 +1957,7 @@ static void Task_ClearBoard(u8 taskId)
         gSprites[sRoulette->spriteIds[i + SPR_WHEEL_ICONS]].invisible = FALSE;
     }
 
-    if (gTasks[taskId].tCoins == MAX_COINS)
+    if (TASK_COINS(taskId) == MAX_COINS)
     {
         DrawStdWindowFrame(sTextWindowId, FALSE);
         AddTextPrinterParameterized(sTextWindowId, FONT_NORMAL, Roulette_Text_CoinCaseIsFull, 0, 1, TEXT_SKIP_DRAW, NULL);
@@ -1970,7 +1974,7 @@ static void ExitRoulette(u8 taskId)
 {
     RouletteFlash_Stop(&sRoulette->flashUtil, 0xFFFF);
     RouletteFlash_Reset(&sRoulette->flashUtil);
-    SetCoins(gTasks[taskId].tCoins);
+    SetCoins(TASK_COINS(taskId));
     if (GetCoins() < sRoulette->minBet)
         gSpecialVar_0x8004 = TRUE;
     else
@@ -3442,11 +3446,11 @@ static void Task_PrintMinBet(u8 taskId)
 static void Task_PrintRouletteEntryMsg(u8 taskId)
 {
     s32 minBet;
-    PrintCoinsString(gTasks[taskId].tCoins);
+    PrintCoinsString(TASK_COINS(taskId));
     minBet = sTableMinBets[GET_MIN_BET_ID(gSpecialVar_0x8004)];
     ConvertIntToDecimalStringN(gStringVar1, minBet, STR_CONV_MODE_LEADING_ZEROS, 1);
 
-    if (gTasks[taskId].tCoins >= minBet)
+    if (TASK_COINS(taskId) >= minBet)
     {
         if ((gSpecialVar_0x8004 & ROULETTE_SPECIAL_RATE) && (gSpecialVar_0x8004 & 1))
         {
@@ -3474,7 +3478,7 @@ static void Task_PrintRouletteEntryMsg(u8 taskId)
         AddTextPrinterParameterized(0, FONT_NORMAL, gStringVar4, 0, 1, TEXT_SKIP_DRAW, NULL);
         CopyWindowToVram(0, COPYWIN_FULL);
         gTasks[taskId].func = Task_NotEnoughForMinBet;
-        gTasks[taskId].tCoins = 0;
+        TASK_COINS(taskId) = 0;
         gTasks[taskId].data[0] = 0;
     }
 }
@@ -3485,7 +3489,7 @@ void PlayRoulette(void)
     LockPlayerFieldControls();
     ShowCoinsWindow(GetCoins(), 1, 1);
     taskId = CreateTask(Task_PrintRouletteEntryMsg, 0);
-    gTasks[taskId].tCoins = GetCoins();
+    TASK_COINS(taskId) = GetCoins();
 }
 
 static void LoadOrFreeMiscSpritePalettesAndSheets(bool8 free)
@@ -3720,7 +3724,7 @@ static void CreateInterfaceSprites(void)
     gSprites[sRoulette->spriteIds[SPR_CREDIT]].animPaused = TRUE;
     for (i = 0; i < MAX_COIN_DIGITS; i++)
     {
-        sRoulette->spriteIds[i + SPR_CREDIT_DIGITS] = CreateSprite(&sSpriteTemplate_CreditDigit, i * 8 + 196, 24, 0);
+        sRoulette->spriteIds[i + SPR_CREDIT_DIGITS] = CreateSprite(&sSpriteTemplate_CreditDigit, i * 8 + 196 - (MAX_COIN_DIGITS - 4) * 8, 24, 0);
         gSprites[sRoulette->spriteIds[i + SPR_CREDIT_DIGITS]].invisible = TRUE;
         gSprites[sRoulette->spriteIds[i + SPR_CREDIT_DIGITS]].animPaused = TRUE;
     }
@@ -3742,7 +3746,7 @@ static void CreateInterfaceSprites(void)
 static void SetCreditDigits(u16 num)
 {
     u8 i;
-    u16 d = 1000;
+    u16 d = 10000;   // (Moemon Kai: MAX_COIN_DIGITS 5)
     bool8 printZero = FALSE;
     for (i = 0; i < MAX_COIN_DIGITS; i++)
     {

@@ -1,0 +1,7 @@
+# SINNOH: ROUTE 212's move tutor (Platinum's own script and tutor table): a MACHOP picked, THUNDERPUNCH from the list
+# for 2 RED and 6 BLUE SHARDS, learnt in its third move slot. Needs the 3D pack.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=66:5"
+EXPECT_A=("party: slot 0 learns move 9 in move slot 2" "[test] item 48: 1" "[test] item 49: 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

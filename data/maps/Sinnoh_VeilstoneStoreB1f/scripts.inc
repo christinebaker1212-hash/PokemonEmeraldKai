@@ -10,6 +10,10 @@ Sinnoh_VeilstoneStoreB1f_EventScript_Person1::
 	goto SinnohP_veilstone_store_b1f_4
 	end
 
+Sinnoh_VeilstoneStoreB1f_EventScript_Person2::
+	goto SinnohP_veilstone_store_b1f_8
+	end
+
 Sinnoh_VeilstoneStoreB1f_EventScript_Person3::
 	goto SinnohP_veilstone_store_b1f_9
 	end

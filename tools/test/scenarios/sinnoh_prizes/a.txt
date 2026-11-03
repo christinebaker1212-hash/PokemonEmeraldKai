@@ -1,7 +1,7 @@
 pressuntil A field 5000
 wait 30
 mp register 260
-mp coins 600
+mp coins 1100
 mp warp 44,51,4,5
 wait 60
 waitfor field 1000

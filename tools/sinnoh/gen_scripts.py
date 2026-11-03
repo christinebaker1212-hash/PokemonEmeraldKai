@@ -65,6 +65,15 @@ TOWER_PARTNER_SPECIES, TOWER_PARTNER_MOVE = 210, 212   # (+ the POKéMON's numbe
 TOWER_BUFFER_SPECIES, TOWER_BUFFER_MOVE = 214, 215     # (a kind's / a move's name into text slot DESTVAR, 0-5)
 TOWER_JUDGE_TOTAL, TOWER_JUDGE_STAT, TOWER_JUDGE_BEST = 216, 217, 218   # (the STATS JUDGE: JudgeStats)
 TOWER_RANKINGS = 220   # (JUBILIFE TV's rankings machines: src/sinnoh/s3d_rankings.c)
+SINNOH_PARTY = 63   # (party and BAG queries, Platinum's ribbons: src/sinnoh/s3d_party.c Sinnoh_PartyCall)
+(PARTY_ARG, PARTY_REPEATED_SPECIES, PARTY_GET_RIBBON, PARTY_SET_RIBBON, PARTY_FRIENDSHIP, PARTY_NATURE, PARTY_FIND_NATURE,
+ PARTY_TYPES, PARTY_HIDDEN_POWER, PARTY_CONTEST_STAT, PARTY_COMBEE_GENDERS, PARTY_MOVE_COUNT, PARTY_ITEM_QUANTITY,
+ PARTY_FOSSIL_COUNT, PARTY_FOOTPRINT, PARTY_OUTSIDER, PARTY_SEEN, PARTY_CAN_ADD_COINS, PARTY_ADD_MONEY, PARTY_REMOVE_MONEY,
+ PARTY_ENOUGH_MONEY, PARTY_WEATHER, PARTY_SELECTED_MOVE, PARTY_BUFFER_MOVE, PARTY_FORGET_MOVE, PARTY_HAS_MOVE,
+ PARTY_EV_TOTAL, PARTY_BUFFER_NATURE, PARTY_TEACH_MOVE, PARTY_TEACH_SLOT, PARTY_BUFFER_TYPE, PARTY_GET_MOVE,
+ PARTY_TRADE_INIT, PARTY_TRADE_REQUESTED, PARTY_TRADE_START, PARTY_TRADE_END, PARTY_FOSSIL_FIND,
+ PARTY_FOSSIL_SPECIES, PARTY_PRIZE, PARTY_HAS_COINS, PARTY_TUTOR_CAN, PARTY_TUTOR_MENU, PARTY_TUTOR_AFFORD,
+ PARTY_TUTOR_PAY, PARTY_RESET_MOVE, PARTY_SHARD_COST, PARTY_SHARD_CLOSE) = range(47)
 SINNOH_ROAMER = 60   # (a roaming POKéMON set going: src/sinnoh/s3d_roamer.c; the slot, Platinum's ROAMING_SLOT_*)   # (SINNOH's TV: src/sinnoh/s3d_tv.c TVCALL_*)
 (TVCALL_STATUS, TVCALL_FRAMING, TVCALL_FINISH, TVCALL_SEGMENT_ID, TVCALL_SEGMENT, TVCALL_COMMERCIAL, TVCALL_NEXT,
  TVCALL_INTERVIEW_ID, TVCALL_INTERVIEW_MESSAGE, TVCALL_INTERVIEW_SAVE, TVCALL_INTERVIEW_OK, TVCALL_WORD,
@@ -103,7 +112,7 @@ FANFARE = {'SEQ_FANFA4': 'MUS_OBTAIN_ITEM', 'SEQ_FANFA3': 'MUS_OBTAIN_TMHM', 'SE
            'SEQ_ACCE': 'MUS_OBTAIN_ITEM', 'SEQ_POKEWALKER': 'MUS_OBTAIN_ITEM', 'SEQ_BADGE': 'MUS_OBTAIN_BADGE',
            'SEQ_ASA': 'MUS_HEAL', 'SEQ_KEYITEM': 'MUS_OBTAIN_ITEM', 'SEQ_WAZA': 'MUS_OBTAIN_TMHM'}
 
-CONSTANTS = {'TRUE': 1, 'FALSE': 0, 'NO_EXIT_ON_B': 0, 'EXIT_ON_B': 1, 'MENU_YES': 0, 'MENU_NO': 1, 'GENDER_MALE': 0, 'GENDER_FEMALE': 1}
+CONSTANTS = {'MOVE_NOT_SELECTED': 0xFF, 'TRUE': 1, 'FALSE': 0, 'NO_EXIT_ON_B': 0, 'EXIT_ON_B': 1, 'MENU_YES': 0, 'MENU_NO': 1, 'GENDER_MALE': 0, 'GENDER_FEMALE': 1}
 
 # Platinum's movement actions -> this game's (Platinum's field runs at 30 frames a second, this one at 60: a delay
 # is twice as many frames here)
@@ -145,6 +154,21 @@ MISSING_MUSIC = set()   # Platinum's songs its scripts play that the game lacks 
 
 class Unsupported(Exception):
     pass
+
+
+_RIBBON_NAMES = {}
+
+
+def ribbon_name_id(root, ribbon):
+    """Platinum's ribbon's name's message id (src/ribbon.c sRibbons[...].nameID)"""
+    if not _RIBBON_NAMES:
+        import subprocess
+        path = os.path.join(root, 'src/ribbon.c')
+        text = open(path).read() if os.path.exists(path) else subprocess.run(
+            ['git', '-C', root, 'cat-file', '-p', 'HEAD:src/ribbon.c'], capture_output=True, text=True).stdout
+        for m in re.finditer(r'\[(RIBBON_\w+)\] = \{[^}]*?\.nameID = (\w+)', text, re.S):
+            _RIBBON_NAMES[m.group(1)] = m.group(2)
+    return _RIBBON_NAMES.get(ribbon)
 
 
 def _sprite(gfx):
@@ -443,6 +467,10 @@ class FileConverter:
             raise Unsupported('trainer %s (not in this game)' % x)
         if x in self.dec.consts:
             return str(self.dec.consts[x])
+        if '_Text_' in x:
+            where = self.dec.message(self.bank, x)   # (a text's number, added to a variable: AddMenuEntry by a variable)
+            if where is not None:
+                return str(where[1])
         raise Unsupported('value %s' % x)
 
     def var(self, x):
@@ -550,6 +578,9 @@ class FileConverter:
 
     # ---- one command
     def command(self, cmd, a):
+        out = self.party_command(cmd, a)
+        if out is not None:
+            return out
         out = []
         m = re.match(r'^(GoTo|Call)If(Eq|Ne|Lt|Le|Gt|Ge)$', cmd)
         if m:
@@ -848,11 +879,17 @@ class FileConverter:
             can_exit = self.value(a[4]) if len(a) > 4 else '1'
             return [self.sinnoh(SINNOH_MENU_INIT, self.var(a[3]), can_exit)]
         if cmd in ('AddMenuEntryImm', 'AddMenuEntry', 'AddListMenuEntry'):
+            value = a[1]          # (AddListMenuEntry's third is an alternative text)
+            value = self.var(value) if self.is_var(value) else self.value(value)
+            if self.is_var(a[0]):
+                # (a text by its number in a variable, the MINING MUSEUM's fossils: Platinum's menu entries' bank)
+                return [self.sinnoh(SINNOH_MENU_ADD, self.dec.banks['menu_entries'], self.var(a[0]), value)]
             where = self.dec.message(self.bank, a[0])
             if where is None:
                 raise Unsupported('menu entry %s' % a[0])
-            value = a[1]          # (AddListMenuEntry's third is an alternative text)
-            return [self.sinnoh(SINNOH_MENU_ADD, where[0], where[1], self.value(value))]
+            return [self.sinnoh(SINNOH_MENU_ADD, where[0], where[1], value)]
+        if cmd == 'ShowListMenuRememberCursor':
+            return [self.sinnoh(SINNOH_MENU_SHOW, self.var(a[0]), self.var(a[1]))]
         if cmd in ('ShowMenu', 'ShowListMenu', 'ShowMenuMultiColumn', 'ShowListMenuSetWidth'):
             return [self.sinnoh(SINNOH_MENU_SHOW)]   # (the game's menu sizes itself)
         if cmd in ('ScrCmd_32D', 'ScrCmd_338', 'ScrCmd_32E', 'ScrCmd_339', 'ScrCmd_332', 'LockObject', 'UnlockObject',
@@ -955,9 +992,30 @@ class FileConverter:
                     'setvar VAR_0x8004, 15', 'special DoSpecialTrainerBattle', 'waitstate', 'frontier_saveparty',
                     'special LoadPlayerParty', 'goto_if_eq VAR_RESULT, B_OUTCOME_WON, %s' % won,
                     'fadescreen FADE_TO_BLACK', 'special SetCB2WhiteOut', 'waitstate', '%s:' % won]
+        if cmd == 'StartTrainerBattle' and self.is_var(a[0]):
+            # (a trainer the script picked: the BATTLEGROUND's leaders, the POKeMON CENTERs' daily trainers, the
+            # mansion's maids. Each trainer this file puts in the variable, compared in turn, with its own defeat line)
+            src = open(self.path).read()
+            names = [a[0]] + re.findall(r'#define\s+(\w+)\s+%s\b' % re.escape(a[0]), src)   # (VAR_TRAINER: VAR_0x8005)
+            cands = sorted(set(t for n in names
+                               for t in re.findall(r'SetVar\s+%s,\s*(TRAINER_\w+)' % re.escape(n), src)))
+            if not cands:
+                raise Unsupported('StartTrainerBattle by a variable no trainer is put in')
+            done = '%s%s__trainer%d' % (PREFIX, self.low, self.next_local())
+            out = []
+            for t in cands:
+                where = build_text.trainer_message(self.root, t, 'TRMSG_DEFEAT')
+                if where is None:
+                    raise Unsupported('trainer %s has no defeat line' % t)
+                lab = '%sT_%d_%d' % (PREFIX, where[0], where[1])
+                self.texts[lab] = where
+                skip = '%s%s__trainer%d' % (PREFIX, self.low, self.next_local())
+                out += ['compare_var_to_value %s, %s' % (self.var(a[0]), self.value(t)), 'goto_if 5, %s' % skip,
+                        'trainerbattle_no_intro %s, %s' % (self.value(t), lab), 'goto %s' % done, '%s:' % skip]
+            return out + ['%s:' % done]
+        if cmd == 'BufferTrainerName':
+            return ['buffertrainername %s, %s' % (self.strvar(a[0]), self.var(a[1]) if self.is_var(a[1]) else self.value(a[1]))]
         if cmd == 'StartTrainerBattle':
-            if self.is_var(a[0]):
-                raise Unsupported('StartTrainerBattle by a variable')
             t = self.value(a[0])
             where = build_text.trainer_message(self.root, a[0], 'TRMSG_DEFEAT')
             if where is None:
@@ -1465,6 +1523,161 @@ class FileConverter:
         if name not in self.dec._bt_funcs:
             raise Unsupported('battle tower function %s' % name)
         return self.dec._bt_funcs[name]
+
+    def tutor_location(self, x):
+        names = [n.strip() for n in open(os.path.join(self.root, 'generated/tutor_locations.txt')) if n.strip()]
+        if self.is_var(x):
+            return self.var(x)
+        if x not in names:
+            raise Unsupported('tutor %s' % x)
+        return str(names.index(x))
+
+    def party(self, op, a=0, b=0):
+        return self.sinnoh(SINNOH_PARTY, op, a, b)
+
+    def party_command(self, cmd, a):
+        """Platinum's party and BAG queries (src/sinnoh/s3d_party.c), None: not one"""
+        if cmd == 'CountRepeatedSpeciesInParty':
+            return [self.party(PARTY_REPEATED_SPECIES, self.arg(a[1]), self.var(a[0]))]
+        if cmd == 'GetPartyMonRibbon':
+            return [self.party(PARTY_ARG, self.value(a[2])), self.party(PARTY_GET_RIBBON, self.arg(a[1]), self.var(a[0]))]
+        if cmd == 'SetPartyMonRibbon':
+            return [self.party(PARTY_ARG, self.value(a[1])), self.party(PARTY_SET_RIBBON, self.arg(a[0]))]
+        if cmd == 'IncreasePartyMonFriendship':
+            return [self.party(PARTY_FRIENDSHIP, self.arg(a[0]), self.arg(a[1]))]
+        if cmd == 'GetPartyMonNature':
+            return [self.party(PARTY_NATURE, self.arg(a[1]), self.var(a[0]))]
+        if cmd == 'FindPartySlotWithNature':
+            return [self.party(PARTY_FIND_NATURE, self.arg(a[1]), self.var(a[0]))]
+        if cmd == 'GetPartyMonType':
+            return [self.party(PARTY_ARG, self.arg(a[2])), self.party(PARTY_TYPES, self.var(a[0]), self.var(a[1]))]
+        if cmd == 'CalcHiddenPowerType':
+            return [self.party(PARTY_HIDDEN_POWER, self.arg(a[0]), self.var(a[1]))]
+        if cmd == 'GetPartyMonContestStat':
+            return [self.party(PARTY_ARG, self.arg(a[1])), self.party(PARTY_CONTEST_STAT, self.arg(a[0]), self.var(a[2]))]
+        if cmd == 'CheckPartyCombeeGenderCount':
+            return [self.party(PARTY_COMBEE_GENDERS, 0, self.var(a[0]))]
+        if cmd == 'GetPartyMonMoveCount':
+            return [self.party(PARTY_MOVE_COUNT, self.arg(a[1]), self.var(a[0]))]
+        if cmd == 'GetItemQuantity':
+            return [self.party(PARTY_ITEM_QUANTITY, self.arg(a[0]), self.var(a[1]))]
+        if cmd == 'GetFossilCount':
+            return [self.party(PARTY_FOSSIL_COUNT, 0, self.var(a[0]))]
+        if cmd == 'FindFossilAtThreshold':
+            return [self.party(PARTY_ARG, self.var(a[1])), self.party(PARTY_FOSSIL_FIND, self.arg(a[2]), self.var(a[0]))]
+        if cmd == 'GetSpeciesFromFossil':
+            return [self.party(PARTY_FOSSIL_SPECIES, self.arg(a[1]), self.var(a[0]))]
+        if cmd == 'GetPartyMonFootprintType':
+            return [self.party(PARTY_ARG, self.var(a[1])), self.party(PARTY_FOOTPRINT, self.arg(a[2]), self.var(a[0]))]
+        if cmd == 'CheckIsPartyMonOutsider':
+            return [self.party(PARTY_OUTSIDER, self.var(a[0]), self.var(a[1]))]
+        if cmd == 'CheckHasSeenSpecies':
+            return [self.party(PARTY_SEEN, self.arg(a[0]), self.var(a[1]))]
+        if cmd == 'GoToIfCannotAddCoins':
+            return [self.party(PARTY_CAN_ADD_COINS, self.arg(a[0]), 'VAR_RESULT'),
+                    'goto_if_eq VAR_RESULT, FALSE, %s' % self.label(a[1])]
+        if cmd == 'ShowCoins':
+            return ['showcoinsbox 1, 1']
+        if cmd == 'HideCoins':
+            return ['hidecoinsbox 0, 0']
+        if cmd == 'UpdateCoinDisplay':
+            return ['updatecoinsbox 1, 1']
+        if cmd == 'CheckBonusRoundStreak':
+            # (the GAME CORNER's slots are the game's, which keep no bonus round streak)
+            return ['setvar %s, FALSE' % self.var(a[0])]
+        if cmd == 'GetOverworldWeather':
+            return [self.party(PARTY_WEATHER, 0, self.var(a[0]))]
+        if cmd in ('AddMoney', 'RemoveMoney', 'RemoveMoney2') and self.is_var(a[0]):
+            return [self.party(PARTY_ADD_MONEY if cmd == 'AddMoney' else PARTY_REMOVE_MONEY, self.var(a[0])),
+                    'updatemoneybox']
+        if cmd == 'SelectPartyMonMove':
+            # (Emerald's move deleter's summary screen, picking a move: its answer in VAR_0x8005)
+            return ['copyvar VAR_0x8004, %s' % self.var(a[0]) if self.is_var(a[0]) else 'setvar VAR_0x8004, %s' % self.value(a[0]),
+                    'special MoveDeleterChooseMoveToForget', 'waitstate']
+        if cmd == 'GetSelectedPartyMonMove':
+            return [self.party(PARTY_SELECTED_MOVE, 0, self.var(a[0]))]
+        if cmd == 'BufferPartyMoveName':
+            return [self.party(PARTY_ARG, self.value(a[0])), self.party(PARTY_BUFFER_MOVE, self.arg(a[1]), self.var(a[2]))]
+        if cmd == 'ClearPartyMonMoveSlot':
+            return [self.party(PARTY_FORGET_MOVE, self.arg(a[0]), self.var(a[1]))]
+        if cmd == 'CheckPartyMonHasMove':
+            return [self.party(PARTY_ARG, self.value(a[1])), self.party(PARTY_HAS_MOVE, self.arg(a[2]), self.var(a[0]))]
+        if cmd == 'GetPartyMonEVTotal':
+            return [self.party(PARTY_EV_TOTAL, self.arg(a[1]), self.var(a[0]))]
+        if cmd == 'BufferNatureName':
+            return [self.party(PARTY_ARG, self.value(a[0])), self.party(PARTY_BUFFER_NATURE, self.arg(a[1]))]
+        if cmd == 'BufferRibbonName':
+            # (Platinum's ribbon's name, its ribbon.c nameID in the ribbon_names bank)
+            name = ribbon_name_id(self.root, a[1])
+            where = self.dec.message('ribbon_names', name) if name else None
+            if where is None:
+                raise Unsupported('ribbon %s' % a[1])
+            return [self.sinnoh(SINNOH_BUFFER_TEXT, self.value(a[0]), where[0], where[1])]
+        if cmd == 'OpenSummaryScreenTeachMove':
+            return [self.party(PARTY_ARG, self.arg(a[1])), self.party(PARTY_TEACH_MOVE, self.arg(a[0])), 'waitstate']
+        if cmd == 'GetPartyMonMove':
+            return [self.party(PARTY_ARG, self.arg(a[2])), self.party(PARTY_GET_MOVE, self.arg(a[1]), self.var(a[0]))]
+        if cmd == 'GetSummarySelectedMoveSlot':
+            return [self.party(PARTY_TEACH_SLOT, 0, self.var(a[0]))]
+        # (in-game trades: Platinum's own, src/data/sinnoh_ingame_trades.h, through the game's trade scene)
+        if cmd == 'SelectPokemonToTrade':
+            return [self.sinnoh(SINNOH_CONTEST, 32), 'special ChoosePartyMon', 'waitstate',
+                    self.sinnoh(SINNOH_CONTEST, 33), self.sinnoh(SINNOH_CONTEST, 34, self.var('VAR_RESULT'))]
+        if cmd == 'InitNPCTrade':
+            t = open(os.path.join(self.root, 'include/constants/npc_trades.h')).read()
+            names = [x.split('=')[0].strip() for x in re.search(r'enum NPCTradeID \{(.*?)\}', t, re.S).group(1).split(',')]
+            if a[0] not in names:
+                raise Unsupported('trade %s' % a[0])
+            return [self.party(PARTY_TRADE_INIT, names.index(a[0]))]
+        if cmd == 'GetNPCTradeRequestedSpecies':
+            return [self.party(PARTY_TRADE_REQUESTED, 0, self.var(a[0]))]
+        if cmd == 'StartNPCTrade':
+            return [self.party(PARTY_TRADE_START, self.arg(a[0])), 'special CreateInGameTradePokemon',
+                    'special DoInGameTradeScene', 'waitstate', self.party(PARTY_TRADE_END, 1)]
+        if cmd == 'FinishNPCTrade':
+            return [self.party(PARTY_TRADE_END)]
+        if cmd in ('TurnOnPokedexLanguageDetection', 'TurnOnPokedexFormDetection'):
+            # (the POKeDEX is the game's own, which has no foreign-language or form pages: the scripts go on as
+            # Platinum's, the MEISTER's flag set beside it)
+            return []
+        if cmd == 'BufferTypeName':
+            return [self.party(PARTY_ARG, self.value(a[0])), self.party(PARTY_BUFFER_TYPE, self.arg(a[1]))]
+        if cmd == 'AddCoins':
+            return ['addcoins %s' % self.arg(a[0])]
+        if cmd == 'SubtractCoins':
+            return ['removecoins %s' % self.arg(a[0])]
+        if cmd == 'HasCoins':
+            return [self.party(PARTY_HAS_COINS, self.arg(a[1]), self.var(a[0]))]
+        # (Platinum's move tutors: src/data/sinnoh_tutors.h; the tutor by Platinum's TUTOR_LOCATION_*)
+        if cmd in ('CheckHasLearnableTutorMoves', 'ShowMoveTutorMoveSelectionMenu'):
+            tutor = self.tutor_location(a[1])
+            if cmd == 'CheckHasLearnableTutorMoves':
+                return [self.party(PARTY_ARG, tutor), self.party(PARTY_TUTOR_CAN, self.arg(a[0]), self.var(a[2]))]
+            slot = '255' if a[0] == 'PARTY_SLOT_NONE' else self.arg(a[0])
+            return [self.party(PARTY_ARG, tutor), self.party(PARTY_TUTOR_MENU, slot, self.var(a[2])),
+                    self.sinnoh(SINNOH_MENU_SHOW)]
+        if cmd == 'CheckCanAffordMove':
+            return [self.party(PARTY_TUTOR_AFFORD, self.arg(a[0]), self.var(a[1]))]
+        if cmd == 'PayShardCost':
+            return [self.party(PARTY_TUTOR_PAY, self.arg(a[0]))]
+        if cmd == 'ResetMoveSlot':
+            # (the scripts give the party slot, the move slot, then the move: what Platinum's code does with them)
+            return [self.party(PARTY_ARG, self.arg(a[1])),
+                    self.party(PARTY_RESET_MOVE, self.arg(a[0]), self.var(a[2]) if self.is_var(a[2]) else self.value(a[2]))]
+        if cmd == 'ShowShardCost':
+            first = self.dec.ids('menu_entries').get('pl_msg_00000361_00273')
+            if first is None:
+                raise Unsupported('the SHARDS lines')
+            return [self.party(PARTY_ARG, self.dec.banks['menu_entries']), self.party(PARTY_SHARD_COST, self.arg(a[2]), first)]
+        if cmd == 'CloseShardCostWindow':
+            return [self.party(PARTY_SHARD_CLOSE)]
+        if cmd == 'GetGameCornerPrizeData':
+            # (VEILSTONE's prizes: Platinum's table, src/sinnoh/s3d_party.c sPrizes)
+            return [self.party(PARTY_ARG, self.var(a[2])), self.party(PARTY_PRIZE, self.arg(a[0]), self.var(a[1]))]
+        if cmd == 'GoToIfNotEnoughMoney' and self.is_var(a[0]):
+            return [self.party(PARTY_ENOUGH_MONEY, self.var(a[0]), 'VAR_RESULT'),
+                    'goto_if_eq VAR_RESULT, FALSE, %s' % self.label(a[1])]
+        return None
 
     def tower(self, func, arg=0, dest=0):
         return self.sinnoh(SINNOH_TOWER, func, arg, dest)

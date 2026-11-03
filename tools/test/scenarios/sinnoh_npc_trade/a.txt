@@ -1,0 +1,14 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp warp 42,76,11,8
+wait 60
+waitfor field 1000
+mp face up
+press A 1
+pressuntillog A 3000 party: Platinum's trade 0
+pressuntil A field 6000
+wait 30
+pressuntil A field 2000
+mp party
+quit

@@ -1,8 +1,9 @@
 # Crystal's BANK OF MOM (src/mp/mp_mombank.c): while MOM saves (state 3), a JOHTO battle's winnings go a quarter to her
 # ("Sent some to MOM!"); at home "Or is this about your money?" YES, GET: ¥11 entered digit by digit comes back to
 # the wallet. Shots menu, amount.
+# (the day pinned: a daily goal met by the battle would add its money to the wallet)
 MODE=1
 TMO=120
-ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_BATTLETEXT=1 MOEMON_TEST_STRONG=1 MOEMON_TEST_FOE_HP1=1"
+ENV_A="MOEMON_DEBUG_DATE=20261101 MOEMON_DEBUG_REGION=1 MOEMON_BATTLETEXT=1 MOEMON_TEST_STRONG=1 MOEMON_TEST_FOE_HP1=1"
 EXPECT_A=("Sent some to MOM!" "mom bank: saved 0, state 3" "mom bank: saved 80, state 3, held 5240" "mom bank: saved 69, state 3, held 5251")
 UNEXPECT_A=("[crash]" "TIMEOUT")

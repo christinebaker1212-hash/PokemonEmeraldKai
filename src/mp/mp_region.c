@@ -274,7 +274,9 @@ void MP_Region_StartNewGame(void)
     Sinnoh_TowerReset();
     {
         void Sinnoh_RankingsReset(void);
+        void Sinnoh_RibbonsReset(void);
         Sinnoh_RankingsReset();
+        Sinnoh_RibbonsReset();
     }
     Sinnoh_FrontierReset();
     Sinnoh_TvReset();
@@ -408,6 +410,16 @@ void MP_Region_WriteSidecar(void)
             c[1] = size;
             fwrite(c, sizeof(c), 1, f);
             fwrite(tower, size, 1, f);
+        }
+        {
+            // Platinum's Gen 4 ribbons, by POKéMON (src/sinnoh/s3d_party.c)
+            u32 size;
+            const void *Sinnoh_RibbonsData(u32 *size);
+            const void *rib = Sinnoh_RibbonsData(&size);
+            c[0] = CHUNK('R', 'I', 'B', 'N');
+            c[1] = size;
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(rib, size, 1, f);
         }
         {
             // JUBILIFE TV's rankings (src/sinnoh/s3d_rankings.c)
@@ -582,6 +594,14 @@ static bool8 LoadFrom(const char *path)
                 if (fread(buf, c[1], 1, f) == 1)
                     Sinnoh_TowerLoad(buf, c[1]);
             }
+            else if (c[0] == CHUNK('R', 'I', 'B', 'N') && c[1] <= 32768)
+            {
+                u8 *buf = malloc(c[1]);
+                void Sinnoh_RibbonsLoad(const void *data, u32 size);
+                if (buf != NULL && fread(buf, c[1], 1, f) == 1)
+                    Sinnoh_RibbonsLoad(buf, c[1]);
+                free(buf);
+            }
             else if (c[0] == CHUNK('R', 'A', 'N', 'K') && c[1] <= 4096)
             {
                 static u8 buf[4096];
@@ -724,7 +744,9 @@ void MP_Region_LoadFromSave(void)
     Sinnoh_TowerReset();
     {
         void Sinnoh_RankingsReset(void);
+        void Sinnoh_RibbonsReset(void);
         Sinnoh_RankingsReset();
+        Sinnoh_RibbonsReset();
     }
     Sinnoh_FrontierReset();
     Sinnoh_TvReset();

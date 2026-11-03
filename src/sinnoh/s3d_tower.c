@@ -525,23 +525,25 @@ static u16 GiveBattlePoints(void)
     return bp;
 }
 
-// Platinum's sub_0204AC54: the ribbon for the challenge's POKéMON (TRUE: one got it). Platinum's ABILITY / GREAT
-// ABILITY ribbons are the game's own tower ribbons, WINNING and VICTORY; the doubles' and multis' ABILITY ribbons
-// WINNING
-static bool8 GiveRibbon(bool8 great)
+// Platinum's sub_0204AC54: Platinum's ribbon RIBBON for the challenge's POKéMON (TRUE: one got it; s3d_party.c keeps
+// the Gen 4 ones)
+bool8 Sinnoh_MonHasRibbon(struct Pokemon *mon, u8 ribbon);
+void Sinnoh_MonGiveRibbon(struct Pokemon *mon, u8 ribbon);
+enum { RIBBON_ABILITY = 53, RIBBON_GREAT_ABILITY, RIBBON_DOUBLE_ABILITY, RIBBON_MULTI_ABILITY };   // (Platinum's)
+
+static bool8 GiveRibbon(u8 ribbon)
 {
-    u8 one = 1, n = 0;
-    u32 i, field = great ? MON_DATA_VICTORY_RIBBON : MON_DATA_WINNING_RIBBON;
+    u8 n = 0;
+    u32 i;
     for (i = 0; i < sT.partySize && i < 4; i++)
     {
         struct Pokemon *mon;
         if (sT.slots[i] >= PARTY_SIZE)
             continue;
         mon = &gPlayerParty[sT.slots[i]];
-        if (GetMonData(mon, field))
+        if (Sinnoh_MonHasRibbon(mon, ribbon))
             continue;
-        SetMonData(mon, field, &one);
-        IncrementGameStat(GAME_STAT_RECEIVED_RIBBONS);
+        Sinnoh_MonGiveRibbon(mon, ribbon);
         n++;
     }
     return n != 0;
@@ -800,10 +802,12 @@ bool8 Sinnoh_TowerCall(u16 func, u16 arg, u16 destVar)
         break;
     }
     case BT_FUNC_UNK_48:   // PALMER beaten: the ribbon (sub_0204AB68)
-        out = sT.challengeMode == BT_MODE_SINGLE && sT.beatPalmer ? GiveRibbon(sT.beatPalmer == 2) : 0;
+        out = sT.challengeMode == BT_MODE_SINGLE && sT.beatPalmer
+            ? GiveRibbon(sT.beatPalmer == 2 ? RIBBON_GREAT_ABILITY : RIBBON_ABILITY) : 0;
         break;
     case BT_FUNC_UNK_49:   // 50 in a row outside single battles: the ribbon (sub_0204ABA0)
-        out = sT.ribbons && sT.challengeMode != BT_MODE_SINGLE && sT.challengeMode < BT_MODE_WIFI ? GiveRibbon(FALSE) : 0;
+        out = sT.ribbons && (sT.challengeMode == BT_MODE_DOUBLE || sT.challengeMode == BT_MODE_MULTI)
+            ? GiveRibbon(sT.challengeMode == BT_MODE_DOUBLE ? RIBBON_DOUBLE_ABILITY : RIBBON_MULTI_ABILITY) : 0;
         break;
     case BT_FUNC_SET_PARTNER_ID:
         sT.partnerID = value % BT_PARTNERS;
