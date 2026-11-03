@@ -82,6 +82,8 @@ switch is the same setting. From the Maker's first update:
   be stranded (and unable to save) if it vanished first. One last dev release is built from the new code: those
   installs take it, and its updater moves them to main on the next start (a channel change installs even an equal
   or lower version). Only then is `dev-latest` deleted.
+  Done 2026-11-03: dev-1.80.0.232 is that release (dev-latest points to it) and dev-release.yml is gone; the
+  `dev-latest` prerelease is the user's to delete once dev installs have moved.
 
 **"In the game" means the same program, not inside the game's screen.** The Maker never edits in the 240x160
 picture. It opens its own desktop window at any size, with menus, toolbars, panels and the mouse, like RPG Maker. The

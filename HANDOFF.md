@@ -23,8 +23,8 @@ in-game; their CI runs weren't checked either.
 
 ### 0. Dev auto-updater (ended in 1.80.0)
 - The dev channel ended with Moemon Maker's first update (the user, 2026-11-03): every build follows main and
-  `AllowSmallTweaks = 1` only unlocks the small tweaks. The last dev release came from 1.80.0's code, which moves dev
-  installs back to main; dev-release.yml is gone. History: BUILDING_COOP.md "Dev update channel (ended)".
+  `AllowSmallTweaks = 1` only unlocks the small tweaks. The last dev release, dev-1.80.0.232, came from 1.80.0's code and moves
+  dev installs back to main; dev-release.yml is gone (tools/test/dev_*_test.sh still check dev builds by hand). History: BUILDING_COOP.md "Dev update channel (ended)".
 
 ### Card system (shipped in main 1.27.0, reworked in 1.28.0)
 - Ungated and released as a main update. Status, design decisions, code map, rules fixes,
