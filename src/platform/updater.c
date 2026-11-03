@@ -459,6 +459,76 @@ done:
     free(wurl);
     return ok;
 }
+
+// Moemon Maker: any request (GitHub's API for Publish: src/maker/maker_publish.c); headers "Name: value\r\n"...; TRUE on
+// a 2xx answer (its body in the sink either way)
+static int HttpRequest(const char *method, const char *url, const char *headers, const void *body, long bodyLen,
+                       struct Sink *k, int *status)
+{
+    URL_COMPONENTS uc;
+    wchar_t *wurl = Wide(url), *wmethod = Wide(method), *wheaders = headers ? Wide(headers) : NULL, host[256];
+    HINTERNET s = NULL, c = NULL, r = NULL;
+    DWORD code = 0, len = sizeof(code), got;
+    char buf[16384];
+    int ok = 0;
+
+    *status = 0;
+    if (!wurl || !wmethod)
+        goto done;
+    memset(&uc, 0, sizeof(uc));
+    uc.dwStructSize = sizeof(uc);
+    uc.dwSchemeLength = (DWORD)-1;
+    uc.dwHostNameLength = (DWORD)-1;
+    uc.dwUrlPathLength = (DWORD)-1;
+    uc.dwExtraInfoLength = (DWORD)-1;
+    if (!WinHttpCrackUrl(wurl, 0, 0, &uc) || uc.dwHostNameLength >= 256)
+        goto done;
+    memcpy(host, uc.lpszHostName, uc.dwHostNameLength * sizeof(wchar_t));
+    host[uc.dwHostNameLength] = 0;
+    s = WinHttpOpen(L"MoemonMaker/" MOEMON_VERSION, WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, NULL, NULL, 0);
+    if (!s)
+        s = WinHttpOpen(L"MoemonMaker/" MOEMON_VERSION, WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, NULL, NULL, 0);
+    if (!s)
+        goto done;
+    WinHttpSetTimeouts(s, 8000, 8000, 30000, 60000);
+    c = WinHttpConnect(s, host, uc.nPort, 0);
+    if (!c)
+        goto done;
+    // (the path with its query: dwUrlPathLength stops before "?...")
+    r = WinHttpOpenRequest(c, wmethod, uc.lpszUrlPath, NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES,
+                           uc.nScheme == INTERNET_SCHEME_HTTPS ? WINHTTP_FLAG_SECURE : 0);
+    if (!r)
+        goto done;
+    if (!WinHttpSendRequest(r, wheaders ? wheaders : WINHTTP_NO_ADDITIONAL_HEADERS, wheaders ? (DWORD)-1L : 0,
+                            (LPVOID)body, (DWORD)bodyLen, (DWORD)bodyLen, 0)
+     || !WinHttpReceiveResponse(r, NULL))
+        goto done;
+    if (!WinHttpQueryHeaders(r, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER, WINHTTP_HEADER_NAME_BY_INDEX, &code, &len, WINHTTP_NO_HEADER_INDEX))
+        goto done;
+    *status = (int)code;
+    for (;;)
+    {
+        got = 0;
+        if (!WinHttpReadData(r, buf, sizeof(buf), &got))
+            goto done;
+        if (got == 0)
+            break;
+        if (!SinkWrite(k, buf, got))
+            goto done;
+    }
+    ok = code >= 200 && code < 300;
+done:
+    if (r)
+        WinHttpCloseHandle(r);
+    if (c)
+        WinHttpCloseHandle(c);
+    if (s)
+        WinHttpCloseHandle(s);
+    free(wurl);
+    free(wmethod);
+    free(wheaders);
+    return ok;
+}
 #else
 // libcurl, loaded at run time: the game doesn't need it to start
 typedef void CURL;
@@ -472,6 +542,8 @@ static struct
     int (*easy_getinfo)(CURL *, int, ...);
     void (*easy_cleanup)(CURL *);
     const char *(*easy_strerror)(int);
+    void *(*slist_append)(void *, const char *);
+    void (*slist_free_all)(void *);
 } sCurl;
 
 #define CURLOPT_WRITEDATA 10001
@@ -487,6 +559,10 @@ static struct
 #define CURLOPT_CONNECTTIMEOUT 78
 #define CURLOPT_NOSIGNAL 99
 #define CURLINFO_RESPONSE_CODE 0x200002
+#define CURLOPT_POSTFIELDS 10015
+#define CURLOPT_HTTPHEADER 10023
+#define CURLOPT_CUSTOMREQUEST 10036
+#define CURLOPT_POSTFIELDSIZE 60
 
 static int LoadCurl(void)
 {
@@ -505,6 +581,8 @@ static int LoadCurl(void)
     sCurl.easy_getinfo = (int (*)(CURL *, int, ...))dlsym(sCurl.lib, "curl_easy_getinfo");
     sCurl.easy_cleanup = (void (*)(CURL *))dlsym(sCurl.lib, "curl_easy_cleanup");
     sCurl.easy_strerror = (const char *(*)(int))dlsym(sCurl.lib, "curl_easy_strerror");
+    sCurl.slist_append = (void *(*)(void *, const char *))dlsym(sCurl.lib, "curl_slist_append");
+    sCurl.slist_free_all = (void (*)(void *))dlsym(sCurl.lib, "curl_slist_free_all");
     if (!sCurl.global_init || !sCurl.easy_init || !sCurl.easy_setopt || !sCurl.easy_perform || !sCurl.easy_getinfo
      || !sCurl.easy_cleanup || !sCurl.easy_strerror)
     {
@@ -551,7 +629,89 @@ static int HttpGet(const char *url, struct Sink *k, int *status)
     sCurl.easy_cleanup(c);
     return rc == 0 && code == 200;
 }
+
+// Moemon Maker: any request (GitHub's API for Publish: src/maker/maker_publish.c); headers "Name: value\r\n"...; TRUE on
+// a 2xx answer (its body in the sink either way)
+static int HttpRequest(const char *method, const char *url, const char *headers, const void *body, long bodyLen,
+                       struct Sink *k, int *status)
+{
+    CURL *c;
+    long code = 0;
+    int rc;
+    void *list = NULL;
+    const char *ca = getenv("CURL_CA_BUNDLE") ? getenv("CURL_CA_BUNDLE") : getenv("SSL_CERT_FILE");
+    *status = 0;
+    if (!LoadCurl() || !sCurl.slist_append || !(c = sCurl.easy_init()))
+        return 0;
+    if (headers)
+    {
+        // ("Name: value\r\n" lines, one list entry each)
+        char line[1024];
+        const char *p = headers;
+        while (*p)
+        {
+            const char *e = strstr(p, "\r\n");
+            size_t n = e ? (size_t)(e - p) : strlen(p);
+            if (n && n < sizeof(line))
+            {
+                memcpy(line, p, n);
+                line[n] = 0;
+                list = sCurl.slist_append(list, line);
+            }
+            p += n + (e ? 2 : 0);
+        }
+        sCurl.easy_setopt(c, CURLOPT_HTTPHEADER, list);
+    }
+    sCurl.easy_setopt(c, CURLOPT_URL, url);
+    sCurl.easy_setopt(c, CURLOPT_USERAGENT, "MoemonMaker/" MOEMON_VERSION);
+    sCurl.easy_setopt(c, CURLOPT_CUSTOMREQUEST, method);
+    if (body)
+    {
+        sCurl.easy_setopt(c, CURLOPT_POSTFIELDS, body);
+        sCurl.easy_setopt(c, CURLOPT_POSTFIELDSIZE, bodyLen);
+    }
+    sCurl.easy_setopt(c, CURLOPT_FOLLOWLOCATION, 1L);
+    sCurl.easy_setopt(c, CURLOPT_NOSIGNAL, 1L);
+    sCurl.easy_setopt(c, CURLOPT_CONNECTTIMEOUT, 8L);
+    sCurl.easy_setopt(c, CURLOPT_TIMEOUT, 120L);
+    sCurl.easy_setopt(c, CURLOPT_WRITEFUNCTION, CurlWrite);
+    sCurl.easy_setopt(c, CURLOPT_WRITEDATA, k);
+    if (ca && ca[0])
+        sCurl.easy_setopt(c, CURLOPT_CAINFO, ca);
+    rc = sCurl.easy_perform(c);
+    sCurl.easy_getinfo(c, CURLINFO_RESPONSE_CODE, &code);
+    *status = (int)code;
+    if (rc != 0)
+        Log("%s %s: %s", method, url, sCurl.easy_strerror(rc));
+    sCurl.easy_cleanup(c);
+    if (list)
+        sCurl.slist_free_all(list);
+    return rc == 0 && code >= 200 && code < 300;
+}
 #endif
+
+// Moemon Maker: a request whose answer is kept in memory (up to cap bytes; *out freed by the caller), for Publish
+int Updater_Request(const char *method, const char *url, const char *headers, const void *body, long bodyLen,
+                    char **out, long *outLen, int *status)
+{
+    struct Sink k;
+    SDL_atomic_t never;
+    int ok;
+    memset(&k, 0, sizeof(k));
+    SDL_AtomicSet(&never, 0);
+    k.cap = 32L * 1024 * 1024;
+    k.mem = malloc(k.cap + 1);
+    k.cancel = &never;
+    if (!k.mem)
+        return 0;
+    ShaInit(&k.sha);
+    ok = HttpRequest(method, url, headers, body, bodyLen, &k, status);
+    k.mem[k.len] = 0;
+    *out = k.mem;
+    if (outLen)
+        *outLen = k.len;
+    return ok;
+}
 
 // ---------------------------------------------------------------------------
 // Versions and update.txt

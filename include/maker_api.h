@@ -128,6 +128,17 @@ void MakerApi_StopPlay(void);
 int MakerApi_IsPlaying(void);
 unsigned int MakerApi_GameWindowId(void);   // the game's own window (F12 / closing it ends the test)
 
+// Publish (src/maker/maker_publish.c): the working copy's files to the game's repository through GitHub's API, as one
+// commit; the publish history and rolling back to one
+enum { MAKER_PUBLISH_IDLE, MAKER_PUBLISH_WORKING, MAKER_PUBLISH_DONE, MAKER_PUBLISH_FAILED, MAKER_PUBLISH_ROLLED_BACK };
+int MakerApi_Publish(const char *token, const char *message);
+int MakerApi_PublishHistory(const char *token);
+int MakerApi_PublishRollback(const char *token, const char *sha);
+int MakerApi_PublishState(const char **result);
+void MakerApi_PublishAcknowledge(void);
+int MakerApi_PublishHistoryCount(void);
+int MakerApi_PublishHistoryItem(int i, const char **sha, const char **date, const char **message);
+
 // The game side of the editor (src/maker/maker_main.c)
 void MakerApi_Close(void);            // the editor closed: back to the main menu
 const char *MakerApi_GameVersion(void);

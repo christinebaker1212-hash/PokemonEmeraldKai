@@ -89,6 +89,8 @@ struct Editor
     std::string message;              // the status bar's last message ("Saved 3 maps")
     std::string title;
     bool musicOpen = false;           // Tools > Music
+    bool publishOpen = false;         // File > Publish
+    std::string githubToken;          // Publish's (moemon_maker.ini: this PC only)
     int playKind = 0, playSlot = 1;   // F5's last pick (moemon_maker.ini)
     bool wantPlay = false;            // F5 / the Play button: the "Play as" question
     int playX = -1, playY = -1;       // where F5 starts
@@ -139,6 +141,11 @@ void MusicWindow();
 bool SongPicker(const char *id, int *song);
 void Music_TestCommand(const char *cmd, const char *arg);
 void Music_Dropped(const std::string &path);
+
+// maker_publish.cpp
+void PublishWindow();
+int Publish_ErrorCount();
+void Publish_TestCommand(const char *cmd, const char *arg);
 
 // maker_icons.cpp
 bool IconButton(const char *id, int icon, const char *tooltip, bool selected, bool enabled);
