@@ -958,6 +958,30 @@ void MP_Region_SetCleared(u8 region)
         gRegionState.cleared |= 1 << region;
 }
 
+// Moemon Maker: a story point played on a map of REGION (src/maker/maker_play.c Maker_PlayNewGame): the player there,
+// the region set up as on arriving, its first BADGES badges, and as its Champion (its LEAGUE beaten, the S.S. TICKET:
+// the boats to every region) when asked
+void MP_Region_SetUpForPlay(u8 region, u8 badges, bool8 champion)
+{
+    u8 i;
+    if (region >= REGION_COUNT)
+        return;
+    gRegionState.current = region;
+    gRegionState.started |= 1 << region;
+    MP_Region_Arrive(region);
+    for (i = 0; i < badges && i < 8; i++)
+        FlagSet(MP_Region_BadgeFlag(region, i));
+    if (champion)
+    {
+        MP_Region_SetCleared(region);
+        if (region == REGION_HOENN)
+            FlagSet(FLAG_SYS_GAME_CLEAR);
+        FlagSet(FLAG_IS_CHAMPION);
+        if (!CheckBagHasItem(ITEM_SS_TICKET, 1))
+            AddBagItem(ITEM_SS_TICKET, 1);
+    }
+}
+
 bool8 MP_Region_AnyCleared(void)
 {
     u8 r;

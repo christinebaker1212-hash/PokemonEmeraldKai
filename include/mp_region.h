@@ -67,6 +67,7 @@ u16 MP_TimeLandSlot(u16 species, u8 index);   // grass slots 2-3 by the time of 
 bool8 MP_Region_DeviceHere(u8 home);   // a region's device works here (its region, or anywhere once its LEAGUE is beaten)
 void MP_Region_GiveDevices(void);      // map load: the MOéNAV key item once HOENN's LEAGUE is beaten
 void MP_Region_SetCleared(u8 region);
+void MP_Region_SetUpForPlay(u8 region, u8 badges, bool8 champion);   // Moemon Maker: a story point on REGION's map
 bool8 MP_Region_AnyCleared(void);   // an Elite Four beaten in any region (the GLOBAL PC)
 u8 MP_Region_StartChoice(void);       // PROF. BIRCH's region question, until the new game starts
 u8 MP_Region_Current(void);          // the region of the map the player is on (a shared map: the region they came from)

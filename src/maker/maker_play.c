@@ -29,6 +29,7 @@
 #include "constants/vars.h"
 #include "constants/heal_locations.h"
 #include "maker.h"
+#include "mp_region.h"
 #include "maker_api.h"
 
 extern char gPlatformSavePath[512];
@@ -231,6 +232,10 @@ bool8 Maker_PlayNewGame(void)
         break;
     }
     CalculatePlayerPartyCount();
+    // the map's own region: arrived in, its badges, and (CHAMPION, TEST) its Champion, the boats to every region open
+    MP_Region_SetUpForPlay(MP_Region_OfGroup(m->mapGroup),
+                           sKind == MAKER_PLAY_BADGES4 ? 4 : sKind == MAKER_PLAY_CHAMPION || sKind == MAKER_PLAY_TEST ? 8 : 0,
+                           sKind == MAKER_PLAY_CHAMPION || sKind == MAKER_PLAY_TEST);
     SetLastHealLocationWarp(HEAL_LOCATION_LITTLEROOT_TOWN_BRENDANS_HOUSE_2F);
     SetWarpDestination(m->mapGroup, m->mapNum, WARP_ID_NONE, sX, sY);
     WarpIntoMap();
