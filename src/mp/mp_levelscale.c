@@ -28,6 +28,7 @@
 #include "random.h"
 #include "constants/flags.h"
 #include "constants/trainers.h"
+#include "constants/qz_port.h"
 #include "mp.h"
 #include "mp_region.h"
 
@@ -158,12 +159,30 @@ static u8 ClampLevel(s32 v)
     return v < 1 ? 1 : v > MAX_LEVEL ? MAX_LEVEL : v;
 }
 
+// Each region's very first rival battle stays at its own levels (5) whatever the scaling (the user, 2026-11-03):
+// HOENN's on ROUTE 103, BLUE's in OAK's lab, SILVER's in CHERRYGROVE, BARRY's on ROUTE 201
+static bool8 IsFirstRivalBattle(u16 trainerId)
+{
+    static const u16 sFirst[] = {
+        TRAINER_BRENDAN_ROUTE_103_MUDKIP, TRAINER_BRENDAN_ROUTE_103_TREECKO, TRAINER_BRENDAN_ROUTE_103_TORCHIC,
+        TRAINER_MAY_ROUTE_103_MUDKIP, TRAINER_MAY_ROUTE_103_TREECKO, TRAINER_MAY_ROUTE_103_TORCHIC,
+        TRAINER_QZ_8518, TRAINER_QZ_8519, TRAINER_QZ_8520,
+        TRAINER_QZ_4701,
+        TRAINER_SINNOH_RIVAL_ROUTE_201_CHIMCHAR, TRAINER_SINNOH_RIVAL_ROUTE_201_PIPLUP, TRAINER_SINNOH_RIVAL_ROUTE_201_TURTWIG,
+    };
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sFirst); i++)
+        if (sFirst[i] == trainerId)
+            return TRUE;
+    return FALSE;
+}
+
 // A trainer's Pokémon: its normal level, and the normal level of the trainer's strongest one
 u8 MP_LevelScale_TrainerMon(u16 trainerId, u8 normal, u8 partyMax)
 {
     u8 ref, margin;
     s32 target;
-    if (!Enabled() || (ref = Reference()) == 0 || MP_LevelScaleRule(MP_SCALE_TRAINERS) == 0)
+    if (!Enabled() || (ref = Reference()) == 0 || MP_LevelScaleRule(MP_SCALE_TRAINERS) == 0 || IsFirstRivalBattle(trainerId))
         return normal;
     margin = BossMargin(trainerId);
     target = ref + TrainerOffset() + margin;
