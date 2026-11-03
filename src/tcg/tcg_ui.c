@@ -4664,6 +4664,16 @@ void Tcg_Debug(const char *command)
         TcgBoard_Sync(&U.duel);
         return;
     }
+    if (sscanf(command, "drawn %u", &n) == 1)
+    {
+        /* Harness helper: the top N cards of your deck into your hand (a big hand) */
+        struct TcgPlayer *p = &U.duel.players[0];
+        while (n-- && p->deckSize)
+            p->hand[p->handSize++] = TcgPile_Remove(p->deck, &p->deckSize, 0);
+        printf("[tcg] drawn: hand %u deck %u\n", p->handSize, p->deckSize);
+        TcgBoard_Sync(&U.duel);
+        return;
+    }
     if (sscanf(command, "seed %u", &n) == 1)
     {
         /* Harness helper: the collection's generator (the next duel's shuffle and coin come from it) */

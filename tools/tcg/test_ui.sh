@@ -574,4 +574,47 @@ expect guide 'guide\] closed'
 expect guide 'tcg\] screen 1 '
 if grep -q "words don't fit" "$OUT/guide/log.txt"; then echo "FAIL guide: a page's words don't fit"; exit 1; fi
 echo 'PASS HOW TO PLAY: every page, then back on the case'
+# A big hand (40+ cards): the cursor walks the mat and the hand. The places it can go once had room for 40, and a
+# 22-card hand ran past them and crashed the game on the first cursor move.
+cat > "$OUT/bighand.txt" <<'SCRIPT'
+pressuntil A field 5000
+wait 100
+mp cards starter 0
+mp cards fast
+mp cards open
+wait 20
+press A 2
+wait 200
+mp cards ready
+wait 300
+mp cards drawn 40
+mp cards focus 1 0
+wait 20
+press UP 2
+wait 10
+press DOWN 2
+wait 10
+press RIGHT 2
+wait 10
+press LEFT 2
+wait 10
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press RIGHT 2
+wait 10
+press RIGHT 2
+wait 10
+press UP 2
+wait 10
+rendershot bighand
+mp cards focus 1 0
+mp cards state
+quit
+SCRIPT
+run bighand
+expect bighand 'drawn: hand [3-4][0-9] '
+test "$(grep -c 'board focus 1 0' "$OUT/bighand/log.txt")" = 2 || { echo "FAIL bighand: the game didn't get through the cursor moves"; exit 1; }
+echo 'PASS a hand of 40+ cards: the cursor walks the mat and the hand'
 echo "Screenshots and logs: $OUT"

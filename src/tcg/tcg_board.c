@@ -177,6 +177,9 @@ struct Target
     int kind, index;
     struct Rect r;
 };
+/* Every place the cursor can go: the whole hand (a hand can hold every card of a deck), both fields and the seven
+   piles. Lists of them live on the stack: with room for 40, a 22-card hand ran past the end and crashed the game. */
+#define TARGET_MAX (TCG_DECK_SIZE + 2 * TCG_FIELD_SIZE + 7)
 enum
 {
     FLOW_NONE,
@@ -1440,6 +1443,8 @@ static int Targets(struct Target *out)
 #define ADD(k, idx, rect)                                                                                              \
     do                                                                                                                 \
     {                                                                                                                  \
+        if (n >= TARGET_MAX)                                                                                           \
+            break;                                                                                                     \
         out[n].kind = (k);                                                                                             \
         out[n].index = (idx);                                                                                          \
         out[n].r = (rect);                                                                                             \
@@ -1466,7 +1471,7 @@ static int Targets(struct Target *out)
 static int Valid(int kind, int index);
 static struct Rect FocusRect(void)
 {
-    struct Target t[40];
+    struct Target t[TARGET_MAX];
     int n = Targets(t), i;
     for (i = 0; i < n; i++)
         if (t[i].kind == B.focusKind && t[i].index == B.focusIndex)
@@ -1475,7 +1480,7 @@ static struct Rect FocusRect(void)
 }
 static void Navigate(int dx, int dy)
 {
-    struct Target t[40];
+    struct Target t[TARGET_MAX];
     int n = Targets(t), i, best = -1;
     float bestScore = 1e9f;
     struct Rect cur = FocusRect();
@@ -1848,7 +1853,7 @@ static void Submit(struct TcgAction *out, int *result)
 }
 static int FocusFirstValid(void)
 {
-    struct Target t[40];
+    struct Target t[TARGET_MAX];
     int n = Targets(t), i;
     if (Valid(B.focusKind, B.focusIndex) && (B.focusKind == T_MINE || B.focusKind == T_THEIRS))
         return 1;
