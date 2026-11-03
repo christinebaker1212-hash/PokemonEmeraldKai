@@ -49,7 +49,7 @@ number, PHONE_LINK_VERSION, not the game's), `othersave`, `unknown`, `notpairing
 coins, the game's version), the place (map, map type, `pc`: the party may trade places with the PC here, `safe`: the
 game is free on the overworld), the party, the box in use, all 40 boxes (name, wallpaper, 30 places), the BAG's 5
 pockets, the POKéDEX (seen and caught as hex bit strings by national number). A POKéMON: species, egg, personality
-`p`, Trainer ID `o`, level, held item, gender, shiny, nature, ability (its number in the ability table), ball, friendship, nickname (hex), moves; in the
+`p`, Trainer ID `o`, level, held item, gender, shiny, nature, ability (its number in the ability table), ball (the item the summary shows: a special ball by its style), friendship, nickname (hex), moves; in the
 party also HP, max HP and status.
 
 Orders: `{"t":"order","id":N,"op":"move","from":PLACE,"to":PLACE,"p":..,"o":..,"tp":..,"to2":..}` (PLACE `{"box":B,
@@ -158,6 +158,16 @@ The game's own effects (ExecuteTableBasedItemEffect), rules (MP_RareCandyCap, th
 for an evolution, its own scene (BeginEvolutionScene back to the field, started once it's free). A fresh answer adds
 `learned`, `wants` (four moves known: taught in the game) and `evolve`. Refusals: notparty, noeffect, cap, knows,
 cantlearn, full, cantuse, egg, noitem. LiveTest: a POTION, a RARE CANDY, a THUNDER STONE evolving PIKACHU in the game.
+
+### Safety (1.71.2)
+
+An order is written to "<save>.phone.busy" (its phone and ID) while the game carries it out; if the game closes in the
+middle, the next start remembers it as `crashed` and answers so when it's sent again (BusyRecover). The app sends a
+waiting order again at most 3 times (Orders.toResend) before listing it under COULDN'T DO. USE's evolution starts as a
+co-op trade's does (a fade, CleanupOverworldWindowsAndTilemaps, then BeginEvolutionScene). Front palettes are read
+through FirstColors (room for 64 colors: JIRACHI's has 64), never into 16. The POKéTCH draws for the phone on the field
+only. The snapshot's `ball` is the item the summary shows (a special ball by its style). The app asks again for spawn
+maps cached by an older game (no `region`), and says when the game is older than it.
 
 Next: the POKéNAV's apps (live region map, MOENAV calls, CONDITION, RIBBONS), the POKéGEAR's, and battle mode (the
 MOVE TESTER and the party's HP).

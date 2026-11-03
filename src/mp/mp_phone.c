@@ -126,10 +126,13 @@ static void WriteNow(void)
 }
 
 // save.c LoadGameSave: this save's ID and phones (a save without the file gets an ID, written with its next save)
+static void BusyRecover(void);
+
 void MP_Phone_OnSaveLoaded(void)
 {
     char path[600];
     FILE *f;
+    BusyRecover();
     Path(path, sizeof(path));
     f = fopen(path, "rb");
     sHaveFile = FALSE;
@@ -294,6 +297,33 @@ static u16 Quantity(const struct ItemSlot *slot)
     return slot->quantity ^ gSaveBlock2Ptr->encryptionKey;
 }
 
+// The ball the summary shows (an item): its special ball when its style names one (mp_ballstyle.c), else the ball
+// it was caught in (MON_DATA_POKEBALL holds that ball's item)
+static unsigned BallShown(struct BoxPokemon *box)
+{
+    u8 special = MP_BallStyle_Special(MP_BallStyle_OfBoxMon(box));
+    if (special != MP_SPECIAL_NONE && MP_SpecialBall_Item(special) != ITEM_NONE)
+        return MP_SpecialBall_Item(special);
+    return GetBoxMonData(box, MON_DATA_POKEBALL);
+}
+
+// A compressed palette's first 16 colors (a front picture's), safely: Kai's can hold up to 64 colors (mp_hue.c
+// LZ_MAX_COLORS), so it's unpacked into room for any of them; FALSE if it isn't a palette
+static bool8 FirstColors(const u32 *lz, u16 out[16])
+{
+    static u16 sBuf[512];
+    const u8 *b = (const u8 *)lz;
+    u32 size;
+    if (lz == NULL || b[0] != 0x10)
+        return FALSE;
+    size = b[1] | (b[2] << 8) | (b[3] << 16);
+    if (size < 32 || size > sizeof(sBuf))
+        return FALSE;
+    LZDecompressWram(lz, sBuf);
+    memcpy(out, sBuf, 32);
+    return TRUE;
+}
+
 static void BufBoxMon(struct Buf *b, struct BoxPokemon *box)
 {
     u16 species = GetBoxMonData(box, MON_DATA_SPECIES);
@@ -313,15 +343,14 @@ static void BufBoxMon(struct Buf *b, struct BoxPokemon *box)
            GetLevelFromBoxMonExp(box), (unsigned)GetBoxMonData(box, MON_DATA_HELD_ITEM), GetBoxMonGender(box),
            IsShinyOtIdPersonality(ot, pid), GetNatureFromPersonality(pid),
            (unsigned)GetAbilityBySpecies(species, GetBoxMonData(box, MON_DATA_ABILITY_NUM)),
-           (unsigned)GetBoxMonData(box, MON_DATA_POKEBALL), (unsigned)GetBoxMonData(box, MON_DATA_FRIENDSHIP));
+           BallShown(box), (unsigned)GetBoxMonData(box, MON_DATA_FRIENDSHIP));
     BufText(b, nick, POKEMON_NAME_LENGTH);
-    if (!GetBoxMonData(box, MON_DATA_IS_EGG))
+    if (!GetBoxMonData(box, MON_DATA_IS_EGG) && species < NUM_SPECIES)
     {
         // (shiny, or its Stadium hue: the front picture's 16 colors as the game shows them, when not the species')
         u16 pal[16], own[16];
-        LZDecompressWram(MP_BoxMonFrontPal(box), pal);
-        LZDecompressWram(MP_SpeciesFrontPal(species), own);
-        if (memcmp(pal, own, sizeof(pal)) != 0)
+        if (FirstColors(MP_BoxMonFrontPal(box), pal) && FirstColors(MP_SpeciesFrontPal(species), own)
+         && memcmp(pal, own, sizeof(pal)) != 0)
         {
             BufAdd(b, ",\"pal\":\"");
             for (i = 0; i < 16; i++)
@@ -333,7 +362,7 @@ static void BufBoxMon(struct Buf *b, struct BoxPokemon *box)
     for (i = 0; i < MAX_MON_MOVES; i++)
         BufAdd(b, "%s%u", i ? "," : "", (unsigned)GetBoxMonData(box, MON_DATA_MOVE1 + i));
     BufAdd(b, "]");
-    if (!GetBoxMonData(box, MON_DATA_IS_EGG))
+    if (!GetBoxMonData(box, MON_DATA_IS_EGG) && species < NUM_SPECIES)   // (a BAD EGG or a stray species: no more)
     {
         // the summary's pages: stats (HP, ATTACK, DEFENSE, SP. ATK, SP. DEF, SPEED, as the game works them out), EXP
         // (now, this level's start, the next's), PP, where and at what level it was met, its Trainer
@@ -1102,6 +1131,20 @@ static void SendDone(int c, u32 id, const char *why, bool8 fresh)
 // USE: an item on a party POKeMON (the BAG's USE, as the party menu carries it out: its own effects and rules), what
 // came of it for the answer, and an evolution to play in the game once it's free
 
+static void Task_PhoneEvolve(u8 taskId)
+{
+    s8 slot = sEvoSlot;
+    if (gPaletteFade.active)
+        return;
+    DestroyTask(taskId);
+    sEvoSlot = -1;
+    if (slot < 0 || slot >= gPlayerPartyCount)
+        return;
+    CleanupOverworldWindowsAndTilemaps();
+    gCB2_AfterEvolution = CB2_ReturnToField;
+    BeginEvolutionScene(&gPlayerParty[slot], sEvoSpecies, sEvoCanStop, slot);
+}
+
 static const char *DoUse(const char *json)
 {
     struct Loc at;
@@ -1237,10 +1280,68 @@ static const char *Apply(const char *json)
     return "unknown";
 }
 
+// An order the game is carrying out, written down first ("<save>.phone.busy": the phone's record and the order's ID)
+// and wiped once done: if the game closes in the middle of one, the next start answers it "crashed" when the phone
+// sends it again, so one bad order can't close the game on every link
+static void BusyPath(char *out, size_t size)
+{
+    snprintf(out, size, "%s.phone.busy", gPlatformSavePath);
+}
+
+static void BusyMark(s8 phone, u32 id)
+{
+    char path[600];
+    FILE *f;
+    BusyPath(path, sizeof(path));
+    f = fopen(path, "wb");
+    if (f != NULL)
+    {
+        fwrite(&phone, 1, 1, f);
+        fwrite(&id, 4, 1, f);
+        fflush(f);
+        fclose(f);
+    }
+}
+
+static void BusyClear(void)
+{
+    char path[600];
+    BusyPath(path, sizeof(path));
+    remove(path);
+}
+
+// (the save's load: an order that was cut short is remembered as "crashed", answered so when sent again)
+static void BusyRecover(void)
+{
+    char path[600];
+    FILE *f;
+    s8 phone;
+    u32 id;
+    BusyPath(path, sizeof(path));
+    f = fopen(path, "rb");
+    if (f == NULL)
+        return;
+    if (fread(&phone, 1, 1, f) == 1 && fread(&id, 4, 1, f) == 1)
+    {
+        struct Done *d = &sDone[sDoneNext];
+        sDoneNext = (sDoneNext + 1) % DONE_MAX;
+        d->phone = phone;
+        d->id = id;
+        snprintf(d->why, sizeof(d->why), "crashed");
+        MPNet_Log("phone: order %u closed the game last time: it won't be done again", (unsigned)id);
+    }
+    fclose(f);
+    remove(path);
+}
+
 static void Finish(int c, u32 id, const char *json)
 {
-    const char *why = Apply(json);
-    struct Done *d = &sDone[sDoneNext];
+    const char *why;
+    struct Done *d;
+    BusyMark(sSess[c].phone, id);
+    why = Apply(json);
+    BusyClear();
+    d = &sDone[sDoneNext];
     sDoneNext = (sDoneNext + 1) % DONE_MAX;
     d->phone = sSess[c].phone;
     d->id = id;
@@ -1639,14 +1740,14 @@ void MP_Phone_Update(void)
         if (sSess[o.conn].state == SESS_LIVE)
             Finish(o.conn, o.id, o.json);
     }
-    // An evolution a USE started (an evolution stone, a RARE CANDY's level): the game's own scene, as from the BAG
-    if (sEvoSlot >= 0 && Safe())
+    // An evolution a USE started (an evolution stone, a RARE CANDY's level): the game's own scene, started the way a
+    // co-op trade starts one from the field (mp_trade.c Task_TradeEvolve): the screen fades, the field's windows and
+    // tilemaps are let go, then the scene
+    if (sEvoSlot >= 0 && Safe() && !FuncIsActiveTask(Task_PhoneEvolve))
     {
-        s8 slot = sEvoSlot;
-        sEvoSlot = -1;
-        MPNet_Log("phone: evolution of party slot %d", slot);
-        gCB2_AfterEvolution = CB2_ReturnToField;
-        BeginEvolutionScene(&gPlayerParty[slot], sEvoSpecies, sEvoCanStop, slot);
+        MPNet_Log("phone: evolution of party slot %d", sEvoSlot);
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+        CreateTask(Task_PhoneEvolve, 80);
     }
     PhoneNet_Poll(udp);   // (send what was just answered)
 }

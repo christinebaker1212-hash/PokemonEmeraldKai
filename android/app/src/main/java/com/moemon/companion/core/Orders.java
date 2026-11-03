@@ -62,6 +62,33 @@ public final class Orders {
         return order;
     }
 
+    /**
+     * The waiting orders to send again on a new link. One sent this often with no answer (the link closing each
+     * time: the game closing as it did it?) goes to "Couldn't do" instead, so it can't close the game on every link.
+     */
+    public synchronized List<JSONObject> toResend() {
+        List<JSONObject> out = new ArrayList<>();
+        for (JSONObject o : new ArrayList<>(pending)) {
+            int tries = o.optInt("tries") + 1;
+            try {
+                o.put("tries", tries);
+            } catch (JSONException ignored) {
+            }
+            if (tries > 3) {
+                pending.remove(o);
+                try {
+                    o.put("why", "crashed");
+                } catch (JSONException ignored) {
+                }
+                failed.add(o);
+            } else {
+                out.add(o);
+            }
+        }
+        save();
+        return out;
+    }
+
     public synchronized List<JSONObject> pending() {
         return new ArrayList<>(pending);
     }

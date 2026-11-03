@@ -144,7 +144,7 @@ public class ScreensTest {
         v.page(3).backspace();
         // a map's POKéMON, and the box list
         v.select(4);
-        tap(v, 40, GameView.TOP + 22 + 2 + 22 + 10);
+        tap(v, 40, GameView.TOP + 44 + 2 + 10);
         shot(v, "spawns_map");
         v.select(0);
         tap(v, v.width() / 2, GameView.TOP + 6);

@@ -171,6 +171,10 @@ public final class Companion implements LinkClient.Listener {
         }
         client = new LinkClient(crypto, store, s, this);
         spawnMaps = readJson("spawnmaps_" + s.id() + ".json");
+        JSONArray cached = spawnMaps == null ? null : spawnMaps.optJSONArray("maps");
+        if (cached != null && cached.length() > 0 && !cached.optJSONObject(0).has("region")) {
+            spawnMaps = null;   // (from an older game: asked again, with each place's region)
+        }
         spawns.clear();
         writeSaves();
         if (resumed) {
@@ -321,6 +325,7 @@ public final class Companion implements LinkClient.Listener {
             case "bagfull": return "The BAG is full.";
             case "nothing": return "It isn't holding anything.";
             case "busy": return "The game is busy. Try again.";
+            case "crashed": return "The game closed while doing this, so it was stopped.";
             case "notparty": return "Items are used on the POKéMON in your party.";
             case "noeffect": return "It won't have any effect.";
             case "cap": return "RARE CANDIES won't raise it past the next BADGE's level.";
@@ -377,13 +382,25 @@ public final class Companion implements LinkClient.Listener {
 
     @Override
     public void onModel(Model model) {
+        // a game older than the app sends less (stats, places): say so once, the game updates itself on its start
+        String game = model.save().optString("game"), app = Updater.version(context);
+        if (!game.isEmpty() && Updater.older(game, app) && !game.equals(warnedGame)) {
+            warnedGame = game;
+            toast = "The game is on " + game + ". Restart it to update to " + app + " so everything shows here.";
+            toastGood = false;
+            toastAt = System.currentTimeMillis();
+        }
         changed();
     }
+
+    private String warnedGame = "";
 
     @Override
     public void onAnswer(JSONObject order, JSONObject done) {
         if (done.optInt("ok") == 0) {
-            toast = why(done.optString("why"));
+            // ("unknown": an order the game doesn't know yet: an older game, which updates itself on its start)
+            toast = done.optString("why").equals("unknown")
+                    ? "The game doesn't know how to do that yet. Restart it to update it." : why(done.optString("why"));
             toastGood = false;
             toastAt = System.currentTimeMillis();
         } else if (order != null && "use".equals(order.optString("op"))) {

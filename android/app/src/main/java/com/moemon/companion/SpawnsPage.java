@@ -151,22 +151,25 @@ public final class SpawnsPage extends Page {
     }
 
     private static final String[] REGIONS = {"HOENN", "JOHTO", "KANTO", "SINNOH"};
-    private static final int HEAD = 22;
+    private static final int HEAD = 44;
 
-    /** The list's rows: a region's name (-1 - region) before its maps, then each map's index in spawnmaps */
+    private int region = -1;   // the region shown (-1: the one the player is in)
+
+    private int region() {
+        if (region < 0) {
+            com.moemon.companion.core.Model m = v.app.model();
+            region = m == null ? 0 : Math.max(0, Math.min(3, m.save().optInt("region")));
+        }
+        return region;
+    }
+
+    /** The list's rows: the shown region's maps, each one's index in spawnmaps */
     private java.util.List<Integer> rowsOfList() {
         java.util.List<Integer> out = new java.util.ArrayList<>();
         JSONArray l = maps();
-        for (int r = 0; r < 4; r++) {
-            boolean any = false;
-            for (int i = 0; i < l.length(); i++) {
-                if (l.optJSONObject(i).optInt("region") == r) {
-                    if (!any) {
-                        out.add(-1 - r);
-                        any = true;
-                    }
-                    out.add(i);
-                }
+        for (int i = 0; i < l.length(); i++) {
+            if (l.optJSONObject(i).optInt("region") == region()) {
+                out.add(i);
             }
         }
         return out;
@@ -209,10 +212,6 @@ public final class SpawnsPage extends Page {
             if (y < HEAD - ROW || y > h) {
                 continue;
             }
-            if (i < 0) {
-                art.text(c, REGIONS[-1 - i], 8, y + 2, GOLD, 0xFF305060);
-                continue;
-            }
             JSONObject m = l.optJSONObject(i);
             art.window(c, 0, 12, y + 4, w - 24, ROW - 8);
             art.text(c, label(i), 14, y + 3);
@@ -227,7 +226,15 @@ public final class SpawnsPage extends Page {
                 }
             }
         }
-        banner(c, w, "SPAWNS", l.length() + " PLACES");
+        banner(c, w, "SPAWNS", rows.size() + " PLACES");
+        // the regions: the player's first
+        android.graphics.Paint f = new android.graphics.Paint();
+        f.setColor(BANNER_DARK);
+        c.drawRect(0, 20, w, HEAD - 2, f);
+        int rx = 6;
+        for (int r = 0; r < 4; r++) {
+            rx += DexPage.chip(c, art, f, REGIONS[r], rx, 23, r == region()) + 4;
+        }
     }
 
     private void drawMap(Canvas c, int w, int h) {
@@ -291,6 +298,19 @@ public final class SpawnsPage extends Page {
             return;
         }
         if (y < HEAD) {
+            if (y >= 20) {
+                int rx = 6;
+                for (int r = 0; r < 4; r++) {
+                    int bw = art.width(REGIONS[r]) + 12;
+                    if (x >= rx && x < rx + bw + 4) {
+                        region = r;
+                        scroll = 0;
+                        v.buzz(false);
+                        return;
+                    }
+                    rx += bw + 4;
+                }
+            }
             return;
         }
         java.util.List<Integer> rows = rowsOfList();

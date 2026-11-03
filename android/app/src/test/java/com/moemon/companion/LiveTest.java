@@ -242,7 +242,7 @@ public class LiveTest {
             // SPAWNS: the list, then a map's POKéMON from the game
             v.select(4);
             idleUntil(() -> app.spawnMaps != null, 20, "the spawn maps");
-            tap(v, 40, GameView.TOP + 22 + 2 + 22 + 10);
+            tap(v, 40, GameView.TOP + 44 + 2 + 10);
             idleUntil(() -> !app.spawns.isEmpty(), 20, "a map's spawns");
             draw(v);
 

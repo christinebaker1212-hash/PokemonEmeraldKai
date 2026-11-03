@@ -2742,6 +2742,20 @@ void MP_TestCommand(const char *cmd, const char *arg)
             SetMonData(&gPlayerParty[slot], MON_DATA_NICKNAME, name);
         }
     }
+    else if (strcmp(cmd, "palbig") == 0)
+    {
+        // palbig: the species whose front palettes hold more than 16 colors (the phone link's snapshot reads them)
+        const u32 *MP_SpeciesFrontPal(u16 species);
+        u32 sp, n = 0;
+        for (sp = 1; sp < NUM_SPECIES; sp++)
+        {
+            const u8 *b = (const u8 *)MP_SpeciesFrontPal(sp);
+            u32 size = b[1] | (b[2] << 8) | (b[3] << 16);
+            if (size > 32 && n++ < 12)
+                printf("[test] palbig %u: %u bytes\n", sp, size);
+        }
+        printf("[test] palbig: %u species\n", n);
+    }
     else if (strcmp(cmd, "shinymon") == 0)
     {
         // shinymon SLOT SPECIES LEVEL - a shiny Pokémon in a party slot (SLOT from 1; its Trainer ID is its

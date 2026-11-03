@@ -447,7 +447,7 @@ static void ExportData(const char *dir)
         fprintf(f, ",\"dex\":%u", i < NUM_SPECIES ? SpeciesToNationalPokedexNum(i) : base == SPECIES_UNOWN ? 201 : 0);
         if (base < NUM_SPECIES)
         {
-            u16 pal[16];
+            static u16 pal[512];   // (room for any palette: Kai's hold up to 64 colors)
             u32 k;
             fprintf(f, ",\"t\":[%u,%u],\"g\":%u,\"bs\":[%u,%u,%u,%u,%u,%u]", gSpeciesInfo[base].types[0],
                     gSpeciesInfo[base].types[1], gSpeciesInfo[base].genderRatio, gSpeciesInfo[base].baseHP,

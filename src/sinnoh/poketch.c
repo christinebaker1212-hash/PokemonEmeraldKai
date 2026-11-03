@@ -1352,9 +1352,10 @@ const u8 *MP_Poketch_PhoneFrame(u8 *app, u8 *color, u8 *flags, u32 *unlocked)
         ChangeApp(sPhone.change);
         sPhone.change = 0;
     }
-    if (!Shown())
+    if (!Shown() && gMain.callback2 == CB2_Overworld)
     {
-        // (the game's own isn't drawing it: here, with the phone's finger as the only stylus)
+        // (the game's own isn't drawing it: here, on the field only, with the phone's finger as the only stylus;
+        // elsewhere the phone keeps the last picture)
         bool8 was = sP.touch;
         sP.frame++;
         sP.touch = FALSE;

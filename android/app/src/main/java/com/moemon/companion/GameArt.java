@@ -379,9 +379,8 @@ public final class GameArt {
 
     /** A POKé BALL's icon (MON_DATA_POKEBALL), the ball's BAG icon */
     public void ballIcon(Canvas c, int ball, int x, int y) {
-        JSONObject b = data.optJSONObject("ballItems");
-        int item = b == null ? 4 : b.optInt(String.valueOf(ball), 4);
-        itemIcon(c, item, x, y);
+        // (the snapshot's "ball" is the ball's item, as MON_DATA_POKEBALL keeps it, or its special ball's)
+        itemIcon(c, ball > 0 ? ball : 4, x, y);
     }
 
     /**

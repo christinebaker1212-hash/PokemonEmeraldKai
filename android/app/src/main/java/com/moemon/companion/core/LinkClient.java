@@ -236,7 +236,7 @@ public final class LinkClient {
             try {
                 snapAsked = true;
                 l.send(new JSONObject().put("t", "snap"));
-                for (JSONObject o : orders.pending()) {
+                for (JSONObject o : orders.toResend()) {
                     l.send(o);
                 }
                 pinger.start();
