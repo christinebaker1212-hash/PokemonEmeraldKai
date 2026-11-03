@@ -3488,6 +3488,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_Pokegear_Debug(const char *arg);
         MP_Pokegear_Debug(arg);
     }
+    else if (strcmp(cmd, "qzphone") == 0)   // qzphone register|ready|fights|steps|call N [V] - JOHTO's phone (mp_qzphone.c)
+    {
+        void MP_QzPhone_Debug(const char *arg);
+        MP_QzPhone_Debug(arg);
+    }
     else if (strcmp(cmd, "apricorn") == 0)
     {
         // apricorn - JOHTO's fruit trees picked today, KURT's BALLS, the BERRY patches planted (mp_apricorn.c)

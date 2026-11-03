@@ -1,0 +1,9 @@
+# OPTIONS > CO-OP > MOENAV CALLS: BATTLES in JOHTO (mp_qzphone.c: a call played silently first, kept only when it
+# asks for a battle): JOEY, the only number, rings once to ask for his rematch; once he waits for it his calls would be
+# chatter, so the five chances after it ring none (check_phone_battles.py counts the calls)
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=280:30"
+EXPECT_A=("qzphone: 15 calls" "qzphone 15: registered 1 fights 0 ready 1" "ctx 1 free 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")
+CHECK="python3 tools/test/check_phone_battles.py"

@@ -686,6 +686,16 @@ static bool8 TryStartStepCountScript(u16 metatileBehavior)
     }
     if (TryStartMatchCall())
         return TRUE;
+    {
+        // Moemon Kai: JOHTO's phone (src/mp/mp_qzphone.c): a registered contact calls now and then
+        bool8 MP_QzPhone_TryCall(void);
+        extern const u8 QzPhone_EventScript_IncomingCall[];
+        if (MP_QzPhone_TryCall())
+        {
+            ScriptContext_SetupScript(QzPhone_EventScript_IncomingCall);
+            return TRUE;
+        }
+    }
     return FALSE;
 }
 

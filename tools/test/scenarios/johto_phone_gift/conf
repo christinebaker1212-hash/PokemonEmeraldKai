@@ -1,0 +1,7 @@
+# JOHTO's phone: a contact's gift (Crystal's scripts): ROUTE 31's WADE, registered, with a BERRY waiting (his
+# ENGINE_WADE_HAS_ITEM + EVENT_WADE_HAS_BERRY flags) gives it when talked to, as Crystal's script says
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=280:60"
+EXPECT_A=("qzphone 16: registered 1" "qzphone: contact 16 talked to" "qzphone: item 139 x1 given 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

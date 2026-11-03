@@ -25,6 +25,9 @@ EventScript_TryDoNormalTrainerBattle::
 	goto EventScript_ShowTrainerIntroMsg
 
 EventScript_NoNormalTrainerBattle::
+	@ Moemon Kai: a beaten JOHTO phone contact runs Crystal's own script (rematch, gift, number: mp_qzphone.c)
+	callnative QzPhone_TrainerTalk
+	goto_if_eq VAR_RESULT, TRUE, QzPhone_EventScript_TrainerTalk
 	gotopostbattlescript
 
 EventScript_TryDoDoubleTrainerBattle::

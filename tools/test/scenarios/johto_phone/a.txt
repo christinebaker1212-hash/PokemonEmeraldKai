@@ -1,0 +1,42 @@
+pressuntil A field 5000
+wait 30
+mp setflag 12395
+mp clearflag 4221
+mp warp 35,34,21,28
+waitfor field 600
+wait 60
+mp where
+press LEFT 2
+wait 10
+press A 2
+wait 60
+shot talk1
+mash A 40 20
+wait 60
+shot talk2
+mp qzphone x 15
+mp qzphone call 15
+mp qzphone ready 15
+wait 10
+press A 2
+wait 60
+shot rematch1
+mash A 40 30
+wait 200
+shot rematch2
+mash A 30 30
+wait 60
+mash B 10 10
+wait 60
+mp qzphone x 15
+mp warp 34,16,41,10
+waitfor field 600
+wait 60
+mp qzphone steps 1
+press DOWN 16
+wait 90
+shot call1
+mash A 40 20
+wait 60
+mp ctx
+quit

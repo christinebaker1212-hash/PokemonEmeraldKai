@@ -57,6 +57,7 @@
 #include "constants/rgb.h"
 #include "constants/songs.h"
 #include "mp_region.h"
+#include "mp_qzphone.h"
 
 enum { CARD_CLOCK, CARD_MAP, CARD_PHONE, CARD_RADIO, CARD_COUNT };
 enum { WIN_STATUS, WIN_MAIN, WIN_MSG, WIN_KEYS, WIN_COUNT };   // (the LCD, top to bottom; the body is the backdrop)
@@ -148,11 +149,12 @@ static const char *const sIcons[CARD_COUNT][14] = {
 static EWRAM_DATA struct
 {
     u8 card, cursor, phone, page, pages, freq, station, show, talkStep, drag, midnight;
+    u8 top, nContacts, contacts[48];   // (the phone book's first row shown; JOHTO's numbers: mp_qzphone.c)
     u16 talkTimer, lastMinute, song, callFrames;
     u16 talkSpecies;
     const u8 *dexText;   // (the POKéDEX SHOW's entry, where it has got to)
     u8 talkPlace[24];
-    u8 lines[12][40];   // the call's lines (two to a page), or the radio's now
+    u8 lines[24][40];   // the call's lines (two to a page), or the radio's now
     bool8 leaving;
 } *sG = NULL;
 static EWRAM_DATA u8 sReturnCard = 0;
@@ -376,27 +378,38 @@ static void DrawMap(void)
 
 static void DrawPhone(void)
 {
-    static const u8 *const sRows[] = {sText_Mom, sText_Elm, sText_Empty, sText_Empty};
     u8 i, x;
     if (sG->phone != PHONE_LIST)   // a call: who, and its timer
     {
         u8 buf[12], *p;
         u16 s = sG->callFrames / 60;
         DrawIcon(WIN_MAIN, CARD_PHONE, 100, 6, C_INK);
-        PrintCentered(WIN_MAIN, FONT_NORMAL, sG->cursor == 0 ? sText_MomName : sText_ElmName, 24, sColLcd);
+        PrintCentered(WIN_MAIN, FONT_NORMAL, sG->cursor == 0 ? sText_MomName : sG->cursor == 1 ? sText_ElmName
+                                           : MP_QzPhone_Name(sG->contacts[sG->cursor - 2]), 24, sColLcd);
         p = ConvertIntToDecimalStringN(buf, s / 60, STR_CONV_MODE_LEADING_ZEROS, 2);
         *p++ = CHAR_COLON;
         ConvertIntToDecimalStringN(p, s % 60, STR_CONV_MODE_LEADING_ZEROS, 2);
         PrintCentered(WIN_MAIN, FONT_NORMAL, sG->callFrames < 60 ? sText_Calling : buf, 44, sColLcd);
         return;
     }
-    for (i = 0; i < ARRAY_COUNT(sRows); i++)
+    for (i = 0; i < 4; i++)   // (MOM, PROF. ELM, then JOHTO's numbers as Crystal's: CLASS and name; four rows show)
     {
-        u8 y = 4 + i * 16;
-        if (i == sG->cursor)
+        u8 y = 4 + i * 16, r = sG->top + i;
+        const u8 *colors = r == sG->cursor ? sColInv : sColLcd;
+        if (r == sG->cursor)
             Rect(WIN_MAIN, C_DARK, 6, y, LCD_W - 12, 15);
-        Print(WIN_MAIN, FONT_NORMAL, sRows[i], 12, y, i == sG->cursor ? sColInv : sColLcd);
-        if (i < ARRAY_COUNT(sRows) - 1)
+        if (r == 0)
+            Print(WIN_MAIN, FONT_NORMAL, sText_Mom, 12, y, colors);
+        else if (r == 1)
+            Print(WIN_MAIN, FONT_NORMAL, sText_Elm, 12, y, colors);
+        else if (r < 2 + sG->nContacts)
+        {
+            Print(WIN_MAIN, FONT_SMALL, MP_QzPhone_ClassName(sG->contacts[r - 2]), 12, y + 2, colors);
+            PrintRight(WIN_MAIN, FONT_NORMAL, MP_QzPhone_Name(sG->contacts[r - 2]), LCD_W - 14, y, colors);
+        }
+        else
+            Print(WIN_MAIN, FONT_NORMAL, sText_Empty, 12, y, colors);
+        if (i < 3)
             for (x = 8; x < LCD_W - 8; x += 3)   // (dotted rules)
                 Rect(WIN_MAIN, C_MID, x, y + 15, 1, 1);
     }
@@ -582,6 +595,54 @@ static void CallElm(void)
     else
         SetLines(Random() % 2 ? hatch : moves, 4);
     sG->phone = PHONE_CALL;
+}
+
+// A JOHTO contact (Crystal's callee script: mp_qzphone.c): its words wrapped to the message box, a page per paragraph
+// break the script gives (\p), two lines a page
+static void CallContact(u8 c)
+{
+    static u8 sWords[0x600];
+    u8 line[64];
+    u16 i = 0, n = 0;
+    MP_QzPhone_Call(c, sWords, sizeof(sWords));
+    memset(sG->lines, EOS, sizeof(sG->lines));
+    while (sWords[i] != EOS && n < ARRAY_COUNT(sG->lines))
+    {
+        u16 len = 0, lastSpace = 0, start = i;
+        // as many words as fit LCD_W - 28 pixels (the box's inside)
+        while (sWords[i] != EOS && sWords[i] != CHAR_PROMPT_CLEAR && len < sizeof(line) - 1)
+        {
+            line[len] = sWords[i];
+            line[len + 1] = EOS;
+            if (GetStringWidth(FONT_NORMAL, line, 0) > LCD_W - 28 || len >= 38)
+                break;
+            if (sWords[i] == CHAR_SPACE)
+                lastSpace = len;
+            len++;
+            i++;
+        }
+        if (sWords[i] != EOS && sWords[i] != CHAR_PROMPT_CLEAR && lastSpace > 0)   // (back to the last space)
+        {
+            i = start + lastSpace + 1;
+            len = lastSpace;
+        }
+        memcpy(sG->lines[n], line, len);
+        sG->lines[n][len] = EOS;
+        n++;
+        if (sWords[i] == CHAR_PROMPT_CLEAR)   // (a new page: the next line starts one)
+        {
+            i++;
+            n += n % 2;
+        }
+    }
+    sG->pages = (n + 1) / 2;
+    sG->page = 0;
+    sG->phone = PHONE_CALL;
+}
+
+static void PhoneBook(void)
+{
+    sG->nContacts = MP_QzPhone_Numbers(sG->contacts, ARRAY_COUNT(sG->contacts));
 }
 
 // ---------------------------------------------------------------------------------------------------- radio
@@ -1111,7 +1172,8 @@ static void Task_Pokegear(u8 taskId)
     {
         PlaySE(SE_SELECT);
         sG->card = (sG->card + (JOY_NEW(DPAD_RIGHT) ? 1 : CARD_COUNT - 1)) % CARD_COUNT;
-        sG->cursor = 0;
+        sG->cursor = sG->top = 0;
+        PhoneBook();
         sG->phone = PHONE_LIST;
         if (sG->station != 0)   // (the radio plays while its card is open)
         {
@@ -1130,10 +1192,20 @@ static void Task_Pokegear(u8 taskId)
             TuneTo(sG->freq - 1);
         DrawAll();
     }
-    else if (sG->card == CARD_PHONE && JOY_NEW(DPAD_UP) && sG->cursor > 0)
-        sG->cursor--, PlaySE(SE_SELECT), DrawAll();
-    else if (sG->card == CARD_PHONE && JOY_NEW(DPAD_DOWN) && sG->cursor < 3)
-        sG->cursor++, PlaySE(SE_SELECT), DrawAll();
+    else if (sG->card == CARD_PHONE && JOY_REPEAT(DPAD_UP) && sG->cursor > 0)
+    {
+        sG->cursor--, PlaySE(SE_SELECT);
+        if (sG->cursor < sG->top)
+            sG->top = sG->cursor;
+        DrawAll();
+    }
+    else if (sG->card == CARD_PHONE && JOY_REPEAT(DPAD_DOWN) && sG->cursor < (sG->nContacts > 2 ? sG->nContacts + 1 : 3))
+    {
+        sG->cursor++, PlaySE(SE_SELECT);
+        if (sG->cursor >= sG->top + 4)
+            sG->top = sG->cursor - 3;
+        DrawAll();
+    }
     else if (JOY_NEW(A_BUTTON))
     {
         if (sG->card == CARD_MAP)
@@ -1142,14 +1214,16 @@ static void Task_Pokegear(u8 taskId)
             sReturnCard = CARD_MAP;
             Leave(taskId, CB2_OpenPokegearAgain);
         }
-        else if (sG->card == CARD_PHONE && sG->cursor < 2)   // (the empty rows have no number)
+        else if (sG->card == CARD_PHONE && sG->cursor < 2 + sG->nContacts)   // (the empty rows have no number)
         {
             PlaySE(SE_POKENAV_CALL);
             sG->callFrames = 0;
             if (sG->cursor == 0)
                 CallMom();
-            else
+            else if (sG->cursor == 1)
                 CallElm();
+            else
+                CallContact(sG->contacts[sG->cursor - 2]);
             DrawAll();
         }
     }
@@ -1182,6 +1256,7 @@ static void OpenPokegear(u8 card)
     SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
     sG = AllocZeroed(sizeof(*sG));
     sG->card = card;
+    PhoneBook();
     sG->song = GetCurrentMapMusic();
     {
         static const u32 sBodyTile[8] = {0x99999999, 0x99999999, 0x99999999, 0x99999999,

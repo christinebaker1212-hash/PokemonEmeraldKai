@@ -4689,3 +4689,28 @@ or the README. The updater no longer has a dev channel: AllowSmallTweaks only un
   the user's picture). Followers and Garden POKeMON by their feet against the player's (SpriteFeetCovered). The GAME
   CENTER's counters are its pictures' "over" layer, not tiles: mp_mappic.c MP_MapPic_CoversFeet (the same 8 of the
   bottom rows' 32 pixels). Tests shadow_covered, shadow_covered_tree, shadow_covered_gamecenter (check_shadow_covered.py).
+
+## JOHTO's phone, Crystal's (1.83.0)
+- tools/quetzal_port/gen_phone.py POKECRYSTAL_DIR -> src/data/qz_phone.h: Crystal's 28 trainer contacts (data/phone/
+  phone_contacts.asm; BILL, BUENA and the BIKE SHOP aren't in), every phone script (engine/phone/scripts but MOM's and
+  ELM's, which mp_pokegear.c already has), the number-asking std scripts (engine/events/std_scripts.asm) and each
+  contact's trainer `.Script` on its map, as bytecode for src/mp/mp_qzphone.c (Crystal's semantics: `end` returns
+  from a call, the conditions test the last value); the words (data/phone/text, data/text, maps) as paragraphs run
+  together, paged by the game to its windows; rematch teams Crystal's (data/trainers/parties.asm), the first fight the
+  Quetzal trainer of the same name on the contact's map (Quetzal split ROUTE 26 and joined the LIGHTHOUSE floors).
+- Field: data/scripts/trainer_battle.inc EventScript_NoNormalTrainerBattle asks QzPhone_TrainerTalk first, so a beaten
+  contact runs Crystal's own script (rematch when ready, the gift kept for the player, the number asked once, then
+  again); data/scripts/qz_phone.inc's loop asks QzPhone_Step what to show (text in gStringVar4, YES / NO, giveitem, a
+  rematch through BattleSetup_ConfigureTrainerBattle's no-intro battle with Crystal's beaten words, the registration
+  fanfare). Rematch teams go in through MP_Region_TrainerData (MP_QzPhone_RematchTrainer).
+- Calls: field_control_avatar.c, each step in JOHTO or KANTO, a registered contact not on the map calls every few
+  hundred steps (QzPhone_EventScript_IncomingCall). OPTIONS > CO-OP > MOENAV CALLS: BATTLES plays the call silently
+  first (its own seed, the state put back) and lets only a call asking for a battle ring, as HOENN's MOENAV.
+- POKéGEAR: the phone book is MOM, PROF. ELM, then the numbers (CLASS and name, scrolling); calling one plays its
+  callee script's words (MP_QzPhone_Call), two lines a page.
+- Crystal's story marks: Quetzal's fly flags (0x11BE-0x11C5, VERMILION 0x2262), badge flags, VAR_QZ_0x500A for the RADIO
+  TOWER (6-9 ROCKETS in it, 10 cleared; the ROCKET HIDEOUT counted cleared from 6), the LEAGUEs; the day's BUG-CATCHING
+  CONTEST, the DEPT. STORE sale and KANTO's SNORLAX read as not yet. Swarm news (RALPH, WILTON, ANTHONY, ARNIE) is told
+  but no swarm appears yet.
+- State: region vars 0x5240-0x5258 (numbers, Crystal's phone flags, fight counts, the step count). Debug `mp qzphone
+  register|ready|fights|steps|moenav|call N [V]`. Tests johto_phone, johto_pokegear_contacts, johto_phone_battles.

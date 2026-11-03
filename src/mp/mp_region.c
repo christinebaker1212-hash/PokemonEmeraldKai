@@ -1928,6 +1928,13 @@ const struct Trainer *MP_Region_TrainerData(u16 trainerNum)
     } sParty;
     const struct Trainer *t = TrainerDataFor(trainerNum);
     u32 i, n;
+    {
+        // JOHTO's phone: a contact's rematch fights Crystal's team for it (mp_qzphone.c)
+        const struct Trainer *MP_QzPhone_RematchTrainer(u16 trainerNum, const struct Trainer *base);
+        const struct Trainer *r = MP_QzPhone_RematchTrainer(trainerNum, t);
+        if (r != t)
+            return r;
+    }
     if (trainerNum < FIRST_QZ_TRAINER || trainerNum >= FIRST_QZ_TRAINER + QZ_TRAINERS_COUNT || VarGet(VAR_JOHTO_STARTER) == 0
      || StringCompare(gTrainers[trainerNum].trainerName, sSilver) != 0)
         return t;
