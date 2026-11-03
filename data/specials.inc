@@ -675,3 +675,4 @@ gSpecials::
 	def_special MP_Region_GameCenterLooks   @ Moemon Kai: the GAME CENTER's 3F patrons by region (src/mp/mp_region.c)
 	def_special MP_Region_BufferGameCorner
 	def_special MP_JohtoBerries_NotRipe   @ Moemon Kai: JOHTO's BERRY patches (src/mp/mp_apricorn.c)
+	def_special MP_MagnetTrainOpen   @ Moemon Kai: GOLDENROD <-> SAFFRON (src/mp/mp_region.c)

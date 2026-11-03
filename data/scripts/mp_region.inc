@@ -65,7 +65,7 @@ gText_HoennRegionFerry::
 @ GOLDENROD's MAGNET TRAIN (Quetzal's is broken down): it runs to KANTO's SAFFRON once JOHTO's League is beaten.
 @ The way back is the boat (OLIVINE / VERMILION). Customs as at the ports.
 EventScript_MagnetTrain::
-	specialvar VAR_RESULT, MP_GlobalPcLinked
+	specialvar VAR_RESULT, MP_MagnetTrainOpen   @ (either LEAGUE beaten, the S.S. TICKET: mp_region.c)
 	goto_if_eq VAR_RESULT, 0, EventScript_MagnetTrain_Usual
 	msgbox gText_MagnetTrainRide, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, EventScript_RegionCustoms_Cancel
@@ -87,7 +87,7 @@ EventScript_MagnetTrain_Usual::
 EventScript_MagnetTrainSaffron::
 	lock
 	faceplayer
-	specialvar VAR_RESULT, MP_GlobalPcLinked
+	specialvar VAR_RESULT, MP_MagnetTrainOpen   @ (either LEAGUE beaten, the S.S. TICKET: mp_region.c)
 	goto_if_eq VAR_RESULT, 0, EventScript_MagnetTrainSaffron_Closed
 	msgbox gText_MagnetTrainRideJohto, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, EventScript_RegionCustoms_Cancel
@@ -118,8 +118,8 @@ gText_MagnetTrainDepartsJohto::
 gText_MagnetTrainSaffronClosed::
 	.string "This is the MAGNET TRAIN's SAFFRON\n"
 	.string "counter.\p"
-	.string "The line to JOHTO opens for the\n"
-	.string "CHAMPION of KANTO's POKéMON LEAGUE.$"
+	.string "The line to JOHTO opens for a\n"
+	.string "LEAGUE CHAMPION with an S.S. TICKET.$"
 
 gText_MagnetTrainRide::
 	.string "The MAGNET TRAIN is running again!\p"

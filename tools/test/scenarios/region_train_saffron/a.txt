@@ -1,4 +1,5 @@
 pressuntil A field 5000
+mp register 265
 wait 30
 mp face up
 mp warp 37,67,26,40

@@ -319,6 +319,12 @@ static void Cast(u8 owner, bool8 person)
 void MP_Shadow_Reset(void);
 bool8 MP_IsReflectionSprite(struct Sprite *sprite);   // field_effect_helpers.c
 
+static bool8 InGrass(s16 x, s16 y)
+{
+    u32 b = MapGridGetMetatileBehaviorAt(x, y);
+    return MetatileBehavior_IsTallGrass(b) || MetatileBehavior_IsLongGrass(b);
+}
+
 static bool8 InWater(s16 x, s16 y)
 {
     u8 b = MapGridGetMetatileBehaviorAt(x, y);
@@ -415,6 +421,8 @@ void MP_Shadow_Update(void)
                 continue;
             if (InWater(e->currentCoords.x, e->currentCoords.y))
                 continue;
+            if (InGrass(e->currentCoords.x, e->currentCoords.y))
+                continue;   // (the grass covers the feet: the oval showed a pixel below its tile)
             Cast(e->spriteId, TRUE);
         }
         for (i = 0; i < MAX_SPRITES; i++)   // followers and Garden POKeMON (mp_follower.c marks them)

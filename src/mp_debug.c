@@ -3502,6 +3502,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         MP_GameToAscii(buf, MP_JohtoRivalName(), sizeof(buf) - 1);
         printf("[test] rival name: %s\n", buf);
     }
+    else if (strcmp(cmd, "regionstarted") == 0)
+    {
+        // regionstarted R: as if that region had been visited (its first visit's guide is over)
+        gRegionState.started |= 1 << atoi(arg);
+    }
     else if (strcmp(cmd, "regionclear") == 0)
     {
         // regionclear R: as if that region's Elite Four were beaten (0 HOENN: FLAG_SYS_GAME_CLEAR too)

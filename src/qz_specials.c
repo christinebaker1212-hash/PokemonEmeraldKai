@@ -1140,7 +1140,7 @@ static u16 QzTravelToRegion_(void)
     gSpecialVar_0x8007 = 0;
     if (to >= REGION_COUNT || to == from)
         return 0;
-    if (train ? !MP_Region_Cleared(from) : !(QzGetReachableRegionsMask_() & (1 << to)))
+    if (train ? !MP_MagnetTrainOpen() : !(QzGetReachableRegionsMask_() & (1 << to)))
         return 0;
     return TravelNow(to, keep, train);
 }
@@ -1176,7 +1176,15 @@ static u16 TravelNow(u8 to, u8 keep, bool8 train)
     if (first)
         MP_Region_GoToStartHouse(to);   // the first visit: a guide takes the player to the region's first town
     else if (train)   // GOLDENROD <-> SAFFRON
+    {
+        bool8 MP_MagnetTrain_Ride(bool8 toSaffron);
         SetWarpDestinationToHealLocation(to == REGION_KANTO ? HEAL_LOCATION_KANTO_SAFFRON_CITY : HEAL_LOCATION_JOHTO_GOLDENROD_CITY);
+        if (MP_MagnetTrain_Ride(to == REGION_KANTO))   // (Crystal's ride, then the warp: src/mp/mp_magnettrain.c)
+        {
+            ResetInitialPlayerAvatarState();
+            return 1;
+        }
+    }
     else
         SetWarpDestination(sRegionPorts[to].map >> 8, sRegionPorts[to].map & 0xFF, WARP_ID_NONE, sRegionPorts[to].x, sRegionPorts[to].y);
     DoWarp();

@@ -4634,3 +4634,33 @@ or the README. The updater no longer has a dev channel: AllowSmallTweaks only un
 - **Tests**: tools/test/maker_gate.sh, maker_shell.sh, maker_map.sh, maker_edit.sh, maker_wild.sh, maker_music.sh,
   maker_play.sh, maker_publish.sh (a stand-in for GitHub's API: maker_github_mock.py), maker_pack.sh, maker_sinnoh.sh;
   harness commands `maker ...` (maker_ui.cpp MakerUi_TestCommand) and `makershot NAME`.
+
+## The 1.82.0 fixes (SINNOH, JOHTO, KANTO, the GAME CENTER)
+- SINNOH's stairs: Platinum's WARP_STAIRS_EAST / WEST are the tile beside the stairs, walked off into them. build_pack.py
+  STAIRS gives them Emerald's unused behaviors 0x5C / 0x5D (up, east / west) and 0x5E / 0x5F (down), arrow warps
+  (metatile_behavior.c MetatileBehavior_IsSinnohStairs, SINNOH only), carried up or down by DoSinnohRideWarp, no arrow
+  sprite. Test sinnoh_* (the house's stairs: walk beside them, nothing; walk into them, the floor changes).
+- SINNOH's people: Platinum's sheets stand on row 29 of 32, Emerald's on 30: build_gfx.py feet_shift moves them down.
+- Story people on Platinum's story: s3d_legends.c skips the old written story's battle rows (they cleared FLAG_HIDE_
+  ROUTE_201_RIVAL on every visit). Test sinnoh_platinum_verity. The lab's first visit: gen_scripts.py converts
+  GivePokedex and BufferPlayerCounterpartStarterSpeciesName (sinnoh 6 ..., 1: the counterpart's). Test sinnoh_platinum_lab.
+- Quetzal's setmaplayoutindex numbers are Quetzal's layout ids (quetzal_rip/layouts quetzal_layout_id): the scripts name
+  LAYOUT_ constants now (import.py fix, tools/test/check_scripts.py refuses a number). Three alternate layouts were
+  never ripped (SEAFOAM B3F / B4F, DUNSPARCE TUNNEL): their maps keep their own layout until the rip has them.
+- JOHTO's / KANTO's PC: FireRed's tiles 0x62 / 0x63 (field_specials.c PcTilePair). Test region_pc_tile.
+- The BICYCLE (item 360) rides as the MACH BIKE. Test region_bicycle.
+- Fossil lines are never wild before the region's LEAGUE (mp_region.c MP_WildSpeciesOk). Test region_fossils.
+- JOHTO's BERRY patches: their sprite only when ripe, Crystal's "There's nothing here…" otherwise, replanted when picked
+  (mp_apricorn.c MP_JohtoBerries_*). Test johto_berry_patch.
+- The GAME CENTER away from HOENN: the guide charges the admission, 3F's four patrons are OBJ_EVENT_GFX_VAR_0-3
+  (MP_Region_GameCenterLooks), the coin counter names the region's GAME CORNER (MP_Region_BufferGameCorner). The CARD
+  CLUB people use MP_Region_BufferName and give no second CARD CASE.
+- Map pictures (mp_mappic.c) take the day tint (gMpScenePixel) as the map's tiles do.
+- Battle weather keeps off every sprite but the battlers, and half of it off them too: gba_easy_draw.c records each
+  pixel's sprite palette (gMpPixelObjPal), mp_battleweather.c MayCover.
+- GB2 printed art: tools/tcg/trim_printed_rects.py moves the rectangles' edges past the card border; tcg_gfx.c
+  CleanArtCorners cleans what's left in a rounded corner.
+- JOHTO's item ball sprite 59 is drawn as 15006 (gen_objects.py DRAWN_AS); ETHAN's back picture frames reordered
+  (moemon_chars/import.py BACK_ORDER).
+- SPROUT TOWER's pillar: tools/quetzal_port/gen_sprout_pillar.py (Crystal's TilesetTowerAnim timing on Quetzal's
+  column), tileset_anims.c TilesetAnim_QzSproutPillar.

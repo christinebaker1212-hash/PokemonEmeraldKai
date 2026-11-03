@@ -1245,6 +1245,14 @@ void MP_Region_Travel(u8 from, u8 to)
 
 // ---------------------------------------------------------------------------------------------------- specials
 // The GLOBAL PC links only in a region whose Elite Four the player has beaten
+// The MAGNET TRAIN between GOLDENROD and SAFFRON runs, both ways, once JOHTO's or KANTO's LEAGUE is beaten and the
+// S.S. TICKET is in the BAG (the user, 2026-11-03)
+u16 MP_MagnetTrainOpen(void)
+{
+    return gSpecialVar_Result = (MP_Region_Cleared(REGION_JOHTO) || MP_Region_Cleared(REGION_KANTO))
+                             && CheckBagHasItem(ITEM_SS_TICKET, 1);
+}
+
 u16 MP_GlobalPcLinked(void)
 {
     return gSpecialVar_Result = MP_Region_Cleared(MP_Region_Current());
