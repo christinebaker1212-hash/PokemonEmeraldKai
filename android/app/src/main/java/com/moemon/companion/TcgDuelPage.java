@@ -543,35 +543,60 @@ public final class TcgDuelPage extends Page {
             return;
         }
         float pw = Math.min(aw * 0.36f, 24), ph = pw * 1.375f;
-        // Prize cards on the left; the deck above the discard pile on the right
+        // Prize cards on the left, the deck and discard pile on the right (the deck nearer its owner); the other side
+        // the other way round, as across a real table
+        boolean turned = who != seat;
         int prizes = p.optJSONArray("prize").length();
-        float px = x - 12 - pw - 6, py = y + (ah - ph) / 2 - 4;
+        float left = x - 12 - pw - 6, right = x + aw + 12;
+        float px = turned ? right : left, py = y + (ah - ph) / 2 - 4;
         for (int i = Math.min(prizes, 6) - 1; i >= 0; i--) {
-            ta().draw(c, 0, px + (i % 2) * 5, py + (i / 2) * 4, pw, ph, scale, 255);
+            card(c, 0, px + (i % 2) * 5, py + (i / 2) * 4, pw, ph, turned);
         }
         tag(c, "PRIZES " + prizes, px - 4, py + ph + 22);
-        float dx = x + aw + 12, top = y + 2, low = y + ah - ph - 10;
-        if (p.optInt("deck") > 0) {
-            ta().draw(c, 0, dx, top, pw, ph, scale, 255);
+        float dx = turned ? left : right, near = y + ah - ph - 10, far = y + 2;
+        float deckY, pileY;
+        if (turned) {
+            // (theirs: the deck at the top, nearer them; the discard pile below it)
+            deckY = far;
+            pileY = near;
         } else {
-            empty(c, dx, top, pw, ph);
+            // (yours: the discard pile above, the deck below, nearer you)
+            deckY = near;
+            pileY = far;
         }
-        tag(c, String.valueOf(p.optInt("deck")), dx + pw + 3, top + ph / 2 + 6);
+        // the counts beside the piles, on the outer side
+        float countX = turned ? dx - 4 : dx + pw + 3;
+        if (p.optInt("deck") > 0) {
+            card(c, 0, dx, deckY, pw, ph, turned);
+        } else {
+            empty(c, dx, deckY, pw, ph);
+        }
+        String dn = String.valueOf(p.optInt("deck"));
+        tag(c, dn, turned ? countX - art.width(dn) : countX, deckY + ph / 2 + 6);
         JSONArray discard = p.optJSONArray("discard");
         if (discard.length() > 0) {
-            ta().draw(c, discard.optJSONArray(discard.length() - 1).optInt(1), dx, low, pw, ph, scale, 255);
+            card(c, discard.optJSONArray(discard.length() - 1).optInt(1), dx, pileY, pw, ph, turned);
             final JSONArray d = discard;
             final String title = who == seat ? "YOUR DISCARD PILE" : "THEIR DISCARD PILE";
-            hit(dx, low, pw, ph, () -> {
+            hit(dx, pileY, pw, ph, () -> {
                 pile = d;
                 pileTitle = title;
                 sheet = 4;
             });
         } else {
-            empty(c, dx, low, pw, ph);
+            empty(c, dx, pileY, pw, ph);
         }
-        tag(c, String.valueOf(discard.length()), dx + pw + 3, low + ph / 2 + 6);
-        tag(c, "DISCARD", dx - 6, low + ph + 12);
+        String pn = String.valueOf(discard.length());
+        tag(c, pn, turned ? countX - art.width(pn) : countX, pileY + ph / 2 + 6);
+    }
+
+    // a card on the table: the other side's turned to face them
+    private void card(Canvas c, int id, float x, float y, float w, float h, boolean turned) {
+        if (turned) {
+            ta().drawTurned(c, id, x, y, w, h, scale, 255);
+        } else {
+            ta().draw(c, id, x, y, w, h, scale, 255);
+        }
     }
 
     private void tag(Canvas c, String t, float x, float y) {
@@ -598,7 +623,7 @@ public final class TcgDuelPage extends Page {
             empty(c, x, y, w, h);
         } else {
             int id = f.optInt("id");
-            ta().draw(c, id, x, y, w, h, scale, 255);
+            card(c, id, x, y, w, h, who != seat);
             int dmg = f.optInt("dmg"), hp = f.optInt("hp");
             if (dmg > 0) {
                 // damage counters as the game shows them: a red badge with the damage

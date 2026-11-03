@@ -17,10 +17,12 @@ import java.util.TreeMap;
  * offer: {"kind", g, from, n, seed, first, at, + the game's own: a hand and rules, a deck and Prize cards}); the
  * game's record is under Derive(pair key, kind + "game" + g), each entry sealed with the pair key: the friend's answer
  * (seq 0: their hand / deck, or "declined"), then each move {seq, + the game's own} numbered from 1 in the order they
- * were made (whoever moves next posts the next number). Android-free.
+ * were made (whoever moves next posts the next number). The server keeps 16 entries a record, so the record is in
+ * pages of PAGE numbers (page n > 0 under Derive(pair key, kind + "game" + g + "#" + n)), with room for a few sent
+ * twice; a TRIPLE TRIAD game fits in the first. Android-free.
  */
 public final class CardDuels {
-    public static final int DAYS = 7;
+    public static final int DAYS = 7, PAGE = 12;
 
     private CardDuels() {}
 
@@ -34,6 +36,12 @@ public final class CardDuels {
 
     static byte[] gameKey(Crypto c, byte[] pk, String kind, String g) {
         return c.derive(pk, kind + "game" + g);
+    }
+
+    /** The record's page holding number SEQ */
+    static byte[] pageKey(Crypto c, byte[] pk, String kind, String g, int seq) {
+        int page = seq / PAGE;
+        return page == 0 ? gameKey(c, pk, kind, g) : c.derive(pk, kind + "game" + g + "#" + page);
     }
 
     static boolean post(Crypto c, String server, byte[] key, byte[] pk, JSONObject entry) throws IOException {
@@ -157,7 +165,7 @@ public final class CardDuels {
         try {
             JSONObject entry = new JSONObject().put("seq", seq);
             merge(entry, move);
-            return post(c, server, gameKey(c, pk, kind, g), pk, entry);
+            return post(c, server, pageKey(c, pk, kind, g, seq), pk, entry);
         } catch (JSONException e) {
             throw new IOException(e);
         }
@@ -171,15 +179,18 @@ public final class CardDuels {
         byte[] pk = pk(friend);
         TreeMap<Integer, JSONObject> bySeq = new TreeMap<>();
         try (Server s = new Server(server)) {
-            for (byte[] e : s.get(gameKey(c, pk, kind, g))) {
-                byte[] opened = c.open(pk, e);
-                if (opened == null || opened.length < 5) {
-                    continue;
-                }
-                try {
-                    JSONObject o = new JSONObject(new String(opened, 4, opened.length - 4, StandardCharsets.UTF_8));
-                    bySeq.putIfAbsent(o.optInt("seq", -1), o);
-                } catch (JSONException ignored) {
+            // page by page while each is full (its last number there)
+            for (int page = 0; page == 0 || bySeq.containsKey(page * PAGE - 1); page++) {
+                for (byte[] e : s.get(pageKey(c, pk, kind, g, page * PAGE))) {
+                    byte[] opened = c.open(pk, e);
+                    if (opened == null || opened.length < 5) {
+                        continue;
+                    }
+                    try {
+                        JSONObject o = new JSONObject(new String(opened, 4, opened.length - 4, StandardCharsets.UTF_8));
+                        bySeq.putIfAbsent(o.optInt("seq", -1), o);
+                    } catch (JSONException ignored) {
+                    }
                 }
             }
         }

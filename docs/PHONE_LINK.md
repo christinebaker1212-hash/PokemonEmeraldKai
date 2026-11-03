@@ -353,12 +353,62 @@ RANDOM, cards never change hands; the DAILY PUZZLE; VS FRIENDS; PACKS to open; D
 table, tap or drag, captures turning in waves, SAME / PLUS / COMBO, the AI, the prize order), TtDeckPage (the game's deck
 rules), TtPackPage, TtCardPage.
 
-Turn by turn with friends (core/TtFriends.java): the invite into the friend's inbox {kind "tt", g, from, n, hand, rules,
-seed, first, at}; the game's record under Derive(pair key, "ttgame" + g), entries sealed with the pair key: the
-friend's hand (seq 0, or declined), then each move {seq, slot, cell}. OPEN always; the rules offered replay the same with
+Turn by turn with friends (core/TtFriends.java over core/CardDuels.java, shared with the POKéMON card game): the invite
+into the friend's inbox {kind "tt", g, from, n, hand, rules, seed, first, at}; the game's record under Derive(pair key,
+"ttgame" + g), entries sealed with the pair key: the friend's hand (seq 0, or declined), then each move {seq, slot,
+cell}. OPEN always; the rules offered replay the same with
 either side as the engine's seat 0 (no SWAP, CHAOS, SUDDEN DEATH), so each phone plays as seat 0 (TtFriendGame). Moves
 not taken by the server are sent again; 3 days without a move: CLAIM WIN. Notifier TURN: a challenge, your turn.
 Test: coretest TtFriendsTest (12 games through a real server, both sides agreeing on every board).
+
+### The POKéMON card game on the phone (1.78.0)
+
+The game's own engine in the app: android/app/src/main/cpp/tcg_jni.c over src/tcg (tcg_duel, tcg_effects, tcg_trainers,
+tcg_powers, tcg_ai, tcg_catalog, tcg_collection, tcg_decks, tcg_scale, tcg_ratings, tcg_levels, tcg_link, and
+tcg_flow; the build's include folder holds include/tcg and mp_version.h), Java Tcg.java: the catalog, deck checks
+(Tcg_DeckValidate with the owned counts), CARD SCALING (TcgScale_RateDeck in a thread: about 0.1 s; an opponent fitted
+as tcg_field.c Tcg_FitOpponent does for an ordinary card player, from any of the game's decks), duels by handle (state
+as a seat may see it: the other hand, both decks and the other side's set-up Pokemon hidden; events after a sequence
+number; options: what each card in the hand, each attack, retreat, each Pokemon Power can do now and why not), the AI
+(TcgDuel_AiActionLevel) and the rules state's hash (TcgLink_Hash).
+
+What a move asks for is the game's own duel board's: src/tcg/tcg_flow.c (include/tcg/flow.h) holds the Trainers' and
+Pokemon Powers' steps, the attacks' menus and targets, the filters for spaces and cards, whether a hand card / attack /
+retreat can be used and why not, the retreat's Energy when there's nothing to choose; tcg_board.c uses them (its
+screen and cursor stay its own), and TcgFlow is the same as a machine without a screen (begin a move, answer SLOT /
+PICK / MENU questions, take the action) that the phone drives. Moves are small JSON actions {t, h, s, a, g, o, c, x}.
+Tests: coretest TcgCoreTest (150 whole duels with one or both sides moving only through flows with random legal
+answers against the AI: every action a flow builds is taken by the rules, every duel ends, a replay from the actions
+ends the same, the other side's hand stays hidden). It found three of the board's own: a Basic put on the Bench while
+setting up with the Active spot empty (no way on with no other Basic: now the Active spot first), evolving a Pokemon
+put down this turn when another of the name could evolve (now only those that can), Scoop Up on the last Pokemon in play.
+
+The cards' pictures: graphics/tcg/printed.bin (the scans, "TCGP") re-encoded as WebP by build_assets.py (assets
+game/tcg_cards.bin, ~13 MB, kept uncompressed in the APK so TcgArt reads a picture at a time); decoded at the size shown.
+
+The game's side, src/mp/mp_phone_cards.c: the snapshot's `tcg` {on, day, active, skill, rated, badges, wins, today
+{packs, packsMax 3}, packs[11], decks[8] {n, ace, c[60]}, owned [[id, count]]}; orders `tcgdeck` {deck, cards (60, or
+[] to empty a slot), name, active} (`deckrules`, `notowned`, `empty`, `activedeck`), `tcgduel` {won, kind duel | friend,
+deck and opp ratings, level} (CARD SCALING learns from every FREE DUEL, won or lost; a win: a random booster, 3 a day
+counted in "<save>.phonecards" packs[1]), `tcgopen` {pack} (Tcg_OpenPack: `cards` and `new`, the first copies). Test:
+tools/phone/cards_test.py.
+
+The app: CARDS has a switch between the two games (remembered). POKéMON CARDS: a FREE DUEL, VS FRIENDS, BOOSTERS, DECKS,
+the BINDER by set (TcgBinderPage). TcgDuelPage: upright, their side at the top turned to face them (their Bench, Active
+Pokemon, Prize cards, deck and discard pile, mirrored as across a table, as the game's own table turns them; the user
+2026-11-03: TRIPLE TRIAD stays as it is), yours below, the hand along the bottom. A tap on a card shows it up close with what it
+can do (and why not); a move's questions glow on the table (SLOT), open a card picker (PICK, in order where the order
+matters, Energy by value for a retreat), or a list (MENU). What happens is called out from the events (attacks, coins,
+damage numbers over the Pokemon, conditions, Knock Outs, Prize cards, the AI's Trainers shown). TcgDeckPage (stacks to
+take out, the collection by kind and type to put in, the game's rules as you go), TcgPackPage (ten cards turning over,
+the holo shining, NEW!), TcgCardPage (the scan, then the catalog's words).
+
+With friends by turns: core/CardDuels.java kind "tcg" (the invite {deck, prizes 6}; the friend's deck at seq 0; each
+action {seq, + the action} numbered in the order made, whoever acts posts the next). The inviter is the engine's
+player 0 on both phones (TcgFriendGame). The server keeps 16 entries a record, so a record is in pages of 12 numbers
+(page n > 0 under Derive(pair key, kind + "game" + g + "#" + n)); a TRIPLE TRIAD game stays in the first. Concede on your
+own turn (the rules take it from the player to move). Test: coretest TcgFriendsTest (3 duels, ~250 moves, through a real
+server, the two phones' rules hash equal after every move). `ONLY=tcg android/coretest/run.sh`.
 
 ## The UI / UX pass (1.77.0 on)
 
@@ -370,5 +420,5 @@ Test: coretest TtFriendsTest (12 games through a real server, both sides agreein
 - ON OFFER (a trade by mail) as a small orange tag on box places, and on the PC card and the PARTY's cards.
 - The tab bar: a 12x12 pixel icon for each page above its name, the chosen one on a raised plate (GameView TAB_ICONS).
 
-Next: the POKéMON card game and YU-GI-OH! on the phone (the same pattern: the game's engines through JNI), the app's
-sounds and music (the game's own), and the rest of the pass.
+Next: YU-GI-OH! on the phone (the same pattern: EDOPro's ocgcore with Lua through JNI), the app's sounds and music (the
+game's own), and the rest of the pass.

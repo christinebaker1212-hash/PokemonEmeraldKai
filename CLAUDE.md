@@ -50,8 +50,14 @@ ONLY=trade android/coretest/run.sh), tools/phone/escrow_test.py.
 TRIPLE TRIAD on the phone (1.76.0): the game's src/tt through android cpp/tt_jni.c (Tt.java), art from build_assets.py,
 src/mp/mp_phone_cards.c (snapshot "tt", orders ttdeck / ttwin / ttopen, "<save>.phonecards"), CardsPage / TtDuelPage,
 friend duels core/TtFriends.java; PHONE_LINK.md "TRIPLE TRIAD on the phone"; tests tools/phone/cards_test.py, coretest
-TtCoreTest, TtFriendsTest (ONLY=tt). The user asked (2026-11-03) for all four
-phases in order, then a UI/UX pass: "polished Nintendo quality, mid 2000s to 2007 era graphics, 2026 usability".
+TtCoreTest, TtFriendsTest (ONLY=tt). The POKéMON card game on the phone (1.78.0): src/tcg through cpp/tcg_jni.c
+(Tcg.java); what a move asks for is src/tcg/tcg_flow.c (include/tcg/flow.h), shared with the game's tcg_board.c (never
+a second copy); snapshot "tcg", orders tcgdeck / tcgduel / tcgopen; TcgDuelPage etc.; friends by turns core/CardDuels.java
+(both games; records in pages of 12: the server keeps 16 entries a key); PHONE_LINK.md "The POKéMON card game on the
+phone"; tests coretest TcgCoreTest, TcgFriendsTest (ONLY=tcg), cards_test.py. The POKéMON and YU-GI-OH! tables turn the
+opponent's cards to face them; TRIPLE TRIAD stays as it is (never turn its cards: the user, 2026-11-03). The user asked
+(2026-11-03) for all four phases in order, then a UI/UX pass: "polished Nintendo quality, mid 2000s to 2007 era
+graphics, 2026 usability".
 
 **Trigger word: "Continue Yugioh"** -> read `docs/YGO_HANDOFF.md` and carry on with its next steps (the Yu-Gi-Oh!
 card duels).

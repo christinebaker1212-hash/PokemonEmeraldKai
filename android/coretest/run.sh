@@ -24,9 +24,12 @@ cc -shared -fPIC -O2 -I"$JH/include" -I"$JH/include/linux" -I"$ROOT/src/mp" -I"$
 javac -nowarn -d "$OUT/classes" -cp "$JSON" "$APP"/java/com/moemon/companion/core/*.java \
     "$APP/java/com/moemon/companion/Native.java" "$APP/java/com/moemon/companion/NativeCrypto.java" \
     "$APP/java/com/moemon/companion/Tt.java" "$APP/java/com/moemon/companion/TtFriendGame.java" \
-    "$APP/java/com/moemon/companion/Tcg.java" "$ROOT/android/coretest/TcgCoreTest.java" \
+    "$APP/java/com/moemon/companion/Tcg.java" "$APP/java/com/moemon/companion/TcgFriendGame.java" \
+    "$ROOT/android/coretest/TcgCoreTest.java" "$ROOT/android/coretest/TcgFriendsTest.java" \
     "$ROOT/android/coretest/CoreTest.java" "$ROOT/android/coretest/WalkCoreTest.java" "$ROOT/android/coretest/FriendsTest.java" "$ROOT/android/coretest/TradeTest.java" "$ROOT/android/coretest/TtCoreTest.java" "$ROOT/android/coretest/TtFriendsTest.java"
 java -Djava.library.path="$OUT" -cp "$OUT/classes:$JSON" TcgCoreTest
+bash -c "source '$ROOT/tools/test/common.sh' && build_server"
+java -Djava.library.path="$OUT" -cp "$OUT/classes:$JSON" TcgFriendsTest "$ROOT/tools/test/.bin/moemon_server"
 [ "$ONLY" = tcg ] && exit 0
 java -Djava.library.path="$OUT" -cp "$OUT/classes:$JSON" TtCoreTest
 bash -c "source '$ROOT/tools/test/common.sh' && build_server"

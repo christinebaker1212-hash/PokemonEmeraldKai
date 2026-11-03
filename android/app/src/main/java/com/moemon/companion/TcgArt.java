@@ -252,6 +252,14 @@ public final class TcgArt {
         smooth.setAlpha(255);
     }
 
+    /** The card turned to face the other side of the table (the opponent's cards, as the game's tables show them) */
+    public void drawTurned(Canvas c, int id, float x, float y, float w, float h, float scale, int alpha) {
+        c.save();
+        c.rotate(180, x + w / 2, y + h / 2);
+        draw(c, id, x, y, w, h, scale, alpha);
+        c.restore();
+    }
+
     /** Only the card's illustration, filling x, y, w, h (cut to keep its shape) */
     public void drawArt(Canvas c, int id, float x, float y, float w, float h, float scale, int alpha) {
         int[] r = artRect(id);
