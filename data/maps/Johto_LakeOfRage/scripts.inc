@@ -10,7 +10,7 @@ Johto_LakeOfRage_EventScript_83DD2C9::
 
 Johto_LakeOfRage_EventScript_83DD2E3::
 	call_if_lt VAR_QZ_0x500C, 2, Johto_LakeOfRage_EventScript_83DD30B
-	setmaplayoutindex 0x21B
+	setmaplayoutindex LAYOUT_JOHTO_LAKE_OF_RAGE   @ (Quetzal's layout 0x21B)
 	goto_if_lt VAR_QZ_0x500C, 14, Johto_LakeOfRage_EventScript_83DD30F
 	random 2
 	goto_if_eq VAR_RESULT, 1, Johto_LakeOfRage_EventScript_83DD30F

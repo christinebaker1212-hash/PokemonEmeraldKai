@@ -43,7 +43,8 @@ Kanto_SeafoamIslands_B4F_EventScript_8412D6C::
 	return
 
 Kanto_SeafoamIslands_B4F_EventScript_8412D70::
-	setmaplayoutindex 0x384
+	@ setmaplayoutindex 0x384: Quetzal's other layout of this map, not in the rip (quetzal_rip/layouts):
+	@ the map keeps its own
 	return
 
 Kanto_SeafoamIslands_B4F_EventScript_8412D74::

@@ -1,0 +1,11 @@
+pressuntil A field 5000
+wait 30
+mp warp 35,77,10,10
+wait 120
+mp where
+mp landslots
+mp regionclear 1
+mp warp 35,77,10,10
+wait 120
+mp landslots
+quit

@@ -75,6 +75,7 @@ bool8 MP_Region_IsSharedMap(u8 group, u8 num);   // the MOéMON GARDEN and the G
 void MP_Region_NoteWarp(u8 destGroup, u8 destNum);   // overworld.c ApplyCurrentWarp: stepping into a shared map
 void MP_Region_SharedExit(u8 destGroup, u8 destNum);
 u16 MP_Region_GameCenterOtherFloor(void);   // special: the elevator's other floor in JOHTO / KANTO (2F / 3F only)
+void MP_Region_BufferName(void);
 bool8 MP_Region_WarpClosed(u8 destGroup, u8 destNum);   // field_control_avatar.c: JOHTO's / KANTO's GAME CENTER has no ROOFTOP    // field_control_avatar.c SetupWarp: leaving one goes back where the player came from
 u8 *MP_Region_FlagPointer(u16 id);   // NULL outside REGION_FLAGS_START..END
 u16 *MP_Region_VarPointer(u16 id);
@@ -139,6 +140,8 @@ bool8 MP_Gen_Allowed(u16 species);                 // shown in the region the pl
 bool8 MP_Gen_ObjectHidden(u8 localId);             // a later generation's POKéMON on the map (JOHTO / KANTO)
 u16 MP_Gen_StandIn(u16 species);                   // its nearest earlier form that is
 const struct WildPokemonInfo *MP_Region_WildInfo(const struct WildPokemonInfo *info);   // the Gen 3 table before it
+bool8 MP_IsFossilLine(u16 species);               // revived from a fossil (or its evolution)
+bool8 MP_WildSpeciesOk(u16 species);              // the wild may give it here: no starters, no fossils before the LEAGUE
 bool8 MP_IsStarterLine(u16 species);              // a first partner of any generation (or its evolution)
 u16 MP_WildSlotSpecies(const struct WildPokemonInfo *info, u8 index);   // the slot's species, never a starter
 const struct WildPokemonInfo *MP_Region_WildInfoIn(const struct WildPokemonInfo *info, u8 region);   // as seen in REGION

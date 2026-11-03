@@ -77,7 +77,7 @@ Johto_DayCare_Text_83F047C::
 	.string "{PLAYER} put away the book.$"
 
 Johto_DayCare_Text_83F04FA::
-	.string "A book of word assocations!\p"
+	.string "A book of word associations!\p"
 	.string "{PLAYER} flipped through\n"
 	.string "the book.\p"
 	.string "PICHU -> CUTE\l"

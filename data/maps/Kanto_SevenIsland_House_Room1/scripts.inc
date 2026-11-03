@@ -3,7 +3,7 @@ Kanto_SevenIsland_House_Room1_MapScripts::
 	.byte 0
 
 Kanto_SevenIsland_House_Room1_EventScript_84209D8::
-	setmaplayoutindex 0x3DB
+	setmaplayoutindex LAYOUT_KANTO_SEVEN_ISLAND_HOUSE_ROOM1   @ (Quetzal's layout 0x3DB)
 	setobjectxyperm 1, 4, 4
 	setobjectmovementtype 1, 0xA
 	end

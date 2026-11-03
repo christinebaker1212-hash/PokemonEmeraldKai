@@ -789,6 +789,8 @@ static bool8 TryArrowWarp(struct MapPosition *position, u16 metatileBehavior, u8
     {
         StoreInitialPlayerAvatarState();
         SetupWarp(&gMapHeader, warpEventId, position);
+        if (DoSinnohRideWarp(metatileBehavior))   // Moemon Kai: SINNOH's stairs, walked into (field_screen_effect.c)
+            return TRUE;
         DoWarp();
         return TRUE;
     }

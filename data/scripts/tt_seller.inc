@@ -11,6 +11,7 @@ EventScript_TtSeller::
 	faceplayer
 	special Tt_SellerState
 	goto_if_eq VAR_RESULT, TRUE, EventScript_TtSeller_Shop
+	special MP_Region_BufferName
 	msgbox TtSeller_Text_Intro, MSGBOX_DEFAULT
 	special Tt_SellerHasCase
 	goto_if_eq VAR_RESULT, TRUE, EventScript_TtSeller_HasCase
@@ -70,7 +71,7 @@ EventScript_TtPlayer_NoCase::
 
 TtSeller_Text_Intro:
 	.string "Welcome, welcome! TRIPLE TRIAD\n"
-	.string "cards, from lands far beyond HOENN.\p"
+	.string "cards, from lands far beyond {STR_VAR_1}.\p"
 	.string "Five cards, a three-by-three board,\n"
 	.string "and the higher number takes the card\l"
 	.string "it faces. Simple to learn!$"

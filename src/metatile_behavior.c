@@ -1,6 +1,7 @@
 #include "global.h"
 #include "metatile_behavior.h"
 #include "constants/metatile_behaviors.h"
+#include "s3d.h"
 
 #define TILE_FLAG_HAS_ENCOUNTERS (1 << 0)
 #define TILE_FLAG_SURFABLE       (1 << 1)
@@ -263,8 +264,7 @@ bool8 MetatileBehavior_IsNonAnimDoor(u8 metatileBehavior)
 {
     if (metatileBehavior == MB_NON_ANIMATED_DOOR
      || metatileBehavior == MB_WATER_DOOR
-     || metatileBehavior == MB_DEEP_SOUTH_WARP
-     || metatileBehavior == MB_UNUSED_5E || metatileBehavior == MB_UNUSED_5F)   // Moemon Kai: SINNOH's stairs up / down
+     || metatileBehavior == MB_DEEP_SOUTH_WARP)
         return TRUE;
     else
         return FALSE;
@@ -286,10 +286,26 @@ bool8 MetatileBehavior_IsSurfableWaterOrUnderwater(u8 metatileBehavior)
         return FALSE;
 }
 
+// Moemon Kai: SINNOH's stairs (tools/sinnoh/build_pack.py STAIRS): Platinum's WARP_STAIRS_EAST / WEST, the tile beside
+// the stairs, walked off into them as an arrow warp; Emerald's unused 0x5C / 0x5D lead up (east / west), 0x5E / 0x5F
+// down (field_screen_effect.c DoSinnohRideWarp)
+bool8 MetatileBehavior_IsSinnohStairs(u8 metatileBehavior)
+{
+    return metatileBehavior >= MB_UNUSED_5C && metatileBehavior <= MB_UNUSED_5F
+        && S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup);
+}
+
+bool8 MetatileBehavior_IsSinnohStairsUp(u8 metatileBehavior)
+{
+    return metatileBehavior == MB_UNUSED_5C || metatileBehavior == MB_UNUSED_5D;
+}
+
 bool8 MetatileBehavior_IsEastArrowWarp(u8 metatileBehavior)
 {
     if (metatileBehavior == MB_EAST_ARROW_WARP)
         return TRUE;
+    else if ((metatileBehavior == MB_UNUSED_5C || metatileBehavior == MB_UNUSED_5E) && MetatileBehavior_IsSinnohStairs(metatileBehavior))
+        return TRUE;   // (Moemon Kai: SINNOH's stairs)
     else
         return FALSE;
 }
@@ -298,6 +314,8 @@ bool8 MetatileBehavior_IsWestArrowWarp(u8 metatileBehavior)
 {
     if (metatileBehavior == MB_WEST_ARROW_WARP)
         return TRUE;
+    else if ((metatileBehavior == MB_UNUSED_5D || metatileBehavior == MB_UNUSED_5F) && MetatileBehavior_IsSinnohStairs(metatileBehavior))
+        return TRUE;   // (Moemon Kai: SINNOH's stairs)
     else
         return FALSE;
 }

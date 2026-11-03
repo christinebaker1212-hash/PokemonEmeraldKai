@@ -326,6 +326,18 @@ class Ids:
         # items chosen by number (VAR_ITEM_ID: the fossil lab's remembered fossil)
         text = re.sub(r'(setvar VAR_ITEM_ID, )(0x[0-9A-Fa-f]+|\d+)$', lambda m: m.group(1) + self.item(
             self.item_by_id.get(int(m.group(2), 0), 'ITEM_NONE'), where), text, flags=re.M)
+        # map layouts written as Quetzal's numbers (setmaplayoutindex: GOLDENROD's roof drew black on another layout):
+        # the rip's layouts carry Quetzal's number; one the rip doesn't have stays out (the map keeps its own)
+        if not hasattr(self, 'layout_by_id'):
+            self.layout_by_id = {l['quetzal_layout_id']: l['id'] for l in json.load(open(
+                os.path.join(REPO, 'quetzal_rip/layouts/layouts.json')))['layouts'] if 'quetzal_layout_id' in l}
+        def raw_layout(m):
+            name = self.layout_by_id.get(int(m.group(1), 0))
+            if name is None:
+                return ("\t@ setmaplayoutindex %s: Quetzal's other layout of this map, not in the rip (quetzal_rip/layouts):\n"
+                        "\t@ the map keeps its own" % m.group(1))
+            return "\tsetmaplayoutindex %s   @ (Quetzal's layout %s)" % (name, m.group(1))
+        text = re.sub(r'\tsetmaplayoutindex (0x[0-9A-Fa-f]+|\d+)$', raw_layout, text, flags=re.M)
         text = re.sub(r'\bITEM_\w+\b', lambda m: self.item(m.group(0), where) if m.group(0) not in
                       ('ITEM_NONE', 'ITEM_USE_FIELD') else m.group(0), text)
         text = re.sub(r'\bMOVE_[A-Z0-9_]+\b', lambda m: self.move(m.group(0), where), text)

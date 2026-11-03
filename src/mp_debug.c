@@ -2300,6 +2300,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sp[0] = MP_LandSlotSpecies(6);
         sp[1] = MP_LandSlotSpecies(7);
         printf("[test] land slots 6-7: %d %d\n", sp[0], sp[1]);
+        printf("[test] land slots 8-11: %d %d %d %d\n", MP_LandSlotSpecies(8), MP_LandSlotSpecies(9), MP_LandSlotSpecies(10),
+               MP_LandSlotSpecies(11));
     }
     else if (strcmp(cmd, "marshdaily") == 0)
     {

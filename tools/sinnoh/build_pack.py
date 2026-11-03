@@ -122,10 +122,12 @@ def heights(land, ox=0, oz=0):
 # they were going (field_screen_effect.c SinnohArrivalDir)
 ARROW_MATS = (0x62, 0x63, 0x65)   # MB_EAST / WEST / SOUTH_ARROW_WARP (Platinum's WARP_ENTRANCE_EAST / WEST / SOUTH)
 STEP_WARP = 0x60       # MB_NON_ANIMATED_DOOR
-# Platinum's stairs (0x5E / 0x5F) and escalators (0x6A / 0x6B) by where they lead: up or down a floor (the maps'
-# floor names). Stairs: Emerald's unused 0x5E (up) / 0x5F (down), stepped on as a non-animated door (metatile_behavior.c)
-# with a step up or down on the way (field_screen_effect.c); escalators: Emerald's MB_UP_ESCALATOR / MB_DOWN_ESCALATOR
-STAIRS_UP, STAIRS_DOWN = 0x5E, 0x5F
+# Platinum's stairs (0x5E WARP_STAIRS_EAST / 0x5F WARP_STAIRS_WEST: the tile beside the stairs, walked off east or west
+# into them, as an arrow warp) and escalators (0x6A / 0x6B) by where they lead: up or down a floor (the maps' floor
+# names). Stairs: Emerald's unused 0x5C / 0x5D (up, east / west) and 0x5E / 0x5F (down, east / west), arrow warps
+# (metatile_behavior.c MetatileBehavior_IsSinnohStairs) with a step up or down on the way (field_screen_effect.c);
+# escalators: Emerald's MB_UP_ESCALATOR / MB_DOWN_ESCALATOR
+STAIRS = {(0x5E, True): 0x5C, (0x5F, True): 0x5D, (0x5E, False): 0x5E, (0x5F, False): 0x5F}
 ESCALATOR_UP, ESCALATOR_DOWN = 0x6A, 0x6B
 
 
@@ -142,7 +144,7 @@ def warp_behavior(b, header, dest):
     if b in ARROW_MATS:
         return b
     if b in (0x5E, 0x5F):
-        return STAIRS_UP if up else STAIRS_DOWN
+        return STAIRS[(b, up)]
     if b in (0x6A, 0x6B):
         return ESCALATOR_UP if up else ESCALATOR_DOWN
     return STEP_WARP

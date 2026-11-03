@@ -1536,7 +1536,8 @@ static void HideShowWarpArrow(struct ObjectEvent *objectEvent)
 
     for (x = 0, direction = DIR_SOUTH; x < 4; x++, direction++)
     {
-        if (sArrowWarpMetatileBehaviorChecks2[x](metatileBehavior) && direction == objectEvent->movementDirection)
+        if (sArrowWarpMetatileBehaviorChecks2[x](metatileBehavior) && direction == objectEvent->movementDirection
+         && !MetatileBehavior_IsSinnohStairs(metatileBehavior))   // (Moemon Kai: SINNOH's stairs show no arrow, as Platinum's)
         {
             // Show warp arrow if applicable
             x = objectEvent->currentCoords.x;

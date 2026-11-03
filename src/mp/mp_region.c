@@ -154,6 +154,15 @@ u16 MP_Region_GameCenterOtherFloor(void)
     return gSpecialVar_Result = 0;
 }
 
+// The region the player is in, by name, into STR_VAR_1 (the CARD CLUB's people: data/scripts/card_club.inc)
+void MP_Region_BufferName(void)
+{
+    static const u8 sHoenn[] = _("HOENN"), sJohto[] = _("JOHTO"), sKanto[] = _("KANTO"), sSinnoh[] = _("SINNOH");
+    static const u8 *const sNames[REGION_COUNT] = {sHoenn, sJohto, sKanto, sSinnoh};
+    u8 region = MP_Region_Current();
+    StringCopy(gStringVar1, sNames[region < REGION_COUNT ? region : REGION_HOENN]);
+}
+
 // A warp that doesn't lead anywhere in JOHTO's / KANTO's GAME CENTER: 3F's stairs up to the ROOFTOP
 bool8 MP_Region_WarpClosed(u8 destGroup, u8 destNum)
 {
@@ -1550,14 +1559,46 @@ u16 MP_Gen_StandInIn(u16 species, u8 region)
     return species;
 }
 
+// Fossil POKéMON (revived from their fossils) are never met wild before the region's LEAGUE is beaten (Quetzal's
+// JOHTO / KANTO tables have them in caves and seas)
+static const u16 sFossilLines[] = {
+    SPECIES_OMANYTE, SPECIES_OMASTAR, SPECIES_KABUTO, SPECIES_KABUTOPS, SPECIES_AERODACTYL, SPECIES_LILEEP,
+    SPECIES_CRADILY, SPECIES_ANORITH, SPECIES_ARMALDO, SPECIES_CRANIDOS, SPECIES_RAMPARDOS, SPECIES_SHIELDON,
+    SPECIES_BASTIODON, SPECIES_TIRTOUGA, SPECIES_CARRACOSTA, SPECIES_ARCHEN, SPECIES_ARCHEOPS, SPECIES_TYRUNT,
+    SPECIES_TYRANTRUM, SPECIES_AMAURA, SPECIES_AURORUS, SPECIES_DRACOZOLT, SPECIES_ARCTOZOLT, SPECIES_DRACOVISH,
+    SPECIES_ARCTOVISH,
+};
+
+bool8 MP_IsFossilLine(u16 species)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sFossilLines); i++)
+        if (sFossilLines[i] == species)
+            return TRUE;
+    return FALSE;
+}
+
+// A species the wild may give here and now: no starters (Kai's rule), no fossils before the region's LEAGUE
+bool8 MP_WildSpeciesOk(u16 species)
+{
+    if (MP_IsStarterLine(species))
+        return FALSE;
+    if (MP_IsFossilLine(species) && !MP_Region_Cleared(MP_Region_Current()))
+        return FALSE;
+    return TRUE;
+}
+
 u16 MP_WildSlotSpecies(const struct WildPokemonInfo *info, u8 index)
 {
     s32 i;
     u16 species = info->wildPokemon[index].species;
-    if (!MP_IsStarterLine(species) || InBattlePyramid_())
+    if (MP_WildSpeciesOk(species) || InBattlePyramid_())
         return species;
     for (i = (s32)index - 1; i >= 0; i--)
-        if (!MP_IsStarterLine(info->wildPokemon[i].species))
+        if (MP_WildSpeciesOk(info->wildPokemon[i].species))
+            return info->wildPokemon[i].species;
+    for (i = (s32)index + 1; i < 5; i++)   // (the first slot: a later one; every table has at least five)
+        if (MP_WildSpeciesOk(info->wildPokemon[i].species))
             return info->wildPokemon[i].species;
     return species;   // (a table of nothing else)
 }
