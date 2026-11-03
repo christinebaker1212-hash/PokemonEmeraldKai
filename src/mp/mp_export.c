@@ -246,7 +246,7 @@ static void ExportMons(const char *dir)
         {
             u16 colors[16];
             memset(sPic, 0, sizeof(sPic));
-            LoadSpecialPokePic(&gMonFrontPicTable[s > SPECIES_EGG ? SPECIES_UNOWN : s], sPic,
+            LoadSpecialPokePic(&gMonFrontPicTable_Moe[s > SPECIES_EGG ? SPECIES_UNOWN : s], sPic,
                                s > SPECIES_EGG ? SPECIES_UNOWN : s, pid, TRUE);
             // (as palette indexes: the app colors it with the species' palette, or a POKeMON's own: shiny, hue)
             (void)colors;

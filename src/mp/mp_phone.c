@@ -1683,7 +1683,7 @@ static void OnHello(int c, const char *json)
     }
     sSess[c].state = SESS_LIVE;
     MPNet_Log("phone: \"%s\" linked (conn %d)", sFile.phones[i].name, c);
-    PlaySE(SE_POKENAV_CALL);
+    // (silently: the phone links again and again as it comes and goes, and a sound each time grated)
 }
 
 static void OnFrame(int c, const u8 *body, size_t len)
