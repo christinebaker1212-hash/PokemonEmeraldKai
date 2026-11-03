@@ -343,6 +343,7 @@ static void InspectorPanel()
         row("Size", size);
         ImGui::EndTable();
     }
+    MapView_Inspector();
     ImGui::End();
 }
 
@@ -500,10 +501,13 @@ static void StatusBar()
     {
         const MakerMapInfo &m = gEd.maps[gEd.map];
         ImGui::Text("%s  (%s)   %d x %d", m.title, m.name, m.width, m.height);
-        if (gEd.hoverX >= 0)
+        if (gEd.hoverX >= 0 && gEd.hoverBlock >= 0)
         {
+            int b = gEd.hoverBlock;
             ImGui::SameLine();
-            ImGui::TextDisabled("   tile %d, %d", gEd.hoverX, gEd.hoverY);
+            ImGui::TextDisabled("   tile %d, %d   metatile 0x%03X   %s   elevation %d   behavior 0x%02X", gEd.hoverX, gEd.hoverY,
+                                b & 0x3FF, (b >> 10) & 3 ? "blocked" : "walkable", (b >> 12) & 15,
+                                MakerApi_MetatileBehavior(b & 0x3FF));
         }
     }
     else
@@ -675,7 +679,7 @@ static void Frame()
     ImGui_ImplSDLRenderer2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
-    gEd.hoverX = gEd.hoverY = -1;
+    gEd.hoverX = gEd.hoverY = gEd.hoverBlock = -1;
     Shortcuts();
     MenuBar();
     Toolbar();

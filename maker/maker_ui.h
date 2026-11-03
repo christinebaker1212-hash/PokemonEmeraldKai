@@ -2,6 +2,7 @@
 #ifndef MAKER_UI_H
 #define MAKER_UI_H
 
+#include <stdlib.h>
 #include <string>
 #include <vector>
 #include "imgui.h"
@@ -20,6 +21,8 @@ static const char *const kModeNames[MODE_COUNT] = {"Map", "Collision", "Events",
 static const char *const kModeKeys[MODE_COUNT] = {"F1", "F2", "F3", "F4"};
 static const char *const kToolNames[TOOL_COUNT] = {"Pencil", "Rectangle", "Fill", "Picker"};
 static const char *const kToolKeys[TOOL_COUNT] = {"P", "R", "F", "I"};
+
+enum { SEL_NONE, SEL_OBJECT, SEL_WARP, SEL_BG, SEL_COORD };
 
 enum Icon
 {
@@ -62,6 +65,8 @@ struct Editor
     bool scrollToMap = false;
     int mode = MODE_MAP, tool = TOOL_PENCIL;
     int hoverX = -1, hoverY = -1;   // the tile under the mouse in the MAP panel
+    int hoverBlock = -1;
+    int selKind = 0, selIndex = -1;   // the selected event in the MAP panel: SEL_*
 };
 
 extern Editor gEd;
@@ -80,6 +85,8 @@ void MapView_Closed();
 void MapView_Panel();
 void TilesPanel();
 void MapView_TestCommand(const char *cmd, const char *arg);
+int MapView_SelectedMetatile();
+void MapView_Inspector();   // the selected event's details (the INSPECTOR panel)
 
 } // namespace maker
 

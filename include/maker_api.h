@@ -33,6 +33,59 @@ int MakerApi_MapCount(void);
 int MakerApi_MapInfo(int index, struct MakerMapInfo *info);   // 0 if there's no such map
 int MakerApi_FindMap(const char *name);                      // its index, or -1
 
+// A map's tiles (src/maker/maker_tiles.c): loaded into the game's own BG VRAM while the editor is open, animated by
+// the game's own tile animations
+struct MakerTilesInfo
+{
+    int width, height;                 // the map, in metatiles
+    int primaryMetatiles;              // metatiles 0.. of the primary tileset
+    int secondaryStart;                // the secondary's first metatile id (512, or 640 for FRLG-style primaries)
+    int secondaryMetatiles;
+    char primaryName[40], secondaryName[40];
+    int sinnoh;                        // SINNOH: blocks from the 3D pack, behavior in the id (no tile pictures)
+};
+int MakerApi_LoadMapTiles(int index, struct MakerTilesInfo *info);
+void MakerApi_UnloadMapTiles(void);
+void MakerApi_RenderMetatile(int id, unsigned int *rgba, int layers);   // 16x16 RGBA; layers 1 bottom, 2 top, 3 both
+int MakerApi_MetatileBehavior(int id);
+int MakerApi_MetatileLayerType(int id);
+int MakerApi_MapBlock(int index, int x, int y);   // metatile | collision << 10 | elevation << 12, or -1
+void MakerApi_SetAnimating(int on);
+int MakerApi_TakeTilesChanged(void);   // 1 once after the tiles changed (loaded, or an animation frame)
+enum
+{
+    MAKER_BEHAVIOR_NONE, MAKER_BEHAVIOR_GRASS, MAKER_BEHAVIOR_WATER, MAKER_BEHAVIOR_WATERFALL, MAKER_BEHAVIOR_CAVE,
+    MAKER_BEHAVIOR_DOOR, MAKER_BEHAVIOR_WARP, MAKER_BEHAVIOR_LEDGE_E, MAKER_BEHAVIOR_LEDGE_W, MAKER_BEHAVIOR_LEDGE_N,
+    MAKER_BEHAVIOR_LEDGE_S, MAKER_BEHAVIOR_ICE, MAKER_BEHAVIOR_COUNTER,
+};
+int MakerApi_BehaviorClass(int behavior);   // MAKER_BEHAVIOR_*, by the game's own checks
+
+// A map's people, warps, signs and triggers (src/maker/maker_objects.c): the map's own, named by map.json
+struct MakerObjectInfo
+{
+    int localId, graphicsId, kind;
+    int x, y, elevation;
+    int movementType, rangeX, rangeY;
+    int trainerType, sight;            // (sight: a trainer's sight range, or a berry tree's id)
+    int flag;                          // its hide flag (0: always there)
+    int facing;                        // the way it faces when the map loads: 0 south, 1 north, 2 west, 3 east
+    const char *localIdName;           // "LOCALID_LITTLEROOT_TWIN", or "" (then it's known by its script)
+    const char *gfxName, *scriptName;
+};
+struct MakerWarpInfo { int x, y, elevation, destMap, destWarp; };
+struct MakerBgInfo { int x, y, elevation, kind; const char *typeName, *scriptName; };
+struct MakerCoordInfo { int x, y, elevation; const char *varName, *scriptName; };
+int MakerApi_ObjectCount(int map);
+int MakerApi_ObjectInfo(int map, int i, struct MakerObjectInfo *o);
+int MakerApi_WarpCount(int map);
+int MakerApi_WarpInfo(int map, int i, struct MakerWarpInfo *w);
+int MakerApi_BgCount(int map);
+int MakerApi_BgInfo(int map, int i, struct MakerBgInfo *b);
+int MakerApi_CoordCount(int map);
+int MakerApi_CoordInfo(int map, int i, struct MakerCoordInfo *c);
+// A look's standing picture (facing 0 south, 1 north, 2 west, 3 east) as RGBA (0 = clear); 0 if none fits maxW x maxH
+int MakerApi_RenderObject(int graphicsId, int facing, unsigned int *rgba, int maxW, int maxH, int *w, int *h);
+
 // The game side of the editor (src/maker/maker_main.c)
 void MakerApi_Close(void);            // the editor closed: back to the main menu
 const char *MakerApi_GameVersion(void);

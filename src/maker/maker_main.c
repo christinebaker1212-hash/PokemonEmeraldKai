@@ -17,6 +17,8 @@ static bool8 sOpen;
 // The game while the editor is open: nothing happens, the screen stays black
 static void CB2_MakerWaiting(void)
 {
+    void Maker_TilesFrame(void);
+    Maker_TilesFrame();   // the editor's map's tile animations, frame by frame (maker_tiles.c)
 }
 
 void Maker_Open(void)

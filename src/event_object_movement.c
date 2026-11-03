@@ -2288,6 +2288,24 @@ void MP_SetObjectEventPaletteData(u16 tag, const u16 *data)
         sObjectEventSpritePalettes[i].data = data;
 }
 
+// Moemon Maker: a look's palette as the field would load it for that person (the same slot rules as
+// TrySpawnObjectEventTemplate), read back from the palette buffer. Only while the editor is open (nothing else on screen)
+const u16 *ObjectEvent_MakerPalette(u16 graphicsId)
+{
+    const struct ObjectEventGraphicsInfo *info = GetObjectEventGraphicsInfo(graphicsId);
+    u8 slot = info->paletteSlot;
+    FreeAllSpritePalettes();
+    if (slot == PALSLOT_QZ)
+        slot = QzLoadObjectPalette(info->paletteTag);
+    else
+    {
+        if (slot >= 16)
+            slot -= 16;
+        PatchObjectPalette(info->paletteTag, slot);
+    }
+    return &gPlttBufferUnfaded[OBJ_PLTT_ID(slot & 15)];
+}
+
 static u8 FindObjectEventPaletteIndexByTag(u16 tag)
 {
     u8 i;
