@@ -1,13 +1,25 @@
 /* What EDOPro's duel engine reads, from graphics/ygo/edo.pak (tools/ygo/edo/build_pack.py): the card database, the
  * card scripts, the system strings and the Forbidden & Limited lists. The pack is built in (ygo_edo_pak.c); its
- * chunks are inflated as they're needed and the last few kept. */
+ * chunks are inflated as they're needed and the last few kept. Built with YGO_EDO_PAK_EXTERNAL (the phone app: the
+ * pack is one of its files), YgoEdo_SetPak hands it over before the first duel instead. */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "ygo_edo.h"
 
 char *stbi_zlib_decode_noheader_malloc(const char *buffer, int len, int *outlen);
+#ifdef YGO_EDO_PAK_EXTERNAL
+static const uint8_t *sPak, *sPakEnd;
+#define gYgoEdoPak sPak
+#define gYgoEdoPakEnd sPakEnd
+void YgoEdo_SetPak(const void *data, size_t size)
+{
+    sPak = (const uint8_t *)data;
+    sPakEnd = sPak ? sPak + size : NULL;
+}
+#else
 extern const uint8_t gYgoEdoPak[], gYgoEdoPakEnd[];
+#endif
 extern const uint32_t gYgoEdoCodes[YGO_CARD_COUNT + 1];
 
 #define ENTRY 52
@@ -48,7 +60,12 @@ static uint64_t U64(const uint8_t *p) { return U32(p) | (uint64_t)U32(p + 4) << 
 
 static int Header(void)
 {
-    size_t size = (size_t)(gYgoEdoPakEnd - gYgoEdoPak);
+    size_t size;
+#ifdef YGO_EDO_PAK_EXTERNAL
+    if (!sPak)
+        return 0;
+#endif
+    size = (size_t)(gYgoEdoPakEnd - gYgoEdoPak);
     if (size < 12 || memcmp(gYgoEdoPak, "EDOP", 4))
         return 0;
     E.count = U32(gYgoEdoPak + 4);

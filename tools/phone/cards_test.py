@@ -10,6 +10,8 @@ phone"), against a headless game through the phone link:
     be put in use, the deck in use can't be emptied
   - "tcgduel": a loss (no prize) and three wins a day each a booster (the fourth win none), CARD SCALING's skill moving
   - "tcgopen": a booster opened by the game's pack math: ten cards in the answer and in the collection
+  - the snapshot's "ygo" (YU-GI-OH!): the Starter Deck, the collection; "ygodeck" (saved, in use; not owned refused),
+    "ygoduel" (a loss none, three wins a booster each, the fourth none), "ygoopen" (nine cards, NEW marks)
 
     python3 tools/phone/cards_test.py      (after make linux; exit 0 = passed)
 """
@@ -38,7 +40,7 @@ def main():
     work = tempfile.mkdtemp(prefix='cardstest')
     state = os.path.join(work, 'phone.state')
     W.PORT = 47800 + os.getpid() % 90
-    game = W.start(work, ['mp tt starter', 'mp cards starter 0', 'mp phone pair', 'wait 60', 'mp save'], True)
+    game = W.start(work, ['mp tt starter', 'mp cards starter 0', 'mp ygo starter 0', 'mp phone pair', 'wait 60', 'mp save'], True)
     try:
         line = W.wait_line(game, '[test] phone: save')
         f = line.split()
@@ -156,8 +158,49 @@ def main():
         if empty is not None and link.order(op='tcgopen', pack=empty).get('why') != 'nopack':
             fail('a booster that isn\'t there')
         print('tcg booster: %s' % d['cards'])
+
+        # YU-GI-OH!
+        ygo = link.snap().get('ygo')
+        if not ygo or ygo['on'] != 1 or len(ygo['decks'][0]['m']) < 40:
+            fail('no YU-GI-OH! collection in the snapshot: %s' % (ygo and {k: ygo[k] for k in ygo if k != 'owned'}))
+        start = ygo['decks'][0]
+        print('ygo snapshot: %d cards, deck "%s" %d+%d (ace %d), list "%s"' % (owned_total(ygo), start['n'], len(start['m']),
+                                                                          len(start['x']), start['ace'], ygo['list']))
+        d = link.order(op='ygodeck', deck=1, main=list(reversed(start['m'])), extra=start['x'], name='phone deck', active=1)
+        if not d['ok']:
+            fail('a YU-GI-OH! deck: %s' % d)
+        ygo = link.snap()['ygo']
+        if ygo['decks'][1]['m'] != list(reversed(start['m'])) or ygo['decks'][1]['n'] != 'PHONE DECK' or ygo['active'] != 1:
+            fail('the YU-GI-OH! deck as saved: %s' % ygo['decks'][1]['n'])
+        have = {c: n for c, n in ygo['owned']}
+        unowned = next(i for i in range(1, 300) if have.get(i, 0) == 0)
+        d = link.order(op='ygodeck', deck=2, main=start['m'][:-1] + [unowned], extra=[])
+        if d['ok'] or d.get('why') not in ('notowned', 'deckrules'):
+            fail('a YU-GI-OH! deck with a card not owned: %s' % d)
+        if not link.order(op='ygodeck', deck=0, active=1)['ok']:
+            fail('back to the Starter Deck')
+        packs0 = sum(n for _, n in ygo['packs'])
+        if link.order(op='ygoduel', won=0, deck=1450, opp=1500, level=1).get('prize') != -1:
+            fail('a lost YU-GI-OH! duel')
+        for i in range(3):
+            d = link.order(op='ygoduel', won=1, deck=1450, opp=1500, level=1)
+            if not d['ok'] or d.get('prize', -1) < 0 or d.get('left') != 2 - i:
+                fail('a won YU-GI-OH! duel: %s' % d)
+        if link.order(op='ygoduel', won=1, deck=1450, opp=1500, level=1).get('prize') != -1:
+            fail('a fourth YU-GI-OH! win today')
+        ygo = link.snap()['ygo']
+        if sum(n for _, n in ygo['packs']) != packs0 + 3:
+            fail('the YU-GI-OH! boosters: %d -> %s' % (packs0, ygo['packs']))
+        pset = ygo['packs'][0][0]
+        before = owned_total(ygo)
+        d = link.order(op='ygoopen', set=pset)
+        if not d['ok'] or len(d.get('cards', [])) != 9 or len(d.get('new', [])) != 9:
+            fail('opening a YU-GI-OH! booster: %s' % d)
+        if owned_total(link.snap()['ygo']) != before + 9:
+            fail('after the YU-GI-OH! booster')
+        print('ygo: decks, 3 wins a booster each, a booster opened %s' % d['cards'])
         link.close()
-        print('CARDS TEST PASSED: both games\' collections, decks, today\'s prizes and packs through the phone link')
+        print('CARDS TEST PASSED: the three card games\' collections, decks, today\'s prizes and packs through the phone link')
     finally:
         game.kill()
 

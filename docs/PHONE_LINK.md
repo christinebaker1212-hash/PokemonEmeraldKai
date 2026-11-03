@@ -410,6 +410,43 @@ player 0 on both phones (TcgFriendGame). The server keeps 16 entries a record, s
 own turn (the rules take it from the player to move). Test: coretest TcgFriendsTest (3 duels, ~250 moves, through a real
 server, the two phones' rules hash equal after every move). `ONLY=tcg android/coretest/run.sh`.
 
+### YU-GI-OH! on the phone (1.79.0)
+
+The game's own engine in the app: EDOPro's ocgcore (C++ with its Lua, built by CMake as the game's Makefile EDO_* does)
+and the game's bridge src/ygo (ygo_edo, ygo_edo_data, ygo_edo_codes, ygo_catalog, ygo_fusions, ygo_ai, ygo_collection,
+ygo_rating, ygo_npc_decks, ygo_card_ratings, tools/ygo/stb_zlib.c) through android/app/src/main/cpp/ygo_jni.c, Java
+Ygo.java. The engine's pack (graphics/ygo/edo.pak, every card's database row and script) is an asset handed over at run
+time (YGO_EDO_PAK_EXTERNAL: ygo_edo_data.c YgoEdo_SetPak; the game keeps its .incbin), so it isn't built into the
+native library once per processor type. JSON text from the engine goes through Java's own UTF-8 decoder (EDOPro's card
+texts aren't always Java's modified UTF-8). The cards' pictures: graphics/ygo/printed.bin ("YGOP") as WebP by
+build_assets.py (assets game/ygo_cards.bin, ~19.5 MB), read by CardPack (shared with the POKéMON cards' TcgArt).
+
+Duels by handle: the state as a seat may see it (the other hand, both decks, face-down cards hidden from the other
+side), the question (YgoQuery: its type, prompt, items with their words from EDOPro's strings, and the names to
+declare), answers as picks (+ a zone), Ygo.check (would it be taken), the AI's answer at a level, events, the state's
+hash. A FREE DUEL's duelist: one of the GBA games' decks fitted as ygo_field.c FitOnce does (Ygo_NpcDeckCards in
+ygo_rating.c, shared with the game's duelists), the player's deck rated from its cards (Ygo_DeckRating) plus skill.
+
+The game's side, src/mp/mp_phone_cards.c: the snapshot's `ygo` {on, active, skill, rated, badges, wins, losses, list
+(the decks' Forbidden & Limited list), today, packs [[set, count]], decks[8] {n, ace, m[], x[]}, owned [[id, count]]};
+orders `ygodeck` {deck, main, extra, name, active}, `ygoduel` {won, kind, deck, opp, level} (Ygo_SkillResult; a win a
+booster of a random set that can be had, 3 a day in "<save>.phonecards" packs[2]), `ygoopen` {set} (Ygo_OpenPack: nine
+`cards` and `new`). Test: tools/phone/cards_test.py.
+
+The app: CARDS' third tab. YgoDuelPage: upright, their Spell & Trap and Monster Zones at the top turned to face them
+(as the game's table: the user, 2026-11-03), the Graveyard / Deck / Extra Deck / Field Zone at the row ends, Life
+Points in the middle, the hand along the bottom; defense position sideways. In the Main and Battle Phases the cards
+with something to do glow (tap: the card up close with its words and its actions: SUMMON, SET, ACTIVATE with the
+effect's words...), the phases are buttons; the other questions open a card picker (CARDS, SUM with the running total,
+SORT, COUNTER, OPTION / ZONE when several), a list (OPTION, POSITION, ZONE), a yes / no, or the names to declare.
+Chances to chain while nothing happens are passed (YgoDuel_QuietChance, as the game's table unless L is held); MENU:
+STOP AT EVERY CHANCE. YgoDeckPage (Main and Fusion Decks, the collection by kind, the list's limits), YgoPackPage,
+YgoBinderPage, YgoCardPage. Friends by turns: CardDuels kind "ygo", each move an answer {p, z} (or {concede: seat},
+only on your own move so move numbers never collide); YgoFriendGame rebuilds the duel from decks, seed and answers.
+Companion's friend duels are one set of methods for both "tcg" and "ygo" (duelGames / syncDuelGames ...).
+Tests: coretest YgoCoreTest (24 whole duels answered as the phone's table does: every answer taken, replays agreeing,
+hidden cards hidden), YgoFriendsTest (3 duels through a real server, a concession), `ONLY=ygo android/coretest/run.sh`.
+
 ## The UI / UX pass (1.77.0 on)
 
 - BOXES: the box drawn as large as the screen allows in whole screen pixels (BoxesPage.bk: 1.5x on a 1080-wide phone),
@@ -420,5 +457,4 @@ server, the two phones' rules hash equal after every move). `ONLY=tcg android/co
 - ON OFFER (a trade by mail) as a small orange tag on box places, and on the PC card and the PARTY's cards.
 - The tab bar: a 12x12 pixel icon for each page above its name, the chosen one on a raised plate (GameView TAB_ICONS).
 
-Next: YU-GI-OH! on the phone (the same pattern: EDOPro's ocgcore with Lua through JNI), the app's sounds and music (the
-game's own), and the rest of the pass.
+Next: the app's sounds and music (the game's own), and the rest of the pass.

@@ -38,6 +38,8 @@ enum { EDO_POS_FACEUP_ATTACK = 1, EDO_POS_FACEDOWN_ATTACK = 2, EDO_POS_FACEUP_DE
 
 /* The pack: 1 when it's there and whole. Everything below needs it. */
 int YgoEdo_DataInit(void);
+/* (YGO_EDO_PAK_EXTERNAL builds: the pack, kept by the caller, before YgoEdo_DataInit) */
+void YgoEdo_SetPak(const void *data, size_t size);
 /* A file of the pack, inflated (malloc'd: the caller frees it), NULL when it isn't there */
 uint8_t *YgoEdo_File(const char *name, uint32_t *size);
 int YgoEdo_HasFile(const char *name);

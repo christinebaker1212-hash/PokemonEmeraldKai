@@ -452,46 +452,10 @@ static u8 ThemeAt(u8 theme, u8 alt, u32 h) { return (h >> 9) % 3 == 0 ? alt : th
 // One of the Game Boy Advance games' opponents' decks (ygo_npc_decks.c, weakest first) into o; 0 when it can't make one
 static int GameDeckAt(struct YgoOpponent *o, unsigned index)
 {
-    unsigned i, m = 0, x = 0;
-    const struct YgoNpcDeck *d;
-    if (index >= gYgoNpcDeckCount)
+    if (!Ygo_NpcDeckCards(index, o->main, o->extra))
         return 0;
-    d = &gYgoNpcDecks[index];
-    memset(o->main, 0, sizeof(o->main));
-    memset(o->extra, 0, sizeof(o->extra));
-    for (i = 0; i < d->count; i++)
-    {
-        unsigned id = d->cards[i], k, have = 0;
-        const struct YgoCard *c = Ygo_Card(id);
-        if (!c || !Ygo_CardReady(id))
-            continue;
-        for (k = 0; k < m; k++)
-            have += o->main[k] == id;
-        for (k = 0; k < x; k++)
-            have += o->extra[k] == id;
-        if (have >= Ygo_GameLimit(id))
-            continue;   // (the game's own list)
-        if (c->frame == YGO_FUSION && x < YGO_FUSION_MAX)
-            o->extra[x++] = (u16)id;
-        else if (c->frame != YGO_FUSION && m < YGO_DECK_MAX)
-            o->main[m++] = (u16)id;
-    }
-    // the game's list took some out: more copies of the deck's own cards it allows (Monsters first)
-    for (unsigned pass = 0; pass < 2 && m < YGO_DECK_MIN; pass++)
-        for (i = 0; i < d->count && m < YGO_DECK_MIN; i++)
-        {
-            unsigned id = d->cards[i], k, have = 0;
-            const struct YgoCard *c = Ygo_Card(id);
-            if (!c || !Ygo_CardReady(id) || c->frame == YGO_FUSION || (pass == 0) != Ygo_IsMonster(c))
-                continue;
-            for (k = 0; k < m; k++)
-                have += o->main[k] == id;
-            if (have < Ygo_GameLimit(id))
-                o->main[m++] = (u16)id;
-        }
-    if (m < YGO_DECK_MIN)
-        return 0;
-    printf("[ygo] %s plays %s's deck from %s (rating %u)\n", o->name, d->name, d->gameName, d->rating);
+    printf("[ygo] %s plays %s's deck from %s (rating %u)\n", o->name, gYgoNpcDecks[index].name,
+           gYgoNpcDecks[index].gameName, gYgoNpcDecks[index].rating);
     return 1;
 }
 // ... from the quarter of them that matches tier (0-3); 0 when there's none

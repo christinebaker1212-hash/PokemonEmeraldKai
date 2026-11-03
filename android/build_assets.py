@@ -9,6 +9,7 @@ app's own words, from charmap.txt).
 import json
 import os
 import re
+import shutil
 import struct
 import subprocess
 import sys
@@ -123,14 +124,14 @@ def tt_art():
     open(os.path.join(OUT, 'tt_cards.bin'), 'wb').write(bytes(out))
 
 
-def tcg_art():
-    """The POKéMON cards for the phone: the game's printed cards (graphics/tcg/printed.bin, "TCGP": each card's
-    picture and where its illustration sits, then the card back) as WebP at the same size, the same layout: 443
-    pictures in about 11 MB instead of 19 (the phone shows them at most a little larger than they are)"""
+def webp_pack(src_name, out_name, quality):
+    """A card game's printed pictures (the game's pack: a count, then offset, size and the illustration's x, y, w, h per
+    card, then the back) re-encoded as WebP in the same layout (CardPack.java reads it); made once while the game's
+    pack is older"""
     import io
     from PIL import Image
-    out_path = os.path.join(OUT, 'tcg_cards.bin')
-    src_path = os.path.join(ROOT, 'graphics/tcg/printed.bin')
+    out_path = os.path.join(OUT, out_name)
+    src_path = os.path.join(ROOT, src_name)
     if os.path.exists(out_path) and os.path.getmtime(out_path) >= os.path.getmtime(src_path):
         return   # (made already: the WebP encoding takes a while)
     src = open(src_path, 'rb').read()
@@ -142,11 +143,24 @@ def tcg_art():
         if size:
             im = Image.open(io.BytesIO(src[off:off + size])).convert('RGB')
             b = io.BytesIO()
-            im.save(b, 'WEBP', quality=78, method=4)
+            im.save(b, 'WEBP', quality=quality, method=4)
             data = b.getvalue()
             out[8 + 16 * i:8 + 16 * i + 16] = struct.pack('<IIHHHH', len(out), len(data), x, y, w, h)
             out += data
     open(out_path, 'wb').write(bytes(out))
+
+
+def tcg_art():
+    """The POKéMON cards for the phone: the game's printed cards (graphics/tcg/printed.bin, "TCGP") as WebP: 443
+    pictures in about 13 MB instead of 19 (the phone shows them at most a little larger than they are)"""
+    webp_pack('graphics/tcg/printed.bin', 'tcg_cards.bin', 78)
+
+
+def ygo_art():
+    """YU-GI-OH! for the phone: the printed cards (graphics/ygo/printed.bin, "YGOP") as WebP (about 19 MB instead of
+    28), and EDOPro's pack (graphics/ygo/edo.pak: every card's database row and script) as it is"""
+    webp_pack('graphics/ygo/printed.bin', 'ygo_cards.bin', 75)
+    shutil.copyfile(os.path.join(ROOT, 'graphics/ygo/edo.pak'), os.path.join(OUT, 'ygo_edo.pak'))
 
 
 def main():
@@ -178,6 +192,7 @@ def main():
         write_png(os.path.join(OUT, name), *read_png(os.path.join(exp, name)))
     tt_art()
     tcg_art()
+    ygo_art()
     # the town maps (the live map): KANTO's and the Sevii Islands' pages are narrower than the full view, and black
     # past their right edge: see-through there, so the device's own background shows
     page = 0

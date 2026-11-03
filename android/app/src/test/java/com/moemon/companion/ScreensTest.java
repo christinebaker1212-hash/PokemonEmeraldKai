@@ -244,6 +244,7 @@ public class ScreensTest {
         shot(v, "cards_pack");
         v.showOver(null);
         tcgScreens(v, app);
+        ygoScreens(v, app);
         try (FileOutputStream o = new FileOutputStream(new File(new File(System.getProperty("screens.out", "build/screens")),
                 "widget.png"))) {
             WalkWidget.picture(app).compress(Bitmap.CompressFormat.PNG, 100, o);
@@ -317,6 +318,80 @@ public class ScreensTest {
         shot(v, "tcg_binder");
         v.showOver(new TcgCardPage(v, 37, 1, null));
         shot(v, "tcg_card");
+        v.showOver(null);
+        CardsPage.showGame(0);
+    }
+
+    /** CARDS, YU-GI-OH!: the hub, a duel under way (a card up close with what it can do), a deck, a booster, the binder */
+    static void ygoScreens(GameView v, Companion app) throws Exception {
+        app.ygoArt.engine();
+        org.json.JSONArray sets = app.ygoArt.sets();
+        int yugi = -1, kaiba = -1;
+        for (int i = 0; i < sets.length(); i++) {
+            if (sets.getJSONObject(i).getInt("starter") == 1) {
+                if (yugi < 0) {
+                    yugi = i;
+                } else if (kaiba < 0) {
+                    kaiba = i;
+                }
+            }
+        }
+        JSONObject dy = new JSONObject(Ygo.setDeck(yugi)), dk = new JSONObject(Ygo.setDeck(kaiba));
+        java.util.Map<Integer, Integer> have = new java.util.TreeMap<>();
+        org.json.JSONArray m = dy.getJSONArray("main");
+        for (int i = 0; i < m.length(); i++) {
+            have.merge(m.getInt(i), 1, Integer::sum);
+        }
+        for (int id = 1; id < 300; id += 4) {
+            have.merge(id, 1, Integer::sum);
+        }
+        StringBuilder owned = new StringBuilder();
+        for (java.util.Map.Entry<Integer, Integer> e : have.entrySet()) {
+            owned.append(owned.length() == 0 ? "" : ",").append("[").append(e.getKey()).append(",").append(e.getValue()).append("]");
+        }
+        StringBuilder decks = new StringBuilder("{\"n\":\"YUGI\",\"ace\":" + m.getInt(0) + ",\"m\":" + m + ",\"x\":[]}");
+        for (int i = 1; i < 8; i++) {
+            decks.append(",{\"n\":\"\",\"ace\":0,\"m\":[],\"x\":[]}");
+        }
+        app.model().snap.put("ygo", new JSONObject("{\"on\":1,\"active\":0,\"skill\":0,\"rated\":2,\"badges\":3,\"wins\":4,"
+                + "\"losses\":2,\"list\":\"\",\"today\":{\"packs\":0,\"packsMax\":3},\"packs\":[[0,2],[1,1]],\"decks\":[" + decks
+                + "],\"owned\":[" + owned + "]}"));
+        CardsPage.showGame(2);
+        v.select(8);
+        shot(v, "cards_ygo");
+        v.page(8).scrollTo(420);
+        shot(v, "cards_ygo_more");
+        v.page(8).scrollTo(0);
+        YgoDuelPage.Setup s = new YgoDuelPage.Setup();
+        s.main0 = YgoDuelPage.ints(dy.getJSONArray("main"));
+        s.extra0 = YgoDuelPage.ints(dy.getJSONArray("extra"));
+        s.main1 = YgoDuelPage.ints(dk.getJSONArray("main"));
+        s.extra1 = YgoDuelPage.ints(dk.getJSONArray("extra"));
+        s.seed = 777;
+        s.first = 1;
+        s.level = 2;
+        s.who = "DUELIST  SKILLED";
+        YgoDuelPage duel = new YgoDuelPage(v, s);
+        v.showOver(duel);
+        duel.autoPlay(80);
+        shot(v, "ygo_duel");
+        if (duel.inspectHand()) {
+            shot(v, "ygo_duel_card");
+        }
+        duel.inspect(-1);
+        v.showOver(new YgoDeckPage(v, 0));
+        shot(v, "ygo_deck");
+        int[] pack = new int[9];
+        for (int i = 0; i < 9; i++) {
+            pack[i] = m.getInt(i * 3);
+        }
+        v.showOver(new YgoPackPage(v, 0, pack, 1 << 8 | 1 << 3));
+        Thread.sleep(3600);
+        shot(v, "ygo_pack");
+        v.showOver(new YgoBinderPage(v, 0));
+        shot(v, "ygo_binder");
+        v.showOver(new YgoCardPage(v, m.getInt(0), 1, null));
+        shot(v, "ygo_card");
         v.showOver(null);
         CardsPage.showGame(0);
     }

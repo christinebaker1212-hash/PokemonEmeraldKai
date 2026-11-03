@@ -54,7 +54,10 @@ TtCoreTest, TtFriendsTest (ONLY=tt). The POKéMON card game on the phone (1.78.0
 (Tcg.java); what a move asks for is src/tcg/tcg_flow.c (include/tcg/flow.h), shared with the game's tcg_board.c (never
 a second copy); snapshot "tcg", orders tcgdeck / tcgduel / tcgopen; TcgDuelPage etc.; friends by turns core/CardDuels.java
 (both games; records in pages of 12: the server keeps 16 entries a key); PHONE_LINK.md "The POKéMON card game on the
-phone"; tests coretest TcgCoreTest, TcgFriendsTest (ONLY=tcg), cards_test.py. The POKéMON and YU-GI-OH! tables turn the
+phone"; tests coretest TcgCoreTest, TcgFriendsTest (ONLY=tcg), cards_test.py. YU-GI-OH! on the phone (1.79.0): EDOPro's
+ocgcore + src/ygo through cpp/ygo_jni.c (Ygo.java; the engine's pack an asset: YGO_EDO_PAK_EXTERNAL), YgoDuelPage etc.,
+snapshot "ygo", orders ygodeck / ygoduel / ygoopen; PHONE_LINK.md "YU-GI-OH! on the phone"; tests coretest YgoCoreTest,
+YgoFriendsTest (ONLY=ygo). The POKéMON and YU-GI-OH! tables turn the
 opponent's cards to face them; TRIPLE TRIAD stays as it is (never turn its cards: the user, 2026-11-03). The user asked
 (2026-11-03) for all four phases in order, then a UI/UX pass: "polished Nintendo quality, mid 2000s to 2007 era
 graphics, 2026 usability".

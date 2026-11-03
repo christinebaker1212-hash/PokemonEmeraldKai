@@ -165,7 +165,7 @@ public final class Notifier {
         }
     }
 
-    /** The card games with friends (TRIPLE TRIAD, POKéMON cards): a new challenge, or a friend has played and it's your turn (TURN: each once) */
+    /** The card games with friends (TRIPLE TRIAD, POKéMON cards, YU-GI-OH!): a new challenge, or a friend has played and it's your turn (TURN: each once) */
     public static void cardTurns(Context c, Companion app) {
         if (!on(c, 5) || quiet(c, LocalTime.now())) {
             return;
@@ -192,7 +192,7 @@ public final class Notifier {
         }
         // the POKéMON card game's duels with friends the same way
         app.syncTcgGames();
-        for (JSONObject inv : app.tcgInvites) {
+        for (JSONObject inv : app.tcgInvites()) {
             String key = "j" + inv.optString("g");
             if (!told.contains(key)) {
                 remember(c, key);
@@ -206,6 +206,26 @@ public final class Notifier {
             if ("yourturn".equals(TcgFriendGame.status(g)) && !told.contains(key)) {
                 remember(c, key);
                 post(c, 5, LocalDate.now(), "Your turn!", app.art.plain(GameArt.hexText(g.optString("pn")))
+                        + " has played. Your move in CARDS.");
+                return;
+            }
+        }
+        // and YU-GI-OH!'s
+        app.syncDuelGames("ygo");
+        for (JSONObject inv : app.ygoInvites()) {
+            String key = "y" + inv.optString("g");
+            if (!told.contains(key)) {
+                remember(c, key);
+                post(c, 5, LocalDate.now(), app.art.plain(GameArt.hexText(inv.optString("n"))) + " challenges you!",
+                        "A YU-GI-OH! duel, a turn at a time. Answer in CARDS.");
+                return;
+            }
+        }
+        for (JSONObject g : app.ygoGames()) {
+            String key = "z" + g.optString("g") + ":" + g.optJSONArray("moves").length();
+            if ("yourturn".equals(YgoFriendGame.status(g)) && !told.contains(key)) {
+                remember(c, key);
+                post(c, 5, LocalDate.now(), "Your move!", app.art.plain(GameArt.hexText(g.optString("pn")))
                         + " has played. Your move in CARDS.");
                 return;
             }

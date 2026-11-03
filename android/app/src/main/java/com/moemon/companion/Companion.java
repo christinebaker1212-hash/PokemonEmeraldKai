@@ -36,6 +36,9 @@ public final class Companion implements LinkClient.Listener {
     public final TcgArt tcgArt;                                   // the POKéMON cards (the game's engine and scans)
     public volatile int[] lastTcgPack;                            // the cards of the last booster opened (tcgopen's answer)
     public volatile int lastTcgPackType = -1, lastTcgPackNew;   // (the booster's NEW cards: a bit each)
+    public final YgoArt ygoArt;                                   // YU-GI-OH! (the game's engine, its pack and scans)
+    public volatile int[] lastYgoPack;                            // the cards of the last YU-GI-OH! booster (ygoopen)
+    public volatile int lastYgoPackSet = -1, lastYgoPackNew;
     public volatile int[] lastPack;                               // the cards of the last pack opened (ttopen's answer)
     public volatile int lastPackType = -1;
     public final Store store;
@@ -104,6 +107,7 @@ public final class Companion implements LinkClient.Listener {
         this.art = new GameArt(context.getAssets());
         this.ttArt = new TtArt(context.getAssets());
         this.tcgArt = new TcgArt(context.getAssets());
+        this.ygoArt = new YgoArt(context.getAssets());
         final File dir = context.getFilesDir();
         this.store = new Store() {
             public String read(String name) {
@@ -559,61 +563,115 @@ public final class Companion implements LinkClient.Listener {
         });
     }
 
-    // ------------------------------------------------------------------ the POKéMON card game with friends, by turns
+    // ------------------------------------------- the POKéMON card game and YU-GI-OH! with friends, by turns
 
-    private java.util.List<JSONObject> tcgGames;   // this save's friend duels (the phone's own record)
-    private String tcgGamesSave = "";
-    public volatile java.util.List<JSONObject> tcgInvites = new java.util.ArrayList<>();
+    // (per game, "tcg" / "ygo": this save's duels with friends, the phone's own record, and friends' invites)
+    private final java.util.Map<String, java.util.List<JSONObject>> duelGames = new java.util.HashMap<>();
+    private final java.util.Map<String, String> duelGamesSave = new java.util.HashMap<>();
+    private final java.util.Map<String, java.util.List<JSONObject>> duelInvites = new java.util.concurrent.ConcurrentHashMap<>();
 
-    /** This save's POKéMON card duels with friends, newest first */
-    public synchronized java.util.List<JSONObject> tcgGames() {
-        String save = client == null ? "" : client.saved().id();
-        if (tcgGames == null || !save.equals(tcgGamesSave)) {
-            tcgGamesSave = save;
-            tcgGames = new java.util.ArrayList<>();
-            JSONObject o = readJson("tcggames_" + save + ".json");
-            JSONArray a = o == null ? null : o.optJSONArray("games");
-            for (int i = 0; a != null && i < a.length(); i++) {
-                tcgGames.add(a.optJSONObject(i));
-            }
-        }
-        return tcgGames;
+    public java.util.List<JSONObject> tcgGames() {
+        return duelGames("tcg");
     }
 
-    public synchronized void saveTcgGames() {
-        if (tcgGamesSave.isEmpty() || tcgGames == null) {
+    public java.util.List<JSONObject> tcgInvites() {
+        return duelInvites("tcg");
+    }
+
+    public void saveTcgGames() {
+        saveDuelGames("tcg");
+    }
+
+    public void refreshTcgGames() {
+        refreshDuelGames("tcg");
+    }
+
+    public void syncTcgGames() {
+        syncDuelGames("tcg");
+    }
+
+    public void postTcgMove(JSONObject game, JSONObject action) {
+        postDuelMove("tcg", game, action);
+    }
+
+    public java.util.List<JSONObject> ygoGames() {
+        return duelGames("ygo");
+    }
+
+    public java.util.List<JSONObject> ygoInvites() {
+        return duelInvites("ygo");
+    }
+
+    public void refreshYgoGames() {
+        refreshDuelGames("ygo");
+    }
+
+    public void postYgoMove(JSONObject game, JSONObject answer) {
+        postDuelMove("ygo", game, answer);
+    }
+
+    public java.util.List<JSONObject> duelInvites(String kind) {
+        java.util.List<JSONObject> l = duelInvites.get(kind);
+        return l == null ? new java.util.ArrayList<>() : l;
+    }
+
+    /** This save's duels of KIND with friends, newest first */
+    public synchronized java.util.List<JSONObject> duelGames(String kind) {
+        String save = client == null ? "" : client.saved().id();
+        java.util.List<JSONObject> games = duelGames.get(kind);
+        if (games == null || !save.equals(duelGamesSave.get(kind))) {
+            duelGamesSave.put(kind, save);
+            games = new java.util.ArrayList<>();
+            JSONObject o = readJson(kind + "games_" + save + ".json");
+            JSONArray a = o == null ? null : o.optJSONArray("games");
+            for (int i = 0; a != null && i < a.length(); i++) {
+                games.add(a.optJSONObject(i));
+            }
+            duelGames.put(kind, games);
+        }
+        return games;
+    }
+
+    public synchronized void saveDuelGames(String kind) {
+        String save = duelGamesSave.get(kind);
+        java.util.List<JSONObject> games = duelGames.get(kind);
+        if (save == null || save.isEmpty() || games == null) {
             return;
         }
         JSONArray a = new JSONArray();
         long now = System.currentTimeMillis() / 1000;
-        for (JSONObject g : tcgGames) {
+        for (JSONObject g : games) {
             if (now - g.optLong("last") < 30L * 86400) {   // (finished ones fade out after a month)
                 a.put(g);
             }
         }
         try {
-            store.write("tcggames_" + tcgGamesSave + ".json", new JSONObject().put("games", a).toString());
+            store.write(kind + "games_" + save + ".json", new JSONObject().put("games", a).toString());
         } catch (org.json.JSONException ignored) {
         }
     }
 
-    public void refreshTcgGames() {
-        background.execute(this::syncTcgGames);
+    public void refreshDuelGames(String kind) {
+        background.execute(() -> syncDuelGames(kind));
+    }
+
+    private static String duelStatus(String kind, JSONObject g) {
+        return kind.equals("ygo") ? YgoFriendGame.status(g) : TcgFriendGame.status(g);
     }
 
     /** Friends' invites and the moves in each duel going on, from the server (off the screen's thread) */
-    public void syncTcgGames() {
+    public void syncDuelGames(String kind) {
         final JSONObject f = friendsSnap();
         if (f == null) {
             return;
         }
         final java.util.List<JSONObject> games;
         synchronized (this) {
-            games = new java.util.ArrayList<>(tcgGames());
+            games = new java.util.ArrayList<>(duelGames(kind));
         }
         boolean changed = false;
         try {
-            java.util.List<JSONObject> inv = com.moemon.companion.core.CardDuels.invites(crypto, f.optString("srv"), f, "tcg");
+            java.util.List<JSONObject> inv = com.moemon.companion.core.CardDuels.invites(crypto, f.optString("srv"), f, kind);
             java.util.List<JSONObject> fresh = new java.util.ArrayList<>();
             for (JSONObject i : inv) {
                 boolean known = false;
@@ -624,9 +682,9 @@ public final class Companion implements LinkClient.Listener {
                     fresh.add(i);
                 }
             }
-            tcgInvites = fresh;
+            duelInvites.put(kind, fresh);
             for (JSONObject g : games) {
-                String st = TcgFriendGame.status(g);
+                String st = duelStatus(kind, g);
                 if (st.equals("won") || st.equals("lost") || st.equals("declined")) {
                     continue;
                 }
@@ -640,7 +698,7 @@ public final class Companion implements LinkClient.Listener {
                     boolean all = true;
                     JSONArray moves = g.getJSONArray("moves");
                     for (int seq = g.optInt("unsent"); seq <= moves.length() && all; seq++) {
-                        all = com.moemon.companion.core.CardDuels.move(crypto, srv, friend, "tcg", g.optString("g"), seq,
+                        all = com.moemon.companion.core.CardDuels.move(crypto, srv, friend, kind, g.optString("g"), seq,
                                 moves.optJSONObject(seq - 1));
                     }
                     if (all) {
@@ -650,7 +708,7 @@ public final class Companion implements LinkClient.Listener {
                         changed = true;
                     }
                 }
-                JSONObject r = com.moemon.companion.core.CardDuels.read(crypto, srv, friend, "tcg", g.optString("g"));
+                JSONObject r = com.moemon.companion.core.CardDuels.read(crypto, srv, friend, kind, g.optString("g"));
                 synchronized (this) {
                     int other = 1 - g.optInt("seat");
                     if (r.optInt("declined") == 1 && g.optInt("seat") == 0) {
@@ -672,7 +730,7 @@ public final class Companion implements LinkClient.Listener {
         } catch (Exception ignored) {
         }
         if (changed) {
-            saveTcgGames();
+            saveDuelGames(kind);
         }
         main.post(this::changed);
     }
@@ -685,8 +743,30 @@ public final class Companion implements LinkClient.Listener {
         return out;
     }
 
-    /** Invites FRIEND to a POKéMON card duel with DECK (the result: null, else why not) */
+    /** A POKéMON card deck as a duel's "deck" */
+    public static JSONArray tcgDeck(int[] deck) {
+        return ints(deck);
+    }
+
+    /** A YU-GI-OH! deck as a duel's "deck": [main, extra] */
+    public static JSONArray ygoDeck(int[] main, int[] extra) {
+        return new JSONArray().put(ints(main)).put(ints(extra));
+    }
+
     public void inviteTcg(JSONObject friend, int[] deck, java.util.function.Consumer<String> done) {
+        inviteDuel("tcg", friend, tcgDeck(deck), done);
+    }
+
+    public void acceptTcg(JSONObject invite, int[] deck, java.util.function.Consumer<JSONObject> done) {
+        acceptDuel("tcg", invite, tcgDeck(deck), done);
+    }
+
+    public void declineTcg(JSONObject invite) {
+        declineDuel("tcg", invite);
+    }
+
+    /** Invites FRIEND to a duel of KIND with DECK (the result: null, else why not) */
+    public void inviteDuel(String kind, JSONObject friend, JSONArray deck, java.util.function.Consumer<String> done) {
         final JSONObject f = friendsSnap();
         Model m = model();
         if (f == null || m == null) {
@@ -697,13 +777,13 @@ public final class Companion implements LinkClient.Listener {
         background.execute(() -> {
             String why = null;
             try {
-                JSONObject g = com.moemon.companion.core.CardDuels.invite(crypto, f.optString("srv"), f, friend, name, "tcg",
-                        new JSONObject().put("deck", ints(deck)).put("prizes", 6));
-                g.put("prizes", 6).put("decks", new JSONArray().put(ints(deck)).put(JSONObject.NULL));
+                JSONObject g = com.moemon.companion.core.CardDuels.invite(crypto, f.optString("srv"), f, friend, name, kind,
+                        new JSONObject().put("deck", deck).put("prizes", 6));
+                g.put("prizes", 6).put("decks", new JSONArray().put(deck).put(JSONObject.NULL));
                 synchronized (this) {
-                    tcgGames().add(0, g);
+                    duelGames(kind).add(0, g);
                 }
-                saveTcgGames();
+                saveDuelGames(kind);
             } catch (IllegalStateException e) {
                 why = "Play together in a room once more first: then you can duel by turns.";
             } catch (Exception e) {
@@ -717,7 +797,7 @@ public final class Companion implements LinkClient.Listener {
         });
     }
 
-    public void acceptTcg(JSONObject invite, int[] deck, java.util.function.Consumer<JSONObject> done) {
+    public void acceptDuel(String kind, JSONObject invite, JSONArray deck, java.util.function.Consumer<JSONObject> done) {
         final JSONObject f = friendsSnap();
         if (f == null) {
             return;
@@ -725,20 +805,20 @@ public final class Companion implements LinkClient.Listener {
         background.execute(() -> {
             JSONObject g = null;
             try {
-                com.moemon.companion.core.CardDuels.accept(crypto, f.optString("srv"), invite, "tcg",
-                        new JSONObject().put("deck", ints(deck)));
+                com.moemon.companion.core.CardDuels.accept(crypto, f.optString("srv"), invite, kind,
+                        new JSONObject().put("deck", deck));
                 JSONObject friend = invite.optJSONObject("friend");
                 g = new JSONObject().put("g", invite.optString("g")).put("peer", friend.optString("id"))
                         .put("pn", invite.optString("n")).put("seat", 1).put("seed", invite.optInt("seed"))
-                        .put("prizes", invite.optInt("prizes", 6))
-                        .put("decks", new JSONArray().put(invite.optJSONArray("deck")).put(ints(deck)))
+                        .put("first", invite.optInt("first")).put("prizes", invite.optInt("prizes", 6))
+                        .put("decks", new JSONArray().put(invite.opt("deck")).put(deck))
                         .put("moves", new JSONArray()).put("at", invite.optLong("at"))
                         .put("last", System.currentTimeMillis() / 1000).put("srv", f.optString("srv"));
                 synchronized (this) {
-                    tcgGames().add(0, g);
-                    tcgInvites.remove(invite);
+                    duelGames(kind).add(0, g);
+                    duelInvites(kind).remove(invite);
                 }
-                saveTcgGames();
+                saveDuelGames(kind);
             } catch (Exception ignored) {
                 g = null;
             }
@@ -750,29 +830,29 @@ public final class Companion implements LinkClient.Listener {
         });
     }
 
-    public void declineTcg(JSONObject invite) {
+    public void declineDuel(String kind, JSONObject invite) {
         final JSONObject f = friendsSnap();
         if (f == null) {
             return;
         }
-        tcgInvites.remove(invite);
+        duelInvites(kind).remove(invite);
         background.execute(() -> {
             try {
-                com.moemon.companion.core.CardDuels.decline(crypto, f.optString("srv"), invite, "tcg");
+                com.moemon.companion.core.CardDuels.decline(crypto, f.optString("srv"), invite, kind);
             } catch (Exception ignored) {
             }
             main.post(this::changed);
         });
     }
 
-    /** Our action in GAME (already played on the phone): to the server; kept to send again if it doesn't get there */
-    public void postTcgMove(JSONObject game, JSONObject action) {
+    /** Our move in GAME (already played on the phone): to the server; kept to send again if it doesn't get there */
+    public void postDuelMove(String kind, JSONObject game, JSONObject move) {
         final JSONObject f = friendsSnap();
         final JSONObject friend = friendEntry(game.optString("peer"));
         final int seq;
         synchronized (this) {
             JSONArray moves = game.optJSONArray("moves");
-            moves.put(action);
+            moves.put(move);
             seq = moves.length();
             try {
                 game.put("last", System.currentTimeMillis() / 1000);
@@ -782,7 +862,7 @@ public final class Companion implements LinkClient.Listener {
             } catch (org.json.JSONException ignored) {
             }
         }
-        saveTcgGames();
+        saveDuelGames(kind);
         if (f == null || friend == null) {
             return;
         }
@@ -792,7 +872,7 @@ public final class Companion implements LinkClient.Listener {
                 boolean all = true;
                 for (int k = game.optInt("unsent", seq); k <= seq && all; k++) {
                     all = com.moemon.companion.core.CardDuels.move(crypto, game.optString("srv", f.optString("srv")), friend,
-                            "tcg", game.optString("g"), k, moves.optJSONObject(k - 1));
+                            kind, game.optString("g"), k, moves.optJSONObject(k - 1));
                 }
                 if (all) {
                     synchronized (this) {
@@ -800,7 +880,7 @@ public final class Companion implements LinkClient.Listener {
                             game.remove("unsent");
                         }
                     }
-                    saveTcgGames();
+                    saveDuelGames(kind);
                 }
             } catch (Exception ignored) {
             }
@@ -1074,9 +1154,12 @@ public final class Companion implements LinkClient.Listener {
             // ("unknown": an order the game doesn't know yet: an older game, which updates itself on its start)
             String w = done.optString("why");
             boolean tcg = order != null && order.optString("op").startsWith("tcg");
+            boolean ygo = order != null && order.optString("op").startsWith("ygo");
             toast = w.equals("unknown") ? "The game doesn't know how to do that yet. Restart it to update it."
                     : tcg && w.equals("nocards") ? "Get your first POKéMON card deck in your game first: the CARD CLUB member in a POKéMON MART."
                     : tcg && w.equals("deckrules") ? "That deck breaks the deck rules: 60 cards, a Basic POKéMON, and no more than 4 of a name."
+                    : ygo && w.equals("nocards") ? "Get your first YU-GI-OH! deck in your game first: the CARD CLUB duelist in a POKéMON MART."
+                    : ygo && w.equals("deckrules") ? "That deck breaks the deck rules: 40 to 60 cards, up to 15 in the Fusion Deck, and the Forbidden & Limited list."
                     : why(w);
             toastGood = false;
             toastAt = System.currentTimeMillis();
@@ -1123,6 +1206,23 @@ public final class Companion implements LinkClient.Listener {
                 lastTcgPackNew |= fresh.optInt(i) << i;
             }
             lastTcgPack = ids;
+        } else if (order != null && "ygoopen".equals(order.optString("op")) && done.has("cards")) {
+            org.json.JSONArray a = done.optJSONArray("cards");
+            int[] ids = new int[a.length()];
+            for (int i = 0; i < ids.length; i++) {
+                ids[i] = a.optInt(i);
+            }
+            org.json.JSONArray fresh = done.optJSONArray("new");
+            lastYgoPackNew = 0;
+            for (int i = 0; fresh != null && i < fresh.length(); i++) {
+                lastYgoPackNew |= fresh.optInt(i) << i;
+            }
+            lastYgoPackSet = order.optInt("set");
+            lastYgoPack = ids;
+        } else if (order != null && "ygoduel".equals(order.optString("op")) && done.optInt("prize", -1) >= 0) {
+            toast = "Won a " + ygoArt.setName(done.optInt("prize")) + " booster! Open it in CARDS.";
+            toastGood = true;
+            toastAt = System.currentTimeMillis();
         } else if (order != null && "tcgduel".equals(order.optString("op")) && done.optInt("prize", -1) >= 0) {
             toast = "Won a " + Tcg.PACK_NAMES[Math.min(Tcg.PACKS - 1, done.optInt("prize"))] + " booster! Open it in CARDS.";
             toastGood = true;
