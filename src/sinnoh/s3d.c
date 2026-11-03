@@ -979,6 +979,50 @@ static void Render(void)
                 DrawMesh(&sPack.mesh[sDyn[i].mesh], sDyn[i].m, 0, 0, 0, pass);
 }
 
+// Moemon Maker: the 3D world of MAP around tile (TILEX, TILEY) as the game's camera sees it with the player there, into
+// OUT (240 x 160, the game's colors), for the editor's 3D PREVIEW (src/maker/maker_tiles.c). Only while the editor
+// is open and the game isn't playing: the view's own state is put back after. FALSE without the pack or the map.
+bool8 S3D_RenderPreview(u8 group, u8 num, s32 tileX, s32 tileY, u16 *out)
+{
+    static u8 saved[sizeof(sView)];
+    const S3dMatrix *savedMat = sCurMat;
+    s32 savedMap = sCurMap, map = MapIndex(group, num);
+    float p = CAM_PITCH * 3.14159265f / 180.0f, sp = sinf(p), cp = cosf(p);
+    if (map < 0)
+        return FALSE;
+    if (!sPack.tried)
+        LoadPack();
+    if (!sPack.ok)
+        return FALSE;
+    memcpy(saved, &sView, sizeof(sView));
+    sView.map = map;
+    sCurMat = MatrixNumbered(sMaps[map].mat);
+    sCurMap = map;
+    // (as SetupView, the target on the tile's middle instead of the player's)
+    sView.camX = (tileX - 7) * 16;
+    sView.camY = (tileY - 4) * 16 - 8;
+    sView.ax = 7 * 16 + 8;
+    sView.ay = 4 * 16 + 16;
+    sView.originX = sMaps[map].cx * BLOCK;
+    sView.originZ = sMaps[map].cz * BLOCK;
+    sView.tx = sView.originX + tileX * 16 + 8;
+    sView.tz = sView.originZ + tileY * 16 + 8;
+    sView.ty = GroundAt(sView.tx, sView.tz, 0.0f);
+    sView.eye[0] = sView.tx;
+    sView.eye[1] = sView.ty + CAM_DIST * sp;
+    sView.eye[2] = sView.tz + CAM_DIST * cp;
+    sView.fwd[0] = 0.0f, sView.fwd[1] = -sp, sView.fwd[2] = -cp;
+    sView.right[0] = 1.0f, sView.right[1] = 0.0f, sView.right[2] = 0.0f;
+    sView.up[0] = 0.0f, sView.up[1] = cp, sView.up[2] = -sp;
+    sView.focal = 96.0f / tanf(HALF_FOV * 3.14159265f / 180.0f);
+    Render();
+    memcpy(out, sColor, sizeof(sColor));
+    memcpy(&sView, saved, sizeof(sView));
+    sCurMat = savedMat;
+    sCurMap = savedMap;
+    return TRUE;
+}
+
 // ------------------------------------------------------------------------------------------------ run-time props
 // A prop of Platinum's model MODEL in slot SLOT at (X, Y, Z) of the current map's matrix world (Platinum's units: 16 a
 // tile, a block 512 from its matrix's corner), turned TURN degrees about the up axis (as Platinum's): FALSE when the

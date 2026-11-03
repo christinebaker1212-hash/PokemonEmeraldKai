@@ -4578,3 +4578,59 @@ holds dolls and cushions (MP_RoomFloorHoldsDecor). Test johto_my_room.
   ygo_field.c's GameDeckAt), used by the game's duelists and the phone's FREE DUEL.
 - ygo_edo_data.c built with YGO_EDO_PAK_EXTERNAL takes EDOPro's pack from YgoEdo_SetPak (the phone app reads it from its
   files); the game keeps it built in (ygo_edo_pak.c).
+
+## Moemon Maker, M1: quick edits on the base game
+
+The user's own editor (docs/MOEMON_MAKER.md: the design, every decision, the build order). Hidden: the main menu's
+MOéMON MAKER row appears only with `AllowSmallTweaks = 1` and "maker" typed since the start (src/maker/maker_gate.c,
+text_input.c CheckTypedWords; a fifth main-menu item scrolls as MYSTERY EVENTS' does). Never mentioned in PATCH NOTES
+or the README. The updater no longer has a dev channel: AllowSmallTweaks only unlocks the small tweaks.
+
+- **The editor** is C++ in maker/ (Dear ImGui 1.91.9b-docking, maker/README.md), built into the game by the Makefile's
+  MAKER_* rules, reaching the game only through include/maker_api.h (src/maker/*.c). Its own SDL window; the game's
+  window is hidden meanwhile (display.c Display_SetMainWindowShown) and the game waits in CB2_MakerWaiting.
+  Settings in moemon_maker.ini, panels in moemon_maker_layout.ini; the font is Liberation Sans (maker/fonts, OFL).
+- **Names, not numbers**: tools/maker/gen_names.py makes include/constants/maker_names.h (every map; each map's people /
+  signs / triggers by name from map.json; songs, looks, movement / trainer types, items, species, flags as
+  `{"NAME", NAME}` so the compiler works out aliases) and maker_tilesets.h (each tileset's metatile count by sizeof, at
+  the end of src/tilesets.c), both when the game is built (map_data_rules.mk); src/maker/maker_names.c holds them.
+- **Drawing**: a map's tilesets go into the game's own BG VRAM (the screen is off) and the game's own tile animations
+  run on them (tileset_anims.c TilesetAnims_InitForLayout, one step per game frame in CB2_MakerWaiting); the editor draws
+  each metatile once into an atlas (field_camera.c DrawMetatile's layering: NORMAL over the 0x3014 filler). While the
+  game plays (F5) the tiles go into a buffer of their own and don't animate. People: GetObjectEventGraphicsInfo and
+  ObjectEvent_MakerPalette (the field's palette tags, only read). Behavior marks by the game's MetatileBehavior_Is*.
+  SINNOH: by what each tile does (the 3D pack's blocks), with a 3D PREVIEW (s3d.c S3D_RenderPreview: the game's camera
+  on any tile, the view's state put back).
+- **The edits** (MoemonMaker/base/MAP_X.txt, one line each with the value it replaced; the format is at the top of
+  src/maker/maker_overrides.c): the game reads them at start (Maker_ReadDir: the working copy MoemonMaker/ where there
+  is one, else the published pack MoemonMakerPack/) and patches maps through Overworld_GetMapHeaderByGroupAndId (an
+  edited header copy: people, warps, signs, triggers, connections, music) and fieldmap.c Maker_MapBlocks (tiles). An
+  edit applies only while the game still has its "was"; else the game's own wins and the editor's PROBLEMS offers
+  "Keep mine" / "Take the game's". Nothing for converters to skip: the overrides are never in the files they write.
+  Wild slots apply after the GENERATION's pools (mp_region.c MP_Region_WildInfo -> Maker_WildInfo).
+- **Added things**: people (script "nothing", "itemball" or one of the map's own by label), hidden items, signs, warps
+  (after the map's own: other maps lead to them by number), connections. Item balls and hidden items get Maker flags
+  (0x8000+, src/maker/maker_flags.c, "<save>.maker" by name: the save never changes layout); data/scripts/maker.inc
+  Maker_EventScript_ItemBall + special Maker_ItemBallItem (the item rides in the template's berry tree / sight field).
+- **Music**: MoemonMaker/music/ (mp_kaisong.c also scans it, its files first): <song>[@<place>].kaisong replaces; any
+  other name is a new track, song numbers MAKER_SONG_FIRST (0x4000)... by name order, played on MUS_LITTLEROOT's BGM
+  entry (m4a.c MP_Kaisong_TableIndex). A map's music edit: "music WAS NOW".
+- **Editing**: maker/maker_edits.cpp (the model, undo / redo by change, Ctrl+S, recovery files in MoemonMaker/.recovery/,
+  every change sent to the game at once: MakerApi_SetMapEdits), maker_mapview.cpp (MAP, TILES, INSPECTOR, PROBLEMS),
+  maker_wild.cpp (ENCOUNTERS: list with chances spread over the fixed slots, and the slots), maker_music.cpp (MUSIC),
+  maker_publish.cpp (the checker and PUBLISH).
+- **F5** (src/maker/maker_play.c): a copy of a save (Emerald's continue-game warp to the spot) or a story point (a new
+  game set up in Maker_PlayNewGame through the quick start's hook); the play's save is MoemonMaker/.play/play.sav, the
+  real one is read again afterwards. Edits of the map the player is on: tiles redrawn in place, anything else by a quiet
+  warp to the same spot (field_screen_effect.c DoMakerReloadWarp). F12 / closing the game's window: back to editing.
+- **Publish** (src/maker/maker_publish.c, on its own thread): GitHub's git data API with the user's token (moemon_maker.ini
+  only): changed files as blobs (Git blob ids compared), one tree, one commit with a "Moemon-Maker:" trailer, the
+  default branch moved; history from the commits touching MoemonMaker/; a rollback commits the old MoemonMaker tree
+  again and writes its files into the working copy. updater.c HttpRequest / Updater_Request (WinHTTP, libcurl).
+- **The pack**: .github/workflows/maker-pack.yml checks MoemonMaker/ against the game (tools/maker/check_pack.py) and
+  puts MoemonMakerPack.zip + maker-pack.txt (tools/maker/build_pack.sh; the id is a hash of its files) on the
+  "maker-pack" pre-release; updater.c MakerPackWorker downloads it at each start of a release folder; package.sh
+  ships it in every release as MoemonMakerPack/. The editor's first open on a PC starts its working copy from it.
+- **Tests**: tools/test/maker_gate.sh, maker_shell.sh, maker_map.sh, maker_edit.sh, maker_wild.sh, maker_music.sh,
+  maker_play.sh, maker_publish.sh (a stand-in for GitHub's API: maker_github_mock.py), maker_pack.sh, maker_sinnoh.sh;
+  harness commands `maker ...` (maker_ui.cpp MakerUi_TestCommand) and `makershot NAME`.

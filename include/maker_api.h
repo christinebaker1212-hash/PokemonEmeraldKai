@@ -59,6 +59,7 @@ enum
     MAKER_BEHAVIOR_LEDGE_S, MAKER_BEHAVIOR_ICE, MAKER_BEHAVIOR_COUNTER,
 };
 int MakerApi_BehaviorClass(int behavior);   // MAKER_BEHAVIOR_*, by the game's own checks
+int MakerApi_Render3D(int map, int tileX, int tileY, unsigned int *rgba);   // SINNOH: 240 x 160 RGBA; 0 if it can't
 
 // A map's people, warps, signs and triggers (src/maker/maker_objects.c): the map's own, named by map.json
 struct MakerObjectInfo

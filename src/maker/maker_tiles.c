@@ -268,3 +268,18 @@ int MakerApi_BehaviorClass(int b)
         return MAKER_BEHAVIOR_COUNTER;
     return MAKER_BEHAVIOR_NONE;
 }
+
+// The 3D PREVIEW (SINNOH): the map's 3D world around a tile as the game shows it, as RGBA (240 x 160); 0 without the
+// 3D pack, or while the game plays (the 3D engine is the game's then)
+int MakerApi_Render3D(int map, int tileX, int tileY, unsigned int *rgba)
+{
+    bool8 S3D_RenderPreview(u8 group, u8 num, s32 tileX, s32 tileY, u16 *out);
+    static u16 px[DISPLAY_WIDTH * DISPLAY_HEIGHT];
+    const struct MakerMapName *m = Maker_Map(map);
+    int i;
+    if (m == NULL || Maker_IsPlaying() || !S3D_RenderPreview(m->mapGroup, m->mapNum, tileX, tileY, px))
+        return 0;
+    for (i = 0; i < DISPLAY_WIDTH * DISPLAY_HEIGHT; i++)
+        rgba[i] = Rgba(px[i]);
+    return 1;
+}

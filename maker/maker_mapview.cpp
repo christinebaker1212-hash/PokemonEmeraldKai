@@ -55,6 +55,10 @@ static std::vector<MakerWarpInfo> sWarps;
 static std::vector<MakerBgInfo> sBgs;
 static std::vector<MakerCoordInfo> sCoords;
 
+static SDL_Texture *s3dTex;          // SINNOH's 3D PREVIEW
+static int s3dMap = -1, s3dX = -1, s3dY = -1;
+static bool s3dOk;
+
 struct SpritePic { SDL_Texture *tex; int w, h; };
 static std::map<int, SpritePic> sSprites;   // by look * 4 + facing
 
@@ -145,6 +149,10 @@ void MapView_Closed()
     if (sAtlas)
         SDL_DestroyTexture(sAtlas);
     sAtlas = NULL;
+    if (s3dTex)
+        SDL_DestroyTexture(s3dTex);
+    s3dTex = NULL;
+    s3dMap = -1;
     FreeSprites();
     sLoadedMap = -1;
     MakerApi_UnloadMapTiles();
@@ -1453,6 +1461,44 @@ static bool DirPicker(const char *id, int *dir)
     return picked;
 }
 
+// SINNOH: the 3D world round the tile under the mouse (or the picked event, or the map's middle), as the game shows it
+static void Preview3D()
+{
+    int x = gEd.hoverX, y = gEd.hoverY, ex, ey;
+    if (x < 0 && MapView_SelectedSpot(&ex, &ey))
+        x = ex, y = ey;
+    if (x < 0)
+        x = s3dX >= 0 && s3dMap == gEd.map ? s3dX : sW / 2, y = s3dY >= 0 && s3dMap == gEd.map ? s3dY : sH / 2;
+    if (MakerApi_IsPlaying())
+    {
+        ImGui::TextDisabled("(the 3D preview waits while the game plays)");
+        return;
+    }
+    if (x != s3dX || y != s3dY || gEd.map != s3dMap)
+    {
+        static unsigned int px[240 * 160];
+        s3dMap = gEd.map, s3dX = x, s3dY = y;
+        s3dOk = MakerApi_Render3D(gEd.map, x, y, px);
+        if (s3dOk)
+        {
+            if (!s3dTex)
+            {
+                s3dTex = SDL_CreateTexture(gEd.ren, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, 240, 160);
+                SDL_SetTextureScaleMode(s3dTex, SDL_ScaleModeNearest);
+            }
+            SDL_UpdateTexture(s3dTex, NULL, px, 240 * 4);
+        }
+    }
+    if (!s3dOk || !s3dTex)
+    {
+        ImGui::TextWrapped("No 3D preview: this game folder has no SINNOH 3D pack (sinnoh/platinum3d.pak).");
+        return;
+    }
+    float w = ImGui::GetContentRegionAvail().x;
+    ImGui::Image(TexId(s3dTex), ImVec2(w, w * 160 / 240));
+    ImGui::TextDisabled("Tile %d, %d, through the game's camera", x, y);
+}
+
 // The map's own: its music (with a play button) and the maps joined at its edges
 void MapView_MapInspector()
 {
@@ -1460,6 +1506,12 @@ void MapView_MapInspector()
         return;
     int m = gEd.map;
     const MakerMapInfo &info = gEd.maps[m];
+    if (sTiles.sinnoh && sLoadedMap == m)
+    {
+        ImGui::Spacing();
+        ImGui::SeparatorText("3D PREVIEW");
+        Preview3D();
+    }
     ImGui::Spacing();
     ImGui::SeparatorText("MUSIC");
     int song = (int)CurrentMusic(m, info.music);
