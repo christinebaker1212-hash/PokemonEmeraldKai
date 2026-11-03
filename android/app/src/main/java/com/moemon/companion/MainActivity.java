@@ -30,7 +30,15 @@ public class MainActivity extends Activity {
         if (app.saves.isEmpty()) {
             view.showOver(new PairPage(view));
         }
-        Updater.check(view, false);
+        String crash = app.lastCrash();
+        if (crash != null) {
+            String[] lines = crash.split("\n");
+            String first = lines.length > 1 ? lines[1].trim() : crash.trim();
+            view.message("The app closed last time. Please tell the game's team: " + first.replaceAll("[^A-Za-z0-9 .:_()]", " "));
+            android.util.Log.e("Moemon", crash);
+        } else {
+            Updater.check(view, false);
+        }
     }
 
     @Override

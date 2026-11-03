@@ -54,6 +54,19 @@ public final class Companion implements LinkClient.Listener {
 
     private Companion(Context context) throws Exception {
         this.context = context;
+        // (if the app ever closes on its own, why: shown the next time it opens)
+        final Thread.UncaughtExceptionHandler was = Thread.getDefaultUncaughtExceptionHandler();
+        final File crash = new File(context.getFilesDir(), "crash.txt");
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            try (java.io.PrintWriter w = new java.io.PrintWriter(new FileOutputStream(crash))) {
+                w.println(Updater.version(context) + " " + t.getName());
+                e.printStackTrace(w);
+            } catch (Exception ignored) {
+            }
+            if (was != null) {
+                was.uncaughtException(t, e);
+            }
+        });
         this.art = new GameArt(context.getAssets());
         final File dir = context.getFilesDir();
         this.store = new Store() {
@@ -165,6 +178,17 @@ public final class Companion implements LinkClient.Listener {
         }
         writeSaves();
         changed();
+    }
+
+    /** What closed the app last time (once), or null */
+    public String lastCrash() {
+        File f = new File(context.getFilesDir(), "crash.txt");
+        if (!f.exists()) {
+            return null;
+        }
+        String t = store.read("crash.txt");
+        f.delete();
+        return t;
     }
 
     public Model model() {

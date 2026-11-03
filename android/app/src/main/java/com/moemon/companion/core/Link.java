@@ -52,7 +52,16 @@ public final class Link implements AutoCloseable {
         out = sock.getOutputStream();
     }
 
+    /**
+     * The screen's thread, where Android closes an app that touches the network (NetworkOnMainThreadException).
+     * The desktop test sets it to its own thread, so the same mistake fails there too.
+     */
+    public static volatile Thread screenThread;
+
     private void frame(byte kind, byte[] body) throws IOException {
+        if (Thread.currentThread() == screenThread) {
+            throw new IllegalStateException("the network on the screen's thread");
+        }
         byte[] f = new byte[5 + body.length];
         int n = body.length + 1;
         f[0] = (byte) (n >>> 24);

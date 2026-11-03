@@ -34,6 +34,11 @@ public final class LinkClient {
     private volatile Link link;
     private volatile Status status = Status.AWAY;
     private final AtomicBoolean running = new AtomicBoolean();
+    private final java.util.concurrent.ExecutorService sender = java.util.concurrent.Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "moemon-send");
+        t.setDaemon(true);
+        return t;
+    });
     private Thread thread;
     private volatile boolean snapAsked;
 
@@ -107,16 +112,25 @@ public final class LinkClient {
         }
     }
 
+    /**
+     * A message to the game. Never on the caller's thread: Android closes an app that uses the network from its screen's
+     * thread, so every send goes through the link's own sending thread, in order.
+     */
     public boolean send(JSONObject o) {
-        Link l = link;
+        final Link l = link;
         if (l == null) {
             return false;
         }
         try {
-            l.send(o);
+            sender.execute(() -> {
+                try {
+                    l.send(o);
+                } catch (IOException | RuntimeException e) {
+                    l.close();   // (the link's thread sees it close and links again)
+                }
+            });
             return true;
-        } catch (IOException e) {
-            l.close();
+        } catch (java.util.concurrent.RejectedExecutionException e) {
             return false;
         }
     }

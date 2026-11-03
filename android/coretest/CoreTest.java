@@ -198,6 +198,8 @@ public class CoreTest {
             SavedLink saved = Link.pair(crypto, qr.host, qr.port, qr.saveId, qr.secretRaw, null, "CORETEST");
             System.out.println("paired: " + saved.id());
 
+            // (from here this thread is the screen's: everything it asks of the link must go out on another)
+            Link.screenThread = Thread.currentThread();
             DirStore store = new DirStore(appDir);
             Events ev = new Events();
             LinkClient c = new LinkClient(crypto, store, saved, ev);

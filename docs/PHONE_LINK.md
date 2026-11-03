@@ -89,6 +89,8 @@ A plain Android app (no AndroidX; minSdk 26), its screens drawn in the game's pi
   pings; a new snapshot when the game's `rev` isn't the model's), `Orders` (on disk until answered; "Couldn't do"),
   `Model` (the snapshot with each answer's places applied, on disk: the app opens on it, "AWAY 5 MIN AGO"), `Planned`
   (the waiting orders played on the model the way DoMove plays them, for the dashed outlines).
+- Never the network on the screen's thread (Android closes the app: 1.70.0 did after every order): `LinkClient.send`
+  hands every message to its sending thread; `Link.screenThread` makes the desktop test fail the same way.
 - The screens: `GameView` (a whole-number scale, at least 240 pixels across; the link on top, BOXES / PARTY / BAG /
   DEX / SPAWNS at the bottom), `GameArt` (the game's font with its widths and two colors, icons, front pictures, BAG
   icons, PC wallpapers, window frames), the pages, `Menu` (the game's windows), `PairPage`, `ScanActivity` (camera2 and
