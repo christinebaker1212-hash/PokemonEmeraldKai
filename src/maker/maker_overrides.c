@@ -395,22 +395,57 @@ static int ParseEdits(const char *text, const char *from)
     return map;
 }
 
+// The editor's working copy: MoemonMaker/ beside the game (MOEMON_MAKER_DIR in tests). Only the user's PC has one.
 const char *MakerApi_EditsDir(void)
 {
+    static char dir[1100];
     const char *env = getenv("MOEMON_MAKER_DIR");
-    return env && env[0] ? env : Updater_ExeFile("MoemonMaker");
+    snprintf(dir, sizeof(dir), "%s", env && env[0] ? env : Updater_ExeFile("MoemonMaker"));
+    return dir;
+}
+
+// The published pack: MoemonMakerPack/ beside the game (in every release's zip, and downloaded between releases from
+// the maker-pack release: updater.c Updater_MakerPack*)
+const char *MakerApi_PackDir(void)
+{
+    static char dir[1100];
+    snprintf(dir, sizeof(dir), "%s", Updater_ExeFile("MoemonMakerPack"));
+    return dir;
+}
+
+// What the game plays: the working copy where there is one (the user's own PC: their edits as they make them), else the
+// published pack
+const char *Maker_ReadDir(void)
+{
+    char probe[1200];
+    DIR *d;
+    const char *work = MakerApi_EditsDir();
+    if (getenv("MOEMON_MAKER_DIR"))
+        return work;
+    snprintf(probe, sizeof(probe), "%s/base", work);
+    if ((d = opendir(probe)) != NULL)
+    {
+        closedir(d);
+        return work;
+    }
+    snprintf(probe, sizeof(probe), "%s/music", work);
+    if ((d = opendir(probe)) != NULL)
+    {
+        closedir(d);
+        return work;
+    }
+    return MakerApi_PackDir();
 }
 
 // MoemonMaker/base/*.txt beside the game (MOEMON_MAKER_DIR in tests), when the game starts
 static void LoadAll(void)
 {
     char dir[1024], path[1200];
-    const char *env = getenv("MOEMON_MAKER_DIR");
     DIR *d;
     struct dirent *de;
     int count = 0;
     sLoaded = TRUE;
-    snprintf(dir, sizeof(dir), "%s/base", env && env[0] ? env : Updater_ExeFile("MoemonMaker"));
+    snprintf(dir, sizeof(dir), "%s/base", Maker_ReadDir());
     d = opendir(dir);
     if (!d)
         return;

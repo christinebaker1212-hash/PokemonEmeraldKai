@@ -1,0 +1,80 @@
+# Moemon Maker: the published pack (docs/MOEMON_MAKER.md "Files and git"). A push that changes MoemonMaker/ (the user's
+# Publish from the editor) checks it against this checkout's game (tools/maker/check_pack.py: errors stop it, so a pack
+# the game can't read never reaches players) and puts MoemonMakerPack.zip + maker-pack.txt (tools/maker/build_pack.sh)
+# on the "maker-pack" release, a pre-release never marked latest (the game's updater reads releases/latest for the
+# game itself). Players' games download it at their next start (src/platform/updater.c MakerPackWorker). It runs again
+# after every game release, so the pack is checked against each new game.
+name: Moemon Maker pack
+
+on:
+  push:
+    paths: ['MoemonMaker/**']
+  workflow_run:
+    workflows: ['Release']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: maker-pack
+  cancel-in-progress: false
+
+jobs:
+  pack:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Only the default branch publishes
+        id: branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          DEFAULT=$(gh api "repos/$GITHUB_REPOSITORY" --jq .default_branch)
+          BRANCH="${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref_name }}"
+          echo "default branch: $DEFAULT, this run: $BRANCH"
+          if [ "$BRANCH" != "$DEFAULT" ] || [ ! -d MoemonMaker ]; then echo "skip=true" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Check the pack against the game
+        if: steps.branch.outputs.skip != 'true'
+        run: python3 tools/maker/check_pack.py MoemonMaker
+
+      - name: Build the pack
+        if: steps.branch.outputs.skip != 'true'
+        run: tools/maker/build_pack.sh MoemonMaker out
+
+      - name: Publish (never as the latest release)
+        if: steps.branch.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view maker-pack > /dev/null 2>&1; then
+            gh release create maker-pack --prerelease --latest=false --title "Moemon Maker pack" \
+              --notes "The published Moemon Maker pack: the game downloads it at start (not a game release)."
+          fi
+          gh release upload maker-pack out/MoemonMakerPack.zip out/maker-pack.txt --clobber
+
+      - name: The game's release is still the latest
+        if: always() && steps.branch.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          LATEST=$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq .tag_name 2>/dev/null || true)
+          echo "latest release: ${LATEST:-none}"
+          case "$LATEST" in
+            v[0-9]*) exit 0 ;;
+          esac
+          GAME=$(gh release list --exclude-pre-releases --limit 200 --json tagName --jq '.[].tagName' \
+                 | grep -E '^v[0-9]+(\.[0-9]+)*$' | sort -V | tail -1)
+          if [ -z "$GAME" ]; then
+            [ -z "$LATEST" ] && exit 0
+            echo "::error::$LATEST is the latest release and there is no game release to put back"; exit 1
+          fi
+          gh release edit "$GAME" --latest
+          echo "::error::$LATEST had become the latest release: $GAME is the latest again (the game's updater reads it)"
+          exit 1

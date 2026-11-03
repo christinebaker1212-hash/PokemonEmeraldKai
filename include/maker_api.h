@@ -118,7 +118,8 @@ void MakerApi_MusicChanged(void);
 
 // The editor's edits of one map, as the text of its MoemonMaker/base/MAP_X.txt (src/maker/maker_overrides.c)
 void MakerApi_SetMapEdits(const char *mapName, const char *text);
-const char *MakerApi_EditsDir(void);   // MoemonMaker/ beside the game
+const char *MakerApi_EditsDir(void);   // MoemonMaker/ beside the game: the editor's working copy
+const char *MakerApi_PackDir(void);    // MoemonMakerPack/ beside the game: the published pack
 void MakerApi_ReloadEdits(void);       // the saved edits again (the editor's unsaved ones dropped)
 
 // Playing from the editor, F5 (src/maker/maker_play.c)

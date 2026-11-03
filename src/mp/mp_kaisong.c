@@ -193,9 +193,9 @@ static int CmpFiles(const void *a, const void *b)
 
 static const char *MakerMusicDir(void)
 {
-    const char *MakerApi_EditsDir(void);
-    static char dir[1024];
-    snprintf(dir, sizeof(dir), "%s/music", MakerApi_EditsDir());
+    const char *Maker_ReadDir(void);
+    static char dir[1200];
+    snprintf(dir, sizeof(dir), "%s/music", Maker_ReadDir());   // (the working copy's, else the published pack's)
     return dir;
 }
 

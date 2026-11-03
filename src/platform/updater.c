@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <SDL2/SDL.h>
+#include <dirent.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -69,6 +70,7 @@ void Display_Present(void);
 
 // stb_image's raw deflate decoder (compiled in mp_avatar.c)
 char *stbi_zlib_decode_noheader_malloc(const char *buffer, int len, int *outlen);
+static int MakerPackWorker(void *arg);   // Moemon Maker: the published pack (below)
 
 unsigned char MP_ConfigAllowsTweaks(void);
 static int sWantDev;
@@ -1616,6 +1618,12 @@ int Updater_Run(int argc, char **argv)
     JoinPath(marker, sizeof(marker), sExeDir, RELEASE_MARKER);
     if (!UExists(marker))
         return 0;   // a source build, not a release folder
+    {
+        // Moemon Maker: the published pack, in the background (MakerPackWorker)
+        SDL_Thread *mp = SDL_CreateThread(MakerPackWorker, "maker-pack", NULL);
+        if (mp)
+            SDL_DetachThread(mp);
+    }
 
     memset(&U, 0, sizeof(U));
     SDL_AtomicSet(&U.phase, PH_CHECK);
@@ -2034,6 +2042,197 @@ static int SongsDownloadWorker(void *arg)
     Log("songs: %s installed", S.id);
     SDL_AtomicSet(&S.state, SONGS_DONE);
     return 0;
+}
+
+// ---------------------------------------------------------------------------
+// Moemon Maker: the published pack (docs/MOEMON_MAKER.md "Files and git"). The repository's maker-pack workflow puts
+// MoemonMakerPack.zip and maker-pack.txt ("makerpack TAG ZIP BYTES SHA256 ID", ID = the commit) on its own release,
+// never the latest. At each start a release folder fetches maker-pack.txt and, when its ID isn't the one in
+// MoemonMakerPack/pack_version.txt, the zip (checked by SHA-256), which replaces MoemonMakerPack/'s files. The game reads
+// the pack from its next map (src/maker/maker_overrides.c; a PC with the editor's own working copy reads that instead).
+
+#define MAKER_PACK_DIR "MoemonMakerPack"
+#define MAX_MAKER_PACK (256L * 1024L * 1024L)
+static SDL_atomic_t sMakerPackNew;   // a new pack installed: the game reads it again (Updater_TakeMakerPackNew)
+static SDL_atomic_t sMakerPackCancel;
+
+static int MakerPackWorker(void *arg)
+{
+    struct Sink k;
+    char url[600], tag[48], zip[128], bytes[32], sha[80], id[80], have[96] = "", path[1200], dir[1100], hex[65];
+    long n;
+    int status, i;
+    FILE *f;
+    struct Entry *e = NULL;
+    int count = 0;
+    (void)arg;
+    JoinPath(dir, sizeof(dir), sExeDir, MAKER_PACK_DIR);
+    memset(&k, 0, sizeof(k));
+    k.mem = malloc(4097);
+    k.cap = 4096;
+    k.cancel = &sMakerPackCancel;
+    ShaInit(&k.sha);
+    if (!k.mem)
+        return 0;
+    {
+        const char *base = getenv("MOEMON_MAKER_PACK_URL");
+        if (base && base[0])
+            snprintf(url, sizeof(url), "%s%smaker-pack.txt", base, base[strlen(base) - 1] == '/' ? "" : "/");
+        else
+            snprintf(url, sizeof(url), "https://github.com/%s/releases/download/maker-pack/maker-pack.txt", MOEMON_UPDATE_REPO);
+    }
+    if (!HttpGet(url, &k, &status))
+    {
+        Log("maker pack: none online (%d)", status);
+        free(k.mem);
+        return 0;
+    }
+    k.mem[k.len] = 0;
+    if (sscanf(k.mem, "makerpack %47s %127s %31s %79s %79s", tag, zip, bytes, sha, id) != 5 || !ValidName(tag)
+     || !ValidName(zip) || !ValidName(id) || strlen(sha) != 64 || (n = strtol(bytes, NULL, 10)) <= 0 || n > MAX_MAKER_PACK)
+    {
+        Log("maker pack: maker-pack.txt isn't right");
+        free(k.mem);
+        return 0;
+    }
+    free(k.mem);
+    snprintf(path, sizeof(path), "%s/pack_version.txt", dir);
+    if ((f = UOpen(path, "r")) != NULL)
+    {
+        if (fgets(have, sizeof(have), f))
+            have[strcspn(have, "\r\n ")] = 0;
+        fclose(f);
+    }
+    if (strcmp(have, id) == 0)
+    {
+        Log("maker pack: %.12s, up to date", id);
+        return 0;
+    }
+    // the zip
+    JoinPath(path, sizeof(path), sExeDir, "maker_pack_download.zip");
+    memset(&k, 0, sizeof(k));
+    k.file = UOpen(path, "wb");
+    k.cap = n;
+    k.cancel = &sMakerPackCancel;
+    ShaInit(&k.sha);
+    if (!k.file)
+        return 0;
+    {
+        const char *base = getenv("MOEMON_MAKER_PACK_URL");
+        if (base && base[0])
+            snprintf(url, sizeof(url), "%s%s%s", base, base[strlen(base) - 1] == '/' ? "" : "/", zip);
+        else
+            snprintf(url, sizeof(url), "https://github.com/%s/releases/download/%s/%s", MOEMON_UPDATE_REPO, tag, zip);
+    }
+    if (!HttpGet(url, &k, &status) || fclose(k.file) != 0)
+    {
+        URemove(path);
+        Log("maker pack: download failed (%d)", status);
+        return 0;
+    }
+    ShaHex(&k.sha, hex);
+    for (i = 0; i < 64; i++)
+        sha[i] = (char)tolower((unsigned char)sha[i]);
+    if (k.len != n || strcmp(hex, sha) != 0)
+    {
+        URemove(path);
+        Log("maker pack: the download is damaged");
+        return 0;
+    }
+    // installed: its files replace the pack's (what isn't in it any more goes)
+    if ((f = UOpen(path, "rb")) == NULL || !SongsEntries(f, n, &e, &count))
+    {
+        if (f)
+            fclose(f);
+        URemove(path);
+        Log("maker pack: not a good zip");
+        return 0;
+    }
+    {
+        static const char *const sSubs[] = {"base", "music"};
+        int d;
+        for (d = 0; d < 2; d++)
+        {
+            char sub[1200];
+            DIR *dd;
+            struct dirent *de;
+            snprintf(sub, sizeof(sub), "%s/%s", dir, sSubs[d]);
+            if ((dd = opendir(sub)) != NULL)
+            {
+                while ((de = readdir(dd)) != NULL)
+                    if (de->d_name[0] != '.')
+                    {
+                        char old[1400];
+                        snprintf(old, sizeof(old), "%s/%s", sub, de->d_name);
+                        URemove(old);
+                    }
+                closedir(dd);
+            }
+        }
+    }
+    for (i = 0; i < count; i++)
+    {
+        uint8_t head[30], *data = NULL, *out;
+        char dest[1400];
+        long start;
+        if (!e[i].name[0] || strstr(e[i].name, ".."))
+            continue;
+        if (fseek(f, e[i].local, SEEK_SET) != 0 || fread(head, 1, 30, f) != 30 || Rd32(head) != 0x04034b50)
+            break;
+        start = (long)e[i].local + 30 + Rd16(head + 26) + Rd16(head + 28);
+        if (start + (long)e[i].csize > n || e[i].usize > 64u * 1024u * 1024u)
+            break;
+        data = malloc(e[i].csize ? e[i].csize : 1);
+        if (!data || fseek(f, start, SEEK_SET) != 0 || fread(data, 1, e[i].csize, f) != e[i].csize)
+        {
+            free(data);
+            break;
+        }
+        if (e[i].method == 0)
+            out = data;
+        else
+        {
+            int len = 0;
+            out = (uint8_t *)stbi_zlib_decode_noheader_malloc((const char *)data, (int)e[i].csize, &len);
+            free(data);
+            if (!out || (uint32_t)len != e[i].usize)
+            {
+                free(out);
+                break;
+            }
+        }
+        if (Crc32(out, e[i].usize) != e[i].crc)
+        {
+            free(out);
+            break;
+        }
+        snprintf(dest, sizeof(dest), "%s/%s", dir, e[i].name);
+        WriteFileAll(dest, out, e[i].usize, 0);
+        free(out);
+    }
+    fclose(f);
+    free(e);
+    URemove(path);
+    if (i < count)
+    {
+        Log("maker pack: a bad file in the zip");
+        return 0;
+    }
+    snprintf(path, sizeof(path), "%s/pack_version.txt", dir);
+    if ((f = UOpen(path, "w")) != NULL)
+    {
+        fprintf(f, "%s\n", id);
+        fclose(f);
+    }
+    Log("maker pack: %.12s installed (%d files)", id, count);
+    SDL_AtomicSet(&sMakerPackNew, 1);
+    return 0;
+}
+
+// The game, once a frame: a new pack was installed (the game reads it again)
+int Updater_TakeMakerPackNew(void)
+{
+    return SDL_AtomicCAS(&sMakerPackNew, 1, 0);
 }
 
 static void SongsJoin(void)

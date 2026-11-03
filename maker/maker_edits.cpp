@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <dirent.h>
 #include <algorithm>
 #include <map>
 #include <string>
@@ -361,8 +362,39 @@ static void MakeDirs()
 }
 
 // When the editor opens: the saved edits, then any recovery files newer than them (edits not saved with Ctrl+S)
+// The first time the editor opens on this PC: the published pack (MoemonMakerPack/) becomes the working copy, so the
+// user starts from what's published
+static void StartFromPack()
+{
+    std::string work = EditsDir(), pack = MakerApi_PackDir();
+    if (getenv("MOEMON_MAKER_DIR"))
+        return;
+    struct stat st;
+    if (stat((work + "/base").c_str(), &st) == 0 || stat((pack + "/base").c_str(), &st) != 0)
+        return;
+    MakeDirs();
+    MKDIR((work + "/music").c_str());
+    for (const char *sub : {"base", "music"})
+    {
+        DIR *d = opendir((pack + "/" + sub).c_str());
+        if (!d)
+            continue;
+        while (struct dirent *e = readdir(d))
+        {
+            if (e->d_name[0] == '.')
+                continue;
+            std::string text;
+            if (ReadFile(pack + "/" + sub + "/" + e->d_name, &text))
+                WriteFile(work + "/" + sub + "/" + e->d_name, text);
+        }
+        closedir(d);
+    }
+    printf("[maker] the published pack is the working copy now (%s)\n", work.c_str());
+}
+
 void LoadAllEdits()
 {
+    StartFromPack();
     sEdits.clear();
     sDirty.clear();
     sUndo.clear();

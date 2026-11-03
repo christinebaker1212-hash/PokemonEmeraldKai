@@ -41,7 +41,16 @@ bool8 Maker_TakeMenuRefresh(void)
 // Every game frame (mp_main.c MP_FrameUpdate)
 void Maker_FrameUpdate(void)
 {
+    int Updater_TakeMakerPackNew(void);
+    void MakerApi_ReloadEdits(void);
+    void MP_Kaisong_Rescan(void);
     Maker_PlayFrame();   // F5: edits shown at once (maker_play.c)
+    if (Updater_TakeMakerPackNew())
+    {
+        // a new published pack downloaded (updater.c): its edits from the next map loaded
+        MakerApi_ReloadEdits();
+        MP_Kaisong_Rescan();
+    }
     if (sChime)
     {
         sChime = FALSE;
