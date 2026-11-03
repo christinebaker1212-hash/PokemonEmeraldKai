@@ -21,19 +21,10 @@ in-game; their CI runs weren't checked either.
 
 ## Open work
 
-### 0. Dev auto-updater (1.26.4)
-- Main bootstrap version: **1.26.4**, "A Safe Test Flight!".
-- `AllowSmallTweaks = 1` selects `dev-latest`; `0` returns to latest main even
-  when that means downgrading. Updates retain SHA-256 / ZIP CRC validation,
-  rollback and the player's settings.
-- Dev builds disable manual save, autosave and player-progress disk writes,
-  including sidecars; existing saves are read-only. DEV is shown in the title.
-- Main releases refresh dev from the same commit. Explicit experiments are
-  dispatches of the separate Dev Release workflow; keep experimental code gated with
-  `MOEMON_DEV_BUILD` until promoted. Ordinary work remains main by default.
-- Build/release instructions: BUILDING_COOP.md, "Dev update channel".
-- Tests: tools/test/dev_save_test.sh and tools/test/dev_update_test.sh; the
-  existing tools/test/update_test.sh continues to exercise update integrity.
+### 0. Dev auto-updater (ended in 1.80.0)
+- The dev channel ended with Moemon Maker's first update (the user, 2026-11-03): every build follows main and
+  `AllowSmallTweaks = 1` only unlocks the small tweaks. The last dev release came from 1.80.0's code, which moves dev
+  installs back to main; dev-release.yml is gone. History: BUILDING_COOP.md "Dev update channel (ended)".
 
 ### Card system (shipped in main 1.27.0, reworked in 1.28.0)
 - Ungated and released as a main update. Status, design decisions, code map, rules fixes,
