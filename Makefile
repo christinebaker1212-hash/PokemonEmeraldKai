@@ -438,6 +438,22 @@ ifeq ($(PORTABLE),1)
   OBJS += $(ARCADE_OBJS)
 endif
 
+# Moemon Maker: the editor (maker/: C++ on Dear ImGui, docs/MOEMON_MAKER.md). It reaches the game only through
+# include/maker_api.h, so it never includes the game's headers.
+ifeq ($(PORTABLE),1)
+  MAKER_SRCS := $(wildcard maker/*.cpp) $(wildcard maker/imgui/*.cpp) maker/imgui/backends/imgui_impl_sdl2.cpp \
+                maker/imgui/backends/imgui_impl_sdlrenderer2.cpp maker/imgui/misc/imgui_stdlib.cpp
+  MAKER_OBJS := $(patsubst %,$(OBJ_DIR)/%.o,$(MAKER_SRCS))
+  MAKER_CXXFLAGS := -std=c++17 -O2 -m$(BIT_WIDTH) -Wall -Wno-unused-function -iquote include -Imaker -Imaker/imgui \
+                    -DIMGUI_DISABLE_OBSOLETE_FUNCTIONS
+  ifeq ($(TARGET_OS),WINDOWS)
+    MAKER_CXXFLAGS += -I$(SDL_DIR)/include/SDL2 -DNOMINMAX
+  else
+    MAKER_CXXFLAGS += $(shell sdl2-config --cflags 2>/dev/null || echo -I/usr/include/SDL2)
+  endif
+  OBJS += $(MAKER_OBJS)
+endif
+
 OBJS_REL := $(patsubst $(OBJ_DIR)/%,%,$(OBJS))
 
 SUBDIRS  := $(sort $(dir $(OBJS)))
@@ -583,6 +599,14 @@ $(OBJ_DIR)/edopro/%.c.o: edopro/%.c
 	@$(EDO_CXX) $(EDO_CXXFLAGS) -x c++ -MMD -MP -c $< -o $@
 
 -include $(EDO_OBJS:.o=.d)
+
+# Moemon Maker: the editor's objects (MAKER_OBJS); its font is built into src/maker/maker_font.c
+$(OBJ_DIR)/maker/%.cpp.o: maker/%.cpp
+	@echo "$(EDO_CXX) <maker flags> -o $@ $<"
+	@$(EDO_CXX) $(MAKER_CXXFLAGS) -MMD -MP -c $< -o $@
+
+-include $(MAKER_OBJS:.o=.d)
+$(C_BUILDDIR)/maker/maker_font.o: maker/fonts/LiberationSans-Regular.ttf maker/fonts/LiberationSans-Bold.ttf
 
 # Moemon Kai: the arcade boards' objects (ARCADE_OBJS)
 $(OBJ_DIR)/arcade/%.cpp.o: arcade/%.cpp

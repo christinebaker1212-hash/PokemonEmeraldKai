@@ -125,6 +125,8 @@ void MP_FrameEnd(void);
 
 void Platform_InstallCrashLog(void);
 
+#include "maker_api.h"   // Moemon Maker
+
 int main(int argc, char **argv)
 {
     Platform_InstallCrashLog();   // Moemon Co-op: crash_log.txt (crash_log.c)
@@ -242,6 +244,7 @@ int main(int argc, char **argv)
         bool lockstep = false;
 
         ProcessEvents();
+        MakerUi_Frame();   // Moemon Maker: the editor's window, while it's open (maker/maker_ui.cpp)
 
         curGameTime = SDL_GetPerformanceCounter();
         deltaTime = (double)((curGameTime - lastGameTime) / (double)SDL_GetPerformanceFrequency());
@@ -671,6 +674,8 @@ void ProcessEvents(void)
 
     while (SDL_PollEvent(&event))
     {
+        if (MakerUi_HandleEvent(&event))   // Moemon Maker: the editor's window's events are the editor's
+            continue;
         Rhythm_OnEvent(&event);   // Moemon Rhythm: steps timed by when they happened
         if (Display_HandleEvent(&event)) // F11 / Alt+Enter fullscreen, resizes
             continue;
@@ -1426,6 +1431,20 @@ static void TestHarnessStep(void)
             char a2[1100] = "";
             sscanf(line, "%*s %*s %1099[^\n]", a2);   // the rest of the line
             MP_TestCommand(arg, a2);
+        }
+        else if (strcmp(cmd, "maker") == 0)
+        {
+            // maker WORDS: Moemon Maker's editor (maker/maker_ui.cpp MakerUi_TestCommand: open MAP_X, theme dark...)
+            char words[256] = "";
+            sscanf(line, "%*s %255[^\n]", words);
+            MakerUi_TestCommand(words);
+        }
+        else if (strcmp(cmd, "makershot") == 0)
+        {
+            // makershot NAME: the editor's window, drawn on its next frame, as NAME.bmp
+            char path[1024];
+            snprintf(path, sizeof(path), "%s/%s.bmp", sShotDir, arg);
+            MakerUi_SaveShot(path);
         }
         else if (strcmp(cmd, "typetext") == 0)
         {

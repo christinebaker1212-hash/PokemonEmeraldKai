@@ -18,6 +18,7 @@ void Display_UploadFrame(const void *pixels);
 int Display_NeedsPresent(void);
 int Display_GetRefreshRate(void);
 void Display_Present(void);
+void Display_SetMainWindowShown(int shown);   // Moemon Maker: hidden while the editor is open
 // Test harness helpers
 int Display_SaveOutputBMP(const char *path);
 void Display_TestSetWindowSize(int w, int h);

@@ -12,6 +12,8 @@ INCLUDECONSTS_OUTDIR := include/constants
 AUTO_GEN_TARGETS += $(INCLUDECONSTS_OUTDIR)/map_groups.h
 AUTO_GEN_TARGETS += $(INCLUDECONSTS_OUTDIR)/layouts.h
 AUTO_GEN_TARGETS += $(INCLUDECONSTS_OUTDIR)/map_event_ids.h
+# Moemon Maker: the editor's names (maps, songs, people's looks) from this build's own constants (tools/maker/gen_names.py)
+AUTO_GEN_TARGETS += $(INCLUDECONSTS_OUTDIR)/maker_names.h
 
 MAP_DIRS := $(dir $(wildcard $(MAPS_DIR)/*/map.json))
 MAP_CONNECTIONS := $(patsubst $(MAPS_DIR)/%/,$(MAPS_DIR)/%/connections.inc,$(MAP_DIRS))
@@ -42,3 +44,8 @@ $(LAYOUTS_OUTDIR)/layouts.inc $(LAYOUTS_OUTDIR)/layouts_table.inc $(INCLUDECONST
 $(INCLUDECONSTS_OUTDIR)/map_event_ids.h: $(MAP_JSONS)
 	@$(MAPJSON) event_constants emerald $^ $(INCLUDECONSTS_OUTDIR)/map_event_ids.h
 	@echo "$(MAPJSON) event_constants emerald <MAP_JSONS> $(INCLUDECONSTS_OUTDIR)/map_event_ids.h"
+
+# Moemon Maker: the editor's names, made again whenever the constants they come from change
+$(INCLUDECONSTS_OUTDIR)/maker_names.h: tools/maker/gen_names.py $(INCLUDECONSTS_OUTDIR)/map_groups.h include/constants/songs.h include/constants/event_objects.h
+	python3 tools/maker/gen_names.py $@
+	@touch $@
