@@ -172,6 +172,10 @@ void NewGameInitData(void)
     gSaveBlock2Ptr->encryptionKey = 0;
     ZeroPlayerPartyMons();
     MP_Region_NewGame();   // Moemon Kai: Johto / Kanto flags and vars (mp_region.c)
+    {
+        void MP_Phone_NewGame(void);
+        MP_Phone_NewGame();   // Moemon Co-op: a new game is a new save for the phone link (mp_phone.c)
+    }
     ZeroEnemyPartyMons();
     ResetPokedex();
     ClearFrontierRecord();

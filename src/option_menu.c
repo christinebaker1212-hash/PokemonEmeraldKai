@@ -116,6 +116,7 @@ enum
     OPT_SS_GARDEN,
     OPT_SS_BACK,
     OPT_TITLE,        // Moemon Kai: GAME > RETURN TO MAIN MENU (from the field: a save, then a soft reset)
+    OPT_PHONE,        // Moemon Co-op: CO-OP > PHONE LINK (A: pairing and the phones, src/mp/mp_phone.c)
     OPT_CLOSE,
 };
 #define SC_RULE(opt) ((opt) - OPT_SC_ON)
@@ -137,6 +138,7 @@ static EWRAM_DATA u8 sStartCreatures = 0;
 static EWRAM_DATA u32 sShownKey = 0;       // what the screen shows (redrawn when something changes elsewhere)
 static EWRAM_DATA u8 sStartMusic = 0;      // BIKE MUSIC / SURF MUSIC when OPTIONS opened
 static EWRAM_DATA u8 sLabelEnd[MAX_ROWS] = {0};
+static EWRAM_DATA bool8 sOpenPhone = 0;      // CO-OP > PHONE LINK chosen: its screen, then back here
 static EWRAM_DATA bool8 sReturnToTitle = 0;   // GAME > RETURN TO MAIN MENU chosen   // where each row's label ends (its choices start after it)
 
 // Rows 14 pixels apart; seven show at a time (the list scrolls) and a hint line under them
@@ -256,6 +258,9 @@ static const u8 *const sFightButtonNames[FIGHT_BIND_COUNT] = {
 };
 static const u8 sText_MoeNav[] = _("MOENAV CALLS");
 static const u8 sText_Finder[] = _("FRIEND FINDER");
+static const u8 sText_Phone[] = _("PHONE LINK");
+static const u8 sText_NoPhone[] = _("NONE");
+static const u8 sText_Phones[] = _(" PHONE");
 static const u8 sText_FinderBoth[] = _("BOTH");
 static const u8 sText_FinderArrows[] = _("ARROWS");
 static const u8 sText_FinderRadar[] = _("RADAR");
@@ -471,6 +476,7 @@ static void BuildRows(void)
         AddRow(OPT_FLAGRANGE, 0);
         AddRow(OPT_MOENAV, 0);
         AddRow(OPT_FINDER, 0);
+        AddRow(OPT_PHONE, 0);
         break;
     }
     AddRow(OPT_CLOSE, 0);
@@ -622,6 +628,16 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
     case OPT_FIGHTKEYS:
         StringCopy(buf, Fight_BindIsDefault() ? sText_Arcade : sText_Custom);
         break;
+    case OPT_PHONE:
+    {
+        u32 MP_Phone_Count(void);
+        u32 n = MP_Phone_Count();
+        if (n == 0)
+            StringCopy(buf, sText_NoPhone);
+        else
+            StringCopy(ConvertIntToDecimalStringN(buf, n, STR_CONV_MODE_LEFT_ALIGN, 1), sText_Phones);
+        break;
+    }
     case OPT_FB_BIND:
         if (Fight_BindListening() == arg + 1)
             StringCopy(buf, sText_PressAKey);
@@ -1012,6 +1028,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_SS_BACK:     return sText_Back;
     case OPT_MOENAV:      return sText_MoeNav;
     case OPT_FINDER:      return sText_Finder;
+    case OPT_PHONE:       return sText_Phone;
     case OPT_FR_SHOW:     return sText_Show;
     case OPT_FR_PLACE:    return sText_Place;
     case OPT_FR_SIZE:     return sText_Size;
@@ -1474,7 +1491,15 @@ void CB2_InitOptionMenu(void)
         sScalePage = FALSE;
         sFightPage = FALSE;
         sSpritePage = FALSE;
-        GoTo(TAB_GAME, 0, 0);
+        GoTo(sOpenPhone ? TAB_COOP : TAB_GAME, 0, 0);   // (back from PHONE LINK: on its tab)
+        if (sOpenPhone)
+        {
+            u32 i;
+            for (i = 0; i < sRowCount; i++)
+                if (sRows[i].opt == OPT_PHONE)
+                    GoTo(TAB_COOP, 0, i);
+            sOpenPhone = FALSE;
+        }
         gMain.state++;
         break;
     case 11:
@@ -1603,6 +1628,13 @@ static void Task_OptionMenuProcessInput(u8 taskId)
         PlaySE(SE_SELECT);
         Fight_BindDefaults();
     }
+    else if (JOY_NEW(A_BUTTON) && opt == OPT_PHONE)
+    {
+        PlaySE(SE_SELECT);
+        sOpenPhone = TRUE;
+        gTasks[taskId].func = Task_OptionMenuSave;
+        return;
+    }
     else if (JOY_NEW(A_BUTTON) && opt == OPT_TITLE)
     {
         // back to the field, where the game asks to save, then (or if not, once sure) goes back to the main menu
@@ -1712,6 +1744,12 @@ static void Task_OptionMenuFadeOut(u8 taskId)
             sReturnToTitle = FALSE;
             ScriptContext_SetupScript(EventScript_MpReturnToTitle);
             gMain.savedCallback = CB2_ReturnToField;
+        }
+        if (sOpenPhone)
+        {
+            void MP_Phone_OpenScreen(MainCallback returnTo);
+            MP_Phone_OpenScreen(CB2_InitOptionMenu);   // (sOpenPhone stays set: the menu comes back on CO-OP)
+            return;
         }
         SetMainCallback2(gMain.savedCallback);
     }

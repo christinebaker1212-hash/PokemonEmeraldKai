@@ -537,6 +537,10 @@ static void StoreSaveFile()
     Tcg_WriteSidecar();      // Moemon Kai: the card game's collection (src/tcg/tcg_integration.c)
     MP_Region_WriteSidecar();   // Moemon Kai: Johto / Kanto progress (src/mp/mp_region.c)
     MP_Boxes_WriteSidecar();    // Moemon Kai: PC boxes 15-40 (src/mp/mp_boxes.c)
+    {
+        void MP_Phone_WriteSidecar(void);
+        MP_Phone_WriteSidecar();   // Moemon Co-op: the save's ID and phones (src/mp/mp_phone.c)
+    }
     if (SaveSlots_Current())
         SaveSlots_WriteSummary();   // Moemon Co-op: who and where, for the title screen's SAVE FILE (save_slots.c)
 }

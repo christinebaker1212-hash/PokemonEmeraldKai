@@ -947,6 +947,10 @@ u8 LoadGameSave(u8 saveType)
         status = TryLoadSaveSlot(FULL_SAVE_SLOT, gRamSaveSectorLocations);
         if (status == SAVE_STATUS_OK)
             MP_Boxes_LoadFromSave(&sSavedStorage);   // Moemon Kai: the 14 boxes into the 40, then boxes 15-40 (mp_boxes.c)
+            {
+                void MP_Phone_OnSaveLoaded(void);
+                MP_Phone_OnSaveLoaded();   // Moemon Co-op: the save's ID and its phones, "<save>.phone" (mp_phone.c)
+            }
         if (status == SAVE_STATUS_OK)
             MP_Region_LoadFromSave();   // Moemon Kai: Johto / Kanto flags and vars (mp_region.c); older save layouts
                                         // are brought up to date here (mp_savefix.c), before anything is copied out

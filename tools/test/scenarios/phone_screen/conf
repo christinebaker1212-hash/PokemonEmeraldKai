@@ -1,0 +1,6 @@
+# OPTIONS > CO-OP > PHONE LINK: A opens the pairing screen (a QR code with the address, the save's ID and a one-time
+# secret, the 6 letters to type, the phones), B goes back to OPTIONS on the CO-OP tab. Shots p_*.png.
+MODE=1
+TMO=120
+EXPECT_A=("phone: listening on port" "phone: pairing QR" "pairing 1 code")
+UNEXPECT_A=("[crash]" "TIMEOUT")

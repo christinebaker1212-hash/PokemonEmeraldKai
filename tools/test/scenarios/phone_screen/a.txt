@@ -1,0 +1,25 @@
+pressuntil A field 5000
+wait 60
+press START 2
+wait 30
+press UP 2
+wait 10
+press UP 2
+wait 10
+press A 2
+wait 120
+mp optionstab 4
+wait 20
+press UP 2
+wait 10
+press UP 2
+wait 10
+shot p_row
+press A 2
+wait 120
+shot p_screen
+mp phone
+press B 2
+wait 120
+shot p_back
+quit

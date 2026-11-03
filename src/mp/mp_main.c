@@ -2160,6 +2160,10 @@ void MP_FrameEnd(void)
 
 void MP_FrameUpdate(void)
 {
+    {
+        void MP_Phone_Update(void);
+        MP_Phone_Update();   // the phone link (mp_phone.c)
+    }
     MP_TCard_Update();   // the TRAINER CARD's badge records and the BADGE CASE's fading (mp_tcard.c)
     {
         void MP_HmRescue_Update(void);

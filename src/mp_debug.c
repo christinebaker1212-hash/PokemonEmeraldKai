@@ -672,6 +672,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
             gMpConfig.scaleGardenPct = g > 100 ? 100 : g;
         printf("[test] sprite scaling: followers %d garden %d\n", MP_SCALE_FOLLOWERS_NOW(), MP_SCALE_GARDEN_NOW());
     }
+    else if (strcmp(cmd, "phone") == 0)
+    {
+        // phone [pair|forget]: the phone link's state (mp_phone.c); pair: pairing open, its code and secret printed
+        void MP_Phone_Debug(const char *arg);
+        MP_Phone_Debug(arg);
+    }
     else if (strcmp(cmd, "unownsee") == 0)
     {
         // unownsee LETTER [LETTER...]: UNOWN letters 0-27 seen; formviewer: ROUTE 218's POKeDEX upgrade (s3d_legends.c)
