@@ -16,7 +16,9 @@ Read in this order (`docs/quetzal/REGIONS.md` explains how Quetzal runs three re
 
 `python3 tools/quetzal_rip/rip.py QUETZAL.gba --crystal PATH/pokecrystal --firered PATH/pokefirered`
 regenerates `quetzal_rip/` (the pret checkouts are only used to name maps and identify FRLG tilesets/sprites).
-The ROM itself is not in the repo.
+The ROM itself is not in the repo. The user's copy, for when the rip needs the ROM again (door animations, the alternate layouts
+the first rip missed): https://drive.google.com/file/d/1zLPTdf6Z3pEilMJSNowS19GqC9bzbMGP/view?usp=sharing (shared
+2026-11-03). Keep the download out of the repo.
 
 | Folder | Contents | Format |
 |---|---|---|

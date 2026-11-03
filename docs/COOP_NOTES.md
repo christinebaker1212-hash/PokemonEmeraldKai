@@ -4645,8 +4645,11 @@ or the README. The updater no longer has a dev channel: AllowSmallTweaks only un
   ROUTE_201_RIVAL on every visit). Test sinnoh_platinum_verity. The lab's first visit: gen_scripts.py converts
   GivePokedex and BufferPlayerCounterpartStarterSpeciesName (sinnoh 6 ..., 1: the counterpart's). Test sinnoh_platinum_lab.
 - Quetzal's setmaplayoutindex numbers are Quetzal's layout ids (quetzal_rip/layouts quetzal_layout_id): the scripts name
-  LAYOUT_ constants now (import.py fix, tools/test/check_scripts.py refuses a number). Three alternate layouts were
-  never ripped (SEAFOAM B3F / B4F, DUNSPARCE TUNNEL): their maps keep their own layout until the rip has them.
+  LAYOUT_ constants now (import.py fix, tools/test/check_scripts.py refuses a number). Three alternate layouts no map
+  header points at were never ripped: SEAFOAM B3F / B4F with the currents stopped (899 / 900) and DUNSPARCE TUNNEL dug
+  out (940). tools/quetzal_rip/rip_alt_layouts.py QUETZAL_ROM reads them from Quetzal's layout table (ROM 0x930A8C,
+  entry = id - 1; ROM_MAP.md's 0x08939B54 is not it) into the rip and data/layouts (appended: no number moves);
+  `mp layout` prints the layout a map shows; test region_alt_layouts.
 - JOHTO's / KANTO's PC: FireRed's tiles 0x62 / 0x63 (field_specials.c PcTilePair). Test region_pc_tile.
 - The BICYCLE (item 360) rides as the MACH BIKE. Test region_bicycle.
 - Fossil lines are never wild before the region's LEAGUE (mp_region.c MP_WildSpeciesOk). Test region_fossils.
@@ -4664,3 +4667,10 @@ or the README. The updater no longer has a dev channel: AllowSmallTweaks only un
   (moemon_chars/import.py BACK_ORDER).
 - SPROUT TOWER's pillar: tools/quetzal_port/gen_sprout_pillar.py (Crystal's TilesetTowerAnim timing on Quetzal's
   column), tileset_anims.c TilesetAnim_QzSproutPillar.
+- The MAGNET TRAIN (data/scripts/mp_region.inc, MP_MagnetTrainOpen: either LEAGUE + the S.S. TICKET) rides Crystal's
+  scene (engine/events/magnet_train.asm) in src/mp/mp_magnettrain.c with art from tools/quetzal_port/gen_magnet_train.py
+  POKECRYSTAL_DIR: BG1 the scenery (Crystal's 18 rows a row lower; the GBA's extra top and bottom rows carry on the
+  trees), BG0 the train's band (tile 96, past the art, is the clear one: tile 0 is opaque), both VOFS cleared (the
+  field's camera leaves BG1's scrolled). Test region_train_ride: tools/test/check_train_scroll.py checks two frames in a
+  row differ in every 8-pixel row outside the train's band and that trees fill the top and bottom rows.
+- No drop shadow in tall grass (mp_shadow.c InGrass), as the game's own grass covers the feet.

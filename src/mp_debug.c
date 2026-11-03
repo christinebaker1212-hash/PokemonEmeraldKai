@@ -2355,6 +2355,9 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] where map %d.%d xy %d,%d\n", gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum,
                me->currentCoords.x - 7, me->currentCoords.y - 7);
     }
+    else if (strcmp(cmd, "layout") == 0)   // the layout the map shows (setmaplayoutindex can switch it)
+        printf("[test] layout %d (map's own %d)\n", gSaveBlock1Ptr->mapLayoutId,
+               Overworld_GetMapHeaderByGroupAndId(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum)->mapLayoutId);
     else if (strcmp(cmd, "friend") == 0)
     {
         // friend N: CO-OP > FRIENDS > player N (1-4)

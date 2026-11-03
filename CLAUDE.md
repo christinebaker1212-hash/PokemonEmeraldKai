@@ -123,7 +123,10 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
 - Hooks in stock files are marked `Moemon Co-op` / `Moemon Kai` (grep for them)
 - `quetzal_rip/` + `tools/quetzal_rip/`: Kanto and Johto ripped from Moemon Quetzal (maps, scripts, tilesets, sprites,
   trainers, wild, music) for a future port; not built. Start at `docs/QUETZAL_RIP.md` (notes in `docs/quetzal/`).
-  `tools/quetzal_rip/check_build.sh ROM` assembles the rip with Kai's tools and compares it with the ROM byte for byte
+  `tools/quetzal_rip/check_build.sh ROM` assembles the rip with Kai's tools and compares it with the ROM byte for byte.
+  The user's Moemon Quetzal file, for anything the rip lacks (door animations, the alternate layouts SEAFOAM B3F / B4F
+  and DUNSPARCE TUNNEL, re-rips): https://drive.google.com/file/d/1zLPTdf6Z3pEilMJSNowS19GqC9bzbMGP/view?usp=sharing
+  (the user, 2026-11-03). Download it outside the repo (scratchpad / ~/.cache); never commit or ship it
 - `docs/user_images/`: every picture the user sent (mock-ups, bug shots), numbered, with an index. Save new ones there
 
 ## Building

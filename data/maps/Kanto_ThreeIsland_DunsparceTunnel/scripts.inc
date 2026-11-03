@@ -9,8 +9,7 @@ Kanto_ThreeIsland_DunsparceTunnel_EventScript_8414B12::
 	end
 
 Kanto_ThreeIsland_DunsparceTunnel_EventScript_8414B28::
-	@ setmaplayoutindex 0x3AC: Quetzal's other layout of this map, not in the rip (quetzal_rip/layouts):
-	@ the map keeps its own
+	setmaplayoutindex LAYOUT_KANTO_THREE_ISLAND_DUNSPARCE_TUNNEL_DUG_OUT   @ (Quetzal's layout 0x3AC)
 	setobjectxyperm 1, 0x17, 2
 	setobjectmovementtype 1, 8
 	return

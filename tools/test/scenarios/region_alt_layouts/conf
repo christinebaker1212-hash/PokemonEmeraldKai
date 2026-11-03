@@ -1,0 +1,8 @@
+# Quetzal's alternate layouts its scripts switch to (tools/quetzal_rip/rip_alt_layouts.py): SEAFOAM ISLANDS B3F / B4F
+# with the currents stopped (both boulders in) and DUNSPARCE TUNNEL dug out. Each map, entered with its flag set,
+# shows the other layout (its own numbers: the last three in data/layouts/layouts.json)
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=280:30 MOEMON_DEBUG_REGION=2"
+EXPECT_A=("layout 1499 (map's own" "layout 1500 (map's own" "layout 1501 (map's own" "ctx 1 free 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

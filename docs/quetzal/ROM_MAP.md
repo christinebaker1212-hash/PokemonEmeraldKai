@@ -10,7 +10,7 @@ addresses; file offset = address - 0x08000000. The constants in `tools/quetzal_r
 |---|---|---|
 | gMapGroups | 0x0893ADCC | 40 groups. 0-33 = stock Emerald's groups (same sizes and order). 34-35 = Johto (126 + 123 maps), 36-39 = Kanto (126+126+126+37) |
 | map headers | from groups | stock 0x1C-byte MapHeader |
-| layouts | from headers | stock MapLayout (+0x18 border width/height bytes); table of 1182 layouts at 0x08939B54 |
+| layouts | from headers | stock MapLayout (+0x18 border width/height bytes); layouts by id at 0x08930A8C (entry = id - 1: tools/quetzal_rip/rip_alt_layouts.py; 0x08939B54 holds map headers) |
 | object events | from MapEvents | 24 bytes: u8 localId, u8 kind, **u16 graphicsId**, s16 x, s16 y, u8 elevation, u8 movementType, u8 range, u8 pad, u16 trainerType, u16 sight/berry, script*, u16 flag, pad |
 | warps / coord / bg events | | stock (bg hidden items store flag - FLAG_HIDDEN_ITEMS_START; Kanto's numbering restarts at 0) |
 | region map sections | 0x09232A00 (main), 0x09233C94 (Johto) | 8 bytes {x, y, w, h, names**}; names** = 4 strings (EN, ES, ES, short). Johto maps index the Johto table with the same mapsec byte |

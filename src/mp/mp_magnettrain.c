@@ -26,6 +26,7 @@
 #define TRAIN_W      160    // Crystal's train, 20 tiles
 #define TRAIN_TOP    7      // its band on the GBA screen: rows 7-12 (Crystal's 6-11, a row lower: 20 rows, not 18)
 #define WAIT         128
+#define BLANK_TILE   96     // (sMagnetTrainTiles holds 96)
 #define PAL_GRAY     0
 #define PAL_GREEN    1
 #define PAL_YELLOW   2
@@ -52,10 +53,17 @@ static u16 Entry(u8 tile, u8 pal)
     return tile | (pal << 12);
 }
 
-// Crystal's rows by GBA row (one more at the top and the bottom)
+// Crystal's rows by GBA row: its 18 rows a row lower, and the GBA's extra row at the top and the bottom carries on
+// the trees' two-row pattern (Crystal's rows 0-3 and 14-17 are two rows of trees each: the row above row 0 is a
+// tree's lower half, row 1's; the row below row 17 a tree's upper half, row 16's), so the screen's edges show whole
+// rows of trees scrolling with the rest instead of a repeated half row
 static u8 CrystalRow(u8 gbaRow)
 {
-    return gbaRow == 0 ? 0 : gbaRow > 18 ? 17 : gbaRow - 1;
+    if (gbaRow == 0)
+        return 1;
+    if (gbaRow > 18)
+        return 16;
+    return gbaRow - 1;
 }
 
 static void BuildMaps(void)
@@ -64,9 +72,13 @@ static void BuildMaps(void)
     for (y = 0; y < 32; y++)
         for (x = 0; x < 32; x++)
         {
-            u8 r = CrystalRow(y < 20 ? y : 19);
+            u8 r = CrystalRow(y < 20 ? y : 19 - (y & 1));
             sMT->sceneryMap[y * 32 + x] = Entry(sMagnetTrainBgRows[r][x & 1], r >= 4 && r <= 13 ? PAL_GRAY : PAL_GREEN);
         }
+    // the train's layer is clear above and below its band (tile BLANK_TILE: past the 96 loaded, zeros in VRAM, every
+    // pixel transparent), or tile 0 (opaque: Crystal's shades are colours 1-4) covered the scenery there, standing still
+    for (x = 0; x < ARRAY_COUNT(sMT->trainMap); x++)
+        sMT->trainMap[x] = BLANK_TILE;
     // the train's band: the rails (Crystal's rows 6-11 of the scenery) across, the train at columns 0-19
     for (y = TRAIN_TOP; y < TRAIN_TOP + 6; y++)
         for (x = 0; x < 64; x++)
@@ -195,6 +207,10 @@ static void CB2_InitMagnetTrain(void)
         s->mpClipY = (TRAIN_TOP + 3) * 8;
         StartSpriteAnim(s, sMT->dir > 0 ? ANIM_STD_GO_EAST : ANIM_STD_GO_WEST);
     }
+    // the field's camera leaves its vertical scroll in BG1-3's registers (the scenery stood 40 pixels up: the rails'
+    // fence at the screen's top in the trees' place, and too many rows of trees at the bottom)
+    SetGpuReg(REG_OFFSET_BG0VOFS, 0);
+    SetGpuReg(REG_OFFSET_BG1VOFS, 0);
     sMT->trainX = sMT->dir > 0 ? -TRAIN_W : DISPLAY_WIDTH;
     PlaceTrain();
     ShowBg(0);
