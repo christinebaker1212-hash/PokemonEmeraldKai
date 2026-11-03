@@ -594,7 +594,10 @@ static bool32 IsDummyWarp(struct WarpData *warp)
 
 struct MapHeader const *const Overworld_GetMapHeaderByGroupAndId(u16 mapGroup, u16 mapNum)
 {
-    return gMapGroups[mapGroup][mapNum];
+    // Moemon Maker: a map the user edited is its edited copy (src/maker/maker_overrides.c)
+    const struct MapHeader *Maker_EditedHeader(u16 mapGroup, u16 mapNum);
+    const struct MapHeader *edited = Maker_EditedHeader(mapGroup, mapNum);
+    return edited ? edited : gMapGroups[mapGroup][mapNum];
 }
 
 struct MapHeader const *const GetDestinationWarpMapHeader(void)

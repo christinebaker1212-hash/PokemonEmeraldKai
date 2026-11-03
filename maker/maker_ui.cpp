@@ -7,6 +7,7 @@
 // Settings in moemon_maker.ini, the panels' places in moemon_maker_layout.ini (beside the game's other settings).
 #include <SDL.h>
 #include <ctype.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -354,8 +355,37 @@ static void ProblemsPanel()
         ImGui::End();
         return;
     }
-    ImGui::TextDisabled("No problems.");
+    if (gEd.recovered)
+    {
+        ImGui::TextColored(ImVec4(0.1f, 0.45f, 0.85f, 1), "Unsaved edits of %d maps were kept from last time. Ctrl+S saves them.",
+                           gEd.recovered);
+        ImGui::SameLine();
+        if (ImGui::SmallButton("OK"))
+            gEd.recovered = 0;
+    }
+    if (gEd.map >= 0)
+        MapView_Problems();
+    else
+        ImGui::TextDisabled("No problems.");
     ImGui::End();
+}
+
+void Message(const char *fmt, ...)
+{
+    char buf[256];
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+    va_end(ap);
+    gEd.message = buf;
+    gEd.messageUntil = SDL_GetTicks() + 4000;
+    printf("[maker] %s\n", buf);
+}
+
+static void Save()
+{
+    int n = SaveAll();
+    Message(n ? "Saved %d %s." : "Nothing to save.", n, n == 1 ? "map" : "maps");
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -367,7 +397,8 @@ static void MenuBar()
         return;
     if (ImGui::BeginMenu("File"))
     {
-        ImGui::MenuItem("Save", "Ctrl+S", false, false);
+        if (ImGui::MenuItem("Save", "Ctrl+S", false, AnyUnsaved()))
+            Save();
         ImGui::MenuItem("Publish...", NULL, false, false);
         ImGui::Separator();
         if (ImGui::MenuItem("Close Moemon Maker"))
@@ -376,8 +407,10 @@ static void MenuBar()
     }
     if (ImGui::BeginMenu("Edit"))
     {
-        ImGui::MenuItem("Undo", "Ctrl+Z", false, false);
-        ImGui::MenuItem("Redo", "Ctrl+Y", false, false);
+        if (ImGui::MenuItem("Undo", "Ctrl+Z", false, CanUndo()))
+            Undo();
+        if (ImGui::MenuItem("Redo", "Ctrl+Y", false, CanRedo()))
+            Redo();
         ImGui::EndMenu();
     }
     if (ImGui::BeginMenu("Mode"))
@@ -447,11 +480,14 @@ static void Toolbar()
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
     ImGui::Begin("##toolbar", NULL, fl);
     ImGui::PopStyleVar();
-    if (IconButton("save", ICON_SAVE, "Save (Ctrl+S)", false, false)) {}
+    if (IconButton("save", ICON_SAVE, "Save (Ctrl+S)", false, AnyUnsaved()))
+        Save();
     ImGui::SameLine();
-    if (IconButton("undo", ICON_UNDO, "Undo (Ctrl+Z)", false, false)) {}
+    if (IconButton("undo", ICON_UNDO, "Undo (Ctrl+Z)", false, CanUndo()))
+        Undo();
     ImGui::SameLine();
-    if (IconButton("redo", ICON_REDO, "Redo (Ctrl+Y)", false, false)) {}
+    if (IconButton("redo", ICON_REDO, "Redo (Ctrl+Y)", false, CanRedo()))
+        Redo();
     ToolbarSeparator();
     for (int i = 0; i < MODE_COUNT; i++)
     {
@@ -512,8 +548,12 @@ static void StatusBar()
     }
     else
         ImGui::TextDisabled("No map open");
-    char right[96];
-    snprintf(right, sizeof(right), "Zoom %d%%   Moemon Maker %s", gEd.zoom * 100, MakerApi_GameVersion());
+    char right[160];
+    if (!gEd.message.empty() && !SDL_TICKS_PASSED(SDL_GetTicks(), gEd.messageUntil))
+        snprintf(right, sizeof(right), "%s      Zoom %d%%", gEd.message.c_str(), gEd.zoom * 100);
+    else
+        snprintf(right, sizeof(right), "%s%d edited maps   Zoom %d%%   Moemon Maker %s", AnyUnsaved() ? "Unsaved changes   " : "",
+                 EditedMapCount(), gEd.zoom * 100, MakerApi_GameVersion());
     ImGui::SameLine(ImGui::GetWindowWidth() - ImGui::CalcTextSize(right).x - 12);
     ImGui::TextDisabled("%s", right);
     ImGui::End();
@@ -566,8 +606,14 @@ static void DockSpace()
 static void Shortcuts()
 {
     ImGuiIO &io = ImGui::GetIO();
+    if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_S, false))
+        Save();
     if (io.WantTextInput)
         return;
+    if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_Z, false))
+        io.KeyShift ? Redo() : Undo();
+    if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_Y, false))
+        Redo();
     for (int i = 0; i < MODE_COUNT; i++)
         if (ImGui::IsKeyPressed((ImGuiKey)(ImGuiKey_F1 + i), false))
             gEd.mode = i;
@@ -636,6 +682,8 @@ static int Open()
     ImGui_ImplSDL2_InitForSDLRenderer(gEd.win, gEd.ren);
     ImGui_ImplSDLRenderer2_Init(gEd.ren);
     LoadMaps();
+    LoadAllEdits();
+    SendAllToGame();   // (recovered edits too: the game plays what the editor shows)
     gEd.map = -1;
     gEd.layoutBuilt = false;
     gEd.layoutReset = false;
@@ -673,6 +721,38 @@ static void Close()
     MakerApi_Close();
 }
 
+// Closing with unsaved edits: save them, or drop them (the game goes back to the saved ones)
+static void ClosePrompt()
+{
+    if (gEd.wantClose && AnyUnsaved() && !gEd.testMode)
+    {
+        gEd.wantClose = false;
+        ImGui::OpenPopup("Save your edits?");
+    }
+    if (ImGui::BeginPopupModal("Save your edits?", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("Some maps have edits that aren't saved yet.");
+        ImGui::Spacing();
+        if (ImGui::Button("Save", ImVec2(110, 0)))
+        {
+            Save();
+            gEd.wantClose = true;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Don't save", ImVec2(110, 0)))
+        {
+            DiscardUnsaved();
+            gEd.wantClose = true;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel", ImVec2(110, 0)))
+            ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
+    }
+}
+
 static void Frame()
 {
     ImGui::SetCurrentContext(gEd.ctx);
@@ -690,6 +770,22 @@ static void Frame()
     InspectorPanel();
     ProblemsPanel();
     StatusBar();
+    ClosePrompt();
+    // (a slider let go or a stroke ended: that's one undo step, sent to the game)
+    if (InChange() && !ImGui::IsAnyItemActive() && !ImGui::IsMouseDown(ImGuiMouseButton_Left))
+        EndChange();
+    RecoveryTick();
+    {
+        // the window's title: the map, and * for unsaved edits
+        char title[160];
+        snprintf(title, sizeof(title), "Moemon Maker%s%s%s", gEd.map >= 0 ? " - " : "", gEd.map >= 0 ? gEd.maps[gEd.map].title : "",
+                 AnyUnsaved() ? " *" : "");
+        if (gEd.title != title)
+        {
+            gEd.title = title;
+            SDL_SetWindowTitle(gEd.win, title);
+        }
+    }
     ImGui::Render();
     ImVec4 bg = ImGui::GetStyle().Colors[ImGuiCol_WindowBg];
     SDL_SetRenderDrawColor(gEd.ren, (Uint8)(bg.x * 255), (Uint8)(bg.y * 255), (Uint8)(bg.z * 255), 255);
@@ -814,6 +910,18 @@ extern "C" void MakerUi_TestCommand(const char *line)
         snprintf(gEd.mapFilter, sizeof(gEd.mapFilter), "%s", arg);
     else if (c == "close")
         gEd.wantClose = true;
+    else if (c == "save")
+        Save();
+    else if (c == "undo")
+        Undo();
+    else if (c == "redo")
+        Redo();
+    else if (c == "edits")
+    {
+        int m = arg[0] ? MakerApi_FindMap(arg) : gEd.map;
+        if (m >= 0)
+            printf("[maker] edits of %s:\n%s[maker] end\n", gEd.maps[m].name, EditsText(m).c_str());
+    }
     else
         MapView_TestCommand(c.c_str(), arg);
 }

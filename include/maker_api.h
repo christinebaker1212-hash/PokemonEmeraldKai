@@ -85,6 +85,20 @@ int MakerApi_CoordCount(int map);
 int MakerApi_CoordInfo(int map, int i, struct MakerCoordInfo *c);
 // A look's standing picture (facing 0 south, 1 north, 2 west, 3 east) as RGBA (0 = clear); 0 if none fits maxW x maxH
 int MakerApi_RenderObject(int graphicsId, int facing, unsigned int *rgba, int maxW, int maxH, int *w, int *h);
+int MakerApi_MovementFacing(int movementType);
+
+// Named values (songs, looks, movement types, trainer types, items, species, flags): MAKER_NAMES_*
+enum { MAKER_NAMES_SONG, MAKER_NAMES_GFX, MAKER_NAMES_MOVEMENT, MAKER_NAMES_TRAINERTYPE, MAKER_NAMES_ITEM,
+       MAKER_NAMES_SPECIES, MAKER_NAMES_FLAG, MAKER_NAMES_COUNT };
+int MakerApi_NameCount(int table);
+const char *MakerApi_NameAt(int table, int i, unsigned int *value);
+const char *MakerApi_NameOf(int table, unsigned int value);       // "" if it has none
+int MakerApi_ValueOf(int table, const char *name, unsigned int *value);   // 0 if no such name
+
+// The editor's edits of one map, as the text of its MoemonMaker/base/MAP_X.txt (src/maker/maker_overrides.c)
+void MakerApi_SetMapEdits(const char *mapName, const char *text);
+const char *MakerApi_EditsDir(void);   // MoemonMaker/ beside the game
+void MakerApi_ReloadEdits(void);       // the saved edits again (the editor's unsaved ones dropped)
 
 // The game side of the editor (src/maker/maker_main.c)
 void MakerApi_Close(void);            // the editor closed: back to the main menu

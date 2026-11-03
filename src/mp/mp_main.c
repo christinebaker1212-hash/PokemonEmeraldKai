@@ -2154,7 +2154,9 @@ void MP_Init(void)
     LoadConfig();
     {
         void Maker_InitFromEnv(void);
+        void Maker_LoadEdits(void);
         Maker_InitFromEnv();   // Moemon Maker: MOEMON_MAKER_UNLOCK=1 in tests (src/maker/maker_gate.c)
+        Maker_LoadEdits();     // ... and the user's edits to the base game (MoemonMaker/base/, maker_overrides.c)
     }
     sMainAutosaveMinutes = gMpConfig.autosaveMinutes;
     if (MOEMON_DEV_BUILD)

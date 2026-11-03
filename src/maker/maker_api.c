@@ -9,7 +9,7 @@
 #include "region_map.h"
 #include "constants/region_map_sections.h"
 #include "constants/characters.h"
-#include "constants/maker_names.h"
+#include "maker.h"
 #include "mp_version.h"
 #include "maker_api.h"
 
@@ -77,7 +77,7 @@ static void Title(char *dst, int size, const char *name)
 
 int MakerApi_MapCount(void)
 {
-    return MAKER_MAP_COUNT;
+    return Maker_MapCount();
 }
 
 int MakerApi_MapInfo(int index, struct MakerMapInfo *info)
@@ -85,10 +85,10 @@ int MakerApi_MapInfo(int index, struct MakerMapInfo *info)
     const struct MakerMapName *m;
     const struct MapHeader *h;
     u8 buf[64];
-    if (index < 0 || index >= MAKER_MAP_COUNT)
+    if (index < 0 || index >= Maker_MapCount())
         return 0;
-    m = &sMakerMapNames[index];
-    h = Overworld_GetMapHeaderByGroupAndId(m->mapGroup, m->mapNum);
+    m = Maker_Map(index);
+    h = Maker_BaseMapHeader(m->mapGroup, m->mapNum);
     memset(info, 0, sizeof(*info));
     info->name = m->name;
     info->groupName = m->group;
@@ -116,8 +116,8 @@ int MakerApi_MapInfo(int index, struct MakerMapInfo *info)
 int MakerApi_FindMap(const char *name)
 {
     int i;
-    for (i = 0; i < MAKER_MAP_COUNT; i++)
-        if (strcmp(sMakerMapNames[i].name, name) == 0)
+    for (i = 0; i < Maker_MapCount(); i++)
+        if (strcmp(Maker_Map(i)->name, name) == 0)
             return i;
     return -1;
 }

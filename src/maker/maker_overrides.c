@@ -1,0 +1,568 @@
+// Moemon Maker: the user's edits to the base game, as the game uses them (docs/MOEMON_MAKER.md "Why first" and "When a
+// Claude session changes the base game"). One text file per map in MoemonMaker/base/ (MAP_X.txt), one edit a line,
+// each with the value it replaced:
+//
+//   map MAP_LITTLEROOT_TOWN 20 20                  the map, and its size when it was edited
+//   block X Y WAS NOW                              a tile (metatile | collision << 10 | elevation << 12, hex)
+//   person KEY PROP WAS NOW                        KEY: its LOCALID_, else SCRIPT@X,Y (its script and first spot)
+//   warp INDEX PROP WAS NOW                        PROP: x y elevation dest (MAP_X:N)
+//   sign KEY PROP WAS NOW                          KEY: SCRIPT@X,Y
+//   trigger KEY PROP WAS NOW                       KEY: SCRIPT@X,Y
+//
+// Person PROPs: x y elevation look movement range_x range_y trainer sight flag (values by name where they have one).
+//
+// An edit applies only while the game still has its WAS there: where a later update changed the same thing, the
+// game's new version wins and the editor shows the clash (nothing is ever applied blindly). The edits reach the map
+// through the one place every map header is looked up (overworld.c Overworld_GetMapHeaderByGroupAndId: an edited
+// map's header is a patched copy) and through its blocks (fieldmap.c Maker_MapBlocks), so the field, connections,
+// warps and scripts all see the edited map. The editor sends its edits as it makes them (MakerApi_SetMapEdits), so a
+// map played from the editor is always the edited one.
+#include <ctype.h>
+#include <dirent.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "global.h"
+#include "global.fieldmap.h"
+#include "overworld.h"
+#include "s3d.h"
+#include "maker.h"
+#include "maker_api.h"
+
+const char *Updater_ExeFile(const char *name);
+
+enum { KIND_PERSON, KIND_WARP, KIND_SIGN, KIND_TRIGGER };
+enum { PROP_X, PROP_Y, PROP_ELEVATION, PROP_LOOK, PROP_MOVEMENT, PROP_RANGE_X, PROP_RANGE_Y, PROP_TRAINER, PROP_SIGHT,
+       PROP_FLAG, PROP_DEST, PROP_COUNT };
+static const char *const sPropNames[PROP_COUNT] = {"x", "y", "elevation", "look", "movement", "range_x", "range_y",
+                                                   "trainer", "sight", "flag", "dest"};
+
+struct BlockEdit { u16 x, y, was, now; };
+struct PropEdit { u8 kind, prop; char key[80]; s32 was, now; };
+
+struct MapEdits
+{
+    char text[1];   // (unused: the edits are kept parsed)
+    u16 w, h;
+    struct BlockEdit *blocks;
+    u32 blockCount, blockCap;
+    struct PropEdit *props;
+    u32 propCount, propCap;
+    // built from the edits: the patched header (NULL until asked for) and blocks
+    struct MapHeader *header;
+    struct MapEvents *events;
+    u16 *patchedBlocks;
+    const u16 *patchedFrom;   // (the base blocks they were made from)
+    u32 skipped;              // edits whose WAS the game no longer has
+};
+
+static struct MapEdits *sEdits[1700];
+static bool8 sAny, sLoaded;
+
+static struct MapEdits *EditsFor(int map)
+{
+    if (map < 0 || map >= Maker_MapCount() || map >= (int)ARRAY_COUNT(sEdits))
+        return NULL;
+    return sEdits[map];
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Values by name
+
+static bool8 ParseValue(u8 prop, const char *s, s32 *out)
+{
+    unsigned int v;
+    char *end;
+    int table = -1;
+    switch (prop)
+    {
+    case PROP_LOOK: table = MAKER_NAMES_GFX; break;
+    case PROP_MOVEMENT: table = MAKER_NAMES_MOVEMENT; break;
+    case PROP_TRAINER: table = MAKER_NAMES_TRAINERTYPE; break;
+    case PROP_FLAG: table = MAKER_NAMES_FLAG; break;
+    case PROP_DEST:
+    {
+        // MAP_X:N -> map index << 8 | warp id
+        char map[64];
+        const char *colon = strchr(s, ':');
+        int i, len = colon ? (int)(colon - s) : (int)strlen(s);
+        if (!colon || len >= (int)sizeof(map))
+            return FALSE;
+        memcpy(map, s, len);
+        map[len] = 0;
+        i = MakerApi_FindMap(map);
+        if (i < 0)
+            return FALSE;
+        *out = (i << 8) | (atoi(colon + 1) & 0xFF);
+        return TRUE;
+    }
+    }
+    if (table >= 0 && (isalpha((unsigned char)s[0]) || s[0] == '_'))
+    {
+        if (!MakerApi_ValueOf(table, s, &v))
+            return FALSE;
+        *out = (s32)v;
+        return TRUE;
+    }
+    *out = (s32)strtol(s, &end, 0);
+    return end != s;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Reading a map's edits
+
+static void FreeBuilt(struct MapEdits *e)
+{
+    // (a patched header the field still uses, the current map's, is kept: gMapHeader copied it)
+    if (e->header && gMapHeader.events != e->events)
+    {
+        free(e->events ? (void *)e->events->objectEvents : NULL);
+        free(e->events ? (void *)e->events->warps : NULL);
+        free(e->events ? (void *)e->events->coordEvents : NULL);
+        free(e->events ? (void *)e->events->bgEvents : NULL);
+        free(e->events);
+        free(e->header);
+    }
+    e->header = NULL;
+    e->events = NULL;
+    free(e->patchedBlocks);
+    e->patchedBlocks = NULL;
+    e->patchedFrom = NULL;
+}
+
+static void FreeEdits(int map)
+{
+    struct MapEdits *e = EditsFor(map);
+    if (!e)
+        return;
+    FreeBuilt(e);
+    free(e->blocks);
+    free(e->props);
+    free(e);
+    sEdits[map] = NULL;
+}
+
+static void AddBlock(struct MapEdits *e, u16 x, u16 y, u16 was, u16 now)
+{
+    if (e->blockCount == e->blockCap)
+    {
+        e->blockCap = e->blockCap ? e->blockCap * 2 : 64;
+        e->blocks = realloc(e->blocks, e->blockCap * sizeof(*e->blocks));
+    }
+    e->blocks[e->blockCount++] = (struct BlockEdit){x, y, was, now};
+}
+
+static void AddProp(struct MapEdits *e, u8 kind, const char *key, u8 prop, s32 was, s32 now)
+{
+    struct PropEdit *p;
+    if (e->propCount == e->propCap)
+    {
+        e->propCap = e->propCap ? e->propCap * 2 : 32;
+        e->props = realloc(e->props, e->propCap * sizeof(*e->props));
+    }
+    p = &e->props[e->propCount++];
+    p->kind = kind;
+    p->prop = prop;
+    snprintf(p->key, sizeof(p->key), "%s", key);
+    p->was = was;
+    p->now = now;
+}
+
+// One map's edits from their text (the file's, or the editor's); returns the map, or -1
+static int ParseEdits(const char *text, const char *from)
+{
+    char line[512];
+    const char *p = text;
+    struct MapEdits *e = NULL;
+    int map = -1, lineNo = 0;
+    while (*p)
+    {
+        char word[5][96];
+        int n, len;
+        const char *nl = strchr(p, '\n');
+        len = nl ? (int)(nl - p) : (int)strlen(p);
+        if (len >= (int)sizeof(line))
+            len = sizeof(line) - 1;
+        memcpy(line, p, len);
+        line[len] = 0;
+        p = nl ? nl + 1 : p + strlen(p);
+        lineNo++;
+        if (line[0] == '#' || line[0] == 0 || line[0] == '\r')
+            continue;
+        n = sscanf(line, "%95s %95s %95s %95s %95s", word[0], word[1], word[2], word[3], word[4]);
+        if (n <= 0)
+            continue;
+        if (strcmp(word[0], "map") == 0 && n >= 2)
+        {
+            map = MakerApi_FindMap(word[1]);
+            if (map < 0 || map >= (int)ARRAY_COUNT(sEdits))
+            {
+                printf("[maker] %s: no map %s (left out)\n", from, word[1]);
+                return -1;
+            }
+            FreeEdits(map);
+            e = calloc(1, sizeof(*e));
+            sEdits[map] = e;
+            if (n >= 4)
+            {
+                e->w = atoi(word[2]);
+                e->h = atoi(word[3]);
+            }
+            continue;
+        }
+        if (e == NULL)
+            continue;
+        if (strcmp(word[0], "block") == 0 && n == 5)
+            AddBlock(e, atoi(word[1]), atoi(word[2]), strtol(word[3], NULL, 0), strtol(word[4], NULL, 0));
+        else if (n == 5)
+        {
+            static const char *const sKinds[] = {"person", "warp", "sign", "trigger"};
+            int k, prop;
+            s32 was, now;
+            for (k = 0; k < 4 && strcmp(word[0], sKinds[k]) != 0; k++)
+                ;
+            for (prop = 0; prop < PROP_COUNT && strcmp(word[2], sPropNames[prop]) != 0; prop++)
+                ;
+            if (k == 4 || prop == PROP_COUNT || !ParseValue(prop, word[3], &was) || !ParseValue(prop, word[4], &now))
+            {
+                printf("[maker] %s line %d: not understood (left out): %s\n", from, lineNo, line);
+                continue;
+            }
+            AddProp(e, k, word[1], prop, was, now);
+        }
+        else
+            printf("[maker] %s line %d: not understood (left out): %s\n", from, lineNo, line);
+    }
+    return map;
+}
+
+const char *MakerApi_EditsDir(void)
+{
+    const char *env = getenv("MOEMON_MAKER_DIR");
+    return env && env[0] ? env : Updater_ExeFile("MoemonMaker");
+}
+
+// MoemonMaker/base/*.txt beside the game (MOEMON_MAKER_DIR in tests), when the game starts
+static void LoadAll(void)
+{
+    char dir[1024], path[1200];
+    const char *env = getenv("MOEMON_MAKER_DIR");
+    DIR *d;
+    struct dirent *de;
+    int count = 0;
+    sLoaded = TRUE;
+    snprintf(dir, sizeof(dir), "%s/base", env && env[0] ? env : Updater_ExeFile("MoemonMaker"));
+    d = opendir(dir);
+    if (!d)
+        return;
+    while ((de = readdir(d)) != NULL)
+    {
+        FILE *f;
+        long size;
+        char *text;
+        size_t nlen = strlen(de->d_name);
+        if (nlen < 5 || strcmp(de->d_name + nlen - 4, ".txt") != 0)
+            continue;
+        snprintf(path, sizeof(path), "%s/%s", dir, de->d_name);
+        f = fopen(path, "rb");
+        if (!f)
+            continue;
+        fseek(f, 0, SEEK_END);
+        size = ftell(f);
+        fseek(f, 0, SEEK_SET);
+        text = malloc(size + 1);
+        if (text && fread(text, 1, size, f) == (size_t)size)
+        {
+            text[size] = 0;
+            if (ParseEdits(text, de->d_name) >= 0)
+            {
+                count++;
+                sAny = TRUE;
+            }
+        }
+        free(text);
+        fclose(f);
+    }
+    closedir(d);
+    printf("[maker] %d edited maps (%s)\n", count, dir);
+}
+
+void Maker_LoadEdits(void)
+{
+    if (!sLoaded)
+        LoadAll();
+}
+
+void MakerApi_ReloadEdits(void)
+{
+    int i;
+    for (i = 0; i < (int)ARRAY_COUNT(sEdits); i++)
+        FreeEdits(i);
+    sAny = FALSE;
+    LoadAll();
+}
+
+// The editor's edits of one map (its whole text; "" when it has none left)
+void MakerApi_SetMapEdits(const char *mapName, const char *text)
+{
+    int map = MakerApi_FindMap(mapName);
+    Maker_LoadEdits();
+    if (map < 0)
+        return;
+    FreeEdits(map);
+    if (text && text[0] && ParseEdits(text, mapName) == map)
+        sAny = TRUE;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// The edited map
+
+// A person / sign / trigger's key: its LOCALID_ name, else SCRIPT@X,Y
+static void KeyOf(char *key, int size, const char *localIdName, const char *script, int x, int y)
+{
+    if (localIdName && localIdName[0])
+        snprintf(key, size, "%s", localIdName);
+    else
+        snprintf(key, size, "%s@%d,%d", script ? script : "", x, y);
+}
+
+static s32 *PersonField(struct ObjectEventTemplate *t, u8 prop, s32 *tmp)
+{
+    switch (prop)
+    {
+    case PROP_X: *tmp = t->x; return tmp;
+    case PROP_Y: *tmp = t->y; return tmp;
+    case PROP_ELEVATION: *tmp = t->elevation; return tmp;
+    case PROP_LOOK: *tmp = t->graphicsIdLo | (t->graphicsIdHi << 8); return tmp;
+    case PROP_MOVEMENT: *tmp = t->movementType; return tmp;
+    case PROP_RANGE_X: *tmp = t->movementRangeX; return tmp;
+    case PROP_RANGE_Y: *tmp = t->movementRangeY; return tmp;
+    case PROP_TRAINER: *tmp = t->trainerType; return tmp;
+    case PROP_SIGHT: *tmp = t->trainerRange_berryTreeId; return tmp;
+    case PROP_FLAG: *tmp = t->flagId; return tmp;
+    }
+    return NULL;
+}
+
+static void SetPerson(struct ObjectEventTemplate *t, u8 prop, s32 v)
+{
+    switch (prop)
+    {
+    case PROP_X: t->x = v; break;
+    case PROP_Y: t->y = v; break;
+    case PROP_ELEVATION: t->elevation = v; break;
+    case PROP_LOOK: t->graphicsIdLo = v & 0xFF; t->graphicsIdHi = (v >> 8) & 0xFF; break;
+    case PROP_MOVEMENT: t->movementType = v; break;
+    case PROP_RANGE_X: t->movementRangeX = v; break;
+    case PROP_RANGE_Y: t->movementRangeY = v; break;
+    case PROP_TRAINER: t->trainerType = v; break;
+    case PROP_SIGHT: t->trainerRange_berryTreeId = v; break;
+    case PROP_FLAG: t->flagId = v; break;
+    }
+}
+
+// The edited header (people, warps, signs, triggers), made once per change of the edits
+static const struct MapHeader *BuildHeader(int map, struct MapEdits *e)
+{
+    const struct MakerMapName *mn = Maker_Map(map);
+    const struct MapHeader *base = Maker_BaseMapHeader(mn->mapGroup, mn->mapNum);
+    const struct MakerMapEventNames *names = Maker_MapEventNames(map);
+    const struct MapEvents *be = base->events;
+    struct ObjectEventTemplate *objs;
+    struct WarpEvent *warps;
+    struct BgEvent *bgs;
+    struct CoordEvent *coords;
+    u32 i, j;
+    char key[96];
+    if (e->header)
+        return e->header;
+    e->header = malloc(sizeof(*e->header));
+    *e->header = *base;
+    e->skipped = 0;
+    if (be == NULL)
+        return e->header;
+    e->events = malloc(sizeof(*e->events));
+    *e->events = *be;
+    objs = malloc(sizeof(*objs) * (be->objectEventCount + 1));
+    warps = malloc(sizeof(*warps) * (be->warpCount + 1));
+    bgs = malloc(sizeof(*bgs) * (be->bgEventCount + 1));
+    coords = malloc(sizeof(*coords) * (be->coordEventCount + 1));
+    memcpy(objs, be->objectEvents, sizeof(*objs) * be->objectEventCount);
+    memcpy(warps, be->warps, sizeof(*warps) * be->warpCount);
+    memcpy(bgs, be->bgEvents, sizeof(*bgs) * be->bgEventCount);
+    memcpy(coords, be->coordEvents, sizeof(*coords) * be->coordEventCount);
+    for (j = 0; j < e->propCount; j++)
+    {
+        const struct PropEdit *p = &e->props[j];
+        bool8 applied = FALSE;
+        s32 tmp, *cur;
+        switch (p->kind)
+        {
+        case KIND_PERSON:
+            for (i = 0; i < be->objectEventCount && !applied; i++)
+            {
+                const struct MakerObjName *on = names && i < names->objCount ? Maker_ObjName(names->obj + i) : NULL;
+                KeyOf(key, sizeof(key), on ? on->localId : "", on ? on->script : "", be->objectEvents[i].x, be->objectEvents[i].y);
+                if (strcmp(key, p->key) != 0)
+                    continue;
+                // (WAS against the game's own value, never one an earlier edit made)
+                {
+                    struct ObjectEventTemplate orig = be->objectEvents[i];
+                    cur = PersonField(&orig, p->prop, &tmp);
+                }
+                if (cur && *cur == p->was)
+                {
+                    SetPerson(&objs[i], p->prop, p->now);
+                    applied = TRUE;
+                }
+                break;
+            }
+            break;
+        case KIND_WARP:
+            i = atoi(p->key);
+            if (i < be->warpCount)
+            {
+                const struct WarpEvent *w = &be->warps[i];
+                const struct MakerMapName *dn;
+                s32 v = -1;
+                int d;
+                switch (p->prop)
+                {
+                case PROP_X: v = w->x; break;
+                case PROP_Y: v = w->y; break;
+                case PROP_ELEVATION: v = w->elevation; break;
+                case PROP_DEST:
+                    d = Maker_MapIndex(w->mapGroup, w->mapNum);
+                    v = d < 0 ? -1 : (d << 8) | w->warpId;
+                    break;
+                }
+                if (v == p->was && v != -1)
+                {
+                    switch (p->prop)
+                    {
+                    case PROP_X: warps[i].x = p->now; break;
+                    case PROP_Y: warps[i].y = p->now; break;
+                    case PROP_ELEVATION: warps[i].elevation = p->now; break;
+                    case PROP_DEST:
+                        dn = Maker_Map(p->now >> 8);
+                        if (dn)
+                        {
+                            warps[i].mapGroup = dn->mapGroup;
+                            warps[i].mapNum = dn->mapNum;
+                            warps[i].warpId = p->now & 0xFF;
+                        }
+                        break;
+                    }
+                    applied = TRUE;
+                }
+            }
+            break;
+        case KIND_SIGN:
+            for (i = 0; i < be->bgEventCount && !applied; i++)
+            {
+                const struct MakerBgName *bn = names && i < names->bgCount ? Maker_BgName(names->bg + i) : NULL;
+                KeyOf(key, sizeof(key), "", bn ? bn->script : "", be->bgEvents[i].x, be->bgEvents[i].y);
+                if (strcmp(key, p->key) != 0)
+                    continue;
+                if (p->prop == PROP_X && be->bgEvents[i].x == p->was)
+                    bgs[i].x = p->now, applied = TRUE;
+                else if (p->prop == PROP_Y && be->bgEvents[i].y == p->was)
+                    bgs[i].y = p->now, applied = TRUE;
+                else if (p->prop == PROP_ELEVATION && be->bgEvents[i].elevation == p->was)
+                    bgs[i].elevation = p->now, applied = TRUE;
+                break;
+            }
+            break;
+        case KIND_TRIGGER:
+            for (i = 0; i < be->coordEventCount && !applied; i++)
+            {
+                const struct MakerCoordName *cn = names && i < names->coordCount ? Maker_CoordName(names->coord + i) : NULL;
+                KeyOf(key, sizeof(key), "", cn ? cn->script : "", be->coordEvents[i].x, be->coordEvents[i].y);
+                if (strcmp(key, p->key) != 0)
+                    continue;
+                if (p->prop == PROP_X && be->coordEvents[i].x == p->was)
+                    coords[i].x = p->now, applied = TRUE;
+                else if (p->prop == PROP_Y && be->coordEvents[i].y == p->was)
+                    coords[i].y = p->now, applied = TRUE;
+                break;
+            }
+            break;
+        }
+        if (!applied)
+            e->skipped++;
+    }
+    e->events->objectEvents = objs;
+    e->events->warps = warps;
+    e->events->bgEvents = bgs;
+    e->events->coordEvents = coords;
+    e->header->events = e->events;
+    if (e->skipped)
+        printf("[maker] %s: %u edits left out (the game changed there since)\n", mn->name, e->skipped);
+    return e->header;
+}
+
+// overworld.c Overworld_GetMapHeaderByGroupAndId: an edited map's header, or NULL for the game's own
+const struct MapHeader *Maker_EditedHeader(u16 mapGroup, u16 mapNum)
+{
+    int map;
+    struct MapEdits *e;
+    if (!sAny)
+        return NULL;
+    map = Maker_MapIndex(mapGroup, mapNum);
+    e = EditsFor(map);
+    if (e == NULL || e->propCount == 0)
+        return NULL;
+    return BuildHeader(map, e);
+}
+
+// Which map a header is (the current map's copy, an edited copy, or the game's own)
+static int MapOfHeader(const struct MapHeader *h)
+{
+    int i;
+    if (h == &gMapHeader)
+        return Maker_MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
+    for (i = 0; i < Maker_MapCount() && i < (int)ARRAY_COUNT(sEdits); i++)
+    {
+        const struct MakerMapName *m;
+        if (sEdits[i] && sEdits[i]->header == h)
+            return i;
+        m = Maker_Map(i);
+        if (Maker_BaseMapHeader(m->mapGroup, m->mapNum) == h)
+            return i;
+    }
+    return -1;
+}
+
+// fieldmap.c: a map's blocks as the field copies them (SINNOH's from the 3D pack), with the user's tiles
+const u16 *Maker_MapBlocks(const struct MapHeader *h)
+{
+    const u16 *base = S3D_LayoutBlocks(h->mapLayout);
+    struct MapEdits *e;
+    int map;
+    u32 i, n, skipped = 0;
+    if (!sAny)
+        return base;
+    map = MapOfHeader(h);
+    e = EditsFor(map);
+    if (e == NULL || e->blockCount == 0)
+        return base;
+    if (e->patchedBlocks && e->patchedFrom == base)
+        return e->patchedBlocks;
+    n = h->mapLayout->width * h->mapLayout->height;
+    free(e->patchedBlocks);
+    e->patchedBlocks = malloc(n * sizeof(u16));
+    memcpy(e->patchedBlocks, base, n * sizeof(u16));
+    e->patchedFrom = base;
+    for (i = 0; i < e->blockCount; i++)
+    {
+        const struct BlockEdit *b = &e->blocks[i];
+        u32 at = b->y * h->mapLayout->width + b->x;
+        if (b->x < h->mapLayout->width && b->y < h->mapLayout->height && base[at] == b->was)
+            e->patchedBlocks[at] = b->now;
+        else
+            skipped++;
+    }
+    if (skipped)
+        printf("[maker] %s: %u tiles left out (the game changed there since)\n", Maker_Map(map)->name, skipped);
+    return e->patchedBlocks;
+}

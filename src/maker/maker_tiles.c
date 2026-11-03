@@ -14,7 +14,7 @@
 #include "tileset_anims.h"
 #include "s3d.h"
 #include "metatile_behavior.h"
-#include "constants/maker_names.h"
+#include "maker.h"
 #include "maker_api.h"
 
 int Tilesets_MakerMetatileCount(const struct Tileset *tileset, const char **name);   // tilesets.c
@@ -29,9 +29,9 @@ static bool8 sTilesChanged;
 
 static const struct MapHeader *Header(int index)
 {
-    if (index < 0 || index >= MAKER_MAP_COUNT)
+    if (index < 0 || index >= Maker_MapCount())
         return NULL;
-    return Overworld_GetMapHeaderByGroupAndId(sMakerMapNames[index].mapGroup, sMakerMapNames[index].mapNum);
+    return Maker_BaseMapHeader(Maker_Map(index)->mapGroup, Maker_Map(index)->mapNum);
 }
 
 // A tileset's tiles into BG VRAM at tile `offset` (as fieldmap.c CopyTilesetToVram), never past `numTiles`
@@ -77,7 +77,7 @@ int MakerApi_LoadMapTiles(int index, struct MakerTilesInfo *info)
     if (l == NULL)
         return 0;
     sLayout = l;
-    sSinnoh = S3D_IsSinnohGroup(sMakerMapNames[index].mapGroup);
+    sSinnoh = S3D_IsSinnohGroup(Maker_Map(index)->mapGroup);
     LoadTiles(l->primaryTileset, Fieldmap_PrimaryTiles(l), 0);
     LoadTiles(l->secondaryTileset, NUM_TILES_TOTAL - Fieldmap_PrimaryTiles(l), Fieldmap_PrimaryTiles(l));
     LoadPalettes(l);
@@ -190,7 +190,7 @@ int MakerApi_MapBlock(int index, int x, int y)
     const u16 *blocks;
     if (l == NULL || x < 0 || y < 0 || x >= l->width || y >= l->height)
         return -1;
-    blocks = S3D_IsSinnohGroup(sMakerMapNames[index].mapGroup) ? S3D_LayoutBlocks(l) : l->map;
+    blocks = S3D_IsSinnohGroup(Maker_Map(index)->mapGroup) ? S3D_LayoutBlocks(l) : l->map;
     return blocks ? blocks[y * l->width + x] : -1;
 }
 

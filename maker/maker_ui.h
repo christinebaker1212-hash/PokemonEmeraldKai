@@ -3,6 +3,7 @@
 #define MAKER_UI_H
 
 #include <stdlib.h>
+#include <map>
 #include <string>
 #include <vector>
 #include "imgui.h"
@@ -30,6 +31,20 @@ enum Icon
     ICON_MODE_MAP, ICON_MODE_COLLISION, ICON_MODE_EVENTS, ICON_MODE_ENCOUNTERS,
     ICON_PENCIL, ICON_RECT, ICON_FILL, ICON_PICKER,
     ICON_ZOOM_OUT, ICON_ZOOM_IN, ICON_PLAY,
+};
+
+struct PropEdit
+{
+    long was, now;
+    bool operator==(const PropEdit &o) const { return was == o.was && now == o.now; }
+};
+
+// A map's edits (maker_edits.cpp): tiles by y * w + x, properties by "KIND KEY PROP" (person LOCALID_X x)
+struct MapEdits
+{
+    int w = 0, h = 0;
+    std::map<int, std::pair<int, int>> blocks;   // was, now
+    std::map<std::string, PropEdit> props;
 };
 
 struct Place
@@ -67,6 +82,10 @@ struct Editor
     int hoverX = -1, hoverY = -1;   // the tile under the mouse in the MAP panel
     int hoverBlock = -1;
     int selKind = 0, selIndex = -1;   // the selected event in the MAP panel: SEL_*
+    int recovered = 0;                // maps whose unsaved edits came back from the recovery files
+    std::string message;              // the status bar's last message ("Saved 3 maps")
+    std::string title;
+    unsigned int messageUntil = 0;
 };
 
 extern Editor gEd;
@@ -74,6 +93,33 @@ extern Editor gEd;
 void ApplyTheme();
 void SaveSettings();
 void SelectMap(int index);
+
+// maker_edits.cpp
+std::string EditsDir();
+const MapEdits *FindEdits(int map);
+MapEdits &Edits(int map);
+int CurrentBlock(int map, int x, int y, int base);
+void SetBlock(int map, int x, int y, int base, int now);
+long CurrentProp(int map, const char *kind, const std::string &key, const char *prop, long base);
+void SetProp(int map, const char *kind, const std::string &key, const char *prop, long base, long now);
+std::string EditsText(int map);
+void LoadAllEdits();
+void SendToGame(int map);
+void SendAllToGame();
+void BeginChange(int map);
+void EndChange();
+bool InChange();
+bool CanUndo();
+bool CanRedo();
+void Undo();
+void Redo();
+bool AnyUnsaved();
+bool MapUnsaved(int map);
+int EditedMapCount();
+int SaveAll();
+void RecoveryTick();
+void DiscardUnsaved();
+void Message(const char *fmt, ...);
 
 // maker_icons.cpp
 bool IconButton(const char *id, int icon, const char *tooltip, bool selected, bool enabled);
@@ -87,6 +133,9 @@ void TilesPanel();
 void MapView_TestCommand(const char *cmd, const char *arg);
 int MapView_SelectedMetatile();
 void MapView_Inspector();   // the selected event's details (the INSPECTOR panel)
+void MapView_EditsChanged(int map);
+void MapView_Problems();     // the PROBLEMS panel's entries
+int MapView_ProblemCount();
 
 } // namespace maker
 

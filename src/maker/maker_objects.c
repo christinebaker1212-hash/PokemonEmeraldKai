@@ -8,7 +8,7 @@
 #include "overworld.h"
 #include "event_object_movement.h"
 #include "constants/event_object_movement.h"
-#include "constants/maker_names.h"
+#include "maker.h"
 #include "maker_api.h"
 
 const u16 *ObjectEvent_MakerPalette(u16 graphicsId);   // event_object_movement.c
@@ -16,20 +16,14 @@ extern const u8 gInitialMovementTypeFacingDirections[];
 
 static const struct MapHeader *Header(int index)
 {
-    if (index < 0 || index >= MAKER_MAP_COUNT)
+    if (index < 0 || index >= Maker_MapCount())
         return NULL;
-    return Overworld_GetMapHeaderByGroupAndId(sMakerMapNames[index].mapGroup, sMakerMapNames[index].mapNum);
+    return Maker_BaseMapHeader(Maker_Map(index)->mapGroup, Maker_Map(index)->mapNum);
 }
 
 static const struct MakerMapEventNames *Names(int index)
 {
-    int i;
-    if (index < 0 || index >= MAKER_MAP_COUNT)
-        return NULL;
-    for (i = 0; i < MAKER_MAP_EVENTS_COUNT; i++)
-        if (strcmp(sMakerMapEventNames[i].map, sMakerMapNames[index].name) == 0)
-            return &sMakerMapEventNames[i];
-    return NULL;
+    return Maker_MapEventNames(index);
 }
 
 int MakerApi_ObjectCount(int map)
@@ -67,9 +61,9 @@ int MakerApi_ObjectInfo(int map, int i, struct MakerObjectInfo *o)
     o->localIdName = o->gfxName = o->scriptName = "";
     if (n && i < n->objCount)
     {
-        o->localIdName = sMakerObjNames[n->obj + i].localId;
-        o->gfxName = sMakerObjNames[n->obj + i].gfx;
-        o->scriptName = sMakerObjNames[n->obj + i].script;
+        o->localIdName = Maker_ObjName(n->obj + i)->localId;
+        o->gfxName = Maker_ObjName(n->obj + i)->gfx;
+        o->scriptName = Maker_ObjName(n->obj + i)->script;
     }
     return 1;
 }
@@ -94,8 +88,8 @@ int MakerApi_WarpInfo(int map, int i, struct MakerWarpInfo *w)
     w->elevation = e->elevation;
     w->destWarp = e->warpId;
     w->destMap = -1;
-    for (d = 0; d < MAKER_MAP_COUNT; d++)
-        if (sMakerMapNames[d].mapGroup == e->mapGroup && sMakerMapNames[d].mapNum == e->mapNum)
+    for (d = 0; d < Maker_MapCount(); d++)
+        if (Maker_Map(d)->mapGroup == e->mapGroup && Maker_Map(d)->mapNum == e->mapNum)
         {
             w->destMap = d;
             break;
@@ -125,8 +119,8 @@ int MakerApi_BgInfo(int map, int i, struct MakerBgInfo *b)
     b->typeName = b->scriptName = "";
     if (n && i < n->bgCount)
     {
-        b->typeName = sMakerBgNames[n->bg + i].type;
-        b->scriptName = sMakerBgNames[n->bg + i].script;
+        b->typeName = Maker_BgName(n->bg + i)->type;
+        b->scriptName = Maker_BgName(n->bg + i)->script;
     }
     return 1;
 }
@@ -152,8 +146,8 @@ int MakerApi_CoordInfo(int map, int i, struct MakerCoordInfo *c)
     c->varName = c->scriptName = "";
     if (n && i < n->coordCount)
     {
-        c->varName = sMakerCoordNames[n->coord + i].var;
-        c->scriptName = sMakerCoordNames[n->coord + i].script;
+        c->varName = Maker_CoordName(n->coord + i)->var;
+        c->scriptName = Maker_CoordName(n->coord + i)->script;
     }
     return 1;
 }
@@ -202,4 +196,14 @@ int MakerApi_RenderObject(int graphicsId, int facing, unsigned int *rgba, int ma
     *outW = w;
     *outH = h;
     return 1;
+}
+
+// The way a movement type faces when the map loads (0 south, 1 north, 2 west, 3 east), as the field sets it
+int MakerApi_MovementFacing(int movementType)
+{
+    u8 d;
+    if (movementType < 0 || movementType >= NUM_MOVEMENT_TYPES)
+        return 0;
+    d = gInitialMovementTypeFacingDirections[movementType];
+    return d >= 1 && d <= 4 ? d - 1 : 0;
 }

@@ -46,7 +46,7 @@ $(INCLUDECONSTS_OUTDIR)/map_event_ids.h: $(MAP_JSONS)
 	@echo "$(MAPJSON) event_constants emerald <MAP_JSONS> $(INCLUDECONSTS_OUTDIR)/map_event_ids.h"
 
 # Moemon Maker: the editor's names, made again whenever the constants they come from change
-$(INCLUDECONSTS_OUTDIR)/maker_names.h: tools/maker/gen_names.py $(INCLUDECONSTS_OUTDIR)/map_groups.h include/constants/songs.h include/constants/event_objects.h $(MAP_JSONS)
+$(INCLUDECONSTS_OUTDIR)/maker_names.h: tools/maker/gen_names.py $(INCLUDECONSTS_OUTDIR)/map_groups.h include/constants/songs.h include/constants/event_objects.h include/constants/qz_port.h include/constants/sinnoh_gfx.h include/mp.h include/constants/event_object_movement.h include/constants/trainer_types.h include/constants/items.h include/constants/species.h include/constants/flags.h $(MAP_JSONS)
 	python3 tools/maker/gen_names.py $@
 	@touch $@
 $(INCLUDECONSTS_OUTDIR)/maker_tilesets.h: tools/maker/gen_names.py src/data/tilesets/headers.h src/data/tilesets/qz_headers.h
