@@ -21,6 +21,10 @@ what was proposed and not yet confirmed, then what is still open.
 4. 1 vs 1 is the main format. BOOSTER DRAFT is an optional Friend Duel format.
 5. Magic is hidden in every game picker until someone gives the player a starter deck.
 6. As soon as the player has a deck, NPCs who play Magic start offering Magic duels. Before that, no NPC mentions it.
+7. In every region's venue the main floor and B1F are where most Magic duelists gather; only a few are out in the
+   world. (KANTO's venue is not chosen yet: Two Island's Joyful Game Corner, FireRed's twin of MOSSDEEP's building,
+   or another copy of MOSSDEEP's.)
+8. Card art from an API: Scryfall (see below).
 
 ## Proposed, not yet confirmed
 - Card pool: Premodern (4th Edition / Ice Age, 1995, to Scourge, 2003): Magic's fan-revived classic format, the
@@ -43,4 +47,15 @@ what was proposed and not yet confirmed, then what is still open.
   EDOPro (a bundled Java runtime, roughly 50 MB), or an engine of our own in C for the fixed pool, built in stages.
 - Who gives the starter deck, and where (MOSSDEEP's shop is the natural place).
 - Which NPCs play Magic, and how many.
-- Card art and the card back.
+- KANTO's venue (answer 7).
+
+## Card art: Scryfall
+- api.scryfall.com has every printing of every card (checked 2026-11-03 with 4th Edition's Lightning Bolt):
+  image_uris png (745x1040), large, normal, border_crop, art_crop; `frame` ("1993" = the old frame), `artist`,
+  `highres_image`. The card back too.
+- Like the other games' printed art: tools/mtg/fetch_art.py fetches once (a named User-Agent and Accept header, a
+  short pause between requests, as Scryfall asks) into a built-in graphics/mtg/printed.bin; the game never goes online
+  for art. Each card shows its old-frame printing from the pool's years; artist credits from the data.
+- Wizards' Fan Content Policy: free fan content may show the cards; never sold, the artist and copyright line not
+  cropped off (the full printed card keeps both). The old frame's art box is the same on every card: one measured
+  rectangle for the shared foil.
