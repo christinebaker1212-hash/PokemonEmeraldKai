@@ -70,10 +70,13 @@ jobs:
           gh release download "v$VER" --repo "$GITHUB_REPOSITORY" --pattern MoemonEmeraldKaiCoop-linux.zip --dir "$RUNNER_TEMP/main-reference"
           unzip -p "$RUNNER_TEMP/main-reference/MoemonEmeraldKaiCoop-linux.zip" MoemonEmeraldKaiCoop/MoemonEmeraldKaiCoop > pokeemerald64
           chmod +x pokeemerald64
+      # The same tools, song table and SINNOH packs as release.yml (the last dev release must build like 1.80.0)
       - name: Tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential libpng-dev libsdl2-dev gcc-mingw-w64-x86-64 zip unzip python3
+        run: tools/release/ci_tools.sh "$RUNNER_TEMP/debs"
+      - name: Song table
+        run: python3 tools/kaisong/gen.py
+      - name: SINNOH packs and scripts
+        run: tools/sinnoh/make_pack.sh "$RUNNER_TEMP/pokeplatinum"
       - name: SDL2 for Windows (checked)
         run: |
           curl --fail --location -o "$RUNNER_TEMP/sdl2.tar.gz" https://github.com/libsdl-org/SDL/releases/download/release-2.30.9/SDL2-devel-2.30.9-mingw.tar.gz
