@@ -86,6 +86,9 @@ FRONT_WHEEL_PLACEHOLDERS = {34: [15, 16, 19, 20], 35: FRONT_WHEEL, 36: FRONT_WHE
 FRAMES = {'walking': (16, 9), 'running': (16, 9), 'mach_bike': (32, 9), 'acro_bike': (32, 27),
           'underwater_diving': (32, 9)}
 FIVE_FRAME_ORDER = [0, 1, 3, 4]
+# Back pictures whose sheet has the throw out of order (the game plays frames 1, 2, 3: the wind-up, the release, the
+# follow-through): ETHAN's sheet has the follow-through second
+BACK_ORDER = {2: [0, 2, 3, 1]}
 
 
 def rgb5(px):
@@ -261,6 +264,8 @@ def main():
         if n not in CHARS:
             sys.exit('%s: no character' % f)
         order = FIVE_FRAME_ORDER if k == 5 else list(range(4))
+        if n in BACK_ORDER:
+            order = [order[i] for i in BACK_ORDER[n]]
         if k not in (4, 5):
             sys.exit('%s: %d frames' % (f, k))
         cols = make_palette([fr[i] for i in order], f)

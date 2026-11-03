@@ -11019,7 +11019,7 @@ static const struct ObjectEventGraphicsInfo sObjectEventGraphicsInfo_Qz16176 = {
 };
 
 static const struct ObjectEventGraphicsInfo *const sQzObjectEventGraphicsInfoPointers[] = {
-    &sObjectEventGraphicsInfo_Qz59,
+    &sObjectEventGraphicsInfo_Qz15006,
     &sObjectEventGraphicsInfo_Qz60,
     &sObjectEventGraphicsInfo_Qz82,
     &sObjectEventGraphicsInfo_Qz87,
