@@ -1446,7 +1446,10 @@ int Updater_Run(int argc, char **argv)
         FetchTest(getenv("MOEMON_UPDATE_FETCH"));
         return 1;
     }
-    sWantDev = MP_ConfigAllowsTweaks();
+    // Moemon Maker: the dev channel ended (the user, 2026-11-03; docs/MOEMON_MAKER.md "The dev channel ends"): every
+    // build follows main, AllowSmallTweaks only unlocks the small tweaks. A dev build running this code moves itself
+    // back to main (a channel change installs even an equal or lower version).
+    sWantDev = 0;
     Log("selected %s channel (build: %s %s)", sWantDev ? "dev" : "main", MOEMON_BUILD_CHANNEL, MOEMON_BUILD_VERSION);
     if (TurnedOff(argc, argv))
         return 0;

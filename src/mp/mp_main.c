@@ -2152,6 +2152,10 @@ void MP_Init(void)
         return;
     sInitDone = TRUE;
     LoadConfig();
+    {
+        void Maker_InitFromEnv(void);
+        Maker_InitFromEnv();   // Moemon Maker: MOEMON_MAKER_UNLOCK=1 in tests (src/maker/maker_gate.c)
+    }
     sMainAutosaveMinutes = gMpConfig.autosaveMinutes;
     if (MOEMON_DEV_BUILD)
         gMpConfig.autosaveMinutes = 0;
@@ -2172,6 +2176,10 @@ void MP_FrameEnd(void)
 
 void MP_FrameUpdate(void)
 {
+    {
+        void Maker_FrameUpdate(void);
+        Maker_FrameUpdate();   // Moemon Maker: the chime when "maker" is typed (src/maker/maker_gate.c)
+    }
     {
         void MP_Phone_Update(void);
         void MP_Export_IfAsked(void);

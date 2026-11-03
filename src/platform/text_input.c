@@ -28,6 +28,13 @@ void Platform_QueueTypedText(const char *text)
             continue;
         if (c == '\t')
             c = ' ';
+        if (!sOn && ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')))
+        {
+            // (tests: with no text entry open, letters are typed as the keyboard types them: "speed", "maker"...)
+            void Platform_PushLetter(char c);
+            Platform_PushLetter((char)(c | 0x20));
+            continue;
+        }
         if ((c >= 32 && c < 127) || c == TYPED_BACKSPACE || c == TYPED_ENTER)
             Push((char)c);
     }
@@ -109,7 +116,7 @@ int Platform_TextInputKeyDown(int sym, int mod)
 static char sLetters[32];
 static int sLetterHead, sLetterCount;
 
-// Typed anywhere outside text entry: "speed" / "slow" (AllowSmallTweaks = 1)
+// Typed anywhere outside text entry: "speed" / "slow" / "maker" (AllowSmallTweaks = 1)
 static void CheckTypedWords(char c)
 {
     static char sTail[8];
@@ -130,6 +137,12 @@ static void CheckTypedWords(char c)
     else if (n >= 4 && memcmp(sTail + n - 4, "slow", 4) == 0)
     {
         Platform_SetSpeedUp(0);
+        sTail[0] = 0;
+    }
+    else if (n >= 5 && memcmp(sTail + n - 5, "maker", 5) == 0)
+    {
+        void Maker_Typed(void);
+        Maker_Typed();   // Moemon Maker: the main menu's MOéMON MAKER row (AllowSmallTweaks = 1; src/maker/maker_gate.c)
         sTail[0] = 0;
     }
 }
