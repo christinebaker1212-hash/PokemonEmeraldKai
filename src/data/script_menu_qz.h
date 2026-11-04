@@ -605,3 +605,9 @@ static const struct MenuAction sKaiMulti_GOLDENROD_TUTOR[] = {
     {(const u8 []) _("ICE BEAM")},
     {(const u8 []) _("CANCEL")},
 };
+static const struct MenuAction sKaiMulti_GOLDENROD_TM_PRIZES[] = {
+    {(const u8 []) _("TM25    5500")},
+    {(const u8 []) _("TM14    5500")},
+    {(const u8 []) _("TM38    5500")},
+    {(const u8 []) _("CANCEL")},
+};

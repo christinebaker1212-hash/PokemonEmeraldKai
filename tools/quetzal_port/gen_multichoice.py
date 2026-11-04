@@ -39,6 +39,8 @@ KAI_MENUS = [
     ('ACADEMY_BLACKBOARD', ['PSN', 'PAR', 'SLP', 'BRN', 'FRZ', 'QUIT']),
     # GOLDENROD's move tutor (pokecrystal maps/GoldenrodCity.asm MoveTutorScript .MenuData)
     ('GOLDENROD_TUTOR', ['FLAMETHROWER', 'THUNDERBOLT', 'ICE BEAM', 'CANCEL']),
+    # GOLDENROD GAME CORNER's TM prizes (pokecrystal maps/GoldenrodGameCorner.asm TMVendorMenuHeader)
+    ('GOLDENROD_TM_PRIZES', ['TM25    5500', 'TM14    5500', 'TM38    5500', 'CANCEL']),
 ]
 
 

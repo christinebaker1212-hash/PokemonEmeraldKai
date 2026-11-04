@@ -4887,3 +4887,5 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
     (+ MP_PokeSeerOT / Level / Advice) on the met location and level (hatched: level 5, Crystal's EGG_LEVEL), own or
     traded by OT ID, METLOC_FATEFUL_ENCOUNTER = level only, METLOC_IN_GAME_TRADE = can't tell; no time of day (this game
     keeps none). crystal_words.py knows the wSeer* buffers and text_ram ... text_start. Test johto_poke_seer.
+  - GOLDENROD GAME CORNER's TM prizes (Crystal's TMVendorScript on Quetzal's "prizes are to the right" man):
+    MULTI_KAI_GOLDENROD_TM_PRIZES, 5500 coins each, additem (no obtain fanfare, as Crystal). Test johto_tm_prizes.

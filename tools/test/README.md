@@ -84,6 +84,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `johto_sunday_lady` | GOLDENROD DEPT. STORE 5F's receptionist is out on Sundays and gives TM27 RETURN to a loving lead, once that day |
 | `johto_goldenrod_tutor` | GOLDENROD's tutor (Wednesdays after the LEAGUE) teaches FLAMETHROWER for 4000 coins, then leaves for the day |
 | `johto_poke_seer` | CIANWOOD's POKé SEER reads the lead's meeting and gives her advice |
+| `johto_tm_prizes` | GOLDENROD GAME CORNER's TM counter sells TM25 for 5500 coins |
 | `johto_gs_ball` | GOLDENROD's POKéMON CENTER brings the GS BALL only after JOHTO's LEAGUE; KURT keeps it until the next day, then hands it back in AZALEA |
 | `kanto_move_people` | FUCHSIA's MOVE DELETER forgets THUNDERSHOCK, the COPYCAT teaches MIMIC for a POKé DOLL, TWO ISLAND's MOVE MANIAC remembers GROWL for two TINYMUSHROOMS |
 | `kanto_cape_brink` | CAPE BRINK's starter tutor teaches a lead VENUSAUR at full friendship FRENZY PLANT |
