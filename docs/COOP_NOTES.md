@@ -4889,3 +4889,5 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
     keeps none). crystal_words.py knows the wSeer* buffers and text_ram ... text_start. Test johto_poke_seer.
   - GOLDENROD GAME CORNER's TM prizes (Crystal's TMVendorScript on Quetzal's "prizes are to the right" man):
     MULTI_KAI_GOLDENROD_TM_PRIZES, 5500 coins each, additem (no obtain fanfare, as Crystal). Test johto_tm_prizes.
+  - GOLDENROD's NAME RATER: Crystal's words (data/text/common_2 _NameRater*) on KANTO's LAVENDER flow
+    (Common_EventScript_NameReceivedPartyMon, no OT check); his bookshelves Crystal's. Test johto_name_rater.

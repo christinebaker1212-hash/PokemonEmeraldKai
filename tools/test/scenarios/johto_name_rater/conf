@@ -1,0 +1,7 @@
+# GOLDENROD's NAME RATER (docs/REGIONS_AUDIT.md 118, Crystal's words on KANTO's flow): YES, the lead, NO to a better
+# name (his "Come again"), and the field is free again (the naming itself is the stock call KANTO's uses)
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("ctx 1 free 1 overworld 1 locked 0 script 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")
