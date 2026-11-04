@@ -232,7 +232,37 @@ public final class SummaryPage extends Page {
         y += 4;
         // how much it likes its Trainer
         section(c, w, y, "FRIENDSHIP");
-        bar(c, 110, y + 6, w - 140, mon.optInt("f"), 255, 0xFFF870A8);
+        int f = mon.optInt("f");
+        bar(c, 110, y + 6, w - 140, f, 255, 0xFFF870A8);
+        y += 16;
+        // (VERDANTURF's friendship rater's words)
+        String feel = f >= 255 ? "It adores you! It can't possibly love you any more."
+                : f >= 200 ? "It's extremely friendly toward you."
+                : f >= 150 ? "It's quite friendly to you."
+                : f >= 100 ? "It's warming up to you."
+                : f >= 50 ? "It feels neutral toward you."
+                : f >= 1 ? "It's not very fond of you." : "It doesn't like you at all.";
+        for (String l : wrap(feel, w - 40)) {
+            art.text(c, l, 18, y, GameArt.GRAY_TEXT, GameArt.SHADOW);
+            y += 14;
+        }
+        // its page in the POKéDEX
+        button(c, "POKéDEX ENTRY", 18, dexButtonY(), w - 36, true);
+    }
+
+    private int dexButtonY() {
+        return v.contentHeight() - 34 - 4 - 30;
+    }
+
+    private void openDex(JSONObject mon) {
+        int dex = art.species(mon.optInt("s")).optInt("dex");
+        if (dex <= 0) {
+            return;
+        }
+        java.util.ArrayList<Integer> one = new java.util.ArrayList<>();
+        one.add(dex);
+        v.buzz(false);
+        v.showOver(new DexEntryPage(v, one, 0));
     }
 
     private void bar(Canvas c, int x, int y, int bw, int v, int max, int color) {
@@ -339,6 +369,14 @@ public final class SummaryPage extends Page {
         art.text(c, pow, 70, y + 4);
         section(c, w, y + 20, "ACCURACY");
         art.text(c, acc, 90, y + 20);
+        // its kind of damage, the Gen 4 way (each move its own)
+        String[] cats = {"PHYSICAL", "SPECIAL", "STATUS"};
+        int[] catColors = {0xFFE05838, 0xFF5878E0, 0xFF909090};
+        int cat = m.optInt("c");
+        if (cat >= 0 && cat < 3) {
+            int cw = art.width(cats[cat]) + 10;
+            chip(c, cats[cat], w - 20 - cw, y + 10, catColors[cat]);
+        }
         art.paragraph(c, m.optString("d"), 16, y + 38, w - 36, GameArt.TEXT, GameArt.SHADOW);
     }
 
@@ -411,6 +449,10 @@ public final class SummaryPage extends Page {
         }
         if (y < TOP_H + 4 && x < 84) {
             cry();   // (the picture: its cry again)
+            return;
+        }
+        if (tab == 0 && y >= dexButtonY() && y < dexButtonY() + 26 && x >= 18 && x < w - 18) {
+            openDex(mon);
             return;
         }
         if (tab == 2 && y >= BODY_Y + 4 && y < BODY_Y + 4 + 4 * 32) {

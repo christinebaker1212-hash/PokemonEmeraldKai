@@ -299,7 +299,7 @@ public final class DevicePage extends Page {
                 touching = true;
                 touch(p, true);
             }
-        } else if (device() == POKEGEAR && card == CARD_RADIO && inDial(x, y)) {
+        } else if (device() == POKEGEAR && card == CARD_RADIO && stepAt(x, y) == 0 && inDial(x, y)) {
             tuning = true;
             tuneTo(x);
         }
@@ -613,6 +613,16 @@ public final class DevicePage extends Page {
         c.drawRect(nx - 1, dy + 2, nx + 2, dy + 26, fill);
         String f = (freq / 2) + "." + (freq % 2 == 0 ? "0" : "5");
         art.text(c, f, lx1 - 10 - art.width(f), dy + 30, LCD_INK, 0);
+        // fine tuning half a step at a time (a finger on the dial is wider than its ticks)
+        for (int k = 0; k < 2; k++) {
+            int bx = stepX(lx0, k);
+            fill.setColor(LCD_INK);
+            c.drawRect(bx, dy + 30, bx + 18, dy + 45, fill);
+            fill.setColor(stepFlash == k + 1 && System.currentTimeMillis() - stepTime < 150 ? LCD_MID : 0xFFC8E0A0);
+            c.drawRect(bx + 1, dy + 31, bx + 17, dy + 44, fill);
+            String a = k == 0 ? "<" : ">";
+            art.text(c, a, bx + 9 - art.width(a) / 2, dy + 29, LCD_INK, 0);
+        }
         // the station and its show, a line at a time as the game's radio prints them
         long now = System.currentTimeMillis();
         if (radioOn && linked() && now - radioAsked > 1500) {
@@ -643,6 +653,42 @@ public final class DevicePage extends Page {
     }
 
     private JSONObject lastRadio;
+    private int stepFlash;
+    private long stepTime;
+
+    private static int stepX(int lx0, int k) {
+        return lx0 + 8 + k * 24;
+    }
+
+    /** the fine-tuning button under the dial at x, y: -1 down, 1 up, 0 none */
+    private int stepAt(int x, int y) {
+        int lx0 = gearX0() + 10, dy = gearY0() + 10 + 22 + 6;
+        if (y < dy + 28 || y >= dy + 48) {
+            return 0;
+        }
+        for (int k = 0; k < 2; k++) {
+            int bx = stepX(lx0, k);
+            if (x >= bx - 3 && x < bx + 21) {
+                return k == 0 ? -1 : 1;
+            }
+        }
+        return 0;
+    }
+
+    private void step(int d) {
+        int f = Math.max(0, Math.min(41, freq + d));
+        stepFlash = d < 0 ? 1 : 2;
+        stepTime = System.currentTimeMillis();
+        if (f != freq) {
+            freq = f;
+            radioLines[0] = radioLines[1] = "";
+            radioName = "";
+            radioAsked = 0;
+            v.buzz(false);
+        }
+        radioOn = true;
+        v.postInvalidateDelayed(160);
+    }
 
     private boolean inDial(int x, int y) {
         int lx0 = gearX0() + 10, lx1 = v.width() - 22, dy = gearY0() + 10 + 22 + 6;
@@ -703,7 +749,9 @@ public final class DevicePage extends Page {
                 }
                 break;
             case CARD_RADIO:
-                if (inDial(x, y)) {
+                if (stepAt(x, y) != 0) {
+                    step(stepAt(x, y));
+                } else if (inDial(x, y)) {
                     tuneTo(x);
                 } else {
                     radioOn = !radioOn;
