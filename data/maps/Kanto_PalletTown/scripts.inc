@@ -534,7 +534,7 @@ Kanto_PalletTown_Text_842DF1D::
 	.string "{PLAYER}’s house$"
 
 Kanto_PalletTown_Text_842DF28::
-	.string "BLUE’s house$"
+	.string "{RIVAL}’s house$"
 
 Kanto_PalletTown_Text_842DF35::
 	.string "PALLET TOWN\n"

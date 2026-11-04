@@ -252,10 +252,10 @@ Kanto_CeladonCity_Gym_Text_84479AE::
 	.string "CELADON MOéMON GYM\n"
 	.string "LEADER: ERIKA\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE$"
+	.string "{RIVAL}$"
 
 Kanto_CeladonCity_Gym_Text_84479E7::
 	.string "CELADON MOéMON GYM\n"
 	.string "LEADER: ERIKA\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE, {PLAYER}$"
+	.string "{RIVAL}, {PLAYER}$"

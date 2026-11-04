@@ -140,11 +140,23 @@ static bool8 sRoomMoveSplit = TRUE;   // Moemon Kai: MPR_RULES byte 4
 static u8 sRoomGeneration = 3;        // Moemon Kai: the room's GENERATION (MPR_RULES byte 5 + MP_SCALE_COUNT)
 static u8 sRoomGimmicks = 0;         // Moemon Kai: the room's GIMMICKS (MPR_RULES byte 6 + MP_SCALE_COUNT)
 static u8 sRoomRivalName[8];         // Moemon Kai: the host's JOHTO rival's name (MPR_RULES bytes 7-14 + MP_SCALE_COUNT)
+static u8 sRoomKantoRivalName[8];    // ... and KANTO's (bytes 15-22 + MP_SCALE_COUNT, from 1.89.0: older hosts send none)
 // Moemon Kai: the JOHTO rival's name this player gave (7 letters, EOS-padded; qz_specials.c)
 static void OwnRivalName(u8 *out)
 {
     const u8 *MP_JohtoRivalOwnName(void);
     const u8 *n = MP_JohtoRivalOwnName();
+    u32 k;
+    for (k = 0; k < 8; k++)
+        out[k] = EOS;
+    for (k = 0; k < 7 && n[k] != EOS; k++)
+        out[k] = n[k];
+}
+
+static void OwnKantoRivalName(u8 *out)
+{
+    const u8 *MP_KantoRivalOwnName(void);
+    const u8 *n = MP_KantoRivalOwnName();
     u32 k;
     for (k = 0; k < 8; k++)
         out[k] = EOS;
@@ -1394,6 +1406,9 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
             memset(sRoomRivalName, EOS, sizeof(sRoomRivalName));   // Moemon Kai: the JOHTO rival's name the host gave
             if (len >= 15 + MP_SCALE_COUNT)
                 memcpy(sRoomRivalName, data + 7 + MP_SCALE_COUNT, 7);
+            memset(sRoomKantoRivalName, EOS, sizeof(sRoomKantoRivalName));   // ... and KANTO's
+            if (len >= 23 + MP_SCALE_COUNT)
+                memcpy(sRoomKantoRivalName, data + 15 + MP_SCALE_COUNT, 7);
             sRoomRulesHeard = TRUE;
             sRoomHostId = from;
             MPNet_Log("room rules from player %d: team padding %s, anim speed +%d%%, level scaling %s", from + 1,
@@ -1523,7 +1538,7 @@ static void SendWelcome(u8 id)
     if (sLobby.creator)
     {
         // the room's settings first (the host decides them for everyone)
-        u8 rules[15 + MP_SCALE_COUNT] = {MPR_RULES, OwnPadding(), OwnAnimSpeed(), OwnLevelScaling()};
+        u8 rules[23 + MP_SCALE_COUNT] = {MPR_RULES, OwnPadding(), OwnAnimSpeed(), OwnLevelScaling()};
         LevelRulesFromEnv();
         memcpy(rules + 4, gMpConfig.scale, MP_SCALE_COUNT - 1);
         rules[3 + MP_SCALE_COUNT] = OwnMoveSplit();
@@ -1532,6 +1547,8 @@ static void SendWelcome(u8 id)
         rules[5 + MP_SCALE_COUNT] = OwnGeneration();
         rules[6 + MP_SCALE_COUNT] = OwnGimmicks();
         OwnRivalName(rules + 7 + MP_SCALE_COUNT);
+    OwnKantoRivalName(rules + 15 + MP_SCALE_COUNT);
+        OwnKantoRivalName(rules + 15 + MP_SCALE_COUNT);
         MP_SendRelay(id, rules, sizeof(rules));
         SendClock(id);
     }
@@ -1578,12 +1595,13 @@ bool8 MP_Lobby_IsCreator(void) { return sLobby.creator && sLobby.state == MP_LOB
 
 // Moemon Kai: JOHTO's rival is named by the room's host (the user, 2026-11-02): a friend in someone's room reads the
 // host's name (NULL: ours, offline or hosting, or a host who never named him)
-const u8 *MP_RoomRivalName(void)
+const u8 *MP_RoomRivalName(u8 region)
 {
-    if (sLobby.creator || sLobby.state != MP_LOBBY_IN_ROOM || !sRoomRulesHeard || sRoomRivalName[0] == EOS)
+    u8 *name = region == REGION_KANTO ? sRoomKantoRivalName : sRoomRivalName;
+    if (sLobby.creator || sLobby.state != MP_LOBBY_IN_ROOM || !sRoomRulesHeard || name[0] == EOS)
         return NULL;
-    sRoomRivalName[7] = EOS;
-    return sRoomRivalName;
+    name[7] = EOS;
+    return name;
 }
 
 bool8 MP_IsRoomGuest(void)
@@ -1750,7 +1768,7 @@ bool8 MP_LevelScaling(void)
 // The host changed a room setting (OPTIONS): everyone hears it again
 void MP_SendRoomRules(void)
 {
-    u8 rules[15 + MP_SCALE_COUNT];
+    u8 rules[23 + MP_SCALE_COUNT];
     u8 i;
     if (!sLobby.creator || sLobby.state != MP_LOBBY_IN_ROOM)
         return;
@@ -1765,6 +1783,7 @@ void MP_SendRoomRules(void)
     rules[5 + MP_SCALE_COUNT] = OwnGeneration();
     rules[6 + MP_SCALE_COUNT] = OwnGimmicks();
     OwnRivalName(rules + 7 + MP_SCALE_COUNT);
+    OwnKantoRivalName(rules + 15 + MP_SCALE_COUNT);
     for (i = 0; i < MP_MAX_PLAYERS; i++)
         if (i != gMpLocalId && gMpPlayers[i].present)
             MP_SendRelay(i, rules, sizeof(rules));

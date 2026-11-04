@@ -225,6 +225,14 @@ Kanto_PalletTown_ProfessorOaksLab_EventScript_8419162::
 	clearflag FLAG_QZ_0x2130
 	savebgm MUS_DUMMY
 	fadedefaultbgm
+	@ Moemon Kai: FireRed's OAK names his grandson (its intro's words; docs/REGIONS_AUDIT.md case 18); in a friend's room
+	@ the host's name stands (qz_specials.c QzNameKantoRival)
+	goto_if_ne VAR_KANTO_RIVAL_NAME, 0, Kanto_PalletTown_ProfessorOaksLab_EventScript_RivalNamed
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_WhatWasHisName, MSGBOX_DEFAULT
+	closemessage
+	specialvar VAR_RESULT, QzNameKantoRival
+	call_if_eq VAR_RESULT, TRUE, Kanto_PalletTown_ProfessorOaksLab_EventScript_WaitRivalName
+Kanto_PalletTown_ProfessorOaksLab_EventScript_RivalNamed:
 	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843DFAE, MSGBOX_DEFAULT
 	closemessage
 	delay 0x3C
@@ -1393,35 +1401,35 @@ Kanto_PalletTown_ProfessorOaksLab_Movement_8457AB4:
 	step_end
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843DF7F::
-	.string "BLUE: What, it’s only {PLAYER}?\n"
+	.string "{RIVAL}: What, it’s only {PLAYER}?\n"
 	.string "Gramps isn’t around.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843DFAE::
-	.string "BLUE: Gramps!\n"
+	.string "{RIVAL}: Gramps!\n"
 	.string "I’m fed up with waiting!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843DFD5::
-	.string "BLUE: Hey! Gramps! No fair!\n"
+	.string "{RIVAL}: Hey! Gramps! No fair!\n"
 	.string "What about me?$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E000::
-	.string "BLUE: Heh, I don’t need to be\n"
+	.string "{RIVAL}: Heh, I don’t need to be\n"
 	.string "greedy like you. I’m mature!\p"
 	.string "Go ahead and choose, {PLAYER}!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E054::
-	.string "BLUE: I’ll take this one, then!$"
+	.string "{RIVAL}: I’ll take this one, then!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E074::
-	.string "BLUE received the {STR_VAR_1}\n"
+	.string "{RIVAL} received the {STR_VAR_1}\n"
 	.string "from PROF. OAK!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E099::
-	.string "BLUE: My MOéMON looks a lot\n"
+	.string "{RIVAL}: My MOéMON looks a lot\n"
 	.string "tougher than yours.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E0CA::
-	.string "BLUE: Wait, {PLAYER}!\n"
+	.string "{RIVAL}: Wait, {PLAYER}!\n"
 	.string "Let’s check out our MOéMON!\p"
 	.string "Come on, I’ll take you on!$"
 
@@ -1431,20 +1439,20 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843E112::
 	.string "I picked the wrong MOéMON!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E162::
-	.string "BLUE: Okay! I’ll make my\n"
+	.string "{RIVAL}: Okay! I’ll make my\n"
 	.string "MOéMON battle to toughen it up!\p"
 	.string "{PLAYER}! Gramps!\n"
 	.string "Smell you later!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E1B9::
-	.string "BLUE: Gramps!$"
+	.string "{RIVAL}: Gramps!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E1C7::
-	.string "BLUE: I almost forgot!\n"
+	.string "{RIVAL}: I almost forgot!\n"
 	.string "What did you call me for?$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E1F8::
-	.string "BLUE: All right, Gramps!\n"
+	.string "{RIVAL}: All right, Gramps!\n"
 	.string "Leave it all to me!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E225::
@@ -1458,7 +1466,7 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843E225::
 	.string "my place after this!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E2EE::
-	.string "OAK: BLUE?\n"
+	.string "OAK: {RIVAL}?\n"
 	.string "Let me think…\p"
 	.string "Oh, that’s right, I told you to\n"
 	.string "come! Just wait!\p"
@@ -1475,7 +1483,7 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843E2EE::
 	.string "Go on, choose!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E41E::
-	.string "OAK: Be patient, BLUE.\n"
+	.string "OAK: Be patient, {RIVAL}.\n"
 	.string "You can have one, too!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E44C::
@@ -1539,7 +1547,7 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843E86C::
 	.string "It’s a high-tech encyclopedia!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E8FB::
-	.string "OAK: {PLAYER} and BLUE.\n"
+	.string "OAK: {PLAYER} and {RIVAL}.\n"
 	.string "Take your MOéDEX on your travels.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E930::
@@ -1585,7 +1593,7 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843EBAD::
 Kanto_PalletTown_ProfessorOaksLab_Text_843EBD8::
 	.string "Ah, {PLAYER}!\n"
 	.string "How is your MOéDEX shaping up?\p"
-	.string "BLUE has already caught some\n"
+	.string "{RIVAL} has already caught some\n"
 	.string "MOéMON and added to the data.\p"
 	.string "So, {PLAYER}, let’s have a look at\n"
 	.string "your MOéDEX.\p"
@@ -1680,7 +1688,7 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843F19E::
 	.string "like you to go in my place.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843F297::
-	.string "BLUE: Hey, I heard that!\p"
+	.string "{RIVAL}: Hey, I heard that!\p"
 	.string "Gramps, what’s with favoring\n"
 	.string "{PLAYER} over me all the time?\p"
 	.string "I went and collected more MOéMON,\n"
@@ -1709,7 +1717,7 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843F428::
 	.string "{PLAYER}’s MOéDEX was upgraded!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843F443::
-	.string "Now, {PLAYER} and BLUE!\p"
+	.string "Now, {PLAYER} and {RIVAL}!\p"
 	.string "This time, you really must work\n"
 	.string "towards filling your MOéDEXES.\p"
 	.string "I urge you to make them the best\n"
@@ -1718,7 +1726,7 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843F443::
 	.string "undertaking in MOéMON history!$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843F51D::
-	.string "BLUE: Gramps, calm down.\n"
+	.string "{RIVAL}: Gramps, calm down.\n"
 	.string "Don’t get so excited.\p"
 	.string "I’ll get the MOéDEX completed,\n"
 	.string "don’t you worry about a thing.\p"
@@ -1770,3 +1778,13 @@ Kanto_PalletTown_ProfessorOaksLab_Text_8457802::
 	.string "Actually, I know how it is, but I\n"
 	.string "love seeing it anyway!\p"
 	.string "Let’s see…$"
+
+Kanto_PalletTown_ProfessorOaksLab_EventScript_WaitRivalName:
+	waitstate
+	return
+
+Kanto_PalletTown_ProfessorOaksLab_Text_WhatWasHisName::
+	.string "OAK: This is my grandson.\p"
+	.string "He’s been your rival since you both\n"
+	.string "were babies.\p"
+	.string "…Erm, what was his name now?$"

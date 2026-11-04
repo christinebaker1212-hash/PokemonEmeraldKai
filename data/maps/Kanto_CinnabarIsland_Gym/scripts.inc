@@ -894,13 +894,13 @@ Kanto_CinnabarIsland_Gym_Text_8449B6D::
 	.string "CINNABAR MOéMON GYM\n"
 	.string "LEADER: BLAINE\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE$"
+	.string "{RIVAL}$"
 
 Kanto_CinnabarIsland_Gym_Text_8449BA8::
 	.string "CINNABAR MOéMON GYM\n"
 	.string "LEADER: BLAINE\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE, {PLAYER}$"
+	.string "{RIVAL}, {PLAYER}$"
 
 Kanto_CinnabarIsland_Gym_Text_8449BE7::
 	.string "MOéMON Quiz!\p"

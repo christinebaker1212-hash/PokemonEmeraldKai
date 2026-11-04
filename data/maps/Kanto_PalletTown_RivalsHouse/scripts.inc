@@ -80,12 +80,12 @@ Kanto_PalletTown_RivalsHouse_Text_8418D96::
 
 Kanto_PalletTown_RivalsHouse_Text_843D8A4::
 	.string "DAISY: Hi, {PLAYER}!\p"
-	.string "My brother, BLUE, is out at\n"
+	.string "My brother, {RIVAL}, is out at\n"
 	.string "Grandpa’s LAB.$"
 
 Kanto_PalletTown_RivalsHouse_Text_843D8DE::
 	.string "DAISY: {PLAYER}, I heard you had\n"
-	.string "a battle against BLUE.\p"
+	.string "a battle against {RIVAL}.\p"
 	.string "I wish I’d seen that!$"
 
 Kanto_PalletTown_RivalsHouse_Text_843D9CB::

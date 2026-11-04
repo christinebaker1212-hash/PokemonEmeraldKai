@@ -681,3 +681,4 @@ gSpecials::
 	def_special MP_HiddenCoinsFit
 	def_special MP_RegionGateCross
 	def_special MP_MakeScriptedWildShiny
+	def_special QzNameKantoRival   @ Moemon Kai: FireRed names KANTO's rival at OAK's (qz_specials.c)

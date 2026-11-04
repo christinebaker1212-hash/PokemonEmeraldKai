@@ -2137,7 +2137,7 @@ Quetzal_Text_84356AF::
 	.string "{PLAYER} played the MOé FLUTE.$"
 
 Quetzal_Text_843E142::
-	.string "BLUE: Yeah!\n"
+	.string "{RIVAL}: Yeah!\n"
 	.string "Am I great or what?$"
 
 Quetzal_Text_8440C0A::

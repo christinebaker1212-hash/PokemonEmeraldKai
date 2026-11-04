@@ -270,10 +270,10 @@ Kanto_SaffronCity_Gym_Text_844BD55::
 	.string "SAFFRON MOéMON GYM\n"
 	.string "LEADER: SABRINA\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE$"
+	.string "{RIVAL}$"
 
 Kanto_SaffronCity_Gym_Text_844BD90::
 	.string "SAFFRON MOéMON GYM\n"
 	.string "LEADER: SABRINA\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE, {PLAYER}$"
+	.string "{RIVAL}, {PLAYER}$"

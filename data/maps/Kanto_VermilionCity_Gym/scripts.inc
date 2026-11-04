@@ -414,13 +414,13 @@ Kanto_VermilionCity_Gym_Text_8445269::
 	.string "VERMILION MOéMON GYM\n"
 	.string "LEADER: LT. SURGE\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE$"
+	.string "{RIVAL}$"
 
 Kanto_VermilionCity_Gym_Text_84452A8::
 	.string "VERMILION MOéMON GYM\n"
 	.string "LEADER: LT. SURGE\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE, {PLAYER}$"
+	.string "{RIVAL}, {PLAYER}$"
 
 Kanto_VermilionCity_Gym_Text_84452EB::
 	.string "Nope!\n"

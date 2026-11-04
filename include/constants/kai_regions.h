@@ -10,6 +10,7 @@
 
 // KANTO vars
 #define VAR_KANTO_RESORT_STEPS        0x514B   // FireRed's VAR_RESORT_GOREGEOUS_STEP_COUNTER (SELPHY's wish lasts 250 steps)
+#define VAR_KANTO_RIVAL_NAME          0x514C   // ..0x514F: the rival's name as the player gave it (8 bytes; none: BLUE)
 
 // JOHTO (0x1000-0x1FFF)
 #define FLAG_JOHTO_GOT_KILN_CHARCOAL  0x1021   // Crystal's EVENT_GOT_CHARCOAL_IN_CHARCOAL_KILN (0x1030 is HM01 CUT's)

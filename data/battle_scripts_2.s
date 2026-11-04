@@ -199,6 +199,12 @@ BattleScript_ShakeBallThrow::
 BattleScript_ShakeBallThrowEnd::
 	finishaction
 
+BattleScript_MpBallDodged::   @ Moemon Kai: FireRed's ghost dodge (POKéMON TOWER's MAROWAK)
+	waitmessage B_WAIT_TIME_LONG
+	printstring STRINGID_ITDODGEDBALL
+	waitmessage B_WAIT_TIME_LONG
+	finishaction
+
 BattleScript_TrainerBallBlock::
 	waitmessage B_WAIT_TIME_LONG
 	printstring STRINGID_TRAINERBLOCKEDBALL

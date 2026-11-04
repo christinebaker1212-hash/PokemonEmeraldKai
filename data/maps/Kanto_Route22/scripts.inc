@@ -206,7 +206,7 @@ Kanto_Route22_Movement_84181B2:
 	step_end
 
 Kanto_Route22_Text_8438B71::
-	.string "BLUE: Hey! {PLAYER}!\p"
+	.string "{RIVAL}: Hey! {PLAYER}!\p"
 	.string "You’re off to the MOéMON LEAGUE?\n"
 	.string "Forget about it!\p"
 	.string "You probably don’t have any\n"
@@ -229,7 +229,7 @@ Kanto_Route22_Text_8438C57::
 	.string "move on!$"
 
 Kanto_Route22_Text_8438D21::
-	.string "BLUE: What? {PLAYER}!\n"
+	.string "{RIVAL}: What? {PLAYER}!\n"
 	.string "What a surprise to see you here!\p"
 	.string "So you’re going to the MOéMON\n"
 	.string "LEAGUE?\p"

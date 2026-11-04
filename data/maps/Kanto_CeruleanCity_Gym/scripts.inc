@@ -170,10 +170,10 @@ Kanto_CeruleanCity_Gym_Text_84429B2::
 	.string "CERULEAN MOéMON GYM\n"
 	.string "LEADER: MISTY\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE$"
+	.string "{RIVAL}$"
 
 Kanto_CeruleanCity_Gym_Text_84429EC::
 	.string "CERULEAN MOéMON GYM\n"
 	.string "LEADER: MISTY\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE, {PLAYER}$"
+	.string "{RIVAL}, {PLAYER}$"

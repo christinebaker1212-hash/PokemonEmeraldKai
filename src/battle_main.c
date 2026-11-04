@@ -5856,6 +5856,10 @@ static void ReturnFromBattleToOverworld(void)
 
     gSpecialVar_Result = gBattleOutcome;
     gMain.inBattle = FALSE;
+    {
+        extern bool8 gMpUncatchableWild;
+        gMpUncatchableWild = FALSE;   // Moemon Kai: POKéMON TOWER's MAROWAK (battle_script_commands.c)
+    }
     gMain.callback1 = gPreBattleCallback1;
 
     if (gBattleTypeFlags & BATTLE_TYPE_ROAMER && Sinnoh_RoamerAfterBattle(&gEnemyParty[0], gBattleOutcome))

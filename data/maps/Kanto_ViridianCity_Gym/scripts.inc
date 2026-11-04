@@ -285,10 +285,10 @@ Kanto_ViridianCity_Gym_Text_843FEE5::
 	.string "VIRIDIAN MOéMON GYM\n"
 	.string "LEADER: ?\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE$"
+	.string "{RIVAL}$"
 
 Kanto_ViridianCity_Gym_Text_843FF1B::
 	.string "VIRIDIAN MOéMON GYM\n"
 	.string "LEADER: GIOVANNI\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE, {PLAYER}$"
+	.string "{RIVAL}, {PLAYER}$"

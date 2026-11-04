@@ -376,7 +376,7 @@ Kanto_CeruleanCity_Movement_841623C:
 	step_end
 
 Kanto_CeruleanCity_Text_842EC1A::
-	.string "BLUE: Yo! {PLAYER}!\p"
+	.string "{RIVAL}: Yo! {PLAYER}!\p"
 	.string "You’re still struggling along back\n"
 	.string "here?\p"
 	.string "I’m doing great! I caught a bunch\n"
@@ -390,7 +390,7 @@ Kanto_CeruleanCity_Text_842ECB6::
 	.string "You won already!$"
 
 Kanto_CeruleanCity_Text_842ECDA::
-	.string "BLUE: Hey, guess what?\p"
+	.string "{RIVAL}: Hey, guess what?\p"
 	.string "I went to BILL’s and got him to\n"
 	.string "show me his rare MOéMON.\p"
 	.string "That added a lot of pages to my\n"

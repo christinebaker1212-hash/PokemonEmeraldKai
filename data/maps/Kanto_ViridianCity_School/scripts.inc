@@ -207,4 +207,4 @@ Kanto_ViridianCity_School_Text_8461E90::
 	.string "Special Feature: PROF. OAK,\n"
 	.string "the MOéMON Researcher!\p"
 	.string "PROF. OAK reportedly lives with his\n"
-	.string "grandchildren DAISY and BLUE.$"
+	.string "grandchildren DAISY and {RIVAL}.$"

@@ -540,7 +540,9 @@ u16 QzSetupIcePathLegendary(void)
 // Pokémon Tower's ghost: MAROWAK's spirit
 static u16 QzStartMarowakGhostBattle_(void)
 {
+    extern bool8 gMpUncatchableWild;
     CreateScriptedWildMon(SPECIES_MAROWAK, 30, ITEM_NONE);
+    gMpUncatchableWild = TRUE;   // (FireRed's ghost: CUBONE's mother can't be caught)
     BattleSetup_StartScriptedWildBattle();
     return 0;
 }
@@ -1439,84 +1441,121 @@ u16 QzGiveStarterJohto(void)
 // battles' name read it.
 #define VAR_JOHTO_RIVAL_NAME 0x52FC
 static const u8 sSilverName[] = _("SILVER");
+// KANTO's rival too, as FireRed has the player name him (OAK in his lab: QzNameKantoRival; docs/REGIONS_AUDIT.md case
+// 18), in KANTO's vars VAR_KANTO_RIVAL_NAME..+3; none given: BLUE
+static const u8 sBlueName[] = _("BLUE");
 
-static void RivalNameRead(u8 *out)
+static void RivalNameRead(u8 region, u8 *out)
 {
+    u16 var = region == REGION_KANTO ? VAR_KANTO_RIVAL_NAME : VAR_JOHTO_RIVAL_NAME;
     u32 i;
     for (i = 0; i < 4; i++)
     {
-        u16 v = VarGet(VAR_JOHTO_RIVAL_NAME + i);
+        u16 v = VarGet(var + i);
         out[2 * i] = v & 0xFF;
         out[2 * i + 1] = v >> 8;
     }
     out[PLAYER_NAME_LENGTH] = EOS;
     if (out[0] == 0 || out[0] == EOS)
-        StringCopy(out, sSilverName);
+        StringCopy(out, region == REGION_KANTO ? sBlueName : sSilverName);
 }
 
-static void RivalNameWrite(const u8 *name)
+static void RivalNameWrite(u8 region, const u8 *name)
 {
+    u16 var = region == REGION_KANTO ? VAR_KANTO_RIVAL_NAME : VAR_JOHTO_RIVAL_NAME;
     u8 buf[8];
     u32 i;
     memset(buf, EOS, sizeof(buf));
     for (i = 0; i < PLAYER_NAME_LENGTH && name[i] != EOS; i++)
         buf[i] = name[i];
     for (i = 0; i < 4; i++)
-        VarSet(VAR_JOHTO_RIVAL_NAME + i, buf[2 * i] | (buf[2 * i + 1] << 8));
+        VarSet(var + i, buf[2 * i] | (buf[2 * i + 1] << 8));
 }
 
 // The name this player gave (sent to friends in a room this player hosts: mp_main.c MPR_RULES)
 const u8 *MP_JohtoRivalOwnName(void)
 {
     static u8 sName[PLAYER_NAME_LENGTH + 1];
-    RivalNameRead(sName);
+    RivalNameRead(REGION_JOHTO, sName);
+    return sName;
+}
+
+const u8 *MP_KantoRivalOwnName(void)
+{
+    static u8 sName[PLAYER_NAME_LENGTH + 1];
+    RivalNameRead(REGION_KANTO, sName);
     return sName;
 }
 
 // The name he goes by: online in a friend's room, the name the host gave (mp_main.c MP_RoomRivalName)
 const u8 *MP_JohtoRivalName(void)
 {
-    const u8 *MP_RoomRivalName(void);
-    const u8 *host = MP_RoomRivalName();
+    const u8 *MP_RoomRivalName(u8 region);
+    const u8 *host = MP_RoomRivalName(REGION_JOHTO);
     return host != NULL ? host : MP_JohtoRivalOwnName();
 }
 
-// {RIVAL} reads it in JOHTO (else NULL: HOENN's MAY / BRENDAN)
-const u8 *MP_JohtoRivalNameHere(void)
+const u8 *MP_KantoRivalName(void)
 {
-    return MP_Region_Current() == REGION_JOHTO ? MP_JohtoRivalName() : NULL;
+    const u8 *MP_RoomRivalName(u8 region);
+    const u8 *host = MP_RoomRivalName(REGION_KANTO);
+    return host != NULL ? host : MP_KantoRivalOwnName();
 }
 
-// A battle's trainer name: SILVER's teams say his name
+// {RIVAL} reads it in JOHTO / KANTO (else NULL: HOENN's MAY / BRENDAN)
+const u8 *MP_JohtoRivalNameHere(void)
+{
+    u8 region = MP_Region_Current();
+    return region == REGION_JOHTO ? MP_JohtoRivalName() : region == REGION_KANTO ? MP_KantoRivalName() : NULL;
+}
+
+// A battle's trainer name: SILVER's and BLUE's teams say his name
 const u8 *MP_JohtoRivalTrainerName(u16 trainerNum)
 {
-    if (trainerNum >= FIRST_QZ_TRAINER && trainerNum < FIRST_QZ_TRAINER + QZ_TRAINERS_COUNT
-     && StringCompare(gTrainers[trainerNum].trainerName, sSilverName) == 0)
-        return MP_JohtoRivalName();
+    if (trainerNum >= FIRST_QZ_TRAINER && trainerNum < FIRST_QZ_TRAINER + QZ_TRAINERS_COUNT)
+    {
+        if (StringCompare(gTrainers[trainerNum].trainerName, sSilverName) == 0)
+            return MP_JohtoRivalName();
+        if (StringCompare(gTrainers[trainerNum].trainerName, sBlueName) == 0)
+            return MP_KantoRivalName();
+    }
     return gTrainers[trainerNum].trainerName;
 }
 
-// The officer at ELM's asks the thief's name: Crystal's naming screen (special NameRival), SILVER to start
+// The officer at ELM's asks the thief's name: Crystal's naming screen (special NameRival), SILVER to start; OAK asks
+// his grandson's in KANTO, BLUE to start
 static u8 sRivalNameBuf[PLAYER_NAME_LENGTH + 1];
+static u8 sRivalNaming;   // (the region whose rival is being named)
 static void CB2_RivalNamed(void)
 {
     void MP_SendRoomRules(void);
     if (sRivalNameBuf[0] == EOS)
-        StringCopy(sRivalNameBuf, sSilverName);
-    RivalNameWrite(sRivalNameBuf);
+        StringCopy(sRivalNameBuf, sRivalNaming == REGION_KANTO ? sBlueName : sSilverName);
+    RivalNameWrite(sRivalNaming, sRivalNameBuf);
     MP_SendRoomRules();   // (hosting: friends hear it)
     SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
 }
 
-// In a friend's room the host names him: no naming screen here (the officer says the host's name)
-u16 QzNameJohtoRival(void)
+static u16 NameRival(u8 region)
 {
     bool8 MP_IsRoomGuest(void);
     if (MP_IsRoomGuest())
         return gSpecialVar_Result = FALSE;   // (VAR_RESULT: no naming screen to wait for)
-    RivalNameRead(sRivalNameBuf);
+    sRivalNaming = region;
+    RivalNameRead(region, sRivalNameBuf);
     DoNamingScreen(NAMING_SCREEN_RIVAL, sRivalNameBuf, 0, 0, 0, CB2_RivalNamed);
     return gSpecialVar_Result = TRUE;
+}
+
+// In a friend's room the host names him: no naming screen here (the officer / OAK says the host's name)
+u16 QzNameJohtoRival(void)
+{
+    return NameRival(REGION_JOHTO);
+}
+
+u16 QzNameKantoRival(void)
+{
+    return NameRival(REGION_KANTO);
 }
 
 // Moemon Kai: SILVER's starter is the one strong against the player's, as Crystal's (Quetzal gave him TOTODILE's line
