@@ -151,8 +151,9 @@ Johto_GoldenrodGym_Text_83D5A29::
 	.string "GOLDENROD MOéMON GYM$"
 
 Johto_GoldenrodGym_Text_83D5A3F::
-	.string "GOLDENROD TOWN MOéMON GYM\p"
-	.string "WHITNEY’S CERTIFIED TRAINERS:\n"
+	.string "GOLDENROD MOéMON GYM\p"
+	.string "LEADER: WHITNEY\p"
+	.string "WINNING TRAINERS:\n"
 	.string "{PLAYER}$"
 
 Johto_GoldenrodGym_Text_83D5A7B::
@@ -253,14 +254,10 @@ Johto_GoldenrodGym_Text_83D600F::
 
 Johto_GoldenrodGym_Text_83D603D::
 	.string "Yo! CHAMP in making!\p"
-	.string "This GYM is home to WHITNEY, the\n"
-	.string "master of NORMAL-type MOéMON.\p"
-	.string "Be cautious of her cute team.\p"
-	.string "Some of the MOéMON in this gym\n"
-	.string "have the newly discovered FAIRY\l"
-	.string "type as well.\p"
-	.string "Check ROUTE 34 if you need a\n"
-	.string "FIGHTING-type or POISON-type.$"
+	.string "This GYM is home to normal-type\n"
+	.string "MOéMON trainers.\p"
+	.string "I recommend you use fighting-type\n"
+	.string "MOéMON.$"
 
 Johto_GoldenrodGym_Text_83D6139::
 	.string "You won? Great! I was busy admiring\n"

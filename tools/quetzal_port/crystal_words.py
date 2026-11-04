@@ -34,6 +34,11 @@ def words(mapname, label, our_label=None):
     """`OUR_LABEL::` and its .string lines"""
     text = asm(mapname)
     text = text.replace('<PLAYER>', '{PLAYER}').replace('<RIVAL>', '{RIVAL}').replace('<PK><MN>', '#MON')
+    # a name put in by the script (text_ram): the buffers as this game's string vars
+    rams = {'wStringBuffer3': '{STR_VAR_1}', 'wStringBuffer4': '{STR_VAR_2}', 'wStringBuffer5': '{STR_VAR_3}',
+            'wPlayerName': '{PLAYER}', 'wRivalName': '{RIVAL}'}
+    text = re.sub(r'@"\s*\n\s*text_ram (\w+)\s*\n\s*text "',
+                  lambda m: rams.get(m.group(1), '{STR_VAR_1}'), text)
     pars = crystal_text(text, label)
     body = gba_text(pars)
     return ('%s::\n' % our_label if our_label else '') + body

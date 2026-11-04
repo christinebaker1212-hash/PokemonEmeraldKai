@@ -2176,3 +2176,42 @@ void MP_RuinValleyOpenDoor(void)
     FlagSet(FLAG_QZ_0x222F);
     UnlockPlayerFieldControls();
 }
+
+// Crystal's GetFirstPokemonHappiness (GOLDENROD's HAPPINESS RATER): the lead POKéMON's friendship, its name in STR_VAR_1
+u16 MP_LeadFriendship(void)
+{
+    struct Pokemon *mon = &gPlayerParty[GetLeadMonIndex()];
+    GetMonData(mon, MON_DATA_NICKNAME, gStringVar1);
+    StringGet_Nickname(gStringVar1);
+    return gSpecialVar_Result = GetMonData(mon, MON_DATA_FRIENDSHIP);
+}
+
+// Moemon Kai: Crystal's ReturnShuckie (engine/events/shuckle.asm), the party scanned instead of picked: MANIA's
+// SHUCKIE is a SHUCKLE with his OT name and ID. VAR_RESULT 0 not with you, 1 taken back, 2 it's your last
+// POKéMON, 3 it likes you (150+ friendship) and stays (docs/REGIONS_AUDIT.md 102)
+u16 MP_ReturnShuckie(void)
+{
+    static const u8 sMania[] = _("MANIA");
+    u8 i, ot[PLAYER_NAME_LENGTH + 1];
+
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        struct Pokemon *mon = &gPlayerParty[i];
+        if (GetMonData(mon, MON_DATA_SPECIES) != SPECIES_SHUCKLE || GetMonData(mon, MON_DATA_IS_EGG)
+         || (GetMonData(mon, MON_DATA_OT_ID) & 0xFFFF) != 518)
+            continue;
+        GetMonData(mon, MON_DATA_OT_NAME, ot);
+        ot[PLAYER_NAME_LENGTH] = EOS;
+        if (StringCompare(ot, sMania) != 0)
+            continue;
+        if (GetMonData(mon, MON_DATA_FRIENDSHIP) >= 150)
+            return gSpecialVar_Result = 3;
+        if (CalculatePlayerPartyCount() < 2)
+            return gSpecialVar_Result = 2;
+        ZeroMonData(mon);
+        CompactPartySlots();
+        CalculatePlayerPartyCount();
+        return gSpecialVar_Result = 1;
+    }
+    return gSpecialVar_Result = 0;
+}

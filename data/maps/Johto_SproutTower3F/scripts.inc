@@ -201,24 +201,25 @@ Johto_SproutTower3F_Text_83FAAE0::
 	.string "So good of you to come here!\p"
 	.string "SPROUT TOWER is a place of\n"
 	.string "training.\p"
-	.string "People and MOéMON test their\n"
-	.string "bonds to build a bright future\l"
-	.string "together.\p"
+	.string "People and MOéMON test their bonds\n"
+	.string "to build a bright future together.\p"
 	.string "I am the final test.\p"
-	.string "Allow me to check the ties\n"
-	.string "between your MOéMON and you!$"
+	.string "Allow me to check the ties between\n"
+	.string "your MOéMON and you!$"
 
 Johto_SproutTower3F_Text_83FABB7::
 	.string "Ah, excellent!$"
 
 Johto_SproutTower3F_Text_83FABC6::
-	.string "You and your MOéMON have passed\n"
-	.string "the tower’s test.$"
+	.string "You and your MOéMON should have no\n"
+	.string "problem using this move.\p"
+	.string "Take this FLASH HM.$"
 
 Johto_SproutTower3F_Text_83FABF9::
-	.string "Trust in that bond to face\n"
-	.string "the challenges ahead.\p"
-	.string "Have a safe journey!$"
+	.string "FLASH illuminates even the darkest\n"
+	.string "of all places.\p"
+	.string "But to use it out of battle, you\n"
+	.string "need the BADGE from VIOLET’s GYM.$"
 
 Johto_SproutTower3F_Text_83FAC3F::
 	.string "I hope you learn and grow from\n"

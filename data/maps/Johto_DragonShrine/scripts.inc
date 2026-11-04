@@ -244,7 +244,7 @@ Johto_DragonShrine_EventScript_83CCFE5::
 	msgbox Johto_DragonShrine_Text_83CD063, MSGBOX_DEFAULT
 	setvar VAR_TEMP_1, 0x93
 	bufferspeciesname 0, SPECIES_DRATINI
-	qz_givemon_ex SPECIES_DRATINI, 0x23, ITEM_NONE, 2, 0, 0
+	qz_givemon_ex SPECIES_DRATINI, 15, ITEM_NONE, 2, 0, 0
 	call Johto_DragonShrine_EventScript_84017C6
 	msgbox Johto_DragonShrine_Text_83CD0F5, MSGBOX_DEFAULT
 	setflag FLAG_QZ_0x105A

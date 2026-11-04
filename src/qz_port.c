@@ -80,6 +80,9 @@ bool8 ScrCmd_qz_dostaticwildbattle(struct ScriptContext *ctx)
 
 static const u8 sText_Kenya[] = _("KENYA");
 static const u8 sText_Shuckie[] = _("SHUCKIE");
+extern u8 gMpLastGivenMonSlot;
+static const u8 sText_Mania[] = _("MANIA");
+#define QZ_MANIA_OT_ID 518   // Crystal's MANIA_OT_ID
 
 // E9 h: the story gifts (1 KENYA the SPEAROW, 2 SHUCKIE the SHUCKLE, 3 ROTOM, 4 DRATINI); VAR_RESULT = where it went
 bool8 ScrCmd_qz_givestorymon(struct ScriptContext *ctx)
@@ -93,16 +96,39 @@ bool8 ScrCmd_qz_givestorymon(struct ScriptContext *ctx)
     switch (id)
     {
     case 1: species = SPECIES_SPEAROW; nick = sText_Kenya; break;
-    case 2: species = SPECIES_SHUCKLE; nick = sText_Shuckie; item = ITEM_BERRY_JUICE; break;
+    // Moemon Kai: Crystal's SHUCKIE (MANIA's, Lv15 with a BERRY, lent: docs/REGIONS_AUDIT.md 102) and DRATINI (Lv15;
+    // the DRAGON SHRINE's perfect quiz teaches it EXTREMESPEED: 107)
+    case 2: species = SPECIES_SHUCKLE; nick = sText_Shuckie; item = ITEM_ORAN_BERRY; level = 15; break;
     case 3: species = SPECIES_ROTOM; break;
-    case 4: species = SPECIES_DRATINI; level = 35; item = ITEM_EVERSTONE; break;
+    case 4: species = SPECIES_DRATINI; level = 15; break;
     default: gSpecialVar_Result = MON_CANT_GIVE; return FALSE;
     }
-    CreateMon(&mon, species, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
+    if (id == 2)
+        CreateMon(&mon, species, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PRESET, QZ_MANIA_OT_ID);
+    else
+        CreateMon(&mon, species, level, USE_RANDOM_IVS, FALSE, 0, OT_ID_PLAYER_ID, 0);
     SetMonData(&mon, MON_DATA_HELD_ITEM, &item);
     if (nick)
         SetMonData(&mon, MON_DATA_NICKNAME, nick);
+    if (id == 4)
+    {
+        // Crystal's GiveDratini moveset 0
+        static const u16 sMoves[MAX_MON_MOVES] = {MOVE_WRAP, MOVE_THUNDER_WAVE, MOVE_TWISTER, MOVE_EXTREME_SPEED};
+        u8 i;
+        for (i = 0; i < MAX_MON_MOVES; i++)
+            SetMonMoveSlot(&mon, sMoves[i], i);
+    }
     gSpecialVar_Result = GiveMonToPlayer(&mon);
+    if (id == 2 && gSpecialVar_Result == MON_GIVEN_TO_PARTY)
+    {
+        // GiveMonToPlayer makes the player its OT; SHUCKIE stays MANIA's
+        // (re-keyed: the ID is part of the data's encryption key)
+        struct Pokemon *given = &gPlayerParty[gMpLastGivenMonSlot];
+        u8 male = MALE;
+        SetMonData(given, MON_DATA_OT_NAME, sText_Mania);
+        SetMonData(given, MON_DATA_OT_GENDER, &male);
+        MP_SetBoxMonOtIdKeepData(&given->box, QZ_MANIA_OT_ID);
+    }
     if (gSpecialVar_Result != MON_CANT_GIVE)
     {
         u16 dex = SpeciesToNationalPokedexNum(species);

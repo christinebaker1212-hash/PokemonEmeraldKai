@@ -93,7 +93,7 @@ Johto_KurtsHouse_EventScript_83C5B29::
 
 Johto_KurtsHouse_EventScript_83C5B33::
 	msgbox Johto_KurtsHouse_Text_83C5EBA, MSGBOX_DEFAULT
-	setorcopyvar VAR_0x8000, ITEM_FAST_BALL
+	setorcopyvar VAR_0x8000, ITEM_LURE_BALL   @ Moemon Kai: Crystal's first gift (Quetzal: a FAST BALL)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
@@ -362,18 +362,18 @@ Johto_KurtsHouse_Text_83C5D0F::
 
 Johto_KurtsHouse_Text_83C5EBA::
 	.string "KURT: Hi, {PLAYER}!\p"
-	.string "You handled yourself like a\n"
-	.string "real hero at the WELL.\p"
+	.string "You handled yourself like a real\n"
+	.string "hero at the WELL.\p"
 	.string "I like your style!\p"
-	.string "I would be honored to make\n"
-	.string "BALLS for a trainer like you.\p"
-	.string "This is all I have now, \n"
-	.string "but take it.$"
+	.string "I would be honored to make BALLS\n"
+	.string "for a trainer like you.\p"
+	.string "This is all I have now, but take\n"
+	.string "it.$"
 
 Johto_KurtsHouse_Text_83C5F6D::
-	.string "KURT: I make BALLS from BERRIES.\p"
+	.string "KURT: I make BALLS from APRICORNS.\p"
 	.string "Collect them from trees and bring\n"
-	.string "’em to me in batches of 5.\p"
+	.string "’em to me.\p"
 	.string "I’ll make BALLS out of them.$"
 
 Johto_KurtsHouse_Text_83C60AE::
@@ -412,7 +412,7 @@ Johto_KurtsHouse_Text_83C628D::
 
 Johto_KurtsHouse_Text_83C634E::
 	.string "Did that sound come from\n"
-	.string "ILEX FOREST????$"
+	.string "ILEX FOREST?$"
 
 Johto_KurtsHouse_Text_83C6377::
 	.string "Did you check ILEX FOREST yet?\n"

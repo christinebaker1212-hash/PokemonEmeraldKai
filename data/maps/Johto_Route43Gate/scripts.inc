@@ -8,20 +8,17 @@ Johto_Route43Gate_OnFrame_83D1F0B:
 
 Johto_Route43Gate_EventScript_83D1F15::
 	setvar VAR_TEMP_0, 1
-	goto_if_eq VAR_QZ_0x500C, 1, Johto_Route43Gate_EventScript_83D1F52
-	goto_if_eq VAR_QZ_0x500C, 2, Johto_Route43Gate_EventScript_83D1F52
-	goto_if_eq VAR_QZ_0x500C, 3, Johto_Route43Gate_EventScript_83D1F52
-	goto_if_eq VAR_QZ_0x500C, 4, Johto_Route43Gate_EventScript_83D1F52
-	goto_if_eq VAR_QZ_0x500C, 5, Johto_Route43Gate_EventScript_83D1F52
+	@ Moemon Kai: Crystal's toll, ¥1000 (or all you have) while the ROCKETS hold the gate (docs/REGIONS_AUDIT.md 109)
+	goto_if_unset FLAG_QZ_0x1051, Johto_Route43Gate_EventScript_83D1F52
 	end
 
 Johto_Route43Gate_EventScript_83D1F52::
 	lock
 	showmoneybox 0, 0, 0
 	msgbox Johto_Route43Gate_Text_83D200F, MSGBOX_DEFAULT
-	checkmoney 0x1F4, 0
+	checkmoney 1000, 0
 	goto_if_eq VAR_RESULT, 0, Johto_Route43Gate_EventScript_83D1F8A
-	removemoney 0x1F4, 0
+	removemoney 1000, 0
 	playse SE_SHOP
 	updatemoneybox 0
 	msgbox Johto_Route43Gate_Text_83D2045, MSGBOX_DEFAULT
@@ -30,20 +27,10 @@ Johto_Route43Gate_EventScript_83D1F52::
 	end
 
 Johto_Route43Gate_EventScript_83D1F8A::
-	checkmoney 1, 0
-	goto_if_eq VAR_RESULT, 0, Johto_Route43Gate_EventScript_83D1FBD
 	msgbox Johto_Route43Gate_Text_83D205A, MSGBOX_DEFAULT
-	removemoney 0x1F4, 0
+	removemoney 1000, 0
 	playse SE_SHOP
 	updatemoneybox 0
-	msgbox Johto_Route43Gate_Text_83D2045, MSGBOX_DEFAULT
-	hidemoneybox
-	release
-	end
-
-Johto_Route43Gate_EventScript_83D1FBD::
-	msgbox Johto_Route43Gate_Text_83D207A, MSGBOX_DEFAULT
-	closemessage
 	hidemoneybox
 	release
 	end
@@ -78,22 +65,14 @@ Johto_Route43Gate_EventScript_83D2006::
 
 Johto_Route43Gate_Text_83D200F::
 	.string "Hold it there, kiddo!\p"
-	.string "The toll is ¥500 to go\n"
-	.string "through.$"
+	.string "The toll is ¥1000\n"
+	.string "to go through.$"
 
 Johto_Route43Gate_Text_83D2045::
 	.string "Thank you very much!$"
 
 Johto_Route43Gate_Text_83D205A::
 	.string "Then pay what you have, please.$"
-
-Johto_Route43Gate_Text_83D207A::
-	.string "Wow!\p"
-	.string "You’re totally broke!\p"
-	.string "I almost feel sorry for you.\p"
-	.string "Okay, you can pass...\p"
-	.string "Just don’t tell the other guard,\n"
-	.string "okay?$"
 
 Johto_Route43Gate_Text_83D20EF::
 	.string "He-he-he. We’re making a bundle.\p"

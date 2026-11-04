@@ -691,3 +691,7 @@ gSpecials::
 	def_special CompareMagikarpSize
 	def_special GetHeracrossSizeRecordInfo
 	def_special CompareHeracrossSize
+	def_special MP_LeadFriendship
+	def_special MP_ReturnShuckie
+	def_special GetJohtoMagikarpSizeRecordInfo
+	def_special CompareJohtoMagikarpSize

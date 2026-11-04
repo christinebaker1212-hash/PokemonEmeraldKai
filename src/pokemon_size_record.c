@@ -226,6 +226,17 @@ void CompareHeracrossSize(void)
     gSpecialVar_Result = CompareMonSize(SPECIES_HERACROSS, KantoSizeRecord(VAR_KANTO_HERACROSS_SIZE));
 }
 
+// Moemon Kai: Crystal's LAKE OF RAGE MAGIKARP record (pokecrystal LakeOfRageMagikarpHouse), in a JOHTO var
+void GetJohtoMagikarpSizeRecordInfo(void)
+{
+    GetMonSizeRecordInfo(SPECIES_MAGIKARP, KantoSizeRecord(VAR_JOHTO_MAGIKARP_SIZE));
+}
+
+void CompareJohtoMagikarpSize(void)
+{
+    gSpecialVar_Result = CompareMonSize(SPECIES_MAGIKARP, KantoSizeRecord(VAR_JOHTO_MAGIKARP_SIZE));
+}
+
 u16 MP_MonSizeHash(struct Pokemon *mon)
 {
     return GetMonSizeHash(mon);

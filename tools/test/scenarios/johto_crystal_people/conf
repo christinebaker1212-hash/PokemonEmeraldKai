@@ -1,0 +1,8 @@
+# Crystal's JOHTO people (docs/REGIONS_AUDIT.md 102, 108, 109, 135): MANIA lends SHUCKIE and takes it back the next
+# day; the SANDSTORM house checks the lead's loyalty before TM37; LAKE OF RAGE's guru measures a MAGIKARP for an
+# ELIXIR; the ROCKETS at the ROUTE 43 gate take ¥1000.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=129:20,157:50 MOEMON_DEBUG_MONEY=5000"
+EXPECT_A=("[test] var 0x501D = 4" "[test] var 0x501D = 5" "[test] item 325: 0" "[test] item 325: 1" "[test] var 0x5026 = 3" "[test] item 36: 1" "[test] money 4000")
+UNEXPECT_A=("[crash]")
