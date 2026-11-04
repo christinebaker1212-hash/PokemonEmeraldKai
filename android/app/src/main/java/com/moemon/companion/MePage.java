@@ -58,12 +58,7 @@ public class MePage extends Page {
     }
 
     private int heading(Canvas c, int w, int y, String text, String right) {
-        fill.setColor(BANNER_DARK);
-        c.drawRect(8, y + 1, w - 8, y + 15, fill);
-        art.text(c, text, 12, y - 1, GameArt.WHITE_TEXT, 0xFF202850);
-        if (right != null) {
-            art.text(c, right, w - 12 - art.width(right), y - 1, GOLD, 0xFF202850);
-        }
+        sectionBar(c, 8, w - 8, y + 1, 15, text, right);
         return y + 18;
     }
 

@@ -265,12 +265,15 @@ public final class SummaryPage extends Page {
             art.text(c, l, 18, y, GameArt.GRAY_TEXT, GameArt.SHADOW);
             y += 14;
         }
-        // its page in the POKéDEX
-        button(c, "POKéDEX ENTRY", 18, dexButtonY(), w - 36, true);
+        // its page in the POKéDEX, right under its words
+        dexY = y + 8;
+        button(c, "POKéDEX ENTRY  >", 18, dexY, w - 36, true);
     }
 
+    private int dexY = -100;
+
     private int dexButtonY() {
-        return v.contentHeight() - 34 - 4 - 30;
+        return dexY;
     }
 
     private void openDex(JSONObject mon) {

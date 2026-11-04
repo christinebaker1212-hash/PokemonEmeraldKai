@@ -72,6 +72,25 @@ public abstract class Page {
         }
     }
 
+    /**
+     * A section's heading, the same on every page: a bar in the theme's dark color with a gold mark at its left, the
+     * title in white, a count or note on the right in gold. (y: the bar's top, h its height)
+     */
+    protected void sectionBar(Canvas c, int x0, int x1, int y, int h, String title, String right) {
+        sFill.setColor(BANNER_DARK);
+        c.drawRect(x0 + 1, y, x1 - 1, y + h, sFill);
+        c.drawRect(x0, y + 1, x1, y + h - 1, sFill);
+        sFill.setColor(0x30FFFFFF);
+        c.drawRect(x0 + 1, y, x1 - 1, y + 1, sFill);
+        sFill.setColor(GOLD);
+        c.drawRect(x0 + 2, y + 3, x0 + 4, y + h - 3, sFill);
+        int ty = y + (h - 16) / 2;
+        art.text(c, title, x0 + 8, ty, GameArt.WHITE_TEXT, 0xFF101830);
+        if (right != null && !right.isEmpty()) {
+            art.text(c, right, x1 - 5 - art.width(right), ty, GOLD, 0xFF101830);
+        }
+    }
+
     /** A small colored label (a status, a count): a rounded box with white letters */
     protected void chip(Canvas c, String text, int x, int y, int color) {
         int tw = art.width(text) + 6;
