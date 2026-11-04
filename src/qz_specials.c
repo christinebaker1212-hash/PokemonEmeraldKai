@@ -953,6 +953,8 @@ static u16 QzShowSeagallopDestinationMenu_(void)
     {
         if (i == gSpecialVar_0x8004)
             continue;
+        if (i == 0 && VarGet(VAR_QZ_0x510A) < 4)   // FireRed: VERMILION once the first trip has ended with BILL
+            continue;
         if (i >= 1 && i <= 3 && !FlagGet(FLAG_QZ_0x2213))
             continue;
         if (i >= 4 && !FlagGet(FLAG_QZ_0x2214))

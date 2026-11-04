@@ -687,3 +687,7 @@ gSpecials::
 	def_special MP_CapeBrinkLeadMove
 	def_special MP_CapeBrinkTaught
 	def_special MP_DaisyMassage
+	def_special GetMagikarpSizeRecordInfo
+	def_special CompareMagikarpSize
+	def_special GetHeracrossSizeRecordInfo
+	def_special CompareHeracrossSize

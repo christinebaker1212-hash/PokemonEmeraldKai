@@ -1488,12 +1488,9 @@ Quetzal_EventScript_84593E7::
 	goto_if_eq VAR_0x8006, 127, Quetzal_EventScript_8459493
 	goto Quetzal_EventScript_845940D
 
+@ Moemon Kai: FireRed's SEAGALLOP (pokefirered data/scripts/seagallop.inc): ISLANDS 4-7 need only the RAINBOW PASS
+@ (Quetzal also asked for KANTO's LEAGUE), VERMILION once BILL's first trip is over (qz_specials.c)
 Quetzal_EventScript_845940D::
-	goto_if_set FLAG_QZ_0x2108, Quetzal_EventScript_8459439
-	goto_if_lt VAR_0x8006, 4, Quetzal_EventScript_8459439
-	goto_if_gt VAR_0x8006, 7, Quetzal_EventScript_8459439
-	msgbox Quetzal_Text_8456559, MSGBOX_DEFAULT
-	goto Quetzal_EventScript_8459493
 
 Quetzal_EventScript_8459439::
 	specialvar VAR_RESULT, QzGetSeagallopNumber
@@ -2118,8 +2115,8 @@ Quetzal_Text_842FD3B::
 	.string "departing immediately.$"
 
 Quetzal_Text_8431905::
-	.string "Choose a destination (up/down).\n"
-	.string "A: Sail  B: Cancel$"
+	.string "Ahoy, there!\n"
+	.string "Where do you want to sail?$"
 
 Quetzal_Text_843561B::
 	.string "SNORLAX woke up!\p"
@@ -2185,14 +2182,15 @@ Quetzal_Text_8455B3E::
 	.string "Please, go right ahead.$"
 
 Quetzal_Text_8455BAC::
-	.string "In KANTO, you have registered\n"
-	.string "{STR_VAR_3} species as caught.\p"
-	.string "To receive {STR_VAR_2},\n"
-	.string "you need {STR_VAR_1} species.$"
+	.string "Let’s see…\n"
+	.string "Uh-oh! You have caught only\l"
+	.string "{STR_VAR_3} kinds of MOéMON!\p"
+	.string "You need {STR_VAR_1} kinds\n"
+	.string "if you want the {STR_VAR_2}.$"
 
 Quetzal_Text_8455C04::
-	.string "When you register {STR_VAR_1} species\n"
-	.string "as caught in KANTO,\p"
+	.string "…Oh. I see.\p"
+	.string "When you get {STR_VAR_1} kinds of MOéMON,\n"
 	.string "come back for the {STR_VAR_2}.$"
 
 Quetzal_Text_8455C4B::

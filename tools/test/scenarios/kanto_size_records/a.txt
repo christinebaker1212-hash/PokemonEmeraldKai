@@ -1,0 +1,11 @@
+pressuntil A field 5000
+wait 30
+mp setflag 0x2164
+mp warp 38,102,4,5
+wait 150
+press UP 10
+mash A 40 30
+wait 60
+mp checkitem 6
+mp getflag 0x2160
+quit

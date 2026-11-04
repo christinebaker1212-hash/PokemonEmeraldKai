@@ -15,6 +15,8 @@
 // KANTO vars
 #define VAR_KANTO_RESORT_STEPS        0x514B   // FireRed's VAR_RESORT_GOREGEOUS_STEP_COUNTER (SELPHY's wish lasts 250 steps)
 #define VAR_KANTO_RIVAL_NAME          0x514C   // ..0x514F: the rival's name as the player gave it (8 bytes; none: BLUE)
+#define VAR_KANTO_MAGIKARP_SIZE       0x5151   // ROUTE 12 FISHING HOUSE's MAGIKARP record (FireRed's VAR_MAGIKARP_SIZE_RECORD)
+#define VAR_KANTO_HERACROSS_SIZE      0x5152   // SIX ISLAND's HERACROSS record (FireRed's VAR_HERACROSS_SIZE_RECORD)
 #define VAR_KANTO_MASSAGE_STEPS       0x5150   // FireRed's VAR_MASSAGE_COOLDOWN_STEP_COUNTER: DAISY grooms again after 500 steps
 
 // JOHTO (0x1000-0x1FFF)

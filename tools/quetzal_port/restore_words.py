@@ -26,7 +26,7 @@ def body_of(kind, their_map, their_label):
 
 
 def restore(our_map, our_label, kind, their_map, their_label):
-    path = os.path.join(REPO, 'data/maps', our_map, 'scripts.inc')
+    path = os.path.join(REPO, our_map if our_map.startswith('data/') else os.path.join('data/maps', our_map, 'scripts.inc'))
     text = open(path, encoding='utf-8').read()
     m = re.search(r'^%s::?[ \t]*\n((?:[ \t]*\.string[^\n]*\n)+)' % re.escape(our_label), text, re.M)
     if not m:

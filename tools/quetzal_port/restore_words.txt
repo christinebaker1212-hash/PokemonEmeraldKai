@@ -52,3 +52,8 @@ Kanto_Route16 Kanto_Route16_Text_8437246 fr Route16 Route16_Text_CyclingRoadSign
 Kanto_Route17 Kanto_Route17_Text_8437846 fr Route17 Route17_Text_PressBToStayInPlace
 Kanto_Route17 Kanto_Route17_Text_84378FC fr Route17 Route17_Text_CyclingRoadSign
 Kanto_Route18 Kanto_Route18_Text_8437A64 fr Route18 Route18_Text_CyclingRoadSign
+# case 81 [K3-18]: SEVEN ISLAND's box
+Kanto_SevenIsland_House_Room1 Kanto_SevenIsland_House_Room1_Text_84509FB fr SevenIsland_House_Room1 SevenIsland_House_Room1_Text_SlightBreezeAroundBox
+# case 87 [K3-32]: OAK's AIDES (kanto_shared.inc)
+data/scripts/qz/kanto_shared.inc Quetzal_Text_8455BAC fr data/text/aide.inc Aide_Text_HaventCaughtEnoughMonsForItem
+data/scripts/qz/kanto_shared.inc Quetzal_Text_8455C04 fr data/text/aide.inc Aide_Text_GetEnoughMonsComeBackForItem

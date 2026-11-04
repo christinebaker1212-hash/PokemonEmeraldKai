@@ -3,8 +3,10 @@ Kanto_SSAnne_1F_Room6_MapScripts::
 	map_script MAP_SCRIPT_ON_RESUME, Kanto_SSAnne_1F_Room6_EventScript_8410976
 	.byte 0
 
+@ Moemon Kai: FireRed's room (pokefirered SSAnne_1F_Room6): only the woman's rest. Quetzal's bed, DARKRAI dream and
+@ "leave the ship" offer are gone (the woman is back for saves that slept in the bed)
 Kanto_SSAnne_1F_Room6_EventScript_8410976::
-	special QzSSAnneRoom6OnResume
+	clearflag FLAG_QZ_0x292D
 	end
 
 @ Kanto_SSAnne_1F_Room6 object 1 (local id 1, gfx 0x3F58) at 3,5
@@ -14,28 +16,8 @@ Kanto_SSAnne_1F_Room6_EventScript_841097A::
 	msgbox Kanto_SSAnne_1F_Room6_Text_8424AD7, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, 0, Kanto_SSAnne_1F_Room6_EventScript_84109F0
 	closemessage
-	special QzSSAnneDreamEventEligibility
-	goto_if_eq VAR_RESULT, 1, Kanto_SSAnne_1F_Room6_EventScript_8410A5B
 	call Quetzal_EventScript_84570E0
 	msgbox Kanto_SSAnne_1F_Room6_Text_8424B0C, MSGBOX_DEFAULT
-	goto_if_unset FLAG_QZ_0x214E, Kanto_SSAnne_1F_Room6_EventScript_84109EE
-	msgbox Kanto_SSAnne_1F_Room6_Text_8424B4C, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, 0, Kanto_SSAnne_1F_Room6_EventScript_84109EE
-	closemessage
-	goto_if_eq VAR_QZ_0x5135, 1, Kanto_SSAnne_1F_Room6_EventScript_84109E3
-	setvar VAR_QZ_0x5145, 0
-	warp MAP_KANTO_VERMILION_CITY, 255, 23, 31
-	waitstate
-	release
-	end
-
-Kanto_SSAnne_1F_Room6_EventScript_84109E3::
-	warp MAP_KANTO_SSANNE_EXTERIOR, 255, 32, 14
-	waitstate
-	release
-	end
-
-Kanto_SSAnne_1F_Room6_EventScript_84109EE::
 	release
 	end
 
