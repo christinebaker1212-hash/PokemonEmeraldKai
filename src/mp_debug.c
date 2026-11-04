@@ -3668,6 +3668,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
                 printf(" 0");
         printf("  pc box1 slot1 %d\n", (int)GetBoxMonDataAt(0, 0, MON_DATA_SPECIES));
     }
+    else if (strcmp(cmd, "monid") == 0)   // mp monid SLOT: what shows of a party Moemon's personality (ASTRAL BALL tests)
+    {
+        struct Pokemon *mon = &gPlayerParty[atoi(arg) % PARTY_SIZE];
+        u32 p = GetMonData(mon, MON_DATA_PERSONALITY);
+        printf("[test] mon %d: species %d personality %08x nature %d gender %d shiny %d style %04x bad %d\n", atoi(arg) % PARTY_SIZE,
+               (int)GetMonData(mon, MON_DATA_SPECIES), (unsigned)p, (int)GetNature(mon), (int)GetMonGender(mon),
+               (int)IsMonShiny(mon), (int)GetMonData(mon, MON_DATA_ENCRYPT_SEPARATOR), (int)GetMonData(mon, MON_DATA_SANITY_IS_BAD_EGG));
+    }
     else if (strcmp(cmd, "badges") == 0)
     {
         int b;

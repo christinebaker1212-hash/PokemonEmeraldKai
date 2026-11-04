@@ -98,7 +98,7 @@ const u32 *const gItemIconTable[ITEMS_COUNT + 1][2] =
     [ITEM_REPEL] = {gItemIcon_Repel, gItemIconPalette_Repel},
     // ????????
     [ITEM_EPOCH_BALL] = {gItemIcon_EpochBall, gItemIconPalette_EpochBall},
-    [ITEM_058] = {gItemIcon_QuestionMark, gItemIconPalette_QuestionMark},
+    [ITEM_ASTRAL_BALL] = {gItemIcon_AstralBall, gItemIconPalette_AstralBall},
     [ITEM_059] = {gItemIcon_QuestionMark, gItemIconPalette_QuestionMark},
     [ITEM_05A] = {gItemIcon_QuestionMark, gItemIconPalette_QuestionMark},
     [ITEM_05B] = {gItemIcon_QuestionMark, gItemIconPalette_QuestionMark},

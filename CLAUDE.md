@@ -182,6 +182,8 @@ pieces earned by achievements or MoeGatcha prizes (mp_ballunlock.c); art partly 
 Also the GENESIS / EPOCH BALLS (Red's and Crystal's POKé BALLS: their catch math, throw, send-out, art and sounds;
 mp_legacy_*.c, tools/moemon_legacy). Also the HGSS battle balls (16x32 frames, a spin in the air, special balls' own art:
 pokeball.h BALL_FRAME_*, tools/moemon_balls/hgss_balls.py; COOP_NOTES "HGSS POKé BALLS"; test hgss_balls).
+Also the ASTRAL BALL (special 14: a sure catch, the catch made shiny keeping what shows, a prismatic sheen and silver
+sparkles drawn over its own pixels until it clicks shut: pokemon.c MP_Astral_MakeShiny, src/mp/mp_astralfx.c; COOP_NOTES "The ASTRAL BALL"; test astral_ball).
 Also PC TAG mode (west button / F: tag Moemon, then MOVE / RELEASE them together; pokemon_storage_system.c end).
 Also the CANDY JAR (mp_candy.c: candies from releases, PROF. BIRCH brings the jar, a physics jar menu, CONVERT to RARE
 CANDY; ITEM_CANDY_JAR 398). Also the shared PC as 14 boxes in the PC box screen (mp_sharedbox.c: a mirror the stock

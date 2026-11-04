@@ -167,8 +167,13 @@ public class BallPage extends Page {
         for (int i = 0; sp != null && i < sp.length(); i++) {
             kinds.add(sp.optInt(i));
         }
+        JSONArray only = balls().optJSONArray("catchonly");   // (the ASTRAL BALL: only a catch puts one in it)
         for (int item : kinds) {
-            if (item != origBall && bagCount(bag, item) > 0) {
+            boolean catchOnly = false;
+            for (int i = 0; only != null && i < only.length(); i++) {
+                catchOnly |= only.optInt(i) == item;
+            }
+            if (item != origBall && !catchOnly && bagCount(bag, item) > 0) {
                 out.add(item);
             }
         }

@@ -51,6 +51,7 @@ static const u16 sSpecialItems[MP_SPECIAL_COUNT] = {
     [MP_SPECIAL_HEAL - 1] = ITEM_HEAL_BALL,   [MP_SPECIAL_DUSK - 1] = ITEM_DUSK_BALL,
     [MP_SPECIAL_QUICK - 1] = ITEM_QUICK_BALL,
     [MP_SPECIAL_GENESIS - 1] = ITEM_GENESIS_BALL, [MP_SPECIAL_EPOCH - 1] = ITEM_EPOCH_BALL,
+    [MP_SPECIAL_ASTRAL - 1] = ITEM_ASTRAL_BALL,
 };
 
 static const u16 sSpecialRamps[MP_SPECIAL_COUNT][5] = {
@@ -68,6 +69,7 @@ static const u16 sSpecialRamps[MP_SPECIAL_COUNT][5] = {
     // (their own art takes over wherever it can: mp_legacy_balls.c)
     [MP_SPECIAL_GENESIS - 1] = {RGB(4, 4, 4), RGB(20, 10, 10), RGB(31, 16, 16), RGB(31, 24, 24), RGB(31, 31, 31)},
     [MP_SPECIAL_EPOCH - 1] = {RGB(4, 4, 4), RGB(22, 7, 4), RGB(30, 10, 6), RGB(30, 16, 15), RGB(31, 19, 24)},
+    [MP_SPECIAL_ASTRAL - 1] = {RGB(8, 9, 12), RGB(14, 15, 18), RGB(21, 22, 25), RGB(26, 27, 29), RGB(31, 31, 31)},
 };
 
 // Five shades per color, dark to light (the classic red uses the game's own)
@@ -246,6 +248,13 @@ u16 MP_BallStyle_ForItem(u16 item)
     return (u16)MP_SpecialBall_FromItem(item) << 12;
 }
 
+// A Moemon can move into any ball from the BAG but the ASTRAL BALL: only a catch makes an ASTRAL
+// Moemon (and shiny), so one isn't spent on a re-housing that couldn't do what it says
+bool8 MP_BallStyle_CanRehouse(u16 item)
+{
+    return item != ITEM_ASTRAL_BALL;
+}
+
 bool8 MP_BallStyle_ItemCanColor(u16 item)
 {
     return item == ITEM_POKE_BALL;
@@ -278,6 +287,8 @@ void MP_Ball_SetCaught(struct Pokemon *mon, u16 item)
         SetMonData(mon, MON_DATA_STATUS, &status);
         MonRestorePP(mon);
     }
+    else if (special == MP_SPECIAL_ASTRAL)
+        MP_Astral_MakeShiny(&mon->box);   // (and again for its final OT in GiveMonToPlayer)
 }
 
 extern const struct Evolution gEvolutionTable[][EVOS_PER_MON];
@@ -481,7 +492,14 @@ static const u32 *const sSpecialGfx[MP_SPECIAL_COUNT][2] = {
     [MP_SPECIAL_HEAL - 1]   = {gBallGfx_Heal, gBallPal_Heal},
     [MP_SPECIAL_DUSK - 1]   = {gBallGfx_Dusk, gBallPal_Dusk},
     [MP_SPECIAL_QUICK - 1]  = {gBallGfx_Quick, gBallPal_Quick},
+    [MP_SPECIAL_ASTRAL - 1] = {gBallGfx_Astral, gBallPal_Astral},
 };
+
+// Where a special ball's own sheet is in sprite VRAM (0xFFFF: not loaded): mp_astralfx.c finds the ASTRAL BALL by it
+u16 MP_BallStyle_SheetStart(u8 special)
+{
+    return GetSpriteTileStartByTag(TAG_MP_BALL_HGSS + special);
+}
 
 static bool8 SpecialHasArt(u8 special)
 {
@@ -745,5 +763,5 @@ void MP_BallStyle_ExportJson(FILE *f)
     fprintf(f, "],\"special\":[");
     for (i = 0; i < MP_SPECIAL_COUNT; i++)
         fprintf(f, "%s%u", i ? "," : "", sSpecialItems[i]);
-    fprintf(f, "]}");
+    fprintf(f, "],\"catchonly\":[%u]}", ITEM_ASTRAL_BALL);   // (never offered for re-housing)
 }

@@ -848,6 +848,33 @@ as POKé BALL + style like the other special balls); MoeGatcha BALL banner only.
   into mp_legacy_sfx.h; mixed into m4aSoundVSync's output (music_player.c), panned when the sound option is STEREO.
 - Debug: `mp ballstyle SLOT HEX` sets a party Moemon's ball style. Tests: legacy_solo, legacy_coop.
 
+## The ASTRAL BALL (a sure catch, and shiny)
+
+The user's design (2026-11-04; art docs/user_images/69.png battle sheet, 70.png BAG icon): ITEM_ASTRAL_BALL (ITEM_058,
+88), special ball 14 (MP_SPECIAL_ASTRAL, style `e000`; 14 was the last free special index: 15 is a color bit), MoeGatcha
+BALL banner ULTRA x1 and EX x2 (beside the MASTER BALL). Art: `python3 tools/moemon_balls/astral.py` (the sheet in
+the HGSS layout -> graphics/balls/astral.png like hgss_balls.py; the icon's 24x24 middle -> moemon_astral_ball.png/.pal).
+- Catch: Cmd_handleballthrow sets odds 255 (caught on the throw, three shakes like the MASTER BALL). The ghost battle's
+  dodge (gMpUncatchableWild) and trainers' blocks still apply.
+- Shiny: pokemon.c MP_Astral_MakeShiny, from MP_Ball_SetCaught and again in GiveMonToPlayer after the OT re-key (a
+  co-op catch is made with the host's ID). A new personality: low half searched from the old one, high half picked
+  for shininess, keeping nature, gender, UNOWN's letter and WURMPLE's class (only SPINDA's spots move); the four
+  substructures are re-sorted for the new personality and the checksum redone. Logs `astral: species ... ->`.
+- Not a re-housing ball (MP_BallStyle_CanRehouse): the summary's POKé BALL page and the phone (export "catchonly")
+  never offer it, since only a catch makes an ASTRAL Moemon shiny.
+- Looks (src/mp/mp_astralfx.c, no sprite or palette used, the art untouched; the user's design, 2026-11-04):
+  MP_AstralFx_Prism (sdl2.c, right after DrawFrame and the BAG / CANDY JAR pictures, before weather and tints)
+  finds the ball's pixels by its palette's colors inside its box and tints them with a diagonal rainbow that slides
+  and breathes, under it a slower shimmer of lighter and darker patches (two triangle waves meeting); outline and
+  shine kept. MP_AstralFx_Composite draws silver four-pointed sparkles around it, a trail while it moves, darker
+  steel-silver over bright backgrounds, fading with its palette.
+  Only an ASTRAL BALL that hasn't caught anything shows them: item icons (item_icon.c MP_AstralFx_Icon; a tile
+  checksum drops reused slots) and thrown balls (battle_anim_throw.c MP_AstralFx_Thrown, on every player's screen).
+  At the click (SpriteCB_Ball_Capture_Step, MP_AstralFx_Caught) the sheen fades to the ball's own grey over
+  FADE_FRAMES and the sparkles, plus a ring of twelve, fly into it; the summary's ball and send-outs are plain.
+- Test astral_ball (four full-HP catches incl. RAYQUAZA, check.py: shiny, nature, gender, UNOWN letter, WURMPLE;
+  `mp monid SLOT`; shots: flight, shakes, the click, the summary's plain ball, the BAG).
+
 ## NAME CASE and CREATURES (OPTIONS, this game only)
 
 SaveBlock2 spare option bits: optionsNameCase (2 bits: MP_NAMECASE_AS_TYPED / CAPS / MIXED) and optionsPokemonArt

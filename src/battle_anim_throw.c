@@ -824,6 +824,8 @@ void AnimTask_ThrowBall(u8 taskId)
     ballId = ItemIdToBallId(gLastUsedItem);
     spriteId = CreateSprite(&gBallSpriteTemplates[ballId], 32, 80, 29);
     MP_BallStyle_ApplyToBallSprite(spriteId, ballId, MP_BallStyle_ForItem(gLastUsedItem));   // Moemon Co-op: special balls
+    if (gLastUsedItem == ITEM_ASTRAL_BALL)
+        MP_AstralFx_Thrown(spriteId);   // (its sheen and sparkles until it clicks shut)
     gSprites[spriteId].sDuration = 34;
     gSprites[spriteId].sTargetX = GetBattlerSpriteCoord(gBattleAnimTarget, BATTLER_COORD_X);
     gSprites[spriteId].sTargetY = GetBattlerSpriteCoord(gBattleAnimTarget, BATTLER_COORD_Y) - 16;
@@ -863,6 +865,8 @@ void AnimTask_ThrowBall_StandingTrainer(u8 taskId)
     subpriority = GetBattlerSpriteSubpriority(GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT)) + 1;
     spriteId = CreateSprite(&gBallSpriteTemplates[ballId], x + 32, y | 80, subpriority);
     MP_BallStyle_ApplyToBallSprite(spriteId, ballId, MP_BallStyle_ForItem(gLastUsedItem));
+    if (gLastUsedItem == ITEM_ASTRAL_BALL)
+        MP_AstralFx_Thrown(spriteId);
     gSprites[spriteId].sDuration = 34;
     gSprites[spriteId].sTargetX = GetBattlerSpriteCoord(gBattleAnimTarget, BATTLER_COORD_X);
     gSprites[spriteId].sTargetY = GetBattlerSpriteCoord(gBattleAnimTarget, BATTLER_COORD_Y) - 16;
@@ -1375,6 +1379,7 @@ static void SpriteCB_Ball_Capture_Step(struct Sprite *sprite)
     {
         PlaySE(SE_RG_BALL_CLICK);
         MP_BlendSpritePalette(sprite->oam.paletteNum, 6, RGB_BLACK);   // Moemon PC: the ball may be in slot 16+
+        MP_AstralFx_Caught(sprite - gSprites);   // Moemon Co-op: the ASTRAL BALL goes grey and pulls its sparkles in
         MakeCaptureStars(sprite);
     }
     else if (sprite->sTimer == 60)

@@ -122,6 +122,8 @@ static const char *DoStyle(const char *json)
         return "locked";
     if (item != cur)
     {
+        if (!MP_BallStyle_CanRehouse((u16)item))
+            return "bad";
         if (!CheckBagHasItem((u16)item, 1))
             return "noitem";
         RemoveBagItem((u16)item, 1);   // (another kind of ball: it costs one of them)

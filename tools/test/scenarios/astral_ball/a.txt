@@ -1,0 +1,60 @@
+pressuntil A field 5000
+mp item 88 9
+mp savedata ball:last 88
+mp wild 288:5
+pressuntil A action 3000
+wait 10
+press L 2
+shotburst fly 760 4
+pressuntil A field 9000
+wait 30
+mp monid 1
+mp wild 201:5
+pressuntil A action 3000
+wait 10
+press L 2
+pressuntil A field 9000
+wait 30
+mp monid 2
+mp wild 290:5
+pressuntil A action 3000
+wait 10
+press L 2
+pressuntil A field 9000
+wait 30
+mp monid 3
+mp wild 384:70
+pressuntil A action 3000
+wait 10
+press L 2
+pressuntil A field 9000
+wait 30
+mp monid 4
+mp party
+mp summary 0
+wait 120
+press DOWN 2
+wait 90
+shot summary
+wait 30
+shot summary2
+press B 2
+pressuntil B field 600
+mp bagview 2
+press START 2
+wait 30
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press A 2
+wait 90
+press RIGHT 2
+wait 20
+press RIGHT 2
+wait 20
+press DOWN 2
+wait 40
+shotburst bag 60 6
+wait 70
+quit

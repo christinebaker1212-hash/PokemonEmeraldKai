@@ -3137,7 +3137,7 @@ static void MpBall_BuildTypes(void)
     {
         // The Hoenn balls, then the special ones
         item = i < POKEBALL_COUNT ? ITEM_MASTER_BALL + i : MP_SpecialBall_Item(i - POKEBALL_COUNT + 1);
-        if (item != cur && !CheckBagHasItem(item, 1))
+        if (item != cur && (!CheckBagHasItem(item, 1) || !MP_BallStyle_CanRehouse(item)))
             continue;
         if (item == cur)
             sMpBall.typeIndex = sMpBall.typeCount;
@@ -3183,6 +3183,7 @@ static void MpBall_UpdateIcon(void)
     if (id == MAX_SPRITES)
         return;
     sMpBall.iconSprite = id;
+    MP_AstralFx_Forget(id);   // (a Moemon's ASTRAL BALL is a plain grey ball: its show ended with the catch)
     gSprites[id].x = 26 * 8 + 4;
     gSprites[id].y = 6 * 8 + 4;
     gSprites[id].oam.priority = 0;

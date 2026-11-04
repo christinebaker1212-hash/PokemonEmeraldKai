@@ -10916,6 +10916,9 @@ static void Cmd_handleballthrow(void)
         if (gBattleMons[gBattlerTarget].status1 & (STATUS1_POISON | STATUS1_BURN | STATUS1_PARALYSIS | STATUS1_TOXIC_POISON))
             odds = (odds * 15) / 10;
 
+        if (gLastUsedItem == ITEM_ASTRAL_BALL)
+            odds = 255;   // Moemon Co-op: the ASTRAL BALL never misses and never breaks
+
         if (gLastUsedItem != ITEM_SAFARI_BALL)
         {
             if (gLastUsedItem == ITEM_MASTER_BALL)

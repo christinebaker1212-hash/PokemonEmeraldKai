@@ -1,0 +1,8 @@
+# The ASTRAL BALL: thrown at full-HP wild Moemon (a ZIGZAGOON, an UNOWN, a WURMPLE and a RAYQUAZA, catch rate 3) it
+# catches every one on the first throw, and each comes out shiny with what shows kept (nature, gender, UNOWN's letter,
+# WURMPLE's evolution: check.py). Shots: the sheen and sparkles in flight and shaking, the click (the sheen fades, the sparkles fly in), the summary's plain ball, the BAG's icon.
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=280:15"
+EXPECT_A=("astral: species 288" "astral: species 201" "astral: species 290" "astral: species 384")
+CHECK="python3 tools/test/scenarios/astral_ball/check.py"

@@ -4630,6 +4630,7 @@ u8 GiveMonToPlayer(struct Pokemon *mon)
     // write turned the catch into a BAD EGG)
     MP_SetBoxMonOtIdKeepData(&mon->box, gSaveBlock2Ptr->playerTrainerId[0] | (gSaveBlock2Ptr->playerTrainerId[1] << 8)
                              | (gSaveBlock2Ptr->playerTrainerId[2] << 16) | ((u32)gSaveBlock2Ptr->playerTrainerId[3] << 24));
+    MP_Astral_MakeShiny(&mon->box);   // (shiny for its final OT)
 
     for (i = 0; i < PARTY_SIZE; i++)
     {
@@ -7661,6 +7662,57 @@ void MP_SetBoxMonOtIdKeepData(struct BoxPokemon *boxMon, u32 otId)
     for (i = 0; i < ARRAY_COUNT(boxMon->secure.raw); i++)
         boxMon->secure.raw[i] ^= delta;
     boxMon->otId = otId;
+}
+
+// Moemon Co-op: the ASTRAL BALL. A Moemon caught in it is shiny for its OT: a new personality that
+// keeps everything that shows (nature, gender, UNOWN's letter, WURMPLE's evolution; only SPINDA's
+// spots may move). Its data is re-sorted, since the personality orders the substructures.
+// Nothing happens unless it's in an ASTRAL BALL and not shiny yet (a catch, and again once the
+// OT is final in GiveMonToPlayer: a co-op catch is made with the host's ID).
+static bool8 AstralKeeps(u16 species, u32 oldP, u32 newP)
+{
+    if (GetNatureFromPersonality(newP) != GetNatureFromPersonality(oldP)
+     || GetGenderFromSpeciesAndPersonality(species, newP) != GetGenderFromSpeciesAndPersonality(species, oldP)
+     || ((newP >> 16) % 10 <= 4) != ((oldP >> 16) % 10 <= 4))   // WURMPLE: SILCOON or CASCOON
+        return FALSE;
+    return species != SPECIES_UNOWN || GET_UNOWN_LETTER(newP) == GET_UNOWN_LETTER(oldP);
+}
+
+bool8 MP_Astral_MakeShiny(struct BoxPokemon *boxMon)
+{
+    union PokemonSubstruct subs[4];
+    u32 p = boxMon->personality, otId = boxMon->otId, np = 0, i, k;
+    u16 species, lo;
+    bool8 found = FALSE;
+
+    if (!boxMon->hasSpecies || boxMon->isBadEgg || GetBoxMonData(boxMon, MON_DATA_IS_EGG)
+     || MP_BallStyle_Special(GetBoxMonData(boxMon, MON_DATA_ENCRYPT_SEPARATOR)) != MP_SPECIAL_ASTRAL
+     || GET_SHINY_VALUE(otId, p) < SHINY_ODDS)
+        return FALSE;
+    species = GetBoxMonData(boxMon, MON_DATA_SPECIES);
+    // the low half first as it is (gender, most of UNOWN's letter), the high half picked to make it shiny
+    for (i = 0; i < 0x10000 && !found; i++)
+    {
+        lo = LOHALF(p) ^ i;
+        for (k = 0; k < SHINY_ODDS && !found; k++)
+        {
+            np = ((u32)(HIHALF(otId) ^ LOHALF(otId) ^ lo ^ k) << 16) | lo;
+            found = AstralKeeps(species, p, np);
+        }
+    }
+    if (!found)
+        return FALSE;
+    MPNet_Log("astral: species %u personality %08x -> %08x gender %u -> %u ot %08x", species, (unsigned)p, (unsigned)np,
+              GetGenderFromSpeciesAndPersonality(species, p), GetGenderFromSpeciesAndPersonality(species, np), (unsigned)otId);
+    DecryptBoxMon(boxMon);
+    for (i = 0; i < 4; i++)
+        subs[i] = *GetSubstruct(boxMon, p, i);
+    boxMon->personality = np;
+    for (i = 0; i < 4; i++)
+        *GetSubstruct(boxMon, np, i) = subs[i];
+    boxMon->checksum = CalculateBoxMonChecksum(boxMon);
+    EncryptBoxMon(boxMon);
+    return TRUE;
 }
 
 // Moemon Co-op: a BAD EGG (its data doesn't match its checksum, or it was marked as one)

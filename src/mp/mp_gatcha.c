@@ -612,10 +612,10 @@ static const struct PrizeDef sBallSSuper[] = {
     FX(10),
 };
 static const struct PrizeDef sBallUltra[] = {
-    ITEM(ITEM_MASTER_BALL, 1, 10), SET(SET_BALLS, 20, 6), SET(SET_APRICORN, 12, 6),
+    ITEM(ITEM_MASTER_BALL, 1, 10), ITEM(ITEM_ASTRAL_BALL, 1, 10), SET(SET_BALLS, 20, 6), SET(SET_APRICORN, 12, 6),
 };
 static const struct PrizeDef sBallEx[] = {
-    ITEM(ITEM_MASTER_BALL, 2, 10), SET(SET_BALLS, 40, 6), SET(SET_APRICORN, 25, 6),
+    ITEM(ITEM_MASTER_BALL, 2, 10), ITEM(ITEM_ASTRAL_BALL, 2, 10), SET(SET_BALLS, 40, 6), SET(SET_APRICORN, 25, 6),
 };
 
 // PICKUP banner: a new one every week. Every UR is one of its Moemon (picked

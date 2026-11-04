@@ -26,6 +26,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `coop_two_join3` | NA-JP lag, three players: two trainers spot ALICE, BOB teams up, CARL joins once it started (`mp joinask 2`, sent on to ALICE): a Triple Battle against both trainers, the third foe spot from the trainer with more left, both trainers beaten on every game |
 | `coop_merge_join3` / `coop_held_join3` | three players: two players grouped on one trainer (waiting merge / held trainer spots the second), then a third one spotted by that trainer joins (JOIN BATTLE) |
 | `hgss_balls` | shots only (looked at by hand): the HGSS balls' send-out spin, a thrown MASTER BALL, a blue POKé BALL with a STAR, a GENESIS BALL, the summary's ball |
+| `astral_ball` | the ASTRAL BALL: four full-HP catches (one a RAYQUAZA) on the first throw, each shiny with nature, gender, UNOWN letter and WURMPLE evolution kept (check.py); shots of the sheen and sparkles, the click (fade to grey, sparkles drawn in), the summary's plain ball |
 | `tri_rain` | wild triple at NA-JP lag in the leader's rain, one friend's field dry: rain on all three screens, turns go on to the win |
 | `coop_life_emote` | NA-JP lag: a partner save; each game's Pokemon emote shows on the other game over the same Pokemon (check.sh) |
 | `coop_spot_join` / `coop_spot_alone` | ROUTE 116: JERRY, battling ALICE, spots BOB: "join their battle, or battle alone?"; JOIN BATTLE (ALICE lets him in, both win, JERRY beaten on both) / BATTLE ALONE |

@@ -909,6 +909,7 @@ void VDraw(void)
     DrawFrame(image);
     MP_Candy_Composite(image);      // Moemon Co-op: the CANDY JAR's picture under everything drawn
     MP_BagUI_Composite(image);      // ... and the BAG's
+    MP_AstralFx_Prism(image);       // ... the ASTRAL BALL's prismatic sheen (its own pixels, before any tint)
     {
         void MP_StarterTable_Composite(u16 *frame);
         MP_StarterTable_Composite(image);   // ... and the KANTO / JOHTO starter table's (starter_choose.c)
@@ -922,6 +923,7 @@ void VDraw(void)
     MP_TriCards_Composite(image);   // Moemon Co-op: Triple Battle cards over the frame
     MP_TypeIcons_Composite(image);  // ... type icons by the healthboxes (OPTIONS > TYPE ICONS)
     MP_LegacyAnim_Composite(image); // ... GENESIS / EPOCH BALL throws (Red's / Crystal's own)
+    MP_AstralFx_Composite(image);   // ... the ASTRAL BALL's silver sparkles
     MP_Compass_Composite(image);    // ... arrows toward friends off screen
     MP_BallFx_Composite(image);          // ... ball effects (not bound by the GBA's sprites or palettes)
     {
