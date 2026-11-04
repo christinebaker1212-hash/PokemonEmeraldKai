@@ -142,8 +142,8 @@ u16 QzFruitTreePick(void)
     return 0;
 }
 
-// JOHTO's BERRY patches stand on Crystal's fruit trees (the tree is the map's): the BERRY tree's own sprite shows only
-// when its BERRIES are ripe, nobody plants or waters them (Crystal's "There's nothing here…" instead), and a picked
+// JOHTO's BERRY patches stand on Crystal's fruit trees (the tree is the map's): the BERRY tree's own sprite never shows
+// (as in Crystal, the tree looks the same ripe or not; the user, 2026-11-04), nobody plants or waters them (Crystal's "There's nothing here…" instead), and a picked
 // patch grows its BERRY again on the game's own timer (the user, 2026-11-03)
 bool8 MP_JohtoBerries_IsPatch(u8 tree)
 {

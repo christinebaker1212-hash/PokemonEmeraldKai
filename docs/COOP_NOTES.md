@@ -4661,7 +4661,8 @@ or the README. The updater no longer has a dev channel: AllowSmallTweaks only un
 - JOHTO's / KANTO's PC: FireRed's tiles 0x62 / 0x63 (field_specials.c PcTilePair). Test region_pc_tile.
 - The BICYCLE (item 360) rides as the MACH BIKE. Test region_bicycle.
 - Fossil lines are never wild before the region's LEAGUE (mp_region.c MP_WildSpeciesOk). Test region_fossils.
-- JOHTO's BERRY patches: their sprite only when ripe, Crystal's "There's nothing here…" otherwise, replanted when picked
+- JOHTO's BERRY patches: never a sprite of their own (the map's fruit tree is the tree, ripe or not, as in Crystal; until 1.91.0
+  the ripe BERRY tree showed over it), Crystal's "There's nothing here…" otherwise, replanted when picked
   (mp_apricorn.c MP_JohtoBerries_*). Test johto_berry_patch.
 - The GAME CENTER away from HOENN: the guide charges the admission, 3F's four patrons are OBJ_EVENT_GFX_VAR_0-3
   (MP_Region_GameCenterLooks), the coin counter names the region's GAME CORNER (MP_Region_BufferGameCorner). The CARD
@@ -4839,3 +4840,19 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
     kanto_giovanni_leaves, with FIVE ISLAND's POKéMON JOURNAL). The WATER LABYRINTH's TOGEPI EGG (test
     kanto_togepi_egg). The SEAGALLOP: FireRed's prompt, VERMILION once BILL's first trip is over, ISLANDS 4-7 by the
     RAINBOW PASS alone. TWO ISLAND's growing shop (the tickets in its last list). MELOETTA out of the CHANSEY dance.
+- 1.91.0 (the audit's batch D, JOHTO, first part):
+  - crystal_words.py reads Crystal's shared texts too (MAP may be a path: data/text/common_3), and turns text_ram
+    buffers into {STR_VAR_1/2/3}, {PLAYER}, {RIVAL}. restore_words.txt lists every JOHTO text put back, by case.
+  - MANIA lends SHUCKIE (qz_port.c qz_givestorymon 2: Lv15, ORAN BERRY, OT MANIA / 518 re-keyed after
+    GiveMonToPlayer by MP_SetBoxMonOtIdKeepData; VAR_QZ_0x501D 4 lent, 5 done; FLAG_DAILY_JOHTO_SHUCKIE 0x925);
+    qz_specials.c MP_ReturnShuckie scans the party (150+ friendship: it stays). The SANDSTORM house's loyalty check
+    (MP_LeadFriendship, 150). LAKE OF RAGE's MAGIKARP record (Get/CompareJohtoMagikarpSize, VAR_JOHTO_MAGIKARP_SIZE
+    0x5040, FLAG_JOHTO_MAGIKARP_RECORD 0x104A, FLAG_JOHTO_ELIXER_STANDBY 0x104B). The ROUTE 43 toll (1000 while
+    FLAG_QZ_0x1051 is unset). Test johto_crystal_people.
+  - DRATINI: qz_givestorymon 4 is Lv15 with Crystal's EXTREMESPEED moveset; the wrong-answer one Lv15 too.
+  - BLACKTHORN's MOVE DELETER (FUCHSIA's script, Crystal's words; test johto_move_deleter). ECRUTEAK's ITEMFINDER
+    (FLAG_JOHTO_GOT_ITEMFINDER 0x10A3). TOHJO FALLS: MOON STONE, the SUPER ROD fisher gone. ROUTE 32's guard: the
+    ZEPHYRBADGE, then the EGG errand. MAHOGANY's RAGECANDYBAR and ROUTE 43's MAHOGANY gate follow the hideout
+    (VAR_QZ_0x500C >= 14).
+  - JOHTO's BERRY patches never draw a sprite (event_object_movement.c SetBerryTreeGraphics /
+    MovementType_BerryTreeGrowth_Normal): the map's fruit tree is the tree (docs/user_images 68).

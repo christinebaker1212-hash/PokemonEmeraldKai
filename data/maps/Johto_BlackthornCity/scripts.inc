@@ -222,7 +222,7 @@ Johto_BlackthornCity_Text_83C6CB5::
 
 Johto_BlackthornCity_Text_83C6CEF::
 	.string "Are you going to make your MOéMON\n"
-	.string "remember some moves?$"
+	.string "forget some moves?$"
 
 Johto_BlackthornCity_Text_83C6D27::
 	.string "Dragon masters all come from the city\n"
@@ -264,7 +264,7 @@ Johto_BlackthornCity_Text_83C6EBA::
 	.string "The Blessed User of Dragon MOéMON$"
 
 Johto_BlackthornCity_Text_83C6F07::
-	.string "MOVE BROS’ HOUSE$"
+	.string "MOVE DELETER’S HOUSE$"
 
 Johto_BlackthornCity_Text_83C6F18::
 	.string "DRAGON’S DEN AHEAD$"

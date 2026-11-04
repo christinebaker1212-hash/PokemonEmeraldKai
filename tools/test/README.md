@@ -75,6 +75,8 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `kanto_marowak_ghost` | POKéMON TOWER 6F with the SILPH SCOPE: MAROWAK's ghost battle, a thrown ball is dodged |
 | `kanto_icefall_ice` | ICEFALL CAVE 1F: thin ice cracks under a step, breaks on the next and drops the player to B1F |
 | `johto_rival_days` | Crystal's rival after the LEAGUE: INDIGO PLATEAU on a Monday, gone on a Tuesday, training in DRAGON'S DEN |
+| `johto_crystal_people` | MANIA lends SHUCKIE and takes it back the next day; the SANDSTORM house's loyalty check; LAKE OF RAGE's MAGIKARP record and ELIXIR; the ROUTE 43 toll |
+| `johto_move_deleter` | BLACKTHORN's MOVE DELETER makes the lead forget its first move |
 | `johto_gs_ball` | GOLDENROD's POKéMON CENTER brings the GS BALL only after JOHTO's LEAGUE; KURT keeps it until the next day, then hands it back in AZALEA |
 | `kanto_move_people` | FUCHSIA's MOVE DELETER forgets THUNDERSHOCK, the COPYCAT teaches MIMIC for a POKé DOLL, TWO ISLAND's MOVE MANIAC remembers GROWL for two TINYMUSHROOMS |
 | `kanto_cape_brink` | CAPE BRINK's starter tutor teaches a lead VENUSAUR at full friendship FRENZY PLANT |

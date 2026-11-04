@@ -3,7 +3,7 @@
 
     python3 tools/quetzal_port/crystal_words.py MAP LABEL [OUR_LABEL]
 
-Prints Crystal's text LABEL from pret/pokecrystal maps/MAP.asm as `.string` lines (re-wrapped to this game's width,
+Prints Crystal's text LABEL from pret/pokecrystal maps/MAP.asm (or MAP.asm when MAP is a path, e.g. data/text/common_3) as `.string` lines (re-wrapped to this game's width,
 #MON as MOéMON, <PLAYER> / <RIVAL> as {PLAYER} / {RIVAL}). The asm comes from POKECRYSTAL_DIR (default
 /tmp/claude-0/frlg/pokecrystal) or GitHub. Used by hand and by the audit's fix scripts (import `words`).
 """
@@ -16,17 +16,19 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from fix_johto_tms import crystal_text, gba_text   # noqa: E402
 
 LOCAL = os.environ.get('POKECRYSTAL_DIR', '/tmp/claude-0/frlg/pokecrystal')
-RAW = 'https://raw.githubusercontent.com/pret/pokecrystal/master/maps/%s.asm'
+RAW = 'https://raw.githubusercontent.com/pret/pokecrystal/master/%s.asm'
 _cache = {}
 
 
 def asm(mapname):
     if mapname not in _cache:
-        path = os.path.join(LOCAL, 'maps', mapname + '.asm')
+        # a map's name, or a path such as data/text/common_3 (shared texts)
+        rel = mapname if '/' in mapname else 'maps/' + mapname
+        path = os.path.join(LOCAL, rel + '.asm')
         if os.path.exists(path):
             _cache[mapname] = open(path).read()
         else:
-            _cache[mapname] = urllib.request.urlopen(RAW % mapname).read().decode('utf-8')
+            _cache[mapname] = urllib.request.urlopen(RAW % rel).read().decode('utf-8')
     return _cache[mapname]
 
 

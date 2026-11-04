@@ -1,8 +1,8 @@
 # KANTO / JOHTO script audit: the user's decisions (2026-11-04)
 
 The audit compared every KANTO map with FireRed and every JOHTO map with Crystal (findings, with the original's and the
-game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided each of the 157 cases below. Status:
-[ ] to do, [x] done (1.88.0: cases 1-9, 11-14, 16, 19-23, 26, 28, 29, 32-34, 40, 44; case 10 TRAINER TOWER and 15 HM WHIRLPOOL wait for their ports; 1.89.0: cases 18, 27, 30, 31, 35, 36, 38, 39, 41-43; cases 17 / 24 VS SEEKER go with 57's FireRed teams, 25 with 71, 37 BATTLE TOWER its own port; 1.90.0: cases 48, 51, 56, 67-70, 72, 73, 75-87, 119, 123, 129, 150-155, and KANTO's halves of 49 (JOHTO's HEADBUTT man waits), 74 (words; the slope waits), 89 (WADE waits for case 57's teams) and 118 (LAVENDER's NAME RATER)). Rules the user set with these decisions:
+game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided each of the 157 cases below (158 was added by the user later). Status:
+[ ] to do, [x] done (1.88.0: cases 1-9, 11-14, 16, 19-23, 26, 28, 29, 32-34, 40, 44; case 10 TRAINER TOWER and 15 HM WHIRLPOOL wait for their ports; 1.89.0: cases 18, 27, 30, 31, 35, 36, 38, 39, 41-43; cases 17 / 24 VS SEEKER go with 57's FireRed teams, 25 with 71, 37 BATTLE TOWER its own port; 1.90.0: cases 48, 51, 56, 67-70, 72, 73, 75-87, 119, 123, 129, 150-155, and KANTO's halves of 49 (JOHTO's HEADBUTT man waits), 74 (words; the slope waits), 89 (WADE waits for case 57's teams) and 118 (LAVENDER's NAME RATER); 1.91.0: cases 53-55, 90, 98, 102, 103, 107-109, 111, 114, 135, 137, 140, 147, 157 and 158 (the user's, 2026-11-04)). Rules the user set with these decisions:
 
 - **JOHTO is strictly Crystal** (case 116): HGSS-flavoured events Quetzal added are removed; where this file or
   docs/REGIONS_TODO.md said "HGSS ranks above Quetzal", Crystal alone is the reference now.
@@ -67,9 +67,9 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [ ] **50. [J1-4, J2-10, J2-11, J3-38]** Words about travel between regions that don't match Kai's: **RESTORE the original**
 - [x] **51. [K1-12]** DAISY: Quetzal's "no friendship" line, a TOWN MAP she never gives, no grooming: **RESTORE the original**
 - [ ] **52. [J1-5]** EARL's ACADEMY teaches Quetzal's rules; Crystal's lessons are gone: **RESTORE the original**
-- [ ] **53. [J1-6]** KURT's first gift is a FAST BALL with "I make BALLS from BERRIES ... batches of 5": **RESTORE the original**
-- [ ] **54. [J1-7]** AZALEA GYM's words describe Quetzal's CUT-as-BUG move and a different team: **RESTORE the original**
-- [ ] **55. [J2-7]** The HAPPINESS RATER is replaced by Quetzal's rules text, which is false in Kai: **RESTORE the original**
+- [x] **53. [J1-6]** KURT's first gift is a FAST BALL with "I make BALLS from BERRIES ... batches of 5": **RESTORE the original**
+- [x] **54. [J1-7]** AZALEA GYM's words describe Quetzal's CUT-as-BUG move and a different team: **RESTORE the original**
+- [x] **55. [J2-7]** The HAPPINESS RATER is replaced by Quetzal's rules text, which is false in Kai: **RESTORE the original**
 - [x] **56. [K1-17, K2-13, K3-20, K4-18]** Hidden and ball PP UPs / PP MAXes turned into NUGGETs: **RESTORE the original**
 - [ ] **57. [K4-12, J1-22, J3-24]** Trainers' teams (leaders, ELITE FOUR, CHAMPION, routes) are Quetzal's: **RESTORE the original**
 - [ ] **58. [K1-16, K2-14, K4-9, J1-15, J2-19, J3-17]** In-game trades are Quetzal's, not FireRed's / Crystal's: **RESTORE the original**
@@ -104,7 +104,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **87. [K3-32]** kanto_shared.inc: the other Quetzal-only shared pieces: **RESTORE the original**
 - [ ] **88. [K4-6]** The POKéMON TRAINER FAN CLUB is Quetzal's "KANTO EXPLORERS' CLUB" of hint people, some describing things Kai doesn't have: **RESTORE the original**
 - [ ] **89. [K4-20]** A few trainers' lines rewritten by Quetzal: **RESTORE the original**
-- [ ] **90. [J1-11]** ROUTE 32's guard demands Elder LI; Crystal only wants the ZEPHYRBADGE: **RESTORE the original**
+- [x] **90. [J1-11]** ROUTE 32's guard demands Elder LI; Crystal only wants the ZEPHYRBADGE: **RESTORE the original**
 - [ ] **91. [J1-13]** Item balls are Quetzal's, not Crystal's (non-TM ones too): **RESTORE the original**
 - [ ] **92. [J1-19]** SLOWPOKE WELL B2F: Quetzal's SLOWKING / DAMP ROCK instead of Crystal's KING'S ROCK man; B1F's SLOWPOKE with MAIL missing: **RESTORE the original**
 - [ ] **93. [J1-24]** GIOVANNI's alternate-past remnants (dead since 1.68.1) still sit in these maps: **REMOVE it**
@@ -112,23 +112,23 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [ ] **95. [J1-30]** CHERRYGROVE: the rival's "That's my TRAINER CARD! You saw my name..." line and the guide's MAP gift words: **RESTORE the original**
 - [ ] **96. [J2-20]** GOLDENROD DEPT. STORE floors and directory are Quetzal's: **RESTORE the original**
 - [ ] **97. [J2-22]** Bug-Catching Contest uses Quetzal's rules, and its rules text promises RADIANT scoring: **RESTORE the original**
-- [ ] **98. [J2-23]** GOLDENROD GYM guide talks about FAIRY types; gym statues read "TOWN" / "CERTIFIED TRAINERS": **RESTORE the original**
+- [x] **98. [J2-23]** GOLDENROD GYM guide talks about FAIRY types; gym statues read "TOWN" / "CERTIFIED TRAINERS": **RESTORE the original**
 - [ ] **99. [J2-26]** ROUTE 34 / its gate: KATE's SOFT SAND is a ball; Trainer Tips say berries regrow "several times a day"; SWEET SCENT teacher gone: **RESTORE the original**
 - [ ] **100. [J2-27]** ROUTE 36: FLORIA isn't at the odd tree; SQUIRTBOTTLE needs only the badge; a Hisuian GROWLITHE warning: **RESTORE the original**
 - [ ] **101. [J2-28]** NATIONAL PARK / ROUTE 35 people rewritten or added: **RESTORE the original**
-- [ ] **102. [J2-29]** MANIA's SHUCKLE is a gift to keep, not a loan: **RESTORE the original**
-- [ ] **103. [J2-31]** MARY gives BRIGHT POWDER (Crystal: PINK BOW): **RESTORE the original**
+- [x] **102. [J2-29]** MANIA's SHUCKLE is a gift to keep, not a loan: **RESTORE the original**
+- [x] **103. [J2-31]** MARY gives BRIGHT POWDER (Crystal: PINK BOW): **RESTORE the original**
 - [ ] **104. [J2-32]** MOOMOO needs five ORAN BERRIES (Crystal: seven), the farm gives LEFTOVERS (Crystal: TM13 SNORE): **RESTORE the original** - _Re-add and implement new Crystal and Kanto specific TMs to fix TM issues._
 - [ ] **105. [J2-35]** Small Quetzal rewrites and additions (pattern): **RESTORE the original**
 - [ ] **106. [J3-15]** MT. SILVER and RED open right after the JOHTO LEAGUE; RED stands outdoors, gives a LIGHT BALL and can be re-fought: **RESTORE the original**
-- [ ] **107. [J3-16]** DRAGON SHRINE's DRATINI is Lv35 with an EVERSTONE; Crystal's Lv15 EXTREMESPEED reward is gone: **RESTORE the original**
-- [ ] **108. [J3-19]** LAKE OF RAGE's FISHING GURU buys MAGIKARP instead of rating their length: **RESTORE the original**
-- [ ] **109. [J3-20]** ROUTE 43 toll: ¥500 and free for the broke; charged only before LANCE: **RESTORE the original**
+- [x] **107. [J3-16]** DRAGON SHRINE's DRATINI is Lv35 with an EVERSTONE; Crystal's Lv15 EXTREMESPEED reward is gone: **RESTORE the original**
+- [x] **108. [J3-19]** LAKE OF RAGE's FISHING GURU buys MAGIKARP instead of rating their length: **RESTORE the original**
+- [x] **109. [J3-20]** ROUTE 43 toll: ¥500 and free for the broke; charged only before LANCE: **RESTORE the original**
 - [ ] **110. [J3-22]** BLACKTHORN's gym and DRAGON'S DEN gating are Quetzal's: **RESTORE the original**
-- [ ] **111. [J3-25]** MAHOGANY gym guide rewritten for Quetzal's PRYCE: **RESTORE the original**
+- [x] **111. [J3-25]** MAHOGANY gym guide rewritten for Quetzal's PRYCE: **RESTORE the original**
 - [ ] **112. [J3-26]** "Welcome back" rematch intros for the ELITE FOUR, LANCE and the HALL OF FAME: **RESTORE the original**
 - [ ] **113. [J3-28]** LAKE OF RAGE's LANCE scene and ROUTE 42's EUSINE scene are rewritten: **RESTORE the original**
-- [ ] **114. [J3-29]** TOHJO FALLS gives a SUPER ROD and a HEART SCALE: **RESTORE the original**
+- [x] **114. [J3-29]** TOHJO FALLS gives a SUPER ROD and a HEART SCALE: **RESTORE the original**
 - [ ] **115. [J3-34]** Mahogany / Blackthorn / Indigo dead or Quetzal-only bits (low): **RESTORE the original**
 - [ ] **116. [J3-35]** HGSS-flavoured events kept from Quetzal (for the record: HGSS ranks above Quetzal): **REMOVE it** - _We must stick to strictly Crystal._
 - [ ] **117. [J3-39]** Shared-script inventory (what is Quetzal-only and its state): **RESTORE the original**
@@ -149,19 +149,19 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [ ] **132. [J1-14]** Rival battles in CHERRYGROVE and AZALEA can't be lost without whiting out; his "loss" line is gone: **RESTORE the original**
 - [ ] **133. [J1-20]** ROUTE 29's catching demonstration is a text plug for the ACADEMY; its night line can never show: **RESTORE the original**
 - [ ] **134. [J1-26]** NEW BARK / home: Crystal's people and lines missing, Quetzal's scenes added: **RESTORE the original**
-- [ ] **135. [J1-28]** ROUTE 27 SANDSTORM house gives TM37 without Crystal's friendship check: **RESTORE the original**
+- [x] **135. [J1-28]** ROUTE 27 SANDSTORM house gives TM37 without Crystal's friendship check: **RESTORE the original**
 - [ ] **136. [J1-29]** UNION CAVE B2F's Friday LAPRAS is missing: **RESTORE the original**
-- [ ] **137. [J1-33]** SPROUT TOWER's ELDER LI gives HM05 with Quetzal's words: **RESTORE the original**
+- [x] **137. [J1-33]** SPROUT TOWER's ELDER LI gives HM05 with Quetzal's words: **RESTORE the original**
 - [ ] **138. [J1-34]** Small missing people, signs and lines (Crystal has them, the game doesn't): **RESTORE the original**
 - [ ] **139. [J2-14]** The WISE TRIO, SUICUNE at TIN TOWER 1F and the sage's RAINBOW WING are missing: **RESTORE the original**
-- [ ] **140. [J2-15]** ECRUTEAK's ITEMFINDER gift is missing: **RESTORE the original**
+- [x] **140. [J2-15]** ECRUTEAK's ITEMFINDER gift is missing: **RESTORE the original**
 - [ ] **141. [J2-16]** BUENA's PASSWORD show can't be played (no BLUE CARD, no points, no prize desk): **RESTORE the original**
 - [ ] **142. [J2-17]** GAME CORNER's TM prize counter is missing: **RESTORE the original**
 - [ ] **143. [J2-18]** DEPT. STORE 5F's Sunday RETURN / FRUSTRATION lady is missing, though a shopper still talks about her: **RESTORE the original**
 - [ ] **144. [J2-24]** Crystal's GOLDENROD move tutor, city sign and RADIO CARD lady are missing: **RESTORE the original**
 - [ ] **145. [J2-25]** GOLDENROD UNDERGROUND: haircut brothers and the bargain merchant missing; Quetzal shops and a KIMONO GIRL scene added: **RESTORE the original**
 - [ ] **146. [J2-30]** CIANWOOD's PHOTO STUDIO and POKé SEER are missing; an HGSS-style bells lady in their place: **RESTORE the original**
-- [ ] **147. [J3-21]** MOVE DELETER missing in BLACKTHORN ("MOVE BROS' HOUSE" is empty): **RESTORE the original**
+- [x] **147. [J3-21]** MOVE DELETER missing in BLACKTHORN ("MOVE BROS' HOUSE" is empty): **RESTORE the original**
 - [ ] **148. [J3-27]** HALL OF FAME doesn't send PROF. ELM's S.S. TICKET call: **RESTORE the original**
 - [ ] **149. [J1-32, J2-36]** Dead NUZLOCKE branches in gift scripts: **REMOVE it**
 - [x] **150. [K1-18]** CERULEAN's BERRY POWDER man gives a NUGGET while saying "BERRY SWEET": **RESTORE the original**
@@ -171,4 +171,5 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **154. [K4-19]** CINNABAR GYM's last quiz question is reworded: **RESTORE the original**
 - [x] **155. [K4-22]** Dead Quetzal leftovers (no effect in game, clean-up): **RESTORE the original**
 - [ ] **156. [J3-31]** Small text bugs in J3 maps and shared scripts: **FIX it, keep the idea**
-- [ ] **157. [J3-32]** RAGECANDYBAR seller and ROUTE 43's MAHOGANY gate officer follow the RADIO TOWER instead of the hideout: **FIX it, keep the idea**
+- [x] **157. [J3-32]** RAGECANDYBAR seller and ROUTE 43's MAHOGANY gate officer follow the RADIO TOWER instead of the hideout: **FIX it, keep the idea**
+- [x] **158. [user, 2026-11-04]** JOHTO's BERRY patches: the ripe BERRY tree's sprite still draws over the map's fruit tree (seen in 1.89.0): **FIX it** - _the tree stays Crystal's, ripe or not._
