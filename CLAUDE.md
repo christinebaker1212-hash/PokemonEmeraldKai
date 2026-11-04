@@ -201,6 +201,8 @@ mp_legacy_*.c, tools/moemon_legacy). Also the HGSS battle balls (16x32 frames, a
 pokeball.h BALL_FRAME_*, tools/moemon_balls/hgss_balls.py; COOP_NOTES "HGSS POKé BALLS"; test hgss_balls).
 Also the ASTRAL BALL (special 14: a sure catch, the catch made shiny keeping what shows, a prismatic sheen and silver
 sparkles drawn over its own pixels until it clicks shut: pokemon.c MP_Astral_MakeShiny, src/mp/mp_astralfx.c; COOP_NOTES "The ASTRAL BALL"; test astral_ball).
+Also fishing as Gen 1 had it (1.97.0: cast, then a bite and the battle or no nibble; no dots or timing: field_player_avatar.c;
+COOP_NOTES "Fishing as Gen 1 had it"; test fishing_gen1).
 Also PC TAG mode (west button / F: tag Moemon, then MOVE / RELEASE them together; pokemon_storage_system.c end).
 Also the CANDY JAR (mp_candy.c: candies from releases, PROF. BIRCH brings the jar, a physics jar menu, CONVERT to RARE
 CANDY; ITEM_CANDY_JAR 398). Also the shared PC as 14 boxes in the PC box screen (mp_sharedbox.c: a mirror the stock

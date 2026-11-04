@@ -1966,6 +1966,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         u8 TrySavingData(u8 saveType);
         TrySavingData(SAVE_NORMAL);
     }
+    else if (strcmp(cmd, "fishbite") == 0)
+    {
+        // fishbite N - the next casts: 1 always a bite, 2 never, 0 as the dice fall
+        extern u8 gMpFishBiteRig;
+        gMpFishBiteRig = atoi(arg);
+    }
     else if (strcmp(cmd, "fish") == 0)
     {
         // fish ROD - cast a rod (0 old, 1 good, 2 super) where you stand

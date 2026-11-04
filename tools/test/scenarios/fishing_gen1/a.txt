@@ -1,0 +1,15 @@
+pressuntil A field 5000
+wait 60
+mp fishbite 2
+mp fish 0
+wait 100
+shot nibble
+pressuntil A field 600
+wait 60
+mp fishbite 1
+mp fish 2
+shotburst bite 150 15
+waitfor battle 900
+pressuntil A action 1500
+mp fishbite 0
+quit

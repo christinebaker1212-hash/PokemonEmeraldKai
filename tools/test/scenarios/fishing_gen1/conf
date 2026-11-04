@@ -1,0 +1,11 @@
+# Fishing as Gen 1 had it (field_player_avatar.c, the user's call 2026-11-04): no dots, no pressing A in time. On
+# ROUTE 102 (fishing water), with no button pressed at all: a cast with no bite says "Not even a nibble!" and ends;
+# a SUPER ROD cast with a bite (it used to need up to six rounds of timed presses) says "Oh! A bite!" and the battle
+# starts by itself (waitfor battle with no keys, then A to its action menu). The bite roll is rigged (mp fishbite) so the test can't come out either way.
+# Shots: nibble, bite_* by hand.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_WARP=0,17,10,10"
+EXPECT_A=("fishing: not even a nibble (rod 0)" "fishing: a bite (rod 2)" "[test] action menu at frame")
+# (no presses until the battle has begun: waitfor battle; then A through its opening message)
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -1840,6 +1840,12 @@ static void Task_WaitStopSurfing(u8 taskId)
 #define FISHING_NO_BITE 11
 #define FISHING_GOT_AWAY 12
 #define FISHING_SHOW_RESULT 13
+// Moemon Co-op: fishing as Gen 1 had it (the user, 2026-11-04): cast, a pause, then "Oh! A bite!" and the battle,
+// or "Not even a nibble!". No dots, no pressing A in time, no extra rounds for the better rods, nothing gets away.
+// The bite chance and what bites stay the game's own (Fishing_CheckForBite, the maps' fishing tables).
+#define FISHING_CHECK_BITE 5
+#define FISHING_START_ENCOUNTER 10
+#define FISHING_BITE_PAUSE 45   // frames "Oh! A bite!" stays before the battle (A goes on at once)
 
 static bool8 (*const sFishingStateFuncs[])(struct Task *) =
 {
@@ -1924,7 +1930,7 @@ static bool8 Fishing_InitDots(struct Task *task)
     u32 randVal;
 
     LoadMessageBoxAndFrameGfx(0, TRUE);
-    task->tStep++;
+    task->tStep = FISHING_CHECK_BITE;   // Moemon Co-op: Gen 1 fishing, no dots (was task->tStep++)
     task->tFrameCounter = 0;
     task->tNumDots = 0;
     randVal = Random();
@@ -1972,6 +1978,8 @@ static bool8 Fishing_ShowDots(struct Task *task)
     }
 }
 
+u8 gMpFishBiteRig;   // Moemon Co-op: tests (mp fishbite N): 1 always a bite, 2 never, 0 the dice
+
 static bool8 Fishing_CheckForBite(struct Task *task)
 {
     bool8 bite;
@@ -2003,6 +2011,12 @@ static bool8 Fishing_CheckForBite(struct Task *task)
             else
                 bite = TRUE;
         }
+        if (gMpFishBiteRig)   // (tests)
+        {
+            bite = gMpFishBiteRig == 1;
+            task->tStep = bite ? FISHING_GOT_BITE : FISHING_NO_BITE;
+        }
+        MPNet_Log("fishing: %s (rod %d)", bite ? "a bite" : "not even a nibble", task->tFishingRod);
 
         if (bite == TRUE)
             StartSpriteAnim(&gSprites[gPlayerAvatar.spriteId], GetFishingBiteDirectionAnimNum(GetPlayerFacingDirection()));
@@ -2013,7 +2027,7 @@ static bool8 Fishing_CheckForBite(struct Task *task)
 static bool8 Fishing_GotBite(struct Task *task)
 {
     AlignFishingAnimationFrames();
-    AddTextPrinterParameterized(0, FONT_NORMAL, gText_OhABite, 0, 17, 0, NULL);
+    AddTextPrinterParameterized(0, FONT_NORMAL, gText_OhABite, 0, 1, 0, NULL);   // Moemon Co-op: the first line (no dots above it)
     task->tStep++;
     task->tFrameCounter = 0;
     return FALSE;
@@ -2030,10 +2044,13 @@ static bool8 Fishing_WaitForA(struct Task *task)
 
     AlignFishingAnimationFrames();
     task->tFrameCounter++;
-    if (task->tFrameCounter >= reelTimeouts[task->tFishingRod])
-        task->tStep = FISHING_GOT_AWAY;
-    else if (JOY_NEW(A_BUTTON))
-        task->tStep++;
+    (void)reelTimeouts;
+    // Moemon Co-op: Gen 1 fishing, the bite is always landed: a moment to read it, then the battle
+    if (task->tFrameCounter >= FISHING_BITE_PAUSE || JOY_NEW(A_BUTTON))
+    {
+        task->tFrameCounter = 0;
+        task->tStep = FISHING_START_ENCOUNTER;
+    }
     return FALSE;
 }
 

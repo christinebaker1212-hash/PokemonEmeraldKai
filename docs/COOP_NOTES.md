@@ -875,6 +875,17 @@ the HGSS layout -> graphics/balls/astral.png like hgss_balls.py; the icon's 24x2
 - Test astral_ball (four full-HP catches incl. RAYQUAZA, check.py: shiny, nature, gender, UNOWN letter, WURMPLE;
   `mp monid SLOT`; shots: flight, shakes, the click, the summary's plain ball, the BAG).
 
+## Fishing as Gen 1 had it (1.97.0)
+
+The user (2026-11-04) found Emerald's fishing minigame no fun: field_player_avatar.c's state machine now goes cast ->
+the one-second wait -> Fishing_CheckForBite (the game's own odds: half the casts, SUCTION CUPS / STICKY HOLD more; the
+map's fishing table) -> "Oh! A bite!" (first line) held FISHING_BITE_PAUSE frames (A skips) -> the battle, or "Not even
+a nibble!". Fishing_ShowDots / CheckMoreDots / MonOnHook / GotAway stay in the table but are never reached (InitDots
+jumps to FISHING_CHECK_BITE, WaitForA to FISHING_START_ENCOUNTER), so no reaction timing, no extra rounds for the
+GOOD / SUPER RODS, nothing gets away. Log `fishing: a bite (rod N)` / `not even a nibble`; tests rig the roll with
+`mp fishbite 1|2|0` (gMpFishBiteRig). SINNOH's TV fishing show and the LURE BALL's flag are fed as before. Test
+fishing_gen1.
+
 ## NAME CASE and CREATURES (OPTIONS, this game only)
 
 SaveBlock2 spare option bits: optionsNameCase (2 bits: MP_NAMECASE_AS_TYPED / CAPS / MIXED) and optionsPokemonArt
