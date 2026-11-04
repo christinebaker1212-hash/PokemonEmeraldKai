@@ -71,5 +71,14 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 15,
+      "y": 15,
+      "elevation": 0,
+      "item": "ITEM_ICE_HEAL",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_17"
+    }
+  ]
 }

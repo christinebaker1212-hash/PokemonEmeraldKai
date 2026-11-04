@@ -1,0 +1,8 @@
+# Crystal's hidden items in JOHTO (tools/quetzal_port/gen_hidden_items.py, docs/REGIONS_AUDIT.md 131): ROUTE 30's
+# POTION, west of the player at 32,9, is found once (its flag FLAG_JOHTO_HIDDEN_ITEM_33 set, one more POTION in the BAG (the quick start has 5));
+# the second A finds nothing
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("flag 0x1621: 0" "item 13: 5" "flag 0x1621: 1" "item 13: 6" "ctx 1 free 1 overworld 1 locked 0 script 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

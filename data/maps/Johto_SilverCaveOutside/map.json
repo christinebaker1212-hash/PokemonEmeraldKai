@@ -45,6 +45,14 @@
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
       "script": "Johto_SilverCaveOutside_EventScript_83E043C"
+    },
+    {
+      "type": "hidden_item",
+      "x": 9,
+      "y": 20,
+      "elevation": 0,
+      "item": "ITEM_FULL_RESTORE",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_45"
     }
   ]
 }

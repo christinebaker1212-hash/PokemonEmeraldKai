@@ -461,6 +461,22 @@
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
       "script": "Johto_Route32_EventScript_83EEE19"
+    },
+    {
+      "type": "hidden_item",
+      "x": 26,
+      "y": 78,
+      "elevation": 0,
+      "item": "ITEM_GREAT_BALL",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_34"
+    },
+    {
+      "type": "hidden_item",
+      "x": 25,
+      "y": 42,
+      "elevation": 0,
+      "item": "ITEM_SUPER_POTION",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_35"
     }
   ]
 }

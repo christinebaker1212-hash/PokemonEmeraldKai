@@ -133,5 +133,14 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 37,
+      "y": 39,
+      "elevation": 0,
+      "item": "ITEM_HYPER_POTION",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_26"
+    }
+  ]
 }

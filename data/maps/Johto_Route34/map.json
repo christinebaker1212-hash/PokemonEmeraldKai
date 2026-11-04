@@ -393,6 +393,22 @@
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
       "script": "Quetzal_EventScript_84018CD"
+    },
+    {
+      "type": "hidden_item",
+      "x": 27,
+      "y": 62,
+      "elevation": 0,
+      "item": "ITEM_RARE_CANDY",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_36"
+    },
+    {
+      "type": "hidden_item",
+      "x": 30,
+      "y": 34,
+      "elevation": 0,
+      "item": "ITEM_SUPER_POTION",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_37"
     }
   ]
 }

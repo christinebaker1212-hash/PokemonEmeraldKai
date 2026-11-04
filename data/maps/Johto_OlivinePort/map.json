@@ -103,5 +103,14 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 1,
+      "y": 15,
+      "elevation": 0,
+      "item": "ITEM_PROTEIN",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_31"
+    }
+  ]
 }

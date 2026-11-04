@@ -387,6 +387,14 @@
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
       "script": "Johto_AzaleaTown_EventScript_83C3C10"
+    },
+    {
+      "type": "hidden_item",
+      "x": 52,
+      "y": 6,
+      "elevation": 0,
+      "item": "ITEM_FULL_HEAL",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_1"
     }
   ]
 }
