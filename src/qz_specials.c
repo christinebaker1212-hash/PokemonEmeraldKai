@@ -564,6 +564,30 @@ u16 QzIsCurrentPcBoxFull(void) { return gSpecialVar_Result = QzIsCurrentPcBoxFul
 u16 QzGetRivalStarterSpecies(void) { return gSpecialVar_Result = QzGetRivalStarterSpecies_(); }
 u16 QzGetRegionBadgeCount(void) { return gSpecialVar_Result = QzGetRegionBadgeCount_(); }
 u16 QzVictoryRoadGateCheck(void) { return gSpecialVar_Result = QzVictoryRoadGateCheck_(); }
+
+// The walk between JOHTO's VICTORY ROAD gate and KANTO's ROUTE 22 gate (docs/REGIONS_AUDIT.md cases 43 and 70: Kai's
+// customs on every crossing): for champions of both LEAGUES; VAR_0x8004 the region, VAR_0x8005 the one POKéMON who
+// comes (EventScript_RegionCustoms), the others into the GLOBAL PC. RESULT 0: not allowed, or the GLOBAL PC is full
+u16 MP_RegionGateCross(void)
+{
+    u8 to = gSpecialVar_0x8004, from = MP_Region_Current(), keep = gSpecialVar_0x8005, i;
+    if (to >= REGION_COUNT || to == from || !QzVictoryRoadGateCheck_())
+        return gSpecialVar_Result = 0;
+    if (keep >= PARTY_SIZE || !GetMonData(&gPlayerParty[keep], MON_DATA_SANITY_HAS_SPECIES))
+        keep = 0;
+    if (MP_Region_GlobalFree() < CalculatePlayerPartyCount() - 1)
+        return gSpecialVar_Result = 0;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        if (i == keep || !GetMonData(&gPlayerParty[i], MON_DATA_SANITY_HAS_SPECIES))
+            continue;
+        MP_Region_DepositGlobal(&gPlayerParty[i].box);
+        ZeroMonData(&gPlayerParty[i]);
+    }
+    CompactPartySlots();
+    MP_Region_Travel(from, to);
+    return gSpecialVar_Result = 1;
+}
 u16 QzJohtoStaticEncounterSetup(void) { return gSpecialVar_Result = QzJohtoStaticEncounterSetup_(); }
 u16 QzJohtoStaticEncounterSetup2(void) { return gSpecialVar_Result = QzJohtoStaticEncounterSetup2_(); }
 u16 QzJohtoStaticEncounterSetupTower(void) { return gSpecialVar_Result = QzJohtoStaticEncounterSetupTower_(); }

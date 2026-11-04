@@ -174,7 +174,7 @@ Johto_MahoganyTown_EventScript_83DF85E::
 Johto_MahoganyTown_EventScript_83DF869::
 	lock
 	faceplayer
-	goto_if_eq VAR_QZ_0x500C, 6, Johto_MahoganyTown_EventScript_83DF881
+	goto_if_ge VAR_QZ_0x500C, 14, Johto_MahoganyTown_EventScript_83DF881   @ Moemon Kai: once the hideout is cleared (Crystal: EVENT_CLEARED_ROCKET_HIDEOUT)
 	msgbox Johto_MahoganyTown_Text_83DF9E5, MSGBOX_DEFAULT
 	closemessage
 	release

@@ -4,6 +4,7 @@
 EventScript_RegionCustoms::
 	specialvar VAR_RESULT, MP_RegionFirstVisit
 	call_if_eq VAR_RESULT, TRUE, EventScript_RegionFirstVisit
+EventScript_RegionCustomsPick::   @ (the gates between JOHTO and KANTO: customs without the boats' first-visit greeting)
 	setvar VAR_0x8005, 0
 	specialvar VAR_RESULT, MP_RegionPartyCount
 	goto_if_le VAR_RESULT, 1, EventScript_RegionCustoms_Done
@@ -540,3 +541,51 @@ gText_RegionArrivalJohto::
 	.string "A room's ready for you in NEW BARK\n"
 	.string "TOWN, where his POKéMON LAB is.\p"
 	.string "Follow me, I'll take you there!$"
+
+@ The walk between JOHTO's VICTORY ROAD gate and KANTO's ROUTE 22 gate (docs/REGIONS_AUDIT.md cases 43, 70): Crystal's
+@ way through, for champions of both LEAGUES, with Kai's customs as on the boats (qz_specials.c MP_RegionGateCross)
+EventScript_RegionGateToKanto::
+	lockall
+	setvar VAR_0x8004, 2   @ REGION_KANTO
+	specialvar VAR_RESULT, QzVictoryRoadGateCheck
+	goto_if_eq VAR_RESULT, 0, EventScript_RegionGateClosedJohto
+	call EventScript_RegionCustomsPick
+	specialvar VAR_RESULT, MP_RegionGateCross
+	goto_if_eq VAR_RESULT, 0, EventScript_RegionGateRefusedJohto
+	warp MAP_KANTO_ROUTE22_NORTH_ENTRANCE, 3, 2
+	waitstate
+	releaseall
+	end
+
+EventScript_RegionGateToJohto::
+	lockall
+	setvar VAR_0x8004, 1   @ REGION_JOHTO
+	specialvar VAR_RESULT, QzVictoryRoadGateCheck
+	goto_if_eq VAR_RESULT, 0, EventScript_RegionGateClosedKanto
+	call EventScript_RegionCustomsPick
+	specialvar VAR_RESULT, MP_RegionGateCross
+	goto_if_eq VAR_RESULT, 0, EventScript_RegionGateRefusedKanto
+	warp MAP_JOHTO_VICTORY_ROAD_GATE, 19, 9
+	waitstate
+	releaseall
+	end
+
+EventScript_RegionGateRefusedJohto::
+	msgbox Quetzal_Text_840FB2D, MSGBOX_DEFAULT
+EventScript_RegionGateClosedJohto::
+	msgbox Quetzal_Text_83E90EF, MSGBOX_DEFAULT
+	closemessage
+	applymovement LOCALID_PLAYER, Common_Movement_WalkLeft
+	waitmovement 0
+	releaseall
+	end
+
+EventScript_RegionGateRefusedKanto::
+	msgbox Quetzal_Text_840FB2D, MSGBOX_DEFAULT
+EventScript_RegionGateClosedKanto::
+	msgbox Quetzal_Text_83E90EF, MSGBOX_DEFAULT
+	closemessage
+	applymovement LOCALID_PLAYER, Common_Movement_WalkDown
+	waitmovement 0
+	releaseall
+	end
