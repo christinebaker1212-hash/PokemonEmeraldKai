@@ -1,0 +1,21 @@
+pressuntil A field 5000
+wait 30
+mp setvar 0x5141 280
+mp setvar 0x5142 110
+mp clearflag 0x21AD
+mp warp 39,29,4,5
+wait 150
+mp objat 4 4
+mp where
+mp face up
+wait 10
+press A 2
+wait 30
+shot s1
+
+mash A 120 20
+wait 200
+mp getvar 0x5141
+mp checkitem 110
+mp regioninfo
+quit

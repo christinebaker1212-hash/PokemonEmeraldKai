@@ -680,3 +680,4 @@ gSpecials::
 	def_special MP_HiddenCoinsAmount
 	def_special MP_HiddenCoinsFit
 	def_special MP_RegionGateCross
+	def_special MP_MakeScriptedWildShiny

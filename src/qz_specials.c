@@ -916,6 +916,7 @@ static u16 QzSampleResortGorgeousMonAndReward_(void)
             species = SPECIES_PIKACHU;
         VarSet(VAR_QZ_0x5141, species);
         VarSet(0x5142, sRewards[Random() % ARRAY_COUNT(sRewards)]);
+        VarSet(VAR_KANTO_RESORT_STEPS, 0);
     }
     GetSpeciesName(gStringVar1, VarGet(VAR_QZ_0x5141));
     return TRUE;
@@ -2030,4 +2031,19 @@ u16 QzGiovanniStoryElmDone(void)
     FlagSet(0x131B);
     FlagSet(FLAG_QZ_0x131F);
     return 0;
+}
+
+// FireRed's IncrementResortGorgeousStepCounter (field_control_avatar.c, every step): SELPHY's wish lasts 250 steps,
+// then she's tired of waiting (0xFFFF) and wishes for another
+void MP_ResortGorgeousStep(void)
+{
+    u16 steps = VarGet(VAR_KANTO_RESORT_STEPS);
+    if (VarGet(VAR_QZ_0x5141) == SPECIES_NONE)
+        return;
+    if (++steps >= 250)
+    {
+        VarSet(VAR_QZ_0x5141, 0xFFFF);
+        steps = 0;
+    }
+    VarSet(VAR_KANTO_RESORT_STEPS, steps);
 }

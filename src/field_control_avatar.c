@@ -194,6 +194,10 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     {
         IncrementGameStat(GAME_STAT_STEPS);
         IncrementBirthIslandRockStepCount();
+        {
+            void MP_ResortGorgeousStep(void);
+            MP_ResortGorgeousStep();   // Moemon Kai: FireRed's SELPHY wish timer (qz_specials.c)
+        }
         if (TryStartStepBasedScript(&position, metatileBehavior, playerDirection) == TRUE)
             return TRUE;
     }
