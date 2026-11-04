@@ -1,0 +1,14 @@
+pressuntil A field 5000
+mp additem 359 1
+mp item 1 3
+mp savedata ball:last 1
+mp warp 36,93,11,14
+wait 150
+press DOWN 20
+pressuntil A action 3000
+wait 10
+press L 2
+pressuntillog A 3000 ball was dodged
+wait 200
+mp checkitem 4
+quit

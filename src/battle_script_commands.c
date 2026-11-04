@@ -10807,6 +10807,7 @@ static void Cmd_handleballthrow(void)
     }
     else if (gMpUncatchableWild)
     {
+        MPNet_Log("ghost battle: the ball was dodged");
         BtlController_EmitBallThrowAnim(B_COMM_TO_CONTROLLER, BALL_TRAINER_BLOCK);
         MarkBattlerForControllerExec(gActiveBattler);
         gBattlescriptCurrInstr = BattleScript_MpBallDodged;

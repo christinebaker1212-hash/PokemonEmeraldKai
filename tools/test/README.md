@@ -70,6 +70,12 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `kanto_birth_island` | KANTO's BIRTH ISLAND: touching the triangle moves it on its own progress, no freeze |
 | `johto_kiln` | CHARCOAL KILN: the apprentice's CHARCOAL with Crystal's words and its own flag; FARFETCH'D home |
 | `johto_radio_card` | RADIO TOWER 1F: Crystal's RADIO CARD quiz, YES YES NO YES NO gives the RADIO CARD |
+| `region_gate_walk` | VICTORY ROAD gate: the KANTO door refused without both LEAGUEs, then customs: one POKéMON along, the rest to the PC, KANTO's side |
+| `kanto_selphy` | FIVE ISLAND: SELPHY asks to see a POKéMON, 250 steps later it's shown and she rewards it |
+| `kanto_marowak_ghost` | POKéMON TOWER 6F with the SILPH SCOPE: MAROWAK's ghost battle, a thrown ball is dodged |
+| `kanto_icefall_ice` | ICEFALL CAVE 1F: thin ice cracks under a step, breaks on the next and drops the player to B1F |
+| `johto_rival_days` | Crystal's rival after the LEAGUE: INDIGO PLATEAU on a Monday, gone on a Tuesday, training in DRAGON'S DEN |
+| `johto_gs_ball` | GOLDENROD's POKéMON CENTER brings the GS BALL only after JOHTO's LEAGUE; KURT keeps it until the next day, then hands it back in AZALEA |
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped (and their MOéMON GARDEN records travel) |
 | `nurse_no_union` | CHERRYGROVE's nurse heals a game started in JOHTO: she never says "It appears as if <junk> is playing right now" (the wireless UNION ROOM check; flag 0x2A07 stays clear) |
 | `pmd_scale_hop` | a scaled PMD follower (PIKACHU, FOLLOWERS: PMD everywhere) mid-hop is drawn whole: check.py counts its rows and pixels (its lower part was cut off) |

@@ -4797,3 +4797,25 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
   sails ("The ship set sail.", FireRed's harbor words); start_menu.c sets FireRed's FLAG_OPENED_START_MENU (0x21E7);
   JESSIE & JAMES retired (qz_specials.c TravelingEvent hides them always); tools/quetzal_port/kai_gone.py takes a map's
   Quetzal objects / last warp / signs / triggers out; CERULEAN CAVE 2F's ladder to Quetzal's RAYQUAZA room drawn over.
+- 1.89.0 (the audit's batch B):
+  - The VICTORY ROAD gate between JOHTO and KANTO is customs, not a walk: its doors are triggers (VAR_TEMP_9) running
+    data/scripts/mp_region.inc EventScript_RegionGateToKanto / ToJohto; qz_specials.c MP_RegionGateCross checks both
+    LEAGUEs and the GLOBAL PC room, keeps the POKéMON in VAR_0x8005, sends the rest to the PC and travels
+    (MP_Region_Travel). EventScript_RegionCustomsPick is customs without the first-visit greeting. Test region_gate_walk.
+  - KANTO's rival is named by the player (FireRed's OAK's lab scene): VAR_KANTO_RIVAL_NAME (0x514C-0x514F),
+    qz_specials.c NameRival(region) / MP_KantoRivalName / MP_JohtoRivalNameHere; online the room's name rides the
+    rules (mp_main.c MP_RoomRivalName(region)); KANTO's lines say {RIVAL} where Quetzal wrote BLUE. Test kanto_rival_lose.
+  - POKéMON TOWER 6F's MAROWAK is FireRed's ghost battle: battle_script_commands.c gMpUncatchableWild (set by
+    QzStartMarowakGhostBattle_, cleared at the battle's end) makes a ball BattleScript_MpBallDodged. Test kanto_marowak_ghost.
+  - FireRed's SELPHY (FIVE ISLAND's RESORT GORGEOUS): her request (VAR_QZ_0x5141 / 0x5142) and 250 steps to show it
+    (VAR_KANTO_RESORT_STEPS, field_control_avatar.c MP_ResortGorgeousStep). Test kanto_selphy.
+  - ICEFALL CAVE 1F's thin ice: field_tasks.c step callback 8 (FireRed's STEP_CB_ICE, metatiles 0x35A / 0x35B, temp
+    flags 1-9 keep the cracks until the map reloads; VAR_TEMP_1 drops the player to B1F). Test kanto_icefall_ice.
+  - Crystal's GS BALL: GOLDENROD's POKéMON CENTER (a receptionist, object 10, at the door once JOHTO's LEAGUE is beaten:
+    MP_JohtoGsBallReady, FLAG_JOHTO_GOT_GS_BALL); KURT keeps it a day (FLAG_JOHTO_GAVE_GS_BALL, daily
+    FLAG_DAILY_JOHTO_KURT_GS_BALL); ILEX's shrine calls CELEBI once. Debug `mp newday` (a new day for the daily events
+    without touching the clock: the clock is always the PC's, so `mp weekday` alone never passes a day). Test johto_gs_ball.
+  - Crystal's rival after the LEAGUE: INDIGO PLATEAU's POKéMON CENTER on Mondays / Wednesdays (FLAG_DAILY_JOHTO_PLATEAU_RIVAL),
+    DRAGON'S DEN B1F on Tuesdays / Thursdays (FLAG_JOHTO_HIDE_DEN_RIVAL); special MP_JohtoWeekday. Test johto_rival_days.
+  - Also: LAKE OF RAGE's RED GYARADOS shiny (script_pokemon_util.c MP_MakeScriptedWildShiny), Quetzal's viewpoint pans
+    gone, MAHOGANY's old man by VAR_QZ_0x500C, BAOBA (Quetzal's SAFARI quest) gone until case 62's SAFARI ZONE.

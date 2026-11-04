@@ -2,7 +2,7 @@
 
 The audit compared every KANTO map with FireRed and every JOHTO map with Crystal (findings, with the original's and the
 game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided each of the 157 cases below. Status:
-[ ] to do, [x] done (1.88.0: cases 1-9, 11-14, 16, 19-23, 26, 28, 29, 32-34, 40, 44; case 10 TRAINER TOWER and 15 HM WHIRLPOOL wait for their ports). Rules the user set with these decisions:
+[ ] to do, [x] done (1.88.0: cases 1-9, 11-14, 16, 19-23, 26, 28, 29, 32-34, 40, 44; case 10 TRAINER TOWER and 15 HM WHIRLPOOL wait for their ports; 1.89.0: cases 18, 27, 30, 31, 35, 36, 38, 39, 41-43; cases 17 / 24 VS SEEKER go with 57's FireRed teams, 25 with 71, 37 BATTLE TOWER its own port). Rules the user set with these decisions:
 
 - **JOHTO is strictly Crystal** (case 116): HGSS-flavoured events Quetzal added are removed; where this file or
   docs/REGIONS_TODO.md said "HGSS ranks above Quetzal", Crystal alone is the reference now.
@@ -32,7 +32,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [ ] **15. [J3-4]** LANCE says he hands over WHIRLPOOL in the ROCKET HIDEOUT but gives nothing: **RESTORE the original**
 - [x] **16. [K1-3, K2-21, K3-4, K4-3, J1-3, J3-7]** JESSIE & JAMES's travelling battle (Quetzal's), and its reward is an empty POKéMON: **REMOVE it**
 - [ ] **17. [K1-1, K2-4]** KANTO trainer rematches can never happen (no VS SEEKER, dead rematch branches): **RESTORE the original**
-- [ ] **18. [K1-11, K2-22, K3-26, K4-17]** The KANTO rival is always "BLUE" (FireRed lets you name him): **RESTORE the original**
+- [x] **18. [K1-11, K2-22, K3-26, K4-17]** The KANTO rival is always "BLUE" (FireRed lets you name him): **RESTORE the original**
 - [x] **19. [K1-4]** ARCEUS still visits the PALLET bedroom although every ARCEUS trial in KANTO is hidden: **REMOVE it**
 - [x] **20. [K1-6]** CERULEAN CAVE's added RAYQUAZA chamber is now an empty room: **RESTORE the original**
 - [x] **21. [K1-21]** Gift POKéMON sent to the PC name the wrong BOX: **RESTORE the original**
@@ -41,23 +41,23 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [ ] **24. [K2-3]** VERMILION POKéMON CENTER: the VS SEEKER woman gives a PP MAX while talking about an ABILITY PATCH: **RESTORE the original**
 - [ ] **25. [K2-6]** Empty or misleading sections inside the Dept. Store menus: **RESTORE the original**
 - [x] **26. [K2-8]** GAME CORNER hidden coins give nothing: **RESTORE the original**
-- [ ] **27. [K2-12]** POKéMON TOWER 6F MAROWAK: no ghost battle without the SILPH SCOPE, and the MAROWAK can be caught: **RESTORE the original**
+- [x] **27. [K2-12]** POKéMON TOWER 6F MAROWAK: no ghost battle without the SILPH SCOPE, and the MAROWAK can be caught: **RESTORE the original**
 - [x] **28. [K3-5]** TANOBY's seven chambers each stand six overlapping REGI objects; only one chamber works: **REMOVE it**
 - [x] **29. [K3-6]** The three GALARIAN birds stand at every GENERATION and only say "...": **REMOVE it**
-- [ ] **30. [K3-8]** SELPHY's daily request never resets, and FireRed's wish scene is gone: **RESTORE the original**
-- [ ] **31. [K3-22]** ICEFALL CAVE 1F's thin ice never cracks: **RESTORE the original**
+- [x] **30. [K3-8]** SELPHY's daily request never resets, and FireRed's wish scene is gone: **RESTORE the original**
+- [x] **31. [K3-22]** ICEFALL CAVE 1F's thin ice never cracks: **RESTORE the original**
 - [x] **32. [K4-7]** SILPH CO. 1F receptionist opens an empty shop after GIOVANNI is beaten: **RESTORE the original**
 - [x] **33. [K4-21]** SEAFOAM B4F's current doesn't take the player off their POKéMON: **RESTORE the original**
 - [x] **34. [J1-16]** RUINS OF ALPH: DUDUNSPARCE tunnel and ARCEUS chamber (Quetzal); its battle is now an UNOWN that keeps coming back: **REMOVE it**
-- [ ] **35. [J1-17]** The GS BALL lies in the RUINS before the LEAGUE; CELEBI can be called again and again: **RESTORE the original**
-- [ ] **36. [J1-23]** Quetzal "viewpoint" camera pans fire on every step onto their tiles: **RESTORE the original**
+- [x] **35. [J1-17]** The GS BALL lies in the RUINS before the LEAGUE; CELEBI can be called again and again: **RESTORE the original**
+- [x] **36. [J1-23]** Quetzal "viewpoint" camera pans fire on every step onto their tiles: **RESTORE the original**
 - [ ] **37. [J2-33]** TRAINER HILL / BATTLE TENT signs north of ROUTE 40 lead to an empty room; Crystal's BATTLE TOWER area is gone: **RESTORE the original** - _Create the real BATTLE TOWER._
-- [ ] **38. [J3-3]** LAKE OF RAGE's RED GYARADOS is not shiny: **RESTORE the original**
-- [ ] **39. [J3-5]** MAHOGANY's old man says the MAGIKARP are back only while the player is inside the hideout: **RESTORE the original**
+- [x] **38. [J3-3]** LAKE OF RAGE's RED GYARADOS is not shiny: **RESTORE the original**
+- [x] **39. [J3-5]** MAHOGANY's old man says the MAGIKARP are back only while the player is inside the hideout: **RESTORE the original**
 - [x] **40. [J3-6]** MT. SILVER's "bag" starts a repeatable COSMOG battle with no gating: **REMOVE it**
-- [ ] **41. [J3-10]** INDIGO PLATEAU's postgame SILVER: one battle, "challenge me anytime"; Crystal's weekly rival battles missing: **RESTORE the original**
-- [ ] **42. [J3-11]** BAOBA's "SAFARI LEVEL" quest can never start: **RESTORE the original**
-- [ ] **43. [J3-14]** VICTORY ROAD gate's east door walks the whole party into KANTO, skipping Kai's customs: **RESTORE the original** - _Do not allow region walking - customs must apply._
+- [x] **41. [J3-10]** INDIGO PLATEAU's postgame SILVER: one battle, "challenge me anytime"; Crystal's weekly rival battles missing: **RESTORE the original**
+- [x] **42. [J3-11]** BAOBA's "SAFARI LEVEL" quest can never start: **RESTORE the original**
+- [x] **43. [J3-14]** VICTORY ROAD gate's east door walks the whole party into KANTO, skipping Kai's customs: **RESTORE the original** - _Do not allow region walking - customs must apply._
 - [x] **44. [J3-33]** MT. SILVER ROOM 3's triangular rock (DEOXYS) is a dead prop: **REMOVE it**
 - [ ] **45. [J2-12, J3-8, J3-9]** JOHTO's leaders promise rematches at a FIGHTING DOJO that has none: **RESTORE the original**
 - [ ] **46. [K2-18, K3-11, K4-14]** POKéMON CENTER 2F attendants explain Quetzal's MPLAYER, cheats and NUZLOCKE: **RESTORE the original**
