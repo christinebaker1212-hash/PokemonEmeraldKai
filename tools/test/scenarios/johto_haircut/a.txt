@@ -1,0 +1,25 @@
+pressuntil A field 5000
+mp textspeed 2
+wait 30
+mp weekday 2
+mp money 3000
+mp warp 34,88,4,16
+wait 150
+mp getflag 0x153F
+mp getflag 0x1540
+mp face right
+press A 2
+mash A 8 20
+wait 60
+press A 2
+wait 60
+press A 2
+wait 60
+mash A 8 20
+wait 200
+mash B 10 20
+wait 60
+mp money
+mp getflag 0x929
+mp ctx
+quit

@@ -2280,3 +2280,42 @@ u16 MP_PokeSeerAdvice(void)
     int grown = (int)GetMonData(mon, MON_DATA_LEVEL) - SeerMetLevel(mon);
     return gSpecialVar_Result = grown <= 9 ? 0 : grown <= 29 ? 1 : grown <= 59 ? 2 : grown <= 89 ? 3 : 4;
 }
+
+// Moemon Kai: Crystal's HAIRCUT BROTHERS (pokecrystal engine/events/haircut.asm, data/events/happiness_probabilities.asm,
+// happiness_changes.asm; GOLDENROD UNDERGROUND, docs/REGIONS_AUDIT.md 145). VAR_0x8004 the slot ChoosePartyMon picked,
+// VAR_0x8005 1 = the older brother, 0 = the younger. RESULT 0 nothing picked, 1 an EGG, 2 / 3 / 4 how much happier
+// (Crystal's odds: older 30 / 50 / 20 %, younger 60 / 30 / 10 %), the friendship already raised by Crystal's amounts
+// (less from 100 and from 200 up); its nickname in STR_VAR_1.
+u16 MP_HaircutBrother(void)
+{
+    static const s8 sChange[2][3][3] = {    // [younger, older][tier][friendship < 100, < 200, more]
+        {{1, 1, 1}, {3, 3, 1}, {10, 10, 4}},
+        {{1, 1, 1}, {3, 3, 1}, {5, 5, 2}},
+    };
+    struct Pokemon *mon;
+    u8 older = gSpecialVar_0x8005 ? 1 : 0, r, tier;
+    int f;
+    if (gSpecialVar_0x8004 >= PARTY_SIZE)
+        return gSpecialVar_Result = 0;
+    mon = &gPlayerParty[gSpecialVar_0x8004];
+    if (GetMonData(mon, MON_DATA_IS_EGG))
+        return gSpecialVar_Result = 1;
+    GetMonData(mon, MON_DATA_NICKNAME, gStringVar1);
+    StringGet_Nickname(gStringVar1);
+    r = Random() & 0xFF;
+    if (older)
+        tier = r < 77 ? 0 : r < 77 + 128 ? 1 : 2;      // (30 percent, 50 percent + 1, the rest)
+    else
+        tier = r < 154 ? 0 : r < 154 + 77 ? 1 : 2;     // (60 percent + 1, 30 percent, the rest)
+    f = GetMonData(mon, MON_DATA_FRIENDSHIP);
+    f += sChange[older][tier][f < 100 ? 0 : f < 200 ? 1 : 2];
+    if (f > MAX_FRIENDSHIP)
+        f = MAX_FRIENDSHIP;
+    {
+        u8 fb = f;
+        SetMonData(mon, MON_DATA_FRIENDSHIP, &fb);
+    }
+    printf("[mp] haircut: %s brother, slot %u, tier %u, friendship %d\n", older ? "older" : "younger",
+           gSpecialVar_0x8004, tier, f);
+    return gSpecialVar_Result = 2 + tier;
+}

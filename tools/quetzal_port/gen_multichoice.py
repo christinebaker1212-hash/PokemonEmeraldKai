@@ -40,6 +40,8 @@ KAI_MENUS = [
     # GOLDENROD's move tutor (pokecrystal maps/GoldenrodCity.asm MoveTutorScript .MenuData)
     ('GOLDENROD_TUTOR', ['FLAMETHROWER', 'THUNDERBOLT', 'ICE BEAM', 'CANCEL']),
     # GOLDENROD GAME CORNER's TM prizes (pokecrystal maps/GoldenrodGameCorner.asm TMVendorMenuHeader)
+    # GOLDENROD UNDERGROUND's bargain merchant (pokecrystal data/items/bargain_shop.asm)
+    ('GOLDENROD_BARGAIN', ['NUGGET', 'PEARL', 'BIG PEARL', 'STARDUST', 'STAR PIECE', 'CANCEL']),
     ('GOLDENROD_TM_PRIZES', ['TM25    5500', 'TM14    5500', 'TM38    5500', 'CANCEL']),
 ]
 

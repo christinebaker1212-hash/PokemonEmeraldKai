@@ -4891,3 +4891,9 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
     MULTI_KAI_GOLDENROD_TM_PRIZES, 5500 coins each, additem (no obtain fanfare, as Crystal). Test johto_tm_prizes.
   - GOLDENROD's NAME RATER: Crystal's words (data/text/common_2 _NameRater*) on KANTO's LAVENDER flow
     (Common_EventScript_NameReceivedPartyMon, no OT check); his bookshelves Crystal's. Test johto_name_rater.
+  - GOLDENROD UNDERGROUND as Crystal's: the HAIRCUT BROTHERS (qz_specials.c MP_HaircutBrother: Crystal's odds and
+    friendship steps; FLAG_DAILY_JOHTO_HAIRCUT 0x929), the bargain merchant (Monday 4:00-9:59; MULTI_KAI_GOLDENROD_BARGAIN,
+    Crystal's prices, one of each a day: FLAG_DAILY_JOHTO_BARGAIN_* 0x935-0x939), the herb lady at weekends (+ REVIVAL
+    HERB), each on a FLAG_JOHTO_HIDE_* set by MP_JohtoWeekdayPeople, in the alcoves of Quetzal's flute / METEORITE /
+    empty clerks; KUNI's scene gone, its triggers only move VAR_QZ_0x500A to 8. `mp hour H` sets the game clock's hour.
+    crystal_words.py puts in {d:NAME} numbers from the map's DEFs. Tests johto_haircut, johto_bargain.

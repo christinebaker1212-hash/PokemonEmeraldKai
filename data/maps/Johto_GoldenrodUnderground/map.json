@@ -38,7 +38,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_GoldenrodUnderground_EventScript_83DAF41",
-      "flag": "FLAG_QZ_0x1098"
+      "flag": "FLAG_JOHTO_HIDE_HERB_LADY"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16063",
@@ -50,8 +50,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Johto_GoldenrodUnderground_EventScript_83DB1A2",
-      "flag": "0"
+      "script": "Johto_GoldenrodUnderground_EventScript_YoungerCut",
+      "flag": "FLAG_JOHTO_HIDE_YOUNGER_CUT"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16014",
@@ -63,8 +63,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Johto_GoldenrodUnderground_EventScript_83DB260",
-      "flag": "0"
+      "script": "Johto_GoldenrodUnderground_EventScript_OlderCut",
+      "flag": "FLAG_JOHTO_HIDE_OLDER_CUT"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16055",
@@ -168,7 +168,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "0x0",
-      "flag": "FLAG_QZ_0x109B"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16014",
@@ -180,8 +180,8 @@
       "movement_range_y": 0,
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
-      "script": "Johto_GoldenrodUnderground_EventScript_83DB1E2",
-      "flag": "0"
+      "script": "Johto_GoldenrodUnderground_EventScript_Bargain",
+      "flag": "FLAG_JOHTO_HIDE_BARGAIN"
     }
   ],
   "warp_events": [

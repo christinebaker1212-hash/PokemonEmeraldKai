@@ -13,6 +13,12 @@
 #define FLAG_DAILY_JOHTO_KURT_GS_BALL   0x924   // Crystal's ENGINE_KURT_MAKING_BALLS for the GS BALL: KURT checks it until the next day
 #define FLAG_DAILY_JOHTO_LAPRAS         0x926   // Crystal's ENGINE_UNION_CAVE_LAPRAS: UNION CAVE's LAPRAS fought today
 #define FLAG_DAILY_JOHTO_SHUCKIE        0x925   // Crystal's ENGINE_GOT_SHUCKIE_TODAY: MANIA asks SHUCKIE back from the next day
+#define FLAG_DAILY_JOHTO_HAIRCUT        0x929   // Crystal's ENGINE_GOLDENROD_UNDERGROUND_GOT_HAIRCUT
+#define FLAG_DAILY_JOHTO_BARGAIN_NUGGET     0x935   // ..0x939: Crystal's bargain shop, one of each a day
+#define FLAG_DAILY_JOHTO_BARGAIN_PEARL      0x936
+#define FLAG_DAILY_JOHTO_BARGAIN_BIG_PEARL  0x937
+#define FLAG_DAILY_JOHTO_BARGAIN_STARDUST   0x938
+#define FLAG_DAILY_JOHTO_BARGAIN_STAR_PIECE 0x939
 #define FLAG_DAILY_JOHTO_TUTOR          0x928   // Crystal's ENGINE_DAILY_MOVE_TUTOR: GOLDENROD's tutor taught today
 #define FLAG_DAILY_JOHTO_DEPT_TM        0x927   // Crystal's ENGINE_GOLDENROD_DEPT_STORE_TM27_RETURN: the Sunday lady's TM given today
 
@@ -63,6 +69,10 @@
 #define FLAG_JOHTO_HIDE_LAPRAS        0x153A
 #define FLAG_JOHTO_LEARNED_TO_CATCH   0x153B   // Crystal's EVENT_LEARNED_TO_CATCH_POKEMON (ROUTE 29's DUDE, case 133)
 #define FLAG_JOHTO_HIDE_DEPT_LADY     0x153C   // GOLDENROD DEPT. STORE 5F's receptionist, out on Sundays (case 143)
+#define FLAG_JOHTO_HIDE_BARGAIN       0x153E   // GOLDENROD UNDERGROUND (case 145): the bargain merchant (Monday mornings)
+#define FLAG_JOHTO_HIDE_OLDER_CUT     0x153F   // the older HAIRCUT BROTHER (Tuesdays, Thursdays, Saturdays)
+#define FLAG_JOHTO_HIDE_YOUNGER_CUT   0x1540   // the younger (Sundays, Wednesdays, Fridays)
+#define FLAG_JOHTO_HIDE_HERB_LADY     0x1541   // the herb lady (Saturdays, Sundays)
 #define FLAG_JOHTO_HIDE_GOLDENROD_TUTOR 0x153D // GOLDENROD's move tutor: Wednesdays and Saturdays after the LEAGUE (case 144)
 // Crystal's hidden items (case 131, tools/quetzal_port/gen_hidden_items.py)
 #define FLAG_JOHTO_HIDDEN_ITEM_1           0x1601   // AzaleaTown FULL_HEAL (EVENT_AZALEA_TOWN_HIDDEN_FULL_HEAL)

@@ -2279,6 +2279,26 @@ void MP_TestCommand(const char *cmd, const char *arg)
         }
         printf("[test] weekday %d\n", now);
     }
+    else if (strcmp(cmd, "hour") == 0)
+    {
+        // hour H: the game clock moved to that hour of the day (set it before weekday, which keeps the hour)
+        int want = -1;
+        RtcCalcLocalTime();
+        if (sscanf(arg, "%d", &want) == 1 && want >= 0 && want < 24)
+        {
+            int delta = want - gLocalTime.hours;
+            if (delta < 0)
+                delta += 24;
+            gSaveBlock2Ptr->localTimeOffset.hours -= delta;
+            while (gSaveBlock2Ptr->localTimeOffset.hours < 0)
+            {
+                gSaveBlock2Ptr->localTimeOffset.hours += 24;   // (local = clock - offset: a day less of offset)
+                gSaveBlock2Ptr->localTimeOffset.days--;
+            }
+            RtcCalcLocalTime();
+        }
+        printf("[test] hour %d\n", gLocalTime.hours);
+    }
     else if (strcmp(cmd, "clock") == 0)
     {
         // clock - the game clock (online: the host's PC clock)

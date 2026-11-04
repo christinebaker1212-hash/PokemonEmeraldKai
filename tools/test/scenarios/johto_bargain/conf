@@ -1,0 +1,8 @@
+# GOLDENROD UNDERGROUND's bargain merchant (docs/REGIONS_AUDIT.md 145, Crystal's): out on Monday mornings
+# (FLAG_JOHTO_HIDE_BARGAIN 0x153E clear at 7:00), a NUGGET (item 110) at Crystal's 4500 of 5000, one a day
+# (FLAG_DAILY_JOHTO_BARGAIN_NUGGET 0x935); B leaves his menu
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("flag 5438 = 0" "money 500" "item 110: 1" "flag 2357 = 1" "ctx 1 free 1 overworld 1 locked 0 script 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -2176,4 +2176,24 @@ void MP_JohtoWeekdayPeople(void)
         FlagClear(FLAG_JOHTO_HIDE_GOLDENROD_TUTOR);
     else
         FlagSet(FLAG_JOHTO_HIDE_GOLDENROD_TUTOR);
+    // GOLDENROD UNDERGROUND (Crystal's GoldenrodUndergroundCheckDayOfWeekCallback): the bargain merchant on Monday
+    // mornings, the older HAIRCUT BROTHER on Tuesdays / Thursdays / Saturdays, the younger on Sundays / Wednesdays /
+    // Fridays, the herb lady at weekends
+    {
+        bool8 show[4];
+        u8 i;
+        static const u16 sFlags[4] = {FLAG_JOHTO_HIDE_BARGAIN, FLAG_JOHTO_HIDE_OLDER_CUT, FLAG_JOHTO_HIDE_YOUNGER_CUT,
+                                      FLAG_JOHTO_HIDE_HERB_LADY};
+        show[0] = today == 1 && gLocalTime.hours >= 4 && gLocalTime.hours < 10;   // (Crystal's MORN)
+        show[1] = today == 2 || today == 4 || today == 6;
+        show[2] = today == 0 || today == 3 || today == 5;
+        show[3] = today == 0 || today == 6;
+        for (i = 0; i < 4; i++)
+        {
+            if (show[i])
+                FlagClear(sFlags[i]);
+            else
+                FlagSet(sFlags[i]);
+        }
+    }
 }
