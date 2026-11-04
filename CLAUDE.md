@@ -84,9 +84,12 @@ The dev update channel ended with the Maker's first update (the user, 2026-11-03
 AllowSmallTweaks only unlocks the small tweaks, and no dev updates are pushed.
 
 **ORRE** (Pokémon Colosseum's region, started 2026-11-04): the user's decisions and where it stands in
-`docs/ORRE_DECISIONS.md` (the SINNOH engine, 2D sprites rendered from the models, Kai's battles, Colosseum's own words
+`docs/ORRE_DECISIONS.md` (3D maps under a Platinum-style camera, 2D sprites rendered from the models, Kai's battles, Colosseum's own words
 and scripts, Shadow Pokémon in Orre only). Packs ripped from the disc by tools/orre/make_pack.sh into orre/ (never
-committed; the release builds them from the `ORRE_DISC_URL` secret and ships them).
+committed; the release builds them from the `ORRE_DISC_URL` secret and ships them as MoemonOrre.zip). **ORRE has its own
+3D engine, src/orre/o3d.c, never SINNOH's** (the user, 2026-11-04): never put ORRE code in src/sinnoh/ or s3d.h, or
+SINNOH's in src/orre/; where both hook into the game each has its own line. The OUTSKIRT STAND walks (scenario
+orre_outskirt_stand).
 
 **Magic: The Gathering** (a fourth card game): the user's decisions in `docs/MTG_DECISIONS.md`; **start at
 `docs/MTG_HANDOFF.md`**. Forge translated into C (src/mtg/, include/mtg/mtg.h; its AI too, later), reading Forge's own

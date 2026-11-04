@@ -1,0 +1,16 @@
+pressuntil A field 5000
+wait 200
+shot o_start
+press RIGHT 40
+wait 20
+mp where
+mp collision 25 29
+mp collision 26 29
+press DOWN 120
+wait 20
+mp where
+shot o_lot
+press UP 200
+wait 20
+mp where
+shot o_door

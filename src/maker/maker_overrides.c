@@ -38,6 +38,7 @@
 #include "global.fieldmap.h"
 #include "overworld.h"
 #include "s3d.h"
+#include "o3d.h"   // Moemon Kai: ORRE
 #include "event_data.h"
 #include "constants/event_bg.h"
 #include "constants/flags.h"
@@ -978,6 +979,8 @@ static int MapOfHeader(const struct MapHeader *h)
 const u16 *Maker_MapBlocks(const struct MapHeader *h)
 {
     const u16 *base = S3D_LayoutBlocks(h->mapLayout);
+    if (base == h->mapLayout->map)
+        base = O3D_LayoutBlocks(h->mapLayout);   // Moemon Kai: ORRE's from its own pack (src/orre/o3d.c)
     struct MapEdits *e;
     int map;
     u32 i, n, skipped = 0;

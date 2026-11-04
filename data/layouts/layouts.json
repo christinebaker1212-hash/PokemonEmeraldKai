@@ -15560,6 +15560,16 @@
       "border_filepath": "data/layouts/Kanto_ThreeIsland_DunsparceTunnel_DugOut/border.bin",
       "blockdata_filepath": "data/layouts/Kanto_ThreeIsland_DunsparceTunnel_DugOut/map.bin",
       "quetzal": true
+    },
+    {
+      "id": "LAYOUT_ORRE_OUTSKIRT_STAND",
+      "name": "Orre_OutskirtStand_Layout",
+      "width": 64,
+      "height": 64,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
+      "border_filepath": "data/layouts/Orre_OutskirtStand/border.bin",
+      "blockdata_filepath": "data/layouts/Orre_OutskirtStand/map.bin"
     }
   ]
 }

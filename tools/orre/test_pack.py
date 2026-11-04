@@ -15,6 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hsd  # noqa: E402
 import pak  # noqa: E402
 import build_pack  # noqa: E402
+import grid  # noqa: E402
 
 
 def main(src, out):
@@ -56,6 +57,16 @@ def main(src, out):
                         if not np.array_equal(f.images[a.tex], p3.image(b.tex)):
                             print("FAIL texture", fn, a.tex)
                             bad += 1
+    # the grids of the maps in the game, as grid.py makes them
+    import maps as orre_maps
+    for m in orre_maps.MAPS:
+        arc = [a for a in os.listdir(src) if os.path.exists(os.path.join(src, a, m["file"] + ".col"))][0]
+        g = grid.build(grid.read(open(os.path.join(src, arc, m["file"] + ".col"), "rb").read()), grid.TILE, m["start"])
+        p3.map(m["file"])
+        got = p3.grid
+        if got is None or got["w"] != g["w"] or got["h"] != g["h"] or not np.array_equal(got["cells"]["f"] & 1, g["walk"].astype(np.uint8)):
+            print("FAIL grid", m["file"])
+            bad += 1
     print("%d maps, %d textures, %d data files checked: %s" % (len(seen), len(textures_checked), len(pd.files),
                                                               "OK" if not bad else "%d FAILED" % bad))
     return 1 if bad else 0

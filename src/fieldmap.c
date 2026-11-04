@@ -4,6 +4,7 @@
 #include "bg.h"
 #include "fieldmap.h"
 #include "s3d.h"   // Moemon Kai: SINNOH
+#include "o3d.h"   // Moemon Kai: ORRE
 const u16 *Maker_MapBlocks(const struct MapHeader *h);   // Moemon Maker: the user's tiles (src/maker/maker_overrides.c)
 #include "fldeff.h"
 #include "fldeff_misc.h"
@@ -422,6 +423,9 @@ u16 GetMetatileAttributesById(u16 metatile)
     // terrain attributes: tools/sinnoh/build_pack.py), so any of the game's behaviors can be used there
     if (metatile >= S3D_METATILE_BEHAVIOR && S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
         return metatile - S3D_METATILE_BEHAVIOR;
+    // Moemon Kai: ORRE's the same way, from Colosseum's collision (src/orre/o3d.c, tools/orre/grid.py)
+    if (metatile >= O3D_METATILE_BEHAVIOR && O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup))
+        return metatile - O3D_METATILE_BEHAVIOR;
     if (metatile < split)
     {
         return gMapHeader.mapLayout->primaryTileset->metatileAttributes[metatile];

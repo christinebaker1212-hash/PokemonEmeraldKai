@@ -81,6 +81,13 @@ class Pack3D:
                 m.material = {"rendermode": rm, "diffuse": diff, "alpha": alpha, "uvscale": (us, vs), "wrap": (ws, wt)}
                 meshes.append(m)
             sets.append((kind, meshes))
+        self.grid = None
+        if o + 4 <= len(b) and struct.unpack_from("<I", b, o)[0] == 1:
+            w, h, tile, x0, z0 = struct.unpack_from("<HHfff", b, o + 4)
+            o += 20
+            cells = np.frombuffer(b, dtype=[("f", "u1"), ("t", "i1"), ("n", "u1"), ("x", "u1"), ("h", "<f4", 3)],
+                                  count=w * h, offset=o).reshape(h, w)
+            self.grid = {"w": w, "h": h, "tile": tile, "x0": x0, "z0": z0, "cells": cells}
         return sets
 
 
