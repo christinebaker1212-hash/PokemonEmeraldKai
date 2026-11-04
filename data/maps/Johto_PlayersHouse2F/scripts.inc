@@ -40,38 +40,18 @@ Johto_PlayersHouse2F_EventScript_83811BB::
 
 @ Johto_PlayersHouse2F trigger at 9,3 (VAR_QZ_0x5003 == 0)
 Johto_PlayersHouse2F_EventScript_83E3EAE::
-	lock
-	playse SE_PIN
-	applymovement LOCALID_PLAYER, Quetzal_Movement_83607F9
-	waitmovement 0
-	delay 0x3C
-	applymovement LOCALID_PLAYER, Johto_PlayersHouse2F_Movement_83E3F22
-	waitmovement 0
-	msgbox Johto_PlayersHouse2F_Text_82DE143, MSGBOX_DEFAULT
-	setvar VAR_0x8004, 0
-	call Johto_PlayersHouse2F_EventScript_83811BB
-	delay 0x1E
+	@ Moemon Kai: no "The clock is stopped" scene: the game clock is the PC's and Crystal sets it before the
+	@ game starts (docs/REGIONS_AUDIT.md 134); the story still moves on here
 	setvar VAR_QZ_0x5003, 1
 	setflag FLAG_QZ_0x51
-	releaseall
 	end
 
 @ Johto_PlayersHouse2F trigger at 10,3 (VAR_QZ_0x5003 == 0)
 Johto_PlayersHouse2F_EventScript_83E3EE8::
-	lock
-	playse SE_PIN
-	applymovement LOCALID_PLAYER, Quetzal_Movement_83607F9
-	waitmovement 0
-	delay 0x3C
-	applymovement LOCALID_PLAYER, Johto_PlayersHouse2F_Movement_83E3F26
-	waitmovement 0
-	msgbox Johto_PlayersHouse2F_Text_82DE143, MSGBOX_DEFAULT
-	setvar VAR_0x8004, 0
-	call Johto_PlayersHouse2F_EventScript_83811BB
-	delay 0x1E
+	@ Moemon Kai: no "The clock is stopped" scene: the game clock is the PC's and Crystal sets it before the
+	@ game starts (docs/REGIONS_AUDIT.md 134); the story still moves on here
 	setvar VAR_QZ_0x5003, 1
 	setflag FLAG_QZ_0x51
-	releaseall
 	end
 
 @ Johto_PlayersHouse2F sign / bg event at 4,2

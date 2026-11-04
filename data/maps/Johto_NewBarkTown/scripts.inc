@@ -92,6 +92,9 @@ Johto_NewBarkTown_EventScript_83E14A9::
 	goto_if_eq VAR_QZ_0x5003, 2, Johto_NewBarkTown_EventScript_83E14D7
 	goto_if_eq VAR_QZ_0x5003, 3, Johto_NewBarkTown_EventScript_83E14F3
 	goto_if_eq VAR_QZ_0x5003, 4, Johto_NewBarkTown_EventScript_83E14FE
+	@ Moemon Kai: Crystal's teacher (docs/REGIONS_AUDIT.md 134): her POKéGEAR line before the starter, "call your mom"
+	@ after the EGG errand
+	goto_if_ge VAR_QZ_0x5003, 5, Johto_NewBarkTown_EventScript_TeacherCallMom
 	msgbox Johto_NewBarkTown_Text_83E1793, MSGBOX_DEFAULT
 	closemessage
 	release
@@ -123,6 +126,16 @@ Johto_NewBarkTown_EventScript_83E14FE::
 	msgbox Johto_NewBarkTown_Text_83E174F, MSGBOX_DEFAULT
 	closemessage
 	release
+	end
+
+Johto_NewBarkTown_EventScript_TeacherCallMom::
+	msgbox Johto_NewBarkTown_Text_TeacherCallMom, MSGBOX_DEFAULT
+	release
+	end
+
+@ Moemon Kai: Crystal's FISHER (NewBarkTownFisherScript)
+Johto_NewBarkTown_EventScript_Fisher::
+	msgbox Johto_NewBarkTown_Text_Fisher, MSGBOX_NPC
 	end
 
 @ Johto_NewBarkTown trigger at 0,12 (VAR_QZ_0x5003 == 2)
@@ -346,6 +359,7 @@ Johto_NewBarkTown_Text_83E1683::
 
 Johto_NewBarkTown_Text_83E16A9::
 	.string "Wait, {PLAYER}!\p"
+	.string "What do you think you’re doing?\p"
 	.string "It’s dangerous to go out\n"
 	.string "without a MOéMON!\p"
 	.string "Wild MOéMON jump out of the grass\n"
@@ -361,8 +375,8 @@ Johto_NewBarkTown_Text_83E174F::
 	.string "you are leaving.$"
 
 Johto_NewBarkTown_Text_83E1793::
-	.string "Don’t forget to visit your mom\n"
-	.string "from time to time.$"
+	.string "Wow, your POKéGEAR is impressive!\p"
+	.string "Did your mom get it for you?$"
 
 Johto_NewBarkTown_Text_83E17C5::
 	.string ". . .\p"
@@ -443,3 +457,12 @@ Johto_NewBarkTown_Text_8404041::
 Johto_NewBarkTown_Text_8404090::
 	.string "{RIVAL}: CELEBI, take me there first.\n"
 	.string "I will wait upstairs, by GIOVANNI.$"
+
+Johto_NewBarkTown_Text_TeacherCallMom::
+	.string "Call your mom on your POKéGEAR to\n"
+	.string "let her know how you’re doing.$"
+
+Johto_NewBarkTown_Text_Fisher::
+	.string "Yo, {PLAYER}!\p"
+	.string "I hear PROF.ELM discovered some\n"
+	.string "new MOéMON.$"
