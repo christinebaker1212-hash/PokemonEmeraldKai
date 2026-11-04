@@ -5,6 +5,7 @@
 #include "mp.h"
 #include "overworld.h"
 #include "s3d.h"   // Moemon Kai: SINNOH
+#include "o3d.h"   // Moemon Kai: ORRE
 #include "battle_pyramid.h"
 #include "battle_setup.h"
 #include "berry.h"
@@ -1584,6 +1585,7 @@ static void OverworldBasic(void)
     MP_Compass_Update();  // Moemon Co-op: arrows toward friends off screen
     MP_MapPic_Update();   // ... full-color map pictures in view (mp_mappic.c: the GAME CENTER)
     S3D_Update();         // Moemon Kai: SINNOH's maps drawn in 3D (src/sinnoh/s3d.c)
+    O3D_Update();         // Moemon Kai: ORRE's, by their own engine (src/orre/o3d.c)
     MP_Piggy_Update();    // Moemon Co-op: riding piggyback
     MP_Emote_Update();
     MP_PokeRadar_Update(); // Moemon Kai: the POKé RADAR's shaking grass (mp_pokeradar.c)

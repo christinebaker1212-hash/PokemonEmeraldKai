@@ -18,6 +18,10 @@ orre3d.pak (little endian): "ORZ3" u32 version, u32 textures, u32 maps, then
               u8 diffuse r g b a, f32 alpha, u32 vertices, u32 indices;
               vertices: f32 x y z, f32 u v, u8 r g b a, s8 nx ny nz, u8 pad (28 bytes); indices u16, or u32 past 65535
               vertices (triangles; Colosseum's units, Y up)
+            (version 2) u32 grid (0: none; 1: the map is in the game, tools/orre/maps.py): u16 w, h (tiles, whole
+              blocks of 32), f32 tile (Colosseum units a tile), x0, z0 (the grid's corner); then per tile (row by row):
+              u8 flags (1 walkable, 2 a trigger), s8 the trigger's collision object (-1 none), u8 heights (0-3), u8 pad,
+              f32 heights x3 (the ground's, lowest first; Colosseum units) (tools/orre/grid.py)
   then the data: textures one after another.
 orre_data.pak: "ORDT" u32 version, u32 files, each char name[48] ("<archive>/<member>.<type>"), u32 offset, u32 bytes,
   u32 deflated bytes (0: stored); offsets from the data start (files that are the same share one copy).
@@ -32,8 +36,10 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hsd  # noqa: E402
+import grid  # noqa: E402
+import maps as orre_maps  # noqa: E402
 
-VERSION = 1
+VERSION = 2
 DATA_TYPES = ("msg", "col", "scd", "flr", "cam", "rel", "dat")
 
 
@@ -96,6 +102,18 @@ def build(src, out):
                 body.append(struct.pack("<B3xI", kind, len(s)))
                 for m in s:
                     body.append(mesh_bytes(m, remap[m.tex] if 0 <= m.tex < len(remap) else -1))
+            m_conf = orre_maps.by_file().get(name)
+            colpath = os.path.join(src, arc, name + ".col")
+            if m_conf and os.path.exists(colpath):
+                g = grid.build(grid.read(open(colpath, "rb").read()), grid.TILE, m_conf["start"])
+                body.append(struct.pack("<IHHfff", 1, g["w"], g["h"], g["tile"], g["x0"], g["z0"]))
+                for y in range(g["h"]):
+                    for x in range(g["w"]):
+                        hs = (g["heights"][y][x] + [0.0, 0.0, 0.0])[:3]
+                        fl = (1 if g["walk"][y, x] else 0) | (2 if g["trigger"][y, x] >= 0 else 0)
+                        body.append(struct.pack("<BbBBfff", fl, int(g["trigger"][y, x]), len(g["heights"][y][x][:3]), 0, *hs))
+            else:
+                body.append(struct.pack("<I", 0))
             raw_body = b"".join(body)
             maps.append((name, zlib.compress(raw_body, 9), len(raw_body)))
     # orre3d.pak

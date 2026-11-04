@@ -1,5 +1,6 @@
 #include "global.h"
 #include "s3d.h"   // Moemon Kai: S3D_METATILE_BEHAVIOR
+#include "o3d.h"   // Moemon Kai: ORRE
 #include "berry.h"
 #include "bike.h"
 #include "field_camera.h"
@@ -241,6 +242,8 @@ static void DrawMetatileAt(const struct MapLayout *mapLayout, u16 offset, int x,
     // Moemon Kai: SINNOH's tiles carry a behavior, not art (the 3D engine draws SINNOH); only there: HOENN's secondary
     // tilesets use these numbers for their own art (1.63.0-1.63.8 drew their buildings, bridges and paths as grass)
     if (metatileId >= S3D_METATILE_BEHAVIOR && S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+        metatileId = 1;
+    if (metatileId >= O3D_METATILE_BEHAVIOR && O3D_IsOrreGroup(gSaveBlock1Ptr->location.mapGroup))   // (ORRE's too)
         metatileId = 1;
     if (metatileId < Fieldmap_PrimaryMetatiles(mapLayout))   // Moemon Kai: FRLG split
     {

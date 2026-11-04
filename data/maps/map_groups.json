@@ -44,7 +44,8 @@
     "gMapGroup_SinnohIndoor1",
     "gMapGroup_SinnohIndoor2",
     "gMapGroup_SinnohIndoor3",
-    "gMapGroup_SinnohIndoor4"
+    "gMapGroup_SinnohIndoor4",
+    "gMapGroup_Orre"
   ],
   "gMapGroup_TownsAndRoutes": [
     "PetalburgCity",
@@ -1894,5 +1895,8 @@
     "Sinnoh_PoffinHouse",
     "Sinnoh_EternaCityUndergroundManHouse",
     "Sinnoh_Underground"
+  ],
+  "gMapGroup_Orre": [
+    "Orre_OutskirtStand"
   ]
 }
