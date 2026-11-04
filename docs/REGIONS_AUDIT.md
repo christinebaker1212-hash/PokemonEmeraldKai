@@ -2,7 +2,7 @@
 
 The audit compared every KANTO map with FireRed and every JOHTO map with Crystal (findings, with the original's and the
 game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided each of the 157 cases below (158 was added by the user later). Status:
-[ ] to do, [x] done (1.88.0: cases 1-9, 11-14, 16, 19-23, 26, 28, 29, 32-34, 40, 44; case 10 TRAINER TOWER and 15 HM WHIRLPOOL wait for their ports; 1.89.0: cases 18, 27, 30, 31, 35, 36, 38, 39, 41-43; cases 17 / 24 VS SEEKER go with 57's FireRed teams, 25 with 71, 37 BATTLE TOWER its own port; 1.90.0: cases 48, 51, 56, 67-70, 72, 73, 75-87, 119, 123, 129, 150-155, and KANTO's halves of 49 (JOHTO's HEADBUTT man waits), 74 (words; the slope waits), 89 (WADE waits for case 57's teams) and 118 (LAVENDER's NAME RATER); 1.91.0: cases 53-55, 90, 98, 102, 103, 107-109, 111, 114, 135, 137, 140, 147, 157 and 158 (the user's, 2026-11-04)). Rules the user set with these decisions:
+[ ] to do, [x] done (1.88.0: cases 1-9, 11-14, 16, 19-23, 26, 28, 29, 32-34, 40, 44; case 10 TRAINER TOWER and 15 HM WHIRLPOOL wait for their ports; 1.89.0: cases 18, 27, 30, 31, 35, 36, 38, 39, 41-43; cases 17 / 24 VS SEEKER go with 57's FireRed teams, 25 with 71, 37 BATTLE TOWER its own port; 1.90.0: cases 48, 51, 56, 67-70, 72, 73, 75-87, 119, 123, 129, 150-155, and KANTO's halves of 49 (JOHTO's HEADBUTT man waits), 74 (words; the slope waits), 89 (WADE waits for case 57's teams) and 118 (LAVENDER's NAME RATER); 1.91.0: cases 53-55, 90, 98, 102, 103, 107-109, 111, 114, 135, 137, 140, 147, 157 and 158 (the user's, 2026-11-04); 1.92.0: cases 52, 63, 91-95, 131-134, 136, 143 and 148, and the first part of 138 (POKéMON in houses, ELM's lab signs, small lines)). Rules the user set with these decisions:
 
 - **JOHTO is strictly Crystal** (case 116): HGSS-flavoured events Quetzal added are removed; where this file or
   docs/REGIONS_TODO.md said "HGSS ranks above Quetzal", Crystal alone is the reference now.
@@ -66,7 +66,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [ ] **49. [K1-14, K2-10, K3-12, K4-4, K4-13, J1-8, J3-37]** "Moves are managed from the team menu / summary" lines (Quetzal's tutors, Kai can't): **RESTORE the original**
 - [ ] **50. [J1-4, J2-10, J2-11, J3-38]** Words about travel between regions that don't match Kai's: **RESTORE the original**
 - [x] **51. [K1-12]** DAISY: Quetzal's "no friendship" line, a TOWN MAP she never gives, no grooming: **RESTORE the original**
-- [ ] **52. [J1-5]** EARL's ACADEMY teaches Quetzal's rules; Crystal's lessons are gone: **RESTORE the original**
+- [x] **52. [J1-5]** EARL's ACADEMY teaches Quetzal's rules; Crystal's lessons are gone: **RESTORE the original**
 - [x] **53. [J1-6]** KURT's first gift is a FAST BALL with "I make BALLS from BERRIES ... batches of 5": **RESTORE the original**
 - [x] **54. [J1-7]** AZALEA GYM's words describe Quetzal's CUT-as-BUG move and a different team: **RESTORE the original**
 - [x] **55. [J2-7]** The HAPPINESS RATER is replaced by Quetzal's rules text, which is false in Kai: **RESTORE the original**
@@ -77,7 +77,7 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [ ] **60. [K1-5, K2-19, K3-7, K4-16, J1-25, J2-34, J3-23]** Quetzal's overworld legendaries and mythicals: **RESTORE the original** - _Mythicals that belong in the original games' Region must stay. This covers up to Sinnoh. Quetzel's additions must be removed. Legendaries Gen 5 and beyond must be removed and delegated only to Moegatcha pulls. Override REGIONS_TODO.md decisions. Quetzal's fan additions aren't wanted, this still stands._
 - [ ] **61. [K4-10, J1-18]** Fossils revived Quetzal's way (any region's fossil, at once, Lv 20): **RESTORE the original**
 - [ ] **62. [K4-5, J3-30]** Both SAFARI ZONEs are Quetzal's (free, no SAFARI BALLS, no steps): **RESTORE the original**
-- [ ] **63. [J1-9, J2-21, J3-18]** The WEEKDAY siblings stand there every day with a guess-the-day game: **RESTORE the original**
+- [x] **63. [J1-9, J2-21, J3-18]** The WEEKDAY siblings stand there every day with a guess-the-day game: **RESTORE the original**
 - [ ] **64. [K1-9, K1-10, K2-15]** OAK's POKéDEX rating and the NATIONAL DEX come Quetzal's way: **RESTORE the original**
 - [ ] **65. [J2-13, J1-21]** The legendary story is Quetzal's HGSS-style KIMONO GIRL chain: **RESTORE the original**
 - [ ] **66. [K1-7]** Quetzal's empty "MT. MOON ROUTE 4 cave": **RESTORE the original**
@@ -105,11 +105,11 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [ ] **88. [K4-6]** The POKéMON TRAINER FAN CLUB is Quetzal's "KANTO EXPLORERS' CLUB" of hint people, some describing things Kai doesn't have: **RESTORE the original**
 - [ ] **89. [K4-20]** A few trainers' lines rewritten by Quetzal: **RESTORE the original**
 - [x] **90. [J1-11]** ROUTE 32's guard demands Elder LI; Crystal only wants the ZEPHYRBADGE: **RESTORE the original**
-- [ ] **91. [J1-13]** Item balls are Quetzal's, not Crystal's (non-TM ones too): **RESTORE the original**
-- [ ] **92. [J1-19]** SLOWPOKE WELL B2F: Quetzal's SLOWKING / DAMP ROCK instead of Crystal's KING'S ROCK man; B1F's SLOWPOKE with MAIL missing: **RESTORE the original**
-- [ ] **93. [J1-24]** GIOVANNI's alternate-past remnants (dead since 1.68.1) still sit in these maps: **REMOVE it**
-- [ ] **94. [J1-27]** ELM's phone calls arrive as on-screen "A message from PROF. ELM arrived" texts: **RESTORE the original**
-- [ ] **95. [J1-30]** CHERRYGROVE: the rival's "That's my TRAINER CARD! You saw my name..." line and the guide's MAP gift words: **RESTORE the original**
+- [x] **91. [J1-13]** Item balls are Quetzal's, not Crystal's (non-TM ones too): **RESTORE the original**
+- [x] **92. [J1-19]** SLOWPOKE WELL B2F: Quetzal's SLOWKING / DAMP ROCK instead of Crystal's KING'S ROCK man; B1F's SLOWPOKE with MAIL missing: **RESTORE the original**
+- [x] **93. [J1-24]** GIOVANNI's alternate-past remnants (dead since 1.68.1) still sit in these maps: **REMOVE it**
+- [x] **94. [J1-27]** ELM's phone calls arrive as on-screen "A message from PROF. ELM arrived" texts: **RESTORE the original**
+- [x] **95. [J1-30]** CHERRYGROVE: the rival's "That's my TRAINER CARD! You saw my name..." line and the guide's MAP gift words: **RESTORE the original**
 - [ ] **96. [J2-20]** GOLDENROD DEPT. STORE floors and directory are Quetzal's: **RESTORE the original**
 - [ ] **97. [J2-22]** Bug-Catching Contest uses Quetzal's rules, and its rules text promises RADIANT scoring: **RESTORE the original**
 - [x] **98. [J2-23]** GOLDENROD GYM guide talks about FAIRY types; gym statues read "TOWN" / "CERTIFIED TRAINERS": **RESTORE the original**
@@ -145,24 +145,24 @@ game's file:line, in docs/regions_audit/<AREA>_findings.md). The user decided ea
 - [x] **128. [K3-24]** No roaming beast after the SAPPHIRE: **KEEP as it is**
 - [x] **129. [K3-28]** FIVE / SEVEN ISLAND's POKéMON JOURNALs are missing: **RESTORE the original**
 - [ ] **130. [K4-11]** ELITE FOUR rematches: the rematch words come right after the first win, FireRed's stronger rematch teams are missing: **RESTORE the original**
-- [ ] **131. [J1-12]** JOHTO has no hidden items at all: **RESTORE the original**
-- [ ] **132. [J1-14]** Rival battles in CHERRYGROVE and AZALEA can't be lost without whiting out; his "loss" line is gone: **RESTORE the original**
-- [ ] **133. [J1-20]** ROUTE 29's catching demonstration is a text plug for the ACADEMY; its night line can never show: **RESTORE the original**
-- [ ] **134. [J1-26]** NEW BARK / home: Crystal's people and lines missing, Quetzal's scenes added: **RESTORE the original**
+- [x] **131. [J1-12]** JOHTO has no hidden items at all: **RESTORE the original**
+- [x] **132. [J1-14]** Rival battles in CHERRYGROVE and AZALEA can't be lost without whiting out; his "loss" line is gone: **RESTORE the original**
+- [x] **133. [J1-20]** ROUTE 29's catching demonstration is a text plug for the ACADEMY; its night line can never show: **RESTORE the original**
+- [x] **134. [J1-26]** NEW BARK / home: Crystal's people and lines missing, Quetzal's scenes added: **RESTORE the original**
 - [x] **135. [J1-28]** ROUTE 27 SANDSTORM house gives TM37 without Crystal's friendship check: **RESTORE the original**
-- [ ] **136. [J1-29]** UNION CAVE B2F's Friday LAPRAS is missing: **RESTORE the original**
+- [x] **136. [J1-29]** UNION CAVE B2F's Friday LAPRAS is missing: **RESTORE the original**
 - [x] **137. [J1-33]** SPROUT TOWER's ELDER LI gives HM05 with Quetzal's words: **RESTORE the original**
 - [ ] **138. [J1-34]** Small missing people, signs and lines (Crystal has them, the game doesn't): **RESTORE the original**
 - [ ] **139. [J2-14]** The WISE TRIO, SUICUNE at TIN TOWER 1F and the sage's RAINBOW WING are missing: **RESTORE the original**
 - [x] **140. [J2-15]** ECRUTEAK's ITEMFINDER gift is missing: **RESTORE the original**
 - [ ] **141. [J2-16]** BUENA's PASSWORD show can't be played (no BLUE CARD, no points, no prize desk): **RESTORE the original**
 - [ ] **142. [J2-17]** GAME CORNER's TM prize counter is missing: **RESTORE the original**
-- [ ] **143. [J2-18]** DEPT. STORE 5F's Sunday RETURN / FRUSTRATION lady is missing, though a shopper still talks about her: **RESTORE the original**
+- [x] **143. [J2-18]** DEPT. STORE 5F's Sunday RETURN / FRUSTRATION lady is missing, though a shopper still talks about her: **RESTORE the original**
 - [ ] **144. [J2-24]** Crystal's GOLDENROD move tutor, city sign and RADIO CARD lady are missing: **RESTORE the original**
 - [ ] **145. [J2-25]** GOLDENROD UNDERGROUND: haircut brothers and the bargain merchant missing; Quetzal shops and a KIMONO GIRL scene added: **RESTORE the original**
 - [ ] **146. [J2-30]** CIANWOOD's PHOTO STUDIO and POKé SEER are missing; an HGSS-style bells lady in their place: **RESTORE the original**
 - [x] **147. [J3-21]** MOVE DELETER missing in BLACKTHORN ("MOVE BROS' HOUSE" is empty): **RESTORE the original**
-- [ ] **148. [J3-27]** HALL OF FAME doesn't send PROF. ELM's S.S. TICKET call: **RESTORE the original**
+- [x] **148. [J3-27]** HALL OF FAME doesn't send PROF. ELM's S.S. TICKET call: **RESTORE the original**
 - [x] **149. [J1-32, J2-36]** Dead NUZLOCKE branches in gift scripts: **REMOVE it**
 - [x] **150. [K1-18]** CERULEAN's BERRY POWDER man gives a NUGGET while saying "BERRY SWEET": **RESTORE the original**
 - [x] **151. [K2-24]** Leftover Quetzal words no script uses: **RESTORE the original**

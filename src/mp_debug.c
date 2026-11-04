@@ -1154,12 +1154,6 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // setflag N - an event flag (include/constants/flags.h; 0x.. hex too)
         FlagSet(strtol(arg, NULL, 0));
     }
-    else if (strcmp(cmd, "getflag") == 0)
-    {
-        // getflag N - print an event flag (0x.. hex too)
-        long id = strtol(arg, NULL, 0);
-        printf("[test] flag 0x%lX: %d\n", id, FlagGet(id) ? 1 : 0);
-    }
     else if (strcmp(cmd, "setvar") == 0)
     {
         // setvar ID VALUE - an event var (0x.. hex too)

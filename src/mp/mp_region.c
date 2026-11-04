@@ -2164,4 +2164,9 @@ void MP_JohtoWeekdayPeople(void)
         FlagClear(FLAG_JOHTO_HIDE_LAPRAS);
     else
         FlagSet(FLAG_JOHTO_HIDE_LAPRAS);
+    // GOLDENROD DEPT. STORE 5F's receptionist: Sundays (Crystal's GoldenrodDeptStore5FCheckIfSundayCallback)
+    if (today == 0)
+        FlagClear(FLAG_JOHTO_HIDE_DEPT_LADY);
+    else
+        FlagSet(FLAG_JOHTO_HIDE_DEPT_LADY);
 }

@@ -4856,3 +4856,22 @@ The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's de
     (VAR_QZ_0x500C >= 14).
   - JOHTO's BERRY patches never draw a sprite (event_object_movement.c SetBerryTreeGraphics /
     MovementType_BerryTreeGrowth_Normal): the map's fruit tree is the tree (docs/user_images 68).
+- 1.92.0 (the audit's batch E, JOHTO, second part):
+  - Crystal's WEEKDAY siblings (tools/quetzal_port/fix_siblings.py): each object wears FLAG_JOHTO_HIDE_<NAME>, set or
+    cleared on entering a JOHTO map by mp_region.c MP_JohtoWeekdayPeople (overworld.c, after MP_JohtoBerries_Init);
+    met once (FLAG_JOHTO_MET_<NAME>), the gift keeps Quetzal's got-it flag. UNION CAVE B2F's LAPRAS out on Fridays
+    (FLAG_JOHTO_HIDE_LAPRAS, FLAG_DAILY_JOHTO_LAPRAS once fought). GOLDENROD DEPT. STORE 5F's Sunday receptionist
+    (FLAG_JOHTO_HIDE_DEPT_LADY, FLAG_DAILY_JOHTO_DEPT_TM 0x927; her counter tile is the clerks' talk-across one). `mp weekday D` works only while FLAG 0x51 is clear
+    (FixStuckClockSave resets the offset otherwise). Tests johto_weekday_siblings, johto_friday_lapras, johto_sunday_lady.
+  - Item balls hold Crystal's items (fix_item_balls.py; new balls ROUTE 30 / 26 on FLAG_JOHTO_ITEM_*); Crystal's 57
+    JOHTO hidden items (gen_hidden_items.py: FLAG_JOHTO_HIDDEN_ITEM_n = 0x1600 + n, each spot checked against Crystal's
+    map by eye, SPOTS in the script; elevation 0 so any height finds them; test johto_hidden_item). map_ascii.py prints
+    a map's collision and objects for picking spots.
+  - ROUTE 29's catching demonstration: battle_setup.c MP_JohtoCatchingTutorial (WALLY's tutorial with
+    gWallyTutorialBackPic / Name / ThrowFirst; the DUDE's back picture graphics/moemon/dude_back.bin from
+    gen_dude_back.py; FLAG_JOHTO_LEARNED_TO_CATCH). Test johto_catch_tutorial.
+  - CHERRYGROVE's rival is qz_trainerbattle_13 (a loss doesn't black out). ELM's messages ring (SE_POKENAV_CALL) with
+    Crystal's data/phone/text/elm words. GIOVANNI's leftovers and Quetzal's NUZLOCKE calls are gone. Multichoice menus
+    of our own start at KAI_FIRST 240 (gen_multichoice.py checks the stock ids; touch src/script_menu.c after).
+  - POKéMON in houses are OBJ_EVENT_GFX_MON_FIRST + dex objects with their cry and Crystal's line (KURT's and AZALEA's
+    SLOWPOKE on FLAG_QZ_0x1085, until the WELL is saved).

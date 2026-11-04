@@ -91,3 +91,58 @@ Johto_GoldenrodDeptStore5F_Text_83D4553::
 	.string "Mega Stones, Z-Moves and\n"
 	.string "Tera Shards.\p"
 	.string "5F MEGA, Z & TERA$"
+
+@ Moemon Kai: Crystal's Sunday receptionist (pokecrystal GoldenrodDeptStore5F.asm ReceptionistScript, docs/REGIONS_AUDIT.md
+@ 143): she rates the lead's friendship once a day (Sundays only) and gives TM27 RETURN or TM21 FRUSTRATION
+Johto_GoldenrodDeptStore5F_EventScript_SundayLady::
+	lock
+	faceplayer
+	specialvar VAR_RESULT, MP_JohtoWeekday
+	goto_if_ne VAR_RESULT, 0, Johto_GoldenrodDeptStore5F_EventScript_SundayLadyOver
+	goto_if_set FLAG_DAILY_JOHTO_DEPT_TM, Johto_GoldenrodDeptStore5F_EventScript_SundayLadyOver
+	specialvar VAR_0x8004, MP_LeadFriendship
+	msgbox Johto_GoldenrodDeptStore5F_Text_SundayLadyLook, MSGBOX_DEFAULT
+	goto_if_ge VAR_0x8004, 150, Johto_GoldenrodDeptStore5F_EventScript_SundayLadyHappy
+	goto_if_ge VAR_0x8004, 50, Johto_GoldenrodDeptStore5F_EventScript_SundayLadyAdorable
+	msgbox Johto_GoldenrodDeptStore5F_Text_SundayLadyEvil, MSGBOX_DEFAULT
+	setorcopyvar VAR_0x8000, ITEM_TM21
+	goto Johto_GoldenrodDeptStore5F_EventScript_SundayLadyGive
+Johto_GoldenrodDeptStore5F_EventScript_SundayLadyHappy::
+	msgbox Johto_GoldenrodDeptStore5F_Text_SundayLadyPerfect, MSGBOX_DEFAULT
+	setorcopyvar VAR_0x8000, ITEM_TM27
+Johto_GoldenrodDeptStore5F_EventScript_SundayLadyGive::
+	setorcopyvar VAR_0x8001, 1
+	callstd STD_OBTAIN_ITEM
+	goto_if_eq VAR_RESULT, 0, Johto_GoldenrodDeptStore5F_EventScript_SundayLadyEnd
+	setflag FLAG_DAILY_JOHTO_DEPT_TM
+	release
+	end
+Johto_GoldenrodDeptStore5F_EventScript_SundayLadyAdorable::
+	msgbox Johto_GoldenrodDeptStore5F_Text_SundayLadyAdorable, MSGBOX_DEFAULT
+	release
+	end
+Johto_GoldenrodDeptStore5F_EventScript_SundayLadyOver::
+	msgbox Johto_GoldenrodDeptStore5F_Text_SundayLadyOver, MSGBOX_DEFAULT
+Johto_GoldenrodDeptStore5F_EventScript_SundayLadyEnd::
+	release
+	end
+
+Johto_GoldenrodDeptStore5F_Text_SundayLadyLook::
+	.string "Hello. Oh, your MOéMON…$"
+
+Johto_GoldenrodDeptStore5F_Text_SundayLadyPerfect::
+	.string "It’s very attached to you.\p"
+	.string "This move should be perfect for a\n"
+	.string "pair like you.$"
+
+Johto_GoldenrodDeptStore5F_Text_SundayLadyAdorable::
+	.string "It’s adorable!\p"
+	.string "You should teach it good TM moves.$"
+
+Johto_GoldenrodDeptStore5F_Text_SundayLadyEvil::
+	.string "It looks evil. How about this TM\n"
+	.string "for it?$"
+
+Johto_GoldenrodDeptStore5F_Text_SundayLadyOver::
+	.string "There are sure to be TMs that are\n"
+	.string "just perfect for your MOéMON.$"

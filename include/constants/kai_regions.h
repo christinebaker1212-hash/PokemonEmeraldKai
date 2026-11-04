@@ -13,6 +13,7 @@
 #define FLAG_DAILY_JOHTO_KURT_GS_BALL   0x924   // Crystal's ENGINE_KURT_MAKING_BALLS for the GS BALL: KURT checks it until the next day
 #define FLAG_DAILY_JOHTO_LAPRAS         0x926   // Crystal's ENGINE_UNION_CAVE_LAPRAS: UNION CAVE's LAPRAS fought today
 #define FLAG_DAILY_JOHTO_SHUCKIE        0x925   // Crystal's ENGINE_GOT_SHUCKIE_TODAY: MANIA asks SHUCKIE back from the next day
+#define FLAG_DAILY_JOHTO_DEPT_TM        0x927   // Crystal's ENGINE_GOLDENROD_DEPT_STORE_TM27_RETURN: the Sunday lady's TM given today
 
 // KANTO vars
 #define VAR_KANTO_RESORT_STEPS        0x514B   // FireRed's VAR_RESORT_GOREGEOUS_STEP_COUNTER (SELPHY's wish lasts 250 steps)
@@ -60,6 +61,7 @@
 // UNION CAVE B2F's LAPRAS, out on Fridays until it's fought that day (case 136; FLAG_DAILY_JOHTO_LAPRAS)
 #define FLAG_JOHTO_HIDE_LAPRAS        0x153A
 #define FLAG_JOHTO_LEARNED_TO_CATCH   0x153B   // Crystal's EVENT_LEARNED_TO_CATCH_POKEMON (ROUTE 29's DUDE, case 133)
+#define FLAG_JOHTO_HIDE_DEPT_LADY     0x153C   // GOLDENROD DEPT. STORE 5F's receptionist, out on Sundays (case 143)
 // Crystal's hidden items (case 131, tools/quetzal_port/gen_hidden_items.py)
 #define FLAG_JOHTO_HIDDEN_ITEM_1           0x1601   // AzaleaTown FULL_HEAL (EVENT_AZALEA_TOWN_HIDDEN_FULL_HEAL)
 #define FLAG_JOHTO_HIDDEN_ITEM_2           0x1602   // BurnedTower1F ETHER (EVENT_BURNED_TOWER_1F_HIDDEN_ETHER)
