@@ -1286,7 +1286,7 @@ static void MtgCombat(int t)
         MCard("Hill Giant", Lerp(40, 80, go), Lerp(56, 46, go), MW, MH, tap, 255, 0);
         MPt(Lerp(55, 95, go), Lerp(99, 89, go), "3/3", 0xc8ecff);
         if (gone < 1)
-            MCard("Grizzly Bears", 140, 32 + gone * 10, MW, MH, 0, (unsigned)(255 * (1 - gone)), u >= 34 && u < 44 ? 200 : 0);
+            MCard("Grizzly Bears", 140, 32 + gone * 10, MW, MH, 180, (unsigned)(255 * (1 - gone)), u >= 34 && u < 44 ? 200 : 0);
         Shatter(140, 32, MW, MH, gone, 0xffd080);
         if (u < 50)
             MPt(155, 75, "2/2", 0xc8ecff);
@@ -1298,15 +1298,15 @@ static void MtgInstants(int t)
     float shock = InOut(Seg(t, 20, 40)), counter = InOut(Seg(t, 70, 90));
     float out2 = Seg(t, 120, 136), out1 = Seg(t, 150, 166);
     Zone(96, 26, 48, 58, "THE STACK");
-    MCard("Grizzly Bears", 190, 34, MW, MH, 0, 255, 0);
+    MCard("Grizzly Bears", 190, 34, MW, MH, 180, 255, 0);   /* (the opponent's cards face them) */
     if (out2 < 1)
         MCard("Shock", Lerp(20, 104, shock), Lerp(60, 34, shock), MW, MH, 0, (unsigned)(255 * (1 - out1)), 0);
     if (t >= 70 && out2 < 1)
-        MCard("Counterspell", Lerp(210, 110, counter), Lerp(90, 40, counter), MW, MH, 0, (unsigned)(255 * (1 - out2)),
+        MCard("Counterspell", Lerp(210, 110, counter), Lerp(90, 40, counter), MW, MH, 180, (unsigned)(255 * (1 - out2)),
               t >= 120 ? 220 : 0);
     Shatter(104, 34, MW, MH, out1, 0xd0e0ff);
-    Tag(54, 30, "SHOCK THE BEARS", 0xc84040, Show(t, 22, 68));
-    Tag(186, 92, "AN ANSWER!", 0x3878f0, Show(t, 72, 118));
+    Tag(54, 30, "SHOCK THE BEARS", 0x3878f0, Show(t, 22, 68));
+    Tag(186, 92, "THEIR ANSWER!", 0xc84040, Show(t, 72, 118));
     Tag(CX, 102, "THE LAST ONE CAST GOES FIRST", 0x806020, Show(t, 118, 200));
 }
 static void MtgWinning(int t)
