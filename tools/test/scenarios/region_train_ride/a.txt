@@ -1,0 +1,29 @@
+pressuntil A field 5000
+wait 60
+mp register 265
+mp regionclear 1
+mp regionstarted 2
+mp warp 34,84,16,21
+wait 120
+press UP 3
+wait 10
+pressuntil A yesno 3000
+press A 3
+mash A 6 20
+mash A 6 20
+wait 100
+shotburst ride_s 2
+wait 4
+rendershot ride_wait
+wait 160
+rendershot ride_come
+wait 100
+rendershot ride_hold
+wait 180
+rendershot ride_leave
+watchlog region: travel
+wait 300
+mp where
+mp regioninfo
+mp ctx
+quit

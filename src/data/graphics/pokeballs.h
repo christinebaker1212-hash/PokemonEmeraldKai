@@ -55,5 +55,7 @@ const u32 gBallGfx_Dusk[] = INCGFX_U32("graphics/balls/dusk.png", ".4bpp.lz");
 const u32 gBallPal_Dusk[] = INCGFX_U32("graphics/balls/dusk.png", ".gbapal.lz");
 const u32 gBallGfx_Quick[] = INCGFX_U32("graphics/balls/quick.png", ".4bpp.lz");
 const u32 gBallPal_Quick[] = INCGFX_U32("graphics/balls/quick.png", ".gbapal.lz");
+const u32 gBallGfx_Astral[] = INCGFX_U32("graphics/balls/astral.png", ".4bpp.lz");
+const u32 gBallPal_Astral[] = INCGFX_U32("graphics/balls/astral.png", ".gbapal.lz");
 
 const u32 gOpenPokeballGfx[] = INCGFX_U32("graphics/balls/open.png", ".4bpp.lz");

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "maker.h"   // Moemon Maker
 #include "mp_region.h"
 #include "event_data.h"
 #include "mp.h"
@@ -233,6 +234,8 @@ u8 *GetFlagPointer(u16 id)
         return NULL;
     else if (id >= REGION_FLAGS_START && id < SPECIAL_FLAGS_START)
         return MP_Region_FlagPointer(id);   // Moemon Kai: Johto / Kanto flags (mp_region.c)
+    else if (id >= MAKER_FLAGS_START)
+        return Maker_FlagPointer(id);   // Moemon Maker: flags of what the edits add (src/maker/maker_flags.c)
     else if (id < SPECIAL_FLAGS_START)
         return &gSaveBlock1Ptr->flags[id / 8];
     else

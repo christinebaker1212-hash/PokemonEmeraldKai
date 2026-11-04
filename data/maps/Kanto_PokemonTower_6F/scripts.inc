@@ -19,7 +19,6 @@ Kanto_PokemonTower_6F_EventScript_841319C::
 	waitstate
 	specialvar VAR_RESULT, GetBattleOutcome
 	goto_if_eq VAR_RESULT, 1, Kanto_PokemonTower_6F_EventScript_84131FD
-	goto_if_eq VAR_RESULT, 7, Kanto_PokemonTower_6F_EventScript_84131FD
 
 Kanto_PokemonTower_6F_EventScript_84131E1::
 	closemessage
@@ -117,9 +116,10 @@ Kanto_PokemonTower_6F_Text_842A9BF::
 	.string "Intruders…$"
 
 Kanto_PokemonTower_6F_Text_842A9D3::
-	.string "A spirit blocks the way.\p"
-	.string "You need the Silph Scope\n"
-	.string "to identify it.$"
+	.string "The GHOST appeared!\p"
+	.string "Darn!\n"
+	.string "The GHOST can’t be ID’d!\p"
+	.string "GHOST: Get out…… Get out……$"
 
 Kanto_PokemonTower_6F_Text_842AA15::
 	.string "The ghost was the restless spirit\n"

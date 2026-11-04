@@ -7658,6 +7658,48 @@
       "blockdata_filepath": "quetzal_rip/layouts/Kanto_CeruleanCave_RayquazaChamber/map.bin",
       "quetzal_layout_id": 992,
       "quetzal_addr": "0x8930A70"
+    },
+    {
+      "id": "LAYOUT_KANTO_SEAFOAM_ISLANDS_B3F_CURRENT_STOPPED",
+      "name": "Kanto_SeafoamIslands_B3F_CurrentStopped_Layout",
+      "width": 38,
+      "height": 24,
+      "border_width": 2,
+      "border_height": 2,
+      "primary_tileset": "gTileset_Kanto_General",
+      "secondary_tileset": "gTileset_Kanto_SeafoamIslands",
+      "border_filepath": "quetzal_rip/layouts/Kanto_SeafoamIslands_B3F_CurrentStopped/border.bin",
+      "blockdata_filepath": "quetzal_rip/layouts/Kanto_SeafoamIslands_B3F_CurrentStopped/map.bin",
+      "quetzal_layout_id": 899,
+      "quetzal_addr": "0x891EB74"
+    },
+    {
+      "id": "LAYOUT_KANTO_SEAFOAM_ISLANDS_B4F_CURRENT_STOPPED",
+      "name": "Kanto_SeafoamIslands_B4F_CurrentStopped_Layout",
+      "width": 38,
+      "height": 24,
+      "border_width": 2,
+      "border_height": 2,
+      "primary_tileset": "gTileset_Kanto_General",
+      "secondary_tileset": "gTileset_Kanto_SeafoamIslands",
+      "border_filepath": "quetzal_rip/layouts/Kanto_SeafoamIslands_B4F_CurrentStopped/border.bin",
+      "blockdata_filepath": "quetzal_rip/layouts/Kanto_SeafoamIslands_B4F_CurrentStopped/map.bin",
+      "quetzal_layout_id": 900,
+      "quetzal_addr": "0x891F2B8"
+    },
+    {
+      "id": "LAYOUT_KANTO_THREE_ISLAND_DUNSPARCE_TUNNEL_DUG_OUT",
+      "name": "Kanto_ThreeIsland_DunsparceTunnel_DugOut_Layout",
+      "width": 30,
+      "height": 7,
+      "border_width": 2,
+      "border_height": 2,
+      "primary_tileset": "gTileset_Kanto_General",
+      "secondary_tileset": "gTileset_Kanto_Cave",
+      "border_filepath": "quetzal_rip/layouts/Kanto_ThreeIsland_DunsparceTunnel_DugOut/border.bin",
+      "blockdata_filepath": "quetzal_rip/layouts/Kanto_ThreeIsland_DunsparceTunnel_DugOut/map.bin",
+      "quetzal_layout_id": 940,
+      "quetzal_addr": "0x8928848"
     }
   ]
 }

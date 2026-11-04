@@ -102,6 +102,8 @@
 // The GENESIS / EPOCH BALLS: Pokémon Red's and Crystal's own POKé BALLS (mp_legacy_balls.c)
 #define ITEM_GENESIS_BALL ITEM_052
 #define ITEM_EPOCH_BALL ITEM_057
+// The ASTRAL BALL: never misses, never breaks, and what it catches is shiny (mp_ballstyle.c MP_Astral_*)
+#define ITEM_ASTRAL_BALL ITEM_058
 #define ITEM_GUARD_SPEC 73
 #define ITEM_DIRE_HIT 74
 #define ITEM_X_ATTACK 75

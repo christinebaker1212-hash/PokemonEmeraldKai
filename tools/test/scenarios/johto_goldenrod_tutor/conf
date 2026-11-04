@@ -1,0 +1,8 @@
+# GOLDENROD's move tutor (docs/REGIONS_AUDIT.md 144, Crystal's): out on Wednesdays after the LEAGUE with a COIN CASE
+# (FLAG_JOHTO_HIDE_GOLDENROD_TUTOR 0x153D clear); FLAMETHROWER for 4000 of 5000 coins to the lead (TORCHIC learns
+# TM35; MUDKIP is shown NOT ABLE); then he goes into the GAME CORNER for the day (FLAG_DAILY_JOHTO_TUTOR 0x928)
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("flag 5437 = 0" "coins 1000" "flag 2344 = 1" "flag 5437 = 1" "ctx 1 free 1 overworld 1 locked 0 script 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

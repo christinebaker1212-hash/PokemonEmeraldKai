@@ -29,3 +29,16 @@ Johto_Route28SteelWingHouse_Text_83ECB23::
 	.string "It’s tough being a top celebrity.\p"
 	.string "Everywhere I go, people chase me.\p"
 	.string "I just want to be left alone…$"
+
+@ Moemon Kai: Crystal's FEAROW (pokecrystal Route28SteelWingHouse.asm; docs/REGIONS_AUDIT.md 138)
+Johto_Route28SteelWingHouse_EventScript_Fearow::
+	lock
+	faceplayer
+	playmoncry SPECIES_FEAROW, CRY_MODE_NORMAL
+	msgbox Johto_Route28SteelWingHouse_Text_Fearow, MSGBOX_DEFAULT
+	waitmoncry
+	release
+	end
+
+Johto_Route28SteelWingHouse_Text_Fearow::
+	.string "FEAROW: Feero!$"

@@ -155,7 +155,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_SlowpokeWellB1F_EventScript_83F9B64",
-      "flag": "FLAG_QZ_0x1176"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_15006",
@@ -168,7 +168,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_SlowpokeWellB1F_EventScript_83F9B71",
-      "flag": "FLAG_QZ_0x1177"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_15006",
@@ -181,7 +181,33 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_SlowpokeWellB1F_EventScript_83F9B7E",
-      "flag": "FLAG_QZ_0x1178"
+      "flag": "FLAG_KAI_GONE"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_MON_SLOWPOKE",
+      "x": 12,
+      "y": 4,
+      "script": "Johto_SlowpokeWellB1F_EventScript_SlowpokeWithMail",
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "flag": "FLAG_QZ_0x1084"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_MON_SLOWPOKE",
+      "x": 8,
+      "y": 3,
+      "script": "Johto_SlowpokeWellB1F_EventScript_TaillessSlowpoke",
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_DOWN",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "flag": "FLAG_QZ_0x1084"
     }
   ],
   "warp_events": [

@@ -140,6 +140,30 @@ def shrink(im, frames, w, h, src=None, scale=None):
     return [cols[0]] + centers, idx
 
 
+# Emerald's people stand on row 30 of their 32-tall frames, Platinum's on row 29: a walking sheet whose feet are
+# higher than Emerald's moves down to them, or SINNOH's people stood a pixel above the player on the same row
+FEET_ROW = 30
+
+
+def feet_shift(rows_of_frames, standing=3):
+    """how far down a sheet's frames (lists of index rows; the first STANDING ones the person standing) go so its
+    standing feet sit on FEET_ROW (0: already). The standing frames decide: some sheets' stepping feet reach a row
+    lower than their standing ones, and judged by those the person stood a pixel high"""
+    low = max((y for rows in rows_of_frames[:standing] for y, r in enumerate(rows) if any(r)), default=FEET_ROW)
+    return max(0, FEET_ROW - low)
+
+
+def shifted(rows, dy):
+    if dy <= 0:
+        return rows
+    w = len(rows[0])
+    return [[0] * w for _ in range(dy)] + rows[:len(rows) - dy]
+
+
+def frame_rows(im, x0, y0, w, h):
+    return [[im.px(x0 + x, y0 + y) & 15 for x in range(w)] for y in range(h)]
+
+
 def tiles_of(rows, w, h):
     out = bytearray()
     for ty in range(h // 8):
@@ -297,9 +321,12 @@ def main():
     out += struct.pack('<H', len(sh))
     for name, kind, im in sh:
         out += name.encode()[:23].ljust(24, b'\0') + struct.pack('<BB', kind, 0) + palette(im)
+        dy = 0
         if kind in (0, 3):
-            for f in WALK + ((16,) if kind == 3 else ()):   # (3: the nurse's bow, the game's frame 9)
-                out += tiles(im, 0, f * 32, 32, 32)
+            frames = [frame_rows(im, 0, f * 32, 32, 32) for f in WALK + ((16,) if kind == 3 else ())]   # (3: the nurse's bow, the game's frame 9)
+            dy = feet_shift(frames)
+            for rows in frames:
+                out += tiles_of(shifted(rows, dy), 32, 32)
         elif kind == 1:
             out += tiles(im, 0, 0, 32, 32)
         elif kind == 4:
@@ -314,8 +341,9 @@ def main():
         size = 16 if kind == 2 else 64 if kind == 4 else 32
         pal, small = shrink(im, where, size, size)
         out += struct.pack('<16H', *(bgr555(c) for c in pal))
+        sdy = feet_shift(small) if kind in (0, 3) else 0
         for rows in small:
-            out += tiles_of(rows, size, size)
+            out += tiles_of(shifted(rows, sdy), size, size)
     pics = pictures(root)
     out += struct.pack('<H', len(pics))
     for name, im in pics:

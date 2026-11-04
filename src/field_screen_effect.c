@@ -536,7 +536,7 @@ static bool32 WaitForWeatherFadeIn(void)
         return FALSE;
 }
 
-// Moemon Kai: SINNOH's stairs and escalators (tools/sinnoh/build_pack.py: stairs 0x5E up / 0x5F down, escalators
+// Moemon Kai: SINNOH's stairs and escalators (tools/sinnoh/build_pack.py: stairs MetatileBehavior_IsSinnohStairs, escalators
 // MB_UP_ESCALATOR / MB_DOWN_ESCALATOR by the floors they lead to). The player is carried on the way they were going,
 // and up or down, while the screen fades: walking across the stairs, standing on the escalator (1.63.9: both were a
 // plain warp, the player standing still)
@@ -560,7 +560,7 @@ bool8 DoSinnohRideWarp(u16 metatileBehavior)
 {
     u8 dir, taskId;
     s16 dx = 0, dy = 0;
-    bool8 stairs = metatileBehavior == MB_UNUSED_5E || metatileBehavior == MB_UNUSED_5F;
+    bool8 stairs = MetatileBehavior_IsSinnohStairs(metatileBehavior);
     if (!S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup) || !(stairs || MetatileBehavior_IsEscalator(metatileBehavior)))
         return FALSE;
     dir = GetPlayerFacingDirection();
@@ -568,7 +568,7 @@ bool8 DoSinnohRideWarp(u16 metatileBehavior)
     FreezeObjectEvents();
     taskId = CreateTask(Task_SinnohRide, 9);
     gTasks[taskId].tDx = dx;
-    gTasks[taskId].tDy = dy + ((metatileBehavior == MB_UNUSED_5E || metatileBehavior == MB_UP_ESCALATOR) ? -1 : 1);
+    gTasks[taskId].tDy = dy + ((MetatileBehavior_IsSinnohStairsUp(metatileBehavior) || metatileBehavior == MB_UP_ESCALATOR) ? -1 : 1);
     gTasks[taskId].tWalk = stairs;
     DoWarp();
     return TRUE;
@@ -585,6 +585,17 @@ void DoWarp(void)
     WarpFadeOutScreen();
     PlayRainStoppingSoundEffect();
     PlaySE(SE_EXIT);
+    gFieldCallback = FieldCB_DefaultWarpExit;
+    CreateTask(Task_WarpAndLoadMap, 10);
+}
+
+// Moemon Maker: the map loaded again where the player stands, quietly (its edits changed while playing from the editor:
+// src/maker/maker_play.c)
+void DoMakerReloadWarp(void)
+{
+    LockPlayerFieldControls();
+    TryFadeOutOldMapMusic();
+    WarpFadeOutScreen();
     gFieldCallback = FieldCB_DefaultWarpExit;
     CreateTask(Task_WarpAndLoadMap, 10);
 }

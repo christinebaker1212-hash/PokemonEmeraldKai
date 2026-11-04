@@ -26,6 +26,8 @@ struct YgoNpcDeck
 };
 extern const struct YgoNpcDeck gYgoNpcDecks[];
 extern const unsigned gYgoNpcDeckCount;
+/* one of them as cards that can be played (src/ygo/ygo_rating.c): 0 when it can't make a deck */
+int Ygo_NpcDeckCards(unsigned index, uint16_t main[60], uint16_t extra[15]);
 
 /* Power ratings (src/ygo/ygo_card_ratings.c, made by tools/ygo/rate_cards.sh; never shown as numbers) and what they
  * say (src/ygo/ygo_rating.c): a deck's rating from its main deck's cards, the chance one side beats another, what

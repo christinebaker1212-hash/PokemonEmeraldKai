@@ -47,6 +47,7 @@ u16 MP_RegionVictorySong(u16 song);   // Moemon Kai (pokemon.c)
 #include "recorded_battle.h"
 #include "roamer.h"
 bool8 Sinnoh_RoamerAfterBattle(struct Pokemon *mon, u8 outcome);   // Moemon Kai: src/sinnoh/s3d_roamer.c
+bool8 MP_JohtoRoamer_AfterBattle(struct Pokemon *mon, u8 outcome);   // Moemon Kai: src/mp/mp_johto_roamer.c
 #include "safari_zone.h"
 #include "scanline_effect.h"
 #include "sound.h"
@@ -5855,10 +5856,16 @@ static void ReturnFromBattleToOverworld(void)
 
     gSpecialVar_Result = gBattleOutcome;
     gMain.inBattle = FALSE;
+    {
+        extern bool8 gMpUncatchableWild;
+        gMpUncatchableWild = FALSE;   // Moemon Kai: POKéMON TOWER's MAROWAK (battle_script_commands.c)
+    }
     gMain.callback1 = gPreBattleCallback1;
 
     if (gBattleTypeFlags & BATTLE_TYPE_ROAMER && Sinnoh_RoamerAfterBattle(&gEnemyParty[0], gBattleOutcome))
         ;   // Moemon Kai: SINNOH's roamer (s3d_roamer.c: its HP and status kept, or gone)
+    else if (gBattleTypeFlags & BATTLE_TYPE_ROAMER && MP_JohtoRoamer_AfterBattle(&gEnemyParty[0], gBattleOutcome))
+        ;   // Moemon Kai: JOHTO's beasts (mp_johto_roamer.c)
     else if (gBattleTypeFlags & BATTLE_TYPE_ROAMER)
     {
         UpdateRoamerHPStatus(&gEnemyParty[0]);

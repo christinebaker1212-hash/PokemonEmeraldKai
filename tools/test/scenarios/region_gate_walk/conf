@@ -1,0 +1,8 @@
+# The walk between JOHTO's VICTORY ROAD gate and KANTO's ROUTE 22 gate (docs/REGIONS_AUDIT.md cases 43, 70): before
+# both LEAGUES the east door turns the player back (still in the gate); as a champion of both, Kai's customs and the
+# crossing into KANTO's gate (region 2).
+MODE=1
+TMO=250
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("[test] where map 35.20 xy 19,9" "[test] where map 38.110 xy 3,2" "[test] region 2 ")
+UNEXPECT_A=("[crash]")

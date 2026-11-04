@@ -19,6 +19,9 @@ static const u8 sGenesisBallDesc[] = _(
 static const u8 sEpochBallDesc[] = _(
     "CRYSTAL's POKé BALL. Weak foes and any status help.");
 
+static const u8 sAstralBallDesc[] = _(
+    "A BALL of starlight. It never misses and never breaks, and the MOéMON it catches shines in rare colors.");
+
 static const u8 sLoveBallDesc[] = _(
     "POKé BALL for catching MOéMON that are the opposite gender of your MOéMON.");
 

@@ -1,0 +1,28 @@
+pressuntil A field 5000
+wait 30
+mp setflag 0x2107
+mp beattrainer 1429
+mp trainerflag 1429
+mp setflag 0x216C
+mp warp 37,124,2,3
+wait 150
+mp trainerflag 1429
+press UP 10
+mash A 30 30
+wait 120
+mp getflag 0x221D
+mp objat 2 2
+mp warp 39,18,2,2
+wait 150
+press UP 10
+mash A 6 30
+wait 30
+mp setflag 0x2108
+mp warp 39,18,2,2
+wait 150
+press UP 10
+press A 5
+wait 90
+shot journal
+mash A 6 30
+quit

@@ -39,7 +39,6 @@ Johto_RuinsOfAlphResearchCenter_EventScript_83F6EA8::
 Johto_RuinsOfAlphResearchCenter_EventScript_83F6FE3::
 	lock
 	faceplayer
-	call Quetzal_EventScript_8361A4D
 	goto_if_ne VAR_QZ_0x5033, 0, Johto_RuinsOfAlphResearchCenter_EventScript_83F7140
 
 Johto_RuinsOfAlphResearchCenter_EventScript_83F6FF5::

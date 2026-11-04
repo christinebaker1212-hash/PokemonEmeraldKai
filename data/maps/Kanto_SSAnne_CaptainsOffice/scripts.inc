@@ -83,16 +83,6 @@ Kanto_SSAnne_CaptainsOffice_Text_8423C91::
 	.string "MOéMON can now cut small trees.\p"
 	.string "Please take this gift as well!$"
 
-Kanto_SSAnne_CaptainsOffice_Text_8423D4F::
-	.string "{PLAYER} received a METAL COAT\n"
-	.string "from the CAPTAIN!$"
-
-Kanto_SSAnne_CaptainsOffice_Text_8423D7A::
-	.string "A METAL COAT helps certain\n"
-	.string "MOéMON evolve.\p"
-	.string "And now that you know CUT, try it\n"
-	.string "on the trees around VERMILION!$"
-
 Kanto_SSAnne_CaptainsOffice_Text_8423DE6::
 	.string "CAPTAIN: …Whew!\p"
 	.string "Now that I’m not sick anymore,\n"

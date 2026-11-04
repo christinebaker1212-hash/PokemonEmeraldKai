@@ -26,6 +26,7 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `coop_two_join3` | NA-JP lag, three players: two trainers spot ALICE, BOB teams up, CARL joins once it started (`mp joinask 2`, sent on to ALICE): a Triple Battle against both trainers, the third foe spot from the trainer with more left, both trainers beaten on every game |
 | `coop_merge_join3` / `coop_held_join3` | three players: two players grouped on one trainer (waiting merge / held trainer spots the second), then a third one spotted by that trainer joins (JOIN BATTLE) |
 | `hgss_balls` | shots only (looked at by hand): the HGSS balls' send-out spin, a thrown MASTER BALL, a blue POKé BALL with a STAR, a GENESIS BALL, the summary's ball |
+| `astral_ball` | the ASTRAL BALL: four full-HP catches (one a RAYQUAZA) on the first throw, each shiny with nature, gender, UNOWN letter and WURMPLE evolution kept (check.py); shots of the sheen and sparkles, the click (fade to grey, sparkles drawn in), the summary's plain ball |
 | `tri_rain` | wild triple at NA-JP lag in the leader's rain, one friend's field dry: rain on all three screens, turns go on to the win |
 | `coop_life_emote` | NA-JP lag: a partner save; each game's Pokemon emote shows on the other game over the same Pokemon (check.sh) |
 | `coop_spot_join` / `coop_spot_alone` | ROUTE 116: JERRY, battling ALICE, spots BOB: "join their battle, or battle alone?"; JOIN BATTLE (ALICE lets him in, both win, JERRY beaten on both) / BATTLE ALONE |
@@ -64,6 +65,38 @@ Every multi-client scenario also runs at the worst connection we plan for with `
 | `card_friends` | two clients: a friend's card with its add-on, as they styled it: their BADGES & STARS, their BADGE CASE on JOHTO, YOU AND BOB; then the album card on MY CARD > FRIENDS' CARDS |
 | `spec_card` | two clients: BOB's SPECTATE panel shows ALICE's TRAINER CARD and her BADGE CASE up close |
 | `hm_rescue` / `hm_rescue_carried` | HM04 STRENGTH's scene gone (RUSTURF TUNNEL open) without it: Wanda's boyfriend walks up and hands it over; nobody comes when it's already carried |
+| `coop_rusturf` | NA-JP lag: ALICE smashes RUSTURF TUNNEL's boulders while BOB stands across them: the tunnel scene plays on BOB's game too and he gets HM04 STRENGTH (his story had stayed shut) |
+| `johto_roamer` | JOHTO's RAIKOU / ENTEI set going (Crystal's rules): ENTEI met on ROUTE 37, flees keeping its HP, both move on |
+| `kanto_boulder_hole` | SEAFOAM 1F: a STRENGTH boulder pushed into the hole falls (gone, B1F's twin shown) |
+| `kanto_birth_island` | KANTO's BIRTH ISLAND: touching the triangle moves it on its own progress, no freeze |
+| `johto_kiln` | CHARCOAL KILN: the apprentice's CHARCOAL with Crystal's words and its own flag; FARFETCH'D home |
+| `johto_radio_card` | RADIO TOWER 1F: Crystal's RADIO CARD quiz, YES YES NO YES NO gives the RADIO CARD |
+| `region_gate_walk` | VICTORY ROAD gate: the KANTO door refused without both LEAGUEs, then customs: one POKéMON along, the rest to the PC, KANTO's side |
+| `kanto_selphy` | FIVE ISLAND: SELPHY asks to see a POKéMON, 250 steps later it's shown and she rewards it |
+| `kanto_marowak_ghost` | POKéMON TOWER 6F with the SILPH SCOPE: MAROWAK's ghost battle, a thrown ball is dodged |
+| `kanto_icefall_ice` | ICEFALL CAVE 1F: thin ice cracks under a step, breaks on the next and drops the player to B1F |
+| `johto_rival_days` | Crystal's rival after the LEAGUE: INDIGO PLATEAU on a Monday, gone on a Tuesday, training in DRAGON'S DEN |
+| `johto_crystal_people` | MANIA lends SHUCKIE and takes it back the next day; the SANDSTORM house's loyalty check; LAKE OF RAGE's MAGIKARP record and ELIXIR; the ROUTE 43 toll |
+| `johto_move_deleter` | BLACKTHORN's MOVE DELETER makes the lead forget its first move |
+| `johto_weekday_siblings` | Crystal's WEEKDAY siblings stand there only on their day, meet you once and give their gift |
+| `johto_friday_lapras` | UNION CAVE B2F's LAPRAS is there on Fridays only, until it's fought that day |
+| `johto_catch_tutorial` | ROUTE 29's DUDE shows how to catch a RATTATA (his own back picture, throw first) |
+| `johto_hidden_item` | Crystal's hidden items: ROUTE 30's POTION is found once |
+| `johto_sunday_lady` | GOLDENROD DEPT. STORE 5F's receptionist is out on Sundays and gives TM27 RETURN to a loving lead, once that day |
+| `johto_goldenrod_tutor` | GOLDENROD's tutor (Wednesdays after the LEAGUE) teaches FLAMETHROWER for 4000 coins, then leaves for the day |
+| `johto_poke_seer` | CIANWOOD's POKé SEER reads the lead's meeting and gives her advice |
+| `johto_tm_prizes` | GOLDENROD GAME CORNER's TM counter sells TM25 for 5500 coins |
+| `johto_name_rater` | GOLDENROD's NAME RATER asks to rate a nickname and leaves the field free |
+| `johto_haircut` | GOLDENROD UNDERGROUND's older HAIRCUT BROTHER (Tuesdays) cuts for 500 and raises friendship, once a day |
+| `johto_bargain` | the Monday-morning bargain merchant sells a NUGGET at Crystal's price, one a day |
+| `johto_gs_ball` | GOLDENROD's POKéMON CENTER brings the GS BALL only after JOHTO's LEAGUE; KURT keeps it until the next day, then hands it back in AZALEA |
+| `kanto_move_people` | FUCHSIA's MOVE DELETER forgets THUNDERSHOCK, the COPYCAT teaches MIMIC for a POKé DOLL, TWO ISLAND's MOVE MANIAC remembers GROWL for two TINYMUSHROOMS |
+| `kanto_cape_brink` | CAPE BRINK's starter tutor teaches a lead VENUSAUR at full friendship FRENZY PLANT |
+| `kanto_daisy_bike` | DAISY gives the TOWN MAP, grooms after the LEAGUE (friendship 100 -> 103); the BIKE SHOP swaps the BIKE VOUCHER for the BICYCLE |
+| `kanto_size_records` / `kanto_size_heracross` | ROUTE 12's MAGIKARP record (NET BALL), SIX ISLAND's HERACROSS record (NEST BALL) |
+| `kanto_giovanni_leaves` | GIOVANNI's farewell in VIRIDIAN's GYM, then he's gone; FIVE ISLAND's POKéMON JOURNAL after the LEAGUE |
+| `kanto_ruin_valley_cut` | RUIN VALLEY: CUT used from the party menu below the braille door opens it |
+| `kanto_togepi_egg` | the WATER LABYRINTH's gentleman gives a TOGEPI EGG for a lead POKéMON at full friendship |
 | `trade` | CO-OP > TRADE: both offer their lead, READY, confirm, swapped (and their MOéMON GARDEN records travel) |
 | `nurse_no_union` | CHERRYGROVE's nurse heals a game started in JOHTO: she never says "It appears as if <junk> is playing right now" (the wireless UNION ROOM check; flag 0x2A07 stays clear) |
 | `pmd_scale_hop` | a scaled PMD follower (PIKACHU, FOLLOWERS: PMD everywhere) mid-hop is drawn whole: check.py counts its rows and pixels (its lower part was cut off) |

@@ -38,7 +38,7 @@ Johto_Route27_EventScript_83EC3CF::
 
 @ Johto_Route27 object 7 (local id 7, gfx 0x3B) at 69,14
 Johto_Route27_EventScript_83EC3E0::
-	setorcopyvar VAR_0x8000, ITEM_MOON_STONE
+	setorcopyvar VAR_0x8000, ITEM_RARE_CANDY   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

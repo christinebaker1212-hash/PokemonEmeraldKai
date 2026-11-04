@@ -433,6 +433,20 @@ class Model:
                 raise ValueError('render command %02x at %d in %s' % (op, p, self.name))
         return out
 
+    def draw_matshp(self, pairs):
+        """As Platinum draws a building whose (material, shape) pairs build_model_matshp.dat lists (map_prop.c
+        MapPropManager_RenderUsing1Mat1Shp, NNS_G3dDraw1Mat1Shp): each shape with its material, by the prop's own
+        transform and the model's position scale only, its nodes' matrices left out (a house's door copy, hung off a
+        node at the doorway in the model, stays inside the house there: the door prop is the door)"""
+        k = self.up_scale
+        cur = [[k, 0, 0, 0], [0, k, 0, 0], [0, 0, k, 0], [0, 0, 0, 1.0]]
+        stack = [mat_identity() for _ in range(32)]
+        out = {}
+        for mi, si in pairs:
+            if mi < len(self.materials) and si < len(self.shapes):
+                out.setdefault(mi, []).extend(self.run_dl(self.shapes[si].dl, cur, stack))
+        return out
+
     def run_dl(self, dl, cur, stack):
         tris = []
         verts = []
@@ -658,3 +672,58 @@ class Bca0:
             if d[so:so + 4] == b'JNT0':
                 for name, e in read_dict(d, so + 8):
                     self.anims.append(JointAnim(name, d, so + u32(e, 0)))
+
+
+# ------------------------------------------------------------------------------------------------ texture SRT (NSBTA)
+class SrtAnim:
+    """One texture SRT animation (an NSBTA's SRT0 entry, 'M\\0AT'): frames, and per material its scale S / T, rotation
+    and translation S / T tracks (5 of 8 bytes: u16, u8, u8 flags, u32 the value or the data's offset; flags 0x20 a
+    constant, 0x10 FX16 samples, else FX32). value(material, frame) -> (scale s, scale t, translate s, translate t),
+    the translation in texture sizes (1.0: the whole texture); rotations are left out (Platinum's water scrolls)"""
+    def __init__(self, name, d, o):
+        self.name = name
+        self.frames = u16(d, o + 4)
+        self.mats = {}
+        for mname, e in read_dict(d, o + 8):
+            self.mats[mname] = [self._track(d, o, e, k) for k in range(5)]
+
+    def _track(self, d, base, e, k):
+        _n, _u, flags, val = struct.unpack_from('<HBBI', e, 8 * k)
+        if k == 2:   # rotation: left out
+            return None
+        if flags & 0x20:
+            v = (val - (1 << 32) if val >= 1 << 31 else val) / FX12
+            return ('const', v)
+        p = base + val
+        size = 2 if flags & 0x10 else 4
+        step = 4 if flags & 0x80 else 2 if flags & 0x40 else 1
+        count = (self.frames + step - 1) // step
+        vals = [(s16(d, p + 2 * i) if size == 2 else s32(d, p + 4 * i)) / FX12 for i in range(count)]
+        return ('samples', vals, step)
+
+    @staticmethod
+    def _at(track, frame, default):
+        if track is None:
+            return default
+        if track[0] == 'const':
+            return track[1]
+        vals, step = track[1], track[2]
+        return vals[min(frame // step, len(vals) - 1)]
+
+    def value(self, material, frame):
+        t = self.mats.get(material)
+        if t is None:
+            return None
+        return (self._at(t[0], frame, 1.0), self._at(t[1], frame, 1.0), self._at(t[3], frame, 0.0),
+                self._at(t[4], frame, 0.0))
+
+
+class Bta0:
+    def __init__(self, d):
+        assert d[:4] == b'BTA0', d[:4]
+        self.anims = []
+        for i in range(u16(d, 0x0E)):
+            so = u32(d, 0x10 + 4 * i)
+            if d[so:so + 4] == b'SRT0':
+                for name, e in read_dict(d, so + 8):
+                    self.anims.append(SrtAnim(name, d, so + u32(e, 0)))

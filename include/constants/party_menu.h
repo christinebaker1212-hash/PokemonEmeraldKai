@@ -42,7 +42,16 @@
 #define TUTOR_MOVE_THUNDER_PUNCH   27
 #define TUTOR_MOVE_FIRE_PUNCH      28
 #define TUTOR_MOVE_FURY_CUTTER     29
-#define TUTOR_MOVE_COUNT           30
+// Moemon Kai: CAPE BRINK's ultimate moves (FireRed's starter tutor), one species each (party_menu.c CanLearnTutorMove)
+#define TUTOR_MOVE_FRENZY_PLANT    30
+#define TUTOR_MOVE_BLAST_BURN      31
+#define TUTOR_MOVE_HYDRO_CANNON    32
+#define TUTOR_MOVE_COUNT           33
+// Moemon Kai: Crystal's GOLDENROD tutor (docs/REGIONS_AUDIT.md 144): who can learn these is the TM's list, as in
+// Crystal (party_menu.c GetTutorMove / CanLearnTutorMove)
+#define TUTOR_MOVE_TM_FLAMETHROWER 40
+#define TUTOR_MOVE_TM_THUNDERBOLT  41
+#define TUTOR_MOVE_TM_ICE_BEAM     42
 
 #define PARTY_LAYOUT_SINGLE          0
 #define PARTY_LAYOUT_DOUBLE          1

@@ -1,0 +1,7 @@
+# KANTO's SEAGALLOP ferries sail FireRed's ferry scene (src/mp/mp_voyage.c from qz_specials.c QzDoSeagallopFerryScene),
+# east or west as FireRed's direction matrix says: VERMILION -> ONE ISLAND east, back west; each lands at the harbor
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=2"
+EXPECT_A=("voyage: east" "where map 38.122 xy 8,5" "voyage: west" "where map 37.62 xy 23,32")
+UNEXPECT_A=("[crash]" "TIMEOUT")

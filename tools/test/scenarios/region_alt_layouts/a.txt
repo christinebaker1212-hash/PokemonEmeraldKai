@@ -1,0 +1,19 @@
+pressuntil A field 5000
+wait 60
+mp setflag 8712
+mp warp 36,86,10,10
+wait 120
+mp layout
+rendershot b3f
+mp setflag 8713
+mp warp 36,87,10,10
+wait 120
+mp layout
+rendershot b4f
+mp setflag 8456
+mp warp 37,31,5,4
+wait 120
+mp layout
+rendershot tunnel
+mp ctx
+quit

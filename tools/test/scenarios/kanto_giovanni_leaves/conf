@@ -1,0 +1,6 @@
+# VIRIDIAN GYM: GIOVANNI's farewell after his TM, then he's gone for good (FireRed); FIVE ISLAND's POKéMON JOURNAL
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=2"
+EXPECT_A=("[test] flag 8733 = 1" "[test] objat 2,2: none")
+UNEXPECT_A=("[crash]")

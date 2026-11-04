@@ -42,7 +42,6 @@ Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E774::
 Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E77E::
 	lock
 	faceplayer
-	call Quetzal_EventScript_8361A4D
 	goto_if_ne VAR_QZ_0x510C, 0, Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E8CD
 
 Kanto_CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_841E790::

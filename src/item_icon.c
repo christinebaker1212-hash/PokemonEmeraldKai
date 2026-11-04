@@ -3,6 +3,7 @@
 #include "graphics.h"
 #include "item_icon.h"
 #include "malloc.h"
+#include "mp.h"
 #include "sprite.h"
 #include "constants/items.h"
 
@@ -117,6 +118,7 @@ u8 AddItemIconSprite(u16 tilesTag, u16 paletteTag, u16 itemId)
         spriteTemplate->tileTag = tilesTag;
         spriteTemplate->paletteTag = paletteTag;
         spriteId = CreateSprite(spriteTemplate, 0, 0, 0);
+        MP_AstralFx_Icon(spriteId, itemId);   // Moemon Co-op: the ASTRAL BALL sparkles
 
         FreeItemIconTemporaryBuffers();
         Free(spriteTemplate);
@@ -154,6 +156,7 @@ u8 AddCustomItemIconSprite(const struct SpriteTemplate *customSpriteTemplate, u1
         spriteTemplate->tileTag = tilesTag;
         spriteTemplate->paletteTag = paletteTag;
         spriteId = CreateSprite(spriteTemplate, 0, 0, 0);
+        MP_AstralFx_Icon(spriteId, itemId);   // Moemon Co-op: the ASTRAL BALL sparkles
 
         FreeItemIconTemporaryBuffers();
         Free(spriteTemplate);

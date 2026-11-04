@@ -41,10 +41,6 @@ Kanto_Route16_House_Text_844FCAD::
 	.string "Please don't tell anyone I'm here.\n"
 	.string "I'll make it up to you with this!$"
 
-Kanto_Route16_House_Text_844FD1C::
-	.string "{PLAYER} received a RAZOR FANG\n"
-	.string "from the girl.$"
-
 Kanto_Route16_House_Text_844FD44::
 	.string "HM02 is FLY.\n"
 	.string "It's a wonderfully convenient move.\p"

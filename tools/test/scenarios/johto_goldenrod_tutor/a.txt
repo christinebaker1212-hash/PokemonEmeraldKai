@@ -1,0 +1,26 @@
+pressuntil A field 5000
+mp textspeed 2
+wait 30
+mp regionclear 1
+mp additem 260 1
+mp coins 5000
+mp weekday 3
+mp warp 34,59,26,31
+wait 150
+mp getflag 0x153D
+mp face up
+press A 2
+mash A 6 20
+wait 40
+press A 2
+wait 60
+mash A 4 20
+wait 60
+mash A 60 20
+wait 300
+mp coins
+mp getflag 0x928
+mp getflag 0x153D
+mp party
+mp ctx
+quit

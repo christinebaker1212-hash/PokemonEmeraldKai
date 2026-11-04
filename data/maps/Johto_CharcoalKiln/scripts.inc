@@ -1,5 +1,27 @@
 Johto_CharcoalKiln_MapScripts::
+	map_script MAP_SCRIPT_ON_TRANSITION, Johto_CharcoalKiln_OnTransition
 	.byte 0
+
+@ Moemon Kai: Crystal's FARFETCH'D at the kiln once it's home (EVENT_CHARCOAL_KILN_FARFETCH_D, cleared in ILEX FOREST
+@ when the master gives HM01)
+Johto_CharcoalKiln_OnTransition:
+	setflag FLAG_JOHTO_HIDE_KILN_FARFETCHD
+	goto_if_unset FLAG_QZ_0x1030, Johto_CharcoalKiln_OnTransitionEnd
+	clearflag FLAG_JOHTO_HIDE_KILN_FARFETCHD
+Johto_CharcoalKiln_OnTransitionEnd:
+	end
+
+Johto_CharcoalKiln_EventScript_Farfetchd::
+	lock
+	faceplayer
+	msgbox Johto_CharcoalKiln_Text_Kwaa, MSGBOX_DEFAULT
+	playmoncry SPECIES_FARFETCHD, 0
+	waitmoncry
+	release
+	end
+
+Johto_CharcoalKiln_Text_Kwaa::
+	.string "FARFETCH'D: Kwaa!$"
 
 @ Johto_CharcoalKiln object 1 (local id 1, gfx 0x2C) at 2,4
 Johto_CharcoalKiln_EventScript_83C56D5::
@@ -49,13 +71,13 @@ Johto_CharcoalKiln_EventScript_83C573D::
 	end
 
 Johto_CharcoalKiln_EventScript_83C5748::
-	goto_if_set FLAG_QZ_0x1030, Johto_CharcoalKiln_EventScript_83C5776
+	goto_if_set FLAG_JOHTO_GOT_KILN_CHARCOAL, Johto_CharcoalKiln_EventScript_83C5776   @ Moemon Kai: Crystal's own flag (0x1030 is HM01's)
 	msgbox Johto_CharcoalKiln_Text_83C5960, MSGBOX_DEFAULT
 	setorcopyvar VAR_0x8000, ITEM_CHARCOAL
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
-	setflag FLAG_QZ_0x1030
+	setflag FLAG_JOHTO_GOT_KILN_CHARCOAL
 	closemessage
 	release
 	end
@@ -97,9 +119,8 @@ Johto_CharcoalKiln_Text_83C5948::
 	.string "The SLOWPOKE came back!$"
 
 Johto_CharcoalKiln_Text_83C5960::
-	.string "My boss left your gift with me.\p"
-	.string "Thanks for finding FARFETCH’D!\n"
-	.string "Here is your CHARCOAL.$"
+	.string "I'm sorry--I forgot to thank you.\p"
+	.string "This is CHARCOAL that I made.$"
 
 Johto_CharcoalKiln_Text_83C59B6::
 	.string "The SLOWPOKE came back, and you even\n"

@@ -1,0 +1,32 @@
+pressuntil A field 5000
+wait 60
+mp warp 36,83,33,9
+wait 150
+mp setflag 2185
+mp setflag 8638
+mp face left
+wait 10
+press LEFT 16
+wait 90
+press LEFT 40
+wait 90
+mp objat 30 9
+mp where
+press DOWN 16
+wait 20
+press LEFT 16
+wait 20
+press LEFT 16
+wait 20
+mp where
+mp face up
+wait 10
+press UP 30
+wait 120
+mp where
+shot h_after
+mp objat 30 9
+mp objat 30 8
+mp getflag 8638
+mp getflag 8636
+quit

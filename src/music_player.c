@@ -218,6 +218,8 @@ void MP2K_event_fine(struct MP2KPlayerState *unused, struct MP2KTrack *track) {
     track->status = 0;
 }
 
+void (*gMpGotoWatch)(struct MP2KTrack *track);
+
 // Sets the track's cmdPtr to the specified address.
 void MP2K_event_goto(struct MP2KPlayerState *unused, struct MP2KTrack *track) {
 #ifdef NOT_GBA
@@ -234,6 +236,10 @@ void MP2K_event_goto(struct MP2KPlayerState *unused, struct MP2KTrack *track) {
     addr |= SafeDereferenceU8(cmdPtr);
     track->cmdPtr = (u8*)addr;
 #endif
+    // Moemon Co-op: the phone app's sound export finds a song's loop by its GOTO (mp_export_sound.c; patterns' calls
+    // come here a level deeper and aren't loops)
+    if (gMpGotoWatch != NULL && track->patternLevel == 0)
+        gMpGotoWatch(track);
 }
 
 // Sets the track's cmdPtr to the specified address after backing up its current position.

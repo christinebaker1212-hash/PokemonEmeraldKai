@@ -43,6 +43,7 @@
 #include "title_screen.h"
 #include "window.h"
 #include "save_slots.h"   // Moemon Co-op: SAVE FILE
+#include "maker.h"        // Moemon Maker: its row
 #include <stdio.h>
 #include "mystery_gift_menu.h"
 
@@ -185,6 +186,7 @@ static u8 sBirchSpeechMainTaskId;
 
 static u32 InitMainMenu(bool8);
 static void MpReloadSave(void);
+static bool8 sMpBackToSlot;   // Moemon Kai: the menu drawn again on another SAVE FILE: the cursor stays on it, no fade
 static void Task_MainMenuCheckSaveFile(u8);
 static void Task_MainMenuCheckBattery(u8);
 static void Task_WaitForSaveFileErrorWindow(u8);
@@ -549,6 +551,7 @@ enum
     ACTION_MYSTERY_EVENTS,
     ACTION_EREADER,
     ACTION_MP_SAVE_FILE,   // Moemon Co-op: SAVE FILE (save_slots.c)
+    ACTION_MP_MAKER,       // Moemon Maker: MOéMON MAKER (src/maker/maker_gate.c)
     ACTION_INVALID
 };
 
@@ -582,6 +585,12 @@ static void MpReloadSave(void)
     if (gSaveFileStatus == SAVE_STATUS_EMPTY || gSaveFileStatus == SAVE_STATUS_CORRUPT)
         Sav2_ClearSetDefault();
     SetPokemonCryStereo(gSaveBlock2Ptr->optionsSound);
+}
+
+// Moemon Maker: the save read again (after playing from the editor on a copy: src/maker/maker_play.c)
+void MainMenu_ReloadSave(void)
+{
+    MpReloadSave();
 }
 
 // Moemon Kai: OPTIONS > RETURN TO MAIN MENU (special MP_ReturnToTitle): the room left, the save and its side files read
@@ -633,7 +642,9 @@ static u32 InitMainMenu(bool8 returningFromOptionsMenu)
     ResetTasks();
     ResetSpriteData();
     FreeAllSpritePalettes();
-    if (returningFromOptionsMenu)
+    if (sMpBackToSlot)
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 0, RGB_BLACK);   // Moemon Kai: another SAVE FILE: no fade
+    else if (returningFromOptionsMenu)
         BeginNormalPaletteFade(PALETTES_ALL, 0, 0x10, 0, RGB_BLACK); // fade to black
     else
         BeginNormalPaletteFade(PALETTES_ALL, 0, 0x10, 0, RGB_WHITEALPHA); // fade to white
@@ -681,8 +692,9 @@ bool8 MP_MainMenu_Active(void)
     return FuncIsActiveTask(Task_HandleMainMenuInput);
 }
 
-// Moemon Co-op: SAVE FILE, the last item: LEFT / RIGHT go through the three save files (who, where, badges and time
-// from each one's summary), A starts the game again on the one shown (save_slots.c). Not with --save / MOEMON_SAVE.
+// Moemon Co-op: SAVE FILE, the last item: LEFT / RIGHT go through the save files (SAVE_SLOT_COUNT), each one read at
+// once so the whole menu (CONTINUE's name, time, POKéDEX and BADGES, or NEW GAME) is that file's (save_slots.c). Not
+// with --save / MOEMON_SAVE.
 static u8 sMpSlotShown;
 static u8 sMpEraseStep;   // ERASE: 1 asked, 2 asked again
 static const u8 sMpEraseAsk1[] = _("Erase this SAVE FILE and all its data?\nA: ERASE   B: KEEP IT");
@@ -699,9 +711,46 @@ static u8 MpSlotWindow(u8 menuType)
 {
     return menuType == HAS_NO_SAVED_GAME ? 3 : 5;   // (the 3rd / 4th item's place, free in that layout)
 }
+
+// Moemon Maker: MOéMON MAKER, the last item, once "maker" was typed with AllowSmallTweaks = 1 (src/maker/maker_gate.c).
+// With CONTINUE and SAVE FILE it's the fifth item, below the screen: the menu scrolls to it as MYSTERY EVENTS' does.
+static const u8 sText_MpMaker[] = _("MOéMON MAKER");
+static bool8 MpMakerOn(u8 menuType)
+{
+    return Maker_Unlocked() && menuType <= HAS_SAVED_GAME;
+}
+static u8 MpMakerItem(u8 menuType)
+{
+    return menuType + 2 + MpSlotsOn(menuType);
+}
+static u8 MpMakerWindow(u8 menuType)
+{
+    if (menuType == HAS_NO_SAVED_GAME)
+        return MpSlotsOn(menuType) ? 4 : 3;
+    return MpSlotsOn(menuType) ? 6 : 5;
+}
+static bool8 MpMenuScrolls(u8 menuType)
+{
+    return menuType == HAS_MYSTERY_EVENTS || (MpMakerOn(menuType) && MpMakerWindow(menuType) == 6);
+}
+static void MpDrawMakerItem(u8 menuType)
+{
+    u8 win = MpMakerWindow(menuType);
+    FillWindowPixelBuffer(win, PIXEL_FILL(0xA));
+    AddTextPrinterParameterized3(win, FONT_NORMAL, 0, 1, sTextColor_Headers, TEXT_SKIP_DRAW, sText_MpMaker);
+    PutWindowTilemap(win);
+    CopyWindowToVram(win, COPYWIN_GFX);
+}
+// (the highlight's rows for a window, as MENU_WIN_VCOORDS, scrolled or not)
+static u16 MpWinV(u8 win, bool8 scrolled)
+{
+    u8 top = sWindowTemplates_MainMenu[win].tilemapTop, h = sWindowTemplates_MainMenu[win].height;
+    return WIN_RANGE(((top - 1) * 8) + MENU_SHADOW_PADDING, (top + h + 1) * 8 - MENU_SHADOW_PADDING)
+         - (scrolled ? MENU_SCROLL_SHIFT : 0);
+}
 static void MpDrawSlotItem(u8 menuType)
 {
-    static const char *const sRegions[] = {"HOENN", "JOHTO", "KANTO"};
+    static const char *const sRegions[REGION_COUNT] = {"HOENN", "JOHTO", "KANTO", "SINNOH"};
     struct SaveSlotSummary sum;
     char text[64];
     u8 buf[64];
@@ -713,7 +762,9 @@ static void MpDrawSlotItem(u8 menuType)
     {
         u8 *end = buf + StringLength(buf);   // (the font's own arrows round the number)
         *end++ = CHAR_LEFT_ARROW;
-        *end++ = CHAR_0 + sMpSlotShown;
+        if (sMpSlotShown >= 10)
+            *end++ = CHAR_0 + sMpSlotShown / 10;
+        *end++ = CHAR_0 + sMpSlotShown % 10;
         *end++ = CHAR_RIGHT_ARROW;
         *end = EOS;
     }
@@ -726,7 +777,7 @@ static void MpDrawSlotItem(u8 menuType)
     else if (!sum.known)
         snprintf(text, sizeof(text), "saved game");
     else
-        snprintf(text, sizeof(text), "%s  %s %u  %u:%02u", sum.name, sRegions[sum.region < 3 ? sum.region : 0],
+        snprintf(text, sizeof(text), "%s  %s %u  %u:%02u", sum.name, sRegions[sum.region < REGION_COUNT ? sum.region : 0],
                  sum.badges, sum.hours, sum.minutes);
     MP_AsciiToGame(buf, text, sizeof(buf) - 1);
     AddTextPrinterParameterized3(win, FONT_NARROW, 92, 1, sTextColor_MenuInfo, TEXT_SKIP_DRAW, buf);
@@ -754,6 +805,8 @@ static void MpCloseEraseWindow(u8 menuType)
     for (i = 0; i < 7; i++)
     {
         bool8 shown = menuType == HAS_NO_SAVED_GAME ? (i <= 1 || i == 3) : (i >= 2 && i <= 5);
+        if (MpMakerOn(menuType) && i == MpMakerWindow(menuType))
+            shown = TRUE, MpDrawMakerItem(menuType);
         if (!shown)
             continue;
         if (i == MpSlotWindow(menuType))
@@ -811,6 +864,9 @@ static void Task_MainMenuCheckSaveFile(u8 taskId)
                 gTasks[taskId].func = Task_WaitForSaveFileErrorWindow;
                 break;
         }
+        Maker_TakeMenuRefresh();   // Moemon Maker: (drawn now with the row, if typed before)
+        if (Maker_Unlocked() && tMenuType > HAS_SAVED_GAME)
+            tMenuType = HAS_SAVED_GAME;   // (MYSTERY GIFT's menus have no room; it can't connect on PC anyway)
         if (sCurrItemAndOptionMenuCheck & OPTION_MENU_FLAG)   // are we returning from the options menu?
         {
             switch (tMenuType)  // if so, highlight the OPTIONS item
@@ -828,8 +884,14 @@ static void Task_MainMenuCheckSaveFile(u8 taskId)
             }
         }
         sCurrItemAndOptionMenuCheck &= ~OPTION_MENU_FLAG;  // turn off the "returning from options menu" flag
+        if (sMpBackToSlot)
+        {
+            sMpBackToSlot = FALSE;   // (Moemon Kai: on another SAVE FILE: the cursor where it was)
+            if (MpSlotsOn(tMenuType))
+                sCurrItemAndOptionMenuCheck = MpSlotItem(tMenuType);
+        }
         tCurrItem = sCurrItemAndOptionMenuCheck;
-        tItemCount = tMenuType + 2 + MpSlotsOn(tMenuType);
+        tItemCount = tMenuType + 2 + MpSlotsOn(tMenuType) + MpMakerOn(tMenuType);
         sMpSlotShown = SaveSlots_Current();
         sMpEraseStep = 0;
     }
@@ -940,6 +1002,11 @@ static void Task_DisplayMainMenu(u8 taskId)
                     MpDrawSlotItem(HAS_NO_SAVED_GAME);
                     DrawMainMenuWindowBorder(&sWindowTemplates_MainMenu[3], MAIN_MENU_BORDER_TILE);
                 }
+                if (MpMakerOn(HAS_NO_SAVED_GAME))
+                {
+                    MpDrawMakerItem(HAS_NO_SAVED_GAME);
+                    DrawMainMenuWindowBorder(&sWindowTemplates_MainMenu[MpMakerWindow(HAS_NO_SAVED_GAME)], MAIN_MENU_BORDER_TILE);
+                }
                 break;
             case HAS_SAVED_GAME:
                 FillWindowPixelBuffer(2, PIXEL_FILL(0xA));
@@ -962,6 +1029,24 @@ static void Task_DisplayMainMenu(u8 taskId)
                 {
                     MpDrawSlotItem(HAS_SAVED_GAME);
                     DrawMainMenuWindowBorder(&sWindowTemplates_MainMenu[5], MAIN_MENU_BORDER_TILE);
+                }
+                if (MpMakerOn(HAS_SAVED_GAME))
+                {
+                    MpDrawMakerItem(HAS_SAVED_GAME);
+                    DrawMainMenuWindowBorder(&sWindowTemplates_MainMenu[MpMakerWindow(HAS_SAVED_GAME)], MAIN_MENU_BORDER_TILE);
+                }
+                if (MpMenuScrolls(HAS_SAVED_GAME))
+                {
+                    // (Moemon Maker: five items, scrolled as MYSTERY EVENTS' below)
+                    tScrollArrowTaskId = AddScrollIndicatorArrowPair(&sScrollArrowsTemplate_MainMenu, &sCurrItemAndOptionMenuCheck);
+                    gTasks[tScrollArrowTaskId].func = Task_ScrollIndicatorArrowPairOnMainMenu;
+                    if (sCurrItemAndOptionMenuCheck == 4)
+                    {
+                        ChangeBgY(0, 0x2000, BG_COORD_ADD);
+                        ChangeBgY(1, 0x2000, BG_COORD_ADD);
+                        tIsScrolled = TRUE;
+                        gTasks[tScrollArrowTaskId].tArrowTaskIsScrolled = TRUE;
+                    }
                 }
                 break;
             case HAS_MYSTERY_GIFT:
@@ -1057,6 +1142,7 @@ static bool8 HandleMainMenuInput(u8 taskId)
             {
                 SaveSlots_Switch(sMpSlotShown);   // (the file in use: read again, empty, and the menu shown anew)
                 MpReloadSave();
+                sMpBackToSlot = TRUE;
                 SetMainCallback2(CB2_InitMainMenu);
                 return TRUE;
             }
@@ -1082,6 +1168,14 @@ static bool8 HandleMainMenuInput(u8 taskId)
             return FALSE;
         }
         PlaySE(SE_SELECT);
+        if (tIsScrolled)
+        {
+            // (Moemon Maker: the five-item menu scrolled back up first, so the question's window sits where it should)
+            ChangeBgY(0, 0x2000, BG_COORD_SUB);
+            ChangeBgY(1, 0x2000, BG_COORD_SUB);
+            gTasks[tScrollArrowTaskId].tArrowTaskIsScrolled = tIsScrolled = FALSE;
+            HighlightSelectedMainMenuItem(tMenuType, tCurrItem, tIsScrolled);
+        }
         sMpEraseStep = 1;
         MpShowEraseQuestion(sMpEraseAsk1);
         return FALSE;
@@ -1092,7 +1186,15 @@ static bool8 HandleMainMenuInput(u8 taskId)
         sMpSlotShown = JOY_NEW(DPAD_RIGHT) ? sMpSlotShown % SAVE_SLOT_COUNT + 1
                                            : (sMpSlotShown + SAVE_SLOT_COUNT - 2) % SAVE_SLOT_COUNT + 1;
         PlaySE(SE_SELECT);
-        MpDrawSlotItem(tMenuType);
+        // (that file read now: the menu shows it as it would after starting on it)
+        SaveSlots_Switch(sMpSlotShown);
+        MpReloadSave();
+        sMpBackToSlot = TRUE;
+        if (MpMenuScrolls(tMenuType))
+            RemoveScrollIndicatorArrowPair(tScrollArrowTaskId);
+        FreeAllWindowBuffers();
+        SetMainCallback2(CB2_InitMainMenu);
+        DestroyTask(taskId);
         return FALSE;
     }
     if (MpSlotsOn(tMenuType) && tCurrItem == MpSlotItem(tMenuType) && JOY_NEW(A_BUTTON)
@@ -1118,7 +1220,7 @@ static bool8 HandleMainMenuInput(u8 taskId)
     }
     else if ((JOY_NEW(DPAD_UP)) && tCurrItem > 0)
     {
-        if (tMenuType == HAS_MYSTERY_EVENTS && tIsScrolled == TRUE && tCurrItem == 1)
+        if (MpMenuScrolls(tMenuType) && tIsScrolled == TRUE && tCurrItem == 1)
         {
             ChangeBgY(0, 0x2000, BG_COORD_SUB);
             ChangeBgY(1, 0x2000, BG_COORD_SUB);
@@ -1130,7 +1232,7 @@ static bool8 HandleMainMenuInput(u8 taskId)
     }
     else if ((JOY_NEW(DPAD_DOWN)) && tCurrItem < tItemCount - 1)
     {
-        if (tMenuType == HAS_MYSTERY_EVENTS && tCurrItem == 3 && tIsScrolled == FALSE)
+        if (MpMenuScrolls(tMenuType) && tCurrItem == 3 && tIsScrolled == FALSE)
         {
             ChangeBgY(0, 0x2000, BG_COORD_ADD);
             ChangeBgY(1, 0x2000, BG_COORD_ADD);
@@ -1145,6 +1247,17 @@ static bool8 HandleMainMenuInput(u8 taskId)
 
 static void Task_HandleMainMenuInput(u8 taskId)
 {
+    if (Maker_TakeMenuRefresh() && sMpEraseStep == 0)
+    {
+        // Moemon Maker: "maker" typed on this menu: drawn again with its row
+        if (MpMenuScrolls(gTasks[taskId].tMenuType))
+            RemoveScrollIndicatorArrowPair(gTasks[taskId].tScrollArrowTaskId);
+        sCurrItemAndOptionMenuCheck = gTasks[taskId].tCurrItem;
+        FreeAllWindowBuffers();
+        SetMainCallback2(CB2_ReinitMainMenu);
+        DestroyTask(taskId);
+        return;
+    }
     if (HandleMainMenuInput(taskId))
         gTasks[taskId].func = Task_HighlightSelectedMainMenuItem;
 }
@@ -1156,7 +1269,7 @@ static void Task_HandleMainMenuAPressed(u8 taskId)
 
     if (!gPaletteFade.active)
     {
-        if (gTasks[taskId].tMenuType == HAS_MYSTERY_EVENTS)
+        if (MpMenuScrolls(gTasks[taskId].tMenuType))
             RemoveScrollIndicatorArrowPair(gTasks[taskId].tScrollArrowTaskId);
         ClearStdWindowAndFrame(0, TRUE);
         ClearStdWindowAndFrame(1, TRUE);
@@ -1273,6 +1386,8 @@ static void Task_HandleMainMenuAPressed(u8 taskId)
                 }
                 break;
         }
+        if (MpMakerOn(gTasks[taskId].tMenuType) && gTasks[taskId].tCurrItem == MpMakerItem(gTasks[taskId].tMenuType))
+            action = ACTION_MP_MAKER;
         ChangeBgY(0, 0, BG_COORD_SET);
         ChangeBgY(1, 0, BG_COORD_SET);
         switch (action)
@@ -1313,6 +1428,10 @@ static void Task_HandleMainMenuAPressed(u8 taskId)
                 SetMainCallback2(CB2_InitEReader);
                 DestroyTask(taskId);
                 break;
+            case ACTION_MP_MAKER:
+                Maker_Open();   // Moemon Maker: the editor's window (src/maker/maker_main.c)
+                DestroyTask(taskId);
+                break;
             case ACTION_MP_SAVE_FILE:
                 SaveSlots_Switch(sMpSlotShown);   // Moemon Kai: in place: its save read, the menu shown again on it
                 MpReloadSave();
@@ -1345,7 +1464,7 @@ static void Task_HandleMainMenuBPressed(u8 taskId)
 {
     if (!gPaletteFade.active)
     {
-        if (gTasks[taskId].tMenuType == HAS_MYSTERY_EVENTS)
+        if (MpMenuScrolls(gTasks[taskId].tMenuType))
             RemoveScrollIndicatorArrowPair(gTasks[taskId].tScrollArrowTaskId);
         sCurrItemAndOptionMenuCheck = 0;
         FreeAllWindowBuffers();
@@ -1419,28 +1538,18 @@ static void HighlightSelectedMainMenuItem(u8 menuType, u8 selectedMenuItem, s16 
                 case 1:
                     SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(1));
                     break;
-                case 2:   // Moemon Co-op: SAVE FILE
+                case 2:   // Moemon Co-op: SAVE FILE (or Moemon Maker: MOéMON MAKER without it)
                     SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(3));
+                    break;
+                case 3:   // Moemon Maker: MOéMON MAKER after SAVE FILE
+                    SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(4));
                     break;
             }
             break;
         case HAS_SAVED_GAME:
-            switch (selectedMenuItem)
-            {
-                case 0:
-                default:
-                    SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(2));
-                    break;
-                case 1:
-                    SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(3));
-                    break;
-                case 2:
-                    SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(4));
-                    break;
-                case 3:   // Moemon Co-op: SAVE FILE
-                    SetGpuReg(REG_OFFSET_WIN0V, MENU_WIN_VCOORDS(5));
-                    break;
-            }
+            // CONTINUE, NEW GAME, OPTION, then Moemon Co-op's SAVE FILE and Moemon Maker's MOéMON MAKER: windows 2-6,
+            // scrolled once the fifth is reached
+            SetGpuReg(REG_OFFSET_WIN0V, MpWinV(selectedMenuItem <= 4 ? selectedMenuItem + 2 : 2, isScrolled));
             break;
         case HAS_MYSTERY_GIFT:
             switch (selectedMenuItem)

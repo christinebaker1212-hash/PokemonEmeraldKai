@@ -297,6 +297,12 @@ static void SpriteCB_CableEndReceiving(struct Sprite *);
 static void SpriteCB_GbaScreen(struct Sprite *);
 static void TradeAnimInit_LoadGfx(void);
 static void CB2_InGameTrade(void);
+// Moemon Co-op: the in-game trade scene for a trade by mail (mp_phone_trade.c): the friend's POKéMON in gEnemyParty[0],
+// ours in the party slot gSpecialVar_0x8005 (the caller puts both there and puts things back in onEnd)
+static bool8 sMpMailTrade;
+static u8 sMpMailName[PLAYER_NAME_LENGTH + 1];
+static void (*sMpMailEnd)(void);
+static void MpMailTradeEnd(void);
 static void SetTradeSequenceBgGpuRegs(u8);
 static void LoadTradeSequenceSpriteSheetsAndPalettes(void);
 static void BufferTradeSceneStrings(void);
@@ -3350,6 +3356,15 @@ static void BufferTradeSceneStrings(void)
         GetMonData(&gPlayerParty[gSelectedTradeMonPositions[TRADE_PLAYER]], MON_DATA_NICKNAME, name);
         StringCopy_Nickname(gStringVar2, name);
     }
+    else if (sMpMailTrade)
+    {
+        // Moemon Co-op: a trade by mail: the friend's name, their POKéMON coming, ours going
+        StringCopy(gStringVar1, sMpMailName);
+        GetMonData(&gEnemyParty[0], MON_DATA_NICKNAME, name);
+        StringCopy_Nickname(gStringVar3, name);
+        GetMonData(&gPlayerParty[gSpecialVar_0x8005], MON_DATA_NICKNAME, name);
+        StringCopy_Nickname(gStringVar2, name);
+    }
     else
     {
         ingameTrade = InGameTrade(gSpecialVar_0x8004);
@@ -3801,12 +3816,12 @@ static bool8 DoTradeAnim_Cable(void)
         gSprites[sTradeAnim->bouncingPokeballSpriteId].callback = SpriteCB_BouncingPokeballArrive;
         StartSpriteAnim(&gSprites[sTradeAnim->bouncingPokeballSpriteId], 1);
         StartSpriteAffineAnim(&gSprites[sTradeAnim->bouncingPokeballSpriteId], 2);
-        BlendPalettes(1 << (16 + gSprites[sTradeAnim->bouncingPokeballSpriteId].oam.paletteNum), 16, RGB_WHITEALPHA);
+        BlendPalettes(MP_SPRITE_PAL_BIT(gSprites[sTradeAnim->bouncingPokeballSpriteId].oam.paletteNum), 16, RGB_WHITEALPHA);
         sTradeAnim->state++;
         sTradeAnim->timer = 0;
         break;
     case STATE_FADE_POKEBALL_TO_NORMAL:
-        BeginNormalPaletteFade(1 << (16 + gSprites[sTradeAnim->bouncingPokeballSpriteId].oam.paletteNum), 1, 16, 0, RGB_WHITEALPHA);
+        BeginNormalPaletteFade(MP_SPRITE_PAL_BIT(gSprites[sTradeAnim->bouncingPokeballSpriteId].oam.paletteNum), 1, 16, 0, RGB_WHITEALPHA);
         sTradeAnim->state++;
         break;
     case STATE_POKEBALL_ARRIVE_WAIT:
@@ -3904,7 +3919,10 @@ static bool8 DoTradeAnim_Cable(void)
                 FREE_AND_SET_NULL(sTradeAnim);
             }
             SetMainCallback2(CB2_ReturnToField);
-            BufferInGameTradeMonName();
+            if (sMpMailTrade)
+                MpMailTradeEnd();   // Moemon Co-op: a trade by mail (mp_phone_trade.c)
+            else
+                BufferInGameTradeMonName();
         }
         break;
     }
@@ -4298,12 +4316,12 @@ static bool8 DoTradeAnim_Wireless(void)
         gSprites[sTradeAnim->bouncingPokeballSpriteId].callback = SpriteCB_BouncingPokeballArrive;
         StartSpriteAnim(&gSprites[sTradeAnim->bouncingPokeballSpriteId], 1);
         StartSpriteAffineAnim(&gSprites[sTradeAnim->bouncingPokeballSpriteId], 2);
-        BlendPalettes(1 << (16 + gSprites[sTradeAnim->bouncingPokeballSpriteId].oam.paletteNum), 16, RGB_WHITEALPHA);
+        BlendPalettes(MP_SPRITE_PAL_BIT(gSprites[sTradeAnim->bouncingPokeballSpriteId].oam.paletteNum), 16, RGB_WHITEALPHA);
         sTradeAnim->state++;
         sTradeAnim->timer = 0;
         break;
     case STATE_FADE_POKEBALL_TO_NORMAL:
-        BeginNormalPaletteFade(1 << (16 + gSprites[sTradeAnim->bouncingPokeballSpriteId].oam.paletteNum), 1, 16, 0, RGB_WHITEALPHA);
+        BeginNormalPaletteFade(MP_SPRITE_PAL_BIT(gSprites[sTradeAnim->bouncingPokeballSpriteId].oam.paletteNum), 1, 16, 0, RGB_WHITEALPHA);
         sTradeAnim->state++;
         break;
     case STATE_POKEBALL_ARRIVE_WAIT:
@@ -4401,7 +4419,10 @@ static bool8 DoTradeAnim_Wireless(void)
                 FREE_AND_SET_NULL(sTradeAnim);
             }
             SetMainCallback2(CB2_ReturnToField);
-            BufferInGameTradeMonName();
+            if (sMpMailTrade)
+                MpMailTradeEnd();   // Moemon Co-op: a trade by mail (mp_phone_trade.c)
+            else
+                BufferInGameTradeMonName();
         }
         break;
     }
@@ -4493,7 +4514,7 @@ static void SpriteCB_BouncingPokeballDepart(struct Sprite *sprite)
         PlaySE(SE_M_MEGA_KICK);
         sprite->callback = SpriteCB_BouncingPokeballDepartEnd;
         sprite->data[0] = 0;
-        BeginNormalPaletteFade(1 << (16 + sprite->oam.paletteNum), -1, 0, 16, RGB_WHITEALPHA);
+        BeginNormalPaletteFade(MP_SPRITE_PAL_BIT(sprite->oam.paletteNum), -1, 0, 16, RGB_WHITEALPHA);
     }
 }
 
@@ -5120,4 +5141,39 @@ static void CB2_SaveAndEndWirelessTrade(void)
     AnimateSprites();
     BuildOamBuffer();
     UpdatePaletteFade();
+}
+
+// ---------------------------------------------------------------------------
+// Moemon Co-op: a trade by mail plays the game's own trade scene (mp_phone_trade.c)
+
+#include "field_screen_effect.h"
+
+static void Task_MpMailTrade(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        SetMainCallback2(CB2_InitInGameTrade);
+        gFieldCallback = FieldCB_ReturnToFieldNoScriptCheckMusic;
+        DestroyTask(taskId);
+    }
+}
+
+void MP_MailTrade_Scene(u8 partySlot, const u8 *friendName, void (*onEnd)(void))
+{
+    gSpecialVar_0x8005 = partySlot;
+    sMpMailTrade = TRUE;
+    memset(sMpMailName, EOS, sizeof(sMpMailName));
+    memcpy(sMpMailName, friendName, PLAYER_NAME_LENGTH);
+    sMpMailEnd = onEnd;
+    LockPlayerFieldControls();
+    CreateTask(Task_MpMailTrade, 10);
+    BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+}
+
+static void MpMailTradeEnd(void)
+{
+    sMpMailTrade = FALSE;
+    if (sMpMailEnd != NULL)
+        sMpMailEnd();
+    sMpMailEnd = NULL;
 }

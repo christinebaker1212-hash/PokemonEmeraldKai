@@ -231,3 +231,22 @@ void ReducePlayerPartyToSelectedMons(void)
 
     CalculatePlayerPartyCount();
 }
+
+// Moemon Kai: Crystal's BATTLETYPE_FORCESHINY (LAKE OF RAGE's RED GYARADOS): the wild POKéMON CreateScriptedWildMon
+// just made, made again shiny for the player (a personality whose halves XOR the player's Trainer ID to under 8), its
+// species, level and held item kept
+void MP_MakeScriptedWildShiny(void)
+{
+    struct Pokemon *mon = &gEnemyParty[0];
+    u16 species = GetMonData(mon, MON_DATA_SPECIES), item = GetMonData(mon, MON_DATA_HELD_ITEM);
+    u8 level = GetMonData(mon, MON_DATA_LEVEL), heldItem[2];
+    const u8 *id = gSaveBlock2Ptr->playerTrainerId;
+    u32 otId = id[0] | (id[1] << 8) | (id[2] << 16) | (id[3] << 24);
+    u16 lo = Random(), hi = lo ^ (otId >> 16) ^ (otId & 0xFFFF) ^ (Random() & 7);
+    if (species == SPECIES_NONE)
+        return;
+    CreateMon(mon, species, level, USE_RANDOM_IVS, TRUE, ((u32)hi << 16) | lo, OT_ID_PLAYER_ID, 0);
+    heldItem[0] = item;
+    heldItem[1] = item >> 8;
+    SetMonData(mon, MON_DATA_HELD_ITEM, heldItem);
+}

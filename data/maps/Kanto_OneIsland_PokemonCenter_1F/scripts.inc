@@ -615,12 +615,12 @@ Kanto_OneIsland_PokemonCenter_1F_Text_8451552::
 	.string "and gems.\p"
 	.string "We keep in touch, being fellow\n"
 	.string "maniacs.\p"
-	.string "Could you deliver this rock sample\n"
-	.string "to him?$"
+	.string "So, can I get you to deliver this\n"
+	.string "METEORITE to him?$"
 
 Kanto_OneIsland_PokemonCenter_1F_Text_8451686::
-	.string "{PLAYER} agrees to deliver\n"
-	.string "BILL’s rock sample.$"
+	.string "{PLAYER} accepted the METEORITE\n"
+	.string "from BILL.$"
 
 Kanto_OneIsland_PokemonCenter_1F_Text_84516AF::
 	.string "CELIO: {PLAYER}, if you are going\n"

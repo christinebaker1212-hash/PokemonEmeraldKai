@@ -457,7 +457,7 @@ Quetzal_Text_8360DB1::
 
 Quetzal_Text_83614F7::
 	.string "{STR_VAR_2} was transferred to\n"
-	.string "SOMEONE’S PC.\p"
+	.string "BILL’s PC.\p"
 	.string "It was placed in \n"
 	.string "BOX “{STR_VAR_1}.”$"
 
@@ -469,7 +469,7 @@ Quetzal_Text_8361537::
 
 Quetzal_Text_8361577::
 	.string "BOX “{STR_VAR_3}” on\n"
-	.string "SOMEONE’S PC was full.\p"
+	.string "BILL’s PC was full.\p"
 	.string "{STR_VAR_2} was transferred to\n"
 	.string "BOX “{STR_VAR_1}.”$"
 
@@ -560,10 +560,8 @@ Quetzal_Text_840FB09::
 
 Quetzal_Text_840FB2D::
 	.string "To visit another region, you need\n"
-	.string "an S.S. Ticket and must have won\l"
-	.string "both Leagues.\p"
-	.string "Please finish any pending events\n"
-	.string "before boarding, too.$"
+	.string "an S.S.TICKET and must have won\l"
+	.string "this region’s LEAGUE.$"
 
 Quetzal_Text_8446A8F::
 	.string "Coins: {STR_VAR_1}\n"

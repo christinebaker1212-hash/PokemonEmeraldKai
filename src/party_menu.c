@@ -2265,11 +2265,27 @@ static u8 CanMonLearnTMTutor(struct Pokemon *mon, u16 item, u8 tutor)
 
 static u16 GetTutorMove(u8 tutor)
 {
+    // Moemon Kai: Crystal's GOLDENROD tutor teaches TM moves (TUTOR_MOVE_TM_*)
+    if (tutor == TUTOR_MOVE_TM_FLAMETHROWER)
+        return MOVE_FLAMETHROWER;
+    if (tutor == TUTOR_MOVE_TM_THUNDERBOLT)
+        return MOVE_THUNDERBOLT;
+    if (tutor == TUTOR_MOVE_TM_ICE_BEAM)
+        return MOVE_ICE_BEAM;
     return gTutorMoves[tutor];
 }
 
 static bool8 CanLearnTutorMove(u16 species, u8 tutor)
 {
+    // Moemon Kai: Crystal's GOLDENROD tutor: whoever learns the TM (TM35 FLAMETHROWER, TM24 THUNDERBOLT, TM13 ICE BEAM)
+    if (tutor >= TUTOR_MOVE_TM_FLAMETHROWER)
+        return CanSpeciesLearnTMHM(species, TMHM_INDEX(tutor == TUTOR_MOVE_TM_FLAMETHROWER ? ITEM_TM35
+                                                      : tutor == TUTOR_MOVE_TM_THUNDERBOLT ? ITEM_TM24 : ITEM_TM13)) != 0;
+    // Moemon Kai: CAPE BRINK's ultimate moves, FireRed's (VENUSAUR, CHARIZARD, BLASTOISE: tutor_learnsets.h has 30 bits)
+    if (tutor >= TUTOR_MOVE_FRENZY_PLANT)
+        return (tutor == TUTOR_MOVE_FRENZY_PLANT && species == SPECIES_VENUSAUR)
+            || (tutor == TUTOR_MOVE_BLAST_BURN && species == SPECIES_CHARIZARD)
+            || (tutor == TUTOR_MOVE_HYDRO_CANNON && species == SPECIES_BLASTOISE);
     if (sTutorLearnsets[species] & (1 << tutor))
         return TRUE;
     else

@@ -1,0 +1,8 @@
+# JOHTO's phone (src/mp/mp_qzphone.c, Crystal's scripts from tools/quetzal_port/gen_phone.py): ROUTE 30's JOEY,
+# beaten, asks for the number (YES registers it), says his words on the POKéGEAR, fights his rematch once ready
+# (his first team) and then calls on his own
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=280:60"
+EXPECT_A=("qzphone: registered 15" "qzphone 15: registered 1" "qzphone call 15:" "qzphone: rematch 15 fight 0" "qzphone 15: registered 1 fights 1" "qzphone: 15 calls" "ctx 1 free 1")
+UNEXPECT_A=("[crash]" "TIMEOUT" "qzphone call 15: 0 bytes")

@@ -1,0 +1,7 @@
+# CIANWOOD's POKé SEER (docs/REGIONS_AUDIT.md 146, Crystal's): she reads the lead's meeting (qz_specials.c MP_PokeSeer:
+# where, at what level, own or traded) and gives her advice; the script ends with the field free
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("seer: slot 0 met at" "ctx 1 free 1 overworld 1 locked 0 script 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

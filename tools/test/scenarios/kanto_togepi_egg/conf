@@ -1,0 +1,6 @@
+# FIVE ISLAND's WATER LABYRINTH: FireRed's gentleman gives a TOGEPI EGG for a lead POKéMON at full friendship
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=25:30"
+EXPECT_A=("[test] flag 8565 = 1" " 175(")
+UNEXPECT_A=("[crash]")

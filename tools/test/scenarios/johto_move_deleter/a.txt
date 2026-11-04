@@ -1,0 +1,14 @@
+pressuntil A field 5000
+mp textspeed 2
+wait 30
+mp moves 0 52 98 108 172
+mp moves 0
+mp warp 34,11,2,4
+wait 150
+mp face up
+press A 2
+mash A 25 30
+wait 200
+shot done
+mp moves 0
+quit

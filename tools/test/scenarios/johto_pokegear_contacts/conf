@@ -1,0 +1,7 @@
+# JOHTO's phone book in the POKéGEAR (src/mp/mp_pokegear.c, mp_qzphone.c): JOEY's and WADE's numbers below MOM and
+# PROF. ELM; calling JOEY plays Crystal's words for him a page at a time, back to the book after the last
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=280:30"
+EXPECT_A=("qzphone 16: registered 1" "pokegear: card 2 cursor 2 phone 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

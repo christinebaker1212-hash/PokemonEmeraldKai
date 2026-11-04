@@ -45,7 +45,6 @@ Johto_BillsFamilysHouse_EventScript_83D319D::
 	goto_if_eq VAR_RESULT, 0, Johto_BillsFamilysHouse_EventScript_83D31DC
 	msgbox Johto_BillsFamilysHouse_Text_83D3251, MSGBOX_DEFAULT
 	setvar VAR_TEMP_1, SPECIES_EEVEE
-	call Quetzal_EventScript_8361A4D
 	bufferspeciesname 0, SPECIES_EEVEE
 	qz_givemon_ex SPECIES_EEVEE, 20, ITEM_NONE, 1, 2, 3
 	call Quetzal_EventScript_840181E

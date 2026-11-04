@@ -4,6 +4,7 @@
 //   (tools/quetzal_port/import.py). They are kept in "<save>.region", written with the save and only read back
 //   when it was written with this very save (like the bag's extra slots, mp_bag.c).
 #include <stdio.h>
+#include "mp_version.h"
 #include <string.h>
 #include <stdlib.h>
 #include "global.h"
@@ -16,6 +17,10 @@ const void *Sinnoh_UnownData(u32 *size);   // (the UNOWN letters seen: chunk UNO
 void Sinnoh_UnownLoad(const void *data, u32 size);
 void Sinnoh_UnownReset(void);
 const void *Sinnoh_RoamerData(u32 *size);   // (the roaming POKéMON: chunk ROAM, s3d_roamer.c)
+const void *MP_JohtoRoamer_Data(u32 *size);   // (JOHTO's beasts: chunk JRMS, mp_johto_roamer.c)
+void MP_JohtoRoamer_Load(const void *data, u32 size);
+void MP_JohtoRoamer_Reset(void);
+void MP_JohtoRoamer_CatchUp(void);
 void Sinnoh_RoamerLoad(const void *data, u32 size);
 void Sinnoh_RoamerReset(void);
 const void *MP_RegionBerryTrees_Data(u32 *size);   // (the BERRY trees past the save's 128: chunk BTRE, mp_berrytrees.c)
@@ -41,6 +46,8 @@ void Sinnoh_PlatinumStoryBegin(void);   // (src/sinnoh/s3d_scrcmd.c)
 #include "overworld.h"
 #include "constants/flags.h"
 #include "constants/qz_port.h"
+#include "coins.h"
+#include "constants/coins.h"
 #include "constants/items.h"
 #include "item.h"
 #include "constants/moves.h"
@@ -153,6 +160,41 @@ u16 MP_Region_GameCenterOtherFloor(void)
     return gSpecialVar_Result = 0;
 }
 
+// The region the player is in, by name, into STR_VAR_1 (the CARD CLUB's people: data/scripts/card_club.inc)
+void MP_Region_BufferName(void)
+{
+    static const u8 sHoenn[] = _("HOENN"), sJohto[] = _("JOHTO"), sKanto[] = _("KANTO"), sSinnoh[] = _("SINNOH");
+    static const u8 *const sNames[REGION_COUNT] = {sHoenn, sJohto, sKanto, sSinnoh};
+    u8 region = MP_Region_Current();
+    StringCopy(gStringVar1, sNames[region < REGION_COUNT ? region : REGION_HOENN]);
+}
+
+// The GAME CENTER's 3F patrons (OBJ_EVENT_GFX_VAR_0-3: data/maps/RustboroCity_GameCenter_3F): HOENN's own, or the
+// regulars of the region's GAME CORNER (GOLDENROD's / CELADON's people)
+void MP_Region_GameCenterLooks(void)
+{
+    static const u16 sLooks[REGION_COUNT][4] = {
+        [REGION_HOENN]  = {OBJ_EVENT_GFX_GAMEBOY_KID, OBJ_EVENT_GFX_NINJA_BOY, OBJ_EVENT_GFX_MAN_3, OBJ_EVENT_GFX_GIRL_3},
+        [REGION_JOHTO]  = {OBJ_EVENT_GFX_QZ_16002, OBJ_EVENT_GFX_QZ_16004, OBJ_EVENT_GFX_QZ_16003, OBJ_EVENT_GFX_QZ_47},
+        [REGION_KANTO]  = {OBJ_EVENT_GFX_QZ_16134, OBJ_EVENT_GFX_QZ_16137, OBJ_EVENT_GFX_QZ_16102, OBJ_EVENT_GFX_QZ_16173},
+        [REGION_SINNOH] = {OBJ_EVENT_GFX_GAMEBOY_KID, OBJ_EVENT_GFX_NINJA_BOY, OBJ_EVENT_GFX_MAN_3, OBJ_EVENT_GFX_GIRL_3},
+    };
+    u8 region = MP_Region_Current() < REGION_COUNT ? MP_Region_Current() : REGION_HOENN;
+    u32 i;
+    for (i = 0; i < 4; i++)
+        VarSet(VAR_OBJ_GFX_ID_0 + i, sLooks[region][i]);
+}
+
+// The region's GAME CORNER's city into STR_VAR_1 (where a COIN CASE might be found: the GAME CENTER's coin counter)
+void MP_Region_BufferGameCorner(void)
+{
+    static const u8 sHoenn[] = _("MAUVILLE CITY"), sJohto[] = _("GOLDENROD CITY"), sKanto[] = _("CELADON CITY"),
+                    sSinnoh[] = _("VEILSTONE CITY");
+    static const u8 *const sNames[REGION_COUNT] = {sHoenn, sJohto, sKanto, sSinnoh};
+    u8 region = MP_Region_Current();
+    StringCopy(gStringVar1, sNames[region < REGION_COUNT ? region : REGION_HOENN]);
+}
+
 // A warp that doesn't lead anywhere in JOHTO's / KANTO's GAME CENTER: 3F's stairs up to the ROOFTOP
 bool8 MP_Region_WarpClosed(u8 destGroup, u8 destNum)
 {
@@ -194,6 +236,7 @@ void MP_Region_NewGame(void)
 {
     memset(sFlags, 0, sizeof(sFlags));
     memset(sVars, 0, sizeof(sVars));
+    FlagSet(FLAG_KAI_GONE);   // (always: Quetzal's things taken out wear it)
     memset(&gRegionState, 0, sizeof(gRegionState));
     sAwayValid = 0;
     sGlobalValid = FALSE;
@@ -232,6 +275,27 @@ void MP_Region_GoToStartHouse(u8 region)
         VarSet(VAR_SINNOH_ARRIVAL, 1);
         Sinnoh_PlatinumStoryBegin();   // (Platinum's story begins at home in TWINLEAF, where the sailor takes them)
     }
+}
+
+// The first boat to JOHTO / KANTO comes in at the region's port like every other (OLIVINE, VERMILION): its sailor meets
+// the player off the boat and takes them to the first town, where their room is (VAR_REGION_ARRIVAL: the ports' frame
+// scripts, data/scripts/mp_region.inc EventScript_RegionArrival*). SINNOH's own sailor does the same at CANALAVE.
+void MP_Region_FirstBoatIn(u8 region)
+{
+    if (region == REGION_JOHTO)
+    {
+        SetWarpDestination(MAP_GROUP(MAP_JOHTO_OLIVINE_PORT), MAP_NUM(MAP_JOHTO_OLIVINE_PORT), WARP_ID_NONE, 8, 16);
+        SetLastHealLocationWarp(HEAL_LOCATION_JOHTO_NEW_BARK_TOWN);
+        VarSet(VAR_REGION_ARRIVAL, REGION_JOHTO);
+    }
+    else if (region == REGION_KANTO)
+    {
+        SetWarpDestination(MAP_GROUP(MAP_KANTO_VERMILION_CITY), MAP_NUM(MAP_KANTO_VERMILION_CITY), WARP_ID_NONE, 24, 32);
+        SetLastHealLocationWarp(HEAL_LOCATION_KANTO_PALLET_TOWN);
+        VarSet(VAR_REGION_ARRIVAL, REGION_KANTO);
+    }
+    else
+        MP_Region_GoToStartHouse(region);
 }
 
 // The region picked on PROF. BIRCH's question (before the new game starts)
@@ -284,6 +348,7 @@ void MP_Region_StartNewGame(void)
     Sinnoh_UndergroundReset();
     Sinnoh_UnownReset();
     Sinnoh_RoamerReset();
+    MP_JohtoRoamer_Reset();
     MP_RegionBerryTrees_Reset();
     Sinnoh_MiscReset();
     MP_Region_Arrive(sStartRegion);
@@ -292,8 +357,9 @@ void MP_Region_StartNewGame(void)
         // SINNOH: at home in TWINLEAF TOWN (no boat, no sailor), with running shoes; the first POKéMON is in PROF.
         // ROWAN's briefcase on ROUTE 201 (story_people.py: shown for a new game begun here, flag 0x3D38, until one is
         // picked, 0x3D39), the POKéDEX from him at SANDGEM's lab
+        // (in front of the TV, facing it, as Platinum's start: overworld.c CB2_NewGame; BARRY's four triggers round it)
         SetWarpDestination(MAP_GROUP(MAP_SINNOH_TWINLEAF_TOWN_PLAYER_HOUSE2F), MAP_NUM(MAP_SINNOH_TWINLEAF_TOWN_PLAYER_HOUSE2F),
-                           WARP_ID_NONE, 8, 5);
+                           WARP_ID_NONE, 4, 6);
         SetLastHealLocationWarp(HEAL_LOCATION_SINNOH_TWINLEAF_TOWN);
         VarSet(VAR_SINNOH_ARRIVAL, 2);
         FlagSet(FLAG_SINNOH_NEW_GAME);
@@ -336,7 +402,7 @@ void MP_Region_WriteSidecar(void)
     char path[600], tmp[610];
     FILE *f;
     u32 header[4];
-    if (gSaveBlock2Ptr == NULL)
+    if (gSaveBlock2Ptr == NULL || MOEMON_DEV_BUILD)   // (a dev build never writes a save or its side files)
         return;
     snprintf(path, sizeof(path), "%s.region", gPlatformSavePath);
     snprintf(tmp, sizeof(tmp), "%s.tmp", path);
@@ -480,6 +546,15 @@ void MP_Region_WriteSidecar(void)
             c[1] = size;
             fwrite(c, sizeof(c), 1, f);
             fwrite(ro, size, 1, f);
+        }
+        {
+            // JOHTO's roaming beasts (src/mp/mp_johto_roamer.c)
+            u32 size;
+            const void *jr = MP_JohtoRoamer_Data(&size);
+            c[0] = CHUNK('J', 'R', 'M', 'S');
+            c[1] = size;
+            fwrite(c, sizeof(c), 1, f);
+            fwrite(jr, size, 1, f);
         }
         {
             // the BERRY trees past the save's 128 (src/mp/mp_berrytrees.c)
@@ -639,6 +714,12 @@ static bool8 LoadFrom(const char *path)
                 if (fread(buf, c[1], 1, f) == 1)
                     MP_RegionBerryTrees_Load(buf, c[1]);
             }
+            else if (c[0] == CHUNK('J', 'R', 'M', 'S') && c[1] <= 256)
+            {
+                u8 buf[256];
+                if (fread(buf, c[1], 1, f) == 1)
+                    MP_JohtoRoamer_Load(buf, c[1]);
+            }
             else if (c[0] == CHUNK('R', 'O', 'A', 'M') && c[1] <= 512)
             {
                 u8 buf[512];
@@ -735,6 +816,18 @@ static void GiveNationalDex(void)
     }
 }
 
+// Before 1.88.0 CELIO's SAPPHIRE cleared KANTO's GAME CLEAR / CHAMPION flags (qz_specials.c
+// QzClearSeagallopRestrictions): a save whose KANTO LEAGUE is on record gets them back
+static void KantoLeagueFlags(void)
+{
+    if ((gRegionState.cleared & (1 << REGION_KANTO)) && !FlagGet(FLAG_QZ_0x2108))
+    {
+        FlagSet(FLAG_QZ_0x2108);
+        FlagSet(FLAG_QZ_0x2109);
+        MPNet_Log("region: KANTO's LEAGUE flags set again (cleared by the SAPPHIRE before 1.88.0)");
+    }
+}
+
 void MP_Region_LoadFromSave(void)
 {
     char path[600];
@@ -754,6 +847,7 @@ void MP_Region_LoadFromSave(void)
     Sinnoh_UndergroundReset();
     Sinnoh_UnownReset();
     Sinnoh_RoamerReset();
+    MP_JohtoRoamer_Reset();
     MP_RegionBerryTrees_Reset();
     Sinnoh_MiscReset();
     for (i = 0; i <= 3; i++)
@@ -776,6 +870,11 @@ void MP_Region_LoadFromSave(void)
                     FlagClear(TRAINER_FLAG(sMoved[k][0]));
                 }
             MoveQuetzalSystemFlags();
+            KantoLeagueFlags();
+            FlagSet(FLAG_KAI_GONE);
+            if (FlagGet(FLAG_QZ_0x10A2))
+                FlagSet(FLAG_JOHTO_RADIO_CARD);   // (before 1.88.0 WHITNEY's quiz stood in for the RADIO CARD's)
+            MP_JohtoRoamer_CatchUp();
             MP_SaveFix_Migrate(sSaveFormat);
             GiveNationalDex();
             SinnohStarterMenuFlag();
@@ -955,6 +1054,30 @@ void MP_Region_SetCleared(u8 region)
 {
     if (region < REGION_COUNT)
         gRegionState.cleared |= 1 << region;
+}
+
+// Moemon Maker: a story point played on a map of REGION (src/maker/maker_play.c Maker_PlayNewGame): the player there,
+// the region set up as on arriving, its first BADGES badges, and as its Champion (its LEAGUE beaten, the S.S. TICKET:
+// the boats to every region) when asked
+void MP_Region_SetUpForPlay(u8 region, u8 badges, bool8 champion)
+{
+    u8 i;
+    if (region >= REGION_COUNT)
+        return;
+    gRegionState.current = region;
+    gRegionState.started |= 1 << region;
+    MP_Region_Arrive(region);
+    for (i = 0; i < badges && i < 8; i++)
+        FlagSet(MP_Region_BadgeFlag(region, i));
+    if (champion)
+    {
+        MP_Region_SetCleared(region);
+        if (region == REGION_HOENN)
+            FlagSet(FLAG_SYS_GAME_CLEAR);
+        FlagSet(FLAG_IS_CHAMPION);
+        if (!CheckBagHasItem(ITEM_SS_TICKET, 1))
+            AddBagItem(ITEM_SS_TICKET, 1);
+    }
 }
 
 bool8 MP_Region_AnyCleared(void)
@@ -1184,6 +1307,14 @@ void MP_Region_Travel(u8 from, u8 to)
 
 // ---------------------------------------------------------------------------------------------------- specials
 // The GLOBAL PC links only in a region whose Elite Four the player has beaten
+// The MAGNET TRAIN between GOLDENROD and SAFFRON runs, both ways, once JOHTO's or KANTO's LEAGUE is beaten and the
+// S.S. TICKET is in the BAG (the user, 2026-11-03)
+u16 MP_MagnetTrainOpen(void)
+{
+    return gSpecialVar_Result = (MP_Region_Cleared(REGION_JOHTO) || MP_Region_Cleared(REGION_KANTO))
+                             && CheckBagHasItem(ITEM_SS_TICKET, 1);
+}
+
 u16 MP_GlobalPcLinked(void)
 {
     return gSpecialVar_Result = MP_Region_Cleared(MP_Region_Current());
@@ -1524,19 +1655,59 @@ u16 MP_Gen_StandInIn(u16 species, u8 region)
     return species;
 }
 
+// Fossil POKéMON (revived from their fossils) are never met wild before the region's LEAGUE is beaten (Quetzal's
+// JOHTO / KANTO tables have them in caves and seas)
+static const u16 sFossilLines[] = {
+    SPECIES_OMANYTE, SPECIES_OMASTAR, SPECIES_KABUTO, SPECIES_KABUTOPS, SPECIES_AERODACTYL, SPECIES_LILEEP,
+    SPECIES_CRADILY, SPECIES_ANORITH, SPECIES_ARMALDO, SPECIES_CRANIDOS, SPECIES_RAMPARDOS, SPECIES_SHIELDON,
+    SPECIES_BASTIODON, SPECIES_TIRTOUGA, SPECIES_CARRACOSTA, SPECIES_ARCHEN, SPECIES_ARCHEOPS, SPECIES_TYRUNT,
+    SPECIES_TYRANTRUM, SPECIES_AMAURA, SPECIES_AURORUS, SPECIES_DRACOZOLT, SPECIES_ARCTOZOLT, SPECIES_DRACOVISH,
+    SPECIES_ARCTOVISH,
+};
+
+bool8 MP_IsFossilLine(u16 species)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sFossilLines); i++)
+        if (sFossilLines[i] == species)
+            return TRUE;
+    return FALSE;
+}
+
+// A species the wild may give here and now: no starters (Kai's rule), no fossils before the region's LEAGUE
+bool8 MP_WildSpeciesOk(u16 species)
+{
+    if (MP_IsStarterLine(species))
+        return FALSE;
+    if (MP_IsFossilLine(species) && !MP_Region_Cleared(MP_Region_Current()))
+        return FALSE;
+    return TRUE;
+}
+
 u16 MP_WildSlotSpecies(const struct WildPokemonInfo *info, u8 index)
 {
     s32 i;
     u16 species = info->wildPokemon[index].species;
-    if (!MP_IsStarterLine(species) || InBattlePyramid_())
+    if (MP_WildSpeciesOk(species) || InBattlePyramid_())
         return species;
     for (i = (s32)index - 1; i >= 0; i--)
-        if (!MP_IsStarterLine(info->wildPokemon[i].species))
+        if (MP_WildSpeciesOk(info->wildPokemon[i].species))
+            return info->wildPokemon[i].species;
+    for (i = (s32)index + 1; i < 5; i++)   // (the first slot: a later one; every table has at least five)
+        if (MP_WildSpeciesOk(info->wildPokemon[i].species))
             return info->wildPokemon[i].species;
     return species;   // (a table of nothing else)
 }
 
+// Moemon Maker: the user's slot edits on top of what's chosen here (src/maker/maker_overrides.c Maker_WildInfo)
+static const struct WildPokemonInfo *RegionWildInfo(const struct WildPokemonInfo *info);
 const struct WildPokemonInfo *MP_Region_WildInfo(const struct WildPokemonInfo *info)
+{
+    const struct WildPokemonInfo *Maker_WildInfo(const struct WildPokemonInfo *base, const struct WildPokemonInfo *now);
+    return Maker_WildInfo(info, RegionWildInfo(info));
+}
+
+static const struct WildPokemonInfo *RegionWildInfo(const struct WildPokemonInfo *info)
 {
     u32 i;
     if (info != NULL && MP_Region_Current() == REGION_HOENN && MP_Gen_Cap(REGION_HOENN) >= 4)
@@ -1819,6 +1990,13 @@ const struct Trainer *MP_Region_TrainerData(u16 trainerNum)
     } sParty;
     const struct Trainer *t = TrainerDataFor(trainerNum);
     u32 i, n;
+    {
+        // JOHTO's phone: a contact's rematch fights Crystal's team for it (mp_qzphone.c)
+        const struct Trainer *MP_QzPhone_RematchTrainer(u16 trainerNum, const struct Trainer *base);
+        const struct Trainer *r = MP_QzPhone_RematchTrainer(trainerNum, t);
+        if (r != t)
+            return r;
+    }
     if (trainerNum < FIRST_QZ_TRAINER || trainerNum >= FIRST_QZ_TRAINER + QZ_TRAINERS_COUNT || VarGet(VAR_JOHTO_STARTER) == 0
      || StringCompare(gTrainers[trainerNum].trainerName, sSilver) != 0)
         return t;
@@ -1931,4 +2109,91 @@ void MP_Region_OnMapLoaded(void)
     }
     if (cur != gRegionState.current && gRegionState.current < REGION_COUNT)
         MP_Region_Travel(gRegionState.current, cur);
+}
+
+// FireRed's hidden COINS (CELADON's GAME CORNER, CeladonCity_GameCorner/map.json's quantities), by the spot's hidden
+// flag in VAR_0x8004 (data/scripts/obtain_item.inc EventScript_MpHiddenCoins); 0: not a COINS spot
+u16 MP_HiddenCoinsAmount(void)
+{
+    static const u8 sCoins[12] = {10, 10, 20, 10, 10, 20, 10, 10, 10, 40, 100, 10};
+    if (gSpecialVar_0x8004 >= FLAG_QZ_KANTO_HIDDEN_ITEM_51 && gSpecialVar_0x8004 <= FLAG_QZ_KANTO_HIDDEN_ITEM_62)
+        return sCoins[gSpecialVar_0x8004 - FLAG_QZ_KANTO_HIDDEN_ITEM_51];
+    return 0;
+}
+
+u16 MP_HiddenCoinsFit(void)
+{
+    return GetCoins() + gSpecialVar_0x8006 <= MAX_COINS;
+}
+
+// Crystal's GS BALL: GOLDENROD's POKéMON CENTER brings it once JOHTO's LEAGUE is beaten (GoldenrodPokecenter1F.asm)
+u16 MP_JohtoGsBallReady(void)
+{
+    return gSpecialVar_Result = MP_Region_Cleared(REGION_JOHTO) && !FlagGet(FLAG_JOHTO_GOT_GS_BALL);
+}
+
+// Crystal's VAR_WEEKDAY (SUNDAY 0 .. SATURDAY 6) on the game clock, as JOHTO's phone reads it (mp_qzphone.c)
+u16 MP_JohtoWeekday(void)
+{
+    RtcCalcLocalTime();
+    return gSpecialVar_Result = gLocalTime.days % 7;
+}
+
+// Crystal's people who come out on one weekday (their maps' MAPCALLBACK_OBJECTS): after a JOHTO map's transition
+// scripts (overworld.c), each one's hide flag is set but on their day. The WEEKDAY siblings (docs/REGIONS_AUDIT.md
+// case 63, tools/quetzal_port/fix_siblings.py) and UNION CAVE's Friday LAPRAS (case 136)
+void MP_JohtoWeekdayPeople(void)
+{
+    static const u16 sHide[7] = {   // SUNDAY .. SATURDAY
+        FLAG_JOHTO_HIDE_SUNNY, FLAG_JOHTO_HIDE_MONICA, FLAG_JOHTO_HIDE_TUSCANY, FLAG_JOHTO_HIDE_WESLEY,
+        FLAG_JOHTO_HIDE_ARTHUR, FLAG_JOHTO_HIDE_FRIEDA, FLAG_JOHTO_HIDE_SANTOS,
+    };
+    u16 today, i;
+    if (MP_Region_Current() != REGION_JOHTO)
+        return;
+    today = MP_JohtoWeekday();
+    for (i = 0; i < 7; i++)
+    {
+        if (i == today)
+            FlagClear(sHide[i]);
+        else
+            FlagSet(sHide[i]);
+    }
+    // UNION CAVE B2F's LAPRAS: Fridays, until fought that day (Crystal's UnionCaveB2FLaprasCallback)
+    if (today == 5 && !FlagGet(FLAG_DAILY_JOHTO_LAPRAS))
+        FlagClear(FLAG_JOHTO_HIDE_LAPRAS);
+    else
+        FlagSet(FLAG_JOHTO_HIDE_LAPRAS);
+    // GOLDENROD DEPT. STORE 5F's receptionist: Sundays (Crystal's GoldenrodDeptStore5FCheckIfSundayCallback)
+    if (today == 0)
+        FlagClear(FLAG_JOHTO_HIDE_DEPT_LADY);
+    else
+        FlagSet(FLAG_JOHTO_HIDE_DEPT_LADY);
+    // GOLDENROD's move tutor (Crystal's GoldenrodCityMoveTutorCallback): the LEAGUE beaten, a COIN CASE, Wednesdays
+    // and Saturdays, until he has taught that day
+    if (MP_Region_Cleared(REGION_JOHTO) && CheckBagHasItem(ITEM_COIN_CASE, 1) && (today == 3 || today == 6)
+     && !FlagGet(FLAG_DAILY_JOHTO_TUTOR))
+        FlagClear(FLAG_JOHTO_HIDE_GOLDENROD_TUTOR);
+    else
+        FlagSet(FLAG_JOHTO_HIDE_GOLDENROD_TUTOR);
+    // GOLDENROD UNDERGROUND (Crystal's GoldenrodUndergroundCheckDayOfWeekCallback): the bargain merchant on Monday
+    // mornings, the older HAIRCUT BROTHER on Tuesdays / Thursdays / Saturdays, the younger on Sundays / Wednesdays /
+    // Fridays, the herb lady at weekends
+    {
+        bool8 show[4];
+        u8 i;
+        static const u16 sFlags[4] = {FLAG_JOHTO_HIDE_BARGAIN, FLAG_JOHTO_HIDE_OLDER_CUT, FLAG_JOHTO_HIDE_YOUNGER_CUT,
+                                      FLAG_JOHTO_HIDE_HERB_LADY};
+        show[0] = today == 1 && gLocalTime.hours >= 4 && gLocalTime.hours < 10;   // (Crystal's MORN)
+        show[1] = today == 2 || today == 4 || today == 6;
+        show[2] = today == 0 || today == 3 || today == 5;
+        show[3] = today == 0 || today == 6;
+        for (i = 0; i < 4; i++)
+        {
+            if (show[i])
+                FlagClear(sFlags[i]);
+            else
+                FlagSet(sFlags[i]);
+        }
+    }
 }

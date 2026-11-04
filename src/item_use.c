@@ -650,6 +650,38 @@ static void Task_StandingOnHiddenItem(u8 taskId)
 #undef tItemfinderBeeps
 #undef tFacingDir
 
+// Moemon Kai: FireRed's TOWN MAP (DAISY's gift in KANTO): the region map of the region the player is in, from the BAG
+// or as a registered item (region_map.c shows KANTO / JOHTO / HOENN by MP_Region_Current)
+static void CB2_OpenTownMapFromBag(void)
+{
+    FieldInitRegionMap(CB2_ReturnToBagMenuPocket);
+}
+
+static void Task_OpenRegisteredTownMap(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        CleanupOverworldWindowsAndTilemaps();
+        FieldInitRegionMap(CB2_ReturnToField);
+        DestroyTask(taskId);
+    }
+}
+
+void ItemUseOutOfBattle_TownMap(u8 taskId)
+{
+    if (gTasks[taskId].tUsingRegisteredKeyItem != TRUE)
+    {
+        gBagMenu->newScreenCallback = CB2_OpenTownMapFromBag;
+        Task_FadeAndCloseBagMenu(taskId);
+    }
+    else
+    {
+        gFieldCallback = FieldCB_ReturnToFieldNoScript;
+        FadeScreen(FADE_TO_BLACK, 0);
+        gTasks[taskId].func = Task_OpenRegisteredTownMap;
+    }
+}
+
 void ItemUseOutOfBattle_PokeblockCase(u8 taskId)
 {
     if (MenuHelpers_IsLinkActive() == TRUE)

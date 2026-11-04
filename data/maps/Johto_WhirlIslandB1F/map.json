@@ -773,5 +773,30 @@
       "script": "Johto_WhirlIslandB1F_EventScript_8400E32"
     }
   ],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 75,
+      "y": 8,
+      "elevation": 0,
+      "item": "ITEM_RARE_CANDY",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_55"
+    },
+    {
+      "type": "hidden_item",
+      "x": 78,
+      "y": 36,
+      "elevation": 0,
+      "item": "ITEM_ULTRA_BALL",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_56"
+    },
+    {
+      "type": "hidden_item",
+      "x": 12,
+      "y": 52,
+      "elevation": 0,
+      "item": "ITEM_FULL_RESTORE",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_57"
+    }
+  ]
 }

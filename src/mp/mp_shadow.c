@@ -18,6 +18,7 @@
 #include "mp_pmd.h"
 #include "field_effect_helpers.h"
 #include "constants/event_objects.h"
+#include "s3d.h"
 
 #define TAG_SHADOW 0x5AD0
 #define SHADOW_MAGIC 0x5AD0
@@ -319,6 +320,74 @@ static void Cast(u8 owner, bool8 person)
 void MP_Shadow_Reset(void);
 bool8 MP_IsReflectionSprite(struct Sprite *sprite);   // field_effect_helpers.c
 
+static bool8 InGrass(s16 x, s16 y)
+{
+    u32 b = MapGridGetMetatileBehaviorAt(x, y);
+    return MetatileBehavior_IsTallGrass(b) || MetatileBehavior_IsLongGrass(b);
+}
+
+// The tile's top layer over the feet (a potted plant, a tree top, a roof: NORMAL / SPLIT metatiles draw it on BG1,
+// over sprites at priority 2): the owner is hidden there, and its oval, a few pixels lower, peeked out under the tile
+// (the user's picture: a line under the second plant's pot). True when the top layer's bottom two pixel rows are
+// mostly drawn
+static bool8 FeetCovered(s16 x, s16 y, const struct Sprite *o)
+{
+    const struct MapLayout *layout = gMapHeader.mapLayout;
+    const u16 *tiles;
+    u32 id, k, row, opaque = 0;
+    if (o->oam.priority <= 1 || layout == NULL || S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))
+        return FALSE;
+    if (MP_MapPic_CoversFeet(x, y))   // (the GAME CENTER's counters: its pictures' over layer, not tiles)
+        return TRUE;
+    if (MapGridGetMetatileLayerTypeAt(x, y) == METATILE_LAYER_TYPE_COVERED)
+        return FALSE;
+    id = MapGridGetMetatileIdAt(x, y);
+    if (id >= NUM_METATILES_TOTAL)
+        return FALSE;
+    if (id < Fieldmap_PrimaryMetatiles(layout))
+    {
+        if (layout->primaryTileset == NULL)
+            return FALSE;
+        tiles = layout->primaryTileset->metatiles;
+    }
+    else
+    {
+        if (layout->secondaryTileset == NULL)
+            return FALSE;
+        tiles = layout->secondaryTileset->metatiles;
+        id -= Fieldmap_PrimaryMetatiles(layout);
+    }
+    tiles += id * NUM_TILES_PER_METATILE;
+    for (k = 6; k < 8; k++)   // (the top layer's bottom row: entries 6 and 7)
+    {
+        u16 e = tiles[k];
+        const u8 *px = (const u8 *)(BG_VRAM + TILE_OFFSET_4BPP(e & 0x3FF));
+        for (row = 6; row < 8; row++)
+        {
+            u32 r = (e & 0x800) ? 7 - row : row, b;
+            for (b = 0; b < 4; b++)
+                opaque += ((px[r * 4 + b] & 0xF) != 0) + ((px[r * 4 + b] >> 4) != 0);
+        }
+    }
+    return opaque >= 8;   // (of the 32 pixels under the feet: leaves have gaps)
+}
+
+// A follower or Garden POKeMON has no object event: its tile from where its feet stand against the player's (both
+// sprites in the same screen space; a tile is 16 pixels)
+static bool8 SpriteFeetCovered(const struct Sprite *o)
+{
+    struct ObjectEvent *pe = &gObjectEvents[gPlayerAvatar.objectEventId];
+    const struct Sprite *p;
+    s32 fx, fy, px, py, w;
+    if (pe->spriteId >= MAX_SPRITES || o->coordOffsetEnabled != gSprites[pe->spriteId].coordOffsetEnabled)
+        return FALSE;
+    p = &gSprites[pe->spriteId];
+    Feet(o, &fx, &fy, &w);
+    Feet(p, &px, &py, &w);
+    return FeetCovered(pe->currentCoords.x + (fx - px + 8 + 1600) / 16 - 100,
+                       pe->currentCoords.y + (fy - py + 8 + 1600) / 16 - 100, o);
+}
+
 static bool8 InWater(s16 x, s16 y)
 {
     u8 b = MapGridGetMetatileBehaviorAt(x, y);
@@ -415,12 +484,17 @@ void MP_Shadow_Update(void)
                 continue;
             if (InWater(e->currentCoords.x, e->currentCoords.y))
                 continue;
+            if (InGrass(e->currentCoords.x, e->currentCoords.y))
+                continue;   // (the grass covers the feet: the oval showed a pixel below its tile)
+            if (FeetCovered(e->currentCoords.x, e->currentCoords.y, o))
+                continue;   // (a top layer over the feet: the oval showed under the tile)
             Cast(e->spriteId, TRUE);
         }
         for (i = 0; i < MAX_SPRITES; i++)   // followers and Garden POKeMON (mp_follower.c marks them)
         {
             struct Sprite *o = &gSprites[i];
-            if (o->inUse && o->mpCastShadow && !o->invisible && !o->mpClipOn && !sSeen[i] && !MP_IsReflectionSprite(o))
+            if (o->inUse && o->mpCastShadow && !o->invisible && !o->mpClipOn && !sSeen[i] && !MP_IsReflectionSprite(o)
+             && !SpriteFeetCovered(o))
                 Cast(i, FALSE);
         }
     }

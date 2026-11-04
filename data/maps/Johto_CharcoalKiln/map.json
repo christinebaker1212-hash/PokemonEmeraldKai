@@ -39,6 +39,19 @@
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_CharcoalKiln_EventScript_83C571E",
       "flag": "FLAG_QZ_0x1087"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_339",
+      "x": 5,
+      "y": 6,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
+      "movement_range_x": 2,
+      "movement_range_y": 2,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_CharcoalKiln_EventScript_Farfetchd",
+      "flag": "FLAG_JOHTO_HIDE_KILN_FARFETCHD"
     }
   ],
   "warp_events": [

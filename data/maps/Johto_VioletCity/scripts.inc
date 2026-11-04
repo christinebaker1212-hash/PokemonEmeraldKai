@@ -119,6 +119,11 @@ Johto_VioletCity_EventScript_83FE9E3::
 @ Johto_VioletCity trigger at 24,37 (VAR_QZ_0x5008 == 3)
 Johto_VioletCity_EventScript_83FE9F0::
 	lock
+	@ Moemon Kai: ELM rings the POKéGEAR, in Crystal's words (docs/REGIONS_AUDIT.md 94 / 148)
+	playse SE_POKENAV_CALL
+	waitse
+	playse SE_POKENAV_CALL
+	waitse
 	msgbox Johto_VioletCity_Text_83FEEFF, MSGBOX_DEFAULT
 	clearflag FLAG_QZ_0x1081
 	setflag FLAG_QZ_0x106A
@@ -160,14 +165,14 @@ Johto_VioletCity_EventScript_83FEA06::
 
 @ Johto_VioletCity object 10 (local id 10, gfx 0x3A9E) at 46,33
 Johto_VioletCity_EventScript_83FEA7F::
-	setorcopyvar VAR_0x8000, ITEM_RARE_CANDY
+	setorcopyvar VAR_0x8000, ITEM_PP_UP   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
 
 @ Johto_VioletCity object 6 (local id 6, gfx 0x3A9E) at 34,12
 Johto_VioletCity_EventScript_83FEA8C::
-	setorcopyvar VAR_0x8000, ITEM_PECHA_BERRY
+	setorcopyvar VAR_0x8000, ITEM_RARE_CANDY   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
@@ -329,29 +334,26 @@ Johto_VioletCity_Text_83FEC2E::
 	.string "Good it is you study here!$"
 
 Johto_VioletCity_Text_83FEC5D::
-	.string "Ghosts are rumored to appear\n"
-	.string "in SPROUT TOWER.\p"
-	.string "They say that GHOST-type\n"
-	.string "moves can bypass the defenses\p"
-	.string "of tough MOéMON like ONIX\n"
-	.string "and GEODUDE.$"
+	.string "Ghosts are rumored to appear in\n"
+	.string "SPROUT TOWER.\p"
+	.string "They said normal-type MOéMON moves\n"
+	.string "had no effect on ghosts.$"
 
 Johto_VioletCity_Text_83FECEA::
 	.string "Hey, you’re a MOéMON trainer?\p"
-	.string "If you head to the ACADEMY,\n"
-	.string "you might learn something new!$"
+	.string "If you beat the GYM LEADER here,\n"
+	.string "you’ll be ready for prime time!$"
 
 Johto_VioletCity_Text_83FED44::
-	.string "FALKNER, from the VIOLET\n"
-	.string "MOéMON GYM, is a fine trainer!\p"
-	.string "He inherited his father’s gym\n"
-	.string "and has done a great job with\l"
-	.string "it.$"
+	.string "FALKNER, from the VIOLET MOéMON\n"
+	.string "GYM, is a fine trainer!\p"
+	.string "He inherited his father’s gym and\n"
+	.string "has done a great job with it.$"
 
 Johto_VioletCity_Text_83FEDBD::
 	.string "I saw a wiggly tree up ahead!\p"
-	.string "If you touch it, it squirms\n"
-	.string "and dances! Cool!$"
+	.string "If you touch it, it squirms and\n"
+	.string "dances! Cool!$"
 
 Johto_VioletCity_Text_83FEE32::
 	.string "VIOLET CITY MOéMON GYM\p"
@@ -359,12 +361,11 @@ Johto_VioletCity_Text_83FEE32::
 	.string "Master of Flying MOéMON$"
 
 Johto_VioletCity_Text_83FEEFF::
-	.string "A message from PROF. ELM arrived:\p"
-	.string "We discovered something about\n"
-	.string "the EGG!\p"
+	.string "Hello, {PLAYER}? We discovered\n"
+	.string "something about the EGG!\p"
 	.string "My assistant is at the MOéMON\n"
-	.string "CENTER in VIOLET CITY.\p"
-	.string "Please talk to him.$"
+	.string "CENTER in VIOLET CITY. Could you\l"
+	.string "talk to him?$"
 
 Johto_VioletCity_Text_83FEF92::
 	.string "Me oh my...\n"

@@ -257,7 +257,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_RuinsOfAlphOutside_EventScript_840EB76",
-      "flag": "FLAG_QZ_0x1313"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_1284",
@@ -355,13 +355,6 @@
       "y": 11,
       "elevation": 0,
       "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_CHAMBERS",
-      "dest_warp_id": "0"
-    },
-    {
-      "x": 34,
-      "y": 10,
-      "elevation": 0,
-      "dest_map": "MAP_JOHTO_RUINS_OF_ALPH_ARCEUS_CHAMBER",
       "dest_warp_id": "0"
     }
   ],

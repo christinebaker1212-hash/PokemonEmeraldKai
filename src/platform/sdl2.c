@@ -125,6 +125,8 @@ void MP_FrameEnd(void);
 
 void Platform_InstallCrashLog(void);
 
+#include "maker_api.h"   // Moemon Maker
+
 int main(int argc, char **argv)
 {
     Platform_InstallCrashLog();   // Moemon Co-op: crash_log.txt (crash_log.c)
@@ -242,6 +244,7 @@ int main(int argc, char **argv)
         bool lockstep = false;
 
         ProcessEvents();
+        MakerUi_Frame();   // Moemon Maker: the editor's window, while it's open (maker/maker_ui.cpp)
 
         curGameTime = SDL_GetPerformanceCounter();
         deltaTime = (double)((curGameTime - lastGameTime) / (double)SDL_GetPerformanceFrequency());
@@ -536,6 +539,10 @@ static void StoreSaveFile()
     MP_Life_WriteSidecar();  // Moemon Co-op: MOéMON GARDEN, the A-Life (mp_life.c)
     Tcg_WriteSidecar();      // Moemon Kai: the card game's collection (src/tcg/tcg_integration.c)
     MP_Region_WriteSidecar();   // Moemon Kai: Johto / Kanto progress (src/mp/mp_region.c)
+    {
+        void Maker_Flags_WriteSidecar(void);
+        Maker_Flags_WriteSidecar();   // Moemon Maker: flags of what the edits add (src/maker/maker_flags.c)
+    }
     MP_Boxes_WriteSidecar();    // Moemon Kai: PC boxes 15-40 (src/mp/mp_boxes.c)
     {
         void MP_Phone_WriteSidecar(void);
@@ -601,6 +608,15 @@ void Platform_QueueAudio(float *audioBuffer, s32 samplesPerFrame)
     Fight_MixAudio(audioBuffer, samplesPerFrame / (int)(2 * sizeof(float)), 42048);
     // Moemon Rhythm: the DANCE machine's songs and voices instead of the game's sound
     Rhythm_MixAudio(audioBuffer, samplesPerFrame / (int)(2 * sizeof(float)));
+    {
+        // Moemon Co-op: the phone app's sounds, recorded by the game itself (mp_export_sound.c), never sent to the device
+        extern void (*gMpAudioCapture)(const float *buffer, s32 bytes);
+        if (gMpAudioCapture != NULL)
+        {
+            gMpAudioCapture(audioBuffer, samplesPerFrame);
+            return;
+        }
+    }
     SDL_QueueAudio(1, audioBuffer, samplesPerFrame);
     {
         // Tests (MOEMON_AUDIO_DUMP=file): everything sent to the sound device, raw stereo float32 at 42048 Hz
@@ -671,6 +687,8 @@ void ProcessEvents(void)
 
     while (SDL_PollEvent(&event))
     {
+        if (MakerUi_HandleEvent(&event))   // Moemon Maker: the editor's window's events are the editor's
+            continue;
         Rhythm_OnEvent(&event);   // Moemon Rhythm: steps timed by when they happened
         if (Display_HandleEvent(&event)) // F11 / Alt+Enter fullscreen, resizes
             continue;
@@ -891,6 +909,7 @@ void VDraw(void)
     DrawFrame(image);
     MP_Candy_Composite(image);      // Moemon Co-op: the CANDY JAR's picture under everything drawn
     MP_BagUI_Composite(image);      // ... and the BAG's
+    MP_AstralFx_Prism(image);       // ... the ASTRAL BALL's prismatic sheen (its own pixels, before any tint)
     {
         void MP_StarterTable_Composite(u16 *frame);
         MP_StarterTable_Composite(image);   // ... and the KANTO / JOHTO starter table's (starter_choose.c)
@@ -904,6 +923,7 @@ void VDraw(void)
     MP_TriCards_Composite(image);   // Moemon Co-op: Triple Battle cards over the frame
     MP_TypeIcons_Composite(image);  // ... type icons by the healthboxes (OPTIONS > TYPE ICONS)
     MP_LegacyAnim_Composite(image); // ... GENESIS / EPOCH BALL throws (Red's / Crystal's own)
+    MP_AstralFx_Composite(image);   // ... the ASTRAL BALL's silver sparkles
     MP_Compass_Composite(image);    // ... arrows toward friends off screen
     MP_BallFx_Composite(image);          // ... ball effects (not bound by the GBA's sprites or palettes)
     {
@@ -911,6 +931,10 @@ void VDraw(void)
         MP_Poketch_Composite(image);     // Moemon Kai: the POKéTCH while it's open (src/sinnoh/poketch.c)
     }
     MP_BattleOverlay_Composite(image);   // ... and the battle emotes over everything
+    {
+        void MP_FxClip_Frame(const u16 *frame);
+        MP_FxClip_Frame(image);          // ... (MOEMON_EXPORT_FXCLIPS: the ball effects recorded for the phone app)
+    }
     MP_Spectate_PanelSync();             // ... friends' screens in the panel under ours (CO-OP > SPECTATE)
     if (!sTestMode)
         Display_UploadFrame(image);
@@ -1426,6 +1450,20 @@ static void TestHarnessStep(void)
             char a2[1100] = "";
             sscanf(line, "%*s %*s %1099[^\n]", a2);   // the rest of the line
             MP_TestCommand(arg, a2);
+        }
+        else if (strcmp(cmd, "maker") == 0)
+        {
+            // maker WORDS: Moemon Maker's editor (maker/maker_ui.cpp MakerUi_TestCommand: open MAP_X, theme dark...)
+            char words[256] = "";
+            sscanf(line, "%*s %255[^\n]", words);
+            MakerUi_TestCommand(words);
+        }
+        else if (strcmp(cmd, "makershot") == 0)
+        {
+            // makershot NAME: the editor's window, drawn on its next frame, as NAME.bmp
+            char path[1024];
+            snprintf(path, sizeof(path), "%s/%s.bmp", sShotDir, arg);
+            MakerUi_SaveShot(path);
         }
         else if (strcmp(cmd, "typetext") == 0)
         {

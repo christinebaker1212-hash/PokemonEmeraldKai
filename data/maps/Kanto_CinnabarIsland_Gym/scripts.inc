@@ -766,10 +766,9 @@ Kanto_CinnabarIsland_Gym_Text_8449542::
 	.string "You have earned the VOLCANOBADGE.$"
 
 Kanto_CinnabarIsland_Gym_Text_844959A::
-	.string "TM38 contains FIRE BLAST.\n"
-	.string "Teach it to FIRE-type MOéMON.\p"
-	.string "VULPIX or CHARMELEON would be\n"
-	.string "ideal for that move.$"
+	.string "FIRE BLAST is the ultimate fire\n"
+	.string "technique.\p"
+	.string "Don’t waste it on WATER MOéMON.$"
 
 Kanto_CinnabarIsland_Gym_Text_84495E9::
 	.string "Hah!\p"
@@ -782,10 +781,10 @@ Kanto_CinnabarIsland_Gym_Text_844964A::
 	.string "{STR_VAR_1}!$"
 
 Kanto_CinnabarIsland_Gym_Text_844965A::
-	.string "That item will make your attacks\n"
-	.string "even more powerful!\p"
-	.string "But watch your MOéMON’s HP.\n"
-	.string "All that power comes at a price!$"
+	.string "TM38 contains FIRE BLAST.\n"
+	.string "Teach it to FIRE-type MOéMON.\p"
+	.string "VULPIX or CHARMELEON would be\n"
+	.string "ideal for that move.$"
 
 Kanto_CinnabarIsland_Gym_Text_84496CD::
 	.string "Make space for this, child!$"
@@ -894,13 +893,13 @@ Kanto_CinnabarIsland_Gym_Text_8449B6D::
 	.string "CINNABAR MOéMON GYM\n"
 	.string "LEADER: BLAINE\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE$"
+	.string "{RIVAL}$"
 
 Kanto_CinnabarIsland_Gym_Text_8449BA8::
 	.string "CINNABAR MOéMON GYM\n"
 	.string "LEADER: BLAINE\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE, {PLAYER}$"
+	.string "{RIVAL}, {PLAYER}$"
 
 Kanto_CinnabarIsland_Gym_Text_8449BE7::
 	.string "MOéMON Quiz!\p"
@@ -931,7 +930,7 @@ Kanto_CinnabarIsland_Gym_Text_8449D48::
 	.string "are not identical?$"
 
 Kanto_CinnabarIsland_Gym_Text_8449D7E::
-	.string "The move TOMBSTONY exists?$"
+	.string "TM28 contains TOMBSTONY?$"
 
 Kanto_CinnabarIsland_Gym_Text_8449D99::
 	.string "You’re absolutely correct!\p"

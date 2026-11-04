@@ -35,6 +35,7 @@ bool8 FieldEffect_IsReflectionSprite(const struct Sprite *sprite);   // (field_e
 #include "rtc.h"
 #include "s3d.h"
 #include "sprite.h"
+#include "task.h"
 #include "constants/maps.h"
 #include "constants/songs.h"
 #include "../data/sinnoh_night_songs.h"
@@ -97,6 +98,11 @@ static struct
     u32 nmoving;
     struct { u16 mesh, nframes, step; u16 *frames; } *moving;
     u16 *meshShown;
+    // (version 7) Platinum's door props: each one's animations (open, close; four: walking in, then walking out), a
+    // mesh per frame; doorOf[m]: the door of prop mesh m + 1 (0: not a door)
+    u32 ndoor;
+    struct { u16 mesh; u8 sound, nanim; struct { u16 nframes, step; u16 *frames; } a[4]; } *door;
+    u16 *doorOf;
 } sPack;
 
 // Props this game places at run time (SINNOH's gyms that move: src/sinnoh/s3d_gyms.c), in the current map's world
@@ -177,7 +183,7 @@ static void LoadPack(void)
     }
     r.p += 4;
     version = TakeU32(&r);
-    if (version < 3 || version > 6)
+    if (version < 3 || version > 7)
     {
         printf("[s3d] %s: another pack version\n", path);
         free(data);
@@ -322,6 +328,41 @@ static void LoadPack(void)
             }
             if (sPack.moving[i].mesh >= sPack.nmesh || sPack.moving[i].step == 0)
                 sPack.moving[i].nframes = 0;
+        }
+    }
+    sPack.doorOf = calloc(sPack.nmesh ? sPack.nmesh : 1, sizeof(u16));
+    if (version >= 7)
+    {
+        sPack.ndoor = TakeU32(&r);
+        sPack.door = calloc(sPack.ndoor ? sPack.ndoor : 1, sizeof(*sPack.door));
+        for (i = 0; i < sPack.ndoor && !r.bad; i++)
+        {
+            sPack.door[i].mesh = TakeU16(&r);
+            Take(&r, &sPack.door[i].sound, 1);
+            Take(&r, &sPack.door[i].nanim, 1);
+            for (k = 0; k < sPack.door[i].nanim && !r.bad; k++)
+            {
+                u16 n = TakeU16(&r), step = TakeU16(&r);
+                u16 *frames = malloc(2 * (n ? n : 1));
+                for (j = 0; j < n && !r.bad; j++)
+                {
+                    frames[j] = TakeU16(&r);
+                    if (frames[j] >= sPack.nmesh)
+                        frames[j] = sPack.door[i].mesh;
+                }
+                if (k < 4)
+                {
+                    sPack.door[i].a[k].nframes = step ? n : 0;
+                    sPack.door[i].a[k].step = step;
+                    sPack.door[i].a[k].frames = frames;
+                }
+                else
+                    free(frames);
+            }
+            if (sPack.door[i].nanim > 4)
+                sPack.door[i].nanim = 4;
+            if (sPack.door[i].mesh < sPack.nmesh && (sPack.door[i].nanim == 2 || sPack.door[i].nanim == 4))
+                sPack.doorOf[sPack.door[i].mesh] = i + 1;
         }
     }
     free(data);
@@ -932,6 +973,121 @@ void S3D_SetLift(bool8 on, float x0, float z0, float x1, float z1, float y)
     sLift.on = on, sLift.x0 = x0, sLift.z0 = z0, sLift.x1 = x1, sLift.z1 = z1, sLift.y = y;
 }
 
+// ------------------------------------------------------------------------------------------------ Platinum's doors
+// A door prop's animation as the player walks through (ov5_021D431C.c): the field's door calls (field_door.c, as
+// HOENN's door tiles) find the door prop on or beside the warp tile and play one of its animations; the last frame
+// stays (the door left open) until the next one, and a closing one ends with the door as it stands
+static struct { const S3dProp *prop; u16 door; u8 anim; bool8 hold; u16 t; s32 map; } sDoorAnim;
+
+static u16 DoorAnimLength(u16 door, u8 anim)
+{
+    return sPack.door[door].a[anim].nframes * sPack.door[door].a[anim].step * 2;   // (Platinum's 30 a second)
+}
+
+static u16 DoorMesh(const S3dProp *pr)
+{
+    u16 n, i;
+    if (sDoorAnim.prop != pr || sDoorAnim.map != sCurMap)
+        return pr->mesh;
+    n = sPack.door[sDoorAnim.door].a[sDoorAnim.anim].nframes;
+    if (n == 0)
+        return pr->mesh;
+    i = sDoorAnim.t / (sPack.door[sDoorAnim.door].a[sDoorAnim.anim].step * 2);
+    return sPack.door[sDoorAnim.door].a[sDoorAnim.anim].frames[i < n ? i : n - 1];
+}
+
+static void Task_S3dDoor(u8 taskId)
+{
+    if (sDoorAnim.prop == NULL)
+    {
+        DestroyTask(taskId);
+        return;
+    }
+    if (++sDoorAnim.t >= DoorAnimLength(sDoorAnim.door, sDoorAnim.anim))
+    {
+        sDoorAnim.t = DoorAnimLength(sDoorAnim.door, sDoorAnim.anim);
+        if (!sDoorAnim.hold)
+            sDoorAnim.prop = NULL;   // (closed: the prop as it stands)
+        DestroyTask(taskId);
+    }
+}
+
+// The door prop on map tile (X, Y) of the current SINNOH map (the field's coordinates, MAP_OFFSET in), or beside it
+static const S3dProp *DoorAt(s32 x, s32 y, u16 *door)
+{
+    s32 map = MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum), gtx, gtz, cx, cz, dx;
+    const S3dProp *best = NULL;
+    float bestD = 99;
+    if (!sPack.tried)
+        LoadPack();
+    if (map < 0 || !sPack.ok || sPack.ndoor == 0)
+        return NULL;
+    gtx = sMaps[map].cx * 32 + x - MAP_OFFSET, gtz = sMaps[map].cz * 32 + y - MAP_OFFSET;
+    for (dx = -1; dx <= 1; dx++)
+    {
+        const S3dCell *c = CellIn(MatrixNumbered(sMaps[map].mat), (gtx + dx) / 32, gtz / 32);
+        u32 i;
+        if (dx != 0 && (gtx + dx) / 32 == gtx / 32)
+            continue;   // (each block once)
+        cx = (gtx + dx) / 32, cz = gtz / 32;
+        for (i = 0; c != NULL && i < c->nprops; i++)
+        {
+            const S3dProp *pr = &c->props[i];
+            float px, pz, d;
+            if (pr->mesh < 0 || (u32)pr->mesh >= sPack.nmesh || sPack.doorOf[pr->mesh] == 0)
+                continue;
+            px = (cx * BLOCK + BLOCK / 2 + pr->m[3]) / 16.0f, pz = (cz * BLOCK + BLOCK / 2 + pr->m[11]) / 16.0f;
+            if ((s32)floorf(pz) != gtz || abs((s32)floorf(px) - gtx) > 1)
+                continue;
+            d = fabsf(px - (gtx + 0.5f));
+            if (d < bestD)
+                bestD = d, best = pr, *door = sPack.doorOf[pr->mesh] - 1;
+        }
+    }
+    return best;
+}
+
+// Play the door's animation at (X, Y): KIND 0 opening and 1 closing as the player walks in, 2 / 3 walking out. A task
+// that ends with it (-1: no door prop there, or not on a SINNOH map)
+s8 S3D_DoorAnimate(s32 x, s32 y, u8 kind)
+{
+    u16 door = 0;
+    const S3dProp *pr = DoorAt(x, y, &door);
+    u8 taskId;
+    if (pr == NULL)
+        return -1;
+    if (sPack.door[door].nanim == 2)
+        kind &= 1;   // (two: the same open and close both ways)
+    if (DoorAnimLength(door, kind) == 0)
+        return -1;
+    sDoorAnim.prop = pr, sDoorAnim.door = door, sDoorAnim.anim = kind, sDoorAnim.t = 0, sDoorAnim.map = sCurMap;
+    sDoorAnim.hold = !(kind & 1);
+    while ((taskId = FindTaskIdByFunc(Task_S3dDoor)) != TASK_NONE)
+        DestroyTask(taskId);
+    printf("[s3d] door %u at %d,%d: animation %u\n", door, (int)x - MAP_OFFSET, (int)y - MAP_OFFSET, kind);
+    return CreateTask(Task_S3dDoor, 80);
+}
+
+// The door's sound (field_door.c GetDoorSoundEffect): 0 hinged, 1 sliding, 2 the DEPT. STORE's chime; -1 none there
+s8 S3D_DoorSound(s32 x, s32 y)
+{
+    u16 door = 0;
+    return DoorAt(x, y, &door) != NULL ? sPack.door[door].sound : -1;
+}
+
+// Closing: after walking out (the door was opened for that: its own closing of four), else after walking in
+s8 S3D_DoorClose(s32 x, s32 y)
+{
+    u16 door = 0;
+    const S3dProp *pr = DoorAt(x, y, &door);
+    return S3D_DoorAnimate(x, y, pr != NULL && sDoorAnim.prop == pr && sDoorAnim.anim == 2 ? 3 : 1);
+}
+
+bool8 S3D_DoorRunning(void)
+{
+    return FindTaskIdByFunc(Task_S3dDoor) != TASK_NONE;
+}
+
 static void DrawProp(const S3dProp *pr, float ox, float oy, float oz, u32 pass)
 {
     const float *m = pr->m;
@@ -942,7 +1098,7 @@ static void DrawProp(const S3dProp *pr, float ox, float oy, float oz, u32 pass)
         moved[7] = sLift.y - oy;
         m = moved;
     }
-    DrawMesh(&sPack.mesh[sPack.meshShown[pr->mesh]], m, ox, oy, oz, pass);
+    DrawMesh(&sPack.mesh[sDoorAnim.prop == pr ? DoorMesh(pr) : sPack.meshShown[pr->mesh]], m, ox, oy, oz, pass);
 }
 
 static void Render(void)
@@ -977,6 +1133,50 @@ static void Render(void)
         for (i = 0; i < S3D_DYN_PROPS; i++)
             if (sDyn[i].on)
                 DrawMesh(&sPack.mesh[sDyn[i].mesh], sDyn[i].m, 0, 0, 0, pass);
+}
+
+// Moemon Maker: the 3D world of MAP around tile (TILEX, TILEY) as the game's camera sees it with the player there, into
+// OUT (240 x 160, the game's colors), for the editor's 3D PREVIEW (src/maker/maker_tiles.c). Only while the editor
+// is open and the game isn't playing: the view's own state is put back after. FALSE without the pack or the map.
+bool8 S3D_RenderPreview(u8 group, u8 num, s32 tileX, s32 tileY, u16 *out)
+{
+    static u8 saved[sizeof(sView)];
+    const S3dMatrix *savedMat = sCurMat;
+    s32 savedMap = sCurMap, map = MapIndex(group, num);
+    float p = CAM_PITCH * 3.14159265f / 180.0f, sp = sinf(p), cp = cosf(p);
+    if (map < 0)
+        return FALSE;
+    if (!sPack.tried)
+        LoadPack();
+    if (!sPack.ok)
+        return FALSE;
+    memcpy(saved, &sView, sizeof(sView));
+    sView.map = map;
+    sCurMat = MatrixNumbered(sMaps[map].mat);
+    sCurMap = map;
+    // (as SetupView, the target on the tile's middle instead of the player's)
+    sView.camX = (tileX - 7) * 16;
+    sView.camY = (tileY - 4) * 16 - 8;
+    sView.ax = 7 * 16 + 8;
+    sView.ay = 4 * 16 + 16;
+    sView.originX = sMaps[map].cx * BLOCK;
+    sView.originZ = sMaps[map].cz * BLOCK;
+    sView.tx = sView.originX + tileX * 16 + 8;
+    sView.tz = sView.originZ + tileY * 16 + 8;
+    sView.ty = GroundAt(sView.tx, sView.tz, 0.0f);
+    sView.eye[0] = sView.tx;
+    sView.eye[1] = sView.ty + CAM_DIST * sp;
+    sView.eye[2] = sView.tz + CAM_DIST * cp;
+    sView.fwd[0] = 0.0f, sView.fwd[1] = -sp, sView.fwd[2] = -cp;
+    sView.right[0] = 1.0f, sView.right[1] = 0.0f, sView.right[2] = 0.0f;
+    sView.up[0] = 0.0f, sView.up[1] = cp, sView.up[2] = -sp;
+    sView.focal = 96.0f / tanf(HALF_FOV * 3.14159265f / 180.0f);
+    Render();
+    memcpy(out, sColor, sizeof(sColor));
+    memcpy(&sView, saved, sizeof(sView));
+    sCurMat = savedMat;
+    sCurMap = savedMap;
+    return TRUE;
 }
 
 // ------------------------------------------------------------------------------------------------ run-time props

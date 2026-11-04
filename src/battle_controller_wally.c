@@ -193,6 +193,11 @@ static void WallyHandleActions(void)
     case 0:
         gBattleStruct->wallyWaitFrames = B_WAIT_TIME_LONG;
         gBattleStruct->wallyBattleState++;
+        if (gWallyTutorialThrowFirst)   // Moemon Kai: Crystal's DUDE throws at once (battle_setup.c MP_JohtoCatchingTutorial)
+        {
+            gBattleStruct->wallyBattleState = 3;
+            break;
+        }
     case 1:
         if (--gBattleStruct->wallyWaitFrames == 0)
         {

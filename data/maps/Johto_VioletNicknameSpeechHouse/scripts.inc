@@ -27,3 +27,16 @@ Johto_VioletNicknameSpeechHouse_Text_83FFB63::
 
 Johto_VioletNicknameSpeechHouse_Text_83FFBC9::
 	.string "I call my PIDGEY STRAWBERRY!$"
+
+@ Moemon Kai: Crystal's PIDGEY (pokecrystal VioletNicknameSpeechHouse.asm; docs/REGIONS_AUDIT.md 138)
+Johto_VioletNicknameSpeechHouse_EventScript_Pidgey::
+	lock
+	faceplayer
+	playmoncry SPECIES_PIDGEY, CRY_MODE_NORMAL
+	msgbox Johto_VioletNicknameSpeechHouse_Text_Pidgey, MSGBOX_DEFAULT
+	waitmoncry
+	release
+	end
+
+Johto_VioletNicknameSpeechHouse_Text_Pidgey::
+	.string "STRAWBERRY: Pijji!$"

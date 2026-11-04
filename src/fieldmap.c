@@ -4,6 +4,7 @@
 #include "bg.h"
 #include "fieldmap.h"
 #include "s3d.h"   // Moemon Kai: SINNOH
+const u16 *Maker_MapBlocks(const struct MapHeader *h);   // Moemon Maker: the user's tiles (src/maker/maker_overrides.c)
 #include "fldeff.h"
 #include "fldeff_misc.h"
 #include "frontier_util.h"
@@ -126,7 +127,7 @@ static void InitMapLayoutData(const struct MapHeader *mapHeader)
     if (gBackupMapLayout.width * gBackupMapLayout.height > MAX_MAP_DATA_SIZE)
         return;
 
-    InitBackupMapLayoutData(S3D_LayoutBlocks(mapLayout), mapLayout->width, mapLayout->height);   // Moemon Kai: SINNOH's from the 3D pack
+    InitBackupMapLayoutData(Maker_MapBlocks(mapHeader), mapLayout->width, mapLayout->height);   // Moemon Kai: SINNOH's from the 3D pack; Moemon Maker: with the user's tiles
     InitBackupMapLayoutConnections(mapHeader);
 }
 
@@ -190,7 +191,7 @@ static void FillConnection(s32 x, s32 y, const struct MapHeader *connectedMapHea
     s32 mapWidth;
 
     mapWidth = connectedMapHeader->mapLayout->width;
-    src = &S3D_LayoutBlocks(connectedMapHeader->mapLayout)[mapWidth * y2 + x2];   // Moemon Kai: SINNOH's from the 3D pack
+    src = &Maker_MapBlocks(connectedMapHeader)[mapWidth * y2 + x2];   // Moemon Kai: SINNOH's from the 3D pack; Moemon Maker: edited
     dest = &gBackupMapLayout.map[gBackupMapLayout.width * y + x];
 
     for (i = 0; i < height; i++)

@@ -48,9 +48,16 @@ Johto_PlayersHouse1F_EventScript_83E3B45::
 	faceplayer
 	goto_if_set FLAG_QZ_0x106D, Johto_PlayersHouse1F_EventScript_83E3B98
 	goto_if_set FLAG_QZ_0x14A0, Johto_PlayersHouse1F_EventScript_83E3B83
+	@ Moemon Kai: with the starter, Crystal's MOM asks about ELM's errand (docs/REGIONS_AUDIT.md 134)
+	goto_if_ge VAR_QZ_0x5003, 3, Johto_PlayersHouse1F_EventScript_MomErrand
 	msgbox Johto_PlayersHouse1F_Text_83E3D12, MSGBOX_DEFAULT
 	applymovement 1, Johto_PlayersHouse1F_Movement_83E3C23
 	waitmovement 0
+	release
+	end
+
+Johto_PlayersHouse1F_EventScript_MomErrand::
+	msgbox Johto_PlayersHouse1F_Text_MomErrand, MSGBOX_DEFAULT
 	release
 	end
 
@@ -270,7 +277,15 @@ Johto_PlayersHouse1F_EventScript_83E3BC1::
 
 Johto_PlayersHouse1F_EventScript_83E3C01::
 	setflag FLAG_QZ_0xAD8
-	msgbox Johto_PlayersHouse1F_Text_83E3C8A, MSGBOX_DEFAULT
+	@ Moemon Kai: the RUNNING SHOES as KANTO's (FireRed's words, data/maps/Kanto_PewterCity)
+	textcolor 3
+	playfanfare MUS_RG_OBTAIN_KEY_ITEM
+	message Johto_PlayersHouse1F_Text_83E3C8A
+	waitmessage
+	waitfanfare
+	msgbox Kanto_PewterCity_Text_SwitchedShoesWithRunningShoes, MSGBOX_DEFAULT
+	msgbox Kanto_PewterCity_Text_ExplainRunningShoes, MSGBOX_DEFAULT
+	textcolor 1
 	@ Moemon Kai: Crystal's MOM hands over the POKéGEAR here (pokecrystal maps/PlayersHouse1F.asm: no clock to set,
 	@ the game's own clock; src/mp/mp_pokegear.c)
 	msgbox Johto_PlayersHouse1F_Text_MomPokegear, MSGBOX_DEFAULT
@@ -336,7 +351,7 @@ Johto_PlayersHouse1F_EventScript_8401A37::
 	turnobject 3, 3
 	msgbox Johto_PlayersHouse1F_Text_84026AE, MSGBOX_DEFAULT
 	setvar VAR_QZ_0x5076, 4
-	cleartrainerflag 0x137B
+	cleartrainerflag TRAINER_QZ_4987
 	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4987, 0, Johto_PlayersHouse1F_Text_840270C
 	fadedefaultbgm
 	specialvar VAR_RESULT, GetBattleOutcome
@@ -483,8 +498,8 @@ Johto_PlayersHouse1F_Text_83E3C25::
 	.string "something for him.$"
 
 Johto_PlayersHouse1F_Text_83E3C8A::
-	.string "MOM: With your RUNNING SHOES,\n"
-	.string "hold B to run.$"
+	.string "{PLAYER} received the\n"
+	.string "RUNNING SHOES from MOM.$"
 
 Johto_PlayersHouse1F_Text_83E3D12::
 	.string "MOM: PROF.ELM is waiting for you.\p"
@@ -566,3 +581,45 @@ Johto_PlayersHouse1F_Text_8402CC2::
 Johto_PlayersHouse1F_Text_8405554::
 	.string "MOM: Stay back!\n"
 	.string "EEVEE is not going with you.$"
+
+@ Moemon Kai: Crystal's kitchen and TV (pokecrystal PlayersHouse1F.asm; docs/REGIONS_AUDIT.md 134)
+Johto_PlayersHouse1F_EventScript_Stove::
+	msgbox Johto_PlayersHouse1F_Text_Stove, MSGBOX_SIGN
+	end
+
+Johto_PlayersHouse1F_EventScript_Sink::
+	msgbox Johto_PlayersHouse1F_Text_Sink, MSGBOX_SIGN
+	end
+
+Johto_PlayersHouse1F_EventScript_Fridge::
+	msgbox Johto_PlayersHouse1F_Text_Fridge, MSGBOX_SIGN
+	end
+
+Johto_PlayersHouse1F_EventScript_TV::
+	msgbox Johto_PlayersHouse1F_Text_TV, MSGBOX_SIGN
+	end
+
+Johto_PlayersHouse1F_Text_Stove::
+	.string "Mom’s specialty!\p"
+	.string "CINNABAR VOLCANO BURGER!$"
+
+Johto_PlayersHouse1F_Text_Sink::
+	.string "The sink is spotless. Mom likes it\n"
+	.string "clean.$"
+
+Johto_PlayersHouse1F_Text_Fridge::
+	.string "Let’s see what’s in the fridge…\p"
+	.string "FRESH WATER and tasty LEMONADE!$"
+
+Johto_PlayersHouse1F_Text_TV::
+	.string "There’s a movie on TV: Stars dot\n"
+	.string "the sky as two boys ride on a\l"
+	.string "train…\p"
+	.string "I’d better get rolling too!$"
+
+Johto_PlayersHouse1F_Text_MomErrand::
+	.string "So, what was PROF. ELM’s errand?\p"
+	.string "…\p"
+	.string "That does sound challenging.\p"
+	.string "But, you should be proud that\n"
+	.string "people rely on you.$"

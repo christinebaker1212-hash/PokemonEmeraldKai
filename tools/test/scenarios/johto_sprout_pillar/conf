@@ -1,0 +1,8 @@
+# SPROUT TOWER 1F's middle pillar (Quetzal's object 16066, also in TIN TOWER) sways as Crystal's (object_event_anims.h
+# sAnimTable_QzTowerPillar: a step every 16 frames, 0 1 2 3 4 3 2 1): pictures 16 frames apart differ at the pillar
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_PARTY=280:30 MOEMON_DEBUG_REGION=1"
+EXPECT_A=("warp: 35,79")
+UNEXPECT_A=("[crash]" "TIMEOUT")
+CHECK="python3 tools/test/check_pillar_sway.py"

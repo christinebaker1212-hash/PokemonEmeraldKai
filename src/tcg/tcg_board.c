@@ -8,6 +8,7 @@
 #include "sound.h"
 #include "constants/songs.h"
 #include "tcg/card_ids.h"
+#include "tcg/flow.h"
 #include "tcg/integration.h"
 #include "tcg_board.h"
 #include "tcg_gfx.h"
@@ -193,68 +194,6 @@ enum
 };
 enum
 {
-    ST_MY_SLOT,
-    ST_OPP_SLOT,
-    ST_PICK,
-    ST_STAGE,
-    ST_CHOICE,       /* a Pokemon Power's menu: SHIFT's types, PEEK's places */
-    ST_ATTACK_OPTION /* an attack's menu (TcgDuel_AttackOptions): Amnesia, Metronome, Wildfire, Conversion... */
-};
-enum
-{
-    SRC_HAND,
-    SRC_DECK,
-    SRC_MY_DISCARD,
-    SRC_OPP_DISCARD,
-    SRC_MY_ATTACHED,
-    SRC_OPP_ATTACHED,
-    SRC_TOP5,
-    SRC_TOP7,       /* Master Ball: the top 7 of your deck */
-    SRC_TOP3_MINE,  /* Prophecy: the top 3 of a deck, to put in order */
-    SRC_TOP3_THEIRS
-};
-enum
-{
-    F_ANY,
-    F_OCCUPIED,
-    F_BENCH,
-    F_EMPTY_BENCH,
-    F_DAMAGED,
-    F_DAMAGED_ENERGY,
-    F_HAS_ENERGY,
-    F_EVOLVED,
-    F_BREEDER_BASIC,
-    F_POKEMON,
-    F_BASIC,
-    F_BASIC_ENERGY,
-    F_ENERGY,
-    F_TRAINER,
-    F_STAGE2,
-    F_EVOLVE_TARGET,
-    F_BASIC_SLOT,
-    F_ANY_POKEMON,
-    /* Pokemon Powers */
-    F_HAS_GRASS,
-    F_OTHER,       /* occupied, not the first choice */
-    F_WATER_POKEMON,
-    F_ROOM_OTHER,  /* takes a damage counter without a Knock Out, not the first choice */
-    F_DAMAGED_OTHER, /* damaged, not the Pokemon using the power */
-    /* GB2's */
-    F_FOSSIL,          /* a Mysterious Fossil */
-    F_EVOLUTION,       /* an Evolution card */
-    F_COLORLESS_EVOLUTION,
-    F_DARK_EVOLUTION,
-    F_GARBAGE,         /* a Pokemon or basic Energy card */
-    F_HAS_FIRE_OTHER,  /* has a Fire Energy card, not the Pokemon using the power */
-    F_FOSSIL_EVOLVED   /* evolved from a Mysterious Fossil */
-};
-struct Step
-{
-    uint8_t kind, filter, source, min, max;
-    const char *prompt;
-};
-enum
-{
     MENU_PLAY,
     MENU_ATTACK,
     MENU_RETREAT,
@@ -269,7 +208,7 @@ enum
     MENU_STAGE1,
     MENU_STAGE2,
     MENU_DISCARD,
-    MENU_CHOICE /* + the value (ST_CHOICE) */
+    MENU_CHOICE /* + the value (TCG_ST_CHOICE) */
 };
 struct MenuItem
 {
@@ -310,7 +249,7 @@ static struct
     /* What a choice is for */
     int flow, step, nsteps, heldHand, heldPhysical, attackCursor;
     unsigned flowCard;
-    const struct Step *steps;
+    const struct TcgStep *steps;
     struct TcgAction action;
     /* Card picker / viewer */
     uint8_t pickCards[TCG_DECK_SIZE], pickOwner, pickCount, pickSel[TCG_DECK_SIZE], pickOrder[TCG_DECK_SIZE];
@@ -331,7 +270,6 @@ static struct
     uint8_t prizeQueue[6], prizeCount, prizeNext;
 } B;
 
-static const struct Step sNoSteps[1] = {{0, 0, 0, 0, 0, NULL}};
 static void Toast(const char *format, ...)
 {
     va_list ap;
@@ -366,72 +304,16 @@ static int MyTurn(void)
     return g->current == 0;
 }
 static int CanAct(void) { return MyTurn() && TcgBoard_Idle() && !B.waiting; }
-static unsigned EnergyValue(unsigned id) { return id == TCG_CARD_DOUBLE_COLORLESS_ENERGY ? 2 : 1; }
-static int HasEnergy(unsigned who, unsigned slot)
-{
-    const struct TcgFieldCard *f = &B.view.players[who].field[slot];
-    unsigned i;
-    for (i = 0; i < f->attachedSize; i++)
-        if (Tcg_Card(CardOf(who, f->attached[i]))->kind == TCG_ENERGY)
-            return 1;
-    return 0;
-}
+static unsigned EnergyValue(unsigned id) { return TcgFlow_EnergyValue(id); }
+static int HasEnergy(unsigned who, unsigned slot) { return TcgFlow_HasEnergy(&B.view, who, slot); }
 static int AttackReady(unsigned attack, char *reason, size_t size)
 {
-    const struct TcgCard *c = TcgDuel_Attacker(&B.view, 0), *active = Field(0, 0);
-    const struct TcgFieldCard *f = &B.view.players[0].field[0];
-    if (!c || c->kind != TCG_POKEMON || !c->attacks[attack].name[0])
-        return snprintf(reason, size, "No attack."), 0;
-    if (c->attacks[attack].category == TCG_POKEMON_POWER)
-        return snprintf(reason, size, "This is a Pokemon Power."), 0;
-    if (!TcgDuel_EffectSupported(c->attacks[attack].effect))
-        return snprintf(reason, size, "This attack's effect isn't ready yet."), 0;
-    if (TcgDuel_EffectBlock(&B.view, 0, &c->attacks[attack]))
-        return snprintf(reason, size, "%s", TcgDuel_EffectBlock(&B.view, 0, &c->attacks[attack])), 0;
-    if (!TcgDuel_CanAttack(&B.view, 0, attack))
-        return snprintf(reason, size, "Not enough Energy attached."), 0;
-    if (f->condition == TCG_ASLEEP && !TcgDuel_SleepAttack(&c->attacks[attack]))
-        return snprintf(reason, size, "%s is Asleep.", active->name), 0;
-    if (f->condition == TCG_PARALYZED)
-        return snprintf(reason, size, "%s is Paralyzed.", active->name), 0;
-    if (!TcgDuel_CanAttackNow(&B.view, 0, attack))
-        return snprintf(reason, size, "%s can't use that attack this turn.", active->name), 0;
-    if (!Field(1, 0))
-        return snprintf(reason, size, "There is no Defending Pokemon."), 0;
-    return 1;
+    return TcgFlow_AttackReady(&B.view, 0, attack, reason, size);
 }
 /* The Active Pokemon's Retreat Cost, less a Colorless for each Dodrio on the Bench */
 static unsigned RetreatCostNow(void) { return TcgDuel_RetreatCost(&B.view, 0); }
-static int CanRetreat(char *reason, size_t size)
-{
-    const struct TcgCard *c = Field(0, 0);
-    const struct TcgPlayer *p = &B.view.players[0];
-    const struct TcgFieldCard *f = &p->field[0];
-    unsigned s, bench = 0;
-    for (s = 1; s < TCG_FIELD_SIZE; s++)
-        bench += p->field[s].stackSize != 0;
-    if (!c)
-        return snprintf(reason, size, "No Active Pokemon."), 0;
-    if (!bench)
-        return snprintf(reason, size, "No Benched Pokemon to switch in."), 0;
-    if (p->retreated || p->confusionRetreatFailed)
-        return snprintf(reason, size, "You can only retreat once each turn."), 0;
-    if (c->kind == TCG_TRAINER || f->noRetreat)
-        return snprintf(reason, size, "%s can't retreat.", c->name), 0;
-    if (f->condition == TCG_ASLEEP || f->condition == TCG_PARALYZED)
-        return snprintf(reason, size, "%s is %s.", c->name, f->condition == TCG_ASLEEP ? "Asleep" : "Paralyzed"), 0;
-    if (f->lockTurn == B.view.turn && f->lockAttack == 3)
-        return snprintf(reason, size, "%s can't retreat this turn.", c->name), 0;
-    if (TcgPower_RetreatBlock(&B.view, 0))
-        return snprintf(reason, size, "%s", TcgPower_RetreatBlock(&B.view, 0)), 0;
-    if (TcgDuel_Energy(&B.view, 0, 0, TCG_NONE) < RetreatCostNow())
-        return snprintf(reason, size, "Retreating costs %u Energy.", RetreatCostNow()), 0;
-    return 1;
-}
-static int HasPower(const struct TcgCard *c)
-{
-    return c && c->kind == TCG_POKEMON && c->attacks[0].category == TCG_POKEMON_POWER && c->attacks[0].name[0];
-}
+static int CanRetreat(char *reason, size_t size) { return TcgFlow_CanRetreat(&B.view, 0, reason, size); }
+static int HasPower(const struct TcgCard *c) { return TcgFlow_HasPower(c); }
 
 /* ------------------------------------------------------------------ */
 /* Sprites: every physical card has one, following the shown state.     */
@@ -699,47 +581,11 @@ static void CardCenter(unsigned who, unsigned slot, int *x, int *y)
 }
 static unsigned AttackSe(const char *anim, unsigned type, unsigned *color)
 {
-    static const struct
-    {
-        const char *key;
-        unsigned se, color;
-    } map[] = {
-        {"FLAME", SE_M_FLAMETHROWER, 0xf86828}, {"FIRE", SE_M_FIRE_PUNCH, 0xf86828},
-        {"WATER", SE_M_WATERFALL, 0x48a0f8},    {"HYDRO", SE_M_HYDRO_PUMP, 0x48a0f8},
-        {"BUBBLE", SE_M_BUBBLE_BEAM, 0x78c0f8}, {"WHIRLPOOL", SE_M_WHIRLPOOL, 0x48a0f8},
-        {"THUNDER", SE_M_THUNDERBOLT, 0xf8e040}, {"LIGHTNING", SE_M_THUNDERBOLT, 0xf8e040},
-        {"MAGNETIC", SE_M_THUNDER_WAVE, 0xf8e040}, {"PSYCHIC", SE_M_PSYBEAM, 0xc070f0},
-        {"DARK", SE_M_NIGHTMARE, 0x9058c0},     {"CONFUSE", SE_M_CONFUSE_RAY, 0xd080f0},
-        {"HYPNOSIS", SE_M_PSYBEAM2, 0xc070f0},  {"SUPERSONIC", SE_M_SUPERSONIC, 0xd0d0f8},
-        {"SING", SE_M_SING, 0xf8a0d0},          {"LULLABY", SE_M_SING, 0xf8a0d0},
-        {"POWDER", SE_M_POISON_POWDER, 0xc070e0}, {"SPORE", SE_M_POISON_POWDER, 0xa0d050},
-        {"POISON", SE_M_TOXIC, 0xb048d0},       {"TOXIC", SE_M_TOXIC, 0xb048d0},
-        {"GAS", SE_M_HAZE, 0xa070c0},           {"SMOG", SE_M_HAZE, 0xa070c0},
-        {"GOO", SE_M_ACID_ARMOR, 0x90c050},     {"BLIZZARD", SE_M_BLIZZARD, 0xc8f0ff},
-        {"FREEZE", SE_M_ICY_WIND, 0xc8f0ff},    {"ROCK", SE_M_ROCK_THROW, 0xc09060},
-        {"STONE", SE_M_ROCK_THROW, 0xc09060},   {"BONE", SE_M_BONEMERANG, 0xe8e0c8},
-        {"SEISMIC", SE_M_STRENGTH, 0xc09060},   {"BEAM", SE_M_HYPER_BEAM, 0xf8f8a0},
-        {"SELFDESTRUCT", SE_M_EXPLOSION, 0xf8a040}, {"DRAIN", SE_M_GIGA_DRAIN, 0x80e070},
-        {"WHIRLWIND", SE_M_GUST, 0xe0f0f0},     {"SONICBOOM", SE_M_RAZOR_WIND, 0xe0f0f0},
-        {"SLASH", SE_M_CUT, 0xf8f8f8},          {"NEEDLE", SE_M_HORN_ATTACK, 0xf8f8f8},
-        {"DRILL", SE_M_HORN_ATTACK, 0xf8f8f8},  {"WHIP", SE_M_VITAL_THROW, 0x80d050},
-        {"STRING", SE_M_STRING_SHOT, 0xf8f8f8}, {"PETAL", SE_M_PETAL_DANCE, 0xf8a0c0},
-        {"PUNCH", SE_M_MEGA_KICK, 0xf8f8f8},    {"KICK", SE_M_MEGA_KICK2, 0xf8f8f8},
-        {"BIG_HIT", SE_M_MEGA_KICK, 0xf8f8f8},  {"RAMPAGE", SE_M_TAKE_DOWN, 0xf8f8f8},
-        {"QUICK", SE_M_COMET_PUNCH, 0xf8f8f8},  {"BARRIER", SE_M_BARRIER, 0x98e0f8},
-        {"PROTECT", SE_M_BARRIER, 0x98e0f8},    {"GLOW", SE_M_MORNING_SUN, 0xf8f0a0},
-        {"RECOVER", SE_M_MORNING_SUN, 0x80e070}, {"HEAL", SE_M_MORNING_SUN, 0x80e070},
-        {"CRY", SE_M_UPROAR, 0xf8f8f8},         {"DRAGON", SE_M_DRAGON_RAGE, 0xf86828},
-    };
-    unsigned i;
-    for (i = 0; i < sizeof(map) / sizeof(map[0]); i++)
-        if (anim && strstr(anim, map[i].key))
-        {
-            *color = map[i].color;
-            return map[i].se;
-        }
-    *color = G_TypeColor(type, 1);
-    return SE_M_COMET_PUNCH;
+    /* (the table is tcg_flow.c's, shared with the phone's duels) */
+    unsigned se = TcgFlow_AttackSound(anim, color);
+    if (!*color)
+        *color = G_TypeColor(type, 1);
+    return se;
 }
 static const char *PlayerName(unsigned who) { return who ? B.opponent : "YOU"; }
 
@@ -1552,252 +1398,13 @@ static void Navigate(int dx, int dy)
 /* ------------------------------------------------------------------ */
 /* Choices                                                              */
 /* ------------------------------------------------------------------ */
-static const struct Step *TrainerSteps(unsigned id, int *count)
-{
-#define STEPS(...)                                                                                                     \
-    do                                                                                                                 \
-    {                                                                                                                  \
-        static const struct Step s[] = {__VA_ARGS__};                                                                  \
-        *count = sizeof(s) / sizeof(s[0]);                                                                             \
-        return s;                                                                                                      \
-    } while (0)
-    switch (id)
-    {
-    case TCG_CARD_POTION:
-        STEPS({ST_MY_SLOT, F_DAMAGED, 0, 0, 0, "Remove 2 damage counters from which Pokemon?"});
-    case TCG_CARD_SUPER_POTION:
-        STEPS({ST_MY_SLOT, F_DAMAGED_ENERGY, 0, 0, 0, "Heal which Pokemon? (discard 1 Energy from it)"},
-              {ST_PICK, F_ENERGY, SRC_MY_ATTACHED, 1, 1, "Discard which Energy?"});
-    case TCG_CARD_DEFENDER:
-        STEPS({ST_MY_SLOT, F_OCCUPIED, 0, 0, 0, "Attach DEFENDER to which Pokemon?"});
-    case TCG_CARD_SWITCH:
-        STEPS({ST_MY_SLOT, F_BENCH, 0, 0, 0, "Switch in which Benched Pokemon?"});
-    case TCG_CARD_GUST_OF_WIND:
-        STEPS({ST_OPP_SLOT, F_BENCH, 0, 0, 0, "Bring out which of their Benched Pokemon?"});
-    case TCG_CARD_SCOOP_UP:
-        STEPS({ST_MY_SLOT, F_OCCUPIED, 0, 0, 0, "Return which Pokemon to your hand?"});
-    case TCG_CARD_MR_FUJI:
-        STEPS({ST_MY_SLOT, F_BENCH, 0, 0, 0, "Shuffle which Benched Pokemon into your deck?"});
-    case TCG_CARD_CLEFAIRY_DOLL:
-    case TCG_CARD_MYSTERIOUS_FOSSIL:
-        STEPS({ST_MY_SLOT, F_EMPTY_BENCH, 0, 0, 0, "Put it on which Bench space?"});
-    case TCG_CARD_DEVOLUTION_SPRAY:
-        STEPS({ST_MY_SLOT, F_EVOLVED, 0, 0, 0, "Devolve which Pokemon?"}, {ST_STAGE, 0, 0, 0, 0, "Discard how far?"});
-    case TCG_CARD_ENERGY_REMOVAL:
-        STEPS({ST_OPP_SLOT, F_HAS_ENERGY, 0, 0, 0, "Remove Energy from which Pokemon?"},
-              {ST_PICK, F_ENERGY, SRC_OPP_ATTACHED, 1, 1, "Discard which Energy?"});
-    case TCG_CARD_SUPER_ENERGY_REMOVAL:
-        STEPS({ST_MY_SLOT, F_HAS_ENERGY, 0, 0, 0, "First, discard Energy from one of yours."},
-              {ST_PICK, F_ENERGY, SRC_MY_ATTACHED, 1, 1, "Discard which of your Energy?"},
-              {ST_OPP_SLOT, F_HAS_ENERGY, 0, 0, 0, "Then remove Energy from which of theirs?"},
-              {ST_PICK, F_ENERGY, SRC_OPP_ATTACHED, 1, 2, "Discard up to 2 of their Energy."});
-    case TCG_CARD_ENERGY_SEARCH:
-        STEPS({ST_PICK, F_BASIC_ENERGY, SRC_DECK, 1, 1, "Take which basic Energy?"});
-    case TCG_CARD_POKE_BALL:
-        STEPS({ST_PICK, F_POKEMON, SRC_DECK, 1, 1, "If heads, take which Pokemon?"});
-    case TCG_CARD_COMPUTER_SEARCH:
-        STEPS({ST_PICK, F_ANY, SRC_HAND, 2, 2, "Discard 2 cards from your hand."},
-              {ST_PICK, F_ANY, SRC_DECK, 1, 1, "Take any 1 card from your deck."});
-    case TCG_CARD_ITEM_FINDER:
-        STEPS({ST_PICK, F_ANY, SRC_HAND, 2, 2, "Discard 2 cards from your hand."},
-              {ST_PICK, F_TRAINER, SRC_MY_DISCARD, 1, 1, "Take which Trainer from your discard pile?"});
-    case TCG_CARD_ENERGY_RETRIEVAL:
-        STEPS({ST_PICK, F_ANY, SRC_HAND, 1, 1, "Discard 1 card from your hand."},
-              {ST_PICK, F_BASIC_ENERGY, SRC_MY_DISCARD, 1, 2, "Take up to 2 basic Energy."});
-    case TCG_CARD_SUPER_ENERGY_RETRIEVAL:
-        STEPS({ST_PICK, F_ANY, SRC_HAND, 2, 2, "Discard 2 cards from your hand."},
-              {ST_PICK, F_BASIC_ENERGY, SRC_MY_DISCARD, 1, 4, "Take up to 4 basic Energy."});
-    case TCG_CARD_MAINTENANCE:
-        STEPS({ST_PICK, F_ANY, SRC_HAND, 2, 2, "Shuffle 2 cards into your deck."});
-    case TCG_CARD_RECYCLE:
-        STEPS({ST_PICK, F_ANY, SRC_MY_DISCARD, 1, 1, "If heads, put which card on your deck?"});
-    case TCG_CARD_POKEMON_TRADER:
-        STEPS({ST_PICK, F_POKEMON, SRC_HAND, 1, 1, "Trade away which Pokemon?"},
-              {ST_PICK, F_POKEMON, SRC_DECK, 1, 1, "Take which Pokemon from your deck?"});
-    case TCG_CARD_POKEMON_BREEDER:
-        STEPS({ST_PICK, F_STAGE2, SRC_HAND, 1, 1, "Play which Stage 2 card?"},
-              {ST_MY_SLOT, F_BREEDER_BASIC, 0, 0, 0, "Put it on which Basic Pokemon?"});
-    case TCG_CARD_REVIVE:
-        STEPS({ST_PICK, F_BASIC, SRC_MY_DISCARD, 1, 1, "Revive which Basic Pokemon?"},
-              {ST_MY_SLOT, F_EMPTY_BENCH, 0, 0, 0, "Put it on which Bench space?"});
-    case TCG_CARD_POKEMON_FLUTE:
-        STEPS({ST_PICK, F_BASIC, SRC_OPP_DISCARD, 1, 1, "Put which of their Basic Pokemon in play?"},
-              {ST_OPP_SLOT, F_EMPTY_BENCH, 0, 0, 0, "Put it on which of their Bench spaces?"});
-    case TCG_CARD_POKEDEX:
-        STEPS({ST_PICK, F_ANY, SRC_TOP5, 0, 0, "Choose the order: the first is drawn next."});
-    /* GB2's */
-    case TCG_CARD_POKEBALL:
-        STEPS({ST_PICK, F_POKEMON, SRC_DECK, 1, 1, "If heads, take which Pokemon?"});
-    case TCG_CARD_FOSSIL_EXCAVATION:
-        STEPS({ST_PICK, F_FOSSIL, SRC_DECK, 0, 1, "Take a Mysterious Fossil from your deck? (none: discard pile)"});
-    case TCG_CARD_MAX_REVIVE:
-        STEPS({ST_PICK, F_ENERGY, SRC_HAND, 2, 2, "Discard 2 Energy cards from your hand."},
-              {ST_PICK, F_BASIC, SRC_MY_DISCARD, 1, 1, "Revive which Basic Pokemon?"},
-              {ST_MY_SLOT, F_EMPTY_BENCH, 0, 0, 0, "Put it on which Bench space?"});
-    case TCG_CARD_SUPER_SCOOP_UP:
-        STEPS({ST_MY_SLOT, F_OCCUPIED, 0, 0, 0, "If heads, return which Pokemon to your hand?"});
-    case TCG_CARD_MOON_STONE:
-        STEPS({ST_PICK, F_COLORLESS_EVOLUTION, SRC_DECK, 0, 1, "Take which Colorless Evolution card?"});
-    case TCG_CARD_THE_BOSSS_WAY:
-        STEPS({ST_PICK, F_DARK_EVOLUTION, SRC_DECK, 0, 1, "Take which Dark Pokemon card?"});
-    case TCG_CARD_IMPOSTER_OAKS_REVENGE:
-        STEPS({ST_PICK, F_ANY, SRC_HAND, 1, 1, "Discard which card to play it?"});
-    case TCG_CARD_POKEMON_RECALL:
-        STEPS({ST_PICK, F_EVOLUTION, SRC_MY_DISCARD, 1, 1, "Put which Evolution card on your deck?"});
-    case TCG_CARD_MASTER_BALL:
-        STEPS({ST_PICK, F_POKEMON, SRC_TOP7, 0, 1, "Take which Pokemon? (the rest are shuffled in)"});
-    case TCG_CARD_NIGHTLY_GARBAGE_RUN:
-        STEPS({ST_PICK, F_GARBAGE, SRC_MY_DISCARD, 1, 3, "Shuffle up to 3 into your deck."});
-    }
-    *count = 0;
-    return sNoSteps;
-}
-/* A used Pokemon Power's choices: the first Pokemon chosen is action.target, the
- * second action.attack (src/tcg/tcg_powers.c TcgDuel_Power) */
-static const struct Step *PowerSteps(unsigned power, int *count)
-{
-    switch (power)
-    {
-    case TCG_POWER_ENERGY_TRANS:
-        STEPS({ST_MY_SLOT, F_HAS_GRASS, 0, 0, 0, "Move a Grass Energy from which Pokemon?"},
-              {ST_MY_SLOT, F_OTHER, 0, 0, 0, "Move it to which Pokemon?"});
-    case TCG_POWER_HEAL:
-        STEPS({ST_MY_SLOT, F_DAMAGED, 0, 0, 0, "Heal which Pokemon? (a coin: heads, 1 counter)"});
-    case TCG_POWER_SHIFT:
-        STEPS({ST_CHOICE, 0, 0, 0, 0, "Change its type to which?"});
-    case TCG_POWER_RAIN_DANCE:
-        STEPS({ST_MY_SLOT, F_WATER_POKEMON, 0, 0, 0, "Attach a Water Energy to which Water Pokemon?"});
-    case TCG_POWER_PEEK:
-        STEPS({ST_CHOICE, 0, 0, 0, 0, "Look at which card?"});
-    case TCG_POWER_DAMAGE_SWAP:
-        STEPS({ST_MY_SLOT, F_DAMAGED, 0, 0, 0, "Move a damage counter from which Pokemon?"},
-              {ST_MY_SLOT, F_ROOM_OTHER, 0, 0, 0, "Move it to which Pokemon?"});
-    case TCG_POWER_STRANGE_BEHAVIOR:
-        STEPS({ST_MY_SLOT, F_DAMAGED_OTHER, 0, 0, 0, "Move a damage counter from which Pokemon?"});
-    case TCG_POWER_CURSE:
-        STEPS({ST_OPP_SLOT, F_DAMAGED, 0, 0, 0, "Move a damage counter from which of their Pokemon?"},
-              {ST_OPP_SLOT, F_OTHER, 0, 0, 0, "Move it to which of their Pokemon?"});
-    /* GB2's */
-    case TCG_POWER_GATHER_FIRE:
-        STEPS({ST_MY_SLOT, F_HAS_FIRE_OTHER, 0, 0, 0, "Take a Fire Energy from which Pokemon?"});
-    case TCG_POWER_FOSSILIZE:
-        STEPS({ST_MY_SLOT, F_FOSSIL_EVOLVED, 0, 0, 0, "If heads, which Pokemon goes back to a Fossil?"});
-    case TCG_POWER_MATTER_EXCHANGE:
-        STEPS({ST_PICK, F_ANY, SRC_HAND, 1, 1, "Discard which card to draw one?"});
-    case TCG_POWER_EVOLUTIONARY_LIGHT:
-        STEPS({ST_PICK, F_EVOLUTION, SRC_DECK, 1, 1, "Take which Evolution card?"});
-    case TCG_POWER_SPECIAL_DELIVERY:
-        STEPS({ST_PICK, F_ANY, SRC_HAND, 0, 1, "Draw, then put which card on top? (none: the new one)"});
-    }
-    *count = 0;
-    return sNoSteps;
-}
-#undef STEPS
 static int CardMatches(unsigned owner, unsigned physical, int filter)
 {
-    const struct TcgCard *c = Tcg_Card(CardOf(owner, physical));
-    if (!c)
-        return 0;
-    switch (filter)
-    {
-    case F_POKEMON:
-        return c->kind == TCG_POKEMON;
-    case F_BASIC:
-        return c->kind == TCG_POKEMON && !c->stage;
-    case F_BASIC_ENERGY:
-        return c->kind == TCG_ENERGY && c->id <= 6;
-    case F_ENERGY:
-        return c->kind == TCG_ENERGY;
-    case F_TRAINER:
-        return c->kind == TCG_TRAINER;
-    case F_STAGE2:
-        return c->kind == TCG_POKEMON && c->stage == 2;
-    case F_FOSSIL:
-        return c->id == TCG_CARD_MYSTERIOUS_FOSSIL;
-    case F_EVOLUTION:
-        return c->kind == TCG_POKEMON && c->stage;
-    case F_COLORLESS_EVOLUTION:
-        return c->kind == TCG_POKEMON && c->stage && c->type == TCG_COLORLESS;
-    case F_DARK_EVOLUTION:
-        return c->kind == TCG_POKEMON && c->stage && (c->dark || !strncmp(c->name, "Dark ", 5));
-    case F_GARBAGE:
-        return c->kind == TCG_POKEMON || (c->kind == TCG_ENERGY && c->id <= 6);
-    default:
-        return 1;
-    }
+    return TcgFlow_CardMatches(&B.view, owner, physical, filter);
 }
 static int SlotMatches(unsigned who, unsigned slot, int filter)
 {
-    const struct TcgPlayer *p = &B.view.players[who];
-    const struct TcgFieldCard *f = &p->field[slot];
-    const struct TcgCard *c = Field(who, slot);
-    switch (filter)
-    {
-    case F_ANY:
-        return 1;
-    case F_OCCUPIED:
-        return c != NULL;
-    case F_BENCH:
-        return slot && c;
-    case F_EMPTY_BENCH:
-        return slot && !c;
-    case F_DAMAGED:
-        return c && f->damage;
-    case F_DAMAGED_ENERGY:
-        return c && f->damage && HasEnergy(who, slot);
-    case F_HAS_ENERGY:
-        return c && HasEnergy(who, slot);
-    case F_EVOLVED:
-        return c && f->stackSize >= 2;
-    case F_BREEDER_BASIC:
-    {
-        const struct TcgCard *stage2 = B.action.selectionCount ? Tcg_Card(CardOf(0, B.action.selections[0])) : NULL;
-        unsigned i;
-        if (!c || c->kind != TCG_POKEMON || c->stage || !stage2)
-            return 0;
-        for (i = 1; i <= TCG_CARD_COUNT; i++)
-            if (gTcgCards[i].kind == TCG_POKEMON && gTcgCards[i].stage == 1 &&
-                !strcmp(gTcgCards[i].name, stage2->evolvesFrom) && !strcmp(gTcgCards[i].evolvesFrom, c->name))
-                return 1;
-        return 0;
-    }
-    case F_EVOLVE_TARGET:
-    {
-        const struct TcgCard *e = Tcg_Card(B.flowCard);
-        return c && e && c->kind == TCG_POKEMON && !strcmp(e->evolvesFrom, c->name);
-    }
-    case F_BASIC_SLOT:
-        return !c && (slot || B.view.phase == TCG_SETUP);
-    case F_ANY_POKEMON:
-        return c && c->kind == TCG_POKEMON;
-    case F_HAS_GRASS:
-    {
-        unsigned i;
-        for (i = 0; c && i < f->attachedSize; i++)
-            if (CardOf(who, f->attached[i]) == TCG_CARD_GRASS_ENERGY)
-                return 1;
-        return 0;
-    }
-    case F_OTHER:
-        return c && slot != B.action.target;
-    case F_WATER_POKEMON:
-        return c && c->kind == TCG_POKEMON && TcgDuel_Type(&B.view, who, slot) == TCG_WATER;
-    case F_ROOM_OTHER:
-        return c && slot != B.action.target && f->damage + 10u < (c->kind == TCG_TRAINER ? 10u : c->hp);
-    case F_DAMAGED_OTHER:
-        return c && f->damage && slot != B.action.slot;
-    case F_HAS_FIRE_OTHER:
-    {
-        unsigned i;
-        for (i = 0; c && slot != B.action.slot && i < f->attachedSize; i++)
-            if (CardOf(who, f->attached[i]) == TCG_CARD_FIRE_ENERGY)
-                return 1;
-        return 0;
-    }
-    case F_FOSSIL_EVOLVED:
-        return c && f->stackSize > 1 && CardOf(who, f->stack[0]) == TCG_CARD_MYSTERIOUS_FOSSIL;
-    }
-    return 0;
+    return TcgFlow_SlotMatches(&B.view, 0, &B.action, B.flowCard, who, slot, filter);
 }
 static int TargetFilter(int *who)
 {
@@ -1805,23 +1412,23 @@ static int TargetFilter(int *who)
     switch (B.flow)
     {
     case FLOW_BASIC:
-        return F_BASIC_SLOT;
+        return TCG_F_BASIC_SLOT;
     case FLOW_EVOLVE:
-        return F_EVOLVE_TARGET;
+        return TCG_F_EVOLVE_TARGET;
     case FLOW_ATTACH:
-        return F_ANY_POKEMON;
+        return TCG_F_ANY_POKEMON;
     case FLOW_RETREAT:
-        return F_BENCH;
+        return TCG_F_BENCH;
     case FLOW_ATTACK:
     case FLOW_TRAINER:
     case FLOW_POWER:
         if (B.step < B.nsteps)
         {
-            *who = B.steps[B.step].kind == ST_OPP_SLOT;
+            *who = B.steps[B.step].kind == TCG_ST_OPP_SLOT;
             return B.steps[B.step].filter;
         }
     }
-    return F_ANY;
+    return TCG_F_ANY;
 }
 static int Valid(int kind, int index)
 {
@@ -1875,91 +1482,17 @@ static void AddMenu(const char *label, int id, int enabled, const char *reason);
 
 /* An attack's choices as steps (the Trainers' machinery): its menu first (TcgDuel_AttackOptions), then what
    that menu decides (AttackStepsAfterOption) */
-static struct Step sAttackSteps[4];
+static struct TcgStep sAttackSteps[4];
 static char sAttackPrompt[64];
-static int BenchOn(unsigned who)
-{
-    unsigned s;
-    for (s = 1; s < TCG_FIELD_SIZE; s++)
-        if (Field(who, s))
-            return 1;
-    return 0;
-}
 static void AttackStepsAfterOption(const struct TcgAttack *a)
 {
-    unsigned choice = a ? TcgDuel_AttackChoice(a, NULL) : 0, ask = TcgDuel_AttackAsk(a);
-    int n = 0;
-    if ((choice == 1 && BenchOn(1)) || (choice == 2 && BenchOn(0)) || choice == 3 || choice == 4)
-    {
-        const char *prompt = TcgDuel_AttackTargetPrompt(a);
-        struct Step st = {choice == 1 || choice == 3 ? ST_OPP_SLOT : ST_MY_SLOT, choice >= 3 ? F_OCCUPIED : F_BENCH, 0, 0, 0,
-                          prompt                         ? prompt
-                          : choice == 1                  ? "Aim at which of their Benched Pokemon?"
-                          : choice == 2                  ? "Switch with which of your Benched Pokemon?"
-                          : choice == 3                  ? "Aim at which of their Pokemon?"
-                                                         : "Choose one of your Pokemon."};
-        sAttackSteps[n++] = st;
-    }
-    if (ask == TCG_ASK_DISCARD_TRAINER)
-    {
-        struct Step st = {ST_PICK, F_TRAINER, SRC_MY_DISCARD, 1, 1, "Put which Trainer into your hand?"};
-        sAttackSteps[n++] = st;
-    }
-    else if (ask == TCG_ASK_ORDER_TOP3)
-    {
-        struct Step st = {ST_PICK, F_ANY, B.action.option ? SRC_TOP3_THEIRS : SRC_TOP3_MINE, 0, 3,
-                          "Put them back in order: the first chosen goes on top."};
-        sAttackSteps[n++] = st;
-    }
-    else if (ask == TCG_ASK_DECK_TRAINER)
-    {
-        struct Step st = {ST_PICK, F_TRAINER, SRC_DECK, 0, 1, "If heads, take which Trainer?"};
-        sAttackSteps[n++] = st;
-    }
-    else if (ask == TCG_ASK_EVOLVED)
-    {
-        struct Step st = {B.action.option ? ST_OPP_SLOT : ST_MY_SLOT, F_EVOLVED, 0, 0, 0, "Devolve which Pokemon?"};
-        sAttackSteps[n++] = st;
-    }
+    B.nsteps = TcgFlow_AttackSteps(&B.view, 0, &B.action, a, 1, sAttackSteps, sAttackPrompt);
     B.steps = sAttackSteps;
-    B.nsteps = n;
 }
 static void AttackSteps(const struct TcgAttack *a)
 {
-    const char *labels[TCG_MAX_OPTIONS];
-    uint8_t ok[TCG_MAX_OPTIONS];
-    if (a && TcgDuel_AttackOptions(&B.view, 0, a, labels, ok))
-    {
-        struct Step st = {ST_ATTACK_OPTION, 0, 0, 0, 0, sAttackPrompt};
-        static const char *const prompts[][2] = {
-            {"Metronome", "Copy which of their attacks?"},
-            {"Amnesia", "Which attack can't they use next turn?"},
-            {"Mirror Move", "Which attack can't they use next turn?"},
-            {"Wildfire", "Discard how many Fire Energy?"},
-            {"Conversion 1", "Change their Weakness to which type?"},
-            {"Conversion 2", "Change its Resistance to which type?"},
-            {"Prophecy", "Look at the top of which deck?"},
-            {"Devolution Beam", "Devolve whose Pokemon?"},
-            {"Disable", "If heads, which attack can't they use?"},
-            {"Mini-Metronome", "If heads, copy which of their attacks?"},
-            {"Flame Inferno", "Discard how many Fire Energy?"},
-            {"Burning Fire", "Discard how many Fire Energy (any of yours)?"},
-            {"Flame Pillar", "Discard a Fire Energy to hit their Bench?"},
-            {"Rock Blast", "Discard how many Fighting Energy?"},
-            {"Rollout", "Remove how many Food counters?"},
-            {"Texture Magic", "Change its Resistance to which type?"},
-        };
-        unsigned k;
-        snprintf(sAttackPrompt, sizeof(sAttackPrompt), "%s", "Choose for the attack.");
-        for (k = 0; k < sizeof(prompts) / sizeof(prompts[0]); k++)
-            if (!strcmp(a->name, prompts[k][0]))
-                snprintf(sAttackPrompt, sizeof(sAttackPrompt), "%s", prompts[k][1]);
-        sAttackSteps[0] = st;
-        B.steps = sAttackSteps;
-        B.nsteps = 1;
-        return;
-    }
-    AttackStepsAfterOption(a);
+    B.nsteps = TcgFlow_AttackSteps(&B.view, 0, &B.action, a, 0, sAttackSteps, sAttackPrompt);
+    B.steps = sAttackSteps;
 }
 static void AttackOptionMenu(void)
 {
@@ -1988,39 +1521,39 @@ static void StartTarget(void)
 }
 static void ContinueTrainer(struct TcgAction *out, int *result)
 {
-    const struct Step *st;
+    const struct TcgStep *st;
     if (B.step >= B.nsteps)
     {
         Submit(out, result);
         return;
     }
     st = &B.steps[B.step];
-    if (st->kind == ST_MY_SLOT || st->kind == ST_OPP_SLOT)
+    if (st->kind == TCG_ST_MY_SLOT || st->kind == TCG_ST_OPP_SLOT)
     {
         StartTarget();
         return;
     }
-    if (st->kind == ST_PICK)
+    if (st->kind == TCG_ST_PICK)
     {
-        int n = st->max, all = st->source == SRC_TOP5 || st->source == SRC_TOP3_MINE || st->source == SRC_TOP3_THEIRS;
-        if (st->source == SRC_TOP5)
+        int n = st->max, all = st->source == TCG_SRC_TOP5 || st->source == TCG_SRC_TOP3_MINE || st->source == TCG_SRC_TOP3_THEIRS;
+        if (st->source == TCG_SRC_TOP5)
             n = B.view.players[0].deckSize < 5 ? B.view.players[0].deckSize : 5;
-        if (st->source == SRC_TOP7 && !n)
+        if (st->source == TCG_SRC_TOP7 && !n)
             n = 1;
-        if (st->source == SRC_TOP3_MINE || st->source == SRC_TOP3_THEIRS)
+        if (st->source == TCG_SRC_TOP3_MINE || st->source == TCG_SRC_TOP3_THEIRS)
         {
-            n = B.view.players[st->source == SRC_TOP3_THEIRS].deckSize;
+            n = B.view.players[st->source == TCG_SRC_TOP3_THEIRS].deckSize;
             n = n < 3 ? n : 3;
         }
         OpenPick(st->source, st->filter, all ? n : st->min, n, st->prompt);
         return;
     }
-    if (st->kind == ST_ATTACK_OPTION)
+    if (st->kind == TCG_ST_ATTACK_OPTION)
     {
         AttackOptionMenu();
         return;
     }
-    if (st->kind == ST_STAGE)
+    if (st->kind == TCG_ST_STAGE)
     {
         const struct TcgCard *top = Field(0, B.action.slot);
         if (top && top->stage == 2)
@@ -2043,7 +1576,7 @@ static void ContinueTrainer(struct TcgAction *out, int *result)
         ContinueTrainer(out, result);
         return;
     }
-    if (st->kind == ST_CHOICE)
+    if (st->kind == TCG_ST_CHOICE)
         PowerChoices();
 }
 
@@ -2051,43 +1584,43 @@ static void ContinueTrainer(struct TcgAction *out, int *result)
 static void OpenPick(int source, int filter, int min, int max, const char *title)
 {
     const struct TcgPlayer *p;
-    unsigned owner = source == SRC_OPP_DISCARD || source == SRC_OPP_ATTACHED || source == SRC_TOP3_THEIRS, i, n = 0;
+    unsigned owner = source == TCG_SRC_OPP_DISCARD || source == TCG_SRC_OPP_ATTACHED || source == TCG_SRC_TOP3_THEIRS, i, n = 0;
     const uint8_t *pile = NULL;
     unsigned count = 0;
     uint8_t sorted[TCG_DECK_SIZE];
     p = &B.view.players[owner];
     switch (source)
     {
-    case SRC_HAND:
+    case TCG_SRC_HAND:
         pile = p->hand;
         count = p->handSize;
         break;
-    case SRC_DECK:
+    case TCG_SRC_DECK:
         pile = p->deck;
         count = p->deckSize;
         break;
-    case SRC_MY_DISCARD:
-    case SRC_OPP_DISCARD:
+    case TCG_SRC_MY_DISCARD:
+    case TCG_SRC_OPP_DISCARD:
         pile = p->discard;
         count = p->discardSize;
         break;
-    case SRC_MY_ATTACHED:
+    case TCG_SRC_MY_ATTACHED:
         pile = p->field[B.action.slot].attached;
         count = p->field[B.action.slot].attachedSize;
         break;
-    case SRC_OPP_ATTACHED:
+    case TCG_SRC_OPP_ATTACHED:
         pile = p->field[B.action.target].attached;
         count = p->field[B.action.target].attachedSize;
         break;
-    case SRC_TOP7:
+    case TCG_SRC_TOP7:
         count = p->deckSize < 7 ? p->deckSize : 7;
         for (i = 0; i < count; i++)
             sorted[i] = p->deck[p->deckSize - 1 - i];
         pile = sorted;
         break;
-    case SRC_TOP5:
-    case SRC_TOP3_MINE:
-    case SRC_TOP3_THEIRS:
+    case TCG_SRC_TOP5:
+    case TCG_SRC_TOP3_MINE:
+    case TCG_SRC_TOP3_THEIRS:
         for (i = 0; i < (unsigned)max; i++)
             sorted[i] = p->deck[p->deckSize - 1 - i];
         pile = sorted;
@@ -2098,11 +1631,11 @@ static void OpenPick(int source, int filter, int min, int max, const char *title
     for (i = 0; i < count; i++)
     {
         unsigned physical = pile[i];
-        if (source == SRC_HAND && B.flow == FLOW_TRAINER && (int)i == B.action.hand)
+        if (source == TCG_SRC_HAND && B.flow == FLOW_TRAINER && (int)i == B.action.hand)
             continue;
         B.pickCards[n++] = (uint8_t)physical;
     }
-    if (source == SRC_DECK)
+    if (source == TCG_SRC_DECK)
     {
         /* A searched deck is shown in catalogue order, never its real order. */
         unsigned a, b;
@@ -2137,7 +1670,7 @@ static void OpenPick(int source, int filter, int min, int max, const char *title
         unsigned valid = 0;
         for (i = 0; i < n; i++)
             valid += CardMatches(owner, B.pickCards[i], filter);
-        if (valid < (unsigned)min && source != SRC_DECK)
+        if (valid < (unsigned)min && source != TCG_SRC_DECK)
         {
             Toast("There aren't enough cards to choose.");
             PlaySE(SE_FAILURE);
@@ -2155,7 +1688,7 @@ static void OpenViewer(unsigned owner)
     B.pickOwner = (uint8_t)owner;
     B.pickCursor = B.pickScroll = 0;
     B.pickMin = B.pickMax = 0;
-    B.pickFilter = F_ANY;
+    B.pickFilter = TCG_F_ANY;
     snprintf(B.pickTitle, sizeof(B.pickTitle), "%s", owner ? "THEIR DISCARD PILE" : "YOUR DISCARD PILE");
     B.mode = M_VIEW;
 }
@@ -2171,7 +1704,7 @@ static void OpenHandViewer(void)
     B.pickOwner = 1;
     B.pickCursor = B.pickScroll = 0;
     B.pickMin = B.pickMax = 0;
-    B.pickFilter = F_ANY;
+    B.pickFilter = TCG_F_ANY;
     snprintf(B.pickTitle, sizeof(B.pickTitle), "THEIR HAND (CLAIRVOYANCE)");
     B.mode = M_VIEW;
 }
@@ -2210,40 +1743,16 @@ static void BeginRetreat(void)
 }
 static void RetreatCost(struct TcgAction *out, int *result)
 {
-    const struct TcgFieldCard *f = &B.view.players[0].field[0];
-    unsigned i, total = 0, types = 0, first = TCG_NONE, cost = RetreatCostNow();
-    for (i = 0; i < f->attachedSize; i++)
+    unsigned cost = RetreatCostNow();
+    if (TcgFlow_RetreatAutoPay(&B.view, 0, &B.action))
     {
-        const struct TcgCard *e = Tcg_Card(CardOf(0, f->attached[i]));
-        if (e->kind != TCG_ENERGY)
-            continue;
-        total += EnergyValue(e->id);
-        if (first == TCG_NONE || e->id != first)
-            types++;
-        if (first == TCG_NONE)
-            first = e->id;
-    }
-    B.action.selectionCount = 0;
-    if (!cost || total == cost || types == 1)
-    {
-        /* Nothing to choose: pay with the first Energy that covers it. */
-        unsigned paid = 0;
-        for (i = 0; i < f->attachedSize && paid < cost; i++)
-        {
-            const struct TcgCard *e = Tcg_Card(CardOf(0, f->attached[i]));
-            if (e->kind == TCG_ENERGY)
-            {
-                B.action.selections[B.action.selectionCount++] = f->attached[i];
-                paid += EnergyValue(e->id);
-            }
-        }
         Submit(out, result);
         return;
     }
     {
         uint8_t slot = B.action.slot;
         B.action.slot = 0;
-        OpenPick(SRC_MY_ATTACHED, F_ENERGY, 1, (int)cost, "Discard Energy to retreat.");
+        OpenPick(TCG_SRC_MY_ATTACHED, TCG_F_ENERGY, 1, (int)cost, "Discard Energy to retreat.");
         B.action.slot = slot;
         B.pickRetreat = (int)cost;
     }
@@ -2267,137 +1776,16 @@ static void AddMenu(const char *label, int id, int enabled, const char *reason)
     m->enabled = enabled;
     snprintf(m->reason, sizeof(m->reason), "%s", reason ? reason : "");
 }
-static const char *HandVerb(const struct TcgCard *c)
-{
-    return c->kind == TCG_ENERGY ? "ATTACH" : c->kind == TCG_TRAINER ? "PLAY" : c->stage ? "EVOLVE" : "PLAY";
-}
+static const char *HandVerb(const struct TcgCard *c) { return TcgFlow_HandVerb(c); }
 static int HandPlayable(const struct TcgCard *c, char *reason, size_t size)
 {
-    const struct TcgPlayer *p = &B.view.players[0];
-    unsigned s;
     if (!CanAct())
         return snprintf(reason, size, "%s", MyTurn() ? "Wait a moment." : "It isn't your turn."), 0;
-    if (B.view.phase == TCG_PROMOTION)
-        return snprintf(reason, size, "Choose your next Active Pokemon first."), 0;
-    if (B.view.phase == TCG_SETUP)
-    {
-        if (c->kind != TCG_POKEMON || c->stage)
-            return snprintf(reason, size, "Only Basic Pokemon are placed now."), 0;
-        for (s = 0; s < TCG_FIELD_SIZE; s++)
-            if (!p->field[s].stackSize)
-                return 1;
-        return snprintf(reason, size, "Your Bench is full."), 0;
-    }
-    if (c->kind == TCG_ENERGY && p->energyPlayed)
-        return snprintf(reason, size, "You already attached Energy this turn."), 0;
-    if (c->kind == TCG_POKEMON && !c->stage)
-    {
-        for (s = 1; s < TCG_FIELD_SIZE; s++)
-            if (!p->field[s].stackSize)
-                return 1;
-        return snprintf(reason, size, "Your Bench is full."), 0;
-    }
-    if (c->kind == TCG_POKEMON)
-    {
-        for (s = 0; s < TCG_FIELD_SIZE; s++)
-        {
-            const struct TcgCard *f = Field(0, s);
-            if (f && f->kind == TCG_POKEMON && !strcmp(c->evolvesFrom, f->name))
-            {
-                if (p->turnsTaken < 2 || p->field[s].enteredTurn == B.view.turn)
-                    return snprintf(reason, size, "%s can't evolve on its first turn in play.", f->name), 0;
-                return 1;
-            }
-        }
-        return snprintf(reason, size, "You have no %s in play.", c->evolvesFrom), 0;
-    }
-    if (c->kind == TCG_TRAINER && p->noTrainers)
-        return snprintf(reason, size, "Headache: no Trainer cards this turn."), 0;
-    return 1;
+    return TcgFlow_HandPlayable(&B.view, 0, c, reason, size);
 }
 /* Would this Trainer do anything now? Only the plain cases say no (nothing to heal, nothing to switch to, an empty
    deck...); anything unsure counts as playable. */
-static int Has(unsigned who, int (*test)(const struct TcgFieldCard *f, unsigned who), int benchOnly)
-{
-    unsigned s;
-    for (s = benchOnly ? 1 : 0; s < TCG_FIELD_SIZE; s++)
-        if (B.view.players[who].field[s].stackSize && test(&B.view.players[who].field[s], who))
-            return 1;
-    return 0;
-}
-static int AnyCard(const struct TcgFieldCard *f, unsigned who) { (void)f, (void)who; return 1; }
-static int Damaged(const struct TcgFieldCard *f, unsigned who) { (void)who; return f->damage > 0; }
-static int Evolved(const struct TcgFieldCard *f, unsigned who) { (void)who; return f->stackSize > 1; }
-static int WithEnergy(const struct TcgFieldCard *f, unsigned who)
-{
-    unsigned i;
-    for (i = 0; i < f->attachedSize; i++)
-        if (Tcg_Card(B.view.players[who].cards[f->attached[i]])->kind == TCG_ENERGY)
-            return 1;
-    return 0;
-}
-static int DamagedWithEnergy(const struct TcgFieldCard *f, unsigned who) { return f->damage && WithEnergy(f, who); }
-static int InDiscard(int kind, int basicOnly)
-{
-    const struct TcgPlayer *p = &B.view.players[0];
-    unsigned i;
-    for (i = 0; i < p->discardSize; i++)
-    {
-        const struct TcgCard *c = Tcg_Card(p->cards[p->discard[i]]);
-        if (c->kind == kind && (!basicOnly || (kind == TCG_POKEMON ? !c->stage : p->cards[p->discard[i]] <= 6)))
-            return 1;
-    }
-    return 0;
-}
-static int TrainerHasUse(unsigned id)
-{
-    const struct TcgPlayer *p = &B.view.players[0];
-    int bench = 0;
-    unsigned s;
-    for (s = 1; s < TCG_FIELD_SIZE; s++)
-        bench += !p->field[s].stackSize;
-    switch (id)
-    {
-    case TCG_CARD_POTION:
-    case TCG_CARD_POKEMON_CENTER:
-        return Has(0, Damaged, 0);
-    case TCG_CARD_SUPER_POTION:
-        return Has(0, DamagedWithEnergy, 0);
-    case TCG_CARD_FULL_HEAL:
-        return p->field[0].stackSize && (p->field[0].condition || p->field[0].poison);
-    case TCG_CARD_SWITCH:
-        return Has(0, AnyCard, 1);
-    case TCG_CARD_GUST_OF_WIND:
-        return Has(1, AnyCard, 1);
-    case TCG_CARD_ENERGY_REMOVAL:
-        return Has(1, WithEnergy, 0);
-    case TCG_CARD_SUPER_ENERGY_REMOVAL:
-        return Has(1, WithEnergy, 0) && Has(0, WithEnergy, 0);
-    case TCG_CARD_DEVOLUTION_SPRAY:
-        return Has(0, Evolved, 0);
-    case TCG_CARD_CLEFAIRY_DOLL:
-    case TCG_CARD_MYSTERIOUS_FOSSIL:
-        return bench > 0;
-    case TCG_CARD_REVIVE:
-        return bench > 0 && InDiscard(TCG_POKEMON, 1);
-    case TCG_CARD_BILL:
-    case TCG_CARD_POKEDEX:
-    case TCG_CARD_POKE_BALL:
-    case TCG_CARD_ENERGY_SEARCH:
-        return p->deckSize > 0;
-    case TCG_CARD_COMPUTER_SEARCH:
-        return p->deckSize > 0 && p->handSize >= 3;
-    case TCG_CARD_ITEM_FINDER:
-        return p->handSize >= 3 && InDiscard(TCG_TRAINER, 0);
-    case TCG_CARD_ENERGY_RETRIEVAL:
-        return p->handSize >= 2 && InDiscard(TCG_ENERGY, 1);
-    case TCG_CARD_SUPER_ENERGY_RETRIEVAL:
-        return p->handSize >= 3 && InDiscard(TCG_ENERGY, 1);
-    case TCG_CARD_MAINTENANCE:
-        return p->handSize >= 3;
-    }
-    return 1;
-}
+static int TrainerHasUse(unsigned id) { return TcgFlow_TrainerHasUse(&B.view, 0, id); }
 static int HandPlayable(const struct TcgCard *c, char *reason, size_t size);
 /* Is there still a card in your hand to play this turn? (a Basic with room for it, an evolution, Energy not yet
    attached, a Trainer with something to do) */
@@ -2472,7 +1860,7 @@ static void BeginPower(unsigned slot, struct TcgAction *out, int *result)
     B.flow = FLOW_POWER;
     B.heldHand = -1;
     B.mode = M_FREE;
-    B.steps = PowerSteps(power, &B.nsteps);
+    B.steps = TcgFlow_PowerSteps(power, &B.nsteps);
     B.step = 0;
     if (power == TCG_POWER_RAIN_DANCE)
     {
@@ -2483,48 +1871,27 @@ static void BeginPower(unsigned slot, struct TcgAction *out, int *result)
             ;
         B.action.hand = (uint8_t)i;
     }
-    if (B.nsteps && B.steps[0].kind == ST_MY_SLOT)
+    if (B.nsteps && B.steps[0].kind == TCG_ST_MY_SLOT)
         B.focusKind = T_MINE, B.focusIndex = 0;
-    if (B.nsteps && B.steps[0].kind == ST_OPP_SLOT)
+    if (B.nsteps && B.steps[0].kind == TCG_ST_OPP_SLOT)
         B.focusKind = T_THEIRS, B.focusIndex = 0;
     ContinueTrainer(out, result);
 }
 /* SHIFT's types in play and PEEK's five places, as a menu */
 static void PowerChoices(void)
 {
-    unsigned power = TcgPower_Id(Field(0, B.action.slot)), t, who, s;
+    struct TcgFlowMenu m;
+    const char *why;
+    unsigned i;
     B.menuCount = 0;
-    if (power == TCG_POWER_SHIFT)
+    if (!TcgFlow_PowerChoices(&B.view, 0, B.action.slot, &m, &why))
     {
-        static const char *const names[TCG_COLORLESS] = {"FIRE", "GRASS", "LIGHTNING", "WATER", "FIGHTING", "PSYCHIC"};
-        for (t = 0; t < TCG_COLORLESS; t++)
-        {
-            int found = 0;
-            for (who = 0; who < 2; who++)
-                for (s = 0; s < TCG_FIELD_SIZE; s++)
-                    found |= (who || s != B.action.slot) && Field(who, s) && Field(who, s)->kind == TCG_POKEMON &&
-                             TcgDuel_Type(&B.view, who, s) == t;
-            if (found && t != TcgDuel_Type(&B.view, 0, B.action.slot))
-                AddMenu(names[t], MENU_CHOICE + (int)t, 1, NULL);
-        }
-        if (!B.menuCount)
-        {
-            TcgBoard_Reject("Every other type in play is already its own.");
-            CancelFlow();
-            return;
-        }
+        TcgBoard_Reject(why);
+        CancelFlow();
+        return;
     }
-    else
-    {
-        const struct TcgPlayer *me = &B.view.players[0], *them = &B.view.players[1];
-        AddMenu("TOP OF YOUR DECK", MENU_CHOICE + TCG_PEEK_MY_DECK, me->deckSize != 0, "Your deck is empty.");
-        AddMenu("TOP OF THEIR DECK", MENU_CHOICE + TCG_PEEK_THEIR_DECK,
-                them->deckSize != 0, "Their deck is empty.");
-        AddMenu("A CARD IN THEIR HAND", MENU_CHOICE + TCG_PEEK_THEIR_HAND, them->handSize != 0, "Their hand is empty.");
-        AddMenu("ONE OF YOUR PRIZES", MENU_CHOICE + TCG_PEEK_MY_PRIZE, me->prizeSize != 0, "You have no Prizes left.");
-        AddMenu("ONE OF THEIR PRIZES", MENU_CHOICE + TCG_PEEK_THEIR_PRIZE, them->prizeSize != 0,
-                "They have no Prizes left.");
-    }
+    for (i = 0; i < m.count; i++)
+        AddMenu(m.label[i], MENU_CHOICE + m.value[i], m.ok[i], m.why[i]);
     {
         struct Rect r = SlotRect(0, B.action.slot);
         Menu(r.x + r.w + 4 > 150 ? r.x - 100 : r.x + r.w + 4, r.y > 100 ? 70 : r.y);
@@ -2673,13 +2040,13 @@ static void Choose(struct TcgAction *out, int *result, unsigned *card)
         {
             B.action.type = TCG_PLAY_TRAINER;
             B.flow = FLOW_TRAINER;
-            B.steps = TrainerSteps(c->id, &B.nsteps);
+            B.steps = TcgFlow_TrainerSteps(c->id, &B.nsteps);
             B.step = 0;
-            if (B.nsteps && B.steps[0].kind == ST_MY_SLOT)
+            if (B.nsteps && B.steps[0].kind == TCG_ST_MY_SLOT)
                 B.focusKind = T_MINE, B.focusIndex = 0;
-            if (B.nsteps && B.steps[0].kind == ST_OPP_SLOT)
+            if (B.nsteps && B.steps[0].kind == TCG_ST_OPP_SLOT)
                 B.focusKind = T_THEIRS, B.focusIndex = 1;
-            if (!B.nsteps || B.steps[0].kind != ST_MY_SLOT)
+            if (!B.nsteps || B.steps[0].kind != TCG_ST_MY_SLOT)
                 B.heldHand = -1;
             ContinueTrainer(out, result);
         }
@@ -2878,7 +2245,7 @@ static void StepPick(unsigned pressed, struct TcgAction *out, int *result, unsig
         if (PickDone())
             FinishPick(out, result);
         else
-            TcgBoard_Reject(B.pickSource == SRC_DECK && !B.pickChosen && B.pickMin
+            TcgBoard_Reject(B.pickSource == TCG_SRC_DECK && !B.pickChosen && B.pickMin
                                 ? "Choose a card (B cancels)."
                                 : "Choose the required number of cards.");
     }
@@ -3139,9 +2506,9 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
                     B.heldHand = -1;
                     B.mode = M_FREE;
                     B.step = 0;
-                    if (B.steps[0].kind == ST_MY_SLOT || B.steps[0].kind == ST_OPP_SLOT)
+                    if (B.steps[0].kind == TCG_ST_MY_SLOT || B.steps[0].kind == TCG_ST_OPP_SLOT)
                     {
-                        B.focusKind = B.steps[0].kind == ST_OPP_SLOT ? T_THEIRS : T_MINE;
+                        B.focusKind = B.steps[0].kind == TCG_ST_OPP_SLOT ? T_THEIRS : T_MINE;
                         B.focusIndex = 1;
                     }
                     ContinueTrainer(out, &result);
@@ -3206,7 +2573,7 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
             }
             if (B.flow == FLOW_TRAINER)
             {
-                if (B.steps[B.step].kind == ST_OPP_SLOT)
+                if (B.steps[B.step].kind == TCG_ST_OPP_SLOT)
                     B.action.target = (uint8_t)B.focusIndex;
                 else
                     B.action.slot = (uint8_t)B.focusIndex;

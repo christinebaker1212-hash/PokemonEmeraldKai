@@ -289,4 +289,305 @@ The gate: android/coretest FriendsTest (a server, ALICE hosting a room, BOB join
 presence read from the server, ALICE's phone linked through the server with a snapshot of more than one chunk);
 ScreensTest "friends".
 
-Next: trades by mail, then the card games on the phone.
+### Trades by mail (1.75.0)
+
+The server's ESCROW (MAIL ops 7-10, protocol 76; mp_net.h ESC_*; "moemon_escrow.dat", written before each answer):
+a record per trade (its 16-byte ID) with two sides, each a deposit (up to ESC_DATA_MAX) and a lock (the SHA-256 of
+the side's secret, set by its first use). PUT deposits (refused once CLOSED), TAKE gives the other side's deposit
+only when both are in, CANCEL closes it while both aren't in (and gives back the caller's own), LOOK tells the state.
+Every op can be repeated and answers the state. Deposits nobody came back for stay 365 days; tools/phone/escrow_test.py.
+
+Keys: each save has an X25519 pair ("<save>.pals" version 2; 1.74.0's file is converted, its friends kept); MPR_FRIEND
+ends with the public key. Two saves' pair key (PhoneProto_PairKey: BLAKE2b over the X25519 secret) seals offers and
+deposits, so only those two can read them (friend keys are seen by everyone in a room). The snapshot's friends carry
+`pk` (the pair key, once met since 1.74.1), `me`, `tk` (the trade key: a side's secret is Derive(tk, hex(trade))),
+`inbox` and `inown` (Derive(friend key / secret, "inbox")).
+
+The flow:
+- OFFER (the phone, core/Trades.offer): a random trade ID; {t, from, n, mon (the snapshot's keys), want (species, 0
+  anything), at, exp (7 days), srv} sealed with the pair key into the friend's inbox (MAIL_ADD, [from id][sealed]);
+  then the order `{"op":"offer","trade","to","at","p","o","want","exp","srv"}` to this save's game (queued when away):
+  the POKéMON stays where it is, ON OFFER (the PC's label, no release in the PC, no walk or training; `off` in the
+  snapshot).
+- The friend's phone reads its inbox (Trades.incoming: each offer with the escrow's state); ACCEPT is the order
+  `{"op":"accept",...}` to its game (the species must be the one wanted: `notwanted`); DECLINE is an escrow CANCEL
+  from side 1, straight from the phone. CANCEL of one's own offer: CANCEL from side 0 plus `{"op":"untrade"}`.
+- The games (src/mp/mp_phone_trade.c, "<save>.trades"), whenever on the trade's server: the accepting game deposits
+  (side 1); the offering game, seeing it (LOOK), deposits too (side 0) and takes; the other takes on its next look.
+  Custody as the walk's: written down, out of the save, saved at once, then the server; received: written down, in
+  (party, else PC), saved at once; a game closed at any step works out on loading where it stands (the save holds it
+  or not). A deposit called off comes home the same way. Offers run out after 7 days (the accepting side waits a day
+  more before taking its deposit back).
+- Then the game's own in-game trade scene (trade.c MP_MailTrade_Scene: the friend's name, ours going, theirs coming,
+  any trade evolution) the next time the player is free on the field.
+
+App: core/Server.java (look / cancel), core/Trades.java, FriendsPage (TRADES BY MAIL: offers with ACCEPT / DECLINE,
+our trades and how each is getting on, CALL OFF; TRADE on each friend: ours, then "for what": anything or one of the
+species in their party), Notifier kind TURN (a new offer; from StepJob).
+
+The gate (trades pass two-client tests at lag): android/coretest TradeTest: two games and their phones, everything
+through tools/mp_server/lagproxy.py at 120 ms + up to 60 ms each way: a trade (each POKéMON exactly once, the scene in
+both), a turned-down offer (nothing moves), an offer answered while the offering game is closed (it completes after).
+
+### TRIPLE TRIAD on the phone (1.76.0)
+
+The game's own engine in the app: android/app/src/main/cpp/tt_jni.c over src/tt (tt_duel, tt_ai, tt_catalog,
+tt_common, tt_hands, tt_pools, tt_rating(s), tt_collection; the build includes a folder holding only include/tt, as
+the game's include/ has its own strings.h), Java Tt.java: the catalog and the rules' words, duels by handle (start,
+play: the events as JSON, state, the AI that sees only what its side may), opponents as the game makes them
+(tt_field.c Fill) with their hands fitted by CARD SCALING (Tt_FitOpponentHand), and the daily puzzle (a position three
+cards from the end where one or two plays win against the best defense; the same for a day; Best() is a full search).
+The card faces: the game's art pack (graphics/tt/cards.bin) cut to the large faces and the extras by
+android/build_assets.py (assets game/tt_cards.bin, ~10 MB); TtArt composes them as tt_gfx.c Tt_DrawCard does.
+
+The game's side, src/mp/mp_phone_cards.c: the snapshot's `tt` {on, day (Tcg_Today), region, tier (badges), rules and
+trade of the region, skill, active, rec, today {packs, packsMax 3, puzzles, puzzlesMax 1}, packs[5], decks[6] {n, c},
+owned [[id, count]], seen [ids]}; orders `ttdeck` {deck, cards, name, active} (Tt_DeckValid and owned copies:
+`deckrules`, `notowned`), `ttwin` {kind: duel | puzzle, harder, perfect} (a BRONZE pack, SILVER for a tough or perfect
+win, SILVER for the puzzle; per calendar day in "<save>.phonecards": `today`), `ttopen` {pack} (Tt_OpenPack: the cards
+in the answer's `cards`). Rev() takes in the cards and the trades (PhoneCards_Hash, PhoneTrade_Hash), so the app sees
+them change. Tests: tools/phone/cards_test.py, coretest TtCoreTest.
+
+The app: CARDS (CardsPage: PLAY a FREE DUEL against a duelist of where you are under the region's rules without
+RANDOM, cards never change hands; the DAILY PUZZLE; VS FRIENDS; PACKS to open; DECKS; the BINDER), TtDuelPage (upright
+table, tap or drag, captures turning in waves, SAME / PLUS / COMBO, the AI, the prize order), TtDeckPage (the game's deck
+rules), TtPackPage, TtCardPage.
+
+Turn by turn with friends (core/TtFriends.java over core/CardDuels.java, shared with the POKéMON card game): the invite
+into the friend's inbox {kind "tt", g, from, n, hand, rules, seed, first, at}; the game's record under Derive(pair key,
+"ttgame" + g), entries sealed with the pair key: the friend's hand (seq 0, or declined), then each move {seq, slot,
+cell}. OPEN always; the rules offered replay the same with
+either side as the engine's seat 0 (no SWAP, CHAOS, SUDDEN DEATH), so each phone plays as seat 0 (TtFriendGame). Moves
+not taken by the server are sent again; 3 days without a move: CLAIM WIN. Notifier TURN: a challenge, your turn.
+Test: coretest TtFriendsTest (12 games through a real server, both sides agreeing on every board).
+
+### The POKéMON card game on the phone (1.78.0)
+
+The game's own engine in the app: android/app/src/main/cpp/tcg_jni.c over src/tcg (tcg_duel, tcg_effects, tcg_trainers,
+tcg_powers, tcg_ai, tcg_catalog, tcg_collection, tcg_decks, tcg_scale, tcg_ratings, tcg_levels, tcg_link, and
+tcg_flow; the build's include folder holds include/tcg and mp_version.h), Java Tcg.java: the catalog, deck checks
+(Tcg_DeckValidate with the owned counts), CARD SCALING (TcgScale_RateDeck in a thread: about 0.1 s; an opponent fitted
+as tcg_field.c Tcg_FitOpponent does for an ordinary card player, from any of the game's decks), duels by handle (state
+as a seat may see it: the other hand, both decks and the other side's set-up Pokemon hidden; events after a sequence
+number; options: what each card in the hand, each attack, retreat, each Pokemon Power can do now and why not), the AI
+(TcgDuel_AiActionLevel) and the rules state's hash (TcgLink_Hash).
+
+What a move asks for is the game's own duel board's: src/tcg/tcg_flow.c (include/tcg/flow.h) holds the Trainers' and
+Pokemon Powers' steps, the attacks' menus and targets, the filters for spaces and cards, whether a hand card / attack /
+retreat can be used and why not, the retreat's Energy when there's nothing to choose; tcg_board.c uses them (its
+screen and cursor stay its own), and TcgFlow is the same as a machine without a screen (begin a move, answer SLOT /
+PICK / MENU questions, take the action) that the phone drives. Moves are small JSON actions {t, h, s, a, g, o, c, x}.
+Tests: coretest TcgCoreTest (150 whole duels with one or both sides moving only through flows with random legal
+answers against the AI: every action a flow builds is taken by the rules, every duel ends, a replay from the actions
+ends the same, the other side's hand stays hidden). It found three of the board's own: a Basic put on the Bench while
+setting up with the Active spot empty (no way on with no other Basic: now the Active spot first), evolving a Pokemon
+put down this turn when another of the name could evolve (now only those that can), Scoop Up on the last Pokemon in play.
+
+The cards' pictures: graphics/tcg/printed.bin (the scans, "TCGP") re-encoded as WebP by build_assets.py (assets
+game/tcg_cards.bin, ~13 MB, kept uncompressed in the APK so TcgArt reads a picture at a time); decoded at the size shown.
+
+The game's side, src/mp/mp_phone_cards.c: the snapshot's `tcg` {on, day, active, skill, rated, badges, wins, today
+{packs, packsMax 3}, packs[11], decks[8] {n, ace, c[60]}, owned [[id, count]]}; orders `tcgdeck` {deck, cards (60, or
+[] to empty a slot), name, active} (`deckrules`, `notowned`, `empty`, `activedeck`), `tcgduel` {won, kind duel | friend,
+deck and opp ratings, level} (CARD SCALING learns from every FREE DUEL, won or lost; a win: a random booster, 3 a day
+counted in "<save>.phonecards" packs[1]), `tcgopen` {pack} (Tcg_OpenPack: `cards` and `new`, the first copies). Test:
+tools/phone/cards_test.py.
+
+The app: CARDS has a switch between the two games (remembered). POKéMON CARDS: a FREE DUEL, VS FRIENDS, BOOSTERS, DECKS,
+the BINDER by set (TcgBinderPage). TcgDuelPage: upright, their side at the top turned to face them (their Bench, Active
+Pokemon, Prize cards, deck and discard pile, mirrored as across a table, as the game's own table turns them; the user
+2026-11-03: TRIPLE TRIAD stays as it is), yours below, the hand along the bottom. A tap on a card shows it up close with what it
+can do (and why not); a move's questions glow on the table (SLOT), open a card picker (PICK, in order where the order
+matters, Energy by value for a retreat), or a list (MENU). What happens is called out from the events (attacks, coins,
+damage numbers over the Pokemon, conditions, Knock Outs, Prize cards, the AI's Trainers shown). TcgDeckPage (stacks to
+take out, the collection by kind and type to put in, the game's rules as you go), TcgPackPage (ten cards turning over,
+the holo shining, NEW!), TcgCardPage (the scan, then the catalog's words).
+
+With friends by turns: core/CardDuels.java kind "tcg" (the invite {deck, prizes 6}; the friend's deck at seq 0; each
+action {seq, + the action} numbered in the order made, whoever acts posts the next). The inviter is the engine's
+player 0 on both phones (TcgFriendGame). The server keeps 16 entries a record, so a record is in pages of 12 numbers
+(page n > 0 under Derive(pair key, kind + "game" + g + "#" + n)); a TRIPLE TRIAD game stays in the first. Concede on your
+own turn (the rules take it from the player to move). Test: coretest TcgFriendsTest (3 duels, ~250 moves, through a real
+server, the two phones' rules hash equal after every move). `ONLY=tcg android/coretest/run.sh`.
+
+### YU-GI-OH! on the phone (1.79.0)
+
+The game's own engine in the app: EDOPro's ocgcore (C++ with its Lua, built by CMake as the game's Makefile EDO_* does)
+and the game's bridge src/ygo (ygo_edo, ygo_edo_data, ygo_edo_codes, ygo_catalog, ygo_fusions, ygo_ai, ygo_collection,
+ygo_rating, ygo_npc_decks, ygo_card_ratings, tools/ygo/stb_zlib.c) through android/app/src/main/cpp/ygo_jni.c, Java
+Ygo.java. The engine's pack (graphics/ygo/edo.pak, every card's database row and script) is an asset handed over at run
+time (YGO_EDO_PAK_EXTERNAL: ygo_edo_data.c YgoEdo_SetPak; the game keeps its .incbin), so it isn't built into the
+native library once per processor type. JSON text from the engine goes through Java's own UTF-8 decoder (EDOPro's card
+texts aren't always Java's modified UTF-8). The cards' pictures: graphics/ygo/printed.bin ("YGOP") as WebP by
+build_assets.py (assets game/ygo_cards.bin, ~19.5 MB), read by CardPack (shared with the POKéMON cards' TcgArt).
+
+Duels by handle: the state as a seat may see it (the other hand, both decks, face-down cards hidden from the other
+side), the question (YgoQuery: its type, prompt, items with their words from EDOPro's strings, and the names to
+declare), answers as picks (+ a zone), Ygo.check (would it be taken), the AI's answer at a level, events, the state's
+hash. A FREE DUEL's duelist: one of the GBA games' decks fitted as ygo_field.c FitOnce does (Ygo_NpcDeckCards in
+ygo_rating.c, shared with the game's duelists), the player's deck rated from its cards (Ygo_DeckRating) plus skill.
+
+The game's side, src/mp/mp_phone_cards.c: the snapshot's `ygo` {on, active, skill, rated, badges, wins, losses, list
+(the decks' Forbidden & Limited list), today, packs [[set, count]], decks[8] {n, ace, m[], x[]}, owned [[id, count]]};
+orders `ygodeck` {deck, main, extra, name, active}, `ygoduel` {won, kind, deck, opp, level} (Ygo_SkillResult; a win a
+booster of a random set that can be had, 3 a day in "<save>.phonecards" packs[2]), `ygoopen` {set} (Ygo_OpenPack: nine
+`cards` and `new`). Test: tools/phone/cards_test.py.
+
+The app: CARDS' third tab. YgoDuelPage: upright, their Spell & Trap and Monster Zones at the top turned to face them
+(as the game's table: the user, 2026-11-03), the Graveyard / Deck / Extra Deck / Field Zone at the row ends, Life
+Points in the middle, the hand along the bottom; defense position sideways. In the Main and Battle Phases the cards
+with something to do glow (tap: the card up close with its words and its actions: SUMMON, SET, ACTIVATE with the
+effect's words...), the phases are buttons; the other questions open a card picker (CARDS, SUM with the running total,
+SORT, COUNTER, OPTION / ZONE when several), a list (OPTION, POSITION, ZONE), a yes / no, or the names to declare.
+Chances to chain while nothing happens are passed (YgoDuel_QuietChance, as the game's table unless L is held); MENU:
+STOP AT EVERY CHANCE. YgoDeckPage (Main and Fusion Decks, the collection by kind, the list's limits), YgoPackPage,
+YgoBinderPage, YgoCardPage. Friends by turns: CardDuels kind "ygo", each move an answer {p, z} (or {concede: seat},
+only on your own move so move numbers never collide); YgoFriendGame rebuilds the duel from decks, seed and answers.
+Companion's friend duels are one set of methods for both "tcg" and "ygo" (duelGames / syncDuelGames ...).
+Tests: coretest YgoCoreTest (24 whole duels answered as the phone's table does: every answer taken, replays agreeing,
+hidden cards hidden), YgoFriendsTest (3 duels through a real server, a concession), `ONLY=ygo android/coretest/run.sh`.
+
+## The UI / UX pass (1.77.0 on)
+
+- BOXES: the box drawn as large as the screen allows in whole screen pixels (BoxesPage.bk: 1.5x on a 1080-wide phone),
+  and ALL BOXES (the user's ask, 2026-11-03): every box at once (each wallpaper's framed inside under a name strip, the
+  PC's places scaled), the party pinned on top; hold a POKéMON and drag it to any place of any box (the list scrolls
+  near the edges); SELECT several, then tap a box's name to send them there (each a move order, to the box's empty
+  places in the order picked; the party only near a PC). A box's name opens it in ONE BOX.
+- ON OFFER (a trade by mail) as a small orange tag on box places, and on the PC card and the PARTY's cards.
+- The tab bar: a 12x12 pixel icon for each page above its name, the chosen one on a raised plate (GameView TAB_ICONS).
+
+### The app's sounds (1.81.0)
+
+The game's own sounds, played by the game's own sound engine and recorded when the APK is built; nothing is written
+for the app and nothing is committed.
+
+- **The export** (src/mp/mp_export_sound.c, part of MOEMON_EXPORT_APP; MOEMON_EXPORT_NO_SOUND=1 skips it): each sound
+  is played on the game's players and mixed by its mixer, frame by frame, with the output taken from
+  Platform_QueueAudio (gMpAudioCapture: nothing reaches the sound device). Sound effects (the list in sEffects: the
+  card tables', the PC's, the POKéNAV's, the BAG's...), a cry for every species (PlayCry_NormalNoDucking; a cry that
+  doesn't start, a cry player still taken, is tried again after a longer quiet), fanfares, and the card games' duel
+  songs as each scene plays them: MP_Kaisong_Request with a file of the scene (tt_board.c, tcg_board.c, ygo_board.c),
+  so a scene's own .kaisong plays, with no map (a borrowed save block: the export runs at the first frame) so no
+  place's music does. A song's loop is found by its first track's GOTO (music_player.c gMpGotoWatch, at pattern level 0):
+  the loop's end is that frame, its start the first frame the track was past the GOTO's place; 50 ms more is rendered
+  past the end for the app's crossfade. Two scenes with the same music (no file of their own) share one copy.
+- **sounds.bin** ("MSND", the format at the top of mp_export_sound.c): IMA ADPCM, mono at 21024 Hz for sound effects,
+  10512 Hz for cries (their own rate), stereo 21024 Hz for fanfares and songs (the mixer's 42048 Hz taken down through
+  a windowed-sinc filter). About 16 MB: 1,050 cries 7 MB, six songs 7 MB. tools/phone/sounds_pack.py lists it or
+  writes WAVs (songs twice round, crossfaded as the app plays them).
+- **Sound.java**: an AudioTrack at the phone's own rate, low latency, opened while something plays (let go after 1.5 s
+  of quiet). Sound effects on three voices (the same one again starts over; else the oldest gives way), one cry (the
+  music at 85/256 under it, PlayCry_Normal's ducking), a fanfare (the music waits, then goes on), one song (decoded off
+  the main thread, a quarter-second fade in, a crossfade over the loop's seam). The music needs audio focus, never
+  starts while another app's media is playing (USAGE_MEDIA in the active playback configurations), and stops when the
+  app goes behind something (MainActivity onPause: Sound.front(false)); it comes back with the page that asked for it.
+  MENU > SOUND: SOUND EFFECTS (cries too) and MUSIC, each on its own switch.
+- **Where**: pages opening and closing SE_SELECT (GameView.showOver), the tabs SE_RG_BAG_POCKET, the MENU SE_WIN_OPEN
+  and its rows SE_SELECT, a refusal SE_FAILURE and a done SE_SUCCESS (the toast); the SUMMARY plays the POKéMON's cry
+  as it comes up and on the picture (not an EGG's), the POKéDEX entry its cry once seen and SE_DEX_PAGE turning; a
+  MATCH CALL rings SE_POKENAV_CALL. The card tables play what the game's boards play for every event (tcg_board.c
+  BoardEvent, ygo_board.c Present, tt_board.c Play: each page's sound(); a TCG attack's sound by its animation through
+  tcg_flow.c TcgFlow_AttackSound, the board's table moved there and shared, Tcg.attackSound), SE_SELECT on a choice and
+  SE_FAILURE on a refusal, the scene's duel song (TCG / YU-GI-OH!: VS TRAINER against a card player, the UNION ROOM's
+  against a friend; TRIPLE TRIAD: FireRed's VS TRAINER), the scene's victory song on a win, the music stopping on a
+  loss, SE_FAILURE on a TRIPLE TRIAD draw. Pack openings: SE_RG_CARD_OPEN, each card SE_RG_CARD_FLIP as it turns
+  (SE_SHINY for a rare one), MUS_OBTAIN_ITEM at the end, as the game's pack screens.
+- Tests: tools/phone/sounds_test.py (every sound the app names and the attack table's are in the pack, a cry for every
+  species, loops inside their songs with a crossfade tail, nothing silent or clipped), SoundTest (`./gradlew
+  testDebugUnitTest`: the ADPCM decodes, songs go round their loops with no jump at the seam).
+
+### The POKéDEX's details, the type chart, LOOK (1.84.0)
+
+- **The export** (mp_export.c, data.json per species): `"ab"` abilities, `"eg"` egg groups, `"ey"` base EXP., `"evy"`
+  the effort it gives (HP, ATK, DEF, SP. ATK, SP. DEF, SPEED), `"it"` held items (common, rare), `"ec"` egg cycles,
+  `"fr"` base friendship, `"evo"` [method, param, target] from gEvolutionTable, `"lv"` [level, move] and `"tm"` a hex
+  mask of TM / HM indexes; top level `"tms"` the move of each TM / HM index.
+- **DexEntryPage**: chips that jump to ENTRY / STATS / TYPES / EVOLVES / MOVES / MORE (sectionY); ABILITY; TYPE MATCHUPS
+  (x4 / x2 / x1/2 / x1/4 / x0 rows, "TYPE CHART >"); EVOLUTION (the family walked from its first stage, each with its
+  method; a tap opens that stage's entry); MOVES BY LEVEL / TM & HM (a tap: the move's card, moveInfo); BREEDING;
+  TRAINING. **DexPage**: SORTS No. / ABC / TOTAL, a type filter with its own picker, CHART; filter, order and type kept
+  in the app's settings.
+- **TypeChartPage**: CHART (18 x 18, the game's type order), DEFENSE (one or two types), ATTACK (one type); the
+  numbers from the game's own gTypeEffectiveness through data.json.
+- **Look.java** (MENU > LOOK): THEMES (Page.SKY / SKY2 / BANNER / BANNER_DARK), the window frame (GameArt.userFrame:
+  frame 0 drawn as the chosen one), ANIMATIONS (GameView: pages slide in over SLIDE_MS, the tab plate over TAB_MS,
+  menus grow in, all through GameView.eased; off, everything is at once: the tests run with them off), OPEN ON (a
+  page, or LAST). Settings look_theme / look_frame / look_start / look_anim / look_last.
+- SUMMARY: the friendship rater's words under FRIENDSHIP, POKéDEX ENTRY; a move's PHYSICAL / SPECIAL / STATUS.
+  POKéGEAR RADIO: < > under the dial step half a frequency (DevicePage.step).
+- Tests: ScreensTest shots dex_entry_more1-5, dex_types, dex_fire, types_*, look_menu, look_night.
+
+### The POKé BALL page (1.85.0)
+
+The SUMMARY's BALL tab (BallPage.java): the game's POKé BALL page and ball effect editor on the phone.
+- **The clips** (src/mp/mp_fxclip.c, MOEMON_EXPORT_FXCLIPS=DIR; android/build_assets.py runs it after the export,
+  unthrottled through the test harness, about 13 s; MOEMON_EXPORT_NO_FXCLIPS skips it): the game opens its own ball
+  effect editor (mp_ballfx_editor.c, MP_FxClip_Active: the preview's pieces set by MP_FxClip_Next, the Moemon seen from
+  the front, a shorter pause) on a PIKACHU and plays every SEND-OUT, PARTICLES and RETURN once with the rest DEFAULT and
+  RED energy (a first loop unrecorded: the fade-in); sdl2.c hands each finished frame (effects composited) to
+  MP_FxClip_Frame, which keeps the battle field (112 x 112) XORed with the frame before, as runs. build_assets.py packs
+  them into fxclips.bin ("MFXA": 95 clips at 30 frames a second, each frame XORed with the one before, zlib; about
+  3.5 MB). FxClips.java unpacks one clip at a time.
+- **The data** (data.json): "balls" (mp_ballstyle.c MP_BallStyle_ExportJson: the 41 colors with their five shades,
+  the POKé BALL icon's palette and the slots 7-11 a color fills, the 68 decorations' 5x5 icon art, colors and place,
+  their groups, the special balls' items) and "ballfx" (each piece's name, the editor's words for it, where an earned
+  one comes from; the sounds; the ready-made presets as [name, pack, sound]).
+- **The snapshot**: each POKéMON's "bst" (ball style), "fx" (MP_BallFx_Pack) and "fxs" (sound) when not 0; the save's
+  "fxu" (per kind COLOR, SEND-OUT, PARTICLES, RETURN: the pieces it may pick, a bit each in hex, the first first) and
+  "fxp" (MY PRESET 1-6: [pack, sound] or 0). PhoneBall_Hash is in the rev.
+- **The orders** (src/mp/mp_phone_ball.c, as the game's own page and editor allow): "ballstyle" {at, p, o, item,
+  color, deco} (another kind of ball costs one from the BAG: "noitem"; a color not earned: "locked"; a special ball
+  is a POKé BALL underneath with its number in the style), "ballfx" {at, p, o, fx, fxs} (each piece earned or the one
+  it carries, else "locked"), "fxparty" {fx, fxs} (every POKéMON in the party but EGGs), "fxpreset" {slot, fx, fxs}.
+  The app sends "special" with "ballstyle" for Planned's preview; the game works it out itself.
+- **The page**: the stage plays the piece of the row last touched (the effect's most telling part at first; a tap
+  plays it again), the ball's icon in its corner drawn as the game draws it (the red top's shades, the emblem); the
+  info box tells of the piece, or where a piece not earned comes from. Rows THE BALL (BALL, COLOR, DECOR) and
+  SEND-OUT & RETURN (PRESET, SEND-OUT, PARTICLES, ENERGY, RETURN, SOUND): < > step, the middle opens the row's list
+  (every choice, LOCKED ones marked). SAVE (a ball from the BAG asks first), PRESETS (use or save MY PRESET 1-6), PARTY,
+  UNDO / BACK. Pieces not earned can be looked at, never kept.
+- Tests: tools/phone/ball_test.py (the orders against a headless game), ScreensTest ball_page / ball_list /
+  ball_locked.
+
+### The ME page (1.85.0)
+
+The ninth tab, ME (MePage.java): Kai's own things (src/mp/mp_phone_kai.c).
+- **The snapshot's "kai"**: "ach" [done, all], "pulls", "tickets", "free" (MP_Gatcha_FreeWaiting), "jar" (the CANDY JAR
+  in the BAG), "candy" (gMpCandies, a count per type number), "time" [hours, minutes], "farm" (the save's own GARDEN
+  BERRY farm, its open plots: [berry item, stage, minutes to the next, yield, times watered]; a friend's farm online
+  isn't sent). PhoneKai_Hash is in the rev.
+- **Asked for**: {"t":"ach"} -> "cats" and "list" ([category, name, words, status, reward, done]: mp_achieve.c
+  MP_Achieve_Info, the menu's order); {"t":"gatcha"} -> "pulls", "tickets", "banners" ([name, tagline, free 1, free
+  10]).
+- **Orders**: "pull" {banner, how: 0 free 10, 1 free 1, 2 TICKET, 3 one, 4 ten} -> mp_gatcha.c MP_Gatcha_PhonePull:
+  the reel's own RollPrizes (pity, the 10-pull's R or better, random Moemon and ball pieces, achievements, the save
+  after), friends told of a UR / EX; the answer's "prizes" [{r rarity, k kind, id (a Moemon's species, an item; a set's
+  first item, a ball piece as a POKé BALL), sh, amt, n (game text), note}]; "nopulls". "candy" {type: -1 every kind}
+  (MP_Candy_Convert / ConvertType; "nojar", "fewcandy", "bagfull"; the answer's "made"). "rename" {at, p, o, name: game
+  text as hex, 1-10 letters, no control codes ("badname"); any POKéMON but an EGG, as the summary's SELECT}.
+- **The pages**: MePage (the TRAINER CARD drawn in the app: name, ID, money, POKéDEX, time, each region's BADGES;
+  ACHIEVEMENTS with SEE ALL; MOEGATCHA with PULL; the CANDY JAR's kinds and CONVERT; the farm's plots, a ripe one's
+  yield, a growing one's time left), AchievementsPage (ALL / TO DO / DONE, < category >), GatchaPage (banners < >, the
+  pulls the banner can take now, a reel of its own that races while the game answers, slows onto the best prize and
+  flashes for SUPER RARE and up, then the pull's prizes; AGAIN / BACK). The SUMMARY: RENAME by the name (the phone's
+  keyboard; letters the game's font has; DONE sends it). "$" in the app's words is the game's money sign (GameArt
+  encode: the game's "$" ends a string, which hid the BAG's money).
+- Tests: tools/phone/kai_test.py, ScreensTest me / achievements / gatcha / gatcha_prizes.
+
+### MOéMON or POKéMON (1.86.0)
+
+The app follows the game's OPTIONS > CREATURES, or its own MENU > LOOK > CREATURES (AS THE GAME / MOéMON / POKéMON;
+Look.creatures, "look_art"; Look.pokemonArt sets GameArt.pokemonArt every frame, the widget too).
+- **Pictures**: mp_export.c exports both sets (ExportMonsArt: front/ and front_p/ by MP_MONART with the option set; the
+  party icons are the same in both, so once), each species' "pal" (Kai's) and "ppal" (the original's), and the POKéDEX
+  list's header both ways (dex_list.png, dex_list_p.png). The snapshot: each POKéMON's "pal" and "ppal" when not its
+  species' (shiny, a Stadium hue: MP_BoxMonFrontPal for Kai's, GetMonSpritePalFromSpeciesAndPersonality with the
+  option set for the original's), and the save's "art" (the game's setting). GameArt.front draws from front_N or
+  front_p_N with "pal" or "ppal"; GameArt.monPal(mon) picks a POKéMON's own.
+- **Words** (GameArt.words, on every string drawn or measured): with POKéMON, the game's own swap (mp_textopts.c:
+  MOé -> POKé in any case, MOEMON -> POKéMON); with MOéMON, the app's POKéMON / POKéDEX / POKéNAV become Kai's MOéMON /
+  MOéDEX / MOéNAV (Kai kept POKé BALL, POKéGEAR...).
+- Tests: ScreensTest party_pokemon, dex_pokemon.
+
+Next: the rest of the pass.

@@ -136,6 +136,12 @@ static const struct SpriteTemplate sSpriteTemplate_CutGrass =
 };
 
 // code
+// Moemon Kai: FireRed's RUIN VALLEY door (KANTO's SIX ISLAND): CUT from the party menu facing its braille opens it
+// (pokefirered fldeff_cut.c sScheduleOpenDottedHole, field_specials.c CutMoveRuinValleyCheck; qz_specials.c)
+static bool8 sOpenRuinValleyDoor;
+bool8 MP_RuinValleyCutCheck(void);
+void MP_RuinValleyOpenDoor(void);
+
 bool8 SetUpFieldMove_Cut(void)
 {
     s16 x, y;
@@ -144,6 +150,15 @@ bool8 SetUpFieldMove_Cut(void)
     u16 userAbility;
     bool8 cutTiles[CUT_NORMAL_AREA];
     bool8 ret;
+
+    sOpenRuinValleyDoor = FALSE;
+    if (MP_RuinValleyCutCheck())
+    {
+        sOpenRuinValleyDoor = TRUE;
+        gFieldCallback2 = FieldCallback_PrepareFadeInFromMenu;
+        gPostMenuFieldCallback = FieldCallback_CutGrass;
+        return TRUE;
+    }
 
     if (CheckObjectGraphicsInFrontOfPlayer(OBJ_EVENT_GFX_CUTTABLE_TREE) == TRUE)
     {
@@ -309,6 +324,12 @@ bool8 FldEff_UseCutOnTree(void)
 static void StartCutGrassFieldEffect(void)
 {
     FieldEffectActiveListRemove(FLDEFF_USE_CUT_ON_GRASS);
+    if (sOpenRuinValleyDoor)
+    {
+        sOpenRuinValleyDoor = FALSE;
+        MP_RuinValleyOpenDoor();
+        return;
+    }
     FieldEffectStart(FLDEFF_CUT_GRASS);
 }
 

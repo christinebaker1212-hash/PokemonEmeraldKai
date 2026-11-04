@@ -52,8 +52,6 @@ Johto_SproutTower3F_EventScript_83FA7E7::
 	applymovement 5, Johto_SproutTower3F_Movement_83FA8F6
 	waitmovement 0
 	msgbox Johto_SproutTower3F_Text_83FA915, MSGBOX_DEFAULT
-	setvar VAR_0x8004, ITEM_HM05   @ Moemon Kai: Crystal's HM (Quetzal said it, never gave it)
-	call EventScript_GiveHmOnce
 	closemessage
 	playse SE_PIN
 	applymovement 5, Quetzal_Movement_83607F9
@@ -85,8 +83,6 @@ Johto_SproutTower3F_EventScript_83FA84F::
 	applymovement 5, Johto_SproutTower3F_Movement_83FA8F6
 	waitmovement 0
 	msgbox Johto_SproutTower3F_Text_83FA915, MSGBOX_DEFAULT
-	setvar VAR_0x8004, ITEM_HM05   @ Moemon Kai: Crystal's HM (Quetzal said it, never gave it)
-	call EventScript_GiveHmOnce
 	closemessage
 	playse SE_PIN
 	applymovement 5, Quetzal_Movement_83607F9
@@ -120,6 +116,10 @@ Johto_SproutTower3F_EventScript_83FA8B7::
 	closemessage
 	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4461, 0, Johto_SproutTower3F_Text_83FABB7
 	msgbox Johto_SproutTower3F_Text_83FABC6, MSGBOX_DEFAULT
+	@ Moemon Kai: Crystal's HM, given here after the battle as Crystal's SAGE LI does (pokecrystal maps/SproutTower3F.asm;
+	@ Quetzal said it, never gave it; the ELDER's "here is your HM" is to the rival)
+	setvar VAR_0x8004, ITEM_HM05
+	call EventScript_GiveHmOnce
 	setflag FLAG_QZ_0x1004
 	msgbox Johto_SproutTower3F_Text_83FABF9, MSGBOX_DEFAULT
 	closemessage
@@ -201,24 +201,25 @@ Johto_SproutTower3F_Text_83FAAE0::
 	.string "So good of you to come here!\p"
 	.string "SPROUT TOWER is a place of\n"
 	.string "training.\p"
-	.string "People and MOéMON test their\n"
-	.string "bonds to build a bright future\l"
-	.string "together.\p"
+	.string "People and MOéMON test their bonds\n"
+	.string "to build a bright future together.\p"
 	.string "I am the final test.\p"
-	.string "Allow me to check the ties\n"
-	.string "between your MOéMON and you!$"
+	.string "Allow me to check the ties between\n"
+	.string "your MOéMON and you!$"
 
 Johto_SproutTower3F_Text_83FABB7::
 	.string "Ah, excellent!$"
 
 Johto_SproutTower3F_Text_83FABC6::
-	.string "You and your MOéMON have passed\n"
-	.string "the tower’s test.$"
+	.string "You and your MOéMON should have no\n"
+	.string "problem using this move.\p"
+	.string "Take this FLASH HM.$"
 
 Johto_SproutTower3F_Text_83FABF9::
-	.string "Trust in that bond to face\n"
-	.string "the challenges ahead.\p"
-	.string "Have a safe journey!$"
+	.string "FLASH illuminates even the darkest\n"
+	.string "of all places.\p"
+	.string "But to use it out of battle, you\n"
+	.string "need the BADGE from VIOLET’s GYM.$"
 
 Johto_SproutTower3F_Text_83FAC3F::
 	.string "I hope you learn and grow from\n"

@@ -73,7 +73,7 @@ Johto_RadioTower4F_EventScript_83D87A8::
 Johto_RadioTower4F_EventScript_83D87B3::
 	msgbox Johto_RadioTower4F_Text_83D89E3, MSGBOX_DEFAULT
 	closemessage
-	setorcopyvar VAR_0x8000, ITEM_BRIGHT_POWDER
+	setorcopyvar VAR_0x8000, ITEM_SILK_SCARF
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
@@ -125,12 +125,12 @@ Johto_RadioTower4F_Text_83D89E3::
 	.string "Will you take this as my thanks?$"
 
 Johto_RadioTower4F_Text_83D8A27::
-	.string "MARY: It’s good for dodging the\n"
-	.string "enemy’s attacks.$"
+	.string "MARY: It’s just right for MOéMON\n"
+	.string "that know normal-type moves.$"
 
 Johto_RadioTower4F_Text_83D8A58::
-	.string "MARY: Please tune into me on PROF.\n"
-	.string "OAK’S MOéMON TALK show!$"
+	.string "MARY: Please tune into me on PROF.\p"
+	.string "OAK’S MOéMON TALK show.$"
 
 Johto_RadioTower4F_Text_83D8AA4::
 	.string "You plan to rescue the DIRECTOR?\p"

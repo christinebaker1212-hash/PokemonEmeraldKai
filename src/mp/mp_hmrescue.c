@@ -7,6 +7,7 @@
 // in the BAG, the PC or held by a POKéMON) the one who would have given it walks up and hands it over, as the
 // LOTTERY CORNER clerk does with TMs (mp_tmrefund.c). Every other HM's giver stays where they are.
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "global.h"
 #include "mp.h"
@@ -69,7 +70,7 @@ static const struct OwedHm sOwed[OWED_COUNT] = {
 static EWRAM_DATA struct
 {
     u8 state, objId, steps, walked, dir;
-    u8 which;
+    u8 which, slow;
     u16 timer, check;
 } sC = {0};
 
@@ -262,17 +263,42 @@ static void Task_Courier(u8 taskId)
     }
 }
 
+// RUSTURF TUNNEL: a friend smashed a boulder while we were on the map (mp_world.c sets the rock's flag, so it's gone
+// for us for good), but only the smasher's EventScript_SmashRock runs TryUpdateRusturfTunnelState: our tunnel stayed
+// shut in the story, Wanda's boyfriend kept waiting and STRENGTH could never come. Once our own story is there (the
+// AQUA grunt's scene done: state 3) and we're in sight of the spot, it catches up: the map's ON_FRAME scene plays
+// (state 4 / 5), as if we had smashed it, and the boyfriend hands STRENGTH over.
+static void TunnelCatchUp(void)
+{
+    struct ObjectEvent *player = &gObjectEvents[gPlayerAvatar.objectEventId];
+    u8 TryUpdateRusturfTunnelState(void);
+    if (gSaveBlock1Ptr->location.mapGroup != MAP_GROUP(MAP_RUSTURF_TUNNEL) || gSaveBlock1Ptr->location.mapNum != MAP_NUM(MAP_RUSTURF_TUNNEL))
+        return;
+    if (FlagGet(FLAG_RUSTURF_TUNNEL_OPENED) || VarGet(VAR_RUSTURF_TUNNEL_STATE) != 3)
+        return;
+    if (!FlagGet(FLAG_HIDE_RUSTURF_TUNNEL_ROCK_1) && !FlagGet(FLAG_HIDE_RUSTURF_TUNNEL_ROCK_2))
+        return;
+    if (abs(player->currentCoords.x - (24 + MAP_OFFSET)) > 7 || abs(player->currentCoords.y - (5 + MAP_OFFSET)) > 5)
+        return;   // (the scene plays in sight of the boulders, where its people stand)
+    if (TryUpdateRusturfTunnelState())
+        MPNet_Log("hms: RUSTURF TUNNEL's boulder went with a friend: the tunnel scene plays (state %d)", VarGet(VAR_RUSTURF_TUNNEL_STATE));
+}
+
 // Every frame (MP_FrameUpdate): now and then, on HOENN's maps, free on the map, not on the scene's own map
 void MP_HmRescue_Update(void)
 {
     u8 i;
     if (gMain.inBattle || FuncIsActiveTask(Task_Courier) || !MP_IsInOverworld() || !MP_IsLocalFree())
         return;
-    if (++sC.check < 120)
+    if (++sC.check < 30)
         return;
     sC.check = 0;
     if (MP_Region_Current() != REGION_HOENN)
         return;
+    TunnelCatchUp();
+    if (++sC.slow < 4)
+        return;   // (the couriers: every 2 seconds)
+    sC.slow = 0;
     for (i = 0; i < OWED_COUNT; i++)
     {
         if (gSaveBlock1Ptr->location.mapGroup == sOwed[i].giverMapGroup && gSaveBlock1Ptr->location.mapNum == sOwed[i].giverMapNum)

@@ -848,6 +848,33 @@ as POKé BALL + style like the other special balls); MoeGatcha BALL banner only.
   into mp_legacy_sfx.h; mixed into m4aSoundVSync's output (music_player.c), panned when the sound option is STEREO.
 - Debug: `mp ballstyle SLOT HEX` sets a party Moemon's ball style. Tests: legacy_solo, legacy_coop.
 
+## The ASTRAL BALL (a sure catch, and shiny)
+
+The user's design (2026-11-04; art docs/user_images/69.png battle sheet, 70.png BAG icon): ITEM_ASTRAL_BALL (ITEM_058,
+88), special ball 14 (MP_SPECIAL_ASTRAL, style `e000`; 14 was the last free special index: 15 is a color bit), MoeGatcha
+BALL banner ULTRA x1 and EX x2 (beside the MASTER BALL). Art: `python3 tools/moemon_balls/astral.py` (the sheet in
+the HGSS layout -> graphics/balls/astral.png like hgss_balls.py; the icon's 24x24 middle -> moemon_astral_ball.png/.pal).
+- Catch: Cmd_handleballthrow sets odds 255 (caught on the throw, three shakes like the MASTER BALL). The ghost battle's
+  dodge (gMpUncatchableWild) and trainers' blocks still apply.
+- Shiny: pokemon.c MP_Astral_MakeShiny, from MP_Ball_SetCaught and again in GiveMonToPlayer after the OT re-key (a
+  co-op catch is made with the host's ID). A new personality: low half searched from the old one, high half picked
+  for shininess, keeping nature, gender, UNOWN's letter and WURMPLE's class (only SPINDA's spots move); the four
+  substructures are re-sorted for the new personality and the checksum redone. Logs `astral: species ... ->`.
+- Not a re-housing ball (MP_BallStyle_CanRehouse): the summary's POKé BALL page and the phone (export "catchonly")
+  never offer it, since only a catch makes an ASTRAL Moemon shiny.
+- Looks (src/mp/mp_astralfx.c, no sprite or palette used, the art untouched; the user's design, 2026-11-04):
+  MP_AstralFx_Prism (sdl2.c, right after DrawFrame and the BAG / CANDY JAR pictures, before weather and tints)
+  finds the ball's pixels by its palette's colors inside its box and tints them with a diagonal rainbow that slides
+  and breathes, under it a slower shimmer of lighter and darker patches (two triangle waves meeting); outline and
+  shine kept. MP_AstralFx_Composite draws silver four-pointed sparkles around it, a trail while it moves, darker
+  steel-silver over bright backgrounds, fading with its palette.
+  Only an ASTRAL BALL that hasn't caught anything shows them: item icons (item_icon.c MP_AstralFx_Icon; a tile
+  checksum drops reused slots) and thrown balls (battle_anim_throw.c MP_AstralFx_Thrown, on every player's screen).
+  At the click (SpriteCB_Ball_Capture_Step, MP_AstralFx_Caught) the sheen fades to the ball's own grey over
+  FADE_FRAMES and the sparkles, plus a ring of twelve, fly into it; the summary's ball and send-outs are plain.
+- Test astral_ball (four full-HP catches incl. RAYQUAZA, check.py: shiny, nature, gender, UNOWN letter, WURMPLE;
+  `mp monid SLOT`; shots: flight, shakes, the click, the summary's plain ball, the BAG).
+
 ## NAME CASE and CREATURES (OPTIONS, this game only)
 
 SaveBlock2 spare option bits: optionsNameCase (2 bits: MP_NAMECASE_AS_TYPED / CAPS / MIXED) and optionsPokemonArt
@@ -2975,8 +3002,11 @@ music, trainers, wild, statics, heal locations, town maps, menus, Gen 3 stand-in
   and METEORITE 1000).
 - Borders: KANTO's seven FireRed layouts with 3x2 borders (VIRIDIAN FOREST, the SAFARI ZONE, BERRY FOREST, PATTERN
   BUSH) repeat them 3 wide (fieldmap.c GetBorderBlockAt); every other map's border is 2x2.
-- Doors: Quetzal has no door animations for JOHTO / KANTO's tiles either (its door table is Emerald's; a second
-  8-entry one is never used), so their doors open without one.
+- Doors: KANTO's are FireRed's (src/data/frlg_doors.h). JOHTO's are Quetzal's own (1.83.0): its door table at ROM
+  0x952148 (FireRed's format, 19 one-metatile doors, read next to Emerald's at 0x951EC0) plus FireRed's tall doors at
+  0x952358, ripped by tools/quetzal_rip/rip_doors.py QUETZAL_ROM into quetzal_rip/doors/ and src/data/qz_doors.h;
+  mp_frlgdoor.c Find looks a JOHTO door up there by metatile, and a door tile it doesn't list opens without an
+  animation, as in Quetzal (the frames once made from the closed door, all rising, are gone). Test johto_doors.
 - Triple Triad sellers in JOHTO / KANTO stock what MAUVILLE's / LILYCOVE's do (Tt_PoolOf, as their players' hands):
   gTtSellerStock has HOENN's eight shelves only, and the seller crashed on the missing ones.
 - Quetzal's system flags (FireRed's, from 0xA50) that the engine reads are Emerald's own (constants/qz_port.h, from
@@ -4459,6 +4489,11 @@ rival beaten; DIVE: STEVEN's house empty and the 7th badge; WATERFALL: the 8th b
 HM is in neither the BAG, the PC nor held by a POKéMON in the party or the boxes, the giver walks up on the map (never on
 the scene's own map) and hands it over, setting the flag; the walk-up is mp_tmrefund.c's. CUT, ROCK SMASH, FLASH and SURF
 have givers who stay. Debug `mp hmrescue`; tests hm_rescue, hm_rescue_carried.
+A friend's smash of RUSTURF TUNNEL's boulder while the player is on the map (mp_world.c WC_OBJ_GONE) sets the rock's
+flag for good but never ran TryUpdateRusturfTunnelState on the player's game (only the smasher's EventScript_SmashRock
+does): the tunnel stayed shut in their story and Wanda's boyfriend kept waiting (1.87.1). TunnelCatchUp (every half
+second on that map) does it once the player's own story is at state 3 (the AQUA grunt's scene done), a rock is gone and
+they're in sight of the spot: the map's ON_FRAME scene plays and hands STRENGTH over. Test coop_rusturf.
 
 ## Platinum's time of day in the 2D regions (1.67.0)
 - src/mp/mp_daytint.c: on an outdoor map outside SINNOH (IsMapTypeOutdoors; SINNOH's 3D maps light themselves), the
@@ -4559,3 +4594,333 @@ holds dolls and cushions (MP_RoomFloorHoldsDecor). Test johto_my_room.
   the sheets' differently ordered colors joined), mapped onto Brendan's / May's frame layout (PlatinumFrameOf); the
   local player's palette tag is OBJ_EVENT_PAL_TAG_MP_PACK. Without the pack: the hybrid body as before. Platinum's
   watering can only faces north, so watering stays hybrid. Test look_platinum_actions.
+
+## The card tables' choices shared with the phone (1.78.0)
+
+- src/tcg/tcg_flow.c (include/tcg/flow.h): what a POKéMON card move asks for (the Trainers' and Pokemon Powers' steps,
+  the attacks' menus and targets, the filters for spaces and cards, whether a hand card / attack / retreat can be used
+  and why not, the retreat's Energy when there's nothing to choose) moved out of tcg_board.c, which keeps its screen and
+  cursor and calls these; the phone drives the same steps through TcgFlow (docs/PHONE_LINK.md "The POKéMON card game on
+  the phone"). Never copy them back into the board.
+- Fixes the phone's test turned up, in the game too: while setting up, the Active spot is chosen first (a Basic put on
+  the Bench with nothing Active could leave a player with no way on); an evolution card targets only Pokemon that can
+  evolve this turn (not one put down this turn when another of the name can); Scoop Up / Super Scoop Up don't count as
+  playable on your only Pokemon in play.
+
+## YU-GI-OH! shared with the phone (1.79.0)
+
+- The GBA games' duelists' decks as cards that can be played: src/ygo/ygo_rating.c Ygo_NpcDeckCards (it was
+  ygo_field.c's GameDeckAt), used by the game's duelists and the phone's FREE DUEL.
+- ygo_edo_data.c built with YGO_EDO_PAK_EXTERNAL takes EDOPro's pack from YgoEdo_SetPak (the phone app reads it from its
+  files); the game keeps it built in (ygo_edo_pak.c).
+
+## Moemon Maker, M1: quick edits on the base game
+
+The user's own editor (docs/MOEMON_MAKER.md: the design, every decision, the build order). Hidden: the main menu's
+MOéMON MAKER row appears only with `AllowSmallTweaks = 1` and "maker" typed since the start (src/maker/maker_gate.c,
+text_input.c CheckTypedWords; a fifth main-menu item scrolls as MYSTERY EVENTS' does). Never mentioned in PATCH NOTES
+or the README. The updater no longer has a dev channel: AllowSmallTweaks only unlocks the small tweaks.
+
+- **The editor** is C++ in maker/ (Dear ImGui 1.91.9b-docking, maker/README.md), built into the game by the Makefile's
+  MAKER_* rules, reaching the game only through include/maker_api.h (src/maker/*.c). Its own SDL window; the game's
+  window is hidden meanwhile (display.c Display_SetMainWindowShown) and the game waits in CB2_MakerWaiting.
+  Settings in moemon_maker.ini, panels in moemon_maker_layout.ini; the font is Liberation Sans (maker/fonts, OFL).
+- **Names, not numbers**: tools/maker/gen_names.py makes include/constants/maker_names.h (every map; each map's people /
+  signs / triggers by name from map.json; songs, looks, movement / trainer types, items, species, flags as
+  `{"NAME", NAME}` so the compiler works out aliases) and maker_tilesets.h (each tileset's metatile count by sizeof, at
+  the end of src/tilesets.c), both when the game is built (map_data_rules.mk); src/maker/maker_names.c holds them.
+- **Drawing**: a map's tilesets go into the game's own BG VRAM (the screen is off) and the game's own tile animations
+  run on them (tileset_anims.c TilesetAnims_InitForLayout, one step per game frame in CB2_MakerWaiting); the editor draws
+  each metatile once into an atlas (field_camera.c DrawMetatile's layering: NORMAL over the 0x3014 filler). While the
+  game plays (F5) the tiles go into a buffer of their own and don't animate. People: GetObjectEventGraphicsInfo and
+  ObjectEvent_MakerPalette (the field's palette tags, only read). Behavior marks by the game's MetatileBehavior_Is*.
+  SINNOH: by what each tile does (the 3D pack's blocks), with a 3D PREVIEW (s3d.c S3D_RenderPreview: the game's camera
+  on any tile, the view's state put back).
+- **The edits** (MoemonMaker/base/MAP_X.txt, one line each with the value it replaced; the format is at the top of
+  src/maker/maker_overrides.c): the game reads them at start (Maker_ReadDir: the working copy MoemonMaker/ where there
+  is one, else the published pack MoemonMakerPack/) and patches maps through Overworld_GetMapHeaderByGroupAndId (an
+  edited header copy: people, warps, signs, triggers, connections, music) and fieldmap.c Maker_MapBlocks (tiles). An
+  edit applies only while the game still has its "was"; else the game's own wins and the editor's PROBLEMS offers
+  "Keep mine" / "Take the game's". Nothing for converters to skip: the overrides are never in the files they write.
+  Wild slots apply after the GENERATION's pools (mp_region.c MP_Region_WildInfo -> Maker_WildInfo).
+- **Added things**: people (script "nothing", "itemball" or one of the map's own by label), hidden items, signs, warps
+  (after the map's own: other maps lead to them by number), connections. Item balls and hidden items get Maker flags
+  (0x8000+, src/maker/maker_flags.c, "<save>.maker" by name: the save never changes layout); data/scripts/maker.inc
+  Maker_EventScript_ItemBall + special Maker_ItemBallItem (the item rides in the template's berry tree / sight field).
+- **Music**: MoemonMaker/music/ (mp_kaisong.c also scans it, its files first): <song>[@<place>].kaisong replaces; any
+  other name is a new track, song numbers MAKER_SONG_FIRST (0x4000)... by name order, played on MUS_LITTLEROOT's BGM
+  entry (m4a.c MP_Kaisong_TableIndex). A map's music edit: "music WAS NOW".
+- **Editing**: maker/maker_edits.cpp (the model, undo / redo by change, Ctrl+S, recovery files in MoemonMaker/.recovery/,
+  every change sent to the game at once: MakerApi_SetMapEdits), maker_mapview.cpp (MAP, TILES, INSPECTOR, PROBLEMS),
+  maker_wild.cpp (ENCOUNTERS: list with chances spread over the fixed slots, and the slots), maker_music.cpp (MUSIC),
+  maker_publish.cpp (the checker and PUBLISH).
+- **F5** (src/maker/maker_play.c): a copy of a save (Emerald's continue-game warp to the spot) or a story point (a new
+  game set up in Maker_PlayNewGame through the quick start's hook); the play's save is MoemonMaker/.play/play.sav, the
+  real one is read again afterwards. Edits of the map the player is on: tiles redrawn in place, anything else by a quiet
+  warp to the same spot (field_screen_effect.c DoMakerReloadWarp). F12 / closing the game's window: back to editing.
+- **Publish** (src/maker/maker_publish.c, on its own thread): GitHub's git data API with the user's token (moemon_maker.ini
+  only): changed files as blobs (Git blob ids compared), one tree, one commit with a "Moemon-Maker:" trailer, the
+  default branch moved; history from the commits touching MoemonMaker/; a rollback commits the old MoemonMaker tree
+  again and writes its files into the working copy. updater.c HttpRequest / Updater_Request (WinHTTP, libcurl).
+- **The pack**: .github/workflows/maker-pack.yml checks MoemonMaker/ against the game (tools/maker/check_pack.py) and
+  puts MoemonMakerPack.zip + maker-pack.txt (tools/maker/build_pack.sh; the id is a hash of its files) on the
+  "maker-pack" pre-release; updater.c MakerPackWorker downloads it at each start of a release folder; package.sh
+  ships it in every release as MoemonMakerPack/. The editor's first open on a PC starts its working copy from it.
+- **Tests**: tools/test/maker_gate.sh, maker_shell.sh, maker_map.sh, maker_edit.sh, maker_wild.sh, maker_music.sh,
+  maker_play.sh, maker_publish.sh (a stand-in for GitHub's API: maker_github_mock.py), maker_pack.sh, maker_sinnoh.sh;
+  harness commands `maker ...` (maker_ui.cpp MakerUi_TestCommand) and `makershot NAME`.
+
+## The 1.82.0 fixes (SINNOH, JOHTO, KANTO, the GAME CENTER)
+- SINNOH's stairs: Platinum's WARP_STAIRS_EAST / WEST are the tile beside the stairs, walked off into them. build_pack.py
+  STAIRS gives them Emerald's unused behaviors 0x5C / 0x5D (up, east / west) and 0x5E / 0x5F (down), arrow warps
+  (metatile_behavior.c MetatileBehavior_IsSinnohStairs, SINNOH only), carried up or down by DoSinnohRideWarp, no arrow
+  sprite. Test sinnoh_* (the house's stairs: walk beside them, nothing; walk into them, the floor changes).
+- SINNOH's people: Platinum's sheets stand on row 29 of 32, Emerald's on 30: build_gfx.py feet_shift moves them down.
+- Story people on Platinum's story: s3d_legends.c skips the old written story's battle rows (they cleared FLAG_HIDE_
+  ROUTE_201_RIVAL on every visit). Test sinnoh_platinum_verity. The lab's first visit: gen_scripts.py converts
+  GivePokedex and BufferPlayerCounterpartStarterSpeciesName (sinnoh 6 ..., 1: the counterpart's). Test sinnoh_platinum_lab.
+- Quetzal's setmaplayoutindex numbers are Quetzal's layout ids (quetzal_rip/layouts quetzal_layout_id): the scripts name
+  LAYOUT_ constants now (import.py fix, tools/test/check_scripts.py refuses a number). Three alternate layouts no map
+  header points at were never ripped: SEAFOAM B3F / B4F with the currents stopped (899 / 900) and DUNSPARCE TUNNEL dug
+  out (940). tools/quetzal_rip/rip_alt_layouts.py QUETZAL_ROM reads them from Quetzal's layout table (ROM 0x930A8C,
+  entry = id - 1; ROM_MAP.md's 0x08939B54 is not it) into the rip and data/layouts (appended: no number moves);
+  `mp layout` prints the layout a map shows; test region_alt_layouts.
+- JOHTO's / KANTO's PC: FireRed's tiles 0x62 / 0x63 (field_specials.c PcTilePair). Test region_pc_tile.
+- The BICYCLE (item 360) rides as the MACH BIKE. Test region_bicycle.
+- Fossil lines are never wild before the region's LEAGUE (mp_region.c MP_WildSpeciesOk). Test region_fossils.
+- JOHTO's BERRY patches: never a sprite of their own (the map's fruit tree is the tree, ripe or not, as in Crystal; until 1.91.0
+  the ripe BERRY tree showed over it), Crystal's "There's nothing here…" otherwise, replanted when picked
+  (mp_apricorn.c MP_JohtoBerries_*). Test johto_berry_patch.
+- The GAME CENTER away from HOENN: the guide charges the admission, 3F's four patrons are OBJ_EVENT_GFX_VAR_0-3
+  (MP_Region_GameCenterLooks), the coin counter names the region's GAME CORNER (MP_Region_BufferGameCorner). The CARD
+  CLUB people use MP_Region_BufferName and give no second CARD CASE.
+- Map pictures (mp_mappic.c) take the day tint (gMpScenePixel) as the map's tiles do.
+- Battle weather keeps off every sprite but the battlers, and half of it off them too: gba_easy_draw.c records each
+  pixel's sprite palette (gMpPixelObjPal), mp_battleweather.c MayCover.
+- GB2 printed art: tools/tcg/trim_printed_rects.py moves the rectangles' edges past the card border; tcg_gfx.c
+  CleanArtCorners cleans what's left in a rounded corner.
+- JOHTO's item ball sprite 59 is drawn as 15006 (gen_objects.py DRAWN_AS); ETHAN's back picture frames reordered
+  (moemon_chars/import.py BACK_ORDER).
+- The TOWER pillar (SPROUT TOWER, TIN TOWER) is Quetzal's object 16066 (five frames), not map tiles: gen_objects.py
+  OBSTACLE_ANIMS gives it object_event_anims.h sAnimTable_QzTowerPillar (Crystal's TilesetTowerAnim: 0 1 2 3 4 3 2 1,
+  16 frames a step, for every anim index) and event_object_movement.c UpdateObjectEventSpriteAnimPause keeps it
+  running (a standing object's facing anim is paused). Test johto_sprout_pillar (check_pillar_sway.py).
+- Where Quetzal's KANTO layouts differ from FireRed's, FireRed's win (the user, 2026-11-03): tools/quetzal_port/
+  frlg_blocks.py puts FireRed's blocks back in data/layouts at import (the rip keeps Quetzal's bytes); so far SEAFOAM
+  B3F's two ledge-side tiles. The three alternate layouts are FireRed's own byte for byte.
+- The MAGNET TRAIN (data/scripts/mp_region.inc, MP_MagnetTrainOpen: either LEAGUE + the S.S. TICKET) rides Crystal's
+  scene (engine/events/magnet_train.asm) in src/mp/mp_magnettrain.c with art from tools/quetzal_port/gen_magnet_train.py
+  POKECRYSTAL_DIR: BG1 the scenery (Crystal's 18 rows a row lower; the GBA's extra top and bottom rows carry on the
+  trees), BG0 the train's band (tile 96, past the art, is the clear one: tile 0 is opaque), both VOFS cleared (the
+  field's camera leaves BG1's scrolled). Test region_train_ride: tools/test/check_train_scroll.py checks two frames in a
+  row differ in every 8-pixel row outside the train's band and that trees fill the top and bottom rows.
+- No drop shadow in tall grass (mp_shadow.c InGrass), as the game's own grass covers the feet.
+
+## 1.82.1: no shadow behind a tile drawn over the feet
+- mp_shadow.c FeetCovered: a NORMAL / SPLIT metatile's top layer (BG1, over sprites at priority 2) with 8 or more of the
+  32 pixels of its bottom two rows drawn hides the owner's feet: no shadow (it peeked out under a 2x1 tree's leaves,
+  the user's picture). Followers and Garden POKeMON by their feet against the player's (SpriteFeetCovered). The GAME
+  CENTER's counters are its pictures' "over" layer, not tiles: mp_mappic.c MP_MapPic_CoversFeet (the same 8 of the
+  bottom rows' 32 pixels). Tests shadow_covered, shadow_covered_tree, shadow_covered_gamecenter (check_shadow_covered.py).
+
+## JOHTO's phone, Crystal's (1.83.0)
+- tools/quetzal_port/gen_phone.py POKECRYSTAL_DIR -> src/data/qz_phone.h: Crystal's 28 trainer contacts (data/phone/
+  phone_contacts.asm; BILL, BUENA and the BIKE SHOP aren't in), every phone script (engine/phone/scripts but MOM's and
+  ELM's, which mp_pokegear.c already has), the number-asking std scripts (engine/events/std_scripts.asm) and each
+  contact's trainer `.Script` on its map, as bytecode for src/mp/mp_qzphone.c (Crystal's semantics: `end` returns
+  from a call, the conditions test the last value); the words (data/phone/text, data/text, maps) as paragraphs run
+  together, paged by the game to its windows; rematch teams Crystal's (data/trainers/parties.asm), the first fight the
+  Quetzal trainer of the same name on the contact's map (Quetzal split ROUTE 26 and joined the LIGHTHOUSE floors).
+- Field: data/scripts/trainer_battle.inc EventScript_NoNormalTrainerBattle asks QzPhone_TrainerTalk first, so a beaten
+  contact runs Crystal's own script (rematch when ready, the gift kept for the player, the number asked once, then
+  again); data/scripts/qz_phone.inc's loop asks QzPhone_Step what to show (text in gStringVar4, YES / NO, giveitem, a
+  rematch through BattleSetup_ConfigureTrainerBattle's no-intro battle with Crystal's beaten words, the registration
+  fanfare). Rematch teams go in through MP_Region_TrainerData (MP_QzPhone_RematchTrainer).
+- Calls: field_control_avatar.c, each step in JOHTO or KANTO, a registered contact not on the map calls every few
+  hundred steps (QzPhone_EventScript_IncomingCall). OPTIONS > CO-OP > MOENAV CALLS: BATTLES plays the call silently
+  first (its own seed, the state put back) and lets only a call asking for a battle ring, as HOENN's MOENAV.
+- POKéGEAR: the phone book is MOM, PROF. ELM, then the numbers (CLASS and name, scrolling); calling one plays its
+  callee script's words (MP_QzPhone_Call), two lines a page.
+- Crystal's story marks: Quetzal's fly flags (0x11BE-0x11C5, VERMILION 0x2262), badge flags, VAR_QZ_0x500A for the RADIO
+  TOWER (6-9 ROCKETS in it, 10 cleared; the ROCKET HIDEOUT counted cleared from 6), the LEAGUEs; the day's BUG-CATCHING
+  CONTEST, the DEPT. STORE sale and KANTO's SNORLAX read as not yet. Swarm news (RALPH, WILTON, ANTHONY, ARNIE) is told
+  but no swarm appears yet.
+- State: region vars 0x5240-0x5258 (numbers, Crystal's phone flags, fight counts, the step count). Debug `mp qzphone
+  register|ready|fights|steps|moenav|call N [V]`. Tests johto_phone, johto_pokegear_contacts, johto_phone_battles.
+
+## Voyages between regions, the first arrival's guide, KANTO's TVs (1.83.0)
+- src/mp/mp_voyage.c MP_Voyage_Begin(eastbound, faded): FireRed's ferry scene (pokefirered src/seagallop.c, its art in
+  graphics/moemon/voyage): the sea on BG3 scrolling 0x600 a frame, the ferry crossing with its wake every 5 frames,
+  FireRed's letterbox (WIN0, rows 24-136; the backdrop black), 140 frames, then the fade and WarpIntoMap to the warp set
+  before it (in DoWarp's place). The port's music plays on through it, as FireRed's. Logs `voyage: east|west|arrived`.
+- qz_specials.c TravelNow: every boat trip between regions (and a friend following the host's trip) sails it, east when
+  the destination comes later in HOENN, JOHTO, KANTO, SINNOH; the MAGNET TRAIN keeps its own ride.
+  QzDoSeagallopFerryScene: the SEVII ferries, east / west by FireRed's sTravelDirectionMatrix (the script has faded the
+  screen: faded TRUE).
+- The first boat to JOHTO / KANTO (mp_region.c MP_Region_FirstBoatIn) comes in at OLIVINE's port (8,16) / VERMILION's
+  dock (24,32) with VAR_REGION_ARRIVAL 0x52FD = the region; the ports' frame scripts (Moemon Kai lines in
+  Johto_OlivinePort / Kanto_VermilionCity scripts.inc) run data/scripts/mp_region.inc EventScript_RegionArrival*: the
+  port's sailor (local id 1 / 4) says the professor asked him to meet the player and warps them to NEW BARK's / PALLET's
+  room. A new game started there and the MAGNET TRAIN still go straight to the house (MP_Region_GoToStartHouse).
+  SINNOH's CANALAVE sailor was already that. tools/quetzal_port/story_vars.py reads include/mp_region.h's var names.
+- tv.c SetTVMetatilesOnMap does nothing on a FireRed-tileset map (isFrlg): METATILE_Building_TV_On / Off are Emerald's
+  numbers, which drew another tile over KANTO's / JOHTO's TVs when a HOENN show was on the air.
+- Tests region_voyage (HOENN -> KANTO first trip, the guide, back west), kanto_seagallop (`mp seagallop FROM TO`),
+  kanto_tv (`mp tvscreens [off]`).
+
+## SINNOH's doors, moving lakes and the feet row (1.83.0)
+- Doors: Platinum's door props (ov5_021D431C.c's list: door01, the wooden, iron, POKéMON CENTER, gym, DEPT. STORE...
+  doors; the elevator's, a texture pattern, isn't played) carry 2 or 4 joint animations (open, close; four: walking
+  in, then walking out). tools/sinnoh/build_pack.py (pack version 7) bakes each one's frames as meshes (door_frames)
+  and turns a step warp with a door prop on it or beside it (door_at, Platinum's three-tile box) into MB_ANIMATED_DOOR,
+  so the game's own door warp runs (field_screen_effect.c Task_DoDoorWarp / Task_ExitDoor); field_door.c hands its
+  calls to src/sinnoh/s3d.c on SINNOH's maps: S3D_DoorAnimate (0 / 1 walking in, 2 / 3 walking out; a task the field
+  waits on), S3D_DoorClose, S3D_DoorSound (sliding / the DEPT. STORE's chime: SE_SLIDING_DOOR, hinged: SE_DOOR). The
+  door left open keeps its last frame until it shuts. Logs `[s3d] door N at X,Y: animation K`; `mp s3ddoor K` plays one
+  in front of the player.
+- Buildings drawn as Platinum draws them: build_model_matshp.dat (fetch_decomp.sh PARTS 22) lists the (material,
+  shape) pairs of 478 building models; map_prop.c draws them one by one with the prop's transform and the position
+  scale only, their nodes left out (nitro.py Model.draw_matshp). A house's own copy of its door hangs off a node at the
+  doorway, and Platinum's way leaves it inside the house, so the door prop is what's seen (14 towns' pictures are
+  otherwise the same pixel for pixel).
+- Moving textures on props: an NSBTA (texture SRT: nitro.py Bta0 / SrtAnim, translation in texture sizes, rotation
+  left out) on a looping prop is baked frame by frame like the joint animations (build_pack.py prop_frames): LAKE
+  VERITY's water (prop 311, 61 frames a loop) and the other lakes and pools.
+- The feet row: Platinum's sheets stand on row 29 of their frames, Emerald's on 30; build_gfx.py feet_shift now takes
+  the standing frames only (112 sheets step down to row 30, and judged by those weren't moved).
+- Tests sinnoh_doors, sinnoh_lake_water (tools/test/check_lake_water.py), sinnoh_feet_row (tools/test/check_feet_row.py).
+- (1.83.0) Sprite palette slots 16-63 in a palette mask: battle_anim_throw.c SpriteCB_Ball_FadeOut faded
+  `1 << (slot + 16)`; with the ball's palette in slot 17 that wrapped to bit 1, BG palette 1, the battle's YES / NO
+  frame, left white after every catch. It fades by slot now (MP_BeginSpritePaletteFade); the battle animations' and the
+  trade's masks use MP_SPRITE_PAL_BIT (palette.h: 0 for slots 16-63, no fade rather than the wrong palette's).
+  Test catch_yesno_frame (tools/test/check_yesno_frame.py); `mp dumppltt FILE` / `mp dumpvram FILE` write into the
+  test's picture folder for a relative FILE.
+
+## KANTO / JOHTO restored toward FireRed / Crystal (1.88.0, the audit: docs/REGIONS_AUDIT.md)
+The audit's findings are in docs/regions_audit/<AREA>_findings.md, the user's decision per case in docs/REGIONS_AUDIT.md
+(JOHTO strictly Crystal; Gen 5+ legendaries only from MOEGATCHA). Tools and conventions for the work:
+- `FLAG_KAI_GONE` (include/constants/kai_regions.h, always set by mp_region.c on load / new game): a Quetzal person or
+  thing taken out wears it as its object flag, so the map's local ids stay as they are. New JOHTO / KANTO flags of
+  this game's own go in kai_regions.h (free numbers in Quetzal's ranges; the map scripts, map events and C see it).
+- tools/quetzal_port/crystal_words.py MAP LABEL [OURS]: Crystal's text from pret/pokecrystal as `.string` lines.
+- Raw Quetzal trainer numbers in settrainerflag / cleartrainerflag are TRAINER_QZ_<n> now (raw ones went through
+  TRAINER_FLAG into the special flags and past them: memory corruption on every gym win).
+- qz_specials.c QzClearSeagallopRestrictions does nothing (it cleared KANTO's GAME CLEAR / CHAMPION flags);
+  mp_region.c KantoLeagueFlags gives them back to saves with KANTO's LEAGUE on record.
+- JOHTO's roaming RAIKOU / ENTEI: src/mp/mp_johto_roamer.c (Crystal's rules and RoamMaps; chunk JRMS; the BURNED TOWER's
+  special MP_JohtoRoamer_Init; saves past the scene get them on load: MP_JohtoRoamer_CatchUp); their static objects are
+  hidden (RefreshStatics); roamer.c's HOENN roamer only roams HOENN. Debug `mp jroamers [init|SLOT|meet]`; test johto_roamer.
+- FireRed's boulders that fall through holes: field_player_avatar.c MP_BoulderFallThroughHole (the reveal flag in the
+  template's trainer type; holes are non-animated door warps here), mp_world.c for friends' pushes; SEAFOAM B4F's
+  current QzSeafoamCurrentEffect = FireRed's stop-surfing north. Test kanto_boulder_hole.
+- KANTO's BIRTH ISLAND: field_specials.c's DEOXYS rock code takes FireRed's vars there (0x5101 level, 0x5102 steps,
+  0x220B done) and moves the rock on the current map. Test kanto_birth_island.
+- RADIO TOWER 1F: Crystal's RADIO CARD quiz (FLAG_JOHTO_RADIO_CARD gates the POKéGEAR's RADIO card; saves past
+  Quetzal's WHITNEY quiz get it); WHITNEY's door guard and quiz gone. Test johto_radio_card.
+- CHARCOAL KILN: FLAG_JOHTO_GOT_KILN_CHARCOAL, FARFETCH'D shown once HM01 is given (test johto_kiln). PRIMAL CHAMBER walled up
+  (Mansion B1F's warp out, setmetatile 31,2). MAXIE / ARCHIE, ICE PATH's SWINUB, the FLOWER SHOP's gift girl and stalls,
+  NEW BARK's ROUTE 27 guard: FLAG_KAI_GONE. Quetzal's NEW BARK berry planting removed.
+- Also in 1.88.0: FireRed's hidden COINS (obtain_item.inc EventScript_MpHiddenCoins: a hidden spot with ITEM_NONE holds
+  COINS by its flag, mp_region.c MP_HiddenCoinsAmount; test kanto_hidden_coins); VERMILION's pier after the S.S. ANNE
+  sails ("The ship set sail.", FireRed's harbor words); start_menu.c sets FireRed's FLAG_OPENED_START_MENU (0x21E7);
+  JESSIE & JAMES retired (qz_specials.c TravelingEvent hides them always); tools/quetzal_port/kai_gone.py takes a map's
+  Quetzal objects / last warp / signs / triggers out; CERULEAN CAVE 2F's ladder to Quetzal's RAYQUAZA room drawn over.
+- 1.89.0 (the audit's batch B):
+  - The VICTORY ROAD gate between JOHTO and KANTO is customs, not a walk: its doors are triggers (VAR_TEMP_9) running
+    data/scripts/mp_region.inc EventScript_RegionGateToKanto / ToJohto; qz_specials.c MP_RegionGateCross checks both
+    LEAGUEs and the GLOBAL PC room, keeps the POKéMON in VAR_0x8005, sends the rest to the PC and travels
+    (MP_Region_Travel). EventScript_RegionCustomsPick is customs without the first-visit greeting. Test region_gate_walk.
+  - KANTO's rival is named by the player (FireRed's OAK's lab scene): VAR_KANTO_RIVAL_NAME (0x514C-0x514F),
+    qz_specials.c NameRival(region) / MP_KantoRivalName / MP_JohtoRivalNameHere; online the room's name rides the
+    rules (mp_main.c MP_RoomRivalName(region)); KANTO's lines say {RIVAL} where Quetzal wrote BLUE. Test kanto_rival_lose.
+  - POKéMON TOWER 6F's MAROWAK is FireRed's ghost battle: battle_script_commands.c gMpUncatchableWild (set by
+    QzStartMarowakGhostBattle_, cleared at the battle's end) makes a ball BattleScript_MpBallDodged. Test kanto_marowak_ghost.
+  - FireRed's SELPHY (FIVE ISLAND's RESORT GORGEOUS): her request (VAR_QZ_0x5141 / 0x5142) and 250 steps to show it
+    (VAR_KANTO_RESORT_STEPS, field_control_avatar.c MP_ResortGorgeousStep). Test kanto_selphy.
+  - ICEFALL CAVE 1F's thin ice: field_tasks.c step callback 8 (FireRed's STEP_CB_ICE, metatiles 0x35A / 0x35B, temp
+    flags 1-9 keep the cracks until the map reloads; VAR_TEMP_1 drops the player to B1F). Test kanto_icefall_ice.
+  - Crystal's GS BALL: GOLDENROD's POKéMON CENTER (a receptionist, object 10, at the door once JOHTO's LEAGUE is beaten:
+    MP_JohtoGsBallReady, FLAG_JOHTO_GOT_GS_BALL); KURT keeps it a day (FLAG_JOHTO_GAVE_GS_BALL, daily
+    FLAG_DAILY_JOHTO_KURT_GS_BALL); ILEX's shrine calls CELEBI once. Debug `mp newday` (a new day for the daily events
+    without touching the clock: the clock is always the PC's, so `mp weekday` alone never passes a day). Test johto_gs_ball.
+  - Crystal's rival after the LEAGUE: INDIGO PLATEAU's POKéMON CENTER on Mondays / Wednesdays (FLAG_DAILY_JOHTO_PLATEAU_RIVAL),
+    DRAGON'S DEN B1F on Tuesdays / Thursdays (FLAG_JOHTO_HIDE_DEN_RIVAL); special MP_JohtoWeekday. Test johto_rival_days.
+  - Also: LAKE OF RAGE's RED GYARADOS shiny (script_pokemon_util.c MP_MakeScriptedWildShiny), Quetzal's viewpoint pans
+    gone, MAHOGANY's old man by VAR_QZ_0x500C, BAOBA (Quetzal's SAFARI quest) gone until case 62's SAFARI ZONE.
+- 1.90.0 (the audit's batch C, KANTO):
+  - tools/quetzal_port/firered_words.py MAP LABEL [OURS] (FireRed's text, POKéMON as MOéMON, POKéDEX as MOéDEX, ' as
+    ’; a local pokefirered under POKEFIRERED_DIR or GitHub) and restore_words.py with its list restore_words.txt
+    (OUR_MAP / data path, OUR_LABEL, fr|gsc, THEIR_MAP, THEIR_LABEL): every text put back is listed there, by case.
+  - FireRed's move people on Emerald's specials: FUCHSIA's MOVE DELETER, the COPYCAT's MIMIC (a POKé DOLL), TWO
+    ISLAND's MOVE MANIAC (MULTI_QZ_0x6D mushroom menu), CAPE BRINK's starter tutor (TUTOR_MOVE_FRENZY_PLANT /
+    BLAST_BURN / HYDRO_CANNON 30-32: party_menu.c CanLearnTutorMove gives them to VENUSAUR / CHARIZARD / BLASTOISE
+    only; qz_specials.c MP_CapeBrinkLeadMove / MP_CapeBrinkTaught, flags 0x2226-0x2229), CELADON 3F's COUNTER.
+    Tests kanto_move_people, kanto_cape_brink.
+  - DAISY: the TOWN MAP (item_use.c ItemUseOutOfBattle_TownMap: the region map from the BAG or registered), her rest
+    line, grooming after KANTO's LEAGUE every 500 steps (VAR_KANTO_MASSAGE_STEPS, MP_DaisyMassage) and her
+    friendship reading. CERULEAN's BIKE SHOP (MULTI_QZ_0x57 is FireRed's BICYCLE ¥1,000,000 row). Test kanto_daisy_bike.
+  - Size records on Emerald's code: pokemon_size_record.c Get/CompareMagikarpSize, Get/CompareHeracrossSize (vars
+    VAR_KANTO_MAGIKARP_SIZE / VAR_KANTO_HERACROSS_SIZE). Tests kanto_size_records, kanto_size_heracross.
+  - RUIN VALLEY: fldeff_cut.c SetUpFieldMove_Cut asks qz_specials.c MP_RuinValleyCutCheck first; CUT from the party
+    menu below the door opens it (debug `mp usecut`; test kanto_ruin_valley_cut). ROCK TUNNEL requires FLASH.
+  - GIOVANNI leaves VIRIDIAN's GYM after his farewell (FLAG_KANTO_HIDE_GYM_GIOVANNI; debug `mp beattrainer ID`; test
+    kanto_giovanni_leaves, with FIVE ISLAND's POKéMON JOURNAL). The WATER LABYRINTH's TOGEPI EGG (test
+    kanto_togepi_egg). The SEAGALLOP: FireRed's prompt, VERMILION once BILL's first trip is over, ISLANDS 4-7 by the
+    RAINBOW PASS alone. TWO ISLAND's growing shop (the tickets in its last list). MELOETTA out of the CHANSEY dance.
+- 1.91.0 (the audit's batch D, JOHTO, first part):
+  - crystal_words.py reads Crystal's shared texts too (MAP may be a path: data/text/common_3), and turns text_ram
+    buffers into {STR_VAR_1/2/3}, {PLAYER}, {RIVAL}. restore_words.txt lists every JOHTO text put back, by case.
+  - MANIA lends SHUCKIE (qz_port.c qz_givestorymon 2: Lv15, ORAN BERRY, OT MANIA / 518 re-keyed after
+    GiveMonToPlayer by MP_SetBoxMonOtIdKeepData; VAR_QZ_0x501D 4 lent, 5 done; FLAG_DAILY_JOHTO_SHUCKIE 0x925);
+    qz_specials.c MP_ReturnShuckie scans the party (150+ friendship: it stays). The SANDSTORM house's loyalty check
+    (MP_LeadFriendship, 150). LAKE OF RAGE's MAGIKARP record (Get/CompareJohtoMagikarpSize, VAR_JOHTO_MAGIKARP_SIZE
+    0x5040, FLAG_JOHTO_MAGIKARP_RECORD 0x104A, FLAG_JOHTO_ELIXER_STANDBY 0x104B). The ROUTE 43 toll (1000 while
+    FLAG_QZ_0x1051 is unset). Test johto_crystal_people.
+  - DRATINI: qz_givestorymon 4 is Lv15 with Crystal's EXTREMESPEED moveset; the wrong-answer one Lv15 too.
+  - BLACKTHORN's MOVE DELETER (FUCHSIA's script, Crystal's words; test johto_move_deleter). ECRUTEAK's ITEMFINDER
+    (FLAG_JOHTO_GOT_ITEMFINDER 0x10A3). TOHJO FALLS: MOON STONE, the SUPER ROD fisher gone. ROUTE 32's guard: the
+    ZEPHYRBADGE, then the EGG errand. MAHOGANY's RAGECANDYBAR and ROUTE 43's MAHOGANY gate follow the hideout
+    (VAR_QZ_0x500C >= 14).
+  - JOHTO's BERRY patches never draw a sprite (event_object_movement.c SetBerryTreeGraphics /
+    MovementType_BerryTreeGrowth_Normal): the map's fruit tree is the tree (docs/user_images 68).
+- 1.92.0 (the audit's batch E, JOHTO, second part):
+  - Crystal's WEEKDAY siblings (tools/quetzal_port/fix_siblings.py): each object wears FLAG_JOHTO_HIDE_<NAME>, set or
+    cleared on entering a JOHTO map by mp_region.c MP_JohtoWeekdayPeople (overworld.c, after MP_JohtoBerries_Init);
+    met once (FLAG_JOHTO_MET_<NAME>), the gift keeps Quetzal's got-it flag. UNION CAVE B2F's LAPRAS out on Fridays
+    (FLAG_JOHTO_HIDE_LAPRAS, FLAG_DAILY_JOHTO_LAPRAS once fought). GOLDENROD DEPT. STORE 5F's Sunday receptionist
+    (FLAG_JOHTO_HIDE_DEPT_LADY, FLAG_DAILY_JOHTO_DEPT_TM 0x927; her counter tile is the clerks' talk-across one). `mp weekday D` works only while FLAG 0x51 is clear
+    (FixStuckClockSave resets the offset otherwise). Tests johto_weekday_siblings, johto_friday_lapras, johto_sunday_lady.
+  - Item balls hold Crystal's items (fix_item_balls.py; new balls ROUTE 30 / 26 on FLAG_JOHTO_ITEM_*); Crystal's 57
+    JOHTO hidden items (gen_hidden_items.py: FLAG_JOHTO_HIDDEN_ITEM_n = 0x1600 + n, each spot checked against Crystal's
+    map by eye, SPOTS in the script; elevation 0 so any height finds them; test johto_hidden_item). map_ascii.py prints
+    a map's collision and objects for picking spots.
+  - ROUTE 29's catching demonstration: battle_setup.c MP_JohtoCatchingTutorial (WALLY's tutorial with
+    gWallyTutorialBackPic / Name / ThrowFirst; the DUDE's back picture graphics/moemon/dude_back.bin from
+    gen_dude_back.py; FLAG_JOHTO_LEARNED_TO_CATCH). Test johto_catch_tutorial.
+  - CHERRYGROVE's rival is qz_trainerbattle_13 (a loss doesn't black out). ELM's messages ring (SE_POKENAV_CALL) with
+    Crystal's data/phone/text/elm words. GIOVANNI's leftovers and Quetzal's NUZLOCKE calls are gone. Multichoice menus
+    of our own start at KAI_FIRST 240 (gen_multichoice.py checks the stock ids; touch src/script_menu.c after).
+  - POKéMON in houses are OBJ_EVENT_GFX_MON_FIRST + dex objects with their cry and Crystal's line (KURT's and AZALEA's
+    SLOWPOKE on FLAG_QZ_0x1085, until the WELL is saved).
+- 1.93.0 (the audit's batch E, JOHTO, third part):
+  - GOLDENROD's move tutor (Crystal's MoveTutorScript): FLAG_JOHTO_HIDE_GOLDENROD_TUTOR (LEAGUE + COIN CASE +
+    Wednesday / Saturday, mp_region.c MP_JohtoWeekdayPeople), FLAG_DAILY_JOHTO_TUTOR 0x928, MULTI_KAI_GOLDENROD_TUTOR;
+    the moves are TUTOR_MOVE_TM_FLAMETHROWER / THUNDERBOLT / ICE_BEAM (40-42, past TUTOR_MOVE_COUNT): party_menu.c
+    GetTutorMove / CanLearnTutorMove use the TM's list, as Crystal did. Test johto_goldenrod_tutor.
+  - Qz{Johto,Kanto}TravelingEventCheck run in every JOHTO / KANTO map's ON_RESUME and no longer write VAR_RESULT: a
+    script back from the party menu (a tutor after the POKéMON forgot a move) read 0 there and took the "no" branch.
+  - fix_johto_tms.crystal_text joins Crystal's "cam- " / "paign" (a split word with a space after its hyphen).
+  - CIANWOOD's POKé SEER (the old woman's house; Crystal's engine/events/poke_seer.asm): qz_specials.c MP_PokeSeer
+    (+ MP_PokeSeerOT / Level / Advice) on the met location and level (hatched: level 5, Crystal's EGG_LEVEL), own or
+    traded by OT ID, METLOC_FATEFUL_ENCOUNTER = level only, METLOC_IN_GAME_TRADE = can't tell; no time of day (this game
+    keeps none). crystal_words.py knows the wSeer* buffers and text_ram ... text_start. Test johto_poke_seer.
+  - GOLDENROD GAME CORNER's TM prizes (Crystal's TMVendorScript on Quetzal's "prizes are to the right" man):
+    MULTI_KAI_GOLDENROD_TM_PRIZES, 5500 coins each, additem (no obtain fanfare, as Crystal). Test johto_tm_prizes.
+  - GOLDENROD's NAME RATER: Crystal's words (data/text/common_2 _NameRater*) on KANTO's LAVENDER flow
+    (Common_EventScript_NameReceivedPartyMon, no OT check); his bookshelves Crystal's. Test johto_name_rater.
+  - GOLDENROD UNDERGROUND as Crystal's: the HAIRCUT BROTHERS (qz_specials.c MP_HaircutBrother: Crystal's odds and
+    friendship steps; FLAG_DAILY_JOHTO_HAIRCUT 0x929), the bargain merchant (Monday 4:00-9:59; MULTI_KAI_GOLDENROD_BARGAIN,
+    Crystal's prices, one of each a day: FLAG_DAILY_JOHTO_BARGAIN_* 0x935-0x939), the herb lady at weekends (+ REVIVAL
+    HERB), each on a FLAG_JOHTO_HIDE_* set by MP_JohtoWeekdayPeople, in the alcoves of Quetzal's flute / METEORITE /
+    empty clerks; KUNI's scene gone, its triggers only move VAR_QZ_0x500A to 8. `mp hour H` sets the game clock's hour.
+    crystal_words.py puts in {d:NAME} numbers from the map's DEFs. Tests johto_haircut, johto_bargain.

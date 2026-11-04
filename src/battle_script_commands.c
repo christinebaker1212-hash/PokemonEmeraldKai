@@ -10756,6 +10756,10 @@ static void Cmd_removelightscreenreflect(void)
     gBattlescriptCurrInstr++;
 }
 
+// Moemon Kai: FireRed's ghost battle (POKéMON TOWER 6F's MAROWAK): balls are dodged (qz_specials.c sets it, the battle's
+// end clears it)
+bool8 gMpUncatchableWild;
+
 static void Cmd_handleballthrow(void)
 {
     u8 ballMultiplier = 0;
@@ -10800,6 +10804,13 @@ static void Cmd_handleballthrow(void)
         BtlController_EmitBallThrowAnim(B_COMM_TO_CONTROLLER, BALL_TRAINER_BLOCK);
         MarkBattlerForControllerExec(gActiveBattler);
         gBattlescriptCurrInstr = BattleScript_TrainerBallBlock;
+    }
+    else if (gMpUncatchableWild)
+    {
+        MPNet_Log("ghost battle: the ball was dodged");
+        BtlController_EmitBallThrowAnim(B_COMM_TO_CONTROLLER, BALL_TRAINER_BLOCK);
+        MarkBattlerForControllerExec(gActiveBattler);
+        gBattlescriptCurrInstr = BattleScript_MpBallDodged;
     }
     else if (gBattleTypeFlags & BATTLE_TYPE_WALLY_TUTORIAL)
     {
@@ -10904,6 +10915,9 @@ static void Cmd_handleballthrow(void)
             odds *= 2;
         if (gBattleMons[gBattlerTarget].status1 & (STATUS1_POISON | STATUS1_BURN | STATUS1_PARALYSIS | STATUS1_TOXIC_POISON))
             odds = (odds * 15) / 10;
+
+        if (gLastUsedItem == ITEM_ASTRAL_BALL)
+            odds = 255;   // Moemon Co-op: the ASTRAL BALL never misses and never breaks
 
         if (gLastUsedItem != ITEM_SAFARI_BALL)
         {

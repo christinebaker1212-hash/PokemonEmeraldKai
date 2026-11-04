@@ -13,5 +13,5 @@ Johto_Route32RuinsOfAlphGate_EventScript_83D2214::
 Johto_Route32RuinsOfAlphGate_Text_83D225D::
 	.string "There are drawings on stone\n"
 	.string "panels.\p"
-	.string "I tried moving them.\n"
-	.string "I wonder what they are.$"
+	.string "I tried moving them. I wonder what\n"
+	.string "they are.$"

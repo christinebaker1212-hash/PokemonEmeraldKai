@@ -32,6 +32,11 @@ Johto_BlackthornCity_EventScript_83C6887::
 
 Johto_BlackthornCity_EventScript_83C6888::
 	lock
+	@ Moemon Kai: ELM rings the POKéGEAR, in Crystal's words (docs/REGIONS_AUDIT.md 94 / 148)
+	playse SE_POKENAV_CALL
+	waitse
+	playse SE_POKENAV_CALL
+	waitse
 	msgbox Johto_BlackthornCity_Text_83C68ED, MSGBOX_DEFAULT
 	setvar VAR_QZ_0x5010, 5
 	setvar VAR_QZ_0x5004, 7
@@ -133,60 +138,42 @@ Johto_BlackthornCity_EventScript_83C6A16::
 
 @ Johto_BlackthornCity object 3 (local id 3, gfx 0x11) at 27,39
 Johto_BlackthornCity_EventScript_83C6A1F::
+	@ Moemon Kai: Crystal's WEEKDAY sibling (pokecrystal BlackthornCity.asm SantosScript; tools/quetzal_port/fix_siblings.py):
+	@ only on SATURDAY (FLAG_JOHTO_HIDE_SANTOS), once met they give the gift
 	lock
 	faceplayer
-	goto_if_set FLAG_QZ_0x1055, Johto_BlackthornCity_EventScript_83C6ADF
-	msgbox Johto_BlackthornCity_Text_83C6D5C, MSGBOX_DEFAULT
-	closemessage
-	multichoice 0x14, 0, MULTI_QZ_0x4A, 1
-	nop
-	copyvar VAR_0x8000, VAR_RESULT
-	goto_if_eq VAR_0x8000, 0, Johto_BlackthornCity_EventScript_83C6AD1
-	goto_if_eq VAR_0x8000, 1, Johto_BlackthornCity_EventScript_83C6AD1
-	goto_if_eq VAR_0x8000, 2, Johto_BlackthornCity_EventScript_83C6AD1
-	goto_if_eq VAR_0x8000, 3, Johto_BlackthornCity_EventScript_83C6AD1
-	goto_if_eq VAR_0x8000, 4, Johto_BlackthornCity_EventScript_83C6AD1
-	goto_if_eq VAR_0x8000, 5, Johto_BlackthornCity_EventScript_83C6AD1
-	goto_if_eq VAR_0x8000, 6, Johto_BlackthornCity_EventScript_83C6AA4
-	goto_if_eq VAR_0x8000, 7, Johto_BlackthornCity_EventScript_83C6ADC
-	goto_if_eq VAR_0x8000, 127, Johto_BlackthornCity_EventScript_83C6ADC
-	closemessage
-	release
-	end
-
-Johto_BlackthornCity_EventScript_83C6AA4::
-	msgbox Johto_BlackthornCity_Text_83C6D96, MSGBOX_DEFAULT
+	goto_if_set FLAG_QZ_0x1055, Johto_BlackthornCity_EventScript_SantosDay
+	specialvar VAR_RESULT, MP_JohtoWeekday
+	goto_if_ne VAR_RESULT, 6, Johto_BlackthornCity_EventScript_SantosNotDay
+	goto_if_set FLAG_JOHTO_MET_SANTOS, Johto_BlackthornCity_EventScript_SantosMet
+	msgbox Johto_BlackthornCity_Text_SantosMeet, MSGBOX_DEFAULT
+	setflag FLAG_JOHTO_MET_SANTOS
+Johto_BlackthornCity_EventScript_SantosMet::
+	msgbox Johto_BlackthornCity_Text_SantosGivesGift, MSGBOX_DEFAULT
 	setorcopyvar VAR_0x8000, ITEM_SPELL_TAG
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
 	setflag FLAG_QZ_0x1055
-	msgbox Johto_BlackthornCity_Text_83C6DA9, MSGBOX_DEFAULT
-	closemessage
+	msgbox Johto_BlackthornCity_Text_SantosGaveGift, MSGBOX_DEFAULT
 	release
 	end
 
-Johto_BlackthornCity_EventScript_83C6AD1::
-	msgbox Johto_BlackthornCity_Text_83C6E3D, MSGBOX_DEFAULT
-	closemessage
+Johto_BlackthornCity_EventScript_SantosDay::
+	msgbox Johto_BlackthornCity_Text_SantosSaturday, MSGBOX_DEFAULT
 	release
 	end
 
-Johto_BlackthornCity_EventScript_83C6ADC::
-	closemessage
-	release
-	end
-
-Johto_BlackthornCity_EventScript_83C6ADF::
-	msgbox Johto_BlackthornCity_Text_83C6DF3, MSGBOX_DEFAULT
-	closemessage
+Johto_BlackthornCity_EventScript_SantosNotDay::
+	msgbox Johto_BlackthornCity_Text_SantosNotSaturday, MSGBOX_DEFAULT
 	release
 	end
 
 Johto_BlackthornCity_Text_83C68ED::
-	.string "A message from PROF. ELM arrived:\p"
-	.string "I have something for you.\n"
-	.string "Please come to my LAB when you can.$"
+	.string "Hello, {PLAYER}?\p"
+	.string "I have something here for you.\p"
+	.string "Could you swing by my LAB?\p"
+	.string "See you later!$"
 
 Johto_BlackthornCity_Text_83C6AEA::
 	.string "CLAIR, our GYM LEADER, has been\n"
@@ -222,7 +209,7 @@ Johto_BlackthornCity_Text_83C6CB5::
 
 Johto_BlackthornCity_Text_83C6CEF::
 	.string "Are you going to make your MOéMON\n"
-	.string "remember some moves?$"
+	.string "forget some moves?$"
 
 Johto_BlackthornCity_Text_83C6D27::
 	.string "Dragon masters all come from the city\n"
@@ -264,7 +251,29 @@ Johto_BlackthornCity_Text_83C6EBA::
 	.string "The Blessed User of Dragon MOéMON$"
 
 Johto_BlackthornCity_Text_83C6F07::
-	.string "MOVE BROS’ HOUSE$"
+	.string "MOVE DELETER’S HOUSE$"
 
 Johto_BlackthornCity_Text_83C6F18::
 	.string "DRAGON’S DEN AHEAD$"
+
+Johto_BlackthornCity_Text_SantosMeet::
+	.string "SANTOS: …\p"
+	.string "It’s Saturday…\p"
+	.string "I’m SANTOS of Saturday…$"
+
+Johto_BlackthornCity_Text_SantosGaveGift::
+	.string "SANTOS: …\p"
+	.string "SPELL TAG…\p"
+	.string "Ghost-type moves get stronger…\p"
+	.string "It will frighten you…$"
+
+Johto_BlackthornCity_Text_SantosSaturday::
+	.string "SANTOS: …\p"
+	.string "See you again on another Saturday…\p"
+	.string "I won’t have any more gifts…$"
+
+Johto_BlackthornCity_Text_SantosNotSaturday::
+	.string "SANTOS: Today’s not Saturday…$"
+
+Johto_BlackthornCity_Text_SantosGivesGift::
+	.string "You can have this…$"

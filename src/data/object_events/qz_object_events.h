@@ -8771,7 +8771,7 @@ static const struct ObjectEventGraphicsInfo sObjectEventGraphicsInfo_Qz16066 = {
     .tracks = TRACKS_FOOT,
     .oam = &gObjectEventBaseOam_64x64,
     .subspriteTables = sOamTables_64x64,
-    .anims = sAnimTable_Standard,
+    .anims = sAnimTable_QzTowerPillar,
     .images = sPicTable_Qz16066,
     .affineAnims = gDummySpriteAffineAnimTable,
 };
@@ -11019,7 +11019,7 @@ static const struct ObjectEventGraphicsInfo sObjectEventGraphicsInfo_Qz16176 = {
 };
 
 static const struct ObjectEventGraphicsInfo *const sQzObjectEventGraphicsInfoPointers[] = {
-    &sObjectEventGraphicsInfo_Qz59,
+    &sObjectEventGraphicsInfo_Qz15006,
     &sObjectEventGraphicsInfo_Qz60,
     &sObjectEventGraphicsInfo_Qz82,
     &sObjectEventGraphicsInfo_Qz87,

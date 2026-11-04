@@ -265,6 +265,14 @@
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
       "script": "Johto_Route45_EventScript_83F5D39"
+    },
+    {
+      "type": "hidden_item",
+      "x": 24,
+      "y": 74,
+      "elevation": 0,
+      "item": "ITEM_PP_UP",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_44"
     }
   ]
 }

@@ -50,6 +50,8 @@ extern const u32 gBallGfx_Dusk[];
 extern const u32 gBallPal_Dusk[];
 extern const u32 gBallGfx_Quick[];
 extern const u32 gBallPal_Quick[];
+extern const u32 gBallGfx_Astral[];
+extern const u32 gBallPal_Astral[];
 extern const u32 gOpenPokeballGfx[];
 
 // Pokémon gfx
@@ -3399,6 +3401,8 @@ extern const u32 gItemIcon_GenesisBall[];
 extern const u32 gItemIconPalette_GenesisBall[];
 extern const u32 gItemIcon_EpochBall[];
 extern const u32 gItemIconPalette_EpochBall[];
+extern const u32 gItemIcon_AstralBall[];
+extern const u32 gItemIconPalette_AstralBall[];
 extern const u32 gItemIconPalette_LoveBall[];
 extern const u32 gItemIcon_FriendBall[];
 extern const u32 gItemIconPalette_FriendBall[];

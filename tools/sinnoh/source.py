@@ -97,6 +97,22 @@ class Decomp:
         path = self._path('res/graphics/field_effects', name)
         return open(path, 'rb').read() if os.path.exists(path) else None
 
+    def matshp(self, model):
+        """The (material, shape) pairs Platinum draws a prop model by (build_model_matshp.dat: map_prop.c), or None:
+        the whole model, its nodes too (none listed, or the file not fetched: fetch_decomp.sh PARTS 22)"""
+        if not hasattr(self, '_matshp'):
+            path = self._path('res/prebuilt/fielddata/build_model/build_model_matshp.dat')
+            self._matshp = None
+            if os.path.exists(path):
+                d = open(path, 'rb').read()
+                nloc, nids = struct.unpack_from('<HH', d, 0)
+                locs = [struct.unpack_from('<HH', d, 4 + 4 * i) for i in range(nloc)]
+                ids = [struct.unpack_from('<HH', d, 4 + 4 * nloc + 4 * i) for i in range(nids)]
+                self._matshp = [ids[i:i + n] if n else None for n, i in locs]
+        if self._matshp is None or model >= len(self._matshp):
+            return None
+        return self._matshp[model]
+
     def prop_anims(self, model):
         """A prop model's animations as Platinum's field loads them (bm_anime_list): (looping, [file bytes...]);
         None: no list fetched (fetch_decomp.sh PARTS 8)"""
@@ -181,6 +197,9 @@ class RomSource:
 
     def tex_anims(self):
         return self._n('data/fldtanime.narc')
+
+    def matshp(self, model):
+        return self.decomp.matshp(model)
 
     def prop_anims(self, model):
         anims = self._n('arc/bm_anime.narc')

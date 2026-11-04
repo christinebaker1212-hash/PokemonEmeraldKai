@@ -1,0 +1,6 @@
+# Level scaling: each region's first rival battle stays at Lv5 (BARRY on ROUTE 201 here, with a Lv20 team and
+# scaling on), while the next rival battle still scales (MAY on ROUTE 110: ace 18 -> boss margin above the team)
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=280:20,280:20,280:20 MOEMON_LEVEL_SCALING=1"
+EXPECT_A=("trainer 2081 ace 5 -> 5")

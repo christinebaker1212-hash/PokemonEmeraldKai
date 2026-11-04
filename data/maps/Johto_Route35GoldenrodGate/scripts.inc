@@ -9,7 +9,6 @@ Johto_Route35GoldenrodGate_EventScript_83D0E0D::
 	goto_if_eq VAR_QZ_0x5018, 3, Johto_Route35GoldenrodGate_EventScript_83D0EAF
 	goto_if_eq VAR_QZ_0x5018, 2, Johto_Route35GoldenrodGate_EventScript_83D0E7F
 	goto_if_eq VAR_QZ_0x5018, 1, Johto_Route35GoldenrodGate_EventScript_83D0E74
-	call Quetzal_EventScript_8361A4D
 	msgbox Johto_Route35GoldenrodGate_Text_83D0EE8, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, 0, Johto_Route35GoldenrodGate_EventScript_83D0E69
 	closemessage

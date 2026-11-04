@@ -1,0 +1,18 @@
+pressuntil A field 5000
+wait 30
+mp setflag 0x1008
+mp setflag 0x1030
+mp warp 34,2,4,3
+wait 150
+mp objat 5 6
+mp face up
+wait 10
+press A 2
+wait 60
+shot k_apprentice
+mash A 60 15
+wait 60
+mp checkitem 215
+mp ctx
+mp getflag 0x1021
+quit

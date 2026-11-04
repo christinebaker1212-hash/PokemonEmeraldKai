@@ -44,7 +44,7 @@ Kanto_FiveIsland_LostCave_Room10_EventScript_8414A68::
 	return
 
 Kanto_FiveIsland_LostCave_Room10_EventScript_8414A79::
-	settrainerflag 0x225E
+	settrainerflag TRAINER_QZ_8798
 	call Kanto_FiveIsland_LostCave_Room10_EventScript_8414A68
 	releaseall
 	end

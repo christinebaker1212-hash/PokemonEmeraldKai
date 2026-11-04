@@ -1,0 +1,19 @@
+pressuntil A field 5000
+mp textspeed 2
+wait 60
+mp warp 35,34,33,9
+wait 120
+mp getflag 0x1621
+mp checkitem 13
+mp face left
+press A 2
+mash A 20 20
+wait 60
+mp getflag 0x1621
+mp checkitem 13
+press A 2
+mash B 10 20
+wait 60
+mp getflag 0x1621
+mp ctx
+quit

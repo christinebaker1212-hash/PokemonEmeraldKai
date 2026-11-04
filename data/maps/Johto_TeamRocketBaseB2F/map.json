@@ -446,5 +446,14 @@
       "script": "Johto_TeamRocketBaseB2F_EventScript_83EA0E8"
     }
   ],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 29,
+      "y": 12,
+      "elevation": 0,
+      "item": "ITEM_FULL_HEAL",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_50"
+    }
+  ]
 }

@@ -1,5 +1,10 @@
 Johto_OlivinePort_MapScripts::
+	map_script MAP_SCRIPT_ON_FRAME_TABLE, Johto_OlivinePort_OnFrame   @ Moemon Kai: the first boat in
 	.byte 0
+
+Johto_OlivinePort_OnFrame:
+	map_script_2 0x52FD, 1, EventScript_RegionArrivalJohto   @ (VAR_REGION_ARRIVAL: mp_region.c MP_Region_FirstBoatIn)
+	.2byte 0
 
 @ Johto_OlivinePort object 3 (local id 3, gfx 0x3E8F) at 12,12
 Johto_OlivinePort_EventScript_83E6BCF::

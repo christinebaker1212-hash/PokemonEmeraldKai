@@ -92,7 +92,7 @@ Kanto_PokemonTower_2F_Movement_8413072:
 	step_end
 
 Kanto_PokemonTower_2F_Text_842A3C2::
-	.string "BLUE: Hey, {PLAYER}!\n"
+	.string "{RIVAL}: Hey, {PLAYER}!\n"
 	.string "What brings you here?\l"
 	.string "Is your MOéMON dead?\p"
 	.string "Hey! It’s alive!\p"

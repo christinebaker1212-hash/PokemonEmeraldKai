@@ -15527,6 +15527,39 @@
       "secondary_tileset": "gTileset_Johto_GoldenrodUndergroundEntrances",
       "border_filepath": "data/layouts/Sinnoh_Underground/border.bin",
       "blockdata_filepath": "data/layouts/Sinnoh_Underground/map.bin"
+    },
+    {
+      "id": "LAYOUT_KANTO_SEAFOAM_ISLANDS_B3F_CURRENT_STOPPED",
+      "name": "Kanto_SeafoamIslands_B3F_CurrentStopped_Layout",
+      "width": 38,
+      "height": 24,
+      "primary_tileset": "gTileset_Kanto_General",
+      "secondary_tileset": "gTileset_Kanto_SeafoamIslands",
+      "border_filepath": "data/layouts/Kanto_SeafoamIslands_B3F_CurrentStopped/border.bin",
+      "blockdata_filepath": "data/layouts/Kanto_SeafoamIslands_B3F_CurrentStopped/map.bin",
+      "quetzal": true
+    },
+    {
+      "id": "LAYOUT_KANTO_SEAFOAM_ISLANDS_B4F_CURRENT_STOPPED",
+      "name": "Kanto_SeafoamIslands_B4F_CurrentStopped_Layout",
+      "width": 38,
+      "height": 24,
+      "primary_tileset": "gTileset_Kanto_General",
+      "secondary_tileset": "gTileset_Kanto_SeafoamIslands",
+      "border_filepath": "data/layouts/Kanto_SeafoamIslands_B4F_CurrentStopped/border.bin",
+      "blockdata_filepath": "data/layouts/Kanto_SeafoamIslands_B4F_CurrentStopped/map.bin",
+      "quetzal": true
+    },
+    {
+      "id": "LAYOUT_KANTO_THREE_ISLAND_DUNSPARCE_TUNNEL_DUG_OUT",
+      "name": "Kanto_ThreeIsland_DunsparceTunnel_DugOut_Layout",
+      "width": 30,
+      "height": 7,
+      "primary_tileset": "gTileset_Kanto_General",
+      "secondary_tileset": "gTileset_Kanto_Cave",
+      "border_filepath": "data/layouts/Kanto_ThreeIsland_DunsparceTunnel_DugOut/border.bin",
+      "blockdata_filepath": "data/layouts/Kanto_ThreeIsland_DunsparceTunnel_DugOut/map.bin",
+      "quetzal": true
     }
   ]
 }

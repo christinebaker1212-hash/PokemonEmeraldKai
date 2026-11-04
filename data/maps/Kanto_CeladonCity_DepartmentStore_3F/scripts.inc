@@ -3,8 +3,34 @@ Kanto_CeladonCity_DepartmentStore_3F_MapScripts::
 
 @ Kanto_CeladonCity_DepartmentStore_3F object 1 (local id 1, gfx 0x3EFA) at 10,9
 Kanto_CeladonCity_DepartmentStore_3F_EventScript_841BBC1::
-	specialvar VAR_RESULT, QzReturnZero
-	goto_if_eq VAR_RESULT, 2, Quetzal_EventScript_8457FA3
+	@ Moemon Kai: FireRed's COUNTER tutor (pokefirered data/scripts/move_tutors.inc EventScript_CounterTutor), on Kai's
+	@ move tutors; Quetzal's battle-supplies counter below is no longer reached
+	lock
+	faceplayer
+	goto_if_set 0x221C, Kanto_CeladonCity_DepartmentStore_3F_EventScript_CounterTaught
+	msgbox Kanto_CeladonCity_DepartmentStore_3F_Text_CounterTeach, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Kanto_CeladonCity_DepartmentStore_3F_EventScript_CounterDeclined
+	call MoveTutor_EventScript_CanOnlyBeLearnedOnce
+	goto_if_eq VAR_RESULT, NO, Kanto_CeladonCity_DepartmentStore_3F_EventScript_CounterDeclined
+	msgbox Kanto_CeladonCity_DepartmentStore_3F_Text_CounterWhichMon, MSGBOX_DEFAULT
+	setvar VAR_0x8005, TUTOR_MOVE_COUNTER
+	call MoveTutor_EventScript_OpenPartyMenu
+	goto_if_eq VAR_RESULT, 0, Kanto_CeladonCity_DepartmentStore_3F_EventScript_CounterDeclined
+	setflag 0x221C
+	goto Kanto_CeladonCity_DepartmentStore_3F_EventScript_CounterTaught
+	end
+
+Kanto_CeladonCity_DepartmentStore_3F_EventScript_CounterDeclined::
+	msgbox Kanto_CeladonCity_DepartmentStore_3F_Text_CounterDeclined, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_CeladonCity_DepartmentStore_3F_EventScript_CounterTaught::
+	msgbox Kanto_CeladonCity_DepartmentStore_3F_Text_CounterTaught, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_CeladonCity_DepartmentStore_3F_EventScript_QuetzalShop::
 	lock
 	faceplayer
 
@@ -236,3 +262,25 @@ Kanto_CeladonCity_DepartmentStore_3F_Text_8445A81::
 Kanto_CeladonCity_DepartmentStore_3F_Text_8445ABF::
 	.string "Red and Green!\n"
 	.string "Both are MOéMON!$"
+
+Kanto_CeladonCity_DepartmentStore_3F_Text_CounterTeach::
+	.string "Oh, hi!\n"
+	.string "I finally finished MOéMON.\p"
+	.string "Not done yet? How about I teach\n"
+	.string "you a good move?\p"
+	.string "The move I have in mind is\n"
+	.string "COUNTER.\p"
+	.string "Not like the one I’m leaning on,\n"
+	.string "mind you!$"
+
+Kanto_CeladonCity_DepartmentStore_3F_Text_CounterWhichMon::
+	.string "Which MOéMON should I teach\n"
+	.string "COUNTER to?$"
+
+Kanto_CeladonCity_DepartmentStore_3F_Text_CounterDeclined::
+	.string "You’re not interested? Come see\n"
+	.string "me if you change your mind.$"
+
+Kanto_CeladonCity_DepartmentStore_3F_Text_CounterTaught::
+	.string "Are you using that COUNTER move\n"
+	.string "I taught your MOéMON?$"

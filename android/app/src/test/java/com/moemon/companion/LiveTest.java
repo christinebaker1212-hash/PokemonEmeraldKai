@@ -141,6 +141,7 @@ public class LiveTest {
         Companion.resetForTests();
             Companion app = Companion.get(ctx);
             GameView v = new GameView(ctx, app);
+            Look.animations = false;   // (the pictures at once, not mid-slide)
             draw(v);
             String qr = "MOEPHONE:1:127.0.0.1:" + port + ":" + field(line, "save") + ":" + field(line, "secret") + ":"
                     + field(line, "code");
@@ -189,9 +190,12 @@ public class LiveTest {
 
             // GIVE: the box's first POKéMON, its card's GIVE, the BAG's first holdable item
             v.select(0);
-            int x0 = (v.width() - 160) / 2 + 8, y0 = GameView.TOP + 4 + 16;
-            tap(v, x0 + 12, y0 + 12);
-            int cardY = GameView.TOP + 4 + 144 + 6 + 36 + 22, by = cardY + 52 + 10 + 12;
+            // (the box at its scale, as BoxesPage.bk works it out)
+            float bk = Math.max(1, Math.min(2, (float) Math.floor((v.width() - 28) * v.pixelScale() / 160f) / v.pixelScale()));
+            int wpW = Math.round(160 * bk), wpH = Math.round(144 * bk), cl = (int) (24 * bk);
+            int bx0 = (v.width() - wpW) / 2, x0 = bx0 + (int) (8 * bk), y0 = GameView.TOP + 4 + (int) (16 * bk);
+            tap(v, x0 + cl / 2, y0 + cl / 2);
+            int cardY = GameView.TOP + 4 + wpH + 6 + 36 + 22, by = cardY + 52 + 10 + 12;
             int bw = (v.width() - 20) / 4;
             tap(v, 10 + 2 * bw + bw / 2, by);
             assertTrue("GIVE opens the BAG's items", v.overPage() instanceof ItemPickPage);
@@ -204,10 +208,10 @@ public class LiveTest {
             draw(v);
 
             // MOVE: the second POKéMON to the box's last place
-            tap(v, x0 + 24 + 12, y0 + 12);
+            tap(v, x0 + cl + cl / 2, y0 + cl / 2);
             long p2 = app.model().at(Model.boxPlace(0, 1)).optLong("p");
             tap(v, 10 + bw + bw / 2, by);
-            tap(v, x0 + 5 * 24 + 12, y0 + 4 * 24 + 12);
+            tap(v, x0 + 5 * cl + cl / 2, y0 + 4 * cl + cl / 2);
             idleUntil(() -> {
                 JSONObject m = app.model().at(Model.boxPlace(0, 29));
                 return app.client.orders.pending().isEmpty() && m != null && m.optLong("p") == p2;
@@ -216,11 +220,11 @@ public class LiveTest {
             assertTrue("nothing refused", app.client.orders.failed().isEmpty());
 
             // MOVE to another box: the third POKéMON, MOVE, the next box (its arrow), its first place
-            tap(v, x0 + 2 * 24 + 12, y0 + 12);
+            tap(v, x0 + 2 * cl + cl / 2, y0 + cl / 2);
             long p3 = app.model().at(Model.boxPlace(0, 2)).optLong("p");
             tap(v, 10 + bw + bw / 2, by);
-            tap(v, x0 - 8 + 160 + 8, GameView.TOP + 4 + 6);
-            tap(v, x0 + 12, y0 + 12);
+            tap(v, bx0 + wpW - 4, GameView.TOP + 4 + 6);
+            tap(v, x0 + cl / 2, y0 + cl / 2);
             idleUntil(() -> {
                 JSONObject m = app.model().at(Model.boxPlace(1, 0));
                 return app.client.orders.pending().isEmpty() && m != null && m.optLong("p") == p3;

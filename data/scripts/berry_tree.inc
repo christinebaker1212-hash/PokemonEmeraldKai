@@ -1,5 +1,7 @@
 BerryTreeScript::
 	special ObjectEventInteractionGetBerryTreeData
+	specialvar VAR_RESULT, MP_JohtoBerries_NotRipe   @ Moemon Kai: JOHTO's BERRY patches: nothing to plant or water
+	goto_if_eq VAR_RESULT, TRUE, BerryTree_EventScript_JohtoNothing
 	switch VAR_0x8004
 	case BERRY_STAGE_SPARKLING, BerryTree_EventScript_Sparkling
 	case BERRY_STAGE_NO_BERRY, BerryTree_EventScript_CheckSoil
@@ -312,3 +314,12 @@ BerryTree_Text_FarmPickedFirst:
 BerryTree_Text_FarmNoAnswer:
 	.string "The farm's host didn't answer.\n"
 	.string "Try again in a moment.$"
+
+@ Moemon Kai: a JOHTO BERRY patch not ripe yet (Crystal's fruit tree: src/mp/mp_apricorn.c)
+BerryTree_EventScript_JohtoNothing::
+	lockall
+	msgbox Johto_Text_FruitBearingTree, MSGBOX_DEFAULT
+	msgbox Johto_Text_NothingHere, MSGBOX_DEFAULT
+	closemessage
+	releaseall
+	end

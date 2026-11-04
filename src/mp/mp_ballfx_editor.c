@@ -327,6 +327,18 @@ static void DrawInfo(void)
     CopyWindowToVram(WIN_INFO, COPYWIN_FULL);
 }
 
+// A piece's description, as the editor's info box shows it (the phone app's POKé BALL page: mp_export.c)
+const char *MP_BallFxEditor_Info(u8 kind, u8 i)
+{
+    switch (kind)
+    {
+    case MPFX_PIECE_FORM:   return i < MPFX_FORM_COUNT ? sFormInfo[i] : "";
+    case MPFX_PIECE_PART:   return i < MPFX_PART_COUNT ? sPartInfo[i] : "";
+    case MPFX_PIECE_RECALL: return i < MPFX_RECALL_COUNT ? sRecallInfo[i] : "";
+    default:                return i < MPFX_SOUND_COUNT ? sSoundInfo[i] : "";
+    }
+}
+
 static const char *RowLabel(u8 row)
 {
     static const char *const sLabels[ROW_COUNT] = {
@@ -440,12 +452,21 @@ static void SetMonScale(s32 scale)
     gOamMatrices[n].b = gOamMatrices[n].c = 0;
 }
 
+bool8 MP_FxClip_Active(void);
+bool8 MP_FxClip_Next(struct MpBallFx *fx);
+
 static void StartPreview(void)
 {
     struct Sprite *mon;
     s16 yOff;
 
     DestroyPreview();
+    if (MP_FxClip_Active())   // (recording for the phone app: mp_fxclip.c sets the next piece)
+    {
+        if (!MP_FxClip_Next(&sEd->fx))
+            return;
+        sEd->front = TRUE;
+    }
     sEd->defaultForm = sEd->fx.form == MPFX_FORM_DEFAULT;
     sEd->defaultRecall = sEd->fx.recall == MPFX_RECALL_DEFAULT;
     // standing on the player's platform, from the back (or from the front, as others see it)
@@ -560,7 +581,7 @@ static void PreviewFrame(void)
         }
         break;
     case PH_HOLD:
-        if (sEd->timer >= 56)   // a brief pause to look at it
+        if (sEd->timer >= (MP_FxClip_Active() ? 30 : 56))   // a brief pause to look at it
         {
             sEd->phase = PH_RECALL;
             sEd->timer = 0;

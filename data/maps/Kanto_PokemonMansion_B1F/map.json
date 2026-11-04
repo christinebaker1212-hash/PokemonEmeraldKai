@@ -113,13 +113,6 @@
       "elevation": 3,
       "dest_map": "MAP_KANTO_POKEMON_MANSION_1F",
       "dest_warp_id": "4"
-    },
-    {
-      "x": 31,
-      "y": 2,
-      "elevation": 3,
-      "dest_map": "MAP_KANTO_CINNABAR_ISLAND_PRIMAL_CHAMBER",
-      "dest_warp_id": "0"
     }
   ],
   "coord_events": [],

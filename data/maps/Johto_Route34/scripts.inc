@@ -66,6 +66,15 @@ Johto_Route34_EventScript_83EFCD6::
 @ Johto_Route34 object 7 (local id 7, gfx 0x3E8F) at 22,87
 Johto_Route34_EventScript_83EFCED::
 	trainerbattle TRAINER_BATTLE_SINGLE, TRAINER_QZ_4849, 0, Johto_Route34_Text_83F02B0, Johto_Route34_Text_83F02E9
+	@ Moemon Kai: Crystal's KATE gives the SOFT SAND after her battle (it was an item ball: docs/REGIONS_AUDIT.md 99)
+	goto_if_set FLAG_JOHTO_GOT_SOFT_SAND, Johto_Route34_EventScript_KateAfter
+	msgbox Johto_Route34_Text_KateOffer, MSGBOX_DEFAULT
+	setorcopyvar VAR_0x8000, ITEM_SOFT_SAND
+	setorcopyvar VAR_0x8001, 1
+	callstd STD_OBTAIN_ITEM
+	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
+	setflag FLAG_JOHTO_GOT_SOFT_SAND
+Johto_Route34_EventScript_KateAfter::
 	msgbox Johto_Route34_Text_83F0350, MSGBOX_AUTOCLOSE
 	end
 
@@ -189,10 +198,10 @@ Johto_Route34_Text_83F00C6::
 
 Johto_Route34_Text_83F010A::
 	.string "TRAINER TIPS\p"
-	.string "BERRY trees grow new BERRIES\n"
-	.string "several times a day.\p"
-	.string "Note which trees bear which\n"
-	.string "BERRIES.$"
+	.string "BERRY trees grow new BERRIES every\n"
+	.string "day.\p"
+	.string "Make a note of which trees bear\n"
+	.string "which BERRIES.$"
 
 Johto_Route34_Text_83F016E::
 	.string "IRENE: Who are you?!$"
@@ -216,8 +225,8 @@ Johto_Route34_Text_83F0287::
 	.string "stronger.$"
 
 Johto_Route34_Text_83F02B0::
-	.string "KATE: I must pay you back for\n"
-	.string "taking care of my sisters!$"
+	.string "KATE: You sure were mean to my\n"
+	.string "little sisters!$"
 
 Johto_Route34_Text_83F02E9::
 	.string "KATE: No! I can’t believe I lost.$"
@@ -230,3 +239,8 @@ Johto_Route34_Text_83F0350::
 Johto_Route34_Text_83F03AF::
 	.string "DAY-CARE\p"
 	.string "LET US RAISE YOUR MOéMON FOR YOU!$"
+
+Johto_Route34_Text_KateOffer::
+	.string "KATE: You’re too strong. I didn’t\n"
+	.string "stand a chance.\p"
+	.string "Here. You deserve this.$"

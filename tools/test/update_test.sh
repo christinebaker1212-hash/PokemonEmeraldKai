@@ -53,6 +53,9 @@ GOODSHA=$(sha256sum "$Z" | cut -d' ' -f1)
 
 PORT=$((20000 + RANDOM % 20000))
 SLOWPORT=$((PORT + 1))
+# (Moemon Maker's pack, which every start fetches, from the test server too, which has none: a pack published online
+# since this build would otherwise land in the folders and change them)
+export MOEMON_MAKER_PACK_URL=http://127.0.0.1:$PORT/no-maker-pack/
 python3 tools/test/slow_http.py $PORT "$OUT/srv" 2> "$OUT/http.log" &
 P1=$!
 python3 tools/test/slow_http.py $SLOWPORT "$OUT/srv" 0.02 2> "$OUT/http_slow.log" &

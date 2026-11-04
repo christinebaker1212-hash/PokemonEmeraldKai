@@ -1,9 +1,9 @@
 # A new game begun in SINNOH (mp_region.c MP_Region_StartNewGame; PROF. BIRCH's question, MOEMON_DEBUG_REGION here)
 # plays Platinum's own story from its start (src/sinnoh/s3d_scrcmd.c Sinnoh_PlatinumStoryBegin: FLAG_SINNOH_PLATINUM_STORY
-# 15675): in TWINLEAF's house 2F, the TV program ending (VAR_PLAYER_HOUSE_SPECIAL_PROGRAM_STATE 0x5209), no Running
+# 15675): in TWINLEAF's house 2F in front of the TV (4,6, facing it), the TV program ending (VAR_PLAYER_HOUSE_SPECIAL_PROGRAM_STATE 0x5209), no Running
 # Shoes yet (mom gives them, FLAG_SYS_B_DASH). The rest of the opening: sinnoh_platinum_walk, sinnoh_platinum_route201.
 MODE=1
 TMO=120
 ENV_A="MOEMON_DEBUG_REGION=3"
-EXPECT_A=("where map 44.38 xy 8,5" "flag 15675 = 1" "var 0x5209 = 1" "ctx 1 free 1 overworld 1 locked 0 script 0")
+EXPECT_A=("where map 44.38 xy 4,6" "flag 15675 = 1" "var 0x5209 = 1" "ctx 1 free 1 overworld 1 locked 0 script 0")
 UNEXPECT_A=("[crash]" "TIMEOUT")

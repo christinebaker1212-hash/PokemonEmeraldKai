@@ -412,3 +412,23 @@ Johto_AzaleaTown_Text_83C43F2::
 Johto_AzaleaTown_Text_83C4400::
 	.string "ILEX FOREST\p"
 	.string "Enter through the gate.$"
+
+@ Moemon Kai: Crystal's SLOWPOKE, back in town once the WELL is saved (FLAG_QZ_0x1085; pokecrystal AzaleaTown.asm
+@ AzaleaTownSlowpokeScript; docs/REGIONS_AUDIT.md 138)
+Johto_AzaleaTown_EventScript_Slowpoke::
+	lock
+	message Johto_AzaleaTown_Text_Slowpoke1
+	waitmessage
+	delay 60
+	playmoncry SPECIES_SLOWPOKE, CRY_MODE_NORMAL
+	msgbox Johto_AzaleaTown_Text_Slowpoke2, MSGBOX_DEFAULT
+	waitmoncry
+	release
+	end
+
+Johto_AzaleaTown_Text_Slowpoke1::
+	.string "SLOWPOKE: …\p"
+	.string "…… …… ……$"
+
+Johto_AzaleaTown_Text_Slowpoke2::
+	.string "…… ……Yawn?$"

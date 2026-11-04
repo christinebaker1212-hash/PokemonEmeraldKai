@@ -51,7 +51,7 @@
       "trainer_type": "TRAINER_TYPE_NONE",
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Johto_UnionCaveB2F_EventScript_83FE2BF",
-      "flag": "FLAG_QZ_0x1174"
+      "flag": "FLAG_KAI_GONE"
     },
     {
       "graphics_id": "OBJ_EVENT_GFX_QZ_16015",
@@ -104,6 +104,19 @@
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Quetzal_EventScript_840EA6A",
       "flag": "FLAG_QZ_0x126E"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_MON_LAPRAS",
+      "x": 14,
+      "y": 34,
+      "elevation": 1,
+      "movement_type": "MOVEMENT_TYPE_LOOK_AROUND",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_UnionCaveB2F_EventScript_Lapras",
+      "flag": "FLAG_JOHTO_HIDE_LAPRAS"
     }
   ],
   "warp_events": [

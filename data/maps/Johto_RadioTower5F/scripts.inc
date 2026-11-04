@@ -359,7 +359,7 @@ Johto_RadioTower5F_EventScript_8403B5E::
 	turnobject LOCALID_PLAYER, 2
 	turnobject 2, 2
 	turnobject 7, 1
-	cleartrainerflag 0x1362
+	cleartrainerflag TRAINER_QZ_4962
 	setvar VAR_0x8004, 0xE
 	setvar VAR_0x8005, 0
 	special DoSpecialTrainerBattle

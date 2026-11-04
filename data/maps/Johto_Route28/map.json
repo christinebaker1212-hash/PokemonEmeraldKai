@@ -50,6 +50,14 @@
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
       "script": "Johto_Route28_EventScript_83ECA69"
+    },
+    {
+      "type": "hidden_item",
+      "x": 42,
+      "y": 10,
+      "elevation": 0,
+      "item": "ITEM_RARE_CANDY",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_32"
     }
   ]
 }

@@ -53,9 +53,78 @@ Kanto_SaffronCity_CopycatsHouse_2F_EventScript_841EC56::
 	msgbox Kanto_SaffronCity_CopycatsHouse_2F_Text_844AFFB, MSGBOX_SIGN
 	end
 
+@ Moemon Kai: FireRed's MIMIC tutor (pokefirered data/scripts/move_tutors.inc EventScript_MimicTutor): a POKé DOLL for
+@ her, MIMIC once, on Kai's move tutors (Quetzal's "move training from the team menu" stand-in is gone)
 Kanto_SaffronCity_CopycatsHouse_2F_EventScript_8471CC9::
-	msgbox Quetzal_Text_8471CE4, MSGBOX_NPC
+	goto_if_set 0x2221, Kanto_SaffronCity_CopycatsHouse_2F_EventScript_MimicTaught
+	msgbox Kanto_SaffronCity_CopycatsHouse_2F_Text_MimicTeach, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Kanto_SaffronCity_CopycatsHouse_2F_EventScript_MimicDeclined
+	call MoveTutor_EventScript_CanOnlyBeLearnedOnce
+	goto_if_eq VAR_RESULT, NO, Kanto_SaffronCity_CopycatsHouse_2F_EventScript_MimicDeclined
+	msgbox Kanto_SaffronCity_CopycatsHouse_2F_Text_MimicWhichMon, MSGBOX_DEFAULT
+	setvar VAR_0x8005, TUTOR_MOVE_MIMIC
+	call MoveTutor_EventScript_OpenPartyMenu
+	lock
+	faceplayer
+	goto_if_eq VAR_RESULT, 0, Kanto_SaffronCity_CopycatsHouse_2F_EventScript_MimicDeclined
+	removeitem ITEM_POKE_DOLL
+	setflag 0x2221
+	goto Kanto_SaffronCity_CopycatsHouse_2F_EventScript_MimicTaught
 	end
+
+Kanto_SaffronCity_CopycatsHouse_2F_EventScript_MimicDeclined::
+	msgbox Kanto_SaffronCity_CopycatsHouse_2F_Text_MimicDeclined, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_SaffronCity_CopycatsHouse_2F_EventScript_MimicTaught::
+	checkplayergender
+	call_if_eq VAR_RESULT, MALE, Kanto_SaffronCity_CopycatsHouse_2F_EventScript_MimicTaughtMale
+	call_if_eq VAR_RESULT, FEMALE, Kanto_SaffronCity_CopycatsHouse_2F_EventScript_MimicTaughtFemale
+	release
+	end
+
+Kanto_SaffronCity_CopycatsHouse_2F_EventScript_MimicTaughtMale::
+	msgbox Kanto_SaffronCity_CopycatsHouse_2F_Text_MimicTaughtMale, MSGBOX_DEFAULT
+	return
+
+Kanto_SaffronCity_CopycatsHouse_2F_EventScript_MimicTaughtFemale::
+	msgbox Kanto_SaffronCity_CopycatsHouse_2F_Text_MimicTaughtFemale, MSGBOX_DEFAULT
+	return
+
+Kanto_SaffronCity_CopycatsHouse_2F_Text_MimicTeach::
+	.string "Oh wow!\n"
+	.string "A POKé DOLL!\p"
+	.string "For me?\n"
+	.string "Thank you!\p"
+	.string "You know what?\n"
+	.string "I can teach the move MIMIC.$"
+
+Kanto_SaffronCity_CopycatsHouse_2F_Text_MimicWhichMon::
+	.string "I really love MIMIC!\n"
+	.string "Who’s going to learn it?$"
+
+Kanto_SaffronCity_CopycatsHouse_2F_Text_MimicDeclined::
+	.string "Don’t you like MIMIC?$"
+
+Kanto_SaffronCity_CopycatsHouse_2F_Text_MimicTaughtMale::
+	.string "{PLAYER}: Hi!\n"
+	.string "Thanks for earlier!\p"
+	.string "{PLAYER}: Pardon?\p"
+	.string "{PLAYER}: Is it that fun to mimic my\n"
+	.string "every move?\p"
+	.string "COPYCAT: You bet!\n"
+	.string "It’s a scream!$"
+
+Kanto_SaffronCity_CopycatsHouse_2F_Text_MimicTaughtFemale::
+	.string "{PLAYER}: Hi!\n"
+	.string "Thanks for what you did for us.\p"
+	.string "{PLAYER}: Pardon?\p"
+	.string "{PLAYER}: Is it really that fun to\n"
+	.string "copy what I say and do?\p"
+	.string "COPYCAT: You bet!\n"
+	.string "It’s a scream!$"
+
 
 Kanto_SaffronCity_CopycatsHouse_2F_Text_844ABBB::
 	.string "{PLAYER}: Hi!\n"

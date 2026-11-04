@@ -39,6 +39,8 @@
 #include "constants/species.h"
 #include "constants/trainers.h"
 #include "constants/pokemon.h"
+#include "party_menu.h"
+extern const struct Evolution gEvolutionTable[][EVOS_PER_MON];
 
 #ifdef _WIN32
 #include <direct.h>
@@ -48,6 +50,7 @@
 #endif
 
 void MP_ExportGlyph(u16 glyphId, u8 out[16][16], u8 *width);   // text.c
+void MP_ExportGlyphSmall(u16 glyphId, u8 out[16][16], u8 *width);
 const u32 *MP_SpeciesFrontPal(u16 species);   // pokemon.c
 u8 MP_PhoneItemUse(u16 item);                  // party_menu.c
 u8 MP_TypeIconPal(u8 type);                    // pokemon_summary_screen.c
@@ -220,14 +223,18 @@ static u32 AllSpecies(void)
     return SPECIES_UNOWN_QMARK + 1;   // (the EGG and UNOWN's letters after the 1,050)
 }
 
-static void ExportMons(const char *dir)
+// The icons and front pictures of one art set (OPTIONS > CREATURES: 0 Kai's MOéMON in icons/ and front/, 1 the original
+// POKéMON in front_p/ (the party icons are the same); the app shows either, as the game does or as its own swap says)
+static void ExportMonsArt(const char *dir, bool8 pokemon)
 {
     static u8 sPic[64 * 64 / 2 * 4], sRgba[64 * 64 * 4];
     char path[600];
     u32 s, n = 0;
+    bool8 was = gSaveBlock2Ptr->optionsPokemonArt;
+    gSaveBlock2Ptr->optionsPokemonArt = pokemon;
     snprintf(path, sizeof(path), "%s/icons", dir);
     MakeDir(path);
-    snprintf(path, sizeof(path), "%s/front", dir);
+    snprintf(path, sizeof(path), "%s/front%s", dir, pokemon ? "_p" : "");
     MakeDir(path);
     for (s = 1; s < AllSpecies(); s++)
     {
@@ -236,7 +243,7 @@ static void ExportMons(const char *dir)
         u32 pid = (letter & 3) | (((letter >> 2) & 3) << 8) | (((letter >> 4) & 3) << 16) | (((letter >> 6) & 3) << 24);
         const u8 *icon = GetMonIconPtr(s > SPECIES_EGG ? SPECIES_UNOWN : s, pid, TRUE);
         u8 pal = GetValidMonIconPalIndex(s > SPECIES_EGG ? SPECIES_UNOWN : s);
-        if (icon != NULL)
+        if (icon != NULL && !pokemon)   // (the party icons are the same in both sets)
         {
             Tiles(icon, 4, 8, (const u16 *)gMonIconPaletteTable[pal].data, sRgba);
             snprintf(path, sizeof(path), "%s/icons/%u.png", dir, s);
@@ -246,17 +253,24 @@ static void ExportMons(const char *dir)
         {
             u16 colors[16];
             memset(sPic, 0, sizeof(sPic));
-            LoadSpecialPokePic(&gMonFrontPicTable_Moe[s > SPECIES_EGG ? SPECIES_UNOWN : s], sPic,
+            LoadSpecialPokePic(&MP_MONART(gMonFrontPicTable)[s > SPECIES_EGG ? SPECIES_UNOWN : s], sPic,
                                s > SPECIES_EGG ? SPECIES_UNOWN : s, pid, TRUE);
             // (as palette indexes: the app colors it with the species' palette, or a POKeMON's own: shiny, hue)
             (void)colors;
             TilesIndex(sPic, 8, 8, sRgba);
-            snprintf(path, sizeof(path), "%s/front/%u.png", dir, s);
+            snprintf(path, sizeof(path), "%s/front%s/%u.png", dir, pokemon ? "_p" : "", s);
             WritePng(path, sRgba, 64, 64);
         }
         n++;
     }
-    MPNet_Log("export: %u POKeMON's icons and pictures", n);
+    gSaveBlock2Ptr->optionsPokemonArt = was;
+    MPNet_Log("export: %u POKeMON's icons and pictures (%s)", n, pokemon ? "POKeMON" : "MOEMON");
+}
+
+static void ExportMons(const char *dir)
+{
+    ExportMonsArt(dir, FALSE);
+    ExportMonsArt(dir, TRUE);
 }
 
 static void ExportItems(const char *dir)
@@ -395,6 +409,23 @@ static void ExportDexArt(const char *dir)
     }
     snprintf(path, sizeof(path), "%s/dex_list.png", dir);
     WritePng(path, sRgba, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+    {
+        // (the list's header as OPTIONS > CREATURES POKéMON draws it: POKéDEX)
+        bool8 was = gSaveBlock2Ptr->optionsPokemonArt;
+        gSaveBlock2Ptr->optionsPokemonArt = TRUE;
+        MP_DexListScreen(sScreen);
+        gSaveBlock2Ptr->optionsPokemonArt = was;
+        for (i = 0; i < DISPLAY_WIDTH * DISPLAY_HEIGHT; i++)
+        {
+            u16 c = sScreen[i];
+            sRgba[i * 4] = (c & 31) * 255 / 31;
+            sRgba[i * 4 + 1] = ((c >> 5) & 31) * 255 / 31;
+            sRgba[i * 4 + 2] = ((c >> 10) & 31) * 255 / 31;
+            sRgba[i * 4 + 3] = 255;
+        }
+        snprintf(path, sizeof(path), "%s/dex_list_p.png", dir);
+        WritePng(path, sRgba, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+    }
     if (sheet == NULL)
         return;
     for (s = 1; s < n && s < NUM_SPECIES; s++)
@@ -505,6 +536,96 @@ static void ExportFont(const char *dir, FILE *json)
     fprintf(json, "]");
     snprintf(path, sizeof(path), "%s/font.png", dir);
     WritePng(path, sRgba, 256, 256);
+    // the small font too (the app's second size of words, crisp at the same scale)
+    memset(sRgba, 0, sizeof(sRgba));
+    fprintf(json, ",\"fontSmallWidths\":[");
+    for (g = 0; g < 256; g++)
+    {
+        u8 cell[16][16], width;
+        MP_ExportGlyphSmall(g, cell, &width);
+        fprintf(json, "%s%u", g ? "," : "", width);
+        for (r = 0; r < 16; r++)
+            for (c = 0; c < 16; c++)
+                memcpy(sRgba + (((g / 16) * 16 + r) * 256 + (g % 16) * 16 + c) * 4, sColors[cell[r][c] & 3], 4);
+    }
+    fprintf(json, "]");
+    snprintf(path, sizeof(path), "%s/font_small.png", dir);
+    WritePng(path, sRgba, 256, 256);
+}
+
+// The POKé BALL page's pieces (mp_ballstyle.c MP_BallStyle_ExportJson; the effects' names, the editor's words for
+// each, where an earned one comes from, the ready-made presets as [name, pack, sound])
+static void JsonAscii(FILE *f, const char *s)
+{
+    fputc('"', f);
+    for (; *s; s++)
+    {
+        if (*s == '~')
+            fputs("\\u00e9", f);   // (the game's é in ASCII text)
+        else if (*s == '"' || *s == '\\')
+            fprintf(f, "\\%c", *s);
+        else if ((u8)*s >= 0x20)
+            fputc(*s, f);
+    }
+    fputc('"', f);
+}
+
+static void ExportBallFx(FILE *f)
+{
+    void MP_BallStyle_ExportJson(FILE *f);
+    const char *MP_BallFxEditor_Info(u8 kind, u8 i);
+    static const u8 sKinds[] = {MPFX_PIECE_FORM, MPFX_PIECE_PART, MPFX_PIECE_RECALL};
+    static const char *const sKeys[] = {"forms", "parts", "recalls"};
+    u32 k, i;
+    char how[96];
+    MP_BallStyle_ExportJson(f);
+    fprintf(f, ",\"ballfx\":{");
+    for (k = 0; k < 3; k++)
+    {
+        fprintf(f, "%s\"%s\":[", k ? "," : "", sKeys[k]);
+        for (i = 0; i < MP_BallUnlock_Count(sKinds[k]); i++)
+        {
+            fprintf(f, "%s[", i ? "," : "");
+            JsonAscii(f, k == 0 ? MP_BallFx_FormName(i) : k == 1 ? MP_BallFx_PartName(i) : MP_BallFx_RecallName(i));
+            fputc(',', f);
+            JsonAscii(f, MP_BallFxEditor_Info(sKinds[k], i));
+            how[0] = '\0';
+            if (i >= MP_BallUnlock_First(sKinds[k]))
+                MP_BallUnlock_HowTo(sKinds[k], i, how, sizeof(how));
+            fputc(',', f);
+            JsonAscii(f, how);
+            fputc(']', f);
+        }
+        fprintf(f, "]");
+    }
+    fprintf(f, ",\"colorHow\":[");
+    for (i = 0; i < MP_BALL_COLORS; i++)
+    {
+        how[0] = '\0';
+        if (i >= MP_BallUnlock_First(MPFX_PIECE_COLOR))
+            MP_BallUnlock_HowTo(MPFX_PIECE_COLOR, i, how, sizeof(how));
+        fprintf(f, "%s", i ? "," : "");
+        JsonAscii(f, how);
+    }
+    fprintf(f, "],\"sounds\":[");
+    for (i = 0; i < MPFX_SOUND_COUNT; i++)
+    {
+        fprintf(f, "%s[", i ? "," : "");
+        JsonAscii(f, MP_BallFx_SoundName(i));
+        fputc(',', f);
+        JsonAscii(f, MP_BallFxEditor_Info(MPFX_PIECE_KINDS, i));
+        fputc(']', f);
+    }
+    fprintf(f, "],\"presets\":[");
+    for (i = 0; i < MP_BallFx_PresetCount(); i++)
+    {
+        struct MpBallFx fx;
+        MP_BallFx_Preset(i, &fx);
+        fprintf(f, "%s[", i ? "," : "");
+        JsonAscii(f, MP_BallFx_PresetName(i));
+        fprintf(f, ",%u,%u]", (unsigned)MP_BallFx_Pack(&fx), fx.sound);
+    }
+    fprintf(f, "]},");
 }
 
 static void ExportData(const char *dir)
@@ -535,11 +656,51 @@ static void ExportData(const char *dir)
                     gSpeciesInfo[base].types[1], gSpeciesInfo[base].genderRatio, gSpeciesInfo[base].baseHP,
                     gSpeciesInfo[base].baseAttack, gSpeciesInfo[base].baseDefense, gSpeciesInfo[base].baseSpAttack,
                     gSpeciesInfo[base].baseSpDefense, gSpeciesInfo[base].baseSpeed);
-            LZDecompressWram(MP_SpeciesFrontPal(base), pal);
-            fprintf(f, ",\"pal\":\"");
-            for (k = 0; k < 16; k++)
-                fprintf(f, "%04X", pal[k]);
-            fprintf(f, "\"");
+            // (the POKéDEX's details: abilities, egg groups, EXP and EV yields, held items, egg cycles, friendship,
+            // evolutions [method, param, into], level-up moves [level, move], the TMs / HMs it learns as a hex mask)
+            {
+                const struct SpeciesInfo *si = &gSpeciesInfo[base];
+                u32 e, tm, nib;
+                fprintf(f, ",\"ab\":[%u,%u],\"eg\":[%u,%u],\"ey\":%u,\"evy\":[%u,%u,%u,%u,%u,%u],\"it\":[%u,%u]"
+                        ",\"ec\":%u,\"fr\":%u", si->abilities[0], si->abilities[1], si->eggGroups[0], si->eggGroups[1],
+                        si->expYield, si->evYield_HP, si->evYield_Attack, si->evYield_Defense, si->evYield_SpAttack,
+                        si->evYield_SpDefense, si->evYield_Speed, si->itemCommon, si->itemRare, si->eggCycles,
+                        si->friendship);
+                fprintf(f, ",\"evo\":[");
+                for (e = 0, k = 0; e < EVOS_PER_MON; e++)
+                    if (gEvolutionTable[base][e].method != 0 && gEvolutionTable[base][e].targetSpecies != SPECIES_NONE)
+                        fprintf(f, "%s[%u,%u,%u]", k++ ? "," : "", gEvolutionTable[base][e].method,
+                                gEvolutionTable[base][e].param, gEvolutionTable[base][e].targetSpecies);
+                fprintf(f, "],\"lv\":[");
+                for (e = 0; gLevelUpLearnsets[base] != NULL && gLevelUpLearnsets[base][e] != LEVEL_UP_END && e < 128; e++)
+                    fprintf(f, "%s[%u,%u]", e ? "," : "", (gLevelUpLearnsets[base][e] & LEVEL_UP_MOVE_LV) >> 16,
+                            gLevelUpLearnsets[base][e] & LEVEL_UP_MOVE_ID);
+                fprintf(f, "],\"tm\":\"");
+                for (tm = 0; tm < NUM_TMHMS; tm += 4)
+                {
+                    for (nib = 0, k = 0; k < 4; k++)
+                        if (tm + k < NUM_TMHMS && CanSpeciesLearnTMHM(base, tm + k))
+                            nib |= 8 >> k;
+                    fprintf(f, "%X", nib);
+                }
+                fprintf(f, "\"");
+            }
+            {
+                // (Kai's colors, then the original POKéMON's: OPTIONS > CREATURES)
+                bool8 was = gSaveBlock2Ptr->optionsPokemonArt;
+                gSaveBlock2Ptr->optionsPokemonArt = FALSE;
+                LZDecompressWram(MP_SpeciesFrontPal(base), pal);
+                fprintf(f, ",\"pal\":\"");
+                for (k = 0; k < 16; k++)
+                    fprintf(f, "%04X", pal[k]);
+                gSaveBlock2Ptr->optionsPokemonArt = TRUE;
+                LZDecompressWram(gMonPaletteTable_Pokemon[base].data, pal);
+                fprintf(f, "\",\"ppal\":\"");
+                for (k = 0; k < 16; k++)
+                    fprintf(f, "%04X", pal[k]);
+                fprintf(f, "\"");
+                gSaveBlock2Ptr->optionsPokemonArt = was;
+            }
         }
         fprintf(f, "}");
     }
@@ -569,6 +730,9 @@ static void ExportData(const char *dir)
         Json(f, GetItemDescription(i), 300);
         fprintf(f, "}");
     }
+    fprintf(f, "],\"tms\":[");   // (each TM / HM index's move: TM01-TM50, HM01-HM08, TM51-TM92)
+    for (i = 0; i < NUM_TMHMS; i++)
+        fprintf(f, "%s%u", i ? "," : "", ItemIdToBattleMoveId(TMHM_ITEM(i)));
     fprintf(f, "],\"abilities\":[");
     for (i = 0; i < ABILITIES_COUNT; i++)
     {
@@ -689,6 +853,7 @@ static void ExportData(const char *dir)
         fprintf(f, "]");
     }
     fprintf(f, "],");
+    ExportBallFx(f);
     ExportFont(dir, f);
     fprintf(f, "}\n");
     fclose(f);
@@ -713,6 +878,11 @@ void MP_Export_IfAsked(void)
     ExportRibbons(dir);
     ExportTrainerPics(dir);
     ExportData(dir);
+    {
+        void MP_Export_Sounds(const char *dir);   // mp_export_sound.c: the sounds, played by the game's own engine
+        if (getenv("MOEMON_EXPORT_NO_SOUND") == NULL)
+            MP_Export_Sounds(dir);
+    }
     printf("[export] the app's art and tables are in %s\n", dir);
     fflush(stdout);
     exit(0);

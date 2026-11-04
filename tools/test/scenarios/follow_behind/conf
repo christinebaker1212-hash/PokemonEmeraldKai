@@ -4,5 +4,6 @@
 MODE=1
 TMO=90
 ENV_A="MOEMON_DEBUG_PARTY=280:15 MOEMON_FOLLOWER_SPRITES=2"
-EXPECT_A=("pmd depth: follower 16,11 trainer 16,12 front 0" "pmd depth: follower 16,12 trainer 16,13 front 0" "shadow of sprite 0 (object): owner at 120,72 pri 2 sub 136, shadow at 120,83")
+EXPECT_A=("pmd depth: follower 16,11 trainer 16,12 front 0" "pmd depth: follower 16,12 trainer 16,13 front 0" "shadow player: " "its shadow 128 (ours 0)")
+# (1.82.0: no shadow in tall grass, the grass covers the feet: the player stands in it here, so none)
 UNEXPECT_A=("[crash]" "TIMEOUT" "front 1" "shadow shared")

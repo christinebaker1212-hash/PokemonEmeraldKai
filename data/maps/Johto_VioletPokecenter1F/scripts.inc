@@ -11,8 +11,6 @@ Johto_VioletPokecenter1F_EventScript_83FFD24::
 	lock
 	faceplayer
 	goto_if_set FLAG_QZ_0x1080, Johto_VioletPokecenter1F_EventScript_83FFDD8
-	specialvar VAR_RESULT, QzIsNuzlockeActiveInRegion
-	goto_if_eq VAR_RESULT, 1, Johto_VioletPokecenter1F_EventScript_83FFDEB
 	special QzIsCurrentPcBoxFull
 	goto_if_eq VAR_RESULT, 1, Johto_VioletPokecenter1F_EventScript_83FFD6D
 	msgbox Johto_VioletPokecenter1F_Text_83FFECC, MSGBOX_YESNO
@@ -35,7 +33,6 @@ Johto_VioletPokecenter1F_EventScript_83FFD78::
 	end
 
 Johto_VioletPokecenter1F_EventScript_83FFD98::
-	call Quetzal_EventScript_8361A4D
 	special QzIsCurrentPcBoxFull
 	goto_if_eq VAR_RESULT, 1, Johto_VioletPokecenter1F_EventScript_83FFD6D
 	giveegg SPECIES_TOGEPI

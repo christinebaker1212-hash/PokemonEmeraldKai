@@ -17,6 +17,11 @@
 // tracks for songs made without the GBA's limit) and the sample voices it was made for (INFO voices=, up to
 // MAX_DIRECTSOUND_CHANNELS = 64; the game's songs play with 5). A file this game can't read (an unknown sample name,
 // a newer format) is skipped with a line in the log, and the game's own song plays.
+//
+// Moemon Maker: MoemonMaker/music/ beside the game is read too (the user's music, docs/MOEMON_MAKER.md): its
+// <song>[@<place>].kaisong files win over music/'s, and a file whose name is no song of the game's (mus_my_theme) is a
+// new track with a song number of its own (MAKER_SONG_FIRST..., by its name in order) that maps can play. A new track's
+// song number has no entry in gSongTable: MP_Kaisong_TableIndex gives the BGM entry it plays on.
 #define MP_KAISONG_NO_SCENE
 #include <stddef.h>
 #include <stdio.h>
@@ -44,7 +49,8 @@ _Static_assert(sizeof(struct MP2KInstrument) == sizeof(struct ToneData), "voice 
 
 struct KaiFile
 {
-    char file[96];          // file name in music/
+    char file[96];          // file name in music/ (or MoemonMaker/music/: maker)
+    u8 maker;               // Moemon Maker: the user's (wins over music/'s)
     u16 song;
     s16 group, num;         // the map (-1 = not one map)
     s16 scene;              // the scene (sKaisongScenes; -1 = not a scene); neither = everywhere
@@ -179,29 +185,74 @@ static bool8 MapByKey(const char *key, s16 *group, s16 *num)
 
 static int CmpFiles(const void *a, const void *b)
 {
-    return strcmp(((const struct KaiFile *)a)->file, ((const struct KaiFile *)b)->file);
+    const struct KaiFile *x = a, *y = b;
+    if (x->maker != y->maker)
+        return y->maker - x->maker;   // (the user's first: Find takes the first that fits)
+    return strcmp(x->file, y->file);
 }
+
+static const char *MakerMusicDir(void)
+{
+    const char *Maker_ReadDir(void);
+    static char dir[1200];
+    snprintf(dir, sizeof(dir), "%s/music", Maker_ReadDir());   // (the working copy's, else the published pack's)
+    return dir;
+}
+
+static const char *DirOf(const struct KaiFile *f)
+{
+    return f->maker ? MakerMusicDir() : MusicDir();
+}
+
+static u16 sTrackCount;
+static char sTracks[MAKER_SONG_COUNT][64];   // the user's new tracks' names, by song number - MAKER_SONG_FIRST
+
+static void ScanDir(const char *dir, u8 maker);
 
 static void Scan(void)
 {
-    DIR *d;
-    struct dirent *e;
     sKai.scanned = TRUE;
     sKai.count = 0;
-    if (!(d = opendir(MusicDir())))
+    sTrackCount = 0;
+    ScanDir(MusicDir(), FALSE);
+    ScanDir(MakerMusicDir(), TRUE);
+    qsort(sKai.files, sKai.count, sizeof(sKai.files[0]), CmpFiles);
+    if (sKai.count)
+        MPNet_Log("kaisong: %d custom songs in %s", sKai.count, MusicDir());
+}
+
+static int CmpNames(const void *a, const void *b)
+{
+    return strcmp(*(const char *const *)a, *(const char *const *)b);
+}
+
+static void ScanDir(const char *dir, u8 maker)
+{
+    DIR *d;
+    struct dirent *e;
+    char *names[KAI_MAX_FILES];
+    int count = 0, k;
+    if (!(d = opendir(dir)))
         return;
-    while ((e = readdir(d)) != NULL && sKai.count < KAI_MAX_FILES)
+    // (by name, so a new track's song number is the same every time: they're given in this order)
+    while ((e = readdir(d)) != NULL && count < KAI_MAX_FILES)
+        names[count++] = strdup(e->d_name);
+    closedir(d);
+    qsort(names, count, sizeof(names[0]), CmpNames);
+    for (k = 0; k < count && sKai.count < KAI_MAX_FILES; free(names[k]), k++)
     {
+        const char *name = names[k];
         char stem[96], *at;
-        size_t len = strlen(e->d_name);
+        size_t len = strlen(name);
         struct KaiFile *f = &sKai.files[sKai.count];
         int song;
-        if (len <= 8 || len >= sizeof(stem) || strcmp(e->d_name + len - 8, ".kaisong") != 0)
+        if (len <= 8 || len >= sizeof(stem) || strcmp(name + len - 8, ".kaisong") != 0)
             continue;
-        memcpy(stem, e->d_name, len - 8);
+        memcpy(stem, name, len - 8);
         stem[len - 8] = 0;
         memset(f, 0, sizeof(*f));
-        snprintf(f->file, sizeof(f->file), "%s", e->d_name);
+        snprintf(f->file, sizeof(f->file), "%s", name);
+        f->maker = maker;
         f->group = f->num = f->scene = -1;
         if ((at = strchr(stem, '@')) != NULL)
         {
@@ -213,7 +264,13 @@ static void Scan(void)
             }
             f->variant = PlaceVariant(at);
         }
-        if ((song = SongByName(stem)) < 0 || gSongTable[song].ms != 0)
+        if ((song = SongByName(stem)) < 0 && maker && !at && sTrackCount < MAKER_SONG_COUNT)
+        {
+            // Moemon Maker: a new track
+            snprintf(sTracks[sTrackCount], sizeof(sTracks[0]), "%s", stem);
+            song = MAKER_SONG_FIRST + sTrackCount++;
+        }
+        else if (song < 0 || gSongTable[song].ms != 0)
         {
             MPNet_Log("kaisong: %s: no music called %s", f->file, stem);
             continue;
@@ -221,10 +278,44 @@ static void Scan(void)
         f->song = song;
         sKai.count++;
     }
-    closedir(d);
-    qsort(sKai.files, sKai.count, sizeof(sKai.files[0]), CmpFiles);
-    if (sKai.count)
-        MPNet_Log("kaisong: %d custom songs in %s", sKai.count, MusicDir());
+}
+
+// Moemon Maker: a song number's entry in gSongTable (a new track's: the BGM entry it plays on)
+u16 MP_Kaisong_TableIndex(u16 song)
+{
+    return song >= MAKER_SONG_FIRST ? MUS_LITTLEROOT : song;
+}
+
+// Moemon Maker: the user's new tracks (MoemonMaker/music/), by name
+int MP_Kaisong_TrackCount(void)
+{
+    if (!sKai.scanned)
+        Scan();
+    return sTrackCount;
+}
+
+const char *MP_Kaisong_TrackName(int i)
+{
+    if (!sKai.scanned)
+        Scan();
+    return i >= 0 && i < sTrackCount ? sTracks[i] : NULL;
+}
+
+int MP_Kaisong_TrackId(const char *name)
+{
+    int i;
+    if (!sKai.scanned)
+        Scan();
+    for (i = 0; i < sTrackCount; i++)
+        if (strcmp(sTracks[i], name) == 0)
+            return MAKER_SONG_FIRST + i;
+    return -1;
+}
+
+// Moemon Maker: the folders read again (the editor added or removed a file)
+void MP_Kaisong_Rescan(void)
+{
+    sKai.scanned = FALSE;
 }
 
 // ---------------------------------------------------------------------------
@@ -362,7 +453,7 @@ static bool8 Load(struct KaiFile *f)
     u8 priority, reverb;
     struct SongHeader *h;
 
-    snprintf(path, sizeof(path), "%s/%s", MusicDir(), f->file);
+    snprintf(path, sizeof(path), "%s/%s", DirOf(f), f->file);
     if (!(fp = fopen(path, "rb")))
         return Fail(f, "can't open it");
     fseek(fp, 0, SEEK_END);
@@ -710,7 +801,7 @@ struct SongHeader *MP_Kaisong_Header(u16 song, struct SongHeader *builtin)
     {
         int scene = SceneFor(song);
         struct SongHeader *h = HeaderOf(Find(song, scene, gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum), builtin);
-        if (getenv("MOEMON_MUSIC_LOG") && gSongTable[song].ms == 0)   // tests: which scene each song plays for
+        if (getenv("MOEMON_MUSIC_LOG") && gSongTable[MP_Kaisong_TableIndex(song)].ms == 0)   // tests: which scene each song plays for
             MPNet_Log("kaisong: song %d (%s) for %s%s", song, song < ARRAY_COUNT(sKaisongSongNames) ? sKaisongSongNames[song] : "?", scene >= 0 ? "scene " : "the map",
                       scene >= 0 ? sKaisongScenes[scene].key : "");
         return h;
@@ -726,7 +817,7 @@ bool8 MP_Kaisong_Differs(u16 song, const struct WarpData *warp)
         return FALSE;
     if (!warp)
         warp = &gSaveBlock1Ptr->location;
-    want = HeaderOf(Find(song, -1, warp->mapGroup, warp->mapNum), gSongTable[song].header);
+    want = HeaderOf(Find(song, -1, warp->mapGroup, warp->mapNum), gSongTable[MP_Kaisong_TableIndex(song)].header);
     return want != gMPlayInfo_BGM.songHeader && !MP_Kaisong_SameMusic(song, warp);
 }
 
@@ -752,7 +843,7 @@ bool8 MP_Kaisong_SameMusic(u16 song, const struct WarpData *warp)
         return FALSE;
     if (!warp)
         warp = &gSaveBlock1Ptr->location;
-    want = HeaderOf(Find(song, -1, warp->mapGroup, warp->mapNum), gSongTable[song].header);
+    want = HeaderOf(Find(song, -1, warp->mapGroup, warp->mapNum), gSongTable[MP_Kaisong_TableIndex(song)].header);
     a = FileOf(now);
     b = FileOf(want);
     return a && b && (a == b || a->music == b->music);   // (only custom songs: the game's own behave as they always did)
@@ -783,7 +874,7 @@ u8 MP_Kaisong_VariantOf(const struct SongHeader *header)
 
 void MP_Kaisong_StartVariant(u16 song, u8 variant)
 {
-    struct SongHeader *h = gSongTable[song].header;
+    struct SongHeader *h = gSongTable[MP_Kaisong_TableIndex(song)].header;
     int i;
     if (!sKai.scanned)
         Scan();
@@ -796,7 +887,7 @@ void MP_Kaisong_StartVariant(u16 song, u8 variant)
             break;
         }
     }
-    MPlayStart(gMPlayTable[gSongTable[song].ms].info, h);
+    MPlayStart(gMPlayTable[gSongTable[MP_Kaisong_TableIndex(song)].ms].info, h);
 }
 
 // The BGM player's song decides how many sample voices mix at once
@@ -842,7 +933,7 @@ bool8 MP_Kaisong_PlayFile(const char *file)
             struct SongHeader *h = HeaderOf(f, NULL);
             if (!h)
                 return FALSE;
-            MPlayStart(gMPlayTable[gSongTable[f->song].ms].info, h);
+            MPlayStart(gMPlayTable[gSongTable[MP_Kaisong_TableIndex(f->song)].ms].info, h);
             return TRUE;
         }
     }
@@ -862,4 +953,23 @@ void MP_Kaisong_Log(void)
                   f->group, f->num, f->scene >= 0 ? sKaisongScenes[f->scene].key : "-",
                   f->failed ? ", can't be played" : f->header ? ", loaded" : "");
     }
+}
+
+// Moemon Maker: the scenes a song can be replaced in (the editor's place picker), and a map's place key
+int MP_Kaisong_SceneCount(void)
+{
+    return ARRAY_COUNT(sKaisongScenes);
+}
+
+const char *MP_Kaisong_SceneKey(int i)
+{
+    return i >= 0 && i < (int)ARRAY_COUNT(sKaisongScenes) ? sKaisongScenes[i].key : NULL;
+}
+
+// The lowercase name a song's files use (mus_route101), or NULL
+const char *MP_Kaisong_SongFileName(u16 song)
+{
+    if (song >= MAKER_SONG_FIRST)
+        return MP_Kaisong_TrackName(song - MAKER_SONG_FIRST);
+    return song < ARRAY_COUNT(sKaisongSongNames) && sKaisongSongNames[song][0] ? sKaisongSongNames[song] : NULL;
 }

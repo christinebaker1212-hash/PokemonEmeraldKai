@@ -44,6 +44,15 @@ mkdir -p "$P/mugen"
 mkdir -p "$P/music"
 cp music/*.kaisong "$P/music/" 2>/dev/null || true
 cp docs/SONG_TABLE.md "$P/music/SONG_TABLE.md"
+# Moemon Maker's published pack (the repository's MoemonMaker/: the user's edits and music) as MoemonMakerPack/, so a
+# fresh install has it without a download (src/platform/updater.c MakerPackWorker keeps it current between releases).
+# The editor's own working copy (MoemonMaker/ beside a game) is never shipped, so an update never touches it.
+if [ -d MoemonMaker ]; then
+    tools/maker/build_pack.sh MoemonMaker "$P/.makerpack" > /dev/null
+    mkdir -p "$P/MoemonMakerPack"
+    cp -r "$P/.makerpack/pack/." "$P/MoemonMakerPack/"
+    rm -rf "$P/.makerpack"
+fi
 # SINNOH's 3D pack and text pack (tools/sinnoh/make_pack.sh builds them from pret/pokeplatinum; the release runs it first)
 if [ -f sinnoh/platinum3d.pak ]; then
     mkdir -p "$P/sinnoh"

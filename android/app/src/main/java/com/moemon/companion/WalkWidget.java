@@ -54,6 +54,8 @@ public final class WalkWidget extends AppWidgetProvider {
         Canvas c = new Canvas(b);
         c.scale(s, s);
         GameArt art = app.art;
+        Look.ensure(app.context);
+        GameArt.pokemonArt = Look.pokemonArt(app);
         Paint fill = new Paint();
         fill.setColor(0xFF88C8F8);
         c.drawRect(0, 0, w, h, fill);
@@ -69,7 +71,7 @@ public final class WalkWidget extends AppWidgetProvider {
             if (mon.optInt("e") == 1) {
                 art.icon(c, art.data.optInt("egg"), 8, 24, GameArt.ICON_PLAIN);
             } else {
-                art.front(c, mon.optInt("s"), mon.optString("pal", null), 0, 8, 64, false);
+                art.front(c, mon.optInt("s"), art.monPal(mon), 0, 8, 64, false);
             }
         }
         art.window(c, 0, 64, 10, 50, 50);

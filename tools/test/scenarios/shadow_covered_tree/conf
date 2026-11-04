@@ -1,0 +1,9 @@
+# The user's picture: a 2x1 potted tree (its top drawn over the player, its pot as usual): standing behind it, the
+# player's shadow showed as a line under the leaves. The Garden's potted trees at (6,9) and (7,9): a shadow at
+# (6,8) in the open, none behind either tree (mp_shadow.c FeetCovered)
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_PARTY=280:30"
+EXPECT_A=("where map 0.57 xy 6,8" "where map 0.57 xy 6,9" "where map 0.57 xy 7,9")
+UNEXPECT_A=("[crash]" "TIMEOUT")
+CHECK="python3 tools/test/check_shadow_covered.py"

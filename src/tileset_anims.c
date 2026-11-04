@@ -561,6 +561,12 @@ static void AppendTilesetAnimToBuffer(const u16 *src, u16 *dest, u16 size)
     }
 }
 
+// Moemon Maker: whether this frame's animations changed any tiles (the editor draws its tiles again)
+u8 TilesetAnims_Queued(void)
+{
+    return sTilesetDMA3TransferBufferSize;
+}
+
 void TransferTilesetAnimsBuffer(void)
 {
     int i;
@@ -625,16 +631,20 @@ static void TilesetAnim_QzGeneral(u16 timer)
         QueueQzAnim(sQzAnimSet->flower, sQzAnim_Flower[(timer / 16) % ARRAY_COUNT(sQzAnim_Flower)]);
 }
 
+// (Moemon Maker: for any layout, the editor's too: TilesetAnims_InitForLayout)
+static const struct MapLayout *sAnimLayout;
+
 static void _InitPrimaryTilesetAnimation(void)
 {
     u32 i;
+    const struct MapLayout *layout = sAnimLayout ? sAnimLayout : gMapHeader.mapLayout;
     sPrimaryTilesetAnimCounter = 0;
     sPrimaryTilesetAnimCounterMax = 0;
     sPrimaryTilesetAnimCallback = NULL;
-    if (gMapHeader.mapLayout->primaryTileset && gMapHeader.mapLayout->primaryTileset->callback)
-        gMapHeader.mapLayout->primaryTileset->callback();
+    if (layout->primaryTileset && layout->primaryTileset->callback)
+        layout->primaryTileset->callback();
     for (i = 0; i < ARRAY_COUNT(sQzAnimSets); i++)
-        if (gMapHeader.mapLayout->primaryTileset == sQzAnimSets[i].tileset)
+        if (layout->primaryTileset == sQzAnimSets[i].tileset)
         {
             sQzAnimSet = &sQzAnimSets[i];
             sPrimaryTilesetAnimCounterMax = 640;
@@ -644,11 +654,21 @@ static void _InitPrimaryTilesetAnimation(void)
 
 static void _InitSecondaryTilesetAnimation(void)
 {
+    const struct MapLayout *layout = sAnimLayout ? sAnimLayout : gMapHeader.mapLayout;
     sSecondaryTilesetAnimCounter = 0;
     sSecondaryTilesetAnimCounterMax = 0;
     sSecondaryTilesetAnimCallback = NULL;
-    if (gMapHeader.mapLayout->secondaryTileset && gMapHeader.mapLayout->secondaryTileset->callback)
-        gMapHeader.mapLayout->secondaryTileset->callback();
+    if (layout->secondaryTileset && layout->secondaryTileset->callback)
+        layout->secondaryTileset->callback();
+}
+
+// Moemon Maker: a layout's tile animations without making it the current map (src/maker/maker_tiles.c): the same
+// frames are copied to the same tiles in BG VRAM by UpdateTilesetAnimations + TransferTilesetAnimsBuffer
+void TilesetAnims_InitForLayout(const struct MapLayout *layout)
+{
+    sAnimLayout = layout;
+    InitTilesetAnimations();
+    sAnimLayout = NULL;
 }
 
 void InitTilesetAnim_General(void)

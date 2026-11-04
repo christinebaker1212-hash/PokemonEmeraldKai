@@ -1,0 +1,8 @@
+# GOLDENROD UNDERGROUND's HAIRCUT BROTHERS (docs/REGIONS_AUDIT.md 145, Crystal's): on a Tuesday the older one is in
+# (FLAG_JOHTO_HIDE_OLDER_CUT 0x153F clear, the younger's 0x1540 set); his haircut costs 500 of 3000 and raises the
+# lead's friendship (qz_specials.c MP_HaircutBrother); one a day (FLAG_DAILY_JOHTO_HAIRCUT 0x929)
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("flag 5439 = 0" "flag 5440 = 1" "haircut: older brother, slot 0" "money 2500" "flag 2345 = 1" "ctx 1 free 1 overworld 1 locked 0 script 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

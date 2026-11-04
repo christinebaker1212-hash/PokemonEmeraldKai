@@ -29,15 +29,16 @@ Kanto_CeruleanCity_House2_Text_8442119::
 	.string "Those miserable ROCKETS!\p"
 	.string "Look what they’ve done to my\n"
 	.string "house!\p"
-	.string "They stole a valuable SUN STONE!\p"
-	.string "I was going to use it to evolve\n"
-	.string "one of my MOéMON.\p"
+	.string "They stole a TM for teaching\n"
+	.string "MOéMON how to DIG holes!\p"
+	.string "I was going to use it on a\n"
+	.string "MANKEY or a SANDSHREW…\p"
 	.string "That cost me a bundle, it did!$"
 
 Kanto_CeruleanCity_House2_Text_84421C9::
 	.string "I figure what’s lost is lost.\p"
-	.string "I decided to train my DIGLETT the\n"
-	.string "old-fashioned way.$"
+	.string "I decided to teach DIGLETT how to\n"
+	.string "DIG without a TM.$"
 
 Kanto_CeruleanCity_House2_Text_844221C::
 	.string "TEAM ROCKET must be trying to DIG\n"

@@ -55,53 +55,34 @@ Johto_Route40_EventScript_83F406C::
 
 @ Johto_Route40 object 11 (local id 11, gfx 0x2F) at 19,13
 Johto_Route40_EventScript_83F42D3::
+	@ Moemon Kai: Crystal's WEEKDAY sibling (pokecrystal Route40.asm MonicaScript; tools/quetzal_port/fix_siblings.py):
+	@ only on MONDAY (FLAG_JOHTO_HIDE_MONICA), once met they give the gift
 	lock
 	faceplayer
-	goto_if_set FLAG_QZ_0x1047, Johto_Route40_EventScript_83F4393
-	msgbox Johto_Route40_Text_83F411A, MSGBOX_DEFAULT
-	closemessage
-	multichoice 0x14, 0, MULTI_QZ_0x4A, 1
-	nop
-	copyvar VAR_0x8000, VAR_RESULT
-	goto_if_eq VAR_0x8000, 0, Johto_Route40_EventScript_83F4385
-	goto_if_eq VAR_0x8000, 1, Johto_Route40_EventScript_83F4358
-	goto_if_eq VAR_0x8000, 2, Johto_Route40_EventScript_83F4385
-	goto_if_eq VAR_0x8000, 3, Johto_Route40_EventScript_83F4385
-	goto_if_eq VAR_0x8000, 4, Johto_Route40_EventScript_83F4385
-	goto_if_eq VAR_0x8000, 5, Johto_Route40_EventScript_83F4385
-	goto_if_eq VAR_0x8000, 6, Johto_Route40_EventScript_83F4385
-	goto_if_eq VAR_0x8000, 7, Johto_Route40_EventScript_83F4390
-	goto_if_eq VAR_0x8000, 127, Johto_Route40_EventScript_83F4390
-	closemessage
-	release
-	end
-
-Johto_Route40_EventScript_83F4358::
-	msgbox Johto_Route40_Text_83F4189, MSGBOX_DEFAULT
+	goto_if_set FLAG_QZ_0x1047, Johto_Route40_EventScript_MonicaDay
+	specialvar VAR_RESULT, MP_JohtoWeekday
+	goto_if_ne VAR_RESULT, 1, Johto_Route40_EventScript_MonicaNotDay
+	goto_if_set FLAG_JOHTO_MET_MONICA, Johto_Route40_EventScript_MonicaMet
+	msgbox Johto_Route40_Text_MonicaMeet, MSGBOX_DEFAULT
+	setflag FLAG_JOHTO_MET_MONICA
+Johto_Route40_EventScript_MonicaMet::
+	msgbox Johto_Route40_Text_MonicaGivesGift, MSGBOX_DEFAULT
 	setorcopyvar VAR_0x8000, ITEM_SHARP_BEAK
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
 	setflag FLAG_QZ_0x1047
-	msgbox Johto_Route40_Text_83F41CC, MSGBOX_DEFAULT
-	closemessage
+	msgbox Johto_Route40_Text_MonicaGaveGift, MSGBOX_DEFAULT
 	release
 	end
 
-Johto_Route40_EventScript_83F4385::
-	msgbox Johto_Route40_Text_83F42C5, MSGBOX_DEFAULT
-	closemessage
+Johto_Route40_EventScript_MonicaDay::
+	msgbox Johto_Route40_Text_MonicaMonday, MSGBOX_DEFAULT
 	release
 	end
 
-Johto_Route40_EventScript_83F4390::
-	closemessage
-	release
-	end
-
-Johto_Route40_EventScript_83F4393::
-	msgbox Johto_Route40_Text_83F423D, MSGBOX_DEFAULT
-	closemessage
+Johto_Route40_EventScript_MonicaNotDay::
+	msgbox Johto_Route40_Text_MonicaNotMonday, MSGBOX_DEFAULT
 	release
 	end
 
@@ -190,3 +171,26 @@ Johto_Route40_Text_83F423D::
 
 Johto_Route40_Text_83F42C5::
 	.string "Not that one.$"
+
+Johto_Route40_Text_MonicaMeet::
+	.string "MONICA: Glad to meet you. I’m\n"
+	.string "MONICA of Monday.$"
+
+Johto_Route40_Text_MonicaGaveGift::
+	.string "MONICA: It’s an item that raises\n"
+	.string "the power of flying-type moves.\p"
+	.string "You should equip a bird MOéMON\n"
+	.string "with that item.$"
+
+Johto_Route40_Text_MonicaMonday::
+	.string "MONICA: My brothers and sisters\n"
+	.string "are all over the place.\p"
+	.string "See if you could find them all!$"
+
+Johto_Route40_Text_MonicaNotMonday::
+	.string "MONICA: I don’t think today is\n"
+	.string "Monday. How sad…$"
+
+Johto_Route40_Text_MonicaGivesGift::
+	.string "As a token of our friendship, I\n"
+	.string "have a gift for you!$"

@@ -99,7 +99,7 @@ Johto_ElmsLab_EventScript_83E1C6E::
 	faceplayer
 	special QzGiovanniStoryElmCheck
 	goto_if_eq VAR_RESULT, 1, Johto_ElmsLab_EventScript_8401D20
-	call_if_set FLAG_QZ_0x11D1, Johto_ElmsLab_EventScript_83E1F8C
+	call_if_set FLAG_QZ_0xA79, Johto_ElmsLab_EventScript_83E1F8C   @ Moemon Kai: (the POKé BALLS once the POKéDEX is had, not with the starter)
 	goto_if_set FLAG_QZ_0x106A, Johto_ElmsLab_EventScript_83E1D23
 	goto_if_eq VAR_QZ_0x5004, 7, Johto_ElmsLab_EventScript_83E21B8
 	goto_if_eq VAR_QZ_0x5004, 8, Johto_ElmsLab_EventScript_83E2210
@@ -250,15 +250,12 @@ Johto_ElmsLab_EventScript_83E1EFC::
 	message Johto_ElmsLab_Text_83E2881
 	waitfanfare
 	call Quetzal_EventScript_8361ADB
-	call Johto_ElmsLab_EventScript_83E1F77
-	call Johto_ElmsLab_EventScript_83E1F8C
-	setflag FLAG_QZ_0xA79
+	@ Moemon Kai: no POKéDEX or POKé BALLS with the starter: OAK gives the POKéDEX (the NATIONAL DEX) at MR.
+	@ MOéMON's house and ELM's aide the POKé BALLS, as in Crystal
 	setflag FLAG_QZ_0xA78
 	setflag FLAG_QZ_0x149B
 	specialvar VAR_RESULT, QzBufferLastReceivedMonForNickname
 	goto_if_eq VAR_RESULT, 0, Johto_ElmsLab_EventScript_83E1F70
-	specialvar VAR_RESULT, QzIsNuzlockeOption2D4Bit6
-	goto_if_eq VAR_RESULT, 1, Johto_ElmsLab_EventScript_83E1FBC
 	msgbox Johto_ElmsLab_Text_83E2909, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, 1, Johto_ElmsLab_EventScript_83E1FB2
 
@@ -712,8 +709,8 @@ Johto_ElmsLab_Movement_83E2390:
 	step_end
 
 Johto_ElmsLab_Text_82E0C31::
-	.string "It’s a PC used for research.\n"
-	.string "Better not mess around with it.$"
+	.string "OBSERVATIONS ON MOéMON EVOLUTION\p"
+	.string "…It says on the screen…$"
 
 Johto_ElmsLab_Text_82E0C6E::
 	.string "It’s crammed with books on MOéMON.$"
@@ -722,7 +719,7 @@ Johto_ElmsLab_Text_83E1D2E::
 	.string "{PLAYER}!\p"
 	.string "What are you doing here?\p"
 	.string "My aide is still waiting for you\n"
-	.string "In VIOLET CITY!$"
+	.string "in VIOLET CITY!$"
 
 Johto_ElmsLab_Text_83E2392::
 	.string "Probably shouldn’t touch!$"
@@ -963,16 +960,21 @@ Johto_ElmsLab_Text_83E3485::
 	.string "Once there, go straight north!$"
 
 Johto_ElmsLab_Text_83E360F::
-	.string "ELM: {PLAYER}! I have a gift\n"
-	.string "to celebrate your victory.\p"
-	.string "It’s an S.S. Ticket!$"
+	.string "ELM: {PLAYER}! There you are!\p"
+	.string "I called because I have something\n"
+	.string "for you.\p"
+	.string "See? It’s an S.S.TICKET.\p"
+	.string "Now you can catch MOéMON in KANTO.$"
 
 Johto_ElmsLab_Text_83E3656::
-	.string "Keep it to sail from OLIVINE to\n"
-	.string "regions where you have already\l"
-	.string "won the League.\p"
-	.string "To begin another adventure, use\n"
-	.string "New region in the START menu.$"
+	.string "The ship departs from OLIVINE\n"
+	.string "CITY.\p"
+	.string "But you knew that already,\n"
+	.string "{PLAYER}.\p"
+	.string "After all, you’ve traveled all\n"
+	.string "over with your MOéMON.\p"
+	.string "Give my regards to PROF.OAK in\n"
+	.string "KANTO!$"
 
 Johto_ElmsLab_Text_83E3713::
 	.string "{PLAYER}, I want you to have\n"
@@ -1040,3 +1042,49 @@ Johto_ElmsLab_Text_8401E3B::
 Johto_ElmsLab_Text_8401E64::
 	.string "ELM: Good heavens!\n"
 	.string "That MOéMON... is ARCEUS!$"
+
+@ Moemon Kai: Crystal's TRAVEL TIPS and trash can (pokecrystal ElmsLab.asm; docs/REGIONS_AUDIT.md 138)
+Johto_ElmsLab_EventScript_TravelTip1::
+	msgbox Johto_ElmsLab_Text_TravelTip1, MSGBOX_SIGN
+	end
+
+Johto_ElmsLab_EventScript_TravelTip2::
+	msgbox Johto_ElmsLab_Text_TravelTip2, MSGBOX_SIGN
+	end
+
+Johto_ElmsLab_EventScript_TravelTip3::
+	msgbox Johto_ElmsLab_Text_TravelTip3, MSGBOX_SIGN
+	end
+
+Johto_ElmsLab_EventScript_TravelTip4::
+	msgbox Johto_ElmsLab_Text_TravelTip4, MSGBOX_SIGN
+	end
+
+Johto_ElmsLab_EventScript_Trashcan::
+	msgbox Johto_ElmsLab_Text_Trashcan, MSGBOX_SIGN
+	end
+
+Johto_ElmsLab_Text_TravelTip1::
+	.string "{PLAYER} opened a book.\p"
+	.string "Travel Tip 1: Press START to open\n"
+	.string "the MENU.$"
+
+Johto_ElmsLab_Text_TravelTip2::
+	.string "{PLAYER} opened a book.\p"
+	.string "Travel Tip 2: Record your trip\n"
+	.string "with SAVE!$"
+
+Johto_ElmsLab_Text_TravelTip3::
+	.string "{PLAYER} opened a book.\p"
+	.string "Travel Tip 3: Open your PACK and\n"
+	.string "press SELECT to move items.$"
+
+Johto_ElmsLab_Text_TravelTip4::
+	.string "{PLAYER} opened a book.\p"
+	.string "Travel Tip 4: Check your MOéMON\n"
+	.string "moves. Press the A Button to\l"
+	.string "switch moves.$"
+
+Johto_ElmsLab_Text_Trashcan::
+	.string "The wrapper from the snack\n"
+	.string "PROF.ELM ate is in there…$"

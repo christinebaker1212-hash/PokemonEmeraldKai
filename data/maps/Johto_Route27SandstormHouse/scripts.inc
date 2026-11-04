@@ -12,6 +12,10 @@ Johto_Route27SandstormHouse_EventScript_83EC99A::
 	end
 
 Johto_Route27SandstormHouse_EventScript_83EC9B0::
+	@ Moemon Kai: Crystal's loyalty check (docs/REGIONS_AUDIT.md 135)
+	specialvar VAR_RESULT, MP_LeadFriendship
+	msgbox Johto_Route27SandstormHouse_Text_Loyal, MSGBOX_DEFAULT
+	goto_if_lt VAR_RESULT, 150, Johto_Route27SandstormHouse_EventScript_Disloyal
 	msgbox Johto_Route27SandstormHouse_Text_83EC9DD, MSGBOX_DEFAULT
 	@ Moemon Kai: Crystal's TM (tools/quetzal_port/fix_johto_tms.py) (Quetzal gave SMOOTH_ROCK)
 	setorcopyvar VAR_0x8000, ITEM_TM37
@@ -23,6 +27,26 @@ Johto_Route27SandstormHouse_EventScript_83EC9B0::
 	closemessage
 	release
 	end
+
+Johto_Route27SandstormHouse_EventScript_Disloyal::
+	msgbox Johto_Route27SandstormHouse_Text_Disloyal, MSGBOX_DEFAULT
+	closemessage
+	release
+	end
+
+Johto_Route27SandstormHouse_Text_Loyal::
+	.string "Where are you off to with MOéMON?\p"
+	.string "MOéMON LEAGUE?\p"
+	.string "Are your MOéMON loyal enough for\n"
+	.string "you to win?\p"
+	.string "Let me see…$"
+
+Johto_Route27SandstormHouse_Text_Disloyal::
+	.string "If it doesn’t come to trust you\n"
+	.string "some more, it could be tough\l"
+	.string "going.\p"
+	.string "Trust is the tie that binds MOéMON\n"
+	.string "and trainers.$"
 
 Johto_Route27SandstormHouse_Text_83EC9DD::
 	.string "Ah! Your MOéMON trusts you very\n"

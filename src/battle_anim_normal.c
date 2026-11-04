@@ -603,7 +603,7 @@ static void BlendColorCycleByTag(u8 taskId, u8 startBlendAmount, u8 targetBlendA
 {
     u8 paletteIndex = IndexOfSpritePaletteTag(gTasks[taskId].tPalTag);
     BeginNormalPaletteFade(
-        1 << (paletteIndex + 16),
+        MP_SPRITE_PAL_BIT(paletteIndex),
         gTasks[taskId].tDelay,
         startBlendAmount,
         targetBlendAmount,
@@ -682,7 +682,7 @@ void AnimTask_FlashAnimTagWithColor(u8 taskId)
 
     paletteIndex = IndexOfSpritePaletteTag(cmd->tag);
     BeginNormalPaletteFade(
-        1 << (paletteIndex + 16),
+        MP_SPRITE_PAL_BIT(paletteIndex),
         0,
         cmd->blendY1,
         cmd->blendY1,
@@ -710,7 +710,7 @@ static void AnimTask_FlashAnimTagWithColor_Step1(u8 taskId)
         return;
     }
 
-    selectedPalettes = 1 << (IndexOfSpritePaletteTag(gTasks[taskId].tAnimTag) + 16);
+    selectedPalettes = MP_SPRITE_PAL_BIT(IndexOfSpritePaletteTag(gTasks[taskId].tAnimTag));
     if (gTasks[taskId].tDelay & 0x100)
     {
         BeginNormalPaletteFade(
@@ -741,7 +741,7 @@ static void AnimTask_FlashAnimTagWithColor_Step2(u8 taskId)
 
     if (!gPaletteFade.active)
     {
-        selectedPalettes = 1 << (IndexOfSpritePaletteTag(gTasks[taskId].tAnimTag) + 16);
+        selectedPalettes = MP_SPRITE_PAL_BIT(IndexOfSpritePaletteTag(gTasks[taskId].tAnimTag));
         BeginNormalPaletteFade(selectedPalettes, 0, 0, 0, RGB_BLACK);
         DestroyAnimVisualTask(taskId);
     }

@@ -9,36 +9,15 @@ Johto_SlowpokeWellB2F_EventScript_83FA2BB::
 	callstd STD_FIND_ITEM
 	end
 
-@ Johto_SlowpokeWellB2F object 1 (local id 1, gfx 0x1C7) at 13,9
+@ Johto_SlowpokeWellB2F object 1 (local id 1) at 13,9
+@ Moemon Kai: Crystal's man waiting for SLOWPOKE to evolve gives the KING'S ROCK (pokecrystal SlowpokeWellB2F.asm;
+@ Quetzal's SLOWKING made it rain for a DAMP ROCK; docs/REGIONS_AUDIT.md 92)
 Johto_SlowpokeWellB2F_EventScript_83FA2C8::
 	lock
 	faceplayer
-	playmoncry SPECIES_SLOWKING, 0
-	msgbox Johto_SlowpokeWellB2F_Text_83FA36F, MSGBOX_DEFAULT
-	waitmoncry
-	closemessage
-	goto_if_set FLAG_QZ_0x117A, Johto_SlowpokeWellB2F_EventScript_83FA350
-	playmoncry SPECIES_SLOWKING, 0
-	applymovement 1, Johto_SlowpokeWellB2F_Movement_83FA356
-	waitmovement 0
-	delay 0x37
-	playmoncry SPECIES_SLOWKING, 0
-	applymovement 1, Johto_SlowpokeWellB2F_Movement_83FA35D
-	waitmovement 0
-	delay 0x37
-	playmoncry SPECIES_SLOWKING, 0
-	applymovement 1, Johto_SlowpokeWellB2F_Movement_83FA363
-	waitmovement 0
-	delay 0x37
-	playmoncry SPECIES_SLOWKING, 0
-	applymovement 1, Johto_SlowpokeWellB2F_Movement_83FA36A
-	waitmovement 0
-	delay 0x37
-	playmoncry SPECIES_SLOWKING, 0
-	setweather 3
-	doweather
-	waitmoncry
-	setorcopyvar VAR_0x8000, ITEM_DAMP_ROCK
+	goto_if_set FLAG_QZ_0x117A, Johto_SlowpokeWellB2F_EventScript_GotKingsRock
+	msgbox Johto_SlowpokeWellB2F_Text_GymGuide, MSGBOX_DEFAULT
+	setorcopyvar VAR_0x8000, ITEM_KINGS_ROCK
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
@@ -46,9 +25,8 @@ Johto_SlowpokeWellB2F_EventScript_83FA2C8::
 	release
 	end
 
-Johto_SlowpokeWellB2F_EventScript_83FA350::
-	setweather 3
-	doweather
+Johto_SlowpokeWellB2F_EventScript_GotKingsRock::
+	msgbox Johto_SlowpokeWellB2F_Text_GotKingsRock, MSGBOX_DEFAULT
 	release
 	end
 
@@ -87,3 +65,18 @@ Johto_SlowpokeWellB2F_Movement_83FA36A:
 
 Johto_SlowpokeWellB2F_Text_83FA36F::
 	.string "SLOWKING: ........................$"
+
+Johto_SlowpokeWellB2F_Text_GymGuide::
+	.string "I’m waiting to see SLOWPOKE’s\n"
+	.string "moment of evolution.\p"
+	.string "Through observation, I made a new\n"
+	.string "discovery.\p"
+	.string "A SLOWPOKE with a KING’S ROCK\n"
+	.string "often gets bitten by a SHELLDER.\p"
+	.string "Here, I’ll share a KING’S ROCK\n"
+	.string "with you.$"
+
+Johto_SlowpokeWellB2F_Text_GotKingsRock::
+	.string "I’m going to be like SLOWPOKE.\p"
+	.string "I’ll wait patiently, so I can see\n"
+	.string "one evolve.$"

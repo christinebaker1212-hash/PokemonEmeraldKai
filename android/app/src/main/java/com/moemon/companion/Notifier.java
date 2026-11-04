@@ -131,6 +131,112 @@ public final class Notifier {
         }
     }
 
+    /** A friend's new offer of a trade by mail (TURN: each offer once; not held to once a day) */
+    public static void trades(Context c, Companion app) {
+        if (!on(c, 5) || quiet(c, LocalTime.now())) {
+            return;
+        }
+        Model m = app.model();
+        JSONObject f = m == null ? null : m.snap.optJSONObject("friends");
+        if (f == null) {
+            return;
+        }
+        java.util.List<JSONObject> offers;
+        try {
+            offers = com.moemon.companion.core.Trades.incoming(app.crypto, f.optString("srv"), f);
+        } catch (Exception e) {
+            return;
+        }
+        app.offers = offers;
+        String told = prefs(c).getString("offersTold", "");
+        for (JSONObject o : offers) {
+            if ((o.optInt("esc") & (com.moemon.companion.core.Server.CLOSED | com.moemon.companion.core.Server.HAVE1)) != 0
+                    || told.contains(o.optString("t"))) {
+                continue;
+            }
+            told = (o.optString("t") + "," + told);
+            told = told.substring(0, Math.min(told.length(), 33 * 32));
+            prefs(c).edit().putString("offersTold", told).remove("notif_last_TURN").apply();
+            String peer = app.art.plain(GameArt.hexText(o.optString("n")));
+            JSONObject mon = o.optJSONObject("mon");
+            String name = mon == null ? "a POKéMON" : app.art.plain(GameArt.hexText(mon.optString("n")));
+            post(c, 5, LocalDate.now(), peer + " wants to trade!", peer + " offers " + name + ". See it in FRIENDS.");
+            break;
+        }
+    }
+
+    /** The card games with friends (TRIPLE TRIAD, POKéMON cards, YU-GI-OH!): a new challenge, or a friend has played and it's your turn (TURN: each once) */
+    public static void cardTurns(Context c, Companion app) {
+        if (!on(c, 5) || quiet(c, LocalTime.now())) {
+            return;
+        }
+        app.syncTtGames();
+        String told = prefs(c).getString("ttTold", "");
+        for (JSONObject inv : app.ttInvites) {
+            String key = "i" + inv.optString("g");
+            if (!told.contains(key)) {
+                remember(c, key);
+                post(c, 5, LocalDate.now(), app.art.plain(GameArt.hexText(inv.optString("n"))) + " challenges you!",
+                        "A game of TRIPLE TRIAD, a turn at a time. Answer in CARDS.");
+                return;
+            }
+        }
+        for (JSONObject g : app.ttGames()) {
+            String key = "t" + g.optString("g") + ":" + g.optJSONArray("moves").length();
+            if ("yourturn".equals(TtFriendGame.status(g)) && !told.contains(key)) {
+                remember(c, key);
+                post(c, 5, LocalDate.now(), "Your turn!", app.art.plain(GameArt.hexText(g.optString("pn")))
+                        + " has played. Your move in CARDS.");
+                return;
+            }
+        }
+        // the POKéMON card game's duels with friends the same way
+        app.syncTcgGames();
+        for (JSONObject inv : app.tcgInvites()) {
+            String key = "j" + inv.optString("g");
+            if (!told.contains(key)) {
+                remember(c, key);
+                post(c, 5, LocalDate.now(), app.art.plain(GameArt.hexText(inv.optString("n"))) + " challenges you!",
+                        "A POKéMON card duel, a turn at a time. Answer in CARDS.");
+                return;
+            }
+        }
+        for (JSONObject g : app.tcgGames()) {
+            String key = "p" + g.optString("g") + ":" + g.optJSONArray("moves").length();
+            if ("yourturn".equals(TcgFriendGame.status(g)) && !told.contains(key)) {
+                remember(c, key);
+                post(c, 5, LocalDate.now(), "Your turn!", app.art.plain(GameArt.hexText(g.optString("pn")))
+                        + " has played. Your move in CARDS.");
+                return;
+            }
+        }
+        // and YU-GI-OH!'s
+        app.syncDuelGames("ygo");
+        for (JSONObject inv : app.ygoInvites()) {
+            String key = "y" + inv.optString("g");
+            if (!told.contains(key)) {
+                remember(c, key);
+                post(c, 5, LocalDate.now(), app.art.plain(GameArt.hexText(inv.optString("n"))) + " challenges you!",
+                        "A YU-GI-OH! duel, a turn at a time. Answer in CARDS.");
+                return;
+            }
+        }
+        for (JSONObject g : app.ygoGames()) {
+            String key = "z" + g.optString("g") + ":" + g.optJSONArray("moves").length();
+            if ("yourturn".equals(YgoFriendGame.status(g)) && !told.contains(key)) {
+                remember(c, key);
+                post(c, 5, LocalDate.now(), "Your move!", app.art.plain(GameArt.hexText(g.optString("pn")))
+                        + " has played. Your move in CARDS.");
+                return;
+            }
+        }
+    }
+
+    private static void remember(Context c, String key) {
+        String told = key + "," + prefs(c).getString("ttTold", "");
+        prefs(c).edit().putString("ttTold", told.substring(0, Math.min(told.length(), 4000))).remove("notif_last_TURN").apply();
+    }
+
     // a notification of KIND, once a day, while today's budget lasts
     private static void post(Context c, int kind, LocalDate today, String title, String text) {
         SharedPreferences p = prefs(c);

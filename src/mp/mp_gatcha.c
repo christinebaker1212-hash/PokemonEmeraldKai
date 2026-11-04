@@ -612,10 +612,10 @@ static const struct PrizeDef sBallSSuper[] = {
     FX(10),
 };
 static const struct PrizeDef sBallUltra[] = {
-    ITEM(ITEM_MASTER_BALL, 1, 10), SET(SET_BALLS, 20, 6), SET(SET_APRICORN, 12, 6),
+    ITEM(ITEM_MASTER_BALL, 1, 10), ITEM(ITEM_ASTRAL_BALL, 1, 10), SET(SET_BALLS, 20, 6), SET(SET_APRICORN, 12, 6),
 };
 static const struct PrizeDef sBallEx[] = {
-    ITEM(ITEM_MASTER_BALL, 2, 10), SET(SET_BALLS, 40, 6), SET(SET_APRICORN, 25, 6),
+    ITEM(ITEM_MASTER_BALL, 2, 10), ITEM(ITEM_ASTRAL_BALL, 2, 10), SET(SET_BALLS, 40, 6), SET(SET_APRICORN, 25, 6),
 };
 
 // PICKUP banner: a new one every week. Every UR is one of its Moemon (picked
@@ -2985,17 +2985,16 @@ static void TellFriends(const struct Result *r)
     MP_Minigame_SendNews(line);
 }
 
-static void StartSpin(u8 count)
+// The prizes of COUNT pulls on the banner shown (sBanner), rolled and given: the pity counts, the 10-pull's R+,
+// random Moemon and ball pieces decided now, the achievements, the save after (the reel and the phone both)
+static u8 RollPrizes(struct Result *results, u8 count)
 {
     u8 i, best = 0;
     bool8 gotRare = FALSE;
-    s32 center = CenterCell(), prizeCell;
-
-    sG->resultCount = count;
     StirRandom();
     for (i = 0; i < count; i++)
     {
-        struct Result *r = &sG->results[i];
+        struct Result *r = &results[i];
         bool8 lastChance = (count == 10 && i == count - 1 && !gotRare);
         r->rarity = RollRarity(lastChance);
         r->def = PickFromPool(r->rarity);
@@ -3019,28 +3018,37 @@ static void StartSpin(u8 count)
         GivePrize(r);
         if (r->rarity >= R_R)
             gotRare = TRUE;
-        if (r->rarity > sG->results[best].rarity)
+        if (r->rarity > results[best].rarity)
             best = i;
     }
-    sG->best = best;
-    MPNet_Log("gatcha: %d pull(s), best rarity %d", count, sG->results[best].rarity);
+    MPNet_Log("gatcha: %d pull(s), best rarity %d", count, results[best].rarity);
     {
         char list[96];
         int at = 0;
         for (i = 0; i < count; i++)
-            at += snprintf(list + at, sizeof(list) - at, " %s:%d", sRarityShort[sG->results[i].rarity],
-                           (int)(sG->results[i].def - BannerPool(sG->results[i].rarity)->defs));
+            at += snprintf(list + at, sizeof(list) - at, " %s:%d", sRarityShort[results[i].rarity],
+                           (int)(results[i].def - BannerPool(results[i].rarity)->defs));
         MPNet_Log("gatcha: results%s", list);
     }
     // achievements: pulls made, and the rarest prize
     MP_Achieve_Count("pull", count);
-    if (sG->results[best].rarity >= R_SR)
+    if (results[best].rarity >= R_SR)
         MP_Achieve_Unlock("sr");
-    if (sG->results[best].rarity >= R_SSR)
+    if (results[best].rarity >= R_SSR)
         MP_Achieve_Unlock("ssr");
-    if (sG->results[best].rarity >= R_UR)
+    if (results[best].rarity >= R_UR)
         MP_Achieve_Unlock("ur");
     SaveAfterPull();
+    return best;
+}
+
+static void StartSpin(u8 count)
+{
+    u8 i, best;
+    s32 center = CenterCell(), prizeCell;
+
+    sG->resultCount = count;
+    best = sG->best = RollPrizes(sG->results, count);
 
     // The prize where the reel stops, and the cells next to it
     prizeCell = center + SPIN_CELLS;
@@ -4690,4 +4698,82 @@ void MP_Gatcha_Open(void)
     LockPlayerFieldControls();
     FadeScreen(FADE_TO_BLACK, 0);
     CreateTask(Task_EnterGatcha, 80);
+}
+
+// ---------------------------------------------------------------------------
+// The phone app's MOEGATCHA (src/mp/mp_phone_kai.c): the banners, what's in stock, and pulls made there, the same
+// prizes the reel would give (RollPrizes); the app plays its own reel to show them
+
+u8 MP_Gatcha_BannerCount(void)
+{
+    return BANNER_COUNT;
+}
+
+const char *MP_Gatcha_BannerName(u8 b)
+{
+    return b < BANNER_COUNT ? sBanners[b].name : "";
+}
+
+const char *MP_Gatcha_BannerTagline(u8 b)
+{
+    return b < BANNER_COUNT ? sBanners[b].tagline : "";
+}
+
+// A banner's free pulls waiting: the weekly 10-pull (STANDARD only, TEN) or the daily one (ONE)
+s32 MP_Gatcha_FreeStock(u8 b, bool8 ten)
+{
+    if (b >= BANNER_COUNT)
+        return 0;
+    return ten ? (b == BANNER_STANDARD ? Free10Stock() : 0) : Free1Stock(b);
+}
+
+const char *MP_Gatcha_RarityName(u8 r)
+{
+    return r < R_COUNT ? sRarityShort[r] : "";
+}
+
+// how: 0 the free 10-pull, 1 the free pull, 2 a TICKET, 3 one pull, 4 ten pulls. NULL and the prizes in out, or why
+// not ("nopulls")
+const char *MP_Gatcha_PhonePull(u8 banner, u8 how, struct MpGatchaPrize *out, u8 *count)
+{
+    static struct Result sResults[10];
+    u8 keep = sBanner, n, i;
+    *count = 0;
+    if (banner >= BANNER_COUNT || how > 4)
+        return "bad";
+    MP_Gatcha_GrantFree();
+    SetupBanners();
+    if (how == 0 && banner == BANNER_STANDARD && Free10Stock() > 0)
+        MP_SaveData_Add(FREE10_KEY, -1), n = 10;
+    else if (how == 1 && Free1Stock(banner) > 0)
+        AddFree1(banner, -1), n = 1;
+    else if (how == 2 && MP_Gatcha_Tickets() > 0)
+        MP_Gatcha_AddTickets(-1), n = 1;
+    else if (how == 3 && MP_Gatcha_Pulls() >= 1)
+        MP_Gatcha_AddPulls(-1), n = 1;
+    else if (how == 4 && MP_Gatcha_Pulls() >= 10)
+        MP_Gatcha_AddPulls(-10), n = 10;
+    else
+        return "nopulls";
+    sBanner = banner;
+    RollPrizes(sResults, n);
+    for (i = 0; i < n; i++)
+    {
+        struct Result *r = &sResults[i];
+        out[i].rarity = r->rarity;
+        out[i].kind = r->def->kind;
+        // (what the app draws: a Moemon's species, a set's first item, an item; money and ball pieces their item)
+        out[i].id = r->def->kind == K_MON ? DefSpecies(r->def) : r->def->kind == K_SET ? sSets[r->def->id][0]
+                  : r->def->kind == K_FX ? ITEM_POKE_BALL : r->def->id;
+        out[i].shiny = r->def->shiny;
+        out[i].amount = r->amount;
+        PrizeName(r->def, r->amount, out[i].name);
+        snprintf(out[i].note, sizeof(out[i].note), "%s", r->note);
+        if (r->rarity >= R_UR)
+            TellFriends(r);
+    }
+    sBanner = keep;
+    *count = n;
+    MPNet_Log("gatcha: %u pull(s) from the phone on banner %u", n, banner);
+    return NULL;
 }

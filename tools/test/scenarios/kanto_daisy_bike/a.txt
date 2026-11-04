@@ -1,0 +1,31 @@
+pressuntil A field 5000
+wait 30
+mp setvar 0x511B 1
+mp warp 37,121,5,5
+wait 150
+press UP 10
+mash A 40 30
+wait 60
+mp checkitem 361
+mp getflag 0x21D1
+mp setflag 0x2108
+mp setvar 0x5150 500
+mp friendship 0 100
+mp warp 37,121,10,7
+wait 150
+press UP 10
+mash A 50 30
+wait 60
+mp party
+mp additem 352 1
+mp setflag 0x2142
+mp warp 38,17,9,4
+wait 150
+press UP 10
+mash A 30 30
+wait 60
+mp checkitem 360
+mp checkitem 352
+mp moves 0 33
+mp friendship 0 255
+quit

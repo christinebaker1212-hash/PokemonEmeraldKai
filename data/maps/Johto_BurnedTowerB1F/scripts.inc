@@ -105,8 +105,7 @@ Johto_BurnedTowerB1F_EventScript_83C8A62::
 	setflag FLAG_QZ_0x10B0
 	removeobject 7
 	setflag FLAG_QZ_0x10AE
-	setvar VAR_0x8004, 1
-	special InitRoamer
+	special MP_JohtoRoamer_Init   @ Moemon Kai: Crystal's InitRoamMons (RAIKOU, ENTEI roam JOHTO)
 	setflag FLAG_QZ_0x10A9
 	setvar VAR_QZ_0x500B, 4
 	release

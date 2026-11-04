@@ -206,7 +206,7 @@ Kanto_PokemonLeague_LancesRoom_Text_8429109::
 	.string "you have one more challenge left.\p"
 	.string "There is one more TRAINER to face!\n"
 	.string "His name is…\p"
-	.string "BLUE!\p"
+	.string "{RIVAL}!\p"
 	.string "He beat the ELITE FOUR before\n"
 	.string "you.\p"
 	.string "He is the real MOéMON LEAGUE\n"

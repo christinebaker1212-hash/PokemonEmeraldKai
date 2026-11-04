@@ -67,40 +67,105 @@ Kanto_TwoIsland_EventScript_8417319::
 	goto_if_eq VAR_QZ_0x5133, 2, Kanto_TwoIsland_EventScript_8417376
 	goto Kanto_TwoIsland_EventScript_8417388
 
+@ Moemon Kai: FireRed's shop that grows (pokefirered TwoIsland/scripts.inc): its first words for each new stock, then
+@ "May I help you?"; the AURORA / MYSTIC TICKETs (Quetzal's, the way to NAVEL ROCK / BIRTH ISLAND) in the last list
 Kanto_TwoIsland_EventScript_8417352::
-	goto_if_set FLAG_QZ_0x222C, Kanto_TwoIsland_EventScript_841739A
+	goto_if_set FLAG_QZ_0x222C, Kanto_TwoIsland_EventScript_ShopSkipIntro
 	setflag FLAG_QZ_0x222C
-	goto Kanto_TwoIsland_EventScript_841739A
+	message Kanto_TwoIsland_Text_BringingItemsFromDistantLands
+	waitmessage
+	goto Kanto_TwoIsland_EventScript_Shop4
 
 Kanto_TwoIsland_EventScript_8417364::
-	goto_if_set FLAG_QZ_0x222B, Kanto_TwoIsland_EventScript_841739A
+	goto_if_set FLAG_QZ_0x222B, Kanto_TwoIsland_EventScript_ShopSkipIntro
 	setflag FLAG_QZ_0x222B
-	goto Kanto_TwoIsland_EventScript_841739A
+	message Kanto_TwoIsland_Text_HopeYouGiveItYourBest
+	waitmessage
+	goto Kanto_TwoIsland_EventScript_Shop3
 
 Kanto_TwoIsland_EventScript_8417376::
-	goto_if_set FLAG_QZ_0x222A, Kanto_TwoIsland_EventScript_841739A
+	goto_if_set FLAG_QZ_0x222A, Kanto_TwoIsland_EventScript_ShopSkipIntro
 	setflag FLAG_QZ_0x222A
-	goto Kanto_TwoIsland_EventScript_841739A
+	message Kanto_TwoIsland_Text_AddedMerchandiseForLostelle
+	waitmessage
+	goto Kanto_TwoIsland_EventScript_Shop2
 
 Kanto_TwoIsland_EventScript_8417388::
-	goto_if_set FLAG_QZ_0x222D, Kanto_TwoIsland_EventScript_841739A
+	goto_if_set FLAG_QZ_0x222D, Kanto_TwoIsland_EventScript_ShopSkipIntro
 	setflag FLAG_QZ_0x222D
-	goto Kanto_TwoIsland_EventScript_841739A
-
-Kanto_TwoIsland_EventScript_841739A::
-	goto_if_unset FLAG_QZ_0x2108, Kanto_TwoIsland_EventScript_84173C3
-	goto_if_lt VAR_QZ_0x5117, 5, Kanto_TwoIsland_EventScript_84173C3
-	message Kanto_TwoIsland_Text_8431CD2
+	message Kanto_TwoIsland_Text_WelcomeToShopMerchandiseLimited
 	waitmessage
-	pokemart Kanto_TwoIsland_Mart_84173D0
+	goto Kanto_TwoIsland_EventScript_Shop1
+
+Kanto_TwoIsland_EventScript_ShopSkipIntro::
+	message Quetzal_Text_84563A6
+	waitmessage
+	goto_if_eq VAR_QZ_0x5133, 4, Kanto_TwoIsland_EventScript_Shop4
+	goto_if_eq VAR_QZ_0x5133, 3, Kanto_TwoIsland_EventScript_Shop3
+	goto_if_eq VAR_QZ_0x5133, 2, Kanto_TwoIsland_EventScript_Shop2
+	goto Kanto_TwoIsland_EventScript_Shop1
+
+Kanto_TwoIsland_EventScript_Shop1::
+	pokemart Kanto_TwoIsland_Mart_1
 	msgbox Quetzal_Text_84565DA, MSGBOX_DEFAULT
 	release
 	end
 
-Kanto_TwoIsland_EventScript_84173C3::
-	msgbox Kanto_TwoIsland_Text_8431C72, MSGBOX_DEFAULT
+	.align 2
+Kanto_TwoIsland_Mart_1:
+	.2byte ITEM_GREAT_BALL
+	.2byte ITEM_FRESH_WATER
+	.2byte ITEM_NONE
+
+Kanto_TwoIsland_EventScript_Shop2::
+	pokemart Kanto_TwoIsland_Mart_2
+	msgbox Quetzal_Text_84565DA, MSGBOX_DEFAULT
 	release
 	end
+
+	.align 2
+Kanto_TwoIsland_Mart_2:
+	.2byte ITEM_ULTRA_BALL
+	.2byte ITEM_GREAT_BALL
+	.2byte ITEM_SODA_POP
+	.2byte ITEM_FRESH_WATER
+	.2byte ITEM_NONE
+
+Kanto_TwoIsland_EventScript_Shop3::
+	pokemart Kanto_TwoIsland_Mart_3
+	msgbox Quetzal_Text_84565DA, MSGBOX_DEFAULT
+	release
+	end
+
+	.align 2
+Kanto_TwoIsland_Mart_3:
+	.2byte ITEM_ULTRA_BALL
+	.2byte ITEM_GREAT_BALL
+	.2byte ITEM_LEMONADE
+	.2byte ITEM_SODA_POP
+	.2byte ITEM_FRESH_WATER
+	.2byte ITEM_MOOMOO_MILK
+	.2byte ITEM_NONE
+
+Kanto_TwoIsland_EventScript_Shop4::
+	pokemart Kanto_TwoIsland_Mart_4
+	msgbox Quetzal_Text_84565DA, MSGBOX_DEFAULT
+	release
+	end
+
+	.align 2
+Kanto_TwoIsland_Mart_4:
+	.2byte ITEM_ULTRA_BALL
+	.2byte ITEM_REPEAT_BALL
+	.2byte ITEM_TIMER_BALL
+	.2byte ITEM_LEMONADE
+	.2byte ITEM_SODA_POP
+	.2byte ITEM_FRESH_WATER
+	.2byte ITEM_MOOMOO_MILK
+	.2byte ITEM_LAVA_COOKIE
+	.2byte ITEM_AURORA_TICKET
+	.2byte ITEM_MYSTIC_TICKET
+	.2byte ITEM_NONE
 
 @ Kanto_TwoIsland object 4 (local id 4, gfx 0x3F41) at 26,5
 Kanto_TwoIsland_EventScript_84173D6::
@@ -160,22 +225,6 @@ Kanto_TwoIsland_EventScript_846BF95::
 	callstd STD_FIND_ITEM
 	end
 
-Kanto_TwoIsland_Mart_84173D0:
-	.2byte ITEM_AURORA_TICKET
-	.2byte ITEM_MYSTIC_TICKET
-	.2byte ITEM_NONE
-
-Kanto_TwoIsland_Text_8431C72::
-	.string "I’m preparing new voyages.\p"
-	.string "Come back after winning KANTO’s\n"
-	.string "League and getting the Rainbow Pass.$"
-
-Kanto_TwoIsland_Text_8431CD2::
-	.string "We sell tickets for special\n"
-	.string "voyages from VERMILION.\p"
-	.string "Tickets are reusable. If you have\n"
-	.string "one, you don’t need to buy it again.$"
-
 Kanto_TwoIsland_Text_8431D4D::
 	.string "TWO ISLAND\n"
 	.string "Boon Island for Two$"
@@ -232,3 +281,32 @@ Kanto_TwoIsland_Text_8432293::
 	.string "And some go boooooooing!\p"
 	.string "Did you know that?\n"
 	.string "Boing!$"
+
+Kanto_TwoIsland_Text_BringingItemsFromDistantLands::
+	.string "Oh, hello, {PLAYER}!\n"
+	.string "Welcome!\p"
+	.string "I’ve started bringing in items from\n"
+	.string "distant lands.\p"
+	.string "I’ve got some rare items in, too.\n"
+	.string "Please have a look!$"
+
+Kanto_TwoIsland_Text_HopeYouGiveItYourBest::
+	.string "Hi! I’m giving it my best here.\n"
+	.string "I hope you do too, {PLAYER}.$"
+
+Kanto_TwoIsland_Text_AddedMerchandiseForLostelle::
+	.string "I can’t tell you how grateful I am\n"
+	.string "for your rescue of LOSTELLE.\p"
+	.string "Thanks to your feat, the people of\n"
+	.string "THREE ISLAND have changed their\l"
+	.string "attitudes about KANTO people.\p"
+	.string "And, I’m from KANTO, you see.\p"
+	.string "The people of THREE ISLAND\n"
+	.string "helped me add to my merchandise.$"
+
+Kanto_TwoIsland_Text_WelcomeToShopMerchandiseLimited::
+	.string "Oh!\n"
+	.string "Hello, welcome to my shop!\p"
+	.string "We’ve only opened up recently.\p"
+	.string "Our merchandise is limited, but I\n"
+	.string "hope we can serve your needs.$"

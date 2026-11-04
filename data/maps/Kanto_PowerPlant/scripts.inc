@@ -178,4 +178,4 @@ Kanto_PowerPlant_EventScript_846BE26::
 	end
 
 Kanto_PowerPlant_Text_84568C3::
-	.string "Zapdos!$"
+	.string "Gyaoo!$"

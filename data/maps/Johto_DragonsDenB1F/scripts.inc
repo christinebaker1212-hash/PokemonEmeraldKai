@@ -3,6 +3,7 @@ Johto_DragonsDenB1F_MapScripts::
 	.byte 0
 
 Johto_DragonsDenB1F_EventScript_83CBEC5::
+	call Johto_DragonsDenB1F_EventScript_RivalDays
 	call Quetzal_EventScript_83CC300
 	goto Quetzal_EventScript_840EA66
 
@@ -114,3 +115,46 @@ Johto_DragonsDenB1F_Text_83CC2AB::
 Johto_DragonsDenB1F_Text_83CC2B3::
 	.string "We’ll tell on you.\p"
 	.string "MASTER will be angry with you.$"
+
+@ Moemon Kai: Crystal's rival trains here on Tuesdays and Thursdays after the LEAGUE (DragonsDenB1F.asm
+@ DragonsDenB1FRivalScript; docs/REGIONS_AUDIT.md case 41)
+Johto_DragonsDenB1F_EventScript_RivalDays::
+	setflag FLAG_JOHTO_HIDE_DEN_RIVAL
+	goto_if_unset FLAG_QZ_0x11B1, Johto_DragonsDenB1F_EventScript_RivalDaysEnd
+	specialvar VAR_RESULT, MP_JohtoWeekday
+	call_if_eq VAR_RESULT, 2, Johto_DragonsDenB1F_EventScript_RivalAppear
+	call_if_eq VAR_RESULT, 4, Johto_DragonsDenB1F_EventScript_RivalAppear
+Johto_DragonsDenB1F_EventScript_RivalDaysEnd::
+	return
+
+Johto_DragonsDenB1F_EventScript_RivalAppear::
+	clearflag FLAG_JOHTO_HIDE_DEN_RIVAL
+	return
+
+Johto_DragonsDenB1F_EventScript_Rival::
+	lock
+	faceplayer
+	goto_if_set FLAG_TEMP_1, Johto_DragonsDenB1F_EventScript_RivalAgain
+	msgbox Johto_DragonsDenB1F_Text_RivalTraining1, MSGBOX_DEFAULT
+	setflag FLAG_TEMP_1
+	release
+	end
+
+Johto_DragonsDenB1F_EventScript_RivalAgain::
+	msgbox Johto_DragonsDenB1F_Text_RivalTraining2, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_DragonsDenB1F_Text_RivalTraining1::
+	.string "… What? {PLAYER}?\p"
+	.string "…No, I won’t battle you now…\p"
+	.string "My MOéMON aren’t ready to beat\n"
+	.string "you.\p"
+	.string "I can’t push them too hard now.\p"
+	.string "I have to be disciplined to become\n"
+	.string "the greatest MOéMON trainer…$"
+
+Johto_DragonsDenB1F_Text_RivalTraining2::
+	.string "…\p"
+	.string "Whew…\p"
+	.string "Learn to stay out of my way…$"

@@ -346,6 +346,7 @@ Johto_OlivineGym_Text_83E54BF::
 	.string "OLIVINE CITY MOéMON GYM$"
 
 Johto_OlivineGym_Text_83E54D8::
-	.string "OLIVINE CITY MOéMON GYM\p"
-	.string "JASMINE’S CERTIFIED TRAINERS:\n"
+	.string "OLIVINE MOéMON GYM\p"
+	.string "LEADER: JASMINE\p"
+	.string "WINNING TRAINERS:\n"
 	.string "{PLAYER}$"

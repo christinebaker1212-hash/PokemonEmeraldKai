@@ -27,23 +27,10 @@ Kanto_SevenIsland_SevaultCanyon_House_EventScript_8421FFD::
 	call Quetzal_EventScript_8456AB7
 	call_if_ne VAR_FACING, 1, Kanto_SevenIsland_SevaultCanyon_House_EventScript_842210C
 	delay 0x1E
-	special QzSevaultHouseEventEligibility
-	goto_if_ne VAR_RESULT, 1, Kanto_SevenIsland_SevaultCanyon_House_EventScript_8422074
-	call Kanto_SevenIsland_SevaultCanyon_House_EventScript_84220C7
-	goto Kanto_SevenIsland_SevaultCanyon_House_EventScript_8422078
-
-Kanto_SevenIsland_SevaultCanyon_House_EventScript_8422074::
+	@ Moemon Kai: FireRed's CHANSEY dance and rest only (pokefirered SevenIsland_SevaultCanyon_House); Quetzal's
+	@ MELOETTA (object 4) is gone: the user's rule, Gen 5+ legendaries only from MOEGATCHA
 	playbgm MUS_SCHOOL, 0
-
-Kanto_SevenIsland_SevaultCanyon_House_EventScript_8422078::
 	applymovement LOCALID_PLAYER, Kanto_SevenIsland_SevaultCanyon_House_Movement_8422137
-	goto_if_unset FLAG_QZ_0x2924, Kanto_SevenIsland_SevaultCanyon_House_EventScript_84220AE
-	goto_if_set FLAG_QZ_0x2922, Kanto_SevenIsland_SevaultCanyon_House_EventScript_84220AE
-	goto_if_set FLAG_QZ_0x2923, Kanto_SevenIsland_SevaultCanyon_House_EventScript_84220AE
-	applymovement 1, Kanto_SevenIsland_SevaultCanyon_House_Movement_8422137
-	applymovement 4, Kanto_SevenIsland_SevaultCanyon_House_Movement_8422137
-	waitmovement 1
-	waitmovement 4
 
 Kanto_SevenIsland_SevaultCanyon_House_EventScript_84220AE::
 	waitmovement LOCALID_PLAYER

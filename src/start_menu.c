@@ -637,6 +637,7 @@ void Task_ShowStartMenu(u8 taskId)
 
 void ShowStartMenu(void)
 {
+    FlagSet(0x21E7);   // Moemon Kai: FireRed's FLAG_OPENED_START_MENU (KANTO's PALLET sign girl moves to ROUTE 1 then)
     if (!IsOverworldLinkActive())
     {
         FreezeObjectEvents();

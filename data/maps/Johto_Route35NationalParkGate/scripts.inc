@@ -5,8 +5,6 @@ Johto_Route35NationalParkGate_MapScripts::
 Johto_Route35NationalParkGate_EventScript_83D13E2::
 	lockall
 	faceplayer
-	specialvar VAR_RESULT, QzIsNuzlockeActiveInRegion
-	goto_if_eq VAR_RESULT, 1, Johto_Route35NationalParkGate_EventScript_83D14B3
 	msgbox Johto_Route35NationalParkGate_Text_83D15D0, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, 1, Johto_Route35NationalParkGate_EventScript_83D1411
 	msgbox Johto_Route35NationalParkGate_Text_83D1929, MSGBOX_DEFAULT
@@ -74,8 +72,6 @@ Johto_Route35NationalParkGate_EventScript_83D14DA::
 Johto_Route35NationalParkGate_EventScript_83D14F3::
 	lockall
 	faceplayer
-	specialvar VAR_RESULT, QzIsNuzlockeActiveInRegion
-	goto_if_eq VAR_RESULT, 1, Johto_Route35NationalParkGate_EventScript_83D14B3
 	msgbox Johto_Route35NationalParkGate_Text_83D15D0, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, 1, Johto_Route35NationalParkGate_EventScript_83D1522
 	msgbox Johto_Route35NationalParkGate_Text_83D1929, MSGBOX_DEFAULT

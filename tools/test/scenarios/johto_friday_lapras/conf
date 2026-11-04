@@ -1,0 +1,6 @@
+# Crystal's UNION CAVE B2F LAPRAS (docs/REGIONS_AUDIT.md 136): out on Fridays only, drawn from its follower sprite.
+MODE=1
+TMO=100
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("[test] weekday 5" "[test] npc local 8 gfx 2691 xy 14,34 invisible 0" "[test] weekday 6" "[test] flag 5434 = 1")
+UNEXPECT_A=("[crash]")

@@ -6,6 +6,7 @@ EventScript_YgoClub::
 	faceplayer
 	special Ygo_ClubState
 	goto_if_eq VAR_RESULT, TRUE, EventScript_YgoClub_Counter
+	special MP_Region_BufferName
 	msgbox YgoClub_Text_Intro, MSGBOX_DEFAULT
 	special Ygo_ClubHasCase
 	goto_if_eq VAR_RESULT, TRUE, EventScript_YgoClub_HasCase
@@ -47,7 +48,7 @@ EventScript_YgoClub_Counter::
 YgoClub_Text_Intro:
 	.string "Hey! I run the CARD CLUB's\n"
 	.string "Yu-Gi-Oh! table.\p"
-	.string "Lots of duelists around HOENN\n"
+	.string "Lots of duelists around {STR_VAR_1}\n"
 	.string "would rather play Yu-Gi-Oh!\l"
 	.string "than MOéMON cards.$"
 

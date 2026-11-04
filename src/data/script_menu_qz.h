@@ -241,7 +241,7 @@ static const struct MenuAction sQzMulti_56[] = {
     {(const u8 []) _("EXIT")},
 };
 static const struct MenuAction sQzMulti_57[] = {
-    {(const u8 []) _("BICYCLE 1000000")},
+    {(const u8 []) _("BICYCLE{CLEAR_TO 0x49}{FONT_SMALL}¥1,000,000")},
     {(const u8 []) _("NO THANKS")},
 };
 static const struct MenuAction sQzMulti_58[] = {
@@ -590,4 +590,32 @@ static const struct MenuAction sQzMulti_96[] = {
     {(const u8 []) _("Research")},
     {(const u8 []) _("Rotom")},
     {(const u8 []) _("EXIT")},
+};
+static const struct MenuAction sKaiMulti_ACADEMY_BLACKBOARD[] = {
+    {(const u8 []) _("PSN")},
+    {(const u8 []) _("PAR")},
+    {(const u8 []) _("SLP")},
+    {(const u8 []) _("BRN")},
+    {(const u8 []) _("FRZ")},
+    {(const u8 []) _("QUIT")},
+};
+static const struct MenuAction sKaiMulti_GOLDENROD_TUTOR[] = {
+    {(const u8 []) _("FLAMETHROWER")},
+    {(const u8 []) _("THUNDERBOLT")},
+    {(const u8 []) _("ICE BEAM")},
+    {(const u8 []) _("CANCEL")},
+};
+static const struct MenuAction sKaiMulti_GOLDENROD_BARGAIN[] = {
+    {(const u8 []) _("NUGGET")},
+    {(const u8 []) _("PEARL")},
+    {(const u8 []) _("BIG PEARL")},
+    {(const u8 []) _("STARDUST")},
+    {(const u8 []) _("STAR PIECE")},
+    {(const u8 []) _("CANCEL")},
+};
+static const struct MenuAction sKaiMulti_GOLDENROD_TM_PRIZES[] = {
+    {(const u8 []) _("TM25    5500")},
+    {(const u8 []) _("TM14    5500")},
+    {(const u8 []) _("TM38    5500")},
+    {(const u8 []) _("CANCEL")},
 };

@@ -1,0 +1,20 @@
+pressuntil A field 5000
+wait 30
+mp setflag 12404
+mp qzphone register 16
+mp qzphone flag 33 1
+mp qzphone flag 94 1
+mp warp 35,37,27,11
+waitfor field 600
+wait 60
+mp where
+press UP 1
+wait 10
+press A 2
+wait 60
+shot talk1
+mash A 30 20
+wait 60
+shot talk2
+mp qzphone x 16
+quit

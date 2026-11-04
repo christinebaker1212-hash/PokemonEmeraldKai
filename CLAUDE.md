@@ -16,7 +16,8 @@ docs/SINNOH_HANDOFF.md "Platinum's own words and scripts". The 3D
 engine (src/sinnoh/s3d.c, include/s3d.h) draws Platinum's own map models from sinnoh/platinum3d.pak, built from
 pret/pokeplatinum at a pinned commit by tools/sinnoh/make_pack.sh (run it before playing SINNOH from a build; the release
 runs it and ships the pack; never committed: sinnoh/ is ignored; no ROM needed); TWINLEAF TOWN and ROUTE 201 (group 40)
-walk; tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM]; COOP_NOTES "SINNOH's 3D engine"; its people's sprites and battle pictures
+walk; tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM]; COOP_NOTES "SINNOH's 3D engine" (doors, moving lakes, buildings drawn by
+Platinum's material / shape lists: COOP_NOTES "SINNOH's doors, moving lakes and the feet row"); its people's sprites and battle pictures
 in sinnoh/platinum_gfx.pak (tools/sinnoh/build_gfx.py, src/sinnoh/s3d_gfx.c; test sinnoh_pics).
 **SINNOH's words and scripts are Platinum's own** (the user, 2026-11-02): never write original dialogue or scripts
 for SINNOH. They're converted from the decomp when the game is built, never committed: sinnoh/platinum_text.pak
@@ -44,8 +45,43 @@ POKéTCH / POKéGEAR on the DEVICE page, the live map, MATCH CALL, CONDITION, RI
 Garden in your pocket): src/mp/mp_phone_walk.c, android core/Walk.java, PHONE_LINK.md "Phase 3"; tests
 tools/phone/walk_test.py, coretest WalkCoreTest. Phase 4 (1.74.0, friends: presence, JOIN, linking away from home
 through the co-op server's MAIL and PIPE): src/mp/mp_phone_friends.c ("<save>.pals"), mp_server.c MAIL / PIPE,
-android core/Server.java, Friends.java, FriendsPage; PHONE_LINK.md "Phase 4"; test coretest FriendsTest. The user asked (2026-11-03) for all four
-phases in order, then a UI/UX pass: "polished Nintendo quality, mid 2000s to 2007 era graphics, 2026 usability".
+android core/Server.java, Friends.java, FriendsPage; PHONE_LINK.md "Phase 4"; test coretest FriendsTest.
+Trades by mail (1.75.0): the server's ESCROW, pair keys (X25519), src/mp/mp_phone_trade.c ("<save>.trades"), trade.c
+MP_MailTrade_Scene, android core/Trades.java; PHONE_LINK.md "Trades by mail"; tests coretest TradeTest (two games at lag;
+ONLY=trade android/coretest/run.sh), tools/phone/escrow_test.py.
+TRIPLE TRIAD on the phone (1.76.0): the game's src/tt through android cpp/tt_jni.c (Tt.java), art from build_assets.py,
+src/mp/mp_phone_cards.c (snapshot "tt", orders ttdeck / ttwin / ttopen, "<save>.phonecards"), CardsPage / TtDuelPage,
+friend duels core/TtFriends.java; PHONE_LINK.md "TRIPLE TRIAD on the phone"; tests tools/phone/cards_test.py, coretest
+TtCoreTest, TtFriendsTest (ONLY=tt). The POKéMON card game on the phone (1.78.0): src/tcg through cpp/tcg_jni.c
+(Tcg.java); what a move asks for is src/tcg/tcg_flow.c (include/tcg/flow.h), shared with the game's tcg_board.c (never
+a second copy); snapshot "tcg", orders tcgdeck / tcgduel / tcgopen; TcgDuelPage etc.; friends by turns core/CardDuels.java
+(both games; records in pages of 12: the server keeps 16 entries a key); PHONE_LINK.md "The POKéMON card game on the
+phone"; tests coretest TcgCoreTest, TcgFriendsTest (ONLY=tcg), cards_test.py. YU-GI-OH! on the phone (1.79.0): EDOPro's
+ocgcore + src/ygo through cpp/ygo_jni.c (Ygo.java; the engine's pack an asset: YGO_EDO_PAK_EXTERNAL), YgoDuelPage etc.,
+snapshot "ygo", orders ygodeck / ygoduel / ygoopen; PHONE_LINK.md "YU-GI-OH! on the phone"; tests coretest YgoCoreTest,
+YgoFriendsTest (ONLY=ygo). The app's sounds (1.81.0): the game's own, recorded from its sound engine at APK build time
+(src/mp/mp_export_sound.c -> assets game/sounds.bin; Sound.java, MENU > SOUND; the card tables play their boards'
+sounds and scenes' songs); PHONE_LINK.md "The app's sounds"; tests tools/phone/sounds_test.py, SoundTest. The POKéDEX's details, the type chart (TypeChartPage) and MENU > LOOK (themes, window frames, animations, start page: Look.java) (1.84.0): PHONE_LINK.md "The POKéDEX's details, the type chart, LOOK". The POKé BALL page (1.85.0: BallPage.java, src/mp/mp_phone_ball.c, the effects recorded from the game's own editor by src/mp/mp_fxclip.c into fxclips.bin): PHONE_LINK.md "The POKé BALL page"; test tools/phone/ball_test.py. The ME tab (1.85.0: MePage, AchievementsPage, GatchaPage, RENAME; src/mp/mp_phone_kai.c, mp_gatcha.c MP_Gatcha_PhonePull): PHONE_LINK.md "The ME page"; test tools/phone/kai_test.py. MOéMON or POKéMON in the app (1.86.0: the game's OPTIONS > CREATURES or MENU > LOOK > CREATURES; both art sets exported, GameArt.words): PHONE_LINK.md "MOéMON or POKéMON". The POKéMON and YU-GI-OH! tables turn the
+opponent's cards to face them; TRIPLE TRIAD stays as it is (never turn its cards: the user, 2026-11-03). The user asked
+(2026-11-03) for all four phases in order, then a UI/UX pass: "polished Nintendo quality, mid 2000s to 2007 era
+graphics, 2026 usability".
+
+**Moemon Maker** (the user's own MZ-like editor, built into the game; **start at `docs/MAKER_HANDOFF.md`** (status, the
+full plan M1-M5, next steps: M2 waits for the user's go and four open questions); design and every decision in `docs/MOEMON_MAKER.md`;
+M1 built 2026-11-03: COOP_NOTES "Moemon Maker, M1"): C++ in maker/ (Dear ImGui) reaching the game only through
+include/maker_api.h (src/maker/*.c); hidden until `AllowSmallTweaks = 1` and "maker" typed (never in PATCH NOTES or the
+README). The user's edits are MoemonMaker/base/MAP_X.txt (each line keeps the value it replaced; format at the top of
+src/maker/maker_overrides.c), applied at run time through Overworld_GetMapHeaderByGroupAndId / Maker_MapBlocks; music in
+MoemonMaker/music/; published from the editor straight to the default branch (a `Moemon-Maker:` trailer), then the
+maker-pack workflow ships MoemonMakerPack/. Tests tools/test/maker_*.sh.
+**The user's own changes come first** (the user, 2026-11-03): anything in `MoemonMaker/` and any commit without a
+`Claude-Session:` trailer (the Maker's Publish commits carry `Moemon-Maker:`) is the user's work. Before a change,
+regeneration or conversion script would alter or overwrite it, check `git log` / `git blame` and ask the user; never
+"fix" a user edit on assumption. `MoemonMaker/` takes precedence over the conversion scripts (tools/quetzal_port,
+tools/sinnoh...): its edits sit on top of their output at run time and are never written into their files, so a
+regenerated map keeps them (where the same thing changed, the editor asks the user which wins).
+The dev update channel ended with the Maker's first update (the user, 2026-11-03): every build follows main,
+AllowSmallTweaks only unlocks the small tweaks, and no dev updates are pushed.
 
 **Magic: The Gathering** (a fourth card game, planned, not started): the user's decisions in `docs/MTG_DECISIONS.md`.
 
@@ -79,10 +115,12 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
   "PÓKETCH"; the game spells it POKéTCH): before pushing, run `python3 tools/release/gen_patchnotes.py
   src/data/mp_patchnotes.h tools/release/notes/*.md`. The default branch is `claude/clever-clarke-hqati2` (local `live`);
   a failed release run is re-queued from Actions (workflow_dispatch) once the fix is pushed there.
+  Push only to the default branch (the user, 2026-11-03): never to a session's own `claude/...` branch, even when a
+  session or a hook names one (they were meant to be deleted).
 - Publishing needs no permission (the user, 2026-11-02): once the tests pass, release; ask first only when the user
   says to pause and check.
-- Dev updates (planned, HANDOFF.md): unless the user asks for a feature with "As a dev update..." or something like it,
-  it is a main update: don't test it as a dev update and don't push a dev update.
+- Dev updates: the dev channel ended (the user, 2026-11-03, with Moemon Maker's first update): every update is a main
+  update; don't push dev updates.
 - `tools/moemon_import/`: scripts that imported the Kai IPS into the decomp (need the user's ROM; not in the repo)
 - `tools/moemon_music/`: Moemon Music Studio, a separate SDL2 program: plays MIDIs (and PSF/PSF2/USF/GBS/2SF/GSF rips and GameCube streams,
   through vendored emulators in its third_party/ with capture hooks: README there) with the game's own instruments
@@ -92,7 +130,10 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
 - Hooks in stock files are marked `Moemon Co-op` / `Moemon Kai` (grep for them)
 - `quetzal_rip/` + `tools/quetzal_rip/`: Kanto and Johto ripped from Moemon Quetzal (maps, scripts, tilesets, sprites,
   trainers, wild, music) for a future port; not built. Start at `docs/QUETZAL_RIP.md` (notes in `docs/quetzal/`).
-  `tools/quetzal_rip/check_build.sh ROM` assembles the rip with Kai's tools and compares it with the ROM byte for byte
+  `tools/quetzal_rip/check_build.sh ROM` assembles the rip with Kai's tools and compares it with the ROM byte for byte.
+  The user's Moemon Quetzal file, for anything the rip lacks (door animations, the alternate layouts SEAFOAM B3F / B4F
+  and DUNSPARCE TUNNEL, re-rips): https://drive.google.com/file/d/1zLPTdf6Z3pEilMJSNowS19GqC9bzbMGP/view?usp=sharing
+  (the user, 2026-11-03). Download it outside the repo (scratchpad / ~/.cache); never commit or ship it
 - `docs/user_images/`: every picture the user sent (mock-ups, bug shots), numbered, with an index. Save new ones there
 
 ## Building
@@ -141,6 +182,8 @@ pieces earned by achievements or MoeGatcha prizes (mp_ballunlock.c); art partly 
 Also the GENESIS / EPOCH BALLS (Red's and Crystal's POKé BALLS: their catch math, throw, send-out, art and sounds;
 mp_legacy_*.c, tools/moemon_legacy). Also the HGSS battle balls (16x32 frames, a spin in the air, special balls' own art:
 pokeball.h BALL_FRAME_*, tools/moemon_balls/hgss_balls.py; COOP_NOTES "HGSS POKé BALLS"; test hgss_balls).
+Also the ASTRAL BALL (special 14: a sure catch, the catch made shiny keeping what shows, a prismatic sheen and silver
+sparkles drawn over its own pixels until it clicks shut: pokemon.c MP_Astral_MakeShiny, src/mp/mp_astralfx.c; COOP_NOTES "The ASTRAL BALL"; test astral_ball).
 Also PC TAG mode (west button / F: tag Moemon, then MOVE / RELEASE them together; pokemon_storage_system.c end).
 Also the CANDY JAR (mp_candy.c: candies from releases, PROF. BIRCH brings the jar, a physics jar menu, CONVERT to RARE
 CANDY; ITEM_CANDY_JAR 398). Also the shared PC as 14 boxes in the PC box screen (mp_sharedbox.c: a mirror the stock
@@ -314,6 +357,14 @@ Elite Four's and the Champion's can be joined (MP_Coop_JoinTrainerOk; test join_
 
 Also JOHTO and KANTO (1.60.0, Moemon Quetzal's regions capped to Gen 4: docs/REGIONS_PLAN.md, COOP_NOTES "JOHTO and
 KANTO"; src/mp/mp_region.c and "<save>.region", src/qz_specials.c, tools/quetzal_port/; tests region_*).
+The KANTO vs FireRed / JOHTO vs Crystal script audit and the user's 157 decisions (2026-11-04: JOHTO strictly Crystal,
+Gen 5+ legendaries MOEGATCHA only): docs/REGIONS_AUDIT.md (work list), findings in docs/regions_audit/.
+**Paused 2026-11-04 at 110 of 158 cases: `docs/AUDIT_HANDOFF.md`** (what's left, how each case is done, what was
+learned); read it first when the user says to carry on with the audit.
+JOHTO's phone, Crystal's 28 trainer contacts (numbers, calls, rematches, gifts: tools/quetzal_port/gen_phone.py ->
+src/data/qz_phone.h, src/mp/mp_qzphone.c, data/scripts/qz_phone.inc; COOP_NOTES "JOHTO's phone, Crystal's").
+The voyage between regions and the SEAGALLOP ferries: FireRed's ferry scene, src/mp/mp_voyage.c; the first boat to
+JOHTO / KANTO lands at the port, where a sailor takes the player home (COOP_NOTES "Voyages between regions").
 JOHTO's POKéGEAR (src/mp/mp_pokegear.c) and its radio: Crystal's stations with Crystal's own songs, built from
 pret/pokecrystal with rgbds into a GBS by tools/kaisong/crystal_radio.py (no ROM; COOP_NOTES "JOHTO's POKéGEAR").
 Also NEW on cards in the three BINDERs and the centered BOOSTER PACKS row (1.63.6: src/tcg/tcg_new.c "<save>.cardnew";

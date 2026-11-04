@@ -119,5 +119,22 @@
     }
   ],
   "coord_events": [],
-  "bg_events": []
+  "bg_events": [
+    {
+      "type": "hidden_item",
+      "x": 50,
+      "y": 33,
+      "elevation": 0,
+      "item": "ITEM_DIRE_HIT",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_46"
+    },
+    {
+      "type": "hidden_item",
+      "x": 50,
+      "y": 12,
+      "elevation": 0,
+      "item": "ITEM_ULTRA_BALL",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_47"
+    }
+  ]
 }

@@ -100,6 +100,25 @@ void PhoneProto_Derive(const uint8_t key[PHONE_KEY_SIZE], const char *word, uint
     crypto_blake2b_keyed(out, 16, key, PHONE_KEY_SIZE, (const uint8_t *)word, strlen(word));
 }
 
+void PhoneProto_Derive32(const uint8_t key[PHONE_KEY_SIZE], const char *word, uint8_t out[PHONE_KEY_SIZE])
+{
+    crypto_blake2b_keyed(out, PHONE_KEY_SIZE, key, PHONE_KEY_SIZE, (const uint8_t *)word, strlen(word));
+}
+
+void PhoneProto_PublicKey(const uint8_t secret[PHONE_KEY_SIZE], uint8_t pub[PHONE_KEY_SIZE])
+{
+    crypto_x25519_public_key(pub, secret);
+}
+
+void PhoneProto_PairKey(const uint8_t mySecret[PHONE_KEY_SIZE], const uint8_t theirPublic[PHONE_KEY_SIZE],
+                        uint8_t out[PHONE_KEY_SIZE])
+{
+    uint8_t shared[32];
+    crypto_x25519(shared, mySecret, theirPublic);
+    crypto_blake2b_keyed(out, PHONE_KEY_SIZE, shared, sizeof(shared), (const uint8_t *)"moemon pair", 11);
+    crypto_wipe(shared, sizeof(shared));
+}
+
 void PhoneProto_SessionKey(const uint8_t key[PHONE_KEY_SIZE], const uint8_t phoneNonce[PHONE_NONCE_SIZE],
                            const uint8_t gameNonce[PHONE_NONCE_SIZE], uint8_t out[PHONE_KEY_SIZE])
 {

@@ -39,5 +39,5 @@ Kanto_SixIsland_Mart_Text_8454764::
 	.string "She spurs me to do bigger things.$"
 
 Kanto_SixIsland_Mart_Text_845480B::
-	.string "I should buy some REPELS before\n"
-	.string "exploring more of the island.$"
+	.string "I should buy some MAIL and write\n"
+	.string "him a letter…$"

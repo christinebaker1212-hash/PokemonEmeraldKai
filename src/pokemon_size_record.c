@@ -8,6 +8,7 @@
 #include "text.h"
 #include "constants/party_menu.h"
 #include "constants/pokemon_size_record.h"
+#include "constants/kai_regions.h"
 
 #define DEFAULT_MAX_SIZE 0x8000 // was 0x8100 in Ruby/Sapphire
 
@@ -195,6 +196,47 @@ void CompareLotadSize(void)
 
 // Moemon Kai: SINNOH's size contest (ROUTE 222's REMORAID, src/sinnoh/s3d_misc.c) on the same measure: a POKéMON's size
 // hash, and a hash's size in tenths of an inch (Platinum's English text gives inches, rounded as Platinum's)
+// Moemon Kai: FireRed's KANTO records (pokefirered pokemon_size_record.c): ROUTE 12 FISHING HOUSE's MAGIKARP and SIX
+// ISLAND's HERACROSS, kept in KANTO vars (include/constants/kai_regions.h); a record never set reads as the default
+static u16 *KantoSizeRecord(u16 var)
+{
+    u16 *rec = GetVarPointer(var);
+    if (*rec == 0)
+        *rec = DEFAULT_MAX_SIZE;
+    return rec;
+}
+
+void GetMagikarpSizeRecordInfo(void)
+{
+    GetMonSizeRecordInfo(SPECIES_MAGIKARP, KantoSizeRecord(VAR_KANTO_MAGIKARP_SIZE));
+}
+
+void CompareMagikarpSize(void)
+{
+    gSpecialVar_Result = CompareMonSize(SPECIES_MAGIKARP, KantoSizeRecord(VAR_KANTO_MAGIKARP_SIZE));
+}
+
+void GetHeracrossSizeRecordInfo(void)
+{
+    GetMonSizeRecordInfo(SPECIES_HERACROSS, KantoSizeRecord(VAR_KANTO_HERACROSS_SIZE));
+}
+
+void CompareHeracrossSize(void)
+{
+    gSpecialVar_Result = CompareMonSize(SPECIES_HERACROSS, KantoSizeRecord(VAR_KANTO_HERACROSS_SIZE));
+}
+
+// Moemon Kai: Crystal's LAKE OF RAGE MAGIKARP record (pokecrystal LakeOfRageMagikarpHouse), in a JOHTO var
+void GetJohtoMagikarpSizeRecordInfo(void)
+{
+    GetMonSizeRecordInfo(SPECIES_MAGIKARP, KantoSizeRecord(VAR_JOHTO_MAGIKARP_SIZE));
+}
+
+void CompareJohtoMagikarpSize(void)
+{
+    gSpecialVar_Result = CompareMonSize(SPECIES_MAGIKARP, KantoSizeRecord(VAR_JOHTO_MAGIKARP_SIZE));
+}
+
 u16 MP_MonSizeHash(struct Pokemon *mon)
 {
     return GetMonSizeHash(mon);

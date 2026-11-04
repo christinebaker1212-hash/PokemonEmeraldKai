@@ -1,0 +1,7 @@
+# SELPHY (FireRed's FiveIsland_ResortGorgeous_House): she wished for the party's lead (280); shown it, her butler hands
+# over the reward (a NUGGET here) and the wish is done (0x5141 back to 0).
+MODE=1
+TMO=400
+ENV_A="MOEMON_DEBUG_REGION=2"
+EXPECT_A=("[test] var 0x5141 = 0" "[test] item 110: 1")
+UNEXPECT_A=("[crash]")

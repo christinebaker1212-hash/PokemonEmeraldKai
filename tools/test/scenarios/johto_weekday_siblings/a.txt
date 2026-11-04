@@ -1,0 +1,20 @@
+pressuntil A field 5000
+mp textspeed 2
+wait 30
+mp weekday 2
+mp warp 35,33,25,13
+wait 150
+mp weekday
+mp getflag 0x1532
+mp npcs
+mp face up
+press A 2
+mash A 40 20
+wait 120
+mp checkitem 217
+mp weekday 3
+mp warp 35,33,25,13
+wait 150
+mp getflag 0x1532
+mp npcs
+quit

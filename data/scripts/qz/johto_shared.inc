@@ -274,55 +274,55 @@ Quetzal_EventScript_83601F0::
 	return
 
 Quetzal_EventScript_836024E::
-	settrainerflag 0x1009
-	settrainerflag 0x1166
+	settrainerflag TRAINER_QZ_4105
+	settrainerflag TRAINER_QZ_4454
 	return
 
 Quetzal_EventScript_8360255::
-	settrainerflag 0x1168
-	settrainerflag 0x1140
-	settrainerflag 0x1197
-	settrainerflag 0x11E1
+	settrainerflag TRAINER_QZ_4456
+	settrainerflag TRAINER_QZ_4416
+	settrainerflag TRAINER_QZ_4503
+	settrainerflag TRAINER_QZ_4577
 	return
 
 Quetzal_EventScript_8360262::
-	settrainerflag 0x11F6
-	settrainerflag 0x1081
-	settrainerflag 0x112B
-	settrainerflag 0x10F5
+	settrainerflag TRAINER_QZ_4598
+	settrainerflag TRAINER_QZ_4225
+	settrainerflag TRAINER_QZ_4395
+	settrainerflag TRAINER_QZ_4341
 	return
 
 Quetzal_EventScript_836026F::
-	settrainerflag 0x1024
-	settrainerflag 0x110C
-	settrainerflag 0x11D9
-	settrainerflag 0x11C2
+	settrainerflag TRAINER_QZ_4132
+	settrainerflag TRAINER_QZ_4364
+	settrainerflag TRAINER_QZ_4569
+	settrainerflag TRAINER_QZ_4546
 	return
 
 Quetzal_EventScript_836027C::
-	settrainerflag 0x124D
-	settrainerflag 0x1031
-	settrainerflag 0x12F7
-	settrainerflag 0x11A4
+	settrainerflag TRAINER_QZ_4685
+	settrainerflag TRAINER_QZ_4145
+	settrainerflag TRAINER_QZ_4855
+	settrainerflag TRAINER_QZ_4516
 	return
 
 Quetzal_EventScript_8360289::
 	return
 
 Quetzal_EventScript_836028A::
-	settrainerflag 0x115E
-	settrainerflag 0x12BD
-	settrainerflag 0x1099
-	settrainerflag 0x134A
-	settrainerflag 0x11B3
+	settrainerflag TRAINER_QZ_4446
+	settrainerflag TRAINER_QZ_4797
+	settrainerflag TRAINER_QZ_4249
+	settrainerflag TRAINER_QZ_4938
+	settrainerflag TRAINER_QZ_4531
 	return
 
 Quetzal_EventScript_836029A::
-	settrainerflag 0x103A
-	settrainerflag 0x1149
-	settrainerflag 0x1113
-	settrainerflag 0x11EC
-	settrainerflag 0x1200
+	settrainerflag TRAINER_QZ_4154
+	settrainerflag TRAINER_QZ_4425
+	settrainerflag TRAINER_QZ_4371
+	settrainerflag TRAINER_QZ_4588
+	settrainerflag TRAINER_QZ_4608
 	return
 
 Quetzal_EventScript_83602AA::
@@ -2759,7 +2759,7 @@ Quetzal_Text_837F5F7::
 	.string "You cannot cross it yet.$"
 
 Quetzal_Text_8383BB5::
-	.string "GINA: Oh? Only one MOéMON?\n"
+	.string "Oh? Only one MOéMON?\n"
 	.string "Then, we don’t battle with you.\p"
 	.string "If there’s only one MOéMON, it will\n"
 	.string "be lonesome. That’s not nice.$"

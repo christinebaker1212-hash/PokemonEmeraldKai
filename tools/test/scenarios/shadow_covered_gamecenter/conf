@@ -1,0 +1,8 @@
+# The GAME CENTER 1F's counter (its picture's "over" layer, not tiles: mp_mappic.c MP_MapPic_CoversFeet): a shadow in
+# the open at (5,13), none behind the counter at (5,7) and (7,7) (the user's picture: a shadow showed there)
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_PARTY=280:30"
+EXPECT_A=("where map 11.17 xy 5,13" "where map 11.17 xy 5,7" "where map 11.17 xy 7,7")
+UNEXPECT_A=("[crash]" "TIMEOUT")
+CHECK="python3 tools/test/check_shadow_covered.py"

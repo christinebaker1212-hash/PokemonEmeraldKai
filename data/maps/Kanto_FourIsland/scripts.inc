@@ -154,7 +154,7 @@ Kanto_FourIsland_Text_8432D3A::
 	.string "her ever since.$"
 
 Kanto_FourIsland_Text_8432DFC::
-	.string "BLUE: Hey!\n"
+	.string "{RIVAL}: Hey!\n"
 	.string "{PLAYER}!\p"
 	.string "What are you doing here in the\n"
 	.string "SEVII ISLANDS?\p"

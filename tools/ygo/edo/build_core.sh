@@ -1,6 +1,7 @@
 #!/bin/bash
 # Builds EDOPro's engine (edopro/ocgcore and its Lua, as C++) into a static library for the native tests:
 #   tools/ygo/edo/build_core.sh OUT_DIR   ->  OUT_DIR/libocgcore.a (rebuilt only when a source is newer)
+# EDO_CFLAGS adds flags (the phone app's desktop tests: -fPIC, for a shared library; use its own OUT_DIR)
 set -e
 cd "$(dirname "$0")/../../.."
 OUT=${1:?usage: build_core.sh OUT_DIR}
@@ -17,7 +18,7 @@ for f in edopro/ocgcore/*.cpp edopro/ocgcore/lua/src/*.c; do
     case " $SKIP " in *" $b "*) [[ $f == *lua/src* ]] && continue;; esac
     o="$OUT/edo-obj/$b.o"
     objs+=("$o")
-    g++ -std=c++17 -O2 -fno-rtti -w -Iedopro/ocgcore/lua/src -include edopro/ocgcore/lua/luaconf-customize.h \
+    g++ -std=c++17 -O2 ${EDO_CFLAGS:-} -fno-rtti -w -Iedopro/ocgcore/lua/src -include edopro/ocgcore/lua/luaconf-customize.h \
         -DluaP_opmodes=edo_luaP_opmodes -Dlua_ident=edo_lua_ident -DluaT_typenames_=edo_luaT_typenames_ \
         -Dluai_ctype_=edo_luai_ctype_ \
         -x c++ -c "$f" -o "$o" &

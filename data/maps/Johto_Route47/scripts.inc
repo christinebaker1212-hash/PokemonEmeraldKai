@@ -125,7 +125,7 @@ Johto_Route47_Text_83F6951::
 	.string "makes my heart soar!\p"
 	.string "EDA: My heart’s feelings for my\n"
 	.string "boyfriend are as wide and deep\l"
-	.string "the ocean!$"
+	.string "as the ocean!$"
 
 Johto_Route47_Text_83F69D2::
 	.string "DUFF: I was no match for you...\l"

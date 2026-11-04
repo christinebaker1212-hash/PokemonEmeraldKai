@@ -176,10 +176,10 @@ Johto_Route45_Text_83F6319::
 	.string "I’m really, really tough!$"
 
 Johto_Route45_Text_83F6333::
-	.string "I was tough at the TRAINER HILL…$"
+	.string "I was tough at the BATTLE TOWER…$"
 
 Johto_Route45_Text_83F6354::
-	.string "Have you been to the TRAINER HILL?\p"
+	.string "Have you been to the BATTLE TOWER?\p"
 	.string "I never, ever lose there, but…$"
 
 Johto_Route45_Text_83F6396::

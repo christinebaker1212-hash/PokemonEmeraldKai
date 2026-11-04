@@ -40,11 +40,28 @@ Johto_Route29_EventScript_83ECC26::
 	end
 
 Johto_Route29_EventScript_83ECC3C::
+	@ Moemon Kai: Crystal's catching demonstration (pokecrystal Route29.asm CatchingTutorialDudeScript; docs/REGIONS_AUDIT.md
+	@ 133): the DUDE catches a RATTATA with your POKéMON (battle_setup.c MP_JohtoCatchingTutorial), once
+	goto_if_set FLAG_JOHTO_LEARNED_TO_CATCH, Johto_Route29_EventScript_DudeDone
 	msgbox Johto_Route29_Text_83ECDCD, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, 1, Johto_Route29_EventScript_83ECC5B
-	waitmessage
-	msgbox Johto_Route29_Text_83ECF1E, MSGBOX_DEFAULT
+	goto_if_eq VAR_RESULT, NO, Johto_Route29_EventScript_DudeDeclined
 	closemessage
+	special SavePlayerParty
+	special MP_JohtoCatchingTutorial
+	waitstate
+	special LoadPlayerParty
+	msgbox Johto_Route29_Text_83ECE41, MSGBOX_DEFAULT
+	setflag FLAG_JOHTO_LEARNED_TO_CATCH
+	release
+	end
+
+Johto_Route29_EventScript_DudeDeclined::
+	msgbox Johto_Route29_Text_83ECF1E, MSGBOX_DEFAULT
+	release
+	end
+
+Johto_Route29_EventScript_DudeDone::
+	msgbox Johto_Route29_Text_DudeBoxFull, MSGBOX_DEFAULT
 	release
 	end
 
@@ -74,53 +91,34 @@ Johto_Route29_EventScript_83ECC73::
 
 @ Johto_Route29 object 4 (local id 4, gfx 0x11) at 25,12
 Johto_Route29_EventScript_83ECC80::
+	@ Moemon Kai: Crystal's WEEKDAY sibling (pokecrystal Route29.asm TuscanyScript; tools/quetzal_port/fix_siblings.py):
+	@ only on TUESDAY (FLAG_JOHTO_HIDE_TUSCANY), once met they give the gift
 	lock
 	faceplayer
-	goto_if_set FLAG_QZ_0x1022, Johto_Route29_EventScript_83ECD40
-	msgbox Johto_Route29_Text_83ED16A, MSGBOX_DEFAULT
-	closemessage
-	multichoice 0x14, 0, MULTI_QZ_0x4A, 1
-	nop
-	copyvar VAR_0x8000, VAR_RESULT
-	goto_if_eq VAR_0x8000, 0, Johto_Route29_EventScript_83ECD32
-	goto_if_eq VAR_0x8000, 1, Johto_Route29_EventScript_83ECD32
-	goto_if_eq VAR_0x8000, 2, Johto_Route29_EventScript_83ECD05
-	goto_if_eq VAR_0x8000, 3, Johto_Route29_EventScript_83ECD32
-	goto_if_eq VAR_0x8000, 4, Johto_Route29_EventScript_83ECD32
-	goto_if_eq VAR_0x8000, 5, Johto_Route29_EventScript_83ECD32
-	goto_if_eq VAR_0x8000, 6, Johto_Route29_EventScript_83ECD32
-	goto_if_eq VAR_0x8000, 7, Johto_Route29_EventScript_83ECD3D
-	goto_if_eq VAR_0x8000, 127, Johto_Route29_EventScript_83ECD3D
-	closemessage
-	release
-	end
-
-Johto_Route29_EventScript_83ECD05::
-	msgbox Johto_Route29_Text_83ED20F, MSGBOX_DEFAULT
+	goto_if_set FLAG_QZ_0x1022, Johto_Route29_EventScript_TuscanyDay
+	specialvar VAR_RESULT, MP_JohtoWeekday
+	goto_if_ne VAR_RESULT, 2, Johto_Route29_EventScript_TuscanyNotDay
+	goto_if_set FLAG_JOHTO_MET_TUSCANY, Johto_Route29_EventScript_TuscanyMet
+	msgbox Johto_Route29_Text_TuscanyMeet, MSGBOX_DEFAULT
+	setflag FLAG_JOHTO_MET_TUSCANY
+Johto_Route29_EventScript_TuscanyMet::
+	msgbox Johto_Route29_Text_TuscanyGivesGift, MSGBOX_DEFAULT
 	setorcopyvar VAR_0x8000, ITEM_SILK_SCARF
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
 	setflag FLAG_QZ_0x1022
-	msgbox Johto_Route29_Text_83ED253, MSGBOX_DEFAULT
-	closemessage
+	msgbox Johto_Route29_Text_TuscanyGaveGift, MSGBOX_DEFAULT
 	release
 	end
 
-Johto_Route29_EventScript_83ECD32::
-	msgbox Quetzal_Text_83ED204, MSGBOX_DEFAULT
-	closemessage
+Johto_Route29_EventScript_TuscanyDay::
+	msgbox Johto_Route29_Text_TuscanyTuesday, MSGBOX_DEFAULT
 	release
 	end
 
-Johto_Route29_EventScript_83ECD3D::
-	closemessage
-	release
-	end
-
-Johto_Route29_EventScript_83ECD40::
-	msgbox Johto_Route29_Text_83ED2CB, MSGBOX_DEFAULT
-	closemessage
+Johto_Route29_EventScript_TuscanyNotDay::
+	msgbox Johto_Route29_Text_TuscanyNotTuesday, MSGBOX_DEFAULT
 	release
 	end
 
@@ -137,7 +135,10 @@ Johto_Route29_EventScript_83ECD4B::
 Johto_Route29_EventScript_83ECD58::
 	lock
 	faceplayer
-	goto_if_set FLAG_QZ_0x1015, Johto_Route29_EventScript_83ECD6E
+	@ Moemon Kai: Crystal's night check (checktime NITE: 6 PM to 4 AM on the game clock; docs/REGIONS_AUDIT.md 133)
+	gettime
+	goto_if_ge VAR_0x8000, 18, Johto_Route29_EventScript_83ECD6E
+	goto_if_lt VAR_0x8000, 4, Johto_Route29_EventScript_83ECD6E
 	msgbox Johto_Route29_Text_83ED0FC, MSGBOX_DEFAULT
 	closemessage
 	release
@@ -170,31 +171,18 @@ Johto_Route29_Text_83ECD92::
 	.string "Who knows when they’ll pop out…$"
 
 Johto_Route29_Text_83ECDCD::
-	.string "I’ve seen you a couple times.\n"
-	.string "How many MOéMON have you caught?\p"
-	.string "Would you like me to tell you\n"
-	.string "how to catch MOéMON?$"
+	.string "Huh? You want me to show you how\n"
+	.string "to catch MOéMON?$"
 
 Johto_Route29_Text_83ECE41::
-	.string "If you weaken them first,\n"
-	.string "MOéMON are easier to catch.\p"
-	.string "Then, throw a ball at them from\n"
-	.string "your bag! Any ball will do.\p"
-	.string "If you want to learn more,\n"
-	.string "go to the ACADEMY in VIOLET CITY!\p"
-	.string "The students there know a lot\n"
-	.string "about MOéMON.$"
+	.string "That’s how you do it.\p"
+	.string "If you weaken them first, MOéMON\n"
+	.string "are easier to catch.$"
 
 Johto_Route29_Text_83ECF1E::
 	.string "Oh. Fine, then.\p"
-	.string "Check every route to find\n"
-	.string "different types of MOéMON.\p"
-	.string "Your MOéDEX shows where you can\n"
-	.string "find them too!\p"
-	.string "If you want to learn more,\n"
-	.string "go to the ACADEMY in VIOLET CITY!\p"
-	.string "The students know a lot about\n"
-	.string "MOéMON.$"
+	.string "Anyway, if you want to catch\n"
+	.string "MOéMON, you have to walk a lot.$"
 
 Johto_Route29_Text_83ECFF8::
 	.string "Yo. How are your MOéMON?\p"
@@ -212,12 +200,12 @@ Johto_Route29_Text_83ED0C0::
 	.string "so I saved to record my progress.$"
 
 Johto_Route29_Text_83ED0FC::
-	.string "I’m waiting for MOéMON that\n"
-	.string "appear only later in the day.$"
+	.string "I’m waiting for MOéMON that appear\n"
+	.string "only at night.$"
 
 Johto_Route29_Text_83ED137::
-	.string "I’m waiting for MOéMON that\n"
-	.string "appear only at night.$"
+	.string "I’m waiting for MOéMON that appear\n"
+	.string "only in the morning.$"
 
 Johto_Route29_Text_83ED16A::
 	.string "TUSCANY: I do believe that this\n"
@@ -248,3 +236,34 @@ Johto_Route29_Text_83ED2CB::
 Johto_Route29_Text_83ED33B::
 	.string "ROUTE 29\p"
 	.string "CHERRYGROVE CITY - NEW BARK TOWN$"
+
+Johto_Route29_Text_TuscanyMeet::
+	.string "TUSCANY: I do believe that this is\n"
+	.string "the first time we’ve met?\p"
+	.string "Please allow me to introduce\n"
+	.string "myself.\p"
+	.string "I am TUSCANY of Tuesday.$"
+
+Johto_Route29_Text_TuscanyGaveGift::
+	.string "TUSCANY: Wouldn’t you agree that\n"
+	.string "it is most adorable?\p"
+	.string "It strengthens normal-type moves.\p"
+	.string "I am certain it will be of use.$"
+
+Johto_Route29_Text_TuscanyTuesday::
+	.string "TUSCANY: Have you met MONICA, my\n"
+	.string "older sister?\p"
+	.string "Or my younger brother, WESLEY?\p"
+	.string "I am the second of seven children.$"
+
+Johto_Route29_Text_TuscanyNotTuesday::
+	.string "TUSCANY: Today is not Tuesday.\n"
+	.string "That is unfortunate…$"
+
+Johto_Route29_Text_TuscanyGivesGift::
+	.string "By way of introduction, please\n"
+	.string "accept this gift, a PINK BOW.$"
+
+Johto_Route29_Text_DudeBoxFull::
+	.string "MOéMON hide in the grass. Who\n"
+	.string "knows when they’ll pop out…$"

@@ -106,9 +106,8 @@ Kanto_Route18_Text_8437A3F::
 	.string "CELADON CITY - FUCHSIA CITY$"
 
 Kanto_Route18_Text_8437A64::
-	.string "CYCLING ROAD\p"
-	.string "A BICYCLE is required to enter.\n"
-	.string "You may explore on foot inside.$"
+	.string "CYCLING ROAD\n"
+	.string "No pedestrians permitted!$"
 
 Kanto_Route18_Text_84700D1::
 	.string "I’ve been checking every grassy\n"

@@ -1,0 +1,6 @@
+# FireRed's MAGIKARP size record: ROUTE 12 FISHING HOUSE measures it, a NET BALL for the first record
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=129:20"
+EXPECT_A=("[test] item 6: 1" "[test] flag 8544 = 1")
+UNEXPECT_A=("[crash]")

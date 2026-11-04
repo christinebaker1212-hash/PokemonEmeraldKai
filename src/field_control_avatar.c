@@ -194,6 +194,12 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     {
         IncrementGameStat(GAME_STAT_STEPS);
         IncrementBirthIslandRockStepCount();
+        {
+            void MP_ResortGorgeousStep(void);
+            void MP_KantoMassageStep(void);
+            MP_ResortGorgeousStep();   // Moemon Kai: FireRed's SELPHY wish timer (qz_specials.c)
+            MP_KantoMassageStep();     // and DAISY's grooming
+        }
         if (TryStartStepBasedScript(&position, metatileBehavior, playerDirection) == TRUE)
             return TRUE;
     }
@@ -686,6 +692,16 @@ static bool8 TryStartStepCountScript(u16 metatileBehavior)
     }
     if (TryStartMatchCall())
         return TRUE;
+    {
+        // Moemon Kai: JOHTO's phone (src/mp/mp_qzphone.c): a registered contact calls now and then
+        bool8 MP_QzPhone_TryCall(void);
+        extern const u8 QzPhone_EventScript_IncomingCall[];
+        if (MP_QzPhone_TryCall())
+        {
+            ScriptContext_SetupScript(QzPhone_EventScript_IncomingCall);
+            return TRUE;
+        }
+    }
     return FALSE;
 }
 
@@ -789,6 +805,8 @@ static bool8 TryArrowWarp(struct MapPosition *position, u16 metatileBehavior, u8
     {
         StoreInitialPlayerAvatarState();
         SetupWarp(&gMapHeader, warpEventId, position);
+        if (DoSinnohRideWarp(metatileBehavior))   // Moemon Kai: SINNOH's stairs, walked into (field_screen_effect.c)
+            return TRUE;
         DoWarp();
         return TRUE;
     }

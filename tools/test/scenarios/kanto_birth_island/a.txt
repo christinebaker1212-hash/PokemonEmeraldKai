@@ -1,0 +1,21 @@
+pressuntil A field 5000
+wait 60
+mp warp 37,53,15,14
+wait 150
+mp objat 15 12
+mp face up
+wait 10
+press UP 8
+wait 30
+mp where
+mp setvar 0x5102 0
+press A 4
+wait 120
+shot b_moved
+mp getvar 0x5101
+mp objat 11 14
+mp ctx
+press LEFT 8
+wait 30
+mp where
+quit

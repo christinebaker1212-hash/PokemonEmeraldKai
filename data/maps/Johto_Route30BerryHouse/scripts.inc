@@ -21,20 +21,13 @@ Johto_Route30BerryHouse_EventScript_83ED981::
 	end
 
 Johto_Route30BerryHouse_Text_83ED98C::
-	.string "When you follow that path up north,\n"
-	.string "you will see MR. MOéMON’s house.\p"
-	.string "But before you go, allow me to\n"
-	.string "tell you about BERRIES!\p"
-	.string "MOéMON get healthier by eating\n"
-	.string "BERRIES.\p"
-	.string "They can even eat BERRIES\n"
-	.string "they’re holding in battle.\p"
-	.string "If you need special BALLS,\n"
-	.string "KURT sells them in AZALEA TOWN.\p"
+	@ Moemon Kai: Crystal's words (pokecrystal maps/Route30BerryHouse.asm)
+	.string "You know, MOéMON\n"
+	.string "eat BERRIES.\p"
+	.string "Well, my MOéMON\n"
+	.string "got healthier by eating a BERRY.\p"
 	.string "Here. I’ll share one with you!$"
 
 Johto_Route30BerryHouse_Text_83EDAC1::
-	.string "Check trees for BERRIES.\p"
-	.string "If respawning is enabled, defeating\n"
-	.string "MOéMON can replenish them.\p"
-	.string "Waiting a few hours won’t do it.$"
+	.string "Check trees for BERRIES.\n"
+	.string "They just drop right off.$"

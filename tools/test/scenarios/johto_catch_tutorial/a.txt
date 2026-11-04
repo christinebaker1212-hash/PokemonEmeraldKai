@@ -1,0 +1,17 @@
+pressuntil A field 5000
+mp textspeed 2
+wait 30
+mp setflag 0x14A0
+mp warp 35,33,61,17
+wait 120
+mp face up
+press A 2
+mash A 8 20
+wait 60
+shotburst tut 1500 150
+wait 1500
+mash A 40 20
+wait 300
+mp getflag 0x153B
+mp party
+quit

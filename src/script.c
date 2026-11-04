@@ -517,3 +517,8 @@ const u8 *MP_ScriptCurrentPtr(void)
 {
     return sGlobalScriptContext.scriptPtr;
 }
+
+void *MP_ScriptNativePtr(void)   // (tests: the native wait a script is in, mp ctx)
+{
+    return (void *)sGlobalScriptContext.nativePtr;
+}

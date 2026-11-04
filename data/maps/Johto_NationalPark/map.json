@@ -574,6 +574,14 @@
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
       "script": "Quetzal_EventScript_83E0820"
+    },
+    {
+      "type": "hidden_item",
+      "x": 8,
+      "y": 49,
+      "elevation": 0,
+      "item": "ITEM_FULL_HEAL",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_29"
     }
   ]
 }

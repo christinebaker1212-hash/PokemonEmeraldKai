@@ -1,0 +1,9 @@
+# Platinum's story on ROUTE 201 after the starter: BARRY's "let's catch that legendary" (VAR_FOLLOWER_RIVAL_STATE 0x51C9
+# 2 -> 3: he walks with the player, hiding ROUTE 201's own BARRY, FLAG_HIDE_ROUTE_201_RIVAL 0x349A), LAKE VERITY's
+# scene (-> 4: he runs off), then back on ROUTE 201 he stays hidden (s3d_legends.c no longer re-shows the old written
+# story's battle there). Needs the packs.
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=415:5"
+EXPECT_A=("var 0x51C9 = 3" "var 0x51C9 = 4" "flag 13466 = 1" "ctx 1 free 1 overworld 1 locked 0 script 0")
+UNEXPECT_A=("flag 13466 = 0" "[crash]" "TIMEOUT")

@@ -10,7 +10,7 @@ Johto_LakeOfRage_EventScript_83DD2C9::
 
 Johto_LakeOfRage_EventScript_83DD2E3::
 	call_if_lt VAR_QZ_0x500C, 2, Johto_LakeOfRage_EventScript_83DD30B
-	setmaplayoutindex 0x21B
+	setmaplayoutindex LAYOUT_JOHTO_LAKE_OF_RAGE   @ (Quetzal's layout 0x21B)
 	goto_if_lt VAR_QZ_0x500C, 14, Johto_LakeOfRage_EventScript_83DD30F
 	random 2
 	goto_if_eq VAR_RESULT, 1, Johto_LakeOfRage_EventScript_83DD30F
@@ -87,6 +87,7 @@ Johto_LakeOfRage_EventScript_83DD40B::
 	delay 0x28
 	waitmoncry
 	qz_setstaticwildmon SPECIES_GYARADOS, 0x1E, ITEM_NONE
+	special MP_MakeScriptedWildShiny   @ Moemon Kai: Crystal's BATTLETYPE_FORCESHINY: the RED GYARADOS
 	dowildbattle
 	specialvar VAR_RESULT, GetBattleOutcome
 	goto_if_eq VAR_RESULT, 1, Johto_LakeOfRage_EventScript_83DD44C
@@ -200,53 +201,34 @@ Johto_LakeOfRage_EventScript_83DD55C::
 
 @ Johto_LakeOfRage object 6 (local id 6, gfx 0x2C) at 55,15
 Johto_LakeOfRage_EventScript_83DDBDC::
+	@ Moemon Kai: Crystal's WEEKDAY sibling (pokecrystal LakeOfRage.asm WesleyScript; tools/quetzal_port/fix_siblings.py):
+	@ only on WEDNESDAY (FLAG_JOHTO_HIDE_WESLEY), once met they give the gift
 	lock
 	faceplayer
-	goto_if_set FLAG_QZ_0x1053, Johto_LakeOfRage_EventScript_83DDC9C
-	msgbox Johto_LakeOfRage_Text_83DDCA7, MSGBOX_DEFAULT
-	closemessage
-	multichoice 0x14, 0, MULTI_QZ_0x4A, 1
-	nop
-	copyvar VAR_0x8000, VAR_RESULT
-	goto_if_eq VAR_0x8000, 0, Johto_LakeOfRage_EventScript_83DDC8E
-	goto_if_eq VAR_0x8000, 1, Johto_LakeOfRage_EventScript_83DDC8E
-	goto_if_eq VAR_0x8000, 2, Johto_LakeOfRage_EventScript_83DDC8E
-	goto_if_eq VAR_0x8000, 3, Johto_LakeOfRage_EventScript_83DDC61
-	goto_if_eq VAR_0x8000, 4, Johto_LakeOfRage_EventScript_83DDC8E
-	goto_if_eq VAR_0x8000, 5, Johto_LakeOfRage_EventScript_83DDC8E
-	goto_if_eq VAR_0x8000, 6, Johto_LakeOfRage_EventScript_83DDC8E
-	goto_if_eq VAR_0x8000, 7, Johto_LakeOfRage_EventScript_83DDC99
-	goto_if_eq VAR_0x8000, 127, Johto_LakeOfRage_EventScript_83DDC99
-	closemessage
-	release
-	end
-
-Johto_LakeOfRage_EventScript_83DDC61::
-	msgbox Johto_LakeOfRage_Text_83DDD07, MSGBOX_DEFAULT
+	goto_if_set FLAG_QZ_0x1053, Johto_LakeOfRage_EventScript_WesleyDay
+	specialvar VAR_RESULT, MP_JohtoWeekday
+	goto_if_ne VAR_RESULT, 3, Johto_LakeOfRage_EventScript_WesleyNotDay
+	goto_if_set FLAG_JOHTO_MET_WESLEY, Johto_LakeOfRage_EventScript_WesleyMet
+	msgbox Johto_LakeOfRage_Text_WesleyMeet, MSGBOX_DEFAULT
+	setflag FLAG_JOHTO_MET_WESLEY
+Johto_LakeOfRage_EventScript_WesleyMet::
+	msgbox Johto_LakeOfRage_Text_WesleyGivesGift, MSGBOX_DEFAULT
 	setorcopyvar VAR_0x8000, ITEM_BLACK_BELT
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
 	setflag FLAG_QZ_0x1053
-	msgbox Johto_LakeOfRage_Text_83DDD34, MSGBOX_DEFAULT
-	closemessage
+	msgbox Johto_LakeOfRage_Text_WesleyGaveGift, MSGBOX_DEFAULT
 	release
 	end
 
-Johto_LakeOfRage_EventScript_83DDC8E::
-	msgbox Johto_LakeOfRage_Text_83DDDCF, MSGBOX_DEFAULT
-	closemessage
+Johto_LakeOfRage_EventScript_WesleyDay::
+	msgbox Johto_LakeOfRage_Text_WesleyWednesday, MSGBOX_DEFAULT
 	release
 	end
 
-Johto_LakeOfRage_EventScript_83DDC99::
-	closemessage
-	release
-	end
-
-Johto_LakeOfRage_EventScript_83DDC9C::
-	msgbox Johto_LakeOfRage_Text_83DDD6D, MSGBOX_DEFAULT
-	closemessage
+Johto_LakeOfRage_EventScript_WesleyNotDay::
+	msgbox Johto_LakeOfRage_Text_WesleyNotWednesday, MSGBOX_DEFAULT
 	release
 	end
 
@@ -457,3 +439,26 @@ Johto_LakeOfRage_Text_83DDDF8::
 
 Johto_LakeOfRage_Text_83DDE23::
 	.string "FISHING GURU’S HOUSE$"
+
+Johto_LakeOfRage_Text_WesleyMeet::
+	.string "WESLEY: Well, how do you do?\p"
+	.string "Seeing as how it’s Wednesday\n"
+	.string "today, I’m WESLEY of Wednesday.$"
+
+Johto_LakeOfRage_Text_WesleyGaveGift::
+	.string "WESLEY: BLACKBELT beefs up the\n"
+	.string "power of fighting moves.$"
+
+Johto_LakeOfRage_Text_WesleyWednesday::
+	.string "WESLEY: Since you found me, you\n"
+	.string "must have met my brothers and\l"
+	.string "sisters.\p"
+	.string "Or did you just get lucky?$"
+
+Johto_LakeOfRage_Text_WesleyNotWednesday::
+	.string "WESLEY: Today’s not Wednesday.\n"
+	.string "That’s too bad.$"
+
+Johto_LakeOfRage_Text_WesleyGivesGift::
+	.string "Pleased to meet you. Please take a\n"
+	.string "souvenir.$"

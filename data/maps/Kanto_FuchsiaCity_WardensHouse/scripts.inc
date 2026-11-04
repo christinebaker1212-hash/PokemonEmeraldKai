@@ -111,10 +111,6 @@ Kanto_FuchsiaCity_WardensHouse_Text_8448F11::
 	.string "Let me give you something for your\n"
 	.string "trouble.$"
 
-Kanto_FuchsiaCity_WardensHouse_Text_8448FE3::
-	.string "{PLAYER} received BLACK AUGURITE\n"
-	.string "from the WARDEN.$"
-
 Kanto_FuchsiaCity_WardensHouse_Text_844900F::
 	.string "WARDEN: Inside HM04 you'll find\n"
 	.string "STRENGTH.\p"

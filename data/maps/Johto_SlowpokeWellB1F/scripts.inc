@@ -3,7 +3,7 @@ Johto_SlowpokeWellB1F_MapScripts::
 
 @ Johto_SlowpokeWellB1F object 7 (local id 7, gfx 0x3A9E) at 22,6
 Johto_SlowpokeWellB1F_EventScript_83F9B57::
-	setorcopyvar VAR_0x8000, ITEM_SUPER_POTION
+	setorcopyvar VAR_0x8000, ITEM_SUPER_POTION   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
@@ -191,3 +191,39 @@ Johto_SlowpokeWellB1F_Text_83FA1AF::
 Johto_SlowpokeWellB1F_Text_83FA1C0::
 	.string "SLOWPOKETAILS grow back fast!\p"
 	.string "What’s wrong with selling them?$"
+
+@ Moemon Kai: Crystal's two tailless SLOWPOKE, one carrying MAIL (pokecrystal SlowpokeWellB1F.asm; docs/REGIONS_AUDIT.md
+@ 92); gone with the ROCKETS (FLAG_QZ_0x1084)
+Johto_SlowpokeWellB1F_EventScript_SlowpokeWithMail::
+	lock
+	faceplayer
+	playmoncry SPECIES_SLOWPOKE, CRY_MODE_NORMAL
+	msgbox Johto_SlowpokeWellB1F_Text_SlowpokeWithMail, MSGBOX_YESNO
+	waitmoncry
+	goto_if_eq VAR_RESULT, NO, Johto_SlowpokeWellB1F_EventScript_SlowpokeEnd
+	msgbox Johto_SlowpokeWellB1F_Text_SlowpokeMail, MSGBOX_DEFAULT
+Johto_SlowpokeWellB1F_EventScript_SlowpokeEnd::
+	release
+	end
+
+Johto_SlowpokeWellB1F_EventScript_TaillessSlowpoke::
+	lock
+	faceplayer
+	playmoncry SPECIES_SLOWPOKE, CRY_MODE_NORMAL
+	msgbox Johto_SlowpokeWellB1F_Text_TaillessSlowpoke, MSGBOX_DEFAULT
+	waitmoncry
+	release
+	end
+
+Johto_SlowpokeWellB1F_Text_SlowpokeWithMail::
+	.string "A SLOWPOKE with its TAIL cut off…\p"
+	.string "Huh? It has MAIL. Read it?$"
+
+Johto_SlowpokeWellB1F_Text_SlowpokeMail::
+	.string "{PLAYER} read the MAIL.\p"
+	.string "Be good and look after the house\n"
+	.string "with Grandpa and SLOWPOKE.\p"
+	.string "Love, Dad$"
+
+Johto_SlowpokeWellB1F_Text_TaillessSlowpoke::
+	.string "A SLOWPOKE with its TAIL cut off…$"

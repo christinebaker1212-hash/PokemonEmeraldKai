@@ -1,0 +1,53 @@
+pressuntil A field 5000
+wait 30
+mp setflag 0x51
+mp setflag 0x1088
+mp clearflag 0x1089
+mp setvar 0x5009 7
+mp warp 34,78,7,6
+wait 150
+press DOWN 20
+wait 60
+mash A 30 20
+wait 60
+mp checkitem 497
+mp regionclear 1
+mp warp 34,78,7,6
+wait 150
+press DOWN 20
+wait 60
+mash A 30 20
+mash A 20 20
+wait 120
+mp checkitem 497
+mp getflag 0x1066
+mp getflag 0x1150
+mp warp 34,3,15,4
+wait 150
+press UP 20
+wait 10
+mash A 40 20
+wait 60
+mp checkitem 497
+mp getflag 0x1039
+press A 5
+mash A 10 20
+wait 60
+mp getvar 0x5009
+mp newday
+mp warp 34,3,15,4
+wait 150
+press UP 20
+wait 10
+mp getflag 0x924
+mp getflag 0x1039
+mash A 70 20
+wait 200
+mp getvar 0x5009
+mp warp 34,0,19,12
+wait 150
+mash A 50 20
+wait 300
+mp checkitem 497
+mp getvar 0x5009
+quit

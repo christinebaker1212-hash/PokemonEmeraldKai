@@ -1,0 +1,7 @@
+# JOHTO's / KANTO's BICYCLE (item 360, FireRed's) rides: registered to SELECT, on and off again (src/data/items.h:
+# ItemUseOutOfBattle_Bike as the MACH BIKE; it had no use).
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("riding 0" "riding 1" "ctx 1 free 1 overworld 1 locked 0 script 0")
+UNEXPECT_A=("[crash]" "TIMEOUT")

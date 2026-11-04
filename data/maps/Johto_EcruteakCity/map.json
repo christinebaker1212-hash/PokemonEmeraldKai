@@ -623,6 +623,14 @@
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
       "script": "Johto_EcruteakCity_EventScript_83CD506"
+    },
+    {
+      "type": "hidden_item",
+      "x": 25,
+      "y": 15,
+      "elevation": 0,
+      "item": "ITEM_HYPER_POTION",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_10"
     }
   ]
 }

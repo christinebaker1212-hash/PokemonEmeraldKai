@@ -641,6 +641,9 @@ class FileConverter:
             return ['setvar 0x%X, 0' % VAR_SINNOH_SPIRITOMB]
         if cmd in ('SetFlag', 'ClearFlag'):
             return ['%s %s' % (cmd.lower(), self.flag(a[0]))]
+        if cmd == 'GivePokedex':
+            # (PROF. ROWAN's POKéDEX: the START menu's, with the NATIONAL DEX as every region's POKéDEX in this game)
+            return ['setflag FLAG_SYS_POKEDEX_GET', 'special EnableNationalPokedex']
         if cmd == 'LockAll':
             return ['lockall']
         if cmd == 'ReleaseAll':
@@ -1151,8 +1154,11 @@ class FileConverter:
             return ['copyvar 0x%X, VAR_RESULT' % VAR_SINNOH_STARTER, 'setflag 0x3D39', 'setflag FLAG_SYS_POKEMON_GET']
         if cmd == 'ReturnToField':
             return []                       # (the briefcase went back to the field itself)
-        if cmd == 'BufferRivalStarterSpeciesName':
+        if cmd in ('BufferRivalStarterSpeciesName', 'BufferRivalStarterSpeciesNameWithArticle'):
             return [self.sinnoh(SINNOH_BUFFER_RIVAL_STARTER, self.value(a[0]))]
+        if cmd in ('BufferPlayerCounterpartStarterSpeciesName', 'BufferPlayerCounterpartStarterSpeciesNameWithArticle'):
+            # (the counterpart's: the starter neither the player nor BARRY took; English has no article to add)
+            return [self.sinnoh(SINNOH_BUFFER_RIVAL_STARTER, self.value(a[0]), 1)]
         if cmd == 'GiveRunningShoes':
             return ['setflag FLAG_SYS_B_DASH']
         if cmd == 'GiveJournal':

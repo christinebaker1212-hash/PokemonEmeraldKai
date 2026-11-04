@@ -162,16 +162,6 @@
       "dest_warp_id": "1"
     }
   ],
-  "coord_events": [
-    {
-      "type": "trigger",
-      "x": 33,
-      "y": 32,
-      "elevation": 0,
-      "var": "VAR_TEMP_0",
-      "var_value": "0",
-      "script": "Johto_UnionCave1F_EventScript_83FDB22"
-    }
-  ],
+  "coord_events": [],
   "bg_events": []
 }

@@ -130,6 +130,19 @@
       "trainer_sight_or_berry_tree_id": "0",
       "script": "EventScript_TtQueen",
       "flag": "FLAG_TT_QUEEN_AWAY"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_LINK_RECEPTIONIST",
+      "x": 11,
+      "y": 7,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_FACE_LEFT",
+      "movement_range_x": 0,
+      "movement_range_y": 0,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "0x0",
+      "flag": "FLAG_JOHTO_HIDE_GS_RECEPTIONIST"
     }
   ],
   "warp_events": [
@@ -141,7 +154,17 @@
       "dest_warp_id": "12"
     }
   ],
-  "coord_events": [],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 7,
+      "y": 7,
+      "elevation": 0,
+      "var": "VAR_TEMP_9",
+      "var_value": "1",
+      "script": "Johto_GoldenrodPokecenter1F_EventScript_GsBall"
+    }
+  ],
   "bg_events": [
     {
       "type": "sign",

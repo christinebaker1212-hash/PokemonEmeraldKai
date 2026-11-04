@@ -1802,3 +1802,17 @@ void MP_Follower_PmdDebug(u8 slot)
                s->pushX, s->pushY, s->pushX || s->pushY ? " (back)" : "", s->pmd.big.lift);
     }
 }
+
+// Moemon Kai: a POKéMON as a map object (OBJ_EVENT_GFX_MON_FIRST + its national POKéDEX number: Crystal's SLOWPOKE
+// in the WELL, the Friday LAPRAS...; event_object_movement.c MonObjectInfo): its follower sprite's 8 frames (down, up,
+// left, right; two steps each), size (32 or 64) and palette. FALSE when it has none.
+bool8 MP_Follower_MonGfx(u16 dex, const u8 **frames, u8 *size, const u16 **pal)
+{
+    const struct MpFollowerGfx *gfx = dex ? FindGfx(dex, FALSE) : NULL;
+    if (gfx == NULL)
+        return FALSE;
+    *frames = sFollowerData + gfx->offset;
+    *size = gfx->size;
+    *pal = (const u16 *)(sFollowerData + gfx->offset + 8 * ((u32)gfx->size * gfx->size / 2));
+    return TRUE;
+}

@@ -108,6 +108,12 @@ Johto_CherrygroveCity_EventScript_83C8E65::
 	waitmovement 0
 	delay 0x14
 	msgbox Johto_CherrygroveCity_Text_83C9276, MSGBOX_DEFAULT
+	@ Moemon Kai: Crystal's MAP CARD (the POKéGEAR's MAP is always there: the words and the fanfare; case 95)
+	playfanfare MUS_OBTAIN_ITEM
+	message Johto_CherrygroveCity_Text_GotMapCard
+	waitmessage
+	waitfanfare
+	msgbox Johto_CherrygroveCity_Text_PokegearCards, MSGBOX_DEFAULT
 	closemessage
 	applymovement 1, Johto_CherrygroveCity_Movement_83C96E2
 	turnobject LOCALID_PLAYER, 2
@@ -202,7 +208,8 @@ Johto_CherrygroveCity_EventScript_83C8FCD::
 	waitmovement 0
 	msgbox Johto_CherrygroveCity_Text_83C933A, MSGBOX_DEFAULT
 	closemessage
-	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4701, 0, Johto_CherrygroveCity_Text_83C93F3
+	@ Moemon Kai: Crystal's BATTLETYPE_CANLOSE: a loss doesn't black out, the story goes on (docs/REGIONS_AUDIT.md 132)
+	qz_trainerbattle_13 TRAINER_QZ_4701, 1, Johto_CherrygroveCity_Text_83C93F3, Johto_CherrygroveCity_Text_RivalWins
 	goto Johto_CherrygroveCity_EventScript_83C8FF4
 
 Johto_CherrygroveCity_EventScript_83C8FF4::
@@ -222,8 +229,7 @@ Johto_CherrygroveCity_EventScript_83C8FF4::
 	delay 0x1E
 	applymovement 5, Johto_CherrygroveCity_Movement_83C9700
 	waitmovement 0
-	msgbox Johto_CherrygroveCity_Text_83C9475, MSGBOX_DEFAULT
-	closemessage
+	@ Moemon Kai: (Quetzal's "That's my TRAINER CARD!" line gone: Crystal's rival keeps his name; docs/REGIONS_AUDIT.md 95)
 	applymovement 5, Johto_CherrygroveCity_Movement_83C9706
 	waitmovement 0
 	removeobject 5
@@ -412,21 +418,19 @@ Johto_CherrygroveCity_Movement_83C9706:
 	step_end
 
 Johto_CherrygroveCity_Text_83C905B::
-	.string "You’re a rookie trainer,\n"
-	.string "aren’t you? I can tell!\p"
-	.string "That’s OK! Everyone is a\n"
-	.string "rookie at some point!\p"
-	.string "If you’d like, I can teach\n"
-	.string "you a few things.$"
+	.string "You’re a rookie trainer, aren’t\n"
+	.string "you? I can tell!\p"
+	.string "That’s OK! Everyone is a rookie at\n"
+	.string "some point!\p"
+	.string "If you’d like, I can teach you a\n"
+	.string "few things.$"
 
 Johto_CherrygroveCity_Text_83C90E8::
-	.string "OK, then!\n"
-	.string "Follow me!$"
+	.string "OK, then! Follow me!$"
 
 Johto_CherrygroveCity_Text_83C90FD::
-	.string "This is a MOéMON CENTER.\p"
-	.string "They heal your MOéMON in no\n"
-	.string "time at all.\p"
+	.string "This is a MOéMON CENTER. They heal\n"
+	.string "your MOéMON in no time at all.\p"
 	.string "You’ll be relying on them a lot,\n"
 	.string "so you better learn about them.$"
 
@@ -437,35 +441,30 @@ Johto_CherrygroveCity_Text_83C9182::
 
 Johto_CherrygroveCity_Text_83C91DC::
 	.string "ROUTE 30 is out this way.\p"
-	.string "Trainers will be battling\n"
-	.string "their prized MOéMON there.$"
+	.string "Trainers will be battling their\n"
+	.string "prized MOéMON there.$"
 
 Johto_CherrygroveCity_Text_83C922C::
 	.string "This is the sea, as you can see.\p"
 	.string "Some MOéMON are found only in\n"
-	.string "in water.$"
+	.string "water.$"
 
 Johto_CherrygroveCity_Text_83C9276::
-	.string "Here...\p"
-	.string "It’s my house! Thanks for\n"
-	.string "your company.\p"
-	.string "If you’re ever lost, check your\n"
-	.string "REGION MAP!\p"
-	.string "I wish you luck on your journey!$"
+	.string "Here…\p"
+	.string "It’s my house! Thanks for your\n"
+	.string "company.\p"
+	.string "Let me give you a small gift.$"
 
 Johto_CherrygroveCity_Text_83C92F3::
-	.string "Oh… It’s something I enjoy\n"
-	.string "doing…\p"
-	.string "Fine. Come see me whenever\n"
-	.string "you like.$"
+	.string "Oh… It’s something I enjoy doing…\p"
+	.string "Fine. Come see me when you like.$"
 
 Johto_CherrygroveCity_Text_83C933A::
-	.string "… … … … … … … …\p"
+	.string "…… …… ……\p"
 	.string "You got a MOéMON at the LAB.\p"
-	.string "What a waste.\n"
-	.string "A wimp like you.\p"
-	.string "… … … … … … … …\p"
-	.string "Don’t you get what I’m saying?\n"
+	.string "What a waste. A wimp like you.\p"
+	.string "…… …… ……\p"
+	.string "Don’t you get what I’m saying?\p"
 	.string "Well, I too, have a good MOéMON.\p"
 	.string "I’ll show you what I mean!$"
 
@@ -473,16 +472,10 @@ Johto_CherrygroveCity_Text_83C93F3::
 	.string "Humph. Are you happy you won?$"
 
 Johto_CherrygroveCity_Text_83C9411::
-	.string "… … … … … … … …\p"
-	.string "Do you want to know who I am?\p"
+	.string "…… …… ……\p"
+	.string "My name’s ???.\p"
 	.string "I’m going to be the world’s\n"
 	.string "greatest MOéMON trainer.$"
-
-Johto_CherrygroveCity_Text_83C9475::
-	.string "Give it back!\n"
-	.string "That’s my TRAINER CARD!\p"
-	.string "Oh no!\n"
-	.string "You saw my name...$"
 
 Johto_CherrygroveCity_Text_83C94B5::
 	.string "When you’re with MOéMON,\n"
@@ -513,3 +506,14 @@ Johto_CherrygroveCity_Text_83C95FD::
 	.string "CHERRYGROVE CITY\p"
 	.string "The City of Cute, Fragrant\n"
 	.string "Flowers$"
+
+Johto_CherrygroveCity_Text_RivalWins::
+	.string "Humph. That was a waste of time.$"
+
+Johto_CherrygroveCity_Text_GotMapCard::
+	.string "{PLAYER}’s POKéGEAR now has a MAP!$"
+
+Johto_CherrygroveCity_Text_PokegearCards::
+	.string "POKéGEAR becomes more useful as\n"
+	.string "you add CARDS.\p"
+	.string "I wish you luck on your journey!$"

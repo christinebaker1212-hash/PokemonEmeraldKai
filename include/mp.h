@@ -800,6 +800,7 @@ bool8 MP_Compass_AnyShown(void);
 void MP_Compass_Toggle(void);     // the right stick click / G: show or hide the FRIEND FINDER
 void MP_MapPic_Update(void);      // mp_mappic.c: full-color pictures pinned to maps (the GAME CENTER)
 bool8 MP_MapPic_IsPictureMap(u8 group, u8 num);
+bool8 MP_MapPic_CoversFeet(s16 x, s16 y);   // a picture's over layer hides cell (x, y)'s bottom rows (mp_shadow.c)
 u8 MP_MapPic_ArrivalDir(s16 x, s16 y);   // the way to step off an arrival door (DIR_NONE: down)
 bool8 MP_Emote_LoadUiPalette(void);   // the sprite palette shared by bubbles, toasts and compass arrows
 // mp_piggy.c
@@ -875,8 +876,9 @@ u16 MP_RegisteredItem(u8 slot);
 // Special balls (MoeGatcha only): kept in bits 12-15 of a Moemon's ball style
 enum { MP_SPECIAL_NONE, MP_SPECIAL_LOVE, MP_SPECIAL_FRIEND, MP_SPECIAL_FAST, MP_SPECIAL_LEVEL, MP_SPECIAL_LURE,
        MP_SPECIAL_HEAVY, MP_SPECIAL_MOON, MP_SPECIAL_DREAM, MP_SPECIAL_HEAL, MP_SPECIAL_DUSK, MP_SPECIAL_QUICK,
-       MP_SPECIAL_GENESIS, MP_SPECIAL_EPOCH };   // 12 / 13: Pokémon Red's and Crystal's POKé BALLS (mp_legacy_balls.c)
-#define MP_SPECIAL_COUNT MP_SPECIAL_EPOCH
+       MP_SPECIAL_GENESIS, MP_SPECIAL_EPOCH,   // 12 / 13: Pokémon Red's and Crystal's POKé BALLS (mp_legacy_balls.c)
+       MP_SPECIAL_ASTRAL };                    // 14: the ASTRAL BALL (a sure catch, shiny; 14 is the last free index)
+#define MP_SPECIAL_COUNT MP_SPECIAL_ASTRAL
 struct Pokemon;
 u8 MP_BallStyle_Special(u16 style);
 u8 MP_SpecialBall_FromItem(u16 item);
@@ -885,6 +887,15 @@ bool8 MP_IsBallItem(u16 item);
 u16 MP_BallStyle_DisplayItem(struct Pokemon *mon);
 u16 MP_BallStyle_ForItem(u16 item);
 bool8 MP_BallStyle_ItemCanColor(u16 item);
+bool8 MP_BallStyle_CanRehouse(u16 item);
+u16 MP_BallStyle_SheetStart(u8 special);   // a special ball's own battle sheet in sprite VRAM (0xFFFF: none)
+// mp_astralfx.c: the ASTRAL BALL's silver sparkles over its icon and battle sprite
+void MP_AstralFx_Icon(u8 spriteId, u16 itemId);   // item_icon.c: an icon sprite was made
+void MP_AstralFx_Forget(u8 spriteId);   // pokemon_summary_screen.c: a Moemon's own (plain) ball icon
+void MP_AstralFx_Thrown(u8 spriteId);   // battle_anim_throw.c: an ASTRAL BALL was thrown
+void MP_AstralFx_Caught(u8 spriteId);   // ... and clicked shut on a catch
+void MP_AstralFx_Composite(u16 *frame);
+void MP_AstralFx_Prism(u16 *frame);   // its prismatic sheen, right after the game's frame is drawn   // FALSE: the ASTRAL BALL (only a catch puts a Moemon in one)
 bool8 MP_BallStyle_ItemCanDecorate(u16 item);
 void MP_Ball_SetCaught(struct Pokemon *mon, u16 item);
 u8 MP_SpecialBall_Multiplier(u16 item, u8 attacker, u8 target, u8 *catchRate);
@@ -1110,6 +1121,14 @@ bool8 MP_Follower_TryInteract(void);
 bool8 MP_Follower_Toggle(struct Pokemon *mon);
 void MP_Follower_OnWalkSteps(void);
 void MP_Gatcha_GrantFree(void);       // today's / this week's free pulls (stocked)
+// The phone app's MOEGATCHA (mp_gatcha.c, end): banners, stock, pulls with the reel's own prizes
+struct MpGatchaPrize { u8 rarity, kind; u16 id; bool8 shiny; u32 amount; u8 name[48]; char note[48]; };
+u8 MP_Gatcha_BannerCount(void);
+const char *MP_Gatcha_BannerName(u8 b);
+const char *MP_Gatcha_BannerTagline(u8 b);
+s32 MP_Gatcha_FreeStock(u8 b, bool8 ten);
+const char *MP_Gatcha_RarityName(u8 r);
+const char *MP_Gatcha_PhonePull(u8 banner, u8 how, struct MpGatchaPrize *out, u8 *count);
 s32 MP_Gatcha_Tickets(void);          // MOEGATCHA TICKETS: one pull on any banner
 void MP_Gatcha_OnRelay(u8 from, const u8 *data, u16 len);   // the weekly PICKUP vote
 void MP_Gatcha_VoteUpdate(void);
@@ -1359,6 +1378,7 @@ bool8 MP_IsStartMenuOpen(void);       // start_menu.c
 struct BoxPokemon;
 void MP_SetBoxMonOtIdKeepData(struct BoxPokemon *boxMon, u32 otId);   // pokemon.c
 bool8 MP_IsBoxMonBadEgg(struct BoxPokemon *boxMon);                   // pokemon.c
+bool8 MP_Astral_MakeShiny(struct BoxPokemon *boxMon);                 // pokemon.c: an ASTRAL BALL Moemon made shiny for its OT
 void MP_CompensateBadEggs(void);      // mp_badegg.c: after loading a save
 bool8 MP_IsScriptMenuOpen(void);      // script_menu.c
 bool8 MP_IsShopMenuOpen(void);        // shop.c

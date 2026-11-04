@@ -74,7 +74,8 @@ unsigned int SDL_GetTicks(void);
 
 bool8 MP_DebugQuickStartEnabled(void)
 {
-    return getenv("MOEMON_DEBUG_QUICKSTART") != NULL;
+    bool8 Maker_PlayNewGamePending(void);
+    return getenv("MOEMON_DEBUG_QUICKSTART") != NULL || Maker_PlayNewGamePending();   // Moemon Maker: F5's story points
 }
 
 // animall FIRST LAST ATK TGT [TURN]: every move animation from FIRST to LAST in a row, ATK attacking TGT (in a battle,
@@ -166,6 +167,11 @@ void MP_DebugQuickStartNewGame(void)
         gSaveBlock2Ptr->playerTrainerId[1] = tid >> 8;
         gSaveBlock2Ptr->playerTrainerId[2] = tid >> 16;
         gSaveBlock2Ptr->playerTrainerId[3] = tid >> 24;
+    }
+    {
+        bool8 Maker_PlayNewGame(void);
+        if (Maker_PlayNewGame())
+            return;   // Moemon Maker: F5's story point, set up by the editor (src/maker/maker_play.c)
     }
     FlagSet(FLAG_SYS_POKEMON_GET);
     FlagSet(FLAG_SYS_POKEDEX_GET);
@@ -602,6 +608,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
             MP_Shadow_Debug();
             printf("[test] shadows %s: %u (keep %u)\n", gMpConfig.noShadows ? "off" : "on", (unsigned)n, MP_ShadowKeep());
         }
+    }
+    else if (strcmp(cmd, "s3ddoor") == 0)   // s3ddoor KIND - SINNOH's door prop in front of the player: its animation KIND
+    {
+        s16 x, y;
+        PlayerGetDestCoords(&x, &y);
+        printf("[test] s3ddoor %d\n", S3D_DoorAnimate(x, y - 1, atoi(arg)));
     }
     else if (strcmp(cmd, "s3dtex") == 0)   // s3dtex - SINNOH's animated map textures: how many, the first's frame now
     {
@@ -1467,10 +1479,26 @@ void MP_TestCommand(const char *cmd, const char *arg)
         volatile int *p = NULL;
         *p = 1;
     }
+        else if (strcmp(cmd, "dumpvram") == 0)
+    {
+        // dumpvram FILE - the BG / OBJ video memory (binary, VRAM_SIZE bytes)
+        FILE *f = fopen(arg, "wb");
+        if (f)
+        {
+            fwrite((void *)VRAM, 1, VRAM_SIZE, f);
+            fclose(f);
+        }
+        printf("[test] vram dumped\n");
+    }
         else if (strcmp(cmd, "dumppltt") == 0)
     {
-        // dumppltt FILE - palette RAM, both palette buffers and the display registers (binary)
-        FILE *f = fopen(arg, "wb");
+        // dumppltt FILE - palette RAM, both palette buffers and the display registers (binary); a relative FILE
+        // goes in the test's picture folder (MOEMON_SHOTDIR)
+        char path[512];
+        const char *dir = getenv("MOEMON_SHOTDIR");
+        FILE *f;
+        snprintf(path, sizeof(path), "%s%s%s", arg[0] != '/' && dir ? dir : "", arg[0] != '/' && dir ? "/" : "", arg);
+        f = fopen(path, "wb");
         if (f)
         {
             fwrite((void *)PLTT, 1, PLTT_SIZE, f);
@@ -1479,8 +1507,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
             fwrite((void *)REG_BASE, 1, 0x60, f);
             fclose(f);
         }
-        printf("[test] pltt dumped: fade active %d y %d blend %04x sel %08x\n", gPaletteFade.active, gPaletteFade.y,
-               gPaletteFade.blendColor, gPaletteFade.multipurpose1);
+        printf("[test] pltt dumped: fade active %d y %d blend %04x sel %08x transfer off %d\n", gPaletteFade.active,
+               gPaletteFade.y, gPaletteFade.blendColor, gPaletteFade.multipurpose1, gPaletteFade.bufferTransferDisabled);
     }
         else if (strcmp(cmd, "pals") == 0)
     {
@@ -1686,6 +1714,10 @@ void MP_TestCommand(const char *cmd, const char *arg)
                 SetMonMoveSlot(&gPlayerParty[slot], m[i], i);
             printf("[test] moves: slot %d = %d %d %d %d\n", slot, m[0], m[1], m[2], m[3]);
         }
+        else if (n == 1 && slot >= 0 && slot < PARTY_SIZE)   // (no moves: the ones it knows)
+            printf("[test] knows: slot %d = %d %d %d %d\n", slot, (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE1),
+                   (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE2), (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE3),
+                   (int)GetMonData(&gPlayerParty[slot], MON_DATA_MOVE4));
     }
     else if (strcmp(cmd, "battlerhp") == 0)
     {
@@ -2011,6 +2043,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
         SetPlayerAvatarTransitionFlags(arg[0] && atoi(arg) == 0 ? PLAYER_AVATAR_FLAG_ON_FOOT
                                      : atoi(arg) == 2 ? PLAYER_AVATAR_FLAG_ACRO_BIKE : PLAYER_AVATAR_FLAG_MACH_BIKE);
     }
+    else if (strcmp(cmd, "metatileat") == 0)
+    {
+        // metatileat X,Y - the map's metatile id there (map coordinates)
+        int x = 0, y = 0;
+        sscanf(arg, "%d,%d", &x, &y);
+        printf("[test] metatile %d,%d = 0x%X\n", x, y, MapGridGetMetatileIdAt(x + MAP_OFFSET, y + MAP_OFFSET));
+    }
+    else if (strcmp(cmd, "riding") == 0)
+    {
+        // riding - the player's bike state (0 on foot, 1 MACH BIKE / BICYCLE, 2 ACRO BIKE)
+        printf("[test] riding %d\n", TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_MACH_BIKE) ? 1
+                                    : TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_ACRO_BIKE) ? 2 : 0);
+    }
     else if (strcmp(cmd, "mountbike") == 0)
     {
         // mountbike N - on (1 Mach, 2 Acro) or off (0) a bike the game's own way (GetOnOffBike: the bike song too)
@@ -2214,6 +2259,46 @@ void MP_TestCommand(const char *cmd, const char *arg)
         MP_Lobby_Disconnect();
         printf("[test] offline\n");
     }
+    else if (strcmp(cmd, "newday") == 0)
+    {
+        // newday - a new day for the daily events (daily flags, KURT's work...) without touching the clock
+        void DoTimeBasedEvents(void);
+        VarSet(VAR_DAYS, VarGet(VAR_DAYS) - 1);
+        DoTimeBasedEvents();
+        printf("[test] newday\n");
+    }
+    else if (strcmp(cmd, "weekday") == 0)
+    {
+        // weekday [D]: Crystal's weekday on the game clock (SUNDAY 0); D: the game clock moved to that weekday
+        u16 MP_JohtoWeekday(void);
+        int want = -1, now = MP_JohtoWeekday();
+        if (sscanf(arg, "%d", &want) == 1 && want >= 0 && want < 7)
+        {
+            gSaveBlock2Ptr->localTimeOffset.days -= (want - now + 7) % 7;   // (local time = clock - offset)
+            now = MP_JohtoWeekday();
+        }
+        printf("[test] weekday %d\n", now);
+    }
+    else if (strcmp(cmd, "hour") == 0)
+    {
+        // hour H: the game clock moved to that hour of the day (set it before weekday, which keeps the hour)
+        int want = -1;
+        RtcCalcLocalTime();
+        if (sscanf(arg, "%d", &want) == 1 && want >= 0 && want < 24)
+        {
+            int delta = want - gLocalTime.hours;
+            if (delta < 0)
+                delta += 24;
+            gSaveBlock2Ptr->localTimeOffset.hours -= delta;
+            while (gSaveBlock2Ptr->localTimeOffset.hours < 0)
+            {
+                gSaveBlock2Ptr->localTimeOffset.hours += 24;   // (local = clock - offset: a day less of offset)
+                gSaveBlock2Ptr->localTimeOffset.days--;
+            }
+            RtcCalcLocalTime();
+        }
+        printf("[test] hour %d\n", gLocalTime.hours);
+    }
     else if (strcmp(cmd, "clock") == 0)
     {
         // clock - the game clock (online: the host's PC clock)
@@ -2294,6 +2379,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sp[0] = MP_LandSlotSpecies(6);
         sp[1] = MP_LandSlotSpecies(7);
         printf("[test] land slots 6-7: %d %d\n", sp[0], sp[1]);
+        printf("[test] land slots 8-11: %d %d %d %d\n", MP_LandSlotSpecies(8), MP_LandSlotSpecies(9), MP_LandSlotSpecies(10),
+               MP_LandSlotSpecies(11));
     }
     else if (strcmp(cmd, "marshdaily") == 0)
     {
@@ -2334,6 +2421,9 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] where map %d.%d xy %d,%d\n", gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum,
                me->currentCoords.x - 7, me->currentCoords.y - 7);
     }
+    else if (strcmp(cmd, "layout") == 0)   // the layout the map shows (setmaplayoutindex can switch it)
+        printf("[test] layout %d (map's own %d)\n", gSaveBlock1Ptr->mapLayoutId,
+               Overworld_GetMapHeaderByGroupAndId(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum)->mapLayoutId);
     else if (strcmp(cmd, "friend") == 0)
     {
         // friend N: CO-OP > FRIENDS > player N (1-4)
@@ -3127,6 +3217,27 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] bflags %08x battlers %d coop %d wild %d triple %d inBattle %d\n", (unsigned)gBattleTypeFlags,
                gBattlersCount, gMpCoopBattle, gMpCoopWild, gIsTripleBattle, gMain.inBattle);
     }
+    else if (strcmp(cmd, "usecut") == 0)
+    {
+        // usecut - CUT as if chosen in the party menu (party slot 0): what it does here
+        bool8 SetUpFieldMove_Cut(void);
+        extern void (*gPostMenuFieldCallback)(void);
+        if (SetUpFieldMove_Cut() && gPostMenuFieldCallback != NULL)
+        {
+            gPostMenuFieldCallback();
+            printf("[test] usecut: used\n");
+        }
+        else
+            printf("[test] usecut: nothing\n");
+    }
+    else if (strcmp(cmd, "beattrainer") == 0)
+    {
+        // beattrainer ID - the trainer counts as beaten (its trainer flag set)
+        int id = atoi(arg);
+        if (id > 0 && id < 4096)   // (JOHTO / KANTO / SINNOH trainers too: TRAINER_FLAG maps them)
+            FlagSet(TRAINER_FLAG(id));
+        printf("[test] beattrainer %d\n", id);
+    }
     else if (strcmp(cmd, "trainerflag") == 0)
     {
         // trainerflag ID [ID...] - whether each trainer counts as beaten on this game
@@ -3134,7 +3245,7 @@ void MP_TestCommand(const char *cmd, const char *arg)
         while (tok != NULL)
         {
             int id = atoi(tok);
-            if (id > 0 && id < TRAINERS_COUNT)
+            if (id > 0 && id < 4096)
                 printf("[test] trainerflag %d = %d\n", id, FlagGet(TRAINER_FLAG(id)) ? 1 : 0);
             tok = strtok(NULL, " ");
         }
@@ -3207,6 +3318,22 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void Sinnoh_TvDebug(void);
         Sinnoh_TvDebug();
     }
+    else if (strcmp(cmd, "seagallop") == 0)
+    {
+        // seagallop FROM TO: the SEAGALLOP's trip as its script sails it (fadescreen, QzDoSeagallopFerryScene)
+        u16 QzDoSeagallopFerryScene(void);
+        unsigned from = 0, to = 1;
+        sscanf(arg, "%u %u", &from, &to);
+        gSpecialVar_0x8004 = from, gSpecialVar_0x8006 = to;
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, 0);   // (to black)
+        QzDoSeagallopFerryScene();
+    }
+    else if (strcmp(cmd, "tvscreens") == 0)
+    {
+        // tvscreens [off]: the map's TVs lit as when a show is on the air, or turned off (tv.c MP_Tv_DebugScreens)
+        void MP_Tv_DebugScreens(bool8 on);
+        MP_Tv_DebugScreens(strcmp(arg, "off") != 0);
+    }
     else if (strcmp(cmd, "tvprogram") == 0)
     {
         // tvprogram N: Platinum's program N (1-9) on air from now on, whatever the hour (0: the schedule's again)
@@ -3234,6 +3361,30 @@ void MP_TestCommand(const char *cmd, const char *arg)
         else if (arg && *arg)
             Sinnoh_RoamerHere(atoi(arg));
         Sinnoh_RoamerDebug();
+    }
+    else if (strcmp(cmd, "jroamers") == 0)
+    {
+        // jroamers [init | SLOT | meet]: JOHTO's beasts (mp_johto_roamer.c): set going / SLOT to this map / a wild
+        // encounter here until it's one of them, its battle
+        void MP_JohtoRoamer_Debug(void);
+        void MP_JohtoRoamer_Here(u8 slot);
+        void MP_JohtoRoamer_Init(void);
+        if (arg && strncmp(arg, "init", 4) == 0)
+            MP_JohtoRoamer_Init();
+        else if (arg && strncmp(arg, "meet", 4) == 0)
+        {
+            int tries;
+            for (tries = 0; tries < 256; tries++)
+                if (TryStartRoamerEncounter())
+                {
+                    BattleSetup_StartRoamerBattle();
+                    break;
+                }
+            printf("[test] roamer met: %d\n", tries < 256);
+        }
+        else if (arg && *arg)
+            MP_JohtoRoamer_Here(atoi(arg));
+        MP_JohtoRoamer_Debug();
     }
     else if (strcmp(cmd, "tram") == 0)
     {
@@ -3464,6 +3615,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_Pokegear_Debug(const char *arg);
         MP_Pokegear_Debug(arg);
     }
+    else if (strcmp(cmd, "qzphone") == 0)   // qzphone register|ready|fights|steps|call N [V] - JOHTO's phone (mp_qzphone.c)
+    {
+        void MP_QzPhone_Debug(const char *arg);
+        MP_QzPhone_Debug(arg);
+    }
     else if (strcmp(cmd, "apricorn") == 0)
     {
         // apricorn - JOHTO's fruit trees picked today, KURT's BALLS, the BERRY patches planted (mp_apricorn.c)
@@ -3480,6 +3636,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
             ScriptContext_SetupScript(EventScript_MpNameJohtoRival);
         MP_GameToAscii(buf, MP_JohtoRivalName(), sizeof(buf) - 1);
         printf("[test] rival name: %s\n", buf);
+    }
+    else if (strcmp(cmd, "regionstarted") == 0)
+    {
+        // regionstarted R: as if that region had been visited (its first visit's guide is over)
+        gRegionState.started |= 1 << atoi(arg);
     }
     else if (strcmp(cmd, "regionclear") == 0)
     {
@@ -3506,6 +3667,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
             else
                 printf(" 0");
         printf("  pc box1 slot1 %d\n", (int)GetBoxMonDataAt(0, 0, MON_DATA_SPECIES));
+    }
+    else if (strcmp(cmd, "monid") == 0)   // mp monid SLOT: what shows of a party Moemon's personality (ASTRAL BALL tests)
+    {
+        struct Pokemon *mon = &gPlayerParty[atoi(arg) % PARTY_SIZE];
+        u32 p = GetMonData(mon, MON_DATA_PERSONALITY);
+        printf("[test] mon %d: species %d personality %08x nature %d gender %d shiny %d style %04x bad %d\n", atoi(arg) % PARTY_SIZE,
+               (int)GetMonData(mon, MON_DATA_SPECIES), (unsigned)p, (int)GetNature(mon), (int)GetMonGender(mon),
+               (int)IsMonShiny(mon), (int)GetMonData(mon, MON_DATA_ENCRYPT_SEPARATOR), (int)GetMonData(mon, MON_DATA_SANITY_IS_BAD_EGG));
     }
     else if (strcmp(cmd, "badges") == 0)
     {
@@ -3538,6 +3707,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
         // the script's place as an offset from gStdScripts (nm the game for the label: tools/test/script_at.sh)
         if (ScriptContext_IsEnabled() && MP_ScriptCurrentPtr())
             printf("[test] ctx script at gStdScripts%+ld\n", (long)((const u8 *)MP_ScriptCurrentPtr() - (const u8 *)gStdScripts));
+        {
+            // (what a script waits on: the text printers going, the native wait)
+            extern void *MP_ScriptNativePtr(void);
+            extern bool16 IsTextPrinterActive(u8 id);
+            int w;
+            printf("[test] ctx printers:");
+            for (w = 0; w < 32; w++)
+                if (IsTextPrinterActive(w))
+                    printf(" %d", w);
+            printf(" native %p\n", MP_ScriptNativePtr());
+        }
     }
     else if (strcmp(cmd, "event") == 0)
     {
@@ -3718,6 +3898,23 @@ void MP_TestCommand(const char *cmd, const char *arg)
         int x = 0, y = 0;
         sscanf(arg, "%d %d", &x, &y);
         TryRunBoulderSwitchScript(x, y);
+    }
+    else if (strcmp(cmd, "npcs") == 0)
+    {
+        // npcs: the map's people as they are now: local id, look, place, hidden by the game, off-screen hidden
+        int i;
+        for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+        {
+            struct ObjectEvent *o = &gObjectEvents[i];
+            extern s16 gS3dSpriteFeet[MAX_SPRITES];
+            if (!o->active)
+                continue;
+            // (and where its sprite is drawn: OAM x, y and, on a SINNOH map, its feet's screen row)
+            printf("[test] npc local %d gfx %d xy %d,%d invisible %d offscreen %d oam %d,%d feet %d%s\n", o->localId,
+                   OBJ_GFX_ID(o), o->currentCoords.x - MAP_OFFSET, o->currentCoords.y - MAP_OFFSET, o->invisible,
+                   o->offScreen, gSprites[o->spriteId].oam.x, gSprites[o->spriteId].oam.y, gS3dSpriteFeet[o->spriteId],
+                   o->isPlayer ? " player" : "");
+        }
     }
     else if (strcmp(cmd, "objs") == 0)
     {

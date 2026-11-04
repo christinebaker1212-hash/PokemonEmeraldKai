@@ -164,53 +164,34 @@ Johto_Route32_EventScript_83EEBD5::
 
 @ Johto_Route32 object 17 (local id 17, gfx 0x3E85) at 27,78
 Johto_Route32_EventScript_83EEBE0::
+	@ Moemon Kai: Crystal's WEEKDAY sibling (pokecrystal Route32.asm FriedaScript; tools/quetzal_port/fix_siblings.py):
+	@ only on FRIDAY (FLAG_JOHTO_HIDE_FRIEDA), once met they give the gift
 	lock
 	faceplayer
-	goto_if_set FLAG_QZ_0x102D, Johto_Route32_EventScript_83EECA0
-	msgbox Johto_Route32_Text_83EF6AB, MSGBOX_DEFAULT
-	closemessage
-	multichoice 0x14, 0, MULTI_QZ_0x4A, 1
-	nop
-	copyvar VAR_0x8000, VAR_RESULT
-	goto_if_eq VAR_0x8000, 0, Johto_Route32_EventScript_83EEC92
-	goto_if_eq VAR_0x8000, 1, Johto_Route32_EventScript_83EEC92
-	goto_if_eq VAR_0x8000, 2, Johto_Route32_EventScript_83EEC92
-	goto_if_eq VAR_0x8000, 3, Johto_Route32_EventScript_83EEC92
-	goto_if_eq VAR_0x8000, 4, Johto_Route32_EventScript_83EEC92
-	goto_if_eq VAR_0x8000, 5, Johto_Route32_EventScript_83EEC65
-	goto_if_eq VAR_0x8000, 6, Johto_Route32_EventScript_83EEC92
-	goto_if_eq VAR_0x8000, 7, Johto_Route32_EventScript_83EEC9D
-	goto_if_eq VAR_0x8000, 127, Johto_Route32_EventScript_83EEC9D
-	closemessage
-	release
-	end
-
-Johto_Route32_EventScript_83EEC65::
-	msgbox Johto_Route32_Text_83EF728, MSGBOX_DEFAULT
+	goto_if_set FLAG_QZ_0x102D, Johto_Route32_EventScript_FriedaDay
+	specialvar VAR_RESULT, MP_JohtoWeekday
+	goto_if_ne VAR_RESULT, 5, Johto_Route32_EventScript_FriedaNotDay
+	goto_if_set FLAG_JOHTO_MET_FRIEDA, Johto_Route32_EventScript_FriedaMet
+	msgbox Johto_Route32_Text_FriedaMeet, MSGBOX_DEFAULT
+	setflag FLAG_JOHTO_MET_FRIEDA
+Johto_Route32_EventScript_FriedaMet::
+	msgbox Johto_Route32_Text_FriedaGivesGift, MSGBOX_DEFAULT
 	setorcopyvar VAR_0x8000, ITEM_POISON_BARB
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_OBTAIN_ITEM
 	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_83602AA
 	setflag FLAG_QZ_0x102D
-	msgbox Johto_Route32_Text_83EF746, MSGBOX_DEFAULT
-	closemessage
+	msgbox Johto_Route32_Text_FriedaGaveGift, MSGBOX_DEFAULT
 	release
 	end
 
-Johto_Route32_EventScript_83EEC92::
-	msgbox Johto_Route32_Text_83EF828, MSGBOX_DEFAULT
-	closemessage
+Johto_Route32_EventScript_FriedaDay::
+	msgbox Johto_Route32_Text_FriedaFriday, MSGBOX_DEFAULT
 	release
 	end
 
-Johto_Route32_EventScript_83EEC9D::
-	closemessage
-	release
-	end
-
-Johto_Route32_EventScript_83EECA0::
-	msgbox Johto_Route32_Text_83EF7C2, MSGBOX_DEFAULT
-	closemessage
+Johto_Route32_EventScript_FriedaNotDay::
+	msgbox Johto_Route32_Text_FriedaNotFriday, MSGBOX_DEFAULT
 	release
 	end
 
@@ -260,13 +241,9 @@ Johto_Route32_EventScript_83EECF2::
 	goto Johto_Route32_EventScript_83EED10
 
 Johto_Route32_EventScript_83EED10::
-	goto_if_unset FLAG_QZ_0x1082, Johto_Route32_EventScript_83EED76
-	goto_if_unset FLAG_QZ_0x1004, Johto_Route32_EventScript_83EED76
+	@ Moemon Kai: Crystal's guard wants only the ZEPHYRBADGE, then the EGG errand (docs/REGIONS_AUDIT.md 90)
 	goto_if_unset FLAG_QZ_0x11A8, Johto_Route32_EventScript_83EED93
-	goto_if_set FLAG_QZ_0x1080, Johto_Route32_EventScript_83EED4F
-	specialvar VAR_RESULT, QzIsNuzlockeActiveInRegion
-	goto_if_eq VAR_RESULT, 0, Johto_Route32_EventScript_83EEDB0
-	goto_if_eq VAR_QZ_0x5012, 0, Johto_Route32_EventScript_83EEDB0
+	goto_if_unset FLAG_QZ_0x1080, Johto_Route32_EventScript_83EEDB0
 
 Johto_Route32_EventScript_83EED4F::
 	msgbox Johto_Route32_Text_83EEF97, MSGBOX_DEFAULT
@@ -276,15 +253,6 @@ Johto_Route32_EventScript_83EED4F::
 	goto_if_eq VAR_0x8007, 0, Quetzal_EventScript_83602AA
 	closemessage
 	setvar VAR_QZ_0x5008, 5
-	release
-	end
-
-Johto_Route32_EventScript_83EED76::
-	msgbox Johto_Route32_Text_83EEE32, MSGBOX_DEFAULT
-	msgbox Johto_Route32_Text_83EEEC4, MSGBOX_DEFAULT
-	closemessage
-	applymovement LOCALID_PLAYER, Johto_Route32_Movement_83EEE25
-	waitmovement 0
 	release
 	end
 
@@ -308,14 +276,14 @@ Johto_Route32_EventScript_83EEDB0::
 
 @ Johto_Route32 object 5 (local id 5, gfx 0x3A9E) at 16,59
 Johto_Route32_EventScript_83EEDCD::
-	setorcopyvar VAR_0x8000, ITEM_POTION
+	setorcopyvar VAR_0x8000, ITEM_GREAT_BALL   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
 
 @ Johto_Route32 object 4 (local id 4, gfx 0x3A9E) at 10,30
 Johto_Route32_EventScript_83EEDDA::
-	setorcopyvar VAR_0x8000, ITEM_GREAT_BALL
+	setorcopyvar VAR_0x8000, ITEM_REPEL   @ Moemon Kai: Crystal\'s (fix_item_balls.py)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
@@ -398,12 +366,6 @@ Johto_Route32_Text_83EEE4D::
 	.string "was looking for you.\p"
 	.string "See for yourself. He’s waiting for\n"
 	.string "you at the MOéMON CENTER.$"
-
-Johto_Route32_Text_83EEEC4::
-	.string "Before going on, you must defeat\n"
-	.string "the elder, LI.\p"
-	.string "He awaits you at the top of\n"
-	.string "SPROUT TOWER.$"
 
 Johto_Route32_Text_83EEF1E::
 	.string "Have you gone to the MOéMON GYM?\n"
@@ -589,3 +551,29 @@ Johto_Route32_Text_83FEB33::
 	.string "you can catch in an area without\l"
 	.string "having to run around in tall\l"
 	.string "grass all day!$"
+
+Johto_Route32_Text_FriedaMeet::
+	.string "FRIEDA: Yahoo! It’s Friday!\p"
+	.string "I’m FRIEDA of Friday!\p"
+	.string "Nice to meet you!$"
+
+Johto_Route32_Text_FriedaGaveGift::
+	.string "FRIEDA: Give it to a MOéMON that\n"
+	.string "has poison-type moves.\p"
+	.string "Oh!\p"
+	.string "It’s wicked!\p"
+	.string "You’ll be shocked how good it\n"
+	.string "makes poison moves!$"
+
+Johto_Route32_Text_FriedaFriday::
+	.string "FRIEDA: Hiya! What day do you\n"
+	.string "like?\p"
+	.string "I love Friday. No doubt about it!\p"
+	.string "Don’t you think it’s great too?$"
+
+Johto_Route32_Text_FriedaNotFriday::
+	.string "FRIEDA: Isn’t it Friday today?\p"
+	.string "It’s so boring when it’s not!$"
+
+Johto_Route32_Text_FriedaGivesGift::
+	.string "Here’s a POISON BARB for you!$"

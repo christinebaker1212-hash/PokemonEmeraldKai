@@ -218,6 +218,22 @@
       "elevation": 0,
       "player_facing_dir": "BG_EVENT_PLAYER_FACING_ANY",
       "script": "Johto_GoldenrodUndergroundSwitchRoomEntrances_EventScript_83DA32C"
+    },
+    {
+      "type": "hidden_item",
+      "x": 9,
+      "y": 9,
+      "elevation": 0,
+      "item": "ITEM_MAX_POTION",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_14"
+    },
+    {
+      "type": "hidden_item",
+      "x": 2,
+      "y": 9,
+      "elevation": 0,
+      "item": "ITEM_REVIVE",
+      "flag": "FLAG_JOHTO_HIDDEN_ITEM_15"
     }
   ]
 }

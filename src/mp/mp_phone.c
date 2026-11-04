@@ -10,6 +10,7 @@
 #include <string.h>
 #include <time.h>
 #include "global.h"
+#include "data.h"
 #include "mp.h"
 #include "mp_region.h"
 #include "battle.h"
@@ -152,6 +153,8 @@ void MP_Phone_OnSaveLoaded(void)
     SpawnsLoad();
     PhoneWalk_Load();
     PhoneFriends_Load();
+    PhoneTrade_Load();
+    PhoneCards_Load();
 }
 
 const u8 *MP_Phone_SaveId(void)
@@ -354,16 +357,41 @@ void BufBoxMon(struct Buf *b, struct BoxPokemon *box)
     if (!GetBoxMonData(box, MON_DATA_IS_EGG) && species < NUM_SPECIES)
     {
         // (shiny, or its Stadium hue: the front picture's 16 colors as the game shows them, when not the species')
+        // (both art sets, OPTIONS > CREATURES: "pal" Kai's MOéMON, "ppal" the original POKéMON; the app shows either)
         u16 pal[16], own[16];
-        if (FirstColors(MP_BoxMonFrontPal(box), pal) && FirstColors(MP_SpeciesFrontPal(species), own)
-         && memcmp(pal, own, sizeof(pal)) != 0)
+        bool8 was = gSaveBlock2Ptr->optionsPokemonArt;
+        u8 set;
+        for (set = 0; set < 2; set++)
         {
-            BufAdd(b, ",\"pal\":\"");
-            for (i = 0; i < 16; i++)
-                BufAdd(b, "%04X", pal[i]);
-            BufAdd(b, "\"");
+            gSaveBlock2Ptr->optionsPokemonArt = set;
+            if (FirstColors(set ? GetMonSpritePalFromSpeciesAndPersonality(species, ot, pid) : MP_BoxMonFrontPal(box), pal)
+             && FirstColors(set ? gMonPaletteTable_Pokemon[species].data : MP_SpeciesFrontPal(species), own)
+             && memcmp(pal, own, sizeof(pal)) != 0)
+            {
+                BufAdd(b, set ? ",\"ppal\":\"" : ",\"pal\":\"");
+                for (i = 0; i < 16; i++)
+                    BufAdd(b, "%04X", pal[i]);
+                BufAdd(b, "\"");
+            }
         }
+        gSaveBlock2Ptr->optionsPokemonArt = was;
     }
+    {
+        // (its POKé BALL page: the ball style and the entrance / recall effect, when not the plain ones)
+        u16 style = MP_BallStyle_OfBoxMon(box);
+        struct MpBallFx fx;
+        u32 pack;
+        MP_BallFx_OfBoxMon(box, &fx);
+        pack = MP_BallFx_Pack(&fx);
+        if (style)
+            BufAdd(b, ",\"bst\":%u", style);
+        if (pack)
+            BufAdd(b, ",\"fx\":%u", (unsigned)pack);
+        if (fx.sound)
+            BufAdd(b, ",\"fxs\":%u", fx.sound);
+    }
+    if (MP_Phone_OnOffer(pid, ot))
+        BufAdd(b, ",\"off\":1");   // (ON OFFER for a trade by mail: mp_phone_trade.c)
     BufAdd(b, ",\"m\":[");
     for (i = 0; i < MAX_MON_MOVES; i++)
         BufAdd(b, "%s%u", i ? "," : "", (unsigned)GetBoxMonData(box, MON_DATA_MOVE1 + i));
@@ -500,6 +528,14 @@ u32 Rev(void)
         v = GetSetPokedexFlag(i, FLAG_GET_SEEN) | (GetSetPokedexFlag(i, FLAG_GET_CAUGHT) << 1);
         h = Fnv(h, &v, 1);
     }
+    v = PhoneTrade_Hash();   // (trades by mail move along on their own: the app sees each step)
+    h = Fnv(h, &v, 4);
+    v = PhoneCards_Hash();   // (the card collection, decks, packs, today's prizes)
+    h = Fnv(h, &v, 4);
+    v = PhoneBall_Hash();    // (ball pieces earned, MY PRESETs)
+    h = Fnv(h, &v, 4);
+    v = PhoneKai_Hash();     // (achievements, MOEGATCHA pulls, candies)
+    h = Fnv(h, &v, 4);
     return h;
 }
 
@@ -543,6 +579,7 @@ static void BufSnapshot(struct Buf *b)
     for (i = 0; i < ARRAY_COUNT(gSaveBlock1Ptr->giftRibbons); i++)
         BufAdd(b, "%s%u", i ? "," : "", gSaveBlock1Ptr->giftRibbons[i]);
     BufAdd(b, "]");
+    BufAdd(b, ",\"art\":%u", gSaveBlock2Ptr->optionsPokemonArt);   // (OPTIONS > CREATURES: 1 the original POKéMON)
     BufAdd(b, ",\"tid\":%u,\"gender\":%u,\"region\":%u,\"gen\":%u,\"badges\":%u,\"money\":%u,\"coins\":%u,\"game\":\"%s\"},",
            (unsigned)(gSaveBlock2Ptr->playerTrainerId[0] | (gSaveBlock2Ptr->playerTrainerId[1] << 8)),
            gSaveBlock2Ptr->playerGender, MP_Region_Current(), MP_Generation(), MP_Region_TotalBadges(),
@@ -573,6 +610,10 @@ static void BufSnapshot(struct Buf *b)
     BufBag(b);
     PhoneWalk_Snapshot(b, sSnapPhone);
     PhoneFriends_Snapshot(b);
+    PhoneTrade_Snapshot(b);
+    PhoneCards_Snapshot(b);
+    PhoneBall_Snapshot(b);
+    PhoneKai_Snapshot(b);
     // The POKeDEX: a bit per national number (1 first), as hex: seen, then caught
     {
         static const char *const sWhat[] = {"seen", "caught"};
@@ -1317,6 +1358,14 @@ static const char *Apply(const char *json)
         return DoItem(json, FALSE);
     if (strcmp(op, "use") == 0)
         return DoUse(json);
+    {
+        const char *why = PhoneBall_Apply(op, json);
+        if (why != (const char *)-1)
+            return why;
+        why = PhoneKai_Apply(op, json);
+        if (why != (const char *)-1)
+            return why;
+    }
     return PhoneWalk_Apply(op, json);
 }
 
@@ -1474,7 +1523,7 @@ static void OnSealed(int c, const char *json)
     char t[16];
     if (!JsonStr(json, "t", t, sizeof(t)))
         return;
-    if (PhoneDev_OnSealed(c, t, json) || PhoneWalk_OnSealed(c, t, json))
+    if (PhoneDev_OnSealed(c, t, json) || PhoneWalk_OnSealed(c, t, json) || PhoneKai_OnSealed(c, t, json))
         return;
     if (strcmp(t, "snap") == 0)
         SendSnapshot(c);
@@ -1742,6 +1791,7 @@ void MP_Phone_Update(void)
     size_t len;
     char udp[96], idHex[2 * PHONE_SAVEID_SIZE + 1];
     PhoneFriends_Update();   // (presence and the pipes: whenever the game is on a co-op server)
+    PhoneTrade_Update();     // (trades by mail: deposits, pickups, the trade scene)
     if (!sStarted)
     {
         if (!sHaveFile || !Wanted())

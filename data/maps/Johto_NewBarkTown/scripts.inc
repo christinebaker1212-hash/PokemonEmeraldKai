@@ -12,6 +12,11 @@ Johto_NewBarkTown_OnFrame_83E138A:
 
 Johto_NewBarkTown_EventScript_83E139C::
 	lock
+	@ Moemon Kai: ELM rings the POKéGEAR, in Crystal's words (docs/REGIONS_AUDIT.md 94 / 148)
+	playse SE_POKENAV_CALL
+	waitse
+	playse SE_POKENAV_CALL
+	waitse
 	msgbox Johto_NewBarkTown_Text_83E1879, MSGBOX_DEFAULT
 	setvar VAR_QZ_0x5003, 7
 	setvar VAR_QZ_0x5004, 0xA
@@ -33,7 +38,6 @@ Johto_NewBarkTown_EventScript_83E13CE::
 	end
 
 Johto_NewBarkTown_EventScript_83E13F5::
-	call Johto_NewBarkTown_EventScript_8403935
 	end
 
 Johto_NewBarkTown_EventScript_83E13FB::
@@ -46,7 +50,6 @@ Johto_NewBarkTown_EventScript_83E1410::
 
 Johto_NewBarkTown_EventScript_83E1411::
 	call Johto_NewBarkTown_EventScript_83E13FB
-	call Johto_NewBarkTown_EventScript_8403935
 	goto Quetzal_EventScript_83C2D44
 
 Johto_NewBarkTown_EventScript_83E1420::
@@ -55,26 +58,8 @@ Johto_NewBarkTown_EventScript_83E1420::
 
 Johto_NewBarkTown_EventScript_83E1426::
 	goto_if_set FLAG_QZ_0x11D0, Johto_NewBarkTown_EventScript_83E1482
-	setberrytree 0x5A, 1, 1
-	setberrytree 0x5B, 1, 1
-	setberrytree 0x5C, 2, 1
-	setberrytree 0x5D, 2, 1
-	setberrytree 0x5E, 3, 1
-	setberrytree 0x5F, 3, 1
-	setberrytree 0x60, 4, 1
-	setberrytree 0x61, 4, 1
-	setberrytree 0x62, 5, 1
-	setberrytree 0x63, 5, 1
-	setberrytree 0x64, 6, 1
-	setberrytree 0x65, 6, 1
-	setberrytree 0x66, 7, 1
-	setberrytree 0x67, 7, 1
-	setberrytree 0x68, 8, 1
-	setberrytree 0x69, 8, 1
-	setberrytree 0x6A, 9, 1
-	setberrytree 0x6B, 7, 1
-	setberrytree 0x6C, 0xA, 1
-	setberrytree 0x6D, 0xA, 1
+	@ Moemon Kai: Quetzal planted BERRIES here into tree ids 90-109 (JOHTO\'s own patches, mp_apricorn.c, and the
+	@ GARDEN farm\'s plots): they\'re Kai\'s and planted by their own code
 	setflag FLAG_QZ_0x11D0
 
 Johto_NewBarkTown_EventScript_83E1482::
@@ -107,6 +92,9 @@ Johto_NewBarkTown_EventScript_83E14A9::
 	goto_if_eq VAR_QZ_0x5003, 2, Johto_NewBarkTown_EventScript_83E14D7
 	goto_if_eq VAR_QZ_0x5003, 3, Johto_NewBarkTown_EventScript_83E14F3
 	goto_if_eq VAR_QZ_0x5003, 4, Johto_NewBarkTown_EventScript_83E14FE
+	@ Moemon Kai: Crystal's teacher (docs/REGIONS_AUDIT.md 134): her POKéGEAR line before the starter, "call your mom"
+	@ after the EGG errand
+	goto_if_ge VAR_QZ_0x5003, 5, Johto_NewBarkTown_EventScript_TeacherCallMom
 	msgbox Johto_NewBarkTown_Text_83E1793, MSGBOX_DEFAULT
 	closemessage
 	release
@@ -138,6 +126,16 @@ Johto_NewBarkTown_EventScript_83E14FE::
 	msgbox Johto_NewBarkTown_Text_83E174F, MSGBOX_DEFAULT
 	closemessage
 	release
+	end
+
+Johto_NewBarkTown_EventScript_TeacherCallMom::
+	msgbox Johto_NewBarkTown_Text_TeacherCallMom, MSGBOX_DEFAULT
+	release
+	end
+
+@ Moemon Kai: Crystal's FISHER (NewBarkTownFisherScript)
+Johto_NewBarkTown_EventScript_Fisher::
+	msgbox Johto_NewBarkTown_Text_Fisher, MSGBOX_NPC
 	end
 
 @ Johto_NewBarkTown trigger at 0,12 (VAR_QZ_0x5003 == 2)
@@ -291,7 +289,7 @@ Johto_NewBarkTown_EventScript_84039BE::
 	special QzObjectFaceObject
 	msgbox Johto_NewBarkTown_Text_8403CE8, MSGBOX_DEFAULT
 	setvar VAR_QZ_0x5076, 7
-	cleartrainerflag 0x137C
+	cleartrainerflag TRAINER_QZ_4988
 	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4988, 0, Johto_NewBarkTown_Text_8403DB2
 	fadedefaultbgm
 	specialvar VAR_RESULT, GetBattleOutcome
@@ -361,6 +359,7 @@ Johto_NewBarkTown_Text_83E1683::
 
 Johto_NewBarkTown_Text_83E16A9::
 	.string "Wait, {PLAYER}!\p"
+	.string "What do you think you’re doing?\p"
 	.string "It’s dangerous to go out\n"
 	.string "without a MOéMON!\p"
 	.string "Wild MOéMON jump out of the grass\n"
@@ -376,8 +375,8 @@ Johto_NewBarkTown_Text_83E174F::
 	.string "you are leaving.$"
 
 Johto_NewBarkTown_Text_83E1793::
-	.string "Don’t forget to visit your mom\n"
-	.string "from time to time.$"
+	.string "Wow, your POKéGEAR is impressive!\p"
+	.string "Did your mom get it for you?$"
 
 Johto_NewBarkTown_Text_83E17C5::
 	.string ". . .\p"
@@ -399,9 +398,10 @@ Johto_NewBarkTown_Text_83E1868::
 	.string "PROF.ELM’S HOUSE$"
 
 Johto_NewBarkTown_Text_83E1879::
-	.string "A message from PROF. ELM arrived:\p"
-	.string "I have something for you.\n"
-	.string "Please come to my LAB when you can.$"
+	.string "Hello, {PLAYER}? How’s it going?\p"
+	.string "I got ahold of something neat.\p"
+	.string "Swing by my LAB and pick it up!\p"
+	.string "See you later!$"
 
 Johto_NewBarkTown_Text_83E18D9::
 	.string "Wait! That crossing leads to the\n"
@@ -457,3 +457,12 @@ Johto_NewBarkTown_Text_8404041::
 Johto_NewBarkTown_Text_8404090::
 	.string "{RIVAL}: CELEBI, take me there first.\n"
 	.string "I will wait upstairs, by GIOVANNI.$"
+
+Johto_NewBarkTown_Text_TeacherCallMom::
+	.string "Call your mom on your POKéGEAR to\n"
+	.string "let her know how you’re doing.$"
+
+Johto_NewBarkTown_Text_Fisher::
+	.string "Yo, {PLAYER}!\p"
+	.string "I hear PROF.ELM discovered some\n"
+	.string "new MOéMON.$"

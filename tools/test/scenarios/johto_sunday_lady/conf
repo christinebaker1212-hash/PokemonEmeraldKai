@@ -1,0 +1,8 @@
+# GOLDENROD DEPT. STORE 5F's Sunday receptionist (docs/REGIONS_AUDIT.md 143, Crystal's): out on Sundays only
+# (FLAG_JOHTO_HIDE_DEPT_LADY 0x153C clear), a lead that loves you gets TM27 RETURN (item 315), once that day
+# (FLAG_DAILY_JOHTO_DEPT_TM 0x927); on Monday she's gone
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("flag 5436 = 0" "item 315: 1" "flag 2343 = 1" "flag 5436 = 1" "ctx 1 free 1 overworld 1 locked 0 script 0")
+UNEXPECT_A=("item 315: 2" "[crash]" "TIMEOUT")

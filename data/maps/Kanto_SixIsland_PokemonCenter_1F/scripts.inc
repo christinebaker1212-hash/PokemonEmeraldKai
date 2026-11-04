@@ -96,7 +96,7 @@ Kanto_SixIsland_PokemonCenter_1F_Text_845441F::
 	.string "traded while holding specific items.$"
 
 Kanto_SixIsland_PokemonCenter_1F_Text_84544C8::
-	.string "BLUE: Hey, {PLAYER}!\n"
+	.string "{RIVAL}: Hey, {PLAYER}!\n"
 	.string "How’s your MOéDEX filling up?\p"
 	.string "It looks like it’s impossible to get\n"
 	.string "all the MOéMON by hanging around\l"

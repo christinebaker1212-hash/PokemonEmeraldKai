@@ -1934,6 +1934,7 @@ void PlayerObjectTurn(struct PlayerAvatar *playerAvatar, u8 direction)
     ObjectEventTurn(&gObjectEvents[playerAvatar->objectEventId], direction);
 }
 
+bool8 MP_JohtoBerries_IsPatch(u8 tree);   // (mp_apricorn.c)
 static void SetBerryTreeGraphics(struct ObjectEvent *objectEvent, struct Sprite *sprite)
 {
     u8 berryStage;
@@ -1942,6 +1943,8 @@ static void SetBerryTreeGraphics(struct ObjectEvent *objectEvent, struct Sprite 
     objectEvent->invisible = TRUE;
     sprite->invisible = TRUE;
     berryStage = GetStageByBerryTreeId(objectEvent->trainerRange_berryTreeId);
+    if (berryStage != BERRY_STAGE_NO_BERRY && MP_JohtoBerries_IsPatch(objectEvent->trainerRange_berryTreeId))
+        berryStage = BERRY_STAGE_NO_BERRY;   // (Moemon Kai: JOHTO's BERRY patches are the map's fruit tree, never a sprite: mp_apricorn.c)
     if (berryStage != BERRY_STAGE_NO_BERRY)
     {
         objectEvent->invisible = FALSE;
@@ -1971,6 +1974,8 @@ const struct ObjectEventGraphicsInfo *QzObjectEventGraphicsInfo(u16 graphicsId)
 
 #include "constants/sinnoh_gfx.h"
 static u8 SinnohLoadObjectPalette(u16 tag);
+static u8 MonObjectLoadPalette(u16 tag);
+#define MON_OBJ_PAL_TAG 0xC000   // + a POKéMON map object's national POKéDEX number (MonObjectInfo)
 #define SINNOH_PAL_TAG 0xB800         // Moemon Kai: + a Platinum sprite's number (SinnohPackInfo)
 #define SINNOH_PAL_TAG_SMALL 0xB900   // ... its smaller copy's (MIXED)
 #define SINNOH_PAL_TAG_CHAR 0xBA00    // ... a character look standing in for it (SinnohGen3Info)
@@ -1984,6 +1989,8 @@ u8 QzLoadObjectPalette(u16 tag)
         return slot;
     if (tag >= SINNOH_PAL_TAG && (tag & 0xFF) < SINNOH_SPRITE_COUNT && tag < SINNOH_PAL_TAG_CHAR + 0x100)
         return SinnohLoadObjectPalette(tag);   // (Platinum's: from the pack)
+    if (tag >= MON_OBJ_PAL_TAG && tag < MON_OBJ_PAL_TAG + OBJ_EVENT_GFX_MON_COUNT)
+        return MonObjectLoadPalette(tag);   // (a POKéMON on the map: its follower palette)
     for (i = 0; sKaiObjectEventPalettes[i].tag != TAG_NONE; i++)   // (the game's own: kai_objects.h)
         if (sKaiObjectEventPalettes[i].tag == tag)
         {
@@ -2069,6 +2076,73 @@ static const struct ObjectEventGraphicsInfo *SinnohGen3Info(u16 i, u16 gfx)
     return &sChar[i];
 }
 
+// Moemon Kai: a POKéMON standing on the map (OBJ_EVENT_GFX_MON_FIRST + its national POKéDEX number): its follower
+// sprite (mp_follower.c MP_Follower_MonGfx) in the game's nine-frame walking order, its palette by tag MON_OBJ_PAL_TAG
+// + the number (QzLoadObjectPalette); the game's own stand-in without one
+#define MON_OBJ_CACHE 16
+bool8 MP_Follower_MonGfx(u16 dex, const u8 **frames, u8 *size, const u16 **pal);
+static const struct ObjectEventGraphicsInfo *MonObjectInfo(u16 dex)
+{
+    static struct ObjectEventGraphicsInfo sInfo[MON_OBJ_CACHE];
+    static struct SpriteFrameImage sImages[MON_OBJ_CACHE][9];
+    static u16 sDex[MON_OBJ_CACHE];
+    static u8 sNext;
+    static const u8 sOrder[9] = {0, 2, 4, 1, 1, 3, 3, 5, 5};   // face down / up / left, then the walking steps
+    const u8 *frames;
+    const u16 *pal;
+    u8 size, f;
+    u32 i, bytes;
+    struct ObjectEventGraphicsInfo *info;
+    if (!MP_Follower_MonGfx(dex, &frames, &size, &pal))
+        return gObjectEventGraphicsInfoPointers[OBJ_EVENT_GFX_ITEM_BALL];
+    for (i = 0; i < MON_OBJ_CACHE; i++)
+        if (sDex[i] == dex)
+            return &sInfo[i];
+    i = sNext;
+    sNext = (sNext + 1) % MON_OBJ_CACHE;
+    sDex[i] = dex;
+    info = &sInfo[i];
+    bytes = (u32)size * size / 2;
+    for (f = 0; f < 9; f++)
+    {
+        sImages[i][f].data = frames + sOrder[f] * bytes;
+        sImages[i][f].size = bytes;
+    }
+    info->tileTag = TAG_NONE;
+    info->paletteTag = MON_OBJ_PAL_TAG + dex;
+    info->reflectionPaletteTag = OBJ_EVENT_PAL_TAG_NONE;
+    info->size = bytes;
+    info->width = size;
+    info->height = size;
+    info->paletteSlot = PALSLOT_QZ;
+    info->shadowSize = size == 64 ? SHADOW_SIZE_L : SHADOW_SIZE_M;
+    info->inanimate = FALSE;
+    info->disableReflectionPaletteLoad = TRUE;
+    info->tracks = TRACKS_NONE;
+    info->oam = size == 64 ? &gObjectEventBaseOam_64x64 : &gObjectEventBaseOam_32x32;
+    info->subspriteTables = size == 64 ? sOamTables_64x64 : sOamTables_32x32;
+    info->anims = sAnimTable_Standard;
+    info->images = sImages[i];
+    info->affineAnims = gDummySpriteAffineAnimTable;
+    return info;
+}
+
+static u8 MonObjectLoadPalette(u16 tag)
+{
+    const u8 *frames;
+    const u16 *pal;
+    u8 size, slot;
+    struct SpritePalette sp;
+    if (!MP_Follower_MonGfx(tag - MON_OBJ_PAL_TAG, &frames, &size, &pal))
+        return 0;
+    sp.data = pal;
+    sp.tag = tag;
+    slot = LoadSpritePalette(&sp);
+    if (slot != 0xFF)
+        UpdateSpritePaletteWithWeather(slot);
+    return slot == 0xFF ? 0 : slot;
+}
+
 // OPTIONS > DISPLAY > SPRITE SCALING > SINNOH PEOPLE: GEN 4 Platinum's; MIXED a true Gen 3 equivalent, else Platinum's smaller; GEN 3
 // the Gen 3 equivalent, else the closest Gen 3 sprite (the stand-in, also shown without the pack)
 static const struct ObjectEventGraphicsInfo *SinnohGraphicsInfo(u16 i)
@@ -2114,6 +2188,9 @@ const struct ObjectEventGraphicsInfo *GetObjectEventGraphicsInfo(u16 graphicsId)
 
     if (graphicsId >= OBJ_EVENT_GFX_SINNOH_FIRST && graphicsId < OBJ_EVENT_GFX_SINNOH_FIRST + SINNOH_SPRITE_COUNT)
         return SinnohGraphicsInfo(graphicsId - OBJ_EVENT_GFX_SINNOH_FIRST);   // Moemon Kai: Platinum's
+
+    if (graphicsId >= OBJ_EVENT_GFX_MON_FIRST && graphicsId < OBJ_EVENT_GFX_MON_FIRST + OBJ_EVENT_GFX_MON_COUNT)
+        return MonObjectInfo(graphicsId - OBJ_EVENT_GFX_MON_FIRST);   // Moemon Kai: a POKéMON on the map
 
     if (graphicsId >= OBJ_EVENT_GFX_QZ_FIRST)   // Moemon Kai: Johto / Kanto sprites (16-bit ids)
         return QzObjectEventGraphicsInfo(graphicsId);
@@ -2286,6 +2363,37 @@ void MP_SetObjectEventPaletteData(u16 tag, const u16 *data)
     u8 i = FindObjectEventPaletteIndexByTag(tag);
     if (i != 0xFF)
         sObjectEventSpritePalettes[i].data = data;
+}
+
+// Moemon Maker: a look's palette, found as the field finds it for that person (the same tags as
+// TrySpawnObjectEventTemplate and QzLoadObjectPalette) but only read: nothing is loaded, so the editor can draw people
+// while the game plays (src/maker/maker_objects.c)
+const u16 *ObjectEvent_MakerPalette(u16 graphicsId)
+{
+    const struct ObjectEventGraphicsInfo *info = GetObjectEventGraphicsInfo(graphicsId);
+    u16 tag = info->paletteTag;
+    u8 i;
+    if (info->paletteSlot == PALSLOT_QZ)
+    {
+        if (tag >= SINNOH_PAL_TAG && (tag & 0xFF) < SINNOH_SPRITE_COUNT && tag < SINNOH_PAL_TAG_CHAR + 0x100)
+        {
+            u8 kind;
+            const u16 *pal = NULL;
+            const u8 *tiles;
+            if (tag >= SINNOH_PAL_TAG_CHAR)
+                return MP_Avatar_NpcPalette(sSinnohGen3[tag - SINNOH_PAL_TAG_CHAR]);
+            return S3D_Gfx_Sprite(tag & 0xFF, tag >= SINNOH_PAL_TAG_SMALL, &kind, &pal, &tiles) ? pal : NULL;
+        }
+        for (i = 0; sKaiObjectEventPalettes[i].tag != TAG_NONE; i++)
+            if (sKaiObjectEventPalettes[i].tag == tag)
+                return sKaiObjectEventPalettes[i].data;
+        for (i = 0; sQzObjectEventPalettes[i].tag != TAG_NONE; i++)
+            if (sQzObjectEventPalettes[i].tag == tag)
+                return sQzObjectEventPalettes[i].data;
+        return NULL;
+    }
+    i = FindObjectEventPaletteIndexByTag(tag);
+    return i == 0xFF ? NULL : sObjectEventSpritePalettes[i].data;
 }
 
 static u8 FindObjectEventPaletteIndexByTag(u16 tag)
@@ -3340,6 +3448,11 @@ bool8 MovementType_BerryTreeGrowth_Normal(struct ObjectEvent *objectEvent, struc
     objectEvent->invisible = TRUE;
     sprite->invisible = TRUE;
     berryStage = GetStageByBerryTreeId(objectEvent->trainerRange_berryTreeId);
+    if (berryStage != BERRY_STAGE_NO_BERRY && MP_JohtoBerries_IsPatch(objectEvent->trainerRange_berryTreeId))
+    {
+        sprite->animNum = BERRY_STAGE_NO_BERRY;   // (Moemon Kai: JOHTO's BERRY patches are the map's fruit tree, never a sprite: mp_apricorn.c)
+        return FALSE;
+    }
     if (berryStage == BERRY_STAGE_NO_BERRY)
     {
         if (!(sprite->sBerryTreeFlags & BERRY_FLAG_JUST_PICKED) && sprite->animNum == BERRY_STAGE_FLOWERING)
@@ -7654,6 +7767,10 @@ static void UpdateObjectEventSpriteAnimPause(struct ObjectEvent *objectEvent, st
 {
     if (objectEvent->disableAnim)
         sprite->animPaused = TRUE;
+    // Moemon Kai: the TOWER pillar sways the whole time, as Crystal's tile animation (a standing object's facing
+    // anim is paused, which would hold it on one frame)
+    if (sprite->anims == sAnimTable_QzTowerPillar)
+        sprite->animPaused = FALSE;
 }
 
 static void TryEnableObjectEventAnim(struct ObjectEvent *objectEvent, struct Sprite *sprite)

@@ -196,7 +196,7 @@ Kanto_VictoryRoad_2F_Text_8424FD1::
 	.string "You got me!$"
 
 Kanto_VictoryRoad_2F_Text_8424FDD::
-	.string "BLUE also came through here.$"
+	.string "{RIVAL} also came through here.$"
 
 Kanto_VictoryRoad_2F_Text_8424FFA::
 	.string "Come on!\n"

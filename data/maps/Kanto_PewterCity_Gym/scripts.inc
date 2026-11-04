@@ -203,10 +203,10 @@ Kanto_PewterCity_Gym_Text_8441770::
 	.string "PEWTER MOéMON GYM\n"
 	.string "LEADER: BROCK\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE$"
+	.string "{RIVAL}$"
 
 Kanto_PewterCity_Gym_Text_84417A8::
 	.string "PEWTER MOéMON GYM\n"
 	.string "LEADER: BROCK\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE, {PLAYER}$"
+	.string "{RIVAL}, {PLAYER}$"

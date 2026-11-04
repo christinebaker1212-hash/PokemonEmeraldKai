@@ -42,9 +42,14 @@ int gMpBgPictureBg = -1;
 // ... and hides a sprite's pixel where the 3D map is in front of it (NULL off its maps)
 bool (*gMpS3dOamHidden)(int oamIndex, int x, int line);
 
+// Moemon Co-op: which sprite palette (+1; 0: a background) each pixel of the last frame shows: the battle weather
+// keeps out of the health boxes and falls behind some of the Pokémon (mp_battleweather.c)
+uint8_t gMpPixelObjPal[DISPLAY_HEIGHT * DISPLAY_WIDTH];
+
 struct scanlineData {
     uint16_t layers[4][DISPLAY_WIDTH];
     uint16_t spriteLayers[4][DISPLAY_WIDTH];
+    uint8_t spritePal[4][DISPLAY_WIDTH];   // Moemon Co-op: the palette (+1) of each sprite layer's pixel (gMpPixelObjPal)
     uint16_t bgcnts[4];
     uint16_t winMask[DISPLAY_WIDTH];
     //priority bookkeeping
@@ -621,6 +626,8 @@ static void PutObjPixel(struct scanlineData *scanline, uint16_t *pixels, struct 
         }
         //write pixel to pixel framebuffer
         pixels[global_x] = color | (1 << 15);
+        if (pixels == scanline->spriteLayers[oam->priority])
+            scanline->spritePal[oam->priority][global_x] = (oam->paletteNum & 63) + 1;
         // Moemon Co-op: BATTLE ANIMS > MODERN marks the effect sprites' pixels (mp_modernanim.c)
         if (gMpFxLayer != NULL)
             gMpFxLayer[vcount * DISPLAY_WIDTH + global_x] = sFxSprite ? (color | 0x8000) : 0;
@@ -1059,6 +1066,7 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
     memset(scanline.layers, 0, sizeof(scanline.layers));
     memset(scanline.winMask, 0, sizeof(scanline.winMask));
     memset(scanline.spriteLayers, 0, sizeof(scanline.spriteLayers));
+    memset(scanline.spritePal, 0, sizeof(scanline.spritePal));
     memset(scanline.prioritySortedBgsCount, 0, sizeof(scanline.prioritySortedBgsCount));
 
     for (bgnum = 0; bgnum < numOfBgs; bgnum++)
@@ -1202,6 +1210,7 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
     if (REG_DISPCNT & DISPCNT_OBJ_ON)
         DrawSprites(&scanline, vcount, windowsEnabled);
 
+    memset(&gMpPixelObjPal[vcount * DISPLAY_WIDTH], 0, DISPLAY_WIDTH);
     //iterate trough every priority in order
     for (prnum = 3; prnum >= 0; prnum--)
     {
@@ -1256,6 +1265,7 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
                     }
                     //write the pixel to scanline buffer output
                     pixels[xpos] = color;
+                    gMpPixelObjPal[vcount * DISPLAY_WIDTH + xpos] = 0;
                 }
             }
         }
@@ -1270,6 +1280,7 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
                         continue;
                 //draw the pixel
                 pixels[xpos] = src[xpos];
+                gMpPixelObjPal[vcount * DISPLAY_WIDTH + xpos] = scanline.spritePal[prnum][xpos];
             }
         }
     }

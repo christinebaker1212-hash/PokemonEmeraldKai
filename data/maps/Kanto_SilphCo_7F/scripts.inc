@@ -84,7 +84,6 @@ Kanto_SilphCo_7F_EventScript_8411802::
 	lock
 	faceplayer
 	goto_if_set FLAG_QZ_0x2155, Kanto_SilphCo_7F_EventScript_84118CC
-	call Quetzal_EventScript_8361A4D
 	msgbox Kanto_SilphCo_7F_Text_8426947, MSGBOX_DEFAULT
 	setvar VAR_TEMP_1, 0x83
 	givemon SPECIES_LAPRAS, 0x19, ITEM_NONE
@@ -401,10 +400,10 @@ Kanto_SilphCo_7F_Text_8426DC6::
 	.string "ticked off!$"
 
 Kanto_SilphCo_7F_Text_8426DF1::
-	.string "BLUE: What kept you, {PLAYER}?$"
+	.string "{RIVAL}: What kept you, {PLAYER}?$"
 
 Kanto_SilphCo_7F_Text_8426E0A::
-	.string "BLUE: Hahaha! I thought you’d\n"
+	.string "{RIVAL}: Hahaha! I thought you’d\n"
 	.string "turn up if I waited here!\p"
 	.string "I guess TEAM ROCKET slowed you\n"
 	.string "down! Not that I care!\p"

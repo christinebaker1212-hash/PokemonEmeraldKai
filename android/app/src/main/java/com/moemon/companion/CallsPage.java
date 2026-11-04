@@ -165,6 +165,7 @@ public final class CallsPage extends Page {
         open = e;
         checking = false;
         calledAt = System.currentTimeMillis();
+        v.sound.play("se_pokenav_call");   // (the MATCH CALL's ring)
         try {
             v.app.client.send(new JSONObject().put("t", "call").put("k", e.optInt("k")).put("i", e.optInt("i")));
         } catch (org.json.JSONException ignored) {

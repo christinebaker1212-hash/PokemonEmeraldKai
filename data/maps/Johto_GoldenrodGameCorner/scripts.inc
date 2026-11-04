@@ -176,10 +176,62 @@ Johto_GoldenrodGameCorner_EventScript_83D5162::
 
 @ Johto_GoldenrodGameCorner object 2 (local id 2, gfx 0x3E82) at 16,2
 Johto_GoldenrodGameCorner_EventScript_83D5181::
+	@ Moemon Kai: Crystal's TM prize counter (pokecrystal maps/GoldenrodGameCorner.asm TMVendorScript, docs/REGIONS_AUDIT.md
+	@ 142): TM25 THUNDER, TM14 BLIZZARD, TM38 FIRE BLAST for 5500 coins each
 	lock
 	faceplayer
-	msgbox Johto_GoldenrodGameCorner_Text_83D5449, MSGBOX_DEFAULT
-	closemessage
+	msgbox Johto_GoldenrodGameCorner_Text_TMVendorIntro, MSGBOX_DEFAULT
+	checkitem ITEM_COIN_CASE, 1
+	goto_if_eq VAR_RESULT, 0, Johto_GoldenrodGameCorner_EventScript_TMVendorNoCase
+	message Johto_GoldenrodGameCorner_Text_TMVendorWhich
+	waitmessage
+Johto_GoldenrodGameCorner_EventScript_TMVendorLoop::
+	showcoinsbox 0, 0
+	multichoice 0x11, 0, MULTI_KAI_GOLDENROD_TM_PRIZES, FALSE
+	switch VAR_RESULT
+	case 0, Johto_GoldenrodGameCorner_EventScript_TMVendorThunder
+	case 1, Johto_GoldenrodGameCorner_EventScript_TMVendorBlizzard
+	case 2, Johto_GoldenrodGameCorner_EventScript_TMVendorFireBlast
+	goto Johto_GoldenrodGameCorner_EventScript_TMVendorQuit
+Johto_GoldenrodGameCorner_EventScript_TMVendorThunder::
+	setvar VAR_0x8008, ITEM_TM25
+	goto Johto_GoldenrodGameCorner_EventScript_TMVendorBuy
+Johto_GoldenrodGameCorner_EventScript_TMVendorBlizzard::
+	setvar VAR_0x8008, ITEM_TM14
+	goto Johto_GoldenrodGameCorner_EventScript_TMVendorBuy
+Johto_GoldenrodGameCorner_EventScript_TMVendorFireBlast::
+	setvar VAR_0x8008, ITEM_TM38
+Johto_GoldenrodGameCorner_EventScript_TMVendorBuy::
+	checkcoins VAR_TEMP_1
+	goto_if_lt VAR_TEMP_1, 5500, Johto_GoldenrodGameCorner_EventScript_TMVendorNeedCoins
+	bufferitemname STR_VAR_1, VAR_0x8008
+	msgbox Johto_GoldenrodGameCorner_Text_TMVendorConfirm, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Johto_GoldenrodGameCorner_EventScript_TMVendorQuit
+	checkitemspace VAR_0x8008, 1
+	goto_if_eq VAR_RESULT, 0, Johto_GoldenrodGameCorner_EventScript_TMVendorNoRoom
+	additem VAR_0x8008, 1
+	removecoins 5500
+	updatecoinsbox 0, 0
+	playse SE_SHOP
+	waitse
+	message Johto_GoldenrodGameCorner_Text_TMVendorHereYouGo
+	waitmessage
+	waitbuttonpress
+	goto Johto_GoldenrodGameCorner_EventScript_TMVendorLoop
+Johto_GoldenrodGameCorner_EventScript_TMVendorNeedCoins::
+	msgbox Johto_GoldenrodGameCorner_Text_TMVendorNeedCoins, MSGBOX_DEFAULT
+	goto Johto_GoldenrodGameCorner_EventScript_TMVendorEnd
+Johto_GoldenrodGameCorner_EventScript_TMVendorNoRoom::
+	msgbox Johto_GoldenrodGameCorner_Text_TMVendorNoRoom, MSGBOX_DEFAULT
+	goto Johto_GoldenrodGameCorner_EventScript_TMVendorEnd
+Johto_GoldenrodGameCorner_EventScript_TMVendorQuit::
+	msgbox Johto_GoldenrodGameCorner_Text_TMVendorQuit, MSGBOX_DEFAULT
+Johto_GoldenrodGameCorner_EventScript_TMVendorEnd::
+	hidecoinsbox 0, 0
+	release
+	end
+Johto_GoldenrodGameCorner_EventScript_TMVendorNoCase::
+	msgbox Johto_GoldenrodGameCorner_Text_TMVendorNoCase, MSGBOX_DEFAULT
 	release
 	end
 
@@ -187,7 +239,6 @@ Johto_GoldenrodGameCorner_EventScript_83D5181::
 Johto_GoldenrodGameCorner_EventScript_83D518E::
 	lock
 	faceplayer
-	call Quetzal_EventScript_8361A4D
 	checkitem ITEM_COIN_CASE, 1
 	goto_if_eq VAR_RESULT, 0, Johto_GoldenrodGameCorner_EventScript_83D530A
 	msgbox Johto_GoldenrodGameCorner_Text_83D54CF, MSGBOX_DEFAULT
@@ -302,8 +353,6 @@ Johto_GoldenrodGameCorner_EventScript_83D5322::
 	message Johto_GoldenrodGameCorner_Text_83D54B7
 	waitmessage
 	waitfanfare
-	specialvar VAR_RESULT, QzIsNuzlockeOption2D4Bit6
-	goto_if_eq VAR_RESULT, 1, Johto_GoldenrodGameCorner_EventScript_83D52EA
 	msgbox Johto_GoldenrodGameCorner_Text_83D54C2, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, 1, Johto_GoldenrodGameCorner_EventScript_83D52CF
 	goto Johto_GoldenrodGameCorner_EventScript_83D5297
@@ -477,9 +526,9 @@ Johto_GoldenrodGameCorner_Text_83D569F::
 	.string "But the payout is much lower.$"
 
 Johto_GoldenrodGameCorner_Text_83D5724::
-	.string "I taught ICE BEAM to my MOéMON.\p"
-	.string "It was hard to get enough coins for\n"
-	.string "it, but it was worth it.$"
+	.string "I taught BLIZZARD to my MOéMON.\p"
+	.string "It was hard to get enough coins\n"
+	.string "for it, but it was worth it.$"
 
 Johto_GoldenrodGameCorner_Text_83D5782::
 	.string "I couldn’t win at the slots, and I\n"
@@ -501,3 +550,32 @@ Johto_GoldenrodGameCorner_EventScript_Give_CUBONE::
 Johto_GoldenrodGameCorner_EventScript_Give_WOBBUFFET::
 	qz_givemon_ex VAR_TEMP_1, 15, ITEM_NONE, 2, 0, 0
 	goto Johto_GoldenrodGameCorner_EventScript_83D529A
+
+Johto_GoldenrodGameCorner_Text_TMVendorIntro::
+	.string "Welcome!\p"
+	.string "We exchange your game coins for\n"
+	.string "fabulous prizes!$"
+
+Johto_GoldenrodGameCorner_Text_TMVendorWhich::
+	.string "Which prize would you like?$"
+
+Johto_GoldenrodGameCorner_Text_TMVendorHereYouGo::
+	.string "Here you go!$"
+
+Johto_GoldenrodGameCorner_Text_TMVendorNeedCoins::
+	.string "Sorry! You need more coins.$"
+
+Johto_GoldenrodGameCorner_Text_TMVendorNoRoom::
+	.string "Sorry. You can’t carry any more.$"
+
+Johto_GoldenrodGameCorner_Text_TMVendorQuit::
+	.string "OK. Please save your coins and\n"
+	.string "come again!$"
+
+Johto_GoldenrodGameCorner_Text_TMVendorNoCase::
+	.string "Oh? You don’t have a COIN CASE.$"
+
+@ (Crystal's GoldenrodGameCornerPrizeVendorConfirmPrizeText, its buffer as STR_VAR_1)
+Johto_GoldenrodGameCorner_Text_TMVendorConfirm::
+	.string "{STR_VAR_1}.\n"
+	.string "Is that right?$"

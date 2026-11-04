@@ -36,9 +36,10 @@ public final class GameArt {
     private final int[] widths = new int[256];
     private final Map<Character, Integer> charmap = new HashMap<>();
     private final char[] letters = new char[256];
-    private final Bitmap fontMain, fontShadow;
+    private final Bitmap fontMain, fontShadow, smallMain, smallShadow;
+    private final int[] smallWidths = new int[256];
     private Bitmap icons, items, wallpapers, frames, types;
-    private final Bitmap[] fronts = new Bitmap[8];
+    private final Bitmap[] fronts = new Bitmap[8], frontsP = new Bitmap[8];
     private final Map<Integer, Integer> dexToSpecies = new HashMap<>();
     private final Paint pix = new Paint(), tint = new Paint(), silhouette = new Paint(), gray = new Paint();
     private final Rect src = new Rect(), dst = new Rect();
@@ -63,21 +64,17 @@ public final class GameArt {
             }
         }
         // the font's two colors (text, shadow) as white masks, tinted when drawn
-        Bitmap f = bitmap("game/font.png");
-        int n = f.getWidth() * f.getHeight();
-        int[] px = new int[n], main = new int[n], shadow = new int[n];
-        f.getPixels(px, 0, f.getWidth(), 0, 0, f.getWidth(), f.getHeight());
-        for (int i = 0; i < n; i++) {
-            if (Color.alpha(px[i]) != 0) {
-                if (Color.red(px[i]) < 128) {
-                    main[i] = 0xFFFFFFFF;
-                } else {
-                    shadow[i] = 0xFFFFFFFF;
-                }
-            }
+        Bitmap[] big = masks("game/font.png");
+        fontMain = big[0];
+        fontShadow = big[1];
+        // the game's small font: the second size of words (crisp, never a scaled-down big one)
+        Bitmap[] small = masks("game/font_small.png");
+        smallMain = small != null ? small[0] : fontMain;
+        smallShadow = small != null ? small[1] : fontShadow;
+        JSONArray sw = data.optJSONArray("fontSmallWidths");
+        for (int i = 0; i < 256; i++) {
+            smallWidths[i] = sw != null ? sw.optInt(i, 5) : widths[i];
         }
-        fontMain = Bitmap.createBitmap(main, f.getWidth(), f.getHeight(), Bitmap.Config.ARGB_8888);
-        fontShadow = Bitmap.createBitmap(shadow, f.getWidth(), f.getHeight(), Bitmap.Config.ARGB_8888);
         JSONArray sp = data.getJSONArray("species");
         for (int s = sp.length() - 1; s > 0; s--) {
             int dex = sp.getJSONObject(s).optInt("dex");
@@ -96,6 +93,28 @@ public final class GameArt {
         gray.setFilterBitmap(false);
         gray.setColorFilter(new ColorMatrixColorFilter(cm2));
         gray.setAlpha(140);
+    }
+
+    /** A font sheet's text and shadow pixels as two white masks (null: no such sheet) */
+    private Bitmap[] masks(String path) {
+        Bitmap f = bitmap(path);
+        if (f == null) {
+            return null;
+        }
+        int n = f.getWidth() * f.getHeight();
+        int[] px = new int[n], main = new int[n], shadow = new int[n];
+        f.getPixels(px, 0, f.getWidth(), 0, 0, f.getWidth(), f.getHeight());
+        for (int i = 0; i < n; i++) {
+            if (Color.alpha(px[i]) != 0) {
+                if (Color.red(px[i]) < 128) {
+                    main[i] = 0xFFFFFFFF;
+                } else {
+                    shadow[i] = 0xFFFFFFFF;
+                }
+            }
+        }
+        return new Bitmap[]{Bitmap.createBitmap(main, f.getWidth(), f.getHeight(), Bitmap.Config.ARGB_8888),
+                Bitmap.createBitmap(shadow, f.getWidth(), f.getHeight(), Bitmap.Config.ARGB_8888)};
     }
 
     private String readText(String path) throws Exception {
@@ -137,10 +156,16 @@ public final class GameArt {
     }
 
     /** The app's own words in the game's letters (charmap.txt); letters the font lacks become spaces */
+    /** Whether the game's font has this letter (names typed on the phone) */
+    public boolean hasLetter(char ch) {
+        return ch != '$' && charmap.get(ch) != null;
+    }
+
     public byte[] encode(String s) {
         byte[] b = new byte[s.length()];
         for (int i = 0; i < s.length(); i++) {
-            Integer c = charmap.get(s.charAt(i));
+            // ('$' is the end of a string in the game's text; its money sign is the letter '¥' stands for)
+            Integer c = charmap.get(s.charAt(i) == '$' ? '\u00a5' : s.charAt(i));
             b[i] = (byte) (c != null ? c : 0);
         }
         return b;
@@ -167,7 +192,83 @@ public final class GameArt {
         return s.toString();
     }
 
+    // ---------------------------------------------------------------------------- MOéMON or POKéMON (CREATURES)
+
+    /** The pictures and words shown: the original POKéMON's (true) or Kai's MOéMON (Look.creatures, as the game) */
+    public static boolean pokemonArt;
+    /** Whether the words are swapped at all (off on the card games' pages: Page.swapsWords) */
+    public static boolean swapWords = true;
+    private byte[][][][] swaps;   // [mode][pair][from, to]
+
+    /**
+     * The words swapped as the game's OPTIONS > CREATURES swaps them (mp_textopts.c): with POKéMON, Kai's MOé becomes
+     * POKé (MOéMON, MOéDEX...) and MOEMON POKéMON; with MOéMON, the app's own POKéMON, POKéDEX and POKéNAV become Kai's
+     * (POKé BALL stays: Kai kept it)
+     */
+    private byte[] words(byte[] t) {
+        if (!swapWords) {
+            return t;
+        }
+        if (swaps == null) {
+            String[][][] w = {
+                    {{"POK\u00e9MON", "MO\u00e9MON"}, {"POK\u00e9DEX", "MO\u00e9DEX"}, {"POK\u00e9NAV", "MO\u00e9NAV"},
+                     {"Pok\u00e9mon", "Mo\u00e9mon"}},
+                    {{"MO\u00e9", "POK\u00e9"}, {"Mo\u00e9", "Pok\u00e9"}, {"MOEMON", "POK\u00e9MON"}, {"Moemon", "Pok\u00e9mon"}}};
+            swaps = new byte[2][][][];
+            for (int m = 0; m < 2; m++) {
+                swaps[m] = new byte[w[m].length][][];
+                for (int i = 0; i < w[m].length; i++) {
+                    swaps[m][i] = new byte[][]{encode(w[m][i][0]), encode(w[m][i][1])};
+                }
+            }
+        }
+        byte[][][] pairs = swaps[pokemonArt ? 1 : 0];
+        java.io.ByteArrayOutputStream out = null;
+        for (int i = 0; i < t.length; ) {
+            byte[][] hit = null;
+            for (byte[][] pair : pairs) {
+                if (startsAt(t, i, pair[0])) {
+                    hit = pair;
+                    break;
+                }
+            }
+            if (hit != null) {
+                if (out == null) {
+                    out = new java.io.ByteArrayOutputStream(t.length + 4);
+                    out.write(t, 0, i);
+                }
+                out.write(hit[1], 0, hit[1].length);
+                i += hit[0].length;
+            } else {
+                if ((t[i] & 255) == 0xFF) {
+                    if (out != null) {
+                        out.write(t, i, t.length - i);
+                    }
+                    break;
+                }
+                if (out != null) {
+                    out.write(t[i]);
+                }
+                i++;
+            }
+        }
+        return out == null ? t : out.toByteArray();
+    }
+
+    private static boolean startsAt(byte[] t, int at, byte[] p) {
+        if (at + p.length > t.length) {
+            return false;
+        }
+        for (int k = 0; k < p.length; k++) {
+            if (t[at + k] != p[k]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public int width(byte[] t) {
+        t = words(t);
         int w = 0;
         for (byte c : t) {
             if ((c & 255) == 0xFF) {
@@ -184,6 +285,7 @@ public final class GameArt {
 
     /** Text at (x, y) (its 16-pixel cell's top), in a color and its shadow; returns the width */
     public int text(Canvas c, byte[] t, int x, int y, int color, int shadow) {
+        t = words(t);
         int x0 = x;
         for (byte ch : t) {
             int g = ch & 255;
@@ -227,6 +329,62 @@ public final class GameArt {
 
     public int text(Canvas c, String s, int x, int y, int color, int shadow) {
         return text(c, encode(s), x, y, color, shadow);
+    }
+
+    /** The small font (the game's FONT_SMALL): secondary words, notes, labels; y is its cell's top as with text() */
+    public int small(Canvas c, String s, int x, int y, int color, int shadow) {
+        return small(c, encode(s), x, y, color, shadow);
+    }
+
+    public int small(Canvas c, byte[] t, int x, int y, int color, int shadow) {
+        t = words(t);
+        int x0 = x;
+        for (byte ch : t) {
+            int g = ch & 255;
+            if (g == 0xFF) {
+                break;
+            }
+            int gw = Math.max(1, Math.min(16, smallWidths[g]));
+            src.set((g % 16) * 16, (g / 16) * 16, (g % 16) * 16 + gw, (g / 16) * 16 + 16);
+            dst.set(x, y, x + gw, y + 16);
+            if (shadow != 0) {
+                tint.setColorFilter(filter(shadow));
+                c.drawBitmap(smallShadow, src, dst, tint);
+            }
+            tint.setColorFilter(filter(color));
+            c.drawBitmap(smallMain, src, dst, tint);
+            x += smallWidths[g];
+        }
+        return x - x0;
+    }
+
+    public int smallWidth(String s) {
+        byte[] t = words(encode(s));
+        int w = 0;
+        for (byte b : t) {
+            if ((b & 255) == 0xFF) {
+                break;
+            }
+            w += smallWidths[b & 255];
+        }
+        return w;
+    }
+
+    /** Words wrapped to max pixels in the small font */
+    public java.util.List<String> wrapSmall(String text, int max) {
+        java.util.List<String> out = new java.util.ArrayList<>();
+        StringBuilder line = new StringBuilder();
+        for (String word : text.split(" ")) {
+            String next = line.length() == 0 ? word : line + " " + word;
+            if (smallWidth(next) > max && line.length() > 0) {
+                out.add(line.toString());
+                line = new StringBuilder(word);
+            } else {
+                line = new StringBuilder(next);
+            }
+        }
+        out.add(line.toString());
+        return out;
     }
 
     public int textHex(Canvas c, String hex, int x, int y, int color, int shadow) {
@@ -322,6 +480,11 @@ public final class GameArt {
         return p;
     }
 
+    /** A POKéMON's own colors in the set shown (the snapshot's "pal" / "ppal": shiny, a Stadium hue), or null */
+    public String monPal(org.json.JSONObject mon) {
+        return mon == null ? null : mon.optString(pokemonArt ? "ppal" : "pal", null);
+    }
+
     /** A front picture colored by pal (a POKeMON's own palette, the snapshot's "pal"), or its species' when null */
     public void front(Canvas c, int species, String pal, int x, int y, boolean silhouetted) {
         front(c, species, pal, x, y, 64, silhouetted);
@@ -333,20 +496,23 @@ public final class GameArt {
         if (k >= fronts.length) {
             return;
         }
+        boolean po = pokemonArt;
+        String palKey = po ? "ppal" : "pal";
         if (pal == null || pal.isEmpty()) {
-            pal = species(species).optString("pal", null);
+            pal = species(species).optString(palKey, null);
             if (pal == null) {
                 // (UNOWN's letters past the EGG: UNOWN's colors)
-                pal = species(201).optString("pal", "");
+                pal = species(201).optString(palKey, "");
             }
         }
-        String key = species + ":" + pal;
+        String key = (po ? "p" : "") + species + ":" + pal;
         Bitmap b = colored.get(key);
         if (b == null) {
-            if (fronts[k] == null) {
-                fronts[k] = bitmap("game/front_" + k + ".png");
+            Bitmap[] set = po ? frontsP : fronts;
+            if (set[k] == null) {
+                set[k] = bitmap(po ? "game/front_p_" + k + ".png" : "game/front_" + k + ".png");
             }
-            Bitmap sheet = fronts[k];
+            Bitmap sheet = set[k];
             int i = species % 256, sx = (i % 16) * 64, sy = (i / 16) * 64;
             if (sheet == null || sy + 64 > sheet.getHeight()) {
                 return;
@@ -529,12 +695,45 @@ public final class GameArt {
         cell(c, items, item, 24, 24, 32, x, y, pix);
     }
 
+    /** A BAG icon's 24x24 pixels (ARGB), for drawing it changed (the POKé BALL page's colors and decorations) */
+    public int[] itemPixels(int item) {
+        if (items == null) {
+            items = bitmap("game/items.png");
+        }
+        int[] px = new int[24 * 24];
+        int sx = (item % 32) * 24, sy = (item / 32) * 24;
+        if (items == null || sy + 24 > items.getHeight()) {
+            return px;
+        }
+        items.getPixels(px, 0, 24, sx, sy, 24, 24);
+        return px;
+    }
+
     /** A PC box's wallpaper (160x144); Walda's (16) shows as PLAIN */
     public void wallpaper(Canvas c, int id, int x, int y) {
         if (wallpapers == null) {
             wallpapers = bitmap("game/wallpapers.png");
         }
         cell(c, wallpapers, id >= 16 ? 15 : id, 160, 144, 4, x, y, pix);
+    }
+
+    /** A wallpaper's framed inside (below its name banner: 160x122) at any size (the multi-box view's boxes) */
+    public void wallpaperAt(Canvas c, int id, float x, float y, float w, float h) {
+        if (wallpapers == null) {
+            wallpapers = bitmap("game/wallpapers.png");
+        }
+        int i = id >= 16 ? 15 : id;
+        src.set((i % 4) * 160, (i / 4) * 144 + 22, (i % 4) * 160 + 160, (i / 4) * 144 + 144);
+        c.drawBitmap(wallpapers, src, new android.graphics.RectF(x, y, x + w, y + h), pix);
+    }
+
+    /** A POKéMON's icon at SIZE (16: half size, still whole pixels) */
+    public void iconAt(Canvas c, int species, float x, float y, float size, int how) {
+        c.save();
+        c.translate(x, y);
+        c.scale(size / 32f, size / 32f);
+        icon(c, species, 0, 0, how);
+        c.restore();
     }
 
     /** A wallpaper at half size (80x72), for the box list */
@@ -549,7 +748,13 @@ public final class GameArt {
     }
 
     /** A window: OPTIONS > FRAME's frame (its 8-pixel tiles) around x, y, w, h, filled with the window's white */
+    /** The player's window frame (MENU > LOOK), for the windows drawn with frame 0 */
+    public static int userFrame;
+
     public void window(Canvas c, int frame, int x, int y, int w, int h) {
+        if (frame == 0) {
+            frame = userFrame;
+        }
         if (frames == null) {
             frames = bitmap("game/frames.png");
         }

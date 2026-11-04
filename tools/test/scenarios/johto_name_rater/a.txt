@@ -1,0 +1,25 @@
+pressuntil A field 5000
+mp textspeed 2
+wait 30
+mp warp 34,75,4,5
+wait 150
+mp face up
+press A 2
+mash A 4 20
+wait 40
+press A 2
+wait 80
+press A 2
+wait 60
+mash A 4 20
+wait 40
+press A 2
+wait 60
+mash A 3 20
+wait 120
+press B 2
+wait 60
+mash B 8 20
+wait 60
+mp ctx
+quit

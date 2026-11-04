@@ -164,15 +164,15 @@ Kanto_Route14_EventScript_845AFA9::
 	end
 
 Kanto_Route14_Text_843610C::
-	.string "You should review your MOéMON’s\n"
-	.string "moves from the team menu.$"
+	.string "You need to use TMs to teach good\n"
+	.string "moves to MOéMON.$"
 
 Kanto_Route14_Text_8436147::
 	.string "Not good enough quite yet.$"
 
 Kanto_Route14_Text_8436162::
-	.string "Field techniques become available\n"
-	.string "as you earn BADGES.$"
+	.string "You have some HMs, right? MOéMON\n"
+	.string "can’t forget those moves easily.$"
 
 Kanto_Route14_Text_8436198::
 	.string "My bird MOéMON should be ready\n"
@@ -186,10 +186,10 @@ Kanto_Route14_Text_84361D3::
 	.string "better moves.$"
 
 Kanto_Route14_Text_84361FF::
-	.string "They have useful items on sale at\n"
-	.string "the CELADON DEPT. STORE.\p"
-	.string "Evolution items are rare, so I\n"
-	.string "always keep an eye out for them.$"
+	.string "They have TMs on sale at the\n"
+	.string "CELADON DEPT. STORE.\p"
+	.string "TMs aren’t really rare, but not\n"
+	.string "many people have HMs.$"
 
 Kanto_Route14_Text_843627A::
 	.string "Aww, bummer!$"

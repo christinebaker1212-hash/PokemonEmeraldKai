@@ -1,0 +1,20 @@
+pressuntil A field 5000
+wait 30
+mp warp 34,21,11,2
+wait 120
+mp face up
+mp metatileat 11,1
+press A 4
+wait 90
+mp metatileat 11,1
+mash B 10 20
+wait 120
+mp metatileat 11,1
+mp ctx
+press A 4
+wait 90
+mash B 10 20
+wait 120
+mp metatileat 11,1
+mp ctx
+quit

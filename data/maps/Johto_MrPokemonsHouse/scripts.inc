@@ -254,3 +254,12 @@ Johto_MrPokemonsHouse_Text_83EE44F::
 	.string "A whole pile of strange coins!\p"
 	.string "Maybe they’re from another\n"
 	.string "country…$"
+
+@ Moemon Kai: Crystal's broken computer (docs/REGIONS_AUDIT.md 138)
+Johto_MrPokemonsHouse_EventScript_BrokenComputer::
+	msgbox Johto_MrPokemonsHouse_Text_BrokenComputer, MSGBOX_SIGN
+	end
+
+Johto_MrPokemonsHouse_Text_BrokenComputer::
+	.string "It’s a big computer. Hmm. It’s\n"
+	.string "broken.$"

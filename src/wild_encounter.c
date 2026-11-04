@@ -747,12 +747,14 @@ static bool8 QzTreeEncounter(void)
     static const u8 sRates[5] = {50, 15, 15, 10, 10};
     int t = QzTreeTable(), i, roll, total = 0;
     u16 species[5];
+    bool8 ok[5];
     if (t < 0 || Random() % 100 >= sHeadbuttEncounters[t].rate)
         return FALSE;
     for (i = 0; i < 5; i++)
     {
         species[i] = MP_Gen_StandIn(sHeadbuttEncounters[t].mons[i].species);
-        if (MP_Gen_Allowed(species[i]))
+        ok[i] = MP_Gen_Allowed(species[i]) && MP_WildSpeciesOk(species[i]);   // (no fossils before the LEAGUE: mp_region.c)
+        if (ok[i])
             total += sRates[i];
     }
     if (total == 0)
@@ -760,7 +762,7 @@ static bool8 QzTreeEncounter(void)
     roll = Random() % total;
     for (i = 0; i < 5; i++)
     {
-        if (!MP_Gen_Allowed(species[i]))
+        if (!ok[i])
             continue;
         if (roll < sRates[i])
             break;

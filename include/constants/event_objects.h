@@ -282,6 +282,16 @@
 #define OBJ_EVENT_GFX_KAI_FIRST 0x2F0          // Moemon Kai: the game's own past the port's (data/object_events/kai_objects.h)
 #define OBJ_EVENT_GFX_FRUIT_TREE (OBJ_EVENT_GFX_KAI_FIRST + 0)   // JOHTO's APRICORN trees: Crystal's fruit tree
 #include "constants/sinnoh_gfx.h"   // Moemon Kai: OBJ_EVENT_GFX_SINNOH_* (0x400+), Platinum's sprites
+// Moemon Kai: a POKéMON standing on the map as an object, drawn from the follower sprites (mp_follower.c
+// MP_Follower_MonObjectInfo): OBJ_EVENT_GFX_MON_FIRST + its national POKéDEX number (Crystal's SLOWPOKE, LAPRAS...)
+#define OBJ_EVENT_GFX_MON_FIRST 0xA00
+#define OBJ_EVENT_GFX_MON_COUNT 0x500
+#define OBJ_EVENT_GFX_MON_SLOWPOKE (OBJ_EVENT_GFX_MON_FIRST + 79)
+#define OBJ_EVENT_GFX_MON_MACHOP   (OBJ_EVENT_GFX_MON_FIRST + 66)
+#define OBJ_EVENT_GFX_MON_LAPRAS   (OBJ_EVENT_GFX_MON_FIRST + 131)
+#define OBJ_EVENT_GFX_MON_MILTANK  (OBJ_EVENT_GFX_MON_FIRST + 241)
+#define OBJ_EVENT_GFX_MON_PIDGEY   (OBJ_EVENT_GFX_MON_FIRST + 16)
+#define OBJ_EVENT_GFX_MON_FEAROW   (OBJ_EVENT_GFX_MON_FIRST + 22)
 
 #define SHADOW_SIZE_S   0
 #define SHADOW_SIZE_M   1

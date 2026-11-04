@@ -708,20 +708,17 @@ Johto_AzaleaGym_Text_83C4D3F::
 	.string "AZALEA MOéMON GYM$"
 
 Johto_AzaleaGym_Text_83C4D52::
-	.string "AZALEA TOWN MOéMON GYM\p"
-	.string "BUGSY’S CERTIFIED TRAINERS:\n"
+	.string "AZALEA MOéMON GYM\p"
+	.string "LEADER: BUGSY\p"
+	.string "WINNING TRAINERS:\n"
 	.string "{PLAYER}$"
 
 Johto_AzaleaGym_Text_83C4D89::
-	.string "I’m BUGSY!\p"
-	.string "I never lose when it comes\n"
-	.string "to bug MOéMON.\p"
-	.string "My research is going to make me the\n"
-	.string "authority on bug MOéMON!\p"
-	.string "For example, did you know\n"
-	.string "that the move CUT is\l"
-	.string "actually a BUG-type move?\p"
-	.string "Let me demonstrate all I’ve\n"
+	.string "I’m BUGSY! I never lose when it\n"
+	.string "comes to bug MOéMON.\p"
+	.string "My research is going to make me\n"
+	.string "the authority on bug MOéMON!\p"
+	.string "Let me demonstrate what I’ve\n"
 	.string "learned from my studies.$"
 
 Johto_AzaleaGym_Text_83C4E7B::
@@ -809,36 +806,25 @@ Johto_AzaleaGym_Text_83C53AB::
 	.string "always makes critical hits!$"
 
 Johto_AzaleaGym_Text_83C5416::
-	.string "MAY: You want to see the\n"
-	.string "LEADER? Good luck!\p"
-	.string "BUGSY is so strong!\n"
-	.string "His SCYTHER’s CUT always\l"
-	.string "seems to crit!$"
+	.string "AMY: Hi! Are you challenging the\n"
+	.string "LEADER? No way!$"
 
 Johto_AzaleaGym_Text_83C547E::
-	.string "AMY & MAY: Oh, double\n"
-	.string "goodness!$"
+	.string "AMY & MAY: Oh, double goodness!$"
 
 Johto_AzaleaGym_Text_83C549E::
-	.string "MAY: Our bug MOéMON lost!\n"
-	.string "Oh, what a shame.\p"
-	.string "BUGSY’s won’t lose though!\p"
-	.string "His PINECO makes short work\n"
-	.string "of ROCK-type MOéMON!$"
+	.string "AMY: You’re really strong!$"
 
 Johto_AzaleaGym_Text_83C5518::
 	.string "Yo, challenger!\p"
 	.string "BUGSY’s young, but his knowledge\n"
 	.string "of bug MOéMON is for real.\p"
-	.string "It’s going to be tough\n"
-	.string "without my advice.\p"
-	.string "Let’s see… BUGSY’s bagworm MOéMON\n"
-	.string "knows a move that covers its\l"
-	.string "ROCK-type weakness.\p"
-	.string "He’s also developed a new version\n"
-	.string "of CUT that is BUG-type.\p"
-	.string "Oh, and don’t forget about those\n"
-	.string "nasty critical hits! Good luck!$"
+	.string "It’s going to be tough without my\n"
+	.string "advice.\p"
+	.string "Let’s see… Bug MOéMON don’t like\n"
+	.string "fire.\p"
+	.string "Flying-type moves are\n"
+	.string "super-effective too.$"
 
 Johto_AzaleaGym_Text_83C565F::
 	.string "Well done! That was a great\n"

@@ -33,14 +33,17 @@ MARK = "@ Moemon Kai: Crystal's TM (tools/quetzal_port/fix_johto_tms.py)"
 
 def crystal_text(asm, label):
     """A Crystal text label as paragraphs of words"""
-    m = re.search(r'^' + re.escape(label) + r':\n((?:\t(?:text|line|cont|para|done|prompt)[^\n]*\n|\n)+)', asm, re.M)
+    m = re.search(r'^' + re.escape(label) + r'::?\n((?:\t(?:text|line|cont|para|done|prompt)[^\n]*\n|\n)+)', asm, re.M)
     pars, cur = [], ''
     for cmd, arg in re.findall(r'\t(text|line|cont|para|done|prompt)(?: "([^"]*)")?', m.group(1)):
         if cmd in ('done', 'prompt'):
             break
-        if cmd == 'para' and cur and cur.rstrip('"\'').endswith(('.', '!', '?', '…')):
-            pars.append(cur)   # (a new page where a sentence ends; Crystal's other pages flow on)
+        if cmd == 'para' and cur and (cur.rstrip('"\'').endswith(('.', '!', '?', '…'))
+                                      or not any(c.islower() for c in cur)):
+            pars.append(cur)   # (a new page where a sentence or a heading such as TRAINER TIPS ends; others flow on)
             cur = ''
+        if cur.endswith('- '):
+            cur = cur[:-1]   # ("cam- " / "paign": a split word with a space after its hyphen)
         if cur.endswith('-') and arg and arg.split()[0].lower().strip('.,!?') in KEEP_HYPHEN:
             cur = cur + arg   # (fire-type: a hyphenated word at the line's end)
         elif cur.endswith('-') and arg and (arg[0].islower() or cur.endswith('#-')):

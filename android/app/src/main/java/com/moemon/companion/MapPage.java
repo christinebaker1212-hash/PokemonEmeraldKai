@@ -334,9 +334,7 @@ public final class MapPage extends Page {
     }
 
     private int heading(Canvas c, int w, int y, String what, String count) {
-        art.window(c, 0, 12, y + 2, w - 24, 14);
-        art.text(c, what, 16, y + 1, GameArt.BLUE_TEXT, GameArt.SHADOW);
-        art.text(c, count, w - 16 - art.width(count), y + 1, GameArt.TEXT, GameArt.SHADOW);
+        sectionBar(c, 8, w - 8, y + 2, 16, what, count);
         return y + 20;
     }
 

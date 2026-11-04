@@ -25,7 +25,6 @@ Kanto_Route4_PokemonCenter_1F_EventScript_841F6D9::
 	lock
 	faceplayer
 	goto_if_set FLAG_QZ_0x2111, Kanto_Route4_PokemonCenter_1F_EventScript_841F821
-	call Quetzal_EventScript_8361A4D
 	showmoneybox 0, 0, 0
 	checkplayergender
 	goto_if_eq VAR_RESULT, 0, Kanto_Route4_PokemonCenter_1F_EventScript_841F705

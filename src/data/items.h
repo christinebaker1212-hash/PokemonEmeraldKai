@@ -1130,15 +1130,17 @@ const struct Item gItems[] =
         .secondaryId = ITEM_POKE_BALL - FIRST_BALL,
     },
 
-    [ITEM_058] =
+    [ITEM_ASTRAL_BALL] =
     {
-        .name = _("????????"),
-        .itemId = ITEM_NONE,
+        .name = _("ASTRAL BALL"),
+        .itemId = ITEM_ASTRAL_BALL,
         .price = 0,
-        .description = sDummyDesc,
-        .pocket = POCKET_ITEMS,
-        .type = ITEM_USE_BAG_MENU,
-        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .description = sAstralBallDesc,
+        .pocket = POCKET_POKE_BALLS,
+        .type = ITEM_POKE_BALL - FIRST_BALL,
+        .battleUsage = ITEM_B_USE_OTHER,
+        .battleUseFunc = ItemUseInBattle_PokeBall,
+        .secondaryId = ITEM_POKE_BALL - FIRST_BALL,
     },
 
     [ITEM_059] =
@@ -4353,7 +4355,8 @@ const struct Item gItems[] =
         .registrability = TRUE,
         .pocket = POCKET_KEY_ITEMS,
         .type = ITEM_USE_FIELD,
-        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .fieldUseFunc = ItemUseOutOfBattle_Bike,   // Moemon Kai: JOHTO's / KANTO's BICYCLE rides as FireRed's, one speed
+        .secondaryId = MACH_BIKE,
     },
 
     [ITEM_TOWN_MAP] =
@@ -4366,7 +4369,7 @@ const struct Item gItems[] =
         .registrability = TRUE,
         .pocket = POCKET_KEY_ITEMS,
         .type = ITEM_USE_BAG_MENU,
-        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,
+        .fieldUseFunc = ItemUseOutOfBattle_TownMap,
     },
 
     [ITEM_VS_SEEKER] =

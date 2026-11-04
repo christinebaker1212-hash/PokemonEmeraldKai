@@ -186,8 +186,7 @@ Johto_NationalParkBugContest_EventScript_83E0792::
 	end
 
 Johto_NationalParkBugContest_EventScript_83E0798::
-	specialvar VAR_RESULT, QzIsNuzlockeActiveInRegion
-	goto_if_ne VAR_RESULT, 1, Johto_NationalParkBugContest_EventScript_83E07AD
+	goto Johto_NationalParkBugContest_EventScript_83E07AD
 	setvar VAR_QZ_0x5019, 3
 
 Johto_NationalParkBugContest_EventScript_83E07AD::
@@ -243,8 +242,6 @@ Johto_NationalParkBugContest_EventScript_83E082C::
 
 Johto_NationalParkBugContest_EventScript_83E085D::
 	lockall
-	specialvar VAR_RESULT, QzIsNuzlockeActiveInRegion
-	goto_if_eq VAR_RESULT, 1, Johto_NationalParkBugContest_EventScript_83C339A
 	turnobject LOCALID_PLAYER, 2
 	goto Johto_NationalParkBugContest_EventScript_83C342B
 

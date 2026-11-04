@@ -24,10 +24,26 @@ PRIZE_MENUS = {
     0x62: ['TM13{CLEAR_TO 0x48}{FONT_SMALL}4,000 COINS', 'TM23{CLEAR_TO 0x48}{FONT_SMALL}3,500 COINS',
            'TM24{CLEAR_TO 0x48}{FONT_SMALL}4,000 COINS', 'TM30{CLEAR_TO 0x48}{FONT_SMALL}4,500 COINS',
            'TM35{CLEAR_TO 0x48}{FONT_SMALL}4,000 COINS'],
+    # CERULEAN's BIKE SHOP: FireRed's (src/strings.c gText_Bicycle_Price, gOtherText_NoThanks)
+    0x57: ['BICYCLE{CLEAR_TO 0x49}{FONT_SMALL}¥1,000,000', 'NO THANKS'],
     0x5F: ['SMOKE BALL{CLEAR_TO 0x5A}{FONT_SMALL}800 COINS', 'MIRACLE SEED{CLEAR_TO 0x50}{FONT_SMALL}1,000 COINS',
            'CHARCOAL{CLEAR_TO 0x50}{FONT_SMALL}1,000 COINS', 'MYSTIC WATER{CLEAR_TO 0x50}{FONT_SMALL}1,000 COINS',
            'YELLOW FLUTE{CLEAR_TO 0x50}{FONT_SMALL}1,600 COINS'],
 }
+
+KAI_FIRST = 240   # past Kai's own menus
+
+# Menus Crystal / FireRed have that Quetzal dropped (docs/REGIONS_AUDIT.md), numbered after Quetzal's: MULTI_KAI_<NAME>
+KAI_MENUS = [
+    # EARL's ACADEMY blackboard (pokecrystal maps/EarlsPokemonAcademy.asm BlackboardMenuHeader)
+    ('ACADEMY_BLACKBOARD', ['PSN', 'PAR', 'SLP', 'BRN', 'FRZ', 'QUIT']),
+    # GOLDENROD's move tutor (pokecrystal maps/GoldenrodCity.asm MoveTutorScript .MenuData)
+    ('GOLDENROD_TUTOR', ['FLAMETHROWER', 'THUNDERBOLT', 'ICE BEAM', 'CANCEL']),
+    # GOLDENROD GAME CORNER's TM prizes (pokecrystal maps/GoldenrodGameCorner.asm TMVendorMenuHeader)
+    # GOLDENROD UNDERGROUND's bargain merchant (pokecrystal data/items/bargain_shop.asm)
+    ('GOLDENROD_BARGAIN', ['NUGGET', 'PEARL', 'BIG PEARL', 'STARDUST', 'STAR PIECE', 'CANCEL']),
+    ('GOLDENROD_TM_PRIZES', ['TM25    5500', 'TM14    5500', 'TM38    5500', 'CANCEL']),
+]
 
 
 def main():
@@ -47,6 +63,19 @@ def main():
         lists.append('static const struct MenuAction sQzMulti_%02X[] = {\n%s};' % (
             m['id'], ''.join('    {(const u8 []) _("%s")},\n' % t.replace('"', '\\"') for t in m['items'])))
         rows.append('    [MULTI_QZ_0x%02X] = MULTICHOICE(sQzMulti_%02X),' % (m['id'], m['id']))
+    # after Kai's own (include/constants/script_menu.h ends at MULTI_MOM_BANK 229): from KAI_FIRST up
+    import re
+    used = [int(v) for v in re.findall(r'^#define MULTI_(?!B_PRESSED)\w+\s+(\d+)', open(os.path.join(
+        REPO, 'include/constants/script_menu.h')).read(), re.M)]
+    assert FIRST + len(menus) <= min(v for v in used if v >= FIRST), 'Quetzal\'s menus run into Kai\'s'
+    assert KAI_FIRST > max(used)
+    for k, (name, items) in enumerate(KAI_MENUS):
+        num = KAI_FIRST + k
+        assert num < 256
+        head.append('#define MULTI_KAI_%s %d' % (name, num))
+        lists.append('static const struct MenuAction sKaiMulti_%s[] = {\n%s};' % (
+            name, ''.join('    {(const u8 []) _("%s")},\n' % t for t in items)))
+        rows.append('    [MULTI_KAI_%s] = MULTICHOICE(sKaiMulti_%s),' % (name, name))
     head += ['#endif', '']
     open(os.path.join(REPO, 'include/constants/script_menu_qz.h'), 'w').write('\n'.join(head))
     open(os.path.join(REPO, 'src/data/script_menu_qz.h'), 'w').write('\n'.join(lists) + '\n')

@@ -26,7 +26,6 @@ Johto_DayCare_EventScript_83F0695::
 	lock
 	faceplayer
 	goto_if_set FLAG_QZ_0x1069, Johto_DayCare_EventScript_83F06FC
-	call Quetzal_EventScript_8361A4D
 	msgbox Johto_DayCare_Text_83F0707, MSGBOX_DEFAULT
 	special QzIsCurrentPcBoxFull
 	goto_if_eq VAR_RESULT, 1, Johto_DayCare_EventScript_83F06F1
@@ -77,7 +76,7 @@ Johto_DayCare_Text_83F047C::
 	.string "{PLAYER} put away the book.$"
 
 Johto_DayCare_Text_83F04FA::
-	.string "A book of word assocations!\p"
+	.string "A book of word associations!\p"
 	.string "{PLAYER} flipped through\n"
 	.string "the book.\p"
 	.string "PICHU -> CUTE\l"

@@ -30,7 +30,16 @@ Johto_IndigoPlateauPokecenter1F_EventScript_83DCEA0::
 
 Johto_IndigoPlateauPokecenter1F_EventScript_83DCEA9::
 	setrespawn 0x23
+	@ Moemon Kai: Crystal's rival waits here on Mondays and Wednesdays, once a day, after the LEAGUE
+	@ (IndigoPlateauPokecenter1F.asm PlateauRivalBattle; docs/REGIONS_AUDIT.md case 41)
 	goto_if_unset FLAG_QZ_0x11B1, Johto_IndigoPlateauPokecenter1F_EventScript_83DCEB9
+	goto_if_set FLAG_DAILY_JOHTO_PLATEAU_RIVAL, Johto_IndigoPlateauPokecenter1F_EventScript_83DCEB9
+	specialvar VAR_RESULT, MP_JohtoWeekday
+	goto_if_eq VAR_RESULT, 1, Johto_IndigoPlateauPokecenter1F_EventScript_RivalHere
+	goto_if_eq VAR_RESULT, 3, Johto_IndigoPlateauPokecenter1F_EventScript_RivalHere
+	goto Johto_IndigoPlateauPokecenter1F_EventScript_83DCEB9
+
+Johto_IndigoPlateauPokecenter1F_EventScript_RivalHere::
 	clearflag FLAG_QZ_0x10DA
 	end
 
@@ -55,12 +64,20 @@ Johto_IndigoPlateauPokecenter1F_EventScript_83DCECF::
 
 @ Johto_IndigoPlateauPokecenter1F object 7 (local id 7, gfx 0x3EB5) at 32,8
 Johto_IndigoPlateauPokecenter1F_EventScript_83DD079::
-	trainerbattle TRAINER_BATTLE_SINGLE, TRAINER_QZ_4325, 0, Johto_IndigoPlateauPokecenter1F_Text_83DD097, Johto_IndigoPlateauPokecenter1F_Text_83DD100
-	goto Johto_IndigoPlateauPokecenter1F_EventScript_83DD08C
-
-Johto_IndigoPlateauPokecenter1F_EventScript_83DD08C::
-	msgbox Johto_IndigoPlateauPokecenter1F_Text_83DD10E, MSGBOX_DEFAULT
+	lock
+	faceplayer
+	playbgm MUS_JOHTO_RIVAL_APPEARS, FALSE
+	msgbox Johto_IndigoPlateauPokecenter1F_Text_PlateauRivalText1, MSGBOX_DEFAULT
 	closemessage
+	cleartrainerflag TRAINER_QZ_4325   @ (a battle each visit)
+	trainerbattle_no_intro TRAINER_QZ_4325, Johto_IndigoPlateauPokecenter1F_Text_PlateauRivalWinText
+	msgbox Johto_IndigoPlateauPokecenter1F_Text_PlateauRivalText2, MSGBOX_DEFAULT
+	closemessage
+	setflag FLAG_DAILY_JOHTO_PLATEAU_RIVAL
+	fadescreen FADE_TO_BLACK
+	removeobject 7
+	setflag FLAG_QZ_0x10DA
+	fadescreen FADE_FROM_BLACK
 	release
 	end
 
@@ -178,3 +195,23 @@ Johto_IndigoPlateauPokecenter1F_Text_8401DBF::
 Johto_IndigoPlateauPokecenter1F_Text_8403484::
 	.string "This Johto is recovering. The LEAGUE\n"
 	.string "remains closed to the public.$"
+
+Johto_IndigoPlateauPokecenter1F_Text_PlateauRivalText1::
+	.string "Hold it.\p"
+	.string "You’re going to take the MOéMON\n"
+	.string "LEAGUE challenge now?\p"
+	.string "That’s not going to happen.\p"
+	.string "My super-welltrained MOéMON are\n"
+	.string "going to pound you.\p"
+	.string "{PLAYER}! I challenge you!$"
+
+Johto_IndigoPlateauPokecenter1F_Text_PlateauRivalWinText::
+	.string "…\p"
+	.string "OK--I lost…$"
+
+Johto_IndigoPlateauPokecenter1F_Text_PlateauRivalText2::
+	.string "…Darn… I still can’t win…\p"
+	.string "I… I have to think more about my\n"
+	.string "MOéMON…\p"
+	.string "Humph! Try not to lose!$"
+

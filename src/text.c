@@ -1950,6 +1950,22 @@ void MP_ExportGlyph(u16 glyphId, u8 out[16][16], u8 *width)
         }
 }
 
+// The same with the small font (the phone app's small words: mp_export.c)
+void MP_ExportGlyphSmall(u16 glyphId, u8 out[16][16], u8 *width)
+{
+    u32 r, c;
+    GenerateFontHalfRowLookupTable(2, 1, 3);
+    DecompressGlyph_Small(glyphId, FALSE);
+    *width = gCurGlyph.width;
+    for (r = 0; r < 16; r++)
+        for (c = 0; c < 16; c++)
+        {
+            const u32 *rows = r < 8 ? gCurGlyph.gfxBufferTop : gCurGlyph.gfxBufferBottom;
+            u32 row = rows[(c < 8 ? 0 : 8) + (r % 8)];
+            out[r][c] = (row >> (4 * (c % 8))) & 0xF;
+        }
+}
+
 // Moemon Kai: FONT_UNOWN, Platinum's glyphs (its character codes - 1) for this game's letters; the normal font's
 // without the pack
 bool8 S3D_Gfx_UnownFont(const u16 **glyphs, const u8 **widths, u16 *count);

@@ -25,7 +25,7 @@ public final class MonCard {
         if (egg) {
             art.icon(c, eggSpecies(art), x + 18, y + 18, GameArt.ICON_PLAIN);   // (the EGG has no front picture)
         } else {
-            art.front(c, species, mon.optString("pal", null), x + 2, y + 2, false);
+            art.front(c, species, art.monPal(mon), x + 2, y + 2, false);
         }
         int tx = x + 70;
         art.textHex(c, mon.optString("n"), tx, y, GameArt.TEXT, GameArt.SHADOW);
@@ -43,6 +43,10 @@ public final class MonCard {
         }
         if (mon.optInt("sh") == 1) {
             art.text(c, "SHINY", tx + lw + 18, y + 16, 0xFFD89010, GameArt.SHADOW);
+        }
+        if (mon.optInt("off") == 1) {
+            String o = "ON OFFER";
+            art.text(c, o, tx + lw + 18 + (mon.optInt("sh") == 1 ? art.width("SHINY") + 6 : 0), y + 16, 0xFFE07820, GameArt.SHADOW);
         }
         art.text(c, art.speciesName(species), tx, y + 32, GameArt.GRAY_TEXT, GameArt.SHADOW);
         if (mon.has("hp")) {

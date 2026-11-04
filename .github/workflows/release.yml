@@ -154,6 +154,10 @@ jobs:
           fi
           echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
           export MOEMON_APK_KEYSTORE="$RUNNER_TEMP/release.jks"
+          # (Pillow: the POKéMON cards' pictures go into the app as WebP)
+          python3 -c 'import PIL' 2>/dev/null || python3 -m pip install -q --user --break-system-packages pillow \
+            || { sudo apt-get update -q && sudo apt-get install -y -q python3-pil; }
+          python3 -c 'from PIL import Image, features; assert features.check("webp")'
           python3 android/build_assets.py
           (cd android && ./gradlew --no-daemon -q assembleRelease) || { echo "::warning::the app didn't build"; exit 0; }
           mkdir -p dist

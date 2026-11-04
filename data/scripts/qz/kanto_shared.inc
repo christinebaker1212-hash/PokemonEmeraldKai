@@ -524,9 +524,9 @@ Quetzal_EventScript_84569D3::
 	clearflag FLAG_QZ_0x2119
 	clearflag FLAG_QZ_0x211F
 	clearflag FLAG_QZ_0x2109
-	cleartrainerflag 0x21B6
-	cleartrainerflag 0x21B7
-	cleartrainerflag 0x21B8
+	cleartrainerflag TRAINER_QZ_8630
+	cleartrainerflag TRAINER_QZ_8631
+	cleartrainerflag TRAINER_QZ_8632
 	setvar VAR_QZ_0x5120, 0
 	return
 
@@ -596,68 +596,68 @@ Quetzal_EventScript_8456FD2::
 	end
 
 Quetzal_EventScript_8457030::
-	settrainerflag 0x208E
+	settrainerflag TRAINER_QZ_8334
 	return
 
 Quetzal_EventScript_8457034::
-	settrainerflag 0x2096
-	settrainerflag 0x20EA
+	settrainerflag TRAINER_QZ_8342
+	settrainerflag TRAINER_QZ_8426
 	return
 
 Quetzal_EventScript_845703B::
-	settrainerflag 0x208D
-	settrainerflag 0x20DC
-	settrainerflag 0x21A7
+	settrainerflag TRAINER_QZ_8333
+	settrainerflag TRAINER_QZ_8412
+	settrainerflag TRAINER_QZ_8615
 	return
 
 Quetzal_EventScript_8457045::
-	settrainerflag 0x2084
-	settrainerflag 0x2085
-	settrainerflag 0x20A0
-	settrainerflag 0x2109
-	settrainerflag 0x210A
-	settrainerflag 0x210B
-	settrainerflag 0x2192
+	settrainerflag TRAINER_QZ_8324
+	settrainerflag TRAINER_QZ_8325
+	settrainerflag TRAINER_QZ_8352
+	settrainerflag TRAINER_QZ_8457
+	settrainerflag TRAINER_QZ_8458
+	settrainerflag TRAINER_QZ_8459
+	settrainerflag TRAINER_QZ_8594
 	return
 
 Quetzal_EventScript_845705B::
-	settrainerflag 0x2126
-	settrainerflag 0x2127
-	settrainerflag 0x2120
-	settrainerflag 0x2121
-	settrainerflag 0x2124
-	settrainerflag 0x2125
+	settrainerflag TRAINER_QZ_8486
+	settrainerflag TRAINER_QZ_8487
+	settrainerflag TRAINER_QZ_8480
+	settrainerflag TRAINER_QZ_8481
+	settrainerflag TRAINER_QZ_8484
+	settrainerflag TRAINER_QZ_8485
 	return
 
 Quetzal_EventScript_845706E::
-	settrainerflag 0x2118
-	settrainerflag 0x2119
-	settrainerflag 0x211A
-	settrainerflag 0x211B
-	settrainerflag 0x21CE
-	settrainerflag 0x21CF
-	settrainerflag 0x21D0
+	settrainerflag TRAINER_QZ_8472
+	settrainerflag TRAINER_QZ_8473
+	settrainerflag TRAINER_QZ_8474
+	settrainerflag TRAINER_QZ_8475
+	settrainerflag TRAINER_QZ_8654
+	settrainerflag TRAINER_QZ_8655
+	settrainerflag TRAINER_QZ_8656
 	return
 
 Quetzal_EventScript_8457084::
-	settrainerflag 0x20B1
-	settrainerflag 0x20B2
-	settrainerflag 0x20B3
-	settrainerflag 0x20B4
-	settrainerflag 0x20D5
-	settrainerflag 0x20D6
-	settrainerflag 0x20D7
+	settrainerflag TRAINER_QZ_8369
+	settrainerflag TRAINER_QZ_8370
+	settrainerflag TRAINER_QZ_8371
+	settrainerflag TRAINER_QZ_8372
+	settrainerflag TRAINER_QZ_8405
+	settrainerflag TRAINER_QZ_8406
+	settrainerflag TRAINER_QZ_8407
 	return
 
 Quetzal_EventScript_845709A::
-	settrainerflag 0x2128
-	settrainerflag 0x2129
-	settrainerflag 0x2142
-	settrainerflag 0x2143
-	settrainerflag 0x2144
-	settrainerflag 0x2188
-	settrainerflag 0x2190
-	settrainerflag 0x2191
+	settrainerflag TRAINER_QZ_8488
+	settrainerflag TRAINER_QZ_8489
+	settrainerflag TRAINER_QZ_8514
+	settrainerflag TRAINER_QZ_8515
+	settrainerflag TRAINER_QZ_8516
+	settrainerflag TRAINER_QZ_8584
+	settrainerflag TRAINER_QZ_8592
+	settrainerflag TRAINER_QZ_8593
 	return
 
 Quetzal_EventScript_84570B3::
@@ -1356,7 +1356,7 @@ Quetzal_EventScript_84590F6::
 	return
 
 Quetzal_EventScript_84590FF::
-	bufferboxname 0, VAR_QZ_0x513F
+	bufferboxname STR_VAR_1, VAR_PC_BOX_TO_SEND_MON   @ Moemon Kai: the box the game just used (FireRed's; 0x513F was never set)
 	bufferspeciesname 1, VAR_TEMP_1
 	call_if_unset FLAG_QZ_0x220F, Quetzal_EventScript_845911A
 	call_if_set FLAG_QZ_0x220F, Quetzal_EventScript_8459145
@@ -1488,12 +1488,9 @@ Quetzal_EventScript_84593E7::
 	goto_if_eq VAR_0x8006, 127, Quetzal_EventScript_8459493
 	goto Quetzal_EventScript_845940D
 
+@ Moemon Kai: FireRed's SEAGALLOP (pokefirered data/scripts/seagallop.inc): ISLANDS 4-7 need only the RAINBOW PASS
+@ (Quetzal also asked for KANTO's LEAGUE), VERMILION once BILL's first trip is over (qz_specials.c)
 Quetzal_EventScript_845940D::
-	goto_if_set FLAG_QZ_0x2108, Quetzal_EventScript_8459439
-	goto_if_lt VAR_0x8006, 4, Quetzal_EventScript_8459439
-	goto_if_gt VAR_0x8006, 7, Quetzal_EventScript_8459439
-	msgbox Quetzal_Text_8456559, MSGBOX_DEFAULT
-	goto Quetzal_EventScript_8459493
 
 Quetzal_EventScript_8459439::
 	specialvar VAR_RESULT, QzGetSeagallopNumber
@@ -2118,8 +2115,8 @@ Quetzal_Text_842FD3B::
 	.string "departing immediately.$"
 
 Quetzal_Text_8431905::
-	.string "Choose a destination (up/down).\n"
-	.string "A: Sail  B: Cancel$"
+	.string "Ahoy, there!\n"
+	.string "Where do you want to sail?$"
 
 Quetzal_Text_843561B::
 	.string "SNORLAX woke up!\p"
@@ -2137,7 +2134,7 @@ Quetzal_Text_84356AF::
 	.string "{PLAYER} played the MOé FLUTE.$"
 
 Quetzal_Text_843E142::
-	.string "BLUE: Yeah!\n"
+	.string "{RIVAL}: Yeah!\n"
 	.string "Am I great or what?$"
 
 Quetzal_Text_8440C0A::
@@ -2185,14 +2182,15 @@ Quetzal_Text_8455B3E::
 	.string "Please, go right ahead.$"
 
 Quetzal_Text_8455BAC::
-	.string "In KANTO, you have registered\n"
-	.string "{STR_VAR_3} species as caught.\p"
-	.string "To receive {STR_VAR_2},\n"
-	.string "you need {STR_VAR_1} species.$"
+	.string "Let’s see…\n"
+	.string "Uh-oh! You have caught only\l"
+	.string "{STR_VAR_3} kinds of MOéMON!\p"
+	.string "You need {STR_VAR_1} kinds\n"
+	.string "if you want the {STR_VAR_2}.$"
 
 Quetzal_Text_8455C04::
-	.string "When you register {STR_VAR_1} species\n"
-	.string "as caught in KANTO,\p"
+	.string "…Oh. I see.\p"
+	.string "When you get {STR_VAR_1} kinds of MOéMON,\n"
 	.string "come back for the {STR_VAR_2}.$"
 
 Quetzal_Text_8455C4B::
