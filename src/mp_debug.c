@@ -3197,6 +3197,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] bflags %08x battlers %d coop %d wild %d triple %d inBattle %d\n", (unsigned)gBattleTypeFlags,
                gBattlersCount, gMpCoopBattle, gMpCoopWild, gIsTripleBattle, gMain.inBattle);
     }
+    else if (strcmp(cmd, "usecut") == 0)
+    {
+        // usecut - CUT as if chosen in the party menu (party slot 0): what it does here
+        bool8 SetUpFieldMove_Cut(void);
+        extern void (*gPostMenuFieldCallback)(void);
+        if (SetUpFieldMove_Cut() && gPostMenuFieldCallback != NULL)
+        {
+            gPostMenuFieldCallback();
+            printf("[test] usecut: used\n");
+        }
+        else
+            printf("[test] usecut: nothing\n");
+    }
     else if (strcmp(cmd, "beattrainer") == 0)
     {
         // beattrainer ID - the trainer counts as beaten (its trainer flag set)

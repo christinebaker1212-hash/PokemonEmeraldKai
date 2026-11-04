@@ -2152,3 +2152,27 @@ u16 MP_CapeBrinkTaught(void)
         FlagSet(FLAG_KANTO_CAPE_BRINK_ALL);
     return gSpecialVar_Result = (n == 3);
 }
+
+// ---------------------------------------------------------------------------------------------------- RUIN VALLEY
+// FireRed's CutMoveRuinValleyCheck / CutMoveOpenDottedHoleDoor (fldeff_cut.c calls these): CUT used from the party menu
+// standing below the braille door (24,24), facing it, opens it (FLAG_QZ_0x222F, FireRed's
+// FLAG_USED_CUT_ON_RUIN_VALLEY_BRAILLE; the map's ON_LOAD keeps it open)
+#include "fieldmap.h"
+#include "field_player_avatar.h"
+bool8 MP_RuinValleyCutCheck(void)
+{
+    return !FlagGet(FLAG_QZ_0x222F)
+        && gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_KANTO_SIX_ISLAND_RUIN_VALLEY)
+        && gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_KANTO_SIX_ISLAND_RUIN_VALLEY)
+        && gSaveBlock1Ptr->pos.x == 24 && gSaveBlock1Ptr->pos.y == 25
+        && GetPlayerFacingDirection() == DIR_NORTH;
+}
+
+void MP_RuinValleyOpenDoor(void)
+{
+    MapGridSetMetatileIdAt(24 + MAP_OFFSET, 24 + MAP_OFFSET, 0x358);
+    DrawWholeMapView();
+    PlaySE(SE_BANG);
+    FlagSet(FLAG_QZ_0x222F);
+    UnlockPlayerFieldControls();
+}

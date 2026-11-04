@@ -1,0 +1,6 @@
+# SIX ISLAND's RUIN VALLEY: CUT used from the party menu below the braille door opens it, as in FireRed
+MODE=1
+TMO=90
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=25:40"
+EXPECT_A=("[test] usecut: used" "[test] flag 8751 = 1" "[test] tile 24,24 = 856")
+UNEXPECT_A=("[crash]")
