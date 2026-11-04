@@ -9,13 +9,13 @@ Kanto_ThreeIsland_DunsparceTunnel_EventScript_8414B12::
 	end
 
 Kanto_ThreeIsland_DunsparceTunnel_EventScript_8414B28::
-	setmaplayoutindex 0x3AC
+	setmaplayoutindex LAYOUT_KANTO_THREE_ISLAND_DUNSPARCE_TUNNEL_DUG_OUT   @ (Quetzal's layout 0x3AC)
 	setobjectxyperm 1, 0x17, 2
 	setobjectmovementtype 1, 8
 	return
 
 Kanto_ThreeIsland_DunsparceTunnel_EventScript_8414B37::
-	setmaplayoutindex 0x3AB
+	setmaplayoutindex LAYOUT_KANTO_THREE_ISLAND_DUNSPARCE_TUNNEL   @ (Quetzal's layout 0x3AB)
 	setobjectxyperm 1, 6, 3
 	setobjectmovementtype 1, 0xA
 	return

@@ -1,0 +1,58 @@
+pressuntil A field 5000
+wait 30
+mp setflag 0x51
+mp warp 34,26,4,5
+wait 150
+press UP 10
+wait 10
+mash A 70 20
+wait 60
+mp getvar 0x501D
+mp party
+mp newday
+mp warp 34,26,4,5
+wait 150
+press UP 10
+wait 10
+mash A 120 20
+wait 300
+mp getvar 0x501D
+mp party
+mp friendship 0 50
+mp warp 35,30,4,5
+wait 150
+press UP 10
+wait 10
+mash A 30 20
+wait 60
+mp checkitem 325
+mp friendship 0 200
+mash A 40 20
+wait 60
+mp checkitem 325
+mp setflag 0x1051
+mp warp 34,100,5,5
+wait 150
+press UP 10
+wait 10
+mash A 45 20
+wait 400
+mp getvar 0x5026
+press A 5
+mash A 20 20
+wait 200
+shot party
+press A 5
+wait 30
+mash A 80 20
+wait 300
+mp checkitem 36
+shot after
+mp clearflag 0x1051
+mp money 5000
+mp warp 34,56,7,6
+wait 150
+mash A 20 20
+wait 60
+mp money
+quit

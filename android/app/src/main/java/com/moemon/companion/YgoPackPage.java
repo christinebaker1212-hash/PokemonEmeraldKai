@@ -37,8 +37,19 @@ public final class YgoPackPage extends Page {
         return System.currentTimeMillis() - start > FIRST + cards.length * (long) STEP + 600;
     }
 
+    private int heard = -2;   // (the last card heard turning; -2: the pack not opened yet)
+    private boolean fanfare;
+
     @Override
     public void draw(Canvas c, int w, int h) {
+        if (heard == -2) {
+            heard = -1;
+            v.sound.play("se_rg_card_open");
+        }
+        if (!fanfare && done()) {
+            fanfare = true;
+            v.sound.fanfare("mus_obtain_item");
+        }
         YgoArt ya = v.app.ygoArt;
         long t = System.currentTimeMillis() - start;
         fill.setShader(new LinearGradient(0, 0, 0, h, 0xFF302868, 0xFF0C0A20, Shader.TileMode.CLAMP));
@@ -59,6 +70,10 @@ public final class YgoPackPage extends Page {
             long at = FIRST + i * (long) STEP;
             float flip = 1;
             boolean front = t > at + 130;
+            if (front && i > heard) {
+                heard = i;   // (as the game's pack screen: each card as it turns, a rare one shining)
+                v.sound.play(ya.card(cards[i]) != null && ya.card(cards[i]).optInt("ra") >= 3 ? "se_shiny" : "se_rg_card_flip");
+            }
             if (t > at && t < at + 260) {
                 flip = Math.max(0.04f, (float) Math.abs(Math.cos((t - at) / 260.0 * Math.PI)));
             }
@@ -103,5 +118,10 @@ public final class YgoPackPage extends Page {
             }
         }
         v.showOver(null);
+    }
+
+    @Override
+    public boolean swapsWords() {
+        return false;   // (the card games' own words: the POKéMON card game is the POKéMON card game)
     }
 }

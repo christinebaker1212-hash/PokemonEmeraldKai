@@ -1,0 +1,6 @@
+# POKéMON TOWER 6F's MAROWAK (with the SILPH SCOPE): FireRed's ghost battle, where a thrown ball is dodged
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=2"
+EXPECT_A=("ghost battle: the ball was dodged")
+UNEXPECT_A=("[crash]")

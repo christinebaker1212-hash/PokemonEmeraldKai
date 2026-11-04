@@ -1,0 +1,6 @@
+pressuntil A field 5000
+wait 30
+mp trainer 2081
+wait 400
+shot barry
+quit

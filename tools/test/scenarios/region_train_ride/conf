@@ -1,0 +1,10 @@
+# The MAGNET TRAIN with Crystal's ride (src/mp/mp_magnettrain.c): JOHTO's LEAGUE beaten and the S.S. TICKET in the BAG,
+# GOLDENROD's clerk sends the player to SAFFRON (KANTO visited before: no guide), the ride (the scenery, the train
+# coming on, holding, leaving), then SAFFRON's POKéMON CENTER door in KANTO
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:30 MOEMON_DEBUG_REGION=1"
+EXPECT_A=("region: travel 1 -> 2" "region 2 " "ctx 1 free 1 overworld 1 locked 0 script 0")
+# the scenery scrolls over the whole screen, trees at its top and bottom (Crystal's rows, the field's camera scroll cleared)
+CHECK="python3 tools/test/check_train_scroll.py"
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -821,6 +821,47 @@ static bool8 ShouldJumpLedge(s16 x, s16 y, u8 direction)
         return FALSE;
 }
 
+// Moemon Kai: FireRed's boulders that fall through holes (pokefirered field_control_avatar.c
+// HandleBoulderFallThroughHole, field_player_avatar.c TryPushBoulder): KANTO's SEAFOAM ISLANDS and VICTORY ROAD
+// boulders keep, in their template's trainer type, the flag that shows them on the floor below (FireRed's
+// GetBoulderRevealFlagByLocalIdAndMap). Such a boulder may be pushed onto a hole (FireRed's MB_FALL_WARP: this port's
+// holes are non-animated door warps); it falls (SE_FALL), gone here for good, and the flag below is cleared.
+// (qz_specials.c QzSeafoamCurrentEffect: FireRed's SeafoamIslandsB4F_CurrentDumpsPlayerOnLand)
+void MP_StopSurfingNorth(void)
+{
+    CreateStopSurfingTask(DIR_NORTH);
+}
+
+u16 MP_BoulderRevealFlag(struct ObjectEvent *boulder)
+{
+    u8 i;
+    for (i = 0; i < OBJECT_EVENT_TEMPLATES_COUNT; i++)
+    {
+        const struct ObjectEventTemplate *t = &gSaveBlock1Ptr->objectEventTemplates[i];
+        if (t->localId == boulder->localId)
+            return t->trainerType >= 0x20 && t->trainerType < SPECIAL_FLAGS_START ? t->trainerType : 0;   // (a flag, not a trainer type)
+    }
+    return 0;
+}
+
+static bool8 IsBoulderHole(struct ObjectEvent *boulder, s16 x, s16 y)
+{
+    return MP_BoulderRevealFlag(boulder) != 0 && MetatileBehavior_IsNonAnimDoor(MapGridGetMetatileBehaviorAt(x, y));
+}
+
+// (after a push: here, and mp_world.c for a friend's push) TRUE: it fell
+bool8 MP_BoulderFallThroughHole(struct ObjectEvent *boulder)
+{
+    u16 flag;
+    if (!IsBoulderHole(boulder, boulder->currentCoords.x, boulder->currentCoords.y))
+        return FALSE;
+    flag = MP_BoulderRevealFlag(boulder);
+    PlaySE(SE_FALL);
+    RemoveObjectEventByLocalIdAndMap(boulder->localId, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
+    FlagClear(flag);
+    return TRUE;
+}
+
 static bool8 TryPushBoulder(s16 x, s16 y, u8 direction)
 {
     if (FlagGet(FLAG_SYS_USE_STRENGTH))
@@ -832,8 +873,9 @@ static bool8 TryPushBoulder(s16 x, s16 y, u8 direction)
             x = gObjectEvents[objectEventId].currentCoords.x;
             y = gObjectEvents[objectEventId].currentCoords.y;
             MoveCoords(direction, &x, &y);
-            if (GetCollisionAtCoords(&gObjectEvents[objectEventId], x, y, direction) == COLLISION_NONE
-             && MetatileBehavior_IsNonAnimDoor(MapGridGetMetatileBehaviorAt(x, y)) == FALSE)
+            if (IsBoulderHole(&gObjectEvents[objectEventId], x, y)   // Moemon Kai: FireRed's fall through a hole
+             || (GetCollisionAtCoords(&gObjectEvents[objectEventId], x, y, direction) == COLLISION_NONE
+             && MetatileBehavior_IsNonAnimDoor(MapGridGetMetatileBehaviorAt(x, y)) == FALSE))
             {
                 StartStrengthAnim(objectEventId, direction);
                 MP_World_BoulderPushed(objectEventId, direction, x, y);   // Moemon Co-op: for friends on the map
@@ -1536,7 +1578,8 @@ static void HideShowWarpArrow(struct ObjectEvent *objectEvent)
 
     for (x = 0, direction = DIR_SOUTH; x < 4; x++, direction++)
     {
-        if (sArrowWarpMetatileBehaviorChecks2[x](metatileBehavior) && direction == objectEvent->movementDirection)
+        if (sArrowWarpMetatileBehaviorChecks2[x](metatileBehavior) && direction == objectEvent->movementDirection
+         && !MetatileBehavior_IsSinnohStairs(metatileBehavior))   // (Moemon Kai: SINNOH's stairs show no arrow, as Platinum's)
         {
             // Show warp arrow if applicable
             x = objectEvent->currentCoords.x;
@@ -1616,8 +1659,10 @@ static bool8 PushBoulder_End(struct Task *task, struct ObjectEvent *player, stru
         gPlayerAvatar.preventStep = FALSE;
         UnlockPlayerFieldControls();
         DestroyTask(FindTaskIdByFunc(Task_PushBoulder));
-        // Moemon Kai: a boulder on a FireRed switch (KANTO's VICTORY ROAD, the TANOBY KEY)
-        TryRunBoulderSwitchScript(boulder->currentCoords.x - MAP_OFFSET, boulder->currentCoords.y - MAP_OFFSET);
+        // Moemon Kai: a boulder into a hole (KANTO's SEAFOAM, VICTORY ROAD), or on a FireRed switch (VICTORY ROAD,
+        // the TANOBY KEY)
+        if (!MP_BoulderFallThroughHole(boulder))
+            TryRunBoulderSwitchScript(boulder->currentCoords.x - MAP_OFFSET, boulder->currentCoords.y - MAP_OFFSET);
     }
     return FALSE;
 }

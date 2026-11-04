@@ -51,7 +51,6 @@ Johto_VictoryRoadGate_EventScript_83E8F1A::
 	playse SE_PIN
 	applymovement 1, Quetzal_Movement_83607F9
 	delay 0x14
-	goto_if_lt VAR_QZ_0x501A, 8, Johto_VictoryRoadGate_EventScript_83E8F54
 	msgbox Johto_VictoryRoadGate_Text_83E8F90, MSGBOX_DEFAULT
 	goto_if_unset FLAG_QZ_0x11B9, Johto_VictoryRoadGate_EventScript_83E8F69
 	msgbox Johto_VictoryRoadGate_Text_83E906B, MSGBOX_DEFAULT

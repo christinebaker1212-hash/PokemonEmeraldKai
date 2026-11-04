@@ -2928,10 +2928,16 @@
    "illustration": [
     40,
     70,
-    287,
+    275,
     195
    ],
-   "bytes": 42100
+   "bytes": 42100,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 12,
+    "b": 0
+   }
   },
   "235": {
    "name": "Ivysaur",
@@ -2941,9 +2947,15 @@
     41,
     61,
     275,
-    198
+    192
    ],
-   "bytes": 41037
+   "bytes": 41037,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 0,
+    "b": 6
+   }
   },
   "236": {
    "name": "Dark Ivysaur",
@@ -2976,10 +2988,16 @@
    "illustration": [
     40,
     69,
-    287,
-    195
+    280,
+    189
    ],
-   "bytes": 49578
+   "bytes": 49578,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 6
+   }
   },
   "239": {
    "name": "Weedle",
@@ -2988,22 +3006,34 @@
    "illustration": [
     42,
     71,
-    284,
-    195
+    277,
+    189
    ],
-   "bytes": 36045
+   "bytes": 36045,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 6
+   }
   },
   "240": {
    "name": "Kakuna",
    "printing": "japan-expansion_sheet",
    "layout": "pokemon/japan",
    "illustration": [
-    41,
+    53,
     70,
-    287,
-    195
+    268,
+    189
    ],
-   "bytes": 40059
+   "bytes": 40059,
+   "trimmed": {
+    "l": 12,
+    "t": 0,
+    "r": 7,
+    "b": 6
+   }
   },
   "241": {
    "name": "Ekans",
@@ -3024,22 +3054,34 @@
    "illustration": [
     41,
     71,
-    287,
-    195
+    279,
+    189
    ],
-   "bytes": 36787
+   "bytes": 36787,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 8,
+    "b": 6
+   }
   },
   "243": {
    "name": "Dark Arbok",
    "printing": "base5-2",
    "layout": "pokemon/base5",
    "illustration": [
-    41,
+    44,
     58,
-    287,
+    284,
     201
    ],
-   "bytes": 50814
+   "bytes": 50814,
+   "trimmed": {
+    "l": 3,
+    "t": 0,
+    "r": 0,
+    "b": 0
+   }
   },
   "244": {
    "name": "Nidoran F",
@@ -3072,10 +3114,16 @@
    "illustration": [
     42,
     70,
-    284,
+    277,
     196
    ],
-   "bytes": 40505
+   "bytes": 40505,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 0
+   }
   },
   "247": {
    "name": "Nidorino",
@@ -3084,10 +3132,16 @@
    "illustration": [
     41,
     56,
-    287,
+    279,
     210
    ],
-   "bytes": 36253
+   "bytes": 36253,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 8,
+    "b": 0
+   }
   },
   "248": {
    "name": "Zubat",
@@ -3096,10 +3150,16 @@
    "illustration": [
     41,
     58,
-    287,
-    201
+    280,
+    195
    ],
-   "bytes": 37313
+   "bytes": 37313,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 6
+   }
   },
   "249": {
    "name": "Zubat",
@@ -3108,10 +3168,16 @@
    "illustration": [
     41,
     69,
-    286,
-    196
+    279,
+    190
    ],
-   "bytes": 38995
+   "bytes": 38995,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 6
+   }
   },
   "250": {
    "name": "Golbat",
@@ -3120,10 +3186,16 @@
    "illustration": [
     41,
     68,
-    287,
-    196
+    280,
+    191
    ],
-   "bytes": 38110
+   "bytes": 38110,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 5
+   }
   },
   "251": {
    "name": "Dark Golbat",
@@ -3145,9 +3217,15 @@
     41,
     58,
     287,
-    201
+    194
    ],
-   "bytes": 41887
+   "bytes": 41887,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 0,
+    "b": 7
+   }
   },
   "253": {
    "name": "Dark Gloom",
@@ -3180,10 +3258,16 @@
    "illustration": [
     40,
     50,
-    287,
-    215
+    280,
+    209
    ],
-   "bytes": 35861
+   "bytes": 35861,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 6
+   }
   },
   "256": {
    "name": "Parasect",
@@ -3192,10 +3276,16 @@
    "illustration": [
     41,
     69,
-    287,
+    280,
     189
    ],
-   "bytes": 40132
+   "bytes": 40132,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 0
+   }
   },
   "257": {
    "name": "Venonat",
@@ -3216,10 +3306,16 @@
    "illustration": [
     43,
     56,
-    283,
-    210
+    276,
+    205
    ],
-   "bytes": 48791
+   "bytes": 48791,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 5
+   }
   },
   "259": {
    "name": "Bellsprout",
@@ -3228,10 +3324,16 @@
    "illustration": [
     40,
     70,
-    286,
-    195
+    279,
+    190
    ],
-   "bytes": 38323
+   "bytes": 38323,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 5
+   }
   },
   "260": {
    "name": "Weepinbell",
@@ -3253,9 +3355,15 @@
     41,
     58,
     287,
-    201
+    195
    ],
-   "bytes": 45211
+   "bytes": 45211,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 0,
+    "b": 6
+   }
   },
   "262": {
    "name": "Dark Muk",
@@ -3288,10 +3396,16 @@
    "illustration": [
     44,
     67,
-    285,
-    197
+    279,
+    191
    ],
-   "bytes": 45963
+   "bytes": 45963,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 6,
+    "b": 6
+   }
   },
   "265": {
    "name": "Weezing",
@@ -3300,10 +3414,16 @@
    "illustration": [
     41,
     70,
-    285,
-    196
+    278,
+    190
    ],
-   "bytes": 40419
+   "bytes": 40419,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 6
+   }
   },
   "266": {
    "name": "Dark Weezing",
@@ -3322,12 +3442,18 @@
    "printing": "basep-45",
    "layout": "pokemon/basep",
    "illustration": [
-    41,
+    45,
     59,
-    279,
+    275,
     193
    ],
-   "bytes": 40991
+   "bytes": 40991,
+   "trimmed": {
+    "l": 4,
+    "t": 0,
+    "r": 0,
+    "b": 0
+   }
   },
   "268": {
    "name": "Pinsir",
@@ -3336,10 +3462,16 @@
    "illustration": [
     41,
     62,
-    287,
-    203
+    280,
+    197
    ],
-   "bytes": 41031
+   "bytes": 41031,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 6
+   }
   },
   "269": {
    "name": "Charmander",
@@ -3348,10 +3480,16 @@
    "illustration": [
     41,
     58,
-    287,
-    201
+    279,
+    194
    ],
-   "bytes": 41800
+   "bytes": 41800,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 8,
+    "b": 7
+   }
   },
   "270": {
    "name": "Charmander",
@@ -3360,10 +3498,16 @@
    "illustration": [
     34,
     69,
-    293,
+    286,
     196
    ],
-   "bytes": 40450
+   "bytes": 40450,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 0
+   }
   },
   "271": {
    "name": "Dark Charmeleon",
@@ -3419,11 +3563,17 @@
    "layout": "pokemon/japan",
    "illustration": [
     35,
-    61,
+    68,
     293,
-    202
+    195
    ],
-   "bytes": 45673
+   "bytes": 45673,
+   "trimmed": {
+    "l": 0,
+    "t": 7,
+    "r": 0,
+    "b": 0
+   }
   },
   "276": {
    "name": "Growlithe",
@@ -3456,10 +3606,16 @@
    "illustration": [
     40,
     70,
-    286,
+    280,
     189
    ],
-   "bytes": 37635
+   "bytes": 37635,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 6,
+    "b": 0
+   }
   },
   "279": {
    "name": "Ponyta",
@@ -3468,10 +3624,16 @@
    "illustration": [
     41,
     58,
-    287,
+    279,
     201
    ],
-   "bytes": 40519
+   "bytes": 40519,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 8,
+    "b": 0
+   }
   },
   "280": {
    "name": "Rapidash",
@@ -3491,11 +3653,17 @@
    "layout": "pokemon/base5",
    "illustration": [
     41,
-    58,
-    287,
-    201
+    62,
+    282,
+    197
    ],
-   "bytes": 47040
+   "bytes": 47040,
+   "trimmed": {
+    "l": 0,
+    "t": 4,
+    "r": 5,
+    "b": 0
+   }
   },
   "282": {
    "name": "Magmar",
@@ -3504,10 +3672,16 @@
    "illustration": [
     41,
     67,
-    287,
-    196
+    279,
+    189
    ],
-   "bytes": 41978
+   "bytes": 41978,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 8,
+    "b": 7
+   }
   },
   "283": {
    "name": "Magmar",
@@ -3553,9 +3727,15 @@
     41,
     61,
     275,
-    198
+    190
    ],
-   "bytes": 45646
+   "bytes": 45646,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 0,
+    "b": 8
+   }
   },
   "287": {
    "name": "Squirtle",
@@ -3565,21 +3745,33 @@
     34,
     48,
     294,
-    215
+    209
    ],
-   "bytes": 49530
+   "bytes": 49530,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 0,
+    "b": 6
+   }
   },
   "288": {
    "name": "Squirtle",
    "printing": "render-pokemon",
    "layout": "pokemon/render",
    "illustration": [
-    41,
-    61,
-    275,
-    198
+    49,
+    65,
+    267,
+    185
    ],
-   "bytes": 44905
+   "bytes": 44905,
+   "trimmed": {
+    "l": 8,
+    "t": 4,
+    "r": 0,
+    "b": 9
+   }
   },
   "289": {
    "name": "Squirtle",
@@ -3587,11 +3779,17 @@
    "layout": "pokemon/base5",
    "illustration": [
     41,
-    58,
-    287,
-    201
+    60,
+    279,
+    193
    ],
-   "bytes": 44222
+   "bytes": 44222,
+   "trimmed": {
+    "l": 0,
+    "t": 2,
+    "r": 8,
+    "b": 6
+   }
   },
   "290": {
    "name": "Wartortle",
@@ -3600,10 +3798,16 @@
    "illustration": [
     35,
     55,
-    293,
-    209
+    284,
+    203
    ],
-   "bytes": 48728
+   "bytes": 48728,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 9,
+    "b": 6
+   }
   },
   "291": {
    "name": "Dark Wartortle",
@@ -3611,11 +3815,17 @@
    "layout": "pokemon/base5",
    "illustration": [
     41,
-    58,
+    67,
     287,
-    201
+    192
    ],
-   "bytes": 50694
+   "bytes": 50694,
+   "trimmed": {
+    "l": 0,
+    "t": 9,
+    "r": 0,
+    "b": 0
+   }
   },
   "292": {
    "name": "Dark Blastoise",
@@ -3623,11 +3833,17 @@
    "layout": "pokemon/base5",
    "illustration": [
     41,
-    58,
+    65,
     287,
-    201
+    194
    ],
-   "bytes": 52989
+   "bytes": 52989,
+   "trimmed": {
+    "l": 0,
+    "t": 7,
+    "r": 0,
+    "b": 0
+   }
   },
   "293": {
    "name": "Psyduck",
@@ -3636,10 +3852,16 @@
    "illustration": [
     41,
     58,
-    287,
-    201
+    280,
+    194
    ],
-   "bytes": 45913
+   "bytes": 45913,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 7
+   }
   },
   "294": {
    "name": "Golduck",
@@ -3659,35 +3881,53 @@
    "layout": "pokemon/base5",
    "illustration": [
     41,
-    58,
+    70,
     287,
-    201
+    189
    ],
-   "bytes": 51457
+   "bytes": 51457,
+   "trimmed": {
+    "l": 0,
+    "t": 12,
+    "r": 0,
+    "b": 0
+   }
   },
   "296": {
    "name": "Poliwag",
    "printing": "japan-expansion_sheet",
    "layout": "pokemon/japan",
    "illustration": [
-    33,
+    40,
     51,
-    293,
-    215
+    286,
+    209
    ],
-   "bytes": 37704
+   "bytes": 37704,
+   "trimmed": {
+    "l": 7,
+    "t": 0,
+    "r": 0,
+    "b": 6
+   }
   },
   "297": {
    "name": "Poliwhirl",
    "printing": "japan-expansion_sheet",
    "layout": "pokemon/japan",
    "illustration": [
-    34,
+    40,
     58,
-    294,
-    209
+    280,
+    203
    ],
-   "bytes": 41375
+   "bytes": 41375,
+   "trimmed": {
+    "l": 6,
+    "t": 0,
+    "r": 8,
+    "b": 6
+   }
   },
   "298": {
    "name": "Poliwrath",
@@ -3706,12 +3946,18 @@
    "printing": "japan-expansion_sheet",
    "layout": "pokemon/japan",
    "illustration": [
-    34,
+    40,
     71,
-    293,
-    195
+    280,
+    189
    ],
-   "bytes": 43111
+   "bytes": 43111,
+   "trimmed": {
+    "l": 6,
+    "t": 0,
+    "r": 7,
+    "b": 6
+   }
   },
   "300": {
    "name": "Dewgong",
@@ -3732,34 +3978,52 @@
    "illustration": [
     34,
     71,
-    294,
-    196
+    287,
+    190
    ],
-   "bytes": 38050
+   "bytes": 38050,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 6
+   }
   },
   "302": {
    "name": "Krabby",
    "printing": "japan-expansion_sheet",
    "layout": "pokemon/japan",
    "illustration": [
-    32,
+    39,
     67,
-    294,
-    196
+    287,
+    190
    ],
-   "bytes": 37287
+   "bytes": 37287,
+   "trimmed": {
+    "l": 7,
+    "t": 0,
+    "r": 0,
+    "b": 6
+   }
   },
   "303": {
    "name": "Kingler",
    "printing": "japan-expansion_sheet",
    "layout": "pokemon/japan",
    "illustration": [
-    35,
+    41,
     71,
-    293,
-    196
+    281,
+    190
    ],
-   "bytes": 40351
+   "bytes": 40351,
+   "trimmed": {
+    "l": 6,
+    "t": 0,
+    "r": 6,
+    "b": 6
+   }
   },
   "304": {
    "name": "Horsea",
@@ -3768,10 +4032,16 @@
    "illustration": [
     42,
     69,
-    286,
-    196
+    279,
+    190
    ],
-   "bytes": 36828
+   "bytes": 36828,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 6
+   }
   },
   "305": {
    "name": "Seadra",
@@ -3780,10 +4050,16 @@
    "illustration": [
     41,
     47,
-    285,
+    279,
     212
    ],
-   "bytes": 40392
+   "bytes": 40392,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 6,
+    "b": 0
+   }
   },
   "306": {
    "name": "Staryu",
@@ -3815,23 +4091,35 @@
    "layout": "pokemon/base5",
    "illustration": [
     41,
-    58,
+    63,
     287,
-    201
+    196
    ],
-   "bytes": 45645
+   "bytes": 45645,
+   "trimmed": {
+    "l": 0,
+    "t": 5,
+    "r": 0,
+    "b": 0
+   }
   },
   "309": {
    "name": "Magikarp",
    "printing": "japan-pro",
    "layout": "pokemon/japan",
    "illustration": [
-    33,
-    62,
-    292,
-    203
+    39,
+    69,
+    279,
+    190
    ],
-   "bytes": 52057
+   "bytes": 52057,
+   "trimmed": {
+    "l": 6,
+    "t": 7,
+    "r": 7,
+    "b": 6
+   }
   },
   "310": {
    "name": "Dark Gyarados",
@@ -3850,12 +4138,18 @@
    "printing": "japan-expansion_sheet",
    "layout": "pokemon/japan",
    "illustration": [
-    34,
+    39,
     70,
-    294,
-    196
+    282,
+    190
    ],
-   "bytes": 39634
+   "bytes": 39634,
+   "trimmed": {
+    "l": 5,
+    "t": 0,
+    "r": 7,
+    "b": 6
+   }
   },
   "312": {
    "name": "Dark Vaporeon",
@@ -3877,9 +4171,15 @@
     42,
     68,
     286,
-    196
+    189
    ],
-   "bytes": 46418
+   "bytes": 46418,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 0,
+    "b": 7
+   }
   },
   "314": {
    "name": "Omanyte",
@@ -3888,10 +4188,16 @@
    "illustration": [
     43,
     71,
-    281,
+    274,
     182
    ],
-   "bytes": 50257
+   "bytes": 50257,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 0
+   }
   },
   "315": {
    "name": "Omastar",
@@ -3959,11 +4265,17 @@
    "layout": "pokemon/japan",
    "illustration": [
     41,
-    59,
-    287,
-    202
+    71,
+    280,
+    190
    ],
-   "bytes": 42644
+   "bytes": 42644,
+   "trimmed": {
+    "l": 0,
+    "t": 12,
+    "r": 7,
+    "b": 0
+   }
   },
   "321": {
    "name": "Raichu",
@@ -3972,10 +4284,16 @@
    "illustration": [
     41,
     55,
-    285,
-    210
+    278,
+    203
    ],
-   "bytes": 47824
+   "bytes": 47824,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 7
+   }
   },
   "322": {
    "name": "Dark Raichu",
@@ -3983,11 +4301,17 @@
    "layout": "pokemon/base5",
    "illustration": [
     41,
-    58,
+    70,
     287,
-    201
+    189
    ],
-   "bytes": 49634
+   "bytes": 49634,
+   "trimmed": {
+    "l": 0,
+    "t": 12,
+    "r": 0,
+    "b": 0
+   }
   },
   "323": {
    "name": "Magnemite",
@@ -3996,10 +4320,16 @@
    "illustration": [
     41,
     58,
-    287,
-    201
+    280,
+    193
    ],
-   "bytes": 39951
+   "bytes": 39951,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 8
+   }
   },
   "324": {
    "name": "Magnemite",
@@ -4009,9 +4339,15 @@
     41,
     61,
     275,
-    198
+    192
    ],
-   "bytes": 43194
+   "bytes": 43194,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 0,
+    "b": 6
+   }
   },
   "325": {
    "name": "Magneton",
@@ -4045,9 +4381,15 @@
     40,
     50,
     286,
-    215
+    209
    ],
-   "bytes": 41897
+   "bytes": 41897,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 0,
+    "b": 6
+   }
   },
   "328": {
    "name": "Voltorb",
@@ -4056,10 +4398,16 @@
    "illustration": [
     41,
     58,
-    287,
-    201
+    279,
+    194
    ],
-   "bytes": 36267
+   "bytes": 36267,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 8,
+    "b": 7
+   }
   },
   "329": {
    "name": "Dark Electrode",
@@ -4092,10 +4440,16 @@
    "illustration": [
     41,
     58,
-    287,
+    282,
     201
    ],
-   "bytes": 49276
+   "bytes": 49276,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 5,
+    "b": 0
+   }
   },
   "332": {
    "name": "Zapdos",
@@ -4128,10 +4482,16 @@
    "illustration": [
     40,
     71,
-    286,
+    279,
     195
    ],
-   "bytes": 41809
+   "bytes": 41809,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 0
+   }
   },
   "335": {
    "name": "Diglett",
@@ -4189,9 +4549,15 @@
     41,
     58,
     287,
-    201
+    190
    ],
-   "bytes": 44286
+   "bytes": 44286,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 0,
+    "b": 11
+   }
   },
   "340": {
    "name": "Dark Primeape",
@@ -4200,10 +4566,16 @@
    "illustration": [
     41,
     58,
-    287,
+    285,
     201
    ],
-   "bytes": 48601
+   "bytes": 48601,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 2,
+    "b": 0
+   }
   },
   "341": {
    "name": "Machop",
@@ -4224,10 +4596,16 @@
    "illustration": [
     41,
     58,
-    287,
-    201
+    278,
+    194
    ],
-   "bytes": 38355
+   "bytes": 38355,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 9,
+    "b": 7
+   }
   },
   "343": {
    "name": "Machoke",
@@ -4236,10 +4614,16 @@
    "illustration": [
     40,
     68,
-    286,
-    196
+    279,
+    190
    ],
-   "bytes": 43513
+   "bytes": 43513,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 6
+   }
   },
   "344": {
    "name": "Machoke",
@@ -4248,10 +4632,16 @@
    "illustration": [
     40,
     49,
-    287,
-    217
+    279,
+    211
    ],
-   "bytes": 43641
+   "bytes": 43641,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 8,
+    "b": 6
+   }
   },
   "345": {
    "name": "Dark Machoke",
@@ -4297,9 +4687,15 @@
     41,
     50,
     286,
-    216
+    207
    ],
-   "bytes": 32327
+   "bytes": 32327,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 0,
+    "b": 9
+   }
   },
   "349": {
    "name": "Graveler",
@@ -4308,10 +4704,16 @@
    "illustration": [
     40,
     70,
-    286,
-    195
+    280,
+    190
    ],
-   "bytes": 40066
+   "bytes": 40066,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 6,
+    "b": 5
+   }
   },
   "350": {
    "name": "Graveler",
@@ -4320,10 +4722,16 @@
    "illustration": [
     40,
     57,
-    286,
+    279,
     209
    ],
-   "bytes": 42379
+   "bytes": 42379,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 0
+   }
   },
   "351": {
    "name": "Golem",
@@ -4344,10 +4752,16 @@
    "illustration": [
     41,
     51,
-    287,
-    215
+    279,
+    210
    ],
-   "bytes": 46020
+   "bytes": 46020,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 8,
+    "b": 5
+   }
   },
   "353": {
    "name": "Cubone",
@@ -4380,10 +4794,16 @@
    "illustration": [
     39,
     69,
-    286,
-    196
+    280,
+    190
    ],
-   "bytes": 40920
+   "bytes": 40920,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 6,
+    "b": 6
+   }
   },
   "356": {
    "name": "Hitmonchan",
@@ -4392,10 +4812,16 @@
    "illustration": [
     40,
     71,
-    287,
-    195
+    280,
+    188
    ],
-   "bytes": 43891
+   "bytes": 43891,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 7
+   }
   },
   "357": {
    "name": "Rhydon",
@@ -4416,10 +4842,16 @@
    "illustration": [
     43,
     71,
-    280,
-    194
+    274,
+    189
    ],
-   "bytes": 49853
+   "bytes": 49853,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 6,
+    "b": 5
+   }
   },
   "359": {
    "name": "Aerodactyl",
@@ -4438,12 +4870,18 @@
    "printing": "japan-expansion_sheet",
    "layout": "pokemon/japan",
    "illustration": [
-    34,
-    61,
-    294,
-    204
+    40,
+    68,
+    281,
+    191
    ],
-   "bytes": 38932
+   "bytes": 38932,
+   "trimmed": {
+    "l": 6,
+    "t": 7,
+    "r": 7,
+    "b": 6
+   }
   },
   "361": {
    "name": "Abra",
@@ -4453,21 +4891,33 @@
     41,
     58,
     287,
-    201
+    189
    ],
-   "bytes": 47867
+   "bytes": 47867,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 0,
+    "b": 12
+   }
   },
   "362": {
    "name": "Kadabra",
    "printing": "japan-expansion_sheet",
    "layout": "pokemon/japan",
    "illustration": [
-    33,
-    61,
-    293,
-    203
+    39,
+    68,
+    280,
+    191
    ],
-   "bytes": 37695
+   "bytes": 37695,
+   "trimmed": {
+    "l": 6,
+    "t": 7,
+    "r": 7,
+    "b": 5
+   }
   },
   "363": {
    "name": "Dark Kadabra",
@@ -4488,22 +4938,34 @@
    "illustration": [
     43,
     70,
-    283,
-    196
+    277,
+    190
    ],
-   "bytes": 53392
+   "bytes": 53392,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 6,
+    "b": 6
+   }
   },
   "365": {
    "name": "Dark Alakazam",
    "printing": "base5-1",
    "layout": "pokemon/base5",
    "illustration": [
-    41,
+    47,
     58,
-    287,
+    281,
     201
    ],
-   "bytes": 45268
+   "bytes": 45268,
+   "trimmed": {
+    "l": 6,
+    "t": 0,
+    "r": 0,
+    "b": 0
+   }
   },
   "366": {
    "name": "Slowpoke",
@@ -4513,9 +4975,15 @@
     41,
     58,
     287,
-    201
+    195
    ],
-   "bytes": 39635
+   "bytes": 39635,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 0,
+    "b": 6
+   }
   },
   "367": {
    "name": "Slowbro",
@@ -4524,10 +4992,16 @@
    "illustration": [
     41,
     68,
-    287,
-    196
+    280,
+    190
    ],
-   "bytes": 35055
+   "bytes": 35055,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 6
+   }
   },
   "368": {
    "name": "Dark Slowbro",
@@ -4548,22 +5022,34 @@
    "illustration": [
     39,
     68,
-    287,
-    197
+    279,
+    190
    ],
-   "bytes": 38905
+   "bytes": 38905,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 8,
+    "b": 7
+   }
   },
   "370": {
    "name": "Haunter",
    "printing": "japan-expansion_sheet",
    "layout": "pokemon/japan",
    "illustration": [
-    34,
-    61,
-    294,
-    204
+    40,
+    68,
+    288,
+    189
    ],
-   "bytes": 35610
+   "bytes": 35610,
+   "trimmed": {
+    "l": 6,
+    "t": 7,
+    "r": 0,
+    "b": 8
+   }
   },
   "371": {
    "name": "Haunter",
@@ -4572,10 +5058,16 @@
    "illustration": [
     40,
     70,
-    286,
+    279,
     196
    ],
-   "bytes": 39315
+   "bytes": 39315,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 0
+   }
   },
   "372": {
    "name": "Dark Haunter",
@@ -4596,10 +5088,16 @@
    "illustration": [
     40,
     70,
-    285,
+    278,
     189
    ],
-   "bytes": 46094
+   "bytes": 46094,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 0
+   }
   },
   "374": {
    "name": "Dark Gengar",
@@ -4620,22 +5118,34 @@
    "illustration": [
     41,
     58,
-    287,
-    201
+    280,
+    195
    ],
-   "bytes": 41946
+   "bytes": 41946,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 6
+   }
   },
   "376": {
    "name": "Hypno",
    "printing": "japan-expansion_sheet",
    "layout": "pokemon/japan",
    "illustration": [
-    34,
+    40,
     70,
-    293,
+    287,
     195
    ],
-   "bytes": 37110
+   "bytes": 37110,
+   "trimmed": {
+    "l": 6,
+    "t": 0,
+    "r": 0,
+    "b": 0
+   }
   },
   "377": {
    "name": "Dark Hypno",
@@ -4654,12 +5164,18 @@
    "printing": "japan-expansion_sheet",
    "layout": "pokemon/japan",
    "illustration": [
-    32,
-    61,
-    294,
-    203
+    38,
+    68,
+    288,
+    196
    ],
-   "bytes": 42365
+   "bytes": 42365,
+   "trimmed": {
+    "l": 6,
+    "t": 7,
+    "r": 0,
+    "b": 0
+   }
   },
   "379": {
    "name": "Jynx",
@@ -4678,12 +5194,18 @@
    "printing": "japan-bulbasaur_deck",
    "layout": "pokemon/japan",
    "illustration": [
-    34,
+    40,
     68,
-    294,
-    197
+    281,
+    190
    ],
-   "bytes": 42608
+   "bytes": 42608,
+   "trimmed": {
+    "l": 6,
+    "t": 0,
+    "r": 7,
+    "b": 7
+   }
   },
   "381": {
    "name": "Mewtwo",
@@ -4702,12 +5224,18 @@
    "printing": "japan-expansion_sheet",
    "layout": "pokemon/japan",
    "illustration": [
-    34,
+    41,
     71,
-    293,
-    196
+    279,
+    189
    ],
-   "bytes": 33940
+   "bytes": 33940,
+   "trimmed": {
+    "l": 7,
+    "t": 0,
+    "r": 7,
+    "b": 7
+   }
   },
   "383": {
    "name": "Mewtwo",
@@ -4741,9 +5269,15 @@
     41,
     67,
     287,
-    196
+    190
    ],
-   "bytes": 40813
+   "bytes": 40813,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 0,
+    "b": 6
+   }
   },
   "386": {
    "name": "Pidgeotto",
@@ -4752,10 +5286,16 @@
    "illustration": [
     41,
     56,
-    286,
+    278,
     204
    ],
-   "bytes": 44817
+   "bytes": 44817,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 8,
+    "b": 0
+   }
   },
   "387": {
    "name": "Rattata",
@@ -4764,10 +5304,16 @@
    "illustration": [
     41,
     58,
-    287,
-    201
+    279,
+    194
    ],
-   "bytes": 43242
+   "bytes": 43242,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 8,
+    "b": 7
+   }
   },
   "388": {
    "name": "Rattata",
@@ -4777,9 +5323,15 @@
     40,
     70,
     286,
-    196
+    187
    ],
-   "bytes": 43444
+   "bytes": 43444,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 0,
+    "b": 9
+   }
   },
   "389": {
    "name": "Dark Raticate",
@@ -4800,10 +5352,16 @@
    "illustration": [
     40,
     46,
-    286,
-    217
+    280,
+    211
    ],
-   "bytes": 43852
+   "bytes": 43852,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 6,
+    "b": 6
+   }
   },
   "391": {
    "name": "Spearow",
@@ -4812,10 +5370,16 @@
    "illustration": [
     41,
     69,
-    287,
+    280,
     196
    ],
-   "bytes": 36497
+   "bytes": 36497,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 0
+   }
   },
   "392": {
    "name": "Fearow",
@@ -4825,9 +5389,15 @@
     41,
     71,
     286,
-    196
+    190
    ],
-   "bytes": 39574
+   "bytes": 39574,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 0,
+    "b": 6
+   }
   },
   "393": {
    "name": "Dark Fearow",
@@ -4835,11 +5405,17 @@
    "layout": "pokemon/japan",
    "illustration": [
     37,
-    67,
+    71,
     285,
-    184
+    180
    ],
-   "bytes": 45136
+   "bytes": 45136,
+   "trimmed": {
+    "l": 0,
+    "t": 4,
+    "r": 0,
+    "b": 0
+   }
   },
   "394": {
    "name": "Clefairy",
@@ -4848,10 +5424,16 @@
    "illustration": [
     39,
     69,
-    287,
-    196
+    280,
+    190
    ],
-   "bytes": 37114
+   "bytes": 37114,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 6
+   }
   },
   "395": {
    "name": "Dark Clefable",
@@ -4884,10 +5466,16 @@
    "illustration": [
     41,
     58,
-    287,
+    278,
     201
    ],
-   "bytes": 45217
+   "bytes": 45217,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 9,
+    "b": 0
+   }
   },
   "398": {
    "name": "Meowth",
@@ -4944,10 +5532,16 @@
    "illustration": [
     41,
     70,
-    287,
+    279,
     195
    ],
-   "bytes": 39495
+   "bytes": 39495,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 8,
+    "b": 0
+   }
   },
   "403": {
    "name": "Dodrio",
@@ -4956,10 +5550,16 @@
    "illustration": [
     42,
     68,
-    286,
+    279,
     190
    ],
-   "bytes": 35176
+   "bytes": 35176,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 0
+   }
   },
   "404": {
    "name": "Lickitung",
@@ -4980,10 +5580,16 @@
    "illustration": [
     40,
     70,
-    287,
-    195
+    279,
+    189
    ],
-   "bytes": 38161
+   "bytes": 38161,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 8,
+    "b": 6
+   }
   },
   "406": {
    "name": "Kangaskhan",
@@ -4992,10 +5598,16 @@
    "illustration": [
     40,
     70,
-    286,
-    196
+    278,
+    189
    ],
-   "bytes": 40079
+   "bytes": 40079,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 8,
+    "b": 7
+   }
   },
   "407": {
    "name": "Kangaskhan",
@@ -5005,9 +5617,15 @@
     41,
     70,
     275,
-    195
+    190
    ],
-   "bytes": 55979
+   "bytes": 55979,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 0,
+    "b": 5
+   }
   },
   "408": {
    "name": "Tauros",
@@ -5028,10 +5646,16 @@
    "illustration": [
     40,
     70,
-    286,
+    279,
     195
    ],
-   "bytes": 35210
+   "bytes": 35210,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 0
+   }
   },
   "410": {
    "name": "Eevee",
@@ -5040,10 +5664,16 @@
    "illustration": [
     41,
     58,
-    287,
-    201
+    280,
+    195
    ],
-   "bytes": 44708
+   "bytes": 44708,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 7,
+    "b": 6
+   }
   },
   "411": {
    "name": "Porygon",
@@ -5173,9 +5803,15 @@
     39,
     67,
     283,
-    184
+    178
    ],
-   "bytes": 47113
+   "bytes": 47113,
+   "trimmed": {
+    "l": 0,
+    "t": 0,
+    "r": 0,
+    "b": 6
+   }
   },
   "422": {
    "name": "Imakuni?",

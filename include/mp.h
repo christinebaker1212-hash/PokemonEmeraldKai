@@ -800,6 +800,7 @@ bool8 MP_Compass_AnyShown(void);
 void MP_Compass_Toggle(void);     // the right stick click / G: show or hide the FRIEND FINDER
 void MP_MapPic_Update(void);      // mp_mappic.c: full-color pictures pinned to maps (the GAME CENTER)
 bool8 MP_MapPic_IsPictureMap(u8 group, u8 num);
+bool8 MP_MapPic_CoversFeet(s16 x, s16 y);   // a picture's over layer hides cell (x, y)'s bottom rows (mp_shadow.c)
 u8 MP_MapPic_ArrivalDir(s16 x, s16 y);   // the way to step off an arrival door (DIR_NONE: down)
 bool8 MP_Emote_LoadUiPalette(void);   // the sprite palette shared by bubbles, toasts and compass arrows
 // mp_piggy.c
@@ -1110,6 +1111,14 @@ bool8 MP_Follower_TryInteract(void);
 bool8 MP_Follower_Toggle(struct Pokemon *mon);
 void MP_Follower_OnWalkSteps(void);
 void MP_Gatcha_GrantFree(void);       // today's / this week's free pulls (stocked)
+// The phone app's MOEGATCHA (mp_gatcha.c, end): banners, stock, pulls with the reel's own prizes
+struct MpGatchaPrize { u8 rarity, kind; u16 id; bool8 shiny; u32 amount; u8 name[48]; char note[48]; };
+u8 MP_Gatcha_BannerCount(void);
+const char *MP_Gatcha_BannerName(u8 b);
+const char *MP_Gatcha_BannerTagline(u8 b);
+s32 MP_Gatcha_FreeStock(u8 b, bool8 ten);
+const char *MP_Gatcha_RarityName(u8 r);
+const char *MP_Gatcha_PhonePull(u8 banner, u8 how, struct MpGatchaPrize *out, u8 *count);
 s32 MP_Gatcha_Tickets(void);          // MOEGATCHA TICKETS: one pull on any banner
 void MP_Gatcha_OnRelay(u8 from, const u8 *data, u16 len);   // the weekly PICKUP vote
 void MP_Gatcha_VoteUpdate(void);

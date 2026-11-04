@@ -146,10 +146,9 @@ Kanto_CeladonCity_Condominiums_RoofRoom_Text_8446868::
 	.string "meeting other TRAINERS.$"
 
 Kanto_CeladonCity_Condominiums_RoofRoom_Text_844690F::
-	.string "It’s a pamphlet on move training.\p"
+	.string "It’s a pamphlet on TMs.\p"
 	.string "… …\p"
-	.string "Moves can be managed directly from\n"
-	.string "the MOéMON team menu.\p"
-	.string "Field techniques are unlocked by\n"
-	.string "earning BADGES.\p"
+	.string "There are fifty TMs in all.\p"
+	.string "There are also seven HMs that\n"
+	.string "can be used repeatedly.\p"
 	.string "SILPH CO.$"

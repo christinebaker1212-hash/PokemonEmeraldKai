@@ -177,17 +177,7 @@
       "dest_warp_id": "1"
     }
   ],
-  "coord_events": [
-    {
-      "type": "trigger",
-      "x": 4,
-      "y": 9,
-      "elevation": 0,
-      "var": "VAR_TEMP_0",
-      "var_value": "0",
-      "script": "Johto_Route29_EventScript_83ECBA0"
-    }
-  ],
+  "coord_events": [],
   "bg_events": [
     {
       "type": "sign",

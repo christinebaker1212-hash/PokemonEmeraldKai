@@ -61,8 +61,8 @@ Kanto_MtEmber_Summit_EventScript_8413939::
 	goto Quetzal_EventScript_8459513
 
 Kanto_MtEmber_Summit_EventScript_8413942::
-	setvar VAR_0x8004, 0x92
+	setvar VAR_0x8004, SPECIES_MOLTRES
 	goto Quetzal_EventScript_845951C
 
 Kanto_MtEmber_Summit_Text_84568CB::
-	.string "Moltres!$"
+	.string "Gyaoo!$"

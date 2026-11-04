@@ -1,8 +1,8 @@
-// Moemon Co-op: the saves folder and the three save files (src/platform/save_slots.c)
+// Moemon Co-op: the saves folder and the twelve save files (src/platform/save_slots.c)
 #ifndef GUARD_SAVE_SLOTS_H
 #define GUARD_SAVE_SLOTS_H
 
-#define SAVE_SLOT_COUNT 3
+#define SAVE_SLOT_COUNT 12
 
 struct SaveSlotSummary
 {
@@ -14,7 +14,7 @@ struct SaveSlotSummary
 };
 
 void SaveSlots_Init(bool8 readOnly);   // before the save is read: the old save moved in, the slot in use picked
-int SaveSlots_Current(void);        // 1-3, 0 with --save / MOEMON_SAVE (no slots)
+int SaveSlots_Current(void);        // 1-SAVE_SLOT_COUNT, 0 with --save / MOEMON_SAVE (no slots)
 void SaveSlots_WriteSummary(void);  // with every save
 bool8 SaveSlots_Summary(int slot, struct SaveSlotSummary *out);
 void SaveSlots_Switch(int slot);    // goes on with that save file in place (main_menu.c reloads the save)

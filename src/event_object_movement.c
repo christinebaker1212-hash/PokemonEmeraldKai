@@ -1934,6 +1934,7 @@ void PlayerObjectTurn(struct PlayerAvatar *playerAvatar, u8 direction)
     ObjectEventTurn(&gObjectEvents[playerAvatar->objectEventId], direction);
 }
 
+bool8 MP_JohtoBerries_IsPatch(u8 tree);   // (mp_apricorn.c)
 static void SetBerryTreeGraphics(struct ObjectEvent *objectEvent, struct Sprite *sprite)
 {
     u8 berryStage;
@@ -1942,6 +1943,8 @@ static void SetBerryTreeGraphics(struct ObjectEvent *objectEvent, struct Sprite 
     objectEvent->invisible = TRUE;
     sprite->invisible = TRUE;
     berryStage = GetStageByBerryTreeId(objectEvent->trainerRange_berryTreeId);
+    if (berryStage != BERRY_STAGE_NO_BERRY && MP_JohtoBerries_IsPatch(objectEvent->trainerRange_berryTreeId))
+        berryStage = BERRY_STAGE_NO_BERRY;   // (Moemon Kai: JOHTO's BERRY patches are the map's fruit tree, never a sprite: mp_apricorn.c)
     if (berryStage != BERRY_STAGE_NO_BERRY)
     {
         objectEvent->invisible = FALSE;
@@ -3371,6 +3374,11 @@ bool8 MovementType_BerryTreeGrowth_Normal(struct ObjectEvent *objectEvent, struc
     objectEvent->invisible = TRUE;
     sprite->invisible = TRUE;
     berryStage = GetStageByBerryTreeId(objectEvent->trainerRange_berryTreeId);
+    if (berryStage != BERRY_STAGE_NO_BERRY && MP_JohtoBerries_IsPatch(objectEvent->trainerRange_berryTreeId))
+    {
+        sprite->animNum = BERRY_STAGE_NO_BERRY;   // (Moemon Kai: JOHTO's BERRY patches are the map's fruit tree, never a sprite: mp_apricorn.c)
+        return FALSE;
+    }
     if (berryStage == BERRY_STAGE_NO_BERRY)
     {
         if (!(sprite->sBerryTreeFlags & BERRY_FLAG_JUST_PICKED) && sprite->animNum == BERRY_STAGE_FLOWERING)
@@ -7685,6 +7693,10 @@ static void UpdateObjectEventSpriteAnimPause(struct ObjectEvent *objectEvent, st
 {
     if (objectEvent->disableAnim)
         sprite->animPaused = TRUE;
+    // Moemon Kai: the TOWER pillar sways the whole time, as Crystal's tile animation (a standing object's facing
+    // anim is paused, which would hold it on one frame)
+    if (sprite->anims == sAnimTable_QzTowerPillar)
+        sprite->animPaused = FALSE;
 }
 
 static void TryEnableObjectEventAnim(struct ObjectEvent *objectEvent, struct Sprite *sprite)

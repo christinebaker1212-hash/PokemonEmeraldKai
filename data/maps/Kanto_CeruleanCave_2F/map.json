@@ -226,13 +226,6 @@
       "elevation": 3,
       "dest_map": "MAP_KANTO_CERULEAN_CAVE_1F",
       "dest_warp_id": "7"
-    },
-    {
-      "x": 4,
-      "y": 3,
-      "elevation": 3,
-      "dest_map": "MAP_KANTO_CERULEAN_CAVE_RAYQUAZA_CHAMBER",
-      "dest_warp_id": "0"
     }
   ],
   "coord_events": [],

@@ -44,12 +44,6 @@ Johto_MahoganyTown_EventScript_83DF67B::
 @ Johto_MahoganyTown trigger at 30,12 (VAR_QZ_0x500C == 11)
 @ Johto_MahoganyTown trigger at 30,12 (VAR_QZ_0x500C == 12)
 @ Johto_MahoganyTown trigger at 30,12 (VAR_QZ_0x500C == 13)
-@ Johto_MahoganyTown trigger at 30,12 (VAR_QZ_0x500C == 14)
-@ Johto_MahoganyTown trigger at 30,12 (VAR_QZ_0x500C == 15)
-@ Johto_MahoganyTown trigger at 30,12 (VAR_QZ_0x500C == 16)
-@ Johto_MahoganyTown trigger at 30,13 (VAR_QZ_0x500C == 16)
-@ Johto_MahoganyTown trigger at 30,13 (VAR_QZ_0x500C == 15)
-@ Johto_MahoganyTown trigger at 30,13 (VAR_QZ_0x500C == 14)
 @ Johto_MahoganyTown trigger at 30,13 (VAR_QZ_0x500C == 13)
 @ Johto_MahoganyTown trigger at 30,13 (VAR_QZ_0x500C == 12)
 @ Johto_MahoganyTown trigger at 30,13 (VAR_QZ_0x500C == 11)
@@ -57,9 +51,6 @@ Johto_MahoganyTown_EventScript_83DF67B::
 @ Johto_MahoganyTown trigger at 30,13 (VAR_QZ_0x500C == 9)
 @ Johto_MahoganyTown trigger at 30,13 (VAR_QZ_0x500C == 8)
 @ Johto_MahoganyTown trigger at 30,13 (VAR_QZ_0x500C == 7)
-@ Johto_MahoganyTown trigger at 30,14 (VAR_QZ_0x500C == 16)
-@ Johto_MahoganyTown trigger at 30,14 (VAR_QZ_0x500C == 15)
-@ Johto_MahoganyTown trigger at 30,14 (VAR_QZ_0x500C == 14)
 @ Johto_MahoganyTown trigger at 30,14 (VAR_QZ_0x500C == 13)
 @ Johto_MahoganyTown trigger at 30,14 (VAR_QZ_0x500C == 12)
 @ Johto_MahoganyTown trigger at 30,14 (VAR_QZ_0x500C == 11)
@@ -111,7 +102,8 @@ Johto_MahoganyTown_EventScript_83DF787::
 Johto_MahoganyTown_EventScript_83DF792::
 	lock
 	faceplayer
-	goto_if_eq VAR_QZ_0x500C, 17, Johto_MahoganyTown_EventScript_83DF853
+	@ Moemon Kai: sold out once the ROCKET HIDEOUT is cleared, as Crystal's (docs/REGIONS_AUDIT.md 157)
+	goto_if_ge VAR_QZ_0x500C, 14, Johto_MahoganyTown_EventScript_83DF853
 	showmoneybox 0, 0, 0
 	msgbox Johto_MahoganyTown_Text_83DF8CF, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, 0, Johto_MahoganyTown_EventScript_83DF7F6
@@ -174,7 +166,7 @@ Johto_MahoganyTown_EventScript_83DF85E::
 Johto_MahoganyTown_EventScript_83DF869::
 	lock
 	faceplayer
-	goto_if_eq VAR_QZ_0x500C, 6, Johto_MahoganyTown_EventScript_83DF881
+	goto_if_ge VAR_QZ_0x500C, 14, Johto_MahoganyTown_EventScript_83DF881   @ Moemon Kai: once the hideout is cleared (Crystal: EVENT_CLEARED_ROCKET_HIDEOUT)
 	msgbox Johto_MahoganyTown_Text_83DF9E5, MSGBOX_DEFAULT
 	closemessage
 	release

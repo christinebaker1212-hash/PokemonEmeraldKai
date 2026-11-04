@@ -1417,7 +1417,9 @@ static void SpriteCB_Ball_FadeOut(struct Sprite *sprite)
         SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_EFFECT_BLEND | BLDCNT_TGT2_ALL);
         SetGpuReg(REG_OFFSET_BLDALPHA, BLDALPHA_BLEND(16, 0));
         paletteIndex = IndexOfSpritePaletteTag(sprite->template->paletteTag);
-        BeginNormalPaletteFade(1 << (paletteIndex + 0x10), 0, 0, 16, RGB_WHITE);
+        // Moemon Co-op: by slot (a ball's palette can be in slots 16-63: the mask's bit wrapped onto BG palette 1, the
+        // battle's YES / NO frame, which stayed white)
+        MP_BeginSpritePaletteFade(paletteIndex, 0, 0, 16, RGB_WHITE);
         sprite->sState++;
         break;
     case 1:

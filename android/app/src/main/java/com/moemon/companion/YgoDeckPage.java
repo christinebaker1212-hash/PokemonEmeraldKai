@@ -249,12 +249,7 @@ public final class YgoDeckPage extends Page {
     }
 
     private void heading(Canvas c, int w, int y, String title, String right) {
-        fill.setColor(0xFF203868);
-        c.drawRect(8, y + 2, w - 8, y + 18, fill);
-        art.text(c, title, 14, y + 3, GameArt.WHITE_TEXT, 0xFF101830);
-        if (right != null) {
-            art.text(c, right, w - 14 - art.width(right), y + 3, 0xFFF8D030, 0xFF101830);
-        }
+        sectionBar(c, 8, w - 8, y + 2, 16, title, right);
     }
 
     private void rename() {
@@ -362,5 +357,10 @@ public final class YgoDeckPage extends Page {
             return;
         }
         v.showOver(null);
+    }
+
+    @Override
+    public boolean swapsWords() {
+        return false;   // (the card games' own words: the POKéMON card game is the POKéMON card game)
     }
 }

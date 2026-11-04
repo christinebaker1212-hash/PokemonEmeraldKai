@@ -4,6 +4,7 @@
 EventScript_RegionCustoms::
 	specialvar VAR_RESULT, MP_RegionFirstVisit
 	call_if_eq VAR_RESULT, TRUE, EventScript_RegionFirstVisit
+EventScript_RegionCustomsPick::   @ (the gates between JOHTO and KANTO: customs without the boats' first-visit greeting)
 	setvar VAR_0x8005, 0
 	specialvar VAR_RESULT, MP_RegionPartyCount
 	goto_if_le VAR_RESULT, 1, EventScript_RegionCustoms_Done
@@ -65,7 +66,7 @@ gText_HoennRegionFerry::
 @ GOLDENROD's MAGNET TRAIN (Quetzal's is broken down): it runs to KANTO's SAFFRON once JOHTO's League is beaten.
 @ The way back is the boat (OLIVINE / VERMILION). Customs as at the ports.
 EventScript_MagnetTrain::
-	specialvar VAR_RESULT, MP_GlobalPcLinked
+	specialvar VAR_RESULT, MP_MagnetTrainOpen   @ (either LEAGUE beaten, the S.S. TICKET: mp_region.c)
 	goto_if_eq VAR_RESULT, 0, EventScript_MagnetTrain_Usual
 	msgbox gText_MagnetTrainRide, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, EventScript_RegionCustoms_Cancel
@@ -87,7 +88,7 @@ EventScript_MagnetTrain_Usual::
 EventScript_MagnetTrainSaffron::
 	lock
 	faceplayer
-	specialvar VAR_RESULT, MP_GlobalPcLinked
+	specialvar VAR_RESULT, MP_MagnetTrainOpen   @ (either LEAGUE beaten, the S.S. TICKET: mp_region.c)
 	goto_if_eq VAR_RESULT, 0, EventScript_MagnetTrainSaffron_Closed
 	msgbox gText_MagnetTrainRideJohto, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, EventScript_RegionCustoms_Cancel
@@ -118,8 +119,8 @@ gText_MagnetTrainDepartsJohto::
 gText_MagnetTrainSaffronClosed::
 	.string "This is the MAGNET TRAIN's SAFFRON\n"
 	.string "counter.\p"
-	.string "The line to JOHTO opens for the\n"
-	.string "CHAMPION of KANTO's POKéMON LEAGUE.$"
+	.string "The line to JOHTO opens for a\n"
+	.string "LEAGUE CHAMPION with an S.S. TICKET.$"
 
 gText_MagnetTrainRide::
 	.string "The MAGNET TRAIN is running again!\p"
@@ -203,14 +204,31 @@ gText_QzHeadbuttNothing::
 EventScript_GameCenterGuide::
 	lock
 	faceplayer
+	showmoneybox 0, 0
 	msgbox gText_GameCenterGuide, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, NO, EventScript_GameCenterGuide_No
+	goto_if_eq VAR_RESULT, NO, EventScript_GameCenterGuide_NoBox
+	checkmoney 500   @ (admission as HOENN's GAME CENTER charges: RustboroCity_GameCenter_1F)
+	goto_if_eq VAR_RESULT, FALSE, EventScript_GameCenterGuide_NoMoney
+	removemoney 500
+	updatemoneybox
+	playse SE_SHOP
 	msgbox gText_GameCenterGuideGo, MSGBOX_DEFAULT
+	hidemoneybox
 	closemessage
 	setvar VAR_GAME_CENTER_PAID, 1
 	warp MAP_RUSTBORO_CITY_GAME_CENTER_2F, 0
 	waitstate
 	end
+
+EventScript_GameCenterGuide_NoMoney::
+	msgbox gText_GameCenterGuideNoMoney, MSGBOX_DEFAULT
+	hidemoneybox
+	release
+	end
+
+EventScript_GameCenterGuide_NoBox::
+	hidemoneybox
+	goto EventScript_GameCenterGuide_No
 
 EventScript_GameCenterRoofClosed::
 	lockall
@@ -237,7 +255,13 @@ EventScript_GameCenterGuide_No::
 gText_GameCenterGuide::
 	.string "Upstairs is the GAME CENTER! The\n"
 	.string "CARD SHOP on 2F, games and the DANCE\p"
-	.string "machine on 3F. Shall I take you up?$"
+	.string "machine on 3F.\p"
+	.string "Admission is ¥500, and it's good for\n"
+	.string "every floor until you leave.\p"
+	.string "Shall I take you up?$"
+
+gText_GameCenterGuideNoMoney::
+	.string "Oh, I'm sorry. Admission is ¥500...$"
 
 gText_GameCenterGuideGo::
 	.string "Right this way! Have fun!$"
@@ -458,7 +482,7 @@ Johto_EventScript_FruitTreeFull::
 	releaseall
 	end
 
-Johto_Text_FruitBearingTree:
+Johto_Text_FruitBearingTree::
 	.string "It’s a fruit-bearing tree.$"
 
 Johto_Text_HeyItsFruit:
@@ -470,5 +494,98 @@ Johto_Text_ObtainedFruit:
 Johto_Text_FruitBagFull:
 	.string "But the BAG is full…$"
 
-Johto_Text_NothingHere:
+Johto_Text_NothingHere::
 	.string "There’s nothing here…$"
+
+@ The first boat to KANTO / JOHTO (MP_Region_FirstBoatIn, VAR_REGION_ARRIVAL 0x52FD = the region): off the boat at
+@ VERMILION / OLIVINE, the port's sailor meets the player and takes them to the region's first town, where a room
+@ waits (PALLET TOWN, NEW BARK TOWN). The ports' frame scripts run these.
+EventScript_RegionArrivalKanto::
+	lockall
+	turnobject OBJ_EVENT_ID_PLAYER, DIR_SOUTH
+	turnobject 4, DIR_NORTH
+	msgbox gText_RegionArrivalKanto, MSGBOX_DEFAULT
+	closemessage
+	setvar 0x52FD, 0
+	warp MAP_KANTO_PALLET_TOWN_PLAYERS_HOUSE_2F, 6, 6
+	waitstate
+	releaseall
+	end
+
+EventScript_RegionArrivalJohto::
+	lockall
+	turnobject OBJ_EVENT_ID_PLAYER, DIR_SOUTH
+	turnobject 1, DIR_NORTH
+	msgbox gText_RegionArrivalJohto, MSGBOX_DEFAULT
+	closemessage
+	setvar 0x52FD, 0
+	warp MAP_JOHTO_PLAYERS_HOUSE2F, 4, 4
+	waitstate
+	releaseall
+	end
+
+gText_RegionArrivalKanto::
+	.string "Ahoy! You're the TRAINER from\n"
+	.string "overseas, aren't you?\p"
+	.string "Welcome to KANTO! PROF. OAK asked\n"
+	.string "me to watch for your boat.\p"
+	.string "A room's ready for you in PALLET\n"
+	.string "TOWN, where his POKéMON LAB is.\p"
+	.string "Follow me, I'll take you there!$"
+
+gText_RegionArrivalJohto::
+	.string "Ahoy! You're the TRAINER from\n"
+	.string "overseas, aren't you?\p"
+	.string "Welcome to JOHTO! PROF. ELM asked\n"
+	.string "me to watch for your boat.\p"
+	.string "A room's ready for you in NEW BARK\n"
+	.string "TOWN, where his POKéMON LAB is.\p"
+	.string "Follow me, I'll take you there!$"
+
+@ The walk between JOHTO's VICTORY ROAD gate and KANTO's ROUTE 22 gate (docs/REGIONS_AUDIT.md cases 43, 70): Crystal's
+@ way through, for champions of both LEAGUES, with Kai's customs as on the boats (qz_specials.c MP_RegionGateCross)
+EventScript_RegionGateToKanto::
+	lockall
+	setvar VAR_0x8004, 2   @ REGION_KANTO
+	specialvar VAR_RESULT, QzVictoryRoadGateCheck
+	goto_if_eq VAR_RESULT, 0, EventScript_RegionGateClosedJohto
+	call EventScript_RegionCustomsPick
+	specialvar VAR_RESULT, MP_RegionGateCross
+	goto_if_eq VAR_RESULT, 0, EventScript_RegionGateRefusedJohto
+	warp MAP_KANTO_ROUTE22_NORTH_ENTRANCE, 3, 2
+	waitstate
+	releaseall
+	end
+
+EventScript_RegionGateToJohto::
+	lockall
+	setvar VAR_0x8004, 1   @ REGION_JOHTO
+	specialvar VAR_RESULT, QzVictoryRoadGateCheck
+	goto_if_eq VAR_RESULT, 0, EventScript_RegionGateClosedKanto
+	call EventScript_RegionCustomsPick
+	specialvar VAR_RESULT, MP_RegionGateCross
+	goto_if_eq VAR_RESULT, 0, EventScript_RegionGateRefusedKanto
+	warp MAP_JOHTO_VICTORY_ROAD_GATE, 19, 9
+	waitstate
+	releaseall
+	end
+
+EventScript_RegionGateRefusedJohto::
+	msgbox Quetzal_Text_840FB2D, MSGBOX_DEFAULT
+EventScript_RegionGateClosedJohto::
+	msgbox Quetzal_Text_83E90EF, MSGBOX_DEFAULT
+	closemessage
+	applymovement LOCALID_PLAYER, Common_Movement_WalkLeft
+	waitmovement 0
+	releaseall
+	end
+
+EventScript_RegionGateRefusedKanto::
+	msgbox Quetzal_Text_840FB2D, MSGBOX_DEFAULT
+EventScript_RegionGateClosedKanto::
+	msgbox Quetzal_Text_83E90EF, MSGBOX_DEFAULT
+	closemessage
+	applymovement LOCALID_PLAYER, Common_Movement_WalkDown
+	waitmovement 0
+	releaseall
+	end

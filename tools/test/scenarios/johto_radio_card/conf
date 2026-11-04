@@ -1,0 +1,7 @@
+# Crystal's RADIO CARD quiz on RADIO TOWER 1F (RadioTower1F.asm): WHITNEY's quiz (Quetzal's) is gone, the woman asks
+# Crystal's five questions (YES, YES, NO, YES, NO) and the RADIO CARD (0x1064) puts the RADIO on the POKéGEAR.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("[test] objat 13,8: none" "[test] flag 4196 = 1")
+UNEXPECT_A=("[crash]")

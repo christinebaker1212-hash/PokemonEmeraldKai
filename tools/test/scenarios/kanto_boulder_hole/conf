@@ -1,0 +1,8 @@
+# FireRed's boulders that fall through holes (field_player_avatar.c MP_BoulderFallThroughHole): SEAFOAM ISLANDS 1F's
+# boulder (32,9) pushed west twice, then north into the hole at (30,8): it falls (gone, its hide flag 0x21BC set) and
+# the flag that shows it on B1F (8638) is cleared.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=2"
+EXPECT_A=("[test] flag 8638 = 0" "[test] flag 8636 = 1")
+UNEXPECT_A=("[crash]")

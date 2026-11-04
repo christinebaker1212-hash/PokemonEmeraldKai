@@ -156,6 +156,43 @@ public final class Model {
         return o;
     }
 
+    /** The POKé BALL page: its ball (another kind costs one from the BAG), color and decoration */
+    public static JSONObject ballStyle(JSONObject at, JSONObject mon, int item, int color, int deco, int special) {
+        JSONObject o = new JSONObject();
+        try {
+            o.put("op", "ballstyle");
+            o.put("at", at);
+            o.put("p", mon.optLong("p"));
+            o.put("o", mon.optLong("o"));
+            o.put("item", item);
+            o.put("color", color);
+            o.put("deco", deco);
+            o.put("special", special);
+        } catch (JSONException ignored) {
+        }
+        return o;
+    }
+
+    /** The POKé BALL page: its entrance / recall effect; at null = every POKéMON in the party; slot >= 0 = MY PRESET */
+    public static JSONObject ballFx(JSONObject at, JSONObject mon, BallFx fx, int slot) {
+        JSONObject o = new JSONObject();
+        try {
+            o.put("op", slot >= 0 ? "fxpreset" : at == null ? "fxparty" : "ballfx");
+            if (at != null && slot < 0) {
+                o.put("at", at);
+                o.put("p", mon.optLong("p"));
+                o.put("o", mon.optLong("o"));
+            }
+            if (slot >= 0) {
+                o.put("slot", slot);
+            }
+            o.put("fx", fx.pack());
+            o.put("fxs", fx.sound);
+        } catch (JSONException ignored) {
+        }
+        return o;
+    }
+
     public static JSONObject boxPlace(int box, int slot) {
         JSONObject o = new JSONObject();
         try {

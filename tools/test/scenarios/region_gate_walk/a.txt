@@ -1,0 +1,32 @@
+pressuntil A field 5000
+wait 30
+mp warp 35,20,19,9
+wait 150
+mp where
+mp face right
+press RIGHT 16
+wait 30
+shot g1
+mash A 16 20
+wait 90
+wait 60
+mp where
+mp regioninfo
+mp regionclear 1
+mp regionclear 2
+mp face right
+press RIGHT 16
+wait 30
+shot g2
+press A 2
+wait 40
+shot g3
+press A 2
+wait 40
+shot g4
+
+mash A 60 20
+wait 400
+mp where
+mp regioninfo
+quit

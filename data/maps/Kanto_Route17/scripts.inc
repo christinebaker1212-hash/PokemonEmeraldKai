@@ -277,8 +277,8 @@ Kanto_Route17_Text_84377DD::
 
 Kanto_Route17_Text_8437846::
 	.string "TRAINER TIPS\p"
-	.string "Get off your bike and move slowly\n"
-	.string "when approaching a DexNav MOéMON.$"
+	.string "Press the B Button to stay in place\n"
+	.string "while on a slope.$"
 
 Kanto_Route17_Text_8437898::
 	.string "ROUTE 17\n"
@@ -291,7 +291,7 @@ Kanto_Route17_Text_84378BD::
 
 Kanto_Route17_Text_84378FC::
 	.string "CYCLING ROAD\n"
-	.string "Continue towards FUCHSIA CITY.$"
+	.string "Slope ends here!$"
 
 Kanto_Route17_Text_846FF2E::
 	.string "I told you, there’s no getting rich\n"

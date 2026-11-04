@@ -1360,11 +1360,11 @@ Kanto_PewterCity_Text_ReceivedRunningShoesFromAide:
 	.string "{PLAYER} received the\n"
 	.string "RUNNING SHOES from the AIDE.$"
 
-Kanto_PewterCity_Text_SwitchedShoesWithRunningShoes:
+Kanto_PewterCity_Text_SwitchedShoesWithRunningShoes::
 	.string "{PLAYER} switched shoes with the\n"
 	.string "RUNNING SHOES.$"
 
-Kanto_PewterCity_Text_ExplainRunningShoes:
+Kanto_PewterCity_Text_ExplainRunningShoes::
 	.string "Press the B Button to run.\n"
 	.string "But only where there's room to run!$"
 

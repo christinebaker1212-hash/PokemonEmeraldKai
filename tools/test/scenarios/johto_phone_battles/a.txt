@@ -1,0 +1,57 @@
+pressuntil A field 5000
+wait 30
+mp qzphone register 15
+mp qzphone moenav 1
+mp warp 34,16,41,10
+waitfor field 600
+wait 60
+mp qzphone steps 1
+press DOWN 16
+wait 60
+mash A 30 20
+wait 30
+mash B 6 10
+wait 20
+mp qzphone x 15
+mp qzphone steps 1
+press UP 16
+wait 60
+mash A 30 20
+wait 30
+mash B 6 10
+wait 20
+mp qzphone x 15
+mp qzphone steps 1
+press DOWN 16
+wait 60
+mash A 30 20
+wait 30
+mash B 6 10
+wait 20
+mp qzphone x 15
+mp qzphone steps 1
+press UP 16
+wait 60
+mash A 30 20
+wait 30
+mash B 6 10
+wait 20
+mp qzphone x 15
+mp qzphone steps 1
+press DOWN 16
+wait 60
+mash A 30 20
+wait 30
+mash B 6 10
+wait 20
+mp qzphone x 15
+mp qzphone steps 1
+press UP 16
+wait 60
+mash A 30 20
+wait 30
+mash B 6 10
+wait 20
+mp qzphone x 15
+mp ctx
+quit

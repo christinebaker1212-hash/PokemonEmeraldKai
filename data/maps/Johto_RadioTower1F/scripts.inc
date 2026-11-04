@@ -50,105 +50,116 @@ Johto_RadioTower1F_EventScript_83D6C76::
 	release
 	end
 
-@ Johto_RadioTower1F object 5 (local id 5, gfx 0x3E82) at 14,10
+@ Johto_RadioTower1F object 5 (local id 5): Crystal's RADIO CARD woman (RadioTower1F.asm RadioTower1FRadioCardWomanScript;
+@ Quetzal's WHITNEY quiz that kept the GOLDENROD GYM shut is gone: docs/REGIONS_AUDIT.md case 11)
 Johto_RadioTower1F_EventScript_83D6D6E::
 	lock
 	faceplayer
-	msgbox Johto_RadioTower1F_Text_83D6EE1, MSGBOX_DEFAULT
-	goto_if_set FLAG_QZ_0x149F, Johto_RadioTower1F_EventScript_83D6E4C
-	goto_if_unset FLAG_QZ_0x10A3, Johto_RadioTower1F_EventScript_83D6D95
-	msgbox Johto_RadioTower1F_Text_83D6EEA, MSGBOX_DEFAULT
+	goto_if_set FLAG_JOHTO_RADIO_CARD, Johto_RadioTower1F_EventScript_RadioCardTuneIn
+	msgbox Johto_RadioTower1F_Text_RadioCardOffer, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Johto_RadioTower1F_EventScript_RadioCardNoQuiz
+	msgbox Johto_RadioTower1F_Text_RadioCardQ1, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Johto_RadioTower1F_EventScript_RadioCardWrong
+	playse SE_DING_DONG
+	waitse
+	msgbox Johto_RadioTower1F_Text_RadioCardQ2, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Johto_RadioTower1F_EventScript_RadioCardWrong
+	playse SE_DING_DONG
+	waitse
+	msgbox Johto_RadioTower1F_Text_RadioCardQ3, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, YES, Johto_RadioTower1F_EventScript_RadioCardWrong
+	playse SE_DING_DONG
+	waitse
+	msgbox Johto_RadioTower1F_Text_RadioCardQ4, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Johto_RadioTower1F_EventScript_RadioCardWrong
+	playse SE_DING_DONG
+	waitse
+	msgbox Johto_RadioTower1F_Text_RadioCardQ5, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, YES, Johto_RadioTower1F_EventScript_RadioCardWrong
+	playse SE_DING_DONG
+	waitse
+	msgbox Johto_RadioTower1F_Text_RadioCardWin, MSGBOX_DEFAULT
+	playfanfare MUS_OBTAIN_ITEM
+	message Johto_RadioTower1F_Text_RadioCardReceived
+	waitmessage
+	waitfanfare
+	setflag FLAG_JOHTO_RADIO_CARD
+	msgbox Johto_RadioTower1F_Text_RadioCardPokegear, MSGBOX_DEFAULT
+Johto_RadioTower1F_EventScript_RadioCardTuneIn::
+	msgbox Johto_RadioTower1F_Text_RadioCardTuneIn, MSGBOX_DEFAULT
 	closemessage
 	release
 	end
 
-Johto_RadioTower1F_EventScript_83D6D95::
-	msgbox Johto_RadioTower1F_Text_83D6F24, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, 1, Johto_RadioTower1F_EventScript_83D6DB3
-	msgbox Johto_RadioTower1F_Text_83D7276, MSGBOX_DEFAULT
+Johto_RadioTower1F_EventScript_RadioCardWrong::
+	playse SE_FAILURE
+	waitse
+	msgbox Johto_RadioTower1F_Text_RadioCardWrong, MSGBOX_DEFAULT
 	closemessage
 	release
 	end
 
-Johto_RadioTower1F_EventScript_83D6DB3::
-	msgbox Johto_RadioTower1F_Text_83D6F8F, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, 1, Johto_RadioTower1F_EventScript_83D6DD1
-	msgbox Johto_RadioTower1F_Text_83D723D, MSGBOX_DEFAULT
+Johto_RadioTower1F_EventScript_RadioCardNoQuiz::
+	msgbox Johto_RadioTower1F_Text_RadioCardNoQuiz, MSGBOX_DEFAULT
 	closemessage
 	release
 	end
 
-Johto_RadioTower1F_EventScript_83D6DD1::
-	msgbox Johto_RadioTower1F_Text_83D6FE1, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, 1, Johto_RadioTower1F_EventScript_83D6DEF
-	msgbox Johto_RadioTower1F_Text_83D723D, MSGBOX_DEFAULT
-	closemessage
-	release
-	end
+Johto_RadioTower1F_Text_RadioCardReceived::
+	.string "{PLAYER} received RADIO CARD.$"
 
-Johto_RadioTower1F_EventScript_83D6DEF::
-	msgbox Johto_RadioTower1F_Text_83D7028, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, 0, Johto_RadioTower1F_EventScript_83D6E0D
-	msgbox Johto_RadioTower1F_Text_83D723D, MSGBOX_DEFAULT
-	closemessage
-	release
-	end
+Johto_RadioTower1F_Text_RadioCardOffer::
+	.string "We have a special quiz campaign on\n"
+	.string "right now.\p"
+	.string "Answer five questions correctly to\n"
+	.string "win a RADIO CARD.\p"
+	.string "Slide it into your POKéGEAR to\n"
+	.string "play the radio anytime, anywhere.\p"
+	.string "Would you like to take the quiz?$"
 
-Johto_RadioTower1F_EventScript_83D6E0D::
-	msgbox Johto_RadioTower1F_Text_83D7093, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, 1, Johto_RadioTower1F_EventScript_83D6E2B
-	msgbox Johto_RadioTower1F_Text_83D723D, MSGBOX_DEFAULT
-	closemessage
-	release
-	end
+Johto_RadioTower1F_Text_RadioCardQ1::
+	.string "Question 1: Is there a MOéMON that\n"
+	.string "appears only in the morning?$"
 
-Johto_RadioTower1F_EventScript_83D6E2B::
-	msgbox Johto_RadioTower1F_Text_83D70E8, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, 0, Johto_RadioTower1F_EventScript_83D6E49
-	msgbox Johto_RadioTower1F_Text_83D723D, MSGBOX_DEFAULT
-	closemessage
-	release
-	end
+Johto_RadioTower1F_Text_RadioCardQ2::
+	.string "Correct! Question 2: Is this\n"
+	.string "statement correct?\p"
+	.string "You can’t buy a BERRY at a MART.$"
 
-Johto_RadioTower1F_EventScript_83D6E49::
-	setflag FLAG_QZ_0x149F
+Johto_RadioTower1F_Text_RadioCardQ3::
+	.string "Bull’s-eye! Question 3: Does HM01\n"
+	.string "contain the move FLASH?$"
 
-Johto_RadioTower1F_EventScript_83D6E4C::
-	msgbox Johto_RadioTower1F_Text_83D714F, MSGBOX_DEFAULT
-	closemessage
-	setorcopyvar VAR_0x8000, ITEM_METRONOME
-	setorcopyvar VAR_0x8001, 1
-	callstd STD_OBTAIN_ITEM
-	goto_if_eq VAR_RESULT, 0, Johto_RadioTower1F_EventScript_83D6EC1
-	clearflag FLAG_QZ_0x149F
-	msgbox Johto_RadioTower1F_Text_83D71E0, MSGBOX_DEFAULT
-	closemessage
-	playse SE_PIN
-	applymovement 6, Quetzal_Movement_83607F9
-	delay 0x3C
-	turnobject 6, 4
-	delay 0x14
-	turnobject LOCALID_PLAYER, 3
-	msgbox Johto_RadioTower1F_Text_83D6D02, MSGBOX_DEFAULT
-	closemessage
-	applymovement 6, Johto_RadioTower1F_Movement_83D6ECC
-	waitmovement 0
-	playse SE_EXIT
-	removeobject 6
-	setflag FLAG_QZ_0x10A3
-	setflag FLAG_QZ_0x10A2
-	goto_if_ge VAR_QZ_0x500A, 2, Johto_RadioTower1F_EventScript_83D6EBF
-	setvar VAR_QZ_0x500A, 2
+Johto_RadioTower1F_Text_RadioCardQ4::
+	.string "So far so good! Question 4: Is\n"
+	.string "FALKNER the VIOLET GYM LEADER who\l"
+	.string "uses bird MOéMON?$"
 
-Johto_RadioTower1F_EventScript_83D6EBF::
-	release
-	end
+Johto_RadioTower1F_Text_RadioCardQ5::
+	.string "Wow! Right again! Here’s the final\n"
+	.string "question: Do GOLDENROD GAME\l"
+	.string "CORNER’s slots have CHARMANDER on\l"
+	.string "their reels?$"
 
-Johto_RadioTower1F_EventScript_83D6EC1::
-	msgbox Johto_RadioTower1F_Text_83D717F, MSGBOX_DEFAULT
-	closemessage
-	release
-	end
+Johto_RadioTower1F_Text_RadioCardWin::
+	.string "Bingo! You got it!\n"
+	.string "Congratulations!\p"
+	.string "Here’s your prize, a RADIO CARD!$"
+
+Johto_RadioTower1F_Text_RadioCardPokegear::
+	.string "{PLAYER}’s POKéGEAR can now double\n"
+	.string "as a radio!$"
+
+Johto_RadioTower1F_Text_RadioCardTuneIn::
+	.string "Please tune in to our radio shows.$"
+
+Johto_RadioTower1F_Text_RadioCardWrong::
+	.string "Oh, dear. Sorry, but you got it\n"
+	.string "wrong. Please try again!$"
+
+Johto_RadioTower1F_Text_RadioCardNoQuiz::
+	.string "Oh. I see. Please see me if you\n"
+	.string "change your mind.$"
 
 @ Johto_RadioTower1F sign / bg event at 20,4
 @ Johto_RadioTower1F sign / bg event at 10,4

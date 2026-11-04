@@ -197,6 +197,7 @@ Johto_VioletGym_Text_83FF8FC::
 	.string "VIOLET CITY MOéMON GYM$"
 
 Johto_VioletGym_Text_83FF914::
-	.string "VIOLET CITY MOéMON GYM\p"
-	.string "FALKNER’S CERTIFIED TRAINERS:\n"
+	.string "VIOLET MOéMON GYM\p"
+	.string "LEADER: FALKNER\p"
+	.string "WINNING TRAINERS:\n"
 	.string "{PLAYER}$"

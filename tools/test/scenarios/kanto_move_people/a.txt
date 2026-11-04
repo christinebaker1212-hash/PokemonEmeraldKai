@@ -1,0 +1,29 @@
+pressuntil A field 5000
+wait 30
+mp moves 0 84 45
+mp warp 38,64,4,5
+wait 150
+press UP 10
+mash A 45 30
+wait 60
+mp moves 0
+mp moves 0 84
+mp additem 80 1
+mp warp 38,76,9,7
+wait 150
+press UP 10
+mash A 45 30
+wait 60
+mp getflag 0x2221
+mp checkitem 80
+mp moves 0
+mp moves 0 84
+mp additem 103 2
+mp warp 38,124,7,6
+wait 150
+press UP 10
+mash A 90 30
+wait 60
+mp checkitem 103
+mp moves 0
+quit

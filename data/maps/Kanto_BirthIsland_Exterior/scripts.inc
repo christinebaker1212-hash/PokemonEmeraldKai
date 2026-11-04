@@ -110,11 +110,11 @@ Kanto_BirthIsland_Exterior_EventScript_84150EE::
 
 Kanto_BirthIsland_Exterior_EventScript_841518F::
 	setflag FLAG_QZ_0x2126
-	setvar VAR_0x8004, 0x182
+	setvar VAR_0x8004, SPECIES_DEOXYS
 	goto Quetzal_EventScript_845951C
 
 Kanto_BirthIsland_Exterior_EventScript_841519D::
-	setvar VAR_0x8004, 0x182
+	setvar VAR_0x8004, SPECIES_DEOXYS
 	goto Quetzal_EventScript_845951C
 
 Kanto_BirthIsland_Exterior_Movement_84151A8:

@@ -10,8 +10,12 @@ Kanto_ViridianCity_Gym_EventScript_8419EB8::
 
 Kanto_ViridianCity_Gym_EventScript_8419ED7::
 	goto_if_unset FLAG_QZ_0x216C, Kanto_ViridianCity_Gym_EventScript_8419F28
+	@ Moemon Kai: FireRed's GIOVANNI leaves for good after his farewell (FLAG_KANTO_HIDE_GYM_GIOVANNI hides him)
 	msgbox Kanto_ViridianCity_Gym_Text_843F856, MSGBOX_DEFAULT
 	closemessage
+	fadescreen FADE_TO_BLACK
+	removeobject 8
+	fadescreen FADE_FROM_BLACK
 	release
 	end
 
@@ -150,7 +154,8 @@ Kanto_ViridianCity_Gym_Text_843F856::
 	.string "finished forever!\p"
 	.string "As for myself, I shall dedicate\n"
 	.string "my life to training again.\p"
-	.string "I will keep training here at my GYM.$"
+	.string "Let us meet again someday!\n"
+	.string "Farewell!$"
 
 Kanto_ViridianCity_Gym_Text_843F93A::
 	.string "The EARTHBADGE makes MOéMON of\n"
@@ -159,8 +164,9 @@ Kanto_ViridianCity_Gym_Text_843F93A::
 	.string "a MOéMON TRAINER.\p"
 	.string "With it, you can challenge the\n"
 	.string "MOéMON LEAGUE.\p"
-	.string "Also, take this gift for\n"
-	.string "your LEAGUE challenge.$"
+	.string "Also, take this TM.\p"
+	.string "Consider it a gift for your MOéMON\n"
+	.string "LEAGUE challenge.$"
 
 Kanto_ViridianCity_Gym_Text_843FA0F::
 	.string "{PLAYER} received\n"
@@ -285,10 +291,10 @@ Kanto_ViridianCity_Gym_Text_843FEE5::
 	.string "VIRIDIAN MOéMON GYM\n"
 	.string "LEADER: ?\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE$"
+	.string "{RIVAL}$"
 
 Kanto_ViridianCity_Gym_Text_843FF1B::
 	.string "VIRIDIAN MOéMON GYM\n"
 	.string "LEADER: GIOVANNI\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE, {PLAYER}$"
+	.string "{RIVAL}, {PLAYER}$"

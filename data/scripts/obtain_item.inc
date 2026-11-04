@@ -178,6 +178,7 @@ EventScript_NoRoomToPickUpItem::
 EventScript_HiddenItemScript::
 	lockall
 	waitse
+	goto_if_eq VAR_0x8005, ITEM_NONE, EventScript_MpHiddenCoins   @ Moemon Kai: FireRed's hidden COINS (CELADON's GAME CORNER)
 	additem VAR_0x8005
 	copyvar VAR_0x8007, VAR_RESULT
 	bufferitemnameplural STR_VAR_2, VAR_0x8005, 1
@@ -223,3 +224,52 @@ EventScript_NoRoomForHiddenItem::
 	setvar VAR_RESULT, 0
 	releaseall
 	end
+
+@ Moemon Kai: FireRed's EventScript_TryPickUpHiddenCoins: a hidden spot with no item holds COINS (how many: by its flag,
+@ src/mp/mp_region.c MP_HiddenCoinsAmount)
+EventScript_MpHiddenCoins::
+	specialvar VAR_0x8006, MP_HiddenCoinsAmount
+	goto_if_eq VAR_0x8006, 0, EventScript_MpHiddenCoinsEnd
+	buffernumberstring STR_VAR_1, VAR_0x8006
+	checkitem ITEM_COIN_CASE
+	goto_if_eq VAR_RESULT, FALSE, EventScript_MpHiddenCoinsNoCase
+	specialvar VAR_RESULT, MP_HiddenCoinsFit
+	goto_if_eq VAR_RESULT, FALSE, EventScript_MpHiddenCoinsFull
+	addcoins VAR_0x8006
+	playfanfare MUS_OBTAIN_ITEM
+	message gText_MpFoundXCoins
+	waitmessage
+	waitfanfare
+	msgbox gText_MpPutCoinsAway, MSGBOX_DEFAULT
+	special SetHiddenItemFlag
+EventScript_MpHiddenCoinsEnd::
+	releaseall
+	end
+
+EventScript_MpHiddenCoinsNoCase::
+	msgbox gText_MpFoundXCoins, MSGBOX_DEFAULT
+	msgbox gText_MpNothingToPutCoinsIn, MSGBOX_DEFAULT
+	releaseall
+	end
+
+EventScript_MpHiddenCoinsFull::
+	msgbox gText_MpFoundXCoins, MSGBOX_DEFAULT
+	msgbox gText_MpCoinCaseFull, MSGBOX_DEFAULT
+	releaseall
+	end
+
+gText_MpFoundXCoins::
+	.string "{PLAYER} found\n"
+	.string "{STR_VAR_1} COINS!$"
+
+gText_MpPutCoinsAway::
+	.string "{PLAYER} put the COINS away in\n"
+	.string "the COIN CASE.$"
+
+gText_MpCoinCaseFull::
+	.string "Too bad!\n"
+	.string "The COIN CASE is full…$"
+
+gText_MpNothingToPutCoinsIn::
+	.string "Too bad!\n"
+	.string "There's nothing to put them in…$"

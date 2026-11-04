@@ -61,6 +61,7 @@
 	.include "asm/macros/event.inc"
 	.include "constants/constants.inc"
 #include "constants/qz_port.h"
+#include "constants/kai_regions.h"
 #include "constants/region_map_sections_johto.h"
 	.include "asm/macros/qz_event.inc"
 

@@ -1127,6 +1127,43 @@ static const unsigned char *PrintedEntry(unsigned id, unsigned *offset, unsigned
 {
     return Entry(gTcgPrintedArt, gTcgPrintedArtEnd, "TCGP", 16, 1, id, offset, size);
 }
+/* Moemon Kai: a GB2 card's printed illustration (ids 229-442) whose window still shows a wedge of the yellow card
+ * border in a corner (the window's rounded corner; tools/tcg/trim_printed_rects.py moved the straight edges in):
+ * each yellow pixel near a corner takes the first colour inward along the diagonal that isn't yellow. */
+static int BorderYellow(uint32_t c)
+{
+    int r = c >> 16 & 0xFF, g = c >> 8 & 0xFF, b = c & 0xFF;
+    return r > 140 && g > 100 && b * 100 < g * 62 && r - b > 70;
+}
+static void CleanArtCorners(struct Source *s)
+{
+    enum { R = 8 };
+    int corner, i, j;
+    if (s->artW < 4 * R || s->artH < 4 * R)
+        return;
+    for (corner = 0; corner < 4; corner++)
+    {
+        int dx = corner & 1 ? -1 : 1, dy = corner & 2 ? -1 : 1;
+        int x0 = corner & 1 ? s->artX + s->artW - 1 : s->artX, y0 = corner & 2 ? s->artY + s->artH - 1 : s->artY;
+        for (j = 0; j < R; j++)
+            for (i = 0; i < R - j; i++)   /* (the wedge: the corner's triangle) */
+            {
+                int x = x0 + dx * i, y = y0 + dy * j, k;
+                uint32_t *p = &s->px[y * s->w + x];
+                if (!BorderYellow(*p))
+                    continue;
+                for (k = 1; k <= 2 * R; k++)
+                {
+                    uint32_t q = s->px[(y + dy * k) * s->w + x + dx * k];
+                    if (!BorderYellow(q))
+                    {
+                        *p = q;
+                        break;
+                    }
+                }
+            }
+    }
+}
 /* Decodes the Game Boy illustration (kind 0) or the printed card (kind 1; id 0 = the back). */
 static int LoadSource(struct Source *s, unsigned id, unsigned kind)
 {
@@ -1149,6 +1186,8 @@ static int LoadSource(struct Source *s, unsigned id, unsigned kind)
         s->artH = b[14] | b[15] << 8;
         if (!s->artW || !s->artH || s->artX + s->artW > s->w || s->artY + s->artH > s->h)
             s->artX = 0, s->artY = 0, s->artW = s->w, s->artH = s->h;
+        else if (id >= 229 && id <= 442)
+            CleanArtCorners(s);
     }
     return 1;
 }

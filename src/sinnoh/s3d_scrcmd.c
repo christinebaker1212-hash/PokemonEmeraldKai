@@ -80,7 +80,7 @@ enum {
     SINNOH_OBJECT_POS,              // ARG: an object, ARG2, ARG3: Platinum's map tile (each a value or a variable)
     SINNOH_TWO_TRAINERS,            // ARG, ARG2: two trainers, the script's data 0 / 1 their defeat lines: the battle
     SINNOH_SET_BG,                  // ARG: the map's sign / bg event, ARG2, ARG3: its new tile (Platinum's SetBgEventPos)
-    SINNOH_BUFFER_RIVAL_STARTER,    // ARG: a string buffer <- the rival's starter (the one strong against the player's)
+    SINNOH_BUFFER_RIVAL_STARTER,    // ARG: a string buffer <- the rival's starter (the one strong against the player's; ARG2 1: the counterpart's)
     SINNOH_MOVEMENT_TYPE,           // ARG: an object, ARG2: its movement type now (MOVEMENT_TYPE_FOLLOW_PLAYER: the partner)
     SINNOH_LOCAL_DEX,               // ARG: a variable <- of Platinum's SINNOH POKéDEX: ARG2 0 the seen, 1 the caught, 2 all seen
     SINNOH_STOP_MUSIC,              // ARG: Platinum's frames (0: at once): the song fades out and stops; the script waits
@@ -542,9 +542,14 @@ bool8 ScrCmd_sinnoh(struct ScriptContext *ctx)
         break;
     case SINNOH_BUFFER_RIVAL_STARTER:
     {
+        // (ARG2 1: the counterpart's, the one left: weak to the player's)
         u16 mine = VarGet(VAR_SINNOH_STARTER);
-        GetSpeciesName(StringVar(arg), mine == SPECIES_TURTWIG ? SPECIES_CHIMCHAR : mine == SPECIES_CHIMCHAR ? SPECIES_PIPLUP
-                                                                                                          : SPECIES_TURTWIG);
+        if (arg2 == 1)
+            GetSpeciesName(StringVar(arg), mine == SPECIES_TURTWIG ? SPECIES_PIPLUP : mine == SPECIES_CHIMCHAR ? SPECIES_TURTWIG
+                                                                                                             : SPECIES_CHIMCHAR);
+        else
+            GetSpeciesName(StringVar(arg), mine == SPECIES_TURTWIG ? SPECIES_CHIMCHAR : mine == SPECIES_CHIMCHAR ? SPECIES_PIPLUP
+                                                                                                              : SPECIES_TURTWIG);
         break;
     }
     case SINNOH_MOVEMENT_TYPE:

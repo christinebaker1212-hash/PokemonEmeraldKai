@@ -28,6 +28,7 @@ pressuntil A field 12000
 mp where
 mp getvar 0x5118
 mp party
+mp getflag 2145
 mp getflag 2144
 mp getflag 2145
 mp startmenu

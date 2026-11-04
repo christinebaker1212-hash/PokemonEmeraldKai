@@ -35,10 +35,6 @@ Kanto_SafariZone_SecretHouse_Text_84284C2::
 	.string "Congratulations!\n"
 	.string "You have won!$"
 
-Kanto_SafariZone_SecretHouse_Text_8428593::
-	.string "{PLAYER} received a PRISM SCALE\n"
-	.string "from the attendant!$"
-
 Kanto_SafariZone_SecretHouse_Text_84285C1::
 	.string "HM03 is SURF.\p"
 	.string "MOéMON will be able to ferry you\n"

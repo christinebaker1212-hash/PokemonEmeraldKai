@@ -95,13 +95,6 @@
       "elevation": 0,
       "dest_map": "MAP_JOHTO_ROUTE28",
       "dest_warp_id": "0"
-    },
-    {
-      "x": 20,
-      "y": 9,
-      "elevation": 0,
-      "dest_map": "MAP_KANTO_ROUTE22_NORTH_ENTRANCE",
-      "dest_warp_id": "4"
     }
   ],
   "coord_events": [
@@ -113,6 +106,15 @@
       "var": "VAR_QZ_0x5029",
       "var_value": "1",
       "script": "Johto_VictoryRoadGate_EventScript_83E8F1A"
+    },
+    {
+      "type": "trigger",
+      "x": 20,
+      "y": 9,
+      "elevation": 0,
+      "var": "VAR_TEMP_9",
+      "var_value": "0",
+      "script": "EventScript_RegionGateToKanto"
     }
   ],
   "bg_events": []

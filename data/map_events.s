@@ -1,5 +1,6 @@
 #include "constants/global.h"
 #include "constants/qz_port.h"   // Moemon Kai: Johto / Kanto flags, graphics
+#include "constants/kai_regions.h"
 #include "constants/event_bg.h"
 #include "constants/event_object_movement.h"
 #include "constants/event_objects.h"

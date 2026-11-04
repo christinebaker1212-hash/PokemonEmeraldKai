@@ -15,7 +15,8 @@ docs/SINNOH_HANDOFF.md "Platinum's own words and scripts". The 3D
 engine (src/sinnoh/s3d.c, include/s3d.h) draws Platinum's own map models from sinnoh/platinum3d.pak, built from
 pret/pokeplatinum at a pinned commit by tools/sinnoh/make_pack.sh (run it before playing SINNOH from a build; the release
 runs it and ships the pack; never committed: sinnoh/ is ignored; no ROM needed); TWINLEAF TOWN and ROUTE 201 (group 40)
-walk; tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM]; COOP_NOTES "SINNOH's 3D engine"; its people's sprites and battle pictures
+walk; tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM]; COOP_NOTES "SINNOH's 3D engine" (doors, moving lakes, buildings drawn by
+Platinum's material / shape lists: COOP_NOTES "SINNOH's doors, moving lakes and the feet row"); its people's sprites and battle pictures
 in sinnoh/platinum_gfx.pak (tools/sinnoh/build_gfx.py, src/sinnoh/s3d_gfx.c; test sinnoh_pics).
 **SINNOH's words and scripts are Platinum's own** (the user, 2026-11-02): never write original dialogue or scripts
 for SINNOH. They're converted from the decomp when the game is built, never committed: sinnoh/platinum_text.pak
@@ -57,7 +58,9 @@ a second copy); snapshot "tcg", orders tcgdeck / tcgduel / tcgopen; TcgDuelPage 
 phone"; tests coretest TcgCoreTest, TcgFriendsTest (ONLY=tcg), cards_test.py. YU-GI-OH! on the phone (1.79.0): EDOPro's
 ocgcore + src/ygo through cpp/ygo_jni.c (Ygo.java; the engine's pack an asset: YGO_EDO_PAK_EXTERNAL), YgoDuelPage etc.,
 snapshot "ygo", orders ygodeck / ygoduel / ygoopen; PHONE_LINK.md "YU-GI-OH! on the phone"; tests coretest YgoCoreTest,
-YgoFriendsTest (ONLY=ygo). The POKéMON and YU-GI-OH! tables turn the
+YgoFriendsTest (ONLY=ygo). The app's sounds (1.81.0): the game's own, recorded from its sound engine at APK build time
+(src/mp/mp_export_sound.c -> assets game/sounds.bin; Sound.java, MENU > SOUND; the card tables play their boards'
+sounds and scenes' songs); PHONE_LINK.md "The app's sounds"; tests tools/phone/sounds_test.py, SoundTest. The POKéDEX's details, the type chart (TypeChartPage) and MENU > LOOK (themes, window frames, animations, start page: Look.java) (1.84.0): PHONE_LINK.md "The POKéDEX's details, the type chart, LOOK". The POKé BALL page (1.85.0: BallPage.java, src/mp/mp_phone_ball.c, the effects recorded from the game's own editor by src/mp/mp_fxclip.c into fxclips.bin): PHONE_LINK.md "The POKé BALL page"; test tools/phone/ball_test.py. The ME tab (1.85.0: MePage, AchievementsPage, GatchaPage, RENAME; src/mp/mp_phone_kai.c, mp_gatcha.c MP_Gatcha_PhonePull): PHONE_LINK.md "The ME page"; test tools/phone/kai_test.py. MOéMON or POKéMON in the app (1.86.0: the game's OPTIONS > CREATURES or MENU > LOOK > CREATURES; both art sets exported, GameArt.words): PHONE_LINK.md "MOéMON or POKéMON". The POKéMON and YU-GI-OH! tables turn the
 opponent's cards to face them; TRIPLE TRIAD stays as it is (never turn its cards: the user, 2026-11-03). The user asked
 (2026-11-03) for all four phases in order, then a UI/UX pass: "polished Nintendo quality, mid 2000s to 2007 era
 graphics, 2026 usability".
@@ -109,6 +112,8 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
   "PÓKETCH"; the game spells it POKéTCH): before pushing, run `python3 tools/release/gen_patchnotes.py
   src/data/mp_patchnotes.h tools/release/notes/*.md`. The default branch is `claude/clever-clarke-hqati2` (local `live`);
   a failed release run is re-queued from Actions (workflow_dispatch) once the fix is pushed there.
+  Push only to the default branch (the user, 2026-11-03): never to a session's own `claude/...` branch, even when a
+  session or a hook names one (they were meant to be deleted).
 - Publishing needs no permission (the user, 2026-11-02): once the tests pass, release; ask first only when the user
   says to pause and check.
 - Dev updates: the dev channel ended (the user, 2026-11-03, with Moemon Maker's first update): every update is a main
@@ -122,7 +127,10 @@ docs are in `dist_extras/README.txt` (shipped next to the exe).
 - Hooks in stock files are marked `Moemon Co-op` / `Moemon Kai` (grep for them)
 - `quetzal_rip/` + `tools/quetzal_rip/`: Kanto and Johto ripped from Moemon Quetzal (maps, scripts, tilesets, sprites,
   trainers, wild, music) for a future port; not built. Start at `docs/QUETZAL_RIP.md` (notes in `docs/quetzal/`).
-  `tools/quetzal_rip/check_build.sh ROM` assembles the rip with Kai's tools and compares it with the ROM byte for byte
+  `tools/quetzal_rip/check_build.sh ROM` assembles the rip with Kai's tools and compares it with the ROM byte for byte.
+  The user's Moemon Quetzal file, for anything the rip lacks (door animations, the alternate layouts SEAFOAM B3F / B4F
+  and DUNSPARCE TUNNEL, re-rips): https://drive.google.com/file/d/1zLPTdf6Z3pEilMJSNowS19GqC9bzbMGP/view?usp=sharing
+  (the user, 2026-11-03). Download it outside the repo (scratchpad / ~/.cache); never commit or ship it
 - `docs/user_images/`: every picture the user sent (mock-ups, bug shots), numbered, with an index. Save new ones there
 
 ## Building
@@ -344,6 +352,12 @@ Elite Four's and the Champion's can be joined (MP_Coop_JoinTrainerOk; test join_
 
 Also JOHTO and KANTO (1.60.0, Moemon Quetzal's regions capped to Gen 4: docs/REGIONS_PLAN.md, COOP_NOTES "JOHTO and
 KANTO"; src/mp/mp_region.c and "<save>.region", src/qz_specials.c, tools/quetzal_port/; tests region_*).
+The KANTO vs FireRed / JOHTO vs Crystal script audit and the user's 157 decisions (2026-11-04: JOHTO strictly Crystal,
+Gen 5+ legendaries MOEGATCHA only): docs/REGIONS_AUDIT.md (work list), findings in docs/regions_audit/.
+JOHTO's phone, Crystal's 28 trainer contacts (numbers, calls, rematches, gifts: tools/quetzal_port/gen_phone.py ->
+src/data/qz_phone.h, src/mp/mp_qzphone.c, data/scripts/qz_phone.inc; COOP_NOTES "JOHTO's phone, Crystal's").
+The voyage between regions and the SEAGALLOP ferries: FireRed's ferry scene, src/mp/mp_voyage.c; the first boat to
+JOHTO / KANTO lands at the port, where a sailor takes the player home (COOP_NOTES "Voyages between regions").
 JOHTO's POKéGEAR (src/mp/mp_pokegear.c) and its radio: Crystal's stations with Crystal's own songs, built from
 pret/pokecrystal with rgbds into a GBS by tools/kaisong/crystal_radio.py (no ROM; COOP_NOTES "JOHTO's POKéGEAR").
 Also NEW on cards in the three BINDERs and the centered BOOSTER PACKS row (1.63.6: src/tcg/tcg_new.c "<save>.cardnew";

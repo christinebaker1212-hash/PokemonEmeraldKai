@@ -1,10 +1,11 @@
 #!/bin/bash
-# The saves folder and the three save files (src/platform/save_slots.c), in a scratch game folder:
+# The saves folder and the twelve save files (src/platform/save_slots.c), in a scratch game folder:
 #   1. a save made the old way (pokeemerald.sav and its files beside the game) moves into saves/slot1 unchanged
-#   2. the title screen's SAVE FILE item: RIGHT shows file 2 (empty), A goes on with it in place (its save read, the
-#      menu shown again; its own copy of the shared settings, moemon_controls.ini here)
-#   3. the next start is on saves/slot2: no save there (NEW GAME), file 1 still shows its player
-#   4. ERASE (SELECT on SAVE FILE, A twice) empties file 1 and nothing else
+#   2. the title screen's SAVE FILE item: RIGHT goes on with file 2 (empty) at once (its save read, the menu shown
+#      again on it; its own copy of the shared settings, moemon_controls.ini here)
+#   3. the next start is on saves/slot2: no save there (NEW GAME); LEFT goes back to file 1 and its player
+#   4. ERASE (SELECT on SAVE FILE, A twice) empties file 1 (the one shown, so the one in use) and nothing else
+#   5. LEFT from file 1 goes round to file 12
 # usage: tools/test/save_slots.sh [BIN]   (results in /tmp/save_slots_test)
 set -u
 BIN=$(realpath "${1:-$(dirname "$0")/../../pokeemerald64}")
@@ -32,13 +33,10 @@ wait 10
 press DOWN 2
 wait 10
 press RIGHT 2
-wait 20
-shot menu1_file2
-press A 2
 wait 60
 waitfor mainmenu 1200
 wait 30
-shot menu1_after
+shot menu1_file2
 quit
 S
 printf 'rumble = 0\n' > "$T/moemon_controls.ini"
@@ -61,7 +59,9 @@ wait 10
 press DOWN 2
 wait 10
 press LEFT 2
-wait 20
+wait 60
+waitfor mainmenu 1200
+wait 30
 shot menu2_file1
 press SELECT 2
 wait 60
@@ -76,11 +76,31 @@ quit
 S
 run second second.txt
 want second "save file 2: saves/slot2/pokeemerald.sav"
+want second "now on save file 1"
 want second "erased save file 1"
-[ -f "$T/saves/slot1/pokeemerald.sav" ] && { echo "FAIL: file 1 wasn't erased"; fail=1; }
-ls "$T/saves/slot1" | grep -q . && { echo "FAIL: files left in saves/slot1: $(ls "$T/saves/slot1")"; fail=1; }
+# (file 1 is the one in use: it's open again, empty: no save in it, nothing of its POKéMON's side files)
+[ -s "$T/saves/slot1/pokeemerald.sav" ] && { echo "FAIL: file 1 wasn't erased"; fail=1; }
+ls "$T/saves/slot1" | grep -v -x -e pokeemerald.sav -e pokeemerald.sav.pals -e moemon_controls.ini -e 'moemon_.*\.ini' \
+    | grep -q . && { echo "FAIL: files left in saves/slot1: $(ls "$T/saves/slot1")"; fail=1; }
+cat > "$T/round.txt" <<'S'
+pressuntil START mainmenu 3000
+wait 30
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press LEFT 2
+wait 60
+waitfor mainmenu 1200
+wait 30
+shot menu_file12
+quit
+S
+run round round.txt
+want round "now on save file 12"
+grep -qx 12 "$T/saves/slot.txt" || { echo "FAIL: saves/slot.txt isn't 12"; fail=1; }
 [ -d "$T/saves/slot2" ] || { echo "FAIL: no saves/slot2"; fail=1; }
 for f in "$T"/*.bmp; do [ -f "$f" ] && python3 -c "from PIL import Image; import sys; Image.open(sys.argv[1]).save(sys.argv[1][:-4]+'.png')" "$f" && rm -f "$f"; done
 rm -rf /tmp/save_slots_test; mv "$T" /tmp/save_slots_test
-[ $fail = 0 ] && echo "PASS save files: the old save moved in unchanged, file 2 picked on the title screen, file 1 erased"
+[ $fail = 0 ] && echo "PASS save files: the old save moved in unchanged, file 2 and back to 1 on the title screen, file 1 erased, round to 12"
 exit $fail

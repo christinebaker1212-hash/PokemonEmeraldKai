@@ -48,6 +48,8 @@
 #include "roamer.h"
 void Sinnoh_RoamerMapChanged(void);   // Moemon Kai: src/sinnoh/s3d_roamer.c
 void Sinnoh_RoamerFlew(void);
+void MP_JohtoRoamer_MapChanged(void);
+void MP_JohtoRoamer_Flew(void);
 #include "rotating_gate.h"
 #include "safari_zone.h"
 #include "save.h"
@@ -381,6 +383,7 @@ void Overworld_ResetStateAfterFly(void)
     FlagClear(FLAG_SYS_USE_STRENGTH);
     FlagClear(FLAG_SYS_USE_FLASH);
     Sinnoh_RoamerFlew();   // Moemon Kai: SINNOH's roamers anywhere after a flight (src/sinnoh/s3d_roamer.c)
+    MP_JohtoRoamer_Flew();
 }
 
 void Overworld_ResetStateAfterTeleport(void)
@@ -848,6 +851,7 @@ void LoadMapFromCameraTransition(u8 mapGroup, u8 mapNum)
     UpdateLocationHistoryForRoamer();
     RoamerMove();
     Sinnoh_RoamerMapChanged();   // Moemon Kai: SINNOH's roamers move on (src/sinnoh/s3d_roamer.c)
+    MP_JohtoRoamer_MapChanged();   // Moemon Kai: JOHTO's beasts too (src/mp/mp_johto_roamer.c)
     DoCurrentWeather();
     ResetFieldTasksArgs();
     RunOnResumeMapScript();
@@ -899,6 +903,7 @@ static void LoadMapFromWarp(bool32 a1)
     UpdateLocationHistoryForRoamer();
     RoamerMoveToOtherLocationSet();
     Sinnoh_RoamerMapChanged();   // Moemon Kai: SINNOH's roamers move on (src/sinnoh/s3d_roamer.c)
+    MP_JohtoRoamer_MapChanged();   // Moemon Kai: JOHTO's beasts too (src/mp/mp_johto_roamer.c)
     if (gMapHeader.mapLayoutId == LAYOUT_BATTLE_FRONTIER_BATTLE_PYRAMID_FLOOR)
         InitBattlePyramidMap(FALSE);
     else if (InTrainerHill())
@@ -1649,6 +1654,8 @@ void CB2_NewGame(void)
     ResetSafariZoneFlag_();
     NewGameInitData();
     ResetInitialPlayerAvatarState();
+    if (MP_Region_Current() == REGION_SINNOH)
+        sInitialPlayerAvatarState.direction = DIR_NORTH;   // Moemon Kai: SINNOH's start: watching the TV, as Platinum's
     PlayTimeCounter_Start();
     ScriptContext_Init();
     UnlockPlayerFieldControls();

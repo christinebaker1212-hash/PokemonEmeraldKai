@@ -1,0 +1,15 @@
+pressuntil A field 5000
+wait 30
+mp setflag 0x11B1
+mp weekday 1
+mp warp 34,96,32,10
+wait 150
+mp objat 32 8
+mp weekday 2
+mp warp 34,96,32,10
+wait 150
+mp objat 32 8
+mp warp 34,33,20,25
+wait 150
+mp objat 20 23
+quit

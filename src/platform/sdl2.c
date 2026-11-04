@@ -608,6 +608,15 @@ void Platform_QueueAudio(float *audioBuffer, s32 samplesPerFrame)
     Fight_MixAudio(audioBuffer, samplesPerFrame / (int)(2 * sizeof(float)), 42048);
     // Moemon Rhythm: the DANCE machine's songs and voices instead of the game's sound
     Rhythm_MixAudio(audioBuffer, samplesPerFrame / (int)(2 * sizeof(float)));
+    {
+        // Moemon Co-op: the phone app's sounds, recorded by the game itself (mp_export_sound.c), never sent to the device
+        extern void (*gMpAudioCapture)(const float *buffer, s32 bytes);
+        if (gMpAudioCapture != NULL)
+        {
+            gMpAudioCapture(audioBuffer, samplesPerFrame);
+            return;
+        }
+    }
     SDL_QueueAudio(1, audioBuffer, samplesPerFrame);
     {
         // Tests (MOEMON_AUDIO_DUMP=file): everything sent to the sound device, raw stereo float32 at 42048 Hz
@@ -920,6 +929,10 @@ void VDraw(void)
         MP_Poketch_Composite(image);     // Moemon Kai: the POKéTCH while it's open (src/sinnoh/poketch.c)
     }
     MP_BattleOverlay_Composite(image);   // ... and the battle emotes over everything
+    {
+        void MP_FxClip_Frame(const u16 *frame);
+        MP_FxClip_Frame(image);          // ... (MOEMON_EXPORT_FXCLIPS: the ball effects recorded for the phone app)
+    }
     MP_Spectate_PanelSync();             // ... friends' screens in the panel under ours (CO-OP > SPECTATE)
     if (!sTestMode)
         Display_UploadFrame(image);

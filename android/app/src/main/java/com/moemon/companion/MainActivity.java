@@ -69,6 +69,7 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         if (view != null) {
+            view.sound.front(true);
             view.app.resume();
             // the walk's steps while the app is open; StepJob reads them when it's closed
             steps = new StepCounter(this, view.app);
@@ -90,6 +91,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onPause() {
         if (view != null) {
+            view.sound.front(false);
             view.app.pause();
             WalkWidget.updateAll(this, view.app);
         }

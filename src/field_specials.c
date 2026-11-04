@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_region.h"   // Moemon Kai: the PC's tiles by region
 #include "malloc.h"
 #include "battle.h"
 #include "battle_tower.h"
@@ -987,9 +988,45 @@ void FieldShowRegionMap(void)
 #define tTimer        data[3]
 #define tIsScreenOn   data[4]
 
+// Moemon Kai: the PC's own tiles. HOENN's buildings have Emerald's pair (METATILE_Building_PC_Off / _On, 4 / 5);
+// JOHTO's and KANTO's (Quetzal's FireRed tilesets) have FireRed's, 0x62 / 0x63 (METATILE_Building_PCOff / PCOn
+// there); writing Emerald's numbers there drew another tile with no PC on it. A PC with no "on" tile keeps its own.
+static u16 sPcTile = 0xFFFF;   // (the PC's tile when the effect began)
+static void PcTilePair(s8 dx, s8 dy, u16 *off, u16 *on)
+{
+    u16 t = sPcTile != 0xFFFF ? sPcTile
+          : MapGridGetMetatileIdAt(gSaveBlock1Ptr->pos.x + dx + MAP_OFFSET, gSaveBlock1Ptr->pos.y + dy + MAP_OFFSET);
+    if (MP_Region_Current() == REGION_HOENN && (t == METATILE_Building_PC_Off || t == METATILE_Building_PC_On))
+        *off = METATILE_Building_PC_Off, *on = METATILE_Building_PC_On;
+    else if (MP_Region_Current() != REGION_HOENN && (t == 0x62 || t == 0x63))
+        *off = 0x62, *on = 0x63;
+    else if (MP_Region_Current() == REGION_HOENN)
+        *off = METATILE_Building_PC_Off, *on = METATILE_Building_PC_On;   // (Emerald's own, as before)
+    else
+        *off = *on = t;
+}
+
+static void PcFacingOffset(s8 *dx, s8 *dy)
+{
+    switch (GetPlayerFacingDirection())
+    {
+    case DIR_NORTH: *dx = 0;  *dy = -1; break;
+    case DIR_WEST:  *dx = -1; *dy = -1; break;
+    case DIR_EAST:  *dx = 1;  *dy = -1; break;
+    default:        *dx = 0;  *dy = 0;  break;
+    }
+}
+
 // For this special, gSpecialVar_0x8004 is expected to be some PC_LOCATION_* value.
 void DoPCTurnOnEffect(void)
 {
+    if (FuncIsActiveTask(Task_PCTurnOnEffect) != TRUE)
+    {
+        s8 dx, dy;
+        PcFacingOffset(&dx, &dy);
+        sPcTile = 0xFFFF;
+        sPcTile = MapGridGetMetatileIdAt(gSaveBlock1Ptr->pos.x + dx + MAP_OFFSET, gSaveBlock1Ptr->pos.y + dy + MAP_OFFSET);
+    }
     if (FuncIsActiveTask(Task_PCTurnOnEffect) != TRUE)
     {
         u8 taskId = CreateTask(Task_PCTurnOnEffect, 8);
@@ -1050,12 +1087,13 @@ static void PCTurnOnEffect(struct Task *task)
 
 static void PCTurnOnEffect_SetMetatile(s16 isScreenOn, s8 dx, s8 dy)
 {
-    u16 metatileId = 0;
+    u16 metatileId = 0, pcOff, pcOn;
+    PcTilePair(dx, dy, &pcOff, &pcOn);
     if (isScreenOn)
     {
         // Screen is on, set it off
         if (gSpecialVar_0x8004 == PC_LOCATION_OTHER)
-            metatileId = METATILE_Building_PC_Off;
+            metatileId = pcOff;
         else if (gSpecialVar_0x8004 == PC_LOCATION_BRENDANS_HOUSE)
             metatileId = METATILE_BrendansMaysHouse_BrendanPC_Off;
         else if (gSpecialVar_0x8004 == PC_LOCATION_MAYS_HOUSE)
@@ -1065,7 +1103,7 @@ static void PCTurnOnEffect_SetMetatile(s16 isScreenOn, s8 dx, s8 dy)
     {
         // Screen is off, set it on
         if (gSpecialVar_0x8004 == PC_LOCATION_OTHER)
-            metatileId = METATILE_Building_PC_On;
+            metatileId = pcOn;
         else if (gSpecialVar_0x8004 == PC_LOCATION_BRENDANS_HOUSE)
             metatileId = METATILE_BrendansMaysHouse_BrendanPC_On;
         else if (gSpecialVar_0x8004 == PC_LOCATION_MAYS_HOUSE)
@@ -1105,11 +1143,16 @@ static void PCTurnOffEffect(void)
     }
 
     if (gSpecialVar_0x8004 == PC_LOCATION_OTHER)
-        metatileId = METATILE_Building_PC_Off;
+    {
+        u16 pcOff, pcOn;
+        PcTilePair(dx, dy, &pcOff, &pcOn);
+        metatileId = pcOff;
+    }
     else if (gSpecialVar_0x8004 == PC_LOCATION_BRENDANS_HOUSE)
         metatileId = METATILE_BrendansMaysHouse_BrendanPC_Off;
     else if (gSpecialVar_0x8004 == PC_LOCATION_MAYS_HOUSE)
         metatileId = METATILE_BrendansMaysHouse_MayPC_Off;
+    sPcTile = 0xFFFF;
 
     MapGridSetMetatileIdAt(gSaveBlock1Ptr->pos.x + dx + MAP_OFFSET, gSaveBlock1Ptr->pos.y + dy + MAP_OFFSET, metatileId | MAPGRID_IMPASSABLE);
     DrawWholeMapView();
@@ -3323,6 +3366,18 @@ void ScrollableMultichoice_ClosePersistentMenu(void)
 #define DEOXYS_ROCK_LEVELS 11
 #define ROCK_PAL_ID 10
 
+// Moemon Kai: KANTO's BIRTH ISLAND plays FireRed's own DEOXYS triangle (pokefirered DoDeoxysTriangleInteraction: the
+// same places and step caps) with its own progress: VAR_DEOXYS_INTERACTION_NUM / _STEP_COUNTER (Quetzal's 0x5101 /
+// 0x5102, reset on entering by the map's script) and FLAG_SYS_DEOXYS_AWAKENED (0x220B); HOENN's island keeps Emerald's.
+static bool8 OnKantoBirthIsland(void)
+{
+    return gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_KANTO_BIRTH_ISLAND_EXTERIOR)
+        && gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_KANTO_BIRTH_ISLAND_EXTERIOR);
+}
+#define ROCK_LEVEL_VAR  (OnKantoBirthIsland() ? 0x5101 : VAR_DEOXYS_ROCK_LEVEL)
+#define ROCK_STEPS_VAR  (OnKantoBirthIsland() ? 0x5102 : VAR_DEOXYS_ROCK_STEP_COUNT)
+#define ROCK_DONE_FLAG  (OnKantoBirthIsland() ? 0x220B : FLAG_DEOXYS_ROCK_COMPLETE)
+
 void DoDeoxysRockInteraction(void)
 {
     CreateTask(Task_DeoxysRockInteraction, 8);
@@ -3360,7 +3415,7 @@ static void Task_DeoxysRockInteraction(u8 taskId)
 {
     static const u8 sStoneMaxStepCounts[DEOXYS_ROCK_LEVELS - 1] = { 4, 8, 8, 8, 4, 4, 4, 6, 3, 3 };
 
-    if (FlagGet(FLAG_DEOXYS_ROCK_COMPLETE) == TRUE)
+    if (FlagGet(ROCK_DONE_FLAG) == TRUE)
     {
         gSpecialVar_Result = DEOXYS_ROCK_COMPLETE;
         ScriptContext_Enable();
@@ -3368,21 +3423,21 @@ static void Task_DeoxysRockInteraction(u8 taskId)
     }
     else
     {
-        u16 rockLevel = VarGet(VAR_DEOXYS_ROCK_LEVEL);
-        u16 stepCount = VarGet(VAR_DEOXYS_ROCK_STEP_COUNT);
+        u16 rockLevel = VarGet(ROCK_LEVEL_VAR);
+        u16 stepCount = VarGet(ROCK_STEPS_VAR);
 
-        VarSet(VAR_DEOXYS_ROCK_STEP_COUNT, 0);
+        VarSet(ROCK_STEPS_VAR, 0);
         if (rockLevel != 0 && sStoneMaxStepCounts[rockLevel - 1] < stepCount)
         {
             // Player failed to take the shortest path to the stone, so it resets.
             ChangeDeoxysRockLevel(0);
-            VarSet(VAR_DEOXYS_ROCK_LEVEL, 0);
+            VarSet(ROCK_LEVEL_VAR, 0);
             gSpecialVar_Result = DEOXYS_ROCK_FAILED;
             DestroyTask(taskId);
         }
         else if (rockLevel == DEOXYS_ROCK_LEVELS - 1)
         {
-            FlagSet(FLAG_DEOXYS_ROCK_COMPLETE);
+            FlagSet(ROCK_DONE_FLAG);
             gSpecialVar_Result = DEOXYS_ROCK_SOLVED;
             ScriptContext_Enable();
             DestroyTask(taskId);
@@ -3391,7 +3446,7 @@ static void Task_DeoxysRockInteraction(u8 taskId)
         {
             rockLevel++;
             ChangeDeoxysRockLevel(rockLevel);
-            VarSet(VAR_DEOXYS_ROCK_LEVEL, rockLevel);
+            VarSet(ROCK_LEVEL_VAR, rockLevel);
             gSpecialVar_Result = DEOXYS_ROCK_PROGRESSED;
             DestroyTask(taskId);
         }
@@ -3411,8 +3466,8 @@ static void ChangeDeoxysRockLevel(u8 rockLevel)
 
     CreateTask(WaitForDeoxysRockMovement, 8);
     gFieldEffectArguments[0] = LOCALID_BIRTH_ISLAND_EXTERIOR_ROCK;
-    gFieldEffectArguments[1] = MAP_NUM(MAP_BIRTH_ISLAND_EXTERIOR);
-    gFieldEffectArguments[2] = MAP_GROUP(MAP_BIRTH_ISLAND_EXTERIOR);
+    gFieldEffectArguments[1] = gSaveBlock1Ptr->location.mapNum;   // Moemon Kai: KANTO's island too (was HOENN's map)
+    gFieldEffectArguments[2] = gSaveBlock1Ptr->location.mapGroup;
     gFieldEffectArguments[3] = sDeoxysRockCoords[rockLevel][0];
     gFieldEffectArguments[4] = sDeoxysRockCoords[rockLevel][1];
 
@@ -3438,19 +3493,20 @@ static void WaitForDeoxysRockMovement(u8 taskId)
 
 void IncrementBirthIslandRockStepCount(void)
 {
-    u16 stepCount = VarGet(VAR_DEOXYS_ROCK_STEP_COUNT);
-    if (gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_BIRTH_ISLAND_EXTERIOR) && gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_BIRTH_ISLAND_EXTERIOR))
+    u16 stepCount = VarGet(ROCK_STEPS_VAR);
+    if ((gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_BIRTH_ISLAND_EXTERIOR) && gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_BIRTH_ISLAND_EXTERIOR))
+     || OnKantoBirthIsland())
     {
         if (++stepCount > 99)
-            VarSet(VAR_DEOXYS_ROCK_STEP_COUNT, 0);
+            VarSet(ROCK_STEPS_VAR, 0);
         else
-            VarSet(VAR_DEOXYS_ROCK_STEP_COUNT, stepCount);
+            VarSet(ROCK_STEPS_VAR, stepCount);
     }
 }
 
 void SetDeoxysRockPalette(void)
 {
-    LoadPalette(&sDeoxysRockPalettes[(u8)VarGet(VAR_DEOXYS_ROCK_LEVEL)], OBJ_PLTT_ID(ROCK_PAL_ID), PLTT_SIZEOF(4));
+    LoadPalette(&sDeoxysRockPalettes[(u8)VarGet(ROCK_LEVEL_VAR)], OBJ_PLTT_ID(ROCK_PAL_ID), PLTT_SIZEOF(4));
     BlendPalettes(1 << (ROCK_PAL_ID + 16), 16, 0);
 }
 

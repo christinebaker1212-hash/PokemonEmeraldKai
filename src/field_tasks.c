@@ -57,6 +57,8 @@ static void SootopolisGymIcePerStepCallback(u8);
 static void CrackedFloorPerStepCallback(u8);
 static void Task_MuddySlope(u8);
 
+static void IcefallCaveIcePerStepCallback(u8 taskId);
+
 static const TaskFunc sPerStepCallbacks[] =
 {
     [STEP_CB_DUMMY]             = DummyPerStepCallback,
@@ -66,7 +68,8 @@ static const TaskFunc sPerStepCallbacks[] =
     [STEP_CB_SOOTOPOLIS_ICE]    = SootopolisGymIcePerStepCallback,
     [STEP_CB_TRUCK]             = EndTruckSequence,
     [STEP_CB_SECRET_BASE]       = SecretBasePerStepCallback,
-    [STEP_CB_CRACKED_FLOOR]     = CrackedFloorPerStepCallback
+    [STEP_CB_CRACKED_FLOOR]     = CrackedFloorPerStepCallback,
+    [8]                         = IcefallCaveIcePerStepCallback,   // Moemon Kai: FireRed's STEP_CB_ICE (KANTO's ICEFALL CAVE)
 };
 
 // Each array has 4 pairs of data, each pair representing two metatiles of a log and their relative position.
@@ -962,3 +965,110 @@ static void Task_MuddySlope(u8 taskId)
         }
     }
 }
+
+// Moemon Kai: FireRed's ICEFALL CAVE 1F thin ice (pokefirered field_tasks.c IcefallCaveIcePerStepCallback,
+// SetIcefallCaveCrackedIceMetatiles): thin ice cracks under a step, cracked ice breaks into a hole (VAR_TEMP_1 = 1: the
+// map's script drops the player to B1F); the cracked spots stay cracked until the map reloads (temp flags 1-9).
+// KANTO's tiles keep FireRed's metatile numbers.
+#define FRLG_METATILE_CRACKED_ICE 0x35A
+#define FRLG_METATILE_ICE_HOLE    0x35B
+static const u8 sIcefallCaveIceCoords[][2] = {{8, 3}, {10, 5}, {15, 5}, {8, 9}, {9, 9}, {16, 9}, {8, 10}, {9, 10}, {8, 14}};
+
+static void IcefallMarkCoordVisited(s16 x, s16 y)
+{
+    u8 i;
+    for (i = 0; i < ARRAY_COUNT(sIcefallCaveIceCoords); i++)
+        if (sIcefallCaveIceCoords[i][0] + MAP_OFFSET == x && sIcefallCaveIceCoords[i][1] + MAP_OFFSET == y)
+        {
+            FlagSet(i + 1);
+            break;
+        }
+}
+
+void MP_SetIcefallCaveCrackedIceMetatiles(void)
+{
+    u8 i;
+    for (i = 0; i < ARRAY_COUNT(sIcefallCaveIceCoords); i++)
+        if (FlagGet(i + 1) == TRUE)
+            MapGridSetMetatileIdAt(sIcefallCaveIceCoords[i][0] + MAP_OFFSET, sIcefallCaveIceCoords[i][1] + MAP_OFFSET, FRLG_METATILE_CRACKED_ICE);
+}
+
+#define tState data[1]
+#define tPrevX data[2]
+#define tPrevY data[3]
+#define tIceX  data[4]
+#define tIceY  data[5]
+#define tDelay data[6]
+
+static void IcefallCaveIcePerStepCallback(u8 taskId)
+{
+    s16 x, y;
+    u8 tileBehavior;
+    s16 *data = gTasks[taskId].data;
+    switch (tState)
+    {
+    case 0:
+        PlayerGetDestCoords(&x, &y);
+        tPrevX = x;
+        tPrevY = y;
+        tState = 1;
+        break;
+    case 1:
+        PlayerGetDestCoords(&x, &y);
+        if (x == tPrevX && y == tPrevY)
+            return;
+        tPrevX = x;
+        tPrevY = y;
+        tileBehavior = MapGridGetMetatileBehaviorAt(x, y);
+        if (MetatileBehavior_IsThinIce(tileBehavior) == TRUE)
+        {
+            IcefallMarkCoordVisited(x, y);
+            tDelay = 4;
+            tState = 2;
+            tIceX = x;
+            tIceY = y;
+        }
+        else if (MetatileBehavior_IsCrackedIce(tileBehavior) == TRUE)
+        {
+            tDelay = 4;
+            tState = 3;
+            tIceX = x;
+            tIceY = y;
+        }
+        break;
+    case 2:
+        if (tDelay != 0)
+        {
+            tDelay--;
+        }
+        else
+        {
+            PlaySE(SE_ICE_CRACK);
+            MapGridSetMetatileIdAt(tIceX, tIceY, FRLG_METATILE_CRACKED_ICE);
+            CurrentMapDrawMetatileAt(tIceX, tIceY);
+            tState = 1;
+        }
+        break;
+    case 3:
+        if (tDelay != 0)
+        {
+            tDelay--;
+        }
+        else
+        {
+            PlaySE(SE_ICE_BREAK);
+            MapGridSetMetatileIdAt(tIceX, tIceY, FRLG_METATILE_ICE_HOLE);
+            CurrentMapDrawMetatileAt(tIceX, tIceY);
+            VarSet(VAR_TEMP_1, 1);
+            tState = 1;
+        }
+        break;
+    }
+}
+
+#undef tState
+#undef tPrevX
+#undef tPrevY
+#undef tIceX
+#undef tIceY
+#undef tDelay

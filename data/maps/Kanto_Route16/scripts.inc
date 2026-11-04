@@ -262,8 +262,8 @@ Kanto_Route16_Text_8437209::
 	.string "a deep and comfortable slumber.$"
 
 Kanto_Route16_Text_8437246::
-	.string "CYCLING ROAD\n"
-	.string "Enjoy the ride!$"
+	.string "Enjoy the slope!\n"
+	.string "CYCLING ROAD$"
 
 Kanto_Route16_Text_8437263::
 	.string "ROUTE 16\n"

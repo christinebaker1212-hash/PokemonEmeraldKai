@@ -1,0 +1,7 @@
+# FireRed's hidden COINS in CELADON's GAME CORNER (obtain_item.inc EventScript_MpHiddenCoins): the spot at (2,4) holds
+# 10 COINS, put in the COIN CASE, the spot's flag set.
+MODE=1
+TMO=100
+ENV_A="MOEMON_DEBUG_REGION=2"
+EXPECT_A=("[test] coins 10" "[test] flag 11059 = 1")
+UNEXPECT_A=("[crash]")

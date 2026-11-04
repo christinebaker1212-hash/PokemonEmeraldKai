@@ -86,7 +86,7 @@ public final class ConditionPage extends Page {
         JSONArray cond = m.optJSONArray("cond");
         int r = Math.min(56, (w - 24) / 4), cx = w / 2 + (w >= 300 ? 40 : 0), cy = y + 46 + r;
         if (w >= 300) {
-            art.front(c, m.optInt("s"), m.optString("pal", null), 8, cy - 40, 80, false);
+            art.front(c, m.optInt("s"), art.monPal(m), 8, cy - 40, 80, false);
         }
         // the rings
         line.setColor(0xFF5868B8);

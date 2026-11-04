@@ -186,7 +186,7 @@ Kanto_PokemonLeague_ChampionsRoom_Movement_84129EE:
 	step_end
 
 Kanto_PokemonLeague_ChampionsRoom_Text_8429225::
-	.string "BLUE: Hey, {PLAYER}!\p"
+	.string "{RIVAL}: Hey, {PLAYER}!\p"
 	.string "I was looking forward to seeing\n"
 	.string "you, {PLAYER}.\p"
 	.string "My rival should be strong to keep\n"
@@ -204,7 +204,7 @@ Kanto_PokemonLeague_ChampionsRoom_Text_8429225::
 	.string "the world!$"
 
 Kanto_PokemonLeague_ChampionsRoom_Text_842938F::
-	.string "BLUE: Hey, {PLAYER}!\p"
+	.string "{RIVAL}: Hey, {PLAYER}!\p"
 	.string "You came back, {PLAYER}!\n"
 	.string "Hahah, that is so great!\p"
 	.string "My rival should be strong to keep\n"
@@ -253,13 +253,13 @@ Kanto_PokemonLeague_ChampionsRoom_Text_842968E::
 	.string "{PLAYER}, you have come of age!$"
 
 Kanto_PokemonLeague_ChampionsRoom_Text_842974E::
-	.string "OAK: BLUE…\n"
+	.string "OAK: {RIVAL}…\n"
 	.string "I’m disappointed in you.\p"
 	.string "I came when I heard you’d beaten\n"
 	.string "the ELITE FOUR.\p"
 	.string "But, when I got here, you had\n"
 	.string "already lost!\p"
-	.string "BLUE, do you understand why\n"
+	.string "{RIVAL}, do you understand why\n"
 	.string "you lost?\p"
 	.string "You have forgotten to treat your\n"
 	.string "MOéMON with love and trust.\p"

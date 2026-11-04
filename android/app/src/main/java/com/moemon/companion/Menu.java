@@ -72,8 +72,28 @@ public final class Menu {
         return m;
     }
 
+    private final long born = System.currentTimeMillis();
+    /** (replacing a menu on screen, as a setting's row reopens its menu: no opening again) */
+    boolean still;
+
     public void draw(Canvas c, int w, int h) {
+        // (a menu opening: the dim fades in, the window grows from a little smaller)
+        float e = still ? 1f : GameView.eased(born, 140);
+        int dimAlpha = dim.getAlpha();
+        dim.setAlpha((int) (dimAlpha * e));
         c.drawRect(0, 0, w, h, dim);
+        dim.setAlpha(dimAlpha);
+        if (e < 1f) {
+            v.postInvalidateOnAnimation();
+        }
+        c.save();
+        float k = 0.92f + 0.08f * e;
+        c.scale(k, k, w / 2f, h / 2f);
+        drawWindow(c, w, h);
+        c.restore();
+    }
+
+    private void drawWindow(Canvas c, int w, int h) {
         int widest = title == null ? 0 : art.width(title);
         for (String r : rows) {
             widest = Math.max(widest, art.width(r) + 12);
@@ -112,6 +132,7 @@ public final class Menu {
         }
         int i = (ty - rowY) / 20;
         if (ty >= rowY && i >= 0 && i < rows.size()) {
+            v.sound.play("se_select");
             v.showMenu(parent);
             if (actions.get(i) != null) {
                 actions.get(i).run();
@@ -147,6 +168,22 @@ public final class Menu {
             }
             Notifier.prefs(c).edit().putInt("quietFrom", choices[next][0]).putInt("quietTo", choices[next][1]).apply();
             v.showMenu(notifications(v));
+        });
+        m.add("CANCEL", null);
+        return m;
+    }
+
+    /** The game's sounds and its music (the card duels' songs) on their own switches */
+    static Menu sound(GameView v) {
+        Sound s = v.sound;
+        Menu m = make(v, "SOUND");
+        m.add((s.effectsOn() ? "ON  " : "OFF ") + "SOUND EFFECTS", () -> {
+            s.setEffects(!s.effectsOn());
+            v.showMenu(sound(v));
+        });
+        m.add((s.musicOn() ? "ON  " : "OFF ") + "MUSIC", () -> {
+            s.setMusic(!s.musicOn());
+            v.showMenu(sound(v));
         });
         m.add("CANCEL", null);
         return m;
@@ -195,7 +232,9 @@ public final class Menu {
             }
             v.showMenu(t);
         });
+        m.add("LOOK", () -> v.showMenu(Look.menu(v)));
         m.add("NOTIFICATIONS", () -> v.showMenu(notifications(v)));
+        m.add("SOUND", () -> v.showMenu(sound(v)));
         m.add("UPDATE", () -> Updater.check(v, true));
         m.add("ABOUT", () -> v.message("MOEMON COMPANION " + Updater.version(v.getContext())
                 + "\nThe game's own POKéMON, words and art. Pair it from OPTIONS > CO-OP > PHONE LINK in the game."));

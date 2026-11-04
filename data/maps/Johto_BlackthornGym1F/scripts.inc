@@ -327,6 +327,7 @@ Johto_BlackthornGym1F_Text_83C7F07::
 	.string "BLACKTHORN CITY MOéMON GYM$"
 
 Johto_BlackthornGym1F_Text_83C7F23::
-	.string "BLACKTHORN CITY MOéMON GYM\p"
-	.string "CLAIR’S CERTIFIED TRAINERS:\n"
+	.string "BLACKTHORN MOéMON GYM\p"
+	.string "LEADER: CLAIR\p"
+	.string "WINNING TRAINERS:\n"
 	.string "{PLAYER}$"

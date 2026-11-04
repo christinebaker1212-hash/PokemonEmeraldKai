@@ -19,9 +19,9 @@ Johto_SilverCaveSummit_EventScript_83E05C5::
 	end
 
 Johto_SilverCaveSummit_EventScript_83E05E0::
-	setmaplayoutindex 0x232
+	setmaplayoutindex LAYOUT_JOHTO_SILVER_CAVE_SUMMIT_ALT   @ (Quetzal's layout 0x232)
 	return
 
 Johto_SilverCaveSummit_EventScript_83E05E4::
-	setmaplayoutindex 0x231
+	setmaplayoutindex LAYOUT_JOHTO_SILVER_CAVE_SUMMIT   @ (Quetzal's layout 0x231)
 	return

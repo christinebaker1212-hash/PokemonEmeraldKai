@@ -255,6 +255,7 @@ Johto_IlexForest_EventScript_83DC278::
 Johto_IlexForest_EventScript_83DC28F::
 	checkitem ITEM_GS_BALL, 1
 	goto_if_eq VAR_RESULT, 0, Johto_IlexForest_EventScript_83DC2C4
+	@ Moemon Kai: Crystal's shrine calls CELEBI once (IlexForest.asm .CelebiEvent); Quetzal's "Call CELEBI again?" is gone
 	msgbox Johto_IlexForest_Text_83DCA20, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, 0, Johto_IlexForest_EventScript_83DC3EC
 	msgbox Johto_IlexForest_Text_83DCB00, MSGBOX_DEFAULT
@@ -262,8 +263,11 @@ Johto_IlexForest_EventScript_83DC28F::
 	goto Johto_IlexForest_EventScript_83DC2D7
 
 Johto_IlexForest_EventScript_83DC2C4::
-	msgbox Johto_IlexForest_Text_83DCAC9, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, 0, Johto_IlexForest_EventScript_83DC3EC
+	msgbox Johto_IlexForest_Text_83DC9E3, MSGBOX_DEFAULT
+	closemessage
+	release
+	end
+
 
 Johto_IlexForest_EventScript_83DC2D7::
 	closemessage
@@ -298,8 +302,7 @@ Johto_IlexForest_EventScript_83DC2D7::
 	special BattleSetup_StartLegendaryBattle
 	waitstate
 	specialvar VAR_RESULT, GetBattleOutcome
-	goto_if_eq VAR_RESULT, 1, Johto_IlexForest_EventScript_83DC36A
-	goto_if_ne VAR_RESULT, 7, Johto_IlexForest_EventScript_83DC3AF
+	goto_if_ne VAR_RESULT, B_OUTCOME_CAUGHT, Johto_IlexForest_EventScript_83DC3AF
 	call Johto_IlexForest_EventScript_83DC3AB
 
 Johto_IlexForest_EventScript_83DC36A::
@@ -328,6 +331,7 @@ Johto_IlexForest_EventScript_83DC3AB::
 	return
 
 Johto_IlexForest_EventScript_83DC3AF::
+	setvar VAR_QZ_0x5009, 0xA
 	fadescreenswapbuffers 1
 	removeobject 7
 	call Johto_IlexForest_EventScript_83DC3C1
@@ -754,10 +758,6 @@ Johto_IlexForest_Text_83DCA20::
 	.string "It looks like the GS BALL would fit\l"
 	.string "inside it.\p"
 	.string "Want to put the GS BALL here?$"
-
-Johto_IlexForest_Text_83DCAC9::
-	.string "The GS BALL is still in the shrine.\p"
-	.string "Call CELEBI again?$"
 
 Johto_IlexForest_Text_83DCB00::
 	.string "{PLAYER} put in the GS BALL.$"

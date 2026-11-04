@@ -1,0 +1,42 @@
+pressuntil A field 5000
+wait 60
+mp setvar 0x5003 5
+mp setvar 0x52EA 1
+mp qzphone register 15
+mp qzphone register 16
+mp warp 35,1,5,5
+wait 120
+press START 2
+wait 30
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+pressuntil A pokegear 600
+wait 30
+press RIGHT 2
+wait 20
+press RIGHT 2
+wait 30
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+shot book
+mp pokegear
+press A 2
+wait 90
+shot call1
+mp pokegear
+press A 2
+wait 20
+shot call2
+press A 2
+wait 20
+shot call3
+mash A 12 20
+wait 30
+mp pokegear
+quit

@@ -48,3 +48,22 @@ Kanto_SevenIsland_PokemonCenter_1F_Text_84511C0::
 Kanto_SevenIsland_PokemonCenter_1F_Text_8451246::
 	.string "If you’re confident, you should\n"
 	.string "check out TRAINER TOWER.$"
+
+@ Moemon Kai: FireRed's POKéMON JOURNAL on the rack (pokefirered data/scripts/fame_checker.inc), there once KANTO's
+@ LEAGUE is beaten (FireRed hides it until the HALL OF FAME); no FAME CHECKER entry, which this game hasn't got
+Kanto_SevenIsland_PokemonCenter_1F_EventScript_PokemonJournal::
+	goto_if_unset FLAG_QZ_0x2108, Kanto_SevenIsland_PokemonCenter_1F_EventScript_JournalNotYet
+	lockall
+	textcolor 3
+	msgbox Kanto_SevenIsland_PokemonCenter_1F_Text_SpecialFeature, MSGBOX_DEFAULT
+	releaseall
+Kanto_SevenIsland_PokemonCenter_1F_EventScript_JournalNotYet::
+	end
+
+Kanto_SevenIsland_PokemonCenter_1F_Text_SpecialFeature::
+	.string "MOéMON JOURNAL\p"
+	.string "Special Feature:\n"
+	.string "ELITE FOUR’s AGATHA!\p"
+	.string "In her youth, AGATHA and PROF.\n"
+	.string "OAK were rivals who vied for\l"
+	.string "supremacy as TRAINERS.$"

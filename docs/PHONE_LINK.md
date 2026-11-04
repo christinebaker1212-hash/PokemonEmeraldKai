@@ -457,4 +457,137 @@ hidden cards hidden), YgoFriendsTest (3 duels through a real server, a concessio
 - ON OFFER (a trade by mail) as a small orange tag on box places, and on the PC card and the PARTY's cards.
 - The tab bar: a 12x12 pixel icon for each page above its name, the chosen one on a raised plate (GameView TAB_ICONS).
 
-Next: the app's sounds and music (the game's own), and the rest of the pass.
+### The app's sounds (1.81.0)
+
+The game's own sounds, played by the game's own sound engine and recorded when the APK is built; nothing is written
+for the app and nothing is committed.
+
+- **The export** (src/mp/mp_export_sound.c, part of MOEMON_EXPORT_APP; MOEMON_EXPORT_NO_SOUND=1 skips it): each sound
+  is played on the game's players and mixed by its mixer, frame by frame, with the output taken from
+  Platform_QueueAudio (gMpAudioCapture: nothing reaches the sound device). Sound effects (the list in sEffects: the
+  card tables', the PC's, the POKéNAV's, the BAG's...), a cry for every species (PlayCry_NormalNoDucking; a cry that
+  doesn't start, a cry player still taken, is tried again after a longer quiet), fanfares, and the card games' duel
+  songs as each scene plays them: MP_Kaisong_Request with a file of the scene (tt_board.c, tcg_board.c, ygo_board.c),
+  so a scene's own .kaisong plays, with no map (a borrowed save block: the export runs at the first frame) so no
+  place's music does. A song's loop is found by its first track's GOTO (music_player.c gMpGotoWatch, at pattern level 0):
+  the loop's end is that frame, its start the first frame the track was past the GOTO's place; 50 ms more is rendered
+  past the end for the app's crossfade. Two scenes with the same music (no file of their own) share one copy.
+- **sounds.bin** ("MSND", the format at the top of mp_export_sound.c): IMA ADPCM, mono at 21024 Hz for sound effects,
+  10512 Hz for cries (their own rate), stereo 21024 Hz for fanfares and songs (the mixer's 42048 Hz taken down through
+  a windowed-sinc filter). About 16 MB: 1,050 cries 7 MB, six songs 7 MB. tools/phone/sounds_pack.py lists it or
+  writes WAVs (songs twice round, crossfaded as the app plays them).
+- **Sound.java**: an AudioTrack at the phone's own rate, low latency, opened while something plays (let go after 1.5 s
+  of quiet). Sound effects on three voices (the same one again starts over; else the oldest gives way), one cry (the
+  music at 85/256 under it, PlayCry_Normal's ducking), a fanfare (the music waits, then goes on), one song (decoded off
+  the main thread, a quarter-second fade in, a crossfade over the loop's seam). The music needs audio focus, never
+  starts while another app's media is playing (USAGE_MEDIA in the active playback configurations), and stops when the
+  app goes behind something (MainActivity onPause: Sound.front(false)); it comes back with the page that asked for it.
+  MENU > SOUND: SOUND EFFECTS (cries too) and MUSIC, each on its own switch.
+- **Where**: pages opening and closing SE_SELECT (GameView.showOver), the tabs SE_RG_BAG_POCKET, the MENU SE_WIN_OPEN
+  and its rows SE_SELECT, a refusal SE_FAILURE and a done SE_SUCCESS (the toast); the SUMMARY plays the POKéMON's cry
+  as it comes up and on the picture (not an EGG's), the POKéDEX entry its cry once seen and SE_DEX_PAGE turning; a
+  MATCH CALL rings SE_POKENAV_CALL. The card tables play what the game's boards play for every event (tcg_board.c
+  BoardEvent, ygo_board.c Present, tt_board.c Play: each page's sound(); a TCG attack's sound by its animation through
+  tcg_flow.c TcgFlow_AttackSound, the board's table moved there and shared, Tcg.attackSound), SE_SELECT on a choice and
+  SE_FAILURE on a refusal, the scene's duel song (TCG / YU-GI-OH!: VS TRAINER against a card player, the UNION ROOM's
+  against a friend; TRIPLE TRIAD: FireRed's VS TRAINER), the scene's victory song on a win, the music stopping on a
+  loss, SE_FAILURE on a TRIPLE TRIAD draw. Pack openings: SE_RG_CARD_OPEN, each card SE_RG_CARD_FLIP as it turns
+  (SE_SHINY for a rare one), MUS_OBTAIN_ITEM at the end, as the game's pack screens.
+- Tests: tools/phone/sounds_test.py (every sound the app names and the attack table's are in the pack, a cry for every
+  species, loops inside their songs with a crossfade tail, nothing silent or clipped), SoundTest (`./gradlew
+  testDebugUnitTest`: the ADPCM decodes, songs go round their loops with no jump at the seam).
+
+### The POKéDEX's details, the type chart, LOOK (1.84.0)
+
+- **The export** (mp_export.c, data.json per species): `"ab"` abilities, `"eg"` egg groups, `"ey"` base EXP., `"evy"`
+  the effort it gives (HP, ATK, DEF, SP. ATK, SP. DEF, SPEED), `"it"` held items (common, rare), `"ec"` egg cycles,
+  `"fr"` base friendship, `"evo"` [method, param, target] from gEvolutionTable, `"lv"` [level, move] and `"tm"` a hex
+  mask of TM / HM indexes; top level `"tms"` the move of each TM / HM index.
+- **DexEntryPage**: chips that jump to ENTRY / STATS / TYPES / EVOLVES / MOVES / MORE (sectionY); ABILITY; TYPE MATCHUPS
+  (x4 / x2 / x1/2 / x1/4 / x0 rows, "TYPE CHART >"); EVOLUTION (the family walked from its first stage, each with its
+  method; a tap opens that stage's entry); MOVES BY LEVEL / TM & HM (a tap: the move's card, moveInfo); BREEDING;
+  TRAINING. **DexPage**: SORTS No. / ABC / TOTAL, a type filter with its own picker, CHART; filter, order and type kept
+  in the app's settings.
+- **TypeChartPage**: CHART (18 x 18, the game's type order), DEFENSE (one or two types), ATTACK (one type); the
+  numbers from the game's own gTypeEffectiveness through data.json.
+- **Look.java** (MENU > LOOK): THEMES (Page.SKY / SKY2 / BANNER / BANNER_DARK), the window frame (GameArt.userFrame:
+  frame 0 drawn as the chosen one), ANIMATIONS (GameView: pages slide in over SLIDE_MS, the tab plate over TAB_MS,
+  menus grow in, all through GameView.eased; off, everything is at once: the tests run with them off), OPEN ON (a
+  page, or LAST). Settings look_theme / look_frame / look_start / look_anim / look_last.
+- SUMMARY: the friendship rater's words under FRIENDSHIP, POKéDEX ENTRY; a move's PHYSICAL / SPECIAL / STATUS.
+  POKéGEAR RADIO: < > under the dial step half a frequency (DevicePage.step).
+- Tests: ScreensTest shots dex_entry_more1-5, dex_types, dex_fire, types_*, look_menu, look_night.
+
+### The POKé BALL page (1.85.0)
+
+The SUMMARY's BALL tab (BallPage.java): the game's POKé BALL page and ball effect editor on the phone.
+- **The clips** (src/mp/mp_fxclip.c, MOEMON_EXPORT_FXCLIPS=DIR; android/build_assets.py runs it after the export,
+  unthrottled through the test harness, about 13 s; MOEMON_EXPORT_NO_FXCLIPS skips it): the game opens its own ball
+  effect editor (mp_ballfx_editor.c, MP_FxClip_Active: the preview's pieces set by MP_FxClip_Next, the Moemon seen from
+  the front, a shorter pause) on a PIKACHU and plays every SEND-OUT, PARTICLES and RETURN once with the rest DEFAULT and
+  RED energy (a first loop unrecorded: the fade-in); sdl2.c hands each finished frame (effects composited) to
+  MP_FxClip_Frame, which keeps the battle field (112 x 112) XORed with the frame before, as runs. build_assets.py packs
+  them into fxclips.bin ("MFXA": 95 clips at 30 frames a second, each frame XORed with the one before, zlib; about
+  3.5 MB). FxClips.java unpacks one clip at a time.
+- **The data** (data.json): "balls" (mp_ballstyle.c MP_BallStyle_ExportJson: the 41 colors with their five shades,
+  the POKé BALL icon's palette and the slots 7-11 a color fills, the 68 decorations' 5x5 icon art, colors and place,
+  their groups, the special balls' items) and "ballfx" (each piece's name, the editor's words for it, where an earned
+  one comes from; the sounds; the ready-made presets as [name, pack, sound]).
+- **The snapshot**: each POKéMON's "bst" (ball style), "fx" (MP_BallFx_Pack) and "fxs" (sound) when not 0; the save's
+  "fxu" (per kind COLOR, SEND-OUT, PARTICLES, RETURN: the pieces it may pick, a bit each in hex, the first first) and
+  "fxp" (MY PRESET 1-6: [pack, sound] or 0). PhoneBall_Hash is in the rev.
+- **The orders** (src/mp/mp_phone_ball.c, as the game's own page and editor allow): "ballstyle" {at, p, o, item,
+  color, deco} (another kind of ball costs one from the BAG: "noitem"; a color not earned: "locked"; a special ball
+  is a POKé BALL underneath with its number in the style), "ballfx" {at, p, o, fx, fxs} (each piece earned or the one
+  it carries, else "locked"), "fxparty" {fx, fxs} (every POKéMON in the party but EGGs), "fxpreset" {slot, fx, fxs}.
+  The app sends "special" with "ballstyle" for Planned's preview; the game works it out itself.
+- **The page**: the stage plays the piece of the row last touched (the effect's most telling part at first; a tap
+  plays it again), the ball's icon in its corner drawn as the game draws it (the red top's shades, the emblem); the
+  info box tells of the piece, or where a piece not earned comes from. Rows THE BALL (BALL, COLOR, DECOR) and
+  SEND-OUT & RETURN (PRESET, SEND-OUT, PARTICLES, ENERGY, RETURN, SOUND): < > step, the middle opens the row's list
+  (every choice, LOCKED ones marked). SAVE (a ball from the BAG asks first), PRESETS (use or save MY PRESET 1-6), PARTY,
+  UNDO / BACK. Pieces not earned can be looked at, never kept.
+- Tests: tools/phone/ball_test.py (the orders against a headless game), ScreensTest ball_page / ball_list /
+  ball_locked.
+
+### The ME page (1.85.0)
+
+The ninth tab, ME (MePage.java): Kai's own things (src/mp/mp_phone_kai.c).
+- **The snapshot's "kai"**: "ach" [done, all], "pulls", "tickets", "free" (MP_Gatcha_FreeWaiting), "jar" (the CANDY JAR
+  in the BAG), "candy" (gMpCandies, a count per type number), "time" [hours, minutes], "farm" (the save's own GARDEN
+  BERRY farm, its open plots: [berry item, stage, minutes to the next, yield, times watered]; a friend's farm online
+  isn't sent). PhoneKai_Hash is in the rev.
+- **Asked for**: {"t":"ach"} -> "cats" and "list" ([category, name, words, status, reward, done]: mp_achieve.c
+  MP_Achieve_Info, the menu's order); {"t":"gatcha"} -> "pulls", "tickets", "banners" ([name, tagline, free 1, free
+  10]).
+- **Orders**: "pull" {banner, how: 0 free 10, 1 free 1, 2 TICKET, 3 one, 4 ten} -> mp_gatcha.c MP_Gatcha_PhonePull:
+  the reel's own RollPrizes (pity, the 10-pull's R or better, random Moemon and ball pieces, achievements, the save
+  after), friends told of a UR / EX; the answer's "prizes" [{r rarity, k kind, id (a Moemon's species, an item; a set's
+  first item, a ball piece as a POKé BALL), sh, amt, n (game text), note}]; "nopulls". "candy" {type: -1 every kind}
+  (MP_Candy_Convert / ConvertType; "nojar", "fewcandy", "bagfull"; the answer's "made"). "rename" {at, p, o, name: game
+  text as hex, 1-10 letters, no control codes ("badname"); any POKéMON but an EGG, as the summary's SELECT}.
+- **The pages**: MePage (the TRAINER CARD drawn in the app: name, ID, money, POKéDEX, time, each region's BADGES;
+  ACHIEVEMENTS with SEE ALL; MOEGATCHA with PULL; the CANDY JAR's kinds and CONVERT; the farm's plots, a ripe one's
+  yield, a growing one's time left), AchievementsPage (ALL / TO DO / DONE, < category >), GatchaPage (banners < >, the
+  pulls the banner can take now, a reel of its own that races while the game answers, slows onto the best prize and
+  flashes for SUPER RARE and up, then the pull's prizes; AGAIN / BACK). The SUMMARY: RENAME by the name (the phone's
+  keyboard; letters the game's font has; DONE sends it). "$" in the app's words is the game's money sign (GameArt
+  encode: the game's "$" ends a string, which hid the BAG's money).
+- Tests: tools/phone/kai_test.py, ScreensTest me / achievements / gatcha / gatcha_prizes.
+
+### MOéMON or POKéMON (1.86.0)
+
+The app follows the game's OPTIONS > CREATURES, or its own MENU > LOOK > CREATURES (AS THE GAME / MOéMON / POKéMON;
+Look.creatures, "look_art"; Look.pokemonArt sets GameArt.pokemonArt every frame, the widget too).
+- **Pictures**: mp_export.c exports both sets (ExportMonsArt: front/ and front_p/ by MP_MONART with the option set; the
+  party icons are the same in both, so once), each species' "pal" (Kai's) and "ppal" (the original's), and the POKéDEX
+  list's header both ways (dex_list.png, dex_list_p.png). The snapshot: each POKéMON's "pal" and "ppal" when not its
+  species' (shiny, a Stadium hue: MP_BoxMonFrontPal for Kai's, GetMonSpritePalFromSpeciesAndPersonality with the
+  option set for the original's), and the save's "art" (the game's setting). GameArt.front draws from front_N or
+  front_p_N with "pal" or "ppal"; GameArt.monPal(mon) picks a POKéMON's own.
+- **Words** (GameArt.words, on every string drawn or measured): with POKéMON, the game's own swap (mp_textopts.c:
+  MOé -> POKé in any case, MOEMON -> POKéMON); with MOéMON, the app's POKéMON / POKéDEX / POKéNAV become Kai's MOéMON /
+  MOéDEX / MOéNAV (Kai kept POKé BALL, POKéGEAR...).
+- Tests: ScreensTest party_pokemon, dex_pokemon.
+
+Next: the rest of the pass.

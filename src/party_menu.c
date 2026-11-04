@@ -2270,6 +2270,11 @@ static u16 GetTutorMove(u8 tutor)
 
 static bool8 CanLearnTutorMove(u16 species, u8 tutor)
 {
+    // Moemon Kai: CAPE BRINK's ultimate moves, FireRed's (VENUSAUR, CHARIZARD, BLASTOISE: tutor_learnsets.h has 30 bits)
+    if (tutor >= TUTOR_MOVE_FRENZY_PLANT)
+        return (tutor == TUTOR_MOVE_FRENZY_PLANT && species == SPECIES_VENUSAUR)
+            || (tutor == TUTOR_MOVE_BLAST_BURN && species == SPECIES_CHARIZARD)
+            || (tutor == TUTOR_MOVE_HYDRO_CANNON && species == SPECIES_BLASTOISE);
     if (sTutorLearnsets[species] & (1 << tutor))
         return TRUE;
     else

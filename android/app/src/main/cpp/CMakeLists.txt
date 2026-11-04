@@ -16,6 +16,8 @@ file(CREATE_LINK ${GAME}/include/tt ${CMAKE_BINARY_DIR}/ttinc/tt SYMBOLIC)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/tcginc)
 file(CREATE_LINK ${GAME}/include/tcg ${CMAKE_BINARY_DIR}/tcginc/tcg SYMBOLIC)
 file(CREATE_LINK ${GAME}/include/mp_version.h ${CMAKE_BINARY_DIR}/tcginc/mp_version.h SYMBOLIC)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/tcginc/constants)
+file(CREATE_LINK ${GAME}/include/constants/songs.h ${CMAKE_BINARY_DIR}/tcginc/constants/songs.h SYMBOLIC)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/ygoinc)
 file(CREATE_LINK ${GAME}/include/ygo ${CMAKE_BINARY_DIR}/ygoinc/ygo SYMBOLIC)
 

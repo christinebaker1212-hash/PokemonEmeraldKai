@@ -77,9 +77,9 @@ Kanto_NavelRock_Base_EventScript_8414F31::
 
 Kanto_NavelRock_Base_EventScript_8414FF4::
 	setflag FLAG_QZ_0x21DE
-	setvar VAR_0x8004, 0xF9
+	setvar VAR_0x8004, SPECIES_LUGIA
 	goto Quetzal_EventScript_845951C
 
 Kanto_NavelRock_Base_EventScript_8415002::
-	setvar VAR_0x8004, 0xF9
+	setvar VAR_0x8004, SPECIES_LUGIA
 	goto Quetzal_EventScript_845951C

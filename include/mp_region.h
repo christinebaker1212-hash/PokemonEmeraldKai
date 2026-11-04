@@ -1,5 +1,6 @@
 #ifndef GUARD_MP_REGION_H
 #define GUARD_MP_REGION_H
+#include "constants/kai_regions.h"   // (JOHTO / KANTO flags this game added)
 // Moemon Kai: HOENN, JOHTO and KANTO (src/mp/mp_region.c, docs/REGIONS_PLAN.md)
 
 #define REGION_HOENN 0
@@ -31,6 +32,7 @@
 #define FLAG_SINNOH_HIDE_REGION_BOAT 0x3D3D   // CANALAVE's ferry sailor hidden (set on each SINNOH map load: s3d_scrcmd.c; shown when the boat can sail)
 #define FLAG_SINNOH_HAS_PARTNER 0x3D3C   // Platinum's walking partner (SetHasPartner)
 #define FLAG_SINNOH_PLATINUM_STORY 0x3D3B   // this save plays Platinum's own story (its converted map scripts, triggers and story people: tools/sinnoh/gen_scripts.py)
+#define VAR_REGION_ARRIVAL  0x52FD   // the region (JOHTO 1, KANTO 2) of a first boat just in: its port's sailor takes the player to the first town (MP_Region_FirstBoatIn)
 #define VAR_SINNOH_ARRIVAL  0x52F0   // 1: just off the first boat to SINNOH (the harbor sailor takes them to TWINLEAF), 2: in SINNOH, 3: BARRY's mom's visit played (TWINLEAF's house 1F)
 u8 MP_Region_TotalBadges(void);   // every region's badges (BADGES on the continue screen and in SAVE)
 #define FLAG_KANTO_TUTOR_MEGA_PUNCH 0x21DF   // FireRed's ROUTE 4 tutors (free in Quetzal's KANTO flags)
@@ -67,6 +69,7 @@ u16 MP_TimeLandSlot(u16 species, u8 index);   // grass slots 2-3 by the time of 
 bool8 MP_Region_DeviceHere(u8 home);   // a region's device works here (its region, or anywhere once its LEAGUE is beaten)
 void MP_Region_GiveDevices(void);      // map load: the MOéNAV key item once HOENN's LEAGUE is beaten
 void MP_Region_SetCleared(u8 region);
+void MP_Region_SetUpForPlay(u8 region, u8 badges, bool8 champion);   // Moemon Maker: a story point on REGION's map
 bool8 MP_Region_AnyCleared(void);   // an Elite Four beaten in any region (the GLOBAL PC)
 u8 MP_Region_StartChoice(void);       // PROF. BIRCH's region question, until the new game starts
 u8 MP_Region_Current(void);          // the region of the map the player is on (a shared map: the region they came from)
@@ -74,12 +77,17 @@ bool8 MP_Region_IsSharedMap(u8 group, u8 num);   // the MOéMON GARDEN and the G
 void MP_Region_NoteWarp(u8 destGroup, u8 destNum);   // overworld.c ApplyCurrentWarp: stepping into a shared map
 void MP_Region_SharedExit(u8 destGroup, u8 destNum);
 u16 MP_Region_GameCenterOtherFloor(void);   // special: the elevator's other floor in JOHTO / KANTO (2F / 3F only)
+void MP_Region_BufferName(void);
+u16 MP_MagnetTrainOpen(void);
+void MP_Region_GameCenterLooks(void);
+void MP_Region_BufferGameCorner(void);
 bool8 MP_Region_WarpClosed(u8 destGroup, u8 destNum);   // field_control_avatar.c: JOHTO's / KANTO's GAME CENTER has no ROOFTOP    // field_control_avatar.c SetupWarp: leaving one goes back where the player came from
 u8 *MP_Region_FlagPointer(u16 id);   // NULL outside REGION_FLAGS_START..END
 u16 *MP_Region_VarPointer(u16 id);
 void MP_Region_NewGame(void);
 void MP_Region_SetStartRegion(u8 region);   // a new game's region (PROF. BIRCH's question)
 void MP_Region_StartNewGame(void);
+void MP_Region_FirstBoatIn(u8 region);    // the first boat to a region: in at its port, where a guide meets the player
 void MP_Region_GoToStartHouse(u8 region);  // the warp to JOHTO's / KANTO's first house (NEW BARK, PALLET)          // end of NewGameInitData: JOHTO / KANTO start at home there
 void MP_Region_WriteSidecar(void);   // "<save>.region", after the save file is written
 void MP_Boxes_WriteSidecar(void);   // Moemon Kai: "<save>.boxes", PC boxes 15-40 (mp_boxes.c)
@@ -138,6 +146,8 @@ bool8 MP_Gen_Allowed(u16 species);                 // shown in the region the pl
 bool8 MP_Gen_ObjectHidden(u8 localId);             // a later generation's POKéMON on the map (JOHTO / KANTO)
 u16 MP_Gen_StandIn(u16 species);                   // its nearest earlier form that is
 const struct WildPokemonInfo *MP_Region_WildInfo(const struct WildPokemonInfo *info);   // the Gen 3 table before it
+bool8 MP_IsFossilLine(u16 species);               // revived from a fossil (or its evolution)
+bool8 MP_WildSpeciesOk(u16 species);              // the wild may give it here: no starters, no fossils before the LEAGUE
 bool8 MP_IsStarterLine(u16 species);              // a first partner of any generation (or its evolution)
 u16 MP_WildSlotSpecies(const struct WildPokemonInfo *info, u8 index);   // the slot's species, never a starter
 const struct WildPokemonInfo *MP_Region_WildInfoIn(const struct WildPokemonInfo *info, u8 region);   // as seen in REGION

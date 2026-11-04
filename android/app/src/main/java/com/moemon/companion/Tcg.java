@@ -12,6 +12,7 @@ public final class Tcg {
     // the tables
     public static native String catalog();   // [{id, n, k, t, ra, set, set2, h, d, st, hp, lv, rc, w, r, sp, ef, a:[{n, c[7], dmg, cat, txt}], txt}]
     public static native String packs();     // [[card ids a booster can hold]...]
+    public static native int attackSound(int card, int attack);   // an SE_ number (the game board's sound)
     public static native String validate(int[] deck, int[] owned);   // why not, or null
     public static native int rateDeck(int[] deck);                   // slow: off the main thread
     public static native int levelRating(int level);

@@ -34,3 +34,22 @@ Kanto_FiveIsland_PokemonCenter_1F_Text_8454195::
 	.string "single kind of MOéMON?\p"
 	.string "…How incredible. Please tell me if\n"
 	.string "you catch a strong one!$"
+
+@ Moemon Kai: FireRed's POKéMON JOURNAL on the rack (pokefirered data/scripts/fame_checker.inc), there once KANTO's
+@ LEAGUE is beaten (FireRed hides it until the HALL OF FAME); no FAME CHECKER entry, which this game hasn't got
+Kanto_FiveIsland_PokemonCenter_1F_EventScript_PokemonJournal::
+	goto_if_unset FLAG_QZ_0x2108, Kanto_FiveIsland_PokemonCenter_1F_EventScript_JournalNotYet
+	lockall
+	textcolor 3
+	msgbox Kanto_FiveIsland_PokemonCenter_1F_Text_SpecialFeature, MSGBOX_DEFAULT
+	releaseall
+Kanto_FiveIsland_PokemonCenter_1F_EventScript_JournalNotYet::
+	end
+
+Kanto_FiveIsland_PokemonCenter_1F_Text_SpecialFeature::
+	.string "MOéMON JOURNAL\p"
+	.string "Special Feature:\n"
+	.string "ELITE FOUR’s LORELEI!\p"
+	.string "Known for her logical, calculated,\n"
+	.string "and cool battling style, LORELEI\l"
+	.string "has a surprising secret!$"

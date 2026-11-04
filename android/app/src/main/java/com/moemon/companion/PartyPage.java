@@ -67,6 +67,20 @@ public final class PartyPage extends Page {
         }
     }
 
+    private static final int GAP = 6;
+
+    private int cardW(int w) {
+        return (w - 2 * 10 - GAP) / 2;
+    }
+
+    private int cardH(int h) {
+        return Math.max(96, Math.min(132, (h - TOP - 26 - 2 * GAP) / 3));
+    }
+
+    /**
+     * The six places as cards in two columns (the game's party screen): the POKéMON's picture on a stand in its type's
+     * color, its name and gender, level, types, HP and condition, the item it holds; the lead's card in gold
+     */
     @Override
     public void draw(Canvas c, int w, int h) {
         Model m = v.app.model();
@@ -77,50 +91,96 @@ public final class PartyPage extends Page {
             return;
         }
         Planned p = planned();
+        int cw = cardW(w), ch = cardH(h);
         for (int i = 0; i < 6; i++) {
-            int y = TOP + i * ROW;
+            int x = 10 + (i % 2) * (cw + GAP), y = TOP + 4 + (i / 2) * (ch + GAP);
             JSONObject mon = i < p.party.size() ? p.party.get(i) : null;
-            // (the lead in the game's highlight, the rest in white)
-            fill.setColor(mon == null ? 0x40FFFFFF : i == 0 ? 0xFFF8E8B0 : 0xFFF8F8F8);
-            c.drawRect(10, y + 4, w - 10, y + ROW - 2, fill);
-            fill.setColor(0xFF384868);
-            c.drawRect(10, y + ROW - 3, w - 10, y + ROW - 2, fill);
+            boolean down = mon != null && pressed(x, y, cw, ch);
+            // the card: a dark edge, a face, the lead's in gold
+            fill.setColor(0xFF283848);
+            c.drawRect(x + 1, y, x + cw - 1, y + ch, fill);
+            c.drawRect(x, y + 1, x + cw, y + ch - 1, fill);
+            fill.setColor(mon == null ? 0xFF8CB8C8 : down ? 0xFFDCE6F4 : i == 0 ? 0xFFF8ECC0 : 0xFFF8F8F8);
+            c.drawRect(x + 1, y + 1, x + cw - 1, y + ch - 1, fill);
             if (mon == null) {
+                String e = "EMPTY";
+                art.small(c, e, x + (cw - art.smallWidth(e)) / 2, y + ch / 2 - 8, 0xFF5C8898, 0);
                 continue;
             }
             boolean egg = mon.optInt("e") == 1;
-            art.icon(c, egg ? MonCard.eggSpecies(art) : mon.optInt("s"), 12, y + 8, GameArt.ICON_PLAIN);
-            int nw = art.textHex(c, mon.optString("n"), 48, y + 4, GameArt.TEXT, GameArt.SHADOW);
+            int species = mon.optInt("s");
+            // the stand: an oval in its first type's color under the picture
+            org.json.JSONArray types = art.species(species).optJSONArray("t");
+            int tc = egg || types == null ? 0xFFB8C0C8 : art.typeColor(types.optInt(0));
+            int pic = Math.min(64, ch - 46);
+            int px = x + (cw - pic) / 2, py = y + 2;
+            fill.setColor((tc & 0x00FFFFFF) | 0x50000000);
+            c.drawOval(px + 4, py + pic - 10, px + pic - 4, py + pic + 2, fill);
+            if (egg) {
+                art.icon(c, MonCard.eggSpecies(art), x + (cw - 32) / 2, py + pic - 34, GameArt.ICON_PLAIN);
+            } else {
+                art.front(c, species, art.monPal(mon), px, py, pic, false);
+            }
+            if (mon.optInt("i") != 0) {
+                art.itemIcon(c, mon.optInt("i"), x + cw - 25, y + 2);
+            }
+            if (i == 0) {
+                art.small(c, "LEAD", x + 4, y, 0xFFB07818, 0);
+            }
+            int ty = y + pic + 2;
+            int nw = art.textHex(c, mon.optString("n"), x + 5, ty, GameArt.TEXT, GameArt.SHADOW);
             if (!egg) {
                 int g = mon.optInt("g");
                 if (g == 0) {
-                    art.text(c, "♂", 48 + nw + 3, y + 4, GameArt.BLUE_TEXT, GameArt.SHADOW);
+                    art.text(c, "♂", x + 5 + nw + 2, ty, GameArt.BLUE_TEXT, GameArt.SHADOW);
                 } else if (g == 254) {
-                    art.text(c, "♀", 48 + nw + 3, y + 4, GameArt.RED_TEXT, GameArt.SHADOW);
+                    art.text(c, "♀", x + 5 + nw + 2, ty, GameArt.RED_TEXT, GameArt.SHADOW);
                 }
-                art.text(c, "Lv" + mon.optInt("l"), 48, y + 22);
-                String s = status(mon);
-                if (s != null) {
-                    chip(c, s, 84, y + 28, statusColor(s));
+                String lv = "Lv" + mon.optInt("l");
+                art.text(c, lv, x + cw - 5 - art.width(lv), ty);
+                String st = status(mon);
+                if (st != null) {
+                    chip(c, st, x + 5, ty + 18, statusColor(st));
+                } else if (types != null) {
+                    art.typeIcon(c, types.optInt(0), x + 5, ty + 16);
+                    if (types.optInt(1) != types.optInt(0)) {
+                        art.typeIcon(c, types.optInt(1), x + 39, ty + 16);
+                    }
                 }
-                MonCard.hp(c, art, w - 132, y + 30, mon.optInt("hp"), mon.optInt("mhp"));
-            }
-            if (mon.optInt("i") != 0) {
-                art.itemIcon(c, mon.optInt("i"), w - 40, y + 4);
+                if (mon.has("hp")) {
+                    hpBar(c, x + 5, ty + 34, cw - 10, mon.optInt("hp"), mon.optInt("mhp"));
+                }
+            } else {
+                art.small(c, "It will hatch soon.", x + 5, ty + 16, GameArt.GRAY_TEXT, 0);
             }
             if (p.isDashed(Model.partyPlace(i)) || p.itemPending(Model.partyPlace(i))) {
-                c.drawRect(11, y + 5, w - 11, y + ROW - 4, dash);
+                c.drawRect(x + 2, y + 2, x + cw - 2, y + ch - 2, dash);
             }
         }
-        int y = TOP + 6 * ROW + 4;
-        art.text(c, "Tap a POKéMON for its SUMMARY.", 12, y, GameArt.WHITE_TEXT, 0xFF305060);
+        int y = TOP + 4 + 3 * (ch + GAP);
+        art.small(c, "Tap a POKéMON for its SUMMARY.", 12, y, GameArt.WHITE_TEXT, 0xFF305060);
+    }
+
+    /** A slim HP bar with its numbers under it, right-aligned */
+    private void hpBar(Canvas c, int x, int y, int w, int hp, int max) {
+        fill.setColor(0xFF404850);
+        c.drawRect(x, y, x + w, y + 5, fill);
+        fill.setColor(0xFFE8ECF0);
+        c.drawRect(x + 1, y + 1, x + w - 1, y + 4, fill);
+        int bw = max > 0 ? (w - 2) * hp / max : 0;
+        fill.setColor(hp * 5 <= max ? 0xFFF85838 : hp * 2 <= max ? 0xFFF8C030 : 0xFF58D068);
+        c.drawRect(x + 1, y + 1, x + 1 + bw, y + 4, fill);
+        String n = hp + "/" + max;
+        art.small(c, n, x + w - art.smallWidth(n), y + 2, GameArt.GRAY_TEXT, 0);
     }
 
     @Override
     public void tap(int x, int y) {
         Planned p = planned();
-        int i = (y - TOP) / ROW;
-        if (y >= TOP && i >= 0 && i < p.party.size()) {
+        int w = v.width(), cw = cardW(w), ch = cardH(v.contentHeight());
+        int col = x < 10 + cw + GAP / 2 ? 0 : 1, row = (y - TOP - 4) / (ch + GAP);
+        int i = row * 2 + col;
+        if (y >= TOP + 4 && row < 3 && i >= 0 && i < p.party.size()) {
             List<JSONObject> places = new ArrayList<>();
             for (int k = 0; k < p.party.size(); k++) {
                 places.add(Model.partyPlace(k));

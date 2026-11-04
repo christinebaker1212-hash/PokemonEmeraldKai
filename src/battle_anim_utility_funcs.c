@@ -150,7 +150,7 @@ void AnimTask_SetCamouflageBlend(u8 taskId)
 void AnimTask_BlendParticle(u8 taskId)
 {
     u8 paletteIndex = IndexOfSpritePaletteTag(gBattleAnimArgs[0]);
-    u32 selectedPalettes = 1 << (paletteIndex + 16);
+    u32 selectedPalettes = MP_SPRITE_PAL_BIT(paletteIndex);
     StartBlendAnimSpriteColor(taskId, selectedPalettes);
 }
 

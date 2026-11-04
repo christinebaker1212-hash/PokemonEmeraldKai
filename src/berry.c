@@ -1595,9 +1595,12 @@ void ObjectEventInteractionPickBerryTree(void)
     gSpecialVar_0x8004 = AddBagItem(BerryTypeToItemId(berry), count);
 }
 
+void MP_JohtoBerries_Picked(u8 tree, u8 berry);   // (mp_apricorn.c)
 void ObjectEventInteractionRemoveBerryTree(void)
 {
+    u8 berry = GetBerryTypeByBerryTreeId(GetObjectEventBerryTreeId(gSelectedObjectEvent));
     RemoveBerryTree(GetObjectEventBerryTreeId(gSelectedObjectEvent));
+    MP_JohtoBerries_Picked(GetObjectEventBerryTreeId(gSelectedObjectEvent), berry);   // Moemon Kai: it grows again
     MP_Farm_Changed(GetObjectEventBerryTreeId(gSelectedObjectEvent));   // Moemon Co-op
     SetBerryTreeJustPicked(gSpecialVar_LastTalked, gSaveBlock1Ptr->location.mapNum, gSaveBlock1Ptr->location.mapGroup);
 }

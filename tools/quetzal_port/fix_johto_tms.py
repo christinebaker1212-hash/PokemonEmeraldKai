@@ -33,7 +33,7 @@ MARK = "@ Moemon Kai: Crystal's TM (tools/quetzal_port/fix_johto_tms.py)"
 
 def crystal_text(asm, label):
     """A Crystal text label as paragraphs of words"""
-    m = re.search(r'^' + re.escape(label) + r':\n((?:\t(?:text|line|cont|para|done|prompt)[^\n]*\n|\n)+)', asm, re.M)
+    m = re.search(r'^' + re.escape(label) + r'::?\n((?:\t(?:text|line|cont|para|done|prompt)[^\n]*\n|\n)+)', asm, re.M)
     pars, cur = [], ''
     for cmd, arg in re.findall(r'\t(text|line|cont|para|done|prompt)(?: "([^"]*)")?', m.group(1)):
         if cmd in ('done', 'prompt'):

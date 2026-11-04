@@ -11,11 +11,11 @@ Johto_TinTowerRoof_EventScript_83FB60B::
 	end
 
 Johto_TinTowerRoof_EventScript_83FB637::
-	setmaplayoutindex 0x294
+	setmaplayoutindex LAYOUT_JOHTO_TIN_TOWER_ROOF_ALT   @ (Quetzal's layout 0x294)
 	return
 
 Johto_TinTowerRoof_EventScript_83FB63B::
-	setmaplayoutindex 0x293
+	setmaplayoutindex LAYOUT_JOHTO_TIN_TOWER_ROOF   @ (Quetzal's layout 0x293)
 	return
 
 Johto_TinTowerRoof_EventScript_83FB63F::

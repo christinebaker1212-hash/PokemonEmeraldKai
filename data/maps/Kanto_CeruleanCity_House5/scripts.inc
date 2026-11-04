@@ -3,22 +3,15 @@ Kanto_CeruleanCity_House5_MapScripts::
 
 @ Kanto_CeruleanCity_House5 object 1 (local id 1, gfx 0x3F2D) at 7,4
 Kanto_CeruleanCity_House5_EventScript_841AE49::
+	@ Moemon Kai: FireRed's BERRY POWDER man without his POWDER JAR (which this game hasn't got): his own idle line;
+	@ Quetzal's "BERRY SWEET" that was a NUGGET is gone
 	lock
 	faceplayer
-	goto_if_set FLAG_QZ_0x215F, Kanto_CeruleanCity_House5_EventScript_841AE9C
-	msgbox Kanto_CeruleanCity_House5_Text_8443292, MSGBOX_DEFAULT
-	msgbox Kanto_CeruleanCity_House5_Text_84432ED, MSGBOX_DEFAULT
-	setorcopyvar VAR_0x8000, ITEM_NUGGET
-	setorcopyvar VAR_0x8001, 1
-	callstd STD_OBTAIN_ITEM
-	goto_if_eq VAR_RESULT, 0, Quetzal_EventScript_84570B3
-	setflag FLAG_QZ_0x215F
-	msgbox Kanto_CeruleanCity_House5_Text_844330C, MSGBOX_DEFAULT
+	msgbox Kanto_CeruleanCity_House5_Text_AnyInterestInBerries, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, YES, Kanto_CeruleanCity_House5_EventScript_InterestInBerries
+	msgbox Kanto_CeruleanCity_House5_Text_TakeInterestInAllSortsOfThings, MSGBOX_DEFAULT
+Kanto_CeruleanCity_House5_EventScript_InterestInBerries::
 	release
-	end
-
-Kanto_CeruleanCity_House5_EventScript_841AE9C::
-	msgbox Kanto_CeruleanCity_House5_Text_8443404, MSGBOX_NPC
 	end
 
 @ Kanto_CeruleanCity_House5 sign / bg event at 3,1
@@ -50,3 +43,16 @@ Kanto_CeruleanCity_House5_Text_8443404::
 
 Kanto_CeruleanCity_House5_Text_84435A6::
 	.string "No records have been registered.$"
+
+Kanto_CeruleanCity_House5_Text_TakeInterestInAllSortsOfThings::
+	.string "You have no interest in BERRIES?\p"
+	.string "Young one, it’s important to take an\n"
+	.string "interest in all sorts of things.$"
+
+Kanto_CeruleanCity_House5_Text_AnyInterestInBerries::
+	.string "I concoct a variety of medicine\n"
+	.string "from BERRY POWDER.\p"
+	.string "Using good BERRY POWDER, I can\n"
+	.string "make any kind of medicine.\p"
+	.string "Now tell me, have you any interest\n"
+	.string "in BERRIES?$"

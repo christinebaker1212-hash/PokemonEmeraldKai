@@ -3816,12 +3816,12 @@ static bool8 DoTradeAnim_Cable(void)
         gSprites[sTradeAnim->bouncingPokeballSpriteId].callback = SpriteCB_BouncingPokeballArrive;
         StartSpriteAnim(&gSprites[sTradeAnim->bouncingPokeballSpriteId], 1);
         StartSpriteAffineAnim(&gSprites[sTradeAnim->bouncingPokeballSpriteId], 2);
-        BlendPalettes(1 << (16 + gSprites[sTradeAnim->bouncingPokeballSpriteId].oam.paletteNum), 16, RGB_WHITEALPHA);
+        BlendPalettes(MP_SPRITE_PAL_BIT(gSprites[sTradeAnim->bouncingPokeballSpriteId].oam.paletteNum), 16, RGB_WHITEALPHA);
         sTradeAnim->state++;
         sTradeAnim->timer = 0;
         break;
     case STATE_FADE_POKEBALL_TO_NORMAL:
-        BeginNormalPaletteFade(1 << (16 + gSprites[sTradeAnim->bouncingPokeballSpriteId].oam.paletteNum), 1, 16, 0, RGB_WHITEALPHA);
+        BeginNormalPaletteFade(MP_SPRITE_PAL_BIT(gSprites[sTradeAnim->bouncingPokeballSpriteId].oam.paletteNum), 1, 16, 0, RGB_WHITEALPHA);
         sTradeAnim->state++;
         break;
     case STATE_POKEBALL_ARRIVE_WAIT:
@@ -4316,12 +4316,12 @@ static bool8 DoTradeAnim_Wireless(void)
         gSprites[sTradeAnim->bouncingPokeballSpriteId].callback = SpriteCB_BouncingPokeballArrive;
         StartSpriteAnim(&gSprites[sTradeAnim->bouncingPokeballSpriteId], 1);
         StartSpriteAffineAnim(&gSprites[sTradeAnim->bouncingPokeballSpriteId], 2);
-        BlendPalettes(1 << (16 + gSprites[sTradeAnim->bouncingPokeballSpriteId].oam.paletteNum), 16, RGB_WHITEALPHA);
+        BlendPalettes(MP_SPRITE_PAL_BIT(gSprites[sTradeAnim->bouncingPokeballSpriteId].oam.paletteNum), 16, RGB_WHITEALPHA);
         sTradeAnim->state++;
         sTradeAnim->timer = 0;
         break;
     case STATE_FADE_POKEBALL_TO_NORMAL:
-        BeginNormalPaletteFade(1 << (16 + gSprites[sTradeAnim->bouncingPokeballSpriteId].oam.paletteNum), 1, 16, 0, RGB_WHITEALPHA);
+        BeginNormalPaletteFade(MP_SPRITE_PAL_BIT(gSprites[sTradeAnim->bouncingPokeballSpriteId].oam.paletteNum), 1, 16, 0, RGB_WHITEALPHA);
         sTradeAnim->state++;
         break;
     case STATE_POKEBALL_ARRIVE_WAIT:
@@ -4514,7 +4514,7 @@ static void SpriteCB_BouncingPokeballDepart(struct Sprite *sprite)
         PlaySE(SE_M_MEGA_KICK);
         sprite->callback = SpriteCB_BouncingPokeballDepartEnd;
         sprite->data[0] = 0;
-        BeginNormalPaletteFade(1 << (16 + sprite->oam.paletteNum), -1, 0, 16, RGB_WHITEALPHA);
+        BeginNormalPaletteFade(MP_SPRITE_PAL_BIT(sprite->oam.paletteNum), -1, 0, 16, RGB_WHITEALPHA);
     }
 }
 

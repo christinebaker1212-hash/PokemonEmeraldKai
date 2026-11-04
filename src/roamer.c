@@ -3,6 +3,7 @@
 #include "pokemon.h"
 #include "random.h"
 #include "roamer.h"
+#include "mp_region.h"
 
 // Despite having a variable to track it, the roamer is
 // hard-coded to only ever be in map group 0
@@ -225,8 +226,13 @@ bool8 TryStartRoamerEncounter(void)
 {
     bool8 Sinnoh_TryRoamerEncounter(u8 *level);
     bool8 S3D_IsSinnohGroup(u8 mapGroup);
+    bool8 MP_JohtoRoamer_TryEncounter(u8 *level);
     if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))   // Moemon Kai: SINNOH's own roamers (s3d_roamer.c)
         return Sinnoh_TryRoamerEncounter(&sEncounterLevel);
+    if (MP_Region_OfGroup(gSaveBlock1Ptr->location.mapGroup) == REGION_JOHTO)   // Moemon Kai: JOHTO's beasts (mp_johto_roamer.c)
+        return MP_JohtoRoamer_TryEncounter(&sEncounterLevel);
+    if (MP_Region_OfGroup(gSaveBlock1Ptr->location.mapGroup) != REGION_HOENN)
+        return FALSE;   // (HOENN's LATIAS / LATIOS roam HOENN only)
     sEncounterLevel = ROAMER->level;
     if (IsRoamerAt(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum) == TRUE && (Random() % 4) == 0)
     {

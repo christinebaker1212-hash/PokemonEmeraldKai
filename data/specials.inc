@@ -671,3 +671,27 @@ gSpecials::
 	def_special QzHasApricorn
 	def_special QzKurtChooseApricorn
 	def_special Maker_ItemBallItem   @ Moemon Maker: an item ball the user put down (src/maker/maker_overrides.c)
+	def_special MP_Region_BufferName   @ Moemon Kai: the region's name into STR_VAR_1 (src/mp/mp_region.c)
+	def_special MP_Region_GameCenterLooks   @ Moemon Kai: the GAME CENTER's 3F patrons by region (src/mp/mp_region.c)
+	def_special MP_Region_BufferGameCorner
+	def_special MP_JohtoBerries_NotRipe   @ Moemon Kai: JOHTO's BERRY patches (src/mp/mp_apricorn.c)
+	def_special MP_MagnetTrainOpen   @ Moemon Kai: GOLDENROD <-> SAFFRON (src/mp/mp_region.c)
+	def_special MP_JohtoRoamer_Init
+	def_special MP_HiddenCoinsAmount
+	def_special MP_HiddenCoinsFit
+	def_special MP_RegionGateCross
+	def_special MP_MakeScriptedWildShiny
+	def_special QzNameKantoRival   @ Moemon Kai: FireRed names KANTO's rival at OAK's (qz_specials.c)
+	def_special MP_JohtoWeekday
+	def_special MP_JohtoGsBallReady
+	def_special MP_CapeBrinkLeadMove
+	def_special MP_CapeBrinkTaught
+	def_special MP_DaisyMassage
+	def_special GetMagikarpSizeRecordInfo
+	def_special CompareMagikarpSize
+	def_special GetHeracrossSizeRecordInfo
+	def_special CompareHeracrossSize
+	def_special MP_LeadFriendship
+	def_special MP_ReturnShuckie
+	def_special GetJohtoMagikarpSizeRecordInfo
+	def_special CompareJohtoMagikarpSize

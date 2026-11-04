@@ -121,6 +121,18 @@ JNIEXPORT jstring JNICALL FN(catalog)(JNIEnv *env, jclass cls)
 }
 
 // Every booster's cards (Tcg_InPack), as [[ids of pack 0], [pack 1]...]
+/* The sound the game's duel board plays for an attack (tcg_flow.c TcgFlow_AttackSound: an SE_ number) */
+JNIEXPORT jint JNICALL FN(attackSound)(JNIEnv *env, jclass cls, jint card, jint attack)
+{
+    const struct TcgCard *c = Tcg_Card((unsigned)card);
+    unsigned color;
+    (void)env;
+    (void)cls;
+    if (!c || attack < 0 || attack > 1)
+        return 0;
+    return (jint)TcgFlow_AttackSound(c->attacks[attack].animation, &color);
+}
+
 JNIEXPORT jstring JNICALL FN(packs)(JNIEnv *env, jclass cls)
 {
     struct Buf b = {0};

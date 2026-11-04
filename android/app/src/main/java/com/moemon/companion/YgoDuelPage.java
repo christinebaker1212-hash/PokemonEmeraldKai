@@ -83,12 +83,21 @@ public final class YgoDuelPage extends Page {
     }
 
     @Override
+    public void shown() {
+        // the duel's song as the game's table plays it (in shown: a rematch's page comes before the last one's hidden)
+        if (!ended) {
+            v.sound.music(s.mode == MODE_FRIEND ? "ygo:mus_rg_union_room" : "ygo:mus_vs_trainer");
+        }
+    }
+
+    @Override
     public boolean fullScreen() {
         return true;
     }
 
     @Override
     public void hidden() {
+        v.sound.music(null);
         if (duel != 0) {
             Ygo.end(duel);
             duel = 0;
@@ -139,6 +148,7 @@ public final class YgoDuelPage extends Page {
             JSONObject r = new JSONObject(Ygo.answer(duel, p, zone));
             if (r.optInt("ok") != 1) {
                 if (who == seat) {
+                    v.sound.play("se_failure");
                     v.message(r.optString("error"));
                     v.buzz(false);
                 }
@@ -329,6 +339,9 @@ public final class YgoDuelPage extends Page {
         while (!beats.isEmpty() && (long) beats.get(0)[0] <= now) {
             Object[] b = beats.remove(0);
             switch ((String) b[1]) {
+                case "se":
+                    v.sound.cue((String) b[2]);
+                    break;
                 case "say":
                     caption = (String) b[2];
                     captionCard = (int) b[6];
@@ -410,6 +423,10 @@ public final class YgoDuelPage extends Page {
             int type = e.optInt(1), who = e.optInt(2), o = e.optInt(3), target = e.optInt(4), card = e.optInt(5),
                     value = e.optInt(7);
             boolean me = who == seat;
+            if (type == Ygo.EV_ATTACK) {
+                se(t + 320, "se_m_mega_kick");   // (the blow, as the card slams home)
+            }
+            se(t, sound(type, me, e.optInt(6), value));
             switch (type) {
                 case Ygo.EV_TURN:
                     t = beat(t, "say", me ? "YOUR TURN" : theirName() + "'S TURN", who, -1, 0, 0, 800);
@@ -469,6 +486,67 @@ public final class YgoDuelPage extends Page {
             }
         }
         beats.add(new Object[]{t, "end", "", 0, -1, 0, 0});
+    }
+
+    private boolean turnMine;
+
+    /** The sound the game's duel table plays for an event (ygo_board.c Present), null for none */
+    private String sound(int type, boolean me, int flags, int value) {
+        switch (type) {
+            case Ygo.EV_TURN:
+                turnMine = me;
+                return me ? "se_ball_tray_enter" : "se_ball_tray_exit";
+            case Ygo.EV_PHASE:
+                return value < 6 ? (turnMine ? "se_ball_tray_enter" : "se_ball_tray_exit") : null;
+            case Ygo.EV_DRAW:
+            case Ygo.EV_SET:
+            case Ygo.EV_FLIP:
+            case Ygo.EV_TO_HAND:
+                return "se_rg_card_flip";
+            case Ygo.EV_SUMMON:
+                return "se_m_teleport";
+            case Ygo.EV_POSITION:
+                return "se_m_harden";
+            case Ygo.EV_ACTIVATE:
+                return "se_use_item";
+            case Ygo.EV_NEGATE:
+                return "se_m_barrier";
+            case Ygo.EV_ATTACK:
+                return "se_m_double_team";
+            case Ygo.EV_DESTROY:
+                return "se_faint";
+            case Ygo.EV_TO_GRAVE:
+                return (flags & 8) != 0 ? "se_m_detect" : null;   // (a Tribute)
+            case Ygo.EV_DAMAGE:
+                return value >= 2000 ? "se_super_effective" : "se_m_pay_day";
+            case Ygo.EV_RECOVER:
+                return "se_m_morning_sun";
+            case Ygo.EV_STAT:
+                return value >= 0 ? "se_m_swords_dance" : "se_m_leer";
+            case Ygo.EV_COUNTER:
+                return "se_m_minimize";
+            case Ygo.EV_EQUIP:
+                return "se_m_reflect";
+            case Ygo.EV_COIN:
+                return "se_m_pay_day";
+            case Ygo.EV_DICE:
+            case Ygo.EV_SHUFFLE:
+                return "se_ball_tray_enter";
+            case Ygo.EV_TARGET:
+                return "se_m_lock_on";
+            case Ygo.EV_CONTROL:
+                return "se_m_bind";
+            case Ygo.EV_WIN:
+                return me ? "!ygo:mus_victory_trainer" : "!";   // (the win's song; a loss: the music stops)
+            default:
+                return null;
+        }
+    }
+
+    private void se(long at, String sound) {
+        if (sound != null) {
+            beats.add(new Object[]{at, "se", sound, 0, -1, 0, 0});
+        }
     }
 
     private int cardOfObj(int o) {
@@ -1296,6 +1374,7 @@ public final class YgoDuelPage extends Page {
         for (int i = hits.size() - 1; i >= 0; i--) {
             int[] r = hits.get(i);
             if (in(x, y, r[0], r[1], r[2], r[3])) {
+                v.sound.play("se_select");
                 actions.get(i).run();
                 v.invalidate();
                 return;
@@ -1328,5 +1407,10 @@ public final class YgoDuelPage extends Page {
             return;
         }
         v.showOver(null);
+    }
+
+    @Override
+    public boolean swapsWords() {
+        return false;   // (the card games' own words: the POKéMON card game is the POKéMON card game)
     }
 }

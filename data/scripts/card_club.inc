@@ -7,9 +7,14 @@ EventScript_CardClub::
 	faceplayer
 	special Tcg_ClubState
 	goto_if_eq VAR_RESULT, TRUE, EventScript_CardClub_Counter
+	special MP_Region_BufferName
 	msgbox CardClub_Text_Intro, MSGBOX_DEFAULT
+	special Ygo_ClubHasCase   @ (a CARD CASE from another card game's people already: no second one)
+	goto_if_eq VAR_RESULT, TRUE, EventScript_CardClub_HasCase
+	msgbox CardClub_Text_Case, MSGBOX_DEFAULT
 	giveitem ITEM_CARD_CASE
 	goto_if_eq VAR_RESULT, FALSE, EventScript_CardClub_NoRoom
+EventScript_CardClub_HasCase::
 	msgbox CardClub_Text_ChooseDeck, MSGBOX_DEFAULT
 	closemessage
 	special Tcg_ClubChooseDeck
@@ -19,11 +24,13 @@ EventScript_CardClub::
 	closemessage
 	special Tcg_ClubTeachingDuel
 	msgbox CardClub_Text_AfterLesson, MSGBOX_DEFAULT
+	special MP_Region_BufferName
 	msgbox CardClub_Text_HowTo, MSGBOX_DEFAULT
 	release
 	end
 
 EventScript_CardClub_NoLesson::
+	special MP_Region_BufferName
 	msgbox CardClub_Text_HowTo, MSGBOX_DEFAULT
 	release
 	end
@@ -66,9 +73,12 @@ EventScript_CardClub_GiftNoRoom::
 CardClub_Text_Intro:
 	.string "Hi there! I'm with the CARD CLUB.\p"
 	.string "We play the MOéMON TRADING CARD GAME\n"
-	.string "all over HOENN.\p"
+	.string "all over {STR_VAR_1}.\p"
 	.string "You look like a TRAINER with an eye\n"
-	.string "for strategy. Here, this is yours!$"
+	.string "for strategy.$"
+
+CardClub_Text_Case:
+	.string "Here, this is yours!$"
 
 CardClub_Text_ChooseDeck:
 	.string "Every player needs a deck.\n"
@@ -92,7 +102,7 @@ CardClub_Text_HowTo:
 	.string "in your BAG.\p"
 	.string "Press that button in front of\n"
 	.string "someone to ask them for a card duel.\p"
-	.string "Most people in HOENN play cards!\n"
+	.string "Most people in {STR_VAR_1} play cards!\n"
 	.string "TRAINERS will play after a MOéMON\l"
 	.string "battle, and GYM LEADERS once you\l"
 	.string "hold their BADGE.\p"

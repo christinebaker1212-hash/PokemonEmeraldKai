@@ -2,7 +2,8 @@
 """Script arguments the game looks up in its own tables must be in range (JOHTO / KANTO's scripts come from Moemon
 Quetzal, whose numbers can differ): every `bufferstdstring VAR, N` has an entry N in gStdStrings. And no command
 that scripts use with arguments runs as nop / nop1, which read no arguments, so the arguments would run as commands
-(FireRed's `textcolor 3` was a `return`).
+(FireRed's `textcolor 3` was a `return`). And `setmaplayoutindex` names a layout (LAYOUT_...): Quetzal's own layout
+numbers are not this game's (GOLDENROD's roof drew black on another layout's number).
 
     python3 tools/test/check_scripts.py
 """
@@ -26,6 +27,11 @@ def main():
     files = glob.glob(os.path.join(REPO, 'data/maps/*/scripts.inc')) + glob.glob(os.path.join(REPO, 'data/scripts/**/*.inc'), recursive=True)
     for f in files:
         for n, line in enumerate(open(f, encoding='utf-8', errors='replace'), 1):
+            m = re.match(r'\s*setmaplayoutindex\s+(\w+)', line)
+            if m and not m.group(1).startswith('LAYOUT_'):
+                print('%s:%d: setmaplayoutindex %s: a number, not a LAYOUT_ (tools/quetzal_port: quetzal_rip/layouts quetzal_layout_id)'
+                      % (os.path.relpath(f, REPO), n, m.group(1)))
+                bad += 1
             m = re.match(r'\s*bufferstdstring\s+\w+,\s*(\w+)', line)
             if m:
                 v = m.group(1)

@@ -401,7 +401,7 @@ Kanto_TwoIsland_JoyfulGameCorner_Text_8452F27::
 	.string "happy.$"
 
 Kanto_TwoIsland_JoyfulGameCorner_Text_8452FB4::
-	.string "{PLAYER} delivered the sample\n"
+	.string "{PLAYER} handed the METEORITE\n"
 	.string "to LOSTELLE’s daddy.$"
 
 Kanto_TwoIsland_JoyfulGameCorner_Text_8452FE1::

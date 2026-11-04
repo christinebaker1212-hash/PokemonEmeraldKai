@@ -175,7 +175,7 @@ public final class WalkPage extends Page {
         if (egg) {
             art.icon(c, art.data.optInt("egg"), w / 2 - 16, y + 52 - bob, GameArt.ICON_PLAIN);
         } else {
-            art.front(c, species, mon.optString("pal", null), px, y + 22 - bob, 64, false);
+            art.front(c, species, art.monPal(mon), px, y + 22 - bob, 64, false);
         }
         // now and then a bubble: the Garden's round pink ones
         if ((t / 3000) % 3 == 0) {
@@ -314,11 +314,7 @@ public final class WalkPage extends Page {
         JSONObject train = m == null ? null : m.snap.optJSONObject("train");
         JSONArray list = train == null ? new JSONArray() : train.optJSONArray("list");
         int slots = train == null ? 2 : train.optInt("slots", 2);
-        fill.setColor(BANNER_DARK);
-        c.drawRect(8, y, w - 8, y + 18, fill);
-        art.text(c, "TRAINING", 14, y + 1, GameArt.WHITE_TEXT, 0xFF202850);
-        String n = list.length() + "/" + slots;
-        art.text(c, n, w - 14 - art.width(n), y + 1, GOLD, 0xFF202850);
+        sectionBar(c, 8, w - 8, y + 1, 16, "TRAINING", list.length() + "/" + slots);
         y += 22;
         long now = m == null ? 0 : m.snap.optLong("now") + (System.currentTimeMillis() - m.asOf) / 1000;
         for (int i = 0; i < list.length(); i++) {
@@ -434,9 +430,7 @@ public final class WalkPage extends Page {
 
     private int drawGarden(Canvas c, int w, int y) {
         Model m = model();
-        fill.setColor(BANNER_DARK);
-        c.drawRect(8, y, w - 8, y + 18, fill);
-        art.text(c, "GARDEN", 14, y + 1, GameArt.WHITE_TEXT, 0xFF202850);
+        sectionBar(c, 8, w - 8, y + 1, 16, "GARDEN", null);
         y += 22;
         JSONArray party = m == null ? null : m.party();
         for (int k = 0; party != null && k < party.length(); k++) {

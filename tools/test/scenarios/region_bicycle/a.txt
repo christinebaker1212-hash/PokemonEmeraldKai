@@ -1,0 +1,18 @@
+pressuntil A field 5000
+wait 30
+mp warp 35,33,40,8
+wait 120
+mp where
+mp register 360
+mp riding
+press SELECT 4
+wait 60
+mp riding
+mp ctx
+press LEFT 30
+wait 20
+mp where
+press SELECT 4
+wait 60
+mp riding
+quit

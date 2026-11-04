@@ -115,8 +115,9 @@ Johto_EcruteakGym_Text_83CDD93::
 	.string "ECRUTEAK CITY MOéMON GYM$"
 
 Johto_EcruteakGym_Text_83CDDAD::
-	.string "ECRUTEAK CITY MOéMON GYM\p"
-	.string "MORTY’S CERTIFIED TRAINERS:\n"
+	.string "ECRUTEAK MOéMON GYM\p"
+	.string "LEADER: MORTY\p"
+	.string "WINNING TRAINERS:\n"
 	.string "{PLAYER}$"
 
 Johto_EcruteakGym_Text_83CDDE6::

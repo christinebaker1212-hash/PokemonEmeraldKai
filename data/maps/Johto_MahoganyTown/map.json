@@ -401,60 +401,6 @@
     {
       "type": "trigger",
       "x": 30,
-      "y": 12,
-      "elevation": 0,
-      "var": "VAR_QZ_0x500C",
-      "var_value": "14",
-      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
-    },
-    {
-      "type": "trigger",
-      "x": 30,
-      "y": 12,
-      "elevation": 0,
-      "var": "VAR_QZ_0x500C",
-      "var_value": "15",
-      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
-    },
-    {
-      "type": "trigger",
-      "x": 30,
-      "y": 12,
-      "elevation": 0,
-      "var": "VAR_QZ_0x500C",
-      "var_value": "16",
-      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
-    },
-    {
-      "type": "trigger",
-      "x": 30,
-      "y": 13,
-      "elevation": 0,
-      "var": "VAR_QZ_0x500C",
-      "var_value": "16",
-      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
-    },
-    {
-      "type": "trigger",
-      "x": 30,
-      "y": 13,
-      "elevation": 0,
-      "var": "VAR_QZ_0x500C",
-      "var_value": "15",
-      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
-    },
-    {
-      "type": "trigger",
-      "x": 30,
-      "y": 13,
-      "elevation": 0,
-      "var": "VAR_QZ_0x500C",
-      "var_value": "14",
-      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
-    },
-    {
-      "type": "trigger",
-      "x": 30,
       "y": 13,
       "elevation": 0,
       "var": "VAR_QZ_0x500C",
@@ -513,33 +459,6 @@
       "elevation": 0,
       "var": "VAR_QZ_0x500C",
       "var_value": "7",
-      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
-    },
-    {
-      "type": "trigger",
-      "x": 30,
-      "y": 14,
-      "elevation": 0,
-      "var": "VAR_QZ_0x500C",
-      "var_value": "16",
-      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
-    },
-    {
-      "type": "trigger",
-      "x": 30,
-      "y": 14,
-      "elevation": 0,
-      "var": "VAR_QZ_0x500C",
-      "var_value": "15",
-      "script": "Johto_MahoganyTown_EventScript_83DF6E1"
-    },
-    {
-      "type": "trigger",
-      "x": 30,
-      "y": 14,
-      "elevation": 0,
-      "var": "VAR_QZ_0x500C",
-      "var_value": "14",
       "script": "Johto_MahoganyTown_EventScript_83DF6E1"
     },
     {

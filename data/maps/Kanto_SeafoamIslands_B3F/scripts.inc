@@ -24,7 +24,7 @@ Kanto_SeafoamIslands_B3F_EventScript_8412C57::
 	return
 
 Kanto_SeafoamIslands_B3F_EventScript_8412C5B::
-	setmaplayoutindex 0x383
+	setmaplayoutindex LAYOUT_KANTO_SEAFOAM_ISLANDS_B3F_CURRENT_STOPPED   @ (Quetzal's layout 0x383)
 	return
 
 Kanto_SeafoamIslands_B3F_EventScript_8412C69::

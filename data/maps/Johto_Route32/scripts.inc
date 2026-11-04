@@ -260,13 +260,9 @@ Johto_Route32_EventScript_83EECF2::
 	goto Johto_Route32_EventScript_83EED10
 
 Johto_Route32_EventScript_83EED10::
-	goto_if_unset FLAG_QZ_0x1082, Johto_Route32_EventScript_83EED76
-	goto_if_unset FLAG_QZ_0x1004, Johto_Route32_EventScript_83EED76
+	@ Moemon Kai: Crystal's guard wants only the ZEPHYRBADGE, then the EGG errand (docs/REGIONS_AUDIT.md 90)
 	goto_if_unset FLAG_QZ_0x11A8, Johto_Route32_EventScript_83EED93
-	goto_if_set FLAG_QZ_0x1080, Johto_Route32_EventScript_83EED4F
-	specialvar VAR_RESULT, QzIsNuzlockeActiveInRegion
-	goto_if_eq VAR_RESULT, 0, Johto_Route32_EventScript_83EEDB0
-	goto_if_eq VAR_QZ_0x5012, 0, Johto_Route32_EventScript_83EEDB0
+	goto_if_unset FLAG_QZ_0x1080, Johto_Route32_EventScript_83EEDB0
 
 Johto_Route32_EventScript_83EED4F::
 	msgbox Johto_Route32_Text_83EEF97, MSGBOX_DEFAULT
@@ -276,15 +272,6 @@ Johto_Route32_EventScript_83EED4F::
 	goto_if_eq VAR_0x8007, 0, Quetzal_EventScript_83602AA
 	closemessage
 	setvar VAR_QZ_0x5008, 5
-	release
-	end
-
-Johto_Route32_EventScript_83EED76::
-	msgbox Johto_Route32_Text_83EEE32, MSGBOX_DEFAULT
-	msgbox Johto_Route32_Text_83EEEC4, MSGBOX_DEFAULT
-	closemessage
-	applymovement LOCALID_PLAYER, Johto_Route32_Movement_83EEE25
-	waitmovement 0
 	release
 	end
 
@@ -398,12 +385,6 @@ Johto_Route32_Text_83EEE4D::
 	.string "was looking for you.\p"
 	.string "See for yourself. He’s waiting for\n"
 	.string "you at the MOéMON CENTER.$"
-
-Johto_Route32_Text_83EEEC4::
-	.string "Before going on, you must defeat\n"
-	.string "the elder, LI.\p"
-	.string "He awaits you at the top of\n"
-	.string "SPROUT TOWER.$"
 
 Johto_Route32_Text_83EEF1E::
 	.string "Have you gone to the MOéMON GYM?\n"

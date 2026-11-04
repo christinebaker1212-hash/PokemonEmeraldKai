@@ -137,8 +137,9 @@ Johto_CianwoodGym_Text_83CA4A7::
 	.string "CIANWOOD CITY MOéMON GYM$"
 
 Johto_CianwoodGym_Text_83CA4C1::
-	.string "CIANWOOD CITY MOéMON GYM\p"
-	.string "CHUCK’S CERTIFIED TRAINERS:\n"
+	.string "CIANWOOD MOéMON GYM\p"
+	.string "LEADER: CHUCK\p"
+	.string "WINNING TRAINERS:\n"
 	.string "{PLAYER}$"
 
 Johto_CianwoodGym_Text_83CA6F9::

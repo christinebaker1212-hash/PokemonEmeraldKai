@@ -126,8 +126,9 @@ Johto_MahoganyGym_Text_83DE585::
 	.string "MAHOGANY TOWN MOéMON GYM$"
 
 Johto_MahoganyGym_Text_83DE59F::
-	.string "MAHOGANY TOWN MOéMON GYM\p"
-	.string "PRYCE’S CERTIFIED TRAINERS:\n"
+	.string "MAHOGANY MOéMON GYM\p"
+	.string "LEADER: PRYCE\p"
+	.string "WINNING TRAINERS:\n"
 	.string "{PLAYER}$"
 
 Johto_MahoganyGym_Text_83DE75C::
@@ -175,13 +176,12 @@ Johto_MahoganyGym_Text_83DEA4F::
 	.string "Cherish your time together!$"
 
 Johto_MahoganyGym_Text_83DEC22::
-	.string "PRYCE is a veteran who has\n"
-	.string "trained MOéMON for some 50 years.\p"
-	.string "He’s got a solid lineup of\n"
-	.string "MOéMON to cover whatever\l"
-	.string "you bring his way.\p"
-	.string "Fire is a good place to start,\n"
-	.string "but watch out for the rain!$"
+	.string "PRYCE is a veteran who has trained\n"
+	.string "MOéMON for some 50 years.\p"
+	.string "He’s said to be good at freezing\n"
+	.string "opponents with ice-type moves.\p"
+	.string "That means you should melt him\n"
+	.string "with your burning ambition!$"
 
 Johto_MahoganyGym_Text_83DECE3::
 	.string "PRYCE is something, but you’re\n"

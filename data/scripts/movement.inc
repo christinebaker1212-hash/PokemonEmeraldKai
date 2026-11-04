@@ -98,3 +98,12 @@ Common_Movement_WalkUp2::
 	walk_up
 	walk_up
 	step_end
+
+@ Moemon Kai: one step back from the JOHTO / KANTO gates' crossing (data/scripts/mp_region.inc)
+Common_Movement_WalkLeft:
+	walk_left
+	step_end
+
+Common_Movement_WalkDown:
+	walk_down
+	step_end

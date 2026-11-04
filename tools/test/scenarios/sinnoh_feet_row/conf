@@ -1,0 +1,10 @@
+# SINNOH's people stand on the player's feet row (tools/sinnoh/build_gfx.py feet_shift: Platinum's sheets stand on
+# row 29 of their frames, Emerald's on 30; the standing frames decide, as some sheets step down to row 30): JUBILIFE's
+# POKeMON CENTER, the player beside the girl on the same row; the lowest outline rows of the two match
+# (tools/test/check_feet_row.py)
+MODE=1
+TMO=60
+ENV_A="MOEMON_DEBUG_PARTY=280:10"
+EXPECT_A=("npc local 3 gfx 1132 xy 10,8" "npc local 255 gfx 0 xy 9,8")
+UNEXPECT_A=("[crash]" "TIMEOUT")
+CHECK="python3 tools/test/check_feet_row.py"

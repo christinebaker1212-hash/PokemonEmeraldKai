@@ -5,6 +5,7 @@ Kanto_PokemonMansion_B1F_MapScripts::
 
 Kanto_PokemonMansion_B1F_EventScript_841204E::
 	call_if_set FLAG_QZ_0x21EA, Quetzal_EventScript_845840F
+	setmetatile 31, 2, 690, TRUE   @ Moemon Kai: Quetzal's doorway to its PRIMAL CHAMBER walled up (FireRed has none)
 	end
 
 @ Kanto_PokemonMansion_B1F sign / bg event at 24,29

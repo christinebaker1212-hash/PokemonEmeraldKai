@@ -10,11 +10,7 @@ Kanto_SilphCo_1F_EventScript_8411329::
 Kanto_SilphCo_1F_EventScript_841132D::
 	lock
 	faceplayer
-	msgbox Kanto_SilphCo_1F_Text_8425BAF, MSGBOX_DEFAULT
-	goto_if_ne VAR_QZ_0x512D, 1, Kanto_SilphCo_1F_EventScript_8411357
-	msgbox Kanto_SilphCo_1F_Text_8425BE2, MSGBOX_DEFAULT
-	pokemart Kanto_SilphCo_1F_Mart_8411364
-	msgbox Quetzal_Text_8360D20, MSGBOX_DEFAULT
+	msgbox Kanto_SilphCo_1F_Text_8425BAF, MSGBOX_DEFAULT   @ Moemon Kai: FireRed's line only (Quetzal's empty shop gone)
 
 Kanto_SilphCo_1F_EventScript_8411357::
 	release

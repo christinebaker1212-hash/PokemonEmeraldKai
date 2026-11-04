@@ -845,6 +845,25 @@ static const union AnimCmd *const sAnimTable_Standard[] = {
     [ANIM_STD_GO_FASTEST_EAST] = sAnim_GoFastestEast,
 };
 
+// Moemon Kai: the TOWER pillar in SPROUT TOWER and TIN TOWER (Quetzal's object 16066, five frames) sways as Crystal's
+// does (pokecrystal TilesetTowerAnim: a step every 16 frames, 0 1 2 3 4 3 2 1), whichever anim the game starts
+static const union AnimCmd sAnim_QzTowerPillar[] =
+{
+    ANIMCMD_FRAME(0, 16),
+    ANIMCMD_FRAME(1, 16),
+    ANIMCMD_FRAME(2, 16),
+    ANIMCMD_FRAME(3, 16),
+    ANIMCMD_FRAME(4, 16),
+    ANIMCMD_FRAME(3, 16),
+    ANIMCMD_FRAME(2, 16),
+    ANIMCMD_FRAME(1, 16),
+    ANIMCMD_JUMP(0),
+};
+
+static const union AnimCmd *const sAnimTable_QzTowerPillar[] = {
+    [ANIM_STD_FACE_SOUTH ... ANIM_STD_GO_FASTEST_EAST] = sAnim_QzTowerPillar,
+};
+
 static const union AnimCmd *const sAnimTable_HoOh[] = {
     [ANIM_STD_FACE_SOUTH] = sAnim_FaceSouth,
     [ANIM_STD_FACE_NORTH] = sAnim_FaceNorth,

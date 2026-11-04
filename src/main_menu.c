@@ -186,6 +186,7 @@ static u8 sBirchSpeechMainTaskId;
 
 static u32 InitMainMenu(bool8);
 static void MpReloadSave(void);
+static bool8 sMpBackToSlot;   // Moemon Kai: the menu drawn again on another SAVE FILE: the cursor stays on it, no fade
 static void Task_MainMenuCheckSaveFile(u8);
 static void Task_MainMenuCheckBattery(u8);
 static void Task_WaitForSaveFileErrorWindow(u8);
@@ -641,7 +642,9 @@ static u32 InitMainMenu(bool8 returningFromOptionsMenu)
     ResetTasks();
     ResetSpriteData();
     FreeAllSpritePalettes();
-    if (returningFromOptionsMenu)
+    if (sMpBackToSlot)
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 0, RGB_BLACK);   // Moemon Kai: another SAVE FILE: no fade
+    else if (returningFromOptionsMenu)
         BeginNormalPaletteFade(PALETTES_ALL, 0, 0x10, 0, RGB_BLACK); // fade to black
     else
         BeginNormalPaletteFade(PALETTES_ALL, 0, 0x10, 0, RGB_WHITEALPHA); // fade to white
@@ -689,8 +692,9 @@ bool8 MP_MainMenu_Active(void)
     return FuncIsActiveTask(Task_HandleMainMenuInput);
 }
 
-// Moemon Co-op: SAVE FILE, the last item: LEFT / RIGHT go through the three save files (who, where, badges and time
-// from each one's summary), A starts the game again on the one shown (save_slots.c). Not with --save / MOEMON_SAVE.
+// Moemon Co-op: SAVE FILE, the last item: LEFT / RIGHT go through the save files (SAVE_SLOT_COUNT), each one read at
+// once so the whole menu (CONTINUE's name, time, POKéDEX and BADGES, or NEW GAME) is that file's (save_slots.c). Not
+// with --save / MOEMON_SAVE.
 static u8 sMpSlotShown;
 static u8 sMpEraseStep;   // ERASE: 1 asked, 2 asked again
 static const u8 sMpEraseAsk1[] = _("Erase this SAVE FILE and all its data?\nA: ERASE   B: KEEP IT");
@@ -746,7 +750,7 @@ static u16 MpWinV(u8 win, bool8 scrolled)
 }
 static void MpDrawSlotItem(u8 menuType)
 {
-    static const char *const sRegions[] = {"HOENN", "JOHTO", "KANTO"};
+    static const char *const sRegions[REGION_COUNT] = {"HOENN", "JOHTO", "KANTO", "SINNOH"};
     struct SaveSlotSummary sum;
     char text[64];
     u8 buf[64];
@@ -758,7 +762,9 @@ static void MpDrawSlotItem(u8 menuType)
     {
         u8 *end = buf + StringLength(buf);   // (the font's own arrows round the number)
         *end++ = CHAR_LEFT_ARROW;
-        *end++ = CHAR_0 + sMpSlotShown;
+        if (sMpSlotShown >= 10)
+            *end++ = CHAR_0 + sMpSlotShown / 10;
+        *end++ = CHAR_0 + sMpSlotShown % 10;
         *end++ = CHAR_RIGHT_ARROW;
         *end = EOS;
     }
@@ -771,7 +777,7 @@ static void MpDrawSlotItem(u8 menuType)
     else if (!sum.known)
         snprintf(text, sizeof(text), "saved game");
     else
-        snprintf(text, sizeof(text), "%s  %s %u  %u:%02u", sum.name, sRegions[sum.region < 3 ? sum.region : 0],
+        snprintf(text, sizeof(text), "%s  %s %u  %u:%02u", sum.name, sRegions[sum.region < REGION_COUNT ? sum.region : 0],
                  sum.badges, sum.hours, sum.minutes);
     MP_AsciiToGame(buf, text, sizeof(buf) - 1);
     AddTextPrinterParameterized3(win, FONT_NARROW, 92, 1, sTextColor_MenuInfo, TEXT_SKIP_DRAW, buf);
@@ -878,6 +884,12 @@ static void Task_MainMenuCheckSaveFile(u8 taskId)
             }
         }
         sCurrItemAndOptionMenuCheck &= ~OPTION_MENU_FLAG;  // turn off the "returning from options menu" flag
+        if (sMpBackToSlot)
+        {
+            sMpBackToSlot = FALSE;   // (Moemon Kai: on another SAVE FILE: the cursor where it was)
+            if (MpSlotsOn(tMenuType))
+                sCurrItemAndOptionMenuCheck = MpSlotItem(tMenuType);
+        }
         tCurrItem = sCurrItemAndOptionMenuCheck;
         tItemCount = tMenuType + 2 + MpSlotsOn(tMenuType) + MpMakerOn(tMenuType);
         sMpSlotShown = SaveSlots_Current();
@@ -1130,6 +1142,7 @@ static bool8 HandleMainMenuInput(u8 taskId)
             {
                 SaveSlots_Switch(sMpSlotShown);   // (the file in use: read again, empty, and the menu shown anew)
                 MpReloadSave();
+                sMpBackToSlot = TRUE;
                 SetMainCallback2(CB2_InitMainMenu);
                 return TRUE;
             }
@@ -1173,7 +1186,15 @@ static bool8 HandleMainMenuInput(u8 taskId)
         sMpSlotShown = JOY_NEW(DPAD_RIGHT) ? sMpSlotShown % SAVE_SLOT_COUNT + 1
                                            : (sMpSlotShown + SAVE_SLOT_COUNT - 2) % SAVE_SLOT_COUNT + 1;
         PlaySE(SE_SELECT);
-        MpDrawSlotItem(tMenuType);
+        // (that file read now: the menu shows it as it would after starting on it)
+        SaveSlots_Switch(sMpSlotShown);
+        MpReloadSave();
+        sMpBackToSlot = TRUE;
+        if (MpMenuScrolls(tMenuType))
+            RemoveScrollIndicatorArrowPair(tScrollArrowTaskId);
+        FreeAllWindowBuffers();
+        SetMainCallback2(CB2_InitMainMenu);
+        DestroyTask(taskId);
         return FALSE;
     }
     if (MpSlotsOn(tMenuType) && tCurrItem == MpSlotItem(tMenuType) && JOY_NEW(A_BUTTON)

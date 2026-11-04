@@ -141,6 +141,7 @@ public class LiveTest {
         Companion.resetForTests();
             Companion app = Companion.get(ctx);
             GameView v = new GameView(ctx, app);
+            Look.animations = false;   // (the pictures at once, not mid-slide)
             draw(v);
             String qr = "MOEPHONE:1:127.0.0.1:" + port + ":" + field(line, "save") + ":" + field(line, "secret") + ":"
                     + field(line, "code");

@@ -2,6 +2,7 @@ pressuntil A field 5000
 wait 60
 mp setvar 0x5003 5
 mp setvar 0x52EA 1
+mp setflag 0x1064
 mp warp 35,1,5,5
 wait 120
 mp checkitem 693

@@ -1,0 +1,39 @@
+pressuntil A field 5000
+wait 30
+mp warp 34,79,14,9
+wait 150
+mp objat 14 10
+mp objat 13 8
+mp face down
+wait 10
+press A 2
+wait 30
+pressuntil A yesno 3000
+wait 20
+press A 2
+wait 40
+pressuntil A yesno 3000
+wait 20
+press A 2
+wait 40
+pressuntil A yesno 3000
+wait 20
+press A 2
+wait 40
+pressuntil A yesno 3000
+wait 20
+press B 2
+wait 40
+pressuntil A yesno 3000
+wait 20
+press A 2
+wait 40
+pressuntil A yesno 3000
+wait 20
+shot rc_q5
+press B 2
+wait 40
+mash A 30 20
+wait 60
+mp getflag 0x1064
+quit

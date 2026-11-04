@@ -258,10 +258,10 @@ Kanto_FuchsiaCity_Gym_Text_8448AC2::
 	.string "FUCHSIA MOéMON GYM\n"
 	.string "LEADER: KOGA\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE$"
+	.string "{RIVAL}$"
 
 Kanto_FuchsiaCity_Gym_Text_8448AFA::
 	.string "FUCHSIA MOéMON GYM\n"
 	.string "LEADER: KOGA\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE, {PLAYER}$"
+	.string "{RIVAL}, {PLAYER}$"

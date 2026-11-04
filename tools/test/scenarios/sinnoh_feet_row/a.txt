@@ -1,0 +1,9 @@
+pressuntil A field 5000
+wait 30
+mp warp 42,24,9,8
+wait 200
+mp face right
+wait 30
+shot side
+mp npcs
+quit

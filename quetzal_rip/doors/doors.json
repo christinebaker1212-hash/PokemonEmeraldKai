@@ -1,0 +1,461 @@
+[
+ {
+  "metatile": 61,
+  "sound": "NORMAL",
+  "size": "1x1",
+  "tiles": "door_894D1B0",
+  "palettes": [
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2
+  ],
+  "rom": "0x8952148"
+ },
+ {
+  "metatile": 98,
+  "sound": "SLIDING",
+  "size": "1x1",
+  "tiles": "door_894D330",
+  "palettes": [
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   3
+  ],
+  "rom": "0x8952154"
+ },
+ {
+  "metatile": 347,
+  "sound": "SLIDING",
+  "size": "1x1",
+  "tiles": "door_894D4B0",
+  "palettes": [
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   3
+  ],
+  "rom": "0x8952160"
+ },
+ {
+  "metatile": 644,
+  "sound": "NORMAL",
+  "size": "1x1",
+  "tiles": "door_894D630",
+  "palettes": [
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10
+  ],
+  "rom": "0x895216C"
+ },
+ {
+  "metatile": 777,
+  "sound": "NORMAL",
+  "size": "1x1",
+  "tiles": "door_894D7B0",
+  "palettes": [
+   5,
+   5,
+   5,
+   5,
+   5,
+   5,
+   5,
+   5
+  ],
+  "rom": "0x8952178"
+ },
+ {
+  "metatile": 701,
+  "sound": "NORMAL",
+  "size": "1x1",
+  "tiles": "door_894D930",
+  "palettes": [
+   8,
+   8,
+   8,
+   8,
+   8,
+   8,
+   8,
+   8
+  ],
+  "rom": "0x8952184"
+ },
+ {
+  "metatile": 674,
+  "sound": "NORMAL",
+  "size": "1x1",
+  "tiles": "door_894D7B0",
+  "palettes": [
+   5,
+   5,
+   5,
+   5,
+   5,
+   5,
+   5,
+   5
+  ],
+  "rom": "0x8952190"
+ },
+ {
+  "metatile": 666,
+  "sound": "NORMAL",
+  "size": "1x1",
+  "tiles": "door_894DC30",
+  "palettes": [
+   11,
+   11,
+   11,
+   11,
+   11,
+   11,
+   11,
+   11
+  ],
+  "rom": "0x895219C"
+ },
+ {
+  "metatile": 795,
+  "sound": "NORMAL",
+  "size": "1x1",
+  "tiles": "door_894DDB0",
+  "palettes": [
+   8,
+   8,
+   8,
+   8,
+   8,
+   8,
+   8,
+   8
+  ],
+  "rom": "0x89521A8"
+ },
+ {
+  "metatile": 715,
+  "sound": "NORMAL",
+  "size": "1x1",
+  "tiles": "door_894DAB0",
+  "palettes": [
+   7,
+   7,
+   7,
+   7,
+   7,
+   7,
+   7,
+   7
+  ],
+  "rom": "0x89521B4"
+ },
+ {
+  "metatile": 722,
+  "sound": "SLIDING",
+  "size": "1x1",
+  "tiles": "door_894DF30",
+  "palettes": [
+   9,
+   9,
+   9,
+   9,
+   9,
+   9,
+   9,
+   9
+  ],
+  "rom": "0x89521C0"
+ },
+ {
+  "metatile": 747,
+  "sound": "NORMAL",
+  "size": "1x1",
+  "tiles": "door_894D930",
+  "palettes": [
+   8,
+   8,
+   8,
+   8,
+   8,
+   8,
+   8,
+   8
+  ],
+  "rom": "0x89521CC"
+ },
+ {
+  "metatile": 811,
+  "sound": "SLIDING",
+  "size": "1x1",
+  "tiles": "door_894E0B0",
+  "palettes": [
+   12,
+   12,
+   12,
+   12,
+   12,
+   12,
+   12,
+   12
+  ],
+  "rom": "0x89521D8"
+ },
+ {
+  "metatile": 819,
+  "sound": "NORMAL",
+  "size": "1x1",
+  "tiles": "door_894E230",
+  "palettes": [
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10
+  ],
+  "rom": "0x89521E4"
+ },
+ {
+  "metatile": 786,
+  "sound": "NORMAL",
+  "size": "1x1",
+  "tiles": "door_894E3B0",
+  "palettes": [
+   11,
+   11,
+   11,
+   11,
+   11,
+   11,
+   11,
+   11
+  ],
+  "rom": "0x89521F0"
+ },
+ {
+  "metatile": 767,
+  "sound": "NORMAL",
+  "size": "1x1",
+  "tiles": "door_894E0B0",
+  "palettes": [
+   12,
+   12,
+   12,
+   12,
+   12,
+   12,
+   12,
+   12
+  ],
+  "rom": "0x89521FC"
+ },
+ {
+  "metatile": 657,
+  "sound": "NORMAL",
+  "size": "1x1",
+  "tiles": "door_894E530",
+  "palettes": [
+   7,
+   7,
+   7,
+   7,
+   7,
+   7,
+   7,
+   7
+  ],
+  "rom": "0x8952208"
+ },
+ {
+  "metatile": 653,
+  "sound": "SLIDING",
+  "size": "1x1",
+  "tiles": "door_894E6B0",
+  "palettes": [
+   8,
+   8,
+   8,
+   8,
+   8,
+   8,
+   8,
+   8
+  ],
+  "rom": "0x8952214"
+ },
+ {
+  "metatile": 683,
+  "sound": "SLIDING",
+  "size": "1x1",
+  "tiles": "door_894E830",
+  "palettes": [
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2
+  ],
+  "rom": "0x8952220"
+ },
+ {
+  "metatile": 653,
+  "sound": "SLIDING",
+  "size": "1x2",
+  "tiles": "door_894EFB0",
+  "palettes": [
+   8,
+   8,
+   8,
+   8,
+   8,
+   8,
+   8,
+   8
+  ],
+  "rom": "0x8952358"
+ },
+ {
+  "metatile": 734,
+  "sound": "SLIDING",
+  "size": "1x2",
+  "tiles": "door_894E9B0",
+  "palettes": [
+   8,
+   8,
+   8,
+   8,
+   8,
+   8,
+   8,
+   8
+  ],
+  "rom": "0x8952364"
+ },
+ {
+  "metatile": 683,
+  "sound": "SLIDING",
+  "size": "1x2",
+  "tiles": "door_894F5B0",
+  "palettes": [
+   12,
+   12,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2
+  ],
+  "rom": "0x8952370"
+ },
+ {
+  "metatile": 641,
+  "sound": "NORMAL",
+  "size": "1x2",
+  "tiles": "door_8950DB0",
+  "palettes": [
+   7,
+   7,
+   7,
+   7,
+   7,
+   7,
+   7,
+   7
+  ],
+  "rom": "0x895237C"
+ },
+ {
+  "metatile": 738,
+  "sound": "SLIDING",
+  "size": "1x2",
+  "tiles": "door_89507B0",
+  "palettes": [
+   8,
+   8,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2
+  ],
+  "rom": "0x8952388"
+ },
+ {
+  "metatile": 662,
+  "sound": "SLIDING",
+  "size": "1x2",
+  "tiles": "door_89510B0",
+  "palettes": [
+   8,
+   8,
+   8,
+   8,
+   8,
+   8,
+   8,
+   8
+  ],
+  "rom": "0x8952394"
+ },
+ {
+  "metatile": 707,
+  "sound": "SLIDING",
+  "size": "1x2",
+  "tiles": "door_89513B0",
+  "palettes": [
+   8,
+   8,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2
+  ],
+  "rom": "0x89523A0"
+ },
+ {
+  "metatile": 854,
+  "sound": "SLIDING",
+  "size": "1x2",
+  "tiles": "door_89516B0",
+  "palettes": [
+   11,
+   11,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2
+  ],
+  "rom": "0x89523AC"
+ }
+]

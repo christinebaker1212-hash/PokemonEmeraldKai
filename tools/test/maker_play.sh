@@ -2,7 +2,8 @@
 # Moemon Maker's F5 (src/maker/maker_play.c, maker/maker_ui.cpp): played from a copy of save file 1 at a spot in
 # LITTLEROOT TOWN; saving there writes only MoemonMaker/.play/play.sav (the real save unchanged, byte for byte); an
 # edit while playing shows at once (a tile in place; a moved person by the map loading again); F12's stop goes back to
-# editing with the real save. Then the start-of-game story point. Pictures in /tmp/maker_play_test.
+# editing with the real save. Then the start-of-game story point, and the CHAMPION one on a JOHTO map: JOHTO's LEAGUE
+# beaten (cleared bit 2), its badges, the S.S. TICKET (the boats to every region). Pictures in /tmp/maker_play_test.
 # usage: tools/test/maker_play.sh [BIN]
 set -u
 BIN=$(realpath "${1:-$(dirname "$0")/../../pokeemerald64}")
@@ -28,7 +29,9 @@ md5sum "$REAL" > "$T/real.md5"
     printf 'maker stamp 4\nmaker paint 9 11\nmaker paint 11 11\nwait 20\nshot hot_tiles\n'
     printf 'maker mode 2\nmaker pick 16 10\nmaker move 10 14\nwait 150\nwaitfor field 600\nwait 30\nshot hot_people\n'
     printf 'mp save\nwait 60\nmakershot editor_playing\nmaker stop\nwait 30\nmakershot editor_after\n'
-    printf 'maker play 1 1 10 12\nwaitfor field 2000\nwait 60\nshot start\nmp checkitem 4\nmp save\nwait 60\nmaker stop\nwait 30\nquit\n'
+    printf 'maker play 1 1 10 12\nwaitfor field 2000\nwait 60\nshot start\nmp checkitem 4\nmp save\nwait 60\nmaker stop\nwait 30\n'
+    printf 'maker open MAP_JOHTO_NEW_BARK_TOWN\nwait 4\nmaker play 3 1 8 8\nwaitfor field 2000\nwait 60\nshot champion\n'
+    printf 'mp regioninfo\nmp checkitem 265\nmp save\nwait 60\nmaker stop\nwait 30\nquit\n'
 } > "$T/play.txt"
 run play play.txt MOEMON_MAKER_UNLOCK=1
 want() { grep -q -- "$1" "$T/play.log" || { echo "FAIL: no '$1'"; fail=1; }; }
@@ -36,6 +39,9 @@ want "\[maker\] playing MAP_LITTLEROOT_TOWN at 10, 12 (a copy of a save)"
 want "\[maker\] back to editing"
 want "\[maker\] playing MAP_LITTLEROOT_TOWN at 10, 12 (a story point)"
 want "\[test\] item 4: 10"   # (the story point's 10 POKé BALLS)
+want "\[maker\] playing MAP_JOHTO_NEW_BARK_TOWN at 8, 8 (a story point)"
+want "\[test\] region 1 cleared 2 "   # (JOHTO's LEAGUE beaten)
+want "\[test\] item 265: 1"            # (the S.S. TICKET)
 md5sum -c "$T/real.md5" > /dev/null 2>&1 || { echo "FAIL: the real save changed"; fail=1; }
 [ -s "$T/mm/.play/play.sav" ] || { echo "FAIL: no play save"; fail=1; }
 cmp -s "$T/shots/play.bmp" "$T/shots/hot_tiles.bmp" && { echo "FAIL: the tile edit didn't show while playing"; fail=1; }

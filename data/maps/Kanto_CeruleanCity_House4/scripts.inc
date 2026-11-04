@@ -7,7 +7,7 @@ Kanto_CeruleanCity_House4_EventScript_841ACDB::
 	end
 
 Kanto_CeruleanCity_House4_Text_841ACE4::
-	.string "I love reading stories of travels\n"
-	.string "and encounters with MOéMON.\p"
-	.string "Maybe one day I’ll read about\n"
-	.string "your adventures!$"
+	.string "Sigh…\n"
+	.string "Too much time, too little to do…\p"
+	.string "Is nothing entertaining happening\n"
+	.string "anywhere?$"

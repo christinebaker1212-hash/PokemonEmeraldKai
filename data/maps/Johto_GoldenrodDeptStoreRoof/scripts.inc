@@ -8,9 +8,9 @@ Johto_GoldenrodDeptStoreRoof_EventScript_83D491D::
 	end
 
 Johto_GoldenrodDeptStoreRoof_EventScript_83D4930::
-	setmaplayoutindex 0x1FF
+	setmaplayoutindex LAYOUT_JOHTO_GOLDENROD_DEPT_STORE_ROOF_ALT   @ (Quetzal's layout 0x1FF)
 	return
 
 Johto_GoldenrodDeptStoreRoof_EventScript_83D4934::
-	setmaplayoutindex 0x1FE
+	setmaplayoutindex LAYOUT_JOHTO_GOLDENROD_DEPT_STORE_ROOF   @ (Quetzal's layout 0x1FE)
 	return

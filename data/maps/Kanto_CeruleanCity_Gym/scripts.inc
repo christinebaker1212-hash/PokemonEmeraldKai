@@ -108,7 +108,7 @@ Kanto_CeruleanCity_Gym_Text_84425F4::
 	.string "anytime, even out of battle.\p"
 	.string "You can CUT down small trees to\n"
 	.string "open new pathways.\p"
-	.string "Please take this gift, too.$"
+	.string "You can also have my favorite TM.$"
 
 Kanto_CeruleanCity_Gym_Text_84426E8::
 	.string "{PLAYER} received\n"
@@ -155,10 +155,10 @@ Kanto_CeruleanCity_Gym_Text_8442896::
 	.string "Let me give you some advice!\p"
 	.string "The LEADER, MISTY, is a pro who\n"
 	.string "uses WATER-type MOéMON.\p"
-	.string "GRASS and ELECTRIC types\n"
-	.string "can help!\p"
-	.string "But watch out for Abilities\n"
-	.string "and secondary types!$"
+	.string "You can drain all their water with\n"
+	.string "GRASS-type MOéMON.\p"
+	.string "Or, you might use ELECTRIC-type\n"
+	.string "MOéMON and zap them!$"
 
 Kanto_CeruleanCity_Gym_Text_8442959::
 	.string "You beat MISTY!\n"
@@ -170,10 +170,10 @@ Kanto_CeruleanCity_Gym_Text_84429B2::
 	.string "CERULEAN MOéMON GYM\n"
 	.string "LEADER: MISTY\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE$"
+	.string "{RIVAL}$"
 
 Kanto_CeruleanCity_Gym_Text_84429EC::
 	.string "CERULEAN MOéMON GYM\n"
 	.string "LEADER: MISTY\p"
 	.string "WINNING TRAINERS:\n"
-	.string "BLUE, {PLAYER}$"
+	.string "{RIVAL}, {PLAYER}$"

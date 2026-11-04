@@ -1,4 +1,4 @@
-@ Moemon Co-op: the GAME CENTER's CARD SHOP: the best selection in HOENN (singles the CARD CLUB counters don't
+@ Moemon Co-op: the GAME CENTER's CARD SHOP: the best selection in the region (singles the CARD CLUB counters don't
 @ have, and three structure decks), a CARD CASE for anyone without one, and card players at the table.
 RustboroCity_GameCenter_2F_MapScripts::
 	.byte 0
@@ -8,16 +8,23 @@ RustboroCity_GameCenter_2F_EventScript_CardShop::
 	faceplayer
 	special Tcg_ClubState
 	goto_if_eq VAR_RESULT, TRUE, RustboroCity_GameCenter_2F_EventScript_Shop
+	special Ygo_ClubHasCase   @ (a CARD CASE from another card game's people already: no second one)
+	goto_if_eq VAR_RESULT, TRUE, RustboroCity_GameCenter_2F_EventScript_HasCase
 	msgbox RustboroCity_GameCenter_2F_Text_NoCase, MSGBOX_DEFAULT
 	giveitem ITEM_CARD_CASE
 	goto_if_eq VAR_RESULT, FALSE, RustboroCity_GameCenter_2F_EventScript_NoRoom
 	msgbox RustboroCity_GameCenter_2F_Text_ChooseDeck, MSGBOX_DEFAULT
+	goto RustboroCity_GameCenter_2F_EventScript_Deck
+RustboroCity_GameCenter_2F_EventScript_HasCase::
+	msgbox RustboroCity_GameCenter_2F_Text_HasCase, MSGBOX_DEFAULT
+RustboroCity_GameCenter_2F_EventScript_Deck::
 	closemessage
 	special Tcg_ClubChooseDeck
 	msgbox RustboroCity_GameCenter_2F_Text_HowTo, MSGBOX_DEFAULT
 RustboroCity_GameCenter_2F_EventScript_Shop::
 	special Tcg_ClubGiftReady
 	goto_if_eq VAR_RESULT, TRUE, EventScript_CardClub_Gift
+	special MP_Region_BufferName
 	msgbox RustboroCity_GameCenter_2F_Text_Welcome, MSGBOX_DEFAULT
 	closemessage
 	special Tcg_GameCenterShop
@@ -104,7 +111,14 @@ RustboroCity_GameCenter_2F_Text_HowTo:
 
 RustboroCity_GameCenter_2F_Text_Welcome:
 	.string "Welcome to the best CARD SHOP in\n"
-	.string "HOENN! Have a look around.$"
+	.string "{STR_VAR_1}! Have a look around.$"
+
+RustboroCity_GameCenter_2F_Text_HasCase:
+	.string "Welcome to the GAME CENTER's\n"
+	.string "CARD SHOP!\p"
+	.string "A CARD CASE, but no MOéMON cards?\n"
+	.string "Every case needs a deck.\l"
+	.string "Pick the one you like!$"
 
 RustboroCity_GameCenter_2F_Text_Bye:
 	.string "Thank you! Come back soon!$"

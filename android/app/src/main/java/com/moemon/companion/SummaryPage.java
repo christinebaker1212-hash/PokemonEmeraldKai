@@ -17,13 +17,14 @@ import java.util.List;
  * for the next one in the same box or party; GIVE / TAKE / MOVE from here.
  */
 public final class SummaryPage extends Page {
-    private static final String[] TABS = {"INFO", "SKILLS", "MOVES"};
+    private static final String[] TABS = {"INFO", "SKILLS", "MOVES", "BALL"};
     private static final String[] STAT_NAMES = {"HP", "ATTACK", "DEFENSE", "SP. ATK", "SP. DEF", "SPEED"};
     // natureStats order (gNatureStatTable): ATTACK, DEFENSE, SPEED, SP. ATK, SP. DEF -> the summary's rows 1-5
     private static final int[] NATURE_ROW = {1, 2, 5, 3, 4};
     private final List<JSONObject> places;
     private final BoxesPage boxes;   // for MOVE (null from the party)
     private int index, tab, move = -1;
+    private String renaming;   // the new name being typed (null: not renaming)
     private final Paint fill = new Paint();
 
     public SummaryPage(GameView v, List<JSONObject> places, int index, BoxesPage boxes) {
@@ -31,6 +32,24 @@ public final class SummaryPage extends Page {
         this.places = places;
         this.index = index;
         this.boxes = boxes;
+    }
+
+    /** Its cry, as the game's summary plays it when a POKéMON comes up (not an EGG's) */
+    private void cry() {
+        JSONObject mon = mon();
+        if (mon != null && mon.optInt("e") != 1) {
+            v.sound.cry(mon.optInt("s"));
+        }
+    }
+
+    private int criedFor = -1;
+
+    @Override
+    public void shown() {
+        if (criedFor != index) {
+            criedFor = index;   // (back from a page over it: no cry again)
+            cry();
+        }
     }
 
     private Planned planned() {
@@ -66,8 +85,8 @@ public final class SummaryPage extends Page {
             art.text(c, "It's still an EGG. Sounds can", 16, BODY_Y + 22);
             art.text(c, "be heard from inside!", 16, BODY_Y + 38);
         } else {
-            int tw = (w - 16) / 3;
-            for (int i = 0; i < 3; i++) {
+            int tw = (w - 16) / TABS.length;
+            for (int i = 0; i < TABS.length; i++) {
                 boolean on = i == tab;
                 if (on) {
                     art.window(c, 0, 8 + i * tw + 4, TAB_Y + 4, tw - 8, 14);
@@ -107,10 +126,25 @@ public final class SummaryPage extends Page {
         if (egg) {
             art.icon(c, MonCard.eggSpecies(art), 30, 44, GameArt.ICON_PLAIN);
         } else {
-            art.front(c, species, mon.optString("pal", null), 14, 28, false);
+            art.front(c, species, art.monPal(mon), 14, 28, false);
         }
         int x = 86, y = 22;
-        int nw = art.textHex(c, mon.optString("n"), x, y, GameArt.TEXT, GameArt.SHADOW);
+        int nw;
+        if (renaming != null) {
+            // the new name as it's typed, in a box with a cursor
+            fill.setColor(0xFFFFFFFF);
+            c.drawRect(x - 2, y + 2, x + 84, y + 16, fill);
+            fill.setColor(0xFF5878E0);
+            c.drawRect(x - 2, y + 15, x + 84, y + 16, fill);
+            nw = art.text(c, renaming, x, y);
+            if ((System.currentTimeMillis() / 400) % 2 == 0) {
+                fill.setColor(GameArt.TEXT);
+                c.drawRect(x + nw + 1, y + 4, x + nw + 2, y + 14, fill);
+            }
+            v.postInvalidateDelayed(400);
+        } else {
+            nw = art.textHex(c, mon.optString("n"), x, y, GameArt.TEXT, GameArt.SHADOW);
+        }
         if (!egg) {
             int g = mon.optInt("g");
             if (g == 0) {
@@ -136,6 +170,9 @@ public final class SummaryPage extends Page {
             if (mon.has("hp")) {
                 MonCard.hp(c, art, x, y + 72, mon.optInt("hp"), mon.optInt("mhp"));
             }
+            // RENAME (the game's SELECT on the summary's INFO): its name typed on the phone
+            String rn = renaming != null ? "DONE" : "RENAME";
+            chip(c, rn, w - 16 - art.width(rn) - 6, y + 50, renaming != null ? 0xFF38A858 : 0xFF5878E0);
         }
     }
 
@@ -214,7 +251,40 @@ public final class SummaryPage extends Page {
         y += 4;
         // how much it likes its Trainer
         section(c, w, y, "FRIENDSHIP");
-        bar(c, 110, y + 6, w - 140, mon.optInt("f"), 255, 0xFFF870A8);
+        int f = mon.optInt("f");
+        bar(c, 110, y + 6, w - 140, f, 255, 0xFFF870A8);
+        y += 16;
+        // (VERDANTURF's friendship rater's words)
+        String feel = f >= 255 ? "It adores you! It can't possibly love you any more."
+                : f >= 200 ? "It's extremely friendly toward you."
+                : f >= 150 ? "It's quite friendly to you."
+                : f >= 100 ? "It's warming up to you."
+                : f >= 50 ? "It feels neutral toward you."
+                : f >= 1 ? "It's not very fond of you." : "It doesn't like you at all.";
+        for (String l : wrap(feel, w - 40)) {
+            art.text(c, l, 18, y, GameArt.GRAY_TEXT, GameArt.SHADOW);
+            y += 14;
+        }
+        // its page in the POKéDEX, right under its words
+        dexY = y + 8;
+        button(c, "POKéDEX ENTRY  >", 18, dexY, w - 36, true);
+    }
+
+    private int dexY = -100;
+
+    private int dexButtonY() {
+        return dexY;
+    }
+
+    private void openDex(JSONObject mon) {
+        int dex = art.species(mon.optInt("s")).optInt("dex");
+        if (dex <= 0) {
+            return;
+        }
+        java.util.ArrayList<Integer> one = new java.util.ArrayList<>();
+        one.add(dex);
+        v.buzz(false);
+        v.showOver(new DexEntryPage(v, one, 0));
     }
 
     private void bar(Canvas c, int x, int y, int bw, int v, int max, int color) {
@@ -321,6 +391,14 @@ public final class SummaryPage extends Page {
         art.text(c, pow, 70, y + 4);
         section(c, w, y + 20, "ACCURACY");
         art.text(c, acc, 90, y + 20);
+        // its kind of damage, the Gen 4 way (each move its own)
+        String[] cats = {"PHYSICAL", "SPECIAL", "STATUS"};
+        int[] catColors = {0xFFE05838, 0xFF5878E0, 0xFF909090};
+        int cat = m.optInt("c");
+        if (cat >= 0 && cat < 3) {
+            int cw = art.width(cats[cat]) + 10;
+            chip(c, cats[cat], w - 20 - cw, y + 10, catColors[cat]);
+        }
         art.paragraph(c, m.optString("d"), 16, y + 38, w - 36, GameArt.TEXT, GameArt.SHADOW);
     }
 
@@ -382,13 +460,103 @@ public final class SummaryPage extends Page {
         if (mon == null) {
             return;
         }
+        if (mon.optInt("e") == 0 && y >= 22 + 48 && y < 22 + 64 && x >= w - 70) {
+            if (renaming != null) {
+                finishRename(mon);
+            } else {
+                startRename(mon);
+            }
+            return;
+        }
+        if (mon.optInt("e") == 0 && renaming == null && y >= 22 && y < 40 && x >= 86 && x < w - 20) {
+            startRename(mon);
+            return;
+        }
         if (y >= TAB_Y && y < TAB_Y + 22 && mon.optInt("e") == 0) {
-            tab = Math.min(2, Math.max(0, (x - 8) / ((w - 16) / 3)));
+            int t = Math.min(TABS.length - 1, Math.max(0, (x - 8) / ((w - 16) / TABS.length)));
+            if (t == 3) {
+                v.buzz(false);
+                v.showOver(new BallPage(v, place(), this));   // (its POKé BALL: a page of its own)
+                return;
+            }
+            if (t != tab) {
+                v.sound.play("se_select");
+            }
+            tab = t;
             move = -1;
+            return;
+        }
+        if (y < TOP_H + 4 && x < 84) {
+            cry();   // (the picture: its cry again)
+            return;
+        }
+        if (tab == 0 && y >= dexButtonY() && y < dexButtonY() + 26 && x >= 18 && x < w - 18) {
+            openDex(mon);
             return;
         }
         if (tab == 2 && y >= BODY_Y + 4 && y < BODY_Y + 4 + 4 * 32) {
             move = (y - BODY_Y - 4) / 32;
+        }
+    }
+
+    private void startRename(JSONObject mon) {
+        if (v.app.client == null || v.app.locked()) {
+            v.message(v.app.client == null ? "Link with your game to rename it." : Companion.LOCKED);
+            return;
+        }
+        renaming = art.plain(GameArt.hexText(mon.optString("n")));
+        v.keyboard(true);
+        v.sound.play("se_select");
+    }
+
+    private void finishRename(JSONObject mon) {
+        String name = renaming == null ? "" : renaming.trim();
+        renaming = null;
+        v.keyboard(false);
+        if (name.isEmpty() || mon == null || name.equals(art.plain(GameArt.hexText(mon.optString("n"))))) {
+            return;
+        }
+        try {
+            v.app.client.order(new JSONObject().put("op", "rename").put("at", place()).put("p", mon.optLong("p"))
+                    .put("o", mon.optLong("o")).put("name", art.toHex(name)));
+        } catch (org.json.JSONException ignored) {
+        }
+        v.buzz(false);
+    }
+
+    @Override
+    public void typed(String text) {
+        if (renaming == null) {
+            return;
+        }
+        StringBuilder b = new StringBuilder(renaming);
+        for (char ch : text.toCharArray()) {
+            if (b.length() < 10 && art.hasLetter(ch) && ch != '\n') {
+                b.append(ch);
+            }
+        }
+        renaming = b.toString();
+    }
+
+    @Override
+    public void backspace() {
+        if (renaming != null && !renaming.isEmpty()) {
+            renaming = renaming.substring(0, renaming.length() - 1);
+        }
+    }
+
+    @Override
+    public void typingDone() {
+        if (renaming != null) {
+            finishRename(mon());
+        }
+    }
+
+    @Override
+    public void hidden() {
+        if (renaming != null) {
+            renaming = null;
+            v.keyboard(false);
         }
     }
 
@@ -397,6 +565,7 @@ public final class SummaryPage extends Page {
         if (places.size() > 1) {
             index = (index + dir + places.size()) % places.size();
             move = -1;
+            cry();
         }
     }
 }

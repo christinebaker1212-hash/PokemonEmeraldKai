@@ -4,7 +4,58 @@ Johto_GoldenrodPokecenter1F_MapScripts::
 
 Johto_GoldenrodPokecenter1F_EventScript_83D6887::
 	setrespawn 0x1B
+	setflag FLAG_JOHTO_HIDE_GS_RECEPTIONIST
+	specialvar VAR_TEMP_9, MP_JohtoGsBallReady
 	end
+
+@ Moemon Kai: Crystal's GS BALL (GoldenrodPokecenter1F.asm GoldenrodPokecenter1F_GSBallScene*): once JOHTO's LEAGUE is
+@ beaten, a receptionist brings it to the player at the door (Quetzal left it in the RUINS OF ALPH)
+Johto_GoldenrodPokecenter1F_EventScript_GsBall::
+	lockall
+	setvar VAR_TEMP_9, 0
+	clearflag FLAG_JOHTO_HIDE_GS_RECEPTIONIST
+	addobject 10
+	playse SE_EXIT
+	applymovement 10, Johto_GoldenrodPokecenter1F_Movement_GsBallApproach
+	waitmovement 0
+	turnobject LOCALID_PLAYER, DIR_EAST
+	msgbox Johto_GoldenrodPokecenter1F_Text_GsBallPleaseAccept, MSGBOX_DEFAULT
+	setorcopyvar VAR_0x8000, ITEM_GS_BALL
+	setorcopyvar VAR_0x8001, 1
+	callstd STD_OBTAIN_ITEM
+	setflag FLAG_JOHTO_GOT_GS_BALL
+	msgbox Johto_GoldenrodPokecenter1F_Text_GsBallComeAgain, MSGBOX_DEFAULT
+	closemessage
+	applymovement 10, Johto_GoldenrodPokecenter1F_Movement_GsBallLeave
+	waitmovement 0
+	removeobject 10
+	setflag FLAG_JOHTO_HIDE_GS_RECEPTIONIST
+	releaseall
+	end
+
+Johto_GoldenrodPokecenter1F_Movement_GsBallApproach:
+	walk_left
+	walk_left
+	walk_left
+	face_left
+	step_end
+
+Johto_GoldenrodPokecenter1F_Movement_GsBallLeave:
+	walk_right
+	walk_right
+	walk_right
+	step_end
+
+Johto_GoldenrodPokecenter1F_Text_GsBallPleaseAccept::
+	.string "{PLAYER}, isn’t it?\p"
+	.string "Congratulations!\p"
+	.string "As a special deal, a GS BALL has\n"
+	.string "been sent just for you!\p"
+	.string "Please accept it!$"
+
+Johto_GoldenrodPokecenter1F_Text_GsBallComeAgain::
+	.string "Please do come again!$"
+
 
 @ Johto_GoldenrodPokecenter1F object 4 (local id 4, gfx 0x3E96) at 2,5
 Johto_GoldenrodPokecenter1F_EventScript_83D688B::

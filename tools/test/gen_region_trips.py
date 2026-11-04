@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Writes the six cross-region trip tests (tools/test/scenarios/region_trip_<from>_<to>): a champion of the starting
 region takes its port's boat to the other region (the real clerk scripts and menus, customs keeping the second POKeMON),
-arrives (the first town on a first visit, else the port), becomes that region's champion, sails back and checks the
+sails (the voyage), arrives (on a first visit the port's sailor takes the player to the first town, else the port), becomes that region's champion, sails back and checks the
 POKeMON are at their own levels in each region and the other one waited in the GLOBAL PC.
 
     python3 tools/test/gen_region_trips.py
@@ -31,7 +31,9 @@ def sail(src, dst, label, customs=True):
     out += ['press A 3', 'wait 30']
     if customs:   # (with one POKeMON customs asks nothing)
         out += ['pressuntil A partymenu 3000', 'wait 60', 'press DOWN 3', 'wait 10', 'press A 3']
+    # (the voyage, then on a first visit the port's sailor takes the player home: free only after him)
     out += ['watchlog region: travel %d -> %d' % (src, dst), 'pressuntillog A 3000 region: travel %d -> %d' % (src, dst),
+            'watchlog voyage: arrived', 'waitlog 1500 voyage: arrived', 'wait 40',
             'pressuntil B field 3000', 'wait 60', 'shot %s_arrived' % label, 'mp where', 'mp regioninfo']
     return out
 

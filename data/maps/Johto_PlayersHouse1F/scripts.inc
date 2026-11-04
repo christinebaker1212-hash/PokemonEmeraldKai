@@ -270,7 +270,15 @@ Johto_PlayersHouse1F_EventScript_83E3BC1::
 
 Johto_PlayersHouse1F_EventScript_83E3C01::
 	setflag FLAG_QZ_0xAD8
-	msgbox Johto_PlayersHouse1F_Text_83E3C8A, MSGBOX_DEFAULT
+	@ Moemon Kai: the RUNNING SHOES as KANTO's (FireRed's words, data/maps/Kanto_PewterCity)
+	textcolor 3
+	playfanfare MUS_RG_OBTAIN_KEY_ITEM
+	message Johto_PlayersHouse1F_Text_83E3C8A
+	waitmessage
+	waitfanfare
+	msgbox Kanto_PewterCity_Text_SwitchedShoesWithRunningShoes, MSGBOX_DEFAULT
+	msgbox Kanto_PewterCity_Text_ExplainRunningShoes, MSGBOX_DEFAULT
+	textcolor 1
 	@ Moemon Kai: Crystal's MOM hands over the POKéGEAR here (pokecrystal maps/PlayersHouse1F.asm: no clock to set,
 	@ the game's own clock; src/mp/mp_pokegear.c)
 	msgbox Johto_PlayersHouse1F_Text_MomPokegear, MSGBOX_DEFAULT
@@ -336,7 +344,7 @@ Johto_PlayersHouse1F_EventScript_8401A37::
 	turnobject 3, 3
 	msgbox Johto_PlayersHouse1F_Text_84026AE, MSGBOX_DEFAULT
 	setvar VAR_QZ_0x5076, 4
-	cleartrainerflag 0x137B
+	cleartrainerflag TRAINER_QZ_4987
 	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, TRAINER_QZ_4987, 0, Johto_PlayersHouse1F_Text_840270C
 	fadedefaultbgm
 	specialvar VAR_RESULT, GetBattleOutcome
@@ -483,8 +491,8 @@ Johto_PlayersHouse1F_Text_83E3C25::
 	.string "something for him.$"
 
 Johto_PlayersHouse1F_Text_83E3C8A::
-	.string "MOM: With your RUNNING SHOES,\n"
-	.string "hold B to run.$"
+	.string "{PLAYER} received the\n"
+	.string "RUNNING SHOES from MOM.$"
 
 Johto_PlayersHouse1F_Text_83E3D12::
 	.string "MOM: PROF.ELM is waiting for you.\p"

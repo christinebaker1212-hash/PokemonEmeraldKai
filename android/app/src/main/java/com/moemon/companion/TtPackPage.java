@@ -29,8 +29,19 @@ public final class TtPackPage extends Page {
         return true;
     }
 
+    private int heard = -2;   // (the last card heard turning; -2: the pack not opened yet)
+    private boolean fanfare;
+
     @Override
     public void draw(Canvas c, int w, int h) {
+        if (heard == -2) {
+            heard = -1;
+            v.sound.play("se_rg_card_open");
+        }
+        if (!fanfare && System.currentTimeMillis() - start > 500 + cards.length * 700L + 400) {
+            fanfare = true;
+            v.sound.fanfare("mus_obtain_item");
+        }
         TtArt ta = v.app.ttArt;
         long t = System.currentTimeMillis() - start;
         fill.setShader(new LinearGradient(0, 0, 0, h, 0xFF203868, 0xFF0A1428, Shader.TileMode.CLAMP));
@@ -45,6 +56,10 @@ public final class TtPackPage extends Page {
             long at = 500 + i * 700L;
             float flip = 1;
             boolean front = t > at + 175;
+            if (front && i > heard) {
+                heard = i;   // (each card as it turns)
+                v.sound.play("se_rg_card_flip");
+            }
             if (t > at && t < at + 350) {
                 flip = Math.max(0.04f, (float) Math.abs(Math.cos((t - at) / 350.0 * Math.PI)));
             }
@@ -79,5 +94,10 @@ public final class TtPackPage extends Page {
         if (System.currentTimeMillis() - start > 500 + cards.length * 700L + 400) {
             v.showOver(null);
         }
+    }
+
+    @Override
+    public boolean swapsWords() {
+        return false;   // (the card games' own words: the POKéMON card game is the POKéMON card game)
     }
 }

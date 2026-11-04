@@ -1,0 +1,8 @@
+# Fossil POKéMON are never met wild before the region's LEAGUE is beaten (mp_region.c MP_WildSpeciesOk, through
+# MP_WildSlotSpecies and the headbutt / rock table): JOHTO's SLOWPOKE WELL B1F has KABUTO (140) and OMANYTE (138) in
+# grass slots 7 and 8 (Quetzal's), which give the slot before them (POLIWAG 60) until JOHTO is cleared.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("land slots 6-7: 60 60" "land slots 8-11: 60 " "land slots 6-7: 60 140" "land slots 8-11: 138 ")
+UNEXPECT_A=("[crash]" "TIMEOUT")

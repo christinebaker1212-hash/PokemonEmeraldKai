@@ -125,7 +125,8 @@ Kanto_ThreeIsland_BerryForest_Text_842B644::
 	.string "Let’s go home!$"
 
 Kanto_ThreeIsland_BerryForest_Text_842B6A8::
-	.string "Your BERRY POUCH is full.\n"
+	.string "Your BAG’s BERRIES pocket\n"
+	.string "is full.\p"
 	.string "I guess you don’t want this.$"
 
 Kanto_ThreeIsland_BerryForest_Text_842B6DF::

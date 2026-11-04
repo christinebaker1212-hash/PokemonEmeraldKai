@@ -2,7 +2,8 @@
 """The app's art and tables from the game itself (src/mp/mp_export.c, MOEMON_EXPORT_APP), packed for the APK into
 android/app/src/main/assets/game/: sheets of the POKeMON's icons (first frame) and front pictures, the BAG's icons,
 the PC wallpapers, the window frames and the font, compressed; data.json; charmap.json (the game's letters, for the
-app's own words, from charmap.txt).
+app's own words, from charmap.txt); sounds.bin (the game's sound effects, cries and songs, played by its own engine); fxclips.bin (the ball effects,
+played by the game's own editor: src/mp/mp_fxclip.c).
 
     python3 android/build_assets.py [EXPORT_DIR]   (no EXPORT_DIR: runs ./pokeemerald64 to make one; make linux first)
 """
@@ -163,6 +164,61 @@ def ygo_art():
     shutil.copyfile(os.path.join(ROOT, 'graphics/ygo/edo.pak'), os.path.join(OUT, 'ygo_edo.pak'))
 
 
+def read_clip(path):
+    """A clip as the game records it (mp_fxclip.c): each frame XORed with the one before, as runs of unchanged and
+    changed pixels (ABGR1555)"""
+    d = open(path, 'rb').read()
+    if d[:4] != b'MFXC':
+        raise ValueError(path)
+    w, h = struct.unpack_from('<HH', d, 4)
+    pos, prev, frames = 8, [0] * (w * h), []
+    while pos < len(d):
+        n, = struct.unpack_from('<I', d, pos)
+        words = struct.unpack_from('<%dH' % (n // 2), d, pos + 4)
+        pos += 4 + n
+        cur, i, k = prev[:], 0, 0
+        while k < len(words):
+            same, diff = words[k], words[k + 1]
+            k += 2
+            i += same
+            for _ in range(diff):
+                cur[i] ^= words[k]
+                k += 1
+                i += 1
+        frames.append(cur)
+        prev = cur
+    return w, h, frames
+
+
+def fx_clips(exp_clips):
+    """fxclips.bin for the app's POKé BALL page: "MFXA", u16 count, u16 width, u16 height; per clip u8 kind (0
+    SEND-OUT, 1 PARTICLES, 2 RETURN), u8 piece, u16 frames, u32 offset, u32 size; then each clip, zlib: its frames at
+    30 a second (every second one), each XORed with the one before, u16 ABGR1555 little-endian"""
+    names = sorted(f for f in os.listdir(exp_clips) if f.endswith('.clip'))
+    entries, blobs, size = [], [], None
+    for name in names:
+        kind, piece = (int(v) for v in name[:-5].split('_'))
+        w, h, frames = read_clip(os.path.join(exp_clips, name))
+        size = (w, h)
+        frames = frames[::2]
+        while len(frames) > 2 and frames[-1] == frames[-2]:
+            frames.pop()   # (the rest at the end: once)
+        out, prev = bytearray(), [0] * (w * h)
+        for f in frames:
+            out += struct.pack('<%dH' % (w * h), *[a ^ b for a, b in zip(f, prev)])
+            prev = f
+        entries.append((kind, piece, len(frames)))
+        blobs.append(zlib.compress(bytes(out), 9))
+    head = b'MFXA' + struct.pack('<HHH', len(entries), size[0], size[1])
+    offset = len(head) + 12 * len(entries)
+    table = b''
+    for (kind, piece, n), blob in zip(entries, blobs):
+        table += struct.pack('<BBHII', kind, piece, n, offset, len(blob))
+        offset += len(blob)
+    with open(os.path.join(OUT, 'fxclips.bin'), 'wb') as f:
+        f.write(head + table + b''.join(blobs))
+
+
 def main():
     exp = sys.argv[1] if len(sys.argv) > 1 else None
     if exp is None:
@@ -171,25 +227,44 @@ def main():
                    MOEMON_SAVE=os.path.join(exp, 'x.sav'), MOEMON_SKIP_COOP_SETUP='1',
                    MOEMON_COOP_CONFIG=os.path.join(exp, 'x.ini'))
         subprocess.check_call([os.path.join(ROOT, 'pokeemerald64')], cwd=ROOT, env=env, stdout=subprocess.DEVNULL)
+        # the ball effects: the game's editor plays each piece (unthrottled through the test harness: a script that
+        # only waits; the game quits when every piece is recorded)
+        if not os.environ.get('MOEMON_EXPORT_NO_FXCLIPS'):
+            script = os.path.join(exp, 'fxclips.txt')
+            open(script, 'w').write('wait 1000000\n')
+            env = dict(env, MOEMON_EXPORT_FXCLIPS=os.path.join(exp, 'clips'), MOEMON_TEST=script, MOEMON_SHOTDIR=exp)
+            del env['MOEMON_EXPORT_APP']
+            subprocess.check_call([os.path.join(ROOT, 'pokeemerald64')], cwd=ROOT, env=env, stdout=subprocess.DEVNULL)
     os.makedirs(OUT, exist_ok=True)
     data = json.load(open(os.path.join(exp, 'data.json')))
     data['charmap'] = charmap()
     data['sheets'] = {'icons': [32, 32, 32], 'front': [64, 64, 16, 256], 'items': [24, 24, 32], 'wallpapers': [160, 144, 4],
                       'frames': [24, 24, 32]}
     json.dump(data, open(os.path.join(OUT, 'data.json'), 'w'), separators=(',', ':'))
+    # both art sets (OPTIONS > CREATURES): Kai's MOéMON, and the original POKéMON as front_p_N (the party icons are the
+    # same in both)
     write_png(os.path.join(OUT, 'icons.png'), *sheet(load_dir(os.path.join(exp, 'icons')), 32, 32, 32))
-    front = load_dir(os.path.join(exp, 'front'))
-    for k in range(0, max(front) + 1, 256):
-        part = {i - k: v for i, v in front.items() if k <= i < k + 256}
-        if part:
-            write_png(os.path.join(OUT, 'front_%d.png' % (k // 256)), *sheet(part, 64, 64, 16))
+    for suffix in ('', '_p'):
+        if not os.path.isdir(os.path.join(exp, 'front' + suffix)):
+            continue
+        front = load_dir(os.path.join(exp, 'front' + suffix))
+        for k in range(0, max(front) + 1, 256):
+            part = {i - k: v for i, v in front.items() if k <= i < k + 256}
+            if part:
+                write_png(os.path.join(OUT, 'front%s_%d.png' % (suffix, k // 256)), *sheet(part, 64, 64, 16))
     write_png(os.path.join(OUT, 'items.png'), *sheet(load_dir(os.path.join(exp, 'items')), 24, 24, 32))
     write_png(os.path.join(OUT, 'wallpapers.png'), *sheet(load_dir(os.path.join(exp, 'wallpapers')), 160, 144, 4))
     write_png(os.path.join(OUT, 'frames.png'), *sheet(load_dir(os.path.join(exp, 'frames')), 24, 24, 32))
     write_png(os.path.join(OUT, 'font.png'), *read_png(os.path.join(exp, 'font.png')))
+    write_png(os.path.join(OUT, 'font_small.png'), *read_png(os.path.join(exp, 'font_small.png')))
     write_png(os.path.join(OUT, 'types.png'), *read_png(os.path.join(exp, 'types.png')))
-    for name in ('dex_info.png', 'dex_list.png', 'footprints.png', 'ribbons.png', 'trainers.png'):
+    for name in ('dex_info.png', 'dex_list.png', 'dex_list_p.png', 'footprints.png', 'ribbons.png', 'trainers.png'):
         write_png(os.path.join(OUT, name), *read_png(os.path.join(exp, name)))
+    # the game's sounds, recorded from its own sound engine (src/mp/mp_export_sound.c; Sound.java plays them)
+    if os.path.exists(os.path.join(exp, 'sounds.bin')):
+        shutil.copyfile(os.path.join(exp, 'sounds.bin'), os.path.join(OUT, 'sounds.bin'))
+    if os.path.isdir(os.path.join(exp, 'clips')):
+        fx_clips(os.path.join(exp, 'clips'))
     tt_art()
     tcg_art()
     ygo_art()

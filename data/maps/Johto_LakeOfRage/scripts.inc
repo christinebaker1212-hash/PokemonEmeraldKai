@@ -10,7 +10,7 @@ Johto_LakeOfRage_EventScript_83DD2C9::
 
 Johto_LakeOfRage_EventScript_83DD2E3::
 	call_if_lt VAR_QZ_0x500C, 2, Johto_LakeOfRage_EventScript_83DD30B
-	setmaplayoutindex 0x21B
+	setmaplayoutindex LAYOUT_JOHTO_LAKE_OF_RAGE   @ (Quetzal's layout 0x21B)
 	goto_if_lt VAR_QZ_0x500C, 14, Johto_LakeOfRage_EventScript_83DD30F
 	random 2
 	goto_if_eq VAR_RESULT, 1, Johto_LakeOfRage_EventScript_83DD30F
@@ -87,6 +87,7 @@ Johto_LakeOfRage_EventScript_83DD40B::
 	delay 0x28
 	waitmoncry
 	qz_setstaticwildmon SPECIES_GYARADOS, 0x1E, ITEM_NONE
+	special MP_MakeScriptedWildShiny   @ Moemon Kai: Crystal's BATTLETYPE_FORCESHINY: the RED GYARADOS
 	dowildbattle
 	specialvar VAR_RESULT, GetBattleOutcome
 	goto_if_eq VAR_RESULT, 1, Johto_LakeOfRage_EventScript_83DD44C

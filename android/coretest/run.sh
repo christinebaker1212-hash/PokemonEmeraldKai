@@ -11,7 +11,8 @@ mkdir -p "$OUT/classes" "$CACHE"
     https://maven-central.storage-download.googleapis.com/maven2/org/json/json/20240303/json-20240303.jar
 JH=${JAVA_HOME:-$(dirname "$(dirname "$(readlink -f "$(command -v javac)")")")}
 mkdir -p "$OUT/ttinc" && ln -sfn "$ROOT/include/tt" "$OUT/ttinc/tt"   # (the game's include/ has its own strings.h)
-mkdir -p "$OUT/tcginc" && ln -sfn "$ROOT/include/tcg" "$OUT/tcginc/tcg" && ln -sfn "$ROOT/include/mp_version.h" "$OUT/tcginc/mp_version.h"
+mkdir -p "$OUT/tcginc/constants" && ln -sfn "$ROOT/include/tcg" "$OUT/tcginc/tcg" && ln -sfn "$ROOT/include/mp_version.h" "$OUT/tcginc/mp_version.h" \
+    && ln -sfn "$ROOT/include/constants/songs.h" "$OUT/tcginc/constants/songs.h"
 mkdir -p "$OUT/ygoinc" && ln -sfn "$ROOT/include/ygo" "$OUT/ygoinc/ygo" && ln -sfn "$ROOT/include/mp_version.h" "$OUT/ygoinc/mp_version.h"
 (cd "$ROOT" && EDO_CFLAGS=-fPIC tools/ygo/edo/build_core.sh "$OUT/ocgcore")   # (EDOPro's engine: once, then when it changes)
 TT="$ROOT/src/tt"

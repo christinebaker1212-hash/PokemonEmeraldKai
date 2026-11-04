@@ -34,18 +34,8 @@ Kanto_SixIsland_RuinValley_EventScript_8418950::
 	braillemessage Kanto_SixIsland_RuinValley_Braille_845959A
 	waitbuttonpress
 	closebraillemessage
-	goto_if_unset FLAG_QZ_0x21B2, Kanto_SixIsland_RuinValley_EventScript_84189BE
-	setvar VAR_0x8004, 0xF
-	special QzHasBadgeForFieldMove
-	goto_if_eq VAR_RESULT, 0, Kanto_SixIsland_RuinValley_EventScript_84189BE
-	msgbox Kanto_SixIsland_RuinValley_Text_843C134, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, 0, Kanto_SixIsland_RuinValley_EventScript_84189CA
-	closemessage
-	playse SE_M_CUT
-	setflag FLAG_QZ_0x222F
-	call Kanto_SixIsland_RuinValley_EventScript_841891F
-	special DrawWholeMapView
-	waitse
+	@ Moemon Kai: FireRed's door: the braille says CUT, and CUT used from the party menu here opens it
+	@ (fldeff_cut.c / qz_specials.c MP_RuinValleyCutCheck); Quetzal's "Use CUT on the door?" is gone
 	releaseall
 	end
 

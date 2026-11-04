@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "global.h"
 #include "constants/moves.h"
+#include "constants/party_menu.h"
 #include "credits.h"
 #include "event_data.h"
 #include "load_save.h"
@@ -282,10 +283,12 @@ u16 QzClearRadioTowerFlag14A3(void)
     return 0;
 }
 
+// Quetzal's C cleared its own flags 0x2108 / 0x2109 here; in this port they're KANTO's FLAG_SYS_GAME_CLEAR and
+// FLAG_DEFEATED_CHAMP, so CELIO taking the SAPPHIRE undid the LEAGUE (ferry to ISLANDS 4-7, MT. EMBER, the ELITE
+// FOUR's rematch teams...). FireRed's SetPostgameFlags only sets flags, which the script does itself: nothing to do.
+// (Saves it already hit get them back on load: mp_region.c KantoLeagueFlags.)
 u16 QzClearSeagallopRestrictions(void)
 {
-    FlagClear(FLAG_QZ_0x2108);
-    FlagClear(FLAG_QZ_0x2109);
     return 0;
 }
 
@@ -499,6 +502,7 @@ static u16 RefreshStatics(void)
             continue;
         if (FlagGet(e->doneFlag) || !MP_Gen_Allowed(e->species) || MP_Gen_Cap(e->region) < e->gen   // (a form: GALARIAN ARTICUNO...)
          || HiddenForeignLegend(e)
+         || (e->region == REGION_JOHTO && (e->species == SPECIES_RAIKOU || e->species == SPECIES_ENTEI))   // (they roam: mp_johto_roamer.c)
          || (!MP_Region_Cleared(e->region) && !PreLeagueLegend(e))
          || (e->region == 2 && e->species == SPECIES_MELOETTA && !FlagGet(FLAG_QZ_0x2924))   // after the CHANSEY Dance
          || (e->species == SPECIES_DARKRAI && !FlagGet(e->region == 1 ? FLAG_QZ_0x1425 : FLAG_QZ_0x292B))   // in a dream
@@ -537,7 +541,9 @@ u16 QzSetupIcePathLegendary(void)
 // Pokémon Tower's ghost: MAROWAK's spirit
 static u16 QzStartMarowakGhostBattle_(void)
 {
+    extern bool8 gMpUncatchableWild;
     CreateScriptedWildMon(SPECIES_MAROWAK, 30, ITEM_NONE);
+    gMpUncatchableWild = TRUE;   // (FireRed's ghost: CUBONE's mother can't be caught)
     BattleSetup_StartScriptedWildBattle();
     return 0;
 }
@@ -561,6 +567,30 @@ u16 QzIsCurrentPcBoxFull(void) { return gSpecialVar_Result = QzIsCurrentPcBoxFul
 u16 QzGetRivalStarterSpecies(void) { return gSpecialVar_Result = QzGetRivalStarterSpecies_(); }
 u16 QzGetRegionBadgeCount(void) { return gSpecialVar_Result = QzGetRegionBadgeCount_(); }
 u16 QzVictoryRoadGateCheck(void) { return gSpecialVar_Result = QzVictoryRoadGateCheck_(); }
+
+// The walk between JOHTO's VICTORY ROAD gate and KANTO's ROUTE 22 gate (docs/REGIONS_AUDIT.md cases 43 and 70: Kai's
+// customs on every crossing): for champions of both LEAGUES; VAR_0x8004 the region, VAR_0x8005 the one POKéMON who
+// comes (EventScript_RegionCustoms), the others into the GLOBAL PC. RESULT 0: not allowed, or the GLOBAL PC is full
+u16 MP_RegionGateCross(void)
+{
+    u8 to = gSpecialVar_0x8004, from = MP_Region_Current(), keep = gSpecialVar_0x8005, i;
+    if (to >= REGION_COUNT || to == from || !QzVictoryRoadGateCheck_())
+        return gSpecialVar_Result = 0;
+    if (keep >= PARTY_SIZE || !GetMonData(&gPlayerParty[keep], MON_DATA_SANITY_HAS_SPECIES))
+        keep = 0;
+    if (MP_Region_GlobalFree() < CalculatePlayerPartyCount() - 1)
+        return gSpecialVar_Result = 0;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        if (i == keep || !GetMonData(&gPlayerParty[i], MON_DATA_SANITY_HAS_SPECIES))
+            continue;
+        MP_Region_DepositGlobal(&gPlayerParty[i].box);
+        ZeroMonData(&gPlayerParty[i]);
+    }
+    CompactPartySlots();
+    MP_Region_Travel(from, to);
+    return gSpecialVar_Result = 1;
+}
 u16 QzJohtoStaticEncounterSetup(void) { return gSpecialVar_Result = QzJohtoStaticEncounterSetup_(); }
 u16 QzJohtoStaticEncounterSetup2(void) { return gSpecialVar_Result = QzJohtoStaticEncounterSetup2_(); }
 u16 QzJohtoStaticEncounterSetupTower(void) { return gSpecialVar_Result = QzJohtoStaticEncounterSetupTower_(); }
@@ -889,6 +919,7 @@ static u16 QzSampleResortGorgeousMonAndReward_(void)
             species = SPECIES_PIKACHU;
         VarSet(VAR_QZ_0x5141, species);
         VarSet(0x5142, sRewards[Random() % ARRAY_COUNT(sRewards)]);
+        VarSet(VAR_KANTO_RESORT_STEPS, 0);
     }
     GetSpeciesName(gStringVar1, VarGet(VAR_QZ_0x5141));
     return TRUE;
@@ -921,6 +952,8 @@ static u16 QzShowSeagallopDestinationMenu_(void)
     for (i = 0; i < ARRAY_COUNT(sSeagallopNames); i++)
     {
         if (i == gSpecialVar_0x8004)
+            continue;
+        if (i == 0 && VarGet(VAR_QZ_0x510A) < 4)   // FireRed: VERMILION once the first trip has ended with BILL
             continue;
         if (i >= 1 && i <= 3 && !FlagGet(FLAG_QZ_0x2213))
             continue;
@@ -960,14 +993,18 @@ static u16 QzGetSeagallopNumber_(void)
     return 6;
 }
 
-// Sail to VAR_0x8006 (FireRed's ferry scene is its own art: the trip is the screen's fade)
+void MP_Voyage_Begin(bool8 eastbound, bool8 faded);   // src/mp/mp_voyage.c
+// Sail from VAR_0x8004 to VAR_0x8006: FireRed's ferry scene (mp_voyage.c), the way FireRed's direction matrix says
+// (pokefirered src/seagallop.c sTravelDirectionMatrix: bit DEST of ORIGIN's entry set = eastbound)
 u16 QzDoSeagallopFerryScene(void)
 {
+    static const u16 sTravelDirectionMatrix[] = {0x6fe, 0x6fc, 0x6f8, 0x6f0, 0x6e0, 0x4c0, 0x400, 0x440, 0x7ff, 0x6e0, 0x000};
     u16 dest = gSpecialVar_0x8006 < ARRAY_COUNT(sSeagallopSpots) ? gSpecialVar_0x8006 : 0;
+    bool8 east = gSpecialVar_0x8004 >= ARRAY_COUNT(sTravelDirectionMatrix) ? TRUE
+               : (sTravelDirectionMatrix[gSpecialVar_0x8004] >> dest) & 1;
     SetWarpDestination(sSeagallopSpots[dest].map >> 8, sSeagallopSpots[dest].map & 0xFF, WARP_ID_NONE,
                        sSeagallopSpots[dest].x, sSeagallopSpots[dest].y);
-    DoWarp();
-    ResetInitialPlayerAvatarState();
+    MP_Voyage_Begin(east, TRUE);   // (the script faded the screen already)
     return 0;
 }
 
@@ -1037,23 +1074,11 @@ static const u16 sKantoTowns[] = {MAP_KANTO_PALLET_TOWN, MAP_KANTO_VIRIDIAN_CITY
     MAP_KANTO_CINNABAR_ISLAND, MAP_KANTO_ONE_ISLAND, MAP_KANTO_TWO_ISLAND, MAP_KANTO_THREE_ISLAND, MAP_KANTO_FOUR_ISLAND,
     MAP_KANTO_FIVE_ISLAND, MAP_KANTO_SIX_ISLAND, MAP_KANTO_SEVEN_ISLAND};
 
+// Quetzal's JESSIE & JAMES travelling battle (a town a day after the LEAGUE) is gone (docs/REGIONS_AUDIT.md case 16:
+// FireRed / Crystal have no such event, and its PIKACHU reward was an empty POKéMON): their objects stay hidden
 static u16 TravelingEvent(const u16 *towns, u8 count, u16 flag, u16 salt)
 {
-    u16 here = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
-    u32 day;
-    // a challenge for champions (a Lv. 50 battle): not before the region's League is beaten
-    if (!MP_Region_Cleared(MP_Region_Current()))
-    {
-        FlagSet(flag);
-        return FALSE;
-    }
-    RtcCalcLocalTime();
-    day = (u32)gLocalTime.days * 2654435761u + salt;
-    if (towns[(day >> 16) % count] == here)
-    {
-        FlagClear(flag);
-        return TRUE;
-    }
+    (void)towns, (void)count, (void)salt;
     FlagSet(flag);
     return FALSE;
 }
@@ -1077,12 +1102,23 @@ static u16 QzBufferLabQuestChecklist_(void)
     return 0;
 }
 
-u16 QzSeafoamCurrentEffect(void) { return 0; }
+// FireRed's SeafoamIslandsB4F_CurrentDumpsPlayerOnLand: the current sweeps the player off their POKéMON onto land, north
+u16 QzSeafoamCurrentEffect(void)
+{
+    void MP_StopSurfingNorth(void);   // (field_player_avatar.c)
+    MP_StopSurfingNorth();
+    return 0;
+}
 u16 QzSetDeoxysRockPaletteVar5071(void) { return 0; }
 u16 QzDoDeoxysRockInteractionAlt(void) { ScriptContext_Enable(); return 0; }
 
 // Icefall Cave's cracked ice: the tiles of floor already cracked (var 0x4001's bits), as FireRed
-u16 QzSetIcefallCaveCrackedIceMetatiles(void) { return 0; }
+u16 QzSetIcefallCaveCrackedIceMetatiles(void)
+{
+    void MP_SetIcefallCaveCrackedIceMetatiles(void);   // (field_tasks.c, FireRed's)
+    MP_SetIcefallCaveCrackedIceMetatiles();
+    return 0;
+}
 u16 QzJohtoTravelingEventCheck(void) { return gSpecialVar_Result = QzJohtoTravelingEventCheck_(); }
 u16 QzKantoTravelingEventCheck(void) { return gSpecialVar_Result = QzKantoTravelingEventCheck_(); }
 u16 QzPlayerNotAtTrainerHillEntrance(void) { return gSpecialVar_Result = QzPlayerNotAtTrainerHillEntrance_(); }
@@ -1140,7 +1176,7 @@ static u16 QzTravelToRegion_(void)
     gSpecialVar_0x8007 = 0;
     if (to >= REGION_COUNT || to == from)
         return 0;
-    if (train ? !MP_Region_Cleared(from) : !(QzGetReachableRegionsMask_() & (1 << to)))
+    if (train ? !MP_MagnetTrainOpen() : !(QzGetReachableRegionsMask_() & (1 << to)))
         return 0;
     return TravelNow(to, keep, train);
 }
@@ -1173,12 +1209,28 @@ static u16 TravelNow(u8 to, u8 keep, bool8 train)
     first = !(gRegionState.started & (1 << to)) && to != REGION_HOENN;
     MP_Region_Travel(from, to);
     HealPlayerParty();
-    if (first)
-        MP_Region_GoToStartHouse(to);   // the first visit: a guide takes the player to the region's first town
+    if (first && !train)
+        MP_Region_FirstBoatIn(to);   // the first visit: in at the port, where a guide takes the player to the first town
+    else if (first)
+        MP_Region_GoToStartHouse(to);
     else if (train)   // GOLDENROD <-> SAFFRON
+    {
+        bool8 MP_MagnetTrain_Ride(bool8 toSaffron);
         SetWarpDestinationToHealLocation(to == REGION_KANTO ? HEAL_LOCATION_KANTO_SAFFRON_CITY : HEAL_LOCATION_JOHTO_GOLDENROD_CITY);
+        if (MP_MagnetTrain_Ride(to == REGION_KANTO))   // (Crystal's ride, then the warp: src/mp/mp_magnettrain.c)
+        {
+            ResetInitialPlayerAvatarState();
+            return 1;
+        }
+    }
     else
         SetWarpDestination(sRegionPorts[to].map >> 8, sRegionPorts[to].map & 0xFF, WARP_ID_NONE, sRegionPorts[to].x, sRegionPorts[to].y);
+    if (!train)
+    {
+        // the voyage (FireRed's ferry scene, mp_voyage.c), east for the regions in order HOENN, JOHTO, KANTO, SINNOH
+        MP_Voyage_Begin(to > from, FALSE);
+        return 1;
+    }
     DoWarp();
     ResetInitialPlayerAvatarState();
     return 1;
@@ -1397,84 +1449,121 @@ u16 QzGiveStarterJohto(void)
 // battles' name read it.
 #define VAR_JOHTO_RIVAL_NAME 0x52FC
 static const u8 sSilverName[] = _("SILVER");
+// KANTO's rival too, as FireRed has the player name him (OAK in his lab: QzNameKantoRival; docs/REGIONS_AUDIT.md case
+// 18), in KANTO's vars VAR_KANTO_RIVAL_NAME..+3; none given: BLUE
+static const u8 sBlueName[] = _("BLUE");
 
-static void RivalNameRead(u8 *out)
+static void RivalNameRead(u8 region, u8 *out)
 {
+    u16 var = region == REGION_KANTO ? VAR_KANTO_RIVAL_NAME : VAR_JOHTO_RIVAL_NAME;
     u32 i;
     for (i = 0; i < 4; i++)
     {
-        u16 v = VarGet(VAR_JOHTO_RIVAL_NAME + i);
+        u16 v = VarGet(var + i);
         out[2 * i] = v & 0xFF;
         out[2 * i + 1] = v >> 8;
     }
     out[PLAYER_NAME_LENGTH] = EOS;
     if (out[0] == 0 || out[0] == EOS)
-        StringCopy(out, sSilverName);
+        StringCopy(out, region == REGION_KANTO ? sBlueName : sSilverName);
 }
 
-static void RivalNameWrite(const u8 *name)
+static void RivalNameWrite(u8 region, const u8 *name)
 {
+    u16 var = region == REGION_KANTO ? VAR_KANTO_RIVAL_NAME : VAR_JOHTO_RIVAL_NAME;
     u8 buf[8];
     u32 i;
     memset(buf, EOS, sizeof(buf));
     for (i = 0; i < PLAYER_NAME_LENGTH && name[i] != EOS; i++)
         buf[i] = name[i];
     for (i = 0; i < 4; i++)
-        VarSet(VAR_JOHTO_RIVAL_NAME + i, buf[2 * i] | (buf[2 * i + 1] << 8));
+        VarSet(var + i, buf[2 * i] | (buf[2 * i + 1] << 8));
 }
 
 // The name this player gave (sent to friends in a room this player hosts: mp_main.c MPR_RULES)
 const u8 *MP_JohtoRivalOwnName(void)
 {
     static u8 sName[PLAYER_NAME_LENGTH + 1];
-    RivalNameRead(sName);
+    RivalNameRead(REGION_JOHTO, sName);
+    return sName;
+}
+
+const u8 *MP_KantoRivalOwnName(void)
+{
+    static u8 sName[PLAYER_NAME_LENGTH + 1];
+    RivalNameRead(REGION_KANTO, sName);
     return sName;
 }
 
 // The name he goes by: online in a friend's room, the name the host gave (mp_main.c MP_RoomRivalName)
 const u8 *MP_JohtoRivalName(void)
 {
-    const u8 *MP_RoomRivalName(void);
-    const u8 *host = MP_RoomRivalName();
+    const u8 *MP_RoomRivalName(u8 region);
+    const u8 *host = MP_RoomRivalName(REGION_JOHTO);
     return host != NULL ? host : MP_JohtoRivalOwnName();
 }
 
-// {RIVAL} reads it in JOHTO (else NULL: HOENN's MAY / BRENDAN)
-const u8 *MP_JohtoRivalNameHere(void)
+const u8 *MP_KantoRivalName(void)
 {
-    return MP_Region_Current() == REGION_JOHTO ? MP_JohtoRivalName() : NULL;
+    const u8 *MP_RoomRivalName(u8 region);
+    const u8 *host = MP_RoomRivalName(REGION_KANTO);
+    return host != NULL ? host : MP_KantoRivalOwnName();
 }
 
-// A battle's trainer name: SILVER's teams say his name
+// {RIVAL} reads it in JOHTO / KANTO (else NULL: HOENN's MAY / BRENDAN)
+const u8 *MP_JohtoRivalNameHere(void)
+{
+    u8 region = MP_Region_Current();
+    return region == REGION_JOHTO ? MP_JohtoRivalName() : region == REGION_KANTO ? MP_KantoRivalName() : NULL;
+}
+
+// A battle's trainer name: SILVER's and BLUE's teams say his name
 const u8 *MP_JohtoRivalTrainerName(u16 trainerNum)
 {
-    if (trainerNum >= FIRST_QZ_TRAINER && trainerNum < FIRST_QZ_TRAINER + QZ_TRAINERS_COUNT
-     && StringCompare(gTrainers[trainerNum].trainerName, sSilverName) == 0)
-        return MP_JohtoRivalName();
+    if (trainerNum >= FIRST_QZ_TRAINER && trainerNum < FIRST_QZ_TRAINER + QZ_TRAINERS_COUNT)
+    {
+        if (StringCompare(gTrainers[trainerNum].trainerName, sSilverName) == 0)
+            return MP_JohtoRivalName();
+        if (StringCompare(gTrainers[trainerNum].trainerName, sBlueName) == 0)
+            return MP_KantoRivalName();
+    }
     return gTrainers[trainerNum].trainerName;
 }
 
-// The officer at ELM's asks the thief's name: Crystal's naming screen (special NameRival), SILVER to start
+// The officer at ELM's asks the thief's name: Crystal's naming screen (special NameRival), SILVER to start; OAK asks
+// his grandson's in KANTO, BLUE to start
 static u8 sRivalNameBuf[PLAYER_NAME_LENGTH + 1];
+static u8 sRivalNaming;   // (the region whose rival is being named)
 static void CB2_RivalNamed(void)
 {
     void MP_SendRoomRules(void);
     if (sRivalNameBuf[0] == EOS)
-        StringCopy(sRivalNameBuf, sSilverName);
-    RivalNameWrite(sRivalNameBuf);
+        StringCopy(sRivalNameBuf, sRivalNaming == REGION_KANTO ? sBlueName : sSilverName);
+    RivalNameWrite(sRivalNaming, sRivalNameBuf);
     MP_SendRoomRules();   // (hosting: friends hear it)
     SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
 }
 
-// In a friend's room the host names him: no naming screen here (the officer says the host's name)
-u16 QzNameJohtoRival(void)
+static u16 NameRival(u8 region)
 {
     bool8 MP_IsRoomGuest(void);
     if (MP_IsRoomGuest())
         return gSpecialVar_Result = FALSE;   // (VAR_RESULT: no naming screen to wait for)
-    RivalNameRead(sRivalNameBuf);
+    sRivalNaming = region;
+    RivalNameRead(region, sRivalNameBuf);
     DoNamingScreen(NAMING_SCREEN_RIVAL, sRivalNameBuf, 0, 0, 0, CB2_RivalNamed);
     return gSpecialVar_Result = TRUE;
+}
+
+// In a friend's room the host names him: no naming screen here (the officer / OAK says the host's name)
+u16 QzNameJohtoRival(void)
+{
+    return NameRival(REGION_JOHTO);
+}
+
+u16 QzNameKantoRival(void)
+{
+    return NameRival(REGION_KANTO);
 }
 
 // Moemon Kai: SILVER's starter is the one strong against the player's, as Crystal's (Quetzal gave him TOTODILE's line
@@ -1989,4 +2078,140 @@ u16 QzGiovanniStoryElmDone(void)
     FlagSet(0x131B);
     FlagSet(FLAG_QZ_0x131F);
     return 0;
+}
+
+// FireRed's IncrementResortGorgeousStepCounter (field_control_avatar.c, every step): SELPHY's wish lasts 250 steps,
+// then she's tired of waiting (0xFFFF) and wishes for another
+void MP_ResortGorgeousStep(void)
+{
+    u16 steps = VarGet(VAR_KANTO_RESORT_STEPS);
+    if (VarGet(VAR_QZ_0x5141) == SPECIES_NONE)
+        return;
+    if (++steps >= 250)
+    {
+        VarSet(VAR_QZ_0x5141, 0xFFFF);
+        steps = 0;
+    }
+    VarSet(VAR_KANTO_RESORT_STEPS, steps);
+}
+
+// FireRed's IncrementMassageCooldownStepCounter / DaisyMassageServices: after KANTO's LEAGUE DAISY grooms a POKéMON
+// (friendship +3, FRIENDSHIP_EVENT_MASSAGE) once every 500 steps (walked in KANTO)
+void MP_KantoMassageStep(void)
+{
+    u16 n = VarGet(VAR_KANTO_MASSAGE_STEPS);
+    if (MP_Region_Current() == REGION_KANTO && n < 500)
+        VarSet(VAR_KANTO_MASSAGE_STEPS, n + 1);
+}
+
+void MP_DaisyMassage(void)
+{
+    struct Pokemon *mon = &gPlayerParty[gSpecialVar_0x8004];
+    u16 f = GetMonData(mon, MON_DATA_FRIENDSHIP) + 3;
+    if (f > MAX_FRIENDSHIP)
+        f = MAX_FRIENDSHIP;
+    SetMonData(mon, MON_DATA_FRIENDSHIP, &f);
+    VarSet(VAR_KANTO_MASSAGE_STEPS, 0);
+}
+
+// ---------------------------------------------------------------------------------------------------- CAPE BRINK
+// FireRed's starter tutor (pokefirered field_specials.c CapeBrinkGetMoveToTeachLeadPokemon /
+// HasLearnedAllMovesFromCapeBrinkTutor): the lead VENUSAUR / CHARIZARD / BLASTOISE at full friendship learns its
+// ultimate move once. 0x8005 = the tutor move, STR_VAR_2 its name; the taught flags are KANTO's (0x2226-0x2229).
+#define FLAG_KANTO_TUTOR_FRENZY_PLANT 0x2226
+#define FLAG_KANTO_CAPE_BRINK_ALL     0x2229
+static const u16 sCapeBrinkSpecies[] = {SPECIES_VENUSAUR, SPECIES_CHARIZARD, SPECIES_BLASTOISE};
+static const u16 sCapeBrinkMoves[] = {MOVE_FRENZY_PLANT, MOVE_BLAST_BURN, MOVE_HYDRO_CANNON};
+
+u16 MP_CapeBrinkLeadMove(void)
+{
+    u8 lead = GetLeadMonIndex(), i;
+    u16 species = GetMonData(&gPlayerParty[lead], MON_DATA_SPECIES_OR_EGG);
+    gSpecialVar_0x8007 = lead;
+    for (i = 0; i < ARRAY_COUNT(sCapeBrinkSpecies); i++)
+        if (species == sCapeBrinkSpecies[i])
+            break;
+    if (i == ARRAY_COUNT(sCapeBrinkSpecies) || GetMonData(&gPlayerParty[lead], MON_DATA_FRIENDSHIP) != 255)
+        return gSpecialVar_Result = FALSE;
+    StringCopy(gStringVar2, gMoveNames[sCapeBrinkMoves[i]]);
+    gSpecialVar_0x8005 = TUTOR_MOVE_FRENZY_PLANT + i;
+    if (FlagGet(FLAG_KANTO_TUTOR_FRENZY_PLANT + i))
+        return gSpecialVar_Result = FALSE;
+    return gSpecialVar_Result = TRUE;
+}
+
+// the move in 0x8005 taught: TRUE once all three are
+u16 MP_CapeBrinkTaught(void)
+{
+    u8 i, n = 0;
+    if (gSpecialVar_0x8005 >= TUTOR_MOVE_FRENZY_PLANT && gSpecialVar_0x8005 <= TUTOR_MOVE_HYDRO_CANNON)
+        FlagSet(FLAG_KANTO_TUTOR_FRENZY_PLANT + gSpecialVar_0x8005 - TUTOR_MOVE_FRENZY_PLANT);
+    for (i = 0; i < 3; i++)
+        n += FlagGet(FLAG_KANTO_TUTOR_FRENZY_PLANT + i);
+    if (n == 3)
+        FlagSet(FLAG_KANTO_CAPE_BRINK_ALL);
+    return gSpecialVar_Result = (n == 3);
+}
+
+// ---------------------------------------------------------------------------------------------------- RUIN VALLEY
+// FireRed's CutMoveRuinValleyCheck / CutMoveOpenDottedHoleDoor (fldeff_cut.c calls these): CUT used from the party menu
+// standing below the braille door (24,24), facing it, opens it (FLAG_QZ_0x222F, FireRed's
+// FLAG_USED_CUT_ON_RUIN_VALLEY_BRAILLE; the map's ON_LOAD keeps it open)
+#include "fieldmap.h"
+#include "field_player_avatar.h"
+bool8 MP_RuinValleyCutCheck(void)
+{
+    return !FlagGet(FLAG_QZ_0x222F)
+        && gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_KANTO_SIX_ISLAND_RUIN_VALLEY)
+        && gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_KANTO_SIX_ISLAND_RUIN_VALLEY)
+        && gSaveBlock1Ptr->pos.x == 24 && gSaveBlock1Ptr->pos.y == 25
+        && GetPlayerFacingDirection() == DIR_NORTH;
+}
+
+void MP_RuinValleyOpenDoor(void)
+{
+    MapGridSetMetatileIdAt(24 + MAP_OFFSET, 24 + MAP_OFFSET, 0x358);
+    DrawWholeMapView();
+    PlaySE(SE_BANG);
+    FlagSet(FLAG_QZ_0x222F);
+    UnlockPlayerFieldControls();
+}
+
+// Crystal's GetFirstPokemonHappiness (GOLDENROD's HAPPINESS RATER): the lead POKéMON's friendship, its name in STR_VAR_1
+u16 MP_LeadFriendship(void)
+{
+    struct Pokemon *mon = &gPlayerParty[GetLeadMonIndex()];
+    GetMonData(mon, MON_DATA_NICKNAME, gStringVar1);
+    StringGet_Nickname(gStringVar1);
+    return gSpecialVar_Result = GetMonData(mon, MON_DATA_FRIENDSHIP);
+}
+
+// Moemon Kai: Crystal's ReturnShuckie (engine/events/shuckle.asm), the party scanned instead of picked: MANIA's
+// SHUCKIE is a SHUCKLE with his OT name and ID. VAR_RESULT 0 not with you, 1 taken back, 2 it's your last
+// POKéMON, 3 it likes you (150+ friendship) and stays (docs/REGIONS_AUDIT.md 102)
+u16 MP_ReturnShuckie(void)
+{
+    static const u8 sMania[] = _("MANIA");
+    u8 i, ot[PLAYER_NAME_LENGTH + 1];
+
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        struct Pokemon *mon = &gPlayerParty[i];
+        if (GetMonData(mon, MON_DATA_SPECIES) != SPECIES_SHUCKLE || GetMonData(mon, MON_DATA_IS_EGG)
+         || (GetMonData(mon, MON_DATA_OT_ID) & 0xFFFF) != 518)
+            continue;
+        GetMonData(mon, MON_DATA_OT_NAME, ot);
+        ot[PLAYER_NAME_LENGTH] = EOS;
+        if (StringCompare(ot, sMania) != 0)
+            continue;
+        if (GetMonData(mon, MON_DATA_FRIENDSHIP) >= 150)
+            return gSpecialVar_Result = 3;
+        if (CalculatePlayerPartyCount() < 2)
+            return gSpecialVar_Result = 2;
+        ZeroMonData(mon);
+        CompactPartySlots();
+        CalculatePlayerPartyCount();
+        return gSpecialVar_Result = 1;
+    }
+    return gSpecialVar_Result = 0;
 }

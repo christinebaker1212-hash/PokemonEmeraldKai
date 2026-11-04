@@ -166,7 +166,7 @@ Kanto_SSAnne_2F_Corridor_Text_84235AA::
 	.string "invited TRAINERS.$"
 
 Kanto_SSAnne_2F_Corridor_Text_842361C::
-	.string "BLUE: Bonjour!\n"
+	.string "{RIVAL}: Bonjour!\n"
 	.string "{PLAYER}!\p"
 	.string "Imagine seeing you here!\n"
 	.string "{PLAYER}, were you really invited?\p"
@@ -182,7 +182,7 @@ Kanto_SSAnne_2F_Corridor_Text_84236F9::
 	.string "MOéMON!$"
 
 Kanto_SSAnne_2F_Corridor_Text_842374D::
-	.string "BLUE: I heard there was a CUT\n"
+	.string "{RIVAL}: I heard there was a CUT\n"
 	.string "master on board.\p"
 	.string "But he was just a seasick old man!\p"
 	.string "CUT itself is really useful.\n"

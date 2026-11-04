@@ -81,6 +81,19 @@ public class ScreensTest {
                 + "\",\"phone\":\"00112233445566778899AABBCCDDEEFF\",\"key\":\"" + "00".repeat(32)
                 + "\",\"name\":\"\",\"host\":\"\",\"port\":47610}]}");
 
+        // the POKé BALL page: the second box POKéMON in the HAUNTED mix, a save with only the first pieces earned
+        {
+            JSONObject snap = file.getJSONObject("snap");
+            snap.getJSONArray("boxes").getJSONObject(0).getJSONArray("m").getJSONObject(1).put("fx", 17813).put("fxs", 7)
+                    .put("bst", 0x15);
+            snap.put("fxu", new org.json.JSONArray("[\"FF7\",\"FFF\",\"FFFF\",\"7F\"]"));
+            snap.put("fxp", new org.json.JSONArray("[[27354,5],0,0,0,0,0]"));
+            // the ME page: achievements, MOEGATCHA, a CANDY JAR, the GARDEN farm
+            snap.put("kai", new JSONObject("{\"ach\":[37,314],\"pulls\":23,\"tickets\":2,\"free\":3,\"jar\":1,"
+                    + "\"candy\":[12,3,0,25,0,0,9,0,0,0,31,4,0,0,0,0,0,0,0],\"time\":[42,17],"
+                    + "\"farm\":[[133,5,0,6,4],[134,3,95,0,2],[0,0,0,0,0],[140,1,200,0,0],[136,4,30,0,1],[0,0,0,0,0]]}"));
+            write(new File(dir, "model_" + id + ".json"), file.toString());
+        }
         // a POKéMON out walking (for WALK's pictures): the snapshot's first box POKéMON
         JSONObject walkMon = file.getJSONObject("snap").getJSONArray("boxes").getJSONObject(0).getJSONArray("m").getJSONObject(0);
         java.time.LocalDate today = java.time.LocalDate.now();
@@ -96,6 +109,7 @@ public class ScreensTest {
         JSONObject spawns = new JSONObject(res("spawns.json"));
         app.spawns.put("0,16", spawns);
         GameView v = new GameView(ctx, app);
+        Look.animations = false;   // (the pictures at once, not mid-slide)
         shot(v, "boxes");
         assertTrue(v.width() >= 240);
 
@@ -131,13 +145,55 @@ public class ScreensTest {
         shot(v, "summary_info");
         tap(v, v.width() / 2, GameView.TOP + 112 + 8);
         shot(v, "summary_skills");
-        tap(v, v.width() - 30, GameView.TOP + 112 + 8);
+        int tw = (v.width() - 16) / 4;
+        tap(v, 8 + 2 * tw + tw / 2, GameView.TOP + 112 + 8);
         tap(v, 60, GameView.TOP + 136 + 4 + 12);
         shot(v, "summary_moves");
+        // its POKé BALL: the page, then the SEND-OUT list open, then a locked piece picked
+        tap(v, 8 + 3 * tw + tw / 2, GameView.TOP + 112 + 8);
+        shot(v, "ball_page");
+        BallPage bp = (BallPage) v.overPage();
+        bp.openList(4);
+        shot(v, "ball_list");
+        bp.pickForTest(4, 20);
+        bp.openList(-1);
+        shot(v, "ball_locked");
+        v.showOver(null);
+        // ME: the card, achievements, MOEGATCHA (a pull's prizes), the CANDY JAR, the farm
+        v.select(9);
+        shot(v, "me");
+        app.ach = new JSONObject("{\"t\":\"ach\",\"cats\":[\"STORY\",\"BATTLE\",\"CO-OP\"],\"list\":["
+                + "[0,\"FIRST PARTNER\",\"Get your first POK\u00e9MON.\",\"DONE\",\"+3 MOEGATCHA pulls\",1],"
+                + "[0,\"BADGE COLLECTOR\",\"Earn four BADGES in any region.\",\"2/4\",\"+5 MOEGATCHA pulls, BALL COLOR: MINT\",0],"
+                + "[1,\"WIN STREAK\",\"Win 10 battles in a row.\",\"3/10\",\"+3 MOEGATCHA pulls\",0],"
+                + "[2,\"BEST FRIENDS\",\"Battle together with a friend 25 times.\",\"DONE\",\"+5 MOEGATCHA pulls, SEND-OUT: PRISM\",1]]}");
+        v.showOver(new AchievementsPage(v, null));
+        shot(v, "achievements");
+        app.gatcha = new JSONObject("{\"t\":\"gatcha\",\"pulls\":23,\"tickets\":2,\"banners\":[[\"STANDARD\","
+                + "\"Event Moemon, items and money!\",1,1],[\"PICKUP\",\"This week's featured Moemon!\",1,0],"
+                + "[\"TRAINING\",\"Candies and vitamins\",0,0],[\"POKE BALLS\",\"Balls and ball effects\",1,0]]}");
+        GatchaPage gp = new GatchaPage(v, null);
+        v.showOver(gp);
+        shot(v, "gatcha");
+        gp.showForTest(new JSONObject("{\"prizes\":[{\"r\":3,\"k\":0,\"id\":1,\"sh\":0,\"amt\":1,\"n\":\"C7BBCDCEBFCC00BCBBC6C6\","
+                + "\"note\":\"\"},{\"r\":0,\"k\":0,\"id\":13,\"sh\":0,\"amt\":3,\"n\":\"CAC9CEC3C9C8\",\"note\":\"\"},"
+                + "{\"r\":2,\"k\":2,\"id\":25,\"sh\":0,\"amt\":1,\"n\":\"CAC3C5BBBDC2CF\",\"note\":\"It joined your party!\"}]}"));
+        shot(v, "gatcha_prizes");
+        v.showOver(null);
+        // CREATURES: the original POKéMON (pictures and words), then back to the game's own
+        Look.creatures = 2;
+        v.select(1);
+        shot(v, "party_pokemon");
+        v.select(3);
+        shot(v, "dex_pokemon");
+        Look.creatures = 0;
+        v.showOver(null);
         v.showOver(null);
         // the shiny in the party, its summary
         v.select(1);
-        tap(v, 60, GameView.TOP + 24 + 3 * 50 + 20);
+        // (the fourth card: the second column's second row)
+        int pch = Math.max(96, Math.min(132, (v.contentHeight() - 24 - 26 - 12) / 3));
+        tap(v, v.width() * 3 / 4, GameView.TOP + 24 + 4 + pch + 6 + pch / 2);
         shot(v, "party_summary");
         v.showOver(null);
         // the BAG with an item chosen, the BALLS
@@ -154,7 +210,39 @@ public class ScreensTest {
         shot(v, "dex_entry");
         v.overPage().scrollTo(320);
         shot(v, "dex_entry_lower");
+        for (int k = 1; k <= 5; k++) {   // (its new parts: abilities, matchups, evolution, moves, breeding, training)
+            v.overPage().scrollTo(320 + k * 480);
+            shot(v, "dex_entry_more" + k);
+        }
+        v.overPage().scrollTo(0);
+        v.showOver(new TypeChartPage(v));
+        shot(v, "types_chart");
+        v.overPage().tap(100, 26 + 14 + 12 + 2 + 16 * 4 + 6);
+        shot(v, "types_chart_pick");
+        v.showOver(new TypeChartPage(v).defending(12, 3));
+        shot(v, "types_defense");
+        v.showOver(new TypeChartPage(v).attacking(10));
+        shot(v, "types_attack");
         v.showOver(null);
+        v.showMenu(Look.menu(v));
+        shot(v, "look_menu");
+        for (int k = 0; k < 6; k++) {   // (NIGHT, and frame 2)
+            Look.theme = (Look.theme + 1) % Look.THEMES.length;
+        }
+        Look.frame = 1;
+        Look.apply();
+        v.showMenu(Menu.message(v, "A window in frame 2, on the NIGHT theme."));
+        shot(v, "look_night");
+        Look.theme = 0;
+        Look.frame = 0;
+        Look.apply();
+        v.showMenu(null);
+        tap(v, 200, GameView.TOP + 72 + 8);   // (the type filter's picker)
+        shot(v, "dex_types");
+        tap(v, 14 + 38 + 4, GameView.TOP + 96 + 22 + 4);   // (FIRE)
+        shot(v, "dex_fire");
+        tap(v, 200, GameView.TOP + 72 + 8);
+        tap(v, 20, GameView.TOP + 96 + 6);   // (ALL TYPES)
         tap(v, 60, GameView.TOP + 30);
         v.overPage();
         v.page(3).typed("PIKA");

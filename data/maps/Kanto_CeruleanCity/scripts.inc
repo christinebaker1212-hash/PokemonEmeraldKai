@@ -56,14 +56,10 @@ Kanto_CeruleanCity_EventScript_8416129::
 	call_if_eq VAR_TEMP_1, 0, Kanto_CeruleanCity_EventScript_84161E4
 	call_if_eq VAR_TEMP_1, 1, Kanto_CeruleanCity_EventScript_84161E4
 	call_if_eq VAR_TEMP_1, 2, Kanto_CeruleanCity_EventScript_84161F6
-	msgbox Kanto_CeruleanCity_Text_842EE1B, MSGBOX_DEFAULT
+	@ Moemon Kai: FireRed's rival gives the FAME CHECKER here, which this game hasn't got (REGIONS_TODO): no gift, so
+	@ none of Quetzal's LUCKY EGG either; he leaves after his news about BILL
 	setvar VAR_QZ_0x5108, 1
 	setflag FLAG_QZ_0x2148
-	setorcopyvar VAR_0x8000, ITEM_LUCKY_EGG
-	setorcopyvar VAR_0x8001, 1
-	callstd STD_OBTAIN_ITEM
-	msgbox Kanto_CeruleanCity_Text_842EE6D, MSGBOX_DEFAULT
-	closemessage
 	applymovement 8, Kanto_CeruleanCity_Movement_841623C
 	waitmovement 0
 	fadedefaultbgm
@@ -376,7 +372,7 @@ Kanto_CeruleanCity_Movement_841623C:
 	step_end
 
 Kanto_CeruleanCity_Text_842EC1A::
-	.string "BLUE: Yo! {PLAYER}!\p"
+	.string "{RIVAL}: Yo! {PLAYER}!\p"
 	.string "You’re still struggling along back\n"
 	.string "here?\p"
 	.string "I’m doing great! I caught a bunch\n"
@@ -390,7 +386,7 @@ Kanto_CeruleanCity_Text_842ECB6::
 	.string "You won already!$"
 
 Kanto_CeruleanCity_Text_842ECDA::
-	.string "BLUE: Hey, guess what?\p"
+	.string "{RIVAL}: Hey, guess what?\p"
 	.string "I went to BILL’s and got him to\n"
 	.string "show me his rare MOéMON.\p"
 	.string "That added a lot of pages to my\n"
@@ -403,16 +399,6 @@ Kanto_CeruleanCity_Text_842ECDA::
 	.string "you should go thank him.\p"
 	.string "Well, I better get rolling!\n"
 	.string "Smell ya later!$"
-
-Kanto_CeruleanCity_Text_842EE1B::
-	.string "Oh, yeah, right.\p"
-	.string "I picked up an extra LUCKY EGG.\n"
-	.string "You can have it--try to keep up!$"
-
-Kanto_CeruleanCity_Text_842EE6D::
-	.string "Have a MOéMON hold it to gain\n"
-	.string "more EXP. Don’t fall behind!\p"
-	.string "All right, smell ya!$"
 
 Kanto_CeruleanCity_Text_842EED4::
 	.string "Hey! Stay out!\n"

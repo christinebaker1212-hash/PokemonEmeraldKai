@@ -142,6 +142,44 @@ u16 QzFruitTreePick(void)
     return 0;
 }
 
+// JOHTO's BERRY patches stand on Crystal's fruit trees (the tree is the map's): the BERRY tree's own sprite never shows
+// (as in Crystal, the tree looks the same ripe or not; the user, 2026-11-04), nobody plants or waters them (Crystal's "There's nothing here…" instead), and a picked
+// patch grows its BERRY again on the game's own timer (the user, 2026-11-03)
+bool8 MP_JohtoBerries_IsPatch(u8 tree)
+{
+    u32 i;
+    if (MP_Region_Current() != REGION_JOHTO)
+        return FALSE;
+    for (i = 0; i < ARRAY_COUNT(sBerryPatches); i++)
+        if (sBerryPatches[i].tree == tree)
+            return TRUE;
+    return FALSE;
+}
+
+// After its BERRIES are picked (berry.c ObjectEventInteractionRemoveBerryTree): the same BERRY again, from the start
+// (the patch's own when it had none: Crystal's)
+void MP_JohtoBerries_Picked(u8 tree, u8 berry)
+{
+    u32 i;
+    if (!MP_JohtoBerries_IsPatch(tree))
+        return;
+    if (berry == 0)
+        for (i = 0; i < ARRAY_COUNT(sBerryPatches); i++)
+            if (sBerryPatches[i].tree == tree && sBerryPatches[i].item != ITEM_NONE)
+                berry = ItemIdToBerryType(sBerryPatches[i].item);
+    if (berry != 0)
+        PlantBerryTree(tree, berry, BERRY_STAGE_PLANTED, TRUE);
+}
+
+// The BERRY tree script's first question (data/scripts/berry_tree.inc): VAR_RESULT TRUE when this is a JOHTO patch
+// whose BERRIES aren't ripe (it says Crystal's words and stops)
+u16 MP_JohtoBerries_NotRipe(void)
+{
+    u8 tree = GetObjectEventBerryTreeId(gSelectedObjectEvent);
+    gSpecialVar_Result = MP_JohtoBerries_IsPatch(tree) && GetStageByBerryTreeId(tree) != BERRY_STAGE_BERRIES;
+    return gSpecialVar_Result;
+}
+
 // After a JOHTO map's transition scripts (overworld.c): the BERRY patches start with Crystal's BERRIES, once
 void MP_JohtoBerries_Init(void)
 {

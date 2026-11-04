@@ -4,7 +4,7 @@ Johto_TohjoFalls_MapScripts::
 
 @ Johto_TohjoFalls object 1 (local id 1, gfx 0x3B) at 15,11
 Johto_TohjoFalls_EventScript_83FBFD7::
-	setorcopyvar VAR_0x8000, ITEM_HEART_SCALE
+	setorcopyvar VAR_0x8000, ITEM_MOON_STONE   @ Moemon Kai: Crystal's (docs/REGIONS_AUDIT.md 114)
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end
