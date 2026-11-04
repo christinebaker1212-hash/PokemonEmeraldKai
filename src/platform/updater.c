@@ -1701,22 +1701,26 @@ int Updater_Run(int argc, char **argv)
 // They go into stepmania/ next to the exe, with the id in stepmania/songs_version.txt. The zip is unpacked a file
 // at a time from the disk (it's a few hundred MB). MOEMON_UPDATE_URL points at a test server here too.
 
-#define SONGS_DIR "stepmania"
-#define SONGS_ID_FILE "songs_version.txt"
-#define SONGS_DOWNLOAD "songs_download.zip"
 #define MAX_SONGS_ZIP (2000L * 1024L * 1024L)
 
 enum { SONGS_IDLE, SONGS_CHECKING, SONGS_AVAILABLE, SONGS_UPTODATE, SONGS_NONE, SONGS_DOWNLOADING, SONGS_INSTALLING,
        SONGS_DONE, SONGS_FAILED };
 
-static struct
+// A download of its own next to the game, listed by the latest release's update.txt as "<key> <tag> <zip> <bytes>
+// <sha256> <id>": the DANCE machine's songs (key "songs", into stepmania/) and ORRE's packs (key "orre", into orre/,
+// docs/ORRE_DECISIONS.md). Each keeps its id in <dir>/<idFile> and is unpacked a file at a time from the disk.
+struct Extra
 {
+    const char *key, *dir, *idFile, *download;
     SDL_atomic_t state, got, cancel, files, filesDone;
     long total;
     char tag[48], zip[128], sha[65], id[80];
     char error[96];
     SDL_Thread *thread;
-} S;
+};
+
+static struct Extra sSongs = {"songs", "stepmania", "songs_version.txt", "songs_download.zip"};
+static struct Extra sOrre = {"orre", "orre", "orre_version.txt", "orre_download.zip"};
 
 static int SongsReady(void)
 {
@@ -1739,31 +1743,43 @@ const char *Updater_ExeFile(const char *name)
     return path;
 }
 
-const char *Updater_SongsRoot(void)
+static const char *ExtraRoot(const struct Extra *x, char *root, size_t size)
 {
-    static char root[1100];
     if (!sExeDir[0] && !FindExe())
-        return SONGS_DIR;
-    JoinPath(root, sizeof(root), sExeDir, SONGS_DIR);
+        return x->dir;
+    JoinPath(root, size, sExeDir, x->dir);
     return root;
 }
 
-static void SongsFail(const char *fmt, ...)
+const char *Updater_SongsRoot(void)
+{
+    static char root[1100];
+    return ExtraRoot(&sSongs, root, sizeof(root));
+}
+
+// ORRE's packs: orre/ next to the game (orre3d.pak, orre_data.pak)
+const char *Updater_OrreRoot(void)
+{
+    static char root[1100];
+    return ExtraRoot(&sOrre, root, sizeof(root));
+}
+
+static void ExtraFail(struct Extra *x, const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    vsnprintf(S.error, sizeof(S.error), fmt, ap);
+    vsnprintf(x->error, sizeof(x->error), fmt, ap);
     va_end(ap);
-    Log("songs: %s", S.error);
-    SDL_AtomicSet(&S.state, SONGS_FAILED);
+    Log("%s: %s", x->key, x->error);
+    SDL_AtomicSet(&x->state, SONGS_FAILED);
 }
 
-static void InstalledId(char *out, size_t size)
+static void InstalledId(const struct Extra *x, char *out, size_t size)
 {
-    char path[1200];
+    char path[1200], root[1100];
     FILE *f;
     out[0] = 0;
-    snprintf(path, sizeof(path), "%s/%s", Updater_SongsRoot(), SONGS_ID_FILE);
+    snprintf(path, sizeof(path), "%s/%s", ExtraRoot(x, root, sizeof(root)), x->idFile);
     if ((f = UOpen(path, "r")) != NULL)
     {
         if (fgets(out, (int)size, f))
@@ -1774,18 +1790,18 @@ static void InstalledId(char *out, size_t size)
 
 static int SongsCheckWorker(void *arg)
 {
+    struct Extra *x = arg;
     struct Sink k;
     char url[512], have[96], *line;
     int status, found = 0;
-    (void)arg;
     memset(&k, 0, sizeof(k));
     k.mem = malloc(MAX_MANIFEST + 1);
     k.cap = MAX_MANIFEST;
-    k.cancel = &S.cancel;
+    k.cancel = &x->cancel;
     ShaInit(&k.sha);
     if (!k.mem)
     {
-        SongsFail("OUT OF MEMORY");
+        ExtraFail(x, "OUT OF MEMORY");
         return 0;
     }
     {
@@ -1798,14 +1814,14 @@ static int SongsCheckWorker(void *arg)
     if (!HttpGet(url, &k, &status))
     {
         free(k.mem);
-        SongsFail(status ? "NO SONGS ONLINE (HTTP %d)" : "NO CONNECTION", status);
+        ExtraFail(x, status ? "NOTHING ONLINE (HTTP %d)" : "NO CONNECTION", status);
         return 0;
     }
     k.mem[k.len] = 0;
     for (line = strtok(k.mem, "\r\n"); line; line = strtok(NULL, "\r\n"))
     {
         char key[16], tag[48], zip[128], bytes[32], sha[80], id[80];
-        if (sscanf(line, "%15s %47s %127s %31s %79s %79s", key, tag, zip, bytes, sha, id) == 6 && !strcmp(key, "songs"))
+        if (sscanf(line, "%15s %47s %127s %31s %79s %79s", key, tag, zip, bytes, sha, id) == 6 && !strcmp(key, x->key))
         {
             char *end;
             long n = strtol(bytes, &end, 10);
@@ -1814,26 +1830,26 @@ static int SongsCheckWorker(void *arg)
                 hex = isxdigit((unsigned char)sha[i]);
             if (*end || n <= 0 || n > MAX_SONGS_ZIP || !hex || !ValidName(zip) || !ValidName(tag) || !ValidName(id))
                 break;
-            snprintf(S.tag, sizeof(S.tag), "%s", tag);
-            snprintf(S.zip, sizeof(S.zip), "%s", zip);
-            snprintf(S.id, sizeof(S.id), "%s", id);
+            snprintf(x->tag, sizeof(x->tag), "%s", tag);
+            snprintf(x->zip, sizeof(x->zip), "%s", zip);
+            snprintf(x->id, sizeof(x->id), "%s", id);
             for (i = 0; i < 64; i++)
-                S.sha[i] = (char)tolower((unsigned char)sha[i]);
-            S.sha[64] = 0;
-            S.total = n;
+                x->sha[i] = (char)tolower((unsigned char)sha[i]);
+            x->sha[64] = 0;
+            x->total = n;
             found = 1;
         }
     }
     free(k.mem);
     if (!found)
     {
-        Log("songs: the latest release lists no songs");
-        SDL_AtomicSet(&S.state, SONGS_NONE);
+        Log("%s: the latest release lists none", x->key);
+        SDL_AtomicSet(&x->state, SONGS_NONE);
         return 0;
     }
-    InstalledId(have, sizeof(have));
-    Log("songs: %s on the release (%ld bytes), %s here", S.id, S.total, have[0] ? have : "none");
-    SDL_AtomicSet(&S.state, strcmp(have, S.id) == 0 ? SONGS_UPTODATE : SONGS_AVAILABLE);
+    InstalledId(x, have, sizeof(have));
+    Log("%s: %s on the release (%ld bytes), %s here", x->key, x->id, x->total, have[0] ? have : "none");
+    SDL_AtomicSet(&x->state, strcmp(have, x->id) == 0 ? SONGS_UPTODATE : SONGS_AVAILABLE);
     return 0;
 }
 
@@ -1893,29 +1909,30 @@ static int SongsEntries(FILE *f, long size, struct Entry **out, int *count)
     return ok;
 }
 
-static int SongsInstall(const char *zipPath, long size)
+static int SongsInstall(struct Extra *x, const char *zipPath, long size)
 {
+    char root[1100];
     FILE *f = UOpen(zipPath, "rb");
     struct Entry *e = NULL;
     int n = 0, i;
     if (!f)
     {
-        SongsFail("COULD NOT READ THE DOWNLOAD");
+        ExtraFail(x, "COULD NOT READ THE DOWNLOAD");
         return 0;
     }
     if (!SongsEntries(f, size, &e, &n))
     {
         fclose(f);
-        SongsFail("THE DOWNLOAD IS NOT A GOOD ZIP");
+        ExtraFail(x, "THE DOWNLOAD IS NOT A GOOD ZIP");
         return 0;
     }
-    SDL_AtomicSet(&S.files, n);
+    SDL_AtomicSet(&x->files, n);
     for (i = 0; i < n; i++)
     {
         uint8_t head[30], *data = NULL, *out;
         char path[1400], tmp[1500];
         long start;
-        SDL_AtomicSet(&S.filesDone, i);
+        SDL_AtomicSet(&x->filesDone, i);
         if (!e[i].name[0])
             continue;
         if (fseek(f, e[i].local, SEEK_SET) != 0 || fread(head, 1, 30, f) != 30 || Rd32(head) != 0x04034b50)
@@ -1945,14 +1962,14 @@ static int SongsInstall(const char *zipPath, long size)
             free(out);
             goto bad;
         }
-        snprintf(path, sizeof(path), "%s/%s", Updater_SongsRoot(), e[i].name);
+        snprintf(path, sizeof(path), "%s/%s", ExtraRoot(x, root, sizeof(root)), e[i].name);
         snprintf(tmp, sizeof(tmp), "%s.part", path);
         if (!WriteFileAll(tmp, out, e[i].usize, 0) || URename(tmp, path) != 0)
         {
             free(out);
             free(e);
             fclose(f);
-            SongsFail("COULD NOT WRITE %.20s", e[i].name);
+            ExtraFail(x, "COULD NOT WRITE %.20s", e[i].name);
             return 0;
         }
         free(out);
@@ -1961,7 +1978,7 @@ static int SongsInstall(const char *zipPath, long size)
         free(data);
         free(e);
         fclose(f);
-        SongsFail("BAD FILE IN THE ZIP: %.16s", e[i].name);
+        ExtraFail(x, "BAD FILE IN THE ZIP: %.16s", e[i].name);
         return 0;
     }
     free(e);
@@ -1971,59 +1988,60 @@ static int SongsInstall(const char *zipPath, long size)
 
 static int SongsDownloadWorker(void *arg)
 {
+    struct Extra *x = arg;
+    char root[1100];
     struct Sink k;
     char url[600], path[1200], hex[65];
     int status;
-    (void)arg;
-    snprintf(path, sizeof(path), "%s/%s", sExeDir, SONGS_DOWNLOAD);
+    snprintf(path, sizeof(path), "%s/%s", sExeDir, x->download);
     memset(&k, 0, sizeof(k));
     k.file = UOpen(path, "wb");
-    k.cap = S.total;
+    k.cap = x->total;
     k.progress = 1;
-    k.got = &S.got;
-    k.cancel = &S.cancel;
+    k.got = &x->got;
+    k.cancel = &x->cancel;
     ShaInit(&k.sha);
     if (!k.file)
     {
-        SongsFail("CANNOT WRITE IN THE GAME FOLDER");
+        ExtraFail(x, "CANNOT WRITE IN THE GAME FOLDER");
         return 0;
     }
     {
         const char *base = getenv("MOEMON_UPDATE_URL");
         if (base && base[0])
-            snprintf(url, sizeof(url), "%s%s%s", base, base[strlen(base) - 1] == '/' ? "" : "/", S.zip);
+            snprintf(url, sizeof(url), "%s%s%s", base, base[strlen(base) - 1] == '/' ? "" : "/", x->zip);
         else
-            snprintf(url, sizeof(url), "https://github.com/%s/releases/download/%s/%s", MOEMON_UPDATE_REPO, S.tag, S.zip);
+            snprintf(url, sizeof(url), "https://github.com/%s/releases/download/%s/%s", MOEMON_UPDATE_REPO, x->tag, x->zip);
     }
-    Log("songs: downloading %s", url);
+    Log("%s: downloading %s", x->key, url);
     if (!HttpGet(url, &k, &status))
     {
         fclose(k.file);
         URemove(path);
-        if (SDL_AtomicGet(&S.cancel))
+        if (SDL_AtomicGet(&x->cancel))
         {
-            Log("songs: stopped by the player");
-            SDL_AtomicSet(&S.state, SONGS_AVAILABLE);
+            Log("%s: stopped by the player", x->key);
+            SDL_AtomicSet(&x->state, SONGS_AVAILABLE);
         }
         else
-            SongsFail(status ? "DOWNLOAD FAILED (HTTP %d)" : "DOWNLOAD FAILED (NO CONNECTION)", status);
+            ExtraFail(x, status ? "DOWNLOAD FAILED (HTTP %d)" : "DOWNLOAD FAILED (NO CONNECTION)", status);
         return 0;
     }
     if (fclose(k.file) != 0)
     {
         URemove(path);
-        SongsFail("CANNOT WRITE IN THE GAME FOLDER");
+        ExtraFail(x, "CANNOT WRITE IN THE GAME FOLDER");
         return 0;
     }
     ShaHex(&k.sha, hex);
-    if (k.len != S.total || strcmp(hex, S.sha) != 0)
+    if (k.len != x->total || strcmp(hex, x->sha) != 0)
     {
         URemove(path);
-        SongsFail("THE DOWNLOAD IS DAMAGED (CHECKSUM)");
+        ExtraFail(x, "THE DOWNLOAD IS DAMAGED (CHECKSUM)");
         return 0;
     }
-    SDL_AtomicSet(&S.state, SONGS_INSTALLING);
-    if (!SongsInstall(path, S.total))
+    SDL_AtomicSet(&x->state, SONGS_INSTALLING);
+    if (!SongsInstall(x, path, x->total))
     {
         URemove(path);
         return 0;
@@ -2032,15 +2050,15 @@ static int SongsDownloadWorker(void *arg)
     {
         char idPath[1200];
         FILE *f;
-        snprintf(idPath, sizeof(idPath), "%s/%s", Updater_SongsRoot(), SONGS_ID_FILE);
+        snprintf(idPath, sizeof(idPath), "%s/%s", ExtraRoot(x, root, sizeof(root)), x->idFile);
         if ((f = UOpen(idPath, "w")) != NULL)
         {
-            fprintf(f, "%s\n", S.id);
+            fprintf(f, "%s\n", x->id);
             fclose(f);
         }
     }
-    Log("songs: %s installed", S.id);
-    SDL_AtomicSet(&S.state, SONGS_DONE);
+    Log("%s: %s installed", x->key, x->id);
+    SDL_AtomicSet(&x->state, SONGS_DONE);
     return 0;
 }
 
@@ -2235,69 +2253,75 @@ int Updater_TakeMakerPackNew(void)
     return SDL_AtomicCAS(&sMakerPackNew, 1, 0);
 }
 
-static void SongsJoin(void)
+static void SongsJoin(struct Extra *x)
 {
-    if (S.thread)
+    if (x->thread)
     {
-        SDL_WaitThread(S.thread, NULL);
-        S.thread = NULL;
+        SDL_WaitThread(x->thread, NULL);
+        x->thread = NULL;
     }
 }
 
-// Asks the latest release which songs it has (in the background): Updater_SongsState says how it went
-void Updater_SongsCheck(void)
+// Asks the latest release which version it has (in the background): ExtraState says how it went
+static void ExtraCheck(struct Extra *x)
 {
-    int st = SDL_AtomicGet(&S.state);
+    int st = SDL_AtomicGet(&x->state);
     if (st == SONGS_CHECKING || st == SONGS_DOWNLOADING || st == SONGS_INSTALLING)
         return;
-    SongsJoin();
+    SongsJoin(x);
     if (!SongsReady())
     {
-        snprintf(S.error, sizeof(S.error), "NO DOWNLOADS ON THIS PC");
-        SDL_AtomicSet(&S.state, SONGS_FAILED);
+        snprintf(x->error, sizeof(x->error), "NO DOWNLOADS ON THIS PC");
+        SDL_AtomicSet(&x->state, SONGS_FAILED);
         return;
     }
-    SDL_AtomicSet(&S.cancel, 0);
-    SDL_AtomicSet(&S.state, SONGS_CHECKING);
-    S.thread = SDL_CreateThread(SongsCheckWorker, "songs", NULL);
-    if (!S.thread)
-        SDL_AtomicSet(&S.state, SONGS_FAILED);
+    SDL_AtomicSet(&x->cancel, 0);
+    SDL_AtomicSet(&x->state, SONGS_CHECKING);
+    x->thread = SDL_CreateThread(SongsCheckWorker, x->key, x);
+    if (!x->thread)
+        SDL_AtomicSet(&x->state, SONGS_FAILED);
 }
 
-void Updater_SongsDownload(void)
+static void ExtraDownload(struct Extra *x)
 {
-    if (SDL_AtomicGet(&S.state) != SONGS_AVAILABLE)
+    if (SDL_AtomicGet(&x->state) != SONGS_AVAILABLE)
         return;
-    SongsJoin();
-    SDL_AtomicSet(&S.cancel, 0);
-    SDL_AtomicSet(&S.got, 0);
-    SDL_AtomicSet(&S.files, 0);
-    SDL_AtomicSet(&S.filesDone, 0);
-    SDL_AtomicSet(&S.state, SONGS_DOWNLOADING);
-    S.thread = SDL_CreateThread(SongsDownloadWorker, "songs", NULL);
-    if (!S.thread)
-        SongsFail("COULD NOT START THE DOWNLOAD");
-}
-
-void Updater_SongsCancel(void)
-{
-    SDL_AtomicSet(&S.cancel, 1);
+    SongsJoin(x);
+    SDL_AtomicSet(&x->cancel, 0);
+    SDL_AtomicSet(&x->got, 0);
+    SDL_AtomicSet(&x->files, 0);
+    SDL_AtomicSet(&x->filesDone, 0);
+    SDL_AtomicSet(&x->state, SONGS_DOWNLOADING);
+    x->thread = SDL_CreateThread(SongsDownloadWorker, x->key, x);
+    if (!x->thread)
+        ExtraFail(x, "COULD NOT START THE DOWNLOAD");
 }
 
 // SONGS_*; *done / *total: bytes downloaded, or files unpacked while installing; why it failed
-int Updater_SongsState(long *done, long *total, const char **error)
+static int ExtraState(struct Extra *x, long *done, long *total, const char **error)
 {
-    int st = SDL_AtomicGet(&S.state);
+    int st = SDL_AtomicGet(&x->state);
     if (st == SONGS_INSTALLING)
     {
-        *done = SDL_AtomicGet(&S.filesDone);
-        *total = SDL_AtomicGet(&S.files);
+        *done = SDL_AtomicGet(&x->filesDone);
+        *total = SDL_AtomicGet(&x->files);
     }
     else
     {
-        *done = SDL_AtomicGet(&S.got);
-        *total = S.total;
+        *done = SDL_AtomicGet(&x->got);
+        *total = x->total;
     }
-    *error = S.error;
+    *error = x->error;
     return st;
 }
+
+void Updater_SongsCheck(void) { ExtraCheck(&sSongs); }
+void Updater_SongsDownload(void) { ExtraDownload(&sSongs); }
+void Updater_SongsCancel(void) { SDL_AtomicSet(&sSongs.cancel, 1); }
+int Updater_SongsState(long *done, long *total, const char **error) { return ExtraState(&sSongs, done, total, error); }
+
+// ORRE's packs, the same way (UPDATER_EXTRA_* = SONGS_*)
+void Updater_OrreCheck(void) { ExtraCheck(&sOrre); }
+void Updater_OrreDownload(void) { ExtraDownload(&sOrre); }
+void Updater_OrreCancel(void) { SDL_AtomicSet(&sOrre.cancel, 1); }
+int Updater_OrreState(long *done, long *total, const char **error) { return ExtraState(&sOrre, done, total, error); }

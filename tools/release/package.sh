@@ -64,12 +64,6 @@ if [ -f sinnoh/platinum_gfx.pak ]; then   # (SINNOH's people as Platinum draws t
     mkdir -p "$P/sinnoh"
     cp sinnoh/platinum_gfx.pak "$P/sinnoh/"
 fi
-# ORRE's packs (tools/orre/make_pack.sh rips them from Pokemon Colosseum's disc; the release runs it when it has the disc)
-if [ -f orre/orre3d.pak ]; then
-    mkdir -p "$P/orre"
-    cp orre/orre3d.pak "$P/orre/"
-    if [ -f orre/orre_data.pak ]; then cp orre/orre_data.pak "$P/orre/"; fi
-fi
 printf 'Moemon Emerald Kai Co-op %s (%s)\nThe game checks for updates when it starts (AutoUpdate = 0 in moemon_coop.ini turns that off).\n' "$VER ($CHANNEL)" "$PLAT" > "$P/moemon_release.txt"
 ZIP="$OUT/MoemonEmeraldKaiCoop-$PLAT.zip"
 rm -f "$ZIP"

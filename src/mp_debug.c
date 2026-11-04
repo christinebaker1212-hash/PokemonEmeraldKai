@@ -3529,6 +3529,24 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] collision %d %d: %d behavior %d\n", x, y, MapGridGetCollisionAt(x + MAP_OFFSET, y + MAP_OFFSET),
                MapGridGetMetatileBehaviorAt(x + MAP_OFFSET, y + MAP_OFFSET));
     }
+    else if (strcmp(cmd, "orrecheck") == 0 || strcmp(cmd, "orredownload") == 0 || strcmp(cmd, "orrestate") == 0)
+    {
+        // ORRE's packs (updater.c sOrre): orrecheck asks the release what it has, orredownload fetches and installs
+        // them when it has newer ones, orrestate prints how it's going (UPDATER state: 2 available, 3 up to date,
+        // 4 none, 7 done, 8 failed; bytes or files done / total; why it failed)
+        void Updater_OrreCheck(void);
+        void Updater_OrreDownload(void);
+        int Updater_OrreState(long *done, long *total, const char **error);
+        long done, total;
+        const char *err;
+        int st;
+        if (cmd[4] == 'c')
+            Updater_OrreCheck();
+        else if (cmd[4] == 'd')
+            Updater_OrreDownload();
+        st = Updater_OrreState(&done, &total, &err);
+        printf("[test] orre state %d %ld/%ld %s\n", st, done, total, err ? err : "");
+    }
     else if (strcmp(cmd, "s3dground") == 0)
     {
         // s3dground X Y [NEAR]: SINNOH's ground height (BDHC) at map pixel (X, Y) of this map, the layer nearest NEAR
