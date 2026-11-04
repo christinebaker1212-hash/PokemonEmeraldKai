@@ -4756,3 +4756,9 @@ or the README. The updater no longer has a dev channel: AllowSmallTweaks only un
 - The feet row: Platinum's sheets stand on row 29 of their frames, Emerald's on 30; build_gfx.py feet_shift now takes
   the standing frames only (112 sheets step down to row 30, and judged by those weren't moved).
 - Tests sinnoh_doors, sinnoh_lake_water (tools/test/check_lake_water.py), sinnoh_feet_row (tools/test/check_feet_row.py).
+- (1.83.0) Sprite palette slots 16-63 in a palette mask: battle_anim_throw.c SpriteCB_Ball_FadeOut faded
+  `1 << (slot + 16)`; with the ball's palette in slot 17 that wrapped to bit 1, BG palette 1, the battle's YES / NO
+  frame, left white after every catch. It fades by slot now (MP_BeginSpritePaletteFade); the battle animations' and the
+  trade's masks use MP_SPRITE_PAL_BIT (palette.h: 0 for slots 16-63, no fade rather than the wrong palette's).
+  Test catch_yesno_frame (tools/test/check_yesno_frame.py); `mp dumppltt FILE` / `mp dumpvram FILE` write into the
+  test's picture folder for a relative FILE.

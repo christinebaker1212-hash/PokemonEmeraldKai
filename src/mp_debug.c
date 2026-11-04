@@ -1479,10 +1479,26 @@ void MP_TestCommand(const char *cmd, const char *arg)
         volatile int *p = NULL;
         *p = 1;
     }
+        else if (strcmp(cmd, "dumpvram") == 0)
+    {
+        // dumpvram FILE - the BG / OBJ video memory (binary, VRAM_SIZE bytes)
+        FILE *f = fopen(arg, "wb");
+        if (f)
+        {
+            fwrite((void *)VRAM, 1, VRAM_SIZE, f);
+            fclose(f);
+        }
+        printf("[test] vram dumped\n");
+    }
         else if (strcmp(cmd, "dumppltt") == 0)
     {
-        // dumppltt FILE - palette RAM, both palette buffers and the display registers (binary)
-        FILE *f = fopen(arg, "wb");
+        // dumppltt FILE - palette RAM, both palette buffers and the display registers (binary); a relative FILE
+        // goes in the test's picture folder (MOEMON_SHOTDIR)
+        char path[512];
+        const char *dir = getenv("MOEMON_SHOTDIR");
+        FILE *f;
+        snprintf(path, sizeof(path), "%s%s%s", arg[0] != '/' && dir ? dir : "", arg[0] != '/' && dir ? "/" : "", arg);
+        f = fopen(path, "wb");
         if (f)
         {
             fwrite((void *)PLTT, 1, PLTT_SIZE, f);
@@ -1491,8 +1507,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
             fwrite((void *)REG_BASE, 1, 0x60, f);
             fclose(f);
         }
-        printf("[test] pltt dumped: fade active %d y %d blend %04x sel %08x\n", gPaletteFade.active, gPaletteFade.y,
-               gPaletteFade.blendColor, gPaletteFade.multipurpose1);
+        printf("[test] pltt dumped: fade active %d y %d blend %04x sel %08x transfer off %d\n", gPaletteFade.active,
+               gPaletteFade.y, gPaletteFade.blendColor, gPaletteFade.multipurpose1, gPaletteFade.bufferTransferDisabled);
     }
         else if (strcmp(cmd, "pals") == 0)
     {
