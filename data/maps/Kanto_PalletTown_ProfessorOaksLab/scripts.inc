@@ -507,13 +507,14 @@ Kanto_PalletTown_ProfessorOaksLab_EventScript_841954D::
 	call_if_eq VAR_FACING, 3, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419783
 	delay 0xA
 	call_if_unset FLAG_QZ_0xA79, Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C51
+	@ Moemon Kai: FireRed's order: OAK explains catching, then the five POKé BALLS
+	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E95B, MSGBOX_DEFAULT
 	call Kanto_PalletTown_ProfessorOaksLab_EventScript_8419C6E
 	setflag FLAG_QZ_0xA79
 	special EnableNationalPokedex
 	setflag FLAG_QZ_0x226A
 	special SetUnlockedPokedexFlags
 	setvar VAR_QZ_0x511F, 1
-	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843E95B, MSGBOX_DEFAULT
 	msgbox Kanto_PalletTown_ProfessorOaksLab_Text_843EA0C, MSGBOX_DEFAULT
 	setvar VAR_0x8004, 0
 	setvar VAR_0x8005, 1
@@ -1559,8 +1560,8 @@ Kanto_PalletTown_ProfessorOaksLab_Text_843E95B::
 	.string "on MOéMON by just seeing them.\p"
 	.string "You must catch them to obtain\n"
 	.string "complete data.\p"
-	.string "Use POKé BALLS to catch\n"
-	.string "wild MOéMON.$"
+	.string "So, here are some tools for\n"
+	.string "catching wild MOéMON.$"
 
 Kanto_PalletTown_ProfessorOaksLab_Text_843E9EF::
 	.string "{PLAYER} received five POKé BALLS.$"

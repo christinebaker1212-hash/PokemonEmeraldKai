@@ -4,38 +4,60 @@ Kanto_FiveIsland_WaterLabyrinth_MapScripts::
 
 @ Kanto_FiveIsland_WaterLabyrinth object 1 (local id 1, gfx 0x3F09) at 14,11
 Kanto_FiveIsland_WaterLabyrinth_EventScript_8418552::
-	specialvar VAR_RESULT, QzReturnZero
-	goto_if_eq VAR_RESULT, 2, Quetzal_EventScript_8457FA3
+	@ Moemon Kai: FireRed's egg gentleman (pokefirered FiveIsland_WaterLabyrinth): a lead POKéMON at full friendship
+	@ earns a TOGEPI EGG (FLAG_QZ_0x2175 got it; 0x221E: no room last time), then his DAISY line for a TOGEPI or
+	@ TOGETIC in the party; Quetzal's hatched Lv. 5 TOGEPI is gone
 	lock
 	faceplayer
-	goto_if_set FLAG_QZ_0x2175, Kanto_FiveIsland_WaterLabyrinth_EventScript_84185BF
-	call Quetzal_EventScript_8361A4D
-	msgbox Kanto_FiveIsland_WaterLabyrinth_Text_84185D3, MSGBOX_DEFAULT
-	qz_givemon_ex SPECIES_TOGEPI, 5, ITEM_NONE, 1, 3, 0
-	goto_if_eq VAR_RESULT, 2, Kanto_FiveIsland_WaterLabyrinth_EventScript_84185C9
-	setflag FLAG_QZ_0x2175
-	clearflag FLAG_QZ_0x21E2
-	playfanfare MUS_LEVEL_UP
-	goto_if_eq VAR_RESULT, 1, Kanto_FiveIsland_WaterLabyrinth_EventScript_84185B2
-	message Kanto_FiveIsland_WaterLabyrinth_Text_841861F
-	goto Kanto_FiveIsland_WaterLabyrinth_EventScript_84185B7
-
-Kanto_FiveIsland_WaterLabyrinth_EventScript_84185B2::
-	message Kanto_FiveIsland_WaterLabyrinth_Text_841863F
-
-Kanto_FiveIsland_WaterLabyrinth_EventScript_84185B7::
-	waitfanfare
-	waitmessage
-	waitbuttonpress
-	goto Kanto_FiveIsland_WaterLabyrinth_EventScript_84185BF
-
-Kanto_FiveIsland_WaterLabyrinth_EventScript_84185BF::
-	msgbox Kanto_FiveIsland_WaterLabyrinth_Text_8418678, MSGBOX_DEFAULT
+	goto_if_set FLAG_QZ_0x2175, Kanto_FiveIsland_WaterLabyrinth_EventScript_PostEggComment
+	goto_if_set 0x221E, Kanto_FiveIsland_WaterLabyrinth_EventScript_TryGiveEgg
+	msgbox Kanto_FiveIsland_WaterLabyrinth_Text_LetMeTakeLookAtMons, MSGBOX_DEFAULT
+	specialvar VAR_RESULT, GetLeadMonFriendshipScore
+	goto_if_eq VAR_RESULT, 6, Kanto_FiveIsland_WaterLabyrinth_EventScript_LeadMonMaxFriendship
+	msgbox Kanto_FiveIsland_WaterLabyrinth_Text_HmmISeeIsee, MSGBOX_DEFAULT
 	release
 	end
 
-Kanto_FiveIsland_WaterLabyrinth_EventScript_84185C9::
-	msgbox Kanto_FiveIsland_WaterLabyrinth_Text_8418698, MSGBOX_DEFAULT
+Kanto_FiveIsland_WaterLabyrinth_EventScript_MonDaisyComment::
+	msgbox Kanto_FiveIsland_WaterLabyrinth_Text_CuteMonRemindsMeOfDaisy, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_FiveIsland_WaterLabyrinth_EventScript_LeadMonMaxFriendship::
+	msgbox Kanto_FiveIsland_WaterLabyrinth_Text_TreatMonRightHaveThis, MSGBOX_DEFAULT
+	goto Kanto_FiveIsland_WaterLabyrinth_EventScript_TryGiveEgg
+	end
+
+Kanto_FiveIsland_WaterLabyrinth_EventScript_TryGiveEgg::
+	getpartysize
+	goto_if_eq VAR_RESULT, PARTY_SIZE, Kanto_FiveIsland_WaterLabyrinth_EventScript_NoRoomForEgg
+	setflag FLAG_QZ_0x2175
+	clearflag FLAG_QZ_0x21E2
+	giveegg SPECIES_TOGEPI
+	playfanfare MUS_LEVEL_UP
+	message Kanto_FiveIsland_WaterLabyrinth_Text_ReceivedEggFromMan
+	waitfanfare
+	waitmessage
+	waitbuttonpress
+	goto Kanto_FiveIsland_WaterLabyrinth_EventScript_PostEggComment
+	end
+
+Kanto_FiveIsland_WaterLabyrinth_EventScript_PostEggComment::
+	bufferspeciesname STR_VAR_2, SPECIES_TOGEPI
+	setvar VAR_0x8004, SPECIES_TOGEPI
+	specialvar VAR_RESULT, QzPartyHasSpecies
+	goto_if_ne VAR_RESULT, 0, Kanto_FiveIsland_WaterLabyrinth_EventScript_MonDaisyComment
+	bufferspeciesname STR_VAR_2, SPECIES_TOGETIC
+	setvar VAR_0x8004, SPECIES_TOGETIC
+	specialvar VAR_RESULT, QzPartyHasSpecies
+	goto_if_ne VAR_RESULT, 0, Kanto_FiveIsland_WaterLabyrinth_EventScript_MonDaisyComment
+	msgbox Kanto_FiveIsland_WaterLabyrinth_Text_GladIMetSomeoneLikeYou, MSGBOX_DEFAULT
+	release
+	end
+
+Kanto_FiveIsland_WaterLabyrinth_EventScript_NoRoomForEgg::
+	setflag 0x221E
+	msgbox Kanto_FiveIsland_WaterLabyrinth_Text_DontHaveSpaceInYourParty, MSGBOX_DEFAULT
 	release
 	end
 
@@ -51,25 +73,6 @@ Kanto_FiveIsland_WaterLabyrinth_EventScript_845C6D1::
 	trainerbattle TRAINER_BATTLE_REMATCH, TRAINER_QZ_8712, 0, Kanto_FiveIsland_WaterLabyrinth_Text_847105D, Kanto_FiveIsland_WaterLabyrinth_Text_843ADF4
 	msgbox Kanto_FiveIsland_WaterLabyrinth_Text_843AE20, MSGBOX_AUTOCLOSE
 	end
-
-Kanto_FiveIsland_WaterLabyrinth_Text_84185D3::
-	.string "This little MOéMON wants to\n"
-	.string "see the world.\p"
-	.string "I’d like it to travel with you!$"
-
-Kanto_FiveIsland_WaterLabyrinth_Text_841861F::
-	.string "You received a special MOéMON!$"
-
-Kanto_FiveIsland_WaterLabyrinth_Text_841863F::
-	.string "You received a special MOéMON!\p"
-	.string "It was sent to a PC Box.$"
-
-Kanto_FiveIsland_WaterLabyrinth_Text_8418678::
-	.string "Enjoy many adventures together!$"
-
-Kanto_FiveIsland_WaterLabyrinth_Text_8418698::
-	.string "You can’t receive it right now.\n"
-	.string "I’ll care for it until you can.$"
 
 Kanto_FiveIsland_WaterLabyrinth_Text_843ADBE::
 	.string "This is an excellent environment\n"
@@ -87,3 +90,47 @@ Kanto_FiveIsland_WaterLabyrinth_Text_847105D::
 	.string "Oh, hello!\p"
 	.string "Are you raising your MOéMON in a\n"
 	.string "good environment?$"
+
+Kanto_FiveIsland_WaterLabyrinth_Text_LetMeTakeLookAtMons::
+	.string "You travel all over the place,\n"
+	.string "don’t you?\p"
+	.string "You’re not driving your MOéMON\n"
+	.string "too harshly, are you?\p"
+	.string "Let me take a look.\n"
+	.string "… … …   … … …$"
+
+Kanto_FiveIsland_WaterLabyrinth_Text_HmmISeeIsee::
+	.string "Ah, hmm…\n"
+	.string "I see, I see…$"
+
+Kanto_FiveIsland_WaterLabyrinth_Text_CuteMonRemindsMeOfDaisy::
+	.string "Oh, hello.\n"
+	.string "That’s a cute {STR_VAR_2}.\p"
+	.string "Seeing it reminds me of a sweet \n"
+	.string "little girl I met while traveling.\p"
+	.string "She was gently grooming MOéMON…\n"
+	.string "She was a little angel.\p"
+	.string "That little girl’s name…\n"
+	.string "I think it was DAISY.$"
+
+Kanto_FiveIsland_WaterLabyrinth_Text_TreatMonRightHaveThis::
+	.string "Oh, impressive.\n"
+	.string "You treat your MOéMON right.\p"
+	.string "I think you can be entrusted with\n"
+	.string "this.\p"
+	.string "Please, I’d like you to have this.$"
+
+Kanto_FiveIsland_WaterLabyrinth_Text_ReceivedEggFromMan::
+	.string "{PLAYER} received an EGG\n"
+	.string "from the man!$"
+
+Kanto_FiveIsland_WaterLabyrinth_Text_GladIMetSomeoneLikeYou::
+	.string "I received that EGG while I was\n"
+	.string "traveling.\p"
+	.string "I’m glad I met someone like you.$"
+
+Kanto_FiveIsland_WaterLabyrinth_Text_DontHaveSpaceInYourParty::
+	.string "…Unfortunately, you don’t have\n"
+	.string "space for this in your party.\p"
+	.string "You’d better come back for it\n"
+	.string "another time.$"

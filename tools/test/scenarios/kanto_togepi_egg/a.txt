@@ -1,0 +1,11 @@
+pressuntil A field 5000
+wait 30
+mp friendship 0 255
+mp warp 37,108,14,12
+wait 150
+press UP 10
+mash A 60 30
+wait 60
+mp getflag 0x2175
+mp party
+quit
