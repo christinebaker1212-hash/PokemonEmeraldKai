@@ -12,6 +12,11 @@ Johto_NewBarkTown_OnFrame_83E138A:
 
 Johto_NewBarkTown_EventScript_83E139C::
 	lock
+	@ Moemon Kai: ELM rings the POKéGEAR, in Crystal's words (docs/REGIONS_AUDIT.md 94 / 148)
+	playse SE_POKENAV_CALL
+	waitse
+	playse SE_POKENAV_CALL
+	waitse
 	msgbox Johto_NewBarkTown_Text_83E1879, MSGBOX_DEFAULT
 	setvar VAR_QZ_0x5003, 7
 	setvar VAR_QZ_0x5004, 0xA
@@ -33,7 +38,6 @@ Johto_NewBarkTown_EventScript_83E13CE::
 	end
 
 Johto_NewBarkTown_EventScript_83E13F5::
-	call Johto_NewBarkTown_EventScript_8403935
 	end
 
 Johto_NewBarkTown_EventScript_83E13FB::
@@ -46,7 +50,6 @@ Johto_NewBarkTown_EventScript_83E1410::
 
 Johto_NewBarkTown_EventScript_83E1411::
 	call Johto_NewBarkTown_EventScript_83E13FB
-	call Johto_NewBarkTown_EventScript_8403935
 	goto Quetzal_EventScript_83C2D44
 
 Johto_NewBarkTown_EventScript_83E1420::
@@ -381,9 +384,10 @@ Johto_NewBarkTown_Text_83E1868::
 	.string "PROF.ELM’S HOUSE$"
 
 Johto_NewBarkTown_Text_83E1879::
-	.string "A message from PROF. ELM arrived:\p"
-	.string "I have something for you.\n"
-	.string "Please come to my LAB when you can.$"
+	.string "Hello, {PLAYER}? How’s it going?\p"
+	.string "I got ahold of something neat.\p"
+	.string "Swing by my LAB and pick it up!\p"
+	.string "See you later!$"
 
 Johto_NewBarkTown_Text_83E18D9::
 	.string "Wait! That crossing leads to the\n"

@@ -32,6 +32,11 @@ Johto_BlackthornCity_EventScript_83C6887::
 
 Johto_BlackthornCity_EventScript_83C6888::
 	lock
+	@ Moemon Kai: ELM rings the POKéGEAR, in Crystal's words (docs/REGIONS_AUDIT.md 94 / 148)
+	playse SE_POKENAV_CALL
+	waitse
+	playse SE_POKENAV_CALL
+	waitse
 	msgbox Johto_BlackthornCity_Text_83C68ED, MSGBOX_DEFAULT
 	setvar VAR_QZ_0x5010, 5
 	setvar VAR_QZ_0x5004, 7
@@ -165,9 +170,10 @@ Johto_BlackthornCity_EventScript_SantosNotDay::
 	end
 
 Johto_BlackthornCity_Text_83C68ED::
-	.string "A message from PROF. ELM arrived:\p"
-	.string "I have something for you.\n"
-	.string "Please come to my LAB when you can.$"
+	.string "Hello, {PLAYER}?\p"
+	.string "I have something here for you.\p"
+	.string "Could you swing by my LAB?\p"
+	.string "See you later!$"
 
 Johto_BlackthornCity_Text_83C6AEA::
 	.string "CLAIR, our GYM LEADER, has been\n"

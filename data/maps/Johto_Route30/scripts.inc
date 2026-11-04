@@ -75,6 +75,11 @@ Johto_Route30_EventScript_83ED400::
 @ Johto_Route30 trigger at 36,5 (VAR_QZ_0x5005 == 2)
 Johto_Route30_EventScript_83ED417::
 	lock
+	@ Moemon Kai: ELM rings the POKéGEAR, in Crystal's words (docs/REGIONS_AUDIT.md 94 / 148)
+	playse SE_POKENAV_CALL
+	waitse
+	playse SE_POKENAV_CALL
+	waitse
 	msgbox Johto_Route30_Text_83ED8CA, MSGBOX_DEFAULT
 	setvar VAR_QZ_0x5005, 3
 	release
@@ -181,10 +186,11 @@ Johto_Route30_Text_83ED7D2::
 	.string "only at wild MOéMON!$"
 
 Johto_Route30_Text_83ED8CA::
-	.string "A message from PROF. ELM arrived:\p"
-	.string "{PLAYER}, it’s a disaster!\p"
-	.string "Something terrible happened at\n"
-	.string "the LAB. Please come back now!$"
+	.string "H-hello? {PLAYER}? It’s a\n"
+	.string "disaster!\p"
+	.string "Uh, um, it’s just terrible!\p"
+	.string "What should I do? It… Oh, no…\p"
+	.string "Please get back here now!$"
 
 @ Moemon Kai: Crystal's item ball (fix_item_balls.py)
 Johto_Route30_EventScript_CrystalBall_20_36::

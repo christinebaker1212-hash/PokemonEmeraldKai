@@ -119,6 +119,11 @@ Johto_VioletCity_EventScript_83FE9E3::
 @ Johto_VioletCity trigger at 24,37 (VAR_QZ_0x5008 == 3)
 Johto_VioletCity_EventScript_83FE9F0::
 	lock
+	@ Moemon Kai: ELM rings the POKéGEAR, in Crystal's words (docs/REGIONS_AUDIT.md 94 / 148)
+	playse SE_POKENAV_CALL
+	waitse
+	playse SE_POKENAV_CALL
+	waitse
 	msgbox Johto_VioletCity_Text_83FEEFF, MSGBOX_DEFAULT
 	clearflag FLAG_QZ_0x1081
 	setflag FLAG_QZ_0x106A
@@ -359,12 +364,11 @@ Johto_VioletCity_Text_83FEE32::
 	.string "Master of Flying MOéMON$"
 
 Johto_VioletCity_Text_83FEEFF::
-	.string "A message from PROF. ELM arrived:\p"
-	.string "We discovered something about\n"
-	.string "the EGG!\p"
+	.string "Hello, {PLAYER}? We discovered\n"
+	.string "something about the EGG!\p"
 	.string "My assistant is at the MOéMON\n"
-	.string "CENTER in VIOLET CITY.\p"
-	.string "Please talk to him.$"
+	.string "CENTER in VIOLET CITY. Could you\l"
+	.string "talk to him?$"
 
 Johto_VioletCity_Text_83FEF92::
 	.string "Me oh my...\n"
