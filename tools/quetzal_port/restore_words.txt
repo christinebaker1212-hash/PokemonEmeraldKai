@@ -137,3 +137,7 @@ Johto_BlackthornCity Johto_BlackthornCity_Text_83C6CEF gsc BlackthornCity Blackt
 Johto_Route34 Johto_Route34_Text_83F02B0 gsc Route34 CooltrainerfKateSeenText
 Johto_Route34 Johto_Route34_Text_KateOffer gsc Route34 CooltrainerfKateOfferSoftSandText
 Johto_Route34 Johto_Route34_Text_83F010A gsc Route34 Route34TrainerTipsText
+# case 156: ROUTE 45's CAMPER QUENTIN talks of the BATTLE TOWER again
+Johto_Route45 Johto_Route45_Text_83F6319 gsc Route45 CamperQuentinSeenText
+Johto_Route45 Johto_Route45_Text_83F6333 gsc Route45 CamperQuentinBeatenText
+Johto_Route45 Johto_Route45_Text_83F6354 gsc Route45 CamperQuentinAfterBattleText

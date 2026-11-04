@@ -2759,7 +2759,7 @@ Quetzal_Text_837F5F7::
 	.string "You cannot cross it yet.$"
 
 Quetzal_Text_8383BB5::
-	.string "GINA: Oh? Only one MOéMON?\n"
+	.string "Oh? Only one MOéMON?\n"
 	.string "Then, we don’t battle with you.\p"
 	.string "If there’s only one MOéMON, it will\n"
 	.string "be lonesome. That’s not nice.$"
