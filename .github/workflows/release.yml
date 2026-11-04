@@ -84,6 +84,18 @@ jobs:
         if: steps.ver.outputs.skip != 'true'
         run: tools/sinnoh/make_pack.sh "$RUNNER_TEMP/pokeplatinum"
 
+      # ORRE's packs (docs/ORRE_DECISIONS.md): Pokemon Colosseum's maps, text, collision, scripts and character
+      # models, ripped from the disc whose link is the ORRE_DISC_URL secret (never in this repository); package.sh
+      # ships them in orre/. Without the secret the step does nothing and the release has no orre/.
+      - name: ORRE packs
+        if: steps.ver.outputs.skip != 'true'
+        env:
+          ORRE_DISC_URL: ${{ secrets.ORRE_DISC_URL }}
+        run: |
+          if [ -z "$ORRE_DISC_URL" ]; then echo "no ORRE_DISC_URL secret: ORRE's packs are left out"; exit 0; fi
+          ORRE_WORK="$RUNNER_TEMP/orre" tools/orre/make_pack.sh
+          rm -rf "$RUNNER_TEMP/orre"
+
       - name: Linux build
         if: steps.ver.outputs.skip != 'true'
         run: make linux -j"$(nproc)"
