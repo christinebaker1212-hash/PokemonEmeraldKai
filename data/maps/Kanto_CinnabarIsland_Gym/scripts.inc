@@ -766,10 +766,9 @@ Kanto_CinnabarIsland_Gym_Text_8449542::
 	.string "You have earned the VOLCANOBADGE.$"
 
 Kanto_CinnabarIsland_Gym_Text_844959A::
-	.string "TM38 contains FIRE BLAST.\n"
-	.string "Teach it to FIRE-type MOéMON.\p"
-	.string "VULPIX or CHARMELEON would be\n"
-	.string "ideal for that move.$"
+	.string "FIRE BLAST is the ultimate fire\n"
+	.string "technique.\p"
+	.string "Don’t waste it on WATER MOéMON.$"
 
 Kanto_CinnabarIsland_Gym_Text_84495E9::
 	.string "Hah!\p"
@@ -782,10 +781,10 @@ Kanto_CinnabarIsland_Gym_Text_844964A::
 	.string "{STR_VAR_1}!$"
 
 Kanto_CinnabarIsland_Gym_Text_844965A::
-	.string "That item will make your attacks\n"
-	.string "even more powerful!\p"
-	.string "But watch your MOéMON’s HP.\n"
-	.string "All that power comes at a price!$"
+	.string "TM38 contains FIRE BLAST.\n"
+	.string "Teach it to FIRE-type MOéMON.\p"
+	.string "VULPIX or CHARMELEON would be\n"
+	.string "ideal for that move.$"
 
 Kanto_CinnabarIsland_Gym_Text_84496CD::
 	.string "Make space for this, child!$"

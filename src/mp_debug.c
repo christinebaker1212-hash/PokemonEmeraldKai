@@ -3197,6 +3197,14 @@ void MP_TestCommand(const char *cmd, const char *arg)
         printf("[test] bflags %08x battlers %d coop %d wild %d triple %d inBattle %d\n", (unsigned)gBattleTypeFlags,
                gBattlersCount, gMpCoopBattle, gMpCoopWild, gIsTripleBattle, gMain.inBattle);
     }
+    else if (strcmp(cmd, "beattrainer") == 0)
+    {
+        // beattrainer ID - the trainer counts as beaten (its trainer flag set)
+        int id = atoi(arg);
+        if (id > 0 && id < 4096)   // (JOHTO / KANTO / SINNOH trainers too: TRAINER_FLAG maps them)
+            FlagSet(TRAINER_FLAG(id));
+        printf("[test] beattrainer %d\n", id);
+    }
     else if (strcmp(cmd, "trainerflag") == 0)
     {
         // trainerflag ID [ID...] - whether each trainer counts as beaten on this game
@@ -3204,7 +3212,7 @@ void MP_TestCommand(const char *cmd, const char *arg)
         while (tok != NULL)
         {
             int id = atoi(tok);
-            if (id > 0 && id < TRAINERS_COUNT)
+            if (id > 0 && id < 4096)
                 printf("[test] trainerflag %d = %d\n", id, FlagGet(TRAINER_FLAG(id)) ? 1 : 0);
             tok = strtok(NULL, " ");
         }

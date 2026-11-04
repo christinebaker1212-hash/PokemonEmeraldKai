@@ -19,6 +19,9 @@
 #define VAR_KANTO_HERACROSS_SIZE      0x5152   // SIX ISLAND's HERACROSS record (FireRed's VAR_HERACROSS_SIZE_RECORD)
 #define VAR_KANTO_MASSAGE_STEPS       0x5150   // FireRed's VAR_MASSAGE_COOLDOWN_STEP_COUNTER: DAISY grooms again after 500 steps
 
+// KANTO flags
+#define FLAG_KANTO_HIDE_GYM_GIOVANNI  0x221D   // FireRed's FLAG_HIDE_VIRIDIAN_GIOVANNI: gone after his farewell in the GYM
+
 // JOHTO (0x1000-0x1FFF)
 #define FLAG_JOHTO_GOT_KILN_CHARCOAL  0x1021   // Crystal's EVENT_GOT_CHARCOAL_IN_CHARCOAL_KILN (0x1030 is HM01 CUT's)
 #define FLAG_JOHTO_HIDE_DEN_RIVAL      0x1065   // the rival training in DRAGON'S DEN (Tuesdays, Thursdays: set / cleared on entering)

@@ -57,3 +57,10 @@ Kanto_SevenIsland_House_Room1 Kanto_SevenIsland_House_Room1_Text_84509FB fr Seve
 # case 87 [K3-32]: OAK's AIDES (kanto_shared.inc)
 data/scripts/qz/kanto_shared.inc Quetzal_Text_8455BAC fr data/text/aide.inc Aide_Text_HaventCaughtEnoughMonsForItem
 data/scripts/qz/kanto_shared.inc Quetzal_Text_8455C04 fr data/text/aide.inc Aide_Text_GetEnoughMonsComeBackForItem
+# case 67 [K1-15]: GIOVANNI's farewell
+Kanto_ViridianCity_Gym Kanto_ViridianCity_Gym_Text_843F856 fr ViridianCity_Gym ViridianCity_Gym_Text_GiovanniPostBattle
+# case 153 [K4-8]: SABRINA's and BLAINE's TM words (Quetzal's held-item lines)
+Kanto_SaffronCity_Gym Kanto_SaffronCity_Gym_Text_844B655 fr SaffronCity_Gym SaffronCity_Gym_Text_ExplainMarshBadgeTakeThis
+Kanto_SaffronCity_Gym Kanto_SaffronCity_Gym_Text_844B736 fr SaffronCity_Gym SaffronCity_Gym_Text_SabrinaPostBattle
+Kanto_CinnabarIsland_Gym Kanto_CinnabarIsland_Gym_Text_844959A fr CinnabarIsland_Gym CinnabarIsland_Gym_Text_FireBlastIsUltimateFireMove
+Kanto_CinnabarIsland_Gym Kanto_CinnabarIsland_Gym_Text_844965A fr CinnabarIsland_Gym CinnabarIsland_Gym_Text_BlainePostBattle

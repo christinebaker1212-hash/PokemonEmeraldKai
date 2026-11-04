@@ -148,16 +148,17 @@ Kanto_SaffronCity_Gym_Text_844B655::
 	.string "ignoring your orders in battle.\p"
 	.string "Just don’t raise your MOéMON too\n"
 	.string "much to avoid that problem.\p"
-	.string "Please take this gift, too.$"
+	.string "Wait, please take this TM with you.$"
 
 Kanto_SaffronCity_Gym_Text_844B726::
 	.string "{PLAYER} received\n"
 	.string "{STR_VAR_1}!$"
 
 Kanto_SaffronCity_Gym_Text_844B736::
-	.string "It boosts the holder’s Special\n"
-	.string "Attack, but locks it into one move\l"
-	.string "until you switch MOéMON.$"
+	.string "Psychic power isn’t something that\n"
+	.string "only a few people have.\p"
+	.string "Everyone has psychic power.\n"
+	.string "People just don’t realize it.$"
 
 Kanto_SaffronCity_Gym_Text_844B792::
 	.string "Your BAG is full of other items.$"
