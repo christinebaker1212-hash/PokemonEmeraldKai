@@ -1,0 +1,7 @@
+# Crystal's rival after JOHTO's LEAGUE: at the INDIGO PLATEAU on Mondays (and Wednesdays), not on a Tuesday, when he
+# trains in DRAGON'S DEN instead.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("[test] weekday 1" "[test] objat 32,8: local 7" "[test] weekday 2" "[test] objat 32,8: none" "[test] objat 20,23: local 23")
+UNEXPECT_A=("[crash]")

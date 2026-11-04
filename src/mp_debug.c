@@ -2255,6 +2255,18 @@ void MP_TestCommand(const char *cmd, const char *arg)
         MP_Lobby_Disconnect();
         printf("[test] offline\n");
     }
+    else if (strcmp(cmd, "weekday") == 0)
+    {
+        // weekday [D]: Crystal's weekday on the game clock (SUNDAY 0); D: the game clock moved to that weekday
+        u16 MP_JohtoWeekday(void);
+        int want = -1, now = MP_JohtoWeekday();
+        if (sscanf(arg, "%d", &want) == 1 && want >= 0 && want < 7)
+        {
+            gSaveBlock2Ptr->localTimeOffset.days -= (want - now + 7) % 7;   // (local time = clock - offset)
+            now = MP_JohtoWeekday();
+        }
+        printf("[test] weekday %d\n", now);
+    }
     else if (strcmp(cmd, "clock") == 0)
     {
         // clock - the game clock (online: the host's PC clock)

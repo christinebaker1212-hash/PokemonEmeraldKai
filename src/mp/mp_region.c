@@ -2125,3 +2125,10 @@ u16 MP_HiddenCoinsFit(void)
 {
     return GetCoins() + gSpecialVar_0x8006 <= MAX_COINS;
 }
+
+// Crystal's VAR_WEEKDAY (SUNDAY 0 .. SATURDAY 6) on the game clock, as JOHTO's phone reads it (mp_qzphone.c)
+u16 MP_JohtoWeekday(void)
+{
+    RtcCalcLocalTime();
+    return gSpecialVar_Result = gLocalTime.days % 7;
+}

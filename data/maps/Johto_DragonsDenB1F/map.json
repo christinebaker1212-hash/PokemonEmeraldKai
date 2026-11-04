@@ -299,6 +299,19 @@
       "trainer_sight_or_berry_tree_id": "0",
       "script": "Quetzal_EventScript_840EA6A",
       "flag": "FLAG_QZ_0x1220"
+    },
+    {
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16053",
+      "x": 20,
+      "y": 23,
+      "elevation": 0,
+      "movement_type": "MOVEMENT_TYPE_WANDER_AROUND",
+      "movement_range_x": 2,
+      "movement_range_y": 2,
+      "trainer_type": "TRAINER_TYPE_NONE",
+      "trainer_sight_or_berry_tree_id": "0",
+      "script": "Johto_DragonsDenB1F_EventScript_Rival",
+      "flag": "FLAG_JOHTO_HIDE_DEN_RIVAL"
     }
   ],
   "warp_events": [
