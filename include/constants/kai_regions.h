@@ -11,6 +11,7 @@
 // Daily (cleared each day with Emerald's daily flags)
 #define FLAG_DAILY_JOHTO_PLATEAU_RIVAL  0x923   // Crystal's ENGINE_INDIGO_PLATEAU_RIVAL_FIGHT (Emerald's FLAG_UNUSED_0x923)
 #define FLAG_DAILY_JOHTO_KURT_GS_BALL   0x924   // Crystal's ENGINE_KURT_MAKING_BALLS for the GS BALL: KURT checks it until the next day
+#define FLAG_DAILY_JOHTO_LAPRAS         0x926   // Crystal's ENGINE_UNION_CAVE_LAPRAS: UNION CAVE's LAPRAS fought today
 #define FLAG_DAILY_JOHTO_SHUCKIE        0x925   // Crystal's ENGINE_GOT_SHUCKIE_TODAY: MANIA asks SHUCKIE back from the next day
 
 // KANTO vars
@@ -56,5 +57,7 @@
 // Crystal's item balls Quetzal's maps lack (case 91, tools/quetzal_port/fix_item_balls.py)
 #define FLAG_JOHTO_ITEM_ROUTE30       0x1538
 #define FLAG_JOHTO_ITEM_ROUTE26       0x1539
+// UNION CAVE B2F's LAPRAS, out on Fridays until it's fought that day (case 136; FLAG_DAILY_JOHTO_LAPRAS)
+#define FLAG_JOHTO_HIDE_LAPRAS        0x153A
 
 #endif // GUARD_CONSTANTS_KAI_REGIONS_H

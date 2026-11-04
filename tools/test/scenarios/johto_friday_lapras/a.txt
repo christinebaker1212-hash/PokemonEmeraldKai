@@ -1,0 +1,13 @@
+pressuntil A field 5000
+wait 30
+mp weekday 5
+mp warp 35,98,9,34
+wait 150
+mp npcs
+shot lapras
+mp weekday 6
+mp warp 35,98,9,34
+wait 150
+mp getflag 0x153A
+mp npcs
+quit

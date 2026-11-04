@@ -77,3 +77,18 @@ Johto_UnionCaveB2F_Text_83FE490::
 	.string "Just once a week, a MOéMON comes to\n"
 	.string "the water’s edge.\p"
 	.string "I wanted to see that MOéMON…$"
+
+@ Moemon Kai: Crystal's Friday LAPRAS (pokecrystal UnionCaveB2F.asm UnionCaveLapras; docs/REGIONS_AUDIT.md 136): out on
+@ Fridays (mp_region.c MP_JohtoWeekdayPeople), a Lv. 20 battle, then gone for the day
+Johto_UnionCaveB2F_EventScript_Lapras::
+	lock
+	faceplayer
+	playmoncry SPECIES_LAPRAS, CRY_MODE_ENCOUNTER
+	waitmoncry
+	setwildbattle SPECIES_LAPRAS, 20
+	dowildbattle
+	setflag FLAG_DAILY_JOHTO_LAPRAS
+	setflag FLAG_JOHTO_HIDE_LAPRAS
+	removeobject VAR_LAST_TALKED
+	release
+	end

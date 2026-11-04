@@ -2141,7 +2141,7 @@ u16 MP_JohtoWeekday(void)
 
 // Crystal's people who come out on one weekday (their maps' MAPCALLBACK_OBJECTS): after a JOHTO map's transition
 // scripts (overworld.c), each one's hide flag is set but on their day. The WEEKDAY siblings (docs/REGIONS_AUDIT.md
-// case 63, tools/quetzal_port/fix_siblings.py)
+// case 63, tools/quetzal_port/fix_siblings.py) and UNION CAVE's Friday LAPRAS (case 136)
 void MP_JohtoWeekdayPeople(void)
 {
     static const u16 sHide[7] = {   // SUNDAY .. SATURDAY
@@ -2159,4 +2159,9 @@ void MP_JohtoWeekdayPeople(void)
         else
             FlagSet(sHide[i]);
     }
+    // UNION CAVE B2F's LAPRAS: Fridays, until fought that day (Crystal's UnionCaveB2FLaprasCallback)
+    if (today == 5 && !FlagGet(FLAG_DAILY_JOHTO_LAPRAS))
+        FlagClear(FLAG_JOHTO_HIDE_LAPRAS);
+    else
+        FlagSet(FLAG_JOHTO_HIDE_LAPRAS);
 }
